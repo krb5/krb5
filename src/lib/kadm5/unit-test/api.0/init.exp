@@ -687,7 +687,7 @@ proc test45_46 {service} {
     expect {
 	-re "Principal .* deleted." {}
 	default {
-	    error "kadmin.local delprinc failed\n";
+	    perror "kadmin.local delprinc failed\n";
 	}
     }
     expect eof

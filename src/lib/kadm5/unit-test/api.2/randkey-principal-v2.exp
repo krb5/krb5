@@ -25,13 +25,13 @@ proc test100 {} {
 		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
 		server_handle
     }]]} {
-	error "$test: unexpected failure in init"
+	perror "$test: unexpected failure in init"
 	return
     }
     if {! [cmd [format {
 	kadm5_randkey_principal $server_handle "%s/a" keys num_keys
     } $test]]} {
-	error "$test: unexpected failure in randkey_principal"
+	perror "$test: unexpected failure in randkey_principal"
     }
     send "puts \$num_keys\n"
     expect {
@@ -53,7 +53,7 @@ proc test100 {} {
 	fail "$test: $num_keys keys, should be 2"
     }
     if { ! [cmd {kadm5_destroy $server_handle}]} {
-	error "$test: unexpected failure in destroy"
+	perror "$test: unexpected failure in destroy"
 	return
     }
 }

@@ -26,7 +26,7 @@ proc test2 {} {
 		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
 		server_handle
     }]} {
-	error "$test: unexpected failure in init"
+	perror "$test: unexpected failure in init"
 	return
     }
     one_line_fail_test \
@@ -52,14 +52,14 @@ proc test5 {} {
 		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
 		server_handle
     }]} {
-	error "$test: unexpected failure in init"
+	perror "$test: unexpected failure in init"
 	return
     }
     one_line_fail_test [format {
 	kadm5_delete_principal $server_handle "%s/a"
     } $test] "UNK_PRINC"
     if { ! [cmd {kadm5_destroy $server_handle}]} {
-	error "$test: unexpected failure in destroy"
+	perror "$test: unexpected failure in destroy"
 	return
     }
 }
@@ -79,14 +79,14 @@ proc test6 {} {
 		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
 		server_handle
     }]} {
-	error "$test: unexpected failure in init"
+	perror "$test: unexpected failure in init"
 	return
     }
     one_line_fail_test [format {
 	kadm5_delete_principal $server_handle "%s/a"
     } $test] "AUTH_DELETE"
     if { ! [cmd {kadm5_destroy $server_handle}]} {
-	error "$test: unexpected failure in destroy"
+	perror "$test: unexpected failure in destroy"
 	return
     }
 }
@@ -107,14 +107,14 @@ proc test7 {} {
 		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
 		server_handle
     }]} {
-	error "$test: unexpected failure in init"
+	perror "$test: unexpected failure in init"
 	return
     }
     one_line_fail_test [format {
 	kadm5_delete_principal $server_handle "%s/a"
     } $test] "AUTH_DELETE"
     if { ! [cmd {kadm5_destroy $server_handle}]} {
-	error "$test: unexpected failure in destroy"
+	perror "$test: unexpected failure in destroy"
 	return
     }
 }
@@ -135,14 +135,14 @@ proc test8 {} {
 		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
 		server_handle
     }]} {
-	error "$test: unexpected failure in init"
+	perror "$test: unexpected failure in init"
 	return
     }
     one_line_fail_test [format {
 	kadm5_delete_principal $server_handle "%s/a"
     } $test] "AUTH_DELETE"
     if { ! [cmd {kadm5_destroy $server_handle}]} {
-	error "$test: unexpected failure in destroy"
+	perror "$test: unexpected failure in destroy"
 	return
     }
 }
@@ -162,14 +162,14 @@ proc test9 {} {
 		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
 		server_handle
     }]} {
-	error "$test: unexpected failure in init"
+	perror "$test: unexpected failure in init"
 	return
     }
     one_line_fail_test [format {
 	kadm5_delete_principal $server_handle "%s/a"
     } $test] "AUTH_DELETE"
     if { ! [cmd {kadm5_destroy $server_handle}]} {
-	error "$test: unexpected failure in destroy"
+	perror "$test: unexpected failure in destroy"
 	return
     }
 }
@@ -189,14 +189,14 @@ proc test10 {} {
 		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
 		server_handle
     }]} {
-	error "$test: unexpected failure in init"
+	perror "$test: unexpected failure in init"
 	return
     }
     one_line_fail_test [format {
 	kadm5_delete_principal $server_handle "%s/a"
     } $test] "AUTH_DELETE"
     if { ! [cmd {kadm5_destroy $server_handle}]} {
-	error "$test: unexpected failure in destroy"
+	perror "$test: unexpected failure in destroy"
 	return
     }
 }
@@ -216,7 +216,7 @@ proc test11 {} {
 		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
 		server_handle
     }]} {
-	error "$test: unexpected failure in init"
+	perror "$test: unexpected failure in init"
 	return
     }
     if { ! [cmd [format {
@@ -226,7 +226,7 @@ proc test11 {} {
 	return;
     }
     if { ! [cmd {kadm5_destroy $server_handle}]} {
-	error "$test: unexpected failure in destroy"
+	perror "$test: unexpected failure in destroy"
 	return
     }
     if { [principal_exists "$test/a"] } {
@@ -251,11 +251,11 @@ proc test12 {} {
 		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
 		server_handle
     }]} {
-	error "$test: unexpected failure in init"
+	perror "$test: unexpected failure in init"
 	return
     }
     if { ! [cmd {kadm5_get_policy $server_handle test-pol p1}]}  {
-	error "$test: unexpected failure on get policy"
+	perror "$test: unexpected failure on get policy"
 	return
     }
     if { ! [cmd [format {
@@ -271,7 +271,7 @@ proc test12 {} {
 	return
     }
     if { ! [cmd {kadm5_get_policy $server_handle test-pol p2}]} {
-	error "$test: unexpected failure on get policy"
+	perror "$test: unexpected failure on get policy"
 	return
     }
     send "lindex \$p1 6\n"
@@ -305,7 +305,7 @@ proc test12 {} {
     }
     pass "$test"
     if { ! [cmd {kadm5_destroy $server_handle}]} {
-	error "$test: unexpected failure in destroy"
+	perror "$test: unexpected failure in destroy"
 	return
     }
 }

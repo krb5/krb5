@@ -9,13 +9,13 @@ proc test1 {} {
 		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
 		server_handle
     }]} {
-	error "$test: unexpected failure in init"
+	perror "$test: unexpected failure in init"
 	return
     }
     one_line_fail_test \
 	    {kadm5_get_principal $server_handle null p KADM5_PRINCIPAL_NORMAL_MASK} "EINVAL"
     if { ! [cmd {kadm5_destroy $server_handle}]} {
-	error "$test: unexpected failure in destroy"
+	perror "$test: unexpected failure in destroy"
 	return
     }
 }
@@ -35,14 +35,14 @@ proc test2 {} {
 		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
 		server_handle
     }]} {
-	error "$test: unexpected failure in init"
+	perror "$test: unexpected failure in init"
 	return
     }
     one_line_fail_test [format {
 	kadm5_get_principal $server_handle "%s/a" p KADM5_PRINCIPAL_NORMAL_MASK
     } $test] "UNK_PRINC"
     if { ! [cmd {kadm5_destroy $server_handle}]} {
-	error "$test: unexpected failure in destroy"
+	perror "$test: unexpected failure in destroy"
 	return
     }
 }
@@ -62,14 +62,14 @@ proc test3 {} {
 		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
 		server_handle
     }]} {
-	error "$test: unexpected failure in init"
+	perror "$test: unexpected failure in init"
 	return
     }
     one_line_fail_test [format {
 	kadm5_get_principal $server_handle "%s/a" p KADM5_PRINCIPAL_NORMAL_MASK
     } $test] "AUTH_GET"
     if { ! [cmd {kadm5_destroy $server_handle}]} {
-	error "$test: unexpected failure in destroy"
+	perror "$test: unexpected failure in destroy"
 	return
     }
 }
@@ -89,7 +89,7 @@ proc test4 {} {
 		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
 		server_handle
     }]} {
-	error "$test: unexpected failure in init"
+	perror "$test: unexpected failure in init"
 	return
     }
     one_line_fail_test [format {
@@ -97,7 +97,7 @@ proc test4 {} {
     } $test] "AUTH_GET"
     if { ! [cmd {kadm5_destroy $server_handle}]} {
 
-	error "$test: unexpected failure in destroy"
+	perror "$test: unexpected failure in destroy"
 	return
     }
 }
@@ -117,7 +117,7 @@ proc test5 {} {
 		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
 		server_handle
     }]} {
-	error "$test: unexpected failure in init"
+	perror "$test: unexpected failure in init"
 	return
     }
     one_line_fail_test [format {
@@ -125,7 +125,7 @@ proc test5 {} {
     } $test] "AUTH_GET"
     if { ! [cmd {kadm5_destroy $server_handle}]} {
 
-	error "$test: unexpected failure in destroy"
+	perror "$test: unexpected failure in destroy"
 	return
     }
 }
@@ -145,7 +145,7 @@ proc test6 {} {
 		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
 		server_handle
     }]} {
-	error "$test: unexpected failure in init"
+	perror "$test: unexpected failure in init"
 	return
     }
     one_line_fail_test [format {
@@ -153,7 +153,7 @@ proc test6 {} {
     } $test] "AUTH_GET"
     if { ! [cmd {kadm5_destroy $server_handle}]} {
 
-	error "$test: unexpected failure in destroy"
+	perror "$test: unexpected failure in destroy"
 	return
     }
 }
@@ -173,7 +173,7 @@ proc test7 {} {
 		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
 		server_handle
     }]} {
-	error "$test: unexpected failure in init"
+	perror "$test: unexpected failure in init"
 	return
     }
     one_line_fail_test [format {
@@ -181,7 +181,7 @@ proc test7 {} {
     } $test] "AUTH_GET"
     if { ! [cmd {kadm5_destroy $server_handle}]} {
 
-	error "$test: unexpected failure in destroy"
+	perror "$test: unexpected failure in destroy"
 	return
     }
 }
@@ -202,14 +202,14 @@ proc test8 {} {
 		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
 		server_handle
     }]} {
-	error "$test: unexpected failure in init"
+	perror "$test: unexpected failure in init"
 	return
     }
     one_line_fail_test [format {
 	kadm5_get_principal $server_handle "%s/a" p KADM5_PRINCIPAL_NORMAL_MASK
     } $test] "AUTH_GET"
     if { ! [cmd {kadm5_destroy $server_handle}]} {
-	error "$test: unexpected failure in destroy"
+	perror "$test: unexpected failure in destroy"
 	return
     }
 }
@@ -224,13 +224,13 @@ proc test9 {} {
 		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
 		server_handle
     }]} {
-	error "$test: unexpected failure in init"
+	perror "$test: unexpected failure in init"
 	return
     }
     one_line_succeed_test \
 	    {kadm5_get_principal $server_handle admin/none p KADM5_PRINCIPAL_NORMAL_MASK} 
     if { ! [cmd {kadm5_destroy $server_handle}]} {
-	error "$test: unexpected failure in destroy"
+	perror "$test: unexpected failure in destroy"
 	return
     }
 }
@@ -244,13 +244,13 @@ proc test10 {} {
 		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
 		server_handle
     }]} {
-	error "$test: unexpected failure in init"
+	perror "$test: unexpected failure in init"
 	return
     }
     one_line_succeed_test \
 	    {kadm5_get_principal $server_handle admin/none p KADM5_PRINCIPAL_NORMAL_MASK}
     if { ! [cmd {kadm5_destroy $server_handle}]} {
-	error "$test: unexpected failure in destroy"
+	perror "$test: unexpected failure in destroy"
 	return
     }
 }
@@ -264,12 +264,12 @@ proc test11 {} {
 		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
 		server_handle
     }]} {
-	error "$test: unexpected failure in init"
+	perror "$test: unexpected failure in init"
 	return
     }
     one_line_succeed_test {kadm5_get_principal $server_handle admin/get p KADM5_PRINCIPAL_NORMAL_MASK}
     if { ! [cmd {kadm5_destroy $server_handle}]} {
-	error "$test: unexpected failure in destroy"
+	perror "$test: unexpected failure in destroy"
 	return
     }
 }
@@ -283,12 +283,12 @@ proc test12 {} {
 		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
 		server_handle
     }]} {
-	error "$test: unexpected failure in init"
+	perror "$test: unexpected failure in init"
 	return
     }
     one_line_succeed_test {kadm5_get_principal $server_handle admin/get p KADM5_PRINCIPAL_NORMAL_MASK}
     if { ! [cmd {kadm5_destroy $server_handle}]} {
-	error "$test: unexpected failure in destroy"
+	perror "$test: unexpected failure in destroy"
 	return
     }
 }
@@ -302,12 +302,12 @@ proc test13 {} {
 		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
 		server_handle
     }]} {
-	error "$test: unexpected failure in init"
+	perror "$test: unexpected failure in init"
 	return
     }
     one_line_succeed_test {kadm5_get_principal $server_handle admin/add p KADM5_PRINCIPAL_NORMAL_MASK} 
     if { ! [cmd {kadm5_destroy $server_handle}]} {
-	error "$test: unexpected failure in destroy"
+	perror "$test: unexpected failure in destroy"
 	return
     }
 }
@@ -321,12 +321,12 @@ proc test14 {} {
 		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
 		server_handle
     }]} {
-	error "$test: unexpected failure in init"
+	perror "$test: unexpected failure in init"
 	return
     }
     one_line_succeed_test {kadm5_get_principal $server_handle admin/add p KADM5_PRINCIPAL_NORMAL_MASK}
     if { ! [cmd {kadm5_destroy $server_handle}]} {
-	error "$test: unexpected failure in destroy"
+	perror "$test: unexpected failure in destroy"
 	return
     }
 }

@@ -208,7 +208,7 @@ eval lock_test_continue $lock9
 eval lock_test_continue $lock9_1
 
 if {! [file exists $lockfile]} {
-    error "lock file missing before test 10"
+    perror "lock file missing before test 10"
 }
 set lock10 [lock_test_start 10 [list \
 	[list permanent	permanent] \

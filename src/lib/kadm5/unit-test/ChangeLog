@@ -1,3 +1,41 @@
+2002-09-15  Tom Yu  <tlyu@mit.edu>
+
+	* api.0/chpass-principal.exp:
+	* api.0/crte-policy.exp:
+	* api.0/crte-principal.exp:
+	* api.0/destroy.exp:
+	* api.0/dlte-policy.exp:
+	* api.0/dlte-principal.exp:
+	* api.0/get-policy.exp:
+	* api.0/get-principal.exp:
+	* api.0/init.exp:
+	* api.0/mod-policy.exp:
+	* api.0/mod-principal.exp:
+	* api.0/randkey-principal.exp:
+	* api.0/rename-principal.exp:
+	* api.1/lock.exp:
+	* api.2/chpass-principal-v2.exp:
+	* api.2/chpass-principal.exp:
+	* api.2/crte-policy.exp:
+	* api.2/crte-principal.exp:
+	* api.2/destroy.exp:
+	* api.2/dlte-policy.exp:
+	* api.2/dlte-principal.exp:
+	* api.2/get-policy.exp:
+	* api.2/get-principal-v2.exp:
+	* api.2/get-principal.exp:
+	* api.2/init-v2.exp:
+	* api.2/init.exp:
+	* api.2/mod-policy.exp:
+	* api.2/mod-principal-v2.exp:
+	* api.2/mod-principal.exp:
+	* api.2/randkey-principal-v2.exp:
+	* api.2/randkey-principal.exp:
+	* lib/lib.t: s/error/perror.
+
+	* config/unix.exp: Work around tcl 8.4's (incorrect?) output EOL
+	translation.
+
 2002-08-29  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in: Revert $(S)=>/ change, for Windows support.

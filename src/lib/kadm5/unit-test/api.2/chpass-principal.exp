@@ -20,7 +20,7 @@ proc test180 {} {
 		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
 		server_handle
     }]} {
-	error "$test: unexpected failure in init"
+	perror "$test: unexpected failure in init"
 	return
     }
     one_line_succeed_test [format {
@@ -28,7 +28,7 @@ proc test180 {} {
     } $test]
 
     if { ! [cmd {kadm5_destroy $server_handle}]} {
-	error "$test: unexpected failure in destroy"
+	perror "$test: unexpected failure in destroy"
 	return
     }
 }
@@ -52,14 +52,14 @@ proc test1805 {} {
 		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
 		server_handle
     }]} {
-	error "$test: unexpected failure in init"
+	perror "$test: unexpected failure in init"
 	return
     }
     one_line_succeed_test [format {
 	kadm5_chpass_principal $server_handle "%s/a" FoobarBax
     } $test]
     if { ! [cmd {kadm5_destroy $server_handle}]} {
-	error "$test: unexpected failure in destroy"
+	perror "$test: unexpected failure in destroy"
 	return
     }
 }
@@ -81,14 +81,14 @@ proc test180625 {} {
 		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
 		server_handle
     }]} {
-	error "$test: unexpected failure in init"
+	perror "$test: unexpected failure in init"
 	return
     }
     one_line_fail_test [format {
 	kadm5_chpass_principal $server_handle "%s/a" password
     } $test] "AUTH"
     if { ! [cmd {kadm5_destroy $server_handle}]} {
-	error "$test: unexpected failure in destroy"
+	perror "$test: unexpected failure in destroy"
 	return
     }
 }
@@ -112,14 +112,14 @@ proc test18075 {} {
 		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
 		server_handle
     }]} {
-	error "$test: unexpected failure in init"
+	perror "$test: unexpected failure in init"
 	return
     }
     one_line_fail_test [format {
 	kadm5_chpass_principal $server_handle "%s/a" Foobar
     } $test] "AUTH_CHANGEPW"
     if { ! [cmd {kadm5_destroy $server_handle}]} {
-	error "$test: unexpected failure in destroy"
+	perror "$test: unexpected failure in destroy"
 	return
     }
 }
@@ -134,14 +134,14 @@ proc test182 {} {
 		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
 		server_handle
     }]} {
-	error "$test: unexpected failure in init"
+	perror "$test: unexpected failure in init"
 	return
     }
     one_line_fail_test {
 	kadm5_chpass_principal $server_handle kadmin/history password
     } "PROTECT"
     if { ! [cmd {kadm5_destroy $server_handle}]} {
-	error "$test: unexpected failure in destroy"
+	perror "$test: unexpected failure in destroy"
 	return
     }
 }
@@ -160,14 +160,14 @@ proc test183 {} {
 		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
 		server_handle
     }]} {
-	error "$test: unexpected failure in init"
+	perror "$test: unexpected failure in init"
 	return
     }
     one_line_fail_test [format {
 	kadm5_chpass_principal null "%s/a" password
     } $test] "BAD_SERVER_HANDLE"
     if { ! [cmd {kadm5_destroy $server_handle}]} {
-	error "$test: unexpected failure in destroy"
+	perror "$test: unexpected failure in destroy"
 	return
     }
 }

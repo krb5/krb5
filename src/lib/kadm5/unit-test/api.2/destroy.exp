@@ -12,7 +12,7 @@ proc test1 {} {
 		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
 		server_handle
 	}]} {
-		error "$test: unexpected failure in init"
+		perror "$test: unexpected failure in init"
 		return
 	}
 	one_line_succeed_test {kadm5_destroy $server_handle}
@@ -30,7 +30,7 @@ test1
 #		    $KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
 #		    server_handle
 #	}]} {
-#	    error "$test: unexpected failure on init"
+#	    perror "$test: unexpected failure on init"
 #	    return
 #	}
 #	if {! [cmd {kadm5_destroy $server_handle}]} {
@@ -58,7 +58,7 @@ test1
 #		    $KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
 #		    server_handle
 #	}]} {
-#	    error "$test: unexpected failure on init"
+#	    perror "$test: unexpected failure on init"
 #	    return
 #	}
 #	if {! [cmd {kadm5_destroy $server_handle}]} {
@@ -120,7 +120,7 @@ test1
 #		    $KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
 #		    server_handle
 #	}]} {
-#	    error "$test: unexpected failure on init"
+#	    perror "$test: unexpected failure on init"
 #	    return
 #	}
 #	if {! [cmd {kadm5_destroy $server_handle}]} {
@@ -155,7 +155,7 @@ test1
 #		    $KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
 #		    server_handle
 #	}]} {
-#		error "$test: unexpected failure in init"
+#		perror "$test: unexpected failure in init"
 #		return
 #	}
 #	if {! [cmd {kadm5_destroy $server_handle}]} {
@@ -175,7 +175,7 @@ proc test8 {} {
 		    $KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
 		    server_handle
 	}]} {
-		error "$test: unexpected failure in init"
+		perror "$test: unexpected failure in init"
 		return
 	}
 	if {! [cmd {kadm5_destroy $server_handle}]} {

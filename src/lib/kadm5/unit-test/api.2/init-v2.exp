@@ -274,7 +274,7 @@ proc test109 {} {
 	}
     }
     if { ! [cmd {kadm5_destroy $server_handle}]} {
-	error "$test: unexpected failure in destroy"
+	perror "$test: unexpected failure in destroy"
 	return
     }
     if {$max_life == 10} {
@@ -510,7 +510,7 @@ proc test117 {} {
 	kadm5_create_principal $server_handle [simple_principal "%s/a"] \
 		{KADM5_PRINCIPAL} "%s/a"
     } $test $test]]} {
-	error "$test: unexpected failure creating principal"
+	perror "$test: unexpected failure creating principal"
     }
     if {! [cmd [format {
 	kadm5_get_principal $server_handle "%s/a" principal KADM5_MAX_LIFE

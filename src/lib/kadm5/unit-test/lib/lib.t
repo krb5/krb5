@@ -198,7 +198,7 @@ proc policy_exists {name} {
 proc error_and_restart {error} {
     api_exit
     api_start
-    error $error
+    perror $error
 }
 
 proc test {name} {

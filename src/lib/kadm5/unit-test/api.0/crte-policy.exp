@@ -17,7 +17,7 @@ proc test1 {} {
 		$OVSEC_KADM_STRUCT_VERSION $OVSEC_KADM_API_VERSION_1 \
 		server_handle
     }]} {
-	error "$test: unexpected failure in init"
+	perror "$test: unexpected failure in init"
 	return
     }
     one_line_fail_test [format {
@@ -25,7 +25,7 @@ proc test1 {} {
 		0xF01000
     } $test] "BAD_MASK"
     if { ! [cmd {ovsec_kadm_destroy $server_handle}]} {
-        error "$test: unexpected failure in destroy"
+        perror "$test: unexpected failure in destroy"
         return
     }
 }
@@ -45,7 +45,7 @@ proc test2 {} {
 		$OVSEC_KADM_STRUCT_VERSION $OVSEC_KADM_API_VERSION_1 \
 		server_handle
     }]} {
-	error "$test: unexpected failure in init"
+	perror "$test: unexpected failure in init"
 	return
     }
     one_line_fail_test [format {
@@ -53,7 +53,7 @@ proc test2 {} {
 		{OVSEC_KADM_POLICY}
     } $test] "AUTH_ADD"
     if { ! [cmd {ovsec_kadm_destroy $server_handle}]} {
-	error "$test: unexpected failure in destroy";
+	perror "$test: unexpected failure in destroy";
 	return
     }
 }
@@ -74,7 +74,7 @@ proc test3 {} {
 		$OVSEC_KADM_STRUCT_VERSION $OVSEC_KADM_API_VERSION_1 \
 		server_handle
     }]} {
-	error "$test: unexpected failure in init"
+	perror "$test: unexpected failure in init"
 	return
     }
     one_line_fail_test [format {
@@ -82,7 +82,7 @@ proc test3 {} {
 		0x000000
     } $test] "BAD_MASK"
     if { ! [cmd {ovsec_kadm_destroy $server_handle}]} {
-        error "$test: unexpected failure in destroy"
+        perror "$test: unexpected failure in destroy"
         return
     }
 }
@@ -103,7 +103,7 @@ proc test4 {} {
 		$OVSEC_KADM_STRUCT_VERSION $OVSEC_KADM_API_VERSION_1 \
 		server_handle
     }]} {
-	error "$test: unexpected failure in init"
+	perror "$test: unexpected failure in init"
 	return
     }
     one_line_fail_test [format {
@@ -111,7 +111,7 @@ proc test4 {} {
 		{OVSEC_KADM_POLICY OVSEC_KADM_REF_COUNT}
     } $test] "BAD_MASK"
     if { ! [cmd {ovsec_kadm_destroy $server_handle}]} {
-        error "$test: unexpected failure in destroy"
+        perror "$test: unexpected failure in destroy"
         return
     }
 }
@@ -127,7 +127,7 @@ proc test5 {} {
 		$OVSEC_KADM_STRUCT_VERSION $OVSEC_KADM_API_VERSION_1 \
 		server_handle
     }]} {
-	error "$test: unexpected failure in init"
+	perror "$test: unexpected failure in init"
 	return
     }
     one_line_fail_test [format {
@@ -135,7 +135,7 @@ proc test5 {} {
 		{OVSEC_KADM_POLICY}
     } $test] "BAD_POLICY"
     if { ! [cmd {ovsec_kadm_destroy $server_handle}]} {
-        error "$test: unexpected failure in destroy"
+        perror "$test: unexpected failure in destroy"
         return
     }
 }
@@ -153,7 +153,7 @@ proc test6 {} {
 		$OVSEC_KADM_STRUCT_VERSION $OVSEC_KADM_API_VERSION_1 \
 		server_handle
     }]} {
-	error "$test: unexpected failure in init"
+	perror "$test: unexpected failure in init"
 	return
     }
     one_line_fail_test {
@@ -161,7 +161,7 @@ proc test6 {} {
 		{OVSEC_KADM_POLICY}
     } "DUP"
     if { ! [cmd {ovsec_kadm_destroy $server_handle}]} {
-	error "$test: unexpected failure in destroy"
+	perror "$test: unexpected failure in destroy"
 	return
     }
 }
@@ -180,7 +180,7 @@ proc test7 {} {
 		$OVSEC_KADM_STRUCT_VERSION $OVSEC_KADM_API_VERSION_1 \
 		server_handle
     }]} {
-	error "$test: unexpected failure in init"
+	perror "$test: unexpected failure in init"
 	return
     }
     one_line_fail_test {
@@ -188,7 +188,7 @@ proc test7 {} {
 		{OVSEC_KADM_POLICY}
     } "EINVAL"
     if { ! [cmd {ovsec_kadm_destroy $server_handle}]} {
-        error "$test: unexpected failure in destroy"
+        perror "$test: unexpected failure in destroy"
         return
     }
 }
@@ -204,7 +204,7 @@ proc test8 {} {
 		$OVSEC_KADM_STRUCT_VERSION $OVSEC_KADM_API_VERSION_1 \
 		server_handle
     }]} {
-	error "$test: unexpected failure in init"
+	perror "$test: unexpected failure in init"
 	return
     }
     one_line_fail_test {
@@ -212,7 +212,7 @@ proc test8 {} {
 		{OVSEC_KADM_POLICY}
     } "BAD_POLICY"
     if { ! [cmd {ovsec_kadm_destroy $server_handle}]} {
-	error "$test: unexpected failure in destroy"
+	perror "$test: unexpected failure in destroy"
 	return
     }
 }
@@ -235,7 +235,7 @@ proc test9 {} {
 		$OVSEC_KADM_STRUCT_VERSION $OVSEC_KADM_API_VERSION_1 \
 		server_handle
     }]} {
-	error "$test: unexpected failure in init"
+	perror "$test: unexpected failure in init"
 	return
     }
     if { ! [cmd [format {
@@ -257,7 +257,7 @@ proc test9 {} {
 	timeout				{ fail "$test" }
     }
     if { ! [cmd {ovsec_kadm_destroy $server_handle}]} {
-	error "$test: unexpected failure in destroy"
+	perror "$test: unexpected failure in destroy"
 	return
     }
 }
@@ -280,7 +280,7 @@ proc test10 {} {
 		$OVSEC_KADM_STRUCT_VERSION $OVSEC_KADM_API_VERSION_1 \
 		server_handle
     }]} {
-	error "$test: unexpected failure in init"
+	perror "$test: unexpected failure in init"
 	return
     }
     if { ! [cmd [format {
@@ -302,7 +302,7 @@ proc test10 {} {
 	timeout				{ fail "$test" }
     }
     if { ! [cmd {ovsec_kadm_destroy $server_handle}]} {
-	error "$test: unexpected failure in destroy"
+	perror "$test: unexpected failure in destroy"
 	return
     }
 }
@@ -325,7 +325,7 @@ proc test11 {} {
 		$OVSEC_KADM_STRUCT_VERSION $OVSEC_KADM_API_VERSION_1 \
 		server_handle
     }]} {
-	error "$test: unexpected failure in init"
+	perror "$test: unexpected failure in init"
 	return
     }
     if {! [cmd [format {
@@ -348,7 +348,7 @@ proc test11 {} {
     }
     
     if { ! [cmd {ovsec_kadm_destroy $server_handle}]} {
-	error "$test: unexpected failure in destroy"
+	perror "$test: unexpected failure in destroy"
 	return
     }
 }
@@ -371,7 +371,7 @@ proc test12 {} {
 		$OVSEC_KADM_STRUCT_VERSION $OVSEC_KADM_API_VERSION_1 \
 		server_handle
     }]} {
-	error "$test: unexpected failure in init"
+	perror "$test: unexpected failure in init"
 	return
     }
     if {! [cmd [format {
@@ -393,7 +393,7 @@ proc test12 {} {
 	timeout				{ fail "$test" }
     }
     if { ! [cmd {ovsec_kadm_destroy $server_handle}]} {
-	error "$test: unexpected failure in destroy"
+	perror "$test: unexpected failure in destroy"
 	return
     }
 }
@@ -416,7 +416,7 @@ proc test13 {} {
 		$OVSEC_KADM_STRUCT_VERSION $OVSEC_KADM_API_VERSION_1 \
 		server_handle
     }]} {
-	error "$test: unexpected failure in init"
+	perror "$test: unexpected failure in init"
 	return
     }
     one_line_fail_test [format {
@@ -424,7 +424,7 @@ proc test13 {} {
 		{OVSEC_KADM_POLICY OVSEC_KADM_PW_MIN_LENGTH}
     } $test] "BAD_LENGTH"
     if { ! [cmd {ovsec_kadm_destroy $server_handle}]} {
-	error "$test: unexpected failure in destroy"
+	perror "$test: unexpected failure in destroy"
 	return
     }
 }
@@ -447,7 +447,7 @@ proc test14 {} {
 		$OVSEC_KADM_STRUCT_VERSION $OVSEC_KADM_API_VERSION_1 \
 		server_handle
     }]} {
-	error "$test: unexpected failure in init"
+	perror "$test: unexpected failure in init"
 	return
     }
     if {! [cmd [format {
@@ -470,7 +470,7 @@ proc test14 {} {
     }
     
     if { ! [cmd {ovsec_kadm_destroy $server_handle}]} {
-	error "$test: unexpected failure in destroy"
+	perror "$test: unexpected failure in destroy"
 	return
     }
 }
@@ -492,7 +492,7 @@ proc test15 {} {
 		$OVSEC_KADM_STRUCT_VERSION $OVSEC_KADM_API_VERSION_1 \
 		server_handle
     }]} {
-	error "$test: unexpected failure in init"
+	perror "$test: unexpected failure in init"
 	return
     }
     one_line_fail_test [format {
@@ -500,7 +500,7 @@ proc test15 {} {
 		{OVSEC_KADM_POLICY OVSEC_KADM_PW_MIN_CLASSES}
     } $test] "BAD_CLASS"
     if { ! [cmd {ovsec_kadm_destroy $server_handle}]} {
-	error "$test: unexpected failure in destroy"
+	perror "$test: unexpected failure in destroy"
 	return
     }
 }
@@ -523,7 +523,7 @@ proc test16 {} {
 		$OVSEC_KADM_STRUCT_VERSION $OVSEC_KADM_API_VERSION_1 \
 		server_handle
     }]} {
-	error "$test: unexpected failure in init"
+	perror "$test: unexpected failure in init"
 	return
     }
     if {! [cmd [format {
@@ -546,7 +546,7 @@ proc test16 {} {
     }
     
     if { ! [cmd {ovsec_kadm_destroy $server_handle}]} {
-	error "$test: unexpected failure in destroy"
+	perror "$test: unexpected failure in destroy"
 	return
     }
 }
@@ -568,7 +568,7 @@ proc test17 {} {
 		$OVSEC_KADM_STRUCT_VERSION $OVSEC_KADM_API_VERSION_1 \
 		server_handle
     }]} {
-	error "$test: unexpected failure in init"
+	perror "$test: unexpected failure in init"
 	return
     }
     if {! [cmd [format {
@@ -590,7 +590,7 @@ proc test17 {} {
 	timeout				{ fail "$test" }
     }
     if { ! [cmd {ovsec_kadm_destroy $server_handle}]} {
-	error "$test: unexpected failure in destroy"
+	perror "$test: unexpected failure in destroy"
 	return
     }
 }
@@ -611,7 +611,7 @@ proc test18 {} {
 		$OVSEC_KADM_STRUCT_VERSION $OVSEC_KADM_API_VERSION_1 \
 		server_handle
     }]} {
-	error "$test: unexpected failure in init"
+	perror "$test: unexpected failure in init"
 	return
     }
     one_line_fail_test [format {
@@ -619,7 +619,7 @@ proc test18 {} {
 		{OVSEC_KADM_POLICY OVSEC_KADM_PW_MIN_CLASSES}
     } $test] "BAD_CLASS"
     if { ! [cmd {ovsec_kadm_destroy $server_handle}]} {
-	error "$test: unexpected failure in destroy"
+	perror "$test: unexpected failure in destroy"
 	return
     }
 }
@@ -640,7 +640,7 @@ proc test19 {} {
 		$OVSEC_KADM_STRUCT_VERSION $OVSEC_KADM_API_VERSION_1 \
 		server_handle
     }]} {
-	error "$test: unexpected failure in init"
+	perror "$test: unexpected failure in init"
 	return
     }
     one_line_fail_test [format {
@@ -648,7 +648,7 @@ proc test19 {} {
 		{OVSEC_KADM_POLICY OVSEC_KADM_PW_HISTORY_NUM}
     } $test] "BAD_HISTORY"
     if { ! [cmd {ovsec_kadm_destroy $server_handle}]} {
-	error "$test: unexpected failure in destroy"
+	perror "$test: unexpected failure in destroy"
 	return
     }
 }
@@ -670,7 +670,7 @@ proc test20 {} {
 		$OVSEC_KADM_STRUCT_VERSION $OVSEC_KADM_API_VERSION_1 \
 		server_handle
     }]} {
-	error "$test: unexpected failure in init"
+	perror "$test: unexpected failure in init"
 	return
     }
     if {! [cmd  [format {
@@ -692,7 +692,7 @@ proc test20 {} {
 	timeout				{ fail "$test" }
     }
     if { ! [cmd {ovsec_kadm_destroy $server_handle}]} {
-	error "$test: unexpected failure in destroy"
+	perror "$test: unexpected failure in destroy"
 	return
     }
 }
@@ -715,7 +715,7 @@ proc test21 {} {
 		$OVSEC_KADM_STRUCT_VERSION $OVSEC_KADM_API_VERSION_1 \
 		server_handle
     }]} {
-	error "$test: unexpected failure in init"
+	perror "$test: unexpected failure in init"
 	return
     }
     if {! [cmd [format {
@@ -737,7 +737,7 @@ proc test21 {} {
 	timeout				{ fail "$test" }
     }
     if { ! [cmd {ovsec_kadm_destroy $server_handle}]} {
-	error "$test: unexpected failure in destroy"
+	perror "$test: unexpected failure in destroy"
 	return
     }
 }
@@ -762,7 +762,7 @@ proc test215 {} {
 		$OVSEC_KADM_STRUCT_VERSION $OVSEC_KADM_API_VERSION_1 \
 		server_handle
     }]} {
-	error "$test: unexpected failure in init"
+	perror "$test: unexpected failure in init"
 	return
     }
 
@@ -771,7 +771,7 @@ proc test215 {} {
 		{OVSEC_KADM_POLICY OVSEC_KADM_PW_HISTORY_NUM}
     } $test] "BAD_HISTORY"
     if { ! [cmd {ovsec_kadm_destroy $server_handle}]} {
-	error "$test: unexpected failure in destroy"
+	perror "$test: unexpected failure in destroy"
 	return
     }
 }
@@ -793,7 +793,7 @@ proc test22 {} {
 		$OVSEC_KADM_STRUCT_VERSION $OVSEC_KADM_API_VERSION_1 \
 		server_handle
     }]} {
-	error "$test: unexpected failure in init"
+	perror "$test: unexpected failure in init"
 	return
     }
     one_line_fail_test [format {
@@ -801,7 +801,7 @@ proc test22 {} {
 		{OVSEC_KADM_POLICY}
     } $test] "AUTH_ADD"
     if { ! [cmd {ovsec_kadm_destroy $server_handle}]} {
-	error "$test: unexpected failure in destroy"
+	perror "$test: unexpected failure in destroy"
 	return
     }
 }
@@ -822,7 +822,7 @@ proc test23 {} {
 		$OVSEC_KADM_STRUCT_VERSION $OVSEC_KADM_API_VERSION_1 \
 		server_handle
     }]} {
-	error "$test: unexpected failure in init"
+	perror "$test: unexpected failure in init"
 	return
     }
     one_line_fail_test [format {
@@ -830,7 +830,7 @@ proc test23 {} {
 		{OVSEC_KADM_POLICY}
     } $test] "AUTH_ADD"
     if { ! [cmd {ovsec_kadm_destroy $server_handle}]} {
-	error "$test: unexpected failure in destroy"
+	perror "$test: unexpected failure in destroy"
 	return
     }
 }
@@ -852,7 +852,7 @@ proc test24 {} {
 		$OVSEC_KADM_STRUCT_VERSION $OVSEC_KADM_API_VERSION_1 \
 		server_handle
     }]} {
-	error "$test: unexpected failure in init"
+	perror "$test: unexpected failure in init"
 	return
     }
     one_line_fail_test [format {
@@ -860,7 +860,7 @@ proc test24 {} {
 		{OVSEC_KADM_POLICY}
     } $test] "AUTH_ADD"
     if { ! [cmd {ovsec_kadm_destroy $server_handle}]} {
-	error "$test: unexpected failure in destroy"
+	perror "$test: unexpected failure in destroy"
 	return
     }
 }
@@ -882,7 +882,7 @@ proc test25 {} {
 		$OVSEC_KADM_STRUCT_VERSION $OVSEC_KADM_API_VERSION_1 \
 		server_handle
     }]} {
-	error "$test: unexpected failure in init"
+	perror "$test: unexpected failure in init"
 	return
     }
     one_line_fail_test [format {
@@ -890,7 +890,7 @@ proc test25 {} {
 		{OVSEC_KADM_POLICY}
     } $test] "AUTH_ADD"
     if { ! [cmd {ovsec_kadm_destroy $server_handle}]} {
-	error "$test: unexpected failure in destroy"
+	perror "$test: unexpected failure in destroy"
 	return
     }
 }
@@ -911,7 +911,7 @@ proc test26 {} {
 		$OVSEC_KADM_STRUCT_VERSION $OVSEC_KADM_API_VERSION_1 \
 		server_handle
     }]} {
-	error "$test: unexpected failure in init"
+	perror "$test: unexpected failure in init"
 	return
     }
     one_line_succeed_test [format {
@@ -919,7 +919,7 @@ proc test26 {} {
 		{OVSEC_KADM_POLICY}
     } $test]
     if { ! [cmd {ovsec_kadm_destroy $server_handle}]} {
-	error "$test: unexpected failure in destroy"
+	perror "$test: unexpected failure in destroy"
 	return
     }
 }
@@ -941,7 +941,7 @@ proc test27 {} {
 		$OVSEC_KADM_STRUCT_VERSION $OVSEC_KADM_API_VERSION_1 \
 		server_handle
     }]} {
-	error "$test: unexpected failure in init"
+	perror "$test: unexpected failure in init"
 	return
     }
     one_line_succeed_test [format {
@@ -949,7 +949,7 @@ proc test27 {} {
 		{OVSEC_KADM_POLICY}
     } $test]
     if { ! [cmd {ovsec_kadm_destroy $server_handle}]} {
-	error "$test: unexpected failure in destroy"
+	perror "$test: unexpected failure in destroy"
 	return
     }
 }
@@ -965,14 +965,14 @@ proc test28 {} {
 		$OVSEC_KADM_STRUCT_VERSION $OVSEC_KADM_API_VERSION_1 \
 		server_handle
     }]} {
-	error "$test: unexpected failure in init"
+	perror "$test: unexpected failure in init"
 	return
     }
     one_line_fail_test {
 	ovsec_kadm_create_policy $server_handle null {OVSEC_KADM_POLICY}
     } "EINVAL"
     if { ! [cmd {ovsec_kadm_destroy $server_handle}]} {
-        error "$test: unexpected failure in destroy"
+        perror "$test: unexpected failure in destroy"
         return
     }
 }

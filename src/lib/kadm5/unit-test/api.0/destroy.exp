@@ -12,7 +12,7 @@ proc test1 {} {
 		$OVSEC_KADM_STRUCT_VERSION $OVSEC_KADM_API_VERSION_1 \
 		server_handle
 	}]} {
-		error "$test: unexpected failure in init"
+		perror "$test: unexpected failure in init"
 		return
 	}
 	one_line_succeed_test {ovsec_kadm_destroy $server_handle}
@@ -30,7 +30,7 @@ test1
 #		    $OVSEC_KADM_STRUCT_VERSION $OVSEC_KADM_API_VERSION_1 \
 #		    server_handle
 #	}]} {
-#	    error "$test: unexpected failure on init"
+#	    perror "$test: unexpected failure on init"
 #	    return
 #	}
 #	if {! [cmd {ovsec_kadm_destroy $server_handle}]} {
@@ -58,7 +58,7 @@ test1
 #		    $OVSEC_KADM_STRUCT_VERSION $OVSEC_KADM_API_VERSION_1 \
 #		    server_handle
 #	}]} {
-#	    error "$test: unexpected failure on init"
+#	    perror "$test: unexpected failure on init"
 #	    return
 #	}
 #	if {! [cmd {ovsec_kadm_destroy $server_handle}]} {
@@ -120,7 +120,7 @@ test1
 #		    $OVSEC_KADM_STRUCT_VERSION $OVSEC_KADM_API_VERSION_1 \
 #		    server_handle
 #	}]} {
-#	    error "$test: unexpected failure on init"
+#	    perror "$test: unexpected failure on init"
 #	    return
 #	}
 #	if {! [cmd {ovsec_kadm_destroy $server_handle}]} {
@@ -155,7 +155,7 @@ test1
 #		    $OVSEC_KADM_STRUCT_VERSION $OVSEC_KADM_API_VERSION_1 \
 #		    server_handle
 #	}]} {
-#		error "$test: unexpected failure in init"
+#		perror "$test: unexpected failure in init"
 #		return
 #	}
 #	if {! [cmd {ovsec_kadm_destroy $server_handle}]} {
@@ -175,7 +175,7 @@ proc test8 {} {
 		    $OVSEC_KADM_STRUCT_VERSION $OVSEC_KADM_API_VERSION_1 \
 		    server_handle
 	}]} {
-		error "$test: unexpected failure in init"
+		perror "$test: unexpected failure in init"
 		return
 	}
 	if {! [cmd {ovsec_kadm_destroy $server_handle}]} {

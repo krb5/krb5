@@ -25,19 +25,19 @@ proc test200 {} {
 		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
 		server_handle
     }]]} {
-	error "$test: unexpected failure in init"
+	perror "$test: unexpected failure in init"
 	return
     }
     if {! [cmd [format {
 	kadm5_chpass_principal $server_handle "%s/a" newpassword
     } $test]]} {
-	error "$test: unexpected failure in chpass_principal"
+	perror "$test: unexpected failure in chpass_principal"
     }
     if {! [cmd [format {
 	kadm5_get_principal $server_handle  "%s/a" p \
 		{KADM5_PRINCIPAL_NORMAL_MASK KADM5_KEY_DATA}
     } $test]]} {
-	error "$test: unexpected failure in get_principal"
+	perror "$test: unexpected failure in get_principal"
     }
     send "lindex \$p 16\n"
     expect {
@@ -59,7 +59,7 @@ proc test200 {} {
 	fail "$test: $num_keys keys, should be 3"
     }
     if { ! [cmd {kadm5_destroy $server_handle}]} {
-	error "$test: unexpected failure in destroy"
+	perror "$test: unexpected failure in destroy"
 	return
     }
 }
