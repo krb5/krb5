@@ -2,7 +2,7 @@ thisconfigdir=.
 myfulldir=lib/krb5
 mydir=.
 BUILDTOP=$(REL)..$(S)..
-LOCALINCLUDES = -I$(srcdir)/ccache -I$(srcdir)/keytab -I$(srcdir)/rcache
+LOCALINCLUDES = -I$(srcdir)/ccache -I$(srcdir)/keytab -I$(srcdir)/rcache -I$(srcdir)/os
 LOCAL_SUBDIRS= error_tables asn.1 ccache keytab krb os rcache posix
 
 ##DOSBUILDTOP = ..\..

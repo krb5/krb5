@@ -1,5 +1,7 @@
 2004-06-15  Ken Raeburn  <raeburn@mit.edu>
 
+	* Makefile.in (LOCALINCLUDES): Add $srcdir/os.
+
 	* krb5_libinit.c: Include os-proto.h.
 	(krb5int_lib_init): Initialize krb5int_us_time_mutex.
 
