@@ -68,7 +68,7 @@ SRCS= \
 	u2gen.c
 
 OBJS= \
-	KRB5-types.o	\
+	$(TYPESOBJS)	\
 	encode.o	\
 	decode.o	\
 	adat2kadat.o	\
@@ -124,8 +124,39 @@ OBJS= \
 	trep2ktrep.o	\
 	u2gen.o
 
+#ifdef TypesObjs
+#include "KRB5-oflist"
+#endif
+
+all:: KRB5-oflist Makefile
 
 OtherdirLibraryTarget($(TOP)/lib,krb5,$(OBJS))
+
+
+#$(TOP)/lib/libkrb5.a:: KRB5-oflist KRB5-pt0.o
+#	$(ARADD) $@ `cat KRB5-oflist`
+#	$(TOUCH) fookrb5
+
+#KRB5-pt0.o:	KRB5-pt0.c KRB5-cflist
+#	$(CC) -c $(CFLAGS) `cat KRB5-cflist`
+
+#define IHaveSpecialMakefileTarget
+
+ImakeDependency(Makefile)
+
+Makefile:: KRB5-oflist Imakefile
+	$(IMAKE_CMD) -DTypesObjs -DTOPDIR=$(TOP) -DCURDIR=$(CURRENT_DIR)   -s Makefile.new
+	$(MAKE) -f Makefile.new noop
+	-@if [ -f Makefile ]; then \
+		echo "$(RM) Makefile.bak; $(MV) Makefile Makefile.bak"; \
+		$(RM) Makefile.bak; $(MV) Makefile Makefile.bak; \
+	fi
+	$(MV) Makefile.new Makefile
+
+noop::
+
+KRB5-pt0.c KRB5-cflist KRB5-oflist:	KRB5-types.c process.perl
+	$(PERL) process.perl KRB5-types.c KRB5-pt /dev/null KRB5-oflist
 
 KRB5-types.c: KRB5-types.py
 
@@ -133,4 +164,4 @@ KRB5-types.py:	KRB5-asn.py
 	$(POSY) $(POFLAGS) -o $@ KRB5-asn.py
 
 clean::
-	$(RM) KRB5-types.c KRB5.ph KRB5-types.py KRB5-types.h
+	$(RM) KRB5-types.c KRB5.ph KRB5-types.py KRB5-types.h KRB5-pt*.c KRB5-oflist
