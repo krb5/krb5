@@ -1,3 +1,9 @@
+2000-4-13	Alexandra Ellwood <lxs@mit.edu>
+
+	* init_os_ctx.c: Added support to store a krb5_principal in the os_context 
+	along with the default ccache name (if known, this principal is the same 
+	as the last time we looked at the ccache.
+
 2000-03-20  Miro Jurisic  <meeroh@mit.edu>
 
 	* def_realm.c (krb5_free_default_realm): Added, use to free
