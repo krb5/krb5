@@ -1,3 +1,7 @@
+2004-07-08  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (LOCALINCLUDES): Add $(srcdir)/.. to the list.
+
 2004-07-07  Ken Raeburn  <raeburn@mit.edu>
 
 	* disp_status.c: Include gss_libinit.h.
