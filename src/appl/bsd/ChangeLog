@@ -1,3 +1,10 @@
+2003-03-28  Ken Raeburn  <raeburn@mit.edu>
+
+	* kcmd.c (kcmd_connect): Log errors if a connect to port 0 is
+	attempted.  Report port number in connection failure.
+	(setup_secondary_channel): Use socklen_t for socket address
+	length.
+
 2003-03-04  Ken Raeburn  <raeburn@mit.edu>
 
 	* compat_recv.c: Only include krb.h if KRB5_KRB4_COMPAT.

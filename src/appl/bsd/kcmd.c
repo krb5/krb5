@@ -201,6 +201,10 @@ kcmd_connect (int *sp, int *addrfamilyp, struct sockaddr_in *sockinp,
     char rport_buf[10];
     GETSOCKNAME_ARG3_TYPE  sin_len;
 
+    if (rport == 0) {
+	fprintf(stderr, "can't connect to %s port 0\n", hname);
+	return -1;
+    }
     sprintf(rport_buf, "%d", ntohs(rport));
     memset(&aihints, 0, sizeof(aihints));
     aihints.ai_socktype = SOCK_STREAM;
@@ -231,8 +235,27 @@ kcmd_connect (int *sp, int *addrfamilyp, struct sockaddr_in *sockinp,
 
     for (ap2 = ap; ap; ap = ap->ai_next) {
 	char hostbuf[NI_MAXHOST];
+	char portbuf[NI_MAXSERV];
 	int oerrno;
 	int af = ap->ai_family;
+
+	/* @@ Debugging.  Yuck.  */
+	switch (af) {
+	case AF_INET:
+	    if (((struct sockaddr_in *)ap->ai_addr)->sin_port == 0) {
+		fprintf(stderr, "internal error: got ipv4 address but port zero?\n");
+		continue;
+	    }
+	    break;
+#ifdef KRB5_USE_INET6
+	case AF_INET6:
+	    if (((struct sockaddr_in6 *)ap->ai_addr)->sin6_port == 0) {
+		fprintf(stderr, "internal error: got ipv6 address but port zero?\n");
+		continue;
+	    }
+	    break;
+#endif
+	}
 
 	for (;;) {
 	    s = getport(lportp, &af);
@@ -254,12 +277,14 @@ kcmd_connect (int *sp, int *addrfamilyp, struct sockaddr_in *sockinp,
 
 	oerrno = errno;
 	aierr = getnameinfo(ap->ai_addr, ap->ai_addrlen,
-			    hostbuf, sizeof(hostbuf), 0, 0, NI_NUMERICHOST);
+			    hostbuf, sizeof(hostbuf), portbuf, sizeof(portbuf),
+			    NI_NUMERICHOST | NI_NUMERICSERV);
 	if (aierr)
 	    fprintf(stderr, "connect to <error formatting address: %s>: ",
 		    gai_strerror (aierr));
 	else
-	    fprintf(stderr, "connect to address %s: ", hostbuf);
+	    fprintf(stderr, "connect to address %s port %s: ", hostbuf,
+		    portbuf);
 	errno = oerrno;
 	perror(0);
 
@@ -292,7 +317,7 @@ setup_secondary_channel (int s, int *fd2p, int *lportp, int *addrfamilyp,
     	*lportp = 0;
     } else {
     	char num[8];
-    	int len = sizeof (*fromp);
+    	socklen_t len = sizeof (*fromp);
 	size_t slen;
     	int s2 = getport(lportp, addrfamilyp), s3;
 	fd_set rfds, xfds;
