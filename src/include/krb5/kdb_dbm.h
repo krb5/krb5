@@ -33,6 +33,7 @@
 #define krb5_dbm_db_fini krb5_db_fini
 #define krb5_dbm_db_get_age krb5_db_get_age
 #define krb5_dbm_db_create krb5_db_create
+#define kdb5_dbm_db_destroy kdb5_db_destroy
 #define krb5_dbm_db_rename krb5_db_rename
 #define krb5_dbm_db_get_principal krb5_db_get_principal
 #define krb5_dbm_db_free_principal krb5_db_free_principal
@@ -49,6 +50,7 @@ krb5_error_code krb5_dbm_db_init PROTOTYPE((void ));
 krb5_error_code krb5_dbm_db_fini PROTOTYPE((void ));
 krb5_error_code krb5_dbm_db_get_age PROTOTYPE((char *, time_t * ));
 krb5_error_code krb5_dbm_db_create PROTOTYPE((char * ));
+krb5_error_code krb5_dbm_db_destroy PROTOTYPE((char * ));
 krb5_error_code krb5_dbm_db_rename PROTOTYPE((char *, char * ));
 krb5_error_code krb5_dbm_db_get_principal PROTOTYPE((krb5_principal,
 						     krb5_db_entry *,
