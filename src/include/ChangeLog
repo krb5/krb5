@@ -1,3 +1,8 @@
+2004-08-08  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: If getpwnam_r is available, determine its return
+	type.
+
 2004-08-07  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Look for sched.h and sched_yield.

@@ -51,6 +51,28 @@ fi
 dnl
 
 if test "$ac_cv_func_getpwnam_r" = yes; then
+  AC_MSG_CHECKING([return type of getpwnam_r])
+  AC_CACHE_VAL(krb5_cv_getpwnam_r_return_type,
+  [AC_TRY_COMPILE([#include <pwd.h>
+   extern int getpwnam_r();], [1;],
+   getpwnam_r_returns_int=yes,getpwnam_r_returns_int=no)
+   AC_TRY_COMPILE([#include <pwd.h>
+   extern struct pwd *getpwnam_r();], [1;],
+   getpwnam_r_returns_ptr=yes,getpwnam_r_returns_ptr=no)
+   case "$getpwnam_r_returns_int/$getpwnam_r_returns_ptr" in
+     yes/no) krb5_cv_getpwnam_r_return_type=int ;;
+     no/yes) krb5_cv_getpwnam_r_return_type=ptr ;;
+     *) krb5_cv_getpwnam_r_return_type=unknown ;;
+   esac])
+  AC_MSG_RESULT($krb5_cv_getpwnam_r_return_type)
+  if test $krb5_cv_getpwnam_r_return_type = int; then
+    AC_DEFINE(GETPWNAM_R_RETURNS_INT, 1, [Define if getpwnam_r returns an int])
+  elif test $krb5_cv_getpwnam_r_return_type = unknown; then
+    AC_MSG_WARN([Cannot determine getpwnam_r return type, disabling])
+    ac_cv_func_getpwnam_r=no
+  fi
+fi
+if test "$ac_cv_func_getpwnam_r" = yes; then
   AC_MSG_CHECKING([number of arguments to getpwnam_r])
   AC_CACHE_VAL(krb5_cv_getpwnam_r_args,
   [AC_TRY_COMPILE([#include <pwd.h>
