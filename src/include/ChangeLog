@@ -1,3 +1,9 @@
+1999-08-31  Jeffrey Altman <jaltman@columbia.edu>
+
+    * k5-int.h:  Add #define ANSI_STDIO for Windows builds so that 
+                 stdio opens files in binary mode instead of text
+                 mode.  This is necessary for Ctrl-Z transparency.
+
 1999-08-30  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Check for memmove and bcopy.
