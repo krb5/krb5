@@ -1,24 +1,53 @@
 CFLAGS = $(CCOPTS) $(DEFS)
 LDFLAGS = -g
 
-EHDRDIR=$(BUILDTOP)/include/krb5
+##DOSBUILDTOP = ..\..\..
+##DOSLIBNAME=..\libkrb5.lib
+##DOS!include $(BUILDTOP)\config\windows.in
+
+EHDRDIR=$(BUILDTOP)$(S)include$(S)krb5
 
 HDRS= asn1_err.h kdb5_err.h krb5_err.h kv5m_err.h adm_err.h
-OBJS= asn1_err.o kdb5_err.o krb5_err.o kv5m_err.o adm_err.o init_ets.o
+OBJS= asn1_err.$(OBJEXT) kdb5_err.$(OBJEXT) krb5_err.$(OBJEXT) \
+      kv5m_err.$(OBJEXT) adm_err.$(OBJEXT) init_ets.$(OBJEXT)
 ETSRCS= asn1_err.c kdb5_err.c krb5_err.c kv5m_err.c adm_err.c
 SRCS=$(ETSRCS) $(srcdir)/init_ets.c
 
-all:: ${HDRS} includes ${OBJS}
+all:: all-$(WHAT)
 
+all-unix:: $(HDRS) includes $(OBJS)
+
+all-windows:: awk-windows $(OBJS)
+
+awk-windows:
+	$(AWK) -f $(SRCTOP)/util/et/et_h.awk outfile=asn1_err.h asn1_err.et
+	$(AWK) -f $(SRCTOP)/util/et/et_h.awk outfile=kdb5_err.h kdb5_err.et
+	$(AWK) -f $(SRCTOP)/util/et/et_h.awk outfile=krb5_err.h krb5_err.et
+	$(AWK) -f $(SRCTOP)/util/et/et_h.awk outfile=adm_err.h adm_err.et
+	$(AWK) -f $(SRCTOP)/util/et/et_h.awk outfile=kv5m_err.h kv5m_err.et
+	$(AWK) -f $(SRCTOP)/util/et/et_c.awk outfile=asn1_err.c asn1_err.et
+	$(AWK) -f $(SRCTOP)/util/et/et_c.awk outfile=kdb5_err.c kdb5_err.et
+	$(AWK) -f $(SRCTOP)/util/et/et_c.awk outfile=krb5_err.c krb5_err.et
+	$(AWK) -f $(SRCTOP)/util/et/et_c.awk outfile=adm_err.c adm_err.et
+	$(AWK) -f $(SRCTOP)/util/et/et_c.awk outfile=kv5m_err.c kv5m_err.et
+	if exist asn1_err.h copy asn1_err.h $(EHDRDIR)
+	if exist kdb5_err.h copy kdb5_err.h $(EHDRDIR)
+	if exist krb5_err.h copy krb5_err.h $(EHDRDIR)
+	if exist adm_err.h copy adm_err.h $(EHDRDIR)
+	if exist kv5m_err.h copy kv5m_err.h $(EHDRDIR)
 #
 # dependencies for traditional makes
 #
-asn1_err.o: asn1_err.c
-isode_err.o: isode_err.c
-kdb5_err.o: kdb5_err.c
-krb5_err.o: krb5_err.c
-adm_err.o: adm_err.c
-kv5m_err.o: kv5m_err.c
+asn1_err.$(OBJEXT): asn1_err.c
+isode_err.$(OBJEXT): isode_err.c
+kdb5_err.$(OBJEXT): kdb5_err.c
+krb5_err.$(OBJEXT): krb5_err.c
+adm_err.$(OBJEXT): adm_err.c
+kv5m_err.$(OBJEXT): kv5m_err.c
 
-clean::
+clean:: clean-$(WHAT)
+
+clean-unix::
 	$(RM) $(HDRS) $(ETSRCS)
+
+clean-windows::

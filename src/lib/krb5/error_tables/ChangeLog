@@ -1,3 +1,10 @@
+Tue Feb 21 0:57:40 1995 Keith Vetter (keithv@fusion.com)
+
+	* Makefile.in: made to work for PC
+        * init_ets.c: 
+           added INTERFACE for windows
+           removed PROTOTYPE macro from the function
+
 Fri Feb 10 14:56:57 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile:
