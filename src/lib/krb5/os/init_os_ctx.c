@@ -466,7 +466,9 @@ krb5_os_init_context(ctx)
 		if (tmp == -1) {
 			int dontblock = 1;
 			tmp = open ("/dev/random", O_RDONLY);
-			(void) ioctl (tmp, FIONBIO, (char *) &dontblock);
+			if (tmp != -1)
+				(void) ioctl (tmp, FIONBIO,
+					      (char *) &dontblock);
 		}
 		if (tmp != -1) {
 			/* If this doesn't work, should we continue or
