@@ -1,3 +1,8 @@
+1999-06-10  Danilo Almeida  <dalmeida@mit.edu>
+
+	* stdcc.c (cache_changed): Use PostMessage instead of SendMessage
+		so that we don't block.
+
 1999-06-08  Danilo Almeida  <dalmeida@mit.edu>
 
 	* winccld.h:  Remove references to cc_*_instance functions.

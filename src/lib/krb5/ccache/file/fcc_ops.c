@@ -59,7 +59,7 @@ krb5_cc_ops krb5_fcc_ops = {
 krb5_error_code 
 krb5_change_cache (void) {
 
-    SendMessage(HWND_BROADCAST, krb5_get_notification_message(), 0, 0);
+    PostMessage(HWND_BROADCAST, krb5_get_notification_message(), 0, 0);
 
     return 0;
 }

@@ -91,7 +91,7 @@ void cache_changed()
 	if (message == 0)
 		message = RegisterWindowMessage(WM_KERBEROS5_CHANGED);
 
-	SendMessage(HWND_BROADCAST, message, 0, 0);
+	PostMessage(HWND_BROADCAST, message, 0, 0);
 }
 #else /* _MSDOS || _WIN32 */
 
