@@ -137,27 +137,28 @@ krb5_mk_req_extended(context, auth_context, ap_req_options, in_data, in_creds,
 
 
     if (in_data) {
-      if ((*auth_context)->req_cksumtype == 0x8003) {
-	/* XXX Special hack for GSSAPI */
-	checksum.checksum_type = 0x8003;
-	checksum.length = in_data->length;
-	checksum.contents = (krb5_octet *) in_data->data;
-      } else  {
-	/* Generate checksum, XXX What should the seed be? */
-	if ((checksum.contents = (krb5_octet *)malloc(krb5_checksum_size(context,
-				 (*auth_context)->req_cksumtype))) == NULL) {
-	  retval = ENOMEM;
-	  goto cleanup;
+	if ((*auth_context)->req_cksumtype == 0x8003) {
+	    /* XXX Special hack for GSSAPI */
+	    checksum.checksum_type = 0x8003;
+	    checksum.length = in_data->length;
+	    checksum.contents = (krb5_octet *) in_data->data;
+	} else  {
+	    /* Generate checksum, XXX What should the seed be? */
+	    checksum.length =
+		krb5_checksum_size(context, (*auth_context)->req_cksumtype);
+	    if ((checksum.contents = (krb5_octet *)malloc(checksum.length)) == NULL) {
+		retval = ENOMEM;
+		goto cleanup;
+	    }
+	    if ((retval = krb5_calculate_checksum(context, 
+					(*auth_context)->req_cksumtype, 
+					in_data->data, in_data->length,
+					(*auth_context)->keyblock->contents,
+					(*auth_context)->keyblock->length,
+					&checksum)))
+		goto cleanup_cksum;
 	}
-	if ((retval = krb5_calculate_checksum(context, 
-					      (*auth_context)->req_cksumtype, 
-					      in_data->data, in_data->length,
-					      (*auth_context)->keyblock->contents,
-					      (*auth_context)->keyblock->length,
-					      &checksum)))
-	  goto cleanup_cksum;
-      }
-      checksump = &checksum;
+	checksump = &checksum;
     }
 
     /* Generate authenticator */

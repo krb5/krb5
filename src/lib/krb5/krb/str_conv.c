@@ -120,7 +120,7 @@ static const char cstype_descbc_in[]	= "des-cbc";
 static const char cstype_md5_in[]	= "md5";
 static const char cstype_md5des_in[]	= "md5-des";
 static const char cstype_sha_in[]	= "sha";
-static const char cstype_shades3_in[]	= "sha-des3";
+static const char cstype_hmacsha_in[]	= "hmac-sha";
 static const char cstype_crc32_out[]	= "CRC-32";
 static const char cstype_md4_out[]	= "RSA-MD4";
 static const char cstype_md4des_out[]	= "RSA-MD4 with DES cbc mode";
@@ -128,7 +128,7 @@ static const char cstype_descbc_out[]	= "DES cbc mode";
 static const char cstype_md5_out[]	= "RSA-MD5";
 static const char cstype_md5des_out[]	= "RSA-MD5 with DES cbc mode";
 static const char cstype_sha_out[]	= "NIST-SHA";
-static const char cstype_shades3_out[]	= "NIST-SHA with DES-3 cbc mode";
+static const char cstype_hmacsha_out[]	= "HMAC-SHA";
 
 /* Absolute time strings */
 static const char atime_full_digits[]	= "%y%m%d%H%M%S";
@@ -217,7 +217,7 @@ static const struct cksumtype_lookup_entry cksumtype_table[] = {
 { CKSUMTYPE_RSA_MD5,      cstype_md5_in,	cstype_md5_out		},
 { CKSUMTYPE_RSA_MD5_DES,  cstype_md5des_in,	cstype_md5des_out	},
 { CKSUMTYPE_NIST_SHA,     cstype_sha_in,	cstype_sha_out		},
-{ CKSUMTYPE_NIST_SHA_DES3,cstype_shades3_in,	cstype_shades3_out	}
+{ CKSUMTYPE_HMAC_SHA,	  cstype_hmacsha_in,	cstype_hmacsha_out	}
 };
 static const int cksumtype_table_nents = sizeof(cksumtype_table)/
 					 sizeof(cksumtype_table[0]);

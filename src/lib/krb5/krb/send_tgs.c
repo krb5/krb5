@@ -60,9 +60,8 @@ krb5_send_tgs_basic(context, in_data, in_cred, outbuf)
     krb5_data           * toutbuf;
 
     /* Generate checksum */
-    if ((checksum.contents = (krb5_octet *)
-	 malloc(krb5_checksum_size(context,
-				   context->kdc_req_sumtype))) == NULL) 
+    checksum.length = krb5_checksum_size(context, context->kdc_req_sumtype);
+    if ((checksum.contents = (krb5_octet *) malloc(checksum.length)) == NULL)
         return(ENOMEM);
 
     if ((retval = krb5_calculate_checksum(context, context->kdc_req_sumtype,

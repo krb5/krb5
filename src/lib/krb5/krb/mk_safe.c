@@ -90,8 +90,9 @@ krb5_mk_safe_basic(context, userdata, keyblock, replaydata, local_addr,
     if ((retval = encode_krb5_safe(&safemsg, &scratch1)))
 	return retval;
 
-    if (!(safe_checksum.contents =
-	  (krb5_octet *) malloc(krb5_checksum_size(context, sumtype)))) {
+    safe_checksum.length = krb5_checksum_size(context, sumtype);
+    if (!(safe_checksum.contents = (krb5_octet *) malloc(safe_checksum.length))) {
+
 	retval = ENOMEM;
 	goto cleanup_scratch;
     }
