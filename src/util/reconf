@@ -15,4 +15,4 @@ do
   esac
 done
 
-./util/autoreconf.local  -m util/autoconf -l . --verbose $force 
+./util/autoconf/autoreconf  -m util/autoconf -l . --verbose $force 
