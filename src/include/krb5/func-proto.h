@@ -3,15 +3,14 @@
  * $Author$
  * $Id$
  *
- * Copyright 1990 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991 by the Massachusetts Institute of Technology.
+ * All Rights Reserved.
  *
  * For copying and distribution information, please see the file
  * <krb5/copyright.h>.
  *
  * Function prototypes for Kerberos V5 library.
  */
-
-#include <krb5/copyright.h>
 
 #ifndef KRB5_FUNC_PROTO__
 #define KRB5_FUNC_PROTO__
@@ -346,6 +345,7 @@ krb5_error_code krb5_mk_safe
 		   const krb5_address *,
 		   const krb5_address *,
 		   krb5_int32, krb5_int32,
+		   krb5_rcache,
 		   krb5_data * ));
 krb5_error_code krb5_mk_priv
 	PROTOTYPE((const krb5_data *,
@@ -354,6 +354,7 @@ krb5_error_code krb5_mk_priv
 		   const krb5_address *,
 		   const krb5_address *,
 		   krb5_int32, krb5_int32,
+		   krb5_rcache,
 		   krb5_pointer,
 		   krb5_data * ));
 krb5_error_code krb5_cc_register
