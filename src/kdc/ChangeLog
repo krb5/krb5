@@ -13,6 +13,8 @@
 	copy.
 	(process_packet): SADDR is now sockaddr_storage.  Use socket-utils
 	macros instead of casting.  Enable the IPv6 code.
+	* dispatch.c, do_as_req.c, do_tgs_req.c: Define NEED_SOCKETS
+	before including k5-int.h.
 
 2002-07-02  Ken Raeburn  <raeburn@mit.edu>
 

@@ -27,6 +27,7 @@
  * KDC Routines to deal with AS_REQ's
  */
 
+#define NEED_SOCKETS
 #include "k5-int.h"
 #include "com_err.h"
 
