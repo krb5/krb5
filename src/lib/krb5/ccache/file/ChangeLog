@@ -1,3 +1,8 @@
+Wed Jun 14 23:54:09 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* fcc_errs.c (krb5_fcc_interpret): Add #ifdef around switch
+		statement for ETXTBUSY.
+
 Sat Jun 10 00:01:23 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* fcc_init.c (krb5_fcc_initialize): Make sure the status return

@@ -47,7 +47,9 @@ int errnum;
     case EISDIR:			/* Mac doesn't have EISDIR */
 #endif
     case ENOTDIR:
+#ifdef ETXTBSY
     case ETXTBSY:
+#endif
     case EBUSY:
     case EROFS:
 	retval = KRB5_FCC_PERM;

@@ -45,7 +45,9 @@ int errnum;
 #ifdef ELOOP
     case ELOOP:				/* XXX */
 #endif
+#ifdef ETXTBSY
     case ETXTBSY:
+#endif
     case EBUSY:
     case EROFS:
 	retval = KRB5_FCC_PERM;
