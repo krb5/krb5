@@ -12,4 +12,4 @@ all:: install.info  install.dvi
 
 clean:: 
 	rm -f *.log *.info *.dvi *.aux *.toc *.cp *.fn *.vr *.tp *.ky \
-		*.pg *.ps 
+		*.pg *.ps *.info-?

@@ -6,9 +6,9 @@
 @setchapternewpage odd
 @c %**end of header
 
-@set EDITION BETA 5
-@set VERSION BETA 5
-@set UPDATED May 5, 1995
+@set EDITION BETA 6
+@set VERSION BETA 6
+@set UPDATED Mar 20, 1996
 
 @ignore
 @iftex
@@ -59,7 +59,7 @@ All other product names are trademarks of their respective companies.
 
 @page
 @vskip 0pt plus 1filll
-Copyright @copyright{} 1995 Massachusetts Institute of Technology
+Copyright @copyright{} 1995, 1996 Massachusetts Institute of Technology
 
 All Rights Reserved.
 
@@ -174,7 +174,7 @@ Operating System Incompatibilities
 
 * Ultrix 4.2/3::                
 * Alpha OSF/1 V1.3::            
-* Alpha OSF/1 V2.0::            
+* Alpha OSF/1 V2.0++::          
 * BSDI::                        
 * Solaris versions 2.0 through 2.3::  
 * Solaris 2.X::                 
@@ -234,7 +234,7 @@ tools.
 
 In any complex software, there will be bugs.  In addition, you may
 find portability problems when you try to build Kerberos V5 on a
-platform on which the developers yet built.  Please send bug reports
+platform on which the developers have not used.  Please send bug reports
 or other problems you may uncover to the e-mail address
 @b{krb5-bugs@@mit.edu}.  Please mention which version of the Kerberos
 V5 distribution you are using, and whether you have made any private
@@ -247,11 +247,11 @@ Please note that there are still a number of aspects of Kerberos V5
 which will likely change before the 1.0 release. 
 As these changes occur, we will update the documentation accordingly.
 
-As of this release, all the databases, including the aname to localname
-ones now use version 1.85 of the Berkeley DB code.  This may imply
-database conversions for those running earlier releases of Kerberos
-V5. We recommend that you dump your database with the old kdb5_edit and
-restore with the new one.
+@c As of this release, all the databases, including the aname to localname
+@c ones now use version 1.85 of the Berkeley DB code.  This may imply
+@c database conversions for those running earlier releases of Kerberos
+@c V5. We recommend that you dump your database with the old kdb5_edit and
+@c restore with the new one.
 
 
 @node How Kerberos Works, Building Kerberos, Introduction, Top
@@ -333,7 +333,7 @@ this is done, see @ref{Setting up Slave Kerberos Servers}.
 The @samp{kinit} command prompts for your password, and if you enter
 it successfully, you will obtain a @dfn{ticket-granting ticket} and a
 @dfn{ticket session key} which gives you the right to use the ticket.
-This combination of the ticket and its associated key is also know as
+This combination of the ticket and its associated key is also known as
 your @dfn{credentials}.  As illustrated below, client programs use
 your ticket-granting ticket credentials in order to obtain
 client-specific credentials as needed.
@@ -396,7 +396,8 @@ Here's what happens:
 
 @enumerate
 
-@item You login to the workstation and use the @samp{kinit} command
+@item 
+You login to the workstation and use the @samp{kinit} command
 to get a ticket-granting ticket.
 This command prompts you for your Kerberos password.  (On some systems
 which have a modified @samp{/bin/login} program, this may be done as
@@ -405,11 +406,13 @@ program.)
 
 @enumerate A
 
-@item The @samp{kinit} command sends your request to the Kerberos master
+@item
+The @samp{kinit} command sends your request to the Kerberos master
 server machine.  The server software looks for your principal name's
 entry in the Kerberos database.
 
-@item If this entry exists, the Kerberos server creates and returns a
+@item 
+If this entry exists, the Kerberos server creates and returns a
 ticket-granting ticket and the key which allows you to use it, encrypted
 by your password.  If @samp{kinit} can decrypt the Kerberos reply using
 the password you provide, it stores this ticket in a credentials cache
@@ -420,7 +423,8 @@ this variable is not set, the name of the file will be
 in decimal format.
 @end enumerate
 
-@item Now you use the @samp{rlogin} client to access the machine
+@item
+Now you use the @samp{rlogin} client to access the machine
 @samp{laughter}.
 
 @example
@@ -429,24 +433,27 @@ host% @b{rlogin laughter}
 
 @enumerate A
 
-@item The @samp{rlogin} client checks your ticket file to see if you
+@item
+The @samp{rlogin} client checks your ticket file to see if you
 have a ticket for the @samp{host} service for @samp{laughter}.
 You don't, so @samp{rlogin} uses the credential cache's ticket-granting
 ticket to make a request to the master server's ticket-granting service.
 
-@item This ticket-granting service receives the
+@item
+This ticket-granting service receives the
 @samp{host/laughter.mit.edu} request and looks in the master database
 for an @samp{host/laughter.mit.edu} entry.  If the entry exists, the
 ticket-granting service issues you a ticket for that service.  That
 ticket is also cached in your credentials cache.
 
-@item The @samp{rlogin} client now sends that ticket to 
+@item
+The @samp{rlogin} client now sends that ticket to 
 the @samp{laughter} @samp{rlogind} service program.  The service program
 checks the ticket by using its own service key.  If the ticket is valid,
 it now knows your identity.  If the ticket is valid and you are allowed
 to login to @samp{laughter} (because the your name matches one in
-/etc/passwd, or you are in the appropriate @file{.klogin} file), will
-let you login.
+/etc/passwd, or you are in the appropriate @file{.klogin} or
+@file{.k5login} file), will let you login.
 
 @end enumerate
 @end enumerate
@@ -482,7 +489,7 @@ megabytes of disk space.  The exact amount will vary depending on the
 platform and whether the distribution is compiled with debugging symbol
 tables or not.
 
-If you wish to keep keep a @dfn{build tree}, which contains the compiled
+If you wish to keep a separate @dfn{build tree}, which contains the compiled
 @file{*.o} file and executables, separate from your source tree, you
 will need a @samp{make} program which supports @samp{VPATH}, or
 you will need to use a tool such as @samp{lndir} to produce a symbolic
@@ -506,12 +513,14 @@ directory.)
 @node Doing the Build, Testing the Build, Unpacking the Sources, Building Kerberos
 @section Doing the Build
 
-You have a number of different options as to build Kerberos.  If you
+You have a number of different options in how to build Kerberos.  If you
 only need to build Kerberos for one platform, using a single directory
 tree which contains both the source files and the object files is the
 simplest.  However, if you need to maintain Kerberos for a large number
 of platforms, you will probably want to use separate build trees for
-each platform.
+each platform. We recommend that you look at see @ref{OS
+Incompatibilities} for notes that we have on particular operating
+systems. 
 
 @menu
 * Building Within a Single Tree::  
@@ -526,9 +535,12 @@ If you don't want separate build trees for each architecture, then
 use the following abbreviated procedure.
 
 @enumerate
-@item @code{cd /u1/krb5/src}
-@item @code{./configure}
-@item @code{make}
+@item
+ @code{cd /u1/krb5/src}
+@item
+ @code{./configure}
+@item
+ @code{make}
 @end enumerate
 
 That's it!
@@ -546,10 +558,14 @@ For example, if you wish to create a build directory for @code{pmax} binaries
 you might use the following procedure:
 
 @enumerate
-@item @code{mkdir /u1/krb5/pmax}
-@item @code{cd /u1/krb5/pmax}
-@item @code{../src/configure}
-@item @code{make}
+@item 
+@code{mkdir /u1/krb5/pmax}
+@item
+ @code{cd /u1/krb5/pmax}
+@item
+ @code{../src/configure}
+@item
+ @code{make}
 @end enumerate
 
 @node Building using lndir,  , Building with Separate Build Directories, Doing the Build
@@ -564,14 +580,19 @@ For example, if you wish to create a build directory for solaris binaries
 you might use the following procedure:
 
 @enumerate
-@item @code{mkdir /u1/krb5/solaris}
-@item @code{cd /u1/krb5/solaris}
-@item @code{/u1/krb5/src/util/lndir `pwd`/../src}
-@item @code{./configure}
-@item @code{make}
+@item
+ @code{mkdir /u1/krb5/solaris}
+@item
+ @code{cd /u1/krb5/solaris}
+@item
+ @code{/u1/krb5/src/util/lndir `pwd`/../src}
+@item
+ @code{./configure}
+@item
+ @code{make}
 @end enumerate
 
-You must give an absolute pathname to lndir because it has a bug that
+You must give an absolute pathname to @samp{lndir} because it has a bug that
 makes it fail for relative pathnames.
 
 @node Testing the Build, Options to Configure, Doing the Build, Building Kerberos
@@ -583,7 +604,7 @@ directory (i.e., the directory where you typed @samp{make} to start
 building Kerberos; see @ref{Doing the Build}.): 
 
 @example
-% @b{make check}
+% make check
 @end example
 
 @menu
@@ -601,7 +622,7 @@ client/server activities.
 DejaGnu may be found wherever GNU software is archived. 
 
 Most of the tests are setup to run as a non-privledged user. There are
-two series of tests (rlogind and telnetd) which require the ability to
+two series of tests (@samp{rlogind} and @samp{telnetd}) which require the ability to
 @samp{rlogin} as root to the local machine. Admittedly, this does
 require the use of a @file{.rhosts} file or some other authenticated
 means. @footnote{If you are fortunate enough to have a previous version
@@ -691,7 +712,7 @@ clients.
 Allows for suppression of or replacement of network libraries. By
 default, Kerberos V5 configuration will look for @code{-lnsl} and
 @code{-lsocket}. If your operating system has a broken resolver library
-@xref{Solaris versions 2.0 through 2.3} or fails to pass the tests in
+(see @ref{Solaris versions 2.0 through 2.3}) or fails to pass the tests in
 @file{src/tests/resolv} you will need to use this option.
 
 @item --enable-shared
@@ -735,16 +756,13 @@ script with the following options:
 
 There is one configuration file which you may wish to edit to control
 various compile-time parameters in the Kerberos distribution:
-@file{osconf.h}. 
+@file{include/krb5/stock/osconf.h}. The list that follows is by no means
+complete, just some of the more interesting variables.
 
 Please note: The former configuration file @file{config.h} no longer
 exists as its functionality has been merged into the auto-configuration
 process. @xref{Options to Configure}.
 
-
-This file is found in @file{include/krb5/stock/osconf.h}. The following
-list is by no means complete, just some of the more interesting
-variables. 
 
 @table @code
 
@@ -797,10 +815,10 @@ of the libraries may be installed on the same system and continue to
 work.
 
 Currently the supported platforms are: NetBSD 1.0A, AIX 3.2.5, Solaris
-5.3, and Alpha OSF/1 V2.1.
+5.3, Alpha OSF/1 >= 2.1, HP-UX >= 9.X.
 
 To enable shared libraries on the above platforms, run the configure
-script with the @samp{--enable-shared} option to @samp{configure}.
+script with the option @samp{--enable-shared}.
 
 One special note is that if the Kerberos V4 compatibility is compiled
 in, you @b{must not} specify an alternate Kerberos V4 library from the
@@ -831,16 +849,16 @@ libfoo.so, but when one executes the program, the shared library loader
 would then look for the shared library with the alternate name.  Hence
 multiple versions of shared libraries may be supported relatively
 easily. @footnote{Under AIX 3.2.5 for the RS/6000 it is not possible to
-append the version name of the shared library to use and only version is
+append the version number of the shared library to use and only version is
 allowed at this time.}
 
 All operating systems (that we have seen) provide a means for programs
 to specify the location of shared libraries. On different operating
 systems, this is either specified when creating the shared library, and
-link time, or both.@footnote{Both is necessary sometimes as the shared
+link time, or both.@footnote{Both are necessary sometimes as the shared
 libraries are dependent on other shared libraries} The build process
-will establish paths to both the installed destination as well as the
-build tree, although this may change in the future.
+will hardwire a path to the installed destination.
+
 
 @node NetBSD Shared Library Support, AIX 3.2.5 Shared Library Support, Shared Library Theory, Shared Library Support
 @subsection NetBSD Shared Library Support
@@ -873,13 +891,23 @@ when creating libraries.
 @node Alpha OSF/1 Shared Library Support,  , Solaris 5.3 Shared Library Support, Shared Library Support
 @subsection Alpha OSF/1 Shared Library Support
 
-Shared library support has been tested with V2.1 of the operating
-system. Shared libraries may be compiled both with GCC and the native
-compiler. 
+Shared library support has been tested with V2.1 and higher of the
+operating system. Shared libraries may be compiled both with GCC and the
+native compiler.
 
 One of the nice features on this platform is that the paths to the
 shared libraries is specified in the library itself without requiring
-that one specify the same at link time.
+that one specify the same at link time. 
+
+We are using the @samp{-rpath} option to @samp{ld} to place the library
+load path into the executables. The one disadvantage of this is during
+testing where we want to make sure that we are using the build tree
+instead of a possibly installed library. The loader uses the contents of
+@samp{-rpath} before LD_LIBRARY_PATH so we must specify a dummy _RLD_ROOT
+and complete LD_LIBRARY_PATH in our tests.
+
+The one disadvantage with the
+method we are using 
 
 @node OS Incompatibilities, Using Autoconf, Shared Library Support, Building Kerberos
 @section Operating System Incompatibilities
@@ -892,7 +920,7 @@ send a report to @b{krb5-bugs@@mit.edu}.  Thanks!
 @menu
 * Ultrix 4.2/3::                
 * Alpha OSF/1 V1.3::            
-* Alpha OSF/1 V2.0::            
+* Alpha OSF/1 V2.0++::          
 * BSDI::                        
 * Solaris versions 2.0 through 2.3::  
 * Solaris 2.X::                 
@@ -917,7 +945,7 @@ years....
 Using GCC version 2.5 instead of the native compiler will also work fine,
 both with or without optimization.
 
-@node Alpha OSF/1 V1.3, Alpha OSF/1 V2.0, Ultrix 4.2/3, OS Incompatibilities
+@node Alpha OSF/1 V1.3, Alpha OSF/1 V2.0++, Ultrix 4.2/3, OS Incompatibilities
 @subsection Alpha OSF/1 V1.3
 
 There is a bug in OSF/1's fgrep which causes the @samp{configure}
@@ -929,8 +957,8 @@ causes the @code{asn.1} library to be compiled incorrectly.
 Using GCC version 2.6.3 instead of the native compiler will also work
 fine, both with or without optimization.
 
-@node Alpha OSF/1 V2.0, BSDI, Alpha OSF/1 V1.3, OS Incompatibilities
-@subsection Alpha OSF/1 V2.0
+@node Alpha OSF/1 V2.0++, BSDI, Alpha OSF/1 V1.3, OS Incompatibilities
+@subsection Alpha OSF/1 V2.0++
 
 There formerly used to be a bug when using the native compiler in
 compiling @file{md4.c} when compiled without either the @samp{-O} or
@@ -941,7 +969,10 @@ not have access to V2.0 to test and see if the problem would exist
 there. (We welcome feedback on this issue). There was never a problem in
 using GCC version 2.6.3.
 
-@node BSDI, Solaris versions 2.0 through 2.3, Alpha OSF/1 V2.0, OS Incompatibilities
+In version 3.2 and beyond of the operating system, we have not seen any
+problems with the native compiler. 
+
+@node BSDI, Solaris versions 2.0 through 2.3, Alpha OSF/1 V2.0++, OS Incompatibilities
 @subsection BSDI
 
 BSDI versions 1.0 and 1.1 reportedly has a bad @samp{sed} which causes
@@ -964,11 +995,14 @@ Workarounds:
 
 @enumerate
 
-@item   Supply your own resolver library.
+@item
+   Supply your own resolver library.
 
-@item   Upgrade to Solaris 2.4
+@item
+   Upgrade to Solaris 2.4
 
-@item   Make sure your /etc/nsswitch.conf has the line:
+@item
+   Make sure your /etc/nsswitch.conf has the line:
 
 @example
 hosts:      files dns
@@ -1550,20 +1584,24 @@ in detail later), they work as follows:
 
 @enumerate 
 
-@item The user starts @samp{sclient} and provides as arguments
+@item 
+ The user starts @samp{sclient} and provides as arguments
 to the command the name of the server machine and an optional port on
 which to contact the server.
 
-@item @samp{sclient} contacts the server machine and
+@item
+ @samp{sclient} contacts the server machine and
 authenticates the user to @samp{sserver}.
 
-@item @samp{sserver} authenticates itself to @samp{sclient} (thus
+@item
+ @samp{sserver} authenticates itself to @samp{sclient} (thus
 performing mutual authentication), and 
 then returns a message to the client program.
 This message contains the name of the Kerberos principal that was used
 to authenticate to @samp{sserver}.
 
-@item @samp{sclient} displays the server's message on the user's
+@item
+ @samp{sclient} displays the server's message on the user's
 terminal screen.
 
 @end enumerate
@@ -1582,16 +1620,21 @@ server-client system.
 
 @enumerate
 
-@item Add the appropriate entry to the Kerberos database using @samp{kdb_edit}
+@item
+ Add the appropriate entry to the Kerberos database using @samp{kdb_edit}
 
-@item Create a @file{/etc/v5srvtab} file for the server machine.
+@item
+ Create a @file{/etc/v5srvtab} file for the server machine.
 
-@item Install the service program and the @file{/etc/v5srvtab}
+@item
+ Install the service program and the @file{/etc/v5srvtab}
 file on the server machine.
 
-@item Install the client program on the client machine.
+@item
+ Install the client program on the client machine.
 
-@item Update the @file{/etc/services} file on the client and server machines.
+@item
+ Update the @file{/etc/services} file on the client and server machines.
 @end enumerate
 
 We will use the sample application as an example, although programs
@@ -1609,7 +1652,8 @@ Here's the process, step by step:
 
 @enumerate
 
-@item Login as root or @samp{su} to root on the Kerberos server machine.
+@item 
+ Login as root or @samp{su} to root on the Kerberos server machine.
 Use the @samp{kdb5_edit} program to create an entry for
 @code{sample} in the Kerberos database:
 
@@ -1621,7 +1665,8 @@ kdb5_edit: @b{quit}
 
 (Note: @samp{add_random_key} may be abbreviated as @samp{ark}.)
 
-@item Use @samp{kdb5_edit} to create a @file{srvtab} file
+@item
+ Use @samp{kdb5_edit} to create a @file{srvtab} file
 for @samp{sserver}'s host machine:
 
 @example
@@ -1642,7 +1687,8 @@ removable media, but should not be sent over an open network in the
 clear.  This file should installed such that only the root user can read
 it.
 
-@item Add the following line to the @file{/etc/services} file on
+@item
+ Add the following line to the @file{/etc/services} file on
 @samp{jimi.mit.edu}, and on all machines that will run the
 @samp{sample_client} program:
 
@@ -1650,7 +1696,8 @@ it.
 sample     906/tcp       # Kerberos sample app server
 @end example
 
-@item Add a line similar to the following line to the @file{/etc/inetd.conf}
+@item
+ Add a line similar to the following line to the @file{/etc/inetd.conf}
 file on @samp{sample_server}'s machine:
 
 @example
@@ -1666,14 +1713,16 @@ same format used by other entries (e.g. for telnet).  Most systems do
 not have a column for the `switched' keyword, and some do not have a
 column for the username (usually `root', as above).
 
-@item Restart @samp{inetd} by sending the current @samp{inetd} process
+@item
+ Restart @samp{inetd} by sending the current @samp{inetd} process
 a hangup signal:
 
 @example
 # @b{kill -HUP} @i{process_id_number}
 @end example
 
-@item The @samp{sserver} is now ready to take @samp{sclient} requests.
+@item
+ The @samp{sserver} is now ready to take @samp{sclient} requests.
 
 @end enumerate
 

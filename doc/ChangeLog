@@ -1,3 +1,10 @@
+Tue Mar 19 10:34:20 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* Makefile (clean): Remove *.info-? now.
+
+	* install.texi: Changes to allow emacs M-X texinfo-format-buffer
+		to work. (The problem was @item used within @enumerate).
+
 Fri Mar  8 09:43:13 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* install.texi (The DejaGnu Tests): Describe the DejaGnu tests.
