@@ -1,3 +1,11 @@
+2003-02-03  Tom Yu  <tlyu@mit.edu>
+
+	* login.c (dofork): Don't dissociate from controlling tty in the
+	parent, since the parent needs to remain the session leader so it
+	can tell when the tty gets hung up.  Make the child wait for the
+	parent to set up a SIGHUP handler to ensure that cleanup happens
+	properly.
+
 2003-01-31  Tom Yu  <tlyu@mit.edu>
 
 	* kcmd.c (v4_des_write): Apply patch from ghudson to fix

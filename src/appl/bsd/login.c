@@ -2371,51 +2371,47 @@ dofork()
 {
     int child,pid;
     handler sa;
+    int syncpipe[2];
+    char c;
+    int n;
     
 #ifdef _IBMR2
     update_ref_count(1);
 #endif
-    if (!(child=fork()))
+    if (pipe(syncpipe) < 0) {
+	perror("login: dofork: setting up syncpipe");
+	exit(1);
+    }
+    if (!(child=fork())) {
+	close(syncpipe[1]);
+	while ((n = read(syncpipe[0], &c, 1)) < 0) {
+	    if (errno != EINTR) {
+		perror("login: dofork: waiting for sync from parent");
+		exit(1);
+	    }
+	}
+	if (n == 0) {
+	    fprintf(stderr, "login: dofork: unexpected EOF waiting for sync\n");
+	    exit(1);
+	}
+	close(syncpipe[0]);
 	return; /* Child process returns */
+    }
 
     /* The parent continues here */
 
-    /* Try and get rid of our controlling tty.  On SunOS, this may or may
-       not work depending on if our parent did a setsid before exec-ing
-       us. */
-#ifndef __linux__
-    /* On linux, TIOCNOTTY causes us to die on a
-       SIGHUP, so don't even try it. */
-#ifdef TIOCNOTTY
-    { 
-	int fd;
-
-	if ((fd = open("/dev/tty", O_RDWR)) >= 0) {
-	    ioctl(fd, TIOCNOTTY, 0);
-	    close(fd);
-	}
-    }
-#endif
-#endif /* __linux__ */
-
-#ifdef HAVE_SETSID
-    (void)setsid();
-#endif
-
-#ifdef SETPGRP_TWOARG
-    (void)setpgrp(0, 0);
-#else
-    (void)setpgrp();
-#endif
+    /* On receipt of SIGHUP, pass that along to child's process group. */
+    handler_init (sa, sighup);
+    handler_set (SIGHUP, sa);
+    /* Tell child we're ready. */
+    close(syncpipe[0]);
+    write(syncpipe[1], "", 1);
+    close(syncpipe[1]);
 
     /* Setup stuff?  This would be things we could do in parallel with login */
     (void) chdir("/");	/* Let's not keep the fs busy... */
     
     /* If we're the parent, watch the child until it dies */
-
-    /* On receipt of SIGHUP, pass that along to child's process group. */
-    handler_init (sa, sighup);
-    handler_set (SIGHUP, sa);
 
     while (1) {
 #ifdef HAVE_WAITPID
