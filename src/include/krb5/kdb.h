@@ -409,15 +409,13 @@ typedef struct _kdb5_dispatch_table {
     char *	kdb5_db_index_ext;
     char *	kdb5_db_data_ext;
     char *	kdb5_db_lock_ext;
-    DBM *	(*kdb5_dbm_open) KRB5_NPROTOTYPE((char *, int, int));
+    DBM *	(*kdb5_dbm_open) KRB5_NPROTOTYPE((const char *, int, int));
     void	(*kdb5_dbm_close) KRB5_NPROTOTYPE((DBM *));
     datum	(*kdb5_dbm_fetch) KRB5_NPROTOTYPE((DBM *, datum));
     datum	(*kdb5_dbm_firstkey) KRB5_NPROTOTYPE((DBM *));
     datum	(*kdb5_dbm_nextkey) KRB5_NPROTOTYPE((DBM *));
     int		(*kdb5_dbm_delete) KRB5_NPROTOTYPE((DBM *, datum));
     int		(*kdb5_dbm_store) KRB5_NPROTOTYPE((DBM *, datum, datum, int));
-    int		(*kdb5_dbm_error) KRB5_NPROTOTYPE((DBM *));
-    int		(*kdb5_dbm_clearerr) KRB5_NPROTOTYPE((DBM *));
     int		(*kdb5_dbm_dirfno) KRB5_NPROTOTYPE((DBM *));
     int		(*kdb5_dbm_pagfno) KRB5_NPROTOTYPE((DBM *));
 } kdb5_dispatch_table;

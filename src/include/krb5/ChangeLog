@@ -1,4 +1,8 @@
-<<<<<<< ChangeLog
+Fri Aug 23 16:20:54 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* kdb.h: Remove dbm_error and dbm_clearerr from the dispatch table
+		(which eventually should be completely removed.)
+
 Wed Jun 12 00:40:29 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* adm_proto.h: Change usage of INTERFACE to use KRB5_CALLCONV and
