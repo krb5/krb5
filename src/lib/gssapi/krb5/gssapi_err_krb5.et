@@ -34,5 +34,7 @@ error_code KG_CONTEXT_ESTABLISHED, "Context is already fully established"
 error_code KG_BAD_SIGN_TYPE, "Unknown signature type in token"
 error_code KG_BAD_LENGTH, "Invalid field length in token"
 error_code KG_CTX_INCOMPLETE, "Attempt to use incomplete security context"
-
+error_code KG_CONTEXT, "Bad magic number for krb5_gss_ctx_id_t"
+error_code KG_CRED, "Bad magic number for krb5_gss_cred_id_t"
+error_code KG_ENC_DESC, "Bad magic number for krb5_gss_enc_desc"
 end
