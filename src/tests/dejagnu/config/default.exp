@@ -11,6 +11,8 @@
 # testsuite default script.  We will use KRBTEST.COM as our Kerberos
 # realm name.
 
+set timeout 100
+
 # We do everything in a temporary directory.
 if ![file isdirectory tmpdir] {catch "exec mkdir tmpdir" status}
 

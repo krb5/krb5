@@ -1,3 +1,8 @@
+Thu Sep 28 18:54:43 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* default.exp: set timeout to 100 since the default of 10 is
+	ludicrous with NFS.
+
 Wed Sep 13 14:02:03 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* default.exp: Save the key used to generate the database files.
