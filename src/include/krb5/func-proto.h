@@ -19,189 +19,191 @@
 
 /* libkrb.spec */
 krb5_error_code krb5_encode_kdc_rep
-	PROTOTYPE((krb5_msgtype,
+	PROTOTYPE((const krb5_msgtype,
+		   const krb5_enc_kdc_rep_part *,
+		   const krb5_keyblock *,
 		   krb5_kdc_rep *,
-		   krb5_enc_kdc_rep_part *,
-		   krb5_keyblock *,
 		   krb5_data ** ));
 krb5_error_code krb5_decode_kdc_rep
-	PROTOTYPE((krb5_data *,
-		   krb5_keyblock *,
-		   krb5_enctype,
+	PROTOTYPE((const krb5_data *,
+		   const krb5_keyblock *,
+		   const krb5_enctype,
 		   krb5_kdc_rep ** ));
 krb5_error_code krb5_kdc_rep_decrypt_proc
-	PROTOTYPE((krb5_keyblock *,
-		   krb5_pointer,
+	PROTOTYPE((const krb5_keyblock *,
+		   const krb5_pointer,
 		   krb5_kdc_rep * ));
 krb5_error_code krb5_encode_ticket
-	PROTOTYPE((krb5_ticket *,
+	PROTOTYPE((const krb5_ticket *,
 		   krb5_data ** ));
 krb5_error_code krb5_decode_ticket
-	PROTOTYPE((krb5_data *,
+	PROTOTYPE((const krb5_data *,
 		   krb5_ticket ** ));
 krb5_error_code krb5_encrypt_tkt_part
-	PROTOTYPE((krb5_keyblock *,
+	PROTOTYPE((const krb5_keyblock *,
 		   krb5_ticket * ));
 krb5_error_code krb5_decrypt_tkt_part
-	PROTOTYPE((krb5_keyblock *,
+	PROTOTYPE((const krb5_keyblock *,
 		   krb5_ticket * ));
 krb5_error_code krb5_send_tgs
-	PROTOTYPE((krb5_flags,
-		   krb5_ticket_times *,
-		   krb5_enctype,
-		   krb5_cksumtype,
-		   krb5_principal,
-		   krb5_address **,
-		   krb5_authdata **,
-		   krb5_data *,
-		   krb5_creds *,
+	PROTOTYPE((const krb5_flags,
+		   const krb5_ticket_times *,
+		   const krb5_enctype,
+		   const krb5_cksumtype,
+		   const krb5_principal,
+		   const krb5_address **,
+		   const krb5_authdata **,
+		   const krb5_data *,
+		   const krb5_creds *,
 		   krb5_response * ));
 krb5_error_code krb5_get_cred_from_kdc
-	PROTOTYPE((krb5_ccache,
+	PROTOTYPE((krb5_ccache,		/* not const, as reading may save
+					   state */
 		   krb5_creds *,
 		   krb5_creds *** ));
-krb5_error_code krb5_free_tgt_creds
-	PROTOTYPE((krb5_creds ** ));
+void krb5_free_tgt_creds
+	PROTOTYPE((krb5_creds ** ));	/* XXX too hard to do with const */
 krb5_error_code krb5_get_credentials
-	PROTOTYPE((krb5_flags,
+	PROTOTYPE((const krb5_flags,
 		   krb5_ccache,
 		   krb5_creds * ));
 krb5_error_code krb5_get_in_tkt
-	PROTOTYPE((krb5_flags,
-		   krb5_address **,
-		   krb5_enctype,
-		   krb5_keytype,
+	PROTOTYPE((const krb5_flags,
+		   const krb5_address **,
+		   const krb5_enctype,
+		   const krb5_keytype,
 		   krb5_error_code (* )(krb5_keytype,
 					krb5_keyblock **,
 					krb5_pointer ),
-		   krb5_pointer,
-		   krb5_error_code (* )(krb5_keyblock *,
-					krb5_pointer,
+		   const krb5_pointer,
+		   krb5_error_code (* )(const krb5_keyblock *,
+					const krb5_pointer,
 					krb5_kdc_rep * ),
-		   krb5_pointer,
+		   const krb5_pointer,
 		   krb5_creds *,
 		   krb5_ccache ));
 krb5_error_code krb5_get_in_tkt_with_password
-	PROTOTYPE((krb5_flags,
-		   krb5_address **,
-		   krb5_enctype,
-		   krb5_keytype,
-		   char *,
+	PROTOTYPE((const krb5_flags,
+		   const krb5_address **,
+		   const krb5_enctype,
+		   const krb5_keytype,
+		   const char *,
 		   krb5_ccache,
 		   krb5_creds * ));
 krb5_error_code krb5_get_in_tkt_with_skey
-	PROTOTYPE((krb5_flags,
-		   krb5_address **,
-		   krb5_enctype,
-		   krb5_keyblock *,
+	PROTOTYPE((const krb5_flags,
+		   const krb5_address **,
+		   const krb5_enctype,
+		   const krb5_keyblock *,
 		   krb5_ccache,
 		   krb5_creds * ));
 krb5_error_code krb5_mk_req
-	PROTOTYPE((krb5_principal,
-		   krb5_flags,
-		   krb5_checksum *,
+	PROTOTYPE((const krb5_principal,
+		   const krb5_flags,
+		   const krb5_checksum *,
 		   krb5_ccache,
 		   krb5_data * ));
 krb5_error_code krb5_mk_req_extended
-	PROTOTYPE((krb5_flags,
-		   krb5_checksum *,
-		   krb5_ticket_times *,
-		   krb5_flags,
+	PROTOTYPE((const krb5_flags,
+		   const krb5_checksum *,
+		   const krb5_ticket_times *,
+		   const krb5_flags,
 		   krb5_ccache,
 		   krb5_creds *,
 		   krb5_data * ));
 krb5_error_code krb5_rd_req
-	PROTOTYPE((krb5_data *,
-		   krb5_principal,
-		   krb5_address *,
-		   krb5_pointer,
+	PROTOTYPE((const krb5_data *,
+		   const krb5_principal,
+		   const krb5_address *,
+		   const krb5_pointer,
 		   krb5_error_code (* )(krb5_pointer,
 					krb5_principal,
 					krb5_kvno,
 					krb5_keyblock ** ),
-		   krb5_pointer,
+		   const krb5_pointer,
 		   krb5_rcache,
 		   krb5_tkt_authent * ));
 krb5_error_code krb5_rd_req_decoded
-	PROTOTYPE((krb5_ap_req *,
-		   krb5_principal,
-		   krb5_address *,
-		   krb5_pointer,
+	PROTOTYPE((const krb5_ap_req *,
+		   const krb5_principal,
+		   const krb5_address *,
+		   const krb5_pointer,
 		   krb5_error_code (* )(krb5_pointer,
 					krb5_principal,
 					krb5_kvno,
 					krb5_keyblock ** ),
-		   krb5_pointer,
+		   const krb5_pointer,
 		   krb5_rcache,
 		   krb5_tkt_authent * ));
 krb5_error_code krb5_mk_error
-	PROTOTYPE((krb5_error *,
+	PROTOTYPE((const krb5_error *,
 		   krb5_data * ));
 krb5_error_code krb5_rd_error
-	PROTOTYPE((krb5_data *,
+	PROTOTYPE((const krb5_data *,
 		   krb5_error * ));
 krb5_error_code krb5_mk_safe
-	PROTOTYPE((krb5_data *,
-		   krb5_cksumtype ,
-		   krb5_keyblock *,
-		   krb5_fulladdr *,
-		   krb5_fulladdr *,
+	PROTOTYPE((const krb5_data *,
+		   const krb5_cksumtype ,
+		   const krb5_keyblock *,
+		   const krb5_fulladdr *,
+		   const krb5_fulladdr *,
 		   krb5_data * ));
 krb5_error_code krb5_rd_safe
-	PROTOTYPE((krb5_data *,
-		   krb5_keyblock *,
-		   krb5_fulladdr *,
-		   krb5_fulladdr *,
+	PROTOTYPE((const krb5_data *,
+		   const krb5_keyblock *,
+		   const krb5_fulladdr *,
+		   const krb5_fulladdr *,
 		   krb5_data * ));
 krb5_error_code krb5_mk_priv
-	PROTOTYPE((krb5_data *,
-		   krb5_enctype,
-		   krb5_keyblock *,
-		   krb5_fulladdr *,
-		   krb5_fulladdr *,
+	PROTOTYPE((const krb5_data *,
+		   const krb5_enctype,
+		   const krb5_keyblock *,
+		   const krb5_fulladdr *,
+		   const krb5_fulladdr *,
 		   krb5_data * ));
 krb5_error_code krb5_rd_priv
-	PROTOTYPE((krb5_data *,
-		   krb5_keyblock *,
-		   krb5_fulladdr *,
-		   krb5_fulladdr *,
+	PROTOTYPE((const krb5_data *,
+		   const krb5_keyblock *,
+		   const krb5_fulladdr *,
+		   const krb5_fulladdr *,
 		   krb5_data * ));
 krb5_error_code krb5_get_default_realm
-	PROTOTYPE((int,
+	PROTOTYPE((const int,
 		   char * ));
 krb5_error_code krb5_get_host_realm
-	PROTOTYPE((char *,
+	PROTOTYPE((const char *,
 		   char *** ));
 krb5_error_code krb5_free_host_realm
-	PROTOTYPE((char ** ));
+	PROTOTYPE((const char ** ));
 krb5_error_code krb5_parse_name
-	PROTOTYPE((char *,
+	PROTOTYPE((const char *,
 		   krb5_principal * ));
 krb5_error_code krb5_unparse_name
-	PROTOTYPE((krb5_principal,
+	PROTOTYPE((const krb5_principal,
 		   char ** ));
 krb5_boolean krb5_address_search
-	PROTOTYPE((krb5_address *,
-		   krb5_address **));
+	PROTOTYPE((const krb5_address *,
+		   const krb5_address **));
 krb5_boolean krb5_address_compare
-	PROTOTYPE((krb5_address *,
-		   krb5_address *));
+	PROTOTYPE((const krb5_address *,
+		   const krb5_address *));
 krb5_boolean krb5_principal_compare
-	PROTOTYPE((krb5_principal, krb5_principal));
+	PROTOTYPE((const krb5_principal,
+		   const krb5_principal));
 int krb5_fulladdr_order
-	PROTOTYPE((krb5_fulladdr *,
-		   krb5_fulladdr *));
+	PROTOTYPE((const krb5_fulladdr *,
+		   const krb5_fulladdr *));
 krb5_error_code krb5_copy_keyblock
-    PROTOTYPE((krb5_keyblock *,
+    PROTOTYPE((const krb5_keyblock *,
 	       krb5_keyblock *));
 krb5_error_code krb5_copy_creds
-    PROTOTYPE((krb5_creds *,
+    PROTOTYPE((const krb5_creds *,
 	       krb5_creds **));
 krb5_error_code krb5_copy_data
-    PROTOTYPE((krb5_data *,
+    PROTOTYPE((const krb5_data *,
 	       krb5_data **));
 krb5_error_code krb5_copy_principal
-    PROTOTYPE((krb5_principal,
+    PROTOTYPE((const krb5_principal,
 	       krb5_principal *));
 
 /* libkt.spec */
