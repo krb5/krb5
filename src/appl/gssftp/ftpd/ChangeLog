@@ -1,3 +1,10 @@
+Sun Feb 22 19:37:07 1998  Tom Yu  <tlyu@mit.edu>
+
+	* ftpd.c: Use krb5_seteuid() and krb5_setegid(). [krb5-libs/505]
+
+	* Makefile.in (ftpd): Fix up KRB4COMPAT_LIBS (was KRB5_BASE_LIBS),
+	and add UTIL_LIB.
+
 Wed Feb 18 15:30:10 1998  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Remove trailing slash from thisconfigdir.  Fix up

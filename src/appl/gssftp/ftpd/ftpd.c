@@ -107,12 +107,7 @@ extern char *sys_errlist[];
 
 extern char *mktemp ();
 
-#ifndef HAVE_SETEUID
-#ifdef HAVE_SETRESUID
-#define seteuid(e) setresuid(-1,e,-1)
-#define setegid(e) setresgid(-1,e,-1)
-#endif
-#endif
+#include <k5-util.h>
 
 #ifdef STDARG
 extern reply(int, char *, ...);
@@ -709,7 +704,7 @@ checkuser(name)
 end_login()
 {
 
-	(void) seteuid((uid_t)0);
+	(void) krb5_seteuid((uid_t)0);
 	if (logged_in)
 		ftp_logwtmp(ttyline, "", "");
 	pw = NULL;
@@ -820,7 +815,7 @@ pass(passwd)
 		}
 	}
 	login_attempts = 0;		/* this time successful */
-	(void) setegid((gid_t)pw->pw_gid);
+	(void) krb5_setegid((gid_t)pw->pw_gid);
 	(void) initgroups(pw->pw_name, pw->pw_gid);
 
 	/* open wtmp before chroot */
@@ -846,7 +841,7 @@ pass(passwd)
 		} else
 			lreply(230, "No directory! Logging in with home=/");
 	}
-	if (seteuid((uid_t)pw->pw_uid) < 0) {
+	if (krb5_seteuid((uid_t)pw->pw_uid) < 0) {
 		reply(550, "Can't set uid.");
 		goto bad;
 	}
@@ -1017,7 +1012,7 @@ getdatasock(mode)
 
 	if (data >= 0)
 		return (fdopen(data, mode));
-	(void) seteuid((uid_t)0);
+	(void) krb5_seteuid((uid_t)0);
 	s = socket(AF_INET, SOCK_STREAM, 0);
 	if (s < 0)
 		goto bad;
@@ -1035,7 +1030,7 @@ getdatasock(mode)
 			goto bad;
 		sleep(tries);
 	}
-	(void) seteuid((uid_t)pw->pw_uid);
+	(void) krb5_seteuid((uid_t)pw->pw_uid);
 #ifdef IP_TOS
 #ifdef IPTOS_THROUGHPUT
 	on = IPTOS_THROUGHPUT;
@@ -1045,7 +1040,7 @@ getdatasock(mode)
 #endif
 	return (fdopen(s, mode));
 bad:
-	(void) seteuid((uid_t)pw->pw_uid);
+	(void) krb5_seteuid((uid_t)pw->pw_uid);
 	(void) close(s);
 	return (NULL);
 }
@@ -1695,7 +1690,7 @@ dologout(status)
 	int status;
 {
 	if (logged_in) {
-		(void) seteuid((uid_t)0);
+		(void) krb5_seteuid((uid_t)0);
 		ftp_logwtmp(ttyline, "", "");
 	}
 	/* beware of flushing buffers after a SIGPIPE */
@@ -1752,12 +1747,12 @@ passive()
 	}
 	pasv_addr = ctrl_addr;
 	pasv_addr.sin_port = 0;
-	(void) seteuid((uid_t)0);
+	(void) krb5_seteuid((uid_t)0);
 	if (bind(pdata, (struct sockaddr *)&pasv_addr, sizeof(pasv_addr)) < 0) {
-		(void) seteuid((uid_t)pw->pw_uid);
+		(void) krb5_seteuid((uid_t)pw->pw_uid);
 		goto pasv_error;
 	}
-	(void) seteuid((uid_t)pw->pw_uid);
+	(void) krb5_seteuid((uid_t)pw->pw_uid);
 	len = sizeof(pasv_addr);
 	if (getsockname(pdata, (struct sockaddr *) &pasv_addr, &len) < 0)
 		goto pasv_error;
