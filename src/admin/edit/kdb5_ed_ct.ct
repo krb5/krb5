@@ -39,8 +39,17 @@ request extract_srvtab, "Extract service key table",
 request list_db, "List database entries",
 	list_db, ldb;
 
+request dump_db, "Dump database entries (not working yet)",
+	dump_db, ddb;
+
 request set_dbname, "Change database name",
 	set_dbname, sdbn;
+
+request change_working_dir, "Change working directory",
+	change_working_directory, cwd, cd;
+
+request print_working_dir, "Print working directory",
+	print_working_direcotry, pwd;
 
 # list_requests is generic -- unrelated to Kerberos
 request	ss_list_requests, "List available requests.",
