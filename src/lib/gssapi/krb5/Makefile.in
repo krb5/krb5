@@ -321,11 +321,13 @@ indicate_mechs.so indicate_mechs.po $(OUTPRE)indicate_mechs.$(OBJEXT): indicate_
   $(SRCTOP)/include/k5-platform.h $(BUILDTOP)/include/krb5/autoconf.h \
   gssapi_krb5.h gssapi_err_krb5.h
 init_sec_context.so init_sec_context.po $(OUTPRE)init_sec_context.$(OBJEXT): init_sec_context.c \
-  gssapiP_krb5.h $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) \
-  $(srcdir)/../generic/gssapiP_generic.h $(srcdir)/../generic/gssapi_generic.h \
-  $(BUILDTOP)/include/gssapi/gssapi.h ../generic/gssapi_err_generic.h \
-  $(SRCTOP)/include/k5-platform.h $(BUILDTOP)/include/krb5/autoconf.h \
-  gssapi_krb5.h gssapi_err_krb5.h
+  $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
+  $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
+  $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
+  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
+  $(SRCTOP)/include/krb5/kdb.h gssapiP_krb5.h $(srcdir)/../generic/gssapiP_generic.h \
+  $(srcdir)/../generic/gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  ../generic/gssapi_err_generic.h gssapi_krb5.h gssapi_err_krb5.h
 inq_context.so inq_context.po $(OUTPRE)inq_context.$(OBJEXT): inq_context.c gssapiP_krb5.h \
   $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(srcdir)/../generic/gssapiP_generic.h \
   $(srcdir)/../generic/gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi.h \
