@@ -72,6 +72,8 @@ datum	 dbm_nextkey __P((DBM *));
 DBM	*dbm_open __P((const char *, int, int));
 int	 dbm_store __P((DBM *, datum, datum, int));
 int	 dbm_dirfno __P((DBM *));
+int	 dbm_error __P((DBM *db));
+int	 dbm_clearerr __P((DBM *db));
 __END_DECLS
 
 #endif /* !_NDBM_H_ */

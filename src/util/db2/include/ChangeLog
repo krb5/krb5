@@ -1,0 +1,4 @@
+Thu Aug 15 15:41:12 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* db-ndbm.h: Add prototypes for missing functions dbm_error() and
+	 	dbm_clearerror().
