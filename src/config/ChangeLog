@@ -1,3 +1,8 @@
+2003-02-12  Tom Yu  <tlyu@mit.edu>
+
+	* post.in (.dtmp): Use -DDEPEND to allow source files to exclude
+	inclusions from dependencies.
+
 2003-01-10  Ken Raeburn  <raeburn@mit.edu>
 
 	* lib.in (LN_S, AR, LIBLIST, LIBLINKS, LIBINSTLIST, STLIBEXT,

@@ -84,7 +84,7 @@ depend-dependencies:
 # NOTE: This will fail when using Make programs whose VPATH support is
 # broken.
 .dtmp: $(ALL_DEP_SRCS)
-	$(CC) -M $(ALL_CFLAGS) $? > .dtmp
+	$(CC) -M -DDEPEND $(ALL_CFLAGS) $? > .dtmp
 
 # Generate a script for dropping in the appropriate make variables, using
 # directory-specific parameters.  General substitutions independent of local
