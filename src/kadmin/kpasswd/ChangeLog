@@ -1,3 +1,9 @@
+Mon Feb 06 17:19:04 1995 Chris Provenzano  (proven@mit.edu)
+
+        * kpasswd.c Removed krb5_keytype, changed krb5_enctype to 
+		krb5_enctype *, changed krb5_preauthtype to krb5_preauthtype *
+		for krb5_get_in_tkt_with_password() rotuine.
+
 Wed Jan 25 16:54:40 1995  Chris Provenzano (proven@mit.edu)
 
         * Removed all narrow types and references to wide.h and narrow.h
