@@ -874,6 +874,8 @@ typedef struct _krb5_response {
     krb5_magic magic;
     krb5_octet message_type;
     krb5_data response;
+    krb5_int32 expected_nonce;	/* The expected nonce for KDC_REP messages */
+    krb5_timestamp request_time;   /* When we made the request */
 } krb5_response;
 
 typedef struct _krb5_safe {

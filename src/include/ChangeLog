@@ -1,5 +1,13 @@
 Fri Sep  1 00:44:59 1995  Theodore Y. Ts'o  <tytso@dcl>
 
+	* k5-int.h: Added clockskew, kdc_req_sumtype, and
+		kdc_default_options to the krb5_context structure.
+
+	* krb5.hin: Added expected nonce and request_time fields to the
+	        krb5_response structure.  The fields are used to pass
+		information from krb5_send_tgs() to
+		krb5_get_cred_via_tkt() so that it can do sanity checking.
+
 	* k5-int.h: Add time offset field to the os_context structure.
 		This offset is added to the system clock time to produce
 		the "true" time.  

@@ -891,15 +891,21 @@ typedef unsigned long profile_t;
 
 struct _krb5_context {
 	krb5_magic	magic;
-	krb5_enctype  FAR *etypes;
+	krb5_enctype	FAR *etypes;
 	int		etype_count;
-	void	      FAR *os_context;
-	char	      FAR *default_realm;
-	profile_t     profile;
-	void	      FAR *db_context;
+	void	      	FAR *os_context;
+	char	      	FAR *default_realm;
+	profile_t     	profile;
+	void	      	FAR *db_context;
 	int		ser_ctx_count;
-	void	      FAR *ser_ctx;
+	void	      	FAR *ser_ctx;
+	krb5_deltat 	clockskew; /* allowable clock skew */
+	krb5_cksumtype	kdc_req_sumtype;
+	krb5_flags 	kdc_default_options;
+	krb5_flags	library_options;
 };
+
+#define KRB5_LIBOPT_SYNC_KDCTIME	0x0001
 
 /*
  * Begin "asn1.h"
