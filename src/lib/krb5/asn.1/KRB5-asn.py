@@ -63,12 +63,12 @@ ChecksumType ::= INTEGER {
 
 -- EncryptionKey 
 EncryptionKey ::= SEQUENCE {
-	keytype[0]			KeyType,
+	keytype[0]			INTEGER, -- KeyType
 	session[1]			OCTET STRING
 }
 
 Checksum ::= SEQUENCE {
-	cksumtype[0]			ChecksumType,
+	cksumtype[0]			INTEGER, -- ChecksumType
 	checksum[1]			OCTET STRING
 }
 
@@ -115,7 +115,7 @@ TicketFlags ::= BIT STRING {
 }
 
 HostAddresses ::= SEQUENCE OF SEQUENCE {
-	addr-type[0]			AddressType,
+	addr-type[0]			INTEGER, -- AddressType
 	address[1]			OCTET STRING
 }
 
@@ -147,7 +147,7 @@ Ticket ::= SEQUENCE {
 	tkt-vno[0]			INTEGER,
 	srealm[1]			Realm,
 	sname[2]			PrincipalName,
-	etype[3]			EncryptionType,
+	etype[3]			INTEGER, -- EncryptionType
 	skvno[4]			INTEGER,
 	enc-part[5]			EncryptedData	-- EncTicketPart
 }
@@ -160,7 +160,7 @@ AS-REQ ::= [APPLICATION 0] SEQUENCE {
 	from[4]				UTCTime,
 	till[5]				UTCTime,
 	rtime[6]			UTCTime OPTIONAL,
-	etype[7]			EncryptionType,
+	etype[7]			INTEGER, -- EncryptionType
 	crealm[8]			Realm,
 	cname[9]			PrincipalName,
 	addresses[10]			HostAddresses,
@@ -172,7 +172,7 @@ KDC-REP ::= [APPLICATION 1] SEQUENCE {
 	msg-type[1]			INTEGER,
 	crealm[2]			Realm,
 	cname[3]			PrincipalName,
-	etype[4]			EncryptionType,
+	etype[4]			INTEGER, -- EncryptionType
 	ckvno[5]			INTEGER,
 	ticket[6]			Ticket,		-- Ticket
 	enc-part[7]			EncryptedData	-- EncKDCRepPart
@@ -247,7 +247,7 @@ TGS-REQ ::= [APPLICATION 5] SEQUENCE {
 	till[5]				UTCTime,
 	rtime[6]			UTCTime OPTIONAL,
 	ctime[7]			UTCTime,
-	etype[8]			EncryptionType,
+	etype[8]			INTEGER, -- EncryptionType
 	sname[9]			PrincipalName,
 	addresses[10]			HostAddresses,
 	enc-part[11]			EncryptedData OPTIONAL -- EncTgsReqPart
@@ -271,7 +271,7 @@ KRB-SAFE ::= [APPLICATION 6] SEQUENCE {
 KRB-PRIV ::= [APPLICATION 7] SEQUENCE {
 	pvno[0]				INTEGER,
 	msg-type[1]			INTEGER,
-	etype[2]			EncryptionType,
+	etype[2]			INTEGER, -- EncryptionType
 	enc-part[3]			EncryptedData	-- EncKrbPrivPart
 }
 
