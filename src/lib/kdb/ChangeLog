@@ -1,3 +1,9 @@
+2002-08-15  Tom Yu  <tlyu@mit.edu>
+
+	* keytab.c (krb5_ktkdb_get_entry): For consistency, check for
+	DISALLOW_ALL_TIX and DISALLOW_SVR when looking up keys.
+	[pullup from trunk]
+
 2002-08-12  Sam Hartman  <hartmans@mit.edu>
 
 	* kdb_xdr.c (krb5_dbe_search_enctype): Initialize ret to 0; thanks
