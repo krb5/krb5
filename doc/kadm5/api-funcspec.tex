@@ -693,11 +693,12 @@ below, as well as all Admin API data structures, type definitions and
 defines mentioned in this document.  
 
 Before \v{\#include}ing $<$kadm5/admin.h$>$, the programmer can
-\v{\#define} the version symbol that the program will use prefixed by
-USE_, such as USE_KADM5_API_VERSION_2.  This will ensure that the
-correct functional protoypes and data structures are defined.  If no
-version symbol is defined, the most recent version supported by the
-header files will be used.
+specify the API version number that the program will use by
+\v{\#define}ing USE_KADM5_API_VERSION; for example, define that symbol
+to be 1 to use KADM5_API_VERSION_1.  This will ensure that the correct
+functional protoypes and data structures are defined.  If no version
+symbol is defined, the most recent version supported by the header
+files will be used.
 
 Some of the defines and their values contained in $<$kadm5/admin.h$>$
 include the following, whose KADM5_ prefixes have been removed.
