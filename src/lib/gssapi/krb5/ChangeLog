@@ -1,3 +1,14 @@
+Fri Feb  3 00:34:55 1995  John Gilmore  <gnu@cygnus.com>
+
+	Rename files for DOS 8.3 uniqueness:
+	* display_name.c    => disp_name.c
+	* display_status.c  => disp_status.c
+	* inquire_context.c => inq_context.c
+	* inquire_cred.c    => inq_cred.c
+	* release_cred.c    => rel_cred.c
+	* release_name.c    => rel_name.c
+	* Makefile.in changed to match.
+
 Fri Jan 27 14:41:12 1995  Chris Provenzano (proven@mit.edu)
 
         * accept_sec_context.c (rd_req_keyproc() added krb5_keytype arg.

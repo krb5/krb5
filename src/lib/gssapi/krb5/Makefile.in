@@ -19,21 +19,21 @@ CCSRCS = \
 	$(srcdir)/compare_name.c \
 	$(srcdir)/context_time.c \
 	$(srcdir)/delete_sec_context.c \
-	$(srcdir)/display_name.c \
-	$(srcdir)/display_status.c \
+	$(srcdir)/disp_name.c \
+	$(srcdir)/disp_status.c \
 	$(srcdir)/get_tkt_flags.c \
 	$(srcdir)/gssapi_krb5.c \
 	$(srcdir)/import_name.c \
 	$(srcdir)/indicate_mechs.c \
 	$(srcdir)/init_sec_context.c \
-	$(srcdir)/inquire_context.c \
-	$(srcdir)/inquire_cred.c \
+	$(srcdir)/inq_context.c \
+	$(srcdir)/inq_cred.c \
 	$(srcdir)/k5seal.c \
 	$(srcdir)/k5unseal.c \
 	$(srcdir)/krb5_gss_glue.c \
 	$(srcdir)/process_context_token.c \
-	$(srcdir)/release_cred.c \
-	$(srcdir)/release_name.c \
+	$(srcdir)/rel_cred.c \
+	$(srcdir)/rel_name.c \
 	$(srcdir)/seal.c \
 	$(srcdir)/sign.c \
 	$(srcdir)/unseal.c \
@@ -49,21 +49,21 @@ CCOBJS = \
 	compare_name.o \
 	context_time.o \
 	delete_sec_context.o \
-	display_name.o \
-	display_status.o \
+	disp_name.o \
+	disp_status.o \
 	get_tkt_flags.o \
 	gssapi_krb5.o \
 	import_name.o \
 	indicate_mechs.o \
 	init_sec_context.o \
-	inquire_context.o \
-	inquire_cred.o \
+	inq_context.o \
+	inq_cred.o \
 	k5seal.o \
 	k5unseal.o \
 	krb5_gss_glue.o \
 	process_context_token.o \
-	release_cred.o \
-	release_name.o \
+	rel_cred.o \
+	rel_name.o \
 	seal.o \
 	sign.o \
 	unseal.o \
