@@ -1,3 +1,8 @@
+2001-01-29  Ken Raeburn  <raeburn@mit.edu>
+
+	* make_checksum.c (krb5_c_make_checksum): Clear checksum contents
+	pointer after freeing it in error case.
+
 2000-10-17  Ezra Peisach  <epeisach@mit.edu>
 
 	* nfold.c (krb5_nfold): inbots and outbits are now unsigned int. 
