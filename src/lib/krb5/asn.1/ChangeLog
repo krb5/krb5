@@ -1,3 +1,8 @@
+Thu Apr 16 17:01:27 1998  Tom Yu  <tlyu@mit.edu>
+
+	* asn1_encode.c (asn1_encode_generaltime): Sanity check the return
+	from gmtime() to avoid overruns.
+
 Wed Jan 14 20:57:33 1998  Tom Yu  <tlyu@mit.edu>
 
 	* asn1buf.c (asn12krb5_buf): Check return value of
