@@ -589,22 +589,22 @@ profile-library-linker-options-68k-debug = {common-linker-options-debug} {profil
 profile-library-linker-options-ppc-final = {common-linker-options-final} {profile-library-common-linker-options}
 profile-library-linker-options-68k-final = {common-linker-options-final} {profile-library-common-linker-options}
 
-gss-library-objects-ppc-debug = `catenate {gss-objects-ppc-debug-list} | StreamEdit -d -set prefix="{root-folder}mac:" -e "/Å/ Insert prefix."` ¶
+gss-library-objects-ppc-debug = `catenate {gss-objects-ppc-debug-list} | StreamEdit -d -set prefix="{root-folder}" -e "/¥:(Å)¨2/ Print prefix¨2"` ¶
 	{root-folder}mac:GSS.CFM{object-suffix-ppc-debug}
-gss-library-objects-68k-debug = `catenate {gss-objects-68k-debug-list} | StreamEdit -d -set prefix="{root-folder}mac:" -e "/Å/ Insert prefix."` ¶
+gss-library-objects-68k-debug = `catenate {gss-objects-68k-debug-list} | StreamEdit -d -set prefix="{root-folder}" -e "/¥:(Å)¨2/ Print prefix¨2"` ¶
 	{root-folder}mac:GSS.CFM{object-suffix-68k-debug}
-gss-library-objects-ppc-final = `catenate {gss-objects-ppc-final-list} | StreamEdit -d -set prefix="{root-folder}mac:" -e "/Å/ Insert prefix."` ¶
+gss-library-objects-ppc-final = `catenate {gss-objects-ppc-final-list} | StreamEdit -d -set prefix="{root-folder}" -e "/¥:(Å)¨2/ Print prefix¨2"` ¶
 	{root-folder}mac:GSS.CFM{object-suffix-ppc-final}
-gss-library-objects-68k-final = `catenate {gss-objects-68k-final-list} | StreamEdit -d -set prefix="{root-folder}mac:" -e "/Å/ Insert prefix."` ¶
+gss-library-objects-68k-final = `catenate {gss-objects-68k-final-list} | StreamEdit -d -set prefix="{root-folder}" -e "/¥:(Å)¨2/ Print prefix¨2"` ¶
 	{root-folder}mac:GSS.CFM{object-suffix-68k-final}
 
-krb5-library-objects-ppc-debug = `catenate {krb5-objects-ppc-debug-list} | StreamEdit -d -set prefix="{root-folder}mac:" -e "/Å/ Insert prefix."` ¶
+krb5-library-objects-ppc-debug = `catenate {krb5-objects-ppc-debug-list} | StreamEdit -d -set prefix="{root-folder}" -e "/¥:(Å)¨2/ Print prefix¨2"` ¶
 	{root-folder}mac:K5.CFM{object-suffix-ppc-debug}
-krb5-library-objects-68k-debug = `catenate {krb5-objects-68k-debug-list} | StreamEdit -d -set prefix="{root-folder}mac:" -e "/Å/ Insert prefix."` ¶
+krb5-library-objects-68k-debug = `catenate {krb5-objects-68k-debug-list} | StreamEdit -d -set prefix="{root-folder}" -e "/¥:(Å)¨2/ Print prefix¨2"` ¶
 	{root-folder}mac:K5.CFM{object-suffix-68k-debug}
-krb5-library-objects-ppc-final = `catenate {krb5-objects-ppc-final-list} | StreamEdit -d -set prefix="{root-folder}mac:" -e "/Å/ Insert prefix."` ¶
+krb5-library-objects-ppc-final = `catenate {krb5-objects-ppc-final-list} | StreamEdit -d -set prefix="{root-folder}" -e "/¥:(Å)¨2/ Print prefix¨2"` ¶
 	{root-folder}mac:K5.CFM{object-suffix-ppc-final}
-krb5-library-objects-68k-final = `catenate {krb5-objects-68k-final-list} | StreamEdit -d -set prefix="{root-folder}mac:" -e "/Å/ Insert prefix."` ¶
+krb5-library-objects-68k-final = `catenate {krb5-objects-68k-final-list} | StreamEdit -d -set prefix="{root-folder}" -e "/¥:(Å)¨2/ Print prefix¨2"` ¶
 	{root-folder}mac:K5.CFM{object-suffix-68k-final}
 
 krb5-globals-library-objects-ppc-debug = ¶
@@ -623,13 +623,13 @@ krb5-globals-library-objects-68k-final = ¶
 krb5-globals-data-library-objects-ppc = {krb5-globals-root-folder}Krb5GlobalsData{object-suffix-ppc-data}
 krb5-globals-data-library-objects-68k = {krb5-globals-root-folder}Krb5GlobalsData{object-suffix-68k-data}
 
-profile-library-objects-ppc-debug = `catenate {profile-objects-ppc-debug-list} | StreamEdit -d -set prefix="{root-folder}mac:" -e "/Å/ Insert prefix."` ¶
+profile-library-objects-ppc-debug = `catenate {profile-objects-ppc-debug-list} | StreamEdit -d -set prefix="{root-folder}" -e "/¥:(Å)¨2/ Print prefix¨2"` ¶
 	{root-folder}mac:ProfileLib.CFM{object-suffix-ppc-debug}
-profile-library-objects-68k-debug = `catenate {profile-objects-68k-debug-list} | StreamEdit -d -set prefix="{root-folder}mac:" -e "/Å/ Insert prefix."` ¶
+profile-library-objects-68k-debug = `catenate {profile-objects-68k-debug-list} | StreamEdit -d -set prefix="{root-folder}" -e "/¥:(Å)¨2/ Print prefix¨2"` ¶
 	{root-folder}mac:ProfileLib.CFM{object-suffix-68k-debug}
-profile-library-objects-ppc-final = `catenate {profile-objects-ppc-final-list} | StreamEdit -d -set prefix="{root-folder}mac:" -e "/Å/ Insert prefix."` ¶
+profile-library-objects-ppc-final = `catenate {profile-objects-ppc-final-list} | StreamEdit -d -set prefix="{root-folder}" -e "/¥:(Å)¨2/ Print prefix¨2"` ¶
 	{root-folder}mac:ProfileLib.CFM{object-suffix-ppc-final}
-profile-library-objects-68k-final = `catenate {profile-objects-68k-final-list} | StreamEdit -d -set prefix="{root-folder}mac:" -e "/Å/ Insert prefix."` ¶
+profile-library-objects-68k-final = `catenate {profile-objects-68k-final-list} | StreamEdit -d -set prefix="{root-folder}" -e "/¥:(Å)¨2/ Print prefix¨2"` ¶
 	{root-folder}mac:ProfileLib.CFM{object-suffix-68k-final}
 
 library-linker-ppc						= MWLinkPPC
