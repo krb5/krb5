@@ -5,7 +5,28 @@
 		over.  (This is needed so we can fold a directory's
 		configure.in scripts into the parent's configure.in
 		without having to move all of its siblings as well into
-		the parent directory's configure.in.)
+		the parent directory's configure.in.  This is because if
+		the parent's configure.in file as a AC_CONFIG_DIRS macro,
+		it gets included into all the $(SUBDIRS) macro of *all*
+		of its generated makefiles, and this is wrong for all
+		but the Makefile.in of the parent directory.  For example,
+		if the configure.in in src/appl contains
+		AC_CONFIG_DIRS(bsd telnet gssftp), and that configure
+		script also generates the Makefile.in for src/appl/sample,
+		then SUBDIRS will contain "bsd telnet gssftp" plus
+		whatever LOCAL_SUBDIRS is defined to contain.  This
+		doesn't work.  So instead of defining LOCAL_SUBDIRS,
+		the Makefile.in in src/appl/sample defines MY_SUBDIRS,
+		which completely overrides the SUBDIRS macro.
+		Eventually, we should replace all of the LOCAL_SUBDIRS
+		definitions in the Makefile.in's with MY_SUBDIRS, and
+		add MY_SUBDIRS definitions into all Makefile.in's that
+		don't currently have then, and depend on
+		AC_CONFIG_SUBDIRS to insert the right magic value into
+		SUBDIRS.  At that point, we can get rid of the SUBDIR
+		definition in pre.in, and remove this test from
+		post.in which tests of MY_SUBDIRS and uses it in
+		preference to SUBDIRS, and simply always use MY_SUBDIRS.)
 
 1998-05-27  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
