@@ -29,8 +29,8 @@ static char rcsid_addr_order_c[] =
  */
 int
 krb5_address_order(addr1, addr2)
-const register krb5_address *addr1;
-const register krb5_address *addr2;
+register const krb5_address *addr1;
+register const krb5_address *addr2;
 {
     int dir;
     register int i;
