@@ -17,7 +17,7 @@ DEPENDS all :
     "$(INCLUDE_DIR)/autoconf.h"
 ;
 
-DEPENDS install all ;
+DEPENDS install : all ;
 
 Clean.Remove clean : 
     "$(PROFILE_DIR)/profile.h"

@@ -32,7 +32,7 @@ DEPENDS all :
     "$(GSS_KRB5_DIR)/gssapi_err_krb5.h"
 ;
 
-DEPENDS install all ;
+DEPENDS install : all ;
 
 Clean.Remove clean : 
     "$(PROFILE_DIR)/prof_err.c"
