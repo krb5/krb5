@@ -49,6 +49,11 @@ register int *error;
     register krb5_enc_tkt_part *retval;
     krb5_transited *temp;
 
+    if (!val) {
+	    *error = EINVAL;
+	    return 0;
+    }
+
     retval = (krb5_enc_tkt_part *)xmalloc(sizeof(*retval));
     if (!retval) {
 	*error = ENOMEM;
