@@ -47,8 +47,7 @@
 
 /* Time set */
 typedef struct _krb5_ticket_times {
-    krb5_timestamp authtime; /* XXX ? should ktime in KDC_REP == authtime
-				in ticket? otherwise client can't get this */ 
+    krb5_timestamp authtime;
     krb5_timestamp starttime;		/* optional in ticket, if not present,
 					   use authtime */
     krb5_timestamp endtime;
@@ -240,6 +239,31 @@ typedef struct _krb5_priv_enc_part {
     krb5_address *r_address;		/* recipient address, optional */
 } krb5_priv_enc_part;
 
+typedef struct _krb5_cred {
+    krb5_ticket **tickets;		/* tickets */
+    krb5_enc_data enc_part;		/* encrypted part */
+} krb5_cred;
+
+typedef struct _krb5_cred_enc_struct {
+    krb5_keyblock* session;             /* session key used to encrypt */
+					/* ticket */
+    krb5_int32 nonce;			/* nonce, optional */
+    krb5_timestamp timestamp;		/* client time */
+    krb5_int32 usec;			/* microsecond portion of time */
+    krb5_address *s_address;		/* sender address, optional */
+    krb5_address *r_address;		/* recipient address, optional */
+    krb5_principal client;              /* client name/realm, optional */
+    krb5_principal server;              /* server name/realm, optional */
+    krb5_flags flags;			/* ticket flags, optional */
+    krb5_ticket_times times;		/* auth, start, end, renew_till, */
+                                        /* optional */
+    krb5_address **caddrs;		/* array of ptrs to addresses */
+} krb5_cred_enc_struct;
+
+typedef struct _krb5_cred_enc_part {
+    krb5_cred_enc_struct **creds;
+} krb5_cred_enc_part;    
+
 /* these need to be here so the typedefs are available for the prototypes */
 #include <krb5/safepriv.h>
 #include <krb5/ccache.h>
@@ -247,16 +271,6 @@ typedef struct _krb5_priv_enc_part {
 #include <krb5/keytab.h>
 #include <krb5/func-proto.h>
 #include <krb5/free.h>
-
-/* This is from Sandia */
-#ifndef FD_SET
-#define FD_SETSIZE          (sizeof (fd_set) * 8)
-
-#define FD_SET(f,s)         ((s)->fds_bits[0] |= (1 << (f)))
-#define FD_CLR(f,s)         ((s)->fds_bits[0] &= ~(1 << (f)))
-#define FD_ISSET(f,s)       ((s)->fds_bits[0] & (1 << (f)))
-#define FD_ZERO(s)          ((s)->fds_bits[0] = 0)
-#endif
 
 /* Sandia password generation structures */
 typedef struct _passwd_phrase_element {
