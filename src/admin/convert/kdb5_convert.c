@@ -51,11 +51,14 @@ static long master_key_version;
 #include <krb5/los-proto.h>
 #include <krb5/asn1.h>
 #include <krb5/osconf.h>
+#include <krb5/sysincl.h>
 
 #include <com_err.h>
 #include <stdio.h>
 
 #include <krb5/ext-proto.h>
+
+#include <netinet/in.h>			/* ntohl */
 
 #define PROGNAME argv[0]
 
