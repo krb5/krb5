@@ -66,7 +66,7 @@ krb5_data      *realm2;
         if (*(nextp-1) == '.')  strcat(next, prev);
         retval = KRB5KRB_AP_ERR_ILL_CR_TKT;
         for (j = 0; tgs_list[j]; j++) {
-          if (strlen(next) == krb5_princ_realm(context, tgs_list[j])->length &&
+          if (strlen(next) == (size_t) krb5_princ_realm(context, tgs_list[j])->length &&
               !memcmp(next, krb5_princ_realm(context, tgs_list[j])->data,
                       strlen(next))) {
             retval = 0;

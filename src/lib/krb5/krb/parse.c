@@ -189,8 +189,10 @@ krb5_parse_name(context, name, nprincipal)
 #ifndef _WINDOWS
 			fprintf(stderr,
 				"Programming error in krb5_parse_name!");
-#endif
 			exit(1);
+#else
+         /* Need to come up with windows error handling mechanism */
+#endif
 		}
 	} else {
 		/*

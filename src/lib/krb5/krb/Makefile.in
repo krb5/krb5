@@ -2,7 +2,7 @@ CFLAGS = $(CCOPTS) $(DEFS)
 LDFLAGS = -g
 
 ##DOSBUILDTOP = ..\..\..
-##DOSLIBNAME=..\libkrb5.lib
+##DOSLIBNAME=..\krb5.lib
 ##DOS!include $(BUILDTOP)\config\windows.in
 
 OBJS=	addr_comp.$(OBJEXT)	\
