@@ -51,11 +51,13 @@ static int get_from_registry_indirect(char *name_buf, int name_size)
 	int found = 0;
 	char *cp;
 
+        newkey[0] = 0;
 	GetPrivateProfileString(INI_FILES, "RegKRB5CCNAME", "", 
 				newkey, sizeof(newkey), KERBEROS_INI);
 	if (!newkey[0])
 		return 0;
 	
+        newkey[sizeof(newkey)-1] = 0;
 	cp = strrchr(newkey,'\\');
 	if (cp) {
 		*cp = '\0'; /* split the string */
@@ -111,6 +113,8 @@ get_from_registry(
     return 1;
 }
 
+#define APPEND_KRB5CC "\\krb5cc"
+
 static int
 try_dir(
     char* dir,
@@ -119,16 +123,18 @@ try_dir(
     )
 {
     struct _stat s;
-    static const char APPEND_KRB5CC[] = "\\krb5cc";
     if (!dir)
         return 0;
     if (_stat(dir, &s))
         return 0;
     if (!(s.st_mode & _S_IFDIR))
         return 0;
-    if (buffer != dir)
+    if (buffer != dir) {
         strncpy(buffer, dir, buf_len);
-    strncat(buffer, APPEND_KRB5CC, buf_len);
+        buffer[buf_len-1]='\0';
+    }
+    strncat(buffer, APPEND_KRB5CC, buf_len-strlen(buffer));
+    buffer[buf_len-1] = '\0';
     return 1;
 }
 #endif
@@ -137,7 +143,7 @@ try_dir(
 static krb5_error_code get_from_os(char *name_buf, int name_size)
 {
 	char *prefix = krb5_cc_dfl_ops->prefix;
-	int len;
+        int size;
         char *p;
 
 	if (get_from_registry(HKEY_CURRENT_USER,
@@ -151,23 +157,26 @@ static krb5_error_code get_from_os(char *name_buf, int name_size)
 	if (get_from_registry_indirect(name_buf, name_size) != 0)
 		return 0;
 
-        strncpy(name_buf, prefix, name_size);
-        strncat(name_buf, ":", name_size);
+        strncpy(name_buf, prefix, name_size);       
         name_buf[name_size - 1] = 0;
-        len = strlen(name_buf);
-        p = name_buf + len;
-        len = name_size - len;
+        size = name_size - strlen(prefix);
+        if (size > 0)
+            strcat(name_buf, ":");
+        size--;
+        p = name_buf + name_size - size;
 	if (!strcmp(prefix, "API")) {
-		strncpy(p, "krb5cc", len);
+		strncpy(p, "krb5cc", size);
 	} else if (!strcmp(prefix, "FILE") || !strcmp(prefix, "STDIO")) {
-		if (!try_dir(getenv("TEMP"), p, len) &&
-		    !try_dir(getenv("TMP"), p, len))
+		if (!try_dir(getenv("TEMP"), p, size) &&
+		    !try_dir(getenv("TMP"), p, size))
 		{
-			GetWindowsDirectory(p, len);
-			strncat(p, "\\krb5cc", len);
+                    int len = GetWindowsDirectory(p, size);
+                    name_buf[name_size - 1] = 0;
+                    if (len < size - sizeof(APPEND_KRB5CC))
+			strcat(p, APPEND_KRB5CC);
 		}
 	} else {
-		strncpy(p, "default_cache_name", len);
+		strncpy(p, "default_cache_name", size);
 	}
 	name_buf[name_size - 1] = 0;
 	return 0;

@@ -1,5 +1,14 @@
 1999-06-16  Danilo Almeida  <dalmeida@mit.edu>
 
+	* ccdefname.c (get_from_registry_indirect, try_dir, get_from_os): 
+		Extra robustness to win32 code.
+
+	* init_os_ctx.c (krb5_get_config_files, krb5_free_config_files):
+		Add function to get config files being used for current 
+		context with corresponding free function.
+
+1999-06-16  Danilo Almeida  <dalmeida@mit.edu>
+
 	* init_os_ctx.c (os_init_paths): Enhance win32 heuristics to use 
 		environment variable (like Unix) and to use the registry
 		too.  Will try executable's dir before windows dir if 
