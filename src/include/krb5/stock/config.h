@@ -33,6 +33,9 @@
 
 #ifdef HasVoidSignalReturnTrue
 #define POSIX_SIGTYPE
+#define krb5_sigtype void
+#else
+typedef int krb5_sigtype;
 #endif
 
 #ifdef HasStringHTrue
