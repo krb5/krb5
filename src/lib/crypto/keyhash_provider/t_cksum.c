@@ -74,7 +74,6 @@ main(argc, argv)
   int 			msgindex;
   krb5_boolean		valid;
   size_t		length;
-  krb5_context		kcontext;
   krb5_keyblock		keyblock;
   krb5_error_code	kret;
   krb5_data		plaintext, newstyle_checksum;
@@ -82,7 +81,7 @@ main(argc, argv)
   /* this is a terrible seed, but that's ok for the test. */
 
   plaintext.length = 8;
-  plaintext.data = testkey;
+  plaintext.data = (char *) testkey;
 
   krb5_c_random_seed(/* XXX */ 0, &plaintext);
 
@@ -94,8 +93,8 @@ main(argc, argv)
 
   newstyle_checksum.length = length;
 
-  if (!(newstyle_checksum.data = (krb5_octet *)
-	malloc(newstyle_checksum.length))) {
+  if (!(newstyle_checksum.data = (char *)
+	malloc((unsigned) newstyle_checksum.length))) {
     printf("cannot get memory for new style checksum\n");
     return(ENOMEM);
   }

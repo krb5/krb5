@@ -60,8 +60,11 @@ k5_descbc_hash(krb5_const krb5_keyblock *key, krb5_const krb5_data *ivec,
 
     /* this has a return value, but it's useless to us */
 
-    mit_des_cbc_cksum(input->data, output->data, input->length,
-		      schedule, ivec?ivec->data:(char *)mit_des_zeroblock);
+    mit_des_cbc_cksum((unsigned char *) input->data, 
+		      (unsigned char *) output->data, input->length,
+		      schedule, 
+		      ivec? (unsigned char *)ivec->data: 
+		            (unsigned char *)mit_des_zeroblock);
 
     memset(schedule, 0, sizeof(schedule));
 

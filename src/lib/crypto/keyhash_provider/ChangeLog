@@ -1,3 +1,11 @@
+2000-09-25  Ezra Peisach  <epeisach@mit.edu>
+
+	* descbc.c, k5_md4des.c, k5_md5des.c, t_cksum.c: Cleanup unsigned
+	vs. signed warnings.
+
+	* Makefile.in (t_cksum5, t_cksum4): Executables do not need to
+	link with the krb5 library.
+
 2000-06-28  Ezra Peisach  <epeisach@mit.edu>
 
 	* descbc.c (k5_descbc_hash): Get rid of unused variable.
