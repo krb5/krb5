@@ -1,3 +1,16 @@
+2003-06-20  Sam Hartman  <hartmans@mit.edu>
+
+	* asn1_k_decode.h (asn1_decode_etype_info2): Prototype.  Also
+	deleted prototype for asn1_decode_etype_info_entry as that is not
+	used outside asn1_k_decode.c
+
+	* krb5_decode.c (decode_krb5_etype_info2): Call etype_info2 decoder
+
+	* asn1_k_decode.c (asn1_decode_etype_info_entry): Split out
+	etype_info2 and etype_info decoder  so we ignore tag 2 in the
+	heimdal encoder
+	(asn1_decode_etype_info2): new function
+
 2003-05-23  Sam Hartman  <hartmans@mit.edu>
 
 	* asn1_k_decode.c (asn1_decode_etype_info_entry): Fix logic error

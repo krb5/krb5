@@ -807,7 +807,7 @@ asn1_error_code asn1_decode_sequence_of_checksum(asn1buf *buf, krb5_checksum ***
   decode_array_body(krb5_checksum, asn1_decode_checksum);
 }
 
-asn1_error_code asn1_decode_etype_info_entry(asn1buf *buf, krb5_etype_info_entry *val )
+static asn1_error_code asn1_decode_etype_info2_entry(asn1buf *buf, krb5_etype_info_entry *val )
 {
   setup();
   { begin_structure();
@@ -832,10 +832,34 @@ asn1_error_code asn1_decode_etype_info_entry(asn1buf *buf, krb5_etype_info_entry
   }
   cleanup();
 }
+static asn1_error_code asn1_decode_etype_info_entry(asn1buf *buf, krb5_etype_info_entry *val )
+{
+  setup();
+  { begin_structure();
+    get_field(val->etype,0,asn1_decode_enctype);
+    if (tagnum == 1) {
+	    get_lenfield(val->length,val->salt,1,asn1_decode_octetstring);
+    } else {
+	    val->length = KRB5_ETYPE_NO_SALT;
+	    val->salt = 0;
+    }
+    val->s2kparams.data = NULL;
+    val->s2kparams.length = 0;
+    
+    end_structure();
+    val->magic = KV5M_ETYPE_INFO_ENTRY;
+  }
+  cleanup();
+}
 
 asn1_error_code asn1_decode_etype_info(asn1buf *buf, krb5_etype_info_entry ***val )
 {
   decode_array_body(krb5_etype_info_entry,asn1_decode_etype_info_entry);
+}
+
+asn1_error_code asn1_decode_etype_info2(asn1buf *buf, krb5_etype_info_entry ***val )
+{
+  decode_array_body(krb5_etype_info_entry,asn1_decode_etype_info2_entry);
 }
 
 asn1_error_code asn1_decode_passwdsequence(asn1buf *buf, passwd_phrase_element *val)
