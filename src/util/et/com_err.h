@@ -10,12 +10,17 @@
 
 #ifndef __COM_ERR_H
 
-#ifdef __STDC__
-#ifndef __HIGHC__		/* gives us STDC but not stdarg */
+#ifdef UseStdarg
+#define STDARG_PROTOTYPES
+#endif
+
+#ifdef STDARG_PROTOTYPES
 #include <stdarg.h>
 #else
 #include <varargs.h>
 #endif
+
+#ifdef __STDC__
 /* ANSI C -- use prototypes etc */
 void com_err (const char *, long, const char *, ...);
 char const *error_message (long);

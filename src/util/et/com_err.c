@@ -7,10 +7,7 @@
 #include <stdio.h>
 #include "mit-sipb-copyright.h"
 
-/* Need <krb5/config.h> for STDARG_PROTOTYPES */
-/* #include <krb5/krb5.h> -- now tested locally*/
-
-#if __STDC__ || defined(STDARG_PROTOTYPES)
+#ifdef STDARG_PROTOTYPES
 #include <stdarg.h>
 #else
 #include <varargs.h>
