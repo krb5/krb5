@@ -1,3 +1,15 @@
+2002-12-19  Ken Raeburn  <raeburn@mit.edu>
+
+	* krb5.hin (krb5_encrypt, krb5_decrypt, krb5_use_enctype,
+	krb5_calculate_checksum, krb5_verify_checksum,
+	krb5_get_credentials, krb5_get_credentials_validate,
+	krb5_get_credentials_renew, krb5_get_cred_via_tkt, krb5_mk_req,
+	krb5_mk_req_extended, krb5_524_conv_principal, krb5_send_tgs,
+	krb5_get_in_tkt, krb5_get_in_tkt_with_password,
+	krb5_get_in_tkt_with_skey, krb5_get_in_tkt_with_keytab,
+	krb5_aname_to_localname): Clean up use of "const" in API, where it
+	was applied to the value passed and not something pointed to.
+
 2002-12-12  Tom Yu  <tlyu@mit.edu>
 
 	* krb5.hin: Update comment on krb5_kt_free_entry prototype to

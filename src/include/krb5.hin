@@ -577,16 +577,16 @@ krb5_boolean KRB5_CALLCONV is_keyed_cksum
  */
 krb5_error_code KRB5_CALLCONV krb5_encrypt
 	(krb5_context context,
-		const krb5_pointer inptr,
+		krb5_const_pointer inptr,
 		krb5_pointer outptr,
-		const size_t size,
+		size_t size,
 		krb5_encrypt_block * eblock,
 		krb5_pointer ivec);
 krb5_error_code KRB5_CALLCONV krb5_decrypt
 	(krb5_context context,
-		const krb5_pointer inptr,
+		krb5_const_pointer inptr,
 		krb5_pointer outptr,
-		const size_t size,
+		size_t size,
 		krb5_encrypt_block * eblock,
 		krb5_pointer ivec);
 krb5_error_code KRB5_CALLCONV krb5_process_key
@@ -622,7 +622,7 @@ krb5_enctype KRB5_CALLCONV krb5_eblock_enctype
 krb5_error_code KRB5_CALLCONV krb5_use_enctype
 	(krb5_context context,
 		krb5_encrypt_block * eblock,
-		const krb5_enctype enctype);
+		krb5_enctype enctype);
 size_t KRB5_CALLCONV krb5_encrypt_size
 	(size_t length,
 		krb5_enctype crypto);
@@ -631,16 +631,16 @@ size_t KRB5_CALLCONV krb5_checksum_size
 		krb5_cksumtype ctype);
 krb5_error_code KRB5_CALLCONV krb5_calculate_checksum
 	(krb5_context context,
-		const krb5_cksumtype ctype,
-		const krb5_pointer in, const size_t in_length,
-		const krb5_pointer seed, const size_t seed_length,
+		krb5_cksumtype ctype,
+		krb5_const_pointer in, size_t in_length,
+		krb5_const_pointer seed, size_t seed_length,
 		krb5_checksum * outcksum);
 krb5_error_code KRB5_CALLCONV krb5_verify_checksum
 	(krb5_context context,
 		krb5_cksumtype ctype,
 		const krb5_checksum * cksum,
-		const krb5_pointer in, const size_t in_length,
-		const krb5_pointer seed, const size_t seed_length);
+		krb5_const_pointer in, size_t in_length,
+		krb5_const_pointer seed, size_t seed_length);
 
 #if KRB5_PRIVATE
 krb5_error_code KRB5_CALLCONV krb5_random_confounder
@@ -1447,19 +1447,19 @@ void KRB5_CALLCONV krb5_free_tgt_creds
 
 krb5_error_code KRB5_CALLCONV krb5_get_credentials
 	(krb5_context,
-		const krb5_flags,
+		krb5_flags,
 		krb5_ccache,
 		krb5_creds *,
 		krb5_creds **);
 krb5_error_code KRB5_CALLCONV krb5_get_credentials_validate
 	(krb5_context,
-		const krb5_flags,
+		krb5_flags,
 		krb5_ccache,
 		krb5_creds *,
 		krb5_creds **);
 krb5_error_code KRB5_CALLCONV krb5_get_credentials_renew
 	(krb5_context,
-		const krb5_flags,
+		krb5_flags,
 		krb5_ccache,
 		krb5_creds *,
 		krb5_creds **);
@@ -1467,7 +1467,7 @@ krb5_error_code KRB5_CALLCONV krb5_get_credentials_renew
 krb5_error_code krb5_get_cred_via_tkt
 	(krb5_context,
 		   krb5_creds *,
-		   const krb5_flags,
+		   krb5_flags,
 		   krb5_address * const *,
 		   krb5_creds *,
 		   krb5_creds **);
@@ -1475,7 +1475,7 @@ krb5_error_code krb5_get_cred_via_tkt
 krb5_error_code KRB5_CALLCONV krb5_mk_req
 	(krb5_context,
 		krb5_auth_context *,
-		const krb5_flags,
+		krb5_flags,
 		char *,
 		char *,
 		krb5_data *,
@@ -1484,7 +1484,7 @@ krb5_error_code KRB5_CALLCONV krb5_mk_req
 krb5_error_code KRB5_CALLCONV krb5_mk_req_extended
 	(krb5_context,
 		krb5_auth_context *,
-		const krb5_flags,
+		krb5_flags,
 		krb5_data *,
 		krb5_creds *,
 		krb5_data * );
@@ -1642,7 +1642,7 @@ krb5_error_code KRB5_CALLCONV krb5_425_conv_principal
 		krb5_principal *princ);
 
 krb5_error_code KRB5_CALLCONV krb5_524_conv_principal
-	(krb5_context context, const krb5_principal princ, 
+	(krb5_context context, krb5_const_principal princ, 
 		char *name, char *inst, char *realm);
 
 #if KRB5_PRIVATE
@@ -1880,7 +1880,7 @@ krb5_get_profile
 #if KRB5_PRIVATE
 krb5_error_code krb5_send_tgs
 	(krb5_context,
-		const krb5_flags,
+		krb5_flags,
 		const krb5_ticket_times *,
 		const krb5_enctype *,
 		krb5_const_principal,
@@ -1895,12 +1895,12 @@ krb5_error_code krb5_send_tgs
 #if KRB5_DEPRECATED
 krb5_error_code KRB5_CALLCONV krb5_get_in_tkt
 	(krb5_context,
-		const krb5_flags,
+		krb5_flags,
 		krb5_address * const *,
 		krb5_enctype *,
 		krb5_preauthtype *,
 		krb5_error_code ( * )(krb5_context,
-					const krb5_enctype,
+					krb5_enctype,
 					krb5_data *,
 					krb5_const_pointer,
 					krb5_keyblock **),
@@ -1916,7 +1916,7 @@ krb5_error_code KRB5_CALLCONV krb5_get_in_tkt
 
 krb5_error_code KRB5_CALLCONV krb5_get_in_tkt_with_password
 	(krb5_context,
-		const krb5_flags,
+		krb5_flags,
 		krb5_address * const *,
 		krb5_enctype *,
 		krb5_preauthtype *,
@@ -1927,7 +1927,7 @@ krb5_error_code KRB5_CALLCONV krb5_get_in_tkt_with_password
 
 krb5_error_code KRB5_CALLCONV krb5_get_in_tkt_with_skey
 	(krb5_context,
-		const krb5_flags,
+		krb5_flags,
 		krb5_address * const *,
 		krb5_enctype *,
 		krb5_preauthtype *,
@@ -1938,11 +1938,11 @@ krb5_error_code KRB5_CALLCONV krb5_get_in_tkt_with_skey
 
 krb5_error_code KRB5_CALLCONV krb5_get_in_tkt_with_keytab
 	(krb5_context,
-		const krb5_flags,
+		krb5_flags,
 		krb5_address * const *,
 		krb5_enctype *,
 		krb5_preauthtype *,
-		const krb5_keytab,
+		krb5_keytab,
 		krb5_ccache,
 		krb5_creds *,
 		krb5_kdc_rep ** );
@@ -2234,7 +2234,7 @@ krb5_error_code KRB5_CALLCONV krb5_read_password
 krb5_error_code KRB5_CALLCONV krb5_aname_to_localname
 	(krb5_context,
 		krb5_const_principal,
-		const int,
+		int,
 		char * );
 #if KRB5_PRIVATE
 krb5_error_code KRB5_CALLCONV krb5_get_host_realm

@@ -29,9 +29,9 @@
 krb5_error_code KRB5_CALLCONV
 krb5_encrypt(context, inptr, outptr, size, eblock, ivec)
      krb5_context context;
-     const krb5_pointer inptr;
+     krb5_const_pointer inptr;
      krb5_pointer outptr;
-     const size_t size;
+     size_t size;
      krb5_encrypt_block * eblock;
      krb5_pointer ivec;
 {
@@ -68,9 +68,9 @@ krb5_encrypt(context, inptr, outptr, size, eblock, ivec)
 krb5_error_code KRB5_CALLCONV
 krb5_decrypt(context, inptr, outptr, size, eblock, ivec)
      krb5_context context;
-     const krb5_pointer inptr;
+     krb5_const_pointer inptr;
      krb5_pointer outptr;
-     const size_t size;
+     size_t size;
      krb5_encrypt_block * eblock;
      krb5_pointer ivec;
 {
@@ -227,11 +227,11 @@ krb5_error_code KRB5_CALLCONV
 krb5_calculate_checksum(context, ctype, in, in_length,
 					seed, seed_length, outcksum)
      krb5_context context;
-     const krb5_cksumtype ctype;
-     const krb5_pointer in;
-     const size_t in_length;
-     const krb5_pointer seed;
-     const size_t seed_length;
+     krb5_cksumtype ctype;
+     krb5_const_pointer in;
+     size_t in_length;
+     krb5_const_pointer seed;
+     size_t seed_length;
      krb5_checksum * outcksum;
 {
     krb5_data input;
@@ -270,10 +270,10 @@ krb5_verify_checksum(context, ctype, cksum, in, in_length,
      krb5_context context;
      krb5_cksumtype ctype;
      const krb5_checksum * cksum;
-     const krb5_pointer in;
-     const size_t in_length;
-     const krb5_pointer seed;
-     const size_t seed_length;
+     krb5_const_pointer in;
+     size_t in_length;
+     krb5_const_pointer seed;
+     size_t seed_length;
 {
     krb5_data input;
     krb5_keyblock key;

@@ -147,11 +147,11 @@ static char *strnchr(register char *s, register char c,
 #define KRB5_INVALID_PRINCIPAL KRB5_LNAME_BADFORMAT
 
 krb5_error_code KRB5_CALLCONV
-krb5_524_conv_principal(krb5_context context, const krb5_principal princ,
+krb5_524_conv_principal(krb5_context context, krb5_const_principal princ,
 			char *name, char *inst, char *realm)
 {
      const struct krb_convert *p;
-     krb5_data *compo;
+     const krb5_data *compo;
      char *c, *tmp_realm, *tmp_prealm;
      unsigned int tmp_realm_len;
      int retval; 

@@ -1,3 +1,8 @@
+2002-12-19  Ken Raeburn  <raeburn@mit.edu>
+
+	* conv_princ.c (krb5_524_conv_principal): Clean up use of "const"
+	in API.
+
 2002-11-14  Ezra Peisach  <epeisach@bu.edu>
 
 	* get_in_tkt.c (krb5_get_in_tkt): Do not pass NULL when an
