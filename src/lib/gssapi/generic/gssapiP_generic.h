@@ -44,7 +44,7 @@
 
 #define g_OID_equal(o1,o2) \
    (((o1)->length == (o2)->length) && \
-    (memcmp((o1)->elements,(o2)->elements,(int) (o1)->length) == 0))
+    (memcmp((o1)->elements,(o2)->elements,(unsigned int) (o1)->length) == 0))
 
 /* this code knows that an int on the wire is 32 bits.  The type of
    num should be at least this big, or the extra shifts may do weird
