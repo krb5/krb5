@@ -1,3 +1,8 @@
+Tue Feb 28 00:20:15 1995  John Gilmore  (gnu at toad.com)
+
+	* md5.c, md5crypto.c, md5glue.c, t_mddriver.c:  Avoid <krb5/...>
+	includes.
+
 Mon Feb 20 15:54:1 1995 Keith Vetter (keithv@fusion.com)
 
 	* Makefile.in: made to work for the PC

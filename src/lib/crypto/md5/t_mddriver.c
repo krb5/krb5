@@ -29,7 +29,7 @@ documentation and/or software.
 #include "rsa-md4.h"
 #endif
 #if MD == 5
-#include <krb5/rsa-md5.h>
+#include "rsa-md5.h"
 #endif
 
 /* Length of test block, number of test blocks.

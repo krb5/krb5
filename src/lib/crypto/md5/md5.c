@@ -36,7 +36,7 @@
  */
 
 #include "k5-int.h"
-#include <krb5/rsa-md5.h>
+#include "rsa-md5.h"
 
 #ifdef __STDC__
 #define UL(x) x##UL

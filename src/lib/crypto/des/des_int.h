@@ -28,7 +28,7 @@
 #ifndef DES_INTERNAL_DEFS
 #define DES_INTERNAL_DEFS
 
-#include <krb5/mit-des.h>
+#include "mit-des.h"		/* From include/krb5 */
 
 /* cbc_cksum.c */
 extern krb5_error_code INTERFACE mit_des_cbc_checksum

@@ -26,7 +26,7 @@
 
 
 #include <krb.h>
-#include <krb5/krb5.h>
+#include "krb5.h"
 
 int	krb5_425_error;		/* For people who want to know what */
 				/* the *real* error was....  */

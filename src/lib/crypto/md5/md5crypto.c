@@ -1,5 +1,5 @@
 #include "k5-int.h"
-#include <krb5/rsa-md5.h>
+#include "rsa-md5.h"
 #include "des_int.h"	/* we cheat a bit and call it directly... */
 
 krb5_error_code INTERFACE

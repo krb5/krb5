@@ -1,3 +1,7 @@
+Tue Feb 28 00:18:38 1995  John Gilmore  (gnu at toad.com)
+
+	* des_int.h:  Avoid <krb5/...> includes.
+
 Mon Feb 20 16:10:29 1995 Keith Vetter (keithv@fusion.com)
 
 	* Makefile.in: made to work under windows PC

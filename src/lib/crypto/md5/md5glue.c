@@ -1,5 +1,5 @@
 #include "k5-int.h"
-#include <krb5/rsa-md5.h>
+#include "rsa-md5.h"
 
 krb5_error_code INTERFACE
 md5_sum_func NPROTOTYPE((krb5_pointer in, size_t in_length,

@@ -73,8 +73,8 @@ extern krb5_checksum_entry
  **********************************************************************
  */
 
-#include <krb5/config.h>
-#include <krb5/wordsize.h>
+#include <k5-config.h>
+#include <wordsize.h>
 
 /* Data structure for MD4 (Message Digest) computation */
 typedef struct {

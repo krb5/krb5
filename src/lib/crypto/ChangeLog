@@ -1,3 +1,7 @@
+Tue Feb 28 00:15:06 1995  John Gilmore  (gnu at toad.com)
+
+	* cryptoconf.c, des_md5.c:  Avoid <krb5/...> includes.
+
 Fri Feb  3 02:44:07 1995  John Gilmore  <gnu@cygnus.com>
 
 	Rename files so that they work in the DOS LIB command,

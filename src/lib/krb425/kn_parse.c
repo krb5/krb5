@@ -26,7 +26,7 @@
 
 #include <stdio.h>
 #include <krb.h>
-#include <krb5/osconf.h>
+#include "k5-int.h"
 
 /* max size of full name */
 #define FULL_SZ (ANAME_SZ + INST_SZ + REALM_SZ)

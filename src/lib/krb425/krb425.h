@@ -31,12 +31,9 @@
 #include <ctype.h>
 #include <netdb.h>
 #include <krb.h>
-#include <krb5/krb5.h>
-#include <krb5/los-proto.h>
-#include <krb5/asn1.h>
+#include "k5-int.h"
 #include <netinet/in.h>
 #include <stdio.h>
-#include <krb5/ext-proto.h>
 
 #define min(a,b)	((a) < (b) ? (a) : (b))
 

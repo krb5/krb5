@@ -43,7 +43,7 @@
 #endif
 
 #ifdef PROVIDE_RSA_MD5
-#include <krb5/rsa-md5.h>
+#include "rsa-md5.h"
 #define MD5_CKENTRY &rsa_md5_cksumtable_entry
 #define MD5_DES_CKENTRY &rsa_md5_des_cksumtable_entry
 #else
@@ -98,7 +98,7 @@
 
 /* WARNING:
    make sure the order of entries in these tables matches the #defines in
-   <krb5/encryption.h>
+   "krb5/encryption.h"
  */
 
 krb5_cs_table_entry *krb5_csarray[] = {
