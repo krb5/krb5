@@ -1,3 +1,9 @@
+Mon Aug 18 11:28:25 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* aclocal.m4 (KRB5_LIB_PARAMS): For the alpha, RUN_ENV needs to
+ 	have sed expression in single quotes unstead of double to deal
+ 	with a shell quoting bug in the dejagnu test suite.
+
 Tue Aug 12 11:09:30 1997  Ezra Peisach  <epeisach@mit.edu>
 
 	* aclocal.m4 (WITH_HESIOD): Fix --with-hesiod support to DTRT if
