@@ -1,3 +1,10 @@
+2002-04-25  Ezra Peisach  <epeisach@bu.edu>
+
+	* reconf: Only for autoreconf 2.53, create a private copy of
+	autoreconf with a patch to a bug that prevented use of three
+	levels configure.in files. The bug is fixed in the development
+	version 2.53a.
+
 2002-04-16  Danilo Almeida  <dalmeida@mit.edu>
 
 	* def-check.pl: Handle KRB5_CALLCONV_WRONG in .def file.

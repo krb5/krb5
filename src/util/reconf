@@ -47,6 +47,33 @@ if autoreconf --version | sed -e "$sedcmd1" -e "$sedcmd2" | egrep "$patb" >/dev/
 	       localdir=`pwd`
 	       ;;
 	esac
+
+	# Determine if we need to patch autoreconf for 2.53
+	case "$autoconfversion" in
+	  2.53)
+	       echo "Patching autoreconf"
+	       # Walk the path to find autoreconf
+	       autoreconfpath=
+	       for i in `echo $PATH | sed -e 's/:/ /g'` ; do
+		   if test -r $i/autoreconf; then
+		       autoreconfpath=$i/autoreconf
+		       break
+		   fi
+	       done
+	       if test "x$autoreconfpath" = "x" ; then 
+		   echo "Could not find autoreconf executable!!!"
+		   exit
+	       fi
+	       
+	       echo "About to patch $autoreconfpath to ..."
+	       TMPCMD=/tmp/autoreconf$$
+	       sed -e 's/push @ARGV, $_;/push @ARGV, catfile ($directory, $_);/' $autoreconfpath > $TMPCMD
+	       autoreconf="/bin/sh $TMPCMD"
+	       trap "rm $TMPCMD" 0
+	       ;;
+	  *)
+	       ;;
+	esac
 else
 	echo "Couldn't find autoconf 2.13 or higher in your path."
 	echo " "
