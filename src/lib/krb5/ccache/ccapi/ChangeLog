@@ -1,3 +1,7 @@
+2000-07-20  Danilo Almeida  <dalmeida@mit.edu>
+
+	* stdcc.h: Include k5-int.h to get krb5_ccache definition.
+
 2000-06-08  Alexandra Ellwood  <lxs@mit.edu>
 
 	* stdcc_util.c (dupCCtoK5, dupK5toCC): 

@@ -1,4 +1,5 @@
 #include "krb5.h"
+#include "k5-int.h"
 	
 #if defined(macintosh)
 #include "CCache2.h"
