@@ -101,7 +101,7 @@ krb5_error_code krb5_rc_io_creat (context, d, fn)
    if (fn)
      if (!(*fn = malloc(35)))
       { FREE(d->fn); return KRB5_RC_IO_MALLOC; }
-   (void) sprintf(d->fn,"%s%skrb5_RC%d",dir,PATH_SEPARATOR,UNIQUE);
+   (void) sprintf(d->fn,"%s%skrb5_RC%d",dir,PATH_SEPARATOR, (int) UNIQUE);
    c = d->fn + strlen(d->fn);
    (void) strcpy(c,"aaa");
    while ((d->fd = THREEPARAMOPEN(d->fn,O_WRONLY|O_CREAT|O_TRUNC|O_EXCL|O_BINARY,0600)) == -1)

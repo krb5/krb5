@@ -1,3 +1,8 @@
+2000-06-29  Ezra Peisach  <epeisach@engrailed.mit.edu>
+
+	* rc_io.c (krb5_rc_io_creat): Cast getpid() to int.
+	(Use of a long might overflow buffer if pid_t is 64 bits */
+
 2000-04-28  Nalin Dahyabhai  <nalin@redhat.com>
 
 	* rc_io.c (getdir): Don't check dirlen again, the call sites
