@@ -1,3 +1,7 @@
+2005-01-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* k5-int.h (krb5int_zap_data): Fix preprocessor test for Windows.
+
 2005-01-07  Ken Raeburn  <raeburn@mit.edu>
 
 	* k5-thread.h (KRB5_CALLCONV, KRB5_CALLCONV_C): Define if not
