@@ -70,7 +70,7 @@ void KRB5_CALLCONV krb5_adm_disconnect
 	 krb5_auth_context,
 	 krb5_ccache);
 
-#if !defined(_WIN32) && !defined(macintosh)
+#if !defined(_WIN32)
 /* adm_kw_dec.c */
 krb5_error_code krb5_adm_proto_to_dbent
 	(krb5_context,
@@ -88,7 +88,7 @@ krb5_error_code krb5_adm_dbent_to_proto
 	 char *,
 	 krb5_int32 *,
 	 krb5_data **);
-#endif /* !(windows or macintosh) */
+#endif /* !windows */
 
 /* adm_kt_dec.c */
 krb5_error_code krb5_adm_proto_to_ktent

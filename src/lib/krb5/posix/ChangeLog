@@ -1,3 +1,8 @@
+2004-06-22  Ken Raeburn  <raeburn@mit.edu>
+
+	* getuid.c: Don't test __MWERKS__.
+	* syslog.c: Don't test macintosh.
+
 2004-06-16  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (MACSRCS): Don't set.

@@ -34,7 +34,7 @@
  * For MacOS, don't expose prototypes of various private functions.
  * Unfortuantely, they've leaked out everywhere else.
  */
-#if defined(macintosh) || (defined(__MACH__) && defined(__APPLE__))
+#if defined(__MACH__) && defined(__APPLE__)
 #	include <TargetConditionals.h>
 #	if TARGET_RT_MAC_CFM
 #		error "Use KfM 4.0 SDK headers for CFM compilation."
@@ -73,10 +73,6 @@
 KRBINT_BEGIN_DECLS
 
 #if TARGET_OS_MAC
-#	if defined(__MWERKS__)
-#		pragma import on
-#		pragma enumsalwaysint on
-#	endif
 #	pragma options align=mac68k
 #endif
 
@@ -783,9 +779,6 @@ long win_time_get_epoch(void);
 #endif
 
 #if TARGET_OS_MAC
-#	if defined(__MWERKS__)
-#		pragma import reset
-#	endif
 #	pragma options align=reset
 #endif
 

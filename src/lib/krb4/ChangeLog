@@ -1,3 +1,8 @@
+2004-06-22  Ken Raeburn  <raeburn@mit.edu>
+
+	* g_pw_in_tkt.c (passwd_to_key): Don't test macintosh.
+	* kadm_net.c (SIGNAL): Don't test macintosh.
+
 2004-06-16  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (check-mac): Target deleted.

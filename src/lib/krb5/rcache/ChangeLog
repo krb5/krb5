@@ -1,3 +1,8 @@
+2004-06-22  Ken Raeburn  <raeburn@mit.edu>
+
+	* rc_io.c (krb5_rc_io_move, krb5_rc_io_sync): Don't test
+	macintosh.
+
 2004-06-15  Ken Raeburn  <raeburn@mit.edu>
 
 	* rc_io.c (dir, dirlen): Top-level variables deleted.

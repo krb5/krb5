@@ -1,3 +1,12 @@
+2004-06-22  Ken Raeburn  <raeburn@mit.edu>
+
+	* an_to_ln.c (db_an_to_ln): Don't test macintosh.
+	* krbfileio.c (krb5_sync_disk_file): Likewise.
+	* kuserok.c: Likewise.
+	* prompter.c: Likewise.
+	* promptusr.c: Likewise.
+	* read_pwd.c: Likewise.
+
 2004-06-15  Ken Raeburn  <raeburn@mit.edu>
 
 	* c_ustime.c: Include k5-thread.h.

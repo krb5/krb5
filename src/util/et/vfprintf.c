@@ -18,7 +18,6 @@
 /* based on @(#)vfprintf.c	5.2 (Berkeley) 6/27/88 */
 
 #include <stdio.h>
-#if !defined(macintosh)
 #if defined(HAVE_STDARG_H) || defined(_WIN32)
 #include <stdarg.h>
 #else
@@ -49,4 +48,3 @@ vfprintf(iop, fmt, ap)
 
 	return (ferror(iop) ? EOF : len);
 }
-#endif

@@ -29,11 +29,7 @@
 #ifndef _GSS_MECHGLUE_H
 #define _GSS_MECHGLUE_H
 
-#if defined(__MWERKS__) || defined(applec) || defined(THINK_C)
-#include <gssapi.h>
-#else
 #include <gssapi/gssapi.h>
-#endif
 
 /********************************************************/
 /* GSSAPI Extension functions -- these functions aren't */

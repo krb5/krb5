@@ -1,3 +1,7 @@
+2004-06-22  Ken Raeburn  <raeburn@mit.edu>
+
+	* parse.c (krb5_parse_name): Don't test macintosh.
+
 2004-06-04  Ken Raeburn  <raeburn@mit.edu>
 
 	* str_conv.c (krb5_string_to_timestamp): Use localtime_r if

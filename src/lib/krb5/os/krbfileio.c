@@ -93,7 +93,7 @@ krb5_error_code
 krb5_sync_disk_file(krb5_context context, FILE *fp)
 {
     fflush(fp);
-#if !defined(MSDOS_FILESYSTEM) && !defined(macintosh)
+#if !defined(MSDOS_FILESYSTEM)
     if (fsync(fileno(fp))) {
         return errno;
     }

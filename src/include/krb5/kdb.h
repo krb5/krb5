@@ -84,7 +84,7 @@
 #define KRB5_KDB_CREATE_BTREE		0x00000001
 #define KRB5_KDB_CREATE_HASH		0x00000002
 
-#if !defined(macintosh) && !defined(_WIN32)
+#if !defined(_WIN32)
 
 /*
  * Note --- these structures cannot be modified without changing the
@@ -330,5 +330,5 @@ krb5_error_code krb5_ser_db_context_init (krb5_context);
  
 #define KRB5_KDB_DEF_FLAGS	0
 
-#endif /* !defined(macintosh) &&!defined(_WIN32) */
+#endif /* !defined(_WIN32) */
 #endif /* KRB5_KDB5__ */

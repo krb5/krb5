@@ -9,7 +9,7 @@
 #include <win-mac.h>
 #endif
 
-#if defined(macintosh) || (defined(__MACH__) && defined(__APPLE__))
+#if defined(__MACH__) && defined(__APPLE__)
 #    include <TargetConditionals.h>
 #    if TARGET_RT_MAC_CFM
 #        error "Use KfM 4.0 SDK headers for CFM compilation."
@@ -33,12 +33,6 @@ typedef struct _profile_t *profile_t;
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
-
-#if TARGET_OS_MAC
-#    if defined(__MWERKS__)
-#        pragma import on
-#    endif
-#endif
 
 typedef char* profile_filespec_t;	/* path as C string */
 typedef char* profile_filespec_list_t;	/* list of : separated paths, C string */
@@ -112,12 +106,6 @@ long KRB5_CALLCONV profile_rename_section
 long KRB5_CALLCONV profile_add_relation
 	(profile_t profile, const char **names, 
 		   const char *new_value);
-
-#if TARGET_OS_MAC
-#    if defined(__MWERKS__)
-#        pragma import reset
-#    endif
-#endif
 
 #ifdef __cplusplus
 }

@@ -1,3 +1,7 @@
+2004-06-22  Ken Raeburn  <raeburn@mit.edu>
+
+	* gssapi.hin: Don't test macintosh or __MWERKS__.
+
 2004-06-16  Ken Raeburn  <raeburn@mit.edu>
 
 	* util_validate.c (g_save): Call gssint_initialize_library.

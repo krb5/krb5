@@ -1089,42 +1089,7 @@ krb5_fcc_store_authdatum (krb5_context context, krb5_ccache id, krb5_authdata *a
 #ifdef USE_STDIO
 static FILE *my_fopen(char *path, char *mode)
 {
-#ifdef macintosh
-/*
- * Kludge for the Macintosh, since fopen doesn't set errno, but open
- * does...
- */
-        int     fd, open_flags;
-        FILE    *f;
-
-        f = fopen(path, mode);
-        if (f)
-                return f;
-        /*
-         * OK, fopen failed; let's try to figure out why....
-         */
-        if (strchr(mode, '+'))
-                open_flags = O_RDWR;
-        else if (strchr(mode, 'w') || strchr(mode, 'a'))
-                open_flags = O_WRONLY;
-        else
-                open_flags = O_RDONLY;
-        if (strchr(mode, 'a'))
-                open_flags  |= O_APPEND;
-
-        fd = open(path, open_flags);
-        if (fd == -1)
-                return NULL;
-        /*
-         * fopen failed, but open succeeded?   W*E*I*R*D.....
-         */
-        close(fd);
-        errno = KRB5_CC_IO;
-        
-        return NULL;
-#else
 	return fopen(path, mode);
-#endif
 }
 #endif
 

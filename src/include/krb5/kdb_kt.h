@@ -31,8 +31,6 @@
 #ifndef KRB5_KDB5_KT_H
 #define KRB5_KDB5_KT_H
 
-#if !defined(macintosh)
-
 #include "kdb.h"
 
 extern struct _krb5_kt_ops krb5_kt_kdb_ops;
@@ -41,5 +39,4 @@ krb5_error_code krb5_ktkdb_resolve (krb5_context, const char *, krb5_keytab *);
 
 krb5_error_code krb5_ktkdb_set_context(krb5_context);
 
-#endif /* !defined(macintosh) */
 #endif /* KRB5_KDB5_DBM__ */

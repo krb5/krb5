@@ -1,3 +1,7 @@
+2004-06-22  Ken Raeburn  <raeburn@mit.edu>
+
+	* vfprintf.c: Don't test macintosh.
+
 2004-06-18  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in ($(OUTPRE)test_et.exe): New target.

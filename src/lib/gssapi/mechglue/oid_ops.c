@@ -36,11 +36,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#ifndef macintosh
 #include <gssapi/gssapi_generic.h>
-#else
-#include <gssapi_generic.h>
-#endif
 #include <errno.h>
 #include <ctype.h>
 

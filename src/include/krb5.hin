@@ -65,7 +65,7 @@
 #define KRB5_PRIVATE 0
 #endif
 
-#if defined(macintosh) || (defined(__MACH__) && defined(__APPLE__))
+#if defined(__MACH__) && defined(__APPLE__)
 #	include <TargetConditionals.h>
 #    if TARGET_RT_MAC_CFM
 #	error "Use KfM 4.0 SDK headers for CFM compilation."
@@ -109,9 +109,6 @@
 KRB5INT_BEGIN_DECLS
 
 #if TARGET_OS_MAC
-#    if defined(__MWERKS__)
-#        pragma import on
-#    endif
 #    pragma options align=mac68k
 #endif
 
@@ -1831,7 +1828,6 @@ krb5_set_password_using_ccache
 			int *result_code, krb5_data *result_code_string, krb5_data *result_string);
 
 #if KRB5_PRIVATE
-#ifndef macintosh
 krb5_error_code krb5_set_config_files
 	(krb5_context, const char **);
 
@@ -1840,8 +1836,6 @@ krb5_error_code KRB5_CALLCONV krb5_get_default_config_files
 
 void KRB5_CALLCONV krb5_free_config_files
 	(char **filenames);
-
-#endif
 #endif
 
 krb5_error_code KRB5_CALLCONV
@@ -2530,9 +2524,6 @@ krb5_prompt_type* KRB5_CALLCONV krb5_get_prompt_types
 	(krb5_context context);
 
 #if TARGET_OS_MAC
-#    if defined(__MWERKS__)
-#        pragma import reset
-#    endif
 #    pragma options align=reset
 #endif
 

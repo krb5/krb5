@@ -27,7 +27,7 @@
  * Determine platform-dependent configuration.
  */
 
-#if defined(macintosh) || (defined(__MACH__) && defined(__APPLE__))
+#if defined(__MACH__) && defined(__APPLE__)
 #	include <TargetConditionals.h>
 #	if TARGET_RT_MAC_CFM
 #		error "Use KfM 4.0 SDK headers for CFM compilation."
@@ -39,9 +39,6 @@ extern "C" {
 #endif /* __cplusplus */
 
 #if TARGET_OS_MAC
-#	if defined(__MWERKS__)
-#		pragma import on
-#	endif
 #	pragma options align=mac68k
 #endif
 
@@ -780,9 +777,6 @@ OM_uint32 KRB5_CALLCONV gss_canonicalize_name
 	);
 
 #if TARGET_OS_MAC
-#  if defined(__MWERKS__)
-#    pragma import reset
-#  endif
 #  pragma options align=reset
 #endif
 

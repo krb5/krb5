@@ -69,7 +69,7 @@ passwd_to_key(user,instance,realm,passwd,key)
     char *user, *instance, *realm, *passwd;
     C_Block key;
 {
-#if defined(_WIN32) || defined(macintosh)
+#if defined(_WIN32)
     string_to_key(passwd, key);
 #else /* unix */
 #ifdef NOENCRYPTION

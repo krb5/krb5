@@ -45,7 +45,7 @@
 #include "prot.h"
 
 /* XXX FIXME! */
-#if defined(_WIN32) || defined(macintosh)
+#if defined(_WIN32)
 	#define SIGNAL(s, f) 0
 #else
 	#define SIGNAL(s, f) signal(s, f)

@@ -338,11 +338,7 @@ krb5_rc_io_move(krb5_context context, krb5_rc_iostuff *new1,
     new1->fn = NULL;		/* avoid clobbering */
     (void) krb5_rc_io_close(context, new1);
     new1->fn = fn;
-#ifdef macintosh
-    new1->fd = fcntl(old->fd, F_DUPFD);
-#else
     new1->fd = dup(old->fd);
-#endif
     return 0;
 #endif
 }
@@ -374,7 +370,6 @@ krb5_rc_io_sync(krb5_context context, krb5_rc_iostuff *d)
 #define fsync _commit
 #endif
 #endif
-#ifndef macintosh
     if (fsync(d->fd) == -1) {
 	switch(errno)
 	{
@@ -383,7 +378,6 @@ krb5_rc_io_sync(krb5_context context, krb5_rc_iostuff *d)
 	default: return KRB5_RC_IO_UNKNOWN;
 	}
     }
-#endif
     return 0;
 }
 

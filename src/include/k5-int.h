@@ -100,24 +100,6 @@
 #define ANSI_STDIO
 #endif
 
-/* Note, this may shoot us in the foot if we switch to CW compilers for Mach-o builds */
-#if !defined(macintosh) && (defined(__MWERKS__) || defined(applec) || defined(THINK_C))
-#define macintosh
-#endif
-
-#ifdef macintosh
-#define SIZEOF_INT 4
-#define SIZEOF_SHORT 2
-#define HAVE_SRAND
-#define NO_PASSWORD
-/*#define ENOMEM -1*/
-#define ANSI_STDIO
-#include <size_t.h>
-#include <unix.h>
-#include <ctype.h>
-#include <fcntl.h>
-#endif
-
 #ifndef KRB5_AUTOCONF__
 #define KRB5_AUTOCONF__
 #include "autoconf.h"
@@ -1674,10 +1656,6 @@ krb5int_make_srv_query_realm(const krb5_data *realm,
 			     const char *protocol,
 			     struct srv_dns_entry **answers);
 void krb5int_free_srv_dns_data(struct srv_dns_entry *);
-
-#if defined(macintosh) && defined(__CFM68K__) && !defined(__USING_STATIC_LIBS__)
-#pragma import reset
-#endif
 
 /*
  * Convenience function for structure magic number

@@ -347,10 +347,6 @@ static void output_quoted_string(char *str, FILE *f)
 #define EOL "\r\n"
 #endif
 
-#ifdef macintosh
-#define EOL "\r"
-#endif
-
 #ifndef EOL
 #define EOL "\n"
 #endif

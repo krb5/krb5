@@ -5,7 +5,7 @@
 #include <time.h>
 #include <stdio.h>
 
-#if defined(macintosh) || (defined(__MACH__) && defined(__APPLE__))
+#if defined(__MACH__) && defined(__APPLE__)
 #include <TargetConditionals.h>
 #define PROFILE_SUPPORTS_FOREIGN_NEWLINES
 #endif

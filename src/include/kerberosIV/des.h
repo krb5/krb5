@@ -26,7 +26,7 @@
  * Include file for the Data Encryption Standard library.
  */
 
-#if defined(macintosh) || (defined(__MACH__) && defined(__APPLE__))
+#if defined(__MACH__) && defined(__APPLE__)
 #	include <TargetConditionals.h>
 #	if TARGET_RT_MAC_CFM
 #		error "Use KfM 4.0 SDK headers for CFM compilation."
@@ -51,9 +51,6 @@
 KRBINT_BEGIN_DECLS
 
 #if TARGET_OS_MAC
-#	if defined(__MWERKS__)
-#		pragma import on
-#	endif
 #	pragma options align=mac68k
 #endif
 
@@ -87,10 +84,6 @@ typedef unsigned char des_cblock[8];	/* crypto-block size */
 typedef struct des_ks_struct {  DES_INT32 _[2]; } des_key_schedule[16];
 
 #if TARGET_OS_MAC
-#	if defined(__MWERKS__)
-#		pragma enumsalwaysint reset
-#		pragma import reset
-#	endif
 #	pragma options align=reset
 #endif
 
@@ -120,10 +113,6 @@ KRBINT_END_DECLS
 KRBINT_BEGIN_DECLS
 
 #if TARGET_OS_MAC
-#	if defined(__MWERKS__)
-#		pragma import on
-#		pragma enumsalwaysint on
-#	endif
 #	pragma options align=mac68k
 #endif
 
@@ -197,9 +186,6 @@ int des_is_weak_key(des_cblock);
 void des_cblock_print_file(des_cblock *, FILE *fp);
 
 #if TARGET_OS_MAC
-#	if defined(__MWERKS__)
-#		pragma import reset
-#	endif
 #	pragma options align=reset
 #endif
 

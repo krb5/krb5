@@ -57,8 +57,6 @@
 #ifndef KRB5_KDB5_DBC__
 #define KRB5_KDB5_DBC__
 
-#if !defined(macintosh)
-
 #include "kdb.h"
 	
 /* Per-database context. */
@@ -85,5 +83,4 @@ krb5_error_code krb5_dbm_db_set_mkey
 krb5_error_code krb5_dbm_db_get_mkey
         (krb5_context,krb5_db_context *,krb5_encrypt_block **);
 
-#endif /* !defined(macintosh) */
 #endif /* KRB5_KDB5_DBM__ */

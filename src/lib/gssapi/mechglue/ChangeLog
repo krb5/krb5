@@ -1,3 +1,8 @@
+2004-06-22  Ken Raeburn  <raeburn@mit.edu>
+
+	* g_initialize.c, oid_ops.c: Don't test macintosh.
+	* mechglue.h: Don't test __MWERKS__, applec, THINK_C.
+
 2004-06-16  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (all-mac, clean-mac): Targets deleted.

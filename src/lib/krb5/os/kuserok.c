@@ -28,7 +28,7 @@
  */
 
 #include "k5-int.h"
-#if !defined(_WIN32) && !defined(macintosh)    /* Not yet for Windows */
+#if !defined(_WIN32)		/* Not yet for Windows */
 #include <stdio.h>
 #include <pwd.h>
 
@@ -151,7 +151,7 @@ krb5_kuserok(krb5_context context, krb5_principal principal, const char *luser)
     return(isok);
 }
 
-#else /* _WIN32 || macintosh */
+#else /* _WIN32 */
 
 /*
  * If the given Kerberos name "server" translates to the same name as "luser"
@@ -173,4 +173,4 @@ krb5_kuserok(context, principal, luser)
 
     return FALSE;
 }
-#endif /* _WIN32 || macintosh */
+#endif /* _WIN32 */

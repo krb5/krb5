@@ -1,3 +1,7 @@
+2004-06-22  Ken Raeburn  <raeburn@mit.edu>
+
+	* adm_proto.h, kdb.h, kdb_dbc.h, kdb_kt.h: Don't test macintosh.
+
 2004-06-16  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (all-mac, clean-mac): Targets deleted.

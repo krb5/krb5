@@ -3,7 +3,7 @@
  */
 
 #include "k5-int.h"
-#if !defined(_WIN32) && !defined(macintosh)
+#if !defined(_WIN32)
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -157,4 +157,4 @@ main(int argc, char **argv)
 
 #endif
 	
-#endif /* !_MSODS || _!MACINTOSH */
+#endif /* !_MSODS */

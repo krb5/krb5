@@ -256,9 +256,6 @@ void dupK5toCC(krb5_context context, krb5_creds *creds, cred_union **cu)
     cc_creds *c;
     int err;
     krb5_int32 offset_seconds = 0, offset_microseconds = 0;
-#ifdef macintosh
-    char *tempname = NULL;
-#endif
 
     if (cu == NULL) return;
 
@@ -275,28 +272,8 @@ void dupK5toCC(krb5_context context, krb5_creds *creds, cred_union **cu)
     (*cu)->cred.pV5Cred = c;
 
     /* convert krb5 principals to flat principals */
-#ifdef macintosh
-    /*
-     * and make sure the memory for c->client and c->server is on
-     * the system heap with NewPtr for the Mac (krb5_unparse_name
-     * puts it in appl heap with malloc)
-     */
-    err = krb5_unparse_name(context, creds->client, &tempname);
-    c->client = malloc(strlen(tempname)+1);
-    if (c->client != NULL)
-	strcpy(c->client,tempname);
-    free(tempname);
-    tempname = NULL;
-
-    err = krb5_unparse_name(context, creds->server, &tempname);
-    c->server = malloc(strlen(tempname)+1);
-    if (c->server != NULL)
-	strcpy(c->server,tempname);
-    free(tempname);
-#else
     err = krb5_unparse_name(context, creds->client, &(c->client));
     err = krb5_unparse_name(context, creds->server, &(c->server));
-#endif
     if (err) return;
 
     /* copy more fields */

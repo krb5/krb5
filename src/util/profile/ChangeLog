@@ -1,3 +1,8 @@
+2004-06-22  Ken Raeburn  <raeburn@mit.edu>
+
+	* prof_int.h, prof_parse.c, profile.hin: Don't test macintosh or
+	__MWERKS__.
+
 2004-06-18  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (SHLIB_EXPLIBS): Add $(LIBS).

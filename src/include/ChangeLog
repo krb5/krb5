@@ -1,3 +1,7 @@
+2004-06-22  Ken Raeburn  <raeburn@mit.edu>
+
+	* k5-int.h: Don't test macintosh, __MWERKS__, applec, or THINK_C.
+
 2004-06-18  Ken Raeburn  <raeburn@mit.edu>
 
 	* k5-platform.h (MAKE_INIT_FUNCTION, CALL_INIT_FUNCTION,
