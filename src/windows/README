@@ -30,6 +30,10 @@ library and DNS_LIB to library itself.  The default is not to support
 DNS because the build cannot know whether there is a DNS resolver
 library around for it to use.
 
+Building ms2mit requires that you have a reasonably recent Microsoft
+Platform SDK installed.  Anything starting at the Windows 2000 edition
+should be fine.
+
 
 Traditional Build Method:
 ------------------------
