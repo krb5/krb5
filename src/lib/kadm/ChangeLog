@@ -1,4 +1,11 @@
 
+Tue May 16 10:35:54 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* t_dbentry.c, t_ktentry.c - new test modules for encode/decode
+		functions.  These convert to and from krb5_db_entry and
+		krb5_keytab_entry and verify contents.
+	* adm_kt_enc.c	- Fix bug encoding integer values.
+
+
 Tue May 9 15:21:49 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* adm_conn.c	- use profile information to locate the admin_server.
 			  Also, return the correct value from krb5_adm_connect
