@@ -304,6 +304,7 @@ connected:
 
     *sp = s;
     *sockinp = *(struct sockaddr_in *) ap->ai_addr;
+    *addrfamilyp = ap->ai_family;
     freeaddrinfo(ap2);
     return 0;
 }
