@@ -1,3 +1,12 @@
+2000-07-19  Danilo Almeida  <dalmeida@mit.edu>
+
+	* k5-int.h: Add krb5int_accessor() and related definitions.
+	krb5int_accessor should be used by any code that is trying to use
+	krb5 internal functions (such as krb524 and GSSAPI).  The goal is
+	to eventually make this function do nothing.  That will only be
+	accomplished when we fix our apps/libraries not to call internal
+	functions.
+
 2000-07-18  Ezra Peisach  <epeisach@mit.edu>
 
 	* k5-int.h: Move prototypes for krb5 only internal functions

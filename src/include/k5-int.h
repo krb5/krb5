@@ -1531,6 +1531,31 @@ int krb5_seteuid  KRB5_PROTOTYPE((int));
 /* to keep lint happy */
 #define krb5_xfree(val) free((char FAR *)(val))
 
+/* To keep happy libraries which are (for now) accessing internal stuff */
+
+/* Make sure to increment by one when changing the struct */
+#define KRB5INT_ACCESS_STRUCT_VERSION 1
+
+typedef struct _krb5int_access {
+    krb5_error_code (*krb5_locate_kdc)
+	PROTOTYPE((krb5_context,
+		   const krb5_data *,
+		   struct sockaddr **,
+		   int *,
+		   int));
+    int krb5_max_skdc_timeout;
+    int krb5_skdc_timeout_shift;
+    int krb5_skdc_timeout_1;
+    int krb5_max_dgram_size;
+} krb5int_access;
+
+#define KRB5INT_ACCESS_VERSION \
+    (((krb5_int32)((sizeof(krb5int_access) & 0xFFFF) | \
+		   (KRB5INT_ACCESS_STRUCT_VERSION << 16))) & 0xFFFFFFFF)
+
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5int_accessor
+	PROTOTYPE((krb5int_access*, krb5_int32));
+
 /* temporary -- this should be under lib/krb5/ccache somewhere */
 
 struct _krb5_ccache {
