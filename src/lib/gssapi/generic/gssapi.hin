@@ -28,11 +28,7 @@
  */
 
 #if defined(macintosh) || (defined(__MACH__) && defined(__APPLE__))
-	#include <KerberosSupport/KerberosSupport.h>
-	
-	#if TARGET_API_MAC_OS8 || (TARGET_API_MAC_CARBON && !TARGET_API_MAC_OSX)
-		#include <Kerberos5/win-mac.h>
-	#endif
+	#include <TargetConditionals.h>
 	
 	/* This is an API divergence in 1.2.3. This will be reconciled in 1.3, when
 	all platforms will have RFC-compliant OID declarations. */

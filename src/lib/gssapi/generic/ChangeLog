@@ -1,3 +1,7 @@
+2002-02-28 Alexandra Ellwood <lxs@mit.edu>
+    * disp_com_err_status.c, gssapi.hin, gssapi_generic.h: 
+    Updated Mac OS X headers to new framework layout
+
 2000-11-19  Alexandra Ellwood <lxs@mit.edu>
         * gssapi_generic.h: Fixed check for Mac OS X includes.
 
