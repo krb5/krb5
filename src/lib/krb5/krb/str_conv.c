@@ -136,7 +136,12 @@ krb5_salttype_to_string(salttype, buffer, buflen)
 static size_t strftime (char *, size_t, const char *, const struct tm *);
 #endif
 
-#ifndef HAVE_STRPTIME
+#ifdef HAVE_STRPTIME
+#ifdef NEED_STRPTIME_PROTOTYPE
+extern char *strptime (const char *, const char *,
+			    struct tm *);
+#endif
+#else /* HAVE_STRPTIME */
 #undef strptime
 #define strptime my_strptime
 static char *strptime (const char *, const char *, struct tm *);

@@ -1,3 +1,21 @@
+2000-07-18  Ezra Peisach  <epeisach@mit.edu>
+
+	* vfy_increds.c: include int-proto.h for krb5_libdefault_boolean
+	prototype.
+
+	* t_ser.c (ser_eblock_test): ifdef out old eblock serialization
+	test which is no longer called. (see 1999-09-01 ChangeLog)
+
+	* t_kerb.c: Cast argument to fprintf to long to agree with format
+	string.
+
+	* t_deltat.c: If MIN is defined, undef before redefined as 60.
+
+	* str_conv.c: Provide strptime prototype if the system header
+	files fail to provide a prototype.
+
+	* int-proto.h:  Add prototype for krb5_libdefault_boolean()
+
 2000-06-30  Tom Yu  <tlyu@mit.edu>
 
 	* conv_princ.c (krb5_425_conv_principal): NULL, not nil.

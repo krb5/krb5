@@ -37,5 +37,9 @@ krb5_error_code krb5_tgtname
 	           const krb5_data *,
 	           krb5_principal *));
 
+krb5_error_code krb5_libdefault_boolean
+        KRB5_PROTOTYPE((krb5_context, const krb5_data *, const char *,
+			int *));
+
 #endif /* KRB5_INT_FUNC_PROTO__ */
 

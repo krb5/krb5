@@ -1,4 +1,5 @@
 #include "k5-int.h"
+#include "int-proto.h"
 
 static krb5_error_code
 krb5_cc_copy_creds_except(context, incc, outcc, princ)

@@ -178,7 +178,7 @@ main(argc, argv)
     retval = krb5_init_context(&ctx);
     if (retval) {
 	fprintf(stderr, "krb5_init_context returned error %ld\n",
-		retval);
+		(long) retval);
 	exit(1);
     }
     progname = argv[0];

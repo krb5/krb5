@@ -512,6 +512,7 @@ ser_rcache_test(kcontext, verbose)
     return(kret);
 }
 
+#if 0
 /*
  * Serialize krb5_encrypt_block.
  */
@@ -563,6 +564,7 @@ ser_eblock_test(kcontext, verbose)
 	printf("* eblock test failed\n");
     return(kret);
 }
+#endif
 
 /*
  * Serialize krb5_principal

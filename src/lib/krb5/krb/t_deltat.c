@@ -38,6 +38,9 @@ main ()
 #define BAD(STR) { STR, 0, 1 }
 #define DAY (24 * 3600)
 #define HOUR 3600
+#ifdef MIN
+#undef MIN
+#endif
 #define MIN 60
     } values[] = {
 	/* d-h-m-s patterns */
