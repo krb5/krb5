@@ -165,7 +165,9 @@ void logwtmp(tty, locuser, host, loggingin)
     sprintf(utmp_id, "kr%s", tmpx);
     strncpy(ut.ut_id, utmp_id, sizeof(ut.ut_id));
 
+#ifndef NO_UT_TYPE
     ut.ut_type = (loggingin ? USER_PROCESS : DEAD_PROCESS);
+#endif
 #ifndef NO_UT_PID
     ut.ut_pid = (loggingin ? getpid() : 0);
 #endif

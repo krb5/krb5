@@ -36,6 +36,7 @@ AC_FUNC_CHECK(waitpid,AC_DEFINE(HAVE_WAITPID))
 AC_FUNC_CHECK(setsid,AC_DEFINE(HAVE_SETSID))
 AC_FUNC_CHECK(line_push,AC_DEFINE(HAVE_LINE_PUSH))
 AC_FUNC_CHECK(ptsname,AC_DEFINE(HAVE_PTSNAME))
+AC_FUNC_CHECK(grantpt,AC_DEFINE(HAVE_GRANTPT))
 AC_HAVE_HEADERS(sys/filio.h sys/sockio.h unistd.h stdlib.h sys/label.h sys/tty.h ttyent.h lastlog.h sys/select.h sys/ptyvar.h)
 AC_REPLACE_FUNCS(getdtablesize)
 CHECK_SIGNALS

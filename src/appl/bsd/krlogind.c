@@ -769,7 +769,9 @@ void doit(f, fromp)
 #ifndef NO_UT_PID
 	    ent.ut_pid = getpid();
 #endif
+#ifndef NO_UT_TYPE
 	    ent.ut_type = LOGIN_PROCESS;
+#endif
 	    update_utmp(&ent, "rlogin", line, ""/*host*/);
 	}
 #endif
@@ -1043,7 +1045,7 @@ krb5_sigtype cleanup()
 #ifndef NO_UT_PID
     ut.ut_pid = 0;
 #endif
-#ifdef HAVE_SETUTENT
+#ifndef NO_UT_TYPE
     ut.ut_type = DEAD_PROCESS;
 #endif
     update_utmp(&ut, "", line, (char *)0);
@@ -1374,20 +1376,14 @@ getpty(fd,slave)
 
 #ifdef HAVE_STREAMS
 
-#ifdef sun
-#define PTY_MASTER "/dev/ptmx"
-#endif
-#ifdef sysvimp
-#define PTY_MASTER "/dev/pty"
-#endif
-#ifndef PTY_MASTER
-#define PTY_MASTER "/dev/ptc"
-#endif
+    *fd = open("/dev/ptmx", O_RDWR|O_NDELAY);	/* Solaris, IRIX */
+    if (*fd < 0) *fd = open("/dev/ptc", O_RDWR|O_NDELAY); /* AIX */
+    if (*fd < 0) *fd = open("/dev/ptm", O_RDWR|O_NDELAY); /* OSF/1 */
+    if (*fd < 0) *fd = open("/dev/pty", O_RDWR|O_NDELAY); /* sysvimp */
 
-    *fd = open(PTY_MASTER, O_RDWR|O_NDELAY);
     if (*fd < 0) return 1;
 
-#ifdef sun
+#ifdef HAVE_GRANTPT
     if (grantpt(*fd) || unlockpt(*fd)) return 1;
 #endif
     
