@@ -1,3 +1,7 @@
+Sat Feb 22 00:54:06 1997  Sam Hartman  <hartmans@luminous.MIT.EDU>
+
+	* krlogin.c (mode): Clean up Posix terminal handling for NetBSD.
+
 Tue Feb 18 18:03:55 1997  Richard Basch  <basch@lehman.com>
 
 	* krcp.c: Replace krb5_xfree with krb5_free_data_contents

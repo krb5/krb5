@@ -1383,6 +1383,12 @@ mode(f)
 {
 #ifdef POSIX_TERMIOS
     struct termios newtty;
+#ifndef IEXTEN
+#define IEXTEN 0 /* No effect*/
+#endif
+#ifndef _POSIX_VDISABLE
+#define _POSIX_VDISABLE 0 /*A good guess at the disable-this-character character*/
+#endif
 
     switch(f) {
     case 0:
@@ -1398,10 +1404,10 @@ mode(f)
 	/* was __svr4__ */
 #ifdef VLNEXT
 	/* there's a POSIX way of doing this, but do we need it general? */
-	newtty.c_cc[VLNEXT] = 0;
+	newtty.c_cc[VLNEXT] = _POSIX_VDISABLE;
 #endif
 		
-	newtty.c_lflag &= ~(ICANON|ISIG|ECHO);
+	newtty.c_lflag &= ~(ICANON|ISIG|ECHO|IEXTEN);
 	newtty.c_iflag &= ~(ISTRIP|INLCR|ICRNL);
 
 	if (!flow) {
