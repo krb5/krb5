@@ -1,3 +1,8 @@
+Fri Apr 12 21:47:46 1996  Richard Basch  <basch@lehman.com>
+
+        * k5seal.c k5unseal.c:
+        Renamed MD5 routines to be preceded with krb5_
+
 Thu Apr 11 18:53:09 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* acquire_cred.c (acquire_init_cred): Return GSS_S_CRED_UNAVAIL on

@@ -49,7 +49,7 @@ kg_unseal(context, minor_status, context_handle, input_token_buffer,
    gss_buffer_desc token;
    unsigned char *ptr;
    krb5_checksum desmac;
-   MD5_CTX md5;
+   krb5_MD5_CTX md5;
    unsigned char *cksum;
    krb5_timestamp now;
    unsigned char *plain;
@@ -161,13 +161,13 @@ kg_unseal(context, minor_status, context_handle, input_token_buffer,
    if (signalg == 0) {
       /* compute the checksum of the message */
 
-      MD5Init(&md5);
-      MD5Update(&md5, (unsigned char *) ptr-2, 8);
+      krb5_MD5Init(&md5);
+      krb5_MD5Update(&md5, (unsigned char *) ptr-2, 8);
       if (ctx->big_endian)
-	 MD5Update(&md5, token.value, token.length);
+	 krb5_MD5Update(&md5, token.value, token.length);
       else
-	 MD5Update(&md5, plain, plainlen);
-      MD5Final(&md5);
+	 krb5_MD5Update(&md5, plain, plainlen);
+      krb5_MD5Final(&md5);
 
       if (sealalg == 0)
 	 xfree(plain);
@@ -199,14 +199,14 @@ kg_unseal(context, minor_status, context_handle, input_token_buffer,
 	 ctx->seed_init = 1;
       }
 
-      MD5Init(&md5);
-      MD5Update(&md5, ctx->seed, sizeof(ctx->seed));
-      MD5Update(&md5, (unsigned char *) ptr-2, 8);
+      krb5_MD5Init(&md5);
+      krb5_MD5Update(&md5, ctx->seed, sizeof(ctx->seed));
+      krb5_MD5Update(&md5, (unsigned char *) ptr-2, 8);
       if (ctx->big_endian)
-	 MD5Update(&md5, token.value, token.length);
+	 krb5_MD5Update(&md5, token.value, token.length);
       else
-	 MD5Update(&md5, plain, plainlen);
-      MD5Final(&md5);
+	 krb5_MD5Update(&md5, plain, plainlen);
+      krb5_MD5Final(&md5);
 
       if (sealalg == 0)
 	 xfree(plain);

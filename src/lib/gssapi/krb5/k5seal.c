@@ -38,7 +38,7 @@ make_seal_token(context, enc_ed, seq_ed, seqnum, direction, text, token,
      int bigend;
 {
    krb5_error_code code;
-   MD5_CTX md5;
+   krb5_MD5_CTX md5;
    krb5_checksum desmac;
    int tmsglen, tlen;
    unsigned char *t, *ptr;
@@ -125,22 +125,22 @@ make_seal_token(context, enc_ed, seq_ed, seqnum, direction, text, token,
 
       /* compute the checksum */
 
-      MD5Init(&md5);
-      MD5Update(&md5, (unsigned char *) ptr-2, 8);
+      krb5_MD5Init(&md5);
+      krb5_MD5Update(&md5, (unsigned char *) ptr-2, 8);
       if (bigend)
-	 MD5Update(&md5, text->value, text->length);
+	 krb5_MD5Update(&md5, text->value, text->length);
       else
-	 MD5Update(&md5, plain, tmsglen);
-      MD5Final(&md5);
+	 krb5_MD5Update(&md5, plain, tmsglen);
+      krb5_MD5Final(&md5);
 
       xfree(plain);
    } else {
       /* compute the checksum */
 
-      MD5Init(&md5);
-      MD5Update(&md5, (unsigned char *) ptr-2, 8);
-      MD5Update(&md5, text->value, text->length);
-      MD5Final(&md5);
+      krb5_MD5Init(&md5);
+      krb5_MD5Update(&md5, (unsigned char *) ptr-2, 8);
+      krb5_MD5Update(&md5, text->value, text->length);
+      krb5_MD5Final(&md5);
    }
 
    /* XXX this depends on the key being a single-des key, but that's
