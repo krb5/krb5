@@ -47,7 +47,7 @@ static void usage()
 {
      fprintf(stderr, "Usage: gss-client [-port port] [-mech mechanism] [-d]\n");
      fprintf(stderr, "       [-f] [-q] [-ccount count] [-mcount count]\n");
-     fprintf(stderr, "       [-na] [-nw] [-nx] [-nm] host service msg\n");
+     fprintf(stderr, "       [-v1] [-na] [-nw] [-nx] [-nm] host service msg\n");
      exit(1);
 }
 
@@ -128,13 +128,14 @@ static int connect_to_server(host, port)
  * unsuccessful, the GSS-API error messages are displayed on stderr
  * and -1 is returned.
  */
-static int client_establish_context(s, service_name, deleg_flag, auth_flag, 
-				    oid, gss_context, ret_flags)
+static int client_establish_context(s, service_name, deleg_flag, auth_flag,
+				    v1_format, oid, gss_context, ret_flags)
      int s;
      char *service_name;
      gss_OID oid;
      OM_uint32 deleg_flag;
      int auth_flag;
+     int v1_format;
      gss_ctx_id_t *gss_context;
      OM_uint32 *ret_flags;
 {
@@ -157,9 +158,11 @@ static int client_establish_context(s, service_name, deleg_flag, auth_flag,
 	 return -1;
        }
      
-       if (send_token(s, TOKEN_NOOP|TOKEN_CONTEXT_NEXT, empty_token) < 0) {
-	 (void) gss_release_name(&min_stat, &target_name);
-	 return -1;
+       if (!v1_format) {
+	 if (send_token(s, TOKEN_NOOP|TOKEN_CONTEXT_NEXT, empty_token) < 0) {
+	   (void) gss_release_name(&min_stat, &target_name);
+	   return -1;
+	 }
        }
 
        /*
@@ -205,7 +208,7 @@ static int client_establish_context(s, service_name, deleg_flag, auth_flag,
 	   if (verbose)
 	     printf("Sending init_sec_context token (size=%d)...",
 		    (int) send_tok.length);
-	   if (send_token(s, TOKEN_CONTEXT, &send_tok) < 0) {
+	   if (send_token(s, v1_format?0:TOKEN_CONTEXT, &send_tok) < 0) {
 	     (void) gss_release_buffer(&min_stat, &send_tok);
 	     (void) gss_release_name(&min_stat, &target_name);
 	     return -1;
@@ -318,7 +321,7 @@ static void read_file(file_name, in_buf)
  * verifies it with gss_verify.  -1 is returned if any step fails,
  * otherwise 0 is returned.  */
 static int call_server(host, port, oid, service_name, deleg_flag, auth_flag,
-		       wrap_flag, encrypt_flag, mic_flag, msg, use_file,
+		       wrap_flag, encrypt_flag, mic_flag, v1_format, msg, use_file,
 		       mcount)
      char *host;
      u_short port;
@@ -326,6 +329,7 @@ static int call_server(host, port, oid, service_name, deleg_flag, auth_flag,
      char *service_name;
      OM_uint32 deleg_flag;
      int auth_flag, wrap_flag, encrypt_flag, mic_flag;
+     int v1_format;
      char *msg;
      int use_file;
      int mcount;
@@ -354,7 +358,8 @@ static int call_server(host, port, oid, service_name, deleg_flag, auth_flag,
 
      /* Establish context */
      if (client_establish_context(s, service_name, deleg_flag, auth_flag,
-				  oid, &context, &ret_flags) < 0) {
+				  v1_format, oid, &context,
+				  &ret_flags) < 0) {
 	  (void) close(s);
 	  return -1;
      }
@@ -474,10 +479,11 @@ static int call_server(host, port, oid, service_name, deleg_flag, auth_flag,
        }
 
        /* Send to server */
-       if (send_token(s, (TOKEN_DATA |
+       if (send_token(s, (v1_format?0
+			  :(TOKEN_DATA |
 			  (wrap_flag ? TOKEN_WRAPPED : 0) |
 			  (encrypt_flag ? TOKEN_ENCRYPTED : 0) |
-			  (mic_flag ? TOKEN_SEND_MIC : 0)), &out_buf) < 0) {
+			  (mic_flag ? TOKEN_SEND_MIC : 0))), &out_buf) < 0) {
 	 (void) close(s);
 	 (void) gss_delete_sec_context(&min_stat, &context, GSS_C_NO_BUFFER);
 	 return -1;
@@ -518,6 +524,7 @@ static int call_server(host, port, oid, service_name, deleg_flag, auth_flag,
        free(in_buf.value);
 
      /* Send NOOP */
+     if (!v1_format)
      (void) send_token(s, TOKEN_NOOP, empty_token);
 
      if (auth_flag) {
@@ -578,10 +585,11 @@ int main(argc, argv)
      gss_OID oid = GSS_C_NULL_OID;
      int mcount = 1, ccount = 1;
      int i;
-     int auth_flag, wrap_flag, encrypt_flag, mic_flag;
+     int auth_flag, wrap_flag, encrypt_flag, mic_flag, v1_format;
 
      display_file = stdout;
      auth_flag = wrap_flag = encrypt_flag = mic_flag = 1;
+     v1_format = 0;
 
      /* Parse arguments. */
      argc--; argv++;
@@ -618,8 +626,10 @@ int main(argc, argv)
 	    encrypt_flag = 0;
 	  } else if (strcmp(*argv, "-nm") == 0) {
 	    mic_flag = 0;
-	  } else 
-	       break;
+	  } else  if (strcmp(*argv, "-v1") == 0) {
+	    v1_format = 1;
+	  } else
+	    break;
 	  argc--; argv++;
      }
      if (argc != 3)
@@ -635,7 +645,7 @@ int main(argc, argv)
      for (i = 0; i < ccount; i++) {
        if (call_server(server_host, port, oid, service_name,
 		       deleg_flag, auth_flag, wrap_flag, encrypt_flag, mic_flag,
-		       msg, use_file, mcount) < 0)
+		       v1_format, 		       msg, use_file, mcount) < 0)
 	 exit(1);
      }
 

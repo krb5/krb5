@@ -1,3 +1,11 @@
+2003-01-08  Sam Hartman  <hartmans@mit.edu>
+
+	* gss-misc.c (recv_token): Support reading 0 token flags as part of length
+
+	* gss-client.c :  Support a -v1 argument meaning that no token flags are used o,
+
+	* gss-misc.c (send_token): If token flags are null, do not send them.
+
 2002-12-30  Ken Raeburn  <raeburn@mit.edu>
 
 	* gss-misc.c (send_token, recv_token): Open-code the math to send

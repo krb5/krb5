@@ -51,6 +51,10 @@ times|
   
 	8. The client and server close the TCP/IP connection and
 	   destroy the GSS-API context.
+
+The client also supports the -v1 flag which uses an older exchange
+format compatible with previous releases of Kerberos and with samples
+shipped in the Microsoft SDK.
   
 The server's command line usage is
   
