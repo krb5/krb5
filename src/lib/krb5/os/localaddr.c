@@ -40,6 +40,12 @@
 #include <sys/time.h>
 #include <errno.h>
 #include <stddef.h>
+#include <ctype.h>
+
+#if defined(TEST) || defined(DEBUG)
+# define FAI_PREFIX krb5int
+# include "fake-addrinfo.h"
+#endif
 
 /*
  * The SIOCGIF* ioctls require a socket.
@@ -385,7 +391,7 @@ foreach_localaddr (/*@null@*/ void *data,
 	/* None of the current callers want loopback addresses.  */
 	if (ifreq.ifr_flags & IFF_LOOPBACK) {
 #ifdef TEST
-	    printf ("loopback\n");
+	    printf ("  loopback\n");
 #endif
 	    goto skip;
 	}
@@ -393,7 +399,7 @@ foreach_localaddr (/*@null@*/ void *data,
 	/* Ignore interfaces that are down.  */
 	if ((ifreq.ifr_flags & IFF_UP) == 0) {
 #ifdef TEST
-	    printf ("down\n");
+	    printf ("  down\n");
 #endif
 	    goto skip;
 	}
@@ -413,7 +419,7 @@ foreach_localaddr (/*@null@*/ void *data,
 			    (ifreq_size (*ifr)
 			     - offsetof (struct ifreq, ifr_addr.sa_data)))) {
 #ifdef TEST
-		printf ("duplicate addr\n");
+		printf ("  duplicate addr\n");
 #endif
 		goto skip;
 	    }
@@ -458,13 +464,12 @@ foreach_localaddr (/*@null@*/ void *data,
 static int print_addr (/*@unused@*/ void *dataptr, struct sockaddr *sa)
      /*@modifies fileSystem@*/
 {
-#ifdef HAVE_GETNAMEINFO
     char hostbuf[NI_MAXHOST];
     int err;
     socklen_t len;
     size_t len_sz;
 
-    printf ("family %2d ", sa->sa_family);
+    printf ("  --> family %2d ", sa->sa_family);
     len_sz = socklen (sa);
     len = (socklen_t) len_sz;
     if ((size_t) len != len_sz)
@@ -476,35 +481,6 @@ static int print_addr (/*@unused@*/ void *dataptr, struct sockaddr *sa)
     else
 	printf ("addr %s\n", hostbuf);
     return 0;
-#else
-#ifdef AF_INET6
-    char buf[50];
-#endif
-    printf ("family %2d ", sa->sa_family);
-    switch (sa->sa_family) {
-    case AF_INET:
-	printf ("addr %s\n",
-		inet_ntoa (((struct sockaddr_in *)sa)->sin_addr));
-	break;
-#ifdef AF_INET6
-    case AF_INET6:
-	printf ("addr %s\n",
-		inet_ntop (sa->sa_family,
-			   &((struct sockaddr_in6 *)sa)->sin6_addr,
-			   buf, sizeof (buf)));
-	break;
-#endif
-#ifdef AF_LINK
-    case AF_LINK:
-	printf ("linkaddr\n");
-	break;
-#endif
-    default:
-	printf ("don't know how to print addr\n");
-	break;
-    }
-    return 0;
-#endif
 }
 
 int main ()
@@ -520,7 +496,7 @@ int main ()
 #else /* not TESTing */
 
 struct localaddr_data {
-    int count, mem_err, cur_idx;
+    int count, mem_err, cur_idx, cur_size;
     krb5_address **addr_temp;
 };
 
@@ -551,15 +527,17 @@ allocate (void *P_data)
 {
     struct localaddr_data *data = P_data;
     int i;
+    void *n;
 
-    if (data->addr_temp != NULL)
-	free (data->addr_temp);
-    data->addr_temp = (krb5_address **) malloc ((1 + data->count) * sizeof (krb5_address *));
-    if (data->addr_temp == 0) {
+    n = realloc (data->addr_temp,
+		 (1 + data->count + data->cur_idx) * sizeof (krb5_address *));
+    if (n == 0) {
 	data->mem_err++;
 	return 1;
     }
-    for (i = 0; i <= data->count; i++)
+    data->addr_temp = n;
+    data->cur_size = 1 + data->count + data->cur_idx;
+    for (i = data->cur_idx; i <= data->count + data->cur_idx; i++)
 	data->addr_temp[i] = 0;
     return 0;
 }
@@ -652,6 +630,91 @@ add_addr (void *P_data, struct sockaddr *a)
     return data->mem_err;
 }
 
+static krb5_error_code
+krb5_os_localaddr_profile (krb5_context context, struct localaddr_data *datap)
+{
+    krb5_error_code err;
+    static const char *const profile_name[] = {
+	"libdefaults", "extra_addresses", 0
+    };
+    char **values;
+    char **iter;
+    krb5_address **newaddrs;
+
+#ifdef DEBUG
+    fprintf (stderr, "looking up extra_addresses foo\n");
+#endif
+
+    err = profile_get_values (context->profile, profile_name, &values);
+    /* Ignore all errors for now?  */
+    if (err)
+	return 0;
+
+    for (iter = values; *iter; iter++) {
+	char *cp = *iter, *next, *this;
+	int i, count;
+
+#ifdef DEBUG
+	fprintf (stderr, "  found line: '%s'\n", cp);
+#endif
+
+	for (cp = *iter, next = 0; *cp; cp = next) {
+	    while (isspace (*cp) || *cp == ',')
+		cp++;
+	    if (*cp == 0)
+		break;
+	    /* Start of an address.  */
+#ifdef DEBUG
+	    fprintf (stderr, "    addr found in '%s'\n", cp);
+#endif
+	    this = cp;
+	    while (*cp != 0 && !isspace(*cp) && *cp != ',')
+		cp++;
+	    if (*cp != 0) {
+		next = cp + 1;
+		*cp = 0;
+	    } else
+		next = cp;
+	    /* Got a single address, process it.  */
+#ifdef DEBUG
+	    fprintf (stderr, "    processing '%s'\n", this);
+#endif
+	    newaddrs = 0;
+	    err = krb5_os_hostaddr (context, this, &newaddrs);
+	    if (err)
+		continue;
+	    for (i = 0; newaddrs[i]; i++) {
+#ifdef DEBUG
+		fprintf (stderr, "    %d: family %d", i,
+			 newaddrs[i]->addrtype);
+		fprintf (stderr, "\n");
+#endif
+	    }
+	    count = i;
+#ifdef DEBUG
+	    fprintf (stderr, "    %d addresses\n", count);
+#endif
+	    if (datap->cur_idx + count >= datap->cur_size) {
+		krb5_address **bigger;
+		bigger = realloc (datap->addr_temp,
+				  sizeof (krb5_address *) * (datap->cur_idx + count));
+		if (bigger) {
+		    datap->addr_temp = bigger;
+		    datap->cur_size = datap->cur_idx + count;
+		}
+	    }
+	    for (i = 0; i < count; i++) {
+		if (datap->cur_idx < datap->cur_size)
+		    datap->addr_temp[datap->cur_idx++] = newaddrs[i];
+		else
+		    free (newaddrs[i]->contents), free (newaddrs[i]);
+	    }
+	    free (newaddrs);
+	}
+    }
+    return 0;
+}
+
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_os_localaddr(context, addr)
     krb5_context context;
@@ -659,6 +722,10 @@ krb5_os_localaddr(context, addr)
 {
     struct localaddr_data data = { 0 };
     int r;
+    krb5_error_code err;
+
+    err = krb5_os_localaddr_profile (context, &data);
+    /* ignore err for now */
 
     r = foreach_localaddr (&data, count_addrs, allocate, add_addr);
     if (r != 0) {
@@ -690,6 +757,61 @@ krb5_os_localaddr(context, addr)
 	       be intact.  */
 	    *addr = data.addr_temp;
     }
+
+#ifdef DEBUG
+    {
+	int j;
+	fprintf (stderr, "addresses:\n");
+	for (j = 0; addr[0][j]; j++) {
+	    struct sockaddr_storage ss;
+	    int err2;
+	    char namebuf[NI_MAXHOST];
+	    void *addrp = 0;
+
+	    fprintf (stderr, "%2d: ", j);
+	    fprintf (stderr, "addrtype %2d, length %2d", addr[0][j]->addrtype,
+		     addr[0][j]->length);
+	    memset (&ss, 0, sizeof (ss));
+	    switch (addr[0][j]->addrtype) {
+	    case ADDRTYPE_INET:
+	    {
+		struct sockaddr_in *sinp = ss2sin (&ss);
+		sinp->sin_family = AF_INET;
+		addrp = &sinp->sin_addr;
+#ifdef HAVE_SA_LEN
+		sinp->sin_len = sizeof (struct sockaddr_in);
+#endif
+		break;
+	    }
+#ifdef KRB5_USE_INET6
+	    case ADDRTYPE_INET6:
+	    {
+		struct sockaddr_in6 *sin6p = ss2sin6 (&ss);
+		sin6p->sin6_family = AF_INET6;
+		addrp = &sin6p->sin6_addr;
+#ifdef HAVE_SA_LEN
+		sin6p->sin6_len = sizeof (struct sockaddr_in6);
+#endif
+		break;
+	    }
+#endif
+	    default:
+		ss2sa(&ss)->sa_family = 0;
+		break;
+	    }
+	    if (addrp)
+		memcpy (addrp, addr[0][j]->contents, addr[0][j]->length);
+	    err2 = getnameinfo (ss2sa(&ss), socklen (ss2sa (&ss)),
+				namebuf, sizeof (namebuf), 0, 0,
+				NI_NUMERICHOST);
+	    if (err2 == 0)
+		fprintf (stderr, ": addr %s\n", namebuf);
+	    else
+		fprintf (stderr, ": getnameinfo error %d\n", err2);
+	}
+    }
+#endif
+
     return 0;
 }
 

@@ -1,5 +1,20 @@
 2001-08-01  Ken Raeburn  <raeburn@mit.edu>
 
+	* localaddr.c: Include ctype.h.
+	[TEST || DEBUG]: Defined FAI_PREFIX and include fake-addrinfo.h.
+	(foreach_localaddr) [TEST]: Change whitespace in some debug
+	messages.
+	(print_addr) [TEST]: Delete non-getnameinfo version of code.
+	Change some messages.
+	(struct localaddr_data): New field CUR_SIZE.
+	(allocate): Grow existing storage, if already allocated.
+	(krb5_os_localaddr_profile): New function.  Looks up
+	"extra_addresses" in "libdefaults" section, separates on
+	whitespace, looks up addresses, adds them to the list.
+	(krb5_os_localaddr): Call krb5_os_localaddr_profile first; ignore
+	any errors it reports.
+	(krb5_os_localaddr) [DEBUG]: More debugging code.
+
 	* hostaddr.c (krb5_os_hostaddr): Only retry non-numeric lookup
 	after numeric lookup if AI_NUMERICHOST is nonzero.
 
