@@ -453,8 +453,8 @@ proc setup_kerberos_files { } {
     # Create krb.realms file
     if ![file exists tmpdir/krb.realms] {
 	set conffile [open tmpdir/krb.realms w]
-	puts $conffile ".$domain = $REALMNAME"
-	puts $conffile "$domain = $REALMNAME"
+	puts $conffile ".[string toupper $domain] $REALMNAME"
+	puts $conffile "[string toupper $domain]. $REALMNAME"
 	close $conffile
     }
 
