@@ -1,3 +1,8 @@
+Wed Oct 22 15:40:34 1997  Ezra Peisach  <epeisach@dumpster.rose.brandeis.edu>
+
+	* test.c, tcl_ovsec_kadm.c, tcl_krb5_hash.c, tcl_kadm5.c: Include
+	 	either tcl.h or tcl/tcl.h
+
 Mon Mar 31 17:43:06 1997  Barry Jaspan  <bjaspan@mit.edu>
 
 	* Makefile.in: be more verbose if Tcl is unavailable

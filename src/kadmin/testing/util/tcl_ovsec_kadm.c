@@ -1,6 +1,10 @@
 #include <stdio.h>
 #include <string.h>
+#if HAVE_TCL_H
 #include <tcl.h>
+#elif HAVE_TCL_TCL_H
+#include <tcl/tcl.h>
+#endif
 #define USE_KADM5_API_VERSION 1
 #include <kadm5/admin.h>
 #include <com_err.h>

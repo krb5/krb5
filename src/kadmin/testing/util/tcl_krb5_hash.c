@@ -30,7 +30,11 @@
  * been freed by the caller).
  */
 
+#if HAVE_TCL_H
 #include <tcl.h>
+#elif HAVE_TCL_TCL_H
+#include <tcl/tcl.h>
+#endif
 #include <assert.h>
 
 #define SEP_STR "$"

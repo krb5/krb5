@@ -26,7 +26,11 @@
 
 #include "k5-int.h"
 #include "kdb5_edit.h"
+#ifdef HAVE_TCL_H
 #include <tcl.h>
+#elif defined(HAVE_TCL_TCL_H)
+#include <tcl/tcl.h>
+#endif
 
 #define CMDDECL(x) int x(clientData, interp, argc, argv)\
     ClientData clientData;\

@@ -1,3 +1,7 @@
+Wed Oct 22 15:39:38 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* tcl_wrapper.c: Include either tcl.h or tcl/tcl.h
+
 Fri Jul 25 15:46:24 1997  Tom Yu  <tlyu@mit.edu>
 
 	* loadv4.c:
