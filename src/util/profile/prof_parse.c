@@ -130,6 +130,10 @@ static errcode_t parse_std_line(line, state)
 			profile_make_node_final(state->current_section);
 			cp++;
 		}
+		/*
+		 * A space after ']' should not be fatal 
+		 */
+		cp = skip_over_blanks(cp);
 		if (*cp)
 			return PROF_SECTION_SYNTAX;
 		return 0;
@@ -169,7 +173,7 @@ static errcode_t parse_std_line(line, state)
 	} else if (value[0] == 0) {
 		do_subsection++;
 		state->state = STATE_GET_OBRACE;
-	} else if (value[0] == '{' && value[1] == 0) 
+	} else if (value[0] == '{' && *(skip_over_blanks(value+1)) == 0)
 		do_subsection++;
 	else {
 		cp = value + strlen(value) - 1;
