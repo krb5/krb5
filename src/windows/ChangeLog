@@ -1,3 +1,8 @@
+1999-09-15  Danilo Almeida  <dalmeida@mit.edu>
+
+	* README: Add documentation about configuration under windows and
+	krbcc32.dll.
+
 1999-09-09  Danilo Almeida  <dalmeida@mit.edu>
 
 	* README: Explicitly say that we support only Win32 and not Win16.

@@ -72,15 +72,57 @@ Running Kerberos 5 Apps:
 Make sure you have a valid krb5.ini file.  That will look just like a
 Unix krb5.conf file.  You can place this file in the same directory as
 your krb5_32.dll or in your Windows directory.  You should then be
-able to run the applications that are built.
+able to run the applications that are built.  Note that Kerberos 5
+will not look for the krb5.ini file in your path.
+
+
+Krb5.ini File:
+-------------
+
+WARNING: Despite its name, this is not a Windows .ini file.
+Therefore, do not try to use any .ini tools, including the Windows API
+or any installer tools to manipulate this file.  Its format is subtly
+different from Windows .ini files!
+
+
+Controlling the Kerberos 5 Run-Time Environment:
+-----------------------------------------------
+
+The Kerberos 5 configuration file and credentials cache can be
+controlled with environment variables and registry settings.  The
+environment variable for a particular setting always takes precedence.
+Next in precedence comes the setting in the registry under
+HKEY_CURRENT_USER\Software\MIT\Kerberos5.  Then comes the registry
+setting under HKEY_LOCAL_MACHINE\Software\MIT\Kerberos5.  If none of
+those are found, a default value is used.
+
+Configuration File:
+- Environment: KRB5_CONFIG
+- Registry Value: config
+- Default: looks in krb5_32.dll's dir and Windows directory
+
+Default Credentials Cache:
+- Environment: KRB5CCNAME
+- Registry Value: ccname
+- Default: API:krb5cc or FILE:%TEMP%\krb5cc or FILE:<windows dir>\krb5cc
+
+
+Credentials Cache:
+-----------------
+
+In addition to standard FILE: (disk file) and MEMORY: (in-process
+non-shared memory) Windows supports the API: cache type, which is a
+shared memory cache.  This is implemented by krbcc32.dll, which is not
+included the the krb5-only distribution.  Rather, it is part of MIT's
+Kerberos for Win32 suite.
 
 
 Othes Issues:
 ------------
 
 The krb4_32.dll that is built (but not installed) is not supported.
-If you need Kerberos 4, you can use the krbv4w32.dll that MIT puts
-out.
+If you need Kerberos 4, you can use the krbv4w32.dll that MIT
+distributes as part of the MIT Kerberos for Win32 distribution.
 
 
 More Information:
