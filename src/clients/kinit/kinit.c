@@ -45,6 +45,8 @@ static char rcsid_kinit_c [] =
 extern int optind;
 extern char *optarg;
 
+static time_t convtime();
+
 krb5_error_code
 krb5_parse_lifetime (time, len)
     char *time;
@@ -190,6 +192,10 @@ main(argc, argv)
 					 ccache,
 					 &my_creds);
     krb5_free_principal(server);
+    if (code == KRB5KRB_AP_ERR_BAD_INTEGRITY) {
+	fprintf (stderr, "%s: Password incorrect\n", argv[0]);
+	exit(1);
+    }
     if (code != 0) {
 	com_err (argv[0], code, "while getting initial credentials");
 	exit(1);
@@ -219,7 +225,9 @@ main(argc, argv)
  * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-time_t
+#include <ctype.h>			/* for isdigit */
+
+static time_t
 convtime(p)
         char *p;
 {
