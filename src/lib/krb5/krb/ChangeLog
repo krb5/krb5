@@ -1,3 +1,9 @@
+2005-02-09  Tom Yu  <tlyu@mit.edu>
+
+	* gic_pwd.c (krb5_get_init_creds_password): Fix so empty password
+	string causes prompting and doesn't cause truncation of password
+	to zero characters.
+
 2005-01-28  Ezra Peisach  <epeisach@mit.edu>
 
 	* t_walk_rtree.c (main): Free context at end to allow searching
