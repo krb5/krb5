@@ -4,6 +4,9 @@
 	data into krb5_context and free up the newly allocated OS
 	context.
 
+	* chpw.c (krb5int_rd_chpw_rep): Allow new kpasswd error codes up
+	through _INITIAL_FLAG_NEEDED.
+
 2003-05-13  Sam Hartman  <hartmans@mit.edu>
 
 	* fwd_tgt.c (krb5_fwd_tgt_creds): Try with no specified enctype if
