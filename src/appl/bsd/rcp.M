@@ -23,13 +23,13 @@
 rcp \- remote file copy
 .SH SYNOPSIS
 .B rcp
-[\fB\-p\fP] [\fB\-x\fP | \fB\-\-encrypt\fP] [\fB\-k\fP \fIrealm\fP ]
-[\fB\-D\fP \fIport\fP] [\fB\-N\fP]
+[\fB\-p\fP] [\fB\-x\fP] [\fB\-k\fP \fIrealm\fP ] [\fB\-D\fP \fIport\fP]
+[\fB\-N\fP]
 .I file1 file2
 .sp
 .B rcp
-[\fB\-p\fB] [\fB\-x\fP | \fB\-\-encrypt\fP] [\fP\-k\fP \fIrealm\fP]
-[\fB\-r\fP] [\fB\-D\fP \fIport\fP] [\fB\-N\fP]
+[\fB\-p\fB] [\fB\-x\fP] [\fP\-k\fP \fIrealm\fP] [\fB\-r\fP] [\fB\-D\fP
+\fIport\fP] [\fB\-N\fP]
 .I file ... directory
 .SH DESCRIPTION
 .B Rcp
@@ -81,7 +81,7 @@ attempt to preserve (duplicate) the modification times and modes of the
 source files in the copies, ignoring the
 .IR umask .
 .TP
-\fB\-x\fP | \fB\-\-encrypt\fP
+\fB\-x\fP
 encrypt all information transferring between hosts.
 .TP
 \fB\-k\fP \fIrealm\fP
@@ -109,44 +109,14 @@ the current machine.  Hostnames may also take the form ``rname@rhost''
 to use
 .I rname
 rather than the current user name on the remote host.
-.SH CONFIGURATION
-The following defaults may be specified in the [appdefaults] or [realms]
-section of the
-.IR krb5.conf (5)
-file:
-.TP "\w'.B encrypt\ \ 'u"
-.B encrypt
-Whether or not to encrypt the data stream.  Takes a boolean argument.
-.PP
-For example:
-.sp
-.nf
-.in +1i
-[appdefaults]
-    rcp = {
-        encrypt = true
-    }
-[realms]
-    FUBAR.ORG = {
-        rcp = {
-            encrypt = false
-        }
-    }
-.in -1i
-.fi
-.sp
 .SH FILES
-.TP "\w'/etc/krb5.conf\ \ 'u"
-/etc/krb5.conf
-file containing local host's Kerberos V5 configuration information
-.sp -1v
-.TP
+.TP "\w'~/.k5login\ \ 'u"
 ~/.k5login
 (on remote host) - file containing Kerberos principals that are allowed
 access.
 .SH SEE ALSO
-cp(1), ftp(1), rsh(1), rlogin(1), kerberos(3), krb_getrealm(3),
-krb5.conf(5), rcp(1) [UCB version]
+cp(1), ftp(1), rsh(1), rlogin(1), kerberos(3), krb_getrealm(3), rcp(1)
+[UCB version]
 .SH BUGS
 .B Rcp
 doesn't detect all cases where the target of a copy might be a file in

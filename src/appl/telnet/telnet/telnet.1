@@ -37,12 +37,11 @@
 telnet \- user interface to the TELNET protocol
 .SH SYNOPSIS
 .B telnet
-[\fB\-8\fP] [\fB\-E\fP] [\fB\-F\fP] [\fB\-K\fP | \fB\-\-noautologin\fP]
-[\fB\-L\fP] [\fB\-S\fP \fItos\fP] [\fB\-X\fP \fIauthtype\fP] [\fB\-a\fP
-| \fB\-\-autologin\fP] [\fB\-c\fP] [\fB\-d\fP] [\fB\-e\fP
-\fIescapechar\fP] [\fB\-f\fP] [\fB\-k\fP \fIrealm\fP] [\fB\-l\fP
-\fIuser\fP] [\fB\-n\fP \fItracefile\fP] [\fB\-r\fP] [\fB\-x\fP |
-\fB\-\-encrypt\fP] [\fB\-\-noencrypt\fP] [\fIhost\fP [\fIport\fP]]
+[\fB\-8\fP] [\fB\-E\fP] [\fB\-F\fP] [\fB\-K\fP] [\fB\-L\fP] [\fB\-S\fP
+\fItos\fP] [\fB\-X\fP \fIauthtype\fP] [\fB\-a\fP] [\fB\-c\fP]
+[\fB\-d\fP] [\fB\-e\fP \fIescapechar\fP] [\fB\-f\fP] [\fB\-k\fP
+\fIrealm\fP] [\fB\-l\fP \fIuser\fP] [\fB\-n\fP \fItracefile\fP]
+[\fB\-r\fP] [\fB\-x\fP] [\fIhost\fP [\fIport\fP]]
 .SH DESCRIPTION
 The 
 .B telnet
@@ -68,18 +67,12 @@ option on both input and output.
 .B \-E
 Stop any character from being recognized as an escape character.
 .TP
-\fB\-F\fP | \fB\-\-forwardable\fP
+\fB\-F\fP
 forward a
 .I forwardable
 copy of the local credentials to the remote system.
 .TP
-.B \-\-noforwardable
-make any forwarded tickets non-forwardable.  This is useful for
-overriding the application defaults in the host's
-.IR krb5.conf (5)
-file.
-.TP
-\fB\-K\fP | \fB\-\-noautologin\fP
+\fB\-K\fP
 Specify no automatic login to the remote system.
 .TP
 .B \-L
@@ -98,7 +91,7 @@ Disable the
 .I atype
 type of authentication.
 .TP
-\fB\-a\fP | \fB\-\-autologin\fP
+\fB\-a\fP
 Attempt automatic login.  This sends the user name via the
 .SM USER
 variable of the
@@ -130,14 +123,8 @@ If
 .I escape char
 is omitted, then there will be no escape character.
 .TP
-\fB\-f\fP | \fB\-\-forward\fP
+\fB\-f\fP
 forward a copy of the local credentials to the remote system.
-.TP
-.B \-\-noforward
-disable ticket forwarding.  This is useful for overriding the
-application defaults in the host's
-.IR krb5.conf (5)
-file.
 .TP
 \fB\-k\fP \fIrealm\fP
 If Kerberos authentication is being used, request that telnet obtain
@@ -174,14 +161,8 @@ unless modified by the
 .B \-e
 option.
 .TP
-\fB\-x\fP | \fB\-\-encrypt\fP
+\fB\-x\fP
 Turn on encryption of the data stream.
-.TP
-.B \-\-noencrypt
-disable encryption.  This is useful for overriding the application
-defaults in the host's
-.IR krb5.conf (5)
-file.
 .TP
 .I host
 Indicates the name, alias, or Internet address of the remote host.
@@ -1328,51 +1309,8 @@ environment variables.  Other environment variables may be propagated to
 the other side via the
 .SM TELNET ENVIRON
 option.
-.SH CONFIGURATION
-The following defaults may be specified in the [appdefaults] or [realms]
-section of the
-.IR krb5.conf (5)
-file:
-.TP "\w'.B forwardable\ \ 'u"
-.B forward
-Whether or not to forward tickets to the remote host.  Takes a boolean
-argument.
-.TP
-.B forwardable
-Whether or not any forwarded tickets should be forwardable.  Takes a
-boolean argument.
-.TP
-.B encrypt
-Whether or not to encrypt the data stream.  Takes a boolean argument.
-.TP
-.B autologin
-Whether or not to attempt automatic login.  Takes a boolean argument.
-.PP
-For example:
-.sp
-.nf
-.in +1i
-[appdefaults]
-    telnet = {
-        forwardable = true
-        forward = true
-        encrypt = true
-        autologin = true
-    }
-[realms]
-    FUBAR.ORG = {
-        telnet = {
-            forward = false
-        }
-    }
-.in -1i
-.fi
-.sp
 .SH FILES
-.TP "\w'/etc/krb5.conf\ \ 'u"
-/etc/krb5.conf
-file containing local host's Kerberos V5 configuration information
-.sp -1v
+.TP "\w'~/.telnetrc\ \ 'u"
 .TP
 ~/.telnetrc
 user-customized telnet startup values

@@ -24,12 +24,10 @@ rlogin \- remote login
 .SH SYNOPSIS
 .B rlogin
 .I rhost
-[\fB\-e\fP\fI\|c\fP] [\fB\-8\fP] [\fB\-c\fP] [ \fB\-a\fP] [\fB\-f\fP |
-\fB\-\-forward\fP] [\fB\-\-noforward\fP] [\fB\-F\fP |
-\fB\-\-forwardable\fP] [\fB\-\-noforwardable\fP] [\fB\-t\fP
-\fItermtype\fP] [\fB\-n\fP] [\fB\-7\fP] [\fB\-d\fP] [\fB\-k\fP
-\fIrealm\fP] [\fB\-x\fP | \fB\-\-encrypt\fP] [\fB\-\-noencrypt\fP]
-[\fB\-\-noflow\fP] [\fB\-L\fP] [\fB\-l\fP \fIusername\fP]
+[\fB\-e\fP\fI\|c\fP] [\fB\-8\fP] [\fB\-c\fP] [ \fB\-a\fP] [\fB\-f\fP]
+[\fB\-F\fP] [\fB\-t\fP \fItermtype\fP] [\fB\-n\fP] [\fB\-7\fP]
+[\fB\-d\fP] [\fB\-k\fP \fIrealm\fP] [\fB\-x\fP] [\fB\-L\fP] [\fB\-l\fP
+\fIusername\fP]
 .PP
 .SH DESCRIPTION
 .I Rlogin
@@ -103,25 +101,13 @@ force the remote machine to ask for a password by sending a null local
 username.  This option has no effect unless the standard UCB rlogin is
 executed in place of the Kerberos rlogin (see above).
 .TP
-\fB\-f\fP | \fB\-\-forward\fP
+\fB\-f\fP
 forward a copy of the local credentials to the remote system.
 .TP
-.B \-\-noforward
-disables ticket forwarding.  This is useful for overriding the
-application defaults in the host's
-.IR krb5.conf (5)
-file.
-.TP
-\fB\-F\fP | \fB\-\-forwardable\fP
+\fB\-F\fP
 forward a
 .I forwardable
 copy of the local credentials to the remote system.
-.TP
-.B \-\-noforwardable
-makes any forwarded tickets non-forwardable.  This is useful for
-overriding the application defaults in the host's
-.IR krb5.conf (5)
-file.
 .TP
 \fB\-t\fP \fItermtype\fP
 replace the terminal type passed to the remote host with
@@ -138,71 +124,21 @@ turn on socket debugging (via
 .IR setsockopt (2))
 on the TCP sockets used for communication with the remote host.
 .TP
-.B \-\-noflow
-force transmission of flow control characters (^S/^Q) to the remote
-system.
-.TP
 .B \-k
 request rlogin to obtain tickets for the remote host in realm
 .I realm
 instead of the remote host's realm as determined by 
 .IR krb_realmofhost (3).
 .TP
-\fB\-x\fP | \fB\-\-encrypt\fP
+\fB\-x\fP
 turn on DES encryption for all data passed via the rlogin session.  This
 significantly reduces response time and significantly increases CPU
 utilization.
-.TP
-.B \-\-noencrypt
-disables encryption.  This is useful for overriding the application
-defaults in the host's
-.IR krb5.conf (5)
-file.
-.SH CONFIGURATION
-The following defaults may be specified in the [appdefaults] or [realms]
-section of the
-.IR krb5.conf (5)
-file:
-.TP "\w'.B forwardable\ \ 'u"
-.B forwardable
-Whether or not any forwarded tickets should be forwardable.  Takes a
-boolean argument.
-.TP
-.B forward
-Whether or not to forward tickets to the remote host.  Takes a boolean
-argument.
-.TP
-.B encrypt
-Whether or not to encrypt the data stream.  Takes a boolean argument.
-.PP
-For example:
-.sp
-.nf
-.in +1i
-[appdefaults]
-    rlogin = {
-        forwardable = true
-        forward = true
-        encrypt = true
-    }
-[realms]
-    FUBAR.ORG = {
-        rlogin = {
-            forward = false
-        }
-    }
-.in -1i
-.fi
-.sp
 .SH SEE ALSO
-rsh(1), kerberos(3), krb_sendauth(3), krb_realmofhost(3),
-krb5.conf(5), rlogin(1) [UCB version]
+rsh(1), kerberos(3), krb_sendauth(3), krb_realmofhost(3), rlogin(1) [UCB
+version]
 .SH FILES
-.TP "\w'/etc/krb5.conf\ \ 'u"
-/etc/krb5.conf
-file containing local host's Kerberos V5 configuration information
-.sp -1v
-.TP
+.TP "\w'~/\&.k5login\ \ 'u"
 ~/\&.k5login
 (on remote host) - file containing Kerberos principals that are allowed
 access.

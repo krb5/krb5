@@ -25,9 +25,7 @@ rsh \- remote shell
 .B rsh
 .I host
 [\fB\-l\fP \fIusername\fP] [\fB\-n\fP] [\fB\-d\fP] [\fB\-k\fP
-\fIrealm\fP] [\fB\-f\fP | \fB\-\-forward\fP | \fB\-F\fP |
-\fB\-\-forwardable\fP] [\fB\-\-noforward\fP] [\fB\-\-noforwardable\fP]
-[\fB\-x\fP | \fB\-\-encrypt\fP] [\fB\-\-noencrypt\fP] [\fB\-\-noflow\fP]
+\fIrealm\fP] [\fB\-f\fP | \fB\-F\fP] [\fB\-x\fP]
 .I command
 .SH DESCRIPTION
 .B Rsh
@@ -62,37 +60,21 @@ sets the remote username to
 .IR username .
 Otherwise, the remote username will be the same as the local username.
 .TP
-\fB\-x\fP | \fB\-\-encrypt\fP
+\fB\-x\fP
 causes the network session traffic to be encrypted.
 .TP
-.B \-\-noencrypt
-disables encryption.  This is useful for overriding the application
-defaults in the host's
-.IR krb5.conf (5)
-file.
-.TP
-\fB\-f\fP | \fB\-\-forward\fP
-The
-.B \-f
-and
-.B \-\-forward
-options cause Kerberos credentials to be forwarded to the remote machine
-for use by the specified
+\fB\-f\fP
+cause nonforwardable Kerberos credentials to be forwarded to the remote
+machine for use by the specified
 .IR command .
 They will be removed when
 .I command
 finishes.  This option is mutually exclusive with the
 .B \-F
-or
-.B \-\-forwardable
-options.
+option.
 .TP
-\fB\-F\fP | \fB\-\-forwardable\fP
-The
-.B \-F
-and
-.B \-\-forwardable
-options cause
+\fB\-F\fP
+cause
 .I forwardable
 Kerberos credentials to be forwarded to the remote machine for use by
 the specified
@@ -101,23 +83,9 @@ They will be removed when
 .I command
 finishes.  This option is mutually exclusive with the
 .B \-f
-or
-.B \-\-forward
-options.
+option.
 .TP
-.B \-\-noforward
-disables ticket forwarding.  This is useful for overriding the
-application defaults in the host's
-.IR krb5.conf (5)
-file.
-.TP
-.B \-\-noforwardable
-makes any forwarded tickets non-forwardable.  This is useful for
-overriding the application defaults in the host's
-.IR krb5.conf (5)
-file.
-.TP
-\fB\-k\fP\fIrealm\fP
+\fB\-k\fP \fIrealm\fP
 causes 
 .I rsh
 to obtain tickets for the remote host in
@@ -134,14 +102,6 @@ on the TCP sockets used for communication with the remote host.
 redirects input from the special device
 .I /dev/null
 (see the BUGS section below).
-.TP
-.B \-\-noflow
-If
-.B rsh
-causes you to be logged into the remote host using
-.IR rlogin (1),
-this option passes the \-\-noflow option to
-.IR rlogin .
 .PP
 If you omit
 .IR command ,
@@ -167,57 +127,16 @@ appends
 .I remotefile
 to
 .IR otherremotefile .
-.SH CONFIGURATION
-The following defaults may be specified in the [appdefaults] or [realms]
-section of the
-.IR krb5.conf (5)
-file:
-.TP "\w'.B forwardable\ \ 'u"
-.B forwardable
-Whether or not any forwarded tickets should be forwardable.  Takes a
-boolean argument.
-.TP
-.B forward
-Whether or not to forward tickets to the remote host.  Takes a boolean
-argument.
-.TP
-.B encrypt
-Whether or not to encrypt the data stream.  Takes a boolean argument.
-.PP
-For example:
-.sp
-.nf
-.in +1i
-[appdefaults]
-    rsh = {
-        forwardable = true
-        forward = true
-        encrypt = true
-    }
-[realms]
-    FUBAR.ORG = {
-        rsh = {
-            forward = false
-        }
-    }
-.in -1i
-.fi
-.sp
 .SH FILES
-.TP "\w'/etc/krb5.conf\ \ 'u"
+.TP "\w'~/.k5login\ \ 'u"
 /etc/hosts
-.sp -1v
-.TP
-/etc/krb5.conf
-file containing local host's Kerberos V5 configuration information
 .sp -1v
 .TP
 ~/\&.k5login
 (on remote host) - file containing Kerberos principals that are allowed
 access.
 .SH SEE ALSO
-rlogin(1), kerberos(3), krb_sendauth(3), krb_realmofhost(3),
-krb5.conf(5)
+rlogin(1), kerberos(3), krb_sendauth(3), krb_realmofhost(3)
 .SH BUGS
 If you are using
 .IR csh (1)
