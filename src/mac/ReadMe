@@ -13,7 +13,7 @@ To Build the Macintosh version of Kerberos 5 and GSS:
 
 	4) Launch MPW
 
-	5) Set directory in MPW to the top level of Kerberos 5 distribution ("GSS-Kerberos v5 1.0.5")
+	5) Set directory in MPW to the top level of Kerberos 5 distribution ("GSS-Kerberos5-1.0.5")
 
 	6) Execute "perl :mac:macfile_gen.pl" in MPW
 
