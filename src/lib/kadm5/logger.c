@@ -60,19 +60,19 @@
 #define	LOG_ERR		0
 #endif	/* LOG_ERR */
 
-static const char lspec_parse_err_1[] =	"%s: cannot parse <%s>\n";
-static const char lspec_parse_err_2[] =	"%s: warning - logging entry syntax error\n";
-static const char log_file_err[] =	"%s: error writing to %s\n";
-static const char log_device_err[] =	"%s: error writing to %s device\n";
-static const char log_ufo_string[] =	"???";
-static const char log_emerg_string[] =	"EMERGENCY";
-static const char log_alert_string[] =	"ALERT";
-static const char log_crit_string[] =	"CRITICAL";
-static const char log_err_string[] =	"Error";
-static const char log_warning_string[] =	"Warning";
-static const char log_notice_string[] =	"Notice";
-static const char log_info_string[] =	"info";
-static const char log_debug_string[] =	"debug";
+#define lspec_parse_err_1	"%s: cannot parse <%s>\n"
+#define lspec_parse_err_2	"%s: warning - logging entry syntax error\n"
+#define log_file_err		"%s: error writing to %s\n"
+#define log_device_err		"%s: error writing to %s device\n"
+#define log_ufo_string		"???"
+#define log_emerg_string	"EMERGENCY"
+#define log_alert_string	"ALERT"
+#define log_crit_string		"CRITICAL"
+#define log_err_string		"Error"
+#define log_warning_string	"Warning"
+#define log_notice_string	"Notice"
+#define log_info_string		"info"
+#define log_debug_string	"debug"
 
 /*
  * Output logging.
@@ -318,7 +318,7 @@ klog_com_err_proc(whoami, code, format, ap)
 		    log_control.log_entries[lindex].lsu_severity;
 					       
 	    /* Log the message with our header trimmed off */
-	    syslog(log_pri, syslogp);
+	    syslog(log_pri, "%s", syslogp);
 	    break;
 #endif /* HAVE_SYSLOG */
 	default:
@@ -853,8 +853,8 @@ klog_vsyslog(priority, format, arglist)
     cp += 15;
 #endif	/* HAVE_STRFTIME */
 #ifdef VERBOSE_LOGS
-    sprintf(cp, " %s %s[%d](%s): ", 
-	    log_control.log_hostname, log_control.log_whoami, getpid(),
+    sprintf(cp, " %s %s[%ld](%s): ",
+	    log_control.log_hostname, log_control.log_whoami, (long) getpid(),
 	    severity2string(priority));
 #else
     sprintf(cp, " ");
@@ -910,7 +910,7 @@ klog_vsyslog(priority, format, arglist)
 	     */
 					       
 	    /* Log the message with our header trimmed off */
-	    syslog(priority, syslogp);
+	    syslog(priority, "%s", syslogp);
 	    break;
 #endif /* HAVE_SYSLOG */
 	default:
