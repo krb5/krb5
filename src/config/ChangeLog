@@ -24,6 +24,10 @@
 	corresponding.
 	(depend-verify-srcdir): New target, split out from .d rules.
 	(.d): Depend on depend-verify-{et,ss,db,srcdir}.
+	(depend-verify-gcc, depend-verify-gcc-yes, depend-verify-gcc-no):
+	Report an error if not using gcc.
+	(depfix2.sed): Depend on depend-verify-gcc.  Supply libgcc file
+	name as fifth input field to depgen.sed.
 
 	* pre.in (DB_DEPLIB-k5, DB_DEPLIB-sys, DB_DEPS-sys, DB_DEPS-k5,
 	DB_DEPS-redirect): New variables.

@@ -27,6 +27,12 @@ depend-verify-db-k5:
 depend-verify-db-sys:
 	@echo 1>&2 error: cannot build dependencies using system db package
 	@exit 1
+depend-verify-gcc: depend-verify-gcc-@HAVE_GCC@
+depend-verify-gcc-yes:
+depend-verify-gcc-no:
+	@echo 1>&2 error: The '"depend"' rules are written for gcc.
+	@echo 1>&2 Please use gcc, or update the rules to handle your compiler.
+	@exit 1
 
 .d: $(ALL_DEP_SRCS) depend-verify-srcdir depend-verify-et depend-verify-ss depend-verify-db
 	if test "$(ALL_DEP_SRCS)" != " " ; then \
@@ -39,8 +45,9 @@ depend-verify-db-sys:
 # Generate a script for dropping in the appropriate make variables, using
 # directory-specific parameters.  General substitutions independent of local
 # make variables happen in depfix.sed.
-depfix2.sed: Makefile $(SRCTOP)/util/depgen.sed
-	echo '$(SRCTOP)' '$(myfulldir)' '$(srcdir)' '$(BUILDTOP)' | sed -f $(SRCTOP)/util/depgen.sed > depfix2.tmp
+depfix2.sed: depend-verify-gcc Makefile $(SRCTOP)/util/depgen.sed
+	x=`$(CC) -print-libgcc-file-name` ; \
+	echo '$(SRCTOP)' '$(myfulldir)' '$(srcdir)' '$(BUILDTOP)' "$$x" | sed -f $(SRCTOP)/util/depgen.sed > depfix2.tmp
 	mv -f depfix2.tmp depfix2.sed
 
 DEPLIBOBJNAMEFIX = sed -e 's;^\$$(OUTPRE)\([a-zA-Z0-9_\-]*\)\.\$$(OBJEXT):;\1.so \1.po &;'

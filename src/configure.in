@@ -14,21 +14,7 @@ eval `sed 's/#define \([A-Z0-9_]*\)[ \t]*\(.*\)/\1=\2/' < $srcdir/patchlevel.h`
 KRB5_VERSION="$KRB5_MAJOR_RELEASE.$KRB5_MINOR_RELEASE.$KRB5_PATCHLEVEL"
 AC_SUBST(KRB5_VERSION)
 dnl
-dnl This causes us to *always* set CPP, instead of doing it below only
-dnl when krb5_cv_prog_gcc isn't set.
 AC_REQUIRE_CPP
-dnl
-dnl
-dnl We cannot use the autoconf form as it is too generic and sets other
-dnl variables. This is only for the purpose of changing the link options.
-AC_MSG_CHECKING(whether we are using GNU C)
-AC_CACHE_VAL(krb5_cv_prog_gcc,
-[
-AC_EGREP_CPP(yes,[#ifdef __GNUC__
-yes;
-#endif],krb5_cv_prog_gcc=yes,krb5_cv_prog_gcc=no)
-])dnl
-AC_MSG_RESULT($krb5_cv_prog_gcc)
 dnl
 dnl The following lines are so that configure --help gives some global 
 dnl configuration options.
@@ -69,13 +55,6 @@ KRB5_BUILD_LIBOBJS
 KRB5_BUILD_LIBRARY
 KRB5_BUILD_PROGRAM
 dnl
-dnl For util/makeshlib.
-dnl
-if test $krb5_cv_prog_gcc = yes ; then
-     HAVE_GCC=yes
-     else HAVE_GCC=
-fi
-AC_SUBST(HAVE_GCC)
 HOST_TYPE=$krb5_cv_host
 AC_SUBST(HOST_TYPE)
 dnl

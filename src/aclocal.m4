@@ -444,6 +444,12 @@ AC_REQUIRE([KRB5_AC_CHECK_FOR_CFLAGS])
 AC_ARG_WITH([cc],AC_HELP_STRING(--with-cc=COMPILER,deprecated; use CC=...),
 	    AC_MSG_ERROR(option --with-cc is deprecated; use CC=...))
 AC_PROG_CC
+krb5_cv_prog_gcc=$ac_cv_c_compiler_gnu
+if test $ac_cv_c_compiler_gnu = yes ; then
+     HAVE_GCC=yes
+     else HAVE_GCC=
+fi
+AC_SUBST(HAVE_GCC)
 # maybe add -Waggregate-return, or can we assume that actually works by now?
 # -Wno-comment is for SunOS system header <sys/stream.h>
 extra_gcc_warn_opts="-Wall -Wmissing-prototypes -Wcast-qual \

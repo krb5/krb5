@@ -1,5 +1,10 @@
 2002-09-13  Ken Raeburn  <raeburn@mit.edu>
 
+	* aclocale.m4 (WITH_CC): Substitute @HAVE_GCC@.  Set
+	krb5_cv_prog_gcc from ac_cv_compiler_gnu.
+	* configure.in: Don't explicitly set HAVE_GCC or test for gcc
+	here.
+
 	* aclocal.m4 (KRB5_AC_CHOOSE_DB): New macro.
 	(CONFIG_RULES): Invoke it.
 	(KRB5_LIB_PARAMS): Don't substitute LIB_LINK_OPT.
