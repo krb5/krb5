@@ -384,8 +384,7 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
    ctx->mech_used = mech_used;
    ctx->auth_context = auth_context;
    ctx->initiate = 0;
-   ctx->gss_flags = GSS_C_CONF_FLAG | GSS_C_INTEG_FLAG |
-	(gss_flags & (GSS_C_MUTUAL_FLAG | GSS_C_DELEG_FLAG));
+   ctx->gss_flags = KG_IMPLFLAGS(gss_flags);
    ctx->seed_init = 0;
    ctx->big_endian = bigend;
 
@@ -510,8 +509,8 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
    }
 
    g_order_init(&(ctx->seqstate), ctx->seq_recv,
-		(gss_flags & GSS_C_REPLAY_FLAG) != 0,
-		(gss_flags & GSS_C_SEQUENCE_FLAG) != 0);
+		(ctx->gss_flags & GSS_C_REPLAY_FLAG) != 0,
+		(ctx->gss_flags & GSS_C_SEQUENCE_FLAG) != 0);
 
    /* at this point, the entire context structure is filled in, 
       so it can be released.  */
@@ -568,7 +567,7 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
       *time_rec = ctx->endtime - now;
 
    if (ret_flags)
-      *ret_flags = KG_IMPLFLAGS(gss_flags);
+      *ret_flags = ctx->gss_flags;
 
    ctx->established = 1;
 
