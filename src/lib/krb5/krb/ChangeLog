@@ -1,3 +1,9 @@
+Thu Sep 28 22:58:53 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* conv_princ.c (krb5_425_conv_principal): Only convert instances
+		which don't have a '.' in them.  If they have a '.',
+		assume that they are fully qualified already.
+
 Thu Sep 28 12:00:00 1995  John Rivlin <jrivlin@fusion.com)
 
 	* gc_via_tkt.c: Cleaned up corrupt ticket error testing to 

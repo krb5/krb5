@@ -196,7 +196,7 @@ krb5_425_conv_principal(context, name, instance, realm, princ)
 	       p++;
 	  }
 	  name = p->v5_str;
-	  if (p->flags & DO_REALM_CONVERSION) {
+	  if ((p->flags & DO_REALM_CONVERSION) && !strchr(instance, '.')) {
 	      names[0] = "realms";
 	      names[1] = realm;
 	      names[2] = "v4_instance_convert";
