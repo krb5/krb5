@@ -1,3 +1,7 @@
+2003-01-03  Ezra Peisach  <epeisach@bu.edu>
+
+	* fake-addrinfo.h (freeaddrinfo): Do not free a NULL pointer.
+
 2002-12-19  Ken Raeburn  <raeburn@mit.edu>
 
 	* krb5.hin (krb5_encrypt, krb5_decrypt, krb5_use_enctype,
