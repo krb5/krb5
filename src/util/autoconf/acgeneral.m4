@@ -1282,7 +1282,7 @@ ifelse([$6], , , [  ac_prog_rejected=no
 dnl $ac_dummy forces splitting on constant user-supplied paths.
 dnl POSIX.2 word splitting is done only on the output of word expansions,
 dnl not every word.  This closes a longstanding sh security hole.
-  ac_dummy=ifelse([$5], , $PATH, [$5])
+  ac_dummy="ifelse([$5], , $PATH, [$5])"
   for ac_dir in $ac_dummy; do
     test -z "$ac_dir" && ac_dir=.
     if test -f $ac_dir/$ac_word; then
@@ -1347,7 +1347,7 @@ AC_CACHE_VAL(ac_cv_path_$1,
 dnl $ac_dummy forces splitting on constant user-supplied paths.
 dnl POSIX.2 word splitting is done only on the output of word expansions,
 dnl not every word.  This closes a longstanding sh security hole.
-  ac_dummy=ifelse([$4], , $PATH, [$4])
+  ac_dummy="ifelse([$4], , $PATH, [$4])"
   for ac_dir in $ac_dummy; do
     test -z "$ac_dir" && ac_dir=.
     if test -f $ac_dir/$ac_word; then

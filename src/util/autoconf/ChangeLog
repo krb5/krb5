@@ -1,3 +1,8 @@
+Thu Jun 19 22:30:06 1997  Tom Yu  <tlyu@mit.edu>
+
+	* acgeneral.m4 (AC_CHECK_PROG, AC_PATH_PROG): Fix bug in previous
+	patch; add double quotes to protect things.
+
 Wed Jun 18 16:13:11 1997  Tom Yu  <tlyu@mit.edu>
 
 	* acgeneral.m4 (AC_CHECK_PROG, AC_PATH_PROG): Assign the path to
