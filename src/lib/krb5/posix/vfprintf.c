@@ -25,7 +25,7 @@ static char sccsid[] = "@(#)vfprintf.c	5.2 (Berkeley) 6/27/88";
 int
 vfprintf(iop, fmt, ap)
 	FILE *iop;
-	char *fmt;
+	const char *fmt;
 	va_list ap;
 {
 	int len;
