@@ -7,5 +7,6 @@ AC_PROG_RANLIB
 MAKE_SUBDIRS("making",all)
 MAKE_SUBDIRS("cleaning",clean)
 AppendRule([all:: libgssapi_krb5.a])
+WITH_CCOPTS
 CONFIG_RULES
 AC_OUTPUT(Makefile,[EXTRA_RULES])

@@ -3,5 +3,6 @@ AC_SET_BUILDTOP
 CONFIG_DIRS(h compat psap pepsy support)
 MAKE_SUBDIRS("making",all)
 MAKE_SUBDIRS("cleaning",clean)
+WITH_CCOPTS
 CONFIG_RULES
 AC_OUTPUT(Makefile,[EXTRA_RULES])
