@@ -1704,6 +1704,7 @@ typedef struct _krb5int_access {
 					    const char *protocol,
 					    struct srv_dns_entry **answers);
     void (*free_srv_dns_data)(struct srv_dns_entry *);
+    int (*use_dns_kdc)(krb5_context);
 
     /* krb4 compatibility stuff -- may be null if not enabled */
     krb5_int32 (*krb_life_to_time)(krb5_int32, int);

@@ -1,6 +1,7 @@
 2004-12-08  Ken Raeburn  <raeburn@mit.edu>
 
 	* k5-int.h (KRB5INT_ACCESS_STRUCT_VERSION): Bump to 9.
+	(struct _krb5int_access): Add function pointer field use_dns_kdc.
 
 2004-12-06  Ken Raeburn  <raeburn@mit.edu>
 
