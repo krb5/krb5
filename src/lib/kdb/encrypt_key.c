@@ -44,14 +44,15 @@ krb5_error_code
 krb5_kdb_encrypt_key(eblock, in, out)
 krb5_encrypt_block *eblock;
 const krb5_keyblock *in;
-krb5_encrypted_keyblock *out;
+register krb5_encrypted_keyblock *out;
 {
-    /* encrypted rep has the real (unencrypted) key length stored
-       along with the encrypted key */
+    /* Encrypted rep has the real (unencrypted) key length stored
+       along with the encrypted key.  The length is stored as a 4
+       byte integer, MSB first.  */
 
     krb5_error_code retval;
     krb5_keyblock tmpin;
-    int length;
+    unsigned int length;
 
     out->keytype = in->keytype;
     out->length = krb5_encrypt_size(in->length, eblock->crypto_entry);
@@ -64,14 +65,7 @@ krb5_encrypted_keyblock *out;
 	out->length = 0;
 	return ENOMEM;
     }
-    /* Convert length from MSB first to host byte order for the encryption
-       routine.  Assumes sizeof (int) is 4. */
-    length = ((((unsigned char*)in->contents)[0] << 24) + 
-	      (((unsigned char*)in->contents)[1] << 16) + 
-	      (((unsigned char*)in->contents)[2] << 8) + 
-	      ((unsigned char*)in->contents)[3]);
-    memcpy((char *)tmpin.contents, (const char *)&length, 4);
-    memcpy((char *)tmpin.contents + 4, (const char *)in->contents + 4, tmpin.length);
+    memcpy((char *)tmpin.contents, (const char *)in->contents, tmpin.length);
 
     out->length += sizeof(out->length);
     out->contents = (krb5_octet *)malloc(out->length);
@@ -81,13 +75,15 @@ krb5_encrypted_keyblock *out;
 	out->length = 0;
 	return ENOMEM;
     }
-    /* copy in real length */
-    memcpy((char *)out->contents, (const char *)&tmpin.length,
-	   sizeof(out->length));
-    /* and arrange for encrypted key */
+
+    length = tmpin.length;
+    ((char *)out->contents)[0] = length >> 24;
+    ((char *)out->contents)[1] = length >> 16;
+    ((char *)out->contents)[2] = length >> 8;
+    ((char *)out->contents)[3] = length;
+    
     retval = krb5_encrypt((krb5_pointer) tmpin.contents,
-			  (krb5_pointer) (((char *) out->contents) +
-					  sizeof(out->length)),
+			  (krb5_pointer) ((char *) out->contents + 4),
 			  tmpin.length, eblock, 0);
     xfree(tmpin.contents);
     if (retval) {
@@ -95,5 +91,6 @@ krb5_encrypted_keyblock *out;
 	out->contents = 0;
 	out->length = 0;
     }
+
     return retval;
 }
