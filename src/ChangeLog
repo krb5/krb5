@@ -1,3 +1,8 @@
+2003-03-05  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (WINMAKEFILES): Add lib\crypto\aes\Makefile.
+	(lib\crypto\aes\Makefile) [##DOS##]: New target.
+
 2003-03-03  Tom Yu  <tlyu@mit.edu>
 
 	* krb5-config.in (lib_flags): Prune out CFLAGS.

@@ -147,7 +147,7 @@ WINMAKEFILES=Makefile \
 	lib\crypto\raw\Makefile lib\crypto\old\Makefile \
 	lib\crypto\sha1\Makefile lib\crypto\arcfour\Makefile \
 	lib\crypto\md4\Makefile lib\crypto\md5\Makefile \
-	lib\crypto\yarrow\Makefile \
+	lib\crypto\yarrow\Makefile lib\crypto\aes\Makefile \
 	lib\des425\Makefile \
 	lib\gssapi\Makefile lib\gssapi\generic\Makefile \
 	lib\gssapi\krb5\Makefile lib\gssapi\mechglue\Makefile \
@@ -218,6 +218,8 @@ WINMAKEFILES=Makefile \
 ##DOS##lib\crypto\md5\Makefile: lib\crypto\md5\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##lib\crypto\yarrow\Makefile: lib\crypto\yarrow\Makefile.in $(MKFDEP)
+##DOS##	$(WCONFIG) config < $@.in > $@
+##DOS##lib\crypto\aes\Makefile: lib\crypto\aes\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##lib\crypto\old\Makefile: lib\crypto\old\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
