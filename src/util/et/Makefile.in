@@ -61,10 +61,12 @@ SHLIB_LIBS=
 SHLIB_LDFLAGS= $(LDFLAGS) @SHLIB_RPATH_DIRS@	
 SHLIB_LIBDIRS= @SHLIB_LIBDIRS@
 
+COM_ERR_HDR=$(BUILDTOP)$(S)include$(S)com_err.h
 
-all-windows:: $(OBJFILE)
-	copy com_err.h $(BUILDTOP)\include
+all-windows:: $(COM_ERR_HDR)
 
+$(COM_ERR_HDR): com_err.h
+	$(CP) com_err.h $@
 
 error_table.c: et_lex.lex.c 
 error_table.c: $(srcdir)/error_table.y
@@ -145,7 +147,7 @@ clean-files::
 		eddep makedep *.ln
 
 clean-windows::
-	$(RM) $(OUTPRE)comerr.lib comerr.bak
+	$(RM) $(COM_ERR_HDR)
 
 com_err.ps : com_err.dvi
 com_err.dvi: com_err.texinfo

@@ -140,108 +140,108 @@ clean::
 all-windows::
 	cd crc32
 	@echo Making in crypto\crc32
-	-$(MAKE) -$(MFLAGS)
+	$(MAKE) -$(MFLAGS)
 	cd ..\des
 	@echo Making in crypto\des
-	-$(MAKE) -$(MFLAGS)
+	$(MAKE) -$(MFLAGS)
 	cd ..\dk
 	@echo Making in crypto\dk
-	-$(MAKE) -$(MFLAGS)
+	$(MAKE) -$(MFLAGS)
 	cd ..\enc_provider
 	@echo Making in crypto\enc_provider
-	-$(MAKE) -$(MFLAGS)
+	$(MAKE) -$(MFLAGS)
 	cd ..\hash_provider
 	@echo Making in crypto\hash_provider
-	-$(MAKE) -$(MFLAGS)
+	$(MAKE) -$(MFLAGS)
 	cd ..\keyhash_provider
 	@echo Making in crypto\keyhash_provider
-	-$(MAKE) -$(MFLAGS)
+	$(MAKE) -$(MFLAGS)
 	cd ..\md4
 	@echo Making in crypto\md4
-	-$(MAKE) -$(MFLAGS)
+	$(MAKE) -$(MFLAGS)
 	cd ..\md5
 	@echo Making in crypto\md5
-	-$(MAKE) -$(MFLAGS)
+	$(MAKE) -$(MFLAGS)
 	cd ..\old
 	@echo Making in crypto\old
-	-$(MAKE) -$(MFLAGS)
+	$(MAKE) -$(MFLAGS)
 	cd ..\raw
 	@echo Making in crypto\raw
-	-$(MAKE) -$(MFLAGS)
+	$(MAKE) -$(MFLAGS)
 	cd ..\sha1
 	@echo Making in crypto\sha1
-	-$(MAKE) -$(MFLAGS)
+	$(MAKE) -$(MFLAGS)
 	cd ..
 
 clean-windows::
 	cd crc32
 	@echo Making in clean crypto\crc32
-	-$(MAKE) -$(MFLAGS) clean
+	$(MAKE) -$(MFLAGS) clean
 	cd ..\des
 	@echo Making clean in crypto\des
-	-$(MAKE) -$(MFLAGS) clean
+	$(MAKE) -$(MFLAGS) clean
 	cd ..\dk
 	@echo Making clean in crypto\dk
-	-$(MAKE) -$(MFLAGS) clean
+	$(MAKE) -$(MFLAGS) clean
 	cd ..\enc_provider
 	@echo Making clean in crypto\enc_provider
-	-$(MAKE) -$(MFLAGS) clean
+	$(MAKE) -$(MFLAGS) clean
 	cd ..\hash_provider
 	@echo Making clean in crypto\hash_provider
-	-$(MAKE) -$(MFLAGS) clean
+	$(MAKE) -$(MFLAGS) clean
 	cd ..\keyhash_provider
 	@echo Making clean in crypto\keyhash_provider
-	-$(MAKE) -$(MFLAGS) clean
+	$(MAKE) -$(MFLAGS) clean
 	cd ..\md4
 	@echo Making clean in crypto\md4
-	-$(MAKE) -$(MFLAGS) clean
+	$(MAKE) -$(MFLAGS) clean
 	cd ..\md5
 	@echo Making clean in crypto\md5
-	-$(MAKE) -$(MFLAGS) clean
+	$(MAKE) -$(MFLAGS) clean
 	cd ..\old
 	@echo Making clean in crypto\old
-	-$(MAKE) -$(MFLAGS) clean
+	$(MAKE) -$(MFLAGS) clean
 	cd ..\raw
 	@echo Making clean in crypto\raw
-	-$(MAKE) -$(MFLAGS) clean
+	$(MAKE) -$(MFLAGS) clean
 	cd ..\sha1
 	@echo Making clean in crypto\sha1
-	-$(MAKE) -$(MFLAGS) clean
+	$(MAKE) -$(MFLAGS) clean
 	cd ..
 
 check-windows::
 	cd crc32
 	@echo Making in check crypto\crc32
-	-$(MAKE) -$(MFLAGS) check
+	$(MAKE) -$(MFLAGS) check
 	cd ..\des
 	@echo Making check in crypto\des
-	-$(MAKE) -$(MFLAGS) check
+	$(MAKE) -$(MFLAGS) check
 	cd ..\dk
 	@echo Making check in crypto\dk
-	-$(MAKE) -$(MFLAGS) check
+	$(MAKE) -$(MFLAGS) check
 	cd ..\enc_provider
 	@echo Making check in crypto\enc_provider
-	-$(MAKE) -$(MFLAGS) check
+	$(MAKE) -$(MFLAGS) check
 	cd ..\hash_provider
 	@echo Making check in crypto\hash_provider
-	-$(MAKE) -$(MFLAGS) check
+	$(MAKE) -$(MFLAGS) check
 	cd ..\keyhash_provider
 	@echo Making check in crypto\keyhash_provider
-	-$(MAKE) -$(MFLAGS) check
+	$(MAKE) -$(MFLAGS) check
 	cd ..\md4
 	@echo Making check in crypto\md4
-	-$(MAKE) -$(MFLAGS) check
+	$(MAKE) -$(MFLAGS) check
 	cd ..\md5
 	@echo Making check in crypto\md5
-	-$(MAKE) -$(MFLAGS) check
+	$(MAKE) -$(MFLAGS) check
 	cd ..\old
 	@echo Making check in crypto\old
-	-$(MAKE) -$(MFLAGS) check
+	$(MAKE) -$(MFLAGS) check
 	cd ..\raw
 	@echo Making check in crypto\raw
-	-$(MAKE) -$(MFLAGS) check
+	$(MAKE) -$(MFLAGS) check
 	cd ..\sha1
 	@echo Making check in crypto\sha1
-	-$(MAKE) -$(MFLAGS) check
+	$(MAKE) -$(MFLAGS) check
 	cd ..
 

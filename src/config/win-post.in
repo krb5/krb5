@@ -2,10 +2,10 @@
 # Start of Win32 post-config lines (config/win-post.in)
 #
 
-!ifndef NO_OUTPRE
-outpre-dir:: $(OUTPRE)
-!else
+!if defined(NO_OUTPRE) || defined(NO_OUTDIR)
 outpre-dir::
+!else
+outpre-dir:: $(OUTPRE3)
 !endif
 
 #
@@ -27,7 +27,7 @@ DLL_FILE_DEF=/DKRB5_DLL_FILE
 #(where there is already an explicit rule).
 !if !defined(ZIP) && !defined(WINFILES)
 Makefile: Makefile.in $(BUILDTOP)\config\win-pre.in $(BUILDTOP)\config\win-post.in
-	$(BUILDTOP)\$(OUTPRE)wconfig $(BUILDTOP)\config < Makefile.in > Makefile
+	$(WCONFIG) $(BUILDTOP)\config < Makefile.in > Makefile
 !endif
 
 

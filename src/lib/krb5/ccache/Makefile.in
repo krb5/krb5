@@ -44,19 +44,19 @@ all-windows:: subdirs $(OBJFILE)
 ##DOS##file\$(OUTPRE)file.lst::
 ##DOS##	cd file
 ##DOS##	@echo Making in krb5\ccache\file
-##DOS##	-$(MAKE) -$(MFLAGS)
+##DOS##	$(MAKE) -$(MFLAGS)
 ##DOS##	cd ..
 
 ##DOS##memory\$(OUTPRE)file.lst::
 ##DOS##	cd memory
 ##DOS##	@echo Making in krb5\ccache\memory
-##DOS##	-$(MAKE) -$(MFLAGS)
+##DOS##	$(MAKE) -$(MFLAGS)
 ##DOS##	cd ..
 
 ##DOS##ccapi\$(OUTPRE)file.lst::
 ##DOS##	cd ccapi
 ##DOS##	@echo Making in krb5\ccache\ccapi
-##DOS##	-$(MAKE) -$(MFLAGS)
+##DOS##	$(MAKE) -$(MFLAGS)
 ##DOS##	cd ..
 
 ##DOS##$(OBJFILE): $(OBJS) file\$(OUTPRE)file.lst memory\$(OUTPRE)file.lst ccapi\$(OUTPRE)file.lst
@@ -71,13 +71,13 @@ clean-unix:: clean-libobjs
 clean-windows::
 	cd file
 	@echo Making clean in krb5\ccache\file
-	-$(MAKE) -$(MFLAGS) clean
+	$(MAKE) -$(MFLAGS) clean
 	cd ..\memory
 	@echo Making clean in krb5\ccache\memory
-	-$(MAKE) -$(MFLAGS) clean
+	$(MAKE) -$(MFLAGS) clean
 	cd ..\ccapi
 	@echo Making clean in krb5\ccache\ccapi
-	-$(MAKE) -$(MFLAGS) clean
+	$(MAKE) -$(MFLAGS) clean
 	cd ..
 	@echo Making clean in krb5\ccache
 	$(RM) $(OBJFILE)

@@ -10,14 +10,9 @@ all-unix:: krb5.h adm_err.h
 all-mac::
 
 all-windows::
-	copy $(BUILDTOP)\util\et\com_err.h .
-	copy $(BUILDTOP)\util\profile\profile.h .
-	if not exist gssapi\nul mkdir gssapi
-	copy $(BUILDTOP)\lib\gssapi\generic\gssapi.h gssapi
-	copy $(BUILDTOP)\lib\gssapi\generic\gssapi_generic.h gssapi
-	cd krb5
 	@echo Making in include\krb5
-	-$(MAKE) -$(MFLAGS)
+	cd krb5
+	$(MAKE) -$(MFLAGS)
 	cd ..
 
 krb5/autoconf.h:
@@ -70,7 +65,7 @@ clean-windows::
 	if exist gssapi\nul rmdir gssapi
 	cd krb5
 	@echo Making clean in include\krb5
-	-$(MAKE) -$(MFLAGS) clean
+	$(MAKE) -$(MFLAGS) clean
 	cd ..
 	@echo Making clean in include
 

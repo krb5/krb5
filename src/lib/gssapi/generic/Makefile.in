@@ -122,7 +122,7 @@ clean-unix:: clean-libobjs
 
 clean-windows::
 	$(RM) $(HDRS)
-	if exist $(EHDRDIR)\nul rmdir $(EHDRDIR)
+	-if exist $(EHDRDIR)\nul rmdir $(EHDRDIR)
 
 includes-unix::
 	@if test -d $(EHDRDIR); then :; else (set -x; mkdir $(EHDRDIR)) fi

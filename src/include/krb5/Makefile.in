@@ -17,11 +17,21 @@ BUILT_HEADERS = osconf.h
 
 all-unix:: autoconf.h $(BUILT_HEADERS)
 all-mac:: $(BUILT_HEADERS)
-all-windows::
-	$(RM) osconf.h autoconf.h autoconf.stamp
-	copy stock\osconf.h osconf.h
-	copy ..\win-mac.h autoconf.h
+all-windows:: autoconf.h $(BUILT_HEADERS)
 
+##DOS##autoconf.h: ..\win-mac.h
+##DOS##	$(CP) ..\win-mac.h $@
+##DOS##osconf.h: stock\osconf.h
+##DOS##	$(CP) stock\osconf.h $@
+
+# We need to comment out the Unix autoconf.h and osconf.h block below
+# if we're building for Windows.  Thus, we need to enclose them
+# between the lines "##DOS##!if 0" and "##DOS##!endif".  We enclosed
+# the entire section between the long hashed lines to make the block
+# stand out.
+
+###############################################################################
+##DOS##!if 0
 # Should only rebuild autoconf.h here (use CONFIG_FILES=), but the weird krb5
 # makefile post-processing is unconditional and would trash the makefile.
 autoconf.h: autoconf.stamp
@@ -29,9 +39,6 @@ autoconf.stamp: $(srcdir)/autoconf.h.in $(thisconfigdir)/config.status
 	(cd $(thisconfigdir) && $(SHELL) config.status)
 	touch autoconf.stamp
 
-depend::
-
-install::
 SYSCONFDIR = @sysconfdir@
 LOCALSTATEDIR = @localstatedir@
 PROCESS_REPLACE = -e "s+@KRB5RCTMPDIR+$(KRB5RCTMPDIR)+" \
@@ -46,6 +53,12 @@ osconf.h: $(OSCONFSRC)
 	cat $(OSCONFSRC) | sed $(PROCESS_REPLACE) > osconf.new
 	@if cmp -s osconf.new osconf.h ; then :; \
 	else (set -x; $(RM) osconf.h ; $(CP) osconf.new osconf.h; $(RM) osconf.new) fi
+##DOS##!endif
+###############################################################################
+
+depend::
+
+install::
 
 clean::
 	$(RM) osconf.new $(BUILT_HEADERS)

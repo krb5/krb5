@@ -151,19 +151,19 @@ profile.lib: $(PLIB)
 all-windows:: 
 	@echo Making in lib\crypto
 	cd crypto
-	-$(MAKE) -$(MFLAGS)
+	$(MAKE) -$(MFLAGS)
 	@echo Making in lib\krb5
 	cd ..\krb5
-	-$(MAKE) -$(MFLAGS) 
+	$(MAKE) -$(MFLAGS) 
 	@echo Making in lib\des425
 	cd ..\des425
-	-$(MAKE) -$(MFLAGS) 
+	$(MAKE) -$(MFLAGS) 
 	@echo Making in lib\krb4
 	cd ..\krb4
-	-$(MAKE) -$(MFLAGS) 
+	$(MAKE) -$(MFLAGS) 
 	@echo Making in lib\gssapi
 	cd ..\gssapi
-	-$(MAKE) -$(MFLAGS) 
+	$(MAKE) -$(MFLAGS) 
 	@echo Making in lib
 	cd ..
 
@@ -173,18 +173,18 @@ lib-windows:: krb5.lib gssapi.lib krb4.lib
 clean-windows::
 	@echo Making clean in lib\crypto
 	cd crypto
-	-$(MAKE) -$(MFLAGS) clean
+	$(MAKE) -$(MFLAGS) clean
 	@echo Making clean in lib\krb5
 	cd ..\krb5
-	-$(MAKE) -$(MFLAGS) clean
+	$(MAKE) -$(MFLAGS) clean
 	@echo Making clean in lib\des425
 	cd ..\des425
-	-$(MAKE) -$(MFLAGS) clean
+	$(MAKE) -$(MFLAGS) clean
 	@echo Making clean in lib\krb4
 	cd ..\krb4
-	-$(MAKE) -$(MFLAGS) clean
+	$(MAKE) -$(MFLAGS) clean
 	@echo Making clean in lib\gssapi
 	cd ..\gssapi
-	-$(MAKE) -$(MFLAGS) clean
+	$(MAKE) -$(MFLAGS) clean
 	@echo Making clean in lib
 	cd ..

@@ -1,3 +1,8 @@
+Wed May 19 11:39:05 1999  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in: Fix windows cleanup to ignore any errors while
+		removing gssapi include dir.
+
 Mon May 10 15:22:12 1999  Danilo Almeida  <dalmeida@mit.edu>
 
 	* Makefile.in: Do win32 build in subdir.

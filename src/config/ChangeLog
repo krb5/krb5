@@ -1,3 +1,12 @@
+Tue May 18 20:06:01 1999  Danilo Almeida  <dalmeida@mit.edu>
+
+	* win-pre.in, win-pre.in: Remove trailing backslash from output
+		dir target in rule so rule is not always invoked if it
+		already exists.  Add MIGNORE option if we really want make
+		to ignore errors from recursive invocations of make.  Move
+		definition of WCONFIG and WCONFIG_EXE into win-pre.in.
+		Add NO_OUTDIR as synonym for NO_OUTPRE.
+
 Mon May 17 20:45:05 1999  Danilo Almeida  <dalmeida@mit.edu>
 
 	* win-post.in, win-pre.in, windows.in: Rename windows.in to

@@ -65,55 +65,55 @@ clean-windows::
 all-windows::
 	cd asn.1
 	@echo Making in krb5\asn.1
-	-$(MAKE) -$(MFLAGS)
+	$(MAKE) -$(MFLAGS)
 	cd ..\ccache
 	@echo Making in krb5\ccache
-	-$(MAKE) -$(MFLAGS)
+	$(MAKE) -$(MFLAGS)
 	cd ..\error_tables
 	@echo Making in krb5\error_tables
-	-$(MAKE) -$(MFLAGS)
+	$(MAKE) -$(MFLAGS)
 	cd ..\keytab
 	@echo Making in krb5\keytab
-	-$(MAKE) -$(MFLAGS)
+	$(MAKE) -$(MFLAGS)
 	cd ..\krb
 	@echo Making in krb5\krb
-	-$(MAKE) -$(MFLAGS)
+	$(MAKE) -$(MFLAGS)
 	cd ..\os
 	@echo Making in krb5\os
-	-$(MAKE) -$(MFLAGS)
+	$(MAKE) -$(MFLAGS)
 	cd ..\posix
 	@echo Making in krb5\posix
-	-$(MAKE) -$(MFLAGS)
+	$(MAKE) -$(MFLAGS)
 	cd ..\rcache
 	@echo Making in krb5\rcache
-	-$(MAKE) -$(MFLAGS)
+	$(MAKE) -$(MFLAGS)
 	cd ..
 
 clean-windows::
 	cd asn.1
 	@echo Making clean in krb5\asn.1
-	-$(MAKE) -$(MFLAGS) clean
+	$(MAKE) -$(MFLAGS) clean
 	cd ..\ccache
 	@echo Making clean in krb5\ccache
-	-$(MAKE) -$(MFLAGS) clean
+	$(MAKE) -$(MFLAGS) clean
 	cd ..\error_tables
 	@echo Making clean in krb5\error_tables
-	-$(MAKE) -$(MFLAGS) clean
+	$(MAKE) -$(MFLAGS) clean
 	cd ..\keytab
 	@echo Making clean in krb5\keytab
-	-$(MAKE) -$(MFLAGS) clean
+	$(MAKE) -$(MFLAGS) clean
 	cd ..\krb
 	@echo Making clean in krb5\krb
-	-$(MAKE) -$(MFLAGS) clean
+	$(MAKE) -$(MFLAGS) clean
 	cd ..\os
 	@echo Making clean in krb5\os
-	-$(MAKE) -$(MFLAGS) clean
+	$(MAKE) -$(MFLAGS) clean
 	cd ..\posix
 	@echo Making clean in krb5\posix
-	-$(MAKE) -$(MFLAGS) clean
+	$(MAKE) -$(MFLAGS) clean
 	cd ..\rcache
 	@echo Making clean in krb5\rcache
-	-$(MAKE) -$(MFLAGS) clean
+	$(MAKE) -$(MFLAGS) clean
 	cd ..
 	@echo Making clean locally
 

@@ -1,3 +1,8 @@
+Wed May 19 11:44:31 1999  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in: Add windows build rules for putting header files in
+		include dir.  Do cleanup of header for windows clean.
+
 Mon May 10 15:27:07 1999  Danilo Almeida  <dalmeida@mit.edu>
 
 	* Makefile.in: Do win32 build in subdir.

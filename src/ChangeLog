@@ -1,3 +1,12 @@
+Tue May 18 19:52:56 1999  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in: Remove - from recursive Win32 make invocation.
+		Move definition of WCONFIG into config/win-pre.in.  Use
+		symbolic name for output dir dependency when building
+		wconfig.  Remove wconfig clean stuff since we do it
+		automagically in win-post.in.  Build util instead of
+		directly building util/windows, util/et, util/profile.
+
 Mon May 17 20:45:54 1999  Danilo Almeida  <dalmeida@mit.edu>
 
 	* Makefile.in, wconfig.c: Rename config/windows.in to 

@@ -18,27 +18,21 @@ all-unix::
 all-mac::
 
 all-windows:: Makefile-windows
-	@echo Making in util\windows
-	cd util\windows
-	-$(MAKE) -$(MAKEFLAGS)
+	@echo Making in util
+	cd util
+	$(MAKE) -$(MFLAGS)
 	@echo Making in include
-	cd ..\..\include
-	-$(MAKE) -$(MAKEFLAGS) 
-	@echo Making in util\et
-	cd ..\util\et
-	-$(MAKE) -$(MAKEFLAGS) 
-	@echo Making in util\profile
-	cd ..\profile
-	-$(MAKE) -$(MAKEFLAGS) 
+	cd ..\include
+	$(MAKE) -$(MFLAGS) 
 	@echo Making in lib
-	cd ..\..\lib
-	-$(MAKE) -$(MAKEFLAGS) 
+	cd ..\lib
+	$(MAKE) -$(MFLAGS) 
 	@echo Making in windows
 	cd ..\windows
-	-$(MAKE) -$(MAKEFLAGS) 
+	$(MAKE) -$(MFLAGS) 
 	@echo Making in clients
 	cd ..\clients
-	-$(MAKE) -$(MAKEFLAGS)
+	$(MAKE) -$(MFLAGS)
 	cd ..
 
 world::
@@ -120,20 +114,19 @@ unixmac:
 #
 
 config-windows:: Makefile-windows
-	@echo Making in include
-	cd include
-	-$(MAKE) -$(MAKEFLAGS)
-	cd ..
+#	@echo Making in include
+#	cd include
+#	$(MAKE) -$(MFLAGS)
+#	cd ..
 
-##DOS##WCONFIG_EXE=.\$(OUTPRE)wconfig.exe
-##DOS##WCONFIG_OBJ=$(OUTPRE)wconfig.obj
-
-##DOS##$(WCONFIG_EXE): $(OUTPRE) wconfig.c
+#
+# We need outpre-dir explicitly in here because we may
+# try to build wconfig on a config-windows.
+#
+##DOS##$(WCONFIG_EXE): outpre-dir wconfig.c
 ##DOS##	$(CC) -Fe$@ -Fo$*.obj wconfig.c
 
-##DOS##MKFDEP= $(WCONFIG_EXE) config\pre.in config\post.in \
-##DOS##	config\win-pre.in config\win-post.in
-##DOS##WCONFIG= $(WCONFIG_EXE) $(WCONFIG_FLAGS)
+##DOS##MKFDEP=$(WCONFIG_EXE) config\win-pre.in config\win-post.in
 
 WINMAKEFILES=Makefile \
 	clients\Makefile clients\kdestroy\Makefile \
@@ -161,6 +154,7 @@ WINMAKEFILES=Makefile \
 	lib\krb5\keytab\file\Makefile lib\krb5\krb\Makefile \
 	lib\krb5\os\Makefile lib\krb5\posix\Makefile \
 	lib\krb5\rcache\Makefile \
+	util\Makefile \
 	util\et\Makefile util\profile\Makefile \
 	util\windows\Makefile \
 	windows\Makefile windows\lib\Makefile \
@@ -168,7 +162,6 @@ WINMAKEFILES=Makefile \
 	windows\gss\Makefile windows\wintel\Makefile
 
 ##DOS##Makefile-windows:: $(MKFDEP) $(WINMAKEFILES)
-##DOS##	config\rm.bat $(WCONFIG_OBJ)
 
 ##DOS##Makefile: Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
@@ -250,6 +243,8 @@ WINMAKEFILES=Makefile \
 ##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##lib\krb5\rcache\Makefile: lib\krb5\rcache\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
+##DOS##util\Makefile: util\Makefile.in $(MKFDEP)
+##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##util\et\Makefile: util\et\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##util\profile\Makefile: util\profile\Makefile.in $(MKFDEP)
@@ -270,30 +265,23 @@ WINMAKEFILES=Makefile \
 ##DOS##	$(WCONFIG) config < $@.in > $@
 
 clean-windows:: Makefile-windows
-	@echo Making clean in util\windows
-	cd util\windows
-	-$(MAKE) -$(MAKEFLAGS) clean
+	@echo Making clean in util
+	cd util
+	$(MAKE) -$(MFLAGS) clean
 	@echo Making clean in include
-	cd ..\..\include
-	-$(MAKE) -$(MAKEFLAGS) clean
-	@echo Making clean in util\et
-	cd ..\util\et
-	-$(MAKE) -$(MAKEFLAGS) clean
-	@echo Making clean in util\profile
-	cd ..\profile
-	-$(MAKE) -$(MAKEFLAGS) clean
+	cd ..\include
+	$(MAKE) -$(MFLAGS) clean
 	@echo Making clean in lib
-	cd ..\..\lib
-	-$(MAKE) -$(MAKEFLAGS) clean
+	cd ..\lib
+	$(MAKE) -$(MFLAGS) clean
 	@echo Making clean in windows
 	cd ..\windows
-	-$(MAKE) -$(MAKEFLAGS) clean
+	$(MAKE) -$(MFLAGS) clean
 	@echo Making clean in clients
 	cd ..\clients
-	-$(MAKE) -$(MAKEFLAGS) clean
+	$(MAKE) -$(MFLAGS) clean
 	cd ..
 	@echo Making clean in root
-	config\rm.bat $(WCONFIG_OBJ) $(WCONFIG_EXE)
 
 #
 # Renames DOS 8.3 filenames back to their proper, longer names.
@@ -514,17 +502,17 @@ clean-windows-mac:
 KBINDIR=kbin
 
 distclean-windows:
-	rm -f $(CLEANUP)
-	rm -f $(WINMAKEFILES)
-	rm -f $(KBINDIR)\*
+	config\rm.bat $(CLEANUP:^/=^\)
+	config\rm.bat $(WINMAKEFILES)
+	config\rm.bat $(KBINDIR)\*.dll $(KBINDIR)\*.exe
 	@if exist $(KBINDIR)\nul rmdir $(KBINDIR)
 
 mkbin:
 	@if not exist $(KBINDIR)\nul mkdir $(KBINDIR)
-	-$(CP) lib\$(OUTPRE)*.dll $(KBINDIR)\.
-	-$(CP) windows\cns\$(OUTPRE)krb5.exe $(KBINDIR)\.
-	-$(CP) windows\telnet\$(OUTPRE)telnet.exe $(KBINDIR)\.
-	-$(CP) windows\gss\$(OUTPRE)gss.exe $(KBINDIR)\.
-	-$(CP) clients\klist\$(OUTPRE)klist.exe $(KBINDIR)\.
-	-$(CP) clients\kinit\$(OUTPRE)kinit.exe $(KBINDIR)\.
-	-$(CP) clients\kdestroy\$(OUTPRE)kdestroy.exe $(KBINDIR)\.
+	$(CP) lib\$(OUTPRE)*.dll $(KBINDIR)\.
+	$(CP) windows\cns\$(OUTPRE)krb5.exe $(KBINDIR)\.
+	$(CP) windows\wintel\$(OUTPRE)telnet.exe $(KBINDIR)\.
+	$(CP) windows\gss\$(OUTPRE)gss.exe $(KBINDIR)\.
+	$(CP) clients\klist\$(OUTPRE)klist.exe $(KBINDIR)\.
+	$(CP) clients\kinit\$(OUTPRE)kinit.exe $(KBINDIR)\.
+	$(CP) clients\kdestroy\$(OUTPRE)kdestroy.exe $(KBINDIR)\.

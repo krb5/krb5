@@ -43,7 +43,7 @@ all-windows:: subdirs $(OBJFILE)
 ##DOSfile\$(OUTPRE)file.lst::
 ##DOS	cd file
 ##DOS	@echo Making in krb5\keytab\file
-##DOS	-$(MAKE) -$(MFLAGS)
+##DOS	$(MAKE) -$(MFLAGS)
 ##DOS	cd ..
 
 ##DOS$(OBJFILE): $(OBJS) file\$(OUTPRE)file.lst
@@ -57,7 +57,7 @@ clean-unix:: clean-libobjs
 clean-windows::
 	cd file
 	@echo Making clean in krb5\keytab\file
-	-$(MAKE) -$(MFLAGS) clean
+	$(MAKE) -$(MFLAGS) clean
 	cd ..
 	@echo Making clean in krb5\keytab
 	$(RM) $(OBJFILE)

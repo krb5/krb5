@@ -7,35 +7,35 @@ NO_OUTPRE=1
 all-windows::
 	@echo Making in windows\lib
 	cd lib
-	-$(MAKE) -$(MAKEFLAGS) LIBCMD=$(LIBCMD)
+	$(MAKE) -$(MFLAGS) LIBCMD=$(LIBCMD)
 	@echo Making in windows\cns
 	cd ..\cns
-	-$(MAKE) -$(MAKEFLAGS) LIBCMD=$(LIBCMD)
+	$(MAKE) -$(MFLAGS) LIBCMD=$(LIBCMD)
 	@echo Making in windows\wintel
 	cd ..\wintel
-	-$(MAKE) -$(MAKEFLAGS) LIBCMD=$(LIBCMD)
+	$(MAKE) -$(MFLAGS) LIBCMD=$(LIBCMD)
 	@echo Making in windows\gss
 	cd ..\gss
-	-$(MAKE) -$(MAKEFLAGS) LIBCMD=$(LIBCMD)
+	$(MAKE) -$(MFLAGS) LIBCMD=$(LIBCMD)
 	@echo Making in windows\gina
 	cd ..\gina
-	-$(MAKE) -$(MAKEFLAGS) LIBCMD=$(LIBCMD)
+	$(MAKE) -$(MFLAGS) LIBCMD=$(LIBCMD)
 	cd ..
 
 clean-windows::
 	@echo Making clean in windows\lib
 	cd lib
-	-$(MAKE) -$(MAKEFLAGS) clean
+	$(MAKE) -$(MFLAGS) clean
 	@echo Making clean in windows\cns
 	cd ..\cns
-	-$(MAKE) -$(MAKEFLAGS) clean
+	$(MAKE) -$(MFLAGS) clean
 	@echo Making clean in windows\wintel
 	cd ..\wintel
-	-$(MAKE) -$(MAKEFLAGS) clean
+	$(MAKE) -$(MFLAGS) clean
 	@echo Making clean in windows\gss
 	cd ..\gss
-	-$(MAKE) -$(MAKEFLAGS) clean
+	$(MAKE) -$(MFLAGS) clean
 	@echo Making clean in windows\gina
 	cd ..\gina
-	-$(MAKE) -$(MAKEFLAGS) clean
+	$(MAKE) -$(MFLAGS) clean
 	cd ..

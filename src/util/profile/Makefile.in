@@ -51,9 +51,14 @@ SHLIB_RDIRS=$(KRB5_LIBDIR)
 
 STOBJLISTS=OBJS.ST
 
+PROFILE_HDR=$(BUILDTOP)$(S)include$(S)profile.h
+
 all-unix:: includes test_parse test_profile
 all-unix:: all-libs
-all-windows::
+all-windows:: $(PROFILE_HDR)
+
+$(PROFILE_HDR):: profile.h
+	$(CP) profile.h $@
 
 includes:: profile.h
 	if cmp profile.h \
@@ -106,7 +111,7 @@ clean-unix:: clean-libs clean-libobjs
 		prof_err.c test_profile profile.h
 
 clean-windows::
-	$(RM) $(OUTPRE)profile.lib profile.bak $(OUTPRE)test_parse.exe $(OUTPRE)test_profile.exe
+	$(RM) $(PROFILE_HDR)
 
 check-windows:: $(OUTPRE)test_profile.exe $(OUTPRE)test_parse.exe
 	$(RM) $(OUTPRE)*.obj

@@ -37,25 +37,25 @@ clean-windows::
 all-windows::
 	cd generic
 	@echo Making in gssapi\generic
-	-$(MAKE) -$(MFLAGS)
+	$(MAKE) -$(MFLAGS)
 	cd ..\krb5
 	@echo Making in gssapi\krb5
-	-$(MAKE) -$(MFLAGS)
+	$(MAKE) -$(MFLAGS)
 #	cd ..\mechglue
 #	@echo Making in gssapi\mechglue
-#	-$(MAKE) -$(MFLAGS)
+#	$(MAKE) -$(MFLAGS)
 	cd ..
 
 clean-windows::
 	cd generic
 	@echo Making clean in gssapi\generic
-	-$(MAKE) -$(MFLAGS) clean
+	$(MAKE) -$(MFLAGS) clean
 	cd ..\krb5
 	@echo Making clean in gssapi\krb5
-	-$(MAKE) -$(MFLAGS) clean
+	$(MAKE) -$(MFLAGS) clean
 #	cd ..\mechglue
 #	@echo Making clean in gssapi\mechglue
-#	-$(MAKE) -$(MFLAGS) clean
+#	$(MAKE) -$(MFLAGS) clean
 	cd ..
 	@echo Making clean in gssapi
 

@@ -170,7 +170,9 @@ EXPORTED_HEADERS= gssapi_krb5.h
 
 ##DOS##LIBOBJS = $(OBJS)
 
-all-windows:: win-include $(SRCS) $(HDRS)
+GSSAPI_KRB5_HDR=$(EHDRDIR)$(S)gssapi_krb5.h
+
+all-windows:: win-include $(GSSAPI_KRB5_HDR) $(SRCS) $(HDRS)
 
 all-unix:: $(SRCS) $(HDRS) includes
 all-unix:: all-libobjs
@@ -189,14 +191,16 @@ clean-unix::
 
 win-include::
 	if not exist $(EHDRDIR)\nul mkdir $(EHDRDIR)
-	copy gssapi_krb5.h $(EHDRDIR)
+
+$(GSSAPI_KRB5_HDR): gssapi_krb5.h
+	$(CP) gssapi_krb5.h $@
 
 clean-unix:: clean-libobjs
 	$(RM) $(ETHDRS) $(ETSRCS)
 
 clean-windows::
 	$(RM) $(EHDRDIR)\gssapi_krb5.h
-	if exist $(EHDRDIR)\nul rmdir $(EHDRDIR)
+	-if exist $(EHDRDIR)\nul rmdir $(EHDRDIR)
 
 install::
 	@set -x; for f in $(EXPORTED_HEADERS) ; \

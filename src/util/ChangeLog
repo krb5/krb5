@@ -1,3 +1,8 @@
+Wed May 19 11:43:36 1999  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in: Add all and cleanup rules for windows for windows,
+		et, and profile subdirectories.
+
 Sat May 15 19:48:31 1999  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* makeshlib.sh (library): Add -bnoentry to the AIX shared library

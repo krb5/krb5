@@ -9,23 +9,23 @@ NO_OUTPRE=1
 all-windows::
 	@echo Making all in clients\klist
 	cd klist
-	-$(MAKE) -$(MAKEFLAGS)
+	$(MAKE) -$(MFLAGS)
 	@echo Making all in clients\kdestroy
 	cd ..\kdestroy
-	-$(MAKE) -$(MAKEFLAGS)
+	$(MAKE) -$(MFLAGS)
 	@echo Making all in clients\kinit
 	cd ..\kinit
-	-$(MAKE) -$(MAKEFLAGS)
+	$(MAKE) -$(MFLAGS)
 	cd ..
 
 clean-windows::
 	@echo Making clean in clients\klist
 	cd klist
-	-$(MAKE) -$(MAKEFLAGS) clean
+	$(MAKE) -$(MFLAGS) clean
 	@echo Making clean in clients\kdestroy
 	cd ..\kdestroy
-	-$(MAKE) -$(MAKEFLAGS) clean
+	$(MAKE) -$(MFLAGS) clean
 	@echo Making clean in clients\kinit
 	cd ..\kinit
-	-$(MAKE) -$(MAKEFLAGS) clean
+	$(MAKE) -$(MFLAGS) clean
 	cd ..
