@@ -23,11 +23,8 @@
 #include <krb5/sysincl.h>
 #include <stdio.h>
 
-/* XXX  A hack because I don't feel like updating every file. */
 #define KRB5_OK 0
-#define KRB5_NOMEM ENOMEM
-#define KRB5_NOTFOUND KRB5_CC_NOTFOUND
-#define KRB5_EOF KRB5_CC_END
+
 #define KRB5_FCC_MAXLEN 100
 
 #ifndef TKT_ROOT
