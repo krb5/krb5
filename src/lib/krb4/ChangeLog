@@ -1,3 +1,12 @@
+2000-04-28  Ken Raeburn  <raeburn@mit.edu>
+	    Nalin Dahyabhai  <nalin@redhat.com>
+
+	* kuserok.c (kuserok): Don't overflow buffer "pbuf".
+
+2000-04-28  Tom Yu  <tlyu@mit.edu>
+
+	* rd_req.c (krb_rd_req): Fix some uses of strcpy().
+
 Thu Apr 15 20:18:38 1999  Tom Yu  <tlyu@mit.edu>
 
 	* g_cnffile.c (krb__get_srvtabname): Fix to actually extract

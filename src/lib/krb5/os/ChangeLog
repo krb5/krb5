@@ -1,3 +1,7 @@
+2000-04-28  Nalin Dahyabhai  <nalin@redhat.com>
+
+	* kuserok.c (krb5_kuserok): Don't overflow buffer "pbuf".
+
 Thu Mar 25 18:45:48 1999  Tom Yu  <tlyu@mit.edu>
 
 	* promptusr.c (krb5_os_get_tty_uio): getchar() returns int, not

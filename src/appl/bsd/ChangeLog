@@ -1,3 +1,7 @@
+2000-04-27  Nalin Dahyabhai  <nalin@redhat.com>
+
+	* krshd.c (doit): Don't overflow buffer "cmdbuf".
+
 Fri Mar 12 19:01:35 1999  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in (kshd): Add $(LOGINLIBS).

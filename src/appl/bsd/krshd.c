@@ -1469,15 +1469,16 @@ if(port)
         strcpy((char *) cmdbuf + offst, kprogdir);
 	cp = copy + 3 + offst;
 
+	cmdbuf[sizeof(cmdbuf) - 1] = '\0';
 	if (auth_sys == KRB5_RECVAUTH_V4) {
-	  strcat(cmdbuf, "/v4rcp");
+	  strncat(cmdbuf, "/v4rcp", sizeof(cmdbuf) - 1 - strlen(cmdbuf));
 	} else {
-	  strcat(cmdbuf, "/rcp");
+	  strncat(cmdbuf, "/rcp", sizeof(cmdbuf) - 1 - strlen(cmdbuf));
 	}
 	if (stat((char *)cmdbuf + offst, &s) >= 0)
-	  strcat(cmdbuf, cp);
+	  strncat(cmdbuf, cp, sizeof(cmdbuf) - 1 - strlen(cmdbuf));
 	else
-	  strcpy(cmdbuf, copy);
+	  strncpy(cmdbuf, copy, sizeof(cmdbuf) - 1 - strlen(cmdbuf));
 	free(copy);
     }
 #endif
