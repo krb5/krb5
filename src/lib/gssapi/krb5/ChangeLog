@@ -1,3 +1,17 @@
+Thu Mar 27 15:52:04 1997  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in: Add canon_name.c, duplicate_name.c, export_name.c
+		to the GSSAPI library.
+	
+	* canon_name.c (gss_canonicalize_name): New GSSAPI V2 function
+
+	* duplicate_name.c (gss_duplicate_name): New GSSAPI V2 function
+
+	* export_name.c (gss_export_name): New GSSAPI V2 function
+
+	* gssapiP_krb5.h (KG_IMPLFLAGS): Add support for
+		GSS_C_PROT_STATE_READY and GSS_C_TRANS_FLAG
+
 Tue Mar 25 01:00:55 1997  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* init_sec_context.c (krb5_gss_init_sec_context): A zero-length
