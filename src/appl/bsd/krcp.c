@@ -1163,12 +1163,11 @@ void send_auth()
     int sin_len;
     char *princ;          /* principal in credentials cache */
     krb5_ccache cc;
-    krb5_creds creds;
+    krb5_creds in_creds, *out_creds;
     krb5_data reply, princ_data;
     krb5_tkt_authent *authdat;
     krb5_error_code status;
     krb5_address faddr;
-    
     
     
     if (status = krb5_cc_default(bsd_context, &cc)){
@@ -1177,9 +1176,9 @@ void send_auth()
 	exit(1);
     }
     
-    memset ((char*)&creds, 0, sizeof(creds));
+    memset ((char*)&in_creds, 0, sizeof(krb5_creds));
     
-    if (status = krb5_cc_get_principal(bsd_context, cc, &creds.client)){
+    if (status = krb5_cc_get_principal(bsd_context, cc, &in_creds.client)){
 	fprintf(stderr,
 		"rcp: send_auth failed krb5_cc_get_principal : %s\n",
 		error_message(status));
@@ -1187,18 +1186,18 @@ void send_auth()
 	exit(1);
     }
     
-    if (status = krb5_unparse_name(bsd_context, creds.client, &princ)){
+    if (status = krb5_unparse_name(bsd_context, in_creds.client, &princ)){
 	fprintf(stderr,"rcp: send_auth failed krb5_parse_name : %s\n",
 		error_message(status));
 	krb5_cc_close(bsd_context, cc);
 	exit(1);
     }
-    if (status = krb5_build_principal_ext(bsd_context, &creds.server,
-			  krb5_princ_realm(bsd_context, creds.client)->length,
-			  krb5_princ_realm(bsd_context, creds.client)->data,
+    if (status = krb5_build_principal_ext(bsd_context, &in_creds.server,
+			  krb5_princ_realm(bsd_context,in_creds.client)->length,
+			  krb5_princ_realm(bsd_context,in_creds.client)->data,
 					  6, "krbtgt",
-			  krb5_princ_realm(bsd_context, creds.client)->length,
-			  krb5_princ_realm(bsd_context, creds.client)->data,
+			  krb5_princ_realm(bsd_context,in_creds.client)->length,
+			  krb5_princ_realm(bsd_context,in_creds.client)->data,
 					  0)){
 	fprintf(stderr,
 		"rcp: send_auth failed krb5_build_principal_ext : %s\n",
@@ -1208,7 +1207,8 @@ void send_auth()
     }
     
     /* Get TGT from credentials cache */
-    if (status = krb5_get_credentials(bsd_context, KRB5_GC_CACHED, cc, &creds)){
+    if (status = krb5_get_credentials(bsd_context, KRB5_GC_CACHED, cc, 
+				      &in_creds, &out_creds)){
 	fprintf(stderr,
                 "rcp: send_auth failed krb5_get_credentials: %s\n",
 		error_message(status));
@@ -1229,7 +1229,8 @@ void send_auth()
 	exit(1);
     }
     krb5_xfree(princ);
-    status = krb5_write_message(bsd_context, (krb5_pointer)&rem, &creds.ticket);
+    status = krb5_write_message(bsd_context, (krb5_pointer)&rem, 
+				&out_creds->ticket);
     if (status){
 	fprintf(stderr,
                 "rcp: send_auth failed krb5_write_message: %s\n",
@@ -1256,7 +1257,7 @@ void send_auth()
 			 &faddr,
 			 0,               /* no fetchfrom */
 			 tgt_keyproc,
-			 (krb5_pointer)&creds, /* credentials as arg to
+			 (krb5_pointer)out_creds, /* credentials as arg to
 						  keyproc */
 			 0,               /* no rcache for the moment XXX */
 			 &authdat);
@@ -1270,7 +1271,7 @@ void send_auth()
     krb5_copy_keyblock(bsd_context, authdat->ticket->enc_part2->session,
 		       &session_key);
     krb5_free_tkt_authent(bsd_context, authdat);
-    krb5_free_cred_contents(bsd_context, &creds);
+    krb5_free_creds(bsd_context, out_creds);
     
     krb5_use_keytype(bsd_context, &eblock, session_key->keytype);
     if ( status = krb5_process_key(bsd_context, &eblock, 
@@ -1288,7 +1289,7 @@ void
   answer_auth()
 {
     krb5_data pname_data, msg;
-    krb5_creds creds;
+    krb5_creds creds, *new_creds;
     krb5_ccache cc;
     krb5_error_code status;
     extern krb5_flags krb5_kdc_default_options;
@@ -1323,20 +1324,19 @@ void
     }
     krb5_xfree(pname_data.data);
     
-    if (status = krb5_get_credentials(bsd_context, KRB5_GC_USER_USER, cc, &creds)){
+    if (status = krb5_get_credentials(bsd_context, KRB5_GC_USER_USER, cc, 
+				      &creds, &new_creds)){
 	krb5_cc_destroy(bsd_context, cc);
 	krb5_cc_close(bsd_context, cc);
 	exit(1);
     }
     
     if (status = krb5_mk_req_extended(bsd_context, AP_OPTS_USE_SESSION_KEY,
-				      0,       /* no application checksum here */
-				      krb5_kdc_default_options,
+				      0,     /* no application checksum here */
 				      0,
-				      0,       /* no need for subkey */
-				      cc,
-				      &creds,
-				      0,       /* don't need authenticator copy */
+				      0,     /* no need for subkey */
+				      new_creds,
+				      0,     /* don't need authenticator copy */
 				      &msg)) {
 	krb5_cc_destroy(bsd_context, cc);
 	krb5_cc_close(bsd_context, cc);
@@ -1351,10 +1351,11 @@ void
     }
     
     /* setup eblock for des_read and write */
-    krb5_copy_keyblock(bsd_context, &creds.keyblock,&session_key);
+    krb5_copy_keyblock(bsd_context, &new_creds->keyblock,&session_key);
     
     /* cleanup */
     krb5_free_cred_contents(bsd_context, &creds);
+    krb5_free_creds(bsd_context, new_creds);
     
     /* OK process key */
     krb5_use_keytype(bsd_context, &eblock, session_key->keytype);

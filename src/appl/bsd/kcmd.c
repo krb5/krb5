@@ -90,7 +90,7 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
     long oldmask;
 #endif
     struct sockaddr_in sin, from, local_laddr;
-    krb5_creds *ret_cred = 0;
+    krb5_creds *get_cred, *ret_cred;
     char c;
     int lport = START_PORT;
     struct hostent *hp;
@@ -136,12 +136,12 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
 	return(-1);
     }
     
-    if (!(ret_cred = (krb5_creds *)calloc(1,sizeof(*ret_cred)))){
+    if (!(get_cred = (krb5_creds *)calloc(1, sizeof(krb5_creds)))) {
         fprintf(stderr,"kcmd: no memory\n");
         return(-1);
     }
     status = krb5_sname_to_principal(bsd_context, host_save,service,
-				     KRB5_NT_SRV_HST, &ret_cred->server);
+				     KRB5_NT_SRV_HST, &get_cred->server);
     if (status) {
 	    fprintf(stderr, "kcmd: krb5_sname_to_principal failed: %s\n",
 		    error_message(status));
@@ -157,7 +157,7 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
        strcpy(rdata.data, realm);
        
        /* XXX we should free the old realm first */
-       krb5_princ_set_realm(bsd_context, ret_cred->server, &rdata);
+       krb5_princ_set_realm(bsd_context, get_cred->server, &rdata);
    }
 #ifdef POSIX_SIGNALS
     sigemptyset(&urgmask);
@@ -180,7 +180,7 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
 	    sigsetmask(oldmask);
 #endif /* POSIX_SIGNALS */
 	    if (tmpstr) krb5_xfree(tmpstr);
-	    krb5_free_creds(bsd_context, ret_cred);
+	    krb5_free_creds(bsd_context, get_cred);
 	    return (-1);
     	}
 #ifdef HAVE_SETOWN
@@ -227,7 +227,7 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
     	sigsetmask(oldmask);
 #endif /* POSIX_SIGNALS */
 	if (tmpstr) krb5_xfree(tmpstr);
-	krb5_free_creds(bsd_context, ret_cred);
+	krb5_free_creds(bsd_context, get_cred);
     	return (-1);
     }
     lport--;
@@ -301,11 +301,12 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
     status = krb5_cc_default(bsd_context, &cc);
     if (status) goto bad3;
 
-    status = krb5_cc_get_principal(bsd_context, cc, &ret_cred->client);
+    status = krb5_cc_get_principal(bsd_context, cc, &get_cred->client);
     if (status) goto bad3;
 
     /* Get ticket from credentials cache or kdc */
-    status = krb5_get_credentials(bsd_context, 0, cc, ret_cred);
+    status = krb5_get_credentials(bsd_context, 0, cc, get_cred, &ret_cred);
+    krb5_free_creds(bsd_context, get_cred);
     if (status) goto bad3;
 
     /* Reset internal flags; these should not be sent. */
@@ -324,7 +325,7 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
                            seqno,
                            0,           /* don't need a subsession key */
                            &error,		/* No error return */
-                           &rep_ret);
+                           &rep_ret, NULL);
     if (status) {
 	printf("Couldn't authenticate to server: %s\n", error_message(status));
 	if (error) {
@@ -398,7 +399,7 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
     if (tmpstr) krb5_xfree(tmpstr);
     
     /* pass back credentials if wanted */
-    if (cred) krb5_copy_creds(bsd_context, ret_cred,cred);
+    if (cred) krb5_copy_creds(bsd_context, ret_cred, cred);
     krb5_free_creds(bsd_context, ret_cred);
     
     return (0);
