@@ -5,6 +5,7 @@
 #include "kv5m_err.h"
 #include "asn1_err.h"
 #include "kdb5_err.h"
+#include "krb5_libinit.h"
 
 static	int		initialized = 0;
 
