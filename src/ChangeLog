@@ -1,3 +1,9 @@
+Wed Jul  8 01:10:44 1998  Matthew D Hancher  <mdh@mit.edu>
+
+	* aclocal.m4: Allow shared libraries to build properly under Irix
+ 	6.x with gcc. (This is actually a fix of a previous fix that
+ 	didn't make it into ChangeLog.)
+
 Thu Jul  2 20:41:02 1998  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* Makefile.in: Update commands to build the Macintosh MPW Makefile
