@@ -195,7 +195,8 @@ krb5_get_cred_via_tkt (context, tkt, kdcoptions, address, in_cred, out_cred)
     if (dec_rep->enc_part2->nonce != tgsrep.expected_nonce)
 	retval = KRB5_KDCREP_MODIFIED;
 
-    if ((in_cred->times.starttime != 0) &&
+    if ((kdcoptions & KDC_OPT_POSTDATED) &&
+	(in_cred->times.starttime != 0) &&
     	(in_cred->times.starttime != dec_rep->enc_part2->times.starttime))
 	retval = KRB5_KDCREP_MODIFIED;
 

@@ -1,3 +1,9 @@
+Fri Sep 29 00:08:53 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* gc_via_tkt.c (krb5_get_cred_via_tkt): Only check the returned
+		starttime to make sure it matches the requested starttime
+		if we requested a postdated ticket.
+
 Thu Sep 28 22:58:53 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* conv_princ.c (krb5_425_conv_principal): Only convert instances
