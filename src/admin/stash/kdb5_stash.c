@@ -164,11 +164,11 @@ char *argv[];
     }	
     if (retval = krb5_db_store_mkey(keyfile, master_princ, &master_keyblock)) {
 	com_err(argv[0], errno, "while storing key");
-	bzero((char *)master_keyblock.contents, master_keyblock.length);
+	memset((char *)master_keyblock.contents, 0, master_keyblock.length);
 	(void) krb5_db_fini();
 	exit(1);
     }
-    bzero((char *)master_keyblock.contents, master_keyblock.length);
+    memset((char *)master_keyblock.contents, 0, master_keyblock.length);
     if (retval = krb5_db_fini()) {
 	com_err(argv[0], retval, "closing database '%s'", dbname);
 	exit(1);

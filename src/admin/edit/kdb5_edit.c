@@ -87,7 +87,7 @@ void
 quit()
 {
     krb5_error_code retval = krb5_db_fini();
-    bzero((char *)master_keyblock.contents, master_keyblock.length);
+    memset((char *)master_keyblock.contents, 0, master_keyblock.length);
     if (retval) {
 	com_err(progname, retval, "while closing database");
 	exit(1);
@@ -208,7 +208,7 @@ char *argv[];
     (void) (*csentry->finish_key)(&master_encblock);
     (void) (*csentry->finish_random_key)(&master_random);
     retval = krb5_db_fini();
-    bzero((char *)master_keyblock.contents, master_keyblock.length);
+    memset((char *)master_keyblock.contents, 0, master_keyblock.length);
     if (retval && retval != KRB5_KDB_DBNOTINITED) {
 	com_err(progname, retval, "while closing database");
 	exit(1);
@@ -350,14 +350,14 @@ OLDDECLARG(krb5_kvno, vno)
     newentry.mod_name = master_princ;
     if (retval = krb5_timeofday(&newentry.mod_date)) {
 	com_err(argv[0], retval, "while fetching date");
-	bzero((char *)newentry.key.contents, newentry.key.length);
+	memset((char *)newentry.key.contents, 0, newentry.key.length);
 	free((char *)newentry.key.contents);
 	return;
     }
     newentry.attributes = mblock.flags;
     
     retval = krb5_db_put_principal(&newentry, &one);
-    bzero((char *)newentry.key.contents, newentry.key.length);
+    memset((char *)newentry.key.contents, 0, newentry.key.length);
     free((char *)newentry.key.contents);
     if (retval) {
 	com_err(argv[0], retval, "while storing entry for '%s'\n", argv[1]);
@@ -520,7 +520,7 @@ char *argv[];
 	return;
     }
 
-    bzero(ktname, sizeof(ktname));
+    memset(ktname, 0, sizeof(ktname));
     strcpy(ktname, "WRFILE:");
     if (strlen(argv[1])+sizeof("WRFILE:")+sizeof("-new-srvtab") >= sizeof(ktname)) {
 	com_err(argv[0], 0,
@@ -587,7 +587,7 @@ char *argv[];
 	} else
 	    printf("'%s' added to keytab '%s'\n",
 		   pname, ktname);
-	bzero((char *)newentry.key.contents, newentry.key.length);
+	memset((char *)newentry.key.contents, 0, newentry.key.length);
 	free((char *)newentry.key.contents);
     cleanall:
 	    krb5_db_free_principal(&dbentry, nentries);
@@ -719,7 +719,7 @@ OLDDECLARG(krb5_kvno, vno)
 	return;
     }
     add_key(argv, princ, tempkey, ++vno);
-    bzero((char *)tempkey->contents, tempkey->length);
+    memset((char *)tempkey->contents, 0, tempkey->length);
     krb5_free_keyblock(tempkey);
     return;
 }
@@ -809,13 +809,13 @@ OLDDECLARG(krb5_kvno, vno)
 				&tempkey,
 				&pwd,
 				string_princ);
-    bzero(password, sizeof(password)); /* erase it */
+    memset(password, 0, sizeof(password)); /* erase it */
     if (retval) {
 	com_err(argv[0], retval, "while converting password to key for '%s'", argv[1]);
 	return;
     }
     add_key(argv, princ, &tempkey, ++vno);
-    bzero((char *)tempkey.contents, tempkey.length);
+    memset((char *)tempkey.contents, 0, tempkey.length);
     free((char *)tempkey.contents);
     return;
 }

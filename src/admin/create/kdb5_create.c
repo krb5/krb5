@@ -251,7 +251,7 @@ master key name '%s'\n",
     (void) krb5_db_fini();
     (void) (*csentry->finish_key)(&master_encblock);
     (void) (*csentry->finish_random_key)(&rblock.rseed);
-    bzero((char *)master_keyblock.contents, master_keyblock.length);
+    memset((char *)master_keyblock.contents, 0, master_keyblock.length);
     exit(0);
 
 }
