@@ -401,12 +401,12 @@ krb5_get_in_tkt(context, options, addrs, ktypes, ptypes, key_proc, keyseed,
     request.msg_type = KRB5_AS_REQ;
     request.addresses = 0;
     request.ktype = 0;
+    request.padata = 0;
     if (addrs)
 	request.addresses = (krb5_address **) addrs;
     else
 	if ((retval = krb5_os_localaddr(context, &request.addresses)))
 	    goto cleanup;
-    request.padata = 0;
     request.kdc_options = options;
     request.client = creds->client;
     request.server = creds->server;
