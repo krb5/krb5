@@ -1,3 +1,6 @@
+Tue Jun 20 12:48:06 1995  Tom Yu  (tlyu@dragons-lair)
+
+	* configure.in: add missing check for stdlib.h
 
 Thu Jun 15 17:49:31 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in - Change explicit library names to -l<lib> form, and
