@@ -1,3 +1,8 @@
+Tue Mar 18 13:47:26 1997  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* krb5.hin: Add 'extern "C"' for C++ compatibility; also check for
+		__cplusplus since some C++ compilers don't set __STDC__
+
 Tue Feb 25 00:33:52 1997  Richard Basch  <basch@lehman.com>
 
 	* krb5.hin: Export krb5_read_password

@@ -157,7 +157,7 @@ typedef struct _krb5_data {
 #define krb5_const const
 #endif
 
-#if defined(__STDC__) || defined(HAS_VOID_TYPE)
+#if defined(__STDC__) || defined(__cplusplus) || defined(HAS_VOID_TYPE)
 typedef	void FAR * krb5_pointer;
 typedef void krb5_const FAR * krb5_const_pointer;
 #else
@@ -165,13 +165,13 @@ typedef char FAR * krb5_pointer;
 typedef char krb5_const FAR * krb5_const_pointer;
 #endif
 
-#if (defined(__STDC__) || defined(_MSDOS) || defined(_WIN32) || defined(KRB5_PROVIDE_PROTOTYPES)) && !defined(KRB5_NO_PROTOTYPES)
+#if (defined(__STDC__) || defined(__cplusplus) || defined(_MSDOS) || defined(_WIN32) || defined(KRB5_PROVIDE_PROTOTYPES)) && !defined(KRB5_NO_PROTOTYPES)
 #define KRB5_PROTOTYPE(x) x
-#if defined(__STDC__) || defined(HAVE_STDARG_H) || defined(_MSDOS) || defined(_WIN32)
+#if defined(__STDC__) || defined(__cplusplus) || defined(HAVE_STDARG_H) || defined(_MSDOS) || defined(_WIN32)
 #define	KRB5_STDARG_P(x) x
 #else
 #define KRB5_STDARG_P(x) ()
-#endif /* defined(__STDC__) || defined(HAVE_STDARG_H) */
+#endif /* defined(__STDC__) || defined(__cplusplus) || defined(HAVE_STDARG_H) */
 #else
 #define KRB5_PROTOTYPE(x) ()
 #define KRB5_STDARG_P(x) ()
@@ -340,6 +340,10 @@ typedef struct _krb5_enc_data {
 #define krb5_xc(ptr,args) ((*(ptr)) args)
 #endif
 
+#ifdef __cplusplus
+#extern "C" {
+#endif
+
 /*
  * cryptosystem routine prototypes
  */
@@ -431,6 +435,9 @@ krb5_error_code krb5_decrypt_data
 	KRB5_PROTOTYPE((krb5_context context, krb5_keyblock *key, 
 		krb5_pointer ivec, krb5_enc_data *data, 
 		krb5_data *enc_data));
+#ifdef __cplusplus
+}
+#endif
 
 /*
  * end "encryption.h"
@@ -1077,6 +1084,10 @@ typedef struct _krb5_rc_ops {
 	KRB5_NPROTOTYPE((krb5_context, krb5_rcache, char FAR *));
 } krb5_rc_ops;
 
+#ifdef __cplusplus
+#extern "C" {
+#endif
+
 krb5_error_code krb5_rc_default 
 	KRB5_PROTOTYPE((krb5_context,
 		krb5_rcache FAR *));
@@ -1100,6 +1111,11 @@ krb5_error_code krb5_auth_to_rep
 	KRB5_PROTOTYPE((krb5_context,
 		krb5_tkt_authent FAR *,
 		krb5_donot_replay FAR *));
+
+#ifdef __cplusplus
+}
+#endif
+
 
 #define krb5_rc_initialize(context, id, span) krb5_x((id)->ops->init,(context, id, span))
 #define krb5_rc_recover(context, id) krb5_x((id)->ops->recover,(context, id))
@@ -1213,6 +1229,10 @@ extern krb5_kt_ops krb5_kt_dfl_ops;
 /*
  * begin "func-proto.h"
  */
+
+#ifdef __cplusplus
+#extern "C" {
+#endif
 
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_init_context
 	KRB5_PROTOTYPE((krb5_context FAR *));
@@ -2004,6 +2024,9 @@ KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_timestamp_to_sfstring
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_deltat_to_string
 	KRB5_PROTOTYPE((krb5_deltat, char FAR *, size_t));
 
+#ifdef __cplusplus
+}
+#endif
 
 
 /* The name of the Kerberos ticket granting service... and its size */
