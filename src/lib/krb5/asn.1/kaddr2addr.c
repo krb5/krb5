@@ -32,6 +32,10 @@ krb5_address2KRB5_HostAddresses(val, error)
 register krb5_address * const *val;
 register int *error;
 {
+#if 0
+    /* this code is for -h2 style ISODE structures.  However, pepsy
+       generates horribly broken when given -h2. */
+
     register struct type_KRB5_HostAddresses *retval;
     register krb5_address * const *temp;
     register int i;
@@ -63,6 +67,45 @@ register int *error;
 	if (!retval->element_KRB5_0[i]->address) {
 	    /* clean up */
 	    xfree(retval->element_KRB5_0[i]);
+	    goto errout;
+	}
+    }
+    return(retval);
+#endif
+    register struct type_KRB5_HostAddresses *retval = 0, *rv1 = 0, *rv2;
+    register krb5_address * const *temp;
+    register int i;
+
+    for (i = 0, temp = val; *temp; temp++,i++, rv1 = rv2) {
+
+	rv2 = (struct type_KRB5_HostAddresses *) xmalloc(sizeof(*rv2));
+	if (!rv2) {
+	    if (retval)
+		free_KRB5_HostAddresses(retval);
+	    *error = ENOMEM;
+	    return(0);
+	}
+	if (rv1)
+	    rv1->next = rv2;
+	xbzero((char *)rv2, sizeof (*rv2));
+	if (!retval)
+	    retval = rv2;
+
+	rv2->element_KRB5_0 = (struct element_KRB5_1 *)
+	    xmalloc(sizeof(*(retval->element_KRB5_0)));
+	if (!rv2->element_KRB5_0) {
+	errout:
+	    if (retval)
+		free_KRB5_HostAddresses(retval);
+	    *error = ENOMEM;
+	    return(0);
+	}	    
+	rv2->element_KRB5_0->addr__type = (val[i])->addrtype;
+	rv2->element_KRB5_0->address = str2qb((char *)(val[i])->contents,
+					      (val[i])->length, 1);
+	if (!rv2->element_KRB5_0->address) {
+	    /* clean up */
+	    xfree(rv2->element_KRB5_0);
 	    goto errout;
 	}
     }

@@ -32,6 +32,10 @@ KRB5_AuthorizationData2krb5_authdata(val, error)
 const struct type_KRB5_AuthorizationData *val;
 register int *error;
 {
+#if 0
+    /* this code is for -h2 style ISODE structures.  However, pepsy
+       generates horribly broken when given -h2. */
+
     register krb5_authdata **retval;
     register int i;
 
@@ -56,6 +60,7 @@ register int *error;
 	retval[i]->contents = (unsigned char *)xmalloc(val->element_KRB5_2[i]->ad__data->qb_forw->qb_len);
 	if (!retval[i]->contents) {
 	    xfree(retval[i]);
+	    retval[i] = 0;
 	    krb5_free_authdata(retval);
 	    goto nomem;
 	}
@@ -63,6 +68,46 @@ register int *error;
 	retval[i]->length = val->element_KRB5_2[i]->ad__data->qb_forw->qb_len;
 	xbcopy(val->element_KRB5_2[i]->ad__data->qb_forw->qb_data,
 	      &retval[i]->contents[0], retval[i]->length);
+    }
+    retval[i] = 0;
+    return(retval);
+#endif
+
+    register krb5_authdata **retval;
+    register int i;
+    register struct type_KRB5_AuthorizationData *rv;
+
+    for (i = 0, rv = val; rv; i++, rv = rv->next)
+	;
+
+    /* plus one for null terminator */
+    retval = (krb5_authdata **) xcalloc(i + 1, sizeof(*retval));
+    if (!retval) {
+    nomem:
+	*error = ENOMEM;
+	return(0);
+    }
+    for (i = 0, rv = val; rv->next; rv = rv->next, i++) {
+	if (qb_pullup(rv->element_KRB5_2->ad__data) != OK) {
+	    xfree(retval);
+	    goto nomem;
+	}
+	retval[i] = (krb5_authdata *) xmalloc(sizeof(*retval[i]));
+	if (!retval[i]) {
+	    krb5_free_authdata(retval);
+	    goto nomem;
+	}
+	retval[i]->contents = (unsigned char *)xmalloc(rv->element_KRB5_2->ad__data->qb_forw->qb_len);
+	if (!retval[i]->contents) {
+	    xfree(retval[i]);
+	    retval[i] = 0;
+	    krb5_free_authdata(retval);
+	    goto nomem;
+	}
+	retval[i]->ad_type = rv->element_KRB5_2->ad__type;
+	retval[i]->length = rv->element_KRB5_2->ad__data->qb_forw->qb_len;
+	xbcopy(rv->element_KRB5_2->ad__data->qb_forw->qb_data,
+	      retval[i]->contents, retval[i]->length);
     }
     retval[i] = 0;
     return(retval);
