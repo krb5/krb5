@@ -2,7 +2,7 @@
  * $Source$
  * $Author$
  *
- * Copyright 1990 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991 by the Massachusetts Institute of Technology.
  *
  * For copying and distribution information, please see the file
  * <krb5/copyright.h>.
@@ -72,12 +72,29 @@ krb5_fcc_generate_new (id)
      strcpy(((krb5_fcc_data *) lid->data)->filename, scratch);
 
      /* Make sure the file name is reserved */
-     ret = open(((krb5_fcc_data *) lid->data)->filename, O_CREAT | O_EXCL, 0);
+     ret = open(((krb5_fcc_data *) lid->data)->filename,
+		O_CREAT | O_EXCL | O_WRONLY, 0);
      if (ret == -1)
 	  return krb5_fcc_interpret(errno);
      else {
+	  krb5_int16 fcc_fvno = htons(KRB5_FCC_FVNO);
+	  int errsave, cnt;
+
 	  /* Ignore user's umask, set mode = 0600 */
 	  fchmod(ret, S_IREAD | S_IWRITE);
+	  if ((cnt = write(ret, (char *)&fcc_fvno, sizeof(fcc_fvno)))
+	      != sizeof(fcc_fvno)) {
+	      errsave = errno;
+	      (void) close(ret);
+	      (void) unlink(((krb5_fcc_data *) lid->data)->filename);
+	      return (cnt == -1) ? krb5_fcc_interpret(errsave) : KRB5_CC_IO;
+	  }
+	  if (close(ret) == -1) {
+	      errsave = errno;
+	      (void) unlink(((krb5_fcc_data *) lid->data)->filename);
+	      return krb5_fcc_interpret(errsave);
+	  }
+
 	  close(ret);
 	  *id = lid;
 	  return KRB5_OK;

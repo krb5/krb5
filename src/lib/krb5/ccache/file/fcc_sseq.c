@@ -2,7 +2,7 @@
  * $Source$
  * $Author$
  *
- * Copyright 1990 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991 by the Massachusetts Institute of Technology.
  *
  * For copying and distribution information, please see the file
  * <krb5/copyright.h>.
@@ -37,29 +37,28 @@ krb5_fcc_start_seq_get(id, cursor)
    krb5_cc_cursor *cursor;
 {
      krb5_fcc_cursor *fcursor;
-     int ret;
+     int ret = KRB5_OK;
      
      fcursor = (krb5_fcc_cursor *) malloc(sizeof(krb5_fcc_cursor));
      if (fcursor == NULL)
 	  return KRB5_CC_NOMEM;
-
-     /* Make sure we start reading right after the primary principal */
      if (OPENCLOSE(id)) {
-	  ret = open(((krb5_fcc_data *) id->data)->filename, O_RDONLY, 0);
-	  if (ret < 0)
-	       return krb5_fcc_interpret(errno);
-	  ((krb5_fcc_data *) id->data)->fd = ret;
+	  ret = krb5_fcc_open_file(id, FCC_OPEN_RDONLY);
+	  if (ret) {
+	      free((char *)fcursor);
+	      return ret;
+	  }
      }
      else
-	  lseek(((krb5_fcc_data *) id->data)->fd, 0, L_SET);
+	  /* seek after the version number */
+	  lseek(((krb5_fcc_data *) id->data)->fd, sizeof(krb5_int16), L_SET);
+
+     /* Make sure we start reading right after the primary principal */
 
      krb5_fcc_skip_principal(id);
      fcursor->pos = tell(((krb5_fcc_data *) id->data)->fd);
      *cursor = (krb5_cc_cursor) fcursor;
 
-     if (OPENCLOSE(id)) {
-	  close(((krb5_fcc_data *) id->data)->fd);
-	  ((krb5_fcc_data *) id->data)->fd = -1;
-     }
-     return KRB5_OK;
+     MAYBE_CLOSE(id, ret);
+     return ret;
 }
