@@ -377,8 +377,6 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
        major_status = GSS_S_FAILURE;
        goto fail;
    }
-   krb5_auth_con_setflags(context, auth_context,
-			  KRB5_AUTH_CONTEXT_DO_SEQUENCE);
    if (cred->rcache) {
        if ((code = krb5_auth_con_setrcache(context, auth_context, cred->rcache))) {
 	   major_status = GSS_S_FAILURE;
@@ -395,6 +393,8 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
        major_status = GSS_S_FAILURE;
        goto fail;
    }
+   krb5_auth_con_setflags(context, auth_context,
+			  KRB5_AUTH_CONTEXT_DO_SEQUENCE);
 
    krb5_auth_con_getauthenticator(context, auth_context, &authdat);
 
