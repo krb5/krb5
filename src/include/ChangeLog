@@ -1,3 +1,8 @@
+
+Fri Apr 28 01:44:51 1995  Chris Provenzano  (proven@mit.edu)
+
+	* krb5.h (krb5_send_tgs()) : Removed krb5_cksumtype argument.
+
 Thu Apr 27 21:36:01 1995  Chris Provenzano  (proven@mit.edu)
 
         * krb5.h : Added mask AP_OPTS_WIRE_MASK.

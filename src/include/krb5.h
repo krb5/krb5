@@ -1626,7 +1626,6 @@ krb5_error_code krb5_send_tgs
 		   const krb5_flags,
 		   const krb5_ticket_times *,
 		   const krb5_enctype *,
-		   const krb5_cksumtype,
 		   krb5_const_principal,
 		   krb5_address * const *,
 		   krb5_authdata * const *,
