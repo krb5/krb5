@@ -1,3 +1,8 @@
+Thu Jul 31 14:54:10 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* kdb_db2.c (krb5_db2_db_delete_principal): Fix switch statement
+	        so that all cases have one statement.
+
 Tue Jul 29 02:35:09 1997  Tom Yu  <tlyu@mit.edu>
 
 	* kdb_db2.c (krb5_db2_db_set_hashfirst): Don't cast a

@@ -1044,6 +1044,7 @@ krb5_db2_db_delete_principal(context, searchfor, nentries)
 	*nentries = 0;
 	goto cleankey;
     case 0:
+	;
     }
     memset((char *)&entry, 0, sizeof(entry));
     contdata.data = contents.data;
