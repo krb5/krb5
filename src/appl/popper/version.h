@@ -4,12 +4,19 @@
  * specifies the terms and conditions for redistribution.
  *
  * static char copyright[] = "Copyright (c) 1990 Regents of the University of California.\nAll rights reserved.\n";
- * static char SccsId[] = "@(#)version.h    1.11  9/15/90";
+ * static char SccsId[] = "@(#)version.h	2.6  4/3/91";
  *
  */
 
 /*
  *  Current version of this POP implementation
  */
-
-#define VERSION         "1.7"
+#ifdef KERBEROS
+#ifdef KRB5
+#define VERSION         "1.831beta Kerberos5"
+#else
+#define VERSION         "1.831beta KerberosIV"
+#endif
+#else
+#define VERSION         "1.831beta"
+#endif

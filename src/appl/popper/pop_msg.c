@@ -6,7 +6,7 @@
 
 #ifndef lint
 static char copyright[] = "Copyright (c) 1990 Regents of the University of California.\nAll rights reserved.\n";
-static char SccsId[] = "@(#)pop_msg.c   1.7 7/13/90";
+static char SccsId[] = "@(#)pop_msg.c	2.1  3/18/91";
 #endif not lint
 
 #include <stdio.h>
@@ -49,18 +49,22 @@ va_dcl
 
     /*  Append the message (formatted, if necessary) */
     if (format) 
-#ifdef HAVE_VSPRINTF
+#ifdef HAS_VSPRINTF
         vsprintf(mp,format,ap);
 #else
         (void)sprintf(mp,format,((int *)ap)[0],((int *)ap)[1],((int *)ap)[2],
                 ((int *)ap)[3],((int *)ap)[4]);
-#endif HAVE_VSPRINTF
+#endif /* HAS_VSPRINTF */
     
     /*  Log the message if debugging is turned on */
 #ifdef DEBUG
     if (p->debug && stat == POP_SUCCESS)
         pop_log(p,POP_DEBUG,"%s",message);
 #endif DEBUG
+
+    /*  Log the message if a failure occurred */
+    if (stat != POP_SUCCESS) 
+        pop_log(p,POP_PRIORITY,"%s",message);
 
     /*  Append the <CR><LF> */
     (void)strcat(message, "\r\n");

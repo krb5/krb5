@@ -4,27 +4,27 @@
  * specifies the terms and conditions for redistribution.
  */
 
-/*
- * code for mh compatibility (tom) 
- */
-
 #ifndef lint
 static char copyright[] = "Copyright (c) 1990 Regents of the University of California.\nAll rights reserved.\n";
-static char SccsId[] = "@(#)pop_updt.c  1.9 8/16/90";
+static char SccsId[] = "@(#)pop_updt.c	2.3  3/20/91";
 #endif not lint
 
 #include <errno.h>
 #include <stdio.h>
+#ifdef HAS_UNISTD_H
+#include <unistd.h>
+#endif
+#ifdef POSIX_FILE_LOCKS
+#include <fcntl.h>
+#endif
 #include <sys/types.h>
 #include <strings.h>
 #include <sys/stat.h>
 #include <sys/file.h>
 #include "popper.h"
 
-extern int      errno;
-
 static char standard_error[] =
-    "Error updating primary drop. Mailbox unchanged.";
+    "Error error updating primary drop. Mailbox unchanged";
 
 /* 
  *  updt:   Apply changes to a user's POP maildrop
@@ -45,11 +45,14 @@ POP     *   p;
                                                         counter */
     register int            status_written;         /*  Status header field 
                                                         written */
-    int                     nchar;                  /*  Bytes read/written */
+    int                     nchar;                  /* Bytes read/written */
 
-    long                    offset;                 /*  New mail offset */
-    
+    off_t                   offset;                 /* New mail offset */
+
     int                     begun;                  /*  Sanity check */
+#ifdef POSIX_FILE_LOCKS
+    struct flock            lock_arg;
+#endif
 
 #ifdef DEBUG
     if (p->debug) {
@@ -72,18 +75,29 @@ POP     *   p;
 #endif DEBUG
 
     /*  Open the user's real maildrop */
-    if (((mfd = open(p->drop_name,O_RDWR|O_CREAT,0666)) == -1 ) ||
-        ((md = fdopen(mfd,"r+")) == NULL)) {
-        return pop_msg(p,POP_FAILURE,"%s %s", 
-		       p->drop_name, sys_errlist[errno]);
+    if ((mfd = open(p->drop_name,O_RDWR|O_CREAT,0600)) == -1 ||
+        (md = fdopen(mfd,"r+")) == NULL) {
+        return pop_msg(p,POP_FAILURE,standard_error);
     }
 
     /*  Lock the user's real mail drop */
+#ifdef POSIX_FILE_LOCKS
+    lock_arg.l_type = F_WRLCK;
+    lock_arg.l_whence = 0;
+    lock_arg.l_start = 0;
+    lock_arg.l_len = 0;
+    if ( fcntl(mfd, F_SETLKW, &lock_arg) == -1) {
+        (void)fclose(md) ;
+        return pop_msg(p,POP_FAILURE, "lockf: '%s': %s", p->temp_drop,
+            strerror(errno));
+    }
+#else
     if ( flock(mfd,LOCK_EX) == -1 ) {
         (void)fclose(md) ;
         return pop_msg(p,POP_FAILURE, "flock: '%s': %s", p->temp_drop,
-            (errno < sys_nerr) ? sys_errlist[errno] : "");
+            strerror(errno));
     }
+#endif
 
     /* Go to the right places */
     offset = lseek((int)fileno(p->drop),0,L_XTND) ; 
@@ -97,7 +111,7 @@ POP     *   p;
         }
     if ( nchar != 0 ) {
         (void)fclose(md) ;
-        (void)ftruncate((int)fileno(p->drop),(int)offset) ;
+        (void)ftruncate((int)fileno(p->drop),offset) ;
         (void)fclose(p->drop) ;
         return pop_msg(p,POP_FAILURE,standard_error);
     }
@@ -116,11 +130,11 @@ POP     *   p;
         pop_log(p,POP_DEBUG,"Creating new maildrop \"%s\" from \"%s\"",
                 p->drop_name,p->temp_drop);
 #endif DEBUG
-    
+
     for (msg_num = 0; msg_num < p->msg_count; ++msg_num) {
 
         int doing_body;
-      
+
         /*  Get a pointer to the message information list */
         mp = &p->mlp[msg_num];
 
@@ -132,14 +146,13 @@ POP     *   p;
 #endif DEBUG
             continue;
         }
-	
+
         (void)fseek(p->drop,mp->offset,0);
 
 #ifdef DEBUG
         if(p->debug)
             pop_log(p,POP_DEBUG,"Copying message %d.",mp->number);
 #endif DEBUG
-
 	begun = 0;
 
         for(status_written = doing_body = 0 ;
@@ -147,6 +160,7 @@ POP     *   p;
 
             if (doing_body == 0) { /* Header */
 
+#ifdef MMDF
 	        /* panic, I'm tired and can't think contorted. */
 	        if(is_msg_boundary(buffer) && begun) {  
 		  pop_log(p, POP_ERROR,
@@ -158,7 +172,7 @@ POP     *   p;
 		}
 
 		begun = 1;
-
+#endif
                 /*  Update the message status */
                 if (strncasecmp(buffer,"Status:",7) == 0) {
                     if (mp->retr_flag)
@@ -171,32 +185,31 @@ POP     *   p;
                 /*  A blank line signals the end of the header. */
                 if (*buffer == '\n') {
                     doing_body = 1;
-
-#ifndef NOSTATUS
                     if (status_written == 0) {
                         if (mp->retr_flag)
                             (void)fputs("Status: RO\n\n",md);
                         else
                             (void)fputs("Status: U\n\n",md);
                     }
-		    else
-#endif /* NOSTATUS */
-                    (void)fputs ("\n", md);
+                    else (void)fputs ("\n", md);
                     continue;
                 }
                 /*  Save another header line */
                 (void)fputs (buffer, md);
-	    }
-	    else { /* Body */ 
+            } 
+            else { /* Body */ 
+#ifdef MMDF
 		if (strncmp(buffer,"\001\001\001\001",4) == 0) {
 		    (void)fputs (buffer, md);
 		    break;
 		}
-		if(is_msg_boundary(buffer))
-		  break;
+		if (is_msg_boundary(buffer)) break;
+#else
+                if (strncmp(buffer,"From ",5) == 0) break;
+#endif
                 (void)fputs (buffer, md);
-	    }
-	}
+            }
+        }
     }
 
     /* flush and check for errors now!  The new mail will writen
@@ -233,9 +246,7 @@ POP     *   p;
     return(pop_quit(p));
 }
 
-
-
-
+#ifdef MMDF
 is_msg_boundary(line)
      char *line;
 {
@@ -251,8 +262,12 @@ is_msg_boundary(line)
 
   if(*line++ != ' ')
     return(0);
-  
-  if(strlen(line) < 28)
+ 
+  /*
+   * check the line length but some timestamps do not include time zone 
+   */
+ 
+  if(strlen(line) < 24)
     return(0);
 
   /* Tue */
@@ -285,4 +300,4 @@ is_msg_boundary(line)
 
   return(1);
 }
-
+#endif

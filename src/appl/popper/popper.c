@@ -6,7 +6,7 @@
 
 #ifndef lint
 static char copyright[] = "Copyright (c) 1990 Regents of the University of California.\nAll rights reserved.\n";
-static char SccsId[] = "@(#)popper.c    1.7 7/13/90";
+static char SccsId[] = "@(#)popper.c	2.1  3/18/91";
 #endif not lint
 
 #include <stdio.h>
@@ -42,7 +42,7 @@ char    **  argv;
 #else /* !KERBEROS */
         "UCB Pop server (version %s) at %s starting.",
 #endif /* KERBEROS */
-	    VERSION,p.myhost);
+        VERSION,p.myhost);
 
     /*  State loop.  The POP server is always in a particular state in 
         which a specific suite of commands can be executed.  The following 
@@ -60,6 +60,7 @@ char    **  argv;
         else {
             /*  Search for the command in the command/state table */
             if ((s = pop_get_command(&p,message)) == NULL) continue;
+
             /*  Call the function associated with this command in 
                 the current state */
             if (s->function) p.CurrentState = s->result[(*s->function)(&p)];
@@ -72,13 +73,12 @@ char    **  argv;
         }       
     }
 
-
     /*  Say goodbye to the client */
     pop_msg(&p,POP_SUCCESS,"Pop server at %s signing off.",p.myhost);
 
     /*  Log the end of activity */
-    pop_log(&p,POP_DEBUG,
-        "%s: (v%s) Ending request from \"%s\".\n",p.ipaddr,VERSION,p.client);
+    pop_log(&p,POP_PRIORITY,
+        "(v%s) Ending request from \"%s\" at %s\n",VERSION,p.user,p.ipaddr);
 
     /*  Stop logging */
     closelog();

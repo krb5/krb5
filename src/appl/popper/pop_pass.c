@@ -4,21 +4,15 @@
  * specifies the terms and conditions for redistribution.
  */
 
-/* 
- * authorization rules for use with kerberos (tom)
- * password server using kerberos (jon)
- */
-
 #ifndef lint
 static char copyright[] = "Copyright (c) 1990 Regents of the University of California.\nAll rights reserved.\n";
-static char SccsId[] = "@(#)pop_pass.c  1.7 7/13/90";
+static char SccsId[] = "@(#)pop_pass.c	2.3  4/2/91";
 #endif not lint
 
 #include <stdio.h>
 #include <sys/types.h>
 #include <strings.h>
 #include <pwd.h>
-#include <netinet/in.h>
 #include "popper.h"
 
 #ifdef KERBEROS
@@ -39,7 +33,9 @@ extern char *client_name;
 #endif /* KRB5 */
 #endif /* KERBEROS */
 
-#ifndef KERBEROS_PASSWD_HACK
+#ifdef POP_PASSFILE
+struct passwd * our_getpwnam();
+#endif
 
 /* 
  *  pass:   Obtain the user password from a POP client
@@ -62,7 +58,6 @@ POP     *   p;
     register struct passwd  *   pw;
     char *crypt();
 #endif /* KERBEROS */
-
 
 #ifdef KERBEROS
 #ifdef KRB4
@@ -90,6 +85,7 @@ POP     *   p;
 
 #endif /* KRB4 */
 #ifdef KRB5
+#ifdef NO_CROSSREALM
     if (retval = krb5_get_default_realm(&lrealm)) {
         pop_log(p, POP_WARNING, "%s: (%s) %s", p->client, client_name,
 		error_message(retval));
@@ -105,7 +101,7 @@ POP     *   p;
 		     "Kerberos realm \"%*s\" not accepted.",
 			tmpdata->length, tmpdata->data));
     }
-
+#endif
     /* only accept one-component names, i.e. realm and name only */
     if (krb5_princ_size(ext_client) > 1) {
         pop_log(p, POP_WARNING, "%s: (%s) instance not accepted.", 
@@ -134,51 +130,45 @@ POP     *   p;
 #endif /* KRB5 */
 
     /*  Build the name of the user's maildrop */
-    (void)sprintf(p->drop_name,"%s/%s",POP_MAILDIR,p->user);
+    (void)sprintf(p->drop_name,"%s/%s",MAILDIR,p->user);
     
     /*  Make a temporary copy of the user's maildrop */
-    if (pop_dropcopy(p) != POP_SUCCESS) return (POP_FAILURE);
+    if (pop_dropcopy(p, NULL) != POP_SUCCESS) return (POP_FAILURE);
 
 #else /* KERBEROS */
 
     /*  Look for the user in the password file */
+#ifdef POP_PASSFILE
+    our_setpwent(POP_PASSFILE);
+
+    if ((pw = our_getpwnam(p->user)) == NULL)
+#else    
     if ((pw = getpwnam(p->user)) == NULL)
+#endif
         return (pop_msg(p,POP_FAILURE,
             "Password supplied for \"%s\" is incorrect.",p->user));
-        
+
     /*  We don't accept connections from users with null passwords */
     if (pw->pw_passwd == NULL)
         return (pop_msg(p,POP_FAILURE,
             "Password supplied for \"%s\" is incorrect.",p->user));
-      
+
     /*  Compare the supplied password with the password file entry */
     if (strcmp (crypt (p->pop_parm[1], pw->pw_passwd), pw->pw_passwd) != 0)
         return (pop_msg(p,POP_FAILURE,
             "Password supplied for \"%s\" is incorrect.",p->user));
 
     /*  Build the name of the user's maildrop */
-    (void)sprintf(p->drop_name,"%s/%s",POP_MAILDIR,p->user);
+    (void)sprintf(p->drop_name,"%s/%s",MAILDIR,p->user);
 
     /*  Make a temporary copy of the user's maildrop */
-    if (pop_dropcopy(p) != POP_SUCCESS) return (POP_FAILURE);
-
-#ifndef KERBEROS_PASSWD_HACK
-    /*  Set the group and user id */
-    (void)setgid(pw->pw_gid);
-    (void)setuid(pw->pw_uid);
-#endif /* KERBEROS_PASSWD_HACK */
-
-#ifdef DEBUG
-    if(p->debug)pop_log(p,POP_DEBUG,"uid = %d, gid = %d",getuid(),getgid());
-#endif DEBUG
+    /*    and set the group and user id */
+    if (pop_dropcopy(p,pw) != POP_SUCCESS) return (POP_FAILURE);
 
 #endif /* KERBEROS */
 
     /*  Get information about the maildrop */
-    if (pop_dropinfo(p) != POP_SUCCESS) {
-      pop_log(p, POP_PRIORITY, "dropinfo failure");
-      return(POP_FAILURE);
-    }
+    if (pop_dropinfo(p) != POP_SUCCESS) return(POP_FAILURE);
 
     /*  Initialize the last-message-accessed number */
     p->last_msg = 0;
@@ -189,189 +179,69 @@ POP     *   p;
             p->user,p->msg_count,p->drop_size));
 }
 
-
-
-
-
-#else /* KERBEROS_PASSWD_HACK */
-
-
-
-#ifdef KRB4
+#ifdef POP_PASSFILE
 
 /*
- * Check to see if the user is in the passwd file, if not get a kerberos
- * ticket with the password
+ * I'm getting myself deeper and deeper
  */
 
+static char *pwfile = "/etc/passwd";
 
-
-#include <sys/file.h>
-#include <netdb.h>
-#include <krb.h>
-
-int pop_pass (p)
-POP     *   p;
+our_setpwent(file)
+     char *file;
 {
-    register struct passwd  *   pw;
-    char *crypt();
-    
-    setpwfile(POP_PASSFILE);
-
-    /*  Look for the user in the password file */
-    pw = getpwnam(p->user);
-
-    /*  Compare the supplied password with the password file entry */
-    if (pw && pw->pw_passwd) {
-      if (strcmp (crypt (p->pop_parm[1], pw->pw_passwd), pw->pw_passwd) != 0)
-        return (pop_msg(p,POP_FAILURE,
-            "Password supplied for \"%s\" is incorrect.",p->user));
+  if(file)
+    {
+      pwfile = (char *) malloc(strlen(file) + 1);
+      if(pwfile)
+	strcpy(pwfile, file);
+      else
+	return(-1);
+      return(0);
     }
-    else {
-      if(verify_passwd_hack_hack_hack(p) != POP_SUCCESS)
-	return(POP_FAILURE);
-    }
-
-    /*  Build the name of the user's maildrop */
-    (void)sprintf(p->drop_name,"%s/%s",POP_MAILDIR,p->user);
-    
-    /*  Make a temporary copy of the user's maildrop */
-    if (pop_dropcopy(p) != POP_SUCCESS) return (POP_FAILURE);
-
-    
-#ifndef KERBEROS_PASSWD_HACK
-    /*  Set the group and user id */
-    (void)setgid(pw->pw_gid);
-    (void)setuid(pw->pw_uid);
-#endif /* KERBEROS_PASSWD_HACK */
-
-#ifdef DEBUG
-    if(p->debug)pop_log(p,POP_DEBUG,"uid = %d, gid = %d",getuid(),getgid());
-#endif DEBUG
-
-    /*  Get information about the maildrop */
-    if (pop_dropinfo(p) != POP_SUCCESS) {
-      pop_log(p, POP_PRIORITY, "dropinfo failure");
-      return(POP_FAILURE);
-    }
-
-    /*  Initialize the last-message-accessed number */
-    p->last_msg = 0;
-
-    /*  Authorization completed successfully */
-    return (pop_msg (p,POP_SUCCESS,
-        "%s has %d message(s) (%d octets).",
-            p->user,p->msg_count,p->drop_size));
+  return(-1);
 }
 
-
-/* for Ultrix and friends ... */
-#ifndef MAXHOSTNAMELEN
-#define MAXHOSTNAMELEN 64
-#endif
-
-#ifndef MAXPATHLEN
-#define MAXPATHLEN 1024
-#endif
-
-
-int verify_passwd_hack_hack_hack(p)
-     POP *p;
+struct passwd *
+our_getpwnam(user)
+     char *user;
 {
-    char lrealm[REALM_SZ];
-    int status, fd; 
-    KTEXT_ST ticket;
-    AUTH_DAT kdata;
-    char savehost[MAXHOSTNAMELEN];
-    char tkt_file_name[MAXPATHLEN];
-    struct sockaddr_in sin;
-    int len;
+  FILE *fp;
+  char buf[BUFSIZ];
+  register char *c;
+  register char *d;
+  static struct passwd p;
 
-    extern int errno;
-    extern int sp;
+  if(!(fp = fopen(pwfile, "r")))
+    return(NULL);
 
-    /* Be sure ticket file is correct and exists */
+  bzero(&p, sizeof(p));
+  while(fgets(buf, sizeof(buf), fp))
+    {
+      if(!(c = (char *) index(buf, ':')))
+	continue;
 
-    sprintf(tkt_file_name, "/tmp/tkt_pop.%s.%d", p->user, getpid());
-    if (setenv("KRBTKFILE", tkt_file_name, 1 /* overwrite = yes */))
-      return(pop_msg(p,POP_FAILURE, "Could not set ticket file name."));
-
-    if ((fd = open(tkt_file_name, O_RDWR|O_CREAT, 0600)) == -1) {
-      close(fd);
-	pop_log(p, POP_ERROR, "%s: could not create ticket file, \"%s\": %s",
-		p->user, tkt_file_name, sys_errlist[errno]);
-	return(pop_msg(p,POP_FAILURE,"POP server error: %s while creating %s.",
-		       sys_errlist[errno], tkt_file_name));
-    }
-    close(fd);
-
-    /* 
-     * Get an initial ticket using the given name/password and then use it.
-     * This hack will allow us to stop maintaining a separate pop passwd 
-     * on eagle. We can cut over to real Kerberos POP clients at any point. 
-     */
-
-    if ((status = krb_get_lrealm(lrealm,1)) == KFAILURE) {
-        pop_log(p,POP_ERROR, "%s (%s):  error getting local realm:  \"%s\".", 
-		p->user, p->client, krb_err_txt[status]);
-	return(pop_msg(p,POP_FAILURE, "POP server error:  \"%s\".", 
-		       krb_err_txt[status]));
-    }
-    
-    status = krb_get_pw_in_tkt(p->user, "", lrealm, "krbtgt", lrealm,
-				2 /* 10 minute lifetime */, p->pop_parm[1]);
-    if (status != KSUCCESS) {
-        pop_log(p,POP_WARNING, "%s (%s): error getting tgt: %s", 
-		p->user, p->client, krb_err_txt[status]);
-      return(pop_msg(p,POP_FAILURE,
-		       "Kerberos authentication error:  \"%s\".", 
-		       krb_err_txt[status]));
-    }
-    
-    /*
-     * Now use the ticket for something useful, to make sure
-     * it is valid.
-     */
-
-    (void) strncpy(savehost, krb_get_phost(p->myhost), sizeof(savehost));
-    savehost[sizeof(savehost)-1] = 0;
-
-    status = krb_mk_req(&ticket, "pop", savehost, lrealm, 0);
-    if (status == KDC_PR_UNKNOWN) {
-          pop_log(p, POP_ERROR, "%s (%s): %s", p->user, p->client, 
-		  krb_err_txt[status]);
-          return(pop_msg(p,POP_FAILURE,
-		     "POP server configuration error:  \"%s\".", 
-		     krb_err_txt[status]));
-    } 
+      *c++ = '\0';
+      if(strcmp(buf, user))
+	continue;
       
-    if (status != KSUCCESS) {
-	  dest_tkt();
-	  pop_log(p, POP_ERROR, "%s (%s): krb_mk_req error: %s", p->user, 
-		  p->client, krb_err_txt[status]);
-	  return(pop_msg(p,POP_FAILURE,
-	        "Kerberos authentication error (while getting ticket) \"%s\".",
-			 krb_err_txt[status]));
-    }  
+      p.pw_name = strdup(buf);
 
-    len = sizeof(sin);
-    getsockname(sp, &sin, &len); 
-    if ((status = krb_rd_req(&ticket, "pop", savehost, sin.sin_addr.s_addr, 
-			     &kdata, ""))
-	!= KSUCCESS) {
-         dest_tkt();
-	 pop_log(p, POP_WARNING, "%s (%s): krb_rd_req error: %s", p->user, 
-		 p->client, krb_err_txt[status]);
-	 return(pop_msg(p,POP_FAILURE,
-			"Kerberos authentication error:  \"%s\".", 
-			krb_err_txt[status]));
+#ifdef hpux
+      if (!(d = (char *) index(c, ':')))
+         return(&p);
+#else 
+      if(!((d = (char *) index(c, ':')) && (c = (char *) index(++d, ':')) &&
+	 (d = (char *) index(++c, ':'))))
+	return(&p);
+#endif
+      *d = '\0';
+
+      p.pw_passwd = strdup(c);
+      return(&p);
     }
-    dest_tkt();
-    return(POP_SUCCESS);
+  
+  return(NULL);
 }
 
-#endif
-#ifdef KRB5
- #error: no passwd_hack source for V5.
-#endif
-#endif /* KERBEROS_PASSWD_HACK */
+#endif /* POP_PASSFILE */

@@ -19,8 +19,6 @@ char *Zsignature = "Your friendly neighborhood post office.";
 
 void notify_recipient();
 
-#define POP_MAILDIR "/usr/spool/pop"
-
 char buffer[BUFSIZ];
 char xtmpfile[512];           /* tmp file */
 int  newmail;                /* fd for temp message */
@@ -94,7 +92,7 @@ open_drop(name)
 {
   char dropfile[512];             
 
-  sprintf(dropfile, "%s/%s", POP_MAILDIR, name);
+  sprintf(dropfile, "%s/%s", MAILDIR, name);
   if ((maildrop = open(dropfile, O_RDWR|O_CREAT,0600)) == -1)  
     {
       fprintf(stderr, "unable to open \"%s\": %s.\n", 

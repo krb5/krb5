@@ -4,13 +4,9 @@
  * specifies the terms and conditions for redistribution.
  */
 
-/*
- * mh compatibility (tom)
- */
-
 #ifndef lint
 static char copyright[] = "Copyright (c) 1990 Regents of the University of California.\nAll rights reserved.\n";
-static char SccsId[] = "@(#)pop_send.c  1.7 7/13/90";
+static char SccsId[] = "@(#)pop_send.c	2.1  3/18/91";
 #endif not lint
 
 #include <stdio.h>
@@ -78,7 +74,11 @@ POP     *   p;
     /*  Send the message body */
     while (fgets(buffer,MAXMSGLINELEN,p->drop)) {
         /*  Look for the start of the next message */
+#ifdef MMDF
         if (is_msg_boundary(buffer)) break;
+#else
+        if (strncmp(buffer,"From ",5) == 0) break;
+#endif
         /*  Decrement the lines sent (for a TOP command) */
         if (msg_lines >= 0 && msg_lines-- == 0) break;
         pop_sendline(p,buffer);

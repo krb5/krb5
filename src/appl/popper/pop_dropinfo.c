@@ -4,13 +4,9 @@
  * specifies the terms and conditions for redistribution.
  */
 
-/*
- * compatibility with mail files stored with mh (tom)
- */
-
 #ifndef lint
 static char copyright[] = "Copyright (c) 1990 Regents of the University of California.\nAll rights reserved.\n";
-static char SccsId[] = "@(#)pop_dropinfo.c  1.4 8/16/90";
+static char SccsId[] = "@(#)pop_dropinfo.c	2.1  3/18/91";
 #endif not lint
 
 #include <errno.h>
@@ -20,10 +16,6 @@ static char SccsId[] = "@(#)pop_dropinfo.c  1.4 8/16/90";
 #include <sys/stat.h>
 #include <sys/file.h>
 #include "popper.h"
-
-extern int      errno;
-extern int      sys_nerr;
-extern char    *sys_errlist[];
 
 /* 
  *  dropinfo:   Extract information about the POP maildrop and store 
@@ -55,7 +47,6 @@ POP     *   p;
     if (p->mlp == NULL){
         (void)fclose (p->drop);
         p->msg_count = 0;
-	pop_log(p, POP_ERROR, "%s: (%s) no memory.", p->client, p->user);
         return pop_msg (p,POP_FAILURE,
             "Can't build message list for '%s': Out of memory", p->user);
     }
@@ -69,6 +60,7 @@ POP     *   p;
              fgets(buffer,MAXMSGLINELEN,p->drop);) {
 
         nchar  = strlen(buffer);
+#ifdef MMDF
 	if((strncmp(buffer,"\001\001\001\001",4) == 0) && (end == 0)) {
 	    end = 1;
 	    continue;
@@ -76,14 +68,15 @@ POP     *   p;
 	
         if (is_msg_boundary(buffer)) {
 	    end = 0;
+#else
+        if (strncmp(buffer,"From ",5) == 0) {
+#endif
             if (++msg_num > p->msg_count) {
                 p->mlp=(MsgInfoList *) realloc(p->mlp,
                     (p->msg_count+=ALLOC_MSGS)*sizeof(MsgInfoList));
                 if (p->mlp == NULL){
                     (void)fclose (p->drop);
                     p->msg_count = 0;
-		    pop_log(p, POP_ERROR, "%s: (%s) no memory.", 
-			    p->client, p->user);
                     return pop_msg (p,POP_FAILURE,
                         "Can't build message list for '%s': Out of memory",
                             p->user);
@@ -107,7 +100,7 @@ POP     *   p;
             if(p->debug)
                 pop_log(p,POP_DEBUG, "Msg %d being added to list", mp->number);
 #endif DEBUG
-	}
+        }
         mp->length += nchar;
         p->drop_size += nchar;
         mp->lines++;
@@ -126,5 +119,3 @@ POP     *   p;
 
     return(POP_SUCCESS);
 }
-
-

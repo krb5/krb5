@@ -8,11 +8,13 @@
 .\" software without specific prior written permission. This software
 .\" is provided ``as is'' without express or implied warranty.
 .\"
-.\" @(#)popper.8    1.3    (CCS)   9/15/90     Copyright (c) 1990 Regents of the University of California.\nAll rights reserved.\n
+.\" @(#)@(#)popper.8	2.3    2.3    (CCS)   4/2/91     Copyright (c) 1990 Regents of the University of California.\nAll rights reserved.\n
 .\"
-.TH popper 8 "Kerberos Version 5.0" "MIT Project Athena"
+.TH popper 8 "August 1990"
+.UC 6
+.ad
 .SH NAME
-popper \- Kerberized Berkeley pop 3 server
+popper \- pop 3 server
 .SH SYNOPSIS
 .B /usr/etc/popper
 [ -d ]
@@ -24,29 +26,7 @@ variety of Unix computers to manage electronic mail for Macintosh
 and MS-DOS computers.  The server was developed at the University of
 California at Berkeley and conforms fully to the specifications in RFC
 1081 and RFC 1082.  The Berkeley server also has extensions to
-send electronic mail on behalf of a client.  
-
-This  Kerberized version of popper works like just like the Berkeley
-POP server, except
-that it expects the client to do a Kerberos authentication at the very
-beginning (using krb5_sendauth).  After the successful Kerberos
-exchange, the protocol reverts back to standard POP protocol, except
-that the username must match the Kerberos principal used in the initial
-authentication, and the password command is ignored, since the user has
-already authenticated using Kerberos. 
-.PP
-The kerberized version of popper is invoked out of 
-.IR inetd(8),
-using a
-line in /etc/inetd.conf like this:
-.PP
-kpop    stream  tcp     nowait  root    /usr/etc/popper popper
-.PP
-Since a Kerberos authentication is required at the beginning, the port
-used by the Kerberized POP protocol is different from the standard
-Berkeley POP
-protocol.  This port is kpop, and it is traditionally 1109 (where the
-official Berkely port is 110 for version 3 and 109 for version 2).
+send electronic mail on behalf of a client.
 .PP
 The 
 .B \-d
@@ -56,26 +36,31 @@ information is saved using syslog(8).  The
 flag turns on debugging and saves the trace information in
 .I trace\-file
 using fprintf(s).
-.\" .SH HOW TO OBTAIN THE SERVER
-.\" .PP
-.\" The POP server is available via anonymous ftp from lilac.Berkeley.EDU
-.\" (128.32.136.12).  It is in two files in the pub directory: a compressed
-.\" tar file popper.tar.Z and a Macintosh StuffIt archive in BinHex format
-.\" called MacPOP.sit.hqx.
-.\" 
+.SH HOW TO OBTAIN THE SERVER
+.PP
+The POP server is available via anonymous ftp from ftp.CC.Berkeley.EDU
+(128.32.136.9, 128.32.206.12).  It is in two files in the pub directory:
+a compressed
+tar file popper.tar.Z and a Macintosh StuffIt archive in BinHex format
+called MacPOP.sit.hqx.
 .SH THE POP TRANSACTION CYCLE
 .PP
-The Kerberized Berkeley POP server is a single program (called popper) that is
-launched by inetd when it gets a service request on the KPOP TCP port.
+The Berkeley POP server is a single program (called popper) that is
+launched by inetd when it gets a service request on the POP TCP port.
+(The official port number specified in RFC 1081 for POP version 3 is
+port 110.  However, some POP3 clients attempt to contact the server at
+port 109, the POP version 2 port.  Unless you are running both POP2 and
+POP3 servers, you can simply define both ports for use by the POP3
+server.  This is explained in the installation instructions later on.)
 The popper program initializes and verifies that the peer IP address is
 registered in the local domain, logging a warning message when a
 connection is made to a client whose IP address does not have a
 canonical name.  For systems using BSD 4.3 bind, it also checks to see
 if a cannonical name lookup for the client returns the same peer IP
 address, logging a warning message if it does not.  The the server
-enters the authorization state, during which the client sends the
-password command with a dummy password, since authentication is done
-with Kerberos credentials.  No other exchanges are allowed during this
+enters the authorization state, during which the client must correctly
+identify itself by providing a valid Unix userid and password on the
+server's host machine.  No other exchanges are allowed during this
 state (other than a request to quit.)  If authentication fails, a
 warning message is logged and the session ends.  Once the user is
 identified, popper changes its user and group ids to match that of the
@@ -106,18 +91,18 @@ be exercised in using this option since it generates considerable
 output in the syslog file.  Alternatively, the "-t <file-name>" option
 will place debugging information into file "<file-name>" using fprintf
 instead of syslog.
-.\" .PP
-.\" For SunOS version 3.5, the popper program is launched by inetd from
-.\" /etc/servers.  This file does not allow you to specify command line
-.\" arguments.  Therefore, if you want to enable debugging, you can specify
-.\" a shell script in /etc/servers to be launched instead of popper and in
-.\" this script call popper with the desired arguments.
+.PP
+For SunOS version 3.5, the popper program is launched by inetd from
+/etc/servers.  This file does not allow you to specify command line
+arguments.  Therefore, if you want to enable debugging, you can specify
+a shell script in /etc/servers to be launched instead of popper and in
+this script call popper with the desired arguments.
 .PP
 You can confirm that the POP server is running on Unix by telneting to
-port 1109.  For example:
+port 110 (or 109 if you set it up that way).  For example:
 .PP
 .nf
-%telnet myhost 1109
+%telnet myhost 110
 Trying...
 Connected to myhost.berkeley.edu.
 Escape character is '^]'.
@@ -142,6 +127,19 @@ in response to a TOP or RETR command.
 Encased all debugging code in #ifdef DEBUG constructs.  This code can
 be included by specifying the DEGUG compiler flag.  Note:  You still
 need to use the -d or -t option to obtain debugging output.
+.SH LIMITATIONS
+The POP server copies the user's entire maildrop to /tmp and
+then operates on that copy.  If the maildrop is particularly
+large, or inadequate space is available in /tmp, then the
+server will refuse to continue and terminate the connection.
+.PP
+Simultaneous modification of a single maildrop can result in 
+confusing results.  For example, manipulating messages in a
+maildrop using the Unix /usr/ucb/mail command while a copy of
+it is being processed by the POP server can cause the changes
+made by one program to be lost when the other terminates.  This
+problem is being worked on and will be fixed in a later
+release.
 .SH FILES
 .nf
 /usr/spool/mail         mail files
@@ -154,5 +152,4 @@ RFC1081,
 RFC1082
 .SH AUTHORS
 Bob Campbell, Edward Moy, Austin Shelton, Marshall T Rose, and cast of
-thousands at Rand, UDel, UCI, and elsewhere.
-Kerberos authentication added by Tom Coppeto - MIT Network Services.
+thousands at Rand, UDel, UCI, and elsewhere

@@ -6,7 +6,7 @@
 
 #ifndef lint
 static char copyright[] = "Copyright (c) 1990 Regents of the University of California.\nAll rights reserved.\n";
-static char SccsId[] = "@(#)pop_last.c  1.5 7/13/90";
+static char SccsId[] = "@(#)pop_last.c	2.1  3/18/91";
 #endif not lint
 
 #include <stdio.h>

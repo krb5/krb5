@@ -4,7 +4,7 @@
  * specifies the terms and conditions for redistribution.
  *
  * static char copyright[] = "Copyright (c) 1990 Regents of the University of California.\nAll rights reserved.\n";
- * static char SccsId[] = "@(#)popper.h 1.10  7/13/90";
+ * static char SccsId[] = "@(#)popper.h	2.2  4/2/91";
  *
  */
 
@@ -26,14 +26,13 @@
 
 #define MAXHOSTNAMELEN  256
 #define MAXUSERNAMELEN  65
-#define MAXDROPLEN      296  /* was 65: kerberos name + max path size - tom */
+#define MAXDROPLEN      64
 #define MAXLINELEN      1024
 #define MAXMSGLINELEN   1024
 #define MAXCMDLEN       4
 #define MAXPARMCOUNT    5
 #define MAXPARMLEN      10
 #define ALLOC_MSGS  20
-#define MAIL_COMMAND    "/usr/lib/sendmail"
 
 #define POP_FACILITY    LOG_LOCAL0
 #define POP_ERROR       LOG_ERR
@@ -42,10 +41,25 @@
 #define POP_INFO        LOG_INFO
 #define POP_DEBUG       LOG_DEBUG
 #define POP_LOGOPTS     0
-#define POP_MAILDIR     "/usr/spool/pop"
+
+#ifdef POP_PVT_PASSWD
+#ifndef POP_PASSFILE
 #define POP_PASSFILE    "/usr/spool/pop/POP"
-#define POP_DROP        "/usr/spool/pop/.%s.temp"
-#define POP_TMPXMIT     "/tmp/xmitXXXXXX"
+#endif /* POP_PASSFILE */
+#endif
+
+#ifndef MAILDIR
+#ifdef BSD
+#if BSD < 199103
+#define MAILDIR "/usr/spool/mail"
+#else
+#define MAILDIR "/var/mail"
+#endif
+#else
+#define MAILDIR "/usr/mail"
+#endif
+#endif
+
 #define POP_OK          "+OK"
 #define POP_ERR         "-ERR"
 #define POP_SUCCESS     1
@@ -53,9 +67,6 @@
 #define POP_TERMINATE   '.'
 
 extern int              errno;
-extern int              sys_nerr;
-extern char         *   sys_errlist[];
-extern char         *   sys_siglist[];
 
 #define pop_command         pop_parm[0]     /*  POP command is first token */
 #define pop_subcommand      pop_parm[1]     /*  POP XTND subcommand is the 

@@ -1,4 +1,4 @@
-@(#)README  1.6 7/13/90
+@(#)@(#)README	2.6   2.6 4/2/91
 
 
 The Post Office Protocol Server:  Installation Guide
@@ -21,10 +21,10 @@ capable of performing Unix system administration.
 
 How to Obtain the Server
 
-The POP server is available via anonymous ftp from lilac.Berkeley.EDU
-(128.32.136.12).  It is in two files in the pub directory: a compressed
-tar file popper.tar.Z and a Macintosh StuffIt archive in BinHex format
-called MacPOP.sit.hqx.
+The POP server is available via anonymous ftp from ftp.CC.Berkeley.EDU
+(128.32.136.9, 128.32.206.12).  It is in two files in the pub directory:
+a compressed tar file popper-version.tar.Z and a Macintosh StuffIt archive
+in BinHex format called MacPOP.sit.hqx.
 
 
 Contents of the Distribution
@@ -121,6 +121,30 @@ debugging which is logged at priority "debug".  The default log file is
 systems with 4.2 syslogging all messages are logged to the local log
 file, usually /usr/spool/mqueue/syslog.
 
+Problems
+
+If the filesystem which holds the /usr/spool/mail fills up users will 
+experience difficulties.  The filesystem must have enough space to hold
+(approximately) two copies of the largest mail box.  Popper (v1.81 and
+above) is designed to be robust in the face of this problem, but you may
+end up with a situation where some of the user's mail is in
+
+	/usr/spool/mail/.userid.pop
+
+and some of the mail is in
+
+	/usr/spool/mail/userid
+
+If this happens the System Administrator should clear enough disk space
+so that the filesystem has at least as much free disk as both mailboxes
+hold and probably a little more.  Then the user should initiate a POP
+session, and do nothing but quit.  If the POP session ends without an
+error the user can then use POP or another mail program to clean up his/her
+mailbox.
+
+Alternatively, the System Administrator can combine the two files (but
+popper will do this for you if there is enough disk space).
+
 
 Debugging
 
@@ -129,7 +153,8 @@ is specified after its invocation in the inetd.conf file.  Care should
 be exercised in using this option since it generates considerable
 output in the syslog file.  Alternatively, the "-t <file-name>" option
 will place debugging information into file "<file-name>" using fprintf
-instead of syslog.
+instead of syslog.  (To enable debugging, you must edit the Makefile
+to add -DDEBUG to the compiler options.)
 
 For SunOS version 3.5, the popper program is launched by inetd from
 /etc/servers.  This file does not allow you to specify command line
@@ -227,6 +252,26 @@ Connection closed by foreign host.
 
 Release Notes
 
+1.83    Make sure that everything we do as root is non-destructive.
+
+1.82	Make the /usr/spool/mail/.userid.pop file owned by the user rather
+	than owned by root.
+
+1.81	There were two versions of 1.7 floating around, 1.7b4 and 1.7b5.
+	The difference is that 1.7b5 attempted to save disk space on 
+	/usr/spool/mail by deleting the users permanent maildrop after
+	making the temporary copy.  Unfortunately, if compiled with 
+	-DDEBUG, this version could easily wipe out a users' mail file.
+	This is now fixed.
+
+	This version also fixes a security hole for systems that have
+	/usr/spool/mail writeable by all users.
+
+	With this version we go to all new SCCS IDs for all files.  This
+	is unfortunate, and we hope it is not too much of a problem.
+
+	Thanks to Steve Dorner of UIUC for pointing out the major problem.
+
 1.7     Extensive re-write of the maildrop processing code contributed by 
         Viktor Dukhovni <viktor@math.princeton.edu> that greatly reduces the
         possibility that the maildrop can be corrupted as the result of
@@ -292,6 +337,24 @@ Release Notes
         enabled by the SYSLOG42 compiler flag.
 
 1.1     Several bugs fixed.
+
+1.0     Original version.
+
+
+Limitations
+
++   The POP server copies the user's entire maildrop to /tmp and
+    then operates on that copy.  If the maildrop is particularly
+    large, or inadequate space is available in /tmp, then the
+    server will refuse to continue and terminate the connection.
+
++   Simultaneous modification of a single maildrop can result in 
+    confusing results.  For example, manipulating messages in a
+    maildrop using the Unix /usr/ucb/mail command while a copy of
+    it is being processed by the POP server can cause the changes
+    made by one program to be lost when the other terminates.  This
+    problem is being worked on and will be fixed in a later
+    release.
 
 
 Credits

@@ -4,13 +4,9 @@
  * specifies the terms and conditions for redistribution.
  */
 
-/*
- * added kerberos authentication (tom coppeto, 1/15/91)
- */
-
 #ifndef lint
 static char copyright[] = "Copyright (c) 1990 Regents of the University of California.\nAll rights reserved.\n";
-static char SccsId[] = "@(#)pop_init.c  1.12    8/16/90";
+static char SccsId[] = "@(#)pop_init.c	2.1  2.1 3/18/91";
 #endif not lint
 
 #include <errno.h>
@@ -20,8 +16,12 @@ static char SccsId[] = "@(#)pop_init.c  1.12    8/16/90";
 #include <netinet/in.h>
 #include <netdb.h>
 #include <arpa/inet.h>
-#include <fcntl.h>
 #include "popper.h"
+
+#ifndef lint
+static char whatId[] = "@(#)POP3 Mail daemon - popper " VERSION;
+static char rcsId[] = "$Id$";
+#endif
 
 #ifdef KERBEROS
 #ifdef KRB4
@@ -41,9 +41,6 @@ char *client_name;
 #endif /* KRB5 */
 #endif /* KERBEROS */
 
-extern int      errno;
-int             sp = 0;             /*  Socket pointer */
-                                    /*  we use this later */
 /* 
  *  init:   Start a Post Office Protocol session
  */
@@ -57,15 +54,16 @@ char    **      argmessage;
     struct sockaddr_in      cs;                 /*  Communication parameters */
     struct hostent      *   ch;                 /*  Client host information */
     int                     errflag = 0;
-    int standalone = 0;
     int                     c;
     int                     len;
     extern char         *   optarg;
     int                     options = 0;
+    int                     sp = 0;             /*  Socket pointer */
     char                *   trace_file_name;
+    int                     standalone = 0;
 
     /*  Initialize the POP parameter block */
-    memset ((char *)p, 0,(int)sizeof(POP));
+    bzero ((char *)p,(int)sizeof(POP));
 
     /*  Save my name in a global variable */
     p->myname = argmessage[0];
@@ -81,7 +79,7 @@ char    **      argmessage;
 #endif
 
     /*  Process command line arguments */
-    while ((c = getopt(argcount,argmessage,"dst:")) != EOF)
+    while ((c = getopt(argcount,argmessage,"dt:s")) != EOF)
         switch (c) {
 
             /*  Debugging requested */
@@ -94,16 +92,19 @@ char    **      argmessage;
             case 't':
                 p->debug++;
                 if ((p->trace = fopen(optarg,"a+")) == NULL) {
-                    pop_log(p,POP_ERROR,
+                    pop_log(p,POP_PRIORITY,
                         "Unable to open trace file \"%s\", err = %d",
                             optarg,errno);
                     exit(-1);
                 }
                 trace_file_name = optarg;
                 break;
+
+	    /* Standalone operation */
 	    case 's':
 		standalone++;
 		break;
+
             /*  Unknown option received */
             default:
                 errflag++;
@@ -129,13 +130,16 @@ char    **      argmessage;
 	sin.sin_addr.s_addr = 0;
 
 #ifdef KERBEROS
-	if (!(spr = getservbyname("kpop", "tcp"))) {
-	    syslog(LOG_ERR, "kpop/tcp: unknown service");
+#ifndef KPOP_SERVICE
+#define KPOP_SERVICE "kpop"
+#endif
+	if (!(spr = getservbyname(KPOP_SERVICE, "tcp"))) {
+	    syslog(LOG_ERR, "%s/tcp: unknown service", KPOP_SERVICE);
 	    exit(3);
 	}
 #else
 	if (!(spr = getservbyname("pop", "tcp"))) {
-	    syslog(LOG_ERR, "kpop/tcp: unknown service");
+	    syslog(LOG_ERR, "pop/tcp: unknown service");
 	    exit(3);
 	}
 #endif
@@ -161,7 +165,7 @@ char    **      argmessage;
     /*  Get the address and socket of the client to whom I am speaking */
     len = sizeof(cs);
     if (getpeername(sp,(struct sockaddr *)&cs,&len) < 0){
-        pop_log(p,POP_ERROR,
+        pop_log(p,POP_PRIORITY,
             "Unable to obtain socket and address of client, err = %d",errno);
         exit(-1);
     }
@@ -177,26 +181,23 @@ char    **      argmessage;
     ch = gethostbyaddr((char *) &cs.sin_addr, sizeof(cs.sin_addr), AF_INET);
     if (ch == NULL){
         pop_log(p,POP_PRIORITY,
-            "%s: unable to get canonical name of client, err = %d", 
-		p->ipaddr, errno);
+            "Unable to get canonical name of client, err = %d",errno);
         p->client = p->ipaddr;
     }
     /*  Save the cannonical name of the client host in 
         the POP parameter block */
     else {
 
-#ifndef BIND43HACK
+#ifndef BIND43
         p->client = ch->h_name;
 #else
-	/*
-	 * There's no reason for this. In any case, reset res options.
-	 */
-
 #       include <arpa/nameser.h>
 #       include <resolv.h>
 
         /*  Distrust distant nameservers */
+#if (__RES < 19931104)
         extern struct state     _res;
+#endif
         struct hostent      *   ch_again;
         char            *   *   addrp;
 
@@ -206,8 +207,8 @@ char    **      argmessage;
         /*  See if the name obtained for the client's IP 
             address returns an address */
         if ((ch_again = gethostbyname(ch->h_name)) == NULL) {
-	  pop_log(p,POP_PRIORITY,
-                "%s: resolves to an unknown host name \"%s\".",
+            pop_log(p,POP_PRIORITY,
+                "Client at \"%s\" resolves to an unknown host name \"%s\"",
                     p->ipaddr,ch->h_name);
             p->client = p->ipaddr;
         }
@@ -219,41 +220,35 @@ char    **      argmessage;
             /*  Look for the client's IP address in the list returned 
                 for its name */
             for (addrp=ch_again->h_addr_list; *addrp; ++addrp)
-                if (memcmp(*addrp,&(cs.sin_addr),sizeof(cs.sin_addr)) == 0) break;
+                if (bcmp(*addrp,&(cs.sin_addr),sizeof(cs.sin_addr)) == 0) break;
 
             if (!*addrp) {
                 pop_log (p,POP_PRIORITY,
-			 "%s: not listed for its host name \"%s\".",
-			 p->ipaddr,ch->h_name);
+                    "Client address \"%s\" not listed for its host name \"%s\"",
+                        p->ipaddr,ch->h_name);
                 p->client = p->ipaddr;
             }
         }
-	/*  restore bind state */
-        _res.options |= RES_DEFNAMES;
-
-#endif /* BIND43HACK */
+#endif BIND43
     }
-
-    fcntl(sp, F_SETFL, SO_KEEPALIVE);
 
     /*  Create input file stream for TCP/IP communication */
     if ((p->input = fdopen(sp,"r")) == NULL){
-        pop_log(p,POP_ERROR,
-            "%s: unable to open communication stream for input, err = %d",
-		p->client, errno);
+        pop_log(p,POP_PRIORITY,
+            "Unable to open communication stream for input, err = %d",errno);
         exit (-1);
     }
 
     /*  Create output file stream for TCP/IP communication */
     if ((p->output = fdopen(sp,"w")) == NULL){
-      pop_log(p,POP_ERROR,
-	      "%s: unable to open communication stream for output, err = %d",
-	      p->client, errno);
+        pop_log(p,POP_PRIORITY,
+            "Unable to open communication stream for output, err = %d",errno);
         exit (-1);
     }
 
-    pop_log(p,POP_INFO,
-        "%s: (v%s) Servicing request at %s\n", p->client, VERSION, p->ipaddr);
+    pop_log(p,POP_PRIORITY,
+        "(v%s) Servicing request from \"%s\" at %s\n",
+            VERSION,p->client,p->ipaddr);
 
 #ifdef DEBUG
     if (p->trace)
@@ -263,11 +258,9 @@ char    **      argmessage;
     else if (p->debug)
         pop_log(p,POP_PRIORITY,"Debugging turned on");
 #endif DEBUG
-    
+
     return(authenticate(p, &cs));
 }
-
-
 
 authenticate(p, addr)
      POP     *p;
@@ -301,14 +294,20 @@ authenticate(p, addr)
 #endif /* DEBUG */
 
     strcpy(p->user, kdata.pname);
+#endif
+
+#ifdef KRB5
+    krb5_error_code retval;
+    krb5_principal server;
+    int sock = 0;
 
     krb5_init_ets();
 
-    if (retval = krb5_sname_to_principal(p->myhost, "pop", KRB5_NT_SRV_HOST,
+    if (retval = krb5_sname_to_principal(p->myhost, "pop", KRB5_NT_SRV_HST,
 					 &server)) {
 	pop_msg(p, POP_FAILURE,
-		"server mis-configured, can't get principal--%s",
-		error_message(retval));
+		"server '%s' mis-configured, can't get principal--%s",
+		p->myhost, error_message(retval));
 	pop_log(p, POP_WARNING,  "%s: mis-configured, can't get principal--%s",
 		p->client, error_message(retval));
 	exit(-1);
@@ -343,6 +342,14 @@ authenticate(p, addr)
     pop_log(p, POP_DEBUG, "%s (%s): ok", client_name, inet_ntoa(addr->sin_addr));
 #endif /* DEBUG */
 
+    if (retval= krb5_aname_to_localname(ext_client, sizeof(p->user), p->user)) {
+	pop_msg(p, POP_FAILURE, "unable to convert aname(%s) to localname --%s",
+		client_name,
+		error_message(retval));
+	pop_log(p, POP_DEBUG, "unable to convert aname to localname (%s)",
+		client_name);
+	exit(-1);
+    }
 #endif /* KRB5 */
 #endif /* KERBEROS */
 
