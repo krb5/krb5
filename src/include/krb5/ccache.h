@@ -20,7 +20,7 @@ typedef	krb5_pointer	krb5_cc_cursor;	/* cursor for sequential lookup */
 
 typedef struct _krb5_ccache {
 	struct _krb5_cc_ops *ops;
-	void *data;
+	krb5_pointer data;
 } *krb5_ccache;
 
 typedef struct _krb5_cc_ops {
