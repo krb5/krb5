@@ -40,6 +40,9 @@ all-windows::
 	@echo Making in util\windows
 	cd windows
 	$(MAKE) -$(MFLAGS)
+	@echo Making in util\support
+	cd ..\support
+	$(MAKE) -$(MFLAGS)
 	@echo Making in util\et
 	cd ..\et
 	$(MAKE) -$(MFLAGS) 

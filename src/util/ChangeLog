@@ -1,3 +1,7 @@
+2004-06-18  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (all-windows): Build support directory.
+
 2004-06-16  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (MAC_SUBDIRS): Don't set.
