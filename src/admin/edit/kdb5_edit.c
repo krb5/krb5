@@ -1089,7 +1089,7 @@ void show_principal(argc, argv)
     }
 
     printf("Name: %s\n", pr_name);
-    printf("Key version: %d\n", entry.mkvno); 
+    printf("Key version: %d\n", entry.key_data[0].key_data_kvno); 
     printf("Maximum life: %s\n", strdur(entry.max_life));
     printf("Maximum renewable life: %s\n", strdur(entry.max_renewable_life));
     printf("Master key version: %d\n", entry.mkvno);
