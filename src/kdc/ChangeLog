@@ -1,3 +1,9 @@
+2003-05-23  Ezra Peisach  <epeisach@mit.edu>
+
+	* kdc_preauth.c (return_etype_info2): After encoding the
+	etype_info2 and copying the pointers to the pa_data, free the
+	krb5_data pointer.
+
 2003-05-22  Sam Hartman  <hartmans@mit.edu>
 
 	* do_tgs_req.c (process_tgs_req): LOG transited check disabled as info not error
