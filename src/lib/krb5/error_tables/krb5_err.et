@@ -293,6 +293,7 @@ error_code KRB5_SNAME_UNSUPP_NAMETYPE,	"Conversion to service principal undefine
 error_code KRB5KRB_AP_ERR_V4_REPLY, "Initial Ticket response appears to be Version 4 error"
 error_code KRB5_REALM_CANT_RESOLVE,	"Cannot resolve KDC for requested realm"
 error_code KRB5_TKT_NOT_FORWARDABLE,	"Requesting ticket can't get forwardable tickets"
+error_code KRB5_FWD_BAD_PRINCIPAL, "Bad principal name while trying to forward credentials"
 
 error_code KRB5_GET_IN_TKT_LOOP,  "Looping detected inside krb5_get_in_tkt"
 

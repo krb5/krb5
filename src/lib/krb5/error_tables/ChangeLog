@@ -1,3 +1,7 @@
+Fri Jan  5 12:23:44 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* krb5_err.et: Added error table code KRB5_FWD_BAD_PRINCIPAL.
+
 Thu Dec 21 18:46:45 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* krb5_err.et: Changed KRB5_SENDAUTH_MUTUAL_FAILED to
