@@ -41,11 +41,10 @@
 /* due to argument promotion rules, we need to use the DECLARG/OLDDECLARG
    stuff... */
 krb5_error_code
-krb5_encode_kdc_rep(context, type, encpart, eblock, client_key, dec_rep, enc_rep)
+krb5_encode_kdc_rep(context, type, encpart, client_key, dec_rep, enc_rep)
     krb5_context context;
     const krb5_msgtype type;
     const krb5_enc_kdc_rep_part * encpart;
-    krb5_encrypt_block * eblock;
     const krb5_keyblock * client_key;
     krb5_kdc_rep * dec_rep;
     krb5_data ** enc_rep;
@@ -53,6 +52,7 @@ krb5_encode_kdc_rep(context, type, encpart, eblock, client_key, dec_rep, enc_rep
     krb5_data *scratch;
     krb5_error_code retval;
     krb5_enc_kdc_rep_part tmp_encpart;
+    krb5_encrypt_block eblock;
 
     if (!valid_enctype(dec_rep->enc_part.enctype))
 	return KRB5_PROG_ETYPE_NOSUPP;
@@ -89,8 +89,9 @@ krb5_encode_kdc_rep(context, type, encpart, eblock, client_key, dec_rep, enc_rep
 #define cleanup_scratch() { (void) memset(scratch->data, 0, scratch->length); \
 krb5_free_data(context, scratch); }
 
+    krb5_use_enctype(context, &eblock, client_key->enctype);
     dec_rep->enc_part.ciphertext.length =
-	krb5_encrypt_size(scratch->length, eblock->crypto_entry);
+	krb5_encrypt_size(scratch->length, eblock.crypto_entry);
     /* add padding area, and zero it */
     if (!(scratch->data = realloc(scratch->data,
 				  dec_rep->enc_part.ciphertext.length))) {
@@ -113,26 +114,26 @@ free(dec_rep->enc_part.ciphertext.data); \
 dec_rep->enc_part.ciphertext.length = 0; \
 dec_rep->enc_part.ciphertext.data = 0;}
 
-    retval = krb5_process_key(context, eblock, client_key);
+    retval = krb5_process_key(context, &eblock, client_key);
     if (retval) {
 	goto clean_encpart;
     }
 
-#define cleanup_prockey() {(void) krb5_finish_key(context, eblock);}
+#define cleanup_prockey() {(void) krb5_finish_key(context, &eblock);}
 
     retval = krb5_encrypt(context, (krb5_pointer) scratch->data,
 			      (krb5_pointer) dec_rep->enc_part.ciphertext.data,
-			      scratch->length, eblock, 0);
+			      scratch->length, &eblock, 0);
     if (retval) {
 	goto clean_prockey;
     }
 
-    dec_rep->enc_part.enctype = krb5_eblock_enctype(context, eblock);
+    dec_rep->enc_part.enctype = krb5_eblock_enctype(context, &eblock);
 
     /* do some cleanup */
     cleanup_scratch();
 
-    retval = krb5_finish_key(context, eblock);
+    retval = krb5_finish_key(context, &eblock);
     if (retval) {
 	cleanup_encpart();
 	return retval;

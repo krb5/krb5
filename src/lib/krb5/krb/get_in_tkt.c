@@ -197,7 +197,7 @@ decrypt_as_reply(context, request, as_reply, key_proc, keyseed, key,
 	if ((retval = krb5_principal2salt(context, request->client, &salt)))
 	    return(retval);
     
-	retval = (*key_proc)(context, as_reply->ticket->enc_part.enctype,
+	retval = (*key_proc)(context, as_reply->enc_part.enctype,
 			     &salt, keyseed, &decrypt_key);
 	krb5_xfree(salt.data);
 	if (retval)

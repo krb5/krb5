@@ -1,3 +1,14 @@
+Fri Nov 17 22:35:52 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* get_in_tkt.c (decrypt_as_reply): 
+	* preauth.c (process_pw_salt): When fetching the key to decrypting
+		the encrypted kdc reply, use the etype associated with the
+		etype reply, not the etype associated with the included
+		ticket. 
+
+	* encode_kdc.c: Remove eblock argument from krb5_encode_kdc_rep;
+		set the eblock type from the client_key's enctype.
+
 Thu Nov 16 20:29:17 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* srv_rcache.c (krb5_get_server_rcache): Use krb5_rc_default_type

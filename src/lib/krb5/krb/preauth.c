@@ -305,7 +305,7 @@ process_pw_salt(context, padata, request, as_reply,
     salt.data = (char *) padata->contents;
     salt.length = padata->length;
     
-    if ((retval = (*key_proc)(context, as_reply->ticket->enc_part.enctype,
+    if ((retval = (*key_proc)(context, as_reply->enc_part.enctype,
 			      &salt, keyseed, decrypt_key))) {
 	*decrypt_key = 0;
 	return retval;
