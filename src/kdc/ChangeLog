@@ -1,3 +1,8 @@
+1999-06-28  Tom Yu  <tlyu@mit.edu>
+
+	* replay.c (MATCH): Fix up to compare the correct components of
+	the input address.
+
 Fri Apr 30 00:05:07 1999  Tom Yu  <tlyu@mit.edu>
 
 	* kerberos_v4.c (kerberos_v4): Fix bug where krb_create_ticket()

@@ -54,7 +54,8 @@ static int num_entries = 0;
 		    !memcmp((ptr)->req_packet->data, inpkt->data,	\
 			    inpkt->length) &&				\
 		    ((ptr)->addr->length == from->address->length) &&	\
-		    !memcmp((ptr)->addr->contents, from->address,	\
+		    !memcmp((ptr)->addr->contents,			\
+			    from->address->contents,			\
 			    from->address->length)&&			\
 		    ((ptr)->db_age == db_age))
 /* XXX
