@@ -7,6 +7,8 @@
 #  For copying and distribution information, please see the file
 #  <krb5/copyright.h>.
 # 
+DEFINES = -DBACKWARD_COMPAT
+INCLUDES = $(KRB4INCLUDES)
 SRCS= \
 	kdc5_err.c \
 	dispatch.c \
@@ -17,6 +19,7 @@ SRCS= \
 	network.c \
 	policy.c \
 	extern.c
+#	kerberos_v4.c
 
 OBJS= \
 	kdc5_err.o \
@@ -28,6 +31,7 @@ OBJS= \
 	network.o \
 	policy.o \
 	extern.o
+#	kerberos_v4.o
 
 ErrorTableObjectRule()
 
@@ -35,7 +39,8 @@ all::	krb5kdc
 
 kdc5_err.c: kdc5_err.et
 
-NormalProgramTarget(krb5kdc,$(OBJS),$(DEPKDBLIB) $(DEPKLIB),$(KDBLIB) $(KLIB),)
+NormalProgramTarget(krb5kdc,$(OBJS),$(DEPKDBLIB) $(DEPKLIB), \
+	$(KDBLIB) $(KLIB) $(KRB4LIB),)
 
 clean::
 	$(RM) kdc5_err.h kdc5_err.c
