@@ -180,10 +180,6 @@ struct type_KRB5_KDC__REP *krb5_tgs_rep2KRB5_KDC__REP
 struct type_KRB5_Ticket *krb5_ticket2KRB5_Ticket
 	PROTOTYPE((const krb5_ticket *, int *));
 
-/* ktrep2trep.c */
-struct type_KRB5_EncTgsReqPart *krb5_tgs_req_enc_part2KRB5_EncTgsReqPart
-	PROTOTYPE((const krb5_tgs_req_enc_part *, int *));
-
 /* lsrq2klsrq.c */
 krb5_last_req_entry **KRB5_LastReq2krb5_last_req
 	PROTOTYPE((const struct type_KRB5_LastReq *, int *));
@@ -215,10 +211,6 @@ krb5_kdc_req *KRB5_TGS__REQ2krb5_kdc_req
 /* tkt2ktkt.c */
 krb5_ticket *KRB5_Ticket2krb5_ticket
 	PROTOTYPE((const struct type_KRB5_Ticket *, int *));
-
-/* trep2ktrep.c */
-krb5_tgs_req_enc_part *KRB5_EncTgsReqPart2krb5_tgs_req_enc_part
-	PROTOTYPE((const struct type_KRB5_EncTgsReqPart *, int *));
 
 /* u2gen.c */
 struct type_UNIV_GeneralizedTime *unix2gentime

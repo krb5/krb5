@@ -55,7 +55,6 @@ SRCS= \
 	ktgrq2tgrq.c	\
 	ktgsr2kdcr.c	\
 	ktkt2tkt.c	\
-	ktrep2trep.c	\
 	lsrq2klsrq.c	\
 	prep2kprep.c	\
 	prin2kprin.c	\
@@ -64,7 +63,6 @@ SRCS= \
 	safe2ksafe.c	\
 	tgrq2ktgrq.c	\
 	tkt2ktkt.c	\
-	trep2ktrep.c	\
 	u2gen.c
 
 OBJS= \
@@ -112,7 +110,6 @@ OBJS= \
 	ktgrq2tgrq.o	\
 	ktgsr2kdcr.o	\
 	ktkt2tkt.o	\
-	ktrep2trep.o	\
 	lsrq2klsrq.o	\
 	prep2kprep.o	\
 	prin2kprin.o	\
@@ -121,7 +118,6 @@ OBJS= \
 	safe2ksafe.o	\
 	tgrq2ktgrq.o	\
 	tkt2ktkt.o	\
-	trep2ktrep.o	\
 	u2gen.o
 
 #if HavePerl
