@@ -127,7 +127,7 @@ krb5_get_cred_from_kdc (ccache, cred, tgts)
 	/* get a list of realms to consult */
 	retval = krb5_walk_realm_tree(krb5_princ_realm(cred->client),
 				      krb5_princ_realm(cred->server),
-				      &tgs_list);
+				      &tgs_list, KRB5_REALM_BRANCH_CHAR);
 	if (retval)
 	    goto out;
 	/* walk the list BACKWARDS until we find a cached
@@ -183,12 +183,12 @@ krb5_get_cred_from_kdc (ccache, cred, tgts)
 	    tgtq.client = tgt.client;
 
 	    /* ask each realm for a tgt to the end */
-	    if (retval = krb5_copy_data((*next_server)[0], &tmpdata)) {
+	    if (retval = krb5_copy_data(krb5_princ_realm(*next_server), &tmpdata)) {
 		krb5_free_realm_tree(tgs_list);
 		goto out;
 	    }
-	    krb5_free_data(final_server[0]);
-	    final_server[0] = tmpdata;
+	    krb5_free_data(krb5_princ_realm(final_server));
+	    krb5_princ_set_realm(final_server, tmpdata);
 	    tgtq.server = final_server;
 
 	    tgtq.is_skey = FALSE;
