@@ -474,6 +474,7 @@ do_testing(db, passes, verbose, timing, rcases, check, save_db, dontclean,
     krb5_context	kcontext;
     char		*op, *linkage, *oparg;
     krb5_principal	master_princ;
+    int                 master_princ_set = 0;
     char		*mkey_name;
     char		*realm;
     char		*mkey_fullname;
@@ -502,6 +503,8 @@ do_testing(db, passes, verbose, timing, rcases, check, save_db, dontclean,
     oparg = "";
     crflags = hash ? KRB5_KDB_CREATE_HASH : KRB5_KDB_CREATE_BTREE;
 
+    memset(&master_keyblock, 0, sizeof(master_keyblock));
+
     /* Set up some initial context */
     op = "initializing krb5";
     kret = krb5_init_context(&kcontext);
@@ -523,9 +526,13 @@ do_testing(db, passes, verbose, timing, rcases, check, save_db, dontclean,
 					&mkey_fullname, &master_princ)))
 	goto goodbye;
 
+    master_princ_set = 1;
     if (verbose)
 	fprintf(stdout, "%s: Initializing '%s', master key is '%s'\n",
 		programname, db, mkey_fullname);
+
+    free(mkey_fullname);
+    mkey_fullname = 0;
 
     op = "salting master key";
     if ((kret = krb5_principal2salt(kcontext, master_princ, &salt_data)))
@@ -862,6 +869,9 @@ do_testing(db, passes, verbose, timing, rcases, check, save_db, dontclean,
     }
 
  goodbye:
+    if(master_princ_set) {
+	krb5_free_principal(kcontext, master_princ);
+    }
     if (kret)
 	fprintf(stderr, "%s: error while %s %s%s(%s)\n",
 		programname, op, linkage, oparg, error_message(kret));
@@ -976,6 +986,7 @@ do_testing(db, passes, verbose, timing, rcases, check, save_db, dontclean,
 	}
     }
 
+    krb5_free_keyblock_contents(kcontext, &master_keyblock);
     krb5_free_context(kcontext);
 
     return((kret) ? 1 : 0);

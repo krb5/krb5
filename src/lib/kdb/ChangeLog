@@ -1,3 +1,9 @@
+2001-11-19  Ezra Peisach  <epeisach@mit.edu>
+
+	* t_kdb.c (do_testing): Invoke krb5_free_principal and
+	krb5_free_keyblock_contents on master key to prevent minor memory
+	leak.
+
 2001-10-30  Ezra Peisach  <epeisach@mit.edu>
 
 	* kdb_cpw.c (cleanup_key_data): Do not free NULL pointer.
