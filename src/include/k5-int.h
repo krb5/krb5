@@ -973,7 +973,8 @@ KRB5_PROTOTYPE((krb5_context context,
 krb5_error_code krb5_do_preauth
 KRB5_PROTOTYPE((krb5_context, krb5_kdc_req *,
 		krb5_pa_data **, krb5_pa_data ***,
-		krb5_data *, krb5_keyblock *,
+		krb5_data *, krb5_enctype *,
+		krb5_keyblock *,
 		krb5_prompter_fct, void *,
 		krb5_gic_get_as_key_fct, void *));
 
