@@ -1,0 +1,68 @@
+#	$Source$
+#	$Author$
+#	$Id$
+#
+#  Copyright 1990 by the Massachusetts Institute of Technology.
+#  All Rights Reserved.
+# 
+# Export of this software from the United States of America is assumed
+#   to require a specific license from the United States Government.
+#   It is the responsibility of any person or organization contemplating
+#   export to obtain such a license before exporting.
+# 
+# WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
+# distribute this software and its documentation for any purpose and
+# without fee is hereby granted, provided that the above copyright
+# notice appear in all copies and that both that copyright notice and
+# this permission notice appear in supporting documentation, and that
+# the name of M.I.T. not be used in advertising or publicity pertaining
+# to distribution of the software without specific, written prior
+# permission.  M.I.T. makes no representations about the suitability of
+# this software for any purpose.  It is provided "as is" without express
+# or implied warranty.
+# 
+# 
+NormalLibraryObjectRule()
+ErrorTableObjectRule()
+
+OBJS=	ss_err.o \
+	std_rqs.o \
+	invocation.o help.o \
+	execute_cmd.o listen.o parse.o error.o prompt.o \
+	request_tbl.o list_rqs.o pager.o requests.o \
+	data.o
+
+SRCS=	invocation.c help.c \
+	execute_cmd.c listen.c parse.c error.c prompt.c \
+	request_tbl.c list_rqs.c pager.c requests.c \
+	data.c
+
+INCLUDE=-I$(TOP)/include -I. -I.. -I../et
+
+Krb5LibraryTarget(ss,$(OBJS))
+
+mk_cmds: mk_cmds.sh
+	./config_script mk_cmds.sh $(AWK) > mk_cmds
+	chmod +x mk_cmds
+
+SpecialObjectRule(ss_err.o,ss_err.c,)
+SpecialObjectRule(std_rqs.o,std_rqs.c,)
+
+std_rqs.c: std_rqs.ct mk_cmds
+	./mk_cmds std_rqs.ct
+
+all:: mk_cmds
+
+includes:: mk_cmds ss_err.h
+	-$(RM) -rf $(TOP)/include/ss
+	mkdir $(TOP)/include/ss
+	$(LN) ../../$(CURRENT_DIR)/ss.h $(TOP)/include/ss
+	$(LN) ../../$(CURRENT_DIR)/mit-sipb-copyright.h $(TOP)/include/ss
+	$(LN) ../../$(CURRENT_DIR)/copyright.h $(TOP)/include/ss
+	$(LN) ../../$(CURRENT_DIR)/ss_err.h $(TOP)/include/ss
+	$(LN) ../../$(CURRENT_DIR)/ss_internal.h $(TOP)/include/ss
+
+clean::
+	$(RM) mk_cmds ss_err.c ss_err.h
+
+
