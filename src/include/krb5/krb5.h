@@ -47,7 +47,6 @@ typedef struct _krb5_authdata {
 
 typedef struct _krb5_enc_tkt_part {
     /* to-be-encrypted portion */
-    krb5_confounder confounder;		/* confounder */
     krb5_flags flags;			/* flags */
     krb5_keyblock *session;		/* session key: includes keytype */
     krb5_principal client;		/* client name/realm */
@@ -60,10 +59,8 @@ typedef struct _krb5_enc_tkt_part {
 typedef struct _krb5_ticket {
     /* cleartext portion */
     krb5_principal server;		/* server name/realm */
-    krb5_enctype etype;			/* ticket encryption type */
-    krb5_kvno skvno;			/* server kvno */
-    krb5_data enc_part;			/* encrypted encoding,
-					   see above for hidden contents */
+    krb5_enc_data enc_part;		/* encryption type, kvno, encrypted
+					   encoding */
     krb5_enc_tkt_part *enc_part2;	/* ptr to decrypted version, if
 					   available */
 } krb5_ticket;
@@ -100,28 +97,35 @@ typedef struct _krb5_creds {
 
 /* Last request fields */
 typedef struct _krb5_last_req_entry {
-    krb5_ui_4 value;
     krb5_octet lr_type;
+    krb5_timestamp value;
 } krb5_last_req_entry;
 
-typedef struct _krb5_as_req {
+typedef struct _krb5_kdc_req {
+    krb5_msgtype msg_type;		/* AS_REQ or TGS_REQ? */
+    krb5_octet padata_type;
+    krb5_data padata;			/* e.g. encoded AP_REQ */
+    /* real body */
     krb5_flags kdc_options;		/* requested options */
-    krb5_timestamp ctime;		/* client's time */
+    krb5_principal client;		/* includes realm; optional */
+    krb5_principal server;		/* includes realm (only used if no
+					   client) */
     krb5_timestamp from;		/* requested starttime */
     krb5_timestamp till;		/* requested endtime */
     krb5_timestamp rtime;		/* (optional) requested renew_till */
+    krb5_timestamp ctime;		/* client's time */
+    krb5_int32 nonce;			/* nonce to match request/response */
     krb5_enctype etype;			/* requested encryption type */
-    krb5_principal client;		/* includes realm */
     krb5_address **addresses;		/* requested addresses */
-    krb5_principal server;		/* includes realm (but not used) */
-} krb5_as_req;
+    krb5_authdata **authorization_data;	/* auth data; OPTIONAL */
+    krb5_ticket **second_ticket;	/* second ticket array; OPTIONAL */
+} krb5_kdc_req;
 
 typedef struct _krb5_enc_kdc_rep_part {
     /* encrypted part: */
-    krb5_confounder confounder;		/* confounder */
     krb5_keyblock *session;		/* session key */
     krb5_last_req_entry **last_req;	/* array of ptrs to entries */
-    krb5_timestamp ctime;		/* client timestamp */
+    krb5_int32 nonce;			/* nonce from request */
     krb5_timestamp key_exp;		/* expiration date */
     krb5_flags flags;			/* ticket flags */
     krb5_ticket_times times;		/* lifetime info */
@@ -132,24 +136,25 @@ typedef struct _krb5_enc_kdc_rep_part {
 typedef struct _krb5_kdc_rep {
     /* cleartext part: */
     krb5_principal client;		/* client's principal identifier */
-    krb5_enctype etype;			/* encryption type */
-    krb5_kvno ckvno;			/* client key version */
     krb5_ticket *ticket;		/* ticket */
-    krb5_data enc_part;			/* encrypted part */
+    krb5_enc_data enc_part;		/* encryption type, kvno, encrypted
+					   encoding */
     krb5_enc_kdc_rep_part *enc_part2;	/* unencrypted version, if available */
 } krb5_kdc_rep;
 
 /* error message structure */
 typedef struct _krb5_error {
     /* some of these may be meaningless in certain contexts */
-    krb5_timestamp ctime;		/* client sec portion */
-    krb5_ui_2 cmsec;			/* client msec portion */
+    krb5_timestamp ctime;		/* client sec portion; optional */
+    krb5_ui_2 cmsec;			/* client msec portion; optional */
     krb5_ui_2 smsec;			/* server msec portion */
     krb5_timestamp stime;		/* server sec portion */
     krb5_ui_4 error;			/* error code (protocol error #'s) */
-    krb5_principal client;		/* client's principal identifier */
+    krb5_principal client;		/* client's principal identifier;
+					   optional */
     krb5_principal server;		/* server's principal identifier */
     krb5_data text;			/* descriptive text */
+    krb5_data e_data;			/* additional error-describing data */
 } krb5_error;
 
 typedef struct _krb5_ap_req {
@@ -159,7 +164,7 @@ typedef struct _krb5_ap_req {
 } krb5_ap_req;
 
 typedef struct _krb5_ap_rep {
-    krb5_data enc_part;
+    krb5_enc_data enc_part;
 } krb5_ap_rep;
 
 typedef struct _krb5_ap_rep_enc_part {
@@ -172,32 +177,6 @@ typedef struct _krb5_response {
     krb5_data response;
 } krb5_response;
 
-typedef struct _krb5_tgs_req_enc_part {
-    krb5_authdata **authorization_data;	/* auth data */
-    krb5_ticket *second_ticket;		/* second ticket */
-} krb5_tgs_req_enc_part;
-
-typedef struct _krb5_real_tgs_req {
-    krb5_flags kdc_options;		/* requested options */
-    krb5_timestamp from;		/* requested starttime */
-    krb5_timestamp till;		/* requested endtime */
-    krb5_timestamp rtime;		/* (optional) requested renew_till */
-    krb5_timestamp ctime;		/* client's time */
-    krb5_enctype etype;			/* encryption type */
-    krb5_principal server;		/* server's principal identifier */
-    krb5_address **addresses;		/* array of ptrs to addresses */
-    krb5_data enc_part;			/* (optional) encrypted part */
-    krb5_tgs_req_enc_part *enc_part2;	/* ptr to decrypted version, if
-					   available */
-} krb5_real_tgs_req;
-
-typedef struct _krb5_tgs_req {
-    krb5_data header;			/* encoded AP-REQ */
-    krb5_data tgs_request;		/* encoded krb5_real_tgs_req */
-    krb5_ap_req *header2;		/* pointer to decoded, if available */
-    krb5_real_tgs_req *tgs_request2;	/* pointer to decoded, if available */
-} krb5_tgs_req;
-
 typedef struct _krb5_safe {
     krb5_data user_data;		/* user data */
     krb5_timestamp timestamp;		/* client time */
@@ -208,8 +187,7 @@ typedef struct _krb5_safe {
 } krb5_safe;
 
 typedef struct _krb5_priv {
-    krb5_enctype etype;			/* encryption type */
-    krb5_data enc_part;			/* encrypted part */
+    krb5_enc_data enc_part;		/* encrypted part */
 } krb5_priv;
 
 typedef struct _krb5_priv_enc_part {
