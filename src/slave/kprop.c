@@ -25,10 +25,6 @@
 
 
 #include <errno.h>
-#ifdef POSIX_FILE_LOCKS
-#include <fcntl.h>
-#endif
-
 #include <stdio.h>
 #include <ctype.h>
 #include <sys/file.h>
@@ -49,6 +45,7 @@
 #include <krb5/kdb_dbm.h>
 #include <krb5/ext-proto.h>
 #include <krb5/los-proto.h>
+#include <krb5/libos.h>
 #include <com_err.h>
 
 #ifdef NEED_SYS_FCNTL_H
@@ -77,13 +74,14 @@ krb5_address	receiver_addr;
 
 void	PRS();
 void	get_tickets();
-static void usage();
-krb5_error_code open_connection();
-void	kerberos_authenticate();
-int	open_database();
-void	xmit_database();
-void	send_error();
-void	update_last_prop_file();
+static void usage NPROTOTYPE((void));
+krb5_error_code open_connection NPROTOTYPE((char *, int *, char *));
+void	kerberos_authenticate NPROTOTYPE((int, krb5_principal));
+int	open_database NPROTOTYPE((char *, int *));
+void	close_database NPROTOTYPE((int));
+void	xmit_database NPROTOTYPE((int, int, int));
+void	send_error NPROTOTYPE((int, int, int));
+void	update_last_prop_file NPROTOTYPE((char *, char *));
 
 static void usage()
 {
@@ -123,6 +121,7 @@ main(argc, argv)
 	xmit_database(fd, database_fd, database_size);
 	update_last_prop_file(slave_host, file);
 	printf("Database propagation to %s: SUCCEEDED\n", slave_host);
+	close_database(database_fd);
 	exit(0);
 }
 
@@ -395,6 +394,8 @@ void kerberos_authenticate(fd, me)
 	krb5_free_ap_rep_enc_part(rep_result);
 }
 
+FILE * dbfp;
+char * dbpathname;
 /*
  * Open the Kerberos database dump file.  Takes care of locking it
  * and making sure that the .ok file is more recent that the database
@@ -409,41 +410,33 @@ open_database(data_fn, size)
 	int	*size;
 {
 	int		fd;
+	int		err;
 	struct stat 	stbuf, stbuf_ok;
 	char		*data_ok_fn;
 	static char ok[] = ".dump_ok";
-#ifdef POSIX_FILE_LOCKS
-	struct flock lock_arg;
-#endif
 
-	if ((fd = open(data_fn, O_RDONLY)) < 0) {
+	dbpathname = strdup(data_fn);
+	if (!dbpathname) {
+ 	    com_err(progname, ENOMEM, "allocating database file name '%s'",
+ 		    data_fn);
+ 	    exit(1);
+ 	}
+	if ((dbfp = fopen(dbpathname, "r")) == 0) {
 		com_err(progname, errno, "while trying to open %s",
-			data_fn);
+			dbpathname);
 		exit(1);
 	}
-	
-#ifdef POSIX_FILE_LOCKS
-	lock_arg.l_whence = 0;
-	lock_arg.l_start = 0;
-	lock_arg.l_len = 0;
-	if (fcntl(fd, F_SETLK, &lock_arg) == -1) {
-		if (errno == EACCES || errno == EAGAIN)
-			com_err(progname, 0, "database locked");
-		else
-			com_err(progname, errno, "while trying to flock %s",
-				data_fn);
-		exit(1);
-	}
-#else
-	if (flock(fd, LOCK_SH | LOCK_NB) < 0) {
-		if (errno == EWOULDBLOCK || errno == EAGAIN)
-			com_err(progname, 0, "database locked");
-		else
-			com_err(progname, errno, "while trying to flock %s",
-				data_fn);
-		exit(1);
-	}
-#endif
+
+	err = krb5_lock_file(dbfp, dbpathname,
+			     KRB5_LOCKMODE_SHARED|KRB5_LOCKMODE_DONTBLOCK);
+	if (err == EAGAIN || err == EWOULDBLOCK || errno == EACCES) {
+	    com_err(progname, 0, "database locked");
+	    exit(1);
+	} else if (err) {
+	    com_err(progname, err, "while trying to lock '%s'", dbpathname);
+	    exit(1);
+	}	    
+	fd = fileno(dbfp);
 	if (fstat(fd, &stbuf)) {
 		com_err(progname, errno, "while trying to stat %s",
 			data_fn);
@@ -471,6 +464,23 @@ open_database(data_fn, size)
 	return(fd);
 }
 
+void
+close_database(fd)
+    int fd;
+{
+    int err;
+    if (fd != fileno(dbfp)) {
+	com_err(progname, 0, "bad fd passed to close_database");
+	exit(1);
+    }
+    err = krb5_file_lock(dbfp, dbpathname, KRB5_LOCKMODE_UNLOCK);
+    if (err)
+	com_err(progname, err, "while unlocking database '%s'", dbpathname);
+    free(dbpathname);
+    (void) fclose(dbfp);
+    return;
+}
+  
 /*
  * Now we send over the database.  We use the following protocol:
  * Send over a KRB_SAFE message with the size.  Then we send over the

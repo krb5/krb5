@@ -1,3 +1,12 @@
+Thu Nov 17 18:31:18 1994  Mark Eichin  (eichin@cygnus.com)
+
+	* kprop.c: Use NPROTOTYPE for declarations.
+	(close_database): New function. Cleans up locks properly.
+	(main): call it.
+	(open_database): Use krb5_lock_file instead of POSIX_FILE_LOCKS.
+	* kpropd.c (doit): Use krb5_lock_file.
+	(changes from jtkohl@mit.edu.)
+
 Mon Oct  3 19:13:46 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* Makefile.in: Use $(srcdir) to find manual page for make install.

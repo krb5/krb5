@@ -57,6 +57,7 @@
 #include <krb5/kdb_dbm.h>
 #include <krb5/ext-proto.h>
 #include <krb5/los-proto.h>
+#include <krb5/libos.h>
 #include <com_err.h>
 #include <errno.h>
 
@@ -189,7 +190,8 @@ void doit(fd)
 	int on = 1, fromlen;
 	struct hostent	*hp;
 	krb5_error_code	retval;
-	int	lock_fd;
+	FILE *lock_fp;
+	int omask;
 
 	fromlen = sizeof (from);
 	if (getpeername(fd, (struct sockaddr *) &from, &fromlen) < 0) {
@@ -238,37 +240,16 @@ void doit(fd)
 		printf("My sequence number: %d\n", my_seq_num);
 		printf("His sequence number: %d\n", his_seq_num);
 	}
-	if ((lock_fd = (open(temp_file_name, O_WRONLY | O_CREAT, 0600))) < 0) {
-		com_err(progname, errno,
-			"while opening database file, '%s'",
-			temp_file_name);
-		exit(1);
+	omask = umask(077);
+	lock_fp = fopen(temp_file_name, "a");
+	(void) umask(omask);
+	retval = krb5_lock_file(lock_fp, temp_file_name,
+				KRB5_LOCKMODE_EXCLUSIVE|KRB5_LOCKMODE_DONTBLOCK);
+	if (retval) {
+	    com_err(progname, retval, "while trying to lock '%s'",
+		    temp_file_name);
+	    exit(1);
 	}
-#ifdef POSIX_FILE_LOCKS
-	{
-		int lock_cmd = F_SETLK;
-		struct flock lock_arg;
-
-		lock_arg.l_type = F_WRLCK;
-		lock_arg.l_whence = 0;
-		lock_arg.l_start = 0;
-		lock_arg.l_len = 0;
-		
-		if (fcntl(lock_fd, lock_cmd, &lock_arg) == -1) {
-			/* see POSIX/IEEE 1003.1-1988, 6.5.2.4 */
-			if (errno == EACCES || errno == EAGAIN)
-				errno = EAGAIN;
-			com_err(progname, errno, "while trying to lock '%s'",
-				temp_file_name);
-		}
-	}
-#else
-	if (flock(lock_fd, LOCK_EX | LOCK_NB)) {
-		com_err(progname, errno, "while trying to lock '%s'",
-			temp_file_name);
-		exit(1);
-	}
-#endif
 	if ((database_fd = open(temp_file_name,
 				O_WRONLY|O_CREAT|O_TRUNC, 0600)) < 0) {
 		com_err(progname, errno,
@@ -288,7 +269,12 @@ void doit(fd)
 		exit(1);
 	}
 	load_database(kdb5_edit, file);
-	close(lock_fd);
+	retval = krb5_lock_file(lock_fp, temp_file_name, KRB5_LOCKMODE_UNLOCK);
+	if (retval) {
+	    com_err(progname, retval, "while unlocking '%s'", temp_file_name);
+	    exit(1);
+	}
+	(void) fclose(lock_fp);
 	exit(0);
 }
 
