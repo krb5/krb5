@@ -39,6 +39,9 @@ krb5_cc_default_name(context)
 	if (name_buf == 0)
 	    name_buf = malloc (160);
 	
+#ifdef HAVE_MACSOCK_H
+	strcpy (name_buf, "STDIO:krb5cc");
+#else
 #ifdef _WINDOWS
         {
             char defname[160];                  /* Default value */
@@ -51,6 +54,7 @@ krb5_cc_default_name(context)
         }
 #else
 	sprintf(name_buf, "FILE:/tmp/krb5cc_%d", getuid());
+#endif
 #endif
 	name = name_buf;
     }
