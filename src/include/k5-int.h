@@ -921,6 +921,8 @@ struct _krb5_context {
 	krb5_flags 	kdc_default_options;
 	krb5_flags	library_options;
 	krb5_boolean	profile_secure;
+	int		fcc_default_format;
+	int		scc_default_format;
 };
 
 #define KRB5_LIBOPT_SYNC_KDCTIME	0x0001
