@@ -10,6 +10,7 @@
 #define IHaveSubdirs
 #define PassCDebugFlags
 NormalLibraryObjectRule()
+
         SUBDIRS = ccache keytab krb rcache free os kdb des crc-32
 #ifdef HasVfprintf
 VPOBJS=
