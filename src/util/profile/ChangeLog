@@ -1,3 +1,7 @@
+Mon Mar 15 16:03:34 1999  Tom Yu  <tlyu@mit.edu>
+
+	* profile.hin: Fix GSS_DLLIMP.
+
 Mon Mar  8 19:10:06 1999  Tom Yu  <tlyu@mit.edu>
 
 	* profile.hin: Fix prototype of profile_flush() to use long rather
