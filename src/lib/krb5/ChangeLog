@@ -1,3 +1,10 @@
+1998-11-13  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in: Set the myfulldir and mydir variables (which are
+		relative to buildtop and thisconfigdir, respectively.)
+
+	* configure.in: Add test for the fcntl.h header file.
+
 Thu Jul 30 13:12:57 1998  Sam Hartman  <hartmans@utwig.mesas.com>
 
 	* configure.in: Test for sa_len so localaddr works on NetBSD.
