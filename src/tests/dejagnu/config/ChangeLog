@@ -1,3 +1,7 @@
+Thu Oct 12 12:06:03 2000  Ezra Peisach  <epeisach@mit.edu>
+
+	* default.exp: Add dict_file entry (and create one) for kdc.conf
+
 Tue Aug 22 09:47:50 2000  Ezra Peisach  <epeisach@mit.edu>
 
 	* default.exp: Create a properly formatted krb.conf file.  Also

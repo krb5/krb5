@@ -431,6 +431,7 @@ proc setup_kerberos_files { } {
 	puts $conffile "		kdc_ports = 3088"
 	puts $conffile "		default_principal_expiration = 2037.12.31.23.59.59"
 	puts $conffile "		default_principal_flags = -postdateable forwardable"
+	puts $conffile "		dict_file = $tmppwd/dictfile"
 	puts $conffile "	\}"
 	puts $conffile ""
 	close $conffile
@@ -457,6 +458,13 @@ proc setup_kerberos_files { } {
 	puts $conffile ".[string toupper $domain] $REALMNAME"
 	puts $conffile "[string toupper $domain]. $REALMNAME"
 	close $conffile
+    }
+
+    # Create dictfile file.
+    if ![file exists tmpdir/dictfile] {
+	set dictfile [open tmpdir/dictfile w]
+	puts $dictfile "weak_password"
+	close $dictfile
     }
 
     set last_passname_conf $multipass_name
