@@ -6,9 +6,10 @@ DIR=@DIR@
 AWK=@AWK@
 SED=@SED@
 
+set -e
 FILE=$1
-ROOT=`echo $1 | sed -e s/.ct$//`
-BASE=`echo $ROOT | sed -e 's;.*/;;'`
+ROOT=`echo $1 | ${SED} -e s/.ct$//`
+BASE=`echo $ROOT | ${SED} -e 's;.*/;;'`
 TMP=ct$$.c
 
 ${SED} -f ${DIR}/ct_c.sed  ${FILE} \
