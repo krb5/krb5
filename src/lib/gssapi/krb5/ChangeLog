@@ -1,3 +1,8 @@
+2003-06-13  Tom Yu  <tlyu@mit.edu>
+
+	* init_sec_context.c (make_ap_req_v1): Free checksum_data if
+	needed, to avoid leaking memory.  Found by Kent Wu.
+
 2003-05-13  Tom Yu  <tlyu@mit.edu>
 
 	* gssapi_krb5.h: Remove check for GSS_RFC_COMPLIANT_OIDS.

@@ -316,6 +316,8 @@ make_ap_req_v1(context, ctx, cred, k_cred, chan_bindings, mech_type, token)
    code = 0;
     
  cleanup:
+   if (checksum_data && checksum_data->data)
+       krb5_free_data_contents(context, checksum_data);
    if (ap_req.data)
        krb5_free_data_contents(context, &ap_req);
 
