@@ -299,6 +299,7 @@ struct realm_info *pblock;
     krb5_keyblock *rkey;
     int nentries = 1;
 
+    memset((char *) &entry, 0, sizeof(entry));
     entry.principal = princ;
     entry.kvno = 0;
     entry.max_life = pblock->max_life;
