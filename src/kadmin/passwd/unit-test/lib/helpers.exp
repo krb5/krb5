@@ -97,7 +97,7 @@ proc kinit { princ pass } {
 	spawn -noecho $KINIT -5 $princ;
 
 	expect {
-		-re {Password for .*: $}
+		-re "Password for .*:\[^\n\]*$"
 		    {send "$pass\n"}
 		timeout {puts "Timeout waiting for prompt" ; close }
 	}
@@ -147,24 +147,24 @@ proc test_win { args name princ pass1 { pass2 "\001\001" } } {
 	if { $pass2 == "\001\001" } { set pass2 "$pass1" }
 
 	mytest "$name" $args 0 {
-		-re "Changing password for $princ.*\\.$s+Old password:"
+		-re "Changing password for $princ.*\\.$s+Old password:\[^\n\]*$"
 			{ send "$pass1\n" }
 	} {
 		-re "Old Kerberos password is incorrect. Please try again."
 			{ close; myfail "Old password incorrect" }
 		-re "${initerr_regexp}(.+\[^\r\n\t\ \])\r\n"
 			{ close; myfail "init error: $expect_out(1,string)" }
-		-re "^$s+New password:"
+		-re "$s+New password:\[^\n\]*$"
 			{ send "$pass2\n" }
-		-re "^$s+.*$s+.*$s+.*$s+New password:"
-			{ send "$pass2\n" }
-	} {
-		-re "^$s+New password \\(again\\):"
+		-re "$s+.*$s+.*$s+.*$s+New password:\[^\n\]*$"
 			{ send "$pass2\n" }
 	} {
-		-re "^$s+Kerberos password changed."
+		-re "$s+New password \\(again\\):\[^\n\]*$"
+			{ send "$pass2\n" }
+	} {
+		-re "$s+Kerberos password changed."
 			{ mypass }
-		-re "^$s+Password changed."
+		-re "$s+Password changed."
 			{ close; myfail "Wrong message on success." }
 	}
 }
@@ -176,7 +176,7 @@ proc test_initerr { args name princ pass status err } {
 	regsub -all "$s+" $err "$s+" err2
 
 	mytest "$name" $args $status {
-		-re "Changing password for $princ.*\\.$s+Old password:"
+		-re "Changing password for $princ.*\\.$s+Old password:\[^\n\]*$"
 			{ send "$pass\n" }
 	} {
 		-re "$err2"
@@ -195,19 +195,19 @@ proc test_3pass { args name princ pass1 pass2 pass3 status err } {
 	regsub -all "$s+" $err "$s+" err2
 
 	mytest "$name" $args $status {
-		-re "Changing password for $princ.*\\.$s+Old password:"
+		-re "Changing password for $princ.*\\.$s+Old password:\[^\n\]*$"
 			{ send "$pass1\n" }
 	} {
 		-re "Old Kerberos password is incorrect. Please try again."
 			{ close; myfail "Old password incorrect" }
 		-re "${initerr_regexp}(.+)\r\n"
 			{ close; myfail "init error: $expect_out(1,string)" }
-		-re "^$s+New password:"
+		-re "$s+New password:\[^\n\]*$"
 			{ send "$pass2\n" }
-		-re "^$s+.*$s+.*$s+.*$s+New password:"
+		-re "$s+.*$s+.*$s+.*$s+New password:\[^\n\]*$"
 			{ send "$pass2\n" }
 	} {
-		-re "^$s+New password \\(again\\):"
+		-re "$s+New password \\(again\\):\[^\n\]*$"
 			{ send "$pass3\n" }
 	} {
 		-re "$s+$err2"

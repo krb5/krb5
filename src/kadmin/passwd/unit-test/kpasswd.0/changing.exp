@@ -30,17 +30,17 @@ test_win {test1} {D.8: change password} test1 test1 newpass
 test_win {test1} {D.9: test changed password} test1 newpass test1
 
 mytest "D.22: No policy description was shown" test1 4 {
-	-re "Changing password for test1.*\\.$s+Old password:"
+	-re "Changing password for test1.*\\.$s+Old password:\[^\n\]*$"
 		{ send "test1\n" }
 } {
 	-re "$s+.*$s+.*$s+.*char.*classes.*"
 		{ myfail "policy description displayed" }
 	timeout { mypass }
 } {
-	-re "^$s+New password:"
+	-re "^$s+New password:\[^\n\]*$"
 		{ send "newpass\n" }
 } {
-	-re "^$s+New password \\(again\\):"
+	-re "^$s+New password \\(again\\):\[^\n\]*\$"
 		{ send "ssapwen\n" }
 } {
 	-re "$s+New passwords do not match - password not changed."
@@ -70,13 +70,13 @@ test_3pass {pol1} {D.12: new password in history} pol1 \
 	4 {New password was used previously.  Please choose a different password.}
 
 mytest "D.18: Policy description was shown" pol1 4 {
-	-re "Changing password for pol1.*\\.$s+Old password:"
+	-re "Changing password for pol1.*\\.$s+Old password:\[^\n\]*$"
 		{ send "polAAAAAA\n" }
 } {
-	-re "$s+.*$s+.*$s+.*8 char.*2 classes.*$s+New password:"
+	-re "$s+.*$s+.*$s+.*8 char.*2 classes.*$s+New password:\[^\n\]*$"
 		{ send "newpass1234\n" }
 } {
-	-re "^$s+New password \\(again\\):"
+	-re "^$s+New password \\(again\\):\[^\n\]*$"
 		{ send "newpass4321\n" }
 } {
 	-re "$s+New passwords do not match - password not changed."
