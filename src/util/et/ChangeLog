@@ -1,0 +1,4 @@
+Mon Jun 20 21:59:37 1994  Tom Yu  (tlyu at dragons-lair)
+
+	* configure.in: install com_err.h during build
+
