@@ -38,6 +38,9 @@ static char rcsid_kprop_c[] =
 #include <krb5/los-proto.h>
 #include <com_err.h>
 #include <errno.h>
+#ifdef POSIX_FILE_LOCKS
+#include <fcntl.h>
+#endif
 
 #include <stdio.h>
 #include <ctype.h>
@@ -409,6 +412,9 @@ open_database(data_fn, size)
 	struct stat 	stbuf, stbuf_ok;
 	char		*data_ok_fn;
 	static char ok[] = ".dump_ok";
+#ifdef POSIX_FILE_LOCKS
+	struct flock lock_arg;
+#endif
 
 	if ((fd = open(data_fn, O_RDONLY)) < 0) {
 		com_err(progname, errno, "while trying to open %s",
@@ -417,8 +423,11 @@ open_database(data_fn, size)
 	}
 	
 #ifdef POSIX_FILE_LOCKS
-	if (lockf(fd, LOCK_SH | LOCK_NB, 0) < 0) {
-		if (errno == EWOULDBLOCK || errno == EAGAIN)
+	lock_arg.l_whence = 0;
+	lock_arg.l_start = 0;
+	lock_arg.l_len = 0;
+	if (fcntl(fd, F_SETLK, &lock_arg) == -1) {
+		if (errno == EACCES || errno == EAGAIN)
 			com_err(progname, 0, "database locked");
 		else
 			com_err(progname, errno, "while trying to flock %s",
