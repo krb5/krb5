@@ -26,11 +26,8 @@
 #endif
 
 typedef krb5_octet	krb5_boolean;
-typedef krb5_int32	krb5_timestamp;
-typedef krb5_ui_4	krb5_confounder;
 typedef	krb5_octet	krb5_msgtype;
 typedef	krb5_octet	krb5_kvno;
-typedef	krb5_int32	krb5_flags;
 
 typedef	krb5_ui_2	krb5_addrtype;
 typedef krb5_ui_2	krb5_keytype;
@@ -38,6 +35,8 @@ typedef krb5_ui_2	krb5_enctype;
 typedef krb5_ui_2	krb5_cksumtype;
 typedef krb5_ui_2	krb5_authdatatype;
 
+typedef	krb5_int32	krb5_flags;
+typedef krb5_int32	krb5_timestamp;
 typedef	krb5_int32	krb5_error_code;
 typedef krb5_int32	krb5_deltat;
 
@@ -51,8 +50,13 @@ typedef struct _krb5_data {
 typedef	void * krb5_pointer;
 typedef void const * krb5_const_pointer;
 #define PROTOTYPE(x) x
+#ifdef NARROW_PROTOTYPES
 #define DECLARG(type, val) type val
 #define OLDDECLARG(type, val)
+#else
+#define DECLARG(type, val) val
+#define OLDDECLARG(type, val) type val;
+#endif /* Narrow prototypes */
 #else
 /* make const & volatile available without effect */
 #define const
