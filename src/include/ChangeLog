@@ -1,3 +1,17 @@
+2004-07-02  Ken Raeburn  <raeburn@mit.edu>
+
+	* k5-thread.h: Restructured mutex code.
+	(k5_debug_loc): New type, may contain file/line info if
+	DEBUG_THREADS_LOC is defined.
+	(k5_os_nothread_*): Dummy implementation of mutex lock for a
+	single-threded process.  Uses a flag and assert() if DEBUG_THREADS
+	is defined, does nothing interesting otherwise.
+	(k5_os_mutex*, k5_once*): General implementations, with dummy or
+	POSIX or POSIX-if-loaded-otherwise-dummy variants.
+	(k5_mutex_*): Combine OS-specific mutex implementation with
+	optional file/line tracking, and provide a place to instrument for
+	other debugging or performance data.
+
 2004-07-01  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Test for 'inline' support.
