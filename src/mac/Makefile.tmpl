@@ -501,8 +501,10 @@ compile-testtrack : {testtrack-obj-cfm68k} {testtrack-obj-ppc}
 ## Linking
 ##
 ################################################################################
-link : link-cfm68k link-ppc link-fat
-link-debug : link-cfm68k-debug link-ppc-debug link-fat-debug
+# link : link-cfm68k link-ppc link-fat
+link : link-ppc link-fat
+# link-debug : link-cfm68k-debug link-ppc-debug link-fat-debug
+link-debug : link-ppc-debug link-fat-debug
 link-all : link link-debug
 
 ################################################################################
@@ -634,21 +636,21 @@ link-fat-all :Êlink-fat link-fat-debug
 GSSLib : GSSLib.PPC Kerberos5Lib.PPC {ccache-ppc} # GSSLib.68K Kerberos5Lib.68K {ccache-cfm68k}
 	Delete -i GSSLib
 	Duplicate -y GSSLib.PPC GSSLib
-	MergeFragment GSSLib.68K GSSLib
+#	MergeFragment GSSLib.68K GSSLib
 	MergeFragment "/bin/MIT CLib.PPC" GSSLib
 	MergeFragment "/bin/MIT RuntimeLib.PPC" GSSLib
 	MergeFragment Kerberos5Lib.PPC GSSLib
-	MergeFragment Kerberos5Lib.68K GSSLib
-	MergeFragment "/bin/MIT CLib.68K" GSSLib
-	MergeFragment "/bin/MIT RuntimeLib.68K" GSSLib
-	MergeFragment "/mac/libraries/CCache API/bin/CCacheLib.68K" GSSLib
-	MergeFragment "/mac/libraries/CCache API/bin/CCacheGlobalsLib.68K" GSSLib
+#	MergeFragment Kerberos5Lib.68K GSSLib
+#	MergeFragment "/bin/MIT CLib.68K" GSSLib
+#	MergeFragment "/bin/MIT RuntimeLib.68K" GSSLib
+#	MergeFragment "/mac/libraries/CCache API/bin/CCacheLib.68K" GSSLib
+#	MergeFragment "/mac/libraries/CCache API/bin/CCacheGlobalsLib.68K" GSSLib
 	MergeFragment "/mac/libraries/CCache API/bin/CCacheLib.PPC" GSSLib
 	MergeFragment "/mac/libraries/CCache API/bin/CCacheGlobalsLib.PPC" GSSLib
-	MergeFragment "/mac/libraries/DES/bin/deslib.68K" GSSLib
+#	MergeFragment "/mac/libraries/DES/bin/deslib.68K" GSSLib
 	MergeFragment "/mac/libraries/DES/bin/deslib.PPC" GSSLib
-	MergeFragment "Kerberos5GlobalsLib.68K" GSSLib
-	MergeFragment "Kerberos5GlobalsDataLib.68K" GSSLib
+#	MergeFragment "Kerberos5GlobalsLib.68K" GSSLib
+#	MergeFragment "Kerberos5GlobalsDataLib.68K" GSSLib
 	MergeFragment "Kerberos5GlobalsLib.PPC" GSSLib
 	MergeFragment "Kerberos5GlobalsDataLib.PPC" GSSLib
 	DeRez -only "'cfrg'(0)" GSSLib "{RIncludes}"CodeFragments.r | StreamEdit -s /mac/FragmentAlias.mpw | Rez -a -o GSSLib -i "{RIncludes}"
@@ -657,23 +659,23 @@ GSSLib : GSSLib.PPC Kerberos5Lib.PPC {ccache-ppc} # GSSLib.68K Kerberos5Lib.68K 
 GSSLib.debug : GSSLib.PPC.debug Kerberos5Lib.PPC.debug {ccache-ppc-debug} # GSSLib.68K.debug Kerberos5Lib.68K.debug {ccache-cfm68k-debug}
 	Delete -i GSSLib.debug
 	Duplicate -y GSSLib.PPC.debug GSSLib.debug
-	MergeFragment GSSLib.68K.debug GSSLib.debug
+#	MergeFragment GSSLib.68K.debug GSSLib.debug
 	MergeFragment "/bin/MIT CLib.PPC.debug" GSSLib.debug
 	MergeFragment "/bin/MIT RuntimeLib.PPC.debug" GSSLib.debug
 	MergeFragment Kerberos5Lib.PPC.debug GSSLib.debug
-	MergeFragment Kerberos5Lib.68K.debug GSSLib.debug
-	MergeFragment "/bin/MIT CLib.68K" GSSLib.debug
-	MergeFragment "/bin/MIT RuntimeLib.68K" GSSLib.debug
-	MergeFragment "/mac/libraries/CCache API/bin/CCacheLib.68K.debug" GSSLib.debug
-	MergeFragment "/mac/libraries/CCache API/bin/CCacheGlobalsLib.68K" GSSLib.debug
+#	MergeFragment Kerberos5Lib.68K.debug GSSLib.debug
+#	MergeFragment "/bin/MIT CLib.68K" GSSLib.debug
+#	MergeFragment "/bin/MIT RuntimeLib.68K" GSSLib.debug
+#	MergeFragment "/mac/libraries/CCache API/bin/CCacheLib.68K.debug" GSSLib.debug
+#	MergeFragment "/mac/libraries/CCache API/bin/CCacheGlobalsLib.68K" GSSLib.debug
 	MergeFragment "/mac/libraries/CCache API/bin/CCacheLib.PPC.debug" GSSLib.debug
 	MergeFragment "/mac/libraries/CCache API/bin/CCacheGlobalsLib.PPC" GSSLib.debug
-	MergeFragment "/mac/libraries/DES/bin/deslib.68K.debug" GSSLib.debug
+#	MergeFragment "/mac/libraries/DES/bin/deslib.68K.debug" GSSLib.debug
 	MergeFragment "/mac/libraries/DES/bin/deslib.PPC.debug" GSSLib.debug
 	MergeFragment "Kerberos5GlobalsLib.PPC.debug" GSSLib.debug
 	MergeFragment "Kerberos5GlobalsDataLib.PPC" GSSLib.debug
-	MergeFragment "Kerberos5GlobalsLib.68K.debug" GSSLib.debug
-	MergeFragment "Kerberos5GlobalsDataLib.68K" GSSLib.debug
+#	MergeFragment "Kerberos5GlobalsLib.68K.debug" GSSLib.debug
+#	MergeFragment "Kerberos5GlobalsDataLib.68K" GSSLib.debug
 	DeRez -only "'cfrg'(0)" GSSLib.debug "{RIncludes}"CodeFragments.r | StreamEdit -s /mac/FragmentAlias.mpw | Rez -a -o GSSLib.debug -i "{RIncludes}"
 	
 ################################################################################

@@ -49,3 +49,7 @@ Changes in 1.1a3:
  
 1.1b11
  Fixed krb5 globals lib to use existing default cache instead of creating a new one
+ 
+1.1b12
+ CCache 2.0b4 (v5 credentials corruption fix)
+ 68K builds gone again
