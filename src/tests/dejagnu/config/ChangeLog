@@ -1,3 +1,48 @@
+Fri May  3 20:48:16 1996  Ken Raeburn  <raeburn@cygnus.com>
+
+	Tue Apr  2 22:22:47 1996  Chris Provenzano  <proven@cygnus.com>
+
+	* default.exp : Do an stty to set kill and erase correctly. 
+		Things don't work if kill is set to '@'.
+
+	Fri Mar 29 15:02:32 1996  Chris Provenzano  <proven@cygnus.com>
+
+	* default.exp : Always use variable BINSH instead of sh.
+		Use -f flag with kinit to get forwardable tickets.
+		Setup kdc.conf to allow forwardable tickets.
+
+	Thu Mar 28 17:30:55 1996  Ken Raeburn  <raeburn@cygnus.com>
+
+	* default.exp (touch, tail1): New proc.
+	(start_kerberos_daemons, stop_root_shell): Use them, and sleep
+	built-in command.
+
+	Wed Mar 27 22:43:08 1996  Ken Raeburn  <raeburn@cygnus.com>
+
+	* default.exp (start_kerberos_daemons): Use ">>" to avoid updating
+	mod time on kadmind log file.
+
+	Wed Mar 27 21:35:57 1996  Marc Horowitz <marc@mit.edu>
+
+	* default.exp: (start_kerberos_daemons): exec the kadmind
+		inside an sh to redirect stderr (this is a pending
+		bug), and keep the same pid, so that
+		stop_kerberos_daemons doesn't leave a kadmind running.
+
+	Wed Mar 27 21:24:35 1996  Marc Horowitz <marc@mit.edu>
+
+	* default.exp: (start_kerberos_daemons): add a check for
+		"cannot initialize network" as a failure message to
+		the kadmind5 startup expect checks
+
+	Wed Mar 27 21:10:47 1996  Marc Horowitz <marc@mit.edu>
+
+	* default.exp (start_kerberos_daemons): use ezra's KDC tail
+		changes for kadmind5, too.
+	* rlogin.exp (start_rlogin_daemon): start klogind with sh -c
+		so that setsid() won't fail due to the process already
+		being the leader of a process group
+	
 Sun Apr  7 23:06:13 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* default.exp: Major changes to use run time environment variables as

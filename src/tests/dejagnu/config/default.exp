@@ -12,6 +12,7 @@
 # realm name, defaulting to KRBTEST.COM.
 
 set timeout 100
+set stty_init {erase ^h kill ^u}
 
 # We do everything in a temporary directory.
 if ![file isdirectory tmpdir] {catch "exec mkdir tmpdir" status}
@@ -158,6 +159,7 @@ proc check_k5login { testname } {
 proc check_exit_status { testname } {
     global spawn_id
 
+    verbose "about to wait ($testname)"
     set status_list [wait -i $spawn_id]
     verbose "wait -i $spawn_id returned $status_list ($testname)"
     catch "close -i $spawn_id"
@@ -317,7 +319,6 @@ proc setup_kerberos_files { } {
     puts $conffile "	$domain = $REALMNAME"
     puts $conffile ""
     puts $conffile "\[logging\]"
-    puts $conffile "	admin_server = STDERR"
     puts $conffile "	admin_server = FILE:$tmppwd/kadmind5.log"
     puts $conffile "	kdc = FILE:$tmppwd/kdc.log"
     puts $conffile "	default = FILE:$tmppwd/others.log"
@@ -341,7 +342,7 @@ proc setup_kerberos_files { } {
 	puts $conffile "		max_life = 1:00:00"
 	puts $conffile "		max_renewable_life = 3:00:00"
 	puts $conffile "		default_principal_expiration = 99.12.31.23.59.59"
-	puts $conffile "		default_principal_flags = -postdateable -forwardable"
+	puts $conffile "		default_principal_flags = -postdateable forwardable"
 	puts $conffile "		supported_enctypes = des-cbc-crc:normal des-cbc-md5:normal des-cbc-crc:v4 des-cbc-md5:norealm des3-cbc-md5:normal"
 	puts $conffile "	\}"
 	puts $conffile ""
@@ -663,7 +664,7 @@ proc setup_kerberos_db { standalone } {
     expect_after {
 	timeout {
 	    catch "expect_after"
-	    fail "kdb5_edit"
+	    fail "kdb5_edit (timeout)"
 	    if {!$standalone} {
 		catch "exec rm -f tmpdir/db.ok"
 	    }
@@ -671,7 +672,7 @@ proc setup_kerberos_db { standalone } {
 	}
 	eof {
 	    catch "expect_after"
-	    fail "kdb5_edit"
+	    fail "kdb5_edit (eof)"
 	    if {!$standalone} {
 		catch "exec rm -f tmpdir/db.ok"
 	    }
@@ -717,6 +718,7 @@ proc setup_kerberos_db { standalone } {
 # success, 0 on failure.
 
 proc start_kerberos_daemons { standalone } {
+    global BINSH
     global REALMNAME
     global KRB5KDC
     global KADMIND
@@ -742,26 +744,28 @@ proc start_kerberos_daemons { standalone } {
     #   of the server to say stderr, then if we stop looking for output,
     #   buffers will fill and the server will stop working....
     #   So, we look to see when a line is added to the log file and then
-    #   check it.. 
+    #   check it..
+    # The same thing is done a little later for the kadmind
     set kdc_lfile $tmppwd/kdc.log
+    set kadmind_lfile $tmppwd/kadmind5.log
     set retry 30
 
     if ![file exists $kdc_lfile] then {
-	catch [exec touch $kdc_lfile]
-	catch "exec sleep 1"
+	catch [touch $kdc_lfile]
+	sleep 1
     }
 
-    set start [file mtime $kdc_lfile]
+    set kdc_start [file mtime $kdc_lfile]
 
     spawn $KRB5KDC -r $REALMNAME -n
     set kdc_pid [exp_pid]
     set kdc_spawn_id $spawn_id
 
     for {set count 0} {$count < $retry} {incr count} {
-	if { [file mtime $kdc_lfile] != $start } then  {
+	if { [file mtime $kdc_lfile] != $kdc_start } then  {
 		break;
 	}	
-	catch "exec sleep 1"
+	sleep 1
     }
 
     if {$count >= $retry} {
@@ -770,55 +774,60 @@ proc start_kerberos_daemons { standalone } {
 	return 0
     }
 
-    spawn -open [open "|tail -1 $kdc_lfile"]
-
-    expect {
-	"while.*\r" {
-	    fail "krb5kdc"
-	    stop_kerberos_daemons
-	    return 0
-	}
-	"commencing operation\n" { }
-	timeout {
-	    fail "krb5kdc"
-	    stop_kerberos_daemons
-	    return 0
-	}
-	eof {
-	    fail "krb5kdc"
-	    stop_kerberos_daemons
-	    return 0
-	}
+    if ![regexp "commencing operation" [tail1 $kdc_lfile]] {
+	fail "krb5kdc"
+	stop_kerberos_daemons
+	return 0
     }
-
-    # And cleanup for the tail -1...
-    wait 
 
     if {$standalone} {
 	pass "krb5kdc"
     }
 
     # Give the kerberos daemon a few seconds to get set up.
-    catch "exec sleep 2"
+    sleep 2
+
+    if ![file exists $kadmind_lfile] then {
+	catch [touch $kadmind_lfile]
+	sleep 1
+    }
+
+    set kadmind_start [file mtime $kadmind_lfile]
 
     # Start up the kadmind daemon
-    spawn $KADMIND -a $tmppwd/acl -r $REALMNAME -n
+    # XXXX kadmind uses stderr a lot.  the sh -c and redirect can be
+    # removed when this is fixed	
+    spawn $BINSH -c "exec $KADMIND -a $tmppwd/acl -r $REALMNAME -n 2>>$kadmind_lfile"
     set kadmind_pid [exp_pid]
     set kadmind_spawn_id $spawn_id
-    expect {
+
+    for {set count 0} {$count < $retry} {incr count} {
+	if { [file mtime $kadmind_lfile] != $kadmind_start } then  {
+		break;
+	}	
+	sleep 1
+    }
+
+    if {$count >= $retry} {
+	fail "kadmin5 (starting)"
+	stop_kerberos_daemons
+	return 0
+    }
+
+    switch -regexp [tail1 $kadmind_lfile] {
+	"cannot initialize network" {
+	    fail "kadmind (network init)"
+	    stop_kerberos_daemons
+	    return 0
+	}
 	"cannot bind to network address" {
-	    fail "kadmind"
+	    fail "kadmind (bind)"
 	    stop_kerberos_daemons
 	    return 0
 	}
-	"\r" { }
-	timeout {
-	    fail "kadmind"
-	    stop_kerberos_daemons
-	    return 0
-	}
-	eof {
-	    fail "kadmind"
+	"administrative server starting" { }
+	default {
+	    fail "kadmind (startup)"
 	    stop_kerberos_daemons
 	    return 0
 	}
@@ -829,7 +838,7 @@ proc start_kerberos_daemons { standalone } {
     }
 
     # Give the kadmind daemon a few seconds to get set up.
-    catch "exec sleep 2"
+    sleep 2
 
     return 1
 }
@@ -1065,7 +1074,12 @@ proc kinit { name pass standalone } {
     global spawn_id
 
     # Use kinit to get a ticket.
-    spawn $KINIT $name@$REALMNAME
+	#
+	# For now always get forwardable tickets. Later when we need to make
+	# tests that distiguish between forwardable tickets and otherwise
+	# we should but another option to this proc. --proven
+	#
+    spawn $KINIT -f $name@$REALMNAME
     expect {
 	"Password for $name@$REALMNAME:" {
 	    verbose "kinit started"
@@ -1251,7 +1265,7 @@ proc stop_root_shell { } {
 
     catch "close -i $rlogin_spawn_id"
     catch "exec kill $rlogin_pid"
-    catch "exec sleep 1"
+    sleep 1
     catch "exec kill -9 $rlogin_pid"
     catch "wait -i $rlogin_spawn_id"
 }
@@ -1275,4 +1289,15 @@ proc check_date { date } {
 	return 0
     }
     return 1
+}
+
+proc touch { file } {
+    set f [open $file "a"]
+    puts $f ""
+    close $f
+}
+
+# Implement this in tcl someday?
+proc tail1 { file } {
+    exec tail -1 $file
 }
