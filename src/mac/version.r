@@ -7,15 +7,15 @@
 #endif
 
 resource 'vers' (1) {
-	0x01, 0x10, beta, 0x04,
+	0x01, 0x10, beta, 0x05,
 	verUS,
-	"1.1b4",
-	"1.1b4, Copyright 1996-1999 Massachusetts Institute of Technology"
+	"1.1b5",
+	"1.1b5, Copyright 1996-1999 Massachusetts Institute of Technology"
 };
 
 resource 'vers' (2) {
-	0x01, 0x50, alpha, 0x1,
+	0x01, 0x50, beta, 0x1,
 	verUS,
-	"1.5a1",
-	"MacOS Kerberos v5 1.5a1"
+	"1.5b1",
+	"MacOS Kerberos v5 1.5b1"
 };
