@@ -103,7 +103,7 @@ char *name;
 {
     fprintf(stderr, "Usage: %s\t[-a aclfile] [-d dbname] [-k masterkeytype]", 
 			name);
-    fprintf(stderr, "\n\t[-h] [-m] [-M masterkeyname] [-r realm]\n");
+    fprintf(stderr, "\n\t[-h] [-m] [-M masterkeyname] [-r realm] [-p port]\n");
     return;
 }
  
@@ -148,7 +148,7 @@ process_args(context, argc, argv)
         fclose(startup_file);
     }
 #endif
-    while ((c = getopt(argc, argv, "hmM:a:d:k:r:De:")) != EOF) {
+    while ((c = getopt(argc, argv, "hmM:a:d:k:r:De:p:")) != EOF) {
 	switch(c) {
 	    case 'a':			/* new acl directory */
 		acl_file_name = optarg;
@@ -187,6 +187,10 @@ process_args(context, argc, argv)
 
 	    case 'D':
 		adm_debug_flag = 1;
+		break;
+
+	    case 'p':
+		admin_port = atoi(optarg);
 		break;
 
 	    case 'h':			/* get help on using adm_server */

@@ -52,3 +52,5 @@ krb5_data *tgs_server[4] = {0, &tgs_name, 0, 0};
 */
 
 krb5_principal tgs_server;
+
+short admin_port = 0;

@@ -209,27 +209,27 @@ setup_network(context, prog)
 #endif	/* DEBUG */
 
     service_servent = getservbyname(adm5_tcp_portname, "tcp");
-
-    if (service_servent) {
-	client_server_info.server_name.sin_port = service_servent->s_port;
+    if (admin_port) {
+      client_server_info.server_name.sin_port = admin_port;
+    } else if (service_servent) {
+      client_server_info.server_name.sin_port = service_servent->s_port;
 #ifdef DEBUG
-	fprintf(stderr, "Official service name = %s\n", service_servent->s_name);
+      fprintf(stderr, "Official service name = %s\n", service_servent->s_name);
 #endif	/* DEBUG */
     } else {
 #ifdef ADM5_DEFAULT_PORT
-	client_server_info.server_name.sin_port = htons(ADM5_DEFAULT_PORT);
-	com_err("setup_network", 0, "adm_network: using default port %d",
-		ADM5_DEFAULT_PORT);
+      client_server_info.server_name.sin_port = htons(ADM5_DEFAULT_PORT);
+      com_err("setup_network", 0, "adm_network: using default port %d",
+	      ADM5_DEFAULT_PORT);
 #else
-        krb5_free_principal(client_server_info.server);
-        free(client_server_info.name_of_service);
-	com_err("setup_network", 0, "adm_network: %s/tcp service unknown", 
-			adm5_tcp_portname);
-	return(1);
+      krb5_free_principal(client_server_info.server);
+      free(client_server_info.name_of_service);
+      com_err("setup_network", 0, "adm_network: %s/tcp service unknown", 
+	      adm5_tcp_portname);
+      return(1);
 #endif
     }
 
-    client_server_info.server_name.sin_port =  service_servent->s_port;
 
     if ((client_server_info.server_socket = 
 		socket(AF_INET, SOCK_STREAM, 0)) < 0) {

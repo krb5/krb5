@@ -76,6 +76,8 @@ extern int send_seqno;
 
 extern int exit_now;
 
+extern short admin_port;
+
 extern krb5_data inbuf;
 extern krb5_data msg_data;
 
