@@ -329,7 +329,7 @@ void doit(fd)
 			"while sending # of received bytes");
 		exit(1);
 	}
-	krb5_free_data_contents(context, &confmsg);
+	krb5_free_data_contents(kpropd_context, &confmsg);
 	if (close(fd) < 0) {
 		com_err(progname, errno,
 			"while trying to close database file");
