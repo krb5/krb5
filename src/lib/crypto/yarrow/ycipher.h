@@ -17,15 +17,15 @@ typedef struct
  * call the enc_provider function to get the info.
  */
 
-#define yarrow_enc_provider krb5int_enc_des3
+#define yarrow_enc_provider krb5int_enc_aes256
 
-#define CIPHER_BLOCK_SIZE 8
-#define CIPHER_KEY_SIZE 21
+#define CIPHER_BLOCK_SIZE 16
+#define CIPHER_KEY_SIZE 32
 
 #if defined( YARROW_NO_MATHLIB )
 /* see macros at end for functions evaluated */
-#define POW_CIPHER_KEY_SIZE    72057594037927936.0
-#define POW_CIPHER_BLOCK_SIZE  18446744073709551616.0
+#define POW_CIPHER_KEY_SIZE    115792089237316195423570985008687907853269984665640564039457584007913129639936.0
+#define POW_CIPHER_BLOCK_SIZE  340282366920938463463374607431768211456.0
 #endif
 
 
