@@ -24,11 +24,11 @@ error(do not have a 4-byte integer type)
 #endif	/* SIZEOF_LONG == 4 */
 
 KRB5_DLLIMP errcode_t KRB5_CALLCONV
-profile_init(filenames, ret_profile)
-	const char **filenames;
+profile_init(files, ret_profile)
+	profile_filespec_t *files;
 	profile_t *ret_profile;
 {
-	const char **fn;
+	profile_filespec_t *fs;
 	profile_t profile;
 	prf_file_t  new_file, last = 0;
 	errcode_t retval = 0;
@@ -41,8 +41,8 @@ profile_init(filenames, ret_profile)
 	memset(profile, 0, sizeof(struct _profile_t));
 	profile->magic = PROF_MAGIC_PROFILE;
 
-	for (fn = filenames; *fn; fn++) {
-		retval = profile_open_file(*fn, &new_file);
+	for (fs = files; !PROFILE_LAST_FILESPEC(*fs); fs++) {
+		retval = profile_open_file(*fs, &new_file);
 		/* if this file is missing, skip to the next */
 		if (retval == ENOENT) {
 			continue;
@@ -69,9 +69,13 @@ profile_init(filenames, ret_profile)
 	return 0;
 }
 
+#ifndef macintosh
+/* 
+ * On MacOS, profile_init_path is the same as profile_init
+ */
 KRB5_DLLIMP errcode_t KRB5_CALLCONV
 profile_init_path(filepath, ret_profile)
-	const char *filepath;
+	profile_filespec_list_t filelist;
 	profile_t *ret_profile;
 {
 	int n_entries, i;
@@ -119,6 +123,15 @@ profile_init_path(filepath, ret_profile)
 
 	return retval;
 }
+#else
+KRB5_DLLIMP errcode_t KRB5_CALLCONV
+profile_init_path(filelist, ret_profile)
+	profile_filespec_list_t filelist;
+	profile_t *ret_profile;
+{
+	return profile_init (filelist, ret_profile);
+}
+#endif
 
 KRB5_DLLIMP errcode_t KRB5_CALLCONV
 profile_flush(profile)
@@ -181,8 +194,12 @@ errcode_t profile_ser_size(unused, profile, sizep)
     required = 3*sizeof(prof_int32);
     for (pfp = profile->first_file; pfp; pfp = pfp->next) {
 	required += sizeof(prof_int32);
+#ifdef PROFILE_USES_PATHS
 	if (pfp->filename)
-	    required += strlen(pfp->filename);
+	    required += strlen(pfp->filespec);
+#else
+	required += sizeof (profile_filespec_t);
+#endif
     }
     *sizep += required;
     return 0;
@@ -228,14 +245,22 @@ errcode_t profile_ser_externalize(unused, profile, bufpp, remainp)
 	    pack_int32(PROF_MAGIC_PROFILE, &bp, &remain);
 	    pack_int32(fcount, &bp, &remain);
 	    for (pfp = profile->first_file; pfp; pfp = pfp->next) {
-		slen = (pfp->filename) ?
-		    (prof_int32) strlen(pfp->filename) : 0;
+#ifdef PROFILE_USES_PATHS
+		slen = (pfp->filespec) ?
+		    (prof_int32) strlen(pfp->filespec) : 0;
 		pack_int32(slen, &bp, &remain);
 		if (slen) {
-		    memcpy(bp, pfp->filename, (size_t) slen);
+		    memcpy(bp, pfp->filespec, (size_t) slen);
 		    bp += slen;
 		    remain -= (size_t) slen;
 		}
+#else
+		slen = sizeof (FSSpec);
+		pack_int32(slen, &bp, &remain);
+		memcpy (bp, &(pfp->filespec), (size_t) slen);
+		bp += slen;
+		remain -= (size_t) slen;
+#endif
 	    }
 	    pack_int32(PROF_MAGIC_PROFILE, &bp, &remain);
 	    retval = 0;
@@ -275,7 +300,7 @@ errcode_t profile_ser_internalize(unused, profilep, bufpp, remainp)
 	size_t		remain;
 	int			i;
 	prof_int32		fcount, tmp;
-	char		**flist = 0;
+	profile_filespec_t		*flist = 0;
 
 	bp = *bufpp;
 	remain = *remainp;
@@ -293,18 +318,22 @@ errcode_t profile_ser_internalize(unused, profilep, bufpp, remainp)
 	(void) unpack_int32(&fcount, &bp, &remain);
 	retval = ENOMEM;
 
-	flist = (char **) malloc(sizeof(char *) * (fcount + 1));
+	flist = (profile_filespec_t *) malloc(sizeof(profile_filespec_t) * (fcount + 1));
 	if (!flist)
 		goto cleanup;
 	
 	memset(flist, 0, sizeof(char *) * (fcount+1));
 	for (i=0; i<fcount; i++) {
 		if (!unpack_int32(&tmp, &bp, &remain)) {
+#ifdef PROFILE_USES_PATHS
 			flist[i] = (char *) malloc((size_t) (tmp+1));
 			if (!flist[i])
 				goto cleanup;
 			memcpy(flist[i], bp, (size_t) tmp);
 			flist[i][tmp] = '\0';
+#else
+			memcpy (&flist[i], bp, (size_t) tmp);
+#endif
 			bp += tmp;
 			remain -= (size_t) tmp;
 		}
@@ -316,7 +345,7 @@ errcode_t profile_ser_internalize(unused, profilep, bufpp, remainp)
 		goto cleanup;
 	}
 
-	if ((retval = profile_init((const char **)flist, profilep)))
+	if ((retval = profile_init(flist, profilep)))
 		goto cleanup;
 	
 	*bufpp = bp;
@@ -324,10 +353,12 @@ errcode_t profile_ser_internalize(unused, profilep, bufpp, remainp)
     
 cleanup:
 	if (flist) {
+#ifdef PROFILE_USES_PATHS
 		for (i=0; i<fcount; i++) {
 			if (flist[i])
 				free(flist[i]);
 		}
+#endif
 		free(flist);
 	}
 	return(retval);
