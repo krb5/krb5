@@ -30,30 +30,49 @@ kdb5_anadd \- manipulate aname/lname translation database
 ] [
 .B \-n
 .I dbname
-] pname lname
+] kerberos_principal local_name
 .br
 .B kdb5_anadd \-d
 [
 .B \-n
 .I dbname
-] pname
+] kerberos_principal 
 .br
 .SH DESCRIPTION
 .I kdb5_anadd
-is a primitive tool for manipulating the authentication name (aname) to
-local name (lname) translation database.
+is a primitive tool for manipulating a database which maps
+kerberos principals into user accounts on the local machine.  By
+default, Kerberos assumes that a kerberos principal
+"username@LOCALREALM" maps into the account "username" on the local
+machine.  However, this assumption is not always true.
+
 .PP
-The first use described above is for entering new translations or
-changing existing translations from anames to lnames.
-After execution, the function
-.IR krb5_aname_to_localname (3)
-with its first argument passed as a principal with text representation of
-.I pname
-will fill in
-.I lname
-as the translation.
+In order accomodate systems which have local usernames which are not the
+same as Kerberos principals, the system administrator can use 
+.I krb5_anadd
+to set up mappings between a kerberos name and a local account name.  (If
+this database is established using 
+.Ikrb5_anadd, 
+then Kerberos will not do
+the default mapping; you will have to specify each mapping between a
+Kerberos principal and username manually).
+
 .PP
-The second use described above is for deleting translations from the
+For example, the following mapping can be established by
+.Ikrb5_anadd: 
+"joechen@ATHENA.MIT.EDU" maps to "joe" by using the command:
+
+.PP
+krb5_adadd jochen@ATHENA.MIT.EDU joe
+
+.PP
+After this command, if joechen@ATHENA.MIT.EDU tries to do an
+authenticated rlogin to the account "joe" on that machine, the Kerberos
+access control mechanism will allow the login, since
+joechen@ATHENA.MIT.EDU is considered to be the local user "joe".
+
+.PP
+The \fB\-d\fP option deletes translations from the
 database; after execution the principal named by 
 .I pname
 will not translate to any local name.
@@ -65,5 +84,8 @@ option specifies the name of the database which holds the translation;
 the default database is DEFAULT_LNAME_FILENAME (usually /krb5/aname).
 .SH SEE ALSO
 krb5(3)
+krb5_aname_to_localname (3)
 .SH BUGS
 The mapping is many-to-one, not many-to-many.
+
+
