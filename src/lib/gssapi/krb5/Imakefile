@@ -57,7 +57,7 @@ CCSRCS = \
 	util_seqnum.c \
 	verify.c
 
-CCSRCS = \
+CCOBJS = \
 	accept_sec_context.o \
 	acquire_cred.o \
 	compare_name.o \
@@ -87,8 +87,8 @@ CCSRCS = \
 	util_seqnum.o \
 	verify.o
 
-SRCS= $(ETSRCS) $(CSRCS)
-OBJS= $(ETOBJS) $(COBJS)
+SRCS= $(ETSRCS) $(CCSRCS)
+OBJS= $(ETOBJS) $(CCOBJS)
 HDRS= $(ETHDRS)
 
 EHDRDIR=$(TOP)/include/gssapi
@@ -96,7 +96,7 @@ EHDRDIR=$(TOP)/include/gssapi
 NormalLibraryObjectRule()
 ErrorTableObjectRule()
 
-all:: ${SRCS} ${HDRS} includes ${OBJS}
+all:: $(SRCS) $(HDRS) includes $(OBJS)
 
 clean::
 	$(RM) $(ETHDRS) $(ETSRCS)
