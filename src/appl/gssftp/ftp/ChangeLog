@@ -1,3 +1,11 @@
+Tue Apr  7 16:53:58 1998  Dan Winship  <danw@mit.edu>
+
+	* secure.c (secure_putbyte): Set nout = 0 *before* calling
+ 	secure_putbuf: if the transfer is aborted, the SIGURG handler will
+ 	longjmp out, so the line after the secure_putbuf will never get
+ 	executed, so nout would never be reset and the next transfer
+ 	would overrun ucbuf.
+
 Fri Nov 22 15:48:19 1996  unknown  <bjaspan@mit.edu>
 
 	* ftp.c (hookup): use sizeof instead of h_length to determine

@@ -153,8 +153,8 @@ unsigned char c;
 
 	ucbuf[nout++] = c;
 	if (nout == MAX - FUDGE_FACTOR) {
-	  ret = secure_putbuf(fd, ucbuf, nout);
 	  nout = 0;
+	  ret = secure_putbuf(fd, ucbuf, MAX - FUDGE_FACTOR);
 	  return(ret?ret:c);
 	}
 return (c);
