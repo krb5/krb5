@@ -567,7 +567,7 @@ succeedes, and both clients maintain their correct privileges.}
 Functional Specification when kdc.conf is unreadable.}
 \Priority{Bug fix, krb5-admin/18}
 \Conditions{local}
-\Status{xxx}
+\Status{Implemented}
 }
 
 \numtest{150}{
@@ -1306,7 +1306,37 @@ no pw_expiration is specified.}
 \Version{KADM5_API_VERSION_2}
 \Priority{bug-fix}
 \Reason{Accepts max_rlife change.}
-\Status{Unimplemented.  Add all V2 tests for mod_princ!}
+\Status{Implemented}
+}
+
+\numtest{101}{
+\Version{KADM5_API_VERSION_2}
+\Reason{Rejects last_success change.}
+\Status{Implemented}
+}
+
+\numtest{102}{
+\Version{KADM5_API_VERSION_2}
+\Reason{Rejects last_failed change.}
+\Status{Implemented}
+}
+
+\numtest{103}{
+\Version{KADM5_API_VERSION_2}
+\Reason{Rejects fail_auth_count change.}
+\Status{Implemented}
+}
+
+\numtest{103.5}{
+\Version{KADM5_API_VERSION_2}
+\Reason{Rejects key_data change.}
+\Status{Implemented}
+}
+
+\numtest{104}{
+\Version{KADM5_API_VERSION_2}
+\Reason{Accepts tl_data change.}
+\Status{Implemented}
 }
 
 \section{ovsec_kadm_rename_principal}
