@@ -567,7 +567,7 @@ compat_decrypt_key (in5, out4)
 	bcopy(	out5.contents, out4, out5.length);
     }
     bzero(	out5.contents,       out5.length);
-    xfree(	out5.contents);
+    krb5_xfree(	out5.contents);
     return( retval);
 }
 /* array of name-components + NULL ptr

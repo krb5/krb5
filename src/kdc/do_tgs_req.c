@@ -506,7 +506,7 @@ tgt_again:
 	retval = krb5_encrypt_tkt_part(&encrypting_key, &ticket_reply);
 
 	memset((char *)encrypting_key.contents, 0, encrypting_key.length);
-	xfree(encrypting_key.contents);
+	krb5_xfree(encrypting_key.contents);
 
 	if (retval) {
 	    status = "TKT_ENCRYPT";

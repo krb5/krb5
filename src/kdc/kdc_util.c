@@ -79,7 +79,7 @@ krb5_authdata ***output;
 	    *retdata[i] = **ptr;
 	    if (!(retdata[i]->contents =
 		  (krb5_octet *)malloc(retdata[i]->length))) {
-		xfree(retdata[i]);
+		krb5_xfree(retdata[i]);
 		retdata[i] = 0;
 		krb5_free_authdata(retdata);
 		return ENOMEM;
@@ -281,7 +281,7 @@ krb5_tkt_authent **ret_authdat;
      * no longer need to protect the ticket in apreq, since
      * authdat is about to get nuked --- it's going to get reassigned.
      */
-    xfree(authdat);
+    krb5_xfree(authdat);
 
     authdat = nauthdat;
     *ret_authdat = authdat;
@@ -342,7 +342,7 @@ krb5_tkt_authent **ret_authdat;
 			    &our_cksum);
     }
     
-    xfree(our_cksum.contents);
+    krb5_xfree(our_cksum.contents);
     
 cleanup:
     if (apreq)
@@ -547,7 +547,7 @@ krb5_principal server;
 
     if(!trans) return(ENOMEM);
 
-    if(new_trans->data) xfree(new_trans->data);
+    if(new_trans->data) krb5_xfree(new_trans->data);
 
     new_trans->data = trans;
 

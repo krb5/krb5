@@ -90,7 +90,7 @@ check_padata (client, src_addr, padata, pa_id, flags)
     retval =  krb5_verify_padata(*padata,client->principal,src_addr,
 				 &tmpkey, pa_id, flags);
     memset((char *)tmpkey.contents, 0, tmpkey.length);
-    xfree(tmpkey.contents);
+    krb5_xfree(tmpkey.contents);
     if (retval && client->alt_key.length) {
 	/*
 	 * If we failed, try again with the alternative key
@@ -104,7 +104,7 @@ check_padata (client, src_addr, padata, pa_id, flags)
 	retval = krb5_verify_padata(*padata,client->principal,src_addr,
 				    &tmpkey, pa_id, flags);
 	memset((char *)tmpkey.contents, 0, tmpkey.length);
-	xfree(tmpkey.contents);
+	krb5_xfree(tmpkey.contents);
     }
     return retval;
 }
@@ -411,7 +411,7 @@ ticket_reply.enc_part2 = &enc_tkt_reply;
     }
     retval = krb5_encrypt_tkt_part(&encrypting_key, &ticket_reply);
     memset((char *)encrypting_key.contents, 0, encrypting_key.length);
-    xfree(encrypting_key.contents);
+    krb5_xfree(encrypting_key.contents);
     if (retval) {
 	cleanup();
 	return retval;
@@ -476,7 +476,7 @@ ticket_reply.enc_part2 = &enc_tkt_reply;
 		   free(ticket_reply.enc_part.ciphertext.data); \
 		   free(cname); free(sname); \
 		   if (client.salt_type == KRB5_KDB_SALTTYPE_NOREALM) \
-		       xfree(padat_tmp[0]->contents);}
+		       krb5_xfree(padat_tmp[0]->contents);}
 
     reply.client = request->client;
     /* XXX need separate etypes for ticket encryption and kdc_rep encryption */
@@ -513,7 +513,7 @@ ticket_reply.enc_part2 = &enc_tkt_reply;
     retval = krb5_encode_kdc_rep(KRB5_AS_REP, &reply_encpart,
 				 &encrypting_key,  &reply, response);
     memset((char *)encrypting_key.contents, 0, encrypting_key.length);
-    xfree(encrypting_key.contents);
+    krb5_xfree(encrypting_key.contents);
     cleanup();
     /* these parts are left on as a courtesy from krb5_encode_kdc_rep so we
        can use them in raw form if needed.  But, we don't... */
