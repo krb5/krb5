@@ -249,8 +249,8 @@ process_chpw_request(context, server_handle, realm, s, keytab, sockin,
     memcpy(ptr, clear.data, clear.length);
     ptr[clear.length] = '\0';
 
-    ret = kadm5_chpass_principal_util(server_handle, ticket->enc_part2->client,
-				      ptr, NULL, strresult, sizeof(strresult));
+    ret = chpass_util_wrapper(server_handle, ticket->enc_part2->client,
+			      ptr, NULL, strresult, sizeof(strresult));
 
     /* zap the password */
     memset(clear.data, 0, clear.length);

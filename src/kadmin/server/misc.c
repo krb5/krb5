@@ -41,44 +41,12 @@ chpass_principal_wrapper_3(void *server_handle,
 			   krb5_key_salt_tuple *ks_tuple,
 			   char *password)
 {
-    krb5_int32			now;
     kadm5_ret_t			ret;
-    kadm5_policy_ent_rec	pol;
-    kadm5_principal_ent_rec	princ;
-    kadm5_server_handle_t	handle = server_handle;
 
-    ret = krb5_timeofday(handle->context, &now);
-    if (ret)
-	return ret;
-
-    ret = kadm5_get_principal(handle->lhandle, principal,
-			      &princ, KADM5_PRINCIPAL_NORMAL_MASK);
-    if(ret != KADM5_OK) 
-	 return ret;
-    if(princ.aux_attributes & KADM5_POLICY) {
-	if((ret=kadm5_get_policy(handle->lhandle,
-				 princ.policy, &pol)) != KADM5_OK) {
-	    (void) kadm5_free_principal_ent(handle->lhandle, &princ);
-	    return ret;
-	}
-	if((now - princ.last_pwd_change) < pol.pw_min_life &&
-	   !(princ.attributes & KRB5_KDB_REQUIRES_PWCHANGE)) {
-	    (void) kadm5_free_policy_ent(handle->lhandle, &pol);
-	    (void) kadm5_free_principal_ent(handle->lhandle, &princ);
-	    return KADM5_PASS_TOOSOON;
-	}
-
-	ret = kadm5_free_policy_ent(handle->lhandle, &pol);
-	if (ret) {
-	    (void) kadm5_free_principal_ent(handle->lhandle, &princ);
-	    return ret;
-        }
-    }
-
-    ret = kadm5_free_principal_ent(handle->lhandle, &princ);
+    ret = check_min_life(server_handle, principal);
     if (ret)
 	 return ret;
-    
+
     return kadm5_chpass_principal_3(server_handle, principal,
 				    keepold, n_ks_tuple, ks_tuple,
 				    password);
@@ -89,7 +57,7 @@ chpass_principal_wrapper_3(void *server_handle,
  * Function: randkey_principal_wrapper_3
  * 
  * Purpose: wrapper to kadm5_randkey_principal which checks the
-	    passwords min. life.
+ *	    password's min. life.
  *
  * Arguments:
  *	principal	    (input) krb5_principal whose password we are
@@ -116,7 +84,35 @@ randkey_principal_wrapper_3(void *server_handle,
 			    krb5_key_salt_tuple *ks_tuple,
 			    krb5_keyblock **keys, int *n_keys)
 {
+    kadm5_ret_t			ret;
 
+    ret = check_min_life(server_handle, principal);
+    if (ret)
+	 return ret;
+    return kadm5_randkey_principal_3(server_handle, principal,
+				     keepold, n_ks_tuple, ks_tuple,
+				     keys, n_keys);
+}
+
+kadm5_ret_t
+chpass_util_wrapper(void *server_handle, krb5_principal princ,
+		    char *new_pw, char **ret_pw,
+		    char *msg_ret, unsigned int msg_len)
+{
+    kadm5_ret_t ret;
+
+    ret = check_min_life(server_handle, princ);
+    if (ret)
+	return ret;
+
+    return kadm5_chpass_principal_util(server_handle, princ,
+				       new_pw, ret_pw,
+				       msg_ret, msg_len);
+}
+
+kadm5_ret_t
+check_min_life(void *server_handle, krb5_principal principal)
+{
     krb5_int32			now;
     kadm5_ret_t			ret;
     kadm5_policy_ent_rec	pol;
@@ -153,8 +149,5 @@ randkey_principal_wrapper_3(void *server_handle,
 
     ret = kadm5_free_principal_ent(handle->lhandle, &princ);
     if (ret)
-	 return ret;
-    return kadm5_randkey_principal_3(server_handle, principal,
-				     keepold, n_ks_tuple, ks_tuple,
-				     keys, n_keys);
+	return ret;
 }

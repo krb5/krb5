@@ -1,3 +1,12 @@
+2004-10-27  Tom Yu  <tlyu@mit.edu>
+
+	* misc.c, misc.h: New function check_min_life(), containing common
+	code from wrapper functions.  New function chpass_util_wrapper(),
+	which does min_life checking prior to calling
+	kadm5_chpass_principal_util().
+
+	* schpw.c (process_chpw_request): Call chpass_util_wrapper().
+
 2004-09-21  Tom Yu  <tlyu@mit.edu>
 
 	* ovsec_kadmd.c (kadm_svc_run): Don't use rpc_dtablesize().
