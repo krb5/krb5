@@ -82,6 +82,7 @@ char * v4_klog KRB5_PROTOTYPE((int, const char *, ...));
 #else
 char * v4_klog KRB5_PROTOTYPE((int, char *, va_dcl));
 #endif
+#define klog v4_klog
 
 /* take this out when we don't need it anymore */
 int krbONE = 1;
@@ -168,12 +169,6 @@ krb5_data **resp;
     KTEXT_ST v4_pkt;
     char *lrealm;
 
-    /* Check if disabled completely */
-    if (kdc_v4 == KDC_V4_NONE) {
-	(void) klog(L_KRB_PERR, "Disabled KRB V4 request");
-	return KRB5KDC_ERR_BAD_PVNO;
-    }
-
     if ((retval = krb5_timeofday(kdc_context, (krb5_timestamp *) &kerb_time.tv_sec)))
         return(retval);
 
@@ -228,7 +223,6 @@ int type_2_v5err[] = { 0,	/* 		0 No error		     */
     KRB_AP_ERR_BADVERSION	/* L_KRB_PWARN  16 Protocol warning messages */
 };
 #endif
-#define klog v4_klog
 #ifdef HAVE_STDARG_H
 char * v4_klog( int type, const char *format, ...)
 #else
