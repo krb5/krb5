@@ -1415,8 +1415,8 @@ documentation Ä unset-echo {documentation-output}
 	End
 	If (`Exists {root-folder}":::Documentation:pdf:krb5api.pdf"`)
 		Catenate {root-folder}":::Documentation:pdf:krb5api.pdf" > {Targ}
+		SetFile -a l -t 'PDF ' -c 'CARO' {Targ}
 	End
-	SetFile -a l -t 'PDF ' -c 'CARO' {Targ}
 
 {krb5-globals-documentation-output-folder}"Kerberos5Globals.html" Ä {root-folder}"mac:libraries:Kerberos v5 Globals:Krb5Globals.html" {makefile-name}
 	"{create-folder}" "{TargDir}"
