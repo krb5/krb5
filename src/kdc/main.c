@@ -145,7 +145,6 @@ char **argv;
     krb5_enctype etype;
 
     extern char *optarg;
-    extern krb5_deltat krb5_clockskew;
 
     while ((c = getopt(argc, argv, "r:d:mM:k:")) != EOF) {
 	switch(c) {
