@@ -26,10 +26,6 @@
 #define STDARG
 #endif
 
-#ifdef _STDARG_H
-#define STDARG
-#endif
-
 #ifndef __STDC__
 /* we didn't get it in com_err.h if it wasn't STDC. */
 #ifndef STDARG
