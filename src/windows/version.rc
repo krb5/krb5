@@ -39,6 +39,17 @@
 #endif
 #endif /* comerr */
 
+#ifdef PROF_LIB
+#define K5_DESCRIPTION "PROFILE - Profile Library MIT Kerberos v5 / GSS distribution\0"
+#define K5_INTERNAL_NAME "profile\0"
+#define K5_FILETYPE	VFT_DLL
+#if !defined(_WIN32)
+#define K5_ORIGINAL_NAME "xpprof16.dll\0"
+#else
+#define K5_ORIGINAL_NAME "xpprof32.dll\0"
+#endif
+#endif /* profile */
+
 #ifdef KRB5_LIB
 #define K5_DESCRIPTION "Kerberos v5 - MIT GSS / Kerberos v5 distribution\0"
 #define K5_INTERNAL_NAME "krb5\0"
