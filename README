@@ -164,15 +164,19 @@ Major changes listed by ticket ID
 * [1415] Subsession key negotiation has been fixed to allow for
   server-selected subsession keys in the future.
 
-* [1418, 1429, 1446, 1484, 1486, 1487] The AES cryptosystem has been
-  implemented.  It is not usable for GSSAPI, though.
+* [1418, 1429, 1446, 1484, 1486, 1487, 1535] The AES cryptosystem has
+  been implemented.  It is not usable for GSSAPI, though.
 
 * [1491] The client-side functionality of the krb524 library has been
   moved into the krb5 library.
 
+* [1550] SRV record support exists for Kerberos v4.
+
 * [1551] The heuristic for locating the Kerberos v4 KDC by prepending
   "kerberos." to the realm name if no config file or DNS information
   is available has been removed.
+
+* [1568, 1067] A krb524 stub library is built on Windows.
 
 Minor changes listed by ticket ID
 ---------------------------------
@@ -181,9 +185,15 @@ Minor changes listed by ticket ID
 
 * [175] Docs refer to appropriate example domains/IPs now.
 
-* [433] --includedir honored now.
+* [299] kadmin no longer complains about missing kdc.conf parameters
+  when it really means krb5.conf parameters.
+
+* [443] --includedir honored now.
 
 * [479] unused argument in try_krb4() in login.c deleted.
+
+* [590] The des_read_pw_string() function in libdes425 has been
+  aligned with the original krb4 and CNS APIs.
 
 * [608] login.krb5 handles SIGHUP more sanely now and thus avoids
   getting the session into a weird state w.r.t. job control.
@@ -257,8 +267,8 @@ Minor changes listed by ticket ID
   host having a large number of local network interfaces should be
   fixed now.
 
-* [1064] krb5_auth_con_genaddrs() no longer inappropriately returns -1
-  on some error cases.
+* [1064] Incorrect option parsing in the gssapi library is no longer
+  relevant due to removal of the "v2" mechanism.
 
 * [1065, 1225] krb5_get_init_creds_password() should properly warn about
   password expiration.
@@ -269,6 +279,9 @@ Minor changes listed by ticket ID
   of ftp from behind a NAT.
 
 * [1102] gssapi_generic.h should now work with C++.
+
+* [1136] Some documentation for the setup of cross-realm
+  authentication has been added.
 
 * [1164] krb5_auth_con_gen_addrs() now properly returns errno instead
   of -1 if getpeername() fails.
@@ -334,8 +347,9 @@ Minor changes listed by ticket ID
   preference to attempting to use expired ticketes.  Thanks to Ben
   Cox.
 
-* [1262] Sequence numbers are now unsigned; negative sequence numbers
-  will be accepted for the purposes of backwards compatibility.
+* [1262, 1572] Sequence numbers are now unsigned; negative sequence
+  numbers will be accepted for the purposes of backwards
+  compatibility.
 
 * [1263] A heuristic for matching the incorrectly encoded sequence
   numbers emitted by Heimdal implementations has been written.
@@ -390,7 +404,7 @@ Minor changes listed by ticket ID
 * [1400] If DO_TIME is not set in the auth_context, and no replay
   cache is available, no replay cache will be used.
 
-* [1406] libdb is no longer installed.  If you installed
+* [1406, 1108] libdb is no longer installed.  If you installed
   krb5-1.3-alpha1, you should ensure that no spurious libdb is left in
   your install tree.
 
@@ -455,6 +469,34 @@ Minor changes listed by ticket ID
 
 * [1520] Documentation of OS-specific build options has been updated.
 
+* [1536] A missing prototype for krb5_db_iterate_ext() has been
+  added.
+
+* [1537] An incorrect path to kdc.conf show in the kdc.conf manpage
+  has been fixed.
+
+* [1540] verify_as_reply() will only check the "renew-till" time
+  against the "till" time if the RENEWABLE is not set in the request.
+
+* [1547] gssftpd no longer uses vfork(), as this was causing problems
+  under RedHat 9.
+
+* [1549] SRV records with a value of "." are now interpreted as a lack
+  of support for the protocol.
+
+* [1553] The undocumented (and confusing!) kdc_supported_enctypes
+  kdc.conf variable is no longer used.
+
+* [1560] Some spurious double-colons in password prompts have been
+  fixed.
+
+* [1571] The test suite tries a little harder to get a root shell.
+
+* [1573] The KfM build process now sets localstatedir=/var/db.
+
+* [1576, 1575] The client library no longer requests RENEWABLE_OK if
+  the renew lifetime is greater than the ticket lifetime.
+
 --[ DELETE BEFORE RELEASE ---changes to unreleased code, etc.--- ]--
 
 * [1054] KRB-CRED messages for RC4 are encrypted now.
@@ -492,6 +534,26 @@ Minor changes listed by ticket ID
 * [1512, 1522] afs_string_to_key now works with etype_info2.
 
 * [1514] krb5int_populate_gic_opt returns void now.
+
+* [1521] Using an afs3 salt for an AES key no longer causes
+  segfaults.
+
+* [1533] krb524.h no longer contains invalid Mac pragmas.
+
+* [1546] krb_mk_req_creds() no longer zeros the session key.
+
+* [1554] The krb4 string-to-key iteration now accounts correctly for
+  the decrypt-in-place semantics of libdes425.
+
+* [1557] KerberosLoginPrivate.h is now correctly included for the use
+  of __KLAllowHomeDirectoryAccess() in init_os_ctx.c (for KfM).
+
+* [1558] KfM exports the new krb524 interface.
+
+* [1563] krb__get_srvtaname() no longer returns a pointer that is
+  free()d upon a subsequent call.
+
+* [1569] A debug statement has been removed from krb524init.
 
 Copyright Notice and Legal Administrivia
 ----------------------------------------
