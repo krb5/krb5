@@ -1,3 +1,8 @@
+Mon Jun 26 14:39:18 1995  Sam Hartman  <hartmans@tardis.MIT.EDU>
+
+	* Makefile.in (LDFLAGS): Removed bogus -g.  It breaks on shared
+        links when you're actually calling ld not cc.
+
 Fri Jun 23 18:16:09 1995  Tom Yu  (tlyu@dragons-lair)
 
 	* configure.in: fix Sam's typo so libdes425.a gets symlinked
