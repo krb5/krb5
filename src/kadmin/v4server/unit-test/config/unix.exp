@@ -11,7 +11,6 @@ if {[file exists /bin/sleep]} {
 set kpasswd_v4 /usr/athena/bin/kpasswd
 set ovpasswd $env(TOP)/kpasswd/kpasswd
 set kadmin_local $env(TOP)/cli/kadmin.local
-set kdb5_edit $KDBFIVE_EDIT
 set remove_changepw_perms ./remove_changepw_perms.sh
 set getpid ./getpid.sh
 set ovsec_adm_server $env(TOP)/server/kadmind
