@@ -131,4 +131,5 @@ clean::
 	$(RM) server-handle-test handle-test.o
 	$(RM) lock-test lock-test.o
 	$(RM) server-iter-test iter-test.o
+	$(RM) server-setkey-test client-setkey-test setkey-test.o
 	$(RM) *.log *.plog *.sum *.psum unit-test-log.*
