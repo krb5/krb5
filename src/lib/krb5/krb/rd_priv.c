@@ -166,6 +166,11 @@ OLDDECLARG(krb5_data *, outbuf)
 	    cleanup_mesg();  
 	    return KRB5_RC_REQUIRED;
 	}
+	if (!krb5_address_compare(sender_addr, privmsg_enc_part->s_address)) {
+	    cleanup_data();
+	    cleanup_mesg();
+	    return KRB5KRB_AP_ERR_BADADDR;
+	}
 	if (retval = krb5_gen_replay_name(sender_addr, "_priv",
 					  &replay.client)) {
 	    cleanup_data();
@@ -207,7 +212,6 @@ OLDDECLARG(krb5_data *, outbuf)
 	}
 	krb5_free_address(our_addrs);
     }
-    /* XXX check sender's address */
 
     /* everything is ok - return data to the user */
 

@@ -87,6 +87,10 @@ krb5_data *outbuf;
 	    cleanup();
 	    return KRB5_RC_REQUIRED;
 	}
+	if (!krb5_address_compare(sender_addr, message->s_address)) {
+	    cleanup();
+	    return KRB5KRB_AP_ERR_BADADDR;
+	}
 	if (retval = krb5_gen_replay_name(sender_addr, "_safe",
 					  &replay.client)) {
 	    cleanup();
@@ -123,8 +127,6 @@ krb5_data *outbuf;
 	}
 	krb5_free_address(our_addrs);
     }
-
-    /* XXX check sender's address */
 
     /* verify the checksum */
     /* to do the checksum stuff, we need to re-encode the message with a
