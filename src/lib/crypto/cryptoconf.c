@@ -42,13 +42,17 @@ static char rcsid_cryptoconf_c[] =
 
 #ifdef PROVIDE_DES_CBC_CKSUM
 #include <krb5/mit-des.h>
+#define _DES_DONE__
 #define DES_CBC_CKENTRY &mit_des_cbc_cksumtable_entry
 #else
 #define DES_CBC_CKENTRY 0
 #endif
 
 #ifdef PROVIDE_DES_CBC_CRC
+#ifndef _DES_DONE__
 #include <krb5/mit-des.h>
+#define _DES_DONE__
+#endif
 static krb5_cs_table_entry mit_des_cbc_crc_csentry = {
     &mit_des_cryptosystem_entry, 0 };
 #define DES_CBC_CRC_CSENTRY &mit_des_cbc_crc_csentry
@@ -94,3 +98,5 @@ krb5_checksum_entry *krb5_cksumarray[] = {
 };
 
 int krb5_max_cksum = sizeof(krb5_cksumarray)/sizeof(krb5_cksumarray[0]);
+
+#undef _DES_DONE__
