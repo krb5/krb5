@@ -64,7 +64,7 @@ kadm_entry2princ(entry, princ)
 	  DATE_SZ);
   princ->attributes = entry.attributes;
   princ->max_life = entry.max_life / (60 * 5);
-  princ->kdc_key_ver = entry.mkvno;
+  princ->kdc_key_ver = 1; /* entry.mkvno; */
   princ->key_version = entry.key_data[0].key_data_kvno;
 
   retval = krb5_dbe_decode_mod_princ_data(kadm_context, &entry, &mprinc);
@@ -109,7 +109,6 @@ kadm_princ2entry(princ, entry)
     return retval;
   entry->max_life = princ.max_life * (60 * 5);
   entry->max_renewable_life = server_parm.max_rlife; /* XXX yeah well */
-  entry->mkvno = server_parm.mkvno; /* XXX */
   entry->expiration = princ.exp_date;
   entry->attributes = princ.attributes;
 
@@ -537,7 +536,6 @@ Kadm_vals *valsout;		/* the actual record which is returned */
     if (IS_FIELD(KADM_MAXLIFE,valsin2->fields))
       newentry.max_life = temp_key.max_life; 
     if (IS_FIELD(KADM_DESKEY,valsin2->fields)) {
-      newentry.mkvno = server_parm.mkvno;
       if ((newpw.contents = (krb5_octet *)malloc(8)) == NULL) {
 	krb5_db_free_principal(kadm_context, &newentry, 1);
 	memset((char *)&temp_key, 0, sizeof (temp_key));
@@ -695,7 +693,6 @@ des_cblock newpw;
       failchange(retval);
     }
     pkey->key_data_kvno++;
-    odata.mkvno = server_parm.mkvno;
     numfound = 1;
     sblock.type = KRB5_KDB_SALTTYPE_V4;
     sblock.data.length = 0;
@@ -988,7 +985,6 @@ kadm_chg_srvtab(rname, rinstance, rrealm, values)
     odata.princ = inprinc;
     odata.max_life = server_parm.max_life;
     odata.max_renewable_life = server_parm.max_rlife;
-    odata.mkvno = server_parm.mkvno;
     odata.expiration = server_parm.expiration;
     odata.attributes = 0;
     if (!krb5_dbe_create_key_data(kadm_context, &odata)) {

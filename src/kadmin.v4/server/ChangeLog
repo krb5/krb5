@@ -1,3 +1,7 @@
+Wed Dec 13 03:51:53 1995  Chris Provenzano (proven@mit.edu)
+
+        * kadm_funcs.c : Remove mkvno for krb5_db_entry
+
 Wed Sep 06 14:20:57 1995   Chris Provenzano (proven@mit.edu)
 
         * admin_server.c, kadm_funcs.c kadm_ser_wrap.c : 
