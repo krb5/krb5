@@ -1,3 +1,11 @@
+2001-07-26  Ezra Peisach  <epeisach@mit.edu>
+
+	* kdb_xdr.c (krb5_dbe_update_mod_princ_data,
+ 	krb5_encode_princ_contents): Delcare local variable unsigned.
+
+	* kdb_cpw.c (add_key_pwd): Declare local variable unsigned based
+	on use.
+
 2001-04-25  Ezra Peisach  <epeisach@mit.edu>
 
 	* kdb_dbm.c (destroy_file_suffix): Declare as static.

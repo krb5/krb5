@@ -181,13 +181,13 @@ krb5_dbe_update_mod_princ_data(context, entry, mod_date, mod_princ)
     krb5_error_code 	  retval = 0;
     krb5_octet		* nextloc = 0;
     char		* unparse_mod_princ = 0;
-    int			  unparse_mod_princ_size;
+    unsigned int	unparse_mod_princ_size;
 
     if ((retval = krb5_unparse_name(context, mod_princ, 
 				    &unparse_mod_princ)))
 	return(retval);
 
-    unparse_mod_princ_size = (int) strlen(unparse_mod_princ) + 1;
+    unparse_mod_princ_size = strlen(unparse_mod_princ) + 1;
 
     if ((nextloc = (krb5_octet *) malloc(unparse_mod_princ_size + 4))
 	== NULL) {
@@ -275,7 +275,8 @@ krb5_encode_princ_contents(context, content, entry)
     krb5_data  		* content;
     krb5_db_entry 	* entry;
 {
-    int 		  unparse_princ_size, i, j;
+    int 		  i, j;
+    unsigned int	  unparse_princ_size;
     char 		* unparse_princ;
     char		* nextloc;
     krb5_tl_data	* tl_data;

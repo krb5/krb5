@@ -389,7 +389,8 @@ add_key_pwd(context, master_key, ks_tuple, ks_tuple_count, passwd,
 #else
 	    /* Why do we do this? Well, the afs_mit_string_to_key needs to
 	       use strlen, and the realm is not NULL terminated.... */
-	    int slen = (*krb5_princ_realm(context,db_entry->princ)).length;
+	    unsigned int slen = 
+		(*krb5_princ_realm(context,db_entry->princ)).length;
 	    if(!(key_salt.data.data = (char *) malloc(slen+1)))
 	        return ENOMEM;
 	    key_salt.data.data[slen] = 0;
