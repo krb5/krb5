@@ -32,7 +32,6 @@ configure
 configure.in
 heuristic.c
 krb_auth_su.c
-ksu.1
 ksu.M
 ksu.h
 main.c
