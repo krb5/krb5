@@ -1,3 +1,7 @@
+Tue Aug 16 22:41:25 1994  Mark Eichin  (eichin@cygnus.com)
+
+	* krlogind.c: add sys/ioctl.h.
+
 Tue Aug 16 22:36:29 1994  Mark Eichin  (eichin@cygnus.com)
 
 	* configure.in: set LOGINLIBS to -lodm -ls -lcfg if the system has
