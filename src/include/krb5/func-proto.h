@@ -253,8 +253,8 @@ krb5_error_code krb5_cc_register
 		   krb5_boolean ));
 char *krb5_cc_default_name
 	PROTOTYPE((void ));
-krb5_ccache krb5_cc_default
-	PROTOTYPE((void ));
+krb5_error_code krb5_cc_default
+	PROTOTYPE((krb5_ccache *));
 
 
 /* krb5_free.c */
