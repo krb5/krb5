@@ -1,3 +1,8 @@
+Sun Nov 24 23:35:22 1996  Ezra Peisach  <epeisach@mit.edu>
+
+	* login.c (try_afscall): Change to take pointer to function
+		instead of only calling setpag(). [krb5-appl/190]
+
 Fri Nov 22 15:46:46 1996  unknown  <bjaspan@mit.edu>
 
 	* kcmd.c (kcmd): use sizeof instead of h_length to determine
