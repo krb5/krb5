@@ -1820,6 +1820,8 @@ krb5_error_code krb5_auth_to_rep
 
 krb5_error_code KRB5_CALLCONV krb5_rc_initialize
 	(krb5_context, krb5_rcache,krb5_deltat);
+krb5_error_code KRB5_CALLCONV krb5_rc_recover_or_initialize
+	(krb5_context, krb5_rcache,krb5_deltat);
 krb5_error_code KRB5_CALLCONV krb5_rc_recover
 	(krb5_context, krb5_rcache);
 krb5_error_code KRB5_CALLCONV krb5_rc_destroy

@@ -2,6 +2,8 @@
 
 	* configure.in: Actually check for pthread_mutex_lock.
 
+	* k5-int.h (krb5_rc_recover_or_initialize): Declare.
+
 2004-07-28  Ken Raeburn  <raeburn@mit.edu>
 
 	* k5-thread.h [HAVE_PRAGMA_WEAK_REF]: Declare the pthread mutex
