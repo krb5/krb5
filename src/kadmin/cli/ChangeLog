@@ -1,3 +1,8 @@
+2004-06-15  Tom Yu  <tlyu@mit.edu>
+
+	* kadmin.c (kadmin_startup): Add option to force old AUTH_GSSAPI
+	flavor.
+
 2003-08-26  Ken Raeburn  <raeburn@mit.edu>
 
 	* getdate.y (bcopy): Don't bother with HAVE_BCOPY and HAVE_MEMCPY
