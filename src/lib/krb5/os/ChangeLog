@@ -1,5 +1,10 @@
 2000-06-09  Miro Jurisic  <meeroh@mit.edu>
 
+	* init_os_ctx.c (os_get_default_config_files):  
+	Eliminated some dead code
+
+2000-06-09  Miro Jurisic  <meeroh@mit.edu>
+
 	* init_os_ctx.c (os_get_default_config_files):  Use Kerberos
 	Preferences library to locate the config files on Mac OS
 

@@ -214,10 +214,6 @@ os_get_default_config_files(pfiles, secure)
 					err = GetEOF (refNum, &length);
 				}
 				
-				if ((err == noErr) && (length == 0)) {
-					err = fnfErr;
-				}
-			
 				if (refNum != -1) {
 					FSClose (refNum);
 				}
@@ -229,7 +225,6 @@ os_get_default_config_files(pfiles, secure)
 			}
 		}
 
-		err = noErr;
 		if (!foundPreferences) {
 			/* We found no profile data in any of those files; try to initialize one */
 			/* If we are running "secure" do not try to initialize preferences */
