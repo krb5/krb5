@@ -263,7 +263,8 @@ config-windows:: Makefile-windows
 
 ##DOS##wconfig.exe: wconfig.c
 ##DOS##	SET CL=/nologo
-##DOS##	$(CC) /AL wconfig.c
+##WIN16##	$(CC) /AL wconfig.c
+##WIN32##	$(CC) wconfig.c
 
 clean-windows::
 	@echo Making clean in include

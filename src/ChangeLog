@@ -1,3 +1,8 @@
+Mon May 10 15:07:11 1999  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in: Change wconfig build so win16 flags are not used
+		for win32 build.
+
 Mon Feb  8 21:42:44 1999  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* Makefile.in: Change Windows kerbsrc.zip target so this now does
