@@ -1,3 +1,8 @@
+Tue Dec 16 11:00:18 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* locate_kdc.c (krb5_locate_kdc): Free hostlist array elements
+		when finished with them.
+
 Sat Dec  6 23:12:23 1997  Ezra Peisach  <epeisach@mit.edu>
 
 	* locate_kdc.c (krb5_locate_kdc): Get rid of extra krb5_xfree

@@ -209,6 +209,10 @@ krb5_locate_kdc(context, realm, addr_pp, naddrs, master_index, nmasters)
 	}
 	if (masterlist)
 	    *nmasters = out - *master_index;
+
+	/* Free the hostlist entry we are looping over. */
+	free(hostlist[i]);
+	hostlist[i] = 0;
     }
 
 
