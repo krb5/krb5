@@ -58,6 +58,8 @@ krb5_scc_store(id, creds)
      TCHECK(ret);
      ret = krb5_scc_store_addrs(id, creds->addresses);
      TCHECK(ret);
+     ret = krb5_scc_store_authdata(id, creds->authdata);
+     TCHECK(ret);
      ret = krb5_scc_store_data(id, &creds->ticket);
      TCHECK(ret);
      ret = krb5_scc_store_data(id, &creds->second_ticket);
