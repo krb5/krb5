@@ -1,3 +1,8 @@
+1999-09-17  Tom Yu  <tlyu@mit.edu>
+
+	* def_realm.c: Patch from jaltman@columbia.edu to allow compiling
+	under non-Windows platforms with DNS lookup enabled.
+
 1999-08-26  Danilo Almeida  <dalmeida@mit.edu>
 
 	* kuserok.c (krb5_kuserok): Fix improper negation in

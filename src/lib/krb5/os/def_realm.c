@@ -28,6 +28,15 @@
 #include <stdio.h>
 
 #ifdef KRB5_DNS_LOOKUP	     
+#ifdef WSHELPER
+#include <wshelper.h>
+#else /* WSHELPER */
+#include <arpa/inet.h>
+#include <arpa/nameser.h>
+#include <resolv.h>
+#include <netdb.h>
+#endif /* WSHELPER */
+
 /* for old Unixes and friends ... */
 #ifndef MAXHOSTNAMELEN
 #define MAXHOSTNAMELEN 64
