@@ -1,3 +1,8 @@
+Mon Feb 13 20:25:20 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* get_in_tkt.c (krb5_get_in_tkt): Fix memory leak --- the default
+		encryption types was not being freed.
+
 Fri Feb 10 15:45:59 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* rd_req.c (krb5_rd_req): Remove ISODE cruft.
