@@ -697,7 +697,7 @@ initialize_realms(kcontext, argc, argv)
     char		*rcname = KDCRCACHE;
     char		*lrealm;
     krb5_error_code	retval;
-    krb5_enctype	menctype = ENCTYPE_DES_CBC_CRC;
+    krb5_enctype	menctype = ENCTYPE_UNKNOWN;
     kdc_realm_t		*rdatap;
     krb5_boolean	manual = FALSE;
     char		*default_ports = 0;
@@ -742,6 +742,8 @@ initialize_realms(kcontext, argc, argv)
 	    break;
 	case 'm':			/* manual type-in of master key */
 	    manual = TRUE;
+	    if (menctype == ENCTYPE_UNKNOWN)
+		menctype = ENCTYPE_DES_CBC_CRC;
 	    break;
 	case 'M':			/* master key name in DB */
 	    mkey_name = optarg;

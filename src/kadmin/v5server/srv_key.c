@@ -367,7 +367,12 @@ key_init(kcontext, debug_level, key_type, master_key_name, manual,
     /*
      * Figure out arguments.
      */
-    master_keyblock.enctype=((key_type == -1) ? DEFAULT_KDC_ENCTYPE : key_type);
+    if (key_type == -1)
+	master_keyblock.enctype =
+	    manual ? DEFAULT_KDC_ENCTYPE : ENCTYPE_UNKNOWN;
+    else
+	master_keyblock.enctype = key_type;
+
     mkey_name = ((!master_key_name) ? KRB5_KDB_M_NAME : master_key_name);
 
     /*
@@ -466,7 +471,9 @@ key_init(kcontext, debug_level, key_type, master_key_name, manual,
     }
     ment_init = 1;
 
-    krb5_use_enctype(kcontext, &master_encblock, master_keyblock.enctype);
+    /* krb5_db_fetch_mkey will setup the eblock if it is reading the stash */
+    if (manual)
+	krb5_use_enctype(kcontext, &master_encblock, master_keyblock.enctype);
 
     /* Go get the master key */
     kret = krb5_db_fetch_mkey(kcontext,
@@ -739,7 +746,6 @@ key_string2key_keysalt(ksent, ptr)
 	 */
 	if ((kret = krb5_string_to_key(argp->context,
 				       &master_encblock,
-				       kdata->key_data_type[0],
 				       &key,
 				       argp->string,
 				       &salt)))

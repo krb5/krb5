@@ -251,10 +251,10 @@ char *kdb5_edit_Init(argc, argv)
 	if (manual_mkey)
 	    master_keyblock.enctype = DEFAULT_KDC_ENCTYPE;
 	else
-	    master_keyblock.enctype = NULL;
+	    master_keyblock.enctype = ENCTYPE_UNKNOWN;
     }
 
-    if (master_keyblock.enctype) {
+    if (master_keyblock.enctype != ENCTYPE_UNKNOWN) {
 	if (!valid_enctype(master_keyblock.enctype)) {
 	    char tmp[32];
 	    if (krb5_enctype_to_string(master_keyblock.enctype,
