@@ -1,3 +1,10 @@
+1999-08-26  Tom Yu  <tlyu@mit.edu>
+
+	* etypes.c: Add aliases "des" for "des-cbc-md5", "des3-hmac-sha1"
+	and "des3-cbc-sha1-kd" for "des3-cbc-sha1".
+
+	* cksumtypes.c: Add alias "hmac-sha1-des3-kd".
+
 1999-08-18  Tom Yu  <tlyu@mit.edu>
 
 	* etypes.c: Update des3-cbc-sha1 to alignt with new number
