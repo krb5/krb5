@@ -1,3 +1,8 @@
+Mon Apr 24 23:12:21 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in, configure.in (t_walk_rtree): Add WITH_NETLIBS and
+		$(LIBS), so that t_walk_rtree can compile under solaris.
+
 Mon Apr 24 17:09:36 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* parse.c (krb5_parse_name): Add magic number to new structure
