@@ -810,7 +810,7 @@ proc add_kerberos_key { kkey standalone } {
     spawn $KADMIN -m -p krbtest/admin@$REALMNAME
     expect_after {
 	"Cannot contact any KDC" {
-	    fail "kadmin $kkey lost KDC"
+	    fail "kadmin interactive add $kkey lost KDC"
 	    catch "expect_after"
 	    return 0
 	}

@@ -37,6 +37,11 @@ proc kadmin_add { pname password } {
     set good 0
     spawn $KADMIN -m -p krbtest/admin@$REALMNAME ank $pname
     expect_after {
+	"Cannot contact any KDC" {
+	    fail "kadmin add$pname lost KDC"
+	    catch "expect_after"
+	    return 0
+	}
 	timeout {
 	    fail "kadmin add $pname"
 	    catch "expect_after"
@@ -124,6 +129,11 @@ proc kadmin_add_rnd { pname } {
     set good 0
     spawn $KADMIN -m -p krbtest/admin@$REALMNAME ark $pname
     expect_after {
+	"Cannot contact any KDC" {
+	    fail "kadmin add rnd $pname lost KDC"
+	    catch "expect_after"
+	    return 0
+	}
 	timeout {
 	    fail "kadmin add_rnd $pname"
 	    catch "expect_after"
@@ -200,6 +210,11 @@ proc kadmin_show { pname } {
 
     spawn $KADMIN -m -p krbtest/admin@$REALMNAME show $pname
     expect_after {
+	"Cannot contact any KDC" {
+	    fail "kadmin show $pname lost KDC"
+	    catch "expect_after"
+	    return 0
+	}
 	timeout {
 	    fail "kadmin show $pname"
 	    catch "expect_after"
@@ -237,6 +252,11 @@ proc kadmin_cpw { pname password } {
 
     spawn $KADMIN -m -p krbtest/admin@$REALMNAME cpw $pname
     expect_after {
+	"Cannot contact any KDC" {
+	    fail "kadmin cpw $pname lost KDC"
+	    catch "expect_after"
+	    return 0
+	}
 	timeout {
 	    fail "kadmin cpw $pname"
 	    catch "expect_after"
@@ -280,6 +300,11 @@ proc kadmin_cpw_rnd { pname } {
 
     spawn $KADMIN -m -p krbtest/admin@$REALMNAME crk $pname
     expect_after {
+	"Cannot contact any KDC" {
+	    fail "kadmin cpw_rnd $pname lost KDC"
+	    catch "expect_after"
+	    return 0
+	}
 	timeout {
 	    fail "kadmin cpw_rnd $pname"
 	    catch "expect_after"
@@ -321,6 +346,11 @@ proc kadmin_modify { pname flags } {
 
     spawn $KADMIN -m -p krbtest/admin@$REALMNAME -- modent $pname $flags
     expect_after {
+	"Cannot contact any KDC" {
+	    fail "kadmin modify $pname ($flags) lost KDC"
+	    catch "expect_after"
+	    return 0
+	}
 	timeout {
 	    fail "kadmin modify $pname"
 	    catch "expect_after"
@@ -362,6 +392,11 @@ proc kadmin_rename { pname npname } {
     set good 0
     spawn $KADMIN -m -p krbtest/admin@$REALMNAME -- renent -force $pname $npname
     expect_after {
+	"Cannot contact any KDC" {
+	    fail "kadmin rename $pname $npname lost KDC"
+	    catch "expect_after"
+	    return 0
+	}
 	timeout {
 	    fail "kadmin renent $pname $npname"
 	    catch "expect_after"
@@ -471,6 +506,11 @@ proc kadmin_list {  } {
 
     spawn $KADMIN -m -p krbtest/admin@$REALMNAME ldb
     expect_after {
+	"Cannot contact any KDC" {
+	    fail "kadmin ldb lost KDC"
+	    catch "expect_after"
+	    return 0
+	}
 	timeout {
 	    fail "kadmin ldb"
 	    catch "expect_after"
@@ -509,6 +549,11 @@ proc kadmin_extract { instance name } {
 
     spawn $KADMIN -m -p krbtest/admin@$REALMNAME xst $instance $name
     expect_after {
+	"Cannot contact any KDC" {
+	    fail "kadmin xst $instance $name lost KDC"
+	    catch "expect_after"
+	    return 0
+	}
 	timeout {
 	    fail "kadmin xst $instance $name"
 	    catch "expect_after"
@@ -549,6 +594,11 @@ proc kadmin_extractv4 { instance name } {
 
     spawn $KADMIN -m -p krbtest/admin@$REALMNAME xst4 $instance $name
     expect_after {
+	"Cannot contact any KDC" {
+	    fail "kadmin xst4 $instance $name lost KDC"
+	    catch "expect_after"
+	    return 0
+	}
 	timeout {
 	    fail "kadmin xst4 $instance $name"
 	    catch "expect_after"
@@ -591,6 +641,11 @@ proc kadmin_delete { pname } {
     set good 0
     spawn $KADMIN -m -p krbtest/admin@$REALMNAME -- delent -force $pname
     expect_after {
+	"Cannot contact any KDC" {
+	    fail "kadmin_delete $pname lost KDC"
+	    catch "expect_after"
+	    return 0
+	}
 	timeout {
 	    fail "kadmin delent $pname"
 	    catch "expect_after"
