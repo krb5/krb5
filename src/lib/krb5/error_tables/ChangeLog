@@ -1,3 +1,10 @@
+Thu Dec 21 18:46:45 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* krb5_err.et: Changed KRB5_SENDAUTH_MUTUAL_FAILED to
+		KRB5_MUTUAL_FAILED (since the error code is no longer used
+		in sendauth).  Added KRB5_CC_FORMAT for indicating a
+		problem in the credentials cache format.
+
 Wed Nov  8 02:45:56 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* kv5m_err.et: Added magic number for krb5_preauth_ops.
