@@ -167,7 +167,10 @@ char *argv[];
 	exit(1);
     }
 
-    ccdef = krb5_cc_default();
+    if (retval = krb5_cc_default(&ccdef)) {
+	com_err(argv[0], retval, "while getting default ccache");
+	exit(1);
+    }
 
     if (retval = krb5_mk_req(server, 0, &send_cksum, ccdef, &send_data)) {
 	com_err(argv[0], retval, "while preparing AP_REQ");
