@@ -42,7 +42,6 @@ kg_checksum_channel_bindings(context, cb, cksum, bigend)
    cksum->checksum_type = CKSUMTYPE_RSA_MD5;
    cksum->length = krb5_checksum_size(context, CKSUMTYPE_RSA_MD5);
    if ((cksum->contents = (krb5_octet *) xmalloc(cksum->length)) == NULL) {
-      free(buf);
       return(ENOMEM);
    }
  

@@ -1,3 +1,8 @@
+Wed Aug 28 17:45:55 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* util_cksum.c (kg_checksum_channel_bindings): Fix stupid bug;
+		don't free buf before it's allocated!
+
 Thu Aug 15 20:52:37 1996  Sam Hartman  <hartmans@tertius.mit.edu>
 
 	* init_sec_context.c (make_ap_req): Require des-cbc-crc for now;
