@@ -35,4 +35,5 @@ clean::
 # Makefile dependencies follow.  This must be the last section in
 # the Makefile.in file
 #
-
+$(OUTPRE)t_loader.$(OBJEXT): t_loader.c $(BUILDTOP)/include/krb5/autoconf.h \
+  $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(BUILDTOP)/include/gssapi/gssapi.h
