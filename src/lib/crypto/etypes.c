@@ -101,6 +101,10 @@ const struct krb5_keytypes krb5_enctypes_list[] = {
       "rc4-hmac", "ArcFour with HMAC/md5", &krb5int_enc_arcfour,
       &krb5int_hash_md5, krb5_arcfour_encrypt_length, krb5_arcfour_encrypt,
       krb5_arcfour_decrypt, krb5_arcfour_string_to_key },
+    { ENCTYPE_ARCFOUR_HMAC,  /* alias */
+      "arcfour-hmac-md5", "ArcFour with HMAC/md5", &krb5int_enc_arcfour,
+      &krb5int_hash_md5, krb5_arcfour_encrypt_length, krb5_arcfour_encrypt,
+      krb5_arcfour_decrypt, krb5_arcfour_string_to_key },
     { ENCTYPE_ARCFOUR_HMAC_EXP, 
       "arcfour-hmac-exp", "Exportable ArcFour with HMAC/md5",
       &krb5int_enc_arcfour,
@@ -108,6 +112,11 @@ const struct krb5_keytypes krb5_enctypes_list[] = {
       krb5_arcfour_decrypt, krb5_arcfour_string_to_key },
     { ENCTYPE_ARCFOUR_HMAC_EXP, /* alias */
       "rc4-hmac-exp", "Exportable ArcFour with HMAC/md5",
+      &krb5int_enc_arcfour,
+      &krb5int_hash_md5, krb5_arcfour_encrypt_length, krb5_arcfour_encrypt,
+      krb5_arcfour_decrypt, krb5_arcfour_string_to_key },
+    { ENCTYPE_ARCFOUR_HMAC_EXP, /* alias */
+      "arcfour-hmac-md5-exp", "Exportable ArcFour with HMAC/md5",
       &krb5int_enc_arcfour,
       &krb5int_hash_md5, krb5_arcfour_encrypt_length, krb5_arcfour_encrypt,
       krb5_arcfour_decrypt, krb5_arcfour_string_to_key },
