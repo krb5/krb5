@@ -429,6 +429,7 @@ krb5_get_in_tkt_with_password(krb5_context context, krb5_flags options,
     char pw0array[1024];
     krb5_get_init_creds_opt opt;
     char * server;
+    krb5_principal server_princ, client_princ;
 
     pw0array[0] = '\0';
     pw0.data = pw0array;
@@ -448,6 +449,8 @@ krb5_get_in_tkt_with_password(krb5_context context, krb5_flags options,
     retval = krb5_unparse_name( context, creds->server, &server);
     if (retval)
       return (retval);
+    server_princ = creds->server;
+    client_princ = creds->client;
         retval = krb5_get_init_creds (context,
 					   creds, creds->client,  
 					   krb5_prompter_posix,  NULL,
@@ -458,7 +461,12 @@ krb5_get_in_tkt_with_password(krb5_context context, krb5_flags options,
 	if (retval) {
 	  return (retval);
 	}
-	
+	if (creds->server)
+	    krb5_free_principal( context, creds->server);
+	if (creds->client)
+	    krb5_free_principal( context, creds->client);
+	creds->client = client_princ;
+	creds->server = server_princ;
 	/* store it in the ccache! */
 	if (ccache)
 	  if ((retval = krb5_cc_store_cred(context, ccache, creds)))

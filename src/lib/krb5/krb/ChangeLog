@@ -1,3 +1,10 @@
+2003-05-27  Sam Hartman  <hartmans@mit.edu>
+
+	* gic_keytab.c (krb5_get_in_tkt_with_keytab): as below
+
+	* gic_pwd.c (krb5_get_in_tkt_with_password): Store client and
+	server principals to avoid memory leak  
+
 2003-05-24  Ken Raeburn  <raeburn@mit.edu>
 
 	* conv_creds.c: New file, moved from krb524/conv_creds.c and
