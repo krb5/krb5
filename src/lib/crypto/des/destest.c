@@ -25,15 +25,10 @@
  */
 
 
-#include "k5-int.h"
 #include "des_int.h"
 #include "com_err.h"
 
-extern int errno;
-extern mit_des_ecb_encrypt();
-
 #include <stdio.h>
-
 
 void convert PROTOTYPE((char *, unsigned char []));
 
@@ -46,38 +41,23 @@ char *argv[];
 {
     char block1[17], block2[17], block3[17];
 
-    krb5_encrypt_block eblock;
-    krb5_keyblock keyblock;
-    krb5_context context;
     mit_des_cblock key, input, output, output2;
-    krb5_error_code retval;
+    mit_des_key_schedule sched;
     int num = 0;
+    int retval;
 
     int error = 0;
-    /* This is a crock and we know it... We win because 
-       none of these tests rely on a valid context pointer */
-    context = 0;
-
-    /* do some initialisation */
-    initialize_krb5_error_table();
-
-    krb5_use_enctype(context, &eblock, ENCTYPE_DES_CBC_CRC);
-    keyblock.magic = KV5M_KEYBLOCK;
-    keyblock.enctype = ENCTYPE_DES_CBC_CRC;
-    keyblock.length = sizeof (mit_des_cblock);
-    keyblock.contents = (krb5_octet *)key;
 
     while (scanf("%16s %16s %16s", block1, block2, block3) == 3) {
 	convert(block1, key);
 	convert(block2, input);
 	convert(block3, output);
 
-        if (retval = krb5_process_key(context, &eblock,&keyblock)) {
-            com_err("des test", retval, "can't process key");
-            exit(-1);
+	if (retval = mit_des_key_sched(key, sched)) {
+            fprintf(stderr, "des test: can't process key");
+            exit(1);
         }
-	mit_des_ecb_encrypt(&input, &output2,
-			    (struct mit_des_ks_struct *)eblock.priv,1);
+	mit_des_ecb_encrypt(&input, &output2, sched, 1);
 
 	if (memcmp((char *)output2, (char *)output, 8)) {
 	    fprintf(stderr, 
@@ -91,8 +71,7 @@ char *argv[];
 	/*
 	 * Now try decrypting....
 	 */
-	mit_des_ecb_encrypt(&output, &output2,
-			    (struct mit_des_ks_struct *)eblock.priv,0);
+	mit_des_ecb_encrypt(&output, &output2, sched, 0);
 
 	if (memcmp((char *)output2, (char *)input, 8)) {
 	    fprintf(stderr, 
@@ -103,10 +82,6 @@ char *argv[];
 	    error++;
 	}
 
-        if (retval = krb5_finish_key(context, &eblock)) {
-            com_err("des verify", retval, "can't finish key");
-            exit(-1);
-        }
 	num++;
     }
 

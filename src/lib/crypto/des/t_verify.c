@@ -33,8 +33,6 @@
 #include <stdio.h>
 #include "com_err.h"
 
-extern krb5_cryptosystem_entry mit_des_cryptosystem_entry;
-
 char *progname;
 int nflag = 2;
 int vflag;
@@ -42,10 +40,6 @@ int mflag;
 int zflag;
 int pid;
 int mit_des_debug;
-
-krb5_encrypt_block eblock;
-krb5_keyblock keyblock;
-krb5_data kdata;
 
 unsigned char cipher_text[64];
 unsigned char clear_text[64] = "Now is the time for all " ;
@@ -86,7 +80,6 @@ unsigned char default_ivec[8] = {
 unsigned char *ivec;
 unsigned char zero_key[8] = {1,1,1,1,1,1,1,1}; /* just parity bits */
 int i,j;
-krb5_error_code retval;
 
 unsigned char cipher1[8] = {
     0x25,0xdd,0xac,0x3e,0x96,0x17,0x64,0x67
@@ -117,14 +110,15 @@ unsigned char mresult[8] = {
  * plaintext = 0, key = 0, cipher = 0x8ca64de9c1b123a7 (or is it a 1?)
  */
 
+mit_des_key_schedule sched;
+
 void
 main(argc,argv)
     int argc;
     char *argv[];
 {
     /* Local Declarations */
-    krb5_context context;
-    int	 in_length;
+    int	 in_length, retval;
     void do_encrypt();
     void do_decrypt();
 
@@ -164,23 +158,13 @@ main(argc,argv)
     }
 
     /* do some initialisation */
-    initialize_krb5_error_table(); 
-    krb5_init_context(&context);
-
-    krb5_use_enctype(context, &eblock, ENCTYPE_DES_CBC_CRC);
-    keyblock.enctype = ENCTYPE_DES_CBC_CRC;
-    keyblock.length = sizeof(mit_des_cblock);
 
     /* use known input and key */
 
     /* ECB zero text zero key */
     if (zflag) {
 	input = zero_text;
-	keyblock.contents = (krb5_octet *)zero_key;
-	if (retval = krb5_process_key(context, &eblock,&keyblock)) {
-	    com_err("des verify", retval, "can't process zero key");
-	    exit(-1);
-	}
+	mit_des_key_sched(zero_key, sched);
 	printf("plaintext = key = 0, cipher = 0x8ca64de9c1b123a7\n");
 	do_encrypt(input,cipher_text);
 	printf("\tcipher  = (low to high bytes)\n\t\t");
@@ -188,26 +172,17 @@ main(argc,argv)
 	    printf("%02x ",cipher_text[j]);
 	printf("\n");
 	do_decrypt(output,cipher_text);
-	if (retval = krb5_finish_key(context, &eblock)) {
-	    com_err("des verify", retval, "can't finish zero key");
-	    exit(-1);
-	}
 	if ( memcmp((char *)cipher_text, (char *)zresult, 8) ) {
 	    printf("verify: error in zero key test\n");
 	    exit(-1);
 	}
 
-	krb5_free_context(context);
 	exit(0);
     }
 
     if (mflag) {
 	input = msb_text;
-	keyblock.contents = (krb5_octet *)key3;
-	if (retval = krb5_process_key(context, &eblock,&keyblock)) {
-	    com_err("des verify", retval, "can't process key3");
-	    exit(-1);
-	}
+	mit_des_key_sched(key3, sched);
 	printf("plaintext = 0x00 00 00 00 00 00 00 40, ");
 	printf("key = 0x80 01 01 01 01 01 01 01\n");
 	printf("	cipher = 0xa380e02a6be54696\n");
@@ -218,26 +193,17 @@ main(argc,argv)
 	}
 	printf("\n");
 	do_decrypt(output,cipher_text);
-	if (retval = krb5_finish_key(context, &eblock)) {
-	    com_err("des verify", retval, "can't finish key3");
-	    exit(-1);
-	}
 	if ( memcmp((char *)cipher_text, (char *)mresult, 8) ) {
 	    printf("verify: error in msb test\n");
 	    exit(-1);
 	}
-	krb5_free_context(context);
 	exit(0);
     }
 
     /* ECB mode Davies and Price */
     {
 	input = zero_text;
-	keyblock.contents = (krb5_octet *)key2;
-	if (retval = krb5_process_key(context, &eblock,&keyblock)) {
-	    com_err("des verify", retval, "can't process key2");
-	    exit(-1);
-	}
+	mit_des_key_sched(key2, sched);
 	printf("Examples per FIPS publication 81, keys ivs and cipher\n");
 	printf("in hex.  These are the correct answers, see below for\n");
 	printf("the actual answers.\n\n");
@@ -253,10 +219,6 @@ main(argc,argv)
 	    printf("%02x ",cipher_text[j]);
 	printf("\n\n");
 	do_decrypt(output,cipher_text);
-	if (retval = krb5_finish_key(context, &eblock)) {
-	    com_err("des verify", retval, "can't finish key2");
-	    exit(-1);
-	}
 	if ( memcmp((char *)cipher_text, (char *)cipher1, 8) ) {
 	    printf("verify: error in ECB encryption\n");
 	    exit(-1);
@@ -267,11 +229,7 @@ main(argc,argv)
 
     /* ECB mode */
     {
-	keyblock.contents = (krb5_octet *)default_key;
-	if (retval = krb5_process_key(context, &eblock,&keyblock)) {
-	    com_err("des verify", retval, "can't process key2");
-	    exit(-1);
-	}
+	mit_des_key_sched(default_key, sched);
 	input = clear_text;
 	ivec = default_ivec;
 	printf("EXAMPLE ECB\tkey = 0123456789abcdef\n");
@@ -306,14 +264,14 @@ main(argc,argv)
     if (retval = mit_des_cbc_encrypt((mit_des_cblock *) input,
 				     (mit_des_cblock *) cipher_text,
 				     (size_t) in_length, 
-				     (struct mit_des_ks_struct *)eblock.priv,
+				     sched,
 				     ivec,
 				     MIT_DES_ENCRYPT)) {
 	com_err("des verify", retval, "can't encrypt");
 	exit(-1);
     }
     printf("\tciphertext = (low to high bytes)\n");
-    for (i = 0; i <= 7; i++) {
+    for (i = 0; i <= 2; i++) {
 	printf("\t\t");
 	for (j = 0; j <= 7; j++) {
 	    printf("%02x ",cipher_text[i*8+j]);
@@ -323,7 +281,7 @@ main(argc,argv)
     if (retval = mit_des_cbc_encrypt((mit_des_cblock *) cipher_text,
 				     (mit_des_cblock *) clear_text,
 				     (size_t) in_length, 
-				     eblock.priv,
+				     sched,
 				     ivec,
 				     MIT_DES_DECRYPT)) {
 	com_err("des verify", retval, "can't decrypt");
@@ -345,16 +303,12 @@ main(argc,argv)
     printf("or some part thereof\n");
     input = clear_text2;
     mit_des_cbc_cksum(input,cipher_text,(long) strlen((char *)input),
-		      eblock.priv,ivec);
+		      sched,ivec);
     printf("ACTUAL CBC checksum\n");
     printf("\t\tencrypted cksum = (low to high bytes)\n\t\t");
     for (j = 0; j<=7; j++)
 	printf("%02x ",cipher_text[j]);
     printf("\n\n");
-    if (retval = krb5_finish_key(context, &eblock)) {
-	com_err("des verify", retval, "can't finish key2");
-	exit(-1);
-    }
     if ( memcmp((char *)cipher_text, (char *)checksum, 8) ) {
 	printf("verify: error in CBC cheksum\n");
 	exit(-1);
@@ -364,11 +318,9 @@ main(argc,argv)
 
     printf("N-fold\n");
     for (i=0; i<sizeof(nfold_in)/sizeof(char *); i++) {
-	kdata.data = nfold_in[i];
-	kdata.length = strlen(kdata.data);
-	printf("\tInput:\t\"%.*s\"\n", kdata.length, kdata.data);
+	printf("\tInput:\t\"%.*s\"\n", strlen(nfold_in[i]), nfold_in[i]);
 	printf("\t192-Fold:\t");
-	mit_des_n_fold(kdata.data, kdata.length, cipher_text, 24);
+	mit_des_n_fold(nfold_in[i], strlen(nfold_in[i]), cipher_text, 24);
 	for (j=0; j<24; j++)
 	    printf("%s%02x", (j&3) ? "" : " ", cipher_text[j]);
 	printf("\n");
@@ -379,8 +331,6 @@ main(argc,argv)
     }
     printf("verify: N-fold is correct\n\n");
 
-    krb5_free_context(context);
-    
     exit(0);
 }
 
@@ -414,7 +364,7 @@ do_encrypt(in,out)
     for (i =1; i<=nflag; i++) {
 	mit_des_ecb_encrypt((mit_des_cblock *)in,
 			    (mit_des_cblock *)out,
-			    (struct mit_des_ks_struct *)eblock.priv,
+			    sched,
 			    MIT_DES_ENCRYPT);
 	if (mit_des_debug) {
 	    printf("\nclear %s\n",in);
@@ -436,7 +386,7 @@ do_decrypt(in,out)
     for (i =1; i<=nflag; i++) {
 	mit_des_ecb_encrypt((mit_des_cblock *)out,
 			    (mit_des_cblock *)in,
-			    (struct mit_des_ks_struct *)eblock.priv,
+			    sched,
 			    MIT_DES_DECRYPT);
 	if (mit_des_debug) {
 	    printf("clear %s\n",in);

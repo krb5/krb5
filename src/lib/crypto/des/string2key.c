@@ -41,8 +41,7 @@
  */
 
 krb5_error_code
-mit_des_string_to_key (eblock, keyblock, data, salt)
-const krb5_encrypt_block FAR * eblock;
+mit_des_string_to_key_int (keyblock, data, salt)
 krb5_keyblock FAR * keyblock;
 const krb5_data FAR * data;
 const krb5_data FAR * salt;
@@ -59,28 +58,22 @@ const krb5_data FAR * salt;
     register char *p_char;
     char k_char[64];
     mit_des_key_schedule key_sked;
-    krb5_enctype enctype = eblock->crypto_entry->proto_enctype;
 
 #ifndef min
 #define min(A, B) ((A) < (B) ? (A): (B))
 #endif
-
-    if ((enctype != ENCTYPE_DES_CBC_CRC) && (enctype != ENCTYPE_DES_CBC_MD4) &&
-       (enctype != ENCTYPE_DES_CBC_MD5) && (enctype != ENCTYPE_DES_CBC_RAW)) 
-	return (KRB5_PROG_ETYPE_NOSUPP);
 
     if ( !(keyblock->contents = (krb5_octet *)malloc(sizeof(mit_des_cblock))) )
 	return(ENOMEM);
 
     keyblock->magic = KV5M_KEYBLOCK;
     keyblock->length = sizeof(mit_des_cblock);
-    keyblock->enctype = eblock->crypto_entry->proto_enctype;
     key = keyblock->contents;
 
     if (salt) {
       if (salt->length == -1) {
 	/* cheat and do AFS string2key instead */
-	return mit_afs_string_to_key (eblock, keyblock, data, salt);
+	return mit_afs_string_to_key (keyblock, data, salt);
       } else 
 	length = data->length + salt->length;
       }
