@@ -25,8 +25,6 @@
 
 static unsigned char zeros[16] = {0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0};
 
-extern krb5_context kg_context;
-
 krb5_error_code
 kg_make_seed(key, seed)
      krb5_keyblock *key;
@@ -36,6 +34,9 @@ kg_make_seed(key, seed)
    krb5_gss_enc_desc ed;
    int i;
 
+   if (!kg_context && (code=kg_get_context()))
+	   return code;
+   
    if (code = krb5_copy_keyblock(kg_context, key, &ed.key))
       return(code);
 

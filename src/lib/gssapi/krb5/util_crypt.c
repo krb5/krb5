@@ -25,8 +25,6 @@
 
 static unsigned char zeros[8] = {0,0,0,0,0,0,0,0};
 
-extern krb5_context kg_context;
-
 int kg_confounder_size(ed)
      krb5_gss_enc_desc *ed;
 {
@@ -40,8 +38,9 @@ kg_make_confounder(ed, buf)
      krb5_gss_enc_desc *ed;
      unsigned char *buf;
 {
-   return(krb5_random_confounder(kg_context, 
-				 ed->eblock.crypto_entry->block_length, buf));
+   krb5_error_code code;
+
+   return(krb5_random_confounder( ed->eblock.crypto_entry->block_length, buf));
 }
 
 int kg_encrypt_size(ed, n)
@@ -61,6 +60,9 @@ kg_encrypt(ed, iv, in, out, length)
 {
    krb5_error_code code;
 
+   if (!kg_context && (code=kg_get_context()))
+	   return code;
+   
    if (! ed->processed) {
       if (code = krb5_process_key(kg_context, &ed->eblock, ed->key))
 	 return(code);
@@ -88,6 +90,9 @@ kg_decrypt(ed, iv, in, out, length)
    int elen;
    char *buf;
 
+   if (!kg_context && (code=kg_get_context()))
+	   return code;
+   
    if (! ed->processed) {
       if (code = krb5_process_key(kg_context, &ed->eblock, ed->key))
 	 return(code);

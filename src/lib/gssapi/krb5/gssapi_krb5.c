@@ -81,6 +81,9 @@ kg_get_defcred(minor_status, cred)
    if (defcred == GSS_C_NO_CREDENTIAL) {
       OM_uint32 major;
 
+      if (!kg_context && kg_get_context())
+	      return GSS_S_FAILURE;
+
       if ((major = krb5_gss_acquire_cred(kg_context, minor_status, 
 					 GSS_C_NO_NAME, GSS_C_INDEFINITE, 
 					 GSS_C_NULL_OID_SET, GSS_C_INITIATE, 
@@ -105,5 +108,18 @@ kg_release_defcred(minor_status)
       return(GSS_S_COMPLETE);
    }
 
+   if (!kg_context && kg_get_context())
+	   return GSS_S_FAILURE;
+   
    return(krb5_gss_release_cred(kg_context, minor_status, &defcred));
+}
+
+OM_uint32
+kg_get_context()
+{
+	if (kg_context)
+		return GSS_S_COMPLETE;
+	if (krb5_init_context(&kg_context))
+		return GSS_S_FAILURE;
+	return GSS_S_COMPLETE;
 }

@@ -223,8 +223,8 @@ kg_seal(minor_status, context_handle, conf_req_flag, qop_req,
       return(GSS_S_FAILURE);
    }
 
-   if (code = make_seal_token(&ctx->enc, &ctx->seq, &ctx->seq_send,
-			      ctx->initiate,
+   if (code = make_seal_token(ctx->context, &ctx->enc, &ctx->seq,
+			      &ctx->seq_send, ctx->initiate,
 			      input_message_buffer, output_message_buffer,
 			      conf_req_flag, toktype, ctx->big_endian)) {
       *minor_status = code;

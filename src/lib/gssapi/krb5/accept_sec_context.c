@@ -319,6 +319,7 @@ krb5_gss_accept_sec_context(context, minor_status, context_handle,
       return(GSS_S_FAILURE);
    }
 
+   ctx->context = context;
    ctx->initiate = 0;
    ctx->mutual = gss_flags & GSS_C_MUTUAL_FLAG;
    ctx->seed_init = 0;
@@ -377,7 +378,8 @@ krb5_gss_accept_sec_context(context, minor_status, context_handle,
    /* generate an AP_REP if necessary */
 
    if (ctx->mutual) {
-      if (code = make_ap_rep(authdat, ctx->subkey, &ctx->seq_send, &token)) {
+      if (code = make_ap_rep(context, authdat, ctx->subkey, &ctx->seq_send,
+			     &token)) {
 	 (void)krb5_gss_delete_sec_context(context, minor_status, 
 					   (gss_ctx_id_t *) &ctx, NULL);
 	 krb5_free_tkt_authent(context, authdat);

@@ -309,7 +309,7 @@ krb5_gss_acquire_cred(context, minor_status, desired_name, time_req,
 
    if ((cred_usage == GSS_C_ACCEPT) ||
        (cred_usage == GSS_C_BOTH))
-      if ((ret = acquire_accept_cred(minor_status, desired_name,
+      if ((ret = acquire_accept_cred(context, minor_status, desired_name,
 				     &(cred->princ), cred))
 	  != GSS_S_COMPLETE) {
 	 if (cred->princ)
@@ -326,7 +326,7 @@ krb5_gss_acquire_cred(context, minor_status, desired_name, time_req,
    if ((cred_usage == GSS_C_INITIATE) ||
        (cred_usage == GSS_C_BOTH))
       if ((ret =
-	   acquire_init_cred(minor_status,
+	   acquire_init_cred(context, minor_status,
 			     cred->princ?(gss_name_t)cred->princ:desired_name,
 			     &(cred->princ), cred))
 	  != GSS_S_COMPLETE) {

@@ -96,6 +96,8 @@ typedef struct _krb5_gss_ctx_id_rec {
 
 extern void *kg_vdb;
 
+extern krb5_context kg_context;
+
 /* helper macros */
 
 #define kg_save_name(name)		g_save_name(&kg_vdb,name)
@@ -339,4 +341,6 @@ PROTOTYPE( (krb5_context,
 	    int*              /* locally_initiated */
 	   ));
 
+OM_uint32 kg_get_context();
+	
 #endif /* _GSSAPIP_KRB5_H_ */

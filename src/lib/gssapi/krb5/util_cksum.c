@@ -34,6 +34,9 @@ kg_checksum_channel_bindings(cb, cksum, bigend)
    long tmp;
    krb5_error_code code;
 
+   if (!kg_context && (code=kg_get_context()))
+	   return code;
+   
    /* generate a buffer full of zeros if no cb specified */
 
    if (cb == GSS_C_NO_CHANNEL_BINDINGS) {
@@ -44,7 +47,7 @@ kg_checksum_channel_bindings(cb, cksum, bigend)
 
       cksum->checksum_type = CKSUMTYPE_RSA_MD5;
       memset(cksum->contents, '\0',
-	     (cksum->length = krb5_checksum_size(global_context, CKSUMTYPE_RSA_MD5)));
+	     (cksum->length = krb5_checksum_size(kg_context, CKSUMTYPE_RSA_MD5)));
       return(0);
    }
 
@@ -78,7 +81,7 @@ kg_checksum_channel_bindings(cb, cksum, bigend)
 
    /* checksum the data */
 
-   if (code = krb5_calculate_checksum(global_context, CKSUMTYPE_RSA_MD5, 
+   if (code = krb5_calculate_checksum(kg_context, CKSUMTYPE_RSA_MD5, 
 				      buf, len, NULL, 0, cksum)) {
       xfree(cksum->contents);
       xfree(buf);

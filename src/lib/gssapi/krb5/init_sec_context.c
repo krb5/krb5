@@ -226,6 +226,7 @@ krb5_gss_init_sec_context(context, minor_status, claimant_cred_handle,
 
       /* fill in the ctx */
 
+      ctx->context = context;
       ctx->initiate = 1;
       ctx->mutual = req_flags & GSS_C_MUTUAL_FLAG;
       ctx->seed_init = 0;
@@ -257,7 +258,7 @@ krb5_gss_init_sec_context(context, minor_status, claimant_cred_handle,
 	 return(GSS_S_FAILURE);
       }
 
-      if (code = make_ap_req(ctx->cred, ctx->there, &ctx->endtime,
+      if (code = make_ap_req(context, ctx->cred, ctx->there, &ctx->endtime,
 			     input_chan_bindings, ctx->mutual,
 			     &ctx->subkey, &ctx->flags,
 			     &ctx->seq_send, &token)) {
