@@ -1,3 +1,18 @@
+Tue Jan  5 00:06:02 1999  Tom Yu  <tlyu@mit.edu>
+
+	* make_checksum.c (krb5_c_make_checksum): Note the fact that we're
+	punting on dealing with backwards compat with length-included
+	checksums.
+
+	* etypes.c: Add ENCTYPE_LOCAL_DES3_HMAC_SHA1 as a temporary
+	kludge.  Note that this is added to the end of the array so other
+	code can lop off the last member of the array and the right thing
+	will happen so that it is possible to disable des3-marc-hmac-sha1
+	from the KDC command line, for instance.
+
+	* configure.in: Conditionalize ATHENA_DES3_KLUDGE on
+	--enable-athena.
+
 1998-11-13  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* Makefile.in: Set the myfulldir and mydir variables (which are

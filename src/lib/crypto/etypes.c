@@ -76,6 +76,14 @@ struct krb5_keytypes krb5_enctypes_list[] = {
       &krb5_enc_des, &krb5_hash_sha1,
       krb5_dk_encrypt_length, krb5_dk_encrypt, krb5_dk_decrypt,
       krb5_dk_string_to_key },
+#ifdef ATHENA_DES3_KLUDGE
+    { ENCTYPE_LOCAL_DES3_HMAC_SHA1,
+      "des3-marc-hmac-sha1",
+      "Triple DES with HMAC/sha1 and 32-bit length code",
+      &krb5_enc_des3, &krb5_hash_sha1,
+      krb5_marc_dk_encrypt_length, krb5_marc_dk_encrypt, krb5_marc_dk_decrypt,
+      krb5_dk_string_to_key },
+#endif
 };
 
 int krb5_enctypes_length =

@@ -87,7 +87,15 @@ krb5_c_make_checksum(context, cksumtype, key, usage, input, cksum)
 	ret = (*(krb5_cksumtypes_list[i].keyhash->hash))(key, 0, input, &data);
     } else if (krb5_cksumtypes_list[i].flags & KRB5_CKSUMFLAG_DERIVE) {
 	/* any key is ok */
-
+#ifdef ATHENA_DES3_KLUDGE
+	/*
+	 * XXX Punt on actually using krb5_marc_dk_make_checksum
+	 * for now because we never actually use a DES3 session key
+	 * anywhere on Athena, and this is temporary anyway.
+	 * In any case, it's way too hairy to actually make this work
+	 * properly.
+	 */
+#endif
 	ret = krb5_dk_make_checksum(krb5_cksumtypes_list[i].hash,
 				    key, usage, input, &data);
     } else {

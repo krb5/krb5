@@ -10,6 +10,12 @@ KRB5_BUILD_PROGRAM
 KRB5_BUILD_LIBOBJS
 KRB5_BUILD_LIBRARY
 
+dnl XXX This will go away soon. -- tlyu
+AC_ARG_ENABLE([athena],
+[  --enable-athena         build with MIT Project Athena configuration
+                           -- here meaning use temporary DES3 etype that
+                              includes 32-bit length codings],
+[AC_DEFINE(ATHENA_DES3_KLUDGE)],)
 K5_GEN_MAKEFILE(., lib libobj)
 K5_GEN_MAKEFILE(crc32, libobj)
 K5_GEN_MAKEFILE(des, libobj)
