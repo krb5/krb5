@@ -2,6 +2,8 @@
 
 	* bsdlib.h, bstring.h, fake-stdlib.h: Deleted.
 
+	* sys/syslog.h: Deleted.
+
 2002-06-10  Ken Raeburn  <raeburn@mit.edu>
 
 	* k5-int.h (KRB_AP_PATH_NOT_ACCEPTED, KRB_ERR_RESPONSE_TOO_BIG):
@@ -59,6 +61,12 @@
 	declaration.
 	(krb5_ui_1): Delete.
 	* Makefile.in (krb5.h): Don't put SIZEOF macros into output.
+
+2001-04-26  Ken Raeburn  <raeburn@mit.edu>
+
+	* sys/syslog.h (syslog, vsyslog, openlog, closelog, setlogmask):
+	Always use prototype versions of declarations; delete
+	non-prototype declarations.
 
 2002-04-25  Ken Raeburn  <raeburn@mit.edu>
 
@@ -1122,6 +1130,8 @@ Wed Jun 12 01:32:33 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* syslog.h: Add #ifdef _WIN32 in places where we had #ifdef _MSDOS
 
+	* sys/syslog.h: Add #ifdef _WIN32 in places where we had #ifdef _MSDOS
+
 Mon Jun 10 16:52:35 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* krb5.hin		
@@ -1544,6 +1554,7 @@ Thu Jun 22 16:03:07 1995  Tom Yu  (tlyu@dragons-lair)
 		also, NO_NESTED_PROTOTYPES -> KRB5_NO_NESTED_PROTOTYPES
 	* Makefile.in: don't install NO_NESTED_PROTOTYPES, HAS_VOID_TYPE,
 		and KRB5_PROVIDE_PROTOTYPES symbols into krb5.h
+	* sys/syslog.h: reverse sense of KRB5_PROVIDE_PROTOTYPES
 
 Thu Jun 22 11:51:10 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* k5-int.h - Add pointer in krb5_context for database context.
@@ -1700,6 +1711,8 @@ Thu Apr 13 16:05:08 1995 Keith Vetter (keithv@fusion.com)
 	* bsdlib.h, bstring.h, fake-std.h, syslog.h:  __STDC__ conditionals
            also check for the _WINDOWS define.
         * krb5.h: added FAR to pointers visible to the world.
+	* sys/syslog.h:  __STDC__ conditionals also check for the _WINDOWS
+	   define.
 
 Tue Mar 28 18:12:32 1995  John Gilmore  (gnu at toad.com)
 
