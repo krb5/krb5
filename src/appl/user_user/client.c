@@ -83,12 +83,7 @@ char *argv[];
 
   if ((host = gethostbyname (argv[1])) == NULL)
     {
-
-
-      if (h_errno == HOST_NOT_FOUND)
-	fprintf (stderr, "uu-client: unknown host \"%s\".\n", argv[1]);
-      else
-	fprintf (stderr, "uu-client: can't get address of host \"%s\".\n", argv[1]);
+      fprintf (stderr, "uu-client: can't get address of host \"%s\".\n", argv[1]);
       return 3;
     }
 
