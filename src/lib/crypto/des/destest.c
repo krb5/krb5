@@ -1,4 +1,22 @@
 /*
+ * $Source$
+ * $Author$
+ *
+ * Copyright 1990,1991 by the Massachusetts Institute of Technology.
+ * All Rights Reserved.
+ *
+ * For copying and distribution information, please see the file
+ * <krb5/copyright.h>.
+ *
+ * Test a DES implementation against known inputs & outputs
+ */
+
+#if !defined(lint) && !defined(SABER)
+static char rcsid_destest_c[] =
+"$Id$";
+#endif	/* !lint & !SABER */
+
+/*
  * -DBSD_DES will test the BSD DES library.
  * without, it will test the MIT DES implementation.
  */
