@@ -1,3 +1,9 @@
+Wed Oct 23 01:15:40 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* configure.in, Makefile.in: Check to see if the -lgen library
+		exists; if so, add it to the SHLIB_LIBS line, since it
+		will be needed by an_to_ln.c, in all probability.
+
 Fri Jun  7 17:38:09 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* Makefile.in (all-windows, clean-windows): Use full directory
