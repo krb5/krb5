@@ -38,10 +38,10 @@
 	_krb5_c_keyed_checksum_types
 #
 # Needs to be renamed to krb5_c_
-#	_krb5_c_valid_enctype
-#	_krb5_c_valid_cksumtype
-#	_krb5_c_is_coll_proof_cksum
-#	_krb5_c_is_keyed_cksum
+	_krb5_c_valid_enctype
+	_krb5_c_valid_cksumtype
+	_krb5_c_is_coll_proof_cksum
+	_krb5_c_is_keyed_cksum
 #
 	_krb5_auth_con_genaddrs
 	_krb5_auth_con_init
@@ -97,7 +97,7 @@
     _krb5_kt_default
 	_krb5_kt_add_entry
 	_krb5_kt_remove_entry
-#	_krb5_kt_free_entry_contents  (rename)
+	_krb5_kt_free_entry_contents
 	_krb5_kt_read_service_key
 #
     _krb5_prompter_posix
