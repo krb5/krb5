@@ -88,8 +88,8 @@ usage()
 	     "\tstash	[-f keyfile]\n"
 	     "\tdump	[-old] [-ov] [-b6] [-verbose] [filename	[princs...]]\n"
 	     "\tload	[-old] [-ov] [-b6] [-verbose] [-update] filename\n"
-	     "\tdump_v4	[filename]\n"
-	     "\tload_v4	[-t] [-n] [-v] [-K] [-s stashfile] inputfile\n"
+	     "\tdump_v4	[-S] [filename]\n"
+	     "\tload_v4	[-S] [-t] [-n] [-v] [-K] [-s stashfile] inputfile\n"
 	     "\tark	[-e etype_list] principal\n");
      exit(1);
 }

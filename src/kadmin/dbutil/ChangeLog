@@ -1,3 +1,19 @@
+2000-10-16  Tom Yu  <tlyu@mit.edu>
+
+	* kdb5_util.M: Update manpage.
+
+	* kdb5_util.c (usage): Update usage message.
+
+	* dumpv4.c (dump_v4_iterator): Add logic to deal with long
+	lifetimes, as well as optionally using short lifetimes.
+
+	* loadv4.c (load_v4db): Add logic to deal with long lifetimes, as
+	well as optionally using short lifetimes.
+
+	* kadm5_create.c (kadm5_create_magic_princs): Add calls to
+	krb5_klog_init() and krb5_klog_close() to avoid coredumping if
+	kadm5_init() calls krb5_klog_syslog().
+
 2000-07-05  Ken Raeburn  <raeburn@mit.edu>
 
 	* dump.c: Various message char arrays turned into macros, to

@@ -101,6 +101,8 @@ static struct realm_info rblock = { /* XXX */
 
 static int verbose = 0;
 
+static int shortlife = 0;
+
 static krb5_error_code add_principal 
 	PROTOTYPE((krb5_context,
 		   krb5_principal, 
@@ -201,6 +203,9 @@ char *argv[];
 	}
 	else if (!strcmp(argv[op_ind], "-n")) {
 	    v4manual++;
+	} 
+	else if (!strcmp(argv[op_ind], "-S")) {
+	    shortlife++;
 	}
 	else if (!strcmp(argv[op_ind], "-s")) {
 	    if ((argc - op_ind) >= 1) {
@@ -525,7 +530,12 @@ Principal *princ;
     }
     mod_time = princ->mod_date;
 
-    entry.max_life = princ->max_life * 60 * 5;
+    if (!shortlife) {
+	entry.max_life = krb_life_to_time(0, princ->max_life);
+	if (entry.max_life == KRB_NEVERDATE)
+	    entry.max_life = rblock.max_life;
+    } else
+	entry.max_life = princ->max_life * 60 * 5;
     entry.max_renewable_life = rblock.max_rlife;
     entry.len = KRB5_KDB_V1_BASE_LENGTH;
     entry.expiration = princ->exp_date;

@@ -156,10 +156,11 @@ is optional and is derived from
 if not specified.
 .RE
 .TP
-\fBdump_v4\fP [\fIfilename\fP]
+\fBdump_v4\fP [\fB\-S\fP] [\fIfilename\fP]
 Dumps the current database into the Kerberos 4 database dump format.
+The \-S option specifies the short lifetime algorithm.
 .TP
-\fBload_v4\fP [\fB\-t\fP] [\fB-n\fP] [\fB\-K\fP] [\fB-s \fIstashfile\fP] \fIinputfile\fP
+\fBload_v4\fP [\fB\-S\fP] [\fB\-t\fP] [\fB-n\fP] [\fB\-K\fP] [\fB-s \fIstashfile\fP] \fIinputfile\fP
 Loads a Kerberos 4 database dump file.  Options:
 .RS
 .TP
@@ -183,6 +184,9 @@ lists each principal as it is converted or ignored.
 .B \-t
 uses a temporary database, then moves that into place, instead of adding 
 the keys to the current database.
+.TP
+.B \-S
+Uses the short lifetime algorithm for conversion.
 .PP
 Note: if the Kerberos 4 database had a default expiration date of 12/31/1999
 or 12/31/2009 (the compiled in defaults for older or newer Kerberos

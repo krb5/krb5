@@ -94,6 +94,7 @@ void update_ok_file();
 #define INST_SZ 40
 
 static char *v4_mkeyfile = "/.k";
+static int shortlife;
 
 static int
 v4init(arg, manual)
@@ -241,8 +242,14 @@ dump_v4_iterator(ptr, entry)
 
 found_one:;
     principal->key_version = max_kvno;
-    if ((principal->max_life = entry->max_life / (60 * 5)) > 255)
-	principal->max_life = 255;
+    if (!shortlife)
+	principal->max_life = krb_time_to_life(0, entry->max_life);
+    else {
+	principal->max_life = entry->max_life / (60 * 5);
+	if (principal->max_life > 255)
+	    principal->max_life = 255;
+    }
+
     principal->kdc_key_ver = arg->master_key_version;
     principal->attributes = 0;	/* ??? not preserved either */
 
@@ -282,11 +289,20 @@ void dump_v4db(argc, argv)
 	int	argc;
 	char	**argv;
 {
+	int	i;
+	char	*outname = NULL;
 	FILE	*f;
 	struct dump_record	arg;
-	
-	if (argc > 2) {
-		com_err(argv[0], 0, "Usage: %s filename", argv[0]);
+
+	for (i = 1; i < argc; i++) {
+		if (!strcmp(argv[i], "-S")) {
+			shortlife++;
+			continue;
+		}
+		break;
+	}
+	if (argc - i > 1) {
+		com_err(argv[0], 0, "Usage: %s [-S] filename", argv[0]);
 		exit_status++;
 		return;
 	}
@@ -295,7 +311,8 @@ void dump_v4db(argc, argv)
 		exit_status++;
 		return;
 	}
-	if (argc == 2) {
+	if (argc - i == 1) {
+		outname = argv[i];
 		/*
 		 * Make sure that we don't open and truncate on the fopen,
 		 * since that may hose an on-going kprop process.
@@ -306,10 +323,10 @@ void dump_v4db(argc, argv)
 		 * but that would involve more OS dependancies than I
 		 * want to get into.
 		 */
-		unlink(argv[1]);
-		if (!(f = fopen(argv[1], "w"))) {
+		unlink(outname);
+		if (!(f = fopen(outname, "w"))) {
 			com_err(argv[0], errno,
-				"While opening file %s for writing", argv[1]);
+				"While opening file %s for writing", outname);
 			exit_status++;
 			return;
 		}
@@ -363,8 +380,8 @@ void dump_v4db(argc, argv)
 			       (krb5_pointer) &arg);
 	if (argc == 2)
 		fclose(f);
-	if (argv[1])
-		update_ok_file(argv[1]);
+	if (outname)
+		update_ok_file(outname);
 }
 
 int handle_keys(arg)

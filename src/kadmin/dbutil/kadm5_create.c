@@ -112,6 +112,9 @@ int kadm5_create_magic_princs(kadm5_config_params *params,
      int retval;
      void *handle;
      
+     retval = krb5_klog_init(context, "admin_server", progname, 0);
+     if (retval)
+	  return retval;
      if ((retval = kadm5_init(progname, NULL, NULL, params,
 			      KADM5_STRUCT_VERSION,
 			      KADM5_API_VERSION_2,
@@ -123,6 +126,8 @@ int kadm5_create_magic_princs(kadm5_config_params *params,
      retval = add_admin_princs(handle, context, params->realm);
 
      kadm5_destroy(handle);
+
+     krb5_klog_close(context);
 
      return retval;
 }
