@@ -2,11 +2,12 @@
  * prof_file.c ---- routines that manipulate an individual profile file.
  */
 
-#include "prof_int.h"
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include "prof_int.h"
+
 #ifndef NO_SYS_TYPES_H
 #include <sys/types.h>
 #endif
