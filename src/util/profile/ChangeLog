@@ -1,3 +1,13 @@
+Thu Apr 27 10:43:24 1995 Keith Vetter (keithv@fusion.com)
+
+	* Makefile.in: made to work on the PC.
+	* profile.hin, prof_int.h: use _MSDOS instead of _WINDOWS 
+	   so we can compile DOS test programs.
+	* *.c: Don't need to include file unistd.h.
+	* test_*.c: Made to work under DOS--used stubs for the com_err stuff.
+	* prof_parse.c: Turned a 2k automatic array into a malloc'ed block
+	   because windows dll's shouldn't use up a lot of stack space.
+
 Wed Apr 26 09:54:18 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* profile.hin: Only define PROTOTYPE if it is undefined.

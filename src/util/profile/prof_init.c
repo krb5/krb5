@@ -5,7 +5,6 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <unistd.h>
 #include <stdlib.h>
 #include <errno.h>
 
@@ -131,11 +130,6 @@ errcode_t profile_get_values(profile, names, ret_values)
 	return PROF_BAD_NAMESET;
 
     init_list(&values);
-
-    if (profile == 0) {
-	*ret_values = 0;
-	return 0;
-    }
 
     file = profile->first_file;
     retval = profile_update_file(file);

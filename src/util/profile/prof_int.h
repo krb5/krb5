@@ -5,7 +5,7 @@
 #include <time.h>
 #include "prof_err.h"
 
-#if defined(__STDC__) || defined(_WINDOWS)
+#if defined(__STDC__) || defined(_MSDOS)
 #define PROTOTYPE(x) x
 #else
 #define PROTOTYPE(x) ()

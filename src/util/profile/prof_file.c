@@ -3,7 +3,6 @@
  */
 
 #include <stdio.h>
-#include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
@@ -11,6 +10,10 @@
 #include <errno.h>
 
 #include "prof_int.h"
+
+#ifdef _WINDOWS
+#define stat _stat
+#endif
 
 errcode_t profile_open_file(filename, ret_prof)
 	const char *filename;

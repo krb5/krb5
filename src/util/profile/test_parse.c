@@ -1,20 +1,33 @@
 #include <stdio.h>
 #include <string.h>
-#include <unistd.h>
 #include <stdlib.h>
 #include <errno.h>
 #include <ctype.h>
 
 #include "profile.h"
+
+#ifndef _MSDOS
 #include "com_err.h"
+#else
+
+#include "prof_int.h"
+#define initialize_prof_error_table()
+char *error_message (long err) {
+	static char buf[50];
+
+	sprintf (buf, " 0x%lX (%ld)", err, err);
+	return buf;
+}
+#endif
 
 int main(argc, argv)
 	int	argc;
 	char	**argv;
 {
-	struct profile_relation *root;
+	struct profile_node *root;
 	unsigned long retval;
 	FILE *f;
+	void dump_profile(struct profile_node *root, int level);
 
 	initialize_prof_error_table();
 	if (argc != 2) {

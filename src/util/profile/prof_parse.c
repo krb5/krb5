@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <string.h>
-#include <unistd.h>
 #include <stdlib.h>
 #include <errno.h>
 #include <ctype.h>
@@ -166,23 +165,36 @@ errcode_t profile_parse_file(f, root)
 	FILE	*f;
 	struct profile_node **root;
 {
-	char	buf[2048];
-	int	retval;
+#define BUF_SIZE	2048
+	char *bptr;
+	errcode_t retval;
 	struct parse_state state;
 
+	bptr = malloc (BUF_SIZE);
+	if (!bptr)
+		return ENOMEM;
+
 	retval = parse_init_state(&state);
-	if (retval)
+	if (retval) {
+		free (bptr);
 		return retval;
+	}
 	while (!feof(f)) {
-		if (fgets(buf, sizeof(buf), f) == NULL)
+		if (fgets(bptr, BUF_SIZE, f) == NULL)
 			break;
-		retval = parse_line(buf, &state);
-		if (retval)
+		retval = parse_line(bptr, &state);
+		if (retval) {
+			free (bptr);
 			return retval;
+		}
 	}
 	*root = state.root_section;
+
+	free (bptr);
 	return 0;
 }
+
+#ifndef _WINDOWS
 
 void dump_profile(root, level)
 	struct profile_node *root;
@@ -217,4 +229,4 @@ void dump_profile(root, level)
 		dump_profile(p, level+1);
 	} while (iter != 0);
 }
-
+#endif /* ! _WINDOWS */

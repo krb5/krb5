@@ -3,11 +3,20 @@
  */
 
 #include <stdio.h>
-#include <unistd.h>
 #include <stdlib.h>
 
 #include "profile.h"
+#ifndef _MSDOS
 #include "com_err.h"
+#else
+
+/* Stubs for the error handling routines */
+#include "prof_int.h"
+void initialize_prof_error_table() {}
+void com_err (char *fmt, long err, char *msg) {
+    printf (fmt, err, msg);
+}
+#endif
 
 int main(argc, argv)
     int		argc;
@@ -41,7 +50,9 @@ int main(argc, argv)
     }
     free(values);
     profile_release(profile);
-    exit(0);
+
+	return 0;
+
 }
     
     
