@@ -92,7 +92,7 @@ static void usage()
 	exit(1);
 }
 
-void
+int
 main(argc, argv)
 	int	argc;
 	char	**argv;
