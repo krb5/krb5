@@ -32,7 +32,7 @@
 #include <stdio.h>
 
 #ifdef macintosh
-#include "Krb5Globals.h"
+#include "CCache.h"
 #endif
 
 #if defined(_WIN32)
@@ -190,11 +190,34 @@ static krb5_error_code get_from_os(char *name_buf, int name_size)
 
 static krb5_error_code get_from_os(char *name_buf, int name_size)
 {
-	if (name_size < 4)
-		return ENOMEM;
-	Krb5GlobalsGetDefaultCacheName (name_buf + 4, name_size - 4);
-	memcpy (name_buf, "API:", 4);
-	return 0;
+	krb5_error_code result = 0;
+	cc_context_t cc_context = NULL;
+	cc_string_t default_name = NULL;
+
+	cc_int32 ccerr = cc_initialize (&cc_context, ccapi_version_3, NULL, NULL);
+	if (ccerr == ccNoError) {
+		ccerr = cc_context_get_default_ccache_name (cc_context, &default_name);
+	}
+	
+	if (ccerr == ccNoError) {
+		if (strlen (default_name -> data) + 5 > name_size) {
+			result = ENOMEM;
+			goto cleanup;
+		} else {
+			sprintf (name_buf, "API:%s", default_name -> data);
+		}
+	}
+	
+cleanup:
+	if (cc_context != NULL) {
+		cc_context_release (cc_context);
+	}
+	
+	if (default_name != NULL) {
+		cc_string_release (default_name);
+	}
+	
+	return result;
 }
 
 #else
