@@ -152,19 +152,19 @@ extern krb5_error_code mit_afs_string_to_key
 
 /* f_cksum.c */
 extern unsigned long mit_des_cbc_cksum
-    (krb5_octet FAR *, krb5_octet FAR *, unsigned long , mit_des_key_schedule ,
-	       krb5_octet FAR *);
+    (const krb5_octet FAR *, krb5_octet FAR *, unsigned long ,
+     const mit_des_key_schedule, const krb5_octet FAR *);
 
 /* f_ecb.c */
 extern int mit_des_ecb_encrypt
     (const mit_des_cblock FAR *, mit_des_cblock FAR *, mit_des_key_schedule , int );
 
 /* f_cbc.c */
-extern int mit_des_cbc_encrypt
-    (const mit_des_cblock FAR *in, mit_des_cblock FAR *out, 
-	       unsigned long length,
-	       mit_des_key_schedule schedule, mit_des_cblock ivec,
-	       int encrypt);
+extern int mit_des_cbc_encrypt (const mit_des_cblock FAR *in,
+				mit_des_cblock FAR *out,
+				unsigned long length,
+				const mit_des_key_schedule schedule,
+				const mit_des_cblock ivec, int encrypt);
     
 /* fin_rndkey.c */
 extern krb5_error_code mit_des_finish_random_key
@@ -202,6 +202,8 @@ extern krb5_error_code mit_des_random_key
 extern krb5_error_code mit_des_string_to_key
     ( const krb5_encrypt_block FAR *, 
 	       krb5_keyblock FAR *, const krb5_data FAR *, const krb5_data FAR *);
+extern krb5_error_code mit_des_string_to_key_int
+	(krb5_keyblock FAR *, const krb5_data FAR *, const krb5_data FAR *);
 
 /* weak_key.c */
 extern int mit_des_is_weak_key (mit_des_cblock );

@@ -1,5 +1,12 @@
 2001-04-10  Ken Raeburn  <raeburn@mit.edu>
 
+	* f_cksum.c (mit_des_cbc_cksum): Use const for input, key
+	schedule, and initial vector.
+	* f_cbc.c (mit_des_cbc_encrypt): Likewise.
+	* des_int.h (mit_des_cbc_cksum, mit_des_cbc_encrypt): Update
+	decls.
+	(mit_des_string_to_key_int): New decl.
+
 	* des_int.h (des_cblock, des_key_schedule): Duplicate definitions
 	here and in kerberosIV/des.h, using macro
 	KRB5INT_DES_TYPES_DEFINED to avoid duplication.

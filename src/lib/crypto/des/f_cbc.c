@@ -41,19 +41,20 @@ mit_des_cbc_encrypt(in, out, length, schedule, ivec, encrypt)
 	const mit_des_cblock FAR *in;
 	mit_des_cblock FAR *out;
 	unsigned long length;
-	mit_des_key_schedule schedule;
-	mit_des_cblock ivec;
+	const mit_des_key_schedule schedule;
+	const mit_des_cblock ivec;
 	int encrypt;
 {
 	register unsigned DES_INT32 left, right;
 	register unsigned DES_INT32 temp;
-	register unsigned DES_INT32 *kp;
-	register unsigned char *ip, *op;
+	const unsigned DES_INT32 *kp;
+	const unsigned char *ip;
+	unsigned char *op;
 
 	/*
 	 * Get key pointer here.  This won't need to be reinitialized
 	 */
-	kp = (unsigned DES_INT32 *)schedule;
+	kp = (const unsigned DES_INT32 *)schedule;
 
 	/*
 	 * Deal with encryption and decryption separately.
@@ -63,7 +64,7 @@ mit_des_cbc_encrypt(in, out, length, schedule, ivec, encrypt)
 		 * Initialize left and right with the contents of the initial
 		 * vector.
 		 */
-		ip = (unsigned char *)ivec;
+		ip = (const unsigned char *)ivec;
 		GET_HALF_BLOCK(left, ip);
 		GET_HALF_BLOCK(right, ip);
 
@@ -142,7 +143,7 @@ mit_des_cbc_encrypt(in, out, length, schedule, ivec, encrypt)
 		/*
 		 * Prime the old cipher with ivec.
 		 */
-		ip = (unsigned char *)ivec;
+		ip = (const unsigned char *)ivec;
 		GET_HALF_BLOCK(ocipherl, ip);
 		GET_HALF_BLOCK(ocipherr, ip);
 
