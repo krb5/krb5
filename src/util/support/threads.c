@@ -312,8 +312,21 @@ int k5_key_delete (k5_key_t keynum)
 
 #else /* POSIX */
 
-    /* Not written yet -- resource leak!  */
-    /* abort(); */
+    {
+	int err;
+
+	/* XXX RESOURCE LEAK:
+
+	   Need to destroy the allocated objects first!  */
+
+	err = k5_mutex_lock(&key_lock);
+	if (err == 0) {
+	    assert(destructors_set[keynum] == 1);
+	    destructors_set[keynum] = 0;
+	    destructors[keynum] = NULL;
+	    k5_mutex_unlock(&key_lock);
+	}
+    }
 
 #endif
 
@@ -335,6 +348,10 @@ static FILE *stats_logfile;
 int krb5int_thread_support_init (void)
 {
     int err;
+
+#ifdef SHOW_INITFINI_FUNCS
+    printf("krb5int_thread_support_init\n");
+#endif
 
 #ifdef DEBUG_THREADS_STATS
     /*    stats_logfile = stderr; */
@@ -377,6 +394,10 @@ void krb5int_thread_support_fini (void)
 {
     if (! INITIALIZER_RAN (krb5int_thread_support_init))
 	return;
+
+#ifdef SHOW_INITFINI_FUNCS
+    printf("krb5int_thread_support_fini\n");
+#endif
 
 #ifndef ENABLE_THREADS
 

@@ -1,3 +1,10 @@
+2005-02-08  Ken Raeburn  <raeburn@mit.edu>
+
+	* threads.c (k5_key_delete) [pthread case]: Reset flags and
+	destructor function pointer to unset state.
+	(krb5int_thread_support_init, krb5int_thread_support_fini): If
+	SHOW_INITFINI_FUNCS is defined, print some tracing messages.
+
 2005-01-18  Ken Raeburn  <raeburn@mit.edu>
 
 	* threads.c (k5_key_delete) [ENABLE_THREADS && !_WIN32]: Don't
