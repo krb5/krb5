@@ -1,3 +1,8 @@
+Fri Feb  3 17:23:45 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* pcbc_encrypt.c: Add SIZEOF_FOO checks to properly define
+		  KRB_INT32
+
 Wed Jan 18 15:12:18 1995  Theodore Y. Ts'o  (tytso@dcl)
 
 	* read_passwd.c (des_read_password): Declare global_context and
