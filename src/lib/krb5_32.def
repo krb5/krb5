@@ -158,6 +158,7 @@ krb5_c_string_to_key_with_params
 	krb5_get_init_creds_opt_set_salt
 	krb5_get_init_creds_opt_set_tkt_life
 	krb5_get_init_creds_password
+	krb5_get_permitted_enctypes
 	krb5_get_prompt_types
 	krb5_get_renewed_creds
 	krb5_get_server_rcache
@@ -212,6 +213,7 @@ krb5_c_string_to_key_with_params
 krb5_set_password
 krb5_set_password_using_ccache
 	krb5_set_principal_realm
+	krb5_set_real_time
 	krb5_sname_to_principal
 	krb5_string_to_cksumtype
 	krb5_string_to_deltat

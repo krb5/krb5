@@ -1,3 +1,7 @@
+2003-07-09  Alexandra Ellwood  <lxs@mit.edu>
+
+        * toffset.c: Export and krb5_set_real_time for Samba.
+
 2003-06-06  Ken Raeburn  <raeburn@mit.edu>
 
 	* locate_kdc.c (struct srv_dns_entry): Moved to k5-int.h.

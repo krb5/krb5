@@ -449,7 +449,7 @@ krb5_get_tgs_ktypes(krb5_context context, krb5_const_principal princ, krb5_encty
 				      context->tgs_ktypes));
 }
 
-krb5_error_code
+krb5_error_code KRB5_CALLCONV
 krb5_get_permitted_enctypes(krb5_context context, krb5_enctype **ktypes)
 {
     return(get_profile_etype_list(context, ktypes, "permitted_enctypes",

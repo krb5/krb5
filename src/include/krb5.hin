@@ -1410,9 +1410,12 @@ krb5_error_code KRB5_CALLCONV krb5_get_tgs_ktypes
 	(krb5_context,
 		krb5_const_principal,
 		krb5_enctype **);
+#endif
 
-krb5_error_code krb5_get_permitted_enctypes
+krb5_error_code KRB5_CALLCONV krb5_get_permitted_enctypes
 	(krb5_context, krb5_enctype **);
+
+#if KRB5_PRIVATE
 void KRB5_CALLCONV krb5_free_ktypes
 	(krb5_context, krb5_enctype *);
 
@@ -2314,9 +2317,12 @@ krb5_error_code krb5_make_fulladdr
 		krb5_address *,
 		krb5_address *,
 		krb5_address *);
+#endif
 
-krb5_error_code krb5_set_real_time
+krb5_error_code KRB5_CALLCONV krb5_set_real_time
 	(krb5_context, krb5_int32, krb5_int32);
+
+#if KRB5_PRIVATE
 krb5_error_code krb5_set_debugging_time
 	(krb5_context, krb5_int32, krb5_int32);
 krb5_error_code krb5_use_natural_time
