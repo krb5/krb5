@@ -230,7 +230,23 @@ dnl Check for IPv6 compile-time support.
 dnl
 AC_DEFUN(KRB5_AC_INET6,[
 AC_CHECK_HEADERS(sys/types.h macsock.h sys/socket.h netinet/in.h netdb.h)
-AC_CHECK_FUNCS(inet_ntop inet_pton getaddrinfo getnameinfo)
+AC_CHECK_FUNCS(inet_ntop inet_pton getnameinfo)
+dnl getaddrinfo test needs netdb.h, for proper compilation on alpha
+dnl under OSF/1^H^H^H^H^HDigital^H^H^H^H^H^H^HTru64 UNIX, where it's
+dnl a macro
+AC_MSG_CHECKING(for getaddrinfo)
+AC_CACHE_VAL(ac_cv_func_getaddrinfo,
+[AC_TRY_LINK([#ifdef HAVE_NETDB_H
+#include <netdb.h>
+#endif],[
+struct addrinfo *ai;
+getaddrinfo("kerberos.mit.edu", "echo", 0, &ai);
+], ac_cv_func_getaddrinfo=yes, ac_cv_func_getaddrinfo=no)])
+AC_MSG_RESULT($ac_cv_func_getaddrinfo)
+if test $ac_cv_func_getaddrinfo = yes; then
+  AC_DEFINE(HAVE_GETADDRINFO)
+fi
+dnl
 AC_REQUIRE([KRB5_SOCKADDR_SA_LEN])
 AC_ARG_ENABLE([ipv6],
 [  --enable-ipv6           enable IPv6 support

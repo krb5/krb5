@@ -1,3 +1,8 @@
+2002-07-05  Ken Raeburn  <raeburn@mit.edu>
+
+	* aclocal.m4 (KRB5_AC_INET6): Include netdb.h when checking for
+	getaddrinfo, in case it's a macro.
+
 2002-06-25  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Don't configure lib/krb5util.
