@@ -115,7 +115,6 @@ char *argv[];
     }
 
     memset((char *)&c_sock, 0, sizeof(c_sock));
-    memcpy((char *)&c_sock.sin_addr, host->h_addr, host->h_length);
     c_sock.sin_family = AF_INET;
 
     /* Bind it to set the address; kernel will fill in port # */
