@@ -104,10 +104,11 @@ register int *error;
 	    goto errout;
 	}	
     }
-
-    retval->caddrs = KRB5_HostAddresses2krb5_address(val->caddr, error);
-    if (!retval->caddrs) {
-	goto errout;
+    if (val->caddr) {
+        retval->caddrs = KRB5_HostAddresses2krb5_address(val->caddr, error);
+        if (!retval->caddrs) {
+	    goto errout;
+        }
     }
     if (val->authorization__data) {
 	retval->authorization_data =
