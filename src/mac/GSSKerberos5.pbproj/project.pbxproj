@@ -919,6 +919,7 @@
 				174476CDFF60088512120111,
 				00CFB47BFF6EA3C312120111,
 				0F801492FF9A8D33126500C7,
+				17D71675FFAF834712120111,
 				61622FDAFF85346F12120111,
 				61622FD1FF82A36412120111,
 				174476B8FF5FFFA512120111,
@@ -948,7 +949,7 @@
 				EXPORTED_SYMBOLS_FILE = "$(SRCROOT)/Kerberos5Lib.pbexp";
 				FRAMEWORK_SEARCH_PATHS = "\"/System/Library/Frameworks/Kerberos.framework/Frameworks\"";
 				FRAMEWORK_VERSION = A;
-				HEADER_SEARCH_PATHS = "/System/Library/Frameworks/CarbonCore.framework/Headers \"$(SYMROOT)/ComErr.framework/Headers\" \"$(SYMROOT)/Profile.framework/Headers\" /System/Library/Frameworks/Kerberos.framework/Frameworks/CCache.framework/Headers /System/Library/Frameworks/Kerberos.framework/Frameworks/Preferences.framework/Headers /System/Library/Frameworks/Kerberos.framework/Frameworks/KerberosSupport.framework/Headers";
+				HEADER_SEARCH_PATHS = "/System/Library/Frameworks/CarbonCore.framework/Headers \"$(SYMROOT)/ComErr.framework/Headers\" \"$(SYMROOT)/Profile.framework/Headers\" /System/Library/Frameworks/Kerberos.framework/Frameworks/CCache.framework/Headers /System/Library/Frameworks/Kerberos.framework/Frameworks/Preferences.framework/Headers /System/Library/Frameworks/Kerberos.framework/Frameworks/KerberosSupport.framework/Headers /System/Library/Frameworks/Kerberos.framework/Frameworks/Login.framework/Headers";
 				LIBRARY_SEARCH_PATHS = "";
 				OPTIMIZATION_CFLAGS = "";
 				OTHER_CFLAGS = "-imacros \"$(SRCROOT)/GSSKerberosPrefix.h\"";
@@ -1404,6 +1405,7 @@
 				1744770FFF60088512120111,
 				00CFB47CFF6EA3C312120111,
 				0F801493FF9A8D33126500C7,
+				17D71677FFAF834712120111,
 			);
 			isa = PBXFrameworksBuildPhase;
 			name = "Frameworks & Libraries";
@@ -7259,6 +7261,40 @@
 				);
 			};
 		};
+		17D71675FFAF834712120111 = {
+			isa = PBXFrameworkReference;
+			name = Login.framework;
+			path = /System/Library/Frameworks/Kerberos.framework/Frameworks/Login.framework;
+			refType = 0;
+		};
+		17D71676FFAF834712120111 = {
+			isa = PBXFrameworkReference;
+			name = Login.framework;
+			path = /System/Library/Frameworks/Kerberos.framework/Frameworks/Login.framework;
+			refType = 0;
+		};
+		17D71677FFAF834712120111 = {
+			fileRef = 17D71675FFAF834712120111;
+			isa = PBXBuildFile;
+			settings = {
+				INCLUDED_OSS = (
+					MACOS,
+					WINDOWS,
+					PDOUNIX,
+				);
+			};
+		};
+		17D71678FFAF834712120111 = {
+			fileRef = 17D71676FFAF834712120111;
+			isa = PBXBuildFile;
+			settings = {
+				INCLUDED_OSS = (
+					MACOS,
+					WINDOWS,
+					PDOUNIX,
+				);
+			};
+		};
 		25C77492FF52D03A12120111 = {
 			isa = PBXProject;
 			mainGroup = 25C77493FF52D03A12120111;
@@ -7336,6 +7372,7 @@
 				5C1372EAFF6546C412120111,
 				5C137376FF654C0212120111,
 				5C137384FF6824DB12120111,
+				17D71676FFAF834712120111,
 				61622FDEFF88D9AF12120111,
 				61622FD8FF85304012120111,
 				5C1372F4FF65475012120111,
@@ -7373,7 +7410,7 @@
 				EXPORTED_SYMBOLS_FILE = "$(SRCROOT)/GSSLibrary.pbexp";
 				FRAMEWORK_SEARCH_PATHS = "";
 				FRAMEWORK_VERSION = A;
-				HEADER_SEARCH_PATHS = "\"/System/Library/Frameworks/CarbonCore.framework/Headers\" \"$(SYMROOT)/Kerberos5.framework/Headers\" \"$(SYMROOT)/Profile.framework/Headers\" \"$(SYMROOT)/ComErr.framework/Headers\"";
+				HEADER_SEARCH_PATHS = "/System/Library/Frameworks/CarbonCore.framework/Headers /System/Library/Frameworks/Kerberos.framework/Frameworks/Login.framework/Headers \"$(SYMROOT)/Kerberos5.framework/Headers\" \"$(SYMROOT)/Profile.framework/Headers\" \"$(SYMROOT)/ComErr.framework/Headers\"";
 				LIBRARY_SEARCH_PATHS = "";
 				OPTIMIZATION_CFLAGS = "";
 				OTHER_CFLAGS = "-imacros \"$(SRCROOT)/GSSKerberosPrefix.h\"";
@@ -7543,6 +7580,7 @@
 				5C1372F2FF6546C412120111,
 				5C137378FF654C0212120111,
 				5C137385FF6824DB12120111,
+				17D71678FFAF834712120111,
 			);
 			isa = PBXFrameworksBuildPhase;
 			name = "Frameworks & Libraries";
