@@ -1,3 +1,19 @@
+Fri Apr 21 17:18:57 1995  Mark Eichin  <eichin@cygnus.com>
+
+	rlogin testing changes from ian@cygnus.com.
+
+> Fri Mar 24 15:04:25 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* krlogind.c (srvtab): New global variable.
+	(krb5_override_default_realm): Declare.
+	(ARGSTR): Add "S:M:L:" to Kerberos version.
+	(login_program): New global variable.
+	(main): Handle -S, -M, and -L arguments.  Call SO_REUSEADDR on
+	socket if debug_port set.
+	(doit): Use login_program instead of LOGIN_PROGRAM.
+	(recvauth): Pass srvtab to krb5_compat_recvauth.
+	* krlogind.M: Document -S, -M, and -L.
+
 Fri Apr 21 17:13:48 1995  Mark Eichin  <eichin@cygnus.com>
 
 	More changes from ian@cygnus.com to support testing.

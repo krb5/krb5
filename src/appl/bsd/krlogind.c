@@ -245,7 +245,10 @@ krb5_authenticator      *kdata;
 krb5_ticket     *ticket = 0;
 krb5_context bsd_context;
 
-#define ARGSTR	"rRkKeExXpPD:?"
+char *srvtab = NULL;
+extern char *krb5_override_default_realm;
+
+#define ARGSTR	"rRkKeExXpPD:S:M:L:?"
 #else /* !KERBEROS */
 #define ARGSTR	"rRpPD:?"
 #define (*des_read)  read
@@ -263,6 +266,8 @@ krb5_context bsd_context;
 #define LOGIN_PROGRAM KRB5_PATH_LOGIN
 #endif /* DO_NOT_USE_K_LOGIN */
 #endif /* LOGIN_PROGRAM */
+
+char *login_program = LOGIN_PROGRAM;
 
 #define MAXRETRIES 4
 #define MAX_PROG_NAME 16
@@ -383,6 +388,12 @@ main(argc, argv)
 	  do_encrypt = 1;
 	  break;
 #endif
+	case 'S':
+	  srvtab = optarg;
+	  break;
+	case 'M':
+	  krb5_override_default_realm = optarg;
+	  break;
 #endif
 	case 'p':
 	  passwd_if_fail = 1; /* Passwd reqd if any check fails */
@@ -392,6 +403,11 @@ main(argc, argv)
 	  break;
 	case 'D':
 	  debug_port = atoi(optarg);
+	  break;
+	case 'L':
+#ifndef DO_NOT_USE_K_LOGIN
+	  login_program = optarg;
+#endif
 	  break;
 	case '?':
 	default:
@@ -418,6 +434,9 @@ main(argc, argv)
 	 sin.sin_port = htons(debug_port);
 	 sin.sin_addr.s_addr = INADDR_ANY;
 	 
+	 (void) setsockopt(s, SOL_SOCKET, SO_REUSEADDR,
+			   (char *)&on, sizeof(on));
+
 	 if ((bind(s, (struct sockaddr *) &sin, sizeof(sin))) < 0) {
 	     fprintf(stderr, "Error in bind: %s\n", strerror(errno));
 	     exit(2);
@@ -749,15 +768,15 @@ void doit(f, fromp)
 #endif
 
 #ifdef DO_NOT_USE_K_LOGIN
-	execl(LOGIN_PROGRAM, "login", "-r", rhost_name, 0);
+	execl(login_program, "login", "-r", rhost_name, 0);
 #else
 	if (passwd_req)
-	  execl(LOGIN_PROGRAM, "login","-h", rhost_name, lusername, 0);
+	  execl(login_program, "login","-h", rhost_name, lusername, 0);
 	else
-	  execl(LOGIN_PROGRAM, "login", "-h", rhost_name, "-e", lusername, 0);
+	  execl(login_program, "login", "-h", rhost_name, "-e", lusername, 0);
 #endif
 	
-	fatalperror(2, LOGIN_PROGRAM);
+	fatalperror(2, login_program);
 	/*NOTREACHED*/
     } /* if (pid == 0) */
 
@@ -1535,7 +1554,7 @@ recvauth()
 				  server, 	/* Specify daemon principal */
 				  0, 		/* default rc_type */
 				  0, 		/* no flags */
-				  NULL,		/* default keytab */
+				  srvtab, /* normally NULL to use v5srvtab */
 
 				  do_encrypt ? KOPT_DO_MUTUAL : 0, /*v4_opts*/
 				  "rcmd", 	/* v4_service */

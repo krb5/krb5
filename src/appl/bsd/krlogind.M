@@ -94,6 +94,21 @@ as found in the environment variable, ``TERM''; see
 .IR environ (7).
 The screen or window size of the terminal is requested from the client,
 and window size changes from the client are propagated to the pseudo terminal.
+.PP
+.I Krlogind
+supports three options which are used for testing purposes:
+
+.IP \fB\-S\ srvtab\fP 10
+Set the \fIsrvtab\fP file to use.
+
+.IP \fB\-M\ realm\fP
+Set the Kerberos realm to use.
+
+.IP \fB\-L\ login\fP
+Set the login program to use.  This option only has an effect if
+DO_NOT_USE_K_LOGIN was not defined when
+.I krlogind
+was compiled.
 .SH DIAGNOSTICS
 All diagnostic messages are returned on the connection
 associated with the
