@@ -2,6 +2,13 @@ Tue Oct 21 09:02:51 1997  Ezra Peisach  <epeisach@mit.edu>
 
 	* kparse.c: Include stdlib.h if present (for malloc prototyp)
 
+Fri Oct 17 20:33:17 1997  Tom Yu  <tlyu@mit.edu>
+
+	* mac_time.c: Don't use the type KRB_INT32; it was leaked from
+	des.h and was just the wrong answer.  Use long instead.  While
+	we're at it, declare gettimeofdaynet_no_offset() as static because
+	we have no real need to export it.
+
 Tue Sep 30 19:00:33 1997  Tom Yu  <tlyu@mit.edu>
 
 	* tkt_string.c: Replace HAS_STDLIB_H with something more sane.

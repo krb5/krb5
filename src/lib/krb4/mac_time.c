@@ -43,7 +43,7 @@
 
 /* returns the offset in hours between the mac local time and the GMT  */
 
-unsigned KRB_INT32
+unsigned long
 getTimeZoneOffset()
 {
 	MachineLocation		macLocation;
@@ -60,7 +60,8 @@ getTimeZoneOffset()
 
 /* Returns the GMT in seconds using the Unix epoch, ie. Net time */
 
-unsigned KRB_INT32 gettimeofdaynet_no_offset()
+static unsigned long
+gettimeofdaynet_no_offset()
 {
 	time_t the_time;
 	
