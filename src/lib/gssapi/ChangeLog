@@ -1,3 +1,7 @@
+2000-06-03  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in(LIBMINOR): Bump library version.
+
 Tue Feb 22 10:23:19 2000  Ezra Peisach  <epeisach@mit.edu>
 
 	* Makefile.in (clean-unix): Add clean-libobjs.

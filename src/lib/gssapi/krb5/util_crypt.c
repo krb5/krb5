@@ -122,7 +122,10 @@ kg_encrypt(context, key, usage, iv, in, out, length)
 	   return(code);
 
        ivd.length = blocksize;
-       ivd.data = iv;
+       ivd.data = malloc(ivd.length);
+       if (ivd.data == NULL)
+	   return ENOMEM;
+       memcpy(ivd.data, iv, ivd.length);
        pivd = &ivd;
    } else {
        pivd = NULL;
@@ -134,8 +137,10 @@ kg_encrypt(context, key, usage, iv, in, out, length)
    outputd.ciphertext.length = length;
    outputd.ciphertext.data = out;
 
-   return(krb5_c_encrypt(context, key,
-			 usage, pivd, &inputd, &outputd));
+   code = krb5_c_encrypt(context, key, usage, pivd, &inputd, &outputd);
+   if (pivd != NULL)
+       krb5_free_data_contents(context, pivd);
+   return code;
 }
 
 /* length is the length of the cleartext. */
@@ -160,7 +165,10 @@ kg_decrypt(context, key, usage, iv, in, out, length)
 	   return(code);
 
        ivd.length = blocksize;
-       ivd.data = iv;
+       ivd.data = malloc(ivd.length);
+       if (ivd.data == NULL)
+	   return ENOMEM;
+       memcpy(ivd.data, iv, ivd.length);
        pivd = &ivd;
    } else {
        pivd = NULL;
@@ -173,6 +181,8 @@ kg_decrypt(context, key, usage, iv, in, out, length)
    outputd.length = length;
    outputd.data = out;
 
-   return(krb5_c_decrypt(context, key,
-			 usage, pivd, &inputd, &outputd));
+   code = krb5_c_decrypt(context, key, usage, pivd, &inputd, &outputd);
+   if (pivd != NULL)
+       krb5_free_data_contents(context, pivd);
+   return code;
 }

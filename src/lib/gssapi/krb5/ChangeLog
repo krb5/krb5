@@ -1,3 +1,9 @@
+2000-06-03  Tom Yu  <tlyu@mit.edu>
+
+	* util_crypt.c (kg_encrypt): Copy ivec, since c_encrypt() now
+	updates ivecs.
+	(kg_decrypt): Copy ivec, since c_decrypt() now updates ivecs.
+
 2000-06-02  Ken Raeburn  <raeburn@mit.edu>
 
 	* init_sec_context.c (get_credentials): Don't check each enctype
