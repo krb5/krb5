@@ -1,3 +1,9 @@
+Mon May 10 18:56:11 1999  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in: Back out win16/win32 change.  Does not
+		work from clean.  Must wait until win32-only to
+		remove /AL flag.
+
 Mon May 10 15:07:11 1999  Danilo Almeida  <dalmeida@mit.edu>
 
 	* Makefile.in: Change wconfig build so win16 flags are not used
