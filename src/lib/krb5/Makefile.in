@@ -30,8 +30,8 @@ LIBDONE= error_tables/DONE asn.1/DONE ccache/DONE ccache/stdio/DONE \
 #SHLIB_LIBDIRS= @SHLIB_LIBDIRS@
 
 LIB=krb5
-LIBMAJOR=2
-LIBMINOR=1
+LIBMAJOR=4
+LIBMINOR=0
 
 STOBJLISTS= \
 	error_tables/OBJS.ST \
