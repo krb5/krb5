@@ -46,27 +46,27 @@ krb5_scc_initialize(context, id, princ)
    krb5_ccache id;
    krb5_principal princ;
 {
-     int ret;
+     krb5_error_code kret;
 
-     ret = krb5_scc_open_file (context, id, SCC_OPEN_AND_ERASE);
-     if (ret < 0)
+     kret = krb5_scc_open_file (context, id, SCC_OPEN_AND_ERASE);
+     if (kret < 0)
 	  return krb5_scc_interpret(context, errno);
 
 #if 0
-     ret = fchmod(((krb5_scc_data *) id->data)->fd, S_IREAD | S_IWRITE);
-     if (ret == -1) {
-	 ret = krb5_scc_interpret(context, errno);
+     kret = fchmod(((krb5_scc_data *) id->data)->fd, S_IREAD | S_IWRITE);
+     if (kret == -1) {
+	 kret = krb5_scc_interpret(context, errno);
 	 if (OPENCLOSE(id)) {
 	     close(((krb5_scc_data *)id->data)->fd);
 	     ((krb5_scc_data *) id->data)->fd = -1;
 	 }
-	 return ret;
+	 return kret;
      }
 #endif
-     krb5_scc_store_principal(context, id, princ);
+     kret = krb5_scc_store_principal(context, id, princ);
 
-     MAYBE_CLOSE (context, id, ret);
-     return ret;
+     MAYBE_CLOSE (context, id, kret);
+     return kret;
 }
 
 
