@@ -598,7 +598,7 @@ krb5_error_code kadm5_get_config_params(context, kdcprofile, kdcenv,
 		  (ep = strchr(sp, (int) '\t'))) {
 		   /* Fill in trailing whitespace of sp */
 		   tp = ep - 1;
-		   while (isspace(*tp) && (tp < sp)) {
+		   while (isspace(*tp) && (tp > sp)) {
 			*tp = '\0';
 			tp--;
 		   }

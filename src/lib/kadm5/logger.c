@@ -853,8 +853,8 @@ klog_vsyslog(priority, format, arglist)
     cp += 15;
 #endif	/* HAVE_STRFTIME */
 #ifdef VERBOSE_LOGS
-    sprintf(cp, " %s %s[%d](%s): ", 
-	    log_control.log_hostname, log_control.log_whoami, getpid(),
+    sprintf(cp, " %s %s[%ld](%s): ",
+	    log_control.log_hostname, log_control.log_whoami, (long) getpid(),
 	    severity2string(priority));
 #else
     sprintf(cp, " ");
