@@ -1,13 +1,18 @@
 CFLAGS = $(CCOPTS) $(DEFS) -I. -I$(srcdir)
 LDFLAGS = -g
 
+##DOSBUILDTOP = ..\..\..
+##DOSLIBNAME=..\libgssapi_krb5.$(LIBEXT)
+##DOSsrcdir = .
+##DOS!include $(BUILDTOP)\config\windows.in
+
 all:: $(OBJS)
 
 ETSRCS= gssapi_err_generic.c
-ETOBJS= gssapi_err_generic.o
+ETOBJS= gssapi_err_generic.$(OBJEXT)
 ETHDRS= gssapi_err_generic.h
 
-gssapi_err_generic.o: gssapi_err_generic.c
+gssapi_err_generic.$(OBJEXT): gssapi_err_generic.c
 
 gssapi_err_generic.h: gssapi_err_generic.et
 
@@ -15,10 +20,10 @@ gssapi_err_generic.c: gssapi_err_generic.et
 
 #if HasHashLibrary
 # UTIL_VALIDATE_SRC= $(srcdir)/util_validate.c
-# UTIL_VALIDATE_OBJ= util_validate.o
+# UTIL_VALIDATE_OBJ= util_validate.$(OBJEXT)
 #else
 UTIL_VALIDATE_SRC= $(srcdir)/utl_nohash_validate.c
-UTIL_VALIDATE_OBJ= utl_nohash_validate.o
+UTIL_VALIDATE_OBJ= utl_nohash_validate.$(OBJEXT)
 #endif
 
 CCSRCS = \
@@ -35,31 +40,46 @@ CCSRCS = \
 	$(UTIL_VALIDATE_SRC)
 
 CCOBJS = \
-	disp_major_status.o \
-	disp_com_err_status.o \
-	gssapi_generic.o \
-	rel_buffer.o \
-	rel_oid_set.o \
-	util_buffer.o \
-	util_canonhost.o \
-	util_dup.o \
-	util_oid.o \
-	util_token.o \
+	disp_major_status.$(OBJEXT) \
+	disp_com_err_status.$(OBJEXT) \
+	gssapi_generic.$(OBJEXT) \
+	rel_buffer.$(OBJEXT) \
+	rel_oid_set.$(OBJEXT) \
+	util_buffer.$(OBJEXT) \
+	util_canonhost.$(OBJEXT) \
+	util_dup.$(OBJEXT) \
+	util_oid.$(OBJEXT) \
+	util_token.$(OBJEXT) \
 	$(UTIL_VALIDATE_OBJ)
 
 
-EHDRDIR= $(BUILDTOP)/include/gssapi
+EHDRDIR= $(BUILDTOP)$(S)include$(S)gssapi
 EXPORTED_HEADERS= gssapi.h gssapi_generic.h
 
 SRCS= $(ETSRCS) $(CCSRCS)
 OBJS= $(ETOBJS) $(CCOBJS)
 HDRS= $(ETHDRS)
 
-all:: $(SRCS) $(HDRS) includes $(OBJS)
+all:: all-$(WHAT) $(SRCS) $(HDRS) includes $(OBJS)
 
-clean::
+all-unix::
+
+all-windows::
+	if not exist $(EHDRDIR)\nul mkdir $(EHDRDIR)
+	copy gssapi.h $(EHDRDIR)
+	copy gssapi_generic.h $(EHDRDIR)
+
+clean:: clean-$(WHAT)
+
+clean-unix::
 	$(RM) $(ETHDRS) $(ETSRCS)
+
+clean-windows::
+	$(RM) $(EHDRDIR)\gssapi.h $(EHDRDIR)\gssapi_generic.h
+	if exist $(EHDRDIR)\nul rmdir $(EHDRDIR)
 
 # Krb5InstallHeaders($(EXPORTED_HEADERS), $(KRB5_INCDIR)/krb5)
 
 depend:: $(ETSRCS)
+
+includes::

@@ -232,7 +232,7 @@ acquire_init_cred(context, minor_status, desired_name, output_princ, cred)
 }
    
 /*ARGSUSED*/
-OM_uint32 
+OM_uint32 INTERFACE
 krb5_gss_acquire_cred(context, minor_status, desired_name, time_req,
 		      desired_mechs, cred_usage, output_cred_handle,
 		      actual_mechs, time_rec)

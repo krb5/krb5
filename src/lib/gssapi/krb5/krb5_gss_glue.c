@@ -22,7 +22,7 @@
 
 #include "gssapiP_krb5.h"
 
-OM_uint32
+OM_uint32 INTERFACE
 gss_accept_sec_context(minor_status, context_handle, verifier_cred_handle,
 		       input_token, input_chan_bindings, src_name, mech_type, 
 		       output_token, ret_flags, time_rec, delegated_cred_handle)
@@ -64,7 +64,7 @@ gss_accept_sec_context(minor_status, context_handle, verifier_cred_handle,
 				      delegated_cred_handle));
 }
 
-OM_uint32
+OM_uint32 INTERFACE
 gss_acquire_cred(minor_status, desired_name, time_req, desired_mechs,
 		 cred_usage, output_cred_handle, actual_mechs, time_rec)
      OM_uint32 *minor_status;
@@ -89,7 +89,7 @@ gss_acquire_cred(minor_status, desired_name, time_req, desired_mechs,
 				time_rec));
 }
 
-OM_uint32
+OM_uint32 INTERFACE
 gss_compare_name(minor_status, name1, name2, name_equal)
      OM_uint32 *minor_status;
      gss_name_t name1;
@@ -103,7 +103,7 @@ gss_compare_name(minor_status, name1, name2, name_equal)
 				name2, name_equal));
 }
 
-OM_uint32
+OM_uint32 INTERFACE
 gss_context_time(minor_status, context_handle, time_rec)
      OM_uint32 *minor_status;
      gss_ctx_id_t context_handle;
@@ -123,7 +123,7 @@ gss_context_time(minor_status, context_handle, time_rec)
 				time_rec));
 }
 
-OM_uint32
+OM_uint32 INTERFACE
 gss_delete_sec_context(minor_status, context_handle, output_token)
      OM_uint32 *minor_status;
      gss_ctx_id_t *context_handle;
@@ -143,7 +143,7 @@ gss_delete_sec_context(minor_status, context_handle, output_token)
 				      context_handle, output_token));
 }
 
-OM_uint32
+OM_uint32 INTERFACE
 gss_display_name(minor_status, input_name, output_name_buffer, output_name_type)
      OM_uint32 *minor_status;
      gss_name_t input_name;
@@ -157,7 +157,7 @@ gss_display_name(minor_status, input_name, output_name_buffer, output_name_type)
 				output_name_buffer, output_name_type));
 }
 
-OM_uint32
+OM_uint32 INTERFACE
 gss_display_status(minor_status, status_value, status_type,
 		   mech_type, message_context, status_string)
      OM_uint32 *minor_status;
@@ -175,7 +175,7 @@ gss_display_status(minor_status, status_value, status_type,
 				  status_string));
 }
 
-OM_uint32
+OM_uint32 INTERFACE
 gss_import_name(minor_status, input_name_buffer, input_name_type, output_name)
      OM_uint32 *minor_status;
      gss_buffer_t input_name_buffer;
@@ -189,7 +189,7 @@ gss_import_name(minor_status, input_name_buffer, input_name_type, output_name)
 			       input_name_type, output_name));
 }
 
-OM_uint32
+OM_uint32 INTERFACE
 gss_indicate_mechs(minor_status, mech_set)
      OM_uint32 *minor_status;
      gss_OID_set *mech_set;
@@ -200,7 +200,7 @@ gss_indicate_mechs(minor_status, mech_set)
    return(krb5_gss_indicate_mechs(kg_context, minor_status, mech_set));
 }
 
-OM_uint32
+OM_uint32 INTERFACE
 gss_init_sec_context(minor_status, claimant_cred_handle, context_handle,
 		     target_name, mech_type, req_flags, time_req,
 		     input_chan_bindings, input_token, actual_mech_type,
@@ -230,7 +230,7 @@ gss_init_sec_context(minor_status, claimant_cred_handle, context_handle,
 				    time_rec));
 }
 
-OM_uint32
+OM_uint32 INTERFACE
 gss_inquire_context(minor_status, context_handle, initiator_name, acceptor_name,
 		    lifetime_rec, mech_type, ret_flags,
 		    locally_initiated)
@@ -258,7 +258,7 @@ gss_inquire_context(minor_status, context_handle, initiator_name, acceptor_name,
 				   mech_type, ret_flags, locally_initiated));
 }
 
-OM_uint32
+OM_uint32 INTERFACE
 gss_inquire_cred(minor_status, cred_handle, name, lifetime_ret,
 		 cred_usage, mechanisms)
      OM_uint32 *minor_status;
@@ -275,7 +275,7 @@ gss_inquire_cred(minor_status, cred_handle, name, lifetime_ret,
 				name, lifetime_ret, cred_usage, mechanisms));
 }
 
-OM_uint32
+OM_uint32 INTERFACE
 gss_process_context_token(minor_status, context_handle, token_buffer)
      OM_uint32 *minor_status;
      gss_ctx_id_t context_handle;
@@ -295,7 +295,7 @@ gss_process_context_token(minor_status, context_handle, token_buffer)
 					 context_handle, token_buffer));
 }
 
-OM_uint32
+OM_uint32 INTERFACE
 gss_release_cred(minor_status, cred_handle)
      OM_uint32 *minor_status;
      gss_cred_id_t *cred_handle;
@@ -306,7 +306,7 @@ gss_release_cred(minor_status, cred_handle)
    return(krb5_gss_release_cred(kg_context, minor_status, cred_handle));
 }
 
-OM_uint32
+OM_uint32 INTERFACE
 gss_release_name(minor_status, input_name)
      OM_uint32 *minor_status;
      gss_name_t *input_name;
@@ -317,7 +317,7 @@ gss_release_name(minor_status, input_name)
    return(krb5_gss_release_name(kg_context, minor_status, input_name));
 }
 
-OM_uint32
+OM_uint32 INTERFACE
 gss_release_buffer(minor_status, buffer)
      OM_uint32 *minor_status;
      gss_buffer_t buffer;
@@ -326,7 +326,7 @@ gss_release_buffer(minor_status, buffer)
 				     buffer));
 }
 
-OM_uint32
+OM_uint32 INTERFACE
 gss_release_oid_set(minor_status, set)
      OM_uint32* minor_status;
      gss_OID_set *set;
@@ -334,7 +334,7 @@ gss_release_oid_set(minor_status, set)
    return(generic_gss_release_oid_set(minor_status, set));
 }
 
-OM_uint32
+OM_uint32 INTERFACE
 gss_seal(minor_status, context_handle, conf_req_flag, qop_req,
 	 input_message_buffer, conf_state, output_message_buffer)
      OM_uint32 *minor_status;
@@ -360,7 +360,7 @@ gss_seal(minor_status, context_handle, conf_req_flag, qop_req,
 			conf_state, output_message_buffer));
 }
 
-OM_uint32
+OM_uint32 INTERFACE
 gss_sign(minor_status, context_handle, qop_req, message_buffer, message_token)
      OM_uint32 *minor_status;
      gss_ctx_id_t context_handle;
@@ -382,7 +382,7 @@ gss_sign(minor_status, context_handle, qop_req, message_buffer, message_token)
 			qop_req, message_buffer, message_token));
 }
 
-OM_uint32
+OM_uint32 INTERFACE
 gss_unseal(minor_status, context_handle, input_message_buffer,
 	   output_message_buffer, conf_state, qop_state)
      OM_uint32 *minor_status;
@@ -407,7 +407,7 @@ gss_unseal(minor_status, context_handle, input_message_buffer,
 			  conf_state, qop_state));
 }
 
-OM_uint32
+OM_uint32 INTERFACE
 gss_verify(minor_status, context_handle, message_buffer,
 	   token_buffer, qop_state)
      OM_uint32 *minor_status;

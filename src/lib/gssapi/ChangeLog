@@ -1,3 +1,7 @@
+Mon Feb 20 21:38:20 1995 Keith Vetter (keithv@fusion.com)
+
+	* Makefile.in: made to work on the PC
+
 Fri Nov 18 00:17:29 1994  Mark Eichin  <eichin@cygnus.com>
 
 	* configure.in: move WITH_CCOPTS.

@@ -22,7 +22,7 @@
 
 #include "gssapiP_generic.h"
 
-char *g_strdup(str)
+char * INTERFACE g_strdup(str)
      char *str;
 {
    char *ret;

@@ -1,6 +1,12 @@
 TST=if test -n "`cat DONE`" ; then
 
-all::
+##DOSBUILDTOP = ..\..
+##DOSLIBNAME=libgssapi_krb5.$(LIBEXT)
+##DOS!include $(BUILDTOP)\config\windows.in
+
+all:: all-$(WHAT)
+
+all-unix::
 
 libgssapi_krb5.a: generic/DONE krb5/DONE
 	(cd generic; $(TST) $(ARADD) ../$@ `cat DONE` ; fi)
@@ -11,5 +17,27 @@ install:: libgssapi_krb5.a
 	$(INSTALL_DATA) libgssapi_krb5.a $(DESTDIR)$(KRB5_LIBDIR)/libgssapi_krb5.a
 	$(RANLIB) $(DESTDIR)$(KRB5_LIBDIR)/libgssapi_krb5.a
 
-clean::
-	$(RM) libgssapi_krb5.a
+clean:: clean-$(WHAT)
+	$(RM) libgssapi_krb5.$(LIBEXT) libgssapi_krb5.bak
+
+clean-unix::
+
+all-windows::
+	cd generic
+	@echo Making in ..\generic
+	-$(MAKE) -$(MFLAGS) LIB=$(LIB)
+	cd ..\krb5
+	@echo Making in krb5
+	-$(MAKE) -$(MFLAGS) LIB=$(LIB)
+	cd ..
+
+clean-windows::
+	cd generic
+	@echo Making clean in ..\generic
+	-$(MAKE) -$(MFLAGS) clean
+	cd ..\krb5
+	@echo Making clean in krb5
+	-$(MAKE) -$(MFLAGS) clean
+	cd ..
+
+

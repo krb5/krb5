@@ -22,7 +22,7 @@
 
 #include "gssapiP_krb5.h"
 
-OM_uint32
+OM_uint32 INTERFACE
 krb5_gss_compare_name(context, minor_status, name1, name2, name_equal)
      krb5_context context;
      OM_uint32 *minor_status;

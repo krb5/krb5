@@ -22,7 +22,7 @@
 
 #include "gssapiP_krb5.h"
 
-OM_uint32
+OM_uint32 INTERFACE
 krb5_gss_inquire_context(context, minor_status, context_handle, initiator_name, 
 			 acceptor_name, lifetime_rec, mech_type, ret_flags,
 			 locally_initiated)

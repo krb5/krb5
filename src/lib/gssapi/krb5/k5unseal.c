@@ -22,14 +22,13 @@
 
 #include "gssapiP_krb5.h"
 #include <memory.h>
-#include <netinet/in.h>
 #include <krb5/rsa-md5.h>
 
 /* message_buffer is an input if SIGN, output if SEAL, and ignored if DEL_CTX
    conf_state is only valid if SEAL.
    */
 
-OM_uint32
+OM_uint32 INTERFACE
 kg_unseal(minor_status, context_handle, input_token_buffer, message_buffer,
 	  conf_state, qop_state, toktype)
      OM_uint32 *minor_status;

@@ -1,13 +1,18 @@
 CFLAGS = $(CCOPTS) $(DEFS) -I. -I$(srcdir) -I../generic -I$(srcdir)/../generic
 LDFLAGS = -g
 
+##DOSBUILDTOP = ..\..\..
+##DOSLIBNAME=..\libgssapi_krb5.$(LIBEXT)
+##DOSsrcdir = .
+##DOS!include $(BUILDTOP)\config\windows.in
+
 all:: $(OBJS)
 
 ETSRCS= gssapi_err_krb5.c
-ETOBJS= gssapi_err_krb5.o
+ETOBJS= gssapi_err_krb5.$(OBJEXT)
 ETHDRS= gssapi_err_krb5.h
 
-gssapi_err_krb5.o: gssapi_err_krb5.c
+gssapi_err_krb5.$(OBJEXT): gssapi_err_krb5.c
 
 gssapi_err_krb5.h: gssapi_err_krb5.et
 
@@ -44,34 +49,34 @@ CCSRCS = \
 	$(srcdir)/verify.c
 
 CCOBJS = \
-	accept_sec_context.o \
-	acquire_cred.o \
-	compare_name.o \
-	context_time.o \
-	delete_sec_context.o \
-	disp_name.o \
-	disp_status.o \
-	get_tkt_flags.o \
-	gssapi_krb5.o \
-	import_name.o \
-	indicate_mechs.o \
-	init_sec_context.o \
-	inq_context.o \
-	inq_cred.o \
-	k5seal.o \
-	k5unseal.o \
-	krb5_gss_glue.o \
-	process_context_token.o \
-	rel_cred.o \
-	rel_name.o \
-	seal.o \
-	sign.o \
-	unseal.o \
-	util_cksum.o \
-	util_crypt.o \
-	util_seed.o \
-	util_seqnum.o \
-	verify.o
+	accept_sec_context.$(OBJEXT) \
+	acquire_cred.$(OBJEXT) \
+	compare_name.$(OBJEXT) \
+	context_time.$(OBJEXT) \
+	delete_sec_context.$(OBJEXT) \
+	disp_name.$(OBJEXT) \
+	disp_status.$(OBJEXT) \
+	get_tkt_flags.$(OBJEXT) \
+	gssapi_krb5.$(OBJEXT) \
+	import_name.$(OBJEXT) \
+	indicate_mechs.$(OBJEXT) \
+	init_sec_context.$(OBJEXT) \
+	inq_context.$(OBJEXT) \
+	inq_cred.$(OBJEXT) \
+	k5seal.$(OBJEXT) \
+	k5unseal.$(OBJEXT) \
+	krb5_gss_glue.$(OBJEXT) \
+	process_context_token.$(OBJEXT) \
+	rel_cred.$(OBJEXT) \
+	rel_name.$(OBJEXT) \
+	seal.$(OBJEXT) \
+	sign.$(OBJEXT) \
+	unseal.$(OBJEXT) \
+	util_cksum.$(OBJEXT) \
+	util_crypt.$(OBJEXT) \
+	util_seed.$(OBJEXT) \
+	util_seqnum.$(OBJEXT) \
+	verify.$(OBJEXT)
 
 SRCS= $(ETSRCS) $(CCSRCS)
 OBJS= $(ETOBJS) $(CCOBJS)
@@ -81,8 +86,12 @@ EHDRDIR=$(TOP)/include/gssapi
 
 all:: $(SRCS) $(HDRS) includes $(OBJS)
 
-clean::
+clean:: clean-$(WHAT)
+
+clean-unix::
 	$(RM) $(ETHDRS) $(ETSRCS)
+
+clean-windows::
 
 depend:: $(ETSRCS)
 

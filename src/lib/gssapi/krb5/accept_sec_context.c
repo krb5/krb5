@@ -108,7 +108,7 @@ make_ap_rep(context, authdat, subkey, seq_send, token)
    return(0);
 }
 
-OM_uint32 
+OM_uint32 INTERFACE
 krb5_gss_accept_sec_context(context, minor_status, context_handle, 
 			    verifier_cred_handle, input_token,
 			    input_chan_bindings, src_name, mech_type,
@@ -128,6 +128,7 @@ krb5_gss_accept_sec_context(context, minor_status, context_handle,
      gss_cred_id_t *delegated_cred_handle;
 {
    unsigned char *ptr, *ptr2;
+   char *sptr;
    long tmp;
    int bigend;
    krb5_gss_cred_id_t cred;
@@ -197,7 +198,8 @@ krb5_gss_accept_sec_context(context, minor_status, context_handle,
       return(GSS_S_DEFECTIVE_TOKEN);
    }
 
-   TREAD_STR(ptr, ap_req.data, ap_req.length);
+   sptr = (char *) ptr;
+   TREAD_STR(sptr, ap_req.data, ap_req.length);
 
    /* construct the sender_addr */
 
@@ -229,8 +231,8 @@ krb5_gss_accept_sec_context(context, minor_status, context_handle,
    /* decode the message */
 
    if (code = krb5_rd_req(context, &ap_req, cred->princ, paddr, NULL, 
-			  &rd_req_keyproc, (krb5_pointer) cred->keytab, 
-			  rcache, &authdat)) {
+			  (krb5_rdreq_key_proc) rd_req_keyproc,
+                          (krb5_pointer) cred->keytab, rcache, &authdat)) {
       (void) krb5_rc_close(context, rcache);
       *minor_status = code;
       return(GSS_S_FAILURE);

@@ -1,3 +1,17 @@
+Mon Feb 20 18:50:33 1995 Keith Vetter (keithv@fusion.com)
+
+	* Makefile.in: made to work on the PC
+        * Added windows INTERFACE keyword
+          disp_com.c disp_maj.c rel_buff.c rel_oid_.c
+          util_buf.c util_can.c util_dup.c util_oid.c
+          util_tok.c util_val.c utl_noha.c
+        * gssapiP_generic.h: 
+          added INTERFACE keyword
+          removed inclusion
+        * util_tok.c: had to coerce long to int on TWRITE_STR.
+        * gssapi.h: made typedef for OM_uint32 machine independent and
+          added INTERFACE to prototypes.
+
 Mon Feb 20 12:00:00 1994  Keith Vetter (keithv@fusion.com)
 
 	More DOS 8.3 renames--for files created by make

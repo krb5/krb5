@@ -111,7 +111,7 @@ static int der_read_length(buf, bufsize)
 
 /* returns the length of a token, given the mech oid and the body size */
 
-int g_token_size(mech, body_size)
+int INTERFACE g_token_size(mech, body_size)
      const_gss_OID mech;
      unsigned int body_size;
 {
@@ -123,7 +123,7 @@ int g_token_size(mech, body_size)
 /* fills in a buffer with the token header.  The buffer is assumed to
    be the right size.  buf is advanced past the token header */
 
-void g_make_token_header(mech, body_size, buf, tok_type)
+void INTERFACE g_make_token_header(mech, body_size, buf, tok_type)
      const_gss_OID mech;
      int body_size;
      unsigned char **buf;
@@ -133,7 +133,7 @@ void g_make_token_header(mech, body_size, buf, tok_type)
    der_write_length(buf, 4 + mech->length + body_size);
    *(*buf)++ = 0x06;
    *(*buf)++ = (unsigned char) mech->length;
-   TWRITE_STR(*buf, mech->elements, mech->length);
+   TWRITE_STR(*buf, mech->elements, ((int) mech->length));
    *(*buf)++ = (unsigned char) ((tok_type>>8)&0xff);
    *(*buf)++ = (unsigned char) (tok_type&0xff);
 }
@@ -142,7 +142,7 @@ void g_make_token_header(mech, body_size, buf, tok_type)
    leaving buf advanced past the token header, and setting body_size
    to the number of remaining bytes */
 
-int g_verify_token_header(mech, body_size, buf, tok_type, toksize)
+int INTERFACE g_verify_token_header(mech, body_size, buf, tok_type, toksize)
      const_gss_OID mech;
      int *body_size;
      unsigned char **buf;

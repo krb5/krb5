@@ -73,7 +73,7 @@ static gss_cred_id_t defcred = GSS_C_NO_CREDENTIAL;
 
 /* XXX what happens when the default credentials expire or are invalidated? */
 
-OM_uint32
+OM_uint32 INTERFACE
 kg_get_defcred(minor_status, cred)
      OM_uint32 *minor_status;
      gss_cred_id_t *cred;
@@ -99,7 +99,7 @@ kg_get_defcred(minor_status, cred)
    return(GSS_S_COMPLETE);
 }
 
-OM_uint32
+OM_uint32 INTERFACE
 kg_release_defcred(minor_status)
      OM_uint32 *minor_status;
 {
@@ -114,7 +114,7 @@ kg_release_defcred(minor_status)
    return(krb5_gss_release_cred(kg_context, minor_status, &defcred));
 }
 
-OM_uint32
+OM_uint32 INTERFACE
 kg_get_context()
 {
 	if (kg_context)

@@ -28,13 +28,12 @@
 #include "gssapi_err_generic.h"
 #include <errno.h>
 #include <sys/types.h>
-#include <netinet/in.h>
 
 /** helper macros **/
 
 #define g_OID_equal(o1,o2) \
    (((o1)->length == (o2)->length) && \
-    (memcmp((o1)->elements,(o2)->elements,(o1)->length) == 0))
+    (memcmp((o1)->elements,(o2)->elements,(int) (o1)->length) == 0))
 
 /* this code knows that an int on the wire is 32 bits.  The type of
    num should be at least this big, or the extra shifts may do weird
@@ -77,51 +76,51 @@
 
 /** helper functions **/
 
-int g_save_name PROTOTYPE((void **vdb, gss_name_t *name));
-int g_save_cred_id PROTOTYPE((void **vdb, gss_cred_id_t *cred));
-int g_save_ctx_id PROTOTYPE((void **vdb, gss_ctx_id_t *ctx));
+int INTERFACE g_save_name PROTOTYPE((void **vdb, gss_name_t *name));
+int INTERFACE g_save_cred_id PROTOTYPE((void **vdb, gss_cred_id_t *cred));
+int INTERFACE g_save_ctx_id PROTOTYPE((void **vdb, gss_ctx_id_t *ctx));
 
-int g_validate_name PROTOTYPE((void **vdb, gss_name_t *name));
-int g_validate_cred_id PROTOTYPE((void **vdb, gss_cred_id_t *cred));
-int g_validate_ctx_id PROTOTYPE((void **vdb, gss_ctx_id_t *ctx));
+int INTERFACE g_validate_name PROTOTYPE((void **vdb, gss_name_t *name));
+int INTERFACE g_validate_cred_id PROTOTYPE((void **vdb, gss_cred_id_t *cred));
+int INTERFACE g_validate_ctx_id PROTOTYPE((void **vdb, gss_ctx_id_t *ctx));
 
-int g_delete_name PROTOTYPE((void **vdb, gss_name_t *name));
-int g_delete_cred_id PROTOTYPE((void **vdb, gss_cred_id_t *cred));
-int g_delete_ctx_id PROTOTYPE((void **vdb, gss_ctx_id_t *ctx));
+int INTERFACE g_delete_name PROTOTYPE((void **vdb, gss_name_t *name));
+int INTERFACE g_delete_cred_id PROTOTYPE((void **vdb, gss_cred_id_t *cred));
+int INTERFACE g_delete_ctx_id PROTOTYPE((void **vdb, gss_ctx_id_t *ctx));
 
-int g_make_string_buffer PROTOTYPE((const char *str, gss_buffer_t buffer));
+int INTERFACE g_make_string_buffer PROTOTYPE((const char *str, gss_buffer_t buffer));
 
-int g_copy_OID_set PROTOTYPE((const gss_OID_set_desc * const in, gss_OID_set *out));
+int INTERFACE g_copy_OID_set PROTOTYPE((const gss_OID_set_desc * const in, gss_OID_set *out));
 
-int g_token_size PROTOTYPE((const_gss_OID mech, unsigned int body_size));
+int INTERFACE g_token_size PROTOTYPE((const_gss_OID mech, unsigned int body_size));
 
-void g_make_token_header PROTOTYPE((const_gss_OID mech, int body_size,
+void INTERFACE g_make_token_header PROTOTYPE((const_gss_OID mech, int body_size,
 			  unsigned char **buf, int tok_type));
 
-int g_verify_token_header PROTOTYPE((const_gss_OID mech, int *body_size,
+int INTERFACE g_verify_token_header PROTOTYPE((const_gss_OID mech, int *body_size,
 			  unsigned char **buf, int tok_type, int toksize));
 
-OM_uint32 g_display_major_status PROTOTYPE((OM_uint32 *minor_status,
+OM_uint32 INTERFACE g_display_major_status PROTOTYPE((OM_uint32 *minor_status,
 				 OM_uint32 status_value,
 				 int *message_context,
 				 gss_buffer_t status_string));
 
-OM_uint32 g_display_com_err_status PROTOTYPE((OM_uint32 *minor_status,
+OM_uint32 INTERFACE INTERFACE g_display_com_err_status PROTOTYPE((OM_uint32 *minor_status,
 				   OM_uint32 status_value,
 				   gss_buffer_t status_string));
 
-char *g_canonicalize_host PROTOTYPE((char *hostname));
+char * INTERFACE g_canonicalize_host PROTOTYPE((char *hostname));
 
-char *g_strdup PROTOTYPE((char *str));
+char * INTERFACE g_strdup PROTOTYPE((char *str));
 
 /** declarations of internal name mechanism functions **/
 
-OM_uint32 generic_gss_release_buffer
+OM_uint32 INTERFACE generic_gss_release_buffer
 PROTOTYPE( (OM_uint32*,       /* minor_status */
             gss_buffer_t      /* buffer */
            ));
 
-OM_uint32 generic_gss_release_oid_set
+OM_uint32 INTERFACE generic_gss_release_oid_set
 PROTOTYPE( (OM_uint32*,       /* minor_status */
             gss_OID_set*      /* set */
            ));

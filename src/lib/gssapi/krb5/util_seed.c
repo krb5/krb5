@@ -25,7 +25,7 @@
 
 static unsigned char zeros[16] = {0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0};
 
-krb5_error_code
+krb5_error_code INTERFACE
 kg_make_seed(key, seed)
      krb5_keyblock *key;
      unsigned char *seed;

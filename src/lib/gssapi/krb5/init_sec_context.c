@@ -129,7 +129,7 @@ make_ap_req(context, cred, server, endtime, chan_bindings, do_mutual,
    return(0);
 }
 
-OM_uint32
+OM_uint32 INTERFACE
 krb5_gss_init_sec_context(context, minor_status, claimant_cred_handle,
 			context_handle, target_name, mech_type,
 			req_flags, time_req, input_chan_bindings,
@@ -337,6 +337,7 @@ krb5_gss_init_sec_context(context, minor_status, claimant_cred_handle,
       }
    } else {
       unsigned char *ptr;
+      char *sptr;
       krb5_data ap_rep;
       krb5_ap_rep_enc_part *ap_rep_data;
 
@@ -387,7 +388,8 @@ krb5_gss_init_sec_context(context, minor_status, claimant_cred_handle,
 	 return(GSS_S_DEFECTIVE_TOKEN);
       }
 
-      TREAD_STR(ptr, ap_rep.data, ap_rep.length);
+      sptr = (char *) ptr;                      /* PC compiler bug */
+      TREAD_STR(sptr, ap_rep.data, ap_rep.length);
 
       /* decode the ap_rep */
       if (code = krb5_rd_rep(context, &ap_rep, ctx->subkey, &ap_rep_data)) {

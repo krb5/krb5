@@ -22,7 +22,7 @@
 
 #include "gssapiP_krb5.h"
 
-OM_uint32
+OM_uint32 INTERFACE
 krb5_gss_display_name(context, minor_status, input_name, output_name_buffer, 
 		      output_name_type)
      krb5_context context;

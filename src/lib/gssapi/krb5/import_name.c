@@ -21,6 +21,7 @@
  */
 
 #include "gssapiP_krb5.h"
+#ifndef _MSDOS
 #include <pwd.h>
 #ifdef USE_STRING_H
 #include <string.h>
@@ -35,7 +36,7 @@
  * GSS_S_FAILURE	if memory allocation fails
  */
 
-OM_uint32
+OM_uint32 INTERFACE
 krb5_gss_import_name(context, minor_status, input_name_buffer, 
 		     input_name_type, output_name)
      krb5_context context;
@@ -146,3 +147,4 @@ krb5_gss_import_name(context, minor_status, input_name_buffer,
    *output_name = (gss_name_t) princ;
    return(GSS_S_COMPLETE);
 }
+#endif

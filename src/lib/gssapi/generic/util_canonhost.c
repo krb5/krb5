@@ -21,15 +21,15 @@
  */
 
 /* This file could be OS specific */
-
 #include "gssapiP_generic.h"
-
+#ifndef _MSDOS
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
 #include <ctype.h>
 
-char *g_canonicalize_host(hostname)
+char * INTERFACE
+g_canonicalize_host(hostname)
      char *hostname;
 {
    struct hostent *hent;
@@ -61,3 +61,4 @@ char *g_canonicalize_host(hostname)
 
    return(canon);
 }
+#endif

@@ -1,3 +1,11 @@
+Mon Feb 20 19:53:9 1995 Keith Vetter (keithv@fusion.com)
+
+	* accept_s.c: needed temp to avoid sign/unsigned mismatch on the PC.
+	* init_sec.c: needed temp to avoid sign/unsigned mismatch on the PC.
+        * gssapiP_krb5.h k5seal.c, k5unseal.c: removed netinet/in.h include.
+        * util_seq.c: changed int to 32bit int
+        * gssapiP_krb5.h, gssapi_krb5.h, *.c: added windows INTERFACE keyword
+
 Mon Feb 20 12:00:00 1995  keith Vetter (keithv@fusion.com)
 
 	Rename files for DOS 8.3 uniqueness--files created by Make

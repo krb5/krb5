@@ -21,7 +21,6 @@
  */
 
 #include "gssapiP_krb5.h"
-#include <netinet/in.h>
 #include <krb5/rsa-md5.h>
 
 static krb5_error_code
@@ -180,7 +179,7 @@ make_seal_token(context, enc_ed, seq_ed, seqnum, direction, text, token,
 /* if signonly is true, ignore conf_req, conf_state, 
    and do not encode the ENC_TYPE, MSG_LENGTH, or MSG_TEXT fields */
 
-OM_uint32
+OM_uint32 INTERFACE
 kg_seal(minor_status, context_handle, conf_req_flag, qop_req, 
 	input_message_buffer, conf_state, output_message_buffer, toktype)
      OM_uint32 *minor_status;

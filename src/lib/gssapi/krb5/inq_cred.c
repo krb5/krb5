@@ -22,7 +22,7 @@
 
 #include "gssapiP_krb5.h"
 
-OM_uint32
+OM_uint32 INTERFACE
 krb5_gss_inquire_cred(context, minor_status, cred_handle, name, lifetime_ret,
 		      cred_usage, mechanisms)
      krb5_context context;
