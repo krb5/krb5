@@ -1,3 +1,13 @@
+2001-03-08  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* kdc_util.h: Add prototype for process_v4_mode() for main.c to use.
+
+	* kerberos_v4.c: Do not shadow progname and more variables.
+
+	* rtest.c (make_princ): Declare static.
+
+	* sock2p.c: Include kdc_util.h for prototypes.
+
 2001-02-08  Tom Yu  <tlyu@mit.edu>
 
 	* kerberos_v4.c (kerberos_v4): Remove references to

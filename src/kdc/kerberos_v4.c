@@ -103,7 +103,6 @@ static C_Block session_key;
 
 static char log_text[512];
 static char *lt;
-static int more;
 
 /* fields within the received request packet */
 static u_char req_msg_type;
@@ -184,8 +183,8 @@ static const struct v4mode_lookup_entry  v4mode_table[] = {
 static const int v4mode_table_nents = sizeof(v4mode_table)/
 				      sizeof(v4mode_table[0]);
 
-void process_v4_mode(progname, string)
-    const char          *progname;
+void process_v4_mode(program_name, string)
+    const char          *program_name;
     const char          *string;
 {
     int i, found;
@@ -205,7 +204,7 @@ void process_v4_mode(progname, string)
 
     if(!found) {
       /* It is considered fatal if we request a mode that is not found */
-	com_err(progname, 0, "invalid v4_mode %s", string);
+	com_err(program_name, 0, "invalid v4_mode %s", string);
 	exit(1);
     }
     return;
@@ -1163,6 +1162,7 @@ set_tgtkey(r, kvno)
     int     n;
     static char lastrealm[REALM_SZ] = "";
     static int last_kvno = 0;
+    static int more;
     Principal p_st;
     Principal *p = &p_st;
     C_Block key;

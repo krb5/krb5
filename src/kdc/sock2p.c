@@ -32,6 +32,7 @@
 #include <sys/types.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
+#include "kdc_util.h"
 
 #ifndef HAVE_INET_NTOP
 char *

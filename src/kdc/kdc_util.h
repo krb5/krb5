@@ -177,6 +177,7 @@ krb5_error_code process_v4 PROTOTYPE((const krb5_data *,
 				      const krb5_fulladdr *,
 				      int is_secondary,
 				      krb5_data **));
+void process_v4_mode PROTOTYPE((const char *, const char *));
 #else
 #define process_v4(foo,bar,quux,foobar)	KRB5KRB_AP_ERR_BADVERSION
 #endif

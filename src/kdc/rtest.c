@@ -31,7 +31,7 @@
 #include "kdc_util.h"
 #include "extern.h"
 
-krb5_principal 
+static krb5_principal 
 make_princ(ctx, str, prog)
     krb5_context ctx;
     const char *str;
