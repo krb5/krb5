@@ -64,6 +64,7 @@ char *default_service = "host";
 extern krb5_cksumtype krb5_kdc_req_sumtype;
 extern krb5_context bsd_context;
 
+krb5_enctype bsd_ktypes[] = { ENCTYPE_DES_CBC_CRC , 0 };
 
 
 kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
@@ -267,6 +268,9 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
     if (status = krb5_cc_default(bsd_context, &cc))
     	goto bad2;
 
+    if (krb5_set_default_tgs_ktypes(bsd_context, bsd_ktypes))
+	goto bad2;
+    
     if (status = krb5_cc_get_principal(bsd_context, cc, &get_cred->client)) {
     	(void) krb5_cc_close(bsd_context, cc);
     	goto bad2;
