@@ -1,3 +1,7 @@
+2003-06-18  Tom Yu  <tlyu@mit.edu>
+
+	* dnssrv.texinfo: Add note about _kerberos-iv._udp SRV records.
+
 2003-06-05  Tom Yu  <tlyu@mit.edu>
 
 	* procedures.txt: New file.  Draft of current procedures.
