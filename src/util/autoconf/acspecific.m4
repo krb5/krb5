@@ -45,7 +45,7 @@ dnl to the GPL from your modified version.
 dnl
 dnl Written by David MacKenzie, with help from
 dnl Franc,ois Pinard, Karl Berry, Richard Pixley, Ian Lance Taylor,
-dnl Roland McGrath, and Noah Friedman.
+dnl Roland McGrath, Noah Friedman, david d zuhn, and many others.
 
 
 dnl ### Checks for programs

@@ -30,7 +30,7 @@ File: autoconf.info,  Node: Top,  Next: Introduction,  Up: (dir)
 
    This file documents the GNU Autoconf package for creating scripts to
 configure source code packages using templates and an `m4' macro
-package.  This is edition 1.125, for Autoconf version 1.125.
+package.  This is edition 2.0, for Autoconf version 2.0.
 
 * Menu:
 
@@ -885,6 +885,9 @@ optional files, such as `aclocal.m4' and those related to configuration
 header files.  Omit from the `Makefile.in' rules any of these files
 that your package does not use.
 
+   The `${srcdir}/' prefix is included because of limitations in the
+`VPATH' mechanism.
+
    The `stamp-' files are necessary because the timestamps of
 `config.h.in' and `config.h' will not be changed if remaking them does
 not change their contents.  This feature avoids unnecessary
@@ -894,12 +897,13 @@ some old BSD systems, `touch' or any command that results in an empty
 file does not update the timestamps, so use a command like `date' as a
 workaround.
 
-     configure: configure.in aclocal.m4
+     ${srcdir}/configure: configure.in aclocal.m4
              cd ${srcdir} && autoconf
      
      # autoheader might not change config.h.in, so touch a stamp file.
-     config.h.in: stamp-h.in
-     stamp-h.in: configure.in aclocal.m4 acconfig.h config.h.top config.h.bot
+     ${srcdir}/config.h.in: stamp-h.in
+     ${srcdir}/stamp-h.in: configure.in aclocal.m4 acconfig.h \
+         config.h.top config.h.bot
              cd ${srcdir} && autoheader
              date > ${srcdir}/stamp-h.in
      

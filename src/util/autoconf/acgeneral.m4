@@ -46,12 +46,12 @@ dnl to the GPL from your modified version.
 dnl
 dnl Written by David MacKenzie, with help from
 dnl Franc,ois Pinard, Karl Berry, Richard Pixley, Ian Lance Taylor,
-dnl Roland McGrath, Noah Friedman, and david d zuhn.
+dnl Roland McGrath, Noah Friedman, david d zuhn, and many others.
 dnl
 divert(-1)dnl Throw away output until AC_INIT is called.
 changequote([, ])
 
-define(AC_ACVERSION, 1.126)
+define(AC_ACVERSION, 2.0)
 
 dnl Some old m4's don't support m4exit.  But they provide
 dnl equivalent functionality by core dumping because of the

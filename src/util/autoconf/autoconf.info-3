@@ -396,13 +396,13 @@ are always available.
 
  - Macro: AC_SUBST_FILE (VARIABLE)
      Another way to create an output variable from a shell variable.
-     Make `AC_OUTPUT' substitute the contents of the file named by shell
-     variable VARIABLE into output files (typically one or more
-     `Makefile's).  This means that `AC_OUTPUT' will replace instances
-     of `@VARIABLE@' in the `Makefile.in' files with the contents of
-     the file that the shell variable VARIABLE names when `AC_OUTPUT'
-     is called.  Set the variable to `/dev/null' for cases which do not
-     have a file to insert.
+     Make `AC_OUTPUT' insert (without substitutions) the contents of
+     the file named by shell variable VARIABLE into output files.  This
+     means that `AC_OUTPUT' will replace instances of `@VARIABLE@' in
+     output files (such as `Makefile.in') with the contents of the file
+     that the shell variable VARIABLE names when `AC_OUTPUT' is called.
+     Set the variable to `/dev/null' for cases that do not have a file
+     to insert.
 
      This macro is useful for inserting `Makefile' fragments containing
      special dependencies or other `make' directives for particular host

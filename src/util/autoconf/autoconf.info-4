@@ -100,7 +100,8 @@ feature.)
 
    One way to install multiple versions of some programs simultaneously
 is to append a version number to the name of one or both.  For example,
-you can configure Autoconf using `--program-suffix=2' to install the
+if you want to keep Autoconf version 1 around for awhile, you can
+configure Autoconf version 2 using `--program-suffix=2' to install the
 programs as `/usr/local/bin/autoconf2', `/usr/local/bin/autoheader2',
 etc.
 
@@ -116,6 +117,9 @@ Transformation Rules
      transform=@program_transform_name@
      install: all
              $(INSTALL_PROGRAM) myprog $(bindir)/`echo myprog|sed '$(transform)'`
+     
+     uninstall:
+             rm -f $(bindir)/`echo myprog|sed '$(transform)'`
 
 If you have more than one program to install, you can do it in a loop:
 
@@ -124,6 +128,21 @@ If you have more than one program to install, you can do it in a loop:
              for p in $(PROGRAMS); do \
                $(INSTALL_PROGRAM) $$p $(bindir)/`echo $$p|sed '$(transform)'`; \
              done
+     
+     uninstall:
+             for p in $(PROGRAMS); do \
+               rm -f $(bindir)/`echo $$p|sed '$(transform)'`; \
+             done
+
+   Whether to do the transformations on documentation files (Texinfo or
+`man') is a tricky question; there seems to be no perfect answer, due
+to the several reasons for name transforming.  Documentation is not
+usually particular to a specific architecture, and Texinfo files do not
+conflict with system documentation.  But they might conflict with
+earlier versions of the same files, and `man' pages sometimes do
+conflict with system documentation.  As a compromise, it is probably
+best to do name transformations on `man' pages but not on Texinfo
+manuals.
 
 
 File: autoconf.info,  Node: Site Defaults,  Prev: Transforming Names,  Up: Site Configuration
@@ -164,8 +183,8 @@ that require running a test program.  You could "prime the cache" by
 setting those values correctly for that system in
 `PREFIX/etc/config.site'.  To find out the names of the cache variables
 you need to set, look for shell variables with `_cv_' in their names in
-the affected configure scripts, or in the Autoconf `m4' source code for
-those macros.
+the affected `configure' scripts, or in the Autoconf `m4' source code
+for those macros.
 
    The cache file is careful to not override any variables set in the
 site files.  Similarly, you should not override command-line options in
@@ -175,7 +194,7 @@ and `cache_file' have their default values (as set near the top of
 
    Here is a sample file `/usr/share/local/gnu/share/config.site'.  The
 command `configure --prefix=/usr/share/local/gnu' would read this file
-(if `CONFIG_SITE' is not set).
+(if `CONFIG_SITE' is not set to a different file).
 
      # config.site for configure
      #
@@ -1094,8 +1113,9 @@ shown that Autoconf has a pronounced tendency to regress when we change
 it.
 
    Again, several alpha testers gave invaluable feedback, especially
-Franc,ois Pinard, Jim Meyering, Karl Berry, Rob Savoye, and Ken Raeburn.
+Franc,ois Pinard, Jim Meyering, Karl Berry, Rob Savoye, Ken Raeburn,
+and Mark Eichin.
 
    Finally, version 2.0 was ready.  And there was much rejoicing.  (And
-I have free time again.  I think.)
+I have free time again.  I think.  Yeah, right.)
 

@@ -28,9 +28,9 @@ Major changes in release 2.0:
 * autoscan to generate a preliminary configure.in for a package by
   scanning its source code for commonly used nonportable functions,
   programs, and header files.
-* autoupdate to update a configure.in to use the new macro names.
 * ifnames to list the symbols used in #if and #ifdef directives in a
   source tree.
+* autoupdate to update a configure.in to use the version 2 macro names.
 * autoreconf to recursively remake configure and configuration header
   files in a source tree.
 
@@ -49,10 +49,10 @@ Major changes in release 2.0:
 * AC_ARG_PROGRAM to use the options --program-prefix,
   --program-suffix, and --program-transform-name to change the names
   of programs being installed.
-* AC_PREFIX_DEFAULT to change the default prefix.
+* AC_PREFIX_DEFAULT to change the default installation prefix.
 * AC_TRY_COMPILE to compile a test program without linking it.
-* AC_CHECK_TYPE to check whether sys/types.h defines a given type.
-* AC_CHECK_LIB to check for a particular function in a library.
+* AC_CHECK_TYPE to check whether sys/types.h or stdlib.h defines a given type.
+* AC_CHECK_LIB to check for a particular function and library.
 * AC_MSG_CHECKING and AC_MSG_RESULT to print test results, on a single line,
   whether or not the test succeeds.  They obsolete AC_CHECKING and AC_VERBOSE.
 * AC_SUBST_FILE to insert one file into another.
@@ -83,9 +83,9 @@ Major changes in release 2.0:
 * AC_DEFINE, AC_DEFINE_UNQUOTED, and AC_SUBST are more robust and smaller.
 * AC_DEFINE no longer prints anything, because of the new result reporting
   mechanism (AC_MSG_CHECKING and AC_MSG_RESULT).
+* AC_VERBOSE pays attention to --quiet/--silent, not --verbose.
 * AC_ARG_ENABLE and AC_ARG_WITH support whitespace in the arguments to
   --enable- and --with- options.
-* AC_VERBOSE pays attention to --quiet/--silent, not --verbose.
 * AC_CHECK_FUNCS and AC_CHECK_HEADERS take optional shell commands to
   execute on success or failure.
 * Checking for C functions in C++ works.
@@ -106,7 +106,7 @@ Major changes in release 2.0:
 * configure saves compiler output to ./config.log for debugging.
 * New files autoconf.m4 and autoheader.m4 load the other Autoconf macros.
 * acsite.m4 is the new name for the system-wide aclocal.m4.
-* Has the beginnings of a DejaGnu test suite.
+* Has a DejaGnu test suite.
 
 Major changes in release 1.11:
 

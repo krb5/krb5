@@ -6,8 +6,8 @@
 @c @setchapternewpage odd
 @c %**end of header
 
-@set EDITION 1.126
-@set VERSION 1.126
+@set EDITION 2.0
+@set VERSION 2.0
 @set UPDATED October 1994
 
 @iftex
@@ -1003,8 +1003,8 @@ optional files, such as @file{aclocal.m4} and those related to
 configuration header files.  Omit from the @file{Makefile.in} rules any
 of these files that your package does not use.
 
-The @samp{$@{srcdir@}/} prefix is included to work around limitations of
-the @code{VPATH} implementations in some non-GNU @code{make}s.
+The @samp{$@{srcdir@}/} prefix is included because of limitations in the
+@code{VPATH} mechanism.
 
 The @file{stamp-} files are necessary because the timestamps of
 @file{config.h.in} and @file{config.h} will not be changed if remaking
@@ -1022,7 +1022,8 @@ $@{srcdir@}/configure: configure.in aclocal.m4
 
 # autoheader might not change config.h.in, so touch a stamp file.
 $@{srcdir@}/config.h.in: stamp-h.in
-stamp-h.in: configure.in aclocal.m4 acconfig.h config.h.top config.h.bot
+$@{srcdir@}/stamp-h.in: configure.in aclocal.m4 acconfig.h \
+    config.h.top config.h.bot
         cd $@{srcdir@} && autoheader
         date > $@{srcdir@}/stamp-h.in
 
@@ -3124,13 +3125,13 @@ newlines.
 @defmac AC_SUBST_FILE (@var{variable})
 @maindex SUBST_FILE
 Another way to create an output variable from a shell variable.  Make
-@code{AC_OUTPUT} substitute the contents of the file named by shell
-variable @var{variable} into output files (typically one or more
-@file{Makefile}s).  This means that @code{AC_OUTPUT} will replace
-instances of @samp{@@@var{variable}@@} in the @file{Makefile.in} files
+@code{AC_OUTPUT} insert (without substitutions) the contents of the file
+named by shell variable @var{variable} into output files.  This means
+that @code{AC_OUTPUT} will replace instances of
+@samp{@@@var{variable}@@} in output files (such as @file{Makefile.in})
 with the contents of the file that the shell variable @var{variable}
 names when @code{AC_OUTPUT} is called.  Set the variable to
-@file{/dev/null} for cases which do not have a file to insert.
+@file{/dev/null} for cases that do not have a file to insert.
 
 This macro is useful for inserting @file{Makefile} fragments containing
 special dependencies or other @code{make} directives for particular host
