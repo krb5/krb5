@@ -68,8 +68,8 @@ krb5_locate_kdc(realm, addr_pp, naddrs)
     struct hostent *hp;
     struct servent *sp;
 #ifdef KRB5_USE_INET
-    u_short udpport = 0;		/* 0 is an invalid UDP port #. */
-    u_short sec_udpport = 0;		/* 0 is an invalid UDP port #. */
+    u_short udpport = KRB5_DEFAULT_PORT;
+    u_short sec_udpport = KRB5_DEFAULT_SEC_PORT;
 #endif
 
     hostlist = 0;
