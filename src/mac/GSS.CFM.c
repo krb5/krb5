@@ -12,6 +12,7 @@
 #include "gssapi_err_generic.h"
 #include "gssapi_err_krb5.h"
 
+#include "gssapi.h"
 
 OSErr __initializeGSS(CFragInitBlockPtr ibp);
 void __terminateGSS(void);
