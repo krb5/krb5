@@ -1,6 +1,4 @@
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netdb.h>
+#include "port-sockets.h"
 
 #ifndef HAVE_GETADDRINFO
 

@@ -1,3 +1,8 @@
+2001-07-20  Ken Raeburn  <raeburn@mit.edu>
+
+	* fake-addrinfo.h: Include port-sockets.h instead of system header
+	files; should fix Windows build.
+
 2001-07-19  Ken Raeburn  <raeburn@mit.edu>
 
 	* fake-addrinfo.h (translate_h_errno): Supply a default value in
