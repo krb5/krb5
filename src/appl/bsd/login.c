@@ -998,7 +998,7 @@ destroy_tickets()
 		krb5_cc_destroy (c, cache);
 	}
 #ifdef KRB4_GET_TICKETS
-	if (login_krb4_get_tickets)
+	if (login_krb4_get_tickets||login_krb4_convert)
 	dest_tkt();
 #endif /* KRB4_GET_TICKETS */
 }
@@ -1724,11 +1724,11 @@ int rewrite_ccache = 1; /*try to write out ccache*/
 	    setluid((uid_t) pwd->pw_uid);
 	}
 #endif	/* HAVE_SETLUID */
-	/* This call MUST succeed */
 #ifdef _IBMR2
 	setuidx(ID_LOGIN, pwd->pw_uid);
 #endif
 
+	/* This call MUST succeed */
 	if(setuid((uid_t) pwd->pw_uid) < 0) {
 	     perror("setuid");
 	     sleepexit(1);
@@ -1762,7 +1762,7 @@ int rewrite_ccache = 1; /*try to write out ccache*/
 	     if (retval != KSUCCESS) {
 		  syslog(LOG_ERR,
 			 "%s while re-initializing V4 ticket cache as user",
-			 error_message(retval));
+			 error_message((retval == -1)?errno:retval));
 		  goto skip_output_tkfile;
 	     }
 	     retval = krb_save_credentials(save_v4creds.service,

@@ -1,3 +1,14 @@
+Fri Nov  1 23:11:21 1996  Sam Hartman  <hartmans@planet-zorp.MIT.EDU>
+
+	* login.c: print out system error if -1 returns.
+	(destroy_tickets): Destroy krb4 tickets if we are converting as
+ 	well as just for initial tickets.
+
+Fri Nov  1 21:00:01 1996  Sam Hartman  <hartmans@mit.edu>
+
+	* login.c: Have the this call must succeed comment before setuid,
+ 	not the AIX login uid setting.
+
 Thu Oct 31 22:14:00 1996  Sam Hartman  <hartmans@planet-zorp.MIT.EDU>
 
 	* krlogind.c (doit): Remove tab3 because it isn't very useful and
