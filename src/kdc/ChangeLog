@@ -1,3 +1,9 @@
+2004-01-05  Sam Hartman  <hartmans@mit.edu>
+
+	* kerberos_v4.c (kerberos_v4): Only backdate the rquest in the
+	issued ticket.  Client libraries tend to verify that the
+	backdating falls within clockskew.  a
+
 2003-06-03  Tom Yu  <tlyu@mit.edu>
 
 	* extern.h (master_princ): Remove realm_mkvno, realm_tgskey,
