@@ -27,7 +27,7 @@
 #include <krb5/los-proto.h>
 #include <krb5/ext-proto.h>
 
-krb5_error_code
+krb5_error_code INTERFACE
 krb5_init_context(context)
 	krb5_context *context;
 {
@@ -57,7 +57,7 @@ cleanup:
 	return retval;
 }
 
-void
+void INTERFACE
 krb5_free_context(ctx)
 	krb5_context	ctx;
 {
@@ -73,7 +73,7 @@ krb5_free_context(ctx)
 /*
  * Set the desired default etypes, making sure they are valid.
  */
-krb5_error_code
+krb5_error_code INTERFACE
 krb5_set_default_in_tkt_etypes(context, etypes)
 	krb5_context context;
 	const krb5_enctype *etypes;
@@ -112,7 +112,7 @@ krb5_set_default_in_tkt_etypes(context, etypes)
     return 0;
 }
 
-krb5_error_code
+krb5_error_code INTERFACE
 krb5_get_default_in_tkt_etypes(context, etypes)
     krb5_context context;
     krb5_enctype **etypes;
@@ -124,7 +124,7 @@ krb5_get_default_in_tkt_etypes(context, etypes)
 				(context->etype_count + 1))) {
 	memcpy(old_etypes, context->etypes, sizeof(krb5_enctype) * 
 		  		context->etype_count);
-	old_etypes[context->etype_count] = NULL;
+	old_etypes[context->etype_count] = 0;
     } else {
 	return ENOMEM;
     }

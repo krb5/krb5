@@ -34,7 +34,7 @@
 #include <krb5/asn1.h>
 
 /* Create asn.1 encoded KRB-CRED message from the kdc reply. */
-krb5_error_code
+krb5_error_code INTERFACE
 krb5_mk_cred(context, dec_rep, etype, key, sender_addr, recv_addr, outbuf)
     krb5_context context;
     krb5_kdc_rep *dec_rep;

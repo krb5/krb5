@@ -1,74 +1,74 @@
 CFLAGS = $(CCOPTS) $(DEFS)
 LDFLAGS = -g
 
-all:: $(OBJS)
+##DOSBUILDTOP = ..\..\..
+##DOSLIBNAME=..\libkrb5.lib
+##DOS!include $(BUILDTOP)\config\windows.in
 
-
-
-OBJS=	addr_comp.o	\
-	addr_order.o	\
-	addr_srch.o	\
-	bld_pr_ext.o	\
-	bld_princ.o	\
-	chk_trans.o	\
-	compat_recv.o	\
-	conv_princ.o	\
-	copy_addrs.o	\
-	copy_auth.o	\
-	copy_athctr.o	\
-	copy_cksum.o    \
-	copy_creds.o	\
-	copy_data.o	\
-	copy_key.o	\
-	copy_princ.o	\
-	copy_tick.o	\
-	cp_key_cnt.o	\
-	decode_kdc.o	\
-	decrypt_tk.o	\
-	encode_kdc.o	\
-	encrypt_tk.o	\
-	free_rtree.o	\
-	faddr_ordr.o	\
-	gc_frm_kdc.o	\
-	gc_via_tgt.o	\
-	gc_2tgt.o	\
-	gen_seqnum.o	\
-	gen_subkey.o	\
-	get_creds.o	\
-	get_fcreds.o	\
-	get_in_tkt.o	\
-	in_tkt_ktb.o	\
-	in_tkt_pwd.o	\
-	in_tkt_sky.o	\
-	init_ctx.o	\
-	kdc_rep_dc.o	\
-	krbconfig.o	\
-	mk_cred.o	\
-	mk_error.o	\
-	mk_priv.o	\
-	mk_rep.o	\
-	mk_req.o	\
-	mk_req_ext.o	\
-	mk_safe.o	\
-	parse.o		\
-	pr_to_salt.o	\
-	preauth.o	\
-	princ_comp.o	\
-	rd_cred.o	\
-	rd_error.o	\
-	rd_priv.o	\
-	rd_rep.o	\
-	rd_req.o	\
-	rd_req_sim.o	\
-	rd_req_dec.o	\
-	rd_safe.o	\
-	recvauth.o	\
-	sendauth.o	\
-	send_tgs.o	\
-	srv_rcache.o	\
-	tgtname.o	\
-	unparse.o	\
-	walk_rtree.o
+OBJS=	addr_comp.$(OBJEXT)	\
+	addr_order.$(OBJEXT)	\
+	addr_srch.$(OBJEXT)	\
+	bld_pr_ext.$(OBJEXT)	\
+	bld_princ.$(OBJEXT)	\
+	chk_trans.$(OBJEXT)	\
+	compat_recv.$(OBJEXT)	\
+	conv_princ.$(OBJEXT)	\
+	copy_addrs.$(OBJEXT)	\
+	copy_auth.$(OBJEXT)	\
+	copy_athctr.$(OBJEXT)	\
+	copy_cksum.$(OBJEXT)    \
+	copy_creds.$(OBJEXT)	\
+	copy_data.$(OBJEXT)	\
+	copy_key.$(OBJEXT)	\
+	copy_princ.$(OBJEXT)	\
+	copy_tick.$(OBJEXT)	\
+	cp_key_cnt.$(OBJEXT)	\
+	decode_kdc.$(OBJEXT)	\
+	decrypt_tk.$(OBJEXT)	\
+	encode_kdc.$(OBJEXT)	\
+	encrypt_tk.$(OBJEXT)	\
+	free_rtree.$(OBJEXT)	\
+	faddr_ordr.$(OBJEXT)	\
+	gc_frm_kdc.$(OBJEXT)	\
+	gc_via_tgt.$(OBJEXT)	\
+	gc_2tgt.$(OBJEXT)	\
+	gen_seqnum.$(OBJEXT)	\
+	gen_subkey.$(OBJEXT)	\
+	get_creds.$(OBJEXT)	\
+	get_fcreds.$(OBJEXT)	\
+	get_in_tkt.$(OBJEXT)	\
+	in_tkt_ktb.$(OBJEXT)	\
+	in_tkt_pwd.$(OBJEXT)	\
+	in_tkt_sky.$(OBJEXT)	\
+	init_ctx.$(OBJEXT)	\
+	kdc_rep_dc.$(OBJEXT)	\
+	krbconfig.$(OBJEXT)	\
+	mk_cred.$(OBJEXT)	\
+	mk_error.$(OBJEXT)	\
+	mk_priv.$(OBJEXT)	\
+	mk_rep.$(OBJEXT)	\
+	mk_req.$(OBJEXT)	\
+	mk_req_ext.$(OBJEXT)	\
+	mk_safe.$(OBJEXT)	\
+	parse.$(OBJEXT)		\
+	pr_to_salt.$(OBJEXT)	\
+	preauth.$(OBJEXT)	\
+	princ_comp.$(OBJEXT)	\
+	rd_cred.$(OBJEXT)	\
+	rd_error.$(OBJEXT)	\
+	rd_priv.$(OBJEXT)	\
+	rd_rep.$(OBJEXT)	\
+	rd_req.$(OBJEXT)	\
+	rd_req_sim.$(OBJEXT)	\
+	rd_req_dec.$(OBJEXT)	\
+	rd_safe.$(OBJEXT)	\
+	recvauth.$(OBJEXT)	\
+	sendauth.$(OBJEXT)	\
+	send_tgs.$(OBJEXT)	\
+	srv_rcache.$(OBJEXT)	\
+	tgtname.$(OBJEXT)	\
+	unparse.$(OBJEXT)	\
+	walk_rtree.$(OBJEXT)
 
 SRCS=	$(srcdir)/addr_comp.c	\
 	$(srcdir)/addr_order.c	\
@@ -135,6 +135,8 @@ SRCS=	$(srcdir)/addr_comp.c	\
 	$(srcdir)/unparse.c	\
 	$(srcdir)/walk_rtree.c
 
+all:: $(OBJS)
+
 COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
 
 T_WALK_RTREE_OBJS= t_walk_rtree.o walk_rtree.o tgtname.o unparse.o \
@@ -145,7 +147,11 @@ t_walk_rtree: $(T_WALK_RTREE_OBJS)
 
 TEST_PROGS= t_walk_rtree
 
-check:: $(TEST_PROGS)
+check:: check-$(WHAT)
+
+check-unix:: $(TEST_PROGS)
+
+check-windows::
 
 clean::
-	$(RM) t_walk_rtree t_walk_rtree.o
+	$(RM) t_walk_rtree$(EXEEXT) t_walk_rtree.$(OBJEXT)

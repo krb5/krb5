@@ -28,19 +28,19 @@
 #ifndef KRB5_INT_FUNC_PROTO__
 #define KRB5_INT_FUNC_PROTO__
 
-krb5_error_code krb5_tgtname
+krb5_error_code INTERFACE krb5_tgtname
     	PROTOTYPE((krb5_context context,
 	           const krb5_data *,
 	           const krb5_data *,
 	           krb5_principal *));
-krb5_error_code krb5_get_cred_via_tgt
+krb5_error_code INTERFACE krb5_get_cred_via_tgt
     	PROTOTYPE((krb5_context context,
 	           krb5_creds *,
 	           const krb5_flags,
 	           const krb5_cksumtype,
 	           krb5_creds *,
 		   krb5_creds **));
-krb5_error_code krb5_get_cred_via_2tgt
+krb5_error_code INTERFACE krb5_get_cred_via_2tgt
     	PROTOTYPE((krb5_context context,
 	           krb5_creds *,
 	           const krb5_flags,

@@ -1,3 +1,11 @@
+Mon Feb 27 11:35:49 1995 Keith Vetter (keithv@fusion.com)
+
+        * config.h: added windows interface keyword for varargs functions,
+           added defines to allows <windows.h> to be stdc compliant.
+	* func-proto.h: added windows INTERFACE_C keyword for functions
+           with varargs, and fixed const in prototype for krb5_send_tgs.
+        * preauth.h: added windows INTERFACE keyword to prototypes
+
 Wed Feb 22 17:39:46 1995 Chris Provenzano (proven@mit.edu)
 
 	* func-proto.h (krb5_get_credentials(), krb5_get_cred_from_kdc(),

@@ -28,7 +28,7 @@
 #include <krb5/krb5.h>
 #include <krb5/ext-proto.h>
 
-void
+void INTERFACE
 krb5_free_realm_tree(context, realms)
     krb5_context context;
     krb5_principal *realms;

@@ -43,7 +43,7 @@
  enc_part->ciphertext.data allocated & filled in with encrypted stuff
 */
 
-krb5_error_code
+krb5_error_code INTERFACE
 krb5_encrypt_tkt_part(context, eblock, srv_key, dec_ticket)
     krb5_context context;
     krb5_encrypt_block *eblock;

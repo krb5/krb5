@@ -54,7 +54,7 @@
  *  returns system errors, encryption errors, replay errors
  */
 
-krb5_error_code
+krb5_error_code INTERFACE
 krb5_rd_req(context, inbuf, server, sender_addr, fetchfrom, keyproc, 
 	    keyprocarg, rcache, authdat)
     krb5_context context;

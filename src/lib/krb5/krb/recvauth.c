@@ -26,6 +26,7 @@
 
 
 #include <krb5/krb5.h>
+#ifndef _MSDOS
 #include <krb5/osconf.h>
 #include <krb5/kdb.h>
 #include <krb5/kdb_dbm.h>
@@ -42,7 +43,7 @@ extern krb5_flags	krb5_kdc_default_options;
 
 static char *sendauth_version = "KRB5_SENDAUTH_V1.0";
 
-krb5_error_code
+krb5_error_code INTERFACE
 krb5_recvauth(context, 
 	      /* IN */
 	      fd, appl_version, server, sender_addr, fetch_from,
@@ -322,4 +323,4 @@ krb5_recvauth(context,
 	return 0;
 }
 
-
+#endif

@@ -25,7 +25,8 @@
 
 #define MAX_REALM_LN 500
 
-krb5_error_code krb5_check_transited_list(context, trans, realm1, realm2)
+krb5_error_code INTERFACE
+krb5_check_transited_list(context, trans, realm1, realm2)
     krb5_context context;
 krb5_data      *trans;
 krb5_data      *realm1;

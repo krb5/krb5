@@ -32,7 +32,7 @@
 #include <krb5/ext-proto.h>
 
 extern krb5_deltat krb5_clockskew;   
-#define in_clock_skew(date) (abs((date)-currenttime) < krb5_clockskew)
+#define in_clock_skew(date) (labs((date)-currenttime) < krb5_clockskew)
 
 /*
 
@@ -55,7 +55,7 @@ Returns system errors, integrity errors.
 
 */
 
-krb5_error_code
+krb5_error_code INTERFACE
 krb5_rd_priv(context, inbuf, key, sender_addr, recv_addr, seq_number,
 	     priv_flags, i_vector, rcache, outbuf)
     krb5_context context;

@@ -35,6 +35,7 @@
 
 
 #include <krb5/krb5.h>
+#ifndef _MSDOS
 #include <krb5/osconf.h>
 #include <krb5/kdb.h>
 #include <krb5/kdb_dbm.h>
@@ -313,4 +314,5 @@ mutual_fail:
     }
     return(rem);
 }
+#endif
 #endif

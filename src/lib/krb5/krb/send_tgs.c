@@ -48,7 +48,7 @@
 
  returns system errors
  */
-krb5_error_code
+krb5_error_code INTERFACE
 krb5_send_tgs(context, kdcoptions, timestruct, etypes, sumtype, sname, addrs,
 	      authorization_data, padata, second_ticket, in_cred, rep)
     krb5_context context;
@@ -58,7 +58,7 @@ krb5_send_tgs(context, kdcoptions, timestruct, etypes, sumtype, sname, addrs,
     const krb5_cksumtype sumtype;
     krb5_const_principal sname;
     krb5_address * const * addrs;
-    krb5_authdata * const * authorization_data;
+    const krb5_authdata ** authorization_data;
     krb5_pa_data * const * padata;
     const krb5_data * second_ticket;
     krb5_creds * in_cred;

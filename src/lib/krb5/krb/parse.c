@@ -64,7 +64,7 @@
  * May the fleas of a thousand camels infest the ISO, they who think
  * that arbitrarily large multi-component names are a Good Thing.....
  */
-krb5_error_code
+krb5_error_code INTERFACE
 krb5_parse_name(context, name, nprincipal)
     	krb5_context context;
 	const char	*name;
@@ -190,8 +190,10 @@ krb5_parse_name(context, name, nprincipal)
 		else
 			krb5_princ_component(context, principal, i)->length = size;
 		if (i + 1 != components) {
+                        #ifndef _WINDOWS
 			fprintf(stderr,
 				"Programming error in krb5_parse_name!");
+                        #endif
 			exit(1);
 		}
 	} else {

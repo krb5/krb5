@@ -31,6 +31,7 @@
 /* libkrb5.a to allow widespread use */ 
 
 #include <stdio.h>
+#ifndef _MSDOS
 #include <pwd.h>
 #include <netdb.h>
 
@@ -44,7 +45,7 @@
 #define flags2options(flags) (flags & KDC_TKT_COMMON_MASK)
 
 /* Get a TGT for use at the remote host */
-krb5_error_code
+krb5_error_code INTERFACE
 krb5_get_for_creds(context, sumtype, rhost, client, enc_key, 
 		   forwardable, outbuf)
     krb5_context context;
@@ -226,4 +227,4 @@ errout:
 	krb5_free_kdc_rep(context, dec_rep); 
     return retval;
 }
-
+#endif

@@ -76,7 +76,7 @@ static krb5_error_code find_preauthenticator
  *
  *   Note: This is a first crack at what any preauthentication will need...
  */
-krb5_error_code 
+krb5_error_code INTERFACE
 krb5_obtain_padata(context, type, client, src_addr, encrypt_key, ret_data)
     krb5_context context;
     int type;			 	/*IN:  Preauth type */
@@ -182,7 +182,7 @@ error_out:
  *   Note: This is a first crack at what any preauthentication will need...
  */
 
-krb5_error_code
+krb5_error_code INTERFACE
 krb5_verify_padata(context, data,client,src_addr, decrypt_key, req_id, flags)
     krb5_context context;
     krb5_pa_data *data;                 /*IN: padata */
@@ -307,7 +307,7 @@ find_preauthenticator(type, preauth)
  */
 int seeded = 0 ; /* Used by srand below */
 
-krb5_error_code
+krb5_error_code INTERFACE
 get_unixtime_padata(context, client, src_addr, pa_data)
     krb5_context context;
     krb5_principal client;
@@ -344,7 +344,7 @@ get_unixtime_padata(context, client, src_addr, pa_data)
     return(0);
 }
 
-krb5_error_code
+krb5_error_code INTERFACE
 verify_unixtime_padata(context, client, src_addr, data)
     krb5_context context;
     krb5_principal client;
@@ -355,7 +355,7 @@ verify_unixtime_padata(context, client, src_addr, data)
     krb5_error_code     retval;
     krb5_timestamp      currenttime, patime;
     extern krb5_deltat  krb5_clockskew;
-#define in_clock_skew(date) (abs((date)-currenttime) < krb5_clockskew)
+#define in_clock_skew(date) (labs((date)-currenttime) < krb5_clockskew)
 
     tmp = (unsigned char *) data->data;
     if (tmp[8] != 0)
@@ -379,7 +379,7 @@ verify_unixtime_padata(context, client, src_addr, data)
 #include "sdcli.h"
 #include "sdconf.c"
 
-krb5_error_code
+krb5_error_code INTERFACE
 verify_securid_padata(client, src_addr, data)
     krb5_principal client;
     krb5_address **src_addr;
@@ -427,7 +427,7 @@ verify_securid_padata(client, src_addr, data)
     }
 }
 #else
-krb5_error_code
+krb5_error_code INTERFACE
 verify_securid_padata(context, client, src_addr, data)
     krb5_context context;
     krb5_principal client;
@@ -451,7 +451,7 @@ static char *krb5_SecureId_prompt = "\nEnter Your SecurId Access Code Prepended 
  */
 static char *krb5_SecureId_prompt = "\nEnter Your SecurId Access Code Prepended with Your PIN\n (or a \'#\'if Your PIN is entered on the card keypad): ";
 
-krb5_error_code
+krb5_error_code INTERFACE
 get_securid_padata(context, client,src_addr,pa_data)
     krb5_context context;
     krb5_principal client;

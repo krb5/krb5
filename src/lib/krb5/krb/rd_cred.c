@@ -33,10 +33,10 @@
 #include <krb5/asn1.h>
 
 extern krb5_deltat krb5_clockskew;
-#define in_clock_skew(date) (abs((date)-currenttime) < krb5_clockskew)
+#define in_clock_skew(date) (labs((date)-currenttime) < krb5_clockskew)
 
 /* Decode the KRB-CRED message, and return creds */
-krb5_error_code
+krb5_error_code INTERFACE
 krb5_rd_cred(context, inbuf, key, creds, sender_addr, recv_addr)
     krb5_context context;
     const krb5_data *inbuf;

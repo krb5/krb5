@@ -47,7 +47,7 @@
 
  returns system errors
 */
-krb5_error_code
+krb5_error_code INTERFACE
 krb5_mk_priv(context, userdata, etype, key, sender_addr, recv_addr,
 	     seq_number, priv_flags, rcache, i_vector, outbuf)
     krb5_context context;

@@ -55,9 +55,20 @@ typedef unsigned char u_char;
 #endif 
 
 #ifndef INTERFACE
-#define INTERFACE __far __export __pascal
+#define INTERFACE   __far __export __pascal
+#define INTERFACE_C __far __export __cdecl
 #endif
 #define FAR __far
+
+/*
+ * The following defines are needed to make <windows.h> work
+ * in stdc mode (/Za flag). Winsock.h needs <windows.h>.
+ */
+#define _far    __far
+#define _near   __near
+#define _pascal __pascal
+#define _cdecl  __cdecl
+#define _huge   __huge
 
 #else 		/* Rest of include file is for non-Microloss-Windows */
 
@@ -116,7 +127,9 @@ typedef unsigned char u_char;
  * just define it as NULL.
  */
 #define INTERFACE
+#define INTERFACE_C
 #define FAR
+#define labs(x) abs(x)
 
 #endif /* __windows__ */
 

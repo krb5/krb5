@@ -60,21 +60,21 @@
 
 
 extern krb5_deltat krb5_clockskew;
-#define in_clock_skew(date) (abs((date)-request.nonce) < krb5_clockskew)
+#define in_clock_skew(date) (labs((date)-request.nonce) < krb5_clockskew)
 
 /* some typedef's for the function args to make things look a bit cleaner */
 
-typedef krb5_error_code (*git_key_proc) PROTOTYPE((krb5_context,
+typedef krb5_error_code (INTERFACE *git_key_proc) PROTOTYPE((krb5_context,
 						   const krb5_keytype,
 						   krb5_data *,
 						   krb5_const_pointer,
 						   krb5_keyblock **));
 
-typedef krb5_error_code (*git_decrypt_proc) PROTOTYPE((krb5_context,
+typedef krb5_error_code (INTERFACE *git_decrypt_proc) PROTOTYPE((krb5_context,
 						       const krb5_keyblock *,
 						       krb5_const_pointer,
 						       krb5_kdc_rep * ));
-krb5_error_code
+krb5_error_code INTERFACE
 krb5_get_in_tkt(context, options, addrs, etypes, ptypes, key_proc, keyseed,
 		decrypt_proc, decryptarg, creds, ccache, ret_as_reply)
     krb5_context context;

@@ -34,7 +34,7 @@
 #include <varargs.h>
 #endif
 
-krb5_error_code
+krb5_error_code INTERFACE_C
 #if __STDC__ || defined(STDARG_PROTOTYPES)
 krb5_build_principal_ext(krb5_context context,  krb5_principal * princ, int rlen, const char * realm, ...)
 #else

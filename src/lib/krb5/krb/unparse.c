@@ -55,7 +55,7 @@
 #define REALM_SEP	'@'
 #define	COMPONENT_SEP	'/'
 
-krb5_error_code
+krb5_error_code INTERFACE
 krb5_unparse_name_ext(context, principal, name, size)
     krb5_context context;
     krb5_const_principal principal;
@@ -174,7 +174,7 @@ krb5_unparse_name_ext(context, principal, name, size)
     return 0;
 }
 
-krb5_error_code
+krb5_error_code INTERFACE
 krb5_unparse_name(context, principal, name)
     krb5_context context;
     krb5_const_principal principal;

@@ -1,44 +1,17 @@
+Wed Feb 22 17:14:31 1995 Keith Vetter (keithv@fusion.com)
+
+	* walk_rtr.c (krb5_walk_realm_tree): formal parameter wasn't declared.
+        * send_tgs.c: const in wrong place in the prototype.
+        * get_in_tkt.c, preauth.c, rd_cred.c, rd_priv.c, rd_req_dec.c, 
+           rd_safe.c: needed a 32 bit abs() function.
+        * parse.c: removed call to fprintf on error the windows version
+        * send_auth.c: defined for windows the ECONNABORTED errno (will
+           be removed when the socket layer is fully implemented).
+
 Tue Feb 21 23:38:34 1995  Theodore Y. Ts'o  (tytso@dcl)
 
 	* mk_cred.c (krb5_mk_cred): Fix argument type to
 		krb5_free_cred_enc_part().
-
-Thu Feb 16 00:22:03 1995 Chris Provenzano  (proven@mit.edu)
-
-	* send_tgs.c (krb5_send_tgs()) Added check for a valid krb5_creds * arg.
-
-	* mk_req_ext.c (krb5_mk_req_extended()) Require caller to pass in a
-		valid krb5_creds * arg, and removed kdc_options krb5_flags
-		and krb5_ccache from arg list.
-	* send_tgs.c (krb5_send_tgs())
-	* sendauth.c (krb5_sendauth())
-		Fix calls to krb5_mk_req_extended()
-
-	* gc_frm_kdc.c (krb5_get_cred_from_kdc()) Changed krb5_creds * in/out
-		arg to be an in only arg and added krb5_creds ** out arg.
-		
-	* gc_via_tgt.c (krb5_get_cred_via_tgt()) Changed krb5_creds * in/out
-		arg to be an in only arg and added krb5_creds ** out arg.
-
-	* gc_2tgt.c (krb5_get_cred_via_2tgt()) Changed krb5_creds * in/out
-		arg to be an in only arg and added krb5_creds ** out arg.
-
-	* int-proto.h Updated prototypes for krb5_get_cred_via_tgt() and
-		krb5_get_cred_via_2tgt().
-
-	* get_creds.c (krb5_get_credentials()) Changed krb5_creds * in/out
-		arg to be an in only arg and added krb5_creds ** out arg.
-	* sendauth.c (krb5_sendauth())
-		Routines that also require krb5_creds * in/out arg to be 
-		appropriately changed because krb5_get_credentials() changed.
-	* gc_frm_kdc.c (krb5_get_cred_from_kdc())
-	* get_fcreds.c (krb5_get_for_creds())
-	* mk_req.c (krb5_mk_req())
-		Other routines that needed adjusting because 
-		krb5_get_credentials() changed but didn't need an API change.
-
-	* int-proto.h Don't prototype krb5_get_cred_via_tgt() twice. Use the
-		second to prototype krb5_get_cred_via_2tgt().
 
 Mon Feb 13 20:25:20 1995  Theodore Y. Ts'o  (tytso@dcl)
 

@@ -43,7 +43,7 @@
 #include <krb5/krb5.h>
 #include <krb5/ext-proto.h>
 
-krb5_error_code
+krb5_error_code INTERFACE
 krb5_get_credentials(context, options, ccache, in_creds, out_creds)
     krb5_context context;
     const krb5_flags options;

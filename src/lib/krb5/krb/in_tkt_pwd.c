@@ -34,8 +34,14 @@ extern char *krb5_default_pwd_prompt1;
 /* 
  * key-producing procedure for use by krb5_get_in_tkt_with_password.
  */
+krb5_error_code INTERFACE pwd_keyproc
+    PROTOTYPE((krb5_context,
+               const krb5_keytype,
+               krb5_data *,
+               krb5_const_pointer,
+               krb5_keyblock **));
 
-static krb5_error_code
+krb5_error_code INTERFACE
 pwd_keyproc(context, type, salt, keyseed, key)
     krb5_context context;
     const krb5_keytype type;
@@ -93,7 +99,7 @@ pwd_keyproc(context, type, salt, keyseed, key)
 
  returns system errors, encryption errors
  */
-krb5_error_code
+krb5_error_code INTERFACE
 krb5_get_in_tkt_with_password(context, options, addrs, etypes, pre_auth_types, 
 			      password, ccache, creds, ret_as_reply)
     krb5_context context;

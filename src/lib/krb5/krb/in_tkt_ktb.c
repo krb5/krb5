@@ -38,7 +38,15 @@ struct keytab_keyproc_arg {
  * "keyseed" is actually a krb5_keytab, or NULL if we should fetch
  * from system area.
  */
-static keytab_keyproc(context, type, salt, keyseed, key)
+krb5_error_code INTERFACE keytab_keyproc
+    PROTOTYPE((krb5_context,
+               const krb5_keytype,
+               krb5_data *,
+               krb5_const_pointer,
+               krb5_keyblock **));
+
+krb5_error_code INTERFACE
+keytab_keyproc(context, type, salt, keyseed, key)
     krb5_context context;
     const krb5_keytype type;
     krb5_data * salt;
@@ -100,7 +108,7 @@ static keytab_keyproc(context, type, salt, keyseed, key)
  returns system errors, encryption errors
 
  */
-krb5_error_code
+krb5_error_code INTERFACE
 krb5_get_in_tkt_with_keytab(context, options, addrs, etypes, pre_auth_types, 
 			    keytab, ccache, creds, ret_as_reply)
     krb5_context context;

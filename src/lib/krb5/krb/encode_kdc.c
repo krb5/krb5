@@ -43,7 +43,7 @@
 */
 /* due to argument promotion rules, we need to use the DECLARG/OLDDECLARG
    stuff... */
-krb5_error_code
+krb5_error_code INTERFACE
 krb5_encode_kdc_rep(context, type, encpart, eblock, client_key, dec_rep, enc_rep)
     krb5_context context;
     const krb5_msgtype type;

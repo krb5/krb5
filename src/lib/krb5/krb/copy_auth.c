@@ -52,7 +52,7 @@ krb5_authdata **outad;
 /*
  * Copy an authdata array, with fresh allocation.
  */
-krb5_error_code
+krb5_error_code INTERFACE
 krb5_copy_authdata(context, inauthdat, outauthdat)
     krb5_context context;
 krb5_authdata * const * inauthdat;

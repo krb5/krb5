@@ -66,9 +66,9 @@ static krb5_error_code decrypt_authenticator
 	PROTOTYPE((krb5_context, const krb5_ap_req *, krb5_authenticator **));
 
 extern krb5_deltat krb5_clockskew;
-#define in_clock_skew(date) (abs((date)-currenttime) < krb5_clockskew)
+#define in_clock_skew(date) (labs((date)-currenttime) < krb5_clockskew)
 
-krb5_error_code
+krb5_error_code INTERFACE
 krb5_rd_req_decoded(context, req, server, sender_addr, fetchfrom, keyproc,
 		    keyprocarg, rcache, authdat)
     krb5_context context;

@@ -29,7 +29,7 @@
 
 #include <krb5/ext-proto.h>
 
-krb5_error_code
+krb5_error_code INTERFACE
 krb5_copy_checksum(context, ckfrom, ckto)
     krb5_context context;
     const krb5_checksum *ckfrom;

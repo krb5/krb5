@@ -50,7 +50,7 @@
 
 extern krb5_flags krb5_kdc_default_options;
 
-krb5_error_code
+krb5_error_code INTERFACE
 krb5_mk_req(context, server, ap_req_options, checksum, ccache, outbuf)
     krb5_context context;
     krb5_const_principal server;

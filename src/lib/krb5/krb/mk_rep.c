@@ -45,7 +45,7 @@
  returns system errors
 */
 
-krb5_error_code
+krb5_error_code INTERFACE
 krb5_mk_rep(context, repl, kblock, outbuf)
     krb5_context context;
     const krb5_ap_rep_enc_part *repl;

@@ -36,7 +36,7 @@
 
 #include <krb5/ext-proto.h>
 
-krb5_error_code
+krb5_error_code INTERFACE_C
 krb5_build_principal_va(context, princ, rlen, realm, ap)
     krb5_context context;
     krb5_principal princ;
@@ -99,7 +99,7 @@ krb5_build_principal_va(context, princ, rlen, realm, ap)
     return 0;
 }
 
-krb5_error_code
+krb5_error_code INTERFACE_C
 #if __STDC__ || defined(STDARG_PROTOTYPES)
 krb5_build_principal(krb5_context context,  krb5_principal * princ, int rlen,
     const char * realm, ...)

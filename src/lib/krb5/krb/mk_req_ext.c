@@ -72,7 +72,7 @@ krb5_generate_authenticator PROTOTYPE((krb5_context,
 				       const krb5_checksum *, krb5_keyblock *,
 				       krb5_int32, krb5_authdata ** ));
 
-krb5_error_code
+krb5_error_code INTERFACE
 krb5_mk_req_extended(context, ap_req_options, checksum, sequence, 
 		     newkey, in_creds, authentp, outbuf)
     krb5_context context;

@@ -235,13 +235,13 @@ krb5_error_code INTERFACE krb5_generate_seq_number
 krb5_error_code INTERFACE krb5_get_server_rcache
     	PROTOTYPE((krb5_context,
 		   const krb5_data *, krb5_rcache *));
-krb5_error_code krb5_build_principal_ext
+krb5_error_code INTERFACE_C krb5_build_principal_ext
     	STDARG_P((krb5_context, krb5_principal *, int, const char *, ...));
-krb5_error_code krb5_build_principal
+krb5_error_code INTERFACE_C krb5_build_principal
     	STDARG_P((krb5_context, krb5_principal *, int, const char *, ...));
 #ifdef va_start
 /* XXX depending on varargs include file defining va_start... */
-krb5_error_code krb5_build_principal_va
+krb5_error_code INTERFACE_C krb5_build_principal_va
     	PROTOTYPE((krb5_context,
 		   krb5_principal *, int, const char *, va_list));
 #endif
@@ -439,7 +439,7 @@ krb5_error_code INTERFACE krb5_send_tgs
 		   const krb5_cksumtype,
 		   krb5_const_principal,
 		   krb5_address * const *,
-		   krb5_authdata * const *,
+		   const krb5_authdata **,
 		   krb5_pa_data * const *,
 		   const krb5_data *,
 		   krb5_creds *,
@@ -451,13 +451,13 @@ krb5_error_code INTERFACE krb5_get_in_tkt
 		   krb5_address * const *,
 		   krb5_enctype *,
 		   krb5_preauthtype *,
-		   krb5_error_code (* )(krb5_context,
+		   krb5_error_code (INTERFACE * )(krb5_context,
 					const krb5_keytype,
                                         krb5_data *,
                                         krb5_const_pointer,
                                         krb5_keyblock **),
 		   krb5_const_pointer,
-		   krb5_error_code (* )(krb5_context,
+		   krb5_error_code (INTERFACE * )(krb5_context,
 					const krb5_keyblock *,
 					krb5_const_pointer,
 					krb5_kdc_rep * ),
