@@ -457,7 +457,6 @@ krb5_db_entry *entry;
        */
     copy_princ = *entry;
     copy_princ.principal = 0;
-    copy_princ.key = 0;
     copy_princ.mod_name = 0;
 
     if (retval = krb5_unparse_name(entry->principal, &unparse_princ))
@@ -469,7 +468,7 @@ krb5_db_entry *entry;
     princ_size = strlen(unparse_princ)+1;
     mod_size = strlen(unparse_mod_princ)+1;
     contents->dsize = sizeof(copy_princ)+ princ_size + mod_size
-		      + sizeof(*entry->key) + entry->key->length - 1;
+		      + entry->key.length;
     contents->dptr = malloc(contents->dsize);
     if (!contents->dptr) {
 	free(unparse_princ);
@@ -485,8 +484,7 @@ krb5_db_entry *entry;
     nextloc += princ_size;
     (void) bcopy(unparse_mod_princ, nextloc, mod_size);
     nextloc += mod_size;
-    (void) bcopy((char *)entry->key, nextloc,
-		 sizeof(*entry->key) + entry->key->length - 1);
+    (void) bcopy((char *)entry->key.contents, nextloc, entry->key.length);
     free(unparse_princ);
     free(unparse_mod_princ);
     return 0;
@@ -537,24 +535,24 @@ krb5_db_entry *entry;
     }
     entry->mod_name = mod_princ;
     nextloc += strlen(nextloc)+1;	/* advance past 2nd string */
-    keysize = contents->dsize - (nextloc - contents->dptr);
+    keysize = contents->dsize - (nextloc - contents->dptr) - sizeof(entry->key);
     if (keysize <= 0) {
 	krb5_free_principal(princ);
 	krb5_free_principal(mod_princ);
 	(void) bzero((char *) entry, sizeof(*entry));
 	return KRB5_KDB_TRUNCATED_RECORD;
     }
-    if (!(entry->key = (krb5_keyblock *)malloc(keysize))) {
+    if (!(entry->key.contents = (unsigned char *)malloc(keysize))) {
 	krb5_free_principal(princ);
 	krb5_free_principal(mod_princ);
 	(void) bzero((char *) entry, sizeof(*entry));
 	return ENOMEM;
     }
-    (void) bcopy(nextloc, (char *)entry->key, keysize);
-    if (keysize != sizeof(*entry->key) + entry->key->length - 1) {
+    (void) bcopy(nextloc, (char *)entry->key.contents, keysize);
+    if (keysize != entry->key.length) {
 	krb5_free_principal(princ);
 	krb5_free_principal(mod_princ);
-	free((char *)entry->key);
+	free((char *)entry->key.contents);
 	(void) bzero((char *) entry, sizeof(*entry));
 	return KRB5_KDB_TRUNCATED_RECORD;
     }	
@@ -566,8 +564,8 @@ free_decode_princ_contents(entry)
 krb5_db_entry *entry;
 {
     /* erase the key */
-    bzero((char *)entry->key, sizeof(*entry->key) + entry->key->length - 1);
-    free((char *)entry->key);
+    bzero((char *)entry->key.contents, entry->key.length);
+    free((char *)entry->key.contents);
 
     krb5_free_principal(entry->principal);
     krb5_free_principal(entry->mod_name);
