@@ -1567,7 +1567,7 @@ void try_normal(argv)
     register char *host;
 #ifdef POSIX_SIGNALS
     struct sigaction sa;
-    sigest_t mask;
+    sigset_t mask;
 #endif
     
 #ifndef KRB5_ATHENA_COMPAT
@@ -1587,7 +1587,7 @@ void try_normal(argv)
       argv++;
     
 #ifdef POSIX_SIGNALS
-    sigemptyset(&mask)
+    sigemptyset(&mask);
     sigprocmask(SIG_SETMASK, &mask, NULL);
 #endif
 
