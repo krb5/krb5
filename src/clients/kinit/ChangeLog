@@ -1,3 +1,8 @@
+2002-07-30  Ezra Peisach  <epeisach@bu.edu>
+
+	* kinit.c (ULINE): Invoke fprintf with correct number of arguments
+	depending on if V4 support is compiled in or not.
+
 2002-07-17  Jen Selby <jenselby@mit.edu>
 
 	* kinit.M: added documentation of the "-a" option

@@ -236,12 +236,13 @@ usage(progname)
 
 #ifdef KRB5_KRB4_COMPAT
 #define USAGE_OPT_FMT "%s%-50s%s\n"
-#else
-#define USAGE_OPT_FMT "%s%s\n"
-#endif
-
 #define ULINE(indent, col1, col2) \
 fprintf(stderr, USAGE_OPT_FMT, indent, col1, col2)
+#else
+#define USAGE_OPT_FMT "%s%s\n"
+#define ULINE(indent, col1, col2) \
+fprintf(stderr, USAGE_OPT_FMT, indent, col1)
+#endif
 
     ULINE("    ", "options:", "valid with Kerberos:");
     fprintf(stderr, "\t-5 Kerberos 5 (%s)\n", KRB_AVAIL_STRING(got_k5));
