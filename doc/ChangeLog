@@ -1,5 +1,7 @@
 Fri Nov  1 19:05:15 1996  Tom Yu  <tlyu@mit.edu>
 
+	* Makefile: Apply jik's changes for dependencies [krb5-doc/101]
+
 	* install.texinfo (krb5.conf): Fixed extra
 	closebrace. [krb5-doc/92]
 
