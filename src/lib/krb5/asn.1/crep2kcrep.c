@@ -75,7 +75,7 @@ register int *error;
       retval->nonce = 0;
     
     if (val->timestamp) {
-	if (!(val->optionals & opt_KRB5_EncKrbPrivPart_usec)) {
+	if (!(val->optionals & opt_KRB5_EncKrbCredPart_usec)) {
 	    /* must have usec if we have timestamp */
 	    *error = ISODE_50_LOCAL_ERR_BADCOMBO;
 	    goto errout;
