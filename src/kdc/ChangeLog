@@ -1,3 +1,8 @@
+Fri May  8 18:46:59 1998  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* kerberos_v4.c (krb4_stime): Print 4 digit years in Krb4 log
+	 	entries to avoid Y2K issues.
+
 Fri Mar 20 17:13:46 1998  Tom Yu  <tlyu@mit.edu>
 
 	* kdc_util.c (add_to_transited): Check lengths, fix up comma
