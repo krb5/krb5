@@ -30,9 +30,9 @@ static char rcsid_fcc_resolve_c[] =
 "$Id$";
 #endif /* !lint && !SABER */
 
-#include "fcc.h"
-
+#include <errno.h>
 #include <krb5/osconf.h>
+#include "fcc.h"
 
 #ifdef KRB5_USE_INET
 #include <netinet/in.h>
@@ -112,7 +112,11 @@ krb5_fcc_generate_new (id)
 	  int errsave, cnt;
 
 	  /* Ignore user's umask, set mode = 0600 */
+#ifdef NOFCHMOD
+	  chmod(((krb5_fcc_data *) lid->data)->filename, S_IREAD | S_IWRITE);
+#else
 	  fchmod(ret, S_IREAD | S_IWRITE);
+#endif
 	  if ((cnt = write(ret, (char *)&fcc_fvno, sizeof(fcc_fvno)))
 	      != sizeof(fcc_fvno)) {
 	      errsave = errno;
