@@ -1,3 +1,8 @@
+2002-11-27  Tom Yu  <tlyu@mit.edu>
+
+	* depfix.sed: Remove tcl-specific headers from dependencies.
+	Delete now obsolete comment about gcc-specific directories.
+
 2002-11-13  Ezra Peisach  <epeisach@bu.edu>
 
 	* reconf: For pre autoconf 2.54 - invoke autoreconf with -l for

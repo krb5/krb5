@@ -27,9 +27,12 @@ s/  */ /g
 # change foo.o -> $(OUTPRE)foo.$(OBJEXT)
 s;^\([a-zA-Z0-9_\-]*\).o:;$(OUTPRE)\1.$(OBJEXT):;
 
+# delete tcl-specific headers
+s;/[^ ]*/tcl\.h ;;g
+s;/[^ ]*/tclDecls\.h ;;g
+s;/[^ ]*/tclPlatDecls\.h ;;g
+
 # delete system-specific or compiler-specific files from list
-# (the last two are pathnames used at MIT -- if you have a local
-#  gcc installation in some odd place, you may need to customize this)
 s;/usr/include/[^ ]* ;;g
 s;/usr/lib/[^ ]* ;;g
 
