@@ -23,10 +23,6 @@ static char rcsid_ktdefname_c[] =
 #include <stdio.h>
 #include <krb5/ext-proto.h>
 
-#ifndef min
-#define min(a,b) ((a) < (b) ? (a) : (b))
-#endif
-
 extern char *krb5_defkeyname;
 
 krb5_error_code
@@ -34,8 +30,8 @@ krb5_kt_default_name(name, namesize)
 char *name;
 int namesize;
 {
-    strncpy(name, krb5_defkeyname, min(namesize, sizeof(krb5_defkeyname)));
-    if (namesize < sizeof(krb5_defkeyname))
+    strncpy(name, krb5_defkeyname, namesize);
+    if (namesize < strlen(krb5_defkeyname))
 	return KRB5_CONFIG_NOTENUFSPACE;
     else
 	return 0;
