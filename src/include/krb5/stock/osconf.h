@@ -99,7 +99,7 @@
 
 #define KPROP_DEFAULT_FILE "@PREFIX/lib/krb5kdc/slave_datatrans"
 #define KPROPD_DEFAULT_FILE "@PREFIX/lib/krb5kdc/from_master"
-#define KPROPD_DEFAULT_KDB5_EDIT "@PREFIX/admin/kdb5_edit"
+#define KPROPD_DEFAULT_KDB5_EDIT "@PREFIX/sbin/kdb5_edit"
 #define KPROPD_DEFAULT_KRB_DB DEFAULT_KDB_FILE
 #define KPROPD_ACL_FILE "@PREFIX/lib/krb5kdc/kpropd.acl"
 
