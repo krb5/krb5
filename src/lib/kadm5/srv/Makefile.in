@@ -109,9 +109,9 @@ svr_policy.so svr_policy.po $(OUTPRE)svr_policy.$(OBJEXT): svr_policy.c $(BUILDT
   $(BUILDTOP)/include/gssrpc/auth_unix.h $(BUILDTOP)/include/gssrpc/svc_auth.h \
   $(BUILDTOP)/include/gssrpc/svc.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
-  $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
-  $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/kadm5/kadm_err.h \
+  $(BUILDTOP)/include/krb5/autoconf.h $(BUILDTOP)/include/profile.h \
+  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
+  $(SRCTOP)/include/krb5/kdb.h $(BUILDTOP)/include/kadm5/kadm_err.h \
   $(BUILDTOP)/include/kadm5/adb_err.h $(BUILDTOP)/include/kadm5/chpass_util_strings.h \
   $(BUILDTOP)/include/kadm5/adb.h $(DB_DEPS) $(BUILDTOP)/include/kadm5/server_internal.h \
   $(BUILDTOP)/include/kadm5/admin_internal.h
@@ -122,9 +122,9 @@ svr_principal.so svr_principal.po $(OUTPRE)svr_principal.$(OBJEXT): svr_principa
   $(BUILDTOP)/include/gssrpc/auth_unix.h $(BUILDTOP)/include/gssrpc/svc_auth.h \
   $(BUILDTOP)/include/gssrpc/svc.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
-  $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
-  $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/kadm5/kadm_err.h \
+  $(BUILDTOP)/include/krb5/autoconf.h $(BUILDTOP)/include/profile.h \
+  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
+  $(SRCTOP)/include/krb5/kdb.h $(BUILDTOP)/include/kadm5/kadm_err.h \
   $(BUILDTOP)/include/kadm5/adb_err.h $(BUILDTOP)/include/kadm5/chpass_util_strings.h \
   $(BUILDTOP)/include/kadm5/adb.h $(DB_DEPS) $(BUILDTOP)/include/kadm5/server_internal.h \
   $(BUILDTOP)/include/kadm5/admin_internal.h
@@ -132,8 +132,8 @@ server_acl.so server_acl.po $(OUTPRE)server_acl.$(OBJEXT): server_acl.c $(SRCTOP
   $(BUILDTOP)/include/gssapi/gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi.h \
   $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(BUILDTOP)/include/krb5.h \
-  $(COM_ERR_DEPS) $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
-  $(SRCTOP)/include/krb5/kdb.h $(BUILDTOP)/include/profile.h \
+  $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
   $(BUILDTOP)/include/kadm5/server_internal.h $(BUILDTOP)/include/kadm5/admin.h \
   $(BUILDTOP)/include/gssrpc/rpc.h $(BUILDTOP)/include/gssrpc/types.h \
   $(BUILDTOP)/include/gssrpc/xdr.h $(BUILDTOP)/include/gssrpc/auth.h \
@@ -145,9 +145,9 @@ server_acl.so server_acl.po $(OUTPRE)server_acl.$(OBJEXT): server_acl.c $(SRCTOP
   $(DB_DEPS) $(SRCTOP)/include/krb5/adm_proto.h server_acl.h
 server_kdb.so server_kdb.po $(OUTPRE)server_kdb.$(OBJEXT): server_kdb.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
-  $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
-  $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/kadm5/admin.h \
+  $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
+  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
+  $(SRCTOP)/include/krb5/kdb.h $(BUILDTOP)/include/kadm5/admin.h \
   $(BUILDTOP)/include/gssrpc/rpc.h $(BUILDTOP)/include/gssrpc/types.h \
   $(BUILDTOP)/include/gssrpc/xdr.h $(BUILDTOP)/include/gssrpc/auth.h \
   $(BUILDTOP)/include/gssrpc/clnt.h $(BUILDTOP)/include/gssrpc/rpc_msg.h \
@@ -158,9 +158,9 @@ server_kdb.so server_kdb.po $(OUTPRE)server_kdb.$(OBJEXT): server_kdb.c $(SRCTOP
   $(BUILDTOP)/include/kadm5/adb.h $(DB_DEPS)
 server_misc.so server_misc.po $(OUTPRE)server_misc.$(OBJEXT): server_misc.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
-  $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
-  $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/kadm5/adb.h \
+  $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
+  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
+  $(SRCTOP)/include/krb5/kdb.h $(BUILDTOP)/include/kadm5/adb.h \
   $(BUILDTOP)/include/gssrpc/types.h $(DB_DEPS) $(BUILDTOP)/include/kadm5/admin.h \
   $(BUILDTOP)/include/gssrpc/rpc.h $(BUILDTOP)/include/gssrpc/xdr.h \
   $(BUILDTOP)/include/gssrpc/auth.h $(BUILDTOP)/include/gssrpc/clnt.h \
@@ -177,8 +177,8 @@ server_init.so server_init.po $(OUTPRE)server_init.$(OBJEXT): server_init.c $(CO
   $(BUILDTOP)/include/gssrpc/svc_auth.h $(BUILDTOP)/include/gssrpc/svc.h \
   $(BUILDTOP)/include/krb5.h $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
-  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
-  $(SRCTOP)/include/krb5/kdb.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
   $(BUILDTOP)/include/kadm5/kadm_err.h $(BUILDTOP)/include/kadm5/adb_err.h \
   $(BUILDTOP)/include/kadm5/chpass_util_strings.h $(BUILDTOP)/include/kadm5/server_internal.h \
   $(BUILDTOP)/include/kadm5/admin_internal.h $(BUILDTOP)/include/kadm5/adb.h \
@@ -190,9 +190,9 @@ server_dict.so server_dict.po $(OUTPRE)server_dict.$(OBJEXT): server_dict.c $(BU
   $(BUILDTOP)/include/gssrpc/auth_unix.h $(BUILDTOP)/include/gssrpc/svc_auth.h \
   $(BUILDTOP)/include/gssrpc/svc.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
-  $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
-  $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/kadm5/kadm_err.h \
+  $(BUILDTOP)/include/krb5/autoconf.h $(BUILDTOP)/include/profile.h \
+  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
+  $(SRCTOP)/include/krb5/kdb.h $(BUILDTOP)/include/kadm5/kadm_err.h \
   $(BUILDTOP)/include/kadm5/adb_err.h $(BUILDTOP)/include/kadm5/chpass_util_strings.h \
   $(SRCTOP)/include/krb5/adm_proto.h $(SRCTOP)/include/syslog.h \
   $(BUILDTOP)/include/kadm5/server_internal.h $(BUILDTOP)/include/kadm5/admin_internal.h \
@@ -204,9 +204,9 @@ svr_iters.so svr_iters.po $(OUTPRE)svr_iters.$(OBJEXT): svr_iters.c $(BUILDTOP)/
   $(BUILDTOP)/include/gssrpc/auth_unix.h $(BUILDTOP)/include/gssrpc/svc_auth.h \
   $(BUILDTOP)/include/gssrpc/svc.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
-  $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
-  $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/kadm5/kadm_err.h \
+  $(BUILDTOP)/include/krb5/autoconf.h $(BUILDTOP)/include/profile.h \
+  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
+  $(SRCTOP)/include/krb5/kdb.h $(BUILDTOP)/include/kadm5/kadm_err.h \
   $(BUILDTOP)/include/kadm5/adb_err.h $(BUILDTOP)/include/kadm5/chpass_util_strings.h \
   $(BUILDTOP)/include/kadm5/adb.h $(DB_DEPS) $(BUILDTOP)/include/kadm5/server_internal.h \
   $(BUILDTOP)/include/kadm5/admin_internal.h
@@ -218,8 +218,8 @@ svr_chpass_util.so svr_chpass_util.po $(OUTPRE)svr_chpass_util.$(OBJEXT): svr_ch
   $(BUILDTOP)/include/gssrpc/svc_auth.h $(BUILDTOP)/include/gssrpc/svc.h \
   $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
-  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
-  $(SRCTOP)/include/krb5/kdb.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
   $(BUILDTOP)/include/kadm5/kadm_err.h $(BUILDTOP)/include/kadm5/adb_err.h \
   $(BUILDTOP)/include/kadm5/chpass_util_strings.h $(BUILDTOP)/include/kadm5/server_internal.h \
   $(BUILDTOP)/include/kadm5/admin_internal.h $(BUILDTOP)/include/kadm5/adb.h \
@@ -231,18 +231,18 @@ adb_xdr.so adb_xdr.po $(OUTPRE)adb_xdr.$(OBJEXT): adb_xdr.c $(BUILDTOP)/include/
   $(BUILDTOP)/include/gssrpc/auth_unix.h $(BUILDTOP)/include/gssrpc/svc_auth.h \
   $(BUILDTOP)/include/gssrpc/svc.h $(BUILDTOP)/include/kadm5/adb.h \
   $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
-  $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
-  $(BUILDTOP)/include/profile.h $(DB_DEPS) $(BUILDTOP)/include/kadm5/admin.h \
+  $(BUILDTOP)/include/krb5/autoconf.h $(BUILDTOP)/include/profile.h \
+  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
+  $(SRCTOP)/include/krb5/kdb.h $(DB_DEPS) $(BUILDTOP)/include/kadm5/admin.h \
   $(BUILDTOP)/include/kadm5/kadm_err.h $(BUILDTOP)/include/kadm5/adb_err.h \
   $(BUILDTOP)/include/kadm5/chpass_util_strings.h $(BUILDTOP)/include/kadm5/admin_xdr.h \
   $(BUILDTOP)/include/kadm5/kadm_rpc.h
 adb_policy.so adb_policy.po $(OUTPRE)adb_policy.$(OBJEXT): adb_policy.c $(BUILDTOP)/include/kadm5/adb.h \
   $(BUILDTOP)/include/gssrpc/types.h $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
-  $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
-  $(BUILDTOP)/include/profile.h $(DB_DEPS) $(BUILDTOP)/include/kadm5/admin.h \
+  $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
+  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
+  $(SRCTOP)/include/krb5/kdb.h $(DB_DEPS) $(BUILDTOP)/include/kadm5/admin.h \
   $(BUILDTOP)/include/gssrpc/rpc.h $(BUILDTOP)/include/gssrpc/xdr.h \
   $(BUILDTOP)/include/gssrpc/auth.h $(BUILDTOP)/include/gssrpc/clnt.h \
   $(BUILDTOP)/include/gssrpc/rpc_msg.h $(BUILDTOP)/include/gssrpc/auth_unix.h \
@@ -252,9 +252,9 @@ adb_policy.so adb_policy.po $(OUTPRE)adb_policy.$(OBJEXT): adb_policy.c $(BUILDT
 adb_free.so adb_free.po $(OUTPRE)adb_free.$(OBJEXT): adb_free.c $(BUILDTOP)/include/kadm5/adb.h \
   $(BUILDTOP)/include/gssrpc/types.h $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
-  $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
-  $(BUILDTOP)/include/profile.h $(DB_DEPS) $(BUILDTOP)/include/kadm5/admin.h \
+  $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
+  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
+  $(SRCTOP)/include/krb5/kdb.h $(DB_DEPS) $(BUILDTOP)/include/kadm5/admin.h \
   $(BUILDTOP)/include/gssrpc/rpc.h $(BUILDTOP)/include/gssrpc/xdr.h \
   $(BUILDTOP)/include/gssrpc/auth.h $(BUILDTOP)/include/gssrpc/clnt.h \
   $(BUILDTOP)/include/gssrpc/rpc_msg.h $(BUILDTOP)/include/gssrpc/auth_unix.h \
@@ -264,9 +264,9 @@ adb_free.so adb_free.po $(OUTPRE)adb_free.$(OBJEXT): adb_free.c $(BUILDTOP)/incl
 adb_openclose.so adb_openclose.po $(OUTPRE)adb_openclose.$(OBJEXT): adb_openclose.c $(BUILDTOP)/include/kadm5/adb.h \
   $(BUILDTOP)/include/gssrpc/types.h $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
-  $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
-  $(BUILDTOP)/include/profile.h $(DB_DEPS) $(BUILDTOP)/include/kadm5/admin.h \
+  $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
+  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
+  $(SRCTOP)/include/krb5/kdb.h $(DB_DEPS) $(BUILDTOP)/include/kadm5/admin.h \
   $(BUILDTOP)/include/gssrpc/rpc.h $(BUILDTOP)/include/gssrpc/xdr.h \
   $(BUILDTOP)/include/gssrpc/auth.h $(BUILDTOP)/include/gssrpc/clnt.h \
   $(BUILDTOP)/include/gssrpc/rpc_msg.h $(BUILDTOP)/include/gssrpc/auth_unix.h \
