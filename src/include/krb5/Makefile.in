@@ -1,5 +1,3 @@
-KDB5DIR = $(KRB5ROOT)
-KRB5SRVTABDIR = /etc
 KRB5RCTMPDIR= @KRB5_RCTMPDIR@
 
 ##DOSBUILDTOP = ..\..
@@ -45,10 +43,9 @@ install::
 	do $(INSTALL_DATA) $(C)$$f $(DESTDIR)$(KRB5_INCDIR)$(S)krb5$(S)$$f; \
 	done
 
-PROCESS_REPLACE = -e "s+@KRB5ROOT+$(KRB5ROOT)+" \
-		  -e "s+@KDB5DIR+$(KDB5DIR)+" \
-		  -e "s+@KRB5RCTMPDIR+$(KRB5RCTMPDIR)+" \
-		  -e "s+@KRB5SRVTABDIR+$(KRB5SRVTABDIR)+" 
+PROCESS_REPLACE = -e "s+@KRB5RCTMPDIR+$(KRB5RCTMPDIR)+" \
+		  -e "s+@PREFIX+$(INSTALL_PREFIX)+" \
+		  -e "s+@EXEC_PREFIX+$(INSTALL_EXEC_PREFIX)+"
 
 OSCONFSRC = $(srcdir)/stock/osconf.h
 

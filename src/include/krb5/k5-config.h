@@ -33,10 +33,6 @@
 /* Kerberos Windows initialization file */
 #define KERBEROS_INI    "kerberos.ini"
 #define INI_FILES       "Files"
-#ifdef OLD_CONFIG_FILES
-#define INI_KRB_CONF    "krb.conf"		/* Location of krb.conf file */
-#define INI_KRB_REALMS  "krb.realms"	/* Location of krb.realms file */
-#endif
 #define INI_KRB_CCACHE  "krb5cc"       /* Location of the ccache */
 #define INI_KRB5_CONF   "krb5.ini"		/* Location of krb5.conf file */
 
