@@ -1,3 +1,10 @@
+2005-03-05  Jeffrey Altman <jaltman@mit.edu>
+
+        * sn2princ.c (krb5_sname_to_principal):
+          conditionalize the use of reverse dns lookups.  The default
+          is to use the existing behavior.  rdns can be disabled by
+          specifying [libdefaults] rdns=false
+
 2005-01-12  Tom Yu  <tlyu@mit.edu>
 
 	* dnsglue.c (krb5int_dns_fini): Reorder to make more correct.
