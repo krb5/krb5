@@ -254,7 +254,7 @@ FILE	*dataconn();
 #endif
 static void dolog(struct sockaddr_in *);
 static int receive_data(FILE *, FILE *);
-static void login(char *passwd);
+static void login(char *passwd, int logincode);
 static void end_login(void);
 static int disallowed_user(char *);
 static int restricted_user(char *);
@@ -815,7 +815,7 @@ user(name)
 		syslog(authorized ? LOG_INFO : LOG_ERR, "%s", buf);
 
 		if (result == 232)
-			login(NULL);
+			login(NULL, result);
 		return;
 	}
 
@@ -1088,13 +1088,14 @@ pass(passwd)
 	}
 	login_attempts = 0;		/* this time successful */
 
-	login(passwd);
+	login(passwd, 0);
 	return;
 }
 
 static void
-login(passwd)
+login(passwd, logincode)
 	char *passwd;
+	int logincode;
 {
 	if (have_creds) {
 #ifdef GSSAPI
@@ -1152,8 +1153,11 @@ login(passwd)
 			        reply(530, "User %s: can't change directory to %s.",
 				      pw->pw_name, pw->pw_dir);
 				goto bad;
-			} else
-			        lreply(230, "No directory! Logging in with home=/");
+			} else {
+				if (!logincode)
+					logincode = 230;
+			        lreply(logincode, "No directory! Logging in with home=/");
+			}
 		}
 	}
 	if (guest) {

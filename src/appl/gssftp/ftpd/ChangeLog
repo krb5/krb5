@@ -1,3 +1,11 @@
+2002-01-08  Ken Raeburn  <raeburn@mit.edu>
+
+	* ftpd.c (login): New argument LOGINCODE, optional result code to
+	override local use of success code 230 when homedir is not
+	accessible but root directory is.
+	(user): Pass result code 232 to login.
+	(pass): Pass result code 0 to login.
+
 2001-11-30  Tom Yu  <tlyu@mit.edu>
 
 	* ftpcmd.y (pathname): Handle returns from ftpglob() better so
