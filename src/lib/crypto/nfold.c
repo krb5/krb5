@@ -25,7 +25,9 @@
  */
 
 #include "k5-int.h"
+#ifdef HAVE_MEMORY_H
 #include <memory.h>
+#endif
 
 /*
 n-fold(k-bits):

@@ -8,7 +8,9 @@
 
 
 #include <stdio.h>
+#ifdef HAVE_MEMORY_H
 #include <memory.h>
+#endif
 #include <time.h>
 
 #include <kadm5/admin.h>

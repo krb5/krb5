@@ -13,7 +13,9 @@
 #ifndef __KADM5_SERVER_INTERNAL_H__
 #define __KADM5_SERVER_INTERNAL_H__
 
+#ifdef HAVE_MEMORY_H
 #include    <memory.h>
+#endif
 #include    <stdlib.h>
 #include    "k5-int.h"
 #include    <krb5/kdb.h>

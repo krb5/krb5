@@ -1,3 +1,8 @@
+2000-05-31  Wilfredo Sanchez  <tritan@mit.edu>
+
+	* configure.in: Check for existance of <memory.h>.
+	[from Nathan Neulinger <nneul@umr.edu>]
+
 Tue Feb 22 10:23:19 2000  Ezra Peisach  <epeisach@mit.edu>
 
 	* Makefile.in (clean-unix): Add clean-libobjs.

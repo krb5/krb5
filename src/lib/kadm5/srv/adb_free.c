@@ -4,6 +4,10 @@
  * $Header$
  * 
  * $Log$
+ * Revision 1.3  2000/06/01 02:02:03  tritan
+ * Check for existance of <memory.h>.
+ * (from Nathan Neulinger <nneul@umr.edu>)
+ *
  * Revision 1.2  1996/10/18 19:45:49  bjaspan
  * 	* svr_misc_free.c, server_dict.c, adb_policy.c, adb_free.c:
  *  	include stdlib.h instead of malloc.h [krb5-admin/35]
@@ -52,7 +56,9 @@ static char *rcsid = "$Header$";
 #endif
 
 #include	"adb.h"
+#ifdef HAVE_MEMORY_H
 #include	<memory.h>
+#endif
 #include	<stdlib.h>
 
 void

@@ -1,3 +1,9 @@
+2000-05-31  Wilfredo Sanchez  <tritan@mit.edu>
+
+	* configure.in, chpass_util.c, server_internal.h: Check for
+	existance of <memory.h>.
+	[from Nathan Neulinger <nneul@umr.edu>]
+
 2000-02-26  Tom Yu  <tlyu@mit.edu>
 
 	* kadm_rpc_xdr.c (xdr_cprinc3_arg): Don't XDR the nonexistent

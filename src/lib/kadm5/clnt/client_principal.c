@@ -11,7 +11,9 @@ static char *rcsid = "$Header$";
 #include    <gssrpc/rpc.h>
 #include    <kadm5/admin.h>
 #include    <kadm5/kadm_rpc.h>
+#ifdef HAVE_MEMORY_H
 #include    <memory.h>
+#endif
 #include    "client_internal.h"
 
 kadm5_ret_t

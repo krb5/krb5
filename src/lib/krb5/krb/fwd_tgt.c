@@ -26,7 +26,9 @@
 
 #define NEED_SOCKETS
 #include "k5-int.h"
+#ifdef HAVE_MEMORY_H
 #include <memory.h>
+#endif
 
 /* helper function: convert flags to necessary KDC options */
 #define flags2options(flags) (flags & KDC_TKT_COMMON_MASK)

@@ -6,7 +6,7 @@ AC_PROG_RANLIB
 AC_PROG_INSTALL
 AC_PROG_LEX
 AC_PROG_AWK
-AC_CHECK_HEADERS(syslog.h)
+AC_CHECK_HEADERS(syslog.h memory.h)
 AC_CHECK_FUNCS(openlog syslog closelog strftime vsprintf)
 KRB5_AC_REGEX_FUNCS
 dnl

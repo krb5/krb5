@@ -1,3 +1,8 @@
+2000-05-31  Wilfredo Sanchez  <tritan@mit.edu>
+
+	* configure.in, nfold.c: Check for existance of <memory.h>.
+	[from Nathan Neulinger <nneul@umr.edu>]
+
 2000-01-24  Tom Yu  <tlyu@mit.edu>
 
 	* crypto_libinit.c: Add terminating newline; use 0 and 1 instead

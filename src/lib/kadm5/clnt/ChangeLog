@@ -1,3 +1,9 @@
+2000-05-31  Wilfredo Sanchez  <tritan@mit.edu>
+
+	* client_init.c, client_principal.c, client_rpc.c: Check for
+	existance of <memory.h>.
+	[from Nathan Neulinger <nneul@umr.edu>]
+
 2000-02-26  Tom Yu  <tlyu@mit.edu>
 
 	* client_principal.c (kadm5_create_principal_3): Remove keepold

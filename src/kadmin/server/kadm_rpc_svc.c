@@ -12,7 +12,9 @@ static char *rcsid = "$Header$";
 #include <stdio.h>
 #include <gssrpc/rpc.h>
 #include <syslog.h>
+#ifdef HAVE_MEMORY_H
 #include <memory.h>
+#endif
 #include <kadm5/kadm_rpc.h>
 #include <krb5.h>
 #include <kadm5/admin.h>

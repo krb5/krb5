@@ -21,7 +21,9 @@
  */
 
 #include "gssapiP_generic.h"
+#ifdef HAVE_MEMORY_H
 #include <memory.h>
+#endif
 
 /*
  * $Id$

@@ -7,7 +7,7 @@ AC_PROG_ARCHIVE_ADD
 AC_PROG_AWK
 AC_PROG_INSTALL
 AC_PROG_RANLIB
-AC_CHECK_HEADERS(stdlib.h sys/types.h limits.h)
+AC_CHECK_HEADERS(stdlib.h sys/types.h limits.h memory.h)
 AC_SIZE_T
 AC_CHECK_SIZEOF(short)
 AC_CHECK_SIZEOF(int)

@@ -1,3 +1,10 @@
+2000-05-31  Wilfredo Sanchez  <tritan@mit.edu>
+
+	* accept_sec_context.c, gssapiP_krb5.h, init_sec_context.c,
+	k5unseal.c, util_cksum.c, util_crypt.c, util_seed.c: Check for
+	existance of <memory.h>.
+	[from Nathan Neulinger <nneul@umr.edu>]
+
 2000-5-19	Alexandra Ellwood <lxs@mit.edu>
 
 	* acquire_cred.c: Changed to use krb5int_cc_default.  This function 

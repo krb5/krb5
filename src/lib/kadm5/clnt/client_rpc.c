@@ -2,7 +2,9 @@
 #include <kadm5/kadm_rpc.h>
 #include <krb5.h>
 #include <kadm5/admin.h>
+#ifdef HAVE_MEMORY_H
 #include <memory.h>
+#endif
 
 /* Default timeout can be changed using clnt_control() */
 static struct timeval TIMEOUT = { 25, 0 };

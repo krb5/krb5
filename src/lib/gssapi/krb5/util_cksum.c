@@ -25,7 +25,9 @@
  */
 
 #include "gssapiP_krb5.h"
+#ifdef HAVE_MEMORY_H
 #include <memory.h>
+#endif
 
 krb5_error_code
 kg_checksum_channel_bindings(context, cb, cksum, bigend)

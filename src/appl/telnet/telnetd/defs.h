@@ -154,7 +154,9 @@ typedef unsigned char cc_t;
 #  endif /* FD_ZERO */
 # endif	/* CRAY1 */
 
+#ifdef HAVE_MEMORY_H
 #include <memory.h>
+#endif
 #endif	/* CRAY */
 
 #ifdef __hpux

@@ -13,7 +13,9 @@ static char *rcsid = "$Header$";
 #include <gssrpc/rpc.h>
 #include "adb.h"
 #include "admin_xdr.h"
+#ifdef HAVE_MEMORY_H
 #include <memory.h>
+#endif
 
 bool_t
 xdr_krb5_key_data(XDR *xdrs, krb5_key_data *objp)

@@ -1,7 +1,9 @@
 #include    <unistd.h>
 #include    <string.h>
 #include    <stdlib.h>
+#ifdef HAVE_MEMORY_H
 #include    <memory.h>
+#endif
 
 #include    <kadm5/adb.h>
 #include    "import_err.h"

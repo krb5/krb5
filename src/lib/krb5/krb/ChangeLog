@@ -1,3 +1,8 @@
+2000-05-31  Wilfredo Sanchez  <tritan@mit.edu>
+
+	* fwd_tgt.c: Check for existance of <memory.h>.
+	[from Nathan Neulinger <nneul@umr.edu>]
+
 2000-5-19	Alexandra Ellwood <lxs@mit.edu>
 
 	* sendauth.c, fwd_tgt.c: Changed to use krb5int_cc_default.  This function 
