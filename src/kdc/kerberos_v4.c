@@ -1178,7 +1178,7 @@ int set_tgtkey(r)
     if (!strcmp(lastrealm, r))
 	return (KSUCCESS);
 
-    log("Getting key for %s", r);
+/*  log("Getting key for %s", r); */
 
     n = kerb_get_principal("krbtgt", r, p, 1, &more);
     if (n == 0)
