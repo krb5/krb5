@@ -1,3 +1,10 @@
+Tue Mar 25 00:32:55 1997  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* preauth.c (obtain_sam_padata): Fix handling of the sam-timestamp
+ 		and sam-usec fields, which should always be set if the
+		nonce is not available, not just SAM_USE_SAD_AS_KEY is
+		being used.  [krb5-libs/325]
+
 Mon Mar 24 12:21:38 1997  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* t_ser.c: Clean up error reporting for krb5_init_context().  Also
