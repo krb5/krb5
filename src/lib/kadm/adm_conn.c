@@ -34,16 +34,20 @@
 #include <pwd.h>
 #endif	/* HAVE_PWD_H */
 
+/* Default ticket life is 10 minutes */
+#define	KADM_DEFAULT_LIFETIME	(10*60)
+
 /*
  * Strings
  */
-static char *kadm_cache_name_fmt =	"FILE:/tmp/tkt_kpw_%d";
+static char *kadm_cache_name_fmt =	"FILE:/tmp/tkt_kadm_%d";
 
 /*
  * Prototypes for local functions
  */
 static krb5_error_code kadm_get_ccache
 	PROTOTYPE((krb5_context,
+		   char *,
 		   char *,
 		   krb5_ccache *,
 		   krb5_principal *));
@@ -53,7 +57,8 @@ static krb5_error_code kadm_get_creds
 		krb5_principal,
 		krb5_creds  *,
 		char *,
-		char *));
+		char *,
+		krb5_timestamp));
 static krb5_error_code kadm_contact_server
 	PROTOTYPE((krb5_context,
 		krb5_data *,
@@ -73,9 +78,10 @@ static krb5_error_code kadm_get_auth
  * Allocates new ccache and client.
  */
 static krb5_error_code
-kadm_get_ccache(kcontext, user, ccache, client)
+kadm_get_ccache(kcontext, user, ccname, ccache, client)
     krb5_context	kcontext;
     char		*user;
+    char		*ccname;
     krb5_ccache		*ccache;
     krb5_principal	*client;
 {
@@ -83,9 +89,11 @@ kadm_get_ccache(kcontext, user, ccache, client)
     char		*name;
     int 		did_malloc = 0;
     char		new_cache[MAXPATHLEN];
+    krb5_principal	tprinc;
 
     /* Initialize. */
     *client = (krb5_principal) NULL;
+    tprinc = (krb5_principal) NULL;
 
     /*
      * If a name specified, then use that one, else get it from our
@@ -118,21 +126,36 @@ kadm_get_ccache(kcontext, user, ccache, client)
     if (kret = krb5_parse_name(kcontext, name, client))
 	goto cleanup;
 
+    if (!ccname) {
 #ifdef _WINDOWS
-    strcpy (new_cache, "FILE:");
-    GetTempFileName (0, "tkt", 0, new_cache+5);
+	strcpy (new_cache, "FILE:");
+	GetTempFileName (0, "tkt", 0, new_cache+5);
 #else
-    (void) sprintf(new_cache, kadm_cache_name_fmt, getpid());
+	(void) sprintf(new_cache, kadm_cache_name_fmt, getpid());
 #endif /* _WINDOWS */
+    }
+    else
+	sprintf(new_cache, "FILE:%s", ccname);
 
-    if (kret = krb5_cc_resolve(kcontext, new_cache, ccache))
+    /*
+     * We only need to resolve the credentials cache if one hasn't
+     * been supplied to us.
+     */
+    if (!(*ccache) && (kret = krb5_cc_resolve(kcontext, new_cache, ccache)))
 	goto cleanup;
 
-    kret = krb5_cc_initialize(kcontext, *ccache, *client);
+    /* XXX assumes a file ccache */
+    if ((kret = krb5_cc_get_principal(kcontext, *ccache, &tprinc)) ==
+	KRB5_FCC_NOFILE)
+	kret = krb5_cc_initialize(kcontext, *ccache, *client);
+
 
  cleanup:
     if (did_malloc)
 	free(name);
+
+    if (tprinc)
+	krb5_free_principal(kcontext, tprinc);
 
     if (kret) {
 	if (*client)
@@ -149,18 +172,20 @@ kadm_get_ccache(kcontext, user, ccache, client)
  * Allocates new principal for creds->server.
  */
 static krb5_error_code
-kadm_get_creds(kcontext, ccache, client, creds, prompt, oldpw)
+kadm_get_creds(kcontext, ccache, client, creds, prompt, oldpw, tlife)
     krb5_context	kcontext;
     krb5_ccache		ccache;
     krb5_principal	client;
     krb5_creds		*creds;
     char		*prompt;
     char		*oldpw;
+    krb5_timestamp	tlife;
 {
     char		*client_name;
     krb5_error_code	kret;
     krb5_address	**my_addresses;
     int			old_pwsize;
+    krb5_creds		tcreds;
 
     /* Initialize */
     my_addresses = (krb5_address **) NULL;
@@ -191,27 +216,68 @@ kadm_get_creds(kcontext, ccache, client, creds, prompt, oldpw)
 					0))
 	goto cleanup;
 
-    if (prompt != (char *) NULL) {
-	/* Read the password */
-	old_pwsize = KRB5_ADM_MAX_PASSWORD_LEN;
-	if (kret = krb5_read_password(kcontext,
-				      prompt,
-				      (char *) NULL,
-				      oldpw,
-				      &old_pwsize))
-	    goto cleanup;
-    }
+    /* Attempt to retrieve an appropriate entry from the credentials cache. */
+    if ((kret = krb5_cc_retrieve_cred(kcontext,
+				      ccache,
+				      KRB5_TC_MATCH_SRV_NAMEONLY,
+				      creds,
+				      &tcreds))
+	== KRB5_CC_NOTFOUND) {
+	krb5_timestamp	jetzt;
 
-    /* Get our initial ticket */
-    kret = krb5_get_in_tkt_with_password(kcontext,
-					 0,
-					 my_addresses,
-					 NULL,
-					 NULL,
-					 oldpw,
-					 ccache,
-					 creds,
-					 0);
+	if (prompt != (char *) NULL) {
+	    /* Read the password */
+	    old_pwsize = KRB5_ADM_MAX_PASSWORD_LEN;
+	    if (kret = krb5_read_password(kcontext,
+					  prompt,
+					  (char *) NULL,
+					  oldpw,
+					  &old_pwsize))
+		goto cleanup;
+	}
+
+	if (kret = krb5_timeofday(kcontext, &jetzt))
+	    goto cleanup;
+
+	if (tlife > 0)
+	    creds->times.endtime = jetzt + tlife;
+	else
+	    creds->times.endtime = jetzt + KADM_DEFAULT_LIFETIME;
+
+	/* Get our initial ticket */
+	kret = krb5_get_in_tkt_with_password(kcontext,
+					     0,
+					     my_addresses,
+					     NULL,
+					     NULL,
+					     oldpw,
+					     ccache,
+					     creds,
+					     0);
+    }
+    else {
+	krb5_principal sclient, sserver;
+
+	if (!kret) {
+	    /*
+	     * We found the credentials cache entry - copy it out.
+	     *
+	     * We'd like to just blast tcreds on top of creds, but we cannot.
+	     * other logic uses the client data, and rather than going and
+	     * chasing all that logic down, might as well pretend that we just
+	     * filled in all the other muck.
+	     */
+	    sclient = creds->client;
+	    sserver = creds->server;
+	    memcpy((char *) creds, (char *) &tcreds, sizeof(tcreds));
+	    if (creds->client)
+		krb5_free_principal(kcontext, creds->client);
+	    if (creds->server)
+		krb5_free_principal(kcontext, creds->server);
+	    creds->client = sclient;
+	    creds->server = sserver;
+	}
+    }
 
  cleanup:
     if (kret) {
@@ -523,21 +589,27 @@ kadm_get_auth(kcontext, ctxp, local, remote)
 /*
  * krb5_adm_connect()	- Establish the connection to the service.
  *
+ * If *ccachep is not null, then that ccache is used to establish the identity
+ * of the caller.  (Argument list is ugly, I know)
+ *
  * Errors are not reported by this routine.
  * Cleanup after successful invocation must:
- *	destroy ccache.
+ *	destroy/close ccache.
  *	free auth_context
  *	close socket.
  */
 krb5_error_code INTERFACE
-krb5_adm_connect(kcontext, user, prompt, opassword, sockp, ctxp, ccachep)
+krb5_adm_connect(kcontext, user, prompt, opassword, sockp, ctxp,
+		 ccachep, ccname, tlife)
     krb5_context	kcontext;	/* Context handle	(In ) */
     char		*user;		/* User specified	(In ) */
     char		*prompt;	/* Old password prompt	(In ) */
     char		*opassword;	/* Old Password		(I/O) */
     int			*sockp;		/* Socket for conn.	(Out) */
     krb5_auth_context	**ctxp;		/* Auth context		(Out) */
-    krb5_ccache		*ccachep;	/* Credentials cache	(Out) */
+    krb5_ccache		*ccachep;	/* Credentials cache	(I/O) */
+    char		*ccname;	/* Cred cache name	(In ) */
+    krb5_timestamp	tlife;		/* Ticket lifetime	(In ) */
 {
     krb5_error_code	kret;
     krb5_principal	client;
@@ -547,6 +619,7 @@ krb5_adm_connect(kcontext, user, prompt, opassword, sockp, ctxp, ccachep)
     krb5_data		response_data;
     krb5_address	*local_addr;
     krb5_address	*remote_addr;
+    krb5_boolean	ccache_supplied;
 
     char		*server;
 
@@ -557,12 +630,12 @@ krb5_adm_connect(kcontext, user, prompt, opassword, sockp, ctxp, ccachep)
     local_addr = remote_addr = (krb5_address *) NULL;
     client = (krb5_principal) NULL;
     *ctxp = (krb5_auth_context *) NULL;
-    *ccachep = (krb5_ccache) NULL;
+    ccache_supplied = (*ccachep != (krb5_ccache) NULL);
 
     /*
      * Find the appropriate credentials cache and set up our identity.
      */
-    if (kret = kadm_get_ccache(kcontext, user, ccachep, &client))
+    if (kret = kadm_get_ccache(kcontext, user, ccname, ccachep, &client))
 	goto cleanup;
 
     /*
@@ -573,7 +646,8 @@ krb5_adm_connect(kcontext, user, prompt, opassword, sockp, ctxp, ccachep)
 			      client,
 			      &creds,
 			      prompt,
-			      opassword))
+			      opassword,
+			      tlife))
 	goto cleanup;
 
     /*
@@ -652,7 +726,7 @@ krb5_adm_connect(kcontext, user, prompt, opassword, sockp, ctxp, ccachep)
 	    krb5_free_principal(kcontext, creds.server);
 	if (client)
 	    krb5_free_principal(kcontext, client);
-	if (*ccachep) {
+	if (*ccachep && !ccache_supplied) {
 	    krb5_cc_destroy(kcontext, *ccachep);
 	    *ccachep = (krb5_ccache) NULL;
 	}
@@ -663,6 +737,9 @@ krb5_adm_connect(kcontext, user, prompt, opassword, sockp, ctxp, ccachep)
 
 /*
  * krb5_adm_disconnect()	- Disconnect from the administrative service.
+ *
+ * If ccache is supplied, then it is destroyed.  Otherwise, the ccache is
+ * the caller's responsibility to close.
  */
 void INTERFACE
 krb5_adm_disconnect(kcontext, socketp, auth_context, ccache)

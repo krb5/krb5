@@ -1,3 +1,13 @@
+
+Mon Jun 5 14:15:37 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* adm_conn.c - Rework kadm_get_ccache() and kadm_get_creds() so that
+		we can specify differing credentials caches and the lifetime
+		of obtained tickets if not using an existing ccache.  This
+		changes the calling sequence of krb5_adm_connect(), adding
+		two arguments: a ccache name and a (delta) lifetime.  Default
+		ccache name changes formats to tkt_kadm_<pid> and default
+		lifetime is 10 minutes.
+
 Fri Jun 2 17:56:03 1995 Keith Vetter (keithv@fusion.com)
 
 	* adm_conn.c: used SOCKET_ERRNO instead of errno and 
