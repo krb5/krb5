@@ -20,4 +20,4 @@ ignore *.a
 ignore include/isode-5.0
 ignore prototype
 ignore lib/des.v4
-ignore .rconf
+ignore *.rconf
