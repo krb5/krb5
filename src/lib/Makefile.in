@@ -54,7 +54,7 @@ SKDEF = krb5_32.def
 SGLIB = $(OUTPRE)sapgss32.lib
 SKLIB = $(OUTPRE)sapkrb32.lib
 
-KRB5RES = $(OUTPRE)krb5.res
+KRB5RC = krb5.rc
 VERSIONRC = $(BUILDTOP)\windows\version.rc
 
 WINLIBS = kernel32.lib wsock32.lib user32.lib shell32.lib oldnames.lib \
@@ -74,60 +74,59 @@ GGLUE=$(GSS_GLUE)
 K4GLUE=$(K4_GLUE)
 SKGLUE=$(SAP_GLUE)
 
-VER_RC_FLAGS=$(CPPFLAGS) -D_WIN32 -D_MSDOS_ -DRES_ONLY
+RCFLAGS=$(CPPFLAGS) -D_WIN32 -D_MSDOS_ -DRES_ONLY
 
-##WIN32##CVER=$(CLIB:.lib=.res)
-##WIN32##PVER=$(PLIB:.lib=.res)
-##WIN32##KVER=$(KLIB:.lib=.res)
-##WIN32##GVER=$(GLIB:.lib=.res)
-##WIN32##K4VER=$(K4LIB:.lib=.res)
-##WIN32##SKVER=$(SKLIB:.lib=.res)
-##WIN32##SGVER=$(SGLIB:.lib=.res)
+##WIN32##CRES=$(CLIB:.lib=.res)
+##WIN32##PRES=$(PLIB:.lib=.res)
+##WIN32##KRES=$(KLIB:.lib=.res)
+##WIN32##GRES=$(GLIB:.lib=.res)
+##WIN32##K4RES=$(K4LIB:.lib=.res)
+##WIN32##SKRES=$(SKLIB:.lib=.res)
+##WIN32##SGRES=$(SGLIB:.lib=.res)
 
-##WIN32##$(CVER): $(VERSIONRC)
-##WIN32##	$(RC) $(VER_RC_FLAGS) -DCE_LIB -fo $@ -r $**
-##WIN32##$(PVER): $(VERSIONRC)
-##WIN32##	$(RC) $(VER_RC_FLAGS) -DPROF_LIB -fo $@ -r $**
-##WIN32##$(KVER): $(VERSIONRC)
-##WIN32##	$(RC) $(VER_RC_FLAGS) -DKRB5_LIB -fo $@ -r $**
-##WIN32##$(K4VER): $(VERSIONRC)
-##WIN32##	$(RC) $(VER_RC_FLAGS) -DKRB4_LIB -fo $@ -r $**
-##WIN32##$(GVER): $(VERSIONRC)
-##WIN32##	$(RC) $(VER_RC_FLAGS) -DGSSAPI_LIB -fo $@ -r $**
-##WIN32##$(SKVER): $(VERSIONRC)
-##WIN32##	$(RC) $(VER_RC_FLAGS) -DSAPKRB_LIB -fo $@ -r $**
-##WIN32##$(SGVER): $(VERSIONRC)
-##WIN32##	$(RC) $(VER_RC_FLAGS) -DSAPGSS_LIB -fo $@ -r $**
+##WIN32##$(CRES): $(VERSIONRC)
+##WIN32##	$(RC) $(RCFLAGS) -DCE_LIB -fo $@ -r $**
+##WIN32##$(PRES): $(VERSIONRC)
+##WIN32##	$(RC) $(RCFLAGS) -DPROF_LIB -fo $@ -r $**
+##WIN32##$(KRES): $(KRB5RC)
+##WIN32##	$(RC) $(RCFLAGS) -DKRB5_LIB -fo $@ -r $**
+##WIN32##$(K4RES): $(VERSIONRC)
+##WIN32##	$(RC) $(RCFLAGS) -DKRB4_LIB -fo $@ -r $**
+##WIN32##$(GRES): $(VERSIONRC)
+##WIN32##	$(RC) $(RCFLAGS) -DGSSAPI_LIB -fo $@ -r $**
+##WIN32##$(SKRES): $(KRB5RC)
+##WIN32##	$(RC) $(RCFLAGS) -DSAPKRB_LIB -fo $@ -r $**
+##WIN32##$(SGRES): $(VERSIONRC)
+##WIN32##	$(RC) $(RCFLAGS) -DSAPGSS_LIB -fo $@ -r $**
+##WIN32##$(KRB5RC): $(VERSIONRC)
 
-##WIN32##$(CLIB): $(CDEF) $(CLIBS) $(CGLUE) $(CVER)
+##WIN32##$(CLIB): $(CDEF) $(CLIBS) $(CGLUE) $(CRES)
 ##WIN32##	link $(WINDLLFLAGS) -def:$(CDEF) -out:$*.dll \
-##WIN32##	  $(CLIBS) $(CGLUE) $(CVER) $(WINLIBS)
+##WIN32##	  $(CLIBS) $(CGLUE) $(CRES) $(WINLIBS)
 
-##WIN32##$(PLIB): $(PDEF) $(PLIBS) $(PGLUE) $(PVER) $(CLIB)
+##WIN32##$(PLIB): $(PDEF) $(PLIBS) $(PGLUE) $(PRES) $(CLIB)
 ##WIN32##	link $(WINDLLFLAGS) -def:$(PDEF) -out:$*.dll \
-##WIN32##	  $(PLIBS) $(PGLUE) $(PVER) $(CLIB) $(WINLIBS)
+##WIN32##	  $(PLIBS) $(PGLUE) $(PRES) $(CLIB) $(WINLIBS)
 
-##WIN32##$(KLIB): $(KDEF) $(KLIBS) $(KGLUE) $(KVER) $(KRB5RES) $(CLIB) $(MITLIBS)
+##WIN32##$(KLIB): $(KDEF) $(KLIBS) $(KGLUE) $(KRES) $(CLIB) $(MITLIBS)
 ##WIN32##	link $(WINDLLFLAGS) -def:$(KDEF) -out:$*.dll \
-##WIN32##	  $(KLIBS) $(KGLUE) $(KVER) $(KRB5RES) $(CLIB) $(MITLIBS) \
-##WIN32##	  $(WINLIBS)
+##WIN32##	  $(KLIBS) $(KGLUE) $(KRES) $(CLIB) $(MITLIBS) $(WINLIBS)
 
-##WIN32##$(GLIB): $(GDEF) $(GLIBS) $(GGLUE) $(GVER) $(KLIB) $(CLIB)
+##WIN32##$(GLIB): $(GDEF) $(GLIBS) $(GGLUE) $(GRES) $(KLIB) $(CLIB)
 ##WIN32##	link $(WINDLLFLAGS) -def:$(GDEF) -out:$*.dll \
-##WIN32##	  $(GLIBS) $(GGLUE) $(GVER) $(KLIB) $(CLIB) $(WINLIBS)
+##WIN32##	  $(GLIBS) $(GGLUE) $(GRES) $(KLIB) $(CLIB) $(WINLIBS)
 
-##WIN32##$(K4LIB): $(K4DEF) $(K4LIBS) $(K4GLUE) $(K4VER) $(KLIB) $(CLIB) $(PLIB)
+##WIN32##$(K4LIB): $(K4DEF) $(K4LIBS) $(K4GLUE) $(K4RES) $(KLIB) $(CLIB) $(PLIB)
 ##WIN32##	link $(WINDLLFLAGS) -def:$(K4DEF) -out:$*.dll \
-##WIN32##	  $(K4LIBS) $(K4GLUE) $(K4VER) $(KLIB) $(CLIB) $(PLIB) $(WINLIBS)
+##WIN32##	  $(K4LIBS) $(K4GLUE) $(K4RES) $(KLIB) $(CLIB) $(PLIB) $(WINLIBS)
 
-##WIN32##$(SKLIB): $(KDEF) $(KLIBS) $(SKGLUE) $(SKVER) $(KRB5RES) $(CLIB) $(MITLIBS)
+##WIN32##$(SKLIB): $(KDEF) $(KLIBS) $(SKGLUE) $(SKRES) $(CLIB) $(MITLIBS)
 ##WIN32##	link $(WINDLLFLAGS) -def:$(KDEF) -out:$*.dll \
-##WIN32##	  $(KLIBS) $(SKGLUE) $(SKVER) $(KRB5RES) $(CLIB) $(MITLIBS) \
-##WIN32##	  $(WINLIBS)
+##WIN32##	  $(KLIBS) $(SKGLUE) $(SKRES) $(CLIB) $(MITLIBS) $(WINLIBS)
 
-##WIN32##$(SGLIB): $(GDEF) $(GLIBS) $(GGLUE) $(SGVER) $(SKLIB) $(CLIB) $(MITLIBS)
+##WIN32##$(SGLIB): $(GDEF) $(GLIBS) $(GGLUE) $(SGRES) $(SKLIB) $(CLIB) $(MITLIBS)
 ##WIN32##	link $(WINDLLFLAGS) -def:$(GDEF) -out:$*.dll \
-##WIN32##	  $(GLIBS) $(GGLUE) $(SGVER) $(SKLIB) $(CLIB) $(MITLIBS) $(WINLIBS)
+##WIN32##	  $(GLIBS) $(GGLUE) $(SGRES) $(SKLIB) $(CLIB) $(MITLIBS) $(WINLIBS)
 
 ##MIT##lib-windows:: $(SKLIB) $(SGLIB) 
 
@@ -141,9 +140,6 @@ $(GSS_GLUE): win_glue.c
 	$(CC) $(CFLAGS) /c /DGSSAPI=1 /Fo$@ $**
 $(NO_GLUE): win_glue.c
 	$(CC) $(CFLAGS) /c /Fo$@ $**
-
-$(KRB5RES): krb5.rc
-	$(RC) $(CPPFLAGS) -DKRB5 -fo $@ -r $**
 
 # Build Convenience
 comerr.lib: $(CLIB)

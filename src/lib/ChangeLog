@@ -1,3 +1,9 @@
+Mon May 17 19:50:53 1999  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in: Use only one resource file per binary.
+
+	* krb5.rc: Remove silly _MSDOS #ifdef.
+
 Mon May 17 12:37:25 1999  Danilo Almeida  <dalmeida@mit.edu>
 
 	* Makefile.in: Get rid of win16 support/clutter.  Build separate

@@ -38,6 +38,4 @@ FONT 8, "Helv"
   PUSHBUTTON "&Cancel", IDCANCEL, 107, 61, 40, 14
 }
 
-#ifdef _MSDOS
 #include "..\windows\version.rc"
-#endif
