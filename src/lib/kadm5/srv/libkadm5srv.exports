@@ -1,9 +1,9 @@
 _kadm5_check_handle
 _kadm5_chpass_principal_util
-acl_check
-acl_finish
-acl_impose_restrictions
-acl_init
+kadm5int_acl_check
+kadm5int_acl_finish
+kadm5int_acl_impose_restrictions
+kadm5int_acl_init
 adb_policy_close
 adb_policy_init
 destroy_dict

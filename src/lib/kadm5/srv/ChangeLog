@@ -1,3 +1,7 @@
+2004-08-21  Tom Yu  <tlyu@mit.edu>
+
+	* libkadm5srv.exports: Update for previous renaming.
+
 2004-08-20  Alexandra Ellwood <lxs@mit.edu>
 
         * server_acl.[ch]: renamed acl_* functions to kadm5int_acl_*
