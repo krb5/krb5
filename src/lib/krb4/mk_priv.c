@@ -141,7 +141,7 @@ krb_mk_priv(in, out, length, schedule, key, sender, receiver)
     q = p;
 
     /* stuff input length */
-    KRB4_PUT32(p, length);
+    KRB4_PUT32BE(p, length);
 
 #ifdef NOENCRYPTION
     /* make all the stuff contiguous for checksum */
@@ -174,7 +174,7 @@ krb_mk_priv(in, out, length, schedule, key, sender, receiver)
 				receiver->sin_port) == -1)
             msg_time_sec = -msg_time_sec;
     /* stuff time sec */
-    KRB4_PUT32(p, msg_time_sec);
+    KRB4_PUT32BE(p, msg_time_sec);
 
     /*
      * All that for one tiny bit!  Heaven help those that talk to
@@ -210,7 +210,7 @@ krb_mk_priv(in, out, length, schedule, key, sender, receiver)
 		/ sizeof(C_Block)) * sizeof(C_Block);
     /* stuff the length */
     p = c_length_ptr;
-    KRB4_PUT32(p, c_length);
+    KRB4_PUT32BE(p, c_length);
 
 #ifndef NOENCRYPTION
     /* pcbc encrypt, pad as needed, use key as ivec */

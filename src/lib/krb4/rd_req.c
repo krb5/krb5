@@ -1,7 +1,7 @@
 /*
  * lib/krb4/rd_req.c
  *
- * Copyright 1985, 1986, 1987, 1988, 2000 by the Massachusetts
+ * Copyright 1985, 1986, 1987, 1988, 2000, 2001 by the Massachusetts
  * Institute of Technology.  All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -239,7 +239,7 @@ krb_rd_req(authent, service, instance, from_addr, ad, fn)
         mutual = 0;
 #endif /* lint */
     s_kvno = *ptr++;		/* get server key version */
-    len = krb_strnlen((char *)ptr, AUTHENT_REMAIN) + 1;
+    len = krb4int_strnlen((char *)ptr, AUTHENT_REMAIN) + 1;
     if (len <= 0 || len > sizeof(realm)) {
 	return RD_AP_MODIFIED;  /* must have been modified, the client wouldn't
 	                           try to trick us with wacky data */
@@ -277,15 +277,15 @@ krb_rd_req(authent, service, instance, from_addr, ad, fn)
 	    return RD_AP_UNDEC;
 #endif /* !NOENCRYPTION */
 
-	len = krb_strnlen(realm, sizeof(st_rlm)) + 1;
+	len = krb4int_strnlen(realm, sizeof(st_rlm)) + 1;
 	if (len <= 0)
 	    return KFAILURE;
 	memcpy(st_rlm, realm, (size_t)len);
-	len = krb_strnlen(service, sizeof(st_nam)) + 1;
+	len = krb4int_strnlen(service, sizeof(st_nam)) + 1;
 	if (len <= 0)
 	    return KFAILURE;
 	memcpy(st_nam, service, (size_t)len);
-	len = krb_strnlen(instance, sizeof(st_inst)) + 1;
+	len = krb4int_strnlen(instance, sizeof(st_inst)) + 1;
 	if (len <= 0)
 	    return KFAILURE;
 	memcpy(st_inst, instance, (size_t)len);
@@ -366,17 +366,17 @@ krb_rd_req(authent, service, instance, from_addr, ad, fn)
 
     ret = RD_AP_MODIFIED;
 
-    len = krb_strnlen((char *)ptr, REQID_REMAIN) + 1;
+    len = krb4int_strnlen((char *)ptr, REQID_REMAIN) + 1;
     if (len <= 0 || len > ANAME_SZ)
 	goto cleanup;
     memcpy(r_aname, ptr, (size_t)len); /* Authentication name */
     ptr += len;
-    len = krb_strnlen((char *)ptr, REQID_REMAIN) + 1;
+    len = krb4int_strnlen((char *)ptr, REQID_REMAIN) + 1;
     if (len <= 0 || len > INST_SZ)
 	goto cleanup;
     memcpy(r_inst, ptr, (size_t)len); /* Authentication instance */
     ptr += len;
-    len = krb_strnlen((char *)ptr, REQID_REMAIN) + 1;
+    len = krb4int_strnlen((char *)ptr, REQID_REMAIN) + 1;
     if (len <= 0 || len > REALM_SZ)
 	goto cleanup;
     memcpy(r_realm, ptr, (size_t)len); /* Authentication name */

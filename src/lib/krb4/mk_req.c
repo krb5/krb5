@@ -197,13 +197,13 @@ krb_mk_req(authent, service, instance, realm, checksum)
     memcpy(q, myrealm, myrealmlen);
     q += myrealmlen;
     /* Checksum */
-    KRB4_PUT32(q, checksum);
+    KRB4_PUT32BE(q, checksum);
 
     /* Fill in the times on the request id */
     time_secs = TIME_GMT_UNIXSEC_US (&time_usecs);
     *q++ = time_usecs;		/* time_usecs % 255 */
     /* Time (coarse) */
-    KRB4_PUT32(q, time_secs);
+    KRB4_PUT32BE(q, time_secs);
 
     /* Fill to a multiple of 8 bytes for DES */
     req_id->length = ((q - req_id->dat + 7) / 8) * 8;

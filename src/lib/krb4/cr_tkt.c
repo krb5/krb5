@@ -199,7 +199,7 @@ krb_cr_tkt_int(tkt, flags_in, pname, pinstance, prealm, paddress,
     data += 8;
     *data++ = life;
     /* issue time */
-    KRB4_PUT32(data, time_sec);
+    KRB4_PUT32BE(data, time_sec);
 
     memcpy(data, sname, snamelen);
     data += snamelen;

@@ -53,6 +53,8 @@ OBJS	= \
 	$(OUTPRE)mk_safe.$(OBJEXT) \
 	$(OUTPRE)month_sname.$(OBJEXT) \
 	$(OUTPRE)one.$(OBJEXT) \
+	$(OUTPRE)prot_common.$(OBJEXT) \
+	$(OUTPRE)prot_kdc.$(OBJEXT) \
 	$(OUTPRE)pkt_cipher.$(OBJEXT) \
 	$(OUTPRE)pkt_clen.$(OBJEXT) \
 	$(OUTPRE)rd_err.$(OBJEXT) \
@@ -92,6 +94,8 @@ SRCS = \
 	$(srcdir)/one.c \
 	$(srcdir)/pkt_cipher.c \
 	$(srcdir)/pkt_clen.c \
+	$(srcdir)/prot_common.c \
+	$(srcdir)/prot_kdc.c \
 	$(srcdir)/rd_err.c \
 	$(srcdir)/rd_priv.c \
 	$(srcdir)/rd_safe.c \

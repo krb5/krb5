@@ -117,16 +117,16 @@ create_auth_reply(pname, pinst, prealm, time_ws, n, x_date, kvno, cipher)
     p += prealmlen;
 
     /* Workstation timestamp */
-    KRB4_PUT32(p, time_ws);
+    KRB4_PUT32BE(p, time_ws);
 
     *p++ = n;
 
     /* Expiration date */
-    KRB4_PUT32(p, x_date);
+    KRB4_PUT32BE(p, x_date);
 
     /* Now send the ciphertext and info to help decode it */
     *p++ = kvno;
-    KRB4_PUT16(p, cipher->length);
+    KRB4_PUT16BE(p, cipher->length);
     memcpy(p, cipher->dat, (size_t)cipher->length);
     p += cipher->length;
 

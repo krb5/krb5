@@ -74,7 +74,7 @@ krb_mk_err(p, e, e_string)
     *p++ = AUTH_MSG_APPL_ERR;
 
     /* Add the basic info */
-    KRB4_PUT32(p, e);
+    KRB4_PUT32BE(p, e);
     memcpy(p, e_string, e_len); /* err text */
     p += e_len;
 

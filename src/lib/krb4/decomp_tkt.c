@@ -1,7 +1,7 @@
 /*
  * lib/krb4/decomp_tkt.c
  *
- * Copyright 1985, 1986, 1987, 1988, 2000 by the Massachusetts
+ * Copyright 1985, 1986, 1987, 1988, 2000, 2001 by the Massachusetts
  * Institute of Technology.  All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -213,19 +213,19 @@ dcmp_tkt_int(tkt, flags, pname, pinstance, prealm, paddress, session,
     *flags = *ptr++;
     tkt_le = (*flags >> K_FLAG_ORDER) & 1;
 
-    len = krb_strnlen((char *)ptr, TKT_REMAIN) + 1;
+    len = krb4int_strnlen((char *)ptr, TKT_REMAIN) + 1;
     if (len <= 0 || len > ANAME_SZ)
 	goto cleanup;
     memcpy(pname, ptr, (size_t)len);
     ptr += len;
 
-    len = krb_strnlen((char *)ptr, TKT_REMAIN) + 1;
+    len = krb4int_strnlen((char *)ptr, TKT_REMAIN) + 1;
     if (len <= 0 || len > INST_SZ)
 	goto cleanup;
     memcpy(pinstance, ptr, (size_t)len);
     ptr += len;
 
-    len = krb_strnlen((char *)ptr, TKT_REMAIN) + 1;
+    len = krb4int_strnlen((char *)ptr, TKT_REMAIN) + 1;
     if (len <= 0 || len > REALM_SZ)
 	goto cleanup;
     memcpy(prealm, ptr, (size_t)len);
@@ -258,13 +258,13 @@ dcmp_tkt_int(tkt, flags, pname, pinstance, prealm, paddress, session,
 
     KRB4_GET32(*time_sec, ptr, tkt_le);
 
-    len = krb_strnlen((char *)ptr, TKT_REMAIN) + 1;
+    len = krb4int_strnlen((char *)ptr, TKT_REMAIN) + 1;
     if (len <= 0 || len > SNAME_SZ)
 	goto cleanup;
     memcpy(sname, ptr, (size_t)len);
     ptr += len;
 
-    len = krb_strnlen((char *)ptr, TKT_REMAIN) + 1;
+    len = krb4int_strnlen((char *)ptr, TKT_REMAIN) + 1;
     if (len <= 0 || len > INST_SZ)
 	goto cleanup;
     memcpy(sinstance, ptr, (size_t)len);

@@ -1,7 +1,7 @@
 /*
  * lib/krb4/strnlen.c
  *
- * Copyright 2000 by the Massachusetts Institute of Technology.
+ * Copyright 2000, 2001 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -27,15 +27,17 @@
 
 #include <stddef.h>
 #include "krb.h"
+#include "prot.h"
+
 /*
- * krb_strnlen()
+ * krb4int_strnlen()
  *
  * Return the length of the string if a NUL is found in the first n
  * bytes, otherwise, -1.
  */
 
 int KRB5_CALLCONV
-krb_strnlen(const char *s, int n)
+krb4int_strnlen(const char *s, int n)
 {
     int i = 0;
 

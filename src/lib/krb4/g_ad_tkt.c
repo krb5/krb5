@@ -116,7 +116,7 @@ g_ad_tkt_parse(KTEXT rpkt, C_Block tgtses, C_Block ses,
      * these?
      */
     for (i = 0; i < 3; i++) {
-	len = krb_strnlen((char *)ptr, RPKT_REMAIN) + 1;
+	len = krb4int_strnlen((char *)ptr, RPKT_REMAIN) + 1;
 	if (len <= 0)
 	    return INTK_PROT;
 	ptr += len;
@@ -128,8 +128,9 @@ g_ad_tkt_parse(KTEXT rpkt, C_Block tgtses, C_Block ses,
 	ptr += 4 + 1 + 4 + 1;
 	break;
     case AUTH_MSG_ERR_REPLY:
-	if (RPKT_REMAIN < 4)
+	if (RPKT_REMAIN < 8)
 	    return INTK_PROT;
+	ptr += 4;
 	KRB4_GET32(rep_err_code, ptr, msg_byte_order);
 	return rep_err_code;
 
@@ -175,19 +176,19 @@ g_ad_tkt_parse(KTEXT rpkt, C_Block tgtses, C_Block ses,
     memset(ptr, 0, 8);
     ptr += 8;
 
-    len = krb_strnlen((char *)ptr, CIP_REMAIN) + 1;
+    len = krb4int_strnlen((char *)ptr, CIP_REMAIN) + 1;
     if (len <= 0 || len > SNAME_SZ)
 	return RD_AP_MODIFIED;
     memcpy(s_name, ptr, (size_t)len);
     ptr += len;
 
-    len = krb_strnlen((char *)ptr, CIP_REMAIN) + 1;
+    len = krb4int_strnlen((char *)ptr, CIP_REMAIN) + 1;
     if (len <= 0 || len > INST_SZ)
 	return RD_AP_MODIFIED;
     memcpy(s_instance, ptr, (size_t)len);
     ptr += len;
 
-    len = krb_strnlen((char *)ptr, CIP_REMAIN) + 1;
+    len = krb4int_strnlen((char *)ptr, CIP_REMAIN) + 1;
     if (len <= 0 || len > REALM_SZ)
 	return RD_AP_MODIFIED;
     memcpy(rlm, ptr, (size_t)len);
@@ -317,7 +318,7 @@ get_ad_tkt(service, sinstance, realm, lifetime)
     }
 
     /* timestamp */   /* FIXME -- always 0 now, should we fill it in??? */
-    KRB4_PUT32(ptr, time_ws);
+    KRB4_PUT32BE(ptr, time_ws);
 
     *ptr++ = lifetime;
 

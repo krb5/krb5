@@ -117,7 +117,7 @@ krb_mk_safe(in, out, length, key, sender, receiver)
 
     q = p;			/* start for checksum stuff */
     /* stuff input length */
-    KRB4_PUT32(p, length);
+    KRB4_PUT32BE(p, length);
 
     /* make all the stuff contiguous for checksum */
     memcpy(p, in, length);
@@ -151,7 +151,7 @@ krb_mk_safe(in, out, length, key, sender, receiver)
      */
 
     /* stuff time sec */
-    KRB4_PUT32(p, msg_time_sec);
+    KRB4_PUT32BE(p, msg_time_sec);
 
 #ifdef NOENCRYPTION
     cksum = 0;
@@ -165,7 +165,7 @@ krb_mk_safe(in, out, length, key, sender, receiver)
 
     /* stuff checksum */
     for (i = 0; i < 4; i++)
-	KRB4_PUT32(p, big_cksum[i]);
+	KRB4_PUT32BE(p, big_cksum[i]);
 
     return p - out;		/* resulting size */
 }

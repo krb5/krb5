@@ -1,7 +1,7 @@
 /*
  * lib/krb4/mk_auth.c
  *
- * Copyright 1987, 1988, 2000 by the Massachusetts Institute of
+ * Copyright 1987, 1988, 2000, 2001 by the Massachusetts Institute of
  * Technology.  All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -29,6 +29,7 @@
 #define	DEFINE_SOCKADDR		/* Ask for sockets declarations from krb.h. */
 #include <stdio.h>
 #include "krb.h"
+#include "prot.h"
 #include <errno.h>
 #include <string.h>
 
@@ -143,7 +144,7 @@ krb_mk_auth(options, ticket, service, inst, realm, checksum, version, buf)
 
     if (!(options & KOPT_DONT_CANON)) {
 	phost = krb_get_phost(inst);
-	phostlen = krb_strnlen(phost, INST_SZ) + 1;
+	phostlen = krb4int_strnlen(phost, INST_SZ) + 1;
 	if (phostlen <= 0 || phostlen > INST_SZ)
 	    return KFAILURE;
 	memcpy(inst, phost, (size_t)phostlen);
@@ -183,7 +184,7 @@ krb_mk_auth(options, ticket, service, inst, realm, checksum, version, buf)
     p += KRB_SENDAUTH_VLEN;
 
     /* put ticket length into buffer */
-    KRB4_PUT32(p, ticket->length);
+    KRB4_PUT32BE(p, ticket->length);
 
     /* put ticket into buffer */
     memcpy(p, ticket->dat, (size_t)ticket->length);

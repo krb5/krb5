@@ -106,9 +106,9 @@ cr_err_reply(pkt,pname,pinst,prealm,time_ws,e,e_string)
     memcpy(p, prealm, prealmlen);
     p += prealmlen;
     /* ws timestamp */
-    KRB4_PUT32(p, time_ws);
+    KRB4_PUT32BE(p, time_ws);
     /* err code */
-    KRB4_PUT32(p, e);
+    KRB4_PUT32BE(p, e);
     /* err text */
     memcpy(p, e_string, e_stringlen);
     p += e_stringlen;

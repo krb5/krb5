@@ -196,7 +196,7 @@ krb_mk_in_tkt_preauth(user, instance, realm, service, sinstance, life,
 
     /* timestamp */
     t_local = TIME_GMT_UNIXSEC;
-    KRB4_PUT32(p, t_local);
+    KRB4_PUT32BE(p, t_local);
 
     *p++ = life;
 
@@ -241,7 +241,7 @@ krb_mk_in_tkt_preauth(user, instance, realm, service, sinstance, life,
      * cr_auth_repl.c for details).
      */
     for (i = 0; i < 3; i++) {
-	len = krb_strnlen((char *)p, RPKT_REMAIN) + 1;
+	len = krb4int_strnlen((char *)p, RPKT_REMAIN) + 1;
 	if (len <= 0)
 	    return INTK_PROT;
 	p += len;
@@ -253,8 +253,9 @@ krb_mk_in_tkt_preauth(user, instance, realm, service, sinstance, life,
 	p += 4 + 1 + 4 + 1;
         break;
     case AUTH_MSG_ERR_REPLY:
-	if (RPKT_REMAIN < 4)
+	if (RPKT_REMAIN < 8)
 	    return INTK_PROT;
+	p += 4;
 	KRB4_GET32(rep_err_code, p, msg_byte_order);
 	return rep_err_code;
     default:
@@ -316,21 +317,21 @@ krb_parse_in_tkt(user, instance, realm, service, sinstance, life, cip,
     ptr += 8;
 
     /* extract server's name */
-    len = krb_strnlen((char *)ptr, CIP_REMAIN) + 1;
+    len = krb4int_strnlen((char *)ptr, CIP_REMAIN) + 1;
     if (len <= 0 || len > sizeof(s_name))
 	return INTK_BADPW;
     memcpy(s_name, ptr, (size_t)len);
     ptr += len;
 
     /* extract server's instance */
-    len = krb_strnlen((char *)ptr, CIP_REMAIN) + 1;
+    len = krb4int_strnlen((char *)ptr, CIP_REMAIN) + 1;
     if (len <= 0 || len > sizeof(s_instance))
 	return INTK_BADPW;
     memcpy(s_instance, ptr, (size_t)len);
     ptr += len;
 
     /* extract server's realm */
-    len = krb_strnlen((char *)ptr, CIP_REMAIN) + 1;
+    len = krb4int_strnlen((char *)ptr, CIP_REMAIN) + 1;
     if (len <= 0 || len > sizeof(rlm))
 	return INTK_BADPW;
     memcpy(rlm, ptr, (size_t)len);
