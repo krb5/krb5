@@ -64,8 +64,6 @@ static krb5_error_code decode_princ_contents
     PROTOTYPE((datum *,
 	       krb5_db_entry * ));
 static void free_decode_princ_contents PROTOTYPE((krb5_db_entry * ));
-static krb5_error_code krb5_dbm_db_lock PROTOTYPE((int ));
-static krb5_error_code krb5_dbm_db_unlock PROTOTYPE((void ));
 
 #if 0
 /* not used */
@@ -538,7 +536,7 @@ krb5_db_entry *entry;
     return;
 }
 
-static krb5_error_code
+krb5_error_code
 krb5_dbm_db_lock(mode)
 int mode;
 {
@@ -569,13 +567,13 @@ int mode;
     return 0;
 }
 
-static krb5_error_code
+krb5_error_code
 krb5_dbm_db_unlock()
 {
     if (!mylock)		/* lock already unlocked */
 	return KRB5_KDB_NOTLOCKED;
 
-    if (--mylock) {
+    if (--mylock == 0) {
 	    if (flock(dblfd, LOCK_UN) < 0)
 		    return errno;
     }
