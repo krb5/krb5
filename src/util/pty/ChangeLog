@@ -15,6 +15,10 @@ Wed Dec  3 17:16:44 1997  Tom Yu  <tlyu@mit.edu>
 	* open_slave.c (pty_open_slave): Check to ensure that the slave
 	name is not NULL or zero-length.
 
+Tue Jun  3 23:05:07 1997  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* getpty.c (pty_getpty): Remove erroneous space from the HPUX open().
+
 Thu Dec  5 22:43:35 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* update_utmp.c (pty_update_utmp): Apply platform specific patch
