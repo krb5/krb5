@@ -84,12 +84,14 @@
 #include <stdlib.h>
 #include <limits.h>		/* for *_MAX */
 
-#if defined(__cplusplus) && !defined(KRB5INT_BEGIN_DECLS)
+#ifndef KRB5INT_BEGIN_DECLS
+#if defined(__cplusplus)
 #define KRB5INT_BEGIN_DECLS	extern "C" {
 #define KRB5INT_END_DECLS	}
 #else
 #define KRB5INT_BEGIN_DECLS
 #define KRB5INT_END_DECLS
+#endif
 #endif
 
 KRB5INT_BEGIN_DECLS
