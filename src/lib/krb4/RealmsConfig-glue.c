@@ -226,6 +226,8 @@ krb_get_lrealm(
         if (!profileErr) {
             if (strlen (profileDefaultRealm) < REALM_SZ) {
                 profileHasDefaultRealm = 1;  /* a reasonable default realm */
+            } else {
+                profileErr = KFAILURE;
             }
         }
 
@@ -260,8 +262,6 @@ krb_get_lrealm(
                 if (strlen(scratch) < REALM_SZ) {
                     strncpy(krbConfLocalRealm, scratch, REALM_SZ);
                     krbConfHasLocalRealm = 1;
-                } else {
-                    result = KFAILURE; /* Invalid config file! */
                 }
             }
             fclose(cnffile);
