@@ -1,3 +1,11 @@
+Tue Feb 18 17:43:55 1997  Richard Basch  <basch@lehman.com>
+
+	* krb5.hin:
+		Added prototypes for krb5_free_data, krb5_free_data_contents
+		Moved krb5_xfree definition to k5-int.h
+	* k5-int.h:
+		krb5_xfree is an internal macro
+
 Mon Feb 17 13:58:45 1997  Richard Basch  <basch@lehman.com>
 
 	* win-mac.h: Added KRB4 Windows INI related definitions.

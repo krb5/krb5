@@ -1263,4 +1263,8 @@ int krb5_seteuid  KRB5_PROTOTYPE((int));
 int krb5_setenv  KRB5_PROTOTYPE((const char *, const char *, int));
 
 void krb5_unsetenv  KRB5_PROTOTYPE((const char *));
+
+/* to keep lint happy */
+#define krb5_xfree(val) free((char FAR *)(val))
+
 #endif /* _KRB5_INT_H */

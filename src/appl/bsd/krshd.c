@@ -1850,7 +1850,7 @@ recvauth(netf, peersin, valid_checksum)
 
     error_cleanup:
 	if (chksumbuf)
-	    krb5_xfree(chksumbuf);
+	    free(chksumbuf);
 	if (status) {
 	    krb5_free_authenticator(bsd_context, authenticator);
 	    return status;

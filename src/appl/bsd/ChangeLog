@@ -1,3 +1,8 @@
+Tue Feb 18 18:03:55 1997  Richard Basch  <basch@lehman.com>
+
+	* krcp.c: Replace krb5_xfree with krb5_free_data_contents
+	* kcmd.c krlogind.c krshd.c: Use free instead of internal krb5_xfree
+
 Sat Dec 28 21:06:43 1996  Sam Hartman  <hartmans@luminous.MIT.EDU>
 
 	* login.c: Force environment variables like HOME to be set even if

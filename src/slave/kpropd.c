@@ -324,12 +324,12 @@ void doit(fd)
 	 */
 	if (retval = krb5_write_message(kpropd_context, (void *) &fd,
 					&confmsg)) { 
-		krb5_xfree(confmsg.data);
+		krb5_free_data_contents(context, &confmsg);
 		com_err(progname, retval,
 			"while sending # of received bytes");
 		exit(1);
 	}
-	krb5_xfree(confmsg.data);
+	krb5_free_data_contents(context, &confmsg);
 	if (close(fd) < 0) {
 		com_err(progname, errno,
 			"while trying to close database file");
@@ -652,14 +652,14 @@ recv_database(context, fd, database_fd, confmsg)
 		recv_error(context, &inbuf);
 	if (retval = krb5_rd_safe(context,auth_context,&inbuf,&outbuf,NULL)) {
 		send_error(context, fd, retval, "while decoding database size");
-		krb5_xfree(inbuf.data);
+		krb5_free_data_contents(context, &inbuf);
 		com_err(progname, retval,
 			"while decoding database size from client");
 		exit(1);
 	}
 	memcpy((char *) &database_size, outbuf.data, sizeof(database_size));
-	krb5_xfree(inbuf.data);
-	krb5_xfree(outbuf.data);
+	krb5_free_data_contents(context, &inbuf);
+	krb5_free_data_contents(context, &outbuf);
 	database_size = ntohl(database_size);
 
     /*
@@ -693,12 +693,12 @@ recv_database(context, fd, database_fd, confmsg)
 				received_size);
 			com_err(progname, retval, buf);
 			send_error(context, fd, retval, buf);
-			krb5_xfree(inbuf.data);
+			krb5_free_data_contents(context, &inbuf);
 			exit(1);
 		}
 		n = write(database_fd, outbuf.data, outbuf.length);
-		krb5_xfree(inbuf.data);
-		krb5_xfree(outbuf.data);
+		krb5_free_data_contents(context, &inbuf);
+		krb5_free_data_contents(context, &outbuf);
 		if (n < 0) {
 			sprintf(buf,
 				"while writing database block starting at offset %d",
@@ -774,7 +774,7 @@ send_error(context, fd, err_code, err_text)
 		strcpy(error.text.data, text);
 		if (!krb5_mk_error(context, &error, &outbuf)) {
 			(void) krb5_write_message(context, (void *)&fd,&outbuf);
-			krb5_xfree(outbuf.data);
+			krb5_free_data_contents(context, &outbuf);
 		}
 		free(error.text.data);
 	}

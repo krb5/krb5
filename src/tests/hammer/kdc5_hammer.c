@@ -458,8 +458,7 @@ cleanup_keyblock:
     krb5_free_keyblock(context, keyblock);
 
 cleanup_rdata:
-    krb5_xfree(request_data.data);
-
+    krb5_free_data_contents(context, &request_data);
     krb5_free_cred_contents(context, credsp);
 
     return retval;

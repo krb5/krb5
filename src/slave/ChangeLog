@@ -1,3 +1,7 @@
+Tue Feb 18 18:18:44 1997  Richard Basch  <basch@lehman.com>
+
+	* kprop.c kpropd.c: Use krb5_free_data_contents, where appropriate.
+
 Fri Jan 31 19:22:37 1997  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in:

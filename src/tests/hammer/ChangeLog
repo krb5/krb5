@@ -1,3 +1,8 @@
+Tue Feb 18 18:21:16 1997  Richard Basch  <basch@lehman.com>
+
+	* kdc5_hammer.c (verify_cs_pair):
+		Use krb5_free_data_contents instead of krb5_xfree
+
 Sun Feb  9 01:45:03 1997  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in:

@@ -303,7 +303,7 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
     status = krb5_sendauth(bsd_context, &auth_context, (krb5_pointer) &s,
                            "KCMDV0.1", ret_cred->client, ret_cred->server,
 			   authopts, &cksumdat, ret_cred, 0,	&error, &rep_ret, NULL);
-	krb5_xfree(cksumdat.data);
+    free(cksumbuf);
     if (status) {
 	printf("Couldn't authenticate to server: %s\n", error_message(status));
 	if (error) {

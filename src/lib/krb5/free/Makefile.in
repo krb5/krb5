@@ -15,8 +15,11 @@ STLIBOBJS= \
 	f_authent.o	\
 	f_auth_cnt.o	\
 	f_chksum.o	\
-	f_creds.o	\
+	f_cred.o	\
 	f_cred_cnt.o	\
+	f_cred_enc.o	\
+	f_creds.o	\
+	f_data.o	\
 	f_enc_kdc.o	\
 	f_enc_tkt.o	\
 	f_einfo.o	\
@@ -35,9 +38,7 @@ STLIBOBJS= \
 	f_tgt_cred.o	\
 	f_tkt_auth.o	\
 	f_pwd_data.o	\
-	f_pwd_seq.o	\
-	f_cred.o	\
-	f_cred_enc.o
+	f_pwd_seq.o
 
 OBJS=	\
 	f_addr.$(OBJEXT)	\
@@ -49,8 +50,11 @@ OBJS=	\
 	f_authent.$(OBJEXT)	\
 	f_auth_cnt.$(OBJEXT)	\
 	f_chksum.$(OBJEXT)	\
-	f_creds.$(OBJEXT)	\
+	f_cred.$(OBJEXT)	\
 	f_cred_cnt.$(OBJEXT)	\
+	f_cred_enc.$(OBJEXT)	\
+	f_creds.$(OBJEXT)	\
+	f_data.$(OBJEXT)	\
 	f_enc_kdc.$(OBJEXT)	\
 	f_enc_tkt.$(OBJEXT)	\
 	f_einfo.$(OBJEXT)	\
@@ -69,9 +73,7 @@ OBJS=	\
 	f_tgt_cred.$(OBJEXT)	\
 	f_tkt_auth.$(OBJEXT)	\
 	f_pwd_data.$(OBJEXT)	\
-	f_pwd_seq.$(OBJEXT)	\
-	f_cred.$(OBJEXT)	\
-	f_cred_enc.$(OBJEXT)
+	f_pwd_seq.$(OBJEXT)
 
 SRCS=	\
 	$(srcdir)/f_addr.c	\
@@ -83,8 +85,11 @@ SRCS=	\
 	$(srcdir)/f_authent.c	\
 	$(srcdir)/f_auth_cnt.c	\
 	$(srcdir)/f_chksum.c	\
-	$(srcdir)/f_creds.c	\
+	$(srcdir)/f_cred.c	\
 	$(srcdir)/f_cred_cnt.c	\
+	$(srcdir)/f_cred_enc.c	\
+	$(srcdir)/f_creds.c	\
+	$(srcdir)/f_data.c	\
 	$(srcdir)/f_enc_kdc.c	\
 	$(srcdir)/f_enc_tkt.c	\
 	$(srcdir)/f_einfo.c	\
@@ -103,9 +108,7 @@ SRCS=	\
 	$(srcdir)/f_tgt_cred.c	\
 	$(srcdir)/f_tkt_auth.c	\
 	$(srcdir)/f_pwd_data.c	\
-	$(srcdir)/f_pwd_seq.c	\
-	$(srcdir)/f_cred.c	\
-	$(srcdir)/f_cred_enc.c
+	$(srcdir)/f_pwd_seq.c
 
 all-windows:: $(OBJFILE)
 

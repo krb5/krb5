@@ -1306,7 +1306,8 @@ void
 				  &creds.server)) )
 	exit(1);
 
-    krb5_xfree(pname_data.data);
+    krb5_free_data_contents(bsd_context, &pname_data);
+
     if ((status = krb5_get_credentials(bsd_context, KRB5_GC_USER_USER, cc, 
 				       &creds, &new_creds)))
 	exit(1);
@@ -1318,7 +1319,7 @@ void
     
     if ((status = krb5_write_message(bsd_context, (krb5_pointer) &rem,
 				     &msg))) {
-    	krb5_xfree(msg.data);
+    	krb5_free_data_contents(bsd_context, &msg);
 	exit(1);
     }
     
@@ -1328,7 +1329,7 @@ void
     /* cleanup */
     krb5_free_cred_contents(bsd_context, &creds);
     krb5_free_creds(bsd_context, new_creds);
-    krb5_xfree(msg.data);
+    krb5_free_data_contents(bsd_context, &msg);
     
     /* OK process key */
     krb5_use_enctype(bsd_context, &eblock, session_key->enctype);

@@ -1495,7 +1495,7 @@ recvauth(valid_checksum)
 				      ticket->enc_part2->session->length);
     error_cleanup:
 	if (chksumbuf)
-	    krb5_xfree(chksumbuf);
+	    free(chksumbuf);
 	if (status) {
 	  krb5_free_authenticator(bsd_context, authenticator);
 	  return status;

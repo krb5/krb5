@@ -237,7 +237,7 @@ main(argc, argv)
     if ((i = send(sock, (char *)packet.data, packet.length, flags)) < 0) 
 	com_err(progname, errno, "while sending KRB_AP_REQ message");
     printf("Sent authentication data: %d bytes\n", i);
-    krb5_xfree(packet.data);
+    krb5_free_data_contents(context, &packet);
 
     /* PREPARE KRB_SAFE MESSAGE */
 
@@ -305,7 +305,7 @@ main(argc, argv)
     if ((i = send(sock, (char *)packet.data, packet.length, flags)) < 0)
 	com_err(progname, errno, "while sending SAFE message");
     printf("Sent checksummed message: %d bytes\n", i);
-    krb5_xfree(packet.data);
+    krb5_free_data_contents(context, &packet);
 
     /* PREPARE KRB_PRIV MESSAGE */
 
@@ -320,7 +320,7 @@ main(argc, argv)
     if ((i = send(sock, (char *)packet.data, packet.length, flags)) < 0)
 	com_err(progname, errno, "while sending PRIV message");
     printf("Sent encrypted message: %d bytes\n", i);
-    krb5_xfree(packet.data);
+    krb5_free_data_contents(context, &packet);
 
     krb5_auth_con_free(context, auth_context);
     krb5_free_context(context);

@@ -1,3 +1,7 @@
+Tue Feb 18 18:11:03 1997  Richard Basch  <basch@lehman.com>
+
+	* sim_client.c: Replace krb5_xfree with krb5_free_data_contents
+
 Tue Feb  4 20:38:44 1997  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in:

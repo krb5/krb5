@@ -1,3 +1,9 @@
+Tue Feb 18 17:42:52 1997  Richard Basch  <basch@lehman.com>
+
+	* Makefile.in f_data.c:
+		f_data.c now implements the functions
+		krb5_free_data, krb5_free_data_contents
+
 Thu Nov 21 11:55:16 EST 1996    Richard Basch   <basch@lehman.com>
 
         * Makefile.in: win32 build

@@ -244,7 +244,7 @@ char *argv[];
     }
     printf("Safe message is: '%.*s'\n", message.length, message.data);
 
-    krb5_xfree(message.data);
+    krb5_free_data_contents(context, &message);
 
     /* NOW GET ENCRYPTED MESSAGE */
 

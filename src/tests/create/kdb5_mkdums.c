@@ -282,10 +282,10 @@ add_princ(context, str_newprinc)
 				        &key, &pwd, &salt)) {
 	    com_err(progname,retval,"while converting password to key for '%s'",
 		    princ_name);
-	    krb5_xfree(salt.data);
+	    krb5_free_data_contents(context, &salt);
 	    goto error;
 	}
-	krb5_xfree(salt.data);
+	krb5_free_data_contents(context, &salt);
 
 	if (retval = krb5_dbe_create_key_data(context, &newentry)) {
 	    com_err(progname, retval, "while creating key_data for '%s'",

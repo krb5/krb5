@@ -1,3 +1,7 @@
+Tue Feb 18 18:12:16 1997  Richard Basch  <basch@lehman.com>
+
+	* sim_server.c: Use krb5_free_data_contents instead of krb5_xfree
+
 Tue Feb  4 20:41:49 1997  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in:

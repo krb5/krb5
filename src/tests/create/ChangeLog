@@ -1,3 +1,8 @@
+Tue Feb 18 18:20:14 1997  Richard Basch  <basch@lehman.com>
+
+	* kdb5_mkdums.c (add_princ): 
+		Replace krb5_xfree with krb5_free_data_contents
+
 Sun Feb  9 01:35:19 1997  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in:

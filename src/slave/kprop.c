@@ -546,11 +546,11 @@ xmit_database(context, auth_context, my_creds, fd, database_fd, database_size)
 		exit(1);
 	}
 	if (retval = krb5_write_message(context, (void *) &fd, &outbuf)) {
-		krb5_xfree(outbuf.data);
+		krb5_free_data_contents(context, &outbuf);
 		com_err(progname, retval, "while sending database size");
 		exit(1);
 	}
-	krb5_xfree(outbuf.data);
+	krb5_free_data_contents(context, &outbuf);
     /*
      * Initialize the initial vector.
      */
@@ -577,13 +577,13 @@ xmit_database(context, auth_context, my_creds, fd, database_fd, database_size)
 			exit(1);
 		}
 		if (retval = krb5_write_message(context, (void *)&fd,&outbuf)) {
-			krb5_xfree(outbuf.data);
+			krb5_free_data_contents(context, &outbuf);
 			com_err(progname, retval,
 				"while sending database block starting at %d",
 				sent_size);
 			exit(1);
 		}
-		krb5_xfree(outbuf.data);
+		krb5_free_data_contents(context, &outbuf);
 		sent_size += n;
 		if (debug)
 			printf("%d bytes sent.\n", sent_size);
@@ -674,7 +674,7 @@ send_error(context, my_creds, fd, err_text, err_code)
 		strcpy(error.text.data, text);
 		if (!krb5_mk_error(context, &error, &outbuf)) {
 			(void) krb5_write_message(context, (void *)&fd,&outbuf);
-			krb5_xfree(outbuf.data);
+			krb5_free_data_contents(context, &outbuf);
 		}
 		free(error.text.data);
 	}
