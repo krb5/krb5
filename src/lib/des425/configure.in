@@ -4,6 +4,20 @@ AC_PROG_ARCHIVE
 AC_PROG_ARCHIVE_ADD
 AC_PROG_RANLIB
 AC_PROG_INSTALL
+dnl
+AC_MSG_CHECKING([if pragma weak supported])
+AC_CACHE_VAL(krb5_cv_pragma_weak,
+[AC_TRY_LINK(
+[#pragma weak testit = __testit
+int __testit = 1;],
+[extern int testit;
+exit(testit);],
+krb5_cv_pragma_weak=yes, krb5_cv_pragma_weak=no)])
+AC_MSG_RESULT($krb5_cv_pragma_weak)
+if test $krb5_cv_pragma_weak = yes; then
+AC_DEFINE(HAVE_PRAGMA_WEAK)
+fi
+dnl
 V5_SHARED_LIB_OBJS
 SubdirLibraryRule([${OBJS}])
 LinkFileDir(../libdes425.a, libdes425.a, ./des425)

@@ -1,4 +1,4 @@
-CFLAGS = $(CCOPTS) $(DEFS) -I$(srcdir)/../crypto/des
+CFLAGS = $(CCOPTS) $(DEFS) -I$(srcdir)/../crypto/des -I$(srcdir)/../../include/kerberosIV
 LDFLAGS = -g
 
 ##DOSBUILDTOP = ..\..
@@ -22,7 +22,8 @@ OBJS=	cksum.$(OBJEXT)		\
 	str_to_key.$(OBJEXT)	\
 	unix_time.$(OBJEXT)     \
 	util.$(OBJEXT)		\
-	weak_key.$(OBJEXT)	
+	weak_key.$(OBJEXT)	\
+	k4_glue.$(OBJEXT)
 
 SRCS=	$(srcdir)/cksum.c	\
 	$(srcdir)/des.c		\
@@ -37,7 +38,8 @@ SRCS=	$(srcdir)/cksum.c	\
 	$(srcdir)/str_to_key.c \
 	$(srcdir)/unix_time.c   \
 	$(srcdir)/util.c	\
-	$(srcdir)/weak_key.c	
+	$(srcdir)/weak_key.c	\
+	$(srcdir)/k4_glue.c
 
 LIB_SUBDIRS= .
 LIBDONE= DONE

@@ -1,4 +1,10 @@
 
+Fri Jun 16 17:00:04 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* k4_glue.c - Add this module with the "req_act_vno" symbol definition
+		so that we can use old versions of K4.
+	* configure.in - Check for #pragma weak.
+	* Makefile.in - Add k4_glue.c, Add K4 to include list.
+
 Fri Jun 16 11:15:11 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* configure.in - Add install target for shared library.
 
