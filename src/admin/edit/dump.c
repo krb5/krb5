@@ -46,6 +46,8 @@ struct dump_record {
 	FILE	*f;
 };
 
+static char ld_vers[] = "kdb5_edit load_dump version 1.0\n";
+
 krb5_encrypt_block master_encblock;
 extern char *current_dbname;
 extern krb5_boolean dbactive;
@@ -76,9 +78,14 @@ krb5_db_entry *entry;
     for (i=0; i<entry->key.length; i++) {
 	    fprintf(arg->f, "%02x", *(entry->key.contents+i));
     }
-    fprintf(arg->f, "\t%u\t%u\t%u\t%u\t%u\t%s\t%u\t%u\n", entry->kvno,
-	   entry->max_life, entry->max_renewable_life, entry->mkvno,
-	   entry->expiration, mod_name, entry->mod_date, entry->attributes);
+    fprintf(arg->f, "\t%u\t%u\t%u\t%u\t%u\t%s\t%u\t%u\t%u\t%u\t", entry->kvno,
+	    entry->max_life, entry->max_renewable_life, entry->mkvno,
+	    entry->expiration, mod_name, entry->mod_date, entry->attributes,
+	    entry->salt_type, entry->salt_length);
+    for (i=0; i<entry->salt_length; i++) {
+	    fprintf(arg->f, "%02x", *(entry->salt+i));
+    }
+    fprintf(arg->f, ";\n");
     free(name);
     free(mod_name);
     return 0;
@@ -120,6 +127,7 @@ void dump_db(argc, argv)
 	} else {
 		f = stdout;
 	}
+	fputs(ld_vers, f);
 	arg.comerr_name = argv[0];
 	arg.f = f;
 	(void) krb5_db_iterate(dump_iterator, (krb5_pointer) &arg);
@@ -167,7 +175,11 @@ void load_db(argc, argv)
 	int	name_len, mod_name_len,i,one;
 	char	*name, *mod_name;
 	char	*new_dbname;
+	int	ch;
 	int	load_error = 0;
+	int	lineno = 0;
+	int	stype, slength;
+	char	buf[64];	/* Must be longer than ld_vers */
 	
 	if (argc != 3) {
 		com_err(argv[0], 0, "Usage: %s filename dbname", argv[0]);
@@ -210,7 +222,14 @@ void load_db(argc, argv)
 			"While opening file %s for writing", argv[1]);
 		return;
 	}
+	fgets(buf, sizeof(buf), f);
+	if (strcmp(buf, ld_vers)) {
+		com_err(argv[0], 0, "Bad dump file version");
+		load_error++;
+		goto error_out;
+	}
 	for (;;) {
+		lineno++;
 		memset((char *)&entry, 0, sizeof(entry));
 		if (fscanf(f,"%d\t%d\t", &name_len, &mod_name_len) == EOF)
 			break;
@@ -227,8 +246,12 @@ void load_db(argc, argv)
 			load_error++;
 			break;
 		}
-		fscanf(f, "%s\t%d\t%d\t", name, &entry.key.keytype,
-		       &entry.key.length);
+		if (fscanf(f, "%s\t%d\t%d\t", name, &entry.key.keytype,
+			   &entry.key.length) != 3) {
+			fprintf(stderr, "Couldn't parse line #%d\n", lineno);
+			load_error++;
+			break;
+		}
 		if (!(entry.key.contents = (krb5_octet *) malloc(entry.key.length+1))) {
 			free(name);
 			free(mod_name);
@@ -238,23 +261,65 @@ void load_db(argc, argv)
 			break;
 		}
 		for (i=0; i<entry.key.length; i++) {
-			fscanf(f,"%02x", entry.key.contents+i);
+			if (fscanf(f,"%02x", entry.key.contents+i) != 1) {
+				fprintf(stderr, "Couldn't parse line #%d\n",
+					lineno);
+				load_error++;
+				break;
+			}
 		}
-		fscanf(f, "\t%u\t%u\t%u\t%u\t%u\t%s\t%u\t%u\n",
-			&entry.kvno, &entry.max_life,
-			&entry.max_renewable_life, &entry.mkvno,
-			&entry.expiration, mod_name, &entry.mod_date,
-			&entry.attributes);
+		if (fscanf(f, "\t%u\t%u\t%u\t%u\t%u\t%s\t%u\t%u\t%u\t%u\t",
+			   &entry.kvno, &entry.max_life,
+			   &entry.max_renewable_life, &entry.mkvno,
+			   &entry.expiration, mod_name, &entry.mod_date,
+			   &entry.attributes, &stype,
+			   &slength) != 10) {
+			fprintf(stderr, "Couldn't parse line #%d\n",
+				lineno);
+			load_error++;
+			break;
+		}
+		entry.salt_type = stype;
+		entry.salt_length = slength;
+		if (slength) {
+			if (!(entry.salt = (krb5_octet *) malloc(slength+1))) {
+				free(name);
+				free(mod_name);
+				xfree(entry.key.contents);
+				com_err(argv[0], errno,
+					"While allocating speace for the salt");
+				load_error++;
+				break;
+			}
+		} else
+			entry.salt = 0;
+		for (i=0; i <entry.salt_length; i++) {
+			if (fscanf(f, "%02x", entry.salt+i) != 1) {
+				fprintf(stderr, "Couldn't parse line #%d\n",
+					lineno);
+				load_error++;
+				break;
+			}
+		}
+		if (((ch = fgetc(f)) != ';') || ((ch = fgetc(f)) != '\n')) {
+			fprintf(stderr, "Ignoring trash at end of entry: ");
+			while (ch != '\n') {
+				putc(ch, stderr);
+				ch = fgetc(f);
+			}
+			putc(ch, stderr);
+		}
 		if (retval=krb5_parse_name(name, &entry.principal)) {
-			com_err(argv[0], retval, "while trying to parse %s",
-				name);
+			com_err(argv[0], retval,
+				"while trying to parse %s in line %d",
+				name, lineno);
 			load_error++;
 			goto cleanup;
 		}
 		if (retval=krb5_parse_name(mod_name, &entry.mod_name)) {
 			com_err(argv[0], retval,
-				"while trying to parse %s for %s",
-				mod_name, name);
+				"while trying to parse %s in line %d",
+				mod_name, lineno);
 			load_error++;
 			goto cleanup;
 		}
@@ -271,6 +336,7 @@ void load_db(argc, argv)
 		free(mod_name);
 		xfree(entry.key.contents);
 	}
+error_out:
 	if (retval = krb5_db_fini()) {
 		com_err(argv[0], retval,
 			"while closing database '%s'", new_dbname);
