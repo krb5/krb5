@@ -1391,4 +1391,7 @@ krb5_error_code krb5_ser_unpack_bytes KRB5_PROTOTYPE((krb5_octet *,
 
 int krb5_seteuid  KRB5_PROTOTYPE((int));
 
+int krb5_setenv  KRB5_PROTOTYPE((const char *, const char *, int));
+
+void krb5_unsetenv  KRB5_PROTOTYPE((const char *));
 #endif /* _KRB5_INT_H */
