@@ -30,6 +30,7 @@ libkrb5.a: $(LIBDONE)
 		done ; \
 	fi
 	$(RANLIB) libkrb5.a
+	touch libkrb5.stamp
 
 install:: 
 	$(INSTALL_DATA) libkrb5.a $(DESTDIR)$(KRB5_LIBDIR)/libkrb5.a
@@ -38,7 +39,7 @@ install::
 clean:: clean-$(WHAT)
 
 clean-unix::
-	$(RM) libkrb5.$(LIBEXT) 
+	$(RM) libkrb5.$(LIBEXT) libkrb5.stamp
 
 clean-windows::
 	$(RM) krb5.lib krb5.bak
