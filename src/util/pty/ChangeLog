@@ -1,3 +1,11 @@
+Sun Oct 22 03:48:37 1995  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* update_wtmp.c (ptyint_update_wtmp): Add comments explaining why ifdefs are right.
+
+Sun Oct 22 01:20:52 1995  Sam Hartman  <hartmans@infocalypse>
+
+	* update_wtmp.c (ptyint_update_wtmp): Try utx not uts.
+
 Mon Oct 16 17:41:45 1995  Sam Hartman  <hartmans@tertius.mit.edu>
 
 

@@ -42,12 +42,13 @@ long ptyint_update_wtmp (ent , host)
     getutmpx(ent, &utx);
 if (host)
     strncpy(utx.ut_host, host, sizeof(utx.ut_host) );
-    else uts.ut_host[0] = 0;
+    else utx.ut_host[0] = 0;
     updwtmpx(WTMPX_FILE, &utx);
 #endif
 
 #ifdef HAVE_UPDWTMP
 #ifndef HAVE_SETUTXENT
+/* This is already performed byupdwtmpx if present.*/
     updwtmp(WTMP_FILE, ent);
 #endif /* HAVE_SETUTXENT*/
 #else /* HAVE_UPDWTMP */
