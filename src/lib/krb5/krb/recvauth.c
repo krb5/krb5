@@ -297,10 +297,12 @@ krb5_recvauth(/* IN */
 	 * up, and exit.
 	 */
 	if (client)
-		if (retval =
-		    krb5_copy_principal(authdat->ticket->enc_part2->client,
-					client))
-			return(retval);
+	    if (retval =
+		krb5_copy_principal(authdat->ticket->enc_part2->client,
+				    client)) {
+		krb5_free_tkt_authent(authdat);
+		return(retval);
+	    }
 	/*
 	 * The following efficiency hack assumes knowledge about the
 	 * structure of krb5_tkt_authent.  If we later add additional
