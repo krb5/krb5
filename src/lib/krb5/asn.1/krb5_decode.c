@@ -29,54 +29,46 @@
 
 /* setup *********************************************************/
 /* set up variables */
-#define setup()\
+/* the setup* macros can return, but are always used at function start
+   and thus need no malloc cleanup */
+/* to make things less painful, assume the cleanup is passed rep */
+#define setup_buf_only(cr)\
 asn1_error_code retval;\
 asn1buf buf;\
+int (*error_cleanup)() = cr;\
+\
+retval = asn1buf_wrap_data(&buf,code);\
+if(retval) return retval
+
+#define setup_no_tagnum(cr)\
 asn1_class class;\
 asn1_construction construction;\
+setup_buf_only(cr)
+
+#define setup_no_length(cr)\
 asn1_tagnum tagnum;\
+setup_no_tagnum(cr)
+
+#define setup(cr)\
 int length;\
-\
-retval = asn1buf_wrap_data(&buf,code);\
-if(retval) return retval
+setup_no_length(cr)
 
-#define setup_no_length()\
-asn1_error_code retval;\
-asn1buf buf;\
-asn1_class class;\
-asn1_construction construction;\
-asn1_tagnum tagnum;\
-\
-retval = asn1buf_wrap_data(&buf,code);\
-if(retval) return retval
+/* helper macros for cleanup */
+#define clean_return(val) { if(error_cleanup && rep && *rep) error_cleanup(*rep); return val; }
 
-#define setup_no_tagnum()\
-asn1_error_code retval;\
-asn1buf buf;\
-asn1_class class;\
-asn1_construction construction;\
-\
-retval = asn1buf_wrap_data(&buf,code);\
-if(retval) return retval
-
+/* alloc_field is the first thing to allocate storage that may need cleanup */
 #define alloc_field(var,type)\
 var = (type*)calloc(1,sizeof(type));\
-if((var) == NULL) return ENOMEM
-
-#define setup_buf_only()\
-asn1_error_code retval;\
-asn1buf buf;\
-retval = asn1buf_wrap_data(&buf,code);\
-if(retval) return retval
-
+if((var) == NULL) clean_return(ENOMEM)
 
 /* process encoding header ***************************************/
 /* decode tag and check that it == [APPLICATION tagnum] */
 #define check_apptag(tagexpect)\
 retval = asn1_get_tag(&buf,&class,&construction,&tagnum,NULL);\
-if(retval) return retval;\
-if(class != APPLICATION || construction != CONSTRUCTED) return ASN1_BAD_ID;\
-if(tagnum != (tagexpect)) return KRB5_BADMSGTYPE
+if(retval) clean_return(retval);\
+if(class != APPLICATION || construction != CONSTRUCTED) \
+   clean_return(ASN1_BAD_ID);\
+if(tagnum != (tagexpect)) clean_return(KRB5_BADMSGTYPE)
 
 
 
@@ -85,19 +77,19 @@ if(tagnum != (tagexpect)) return KRB5_BADMSGTYPE
 /* decode an explicit tag and place the number in tagnum */
 #define next_tag()\
 retval = asn1_get_tag(&subbuf,&class,&construction,&tagnum,NULL);\
-if(retval) return retval;\
+if(retval) clean_return(retval);\
 if(class != CONTEXT_SPECIFIC || construction != CONSTRUCTED)\
-  return ASN1_BAD_ID
+  clean_return(ASN1_BAD_ID)
 
 /* decode sequence header and initialize tagnum with the first field */
 #define begin_structure()\
 asn1buf subbuf;\
 retval = asn1_get_tag(&buf,&class,&construction,&tagnum,&length);\
-if(retval) return retval;\
+if(retval) clean_return(retval);\
 if(class != UNIVERSAL || construction != CONSTRUCTED ||\
-   tagnum != ASN1_SEQUENCE) return ASN1_BAD_ID;\
+   tagnum != ASN1_SEQUENCE) clean_return(ASN1_BAD_ID);\
 retval = asn1buf_imbed(&subbuf,&buf,length);\
-if(retval) return retval;\
+if(retval) clean_return(retval);\
 next_tag()
 
 #define end_structure()\
@@ -107,7 +99,7 @@ asn1buf_sync(&buf,&subbuf)
 /* normal fields ************************/
 #define get_field_body(var,decoder)\
 retval = decoder(&subbuf,&(var));\
-if(retval) return (krb5_error_code)retval;\
+if(retval) clean_return((krb5_error_code)retval);\
 next_tag()
 
 /* decode a field (<[UNIVERSAL id]> <length> <contents>)
@@ -115,8 +107,8 @@ next_tag()
     decode into var
     get the next tag */
 #define get_field(var,tagexpect,decoder)\
-if(tagnum > (tagexpect)) return ASN1_MISSING_FIELD;\
-if(tagnum < (tagexpect)) return ASN1_MISPLACED_FIELD;\
+if(tagnum > (tagexpect)) clean_return(ASN1_MISSING_FIELD);\
+if(tagnum < (tagexpect)) clean_return(ASN1_MISPLACED_FIELD);\
 get_field_body(var,decoder)
 
 /* decode (or skip, if not present) an optional field */
@@ -126,13 +118,13 @@ if(tagnum == (tagexpect)){ get_field_body(var,decoder); }
 /* field w/ accompanying length *********/
 #define get_lenfield_body(len,var,decoder)\
 retval = decoder(&subbuf,&(len),&(var));\
-if(retval) return (krb5_error_code)retval;\
+if(retval) clean_return((krb5_error_code)retval);\
 next_tag()
 
 /* decode a field w/ its length (for string types) */
 #define get_lenfield(len,var,tagexpect,decoder)\
-if(tagnum > (tagexpect)) return ASN1_MISSING_FIELD;\
-if(tagnum < (tagexpect)) return ASN1_MISPLACED_FIELD;\
+if(tagnum > (tagexpect)) clean_return(ASN1_MISSING_FIELD);\
+if(tagnum < (tagexpect)) clean_return(ASN1_MISPLACED_FIELD);\
 get_lenfield_body(len,var,decoder)
 
 /* decode an optional field w/ length */
@@ -147,18 +139,32 @@ if(tagnum == (tagexpect)){\
 #define cleanup()\
 return 0
 
+#define free_field(rep,f) if (rep->f) free(rep->f)
+#define clear_field(rep,f) (*rep)->f = 0
+static clean_krb5_authenticator(rep) 
+     krb5_authenticator *rep;
+{
+  free_field(rep,subkey);
+  free_field(rep,checksum);
+  free_field(rep,client);
+  free(rep);
+}
+
 krb5_error_code decode_krb5_authenticator(code, rep)
      const krb5_data * code;
      krb5_authenticator ** rep;
 {
-  setup();
+  setup(clean_krb5_authenticator);
   alloc_field(*rep,krb5_authenticator);
+  clear_field(rep,subkey);
+  clear_field(rep,checksum);
+  clear_field(rep,client);
 
   check_apptag(2);
   { begin_structure();
     { krb5_kvno kvno;
       get_field(kvno,0,asn1_decode_kvno);
-      if(kvno != KVNO) return KRB5KDC_ERR_BAD_PVNO; }
+      if(kvno != KVNO) clean_return(KRB5KDC_ERR_BAD_PVNO); }
     alloc_field((*rep)->client,krb5_principal_data);
     get_field((*rep)->client,1,asn1_decode_realm);
     get_field((*rep)->client,2,asn1_decode_principal_name);
@@ -176,12 +182,20 @@ krb5_error_code decode_krb5_authenticator(code, rep)
   cleanup();
 }
 
+static clean_krb5_ticket(rep) 
+     krb5_ticket *rep;
+{
+  free_field(rep,server);
+  free(rep);
+}
+
 krb5_error_code decode_krb5_ticket(code, rep)
      const krb5_data * code;
      krb5_ticket ** rep;
 {
-  setup();
+  setup(clean_krb5_ticket);
   alloc_field(*rep,krb5_ticket);
+  clear_field(rep,server);
   
   check_apptag(1);
   { begin_structure();
@@ -202,7 +216,7 @@ krb5_error_code decode_krb5_encryption_key(code, rep)
      const krb5_data * code;
      krb5_keyblock ** rep;
 {
-  setup();
+  setup(free);
   alloc_field(*rep,krb5_keyblock);
 
   { begin_structure();
@@ -214,12 +228,22 @@ krb5_error_code decode_krb5_encryption_key(code, rep)
   cleanup();
 }
 
+static clean_krb5_enc_tkt_part(rep)
+     krb5_enc_tkt_part * rep;
+{
+  free_field(rep,session);
+  free_field(rep,client);
+  free(rep);
+}
+
 krb5_error_code decode_krb5_enc_tkt_part(code, rep)
      const krb5_data * code;
      krb5_enc_tkt_part ** rep;
 {
-  setup();
+  setup(clean_krb5_enc_tkt_part);
   alloc_field(*rep,krb5_enc_tkt_part);
+  clear_field(rep,session);
+  clear_field(rep,client);
 
   check_apptag(3);
   { begin_structure();
@@ -245,18 +269,18 @@ krb5_error_code decode_krb5_enc_kdc_rep_part(code, rep)
      const krb5_data * code;
      krb5_enc_kdc_rep_part ** rep;
 {
-  setup_no_length();
+  setup_no_length(free);
   alloc_field(*rep,krb5_enc_kdc_rep_part);
 
   retval = asn1_get_tag(&buf,&class,&construction,&tagnum,NULL);
-  if(retval) return retval;
-  if(class != APPLICATION || construction != CONSTRUCTED) return ASN1_BAD_ID;
+  if(retval) clean_return(retval);
+  if(class != APPLICATION || construction != CONSTRUCTED) clean_return(ASN1_BAD_ID);
   if(tagnum == 25) (*rep)->msg_type = KRB5_AS_REP;
   else if(tagnum == 26) (*rep)->msg_type = KRB5_TGS_REP;
-  else return KRB5_BADMSGTYPE;
+  else clean_return(KRB5_BADMSGTYPE);
 
   retval = asn1_decode_enc_kdc_rep_part(&buf,*rep);
-  if(retval) return (krb5_error_code)retval;
+  if(retval) clean_return((krb5_error_code)retval);
 
   cleanup();
 }
@@ -265,15 +289,15 @@ krb5_error_code decode_krb5_as_rep(code, rep)
      const krb5_data * code;
      krb5_kdc_rep ** rep;
 {
-  setup_no_length();
+  setup_no_length(free);
   alloc_field(*rep,krb5_kdc_rep);
 
   check_apptag(11);
   retval = asn1_decode_kdc_rep(&buf,*rep);
-  if(retval) return (krb5_error_code)retval;
+  if(retval) clean_return((krb5_error_code)retval);
 #ifdef KRB5_MSGTYPE_STRICT
   if((*rep)->msg_type != KRB5_AS_REP)
-      return KRB5_BADMSGTYPE;
+    clean_return(KRB5_BADMSGTYPE);
 #endif
 
   cleanup();
@@ -283,35 +307,42 @@ krb5_error_code decode_krb5_tgs_rep(code, rep)
      const krb5_data * code;
      krb5_kdc_rep ** rep;
 {
-  setup_no_length();
+  setup_no_length(free);
   alloc_field(*rep,krb5_kdc_rep);
 
   check_apptag(13);
   retval = asn1_decode_kdc_rep(&buf,*rep);
-  if(retval) return (krb5_error_code)retval;
+  if(retval) clean_return((krb5_error_code)retval);
 #ifdef KRB5_MSGTYPE_STRICT
-  if((*rep)->msg_type != KRB5_TGS_REP) return KRB5_BADMSGTYPE;
+  if((*rep)->msg_type != KRB5_TGS_REP) clean_return(KRB5_BADMSGTYPE);
 #endif
 
   cleanup();
 }
 
+static clean_krb5_ap_req(rep)
+     krb5_ap_req * rep;
+{
+  free_field(rep,ticket);
+  free(rep);
+}
 krb5_error_code decode_krb5_ap_req(code, rep)
      const krb5_data * code;
      krb5_ap_req ** rep;
 {
-  setup();
+  setup(clean_krb5_ap_req);
   alloc_field(*rep,krb5_ap_req);
+  clear_field(rep,ticket);
 
   check_apptag(14);
   { begin_structure();
     { krb5_kvno kvno;
       get_field(kvno,0,asn1_decode_kvno);
-      if(kvno != KVNO) return KRB5KDC_ERR_BAD_PVNO; }
+      if(kvno != KVNO) clean_return(KRB5KDC_ERR_BAD_PVNO); }
     { krb5_msgtype msg_type;
       get_field(msg_type,1,asn1_decode_msgtype);
 #ifdef KRB5_MSGTYPE_STRICT
-      if(msg_type != KRB5_AP_REQ) return KRB5_BADMSGTYPE;
+      if(msg_type != KRB5_AP_REQ) clean_return(KRB5_BADMSGTYPE);
 #endif
     }
     get_field((*rep)->ap_options,2,asn1_decode_ap_options);
@@ -327,18 +358,18 @@ krb5_error_code decode_krb5_ap_rep(code, rep)
      const krb5_data * code;
      krb5_ap_rep ** rep;
 {
-  setup();
+  setup(free);
   alloc_field(*rep,krb5_ap_rep);
 
   check_apptag(15);
   { begin_structure();
     { krb5_kvno kvno;
       get_field(kvno,0,asn1_decode_kvno);
-      if(kvno != KVNO) return KRB5KDC_ERR_BAD_PVNO; }
+      if(kvno != KVNO) clean_return(KRB5KDC_ERR_BAD_PVNO); }
     { krb5_msgtype msg_type;
       get_field(msg_type,1,asn1_decode_msgtype);
 #ifdef KRB5_MSGTYPE_STRICT
-      if(msg_type != KRB5_AP_REP) return KRB5_BADMSGTYPE;
+      if(msg_type != KRB5_AP_REP) clean_return(KRB5_BADMSGTYPE);
 #endif
     }
     get_field((*rep)->enc_part,2,asn1_decode_encrypted_data);
@@ -347,12 +378,20 @@ krb5_error_code decode_krb5_ap_rep(code, rep)
   cleanup();
 }
 
+static clean_krb5_ap_rep_enc_part(rep)
+     krb5_ap_rep_enc_part * rep;
+{
+  free_field(rep,subkey);
+  free(rep);
+}
+
 krb5_error_code decode_krb5_ap_rep_enc_part(code, rep)
      const krb5_data * code;
      krb5_ap_rep_enc_part ** rep;
 {
-  setup();
+  setup(clean_krb5_ap_rep_enc_part);
   alloc_field(*rep,krb5_ap_rep_enc_part);
+  clear_field(rep,subkey);
 
   check_apptag(27);
   { begin_structure();
@@ -370,14 +409,14 @@ krb5_error_code decode_krb5_as_req(code, rep)
      const krb5_data * code;
      krb5_kdc_req ** rep;
 {
-  setup_no_length();
+  setup_no_length(free);
   alloc_field(*rep,krb5_kdc_req);
 
   check_apptag(10);
   retval = asn1_decode_kdc_req(&buf,*rep);
-  if(retval) return (krb5_error_code)retval;
+  if(retval) clean_return((krb5_error_code)retval);
 #ifdef KRB5_MSGTYPE_STRICT
-  if((*rep)->msg_type != KRB5_AS_REQ) return KRB5_BADMSGTYPE;
+  if((*rep)->msg_type != KRB5_AS_REQ) clean_return(KRB5_BADMSGTYPE);
 #endif
   
   cleanup();
@@ -387,14 +426,14 @@ krb5_error_code decode_krb5_tgs_req(code, rep)
      const krb5_data * code;
      krb5_kdc_req ** rep;
 {
-  setup_no_length();
+  setup_no_length(free);
   alloc_field(*rep,krb5_kdc_req);
 
   check_apptag(12);
   retval = asn1_decode_kdc_req(&buf,*rep);
-  if(retval) return (krb5_error_code)retval;
+  if(retval) clean_return((krb5_error_code)retval);
 #ifdef KRB5_MSGTYPE_STRICT
-  if((*rep)->msg_type != KRB5_TGS_REQ) return KRB5_BADMSGTYPE;
+  if((*rep)->msg_type != KRB5_TGS_REQ) clean_return(KRB5_BADMSGTYPE);
 #endif
   
   cleanup();
@@ -404,31 +443,39 @@ krb5_error_code decode_krb5_kdc_req_body(code, rep)
      const krb5_data * code;
      krb5_kdc_req ** rep;
 {
-  setup_buf_only();
+  setup_buf_only(free);
   alloc_field(*rep,krb5_kdc_req);
 
   retval = asn1_decode_kdc_req_body(&buf,*rep);
-  if(retval) return (krb5_error_code)retval;
+  if(retval) clean_return((krb5_error_code)retval);
 
   cleanup();
+}
+
+static clean_krb5_safe(rep)
+     krb5_safe * rep;
+{
+  free_field(rep,checksum);
+  free(rep);
 }
 
 krb5_error_code decode_krb5_safe(code, rep)
      const krb5_data * code;
      krb5_safe ** rep;
 {
-  setup();
+  setup(clean_krb5_safe);
   alloc_field(*rep,krb5_safe);
+  clear_field(rep,checksum);
 
   check_apptag(20);
   { begin_structure();
     { krb5_kvno kvno;
       get_field(kvno,0,asn1_decode_kvno);
-      if(kvno != KVNO) return KRB5KDC_ERR_BAD_PVNO; }
+      if(kvno != KVNO) clean_return(KRB5KDC_ERR_BAD_PVNO); }
     { krb5_msgtype msg_type;
       get_field(msg_type,1,asn1_decode_msgtype);
 #ifdef KRB5_MSGTYPE_STRICT
-      if(msg_type != KRB5_SAFE) return KRB5_BADMSGTYPE;
+      if(msg_type != KRB5_SAFE) clean_return(KRB5_BADMSGTYPE);
 #endif
     }
     get_field(**rep,2,asn1_decode_krb_safe_body);
@@ -443,18 +490,18 @@ krb5_error_code decode_krb5_priv(code, rep)
      const krb5_data * code;
      krb5_priv ** rep;
 {
-  setup();
+  setup(free);
   alloc_field(*rep,krb5_priv);
 
   check_apptag(21);
   { begin_structure();
     { krb5_kvno kvno;
       get_field(kvno,0,asn1_decode_kvno);
-      if(kvno != KVNO) return KRB5KDC_ERR_BAD_PVNO; }
+      if(kvno != KVNO) clean_return(KRB5KDC_ERR_BAD_PVNO); }
     { krb5_msgtype msg_type;
       get_field(msg_type,1,asn1_decode_msgtype);
 #ifdef KRB5_MSGTYPE_STRICT
-      if(msg_type != KRB5_PRIV) return KRB5_BADMSGTYPE;
+      if(msg_type != KRB5_PRIV) clean_return(KRB5_BADMSGTYPE);
 #endif
     }
     get_field((*rep)->enc_part,3,asn1_decode_encrypted_data);
@@ -463,12 +510,22 @@ krb5_error_code decode_krb5_priv(code, rep)
   cleanup();
 }
 
+static clean_krb5_priv_enc_part(rep)
+     krb5_priv_enc_part * rep;
+{
+  free_field(rep,r_address);
+  free_field(rep,s_address);
+  free(rep);
+}
+
 krb5_error_code decode_krb5_enc_priv_part(code, rep)
      const krb5_data * code;
      krb5_priv_enc_part ** rep;
 {
-  setup();
+  setup(clean_krb5_priv_enc_part);
   alloc_field(*rep,krb5_priv_enc_part);
+  clear_field(rep,r_address);
+  clear_field(rep,s_address);
 
   check_apptag(28);
   { begin_structure();
@@ -489,18 +546,18 @@ krb5_error_code decode_krb5_cred(code, rep)
      const krb5_data * code;
      krb5_cred ** rep;
 {
-  setup();
+  setup(free);
   alloc_field(*rep,krb5_cred);
 
   check_apptag(22);
   { begin_structure();
     { krb5_kvno kvno;
       get_field(kvno,0,asn1_decode_kvno);
-      if(kvno != KVNO) return KRB5KDC_ERR_BAD_PVNO; }
+      if(kvno != KVNO) clean_return(KRB5KDC_ERR_BAD_PVNO); }
     { krb5_msgtype msg_type;
       get_field(msg_type,1,asn1_decode_msgtype);
 #ifdef KRB5_MSGTYPE_STRICT
-      if(msg_type != KRB5_CRED) return KRB5_BADMSGTYPE;
+      if(msg_type != KRB5_CRED) clean_return(KRB5_BADMSGTYPE);
 #endif
     }
     get_field((*rep)->tickets,2,asn1_decode_sequence_of_ticket);
@@ -510,12 +567,22 @@ krb5_error_code decode_krb5_cred(code, rep)
   cleanup();
 }
 
+static clean_krb5_cred_enc_part(rep)
+     krb5_cred_enc_part * rep;
+{
+  free_field(rep,r_address);
+  free_field(rep,s_address);
+  free(rep);
+}
+
 krb5_error_code decode_krb5_enc_cred_part(code, rep)
      const krb5_data * code;
      krb5_cred_enc_part ** rep;
 {
-  setup();
+  setup(clean_krb5_cred_enc_part);
   alloc_field(*rep,krb5_cred_enc_part);
+  clear_field(rep,r_address);
+  clear_field(rep,s_address);
 
   check_apptag(29);
   { begin_structure();
@@ -532,22 +599,33 @@ krb5_error_code decode_krb5_enc_cred_part(code, rep)
   cleanup();
 }
 
+
+static clean_krb5_error(rep)
+     krb5_error * rep;
+{
+  free_field(rep,server);
+  free_field(rep,client);
+  free(rep);
+}
+
 krb5_error_code decode_krb5_error(code, rep)
      const krb5_data * code;
      krb5_error ** rep;
 {
-  setup();
+  setup(clean_krb5_error);
   alloc_field(*rep,krb5_error);
+  clear_field(rep,server);
+  clear_field(rep,client);
   
   check_apptag(30);
   { begin_structure();
     { krb5_kvno kvno;
       get_field(kvno,0,asn1_decode_kvno);
-      if(kvno != KVNO) return KRB5KDC_ERR_BAD_PVNO; }
+      if(kvno != KVNO) clean_return(KRB5KDC_ERR_BAD_PVNO); }
     { krb5_msgtype msg_type;
       get_field(msg_type,1,asn1_decode_msgtype);
 #ifdef KRB5_MSGTYPE_STRICT
-      if(msg_type != KRB5_ERROR) return KRB5_BADMSGTYPE;
+      if(msg_type != KRB5_ERROR) clean_return(KRB5_BADMSGTYPE);
 #endif
     }
     opt_field((*rep)->ctime,2,asn1_decode_kerberos_time);
@@ -572,10 +650,10 @@ krb5_error_code decode_krb5_authdata(code, rep)
      const krb5_data * code;
      krb5_authdata *** rep;
 {
-  setup_buf_only();
+  setup_buf_only(0);		/* we're not allocating anything here... */
   *rep = 0;
   retval = asn1_decode_authorization_data(&buf,rep);
-  if(retval) return (krb5_error_code)retval;
+  if(retval) clean_return((krb5_error_code)retval);
   cleanup();
 }
 
@@ -583,10 +661,10 @@ krb5_error_code decode_krb5_pwd_sequence(code, rep)
      const krb5_data * code;
      passwd_phrase_element ** rep;
 {
-  setup_buf_only();
+  setup_buf_only(free);
   alloc_field(*rep,passwd_phrase_element);
   retval = asn1_decode_passwdsequence(&buf,*rep);
-  if(retval) return retval;
+  if(retval) clean_return(retval);
   cleanup();
 }
 
@@ -594,7 +672,7 @@ krb5_error_code decode_krb5_pwd_data(code, rep)
      const krb5_data * code;
      krb5_pwd_data ** rep;
 {
-  setup();
+  setup(free);
   alloc_field(*rep,krb5_pwd_data);
   { begin_structure();
     get_field((*rep)->sequence_count,0,asn1_decode_int);
@@ -607,7 +685,7 @@ krb5_error_code decode_krb5_padata_sequence(code, rep)
      const krb5_data * code;
      krb5_pa_data ***rep;
 {
-  setup_buf_only();
+  setup_buf_only(0);		/* we're not allocating anything here */
   *rep = 0;
   retval = asn1_decode_sequence_of_pa_data(&buf,rep);
   if(retval) return (krb5_error_code)retval;
@@ -618,7 +696,7 @@ krb5_error_code decode_krb5_alt_method(code, rep)
      const krb5_data * code;
      krb5_alt_method ** rep;
 {
-  setup();
+  setup(free);
   alloc_field(*rep,krb5_alt_method);
   { begin_structure();
     get_field((*rep)->method,0,asn1_decode_int);
@@ -638,10 +716,10 @@ krb5_error_code decode_krb5_etype_info(code, rep)
      const krb5_data * code;
      krb5_etype_info_entry ***rep;
 {
-  setup_buf_only();
+  setup_buf_only(0);		/* we're not allocating anything here */
   *rep = 0;
   retval = asn1_decode_etype_info(&buf,rep);
-  if(retval) return (krb5_error_code)retval;
+  if(retval) clean_return((krb5_error_code)retval);
   cleanup();
 }
 

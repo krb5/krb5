@@ -1,3 +1,39 @@
+Wed Sep 13 19:53:30 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* krb5_decode.c (clean_krb5_authenticator, clean_krb5_ticket,
+	clean_krb5_enc_tkt_part,clean_krb5_ap_req,
+	clean_krb5_ap_rep_enc_part, clean_krb5_safe,
+	clean_krb5_priv_enc_part, clean_krb5_cred_enc_part,
+	clean_krb5_error): new static functions to free objects that may
+	be partially constructed.
+	(setup_buf_only, setup_no_tagnum, setup_no_length, setup): define
+	in terms of each other to remove duplication, then add local
+	variable error_cleanup to common declarations.
+	(clean_return): new macro, uses error_cleanup on rep if possible
+	and the allows the argument to be returned.
+	(alloc_field, check_apptag, next_tag, begin_structure,
+	get_field_body, get_field, get_lenfield_body, get_lenfield): use
+	clean_return. 
+	(free_field): new macro to simplify the writing of clean_*.
+	(clear_field): macro to clean up preparation of fields for later
+	use by clean_* functions.
+	(decode_krb5_authenticator, decode_krb5_ticket,
+	decode_krb5_encryption_key, decode_krb5_enc_tkt_part, 
+	decode_krb5_enc_kdc_rep_part, decode_krb5_as_rep,
+	decode_krb5_tgs_rep, decode_krb5_ap_req, decode_krb5_ap_rep,
+	decode_krb5_ap_rep_enc_part, decode_krb5_as_req,
+	decode_krb5_tgs_req, decode_krb5_kdc_req_body, decode_krb5_safe,
+	decode_krb5_priv, decode_krb5_enc_priv_part, decode_krb5_cred,
+	decode_krb5_enc_cred_part, decode_krb5_error,
+	decode_krb5_authdata, decode_krb5_pwd_sequence,
+	decode_krb5_pwd_data, decode_krb5_padata_sequence,
+	decode_krb5_alt_method, decode_krb5_etype_info): change setup
+	macro to pass a cleanup method (or just free if there were no
+	partial allocations, or 0 for the two cases with no allocation at
+	all.) Also explicitly zero pointer subfields, since calloc is not
+	a safe way to assure that. Generally, provide for automatic
+	deallocation of storage on error.
+	
 Sun Sep 10 12:00:00 1995    <mattly@fusion.com>
 
 	* asn1_encode.c: Removed use of localtime for encoding of generaltime.
