@@ -93,7 +93,7 @@ krb5_db_fetch_mkey(context, mname, eblock, fromkeyboard, twice, salt, key)
 
     } else {
 	/* from somewhere else */
-	krb5_keytype keytype;
+        krb5_octet keytype;
 	char defkeyfile[MAXPATHLEN+1];
 	krb5_data *realm = krb5_princ_realm(context, mname);
 	FILE *kf;
