@@ -1,3 +1,8 @@
+Wed Sep 13 18:40:24 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* kdc.conf.M (profile): Remove definition of the profile field,
+		which is being desupported.
+
 Fri Sep  1 23:26:46 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* krb5.conf.M: Add documentation for the clockskew and

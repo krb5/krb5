@@ -85,13 +85,6 @@ that particular realm.
 For each realm, the following tags may be specified in the
 .I [realms]
 subsection:
-.IP profile
-This
-.B string
-specifies the location of the Kerberos configuration file, e.g. 
-.I krb5.conf
-, for that realm.
-
 .IP database_name
 This
 .B string
