@@ -27,8 +27,10 @@
 /*
  * Kerberos V5 Change Password service name
  */
-#define	KRB5_ADM_SERVICE_NAME	"changepw"
+#define	KRB5_ADM_SERVICE_NAME	"kpasswd"
 #define	KRB5_ADM_DEFAULT_PORT	464
+
+#define KRB5_ADM_SERVICE_INSTANCE "changepw"
 
 /*
  * Maximum password length.
