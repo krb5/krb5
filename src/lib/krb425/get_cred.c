@@ -39,11 +39,10 @@ char *instance;
 char *realm;
 CREDENTIALS *c;
 {
-	static krb5_principal client_principal = { 0 };
+	static krb5_principal client_principal = 0;
 
 	krb5_creds creds;
 	krb5_principal server;
-	krb5_data srvdata[3];
 	krb5_error_code r;
 	krb5_ticket *ticket;
 
