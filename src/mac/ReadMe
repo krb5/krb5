@@ -9,14 +9,13 @@ On the unix side, after checking out the source, build the target
 "kerbsrc.mac":
    
    cd ~/k5mac/src
-   make -f Makefile.in kerbsrc.mac (the product of the make is "kerbsrc.tar")
-
+   make -f Makefile.in kerbsrc.mac.tar
 
 2) Move the Source to the Mac
 
-Transfer the resulting file from the previous step (kerbsrc.tar) to the
-Macintosh.  Remember it is a tar file, and must be transferred in binary mode
-without conversion.
+Transfer the resulting file from the previous step (kerbsrc.mac.tar)
+to the Macintosh.  Remember it is a tar file, and must be transferred
+in binary mode without conversion.
 
 
 3) Unpack the Source on the Mac
