@@ -53,8 +53,13 @@ int main(argc, argv)
      int nodelete = 0;
      int lose = 0;
      krb5_context context;
+     krb5_error_code retval;
 
-     krb5_init_context(&context);
+     retval = krb5_init_context(&context);
+     if (retval) {
+	     com_err(argv[0], retval, "while initializing krb5");
+	     exit(1);
+     }
 
      while(((option =  getopt(argc, argv, "p:n")) != EOF)) {
 	 switch(option) {

@@ -34,9 +34,13 @@ main(argc, argv)
      CREDENTIALS v4creds;
      int i, ret;
      krb5_context context;
+     krb5_error_code retval;
      
-     krb5_init_context(&context);
-     krb524_init_ets(context);
+     retval = krb5_init_context(&context);
+     if (retval) {
+	     com_err(argv[0], retval, "while initializing krb5");
+	     exit(1);
+     }
 
      if (ret = krb5_parse_name(argv[1], &client)) {
 	  com_err("getcred", ret, "parsing client name");
