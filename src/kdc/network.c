@@ -204,17 +204,19 @@ process_packet(port_fd, prog, is_secondary)
     }
     cc = sendto(port_fd, response->data, response->length, 0,
 		(struct sockaddr *)&saddr, saddr_len);
-    krb5_free_data(response);
     if (cc == -1) {
+        krb5_free_data(response);
 	com_err(prog, errno, "while sending reply to %s/%d",
 		inet_ntoa(saddr.sin_addr), ntohs(saddr.sin_port));
 	return errno;
     }
     if (cc != response->length) {
+	krb5_free_data(response);
 	com_err(prog, 0, "short reply write %d vs %d\n",
 		response->length, cc);
 	return KDC5_IO_RESPONSE;
     }
+    krb5_free_data(response);
     return 0;
 }
 
