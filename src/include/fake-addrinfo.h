@@ -145,12 +145,12 @@ extern /*@dependent@*/ char *gai_strerror (int code) /*@*/;
 #define FAI_CACHE
 #endif
 
-#if defined (__linux__) || defined (_AIX)
+#if (defined (__linux__) && defined(HAVE_GETADDRINFO)) || defined (_AIX)
 /* See comments below.  */
 #  define WRAP_GETADDRINFO
 #endif
 
-#ifdef __linux__
+#if defined (__linux__) && defined(HAVE_GETADDRINFO)
 # define COPY_FIRST_CANONNAME
 #endif
 
@@ -1209,7 +1209,9 @@ getaddrinfo (const char *name, const char *serv, const struct addrinfo *hint,
        set, the returned ai_canonname field can be null.  The NetBSD
        1.5 implementation also does this, if the input hostname is a
        numeric host address string.  That case isn't handled well at
-       the moment.  */
+       the moment.
+
+       Libc version 5 didn't have getaddrinfo at all.  */
 
 #ifdef COPY_FIRST_CANONNAME
     /*
