@@ -10,7 +10,7 @@
 #include <stdlib.h>
 #endif
 #include <errno.h>
-
+#include <limits.h>
 #include "prof_int.h"
 
 /*
@@ -252,7 +252,7 @@ profile_get_integer(profile, name, subname, subsubname,
 	const char	*value;
 	errcode_t	retval;
 	const char	*names[4];
-	const char *end_value;
+	char            *end_value;
 	long		ret_long;
 
 	if (profile == 0) {
@@ -324,14 +324,14 @@ profile_get_boolean(profile, name, subname, subsubname,
 	profile_t	profile;
 	const char	*name, *subname, *subsubname;
 	int		def_val;
-	int		*ret_int;
+	int		*ret_boolean;
 {
 	const char	*value;
 	errcode_t	retval;
 	const char	*names[4];
 
 	if (profile == 0) {
-		*ret_int = def_val;
+		*ret_boolean = def_val;
 		return 0;
 	}
 
@@ -341,12 +341,12 @@ profile_get_boolean(profile, name, subname, subsubname,
 	names[3] = 0;
 	retval = profile_get_value(profile, names, &value);
 	if (retval == PROF_NO_SECTION || retval == PROF_NO_RELATION) {
-		*ret_int = def_val;
+		*ret_boolean = def_val;
 		return 0;
 	} else if (retval)
 		return retval;
    
-	return prof_parse_boolean (value, ret_int);
+	return prof_parse_boolean (value, ret_boolean);
 }
 
 /*
