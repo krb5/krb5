@@ -18,7 +18,7 @@
 
 typedef struct _krb5_db_entry {
     krb5_principal principal;
-    krb5_keyblock *key;
+    krb5_keyblock key;
     krb5_kvno kvno;
     krb5_deltat	max_life;
     krb5_deltat	max_renewable_life;
@@ -73,5 +73,7 @@ krb5_error_code krb5_db_iterate
 	PROTOTYPE((krb5_error_code (* ) PROTOTYPE((krb5_pointer,
 						   krb5_db_entry *)),
 		   krb5_pointer ));
+krb5_error_code krb5_db_verify_master_key
+	PROTOTYPE((krb5_principal, krb5_keyblock *));
 
 #endif /* __KRB5_KDB5__ */
