@@ -28,7 +28,13 @@ static char rcsid_rc_io_c[] =
 #include "rc_dfl.h"
 #include "rc_io.h"
 #include <krb5/sysincl.h>
-#include <netinet/in.h>			/* XXX ip only? */
+#include <krb5/osconf.h>
+
+#ifdef KRB5_USE_INET
+#include <netinet/in.h>
+#else
+ #error find some way to use net-byte-order file version numbers.
+#endif
 
 extern int errno; /* this should be in errno.h, but isn't on some systems */
 
