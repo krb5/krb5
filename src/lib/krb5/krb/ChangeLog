@@ -11,12 +11,6 @@ Wed Apr  3 16:04:36 1996  Theodore Y. Ts'o  <tytso@dcl>
 		credentials is valid.  If it isn't, return an error right
 		away. 
 
-Tue Mar 26 14:45:03 1996  Richard Basch  <basch@lehman.com>
-
-	* conv_princ.c: added "imap" service to the conversion list as
-	requiring domain conversion for the instance.  (imap/<host> is used
-	by some of the new imap mail implementations)
-
 Wed Mar 27 17:05:47 1996  Richard Basch  <basch@lehman.com>
 
 	* in_tkt_ktb.c (keytab_keyproc): Do not check to see that the
@@ -30,6 +24,12 @@ Wed Mar 27 17:05:47 1996  Richard Basch  <basch@lehman.com>
 	functional, or not in there at all.  Besides, there are too many
 	other components in Kerberos that expect the end-service to know
 	all its keys that this sanity check is overkill.
+
+Tue Mar 26 14:45:03 1996  Richard Basch  <basch@lehman.com>
+
+	* conv_princ.c: added "imap" service to the conversion list as
+	requiring domain conversion for the instance.  (imap/<host> is used
+	by some of the new imap mail implementations)
 
 Sun Mar 24 01:34:14 1996  Sam Hartman  <hartmans@tertius.mit.edu>
 
