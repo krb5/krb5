@@ -170,14 +170,12 @@ init_realm(progname, rdp, realm, def_dbname, def_mpname,
     krb5_db_entry	db_entry;
     int			num2get;
     krb5_boolean	more;
-    krb5_boolean	db_inited;
     krb5_realm_params	*rparams;
     krb5_key_data	*kdata;
     krb5_key_salt_tuple	*kslist;
     krb5_int32		nkslist;
     int			i;
 
-    db_inited = 0;
     memset((char *) rdp, 0, sizeof(kdc_realm_t));
     if (!realm) {
 	kret = EINVAL;
@@ -327,8 +325,7 @@ init_realm(progname, rdp, realm, def_dbname, def_mpname,
 	com_err(progname, kret,
 		"while initializing database for realm %s", realm);
 	goto whoops;
-    } else
-	db_inited = 1;
+    }
 
     /* Verify the master key */
     if ((kret = krb5_db_verify_master_key(rdp->realm_context,
@@ -506,6 +503,7 @@ init_realm(progname, rdp, realm, def_dbname, def_mpname,
      * If we choked, then clean up any dirt we may have dropped on the floor.
      */
     if (kret) {
+        
 	finish_realm(rdp);
     }
     return(kret);
@@ -781,7 +779,6 @@ int main(argc, argv)
 {
     krb5_error_code	retval;
     krb5_context	kcontext;
-    int			*port_list;
     int errout = 0;
 
     if (strrchr(argv[0], '/'))
@@ -794,7 +791,6 @@ int main(argc, argv)
     }
     memset((char *) kdc_realmlist, 0,
 	   (size_t) (sizeof(kdc_realm_t *) * KRB5_KDC_MAX_REALMS));
-    port_list = NULL;
 
     /*
      * A note about Kerberos contexts: This context, "kcontext", is used
