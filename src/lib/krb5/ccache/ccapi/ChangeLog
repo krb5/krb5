@@ -1,3 +1,8 @@
+1999-11-22  Miro Jurisic  <meeroh@mit.edu>
+
+	* stdcc.h, stdcc_util.h: use CCache2.h under MacOS for CCAPI v2
+	compatibility
+
 1999-10-26  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,

@@ -3,7 +3,7 @@
 // Frank Dabek, July 1998
 
 #if defined(macintosh)
-#include "CCache.h"
+#include "CCache2.h"
 #endif
 
 #if defined(_MSDOS) || defined(_WIN32)
