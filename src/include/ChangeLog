@@ -1,3 +1,7 @@
+2003-02-19  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Check for sys/select.h and time.h.
+
 2003-02-07  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in (all-unix): Remove kerberosIV/krb_err.h, as it was
