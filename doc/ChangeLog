@@ -6,6 +6,7 @@
 	Outdated sections deleted.
 	(Shared Library Theory): Fixed typo.
 	(Advanced Shared Library Requirements): New section.
+	(Thread Safety): Rewrite; add subsections.
 
 2004-06-10  Ken Raeburn  <raeburn@mit.edu>
 

@@ -413,35 +413,235 @@ using it.
 @node Thread Safety, Shared Libraries, Host Address Lookup, Top
 @chapter Thread Safety
 
-Hahahahahaha...  We're not even close.
+Work is still needed as this section is being written.  However, we've
+made a lot of progress.
 
-We have started talking about it, though.  Some stuff is ``kind of''
-thread safe because it operates on a @code{krb5_context} and we simply
-assert that a context can be used only in one thread at a time.  But
-there are places where we use unsafe C library functions, and a few
-places where we have modifiable static data in the libraries.
+@menu
+* Kerberos API Thread Safety::  
+* Thread System Requirements::  
+* Internal Thread API::         
+@end menu
 
-Even if the Kerberos or C library functions aren't using static data
-themselves, there are other instances of per-process data that have to
-be dealt with before our library can become thread-safe.  For example,
-file locking with UNIX @code{flock()} is on a per-process basis;
-for a single thread to be able to lock a file against accesses from
-other threads, we'll have to implement per-thread locks for files on
-top of the operating system per-process locks, and that means a global
-(per-process) table listing all the locks.  So it seems unlikely that
-we will find an approach that eliminates all static modifiable data
-from the library.
+@node Kerberos API Thread Safety, Thread System Requirements, Thread Safety, Thread Safety
+@section Kerberos API Thread Safety
 
-A rough proposal for hooks for implementing locking was put forth, and
-an IBM Linux group is experimenting with a trial implementation of it,
-with a few changes.  A few issues with the proposal have been
-discussed on the @samp{krbdev} mailing list, and you can find the
-discussion in the list archives.
+We assume that a @code{krb5_context} or a @code{krb5_auth_context}
+will be used in only one thread at a time, and any non-opaque object
+clearly being modified by the application code (@i{e.g.}, a
+@code{krb5_principal} having a field replaced) is not being used in
+another thread at the same time.
 
+A credentials cache, key table, or replay cache object, once the C
+object is created, may be used in multiple threads simultaneously;
+internal locking is done by the implementations of those objects.
+(Iterators?  Probably okay now, but needs review.)  However, this
+doesn't mean that we've fixed any problems there may be regarding
+simultaneous access to on-disk files from multiple processes, and in
+fact if a process opens a disk file multiple times, the same problems
+may come up.
+
+Any file locking issues may become worse, actually.  UNIX file locking
+with @code{flock} is done on a per-process basis, and closing a file
+descriptor that was opened on a file releases any locks the process
+may have on that file, even if they were obtained using other,
+still-open file descriptors.
+
+We MAY implement --- but haven't yet --- a ``fix'' whereby open files
+are tracked by name (and per object type), and a new attempt to open
+one gets a handle that uses the same open file descriptor, even if it
+appears as two objects to the application.  This won't address the
+problem of getting the same file via two names that look different,
+but it may be ``good enough.''
+
+GSSAPI ....
+
+@node Thread System Requirements, Internal Thread API, Kerberos API Thread Safety, Thread Safety
+@section Thread System Requirements
+
+We support a few types of environments with regard to thread support:
+
+@itemize @bullet
+
+@item
+Windows native threads.  The objects used by the Windows thread
+support functions generally need run-time initialization; this is done
+through the library initialization function.  (@xref{Advanced Shared
+Library Requirements}.)
+
+@item
+POSIX threads, with weak reference support so we can tell whether the
+thread code was actually linked into the current executable.  If the
+functions aren't available, we assume the process is single-threaded
+and ignore locks.  (We do assume that the thread support functions
+won't show up half-way through execution of the program.)  In order to
+support single-threaded programs wanting to load Kerberos or GSSAPI
+modules through a plug-in mechanism, we don't list the pthread library
+in the dependencies of our shared libraries.
+
+@item
+POSIX threads, with the library functions always available, even if
+they're stub versions that behave normally but don't permit the
+creation of new threads.
+
+On AIX 4.3.3, we do not get weak references or useful stub functions,
+and calling @code{dlopen} apparently causes the pthread library to get
+loaded, so we've decided to link against the pthread library always.
+
+On Tru64 UNIX 5.1, we again do not get weak references or useful stub
+functions.  Rather than look for yet another approach for this one
+platform, we decided to always link against the pthread library on
+this platform as well.  This may break single-threaded applications
+that load the Kerberos libraries after startup.  A clean solution,
+even if platform-dependent, would be welcome.
+
+@item
+Single-threaded.  No locking is performed, any ``thread-local''
+storage is in fact global, @i{etc}.
+
+@end itemize
 
 If @code{pthread_once} is not provided in functional form in the
 default libraries, and weak references are not supported, we always
-link against the pthread libraries.
+link against the pthread libraries.  (Tru64, AIX.)
+
+System routines: getaddrinfo (not always implemented thread-safe),
+gethostbyname_r, gmtime_r, getpwnam_r, res_nsearch.
+
+Unsafe system routines: setenv, setlocale.
+
+@node Internal Thread API,  , Thread System Requirements, Thread Safety
+@section Internal Thread API
+
+Some ideas were discussed on the @samp{krbdev} mailing list, and while
+the current implementation does largely resemble the scheme Ken
+Raeburn proposed.
+
+The following macros in @file{k5-thread.h} implement a locking scheme
+similar to POSIX threads, with fewer features.
+
+@deftp {Data type} k5_mutex_t
+This is the type of a mutex to be used by the Kerberos libraries.  Any
+object of this type needs initialization.  If the object is
+dynamically allocated, @code{k5_mutex_init} must be used; if the
+object is allocated statically, it should be initialized at compile
+time with @code{K5_MUTEX_PARTIAL_INITIALIZER} and then
+@code{k5_mutex_finish_init} should be called at run time.  (In
+general, one of these will do the work, and the other will do nothing
+interesting, depending on the platform.  When the debugging code is
+turned on, it will check that both were done.  However, as far as I
+know, it should work to use just @code{k5_mutex_init} on a mutex in
+static storage.)
+
+The mutex may be used only within the current process.  It should not
+be created in memory shared between processes.  (Will it work in a
+child process after @code{fork()}?  I think so.)
+
+Depending on compile-time options, the @code{k5_mutex_t} object may
+contain more than an operating-system mutex; it may also contain
+debugging information such as the file and line number in the Kerberos
+code where the last mutex operation was performed, information for
+gathering statistics on mutex usage, @i{etc}.
+
+This type @emph{is not} a simple typedef for the native OS mutex
+object, to prevent programmers from accidentally assuming that
+arbitrary features of the native thread system will always be
+available.  (If someone wishes to make use of native thread system
+features in random library code, they'll have to go further out of
+their way to do it, and such changes probably won't be accepted in the
+main Kerberos code base at MIT.)
+@end deftp
+
+@defvr Macro K5_MUTEX_PARTIAL_INITIALIZER
+Value to be used for compile-time initialization of a mutex in static
+storage.
+@end defvr
+
+@deftypefn Macro int k5_mutex_finish_init (k5_mutex_t *@var{m})
+Finishes run-time initialization, if such is needed, of a mutex that
+was initialized with @code{K5_MUTEX_PARTIAL_INITIALIZER}.  This macro
+must be called before the mutex can be locked; usually this is done
+from library initialization functions.
+@end deftypefn
+
+@deftypefn Macro int k5_mutex_init (k5_mutex_t *@var{m})
+Initializes a mutex.
+@end deftypefn
+
+@deftypefn Macro int k5_mutex_destroy (k5_mutex_t *@var{m})
+Destroys a mutex, whether allocated in static or heap storage.  All
+mutexes should be destroyed before the containing storage is freed, in
+case additional system resources have been allocated to manage them.
+@end deftypefn
+
+@deftypefn Macro int k5_mutex_lock (k5_mutex_t *@var{m})
+@deftypefnx Macro int k5_mutex_unlock (k5_mutex_t *@var{m})
+Lock or unlock a mutex, returning a system error code if an error
+happened, or zero for success.  (Typically, the return code from
+@code{k5_mutex_unlock} is ignored.)
+@end deftypefn
+
+@deftypefn Macro void k5_mutex_assert_locked (k5_mutex_t *@var{m})
+@deftypefnx Macro void k5_mutex_assert_unlocked (k5_mutex_t *@var{m})
+These macros may be used in functions that require that a certain
+mutex be locked by the current thread, or not, at certain points
+(typically on entry to the function).  They may generate error
+messages or debugger traps, or abort the program, if the mutex is not
+in the expected state.  Or, they may simply do nothing.
+
+It is not required that the OS mutex interface let the application
+code determine the state of a mutex; hence these are not specified as
+a single macro returning the current state, to be checked with
+@code{assert}.
+@end deftypefn
+
+Mutexes are assumed not to be recursive (@i{i.e.}, if a thread has the
+mutex locked already, attempting to lock it again is an error).  There
+is also no support assumed for ``trylock'' or ``lock with timeout''
+operations.
+
+The operating system interface is similar to the above interface, with
+@code{k5_os_} names used for the OS mutex manipulation code.  The type
+and macros indicated above are wrappers that optionally add debugging
+code and other stuff.  So the Kerberos library code should use the
+macros above, and ports to new thread systems should be done through
+the @code{k5_os_} layer.
+
+Thread-local storage is managed through another interface layer
+
+@deftp {Enumerator} k5_key_t
+This is an enumeration type which indicates which of the per-thread
+data objects is to be referenced.
+@end deftp
+
+@deftypefn Macro int k5_key_register (k5_key_t @var{key}, void (*@var{destructor})(void*))
+Registers a thread-local storage key and a function to destroy a
+stored object if the thread exits.  This function must be called
+before @code{k5_setspecific} can be used.  Currently @var{destructor}
+must not be a null pointer; note, however, that the standard library
+function @code{free} is of the correct type to be used here if the
+allocated data doesn't require any special cleanup besides releasing
+one block of storage.
+@end deftypefn
+
+@deftypefn Macro void *k5_getspecific (k5_key_t @var{key})
+@deftypefnx Macro int k5_setspecific (k5_key_t @var{key}, void *@var{value})
+As with the POSIX interface, retrieve or store the value for the
+current thread.  Storing a value may return an error indication.  If
+an error occurs retrieving a value, @code{NULL} is returned.
+@end deftypefn
+
+@deftypefn Macro int k5_key_delete (k5_key_t @var{key})
+Called to indicate that the key value will no longer be used, for
+example if the library is in the process of being unloaded.  The
+destructor function should be called on objects of this type currently
+allocated in any thread.  (XXX Not implemented yet.)
+@end deftypefn
+
+If support functions are needed to implement any of these macros,
+they'll be in the Kerberos support library, and any exported symbols
+will use the @code{krb5int_} prefix.  The shorter @code{k5_} prefix is
+just for convenience, and should not be visible to any application
+code.
 
 @node Shared Libraries,  , Thread Safety, Top
 @chapter Shared Libraries
@@ -547,11 +747,12 @@ attribute), we use it.
 The internal interface currently used within the code of the Kerberos
 libraries consists of four macros:
 
-@deftypefn Macro MAKE_INIT_FUNCTION(@var{fname})
-Declares @var{fname}, a function taking no arguments and returning
-@code{int}, to be an initialization function.  This macro must be used
-before the function is declared, and it must be defined in the current
-file as:
+@defmac MAKE_INIT_FUNCTION (@var{fname})
+Used at the top level of the file (@i{i.e.}, not within a function),
+with a semicolon after it, declares @var{fname}, a function taking no
+arguments and returning @code{int}, to be an initialization function.
+This macro must be used before the function is declared, and it must
+be defined in the current file as:
 @example
 int @var{fname} (void) @{ ... @}
 @end example
@@ -568,20 +769,21 @@ code --- will be saved away, and returned any time
 
 There may be only one initialization function declared this way in
 each UNIX library, currently.
-@end deftypefn
+@end defmac
 
-@deftypefn Macro MAKE_FINI_FUNCTION(@var{fname})
+@defmac MAKE_FINI_FUNCTION (@var{fname})
 This is similar to @code{MAKE_INIT_FUNCTION} except that @var{fname}
-is to be a library finalization function.
+is to be a library finalization function, called when the library is
+no longer in use and is being unloaded from the address space.
 @example
 void @var{fname} (void) @{ ... @}
 @end example
 
 There may be only one finalization function declared this way in each
 UNIX library, currently.
-@end deftypefn
+@end defmac
 
-@deftypefn Macro CALL_INIT_FUNCTION(@var{fname})
+@deftypefn Macro int CALL_INIT_FUNCTION (@var{fname})
 This macro ensures that the initialization function @var{fname} is
 called at this point, if it has not been called already.  The macro
 returns an error code that indicates success (zero), an error in the
@@ -592,7 +794,7 @@ Currently, all uses of @code{CALL_INIT_FUNCTION} must be in the same
 file as the use of @code{MAKE_INIT_FUNCTION}, and must come after it.
 @end deftypefn
 
-@deftypefn Macro INITIALIZER_RAN(@var{fname})
+@deftypefn Macro int INITIALIZER_RAN (@var{fname})
 This macro returns non-zero iff the initialization function designated
 by @var{fname} (and previously declared in the current file with
 @code{MAKE_INIT_FUNCTION}) has been run, and returned no error
@@ -623,6 +825,24 @@ initialized on various platforms.  The hooks we've added should be
 sufficient for each library to free up any internal caches of
 information at unload time, and we have added some of that support,
 but it is not complete at this time.
+
+
+We have also started limiting the list of exported symbols from shared
+libraries on some UNIX platforms, and intend to start doing symbol
+versioning on platforms that support it.  The symbol lists we use for
+UNIX at the moment are fairly all-inclusive, because we need more
+symbols exported than are in the lists used for Windows and Mac
+platforms, and we have not yet narrowed them down.  The current lists
+should not be taken as an indication of what we intend to export and
+support in the future; see @file{krb5.h} for that.
+
+The export lists are stored in the directories in which each UNIX
+library is built, and the commands set up at configuration time by
+@file{shlib.conf} can specify any processing to be done on those files
+(@i{e.g.}, insertion of leading underscores or linker command-line
+arguments.
+
+(updated 7/20/2004)
 
 @node Operating System Notes for Shared Libraries,  , Advanced Shared Library Requirements, Shared Libraries
 @section Operating System Notes for Shared Libraries
