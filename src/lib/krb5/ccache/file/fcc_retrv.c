@@ -180,10 +180,18 @@ srvname_match(mcreds, creds)
 register const krb5_creds *mcreds, *creds;
 {
     krb5_boolean retval;
+    krb5_principal_data p1, p2;
+    
     retval = krb5_principal_compare(mcreds->client,creds->client);
     if (retval != TRUE)
 	return retval;
-    return krb5_principal_compare(mcreds->server, creds->server);
+    /*
+     * Hack to ignore the server realm for the purposes of the compare.
+     */
+    p1 = *mcreds->server;
+    p2 = *creds->server;
+    p1.realm = p2.realm;
+    return krb5_principal_compare(&p1, &p2);
 }
 
 static krb5_boolean
