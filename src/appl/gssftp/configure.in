@@ -32,7 +32,7 @@ AC_CACHE_VAL(krb5_cv_setenv,
 krb5_cv_setenv=yes,krb5_cv_setenv=no)])
 AC_MSG_RESULT($krb5_cv_setenv)
 if test $krb5_cv_setenv = no; then
-SETENVSRC='$(srcdir)/../bsd/setenv.c'
+SETENVSRC='$(srcdir)/../../bsd/setenv.c'
 SETENVOBJ=setenv.o
 AC_SUBST([SETENVSRC])
 AC_SUBST([SETENVOBJ])
