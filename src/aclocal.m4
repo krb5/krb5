@@ -1153,18 +1153,6 @@ if test "$dbval" = "" -o "$dbval" = ndbm; then
 		AC_DEFINE(MISSING_CLEARERR_PROTO))])
 	LIBS="$OLIBS"
 fi
-if test "$dbval" = "" -o "$dbval" = dbm; then
-	OLIBS="$LIBS"
-	AC_HEADER_CHECK(dbm.h,[dbval=dbm
-	  AC_CHECK_FUNC(nextkey,,
-	    AC_CHECK_LIB(dbm,dbm_nextkey,[dblibs=-ldbm]))
-	  AC_DEFINE(ODBM)
-	  AC_CHECK_DBM_PROTO($dbval,dbm_error,,
-		AC_DEFINE(MISSING_ERROR_PROTO))
-	  AC_CHECK_DBM_PROTO($dbval,dbm_clearerr,,
-		AC_DEFINE(MISSING_CLEARERR_PROTO))])
-	LIBS="$OLIBS"
-fi
 if test "$dbval" = "" -o "$dbval" = db; then
 	dbval=db
 	dblibs=-ldb

@@ -1,3 +1,7 @@
+Mon May 20 17:56:15 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* aclocal.m4 (CHECK_DB): Remove vestigal support for ODBM.  
+
 Tue May 14 21:56:08 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* aclocal.m4 (AC_CHECK_DBM_PROTO): Arguments were not executed if
