@@ -57,14 +57,11 @@ DONE: $(OBJS)
 	$(RM) DONE
 	echo $(OBJS) > DONE
 
-libkdb5.a: $(OBJS)
+libkdb5.$(STEXT): $(OBJS)
 	$(RM) $@
 	$(ARADD) $@ $(OBJS)
 	$(RANLIB) $@
 
-install:: libkdb5.a
-	$(INSTALL_DATA) libkdb5.a $(DESTDIR)$(KRB5_LIBDIR)/libkdb5.a
-	$(RANLIB) $(DESTDIR)$(KRB5_LIBDIR)/libkdb5.a
 
 clean::
 	$(RM) libkdb5.a DONE
@@ -77,3 +74,4 @@ check::	t_kdb
 
 clean::
 	$(RM) t_kdb t_kdb.o
+
