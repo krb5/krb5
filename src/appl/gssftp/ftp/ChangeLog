@@ -1,3 +1,9 @@
+2001-05-01  Ken Raeburn  <raeburn@mit.edu>
+
+	* cmds.c (setpeer): Port number should be unsigned short.  (Patch
+	from Garry Zacheiss.)  Add upper-bound check in case short is not
+	exactly 16 bits.  Don't truncate the port number before checking.
+
 2001-04-27  Ezra Peisach  <epeisach@mit.edu>
 
 	* ftp_var.h: Prototype for recvrequest() needs volatile
