@@ -1,3 +1,19 @@
+Wed Sep 21 17:40:56 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* kdc_util.c, kdc_util.h (realm_compare): Change realm_compare so
+		that both arguments are principals.  This makes it less
+		confusing....
+
+	* kdc_util.c (add_to_transited): Folded in Tony Andrea's changes
+		so that add_to_transited doesn't assume that the contents
+		of a krb5_data->data are null terminated.
+
+	* do_tgs_req.c (process_tgs_req): Add the realm of the presented
+	  tgt if it is different from the local realm (cross-realm) and it
+	  is different than the realm of the client (since the realm of
+	  the client is already implicitly part of the transited list and
+	  should not be explicitly listed).
+
 Thu Aug 18 18:17:59 1994  Theodore Y. Ts'o  (tytso at tsx-11)
 
 	* configure.in:

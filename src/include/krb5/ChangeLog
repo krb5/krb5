@@ -1,3 +1,8 @@
+Wed Sep 21 18:10:55 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* func_proto.h (krb5_check_transited_list): Added prototype for
+		function donated by Cybersafe.
+
 Wed Aug 17 16:33:22 1994  Theodore Y. Ts'o  (tytso at tsx-11)
 
 	* krb5.h (krb5_enc_kdc_rep_part): Added msg_type field.  Needed

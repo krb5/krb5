@@ -29,7 +29,7 @@
 #define __KRB5_KDC_UTIL__
 
 krb5_error_code check_hot_list PROTOTYPE((krb5_ticket *));
-krb5_boolean realm_compare PROTOTYPE((krb5_data *, krb5_principal));
+krb5_boolean realm_compare PROTOTYPE((krb5_principal, krb5_principal));
 krb5_boolean krb5_is_tgs_principal PROTOTYPE((krb5_principal));
 krb5_error_code add_to_transited PROTOTYPE((krb5_data *,
 					    krb5_data *,
@@ -91,7 +91,6 @@ void kdc_insert_lookaside PROTOTYPE((krb5_data *, krb5_data *));
 #define setflag(flagfield, flag) (flagfield |= (flag))
 #define clear(flagfield, flag) (flagfield &= ~(flag))
 
-#define realm_of_tgt(ticket) krb5_princ_realm(ticket->server)
 #ifdef KRB4
 krb5_error_code process_v4 PROTOTYPE((const krb5_data *,
 				      const krb5_fulladdr *,

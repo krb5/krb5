@@ -91,15 +91,16 @@ krb5_authdata ***output;
 }
 
 krb5_boolean
-realm_compare(realmname, princ)
-krb5_data *realmname;
-krb5_principal princ;
+realm_compare(DECLARG(krb5_principal, princ1), 
+              DECLARG(krb5_principal, princ2))
+OLDDECLARG(krb5_principal, princ1)
+OLDDECLARG(krb5_principal, princ2)
 {
-    if (realmname->length != krb5_princ_realm(princ)->length)
-	return FALSE;
-    return(memcmp((char *)realmname->data,
-		  (char *)krb5_princ_realm(princ)->data,
-		  realmname->length) ? FALSE : TRUE);
+  krb5_data *realm1 = krb5_princ_realm(princ1);
+  krb5_data *realm2 = krb5_princ_realm(princ2);
+
+  return((realm1->length == realm2->length) &&
+         !memcmp(realm1->data, realm2->data, realm1->length));
 }
 
 struct kparg {
@@ -518,147 +519,188 @@ char	*r2;
  */
 
 krb5_error_code 
-add_to_transited(tgt_trans,new_trans,tgs,client,server)
-krb5_data *tgt_trans;
-krb5_data *new_trans;
-krb5_principal tgs;
-krb5_principal client;
-krb5_principal server;
+add_to_transited(DECLARG(krb5_data *, tgt_trans),
+                 DECLARG(krb5_data *, new_trans),
+                 DECLARG(krb5_principal, tgs),
+                 DECLARG(krb5_principal, client),
+                 DECLARG(krb5_principal, server))
+OLDDECLARG(krb5_data *, tgt_trans)
+OLDDECLARG(krb5_data *, new_trans)
+OLDDECLARG(krb5_principal, tgs)
+OLDDECLARG(krb5_principal, client)
+OLDDECLARG(krb5_principal, server)
 {
-    char	*realm = (char *)krb5_princ_realm(tgs)->data;
-    char	*trans = (char *)malloc(strlen(realm) + tgt_trans->length + 1);
-    char	*otrans = tgt_trans->data;
+  char        *realm;
+  char        *trans;
+  char        *otrans;
 
-    /* The following are for stepping through the transited field     */
-    char	prev[MAX_REALM_LN];
-    char	next[MAX_REALM_LN];
-    char	current[MAX_REALM_LN];
-    char	exp[MAX_REALM_LN];	/* Expanded current realm name     */
+  /* The following are for stepping through the transited field     */
 
-    int	retval;
-    int	clst,nlst;			/* count of last character in current and next */
-    int	pl,pl1;				/* prefix length                               */
-    int	added = 0;			/* 1 = new realm has been added                */
+  char        prev[MAX_REALM_LN];
+  char        next[MAX_REALM_LN];
+  char        current[MAX_REALM_LN];
+  char        exp[MAX_REALM_LN];      /* Expanded current realm name     */
 
-    if(!trans) return(ENOMEM);
+  int         clst, nlst;    /* count of last character in current and next */
+  int         pl, pl1;       /* prefix length                               */
+  int         added;         /* TRUE = new realm has been added             */
 
-    if(new_trans->data) krb5_xfree(new_trans->data);
+  if (!(realm = (char *) malloc(krb5_princ_realm(tgs)->length+1))) {
+    return(ENOMEM);
+  }
+  memcpy(realm, krb5_princ_realm(tgs)->data, krb5_princ_realm(tgs)->length);
+  realm[krb5_princ_realm(tgs)->length] = '\0';
 
-    new_trans->data = trans;
+  if (!(otrans = (char *) malloc(tgt_trans->length+1))) {
+    return(ENOMEM);
+  }
+  memcpy(otrans, tgt_trans->data, tgt_trans->length);
+  otrans[tgt_trans->length] = '\0';
 
-    /* For the purpose of appending, the realm preceding the first */
-    /* relam in the transited field is considered the null realm   */
-    strcpy(prev,"");
+  if (!(trans = (char *) malloc(strlen(realm) + strlen(otrans) + 1))) {
+    return(ENOMEM);
+  }
 
-    /***** In next statement, need to keep reading if the , was quoted *****/
-    /* read field into current */
-    retval = sscanf(otrans,"%[^,]",current);
+  if (new_trans->data)  free(new_trans->data);
+  new_trans->data = trans;
 
-    if(retval == 1) otrans = otrans + strlen(current);
-    else *current = '\0';
+  /* For the purpose of appending, the realm preceding the first */
+  /* realm in the transited field is considered the null realm   */
 
-    if(*otrans == ',') otrans++;
-	       
-    if(strcmp(krb5_princ_realm(client)->data,realm) == 0)
-	added = 1;
+  prev[0] = '\0';
 
-    if(strcmp(krb5_princ_realm(server)->data,realm) == 0)
-	added = 1;
+  /***** In next statement, need to keep reading if the , was quoted *****/
+  /* read field into current */
 
-    while(*current) {
+  if (sscanf(otrans, "%[^,]", current) == 1) {
+    otrans += strlen(current);
+  }
+  else {
+    current[0] = '\0';
+  }
 
-	/* figure out expanded form of current name */
-	clst = strlen(current) - 1;
-	if(current[0] == ' ') {
-	    strcpy(exp,current+1);
-	}
-	else if((current[0] == '/') && (prev[0] == '/')) {
-	    strcpy(exp,prev);
-	    strcat(exp,current);
-	}
-	else if(current[clst] == '.') {
-	    strcpy(exp,current);
-	    strcat(exp,prev);
-	}
-	else strcpy(exp,current);
+  if (otrans[0] == ',')  otrans++;
+             
+  added = (krb5_princ_realm(client)->length == strlen(realm) &&
+           !strncmp(krb5_princ_realm(client)->data, realm, strlen(realm))) ||
+          (krb5_princ_realm(server)->length == strlen(realm) &&
+           !strncmp(krb5_princ_realm(server)->data, realm, strlen(realm)));
 
-	/***** next statement, need to keep reading if the , was quoted *****/
-	/* read field into next */
-	retval = sscanf(otrans,"%[^,]",next);
+  while (current[0]) {
 
-	if(retval == 1) {
-	    otrans = otrans + strlen(next);
-	    nlst = strlen(next) - 1;
-	}
-	else {
-	    *next = '\0';
-	    nlst = 0;
-	}
+    /* figure out expanded form of current name */
 
-	if(*otrans == ',') otrans++;
-
-	if(strcmp(exp,realm) == 0) added = 1;
-
-	/* If we still have to insert the new realm */
-	if(added == 0) {
-	    /* Is the next field compressed?  If not, and if the new */
-	    /* realm is a subrealm of the current realm, compress    */
-	    /* the new realm, and insert immediately following the   */
-	    /* current one.  Note that we can not do this if the next*/
-	    /* field is already compressed since it would mess up    */
-	    /* what has already been done.  In most cases, this is   */
-	    /* not a problem becase the realm to be added will be a  */
-	    /* subrealm of the next field too, and we will catch     */
-	    /* it in a future iteration.                             */
-	    if((next[nlst] != '.') && (next[0] != '/') && 
-	       (pl = subrealm(exp,realm))) {
-		added = 1;
-		strcat(current,",");
-		if(pl > 0) strncat(current,realm,pl);
-		else strncat(current,realm+strlen(realm)+pl,-pl);
-	    }
-	    /* Whether or not the next field is compressed, if the    */
-	    /* realm to be added is a superrealm of the current realm,*/
-	    /* then the current realm can be compressed.  First the   */
-	    /* realm to be added must be compressed relative to the   */
-	    /* previous realm (if possible), and then the current     */
-	    /* realm compressed relative to the new realm.  Note that */
-	    /* if the realm to be added is also a superrealm of the   */
-	    /* previous realm, it would have been added earlier, and  */
-	    /* we would not reach this step this time around.         */
-	    else if(pl = subrealm(realm,exp)) {
-		added = 1;
-		*current = '\0';
-		pl1 = subrealm(prev,realm);
-		if(pl1) {
-		    if(pl1 > 0) strncat(current,realm,pl1);
-		    else strncat(current,realm+strlen(realm)+pl1,-pl1);
-		}
-		else { /* If not a subrealm */
-		    if((realm[0] == '/') && prev[0]) strcat(current," ");
-		    strcat(current,realm);
-		}
-		strcat(current,",");
-		if(pl > 0) strncat(current,exp,pl);
-		else strncat(current,exp+strlen(exp)+pl,-pl);
-	    }
-	}
-
-	if(new_trans->length != 0) strcat(trans,",");
-	strcat(trans,current);
-	new_trans->length = strlen(trans) + 1;
-
-	strcpy(prev,exp);
-	strcpy(current,next);
+    clst = strlen(current) - 1;
+    if (current[0] == ' ') {
+      strcpy(exp, current+1);
+    }
+    else if ((current[0] == '/') && (prev[0] == '/')) {
+      strcpy(exp, prev);
+      strcat(exp, current);
+    }
+    else if (current[clst] == '.') {
+      strcpy(exp, current);
+      strcat(exp, prev);
+    }
+    else {
+      strcpy(exp, current);
     }
 
-    if(added == 0) {
-	if(new_trans->length != 0) strcat(trans,",");
-	if((realm[0] == '/') && trans[0]) strcat(trans," ");
-	strcat(trans,realm);
-	new_trans->length = strlen(trans) + 1;
+    /***** next statement, need to keep reading if the , was quoted *****/
+    /* read field into next */
+
+    if (sscanf(otrans, "%[^,]", next) == 1) {
+      otrans += strlen(next);
+      nlst    = strlen(next) - 1;
     }
-    return 0;
+    else {
+      next[0] = '\0';
+      nlst    = 0;
+    }
+
+    if (otrans[0] == ',')  otrans++;
+
+    if (!strcmp(exp, realm))  added = TRUE;
+
+    /* If we still have to insert the new realm */
+
+    if (!added) {
+
+      /* Is the next field compressed?  If not, and if the new */
+      /* realm is a subrealm of the current realm, compress    */
+      /* the new realm, and insert immediately following the   */
+      /* current one.  Note that we can not do this if the next*/
+      /* field is already compressed since it would mess up    */
+      /* what has already been done.  In most cases, this is   */
+      /* not a problem because the realm to be added will be a */
+      /* subrealm of the next field too, and we will catch     */
+      /* it in a future iteration.                             */
+
+      if ((next[nlst] != '.') && (next[0] != '/') &&
+          (pl = subrealm(exp, realm))) {
+        added = TRUE;
+        strcat(current, ",");
+        if (pl > 0) {
+          strncat(current, realm, pl);
+        }
+        else {
+          strncat(current, realm+strlen(realm)+pl, -pl);
+        }
+      }
+
+      /* Whether or not the next field is compressed, if the    */
+      /* realm to be added is a superrealm of the current realm,*/
+      /* then the current realm can be compressed.  First the   */
+      /* realm to be added must be compressed relative to the   */
+      /* previous realm (if possible), and then the current     */
+      /* realm compressed relative to the new realm.  Note that */
+      /* if the realm to be added is also a superrealm of the   */
+      /* previous realm, it would have been added earlier, and  */
+      /* we would not reach this step this time around.         */
+
+      else if (pl = subrealm(realm, exp)) {
+        added      = TRUE;
+        current[0] = '\0';
+        if (pl1 = subrealm(prev,realm)) {
+          if (pl1 > 0) {
+            strncat(current, realm, pl1);
+          }
+          else {
+            strncat(current, realm+strlen(realm)+pl1, -pl1);
+          }
+        }
+        else { /* If not a subrealm */
+          if ((realm[0] == '/') && prev[0]) {
+            strcat(current, " ");
+          }
+          strcat(current, realm);
+        }
+        strcat(current,",");
+        if (pl > 0) {
+          strncat(current, exp, pl);
+        }
+        else {
+          strncat(current, exp+strlen(exp)+pl, -pl);
+        }
+      }
+    }
+
+    if (new_trans->length != 0)  strcat(trans, ",");
+    strcat(trans, current);
+    new_trans->length = strlen(trans) + 1;
+
+    strcpy(prev, exp);
+    strcpy(current, next);
+  }
+
+  if (!added) {
+    if (new_trans->length != 0)  strcat(trans, ",");
+    if((realm[0] == '/') && trans[0])  strcat(trans, " ");
+    strcat(trans, realm);
+    new_trans->length = strlen(trans) + 1;
+  }
+
+  return(0);
 }
 
 /*

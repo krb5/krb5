@@ -422,12 +422,21 @@ tgt_again:
     enc_tkt_reply.transited.tr_type = KRB5_DOMAIN_X500_COMPRESS;
     enc_tkt_reply.transited.tr_contents = empty_string; /* equivalent of "" */
 
+    /*
+     * Only add the realm of the presented tgt to the transited list if 
+     * it is different than the local realm (cross-realm) and it is different
+     * than the realm of the client (since the realm of the client is already
+     * implicitly part of the transited list and should not be explicitly
+     * listed).
+     */
+
     /* realm compare is like strcmp, but knows how to deal with these args */
-    if (realm_compare(realm_of_tgt(header_ticket),
-		       header_ticket->server)) {
-	/* tgt issued by local realm */
+    if (realm_compare(header_ticket->server, tgs_server) ||
+	realm_compare(header_ticket->server, enc_tkt_reply.client)) {
+	/* tgt issued by local realm or issued by realm of client */
 	enc_tkt_reply.transited = header_ticket->enc_part2->transited;
     } else {
+	/* tgt issued by some other realm and not the realm of the client */
 	/* assemble new transited field into allocated storage */
 	if (header_ticket->enc_part2->transited.tr_type !=
 	    KRB5_DOMAIN_X500_COMPRESS) {

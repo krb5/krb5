@@ -1,6 +1,7 @@
 /*
  * lib/krb5/krb/rd_req_dec.c
  *
+ * Copyright (c) 1994 CyberSAFE Corporation.
  * Copyright 1990,1991 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
@@ -16,7 +17,8 @@
  * this permission notice appear in supporting documentation, and that
  * the name of M.I.T. not be used in advertising or publicity pertaining
  * to distribution of the software without specific, written prior
- * permission.  M.I.T. makes no representations about the suitability of
+ * permission.  Neither M.I.T., the Open Computing Security Group, nor
+ * CyberSAFE Corporation make any representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
  * 
@@ -164,6 +166,66 @@ krb5_tkt_authent **authdat;
 	goto cleanup;
     }
 
+    /* okay, now check cross-realm policy */
+
+#if defined(_SINGLE_HOP_ONLY)
+
+    /* Single hop cross-realm tickets only */
+
+    { krb5_transited *trans = &(req->ticket->enc_part2->transited);
+
+      /* If the transited list is empty, then we have at most one hop */
+
+      if (trans->tr_contents.data && trans->tr_contents.data[0]) {
+        retval = KRB5KRB_AP_ERR_ILL_CR_TKT;
+      }
+    }
+
+#elif defined(_NO_CROSS_REALM)
+
+    /* No cross-realm tickets */
+
+    { char           *lrealm;
+      krb5_data      *realm = krb5_princ_realm(req->ticket->enc_part2->client);
+      krb5_transited *trans = &(req->ticket->enc_part2->transited);
+
+      /* If the transited list is empty, then we have at most one hop      */
+      /* So we also have to check that the client's realm is the local one */
+
+      krb5_get_default_realm(&lrealm);
+      if ((trans->tr_contents.data && trans->tr_contents.data[0]) ||
+          strlen(lrealm) != realm->length ||
+          memcmp(lrealm, realm->data, strlen(lrealm))) {
+        retval = KRB5KRB_AP_ERR_ILL_CR_TKT;
+      }
+      free(lrealm);
+    }
+
+#else
+
+    /* Hierarchical Cross-Realm */
+  
+    { int            i;
+      krb5_data      lrealm;
+      krb5_data      *realm = krb5_princ_realm(req->ticket->enc_part2->client);
+      krb5_transited *trans = &(req->ticket->enc_part2->transited);
+  
+      /* If the transited list is not empty, then check that all realms */
+      /* transited are within the hierarchy between the client's realm  */
+      /* and the local realm.                                           */
+  
+      if (trans->tr_contents.data && trans->tr_contents.data[0]) {
+        krb5_get_default_realm(&(lrealm.data));
+        lrealm.length = strlen(lrealm.data);
+        retval = krb5_check_transited_list(&(trans->tr_contents), realm,
+                                           &lrealm);
+        free(lrealm.data);
+      }
+    }
+
+#endif
+
+    if (retval)  goto cleanup;
 
     /* only check rcache if sender has provided one---some services
        may not be able to use replay caches (such as datagram servers) */

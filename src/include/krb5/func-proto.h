@@ -233,6 +233,10 @@ char *krb5_cc_default_name
 krb5_error_code krb5_cc_default
 	PROTOTYPE((krb5_ccache *));
 
+/* chk_trans.c */
+krb5_error_code krb5_check_transited_list
+    PROTOTYPE((krb5_data *trans, krb5_data *realm1, krb5_data *realm2));
+
 /* free_rtree.c */
 void krb5_free_realm_tree
 	PROTOTYPE((krb5_principal *));

@@ -1,3 +1,11 @@
+Wed Sep 21 17:57:35 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* rd_req_dec.c (krb5_rd_req_decoded): Added Changes from Cybersafe
+		to do transited realm path checking.
+
+	* chk_trans.c: Added donated module from CyberSafe.  It checks to
+		see if a transited path is a legal one between two realms.
+
 Thu Sep 15 11:08:39 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* rd_req_sim.c (krb5_rd_req_simple): Use krb5_rd_req instead of
