@@ -1,3 +1,7 @@
+
+Thu Aug 31 12:02:36 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* gssapi.exp - Repeat tests with -v2 switch.
+
 Sat Aug 26 17:56:50 1995  Ezra Peisach  (epeisach@kangaroo.mit.edu)
 
 	* sample.exp: Add inetd test

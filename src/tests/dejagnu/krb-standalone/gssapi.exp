@@ -375,6 +375,171 @@ proc doit { } {
     pass gssclient3
 
     stop_gss_server
+
+    # Try some V2 services.
+    # Now start the gss-server.
+    spawn $GSSSERVER -port 5557 -v2 gssservice@$hostname
+    set gss_server_pid [exp_pid]
+    set gss_server_spawn_id $spawn_id
+    catch "exec sleep 4"
+
+    # Start the client with client identity 0
+    set env(KRB5CCNAME) $tmppwd/gss_tk_0
+    verbose "KRB5CCNAME=$env(KRB5CCNAME)"
+    spawn $GSSCLIENT -port 5557 -v2 $hostname gssservice@$hostname "message from gsstest0"
+    expect_after -i $spawn_id {
+	timeout {
+	    fail gssclient0
+	    catch "expect_after"
+	    return
+	}
+	eof {
+	    fail gssclient0
+	    catch "expect_after"
+	    return
+	}
+    }
+    expect -i $spawn_id "Signature verified"
+    catch "expect_after"
+    expect_after -i $gss_server_spawn_id {
+	timeout {
+	    fail gssclient0
+	    catch "expect_after"
+	    return
+	}
+	eof {
+	    fail gssclient0
+	    catch "expect_after"
+	    return
+	}
+    }
+    expect -i $gss_server_spawn_id "Accepted connection: \"gsstest0@KRBTEST.COM\" at"
+    expect -i $gss_server_spawn_id "Received message: \"message from gsstest0\""
+    catch "expect_after"
+    if ![check_exit_status gssclient0] {
+	fail gssclient0
+	return
+    }
+    pass gssclient0
+
+    # Start the client with client identity 1
+    set env(KRB5CCNAME) $tmppwd/gss_tk_1
+    verbose "KRB5CCNAME=$env(KRB5CCNAME)"
+    spawn $GSSCLIENT -port 5557 -v2 $hostname gssservice@$hostname "message from gsstest1"
+    expect_after -i $spawn_id {
+	timeout {
+	    fail gssclient1
+	    catch "expect_after"
+	    return
+	}
+	eof {
+	    fail gssclient1
+	    catch "expect_after"
+	    return
+	}
+    }
+    expect -i $spawn_id "Signature verified"
+    catch "expect_after"
+    expect_after -i $gss_server_spawn_id {
+	timeout {
+	    fail gssclient1
+	    catch "expect_after"
+	    return
+	}
+	eof {
+	    fail gssclient1
+	    catch "expect_after"
+	    return
+	}
+    }
+    expect -i $gss_server_spawn_id "Accepted connection: \"gsstest1@KRBTEST.COM\" at"
+    expect -i $gss_server_spawn_id "Received message: \"message from gsstest1\""
+    catch "expect_after"
+    if ![check_exit_status gssclient1] {
+	fail gssclient1
+	return
+    }
+    pass gssclient1
+
+    # Start the client with client identity 2
+    set env(KRB5CCNAME) $tmppwd/gss_tk_2
+    verbose "KRB5CCNAME=$env(KRB5CCNAME)"
+    spawn $GSSCLIENT -port 5557 -v2 $hostname gssservice@$hostname "message from gsstest2"
+    expect_after -i $spawn_id {
+	timeout {
+	    fail gssclient2
+	    catch "expect_after"
+	    return
+	}
+	eof {
+	    fail gssclient2
+	    catch "expect_after"
+	    return
+	}
+    }
+    expect -i $spawn_id "Signature verified"
+    catch "expect_after"
+    expect_after -i $gss_server_spawn_id {
+	timeout {
+	    fail gssclient2
+	    catch "expect_after"
+	    return
+	}
+	eof {
+	    fail gssclient2
+	    catch "expect_after"
+	    return
+	}
+    }
+    expect -i $gss_server_spawn_id "Accepted connection: \"gsstest2@KRBTEST.COM\" at"
+    expect -i $gss_server_spawn_id "Received message: \"message from gsstest2\""
+    catch "expect_after"
+    if ![check_exit_status gssclient2] {
+	fail gssclient2
+	return
+    }
+    pass gssclient2
+
+    # Start the client with client identity 3
+    set env(KRB5CCNAME) $tmppwd/gss_tk_3
+    verbose "KRB5CCNAME=$env(KRB5CCNAME)"
+    spawn $GSSCLIENT -port 5557 -v2 $hostname gssservice@$hostname "message from gsstest3"
+    expect_after -i $gss_server_spawn_id {
+	timeout {
+	    fail gssclient3
+	    catch "expect_after"
+	    return
+	}
+	eof {
+	    fail gssclient3
+	    catch "expect_after"
+	    return
+	}
+    }
+    expect -i $gss_server_spawn_id "Accepted connection: \"gsstest3@KRBTEST.COM\" at"
+    expect -i $gss_server_spawn_id "Received message: \"message from gsstest3\""
+    catch "expect_after"
+    expect_after -i $spawn_id {
+	timeout {
+	    fail gssclient3
+	    catch "expect_after"
+	    return
+	}
+	eof {
+	    fail gssclient3
+	    catch "expect_after"
+	    return
+	}
+    }
+    expect -i $spawn_id "Signature verified"
+    catch "expect_after"
+    if ![check_exit_status gssclient3] {
+	fail gssclient3
+	return
+    }
+    pass gssclient3
+
+    stop_gss_server
     gss_restore_env
 
     if ![our_kdestroy $tmppwd/gss_tk_0] {
