@@ -1,63 +1,110 @@
-# config/post.in
+############################################################
+## config/post.in
+##
+
+# in case there is no default target (very unlikely)
+all::
 
 check-windows::
+
+##############################
+# dependency generation
+#
+
+depend:: depend-postrecurse
+depend-postrecurse: depend-recurse
+depend-recurse: depend-prerecurse
+
+depend-prerecurse:
+depend-postrecurse:
+
+depend-postrecurse: depend-update-makefile
 
 ALL_DEP_SRCS= $(SRCS) $(EXTRADEPSRCS)
 
 # be sure to check ALL_DEP_SRCS against *what it would be if SRCS and
 # EXTRADEPSRCS are both empty*
-depend-verify-srcdir:
+.depend-verify-srcdir:
 	@if test "$(srcdir)" = "." ; then \
 		echo 1>&2 error: cannot build dependencies with srcdir=. ; \
 		echo 1>&2 "(can't distinguish generated files from source files)" ; \
 		exit 1 ; \
+	else \
+		if test -r .depend-verify-srcdir; then :; \
+			else (set -x; touch .depend-verify-srcdir); fi \
 	fi
-depend-verify-et: depend-verify-et-$(COM_ERR_VERSION)
+.depend-verify-et: depend-verify-et-$(COM_ERR_VERSION)
 depend-verify-et-k5:
+	@if test -r .depend-verify-et; then :; \
+		else (set -x; touch .depend-verify-et); fi
 depend-verify-et-sys:
 	@echo 1>&2 error: cannot build dependencies using system et package
 	@exit 1
-depend-verify-ss: depend-verify-ss-$(SS_VERSION)
+.depend-verify-ss: depend-verify-ss-$(SS_VERSION)
 depend-verify-ss-k5:
+	@if test -r .depend-verify-ss; then :; \
+		else (set -x; touch .depend-verify-ss); fi
 depend-verify-ss-sys:
 	@echo 1>&2 error: cannot build dependencies using system ss package
 	@exit 1
-depend-verify-db: depend-verify-db-$(DB_VERSION)
+.depend-verify-db: depend-verify-db-$(DB_VERSION)
 depend-verify-db-k5:
+	@if test -r .depend-verify-db; then :; \
+		else (set -x; touch .depend-verify-db); fi
 depend-verify-db-sys:
 	@echo 1>&2 error: cannot build dependencies using system db package
 	@exit 1
-depend-verify-gcc: depend-verify-gcc-@HAVE_GCC@
+.depend-verify-gcc: depend-verify-gcc-@HAVE_GCC@
 depend-verify-gcc-yes:
+	@if test -r .depend-verify-gcc; then :; \
+		else (set -x; touch .depend-verify-gcc); fi
 depend-verify-gcc-no:
 	@echo 1>&2 error: The '"depend"' rules are written for gcc.
 	@echo 1>&2 Please use gcc, or update the rules to handle your compiler.
 	@exit 1
 
-.d: $(ALL_DEP_SRCS) depend-verify-srcdir depend-verify-et depend-verify-ss depend-verify-db
+DEP_CFG_VERIFY = .depend-verify-srcdir \
+	.depend-verify-et .depend-verify-ss .depend-verify-db
+DEP_VERIFY = $(DEP_CFG_VERIFY) .depend-verify-gcc
+
+.d: $(ALL_DEP_SRCS) $(DEP_CFG_VERIFY) depend-dependencies
 	if test "$(ALL_DEP_SRCS)" != " " ; then \
-		$(CC) -M $(ALL_CFLAGS) $(ALL_DEP_SRCS) > .dtmp || exit 1 ; \
-		mv -f .dtmp .d ; \
+		$(RM) .dtmp && $(MAKE) .dtmp && mv -f .dtmp .d ; \
 	else \
 		touch .d ; \
 	fi
 
+# These are dependencies of the depend target that do not get fed to
+# the compiler.  Examples include generated header files.
+depend-dependencies:
+
+# .dtmp must *always* be out of date so that $? can be used to perform
+# VPATH searches on the sources.
+#
+# NOTE: This will fail when using Make programs whose VPATH support is
+# broken.
+.dtmp: $(ALL_DEP_SRCS)
+	$(CC) -M $(ALL_CFLAGS) $? > .dtmp
+
 # Generate a script for dropping in the appropriate make variables, using
 # directory-specific parameters.  General substitutions independent of local
 # make variables happen in depfix.sed.
-.depfix2.sed: depend-verify-gcc Makefile $(SRCTOP)/util/depgen.sed
+.depfix2.sed: .depend-verify-gcc Makefile $(SRCTOP)/util/depgen.sed
 	x=`$(CC) -print-libgcc-file-name` ; \
 	echo '$(SRCTOP)' '$(myfulldir)' '$(srcdir)' '$(BUILDTOP)' "$$x" | sed -f $(SRCTOP)/util/depgen.sed > .depfix2.tmp
 	mv -f .depfix2.tmp .depfix2.sed
 
 DEPLIBOBJNAMEFIX = sed -e 's;^\$$(OUTPRE)\([a-zA-Z0-9_\-]*\)\.\$$(OBJEXT):;\1.so \1.po &;'
 
+# NOTE: This will also generate spurious $(OUTPRE) and $(OBJEXT)
+# references in rules for non-library objects in a directory where
+# library objects happen to be built.  It's mostly harmless.
 .depend: .d .depfix2.sed $(SRCTOP)/util/depfix.sed
 	sed -f .depfix2.sed < .d | sed -f $(SRCTOP)/util/depfix.sed | \
 	(if test "x$(STLIBOBJS)" != "x"; then $(DEPLIBOBJNAMEFIX) ; else cat; fi ) \
 	> .depend
 
-depend-postrecurse:: .depend
+depend-update-makefile: .depend depend-recurse
 	if test -n "$(SRCS)" ; then \
 		sed -e '/^# +++ Dependency line eater +++/,$$d' \
 			< $(srcdir)/Makefile.in | cat - .depend \
@@ -65,13 +112,16 @@ depend-postrecurse:: .depend
 	$(SRCTOP)/config/move-if-changed $(srcdir)/Makefile.in.new $(srcdir)/Makefile.in ; \
 	else :; fi
 
-depend:: depend-prerecurse depend-recurse depend-postrecurse
-depend-prerecurse::
+DEPTARGETS = .depend .d .dtmp .depfix2.sed .depfix2.tmp $(DEP_VERIFY)
+
+#
+# end dependency generation
+##############################
 
 clean:: clean-$(WHAT)
 
 clean-unix::
-	$(RM) $(OBJS) .depend .d .depfix2.sed .depfix2.tmp
+	$(RM) $(OBJS) $(DEPTARGETS)
 
 clean-windows::
 	$(RM) *.$(OBJEXT)
@@ -79,14 +129,17 @@ clean-windows::
 
 distclean:: distclean-$(WHAT)
 
-distclean-prerecurse::
+distclean-normal-clean:
 	$(MAKE) NORECURSE=true clean
-
-distclean-postrecurse::
+distclean-prerecurse: distclean-normal-clean
+distclean-nuke-configure-state:
 	$(RM) config.log config.cache config.status Makefile
+distclean-postrecurse: distclean-nuke-configure-state
 
-Makefiles-prerecurse:: Makefile
+Makefiles-prerecurse: Makefile
 
+# thisconfigdir = relative path from this Makefile to config.status
+# mydir = relative path from config.status to this Makefile
 Makefile: $(srcdir)/Makefile.in $(thisconfigdir)/config.status \
 		$(SRCTOP)/config/pre.in $(SRCTOP)/config/post.in
 	cd $(thisconfigdir) && $(SHELL) config.status $(mydir)/Makefile
@@ -102,6 +155,15 @@ $(srcdir)/$(thisconfigdir)/configure: $(srcdir)/$(thisconfigdir)/configure.in \
 RECURSE_TARGETS=all-recurse clean-recurse distclean-recurse install-recurse \
 	check-recurse depend-recurse Makefiles-recurse install-headers-recurse
 
+# MY_SUBDIRS overrides any setting of SUBDIRS generated by the
+# configure script that generated this Makefile.  This is needed when
+# the configure script that produced this Makefile creates multiple
+# Makefiles in different directories; the setting of SUBDIRS will be
+# the same in each.
+#
+# LOCAL_SUBDIRS seems to account for the case where the configure
+# script doesn't call any other subsidiary configure scripts, but
+# generates multiple Makefiles.
 $(RECURSE_TARGETS):
 	@case "`echo 'x$(MFLAGS)'|sed -e 's/^x//' -e 's/ --.*$$//'`" \
 		in *[ik]*) e="status=1" ;; *) e="exit 1";; esac; \
@@ -129,3 +191,7 @@ $(RECURSE_TARGETS):
 	else :; \
 	fi;\
 	exit $$status
+
+##
+## end of post.in
+############################################################

@@ -92,8 +92,8 @@ includes:: $(SRC_HDRS) $(BUILD_HDRS)
 clean-unix::
 	$(RM) $(HDRS)
 
-all-prerecurse:: includes
-all-prerecurse:: all-libobjs
+all-prerecurse: includes
+all-prerecurse: all-libobjs
 
 all-windows:: $(OBJS)
 

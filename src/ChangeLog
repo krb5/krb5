@@ -1,3 +1,8 @@
+2002-12-12  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (install-headers-prerecurse): Update to not use
+	double colons.
+
 2002-12-06  Ezra Peisach  <epeisach@bu.edu>
 
 	* Makefile.in (clean-unix): Remove krb5-config.

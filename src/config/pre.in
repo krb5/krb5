@@ -1,5 +1,7 @@
+############################################################
 ## config/pre.in
 ## common prefix for all Makefile.in in the Kerberos V5 tree.
+##
 
 WHAT = unix
 SHELL=/bin/sh
@@ -8,59 +10,103 @@ all:: all-$(WHAT)
 
 clean:: clean-$(WHAT)
 
+distclean:: distclean-$(WHAT)
+
 install:: install-$(WHAT)
 
 check:: check-$(WHAT)
 
 install-headers:: install-headers-$(WHAT)
 
-all-recurse: all-prerecurse
-all-postrecurse:: all-recurse
+##############################
+# Recursion rule support
+#
+
+# The commands for the recursion targets live in config/post.in.
+#
+# General form of recursion rules:
+#
+# Each recursive target foo-unix has related targets: foo-prerecurse,
+# foo-recurse, and foo-postrecurse
+#
+# The foo-recurse rule is in post.in.  It is what actually recursively
+# calls make.
+#
+# foo-recurse depends on foo-prerecurse, so any targets that must be
+# built before descending into subdirectories must be dependencies of
+# foo-prerecurse.
+#
+# foo-postrecurse depends on foo-recurse, but targets that must be
+# built after descending into subdirectories should be have
+# foo-recurse as dependencies in addition to being listed under
+# foo-postrecurse, to avoid ordering issues.
+#
+# The foo-prerecurse, foo-recurse, and foo-postrecurse rules are all
+# single-colon rules, to avoid nasty ordering problems with
+# double-colon rules.
+#
+# e.g.
+# all:: includes foo
+# foo:
+#	echo foo
+# includes::
+#	echo bar
+# includes::
+#	echo baz
+#
+# will result in "bar", "foo", "baz" on AIX, and possibly others.
 all-unix:: all-postrecurse
+all-postrecurse: all-recurse
+all-recurse: all-prerecurse
 
-all-prerecurse::
-all-postrecurse::
+all-prerecurse:
+all-postrecurse:
 
-clean-unix:: clean-prerecurse
-clean-unix:: clean-recurse
 clean-unix:: clean-postrecurse
+clean-postrecurse: clean-recurse
+clean-recurse: clean-prerecurse
 
-clean-prerecurse::
-clean-postrecurse::
+clean-prerecurse:
+clean-postrecurse:
 
-distclean-unix:: distclean-prerecurse
-distclean-unix:: distclean-recurse
-distclean-unix:: distclean-postrecurse
+distclean-unix: distclean-postrecurse
+distclean-postrecurse: distclean-recurse
+distclean-recurse: distclean-prerecurse
 
-install-unix:: install-prerecurse
-install-unix:: install-recurse
+distclean-prerecurse:
+distclean-postrecurse:
+
 install-unix:: install-postrecurse
+install-postrecurse: install-recurse
+install-recurse: install-prerecurse
 
-install-prerecurse::
-install-postrecurse::
+install-prerecurse:
+install-postrecurse:
 
-install-headers-unix:: install-headers-prerecurse
-install-headers-unix:: install-headers-recurse
 install-headers-unix:: install-headers-postrecurse
+install-headers-postrecurse: install-headers-recurse
+install-headers-recurse: install-headers-prerecurse
 
-install-headers-prerecurse::
+install-headers-prerecurse:
+install-headers-postrecurse:
 
-install-headers-postrecurse::
-
-
-check-unix:: check-prerecurse
-check-unix:: check-recurse
 check-unix:: check-postrecurse
+check-postrecurse: check-recurse
+check-recurse: check-prerecurse
 
-check-prerecurse::
-check-postrecurse::
+check-prerecurse:
+check-postrecurse:
 
-Makefiles:: Makefiles-prerecurse
-Makefiles:: Makefiles-recurse
-Makefiles:: Makefiles-postrecurse
+Makefiles: Makefiles-postrecurse
+Makefiles-postrecurse: Makefiles-recurse
+Makefiles-recurse: Makefiles-prerecurse
 
-Makefiles-prerecurse::
-Makefiles-postrecurse::
+Makefiles-prerecurse:
+Makefiles-postrecurse:
+
+#
+# end recursion rule support
+##############################
 
 # Directory syntax:
 #
@@ -364,5 +410,6 @@ MAKE_COMMANDS-k5= $(BUILDTOP)/util/ss/mk_cmds
 .ct.c:
 	$(MAKE_COMMANDS) $<
 
-#
-# end of pre.in
+##
+## end of pre.in
+############################################################

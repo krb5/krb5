@@ -1,3 +1,8 @@
+2002-12-12  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (depend-dependencies): Was previously
+	depend-prerecurse.
+
 2002-09-10  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (LOCALINCLUDES): Drop references to .. and et

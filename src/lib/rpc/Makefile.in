@@ -174,8 +174,8 @@ HDRS=	$(HDRDIR)/auth.h \
 	$(HDRDIR)/types.h \
 	$(HDRDIR)/xdr.h
 
-all-prerecurse:: includes
-all-prerecurse:: all-liblinks
+all-prerecurse: includes
+all-prerecurse: all-liblinks
 
 all-windows:: $(OBJS)
 

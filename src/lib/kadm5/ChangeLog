@@ -1,3 +1,8 @@
+2002-12-12  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (all-prerecurse): Change double colons to single
+	colons.
+
 2002-11-05  Tom Yu  <tlyu@mit.edu>
 
 	* chpass_util_strings.et: Remove trailing colons, as new

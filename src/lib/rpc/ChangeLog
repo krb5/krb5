@@ -1,3 +1,8 @@
+2002-12-12  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (all-prerecurse): Change double colons to single
+	colons.
+
 2002-11-11  Ken Raeburn  <raeburn@mit.edu>
 
 	* get_myaddress.c (get_myaddress): Local array buf size should be

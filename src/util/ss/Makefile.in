@@ -44,7 +44,7 @@ SRCS=	$(srcdir)/invocation.c $(srcdir)/help.c \
 	$(srcdir)/error.c $(srcdir)/prompt.c \
 	$(srcdir)/request_tbl.c $(srcdir)/list_rqs.c $(srcdir)/pager.c \
 	$(srcdir)/requests.c $(srcdir)/data.c
-depend-prerecurse:: ss_err.h includes
+depend-dependencies: ss_err.h includes
 
 std_rqs.o: std_rqs.c ss_err.h
 

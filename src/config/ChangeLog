@@ -1,3 +1,13 @@
+2002-12-12  Tom Yu  <tlyu@mit.edu>
+
+	* post.in: Fix depend rules to keep state about whether
+	verification of various things succeeded.  Change some double
+	colons to single colons.  Add a new depend-dependencies target to
+	allow Makefile.in to specify things that must be built for depend
+	to work.
+
+	* pre.in: Fix recursion rules to use fewer double colons.
+
 2002-12-09  Tom Yu  <tlyu@mit.edu>
 
 	* post.in: depfix2.sed -> .depfix2.sed to avoid a little clutter.
