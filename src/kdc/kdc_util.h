@@ -161,10 +161,6 @@ void kdc_insert_lookaside (krb5_data *, const krb5_fulladdr *,
 				     krb5_data *);
 
 /* sock2p.c */
-#ifndef HAVE_INET_NTOP
-/* It's provided by sock2p.c in this case.  */
-extern char *inet_ntop (int, const void *, char *, size_t);
-#endif
 extern void sockaddr2p (const struct sockaddr *, char *, size_t, int *);
 
 /* which way to convert key? */

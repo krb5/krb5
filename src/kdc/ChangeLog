@@ -2,6 +2,7 @@
 
 	* sock2p.c (inet_ntop): Disable definition; it should be provided
 	by the socket support header files.
+	* kdc_util.h (inet_ntop): Delete declaration. 
 
 2002-06-26  Ken Raeburn  <raeburn@mit.edu>
 
