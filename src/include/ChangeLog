@@ -1,8 +1,12 @@
-
 Wed May 24 10:54:34 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in	- Change $< to explicit target names when generating
 			  error table header files.  OSF/1 and Ultrix-native
 			  make only expand $< on suffix rules.
+
+Tue May 23 22:07:02 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* krb5.hin: Remove krb5_encode_ticket as it does not exist in
+		library. 
 
 Tue May 23 15:08:54 1995  Theodore Y. Ts'o  (tytso@dcl)
 
