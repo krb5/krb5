@@ -53,6 +53,11 @@ void usage (){
 
 }
 
+/* for Ultrix and friends ... */
+#ifndef MAXHOSTNAMELEN
+#define MAXHOSTNAMELEN 64
+#endif
+
 #define DEBUG
 
 main (argc, argv)
@@ -922,14 +927,27 @@ return 0;
 
 }
 
+#ifdef STDARG_PROTOTYPES
 void print_status( const char *fmt, ...)
+#else
+void print_status (va_alist)
+     va_dcl
+#endif
 {
-va_list ap;
+  va_list ap;
+#ifndef STDARG_PROTOTYPES
+  char *fmt;
+  va_start (ap);
+  fmt = va_arg (ap, char*);
+  if (!quiet) vfprintf(stderr, fmt, ap);
+  va_end(ap);
+#else
         if (! quiet){
             va_start(ap, fmt);
             vfprintf(stderr, fmt, ap);
             va_end(ap);
         }
+#endif
 }
 
 

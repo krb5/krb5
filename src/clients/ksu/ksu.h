@@ -41,7 +41,11 @@
 #include <unistd.h>
 #include <string.h>
 #include <syslog.h>
+#ifdef STDARG_PROTOTYPES
 #include <stdarg.h>
+#else
+#include <varargs.h>
+#endif
 
 #define NO_TARGET_FILE '.'
 #define SOURCE_USER_LOGIN "."
