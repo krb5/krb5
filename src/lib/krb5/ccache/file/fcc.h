@@ -3,7 +3,7 @@
  * $Author$
  * $Id$
  *
- * Copyright 1990 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991 by the Massachusetts Institute of Technology.
  *
  * For copying and distribution information, please see the file
  * <krb5/copyright.h>.
@@ -27,6 +27,11 @@
 
 #define KRB5_FCC_MAXLEN 100
 
+#define KRB5_FCC_FVNO 0x0501		/* krb v5, fcc v1 */
+#define	FCC_OPEN_AND_ERASE	1
+#define	FCC_OPEN_RDWR		2
+#define	FCC_OPEN_RDONLY		3
+
 #ifndef TKT_ROOT
 #define TKT_ROOT "/tmp/tkt"
 #endif
@@ -44,6 +49,23 @@ typedef struct _krb5_fcc_data {
 typedef struct _krb5_fcc_cursor {
      off_t pos;
 } krb5_fcc_cursor;
+
+#define MAYBE_OPEN(ID, MODE) \
+{									\
+    if (OPENCLOSE (ID)) {						\
+	krb5_error_code maybe_open_ret = krb5_fcc_open_file (ID,MODE);	\
+	if (maybe_open_ret) return maybe_open_ret; } }
+
+#define MAYBE_CLOSE(ID, RET) \
+{									\
+    if (OPENCLOSE (ID)) {						\
+	krb5_error_code maybe_close_ret = krb5_fcc_close_file (ID);	\
+	if (!(RET)) RET = maybe_close_ret; } }
+
+#define MAYBE_CLOSE_IGNORE(ID) \
+{									\
+    if (OPENCLOSE (ID)) {						\
+	(void) krb5_fcc_close_file (ID); } }
 
 /* DO NOT ADD ANYTHING AFTER THIS #endif */
 #endif /* __KRB5_FILE_CCACHE__ */
