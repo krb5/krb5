@@ -196,14 +196,14 @@ FILES= ./* \
 	lib/gssapi/generic/* lib/gssapi/krb5/* lib/kadm/* lib/krb425/* \
 	lib/krb5/* lib/krb5/asn.1/* lib/krb5/krb/* \
 	lib/krb5/ccache/* lib/krb5/ccache/file/* \
-	lib/krb5/ccache/stdio/* lib/krb5/error_tables/* \
+	lib/krb5/ccache/stdio/* lib/krb5/error_tables/* 
 	lib/krb5/free/* lib/krb5/keytab/* lib/krb5/keytab/file/* \
 	lib/krb5/os/* lib/krb5/posix/* lib/krb5/rcache/* util/et/* \
 	util/profile/*
 
 WINFILES= windows/* windows/cns/* windows/wintel/* windows/gss/*
 
-MACFILES= mac/kconfig/* mac/libraries/* mac/telnet/*
+MACFILES= mac/* mac/kconfig/* mac/libraries/* mac/telnet/*
 
 WINBINARYFILES=windows/cns/*.ico windows/wintel/*.ico windows/gss/*.ico
 
