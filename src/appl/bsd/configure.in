@@ -1,12 +1,9 @@
 AC_INIT(krlogind.c)
 WITH_CCOPTS
-ISODE_DEFS
-ISODE_INCLUDE
 CONFIG_RULES
 AC_SET_BUILDTOP
 AC_PROG_INSTALL
-AC_CHECK_LIB(socket,main)
-AC_CHECK_LIB(nsl,main)
+WITH_NETLIB
 dnl dbm libs for use of an_to_ln
 AC_CHECK_LIB(ndbm,main)
 AC_CHECK_LIB(dbm,main)

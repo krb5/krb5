@@ -1,3 +1,8 @@
+Wed Mar  1 16:32:02 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* configure.in: Remove ISODE_INCLUDE and ISODE_DEFS, replace check
+		for -lsocket and -lnsl with WITH_NETLIB check.
+
 Tue Feb 28 01:23:57 1995  John Gilmore  (gnu at toad.com)
 
 	* krb5_decode_test.c, krb5_encode_test.c, ktest.h, ktest_equal.h,

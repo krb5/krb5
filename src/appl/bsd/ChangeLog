@@ -1,3 +1,8 @@
+Wed Mar  1 11:54:50 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* configure.in: Remove ISODE_INCLUDE and ISODE_DEFS, replace check
+		for -lsocket and -lnsl with WITH_NETLIB check.
+
 Tue Feb 28 01:41:04 1995  John Gilmore  (gnu at toad.com)
 
 	* forward.c, kcmd.c, krcp.c, krlogin.c, krlogind.c, krsh.c,
