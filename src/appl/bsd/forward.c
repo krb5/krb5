@@ -62,65 +62,67 @@ get_for_creds(etype, sumtype, rhost, client, enc_key, forwardable, outbuf)
     krb5_address **addrs;
     krb5_error_code retval;
     krb5_data *scratch;
-    krb5_kdc_rep *dec_rep;
+    krb5_kdc_rep *dec_rep = 0;
     krb5_error *err_reply;
     krb5_response tgsrep;
     krb5_creds creds, tgt;
     krb5_ccache cc;
     krb5_flags kdcoptions;
     krb5_timestamp now;
-    char *remote_host;
-    char **hrealms;
+    char *remote_host = 0;
+    char **hrealms = 0;
     int i;
+
+    memset((char *)&creds, 0, sizeof(creds));
+    memset((char *)&tgsrep, 0, sizeof(tgsrep));
 
     if (!rhost || !(hp = gethostbyname(rhost)))
       return KRB5_ERR_BAD_HOSTNAME;
 
     remote_host = (char *) malloc(strlen(hp->h_name)+1);
-    if (!remote_host)
-      return ENOMEM;
+    if (!remote_host) {
+	retval = ENOMEM;
+	goto errout;
+    }	
     strcpy(remote_host, hp->h_name);
 
-    if (retval = krb5_get_host_realm(remote_host, &hrealms)) {
-	free(remote_host);
-	return retval;
-    }
+    if (retval = krb5_get_host_realm(remote_host, &hrealms))
+	goto errout;
     if (!hrealms[0]) {
-	free(remote_host);
-	krb5_xfree(hrealms);
-	return KRB5_ERR_HOST_REALM_UNKNOWN;
+	retval = KRB5_ERR_HOST_REALM_UNKNOWN;
+	goto errout;
     }
 
     /* Count elements */
     for(i=0; hp->h_addr_list[i]; i++);
 
     addrs = (krb5_address **) malloc ((i+1)*sizeof(*addrs));
-    if (!addrs)
-      return ENOMEM;
+    if (!addrs) {
+	retval = ENOMEM;
+	goto errout;
+    }
+    memset(addrs, 0, (i+1)*sizeof(*addrs));
     
     for(i=0; hp->h_addr_list[i]; i++) {
 	addrs[i] = (krb5_address *) malloc(sizeof(krb5_address));
-	if (addrs[i]) {
-	    addrs[i]->addrtype = hp->h_addrtype;
-	    addrs[i]->length   = hp->h_length;
-	    addrs[i]->contents = (unsigned char *)malloc(addrs[i]->length);
-	    if (!addrs[i]->contents) {
-		krb5_free_addresses(addrs);
-		return ENOMEM;
-	    }
-	    else
-	      memcpy ((char *)addrs[i]->contents, hp->h_addr_list[i],
-		      addrs[i]->length);
+	if (!addrs[i]) {
+	    retval = ENOMEM;
+	    goto errout;
 	}
-	else {
-	    return ENOMEM;
+	addrs[i]->addrtype = hp->h_addrtype;
+	addrs[i]->length   = hp->h_length;
+	addrs[i]->contents = (unsigned char *)malloc(addrs[i]->length);
+	if (!addrs[i]->contents) {
+	    retval = ENOMEM;
+	    goto errout;
 	}
+	memcpy ((char *)addrs[i]->contents, hp->h_addr_list[i],
+		addrs[i]->length);
     }
     addrs[i] = 0;
 
-    memset((char *)&creds, 0, sizeof(creds));
     if (retval = krb5_copy_principal(client, &creds.client))
-      return retval;
+	goto errout;
     
     if (retval = krb5_build_principal_ext(&creds.server,
 					  strlen(hrealms[0]),
@@ -130,33 +132,37 @@ get_for_creds(etype, sumtype, rhost, client, enc_key, forwardable, outbuf)
 					  client->realm.length,
 					  client->realm.data,
 					  0))
-      return retval;
+	goto errout;
 	
     creds.times.starttime = 0;
-    if (retval = krb5_timeofday(&now)) {
-	return retval;
-    }
+    if (retval = krb5_timeofday(&now))
+	goto errout;
+
     creds.times.endtime = now + KRB5_DEFAULT_LIFE;
     creds.times.renew_till = 0;
     
-    if (retval = krb5_cc_default(&cc)) {
-	return retval;
-    }
+    if (retval = krb5_cc_default(&cc))
+	goto errout;
 
     /* fetch tgt directly from cache */
-    if (retval = krb5_cc_retrieve_cred (cc,
-					KRB5_TC_MATCH_SRV_NAMEONLY,
-					&creds,
-					&tgt)) {
-	return retval;
-    }
+    retval = krb5_cc_retrieve_cred (cc,
+				    KRB5_TC_MATCH_SRV_NAMEONLY,
+				    &creds,
+				    &tgt);
+    krb5_cc_close(cc);
+    if (retval)
+	goto errout;
 
     /* tgt->client must be equal to creds.client */
-    if (!krb5_principal_compare(tgt.client, creds.client))
-	return KRB5_PRINC_NOMATCH;
+    if (!krb5_principal_compare(tgt.client, creds.client)) {
+	retval = KRB5_PRINC_NOMATCH;
+	goto errout;
+    }
 
-    if (!tgt.ticket.length)
-	return(KRB5_NO_TKT_SUPPLIED);
+    if (!tgt.ticket.length) {
+	retval = KRB5_NO_TKT_SUPPLIED;
+	goto errout;
+    }
 
     kdcoptions = flags2options(tgt.ticket_flags)|KDC_OPT_FORWARDED;
 
@@ -170,10 +176,7 @@ get_for_creds(etype, sumtype, rhost, client, enc_key, forwardable, outbuf)
 			       0,		/* no padata */
 			       0,		/* no second ticket */
 			       &tgt, &tgsrep))
-	return retval;
-
-#undef cleanup
-#define cleanup() free(tgsrep.response.data)
+	goto errout;
 
     switch (tgsrep.message_type) {
     case KRB5_TGS_REP:
@@ -182,58 +185,51 @@ get_for_creds(etype, sumtype, rhost, client, enc_key, forwardable, outbuf)
     default:
 	if (!krb5_is_krb_error(&tgsrep.response)) {
 	    retval = KRB5KRB_AP_ERR_MSG_TYPE;
-	} else
-	    retval = decode_krb5_error(&tgsrep.response, &err_reply);
-	if (retval) {
-	    cleanup();
-	    return retval;		/* neither proper reply nor error! */
+	    goto errout;
+	} else {
+	    if (retval = decode_krb5_error(&tgsrep.response, &err_reply))
+		goto errout;
 	}
 
 	retval = err_reply->error + ERROR_TABLE_BASE_krb5;
 
 	krb5_free_error(err_reply);
-	cleanup();
-	return retval;
+	goto errout;
     }
-    retval = krb5_decode_kdc_rep(&tgsrep.response,
-				 &tgt.keyblock,
-				 etype, /* enctype */
-				 &dec_rep);
     
-    cleanup();
-    if (retval)
-	return retval;
-#undef cleanup
-#define cleanup() {\
-	memset((char *)dec_rep->enc_part2->session->contents, 0,\
-	      dec_rep->enc_part2->session->length);\
-		  krb5_free_kdc_rep(dec_rep); }
-
+    if (retval = krb5_decode_kdc_rep(&tgsrep.response,
+				     &tgt.keyblock,
+				     etype, /* enctype */
+				     &dec_rep))
+	goto errout;
+    
     if (dec_rep->msg_type != KRB5_TGS_REP) {
 	retval = KRB5KRB_AP_ERR_MSG_TYPE;
-	cleanup();
-	return retval;
+	goto errout;
     }
     
     /* now it's decrypted and ready for prime time */
 
     if (!krb5_principal_compare(dec_rep->client, tgt.client)) {
-	cleanup();
-	return KRB5_KDCREP_MODIFIED;
+	retval = KRB5_KDCREP_MODIFIED;
+	goto errout;
     }
 
-    if (retval = mk_cred(dec_rep, 
-			 etype, 
-			 enc_key,
-			 0,
-			 0, 
-			 outbuf))
-      return retval;
-
-    krb5_free_kdc_rep(dec_rep);
-
+    retval = mk_cred(dec_rep, etype, enc_key, 0, 0, outbuf);
+    
+errout:
+    if (remote_host)
+	free(remote_host);
+    if (hrealms)
+	krb5_xfree(hrealms);
+    if (addrs)
+	krb5_free_addresses(addrs);
+    krb5_free_cred_contents(&creds);
+    if (tgsrep.response.data)
+	free(tgsrep.response.data);
+    if (dec_rep)
+	krb5_free_kdc_rep(dec_rep); 
     return retval;
-#undef cleanup
 }
 
 
