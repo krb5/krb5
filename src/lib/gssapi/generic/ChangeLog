@@ -1,5 +1,8 @@
 Tue Jul 23 16:44:50 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
+	* gssapiP_generic.h: Must include k5-int.h on Windows and
+		Macintosh builds.
+
 	* Makefile.in (SRCS): Renamed release_buffer.c to rel_buffer.c,
 		and release_oid_set.c to rel_oid_set.c.  Marc broke the
 		DOS 8.3 renaming which Gilmore had done to conform with

@@ -27,6 +27,9 @@
  * $Id$
  */
 
+#if (defined(_MSDOS) || defined(_WIN32) || defined(_MACINTOSH))
+#include <k5-int.h>
+#endif
 #include "gssapi.h"
 
 #include "gssapi_err_generic.h"
