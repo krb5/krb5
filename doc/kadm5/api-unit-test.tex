@@ -577,7 +577,15 @@ the init doesn't succeed.
 \Status{Implemented}
 }
 
+\numtest{41}{
+\Priority{High}
+\Reason{Doesn't modify or free mod_name on success.}
+}
 
+\numtest{42}{
+\Priority{High}
+\Reason{Doesn't modify or free mod_name on failure.}
+}
 
 \section{ovsec_kadm_delete_principal}
 
@@ -914,6 +922,16 @@ the init doesn't succeed.
 \numtest{40}{
 \Reason{Rejects null principal argument.}
 \Status{Implemented}
+}
+
+\numtest{41}{
+\Priority{High}
+\Reason{Doesn't modify or free mod_name on success.}
+}
+
+\numtest{42}{
+\Priority{High}
+\Reason{Doesn't modify or free mod_name on failure.}
 }
 
 
