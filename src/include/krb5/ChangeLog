@@ -1,3 +1,7 @@
+Thu Mar 16 12:12:17 1995 Keith Vetter (keithv@fusion.com)
+
+	* k5-config.h: PC change, getting sys_nerr and sys_errlist to work.
+
 Tue Mar 14 17:38:28 1995 Keith Vetter (keithv@fusion.com)
 
 	* k5-config.h: more PC changes, mostly dealing with chmod not 

@@ -112,10 +112,6 @@ typedef unsigned char u_char;
 #define O_TEXT          _O_TEXT
 #define O_BINARY        _O_BINARY
 #define O_NOINHERIT     _O_NOINHERIT
-#define S_IREAD         _S_IREAD
-#define S_IWRITE        _S_IWRITE
-#define S_IRUSR         S_IREAD        /* read permission, owner */
-#define S_IWUSR         S_IWRITE       /* write permission, owner */
 #define stat            _stat
 #define unlink          _unlink
 #define lseek           _lseek
@@ -127,6 +123,12 @@ typedef unsigned char u_char;
 #define mktemp          _mktemp
 
 #define getpid          _getpid
+#endif
+
+#ifdef NEED_SYSERROR
+/* Only needed by util/et/error_message.c but let's keep the source clean */
+#define sys_nerr        _sys_nerr
+#define sys_errlist     _sys_errlist
 #endif
 
 /* XXX these should be parameterized soon... */
