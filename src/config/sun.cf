@@ -33,8 +33,9 @@
 #define	HasStdlibH		YES
 #define	HasInet			YES
 #define HasPutenv		YES
+#define HaveSetenv		YES
 #define HasBsearch		YES
-#define	HasGCC			NO
+#define	HasGcc			NO
 #define	UseSysTimeH		YES
 #define IsPOSIX			NO
 #define	Bitsize32		YES
