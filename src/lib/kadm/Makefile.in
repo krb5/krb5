@@ -10,7 +10,7 @@ BASE_OBJS= adm_conn.$(OBJEXT)	\
 	adm_kt_enc.$(OBJEXT)	\
 	adm_rw.$(OBJEXT)
 
-DBOBJS= adm_kw_dec.$(OBJEXT)	\
+DB_OBJS= adm_kw_dec.$(OBJEXT)	\
 	adm_kw_enc.$(OBJEXT)
 
 OBJS=	$(BASE_OBJS) $(DB_OBJS)

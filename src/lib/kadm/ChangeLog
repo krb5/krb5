@@ -1,3 +1,8 @@
+Wed May 31 08:10:13 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* Makefile.in (DB_OBJS): Change DBOBJS to DB_OBJS to match rest of
+		Makefile.in 
+
 Tue May 30 17:36:47 1995 Keith Vetter (keithv@fusion.com)
 
 	* adm_rw.c: removed INTERFACE from two routines.
