@@ -135,6 +135,14 @@ void get_preauth_hint_list PROTOTYPE((krb5_kdc_req * request,
 				      krb5_db_entry *client,
 				      krb5_db_entry *server,
 				      krb5_data *e_data));
+krb5_error_code check_padata
+    PROTOTYPE((krb5_context context, krb5_db_entry *client,
+	       krb5_kdc_req *request, krb5_enc_tkt_part *enc_tkt_reply));
+    
+krb5_error_code return_padata
+    PROTOTYPE((krb5_context context, krb5_db_entry *client,
+	       krb5_kdc_req *request, krb5_kdc_rep *reply,
+	       krb5_key_data *client_key, krb5_keyblock *encrypting_key));
     
 /* replay.c */
 krb5_boolean kdc_check_lookaside PROTOTYPE((krb5_data *, krb5_data **));

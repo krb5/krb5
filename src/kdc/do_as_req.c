@@ -63,13 +63,10 @@ krb5_data **response;			/* filled in with a response packet */
     krb5_enc_tkt_part enc_tkt_reply;
     krb5_error_code errcode;
     int c_nprincs = 0, s_nprincs = 0;
-    int pa_id, pa_flags;
     krb5_boolean more;
     krb5_timestamp kdc_time, authtime;
     krb5_keyblock *session_key = 0;
     krb5_keyblock encrypting_key;
-    krb5_pa_data *padat_tmp[2], padat_local;
-    krb5_data salt_data;
     const char *status;
     krb5_encrypt_block eblock;
     krb5_key_data  *server_key, *client_key;
@@ -83,8 +80,8 @@ krb5_data **response;			/* filled in with a response packet */
     char *cname = 0, *sname = 0, *fromstring = 0;
 
     ticket_reply.enc_part.ciphertext.data = 0;
-    salt_data.data = 0;
     e_data.data = 0;
+    encrypting_key.contents = 0;
 
 #ifdef KRB5_USE_INET
     if (from->address->addrtype == ADDRTYPE_INET)
@@ -326,6 +323,7 @@ krb5_data **response;			/* filled in with a response packet */
     errcode = krb5_encrypt_tkt_part(kdc_context, &encrypting_key, &ticket_reply);
     memset((char *)encrypting_key.contents, 0, encrypting_key.length);
     krb5_xfree(encrypting_key.contents);
+    encrypting_key.contents = 0;
     if (errcode) {
 	status = "ENCRYPTING_TICKET";
 	goto errout;
@@ -353,66 +351,25 @@ krb5_data **response;			/* filled in with a response packet */
 	goto errout;
     }
 
+    /* convert client.key_data into a real key */
+    if ((errcode = krb5_dbekd_decrypt_key_data(kdc_context, &master_encblock, 
+					       client_key, &encrypting_key,
+					       NULL))) {
+	status = "DECRYPT_CLIENT_KEY";
+	goto errout;
+    }
+    encrypting_key.enctype = useenctype;
+
     /* Start assembling the response */
     reply.msg_type = KRB5_AS_REP;
-
     reply.padata = 0;
-
-    if (client_key->key_data_ver > 1) {
-        padat_tmp[0] = &padat_local;
-        padat_tmp[1] = 0;
- 
-        padat_tmp[0]->pa_type = KRB5_PADATA_PW_SALT;
-
-	/* WARNING: sharing substructure here, but it's not a real problem,
-	   since nothing below will "pull out the rug" */
-
-	switch (client_key->key_data_type[1]) {
-	    krb5_data *data_foo;
-	case KRB5_KDB_SALTTYPE_NORMAL:
-	    reply.padata = (krb5_pa_data **) NULL;
-	    break;
-	case KRB5_KDB_SALTTYPE_V4:
-	    /* send an empty (V4) salt */
-	    padat_tmp[0]->contents = 0;
-	    padat_tmp[0]->length = 0;
-	    reply.padata = padat_tmp;
-	    break;
-	case KRB5_KDB_SALTTYPE_NOREALM:
-	    if ((errcode = krb5_principal2salt_norealm(kdc_context, 
-						      request->client,
-						       &salt_data))) {
-		status = "SALT_NOREALM";
-		goto errout;
-	    }
-	    padat_tmp[0]->contents = (krb5_octet *)salt_data.data;
-	    padat_tmp[0]->length = salt_data.length;
-	    reply.padata = padat_tmp;
-	    break;
-	case KRB5_KDB_SALTTYPE_ONLYREALM:
-	    data_foo = krb5_princ_realm(kdc_context, request->client);
-	    padat_tmp[0]->contents = (krb5_octet *)data_foo->data;
-	    padat_tmp[0]->length = data_foo->length;
-	    reply.padata = padat_tmp;
-	    break;
-	case KRB5_KDB_SALTTYPE_SPECIAL:
-	    padat_tmp[0]->contents = client_key->key_data_contents[1];
-	    padat_tmp[0]->length = client_key->key_data_length[1];
-	    reply.padata = padat_tmp;
-	    break;
-	}
-    }
-
     reply.client = request->client;
-
     reply.ticket = &ticket_reply;
-
     reply_encpart.session = session_key;
     if ((errcode = fetch_last_req_info(&client, &reply_encpart.last_req))) {
 	status = "FETCH_LAST_REQ";
 	goto errout;
     }
-
     reply_encpart.nonce = request->nonce;
     reply_encpart.key_exp = client.expiration;
     reply_encpart.flags = enc_tkt_reply.flags;
@@ -424,20 +381,19 @@ krb5_data **response;			/* filled in with a response packet */
     reply_encpart.times.authtime = authtime = kdc_time;
 
     reply_encpart.caddrs = enc_tkt_reply.caddrs;
+    reply.enc_part.kvno = client_key->key_data_kvno;
+
+    /* Fetch the padata info to be returned */
+    errcode = return_padata(kdc_context, &client, request, &reply, client_key,
+			    &encrypting_key);
+    if (errcode) {
+	status = "KDC_RETURN_PADATA";
+	goto errout;
+    }
 
     /* now encode/encrypt the response */
 
-    reply.enc_part.enctype = useenctype;
-    reply.enc_part.kvno = client_key->key_data_kvno;
-
-    /* convert client.key_data into a real key */
-    if ((errcode = krb5_dbekd_decrypt_key_data(kdc_context, &master_encblock, 
-					       client_key, &encrypting_key,
-					       NULL))) {
-	status = "DECRYPT_CLIENT_KEY";
-	goto errout;
-    }
-    encrypting_key.enctype = useenctype;
+    reply.enc_part.enctype = encrypting_key.enctype;
 
     errcode = krb5_encode_kdc_rep(kdc_context, KRB5_AS_REP, &reply_encpart, 
 				  &eblock, &encrypting_key,  &reply, response);
@@ -481,6 +437,10 @@ errout:
 	    
 	errcode = prepare_error_as(request, errcode, &e_data, response);
     }
+    if (encrypting_key.contents) {
+	memset((char *)encrypting_key.contents, 0, encrypting_key.length);
+	krb5_xfree(encrypting_key.contents);
+    }
     if (cname)
 	    free(cname);
     if (sname)
@@ -510,8 +470,6 @@ errout:
 	       ticket_reply.enc_part.ciphertext.length);
 	free(ticket_reply.enc_part.ciphertext.data);
     }
-    if (salt_data.data)
-	krb5_xfree(salt_data.data);
     if (e_data.data)
 	krb5_xfree(e_data.data);
     

@@ -38,15 +38,25 @@ typedef krb5_error_code (edata_proc)
 		    krb5_db_entry *client, krb5_db_entry *server,
 		    krb5_pa_data *data));
 
+typedef krb5_error_code (return_proc)
+    KRB5_PROTOTYPE((krb5_context, krb5_pa_data * padata, 
+		    krb5_db_entry *client,
+		    krb5_kdc_req *request, krb5_kdc_rep *reply,
+		    krb5_key_data *client_key,
+		    krb5_keyblock *encrypting_key,
+		    krb5_pa_data **send_pa));
+
 typedef struct _krb5_preauth_systems {
     int		type;
     int		flags;
     edata_proc	*get_edata;
-    verify_proc	*verify;
+    verify_proc	*verify_padata;
+    return_proc *return_padata;
 } krb5_preauth_systems;
 
 static verify_proc verify_enc_timestamp;
 static edata_proc get_etype_info;
+static return_proc return_pw_salt;
 
 /*
  * Preauth property flags
@@ -61,12 +71,21 @@ static krb5_preauth_systems preauth_systems[] = {
         0,
         0,
 	verify_enc_timestamp,
+	0
     },
     {
 	KRB5_PADATA_ETYPE_INFO,
 	0,
 	get_etype_info,
+	0,
 	0
+    },
+    {
+	KRB5_PADATA_PW_SALT,
+	0,
+	0, 
+	0,
+	return_pw_salt
     },
     { -1,}
 };
@@ -88,45 +107,6 @@ find_pa_system(type, preauth)
     return 0;
 } 
 
-krb5_error_code
-krb5_decrypt_data(context, key, ivec, enc_data, data)
-    krb5_context	context;
-    krb5_keyblock *	key;
-    krb5_pointer	ivec;
-    krb5_enc_data *	enc_data;
-    krb5_data *		data;
-{
-    krb5_error_code	retval;
-    krb5_encrypt_block	eblock;
-
-    krb5_use_enctype(context, &eblock, key->enctype);
-    data->length = enc_data->ciphertext.length;
-    if (!(data->data = malloc(data->length)))
-	return ENOMEM;
-
-    if ((retval = krb5_process_key(context, &eblock, key)) != 0)
-	goto cleanup;
-
-    if ((retval = krb5_decrypt(context,
-			       (krb5_pointer) enc_data->ciphertext.data,
-			       (krb5_pointer) data->data,
-			       enc_data->ciphertext.length, &eblock, ivec))) {
-    	krb5_finish_key(context, &eblock);
-        goto cleanup;
-    }
-    (void) krb5_finish_key(context, &eblock);
-
-    return 0;
-
-cleanup:
-    if (data->data) {
-	free(data->data);
-	data->data = 0;
-    }
-    return retval;
-}
-
-    
 const char *missing_required_preauth(client, server, enc_tkt_reply)
     krb5_db_entry *client, *server;
     krb5_enc_tkt_part *enc_tkt_reply;
@@ -227,10 +207,10 @@ check_padata (context, client, request, enc_tkt_reply)
     for (padata = request->padata; *padata; padata++) {
 	if (find_pa_system((*padata)->pa_type, &pa_sys))
 	    continue;
-	if (pa_sys->verify == 0)
+	if (pa_sys->verify_padata == 0)
 	    continue;
-	retval = pa_sys->verify(context, client, request,
-				enc_tkt_reply, *padata);
+	retval = pa_sys->verify_padata(context, client, request,
+				       enc_tkt_reply, *padata);
 	if (retval) {
 	    if (pa_sys->flags & PA_REQUIRED)
 		break;
@@ -242,6 +222,73 @@ check_padata (context, client, request, enc_tkt_reply)
     if (retval)
 	retval = KRB5KDC_ERR_PREAUTH_FAILED;
     return retval;
+}
+
+/*
+ * return_padata creates any necessary preauthentication
+ * structures which should be returned by the KDC to the client
+ */
+krb5_error_code
+return_padata(context, client, request, reply,
+	      client_key, encrypting_key)
+    krb5_context	context;
+    krb5_db_entry *	client;
+    krb5_kdc_req *	request;
+    krb5_kdc_rep *	reply;
+    krb5_key_data *	client_key;
+    krb5_keyblock *	encrypting_key;
+{
+    krb5_error_code		retval;
+    krb5_pa_data **		padata;
+    krb5_pa_data **		send_pa_list;
+    krb5_pa_data **		send_pa;
+    krb5_pa_data *		pa = 0;
+    krb5_preauth_systems *	ap;
+    int 			size;
+
+    for (ap = preauth_systems; ap->type != -1; ap++) {
+	if (ap->return_padata)
+	    size++;
+    }
+
+    if ((send_pa_list = malloc((size+1) * sizeof(krb5_pa_data *))) == NULL)
+	return ENOMEM;
+
+    send_pa = send_pa_list;
+    *send_pa = 0;
+    
+    for (ap = preauth_systems; ap->type != -1; ap++) {
+	if (ap->return_padata == 0)
+	    continue;
+	pa = 0;
+	if (request->padata) {
+	    for (padata = request->padata; *padata; padata++) {
+		if ((*padata)->pa_type == ap->type) {
+		    pa = *padata;
+		    break;
+		}
+	    }
+	}
+	if ((retval = ap->return_padata(context, pa, client, request, reply,
+					client_key, encrypting_key, send_pa)))
+	    goto cleanup;
+
+	if (*send_pa)
+	    send_pa++;
+	*send_pa = 0;
+    }
+    
+    retval = 0;
+
+    if (send_pa_list[0]) {
+	reply->padata = send_pa_list;
+	send_pa_list = 0;
+    }
+    
+cleanup:
+    if (send_pa_list)
+	krb5_free_pa_data(context, send_pa_list);
+    return (retval);
 }
 
 static krb5_error_code
@@ -281,7 +328,7 @@ verify_enc_timestamp(context, client, request, enc_tkt_reply, pa)
 	    goto cleanup;
 	key.enctype = enc_data->enctype;
 
-	retval = krb5_decrypt_data(context, key, 0, enc_data, &enc_ts_data);
+	retval = krb5_decrypt_data(context, &key, 0, enc_data, &enc_ts_data);
 	memset((char *)key.contents, 0, key.length);
 	krb5_xfree(key.contents);
 
@@ -403,4 +450,78 @@ cleanup:
 	krb5_xfree(salt.data);
     return retval;
 }
+
+static krb5_error_code
+return_pw_salt(context, in_padata, client, request, reply, client_key,
+	       encrypting_key, send_pa)
+    krb5_context	context;
+    krb5_pa_data *	in_padata;
+    krb5_db_entry *	client;
+    krb5_kdc_req *	request;
+    krb5_kdc_rep *	reply;
+    krb5_key_data *	client_key;
+    krb5_keyblock *	encrypting_key;
+    krb5_pa_data **	send_pa;
+{
+    krb5_error_code	retval;
+    krb5_pa_data *	padata;
+    krb5_data *		scratch;
+    krb5_data		salt_data;
+    
+    if (client_key->key_data_ver == 1 ||
+	client_key->key_data_type[1] == KRB5_KDB_SALTTYPE_NORMAL)
+	return 0;
+
+    if ((padata = malloc(sizeof(krb5_pa_data))) == NULL)
+	return ENOMEM;
+    padata->magic = KV5M_PA_DATA;
+    padata->pa_type = KRB5_PADATA_PW_SALT;
+    
+    switch (client_key->key_data_type[1]) {
+    case KRB5_KDB_SALTTYPE_V4:
+	/* send an empty (V4) salt */
+	padata->contents = 0;
+	padata->length = 0;
+	break;
+    case KRB5_KDB_SALTTYPE_NOREALM:
+	if ((retval = krb5_principal2salt_norealm(kdc_context, 
+						   request->client,
+						   &salt_data)))
+	    goto cleanup;
+	padata->contents = (krb5_octet *)salt_data.data;
+	padata->length = salt_data.length;
+	break;
+    case KRB5_KDB_SALTTYPE_ONLYREALM:
+	scratch = krb5_princ_realm(kdc_context, request->client);
+	if ((padata->contents = malloc(scratch->length)) == NULL) {
+	    retval = ENOMEM;
+	    goto cleanup;
+	}
+	memcpy(padata->contents, scratch->data, scratch->length);
+	padata->length = scratch->length;
+	break;
+    case KRB5_KDB_SALTTYPE_SPECIAL:
+	if ((padata->contents = malloc(client_key->key_data_length[1]))
+	    == NULL) {
+	    retval = ENOMEM;
+	    goto cleanup;
+	}
+	memcpy(padata->contents, client_key->key_data_contents[1],
+	       client_key->key_data_length[1]);
+	padata->length = client_key->key_data_length[1];
+	break;
+    default:
+	free(padata);
+	return 0;
+    }
+
+    *send_pa = padata;
+    return 0;
+    
+cleanup:
+    free(padata);
+    return retval;
+}
+
+    
 

@@ -1,3 +1,20 @@
+Mon Nov 13 19:40:50 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* kdc_util.h: Added new prototypes for return_padata() and
+	        check_padata().
+
+	* kdc_preauth.c (return_padata): New function which calls out to
+		each preauth type to see if it is necessary to return
+		preauth data or not.
+	(return_pw_salt): New function responsible for returning the
+		KRB5_PW_SALT preauth information.
+
+	* do_as_req.c (process_as_req):  Move creation of the PW_SALT
+		preauthentication step into kdc_preauth.c.  Call
+		return_pdata() which is responsible for all padata info
+		which is returned by the KDC in the KRB_AS_REP message.
+
+
 Thu Nov  9 00:05:55 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* kdc_preauth.c (get_etype_info): Added function to return the
