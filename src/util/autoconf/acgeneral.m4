@@ -916,7 +916,31 @@ dnl The big finish
 dnl
 dnl
 define(AC_OUTPUT,
-[changequote(,)dnl
+[
+dnl If we have AC_TOPDIR, check for a top/config/pre.in and post.in
+ifelse(AC_TOPDIR, [], ac_top=, ac_top=AC_TOPDIR/)
+changequote(,)dnl
+case $ac_top in
+  /*) ;; # it's fine as is
+  *) ac_top=$srcdir/$ac_top ;;
+esac
+echo "... using ac_top = $ac_top"
+  ac_tmpin="${ac_top}config/pre.in"
+echo "testing ac_tmpin=$ac_tmpin"
+pwd; ls -al $ac_tmpin
+  if test -r $ac_tmpin; then
+     ac_prepend=$ac_tmpin
+     echo "... using ac_prepend=$ac_prepend"
+  else
+     ac_prepend=
+  fi
+  ac_tmpin="${ac_top}config/post.in"
+  if test -r $ac_tmpin; then
+     ac_postpend=$ac_tmpin
+     echo "... using ac_postpend=$ac_postpend"
+  else
+     ac_postpend=
+  fi
 
 # The preferred way to propogate these variables is regular @ substitutions.
 if test -n "$prefix"; then
@@ -965,6 +989,8 @@ divert(2)dnl
 ac_prsub='$ac_prsub'
 ac_vpsub='$ac_vpsub'
 extrasub='$extrasub'
+ac_prepend='$ac_prepend'
+ac_postpend='$ac_postpend'
 divert(0)dnl
 
 trap 'rm -f config.status; exit 1' 1 2 15
@@ -1051,7 +1077,7 @@ dnl Shell code in configure.in might set extrasub.
 $extrasub
 dnl Insert the sed substitutions.
 undivert(1)dnl
-" $ac_given_srcdir/${ac_file}.in >> $ac_file
+" $ac_prepend $ac_given_srcdir/${ac_file}.in $ac_postpend >> $ac_file
 fi; done
 AC_OUTPUT_HEADER
 $2
