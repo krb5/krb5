@@ -1,3 +1,7 @@
+2002-09-03  Ezra Peisach  <epeisach@bu.edu>
+
+	* acconfig.h: Remove file. All handled by configure.in now.
+
 2002-08-29  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in, btree/Makefile.in, clib/Makefile.in,
