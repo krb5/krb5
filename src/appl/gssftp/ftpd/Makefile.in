@@ -29,7 +29,7 @@ ftpd:	$(OBJS) $(DEPKLIB)
 	$(LD) $(LDFLAGS) $(LDARGS) -o $@ $(OBJS) $(KLIB) $(LIBS)
 
 clean::
-	$(RM) ftp ftpcmd.c
+	$(RM) ftpd ftpcmd.c
 
 depend::
 

@@ -1,3 +1,7 @@
+Wed Feb  7 13:33:41 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* Makefile.in (clean): Remove ftpd
+
 Thu Jan 18 18:39:06 1996  Sam Hartman  <hartmans@zygorthian-space-raiders.MIT.EDU>
 
 	* configure.in: Check for crypt in -lcrypt
