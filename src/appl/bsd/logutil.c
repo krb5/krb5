@@ -172,7 +172,7 @@ void update_wtmp(ent)
 #endif
 	  (void)time(&ut.ut_time);
 #ifdef HAVE_GETUTENT
-	  if (*name) {
+	  if (ent->ut_name) {
 	    if (!ut.ut_pid)
 	      ut.ut_pid = getpid();
 	    ut.ut_type = USER_PROCESS;
