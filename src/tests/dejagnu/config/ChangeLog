@@ -1,3 +1,8 @@
+2002-01-08  Ken Raeburn  <raeburn@mit.edu>
+
+	* default.exp (start_kerberos_daemons): When standalone, delete
+	KDC replay cache before starting it up.
+
 2001-10-31  Tom Yu  <tlyu@mit.edu>
 
 	* default.exp (check_k5login, check_klogin): Error out if there is

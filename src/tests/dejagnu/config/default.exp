@@ -1244,6 +1244,7 @@ proc start_kerberos_daemons { standalone } {
     if {$standalone} {
         catch "exec rm -f $tmppwd/krb.log"
 	catch "exec rm -f $tmppwd/kadmind.log"
+	catch "exec rm -f $tmppwd/krb5kdc_rcache"
     }
 
     # Start up the kerberos daemon
