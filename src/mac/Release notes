@@ -250,3 +250,13 @@ Changes in 1.1a3:
 3.1a4
  from tag Mac_GSSKerberos5_3_1a4
  fixed SleepQInstall crash on NuBus Macs
+ 
+3.1b1
+ from tag Mac_GSSKerberos5_3_1b1
+ Upped the dylib version numbers.
+ added com_err to the export list on X
+ added krb5_prompter_posix and krb5_read_password to the Kerberos 5 exports
+ added new rfc 2744 GSS oids
+ added gssapi_generic.h to the public headers for GSS.framework
+ added kinit, klist, kdestroy, kpasswd command line tools
+ added kerberosIV directory to /usr/include headers
