@@ -1,3 +1,11 @@
+2000-05-15      Jeffrey Altman          <jaltman@columbia.edu>
+
+        * Added new source file appdefault.c
+          Implements new public functions
+
+               krb5_appdefault_string
+               krb5_appdefault_boolean
+
 2000-04-28	Alexandra Ellwood	<lxs@mit.edu>
 
 	* gic_pwd.c (krb5_init_creds_password) added code to return to login library if 
