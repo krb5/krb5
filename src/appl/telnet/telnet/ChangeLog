@@ -1,3 +1,12 @@
+Sat Jul 27 21:34:22 1996  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* telnet.c(setupterm): Only compile if setupterm not present in
+        library; for Debian Linux and others, you get an endless loop
+        because tcgetent is defined in terms of setupterm, and setupterm
+        in telnet calls tcgetent.
+
+	* configure.in : Check for setupterm
+
 Mon Jun  3 21:31:37 1996  Tom Yu  <tlyu@mit.edu>
 
 	* configure.in: Ezra's patches to allow compilation w/o krb4

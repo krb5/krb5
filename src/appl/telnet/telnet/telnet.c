@@ -741,7 +741,7 @@ is_unique(name, as, ae)
 	return (1);
 }
 
-#ifndef	HAS_SETUPTERM
+#ifndef	HAVE_SETUPTERM
 char termbuf[1024];
 
 	/*ARGSUSED*/
