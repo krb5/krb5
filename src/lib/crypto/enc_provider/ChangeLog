@@ -1,3 +1,9 @@
+2003-02-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* aes.c: New file.
+	* Makefile.in (STLIBOBJS, OBJS, SRCS): Include it.
+	(LOCALINCLUDE): Add aes source dir.
+
 2003-01-10  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in: Add AC_SUBST_FILE marker for libobj_frag.
