@@ -54,6 +54,9 @@ static char sccsid[] = "@(#)dbtest.c	8.17 (Berkeley) 9/1/94";
 #include <unistd.h>
 
 #include "db-int.h"
+#ifdef STATISTICS
+#include "btree.h"
+#endif
 
 enum S { COMMAND, COMPARE, GET, PUT, REMOVE, SEQ, SEQFLAG, KEY, DATA };
 
