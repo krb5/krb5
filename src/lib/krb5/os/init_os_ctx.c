@@ -30,7 +30,7 @@
 #include "k5-int.h"
 
 #ifdef TARGET_OS_MAC
-#include <KerberosPreferences/KerberosPreferences.h>
+#include <Kerberos/KerberosPreferences.h>
 #endif /* TARGET_OS_MAC */
 
 #if defined(_MSDOS) || defined(_WIN32)
@@ -277,7 +277,7 @@ os_get_default_config_files(pfiles, secure)
 	else if (err != noErr)
 		return ENOENT;
 	
-#else /* !macintosh */
+#else /* !TARGET_OS_MAC */
     profile_filespec_t* files;
 #if defined(_MSDOS) || defined(_WIN32)
     krb5_error_code retval = 0;

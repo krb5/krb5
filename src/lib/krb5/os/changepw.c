@@ -76,7 +76,6 @@ krb5_locate_kpasswd(context, realm, addr_pp, naddrs)
     int *naddrs;
 {
     krb5_error_code code;
-    int i;
 
     /*
      * We always try the local file first

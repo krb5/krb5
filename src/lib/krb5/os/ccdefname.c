@@ -32,7 +32,7 @@
 #include <stdio.h>
 
 #if TARGET_OS_MAC
-#include <CredentialsCache/CredentialsCache.h>
+#include <Kerberos/CredentialsCache.h>
 #endif
 
 #if defined(_WIN32)
@@ -186,7 +186,7 @@ static krb5_error_code get_from_os(char *name_buf, int name_size)
 }
 #endif
 
-#if defined (macintosh) || defined(__MACH__)
+#if TARGET_OS_MAC
 
 static krb5_error_code get_from_os(char *name_buf, int name_size)
 {

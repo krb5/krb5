@@ -1,3 +1,9 @@
+2002-02-28 Alexandra Ellwood <lxs@mit.edu>
+    * ccdefname.c, init_os_ctx.c, timeofday.c: Updated Mac OS X headers to new 
+    framework layout and updated Mac OS macros
+    * changepw.c: removed unused variable
+    * gmt_mktime.c: added int to removed warning about type defaulting to int
+
 2002-01-29  Tom Yu  <tlyu@mit.edu>
 
 	* def_realm.c: Add terminal newline.  Fixes [krb5-build/1041].
