@@ -112,11 +112,6 @@ char *mkey_name = 0;
 krb5_boolean manual_mkey = FALSE;
 krb5_boolean dbactive = FALSE;
 
-/*
- * XXX Memory leak for cur_realm, which is assigned both allocated
- * values (in set_dbname) and unallocated values (from argv()).
- */
-
 void
 quit()
 {
@@ -162,7 +157,14 @@ char *argv[];
 	    dbname = optarg;
 	    break;
 	case 'r':
-	    cur_realm = optarg;
+	    if (cur_realm)
+		    free(cur_realm);
+	    cur_realm = malloc(strlen(optarg)+1);
+	    if (!cur_realm) {
+		    com_err(argv[0], 0, "Insufficient memory to proceed");
+		    exit(1);
+	    }
+	    (void) strcpy(cur_realm, optarg);
 	    break;
         case 'R':
 	    request = optarg;
@@ -229,7 +231,12 @@ char *argv[];
 	    com_err(progname, retval, "while retrieving default realm name");
 	    exit(1);
 	}	    
-	cur_realm = defrealm;
+	cur_realm = malloc(strlen(defrealm)+1);
+	if (!cur_realm) {
+		com_err(argv[0], 0, "Insufficient memory to proceed");
+		exit(1);
+	}
+	(void) strcpy(cur_realm, defrealm);
     }
     (void) set_dbname_help(progname, dbname);
 
@@ -475,6 +482,8 @@ krb5_pointer infop;
 	krb5_free_principal(master_princ);
 	dbactive = FALSE;
     }
+    if (cur_realm)
+	    free(cur_realm);
     cur_realm = malloc(strlen(argv[2])+1);
     if (!cur_realm) {
 	com_err(argv[0], 0, "Insufficient memory to proceed");
@@ -544,8 +553,7 @@ char *dbname;
 
     krb5_db_free_principal(&master_entry, nentries);
     if (retval = krb5_db_fetch_mkey(master_princ, &master_encblock,
-				    manual_mkey,
-				    FALSE, &master_keyblock)) {
+				    manual_mkey, FALSE, 0, &master_keyblock)) {
 	com_err(pname, retval, "while reading master key");
 	com_err(pname, 0, "Warning: proceeding without master key");
 	valid_master_key = 0;
@@ -598,7 +606,7 @@ void enter_master_key(argc, argv)
 		return;
 	}
 	if (retval = krb5_db_fetch_mkey(master_princ, &master_encblock,
-					TRUE, FALSE, &master_keyblock)) {
+					TRUE, FALSE, 0, &master_keyblock)) {
 		com_err(pname, retval, "while reading master key");
 		return;
 	}
@@ -837,8 +845,8 @@ char *argv[];
 		xfree(key.contents);
 		continue;
 	}
-	fwrite(argv[i], strlen(argv[1]) + 1, 1, fout); /* p.name */
-	fwrite(argv[1], strlen(argv[i]) + 1, 1, fout); /* p.instance */
+	fwrite(argv[i], strlen(argv[i]) + 1, 1, fout); /* p.name */
+	fwrite(argv[1], strlen(argv[1]) + 1, 1, fout); /* p.instance */
 	fwrite(cur_realm, strlen(cur_realm) + 1, 1, fout); /* p.realm */
 	fwrite((char *)&dbentry.kvno, sizeof(dbentry.kvno), 1, fout);
 	fwrite((char *)key.contents, 8, 1, fout);
