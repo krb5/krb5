@@ -1548,9 +1548,6 @@ void krb5_free_priv
 void krb5_free_priv_enc_part
 	PROTOTYPE((krb5_context,
 		   krb5_priv_enc_part * ));
-void krb5_free_kdc_req
-	PROTOTYPE((krb5_context,
-		   krb5_kdc_req * ));
 void krb5_free_cred
    PROTOTYPE((krb5_context, 
          krb5_cred *));
@@ -1610,7 +1607,7 @@ krb5_error_code INTERFACE krb5_sname_to_principal
                    krb5_principal FAR *));
 
 krb5_error_code INTERFACE krb5_set_config_files
-	PROTOTYPE ((krb5_context, char **));
+	PROTOTYPE ((krb5_context, const char **));
 
 krb5_error_code krb5_encode_kdc_rep
 	PROTOTYPE((krb5_context,
