@@ -288,4 +288,6 @@ error_code KRB5_RC_REQUIRED,	"Message replay detection requires rcache parameter
 error_code KRB5_ERR_BAD_HOSTNAME,	"Hostname cannot be canonicalized"
 error_code KRB5_ERR_HOST_REALM_UNKNOWN,	"Cannot determine realm for host"
 error_code KRB5_SNAME_UNSUPP_NAMETYPE,	"Conversion to service principal undefined for name type"
+
+error_code KRB5KRB_AP_ERR_V4_REPLY, "Initial Ticket response appears to be Version 4 error"
 end

@@ -1,3 +1,8 @@
+Thu Feb  2 20:49:10 1995  Mark Eichin  (eichin@cygnus.com)
+
+	* krb5_err.et (KRB5KRB_AP_ERR_V4_REPLY): new error code for V4
+	reply to a V5 request.
+
 Mon Dec 19 17:10:13 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* krb5_err.et (KV5M_CONTEXT, KV5M_OS_CONTEXT): Add new error codes.
