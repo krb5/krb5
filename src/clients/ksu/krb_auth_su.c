@@ -62,7 +62,7 @@ krb5_boolean krb5_auth_check(context, client_pname, hostname, options,
     int *path_passwd;
 {
 krb5_principal client, server;
-krb5_creds tgt, tgtq, cred;
+krb5_creds tgt, tgtq, in_creds, * out_creds;
 krb5_creds **tgts = NULL; /* list of ticket granting tickets */       
 
 krb5_ticket * target_tkt; /* decrypted ticket for server */                
@@ -73,7 +73,7 @@ krb5_boolean zero_password;
 	*path_passwd = 0;
 	memset((char *) &tgtq, 0, sizeof(tgtq)); 
 	memset((char *) &tgt, 0, sizeof(tgt)); 
-	memset((char *) &cred, 0, sizeof(cred)); 
+	memset((char *) &in_creds, 0, sizeof(krb5_creds)); 
 
 	
 	if (retval= krb5_copy_principal(context,  client_pname, &client)){
@@ -162,17 +162,18 @@ krb5_boolean zero_password;
 
 	}
 
-	if (retval= krb5_copy_principal(context, client, &cred.client)){
+	if (retval= krb5_copy_principal(context, client, &in_creds.client)){
 		com_err(prog_name, retval,"while copying client principal");   
  		return (FALSE) ; 	
 	}
 
-	if (retval= krb5_copy_principal(context, server, &cred.server)){
+	if (retval= krb5_copy_principal(context, server, &in_creds.server)){
 		com_err(prog_name, retval,"while copying client principal");   
  		return (FALSE) ; 	
 	}
 	
-	if (retval = krb5_get_cred_from_kdc(context, cc, &cred, &tgts)){
+	if (retval = krb5_get_cred_from_kdc(context, cc, &in_creds, 
+					    &out_creds, &tgts)){
 		com_err(prog_name, retval, "while geting credentials from kdc");  
 		return (FALSE);
 	}
@@ -180,7 +181,7 @@ krb5_boolean zero_password;
 
 	if (auth_debug){ 
 	 	fprintf(stderr,"krb5_auth_check: got ticket for end server \n"); 
-		dump_principal("cred.server", cred.server ); 
+		dump_principal("out_creds->server", out_creds->server ); 
 	} 	
 
 
@@ -201,13 +202,14 @@ krb5_boolean zero_password;
 		krb5_free_tgt_creds(context, tgts);
 	}
 
-	if (retval = krb5_verify_tkt_def(context, client, server,&cred.keyblock, 
-					&cred.ticket, &target_tkt)){
+	if (retval = krb5_verify_tkt_def(context, client, server, 
+					 &out_creds->keyblock, 
+					 &out_creds->ticket, &target_tkt)){
 		com_err(prog_name, retval, "while verifing ticket for server"); 
 		return (FALSE);
 	}
 
-	if (retval = krb5_cc_store_cred(context,  cc, &cred)){
+	if (retval = krb5_cc_store_cred(context,  cc, out_creds)){
 		com_err(prog_name, retval,
 		        "While storing credentials");
 		return (FALSE);
