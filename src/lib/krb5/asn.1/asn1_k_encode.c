@@ -774,7 +774,7 @@ asn1_error_code asn1_encode_etype_info_entry(buf, val, retlen)
 {
   asn1_setup();
 
-  if(val == NULL || (val->length >= 0 && val->salt == NULL))
+  if(val == NULL || (val->length > 0 && val->salt == NULL))
      return ASN1_MISSING_FIELD;
 
   if (val->length >= 0)
