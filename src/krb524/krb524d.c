@@ -76,6 +76,7 @@ static int debug = 0;
 void *handle = NULL;
 
 int use_keytab, use_master;
+int allow_v4_crossrealm = 0;
 char *keytab = NULL;
 krb5_keytab kt;
 
@@ -137,7 +138,10 @@ int main(argc, argv)
      config_params.mask = 0;
      
      while (argc) {
-	  if (strncmp(*argv, "-k", 2) == 0)
+       if (strncmp(*argv, "-X", 2) == 0) {
+	 allow_v4_crossrealm = 1;
+       }
+       else if (strncmp(*argv, "-k", 2) == 0)
 	       use_keytab = 1;
 	  else if (strncmp(*argv, "-m", 2) == 0)
 	       use_master = 1;
@@ -524,19 +528,7 @@ handle_classic_v4 (krb5_context context, krb5_ticket *v5tkt,
 				   &v5_service_key, NULL)))
 	  goto error;
 
-     if ((ret = lookup_service_key(context, v5tkt->server,
-				   ENCTYPE_DES3_CBC_RAW,
-				   0, /* highest kvno */
-				   &v4_service_key, v4kvno)) &&
-	 (ret = lookup_service_key(context, v5tkt->server,
-				   ENCTYPE_LOCAL_DES3_HMAC_SHA1,
-				   0,
-				   &v4_service_key, v4kvno)) &&
-	 (ret = lookup_service_key(context, v5tkt->server,
-				   ENCTYPE_DES3_CBC_SHA1,
-				   0,
-				   &v4_service_key, v4kvno)) &&
-	 (ret = lookup_service_key(context, v5tkt->server,
+     if ( (ret = lookup_service_key(context, v5tkt->server,
 				   ENCTYPE_DES_CBC_CRC,
 				   0,
 				   &v4_service_key, v4kvno)))
@@ -544,8 +536,19 @@ handle_classic_v4 (krb5_context context, krb5_ticket *v5tkt,
 
      if (debug)
 	  printf("service key retrieved\n");
+     if ((ret = krb5_decrypt_tkt_part(context, &v5_service_key, v5tkt))) {
+       goto error;
+     }
 
-     ret = krb524_convert_tkt_skey(context, v5tkt, &v4tkt, &v5_service_key,
+    if (!(allow_v4_crossrealm || krb5_realm_compare(context, v5tkt->server,
+						    v5tkt->enc_part2->client))) {
+ret =  KRB5KDC_ERR_POLICY ;
+ goto error;
+    }
+    krb5_free_enc_tkt_part(context, v5tkt->enc_part2);
+    v5tkt->enc_part2= NULL;
+
+         ret = krb524_convert_tkt_skey(context, v5tkt, &v4tkt, &v5_service_key,
 				   &v4_service_key,
 				   (struct sockaddr_in *)saddr);
      if (ret)
@@ -561,6 +564,9 @@ handle_classic_v4 (krb5_context context, krb5_ticket *v5tkt,
 	  printf("v4 credentials encoded\n");
 
  error:
+     if (v5tkt->enc_part2)
+	 krb5_free_enc_tkt_part(context, v5tkt->enc_part2);
+
      if(v5_service_key.contents)
        krb5_free_keyblock_contents(context, &v5_service_key);
      if (v4_service_key.contents)

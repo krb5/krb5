@@ -1,3 +1,16 @@
+2003-03-16  Sam Hartman  <hartmans@mit.edu>
+
+	* main.c (initialize_realms): Add support to call
+	enable_v4_crossrealm if the user wants insecure operation 
+
+	* kerberos_v4.c: Add enable_v4_crossrealm.  By default krb4
+	cross-realm is not allowed as it is insecure.  Also, remove
+	support for generating krb4 tickets encrypted in 3DES as they are
+	insecure. 
+
+	* kdc_util.h: Define enable_v4_crossrealm, new function to enable
+	secure krb4 cross-realm authentication 
+
 2003-03-05  Tom Yu  <tlyu@mit.edu>
 
 	* main.c (init_realm): Update call to krb5_ktdb_resolve().
