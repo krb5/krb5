@@ -52,13 +52,21 @@ OM_uint32 gss_export_name(OM_uint32  *minor_status,
 	}
 
 	length = strlen(str);
-	exported_name->length = 8 + length + gss_mech_krb5->length;
+	exported_name->length = 10 + length + gss_mech_krb5->length;
 	exported_name->value = malloc(exported_name->length);
+	if (!exported_name->value) {
+		free(str);
+		*minor_status = ENOMEM;
+		return(GSS_S_FAILURE);
+	}
 	cp = exported_name->value;
 
+	/* Note: we assume the OID will be less than 128 bytes... */
 	*cp++ = 0x04; *cp++ = 0x01;
-	*cp++ = gss_mech_krb5->length >> 8;
-	*cp++ = gss_mech_krb5->length & 0xFF;
+	*cp++ = (gss_mech_krb5->length+2) >> 8;
+	*cp++ = (gss_mech_krb5->length+2) & 0xFF;
+	*cp++ = 0x06;
+	*cp++ = (gss_mech_krb5->length+2) & 0xFF;
 	memcpy(cp, gss_mech_krb5->elements, gss_mech_krb5->length);
 	cp += gss_mech_krb5->length;
 	*cp++ = length >> 24;
