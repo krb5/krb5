@@ -1,3 +1,8 @@
+Mon Mar 20 21:14:40 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in, unix_time.c(unix_time_gmt_unixsec): Added function
+		needed for des425 to work with the Cygnus krb.a.
+
 Wed Mar 15 13:44:23 1995 Keith Vetter (keithv@fusion.com)
 
 	* des.h: now includes des_int.h for proper prototypes.

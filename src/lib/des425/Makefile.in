@@ -16,6 +16,7 @@ OBJS=	cksum.$(OBJEXT)		\
 	random_key.$(OBJEXT)	\
 	read_passwd.$(OBJEXT) \
 	str_to_key.$(OBJEXT)	\
+	unix_time.$(OBJEXT)     \
 	weak_key.$(OBJEXT)	
 
 SRCS=	$(srcdir)/cksum.c	\
@@ -29,6 +30,7 @@ SRCS=	$(srcdir)/cksum.c	\
 	$(srcdir)/random_key.c	\
 	$(srcdir)/read_passwd.c \
 	$(srcdir)/str_to_key.c \
+	$(srcdir)/unix_time.c   \
 	$(srcdir)/weak_key.c	
 
 
