@@ -31,6 +31,8 @@ strdup(str)
 	int len;
 	char *copy;
 
+	if (!str)
+		return((char *)0);
 	len = strlen(str) + 1;
 	if (!(copy = malloc((u_int)len)))
 		return((char *)0);
