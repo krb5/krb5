@@ -7,6 +7,6 @@ HDRS=isode_err.h kdb5_err.h krb5_err.h
 NormalLibraryObjectRule()
 ErrorTableObjectRule()
 
-NormalLibraryTarget (krberrs,$(OBJS))
+OtherdirLibraryTarget($(TOP)/lib,krb5,$(OBJS))
 
 all:: ${HDRS} ${SRCS}
