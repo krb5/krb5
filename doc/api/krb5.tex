@@ -277,6 +277,274 @@ Sets the replay cache that is used by the authentication routines to \funcparam{
 %% krb5_auth_con_getcksumtype, krb5_auth_con_getivector,
 %% krb5_auth_con_getrcache. -- Ezra
 
+\subsubsection{Principal access functions}
+
+Principals define a uniquely named client or server instance that
+participates in a network communication. The following functions allow
+one to create, modify and access portions of the
+\datatype{krb5_principal}. 
+
+Other functions found in orther portions of the manual include
+\funcname{krb5_sname_to_principal}, \funcname{krb5_free_principal}, 
+
+While it is possible to directly access the data structure in the
+structure, it is recommended that the functions be used. 
+
+\begin{funcdecl}{krb5_parse_name}{krb5_error_code}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcin
+\funcarg{const char *}{name}
+\funcout
+\funcarg{krb5_principal *}{principal}
+\end{funcdecl}
+
+Converts a single-string representation \funcparam{name} of the
+principal name to the multi-part principal format used in the protocols.
+
+A single-string representation of a Kerberos name consists of one or
+more principal name components, separated by slashes, optionally
+followed by the ``@'' character and a realm name.  If the realm name
+is not specified, the local realm is used.
+
+The slash and ``@'' characters may be quoted (i.e., included as part
+of a component rather than as a component separator or realm prefix)
+by preceding them with a backslash (``$\backslash$'') character.
+Similarly, newline, tab, backspace, and null characters may be
+included in a component by using $\backslash{}n$, $\backslash{}t$,
+$\backslash{}b$ or $\backslash{}0$, respectively.
+
+The realm in a Kerberos name may not contain the slash, colon or null
+characters.
+
+\funcparam{*principal} will point to allocated storage which should be freed by
+the caller (using \funcname{krb5_free_principal}) after use.
+
+\funcname{krb5_parse_name} returns KRB5_PARSE_MALFORMED if the string is
+ badly formatted, or ENOMEM if space for the return value can't be
+allocated.
+
+\begin{funcdecl}{krb5_unparse_name}{krb5_error_code}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcin
+\funcarg{krb5_const_principal}{principal}
+\funcout
+\funcarg{char **}{name}
+\end{funcdecl}
+
+Converts the multi-part principal name \funcparam{principal} from the
+format used in the protocols to a single-string representation of the
+name.  The resulting single-string representation will use the format
+and quoting conventions described for \funcname{krb5_parse_name}
+above.
+
+\funcparam{*name} points to allocated storage and should be freed by the caller
+when finished.
+
+\funcname{krb5_unparse_name} returns {\sc KRB_PARSE_MALFORMED} if the principal
+does not contain at least 2 components, and system errors ({\sc ENOMEM} if
+unable to allocate memory).
+
+\begin{funcdecl}{krb5_unparse_name_ext}{krb5_error_code}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcin
+\funcarg{krb5_const_principal}{principal}
+\funcinout
+\funcarg{char **}{name}
+\funcarg{int *}{size}
+\end{funcdecl}
+
+\funcname{krb5_unparse_name_ext} is designed for applications which
+must unparse a large number of principals, and are concerned about the
+speed impact of needing to do a lot of memory allocations and
+deallocations.  It functions similarly to \funcname{krb5_unparse_name}
+except if \funcparam{*name} is non-null, in which case, it is assumed
+to contain an allocated buffer of size \funcparam{*size} and this
+buffer will be resized with \funcname{realloc} to hold the unparsed
+name.  Note that in this case,
+\funcparam{size} must not be null.  
+
+If \funcparam{size} is non-null (whether or not \funcparam{*name} is
+null when the function is called), it will be filled in with the size
+of the unparsed name upon successful return.
+
+\begin{funcdecl}{krb5_princ_realm}{krb5_data}{\funcinout}
+\funcparam{krb5_context}{context}
+\funcparam{krb5_principal}{principal}
+\end{funcdecl}
+
+A macro which returns the realm of \funcparam{principal}.
+
+\begin{funcdecl}{krb5_princ_set_realm}{void}{\funcinout}
+\funcparam{krb5_context}{context}
+\funcparam{krb5_principal}{principal}
+\funcparam{krb5_data *}{realm}
+\end{funcdecl}
+
+A macro which returns sets the realm of \funcparam{principal} to
+\funcparam{realm}. 
+
+\begin{funcdecl}{krb5_princ_set_realm_data}{void}{\funcinout}
+\funcparam{krb5_context}{context}
+\funcparam{krb5_principal}{principal}
+\funcparam{char *}{data}
+\end{funcdecl}
+
+\internalfunc
+
+A macro which returns sets the data portion of the realm of
+\funcparam{principal} to \funcparam{data}. 
+
+\begin{funcdecl}{krb5_princ_set_realm_length}{void}{\funcinout}
+\funcparam{krb5_context}{context}
+\funcparam{krb5_principal}{principal}
+\funcparam{int}{length}
+\end{funcdecl}
+
+\internalfunc
+
+A macro which returns sets the length \funcparam{principal} to
+\funcparam{length}. 
+
+\begin{funcdecl}{krb5_princ_size}{void}{\funcinout}
+\funcparam{krb5_context}{context}
+\funcparam{krb5_principal}{principal}
+\end{funcdecl}
+
+\internalfunc
+
+A macro which gives the number of elements in the principal.
+May also be used on the left size of an assignment.
+
+\begin{funcdecl}{krb5_princ_type}{void}{\funcinout}
+\funcparam{krb5_context}{context}
+\funcparam{krb5_principal}{principal}
+\end{funcdecl}
+
+\internalfunc
+
+A macro which gives the type of the principal.
+May also be used on the left size of an assignment.
+
+\begin{funcdecl}{krb5_princ_data}{}
+\funcparam{krb5_context}{context}
+\funcparam{krb5_principal}{principal}
+\end{funcdecl}
+
+\internalfunc
+
+A macro which gives the pointer to data portion of the principal.
+May also be used on the left size of an assignment.
+
+
+\begin{funcdecl}{krb5_princ_component}{}
+\funcparam{krb5_context}{context}
+\funcparam{krb5_principal}{principal}
+\funcparam{int}{i}
+\end{funcdecl}
+
+\internalfunc
+
+A macro which gives the pointer to ith element of the principal.
+May also be used on the left size of an assignment.
+
+\begin{funcdecl}{krb5_build_principal}{krb5_error_code}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcout
+\funcarg{krb5_principal *}{princ}
+\funcin
+\funcarg{int}{rlen}
+\funcarg{const char *}{realm}
+\funcarg{char}{*s1, *s2, ..., 0}
+\end{funcdecl}
+\begin{funcdecl}{krb5_build_principal_va}{krb5_error_code}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcout
+\funcarg{krb5_principal *}{princ}
+\funcin
+\funcarg{int}{rlen}
+\funcarg{const char *}{realm}
+\funcarg{va_list}{ap}
+\end{funcdecl}
+
+\begin{sloppypar}
+\funcname{krb5_build_principal} and
+\funcname{krb5_build_principal_va} 
+perform the same function; the former takes variadic arguments, while
+the latter takes a pre-computed varargs pointer.
+\end{sloppypar}
+
+Both functions take a realm name \funcparam{realm}, realm name length
+\funcparam{rlen}, and a list of null-terminated strings, and fill in a
+pointer to a principal structure \funcparam{princ}, making it point to a
+structure representing the named principal.
+The last string must be followed in the argument list by a null pointer.
+
+
+\begin{funcdecl}{krb5_build_principal_ext}{krb5_error_code}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcout
+\funcarg{krb5_principal *}{princ}
+\funcin
+\funcarg{int}{rlen}
+\funcarg{const char *}{realm}
+\funcarg{}{int len1, char *s1, int len2, char *s2, ..., 0}
+\end{funcdecl}
+
+\funcname{krb5_build_principal_ext} is similar to
+\funcname{krb5_build_principal} but it takes its components as a list of
+(length, contents) pairs rather than a list of null-terminated strings.
+A length of zero indicates the end of the list.
+
+\begin{funcdecl}{krb5_copy_principal}{krb5_error_code}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcin
+\funcarg{krb5_const_principal}{inprinc}
+\funcout
+\funcarg{krb5_principal *}{outprinc}
+\end{funcdecl}
+
+Copy a principal structure, filling in \funcparam{*outprinc} to point to
+the newly allocated copy, which should be freed with
+\funcname{krb5_free_principal}.
+
+\begin{funcdecl}{krb5_principal_compare}{krb5_boolean}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcin
+\funcarg{krb5_const_principal}{princ1}
+\funcarg{krb5_const_principal}{princ2}
+\end{funcdecl}
+
+If the two principals are the same, return TRUE, else return FALSE.
+
+\begin{funcdecl}{krb5_realm_compare}{krb5_boolean}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcin
+\funcarg{krb5_const_principal}{princ1}
+\funcarg{krb5_const_principal}{princ2}
+\end{funcdecl}
+
+If the realms of the two principals are the same, return TRUE, else
+return FALSE. 
+
+
+\begin{funcdecl}{krb5_425_conv_principal}{krb5_error_code}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcin
+\funcarg{const char *}{name}
+\funcarg{const char *}{instance}
+\funcarg{const char *}{realm}
+\funcout
+\funcarg{krb5_principal *}{princ}
+\end{funcdecl}
+
+Build a principal \funcparam{princ} from a V4 specification made up of 
+\funcparam{name}.\funcparam{instance}@\funcparam{realm}. The routine is
+site-customized to convert the V4 naming scheme to a V5 one. For
+instance, the V4 ``rcmd'' is changed to ``host''. 
+
+The returned principal should be freed with
+\funcname{krb5_free_principal}. 
+
 \subsubsection{The application functions}
 
 \begin{funcdecl}{krb5_encode_kdc_rep}{krb5_error_code}{\funcin}
@@ -1350,131 +1618,6 @@ The \funcparam{auth_context} flags specify whether timestamps
 
 Returns system errors, integrity errors.
 
-\begin{funcdecl}{krb5_parse_name}{krb5_error_code}{\funcinout}
-\funcarg{krb5_context}{context}
-\funcin
-\funcarg{const char *}{name}
-\funcout
-\funcarg{krb5_principal *}{principal}
-\end{funcdecl}
-
-Converts a single-string representation \funcparam{name} of the
-principal name to the multi-part principal format used in the protocols.
-
-A single-string representation of a Kerberos name consists of one or
-more principal name components, separated by slashes, optionally
-followed by the ``@'' character and a realm name.  If the realm name
-is not specified, the local realm is used.
-
-The slash and ``@'' characters may be quoted (i.e., included as part
-of a component rather than as a component separator or realm prefix)
-by preceding them with a backslash (``$\backslash$'') character.
-Similarly, newline, tab, backspace, and null characters may be
-included in a component by using $\backslash{}n$, $\backslash{}t$,
-$\backslash{}b$ or $\backslash{}0$, respectively.
-
-The realm in a Kerberos name may not contain the slash, colon or null
-characters.
-
-\funcparam{*principal} will point to allocated storage which should be freed by
-the caller (using \funcname{krb5_free_principal}) after use.
-
-\funcname{krb5_parse_name} returns KRB5_PARSE_MALFORMED if the string is
- badly formatted, or ENOMEM if space for the return value can't be
-allocated.
-
-\begin{funcdecl}{krb5_unparse_name}{krb5_error_code}{\funcinout}
-\funcarg{krb5_context}{context}
-\funcin
-\funcarg{krb5_const_principal}{principal}
-\funcout
-\funcarg{char **}{name}
-\end{funcdecl}
-
-Converts the multi-part principal name \funcparam{principal} from the
-format used in the protocols to a single-string representation of the
-name.  The resulting single-string representation will use the format
-and quoting conventions described for \funcname{krb5_parse_name}
-above.
-
-\funcparam{*name} points to allocated storage and should be freed by the caller
-when finished.
-
-\funcname{krb5_unparse_name} returns {\sc KRB_PARSE_MALFORMED} if the principal
-does not contain at least 2 components, and system errors ({\sc ENOMEM} if
-unable to allocate memory).
-
-\begin{funcdecl}{krb5_unparse_name_ext}{krb5_error_code}{\funcinout}
-\funcarg{krb5_context}{context}
-\funcin
-\funcarg{krb5_const_principal}{principal}
-\funcinout
-\funcarg{char **}{name}
-\funcarg{int *}{size}
-\end{funcdecl}
-
-\funcname{krb5_unparse_name_ext} is designed for applications which
-must unparse a large number of principals, and are concerned about the
-speed impact of needing to do a lot of memory allocations and
-deallocations.  It functions similarly to \funcname{krb5_unparse_name}
-except if \funcparam{*name} is non-null, in which case, it is assumed
-to contain an allocated buffer of size \funcparam{*size} and this
-buffer will be resized with \funcname{realloc} to hold the unparsed
-name.  Note that in this case,
-\funcparam{size} must not be null.  
-
-If \funcparam{size} is non-null (whether or not \funcparam{*name} is
-null when the function is called), it will be filled in with the size
-of the unparsed name upon successful return.
-
-\begin{funcdecl}{krb5_build_principal}{krb5_error_code}{\funcinout}
-\funcarg{krb5_context}{context}
-\funcout
-\funcarg{krb5_principal *}{princ}
-\funcin
-\funcarg{int}{rlen}
-\funcarg{const char *}{realm}
-\funcarg{char}{*s1, *s2, ..., 0}
-\end{funcdecl}
-\begin{funcdecl}{krb5_build_principal_va}{krb5_error_code}{\funcinout}
-\funcarg{krb5_context}{context}
-\funcout
-\funcarg{krb5_principal *}{princ}
-\funcin
-\funcarg{int}{rlen}
-\funcarg{const char *}{realm}
-\funcarg{va_list}{ap}
-\end{funcdecl}
-
-\begin{sloppypar}
-\funcname{krb5_build_principal} and
-\funcname{krb5_build_principal_va} 
-perform the same function; the former takes variadic arguments, while
-the latter takes a pre-computed varargs pointer.
-\end{sloppypar}
-
-Both functions take a realm name \funcparam{realm}, realm name length
-\funcparam{rlen}, and a list of null-terminated strings, and fill in a
-pointer to a principal structure \funcparam{princ}, making it point to a
-structure representing the named principal.
-The last string must be followed in the argument list by a null pointer.
-
-
-\begin{funcdecl}{krb5_build_principal_ext}{krb5_error_code}{\funcinout}
-\funcarg{krb5_context}{context}
-\funcout
-\funcarg{krb5_principal *}{princ}
-\funcin
-\funcarg{int}{rlen}
-\funcarg{const char *}{realm}
-\funcarg{}{int len1, char *s1, int len2, char *s2, ..., 0}
-\end{funcdecl}
-
-\funcname{krb5_build_principal_ext} is similar to
-\funcname{krb5_build_principal} but it takes its components as a list of
-(length, contents) pairs rather than a list of null-terminated strings.
-A length of zero indicates the end of the list.
-
 \begin{funcdecl}{krb5_address_search}{krb5_boolean}{\funcinout}
 \funcarg{krb5_context}{context}
 \funcin
@@ -1493,15 +1636,6 @@ If \funcparam{addr} is listed in \funcparam{addrlist}, or
 \end{funcdecl}
 
 If the two addresses are the same, return TRUE, else return FALSE.
-
-\begin{funcdecl}{krb5_principal_compare}{krb5_boolean}{\funcinout}
-\funcarg{krb5_context}{context}
-\funcin
-\funcarg{krb5_const_principal}{princ1}
-\funcarg{krb5_const_principal}{princ2}
-\end{funcdecl}
-
-If the two principals are the same, return TRUE, else return FALSE.
 
 \begin{funcdecl}{krb5_fulladdr_order}{int}{\funcinout}
 \funcarg{krb5_context}{context}
@@ -1617,18 +1751,6 @@ to the newly allocated copy, which should be freed with
 Copy a data structure, filling in \funcparam{*outdata} to point to the
 newly allocated copy, which should be freed with \funcname{krb5_free_data}.
 
-\begin{funcdecl}{krb5_copy_principal}{krb5_error_code}{\funcinout}
-\funcarg{krb5_context}{context}
-\funcin
-\funcarg{krb5_const_principal}{inprinc}
-\funcout
-\funcarg{krb5_principal *}{outprinc}
-\end{funcdecl}
-
-Copy a principal structure, filling in \funcparam{*outprinc} to point to
-the newly allocated copy, which should be freed with
-\funcname{krb5_free_principal}.
-
 \begin{funcdecl}{krb5_copy_ticket}{krb5_error_code}{\funcinout}
 \funcarg{krb5_context}{context}
 \funcin
@@ -1640,17 +1762,6 @@ the newly allocated copy, which should be freed with
 Copy a ticket structure, filling in \funcparam{*pto} to point to
 the newly allocated copy, which should be freed with
 \funcname{krb5_free_ticket}.
-
-
-\begin{funcdecl}{krb5_realm_compare}{krb5_boolean}{\funcinout}
-\funcarg{krb5_context}{context}
-\funcin
-\funcarg{krb5_const_principal}{princ1}
-\funcarg{krb5_const_principal}{princ2}
-\end{funcdecl}
-
-If the realms of the two principals are the same, return TRUE, else
-return FALSE. 
 
 
 \begin{funcdecl}{krb5_get_server_rcache}{krb5_error_code}{\funcinout}

@@ -1,7 +1,14 @@
+Thu May  4 14:29:45 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* krb5.tex: Reorganized into subsubsections. Added principal
+		access macros. 
+
+	* libos.tex: Added missing functions (os_context) and reorganized
+		into subsubsections. 
+
 Wed May  3 01:22:11 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
-	* krb5.tex (subsubsection{The krb5_auth_context}): Added
-	auth_context routines. 
+	* krb5.tex: Added auth_context routines. 
 
 	* free.tex: Add krb5_xfree and krb5_free_data.
 
