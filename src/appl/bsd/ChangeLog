@@ -1,3 +1,8 @@
+Thu Apr 27 17:41:06 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* Makefile.in (krshd, login.krb5, krlogind): KRB4_LIB needs to
+	appear before KLIB since it uses des425.
+
 Thu Apr 27 14:36:54 1995  Mark Eichin  <eichin@cygnus.com>
 
 	* Makefile.in (LOCALINCLUDE): get kerberosIV headers for login.c
