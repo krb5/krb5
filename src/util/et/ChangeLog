@@ -1,3 +1,7 @@
+2001-08-29  Alexandra Ellwood  <lxs@mit.edu>
+
+	* error_message.c: fixed busted parentheses
+
 2001-08-10  Alexandra Ellwood  <lxs@mit.edu>
 
 	* error_message.c: call through to strerror on Mac OS X
