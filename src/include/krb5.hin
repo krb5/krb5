@@ -2400,5 +2400,9 @@ krb5_prompt_type* KRB5_CALLCONV krb5_get_prompt_types
 #pragma import reset
 #endif
 
+/* Don't use this!  We're going to phase it out.  It's just here to keep
+   applications from breaking right away.  */
+#define krb5_const const
+
 #endif /* KRB5_GENERAL__ */
 
