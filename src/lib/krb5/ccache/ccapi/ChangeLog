@@ -1,3 +1,34 @@
+2000-05-04  Miro Jurisic  <meeroh@mit.edu>
+
+	* stdcc_util.c (dupCCtoK5, dupK5toCC): 
+		Conditionalized local/KDC time conversions for Mac-only
+		until we figure out what to do about that
+
+2000-04-07  Jeffrey Altman <jaltman@columbia.edu>
+
+	* stdcc_util.c (copyCCDataArrayToK5, copyCCDataArrayToK5): 
+	* stdcc_util.c (dupCCtoK5, dupK5toCC): 
+
+          memory was being allocated as   (sizeof(foo) * count + 1)
+          instead of                      (sizeof(foo) * (count + 1))
+
+2000-04-03  Jeffrey Altman <jaltman@columbia.edu>
+
+	* stdcc_util.c (copyCCDataArrayToK5, copyCCDataArrayToK5): 
+	* stdcc_util.c (dupCCtoK5, dupK5toCC): 
+
+          Changed all references to the type UInt32 to unsigned int
+          since UInt32 is not a standard type on Unix or Win32    
+
+2000-03-24  Alexandra Ellwood  <lxs@mit.edu>
+
+	* stdcc_util.c (copyCCDataArrayToK5, copyCCDataArrayToK5): 
+		Modified to copy authdata as well... this code may have 
+		bugs since I couldn't get a good case where authdata != NULL
+	
+	* stdcc_util.c (dupCCtoK5, dupK5toCC): 
+		Added code to store times in localtime, not in kdc time.
+
 2000-03-15  Danilo Almeida  <dalmeida@mit.edu>
 
 	* stdcc.c (krb5_stdcc_destroy): Do not mask KRB5_FCC_NOFILE error
