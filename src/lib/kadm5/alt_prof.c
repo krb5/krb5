@@ -364,35 +364,9 @@ krb5_error_code kadm5_get_config_params(context, kdcprofile, kdcenv,
     }
 
     /*
-     * Get the value for the admin (policy) database and lockfile.
-     * The logic here is slightly tricky.  DBNAME, ADBNAME, and
-     * ADB_LOCKFILE are dependent on the earlier items in the
-     * sequence.  If an earlier item was specified via the input
-     * parameters, that value overrides the variables in the config
-     * file and causes the later item to be set to ".kadm5" or
-     * ".lock", respectively.  However, if no earlier item was
-     * specified, the variables in the config file are used, and the
-     * ".kadm5" and ".lock" suffixes are only added as a no-variable
-     * default.
-     *
-     * Read the spec.
+     * admin database name and lockfile are now always derived from dbname
      */
-    hierarchy[2] = "admin_database_name";
-    if (params_in->mask & KADM5_CONFIG_ADBNAME) {
-	 params.admin_dbname = strdup(params_in->admin_dbname);
-	 if (params.admin_dbname)
-	      params.mask |= KADM5_CONFIG_ADBNAME;
-    } else if (params_in->mask & KADM5_CONFIG_DBNAME) {
-	 params.admin_dbname = (char *) malloc(strlen(params.dbname) + 7);
-	 if (params.admin_dbname) {
-	      sprintf(params.admin_dbname, "%s.kadm5", params.dbname);
-	      params.mask |= KADM5_CONFIG_ADBNAME;
-	 }
-    } else if (aprofile &&
-	       !krb5_aprof_get_string(aprofile, hierarchy, TRUE, &svalue)) {
-	 params.admin_dbname = svalue;
-	 params.mask |= KADM5_CONFIG_ADBNAME;
-    } else if (params.mask & KADM5_CONFIG_DBNAME) {
+    if (params.mask & KADM5_CONFIG_DBNAME) {
 	 params.admin_dbname = (char *) malloc(strlen(params.dbname) + 7);
 	 if (params.admin_dbname) {
 	      sprintf(params.admin_dbname, "%s.kadm5", params.dbname);
@@ -400,27 +374,7 @@ krb5_error_code kadm5_get_config_params(context, kdcprofile, kdcenv,
 	 }
     }
 
-    /* Get the value for the admin (policy) database lock file*/
-    hierarchy[2] = "admin_database_lockfile";
-    if (params_in->mask & KADM5_CONFIG_ADB_LOCKFILE) {
-	 params.admin_lockfile = strdup(params_in->admin_lockfile);
-	 if (params.admin_lockfile)
-	      params.mask |= KADM5_CONFIG_ADB_LOCKFILE;
-    } else if ((params_in->mask & KADM5_CONFIG_ADBNAME) ||
-	       (params_in->mask & KADM5_CONFIG_DBNAME)) {
-	 /* if DBNAME is set but ADBNAME is not, then admin_database
-	  * will already have been set above */
-	 params.admin_lockfile = (char *) malloc(strlen(params.admin_dbname)
-						 + 6); 
-	 if (params.admin_lockfile) {
-	      sprintf(params.admin_lockfile, "%s.lock", params.admin_dbname);
-	      params.mask |= KADM5_CONFIG_ADB_LOCKFILE;
-	 }
-    } else if (aprofile &&
-	       !krb5_aprof_get_string(aprofile, hierarchy, TRUE, &svalue)) {
-	 params.mask |= KADM5_CONFIG_ADB_LOCKFILE;
-	 params.admin_lockfile = svalue;
-    } else if (params.mask & KADM5_CONFIG_ADBNAME) {
+    if (params.mask & KADM5_CONFIG_ADBNAME) {
 	 params.admin_lockfile = (char *) malloc(strlen(params.admin_dbname)
 						 + 6);
 	 if (params.admin_lockfile) {

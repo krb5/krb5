@@ -720,9 +720,10 @@ if {$RPC} {
     test45_46 ovsec_adm/changepw
 
     # re-extract the keytab so it is right
-    exec rm /krb5/ovsec_adm.srvtab
+    exec rm $env(K5ROOT)/ovsec_adm.srvtab
     exec $env(MAKE_KEYTAB) -princ ovsec_adm/admin -princ ovsec_adm/changepw \
-	    -princ kadmin/admin -princ kadmin/changepw /krb5/ovsec_adm.srvtab
+	    -princ kadmin/admin -princ kadmin/changepw \
+	    $env(K5ROOT)/ovsec_adm.srvtab
 }
 
 return ""

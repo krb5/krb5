@@ -1,3 +1,8 @@
+Thu Sep 26 17:45:18 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* alt_prof.c: don't allow admin_dbname or admin_lockfile to be
+ 	independetly configured
+
 Fri Sep 20 16:52:07 1996  Barry Jaspan  <bjaspan@mit.edu>
 
 	* configure.in: add unit-test directory
