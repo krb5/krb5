@@ -47,8 +47,11 @@ Modifies: cache identified by \funcparam{id}.
 \funcarg{krb5_ccache}{id}
 \end{funcdecl}
 
-Destroys the credentials cache identified by \funcparam{id}.
-Requires that the credentials cache exist.
+Destroys the credentials cache identified by \funcparam{id}, invalidates
+\funcparam{id}, and releases any other resources acquired during use of
+the credentials cache.  Requires that \funcparam{id} identifies a valid
+credentials cache.  After return, \funcparam{id} must not be used unless
+it is first reinitialized.
 
 Errors:  permission errors.
 
@@ -57,8 +60,10 @@ Errors:  permission errors.
 \end{funcdecl}
 
 Closes the credentials cache \funcparam{id}, invalidates \funcparam{id},
-and releases any other resources acquired during use of the credentials cache.
-Requires that \funcparam{id} identifies a valid credentials cache.
+and releases any other resources acquired during use of the credentials
+cache.  Requires that \funcparam{id} identifies a valid credentials
+cache.  After return, \funcparam{id} must not be used unless it is first
+reinitialized.
 
 
 \begin{funcdecl}{krb5_cc_store_cred}{krb5_error_code}{\funcin}
