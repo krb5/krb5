@@ -22,6 +22,12 @@ DONE	* make DES-MD5 default, fall back to DES-CRC
 
 4.  Better Kerberos Database
 DONE	* Design encoders/decoders
+DONE	* Added keytab routines to access to database.
+	* A krb5_db_context is necessary for all the db access routines.
+		Eg put_principal(), get_principal(), etc... 
+		The API on these routines needs to be modified and the 
+		current db_context needs to be removed from the krb5_context
+		to better support multiple databases/realms. (POST 1.0)
 
 5.  Configuration file
 DONE	* write configuration file library

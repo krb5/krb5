@@ -1,3 +1,9 @@
+
+Tue Dec 12 01:30:36 1995  Chris Provenzano (proven@mit.edu)
+
+	* TODO: Done: keytab routines to access to database.
+		Todo: Create a real krb5_db_context after 1.0
+
 Tue Dec  5 20:48:56 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* aclocal.m4 (kutil_lib): Add USE_KRB5UTIL_LIBRARY. Change
