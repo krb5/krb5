@@ -58,9 +58,11 @@ krb5_authdata ***output;
     /* count up the entries */
     i = 0;
     if (first)
-	for (ptr = first; *ptr; ptr++,i++);
+	for (ptr = first; *ptr; ptr++)
+	    i++;
     if (second)
-	for (ptr = second; *ptr; ptr++,i++);
+	for (ptr = second; *ptr; ptr++)
+	    i++;
     
     retdata = (krb5_authdata **)malloc((i+1)*sizeof(*retdata));
     if (!retdata)
@@ -148,6 +150,7 @@ krb5_tkt_authent **ret_authdat;
     krb5_data *scratch, scratch2;
     krb5_pa_data **tmppa;
     krb5_boolean local_client = TRUE;
+    krb5_enc_tkt_part *ticket_enc;
 
     if (!request->padata)
 	return KRB5KDC_ERR_PADATA_TYPE_NOSUPP;
@@ -174,6 +177,13 @@ krb5_tkt_authent **ret_authdat;
     memset((char *)authdat, 0, sizeof(*authdat));
     authdat->ticket = apreq->ticket;
     *ret_authdat = authdat;
+
+    /* Verify that the server principal in authdat->ticket is
+       the ticket granting service.  */
+    if (! krb5_principal_compare (authdat->ticket->server, tgs_server)) {
+	cleanup_apreq();
+	return KRB5KRB_AP_ERR_NOT_US;
+    }
 
     if (isflagset(apreq->ap_options, AP_OPTS_USE_SESSION_KEY) ||
 	isflagset(apreq->ap_options, AP_OPTS_MUTUAL_REQUIRED)) {
@@ -224,14 +234,14 @@ krb5_tkt_authent **ret_authdat;
 #undef cleanup_apreq
     authdat = nauthdat;
     *ret_authdat = authdat;
+    ticket_enc = authdat->ticket->enc_part2;
 
     /* now rearrange output from rd_req_decoded */
 
     /* make sure the client is of proper lineage (see above) */
     if (!local_client &&
-	(authdat->ticket->enc_part2->client[0]->length ==
-	 tgs_server[0]->length) &&
-	!memcmp(authdat->ticket->enc_part2->client[0]->data,
+	(ticket_enc->client[0]->length == tgs_server[0]->length) &&
+	!memcmp(ticket_enc->client[0]->data,
 		tgs_server[0]->data,
 		tgs_server[0]->length)) {
 	/* someone in a foreign realm claiming to be local */
@@ -265,8 +275,8 @@ krb5_tkt_authent **ret_authdat;
     if (retval = krb5_calculate_checksum(our_cksum.checksum_type,
 					 scratch->data,
 					 scratch->length,
-					 authdat->ticket->enc_part2->session->contents, /* seed */
-					 authdat->ticket->enc_part2->session->length,	/* seed length */
+					 ticket_enc->session->contents, /* seed */
+					 ticket_enc->session->length,	/* seed length */
 					 &our_cksum)) {
 	xfree(our_cksum.contents);
 	krb5_free_data(scratch);
