@@ -17,7 +17,14 @@ static char rcsid_fcc_maybe_c[] =
 #endif	/* !lint & !SABER */
 
 #include "fcc.h"
+#include <krb5/osconf.h>
+
+#ifdef KRB5_USE_INET
 #include <netinet/in.h>			/* XXX ip only? */
+#else
+ #error find some way to use net-byte-order file version numbers.
+#endif
+
 #include <krb5/libos.h>
 #include <krb5/los-proto.h>
 #include <stdio.h>
@@ -100,9 +107,9 @@ krb5_fcc_close_file (id)
      krb5_fcc_data *data = (krb5_fcc_data *)id->data;
      krb5_error_code retval;
 
-     if (data->fd == -1) {
-	 abort ();			/* XXX? */
-     }
+     if (data->fd == -1)
+	 return KRB5_FCC_INTERNAL;
+
      retval = fcc_lock_file(data, data->fd, UNLOCK_IT);
      ret = close (data->fd);
      data->fd = -1;
