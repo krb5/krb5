@@ -1,3 +1,13 @@
+2004-04-29  Ken Raeburn  <raeburn@mit.edu>
+
+	* aclocal.m4 (CONFIG_RULES): Invoke KRB5_LIB_PARAMS and
+	KRB5_AC_INITFINI.
+	(KRB5_AC_INITFINI): New macro.  Define delayed-initialization
+	config option, test for gcc constructor/destructor attribute
+	support, and test whether shlib.conf indicates support for
+	link-time options.
+	(KRB5_AC_GCC_ATTRS): Implement.
+
 2004-04-26  Ken Raeburn  <raeburn@mit.edu>
 
 	* aclocal.m4 (KRB5_BUILD_LIBRARY_WITH_DEPS): Report an error if

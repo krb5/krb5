@@ -101,6 +101,8 @@ libobj_frag=$srcdir/$ac_config_fragdir/libobj.in
 AC_SUBST_FILE(libobj_frag)
 dnl
 KRB5_AC_PRAGMA_WEAK_REF
+KRB5_LIB_PARAMS
+KRB5_AC_INITFINI
 KRB5_AC_ENABLE_THREADS
 ])dnl
 
@@ -123,6 +125,33 @@ MAINT=$MAINTAINER_MODE_TRUE
 AC_SUBST(MAINTAINER_MODE_TRUE)
 AC_SUBST(MAINTAINER_MODE_FALSE)
 AC_SUBST(MAINT)
+])
+
+dnl
+AC_DEFUN([KRB5_AC_INITFINI],[
+dnl Do we want initialization at load time?
+AC_ARG_ENABLE([delayed-initialization],
+AC_HELP_STRING([--disable-delayed-initialization],initialize library code when loaded @<:@delay until first use@:>@), , enable_delayed_initialization=yes)
+case "$enable_delayed_initialization" in
+  yes)
+    AC_DEFINE(DELAY_INITIALIZER,1,[Define if library initialization should be delayed until first use]) ;;
+  no) ;;
+  *)  AC_MSG_ERROR(invalid option $enable_delayed_initialization for delayed-initialization) ;;
+esac
+dnl We always want finalization at unload time.
+dnl
+dnl Can we do things through gcc?
+KRB5_AC_GCC_ATTRS
+dnl How about with the linker?
+if test -z "$use_linker_init_option" ; then
+  AC_MSG_ERROR(ran INITFINI before checking shlib.conf?)
+fi
+if test "$use_linker_init_option" = yes; then
+  AC_DEFINE(USE_LINKER_INIT_OPTION,1,[Define if link-time options for library initialization will be used])
+fi
+if test "$use_linker_fini_option" = yes; then
+  AC_DEFINE(USE_LINKER_FINI_OPTION,1,[Define if link-time options for library finalization will be used])
+fi
 ])
 
 dnl Hack for now.
@@ -1551,7 +1580,38 @@ dnl
 dnl
 dnl KRB5_AC_GCC_ATTRS
 AC_DEFUN([KRB5_AC_GCC_ATTRS],
-[
+[AC_CACHE_CHECK([for constructor/destructor attribute support],krb5_cv_attr_constructor_destructor,
+[rm -f conftest.1 conftest.2
+if test -r conftest.1 || test -r conftest.2 ; then
+  AC_MSG_ERROR(write error in local file system?)
+fi
+true > conftest.1
+true > conftest.2
+if test -r conftest.1 && test -r conftest.2 ; then true ; else
+  AC_MSG_ERROR(write error in local file system?)
+fi
+a=no
+b=no
+# blindly assume we have 'unlink'...
+AC_TRY_RUN([void foo1() __attribute__((constructor));
+void foo1() { unlink("conftest.1"); }
+void foo2() __attribute__((destructor));
+void foo2() { unlink("conftest.2"); }
+int main () { return 0; }],
+[test -r conftest.1 || a=yes
+test -r conftest.2 || b=yes], , AC_MSG_ERROR(Cannot test for constructor/destructor support when cross compiling))
+krb5_cv_attr_constructor_destructor="$a,$b"
+])
+# Okay, krb5_cv_... should be set now.
+case $krb5_cv_attr_constructor_destructor in
+  yes,*)
+    AC_DEFINE(CONSTRUCTOR_ATTR_WORKS,1,[Define if __attribute__((constructor)) works]) ;;
+esac
+case $krb5_cv_attr_constructor_destructor in
+  *,yes)
+    AC_DEFINE(DESTRUCTOR_ATTR_WORKS,1,[Define if __attribute__((destructor)) works]) ;;
+esac
+dnl End of attributes we care about right now.
 ])
 dnl
 dnl
