@@ -44,6 +44,8 @@ unsigned char	will[] = { IAC, WILL, '%', 'c', 0 };
 unsigned char	wont[] = { IAC, WONT, '%', 'c', 0 };
 int	not42 = 1;
 
+static int envvarok(P(char *));
+
 /*
  * Buffer for sub-options, and macros
  * for suboptions buffer manipulations
@@ -353,7 +355,7 @@ gotiac:			switch (c) {
 			continue;
 
 		default:
-			syslog(LOG_ERR, "telnetd: panic state=%d\n", state);
+			syslog(LOG_ERR, "telnetd: panic state=%d", state);
 			printf("telnetd: panic state=%d\n", state);
 			exit(1);
 		}
@@ -1078,25 +1080,6 @@ int env_ovalue = -1;
 # define env_ovalue OLD_ENV_VALUE
 #endif	/* ENV_HACK */
 
-/* envvarok(char*) */
-/* check that variable is safe to pass to login or shell */
-static int
-envvarok(varp)
-	char *varp;
-{
-	if ((strchr(varp, '=') == 0) &&
-	    strncmp(varp, "LD_", strlen("LD_")) &&
-	    strncmp(varp, "_RLD_", strlen("_RLD_")) &&
-	    strcmp(varp, "LIBPATH") &&
-	    strcmp(varp, "IFS")) {
-		return 1;
-	} else {
-		/* optionally syslog(LOG_INFO) here */
-		return 0;
-	}
-
-}
-
 /*
  * suboption()
  *
@@ -1436,9 +1419,9 @@ suboption()
 		case ENV_USERVAR:
 			*cp = '\0';
 			if (envvarok(varp)) {
-			if (valp)
+			    if (valp)
 				(void)setenv(varp, valp, 1);
-			else
+			    else
 				unsetenv(varp);
 			}
 			cp = varp = (char *)subpointer;
@@ -1457,9 +1440,9 @@ suboption()
 	}
 	*cp = '\0';
 	if (envvarok(varp)) {
-	if (valp)
+	    if (valp)
 		(void)setenv(varp, valp, 1);
-	else
+	    else
 		unsetenv(varp);
 	}
 	break;
@@ -1638,4 +1621,18 @@ send_status()
 
 	DIAG(TD_OPTIONS,
 		{printsub('>', statusbuf, ncp - statusbuf); netflush();});
+}
+
+static int envvarok(varp)
+char *varp;
+{
+    if (!strncmp(varp, "LD_", 3) || !strncmp(varp, "_RLD_", 5) ||
+	!strncmp(varp, "ELF_LD_", 7) ||
+        !strcmp(varp, "LIBPATH") || !strcmp(varp, "IFS") ||
+	!strchr(varp, '='))
+    {
+	syslog(LOG_INFO, "Rejected the attempt to modify the environment variable \"%s\"", varp);
+	return 0;
+    }
+    return 1;
 }
