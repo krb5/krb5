@@ -114,10 +114,7 @@ static krb5_error_code krb5_ktsrvint_read_entry
  */
 
 static krb5_error_code KRB5_CALLCONV
-krb5_ktsrvtab_resolve(context, name, id)
-    krb5_context context;
-    const char *name;
-    krb5_keytab *id;
+krb5_ktsrvtab_resolve(krb5_context context, const char *name, krb5_keytab *id)
 {
     krb5_ktsrvtab_data *data;
     FILE *fp;
@@ -159,9 +156,7 @@ krb5_ktsrvtab_resolve(context, name, id)
  */
 
 krb5_error_code KRB5_CALLCONV
-krb5_ktsrvtab_close(context, id)
-    krb5_context context;
-    krb5_keytab id;
+krb5_ktsrvtab_close(krb5_context context, krb5_keytab id)
   /*
    * This routine is responsible for freeing all memory allocated 
    * for this keytab.  There are no system resources that need
@@ -184,13 +179,7 @@ krb5_ktsrvtab_close(context, id)
  */
 
 krb5_error_code KRB5_CALLCONV
-krb5_ktsrvtab_get_entry(context, id, principal, kvno, enctype, entry)
-    krb5_context context;
-    krb5_keytab id;
-    krb5_const_principal principal;
-    krb5_kvno kvno;
-    krb5_enctype enctype;
-    krb5_keytab_entry * entry;
+krb5_ktsrvtab_get_entry(krb5_context context, krb5_keytab id, krb5_const_principal principal, krb5_kvno kvno, krb5_enctype enctype, krb5_keytab_entry *entry)
 {
     krb5_keytab_entry best_entry, ent;
     krb5_error_code kerror = 0;
@@ -261,11 +250,7 @@ krb5_ktsrvtab_get_entry(context, id, principal, kvno, enctype, entry)
  */
 
 krb5_error_code KRB5_CALLCONV
-krb5_ktsrvtab_get_name(context, id, name, len)
-    krb5_context context;
-    krb5_keytab id;
-    char *name;
-    unsigned int len;
+krb5_ktsrvtab_get_name(krb5_context context, krb5_keytab id, char *name, unsigned int len)
   /* 
    * This routine returns the name of the name of the file associated with
    * this srvtab-based keytab.  The name is prefixed with PREFIX:, so that
@@ -295,10 +280,7 @@ krb5_ktsrvtab_get_name(context, id, name, len)
  */
 
 krb5_error_code KRB5_CALLCONV
-krb5_ktsrvtab_start_seq_get(context, id, cursorp)
-    krb5_context context;
-    krb5_keytab id;
-    krb5_kt_cursor *cursorp;
+krb5_ktsrvtab_start_seq_get(krb5_context context, krb5_keytab id, krb5_kt_cursor *cursorp)
 {
     krb5_error_code retval;
     long *fileoff;
@@ -321,11 +303,7 @@ krb5_ktsrvtab_start_seq_get(context, id, cursorp)
  */
 
 krb5_error_code KRB5_CALLCONV
-krb5_ktsrvtab_get_next(context, id, entry, cursor)
-    krb5_context context;
-    krb5_keytab id;
-    krb5_keytab_entry *entry;
-    krb5_kt_cursor *cursor;
+krb5_ktsrvtab_get_next(krb5_context context, krb5_keytab id, krb5_keytab_entry *entry, krb5_kt_cursor *cursor)
 {
     long *fileoff = (long *)*cursor;
     krb5_keytab_entry cur_entry;
@@ -345,10 +323,7 @@ krb5_ktsrvtab_get_next(context, id, entry, cursor)
  */
 
 krb5_error_code KRB5_CALLCONV
-krb5_ktsrvtab_end_get(context, id, cursor)
-    krb5_context context;
-    krb5_keytab id;
-    krb5_kt_cursor *cursor;
+krb5_ktsrvtab_end_get(krb5_context context, krb5_keytab id, krb5_kt_cursor *cursor)
 {
     krb5_xfree(*cursor);
     return krb5_ktsrvint_close(context, id);
@@ -422,15 +397,8 @@ struct _krb5_kt_ops krb5_kts_ops = {
 #define		SNAME_SZ	40
 #define		INST_SZ		40
 
-#ifndef HAVE_ERRNO
-extern int errno;
-#endif
-
 static krb5_error_code
-read_field(fp, s, len)
-    FILE *fp;
-    char *s;
-    int len;
+read_field(FILE *fp, char *s, int len)
 {
     int c;
 
@@ -446,9 +414,7 @@ read_field(fp, s, len)
 }
 
 krb5_error_code
-krb5_ktsrvint_open(context, id)
-    krb5_context context;
-    krb5_keytab id;
+krb5_ktsrvint_open(krb5_context context, krb5_keytab id)
 {
     KTFILEP(id) = fopen(KTFILENAME(id), READ_MODE);
     if (!KTFILEP(id))
@@ -457,9 +423,7 @@ krb5_ktsrvint_open(context, id)
 }
 
 krb5_error_code
-krb5_ktsrvint_close(context, id)
-    krb5_context context;
-    krb5_keytab id;
+krb5_ktsrvint_close(krb5_context context, krb5_keytab id)
 {
     if (!KTFILEP(id))
 	return 0;
@@ -469,10 +433,7 @@ krb5_ktsrvint_close(context, id)
 }
 
 krb5_error_code
-krb5_ktsrvint_read_entry(context, id, ret_entry)
-    krb5_context context;
-    krb5_keytab id;
-    krb5_keytab_entry *ret_entry;
+krb5_ktsrvint_read_entry(krb5_context context, krb5_keytab id, krb5_keytab_entry *ret_entry)
 {
     FILE *fp;
     char name[SNAME_SZ], instance[INST_SZ], realm[REALM_SZ];

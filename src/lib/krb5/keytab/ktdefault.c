@@ -31,9 +31,7 @@
 #include <stdio.h>
 
 krb5_error_code KRB5_CALLCONV
-krb5_kt_default(context, id)
-    krb5_context context;
-    krb5_keytab *id;
+krb5_kt_default(krb5_context context, krb5_keytab *id)
 {
     char defname[BUFSIZ];
     krb5_error_code retval;

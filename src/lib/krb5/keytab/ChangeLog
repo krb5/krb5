@@ -1,3 +1,11 @@
+2002-09-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* kt_file.c, kt_srvtab.c, ktadd.c, ktbase.c, ktdefault.c,
+	ktfr_entry.c, ktremove.c, read_servi.c: Use prototype style
+	function definitions.
+
+	* kt_file.c (errno), kt_srvtab.c (errno): Don't declare.
+
 2002-08-29  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in: Revert $(S)=>/ change, for Windows support.

@@ -44,13 +44,7 @@
  * errors: error code if not found or keyprocarg is invalid.
  */
 krb5_error_code KRB5_CALLCONV
-krb5_kt_read_service_key(context, keyprocarg, principal, vno, enctype, key)
-    krb5_context context;
-    krb5_pointer keyprocarg;
-    krb5_principal principal;
-    krb5_kvno vno;
-    krb5_enctype enctype;
-    krb5_keyblock ** key;
+krb5_kt_read_service_key(krb5_context context, krb5_pointer keyprocarg, krb5_principal principal, krb5_kvno vno, krb5_enctype enctype, krb5_keyblock **key)
 {
     krb5_error_code kerror = KSUCCESS;
     char keytabname[MAX_KEYTAB_NAME_LEN + 1]; /* + 1 for NULL termination */

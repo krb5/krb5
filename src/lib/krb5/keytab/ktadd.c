@@ -30,10 +30,7 @@
 #include "k5-int.h"
 
 krb5_error_code KRB5_CALLCONV
-krb5_kt_add_entry (context, id, entry)
-    krb5_context context;
-    krb5_keytab id;
-    krb5_keytab_entry *entry;
+krb5_kt_add_entry (krb5_context context, krb5_keytab id, krb5_keytab_entry *entry)
 {
     if (id->ops->add)
 	return (*id->ops->add)(context, id, entry);

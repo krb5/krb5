@@ -53,9 +53,7 @@ static struct krb5_kt_typelist *kt_typehead = &krb5_kt_typelist_srvtab;
  */
 
 krb5_error_code KRB5_CALLCONV
-krb5_kt_register(context, ops)
-    krb5_context context;
-    krb5_kt_ops *ops;
+krb5_kt_register(krb5_context context, krb5_kt_ops *ops)
 {
     struct krb5_kt_typelist *t;
     for (t = kt_typehead;t && strcmp(t->ops->prefix,ops->prefix);t = t->next)
@@ -82,10 +80,7 @@ krb5_kt_register(context, ops)
  */
 
 krb5_error_code KRB5_CALLCONV
-krb5_kt_resolve (context, name, ktid)
-    krb5_context context;
-    const char *name;
-    krb5_keytab *ktid;
+krb5_kt_resolve (krb5_context context, const char *name, krb5_keytab *ktid)
 {
     struct krb5_kt_typelist *tlist;
     char *pfx;
@@ -143,10 +138,7 @@ static const krb5_ser_entry krb5_keytab_ser_entry = {
 };
 
 static krb5_error_code
-krb5_keytab_size(kcontext, arg, sizep)
-    krb5_context	kcontext;
-    krb5_pointer	arg;
-    size_t		*sizep;
+krb5_keytab_size(krb5_context kcontext, krb5_pointer arg, size_t *sizep)
 {
     krb5_error_code	kret;
     krb5_keytab		keytab;
@@ -162,11 +154,7 @@ krb5_keytab_size(kcontext, arg, sizep)
 }
 
 static krb5_error_code
-krb5_keytab_externalize(kcontext, arg, buffer, lenremain)
-    krb5_context	kcontext;
-    krb5_pointer	arg;
-    krb5_octet		**buffer;
-    size_t		*lenremain;
+krb5_keytab_externalize(krb5_context kcontext, krb5_pointer arg, krb5_octet **buffer, size_t *lenremain)
 {
     krb5_error_code	kret;
     krb5_keytab		keytab;
@@ -182,11 +170,7 @@ krb5_keytab_externalize(kcontext, arg, buffer, lenremain)
 }
 
 static krb5_error_code
-krb5_keytab_internalize(kcontext, argp, buffer, lenremain)
-    krb5_context	kcontext;
-    krb5_pointer	*argp;
-    krb5_octet		**buffer;
-    size_t		*lenremain;
+krb5_keytab_internalize(krb5_context kcontext, krb5_pointer *argp, krb5_octet **buffer, size_t *lenremain)
 {
     krb5_error_code	kret;
     krb5_ser_handle	shandle;
@@ -199,8 +183,7 @@ krb5_keytab_internalize(kcontext, argp, buffer, lenremain)
 }
 
 krb5_error_code KRB5_CALLCONV
-krb5_ser_keytab_init(kcontext)
-    krb5_context	kcontext;
+krb5_ser_keytab_init(krb5_context kcontext)
 {
     return(krb5_register_serializer(kcontext, &krb5_keytab_ser_entry));
 }

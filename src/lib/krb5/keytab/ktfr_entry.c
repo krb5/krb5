@@ -30,9 +30,7 @@
 #include "k5-int.h"
 
 krb5_error_code KRB5_CALLCONV
-krb5_free_keytab_entry_contents (context, entry)
-    krb5_context context;
-    krb5_keytab_entry *entry;
+krb5_free_keytab_entry_contents (krb5_context context, krb5_keytab_entry *entry)
 {
     if (!entry)
 	return 0;
@@ -46,9 +44,7 @@ krb5_free_keytab_entry_contents (context, entry)
 }
 
 krb5_error_code KRB5_CALLCONV
-krb5_kt_free_entry (context, entry)
-    krb5_context context;
-    krb5_keytab_entry *entry;
+krb5_kt_free_entry (krb5_context context, krb5_keytab_entry *entry)
 {
     return krb5_free_keytab_entry_contents (context, entry);
 }
