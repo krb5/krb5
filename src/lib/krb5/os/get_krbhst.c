@@ -18,11 +18,8 @@ static char get_krbhst_c [] =
 #include <krb5/copyright.h>
 
 #include <krb5/krb5.h>
-#include <krb5/krb5_err.h>
-#include <errno.h>
-
-#include <stdio.h>
 #include <krb5/ext-proto.h>
+#include <stdio.h>
 
 /*
  Figures out the Kerberos server names for the given realm, filling in a

@@ -18,7 +18,6 @@ static char rcsid_lock_file_c [] =
 #include <krb5/copyright.h>
 
 #include <krb5/krb5.h>
-#include <krb5/krb5_err.h>
 #include <krb5/libos.h>
 
 #include <stdio.h>

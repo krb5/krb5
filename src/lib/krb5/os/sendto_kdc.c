@@ -19,15 +19,12 @@ static char rcsid_sendto_kdc_c[] =
 #include <krb5/copyright.h>
 
 #include <krb5/krb5.h>
-#include <krb5/krb5_err.h>
-#include <errno.h>
 #include <krb5/ext-proto.h>
 
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/time.h>
 
-#include <stdio.h>
 #include <krb5/libos-proto.h>
 #include "os-proto.h"
 

@@ -18,12 +18,10 @@ static char rcsid_kuserok_c [] =
 #include <krb5/copyright.h>
 #include <krb5/krb5.h>
 #include <krb5/ext-proto.h>
-#include <stdio.h>
 #include <krb5/libos-proto.h>
-#include <sys/types.h>
-#include <sys/param.h>			/* for MAXPATHLEN */
-#include <sys/file.h>
-#include <sys/stat.h>
+#include <krb5/sysincl.h>
+
+#include <stdio.h>
 #include <pwd.h>
 
 #define MAX_USERNAME 10

@@ -17,12 +17,10 @@ static char rcsid_mstime_c[] =
 
 #include <krb5/copyright.h>
 
-#include <sys/time.h>			/* for timeval */
-#include <stdio.h>			/* needed for libos-proto.h */
-
 #include <krb5/config.h>
 #include <krb5/krb5.h>
 #include <krb5/libos-proto.h>
+#include <krb5/sysincl.h>
 
 extern int errno;
 

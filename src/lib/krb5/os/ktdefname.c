@@ -17,10 +17,8 @@ static char rcsid_ktdefname_c[] =
 
 #include <krb5/copyright.h>
 #include <krb5/krb5.h>
-#include <krb5/krb5_err.h>
 #include <krb5/osconf.h>
 
-#include <stdio.h>
 #include <krb5/ext-proto.h>
 
 extern char *krb5_defkeyname;
