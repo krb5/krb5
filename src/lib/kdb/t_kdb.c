@@ -531,7 +531,7 @@ do_testing(db, passes, verbose, timing, rcases, check, save_db, dontclean,
 	goto goodbye;
 
     op = "converting master key";
-    krb5_use_cstype(kcontext, &master_encblock, DEFAULT_KDC_ETYPE);
+    krb5_use_keytype(kcontext, &master_encblock, DEFAULT_KDC_KEYTYPE);
     master_keyblock.keytype = DEFAULT_KDC_KEYTYPE;
     passwd.length = strlen(master_passwd);
     passwd.data = master_passwd;
@@ -586,7 +586,6 @@ do_testing(db, passes, verbose, timing, rcases, check, save_db, dontclean,
 
 
     stat_kb.keytype = DEFAULT_KDC_KEYTYPE;
-    stat_kb.etype = DEFAULT_KDC_ETYPE;
     stat_kb.length = 8;
     stat_kb.contents = (krb5_octet *) "helpmeee";
 

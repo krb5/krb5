@@ -100,7 +100,6 @@ krb5_db_fetch_mkey(context, mname, eblock, fromkeyboard, twice, keyfile, salt, k
 
 	retval = 0;
 	key->magic = KV5M_KEYBLOCK;
-	key->etype = eblock->crypto_entry->proto_enctype;
 	(void) strcpy(defkeyfile, DEFAULT_KEYFILE_STUB);
 	(void) strncat(defkeyfile, realm->data,
 		       min(sizeof(defkeyfile)-sizeof(DEFAULT_KEYFILE_STUB)-1,

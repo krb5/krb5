@@ -1,4 +1,9 @@
 
+Tue Sep 05 22:10:34 1995   Chris Provenzano (proven@mit.edu)
+
+        * decrypt_key.c, fetch_mkey.c, t_kdb.c : Remove krb5_enctype 
+		references, and replace with krb5_keytype where appropriate
+
 Tue Aug 29 13:34:23 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* kdb_dbm.c - Add routines to support serialization of the database
 		context.  Clean up gcc -Wall complaints.
