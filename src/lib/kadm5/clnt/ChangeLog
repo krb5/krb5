@@ -1,3 +1,12 @@
+Sun Feb 18 17:32:53 2001  Ezra Peisach  <epeisach@mit.edu>
+
+	* client_rpc.c: Insure pointer argument type is same as passed
+        onto xdr functions. (arguments specified to *3_1 functions were
+        for the *_1 functions).
+
+	* client_init.c, client_principal.c, clnt_policy.c: Cleanup unused
+        variables and assignments in conditionals.
+
 2000-10-17  Ezra Peisach  <epeisach@mit.edu>
 
 	* clnt_chpass_util.c (kadm5_chpass_principal_util): Change msg_len

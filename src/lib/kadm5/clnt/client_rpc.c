@@ -25,7 +25,7 @@ create_principal_1(argp, clnt)
 
 generic_ret *
 create_principal3_1(argp, clnt)
-	cprinc_arg *argp;
+	cprinc3_arg *argp;
 	CLIENT *clnt;
 {
 	static generic_ret res;
@@ -95,7 +95,7 @@ get_principal_1(argp, clnt)
 
 gprincs_ret *
 get_princs_1(argp, clnt)
-	gprinc_arg *argp;
+	gprincs_arg *argp;
 	CLIENT *clnt;
 {
 	static gprincs_ret res;
@@ -124,7 +124,7 @@ chpass_principal_1(argp, clnt)
 
 generic_ret *
 chpass_principal3_1(argp, clnt)
-	chpass_arg *argp;
+	chpass3_arg *argp;
 	CLIENT *clnt;
 {
 	static generic_ret res;
@@ -166,7 +166,7 @@ setkey_principal_1(argp, clnt)
 
 generic_ret *
 setkey_principal3_1(argp, clnt)
-	setkey_arg *argp;
+	setkey3_arg *argp;
 	CLIENT *clnt;
 {
 	static generic_ret res;
@@ -194,7 +194,7 @@ chrand_principal_1(argp, clnt)
 
 chrand_ret *
 chrand_principal3_1(argp, clnt)
-	chrand_arg *argp;
+	chrand3_arg *argp;
 	CLIENT *clnt;
 {
 	static chrand_ret res;
@@ -264,7 +264,7 @@ get_policy_1(argp, clnt)
 
 gpols_ret *
 get_pols_1(argp, clnt)
-	gprinc_arg *argp;
+	gpols_arg *argp;
 	CLIENT *clnt;
 {
 	static gpols_ret res;

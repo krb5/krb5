@@ -128,7 +128,6 @@ kadm5_get_policies(void *server_handle,
     gpols_arg	arg;
     gpols_ret	*r;
     kadm5_server_handle_t handle = server_handle;
-    krb5_error_code retval;
 
     CHECK_HANDLE(server_handle);
 

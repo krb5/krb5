@@ -214,7 +214,6 @@ kadm5_get_principal(void *server_handle,
     gprinc_arg	arg;
     gprinc_ret	*r;
     kadm5_server_handle_t handle = server_handle;
-    krb5_error_code retval;
 
     CHECK_HANDLE(server_handle);
 
@@ -259,7 +258,6 @@ kadm5_get_principals(void *server_handle,
     gprincs_arg	arg;
     gprincs_ret	*r;
     kadm5_server_handle_t handle = server_handle;
-    krb5_error_code retval;
 
     CHECK_HANDLE(server_handle);
 
@@ -438,7 +436,6 @@ kadm5_randkey_principal_3(void *server_handle,
 {
     chrand3_arg		arg;
     chrand_ret		*r;
-    krb5_keyblock	new;
     kadm5_server_handle_t handle = server_handle;
     int			i, ret;
 
@@ -490,7 +487,6 @@ kadm5_randkey_principal(void *server_handle,
 {
     chrand_arg		arg;
     chrand_ret		*r;
-    krb5_keyblock	new;
     kadm5_server_handle_t handle = server_handle;
     int			i, ret;
 

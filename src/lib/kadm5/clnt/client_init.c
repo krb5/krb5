@@ -148,11 +148,10 @@ static kadm5_ret_t _kadm5_init_any(char *client_name,
 {
      struct sockaddr_in addr;
      struct hostent *hp;
-     struct servent *srv;
      int fd;
      int i;
 
-     char full_service_name[BUFSIZ], host[MAXHOSTNAMELEN], *ccname_orig;
+     char full_service_name[BUFSIZ], *ccname_orig;
      const char *c_ccname_orig; 
      char *realm;
      krb5_creds	creds;
@@ -161,7 +160,10 @@ static kadm5_ret_t _kadm5_init_any(char *client_name,
      
      OM_uint32 gssstat, minor_stat;
      gss_buffer_desc input_name;
-     gss_name_t gss_target, gss_client;
+     gss_name_t gss_client;
+#ifndef INIT_TEST
+     gss_name_t gss_target;
+#endif
      gss_cred_id_t gss_client_creds = GSS_C_NO_CREDENTIAL;
 
      kadm5_server_handle_t handle;
@@ -430,7 +432,7 @@ static kadm5_ret_t _kadm5_init_any(char *client_name,
      handle->lhandle->clnt = handle->clnt;
 
      /* now that handle->clnt is set, we can check the handle */
-     if (code = _kadm5_check_handle((void *) handle))
+     if ((code = _kadm5_check_handle((void *) handle)))
 	  goto error;
 
      /*
