@@ -10,7 +10,18 @@
 #define IHaveSubdirs
 #define PassCDebugFlags
 
-        SUBDIRS = comerr ss error_tables asn.1 lib kdc admin clients appl
+#ifdef UseComErrInstalled
+COMERRDIR=
+#else
+COMERRDIR=comerr
+#endif
+#ifdef UseSSInstalled
+SSDIR=
+#else
+SSDIR=ss
+#endif
+        SUBDIRS = $(COMERRDIR) $(SSDIR) \
+			error_tables asn.1 lib kdc admin clients appl
   LNINSTALLDIRS = 
 
 MakeSubdirs($(SUBDIRS))
