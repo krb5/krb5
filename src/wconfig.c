@@ -25,7 +25,7 @@
  * The makefile.in files are constructed in such a way that all this
  * program needs to do is uncomment lines beginning ##DOS by removing the
  * first 5 characters of the line.  This will allow lines like:
- * ##DOS!include windows.in to become: !include windows.in
+ * ##DOS!include win-pre.in to become: !include win-pre.in
  *
  * We also turn any line beginning with '@' into a blank line.
  *
@@ -128,7 +128,7 @@ int main(int argc, char *argv[])
 		printf("WCONFIG_FLAGS=%s\n", wflags);
 
 	if (argc > 0)
-		copy_file (*argv, "windows.in");
+		copy_file (*argv, "win-pre.in");
 
 	copy_file("", "-");
     

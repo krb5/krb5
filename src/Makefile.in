@@ -132,7 +132,7 @@ config-windows:: Makefile-windows
 ##DOS##	$(CC) -Fe$@ -Fo$*.obj wconfig.c
 
 ##DOS##MKFDEP= $(WCONFIG_EXE) config\pre.in config\post.in \
-##DOS##	config\windows.in config\win-post.in
+##DOS##	config\win-pre.in config\win-post.in
 ##DOS##WCONFIG= $(WCONFIG_EXE) $(WCONFIG_FLAGS)
 
 WINMAKEFILES=Makefile \
@@ -384,7 +384,7 @@ macfile.list:
 		sed -f config/winexclude.sed >> macfile.list
 
 dos-Makefile:
-	cat config/windows.in Makefile.in config/win-post.in | \
+	cat config/win-pre.in Makefile.in config/win-post.in | \
 		sed -e "s/^##DOS##//" -e "s/^##DOS//" > Makefile
 
 prep-windows: dos-Makefile awk-windows-mac
