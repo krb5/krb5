@@ -1,3 +1,19 @@
+2004-01-30  Jeffrey Altman <jaltman@mit.edu>
+
+   * cc_mslsa.c: As per extensive conversations with Doug Engert we have
+     concluded that MS is not specifying a complete set of domain information
+     when it comes to service tickets other than the initial TGT.  What happens
+     is the client principal domain cannot be derived from the fields they
+     export.  Code has now been added to obtain the domain from the initial
+     TGT and use that when constructing the client principals for all tickets.
+
+     This behavior can be turned off by setting a registry either on a per-user
+     or a system-wide basis:
+
+        {HKCU,HKLM}\Software\MIT\Kerberos5
+            PreserveInitialTicketIdentity = 0x0 (DWORD)
+           
+
 2004-01-06  Jeffrey Altman <jaltman@mit.edu>
 
    * cc_file.c, cc_memory.c:
