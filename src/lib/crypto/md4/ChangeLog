@@ -1,3 +1,7 @@
+Thu Feb  2 03:00:41 1995  John Gilmore  <gnu@cygnus.com>
+
+	* Makefile.in (CFLAGS):  Handle $(srcdir) properly in -I options.
+
 Wed Jan 25 20:08:47 1995  John Gilmore  (gnu at toad.com)
 
 	* Makefile.in (CFLAGS):  Add -I../des to pull in DES header file.

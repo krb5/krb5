@@ -1,4 +1,5 @@
-CFLAGS = $(CCOPTS) $(DEFS) -I../des
+# -I$(srcdir) is needed to pull in $(srcdir)/rsa-md4.h for ./t_mddriver.c.
+CFLAGS = $(CCOPTS) $(DEFS) -I$(srcdir)/../des -I$(srcdir)
 LDFLAGS = -g
 
 all:: $(OBJS) t_mddriver

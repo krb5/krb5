@@ -1,4 +1,5 @@
-CFLAGS = $(CCOPTS) $(DEFS) -Icrc32 -Ides -Imd4 -Imd5
+CFLAGS = $(CCOPTS) $(DEFS) -I$(srcdir)/crc32 -I$(srcdir)/des -I$(srcdir)/md4 \
+	-I$(srcdir)/md5
 LDFLAGS = -g
 
 TST=if test -n "`cat DONE`" ; then
