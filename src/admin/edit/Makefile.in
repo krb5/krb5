@@ -1,3 +1,4 @@
+KRB4 = @KRB4@
 CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
 LDFLAGS = -g
 
@@ -8,6 +9,9 @@ DBMLIB=
 KDBLIB=$(TOPLIBD)/libkdb5.a 
 DEPKDBLIB=$(TOPLIBD)/libkdb5.a 
 
+KDB4LIB=$(KRB4)/lib/libkdb.a
+KRB4LIB=$(KRB4)/lib/libkrb.a $(TOPLIBD)/libdes425.a
+
 all::
 
 KLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(ISODELIB) $(SSLIB) $(COMERRLIB) $(DBMLIB)
@@ -15,10 +19,11 @@ DEPKLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(SSLIB) $(COMERRLIB) $(DB
 
 
 DEPLIBS = $(DEPKDBLIB) $(DEPKLIB)
-LOCAL_LIBRARIES = $(KDBLIB) $(KLIB)
+LOCAL_LIBRARIES = $(KDBLIB) $(KLIB) $(KDB4LIB) $(KRB4LIB)
+LOCALINCLUDE=-I$(SRCTOP)/include/kerberosIV -I$(BUILDTOP)/include/kerberosIV
 
-OBJS= kdb5_edit.o kdb5_ed_ct.o util.o dump.o ss_wrapper.o
-SRCS= $(srcdir)/kdb5_edit.c $(srcdir)/kdb5_ed_ct.c $(srcdir)/util.c $(srcdir)/dump.c $(srcdir)/ss_wrapper.c
+OBJS= kdb5_edit.o kdb5_ed_ct.o util.o dump.o dumpv4.o ss_wrapper.o
+SRCS= $(srcdir)/kdb5_edit.c $(srcdir)/kdb5_ed_ct.c $(srcdir)/util.c $(srcdir)/dump.c $(srcdir)/ss_wrapper.c $(srcdir)/dumpv4.c
 
 all:: kdb5_edit
 

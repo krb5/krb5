@@ -1,3 +1,14 @@
+Wed Nov 16 01:03:42 1994  Mark Eichin  (eichin@cygnus.com)
+
+	* dumpv4.c: new file. New command dump_v4db which creates a v4
+	slave dump out of a v5 database, leaving out any keys which aren't
+	using v4 salt, and any keys that aren't for the current
+	realm. Reencrypts using v4 master key, synthesizes arbitrary
+	master key version number.
+	* configure.in: use WITH_KRB4 for dump support.
+	* kdb5_ed_ct.ct: add new dump_v4 command.
+	* Makefile.in: link in dumpv4.
+
 Fri Oct 14 23:31:49 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* dump.c (load_db): When scanning a database entry, read
