@@ -21,7 +21,7 @@ if test -z "$ac_sysv_termio"; then
 fi
 fi
 AC_HEADER_TIME
-AC_CHECK_HEADERS(string.h arpa/nameser.h utmp.h sys/time.h sys/tty.h sac.h sys/ptyvar.h sys/filio.h sys/stream.h)
+AC_CHECK_HEADERS(string.h arpa/nameser.h utmp.h sys/time.h sys/tty.h sac.h sys/ptyvar.h sys/filio.h sys/stream.h sys/utsname.h)
 AC_CHECK_FUNCS(gettosbyname)
 dnl Make our operating system-specific security checks and definitions for
 dnl login.

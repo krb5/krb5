@@ -1,3 +1,10 @@
+1998-11-14  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* configure.in: Add check for <sys/utsname.h>.
+
+	* utility.c (putf): Add support for %s, %m, %r, %v using
+		information from the uname() system call.
+
 1998-11-13  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* Makefile.in: Set the myfulldir and mydir variables (which are
