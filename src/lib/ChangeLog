@@ -1,3 +1,10 @@
+2000-05-15      Jeffrey Altman          <jaltman@columbia.edu>
+
+        * krb5_32.def -- Added exports for new public functions
+
+               krb5_appdefault_string
+               krb5_appdefault_boolean
+
 2000-05-04  Danilo Almeida  <dalmeida@mit.edu>
 
 	* krb5_32.def: Reflect something closer to the reality of

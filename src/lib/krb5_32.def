@@ -221,6 +221,8 @@ EXPORTS
 ;
 ; Added for 1.2:
 	krb5_decode_ticket
+        krb5_appdefault_string
+        krb5_appdefault_boolean
 ;
 ; Temporary exports (DO NOT USE)
 	des_ecb_encrypt
