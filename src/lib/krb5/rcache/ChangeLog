@@ -1,3 +1,11 @@
+2001-06-20  Danilo Almeida  <dalmeida@mit.edu>
+
+	* rc_dfl.c, rc_io.c: More compliance with coding standards: use
+	ANSI function declarations, use curly braces to fix up #ifdef
+	reindenting under Emacs, reindent code, strip trailing whitespace,
+	wrap lines, fix commans.  Not finished: fix indenting of curly
+	braces in control structures.
+
 2001-01-23  Tom Yu  <tlyu@mit.edu>
 
 	* rc_io.c (getdir): Subtract one from dirlen, since sizeof

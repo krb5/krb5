@@ -19,7 +19,7 @@
 
 #define KRB5_RC_VNO	0x0501		/* krb5, rcache v 1 */
 #define NEED_SOCKETS
-#define NEED_LOWLEVEL_IO         
+#define NEED_LOWLEVEL_IO
 
 #include <krb5.h>
 #include <stdio.h> /* for P_tmpdir */
@@ -36,7 +36,7 @@
 #include <netinet/in.h>
 #endif
 #else
- #error find some way to use net-byte-order file version numbers.
+#error find some way to use net-byte-order file version numbers.
 #endif
 
 #ifndef HAVE_ERRNO
@@ -55,195 +55,202 @@ static char *dir;
 
 #define GETDIR do { if (!dirlen) getdir(); } while(0)
 
-static void getdir()
+static void
+getdir()
 {
-   if (!(dir = getenv("KRB5RCACHEDIR")))
+    if (!(dir = getenv("KRB5RCACHEDIR"))) {
 #if defined(_MSDOS) || defined(_WIN32)
-     if (!(dir = getenv("TEMP")))
-	 if (!(dir = getenv("TMP")))
-	     dir = "C:";
+	if (!(dir = getenv("TEMP")))
+	    if (!(dir = getenv("TMP")))
+		dir = "C:";
 #else
-     if (!(dir = getenv("TMPDIR")))
+	if (!(dir = getenv("TMPDIR"))) {
 #ifdef RCTMPDIR
-       dir = RCTMPDIR;
+	    dir = RCTMPDIR;
 #else
-       dir = "/tmp";
+	    dir = "/tmp";
 #endif
+	}
 #endif
-   dirlen = strlen(dir) + sizeof(PATH_SEPARATOR) - 1;
+    }
+    dirlen = strlen(dir) + sizeof(PATH_SEPARATOR) - 1;
 }
 
-krb5_error_code krb5_rc_io_creat (context, d, fn)
-    krb5_context context;
-    krb5_rc_iostuff *d;
-    char **fn;
+krb5_error_code
+krb5_rc_io_creat(krb5_context context, krb5_rc_iostuff *d, char **fn)
 {
- char *c;
- krb5_int16 rc_vno = htons(KRB5_RC_VNO);
- krb5_error_code retval;
+    char *c;
+    krb5_int16 rc_vno = htons(KRB5_RC_VNO);
+    krb5_error_code retval;
 
- GETDIR;
- if (fn && *fn)
-  {
-   if (!(d->fn = malloc(strlen(*fn) + dirlen + 1)))
-     return KRB5_RC_IO_MALLOC;
-   (void) strcpy(d->fn,dir);
-   (void) strcat(d->fn,PATH_SEPARATOR);
-   (void) strcat(d->fn,*fn);
-   d->fd = THREEPARAMOPEN(d->fn,O_WRONLY | O_CREAT | O_TRUNC | O_EXCL | O_BINARY,0600);
-  }
- else
-  {
-      /* %d is max 11 digits (-, 10 digits of 32-bit number)
+    GETDIR;
+    if (fn && *fn)
+    {
+	if (!(d->fn = malloc(strlen(*fn) + dirlen + 1)))
+	    return KRB5_RC_IO_MALLOC;
+	(void) strcpy(d->fn, dir);
+	(void) strcat(d->fn, PATH_SEPARATOR);
+	(void) strcat(d->fn, *fn);
+	d->fd = THREEPARAMOPEN(d->fn, O_WRONLY | O_CREAT | O_TRUNC | O_EXCL |
+			       O_BINARY, 0600);
+    }
+    else
+    {
+	/* %d is max 11 digits (-, 10 digits of 32-bit number)
 	 * 11 + /krb5_RC + aaa = 24, +6 for slop */
-   if (!(d->fn = malloc(30 + dirlen)))
-     return KRB5_RC_IO_MALLOC;
-   if (fn)
-     if (!(*fn = malloc(35)))
-      { FREE(d->fn); return KRB5_RC_IO_MALLOC; }
-   (void) sprintf(d->fn,"%s%skrb5_RC%d",dir,PATH_SEPARATOR, (int) UNIQUE);
-   c = d->fn + strlen(d->fn);
-   (void) strcpy(c,"aaa");
-   while ((d->fd = THREEPARAMOPEN(d->fn,O_WRONLY|O_CREAT|O_TRUNC|O_EXCL|O_BINARY,0600)) == -1)
-    {
-     if ((c[2]++) == 'z')
-      {
-       c[2] = 'a';
-       if ((c[1]++) == 'z')
+	if (!(d->fn = malloc(30 + dirlen)))
+	    return KRB5_RC_IO_MALLOC;
+	if (fn)
+	    if (!(*fn = malloc(35))) {
+		FREE(d->fn);
+		return KRB5_RC_IO_MALLOC;
+	    }
+	(void) sprintf(d->fn, "%s%skrb5_RC%d", dir, PATH_SEPARATOR,
+		       (int) UNIQUE);
+	c = d->fn + strlen(d->fn);
+	(void) strcpy(c, "aaa");
+	while ((d->fd = THREEPARAMOPEN(d->fn, O_WRONLY | O_CREAT | O_TRUNC |
+				       O_EXCL | O_BINARY, 0600)) == -1)
 	{
-         c[1] = 'a';
-         if ((c[0]++) == 'z')
-           break; /* sigh */
-        }
-      }
+	    if ((c[2]++) == 'z')
+	    {
+		c[2] = 'a';
+		if ((c[1]++) == 'z')
+		{
+		    c[1] = 'a';
+		    if ((c[0]++) == 'z')
+			break; /* sigh */
+		}
+	    }
+	}
+	if (fn)
+	    (void) strcpy(*fn, d->fn + dirlen);
     }
-   if (fn)
-     (void) strcpy(*fn,d->fn + dirlen);
-  }
- if (d->fd == -1)
+    if (d->fd == -1)
     {
-   switch(errno)
-    {
-	case EFBIG: 
-#ifdef EDQUOT
-	case EDQUOT:
-#endif
-	case ENOSPC: 
-	    retval = KRB5_RC_IO_SPACE; 
-	    goto fail;
-	case EIO: 
-	    retval = KRB5_RC_IO_IO; goto fail;
-
-	case EPERM: 
-	case EACCES: 
-	case EROFS: 
-	case EEXIST: 
-	    retval = KRB5_RC_IO_PERM; goto no_unlink;
-
-	default: 
-	    retval = KRB5_RC_IO_UNKNOWN; goto fail;
-    }
-    }
-    if ((retval = krb5_rc_io_write(context, d, (krb5_pointer)&rc_vno, sizeof(rc_vno))) ||
-	(retval = krb5_rc_io_sync(context, d)))
-    {
-    fail:
-     (void) unlink(d->fn);
-    no_unlink:
-     FREE(d->fn);
-	d->fn = NULL;
-     (void) close(d->fd);
-     return retval;
- }
- return 0;
-}
-
-krb5_error_code krb5_rc_io_open (context, d, fn)
-    krb5_context context;
-    krb5_rc_iostuff *d;
-    char *fn;
-{
- krb5_int16 rc_vno;
- krb5_error_code retval;
-#ifndef NO_USERID
- struct stat statb;
-#endif
-
- GETDIR;
- if (!(d->fn = malloc(strlen(fn) + dirlen + 1)))
-   return KRB5_RC_IO_MALLOC;
- (void) strcpy(d->fn,dir);
- (void) strcat(d->fn,PATH_SEPARATOR);
- (void) strcat(d->fn,fn);
-
-#ifdef NO_USERID
- d->fd = THREEPARAMOPEN(d->fn,O_RDWR | O_BINARY,0600);
-#else
- if ((d->fd = stat(d->fn, &statb)) != -1) {
-     uid_t me;
-
-     me = geteuid();
-     /* must be owned by this user, to prevent some security problems with
-	 * other users modifying replay cache stufff */
-     if ((statb.st_uid != me) || ((statb.st_mode & S_IFMT) != S_IFREG)) {
-	 FREE(d->fn);
-	 return KRB5_RC_IO_PERM;
-     }
-     d->fd = THREEPARAMOPEN(d->fn,O_RDWR | O_BINARY,0600);
- }
-#endif
- if (d->fd == -1) {
-   switch(errno)
-    {
-	case EFBIG: 
+	switch(errno)
+	{
+	case EFBIG:
 #ifdef EDQUOT
 	case EDQUOT:
 #endif
 	case ENOSPC:
-	    retval = KRB5_RC_IO_SPACE; 
+	    retval = KRB5_RC_IO_SPACE;
 	    goto fail;
 
-	case EIO: 
-	    retval = KRB5_RC_IO_IO; 
+	case EIO:
+	    retval = KRB5_RC_IO_IO;
 	    goto fail;
 
-	case EPERM: 
+	case EPERM:
 	case EACCES:
-	case EROFS: 
-	    retval = KRB5_RC_IO_PERM; 
+	case EROFS:
+	case EEXIST:
+	    retval = KRB5_RC_IO_PERM;
+	    goto no_unlink;
+
+	default:
+	    retval = KRB5_RC_IO_UNKNOWN;
+	    goto fail;
+	}
+    }
+    if ((retval = krb5_rc_io_write(context, d, (krb5_pointer)&rc_vno,
+				   sizeof(rc_vno))) ||
+	(retval = krb5_rc_io_sync(context, d)))
+    {
+    fail:
+	(void) unlink(d->fn);
+    no_unlink:
+	FREE(d->fn);
+	d->fn = NULL;
+	(void) close(d->fd);
+	return retval;
+    }
+    return 0;
+}
+
+krb5_error_code
+krb5_rc_io_open(krb5_context context, krb5_rc_iostuff *d, char *fn)
+{
+    krb5_int16 rc_vno;
+    krb5_error_code retval;
+#ifndef NO_USERID
+    struct stat statb;
+#endif
+
+    GETDIR;
+    if (!(d->fn = malloc(strlen(fn) + dirlen + 1)))
+	return KRB5_RC_IO_MALLOC;
+    (void) strcpy(d->fn, dir);
+    (void) strcat(d->fn, PATH_SEPARATOR);
+    (void) strcat(d->fn, fn);
+
+#ifdef NO_USERID
+    d->fd = THREEPARAMOPEN(d->fn, O_RDWR | O_BINARY, 0600);
+#else
+    if ((d->fd = stat(d->fn, &statb)) != -1) {
+	uid_t me;
+
+	me = geteuid();
+	/* must be owned by this user, to prevent some security problems with
+	 * other users modifying replay cache stufff */
+	if ((statb.st_uid != me) || ((statb.st_mode & S_IFMT) != S_IFREG)) {
+	    FREE(d->fn);
+	    return KRB5_RC_IO_PERM;
+	}
+	d->fd = THREEPARAMOPEN(d->fn, O_RDWR | O_BINARY, 0600);
+    }
+#endif
+    if (d->fd == -1) {
+	switch(errno)
+	{
+	case EFBIG:
+#ifdef EDQUOT
+	case EDQUOT:
+#endif
+	case ENOSPC:
+	    retval = KRB5_RC_IO_SPACE;
 	    goto fail;
 
-	    default: 
-	    retval = KRB5_RC_IO_UNKNOWN; 
+	case EIO:
+	    retval = KRB5_RC_IO_IO;
 	    goto fail;
+
+	case EPERM:
+	case EACCES:
+	case EROFS:
+	    retval = KRB5_RC_IO_PERM;
+	    goto fail;
+
+	default:
+	    retval = KRB5_RC_IO_UNKNOWN;
+	    goto fail;
+	}
     }
- }
     if ((retval = krb5_rc_io_read(context, d, (krb5_pointer) &rc_vno,
 				  sizeof(rc_vno))))
 	goto unlk;
 
 
-    if (ntohs(rc_vno) != KRB5_RC_VNO) 
+    if (ntohs(rc_vno) != KRB5_RC_VNO)
     {
 	retval = KRB5_RCACHE_BADVNO;
     unlk:
 	unlink(d->fn);
     fail:
-     (void) close(d->fd);
-     FREE(d->fn); 
+	(void) close(d->fd);
+	FREE(d->fn);
 	d->fn = NULL;
-     return retval;
- }
- return 0;
+	return retval;
+    }
+    return 0;
 }
 
-krb5_error_code krb5_rc_io_move (context, new, old)
-    krb5_context context;
-    krb5_rc_iostuff *new;
-    krb5_rc_iostuff *old;
+krb5_error_code
+krb5_rc_io_move(krb5_context context, krb5_rc_iostuff *new,
+		krb5_rc_iostuff *old)
 {
     char *fn = NULL;
-
 #if defined(_MSDOS) || defined(_WIN32)
     /*
      * Work around provided by Tom Sanfilippo to work around poor
@@ -254,7 +261,7 @@ krb5_error_code krb5_rc_io_move (context, new, old)
     close(new->fd);
     unlink(new->fn);
     close(old->fd);
-    if (rename(old->fn,new->fn) == -1) /* MUST be atomic! */
+    if (rename(old->fn, new->fn) == -1) /* MUST be atomic! */
 	return KRB5_RC_IO_UNKNOWN;
     fn = new->fn;
     new->fn = NULL;		/* avoid clobbering */
@@ -262,7 +269,7 @@ krb5_error_code krb5_rc_io_move (context, new, old)
     krb5_rc_io_open(context, new, fn);
     free(fn);
 #else
-    if (rename(old->fn,new->fn) == -1) /* MUST be atomic! */
+    if (rename(old->fn, new->fn) == -1) /* MUST be atomic! */
 	return KRB5_RC_IO_UNKNOWN;
     fn = new->fn;
     new->fn = NULL;		/* avoid clobbering */
@@ -277,118 +284,109 @@ krb5_error_code krb5_rc_io_move (context, new, old)
     return 0;
 }
 
-krb5_error_code krb5_rc_io_write (context, d, buf, num)
-    krb5_context context;
-    krb5_rc_iostuff *d;
-    krb5_pointer buf;
-    unsigned int num;
+krb5_error_code
+krb5_rc_io_write(krb5_context context, krb5_rc_iostuff *d, krb5_pointer buf,
+		 unsigned int num)
 {
- if (write(d->fd,(char *) buf,num) == -1)
-   switch(errno)
-    {
-     case EBADF: return KRB5_RC_IO_UNKNOWN; 
-     case EFBIG: return KRB5_RC_IO_SPACE; 
+    if (write(d->fd, (char *) buf, num) == -1)
+	switch(errno)
+	{
+	case EBADF: return KRB5_RC_IO_UNKNOWN;
+	case EFBIG: return KRB5_RC_IO_SPACE;
 #ifdef EDQUOT
-     case EDQUOT: return KRB5_RC_IO_SPACE; 
+	case EDQUOT: return KRB5_RC_IO_SPACE;
 #endif
-     case ENOSPC: return KRB5_RC_IO_SPACE; 
-     case EIO: return KRB5_RC_IO_IO; 
-     default: return KRB5_RC_IO_UNKNOWN; 
-    }
- return 0;
+	case ENOSPC: return KRB5_RC_IO_SPACE;
+	case EIO: return KRB5_RC_IO_IO;
+	default: return KRB5_RC_IO_UNKNOWN;
+	}
+    return 0;
 }
 
-krb5_error_code krb5_rc_io_sync (context, d)
-    krb5_context context;
-    krb5_rc_iostuff *d;
+krb5_error_code
+krb5_rc_io_sync(
+    krb5_context context,
+    krb5_rc_iostuff *d
+    )
 {
 #if !defined(MSDOS_FILESYSTEM) && !defined(macintosh)
     if (fsync(d->fd) == -1) {
-      switch(errno)
-      {
-      case EBADF: return KRB5_RC_IO_UNKNOWN; 
-      case EIO: return KRB5_RC_IO_IO; 
-      default: return KRB5_RC_IO_UNKNOWN; 
-      }
+	switch(errno)
+	{
+	case EBADF: return KRB5_RC_IO_UNKNOWN;
+	case EIO: return KRB5_RC_IO_IO;
+	default: return KRB5_RC_IO_UNKNOWN;
+	}
     }
 #endif
     return 0;
 }
 
-krb5_error_code krb5_rc_io_read (context, d, buf, num)
-    krb5_context context;
-    krb5_rc_iostuff *d;
-    krb5_pointer buf;
-    unsigned int num;
+krb5_error_code
+krb5_rc_io_read(krb5_context context, krb5_rc_iostuff *d, krb5_pointer buf,
+		unsigned int num)
 {
- int count;
- if ((count = read(d->fd,(char *) buf,num)) == -1)
-   switch(errno)
-    {
-     case EBADF: return KRB5_RC_IO_UNKNOWN; 
-     case EIO: return KRB5_RC_IO_IO; 
-     default: return KRB5_RC_IO_UNKNOWN; 
-    }
- if (count == 0)
-     return KRB5_RC_IO_EOF;
- return 0;
+    int count;
+    if ((count = read(d->fd, (char *) buf, num)) == -1)
+	switch(errno)
+	{
+	case EBADF: return KRB5_RC_IO_UNKNOWN;
+	case EIO: return KRB5_RC_IO_IO;
+	default: return KRB5_RC_IO_UNKNOWN;
+	}
+    if (count == 0)
+	return KRB5_RC_IO_EOF;
+    return 0;
 }
 
-krb5_error_code krb5_rc_io_close (context, d)
-    krb5_context context;
-    krb5_rc_iostuff *d;
+krb5_error_code
+krb5_rc_io_close(krb5_context context, krb5_rc_iostuff *d)
 {
- if (d->fn != NULL)
-   FREE(d->fn);
- d->fn = NULL;
- if (close(d->fd) == -1) /* can't happen */
-   return KRB5_RC_IO_UNKNOWN;
- return 0;
+    if (d->fn != NULL)
+	FREE(d->fn);
+    d->fn = NULL;
+    if (close(d->fd) == -1) /* can't happen */
+	return KRB5_RC_IO_UNKNOWN;
+    return 0;
 }
 
-krb5_error_code krb5_rc_io_destroy (context, d)
-    krb5_context context;
-    krb5_rc_iostuff *d;
+krb5_error_code
+krb5_rc_io_destroy(krb5_context context, krb5_rc_iostuff *d)
 {
- if (unlink(d->fn) == -1)
-   switch(errno)
-    {
-     case EBADF: return KRB5_RC_IO_UNKNOWN; 
-     case EIO: return KRB5_RC_IO_IO; 
-     case EPERM: return KRB5_RC_IO_PERM; 
-     case EBUSY: return KRB5_RC_IO_PERM; 
-     case EROFS: return KRB5_RC_IO_PERM; 
-     default: return KRB5_RC_IO_UNKNOWN; 
-    }
- return 0;
+    if (unlink(d->fn) == -1)
+	switch(errno)
+	{
+	case EBADF: return KRB5_RC_IO_UNKNOWN;
+	case EIO: return KRB5_RC_IO_IO;
+	case EPERM: return KRB5_RC_IO_PERM;
+	case EBUSY: return KRB5_RC_IO_PERM;
+	case EROFS: return KRB5_RC_IO_PERM;
+	default: return KRB5_RC_IO_UNKNOWN;
+	}
+    return 0;
 }
 
-krb5_error_code krb5_rc_io_mark (context, d)
-    krb5_context context;
-    krb5_rc_iostuff *d;
+krb5_error_code
+krb5_rc_io_mark(krb5_context context, krb5_rc_iostuff *d)
 {
- d->mark = lseek(d->fd,(off_t) 0,SEEK_CUR); /* can't fail */
- return 0;
+    d->mark = lseek(d->fd, (off_t) 0, SEEK_CUR); /* can't fail */
+    return 0;
 }
 
-krb5_error_code krb5_rc_io_unmark (context, d)
-    krb5_context context;
-    krb5_rc_iostuff *d;
+krb5_error_code
+krb5_rc_io_unmark(krb5_context context, krb5_rc_iostuff *d)
 {
- (void) lseek(d->fd,d->mark,SEEK_SET); /* if it fails, tough luck */
- return 0;
+    (void) lseek(d->fd, d->mark, SEEK_SET); /* if it fails, tough luck */
+    return 0;
 }
 
 long
-krb5_rc_io_size (context, d)
-    krb5_context context;
-    krb5_rc_iostuff *d;
+krb5_rc_io_size(krb5_context context, krb5_rc_iostuff *d)
 {
     struct stat statb;
-    
-    if (fstat (d->fd, &statb) == 0)
+
+    if (fstat(d->fd, &statb) == 0)
 	return statb.st_size;
     else
 	return 0;
 }
-    
