@@ -1,5 +1,7 @@
 2001-10-05  Ken Raeburn  <raeburn@mit.edu>
 
+	* com_err.h (KRB5_EXPORTVAR): Don't define.
+
 	* com_err.c, com_err.h, compile_et.c, error_message.c,
 	error_table.h, et_c.awk, et_c.perl, et_h.awk, et_h.awk, et_h.perl,
 	etN-ame.c, init_et.c, internal.h, vfprintf.c: Drop NEAR/FAR

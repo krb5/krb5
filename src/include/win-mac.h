@@ -36,7 +36,6 @@
 #ifndef KRB5_CALLCONV
 #  define KRB5_CALLCONV __stdcall
 #  define KRB5_CALLCONV_C __cdecl
-#  define KRB5_EXPORTVAR
 #endif /* !KRB5_CALLCONV */
 
 #ifndef KRB5_SYSTYPES__

@@ -19,11 +19,6 @@
 #ifndef KRB5_CALLCONV
 #define KRB5_CALLCONV
 #define KRB5_CALLCONV_C
-/* We don't use this, but since we're using the Kerberos ones, we
-   need to either provide all the ones the Kerberos headers
-   will use, or not define KRB5_CALLCONV, since that's the only one
-   they test.  */
-#define KRB5_EXPORTVAR
 #endif
 
 #include <stdarg.h>

@@ -7,6 +7,8 @@
 	GSS_C_NT_STRING_UID_NAME, GSS_C_NT_HOSTBASED_SERVICE_X,
 	GSS_C_NT_HOSTBASED_SERVICE, GSS_C_NT_ANONYMOUS,
 	GSS_C_NT_EXPORT_NAME): Use GSS_DLLIMP.
+	(KRB5_EXPORTVAR): Don't define.
+
 	* gssapi_generic.h (gss_nt_user_name, gss_nt_machine_uid_name,
 	gss_nt_string_uid_name, gss_nt_service_name): Use GSS_DLLIMP.
 	* gssapi_generic.c (gss_nt_user_name, gss_nt_machine_uid_name,

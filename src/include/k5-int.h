@@ -159,7 +159,6 @@ typedef unsigned char	u_char;
 #ifndef KRB5_CALLCONV
 #define KRB5_CALLCONV
 #define KRB5_CALLCONV_C
-#define KRB5_EXPORTVAR
 #endif
 #ifndef O_BINARY
 #define O_BINARY 0

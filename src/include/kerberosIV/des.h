@@ -49,7 +49,6 @@
 #ifndef KRB5_CALLCONV
 #define KRB5_CALLCONV
 #define KRB5_CALLCONV_C
-#define KRB5_EXPORTVAR
 #endif
 
 #ifndef KRB4_32

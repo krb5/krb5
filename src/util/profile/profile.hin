@@ -12,7 +12,6 @@
 #ifndef KRB5_CALLCONV
 #define KRB5_CALLCONV
 #define KRB5_CALLCONV_C
-#define KRB5_EXPORTVAR
 #endif
 
 typedef struct _profile_t *profile_t;

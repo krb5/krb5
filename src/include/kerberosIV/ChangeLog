@@ -1,3 +1,7 @@
+2001-10-05  Ken Raeburn  <raeburn@mit.edu>
+
+	* des.h (KRB5_EXPORTVAR): Don't define.
+
 2001-10-03  Ken Raeburn  <raeburn@mit.edu>
 
 	* des.h, krb.h: Don't use or define KRB5_DLLIMP, GSS_DLLIMP.  Drop
