@@ -1,3 +1,11 @@
+Thu Feb 02 22:59:41 1995  Chris Provenzano (proven@mit.edu)
+
+	* krb5.tex Documented change of krb5_enctype to krb5_enctypes
+		to krb5_send_tgs().
+
+	* krb5.tex Documented added krb5_keytype arg to (*keyproc)() arg
+		for krb5_rd_req(), krb5_rd_req_decoded(), and krb5_recvauth().
+
 Fri Jan 27 22:15:23 1995  Chris Provenzano (proven@mit.edu)
 
 	* keytab.tex Documented added krb5_keytab argunment to 

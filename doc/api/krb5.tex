@@ -103,7 +103,7 @@ Returns errors from encryption routines, system errors
 \begin{funcdecl}{krb5_send_tgs}{krb5_error_code}{\funcin}
 \funcarg{const krb5_flags}{options}
 \funcarg{const krb5_ticket_times *}{timestruct}
-\funcarg{const krb5_enctype}{etype}
+\funcarg{const krb5_enctype *}{etypes}
 \funcarg{const krb5_cksumtype}{sumtype}
 \funcarg{krb5_const_principal}{sname}
 \funcarg{krb5_address * const *}{addrs}
@@ -122,7 +122,7 @@ Sends a request to the TGS and waits for a response.
 \funcparam{options} is used for the options in the KRB_TGS_REQ.
 \funcparam{timestruct} values are used for from, till, and rtime in the
 KRB_TGS_REQ.
-\funcparam{etype} is used for etype in the KRB_TGS_REQ.
+\funcparam{etypes} is a list of etypes used in the KRB_TGS_REQ.
 \funcparam{sumtype} is used for the checksum in the AP_REQ in the KRB_TGS_REQ.
 \funcparam{sname} is used for sname in the KRB_TGS_REQ.
 \funcparam{addrs}, if non-NULL, is used for addresses in the KRB_TGS_REQ.
@@ -514,6 +514,7 @@ allocated and should be freed by the caller with
 	\funcarg{krb5_pointer}{keyprocarg}
 	\funcarg{krb5_principal}{principal}
 	\funcarg{krb5_kvno}{vno}
+	\funcarg{krb5_keytype}{keytype}
 	\funcarg{krb5_keyblock **}{key}
 \funcendfuncarg
 \funcarg{krb5_pointer}{keyprocarg}
@@ -602,6 +603,7 @@ Returns system errors, encryption errors, replay errors.
 	\funcarg{krb5_pointer}{keyprocarg}
 	\funcarg{krb5_principal}{principal}
 	\funcarg{krb5_kvno}{vno}
+	\funcarg{krb5_keytype}{keytype}
 	\funcarg{krb5_keyblock **}{key}
 \funcendfuncarg
 \funcarg{krb5_pointer}{keyprocarg}
@@ -788,6 +790,7 @@ from the server will be placed in it.  This error should be freed with
 	\funcarg{krb5_pointer}{keyprocarg}
 	\funcarg{krb5_principal}{principal}
 	\funcarg{krb5_kvno}{vno}
+	\funcarg{krb5_keytype}{keytype}
 	\funcarg{krb5_keyblock **}{key}
 \funcendfuncarg
 \funcarg{krb5_pointer}{keyprocarg}
