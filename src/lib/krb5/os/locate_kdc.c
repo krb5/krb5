@@ -17,12 +17,15 @@ static char rcsid_locate_kdc_c[] =
 
 #include <krb5/copyright.h>
 #include <krb5/krb5.h>
+#include <krb5/osconf.h>
 
 #include <krb5/ext-proto.h>
 
 #include <sys/types.h>
 #include <sys/socket.h>
+#ifdef KRB5_USE_INET
 #include <netinet/in.h>
+#endif
 #include <netdb.h>
 
 #define KRB5_UDP_PORT	8973	/* XXX */
@@ -44,9 +47,8 @@ int krb5_locate_kdc(realm, addr_pp)
     
     hostlist = 0;
     
-    code = krb5_get_krbhst (realm, &hostlist);
-    if (code != 0)
-	return 0;		/* XXX losing error code */
+    if (code = krb5_get_krbhst (realm, &hostlist))
+	return(code);
 
     for (i=0; hostlist[i]; i++)
 	;
@@ -61,6 +63,7 @@ int krb5_locate_kdc(realm, addr_pp)
 	hp = gethostbyname(hostlist[i]);
 	if (hp != 0) {
 	    switch (hp->h_addrtype) {
+#ifdef KRB5_USE_INET
 	    case AF_INET:
 		for (j=0; hp->h_addr_list[j]; j++) {
 		    sin_p = (struct sockaddr_in *) &addr_p[out++];
@@ -78,6 +81,7 @@ int krb5_locate_kdc(realm, addr_pp)
 		    }
 		}
 		break;
+#endif
 	    default:
 		break;
 	    }
