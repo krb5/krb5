@@ -1,3 +1,12 @@
+2004-01-06  Jeffrey Altman <jaltman@mit.edu>
+
+   * cc_file.c, cc_memory.c:
+     Add stub implementations for unimplemented krb5_cc_remove_cred()
+     Returns KRB5_CC_NOSUPP
+
+   * cc_mslsa.c:
+     Add implementation for krb5_cc_remove_cred().  Returns KRB5_CC_READONLY.
+
 2003-12-18  Jeffrey Altman <jaltman@mit.edu>
 
    * cc_retr.c:  Extract the test to determine if a credential matches
