@@ -1,3 +1,9 @@
+Thu Mar 23 20:22:57 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* logutil.c (update_wtmp): initialize ut from ent the way the V4
+	code did. Appears to handle SunOS case (when nearly all of the
+	ifdef's are off) correctly now.
+
 Tue Mar 14 16:08:08 1995    <tytso@rsx-11.mit.edu>
 
 	* Makefile.in, configure.in: Use the libdes425 library so that the

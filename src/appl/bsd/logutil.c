@@ -164,6 +164,22 @@ void update_wtmp(ent)
 
     if ((fd = open(WTMP_FILE, O_WRONLY|O_APPEND, 0)) >= 0) {
 	if (!fstat(fd, &statb)) {
+	  (void)memset((char *)&ut, 0, sizeof(ut));
+	  (void)strncpy(ut.ut_line, ent->ut_line, sizeof(ut.ut_line));
+	  (void)strncpy(ut.ut_name, ent->ut_name, sizeof(ut.ut_name));
+#ifndef NO_UT_HOST
+	  (void)strncpy(ut.ut_host, ent->ut_host, sizeof(ut.ut_host));
+#endif
+	  (void)time(&ut.ut_time);
+#ifdef HAVE_GETUTENT
+	  if (*name) {
+	    if (!ut.ut_pid)
+	      ut.ut_pid = getpid();
+	    ut.ut_type = USER_PROCESS;
+	  } else {
+	    ut.ut_type = EMPTY;
+	  }
+#endif
 	    if (write(fd, (char *)&ut, sizeof(struct utmp)) !=
 		sizeof(struct utmp))
 	      (void)ftruncate(fd, statb.st_size);
