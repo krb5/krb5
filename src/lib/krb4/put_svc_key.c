@@ -23,6 +23,7 @@
  */
 
 #include "krb.h"
+#include "krb4int.h"
 
 #include <string.h>
 #include <stdio.h>

@@ -26,6 +26,7 @@
 
 #include "krb.h"
 #include "k5-int.h"
+#include "krb4int.h"
 
 #include <stdio.h>
 #include <string.h>

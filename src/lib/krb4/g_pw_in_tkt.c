@@ -8,6 +8,7 @@
  */
 
 #include "mit-copyright.h"
+#include <krb5.h>
 #include "krb.h"
 #include "krb_err.h"
 #include "prot.h"
@@ -61,7 +62,7 @@ passwd_to_key(user,instance,realm,passwd,key)
     if (passwd)
         string_to_key(passwd, key);
     else {
-        des_read_password(key, "Password: ", 0);
+        des_read_password((des_cblock *)key, "Password: ", 0);
     }
 #endif /* NOENCRYPTION */
 #endif /* unix */

@@ -11,6 +11,7 @@
 #include "mit-copyright.h"
 #include <stdio.h>
 #include "krb.h"
+#include "krb4int.h"
 
 /*
  * This routine takes a ticket and associated info and calls

@@ -1,3 +1,15 @@
+2001-06-18  Ezra Peisach  <epeisach@mit.edu>
+
+	* g_pw_in_tkt.c: Include krb5.h so that des_read_password()
+	prototype is present in des.h. Cast argument to des_read_password.
+
+	* getst.c, put_svc_key.c, rd_svc_key.c, save_creds.c, tf_util.c:
+	Include krb4int.h for prototypes.
+
+	* krb4int.h: New file containing private prototypes for krb4
+	functions not used outside the library. Contains getst() and
+	tf_save_cred().
+
 2001-06-11  Ezra Peisach  <epeisach@mit.edu>
 
 	* sendauth.c (krb_sendauth): Add KRB5_DLLIMP/KRB5_CALLCONV definitions
