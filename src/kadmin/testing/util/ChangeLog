@@ -1,3 +1,8 @@
+Thu Sep 26 11:31:57 1996  Ezra Peisach  (epeisach@kangaroo.mit.edu)
+
+	* Makefile.in: Link with -ltcl -lm. Order the Makefile so programs
+		are built.
+
 Tue Sep 24 13:29:14 1996  Barry Jaspan  <bjaspan@mit.edu>
 
 	* create Makefile.in and configure.in

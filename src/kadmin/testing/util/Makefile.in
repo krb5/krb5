@@ -1,9 +1,9 @@
 # XXX Buzz!
 TCLINC	= /mit/gnu/include
+#TCLLIB=-ltcl7.5 -lm
+TCLLIB=-L/mit/gnu/lib -ltcl -lm
 
 CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE) -I$(TCLINC)
-
-all:: $(CLNTPROG) $(SRVPROG)
 
 SRCS	=	tcl_ovsec_kadm.c tcl_kadm5.c test.c
 OBJS	=	tcl_ovsec_kadm.o tcl_kadm5.o test.o
@@ -11,11 +11,14 @@ OBJS	=	tcl_ovsec_kadm.o tcl_kadm5.o test.o
 CLNTPROG=	ovsec_kadm_clnt_tcl
 SRVPROG	=	ovsec_kadm_srv_tcl
 
+
+all:: $(CLNTPROG) $(SRVPROG)
+
 $(SRVPROG): $(OBJS) $(SRVDEPLIBS)
-	$(CC) $(LDFLAGS) $(LDARGS) -o $(SRVPROG) $(OBJS) $(SRVLIBS)
+	$(CC) $(LDFLAGS) $(LDARGS) -o $(SRVPROG) $(OBJS) $(SRVLIBS) $(TCLLIB)
 
 $(CLNTPROG): $(OBJS) $(CLNTDEPLIBS)
-	$(CC) $(LDFLAGS) $(LDARGS) -o $(CLNTPROG) $(OBJS) $(CLNTLIBS)
+	$(CC) $(LDFLAGS) $(LDARGS) -o $(CLNTPROG) $(OBJS) $(CLNTLIBS) (TCLLIB)
 
 bsddb_dump: bsddb_dump.o
 	$(CC) $(LDFLAGS) $(LDARGS) -o bsddb_dump bsddb_dump.o $(SRVLIBS)
