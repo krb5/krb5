@@ -28,9 +28,11 @@
 #endif
 
 #if TARGET_OS_MAC
-#include <Kerberos/krb5.h>
+    #include <Kerberos/krb5.h>
+    #include <Kerberos/gssapi.h>
+    #include <Kerberos/gssapi_generic.h>
 #else
-#include <krb5.h>
+    #include <krb5.h>
 #endif
 
 /* C++ friendlyness */

@@ -1,3 +1,8 @@
+2002-04-16	Alexandra Ellwood <lxs@mit.edu>
+        * gssapi_krb5.h: Added #include of gssapi.h and gssapi_generic.h for the
+        Mac because we can't assume people will include them and get the OID 
+        macro and the old names on the Mac.
+
 2002-03-03  Sam Hartman  <hartmans@mit.edu>
 
         * accept_sec_context.c (rd_and_store_for_creds): Patch from Steven
@@ -5,7 +10,7 @@
 		        unencrypted credentials.  This is important because Heimdal (and
 			        sometimes Microsoft) send encrypted credentials.
 
-	2002-03-03 Alexandra Ellwood <lxs@mit.edu>
+2002-03-03 Alexandra Ellwood <lxs@mit.edu>
     * accept_sec_context.c, ser_sctx.c, util_crypt.c, wrap_size_limit.c: 
     Removed unused variables.
     * acquire_cred.c: Added include of k5-int.h to get prototypes.
