@@ -1,5 +1,9 @@
 2001-06-18  Ezra Peisach  <epeisach@mit.edu>
 
+	* encrypt.c (encrypt_is): Cast arguments to printf to match format. 
+
+2001-06-18  Ezra Peisach  <epeisach@mit.edu>
+
 	* genget.c (LOWER): Cast argument to isupper()/tolower() to int.
 
 2001-06-07  Ezra Peisach  <epeisach@mit.edu>

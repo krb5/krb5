@@ -563,7 +563,8 @@ encrypt_is(data, cnt)
 	} else {
 		ret = (*ep->is)(data, cnt);
 		if (encrypt_debug_mode)
-			printf("(*ep->is)(%x, %d) returned %s(%d)\n", data, cnt,
+			printf("(*ep->is)(%x, %d) returned %s(%d)\n", 
+			        (unsigned int) data, cnt,
 				(ret < 0) ? "FAIL " :
 				(ret == 0) ? "SUCCESS " : "MORE_TO_DO ", ret);
 	}
@@ -608,7 +609,7 @@ encrypt_reply(data, cnt)
 		ret = (*ep->reply)(data, cnt);
 		if (encrypt_debug_mode)
 			printf("(*ep->reply)(%x, %d) returned %s(%d)\n",
-				data, cnt,
+				(unsigned int) data, cnt,
 				(ret < 0) ? "FAIL " :
 				(ret == 0) ? "SUCCESS " : "MORE_TO_DO ", ret);
 	}
