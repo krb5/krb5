@@ -35,6 +35,7 @@ typedef struct _krb5_db_entry {
 #define	KRB5_KDB_DISALLOW_RENEWABLE	0x00000008
 #define	KRB5_KDB_DISALLOW_PROXIABLE	0x00000010
 #define	KRB5_KDB_DISALLOW_DUP_SKEY	0x00000020
+#define	KRB5_KDB_DISALLOW_ALL_TIX	0x00000040
 
 /* XXX depends on knowledge of krb5_parse_name() formats */
 #define KRB5_KDB_M_NAME		"K/M"	/* Kerberos/Master */
