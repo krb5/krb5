@@ -25,10 +25,15 @@ SSDIR=
 #else
 SSDIR=ss
 #endif
+#ifdef UseUnifdefInstalled
+UNIFDIR=
+#else
+UNIFDIR=util/unifdef
+#endif
 all::
 	make includes
 
-        SUBDIRS = include $(COMERRDIR) $(SSDIR) lib kdc admin clients appl
+        SUBDIRS = $(UNIFDIR) include $(COMERRDIR) $(SSDIR) lib kdc admin clients appl
   LNINSTALLDIRS = 
 
 MakeSubdirs($(SUBDIRS))
