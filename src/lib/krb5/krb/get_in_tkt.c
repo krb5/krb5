@@ -114,9 +114,9 @@ OLDDECLARG(krb5_ccache, ccache)
 
     /* now decode the reply...could be error or as_rep */
 
-    if (retval = decode_krb5_as_rep(packet, &as_reply)) {
-	if (decode_krb5_error(packet, &err_reply))
-	    return retval;		/* some other packet--??? */
+    if (retval = decode_krb5_as_rep(reply, &as_reply)) {
+	if (decode_krb5_error(reply, &err_reply))
+	    return retval;		/* some other reply--??? */
 	/* it was an error */
 
 	/* XXX check to make sure the timestamps match, etc. */
