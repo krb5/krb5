@@ -1,0 +1,28 @@
+Windows Kerberos 5
+
+Here are the steps for making the Windows version of Kerberos 5.
+
+On the Unix side
+1) cd xxx/src                          # Go to where the source lives
+2) make -f Makefile.in zip-windows     # Does some Unix-side configuring
+                                       # ...and creates kerbsrc.zip
+3) <transfer kerbsrc.zip to the PC>
+
+
+On the PC side
+1) md \k5                              # Create where we'll put the tree
+2) cd \k5
+3) unzip kerbsrc.zip
+        - or -
+   pkunzip -d kerbsrc.zip
+
+4) nmake -c -f makefile.in             # Configures the makefiles and runs
+                                       # ...make in all the subdirectories.
+
+The resulting interesting files will be:
+lib/libkrb5.dll                        # The actual DLL
+lib/libkrb5.lib                        # The library for linking in the DLL
+windows/cns/cns.exe                    # Cygnus Network Security program
+
+The config and realms files, krb.con and krb.rea, currently must reside
+in the top level directory.
