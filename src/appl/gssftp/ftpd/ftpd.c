@@ -240,7 +240,7 @@ int	swaitmax = SWAITMAX;
 int	swaitint = SWAITINT;
 
 void	lostconn(), myoob();
-FILE	*getdatasock(); 
+FILE	*getdatasock(char *); 
 #if defined(__STDC__)
 /* 
  * The following prototypes must be ANSI for systems for which
@@ -594,7 +594,7 @@ static char ttyline[20];
 /*
  * Helper function for sgetpwnam().
  */
-char *
+static char *
 sgetsave(s)
 	char *s;
 {
@@ -614,7 +614,7 @@ sgetsave(s)
  * the data returned must not be clobbered by any other command
  * (e.g., globbing).
  */
-struct passwd *
+static struct passwd *
 sgetpwnam(name)
 	char *name;
 {
@@ -653,7 +653,7 @@ sgetpwnam(name)
 /*
  * Expand the given pathname relative to the current working directory.
  */
-char *
+static char *
 path_expand(path)
        char *path;
 {
@@ -1303,7 +1303,7 @@ store_file(name, fmode, unique)
 	FILE *fout, *din;
 	struct stat st;
 	int (*closefunc)();
-	char *gunique();
+	static char *gunique();
 
 	if (logging > 1) syslog(LOG_NOTICE, "put %s", path_expand(name));
 
@@ -2237,7 +2237,7 @@ pasv_error:
  * The file named "local" is already known to exist.
  * Generates failure reply on error.
  */
-char *
+static char *
 gunique(local)
 	char *local;
 {
@@ -2636,10 +2636,10 @@ static char *onefile[] = {
  * FTP_BUFSIZ
  */
 #ifdef STDARG
-int
+static int
 secure_fprintf(FILE *stream, char *fmt, ...)
 #else
-int
+static int
 secure_fprintf(stream, fmt, p1, p2, p3, p4, p5)
 FILE *stream;
 char *fmt;

@@ -57,10 +57,11 @@ void perror_reply(int, char *);
 void pwd(void);
 void removedir(char *);
 void renamecmd(char *, char *);
+char *renamefrom(char *);
 void retrieve(char *, char *);
 void send_file_list(char *);
 void setdlevel(int);
-void statcmd();
+void statcmd(void);
 void statfilecmd(char *);
 void store_file(char *, char *, int);
 void user(char *);
@@ -88,6 +89,9 @@ extern void lreply(int, char *, ...)
 
 /* ftpcmd.y */
 void upper(char *);
-
+char *getline(char *, int, FILE *);
 #endif /* FTPD_VAR_H__ */
 
+/* popen.c */
+FILE * ftpd_popen(char *, char *);
+int ftpd_pclose(FILE *);

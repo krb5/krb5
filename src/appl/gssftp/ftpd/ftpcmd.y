@@ -169,6 +169,7 @@ struct tab sitetab[];
 void sizecmd(char *);
 void help(struct tab *, char *);
 static int yylex(void);
+static char *copy(char *);
 %}
 
 %union { int num; char *str; }
@@ -653,8 +654,6 @@ cmd:		USER SP username CRLF
 	;
 rcmd:		RNFR check_login SP pathname CRLF
 		= {
-			char *renamefrom();
-
 			restart_point = (off_t) 0;
 			if ($2 && $4) {
 				fromname = renamefrom((char *) $4);
@@ -939,7 +938,7 @@ struct tab sitetab[] = {
 	{ NULL,   0,    0,    0,	0 }
 };
 
-struct tab *
+static struct tab *
 lookup(p, cmd)
 	register struct tab *p;
 	char *cmd;
@@ -954,7 +953,7 @@ lookup(p, cmd)
 /*
  * urgsafe_getc - hacked up getc to ignore EOF if SIOCATMARK returns TRUE
  */
-int
+static int
 urgsafe_getc(f)
 	FILE *f;
 {
@@ -979,6 +978,7 @@ urgsafe_getc(f)
 char *
 getline(s, n, iop)
 	char *s;
+	int n;
 	register FILE *iop;
 {
 	register int c;
@@ -1197,7 +1197,7 @@ yylex()
 	register char *cp, *cp2;
 	register struct tab *p;
 	int n;
-	char c, *copy();
+	char c;
 
 	for (;;) {
 		switch (state) {
@@ -1424,7 +1424,7 @@ upper(s)
 	}
 }
 
-char *
+static char *
 copy(s)
 	char *s;
 {

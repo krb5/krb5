@@ -49,6 +49,7 @@ static char sccsid[] = "@(#)popen.c	5.9 (Berkeley) 2/25/91";
 #ifdef HAVE_VFORK_H
 #include <vfork.h>
 #endif
+#include "ftpd_var.h"
 
 /*
  * Special version of popen which avoids call to shell.  This insures noone
