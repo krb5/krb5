@@ -36,16 +36,24 @@
 				   conversion */
 
 #ifdef KRB5_ATHENA_COMPAT
+/*
+ * Let's store krb5.conf is the same place whether or not we're
+ * compiling under with Project Athena options turned on.  Things are
+ * much more sane that way!!!!  --- Ted
+ */
+#define DEFAULT_PROFILE_FILENAME "/etc/krb5.conf"
 #define	DEFAULT_CONFIG_FILENAME	"/etc/athena/krb.conf.v5"
 #define	DEFAULT_TRANS_FILENAME	"/etc/athena/krb.realms"
 #define	DEFAULT_LNAME_FILENAME	"/etc/athena/aname"
 #define	DEFAULT_KEYTAB_NAME	"FILE:/etc/athena/v5srvtab"
 #elif defined(_WINDOWS)
+#define DEFAULT_PROFILE_FILENAME "krb5.ini"
 #define	DEFAULT_CONFIG_FILENAME	"krb.conf"
 #define	DEFAULT_TRANS_FILENAME	"krb.realms"
 #define	DEFAULT_LNAME_FILENAME	"/aname"
 #define	DEFAULT_KEYTAB_NAME	"FILE:/v5srvtab"
 #else
+#define DEFAULT_PROFILE_FILENAME "/etc/krb5.conf"
 #define	DEFAULT_CONFIG_FILENAME	"@KRB5ROOT/krb.conf"
 #define	DEFAULT_TRANS_FILENAME	"@KRB5ROOT/krb.realms"
 #define	DEFAULT_LNAME_FILENAME	"@KRB5ROOT/aname"
