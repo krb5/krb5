@@ -74,7 +74,7 @@ install:: install-libs
 # Makefile dependencies follow.  This must be the last section in
 # the Makefile.in file
 #
-$(OUTPRE)clnt_policy.$(OBJEXT): clnt_policy.c $(BUILDTOP)/include/gssrpc/rpc.h \
+clnt_policy.so clnt_policy.po $(OUTPRE)clnt_policy.$(OBJEXT): clnt_policy.c $(BUILDTOP)/include/gssrpc/rpc.h \
   $(BUILDTOP)/include/gssrpc/types.h $(BUILDTOP)/include/gssrpc/xdr.h \
   $(BUILDTOP)/include/gssrpc/auth.h $(BUILDTOP)/include/gssrpc/clnt.h \
   $(BUILDTOP)/include/gssrpc/rpc_msg.h $(BUILDTOP)/include/gssrpc/auth_unix.h \
@@ -86,7 +86,7 @@ $(OUTPRE)clnt_policy.$(OBJEXT): clnt_policy.c $(BUILDTOP)/include/gssrpc/rpc.h \
   $(BUILDTOP)/include/kadm5/kadm_err.h $(BUILDTOP)/include/kadm5/adb_err.h \
   $(BUILDTOP)/include/kadm5/chpass_util_strings.h $(BUILDTOP)/include/kadm5/kadm_rpc.h \
   client_internal.h $(BUILDTOP)/include/kadm5/admin_internal.h
-$(OUTPRE)client_rpc.$(OBJEXT): client_rpc.c $(BUILDTOP)/include/gssrpc/rpc.h \
+client_rpc.so client_rpc.po $(OUTPRE)client_rpc.$(OBJEXT): client_rpc.c $(BUILDTOP)/include/gssrpc/rpc.h \
   $(BUILDTOP)/include/gssrpc/types.h $(BUILDTOP)/include/gssrpc/xdr.h \
   $(BUILDTOP)/include/gssrpc/auth.h $(BUILDTOP)/include/gssrpc/clnt.h \
   $(BUILDTOP)/include/gssrpc/rpc_msg.h $(BUILDTOP)/include/gssrpc/auth_unix.h \
@@ -97,7 +97,7 @@ $(OUTPRE)client_rpc.$(OBJEXT): client_rpc.c $(BUILDTOP)/include/gssrpc/rpc.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(SRCTOP)/include/krb5/kdb.h $(BUILDTOP)/include/kadm5/kadm_err.h \
   $(BUILDTOP)/include/kadm5/adb_err.h $(BUILDTOP)/include/kadm5/chpass_util_strings.h
-$(OUTPRE)client_principal.$(OBJEXT): client_principal.c \
+client_principal.so client_principal.po $(OUTPRE)client_principal.$(OBJEXT): client_principal.c \
   $(BUILDTOP)/include/gssrpc/rpc.h $(BUILDTOP)/include/gssrpc/types.h \
   $(BUILDTOP)/include/gssrpc/xdr.h $(BUILDTOP)/include/gssrpc/auth.h \
   $(BUILDTOP)/include/gssrpc/clnt.h $(BUILDTOP)/include/gssrpc/rpc_msg.h \
@@ -110,7 +110,7 @@ $(OUTPRE)client_principal.$(OBJEXT): client_principal.c \
   $(BUILDTOP)/include/kadm5/adb_err.h $(BUILDTOP)/include/kadm5/chpass_util_strings.h \
   $(BUILDTOP)/include/kadm5/kadm_rpc.h client_internal.h \
   $(BUILDTOP)/include/kadm5/admin_internal.h
-$(OUTPRE)client_init.$(OBJEXT): client_init.c $(BUILDTOP)/include/com_err.h \
+client_init.so client_init.po $(OUTPRE)client_init.$(OBJEXT): client_init.c $(BUILDTOP)/include/com_err.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
   $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/krb5/kdb.h \
@@ -124,7 +124,7 @@ $(OUTPRE)client_init.$(OBJEXT): client_init.c $(BUILDTOP)/include/com_err.h \
   client_internal.h $(BUILDTOP)/include/kadm5/admin_internal.h \
   $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/gssapi/gssapi_krb5.h \
   $(BUILDTOP)/include/gssrpc/auth_gssapi.h
-$(OUTPRE)clnt_privs.$(OBJEXT): clnt_privs.c $(BUILDTOP)/include/gssrpc/rpc.h \
+clnt_privs.so clnt_privs.po $(OUTPRE)clnt_privs.$(OBJEXT): clnt_privs.c $(BUILDTOP)/include/gssrpc/rpc.h \
   $(BUILDTOP)/include/gssrpc/types.h $(BUILDTOP)/include/gssrpc/xdr.h \
   $(BUILDTOP)/include/gssrpc/auth.h $(BUILDTOP)/include/gssrpc/clnt.h \
   $(BUILDTOP)/include/gssrpc/rpc_msg.h $(BUILDTOP)/include/gssrpc/auth_unix.h \
@@ -136,7 +136,7 @@ $(OUTPRE)clnt_privs.$(OBJEXT): clnt_privs.c $(BUILDTOP)/include/gssrpc/rpc.h \
   $(BUILDTOP)/include/kadm5/kadm_err.h $(BUILDTOP)/include/kadm5/adb_err.h \
   $(BUILDTOP)/include/kadm5/chpass_util_strings.h $(BUILDTOP)/include/kadm5/kadm_rpc.h \
   client_internal.h $(BUILDTOP)/include/kadm5/admin_internal.h
-$(OUTPRE)clnt_chpass_util.$(OBJEXT): clnt_chpass_util.c \
+clnt_chpass_util.so clnt_chpass_util.po $(OUTPRE)clnt_chpass_util.$(OBJEXT): clnt_chpass_util.c \
   $(BUILDTOP)/include/kadm5/admin.h $(BUILDTOP)/include/gssrpc/rpc.h \
   $(BUILDTOP)/include/gssrpc/types.h $(BUILDTOP)/include/gssrpc/xdr.h \
   $(BUILDTOP)/include/gssrpc/auth.h $(BUILDTOP)/include/gssrpc/clnt.h \

@@ -29,8 +29,12 @@ depfix2.sed: Makefile $(SRCTOP)/util/depgen.sed
 	echo 's; $(BUILDTOP)/; $$(BUILDTOP)/;g'		>> depfix2.tmp
 	mv -f depfix2.tmp depfix2.sed
 
+DEPLIBOBJNAMEFIX = sed -e 's;^\$$(OUTPRE)\([a-zA-Z0-9_\-]*\)\.\$$(OBJEXT):;\1.so \1.po &;'
+
 .depend: .d depfix2.sed $(SRCTOP)/util/depfix.sed
-	sed -f depfix2.sed < .d | sed -f $(SRCTOP)/util/depfix.sed > .depend
+	sed -f depfix2.sed < .d | sed -f $(SRCTOP)/util/depfix.sed | \
+	(if test "x$(STLIBOBJS)" != "x"; then $(DEPLIBOBJNAMEFIX) ; else cat; fi ) \
+	> .depend
 
 depend-postrecurse:: .depend
 	if test -n "$(SRCS)" ; then \

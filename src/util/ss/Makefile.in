@@ -170,36 +170,36 @@ clean::
 # Makefile dependencies follow.  This must be the last section in
 # the Makefile.in file
 #
-$(OUTPRE)invocation.$(OBJEXT): invocation.c ss_internal.h \
+invocation.so invocation.po $(OUTPRE)invocation.$(OBJEXT): invocation.c ss_internal.h \
   ss.h $(BUILDTOP)/include/ss/ss_err.h $(BUILDTOP)/include/com_err.h \
   copyright.h
-$(OUTPRE)help.$(OBJEXT): help.c ss_internal.h ss.h \
+help.so help.po $(OUTPRE)help.$(OBJEXT): help.c ss_internal.h ss.h \
   $(BUILDTOP)/include/ss/ss_err.h $(BUILDTOP)/include/com_err.h \
   copyright.h
-$(OUTPRE)execute_cmd.$(OBJEXT): execute_cmd.c ss_internal.h \
+execute_cmd.so execute_cmd.po $(OUTPRE)execute_cmd.$(OBJEXT): execute_cmd.c ss_internal.h \
   ss.h $(BUILDTOP)/include/ss/ss_err.h $(BUILDTOP)/include/com_err.h \
   copyright.h
-$(OUTPRE)listen.$(OBJEXT): listen.c copyright.h ss_internal.h \
+listen.so listen.po $(OUTPRE)listen.$(OBJEXT): listen.c copyright.h ss_internal.h \
   ss.h $(BUILDTOP)/include/ss/ss_err.h $(BUILDTOP)/include/com_err.h
-$(OUTPRE)parse.$(OBJEXT): parse.c ss_internal.h ss.h \
+parse.so parse.po $(OUTPRE)parse.$(OBJEXT): parse.c ss_internal.h ss.h \
   $(BUILDTOP)/include/ss/ss_err.h $(BUILDTOP)/include/com_err.h \
   copyright.h
-$(OUTPRE)error.$(OBJEXT): error.c copyright.h $(BUILDTOP)/include/com_err.h \
+error.so error.po $(OUTPRE)error.$(OBJEXT): error.c copyright.h $(BUILDTOP)/include/com_err.h \
   ss_internal.h ss.h $(BUILDTOP)/include/ss/ss_err.h
-$(OUTPRE)prompt.$(OBJEXT): prompt.c copyright.h ss_internal.h \
+prompt.so prompt.po $(OUTPRE)prompt.$(OBJEXT): prompt.c copyright.h ss_internal.h \
   ss.h $(BUILDTOP)/include/ss/ss_err.h $(BUILDTOP)/include/com_err.h
-$(OUTPRE)request_tbl.$(OBJEXT): request_tbl.c copyright.h \
+request_tbl.so request_tbl.po $(OUTPRE)request_tbl.$(OBJEXT): request_tbl.c copyright.h \
   ss_internal.h ss.h $(BUILDTOP)/include/ss/ss_err.h \
   $(BUILDTOP)/include/com_err.h
-$(OUTPRE)list_rqs.$(OBJEXT): list_rqs.c copyright.h \
+list_rqs.so list_rqs.po $(OUTPRE)list_rqs.$(OBJEXT): list_rqs.c copyright.h \
   ss_internal.h ss.h $(BUILDTOP)/include/ss/ss_err.h \
   $(BUILDTOP)/include/com_err.h
-$(OUTPRE)pager.$(OBJEXT): pager.c ss_internal.h ss.h \
+pager.so pager.po $(OUTPRE)pager.$(OBJEXT): pager.c ss_internal.h ss.h \
   $(BUILDTOP)/include/ss/ss_err.h $(BUILDTOP)/include/com_err.h \
   copyright.h
-$(OUTPRE)requests.$(OBJEXT): requests.c ss_internal.h \
+requests.so requests.po $(OUTPRE)requests.$(OBJEXT): requests.c ss_internal.h \
   ss.h $(BUILDTOP)/include/ss/ss_err.h $(BUILDTOP)/include/com_err.h
-$(OUTPRE)data.$(OBJEXT): data.c ss_internal.h ss.h \
+data.so data.po $(OUTPRE)data.$(OBJEXT): data.c ss_internal.h ss.h \
   $(BUILDTOP)/include/ss/ss_err.h $(BUILDTOP)/include/com_err.h \
   copyright.h
 

@@ -230,198 +230,198 @@ clean::
 # Makefile dependencies follow.  This must be the last section in
 # the Makefile.in file
 #
-$(OUTPRE)accessor.$(OBJEXT): accessor.c $(SRCTOP)/include/k5-int.h \
+accessor.so accessor.po $(OUTPRE)accessor.$(OBJEXT): accessor.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
   $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
   os-proto.h
-$(OUTPRE)an_to_ln.$(OBJEXT): an_to_ln.c $(SRCTOP)/include/k5-int.h \
+an_to_ln.so an_to_ln.po $(OUTPRE)an_to_ln.$(OBJEXT): an_to_ln.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
   $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h
-$(OUTPRE)c_ustime.$(OBJEXT): c_ustime.c $(SRCTOP)/include/k5-int.h \
+c_ustime.so c_ustime.po $(OUTPRE)c_ustime.$(OBJEXT): c_ustime.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
   $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h
-$(OUTPRE)def_realm.$(OBJEXT): def_realm.c $(SRCTOP)/include/k5-int.h \
+def_realm.so def_realm.po $(OUTPRE)def_realm.$(OBJEXT): def_realm.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
   $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h \
   os-proto.h
-$(OUTPRE)ccdefname.$(OBJEXT): ccdefname.c $(SRCTOP)/include/k5-int.h \
+ccdefname.so ccdefname.po $(OUTPRE)ccdefname.$(OBJEXT): ccdefname.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
   $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h
-$(OUTPRE)changepw.$(OBJEXT): changepw.c $(SRCTOP)/include/k5-int.h \
+changepw.so changepw.po $(OUTPRE)changepw.$(OBJEXT): changepw.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
   $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
   os-proto.h $(BUILDTOP)/include/adm_err.h
-$(OUTPRE)free_krbhs.$(OBJEXT): free_krbhs.c $(SRCTOP)/include/k5-int.h \
+free_krbhs.so free_krbhs.po $(OUTPRE)free_krbhs.$(OBJEXT): free_krbhs.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
   $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h
-$(OUTPRE)free_hstrl.$(OBJEXT): free_hstrl.c $(SRCTOP)/include/k5-int.h \
+free_hstrl.so free_hstrl.po $(OUTPRE)free_hstrl.$(OBJEXT): free_hstrl.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
   $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h
-$(OUTPRE)full_ipadr.$(OBJEXT): full_ipadr.c $(SRCTOP)/include/k5-int.h \
+full_ipadr.so full_ipadr.po $(OUTPRE)full_ipadr.$(OBJEXT): full_ipadr.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
   $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
   os-proto.h
-$(OUTPRE)get_krbhst.$(OBJEXT): get_krbhst.c $(SRCTOP)/include/k5-int.h \
+get_krbhst.so get_krbhst.po $(OUTPRE)get_krbhst.$(OBJEXT): get_krbhst.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
   $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h
-$(OUTPRE)gen_port.$(OBJEXT): gen_port.c $(SRCTOP)/include/k5-int.h \
+gen_port.so gen_port.po $(OUTPRE)gen_port.$(OBJEXT): gen_port.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
   $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h \
   os-proto.h
-$(OUTPRE)genaddrs.$(OBJEXT): genaddrs.c $(SRCTOP)/include/k5-int.h \
+genaddrs.so genaddrs.po $(OUTPRE)genaddrs.$(OBJEXT): genaddrs.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
   $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
   os-proto.h
-$(OUTPRE)gen_rname.$(OBJEXT): gen_rname.c $(SRCTOP)/include/k5-int.h \
+gen_rname.so gen_rname.po $(OUTPRE)gen_rname.$(OBJEXT): gen_rname.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
   $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
   os-proto.h
-$(OUTPRE)gmt_mktime.$(OBJEXT): gmt_mktime.c $(SRCTOP)/include/k5-int.h \
+gmt_mktime.so gmt_mktime.po $(OUTPRE)gmt_mktime.$(OBJEXT): gmt_mktime.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
   $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h
-$(OUTPRE)hostaddr.$(OBJEXT): hostaddr.c $(SRCTOP)/include/k5-int.h \
+hostaddr.so hostaddr.po $(OUTPRE)hostaddr.$(OBJEXT): hostaddr.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
   $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
   $(SRCTOP)/include/fake-addrinfo.h
-$(OUTPRE)hst_realm.$(OBJEXT): hst_realm.c $(SRCTOP)/include/k5-int.h \
+hst_realm.so hst_realm.po $(OUTPRE)hst_realm.$(OBJEXT): hst_realm.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
   $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
   os-proto.h
-$(OUTPRE)init_os_ctx.$(OBJEXT): init_os_ctx.c $(SRCTOP)/include/k5-int.h \
+init_os_ctx.so init_os_ctx.po $(OUTPRE)init_os_ctx.$(OBJEXT): init_os_ctx.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
   $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h \
   os-proto.h
-$(OUTPRE)krbfileio.$(OBJEXT): krbfileio.c $(SRCTOP)/include/k5-int.h \
+krbfileio.so krbfileio.po $(OUTPRE)krbfileio.$(OBJEXT): krbfileio.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
   $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h
-$(OUTPRE)ktdefname.$(OBJEXT): ktdefname.c $(SRCTOP)/include/k5-int.h \
+ktdefname.so ktdefname.po $(OUTPRE)ktdefname.$(OBJEXT): ktdefname.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
   $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h
-$(OUTPRE)kuserok.$(OBJEXT): kuserok.c $(SRCTOP)/include/k5-int.h \
+kuserok.so kuserok.po $(OUTPRE)kuserok.$(OBJEXT): kuserok.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
   $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h
-$(OUTPRE)mk_faddr.$(OBJEXT): mk_faddr.c $(SRCTOP)/include/k5-int.h \
+mk_faddr.so mk_faddr.po $(OUTPRE)mk_faddr.$(OBJEXT): mk_faddr.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
   $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
   os-proto.h
-$(OUTPRE)localaddr.$(OBJEXT): localaddr.c $(SRCTOP)/include/k5-int.h \
+localaddr.so localaddr.po $(OUTPRE)localaddr.$(OBJEXT): localaddr.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
   $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h
-$(OUTPRE)locate_kdc.$(OBJEXT): locate_kdc.c $(SRCTOP)/include/k5-int.h \
+locate_kdc.so locate_kdc.po $(OUTPRE)locate_kdc.$(OBJEXT): locate_kdc.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
   $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
   os-proto.h $(SRCTOP)/include/fake-addrinfo.c $(SRCTOP)/include/fake-addrinfo.h
-$(OUTPRE)lock_file.$(OBJEXT): lock_file.c $(SRCTOP)/include/k5-int.h \
+lock_file.so lock_file.po $(OUTPRE)lock_file.$(OBJEXT): lock_file.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
   $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h
-$(OUTPRE)net_read.$(OBJEXT): net_read.c $(SRCTOP)/include/k5-int.h \
+net_read.so net_read.po $(OUTPRE)net_read.$(OBJEXT): net_read.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
   $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h
-$(OUTPRE)net_write.$(OBJEXT): net_write.c $(SRCTOP)/include/k5-int.h \
+net_write.so net_write.po $(OUTPRE)net_write.$(OBJEXT): net_write.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
   $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h
-$(OUTPRE)osconfig.$(OBJEXT): osconfig.c $(SRCTOP)/include/k5-int.h \
+osconfig.so osconfig.po $(OUTPRE)osconfig.$(OBJEXT): osconfig.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
   $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h
-$(OUTPRE)prompter.$(OBJEXT): prompter.c $(SRCTOP)/include/k5-int.h \
+prompter.so prompter.po $(OUTPRE)prompter.$(OBJEXT): prompter.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
   $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h
-$(OUTPRE)promptusr.$(OBJEXT): promptusr.c $(SRCTOP)/include/k5-int.h \
+promptusr.so promptusr.po $(OUTPRE)promptusr.$(OBJEXT): promptusr.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
   $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h
-$(OUTPRE)read_msg.$(OBJEXT): read_msg.c $(SRCTOP)/include/k5-int.h \
+read_msg.so read_msg.po $(OUTPRE)read_msg.$(OBJEXT): read_msg.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
   $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h
-$(OUTPRE)read_pwd.$(OBJEXT): read_pwd.c $(SRCTOP)/include/k5-int.h \
+read_pwd.so read_pwd.po $(OUTPRE)read_pwd.$(OBJEXT): read_pwd.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
   $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h
-$(OUTPRE)realm_dom.$(OBJEXT): realm_dom.c $(SRCTOP)/include/k5-int.h \
+realm_dom.so realm_dom.po $(OUTPRE)realm_dom.$(OBJEXT): realm_dom.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
   $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h
-$(OUTPRE)realm_iter.$(OBJEXT): realm_iter.c $(SRCTOP)/include/k5-int.h \
+realm_iter.so realm_iter.po $(OUTPRE)realm_iter.$(OBJEXT): realm_iter.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
   $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h
-$(OUTPRE)port2ip.$(OBJEXT): port2ip.c $(SRCTOP)/include/k5-int.h \
+port2ip.so port2ip.po $(OUTPRE)port2ip.$(OBJEXT): port2ip.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
   $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
   os-proto.h
-$(OUTPRE)sendto_kdc.$(OBJEXT): sendto_kdc.c $(SRCTOP)/include/k5-int.h \
+sendto_kdc.so sendto_kdc.po $(OUTPRE)sendto_kdc.$(OBJEXT): sendto_kdc.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
   $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
   os-proto.h
-$(OUTPRE)sn2princ.$(OBJEXT): sn2princ.c $(SRCTOP)/include/k5-int.h \
+sn2princ.so sn2princ.po $(OUTPRE)sn2princ.$(OBJEXT): sn2princ.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
   $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h
-$(OUTPRE)timeofday.$(OBJEXT): timeofday.c $(SRCTOP)/include/k5-int.h \
+timeofday.so timeofday.po $(OUTPRE)timeofday.$(OBJEXT): timeofday.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
   $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h
-$(OUTPRE)toffset.$(OBJEXT): toffset.c $(SRCTOP)/include/k5-int.h \
+toffset.so toffset.po $(OUTPRE)toffset.$(OBJEXT): toffset.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
   $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h
-$(OUTPRE)unlck_file.$(OBJEXT): unlck_file.c $(SRCTOP)/include/k5-int.h \
+unlck_file.so unlck_file.po $(OUTPRE)unlck_file.$(OBJEXT): unlck_file.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
   $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h
-$(OUTPRE)ustime.$(OBJEXT): ustime.c $(SRCTOP)/include/k5-int.h \
+ustime.so ustime.po $(OUTPRE)ustime.$(OBJEXT): ustime.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
   $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h
-$(OUTPRE)write_msg.$(OBJEXT): write_msg.c $(SRCTOP)/include/k5-int.h \
+write_msg.so write_msg.po $(OUTPRE)write_msg.$(OBJEXT): write_msg.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
   $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/port-sockets.h \

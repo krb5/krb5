@@ -68,78 +68,78 @@ clean-unix:: clean-libobjs
 # Makefile dependencies follow.  This must be the last section in
 # the Makefile.in file
 #
-$(OUTPRE)ktf_add.$(OBJEXT): ktf_add.c $(SRCTOP)/include/k5-int.h \
+ktf_add.so ktf_add.po $(OUTPRE)ktf_add.$(OBJEXT): ktf_add.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
   $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h \
   ktfile.h
-$(OUTPRE)ktf_endget.$(OBJEXT): ktf_endget.c $(SRCTOP)/include/k5-int.h \
+ktf_endget.so ktf_endget.po $(OUTPRE)ktf_endget.$(OBJEXT): ktf_endget.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
   $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h \
   ktfile.h
-$(OUTPRE)ktf_next.$(OBJEXT): ktf_next.c $(SRCTOP)/include/k5-int.h \
+ktf_next.so ktf_next.po $(OUTPRE)ktf_next.$(OBJEXT): ktf_next.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
   $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h \
   ktfile.h
-$(OUTPRE)ktf_resolv.$(OBJEXT): ktf_resolv.c $(SRCTOP)/include/k5-int.h \
+ktf_resolv.so ktf_resolv.po $(OUTPRE)ktf_resolv.$(OBJEXT): ktf_resolv.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
   $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h \
   ktfile.h
-$(OUTPRE)ktf_wops.$(OBJEXT): ktf_wops.c $(SRCTOP)/include/k5-int.h \
+ktf_wops.so ktf_wops.po $(OUTPRE)ktf_wops.$(OBJEXT): ktf_wops.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
   $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h \
   ktfile.h
-$(OUTPRE)ktf_close.$(OBJEXT): ktf_close.c $(SRCTOP)/include/k5-int.h \
+ktf_close.so ktf_close.po $(OUTPRE)ktf_close.$(OBJEXT): ktf_close.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
   $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h \
   ktfile.h
-$(OUTPRE)ktf_g_ent.$(OBJEXT): ktf_g_ent.c $(SRCTOP)/include/k5-int.h \
+ktf_g_ent.so ktf_g_ent.po $(OUTPRE)ktf_g_ent.$(OBJEXT): ktf_g_ent.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
   $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h \
   ktfile.h
-$(OUTPRE)ktf_ops.$(OBJEXT): ktf_ops.c $(SRCTOP)/include/k5-int.h \
+ktf_ops.so ktf_ops.po $(OUTPRE)ktf_ops.$(OBJEXT): ktf_ops.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
   $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h \
   ktfile.h
-$(OUTPRE)ktf_ssget.$(OBJEXT): ktf_ssget.c $(SRCTOP)/include/k5-int.h \
+ktf_ssget.so ktf_ssget.po $(OUTPRE)ktf_ssget.$(OBJEXT): ktf_ssget.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
   $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h \
   ktfile.h
-$(OUTPRE)ktf_wreslv.$(OBJEXT): ktf_wreslv.c $(SRCTOP)/include/k5-int.h \
+ktf_wreslv.so ktf_wreslv.po $(OUTPRE)ktf_wreslv.$(OBJEXT): ktf_wreslv.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
   $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h \
   ktfile.h
-$(OUTPRE)ktf_defops.$(OBJEXT): ktf_defops.c $(SRCTOP)/include/k5-int.h \
+ktf_defops.so ktf_defops.po $(OUTPRE)ktf_defops.$(OBJEXT): ktf_defops.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
   $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h \
   ktfile.h
-$(OUTPRE)ktf_g_name.$(OBJEXT): ktf_g_name.c $(SRCTOP)/include/k5-int.h \
+ktf_g_name.so ktf_g_name.po $(OUTPRE)ktf_g_name.$(OBJEXT): ktf_g_name.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
   $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h \
   ktfile.h
-$(OUTPRE)ktf_remove.$(OBJEXT): ktf_remove.c $(SRCTOP)/include/k5-int.h \
+ktf_remove.so ktf_remove.po $(OUTPRE)ktf_remove.$(OBJEXT): ktf_remove.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
   $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h \
   ktfile.h
-$(OUTPRE)ktf_util.$(OBJEXT): ktf_util.c $(BUILDTOP)/include/krb5.h \
+ktf_util.so ktf_util.po $(OUTPRE)ktf_util.$(OBJEXT): ktf_util.c $(BUILDTOP)/include/krb5.h \
   $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
   $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
   ktfile.h
-$(OUTPRE)ser_ktf.$(OBJEXT): ser_ktf.c $(SRCTOP)/include/k5-int.h \
+ser_ktf.so ser_ktf.po $(OUTPRE)ser_ktf.$(OBJEXT): ser_ktf.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
   $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h \

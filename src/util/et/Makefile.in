@@ -226,9 +226,9 @@ depend::  et_lex.lex.c
 # Makefile dependencies follow.  This must be the last section in
 # the Makefile.in file
 #
-$(OUTPRE)error_message.$(OBJEXT): error_message.c com_err.h \
+error_message.so error_message.po $(OUTPRE)error_message.$(OBJEXT): error_message.c com_err.h \
   error_table.h
-$(OUTPRE)et_name.$(OBJEXT): et_name.c com_err.h error_table.h
-$(OUTPRE)init_et.$(OBJEXT): init_et.c com_err.h error_table.h
-$(OUTPRE)com_err.$(OBJEXT): com_err.c com_err.h error_table.h
+et_name.so et_name.po $(OUTPRE)et_name.$(OBJEXT): et_name.c com_err.h error_table.h
+init_et.so init_et.po $(OUTPRE)init_et.$(OBJEXT): init_et.c com_err.h error_table.h
+com_err.so com_err.po $(OUTPRE)com_err.$(OBJEXT): com_err.c com_err.h error_table.h
 

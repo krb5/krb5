@@ -158,35 +158,35 @@ clean-unix:: clean-libs clean-libobjs
 # Makefile dependencies follow.  This must be the last section in
 # the Makefile.in file
 #
-$(OUTPRE)conv_creds.$(OBJEXT): conv_creds.c $(BUILDTOP)/include/krb5.h \
+conv_creds.so conv_creds.po $(OUTPRE)conv_creds.$(OBJEXT): conv_creds.c $(BUILDTOP)/include/krb5.h \
   $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
   $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
   $(SRCTOP)/include/port-sockets.h krb524.h $(BUILDTOP)/include/krb524_err.h
-$(OUTPRE)conv_princ.$(OBJEXT): conv_princ.c $(BUILDTOP)/include/krb5.h \
+conv_princ.so conv_princ.po $(OUTPRE)conv_princ.$(OBJEXT): conv_princ.c $(BUILDTOP)/include/krb5.h \
   $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
   $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
   $(SRCTOP)/include/port-sockets.h krb524.h $(BUILDTOP)/include/krb524_err.h
-$(OUTPRE)cnv_tkt_skey.$(OBJEXT): cnv_tkt_skey.c $(SRCTOP)/include/k5-int.h \
+cnv_tkt_skey.so cnv_tkt_skey.po $(OUTPRE)cnv_tkt_skey.$(OBJEXT): cnv_tkt_skey.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
   $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h \
   $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
   $(SRCTOP)/include/port-sockets.h krb524.h $(BUILDTOP)/include/krb524_err.h
-$(OUTPRE)encode.$(OBJEXT): encode.c $(BUILDTOP)/include/krb5.h \
+encode.so encode.po $(OUTPRE)encode.$(OBJEXT): encode.c $(BUILDTOP)/include/krb5.h \
   $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
   $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
   $(SRCTOP)/include/port-sockets.h krb524.h $(BUILDTOP)/include/krb524_err.h
-$(OUTPRE)misc.$(OBJEXT): misc.c $(BUILDTOP)/include/krb5.h \
+misc.so misc.po $(OUTPRE)misc.$(OBJEXT): misc.c $(BUILDTOP)/include/krb5.h \
   $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
   $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
   $(SRCTOP)/include/port-sockets.h krb524.h $(BUILDTOP)/include/krb524_err.h
-$(OUTPRE)globals.$(OBJEXT): globals.c
-$(OUTPRE)sendmsg.$(OBJEXT): sendmsg.c $(SRCTOP)/include/k5-int.h \
+globals.so globals.po $(OUTPRE)globals.$(OBJEXT): globals.c
+sendmsg.so sendmsg.po $(OUTPRE)sendmsg.$(OBJEXT): sendmsg.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
   $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
   $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
   krb524.h $(BUILDTOP)/include/krb524_err.h
-$(OUTPRE)libinit.$(OBJEXT): libinit.c
+libinit.so libinit.po $(OUTPRE)libinit.$(OBJEXT): libinit.c
 

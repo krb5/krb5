@@ -119,30 +119,30 @@ $(BUILDTOP)/include/krb5/autoconf.h: $(SRCTOP)/include/krb5/autoconf.h.in
 # Makefile dependencies follow.  This must be the last section in
 # the Makefile.in file
 #
-$(OUTPRE)pty_err.$(OBJEXT): pty_err.c $(BUILDTOP)/include/com_err.h
-$(OUTPRE)cleanup.$(OBJEXT): cleanup.c $(BUILDTOP)/include/com_err.h \
+pty_err.so pty_err.po $(OUTPRE)pty_err.$(OBJEXT): pty_err.c $(BUILDTOP)/include/com_err.h
+cleanup.so cleanup.po $(OUTPRE)cleanup.$(OBJEXT): cleanup.c $(BUILDTOP)/include/com_err.h \
   libpty.h pty-int.h pty_err.h $(SRCTOP)/include/syslog.h
-$(OUTPRE)getpty.$(OBJEXT): getpty.c $(BUILDTOP)/include/com_err.h \
+getpty.so getpty.po $(OUTPRE)getpty.$(OBJEXT): getpty.c $(BUILDTOP)/include/com_err.h \
   libpty.h pty-int.h pty_err.h $(SRCTOP)/include/syslog.h
-$(OUTPRE)init_slave.$(OBJEXT): init_slave.c $(BUILDTOP)/include/com_err.h \
+init_slave.so init_slave.po $(OUTPRE)init_slave.$(OBJEXT): init_slave.c $(BUILDTOP)/include/com_err.h \
   libpty.h pty-int.h pty_err.h $(SRCTOP)/include/syslog.h
-$(OUTPRE)open_ctty.$(OBJEXT): open_ctty.c $(BUILDTOP)/include/com_err.h \
+open_ctty.so open_ctty.po $(OUTPRE)open_ctty.$(OBJEXT): open_ctty.c $(BUILDTOP)/include/com_err.h \
   libpty.h pty-int.h pty_err.h $(SRCTOP)/include/syslog.h
-$(OUTPRE)open_slave.$(OBJEXT): open_slave.c $(BUILDTOP)/include/com_err.h \
+open_slave.so open_slave.po $(OUTPRE)open_slave.$(OBJEXT): open_slave.c $(BUILDTOP)/include/com_err.h \
   libpty.h pty-int.h pty_err.h $(SRCTOP)/include/syslog.h
-$(OUTPRE)update_utmp.$(OBJEXT): update_utmp.c $(BUILDTOP)/include/com_err.h \
+update_utmp.so update_utmp.po $(OUTPRE)update_utmp.$(OBJEXT): update_utmp.c $(BUILDTOP)/include/com_err.h \
   libpty.h pty-int.h pty_err.h $(SRCTOP)/include/syslog.h
-$(OUTPRE)update_wtmp.$(OBJEXT): update_wtmp.c $(BUILDTOP)/include/com_err.h \
+update_wtmp.so update_wtmp.po $(OUTPRE)update_wtmp.$(OBJEXT): update_wtmp.c $(BUILDTOP)/include/com_err.h \
   libpty.h pty-int.h pty_err.h $(SRCTOP)/include/syslog.h
-$(OUTPRE)vhangup.$(OBJEXT): vhangup.c $(BUILDTOP)/include/com_err.h \
+vhangup.so vhangup.po $(OUTPRE)vhangup.$(OBJEXT): vhangup.c $(BUILDTOP)/include/com_err.h \
   libpty.h pty-int.h pty_err.h $(SRCTOP)/include/syslog.h
-$(OUTPRE)void_assoc.$(OBJEXT): void_assoc.c $(BUILDTOP)/include/com_err.h \
+void_assoc.so void_assoc.po $(OUTPRE)void_assoc.$(OBJEXT): void_assoc.c $(BUILDTOP)/include/com_err.h \
   libpty.h pty-int.h pty_err.h $(SRCTOP)/include/syslog.h
-$(OUTPRE)logwtmp.$(OBJEXT): logwtmp.c $(BUILDTOP)/include/com_err.h \
+logwtmp.so logwtmp.po $(OUTPRE)logwtmp.$(OBJEXT): logwtmp.c $(BUILDTOP)/include/com_err.h \
   libpty.h pty-int.h pty_err.h $(SRCTOP)/include/syslog.h
-$(OUTPRE)init.$(OBJEXT): init.c $(BUILDTOP)/include/com_err.h \
+init.so init.po $(OUTPRE)init.$(OBJEXT): init.c $(BUILDTOP)/include/com_err.h \
   libpty.h pty-int.h pty_err.h $(SRCTOP)/include/syslog.h
-$(OUTPRE)sane_hostname.$(OBJEXT): sane_hostname.c $(BUILDTOP)/include/com_err.h \
+sane_hostname.so sane_hostname.po $(OUTPRE)sane_hostname.$(OBJEXT): sane_hostname.c $(BUILDTOP)/include/com_err.h \
   pty-int.h pty_err.h $(SRCTOP)/include/syslog.h libpty.h \
   $(SRCTOP)/include/socket-utils.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(SRCTOP)/include/fake-addrinfo.c $(SRCTOP)/include/fake-addrinfo.h \

@@ -35,17 +35,17 @@ clean-unix:: clean-libobjs
 # Makefile dependencies follow.  This must be the last section in
 # the Makefile.in file
 #
-$(OUTPRE)des_stringtokey.$(OBJEXT): des_stringtokey.c \
+des_stringtokey.so des_stringtokey.po $(OUTPRE)des_stringtokey.$(OBJEXT): des_stringtokey.c \
   $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(BUILDTOP)/include/krb5.h \
   $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
   $(SRCTOP)/include/krb5/kdb.h old.h
-$(OUTPRE)old_decrypt.$(OBJEXT): old_decrypt.c $(SRCTOP)/include/k5-int.h \
+old_decrypt.so old_decrypt.po $(OUTPRE)old_decrypt.$(OBJEXT): old_decrypt.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
   $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h \
   old.h
-$(OUTPRE)old_encrypt.$(OBJEXT): old_encrypt.c $(SRCTOP)/include/k5-int.h \
+old_encrypt.so old_encrypt.po $(OUTPRE)old_encrypt.$(OBJEXT): old_encrypt.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
   $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h \

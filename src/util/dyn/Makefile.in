@@ -90,21 +90,21 @@ do-lclint: $(SRCS)
 # Makefile dependencies follow.  This must be the last section in
 # the Makefile.in file
 #
-$(OUTPRE)dyn_create.$(OBJEXT): dyn_create.c dynP.h \
+dyn_create.so dyn_create.po $(OUTPRE)dyn_create.$(OBJEXT): dyn_create.c dynP.h \
   dyn.h
-$(OUTPRE)dyn_put.$(OBJEXT): dyn_put.c dynP.h dyn.h
-$(OUTPRE)dyn_debug.$(OBJEXT): dyn_debug.c dynP.h dyn.h
-$(OUTPRE)dyn_delete.$(OBJEXT): dyn_delete.c dynP.h \
+dyn_put.so dyn_put.po $(OUTPRE)dyn_put.$(OBJEXT): dyn_put.c dynP.h dyn.h
+dyn_debug.so dyn_debug.po $(OUTPRE)dyn_debug.$(OBJEXT): dyn_debug.c dynP.h dyn.h
+dyn_delete.so dyn_delete.po $(OUTPRE)dyn_delete.$(OBJEXT): dyn_delete.c dynP.h \
   dyn.h
-$(OUTPRE)dyn_size.$(OBJEXT): dyn_size.c dynP.h dyn.h
-$(OUTPRE)dyn_append.$(OBJEXT): dyn_append.c dynP.h \
+dyn_size.so dyn_size.po $(OUTPRE)dyn_size.$(OBJEXT): dyn_size.c dynP.h dyn.h
+dyn_append.so dyn_append.po $(OUTPRE)dyn_append.$(OBJEXT): dyn_append.c dynP.h \
   dyn.h
-$(OUTPRE)dyn_realloc.$(OBJEXT): dyn_realloc.c dynP.h \
+dyn_realloc.so dyn_realloc.po $(OUTPRE)dyn_realloc.$(OBJEXT): dyn_realloc.c dynP.h \
   dyn.h
-$(OUTPRE)dyn_paranoid.$(OBJEXT): dyn_paranoid.c dynP.h \
+dyn_paranoid.so dyn_paranoid.po $(OUTPRE)dyn_paranoid.$(OBJEXT): dyn_paranoid.c dynP.h \
   dyn.h
-$(OUTPRE)dyn_insert.$(OBJEXT): dyn_insert.c dynP.h \
+dyn_insert.so dyn_insert.po $(OUTPRE)dyn_insert.$(OBJEXT): dyn_insert.c dynP.h \
   dyn.h
-$(OUTPRE)dyn_initzero.$(OBJEXT): dyn_initzero.c dynP.h \
+dyn_initzero.so dyn_initzero.po $(OUTPRE)dyn_initzero.$(OBJEXT): dyn_initzero.c dynP.h \
   dyn.h
 
