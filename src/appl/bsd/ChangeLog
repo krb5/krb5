@@ -1,3 +1,9 @@
+Fri Dec 22 17:42:11 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* login.c (main): If HAVE_SHADOW is defined, and no shadow
+		password entry is availble, try using the password entry
+		in the password file.
+
 Tue Dec 19 17:11:37 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* kcmd.c: Also include unistd.h, if it's available.

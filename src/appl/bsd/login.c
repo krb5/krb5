@@ -616,9 +616,8 @@ int retval;
 		if (spwd)
 		    lpass_ok = !strcmp(namep, spwd->sp_pwdp);
 		else
-#else
-		    lpass_ok = !strcmp (namep, pwd->pw_passwd);
 #endif
+		    lpass_ok = !strcmp (namep, pwd->pw_passwd);
 		
 		if (pwd->pw_uid != 0) { /* Don't get tickets for root */
 
