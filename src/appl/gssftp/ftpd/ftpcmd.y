@@ -91,11 +91,14 @@ extern MSG_DAT msg_data;
 extern gss_ctx_id_t gcontext;
 #endif
 
-#ifndef unix
+#ifndef unix			/* XXX */
 #ifdef _AIX
 #define unix
 #endif
 #ifdef __hpux
+#define unix
+#endif
+#ifdef BSD
 #define unix
 #endif
 #endif

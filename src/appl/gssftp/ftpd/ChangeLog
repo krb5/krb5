@@ -1,3 +1,7 @@
+2001-11-02  Tom Yu  <tlyu@mit.edu>
+
+	* ftpcmd.y: Kludge to #define unix on BSD for now.
+
 2001-10-29  Ken Raeburn  <raeburn@mit.edu>
 
 	* ftpd.c (login): New argument LOGINCODE, optional result code to
