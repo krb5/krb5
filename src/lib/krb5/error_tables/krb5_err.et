@@ -255,4 +255,9 @@ error_code KRB5_RCACHE_BADVNO,	"Unsupported replay cache format version number"
 error_code KRB5_CCACHE_BADVNO,	"Unsupported credentials cache format version number"
 error_code KRB5_KEYTAB_BADVNO,	"Unsupported key table format version number"
 
+#
+#
+
+error_code KRB5_PROG_ATYPE_NOSUPP,	"Program lacks support for address type"
+
 end
