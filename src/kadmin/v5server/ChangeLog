@@ -1,3 +1,12 @@
+
+Thu May 11 12:20:58 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* srv_key.c	- Defer setting keyb and encb init flags until we
+			  have successfully verified the master key.  Avoids
+			  a core dump if we don't enter it correctly.
+	* srv_net.c	- Set SO_REUSEADDR on the socket if we're not binding
+			  to the standard port.  Also remove logic which
+			  retried bind if bind failed.
+
 Sat May 9 17:46:31 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* srv_output.c (lang_error_message): Local variable is assigned
