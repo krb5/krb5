@@ -47,7 +47,7 @@ EXT_LIB = $(TOP)/error_tables/krb5_err.o \
                   $(TOP)/error_tables/isode_err.o \
                   $(TOP)/lib/cryptoconf.o \
                   $(TOP)/lib/crc-32/libcrc32.a \
-                  libdes.a -lcom_err
+                  libdes.a $(COMERRLIB)
 
 NormalProgramTarget(verify, $(VERIFYOBJ), ,$(EXT_LIB),)
 
