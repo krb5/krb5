@@ -20,6 +20,7 @@
 #include <sys/types.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #ifdef NEED_SETENV
 extern int setenv(char *, char *, int);

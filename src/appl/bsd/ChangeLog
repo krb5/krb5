@@ -1,3 +1,7 @@
+2004-05-29  Ken Raeburn  <raeburn@mit.edu>
+
+	* setenv.c: Include string.h.
+
 2004-05-24  Ezra Peisach  <epeisach@mit.edu>
 
 	* krsh.c (main): Invoke krb5_free_context at exit.
