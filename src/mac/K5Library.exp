@@ -207,3 +207,4 @@
 	krb5_ser_rcache_init				# GSSAPI
 	decode_krb5_ap_req					# GSSAPI
 	krb5_mcc_ops						# GSSAPI
+	krb5_c_keyed_checksum_types'		# GSSAPI
