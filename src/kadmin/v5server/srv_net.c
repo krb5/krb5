@@ -746,7 +746,7 @@ net_dispatch(kcontext)
 #endif	/* !USE_PTHREADS */
 
     /* Receive connections on the socket */
-    DPRINT(DEBUG_OPERATION, net_debug_level, ("listening on socket"));
+    DPRINT(DEBUG_OPERATION, net_debug_level, ("+ listening on socket\n"));
     if (
 #if	POSIX_SETJMP
 	sigsetjmp(shutdown_jmp, 1) == 0
@@ -759,7 +759,7 @@ net_dispatch(kcontext)
     }
     else
 	kret = EINTR;
-    DPRINT(DEBUG_OPERATION, net_debug_level, ("listen done"));
+    DPRINT(DEBUG_OPERATION, net_debug_level, ("+ listen done\n"));
 
     while (kret == 0) {
 	/*
@@ -773,13 +773,13 @@ net_dispatch(kcontext)
 #endif	/* POSIX_SETJMP */
 	    ) {
 	    readfds = mask;
-	    DPRINT(DEBUG_OPERATION, net_debug_level, ("doing select"));
+	    DPRINT(DEBUG_OPERATION, net_debug_level, ("+ doing select\n"));
 	    if ((nready = select(net_listen_socket+1,
 				 &readfds,
 				 (fd_set *) NULL,
 				 (fd_set *) NULL,
 				 (struct timeval *) NULL)) == 0) {
-		DPRINT(DEBUG_OPERATION, net_debug_level, ("nobody ready"));
+		DPRINT(DEBUG_OPERATION, net_debug_level, ("+ nobody ready\n"));
 		continue;	/* Nobody ready */
 	    }
 
@@ -795,7 +795,7 @@ net_dispatch(kcontext)
 
 		addrlen = sizeof(client_addr);
 		DPRINT(DEBUG_OPERATION, net_debug_level,
-		       ("accept connection"));
+		       ("+ accept connection\n"));
 		while (((conn_sock = accept(net_listen_socket,
 					    (struct sockaddr *) &client_addr,
 					    &addrlen)) < 0) &&
@@ -806,7 +806,7 @@ net_dispatch(kcontext)
 		    break;
 		}
 		DPRINT(DEBUG_OPERATION, net_debug_level,
-		       ("accepted connection"));
+		       ("+ accepted connection\n"));
 		kret = net_dispatch_client(kcontext,
 					   net_listen_socket,
 					   conn_sock,
@@ -815,7 +815,8 @@ net_dispatch(kcontext)
 		    com_err(net_dispatch_msg, kret, net_cl_disp_fmt);
 		    continue;
 		}
-		DPRINT(DEBUG_OPERATION, net_debug_level, ("dispatch done"));
+		DPRINT(DEBUG_OPERATION, net_debug_level,
+		       ("+ dispatch done\n"));
 	    }
 	    else {
 		com_err(net_dispatch_msg, 0, net_not_ready_fmt);
@@ -824,7 +825,7 @@ net_dispatch(kcontext)
 	}
 	else {
 	    DPRINT(DEBUG_OPERATION, net_debug_level,
-		   ("dispatch interrupted by SIGTERM"));
+		   ("+ dispatch interrupted by SIGTERM\n"));
 	    kret = 0;
 	    break;
 	}
