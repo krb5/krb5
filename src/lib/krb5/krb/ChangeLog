@@ -1,6 +1,13 @@
+Thu Nov 17 01:56:05 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* gc_via_tgt.c (krb5_get_cred_via_tgt): 
+	* gc_2tgt.c (krb5_get_cred_via_2tgt): Set the encryption type of
+		the session keyblock to be the type used to encrypt the
+		ticket. 
+
 Fri Nov 11 01:20:22 1994  Theodore Y. Ts'o  (tytso@dcl)
 
-	* get_in_tkt (krb5_get_in_tkt): Set the encryption type of the
+	* get_in_tkt.c (krb5_get_in_tkt): Set the encryption type of the
 		session keyblock to be the type used to encrypt the
 		ticket. 
 

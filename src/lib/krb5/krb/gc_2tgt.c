@@ -130,6 +130,8 @@ register krb5_creds * cred;
 	memset(&cred->keyblock.contents, 0, cred->keyblock.length);
 	krb5_xfree(cred->keyblock.contents);
     }
+    cred->keyblock.magic = KV5M_KEYBLOCK;
+    cred->keyblock.etype = dec_rep->ticket->enc_part.etype;
     if (retval = krb5_copy_keyblock_contents(dec_rep->enc_part2->session,
 					     &cred->keyblock))
 	goto errout;
