@@ -1,3 +1,8 @@
+2002-07-23  Ezra Peisach  <epeisach@bu.edu>
+
+	* krb524.h: Include socket-utils.h instead of port-sockets.h for
+	socklen_t definition.
+
 2002-07-22  Ken Raeburn  <raeburn@mit.edu>
 
 	* sendmsg.c (krb524_sendto_kdc): Accept new arguments for local

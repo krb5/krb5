@@ -110,7 +110,7 @@ void krb524_init_ets
 
 /* sendmsg.c */
 
-#include "port-sockets.h" /* for socklen_t */
+#include "socket-utils.h" /* for socklen_t */
 int krb524_sendto_kdc
         (krb5_context context, const krb5_data * message, 
 	 const krb5_data * realm, krb5_data * reply,
