@@ -233,13 +233,16 @@ KRB4_LIB	= @KRB4_LIB@
 # DES425_LIB is -ldes425 if building --with-krb4
 DES425_LIB	= @DES425_LIB@
 
+# HESIOD_LIBS is -lhesiod...
+HESIOD_LIBS	= @HESIOD_LIBS@
+
 KRB5_BASE_LIBS	= -lkrb5 -lcrypto -lcom_err $(GEN_LIB) $(LIBS)
 KRB4COMPAT_LIBS	= $(KRB4_LIB) -lkrb5 $(DES425_LIB) -lcrypto -lcom_err $(GEN_LIB) $(LIBS)
 KDB5_LIBS	= $(KDB5_LIB) $(DB_LIB)
 GSS_LIBS	= -lgssapi_krb5
 GSSRPC_LIBS	= -lgssrpc -ldyn $(GSS_LIBS)
 KADM_COMM_LIBS	= -lkrb5util  $(KDB5_LIBS) $(GSSRPC_LIBS)
-KADMSRV_LIBS	= -lkadm5srv $(KADM_COMM_LIBS)
+KADMSRV_LIBS	= -lkadm5srv $(HESIOD_LIBS) $(KADM_COMM_LIBS)
 KADMCLNT_LIBS	= -lkadm5clnt $(KADM_COMM_LIBS)
 
 UTIL_LIB	= -lkrb5util
