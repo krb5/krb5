@@ -1,3 +1,7 @@
+Wed Mar 13 17:37:00 1996  Ken Raeburn  <raeburn@cygnus.com>
+
+	* configure.in: Use AC_HEADER_STDARG.
+
 Sun Dec 10 11:02:56 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* str_conv.c (krb5_input_flag_to_string): Add new routine.

@@ -1,3 +1,7 @@
+Wed Mar 13 17:31:30 1996  Ken Raeburn  <raeburn@cygnus.com>
+
+	* configure.in: Use AC_HEADER_STDARG.
+
 Mon Mar 11 11:15:26 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* str_conv.c (krb5_timestamp_to_string): Handle statement not
