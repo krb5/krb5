@@ -1,3 +1,7 @@
+Mon May 20 00:07:16 1996  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* main.c (main):  Do not force source cache open if we are going to use it as the target.
+
 Sun May 19 13:41:21 1996  Sam Hartman  <hartmans@mit.edu>
 
 	* main.c: Force source ccache to stay open between transactions.
