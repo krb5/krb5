@@ -53,7 +53,7 @@ krb5_c_verify_checksum(context, key, usage, data, cksum, valid)
     /* if there's actually a verify function, call it */
 
     indata.length = cksum->length;
-    indata.data = cksum->contents;
+    indata.data = (char *) cksum->contents;
 
     if (krb5_cksumtypes_list[i].keyhash &&
 	krb5_cksumtypes_list[i].keyhash->verify)

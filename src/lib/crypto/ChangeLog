@@ -3,6 +3,13 @@
 	* make_checksum.c (krb5_c_make_checksum): Add cast assigning to
 	krb5_data data field.
 	* make_random_key.c (krb5_c_make_random_key): Likewise.
+	* hmac.c (krb5_hmac): Likewise.
+	* old-api_glue.c (krb5_init_random_key, krb5_decrypt_data):
+	Likewise.
+	* prng.c (krb5_c_make_random_octets): Likewise.
+	* verify_checksum.c (krb5_c_verify_checksum): Likewise.
+
+	* prng.c (krb5_c_random_seed): Cast argument to krb5_nfold.
 
 	* keyed_cksum.c (is_keyed_cksum): Use -1U to keep compiler quiet,
 	since return type is not signed.

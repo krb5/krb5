@@ -143,7 +143,7 @@ krb5_init_random_key(context, eblock, keyblock, ptr)
     krb5_data data;
 
     data.length = keyblock->length;
-    data.data = keyblock->contents;
+    data.data = (char *) keyblock->contents;
 
     return(krb5_c_random_seed(context, &data));
 }
@@ -365,7 +365,7 @@ krb5_error_code krb5_decrypt_data(context, key, ivec, enc_data, data)
     }
 
     data->length = enc_data->ciphertext.length;
-    if ((data->data = (krb5_octet *) malloc(data->length)) == NULL)
+    if ((data->data = (char *) malloc(data->length)) == NULL)
 	return(ENOMEM);
 
     if ((ret = krb5_c_decrypt(context, key, 0, ivec?&ivecd:0, enc_data, data)))

@@ -69,7 +69,7 @@ krb5_dk_string_to_key(enc, string, salt, key)
     krb5_nfold(concatlen*8, concat, keybytes*8, foldstring);
 
     indata.length = keybytes;
-    indata.data = foldstring;
+    indata.data = (char *) foldstring;
     foldkey.length = keylength;
     foldkey.contents = foldkeydata;
 

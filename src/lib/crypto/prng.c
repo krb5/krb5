@@ -74,7 +74,8 @@ krb5_c_random_seed(krb5_context context, krb5_data *data)
 	random_count = 0;
 	inited = 1;
 
-	krb5_nfold(data->length*8, data->data, STATESIZE*8, STATE);
+	krb5_nfold(data->length*8, (unsigned char *) data->data,
+		   STATESIZE*8, STATE);
 
 	return(0);
     }
@@ -113,7 +114,7 @@ krb5_c_random_make_octets(krb5_context context, krb5_data *data)
 	if (random_count == 0) {
 	    /* set up random krb5_data, and key to be filled in */
 	    data1.length = keybytes;
-	    data1.data = STATEKEY;
+	    data1.data = (char *) STATEKEY;
 	    key.length = keylength;
 	    key.contents = KEYCONTENTS;
 
@@ -123,9 +124,9 @@ krb5_c_random_make_octets(krb5_context context, krb5_data *data)
 
 	    /* encrypt the block */
 	    data1.length = blocksize;
-	    data1.data = STATEBLOCK;
+	    data1.data = (char *) STATEBLOCK;
 	    data2.length = blocksize;
-	    data2.data = RANDBLOCK;
+	    data2.data = (char *) RANDBLOCK;
 	    if ((ret = ((*(enc->encrypt))(&key, NULL, &data1, &data2))))
 		return(ret);
 

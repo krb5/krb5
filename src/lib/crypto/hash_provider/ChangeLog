@@ -1,3 +1,8 @@
+2001-04-10  Ken Raeburn  <raeburn@mit.edu>
+
+	* hash_md4.c (k5_md4_hash): Cast argument to krb5_MD4Update.
+	* hash_md5.c (k5_md5_hash): Cast argument to krb5_MD5Update.
+
 2001-03-09  Ken Raeburn  <raeburn@mit.edu>
 
 	* hash_crc32.c, hash_md4.c, hash_md5.c, hash_provider.h,

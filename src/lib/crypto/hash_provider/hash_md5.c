@@ -52,7 +52,7 @@ k5_md5_hash(unsigned int icount, const krb5_data *input,
 
     krb5_MD5Init(&ctx);
     for (i=0; i<icount; i++)
-	krb5_MD5Update(&ctx, input[i].data, input[i].length);
+	krb5_MD5Update(&ctx, (unsigned char *) input[i].data, input[i].length);
     krb5_MD5Final(&ctx);
 
     memcpy(output->data, ctx.digest, RSA_MD5_CKSUM_LENGTH);

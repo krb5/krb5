@@ -89,12 +89,12 @@ krb5_hmac(hash, key, icount, input, output)
 
     for (i=0; i<icount; i++) {
 	hashin[0].length = blocksize;
-	hashin[0].data = xorkey;
+	hashin[0].data = (char *) xorkey;
 	hashin[i+1] = input[i];
     }
 
     hashout.length = hashsize;
-    hashout.data = ihash;
+    hashout.data = (char *) ihash;
 
     if ((ret = ((*(hash->hash))(icount+1, hashin, &hashout))))
 	goto cleanup;
@@ -109,7 +109,7 @@ krb5_hmac(hash, key, icount, input, output)
     /* compute the outer hash */
 
     hashin[0].length = blocksize;
-    hashin[0].data = xorkey;
+    hashin[0].data = (char *) xorkey;
     hashin[1] = hashout;
 
     output->length = hashsize;
