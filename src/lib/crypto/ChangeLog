@@ -1,3 +1,8 @@
+Mon May 20 10:59:23 1996  Tom Yu  <tlyu@dragons-lair.MIT.EDU>
+
+	* Makefile.in (libcrypto.$(STEXT): deal with new improved
+		libupdate
+
 Sat May 18 13:34:01 1996  Ezra Peisach  (epeisach@paris)
 
 	* des3_sha.c: Add static keywords in function declarartions to

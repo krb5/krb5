@@ -1,3 +1,8 @@
+Mon May 20 10:56:51 1996  Tom Yu  <tlyu@dragons-lair.MIT.EDU>
+
+	* Makefile.in (libkrb5.$(STEXT)): fix sense of test; also deal
+		with new improved libupdate
+
 Tue Apr 30 16:31:50 1996  Ken Raeburn  <raeburn@cygnus.com>
 
 	* Makefile.in (libkrb5.$(STEXT)): Set a variable with or without

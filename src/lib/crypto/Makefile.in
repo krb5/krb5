@@ -51,17 +51,10 @@ all-mac:: $(OBJS)
 all-windows:: $(OBJS)
 
 libcrypto.$(STEXT): $(LIBDONE)
-	-rm -f $@ libcrypto.stamp
-	if test -f $@ ; then \
-		for i in $(LIB_SUBDIRS) ; \
-		do \
-			$(LIBUPDATE) $@ $$i/DONE $$i ; \
-		done ; \
+	@if test -f $@ ; then \
+		(set -x; $(LIBUPDATE) $@ DONE $(LIB_SUBDIRS)) \
 	else \
-		for i in $(LIB_SUBDIRS) ; \
-		do \
-			$(LIBUPDATE) --force $@ $$i/DONE $$i ; \
-		done ; \
+		(set -x; $(LIBUPDATE) --force $@ DONE $(LIB_SUBDIRS)) \
 	fi
 	$(RANLIB) $@
 	touch libcrypto.stamp

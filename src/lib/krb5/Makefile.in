@@ -32,13 +32,11 @@ all-unix::
 all-windows::
 
 libkrb5.$(STEXT): $(LIBDONE)
-	-rm -f $@ libkrb5.stamp
-	if test -f $@ ; then frc=--force ; else frc= ; fi ; \
-	for i in $(LIBDONE) ; \
-	do \
-		$(LIBUPDATE) $$frc $@ $$i `echo $$i | sed s,/DONE,,` \
-			|| exit 1 ; \
-	done
+	@if test -f $@ ; then \
+		(set -x; $(LIBUPDATE) $@ DONE $(LIB_SUBDIRS)) \
+	else \
+		(set -x; $(LIBUPDATE) --force $@ DONE $(LIB_SUBDIRS)) \
+	fi
 	$(RANLIB) libkrb5.$(STEXT)
 	touch libkrb5.stamp
 

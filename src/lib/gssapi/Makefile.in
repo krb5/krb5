@@ -23,16 +23,10 @@ all-unix::
 all-mac::
 
 libgssapi_krb5.$(STEXT): $(LIBDONE)
-	if test -f $@ ; then \
-		for i in $(LIB_SUBDIRS) ; \
-		do \
-			$(LIBUPDATE) $@ $$i/DONE $$i ; \
-		done ; \
+	@if test -f $@ ; then \
+		(set -x; $(LIBUPDATE) $@ DONE $(LIB_SUBDIRS)) \
 	else \
-		for i in $(LIB_SUBDIRS) ; \
-		do \
-			$(LIBUPDATE) --force $@ $$i/DONE $$i ; \
-		done ; \
+		(set -x; $(LIBUPDATE) --force $@ DONE $(LIB_SUBDIRS)) \
 	fi
 	$(RANLIB) libgssapi_krb5.$(STEXT)
 	touch libgssapi_krb5.stamp

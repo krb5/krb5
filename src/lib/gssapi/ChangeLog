@@ -1,3 +1,8 @@
+Mon May 20 11:00:45 1996  Tom Yu  <tlyu@dragons-lair.MIT.EDU>
+
+	* Makefile.in (libgssapi.$(STEXT)): deal with new improved
+		libupdate
+
 Mon May  6 21:33:25 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* Makefile.in (clean-unix): Remove libgssapi_krb5.stamp.
