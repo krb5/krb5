@@ -1,5 +1,15 @@
 2000-03-01  Tom Yu  <tlyu@mit.edu>
 
+	* main.c: Move kdc_initialize_rcache() to kdc_util.c
+
+	* kdc_util.c (kdc_initialize_rcache): Move kdc_initialize_rcache()
+	back here since it's needed for rtest to work.  process_tgs_req()
+	which is called from rtest needs to call kdc_intiialize_rcache()
+	and we can't very well link rtest with main.o
+
+	* kdc_preauth.c (verify_sam_response): Ooops.  Get rc_lifetime
+	from kdc_util, since it's actually declared there.
+
 	* configure.in: Fix --enable-kdc-replay-cache to actually default
 	to "yes".
 

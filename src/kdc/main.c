@@ -60,63 +60,13 @@ void initialize_realms PROTOTYPE((krb5_context, int, char **));
 void finish_realms PROTOTYPE((char *));
 
 static int nofork = 0;
-#ifdef USE_RCACHE
-static char *kdc_current_rcname = (char *) NULL;
-#endif
 static int rkey_init_done = 0;
-
-#ifdef USE_RCACHE
-krb5_deltat rc_lifetime; /* See kdc_initialize_rcache() */
-#endif /* USE_RCACHE */
 
 #ifdef POSIX_SIGNALS
 static struct sigaction s_action;
 #endif /* POSIX_SIGNALS */
 
 #define	KRB5_KDC_MAX_REALMS	32
-
-#ifdef USE_RCACHE
-/*
- * initialize the replay cache.
- */
-krb5_error_code
-kdc_initialize_rcache(kcontext, rcache_name)
-    krb5_context	kcontext;
-    char 		*rcache_name;
-{
-    krb5_error_code	retval;
-    char		*rcname;
-    char		*sname;
-
-    rcname = (rcache_name) ? rcache_name : kdc_current_rcname;
-
-    /* rc_lifetime used elsewhere to verify we're not */
-    /*  replaying really old data                     */
-    rc_lifetime = kcontext->clockskew;
-
-    if (!rcname)
-	rcname = KDCRCACHE;
-    if (!(retval = krb5_rc_resolve_full(kcontext, &kdc_rcache, rcname))) {
-	/* Recover or initialize the replay cache */
-	if (!(retval = krb5_rc_recover(kcontext, kdc_rcache)) ||
-	    !(retval = krb5_rc_initialize(kcontext,
-					  kdc_rcache,
-					  kcontext->clockskew))
-	    ) {
-	    /* Expunge the replay cache */
-	    if (!(retval = krb5_rc_expunge(kcontext, kdc_rcache))) {
-		sname = kdc_current_rcname;
-		kdc_current_rcname = strdup(rcname);
-		if (sname)
-		    free(sname);
-	    }
-	}
-	if (retval)
-	    krb5_rc_close(kcontext, kdc_rcache);
-    }
-    return(retval);
-}
-#endif
 
 /*
  * Find the realm entry for a given realm.

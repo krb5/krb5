@@ -1267,17 +1267,12 @@ verify_sam_response(context, client, request, enc_tkt_reply, pa)
 #ifdef USE_RCACHE
     {
 	krb5_donot_replay rep;
-	krb5_deltat rc_lifetime;
+	extern krb5_deltat rc_lifetime;
 	/*
 	 * Verify this response came back in a timely manner.
 	 * We do this b/c otherwise very old (expunged from the rcache)
 	 * psr's would be able to be replayed.
 	 */
-	retval = krb5_rc_get_lifespan(kdc_context, kdc_rcache, &rc_lifetime);
-	if (retval) {
-	    com_err("krb5kdc", retval, "while getting rcache lifespan");
-	    goto cleanup;
-	}
 	if (timenow - psr->stime > rc_lifetime) {
 	    com_err("krb5kdc", retval = KRB5KDC_ERR_PREAUTH_FAILED,
 	    "SAM psr came back too late! -- replay attack?");
