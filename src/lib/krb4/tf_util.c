@@ -374,6 +374,7 @@ int tf_get_cred(c)
 {
     KTEXT   ticket = &c->ticket_st;	/* pointer to ticket */
     int     k_errno;
+    long issue_date;
 
     if (fd < 0) {
 	if (krb_debug)
@@ -414,11 +415,12 @@ int tf_get_cred(c)
     /* don't try to read a silly amount into ticket->dat */
 	ticket->length > MAX_KTXT_LEN ||
 	tf_read((char *) (ticket->dat), ticket->length) < 1 ||
-	tf_read((char *) &(c->issue_date), sizeof(c->issue_date)) < 1
+	tf_read((char *) &(issue_date), sizeof(issue_date)) < 1
 	) {
 	tf_close();
 	return TKT_FIL_FMT;
     }
+    c->issue_date = issue_date;
 #ifdef TKT_SHMEM
     memcpy(c->session, tmp_shm_addr, KEY_SZ);
     tmp_shm_addr += KEY_SZ;
