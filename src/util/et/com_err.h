@@ -14,7 +14,7 @@
 
 #ifndef HAVE_STDARG_H
 /* End-user programs may need this -- oh well */
-#ifdef __STDC__
+#if defined(__STDC__) || defined(_WINDOWS)
 #define HAVE_STDARG_H 1
 #endif
 #endif
@@ -39,7 +39,7 @@
 #endif
 #endif
 
-#ifdef __STDC__
+#if defined(__STDC__) || defined(_WINDOWS)
 /* ANSI C -- use prototypes etc */
 extern void INTERFACE_C com_err (const char *, long, const char *, ...);
 extern char const * INTERFACE error_message (long);

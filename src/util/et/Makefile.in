@@ -29,6 +29,7 @@ SRCS=$(CFILES)
 all:: all-$(WHAT)
 
 all-windows: com_err.obj error_message.obj et_name.obj
+	copy com_err.h $(BUILDTOP)\include
 
 #
 # what to build...
@@ -46,6 +47,8 @@ com_err.o: com_err.c
 #
 
 all-unix:: compile_et includes
+
+all-mac:: compile_et includes
 
 # The real compile_et just isn't portable.  (But then again, anything using 
 # lex and yacc isn't portable by definition.  :-(  )
@@ -71,6 +74,9 @@ clean:: clean-$(WHAT)
 clean-unix::
 	$(RM) compile_et compile_et.o error_table.o 
 
+clean-mac::
+	$(RM) compile_et compile_et.o error_table.o 
+
 depend:: 
 
 install:: com_err.h 
@@ -89,11 +95,17 @@ install:: compile_et.1
 ## install_library_target(com_err,$(LIBOBJS),$(LINTFILES),)
 all-unix:: libcom_err.a
 
+all-mac:: libcom_err.a
+
 libcom_err.a: $(LIBOBJS)
 	$(ARCHIVE) $@ $(LIBOBJS)
 	$(RANLIB) $@
 
 clean-unix::
+	$(RM) libcom_err.a
+	$(RM) $(LIBOBJS)
+
+clean-mac::
 	$(RM) libcom_err.a
 	$(RM) $(LIBOBJS)
 
@@ -104,7 +116,11 @@ install::
 	$(CHMOD) 444 $(DESTDIR)$(LIBDIR)/libcom_err.a
 ## 
 
-clean-unix::
+clean-unix:: clean-files
+
+clean-mac:: clean-files
+
+clean-files::
 	rm -f *~ \#* *.bak \
 		*.otl *.aux *.toc *.PS *.dvi *.x9700 *.ps \
 		*.cp *.fn *.ky *.log *.pg *.tp *.vr \

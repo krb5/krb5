@@ -1,7 +1,10 @@
-Sat Mar 18 18:44:03 1995  John Gilmore  (gnu at toad.com)
+Thu Mar 16 19:57:20 1995 Keith Vetter (keithv@fusion.com)
 
-	* com_err.c, com_err.h:  Use HAVE_STDARG_H, not STDARG_PROTOTYPES.
-	* configure.in:  Use AC_CHECK_HEADERS(stdarg.h), not CHECK_STDARG.
+	* com_err.c: added missing INTERFACE on a prototype.
+        * com_err.h: added _WINDOWS as an equivalent to __STDC__ since this
+           file gets included by windows programs in which __STDC__ isn't defined.
+        * makefile.in: added xxx-mac targets to mimic xxx-unix, and added
+            copying com_err.h to src\include for the PC.
 
 Wed Mar 16 17:30:00 1995 Keith Vetter (keithv@fusion.com)
 

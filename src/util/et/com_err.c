@@ -36,9 +36,9 @@
  * directly.
  */
 #ifdef __STDC__
-extern char const *error_message (long);
+extern char const * INTERFACE error_message (long);
 #else
-extern char *error_message ();
+extern char * INTERFACE error_message ();
 #endif
 
 static void
@@ -71,7 +71,7 @@ static void
 #else
     fputs (errbuf, stderr);
     fflush(stderr);
-#endif    
+#endif
 }
 
 #ifdef __STDC__
