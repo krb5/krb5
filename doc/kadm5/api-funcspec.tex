@@ -15,7 +15,7 @@
 \def\v#1{\verb+#1+}
 
 \title{Kerberos Administration System \\
-	KADM5 API Functional Specifications\thanks{\rcsId}}
+        KADM5 API Functional Specifications\thanks{\rcsId}}
 \author{Barry Jaspan}
 
 \begin{document}
@@ -276,7 +276,8 @@ timestamp.
 \item[kvno] The version of the principal's current key.
 
 \item[mkvno] The version of the Kerberos Master Key in effect when
-this principal's key was last changed.
+this principal's key was last changed.  In KADM5_API_VERSION_2, this
+field is always zero.
 
 \item[policy] If the POLICY bit is set in aux_attributes, the name
 of the policy controlling this principal.
@@ -325,10 +326,8 @@ kadm5 API, so none of the them provided in this list.  Any new tagged
 data types defined in the future will be provided, however.
 
 \item[key_data] An array of the principal's keys.  The keys contained
-in this array are the principal's {\it actual Kerberos keys}, not
-encrypted in the Kerberos master key as with the libkdb interface.
-See section \ref{sec:keys} for a discussion of the krb5_key_data
-structure.
+in this array are encrypted in the Kerberos master key.  See section
+\ref{sec:keys} for a discussion of the krb5_key_data structure.
 \end{description}
 
 \subsection{Policies, kadm5_policy_ent_t}
@@ -437,6 +436,11 @@ typedef struct _kadm5_config_params {
 \begin{description}
 \item[mask] XXX document all the fields! (once I decide which ones
 will actually be used)
+
+\item[realm] The realm to which these parameters apply, and the realm
+for which additional parameters are to be acquired, if any.  If this
+field is not specified in the mask (XXX awk), the default local ream
+is used.
 \end{description}
 
 \subsection{Principal keys}
@@ -448,7 +452,7 @@ outside the API (by command-line options to the administration
 server).
 
 In KADM5_API_VERSION_2, principals can have multiple keys, each with
-its own encryption and salt type.  Each time a principal's key is
+its own encryption type and salt.  Each time a principal's key is
 changed with kadm5_create_principal, kadm5_chpass_principal or
 kadm5_randkey_principal, a key entry for each encryption and salt type
 tuple specified in the configuration parameters is added.  There is no
@@ -461,11 +465,11 @@ A single key is represented by a krb5_key_data:
 %
 \begin{verbatim}
 typedef struct _krb5_key_data {
-    krb5_int16            key_data_ver;         /* Version */
-    krb5_int16            key_data_kvno;        /* Key Version */
-    krb5_int16            key_data_type[2];     /* Array of types */
-    krb5_int16            key_data_length[2];   /* Array of lengths */
-    krb5_octet          * key_data_contents[2]; /* Array of pointers */
+        krb5_int16            key_data_ver;         /* Version */
+        krb5_int16            key_data_kvno;        /* Key Version */
+        krb5_int16            key_data_type[2];     /* Array of types */
+        krb5_int16            key_data_length[2];   /* Array of lengths */
+        krb5_octet          * key_data_contents[2]; /* Array of pointers */
 } krb5_key_data;
 \end{verbatim}
 %
@@ -1401,7 +1405,7 @@ In KADM5_API_VERSION_2:
 \begin{verbatim}
 kadm5_ret_t
 kadm5_randkey_principal(void *server_handle, krb5_principal princ,
-                        krb5_int16 *n_key_data, krb5_key_data *key_data)
+                        krb5_keyblock **new_keys, int *n_keys)
 \end{verbatim}
 
 AUTHORIZATION REQUIRED: modify, or the calling principal being the
@@ -1409,11 +1413,13 @@ same as the princ argument.  If the request is authenticated to the
 kadmin/changepw service, the modify privilege is disregarded.
 
 Generate and assign a new random key to the named principal, and
-return the generated key in allocated storage.  See section
-\ref{sec:keys} for a description of how the keys are chosen.  In
-KADM5_API_VERSION_1, the caller must free the returned krb5_keyblock *
-with krb5_free_keyblock.  In KADM5_API_VERSION_2, the caller must free
-the returned krb5_key_data array kadm5_free_key_data.
+return the generated key in allocated storage.  In
+KADM5_API_VERSION_2, multiple keys may be generated and returned as an
+array, and n_new_keys is filled in with the number of keys generated.
+See section \ref{sec:keys} for a description of how the keys are
+chosen.  In KADM5_API_VERSION_1, the caller must free the returned
+krb5_keyblock * with krb5_free_keyblock.  In KADM5_API_VERSION_2, the
+caller must free each returned keyblock with krb5_free_keyblock.
 
 If the principal's POLICY bit is set in aux_attributes and the caller does
 not have modify privilege , compliance with the password minimum life
@@ -1483,20 +1489,23 @@ In KADM5_API_VERSION_2:
 \begin{verbatim}
 kadm5_ret_t
 kadm5_get_principal(void *server_handle, krb5_principal princ, 
-                         kadm5_principal_ent_t *ent, u_int32 mask);  
+                         kadm5_principal_ent_t ent, u_int32 mask);  
 \end{verbatim}
 
 AUTHORIZATION REQUIRED: get, or the calling principal being the same
 as the princ argument.  If the request is authenticated to the
 kadmin/changepw service, the get privilege is disregarded.
 
-Return the principal's attributes in allocated memory.  In
-KADM5_API_VERSION_2, only the fields specified in the mask are
-returned.  Typically, a caller will specify the mask
+In KADM5_API_VERSION_1, return all of the principal's attributes in
+allocated memory.  In KADM5_API_VERSION_2, fill in the fields of the
+principal structure specified in the mask; memory for the structure is
+not allocated.  Typically, a caller will specify the mask
 KADM5_PRINCIPAL_NORMAL_MASK, which includes all the fields {\it
 except} key_data and tl_data to improve time and memory efficiency.  A
 caller that wants key_data and tl_data can bitwise-OR those masks onto
-NORMAL_MASK.  The caller must free the returned entry with
+NORMAL_MASK.  
+
+In KADM5_API_VERSION_1, the caller must free the returned entry with
 kadm5_free_principal_ent.  If an error is returned entry is set to
 NULL.
 
@@ -1693,9 +1702,9 @@ void kadm5_free_principal_ent(void *server_handle,
                                    kadm5_principal_ent_t princ);
 \end{verbatim}
 
-Free the memory that was allocated by a call to
-kadm5_get_principal.  If the argument is NULL, the function
-returns succesfully.
+In KADM5_API_VERSION_1, free the structure and contents allocated by a
+call to kadm5_get_principal.  In KADM5_API_VERSION_2, free the
+contents allocated by a call to kadm5_get_principal.
 
 AUTHORIZATION REQUIRED: none (local operation)
 
