@@ -5,7 +5,8 @@
 	PTHREAD_CFLAGS and PTHREAD_LIBS to avoid duplicating the options
 	later.
 	(WITH_CC): If on AIX and not using gcc, add -qhalt=e and -O to
-	CFLAGS if similar options are not already present.
+	CFLAGS if similar options are not already present.  Log messages
+	when doing so.
 
 2004-07-16  Ken Raeburn  <raeburn@mit.edu>
 

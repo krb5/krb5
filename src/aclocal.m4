@@ -584,7 +584,10 @@ else
     # in function calls.  Let's try to fix that with -qhalt=e.
     case "$CC $CFLAGS" in
       *-qhalt=*) ;;
-      *) CFLAGS="$CFLAGS -qhalt=e" ;;
+      *)
+	CFLAGS="$CFLAGS -qhalt=e"
+	AC_MSG_NOTICE(adding -qhalt=e for better error reporting)
+	;;
     esac
     # Also, the optimizer isn't turned on by default, which means
     # the static inline functions get left in random object files,
@@ -592,7 +595,10 @@ else
     # includes k5-int.h whether it uses threads or not.
     case "$CC $CFLAGS" in
       *-O*) ;;
-      *) CFLAGS="$CFLAGS -O" ;;
+      *)
+	CFLAGS="$CFLAGS -O"
+	AC_MSG_NOTICE(adding -O for inline thread-support function elimination)
+	;;
     esac
   fi
 fi
