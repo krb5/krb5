@@ -614,9 +614,19 @@ krb5_stdcc_destroy (krb5_context context, krb5_ccache id)
 		return retval;
 	}
 	
-	/* destroy the named cache */
-	err = cc_destroy(gCntrlBlock, &ccapi_data->NamedCache);
-	cache_changed();
+	/* free memory associated with the krb5_ccache */
+	if (ccapi_data) {
+		if (ccapi_data->cache_name)
+			free(ccapi_data->cache_name);
+		if (ccapi_data->NamedCache) {
+			/* destroy the named cache */
+			err = cc_destroy(gCntrlBlock, &ccapi_data->NamedCache);
+			cache_changed();
+		}
+		free(ccapi_data);
+		id->data = NULL;
+	}
+	free(id);
 	
 	return cc_err_xlate(err);
 }
