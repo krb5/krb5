@@ -13,3 +13,9 @@ crctest: crctest.o $(OBJS)
 	$(RM) crctest
 	$(CC) -o $@ crctest.o $(LDFLAGS) $(OBJS)
 
+check:: crctest
+	./crctest < $(srcdir)/crc-test
+
+clean::
+	$(RM) crctest crctest.o
+

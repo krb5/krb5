@@ -1,3 +1,8 @@
+Wed Oct 12 02:24:04 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* Makefile.in: Run crctest on a "make check".  Clean up the
+		crctest program on a "make clean".
+
 Tue Oct  4 14:53:54 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* crc.c: Added placeholder for magic number
