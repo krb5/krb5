@@ -1,4 +1,9 @@
 
+Mon Aug 7 14:44:21 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* configure.in, sys_term.c - Use utmpx.h if present, then check for
+		utmp.h.  Add logic to handle ut_tv from utmpx.h.
+
+
 Mon Aug 7 13:08:39 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* configure.in - Add check for utmp.h.  Make check for utmpx.h define
 		additional symbol to work with libpty.h.

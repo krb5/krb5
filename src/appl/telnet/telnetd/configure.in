@@ -30,8 +30,11 @@ AC_HEADER_CHECK(sys/filio.h,AC_DEFINE(FILIO_H))
 AC_HEADER_CHECK(sys/stream.h,AC_DEFINE(STREAMS))
 AC_HEADER_CHECK(utmpx.h,
 	AC_DEFINE(UTMPX)
-	AC_DEFINE(HAVE_UTMPX_H))
+	AC_DEFINE(HAVE_UTMPX_H)
+	ac_utmp_h=1)
+if test -z "$ac_utmp_h" ; then
 AC_CHECK_HEADERS(utmp.h)
+fi
 AC_FUNC_CHECK(cgetent,AC_DEFINE(HAS_CGETENT))
 AC_MSG_CHECKING([if setpgrp takes two arguments])
 dnl

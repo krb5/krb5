@@ -1134,7 +1134,12 @@ slavepid = i; /* So we can clean it up later */
 		/*
 		 * Create utmp entry for child
 		 */
+#ifdef	UTMPX
+		(void) time(&wtmp.ut_tv.tv_sec);
+		wtmp.ut_tv.tv_usec = 0;
+#else	/* UTMPX */
 		(void) time(&wtmp.ut_time);
+#endif	/* UTMPX */
 		wtmp.ut_type = LOGIN_PROCESS;
 		wtmp.ut_pid = getpid();
 
