@@ -47,56 +47,56 @@ extern krb5_boolean	delete_ccache;
  */
 /* network.c */
 void		print_proto_sreply
-			PROTOTYPE((krb5_int32, krb5_data *));
+			KRB5_PROTOTYPE((krb5_int32, krb5_data *));
 void		print_proto_error
-			PROTOTYPE((char *,
-				   krb5_int32,
-				   krb5_int32,
-				   krb5_data *));
+			KRB5_PROTOTYPE((char *,
+					krb5_int32,
+					krb5_int32,
+					krb5_data *));
 krb5_error_code	net_connect();
 void		net_disconnect
-			PROTOTYPE((krb5_boolean));
+			KRB5_PROTOTYPE((krb5_boolean));
 krb5_error_code	net_do_proto
-			PROTOTYPE((char *,
-				   char *,
-				   char *,
-				   krb5_int32,
-				   krb5_data *,
-				   krb5_int32 *,
-				   krb5_int32 *,
-				   krb5_data **,
-				   krb5_boolean));
+			KRB5_PROTOTYPE((char *,
+					char *,
+					char *,
+					krb5_int32,
+					krb5_data *,
+					krb5_int32 *,
+					krb5_int32 *,
+					krb5_data **,
+					krb5_boolean));
 
 /* convert.c */
-char *		delta2string PROTOTYPE((krb5_deltat));
-char *		abs2string PROTOTYPE((krb5_timestamp));
-char *		dbflags2string PROTOTYPE((krb5_flags));
-char *		salt2string PROTOTYPE((krb5_int32));
-krb5_boolean	parse_princ_options PROTOTYPE((int,
-					       char **,
-					       krb5_ui_4 *,
-					       krb5_db_entry *));
+char *		delta2string KRB5_PROTOTYPE((krb5_deltat));
+char *		abs2string KRB5_PROTOTYPE((krb5_timestamp));
+char *		dbflags2string KRB5_PROTOTYPE((krb5_flags));
+char *		salt2string KRB5_PROTOTYPE((krb5_int32));
+krb5_boolean	parse_princ_options KRB5_PROTOTYPE((int,
+						    char **,
+						    krb5_ui_4 *,
+						    krb5_db_entry *));
 void		help_princ_options();
 
 /* kadmin5.c */
-void		kadmin_show_principal PROTOTYPE((int, char **));
-void		kadmin_add_new_key PROTOTYPE((int, char **));
-void		kadmin_change_pwd PROTOTYPE((int, char **));
-void		kadmin_add_rnd_key PROTOTYPE((int, char **));
-void		kadmin_change_rnd PROTOTYPE((int, char **));
-void		kadmin_add_v4_key PROTOTYPE((int, char **));
-void		kadmin_change_v4_key PROTOTYPE((int, char **));
-void		kadmin_delete_entry PROTOTYPE((int, char **));
-void		kadmin_extract PROTOTYPE((int, char **));
-void		kadmin_extract_v4 PROTOTYPE((int, char **));
-void		kadmin_modify PROTOTYPE((int, char **));
-void		kadmin_rename PROTOTYPE((int, char **));
-void		kadmin_list PROTOTYPE((int, char **));
-void		kadmin_language PROTOTYPE((int, char **));
-void		kadmin_mime PROTOTYPE((int, char **));
-void		kadmin_cd PROTOTYPE((int, char **));
-void		kadmin_pwd PROTOTYPE((int, char **));
-char *		kadmin_startup PROTOTYPE((int, char **));
+void		kadmin_show_principal KRB5_PROTOTYPE((int, char **));
+void		kadmin_add_new_key KRB5_PROTOTYPE((int, char **));
+void		kadmin_change_pwd KRB5_PROTOTYPE((int, char **));
+void		kadmin_add_rnd_key KRB5_PROTOTYPE((int, char **));
+void		kadmin_change_rnd KRB5_PROTOTYPE((int, char **));
+void		kadmin_add_key_type KRB5_PROTOTYPE((int, char **));
+void		kadmin_del_key_type KRB5_PROTOTYPE((int, char **));
+void		kadmin_delete_entry KRB5_PROTOTYPE((int, char **));
+void		kadmin_extract KRB5_PROTOTYPE((int, char **));
+void		kadmin_extract_v4 KRB5_PROTOTYPE((int, char **));
+void		kadmin_modify KRB5_PROTOTYPE((int, char **));
+void		kadmin_rename KRB5_PROTOTYPE((int, char **));
+void		kadmin_list KRB5_PROTOTYPE((int, char **));
+void		kadmin_language KRB5_PROTOTYPE((int, char **));
+void		kadmin_mime KRB5_PROTOTYPE((int, char **));
+void		kadmin_cd KRB5_PROTOTYPE((int, char **));
+void		kadmin_pwd KRB5_PROTOTYPE((int, char **));
+char *		kadmin_startup KRB5_PROTOTYPE((int, char **));
 int		kadmin_cleanup();
 #endif	/* KADMIN5_H__ */
 

@@ -120,6 +120,16 @@ static const char *cpw_prompt1_fmt	= "   Enter new password for %s: ";
 static const char *cpw_prompt2_fmt	= "Re-enter new password for %s: ";
 static const char *cpw_succ_fmt		= "password changed for %s";
 static const char *cpw_nochange_fmt	= "password not changed for %s";
+static const char *akt_usage_fmt	= "usage is %s principal [key:salt]+";
+static const char *akt_prompt1_fmt	= "   Enter current password for %s: ";
+static const char *akt_prompt2_fmt	= "Re-enter current password for %s: ";
+static const char *akt_succ_fmt		= "keytypes successfully added for %s";
+static const char *akt_nochange_fmt	= "keytypes not added for %s";
+static const char *dkt_usage_fmt	= "usage is %s principal [key:salt[:kvno]]+";
+static const char *dkt_prompt1_fmt	= "   Enter current password for %s: ";
+static const char *dkt_prompt2_fmt	= "Re-enter current password for %s: ";
+static const char *dkt_succ_fmt		= "keytypes successfully deleted for %s";
+static const char *dkt_nochange_fmt	= "keytypes not deleted for %s";
 static const char *dprinc_usage_fmt	= "usage is %s [%s] principal [...]";
 static const char *del_conf_fmt		= "Enter '%c' to delete principal %s: ";
 static const char del_conf_char		= 'y';
@@ -667,6 +677,178 @@ kadmin_change_rnd(argc, argv)
 	    krb5_free_adm_data(kcontext, ncomps, complist);
 	}
     }
+}
+
+/*
+ * kadmin_add_key_type()	- Add key/salt types.
+ */
+void
+kadmin_add_key_type(argc, argv)
+    int		argc;
+    char	*argv[];
+{
+    int			i;
+    krb5_int32		proto_stat;
+    krb5_int32		ncomps;
+    krb5_data		*complist;
+    krb5_error_code	kret;
+    krb5_data		*arglist;
+    char		*p1;
+    char		*p2;
+    char		*opass;
+    int			oplen;
+
+    /*
+     * Command syntax is: akt principal [keysalt]+
+     */
+    if (argc < 3) {
+	com_err(argv[0], 0, akt_usage_fmt, argv[0]);
+	return;
+    }
+
+    requestname = argv[0];
+    kret = 0;
+    arglist = (krb5_data *) malloc((size_t)(sizeof(krb5_data)*(argc-2)));
+    p1 = (char *) malloc(strlen(akt_prompt1_fmt)+strlen(argv[argc-1])+1);
+    p2 = (char *) malloc(strlen(akt_prompt2_fmt)+strlen(argv[argc-1])+1);
+    opass = (char *) malloc(KRB5_ADM_MAX_PASSWORD_LEN);
+    if (arglist && p1 && p2 && opass) {
+	memset(arglist, 0, (size_t) (sizeof(krb5_data)*(argc-2)));
+	sprintf(p1, akt_prompt1_fmt, argv[1]);
+	sprintf(p2, akt_prompt2_fmt, argv[1]);
+	for (i=2; i<argc; i++) {
+	    arglist[i-2].length = strlen(argv[i]);
+	    arglist[i-2].data = argv[i];
+	}
+	if (!(kret = net_connect())) {
+	    oplen = KRB5_ADM_MAX_PASSWORD_LEN;
+	    if (!(kret = krb5_read_password(kcontext,
+					    p1,
+					    p2,
+					    opass,
+					    &oplen))) {
+		opass[oplen] = '\0';
+		if (!(kret = net_do_proto(KRB5_ADM_ADD_KEY_CMD,
+					  argv[1],
+					  opass,
+					  argc-2,
+					  arglist,
+					  &proto_stat,
+					  &ncomps,
+					  &complist,
+					  1))) {
+		    if (proto_stat == KRB5_ADM_SUCCESS)
+			com_err(programname, 0, akt_succ_fmt, argv[1]);
+		    krb5_free_adm_data(kcontext, ncomps, complist);
+		}
+		memset(opass, 0, KRB5_ADM_MAX_PASSWORD_LEN);
+	    }
+	    else {
+		com_err(argv[0], kret, akt_nochange_fmt, argv[1]);
+	    }
+	    net_disconnect(0);
+	}
+	else {
+	    com_err(argv[0], kret, gen_conn_err_fmt);
+	}
+    }
+    else {
+	com_err(requestname, 0, no_memory_fmt);
+    }
+    if (p1)
+	free(p1);
+    if (p2)
+	free(p2);
+    if (opass)
+	free(opass);
+    if (arglist)
+	free(arglist);
+}
+
+/*
+ * kadmin_del_key_type()	- Delete key/salt types.
+ */
+void
+kadmin_del_key_type(argc, argv)
+    int		argc;
+    char	*argv[];
+{
+    int			i;
+    krb5_int32		proto_stat;
+    krb5_int32		ncomps;
+    krb5_data		*complist;
+    krb5_error_code	kret;
+    krb5_data		*arglist;
+    char		*p1;
+    char		*p2;
+    char		*opass;
+    int			oplen;
+
+    /*
+     * Command syntax is: dkt principal [keysalt[:kvno]]+
+     */
+    if (argc < 3) {
+	com_err(argv[0], 0, dkt_usage_fmt, argv[0]);
+	return;
+    }
+
+    requestname = argv[0];
+    kret = 0;
+    arglist = (krb5_data *) malloc((size_t)(sizeof(krb5_data)*(argc-2)));
+    p1 = (char *) malloc(strlen(dkt_prompt1_fmt)+strlen(argv[argc-1])+1);
+    p2 = (char *) malloc(strlen(dkt_prompt2_fmt)+strlen(argv[argc-1])+1);
+    opass = (char *) malloc(KRB5_ADM_MAX_PASSWORD_LEN);
+    if (arglist && p1 && p2 && opass) {
+	memset(arglist, 0, (size_t) (sizeof(krb5_data)*(argc-2)));
+	sprintf(p1, dkt_prompt1_fmt, argv[1]);
+	sprintf(p2, dkt_prompt2_fmt, argv[1]);
+	for (i=2; i<argc; i++) {
+	    arglist[i-2].length = strlen(argv[i]);
+	    arglist[i-2].data = argv[i];
+	}
+	if (!(kret = net_connect())) {
+	    oplen = KRB5_ADM_MAX_PASSWORD_LEN;
+	    if (!(kret = krb5_read_password(kcontext,
+					    p1,
+					    p2,
+					    opass,
+					    &oplen))) {
+		opass[oplen] = '\0';
+		if (!(kret = net_do_proto(KRB5_ADM_DEL_KEY_CMD,
+					  argv[1],
+					  opass,
+					  argc-2,
+					  arglist,
+					  &proto_stat,
+					  &ncomps,
+					  &complist,
+					  1))) {
+		    if (proto_stat == KRB5_ADM_SUCCESS)
+			com_err(programname, 0, dkt_succ_fmt, argv[1]);
+		    krb5_free_adm_data(kcontext, ncomps, complist);
+		}
+		memset(opass, 0, KRB5_ADM_MAX_PASSWORD_LEN);
+	    }
+	    else {
+		com_err(argv[0], kret, dkt_nochange_fmt, argv[1]);
+	    }
+	    net_disconnect(0);
+	}
+	else {
+	    com_err(argv[0], kret, gen_conn_err_fmt);
+	}
+    }
+    else {
+	com_err(requestname, 0, no_memory_fmt);
+    }
+    if (p1)
+	free(p1);
+    if (p2)
+	free(p2);
+    if (opass)
+	free(opass);
+    if (arglist)
+	free(arglist);
 }
 
 /*
@@ -1365,17 +1547,9 @@ kadmin_startup(argc, argv)
 	    saveit = 1;
 	    break;
 	case 'l':
-	    {
-		int hours, minutes;
-
-		if (sscanf(optarg, "%d:%d", &hours, &minutes) == 2)
-		    ticket_life = (hours * 3600) + (minutes * 60);
-		else if (sscanf(optarg, "%d", &minutes) == 1)
-		    ticket_life = minutes * 60;
-		else {
-		    com_err(argv[0], 0, kadmin_badtime_fmt, optarg);
-		    exit(1);
-		}
+	    if (krb5_string_to_deltat(optarg, (krb5_deltat *) &ticket_life)) {
+		com_err(argv[0], 0, kadmin_badtime_fmt, optarg);
+		exit(1);
 	    }
 	    break;
 	case 'r':

@@ -59,6 +59,8 @@ static const char *proto_no_auth_fmt	= "(%s) not authorized for this operation";
 static const char *proto_bad_opt_fmt	= "(%s) option not recognized by server";
 static const char *proto_value_req_fmt	= "(%s) value required for option";
 static const char *proto_system_err_fmt	= "(%s) remote system error";
+static const char *proto_key_exists_fmt	= "(%s) key/salt type already present";
+static const char *proto_key_ufo_fmt	= "(%s) key/salt type not present";
 static const char *proto_ufo_err_fmt	= "- (%s) protocol command %s returned unexpected error %d";
 static const char *net_conn_err_fmt	= "- %s: cannot connect to server";
 static const char *net_ccache_fmt	= "- cannot find credential cache %s";
@@ -127,6 +129,12 @@ print_proto_error(cmd, cstat, ncomps, complist)
 	break;
     case KRB5_ADM_SYSTEM_ERROR:
 	com_err(programname, 0, proto_system_err_fmt, requestname);
+	break;
+    case KRB5_ADM_KEY_ALREADY_EXISTS:
+	com_err(programname, 0, proto_key_exists_fmt, requestname);
+	break;
+    case KRB5_ADM_KEY_DOES_NOT_EXIST:
+	com_err(programname, 0, proto_key_ufo_fmt, requestname);
 	break;
     default:
 	com_err(programname, cstat, proto_ufo_err_fmt, requestname,

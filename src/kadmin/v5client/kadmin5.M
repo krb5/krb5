@@ -36,7 +36,7 @@ kadmin5 \- administer a Kerberos principal database over the network.
 .I ccache
 ] [
 .B \-l
-.I [hours:]minutes
+.I deltatime
 ] [
 .B \-d
 ] [
@@ -60,7 +60,7 @@ specifies a principal name to use instead of the default
 .B ccache
 specifies a credentials cache to use instead of the default.
 .IP \-l
-.B [hours:]minutes
+.B deltatime
 specifies the lifetime for an administrative ticket, if one needs to be
 acquired.
 .IP \-d
@@ -129,6 +129,14 @@ Add new entry to Kerberos database, using a random key.
 .IP change_rnd_key,crk
 Change key of an entry in the Kerberos database (selecting a new random key).
 
+.IP add_key_type,akt
+Add new key type to an existing Kerberos principal (prompting for old
+password).
+
+.IP del_key_type,dkt
+Delete key type from an existing Kerberos principal (prompting for old
+password).
+
 .IP delete_entry,delent,del
 Delete an entry from the database.
 
@@ -167,26 +175,17 @@ and
 commands, an optional list of principal options may be specified.  The
 following options may be specified:
 .TP i
-.I kvno=<integer>
-Specifies the key version number for the principal.
+.I maxlife=<deltatime>
+Specifies the maximum ticket life for the principal.
 .TP i
-.I maxlife=<integer>
-Specifies the maximum ticket life for the principal in seconds.
-.TP i
-.I maxrenewlife=<integer>
-Specifies the maximum renewable ticket life for the principal in seconds.
+.I maxrenewlife=<deltatime>
+Specifies the maximum renewable ticket life for the principal.
 .TP i
 .I expiration=<date>
-Specifies the expiration date and time of the principal.  See below for the
-format of
-.I <date>.
+Specifies the expiration date and time of the principal.
 .TP i
 .I pwexpiration=<date>
-Specifies the expiration date and time of the principal's password.  See below for the format of
-.I <date>.
-.TP i
-.I salttype=[v5|v4|norealm|onlyrealm|special]
-Indicates the salt type.
+Specifies the expiration date and time of the principal's password.
 .TP i
 .I [+/-]postdateable
 Specifies that tickets for this principal [are/are not] postdateable.
@@ -194,7 +193,7 @@ Specifies that tickets for this principal [are/are not] postdateable.
 .I [+/-]forwardable
 Specifies that tickets for this principal [are/are not] forwardable.
 .TP i
-.I [+/-]tgt_req
+.I [+/-]tgt-based
 Specifies that TGT-based requests for this principal [are/are not] allowed.
 .TP i
 .I [+/-]renewable
@@ -203,11 +202,11 @@ Specifies that tickets for this principal [are/are not] renewable.
 .I [+/-]proxiable
 Specifies that tickets for this principal [are/are not] proxiable.
 .TP i
-.I [+/-]dup_skey
+.I [+/-]dup-skey
 Specifies that tickets issued by this service [may/may not] be encrypted
 using the session key instead of the private key.
 .TP i
-.I [+/-]allow_tickets
+.I [+/-]allow-tickets
 Specifies that tickets for this principal [are/are not] allowed.
 .TP i
 .I [+/-]preauth
@@ -217,10 +216,10 @@ Specifies that preauthorization [is/is not] required for this principal.
 Specifies that hardware preauthorization [is/is not] required for this
 principal.
 .TP i
-.I [+/-]pwchange_req
+.I [+/-]pwchange
 Specifies that a password change [is/is not] required for this principal.
 .TP i
-.I [+/-]server
+.I [+/-]service
 Specifies that this principal [is/is not] allowed to be a service.
 .TP i
 .I [+/-]pwservice
@@ -228,57 +227,6 @@ Specifies that this principal [is/is not] the password changing service.
 .TP i
 .I [+/-]md5
 Specifies that DES MD5 [is/is not] supported for this principal.
-
-.SH Date Format
-The format of <date>
-may be one of the following, where
-.I yy
-is the last two digits of the year;
-.I mm
-is the month number (with a leading zero if less than 10);
-.I dd
-is the day number in the month (with a leading zero if less than 10);
-.I HH
-is the hour number (24-hour clock);
-.I MM
-is the minute number; and
-.I SS
-is the second number:
-.TP i
-.I yy.mm.dd.HH.MM.SS
-e.g. 95.09.01.00.00.00 for midnight on September 1, 1995.
-.TP i
-.I yymmddHHMMSS
-e.g. 950901000000 for midnight on September 1, 1995.
-.PP
-If the
-.B strptime(3)
-function is available, then the following formats are also supported.
-.PP
-.TP i
-.I yymmddHHMM
-e.g. 9509010000 for midnight on September 1, 1995.
-.TP i
-.I HHMMSS
-e.g. 200000 for 8pm tonight.
-.TP i
-.I HHMM
-e.g. 2100 for 9pm tonight.
-.TP i
-.I HH:MM:SS
-e.g. 20:00:00 for 8pm tonight.
-.TP i
-.I HH:MM
-e.g. 21:00 for 9pm tonight.
-.TP i
-.I locale-dependent short format (mm/dd/yy:HH:MM:SS) in U.S.
-.e.g 01/09/95:00:00:00 for midnight on September 1, 1995.
-.TP i
-.I dd-<text-month>-yyyy:HH:MM:SS
-e.g. 01-Sep-1995:00:00:00 for midnight on September 1, 1995.
-.TP i
-.I dd-<text-month>-yyyy:HH:MM
-e.g. 01-Sep-1995:00:00 for midnight on September 1, 1995.
 .PP
 .SH SEE ALSO
-kadmind5(8), kpasswd(1), strptime(3)
+kadmind5(8), kpasswd(1)

@@ -42,6 +42,12 @@ request kadmin_add_rnd_key, "Add new entry to Kerberos database, using a random 
 request kadmin_change_rnd, "Change key of an entry in the Kerberos database (selecting a new random key).",
 	change_rnd_key, crk;
 
+request kadmin_add_key_type, "Add new key type to an existing Kerberos principal (prompting for old password).",
+	add_key_type, akt;
+
+request kadmin_del_key_type, "Delete key type from an existing Kerberos principal (prompting for old password).",
+	del_key_type, dkt;
+
 request kadmin_delete_entry, "Delete an entry from the database.",
 	delete_entry, delent, del;
 

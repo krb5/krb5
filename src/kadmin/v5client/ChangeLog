@@ -1,4 +1,16 @@
 
+Tue Aug 8 17:27:04 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* kadmin5_ct.ct - Add add_key_type and del_key_type to add/delete a
+		particular key/salt pair.
+	* kadmin5.c - Add kadmin_{add,del}_key_type to support add_key_type
+		and del_key_type commands.  Change -l processing to use
+		krb5_string_to_deltat().
+	* kadmin5.h - Update prototypes and remove obsolete functions.
+	* network.c - Add new protocol error message support.
+	* kadmin5.M - Remove descriptions of obsolete syntax or syntax which
+		has been made common among utilities.
+
+
 Fri Aug 4 16:13:20 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* kadmin5.c - Replace explicit hand-decoded integers with macros.
 
