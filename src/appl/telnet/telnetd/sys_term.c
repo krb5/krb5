@@ -940,8 +940,11 @@ getptyslave()
 #ifdef	USE_TERMIO
 	ttyfd = t;
 #endif
-	if (ioctl(pty, I_PUSH, "pckt") < 0)
+	if (ioctl(pty, I_PUSH, "pckt") < 0) {
+#ifndef _AIX
 		fatal(net, "I_PUSH pckt");
+#endif
+	}
 #endif
 
 	/*
