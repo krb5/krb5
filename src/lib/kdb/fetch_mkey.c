@@ -41,6 +41,7 @@ char *krb5_mkey_pwd_prompt2 = KRB5_KDC_MKEY_2;
  * if fromkeyboard is TRUE, then the master key is read as a password
  * from the user's terminal.  In this case,
  * eblock should point to a block with an appropriate string_to_key function.
+ * if twice is TRUE, the password is read twice for verification.
  *
  * mname is the name of the key sought; this can be used by the string_to_key
  * function or by some other method to isolate the desired key.
@@ -55,10 +56,12 @@ krb5_error_code
 krb5_db_fetch_mkey(DECLARG(krb5_principal, mname),
 		   DECLARG(krb5_encrypt_block *, eblock),
 		   DECLARG(krb5_boolean, fromkeyboard),
+		   DECLARG(krb5_boolean, twice),
 		   DECLARG(krb5_keyblock *,key))
 OLDDECLARG(krb5_principal, mname)
 OLDDECLARG(krb5_encrypt_block *, eblock)
 OLDDECLARG(krb5_boolean, fromkeyboard)
+OLDDECLARG(krb5_boolean, twice)
 OLDDECLARG(krb5_keyblock *,key)
 {
     krb5_error_code retval;
@@ -69,7 +72,7 @@ OLDDECLARG(krb5_keyblock *,key)
 
     if (fromkeyboard) {
 	if (retval = krb5_read_password(krb5_mkey_pwd_prompt1,
-					krb5_mkey_pwd_prompt2,
+					twice ? krb5_mkey_pwd_prompt2 : 0,
 					password,
 					&size))
 	    return(retval);
