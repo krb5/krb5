@@ -322,8 +322,10 @@ prompt for a password.  Note:  using this option in a shell script can
 be dangerous if unauthorized users gain read access to the script.
 .TP
 \fB\-e\fP \fI"enc:salt ..."\fP
-uses the specified list of enctype\-salttype pairs for setting the
-key of the principal
+uses the specified list of enctype\-salttype pairs for setting the key
+of the principal.  The quotes are necessary if there are multiple
+enctype\-salttype pairs.  This will not function against kadmin
+daemons earlier than krb5\-1.2.
 .nf
 .TP
 EXAMPLE:
@@ -453,8 +455,8 @@ sets the key of the principal to a random value
 set the password to the specified string.  Not recommended.
 .TP
 \fB\-e\fP \fI"enc:salt ..."\fP
-uses the specified list of enctype\-salttype pairs for setting the
-key of the principal.  The quotes are necessary if there are multiple
+uses the specified list of enctype\-salttype pairs for setting the key
+of the principal.  The quotes are necessary if there are multiple
 enctype\-salttype pairs.  This will not function against kadmin
 daemons earlier than krb5\-1.2.
 .TP
