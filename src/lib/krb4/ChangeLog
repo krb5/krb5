@@ -1,3 +1,9 @@
+2003-08-15  Alexandra Ellwood  <lxs@mit.edu>
+
+        * mk_auth.c: krb_check_auth clears the return value for the 
+        schedule parameter with a memset.  This prevents callers 
+        from using the key schedule, which breaks code.
+
 2003-08-06  Alexandra Ellwood  <lxs@mit.edu>
 
         * configure.in: Don't assume all darwin boxes are powerpc.
