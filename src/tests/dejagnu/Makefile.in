@@ -1,5 +1,6 @@
 RUNTEST = @RUNTEST@
 RUNTESTFLAGS =
+KRB5_RUN_ENV= @KRB5_RUN_ENV@
 
 all install::
 
@@ -8,7 +9,7 @@ check:: check-$(RUNTEST)
 check-::
 	@echo "Dejagnu is not installed on this system. No tests run."
 
-check-runtest:: t_inetd
+check-runtest:: t_inetd site.exp
 	$(RUNTEST) --tool krb --srcdir $(srcdir) $(RUNTESTFLAGS)
 
 CFLAGS = $(CCOPTS) $(DEFS)
@@ -17,7 +18,14 @@ t_inetd:: t_inetd.o $(DEPLIBS)
 	$(LD) $(LDFLAGS) $(LDARGS) -o t_inetd t_inetd.o $(LIBS)
 
 clean::
-	$(RM) t_inetd t_inetd.o
+	$(RM) t_inetd t_inetd.o site.exp
 
 clean-unix::
 	$(RM) -rf tmpdir dbg.log krb.log krb.sum
+
+site.exp:: Makefile
+	echo "set runvarlist [list $(KRB5_RUN_ENV)]" | sed \
+		-e 's/;//g' -e 's:=\.:='`pwd`'/.:g' > site.exp
+
+
+
