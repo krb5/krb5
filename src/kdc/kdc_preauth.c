@@ -782,15 +782,21 @@ return_etype_info2(krb5_context context, krb5_pa_data * padata,
     tmp_padata->contents = scratch->data;
     tmp_padata->length = scratch->length;
     *send_pa = tmp_padata;
+
+    /* For cleanup - we no longer own the contents of the krb5_data 
+     * only to pointer to the krb5_data
+     */
+    scratch->data = 0;
+
  cleanup:
     if (entry)
 	krb5_free_etype_info(context, entry);
     if (retval) {
 	if (tmp_padata)
 	    free(tmp_padata);
-	if (scratch)
-	    krb5_free_data(context, scratch);
     }
+    if (scratch)
+	    krb5_free_data(context, scratch);
     return retval;
 }
 

@@ -6,6 +6,12 @@
 	(etype_info_helper): Pass in flag
 	(return_etype_info2): And here
 
+2003-05-23  Ezra Peisach  <epeisach@mit.edu>
+
+	* kdc_preauth.c (return_etype_info2): After encoding the
+	etype_info2 and copying the pointers to the pa_data, free the
+	krb5_data pointer.
+
 2003-05-22  Sam Hartman  <hartmans@mit.edu>
 
 	* kdc_util.c (validate_as_request): Only reject options we
