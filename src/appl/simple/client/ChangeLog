@@ -1,3 +1,14 @@
+Fri Sep 15 04:59:30 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* sim_client.c (main): Added better options parsing for more
+		flexibility in calling this program.  Worked around
+		breakage in the Solaris Streams Sockets emulation where
+		getsockname() can not be used to find out the address of
+		a network interface.
+
+	* configure.in: If we are including both -lsocket and -lnsl,
+		#define BROKEN_STREAMS_SOCKETS.
+	
 
 Fri Jul 7 15:48:14 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in - Remove all explicit library handling and LDFLAGS.

@@ -2,6 +2,9 @@ AC_INIT(sim_client.c)
 CONFIG_RULES
 AC_PROG_INSTALL
 AC_CHECK_HEADERS(stdlib.h)
+if test "$ac_cv_lib_socket" = "yes" -a "$ac_cv_lib_nsl" = "yes"; then
+	AC_DEFINE(BROKEN_STREAMS_SOCKETS)
+fi
 KRB5_LIBRARIES
 V5_USE_SHARED_LIB
 V5_AC_OUTPUT_MAKEFILE
