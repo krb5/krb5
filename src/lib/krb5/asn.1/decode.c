@@ -19,6 +19,7 @@ static char rcsid_decode_c[] =
 #include <isode/psap.h>
 #include <krb5/krb5.h>
 #include <krb5/asn1.h>
+#include "asn1glue.h"
 
 #include <krb5/ext-proto.h>
 

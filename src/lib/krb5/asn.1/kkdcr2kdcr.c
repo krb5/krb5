@@ -20,6 +20,7 @@ static char rcsid_kkdcr2kdcr_c[] =
 
 #include <isode/psap.h>
 #include <krb5/asn1.h>
+#include "asn1glue.h"
 
 #include <krb5/ext-proto.h>
 

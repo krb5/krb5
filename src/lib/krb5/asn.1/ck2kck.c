@@ -21,6 +21,7 @@ static char rcsid_ck2kck_c[] =
 /*#include <time.h> */
 #include <isode/psap.h>
 #include <krb5/asn1.h>
+#include "asn1glue.h"
 
 #include <krb5/ext-proto.h>
 

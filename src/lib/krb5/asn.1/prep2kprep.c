@@ -21,6 +21,7 @@ static char rcsid_prep2kprep_c[] =
 /*#include <time.h> */
 #include <isode/psap.h>
 #include <krb5/asn1.h>
+#include "asn1glue.h"
 
 #include <krb5/ext-proto.h>
 
