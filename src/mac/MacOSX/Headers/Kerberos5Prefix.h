@@ -36,6 +36,8 @@
 #define	HAVE_MEMORY_H		1
 #define HAVE_PWD_H			1
 
+#define HAVE_PTHREADS	1
+
 #define	HAVE_STAT		1
 #define	HAVE_ACCESS		1
 #define	HAVE_FLOCK		1
