@@ -1,6 +1,7 @@
 AC_INIT(init_db)
 CONFIG_RULES
 AC_PATH_PROG(PERL,perl)
+AC_PATH_PROG(EXPECT,expect)
 dnl The following are substituted into env-setup.sh
 AC_SUBST(BUILDTOP)
 AC_SUBST(SRCTOP)

@@ -25,8 +25,7 @@ fi
 
 REALM=SECURE-TEST.OV.COM; export REALM
 
-# XXX This should be detected by configure!
-EXPECT=/mit/gnu/bin/expect; export EXPECT
+EXPECT=@EXPECT@; export EXPECT
 
 COMPARE_DUMP=$TESTDIR/scripts/compare_dump.pl; export COMPARE_DUMP
 FIX_CONF_FILES=$TESTDIR/scripts/fixup-conf-files.pl

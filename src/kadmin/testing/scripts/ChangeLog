@@ -1,3 +1,10 @@
+Thu Oct 10 17:32:22 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* env-setup.shin (EXPECT): Subsititute path for expect from
+		autoconf. 
+
+	* configure.in: Check for expect.
+
 Thu Oct  3 13:16:19 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* env-setup.shin: Renamed env-setup.sh for autoconf use.
