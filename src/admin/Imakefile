@@ -1,5 +1,5 @@
 #define IHaveSubdirs
 #define PassCDebugFlags
 
-SUBDIRS=create destroy edit stash
+SUBDIRS=create destroy edit stash aname
 MakeSubdirs($(SUBDIRS))
