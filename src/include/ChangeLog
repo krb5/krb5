@@ -1,3 +1,8 @@
+2003-12-15  Jeffrey Altman <jaltman@mit.edu>
+
+  * k5-platform.h: apply casts (unsigned char) to the assignments from
+    64-bit ints to unsigned char fields to avoid warnings 
+
 2003-12-13  Ken Raeburn  <raeburn@mit.edu>
 
 	* krb5.hin (KRB5_AUTH_CONTEXT_USE_SUBKEY): New macro.
