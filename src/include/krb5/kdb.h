@@ -54,14 +54,12 @@ typedef struct _krb5_db_entry {
     krb5_int32 salt_type:8,
  	       salt_length:24;
     krb5_octet *salt;
-#ifdef ALT_KEY_SALT	/* SANDIA Enhancement (Pre-Auth/Blacklist) */
     krb5_encrypted_keyblock alt_key;
     krb5_int32 alt_salt_type:8,
  	       alt_salt_length:24;
     krb5_octet *alt_salt;
-#endif	/* ALT_KEY_SALT */
 
-    /* SANDIA Enhancement (Pre-Auth/Blacklist) */    
+    /* SANDIA Enhancement (Pre-Auth/Blacklist) */
     krb5_timestamp last_pwd_change;	
     krb5_timestamp last_success;
     krb5_kvno fail_auth_count;
@@ -88,6 +86,7 @@ typedef struct _krb5_db_entry {
 #define	KRB5_KDB_REQUIRES_PRE_AUTH	0x00000080
 #define KRB5_KDB_REQUIRES_HW_AUTH	0x00000100
 #define	KRB5_KDB_REQUIRES_PWCHANGE	0x00000200
+#define KRB5_KDB_DISALLOW_SVR		0x00001000
 
 /* XXX depends on knowledge of krb5_parse_name() formats */
 #define KRB5_KDB_M_NAME		"K/M"	/* Kerberos/Master */
