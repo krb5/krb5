@@ -315,7 +315,7 @@ krb5_error_code encode_krb5_enc_kdc_rep_part(DECLARG(const krb5_enc_kdc_rep_part
   if(retval) return retval;
   sum += length;
 
-#ifndef ENCKRB5KDCREPPART_HAS_MSGTYPE
+#ifdef KRB5_ENCKRB5KDCREPPART_COMPAT
   krb5_apptag(26);
 #else
   if(rep->msg_type = KRB5_AS_REP){ krb5_apptag(ASN1_KRB_AS_REP); }

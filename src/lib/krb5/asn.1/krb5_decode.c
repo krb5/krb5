@@ -252,16 +252,13 @@ krb5_error_code decode_krb5_enc_kdc_rep_part(DECLARG(const krb5_data *, code),
   setup_no_length();
   alloc_field(*rep,krb5_enc_kdc_rep_part);
 
-#ifndef ENCKRB5KDCREPPART_HAS_MSGTYPE
-  check_apptag(26);
-#else
   retval = asn1_get_tag(&buf,&class,&construction,&tagnum,NULL);
   if(retval) return retval;
   if(class != APPLICATION || construction != CONSTRUCTED) return ASN1_BAD_ID;
   if(tagnum == 25) (*rep)->msg_type = KRB5_AS_REP;
   else if(tagnum == 26) (*rep)->msg_type = KRB5_TGS_REP;
   else return KRB5_BADMSGTYPE;
-#endif
+
   retval = asn1_decode_enc_kdc_rep_part(&buf,*rep);
   if(retval) return (krb5_error_code)retval;
 
@@ -279,7 +276,10 @@ krb5_error_code decode_krb5_as_rep(DECLARG(const krb5_data *, code),
   check_apptag(11);
   retval = asn1_decode_kdc_rep(&buf,*rep);
   if(retval) return (krb5_error_code)retval;
-  if((*rep)->msg_type != KRB5_AS_REP) return KRB5_BADMSGTYPE;
+#ifdef KRB5_MSGTYPE_STRICT
+  if((*rep)->msg_type != KRB5_AS_REP)
+      return KRB5_BADMSGTYPE;
+#endif
 
   cleanup();
 }
@@ -295,7 +295,9 @@ krb5_error_code decode_krb5_tgs_rep(DECLARG(const krb5_data *, code),
   check_apptag(13);
   retval = asn1_decode_kdc_rep(&buf,*rep);
   if(retval) return (krb5_error_code)retval;
+#ifdef KRB5_MSGTYPE_STRICT
   if((*rep)->msg_type != KRB5_TGS_REP) return KRB5_BADMSGTYPE;
+#endif
 
   cleanup();
 }
@@ -315,7 +317,10 @@ krb5_error_code decode_krb5_ap_req(DECLARG(const krb5_data *, code),
       if(kvno != KVNO) return KRB5KDC_ERR_BAD_PVNO; }
     { krb5_msgtype msg_type;
       get_field(msg_type,1,asn1_decode_msgtype);
-      if(msg_type != KRB5_AP_REQ) return KRB5_BADMSGTYPE; }
+#ifdef KRB5_MSGTYPE_STRICT
+      if(msg_type != KRB5_AP_REQ) return KRB5_BADMSGTYPE;
+#endif
+    }
     get_field((*rep)->ap_options,2,asn1_decode_ap_options);
     alloc_field((*rep)->ticket,krb5_ticket);
     get_field(*((*rep)->ticket),3,asn1_decode_ticket);
@@ -340,7 +345,10 @@ krb5_error_code decode_krb5_ap_rep(DECLARG(const krb5_data *, code),
       if(kvno != KVNO) return KRB5KDC_ERR_BAD_PVNO; }
     { krb5_msgtype msg_type;
       get_field(msg_type,1,asn1_decode_msgtype);
-      if(msg_type != KRB5_AP_REP) return KRB5_BADMSGTYPE; }
+#ifdef KRB5_MSGTYPE_STRICT
+      if(msg_type != KRB5_AP_REP) return KRB5_BADMSGTYPE;
+#endif
+    }
     get_field((*rep)->enc_part,2,asn1_decode_encrypted_data);
     end_structure();
   }
@@ -378,8 +386,10 @@ krb5_error_code decode_krb5_as_req(DECLARG(const krb5_data *, code),
   check_apptag(10);
   retval = asn1_decode_kdc_req(&buf,*rep);
   if(retval) return (krb5_error_code)retval;
+#ifdef KRB5_MSGTYPE_STRICT
   if((*rep)->msg_type != KRB5_AS_REQ) return KRB5_BADMSGTYPE;
-
+#endif
+  
   cleanup();
 }
 
@@ -394,8 +404,10 @@ krb5_error_code decode_krb5_tgs_req(DECLARG(const krb5_data *, code),
   check_apptag(12);
   retval = asn1_decode_kdc_req(&buf,*rep);
   if(retval) return (krb5_error_code)retval;
+#ifdef KRB5_MSGTYPE_STRICT
   if((*rep)->msg_type != KRB5_TGS_REQ) return KRB5_BADMSGTYPE;
-
+#endif
+  
   cleanup();
 }
 
@@ -428,7 +440,10 @@ krb5_error_code decode_krb5_safe(DECLARG(const krb5_data *, code),
       if(kvno != KVNO) return KRB5KDC_ERR_BAD_PVNO; }
     { krb5_msgtype msg_type;
       get_field(msg_type,1,asn1_decode_msgtype);
-      if(msg_type != KRB5_SAFE) return KRB5_BADMSGTYPE; }
+#ifdef KRB5_MSGTYPE_STRICT
+      if(msg_type != KRB5_SAFE) return KRB5_BADMSGTYPE;
+#endif
+    }
     get_field(**rep,2,asn1_decode_krb_safe_body);
     alloc_field((*rep)->checksum,krb5_checksum);
     get_field(*((*rep)->checksum),3,asn1_decode_checksum);
@@ -452,7 +467,10 @@ krb5_error_code decode_krb5_priv(DECLARG(const krb5_data *, code),
       if(kvno != KVNO) return KRB5KDC_ERR_BAD_PVNO; }
     { krb5_msgtype msg_type;
       get_field(msg_type,1,asn1_decode_msgtype);
-      if(msg_type != KRB5_PRIV) return KRB5_BADMSGTYPE; }
+#ifdef KRB5_MSGTYPE_STRICT
+      if(msg_type != KRB5_PRIV) return KRB5_BADMSGTYPE;
+#endif
+    }
     get_field((*rep)->enc_part,3,asn1_decode_encrypted_data);
     end_structure();
   }
@@ -497,7 +515,10 @@ krb5_error_code decode_krb5_cred(DECLARG(const krb5_data *, code),
       if(kvno != KVNO) return KRB5KDC_ERR_BAD_PVNO; }
     { krb5_msgtype msg_type;
       get_field(msg_type,1,asn1_decode_msgtype);
-      if(msg_type != KRB5_CRED) return KRB5_BADMSGTYPE; }
+#ifdef KRB5_MSGTYPE_STRICT
+      if(msg_type != KRB5_CRED) return KRB5_BADMSGTYPE;
+#endif
+    }
     get_field((*rep)->tickets,2,asn1_decode_sequence_of_ticket);
     get_field((*rep)->enc_part,3,asn1_decode_encrypted_data);
     end_structure();
@@ -543,7 +564,10 @@ krb5_error_code decode_krb5_error(DECLARG(const krb5_data *, code),
       if(kvno != KVNO) return KRB5KDC_ERR_BAD_PVNO; }
     { krb5_msgtype msg_type;
       get_field(msg_type,1,asn1_decode_msgtype);
-      if(msg_type != KRB5_ERROR) return KRB5_BADMSGTYPE; }
+#ifdef KRB5_MSGTYPE_STRICT
+      if(msg_type != KRB5_ERROR) return KRB5_BADMSGTYPE;
+#endif
+    }
     opt_field((*rep)->ctime,2,asn1_decode_kerberos_time);
     opt_field((*rep)->cusec,3,asn1_decode_int32);
     get_field((*rep)->stime,4,asn1_decode_kerberos_time);

@@ -163,42 +163,11 @@ asn1_error_code asn1_decode_msgtype(DECLARG(asn1buf *, buf),
 {
   asn1_error_code retval;
   unsigned long n;
+  
   retval = asn1_decode_unsigned_integer(buf,&n);
   if(retval) return retval;
-  switch(n){
-  case ASN1_KRB_AS_REQ:
-    *val = KRB5_AS_REQ;
-    break;
-  case ASN1_KRB_AS_REP:
-    *val = KRB5_AS_REP;
-    break;
-  case ASN1_KRB_TGS_REQ:
-    *val = KRB5_TGS_REQ;
-    break;
-  case ASN1_KRB_TGS_REP:
-    *val = KRB5_TGS_REP;
-    break;
-  case ASN1_KRB_AP_REQ:
-    *val = KRB5_AP_REQ;
-    break;
-  case ASN1_KRB_AP_REP:
-    *val = KRB5_AP_REP;
-    break;
-  case ASN1_KRB_SAFE:
-    *val = KRB5_SAFE;
-    break;
-  case ASN1_KRB_PRIV:
-    *val = KRB5_PRIV;
-    break;
-  case ASN1_KRB_CRED:
-    *val = KRB5_CRED;
-    break;
-  case ASN1_KRB_ERROR:
-    *val = KRB5_ERROR;
-    break;
-  default:
-    return KRB5_BADMSGTYPE;
-  }
+  
+  *val = (krb5_msgtype) n;
   return 0;
 }
 

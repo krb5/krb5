@@ -8,13 +8,24 @@
 #ifdef HAS_STDLIB_H
 #include <stdlib.h>
 #endif
-/* The current version of {en,de}code_krb5_enc_kdc_rep_part has a
-   problem in that there's no way to know the message type (AS/TGS) of
-   a krb5_enc_kdc_rep_part.  This should be fixed in the next version
-   by including a msg_type field in krb5_enc_kdc_rep_part.  When that
-   happens, #defining ENCKRB5KDCREPPART_HAS_MSGTYPE will activate the
-   code that uses it. */
-/* #define ENCKRB5KDCREPPART_HAS_MSGTYPE */
+/*
+ * Older versions of the Kerberos are always sending the
+ * enc_kdc_rep_part structure with an application tag of #26, instead
+ * of using the application tag of #25 (AS REP) or #26 (AS REP) as
+ * necessary.  Worse yet, they will only accept a tag of #26, so we
+ * need to follow this for backwards compatibility.  #defining
+ * KRB5_ENCKRB5KDCREPPART_COMPAT will preserve this wrong (but
+ * compatible) behavior.
+ */
+#define KRB5_ENCKRB5KDCREPPART_COMPAT
+
+/*
+ * If KRB5_MSGTYPE_STRICT is defined, then be strict about checking
+ * the msgtype fields.  Unfortunately, there old versions of Kerberos
+ * don't set these fields correctly, so we have to make allowances for
+ * them.
+ */
+/* #define KRB5_MSGTYPE_STRICT */
 
 typedef krb5_octet asn1_octet;
 typedef krb5_error_code asn1_error_code;

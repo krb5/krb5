@@ -1,3 +1,30 @@
+Wed Aug 17 16:07:06 1994  Theodore Y. Ts'o  (tytso at tsx-11)
+
+	* krb5_encode.c (encode_krb5_enc_kdc_rep_part): Older versions of
+	the Kerberos are always sending the enc_kdc_rep_part structure
+	with an application tag of #26, instead of using the application
+	tag of #25 (AS REP) or #26 (AS REP) as necessary.  Worse yet, they
+	will only accept a tag of #26, so we need to follow this for
+	backwards compatibility.  #defining KRB5_ENCKRB5KDCREPPART_COMPAT
+	will preserve this wrong (but compatible) behavior.
+
+	* krb5_decode.c (decode_krb5_enc_kdc_rep_part): Record the tag
+	value of the ASN.1 sequence in the rkb5_enc_kdc_rep structure.
+	Allow both tag #25 and #26 (although old software was always
+	sending tag #26).
+
+	* krb5_decode.c (decode_krb5_as_rep, decode_krb5_tgs_rep,
+	decode_krb5_ap_req, decode_krb5_ap_rep, decode_krb5_as_req,
+	decode_krb5_tgs_req, decode_krb5_safe, decode_krb5_priv,
+	decode_krb5_cred, decode_krb5_error): Only check the ASN.1 message
+	type if KRB5_MSGTYPE_STRICT is defined.  "Be strict in what you
+	send out, liberal in what you receive..."
+
+	* asn1_decode_k.c (asn1_decode_msgtype): Stop checking the
+	validity of the message type here.  Each routine that calls
+	asn1_decode_msgtype is checking the message type anyway, so it's
+	just duplicated effort.
+
 Sat Aug 13 03:40:16 1994  Mark Eichin  (eichin@perdiem)
 
 	* krbasn1.h: include stdlib.h for calloc declaration (if we can)
