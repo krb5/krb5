@@ -23,8 +23,10 @@ void
 krb5_free_keyblock(val)
 register krb5_keyblock *val;
 {
-    if (val->contents)
+    if (val->contents) {
+	memset((char *)val->contents, 0, val->length);
 	xfree(val->contents);
+    }
     xfree(val);
     return;
 }
