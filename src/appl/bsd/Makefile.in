@@ -128,8 +128,8 @@ $(OUTPRE)login.$(OBJEXT): login.c $(BUILDTOP)/include/libpty.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
   $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h \
   $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
-  $(SRCTOP)/include/port-sockets.h $(BUILDTOP)/include/krb524.h \
-  $(BUILDTOP)/include/krb524_err.h loginpaths.h
+  $(SRCTOP)/include/port-sockets.h \
+  loginpaths.h
 $(OUTPRE)krshd.$(OBJEXT): krshd.c $(BUILDTOP)/include/libpty.h \
   $(SRCTOP)/include/syslog.h $(BUILDTOP)/include/krb5.h \
   $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \

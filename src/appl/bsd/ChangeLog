@@ -1,3 +1,8 @@
+2002-03-20  Ezra Peisach  <epeisach@mit.edu>
+
+	* Makefile.in: Remove dependencies on krb524_err.h for login.o. If
+	compiling without krb4 support, this file will not be present.
+
 2002-03-13  Ken Raeburn  <raeburn@mit.edu>
 
 	* kcmd.c (kcmd_connect): Don't call fixup_addrinfo, it's been
