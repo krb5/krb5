@@ -514,6 +514,15 @@ krb5_free_sam_challenge(krb5_context ctx, krb5_sam_challenge *sc)
 }
 
 void KRB5_CALLCONV
+krb5_free_sam_challenge_2(krb5_context ctx, krb5_sam_challenge_2 *sc2)
+{
+    if (!sc2)
+	return;
+    krb5_free_sam_challenge_2_contents(ctx, sc2);
+    krb5_xfree(sc2);
+}
+
+void KRB5_CALLCONV
 krb5_free_sam_challenge_contents(krb5_context ctx, krb5_sam_challenge *sc)
 {
     if (!sc)
@@ -537,12 +546,72 @@ krb5_free_sam_challenge_contents(krb5_context ctx, krb5_sam_challenge *sc)
 }
 
 void KRB5_CALLCONV
+krb5_free_sam_challenge_2_contents(krb5_context ctx,
+				   krb5_sam_challenge_2 *sc2)
+{
+    krb5_checksum **cksump;
+
+    if (!sc2)
+	return;
+    if (sc2->sam_challenge_2_body.data)
+	krb5_free_data_contents(ctx, &sc2->sam_challenge_2_body);
+    if (sc2->sam_cksum) {
+	cksump = sc2->sam_cksum;
+	while (*cksump) {
+	    krb5_free_checksum(ctx, *cksump);
+	    cksump++;
+	}
+	krb5_xfree(sc2->sam_cksum);
+	sc2->sam_cksum = 0;
+    }
+}
+
+void KRB5_CALLCONV
+krb5_free_sam_challenge_2_body(krb5_context ctx,
+			       krb5_sam_challenge_2_body *sc2)
+{
+    if (!sc2)
+	return;
+    krb5_free_sam_challenge_2_body_contents(ctx, sc2);
+    krb5_xfree(sc2);
+}
+
+void KRB5_CALLCONV
+krb5_free_sam_challenge_2_body_contents(krb5_context ctx,
+					krb5_sam_challenge_2_body *sc2)
+{
+    if (!sc2)
+	return;
+    if (sc2->sam_type_name.data) 
+	krb5_free_data_contents(ctx, &sc2->sam_type_name);
+    if (sc2->sam_track_id.data)
+	krb5_free_data_contents(ctx, &sc2->sam_track_id);
+    if (sc2->sam_challenge_label.data)
+	krb5_free_data_contents(ctx, &sc2->sam_challenge_label);
+    if (sc2->sam_challenge.data)
+	krb5_free_data_contents(ctx, &sc2->sam_challenge);
+    if (sc2->sam_response_prompt.data)
+	krb5_free_data_contents(ctx, &sc2->sam_response_prompt);
+    if (sc2->sam_pk_for_sad.data)
+	krb5_free_data_contents(ctx, &sc2->sam_pk_for_sad);
+}
+
+void KRB5_CALLCONV
 krb5_free_sam_response(krb5_context ctx, krb5_sam_response *sr)
 {
     if (!sr)
 	return;
     krb5_free_sam_response_contents(ctx, sr);
     krb5_xfree(sr);
+}
+
+void KRB5_CALLCONV
+krb5_free_sam_response_2(krb5_context ctx, krb5_sam_response_2 *sr2)
+{
+    if (!sr2)
+	return;
+    krb5_free_sam_response_2_contents(ctx, sr2);
+    krb5_xfree(sr2);
 }
 
 void KRB5_CALLCONV
@@ -556,6 +625,17 @@ krb5_free_sam_response_contents(krb5_context ctx, krb5_sam_response *sr)
 	krb5_free_data_contents(ctx, &sr->sam_enc_key.ciphertext);
     if (sr->sam_enc_nonce_or_ts.ciphertext.data)
 	krb5_free_data_contents(ctx, &sr->sam_enc_nonce_or_ts.ciphertext);
+}
+
+void KRB5_CALLCONV
+krb5_free_sam_response_2_contents(krb5_context ctx, krb5_sam_response_2 *sr2)
+{
+    if (!sr2)
+	return;
+    if (sr2->sam_track_id.data)
+	krb5_free_data_contents(ctx, &sr2->sam_track_id);
+    if (sr2->sam_enc_nonce_or_sad.ciphertext.data)
+	krb5_free_data_contents(ctx, &sr2->sam_enc_nonce_or_sad.ciphertext);
 }
 
 void KRB5_CALLCONV
@@ -594,6 +674,16 @@ krb5_free_enc_sam_response_enc(krb5_context ctx,
     krb5_xfree(esre);
 }
 
+void KRB5_CALLCONV 
+krb5_free_enc_sam_response_enc_2(krb5_context ctx,
+				 krb5_enc_sam_response_enc_2 *esre2)
+{
+    if (!esre2)
+	return;
+    krb5_free_enc_sam_response_enc_2_contents(ctx, esre2);
+    krb5_xfree(esre2);
+}
+
 void KRB5_CALLCONV
 krb5_free_enc_sam_response_enc_contents(krb5_context ctx,
 			       krb5_enc_sam_response_enc *esre)
@@ -602,6 +692,16 @@ krb5_free_enc_sam_response_enc_contents(krb5_context ctx,
 	return;
     if (esre->sam_sad.data)
 	krb5_free_data_contents(ctx, &esre->sam_sad);
+}
+
+void KRB5_CALLCONV
+krb5_free_enc_sam_response_enc_2_contents(krb5_context ctx,
+					  krb5_enc_sam_response_enc_2 *esre2)
+{
+    if (!esre2)
+	return;
+    if (esre2->sam_sad.data)
+	krb5_free_data_contents(ctx, &esre2->sam_sad);
 }
 
 void KRB5_CALLCONV

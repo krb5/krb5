@@ -1,3 +1,11 @@
+2002-10-24  Ken Hornstein  <kenh@cmf.nrl.navy.mil
+
+	* kv5m_err.et: Add magic numbers for new hardware preauth structures.
+
+	* krb5_err.et (KRB5_SAM_INVALID_ETYPE, KRB5_SAM_NO_CHECKSUM,
+	KRB5_SAM_BAD_CHECKSUM): New error codes for the new hardware
+	preauthentication code.
+
 2002-09-02  Ken Raeburn  <raeburn@mit.edu>
 
 	* init_ets.c (krb5_init_ets, krb5_free_ets): Use prototype style

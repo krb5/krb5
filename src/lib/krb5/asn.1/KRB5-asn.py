@@ -368,12 +368,31 @@ PA-SAM-CHALLENGE ::= SEQUENCE {
     sam-cksum[9]                Checksum OPTIONAL
 }
 
--- these are [0].. [2] in the draft
-SAMFlags ::= BIT STRING {
-    use-sad-as-key(0),
-    send-encrypted-sad(1),
-    must-pk-encrypt-sad(2)
+PA-SAM-CHALLENGE-2 ::= SEQUENCE {
+    sam-body[0]                 PA-SAM-CHALLENGE-2-BODY,
+    sam-cksum[1]                SEQUENCE (1..MAX) OF Checksum,
+    ...
 }
+
+PA-SAM-CHALLENGE-2-BODY ::= SEQUENCE {
+    sam-type[0]                 INTEGER,
+    sam-flags[1]                SAMFlags,
+    sam-type-name[2]            GeneralString OPTIONAL,
+    sam-track-id[3]             GeneralString OPTIONAL,
+    sam-challenge-label[4]      GeneralString OPTIONAL,
+    sam-challenge[5]            GeneralString OPTIONAL,
+    sam-response-prompt[6]      GeneralString OPTIONAL,
+    sam-pk-for-sad[7]           EncryptionKey OPTIONAL,
+    sam-nonce[8]                INTEGER,
+    sam-etype[9]		INTEGER,
+    ...
+}
+
+-- these are [0].. [2] in the draft
+SAMFlags ::= BIT STRING (SIZE (32..MAX))
+    -- use-sad-as-key(0)
+    -- send-encrypted-sad(1)
+    -- must-pk-encrypt-sad(2)
 
 PA-SAM-RESPONSE ::= SEQUENCE {
     sam-type[0]                 INTEGER,
@@ -388,6 +407,16 @@ PA-SAM-RESPONSE ::= SEQUENCE {
     sam-patimestamp[6]          KerberosTime OPTIONAL
 }
 
+PA-SAM-RESPONSE-2 ::= SEQUENCE {
+    sam-type[0]                 INTEGER,
+    sam-flags[1]                SAMFlags,
+    sam-track-id[2]             GeneralString OPTIONAL,
+    sam-enc-nonce-or-sad[3]     EncryptedData,
+                                   -- PA-ENC-SAM-RESPONSE-ENC
+    sam-nonce[4]                INTEGER,
+    ...
+}
+
 PA-ENC-SAM-KEY ::= SEQUENCE {
              sam-key[0]                 EncryptionKey
 }
@@ -397,5 +426,11 @@ PA-ENC-SAM-RESPONSE-ENC ::= SEQUENCE {
      sam-timestamp[1]           KerberosTime OPTIONAL,
      sam-usec[2]                INTEGER OPTIONAL,
      sam-passcode[3]            GeneralString OPTIONAL
+}
+
+PA-ENC-SAM-RESPONSE-ENC-2 ::= SEQUENCE {
+     sam-nonce[0]               INTEGER,
+     sam-sad[1]                 GeneralString OPTIONAL,
+     ...
 }
 END

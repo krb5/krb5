@@ -69,6 +69,7 @@
     asn1_encode_sequence_of_pa_data
     asn1_encode_sequence_of_ticket
     asn1_encode_sequence_of_enctype
+    asn1_encode_sequence_of_checksum
     asn1_encode_sequence_of_krb_cred_info
 */
 
@@ -184,6 +185,9 @@ asn1_error_code asn1_encode_sequence_of_enctype
 		   const int len, const krb5_enctype *val,
 		   unsigned int *retlen);
 
+asn1_error_code asn1_encode_sequence_of_checksum
+	(asn1buf *buf, const krb5_checksum **val, unsigned int *retlen);
+
 asn1_error_code asn1_encode_kdc_req
 	(int msg_type,
 		   asn1buf *buf,
@@ -234,6 +238,13 @@ asn1_error_code asn1_encode_sam_flags
 asn1_error_code asn1_encode_sam_challenge
 	(asn1buf *buf, const krb5_sam_challenge * val, unsigned int *retlen);
 
+asn1_error_code asn1_encode_sam_challenge_2
+	(asn1buf *buf, const krb5_sam_challenge_2 * val, unsigned int *retlen);
+
+asn1_error_code asn1_encode_sam_challenge_2_body
+	(asn1buf *buf, const krb5_sam_challenge_2_body * val,
+		   unsigned int *retlen);
+
 asn1_error_code asn1_encode_sam_key
 	(asn1buf *buf, const krb5_sam_key *val, unsigned int *retlen);
 
@@ -241,8 +252,15 @@ asn1_error_code asn1_encode_enc_sam_response_enc
 	(asn1buf *buf, const krb5_enc_sam_response_enc *val,
 		   unsigned int *retlen);
 
+asn1_error_code asn1_encode_enc_sam_response_enc_2
+	(asn1buf *buf, const krb5_enc_sam_response_enc_2 *val,
+		   unsigned int *retlen);
+
 asn1_error_code asn1_encode_sam_response
 	(asn1buf *buf, const krb5_sam_response *val, unsigned int *retlen);
+
+asn1_error_code asn1_encode_sam_response_2
+	(asn1buf *buf, const krb5_sam_response_2 *val, unsigned int *retlen);
 
 asn1_error_code asn1_encode_predicted_sam_response
 	(asn1buf *buf, const krb5_predicted_sam_response *val, 

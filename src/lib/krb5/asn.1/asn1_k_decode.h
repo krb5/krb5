@@ -143,12 +143,20 @@ asn1_error_code asn1_decode_etype_info_entry
 	(asn1buf *buf, krb5_etype_info_entry *val);
 asn1_error_code asn1_decode_sam_challenge
 	(asn1buf *buf, krb5_sam_challenge *val);
+asn1_error_code asn1_decode_sam_challenge_2
+	(asn1buf *buf, krb5_sam_challenge_2 *val);
+asn1_error_code asn1_decode_sam_challenge_2_body
+	(asn1buf *buf, krb5_sam_challenge_2_body *val);
 asn1_error_code asn1_decode_enc_sam_key
 	(asn1buf *buf, krb5_sam_key *val);
 asn1_error_code asn1_decode_enc_sam_response_enc
 	(asn1buf *buf, krb5_enc_sam_response_enc *val);
+asn1_error_code asn1_decode_enc_sam_response_enc_2
+	(asn1buf *buf, krb5_enc_sam_response_enc_2 *val);
 asn1_error_code asn1_decode_sam_response
 	(asn1buf *buf, krb5_sam_response *val);
+asn1_error_code asn1_decode_sam_response_2
+	(asn1buf *buf, krb5_sam_response_2 *val);
 asn1_error_code asn1_decode_predicted_sam_response
 	(asn1buf *buf, krb5_predicted_sam_response *val);
 
@@ -168,6 +176,9 @@ asn1_error_code asn1_decode_last_req
 
 asn1_error_code asn1_decode_sequence_of_enctype
 	(asn1buf *buf, int *num, krb5_enctype **val);
+
+asn1_error_code asn1_decode_sequence_of_checksum
+	(asn1buf *buf, krb5_checksum ***val);
 
 asn1_error_code asn1_decode_sequence_of_passwdsequence
 	(asn1buf *buf, passwd_phrase_element ***val);

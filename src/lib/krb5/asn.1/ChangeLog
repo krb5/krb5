@@ -1,3 +1,10 @@
+2002-10-24  Ken Hornstein  <kenh@cmf.nrl.navy.mil>
+
+	* KRB5-asn.py, asn1_k_decode.c, asn1_k_decode.h, asn1_k_encode.c,
+	asn1_k_encode.h, krb5_decode.c, krb5_encode.c: New functions,
+	prototypes, and ASN.1 definitions for the new hardware
+	preauthentication protocol.
+
 2002-07-02  Sam Hartman  <hartmans@mit.edu>
 
 	* asn1_encode.h: Document asn1_encode_enumerated

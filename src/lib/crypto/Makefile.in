@@ -39,6 +39,7 @@ STLIBOBJS=\
 	cksumtype_to_string.o	\
 	cksumtypes.o		\
 	coll_proof_cksum.o	\
+	combine_keys.o	\
 	crypto_libinit.o	\
 	default_state.o \
 	decrypt.o		\
@@ -69,6 +70,7 @@ OBJS=\
 	$(OUTPRE)cksumtype_to_string.$(OBJEXT)	\
 	$(OUTPRE)cksumtypes.$(OBJEXT)		\
 	$(OUTPRE)coll_proof_cksum.$(OBJEXT)	\
+	$(OUTPRE)combine_keys.$(OBJEXT)	\
 	$(OUTPRE)crypto_libinit.$(OBJEXT)	\
 	$(OUTPRE)default_state.$(OBJEXT) \
 	$(OUTPRE)decrypt.$(OBJEXT)		\
@@ -99,6 +101,7 @@ SRCS=\
 	$(srcdir)/cksumtype_to_string.c	\
 	$(srcdir)/cksumtypes.c		\
 	$(srcdir)/coll_proof_cksum.c	\
+	$(srcdir)/combine_keys.c	\
 	$(srcdir)/crypto_libinit.c	\
 	$(srcdir)/default_state.c \
 	$(srcdir)/decrypt.c		\
@@ -348,6 +351,12 @@ coll_proof_cksum.so coll_proof_cksum.po $(OUTPRE)coll_proof_cksum.$(OBJEXT): col
   $(COM_ERR_DEPS) $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
   $(SRCTOP)/include/krb5/kdb.h $(BUILDTOP)/include/profile.h \
   cksumtypes.h
+combine_keys.so combine_keys.po $(OUTPRE)combine_keys.$(OBJEXT): combine_keys.c \
+  $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
+  $(BUILDTOP)/include/krb5/autoconf.h $(BUILDTOP)/include/krb5.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
+  $(SRCTOP)/include/krb5/kdb.h $(BUILDTOP)/include/profile.h \
+  etypes.h $(srcdir)/dk/dk.h
 crypto_libinit.so crypto_libinit.po $(OUTPRE)crypto_libinit.$(OBJEXT): crypto_libinit.c \
   crypto_libinit.h
 default_state.so default_state.po $(OUTPRE)default_state.$(OBJEXT): default_state.c $(SRCTOP)/include/k5-int.h \

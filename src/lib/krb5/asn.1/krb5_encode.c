@@ -751,6 +751,24 @@ krb5_error_code encode_krb5_sam_challenge(const krb5_sam_challenge *rep, krb5_da
   krb5_cleanup();
 }
 
+krb5_error_code encode_krb5_sam_challenge_2(const krb5_sam_challenge_2 *rep, krb5_data **code)
+{
+  krb5_setup();
+  retval = asn1_encode_sam_challenge_2(buf,rep,&length);
+  if(retval) return retval;
+  sum += length;
+  krb5_cleanup();
+}
+
+krb5_error_code encode_krb5_sam_challenge_2_body(const krb5_sam_challenge_2_body *rep, krb5_data **code)
+{
+  krb5_setup();
+  retval = asn1_encode_sam_challenge_2_body(buf,rep,&length);
+  if(retval) return retval;
+  sum += length;
+  krb5_cleanup();
+}
+
 krb5_error_code encode_krb5_sam_key(const krb5_sam_key *rep, krb5_data **code)
 {
   krb5_setup();
@@ -769,10 +787,28 @@ krb5_error_code encode_krb5_enc_sam_response_enc(const krb5_enc_sam_response_enc
   krb5_cleanup();
 }
 
+krb5_error_code encode_krb5_enc_sam_response_enc_2(const krb5_enc_sam_response_enc_2 *rep, krb5_data **code)
+{
+  krb5_setup();
+  retval = asn1_encode_enc_sam_response_enc_2(buf,rep,&length);
+  if(retval) return retval;
+  sum += length;
+  krb5_cleanup();
+}
+
 krb5_error_code encode_krb5_sam_response(const krb5_sam_response *rep, krb5_data **code)
 {
   krb5_setup();
   retval = asn1_encode_sam_response(buf,rep,&length);
+  if(retval) return retval;
+  sum += length;
+  krb5_cleanup();
+}
+
+krb5_error_code encode_krb5_sam_response_2(const krb5_sam_response_2 *rep, krb5_data **code)
+{
+  krb5_setup();
+  retval = asn1_encode_sam_response_2(buf,rep,&length);
   if(retval) return retval;
   sum += length;
   krb5_cleanup();

@@ -130,9 +130,10 @@ krb5_get_init_creds_password(krb5_context context, krb5_creds *creds, krb5_princ
       goto cleanup;
 
    /* If all the kdc's are unavailable, or if the error was due to a
-      user interrupt, fail */
+      user interrupt, or preauth errored out, fail */
 
    if ((ret == KRB5_KDC_UNREACH) ||
+       (ret == KRB5_PREAUTH_FAILED) ||
        (ret == KRB5_LIBOS_PWDINTR) ||
 	   (ret == KRB5_REALM_CANT_RESOLVE))
       goto cleanup;

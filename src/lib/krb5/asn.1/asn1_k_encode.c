@@ -371,6 +371,24 @@ asn1_error_code asn1_encode_enc_kdc_rep_part(asn1buf *buf, const krb5_enc_kdc_re
   asn1_cleanup();
 }
 
+asn1_error_code asn1_encode_sequence_of_checksum(asn1buf *buf, const krb5_checksum ** val, unsigned int *retlen)
+{
+  asn1_setup();
+  int i;
+
+  if(val == NULL) return ASN1_MISSING_FIELD;
+
+  for (i=0; val[i] != NULL; i++);
+  for (i--; i>=0; i--){
+    retval = asn1_encode_checksum(buf,val[i],&length);
+    if(retval) return retval;
+    sum += length;
+  }
+  asn1_makeseq();
+
+  asn1_cleanup();
+}
+
 asn1_error_code asn1_encode_kdc_req_body(asn1buf *buf, const krb5_kdc_req *rep, unsigned int *retlen)
 {
   asn1_setup();
@@ -782,6 +800,45 @@ asn1_error_code asn1_encode_sam_challenge(asn1buf *buf, const krb5_sam_challenge
   asn1_cleanup();
 }
 
+asn1_error_code asn1_encode_sam_challenge_2(asn1buf *buf, const krb5_sam_challenge_2 *val, unsigned int *retlen)
+{
+  asn1_setup();
+  if ( (!val) || (!val->sam_cksum) || (!val->sam_cksum[0]))
+      return ASN1_MISSING_FIELD;
+
+  asn1_addfield((const krb5_checksum **) val->sam_cksum, 1, asn1_encode_sequence_of_checksum);
+  asn1buf_insert_octetstring(buf, val->sam_challenge_2_body.length,
+			     (unsigned char *)val->sam_challenge_2_body.data);
+  sum += val->sam_challenge_2_body.length;
+  retval = asn1_make_etag(buf, CONTEXT_SPECIFIC, 0,
+			  val->sam_challenge_2_body.length, &length);
+  if(retval) return retval;
+  sum += length;
+
+  asn1_makeseq();
+  asn1_cleanup();
+}
+
+asn1_error_code asn1_encode_sam_challenge_2_body(asn1buf *buf, const krb5_sam_challenge_2_body *val, unsigned int *retlen)
+{
+  asn1_setup();
+
+  asn1_addfield(val->sam_etype, 9, asn1_encode_integer);
+  asn1_addfield(val->sam_nonce,8,asn1_encode_integer);
+  add_optstring(val->sam_pk_for_sad,7,asn1_encode_charstring);
+  add_optstring(val->sam_response_prompt,6,asn1_encode_charstring);
+  add_optstring(val->sam_challenge,5,asn1_encode_charstring);
+  add_optstring(val->sam_challenge_label,4,asn1_encode_charstring);
+  add_optstring(val->sam_track_id,3,asn1_encode_charstring);
+  add_optstring(val->sam_type_name,2,asn1_encode_charstring);
+
+  asn1_addfield(val->sam_flags,1,asn1_encode_sam_flags);
+  asn1_addfield(val->sam_type,0,asn1_encode_integer);
+
+  asn1_makeseq();
+  asn1_cleanup();
+}
+
 asn1_error_code asn1_encode_sam_key(asn1buf *buf, const krb5_sam_key *val, unsigned int *retlen)
 {
   asn1_setup();
@@ -806,6 +863,17 @@ asn1_error_code asn1_encode_enc_sam_response_enc(asn1buf *buf, const krb5_enc_sa
   asn1_cleanup();
 }
 
+asn1_error_code asn1_encode_enc_sam_response_enc_2(asn1buf *buf, const krb5_enc_sam_response_enc_2 *val, unsigned int *retlen)
+{
+  asn1_setup();
+  add_optstring(val->sam_sad,1,asn1_encode_charstring);
+  asn1_addfield(val->sam_nonce,0,asn1_encode_integer);
+
+  asn1_makeseq();
+
+  asn1_cleanup();
+}
+
 asn1_error_code asn1_encode_sam_response(asn1buf *buf, const krb5_sam_response *val, unsigned int *retlen)
 {
   asn1_setup();
@@ -817,6 +885,21 @@ asn1_error_code asn1_encode_sam_response(asn1buf *buf, const krb5_sam_response *
   asn1_addfield(&(val->sam_enc_nonce_or_ts),4,asn1_encode_encrypted_data);
   if (val->sam_enc_key.ciphertext.length)
     asn1_addfield(&(val->sam_enc_key),3,asn1_encode_encrypted_data);
+  add_optstring(val->sam_track_id,2,asn1_encode_charstring);
+  asn1_addfield(val->sam_flags,1,asn1_encode_sam_flags);
+  asn1_addfield(val->sam_type,0,asn1_encode_integer);
+
+  asn1_makeseq();
+
+  asn1_cleanup();
+}
+
+asn1_error_code asn1_encode_sam_response_2(asn1buf *buf, const krb5_sam_response_2 *val, unsigned int *retlen)
+{
+  asn1_setup();
+
+  asn1_addfield(val->sam_nonce,4,asn1_encode_integer);
+  asn1_addfield(&(val->sam_enc_nonce_or_sad),3,asn1_encode_encrypted_data);
   add_optstring(val->sam_track_id,2,asn1_encode_charstring);
   asn1_addfield(val->sam_flags,1,asn1_encode_sam_flags);
   asn1_addfield(val->sam_type,0,asn1_encode_integer);

@@ -1,3 +1,8 @@
+2002-10-24  Ken Hornstein  <kenh@cmf.nrl.navy.mil>
+
+	* Makefile.in, combine_keys.c: New file to implement
+	key-combination algorithm.
+
 2002-10-09  Ken Raeburn  <raeburn@mit.edu>
 
 	* pbkdf2.c, t_hmac.c, t_pkcs5.c: New files.

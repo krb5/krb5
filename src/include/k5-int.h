@@ -387,6 +387,39 @@ typedef struct _krb5_sam_response {
 	krb5_timestamp	sam_patimestamp;
 } krb5_sam_response;
 
+typedef struct _krb5_sam_challenge_2 {
+	krb5_data	sam_challenge_2_body;
+	krb5_checksum	**sam_cksum;		/* Array of checksums */
+} krb5_sam_challenge_2;
+
+typedef struct _krb5_sam_challenge_2_body {
+	krb5_magic	magic;
+	krb5_int32	sam_type; /* information */
+	krb5_flags	sam_flags; /* KRB5_SAM_* values */
+	krb5_data	sam_type_name;
+	krb5_data	sam_track_id;
+	krb5_data	sam_challenge_label;
+	krb5_data	sam_challenge;
+	krb5_data	sam_response_prompt;
+	krb5_data	sam_pk_for_sad;
+	krb5_int32	sam_nonce;
+	krb5_enctype	sam_etype;
+} krb5_sam_challenge_2_body;
+
+typedef struct _krb5_sam_response_2 {
+	krb5_magic	magic;
+	krb5_int32	sam_type; /* informational */
+	krb5_flags	sam_flags; /* KRB5_SAM_* values */
+	krb5_data	sam_track_id; /* copied */
+	krb5_enc_data	sam_enc_nonce_or_sad; /* krb5_enc_sam_response_enc */
+	krb5_int32	sam_nonce;
+} krb5_sam_response_2;
+
+typedef struct _krb5_enc_sam_response_enc_2 {
+	krb5_magic	magic;
+	krb5_int32	sam_nonce;
+	krb5_data	sam_sad;
+} krb5_enc_sam_response_enc_2;
 
 /*
  * Begin "ext-proto.h"
@@ -646,6 +679,14 @@ krb5_error_code krb5int_des_init_state
  */
 krb5_error_code krb5int_default_free_state
 (krb5_data *state);
+
+
+/*
+ * Combine two keys (normally used by the hardware preauth mechanism)
+ */
+krb5_error_code krb5int_c_combine_keys
+(krb5_context context, krb5_keyblock *key1, krb5_keyblock *key2,
+		krb5_keyblock *outkey);
 
 
 /* 
@@ -954,20 +995,36 @@ krb5_error_code krb5_do_preauth
 
 void KRB5_CALLCONV krb5_free_sam_challenge
 	(krb5_context, krb5_sam_challenge * );
+void KRB5_CALLCONV krb5_free_sam_challenge_2
+	(krb5_context, krb5_sam_challenge_2 * );
+void KRB5_CALLCONV krb5_free_sam_challenge_2_body
+	(krb5_context, krb5_sam_challenge_2_body *);
 void KRB5_CALLCONV krb5_free_sam_response
 	(krb5_context, krb5_sam_response * );
+void KRB5_CALLCONV krb5_free_sam_response_2
+	(krb5_context, krb5_sam_response_2 * );
 void KRB5_CALLCONV krb5_free_predicted_sam_response
 	(krb5_context, krb5_predicted_sam_response * );
 void KRB5_CALLCONV krb5_free_enc_sam_response_enc
 	(krb5_context, krb5_enc_sam_response_enc * );
+void KRB5_CALLCONV krb5_free_enc_sam_response_enc_2
+	(krb5_context, krb5_enc_sam_response_enc_2 * );
 void KRB5_CALLCONV krb5_free_sam_challenge_contents
 	(krb5_context, krb5_sam_challenge * );
+void KRB5_CALLCONV krb5_free_sam_challenge_2_contents
+	(krb5_context, krb5_sam_challenge_2 * );
+void KRB5_CALLCONV krb5_free_sam_challenge_2_body_contents
+	(krb5_context, krb5_sam_challenge_2_body * );
 void KRB5_CALLCONV krb5_free_sam_response_contents
 	(krb5_context, krb5_sam_response * );
+void KRB5_CALLCONV krb5_free_sam_response_2_contents
+	(krb5_context, krb5_sam_response_2 *);
 void KRB5_CALLCONV krb5_free_predicted_sam_response_contents
 	(krb5_context, krb5_predicted_sam_response * );
 void KRB5_CALLCONV krb5_free_enc_sam_response_enc_contents
 	(krb5_context, krb5_enc_sam_response_enc * );
+void KRB5_CALLCONV krb5_free_enc_sam_response_enc_2_contents
+	(krb5_context, krb5_enc_sam_response_enc_2 * );
  
 void KRB5_CALLCONV krb5_free_pa_enc_ts
 	(krb5_context, krb5_pa_enc_ts *);
@@ -1243,6 +1300,18 @@ krb5_error_code encode_krb5_enc_sam_response_enc
 krb5_error_code encode_krb5_sam_response
 	(const krb5_sam_response * , krb5_data **);
 
+krb5_error_code encode_krb5_sam_challenge_2
+	(const krb5_sam_challenge_2 * , krb5_data **);
+
+krb5_error_code encode_krb5_sam_challenge_2_body
+	(const krb5_sam_challenge_2_body * , krb5_data **);
+
+krb5_error_code encode_krb5_enc_sam_response_enc_2
+	(const krb5_enc_sam_response_enc_2 * , krb5_data **);
+
+krb5_error_code encode_krb5_sam_response_2
+	(const krb5_sam_response_2 * , krb5_data **);
+
 krb5_error_code encode_krb5_predicted_sam_response
 	(const krb5_predicted_sam_response * , krb5_data **);
 
@@ -1279,6 +1348,18 @@ krb5_error_code decode_krb5_sam_response
 
 krb5_error_code decode_krb5_predicted_sam_response
        (const krb5_data *, krb5_predicted_sam_response **);
+
+krb5_error_code decode_krb5_sam_challenge_2
+	(const krb5_data *, krb5_sam_challenge_2 **);
+
+krb5_error_code decode_krb5_sam_challenge_2_body
+	(const krb5_data *, krb5_sam_challenge_2_body **);
+
+krb5_error_code decode_krb5_enc_sam_response_enc_2
+	(const krb5_data *, krb5_enc_sam_response_enc_2 **);
+
+krb5_error_code decode_krb5_sam_response_2
+	(const krb5_data *, krb5_sam_response_2 **);
 
 
 /*************************************************************************
