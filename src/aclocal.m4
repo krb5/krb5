@@ -736,7 +736,7 @@ dnl
 kadm_deplib=''
 kadm_lib=''
 define(USE_KADM_LIBRARY,[
-kadm_deplib="[$](TOPLIBD)/libkadm.a"
+kadm_deplib="\[$](TOPLIBD)/libkadm.a"
 kadm_lib=-lkadm])
 dnl
 dnl This rule tells KRB5_LIBRARIES to include the kdb5 library.
@@ -744,7 +744,7 @@ dnl
 kdb5_deplib=''
 kdb5_lib=''
 define(USE_KDB5_LIBRARY,[
-kdb5_deplib="[$](TOPLIBD)/libkdb5.a"
+kdb5_deplib="\[$](TOPLIBD)/libkdb5.a"
 kdb5_lib=-lkdb5])
 dnl
 dnl This rule tells KRB5_LIBRARIES to include the kdb4 library.
@@ -768,15 +768,15 @@ dnl
 ss_deplib=''
 ss_lib=''
 define(USE_SS_LIBRARY,[
-ss_deplib="[$](TOPLIBD)/libss.a"
+ss_deplib="\[$](TOPLIBD)/libss.a"
 ss_lib=-lss
 ])
 dnl
 dnl This rule generates library lists for programs.
 dnl
 define(KRB5_LIBRARIES,[
-DEPLIBS="[$](DEPLOCAL_LIBRARIES) $kadm_deplib $kdb5_deplib [$](TOPLIBD)/libkrb5.a $kdb4_deplib $krb4_deplib [$](TOPLIBD)/libcrypto.a $ss_deplib [$](TOPLIBD)/libcom_err.a"
-LIBS="[$](LOCAL_LIBRARIES) $kadm_lib $kdb5_lib -lkrb5 $kdb4_lib $krb4_lib -lcrypto $ss_lib -lcom_err $LIBS"
+DEPLIBS="\[$](DEPLOCAL_LIBRARIES) $kadm_deplib $kdb5_deplib \[$](TOPLIBD)/libkrb5.a $kdb4_deplib $krb4_deplib \[$](TOPLIBD)/libcrypto.a $ss_deplib \[$](TOPLIBD)/libcom_err.a"
+LIBS="\[$](LOCAL_LIBRARIES) $kadm_lib $kdb5_lib -lkrb5 $kdb4_lib $krb4_lib -lcrypto $ss_lib -lcom_err $LIBS"
 AC_SUBST(DEPLIBS)])
 dnl
 dnl This rule supports the generation of the shared library object files

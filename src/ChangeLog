@@ -1,3 +1,8 @@
+Sun Jul  9 06:15:33 1995  Tom Yu  <tlyu@lothlorien.MIT.EDU>
+
+	* aclocal.m4: backslash '$' characters that go into double-quoted
+		strings so shells that treat $(foo) like `foo` won't barf
+
 Sun Jul  9 01:31:25 1995  Tom Yu  <tlyu@dragons-lair.MIT.EDU>
 
 	* Makefile.in: remove bogus definitions of prefix, etc.
