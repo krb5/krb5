@@ -67,10 +67,10 @@ install::
 	fi
 
 kshd: krshd.o kcmd.o forward.o compat_recv.o $(SETENVOBJ) $(LIBOBJS) $(PTY_DEPLIB) $(KRB4COMPAT_DEPLIBS)
-	$(CC_LINK) -o kshd krshd.o kcmd.o forward.o $(SETENVOBJ) $(LIBOBJS) $(KRSHDLIBS) $(PTY_LIB) $(KRB4COMPAT_LIBS)
+	$(CC_LINK) -o kshd krshd.o kcmd.o forward.o compat_recv.o $(SETENVOBJ) $(LIBOBJS) $(KRSHDLIBS) $(PTY_LIB) $(KRB4COMPAT_LIBS)
 
 klogind: krlogind.o kcmd.o forward.o compat_recv.o $(SETENVOBJ) $(LIBOBJS) $(PTY_DEPLIB) $(KRB4COMPAT_DEPLIBS)
-	$(CC_LINK) -o klogind krlogind.o  kcmd.o forward.o $(SETENVOBJ) $(LIBOBJS) $(PTY_LIB) $(KRB4COMPAT_LIBS)
+	$(CC_LINK) -o klogind krlogind.o  kcmd.o forward.o compat_recv.o $(SETENVOBJ) $(LIBOBJS) $(PTY_LIB) $(KRB4COMPAT_LIBS)
 
 install::
 	for f in kshd klogind; do \
