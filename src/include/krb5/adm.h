@@ -131,6 +131,9 @@
 #define	KRB5_ADM_M_GET			0x40000000
 #define	KRB5_ADM_M_SET			0x80000000
 
+#define KRB5_ADM_M_EXTRADATA		0x00000000 /* Hack to get */
+						   /* libkadm to compile */
+
 #define	KRB5_ADM_M_SET_VALID		(KRB5_ADM_M_SET		+ \
 					 KRB5_ADM_M_PASSWORD	+ \
 					 KRB5_ADM_M_APASSWORD	+ \

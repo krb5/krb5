@@ -1,3 +1,8 @@
+Fri Dec  1 17:16:05 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* adm.h: Added temporary definition of KRB5_ADM_M_EXTRADATA so
+		that we have a tree which compiles.
+
 Tue Nov  7 16:41:14 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* kdb.h: Added prototype for krb5_dbe_search_enctype().  Changed
