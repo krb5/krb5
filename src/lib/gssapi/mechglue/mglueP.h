@@ -302,6 +302,7 @@ typedef struct gss_config {
 	 ));
     int		     (*pname_to_uid)
 	NPROTOTYPE((
+		    void *,		/* context */
 		    char *,		/* pname */
 		    gss_OID,		/* name type */
 		    gss_OID,		/* mech type */
@@ -313,19 +314,17 @@ typedef struct gss_config {
 /********************************************************/
 /* Internal mechglue routines */
 
-gss_mechanism get_mechanism
+gss_mechanism __gss_get_mechanism
 PROTOTYPE((gss_OID));
-OM_uint32 add_mechanism
-PROTOTYPE((gss_mechanism, int));
-OM_uint32 get_mech_type
+OM_uint32 __gss_get_mech_type
 PROTOTYPE((gss_OID *, gss_buffer_t));
-OM_uint32 import_internal_name
+OM_uint32 __gss_import_internal_name
 PROTOTYPE((OM_uint32 *, gss_OID, gss_union_name_t,
 	   gss_name_t *));
-OM_uint32 display_internal_name
+OM_uint32 __gss_display_internal_name
 PROTOTYPE((OM_uint32 *, gss_OID, gss_name_t,
 	   gss_buffer_t, gss_OID *));
-OM_uint32 release_internal_name
+OM_uint32 __gss_release_internal_name
 PROTOTYPE((OM_uint32 *, gss_OID, gss_name_t *));
 
 OM_uint32 generic_gss_release_oid

@@ -3,8 +3,27 @@
  *  krb5 mechanism specific routine for pname_to_uid 
  *
  *  Copyright 1995 Sun Microsystems, Inc.
+ *
+ * Permission to use, copy, modify, distribute, and sell this software
+ * and its documentation for any purpose is hereby granted without fee,
+ * provided that the above copyright notice appears in all copies and
+ * that both that copyright notice and this permission notice appear in
+ * supporting documentation, and that the name of Sun Microsystems not be used
+ * in advertising or publicity pertaining to distribution of the software
+ * without specific, written prior permission. Sun Microsystems makes no
+ * representations about the suitability of this software for any
+ * purpose.  It is provided "as is" without express or implied warranty.
+ * 
+ * SUN MICROSYSTEMS DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE,
+ * INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO
+ * EVENT SHALL SUN MICROSYSTEMS BE LIABLE FOR ANY SPECIAL, INDIRECT OR
+ * CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF
+ * USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+ * OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+ * PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include "gssapiP_krb5.h"
 #include <gssapi/gssapi.h>
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
@@ -13,12 +32,13 @@
 #include <pwd.h>
 #include <sys/types.h>
 
-extern char *strpbrk(const char *s1, const char *s2);
-extern struct passwd *getpwnam(const char *name);
+/* 
+ * This function will probably get replaced with the gsscred stuff...
+ */
 
 int
-krb5_pname_to_uid(pname, name_type, mech_type, uid)
-
+krb5_pname_to_uid(context, pname, name_type, mech_type, uid)
+krb5_context context;
 char * pname;
 gss_OID name_type;
 gss_OID mech_type;
@@ -26,67 +46,43 @@ uid_t * uid;
 {
 
 	struct passwd	*pw;
-	char		*pname_copy, *prefix, *suffix, *default_realm = NULL,
-			*temp;
 	static unsigned char	krb5principalname[] =
-	{"\052\206\110\206\367\022\001\002\002\001"};
+			  {"\052\206\110\206\367\022\001\002\002\001"};
+	krb5_principal  principal;
+	char lname[256];
+	krb5_error_code stat;
 
 /*
  * check that the name_type is the Kerberos Principal Name form
  * [1.2.840.113554.1.2.2.1] or NULL. 
  */
-
 	if(name_type->length !=0)
-		if((name_type->length != 10)
-			||
+		if((name_type->length != 10) ||
 		   (memcmp(name_type->elements, krb5principalname, 10) != 0))
 			return(0);
-/* take care of the special case of "root.<hostname>@realm */
-
-	if(strncmp(pname, "root.", 5) == 0) {
-		*uid = 0;
-		return(1);
-	}
 		
-/* get the name and realm parts of the Kerberos Principal Name */
+	/* get the name and realm parts of the Kerberos Principal Name */
 
-	pname_copy = (char *) malloc(strlen(pname)+1);
-	strcpy(pname_copy, pname);
-	prefix = pname_copy;
-	suffix = pname_copy;
-
-	/* find last occurance of "@" */
-
-	temp = (char *) !NULL;
-	while(temp != NULL)
-		suffix = (((temp = strpbrk(suffix, "@")) == NULL) ?
-							suffix : temp+1);
-
-	if(suffix != pname_copy)
-		*(suffix-1) = '\0';
-
-/* Make sure the name is in the local realm */
-
-	if(suffix != pname_copy) {
-		krb5_get_default_realm(&default_realm);
-		if(default_realm == NULL ||
-					strcmp(default_realm, suffix) != 0) {
-			free(pname_copy);
-			return(0);
-		}
+	if (krb5_parse_name(context, pname, &principal)) {
+		return(0);
 	}
+
+	stat = krb5_aname_to_localname(context, principal,
+							sizeof(lname), lname);
+	krb5_free_principal(context, principal);
+
+	if (stat)
+		return(0);
 
 /*
  * call getpwnam() and return uid result if successful.
  * Otherwise, return failure.
  */
 
-	if(pw = getpwnam(prefix)) {
+	if(pw = getpwnam(lname)) {
 		*uid = pw->pw_uid;
-		free(pname_copy);
 		return(1);
 	} else {
-		free(pname_copy);
 		return(0);
 	}
 }

@@ -29,7 +29,7 @@
 #include "mglueP.h"
 /* should include to get protos #include "../generic/gssapiP_generic.h" */
 
-extern gss_mechanism *mechs_array;
+extern gss_mechanism *__gss_mechs_array;
 
 OM_uint32
 gss_release_oid(minor_status, oid)
@@ -45,10 +45,10 @@ gss_release_oid(minor_status, oid)
      * if no mechanisms recognize the OID, then call the generic version.
      */
 
-    for(i=0; mechs_array[i]->mech_type.length !=0; i++) {
-        if (mechs_array[i]->gss_internal_release_oid) {
-	    major_status = mechs_array[i]->gss_internal_release_oid(
-					    mechs_array[i]->context,
+    for(i=0; __gss_mechs_array[i]->mech_type.length !=0; i++) {
+        if (__gss_mechs_array[i]->gss_internal_release_oid) {
+	    major_status = __gss_mechs_array[i]->gss_internal_release_oid(
+					    __gss_mechs_array[i]->context,
 					    minor_status,
 					    oid);
 	    if (major_status == GSS_S_COMPLETE) {

@@ -269,10 +269,11 @@ extern OM_uint32 krb5_gss_get_context
 	   );
 
 extern int krb5_pname_to_uid
-             (char *,		/* minor_status */
+             (void *,           /* context */
+              char *,		/* principal name */
               gss_OID,		/* name_type */
 	      gss_OID,		/* mech_type */
-              uid_t *		/* input_name */
+              uid_t *		/* uid (OUT) */
              );
 
 /*

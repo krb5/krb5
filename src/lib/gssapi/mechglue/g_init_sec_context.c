@@ -1,9 +1,29 @@
 #ident  "@(#)gss_init_sec_context.c 1.20     95/08/07 SMI"
+
+/*
+ * Copyright 1996 by Sun Microsystems, Inc.
+ * 
+ * Permission to use, copy, modify, distribute, and sell this software
+ * and its documentation for any purpose is hereby granted without fee,
+ * provided that the above copyright notice appears in all copies and
+ * that both that copyright notice and this permission notice appear in
+ * supporting documentation, and that the name of Sun Microsystems not be used
+ * in advertising or publicity pertaining to distribution of the software
+ * without specific, written prior permission. Sun Microsystems makes no
+ * representations about the suitability of this software for any
+ * purpose.  It is provided "as is" without express or implied warranty.
+ * 
+ * SUN MICROSYSTEMS DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE,
+ * INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO
+ * EVENT SHALL SUN MICROSYSTEMS BE LIABLE FOR ANY SPECIAL, INDIRECT OR
+ * CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF
+ * USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+ * OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+ * PERFORMANCE OF THIS SOFTWARE.
+ */
+
 /*
  *  glue routine for gss_init_sec_context
- *
- * Copyright (c) 1995, by Sun Microsystems, Inc.
- * All rights reserved.
  */
 
 #include "mglueP.h"
@@ -59,7 +79,7 @@ OM_uint32 FAR *		time_rec;
      * mechanism.  If mech_type is NULL, set it to the resultant
      * mechanism
      */
-    mech = get_mechanism (mech_type);
+    mech = __gss_get_mechanism (mech_type);
     if (mech == NULL)
 	return (GSS_S_BAD_MECH);
 
@@ -73,7 +93,7 @@ OM_uint32 FAR *		time_rec;
 
     union_name = (gss_union_name_t) target_name;
     
-    if ((temp_status = import_internal_name (
+    if ((temp_status = __gss_import_internal_name (
 					     minor_status,
 					     mech_type,
 					     union_name,
@@ -136,7 +156,7 @@ OM_uint32 FAR *		time_rec;
     } else
 	status = GSS_S_BAD_BINDINGS;
 
-    temp_status = release_internal_name(
+    temp_status = __gss_release_internal_name(
 					&temp_minor_status,
 					mech_type,
 					&internal_name);

@@ -11,6 +11,7 @@ DEPLIBS=
 SHLIB_LDFLAGS= $(LDFLAGS) @SHLIB_RPATH_DIRS@ \
 	$(LD_UNRESOLVED_PREFIX)krb5_gss_initialize
 
+
 SHLIB_LIBDIRS= @SHLIB_LIBDIRS@
 
 SRCS	= $(srcdir)/g_acquire_cred.c \
@@ -39,11 +40,8 @@ SRCS	= $(srcdir)/g_acquire_cred.c \
 	  $(srcdir)/g_inquire_context.c \
 	  $(srcdir)/g_inquire_names.c \
 	  $(srcdir)/g_initialize.c \
-	  $(srcdir)/get_mtype.c \
-	  $(srcdir)/get_mechanism.c \
-	  $(srcdir)/internal_name.c \
+	  $(srcdir)/g_glue.c \
 	  $(srcdir)/gssd_pname_to_uid.c \
-	  $(srcdir)/add_mechanism.c \
 	  $(srcdir)/gen_oids.c \
 	  $(srcdir)/oid_ops.c
 
@@ -73,11 +71,8 @@ OBJS	= g_acquire_cred.$(OBJEXT) \
 	  g_inquire_context.$(OBJEXT) \
 	  g_inquire_names.$(OBJEXT) \
 	  g_initialize.$(OBJEXT) \
-	  get_mtype.$(OBJEXT) \
-	  get_mechanism.$(OBJEXT) \
-	  internal_name.$(OBJEXT) \
+	  g_glue.$(OBJEXT) \
 	  gssd_pname_to_uid.$(OBJEXT) \
-	  add_mechanism.$(OBJEXT) \
 	  gen_oids.$(OBJEXT) \
 	  oid_ops.$(OBJEXT)
 

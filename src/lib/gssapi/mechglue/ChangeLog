@@ -1,3 +1,9 @@
+Tue Feb  6 23:59:49 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* g_initialize.c (gss_initialize): Added code to try to
+		dynamically read in the GSSAPI mechanim library using
+		dlopen().
+
 Wed Jan 24 20:49:13 1996  Tom Yu  <tlyu@dragons-lair.MIT.EDU>
 
 	* g_compare_name.c, g_delete_sec_context.c, g_dsp_status.c,
