@@ -1,3 +1,18 @@
+Fri Jul  3 18:17:48 1998  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* Makefile.in (build_pwfile): Add rule to build the build_pwfile
+		program.   
+
+	* kadm_server.c (kadm_ser_cpw): Put the call to the
+		kadm_approve_pw in the common code, so it's executed even
+		if KADM5 is defined.  Add appropriate syslogs to the
+		change password processing.
+
+	* kadm_funcs.c (pwstring;): If NDBM_PW_CHECK is defined, then do
+		the NDBM-based dictionary check.   Build kadmind4 using
+		the make option PW_CHECK=-DNDBM_PW_CHECK if this feature
+		is desired.
+
 1998-05-08  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* kadm_server.c (krb_log): Print the year using 4 digit to avoid
