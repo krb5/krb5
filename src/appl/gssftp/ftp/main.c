@@ -193,7 +193,8 @@ main(argc, argv)
 		pw = getpwuid(getuid());
 	if (pw != NULL) {
 		home = homedir;
-		(void) strcpy(home, pw->pw_dir);
+		(void) strncpy(home, pw->pw_dir, sizeof(homedir) - 1);
+		homedir[sizeof(homedir) - 1] = '\0';
 	}
 	if (argc > 0) {
 		if (setjmp(toplevel))

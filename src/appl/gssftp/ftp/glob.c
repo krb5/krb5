@@ -118,7 +118,7 @@ ftpglob(v)
 
 	globerr = 0;
 	gpath = agpath; gpathp = gpath; *gpathp = 0;
-	lastgpathp = &gpath[sizeof agpath - 1];
+	lastgpathp = &gpath[sizeof(agpath) - 1];
 	ginit(agargv); globcnt = 0;
 	collect(v);
 	if (globcnt == 0 && (gflag&1)) {
@@ -702,7 +702,7 @@ gethdir(home)
 {
 	register struct passwd *pp = getpwnam(home);
 
-	if (!pp || home + strlen(pp->pw_dir) >= lastgpathp)
+	if (!pp || ((home + strlen(pp->pw_dir)) >= lastgpathp))
 		return (1);
 	(void) strcpy(home, pp->pw_dir);
 	return (0);

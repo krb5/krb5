@@ -1,3 +1,8 @@
+2000-05-23  Nalin Dahyabhai  <nalin@redhat.com>
+
+	* win_glue.c (GetCallingAppVerInfo): Don't overfill buffers
+	"AppTitle", "AppVer", and "AppIni".
+
 2000-05-15      Jeffrey Altman          <jaltman@columbia.edu>
 
         * krb5_32.def -- Added exports for new public functions

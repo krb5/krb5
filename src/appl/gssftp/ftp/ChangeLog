@@ -1,3 +1,11 @@
+2000-05-11  Nalin Dahyabhai  <nalin@redhat.com>
+
+	* domacro.c (domacro): Don't overflow "line2"
+	* ftp.c (getreply, krb4 compat): Bail if message data too big for buffer
+	(getreply, gssapi): Ditto.
+	(pswitch): Don't overflow "ntin", "ntout", "mapin", "mapout".
+	(do_auth, krb4 compat): Don't overflow "realm".
+
 2000-04-27  Nalin Dahyabhai  <nalin@redhat.com>
 
 	* cmds.c (remglob): Don't overflow buffer "temp".

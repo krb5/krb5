@@ -187,11 +187,20 @@ void GetCallingAppVerInfo( char *AppTitle, char *AppVer, char *AppIni,
 	 * We don't have a way to determine that INI file of the
 	 * application at the moment so let's just use krb5.ini
 	 */
-	strcpy( locAppIni, KERBEROS_INI );
+	strncpy( locAppIni, KERBEROS_INI, sizeof(locAppIni) - 1 );
+	locAppIni[ sizeof(locAppIni) - 1 ] = '\0';
 
-	strcpy( AppTitle, locAppTitle);
-	strcpy( AppVer, locAppVer);
-	strcpy( AppIni, locAppIni);
+	/*
+	 * We're not supposed to know how long these buffers are, but the
+	 * only place this function gets called from is this file, with them
+	 * being 256 chars long.
+	 */
+	strncpy( AppTitle, locAppTitle, 255);
+	AppTitle[ 255 ] = '\0';
+	strncpy( AppVer, locAppVer, 255);
+	AppVer[ 255 ] = '\0';
+	strncpy( AppIni, locAppIni, 255);
+	AppIni[ 255 ] = '\0';
 
 	/*
 	 * We also need to determine if we want to suppress version
