@@ -1,6 +1,7 @@
 2001-06-18  Ezra Peisach  <epeisach@mit.edu>
 
 	* kparse.c (strutol): Cast argument to isupper()/tolower() to int.
+	* realmofhost.c (krb_realmofhost): Likewise.
 
 2001-06-18  Ezra Peisach  <epeisach@mit.edu>
 

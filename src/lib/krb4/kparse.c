@@ -562,8 +562,8 @@ static char * strutol( start )
 {
     char *q;
     for (q=start; *q; q++)
-        if (isupper(*q))
-	    *q=tolower(*q);
+        if (isupper((int) *q))
+	    *q=tolower((int) *q);
     return(start);
 }
 
