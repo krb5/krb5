@@ -81,7 +81,7 @@
  */
 #ifdef HAVE_SA_LEN
 #define ifreq_size(i) max(sizeof(struct ifreq),\
-     sizeof(i.ifr_name)+i.ifr_addr.sa_len)
+     sizeof((i).ifr_name)+(i).ifr_addr.sa_len)
 #else
 #define ifreq_size(i) sizeof(struct ifreq)
 #endif /* HAVE_SA_LEN*/
