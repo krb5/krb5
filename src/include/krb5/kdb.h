@@ -89,7 +89,6 @@ typedef struct _krb5_keysalt {
 typedef struct _krb5_db_entry_new {
     krb5_magic 		  magic;		/* NOT saved */
     krb5_int16		  len;			
-    krb5_kvno 		  mkvno;
     krb5_flags 		  attributes;
     krb5_deltat		  max_life;
     krb5_deltat		  max_renewable_life;
@@ -109,7 +108,7 @@ typedef struct _krb5_db_entry_new {
 } krb5_db_entry;
 
 #define	KRB5_KDB_MAGIC_NUMBER		0xdbdbdbdb
-#define KRB5_KDB_V1_BASE_LENGTH		42
+#define KRB5_KDB_V1_BASE_LENGTH		38
   
 typedef struct tl_data_1 {
     krb5_timestamp 	  last_pwd_change; 	/* Last time passwd changed */
