@@ -1,4 +1,19 @@
+2003-05-27  Ken Raeburn  <raeburn@mit.edu>
+
+	* send524.c (krb5int_524_sendto_kdc): Enable support on Windows
+	always.
+
+2003-05-24  Ken Raeburn  <raeburn@mit.edu>
+
+	* send524.c: New file, moved from krb524/sendmsg.c.  Rename
+	function to have krb5int_ prefix.  If KRB5_KRB4_COMPAT not
+	defined, return an error.
+	* accessor.c (krb5int_accessor): Update for deleted and added
+	fields.  If KRB5_KRB4_COMPAT is not defined, just use null
+	pointers for the new fields.
+
 2003-05-06  Alexandra Ellwood  <lxs@mit.edu>
+
         * init_os_ctx.c: Added support for KLL's __KLAllowHomeDirectoryAccess()
         function so that krb4, krb5 and gssapi will not access the user's homedir
         if the application forbids it.

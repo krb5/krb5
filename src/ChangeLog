@@ -1,3 +1,15 @@
+2003-05-27  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (KRBHDEP): Add krb524_err header.
+
+2003-05-24  Ken Raeburn  <raeburn@mit.edu>
+
+	* aclocal.m4 (WITH_KRB4): Don't set or substitute KRB524_DEPLIB,
+	KRB524_LIB, KRB524_H_DEP, or KRB524_ERR_H_DEP.
+	* Makefile.in (ETOUT): Update location of krb524_err files.
+	(krb524/krb524_err.h, krb524/krb524_err.c): Delete.
+	($(INC)krb524_err.h, $(ET)krb524_err.c): New targets.
+
 2003-05-22  Tom Yu  <tlyu@mit.edu>
 
 	* aclocal.m4: Add -DKRB5_DEPRECATED=1 so stuff in tree builds.

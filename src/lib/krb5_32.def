@@ -231,6 +231,10 @@ krb5_set_password_using_ccache
 	krb5_verify_init_creds_opt_init
 	krb5_verify_init_creds_opt_set_ap_req_nofail
 
+	krb5_524_convert_creds
+; Don't add krb524_convert_creds_kdc or krb524_init_ets here;
+; they've never been exported by this library, and are deprecated. -KR
+
 	krb5int_accessor	; INTERNAL (to end all internals)
 
 ; To Add (exported on Mac OS X):

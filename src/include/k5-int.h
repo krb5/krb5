@@ -1633,26 +1633,20 @@ krb5_error_code krb5int_setpw_result_code_string
 /* To keep happy libraries which are (for now) accessing internal stuff */
 
 /* Make sure to increment by one when changing the struct */
-#define KRB5INT_ACCESS_STRUCT_VERSION 6
+#define KRB5INT_ACCESS_STRUCT_VERSION 7
 
+#ifndef ANAME_SZ
+struct ktext;			/* from krb.h, for krb524 support */
+#endif
 typedef struct _krb5int_access {
-    krb5_error_code (*krb5_locate_kdc) (krb5_context, const krb5_data *,
-					struct addrlist *, int, int, int);
-    krb5_error_code (*krb5_locate_server) (krb5_context, const krb5_data *,
-					   struct addrlist *, int,
-					   const char *, const char *,
-					   int, int, int, int);
-    void (*free_addrlist) (struct addrlist *);
-    unsigned int krb5_max_skdc_timeout;
-    unsigned int krb5_skdc_timeout_shift;
-    unsigned int krb5_skdc_timeout_1;
-    unsigned int krb5_max_dgram_size;
+    /* crypto stuff */
     const struct krb5_hash_provider *md5_hash_provider;
     const struct krb5_enc_provider *arcfour_enc_provider;
     krb5_error_code (* krb5_hmac) (const struct krb5_hash_provider *hash,
 				   const krb5_keyblock *key,
 				   unsigned int icount, const krb5_data *input,
 				   krb5_data *output);
+    /* service location and communication */
     krb5_error_code (*sendto_udp) (krb5_context, const krb5_data *msg,
 				   const struct addrlist *, krb5_data *reply,
 				   struct sockaddr *, socklen_t *);
@@ -1660,6 +1654,11 @@ typedef struct _krb5int_access {
 					const char *hostname,
 					int port, int secport,
 					int socktype, int family);
+    void (*free_addrlist) (struct addrlist *);
+    /* krb4 compatibility stuff -- may be null if not enabled */
+    krb5_int32 (*krb_life_to_time)(krb5_int32, int);
+    int (*krb_time_to_life)(krb5_int32, krb5_int32);
+    int (*krb524_encode_v4tkt)(struct ktext *, char *, unsigned int *);
 } krb5int_access;
 
 #define KRB5INT_ACCESS_VERSION \
@@ -1668,6 +1667,29 @@ typedef struct _krb5int_access {
 
 krb5_error_code KRB5_CALLCONV krb5int_accessor
 	(krb5int_access*, krb5_int32);
+
+/* Ick -- some krb524 and krb4 support placed in the krb5 library,
+   because AFS (and potentially other applications?) use the krb4
+   object as an opaque token, which (in some implementations) is not
+   in fact a krb4 ticket, so we don't want to drag in the krb4 support
+   just to enable this.  */
+
+#define KRB524_SERVICE "krb524"
+#define KRB524_PORT 4444
+
+/* v4lifetime.c */
+extern krb5_int32 krb5int_krb_life_to_time(krb5_int32, int);
+extern int krb5int_krb_time_to_life(krb5_int32, krb5_int32);
+
+/* conv_creds.c */
+int krb5int_encode_v4tkt
+	(struct ktext *v4tkt, char *buf, unsigned int *encoded_len);
+
+/* send524.c */
+int krb5int_524_sendto_kdc
+        (krb5_context context, const krb5_data * message, 
+	 const krb5_data * realm, krb5_data * reply,
+	 struct sockaddr *, socklen_t *);
 
 /* temporary -- this should be under lib/krb5/ccache somewhere */
 
