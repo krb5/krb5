@@ -38,10 +38,6 @@ rcache.c's get_name doesn't fill with zeros unless strncpy does.
 
 rc_base.c:
 
-If SEMAPHORE is defined and <semaphore.h> exists when rc_base.c is
-compiled, all access to the type list will be protected by appropriate
-semaphore ups and downs. This is untested.
-
 It doesn't take linker magic to preregister types. Just change the
 typehead initialization in rc_base.c, with an appropriate include file
 setting the ops.

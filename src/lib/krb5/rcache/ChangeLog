@@ -1,3 +1,7 @@
+2004-03-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* rc_base.c: Delete unused and untested semaphore support.
+
 2003-08-26  Ken Raeburn  <raeburn@mit.edu>
 
 	* rc_dfl.c (alive): Take a timestamp argument instead of the
