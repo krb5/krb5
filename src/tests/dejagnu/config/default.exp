@@ -270,7 +270,7 @@ proc setup_kerberos_env { } {
     verbose "KRB5_CONFIG=$env(KRB5_CONFIG)"
 
     # Direct the Kerberos programs at a local ticket file.
-    set env(KRB5CCNAME) FILE:$tmppwd/tkt
+    set env(KRB5CCNAME) $tmppwd/tkt
     verbose "KRB5CCNAME=$env(KRB5CCNAME)"
 
     # Direct the Kerberos server at a cache file stored in the

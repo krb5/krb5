@@ -1,3 +1,7 @@
+Fri May 05 09:21:21 1995  Chris Provenzano (proven@mit.edu)
+
+	* default.exp : Removed FILE: part of env(KRB5CCNAME).
+
 Wed May  3 22:00:48 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* default.exp: (get_hostname): The FQDN returned by resolve needs
