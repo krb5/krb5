@@ -28,6 +28,7 @@
  */
 
 #include "krb5.h"
+#include <stdio.h>
 
 void
 main(
@@ -39,6 +40,8 @@ main(
     krb5_error_code code;
     krb5_ccache ccache=NULL;
     krb5_ccache mslsa_ccache=NULL;
+    krb5_cc_cursor cursor;
+    krb5_creds creds;
     krb5_principal princ;
     int initial_ticket = 0;
 
