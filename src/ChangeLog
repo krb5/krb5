@@ -1,22 +1,10 @@
-Fri May 26 13:41:46 1995  Ezra Peisach  (epeisach@kangaroo.mit.edu)
+Fri May 26 15:33:12 1995 Keith Vetter (keithv@fusion.com)
 
-	* configure.in: For Alphs OSF/1, prime a local shared library
-		registry with system installed registry file.
+	* wconfig.c: extended so it ignores lines beginning with '@'.
 
 Fri May 26 10:16:02 1995 Keith Vetter (keithv@fusion.com)
 
 	* Makefile.in: added lib/kadm and deleted lib/krb425 from PC stuff.
-
-Fri May 26 12:44:31 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
-
-	* configure.in: Added shared library support for Alpha OSF. 
-
-Thu May 25 22:01:39 1995  Theodore Y. Ts'o  (tytso@dcl)
-
-	* aclocal.m4(V5_MAKE_SHARED_LIB, V5_SHARED_LIB_OBJS): Added autoconf
-		rules for creating shared libraries.
-
-	* configure.in: Add support for --enable-shared
 
 Thu May 25 11:30:00 1995 Keith Vetter (keithv@fusion.com)
 

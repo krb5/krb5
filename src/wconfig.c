@@ -27,24 +27,23 @@
  * first 5 characters of the line.  This will allow lines like:
  * ##DOS!include windows.in to become: !include windows.in
  *
+ * We also turn any line beginning with '@' into a blank line.
+ *
  * If a config directory is specified, then the output will be start with
  * config\pre.in, then the filtered stdin text, and will end with
  * config\post.in.
  *
- * Syntax: wconfig [<config directory>] <input >output
+ * Syntax: wconfig [config_directory] <input_file >output_file
  *
  */
-
 #include <stdio.h>
-static char buf [1024];
+#include <string.h>
+
+static char buf [1024];							/* Holds line from a file */
 static int copy_file (char *path, char *fname);
 
-int main(argc, argv)
-    int argc;
-    char *argv[];
-{
-    int l;
-    char *ptr;
+int main(int argc, char *argv[]) {
+    char *ptr;									/* For parsing the input */
 
     if (argc == 2)                              /* Config directory given */
         copy_file (argv[1], "\\pre.in");        /* Send out prefix */
@@ -52,6 +51,9 @@ int main(argc, argv)
     while ((ptr = gets(buf)) != NULL) {         /* Filter stdin */
         if (memcmp ("##DOS", buf, 5) == 0)
             ptr += 5;
+		else if (*ptr == '@')					/* Lines starting w/ '@'... */
+			*ptr = '\0';						/* ...turn into blank lines */
+
         puts (ptr);
     }
 
