@@ -1,3 +1,8 @@
+Fri Mar 28 03:43:58 1997  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* gssapi_generic.c, gssapi_generic.h: Added definition for the
+		generic gsspi OID type "gss_nt_exported_name".
+
 Thu Mar 27 15:36:32 1997  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* gssapi.hin: Add the GSS_C_PROT_READY_FLAG and GSS_C_TRANS_FLAG

@@ -44,6 +44,9 @@
  * service_name:
  * 	iso(1) member-body(2) US(840) mit(113554) infosys(1) gssapi(2)
  * 	generic(1) service_name(4) = 1.2.840.113554.1.2.1.4
+ * exported_name:
+ *      1(iso), 3(org), 6(dod), 1(internet), 5(security), 6(nametypes),
+ *	    4(gss-api-exported-name)
  */
 
 static gss_OID_desc oids[] = {
@@ -51,9 +54,11 @@ static gss_OID_desc oids[] = {
    {10, "\052\206\110\206\367\022\001\002\001\002"},
    {10, "\052\206\110\206\367\022\001\002\001\003"},
    {10, "\052\206\110\206\367\022\001\002\001\004"},
+   { 6, "\053\006\001\005\006\004"},
 };
 
 KRB5_DLLIMP gss_OID gss_nt_user_name = oids+0;
 KRB5_DLLIMP gss_OID gss_nt_machine_uid_name = oids+1;
 KRB5_DLLIMP gss_OID gss_nt_string_uid_name = oids+2;
 KRB5_DLLIMP gss_OID gss_nt_service_name = oids+3;
+KRB5_DLLIMP gss_OID gss_nt_exported_name = oids+4;
