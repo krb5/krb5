@@ -1,3 +1,40 @@
+2003-07-17  Tom Yu  <tlyu@mit.edu>
+
+	* gssapiP_krb5.h: Delete kg_release_defcred(); it's no longer
+	used.
+
+	* gssapi_krb5.c: Delete defcred; it's no longer cached.
+	(kg_get_defcred): Don't cache.
+	(kg_release_defcred): Delete; it's no longer used.
+
+	* init_sec_context.c (krb5_gss_init_sec_context): Break into more
+	manageable pieces.  Clean up a few error condition memory leaks
+	previously obscured by the sheer size of this function.
+	(setup_enc): New function; used to be part of
+	krb5_gss_init_sec_context() responsible for setting up enctypes,
+	keyblocks, related nastiness.
+	(get_requested_enctypes): New function; used to be part of
+	krb5_gss_init_sec_context() responsible for pruning the krb5
+	library's default enctype list to the limited set of enctypes
+	usable with GSSAPI.
+	(new_connection): New function; used to be part of
+	krb5_gss_init_sec_context() responsible for initial gss_ctx setup
+	and creating the AP-REQ.
+	(mutual_auth): New function; used to be part of
+	krb5_gss_init_sec_context() responsible for reading the AP-REP if
+	mutual auth was requested.
+
+	* inq_cred.c (krb5_gss_inquire_cred): Rearrange due to removal of
+	kg_release_defcred(), particularly to explicitly release the
+	defcred once it's obtained.
+
+	* rel_cred.c (krb5_gss_release_cred): Remove call to
+	kg_release_defcred(), and always succeed in releasing the null
+	credential.
+
+	* set_ccache.c (gss_krb5_ccache_name): Remove call to
+	kg_release_defcred().
+
 2003-07-14  Tom Yu  <tlyu@mit.edu>
 
 	* accept_sec_context.c (krb5_gss_accept_sec_context): Call
