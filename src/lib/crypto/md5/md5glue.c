@@ -22,6 +22,9 @@ krb5_checksum FAR *outcksum;
     krb5_octet *input = (krb5_octet *)in;
     krb5_MD5_CTX working;
 
+    if (outcksum->length < RSA_MD5_CKSUM_LENGTH)
+	return KRB5_BAD_MSIZE;
+    
     krb5_MD5Init(&working);
     krb5_MD5Update(&working, input, in_length);
     krb5_MD5Final(&working);

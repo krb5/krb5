@@ -106,8 +106,10 @@ krb5_checksum FAR *outcksum;
     krb5_keyblock keyblock;
     krb5_error_code retval;
     size_t i;
-
     krb5_MD5_CTX working;
+
+    if (outcksum->length < RSA_MD5_DES_CKSUM_LENGTH + RSA_MD5_DES_CONFOUND_LENGTH)
+	return KRB5_BAD_MSIZE;
 
     /* Generate the confounder in place */
     if (retval = krb5_random_confounder(RSA_MD5_DES_CONFOUND_LENGTH,

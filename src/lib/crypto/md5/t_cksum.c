@@ -116,12 +116,14 @@ main(argc, argv)
     return(kret);
   }
 
+  oldstyle_checksum.length = CHECKSUM_LENGTH;
   if (!(oldstyle_checksum.contents = (krb5_octet *) malloc(CHECKSUM_LENGTH))) {
     printf("cannot get memory for old style checksum\n");
     return(ENOMEM);
   }
+  newstyle_checksum.length = krb5_checksum_size(kcontext, CHECKSUM_TYPE);
   if (!(newstyle_checksum.contents = (krb5_octet *)
-	malloc(krb5_checksum_size(kcontext, CHECKSUM_TYPE)))) {
+	malloc(newstyle_checksum.length))) {
     printf("cannot get memory for new style checksum\n");
     return(ENOMEM);
   }
