@@ -1,3 +1,8 @@
+Wed Aug 16 02:45:19 1995  Chris Provenzano <proven@mit.edu>
+
+        * lock_file.c (krb5_lock_file()), unlck_file.c (krb5_unlock_file()):
+		Pass the fd in instead of converting it from FILE *.
+
 Fri Aug  4 22:51:15 1995  Tom Yu  <tlyu@dragons-lair.MIT.EDU>
 
 	* kuserok.c (krb5_kuserok): Add parens to shut up gcc -Wall

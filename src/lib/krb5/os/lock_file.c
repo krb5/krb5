@@ -52,10 +52,9 @@ extern int errno;
 
 /*ARGSUSED*/
 krb5_error_code
-krb5_lock_file(context, filep, pathname, mode)
+krb5_lock_file(context, fd, mode)
     krb5_context context;
-    FILE *filep;
-    char *pathname;
+    int fd;
     int mode;
 {
 #ifdef POSIX_FILE_LOCKS
@@ -94,14 +93,14 @@ krb5_lock_file(context, filep, pathname, mode)
     lock_arg.l_whence = 0;
     lock_arg.l_start = 0;
     lock_arg.l_len = 0;
-    if (fcntl(fileno(filep), lock_cmd, &lock_arg) == -1) {
+    if (fcntl(fd, lock_cmd, &lock_arg) == -1) {
 	if (errno == EACCES || errno == EAGAIN)	/* see POSIX/IEEE 1003.1-1988,
 						   6.5.2.4 */
 	    return(EAGAIN);
 	return(errno);
     }
 #else
-    if (flock(fileno(filep), lock_flag) == -1)
+    if (flock(fd, lock_flag) == -1)
 	return(errno);
 #endif
     return 0;
@@ -109,10 +108,9 @@ krb5_lock_file(context, filep, pathname, mode)
 #else   /* MSDOS or Macintosh */
 
 krb5_error_code
-krb5_lock_file(context, filep, pathname, mode)
+krb5_lock_file(context, fd, mode)
     krb5_context context;
-    FILE *filep;
-    char *pathname;
+    int fd;
     int mode;
 {
     return 0;
