@@ -1,3 +1,8 @@
+1999-08-18  Miro Jurisic  <meeroh@mit.edu>
+
+	* profile.exp: removed com_err functions (they are in a library
+	of their own now) from MacOS export file
+
 1999-08-05  Danilo Almeida  <dalmeida@mit.edu>
 
 	* prof_get.c (profile_free_string): 
