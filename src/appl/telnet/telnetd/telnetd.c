@@ -885,11 +885,9 @@ long retval;
 pty_init();
 	
 
-	if ((retval = pty_getpty(&pty, line, 20)) != 0 )
-	    {
+	if ((retval = pty_getpty(&pty, line, 17)) != 0) {
 		fatal(net, error_message(retval));
-	    }
-	
+	}
 
 #if	defined(_SC_CRAY_SECURE_SYS)
 	/*
