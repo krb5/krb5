@@ -27,6 +27,10 @@ extern char *malloc(), *realloc(), *calloc();
 extern char *getenv();
 #endif /* ! __STDC__ */
 
+#ifdef USE_STRING_H
 #include <string.h>
+#else
+#include <strings.h>
+#endif
 
 #endif /* KRB5_EXT_PROTO__ */
