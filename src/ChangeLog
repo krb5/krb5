@@ -1,3 +1,9 @@
+Mon Oct  7 15:07:38 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* configure.in: Add AC_KRB5_TCL so configure --help is useful.
+
+	* aclocal.m4 (AC_KRB5_TCL): Added tests for --with-tcl. 
+
 Fri Sep  6 20:23:13 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* patchlevel.h (KRB5_MAJOR_RELEASE): Update patch level file for
