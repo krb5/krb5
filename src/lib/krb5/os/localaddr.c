@@ -263,6 +263,9 @@ foreach_localaddr (data, pass1fn, betweenfn, pass2fn)
     char *buf = 0;
     size_t current_buf_size = 0;
     int fail = 0;
+#ifdef SIOCGSIZIFCONF
+    int ifconfsize = -1;
+#endif
 
     s = socket (USE_AF, USE_TYPE, USE_PROTO);
     if (s < 0)
@@ -272,7 +275,15 @@ foreach_localaddr (data, pass1fn, betweenfn, pass2fn)
        isn't big enough for an IPv6 or ethernet address.  So add a
        little more space.  */
     est_ifreq_size = sizeof (struct ifreq) + 8;
-    current_buf_size = est_ifreq_size * est_if_count;
+#ifdef SIOCGSIZIFCONF
+    code = ioctl (s, SIOCGSIZIFCONF, &ifconfsize);
+    if (!code) {
+	current_buf_size = ifconfsize;
+	est_if_count = ifconfsize / est_ifreq_size;
+    }
+#endif
+    if (current_buf_size == 0)
+	current_buf_size = est_ifreq_size * est_if_count;
     buf = malloc (current_buf_size);
 
  ask_again:
@@ -291,7 +302,11 @@ foreach_localaddr (data, pass1fn, betweenfn, pass2fn)
        the only indication we get, complicated by the fact that the
        associated address may make the required storage a little
        bigger than the size of an ifreq.  */
-    if (current_buf_size - ifc.ifc_len < sizeof (struct ifreq) + 40) {
+    if (current_buf_size - ifc.ifc_len < sizeof (struct ifreq) + 40
+#ifdef SIOCGSIZIFCONF
+	&& ifconfsize <= 0
+#endif
+	) {
 	int new_size;
 	char *newbuf;
 

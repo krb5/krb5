@@ -1,3 +1,9 @@
+2000-06-19  Ken Raeburn  <raeburn@mit.edu>
+
+	* localaddr.c (foreach_localaddr): Use SIOCGSIZIFCONF ioctl if
+	available to get the buffer size needed for SIOCGIFCONF, and skip
+	the silly heuristics if it returns a reasonable value.
+
 2000-06-14  Miro Jurisic  <meeroh@mit.edu>
 
 	* init_os_ctx.c (os_get_default_config_files):  
