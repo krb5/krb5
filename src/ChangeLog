@@ -1,3 +1,9 @@
+2002-04-01  Tom Yu  <tlyu@mit.edu>
+
+	* aclocal.m4 (CONFIG_RULES): Add -DKRB5_PRIVATE=1 and
+	-DKRB5_DEPRECATED=1 to the default CPPFLAGS for now, so that stuff
+	in the tree actually builds.
+
 2002-03-28  Ken Raeburn  <raeburn@mit.edu>
 
 	* aclocal.m4 (TRY_GETSOCK_INT): Strip trailing spaces from defined

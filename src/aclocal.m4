@@ -51,6 +51,8 @@ WITH_LINKER dnl
 WITH_LDOPTS dnl
 WITH_CPPOPTS dnl
 WITH_KRB4 dnl
+dnl allow stuff in tree to access deprecated/private stuff for now
+ADD_DEF([-DKRB5_PRIVATE=1 -DKRB5_DEPRECATED=1]) dnl
 ifdef([AC_PROG_CC_STDC], [AC_PROG_CC_STDC])
 dnl AC_PROG_CC_STDC
 AC_C_CONST dnl
