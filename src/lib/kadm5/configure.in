@@ -9,18 +9,6 @@ AC_PROG_AWK
 AC_CHECK_HEADERS(syslog.h memory.h)
 AC_CHECK_FUNCS(openlog syslog closelog strftime vsprintf)
 KRB5_AC_REGEX_FUNCS
-dnl
-dnl AIX is unusual in that it wants all symbols resolved at link time
-dnl  Fortunately, it will allow us to link the kdb library now, even if
-dnl it is linked again later.
-AIX_DB_LIB=''
-case $krb5_cv_host in
-*-*-aix*)
-	AIX_DB_LIB="-ldb"
-	;;
-esac
-AC_SUBST(AIX_DB_LIB)
-dnl
 AC_CANONICAL_HOST
 dnl The following are tests for the presence of programs required for testing 
 AC_CHECK_PROG(RUNTEST,runtest,runtest)
