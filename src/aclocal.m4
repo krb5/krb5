@@ -322,12 +322,32 @@ dnl set $(KRB4) from --with-krb4=value -- WITH_KRB4
 dnl
 define(WITH_KRB4,[
 AC_ARG_WITH([krb4],
-[  --with-krb4=KRB4DIR     build with Kerberos V4 backwards compatibility],
-AC_MSG_RESULT(krb4 is $withval)
-KRB4=$withval,
-AC_MSG_RESULT(no krb4 support; use --with-krb4=krb4dir)
-KRB4=)dnl
-AC_SUBST(KRB4)])dnl
+[  --without-krb4          don't include Kerberos V4 backwards compatibility
+   --with-krb4             use V4 libraries included with V5 (default)
+   --with-krb4=KRB4DIR     use preinstalled V4 libraries],
+,
+withval=yes
+)dnl
+if test $withval = no; then
+	AC_MSG_RESULT(no krb4 support)
+	KRB4_LIB=
+	KDB4_LIB=
+else 
+ ADD_DEF(-DKRB4)
+ ADD_DEF(-DBACKWARD_COMPAT)
+ if test $withval = yes; then
+	AC_MSG_RESULT(built in krb4 support)
+	KRB4_LIB='$(TOPLIBD)/libkrb4.a $(TOPLIBD)/libdes425.a'
+	KDB4_LIB='$(TOPLIBD)/libkdb4.a'
+ else
+	AC_MSG_RESULT(preinstalled krb4 in $withval)
+	KRB4_LIB='$(withval)/lib/libkrb.a $(TOPLIBD)/libdes425.a'
+	KDB4_LIB='$(withval)/libkdb.a'
+ fi
+fi
+AC_SUBST(KRB4_LIB)
+AC_SUBST(KDB4_LIB)
+])dnl
 dnl
 dnl set $(CC) from --with-cc=value
 dnl
@@ -623,6 +643,6 @@ AC_CACHE_VAL(krb5_cv_has_ansi_volatile,
 krb5_cv_has_ansi_volatile=yes, krb5_cv_has_ansi_volatile=no)])
 AC_MSG_RESULT($krb5_cv_has_ansi_volatile)
 if test $krb5_cv_has_ansi_volatile = no; then
-AC_DEFINE([volatile=])
+ADD_DEF(-Dvolatile=)
 fi
 ])dnl
