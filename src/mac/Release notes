@@ -171,3 +171,7 @@ Changes in 1.1a3:
 3.0d7
  from tag Mac_GSSKerberos5_3_0d7
  support for login library in expired passwords
+
+3.0d8
+ from tag Mac_GSSKerberos5_3_0d8
+ now following the krb5-1-2 branch (except in util/profile)
