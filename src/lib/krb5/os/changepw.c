@@ -116,7 +116,7 @@ krb5_change_set_password(
 	  goto cleanup;
 
     if ((code = krb5_locate_kpasswd(context,
-                                    krb5_princ_realm(context, set_password_for),
+                                    krb5_princ_realm(context, creds->server),
 				    &al)))
         goto cleanup;
 

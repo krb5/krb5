@@ -1,3 +1,9 @@
+2003-04-28  Sam Hartman  <hartmans@mit.edu>
+
+	* changepw.c (krb5_change_set_password): Locate server in realm of
+	creds.server, not in realm of target principal because target
+	principal is null in the  changepw case.
+
 2003-04-28  Ken Raeburn  <raeburn@mit.edu>
 
 	* init_os_ctx.c (krb5_os_init_context, krb5_os_free_context):
