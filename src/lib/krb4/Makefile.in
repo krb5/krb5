@@ -86,6 +86,7 @@ SRCS = \
 	$(srcdir)/g_tkt_svc.c \
 	$(srcdir)/getst.c \
 	$(srcdir)/gethostname.c \
+	kadm_err.c \
 	$(srcdir)/kadm_net.c \
 	$(srcdir)/kadm_stream.c \
 	$(srcdir)/kname_parse.c \
@@ -311,6 +312,7 @@ gethostname.so gethostname.po $(OUTPRE)gethostname.$(OBJEXT): gethostname.c $(SR
   $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
   $(BUILDTOP)/include/kerberosIV/krb_err.h $(COM_ERR_DEPS) \
   $(BUILDTOP)/include/profile.h krb4int.h
+kadm_err.so kadm_err.po $(OUTPRE)kadm_err.$(OBJEXT): kadm_err.c $(COM_ERR_DEPS)
 kadm_net.so kadm_net.po $(OUTPRE)kadm_net.$(OBJEXT): kadm_net.c $(SRCTOP)/include/port-sockets.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/kerberosIV/krb.h \
   $(SRCTOP)/include/kerberosIV/des.h $(BUILDTOP)/include/kerberosIV/krb_err.h \
