@@ -1,3 +1,10 @@
+2004-08-12  Ken Raeburn  <raeburn@mit.edu>
+
+	* run.test (getnwords): New function.  Uses sed to get N words
+	from $DICT as other functions did before, but discards blank
+	lines.
+	(test1, test2, test12, test13, test20): Call getnwords.
+
 2003-01-05  Sam Hartman  <hartmans@mit.edu>
 
 	* SEQ_TEST/t.c (main): Remove declaration of errno

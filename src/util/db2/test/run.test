@@ -68,15 +68,19 @@ main()
 	exit 0
 }
 
+getnwords() {
+	sed -e ${1}q -e '/^$/d' $DICT
+}
+
 # Take the first hundred entries in the dictionary, and make them
 # be key/data pairs.
 test1()
 {
 	echo "Test 1: btree, hash: small key, small data pairs"
-	sed 200q $DICT > $TMP1
+	getnwords 200 > $TMP1
 	for type in btree hash; do
 		rm -f $TMP2 $TMP3
-		for i in `sed 200q $DICT`; do
+		for i in `cat $TMP1`; do
 			echo p
 			echo k$i
 			echo d$i
@@ -92,11 +96,10 @@ test1()
 	done
 	echo "Test 1: recno: small key, small data pairs"
 	rm -f $TMP2 $TMP3
-	sed 200q $DICT |
 	awk '{ 
 		++i;
 		printf("p\nk%d\nd%s\ng\nk%d\n", i, $0, i);
-	}' > $TMP2
+	}' < $TMP1 > $TMP2
 	$PROG -o $TMP3 recno $TMP2
 	if (cmp -s $TMP1 $TMP3) ; then :
 	else
@@ -115,7 +118,7 @@ test2()
 	awk '{ for (i = 1; i < 201; ++i) print $0 }' > $TMP1
 	for type in hash btree; do
 		rm -f $TMP2 $TMP3
-		for i in `sed 200q $DICT`; do
+		for i in `getnwords 200`; do
 			echo p
 			echo k$i
 			echo d$mdata
@@ -566,7 +569,7 @@ test12()
 	awk '{ for (i = 1; i < 20001; ++i) print $0 }' > $TMP1
 	for type in btree; do
 		rm -f $TMP2 $TMP3
-		for i in `sed 20000q $DICT | rev`; do
+		for i in `getnwords 20000 | rev`; do
 			echo p
 			echo k$i
 			echo d$mdata
@@ -586,11 +589,11 @@ test12()
 test13()
 {
 	echo "Test 13: btree, hash: differing byte orders"
-	sed 50q $DICT > $TMP1
+	getnwords 50 > $TMP1
 	for order in 1234 4321; do
 		for type in btree hash; do
 			rm -f byte.file $TMP2 $TMP3
-			for i in `sed 50q $DICT`; do
+			for i in `cat $TMP1`; do
 				echo p
 				echo k$i
 				echo d$i
@@ -603,7 +606,7 @@ test13()
 				echo "test13: $type/$order put failed"
 				exit 1
 			fi
-			for i in `sed 50q $DICT`; do
+			for i in `cat $TMP1`; do
 				echo g
 				echo k$i
 			done > $TMP2
@@ -641,7 +644,7 @@ test20()
 		}
 		exit;
 	}' > $TMP1
-	sed 10000q $DICT |
+	getnwords 10000 |
 	awk 'BEGIN {
 		ds="abcdefg abcdefg abcdefg abcdefg abcdefg abcdefg abcdefg"
 	}
@@ -652,7 +655,7 @@ test20()
 			s = substr(ds, 1);
 		printf("p\nk%s\nd%s\n", $0, s);
 	}' > $TMP2
-	sed 10000q $DICT |
+	getnwords 10000 |
 	awk '{
 		++i;
 		printf("g\nk%s\n", $0);
