@@ -864,6 +864,7 @@ struct _krb5_context {
 	krb5_cksumtype	kdc_req_sumtype;
 	krb5_flags 	kdc_default_options;
 	krb5_flags	library_options;
+	krb5_boolean	profile_secure;
 };
 
 #define KRB5_LIBOPT_SYNC_KDCTIME	0x0001

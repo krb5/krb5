@@ -1,3 +1,9 @@
+Thu Oct  5 07:34:51 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* k5-int.h: Add profile_secure to context.
+
+	* krb5.hin: Add krb5_secure_config_profile prototype.
+
 Fri Sep 29 15:17:30 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in: If krb5/autoconf.h doesn't exist, cd to krb5 and
