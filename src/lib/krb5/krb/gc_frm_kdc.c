@@ -133,7 +133,8 @@ krb5_get_cred_from_kdc (ccache, cred, tgts)
 	/* walk the list BACKWARDS until we find a cached
 	   TGT, then move forward obtaining TGTs until we get the last
 	   TGT needed */
-	for (next_server = tgs_list; *next_server; next_server++);
+	for (next_server = tgs_list; *next_server;)
+		next_server++;
 	nservers = next_server - tgs_list;
 	next_server--;
 
@@ -187,7 +188,6 @@ krb5_get_cred_from_kdc (ccache, cred, tgts)
 		krb5_free_realm_tree(tgs_list);
 		goto out;
 	    }
-	    krb5_free_data(krb5_princ_realm(final_server));
 	    krb5_princ_set_realm(final_server, tmpdata);
 	    tgtq.server = final_server;
 

@@ -67,28 +67,32 @@ register krb5_ticket *ticket;
 	return(ENOMEM);
 
     /* do any necessary key pre-processing */
-    if (retval = krb5_process_key(&eblock, srv_key)) {
+    retval = krb5_process_key(&eblock, srv_key);
+    if (retval) {
 	free(scratch.data);
 	return(retval);
     }
 
     /* call the encryption routine */
-    if (retval = krb5_decrypt((krb5_pointer) ticket->enc_part.ciphertext.data,
-			      (krb5_pointer) scratch.data,
-			      scratch.length, &eblock, 0)) {
+    retval = krb5_decrypt((krb5_pointer) ticket->enc_part.ciphertext.data,
+			  (krb5_pointer) scratch.data,
+			  scratch.length, &eblock, 0);
+    if (retval) {
 	(void) krb5_finish_key(&eblock);
 	free(scratch.data);
 	return retval;
     }
 #define clean_scratch() {memset(scratch.data, 0, scratch.length); \
 free(scratch.data);}
-    if (retval = krb5_finish_key(&eblock)) {
+    retval = krb5_finish_key(&eblock);
+    if (retval) {
 
 	clean_scratch();
 	return retval;
     }
     /*  now decode the decrypted stuff */
-    if (!(retval = decode_krb5_enc_tkt_part(&scratch, &dec_tkt_part))) {
+    retval = decode_krb5_enc_tkt_part(&scratch, &dec_tkt_part);
+    if (!retval) {
 	ticket->enc_part2 = dec_tkt_part;
     }
     clean_scratch();
