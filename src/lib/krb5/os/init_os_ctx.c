@@ -95,29 +95,19 @@ char	pathbuf[255];
 }
 #endif
 
-krb5_error_code
-krb5_os_init_context(ctx)
+/* Set the profile paths in the context. If secure is set to TRUE then 
+   do not include user paths (from environment variables, etc.)
+*/
+static krb5_error_code
+os_init_paths(ctx, secure)
 	krb5_context ctx;
+	krb5_boolean secure;
 {
-	krb5_os_context os_ctx;
 	krb5_error_code	retval = 0;
-	char *name;
+	char *name = 0;
 	const char *filenames[2];
-	
-	if (ctx->os_context)
-		return 0;
 
-	os_ctx = malloc(sizeof(struct _krb5_os_context));
-	if (!os_ctx)
-		return ENOMEM;
-	memset(os_ctx, 0, sizeof(struct _krb5_os_context));
-	os_ctx->magic = KV5M_OS_CONTEXT;
-
-	ctx->os_context = (void *) os_ctx;
-
-	os_ctx->time_offset = 0;
-	os_ctx->usec_offset = 0;
-	os_ctx->os_flags = 0;
+	ctx->profile_secure = secure;
 
 #ifdef _WINDOWS
     {
@@ -147,7 +137,7 @@ krb5_os_init_context(ctx)
 	 * When the profile routines are later enhanced, we will try
 	 * including a config file from user's home directory here.
 	 */
-        name = getenv("KRB5_CONFIG");
+        if (!secure) name = getenv("KRB5_CONFIG");
 	if(!name) name = DEFAULT_PROFILE_PATH;
 
 	retval = profile_init_path(name, &ctx->profile);
@@ -156,6 +146,35 @@ krb5_os_init_context(ctx)
 
 	if (retval)
 	    ctx->profile = 0;
+
+	return retval;
+}
+
+krb5_error_code
+krb5_os_init_context(ctx)
+	krb5_context ctx;
+{
+	krb5_os_context os_ctx;
+	krb5_error_code	retval = 0;
+	char *name;
+	const char *filenames[2];
+	
+	if (ctx->os_context)
+		return 0;
+
+	os_ctx = malloc(sizeof(struct _krb5_os_context));
+	if (!os_ctx)
+		return ENOMEM;
+	memset(os_ctx, 0, sizeof(struct _krb5_os_context));
+	os_ctx->magic = KV5M_OS_CONTEXT;
+
+	ctx->os_context = (void *) os_ctx;
+
+	os_ctx->time_offset = 0;
+	os_ctx->usec_offset = 0;
+	os_ctx->os_flags = 0;
+
+	retval = os_init_paths(ctx, FALSE);
 
 	/*
 	 * We ignore errors if the profile can not be initialized,
@@ -183,6 +202,22 @@ krb5_set_config_files(ctx, filenames)
 	ctx->profile = profile;
 
 	return 0;
+}
+
+krb5_error_code INTERFACE
+krb5_secure_config_files(ctx)
+	krb5_context ctx;
+{
+	krb5_error_code retval;
+	
+	if (ctx->profile) {
+		profile_release(ctx->profile);
+		ctx->profile = 0;
+	}
+
+	retval = os_init_paths(ctx, TRUE);
+
+	return retval;
 }
 
 void

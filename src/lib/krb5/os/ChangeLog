@@ -1,3 +1,9 @@
+Thu Oct  5 07:49:26 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* init_os_ctx.c (krb5_secure_config_files): New function that 
+		will set flag and path to prevent user from overriding
+		configuration files with environment variables.
+
 Mon Oct  2 17:36:38 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* init_os_ctx.c (krb5_os_init_context): Put back in the
