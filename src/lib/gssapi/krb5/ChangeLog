@@ -1,3 +1,8 @@
+2002-04-16  Danilo Almeida  <dalmeida@mit.edu>
+
+	* accept_sec_context.c (rd_and_store_for_creds): Remove
+	registration of MEMORY cache type since that's already registered.
+
 2002-04-16	Alexandra Ellwood <lxs@mit.edu>
         * gssapi_krb5.h: Added #include of gssapi.h and gssapi_generic.h for the
         Mac because we can't assume people will include them and get the OID 
