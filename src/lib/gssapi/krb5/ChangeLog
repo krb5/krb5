@@ -1,5 +1,11 @@
 Sat Feb 24 11:45:05 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
+	* import_sec_context.c (krb5_gss_import_sec_context): Do not
+		shadow parameter ctx.
+
+	* inq_context.c (krb5_gss_inquire_context): Do not shadow
+		parameter ctx.
+
 	* rel_oid.c (krb5_gss_internal_release_oid): Change to match prototype.
 
 	* process_context_token.c (krb5_gss_process_context_token): Change
