@@ -527,7 +527,9 @@ tgt_again:
 						&tmp)))
 			tmp = 0;
 		krb5_klog_syslog(LOG_INFO, "TGS_REQ %s(%d): 2ND_TKT_MISMATCH: authtime %d, %s for %s, 2nd tkt client %s",
-		       fromstring, portnum, authtime, cname, sname,
+		       fromstring, portnum, authtime,
+		       cname ? cname : "<unknown client>",
+		       sname ? sname : "<unknown server>",
 		       tmp ? tmp : "<unknown>");
 		goto cleanup;
 	}

@@ -1405,6 +1405,9 @@ void limit_string(char *name)
 {
 	int	i;
 
+	if (!name)
+		return;
+
 	if (strlen(name) < NAME_LENGTH_LIMIT)
 		return;
 

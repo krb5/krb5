@@ -1,3 +1,12 @@
+Mon Nov 24 19:57:48 1997  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* do_tgs_req.c (process_tgs_req): Add check to make sure cname and
+		sname are non-NULL when syslogging an error because the
+		principals don't match.
+	
+	* kdc_util.c (limit_string): Check to make sure the input string
+		is non-NULL before operating on it.
+
 Thu Nov 13 20:40:01 1997  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* do_tgs_req.c (process_tgs_req): Only try to return a TGT for a
