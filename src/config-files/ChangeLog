@@ -1,3 +1,7 @@
+Sun Nov 12 05:16:28 1995  Mark W. Eichin  <eichin@cygnus.com>
+
+	* krb5.conf[libdefaults]: add krb4_config, krb4_realms.
+
 Sat Oct 21 09:07:59 1995  Ezra Peisach  (epeisach@kangaroo.mit.edu)
     
 	* kdc.conf.M: Fixed typo
