@@ -61,7 +61,8 @@
 #include "des_int.h"
 #include <ctype.h>
 
-static char *afs_crypt (char*,char*,char*);
+#define afs_crypt mit_afs_crypt
+char *afs_crypt (const char *, const char *, char *);
 
 #undef min
 #define min(a,b) ((a)>(b)?(b):(a))
@@ -337,9 +338,9 @@ static const char	S[8][64] = {
 };
  
  
-static char *afs_crypt(pw, salt, iobuf)
-     char *pw;
-     char *salt;
+char *afs_crypt(pw, salt, iobuf)
+     const char *pw;
+     const char *salt;
      char *iobuf;		/* must be at least 16 bytes */
 {
 	int i, j, c;

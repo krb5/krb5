@@ -1,8 +1,8 @@
 /*
  * include/kerberosIV/des.h
  *
- * Copyright 1987, 1988, 1994 by the Massachusetts Institute of Technology.
- * All Rights Reserved.
+ * Copyright 1987, 1988, 1994, 2002 by the Massachusetts Institute of
+ * Technology.  All Rights Reserved.
  *
  * Export of this software from the United States of America may
  *   require a specific license from the United States Government.
@@ -26,9 +26,81 @@
  * Include file for the Data Encryption Standard library.
  */
 
+#if defined(macintosh) || (defined(__MACH__) && defined(__APPLE__))
+	#include <TargetConditionals.h>
+    #if TARGET_RT_MAC_CFM
+        #error "Use KfM 4.0 SDK headers for CFM compilation."
+    #endif
+#endif
+
+#ifndef KRB5INT_DES_TYPES_DEFINED
+#define KRB5INT_DES_TYPES_DEFINED
+
+#if TARGET_OS_MAC
+    #if defined(__MWERKS__)
+        #pragma import on
+        #pragma enumsalwaysint on
+    #endif
+    #pragma options align=mac68k
+#endif
+
+#include <limits.h>
+
+#if UINT_MAX >= 0xFFFFFFFFUL
+#define DES_INT32 int
+#define DES_UINT32 unsigned int
+#else
+#define DES_INT32 long
+#define DES_UINT32 unsigned long
+#endif
+
+typedef unsigned char des_cblock[8];	/* crypto-block size */
+/*
+ * Key schedule.
+ *
+ * This used to be
+ *
+ * typedef struct des_ks_struct { union { DES_INT32 pad; des_cblock _;} __; } des_key_schedule[16];
+ *
+ * but it would cause trouble if DES_INT32 is ever more than 4 bytes.
+ * The reason is that all the encryption functions cast it to
+ * (DES_INT32 *), and treat it as if it were DES_INT32[32].  If
+ * 2*sizeof(DES_INT32) is ever more than sizeof(des_cblock), the
+ * caller-allocated des_key_schedule will be overflowed by the key
+ * scheduling functions.  We can't assume that every platform will
+ * have an exact 32-bit int, and nothing should be looking inside a
+ * des_key_schedule anyway.
+ */
+typedef struct des_ks_struct {  DES_INT32 _[2]; } des_key_schedule[16];
+
+#if TARGET_OS_MAC
+    #if defined(__MWERKS__)
+        #pragma enumsalwaysint reset
+        #pragma import reset
+    #endif
+	#pragma options align=reset
+#endif
+
+#endif /* KRB5INT_DES_TYPES_DEFINED */
+
 /* only do the whole thing once	 */
 #ifndef DES_DEFS
+/*
+ * lib/crypto/des/des_int.h defines KRB5INT_CRYPTO_DES_INT temporarily
+ * to avoid including the defintions and declarations below.  The
+ * reason that the crypto library needs to include this file is that
+ * it needs to have its types aligned with krb4's types.
+ */
+#ifndef KRB5INT_CRYPTO_DES_INT
 #define DES_DEFS
+
+#if TARGET_OS_MAC
+    #if defined(__MWERKS__)
+        #pragma import on
+        #pragma enumsalwaysint on
+    #endif
+    #pragma options align=mac68k
+#endif
 
 #if defined(_WIN32) && !defined(_WINDOWS)
 #define _WINDOWS
@@ -40,9 +112,6 @@
 #endif
 #include <win-mac.h>
 #endif
-#ifdef __STDC__
-#include <limits.h>
-#endif
 #include <stdio.h> /* need FILE for des_cblock_print_file */
 
 /* Windows declarations */
@@ -50,50 +119,6 @@
 #define KRB5_CALLCONV
 #define KRB5_CALLCONV_C
 #endif
-
-#ifndef KRB4_32
-#ifdef SIZEOF_INT
-#if SIZEOF_INT >= 4
-#define KRB4_32 int
-#else  /* !(SIZEOF_INT >= 4) */
-#define KRB4_32 long
-#endif /* !(SIZEOF_INT >= 4) */
-#else  /* !defined(SIZEOF_INT) */
-#ifdef __STDC__
-#if INT_MAX >= 0x7fffffff
-#define KRB4_32 int
-#else  /* !(INT_MAX >= 0x7ffffff) */
-#define KRB4_32 long
-#endif /* !(INT_MAX >= 0x7ffffff) */
-#else  /* !defined(__STDC__) */
-#define KRB4_32 long		/* worst case */
-#endif /* !defined(__STDC__) */
-#endif /* !defined(SIZEOF_INT) */
-#endif /* !defined(KRB4_32) */
-
-/* Key schedule */
-/* Ick.  We need this in here unfortunately... */
-#ifndef DES_INT32
-#define DES_INT32 KRB4_32
-#endif
-
-/*
- *
- * NOTE WELL:
- *
- * This section must be kept in sync with lib/crypto/des/des_int.h,
- * until we get around to actually combining them at the source level.
- * We can't right now, because both the Mac and Windows platforms are
- * using their own versions of krb4 des.h, and that's the one that
- * would have to have the definitions because we install it under UNIX.
- *
- */
-#ifndef KRB5INT_DES_TYPES_DEFINED
-#define KRB5INT_DES_TYPES_DEFINED
-typedef unsigned char des_cblock[8];	/* crypto-block size */
-typedef struct des_ks_struct {  DES_INT32 _[2]; } des_key_schedule[16];
-#endif
-/* end sync */
 
 #define DES_KEY_SZ 	(sizeof(des_cblock))
 #define DES_ENCRYPT	1
@@ -119,7 +144,6 @@ typedef struct des_ks_struct bit_64;
 
 #define des_cblock_print(x) des_cblock_print_file(x, stdout)
 
-
 /*
  * Function Prototypes
  */
@@ -132,25 +156,24 @@ des_pcbc_encrypt (C_Block *in, C_Block *out, long length,
 		  int enc);
 
 unsigned long KRB5_CALLCONV
-des_quad_cksum (const unsigned char *in, unsigned KRB4_32 *out,
+des_quad_cksum (const unsigned char *in, unsigned DES_INT32 *out,
 		long length, int out_count, C_Block *seed);
-
+/*
+ * XXX ABI change: used to return void; also, cns/kfm have signed long
+ * instead of unsigned long length.
+ */
+unsigned long KRB5_CALLCONV
+des_cbc_cksum(const des_cblock *, des_cblock *, unsigned long,
+	      const des_key_schedule, const des_cblock *);
 int KRB5_CALLCONV des_string_to_key (const char *, C_Block);
 
-/* new */
-#ifdef KRB5_GENERAL__
-/* Why are we using krb5 types as part of this API?  */
-void KRB5_CALLCONV
-des_cbc_cksum(const krb5_octet *, krb5_octet *, unsigned long,
-	      const des_key_schedule, const krb5_octet *);
-int des_cbc_encrypt(krb5_octet *, krb5_octet *, unsigned long,
-		    const des_key_schedule, const krb5_octet *, int);
-krb5_error_code des_read_password(des_cblock *, char *, int);
-#endif
-/* The unsigned long pointers are indicative of the desired alignment;
-   the values there aren't really treated as long values.  */
-int KRB5_CALLCONV des_ecb_encrypt(unsigned long *, unsigned long *,
-					      const des_key_schedule, int);
+/* XXX ABI change: used to return krb5_error_code */
+int KRB5_CALLCONV des_read_password(des_cblock *, char *, int);
+int KRB5_CALLCONV des_ecb_encrypt(des_cblock *, des_cblock *,
+				  const des_key_schedule, int);
+/* XXX kfm/cns have signed long length */
+int des_cbc_encrypt(des_cblock *, des_cblock *, unsigned long,
+		    const des_key_schedule, const des_cblock *, int);
 void des_fixup_key_parity(des_cblock);
 int des_check_key_parity(des_cblock);
 int KRB5_CALLCONV des_new_random_key(des_cblock);
@@ -159,4 +182,51 @@ int des_random_key(des_cblock *);
 int des_is_weak_key(des_cblock);
 void des_cblock_print_file(des_cblock *, FILE *fp);
 
+#if TARGET_OS_MAC
+
+/*
+ * Stuff ported from KfM follows...
+ */
+
+void afs_string_to_key(char *, char *, des_cblock);
+
+/*
+ * AFS string2key support; they should be considered internal, but KfM
+ * exposes them.
+ */
+char *des_crypt(const char *, const char *);
+char *des_fcrypt(const char *, const char *, char *);
+int des_set_key(des_cblock *, des_key_schedule);
+
+/*
+ * internal used by des_read_password, but kfm exposes it
+ */
+int KRB5_CALLCONV des_read_pw_string(char *, int, char *, int);
+
+void des_3cbc_encrypt(des_cblock *, des_cblock *, long, des_key_schedule, des_key_schedule, des_key_schedule, des_cblock *, int);
+void des_3ecb_encrypt(des_cblock *, des_cblock *, des_key_schedule, des_key_schedule, des_key_schedule, int);
+
+/*
+ * Should be internal to crypto/des/f_sched.c, but KfM exposes it.
+ */
+int make_key_sched(des_cblock *, des_key_schedule);
+
+/*
+ * XXX need to implement the following three:
+ */
+void des_generate_random_block(des_cblock);
+void des_set_random_generator_seed(des_cblock);
+void des_set_sequence_number(des_cblock);
+
+#endif /* TARGET_OS_MAC */
+
+#if TARGET_OS_MAC
+    #if defined(__MWERKS__)
+        #pragma enumsalwaysint reset
+        #pragma import reset
+    #endif
+	#pragma options align=reset
+#endif
+
+#endif /* KRB5INT_CRYPTO_DES_INT */
 #endif	/* DES_DEFS */

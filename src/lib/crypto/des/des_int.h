@@ -1,8 +1,8 @@
 /*
  * lib/crypto/des/des_int.h
  *
- * Copyright 1987, 1988, 1990 by the Massachusetts Institute of Technology.
- * All Rights Reserved.
+ * Copyright 1987, 1988, 1990, 2002 by the Massachusetts Institute of
+ * Technology.  All Rights Reserved.
  *
  * Export of this software from the United States of America may
  *   require a specific license from the United States Government.
@@ -64,40 +64,10 @@
 #ifndef KRB5_MIT_DES__
 #define KRB5_MIT_DES__
 
-#ifndef DES_INT32
-#ifdef SIZEOF_INT
-#if SIZEOF_INT >= 4
-#define DES_INT32 int
-#else
-#define DES_INT32 long
-#endif
-#else /* !defined(SIZEOF_INT) */
-#include <limits.h>
-#if (UINT_MAX >= 0xffffffff)
-#define DES_INT32 int
-#else
-#define DES_INT32 long
-#endif
-#endif /* !defined(SIZEOF_INT) */
-#endif /* !defined(DES_INT32) */
+#define KRB5INT_CRYPTO_DES_INT	/* skip krb4-specific DES stuff */
+#include "kerberosIV/des.h"	/* for des_key_schedule, etc. */
+#undef KRB5INT_CRYPTO_DES_INT	/* don't screw other inclusions of des.h */
 
-/*
- *
- * NOTE WELL:
- *
- * This section must be kept in sync with include/kerberosIV/des.h,
- * until we get around to actually combining them at the source level.
- * We can't right now, because both the Mac and Windows platforms are
- * using their own versions of krb4 des.h, and that's the one that
- * would have to have the definitions because we install it under UNIX.
- *
- */
-#ifndef KRB5INT_DES_TYPES_DEFINED
-#define KRB5INT_DES_TYPES_DEFINED
-typedef unsigned char des_cblock[8];	/* crypto-block size */
-typedef struct des_ks_struct {  DES_INT32 _[2]; } des_key_schedule[16];
-#endif
-/* end sync */
 typedef des_cblock mit_des_cblock;
 typedef des_key_schedule mit_des_key_schedule;
 
@@ -217,8 +187,7 @@ krb5_error_code mit_des_combine_subkeys
 int mit_des_pcbc_encrypt ();
 
 /* f_sched.c */
-#define make_key_sched mit_des_make_key_sched
-int make_key_sched (mit_des_cblock, mit_des_key_schedule);
+int mit_des_make_key_sched(mit_des_cblock, mit_des_key_schedule);
 
 
 /* misc.c */

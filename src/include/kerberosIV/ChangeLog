@@ -1,3 +1,14 @@
+2002-09-26  Tom Yu  <tlyu@mit.edu>
+
+	* des.h: Some initial work for KfM integration.  Clean up
+	DES_INT32 selection.  Set up for inclusion by
+	lib/crypto/des/des_int.h, which will define a special macro to
+	prevent the krb4-specific stuff from being declared.
+
+	* krb.h: Initial work for KfM integration.  Fix up KRB4_32, and
+	add KRB_INT32, KRB_UINT32.  Change all error code macros to be
+	offsets from krb_err.et symbols.
+
 2002-09-18  Ken Raeburn  <raeburn@mit.edu>
 
 	* krb.h: Add extern "C" markers in case a C++ compiler is used.

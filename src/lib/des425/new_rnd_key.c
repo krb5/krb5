@@ -54,6 +54,7 @@
 
 #include "des_int.h"
 #include "des.h"
+#include "k5-int.h"
 
 void
 des_init_random_number_generator(key)
@@ -93,3 +94,27 @@ des_new_random_key(key)
 
     return 0;
 }
+
+#if TARGET_OS_MAC
+
+void des_generate_random_block(des_cblock block)
+{
+    krb5_data data;
+
+    data.length = sizeof(des_cblock);
+    data.data = (char *)block;
+    if (krb5_c_random_make_octets(/* XXX */ 0, &data))
+	abort();		/* XXX */
+}
+
+void des_set_random_generator_seed(des_cblock block)
+{
+    des_init_random_number_generator(block); /* XXX */
+}
+
+void des_set_sequence_number(des_cblock block)
+{
+    des_init_random_number_generator(block); /* XXX */
+}
+
+#endif

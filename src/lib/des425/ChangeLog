@@ -1,3 +1,29 @@
+2002-09-26  Tom Yu  <tlyu@mit.edu>
+
+	* cksum.c (des_cbc_cksum): Update API for KfM merge.
+
+	* des.c (des_ecb_encrypt): Update API for KfM merge.
+	(des_3ecb_encrypt): New (emulated) function from KfM.
+
+	* enc_dec.c (des_cbc_encrypt): Update API for KfM merge.
+	(des_3cbc_encrypt): New (emulated) function from KfM.
+
+	* key_sched.c (make_key_sched): New (emulated) function for KfM.
+
+	* new_rnd_key.c (des_generate_random_block) 
+	(des_set_random_generator_seed, des_set_sequence_number):
+	New (emulated) functions from KfM.
+
+	* read_passwd.c (des_rd_pwstr_2prompt): Renamed from
+	des_read_pw_string; also now only returns -1, errno, or 0.
+	(des_read_pw_string): New (emulated) function from KfM.
+	(des_read_password): Update API for KfM merge.
+
+	* str_to_key.c (des_string_to_key): Update call to des_cbc_cksum.
+	(afs_string_to_key): New (emulated) function from KfM.
+	(des_crypt, des_fcrypt, des_set_key): New (emulated) functions
+	from KfM, presumed to be internal but exported by KfM anyway.
+
 2002-08-29  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in: Revert $(S)=>/ change, for Windows support.

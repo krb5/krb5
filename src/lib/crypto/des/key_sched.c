@@ -50,7 +50,7 @@ mit_des_key_sched(k,schedule)
     mit_des_cblock k;
     mit_des_key_schedule schedule;
 {
-    make_key_sched(k,schedule);
+    mit_des_make_key_sched(k,schedule);
 
     if (!mit_des_check_key_parity(k))	/* bad parity --> return -1 */
 	return(-1);

@@ -45,7 +45,6 @@
 static jmp_buf pwd_jump;
 
 static krb5_sigtype intr_routine (int);
-krb5_error_code des_read_pw_string (char *, int, char *, char *);
 
 static krb5_sigtype
 intr_routine(signo)
@@ -55,10 +54,13 @@ intr_routine(signo)
     /*NOTREACHED*/
 }
 
+/* This is re-declared here because des.h might not declare it. */
+int KRB5_CALLCONV des_read_pw_string(char *, int, char *, int);
+static int des_rd_pwstr_2prompt(char *, int, char *, char *);
 
 /*** Routines ****************************************************** */
-krb5_error_code
-des_read_pw_string/*_v4_compat_crock*/(return_pwd, bufsize_in, prompt, prompt2)
+static int
+des_rd_pwstr_2prompt(return_pwd, bufsize_in, prompt, prompt2)
     char *return_pwd;
     int bufsize_in;
     char *prompt;
@@ -68,7 +70,7 @@ des_read_pw_string/*_v4_compat_crock*/(return_pwd, bufsize_in, prompt, prompt2)
     register char *ptr;
     int scratchchar;
     krb5_sigtype (*volatile ointrfunc)();
-    krb5_error_code errcode;
+    int errcode;
     size_t bufsize = bufsize_in;
 #ifndef ECHO_PASSWORD
     struct termios echo_control, save_control;
@@ -88,7 +90,7 @@ des_read_pw_string/*_v4_compat_crock*/(return_pwd, bufsize_in, prompt, prompt2)
 #endif /* ECHO_PASSWORD */
 
     if (setjmp(pwd_jump)) {
-	errcode = KRB5_LIBOS_PWDINTR; 	/* we were interrupted... */
+	errcode = -1;		/* we were interrupted... */
 	goto cleanup;
     }
     /* save intrfunc */
@@ -101,7 +103,7 @@ des_read_pw_string/*_v4_compat_crock*/(return_pwd, bufsize_in, prompt, prompt2)
 
     if (fgets(return_pwd, bufsize_in, stdin) == NULL) {
 	(void) putchar('\n');
-	errcode = KRB5_LIBOS_CANTREADPWD;
+	errcode = -1;
 	goto cleanup;
     }
     (void) putchar('\n');
@@ -127,7 +129,7 @@ des_read_pw_string/*_v4_compat_crock*/(return_pwd, bufsize_in, prompt, prompt2)
 	(void) memset((char *)readin_string, 0, bufsize);
 	if (fgets((char *)readin_string, bufsize_in, stdin) == NULL) {
 	    (void) putchar('\n');
-	    errcode = KRB5_LIBOS_CANTREADPWD;
+	    errcode = -1;
 	    goto cleanup;
 	}
 	(void) putchar('\n');
@@ -141,7 +143,7 @@ des_read_pw_string/*_v4_compat_crock*/(return_pwd, bufsize_in, prompt, prompt2)
 	    
 	/* compare */
 	if (strncmp(return_pwd, (char *)readin_string, bufsize)) {
-	    errcode = KRB5_LIBOS_BADPWDMATCH;
+	    errcode = -1;
 	    goto cleanup;
 	}
     }
@@ -164,27 +166,39 @@ cleanup:
     return errcode;
 }
 
-krb5_error_code
-des_read_password/*_v4_compat_crock*/(k,prompt,verify)
+int KRB5_CALLCONV
+des_read_password(k,prompt,verify)
     mit_des_cblock *k;
     char *prompt;
     int	verify;
 {
-    krb5_error_code ok;
+    int ok;
     char key_string[BUFSIZ];
+
+    ok = des_read_pw_string(key_string, sizeof(key_string), prompt, verify);
+    if (ok == 0)
+	des_string_to_key(key_string, *k);
+
+    memset(key_string, 0, sizeof (key_string));
+    return ok;
+}
+
+int KRB5_CALLCONV
+des_read_pw_string(s, max, prompt, verify)
+    char *s;
+    int max;
+    char *prompt;
+    int	verify;
+{
+    int ok;
     char prompt2[BUFSIZ];
 
     if (verify) {
 	strcpy(prompt2, "Verifying, please re-enter ");
 	strncat(prompt2, prompt, sizeof(prompt2)-(strlen(prompt2)+1));
+	prompt2[sizeof(prompt2)-1] = '\0';
     }
-    ok = des_read_pw_string(key_string, sizeof(key_string),
-			    prompt, verify ? prompt2 : 0);
-    
-    if (ok == 0)
-	des_string_to_key(key_string, *k);
-
-    memset(key_string, 0, sizeof (key_string));
+    ok = des_rd_pwstr_2prompt(s, max, prompt, verify ? prompt2 : 0);
     return ok;
 }
 

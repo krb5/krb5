@@ -1,3 +1,21 @@
+2002-09-26  Tom Yu  <tlyu@mit.edu>
+
+	* afsstring2key.c (krb5_afs_crypt): Leak this function out as as
+	mit_afs_crypt to allow for des_crypt and des_fcrypt
+	implementations for the KfM merge.
+
+	* des_int.h: Change DES_INT32 strategy to include kerberosIV/des.h
+	with a magic macro defined for skipping krb4-specific stuff.  Make
+	renaming of make_key_sched explicit, to avoid conflict with
+	kerberosIV/des.h.
+
+	* f_sched.c, key_sched.c, d3_kysched.c: Make renaming of
+	make_key_sched explicit.
+
+	* f_cksum.c (mit_des_cbc_cksum): Return only the rightmost 32
+	bits; this should optimize out on any platform where longs are
+	exactly 32 bits wide.
+
 2002-08-29  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in: Revert $(S)=>/ change, for Windows support.

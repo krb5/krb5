@@ -129,8 +129,8 @@ des_string_to_key(str,key)
 
     /* Now one-way encrypt it with the folded key */
     (void) des_key_sched(key, key_sked);
-    (void) des_cbc_cksum((const unsigned char *) in_str, key, length,
-			 key_sked, key);
+    (void) des_cbc_cksum((const des_cblock *)in_str, (des_cblock *)key,
+			 length, key_sked, (const des_cblock *)key);
     /* erase key_sked */
     memset(key_sked, 0,sizeof(key_sked));
 
@@ -149,3 +149,43 @@ des_string_to_key(str,key)
 				/* return an int, and ANSI compilers */
 				/* can do dumb things sometimes */
 }
+
+#if TARGET_OS_MAC
+char *mit_afs_crypt (const char *, const char *, const char *);
+
+void afs_string_to_key(char *str, char *cell, des_cblock key)
+{
+    krb5_data str_data;
+    krb5_data cell_data;
+    krb5_keyblock keyblock;
+
+    str_data.data = str;
+    str_data.length = strlen(str);
+    cell_data.data = cell;
+    cell_data.length = strlen(cell);
+    keyblock.enctype = ENCTYPE_DES_CBC_CRC;
+    keyblock.length = sizeof(des_cblock);
+    keyblock.contents = key;
+
+    mit_afs_string_to_key(&keyblock, &str_data, &cell_data);
+}
+
+char *des_crypt(const char *str, const char *salt)
+{
+    char afs_buf[16];
+
+    return des_fcrypt(str, salt, afs_buf);
+}
+
+char *des_fcrypt(const char *str, const char *salt, char *buf)
+{
+    return mit_afs_crypt(str, salt, buf);
+}
+
+/* Is this correct? */
+int des_set_key(des_cblock *key, des_key_schedule schedule)
+{
+    return make_key_sched(key, schedule);
+}
+
+#endif /* TARGET_OS_MAC */

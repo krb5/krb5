@@ -33,6 +33,10 @@
 /* Need some defs from des.h	 */
 #include <kerberosIV/des.h>
 
+#define KRB4_32		DES_INT32
+#define KRB_INT32	DES_INT32
+#define KRB_UINT32	DES_UINT32
+
 #ifdef _WINDOWS
 #include <time.h>
 #endif /* _WINDOWS */
@@ -41,21 +45,9 @@
 #define		MAX_KRB_ERRORS	256
 extern const char *const krb_err_txt[MAX_KRB_ERRORS];
 
-/* These are not defined for at least SunOS 3.3 and Ultrix 2.2 */
-#if defined(ULTRIX022) || (defined(SunOS) && SunOS < 40)
-#define FD_ZERO(p)  ((p)->fds_bits[0] = 0)
-#define FD_SET(n, p)   ((p)->fds_bits[0] |= (1 << (n)))
-#define FD_ISSET(n, p)   ((p)->fds_bits[0] & (1 << (n)))
-#endif /* ULTRIX022 || SunOS */
-
 /* General definitions */
 #define		KSUCCESS	0
 #define		KFAILURE	255
-
-#ifdef NO_UIDGID_T
-typedef unsigned short uid_t;
-typedef unsigned short gid_t;
-#endif /* NO_UIDGID_T */
 
 /*
  * Kerberos specific definitions 
@@ -92,7 +84,7 @@ typedef unsigned short gid_t;
 #define		MAX_HSTNM	100
 
 #ifndef DEFAULT_TKT_LIFE		/* allow compile-time override */
-#define DEFAULT_TKT_LIFE	255	/* default lifetime for krb_mk_req */
+#define DEFAULT_TKT_LIFE	120	/* default lifetime for krb_mk_req */
 #endif
 
 /* Definition of text structure used to pass text around */
@@ -160,6 +152,10 @@ struct credentials {
     KRB4_32 issue_date;		/* The issue time */
     char    pname[ANAME_SZ];	/* Principal's name */
     char    pinst[INST_SZ];	/* Principal's instance */
+#if TARGET_OS_MAC
+    KRB_UINT32 address;			/* Address in ticket */
+    KRB_UINT32 stk_type;		/* string_to_key function needed */
+#endif
 };
 
 typedef struct credentials CREDENTIALS;
@@ -186,88 +182,89 @@ typedef struct msg_dat MSG_DAT;
 #define TKT_ROOT        "/tmp/tkt"
 #endif /* PC */
 
-/* Error codes returned from the KDC */
-#define		KDC_OK		0	/* Request OK */
-#define		KDC_NAME_EXP	1	/* Principal expired */
-#define		KDC_SERVICE_EXP	2	/* Service expired */
-#define		KDC_AUTH_EXP	3	/* Auth expired */
-#define		KDC_PKT_VER	4	/* Protocol version unknown */
-#define		KDC_P_MKEY_VER	5	/* Wrong master key version */
-#define		KDC_S_MKEY_VER 	6	/* Wrong master key version */
-#define		KDC_BYTE_ORDER	7	/* Byte order unknown */
-#define		KDC_PR_UNKNOWN	8	/* Principal unknown */
-#define		KDC_PR_N_UNIQUE 9	/* Principal not unique */
-#define		KDC_NULL_KEY   10	/* Principal has null key */
-#define		KDC_GEN_ERR    20	/* Generic error from KDC */
+#include "kerberosIV/krb_err.h"		/* XXX FIXME! */
+#define KRB_ET(x)	((KRBET_ ## x) - ERROR_TABLE_BASE_krb)
 
+/* Error codes returned from the KDC */
+#define	KDC_OK		KRB_ET(KSUCCESS)	/*  0 - Request OK */
+#define	KDC_NAME_EXP	KRB_ET(KDC_NAME_EXP)	/*  1 - Principal expired */
+#define	KDC_SERVICE_EXP	KRB_ET(KDC_SERVICE_EXP)	/*  2 - Service expired */
+#define	KDC_AUTH_EXP	KRB_ET(KDC_AUTH_EXP)	/*  3 - Auth expired */
+#define	KDC_PKT_VER	KRB_ET(KDC_PKT_VER)	/*  4 - Prot version unknown */
+#define	KDC_P_MKEY_VER	KRB_ET(KDC_P_MKEY_VER)	/*  5 - Wrong mkey version */
+#define	KDC_S_MKEY_VER 	KRB_ET(KDC_S_MKEY_VER)	/*  6 - Wrong mkey version */
+#define	KDC_BYTE_ORDER	KRB_ET(KDC_BYTE_ORDER)	/*  7 - Byte order unknown */
+#define	KDC_PR_UNKNOWN	KRB_ET(KDC_PR_UNKNOWN)	/*  8 - Princ unknown */
+#define	KDC_PR_N_UNIQUE KRB_ET(KDC_PR_N_UNIQUE)	/*  9 - Princ not unique */
+#define	KDC_NULL_KEY	KRB_ET(KDC_NULL_KEY)	/* 10 - Princ has null key */
+#define	KDC_GEN_ERR	KRB_ET(KDC_GEN_ERR)	/* 20 - Generic err frm KDC */
 
 /* Values returned by get_credentials */
-#define		GC_OK		0	/* Retrieve OK */
-#define		RET_OK		0	/* Retrieve OK */
-#define		GC_TKFIL       21	/* Can't read ticket file */
-#define		RET_TKFIL      21	/* Can't read ticket file */
-#define		GC_NOTKT       22	/* Can't find ticket or TGT */
-#define		RET_NOTKT      22	/* Can't find ticket or TGT */
-
+#define	GC_OK		KRB_ET(KSUCCESS)	/*  0 - Retrieve OK */
+#define	RET_OK		KRB_ET(KSUCCESS)	/*  0 - Retrieve OK */
+#define	GC_TKFIL	KRB_ET(GC_TKFIL)	/* 21 - Can't rd tkt file */
+#define	RET_TKFIL	KRB_ET(GC_TKFIL)	/* 21 - Can't rd tkt file */
+#define	GC_NOTKT	KRB_ET(GC_NOTKT)	/* 22 - Can't find tkt|TGT */
+#define	RET_NOTKT	KRB_ET(GC_NOTKT)	/* 22 - Can't find tkt|TGT */
 
 /* Values returned by mk_ap_req	 */
-#define		MK_AP_OK	0	/* Success */
-#define		MK_AP_TGTEXP   26	/* TGT Expired */
+#define	MK_AP_OK	KRB_ET(KSUCCESS)	/*  0 - Success */
+#define	MK_AP_TGTEXP	KRB_ET(MK_AP_TGTEXP)	/* 26 - TGT Expired */
 
 /* Values returned by rd_ap_req */
-#define		RD_AP_OK	0	/* Request authentic */
-#define		RD_AP_UNDEC    31	/* Can't decode authenticator */
-#define		RD_AP_EXP      32	/* Ticket expired */
-#define		RD_AP_NYV      33	/* Ticket not yet valid */
-#define		RD_AP_REPEAT   34	/* Repeated request */
-#define		RD_AP_NOT_US   35	/* The ticket isn't for us */
-#define		RD_AP_INCON    36	/* Request is inconsistent */
-#define		RD_AP_TIME     37	/* delta_t too big */
-#define		RD_AP_BADD     38	/* Incorrect net address */
-#define		RD_AP_VERSION  39	/* protocol version mismatch */
-#define		RD_AP_MSG_TYPE 40	/* invalid msg type */
-#define		RD_AP_MODIFIED 41	/* message stream modified */
-#define		RD_AP_ORDER    42	/* message out of order */
-#define		RD_AP_UNAUTHOR 43	/* unauthorized request */
+#define	RD_AP_OK	KRB_ET(KSUCCESS)	/*  0 - Request authentic */
+#define	RD_AP_UNDEC	KRB_ET(RD_AP_UNDEC)	/* 31 - Can't decode authent */
+#define	RD_AP_EXP	KRB_ET(RD_AP_EXP)	/* 32 - Ticket expired */
+#define	RD_AP_NYV	KRB_ET(RD_AP_NYV)	/* 33 - Ticket not yet valid */
+#define	RD_AP_REPEAT	KRB_ET(RD_AP_REPEAT)	/* 34 - Repeated request */
+#define	RD_AP_NOT_US	KRB_ET(RD_AP_NOT_US)	/* 35 - Ticket isn't for us */
+#define	RD_AP_INCON	KRB_ET(RD_AP_INCON)	/* 36 - Request inconsistent */
+#define	RD_AP_TIME	KRB_ET(RD_AP_TIME)	/* 37 - delta_t too big */
+#define	RD_AP_BADD	KRB_ET(RD_AP_BADD)	/* 38 - Incorrect net addr */
+#define	RD_AP_VERSION	KRB_ET(RD_AP_VERSION)	/* 39 - prot vers mismatch */
+#define	RD_AP_MSG_TYPE	KRB_ET(RD_AP_MSG_TYPE)	/* 40 - invalid msg type */
+#define	RD_AP_MODIFIED	KRB_ET(RD_AP_MODIFIED)	/* 41 - msg stream modified */
+#define	RD_AP_ORDER	KRB_ET(RD_AP_ORDER)	/* 42 - message out of order */
+#define	RD_AP_UNAUTHOR	KRB_ET(RD_AP_UNAUTHOR)	/* 43 - unauthorized request */
 
 /* Values returned by get_pw_tkt */
-#define		GT_PW_OK	0	/* Got password changing tkt */
-#define		GT_PW_NULL     51	/* Current PW is null */
-#define		GT_PW_BADPW    52	/* Incorrect current password */
-#define		GT_PW_PROT     53	/* Protocol Error */
-#define		GT_PW_KDCERR   54	/* Error returned by KDC */
-#define		GT_PW_NULLTKT  55	/* Null tkt returned by KDC */
-
+#define	GT_PW_OK	KRB_ET(KSUCCESS)	/*  0 - Got passwd chg tkt */
+#define	GT_PW_NULL	KRB_ET(GT_PW_NULL)	/* 51 - Current PW is null */
+#define	GT_PW_BADPW	KRB_ET(GT_PW_BADPW)	/* 52 - Wrong passwd */
+#define	GT_PW_PROT	KRB_ET(GT_PW_PROT)	/* 53 - Protocol Error */
+#define	GT_PW_KDCERR	KRB_ET(GT_PW_KDCERR)	/* 54 - Error ret by KDC */
+#define	GT_PW_NULLTKT	KRB_ET(GT_PW_NULLTKT)	/* 55 - Null tkt ret by KDC */
 
 /* Values returned by send_to_kdc */
-#define		SKDC_OK		0	/* Response received */
-#define		SKDC_RETRY     56	/* Retry count exceeded */
-#define		SKDC_CANT      57	/* Can't send request */
+#define	SKDC_OK		KRB_ET(KSUCCESS)	/*  0 - Response received */
+#define	SKDC_RETRY	KRB_ET(SKDC_RETRY)	/* 56 - Retry count exceeded */
+#define	SKDC_CANT	KRB_ET(SKDC_CANT)	/* 57 - Can't send request */
 
 /*
  * Values returned by get_intkt
  * (can also return SKDC_* and KDC errors)
  */
 
-#define		INTK_OK		0	/* Ticket obtained */
-#define		INTK_W_NOTALL  61	/* Not ALL tickets returned */
-#define		INTK_BADPW     62	/* Incorrect password */
-#define		INTK_PROT      63	/* Protocol Error */
-#define		INTK_ERR       70	/* Other error */
+#define	INTK_OK		KRB_ET(KSUCCESS)	/*  0 - Ticket obtained */
+#define	INTK_PW_NULL	KRB_ET(GT_PW_NULL)	/* 51 - Current PW is null */
+#define	INTK_W_NOTALL	KRB_ET(INTK_W_NOTALL)	/* 61 - Not ALL tkts retd */
+#define	INTK_BADPW	KRB_ET(INTK_BADPW)	/* 62 - Incorrect password */
+#define	INTK_PROT	KRB_ET(INTK_PROT)	/* 63 - Protocol Error */
+#define	INTK_ERR	KRB_ET(INTK_ERR)	/* 70 - Other error */
 
 /* Values returned by get_adtkt */
-#define         AD_OK           0	/* Ticket Obtained */
-#define         AD_NOTGT       71	/* Don't have tgt */
+#define AD_OK		KRB_ET(KSUCCESS)	/*  0 - Ticket Obtained */
+#define AD_NOTGT	KRB_ET(AD_NOTGT)	/* 71 - Don't have tgt */
 
 /* Error codes returned by ticket file utilities */
-#define		NO_TKT_FIL	76	/* No ticket file found */
-#define		TKT_FIL_ACC	77	/* Couldn't access tkt file */
-#define		TKT_FIL_LCK	78	/* Couldn't lock ticket file */
-#define		TKT_FIL_FMT	79	/* Bad ticket file format */
-#define		TKT_FIL_INI	80	/* tf_init not called first */
+#define	NO_TKT_FIL	KRB_ET(NO_TKT_FIL)	/* 76 - No ticket file found */
+#define	TKT_FIL_ACC	KRB_ET(TKT_FIL_ACC)	/* 77 - Can't acc tktfile */
+#define	TKT_FIL_LCK	KRB_ET(TKT_FIL_LCK)	/* 78 - Can't lck tkt file */
+#define	TKT_FIL_FMT	KRB_ET(TKT_FIL_FMT)	/* 79 - Bad tkt file format */
+#define	TKT_FIL_INI	KRB_ET(TKT_FIL_INI)	/* 80 - tf_init not called */
 
 /* Error code returned by kparse_name */
-#define		KNAME_FMT	81	/* Bad Kerberos name format */
+#define	KNAME_FMT	KRB_ET(KNAME_FMT)	/* 81 - Bad krb name fmt */
 
 /* Error code returned by krb_mk_safe */
 #define		SAFE_PRIV_ERROR	-1	/* syscall error */
@@ -647,6 +644,24 @@ extern int krb_cr_tkt_krb5(KTEXT tkt, unsigned int flags, char *pname,
 extern int krb_set_key_krb5(krb5_context ctx, krb5_keyblock *key);
 
 #endif
+
+#if TARGET_OS_MAC
+/* The following functions are not part of the standard Kerberos v4 API. 
+ * They were created for Mac implementation, and used by admin tools 
+ * such as CNS-Config. */
+extern int KRB5_CALLCONV
+krb_get_num_cred(void);
+
+extern int INTERFACE
+krb_get_nth_cred(char *, char *, char *, int);
+
+extern int INTERFACE
+krb_delete_cred(char *, char *,char *);
+
+extern int INTERFACE
+dest_all_tkts(void);
+
+#endif /* TARGET_OS_MAC */
 
 #ifdef _WINDOWS
 HINSTANCE get_lib_instance(void);

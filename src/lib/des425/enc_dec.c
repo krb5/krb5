@@ -32,15 +32,27 @@
 
 int
 des_cbc_encrypt(in,out,length,key,iv,enc)
-    krb5_octet   *in;	/* >= length bytes of input text */
-    krb5_octet  *out;		/* >= length bytes of output text */
+    des_cblock   *in;	/* >= length bytes of input text */
+    des_cblock  *out;		/* >= length bytes of output text */
     register unsigned long length;	/* in bytes */
     const mit_des_key_schedule key;		/* precomputed key schedule */
-    const krb5_octet *iv;		/* 8 bytes of ivec */
+    const des_cblock *iv;		/* 8 bytes of ivec */
     int enc;		/* 0 ==> decrypt, else encrypt */
 {
 	return (mit_des_cbc_encrypt((const des_cblock *) in,
-                                (des_cblock *) out,
-                                length, key, iv, enc));
+				    out, length, key,
+				    (const unsigned char *)iv, /* YUCK! */
+				    enc));
 }
 
+#if TARGET_OS_MAC
+void des_3cbc_encrypt(des_cblock *in, des_cblock *out, long length,
+		      des_key_schedule ks1, des_key_schedule ks2,
+		      des_key_schedule ks3, des_cblock *iv, int enc)
+{
+    mit_des3_cbc_encrypt((const des_cblock *)in, out, (unsigned long)length,
+			 ks1, ks2, ks3,
+			 (const unsigned char *)iv, /* YUCK! */
+			 enc);
+}
+#endif

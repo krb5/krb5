@@ -28,9 +28,9 @@ mit_des3_key_sched(k,schedule)
     mit_des3_cblock k;
     mit_des3_key_schedule schedule;
 {
-    make_key_sched(k[0],schedule[0]);
-    make_key_sched(k[1],schedule[1]);
-    make_key_sched(k[2],schedule[2]);
+    mit_des_make_key_sched(k[0],schedule[0]);
+    mit_des_make_key_sched(k[1],schedule[1]);
+    mit_des_make_key_sched(k[2],schedule[2]);
 
     if (!mit_des_check_key_parity(k[0]))	/* bad parity --> return -1 */
 	return(-1);

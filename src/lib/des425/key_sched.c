@@ -38,3 +38,10 @@ des_key_sched(k,schedule)
 {
     return (mit_des_key_sched(k, schedule));
 }
+
+#if TARGET_OS_MAC
+int make_key_sched(des_cblock *k, des_key_schedule schedule)
+{
+    return mit_des_key_sched((unsigned char *)k, schedule); /* YUCK! */
+}
+#endif

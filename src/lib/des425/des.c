@@ -31,14 +31,25 @@
 
 int KRB5_CALLCONV
 des_ecb_encrypt(clear, cipher, schedule, enc)
-    unsigned long *clear;
-    unsigned long *cipher;
+    des_cblock *clear;
+    des_cblock *cipher;
     const mit_des_key_schedule schedule;
     int enc;		/* 0 ==> decrypt, else encrypt */
 {
     static const des_cblock iv;
 
-    return (mit_des_cbc_encrypt((const des_cblock *) clear,
-				(des_cblock *) cipher,
+    return (mit_des_cbc_encrypt((const des_cblock *)clear, cipher,
 				8, schedule, iv, enc));
 }
+
+#if TARGET_OS_MAC
+void
+des_3ecb_encrypt(des_cblock *clear, des_cblock *cipher,
+		 des_key_schedule ks1, des_key_schedule ks2,
+		 des_key_schedule ks3, int enc)
+{
+    static const des_cblock iv;
+
+    mit_des3_cbc_encrypt((const des_cblock *)clear, cipher, 8, ks1, ks2, ks3, iv, enc);
+}
+#endif

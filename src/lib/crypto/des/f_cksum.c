@@ -120,5 +120,5 @@ mit_des_cbc_cksum(in, out, length, schedule, ivec)
 	 * inconsistantly (with the low order byte of the checksum
 	 * not always in the low order byte of the DES_INT32).  We won't.
 	 */
-	return right;
+	return right & 0xFFFFFFFFUL;
 }
