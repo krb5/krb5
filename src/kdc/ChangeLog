@@ -1,3 +1,7 @@
+2003-01-21  Sam Hartman  <hartmans@mit.edu>
+
+	* kdc_preauth.c (check_padata): Permit returning KRB5KRB_AP_ERR_SKEW
+
 2003-01-12  Ezra Peisach  <epeisach@bu.edu>
 
 	* kdc_util.h, replay.c, main.c: Pass global krb5_context to

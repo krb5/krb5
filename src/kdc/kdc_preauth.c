@@ -358,7 +358,15 @@ check_padata (krb5_context context, krb5_db_entry *client,
     if (!pa_found)
 	krb5_klog_syslog (LOG_INFO, "no valid preauth type found: %s",
 			  error_message (retval));
-    return KRB5KDC_ERR_PREAUTH_FAILED;
+/* The following switch statement allows us
+ * to return some preauth system errors back to the client.
+ */
+        switch(retval) {
+    case KRB5KRB_AP_ERR_SKEW:
+	return retval;
+    default:
+	return KRB5KDC_ERR_PREAUTH_FAILED;
+    }
 }
 
 /*
