@@ -321,7 +321,7 @@ dnl
 define(UsePepsy,[
 echo "using pepsy"
 PSYFLAGS="-f -h0 -a -s -C"
-PEPSY="$(BUILDTOP)/isode/pepsy/xpepsy"
+PEPSY='$(BUILDTOP)/isode/pepsy/xpepsy'
 AC_SUBST(PEPSY)dnl
 AC_SUBST(PSYFLAGS)dnl
 ])dnl
