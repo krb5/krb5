@@ -1,3 +1,9 @@
+2005-01-17  Ezra Peisach  <epeisach@mit.edu>
+
+	* preauth2.c (krb5_do_preauth): Upon error in decoding
+	krb5_type_info{,2}, on failure, do not call krb5_free_type_info
+	with a null pointer.
+
 2005-01-15  Jeffrey Altman <jaltman@mit.edu>
 
         * cp_key_cnt.c, copy_princ.c:

@@ -892,7 +892,8 @@ krb5_do_preauth(krb5_context context,
 		else ret = decode_krb5_etype_info(&scratch, &etype_info);
 		if (ret) {
 		    ret = 0; /*Ignore error and etype_info element*/
-		    krb5_free_etype_info( context, etype_info);
+		    if (etype_info) 
+		      krb5_free_etype_info( context, etype_info);
 		    etype_info = NULL;
 		    continue;
 		}
