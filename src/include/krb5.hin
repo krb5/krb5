@@ -1407,6 +1407,11 @@ krb5_error_code krb5_425_conv_principal
 		   const char *name, const char *instance, const char *realm,
 		   krb5_principal *princ));
 
+krb5_error_code
+krb5_524_conv_principal
+	PROTOTYPE((krb5_context context, const krb5_principal princ, 
+		   char *name, char *inst, char *realm));
+
 krb5_error_code krb5_obtain_padata
     	PROTOTYPE((krb5_context,
 		   int type, krb5_principal client, krb5_address **src_addr,

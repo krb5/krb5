@@ -1,3 +1,7 @@
+Tue Jun  6 12:25:38 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* krb5.hin: Add prototype for krb5_524_conv_principal()
+
 Tue May 30 10:59:13 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* Makefile.in (clean-unix): Remove built header files krb5.h
