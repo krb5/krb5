@@ -152,6 +152,5 @@ init.so init.po $(OUTPRE)init.$(OBJEXT): init.c $(COM_ERR_DEPS) libpty.h \
 sane_hostname.so sane_hostname.po $(OUTPRE)sane_hostname.$(OBJEXT): sane_hostname.c $(COM_ERR_DEPS) \
   pty-int.h pty_err.h $(SRCTOP)/include/port-sockets.h \
   $(BUILDTOP)/include/krb5/autoconf.h libpty.h $(SRCTOP)/include/socket-utils.h \
-  $(SRCTOP)/include/fake-addrinfo.h $(SRCTOP)/include/k5-platform.h \
-  $(SRCTOP)/include/k5-thread.h
+  $(SRCTOP)/include/fake-addrinfo.h
 
