@@ -1268,7 +1268,7 @@ mips-*-netbsd*)
 	PROFFLAGS=-pg
 	;;
 
-*-*-macos10* | *-*-rhapsody*)
+*-*-darwin* | *-*-rhapsody*)
 	PICFLAGS=-fno-common
 	SHLIBVEXT='.$(LIBMAJOR).$(LIBMINOR).dylib'
 	SHLIBSEXT='.$(LIBMAJOR).dylib'
