@@ -47,7 +47,7 @@ static krb5_error_code prepare_error_as PROTOTYPE((krb5_as_req *,
 krb5_error_code
 process_as_req(request, from, response)
 register krb5_as_req *request;
-krb5_fulladdr *from;			/* who sent it ? */
+const krb5_fulladdr *from;		/* who sent it ? */
 krb5_data **response;			/* filled in with a response packet */
 {
 
@@ -260,8 +260,8 @@ krb5_data **response;			/* filled in with a response packet */
 	cleanup();
 	return retval;
     }
-    retval = krb5_encode_kdc_rep(KRB5_AS_REP, &reply, &reply_encpart,
-				 &encrypting_key, response);
+    retval = krb5_encode_kdc_rep(KRB5_AS_REP, &reply_encpart,
+				 &encrypting_key,  &reply, response);
     bzero((char *)encrypting_key.contents, encrypting_key.length);
     free((char *)encrypting_key.contents);
     cleanup();

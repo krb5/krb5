@@ -43,7 +43,7 @@ static krb5_error_code decrypt_second_ticket PROTOTYPE((krb5_ticket *));
 krb5_error_code
 process_tgs_req(request, from, response)
 krb5_tgs_req *request;
-krb5_fulladdr *from;			/* who sent it ? */
+const krb5_fulladdr *from;		/* who sent it ? */
 krb5_data **response;			/* filled in with a response packet */
 {
 
@@ -391,9 +391,9 @@ krb5_data **response;			/* filled in with a response packet */
     reply_encpart.flags = enc_tkt_reply.flags;
     reply_encpart.server = ticket_reply.server;
 
-    retval = krb5_encode_kdc_rep(KRB5_TGS_REP, &reply, &reply_encpart,
+    retval = krb5_encode_kdc_rep(KRB5_TGS_REP, &reply_encpart,
 				 header_ticket->enc_part2->session,
-				 response);
+				 &reply, response);
     bzero((char *)session_key->contents, session_key->length);
     free((char *)session_key->contents);
     session_key->contents = 0;
