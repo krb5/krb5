@@ -1,3 +1,8 @@
+2001-10-31  Danilo Almeida  <dalmeida@mit.edu>
+
+	* com_err.h: Windows should include <win-mac.h> as opposed
+	to <Kerberos5/win-mac.h>
+
 2001-10-29  Miro Jurisic  <meeroh@mit.edu>
 	* pullup from krb5-1-2 branch after krb5-1-2-2-bp
 	* error_message.c: fixed busted parentheses
