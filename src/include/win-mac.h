@@ -12,6 +12,12 @@
  * Machine-type definitions: PC Clone 386 running Microloss Windows
  */
 
+#define ID_READ_PWD_DIALOG  10000
+#define ID_READ_PWD_PROMPT  10001
+#define ID_READ_PWD_PROMPT2 10002
+#define ID_READ_PWD_PWD     10003
+
+
 #if defined(_MSDOS)
 	/* Windows 16 specific */
 #define BITS16
