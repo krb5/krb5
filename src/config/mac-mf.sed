@@ -31,9 +31,17 @@
 /\./s,\.\./:,::,g
 # Convert ../../ to ::: 
 /\./s,\.\./\.\./,:::,g
+# Convert /../ to ::
+/\./s,/\.\./,::,g
+# Convert ../ to ::
 /\./s,\.\./,::,g
+# Convert ..; to ::;
 /\./s,\.\.;,::;,g
+# Convert /./ to :
+/\.\//s,/\./,:,g
+# Convert ./ to :
 /\.\//s,\./,:,g
+# All other slashes turn into colons.
 /\//s,/,:,g
 
 /=/s/ = \.$/ = :/
@@ -46,9 +54,13 @@
 /BASEDIR/s/^BASEDIR =.*$/BASEDIR = "{srcroot}"/
 /{BASEDIR}:/s/{BASEDIR}:/{BASEDIR}/g
 # The original lines screw up -I$(srcdir)/../des  by eliminating a colon.
-# Proposed fix:  Eliminate srcdir prefixes totally.
+# Proposed fix:  Eliminate srcdir prefixes totally; rplc by colon for
+# current directory.
 #/{srcdir}:/s/{srcdir}:/"{srcdir}"/g
-/{srcdir}:/s/{srcdir}://g
+# $(srcdir)/../foo turns to ::foo.
+/{srcdir}:/s/{srcdir}::/::/g
+# $(srcdir)/bar turns to :bar.
+/{srcdir}:/s/{srcdir}:/:/g
 #/"{srcdir}":/s/"{srcdir}":/"{srcdir}"/g
 
 # Comment out settings of anything set by mpw host config.
@@ -119,8 +131,8 @@
 # /-o/s/\([-a-z]*\)\.c -o "{o}".c.o/\1\.c -o "{o}"\1.c.o/
 
 # Change linking cc to link.
-/LDFLAGS/    s/{CC} \(.*\){CFLAGS}\(.*\){LDFLAGS}/Link \1 \2 {LDFLAGS}/
-/CFLAGS_LINK/s/{CC} \(.*\){CFLAGS_LINK}\(.*\){LDFLAGS}/Link \1 \2 {LDFLAGS}/
+/LDFLAGS/    s/{CC}\(.*\){CFLAGS}\(.*\){LDFLAGS}/Link \1 \2 {LDFLAGS}/
+/CFLAGS_LINK/s/{CC}\(.*\){CFLAGS_LINK}\(.*\){LDFLAGS}/Link \1 \2 {LDFLAGS}/
 
 # Comment out .PHONY rules.
 /\.PHONY/s/^\.PHONY/# \.PHONY/
@@ -149,7 +161,7 @@
 
 # Hackery, pure and simple
 # To speed up compiles, remove duplicated -i options.
-/-i/s/\(-i [^ ]*\) \1 /\1 /g
+/-i/s/-i {SRCTOP}\([^ ]*\) -i {BUILDTOP}\1 /-i {BUILDTOP}\1 /g
 
 # Note!  There are 8-bit characters in the three lines below:
 #   	0xc4, 0xb6, 0xc5.

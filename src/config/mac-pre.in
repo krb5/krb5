@@ -98,7 +98,7 @@ VPATH = @srcdir@
 # Default rule that puts each file into separate segment.
 
 .c.o: .c
-	{CC}  {DepDir}{Default}.c {CFLAGS} -s {Default} -o {TargDir}{Default}.c.o
+	{CC} -sym on {DepDir}{Default}.c {CFLAGS} -s {Default} -o {TargDir}{Default}.c.o
 
 CPPFLAGS = @CPPFLAGS@ -i {CIncludes}
 DEFS = @DEFS@ $(CPPFLAGS)
@@ -106,7 +106,7 @@ CC = c
 LD = link
 # The funny quoting in the LDFLAGS is to avoid xxx.o being mangled by
 # mac-mf.sed into xxx.c.o.
-LDFLAGS=-t MPST -c "MPS " -sym on {Libraries}"Runtime."o {CLibraries}"StdClib."o {Libraries}"ToolLibs."o {Libraries}"Interface."o
+LDFLAGS=-t MPST -c "MPS " -sym on {Libraries}"Runtime."o {CLibraries}"StdClib."o {Libraries}"Interface."o
 CCOPTS = @CCOPTS@
 LIBS = @LIBS@
 KRB5ROOT= @KRB5ROOT@
@@ -136,15 +136,15 @@ RM = Delete -y -i
 CP = Duplicate -y
 MV = mv -f
 CHMOD=chmod
-RANLIB = @RANLIB@
-ARCHIVE = @ARCHIVE@
+RANLIB = echo
+ARCHIVE = lib -o 
 ARADD = @ARADD@
 LN = Duplicate -y
 AWK = @AWK@
 LEX = @LEX@
 LEXLIB = @LEXLIB@
 YACC = @YACC@
-MAKE = BuildProgram
+MAKE = Set Echo 0; BuildProgram
 
 # FIXME:  This won't work for srcdir != objdir.  But on the Mac, there
 # is no easy way to build a relative or absolute path, because : means

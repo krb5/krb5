@@ -22,9 +22,10 @@
 : ${ac_cv_func_ftime='no'}
 : ${ac_cv_func_getcwd='no'}
 : ${ac_cv_func_getdtablesize='no'}
-: ${ac_cv_func_getopt='yes'}
+: ${ac_cv_func_getopt='no'}
 : ${ac_cv_func_getpid='no'}
 : ${ac_cv_func_gettosbyname='no'}
+: ${ac_cv_func_getuid='no'}
 : ${ac_cv_func_getutent='no'}
 : ${ac_cv_func_grantpt='no'}
 : ${ac_cv_func_herror='no'}
@@ -46,11 +47,11 @@
 : ${ac_cv_func_sigprocmask='no'}
 : ${ac_cv_func_sigsetjmp='no'}
 : ${ac_cv_func_srand='yes'}
-: ${ac_cv_func_srand48='yes'}
-: ${ac_cv_func_srandom='yes'}
+: ${ac_cv_func_srand48='no'}
+: ${ac_cv_func_srandom='no'}
 : ${ac_cv_func_strcasecmp='no'}
 : ${ac_cv_func_strdup='no'}
-: ${ac_cv_func_strerror='no'}
+: ${ac_cv_func_strerror='yes'}
 : ${ac_cv_func_strftime='yes'}
 : ${ac_cv_func_strsave='no'}
 : ${ac_cv_func_tcsetattr='no'}

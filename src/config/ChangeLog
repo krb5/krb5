@@ -1,3 +1,13 @@
+Tue Mar 28 17:58:55 1995  John Gilmore  (gnu at toad.com)
+
+	* mac-config.cache:  Correct some entries.
+	* mac-mf.sed:  Improve conversion of pathnames, $(srcdir),
+	support linking MPW tools (for make check, kinit).
+	* mac-pre.in (.c.o):  Add -sym on for debugging.
+	(LDFLAGS):  Remove ToolLibs.o.
+	(RANLIB, ARCHIVE):  Make these work.
+	(MAKE):  Make recursive makes work, with BuildProgram.
+
 Thu Mar 16 20:55:18 1995  John Gilmore  (gnu at toad.com)
 
 	First cut at Macintosh configuration support.
