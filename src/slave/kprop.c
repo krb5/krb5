@@ -701,6 +701,7 @@ void update_last_prop_file(hostname, file_name)
 		free(file_last_prop);
 		return;
 	}
+	write(fd, "", 1);
 	free(file_last_prop);
 	close(fd);
 	return;

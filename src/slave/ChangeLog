@@ -1,3 +1,8 @@
+Tue Mar 12 14:01:32 1996  Richard Basch  <basch@lehman.com>
+
+	* kprop.c: Write a byte to the last-prop file to ensure the file
+		modtime is updated.  Simply opening the file isn't sufficient.
+
 Wed Mar  6 16:15:46 1996  Richard Basch  <basch@lehman.com>
 
 	* kprop.c: The credentials cache should be destroyed after any error.
