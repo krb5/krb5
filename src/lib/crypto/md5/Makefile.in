@@ -26,4 +26,19 @@ includes:: depend
 
 depend:: $(SRCS)
 
+t_mddriver: t_mddriver.o md5.o
+	$(CC) $(CFLAGS) $(LDFLAGS) -o t_mddriver t_mddriver.o md5.o
+
+t_mddriver.exe:
+	$(CC) $(CFLAGS2) -o t_mddriver.exe t_mddriver.c md5.c
+
+check-unix:: t_mddriver
+	$(RUN_SETUP) $(C)t_mddriver -x
+
+check-windows:: t_mddriver$(EXEEXT)
+	$(C)t_mddriver$(EXEEXT) -x
+
+clean:: 
+	$(RM) t_mddriver$(EXEEXT) t_mddriver.$(OBJEXT)
+
 clean-unix:: clean-libobjs

@@ -34,6 +34,8 @@ void convert PROTOTYPE((char *, unsigned char []));
 
 void des_cblock_print_file PROTOTYPE((mit_des_cblock, FILE *));
 
+char zeroblock[8] = {0,0,0,0,0,0,0,0};
+
 void
 main(argc, argv)
 int argc;
@@ -57,7 +59,7 @@ char *argv[];
             fprintf(stderr, "des test: can't process key");
             exit(1);
         }
-	mit_des_ecb_encrypt(&input, &output2, sched, 1);
+	mit_des_cbc_encrypt(&input, &output2, 8, sched, zeroblock, 1);
 
 	if (memcmp((char *)output2, (char *)output, 8)) {
 	    fprintf(stderr, 
@@ -71,7 +73,7 @@ char *argv[];
 	/*
 	 * Now try decrypting....
 	 */
-	mit_des_ecb_encrypt(&output, &output2, sched, 0);
+	mit_des_cbc_encrypt(&output, &output2, 8, sched, zeroblock, 0);
 
 	if (memcmp((char *)output2, (char *)input, 8)) {
 	    fprintf(stderr, 
@@ -132,7 +134,6 @@ unsigned char cblock[];
  * Fake out the DES library, for the purposes of testing.
  */
 
-#include "des.h"
 #include "des_int.h"
 
 int

@@ -50,23 +50,6 @@ unsigned char zero_text[8] = {0x0,0,0,0,0,0,0,0};
 unsigned char msb_text[8] = {0x0,0,0,0, 0,0,0,0x40}; /* to ANSI MSB */
 unsigned char *input;
 
-unsigned char *nfold_in[] = {
-    "basch",
-    "eichin",
-    "sommerfeld",
-    "MASSACHVSETTS INSTITVTE OF TECHNOLOGY" };
-
-unsigned char nfold_192[4][24] = {
-    { 0x1a, 0xab, 0x6b, 0x42, 0x96, 0x4b, 0x98, 0xb2, 0x1f, 0x8c, 0xde, 0x2d,
-      0x24, 0x48, 0xba, 0x34, 0x55, 0xd7, 0x86, 0x2c, 0x97, 0x31, 0x64, 0x3f },
-    { 0x65, 0x69, 0x63, 0x68, 0x69, 0x6e, 0x4b, 0x73, 0x2b, 0x4b, 0x1b, 0x43,
-      0xda, 0x1a, 0x5b, 0x99, 0x5a, 0x58, 0xd2, 0xc6, 0xd0, 0xd2, 0xdc, 0xca },
-    { 0x2f, 0x7a, 0x98, 0x55, 0x7c, 0x6e, 0xe4, 0xab, 0xad, 0xf4, 0xe7, 0x11,
-      0x92, 0xdd, 0x44, 0x2b, 0xd4, 0xff, 0x53, 0x25, 0xa5, 0xde, 0xf7, 0x5c },
-    { 0xdb, 0x3b, 0x0d, 0x8f, 0x0b, 0x06, 0x1e, 0x60, 0x32, 0x82, 0xb3, 0x08,
-      0xa5, 0x08, 0x41, 0x22, 0x9a, 0xd7, 0x98, 0xfa, 0xb9, 0x54, 0x0c, 0x1b }
-};
-
 /* 0x0123456789abcdef */
 unsigned char default_key[8] = {
     0x01,0x23,0x45,0x67,0x89,0xab,0xcd,0xef
@@ -112,7 +95,7 @@ unsigned char mresult[8] = {
 
 mit_des_key_schedule sched;
 
-void
+int
 main(argc,argv)
     int argc;
     char *argv[];
@@ -316,21 +299,6 @@ main(argc,argv)
     else 
 	printf("verify: CBC checksum is correct\n\n");
 
-    printf("N-fold\n");
-    for (i=0; i<sizeof(nfold_in)/sizeof(char *); i++) {
-	printf("\tInput:\t\"%.*s\"\n", strlen(nfold_in[i]), nfold_in[i]);
-	printf("\t192-Fold:\t");
-	mit_des_n_fold(nfold_in[i], strlen(nfold_in[i]), cipher_text, 24);
-	for (j=0; j<24; j++)
-	    printf("%s%02x", (j&3) ? "" : " ", cipher_text[j]);
-	printf("\n");
-	if (memcmp(cipher_text, nfold_192[i], 24)) {
-	    printf("verify: error in n-fold\n");
-	    exit(-1);
-	};
-    }
-    printf("verify: N-fold is correct\n\n");
-
     exit(0);
 }
 
@@ -362,9 +330,11 @@ do_encrypt(in,out)
     char *out;
 {
     for (i =1; i<=nflag; i++) {
-	mit_des_ecb_encrypt((mit_des_cblock *)in,
+	mit_des_cbc_encrypt((mit_des_cblock *)in,
 			    (mit_des_cblock *)out,
+			    8,
 			    sched,
+			    zero_text,
 			    MIT_DES_ENCRYPT);
 	if (mit_des_debug) {
 	    printf("\nclear %s\n",in);
@@ -384,9 +354,11 @@ do_decrypt(in,out)
     /* try to invert it */
 {
     for (i =1; i<=nflag; i++) {
-	mit_des_ecb_encrypt((mit_des_cblock *)out,
+	mit_des_cbc_encrypt((mit_des_cblock *)out,
 			    (mit_des_cblock *)in,
+			    8,
 			    sched,
+			    zero_text,
 			    MIT_DES_DECRYPT);
 	if (mit_des_debug) {
 	    printf("clear %s\n",in);
@@ -402,8 +374,6 @@ do_decrypt(in,out)
 /*
  * Fake out the DES library, for the purposes of testing.
  */
-
-#include "des.h"
 
 int
 mit_des_is_weak_key(key)

@@ -34,7 +34,7 @@ OBJS=	afsstring2key.$(OBJEXT)	\
 	f_sched.$(OBJEXT) 	\
 	f_tables.$(OBJEXT)	\
 	key_sched.$(OBJEXT)	\
-	string2key.$(OBEXT)	\
+	string2key.$(OBJEXT)	\
 	weak_key.$(OBJEXT)
 
 SRCS=	$(srcdir)/afsstring2key.c	\
@@ -57,13 +57,18 @@ includes:: depend
 
 depend:: $(SRCS)
 
-verify$(EXEEXT): t_verify.$(OBJEXT) $(OBJS)
-	$(CC_LINK) -o $@ t_verify.$(OBJEXT) $(OBJS)
+TOBJS = key_sched.$(OBJEXT) f_sched.$(OBJEXT) f_cbc.$(OBJEXT) \
+	f_tables.$(OBJEXT) f_cksum.$(OBJEXT)
 
-destest$(EXEEXT): destest.$(OBJEXT) $(OBJS)
-	$(CC_LINK) -o $@ destest.$(OBJEXT) $(OBJS)
+verify$(EXEEXT): t_verify.$(OBJEXT) $(TOBJS) f_parity.$(OBJEXT) \
+	$(COM_ERR_DEPLIB)
+	$(CC_LINK) -o $@ t_verify.$(OBJEXT) $(TOBJS) f_parity.$(OBJEXT) \
+		-lcom_err
 
-check-unix:: destest verify
+destest$(EXEEXT): destest.$(OBJEXT) $(TOBJS)
+	$(CC_LINK) -o $@ destest.$(OBJEXT) $(TOBJS)
+
+check-unix:: verify destest
 	$(RUN_SETUP) ./verify -z
 	$(RUN_SETUP) ./verify -m
 	$(RUN_SETUP) ./verify

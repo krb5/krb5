@@ -27,4 +27,24 @@ includes:: depend
 
 depend:: $(SRCS)
 
+t_cksum4.o: t_cksum.c
+	$(CC) -DMD=4 $(CFLAGS) -o t_cksum4.o -c t_cksum.c
+
+t_cksum5.o: t_cksum.c
+	$(CC) -DMD=5 $(CFLAGS) -o t_cksum5.o -c t_cksum.c
+
+t_cksum4: t_cksum4.o $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o t_cksum4 t_cksum4.o $(KRB5_BASE_LIBS)
+
+t_cksum5: t_cksum5.o $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o t_cksum5 t_cksum5.o $(KRB5_BASE_LIBS)
+
+check-unix:: t_cksum4 t_cksum5
+	$(RUN_SETUP) $(C)t_cksum4 "this is a test"
+	$(RUN_SETUP) $(C)t_cksum5 "this is a test"
+
+clean-unix::
+	$(RM) t_cksum4 t_cksum4.o
+	$(RM) t_cksum5 t_cksum5.o
+
 clean-unix:: clean-libobjs

@@ -15,6 +15,9 @@ CFLAGS = $(CCOPTS) $(DEFS) -I$(srcdir)/enc_provider \
 MAC_SUBDIRS = crc32 des dk enc_provider hash_provider keyhash_provider \
 	md4 md5 old raw sha1
 
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
+
 STLIBOBJS=\
 	block_size.o		\
 	checksum_length.o	\
@@ -123,7 +126,14 @@ libcrypto.lib:
 
 clean-unix:: clean-liblinks clean-libs clean-libobjs
 
-check-unix::
+check-unix:: t_nfold
+	$(RUN_SETUP) ./t_nfold
+
+t_nfold$(EXEEXT): t_nfold.$(OBJEXT) nfold.$(OBJEXT)
+	$(CC_LINK) -o $@ t_nfold.$(OBJEXT) nfold.$(OBJEXT)
+
+clean::
+	$(RM) t_nfold.o t_nfold
 
 all-windows::
 	cd crc32

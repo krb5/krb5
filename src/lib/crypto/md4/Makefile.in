@@ -26,4 +26,27 @@ includes:: depend
 
 depend:: $(SRCS)
 
+t_mddriver.c: $(srcdir)/../md5/t_mddriver.c
+	$(CP) $(srcdir)/../md5/t_mddriver.c t_mddriver.c
+
+t_mddriver.o: t_mddriver.c
+	$(CC) -DMD=4 $(CFLAGS) -c  t_mddriver.c
+
+t_mddriver: t_mddriver.o md4.o
+	$(CC) $(CFLAGS) -o t_mddriver t_mddriver.o md4.o
+
+t_mddriver.exe:
+	$(CP) $(srcdir)\..\md5\t_mddriver.c t_mddriver.c
+	$(CC) -DMD=4 $(CFLAGS2) -o t_mddriver t_mddriver.c md4.c
+	$(RM) md4.obj
+
+check-unix:: t_mddriver
+	$(RUN_SETUP) $(C)t_mddriver -x
+
+check-windows:: t_mddriver$(EXEEXT)
+	$(C)t_mddriver$(EXEEXT) -x
+
+clean:: 
+	$(RM) t_mddriver$(EXEEXT) t_mddriver.$(OBJEXT) t_mddriver.c
+
 clean-unix:: clean-libobjs
