@@ -69,6 +69,9 @@
 #include "gssapi_krb5.h"
 #include "gssapi_err_krb5.h"
 
+/* for debugging */
+#define CFX_EXERCISE
+
 /** constants **/
 
 #define CKSUMTYPE_KG_CB		0x8003
@@ -191,7 +194,9 @@ typedef struct _krb5_gss_ctx_id_rec {
        1 => draft-ietf-krb-wg-gssapi-cfx-01
        No others defined so far.  */
    int proto;
-   krb5_cksumtype cksumtype;
+   krb5_cksumtype cksumtype;	/* for "main" subkey */
+   krb5_keyblock *acceptor_subkey; /* CFX only */
+   krb5_cksumtype acceptor_subkey_cksumtype;
 } krb5_gss_ctx_id_rec, *krb5_gss_ctx_id_t;
 
 extern void *kg_vdb;
