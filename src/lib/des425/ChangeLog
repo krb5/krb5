@@ -1,3 +1,7 @@
+Mon Jun  5 21:02:37 1995  Ezra Peisach  (epeisach@kangaroo.mit.edu)
+
+	* quad_cksum: Convert longs to KRB_INT32 for 64 bit platforms.
+
 Fri May 26 21:43:52 1995  Theodore Y. Ts'o  (tytso@dcl)
 
 	* util.c: Added new function, des_cblock_print_file(), which is

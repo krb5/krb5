@@ -88,6 +88,20 @@
 /* Application include files */
 #include "k5-int.h"
 #include "des.h"
+
+
+#ifndef KRB_INT32
+#if (SIZEOF_LONG == 4)
+#define KRB_INT32 long
+#elif (SIZEOF_INT == 4)
+#define KRB_INT32 int
+#elif (SIZEOF_SHORT == 4)
+#define KRB_INT32 short
+#else
+  ?== No 32 bit type available
+#endif
+#endif /* !KRB_INT32 */
+
 /* Definitions for byte swapping */
 
 /* vax byte order is LSB first. This is not performance critical, and
@@ -110,7 +124,7 @@ unsigned long
 des_quad_cksum(in,out,length,out_count,c_seed)
     mit_des_cblock *c_seed;		/* secret seed, 8 bytes */
     unsigned char *in;		/* input block */
-    unsigned long *out;		/* optional longer output */
+    unsigned KRB_INT32 *out;		/* optional longer output */
     int out_count;		/* number of iterations */
     long length;		/* original length in bytes */
 {
@@ -122,12 +136,12 @@ des_quad_cksum(in,out,length,out_count,c_seed)
      * checksum is written unto the address pointed to.
      */
 
-    register unsigned long z;
-    register unsigned long z2;
-    register unsigned long x;
-    register unsigned long x2;
+    register unsigned KRB_INT32 z;
+    register unsigned KRB_INT32 z2;
+    register unsigned KRB_INT32 x;
+    register unsigned KRB_INT32 x2;
     register unsigned char *p;
-    register long len;
+    register KRB_INT32 len;
     register int i;
 
     /* use all 8 bytes of seed */
