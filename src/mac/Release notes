@@ -235,4 +235,9 @@ Changes in 1.1a3:
 3.1a1
  from tag Mac_GSSKerberos5_3_1a1
  alpha
- 
+
+3.1a2
+ from tag Mac_GSSKerberos5_3_1a2
+ no longer prevents idle sleep
+ override carbon errno with Kerberos Support Library
+ fix NULL prompter crash
