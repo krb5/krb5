@@ -43,7 +43,7 @@ CHECK_SETJMP
 CHECK_DIRENT
 CHECK_FCNTL
 CHECK_WAIT_TYPE
-AC_HEADER_CHECK(termios.h,AC_FUNC_CHECK([tcsetattr],AC_DEFINE(POSIX_TERMIOS)))
+AC_HEADER_CHECK(termios.h,AC_FUNC_CHECK([cfsetispeed],AC_DEFINE(POSIX_TERMIOS)))
 KRB_INCLUDE
 CHECK_UTMP
 WITH_KRB5ROOT
@@ -136,7 +136,7 @@ AC_CACHE_VAL(krb5_cv_shadow_pwd,
 krb5_cv_shadow_pwd=yes, krb5_cv_shadow_pwd=no)])
 AC_MSG_RESULT($krb5_cv_shadow_pwd)
 if test $krb5_cv_shadow_pwd = yes; then
-AC_DEFINE(HAS_SHADOW)
+AC_DEFINE(HAVE_SHADOW)
 fi
 dnl
 dnl
