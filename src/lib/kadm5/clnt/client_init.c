@@ -457,7 +457,7 @@ static kadm5_ret_t _kadm5_init_any(char *client_name,
      input_name.value = full_service_name;
      input_name.length = strlen((char *)input_name.value) + 1;
      gssstat = gss_import_name(&minor_stat, &input_name,
-			       gss_nt_krb5_name, &gss_target);
+			       (gss_OID) gss_nt_krb5_name, &gss_target);
      if (gssstat != GSS_S_COMPLETE) {
 	  code = KADM5_GSS_ERROR;
 	  goto error;
@@ -467,7 +467,7 @@ static kadm5_ret_t _kadm5_init_any(char *client_name,
      input_name.value = client_name;
      input_name.length = strlen((char *)input_name.value) + 1;
      gssstat = gss_import_name(&minor_stat, &input_name,
-			       gss_nt_krb5_name, &gss_client);
+			       (gss_OID) gss_nt_krb5_name, &gss_client);
      if (gssstat != GSS_S_COMPLETE) {
 	  code = KADM5_GSS_ERROR;
 	  goto error;
@@ -488,7 +488,7 @@ static kadm5_ret_t _kadm5_init_any(char *client_name,
 						&minor_stat,
 						gss_client_creds,
 						gss_target,
-						gss_mech_krb5,
+						(gss_OID) gss_mech_krb5,
 						GSS_C_MUTUAL_FLAG
 						| GSS_C_REPLAY_FLAG,
 						0,
