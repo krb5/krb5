@@ -29,6 +29,7 @@
  */
 
 #include "k5-int.h"
+#include "os-proto.h"
 #include <stdio.h>
 
 #ifdef KRB5_DNS_LOOKUP	     

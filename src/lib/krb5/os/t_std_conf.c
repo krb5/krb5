@@ -3,7 +3,7 @@
  * 	values from the krb5 config file(s).
  */
 
-#include "krb5.h"
+#include "k5-int.h"
 
 #include <stdio.h>
 #include <string.h>

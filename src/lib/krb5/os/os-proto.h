@@ -55,4 +55,9 @@ krb5_error_code krb5_make_full_ipaddr
 
 #endif /* HAVE_NETINET_IN_H */
 
+int _krb5_use_dns_realm KRB5_PROTOTYPE((krb5_context));
+int _krb5_use_dns_kdc KRB5_PROTOTYPE((krb5_context));
+int _krb5_conf_boolean KRB5_PROTOTYPE((const char *));
+
+
 #endif /* KRB5_LIBOS_INT_PROTO__ */

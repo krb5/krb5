@@ -27,6 +27,7 @@
 
 #define NEED_SOCKETS
 #include "k5-int.h"
+#include "os-proto.h"
 #include "adm_err.h"
 
 #include <stdio.h>
