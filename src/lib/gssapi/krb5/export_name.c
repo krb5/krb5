@@ -33,7 +33,7 @@ OM_uint32 krb5_gss_export_name(OM_uint32  *minor_status,
 {
 	krb5_context context;
 	krb5_error_code code;
-	int length;
+	size_t length;
 	char *str, *cp;
 
 	if (GSS_ERROR(kg_get_context(minor_status, &context)))

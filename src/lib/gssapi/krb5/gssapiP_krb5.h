@@ -214,13 +214,13 @@ krb5_error_code kg_checksum_channel_bindings
 
 krb5_error_code kg_make_seq_num (krb5_context context,
 					   krb5_keyblock *key,
-            int direction, krb5_int32 seqnum, unsigned char *cksum,
+            int direction, krb5_ui_4 seqnum, unsigned char *cksum,
 				unsigned char *buf);
 
 krb5_error_code kg_get_seq_num (krb5_context context,
 					  krb5_keyblock *key,
             unsigned char *cksum, unsigned char *buf, int *direction,
-					  krb5_int32 *seqnum);
+					  krb5_ui_4 *seqnum);
 
 krb5_error_code kg_make_seed (krb5_context context,
 					krb5_keyblock *key,
@@ -236,7 +236,7 @@ krb5_error_code kg_encrypt (krb5_context context,
 				      krb5_pointer iv,
 				      krb5_pointer in,
 				      krb5_pointer out,
-				      int length);
+				      unsigned int length);
 krb5_error_code
 kg_arcfour_docrypt (const krb5_keyblock *longterm_key , int ms_usage,
 		    const unsigned char *kd_data, size_t kd_data_len,
@@ -248,7 +248,7 @@ krb5_error_code kg_decrypt (krb5_context context,
 				      krb5_pointer iv,
 				      krb5_pointer in,
 				      krb5_pointer out,
-				      int length);
+				      unsigned int length);
 
 OM_uint32 kg_seal (krb5_context context,
 		  OM_uint32 *minor_status,

@@ -33,7 +33,7 @@ kg_make_seq_num(context, key, direction, seqnum, cksum, buf)
      krb5_context context;
      krb5_keyblock *key;
      int direction;
-     krb5_int32 seqnum;
+     krb5_ui_4 seqnum;
      unsigned char *cksum;
      unsigned char *buf;
 {
@@ -70,7 +70,7 @@ krb5_error_code kg_get_seq_num(context, key, cksum, buf, direction, seqnum)
      unsigned char *cksum;
      unsigned char *buf;
      int *direction;
-     krb5_int32 *seqnum;
+     krb5_ui_4 *seqnum;
 {
    krb5_error_code code;
    unsigned char plain[8];

@@ -1,3 +1,21 @@
+2002-11-15  Ezra Peisach  <epeisach@bu.edu>
+
+	* accept_sec_context.c (krb5_gss_accept_sec_context): Use unsigned
+	lengths for arguments to g_token_size and g_make_token_header.
+
+	* export_name.c (krb5_gss_export_name): Change local length
+	variable to unsigned.
+
+	* k5unseal.c (kg_unseal_v1): Seqnum variable changed from
+	krb5_int32 to krb5_ui_4.
+
+	* k5seal.c (make_seal_token_v1): Change seqnum argument to
+	krb5_ui_4 from krb5_int32 to match krb5_gss_ctx_id_rec struct.
+
+	* gssapiP_krb5.h, util_crypt.c, util_seqnum.c: kg_make_seq_num(),
+	kg_get_seq_num() changed to use krb5_ui_4 for sequence
+	numbers. kg_encrypt(), kg_decrypt() length argument now unsigned.
+
 2002-10-07  Sam Hartman  <hartmans@mit.edu>
 
 	* Makefile.in :  Add install-headers support

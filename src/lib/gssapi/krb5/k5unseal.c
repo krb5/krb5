@@ -83,7 +83,7 @@ kg_unseal_v1(context, minor_status, ctx, ptr, bodysize, message_buffer,
     int cksum_len = 0;
     int plainlen;
     int direction;
-    krb5_int32 seqnum;
+    krb5_ui_4 seqnum;
     OM_uint32 retval;
     size_t sumlen;
     krb5_keyusage sign_usage = KG_USAGE_SIGN;

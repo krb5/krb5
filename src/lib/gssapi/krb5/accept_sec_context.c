@@ -842,7 +842,8 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
    }
 
    if (cred && (gss_flags & GSS_C_MUTUAL_FLAG)) {
-       int tmsglen, toktype;
+       unsigned int tmsglen;
+       int toktype;
 
        /*
 	* The client is expecting a response, so we can send an

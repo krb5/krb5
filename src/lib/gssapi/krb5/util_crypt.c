@@ -98,7 +98,7 @@ kg_encrypt(context, key, usage, iv, in, out, length)
      krb5_pointer iv;
      krb5_pointer in;
      krb5_pointer out;
-     int length;
+     unsigned int length;
 {
    krb5_error_code code;
    size_t blocksize;
@@ -142,7 +142,7 @@ kg_decrypt(context, key, usage, iv, in, out, length)
      krb5_pointer iv;
      krb5_pointer in;
      krb5_pointer out;
-     int length;
+     unsigned int length;
 {
    krb5_error_code code;
    size_t blocksize;
