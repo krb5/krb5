@@ -4,7 +4,8 @@
 	when extracting from autoconf.h.  Don't look for HAVE_ or USE_
 	symbols.  Add ${include_xom} to the prologue.
 	(include_xom): New variable.
-	* gssapi.h: Always include stddef.h unconditionally.
+	* gssapi.hin: Always include stddef.h unconditionally.  Don't
+	conditionally include xom.h here.
 	(GSS_SIZEOF_INT, GSS_SIZEOF_LONG, GSS_SIZEOF_SHORT): Don't
 	define.
 

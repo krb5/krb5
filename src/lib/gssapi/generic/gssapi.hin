@@ -62,13 +62,6 @@ extern "C" {
 #include <sys/types.h>
 
 /*
- * If the platform supports the xom.h header file, it should be included here.
- */
-#if	HAVE_XOM_H
-#include <xom.h>
-#endif	/* HAVE_XOM_H */
-
-/*
  * $Id$
  */
 
