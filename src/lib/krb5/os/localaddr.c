@@ -300,16 +300,6 @@ krb5_os_localaddr (krb5_context context, krb5_address ***addr) {
     if (*addr == NULL)
         return ENOMEM;
 
-#ifdef HAVE_MACSOCK_H
-    hostrec = getmyipaddr();
-    /*
-     * XXX This error code is not right, but we have nothing better.
-     * This will get fixed when we eventually replace the entire
-     * Macintosh socket emulation layer.
-     */
-    if (!hostrec)
-	    return ENOMEM;
-#else /* HAVE_MACSOCK_H */
     err = 0;
     
     if (gethostname (host, sizeof(host))) {
@@ -328,7 +318,6 @@ krb5_os_localaddr (krb5_context context, krb5_address ***addr) {
 	    if (!hostrec)
 		    return err;
     }
-#endif /* HAVE_MACSOCK_H */
 
     (*addr)[0] = calloc (1, sizeof(krb5_address));
     if ((*addr)[0] == NULL) {
