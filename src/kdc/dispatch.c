@@ -46,7 +46,6 @@ dispatch(pkt, from, is_secondary, response)
 
     krb5_error_code retval;
     krb5_kdc_req *as_req;
-    krb5_kdc_req *tgs_req;
 
     /* decode incoming packet, and dispatch */
 
@@ -59,10 +58,7 @@ dispatch(pkt, from, is_secondary, response)
     /* try TGS_REQ first; they are more common! */
 
     if (krb5_is_tgs_req(pkt)) {
-	if (!(retval = decode_krb5_tgs_req(pkt, &tgs_req))) {
-	    retval = process_tgs_req(tgs_req, from, is_secondary, response);
-	    krb5_free_kdc_req(tgs_req);
-	}
+	retval = process_tgs_req(pkt, from, is_secondary, response);
     } else if (krb5_is_as_req(pkt)) {
 	if (!(retval = decode_krb5_as_req(pkt, &as_req))) {
 	    retval = process_as_req(as_req, from, is_secondary, response);
