@@ -647,7 +647,7 @@ P_KRB4_COMPAT=-UKrb4Compat
       FILE_MANDIR = FileMandir
       KRB5_LIBDIR = Krb5Libdir
       KRB5_INCDIR = Krb5Incdir
-  KRB5_INCSUBDIRS = concat(Krb5Incdir,/krb5) \
-                    concat(Krb5Incdir,/krb5/asn.1) \
-                    concat(Krb5Incdir,/kerberosIV)
+  KRB5_INCSUBDIRS = Concat(Krb5Incdir,/krb5) \
+                    Concat(Krb5Incdir,/krb5/asn.1) \
+                    Concat(Krb5Incdir,/kerberosIV)
  KRB5_OTHERMKDIRS = Krb5Othermkdirs
