@@ -1,7 +1,16 @@
+Thu Sep 29 17:55:57 1994  Mark Eichin  (eichin@tweedledumber.cygnus.com)
+
+	* krlogin.c (mode): ifdef VLNEXT instead of svr4 for ^V fixing.
+	(doit): ditto.
+	krlogin.c, configure.in: include sys/tty.h and sys/ttold.h only if
+	they're both there. 
+
+
 Wed Sep 28 20:57:24 1994  Mark Eichin  (eichin@tweedledumber.cygnus.com)
 
 	* configure.in (srand48): check for srand48, and if it exists,
 	substitute it for srandom (and lrand48 for random.)
+	(K4LIB): add libdes.a, needed for des_pcbc_encrypt.
 
 Wed Sep 28 14:36:29 1994  Mark Eichin  (eichin@rtl.cygnus.com)
 

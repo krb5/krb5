@@ -87,7 +87,8 @@ char copyright[] =
 /****** MWE *****/
 
 /****** MWE *****/
-#ifdef __svr4__
+/* formerly __svr4__ but that's not defined by suncc */
+#if defined(HAVE_SYS_TTY_H) && defined(HAVE_SYS_TTOLD_H)
 #include <sys/tty.h>
 #include <sys/ttold.h>
 #ifdef HAVE_SYS_PTYVAR_H
@@ -707,7 +708,8 @@ doit(oldmask)
 {
 #ifdef POSIX_TERMIOS
 	(void) tcgetattr(0, &deftty);
-#ifdef __svr4__
+/* was __svr4__ */
+#ifdef VLNEXT
 	/* there's a POSIX way of doing this, but do we need it general? */
 	deftty.c_cc[VLNEXT] = 0;
 #endif
@@ -1334,7 +1336,8 @@ mode(f)
 		break;
 	case 1:
 		(void) tcgetattr(0, &newtty);
-#ifdef __svr4__
+/* was __svr4__ */
+#ifdef VLNEXT
 	/* there's a POSIX way of doing this, but do we need it general? */
 		newtty.c_cc[VLNEXT] = 0;
 #endif
