@@ -19,6 +19,9 @@
 #include <sys/select.h>
 #endif
 
+/* define it for now */
+#define POSIX_SIGNALS
+
 #include <stdio.h>
 #include <string.h>
 #include <sys/types.h>
@@ -43,6 +46,12 @@
 #include <krb_db.h>
 #include "com_err.h"
 #include "kadm_server.h"
+
+#ifdef POSIX_SIGTYPE
+#define SIGNAL_RETURN return
+#else
+#define SIGNAL_RETURN return(0)
+#endif
 
 /* Almost all procs and such need this, so it is global */
 admin_params prm;		/* The command line parameters struct */
@@ -190,11 +199,7 @@ doexit(sig)
 	int sig;
 {
     exit_now = 1;
-#ifdef POSIX_SIGNALS
-    return;
-#else /* !POSIX */
-    return(0);
-#endif /* POSIX */
+    SIGNAL_RETURN;
 }
    
 unsigned pidarraysize = 0;
@@ -217,14 +222,29 @@ kadm_listen()
     void process_client(), kill_children();
     int pid;
     krb5_sigtype do_child();
+#ifdef POSIX_SIGNALS
+    struct sigaction new_act;
 
-    (void) signal(SIGINT, doexit);
-    (void) signal(SIGTERM, doexit);
-    (void) signal(SIGHUP, doexit);
-    (void) signal(SIGQUIT, doexit);
-    (void) signal(SIGPIPE, SIG_IGN); /* get errors on write() */
-    (void) signal(SIGALRM, doexit);
-    (void) signal(SIGCHLD, do_child);
+    new_act.sa_handler = doexit;
+    sigemptyset(&new_act.sa_mask);
+    sigaction(SIGINT, &new_act, 0);
+    sigaction(SIGTERM, &new_act, 0);
+    sigaction(SIGHUP, &new_act, 0);
+    sigaction(SIGQUIT, &new_act, 0);
+    sigaction(SIGALRM, &new_act, 0);
+    new_act.sa_handler = SIG_IGN;
+    sigaction(SIGPIPE, &new_act, 0);
+    new_act.sa_handler = do_child;
+    sigaction(SIGCHLD, &new_act, 0);
+#else
+    signal(SIGINT, doexit);
+    signal(SIGTERM, doexit);
+    signal(SIGHUP, doexit);
+    signal(SIGQUIT, doexit);
+    signal(SIGPIPE, SIG_IGN); /* get errors on write() */
+    signal(SIGALRM, doexit);
+    signal(SIGCHLD, do_child);
+#endif
 
     if ((admin_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
 	return KADM_NO_SOCK;
@@ -461,11 +481,7 @@ do_child(sig)
 		       pid, status.w_termsig, status.w_coredump, status.w_retcode);
 
 #endif
-#ifdef POSIX_SIGNALS
-	    return;
-#else /* !POSIX */
-	    return(0);
-#endif /* POSIX */
+	    SIGNAL_RETURN;
 	}
     unknown_child = pid;
 #ifdef WAIT_USES_INT
@@ -477,11 +493,7 @@ do_child(sig)
 	   pid, status.w_termsig, status.w_coredump, status.w_retcode);
 
 #endif
-#ifdef POSIX_SIGNALS
-    return;
-#else /* !POSIX */
-    return(0);
-#endif /* POSIX */
+    SIGNAL_RETURN;
 }
 
 #ifndef DEBUG

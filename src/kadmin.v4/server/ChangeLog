@@ -1,3 +1,10 @@
+Sat Apr 29 00:34:01 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* admin_server.c (kadm_listen): Use Posix sigaction() instead of
+		signal() to set signal handlers.  This allows us not to
+		worry about System V signal semantics.  Make the code use 
+		POSIX_SIGNALS by default.
+
 Fri Apr 28 18:08:05 1995  Mark Eichin  <eichin@cygnus.com>
 
 	* Makefile.in (KLIB): put KRB4_LIB inside KLIB.
