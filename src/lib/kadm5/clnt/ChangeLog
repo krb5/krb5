@@ -1,3 +1,7 @@
+2001-11-05  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (LIBMAJOR): Bump to avoid Heimdal conflict.
+
 2000-05-11  Nalin Dahyabhai  <nalin@redhat.com>
 
 	* clnt_chpass_util.c (kadm5_chpass_principal_util): Adjust for new

@@ -1,3 +1,7 @@
+2001-11-05  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (LIBMAJOR): Bump to avoid Heimdal conflict.
+
 2001-10-22  Tom Yu  <tlyu@mit.edu>
 
 	* svr_principal.c (kadm5_decrypt_key): For now, coerce enctype of
