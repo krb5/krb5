@@ -204,27 +204,33 @@ os_get_default_config_files(pfiles, secure)
 {
     profile_filespec_t* files;
 #ifdef macintosh
-	files = malloc(5 * sizeof(FSSpec));
+	files = malloc(7 * sizeof(FSSpec));
 
     if (files != 0) {
-    	OSErr err = GetMacProfileFileSpec(&(files [2]), "\pKerberos5 Configuration", kApplicationSupportFolderType);
+    	OSErr err = GetMacProfileFileSpec(&(files [3]), "\pKerberos Preferences", kApplicationSupportFolderType);
 		if (err == noErr) {
-			err = GetMacProfileFileSpec( &(files [3]), "\pkrb5.ini", kApplicationSupportFolderType);
+			err = GetMacProfileFileSpec( &(files [4]), "\pkrb5.ini", kApplicationSupportFolderType);
 		}
-    
-    	if (err == noErr) {
-			files[4].vRefNum = 0;
-			files[4].parID = 0;
-			files[4].name[0] = '\0';
-		} else {
-			files[2].vRefNum = 0;
-			files[2].parID = 0;
-			files[2].name[0] = '\0';
+    		if (err == noErr) {
+			err = GetMacProfileFileSpec( &(files [5]), "\pKerberos5 Configuration", kApplicationSupportFolderType);
 		}
 
-		err = GetMacProfileFileSpec(&(files [0]), "\pKerberos5 Configuration", kPreferencesFolderType);
+    	if (err == noErr) {
+			files[6].vRefNum = 0;
+			files[6].parID = 0;
+			files[6].name[0] = '\0';
+		} else {
+			files[3].vRefNum = 0;
+			files[3].parID = 0;
+			files[3].name[0] = '\0';
+		}
+
+		err = GetMacProfileFileSpec(&(files [0]), "\pKerberos Preferences", kPreferencesFolderType);
 		if (err == noErr) {
 			err = GetMacProfileFileSpec( &(files [1]), "\pkrb5.ini", kPreferencesFolderType);
+		}
+		if (err == noErr) {
+			err = GetMacProfileFileSpec( &(files [2]), "\pKerberos5 Configuration", kPreferencesFolderType);
 		}
 		
 		if (err != noErr) {
