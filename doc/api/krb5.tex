@@ -375,12 +375,16 @@ ENC-TKT-IN-SKEY ticket.
 The \funcparam{outbuf} buffer storage is allocated, and should be freed
 by the caller when finished.
 
-Returns system errors.
+On an error return, the credentials pointed to by \funcparam{creds}
+might have been augmented with additional fields from the obtained
+credentials; the entire credentials should be released by calling
+\funcname{krb5_free_creds}.
 
+Returns system errors.
 
 \begin{funcdecl}{krb5_rd_req_simple}{krb5_error_code}{\funcin}
 \funcarg{const krb5_data *}{inbuf}
-\funcarg{const krb5_principal}{server}
+\funcarg{krb5_const_principal}{server}
 \funcarg{const krb5_address *}{sender_addr}
 \funcout
 \funcarg{krb5_tkt_authent *}{authdat}
