@@ -119,7 +119,7 @@ int *size_return;
     /* fgets always null-terminates the returned string */
 
     /* replace newline with null */
-    if (ptr = index(return_pwd, '\n'))
+    if (ptr = strchr(return_pwd, '\n'))
 	*ptr = '\0';
     else /* flush rest of input line */
 	do {
@@ -146,7 +146,7 @@ int *size_return;
 	}
 	(void) putchar('\n');
 
-	if (ptr = index(readin_string, '\n'))
+	if (ptr = strchr(readin_string, '\n'))
 	    *ptr = '\0';
         else /* need to flush */
 	    do {

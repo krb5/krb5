@@ -89,7 +89,7 @@ char ***realmsp;
 
     if (!(retrealms = (char **)calloc(2, sizeof(*retrealms))))
 	return ENOMEM;
-    domain = index(host, '.');
+    domain = strchr(host, '.');
 
     /* prepare default */
     if (domain) {

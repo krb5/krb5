@@ -105,11 +105,11 @@ char ***hostlist;
 		break;
 	    }
 	    /* chop off remainder of line */
-	    if (cp = index(rethlist[hlindex], ' '))
+	    if (cp = strchr(rethlist[hlindex], ' '))
 		*cp = '\0';
-	    if (cp = index(rethlist[hlindex], '\t'))
+	    if (cp = strchr(rethlist[hlindex], '\t'))
 		*cp = '\0';
-	    if (cp = index(rethlist[hlindex], '\n'))
+	    if (cp = strchr(rethlist[hlindex], '\n'))
 		*cp = '\0';
 	    if (++hlindex >= hlsize) {
 		/* need larger pointer array */

@@ -110,7 +110,7 @@ const char *luser;
 	linebuf[BUFSIZ-1] = '\0';
 	newline = NULL;
 	/* nuke the newline if it exists */
-	if (newline = index(linebuf, '\n'))
+	if (newline = strchr(linebuf, '\n'))
 	    *newline = '\0';
 	if (!strcmp(linebuf, princname)) {
 	    isok = TRUE;
