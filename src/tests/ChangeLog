@@ -1,3 +1,7 @@
+Wed Jul 30 18:28:06 1997  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in: Add "create" directory back.
+
 Fri Jul 19 15:31:22 1996  Marc Horowitz  <marc@mit.edu>
 
 	* Makefile.in (CFLAGS): the tests in Makefile.in have been
