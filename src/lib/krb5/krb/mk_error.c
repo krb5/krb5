@@ -20,6 +20,8 @@ static char rcsid_mk_error_c [] =
 #include <krb5/krb5.h>
 #include <krb5/asn1.h>
 
+#include <krb5/ext-proto.h>
+
 /*
  formats the error structure *dec_err into an error buffer *enc_err.
 
@@ -31,7 +33,14 @@ static char rcsid_mk_error_c [] =
 krb5_error_code
 krb5_mk_error(dec_err, enc_err)
 krb5_error *dec_err;
-krb5_data **enc_err;
+krb5_data *enc_err;
 {
-    return (encode_krb5_error(dec_err, enc_err));
+    krb5_error_code retval;
+    krb5_data *new_enc_err;
+
+    if (retval = encode_krb5_error(dec_err, &new_enc_err))
+	return(retval);
+    *enc_err = *new_enc_err;
+    (void)free((char *)new_enc_err);
+    return 0;
 }
