@@ -19,8 +19,6 @@ rotate_left (void *ptr, size_t bufsiz, size_t rc)
 
     if (bufsiz == 0)
 	return 1;
-    if ((rc & 0xffff) != rc)
-	abort();
     rc = rc % bufsiz;
     if (rc == 0)
 	return 1;
@@ -49,6 +47,7 @@ _log_block(const char *file, int line, const char *label,
     int i, j;
     if (strrchr(file, '/'))
 	file = 1 + strrchr(file, '/');
+#if 0
     _log("%s:%d: %s: %d at %p\n", file, line, label, len, vptr);
     for (i = 0; i < (len + 7) / 8; i++) {
 	unsigned char *base = (i * 8) + (unsigned char *)vptr;
@@ -57,6 +56,9 @@ _log_block(const char *file, int line, const char *label,
 	    sprintf(b+strlen(b), " %02x", base[j]);
 	_log("\t\t%04x/@%p:%s\n", 8 * i, base, b);
     }
+#else
+    _log("%s:%d: %s: %d at %p [omitted]\n", file, line, label, len, vptr);
+#endif
 }
 
 krb5_error_code
@@ -113,7 +115,6 @@ gss_krb5int_make_seal_token_v3 (krb5_context context,
 	if (ec_max > 0xffff)
 	    ec_max = 0xffff;
 	/* For testing only.  For performance, always set ec = 0.  */
-#define rand() ((rand)() & 0xf)
 	ec = ec_max & rand();
 	_log("%s:%d: ec=%d\n", SFILE, __LINE__, ec);
 	plain.length = message->length + 16 + ec;
