@@ -1620,6 +1620,10 @@ krb5_error_code KRB5_CALLCONV krb5_cc_retrieve_cred_default
 void krb5int_set_prompt_types
 	(krb5_context, krb5_prompt_type *);
 
+krb5_error_code
+krb5int_generate_and_save_subkey (krb5_context, krb5_auth_context,
+				  krb5_keyblock * /* Old keyblock, not new!  */);
+
 /* set and change password helpers */
 
 krb5_error_code krb5int_mk_chpw_req
