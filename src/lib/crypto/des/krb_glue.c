@@ -140,6 +140,33 @@ OLDDECLARG(krb5_pointer, ivec)
 			     MIT_DES_DECRYPT));
 }    
 
+krb5_error_code mit_raw_des_encrypt_func(DECLARG(krb5_const_pointer, in),
+                                         DECLARG(krb5_pointer, out),
+                                         DECLARG(const size_t, size),
+                                         DECLARG(krb5_encrypt_block *, key),
+                                         DECLARG(krb5_pointer, ivec))
+OLDDECLARG(krb5_const_pointer, in)
+OLDDECLARG(krb5_pointer, out)
+OLDDECLARG(const size_t, size)
+OLDDECLARG(krb5_encrypt_block *, key)
+OLDDECLARG(krb5_pointer, ivec)
+{
+   int sumsize;
+
+   /* round up to des block size */
+
+   sumsize =  krb5_roundup(size, sizeof(mit_des_cblock));
+
+   /* assemble crypto input into the output area, then encrypt in place. */
+
+   memset((char *)out, 0, sumsize);
+   memcpy((char *)out, (char *)in, size);
+
+    /* We depend here on the ability of this DES implementation to
+       encrypt plaintext to ciphertext in-place. */
+    return (mit_des_encrypt_f(out, out, sumsize, key, ivec));
+}
+
 krb5_error_code mit_des_encrypt_func(DECLARG(krb5_const_pointer, in),
 				     DECLARG(krb5_pointer, out),
 				     DECLARG(const size_t, size),
@@ -202,6 +229,20 @@ OLDDECLARG(krb5_pointer, ivec)
     return (mit_des_encrypt_f(out, out, sumsize, key, ivec));
 }
 
+krb5_error_code mit_raw_des_decrypt_func(DECLARG(krb5_const_pointer, in),
+                                         DECLARG(krb5_pointer, out),
+                                         DECLARG(const size_t, size),
+                                         DECLARG(krb5_encrypt_block *, key),
+                                         DECLARG(krb5_pointer, ivec))
+OLDDECLARG(krb5_const_pointer, in)
+OLDDECLARG(krb5_pointer, out)
+OLDDECLARG(const size_t, size)
+OLDDECLARG(krb5_encrypt_block *, key)
+OLDDECLARG(krb5_pointer, ivec)
+{
+   return(mit_des_decrypt_f(in, out, size, key, ivec));
+}
+
 krb5_error_code mit_des_decrypt_func(DECLARG(krb5_const_pointer, in),
 				     DECLARG(krb5_pointer, out),
 				     DECLARG(const size_t, size),
@@ -238,7 +279,7 @@ OLDDECLARG(krb5_pointer, ivec)
 
     if (memcmp((char *)contents_get, (char *)contents_prd, CRC32_CKSUM_LENGTH) )
         return KRB5KRB_AP_ERR_BAD_INTEGRITY;
-    memcpy((char *)out, (char *)out +
+    memmove((char *)out, (char *)out +
 	   sizeof(mit_des_cblock) + CRC32_CKSUM_LENGTH,
 	   size - sizeof(mit_des_cblock) - CRC32_CKSUM_LENGTH);
     return 0;

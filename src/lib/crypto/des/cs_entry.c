@@ -36,7 +36,23 @@ static char rcsid_cs_entry_c[] =
 
 #include "des_int.h"
 
-krb5_cryptosystem_entry mit_des_cryptosystem_entry = {
+static krb5_cryptosystem_entry mit_raw_des_cryptosystem_entry = {
+    mit_raw_des_encrypt_func,
+    mit_raw_des_decrypt_func,
+    mit_des_process_key,
+    mit_des_finish_key,
+    mit_des_string_to_key,
+    mit_des_init_random_key,
+    mit_des_finish_random_key,
+    mit_des_random_key,
+    sizeof(mit_des_cblock),
+    0,
+    sizeof(mit_des_cblock),
+    ETYPE_DES_CBC_CRC,
+    KEYTYPE_DES
+    };
+
+static krb5_cryptosystem_entry mit_des_cryptosystem_entry = {
     mit_des_encrypt_func,
     mit_des_decrypt_func, 
     mit_des_process_key,
@@ -52,10 +68,16 @@ krb5_cryptosystem_entry mit_des_cryptosystem_entry = {
     KEYTYPE_DES
     };
 
+krb5_cs_table_entry krb5_raw_des_cst_entry = {
+    &mit_raw_des_cryptosystem_entry,
+    0
+    };
+
 krb5_cs_table_entry krb5_des_cst_entry = {
     &mit_des_cryptosystem_entry,
     0
     };
+
 extern krb5_error_code mit_des_cbc_checksum PROTOTYPE ((krb5_pointer ,
 							size_t ,
 							krb5_pointer ,
@@ -63,7 +85,7 @@ extern krb5_error_code mit_des_cbc_checksum PROTOTYPE ((krb5_pointer ,
 							krb5_checksum * ));
 
 
-krb5_checksum_entry mit_des_cbc_cksumtable_entry = {
+krb5_checksum_entry krb5_des_cbc_cksumtable_entry = {
     mit_des_cbc_checksum,
     sizeof(mit_des_cblock),
     1,					/* is collision proof */

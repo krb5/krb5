@@ -34,7 +34,7 @@ static char rcsid_cryptoconf_c[] =
 #include <krb5/osconf.h>
 #include <krb5/krb5.h>
 
-#if defined(PROVIDE_DES_CBC_CRC) || defined(PROVIDE_LUCIFER_CRC) || defined(PROVIDE_CRC32)
+#if defined(PROVIDE_DES_CBC_CRC) || defined(PROVIDE_CRC32)
 #include <krb5/crc-32.h>
 #define CRC32_CKENTRY &crc32_cksumtable_entry
 #else
@@ -68,7 +68,7 @@ static char rcsid_cryptoconf_c[] =
 #ifdef PROVIDE_DES_CBC_CKSUM
 #include <krb5/mit-des.h>
 #define _DES_DONE__
-#define DES_CBC_CKENTRY &mit_des_cbc_cksumtable_entry
+#define DES_CBC_CKENTRY &krb5_des_cbc_cksumtable_entry
 #else
 #define DES_CBC_CKENTRY 0
 #endif
@@ -78,20 +78,21 @@ static char rcsid_cryptoconf_c[] =
 #include <krb5/mit-des.h>
 #define _DES_DONE__
 #endif
-static krb5_cs_table_entry mit_des_cbc_crc_csentry = {
-    &mit_des_cryptosystem_entry, 0 };
-#define DES_CBC_CRC_CSENTRY &mit_des_cbc_crc_csentry
+#define DES_CBC_CRC_CSENTRY &krb5_des_cst_entry
 #else
 #define DES_CBC_CRC_CSENTRY 0
 #endif
 
-#ifdef PROVIDE_LUCIFER_CRC
-static krb5_cs_table_entry lucifer_crc_csentry = {
-    &lucifer_cryptosystem_entry, 0 };
-#define LUCIFER_CRC_CSENTRY &lucifer_crc_csentry
-#else
-#define LUCIFER_CRC_CSENTRY 0
+#ifdef PROVIDE_RAW_DES_CBC
+#ifndef _DES_DONE__
+#include <krb5/mit-des.h>
+#define _DES_DONE__
 #endif
+#define RAW_DES_CBC_CSENTRY &krb5_des_cst_entry
+#else
+#define RAW_DES_CBC_CSENTRY 0
+#endif
+
 
 /* WARNING:
    make sure the order of entries in these tables matches the #defines in
@@ -99,31 +100,32 @@ static krb5_cs_table_entry lucifer_crc_csentry = {
  */
 
 krb5_cs_table_entry *krb5_csarray[] = {
-    0,
-    DES_CBC_CRC_CSENTRY,
-    LUCIFER_CRC_CSENTRY,
+    0,				/* ETYPE_NULL */
+    DES_CBC_CRC_CSENTRY,	/* ETYPE_DES_CBC_CRC */
+    0,				/* ETYPE_DES_CBC_MD4 */
+    0,				/* ETYPE_DES_CBC_MD5 */
+    RAW_DES_CBC_CSENTRY,	/* ETYPE_RAW_DES_CBC */
 };
 
 int krb5_max_cryptosystem = sizeof(krb5_csarray)/sizeof(krb5_csarray[0]) - 1;
 
 krb5_cs_table_entry *krb5_keytype_array[] = {
-    0,
-    DES_CBC_CRC_CSENTRY,
-    LUCIFER_CRC_CSENTRY,
+    0,				/* KEYTYPE_NULL */
+    DES_CBC_CRC_CSENTRY		/* KEYTYPE_DES */
 };
 
 int krb5_max_keytype = sizeof(krb5_keytype_array)/sizeof(krb5_keytype_array[0]) - 1;
 
 krb5_checksum_entry *krb5_cksumarray[] = {
     0,
-    CRC32_CKENTRY,
-    MD4_CKENTRY,
-    MD4_DES_CKENTRY,
-    DES_CBC_CKENTRY,
-    0,
-    0,
-    MD5_CKENTRY,
-    MD5_DES_CKENTRY
+    CRC32_CKENTRY,		/* CKSUMTYPE_CRC32 */
+    MD4_CKENTRY,		/* CKSUMTYPE_RSA_MD4 */
+    MD4_DES_CKENTRY,		/* CKSUMTYPE_RSA_MD4_DES */
+    DES_CBC_CKENTRY,		/* CKSUMTYPE_DESCBC */
+    0,				/* des-mac */
+    0,				/* des-mac-k */
+    MD5_CKENTRY,		/* CKSUMTYPE_RSA_MD5 */
+    MD5_DES_CKENTRY		/* CKSUMTYPE_RSA_MD5_DES */
 };
 
 int krb5_max_cksum = sizeof(krb5_cksumarray)/sizeof(krb5_cksumarray[0]);

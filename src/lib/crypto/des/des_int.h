@@ -122,12 +122,6 @@ extern int mit_des_ecb_encrypt
     PROTOTYPE((unsigned long *, unsigned long *, mit_des_key_schedule , int ));
 
 /* enc_dec.c */
-extern krb5_error_code mit_des_encrypt_func
-    PROTOTYPE(( krb5_const_pointer, krb5_pointer, const size_t,
-	       krb5_encrypt_block *, krb5_pointer ));
-extern krb5_error_code mit_des_decrypt_func
-    PROTOTYPE(( krb5_const_pointer, krb5_pointer, const size_t,
-	       krb5_encrypt_block *, krb5_pointer ));
 extern krb5_error_code mit_des_cbc_encrypt
     PROTOTYPE((krb5_octet *, krb5_octet *, long, mit_des_key_schedule,
 	       krb5_octet *, int));
@@ -151,6 +145,20 @@ extern int mit_des_check_key_parity PROTOTYPE((mit_des_cblock ));
 /* key_sched.c */
 extern int mit_des_key_sched
     PROTOTYPE((mit_des_cblock , mit_des_key_schedule ));
+
+/* krb_glue.c */
+extern krb5_error_code mit_raw_des_encrypt_func
+    PROTOTYPE(( krb5_const_pointer, krb5_pointer, const size_t,
+               krb5_encrypt_block *, krb5_pointer ));
+extern krb5_error_code mit_des_encrypt_func
+    PROTOTYPE(( krb5_const_pointer, krb5_pointer, const size_t,
+               krb5_encrypt_block *, krb5_pointer ));
+extern krb5_error_code mit_raw_des_decrypt_func
+    PROTOTYPE(( krb5_const_pointer, krb5_pointer, const size_t,
+               krb5_encrypt_block *, krb5_pointer ));
+extern krb5_error_code mit_des_decrypt_func
+    PROTOTYPE(( krb5_const_pointer, krb5_pointer, const size_t,
+               krb5_encrypt_block *, krb5_pointer ));
 
 /* new_rnd_key.c */
 extern int mit_des_new_random_key
