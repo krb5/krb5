@@ -1,3 +1,8 @@
+1999-09-14  Danilo Almeida  <dalmeida@mit.edu>
+
+	* win-pre.in: Fix DNS error messages to wshelper instead of
+	version server.
+
 1999-09-08  Danilo Almeida  <dalmeida@mit.edu>
 
 	* win-pre.in: Fix DNS flags it does not try to depend on mit dir.

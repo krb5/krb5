@@ -119,11 +119,11 @@ LINKOPTS2=-incremental:no $(LOPTS) -nologo
 
 !if defined(KRB5_USE_DNS)
 !if !defined(DNS_INC)
-!message Must define DNS_INC to point to version server include dir!
+!message Must define DNS_INC to point to wshelper includes dir!
 !error
 !endif
 !if !defined(DNS_LIB)
-!message Must define DNS_LIB to point to version server library!
+!message Must define DNS_LIB to point to wshelper library!
 !error
 !endif
 DNSLIBS=$(DNS_LIB)
