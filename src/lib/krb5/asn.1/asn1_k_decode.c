@@ -541,7 +541,9 @@ asn1_error_code asn1_decode_kdc_req(asn1buf *buf, krb5_kdc_req *val)
 asn1_error_code asn1_decode_kdc_req_body(asn1buf *buf, krb5_kdc_req *val)
 {
   setup();
-  { begin_structure();
+  { 
+    krb5_principal psave;
+    begin_structure();
     get_field(val->kdc_options,0,asn1_decode_kdc_options);
     if(tagnum == 1){ alloc_field(val->client,krb5_principal_data); }
     opt_field(val->client,1,asn1_decode_principal_name,NULL);
@@ -550,7 +552,19 @@ asn1_error_code asn1_decode_kdc_req_body(asn1buf *buf, krb5_kdc_req *val)
     if(val->client != NULL){
       retval = asn1_krb5_realm_copy(val->client,val->server);
       if(retval) return retval; }
+
+    /* If opt_field server is missing, memory reference to server is
+       lost and results in memory leak */
+    psave = val->server;
     opt_field(val->server,3,asn1_decode_principal_name,NULL);
+    if(val->server == NULL){
+      if(psave->realm.data) {
+	free(psave->realm.data);
+	psave->realm.data = NULL;
+	psave->realm.length=0;
+      }
+      free(psave);
+    }
     opt_field(val->from,4,asn1_decode_kerberos_time,0);
     get_field(val->till,5,asn1_decode_kerberos_time);
     opt_field(val->rtime,6,asn1_decode_kerberos_time,0);
