@@ -187,6 +187,51 @@ void update_ok_file (file_name)
 	return;
 }
 
+
+/*
+ * Reads a name (actually, any string) of the specified length,
+ * containing any characters, and the character following the string.
+ * Returns a negative number if the specified number of characters
+ * can't be read or if the character following them isn't a tab.
+ *
+ * If successful, adds a null to the end of the string and returns the
+ * number of newlines read into it (usually 0).
+ *
+ * There must be enough space in the passed-in buffer for len
+ * characters followed by a null.
+ */
+int read_name(f, buf, len)
+	FILE	*f;
+	char	*buf;
+	int	len;
+{
+	char *ptr;
+	int c;
+	int newlines = 0;
+
+	for (ptr = buf;
+	     (ptr - buf < len) && ((c = fgetc(f)) >= 0);
+	     ptr++) {
+		*ptr = c;
+		if (c == '\n')
+		     newlines++;
+	}
+
+	if (ptr - buf < len)
+	     return -1;
+
+	if ((c = fgetc(f)) < 0)
+	     return -1;
+
+	if (c != '\t')
+	     return -1;
+
+	*ptr = '\0';
+
+	return newlines;
+}
+	
+	
 void load_db(argc, argv)
 	int	argc;
 	char	**argv;
@@ -198,6 +243,7 @@ void load_db(argc, argv)
 	int	salt_len, alt_salt_len;
 	int	i, one;
 	char	*name, *mod_name;
+	int	name_ret;
 	char	*new_dbname;
 	int	ch;
 	int	load_error = 0;
@@ -258,9 +304,9 @@ void load_db(argc, argv)
 		load_error++;
 		goto error_out;
 	}
+	lineno++;
 	for (;;) {
 		int nitems;
-		unsigned int stop_loop = 0;
 
 		lineno++;
 		memset((char *)&entry, 0, sizeof(entry));
@@ -278,14 +324,12 @@ void load_db(argc, argv)
 			com_err(argv[0], errno,
 				"While allocating space for name");
 			load_error++;
-			stop_loop++;
 			goto cleanup;
 		}
 		if (!(mod_name = malloc(mod_name_len+1))) {
 			com_err(argv[0], errno,
 				"While allocating space for mod_name");
 			load_error++;
-			stop_loop++;
 			goto cleanup;
 		}
 		entry.key.length = key_len;
@@ -295,7 +339,6 @@ void load_db(argc, argv)
 			com_err(argv[0], errno,
 				"While allocating space for the key");
 			load_error++;
-			stop_loop++;
 			goto cleanup;
 		    }
 		} 
@@ -306,7 +349,6 @@ void load_db(argc, argv)
 			com_err(argv[0], errno,
 				"While allocating space for alt_key");
 			load_error++;
-			stop_loop++;
 			goto cleanup;
 		    }			
 		}
@@ -316,7 +358,6 @@ void load_db(argc, argv)
 			com_err(argv[0], errno,
 				"While allocating space for the salt");
 			load_error++;
-			stop_loop++;
 			goto cleanup;
 		    }
 		}
@@ -327,11 +368,16 @@ void load_db(argc, argv)
 			com_err(argv[0], errno,
 				"While allocating space for the alt_salt");
 			load_error++;
-			stop_loop++;
 			goto cleanup;
 		    }
 		}
-		if (fscanf(f, "%s\t%d\t", name, &tmp1) != 2) {
+		if ((name_ret = read_name(f, name, name_len)) < 0) {
+			fprintf(stderr, "Couldn't parse line #%d\n", lineno);
+			load_error++;
+			break;
+		}
+		lineno += name_ret;
+		if (fscanf(f, "%d\t", &tmp1) != 1) {
 			fprintf(stderr, "Couldn't parse line #%d\n", lineno);
 			load_error++;
 			break;
@@ -349,16 +395,25 @@ void load_db(argc, argv)
 			}
 			entry.key.contents[i] = tmp1;
 		}
-		if (fscanf(f,
-	    "\t%u\t%u\t%u\t%u\t%u\t%u\t%u\t%u\t%u\t%u\t%s\t%u\t%u\t%u\t",
+		if (fscanf(f, "\t%u\t%u\t%u\t%u\t%u\t%u\t%u\t%u\t%u\t%u\t",
 			   &tmp1, &entry.max_life, &entry.max_renewable_life,
 			   &tmp2, &entry.expiration, &entry.pw_expiration,
 			   &entry.last_pwd_change, &entry.last_success,
-			   &entry.last_failed, &entry.fail_auth_count, 
-			   mod_name, &entry.mod_date,
-			   &entry.attributes, &stype) != 14) {
+			   &entry.last_failed, &entry.fail_auth_count) != 10) {
 			fprintf(stderr, "Couldn't parse line #%d\n",
 				lineno);
+			load_error++;
+			break;
+		}
+		if ((name_ret = read_name(f, mod_name, mod_name_len)) < 0) {
+			fprintf(stderr, "Couldn't parse line #%d\n", lineno);
+			load_error++;
+			break;
+		}
+		lineno += name_ret;
+		if (fscanf(f, "%u\t%u\t%u\t",
+			   &entry.mod_date, &entry.attributes, &stype) != 3) {
+			fprintf(stderr, "Couldn't parse line #%d\n", lineno);
 			load_error++;
 			break;
 		}

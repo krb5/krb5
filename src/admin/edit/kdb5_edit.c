@@ -35,6 +35,7 @@
 
 #include <com_err.h>
 #include <stdio.h>
+#include <time.h>
 
 #include "kdb5_edit.h"
 
@@ -1370,6 +1371,7 @@ void show_principal(argc, argv)
     krb5_error_code retval;
     char *pr_name = 0;
     char *pr_mod = 0;
+    time_t mod_date;
     
     if (argc < 2) {
 	com_err(argv[0], 0, "Too few arguments");
@@ -1420,8 +1422,8 @@ void show_principal(argc, argv)
     printf("Name: %s\n", pr_name);
     printf("Salt: %d\n", entry.salt_type);
     printf("Alt salt: %d\n", entry.salt_type);
-/* XXX - mod_date is a krb5_timestamp which is krb5_int32, but should be time_t! */
-    printf("Last modified by %s on %s\n", pr_mod, ctime(&entry.mod_date));
+    mod_date = (time_t) entry.mod_date;
+    printf("Last modified by %s on %s\n", pr_mod, ctime(&mod_date));
     
     if (!nprincs) {
 	com_err(argv[0], 0, "Principal '%s' does not exist", argv[1]);

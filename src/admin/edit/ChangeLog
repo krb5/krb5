@@ -1,5 +1,10 @@
 Thu Sep 29 15:52:22 1994  Theodore Y. Ts'o  (tytso@dcl)
 
+	* Makefile.in: Relink executable when libraries change.
+
+	* kdb5_edit.c (show_principal): Pass variable with correct type to
+		ctime().
+
 	* tcl_wrapper.c (doquit):
 	  ss_wrapper.c (main):
 	  kdb5_edit.c:
