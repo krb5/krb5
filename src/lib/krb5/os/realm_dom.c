@@ -98,7 +98,12 @@ krb5_get_realm_domain(realm, domain)
 		    krb5_xfree(realmlist[0]);
 		    krb5_xfree(realmlist);
 		}
-		*domain = NULL;
+		if ((retdomain = malloc(strlen(realm) + 2)) == NULL)
+		    return ENOMEM;
+		strcpy(retdomain, ".");
+		strcat(retdomain, realm); /* return the realm as the domain
+					     if lookup fails */
+		*domain = retdomain;
 		return 0;
 	    }
 	    continue;
