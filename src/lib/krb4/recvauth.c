@@ -252,7 +252,7 @@ char *version;			 /* version string (filled in) */
 			       tmp_buf,
 			       (unsigned KRB4_32) sizeof(cksum),
 			       schedule,
-			       &kdata->session,
+			       kdata->session,
 			       laddr,
 			       faddr);
 	if (priv_len < 0) {

@@ -66,7 +66,7 @@ decrypt_tkt(user, instance, realm, arg, key_proc, cipp)
 #ifndef NOENCRYPTION
     key_sched(key,key_s);
     pcbc_encrypt((C_Block *)cip->dat,(C_Block *)cip->dat,
-		 (long) cip->length,key_s,(C_Block *)&key,0);
+		 (long) cip->length,key_s,(C_Block *)key,0);
 #endif /* !NOENCRYPTION */
     /* Get rid of all traces of key */
     memset((char *)key, 0,sizeof(key));

@@ -1,5 +1,18 @@
 Thu May  4 10:03:22 1995  Tom Yu  (tlyu@dragons-lair)
 
+	* put_svc_key.c (put_svc_key): remove spurious & in front of fkey
+		(it's a char[] and takint address of it is redundant)
+
+	* recvauth.c (krb_recvauth): remove spurious & in front of
+		reference to kdata->session
+
+	* rd_req.c (krb_rd_req): remove spurious & in front of reference
+		to ad->session
+
+	* g_in_tkt.c(decrypt_tkt): remove spurious & in front of reference
+		to key (it is a C_Block and taking address of it is
+		redundant)
+
 	* Makefile.in: new includes target to install krb_err.h in
 		$(BUILDTOP)/include; includes depends on krb_err.h.
 		Previously, it was attempting to install a header that had

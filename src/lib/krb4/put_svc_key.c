@@ -82,7 +82,7 @@ put_svc_key(sfile,name,inst,realm,newvno,key)
                         close(fd);
                         return KFAILURE;
                 }
-                if (read(fd,&fkey,KEYSZ) != KEYSZ) {
+                if (read(fd,fkey,KEYSZ) != KEYSZ) {
                         close(fd);
                         return KFAILURE;
                 }
