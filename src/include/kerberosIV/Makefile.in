@@ -1,4 +1,7 @@
-thisconfigdir=.
+thisconfigdir=./..
+myfulldir=include/kerberosIV
+mydir=kerberosIV
+MY_SUBDIRS=.
 BUILDTOP=$(REL)$(U)$(S)$(U)
 KRB4_HEADERS=krb.h des.h kadm.h mit-copyright.h
 
