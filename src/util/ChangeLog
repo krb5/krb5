@@ -1,3 +1,8 @@
+2001-09-01  Ken Raeburn  <raeburn@mit.edu>
+
+	* depfix.sed: Temporarily add trailing whitespace to make
+	substitutions more regular.  Split lines before writing out.
+
 2001-06-15  Ken Raeburn  <raeburn@mit.edu>
 
 	* getsyms: Fix quoting around find command looking for

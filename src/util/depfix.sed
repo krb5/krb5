@@ -20,11 +20,20 @@ y/	/ /
 s/\\\n */ /
 bFIRST
 }
+# for simplicity, always have a trailing space
+s/$/ /
 s/  */ /g
 
 s;/usr/include/[^ ]* ;;g
 s;/usr/lib/[^ ]* ;;g
 s;/mit/cygnus[^ ]* ;;g
+# now delete trailing whitespace
+s; *$;;g
+
+# Split lines if they're too long.
+s/\(.\{50\}[^ ]*\) /\1 \\\
+  /g
+
 
 #
 # Now insert a trailing newline...
