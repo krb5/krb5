@@ -24,7 +24,7 @@ clean::
 
 NormalProgramTarget(kdb5_edit,$(OBJS),$(DEPLIBS),$(LOCAL_LIBRARIES),)
 
-SaberProgramTarget(kdb5_edit,$(SRCS),$(OBJS),,$(LOCAL_LIBARIES))
+SaberProgramTarget(kdb5_edit,$(SRCS),$(OBJS),$(LOCAL_LIBRARIES),)
 
 depend:: kdb5_ed_ct.c
 
