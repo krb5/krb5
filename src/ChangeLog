@@ -1,5 +1,7 @@
 Wed Jun 29 01:36:38 1994  Tom Yu  (tlyu at dragons-lair)
 
+	* aclocal.m4: oops... fixing some problems with the quoter.
+
 	* aclocal.m4: added ISODE_DEFS to define KRB5_USE_ISODE if
 	--enable-isode is given
 

@@ -46,10 +46,7 @@ if [ -z "${norecursion}" ] ; then
 	recurse_args=
 	recur_state=
 # ok this stuff really belongs in ac_general.m4, but we'll live :-)
-	set foo! "<<<$>>>@"
 	for arg do
-		shift
-		shift
 		if test -z "$recur_state" ; then
 			case $arg in
 				*\"*|*\\*|*\<<<$>>>*)
@@ -57,17 +54,17 @@ if [ -z "${norecursion}" ] ; then
 				;;
 				-srcdir | --srcdir | --srcdi | --srcd | --src | --sr)
 				recur_state="skip"
+				continue
 				;;
 				-srcdir=* | --srcdir=* | --srcdi=* | --srcd=* | --src=* | --sr=*)
 				;;
 			esac
 			# yes this is gross but we need it to make sure that things don't get scrod
-			set foo! "<<<$>>>@" "\"$arg\""
+			recurse_args="$recurse_args \"$arg\""
 		else
 			recur_state=
 		fi
 	done
-	shift
 	for configdir in $1 ; do
 
 		if [ -d ${srcdir}/${configdir} ] ; then
@@ -115,7 +112,7 @@ if [ -z "${norecursion}" ] ; then
 
 ### The recursion line is here.
 			if [ ! -z "${recprog}" ] ; then
-				if eval ${config_shell} ${recprog} "<<<$>>>@" ${srcdiroption}; then
+				if eval ${config_shell} ${recprog} $recurse_args ${srcdiroption}; then
 					true
 				else
 					echo Configure in `pwd` failed, exiting. 1>&2
