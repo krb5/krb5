@@ -1,3 +1,8 @@
+2001-06-21  Ken Raeburn  <raeburn@mit.edu>
+
+	* checksum.c (krb5_dk_make_checksum): Cast 0x99 to char explicitly
+	to silence warnings.
+
 2001-04-10  Ken Raeburn  <raeburn@mit.edu>
 
 	* checksum.c (krb5_dk_make_checksum): Add casts when mixing

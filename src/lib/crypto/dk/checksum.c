@@ -81,7 +81,7 @@ krb5_dk_make_checksum(hash, key, usage, input, output)
     datain.data[2] = (usage>>8)&0xff;
     datain.data[3] = usage&0xff;
 
-    datain.data[4] = 0x99;
+    datain.data[4] = (char) 0x99;
 
     if ((ret = krb5_derive_key(enc, key, &kc, &datain)) != 0)
 	goto cleanup;
