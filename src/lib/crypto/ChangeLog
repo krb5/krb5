@@ -1,3 +1,8 @@
+Tue Sep 22 21:19:01 1998  Tom Yu  <tlyu@mit.edu>
+
+	* prng.c (krb5_c_random_make_octets): Fix to nfold into 15 bytes,
+	not one byte.
+
 Mon Sep 21 15:23:19 1998  Tom Yu  <tlyu@mit.edu>
 
 	* prng.c (krb5_c_random_seed): Fix memory leak.

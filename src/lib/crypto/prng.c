@@ -105,7 +105,7 @@ krb5_c_random_make_octets(krb5_context context, krb5_data *data)
 
 	    /* fold the new output back into the state */
 
-	    krb5_nfold(OUTPUTSIZE*8, OUTPUT, STATESIZE, NEWSTATE);
+	    krb5_nfold(OUTPUTSIZE*8, OUTPUT, STATESIZE*8, NEWSTATE);
 	    memcpy(STATE, NEWSTATE, STATESIZE);
 
 	    random_count = blocksize;
