@@ -30,7 +30,7 @@
           
 #include "fcc.h"
 #include <errno.h>
-#include <krb5/osconf.h>
+#include "k5-int.h"
 
 int krb5_fcc_default_format = KRB5_FCC_DEFAULT_FVNO;
 
@@ -40,8 +40,6 @@ int krb5_fcc_default_format = KRB5_FCC_DEFAULT_FVNO;
  #error find some way to use net-byte-order file version numbers.
 #endif
 
-#include <krb5/libos.h>
-#include <krb5/los-proto.h>
 #include <stdio.h>
 
 #define LOCK_IT 0

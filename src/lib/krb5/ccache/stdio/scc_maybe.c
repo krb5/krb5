@@ -26,16 +26,13 @@
 
 
 #include "scc.h"
-#include <krb5/osconf.h>
+#include "k5-int.h"
 
 #ifdef KRB5_USE_INET
 #include <netinet/in.h>
 #else
  #error find some way to use net-byte-order file version numbers.
 #endif
-
-#include <krb5/libos.h>
-#include <krb5/los-proto.h>
 
 int krb5_scc_default_format = KRB5_SCC_DEFAULT_FVNO;
 

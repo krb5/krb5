@@ -27,7 +27,7 @@
 
 #include "scc.h"
 
-#include <krb5/osconf.h>
+#include "k5-int.h"
 
 #ifdef KRB5_USE_INET
 #include <netinet/in.h>

@@ -24,9 +24,7 @@
  * Registration functions for ccache.
  */
 
-
-#include <krb5/krb5.h>
-#include <krb5/ext-proto.h>
+#include "k5-int.h"
 
 extern krb5_cc_ops *krb5_cc_dfl_ops;
 struct krb5_cc_typelist

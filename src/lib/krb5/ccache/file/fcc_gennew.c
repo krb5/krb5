@@ -26,7 +26,7 @@
 
 
 #include <errno.h>
-#include <krb5/osconf.h>
+#include "k5-int.h"
 #include "fcc.h"
 
 #ifdef KRB5_USE_INET

@@ -25,14 +25,11 @@
  * file-based credential cache routines.
  */
 
-
 #ifndef __KRB5_FILE_CCACHE__
 #define __KRB5_FILE_CCACHE__
 
-#include <krb5/krb5.h>
-#include <krb5/ext-proto.h>
+#include "k5-int.h"
 #include "scc-proto.h"
-#include <krb5/sysincl.h>
 #include <stdio.h>
 
 #define KRB5_OK 0

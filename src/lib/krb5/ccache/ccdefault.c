@@ -24,8 +24,7 @@
  * Find default credential cache
  */
 
-
-#include <krb5/krb5.h>
+#include "k5-int.h"
 
 krb5_error_code krb5_cc_default(context, ccache)
    krb5_context context;

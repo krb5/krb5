@@ -1,3 +1,7 @@
+Tue Feb 28 00:35:55 1995  John Gilmore  (gnu at toad.com)
+
+	* fcc.h, fcc_gennew.c, fcc_maybe.c:  Avoid <krb5/...> includes.
+
 Tue Feb 21 16:14:25 1995  Mark Eichin  (eichin@cygnus.com)
 
 	* configure.in: check for HAVE_FLOCK, since we may need to use
