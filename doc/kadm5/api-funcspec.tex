@@ -765,6 +765,8 @@ local KADM5 client.
 element type
 \item[KADM5_MISSING_CONF_PARAMS] Required parameters in kdc.conf missing
 \item[KADM5_BAD_SERVER_NAME] Bad krb5 admin server hostname
+\item[KADM5_AUTH_SETKEY] Operation requires ``set-key'' privilege
+\item[KADM5_SETKEY_DUP_ENCTYPES] Multiple values for single or folded enctype
 \end{description}
 
 \section{Authentication and Authorization}
@@ -806,6 +808,7 @@ policies; this does not include changing passwords.
 \item[Delete] Able to remove principals and policies.
 \item[List] Able to retrieve a list of principals and policies.
 \item[Changepw] Able to change the password of principals.
+\item[Setkey] Able to set principal keys directly.
 \end{description}
 
 Privileges are specified via an external configuration file on the
@@ -877,6 +880,7 @@ chpass_principal & changepw\footnotemark[\thefootnote] &
 chpass_principal_util & changepw\footnotemark[\thefootnote] & Utility wrapper around chpass_principal. \\
 randkey_principal & changepw\footnotemark[\thefootnote] &
         Randomize a principal's key. \\
+setkey_principal & setkey & Explicitly set a principal's keys. \\
 decrypt_key & none & Decrypt a principal key. \\
 create_policy & add & Create a new policy. \\
 delete_policy & delete & Delete a policy. \\
@@ -1597,6 +1601,73 @@ random password string and with the KRB5_KDB_DISALLOW_ALL_TIX bit set
 in the attributes field.
 
 \item Randomize the principal's key with kadm5_randkey_principal.
+
+\item Call kadm5_modify_principal to reset the
+KRB5_KDB_DISALLOW_ALL_TIX bit in the attributes field.
+\end{enumerate}
+
+The three steps are necessary to ensure secure creation.  Since an
+attacker might be able to guess the initial password assigned by the
+client program, the principal must be disabled until the key can be
+truly randomized.
+
+\subsection{kadm5_setkey_principal}
+
+\begin{verbatim}
+kadm5_ret_t
+kadm5_setkey_principal(void *server_handle, krb5_principal princ,
+                       krb5_keyblock *new_keys, int n_keys)
+\end{verbatim}
+
+AUTHORIZATION REQUIRED: setkey.  This function does not allow the use
+of regular changepw authorization because it bypasses the password
+policy mechanism.
+
+This function only exists in KADM5_API_VERSION_2.
+
+Explicitly sets the specified principal's keys to the n_keys keys in
+the new_keys array.  The keys in new_keys should not be encrypted in
+the Kerberos master key; this function will perform that operation
+itself (the keys will be protected during transmission from the
+calling client to the kadmind server by the AUTH_GSSAPI RPC layer).
+This function completely bypasses the principal's password policy, if
+set.
+
+\begin{enumerate}
+\item If the principal does not exist, return KADM5_UNK_PRINC.
+\item If the principal you are trying to change is kadmin/history return
+KADM5_PROTECT_PRINCIPAL.
+\item If new_keys contains more than one key of any ENCTYPE_DES_CBC_*
+type that is folded, return KADM5_SETKEY_DUP_ENCTYPES.
+\item Store old key in history.
+\item Update principal to have new key.
+\item Increment principal's key version number by one.
+\item If the POLICY bit in aux_attributes is set, set pw_expiration to
+now + max_pw_life.
+\item If the KRB5_KDC_REQUIRES_PWCHANGE bit is set in the principal's
+attributes, clear it.
+\item Update last_pwd_change and mod_date to now, update mod_name to
+caller.
+\end{enumerate}
+
+RETURN CODES:
+
+\begin{description}
+\item[KADM5_UNK_PRINC] Principal does not exist.
+\item[KADM5_PROTECT_PRINCIPAL] Cannot change the password of a special
+principal
+\end{description}
+
+This function can also be used as part of a sequence to create a new
+principal with an explicitly key.  The steps to perform the operation
+securely are
+
+\begin{enumerate}
+\item Create the principal with kadm5_create_principal with a
+random password string and with the KRB5_KDB_DISALLOW_ALL_TIX bit set
+in the attributes field.
+
+\item Set the principal's key with kadm5_setkey_principal.
 
 \item Call kadm5_modify_principal to reset the
 KRB5_KDB_DISALLOW_ALL_TIX bit in the attributes field.
