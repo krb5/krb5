@@ -31,6 +31,7 @@ static char rcsid_fcc_maybe_c[] =
 #endif	/* !lint & !SABER */
 
 #include "fcc.h"
+#include <errno.h>
 #include <krb5/osconf.h>
 
 int krb5_fcc_default_format = KRB5_FCC_DEFAULT_FVNO;
@@ -46,17 +47,20 @@ int krb5_fcc_default_format = KRB5_FCC_DEFAULT_FVNO;
 #include <stdio.h>
 
 #ifdef POSIX_FILE_LOCKS
-#include <errno.h>
+#ifndef unicos61
 #include <fcntl.h>
+#endif /* unicos61 */
 #define SHARED_LOCK	F_RDLCK
 #define EXCLUSIVE_LOCK	F_WRLCK
 #define UNLOCK_LOCK	F_UNLCK
-#else
+#else /* !POSIX_FILE_LOCKS */
+#ifndef sysvimp
 #include <sys/file.h>
+#endif /* sysvimp */
 #define SHARED_LOCK	LOCK_SH
 #define EXCLUSIVE_LOCK	LOCK_EX
 #define UNLOCK_LOCK	LOCK_UN
-#endif
+#endif /* POSIX_FILE_LOCKS */
 
 #define LOCK_IT 0
 #define UNLOCK_IT 1
