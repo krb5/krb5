@@ -164,7 +164,7 @@ extern int mit_des_cbc_encrypt (const mit_des_cblock FAR *in,
 				mit_des_cblock FAR *out,
 				unsigned long length,
 				const mit_des_key_schedule schedule,
-				const mit_des_cblock ivec, int encrypt);
+				const mit_des_cblock ivec, int enc);
     
 /* fin_rndkey.c */
 extern krb5_error_code mit_des_finish_random_key
@@ -244,7 +244,7 @@ extern int mit_des3_ecb_encrypt
 		   mit_des_key_schedule sched1,
 		   mit_des_key_schedule sched2,
 		   mit_des_key_schedule sched3,
-		   int encrypt);
+		   int enc);
 
 /* d3_cbc.c */
 extern int mit_des3_cbc_encrypt
@@ -255,7 +255,7 @@ extern int mit_des3_cbc_encrypt
 	 const mit_des_key_schedule ks2,
 	 const mit_des_key_schedule ks3,
 	 const mit_des_cblock ivec,
-	 int encrypt);
+	 int enc);
 
 /* d3_procky.c */
 extern krb5_error_code mit_des3_process_key

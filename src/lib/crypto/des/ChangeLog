@@ -1,3 +1,8 @@
+2001-05-31  Ezra Peisach  <epeisach@mit.edu>
+
+	* des_int.h (mit_des_cbc_encrypt, mit_des3_ecb_encrypt,
+	mit_des3_cbc_encrypt): Don't use "encrypt" as argument name.
+
 2001-04-12  Ezra Peisach  <epeisach@mit.edu>
 
 	* f_tables.h: Do not define const to nothing on platforms that
