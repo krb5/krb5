@@ -264,3 +264,8 @@ Changes in 1.1a3:
 3.1b2
  from tag Mac_GSSKerberos5_3_1b2
  changes to jam files for Mac OS X build integration
+ 
+3.1fc1
+ from tag Mac_GSSKerberos5_3_1fc1
+ replaced cc_* macros with functions
+ more fixes for Mac OS X build integration
