@@ -189,6 +189,10 @@ errcode_t profile_update_file_data
 errcode_t profile_flush_file_data
 	(prf_data_t data);
 
+#define profile_flush_file_to_file(P,F) (((P) && (P)->magic == PROF_MAGIC_FILE) ? profile_flush_file_data_to_file((P)->data, (F)) : PROF_MAGIC_FILE)
+errcode_t profile_flush_file_data_to_file
+	(prf_data_t data, const char *outfile);
+
 void profile_free_file
 	(prf_file_t profile);
 

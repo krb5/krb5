@@ -1327,6 +1327,31 @@ _wrap_profile_flush(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj
 
 
 static int
+_wrap_profile_flush_to_file(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]) {
+    profile_t arg1 = (profile_t) 0 ;
+    char *arg2 ;
+    errcode_t result;
+    
+    if (SWIG_GetArgs(interp, objc, objv,"os:profile_flush_to_file profile_t path ",0,&arg2) == TCL_ERROR) SWIG_fail;
+    if ((SWIG_ConvertPtr(objv[1], (void **) &arg1, SWIGTYPE_profile_t,SWIG_POINTER_EXCEPTION | 0) != TCL_OK)) SWIG_fail;
+    result = (errcode_t)profile_flush_to_file(arg1,(char const *)arg2);
+    
+    {
+        /* out errcode_t result */
+        if (result) {
+            /* There could be a memory leak here in the SWIG-Tcl layer,
+            	   I'm not sure.  Not going to worry about it though.  */
+            Tcl_SetResult(interp, error_message(result), TCL_STATIC);
+            SWIG_fail;
+        }
+    }
+    return TCL_OK;
+    fail:
+    return TCL_ERROR;
+}
+
+
+static int
 _wrap_profile_abandon(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]) {
     profile_t arg1 = (profile_t) 0 ;
     
@@ -1991,6 +2016,7 @@ static swig_command_info swig_commands[] = {
     { SWIG_prefix "profile_init_path", (swig_wrapper_func) _wrap_profile_init_path, NULL},
     { SWIG_prefix "profile_init", (swig_wrapper_func) _wrap_profile_init, NULL},
     { SWIG_prefix "profile_flush", (swig_wrapper_func) _wrap_profile_flush, NULL},
+    { SWIG_prefix "profile_flush_to_file", (swig_wrapper_func) _wrap_profile_flush_to_file, NULL},
     { SWIG_prefix "profile_abandon", (swig_wrapper_func) _wrap_profile_abandon, NULL},
     { SWIG_prefix "profile_release", (swig_wrapper_func) _wrap_profile_release, NULL},
     { SWIG_prefix "profile_get_values", (swig_wrapper_func) _wrap_profile_get_values, NULL},

@@ -1,3 +1,19 @@
+2004-10-18  Ken Raeburn  <raeburn@mit.edu>
+
+	* prof_file.c (write_data_to_file): New function, split out from
+	profile_flush_file_data.  Add argument can_create indicating
+	whether the old file should already exist or not.
+	(profile_flush_file_data): Call it.
+	(profile_flush_file_data_to_file): New function.
+	* prof_int.h (profile_flush_file_data_to_file): Declare it.
+	(profile_flush_file_to_file): New macro.
+	* prof_init.c (profile_flush_to_file): New function.
+	* profile.hin (profile_flush_to_file): Declare.
+	* profile.swg (profile_flush_to_file): Declare.
+	* profile_tcl.c: Regenerated.
+	* prof_test1: Use profile_flush_to_file instead of profile_flush,
+	and reload from the new filename.
+
 2004-10-15  Ken Raeburn  <raeburn@mit.edu>
 
 	* prof_file.c, prof_int.h, prof_set.c: Remove support for

@@ -132,6 +132,19 @@ profile_flush(profile_t profile)
 	return 0;
 }
 
+errcode_t KRB5_CALLCONV
+profile_flush_to_file(profile_t profile, const_profile_filespec_t outfile)
+{
+	if (!profile || profile->magic != PROF_MAGIC_PROFILE)
+		return PROF_MAGIC_PROFILE;
+
+	if (profile->first_file)
+		return profile_flush_file_to_file(profile->first_file,
+						  outfile);
+
+	return 0;
+}
+
 void KRB5_CALLCONV
 profile_abandon(profile_t profile)
 {

@@ -367,37 +367,26 @@ make_hard_link(const char *oldpath, const char *newpath)
 #endif
 }
 
-errcode_t profile_flush_file_data(prf_data_t data)
+static errcode_t write_data_to_file(prf_data_t data, const char *outfile,
+				    int can_create)
 {
 	FILE		*f;
 	profile_filespec_t new_file;
 	profile_filespec_t old_file;
 	errcode_t	retval = 0;
 
-	if (!data || data->magic != PROF_MAGIC_FILE_DATA)
-		return PROF_MAGIC_FILE_DATA;
-
-	retval = k5_mutex_lock(&data->lock);
-	if (retval)
-	    return retval;
-	
-	if ((data->flags & PROFILE_FILE_DIRTY) == 0) {
-	    k5_mutex_unlock(&data->lock);
-	    return 0;
-	}
-
 	retval = ENOMEM;
 	
 	new_file = old_file = 0;
-	new_file = malloc(strlen(data->filespec) + 5);
+	new_file = malloc(strlen(outfile) + 5);
 	if (!new_file)
 		goto errout;
-	old_file = malloc(strlen(data->filespec) + 5);
+	old_file = malloc(strlen(outfile) + 5);
 	if (!old_file)
 		goto errout;
 
-	sprintf(new_file, "%s.$$$", data->filespec);
-	sprintf(old_file, "%s.bak", data->filespec);
+	sprintf(new_file, "%s.$$$", outfile);
+	sprintf(old_file, "%s.bak", outfile);
 
 	errno = 0;
 
@@ -416,14 +405,19 @@ errcode_t profile_flush_file_data(prf_data_t data)
 	}
 
 	unlink(old_file);
-	if (make_hard_link(data->filespec, old_file) == 0) {
+	if (make_hard_link(outfile, old_file) == 0) {
 	    /* Okay, got the hard link.  Yay.  Now we've got our
 	       backup version, so just put the new version in
 	       place.  */
-	    if (rename(new_file, data->filespec)) {
+	    if (rename(new_file, outfile)) {
 		/* Weird, the rename didn't work.  But the old version
 		   should still be in place, so no special cleanup is
 		   needed.  */
+		retval = errno;
+		goto errout;
+	    }
+	} else if (errno == ENOENT && can_create) {
+	    if (rename(new_file, outfile)) {
 		retval = errno;
 		goto errout;
 	    }
@@ -434,30 +428,66 @@ errcode_t profile_flush_file_data(prf_data_t data)
 #ifndef _WIN32
 	    sync();
 #endif
-	    if (rename(data->filespec, old_file)) {
+	    if (rename(outfile, old_file)) {
 		retval = errno;
 		goto errout;
 	    }
-	    if (rename(new_file, data->filespec)) {
+	    if (rename(new_file, outfile)) {
 		retval = errno;
-		rename(old_file, data->filespec); /* back out... */
+		rename(old_file, outfile); /* back out... */
 		goto errout;
 	    }
 	}
 
 	data->flags = 0;
-	if (rw_access(data->filespec))
+	if (rw_access(outfile))
 		data->flags |= PROFILE_FILE_RW;
 	retval = 0;
-	
+
 errout:
-	k5_mutex_unlock(&data->lock);
 	if (new_file)
 		free(new_file);
 	if (old_file)
 		free(old_file);
 	return retval;
 }
+
+errcode_t profile_flush_file_data(prf_data_t data)
+{
+	errcode_t	retval = 0;
+
+	if (!data || data->magic != PROF_MAGIC_FILE_DATA)
+		return PROF_MAGIC_FILE_DATA;
+
+	retval = k5_mutex_lock(&data->lock);
+	if (retval)
+	    return retval;
+	
+	if ((data->flags & PROFILE_FILE_DIRTY) == 0) {
+	    k5_mutex_unlock(&data->lock);
+	    return 0;
+	}
+
+	retval = write_data_to_file(data, data->filespec, 0);
+	k5_mutex_unlock(&data->lock);
+	return retval;
+}
+
+errcode_t profile_flush_file_data_to_file(prf_data_t data, const char *outfile)
+{
+    errcode_t retval = 0;
+
+    if (!data || data->magic != PROF_MAGIC_FILE_DATA)
+	return PROF_MAGIC_FILE_DATA;
+
+    retval = k5_mutex_lock(&data->lock);
+    if (retval)
+	return retval;
+    retval = write_data_to_file(data, outfile, 1);
+    k5_mutex_unlock(&data->lock);
+    return retval;
+}
+
 
 
 void profile_dereference_data(prf_data_t data)

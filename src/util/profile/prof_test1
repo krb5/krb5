@@ -35,10 +35,12 @@ proc test1 {} {
     }
     if $verbose { puts "" }
     #profile_iterator_free $iter
-    profile_flush $p
+    catch {file delete $wd/test3.ini}
+    profile_flush_to_file $p $wd/test3.ini
+    profile_release $p
 
-    if $verbose { puts "Reloading profile" }
-    set p [profile_init_path $wd/test2.ini]
+    if $verbose { puts "Reloading new profile" }
+    set p [profile_init_path $wd/test3.ini]
     set iter [profile_iterator_create $p $sect 0]
     set done 0
     if $verbose { puts "Iterating again:" }

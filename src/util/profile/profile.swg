@@ -151,6 +151,7 @@ typedef struct _profile_t *profile_t;
 errcode_t profile_init_path(const char *path = NULL, profile_t *OUTPUT);
 errcode_t profile_init(const char **nullterm = NULL, profile_t *OUTPUT);
 errcode_t profile_flush(profile_t);
+errcode_t profile_flush_to_file(profile_t, const char *path);
 /* Nota bene: There is nothing at all in this code to prevent a script
    from accessing a profile object after calling one of these routines
    to destroy it!  */
