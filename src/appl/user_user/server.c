@@ -161,7 +161,6 @@ char *argv[];
 #if 1
   if (retval = krb5_mk_req_extended(AP_OPTS_USE_SESSION_KEY,
 			       0,	/* no application checksum here */
-			       &creds.times,
 			       krb5_kdc_default_options,
 			       seqno,
 			       0,	/* no need for subkey */
