@@ -1,19 +1,5 @@
-BUILDTOP=@BUILDTOP@
-srcdir = @srcdir@
-VPATH = @srcdir@
-
-DEFS = @DEFS@
-CC = @CC@
-CCOPTS = @CCOPTS@
-LIBS = @LIBS@
- 
 CFLAGS = $(CCOPTS) $(DEFS)
 LDFLAGS = -g
-
-RM = rm -f
-CP = cp
-
-SRCTOP = $(srcdir)/$(BUILDTOP)
 
 all:: $(OBJS)
 
@@ -78,7 +64,3 @@ SRCS= \
 	$(srcdir)/unlck_file.c	\
 	$(srcdir)/ustime.c	\
 	$(srcdir)/write_msg.c
-
-clean::
-	$(RM) $(OBJS)
-

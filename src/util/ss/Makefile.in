@@ -1,27 +1,8 @@
-BUILDTOP=@BUILDTOP@
-srcdir = @srcdir@
-VPATH = @srcdir@
- 
-DEFS = @DEFS@
-CC = @CC@
-CCOPTS = @CCOPTS@
-LIBS = @LIBS@
- 
 CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
 LDFLAGS = -g
 
-LEX = @LEX@
-LEXLIB = @LEXLIB@
-
-ARCHIVE = @ARCHIVE@
-RANLIB = @RANLIB@
-RM = rm -f
-MV = mv
-
-AWK = @AWK@
 INSTALLLIB=cp
 INSTALLFILE=cp
-CHMOD=chmod
 
 all::
 
@@ -136,7 +117,6 @@ libss.a: $(OBJS)
 
 clean::
 	$(RM) libss.a
-	$(RM) $(OBJS)
 
 install::
 	$(INSTALLLIB) libss.a $(DESTDIR)$(LIBDIR)/libss.a

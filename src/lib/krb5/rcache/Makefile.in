@@ -1,21 +1,5 @@
-BUILDTOP=@BUILDTOP@
-SUBDIRS = @SUBDIRS@
-
-srcdir = @srcdir@
-VPATH = @srcdir@
-
-DEFS = @DEFS@
-CC = @CC@
-CCOPTS = @CCOPTS@
-LIBS = @LIBS@
- 
 CFLAGS = $(CCOPTS) $(DEFS)
 LDFLAGS = -g
-
-RM = rm -f
-CP = cp
-
-SRCTOP = $(srcdir)/$(BUILDTOP)
 
 all:: $(OBJS)
 
@@ -32,7 +16,3 @@ SRCS=	\
 	$(srcdir)/rc_io.c	\
 	$(srcdir)/rcdef.c	\
 	$(srcdir)/rc_conv.c
-
-clean::
-	$(RM) $(OBJS)
-

@@ -1,22 +1,6 @@
-BUILDTOP=@BUILDTOP@
-srcdir = @srcdir@
-VPATH = @srcdir@
- 
-DEFS = @DEFS@
-CC = @CC@
-CCOPTS = @CCOPTS@
-LIBS = @LIBS@
- 
 CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
 LDFLAGS = -g
 
-LEX = @LEX@
-LEXLIB = @LEXLIB@
-
-ARCHIVE = @ARCHIVE@
-RANLIB = @RANLIB@
-RM = rm -f
-CP = cp
 INSTALLFILE = cp
 
 all::
