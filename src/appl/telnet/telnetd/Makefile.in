@@ -56,6 +56,9 @@ telnetd: $(OBJS)
 clean::
 	$(RM) telnetd
 
+install::
+	$(INSTALL_PROGRAM) telnetd $(DESTDIR)$(SERVER_BINDIR)/telnetd
+
 authenc.o: telnetd.h
 global.o: defs.h ext.h $(ARPA_TELNET)
 slc.o: telnetd.h defs.h ext.h $(ARPA_TELNET)

@@ -47,9 +47,8 @@ telnet:	$(OBJS)
 clean::
 	$(RM) telnet
 
-install: $(MAN) FRC
-	install -s -o bin -g bin -m 755 telnet $(DEST)
-	install -c -o bin -g bin -m 444 telnet.0 $(DESTDIR)/usr/man/cat1
+install:
+	$(INSTALL_PROGRAM) telnet $(DESTDIR)$(CLIENT_BINDIR)/telnet
 
 authenc.o: defines.h externs.h general.h ring.h types.h $(ARPA_TELNET)
 commands.o: defines.h externs.h general.h ring.h types.h $(ARPA_TELNET)

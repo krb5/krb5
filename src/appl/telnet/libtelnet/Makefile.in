@@ -82,3 +82,4 @@ enc_des.o: $(TELNET_H)
 enc_des.o: encrypt.h
 enc_des.o: key-proto.h
 enc_des.o: misc-proto.h
+install::
