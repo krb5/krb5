@@ -96,7 +96,7 @@ DUMMY=${REALM=SECURE-TEST.OV.COM}; export REALM
 hostname=`hostname`
 QUALNAME=`$TOP/testing/scripts/qualname.pl $hostname`; export QUALNAME
 
-eval $SRVTCL <<'EOF' $REDIRECT
+cat - > /tmp/start_servers_local$$ <<\EOF
 source $env(STOP)/testing/tcl/util.t
 set r $env(REALM)
 set q $env(QUALNAME)
@@ -106,6 +106,8 @@ puts stdout [ovsec_kadm_create_principal $server_handle \
 	[simple_principal host/$q@$r] {OVSEC_KADM_PRINCIPAL} notathena]
 puts stdout [ovsec_kadm_destroy $server_handle]
 EOF
+eval "$SRVTCL < /tmp/start_servers_local$$ $REDIRECT"
+rm /tmp/start_servers_local$$
 
 # rm -f /etc/v5srvtab
 # eval $LOCAL_MAKE_KEYTAB -princ host/xCANONHOSTx /etc/v5srvtab $REDIRECT

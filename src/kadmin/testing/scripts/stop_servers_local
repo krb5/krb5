@@ -4,9 +4,9 @@ DUMMY=${TESTDIR=$TOP/testing}
 DUMMY=${RESTORE_FILES=$TESTDIR/scripts/restore_files.sh}
 
 # If it's set, set it to true
-VERBOSE=${VERBOSE_TEST:+true}
+VERBOSE=${VERBOSE_TEST+true}
 # Otherwise, set it to false
-DUMMY=${VERBOSE:=false}
+DUMMY=${VERBOSE=false}
 
 v4files=false
 while [ $# -gt 0 ] ; do
@@ -51,3 +51,4 @@ rm -f /usr/tmp/krb5kdc_rcache
 if $v4files; then
 	$RESTORE_FILES $start_servers
 fi
+exit 0

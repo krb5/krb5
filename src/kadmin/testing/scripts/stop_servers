@@ -18,9 +18,9 @@ DUMMY=${RSH_CMD=rsh}
 DUMMY=${RESTORE_FILES=$TESTDIR/scripts/restore_files.sh}
 
 # If it's set, set it to true
-VERBOSE=${VERBOSE_TEST:+true}
+VERBOSE=${VERBOSE_TEST+true}
 # Otherwise, set it to false
-DUMMY=${VERBOSE:=false}
+DUMMY=${VERBOSE=false}
 
 local=1
 

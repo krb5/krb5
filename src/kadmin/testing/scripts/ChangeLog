@@ -1,5 +1,10 @@
 Mon Nov 11 14:25:15 1996  Tom Yu  <tlyu@mit.edu>
 
+	* init_db, save_files.sh, start_servers_local, stop_servers,
+ 	stop_servers_local: Use temp files rather than a here document to
+ 	provide input to eval'ed commands; Ultrix sh is broken wrt here
+	documents redirected to eval commands.
+
 	* start_servers, start_servers_local, init_db: Use ${FOO+bar} and
 	${FOO=baz} rather than ${FOO:+bar} and ${FOO:=baz} because of
 	Ultrix /bin/sh lossage.

@@ -10,9 +10,9 @@ while [ $# -gt 0 ] ; do
 done
 
 # If it's set, set it to true
-VERBOSE=${VERBOSE_TEST:+true}
+VERBOSE=${VERBOSE_TEST+true}
 # Otherwise, set it to false
-DUMMY=${VERBOSE:=false}
+DUMMY=${VERBOSE=false}
 
 # files="/etc/inetd.conf /etc/syslog.conf /etc/krb.conf \
 # 	/etc/krb.realms /etc/passwd /etc/services /etc/v5srvtab \
