@@ -1,3 +1,7 @@
+Thu Jun 22 21:02:13 1995  Sam Hartman  <hartmans@tardis.MIT.EDU>
+
+	* makeshlib: Added AIX support.
+
 Mon Jun 19 00:58:33 1995  Tom Yu  (tlyu@dragons-lair)
 
 	* getsyms, getsyms.sed: fix a few random bugs
