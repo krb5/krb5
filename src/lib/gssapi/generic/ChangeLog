@@ -1,3 +1,19 @@
+Wed Jun 12 00:46:41 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* gssapi.h: Change INTERFACE to be KRB5_CALLCONV, which is where
+		the calling convention is defined.  Add KRB5_DLLIMP
+		which is where the DLL import/export should be put for
+		Win32.  (Win16 is just different.)  The correct way to
+		declare a function which will be used in a DLL is now:
+		KRB5_DLLIMP func_return_t KRB5_CALLCONV func(long)
+
+		Change function delcarations to use the new
+		convention.  Actually, it doesn't hurt to use the old
+		convention as long as func_return_t doesn't contain a
+		'*'.  But in the long run we should be exterminating
+		all uses of INTERFACE in favor of KRB5_CALLCONV and
+		KRB5_DLLIMP.
+
 Tue Apr  2 15:31:25 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in (SRCS): Inlined list of source files for SRCS and
