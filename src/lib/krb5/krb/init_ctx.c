@@ -84,7 +84,10 @@ init_common (context, secure)
 {
 	krb5_context ctx = 0;
 	krb5_error_code retval;
-	krb5_timestamp now;
+	struct {
+	    krb5_int32 now, now_usec;
+	    long pid;
+	} seed_data;
 	krb5_data seed;
 	int tmp;
 
@@ -129,10 +132,11 @@ init_common (context, secure)
 		goto cleanup;
 
 	/* initialize the prng (not well, but passable) */
-	if ((retval = krb5_timeofday(ctx, &now)))
+	if ((retval = krb5_crypto_us_timeofday(&seed_data.now, &seed_data.now_usec)))
 		goto cleanup;
-	seed.length = sizeof(now);
-	seed.data = (char *) &now;
+	seed_data.pid = getpid ();
+	seed.length = sizeof(seed_data);
+	seed.data = (char *) &seed_data;
 	if ((retval = krb5_c_random_seed(ctx, &seed)))
 		goto cleanup;
 

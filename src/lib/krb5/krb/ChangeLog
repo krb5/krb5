@@ -9,6 +9,14 @@
 	Athena and Stanford names.
 	* t_ref_kerb.out: Updated.
 
+	* init_ctx.c (init_common): Feed current-microsecond time and
+	process-id into PRNG, instead of just current-second time.
+	* mk_req_ext.c (krb5_mk_req_extended): Feed current time into
+	PRNG if a subkey will be generated.
+	* sendauth.c (krb5_sendauth): Feed local and remote addresses of
+	socket, if they can be determined, into the PRNG if a subkey will
+	be used.
+
 2000-05-11  Ken Raeburn  <raeburn@mit.edu>
 	    Booker C. Bense  <bbense@networking.stanford.edu>
 
