@@ -258,9 +258,11 @@ krb5_error_code krb5_dbe_update_tl_data (krb5_context,
 krb5_error_code krb5_dbe_lookup_tl_data (krb5_context,
 					 krb5_db_entry *,
 					 krb5_tl_data *);
-krb5_error_code krb5_dbe_update_generation_number_general(krb5_context,
-							  krb5_db_entry *,
-							  krb5_int32);
+krb5_error_code krb5_dbe_set_generation_number_general(krb5_context,
+						       krb5_db_entry *,
+						       krb5_int32);
+krb5_error_code krb5_dbe_increment_generation_number_general(krb5_context,
+							     krb5_db_entry *);
 krb5_error_code krb5_dbe_lookup_generation_number_general(krb5_context,
 							  krb5_db_entry *,
 							  krb5_int32 *);
