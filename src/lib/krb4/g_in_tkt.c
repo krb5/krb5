@@ -204,7 +204,7 @@ krb_mk_in_tkt_preauth(user, instance, realm, service, sinstance, life,
         break;
     case AUTH_MSG_ERR_REPLY:
         memcpy((char *) &rep_err_code, pkt_err_code(rpkt), 4);
-        if (swap_bytes) swap_u_long(rep_err_code);
+        if (swap_bytes) rep_err_code = krb4_swab32(rep_err_code);
         return((int)rep_err_code);
     default:
         return(INTK_PROT);
@@ -216,7 +216,7 @@ krb_mk_in_tkt_preauth(user, instance, realm, service, sinstance, life,
     /* not used */
     /* get the principal's expiration date */
     memcpy((char *) &exp_date, pkt_x_date(rpkt), sizeof(exp_date));
-    if (swap_bytes) swap_u_long(exp_date);
+    if (swap_bytes) exp_data = krb4_swab32(exp_date);
 #endif
 
     /* Extract the ciphertext */
@@ -307,7 +307,7 @@ krb_parse_in_tkt(user, instance, realm, service, sinstance, life, cip)
 
     /* check KDC time stamp */
     memcpy((char *)&kdc_time, ptr, 4); /* Time (coarse) */
-    if (swap_bytes) swap_u_long(kdc_time);
+    if (swap_bytes) kdc_time = krb4_swab32(kdc_time);
 
     ptr += 4;
 

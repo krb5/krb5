@@ -170,7 +170,7 @@ get_ad_tkt(service,sinstance,realm,lifetime)
     case AUTH_MSG_ERR_REPLY:
 	memcpy((char *) &rep_err_code, pkt_err_code(rpkt), 4);
 	if (swap_bytes)
-	    swap_u_long(rep_err_code);
+	    rep_err_code = krb4_swab32(rep_err_code);
 	return(rep_err_code);
 
     default:
@@ -221,7 +221,7 @@ get_ad_tkt(service,sinstance,realm,lifetime)
 
     /* check KDC time stamp */
     memcpy((char *)&kdc_time, ptr, 4); /* Time (coarse) */
-    if (swap_bytes) swap_u_long(kdc_time);
+    if (swap_bytes) kdc_time = krb4_swab32(kdc_time);
 
     ptr += 4;
 

@@ -27,7 +27,7 @@ int swap_bytes;
 pkt_clen(pkt)
     KTEXT pkt;
 {
-    static unsigned short temp,temp2;
+    static unsigned short temp;
     int clen = 0;
 
     /* Start of ticket list */
@@ -36,11 +36,8 @@ pkt_clen(pkt)
 
     /* Finally the length */
     memcpy((char *)&temp, (char *)(++ptr), 2); /* alignment */
-    if (swap_bytes) {
-        /* assume a short is 2 bytes?? */
-        swab((char *)&temp,(char *)&temp2,2);
-        temp = temp2;
-    }
+    if (swap_bytes)
+	temp = krb4_swab16(temp);    
 
     clen = (int) temp;
 

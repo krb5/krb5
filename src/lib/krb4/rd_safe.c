@@ -88,7 +88,7 @@ krb_rd_safe protocol err sizeof(u_long) != sizeof(struct in_addr)");
     /* safely get length */
     memcpy((char *)&(m_data->app_length), (char *)p, 
 	   sizeof(m_data->app_length));
-    if (swap_bytes) swap_u_long(m_data->app_length);
+    if (swap_bytes) m_data->app_length = krb4_swab32(m_data->app_length);
     p += sizeof(m_data->app_length); /* skip over */
 
     if (m_data->app_length + sizeof(in_length)
@@ -123,7 +123,7 @@ krb_rd_safe protocol err sizeof(u_long) != sizeof(struct in_addr)");
     memcpy((char *)&(m_data->time_sec), (char *)p, 
           sizeof(m_data->time_sec));
     if (swap_bytes)
-        swap_u_long(m_data->time_sec);
+        m_data->time_sec = krb4_swab32(m_data->time_sec);
     p += sizeof(m_data->time_sec);
 
     /* check direction bit is the sign bit */
@@ -169,12 +169,10 @@ krb_rd_safe protocol err sizeof(u_long) != sizeof(struct in_addr)");
     memcpy((char *)big_cksum, (char *)p, sizeof(big_cksum));
     if (swap_bytes) {
       /* swap_u_16(big_cksum); */
-      unsigned KRB4_32 tt, *bb;
+      unsigned KRB4_32 *bb;
       bb = (unsigned KRB4_32*)big_cksum;
-      tt = bb[0]; swap_u_long(tt); bb[0] = tt;
-      tt = bb[1]; swap_u_long(tt); bb[1] = tt;
-      tt = bb[2]; swap_u_long(tt); bb[2] = tt;
-      tt = bb[3]; swap_u_long(tt); bb[3] = tt;
+      bb[0] = krb4_swab32(bb[0]);  bb[1] = krb4_swab32(bb[1]);
+      bb[2] = krb4_swab32(bb[2]);  bb[3] = krb4_swab32(bb[3]);
     }
 
 #ifdef NOENCRYPTION

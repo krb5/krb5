@@ -14,6 +14,7 @@
 #include <string.h>
 
 #include "k5-int.h"
+#include <krb54proto.h>
 
 extern char *krb__get_srvtabname();
 
@@ -113,6 +114,95 @@ int vxworks_srvtab_read(fd, s, n)
 }
 #endif
 
+#ifdef KRB4_USE_KEYTAB
+/*
+ * This function looks up the requested Krb4 srvtab key using the krb5
+ * keytab format, if possible.
+ */
+extern krb5_error_code
+krb54_get_service_keyblock(service,instance,realm,kvno,file,keyblock)
+    char FAR *service;		/* Service Name */
+    char FAR *instance;		/* Instance name or "*" */
+    char FAR *realm;		/* Realm */
+    int kvno;			/* Key version number */
+    char FAR *file;		/* Filename */
+    krb5_keyblock FAR * keyblock;
+{
+    krb5_error_code retval;
+    krb5_principal princ = NULL;
+    krb5_keytab kt_id;
+    krb5_keytab_entry kt_entry;
+    char sname[ANAME_SZ+1];
+    char sinst[INST_SZ+1];
+    char srealm[REALM_SZ+1];
+    char keytabname[MAX_KEYTAB_NAME_LEN + 1];	/* + 1 for NULL termination */
+
+    if (!krb5__krb4_context) {
+	    retval = krb5_init_context(&krb5__krb4_context);
+	    if (retval)
+		    return retval;
+    }
+
+    if (!strcmp(instance, "*")) {
+	if ((retval = krb5_sname_to_principal(krb5__krb4_context, NULL, NULL,
+					      KRB5_NT_SRV_HST, &princ)))
+	    goto errout;
+	
+	if ((retval = krb5_524_conv_principal(krb5__krb4_context, princ,
+					      sname, sinst, srealm)))
+	    goto errout;
+
+	instance = sinst;
+	krb5_free_principal(krb5__krb4_context, princ);
+	princ = 0;
+    }
+    
+    if ((retval = krb5_425_conv_principal(krb5__krb4_context, service,
+					  instance, realm, &princ)))
+	goto errout;
+
+    /*
+     * Figure out what name to use; if the name is one of the standard
+     * /etc/srbtab, /etc/athena/srvtab, etc., use the default keytab
+     * name.  Otherwise, append .krb5 to the filename and try to use
+     * that.
+     */
+    if (file &&
+	strcmp(file, "/etc/srvtab") &&
+	strcmp(file, "/etc/athena/srvtab") &&
+	strcmp(file, KEYFILE)) {
+	    strncpy(keytabname, file, sizeof(keytabname));
+	    keytabname[sizeof(keytabname)-1] = 0;
+	    if (strlen(keytabname)+6 < sizeof(keytabname))
+		    strcat(keytabname, ".krb5");
+    } else {
+	    if ((retval = krb5_kt_default_name(krb5__krb4_context,
+				(char *)keytabname, sizeof(keytabname)-1)))
+		    goto errout;
+    }
+    
+    if ((retval = krb5_kt_resolve(krb5__krb4_context, keytabname, &kt_id)))
+	    goto errout;
+    
+    if ((retval = krb5_kt_get_entry(krb5__krb4_context, kt_id, princ, kvno,
+				    0, &kt_entry))) {
+	krb5_kt_close(krb5__krb4_context, kt_id);
+	goto errout;
+    }
+
+    retval = krb5_copy_keyblock_contents(krb5__krb4_context,
+					 &kt_entry.key, keyblock);
+    
+    krb5_kt_free_entry(krb5__krb4_context, &kt_entry);
+
+errout:
+    if (princ)
+	krb5_free_principal(krb5__krb4_context, princ);
+    return retval;
+}
+#endif
+
+
 KRB5_DLLIMP int KRB5_CALLCONV
 read_service_key(service,instance,realm,kvno,file,key)
     char FAR *service;		/* Service Name */
@@ -125,66 +215,37 @@ read_service_key(service,instance,realm,kvno,file,key)
     int kret;
     
 #ifdef KRB4_USE_KEYTAB
-    krb5_error_code retval;
-    krb5_context context;
-    krb5_principal princ;
-    krb5_keytab kt_id;
-    krb5_keytab_entry kt_entry;
-    char sname[ANAME_SZ+1];
-    char sinst[INST_SZ+1];
-    char srealm[REALM_SZ+1];
-    char keytabname[MAX_KEYTAB_NAME_LEN + 1];	/* + 1 for NULL termination */
+    krb5_error_code	retval;
+    krb5_keyblock 	keyblock;
 #endif
 
     kret = get_service_key(service,instance,realm,&kvno,file,key);
 
-#ifdef KRB4_USE_KEYTAB
     if (! kret)
 	return KSUCCESS;
 
-    krb5_init_context(&context);
+#ifdef KRB4_USE_KEYTAB
+    kret = KFAILURE;
+    keyblock.magic = KV5M_KEYBLOCK;
+    keyblock.contents = 0;
 
-    if (!strcmp(instance, "*")) {
-	retval = krb5_sname_to_principal(context, NULL, NULL, KRB5_NT_SRV_HST,
-					 &princ);
-	if (!retval) {
-	    retval = krb5_524_conv_principal(context, princ,
-					     sname, sinst, srealm);
-	    krb5_free_principal(context, princ);
-	}
-	if (!retval)
-	    instance = sinst;
+    retval = krb54_get_service_keyblock(service,instance,realm,kvno,file,
+					&keyblock);
+    if (retval)
+	    goto errout;
+
+    if ((keyblock.length != sizeof(C_Block)) ||
+	((keyblock.enctype != ENCTYPE_DES_CBC_CRC) &&
+	 (keyblock.enctype != ENCTYPE_DES_CBC_MD4) &&
+	 (keyblock.enctype != ENCTYPE_DES_CBC_MD5))) {
+	    goto errout;
     }
+    (void) memcpy(key, keyblock.contents, sizeof(C_Block));
+    kret = KSUCCESS;
     
-    retval = krb5_425_conv_principal(context,
-				     service,
-				     instance,
-				     realm,
-				     &princ);
-    if (!retval)
-	retval = krb5_kt_default_name(context, (char *)keytabname,
-				      sizeof(keytabname)-1);
-    if (!retval) {
-	retval = krb5_kt_resolve(context, (char *)keytabname, &kt_id);
-	if (!retval) {
-	    retval = krb5_kt_get_entry(context, kt_id, princ, kvno,
-				       ENCTYPE_DES_CBC_CRC, &kt_entry);
-	    krb5_kt_close(context, kt_id);
-	}
-	krb5_free_principal(context, princ);
-    }
-    if (!retval) {
-	if (kt_entry.key.length == sizeof(C_Block)) {
-	    (void) memcpy(key, kt_entry.key.contents, sizeof(C_Block));
-	} else {
-	    retval = KRB5_BAD_KEYSIZE;
-	}
-	krb5_kt_free_entry(context, &kt_entry);
-    }
-    krb5_free_context(context);
-
-    if (! retval)
-	return KSUCCESS;
+errout:
+    if (keyblock.contents)
+	    krb5_free_keyblock_contents(krb5__krb4_context, &keyblock);
 #endif
     
     return kret;

@@ -13,6 +13,8 @@
 #include "krb.h"
 #include "prot.h"
 #include <string.h>
+#include <krb5.h>
+#include <krb54proto.h>
 
 extern int krb_ap_req_debug;
 
@@ -63,7 +65,6 @@ static int krb5_key;		/* whether krb5 key is used for decrypt */
  * krb_rd_req().
  */
 
-#include <krb5.h>
 static krb5_keyblock srv_k5key;
 
 int
@@ -180,6 +181,7 @@ krb_rd_req(authent,service,instance,from_addr,ad,fn)
     int mutual;			/* Mutual authentication requested? */
     unsigned char s_kvno;	/* Version number of the server's key
 				   Kerberos used to encrypt ticket */
+    krb5_keyblock keyblock;
     int status;
 
     if (authent->length <= 0)
@@ -234,10 +236,16 @@ krb_rd_req(authent,service,instance,from_addr,ad,fn)
         st_kvno = s_kvno;
 #ifndef NOENCRYPTION
         if (read_service_key(service,instance,realm,(int) s_kvno,
-                            fn,(char *)skey))
-            return(RD_AP_UNDEC);
-        if (status = krb_set_key((char *)skey,0))
-	    return(status);
+			     fn,(char *)skey) == 0) {
+		if ((status = krb_set_key((char *)skey,0)))
+			return(status);
+	} else if (krb54_get_service_keyblock(service,instance,
+		       realm, (int) s_kvno,fn, &keyblock) == 0) {
+		krb_set_key_krb5(krb5__krb4_context, &keyblock);
+		krb5_free_keyblock_contents(krb5__krb4_context, &keyblock);
+	} else
+		return(RD_AP_UNDEC);
+	
 #endif /* !NOENCRYPTION */
         (void) strcpy(st_rlm,realm);
         (void) strcpy(st_nam,service);
@@ -274,7 +282,7 @@ krb_rd_req(authent,service,instance,from_addr,ad,fn)
 	if (decomp_tkt_krb5(tkt, &ad->k_flags, ad->pname, ad->pinst,
 			    ad->prealm, &ad->address, ad->session,
 			    &ad->life, &ad->time_sec, sname, iname,
-			    srv_k5key)) {
+			    &srv_k5key)) {
 	    return RD_AP_UNDEC;
 	}
     }
@@ -326,7 +334,7 @@ krb_rd_req(authent,service,instance,from_addr,ad,fn)
     memcpy((char *)&ad->checksum, ptr, 4);	/* Checksum */
     ptr += 4;
     check_ptr();
-    if (swap_bytes) swap_u_long(ad->checksum);
+    if (swap_bytes) ad->checksum = krb4_swab32(ad->checksum);
     r_time_ms = *(ptr++);	/* Time (fine) */
 #ifdef lint
     /* XXX r_time_ms is set but not used.  why??? */
@@ -337,7 +345,7 @@ krb_rd_req(authent,service,instance,from_addr,ad,fn)
     check_ptr();
     /* assume sizeof(r_time_sec) == 4 ?? */
     memcpy((char *)&r_time_sec, ptr, 4); /* Time (coarse) */
-    if (swap_bytes) swap_u_long(r_time_sec);
+    if (swap_bytes) r_time_sec = krb4_swab32(r_time_sec);
 
     /* Check for authenticity of the request */
 #ifdef KRB_CRYPT_DEBUG

@@ -96,7 +96,7 @@ krb_rd_priv(in,in_length,schedule,key,sender,receiver,m_data)
     /* get cipher length */
     memcpy((char *)&c_length, (char *)p, sizeof(c_length));
     if (swap_bytes)
-        swap_u_long(c_length);
+	    c_length = krb4_swab32(c_length);
     p += sizeof(c_length);
     /* check for rational length so we don't go comatose */
     if (VERSION_SZ + MSG_TYPE_SZ + c_length > in_length)
@@ -121,7 +121,7 @@ krb_rd_priv(in,in_length,schedule,key,sender,receiver,m_data)
     memcpy((char *)&(m_data->app_length), (char *) p, 
 	   sizeof(m_data->app_length));
     if (swap_bytes)
-        swap_u_long(m_data->app_length);
+        m_data->app_length = krb4_swab32(m_data->app_length);
     p += sizeof(m_data->app_length);    /* skip over */
 
     if (m_data->app_length + sizeof(c_length) + sizeof(in_length) +
@@ -154,7 +154,7 @@ krb_rd_priv(in,in_length,schedule,key,sender,receiver,m_data)
     /* safely get time_sec */
     memcpy((char *)&(m_data->time_sec), (char *) p, 
 	  sizeof(m_data->time_sec));
-    if (swap_bytes) swap_u_long(m_data->time_sec);
+    if (swap_bytes) m_data->time_sec = krb4_swab32(m_data->time_sec);
 
     p += sizeof(m_data->time_sec);
 
@@ -201,7 +201,7 @@ krb_rd_priv(in,in_length,schedule,key,sender,receiver,m_data)
 
 #ifdef notdef
     memcpy((char *)&cksum, (char *) p, sizeof(cksum));
-    if (swap_bytes) swap_u_long(cksum)
+    if (swap_bytes) cksum = krb4_swab32(cksum)
     /*
      * calculate the checksum of the length, sequence,
      * and input data, on the sending byte order!!

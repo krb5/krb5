@@ -1,3 +1,23 @@
+1998-12-05  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* rd_svc_key.c (krb54_get_service_keyblock): New function which
+		searches the appropaite krb5 keytab file for the key to be
+		used by the krb4 library.
+
+	* rd_req.c (krb_rd_req): If the appropriate key cannot be found in
+		the krb4 srvtab file, try calling krb54_get_service_keyblock.
+
+	* decomp_tkt.c (dcmp_tkt_int): 
+	* g_in_tkt.c (krb_mk_in_tkt_preauth): 
+	* g_ad_tkt.c (get_ad_tkt): 
+	* pkt_clen.c (pkt_clen): 
+	* rd_err.c (krb_rd_err): 
+	* rd_priv.c (krb_rd_priv): 
+	* rd_req.c (krb_rd_req): 
+	* rd_safe.c (krb_rd_safe): Use krb4_swab32 and krb4_swab16 instead
+		of swap_u_long and swap_u_short.  The new byte swapping
+		routines are faster and cleaner.
+
 1998-11-13  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* Makefile.in: Set the myfulldir and mydir variables (which are

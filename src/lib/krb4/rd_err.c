@@ -56,7 +56,7 @@ krb_rd_err(in,in_length,code,m_data)
       
       memcpy((char *)&raw_code, (char *)p, sizeof(raw_code));
       if (swap_bytes)
-        swap_u_long(raw_code);
+        raw_code = krb4_swab32(raw_code);
       p += sizeof(raw_code);         /* skip over */
       *code = raw_code;
     }

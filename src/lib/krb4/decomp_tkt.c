@@ -221,7 +221,7 @@ dcmp_tkt_int(tkt, flags, pname, pinstance, prealm, paddress, session,
     memcpy((char *) time_sec, ptr, 4); /* issue time */
     ptr += 4;
     if (tkt_swap_bytes)
-        swap_u_long(*time_sec);
+        *time_sec = krb4_swab32(*time_sec);
 
     (void) strcpy(sname,ptr);   /* service name */
     ptr += 1 + strlen(sname);
