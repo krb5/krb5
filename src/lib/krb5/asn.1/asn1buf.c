@@ -122,6 +122,8 @@ asn1_error_code asn1buf_skiptail(asn1buf *buf, const unsigned int length, const 
       return ASN1_OVERRUN;
   }
   while (nestlevel > 0) {
+    if (buf->bound - buf->next + 1 <= 0)
+      return ASN1_OVERRUN;
     retval = asn1_get_tag_2(buf, &t);
     if (retval) return retval;
     if (!t.indef) {
