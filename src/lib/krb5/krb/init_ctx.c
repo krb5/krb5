@@ -407,6 +407,7 @@ krb5_set_default_tgs_ktypes(context, ktypes)
 }
 
 void
+KRB5_CALLCONV
 krb5_free_ktypes (context, val)
      krb5_context context;
      krb5_enctype FAR *val;
@@ -415,6 +416,7 @@ krb5_free_ktypes (context, val)
 }
 
 krb5_error_code
+KRB5_CALLCONV
 krb5_get_tgs_ktypes(context, princ, ktypes)
     krb5_context context;
     krb5_const_principal princ;

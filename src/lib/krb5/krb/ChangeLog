@@ -1,3 +1,8 @@
+2000-06-02  Danilo Almeida  <dalmeida@mit.edu>
+
+	* init_ctx.c (krb5_get_tgs_ktypes, krb5_free_ktypes): Fix linkage to
+	be KRB5_CALLCONV.
+
 2000-05-31  Ken Raeburn  <raeburn@mit.edu>
 
 	* recvauth.c (krb5_recvauth_version): New routine, takes a
