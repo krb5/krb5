@@ -77,7 +77,7 @@ typedef struct _net_slave_info {
 /*
  * Error messages.
  */
-static const char *net_waiterr_msg = "child wait failed - cannot reap children";
+static const char *net_waiterr_msg = "\004child wait failed - cannot reap children";
 static const char *net_def_realm_fmt = "%s: cannot get default realm (%s).\n";
 static const char *net_no_mem_fmt = "%s: cannot get memory.\n";
 static const char *net_parse_srv_fmt = "%s: cannot parse server name %s (%s).\n";
@@ -88,9 +88,9 @@ static const char *net_sockerr_fmt = "%s: cannot open network socket (%s).\n";
 static const char *net_soerr_fmt = "%s: cannot set socket options (%s).\n";
 static const char *net_binderr_fmt = "%s: cannot bind to network address (%s).\n";
 
-static const char *net_select_fmt = "select failed";
-static const char *net_cl_disp_fmt = "client dispatch failed";
-static const char *net_not_ready_fmt = "select error - no socket to read";
+static const char *net_select_fmt = "\004select failed";
+static const char *net_cl_disp_fmt = "\004client dispatch failed";
+static const char *net_not_ready_fmt = "\004select error - no socket to read";
 static const char *net_dispatch_msg = "network dispatch";
 
 static int net_debug_level = 0;
@@ -740,7 +740,7 @@ net_dispatch(kcontext)
 #endif	/* !USE_PTHREADS */
 
     /* Receive connections on the socket */
-    DLOG(DEBUG_OPERATION, net_debug_level, "listening on socket");
+    DPRINT(DEBUG_OPERATION, net_debug_level, ("listening on socket"));
     if (
 #if	POSIX_SETJMP
 	sigsetjmp(shutdown_jmp, 1) == 0
@@ -753,7 +753,7 @@ net_dispatch(kcontext)
     }
     else
 	kret = EINTR;
-    DLOG(DEBUG_OPERATION, net_debug_level, "listen done");
+    DPRINT(DEBUG_OPERATION, net_debug_level, ("listen done"));
 
     while (kret == 0) {
 	/*
@@ -767,13 +767,13 @@ net_dispatch(kcontext)
 #endif	/* POSIX_SETJMP */
 	    ) {
 	    readfds = mask;
-	    DLOG(DEBUG_OPERATION, net_debug_level, "doing select");
+	    DPRINT(DEBUG_OPERATION, net_debug_level, ("doing select"));
 	    if ((nready = select(net_listen_socket+1,
 				 &readfds,
 				 (fd_set *) NULL,
 				 (fd_set *) NULL,
 				 (struct timeval *) NULL)) == 0) {
-		DLOG(DEBUG_OPERATION, net_debug_level, "nobody ready");
+		DPRINT(DEBUG_OPERATION, net_debug_level, ("nobody ready"));
 		continue;	/* Nobody ready */
 	    }
 
@@ -788,8 +788,8 @@ net_dispatch(kcontext)
 		int			conn_sock;
 
 		addrlen = sizeof(client_addr);
-		DLOG(DEBUG_OPERATION, net_debug_level,
-		     "accept connection");
+		DPRINT(DEBUG_OPERATION, net_debug_level,
+		       ("accept connection"));
 		while (((conn_sock = accept(net_listen_socket,
 					    (struct sockaddr *) &client_addr,
 					    &addrlen)) < 0) &&
@@ -799,8 +799,8 @@ net_dispatch(kcontext)
 		    kret = errno;
 		    break;
 		}
-		DLOG(DEBUG_OPERATION, net_debug_level,
-		     "accepted connection");
+		DPRINT(DEBUG_OPERATION, net_debug_level,
+		       ("accepted connection"));
 		kret = net_dispatch_client(kcontext,
 					   net_listen_socket,
 					   conn_sock,
@@ -809,7 +809,7 @@ net_dispatch(kcontext)
 		    com_err(net_dispatch_msg, kret, net_cl_disp_fmt);
 		    continue;
 		}
-		DLOG(DEBUG_OPERATION, net_debug_level, "dispatch done");
+		DPRINT(DEBUG_OPERATION, net_debug_level, ("dispatch done"));
 	    }
 	    else {
 		com_err(net_dispatch_msg, 0, net_not_ready_fmt);
@@ -817,8 +817,8 @@ net_dispatch(kcontext)
 	    }
 	}
 	else {
-	    DLOG(DEBUG_OPERATION, net_debug_level,
-		 "dispatch interrupted by SIGTERM");
+	    DPRINT(DEBUG_OPERATION, net_debug_level,
+		   ("dispatch interrupted by SIGTERM"));
 	    kret = 0;
 	    break;
 	}

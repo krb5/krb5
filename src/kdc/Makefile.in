@@ -7,6 +7,8 @@ COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
 DBMLIB=
 KDBLIB=$(TOPLIBD)/libkdb5.a 
 KDBDEPLIB=$(TOPLIBD)/libkdb5.a 
+KADMLIB=$(TOPLIBD)/libkadm.a
+KADMDEPLIB=$(TOPLIBD)/libkadm.a
 
 KLIB = $(TOPLIBD)/libkrb5.a $(KRB4_LIB) $(TOPLIBD)/libcrypto.a $(COMERRLIB) $(DBMLIB)
 DEPKLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(COMERRLIB) $(DBMLIB)
@@ -54,8 +56,8 @@ kdc5_err.h: kdc5_err.et
 
 kdc5_err.o: kdc5_err.h
 
-krb5kdc: $(OBJS) $(KDBDEPLIB) $(DEPKLIB)
-	$(LD) $(CFLAGS) -o krb5kdc $(OBJS) $(KDBLIB) $(KLIB) $(LIBS)
+krb5kdc: $(OBJS) $(KDBDEPLIB) $(DEPKLIB) $(KADMDEPLIB)
+	$(LD) $(CFLAGS) -o krb5kdc $(OBJS) $(KDBLIB) $(KADMLIB) $(KLIB) $(LIBS)
 
 install::
 	$(INSTALL_PROGRAM) krb5kdc ${DESTDIR}$(SERVER_BINDIR)/krb5kdc

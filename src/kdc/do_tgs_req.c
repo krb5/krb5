@@ -39,6 +39,7 @@
 #include "kdc_util.h"
 #include "policy.h"
 #include "extern.h"
+#include "adm_proto.h"
 
 
 static void find_alternate_tgs PROTOTYPE((krb5_kdc_req *,
@@ -147,7 +148,7 @@ krb5_data **response;			/* filled in with a response packet */
     nprincs = 1;
     if (retval = krb5_db_get_principal(kdc_context, request->server, &server,
 				       &nprincs, &more)) {
-        syslog(LOG_INFO,
+        krb5_klog_syslog(LOG_INFO,
 	       "TGS_REQ: GET_PRINCIPAL: authtime %d, host %s, %s for %s (%s)",
 	       authtime, fromstring, cname, sname, error_message(retval));
 	nprincs = 0;
@@ -521,7 +522,7 @@ tgt_again:
 				    request->second_ticket[st_idx]->enc_part2->client)) {
 		if (retval = krb5_unparse_name(kdc_context, request->second_ticket[st_idx]->enc_part2->client, &tmp))
 			tmp = 0;
-		syslog(LOG_INFO, "TGS_REQ: 2ND_TKT_MISMATCH: authtime %d, host %s, %s for %s, 2nd tkt client %s",
+		krb5_klog_syslog(LOG_INFO, "TGS_REQ: 2ND_TKT_MISMATCH: authtime %d, host %s, %s for %s, 2nd tkt client %s",
 		       authtime, fromstring, cname, sname,
 		       tmp ? tmp : "<unknown>");
 		goto cleanup;
@@ -617,7 +618,7 @@ tgt_again:
     
 cleanup:
     if (status)
-        syslog(LOG_INFO, "TGS_REQ%c %s: authtime %d, host %s, %s for %s%s%s",
+        krb5_klog_syslog(LOG_INFO, "TGS_REQ%c %s: authtime %d, host %s, %s for %s%s%s",
 	       secondary_ch, status, authtime, fromstring,
 	       cname ? cname : "<unknown client>",
 	       sname ? sname : "<unknown server>",
@@ -755,10 +756,10 @@ int *nprincs;
 	    krb5_free_principal(kdc_context, request->server);
 	    request->server = tmpprinc;
 	    if (krb5_unparse_name(kdc_context, request->server, &sname)) {
-		syslog(LOG_INFO,
+		krb5_klog_syslog(LOG_INFO,
 		       "TGS_REQ: issuing alternate <un-unparseable> TGT");
 	    } else {
-		syslog(LOG_INFO,
+		krb5_klog_syslog(LOG_INFO,
 		       "TGS_REQ: issuing TGT %s", sname);
 		free(sname);
 	    }

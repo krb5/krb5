@@ -36,18 +36,18 @@
 #include "adm_proto.h"
 #include <setjmp.h>
 
-static const char *proto_addrs_msg = "%d: cannot get memory for addresses";
-static const char *proto_rcache_msg = "%d: cannot get replay cache";
-static const char *proto_ap_req_msg = "%d: error reading AP_REQ message";
-static const char *proto_auth_con_msg = "%d: cannot get authorization context";
-static const char *proto_rd_req_msg = "%d: cannot decode AP_REQ message";
-static const char *proto_mk_rep_msg = "%d: cannot generate AP_REP message";
-static const char *proto_wr_rep_msg = "%d: cannot write AP_REP message";
-static const char *proto_conn_abort_msg = "%d: connection destroyed by client";
-static const char *proto_seq_err_msg = "%d: protocol sequence violation";
-static const char *proto_rd_cmd_msg = "%d: cannot read administrative protocol command";
-static const char *proto_wr_reply_msg = "%d: cannot write administrative protocol reply";
-static const char *proto_fmt_reply_msg = "%d: cannot format administrative protocol reply";
+static const char *proto_addrs_msg = "\004%d: cannot get memory for addresses";
+static const char *proto_rcache_msg = "\004%d: cannot get replay cache";
+static const char *proto_ap_req_msg = "\004%d: error reading AP_REQ message";
+static const char *proto_auth_con_msg = "\004%d: cannot get authorization context";
+static const char *proto_rd_req_msg = "\004%d: cannot decode AP_REQ message";
+static const char *proto_mk_rep_msg = "\004%d: cannot generate AP_REP message";
+static const char *proto_wr_rep_msg = "\004%d: cannot write AP_REP message";
+static const char *proto_conn_abort_msg = "\007%d: connection destroyed by client";
+static const char *proto_seq_err_msg = "\004%d: protocol sequence violation";
+static const char *proto_rd_cmd_msg = "\004%d: cannot read administrative protocol command";
+static const char *proto_wr_reply_msg = "\004%d: cannot write administrative protocol reply";
+static const char *proto_fmt_reply_msg = "\004%d: cannot format administrative protocol reply";
 extern char *programname;
 
 static int	proto_proto_timeout = -1;
@@ -720,7 +720,7 @@ proto_serv(kcontext, my_id, cl_sock, sv_p, cl_p)
 	}
     }
     else {
-	DLOG(DEBUG_REQUESTS, proto_debug_level, "connection timed out");
+	DPRINT(DEBUG_REQUESTS, proto_debug_level, ("connection timed out"));
     }
 
     

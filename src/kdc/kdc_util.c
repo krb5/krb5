@@ -29,6 +29,7 @@
 #include "extern.h"
 #include <stdio.h>
 #include <syslog.h>
+#include "adm_proto.h"
 
 /*
  * concatenate first two authdata arrays, returning an allocated replacement.
@@ -194,7 +195,7 @@ kdc_process_tgs_req(request, from, pkt, ticket, subkey)
     
     if (isflagset(apreq->ap_options, AP_OPTS_USE_SESSION_KEY) ||
 	isflagset(apreq->ap_options, AP_OPTS_MUTUAL_REQUIRED)) {
-	syslog(LOG_INFO, "TGS_REQ: SESSION KEY or MUTUAL");
+	krb5_klog_syslog(LOG_INFO, "TGS_REQ: SESSION KEY or MUTUAL");
 	retval = KRB5KDC_ERR_POLICY;
 	goto cleanup;
     }
@@ -263,7 +264,7 @@ kdc_process_tgs_req(request, from, pkt, ticket, subkey)
 	if (tkt_realm->length == tgs_realm->length &&
 	    !memcmp(tkt_realm->data, tgs_realm->data, tgs_realm->length)) {
 	    /* someone in a foreign realm claiming to be local */
-	    syslog(LOG_INFO, "PROCESS_TGS: failed lineage check");
+	    krb5_klog_syslog(LOG_INFO, "PROCESS_TGS: failed lineage check");
 	    retval = KRB5KDC_ERR_POLICY;
 	    goto cleanup_authenticator;
 	}
@@ -326,7 +327,7 @@ krb5_kvno *kvno;
 
 	    krb5_db_free_principal(kdc_context, &server, nprincs);
 	    if (!krb5_unparse_name(kdc_context, ticket->server, &sname)) {
-		syslog(LOG_ERR, "TGS_REQ: UNKNOWN SERVER: server='%s'",
+		krb5_klog_syslog(LOG_ERR, "TGS_REQ: UNKNOWN SERVER: server='%s'",
 		       sname);
 		free(sname);
 	    }

@@ -39,6 +39,7 @@
 #include "kdc_util.h"
 #include "policy.h"
 #include "extern.h"
+#include "adm_proto.h"
 
 static krb5_error_code prepare_error_as PROTOTYPE((krb5_kdc_req *,
 						   int,
@@ -71,7 +72,7 @@ check_padata (client, src_addr, padata, pa_id, flags)
    
     retval = KDB_CONVERT_KEY_OUTOF_DB(kdc_context,enckey,&tmpkey);
     if (retval) {
-	syslog( LOG_ERR, "AS_REQ: Unable to extract client key: %s",
+	krb5_klog_syslog( LOG_ERR, "AS_REQ: Unable to extract client key: %s",
 	       error_message(retval));
 	return retval;
     }
@@ -86,7 +87,7 @@ check_padata (client, src_addr, padata, pa_id, flags)
 	enckey = &(client->alt_key);
 	/* Extract client key/alt_key from master key */
 	if (retval = KDB_CONVERT_KEY_OUTOF_DB(kdc_context,enckey,&tmpkey)) {
-	    syslog( LOG_ERR, "AS_REQ: Unable to extract client alt_key: %s",
+	    krb5_klog_syslog( LOG_ERR, "AS_REQ: Unable to extract client alt_key: %s",
 		   error_message(retval));
 	    return retval;
 	}
@@ -140,14 +141,14 @@ krb5_data **response;			/* filled in with a response packet */
 	return(prepare_error_as(request, KDC_ERR_C_PRINCIPAL_UNKNOWN,
 				response));
     if (retval = krb5_unparse_name(kdc_context, request->client, &cname)) {
-	syslog(LOG_INFO, "AS_REQ: %s while unparsing client name",
+	krb5_klog_syslog(LOG_INFO, "AS_REQ: %s while unparsing client name",
 	       error_message(retval));
 	return(prepare_error_as(request, KDC_ERR_C_PRINCIPAL_UNKNOWN,
 				response));
     }
     if (retval = krb5_unparse_name(kdc_context, request->server, &sname)) {
 	free(cname);
-	syslog(LOG_INFO, "AS_REQ: %s while unparsing server name",
+	krb5_klog_syslog(LOG_INFO, "AS_REQ: %s while unparsing server name",
 	       error_message(retval));
 	return(prepare_error_as(request, KDC_ERR_S_PRINCIPAL_UNKNOWN,
 				response));
@@ -215,7 +216,7 @@ krb5_data **response;			/* filled in with a response packet */
     }
 
     if (retval = krb5_timeofday(kdc_context, &kdc_time)) {
-	syslog(LOG_INFO, "AS_REQ: TIME_OF_DAY: host %s, %s for %s", 
+	krb5_klog_syslog(LOG_INFO, "AS_REQ: TIME_OF_DAY: host %s, %s for %s", 
                   fromstring, cname, sname);
 	goto errout;
     }
@@ -223,7 +224,7 @@ krb5_data **response;			/* filled in with a response packet */
     status = "UNKNOWN REASON";
     if (retval = validate_as_request(request, client, server,
 				     kdc_time, &status)) {
-	syslog(LOG_INFO, "AS_REQ: %s: host %s, %s for %s", status,
+	krb5_klog_syslog(LOG_INFO, "AS_REQ: %s: host %s, %s for %s", status,
                   fromstring, cname, sname);
 	retval = prepare_error_as(request, retval, response);
 	goto errout;
@@ -249,7 +250,7 @@ krb5_data **response;			/* filled in with a response packet */
     if (i == request->netypes) {
 	/* unsupported etype */
 	    
-	syslog(LOG_INFO, "AS_REQ: BAD ENCRYPTION TYPE: host %s, %s for %s",
+	krb5_klog_syslog(LOG_INFO, "AS_REQ: BAD ENCRYPTION TYPE: host %s, %s for %s",
                   fromstring, cname, sname);
 	retval = prepare_error_as(request, KDC_ERR_ETYPE_NOSUPP, response);
 	goto errout;
@@ -261,7 +262,7 @@ krb5_data **response;			/* filled in with a response packet */
 				 krb5_csarray[useetype]->random_sequence,
 				 &session_key)) {
 	/* random key failed */
-	syslog(LOG_INFO, "AS_REQ: RANDOM KEY FAILED: host %s, %s for %s",
+	krb5_klog_syslog(LOG_INFO, "AS_REQ: RANDOM KEY FAILED: host %s, %s for %s",
                   fromstring, cname, sname);
 	goto errout;
     }
@@ -360,7 +361,7 @@ krb5_data **response;			/* filled in with a response packet */
 	    }
             krb5_db_put_principal(kdc_context, &client, &one);
 #endif
-            syslog(LOG_INFO, "AS_REQ: PREAUTH FAILED: host %s, %s for %s (%s)",
+            krb5_klog_syslog(LOG_INFO, "AS_REQ: PREAUTH FAILED: host %s, %s for %s (%s)",
 		   fromstring, cname, sname, error_message(retval));
 #ifdef KRBCONF_VAGUE_ERRORS
             retval = prepare_error_as(request, KRB_ERR_GENERIC, response);
@@ -395,7 +396,7 @@ krb5_data **response;			/* filled in with a response packet */
 	     if TKT_FLG_PRE_AUTH is set allow it. */
 	
 	  if (!pwreq || !(enc_tkt_reply.flags & TKT_FLG_PRE_AUTH)){
-              syslog(LOG_INFO, "AS_REQ: Needed HW preauth: host %s, %s for %s",
+              krb5_klog_syslog(LOG_INFO, "AS_REQ: Needed HW preauth: host %s, %s for %s",
 		     fromstring, cname, sname);
               retval = prepare_error_as(request, KRB_ERR_GENERIC, response);
 	      goto errout;
@@ -490,7 +491,7 @@ krb5_data **response;			/* filled in with a response packet */
     krb5_xfree(encrypting_key.contents);
 
     if (retval) {
-	syslog(LOG_INFO, "AS_REQ: ENCODE_KDC_REP: host %s, %s for %s (%s)",
+	krb5_klog_syslog(LOG_INFO, "AS_REQ: ENCODE_KDC_REP: host %s, %s for %s (%s)",
 	       fromstring, cname, sname, error_message(retval));
 	goto errout;
     }
@@ -502,10 +503,10 @@ krb5_data **response;			/* filled in with a response packet */
     free(reply.enc_part.ciphertext.data);
 
     if (is_secondary)
-	syslog(LOG_INFO, "AS_REQ; ISSUE: authtime %d, host %s, %s for %s",
+	krb5_klog_syslog(LOG_INFO, "AS_REQ; ISSUE: authtime %d, host %s, %s for %s",
 	       authtime, fromstring, cname, sname);
     else
-	syslog(LOG_INFO, "AS_REQ: ISSUE: authtime %d, host %s, %s for %s",
+	krb5_klog_syslog(LOG_INFO, "AS_REQ: ISSUE: authtime %d, host %s, %s for %s",
 	       authtime, fromstring, cname, sname);
 
 errout:
@@ -542,13 +543,13 @@ krb5_data **response;
     char *cname = 0, *sname = 0;
 
     if (retval = krb5_unparse_name(kdc_context, request->client, &cname))
-       syslog(LOG_INFO, "AS_REQ: %s while unparsing client name for error",
+       krb5_klog_syslog(LOG_INFO, "AS_REQ: %s while unparsing client name for error",
               error_message(retval));
     if (retval = krb5_unparse_name(kdc_context, request->server, &sname))
-       syslog(LOG_INFO, "AS_REQ: %s while unparsing server name for error",
+       krb5_klog_syslog(LOG_INFO, "AS_REQ: %s while unparsing server name for error",
               error_message(retval));
 
-    syslog(LOG_INFO, "AS_REQ: %s while processing request from %s for %s",
+    krb5_klog_syslog(LOG_INFO, "AS_REQ: %s while processing request from %s for %s",
 	   error_message(error+KRB5KDC_ERR_NONE),
 	   cname ? cname : "UNKNOWN CLIENT", sname ? sname : "UNKNOWN SERVER");
 

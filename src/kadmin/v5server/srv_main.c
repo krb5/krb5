@@ -30,20 +30,10 @@
 
 #include <stdio.h>
 #include <sys/signal.h>
-#include <syslog.h>
 #include <setjmp.h>
 #include "k5-int.h"
 #include "com_err.h"
-#if	HAVE_STDARG_H
-#include <stdarg.h>
-#else	/* HAVE_STDARG_H */
-#include <varargs.h>
-#endif	/* HAVE_STDARG_H */
-
-#define	KADM_MAX_ERRMSG_SIZE	1024
-#ifndef	LOG_AUTH
-#define	LOG_AUTH	0
-#endif	/* LOG_AUTH */
+#include "adm_proto.h"
 
 #ifdef	LANGUAGES_SUPPORTED
 static const char *usage_format =	"%s: usage is %s [-a aclfile] [-d database] [-e enctype] [-m]\n\t[-k mkeytype] [-l langlist] [-p portnum] [-r realm] [-t timeout] [-n]\n\t[-D dbg] [-M mkeyname] [-T ktabname].\n";
@@ -56,13 +46,12 @@ static const char *fval_not_number =	"%s: value (%s) specified for -%c is not nu
 static const char *extra_params =	"%s extra paramters beginning with %s... \n";
 static const char *daemon_err =		"%s: cannot spawn and detach.\n";
 static const char *no_memory_fmt =	"%s: cannot allocate %d bytes for %s.\n";
-static const char *begin_op_msg =	"%s starting.";
-static const char *disp_err_fmt =	"dispatch error.";
-static const char *happy_exit_fmt =	"terminating normally.";
+static const char *begin_op_msg =	"\007%s starting.";
+static const char *disp_err_fmt =	"\004dispatch error.";
+static const char *happy_exit_fmt =	"\007terminating normally.";
 static const char *init_error_fmt =	"%s: cannot initialize %s.\n";
-static const char *unh_signal_fmt =	"exiting on signal %d.";
+static const char *unh_signal_fmt =	"\007exiting on signal %d.";
 
-static const char *messages_msg =	"messages";
 static const char *proto_msg =		"protocol module";
 static const char *net_msg =		"network";
 static const char *output_msg =		"output";
@@ -94,45 +83,7 @@ unhandled_signal(signo)
 #endif	/* POSIX_SETJMP */
     /* NOTREACHED */
 }
-
-static void
-kadm_com_err_proc(whoami, code, format, ap)
-    const char	*whoami;
-    long	code;
-    const char	*format;
-    va_list	ap;
-{
-    char *outbuf;
-
-    outbuf = (char *) malloc(KADM_MAX_ERRMSG_SIZE);
-    if (outbuf) {
-	char *cp;
-	sprintf(outbuf, "%s: ", whoami);
-	if (code) {
-	    strcat(outbuf, error_message(code));
-	    strcat(outbuf, " - ");
-	}
-	cp = &outbuf[strlen(outbuf)];
-#if	HAVE_VSPRINTF
-	vsprintf(cp, format, ap);
-#else	/* HAVE_VSPRINTF */
-	sprintf(cp, format, ((int *) ap)[0], ((int *) ap)[1],
-		((int *) ap)[2], ((int *) ap)[3],
-		((int *) ap)[4], ((int *) ap)[5]);
-#endif	/* HAVE_VSPRINTF */
-#ifndef	DEBUG
-	syslog(LOG_AUTH|LOG_ERR, outbuf);
-#endif	/* DEBUG */
-	strcat(outbuf, "\n");
-	fprintf(stderr, outbuf);
-	free(outbuf);
-    }
-    else {
-	fprintf(stderr, no_memory_fmt, programname,
-		KADM_MAX_ERRMSG_SIZE, messages_msg);
-    }
-}
-
+
 int
 main(argc, argv)
     int argc;
@@ -280,8 +231,7 @@ main(argc, argv)
 #endif	/* DEBUG */
     krb5_init_context(&kcontext);
     krb5_init_ets(kcontext);
-    openlog(programname, LOG_AUTH|LOG_CONS|LOG_NDELAY|LOG_PID, LOG_LOCAL6);
-    (void) set_com_err_hook(kadm_com_err_proc);
+    krb5_klog_init(kcontext, "admin_server", programname, 1);
 
     if ((signal_number =
 #if	POSIX_SETJMP
@@ -354,7 +304,7 @@ main(argc, argv)
 	     * We've successfully initialized here.
 	     */
 #ifndef	DEBUG
-	    syslog(LOG_AUTH|LOG_INFO, begin_op_msg, server_name_msg);
+	    com_err(programname, 0, begin_op_msg, server_name_msg);
 #endif	/* DEBUG */
 
 	    /*
@@ -373,7 +323,7 @@ main(argc, argv)
     else {
 	/* Received an unhandled signal */
 #ifndef DEBUG
-	syslog(LOG_AUTH|LOG_INFO, unh_signal_fmt, signal_number);
+	com_err(programname, 0, unh_signal_fmt, signal_number);
 #endif
     }
 
@@ -383,6 +333,7 @@ main(argc, argv)
     output_finish(kcontext, debug_level);
     acl_finish(kcontext, debug_level);
     key_finish(kcontext, debug_level);
+    krb5_klog_close(kcontext);
     krb5_xfree(kcontext);
     exit(error);
 }

@@ -29,69 +29,13 @@
 #include <errno.h>
 
 #include "com_err.h"
-/* for STDC, com_err gets varargs/stdarg */
-#ifndef __STDC__
-#include <varargs.h>
-#endif
-
 #include "k5-int.h"
 #include "kdc_util.h"
 #include "extern.h"
 #include "kdc5_err.h"
+#include "adm_proto.h"
 
 static int nofork = 0;
-
-static void
-kdc_com_err_proc(whoami, code, format, pvar)
-	const char *whoami;
-	long code;
-	const char *format;
-	va_list pvar;
-{
-    /* XXX need some way to do this better... */
-#ifndef __STDC__
-    extern int vfprintf();
-#endif
-
-    char syslogbuf[10240], tmpbuf[10240];
-
-    memset(syslogbuf, 0, sizeof(syslogbuf));
-    memset(tmpbuf, 0, sizeof(tmpbuf));
-
-    if (whoami) {
-        fputs(whoami, stderr);
-        fputs(": ", stderr);
-    }
-
-    if (code) {
-	sprintf(tmpbuf, error_message(code));
-	strcat(syslogbuf, tmpbuf);
-	strcat(syslogbuf, " ");
-    }
-
-    if (format) {
-	vsprintf(tmpbuf, format, pvar);
-	strcat(syslogbuf, tmpbuf);
-    }
-
-    fprintf(stderr, syslogbuf);
-    putc('\n', stderr);
-    putc('\r', stderr); /* should do this only on a tty in raw mode */
-    fflush(stderr);
-
-    syslog(LOG_ERR, "%s", syslogbuf);
-
-    return;
-}
-
-void
-setup_com_err()
-{
-    krb5_init_ets(kdc_context);
-    initialize_kdc5_error_table();
-    (void) set_com_err_hook(kdc_com_err_proc);
-    return;
-}
 
 krb5_sigtype
 request_exit()
@@ -436,10 +380,8 @@ char *argv[];
 	argv[0] = strrchr(argv[0], '/')+1;
 
     krb5_init_context(&kdc_context);
-
-    setup_com_err();
-
-    openlog(argv[0], LOG_CONS|LOG_NDELAY|LOG_PID, LOG_LOCAL6); /* XXX */
+    krb5_init_ets(kdc_context);
+    krb5_klog_init(kdc_context, "kdc", argv[0], 1);
 
     process_args(argc, argv);		/* includes reading master key */
 
@@ -460,7 +402,7 @@ char *argv[];
 	finish_args(argv[0]);
 	return 1;
     }
-    syslog(LOG_INFO, "commencing operation");
+    krb5_klog_syslog(LOG_INFO, "commencing operation");
     if (retval = listen_and_process(argv[0])){
 	com_err(argv[0], retval, "while processing network requests");
 	errout++;
@@ -473,7 +415,8 @@ char *argv[];
 	com_err(argv[0], retval, "while closing database");
 	errout++;
     }
-    syslog(LOG_INFO, "shutting down");
+    krb5_klog_syslog(LOG_INFO, "shutting down");
+    krb5_klog_close(kdc_context);
     finish_args(argv[0]);
     return errout;
 }

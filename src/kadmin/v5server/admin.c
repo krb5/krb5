@@ -47,14 +47,14 @@ struct inq_context {
 static krb5_db_entry admin_def_dbent;
 static krb5_boolean admin_def_dbent_inited = 0;
 
-static const char *admin_perm_denied_fmt = "ACL entry prevents %s operation by %s";
-static const char *admin_db_write_err_fmt = "database write failed during %s operation by %s";
-static const char *admin_db_success_fmt = "%s operation for %s successfully issued by %s";
-static const char *admin_db_read_err_fmt = "database read failed during %s operation by %s";
-static const char *admin_no_cl_ident_fmt = "cannot get client identity from ticket for %s operation";
-static const char *admin_db_rename_fmt = "%s operation from %s to %s successfully issued by %s";
-static const char *admin_db_del_err_fmt = "database delete entry(%s) failed during %s operation by %s";
-static const char *admin_key_dec_err_fmt = "key decode failed for %s's key during %s operation by %s";
+static const char *admin_perm_denied_fmt = "\004ACL entry prevents %s operation by %s";
+static const char *admin_db_write_err_fmt = "\004database write failed during %s operation by %s";
+static const char *admin_db_success_fmt = "\007%s operation for %s successfully issued by %s";
+static const char *admin_db_read_err_fmt = "\004database read failed during %s operation by %s";
+static const char *admin_no_cl_ident_fmt = "\004cannot get client identity from ticket for %s operation";
+static const char *admin_db_rename_fmt = "\007%s operation from %s to %s successfully issued by %s";
+static const char *admin_db_del_err_fmt = "\004database delete entry(%s) failed during %s operation by %s";
+static const char *admin_key_dec_err_fmt = "\004key decode failed for %s's key during %s operation by %s";
 
 static const char *admin_add_principal_text = "Add Principal";
 static const char *admin_modify_principal_text = "Modify Principal";

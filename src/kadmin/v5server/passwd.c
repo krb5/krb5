@@ -40,9 +40,9 @@
 #define	KPWD_MIN_PWD_LENGTH	8
 
 extern char *programname;
-static const char *pwd_bad_old_pwd = "incorrect old password for %s";
-static const char *pwd_perm_denied = "ACL entry prevents password change for %s";
-static const char *pwd_changed_pwd = "changed password for %s";
+static const char *pwd_bad_old_pwd = "\004incorrect old password for %s";
+static const char *pwd_perm_denied = "\004ACL entry prevents password change for %s";
+static const char *pwd_changed_pwd = "\007changed password for %s";
 
 /*
  * passwd_check_princ()	- Check if the principal specified in the ticket is ok

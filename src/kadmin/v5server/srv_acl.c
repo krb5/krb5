@@ -76,7 +76,7 @@ static const char *acl_catchall_entry = "* o";
 static const char *acl_line2long_msg = "%s: line %d too long, truncated\n";
 static const char *acl_op_bad_msg = "Unrecognized ACL operation '%c' in %s\n";
 static const char *acl_syn_err_msg = "%s: syntax error at line %d <%10s...>\n";
-static const char *acl_cantopen_msg = "cannot open ACL file";
+static const char *acl_cantopen_msg = "\007cannot open ACL file";
 
 /*
  * acl_get_line()	- Get a line from the ACL file.

@@ -26,6 +26,7 @@
 #ifdef KRB4
 
 #include "k5-int.h"
+#include "adm_proto.h"
 
 #ifdef HAVE_STDARG_H
 #include <stdarg.h>
@@ -483,7 +484,7 @@ char * v4_klog( type, format, va_alist)
     case L_APPL_REQ:
 	strcpy(log_text, "PROCESS_V4:");
 	vsprintf(log_text+strlen(log_text), format, pvar);
-	syslog(logpri, log_text);
+	krb5_klog_syslog(logpri, log_text);
     /* ignore the other types... */
     }
     va_end(pvar);

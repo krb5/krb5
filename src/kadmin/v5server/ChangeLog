@@ -1,3 +1,11 @@
+
+Thu Jun 8 14:46:05 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* admin.c, passwd.c, srv_acl.c - Supply severities for error messages.
+	* proto_serv.c, srv_net.c - Supply severities for error messages and
+		change DLOG to DPRINT.
+	* srv_main.c - Supply severities for error messages.  Remove com_err
+		handling and syslog() logic for routines in libkadm.
+
 Wed Jun  7 12:03:10 1995    <tytso@rsx-11.mit.edu>
 
 	* Makefile.in (CFLAGS), srv_acl.c (acl_init): Use

@@ -27,6 +27,7 @@
 #include <syslog.h>
 #include "kdc_util.h"
 #include "extern.h"
+#include "adm_proto.h"
 
 krb5_error_code
 dispatch(pkt, from, is_secondary, response)
@@ -44,7 +45,7 @@ dispatch(pkt, from, is_secondary, response)
     /* try the replay lookaside buffer */
     if (kdc_check_lookaside(pkt, response)) {
 	/* a hit! */
-	syslog(LOG_INFO, "DISPATCH: replay found and re-transmitted");
+	krb5_klog_syslog(LOG_INFO, "DISPATCH: replay found and re-transmitted");
 	return 0;
     }
     /* try TGS_REQ first; they are more common! */

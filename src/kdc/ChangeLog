@@ -1,4 +1,10 @@
 
+Thu Jun 8 14:52:40 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* Makefile.in - Add libkadm.
+	* dispatch.c, do_as_req.c, do_tgs_req.c, kdc_util.c, kerberos_v4.c
+		main.c - Include adm_proto.h and change syslog calls to
+		calls to krb5_klog_syslog.
+
 Fri May 26 17:50:39 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in	- Define KDBDEPLIB.
 
