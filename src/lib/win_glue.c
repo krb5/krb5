@@ -30,6 +30,7 @@
 
 #ifdef KRB4
 #include <kerberosIV/krb_err.h>
+#include <kerberosIV/kadm_err.h>
 #endif
 #ifdef KRB5
 #include "krb5_err.h"
@@ -404,6 +405,7 @@ control(int mode)
 
 #ifdef KRB4
     (*et_func)(&et_krb_error_table);
+    (*et_func)(&et_kadm_error_table);
 #endif
 #ifdef KRB5
     (*et_func)(&et_krb5_error_table);
