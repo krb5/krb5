@@ -1,3 +1,7 @@
+2004-12-15  Jeffrey Altman <jaltman@mit.edu>
+
+        *.cvsignore, Makefile.in: rename krb5support32.def to k5sprt32.def
+
 2004-09-24  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in (RCFLAGS): Add -I$(SRCTOP) to get patchlevel.h.

@@ -1,3 +1,7 @@
+2004-12-15  Jeffrey Altman <jaltman@mit.edu>
+
+        * Makefile.in: rename krb5support_32.dll to k5sprt32.dll
+
 2004-12-06  Ken Raeburn  <raeburn@mit.edu>
 
 	* threads.c [DEBUG_THREADS_STATS]: Include stdio.h.
