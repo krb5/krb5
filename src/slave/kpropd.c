@@ -676,11 +676,11 @@ authorized_principal(context, p, auth_etype)
 
 	    /* if the next character is not whitespace or nul, then
 	       the match is only partial.  continue on to new lines. */
-	    if (*ptr && !isspace(*ptr))
+	    if (*ptr && !isspace((int) *ptr))
 		continue;
 
 	    /* otherwise, skip trailing whitespace */
-	    for (; *ptr && isspace(*ptr); ptr++) ;
+	    for (; *ptr && isspace((int) *ptr); ptr++) ;
 
 	    /* now, look for an etype string. if there isn't one,
 	       return true.  if there is an invalid string, continue.

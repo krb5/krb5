@@ -1,3 +1,7 @@
+2001-06-18  Ezra Peisach  <epeisach@mit.edu>
+
+	* kpropd.c (authorized_principal): Cast argument to ispace() to int.
+
 2001-01-30  Ken Raeburn  <raeburn@mit.edu>
 
 	* kpropd.c (load_database): Initialize save_stderr variable.
