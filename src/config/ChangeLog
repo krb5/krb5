@@ -1,3 +1,8 @@
+2004-12-15  Jeffrey Altman <jaltman@mit.edu>
+
+        * win-pre.in; optionally build debug symbols for release builds
+                      and rename krb5support_32.dll to k5sprt32.dll
+
 2004-11-19  Tom Yu  <tlyu@mit.edu>
 
 	* pre.in (KRB5_INCSUBDIRS): Add KRB5_INCDIR/gssrpc.
