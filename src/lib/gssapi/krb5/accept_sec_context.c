@@ -77,6 +77,12 @@
 #endif
 #include <assert.h>
 
+#ifdef CFX_EXERCISE
+#define CFX_ACCEPTOR_SUBKEY (time(0) & 1)
+#else
+#define CFX_ACCEPTOR_SUBKEY 1
+#endif
+
 /* Decode, decrypt and store the forwarded creds in the local ccache. */
 static krb5_error_code
 rd_and_store_for_creds(context, auth_context, inbuf, out_cred)
@@ -715,6 +721,25 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
    if (ctx->gss_flags & GSS_C_MUTUAL_FLAG) {
        unsigned char * ptr3;
        krb5_ui_4 seq_temp;
+       int cfx_generate_subkey;
+
+       if (ctx->proto == 1)
+	   cfx_generate_subkey = CFX_ACCEPTOR_SUBKEY;
+       else
+	   cfx_generate_subkey = 0;
+
+       if (cfx_generate_subkey) {
+	   krb5_int32 acflags;
+	   code = krb5_auth_con_getflags(context, auth_context, &acflags);
+	   if (code == 0) {
+	       acflags |= KRB5_AUTH_CONTEXT_USE_SUBKEY;
+	       code = krb5_auth_con_setflags(context, auth_context, acflags);
+	   }
+	   if (code) {
+	       major_status = GSS_S_FAILURE;
+	       goto fail;
+	   }
+       }
 
        if ((code = krb5_mk_rep(context, auth_context, &ap_rep))) {
 	   major_status = GSS_S_FAILURE;
@@ -723,6 +748,25 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
 
        krb5_auth_con_getlocalseqnumber(context, auth_context, &seq_temp);
        ctx->seq_send = seq_temp & 0xffffffffL;
+
+       if (cfx_generate_subkey) {
+	   /* Get the new acceptor subkey.  With the code above, there
+	      should always be one if we make it to this point.  */
+	   code = krb5_auth_con_getsendsubkey(context, auth_context,
+					      &ctx->acceptor_subkey);
+	   if (code != 0) {
+	       major_status = GSS_S_FAILURE;
+	       goto fail;
+	   }
+	   code = krb5int_c_mandatory_cksumtype(context,
+						ctx->acceptor_subkey->enctype,
+						&ctx->acceptor_subkey_cksumtype);
+	   if (code) {
+	       major_status = GSS_S_FAILURE;
+	       goto fail;
+	   }
+	   ctx->have_acceptor_subkey = 1;
+       }
 
        /* the reply token hasn't been sent yet, but that's ok. */
        ctx->gss_flags |= GSS_C_PROT_READY_FLAG;

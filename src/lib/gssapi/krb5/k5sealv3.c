@@ -35,9 +35,9 @@ rotate_left (void *ptr, size_t bufsiz, size_t rc)
 
 static const gss_buffer_desc empty_message = { 0, 0 };
 
-#define FLAG_SENDER_IS_ACCEPTOR	0x80
-#define FLAG_WRAP_CONFIDENTIAL	0x40
-#define FLAG_ACCEPTOR_SUBKEY	0x20
+#define FLAG_SENDER_IS_ACCEPTOR	0x01
+#define FLAG_WRAP_CONFIDENTIAL	0x02
+#define FLAG_ACCEPTOR_SUBKEY	0x04
 
 void
 _log_block(const char *file, int line, const char *label,
@@ -61,6 +61,8 @@ _log_block(const char *file, int line, const char *label,
 #endif
 }
 
+#define SFILE (strrchr(__FILE__,'/') ? 1+strrchr(__FILE__,'/') : __FILE__)
+
 krb5_error_code
 gss_krb5int_make_seal_token_v3 (krb5_context context,
 				krb5_gss_ctx_id_rec *ctx,
@@ -77,11 +79,12 @@ gss_krb5int_make_seal_token_v3 (krb5_context context,
     size_t rrc, ec;
     unsigned short tok_id;
     krb5_checksum sum;
+    krb5_keyblock *key;
 
     assert(toktype != KG_TOK_SEAL_MSG || ctx->enc != 0);
     assert(ctx->big_endian == 0);
 
-    acceptor_flag = ctx->initiate ? 0 : 0x80;
+    acceptor_flag = ctx->initiate ? 0 : FLAG_SENDER_IS_ACCEPTOR;
     key_usage = (toktype == KG_TOK_WRAP_MSG
 		 ? (ctx->initiate
 		    ? KG_USAGE_INITIATOR_SIGN
@@ -89,8 +92,13 @@ gss_krb5int_make_seal_token_v3 (krb5_context context,
 		 : (ctx->initiate
 		    ? KG_USAGE_INITIATOR_SEAL
 		    : KG_USAGE_ACCEPTOR_SEAL));
-
-#define SFILE (strrchr(__FILE__,'/') ? 1+strrchr(__FILE__,'/') : __FILE__)
+    if (ctx->have_acceptor_subkey) {
+	_log("%s:%d: using acceptor subkey\n", SFILE, __LINE__);
+	key = ctx->acceptor_subkey;
+    } else {
+	_log("%s:%d: using main key\n", SFILE, __LINE__);
+	key = ctx->enc;
+    }
 
     _log("%s:%d: wrap input token: %d @%p toktype=0x%x\n", SFILE, __LINE__,
 	 message->length, message->value, toktype);
@@ -114,8 +122,12 @@ gss_krb5int_make_seal_token_v3 (krb5_context context,
 	ec_max = SIZE_MAX - message->length - 300;
 	if (ec_max > 0xffff)
 	    ec_max = 0xffff;
+#ifdef CFX_EXERCISE
 	/* For testing only.  For performance, always set ec = 0.  */
 	ec = ec_max & rand();
+#else
+	ec = 0;
+#endif
 	_log("%s:%d: ec=%d\n", SFILE, __LINE__, ec);
 	plain.length = message->length + 16 + ec;
 	plain.data = malloc(message->length + 16 + ec);
@@ -134,8 +146,9 @@ gss_krb5int_make_seal_token_v3 (krb5_context context,
 	/* TOK_ID */
 	store_16_be(0x0504, outbuf);
 	/* flags */
-	/* no acceptor subkey stuff yet */
-	outbuf[2] = acceptor_flag | (conf_req_flag ? 0x40 : 0);
+	outbuf[2] = (acceptor_flag
+		     | (conf_req_flag ? FLAG_WRAP_CONFIDENTIAL : 0)
+		     | (ctx->have_acceptor_subkey ? FLAG_ACCEPTOR_SUBKEY : 0));
 	/* filler */
 	outbuf[3] = 0xff;
 	/* EC */
@@ -150,9 +163,8 @@ gss_krb5int_make_seal_token_v3 (krb5_context context,
 
 	cipher.ciphertext.data = outbuf + 16;
 	cipher.ciphertext.length = bufsize - 16;
-	cipher.enctype = ctx->enc->enctype;
-	err = krb5_c_encrypt(context, ctx->enc, key_usage, 0,
-			     &plain, &cipher);
+	cipher.enctype = key->enctype;
+	err = krb5_c_encrypt(context, key, key_usage, 0, &plain, &cipher);
 	zap(plain.data, plain.length);
 	free(plain.data);
 	plain.data = 0;
@@ -161,8 +173,8 @@ gss_krb5int_make_seal_token_v3 (krb5_context context,
 	_log("%s:%d: just encrypted:\n"
 	     "\t(key=%d/%02x%02x..., usage=%d, plain.length=%d,\n"
 	     "\t ciphertext=%d/%02x%02x...)\n",
-	     SFILE, __LINE__, ctx->enc->enctype,
-	     ctx->enc->contents[0], ctx->enc->contents[1],
+	     SFILE, __LINE__, key->enctype,
+	     key->contents[0], key->contents[1],
 	     key_usage, plain.length,
 	     cipher.ciphertext.length,
 	     0xff & cipher.ciphertext.data[0],
@@ -171,11 +183,13 @@ gss_krb5int_make_seal_token_v3 (krb5_context context,
 	/* Now that we know we're returning a valid token....  */
 	ctx->seq_send++;
 
+#ifdef CFX_EXERCISE
 	rrc = rand() & 0xffff;
 	if (rotate_left(outbuf+16, bufsize-16,
 			(bufsize-16) - (rrc % (bufsize - 16))))
 	    store_16_be(rrc, outbuf+6);
 	/* If the rotate fails, don't worry about it.  */
+#endif
     } else if (toktype == KG_TOK_WRAP_MSG && !conf_req_flag) {
 	krb5_data plain;
 
@@ -207,8 +221,8 @@ gss_krb5int_make_seal_token_v3 (krb5_context context,
 	/* TOK_ID */
 	store_16_be(tok_id, outbuf);
 	/* flags */
-	/* no acceptor subkey stuff yet */
-	outbuf[2] = acceptor_flag | (conf_req_flag ? 0x80 : 0);
+	outbuf[2] = (acceptor_flag
+		     | (ctx->have_acceptor_subkey ? FLAG_ACCEPTOR_SUBKEY : 0));
 	/* filler */
 	outbuf[3] = 0xff;
 	if (toktype == KG_TOK_WRAP_MSG) {
@@ -240,7 +254,7 @@ gss_krb5int_make_seal_token_v3 (krb5_context context,
 	_log_block(SFILE, __LINE__, "checksum input",
 		   plain.data, plain.length);
 
-	err = krb5_c_make_checksum(context, ctx->cksumtype, ctx->enc,
+	err = krb5_c_make_checksum(context, ctx->cksumtype, key,
 				   key_usage, &plain, &sum);
 	zap(plain.data, plain.length);
 	free(plain.data);
@@ -261,11 +275,13 @@ gss_krb5int_make_seal_token_v3 (krb5_context context,
 	ctx->seq_send++;
 
 	if (toktype == KG_TOK_WRAP_MSG) {
+#ifdef CFX_EXERCISE
 	    rrc = rand() & 0xffff;
 	    /* If the rotate fails, don't worry about it.  */
 	    if (rotate_left(outbuf+16, bufsize-16,
 			    (bufsize-16) - (rrc % (bufsize - 16))))
 		store_16_be(rrc, outbuf+6);
+#endif
 	    /* Fix up EC field.  */
 	    store_16_be(ctx->cksum_size, outbuf+4);
 	} else {
@@ -314,6 +330,7 @@ gss_krb5int_unseal_token_v3(krb5_context *contextptr,
     krb5_checksum sum;
     krb5_error_code err;
     krb5_boolean valid;
+    krb5_keyblock *key;
 
     assert(toktype != KG_TOK_SEAL_MSG || ctx->enc != 0);
     assert(ctx->big_endian == 0);
@@ -356,6 +373,30 @@ gss_krb5int_unseal_token_v3(krb5_context *contextptr,
 	return GSS_S_BAD_SIG;
     }
     LOG();
+
+    /* Two things to note here.
+
+       First, we can't really enforce the use of the acceptor's subkey,
+       if we're the acceptor; the initiator may have sent messages
+       before getting the subkey.  We could probably enforce it if
+       we're the initiator.
+
+       Second, if someone tweaks the code to not set the flag telling
+       the krb5 library to generate a new subkey in the AP-REP
+       message, the MIT library may include a subkey anyways --
+       namely, a copy of the AP-REQ subkey, if it was provided.  So
+       the initiator may think we wanted a subkey, and set the flag,
+       even though we weren't trying to set the subkey.  The "other"
+       key, the one not asserted by the acceptor, will have the same
+       value in that case, though, so we can just ignore the flag.  */
+    if (ctx->have_acceptor_subkey && (ptr[2] & FLAG_ACCEPTOR_SUBKEY)) {
+	_log("%s:%d: sender used acceptor subkey\n", SFILE, __LINE__);
+	key = ctx->acceptor_subkey;
+    } else {
+	_log("%s:%d: sender used its own key\n", SFILE, __LINE__);
+	key = ctx->enc;
+    }
+
     if (toktype == KG_TOK_WRAP_MSG) {
 	if (load_16_be(ptr) != 0x0504)
 	    DEFECTIVE;
@@ -381,7 +422,7 @@ gss_krb5int_unseal_token_v3(krb5_context *contextptr,
 
 	       For all current cryptosystems, the ciphertext size will
 	       be larger than the plaintext size.  */
-	    cipher.enctype = ctx->enc->enctype;
+	    cipher.enctype = key->enctype;
 	    cipher.ciphertext.length = bodysize - 16;
 	    cipher.ciphertext.data = ptr + 16;
 	    plain.length = bodysize - 16;
@@ -390,13 +431,13 @@ gss_krb5int_unseal_token_v3(krb5_context *contextptr,
 		goto no_mem;
 	    _log("%s:%d: about to decrypt:\n"
 		 "\t(key=%d/%02x%02x..., usage=%d, ciphertext=%d/%02x%02x...)\n",
-		 SFILE, __LINE__, ctx->enc->enctype,
-		 ctx->enc->contents[0], ctx->enc->contents[1],
+		 SFILE, __LINE__, key->enctype,
+		 key->contents[0], key->contents[1],
 		 key_usage,
 		 cipher.ciphertext.length,
 		 0xff & cipher.ciphertext.data[0],
 		 0xff & cipher.ciphertext.data[1]);
-	    err = krb5_c_decrypt(context, ctx->enc, key_usage, 0,
+	    err = krb5_c_decrypt(context, key, key_usage, 0,
 				 &cipher, &plain);
 	    if (err) {
 		free(plain.data);
@@ -453,7 +494,7 @@ gss_krb5int_unseal_token_v3(krb5_context *contextptr,
 		       plain.data, plain.length);
 	    _log_block(SFILE, __LINE__, "checksum to test",
 		       sum.contents, sum.length);
-	    err = krb5_c_verify_checksum(context, ctx->enc, key_usage,
+	    err = krb5_c_verify_checksum(context, key, key_usage,
 					 &plain, &sum, &valid);
 	    if (err)
 		goto error;
@@ -507,7 +548,7 @@ gss_krb5int_unseal_token_v3(krb5_context *contextptr,
 		       plain.data, plain.length);
 	    _log_block(SFILE, __LINE__, "checksum to test",
 		       sum.contents, sum.length);
-	err = krb5_c_verify_checksum(context, ctx->enc, key_usage,
+	err = krb5_c_verify_checksum(context, key, key_usage,
 				     &plain, &sum, &valid);
 	if (err) {
 	error:

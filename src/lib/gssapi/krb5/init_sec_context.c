@@ -819,7 +819,12 @@ mutual_auth(
        /* Keep acceptor's subkey.  */
        ctx->have_acceptor_subkey = 1;
        code = krb5_copy_keyblock(context, ap_rep_data->subkey,
-				 &ctx->subkey);
+				 &ctx->acceptor_subkey);
+       if (code)
+	   goto fail;
+       code = krb5int_c_mandatory_cksumtype(context,
+					    ctx->acceptor_subkey->enctype,
+					    &ctx->acceptor_subkey_cksumtype);
        if (code)
 	   goto fail;
    }
