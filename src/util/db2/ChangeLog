@@ -1,3 +1,7 @@
+2000-06-26  Ken Raeburn  <raeburn@mit.edu>
+
+	* btree/bt_put.c (__bt_put): Initialize "e".
+
 2000-05-01  Nalin Dahyabhai  <nalin@redhat.com>
 
 	* hash/dbm.c (kdb2_dbm_open): Don't overflow buffer "path".
