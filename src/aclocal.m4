@@ -322,9 +322,9 @@ dnl set $(KRB4) from --with-krb4=value -- WITH_KRB4
 dnl
 define(WITH_KRB4,[
 AC_ARG_WITH([krb4],
-[   --without-krb4          don't include Kerberos V4 backwards compatibility
-   --with-krb4             use V4 libraries included with V5 (default)
-   --with-krb4=KRB4DIR     use preinstalled V4 libraries],
+[  --without-krb4          don't include Kerberos V4 backwards compatibility
+  --with-krb4             use V4 libraries included with V5 (default)
+  --with-krb4=KRB4DIR     use preinstalled V4 libraries],
 ,
 withval=yes
 )dnl
