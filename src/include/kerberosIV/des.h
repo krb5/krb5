@@ -119,14 +119,21 @@ typedef struct des_ks_struct bit_64;
  * Function Prototypes
  */
 
-KRB5_DLLIMP int KRB5_CALLCONV des_key_sched
+KRB5_DLLIMP int KRB5_CALLCONV
+des_key_sched
 	PROTOTYPE((C_Block, Key_schedule));
-KRB5_DLLIMP int KRB5_CALLCONV des_pcbc_encrypt
+
+KRB5_DLLIMP int KRB5_CALLCONV
+des_pcbc_encrypt
 	PROTOTYPE((C_Block FAR *in, C_Block FAR *out, long length,
-		   Key_schedule, C_Block FAR *ivec, int encrypt));
-KRB5_DLLIMP unsigned long KRB5_CALLCONV des_quad_cksum
-	PROTOTYPE((C_Block FAR *seed, unsigned char FAR *in,
-		   unsigned KRB4_32 FAR *out, int out_count, long length));
-KRB5_DLLIMP int KRB5_CALLCONV des_string_to_key
+		   Key_schedule schedule, C_Block FAR *ivec, int encrypt));
+
+KRB5_DLLIMP unsigned long KRB5_CALLCONV
+des_quad_cksum
+	PROTOTYPE((unsigned char FAR *in, unsigned KRB4_32 FAR *out,
+		   long length, int out_count, C_Block FAR *seed));
+
+KRB5_DLLIMP int KRB5_CALLCONV
+des_string_to_key
 	PROTOTYPE((char FAR *, C_Block));
 #endif	/* DES_DEFS */

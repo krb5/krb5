@@ -1,3 +1,10 @@
+Tue Nov 18 23:37:54 1997  Tom Yu  <tlyu@mit.edu>
+
+	* des.h: Clean up prototypes so they're sane and look a little
+ 	nicer.  The ivec parameter to pcbc_encrypt is now a C_Block FAR *,
+	while the paremeters to quad_cksum have been re-ordered to match
+	reality.
+
 Mon Oct 27 01:04:24 1997  Tom Yu  <tlyu@mit.edu>
 
 	* des.h: Replace KRB_INT32 with DES_INT32 to avoid temptation to
