@@ -1,3 +1,10 @@
+Sat Mar 30 22:56:48 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in (SRCS): Took the list of sources and object files in
+		FSRCS, FOBJS, D3OBJS, and D3SRCS, and inlined them into
+		the OBJS and SRCS list.  This is necessary so that the
+		files are correctly picked up for the Macintosh build.
+
 Thu Mar 28 10:49:31 1996  Richard Basch  <basch@lehman.com>
 
 	* init_rkey.c, d3_str2ky.c, d3_procky.c: Support ENCTYPE_DES3_CBC_RAW
