@@ -1,5 +1,15 @@
 Mon Nov  7 22:36:20 1994  Theodore Y. Ts'o  (tytso@dcl)
 
+	* auth.c (auth_status): Only print each possible authentication
+		type once in the status report.
+
+	* auth.c (auth_onoff): Remove excess call to getauthmask() which
+		stomped the mask field.  Only print each possible
+		authentication type once in the help message.
+
+	* auth.c (getauthmask): Fix reversed sense of strcasecmp
+		comparison.
+
 	* auth.c (auth_enable, auth_disable): Change the input type to be
 		a char *, which is what auth_onoff wants anyway.
 
