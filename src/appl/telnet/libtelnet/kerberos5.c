@@ -107,7 +107,7 @@ krb5_auth_context * auth_context;
 
 static	krb5_data auth;
 	/* telnetd gets session key from here */
-static	krb5_tkt_authent *authdat = NULL;
+static	krb5_ticket * ticket = NULL;
 /* telnet matches the AP_REQ and AP_REP with this */
 
 /* some compilers can't hack void *, so we use the Kerberos krb5_pointer,
@@ -240,14 +240,14 @@ kerberos5_send(ap)
 				 NULL, new_creds, &auth);
 
 #ifdef	ENCRYPTION
-	krb5_auth_con_getlocalsubkey(telnet_context, auth_context, newkey);
+	krb5_auth_con_getlocalsubkey(telnet_context, auth_context, &newkey);
 	if (session_key.contents)
 	    free(session_key.contents);
 	/*
 	 * keep the key in our private storage, but don't use it yet
 	 * ---see kerberos5_reply() below 
 	 * /
-	if (newkey->keytype != KEYTYPE_DES) {
+	if (newkey && (newkey->keytype != KEYTYPE_DES)) {
 	    if (new_creds->keyblock.keytype == KEYTYPE_DES)
 		/* use the session key in credentials instead */
 		krb5_copy_keyblock_contents(telnet_context, new_creds, 
@@ -257,7 +257,8 @@ kerberos5_send(ap)
 	} else {
 	    krb5_copy_keyblock_contents(telnet_context, newkey, &session_key);
 	}
-	krb5_free_keyblock(telnet_context, newkey);
+	if (newkey)
+	    krb5_free_keyblock(telnet_context, newkey);
 #endif	/* ENCRYPTION */
 	krb5_free_cred_contents(telnet_context, &creds);
 	krb5_free_creds(telnet_context, new_creds);
@@ -293,7 +294,7 @@ kerberos5_is(ap, data, cnt)
 {
 	int r;
 	krb5_principal server;
-	krb5_ap_rep_enc_part reply;
+	krb5_keyblock *newkey = NULL;
 	krb5_data outbuf;
 #ifdef ENCRYPTION
 	Session_Key skey;
@@ -313,19 +314,15 @@ kerberos5_is(ap, data, cnt)
 					    KRB5_NT_SRV_HST,
 					    &server);
 		
-		if (authdat)
-			krb5_free_tkt_authent(telnet_context, authdat);
-
 		if (!r) {
-		    r = krb5_rd_req_simple(telnet_context, &auth, server, 0, 
-					   &authdat);
+		    r = krb5_rd_req(telnet_context, &auth_context, &auth,
+				    server, NULL, NULL, &ticket);
 		    krb5_free_principal(telnet_context, server);
 		}
 		if (r) {
 			char errbuf[128];
 
 		    errout:
-			authdat = 0;
 			(void) strcpy(errbuf, "Read req failed: ");
 			(void) strcat(errbuf, error_message(r));
 			Data(ap, KRB_REJECT, errbuf, -1);
@@ -335,23 +332,13 @@ kerberos5_is(ap, data, cnt)
 		}
 		if ((ap->way & AUTH_HOW_MASK) == AUTH_HOW_MUTUAL) {
 		    /* do ap_rep stuff here */
-		    reply.ctime = authdat->authenticator->ctime;
-		    reply.cusec = authdat->authenticator->cusec;
-		    reply.subkey = 0;	/* use the one he gave us, so don't
-					   need to return one here */
-		    reply.seq_number = 0; /* we don't do seq #'s. */
-
-		    if (r = krb5_mk_rep(telnet_context, &reply,
-					authdat->authenticator->subkey ?
-					authdat->authenticator->subkey :
-					authdat->ticket->enc_part2->session,
-					&outbuf)) {
+		    if (r = krb5_mk_rep(telnet_context, auth_context, &outbuf))
 			goto errout;
-		    }
+
 		    Data(ap, KRB_RESPONSE, outbuf.data, outbuf.length);
 		} 
 		if (krb5_unparse_name(telnet_context, 
-				      authdat->ticket->enc_part2 ->client,
+				      ticket->enc_part2 ->client,
 				      &name))
 			name = 0;
 		Data(ap, KRB_ACCEPT, name, name ? -1 : 0);
@@ -363,22 +350,26 @@ kerberos5_is(ap, data, cnt)
 		
 		if (name)
 		    free(name);
-	    	if (authdat->authenticator->subkey &&
-		    authdat->authenticator->subkey->keytype == KEYTYPE_DES) {
+		krb5_auth_con_getremotesubkey(telnet_context, auth_context,
+					      &newkey);
+	    	if (newkey && newkey->keytype == KEYTYPE_DES) {
 		    if (session_key.contents)
 			free(session_key.contents);
-		    krb5_copy_keyblock_contents(telnet_context, 
-						authdat->authenticator->subkey,
+		    krb5_copy_keyblock_contents(telnet_context, newkey,
 					    	&session_key);
-		} else if (authdat->ticket->enc_part2->session->keytype ==
-			   KEYTYPE_DES) {
-		    if (session_key.contents)
-			free(session_key.contents);
-		    krb5_copy_keyblock_contents(telnet_context, 
-					   authdat->ticket->enc_part2->session,
+		    krb5_free_keyblock(telnet_context, newkey);
+		} else {
+		    if (newkey)
+		    	krb5_free_keyblock(telnet_context, newkey);
+		    if (ticket->enc_part2->session->keytype == KEYTYPE_DES) {
+		        if (session_key.contents)
+			    free(session_key.contents);
+		        krb5_copy_keyblock_contents(telnet_context, 
+					   ticket->enc_part2->session,
 					   &session_key);
-		} else
-		    break;
+		    } else
+		        break;
+		}
 		
 #ifdef ENCRYPTION
 		skey.type = SK_DES;
@@ -391,8 +382,7 @@ kerberos5_is(ap, data, cnt)
 	case KRB_FORWARD:
 		inbuf.data = (char *)data;
 		inbuf.length = cnt;
-		if (r = rd_and_store_for_creds(telnet_context, &inbuf, 
-					       authdat->ticket, 
+		if (r = rd_and_store_for_creds(telnet_context, &inbuf, ticket, 
 					       UserNameRequested)) {
 		    char errbuf[128];
 		    
@@ -514,7 +504,7 @@ kerberos5_status(ap, name, level)
 		return(level);
 
 	if (UserNameRequested &&
-	    krb5_kuserok(telnet_context, authdat->ticket->enc_part2->client, 
+	    krb5_kuserok(telnet_context, ticket->enc_part2->client, 
 			 UserNameRequested))
 	{
 		strcpy(name, UserNameRequested);
