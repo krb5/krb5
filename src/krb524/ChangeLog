@@ -1,3 +1,8 @@
+2002-06-14  Tom Yu  <tlyu@mit.edu>
+
+	* krb524.h: Back out erroneous merge of post-1.2.5 change
+	temporarily.
+
 2002-06-14  Alexandra Ellwood <lxs@mit.edu>
 
 	* krb524.h: Updated C++ protection to not interfere with emacs
