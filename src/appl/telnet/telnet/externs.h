@@ -69,9 +69,11 @@
 #   include <sys/termio.h>
 #  else
 #   include <termios.h>
-#   define termio termios
 #  endif
 # endif
+#endif
+#if defined(USE_TERMIO) && !defined(SYSV_TERMIO)
+# define termio termios
 #endif
 #if defined(NO_CC_T) || !defined(USE_TERMIO)
 # if !defined(USE_TERMIO)

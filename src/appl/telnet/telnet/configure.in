@@ -37,7 +37,7 @@ CHECK_SIGNALS
 WITH_KRB4
 AC_ARG_WITH([krb4],,dnl
 ADD_DEF(-DKRB4)
-K4LIB="$(KRB4)/lib/libkrb.a $(KRB4)/lib/libdes.a",
+K4LIB='$(KRB4)/lib/libkrb.a $(KRB4)/lib/libdes.a',
 K4LIB=)
 AC_SUBST(K4LIB)
 AC_CHECK_LIB(socket,main)

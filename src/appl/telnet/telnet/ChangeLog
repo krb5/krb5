@@ -1,3 +1,10 @@
+Thu Dec  1 13:09:34 1994    <tytso@rsx-11.mit.edu>
+
+	* externs.h: If USE_TERMIO is  defined and SYSV_TERMIO isn't,
+		then always #define termio to termios.
+
+	* configure: Set K4LIBS correctly.
+
 Fri Nov 18 01:21:54 1994  Mark Eichin  <eichin@cygnus.com>
 
 	* Makefile.in (install): install telnet man page.
