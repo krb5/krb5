@@ -1,3 +1,8 @@
+2000-02-16  Ezra Peisach  <epeisach@mit.edu>
+
+	* commands.c: Move include of libtelnet/auth.h earlier to provide
+	prototype for auth_cmd.
+
 1999-10-26  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,

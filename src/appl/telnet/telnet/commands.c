@@ -76,6 +76,11 @@
 #include "defines.h"
 #include "types.h"
 
+#if defined(AUTHENTICATION) || defined(FORWARD)
+#include <libtelnet/auth.h>
+#endif
+
+
 #if !defined(CRAY) && !defined(sysV88)
 #include <netinet/in_systm.h>
 # if (defined(vax) || defined(tahoe) || defined(hp300)) && !defined(ultrix)
@@ -2132,7 +2137,6 @@ encrypt_cmd(argc, argv)
 #endif	/* ENCRYPTION */
 
 #if	defined(FORWARD)
-#include <libtelnet/auth.h>
 
 /*
  * The FORWARD command.
