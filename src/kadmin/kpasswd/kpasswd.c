@@ -459,7 +459,7 @@ main(argc,argv)
     rd_priv_resp.oper_code = msg_data.data[1];
     rd_priv_resp.retn_code = msg_data.data[2];
     if (msg_data.length > 3 && msg_data.data[3]) {
-	rd_priv_resp.message = malloc(msg_data.length - 2);
+	rd_priv_resp.message = (char *)malloc(msg_data.length - 2);
 	if (rd_priv_resp.message) {
 	    memcpy(rd_priv_resp.message, msg_data.data + 3,
 		   msg_data.length - 3);
