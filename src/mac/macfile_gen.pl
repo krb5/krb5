@@ -3,19 +3,24 @@
 # Usage:
 # macfile_gen.pl list-type start-path prefix
 # 	list-type is one of:
-#		all-files				-- complete list of mac sources, relative to root
-#		all-folders				-- complete list of mac directories, relative to root
-#		gss-sources				-- complete list of mac GSS sources, relative to root
-#		krb5-sources			-- complete list of mac Krb5 sources, relative to root
-#		gss-objects-ppc-debug	-- complete list of mac GSS PPC debug objects, relative to root
-#		gss-objects-68k-debug	-- complete list of mac GSS 68K debug objects, relative to root
-#		gss-objects-ppc-final	-- complete list of mac GSS PPC final objects, relative to root
-#		gss-objects-68k-final	-- complete list of mac GSS 68K final objects, relative to root
-#		krb5-objects-ppc-debug	-- complete list of mac Kerberos v5 PPC debug objects, relative to root
-#		krb5-objects-68k-debug	-- complete list of mac Kerberos v5 68K debug objects, relative to root
-#		krb5-objects-ppc-final	-- complete list of mac Kerberos v5 PPC final objects, relative to root
-#		krb5-objects-68k-final	-- complete list of mac Kerberos v5 68K final objects, relative to root
-#		include-folders			-- complete list of include paths, relative to root
+#		all-files					-- complete list of mac sources, relative to root
+#		all-folders					-- complete list of mac directories, relative to root
+#		gss-sources					-- complete list of mac GSS sources, relative to root
+#		krb5-sources				-- complete list of mac Krb5 sources, relative to root
+#		profile-sources				-- complete list of mac profile sources, relative to root
+#		gss-objects-ppc-debug		-- complete list of mac GSS PPC debug objects, relative to root
+#		gss-objects-68k-debug		-- complete list of mac GSS 68K debug objects, relative to root
+#		gss-objects-ppc-final		-- complete list of mac GSS PPC final objects, relative to root
+#		gss-objects-68k-final		-- complete list of mac GSS 68K final objects, relative to root
+#		krb5-objects-ppc-debug		-- complete list of mac Kerberos v5 PPC debug objects, relative to root
+#		krb5-objects-68k-debug		-- complete list of mac Kerberos v5 68K debug objects, relative to root
+#		krb5-objects-ppc-final		-- complete list of mac Kerberos v5 PPC final objects, relative to root
+#		krb5-objects-68k-final		-- complete list of mac Kerberos v5 68K final objects, relative to root
+#		profile-objects-ppc-debug	-- complete list of mac profile PPC debug objects, relative to root
+#		profile-objects-68k-debug	-- complete list of mac profile v5 68K debug objects, relative to root
+#		profile-objects-ppc-final	-- complete list of mac profile v5 PPC final objects, relative to root
+#		profile-objects-68k-final	-- complete list of mac profile v5 68K final objects, relative to root
+#		include-folders				-- complete list of include paths, relative to root
 #
 #	input on stdin
 #	output on stdout
@@ -75,9 +80,15 @@ if ($action eq "all-folders") {
 } elsif ($action eq "krb5-sources") {
 
 	print (STDERR "# Building Kerberos v5 source list… ");
-	@outputList = grep (!/:gssapi:/, @sourceList);
+	@outputList = grep (!/:gssapi:|:profile:|:et:/, @sourceList);
 	print (STDERR "Done. \n");
 
+} elsif ($action eq "profile-sources") {
+
+	print (STDERR "# Building profile source list… ");
+	@outputList = grep (/:profile:/, @sourceList);
+	print (STDERR "Done. \n");
+	
 } elsif ($action eq "gss-objects-ppc-debug") {
 
 	print (STDERR "# Building GSS PPC debug object list… ");
@@ -110,28 +121,56 @@ if ($action eq "all-folders") {
 
 	print (STDERR "# Building Kerberos v5 PPC debug object list… ");
 	@outputList = grep (s/\.c$/\.ppcd.o/, @sourceList);
-	@outputList = grep (!/:gssapi:/, @outputList);
+	@outputList = grep (!/:gssapi:|:profile:|:et:/, @outputList);
 	print (STDERR "Done. \n");
 
 } elsif ($action eq "krb5-objects-68k-debug") {
 
 	print (STDERR "# Building Kerberos v5 68K debug object list… ");
 	@outputList = grep (s/\.c$/\.68kd.o/, @sourceList);
-	@outputList = grep (!/:gssapi:/, @outputList);
+	@outputList = grep (!/:gssapi:|:profile:|:et:/, @outputList);
 	print (STDERR "Done. \n");
 
 } elsif ($action eq "krb5-objects-ppc-final") {
 
 	print (STDERR "# Building Kerberos v5 PPC final object list… ");
 	@outputList = grep (s/\.c$/\.ppcf.o/, @sourceList);
-	@outputList = grep (!/:gssapi:/, @outputList);
+	@outputList = grep (!/:gssapi:|:profile:|:et:/, @outputList);
 	print (STDERR "Done. \n");
 
 } elsif ($action eq "krb5-objects-68k-final") {
 
 	print (STDERR "# Building Kerberos v5 68K final object list… ");
 	@outputList = grep (s/\.c$/\.68kf.o/, @sourceList);
-	@outputList = grep (!/:gssapi:/, @outputList);
+	@outputList = grep (!/:gssapi:|:profile:|:et:/, @outputList);
+	print (STDERR "Done. \n");
+
+} elsif ($action eq "profile-objects-ppc-debug") {
+
+	print (STDERR "# Building profile PPC debug object list… ");
+	@outputList = grep (s/\.c$/\.ppcd.o/, @sourceList);
+	@outputList = grep (/:profile:|:et:/, @outputList);
+	print (STDERR "Done. \n");
+
+} elsif ($action eq "profile-objects-68k-debug") {
+
+	print (STDERR "# Building profile 68K debug object list… ");
+	@outputList = grep (s/\.c$/\.68kd.o/, @sourceList);
+	@outputList = grep (/:profile:|:et:/, @outputList);
+	print (STDERR "Done. \n");
+
+} elsif ($action eq "profile-objects-ppc-final") {
+
+	print (STDERR "# Building profile PPC final object list… ");
+	@outputList = grep (s/\.c$/\.ppcf.o/, @sourceList);
+	@outputList = grep (/:profile:|:et:/, @outputList);
+	print (STDERR "Done. \n");
+
+} elsif ($action eq "profile-objects-68k-final") {
+
+	print (STDERR "# Building profile 68K final object list… ");
+	@outputList = grep (s/\.c$/\.68kf.o/, @sourceList);
+	@outputList = grep (/:profile:|:et:/, @outputList);
 	print (STDERR "Done. \n");
 
 } elsif ($action eq "include-folders") {
