@@ -7,19 +7,19 @@ NO_OUTPRE=1
 all-windows::
 	@echo Making in windows\lib
 	cd lib
-	$(MAKE) -$(MFLAGS) LIBCMD=$(LIBCMD)
+	$(MAKE) -$(MFLAGS)
 	@echo Making in windows\cns
 	cd ..\cns
-	$(MAKE) -$(MFLAGS) LIBCMD=$(LIBCMD)
+	$(MAKE) -$(MFLAGS)
 	@echo Making in windows\wintel
 	cd ..\wintel
-	$(MAKE) -$(MFLAGS) LIBCMD=$(LIBCMD)
+	$(MAKE) -$(MFLAGS)
 	@echo Making in windows\gss
 	cd ..\gss
-	$(MAKE) -$(MFLAGS) LIBCMD=$(LIBCMD)
+	$(MAKE) -$(MFLAGS)
 	@echo Making in windows\gina
 	cd ..\gina
-	$(MAKE) -$(MFLAGS) LIBCMD=$(LIBCMD)
+	$(MAKE) -$(MFLAGS)
 	cd ..
 
 clean-windows::

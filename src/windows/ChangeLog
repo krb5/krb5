@@ -1,3 +1,8 @@
+Wed May 19 13:14:38 1999  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in: Remove unncessary LIBCMD definition from recursive
+		make invocations.
+
 Tue May 18 19:52:56 1999  Danilo Almeida  <dalmeida@mit.edu>
 
 	* Makefile.in: Remove - from recursive Win32 make invocation.
