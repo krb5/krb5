@@ -151,7 +151,7 @@ const char *prog;
 				break;
 		}
 	}
-	if (FD_ISSET(sec_udp_port_fd, &readfds)) {
+	if ((sec_udp_port_fd > 0) && FD_ISSET(sec_udp_port_fd, &readfds)) {
 		retval = process_packet(sec_udp_port_fd, prog, 1);
 		if (retval) {
 			if (errcount++ > 3)
