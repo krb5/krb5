@@ -1,3 +1,9 @@
+Tue Jul 15 22:15:09 1997  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* serialize.c (krb5_register_serializer): Only copy over the old
+		table when there's an old table to copy over.  Otherwise,
+		BoundsChecker complains about memcpy(foo, NULL, 0).
+
 Tue Mar 25 00:32:55 1997  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* preauth.c (obtain_sam_padata): Fix handling of the sam-timestamp

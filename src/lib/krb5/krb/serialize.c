@@ -70,8 +70,9 @@ krb5_register_serializer(kcontext, entry)
 	if ((stable = (krb5_ser_handle) malloc(sizeof(krb5_ser_entry) *
 					       (kcontext->ser_ctx_count+1)))) {
 	    /* Copy in old table */
-	    memcpy(stable, kcontext->ser_ctx,
-		   sizeof(krb5_ser_entry) * kcontext->ser_ctx_count);
+	    if (kcontext->ser_ctx_count)
+	         memcpy(stable, kcontext->ser_ctx,
+		        sizeof(krb5_ser_entry) * kcontext->ser_ctx_count);
 	    /* Copy in new entry */
 	    memcpy(&stable[kcontext->ser_ctx_count], entry,
 		   sizeof(krb5_ser_entry));
