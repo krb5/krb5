@@ -92,7 +92,7 @@ dnl append subdir rule -- MAKE_SUBDIRS("making",all)
 dnl
 define(AC_DIVERSION_MAKEFILE,9)dnl   things that get pushed on the makefile
 dnl
-define(MAKE_SUBDIRS,[
+define(_MAKE_SUBDIRS,[
 AC_DIVERT_PUSH(AC_DIVERSION_MAKEFILE)dnl
 changequote(<<<,>>>)dnl
 
@@ -102,11 +102,13 @@ $2::<<<
 	do \
 		(cd $$i ; echo>>> $1 <<<"in $(CURRENT_DIR)$$i..."; \
 			$(MAKE) $(MFLAGS) CC="$(CC)" CCOPTS="$(CCOPTS)" \
-			CURRENT_DIR=$(CURRENT_DIR)$$i/ >>>$2<<<); \
+			CURRENT_DIR=$(CURRENT_DIR)$$i/ >>>$3<<<); \
 	done>>>
 changequote([,])dnl
 AC_DIVERT_POP()dnl
 ])dnl
+define(MAKE_SUBDIRS,[
+_MAKE_SUBDIRS($1, $2, $2)])dnl
 dnl
 dnl take saved makefile stuff and put it in the Makefile
 dnl

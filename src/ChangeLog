@@ -1,3 +1,12 @@
+Fri Apr 14 08:23:52 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* aclocal.m4 (MAKE_SUBDIRS, _MAKE_SUBDIRS): Creatre new macro
+		_MAKE_SUBDIRS which works like MAKE_SUBDIRS except that it
+		is possible for the target name in the parent Makefile and
+		the target name which should be built in each of the
+		subdirectories can be different.  MAKE_SUBDIRS is now a
+		special case of _MAKE_SUBDIRS.
+
 Fri Mar 31 21:27:13 1995  Theodore Y. Ts'o  (tytso@dcl)
 
 	* aclocal.m4: Use the local autoconf when rebuilding the configure
