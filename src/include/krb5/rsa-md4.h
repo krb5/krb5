@@ -1,4 +1,29 @@
 /*
+ * $Source$
+ * $Author$
+ * $Id$
+ *
+ * Copyright 1991 by the Massachusetts Institute of Technology.
+ * All Rights Reserved.
+ *
+ * For copying and distribution information, please see the file
+ * <krb5/copyright.h>.
+ *
+ * RSA MD4 header file, with Kerberos/STDC additions.
+ */
+
+#ifndef __KRB5_RSA_MD4_H__
+#define __KRB5_RSA_MD4_H__
+
+/* 4 words of buffer, plus 8 bytes of count */
+#define RSA_MD4_CKSUM_LENGTH	(4*sizeof(krb5_int32)+8)
+#define RSA_MD4_DES_CKSUM_LENGTH	(4*sizeof(krb5_int32)+8)
+
+extern krb5_checksum_entry
+    rsa_md4_cksumtable_entry,
+    rsa_md4_des_cksumtable_entry;
+
+/*
  **********************************************************************
  ** md4.h -- Header file for implementation of MD4                   **
  ** RSA Data Security, Inc. MD4 Message Digest Algorithm             **
@@ -31,8 +56,12 @@
  **********************************************************************
  */
 
+#ifdef BITS32
 /* typedef a 32 bit type */
 typedef unsigned long int UINT4;
+#else
+ error: you gotta fix this implementation to deal with non-32 bit words;
+#endif
 
 /* Data structure for MD4 (Message Digest) computation */
 typedef struct {
@@ -42,12 +71,19 @@ typedef struct {
   unsigned char digest[16];     /* actual digest after MD4Final call */
 } MD4_CTX;
 
+#ifdef __STDC__
+extern void MD4Init(MD4_CTX *);
+extern void MD4Update(MD4_CTX *, unsigned char *, unsigned int);
+extern void MD4Final(MD4_CTX *);
+#else
 void MD4Init ();
 void MD4Update ();
 void MD4Final ();
+#endif
 
 /*
  **********************************************************************
  ** End of md4.h                                                     **
  ******************************* (cut) ********************************
  */
+#endif /* __KRB5_RSA_MD4_H__ */
