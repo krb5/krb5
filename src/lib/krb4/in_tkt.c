@@ -41,6 +41,10 @@ extern int krb_debug;
 #endif
 #endif
 
+#ifndef O_SYNC
+#define O_SYNC 0
+#endif
+
 in_tkt(pname,pinst)
     char *pname;
     char *pinst;

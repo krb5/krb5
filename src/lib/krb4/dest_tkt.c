@@ -22,6 +22,10 @@
 #include <sys/fcntl.h>
 #endif
 
+#ifndef O_SYNC
+#define O_SYNC 0
+#endif
+
 /*
  * dest_tkt() is used to destroy the ticket store upon logout.
  * If the ticket file does not exist, dest_tkt() returns RET_TKFIL.

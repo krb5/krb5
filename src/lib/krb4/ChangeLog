@@ -1,3 +1,9 @@
+Sun May 21 16:06:20 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* dest_tkt.c: If O_SYNC is not defined, define as 0.
+
+	* in_tkt.c: If O_SYNC is not defined, define as 0.
+
 Thu May 18 14:43:51 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* in_tkt.c: Use HAVE_SETREUID and HAVE_SETRESUID to define 
