@@ -1,3 +1,7 @@
+2003-03-06  Alexandra Ellwood  <lxs@mit.edu>
+
+    * prng.c: use Unix randomness sources on Mac OS X.
+
 2003-03-05  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (OBJFILELIST, OBJFILEDEP) [##DOS]: Add aes.lst.

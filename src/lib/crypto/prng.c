@@ -118,10 +118,9 @@ void prng_cleanup (void)
 
 /*
  * Routines to get entropy from the OS.  For UNIX we try /dev/urandom
- * and /dev/random.  Currently we don't do anything for pre-OSX Mac and
- * Windows.
+ * and /dev/random.  Currently we don't do anything for Windows.
  */
-#if defined(_WIN32) || (defined(TARGET_OS_MAC) && !defined(TARGET_API_MAC_OSX))
+#if defined(_WIN32)
 
 krb5_error_code KRB5_CALLCONV
 krb5_c_random_os_entropy (
@@ -132,7 +131,7 @@ krb5_c_random_os_entropy (
   return 0;
 }
 
-#else /*Windows and non-OSX Mac*/
+#else /*Windows*/
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
