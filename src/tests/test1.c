@@ -52,11 +52,11 @@ tkt_test_1()
 	return;
     }
 
-    serv_k.keytype = 1;		/* XXX symbolic constant */
+    serv_k.enctype = 1;		/* XXX symbolic constant */
     serv_k.length = 8;		/* XXX symbolic constant */
     serv_k.contents = key_one;
     
-    sess_k.keytype = 1;		/* XXX symbolic constant */
+    sess_k.enctype = 1;		/* XXX symbolic constant */
     sess_k.length = 8;		/* XXX symbolic constant */
     sess_k.contents = key_two;
 
@@ -149,7 +149,7 @@ tkt_test_1()
 
     nsess = tk_out->enc_part2->session;
 
-    if (nsess->keytype != 1) {
+    if (nsess->enctype != 1) {
 	com_err("tkt_test_1", 0, "wrong session key type");
 	return;
     }

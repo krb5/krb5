@@ -1,5 +1,9 @@
+Wed Sep 06 14:20:57 1995   Chris Provenzano (proven@mit.edu)
+
+        * test1.c : s/keytype/enctype/g, s/KEYTYPE/ENCTYPE/g
 
 Fri Sep 1 14:39:07 EDT 1995	Paul Park	(pjpark@mit.edu)
+
 	* Makefile.in - Add test for "old" dump format.
 
 Thu Aug 24 18:48:01 1995  Theodore Y. Ts'o  <tytso@dcl>
