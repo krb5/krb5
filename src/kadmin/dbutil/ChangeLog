@@ -1,5 +1,10 @@
 2001-06-18  Ezra Peisach  <epeisach@mit.edu>
 
+	* dump.c (name_matches): Cleanup warning of assignments in
+	conditionals.
+
+2001-06-18  Ezra Peisach  <epeisach@mit.edu>
+
 	* dump.c: Include regex.h if exists and if HAVE_REGCOMP
 	defined. Preior to this, regex.h was never included.
 

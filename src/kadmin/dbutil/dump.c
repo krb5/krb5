@@ -356,9 +356,8 @@ name_matches(name, arglist)
 	/*
 	 * Compile the regular expression.
 	 */
-	if (match_error = regcomp(&match_exp,
-				  arglist->names[i],
-				  REG_EXTENDED)) {
+	match_error = regcomp(&match_exp, arglist->names[i], REG_EXTENDED);
+	if (match_error) {
 	    errmsg_size = regerror(match_error,
 				   &match_exp,
 				   match_errmsg,
@@ -369,7 +368,8 @@ name_matches(name, arglist)
 	/*
 	 * See if we have a match.
 	 */
-	if (match_error = regexec(&match_exp, name, 1, &match_match, 0)) {
+	match_error = regexec(&match_exp, name, 1, &match_match, 0);
+	if (match_error) {
 	    if (match_error != REG_NOMATCH) {
 		errmsg_size = regerror(match_error,
 				       &match_exp,
