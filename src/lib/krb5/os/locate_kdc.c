@@ -113,14 +113,13 @@ _krb5_use_dns_realm(context)
  */
 
 krb5_error_code
-krb5_locate_srv_conf(context, realm, name, addr_pp, naddrs, master_index, nmasters)
+krb5_locate_srv_conf(context, realm, name, addr_pp, naddrs, get_masters)
     krb5_context context;
     const krb5_data *realm;
     const char * name;
     struct sockaddr **addr_pp;
     int *naddrs;
-    int *master_index;
-    int *nmasters;
+    int get_masters;
 {
     const char	*realm_srv_names[4];
     char **masterlist, **hostlist, *host, *port, *cp;
@@ -190,10 +189,7 @@ krb5_locate_srv_conf(context, realm, name, addr_pp, naddrs, master_index, nmaste
 	return 0;
     }
     
-    if (master_index) {
-        *master_index = 0;
-	*nmasters = 0;
-
+    if (get_masters) {
 	realm_srv_names[0] = "realms";
 	realm_srv_names[1] = host;
 	realm_srv_names[2] = "admin_server";
@@ -237,8 +233,10 @@ krb5_locate_srv_conf(context, realm, name, addr_pp, naddrs, master_index, nmaste
 
     addr_p = (struct sockaddr *)malloc (sizeof (struct sockaddr) * count);
     if (addr_p == NULL) {
-        profile_free_list(hostlist);
-        profile_free_list(masterlist);
+        if (hostlist)
+            profile_free_list(hostlist);
+        if (masterlist)
+            profile_free_list(masterlist);
 	return ENOMEM;
     }
 
@@ -267,12 +265,12 @@ krb5_locate_srv_conf(context, realm, name, addr_pp, naddrs, master_index, nmaste
 	if (masterlist) {
 	    for (j=0; masterlist[j]; j++) {
 		if (strcasecmp(hostlist[i], masterlist[j]) == 0) {
-		    *master_index = out;
 		    ismaster = 1;
 		}
 	    }
 	}
 
+        if ( !get_masters || ismaster ) {
 	switch (hp->h_addrtype) {
 
 #ifdef HAVE_NETINET_IN_H
@@ -291,8 +289,10 @@ krb5_locate_srv_conf(context, realm, name, addr_pp, naddrs, master_index, nmaste
 			realloc ((char *)addr_p,
 				 sizeof(struct sockaddr) * count);
 		    if (addr_p == NULL) {
-                        profile_free_list(hostlist);
-                        profile_free_list(masterlist);
+                        if (hostlist)
+                            profile_free_list(hostlist);
+                        if (masterlist)
+                            profile_free_list(masterlist);
 			return ENOMEM;
                     }
 		}
@@ -307,12 +307,13 @@ krb5_locate_srv_conf(context, realm, name, addr_pp, naddrs, master_index, nmaste
 	default:
 	    break;
 	}
-	if (ismaster)
-	    *nmasters = out - *master_index;
+        }
     }
 
-    profile_free_list(hostlist);
-    profile_free_list(masterlist);
+    if (hostlist)
+        profile_free_list(hostlist);
+    if (masterlist)
+        profile_free_list(masterlist);
 
     if (out == 0) {     /* Couldn't resolve any KDC names */
         free (addr_p);
@@ -592,78 +593,29 @@ krb5_locate_srv_dns(realm, service, protocol, addr_pp, naddrs)
  */
 
 krb5_error_code
-krb5_locate_kdc(context, realm, addr_pp, naddrs, master_index, nmasters)
+krb5_locate_kdc(context, realm, addr_pp, naddrs, get_masters)
     krb5_context context;
     const krb5_data *realm;
     struct sockaddr **addr_pp;
     int *naddrs;
-    int *master_index;
-    int *nmasters;
+    int get_masters;
 {
     krb5_error_code code;
-#ifdef KRB5_DNS_LOOKUP
-    struct sockaddr *admin_addr_p, *kdc_addr_p;
-    int nadmin_addrs, nkdc_addrs;
-    int i,j;
-#endif /* KRB5_DNS_LOOKUP */
 
     /*
      * We always try the local file first
      */
 
     code = krb5_locate_srv_conf(context, realm, "kdc", addr_pp, naddrs,
-                                 master_index, nmasters);
+                                 get_masters);
 
 #ifdef KRB5_DNS_LOOKUP
     if (code) {
         int use_dns = _krb5_use_dns_kdc(context);
         if ( use_dns ) {
-            code = krb5_locate_srv_dns(realm, "_kerberos", "_udp",
-                                        addr_pp, naddrs);
-            if ( master_index && nmasters ) {
-
-                code = krb5_locate_srv_dns(realm, "_kerberos-adm", "_tcp",
-                                            &admin_addr_p, &nadmin_addrs);
-                if ( code ) {
-                    free(*addr_pp);
-                    *addr_pp = NULL;
-                    *naddrs = 0;
-                    return(code);
-                } 
-
-                kdc_addr_p = *addr_pp;
-                nkdc_addrs = *naddrs;
-
-                *naddrs = 0;
-                *addr_pp = (struct sockaddr *) malloc(sizeof(*kdc_addr_p));
-                if ( *addr_pp == NULL ) {
-                    free(kdc_addr_p);
-                    free(admin_addr_p);
-                    return ENOMEM;
-                }
-
-                for ( i=0; i<nkdc_addrs; i++ ) {
-                    for ( j=0 ; j<nadmin_addrs; j++) {
-                        if ( !memcmp(&kdc_addr_p[i].sa_data[2],&admin_addr_p[j].sa_data[2],4) ) {
-                            memcpy(&(*addr_pp)[(*naddrs)],&kdc_addr_p[i],
-                                    sizeof(struct sockaddr));
-                            (*naddrs)++;
-                            break;
-                        }
-                    }
-                }
-
-                free(kdc_addr_p);
-                free(admin_addr_p);
-
-                if ( *naddrs == 0 ) {
-                    free(*addr_pp);
-                    *addr_pp = NULL;
-                    return KRB5_REALM_CANT_RESOLVE;
-                }
-                *master_index = 1;
-                *nmasters = *naddrs;
-            }
+            code = krb5_locate_srv_dns(realm, 
+                                        get_masters ? "_kerberos-master" : "_kerberos",
+                                        "_udp", addr_pp, naddrs);
         }
     }
 #endif /* KRB5_DNS_LOOKUP */

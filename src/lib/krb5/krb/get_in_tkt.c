@@ -84,13 +84,13 @@ static krb5_error_code make_preauth_list PROTOTYPE((krb5_context,
  */
 static krb5_error_code
 send_as_request(context, request, time_now, ret_err_reply, ret_as_reply,
-		master)
+		use_master)
     krb5_context 		context;
     krb5_kdc_req		*request;
     krb5_timestamp 		*time_now;
     krb5_error ** 		ret_err_reply;
     krb5_kdc_rep ** 		ret_as_reply;
-    int *			master;
+    int 			use_master;
 {
     krb5_kdc_rep *as_reply = 0;
     krb5_error_code retval;
@@ -116,7 +116,7 @@ send_as_request(context, request, time_now, ret_err_reply, ret_as_reply,
     k4_version = packet->data[0];
     retval = krb5_sendto_kdc(context, packet, 
 			     krb5_princ_realm(context, request->client),
-			     &reply, master);
+			     &reply, use_master);
     krb5_free_data(context, packet);
     if (retval)
 	goto cleanup;
@@ -559,7 +559,7 @@ cleanup:
     return (retval);
 }
 
-/* begin appdefaults parsing code.  This should almost certainly move
+/* begin libdefaults parsing code.  This should almost certainly move
    somewhere else, but I don't know where the correct somewhere else
    is yet. */
 
@@ -595,7 +595,7 @@ _krb5_conf_boolean(s)
 }
 
 static krb5_error_code
-krb5_appdefault_string(context, realm, option, ret_value)
+krb5_libdefault_string(context, realm, option, ret_value)
      krb5_context context;
      const krb5_data *realm;
      const char *option;
@@ -673,7 +673,7 @@ goodbye:
 /* as well as the DNS code */
 
 krb5_error_code
-krb5_appdefault_boolean(context, realm, option, ret_value)
+krb5_libdefault_boolean(context, realm, option, ret_value)
      krb5_context context;
      const char *option;
      const krb5_data *realm;
@@ -682,7 +682,7 @@ krb5_appdefault_boolean(context, realm, option, ret_value)
     char *string = NULL;
     krb5_error_code retval;
 
-    retval = krb5_appdefault_string(context, realm, option, &string);
+    retval = krb5_libdefault_string(context, realm, option, &string);
 
     if (retval)
 	return(retval);
@@ -696,7 +696,7 @@ krb5_appdefault_boolean(context, realm, option, ret_value)
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_get_init_creds(context, creds, client, prompter, prompter_data,
 		    start_time, in_tkt_service, options, gak_fct, gak_data,
-		    master, as_reply)
+		    use_master, as_reply)
      krb5_context context;
      krb5_creds *creds;
      krb5_principal client;
@@ -707,7 +707,7 @@ krb5_get_init_creds(context, creds, client, prompter, prompter_data,
      krb5_get_init_creds_opt *options;
      krb5_gic_get_as_key_fct gak_fct;
      void *gak_data;
-     int *master;
+     int  use_master;
      krb5_kdc_rep **as_reply;
 {
     krb5_error_code ret;
@@ -751,7 +751,7 @@ krb5_get_init_creds(context, creds, client, prompter, prompter_data,
 
     if (options && (options->flags & KRB5_GET_INIT_CREDS_OPT_FORWARDABLE))
 	tempint = options->forwardable;
-    else if ((ret = krb5_appdefault_boolean(context, &client->realm,
+    else if ((ret = krb5_libdefault_boolean(context, &client->realm,
 					    "forwardable", &tempint)) == 0)
 	    ;
     else
@@ -763,7 +763,7 @@ krb5_get_init_creds(context, creds, client, prompter, prompter_data,
 
     if (options && (options->flags & KRB5_GET_INIT_CREDS_OPT_PROXIABLE))
 	tempint = options->proxiable;
-    else if ((ret = krb5_appdefault_boolean(context, &client->realm,
+    else if ((ret = krb5_libdefault_boolean(context, &client->realm,
 					    "proxiable", &tempint)) == 0)
 	    ;
     else
@@ -775,7 +775,7 @@ krb5_get_init_creds(context, creds, client, prompter, prompter_data,
 
     if (options && (options->flags & KRB5_GET_INIT_CREDS_OPT_RENEW_LIFE)) {
 	renew_life = options->renew_life;
-    } else if ((ret = krb5_appdefault_string(context, &client->realm,
+    } else if ((ret = krb5_libdefault_string(context, &client->realm,
 					     "renew_lifetime", &tempstr))
 	       == 0) {
 	if (ret = krb5_string_to_deltat(tempstr, &renew_life)) {
@@ -868,7 +868,7 @@ krb5_get_init_creds(context, creds, client, prompter, prompter_data,
     }
     /* it would be nice if this parsed out an address list, but
        that would be work. */
-    else if (((ret = krb5_appdefault_boolean(context, &client->realm,
+    else if (((ret = krb5_libdefault_boolean(context, &client->realm,
 					    "noaddresses", &tempint)) == 0)
 	     && tempint) {
 	    ;
@@ -923,7 +923,7 @@ krb5_get_init_creds(context, creds, client, prompter, prompter_data,
 	err_reply = 0;
 	local_as_reply = 0;
 	if ((ret = send_as_request(context, &request, &time_now, &err_reply,
-				   &local_as_reply, master)))
+				   &local_as_reply, use_master)))
 	    goto cleanup;
 
 	if (err_reply) {
