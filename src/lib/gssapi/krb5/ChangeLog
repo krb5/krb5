@@ -1,3 +1,8 @@
+Thu Oct 10 13:50:49 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* acquire_cred.c (krb5_gss_acquire_cred): Don't let the "timeleft"
+ 		returned by krb5_gss_acquire_cred be negative!
+
 Wed Oct  9 18:02:43 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* gssapi_krb5.c: Definition of gss_nt_krb5_name was incorrect;

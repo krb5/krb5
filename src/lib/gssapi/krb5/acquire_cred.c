@@ -421,7 +421,7 @@ krb5_gss_acquire_cred(minor_status, desired_name, time_req,
       }
 
       if (time_rec)
-	 *time_rec = cred->tgt_expire - now;
+	 *time_rec = (cred->tgt_expire > now) ? (cred->tgt_expire - now) : 0;
    }
 
    /* create mechs */
