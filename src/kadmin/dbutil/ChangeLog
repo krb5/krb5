@@ -1,3 +1,8 @@
+2001-02-05  Tom Yu  <tlyu@mit.edu>
+
+	* kdb5_util.M: Fix some formatting nits and document new flags
+	controlling dump formats.
+
 2000-10-17  Ezra Peisach  <epeisach@mit.edu>
 
 	* kdb5_create.c (kdb5_create): Argument to krb5_read_password
