@@ -207,6 +207,18 @@ if test $krb5_cv_has_type_socklen_t = yes; then
     AC_DEFINE(HAVE_SOCKLEN_T,1,[Define if there is a socklen_t type. If not, probably use size_t])
 fi
 dnl
+AC_MSG_CHECKING(for struct lifconf)
+AC_CACHE_VAL(krb5_cv_has_struct_lifconf,
+[AC_TRY_COMPILE(
+[#include <sys/socket.h>
+#include <net/if.h>
+],[sizeof (struct lifconf);],
+krb5_cv_has_struct_lifconf=yes,krb5_cv_has_struct_lifconf=no)])
+AC_MSG_RESULT($krb5_cv_has_struct_lifconf)
+if test $krb5_cv_has_struct_lifconf = yes; then
+    AC_DEFINE(HAVE_STRUCT_LIFCONF,1,[Define if there is a struct lifconf.])
+fi
+dnl
 dnl
 KRB5_AC_NEED_BIND_8_COMPAT
 dnl
