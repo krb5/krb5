@@ -1,5 +1,9 @@
+Thu Sep 14 17:36:11 1995  Mark Eichin  <eichin@cygnus.com>
 
-
+	* krb524d.c (usage): needs to get context to pass to
+	cleanup_and_exit so it does get freed, since it is allocated
+	before parsing arguments.
+	(main): change caller as well.
 
 Wed Sep 06 14:20:57 1995   Chris Provenzano (proven@mit.edu)
 

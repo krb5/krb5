@@ -60,10 +60,11 @@ krb5_keyblock master_keyblock;
 void init_keytab(), init_master(), cleanup_and_exit();
 krb5_error_code do_connection(), lookup_service_key(), kdc_get_server_key();
 
-void usage()
+void usage(context)
+     krb5_context context;
 {
      fprintf(stderr, "Usage: %s [-m[aster]] [-k[eytab]]\n", whoami);
-     cleanup_and_exit(1, NULL);
+     cleanup_and_exit(1, context);
 }
 
 RETSIGTYPE request_exit(signo)
@@ -110,7 +111,7 @@ int main(argc, argv)
      }
      if (argc || use_keytab + use_master > 1 ||
 	 use_keytab + use_master == 0)
-	  usage();
+	  usage(context);
      
      signal(SIGINT, request_exit);
      signal(SIGHUP, request_exit);
