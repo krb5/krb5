@@ -1,7 +1,7 @@
 /*
  * kdc/main.c
  *
- * Copyright 1990 by the Massachusetts Institute of Technology.
+ * Copyright 1990,2001 by the Massachusetts Institute of Technology.
  *
  * Export of this software from the United States of America may
  *   require a specific license from the United States Government.
@@ -43,8 +43,6 @@
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
-
-kdc_realm_t *find_realm_data PROTOTYPE((char *, krb5_ui_4));
 
 void usage PROTOTYPE((char *));
 
@@ -229,6 +227,12 @@ init_realm(progname, rdp, realm, def_dbname, def_mpname,
 	rdp->realm_mkey.enctype = (krb5_enctype) rparams->realm_enctype;
     else
 	rdp->realm_mkey.enctype = manual ? def_enctype : ENCTYPE_UNKNOWN;
+
+    /* Handle reject-bad-transit flag */
+    if (rparams && rparams->realm_reject_bad_transit_valid)
+	rdp->realm_reject_bad_transit = rparams->realm_reject_bad_transit;
+    else
+	rdp->realm_reject_bad_transit = 1;
 
     /* Handle ticket maximum life */
     rdp->realm_maxlife = (rparams && rparams->realm_max_life_valid) ?

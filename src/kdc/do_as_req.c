@@ -80,11 +80,17 @@ krb5_data **response;			/* filled in with a response packet */
     register int i;
     krb5_timestamp until, rtime;
     char *cname = 0, *sname = 0, *fromstring = 0;
+    char ktypestr[128];
+    char rep_etypestr[128];
 
     ticket_reply.enc_part.ciphertext.data = 0;
     e_data.data = 0;
     encrypting_key.contents = 0;
+    reply.padata = 0;
     session_key.contents = 0;
+
+    ktypes2str(ktypestr, sizeof(ktypestr),
+	       request->nktypes, request->ktype);
 
 #ifdef HAVE_NETINET_IN_H
     if (from->address->addrtype == ADDRTYPE_INET)
@@ -318,9 +324,6 @@ krb5_data **response;			/* filled in with a response packet */
 	status = "DECRYPT_SERVER_KEY";
 	goto errout;
     }
-    if ((encrypting_key.enctype == ENCTYPE_DES_CBC_CRC) &&
-	(isflagset(server.attributes, KRB5_KDB_SUPPORT_DESMD5)))
-	encrypting_key.enctype = ENCTYPE_DES_CBC_MD5;
 	
     errcode = krb5_encrypt_tkt_part(kdc_context, &encrypting_key, &ticket_reply);
     krb5_free_keyblock_contents(kdc_context, &encrypting_key);
@@ -363,7 +366,6 @@ krb5_data **response;			/* filled in with a response packet */
 
     /* Start assembling the response */
     reply.msg_type = KRB5_AS_REP;
-    reply.padata = 0;
     reply.client = request->client;
     reply.ticket = &ticket_reply;
     reply_encpart.session = &session_key;
@@ -411,8 +413,14 @@ krb5_data **response;			/* filled in with a response packet */
     memset(reply.enc_part.ciphertext.data, 0, reply.enc_part.ciphertext.length);
     free(reply.enc_part.ciphertext.data);
 
-    krb5_klog_syslog(LOG_INFO, "AS_REQ %s(%d): ISSUE: authtime %d, %s for %s",
-	             fromstring, portnum, authtime, cname, sname);
+    rep_etypes2str(rep_etypestr, sizeof(rep_etypestr), &reply);
+    krb5_klog_syslog(LOG_INFO,
+		     "AS_REQ (%s) %s(%d): ISSUE: authtime %d, "
+		     "%s, %s for %s",
+		     ktypestr,
+	             fromstring, portnum, authtime,
+		     rep_etypestr,
+		     cname, sname);
 
 #ifdef	KRBCONF_KDC_MODIFIES_KDB
     /*
@@ -425,7 +433,8 @@ krb5_data **response;			/* filled in with a response packet */
 
 errout:
     if (status)
-        krb5_klog_syslog(LOG_INFO, "AS_REQ %s(%d): %s: %s for %s%s%s",
+        krb5_klog_syslog(LOG_INFO, "AS_REQ (%s) %s(%d): %s: %s for %s%s%s",
+			 ktypestr,
 	       fromstring, portnum, status, 
 	       cname ? cname : "<unknown client>",
 	       sname ? sname : "<unknown server>",
@@ -439,7 +448,10 @@ errout:
 	errcode = prepare_error_as(request, errcode, &e_data, response);
     }
 
-    krb5_free_keyblock_contents(kdc_context, &encrypting_key);
+    if (encrypting_key.contents)
+	krb5_free_keyblock_contents(kdc_context, &encrypting_key);
+    if (reply.padata)
+	krb5_free_pa_data(kdc_context, reply.padata);
 
     if (cname)
 	    free(cname);
@@ -458,7 +470,7 @@ errout:
 				 kdc_active_realm->realm_dbname);
 	    krb5_db_init(kdc_context);
 	    /* Reset master key */
-	    krb5_db_set_mkey(kdc_context, &kdc_active_realm->realm_encblock);
+	    krb5_db_set_mkey(kdc_context, &kdc_active_realm->realm_mkey);
 	}
 #endif	/* KRBCONF_KDC_MODIFIES_KDB */
 	krb5_db_free_principal(kdc_context, &client, c_nprincs);

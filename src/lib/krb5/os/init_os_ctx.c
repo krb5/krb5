@@ -27,26 +27,8 @@
  */
 
 #define NEED_WINDOWS
+
 #include "k5-int.h"
-
-#ifdef macintosh
-OSErr
-GetMacProfileFileSpec (FSSpec* outFileSpec, StringPtr inName, UInt32 whichFolder)
-{
-	OSErr err;
-	
-	
-	
-	err = FindFolder (kOnSystemDisk, whichFolder, kCreateFolder,
-		&(outFileSpec -> vRefNum) , &(outFileSpec -> parID));
-	
-	if (err == noErr) {
-		BlockMoveData (inName, &(outFileSpec -> name), strlen (inName) + 1);
-	}
-
-	return err;
-}
-#endif /* macintosh */
 
 #if defined(_MSDOS) || defined(_WIN32)
 
@@ -185,7 +167,7 @@ static void
 free_filespecs(files)
 	profile_filespec_t *files;
 {
-#ifndef macintosh
+#if !TARGET_OS_MAC
     char **cp;
 
     if (files == 0)
@@ -203,44 +185,6 @@ os_get_default_config_files(pfiles, secure)
 	krb5_boolean secure;
 {
     profile_filespec_t* files;
-#ifdef macintosh
-	files = malloc(7 * sizeof(FSSpec));
-
-    if (files != 0) {
-    	OSErr err = GetMacProfileFileSpec(&(files [3]), "\pKerberos Preferences", kApplicationSupportFolderType);
-		if (err == noErr) {
-			err = GetMacProfileFileSpec( &(files [4]), "\pkrb5.ini", kApplicationSupportFolderType);
-		}
-    		if (err == noErr) {
-			err = GetMacProfileFileSpec( &(files [5]), "\pKerberos5 Configuration", kApplicationSupportFolderType);
-		}
-
-    	if (err == noErr) {
-			files[6].vRefNum = 0;
-			files[6].parID = 0;
-			files[6].name[0] = '\0';
-		} else {
-			files[3].vRefNum = 0;
-			files[3].parID = 0;
-			files[3].name[0] = '\0';
-		}
-
-		err = GetMacProfileFileSpec(&(files [0]), "\pKerberos Preferences", kPreferencesFolderType);
-		if (err == noErr) {
-			err = GetMacProfileFileSpec( &(files [1]), "\pkrb5.ini", kPreferencesFolderType);
-		}
-		if (err == noErr) {
-			err = GetMacProfileFileSpec( &(files [2]), "\pKerberos5 Configuration", kPreferencesFolderType);
-		}
-		
-		if (err != noErr) {
-			free (files);
-			return ENFILE;
-		}
-	} else {
-		return ENOMEM;
-	}
-#else /* !macintosh */
 #if defined(_MSDOS) || defined(_WIN32)
     krb5_error_code retval = 0;
     char *name = 0;
@@ -327,8 +271,7 @@ os_get_default_config_files(pfiles, secure)
     /* cap the array */
     files[i] = 0;
 #endif /* !_MSDOS && !_WIN32 */
-#endif /* !macintosh */
-    *pfiles = files;
+    *pfiles = (profile_filespec_t *)files;
     return 0;
 }
 
@@ -349,10 +292,11 @@ os_init_paths(ctx)
 #endif /* KRB5_DNS_LOOKUP */
 
     retval = os_get_default_config_files(&files, secure);
-
+    
     if (!retval) {
         retval = profile_init((const_profile_filespec_t *) files,
 			      &ctx->profile);
+
 #ifdef KRB5_DNS_LOOKUP
         /* if none of the filenames can be opened use an empty profile */
         if (retval == ENOENT) {
@@ -404,6 +348,7 @@ krb5_os_init_context(ctx)
 	os_ctx->usec_offset = 0;
 	os_ctx->os_flags = 0;
 	os_ctx->default_ccname = 0;
+	os_ctx->default_ccprincipal = 0;
 
 	krb5_cc_set_default_name(ctx, NULL);
 
@@ -427,8 +372,10 @@ krb5_get_profile (ctx, profile)
 
     retval = os_get_default_config_files(&files, ctx->profile_secure);
 
-    if (!retval)
-        retval = profile_init((const_profile_filespec_t *) files, profile);
+    if (!retval) {
+        retval = profile_init((const_profile_filespec_t *) files,
+			      profile);
+    }
 
     if (files)
         free_filespecs(files);
@@ -446,7 +393,6 @@ krb5_get_profile (ctx, profile)
     return retval;
 }	
 
-#ifndef macintosh
 
 krb5_error_code
 krb5_set_config_files(ctx, filenames)
@@ -483,7 +429,6 @@ krb5_free_config_files(filenames)
     free_filespecs(filenames);
 }
 
-#endif /* macintosh */
 
 krb5_error_code
 krb5_secure_config_files(ctx)
@@ -523,6 +468,11 @@ krb5_os_free_context(ctx)
 		free(os_ctx->default_ccname);
                 os_ctx->default_ccname = 0;
         }
+
+	if (os_ctx->default_ccprincipal) {
+		krb5_free_principal (ctx, os_ctx->default_ccprincipal);
+		os_ctx->default_ccprincipal = 0;
+	}
 
 	os_ctx->magic = 0;
 	free(os_ctx);

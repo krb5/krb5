@@ -81,12 +81,14 @@ kadm5_config_params global_params;
 usage()
 {
      fprintf(stderr, "Usage: "
-	   "kdb5_util cmd [-r realm] [-d dbname] [-k mkeytype] [-M mkeyname]\n"
-	     "\t         [-m] [cmd options]\n"
+	   "kdb5_util [-r realm] [-d dbname] [-k mkeytype] [-M mkeyname]\n"
+	     "\t        [-sf stashfilename] [-m] cmd [cmd_options]\n"
 	     "\tcreate	[-s]\n"
 	     "\tdestroy	[-f]\n"
 	     "\tstash	[-f keyfile]\n"
-	     "\tdump	[-old] [-ov] [-b6] [-verbose] [filename	[princs...]]\n"
+	     "\tdump	[-old] [-ov] [-b6] [-verbose]\n"
+	     "\t	[-mkey_convert] [-new_mkey_file mkey_file]\n"
+	     "\t	[-rev] [-recurse] [filename [princs...]]\n"
 	     "\tload	[-old] [-ov] [-b6] [-verbose] [-update] filename\n"
 	     "\tdump_v4	[filename]\n"
 	     "\tload_v4	[-t] [-n] [-v] [-K] [-s stashfile] inputfile\n"

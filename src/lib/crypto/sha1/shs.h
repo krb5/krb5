@@ -1,18 +1,13 @@
 #ifndef _SHS_DEFINED
 
-#include <k5-int.h>
+#include "k5-int.h"
 
 #define _SHS_DEFINED
 
 /* Some useful types */
 
-typedef krb5_octet	BYTE;
-
-/* Old DOS/Windows compilers are case-insensitive */
-#if !defined(_MSDOS) && !defined(_WIN32)
-typedef krb5_ui_4	LONG;
-#endif
-
+typedef krb5_octet	SHS_BYTE;
+typedef krb5_ui_4	SHS_LONG;
 
 /* Define the following to use the updated SHS implementation */
 #define NEW_SHS         /**/
@@ -25,16 +20,16 @@ typedef krb5_ui_4	LONG;
 /* The structure for storing SHS info */
 
 typedef struct {
-               LONG digest[ 5 ];            /* Message digest */
-               LONG countLo, countHi;       /* 64-bit bit count */
-               LONG data[ 16 ];             /* SHS data buffer */
+               SHS_LONG digest[ 5 ];            /* Message digest */
+               SHS_LONG countLo, countHi;       /* 64-bit bit count */
+               SHS_LONG data[ 16 ];             /* SHS data buffer */
                } SHS_INFO;
 
 /* Message digest functions (shs.c) */
 void shsInit
 	KRB5_PROTOTYPE((SHS_INFO *shsInfo));
 void shsUpdate
-	KRB5_PROTOTYPE((SHS_INFO *shsInfo, BYTE *buffer, int count));
+	KRB5_PROTOTYPE((SHS_INFO *shsInfo, SHS_BYTE *buffer, int count));
 void shsFinal
 	KRB5_PROTOTYPE((SHS_INFO *shsInfo));
 

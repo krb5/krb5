@@ -91,7 +91,7 @@ Changes in 1.1a3:
  
 2.0.1b1
  Microseconds support added
- Microseconds fixed on machines that don't have hardware support (Chas Williams)
+ Microseconds fixed on machines that do not have hardware support (Chas Williams)
  Fixed a bunch of missing krb5_auth_con_* exports
  Added NRL config file name (Chas Williams)
  Fixed profile layer to handle missing files correctly when looking for multiple ones
@@ -153,4 +153,167 @@ Changes in 1.1a3:
 3.0d3
  from tag Mac_GSSKerberos5_3_0d3
  no changes on the Mac side
- fixed crash in get_init_creds when no network
+ fixed crash in get_init_creds when no network 
+ 
+3.0d4
+ from tag Mac_GSSKerberos5_3_0d4
+ no changes on the Mac side
+ 
+3.0d5
+ from tag Mac_GSSKerberos5_3_0d5
+ no changes on the Mac side
+
+3.0d6
+ from tag Mac_GSSKerberos5_3_0d6
+ login lib support
+ fixed to ccache v5 creds copying code
+
+3.0d7
+ from tag Mac_GSSKerberos5_3_0d7
+ support for login library in expired passwords
+
+3.0d8
+ from tag Mac_GSSKerberos5_3_0d8
+ now following the krb5-1-2 branch (except in util/profile)
+
+3.0a1
+ from tag Mac_GSSKerberos5_3_0a1
+ fixed krb5_cc_default
+ workaround for hostname resolution problems
+ 
+3.0a2
+ from tag Mac_GSSKerberos5_3_0a2
+ no changes on the Mac side
+
+3.0b1
+ from tag Mac_GSSKerberos5_3_0b1
+ Kerberos5Lib now uses PreferencesLib
+ fixed get_credentials [BZ 323]
+
+3.0b2
+ from tag Mac_GSSKerberos5_3_0b2
+ changed error in krb5_init_context from ENFILE to ENOENT when file not found
+
+3.0fc1
+ from tag Mac_GSSKerberos5_3_0fc1
+ no changes on the Mac side
+
+3.0fc2
+ from tag Mac_GSSKerberos5_3_0fc2
+ fixed memory leak in krb5_425_conv_principal
+
+3.0
+ from tag Mac_GSSKerberos5_3_0
+
+3.1d1
+ from tag Mac_GSSKerberos5_3_1d1
+ Carbon and CWP 6 builds
+ 
+3.1d2
+ from tag Mac_GSSKerberos5_3_1d2
+ Fixed epoch conversion throughout
+ Rebuilt with fixed CWP 6 fcntl.h
+ 
+3.1d3
+ from tag Mac_GSSKerberos5_3_1d3
+ Fixed profile library to support FSpecs under X
+ Fixed build system to work with UNIX newlines under 9
+ 
+3.1d4
+ from tag Mac_GSSKerberos5_3_1d4
+ first Mac OS X release
+
+3.1d5
+ from tag Mac_GSSKerberos5_3_1d5
+ fixed Carbon fragment names
+ 
+3.1d6
+ from tag Mac_GSSKerberos5_3_1d6
+ fixed sleep time bug
+ fixed dependencies on 8.5+ InterfaceLib
+
+3.1a1
+ from tag Mac_GSSKerberos5_3_1a1
+ alpha
+
+3.1a2
+ from tag Mac_GSSKerberos5_3_1a2
+ no longer prevents idle sleep
+ override carbon errno with Kerberos Support Library
+ fix NULL prompter crash
+ 
+3.1a3
+ from tag Mac_GSSKerberos5_3_1a3
+ updated for new Mac OS X header layout
+ fixed bug on newline conversion in profile when reading files bigger than 1K
+
+3.1a4
+ from tag Mac_GSSKerberos5_3_1a4
+ fixed SleepQInstall crash on NuBus Macs
+ 
+3.1b1
+ from tag Mac_GSSKerberos5_3_1b1
+ Upped the dylib version numbers.
+ added com_err to the export list on X
+ added krb5_prompter_posix and krb5_read_password to the Kerberos 5 exports
+ added new rfc 2744 GSS oids
+ added gssapi_generic.h to the public headers for GSS.framework
+ added kinit, klist, kdestroy, kpasswd command line tools
+ added kerberosIV directory to /usr/include headers
+
+3.1b2
+ from tag Mac_GSSKerberos5_3_1b2
+ changes to jam files for Mac OS X build integration
+ 
+3.1fc1
+ from tag Mac_GSSKerberos5_3_1fc1
+ replaced cc_* macros with functions
+ more fixes for Mac OS X build integration
+
+3.1
+from tag Mac_GSSKerberos5_3_1
+final for KL 4.0/KfM 3.5/KfM 4.0a16
+
+3.2a2
+from tag Mac_GSSKerberos5_3_2a2
+updated for Mac OS X 10.1
+
+3.2b1
+from tag Mac_GSSKerberos5_3_2b1
+synced with 1.2.3
+
+3.2b2
+from tag Mac_GSSKerberos5_3_2b2
+Separated private and public krb5 APIs
+
+3.2b3
+from tag Mac_GSSKerberos5_3_2b3
+Fixed gssapi_generic.h Mac OS conditionals and synced with 1.2.3b2
+
+3.2b4
+from tag Mac_GSSKerberos5_3_2b4
+Removed the broken microsecond timing code
+Fixed prebinding on Mac OS X
+
+3.2b5
+from tag Mac_GSSKerberos5_3_2b5
+Removed version strings from the Mac OS X project
+
+3.2b6
+from tag Mac_GSSKerberos5_3_2b6
+Fixed resource fork handling in profile lib
+
+3.2b7
+from tag Mac_GSSKerberos5_3_2b7
+Fixed GSS FTP forwarding
+Fixed profile library handling unreadable files
+
+3.2fc1
+from tag Mac_GSSKerberos5_3_2fc1
+Moved to final candidate
+
+3.2fc2
+from tag Mac_GSSKerberos5_3_2fc2
+
+3.2
+from tag Mac_GSSKerberos5_3_2

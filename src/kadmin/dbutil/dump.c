@@ -47,6 +47,9 @@ extern void usage();
 static int			mkey_convert;
 static krb5_keyblock		new_master_keyblock;
 
+static int	backwards;
+static int	recursive;
+
 /*
  * Use compile(3) if no regcomp present.
  */
@@ -74,8 +77,16 @@ static krb5_error_code dump_k5beta_iterator PROTOTYPE((krb5_pointer,
 						       krb5_db_entry *));
 static krb5_error_code dump_k5beta6_iterator PROTOTYPE((krb5_pointer,
 							krb5_db_entry *));
+static krb5_error_code dump_k5beta6_iterator_ext PROTOTYPE((krb5_pointer,
+							    krb5_db_entry *,
+							    int));
 static krb5_error_code dump_k5beta7_princ PROTOTYPE((krb5_pointer,
 						     krb5_db_entry *));
+static krb5_error_code dump_k5beta7_princ_ext PROTOTYPE((krb5_pointer,
+							 krb5_db_entry *,
+							 int));
+static krb5_error_code dump_k5beta7_princ_withpolicy
+			PROTOTYPE((krb5_pointer, krb5_db_entry *));
 static krb5_error_code dump_ov_princ PROTOTYPE((krb5_pointer,
 						krb5_db_entry *));
 static void dump_k5beta7_policy PROTOTYPE((void *, osa_policy_ent_t));
@@ -139,6 +150,16 @@ dump_version ov_version = {
      dump_ov_princ,
      dump_k5beta7_policy,
      process_ov_record,
+};
+
+dump_version r1_3_version = {
+     "Kerberos version 5 release 1.3",
+     "kdb5_util load_dump version 5\n",
+     0,
+     0,
+     dump_k5beta7_princ_withpolicy,
+     dump_k5beta7_policy,
+     process_k5beta7_record,
 };
 
 /* External data */
@@ -220,6 +241,7 @@ static const char dfile_err_fmt[] = "%s: cannot open %s (%s)\n";
 
 static const char oldoption[] = "-old";
 static const char b6option[] = "-b6";
+static const char b7option[] = "-b7";
 static const char verboseoption[] = "-verbose";
 static const char updateoption[] = "-update";
 static const char hashoption[] = "-hash";
@@ -236,7 +258,7 @@ krb5_error_code master_key_convert(context, db_entry)
     krb5_error_code	retval;
     krb5_keyblock 	v5plainkey, *key_ptr;
     krb5_keysalt 	keysalt;
-    int	      i;
+    int	      i, j;
     krb5_key_data	new_key_data, *key_data;
     krb5_boolean	is_mkey;
 
@@ -265,7 +287,11 @@ krb5_error_code master_key_convert(context, db_entry)
 	if (retval)
 		return retval;
 	krb5_free_keyblock_contents(context, &v5plainkey);
-	free(key_data->key_data_contents);
+	for (j = 0; j < key_data->key_data_ver; j++) {
+	    if (key_data->key_data_length[j]) {
+		free(key_data->key_data_contents[j]);
+	    }
+	}
 	*key_data = new_key_data;
     }
     return 0;
@@ -634,6 +660,15 @@ dump_k5beta6_iterator(ptr, entry)
     krb5_pointer	ptr;
     krb5_db_entry	*entry;
 {
+    return dump_k5beta6_iterator_ext(ptr, entry, 0);
+}
+
+static krb5_error_code
+dump_k5beta6_iterator_ext(ptr, entry, kadm)
+    krb5_pointer	ptr;
+    krb5_db_entry	*entry;
+    int			kadm;
+{
     krb5_error_code	retval;
     struct dump_args	*arg;
     char		*name;
@@ -703,7 +738,10 @@ dump_k5beta6_iterator(ptr, entry)
 	      */
 	     switch (tlp->tl_data_type) {
 	     case KRB5_TL_KADM_DATA:
-		  skip++;
+		  if (kadm)
+		      counter++;
+		  else
+		      skip++;
 		  break;
 	     default:
 		  counter++;
@@ -731,7 +769,7 @@ dump_k5beta6_iterator(ptr, entry)
 		    entry->fail_auth_count);
 	    /* Pound out tagged data. */
 	    for (tlp = entry->tl_data; tlp; tlp = tlp->tl_data_next) {
-		if (tlp->tl_data_type == KRB5_TL_KADM_DATA)
+		if (tlp->tl_data_type == KRB5_TL_KADM_DATA && !kadm)
 		     continue; /* see above, [krb5-admin/89] */
 
 		fprintf(arg->ofile, "%d\t%d\t",
@@ -797,6 +835,15 @@ dump_k5beta7_princ(ptr, entry)
     krb5_pointer	ptr;
     krb5_db_entry	*entry;
 {
+    return dump_k5beta7_princ_ext(ptr, entry, 0);
+}
+
+static krb5_error_code
+dump_k5beta7_princ_ext(ptr, entry, kadm)
+    krb5_pointer	ptr;
+    krb5_db_entry	*entry;
+    int			kadm;
+{
      krb5_error_code retval;
      struct dump_args *arg;
      char *name;
@@ -826,12 +873,20 @@ dump_k5beta7_princ(ptr, entry)
 	  /* save the callee from matching the name again */
 	  tmp_nnames = arg->nnames;
 	  arg->nnames = 0;
-	  retval = dump_k5beta6_iterator(ptr, entry);
+	  retval = dump_k5beta6_iterator_ext(ptr, entry, kadm);
 	  arg->nnames = tmp_nnames;
      }
 
      free(name);
      return retval;
+}
+
+static krb5_error_code
+dump_k5beta7_princ_withpolicy(ptr, entry)
+    krb5_pointer	ptr;
+    krb5_db_entry	*entry;
+{
+    return dump_k5beta7_princ_ext(ptr, entry, 1);
 }
 
 void dump_k5beta7_policy(void *data, osa_policy_ent_t entry)
@@ -953,7 +1008,9 @@ static krb5_error_code dump_ov_princ(krb5_pointer ptr, krb5_db_entry *kdb)
 
 /*
  * usage is:
- *	dump_db [-old] [-b6] [-ov] [-verbose] [filename [principals...]]
+ *	dump_db [-old] [-b6] [-b7] [-ov] [-verbose] [-mkey_convert]
+ *		[-new_mkey_file mkey_file] [-rev] [-recurse]
+ *		[filename [principals...]]
  */
 void
 dump_db(argc, argv)
@@ -980,10 +1037,12 @@ dump_db(argc, argv)
 	programname = strrchr(argv[0], (int) '/') + 1;
     ofile = (char *) NULL;
     error = 0;
-    dump = &beta7_version;
+    dump = &r1_3_version;
     arglist.verbose = 0;
     new_mkey_file = 0;
     mkey_convert = 0;
+    backwards = 0;
+    recursive = 0;
 
     /*
      * Parse the qualifiers.
@@ -993,6 +1052,8 @@ dump_db(argc, argv)
 	     dump = &old_version;
 	else if (!strcmp(argv[aindex], b6option))
 	     dump = &beta6_version;
+	else if (!strcmp(argv[aindex], b7option))
+	     dump = &beta7_version;
 	else if (!strcmp(argv[aindex], ovoption))
 	     dump = &ov_version;
 	else if (!strcmp(argv[aindex], verboseoption))
@@ -1002,7 +1063,11 @@ dump_db(argc, argv)
 	else if (!strcmp(argv[aindex], "-new_mkey_file")) {
 	    new_mkey_file = argv[++aindex];
 	    mkey_convert = 1;
-        } else
+        } else if (!strcmp(argv[aindex], "-rev"))
+	    backwards = 1;
+	else if (!strcmp(argv[aindex], "-recurse"))
+	    recursive = 1;
+	else
 	    break;
     }
 
@@ -1072,6 +1137,11 @@ dump_db(argc, argv)
     locked = 0;
     if (ofile && strcmp(ofile, "-")) {
 	/*
+	 * Discourage accidental dumping to filenames beginning with '-'.
+	 */
+	if (ofile[0] == '-')
+	    usage();
+	/*
 	 * Make sure that we don't open and truncate on the fopen,
 	 * since that may hose an on-going kprop process.
 	 * 
@@ -1108,9 +1178,10 @@ dump_db(argc, argv)
 	if (dump->header[strlen(dump->header)-1] != '\n')
 	     fputc('\n', arglist.ofile);
 	
-	if ((kret = krb5_db_iterate(util_context,
-				    dump->dump_princ,
-				    (krb5_pointer) &arglist))) {
+	if ((kret = krb5_db_iterate_ext(util_context,
+					dump->dump_princ,
+					(krb5_pointer) &arglist,
+					backwards, recursive))) {
 	     fprintf(stderr, dumprec_err,
 		     programname, dump->name, error_message(kret));
 	     exit_status++;
@@ -2008,7 +2079,8 @@ restore_dump(programname, kcontext, dumpfile, f, verbose, dump, pol_db)
 }
 
 /*
- * Usage: load_db [-old] [-ov] [-b6] [-verbose] [-update] [-hash] filename
+ * Usage: load_db [-old] [-ov] [-b6] [-b7] [-verbose] [-update] [-hash]
+ *		filename
  */
 void
 load_db(argc, argv)
@@ -2052,6 +2124,8 @@ load_db(argc, argv)
 	     load = &old_version;
 	else if (!strcmp(argv[aindex], b6option))
 	     load = &beta6_version;
+	else if (!strcmp(argv[aindex], b7option))
+	     load = &beta7_version;
 	else if (!strcmp(argv[aindex], ovoption))
 	     load = &ov_version;
 	else if (!strcmp(argv[aindex], verboseoption))
@@ -2129,6 +2203,8 @@ load_db(argc, argv)
 	      load = &beta6_version;
 	 else if (strcmp(buf, beta7_version.header) == 0)
 	      load = &beta7_version;
+	 else if (strcmp(buf, r1_3_version.header) == 0)
+	      load = &r1_3_version;
 	 else if (strncmp(buf, ov_version.header,
 			  strlen(ov_version.header)) == 0)
 	      load = &ov_version;

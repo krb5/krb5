@@ -3,29 +3,29 @@
 # Usage:
 # macfile_gen.pl list-type start-path prefix
 # 	list-type is one of:
-#		all-files					-- complete list of mac sources, relative to root
-#		all-folders					-- complete list of mac directories, relative to root
-#		gss-sources					-- complete list of mac GSS sources, relative to root
-#		krb5-sources				-- complete list of mac Krb5 sources, relative to root
-#		profile-sources				-- complete list of mac profile sources, relative to root
-#		comerr-sources				-- complete list of mac com_err sources, relative to root
-#		gss-objects-ppc-debug		-- complete list of mac GSS PPC debug objects, relative to root
-#		gss-objects-68k-debug		-- complete list of mac GSS 68K debug objects, relative to root
-#		gss-objects-ppc-final		-- complete list of mac GSS PPC final objects, relative to root
-#		gss-objects-68k-final		-- complete list of mac GSS 68K final objects, relative to root
-#		krb5-objects-ppc-debug		-- complete list of mac Kerberos v5 PPC debug objects, relative to root
-#		krb5-objects-68k-debug		-- complete list of mac Kerberos v5 68K debug objects, relative to root
-#		krb5-objects-ppc-final		-- complete list of mac Kerberos v5 PPC final objects, relative to root
-#		krb5-objects-68k-final		-- complete list of mac Kerberos v5 68K final objects, relative to root
-#		profile-objects-ppc-debug	-- complete list of mac profile PPC debug objects, relative to root
-#		profile-objects-68k-debug	-- complete list of mac profile v5 68K debug objects, relative to root
-#		profile-objects-ppc-final	-- complete list of mac profile v5 PPC final objects, relative to root
-#		profile-objects-68k-final	-- complete list of mac profile v5 68K final objects, relative to root
-#		comerr-objects-ppc-debug	-- complete list of mac com_err PPC debug objects, relative to root
-#		comerr-objects-68k-debug	-- complete list of mac com_err v5 68K debug objects, relative to root
-#		comerr-objects-ppc-final	-- complete list of mac com_err v5 PPC final objects, relative to root
-#		comerr-objects-68k-final	-- complete list of mac com_err v5 68K final objects, relative to root
-#		include-folders				-- complete list of include paths, relative to root
+#		all-files						-- complete list of mac sources, relative to root
+#		all-folders						-- complete list of mac directories, relative to root
+#		gss-sources						-- complete list of mac GSS sources, relative to root
+#		krb5-sources					-- complete list of mac Krb5 sources, relative to root
+#		profile-sources					-- complete list of mac profile sources, relative to root
+#		comerr-sources					-- complete list of mac com_err sources, relative to root
+#		gss-objects-macos9-debug		-- complete list of mac GSS Mac OS 9 debug objects, relative to root
+#		gss-objects-macos9-final		-- complete list of mac GSS Mac OS 9 final objects, relative to root
+#		krb5-objects-macos9-debug		-- complete list of mac Kerberos v5 Mac OS 9 debug objects, relative to root
+#		krb5-objects-macos9-final		-- complete list of mac Kerberos v5 Mac OS 9 final objects, relative to root
+#		profile-objects-macos9-debug	-- complete list of mac profile Mac OS 9 debug objects, relative to root
+#		profile-objects-macos9-final	-- complete list of mac profile v5 Mac OS 9 final objects, relative to root
+#		comerr-objects-macos9-debug		-- complete list of mac com_err Mac OS 9 debug objects, relative to root
+#		comerr-objects-macos9-final		-- complete list of mac com_err v5 Mac OS 9 final objects, relative to root
+#		gss-objects-carbon-debug		-- complete list of mac GSS Carbon debug objects, relative to root
+#		gss-objects-carbon-final		-- complete list of mac GSS Carbon final objects, relative to root
+#		krb5-objects-carbon-debug		-- complete list of mac Kerberos v5 Carbon debug objects, relative to root
+#		krb5-objects-carbon-final		-- complete list of mac Kerberos v5 Carbon final objects, relative to root
+#		profile-objects-carbon-debug	-- complete list of mac profile Carbon debug objects, relative to root
+#		profile-objects-carbon-final	-- complete list of mac profile v5 Carbon final objects, relative to root
+#		comerr-objects-carbon-debug		-- complete list of mac com_err Carbon debug objects, relative to root
+#		comerr-objects-carbon-final		-- complete list of mac com_err v5 Carbon final objects, relative to root
+#		include-folders					-- complete list of include paths, relative to root
 #
 #	input on stdin
 #	output on stdout
@@ -103,115 +103,115 @@ if ($action eq "all-folders") {
 	@outputList = grep (/:et:/, @sourceList);
 	print (STDERR "Done. \n");
 	
-} elsif ($action eq "gss-objects-ppc-debug") {
+} elsif ($action eq "gss-objects-macos9-debug") {
 
-	print (STDERR "# Building GSS PPC debug object list… ");
-	@outputList = grep (s/\.c$/\.ppcd.o/, @sourceList);
+	print (STDERR "# Building GSS Mac OS 9 debug object list… ");
+	@outputList = grep (s/\.c$/\.9d.o/, @sourceList);
 	@outputList = grep (/:gssapi:/, @outputList);
 	print (STDERR "Done. \n");
 
-} elsif ($action eq "gss-objects-68k-debug") {
+} elsif ($action eq "gss-objects-macos9-final") {
 
-	print (STDERR "# Building GSS 68K debug object list… ");
-	@outputList = grep (s/\.c$/\.68kd.o/, @sourceList);
+	print (STDERR "# Building GSS Mac OS 9 final object list… ");
+	@outputList = grep (s/\.c$/\.9.o/, @sourceList);
 	@outputList = grep (/:gssapi:/, @outputList);
 	print (STDERR "Done. \n");
 
-} elsif ($action eq "gss-objects-ppc-final") {
+} elsif ($action eq "krb5-objects-macos9-debug") {
 
-	print (STDERR "# Building GSS PPC final object list… ");
-	@outputList = grep (s/\.c$/\.ppcf.o/, @sourceList);
-	@outputList = grep (/:gssapi:/, @outputList);
-	print (STDERR "Done. \n");
-
-} elsif ($action eq "gss-objects-68k-final") {
-
-	print (STDERR "# Building GSS 68K final object list… ");
-	@outputList = grep (s/\.c$/\.68kf.o/, @sourceList);
-	@outputList = grep (/:gssapi:/, @outputList);
-	print (STDERR "Done. \n");
-
-} elsif ($action eq "krb5-objects-ppc-debug") {
-
-	print (STDERR "# Building Kerberos v5 PPC debug object list… ");
-	@outputList = grep (s/\.c$/\.ppcd.o/, @sourceList);
+	print (STDERR "# Building Kerberos v5 Mac OS 9 debug object list… ");
+	@outputList = grep (s/\.c$/\.9d.o/, @sourceList);
 	@outputList = grep (!/:gssapi:|:profile:|:et:/, @outputList);
 	print (STDERR "Done. \n");
 
-} elsif ($action eq "krb5-objects-68k-debug") {
+} elsif ($action eq "krb5-objects-macos9-final") {
 
-	print (STDERR "# Building Kerberos v5 68K debug object list… ");
-	@outputList = grep (s/\.c$/\.68kd.o/, @sourceList);
+	print (STDERR "# Building Kerberos v5 Mac OS 9 final object list… ");
+	@outputList = grep (s/\.c$/\.9.o/, @sourceList);
 	@outputList = grep (!/:gssapi:|:profile:|:et:/, @outputList);
 	print (STDERR "Done. \n");
 
-} elsif ($action eq "krb5-objects-ppc-final") {
+} elsif ($action eq "profile-objects-macos9-debug") {
 
-	print (STDERR "# Building Kerberos v5 PPC final object list… ");
-	@outputList = grep (s/\.c$/\.ppcf.o/, @sourceList);
-	@outputList = grep (!/:gssapi:|:profile:|:et:/, @outputList);
-	print (STDERR "Done. \n");
-
-} elsif ($action eq "krb5-objects-68k-final") {
-
-	print (STDERR "# Building Kerberos v5 68K final object list… ");
-	@outputList = grep (s/\.c$/\.68kf.o/, @sourceList);
-	@outputList = grep (!/:gssapi:|:profile:|:et:/, @outputList);
-	print (STDERR "Done. \n");
-
-} elsif ($action eq "profile-objects-ppc-debug") {
-
-	print (STDERR "# Building profile PPC debug object list… ");
-	@outputList = grep (s/\.c$/\.ppcd.o/, @sourceList);
+	print (STDERR "# Building profile Mac OS 9 debug object list… ");
+	@outputList = grep (s/\.c$/\.9d.o/, @sourceList);
 	@outputList = grep (/:profile:/, @outputList);
 	print (STDERR "Done. \n");
 
-} elsif ($action eq "profile-objects-68k-debug") {
+} elsif ($action eq "profile-objects-macos9-final") {
 
-	print (STDERR "# Building profile 68K debug object list… ");
-	@outputList = grep (s/\.c$/\.68kd.o/, @sourceList);
+	print (STDERR "# Building profile Mac OS 9 final object list… ");
+	@outputList = grep (s/\.c$/\.9.o/, @sourceList);
 	@outputList = grep (/:profile:/, @outputList);
 	print (STDERR "Done. \n");
 
-} elsif ($action eq "profile-objects-ppc-final") {
+} elsif ($action eq "comerr-objects-macos9-debug") {
 
-	print (STDERR "# Building profile PPC final object list… ");
-	@outputList = grep (s/\.c$/\.ppcf.o/, @sourceList);
-	@outputList = grep (/:profile:/, @outputList);
-	print (STDERR "Done. \n");
-
-} elsif ($action eq "profile-objects-68k-final") {
-
-	print (STDERR "# Building profile 68K final object list… ");
-	@outputList = grep (s/\.c$/\.68kf.o/, @sourceList);
-	@outputList = grep (/:profile:/, @outputList);
-	print (STDERR "Done. \n");
-
-} elsif ($action eq "comerr-objects-ppc-debug") {
-
-	print (STDERR "# Building com_err PPC debug object list… ");
-	@outputList = grep (s/\.c$/\.ppcd.o/, @sourceList);
+	print (STDERR "# Building com_err Mac OS 9 debug object list… ");
+	@outputList = grep (s/\.c$/\.9d.o/, @sourceList);
 	@outputList = grep (/:et:/, @outputList);
 	print (STDERR "Done. \n");
 
-} elsif ($action eq "comerr-objects-68k-debug") {
+} elsif ($action eq "comerr-objects-macos9-final") {
 
-	print (STDERR "# Building com_err 68K debug object list… ");
-	@outputList = grep (s/\.c$/\.68kd.o/, @sourceList);
+	print (STDERR "# Building com_err Mac OS 9 final object list… ");
+	@outputList = grep (s/\.c$/\.9.o/, @sourceList);
 	@outputList = grep (/:et:/, @outputList);
 	print (STDERR "Done. \n");
 
-} elsif ($action eq "comerr-objects-ppc-final") {
+} elsif ($action eq "gss-objects-carbon-debug") {
 
-	print (STDERR "# Building com_err PPC final object list… ");
-	@outputList = grep (s/\.c$/\.ppcf.o/, @sourceList);
+	print (STDERR "# Building GSS Carbon debug object list… ");
+	@outputList = grep (s/\.c$/\.CBd.o/, @sourceList);
+	@outputList = grep (/:gssapi:/, @outputList);
+	print (STDERR "Done. \n");
+
+} elsif ($action eq "gss-objects-carbon-final") {
+
+	print (STDERR "# Building GSS Carbon final object list… ");
+	@outputList = grep (s/\.c$/\.CB.o/, @sourceList);
+	@outputList = grep (/:gssapi:/, @outputList);
+	print (STDERR "Done. \n");
+
+} elsif ($action eq "krb5-objects-carbon-debug") {
+
+	print (STDERR "# Building Kerberos v5 Carbon debug object list… ");
+	@outputList = grep (s/\.c$/\.CBd.o/, @sourceList);
+	@outputList = grep (!/:gssapi:|:profile:|:et:/, @outputList);
+	print (STDERR "Done. \n");
+
+} elsif ($action eq "krb5-objects-carbon-final") {
+
+	print (STDERR "# Building Kerberos v5 Carbon final object list… ");
+	@outputList = grep (s/\.c$/\.CB.o/, @sourceList);
+	@outputList = grep (!/:gssapi:|:profile:|:et:/, @outputList);
+	print (STDERR "Done. \n");
+
+} elsif ($action eq "profile-objects-carbon-debug") {
+
+	print (STDERR "# Building profile Carbon debug object list… ");
+	@outputList = grep (s/\.c$/\.CBd.o/, @sourceList);
+	@outputList = grep (/:profile:/, @outputList);
+	print (STDERR "Done. \n");
+
+} elsif ($action eq "profile-objects-carbon-final") {
+
+	print (STDERR "# Building profile Carbon final object list… ");
+	@outputList = grep (s/\.c$/\.CB.o/, @sourceList);
+	@outputList = grep (/:profile:/, @outputList);
+	print (STDERR "Done. \n");
+
+} elsif ($action eq "comerr-objects-carbon-debug") {
+
+	print (STDERR "# Building com_err Carbon debug object list… ");
+	@outputList = grep (s/\.c$/\.CBd.o/, @sourceList);
 	@outputList = grep (/:et:/, @outputList);
 	print (STDERR "Done. \n");
 
-} elsif ($action eq "comerr-objects-68k-final") {
+} elsif ($action eq "comerr-objects-carbon-final") {
 
-	print (STDERR "# Building com_err 68K final object list… ");
-	@outputList = grep (s/\.c$/\.68kf.o/, @sourceList);
+	print (STDERR "# Building com_err Carbon final object list… ");
+	@outputList = grep (s/\.c$/\.CB.o/, @sourceList);
 	@outputList = grep (/:et:/, @outputList);
 	print (STDERR "Done. \n");
 
@@ -448,7 +448,7 @@ sub read_file
 {
 	die("Bad call to read_file") unless defined $_[0];
 	local($FN) = (&chew_on_filename($_[0]));
-	local (@LINES, @NLFREE_LINES);
+	local ($CONTENTS, @NLFREE_LINES);
 
 	if (!open(FILE, $FN))
 	{
@@ -456,16 +456,23 @@ sub read_file
 		exit(1);
 	}
 
-	@LINES=<FILE>;
-	@NLFREE_LINES=grep(s/\n$//, @LINES);
-	
-	if (!close(FILE))
 	{
-		print(STDERR "Can't close $FN.\n");
-		exit(1);
-	}
+		local ($/);
+		undef $/;
+		$CONTENTS = <FILE>;
+		
+		$CONTENTS =~ s/\012/\015/g;
+		
+		@NLFREE_LINES = split ('\015', $CONTENTS);
+		
+		if (!close(FILE))
+		{
+			print(STDERR "Can't close $FN.\n");
+			exit(1);
+		}
 
-	@NLFREE_LINES;
+		return @NLFREE_LINES;
+	}
 }
 
 # lists files that match $PATTERN in $DIR.

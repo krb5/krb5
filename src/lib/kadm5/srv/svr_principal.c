@@ -974,6 +974,7 @@ int free_history_entry(krb5_context context, osa_pw_hist_ent *hist)
  * array where the next element should be written, and must be [0,
  * adb->old_key_len).
  */
+#define KADM_MOD(x) (x + adb->old_key_next) % adb->old_key_len
 static kadm5_ret_t add_to_history(krb5_context context,
 				  osa_princ_ent_t adb,
 				  kadm5_policy_ent_t pol,
@@ -1001,6 +1002,39 @@ static kadm5_ret_t add_to_history(krb5_context context,
 	  
 	  memset(&adb->old_keys[adb->old_key_len],0,sizeof(osa_pw_hist_ent)); 
      	  adb->old_key_len++;
+     } else if (adb->old_key_len > pol->pw_history_num-1) {
+	 /*
+	  * The policy must have changed!  Shrink the array.
+	  * Can't simply realloc() down, since it might be wrapped.
+	  * To understand the arithmetic below, note that we are
+	  * copying into new positions 0 .. N-1 from old positions
+	  * old_key_next-N .. old_key_next-1, modulo old_key_len,
+	  * where N = pw_history_num - 1 is the length of the
+	  * shortened list.        Matt Crawford, FNAL
+	  */
+	 int j;
+	 histp = (osa_pw_hist_ent *)
+	     malloc((pol->pw_history_num - 1) * sizeof (osa_pw_hist_ent));
+	 if (histp) {
+	     for (i = 0; i < pol->pw_history_num - 1; i++) {
+		 /* We need the number we use the modulus operator on to be
+		    positive, so after subtracting pol->pw_history_num-1, we
+		    add back adb->old_key_len. */
+		 j = KADM_MOD(i - (pol->pw_history_num - 1) + adb->old_key_len);
+		 histp[i] = adb->old_keys[j];
+	     }
+	     /* Now free the ones we don't keep (the oldest ones) */
+	     for (i = 0; i < adb->old_key_len - (pol->pw_history_num - 1); i++)
+		 for (j = 0; j < adb->old_keys[KADM_MOD(i)].n_key_data; j++)
+		     krb5_free_key_data_contents(context,
+				&adb->old_keys[KADM_MOD(i)].key_data[j]);
+	     free((void *)adb->old_keys);
+	     adb->old_keys = histp;
+	     adb->old_key_len = pol->pw_history_num - 1;
+	     adb->old_key_next = 0;
+	 } else {
+	     return(ENOMEM);
+	 }
      }
 
      /* free the old pw history entry if it contains data */
@@ -1017,6 +1051,7 @@ static kadm5_ret_t add_to_history(krb5_context context,
 
      return(0);
 }
+#undef KADM_MOD
 
 kadm5_ret_t
 kadm5_chpass_principal(void *server_handle,
@@ -1482,7 +1517,7 @@ kadm5_setkey_principal_3(void *server_handle,
 	}
     }
 
-    if (n_ks_tuple != n_keys)
+    if (n_ks_tuple && n_ks_tuple != n_keys)
 	return KADM5_SETKEY3_ETYPE_MISMATCH;
 
     if ((ret = kdb_get_entry(handle, principal, &kdb, &adb)))
@@ -1702,6 +1737,13 @@ kadm5_ret_t kadm5_decrypt_key(void *server_handle,
 					  &master_keyblock, key_data,
 					  keyblock, keysalt))
 	 return ret;
+
+    /*
+     * Coerce the enctype of the output keyblock in case we got an
+     * inexact match on the enctype; this behavior will go away when
+     * the key storage architecture gets redesigned for 1.3.
+     */
+    keyblock->enctype = ktype;
 
     if (kvnop)
 	 *kvnop = key_data->key_data_kvno;

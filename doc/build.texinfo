@@ -59,8 +59,8 @@ only need to build Kerberos for one platform, using a single directory
 tree which contains both the source files and the object files is the
 simplest.  However, if you need to maintain Kerberos for a large number
 of platforms, you will probably want to use separate build trees for
-each platform. We recommend that you look at see @ref{OS
-Incompatibilities} for notes that we have on particular operating
+each platform. We recommend that you look at @ref{OS
+Incompatibilities}, for notes that we have on particular operating
 systems. 
 
 @menu
@@ -152,10 +152,10 @@ building Kerberos; see @ref{Doing the Build}.):
 
 @menu
 * The DejaGnu Tests::           
-* The KADM5 Tests::     
+* The KADM5 Tests::             
 @end menu
 
-@node The DejaGnu Tests,  The KADM5 Tests, Testing the Build, Testing the Build
+@node The DejaGnu Tests, The KADM5 Tests, Testing the Build, Testing the Build
 @subsection The DejaGnu Tests 
 
 Some of the built-in regression tests are setup to use the DejaGnu
@@ -200,7 +200,7 @@ libraries to be available during compilation and some of the tests also
 require Perl in order to operate.  If all of these resources are not
 available during configuration, the KADM5 tests will not run.  The TCL
 installation directory can be specified with the @code{--with-tcl}
-configure option (see @xref{Options to Configure}).  The runtest and
+configure option.  (See @xref{Options to Configure}.)  The runtest and
 perl programs must be in the current execution path.
 
 If you install DejaGnu, TCL, or Perl after configuring and building
@@ -208,7 +208,7 @@ Kerberos and then want to run the KADM5 tests, you will need to
 re-configure the tree and run @code{make} at the top level again to make
 sure all the proper programs are built.  To save time, you actually only
 need to reconfigure and build in the directories src/kadmin/testing,
-src/lib/rpc, src/lib/kadm5, and src/kpasswd.
+src/lib/rpc, src/lib/kadm5.
 
 @node Options to Configure, osconf.h, Testing the Build, Building Kerberos V5
 @section Options to Configure 
@@ -301,12 +301,6 @@ default, Kerberos V5 configuration will look for @code{-lnsl} and
 (see @ref{Solaris versions 2.0 through 2.3}) or fails to pass the tests in
 @file{src/tests/resolv} you will need to use this option.
 
-@item --enable-shared
-
-This option will turn on the building and use of shared library objects
-in the Kerberos build. This option is only supported on certain
-platforms. 
-
 @item --with-vague-errors
 
 If enabled, gives vague and unhelpful error messages to the client... er,
@@ -329,10 +323,33 @@ Tcl. The directory specified by @code{TCLPATH} specifies where the Tcl
 header file (@file{TCLPATH/include/tcl.h} as well as where the Tcl
 library should be found (@file{TCLPATH/lib}).
 
+@item --enable-shared
+
+This option will turn on the building and use of shared library objects
+in the Kerberos build. This option is only supported on certain
+platforms. 
+
+@item --enable-dns
+@item --enable-dns-for-kdc
+@item --enable-dns-for-realm
+
+Enable the use of DNS to look up a host's Kerberos realm, or a realm's
+KDCs, if the information is not provided in krb5.conf.  See
+@xref{Hostnames for the Master and Slave KDCs}, and @xref{Mapping
+Hostnames onto Kerberos Realms}.  By default, DNS lookups are enabled
+for the latter but not for the former.
+
+@item --enable-kdc-replay-cache
+
+Enable a cache in the KDC to detect retransmitted messages, and resend
+the previous responses to them.  This protects against certain types of
+attempts to extract information from the KDC through some of the
+hardware preauthentication systems.
+
 @end table
 
 For example, in order to configure Kerberos on a Solaris machine using
-the @samp{suncc} with the optimizer turned on, run the configure
+the @samp{suncc} compiler with the optimizer turned on, run the configure
 script with the following options:
 
 @example
@@ -397,10 +414,15 @@ variables when using the programs. Except where noted, multiple versions
 of the libraries may be installed on the same system and continue to
 work.
 
-Currently the supported platforms are
-@comment NetBSD 1.0A, AIX 3.2.5, AIX 4.1,
-Solaris 2.6 (aka SunOS 5.6) and Irix 6.5.
-@comment Alpha OSF/1 >= 2.1, HP-UX >= 9.X.
+Currently the supported platforms are Solaris 2.6 (aka SunOS 5.6) and Irix 6.5.
+
+Shared library support has been tested on the following platforms but
+not exhaustively (they have been built but not necessarily tested in an
+installed state): Tru64 (aka Alpha OSF/1 or Digital Unix) 4.0, NetBSD
+1.4.x (i386), and HP/UX 10.20.
+
+Platforms for which there is shared library support but not significant
+testing include FreeBSD, OpenBSD, MacOS 10, AIX, Linux, and SunOS 4.x.
 
 To enable shared libraries on the above platforms, run the configure
 script with the option @samp{--enable-shared}.
@@ -428,6 +450,7 @@ Thanks!
 * AIX::                         
 * Alpha OSF/1 V1.3::            
 * Alpha OSF/1 (Digital Unix) V2.0++::  
+* Alpha Tru64 4.0::             
 * BSDI::                        
 * HPUX::                        
 * Solaris versions 2.0 through 2.3::  
@@ -452,7 +475,7 @@ causes the @code{asn.1} library to be compiled incorrectly.
 Using GCC version 2.6.3 or later instead of the native compiler will also work
 fine, both with or without optimization.
 
-@node Alpha OSF/1 (Digital Unix) V2.0++, BSDI, Alpha OSF/1 V1.3, OS Incompatibilities
+@node Alpha OSF/1 (Digital Unix) V2.0++, Alpha Tru64 4.0, Alpha OSF/1 V1.3, OS Incompatibilities
 @subsection Alpha OSF/1 V2.0++
 
 There used to be a bug when using the native compiler in compiling
@@ -463,9 +486,21 @@ problem would exist there. (We welcome feedback on this issue). There
 was never a problem in using GCC version 2.6.3.
 
 In version 3.2 and beyond of the operating system, we have not seen any
-problems with the native compiler. 
+optimizer problems with the native compiler. 
 
-@node BSDI, HPUX, Alpha OSF/1 (Digital Unix) V2.0++, OS Incompatibilities
+@node Alpha Tru64 4.0, BSDI, Alpha OSF/1 (Digital Unix) V2.0++, OS Incompatibilities
+@subsection Alpha Tru64 4.0
+
+Alpha Tru64 4.0 will have some trouble compiling the some stdarg
+prototypes, since it defaults to K&R C.  Use the @samp{-std} or
+@samp{-std1} flags to force ANSI behavior (e.g. @samp{./configure
+--with-cc='cc -std1'}).
+
+@comment  node-name,  next,  previous,  up@c @node Alpha Tru64 UNIX 5.0
+@c @subsection Alpha Tru64 UNIX 5.0
+@c ... login.krb5 problems
+
+@node BSDI, HPUX, Alpha Tru64 4.0, OS Incompatibilities
 @subsection BSDI
 
 BSDI versions 1.0 and 1.1 reportedly has a bad @samp{sed} which causes
@@ -479,9 +514,9 @@ NetBSD and FreeBSD.)
 
 The native (bundled) compiler for HPUX currently will not work, because
 it is not a full ANSI C compiler.  The optional compiler (c89) should
-work as long as you give it the @samp{+Olibcalls -D_HPUX_SOURCE} (this
-has only been tested for HPUX 9.0).  At this point, using GCC is
-probably your best bet.
+work as long as you give it the @samp{-D_HPUX_SOURCE} flag
+(i.e. @samp{./configure --with-cc='c89 -D_HPUX_SOURCE'}).  This has only
+been tested recently for HPUX 10.20.
 
 @node Solaris versions 2.0 through 2.3, Solaris 2.X, HPUX, OS Incompatibilities
 @subsection Solaris versions 2.0 through 2.3
