@@ -1,3 +1,9 @@
+2000-05-03  Tom Yu  <tlyu@mit.edu>
+
+	* aclocal.m4 (AC_KRB5_TCL_TRYOLD): Search by appending stuff to
+	CPPFLAGS and LDFLAGS to notice if there may be problems with stuff
+	earlier along in either variable overriding.
+
 2000-04-18  Ken Raeburn  <raeburn@mit.edu>
 
 	* aclocal.m4 (KRB5_AC_ENABLE_DNS): Set RESOLV_LIB, and substitute
