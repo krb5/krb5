@@ -28,7 +28,7 @@ g_copy_OID_set(in, out)
      gss_OID_set *out;
 {
    gss_OID_set copy;
-   int i;
+   size_t i;
 
    *out = NULL;
 

@@ -1,3 +1,8 @@
+Wed Sep 13 10:36:32 1995 Keith Vetter (keithv@fusion.com)
+
+	* oid_ops.c: signed/unsigned mismatch, removed unused variables.
+	* util_oid.c: changed int to a size_t.
+
 Wed Sep  6 12:00:00 1995  James Mattly  <mattly@fusion.com>
 	* gssapiP_generic.h:  changed a path bearing include for MACINTOSH
 	* gssapi_generic.h:  changed a path bearing include for MACINTOSH

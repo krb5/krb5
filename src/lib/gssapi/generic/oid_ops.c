@@ -28,6 +28,7 @@
 
 #include "gssapiP_generic.h"
 #include "gssapi_generic.h"
+#include <ctype.h>
 
 OM_uint32
 generic_gss_release_oid(minor_status, oid)
@@ -135,7 +136,7 @@ generic_gss_test_oid_set_member(minor_status, member, set, present)
 	if ((set->elements[i].length == member->length) &&
 	    !memcmp(set->elements[i].elements,
 		    member->elements,
-		    member->length)) {
+		    (size_t) member->length)) {
 	    result = 1;
 	    break;
 	}
@@ -228,7 +229,6 @@ generic_gss_str_to_oid(minor_status, oid_str, oid)
     gss_buffer_t	oid_str;
     gss_OID		*oid;
 {
-    size_t	i;
     char	*cp, *bp, *startp;
     int		brace;
     long	numbuf;
@@ -295,7 +295,7 @@ generic_gss_str_to_oid(minor_status, oid_str, oid)
      * Phew!  We've come this far, so the syntax is good.
      */
     if ((*oid = (gss_OID) malloc(sizeof(gss_OID_desc)))) {
-	if ((*oid)->elements = (void *) malloc(nbytes)) {
+	if ((*oid)->elements = (void *) malloc((size_t) nbytes)) {
 	    (*oid)->length = nbytes;
 	    op = (unsigned char *) (*oid)->elements;
 	    bp = startp;
@@ -326,7 +326,7 @@ generic_gss_str_to_oid(minor_status, oid_str, oid)
 		op += nbytes;
 		index = -1;
 		while (numbuf) {
-		    op[index] = numbuf & 0x7f;
+		    op[index] = (unsigned char) numbuf & 0x7f;
 		    if (index != -1)
 			op[index] |= 0x80;
 		    index--;
