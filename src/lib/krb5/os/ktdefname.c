@@ -41,11 +41,14 @@ krb5_kt_default_name(context, name, namesize)
     if (context->kt_default_name == NULL) {
 	if ((context->profile_secure == FALSE) &&
 	    (cp = getenv("KRB5_KTNAME"))) {
+	    if ((context->kt_default_name = malloc(strlen(cp) + 1)) == NULL)
+		return ENOMEM;
+	    strcpy(context->kt_default_name, cp);
 	} else if (((code = profile_get_string(context->profile,
 					       "libdefaults",
 					       "default_keytab_name", NULL, 
 					       NULL, &cp)) == 0) && cp){
-	    ;
+	    context->kt_default_name = cp;
 	} else {
 #if defined (_MSDOS) || defined(_WIN32)
 	    {
@@ -58,17 +61,15 @@ krb5_kt_default_name(context, name, namesize)
 		    == NULL)
 		    return ENOMEM;
 		sprintf(cp, DEFAULT_KEYTAB_NAME, defname);
+		context->kt_default_name = cp;
 	    }
 #else
 	    if ((cp = malloc(strlen(DEFAULT_KEYTAB_NAME) + 1)) == NULL)
 		return ENOMEM;
 	    strcpy(cp, DEFAULT_KEYTAB_NAME);
+	    context->kt_default_name = cp;
 #endif
 	}
-	/* cache the result... */
-	if ((context->kt_default_name = malloc(strlen(cp) + 1)) == NULL)
-	    return ENOMEM;
-	strcpy(context->kt_default_name, cp);
     }
     strncpy(name, context->kt_default_name, namesize);
     if ((size_t) namesize < strlen(context->kt_default_name))
