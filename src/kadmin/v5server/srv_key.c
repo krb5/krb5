@@ -30,6 +30,7 @@
 #include "kadm5_defs.h"
 #include "mit-des.h"
 
+static const char *key_keytab_fmt = "%s: cannot resolve keytab %s (%s).\n";
 static const char *key_bad_etype_fmt = "%s: bad etype %d (%s).\n";
 static const char *key_def_realm_fmt = "%s: cannot find default realm (%s).\n";
 static const char *key_setup_mkey_fmt = "%s: cannot setup master key name (%s).\n";
@@ -58,6 +59,12 @@ static krb5_pointer	master_random;
 static int		ment_init = 0;
 static krb5_db_entry	master_entry;
 
+static int		mrealm_init = 0;
+static char		*master_realm = (char *) NULL;
+
+static int		mkeytab_init = 0;
+static krb5_keytab	key_keytab = (krb5_keytab) NULL;
+
 static int key_debug_level = 0;
 
 extern char *programname;
@@ -67,7 +74,7 @@ extern char *programname;
  */
 krb5_error_code
 key_init(kcontext, debug_level, enc_type, key_type, master_key_name, manual,
-	 db_file, db_realm)
+	 db_file, db_realm, kt_name)
     krb5_context	kcontext;
     int			debug_level;
     int			enc_type;
@@ -76,10 +83,10 @@ key_init(kcontext, debug_level, enc_type, key_type, master_key_name, manual,
     int			manual;
     char		*db_file;
     char		*db_realm;
+    char		*kt_name;
 {
     krb5_enctype 	kdc_etype;
     char		*mkey_name;
-    char		*the_realm;
 
     krb5_error_code	kret;
     krb5_enctype	etype;
@@ -89,18 +96,32 @@ key_init(kcontext, debug_level, enc_type, key_type, master_key_name, manual,
 
     key_debug_level = debug_level;
     DPRINT(DEBUG_CALLS, key_debug_level,
-	   ("* key_init(enc-type=%d, key-type=%d,\n\tmkeyname=%s, manual=%d,\n\tdb=%s, realm=%s)\n",
+	   ("* key_init(enc-type=%d, key-type=%d,\n\tmkeyname=%s, manual=%d,\n\tdb=%s,\n\trealm=%s,\n\tktab=%s)\n",
 	    enc_type, key_type,
 	    ((master_key_name) ? master_key_name : "(null)"),
 	    manual,
 	    ((db_file) ? db_file : "(default)"),
-	    ((db_realm) ? db_realm : "(null)")));
+	    ((db_realm) ? db_realm : "(null)"),
+	    ((kt_name) ? kt_name : "(null)")));
     /*
      * Figure out arguments.
      */
     master_keyblock.keytype = ((key_type == -1) ? KEYTYPE_DES : key_type);
     mkey_name = ((!master_key_name) ? KRB5_KDB_M_NAME : master_key_name);
     kdc_etype = ((enc_type == -1) ? DEFAULT_KDC_ETYPE : enc_type);
+
+    /*
+     * First, try to set up our keytab if supplied.
+     */
+    if (kt_name) {
+	if (kret = krb5_kt_resolve(kcontext, kt_name, &key_keytab)) {
+	    fprintf(stderr, key_keytab_fmt, programname,
+		    kt_name, error_message(kret));
+	    goto leave;
+	}
+    }
+    mkeytab_init = 1;
+
     if (!valid_etype(kdc_etype)) {
 	kret = KRB5_PROG_ETYPE_NOSUPP;
 	fprintf(stderr, key_bad_etype_fmt, programname, kdc_etype,
@@ -108,17 +129,26 @@ key_init(kcontext, debug_level, enc_type, key_type, master_key_name, manual,
 	goto leave;
     }
     if (!db_realm) {
-	kret = krb5_get_default_realm(kcontext, &the_realm);
+	kret = krb5_get_default_realm(kcontext, &master_realm);
 	if (kret) {
 	    fprintf(stderr, key_def_realm_fmt, programname,
 		    error_message(kret));
 	    goto leave;
 	}
     }
-    else
-	the_realm = db_realm;
+    else {
+	if (kret = krb5_set_default_realm(kcontext, db_realm))
+	    goto leave;
+	master_realm = (char *) malloc(strlen(db_realm)+1);
+	if (!master_realm) {
+	    kret = ENOMEM;
+	    goto leave;
+	}
+	strcpy(master_realm, db_realm);
+    }
+    mrealm_init = 1;
     DPRINT(DEBUG_REALM, key_debug_level,
-	   ("- initializing for realm %s\n", the_realm));
+	   ("- initializing for realm %s\n", master_realm));
 
     /* Set database name if supplied */
     if (db_file && (kret = krb5_db_set_name(kcontext, db_file))) {
@@ -137,7 +167,7 @@ key_init(kcontext, debug_level, enc_type, key_type, master_key_name, manual,
     /* Assemble and parse the master key name */
     kret = krb5_db_setup_mkey_name(kcontext,
 				   mkey_name,
-				   the_realm,
+				   master_realm,
 				   (char **) NULL,
 				   &master_principal);
     if (kret) {
@@ -147,7 +177,7 @@ key_init(kcontext, debug_level, enc_type, key_type, master_key_name, manual,
     }
     mprinc_init = 1;
     DPRINT(DEBUG_HOST, key_debug_level,
-	   ("- master key is %s@%s\n", mkey_name, the_realm));
+	   ("- master key is %s@%s\n", mkey_name, master_realm));
 
     /* Get the master database entry and save it. */
     number_of_entries = 1;
@@ -178,7 +208,6 @@ key_init(kcontext, debug_level, enc_type, key_type, master_key_name, manual,
     ment_init = 1;
 
     krb5_use_cstype(kcontext, &master_encblock, kdc_etype);
-    mencb_init = 1;
 
     /* Go get the master key */
     kret = krb5_db_fetch_mkey(kcontext,
@@ -193,6 +222,7 @@ key_init(kcontext, debug_level, enc_type, key_type, master_key_name, manual,
 		error_message(kret));
 	goto cleanup;
     }
+    mencb_init = 1;
     mkeyb_init = 1;
 
     /* Verify the master key */
@@ -241,9 +271,17 @@ key_init(kcontext, debug_level, enc_type, key_type, master_key_name, manual,
 	    krb5_db_free_principal(kcontext, &master_entry, 1);
 	    ment_init = 0;
 	}
+	if (mrealm_init) {
+	    krb5_xfree(master_realm);
+	    mrealm_init = 0;
+	}
+	if (mkeytab_init) {
+	    if (key_keytab)
+		krb5_kt_close(kcontext, key_keytab);
+	    key_keytab = (krb5_keytab) NULL;
+	    mkeytab_init = 0;
+	}
     }
-    if (the_realm != db_realm)
-	krb5_xfree(the_realm);
  leave:
     DPRINT(DEBUG_CALLS, key_debug_level, ("X key_init() = %d\n", kret));
     return(kret);
@@ -280,6 +318,16 @@ key_finish(kcontext, debug_level)
 	krb5_db_free_principal(kcontext, &master_entry, 1);
 	ment_init = 0;
     }
+    if (mrealm_init) {
+	krb5_xfree(master_realm);
+	mrealm_init = 0;
+    }
+    if (mkeytab_init) {
+	if (key_keytab)
+	    krb5_kt_close(kcontext, key_keytab);
+	key_keytab = (krb5_keytab) NULL;
+	mkeytab_init = 0;
+    }
     krb5_db_fini(kcontext);
     /* memset((char *) tgs_key.contents, 0, tgs_key.length); */
     DPRINT(DEBUG_CALLS, key_debug_level, ("X key_finish()\n"));
@@ -290,7 +338,7 @@ key_finish(kcontext, debug_level)
  */
 krb5_error_code
 key_string_to_keys(kcontext, principal, string, psalttype, asalttype,
-		   primary, alternate)
+		   primary, alternate, psaltdatap, asaltdatap)
     krb5_context	kcontext;
     krb5_principal	principal;
     krb5_data		*string;
@@ -298,14 +346,15 @@ key_string_to_keys(kcontext, principal, string, psalttype, asalttype,
     krb5_int32		asalttype;
     krb5_keyblock	*primary;
     krb5_keyblock	*alternate;
+    krb5_data		*psaltdatap;
+    krb5_data		*asaltdatap;
 {
     krb5_error_code	kret;
-    krb5_data		psalt_data, asalt_data;
 
     DPRINT(DEBUG_CALLS, key_debug_level, ("* key_string_to_keys()\n"));
     kret = KRB_ERR_GENERIC;
-    psalt_data.length = asalt_data.length = 0;
-    psalt_data.data = asalt_data.data = (char *) NULL;
+    psaltdatap->length = asaltdatap->length = 0;
+    psaltdatap->data = asaltdatap->data = (char *) NULL;
 
     /*
      * Determine the primary salt type.
@@ -313,25 +362,25 @@ key_string_to_keys(kcontext, principal, string, psalttype, asalttype,
     switch (psalttype) {
     case KRB5_KDB_SALTTYPE_NORMAL:
 	/* Normal salt */
-	if (kret = krb5_principal2salt(kcontext, principal, &psalt_data))
+	if (kret = krb5_principal2salt(kcontext, principal, psaltdatap))
 	    goto done;
-	asalt_data.data = (char *) NULL;
-	asalt_data.length = 0;
+	asaltdatap->data = (char *) NULL;
+	asaltdatap->length = 0;
 	break;
     case KRB5_KDB_SALTTYPE_V4:
 	/* V4 salt */
-	psalt_data.data = (char *) NULL;
-	psalt_data.length = 0;
-	if (kret = krb5_principal2salt(kcontext, principal, &asalt_data))
+	psaltdatap->data = (char *) NULL;
+	psaltdatap->length = 0;
+	if (kret = krb5_principal2salt(kcontext, principal, asaltdatap))
 	    goto done;
 	break;
     case KRB5_KDB_SALTTYPE_NOREALM:
 	if (kret = krb5_principal2salt_norealm(kcontext,
 					       principal,
-					       &psalt_data))
+					       psaltdatap))
 	    goto done;
-	asalt_data.data = (char *) NULL;
-	asalt_data.length = 0;
+	asaltdatap->data = (char *) NULL;
+	asaltdatap->length = 0;
 	break;
     case KRB5_KDB_SALTTYPE_ONLYREALM:
     {
@@ -341,10 +390,10 @@ key_string_to_keys(kcontext, principal, string, psalttype, asalttype,
 				  krb5_princ_realm(kcontext, principal),
 				  &tmp))
 	    goto done;
-	psalt_data = *tmp;
+	*psaltdatap = *tmp;
 	krb5_xfree(tmp);
-	asalt_data.data = (char *) NULL;
-	asalt_data.length = 0;
+	asaltdatap->data = (char *) NULL;
+	asaltdatap->length = 0;
 	break;
     }
     default:
@@ -357,14 +406,14 @@ key_string_to_keys(kcontext, principal, string, psalttype, asalttype,
 			      master_keyblock.keytype,
 			      primary,
 			      string,
-			      &psalt_data);
+			      psaltdatap);
     if (!kret)
 	kret = krb5_string_to_key(kcontext,
 				  &master_encblock,
 				  master_keyblock.keytype,
 				  alternate,
 				  string,
-				  &asalt_data);
+				  asaltdatap);
 
  done:
     if (kret) {
@@ -377,17 +426,41 @@ key_string_to_keys(kcontext, principal, string, psalttype, asalttype,
 		   (size_t) alternate->length);
 	    krb5_xfree(alternate->contents);
 	}
-    }
-    if (psalt_data.data) {
-	memset(psalt_data.data, 0, (size_t) psalt_data.length);
-	krb5_xfree(psalt_data.data);
-    }
-    if (asalt_data.data) {
-	memset(asalt_data.data, 0, (size_t) asalt_data.length);
-	krb5_xfree(asalt_data.data);
+	if (psaltdatap->data) {
+	    memset(psaltdatap->data, 0, (size_t) psaltdatap->length);
+	    krb5_xfree(psaltdatap->data);
+	    psaltdatap->data = (char *) NULL;
+	}
+	if (asaltdatap->data) {
+	    memset(asaltdatap->data, 0, (size_t) asaltdatap->length);
+	    krb5_xfree(asaltdatap->data);
+	    asaltdatap->data = (char *) NULL;
+	}
     }
     DPRINT(DEBUG_CALLS, key_debug_level,
 	   ("X key_string_to_keys() = %d\n", kret));
+    return(kret);
+}
+
+/*
+ * key_random_key()	- generate a random key.
+ */
+krb5_error_code
+key_random_key(kcontext, rkeyp)
+    krb5_context	kcontext;
+    krb5_keyblock	*rkeyp;
+{
+    krb5_error_code	kret;
+    krb5_keyblock	*tmp;
+    DPRINT(DEBUG_CALLS, key_debug_level, ("* key_random_key()\n"));
+
+    tmp = (krb5_keyblock *) NULL;
+    kret = krb5_random_key(kcontext, &master_encblock, master_random, &tmp);
+    if (tmp) {
+	memcpy(rkeyp, tmp, sizeof(krb5_keyblock));
+	krb5_xfree(tmp);
+    }
+    DPRINT(DEBUG_CALLS, key_debug_level, ("X key_random_key()=%d\n", kret));
     return(kret);
 }
 
@@ -490,6 +563,7 @@ key_pwd_is_weak(kcontext, principal, string, psalttype, asalttype)
     krb5_error_code	kret;
     krb5_keyblock	primary;
     krb5_keyblock	alternate;
+    krb5_data		psalt, asalt;
 
     DPRINT(DEBUG_CALLS, key_debug_level, ("* key_pwd_is_weak()\n"));
     weakness = 0;
@@ -497,6 +571,8 @@ key_pwd_is_weak(kcontext, principal, string, psalttype, asalttype)
     if (master_encblock.key->etype != ETYPE_NULL) {
 	memset((char *) &primary, 0, sizeof(primary));
 	memset((char *) &alternate, 0, sizeof(alternate));
+	memset((char *) &psalt, 0, sizeof(psalt));
+	memset((char *) &asalt, 0, sizeof(asalt));
 
 	kret = key_string_to_keys(kcontext,
 				  principal,
@@ -504,7 +580,9 @@ key_pwd_is_weak(kcontext, principal, string, psalttype, asalttype)
 				  psalttype,
 				  asalttype,
 				  &primary,
-				  &alternate);
+				  &alternate,
+				  &psalt,
+				  &asalt);
 	if (!kret) {
 	    if (primary.length &&
 		(primary.length == sizeof(mit_des_cblock)) &&
@@ -523,10 +601,44 @@ key_pwd_is_weak(kcontext, principal, string, psalttype, asalttype)
 		       (size_t) alternate.length);
 		krb5_xfree(alternate.contents);
 	    }
+	    if (psalt.data) {
+		memset((char *) psalt.data, 0, (size_t) psalt.length);
+		krb5_xfree(psalt.data);
+	    }
+	    if (asalt.data) {
+		memset((char *) asalt.data, 0, (size_t) asalt.length);
+		krb5_xfree(asalt.data);
+	    }
 	}
     }
     DPRINT(DEBUG_CALLS, key_debug_level,
 	   ("X key_pwd_is_weak() = %d\n", weakness));
     return(weakness);
 }
-
+
+/*
+ * key_master_entry()	- Return a pointer to the master entry (yuck).
+ */
+krb5_db_entry *
+key_master_entry()
+{
+    return((ment_init) ? &master_entry : (krb5_db_entry *) NULL);
+}
+
+/*
+ * key_master_realm()	- Return name of master realm (yuck).
+ */
+char *
+key_master_realm()
+{
+    return((mrealm_init) ? master_realm : (char *) NULL);
+}
+
+/*
+ * key_keytab_id()	- Which key table to use?
+ */
+krb5_keytab
+key_keytab_id()
+{
+    return((mkeytab_init) ? key_keytab : (krb5_keytab) NULL);
+}
