@@ -1,3 +1,8 @@
+2004-12-17  Ken Raeburn  <raeburn@mit.edu>
+
+	* shlib.conf (*-*-netbsd*): Use -fPIC instead of -fpic, which
+	won't work on sparc64 at least.
+
 2004-12-15  Jeffrey Altman <jaltman@mit.edu>
 
         * win-pre.in; optionally build debug symbols for release builds
