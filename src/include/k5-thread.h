@@ -90,6 +90,13 @@
    For non-threaded case: A simple flag.
    For Windows: Not needed; library init code takes care of it.
 
+   XXX: A general k5_once mechanism isn't possible for Windows,
+   without faking it through named mutexes or mutexes initialized at
+   startup.  I was only using it in one place outside these headers,
+   so I'm dropping the general scheme.  Eventually the existing uses
+   in k5-thread.h and k5-platform.h will be converted to pthread_once
+   or static variables.
+
 
    Thread-specific data:
 
@@ -180,6 +187,8 @@ typedef enum {
 
 
 #ifdef ENABLE_THREADS
+
+#ifdef HAVE_PTHREAD_H
 
 #include <pthread.h>
 
@@ -294,6 +303,17 @@ typedef struct { pthread_once_t o; int i; } k5_once_t;
 typedef pthread_once_t k5_once_t;
 #define K5_ONCE_INIT	PTHREAD_ONCE_INIT
 #define k5_once		pthread_once
+#endif
+
+#elif defined(_WIN32)
+
+# error "Windows thread support not implemented yet"
+/* N.B.: No k5_once support for this platform.  */
+
+#else
+
+# error "Thread support enabled, but thread system unknown"
+
 #endif
 
 #else /* ! ENABLE_THREADS */
