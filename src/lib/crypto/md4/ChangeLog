@@ -1,4 +1,8 @@
 
+Tue Sep 05 22:10:34 1995   Chris Provenzano (proven@mit.edu)
+
+        * md4crypto.c : Replace KEYTYPE_DES_CBC_MD4 for KEYTYPE_DES.
+
 Thu Jul 27 15:22:17 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* rsa-md4.h - Don't include k5-config.h.  No longer present or needed.
 
