@@ -42,14 +42,32 @@ kdb5_edit \- edit a Kerberos V5 principal database
 .I enctype
 ] [
 .B \-m
+] [
+.B \-R
+.I command
+] [
+.B \-s
+.I script
 ]
 .br
 .SH DESCRIPTION
 .I kdb5_edit
 allows an administrator to add, delete, and edit entries in a Kerberos
 version 5 principal database.
-After the master key is verified, the administrator is placed into a
-shell-like command loop, from which he may issue commands to modify the
+After themaster key is verified, commands are to
+.I kdb5_edit
+are issued using one of three mechanisms.  If a single command is supplied 
+using the
+.B \-R
+.I command
+argument, then that single command is processed and execution ceases.  If a
+script file is provided using the 
+.B \-s
+.I script
+argument, then commands are read from this file until either an error occurs
+or an end of file is detected.  Finally, if neither a command or a script is
+specified, the invoker is placed into a shell-like command loop, from which
+[s]he may issue commands to modify the
 database.  
 .PP
 The
@@ -69,9 +87,8 @@ by default the database is in DEFAULT_DBM_FILE (defined in <krb5/osconf.h>).
 The
 .B \-k
 .I keytype
-option specifies the key type (as an ascii representation of a decimal
-number) of the master key in the database; the default is
-DEFAULT_KDC_KEYTYPE (defined in <krb5/osconf.h>).
+option specifies the key type of the master key in the database; the default is
+the string representation of DEFAULT_KDC_KEYTYPE (defined in <krb5/osconf.h>).
 .PP
 The
 .B \-M
@@ -82,9 +99,9 @@ the default is KRB5_KDB_M_NAME (defined in <krb5/kdb.h>).
 The
 .B \-e
 .I enctype
-option specifies the encryption type (as an ascii representation of a decimal
-number) to be used when placing entries in
-the database; the default is DEFAULT_KDC_ETYPE (defined in <krb5/osconf.h>).
+option specifies the encryption type to be used when placing entries in
+the database; the default is the string representation of DEFAULT_KDC_ETYPE
+(defined in <krb5/osconf.h>).
 .PP
 The
 .B \-m
@@ -146,4 +163,4 @@ Exit program.
 .SH SEE ALSO
 krb5(3), krb5kdc(8), ss(3)
 .SH BUGS
-This routine must be run interactively.  There is no command-line interface.
+
