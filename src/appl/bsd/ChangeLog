@@ -10,7 +10,7 @@
 	library.
 	* defines.h (krb5_compat_recvauth, krb5_compat_recvauth_version):
 	Move declarations here from include/k5-util.h.
-	(princ_maps_to_lname): Declare.
+	(princ_maps_to_lname, default_realm): Declare.
 
 	* kcmd.c (kcmd_connect): Use strdup when copying hostname.
 	(princ_maps_to_lname, default_realm): Move functions here...

@@ -67,6 +67,7 @@ krb5_error_code rd_and_store_for_creds(krb5_context context,
 
 
 int princ_maps_to_lname(krb5_principal principal, char *luser);
+int default_realm(krb5_principal principal);
 
 #ifdef NEED_SETENV
 extern int setenv(char *, char *, int);
