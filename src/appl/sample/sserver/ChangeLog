@@ -1,5 +1,7 @@
 Thu Dec  5 19:44:05 1996  Tom Yu  <tlyu@mit.edu>
 
+	* sserver.M: remove ref's to "/krb5" [PR 279]
+
 	* sserver.M: v5srvtab -> krb5.keytab; also kdb5_edit -> kadmin [PR
 	279]
 

@@ -56,7 +56,7 @@ option allows for a different keytab than the default.
 using a line in
 /etc/inetd.conf that looks like this:
 .PP
-sample  stream  tcp     nowait  root /krb5/sbin/sserver	sserver
+sample  stream  tcp     nowait  root /usr/local/sbin/sserver	sserver
 .PP
 Since \fBsample\fP is normally not a port defined in /etc/services, you will
 usually have to add a line to /etc/services which looks like this:
@@ -108,7 +108,7 @@ didn't restart \fIinetd\fP after editing inetd.conf.
 .PP
 4)  \fIsclient\fP returns the error:
 .PP
-/krb5/bin/sclient: Server not found in Kerberos database while using sendauth
+sclient: Server not found in Kerberos database while using sendauth
 .PP
 This means that the "sample/hostname@LOCAL.REALM" service was not
 defined in the Kerberos database; it should be created using \fIkadmin,\fP
