@@ -1,7 +1,6 @@
 /*
  * Copyright 1993 OpenVision Technologies, Inc., All Rights Reserved
  *
- * $Header$
  */
 
 #ifndef __KADM5_ADMIN_INTERNAL_H__
@@ -55,7 +54,7 @@
  * Got that?
  */
 #define _KADM5_CHECK_HANDLE(handle) \
-{ int code; if ((code = _kadm5_check_handle((void *)handle))) return code; }
+{ int ecode; if ((ecode = _kadm5_check_handle((void *)handle))) return ecode;}
 
 int         _kadm5_check_handle(void *handle);
 kadm5_ret_t _kadm5_chpass_principal_util(void *server_handle,

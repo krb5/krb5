@@ -1,3 +1,8 @@
+2001-06-21  Ezra Peisach  <epeisach@mit.edu>
+
+	* admin_internal.h (_KADM5_CHECK_HANDLE): Change code to ecode in
+	blocked statement to prevent shadowing.
+
 2001-06-20  Ken Raeburn  <raeburn@mit.edu>
 
 	* logger.c (krb5_klog_init) [HAVE_SYSLOG]: Loop over an array of
