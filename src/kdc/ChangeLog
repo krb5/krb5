@@ -1,3 +1,7 @@
+Fri Jul 25 15:44:07 1997  Tom Yu  <tlyu@mit.edu>
+
+	* main.c (init_realm): Fix to use new ktkdb.
+
 Tue Jul 15 01:55:56 1997  Tom Yu  <tlyu@mit.edu>
 
 	* kdc_preauth.c (get_sam_edata): Don't goto cleanup if SAM is not

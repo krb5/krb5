@@ -36,7 +36,7 @@
 #include "kdc_util.h"
 #include "extern.h"
 #include "kdc5_err.h"
-#include "kdb_dbc.h"
+#include "kdb_kt.h"
 #ifdef KRB5_USE_INET
 #include <netinet/in.h>
 #endif
@@ -300,7 +300,6 @@ init_realm(progname, rdp, realm, def_dbname, def_mpname,
     char		*def_ports;
     krb5_boolean	def_manual;
 {
-    krb5_db_context	db_context;
     krb5_error_code	kret;
     krb5_boolean	manual;
     krb5_db_entry	db_entry;
@@ -530,16 +529,15 @@ init_realm(progname, rdp, realm, def_dbname, def_mpname,
 	goto whoops;
     }
 
-    /* Set master encblock with db_context */
-    if ((kret = krb5_dbm_db_set_mkey(rdp->realm_context, &db_context, 
-				     &rdp->realm_encblock))) {
+    if ((kret = krb5_db_set_mkey(rdp->realm_context, 
+				 &rdp->realm_encblock))) {
 	com_err(progname, kret,
 		"while setting master key for realm %s", realm);
 	goto whoops;
     }
 
     /* Set up the keytab */
-    if ((kret = krb5_ktkdb_resolve(rdp->realm_context, &db_context, 
+    if ((kret = krb5_ktkdb_resolve(rdp->realm_context, 
 				   &rdp->realm_keytab))) {
 	com_err(progname, kret,
 		"while resolving kdb keytab for realm %s", realm);
