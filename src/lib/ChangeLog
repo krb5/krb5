@@ -1,3 +1,7 @@
+2003-12-08  Jeffrey Altman <jaltman@mit.edu>
+
+        * krb4_32.def: Add exports for functions exported by KfM
+
 2003-07-21  Alexandra Ellwood  <lxs@mit.edu>
 
         * krb5_32.def: Export krb5_principal2salt.
