@@ -144,7 +144,7 @@ char *argv[];
     char *dbname = 0;
     char *defrealm;
     int keytypedone = 0;
-    krb5_enctype etype = 0xffff;
+    krb5_enctype etype = DEFAULT_KDC_ETYPE;
     int sci_idx, code;
     extern krb5_kt_ops krb5_ktf_writable_ops;
     char	*request = NULL;
@@ -187,6 +187,10 @@ char *argv[];
 	}
     }
 
+    /* Dump creates files which should not be world-readable.  It is easiest
+       to do a single umask call here; any shells run by the ss command
+       interface will have umask = 77 but that is not a serious problem. */
+    (void) umask(077);
 
     if (retval = krb5_kt_register(&krb5_ktf_writable_ops)) {
 	com_err(progname, retval,
@@ -202,9 +206,6 @@ char *argv[];
 		"while setting up keytype %d", master_keyblock.keytype);
 	exit(1);
     }
-
-    if (etype == 0xffff)
-	etype = DEFAULT_KDC_ETYPE;
 
     if (!valid_etype(etype)) {
 	com_err(progname, KRB5_PROG_ETYPE_NOSUPP,
@@ -251,6 +252,8 @@ char *argv[];
     exit(0);
 }
 
+#define	NO_PRINC ((krb5_kvno)-1)
+
 krb5_kvno
 princ_exists(pname, principal)
 char *pname;
@@ -267,7 +270,7 @@ krb5_principal principal;
 	return 0;
     }
     if (!nprincs)
-	    return 0;
+	    return NO_PRINC;
     vno = entry.kvno;
     krb5_db_free_principal(&entry, nprincs);
     return(vno);
@@ -307,7 +310,7 @@ char *argv[];
 	com_err(cmdname, retval, "while parsing '%s'", argv[1]);
 	return;
     }
-    if (princ_exists(cmdname, newprinc)) {
+    if (princ_exists(cmdname, newprinc) != NO_PRINC) {
 	com_err(cmdname, 0, "principal '%s' already exists", argv[1]);
 	krb5_free_principal(newprinc);
 	return;
@@ -338,7 +341,7 @@ char *argv[];
 	com_err(argv[0], retval, "while parsing '%s'", argv[1]);
 	return;
     }
-    if (princ_exists(argv[0], newprinc)) {
+    if (princ_exists(argv[0], newprinc) != NO_PRINC) {
 	com_err(argv[0], 0, "principal '%s' already exists", argv[1]);
 	krb5_free_principal(newprinc);
 	return;
@@ -370,7 +373,7 @@ char *argv[];
 	com_err(argv[0], retval, "while parsing '%s'", argv[1]);
 	return;
     }
-    if (princ_exists(argv[0], newprinc)) {
+    if (princ_exists(argv[0], newprinc) != NO_PRINC) {
 	com_err(argv[0], 0, "principal '%s' already exists", argv[1]);
 	krb5_free_principal(newprinc);
 	return;
@@ -914,7 +917,7 @@ char *argv[];
 	com_err(argv[0], retval, "while parsing '%s'", argv[1]);
 	return;
     }
-    if (!princ_exists(argv[0], newprinc)) {
+    if (princ_exists(argv[0], newprinc) == NO_PRINC) {
 	com_err(argv[0], 0, "principal '%s' is not in the database", argv[1]);
 	krb5_free_principal(newprinc);
 	return;
@@ -969,7 +972,7 @@ char *argv[];
 	com_err(argv[0], retval, "while parsing '%s'", argv[1]);
 	return;
     }
-    if (!(vno = princ_exists(argv[0], newprinc))) {
+    if ((vno = princ_exists(argv[0], newprinc)) == NO_PRINC) {
 	com_err(argv[0], 0, "No principal '%s' exists", argv[1]);
 	krb5_free_principal(newprinc);
 	return;
@@ -1039,7 +1042,7 @@ char *argv[];
 	com_err(cmdname, retval, "while parsing '%s'", argv[1]);
 	return;
     }
-    if (!(vno = princ_exists(argv[0], newprinc))) {
+    if ((vno = princ_exists(argv[0], newprinc)) == NO_PRINC) {
 	com_err(cmdname, 0, "No principal '%s' exists!", argv[1]);
 	krb5_free_principal(newprinc);
 	return;
@@ -1075,7 +1078,7 @@ char *argv[];
 	com_err(argv[0], retval, "while parsing '%s'", argv[1]);
 	return;
     }
-    if (!(vno = princ_exists(argv[0], newprinc))) {
+    if ((vno = princ_exists(argv[0], newprinc)) == NO_PRINC) {
 	com_err(argv[0], 0, "No principal '%s' exists!", argv[1]);
 	krb5_free_principal(newprinc);
 	return;
