@@ -61,9 +61,8 @@ krb5_aprof_init(fname, envname, acontextp)
 	    }
 	}
     }
-    namelist[0] = fname;
     profile = (profile_t) NULL;
-    if (!(kret = profile_init(namelist, &profile))) {
+    if (fname && !(kret = profile_init_path(fname, &profile))) {
 	*acontextp = (krb5_pointer) profile;
 	return(0);
     }
