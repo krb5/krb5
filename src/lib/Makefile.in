@@ -15,10 +15,12 @@ clean-mac:: clean-unix
 clean-unix::
 	$(RM) libkrb5.a libkdb5.a libcrypto.a 
 	$(RM) libgssapi_krb5.a libdes425.a libkrb425.a
+	$(RM) libkadm.a
 
 clean-mac::
 	$(RM) libkrb5.a libkdb5.a libcrypto.a 
 	$(RM) libgssapi_krb5.a libdes425.a libkrb425.a
+	$(RM) libkadm.a
 
 clean-windows::
 	$(RM) libkrb5.dll libkrb5.lib libkrb5.bak libkrb5.map winsock.lib

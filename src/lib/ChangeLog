@@ -1,3 +1,7 @@
+
+Fri Apr 28 15:32:54 EDT 1995	Paul Park	(pjpark@mit.edu)
+	Add kadm to list of directories to be built.
+
 Thu Apr 27 14:31:01 1995  Mark Eichin  <eichin@cygnus.com>
 
 	* configure.in: make links for libkrb4 and libkdb4.

@@ -38,6 +38,7 @@ exports.krb5
 glue4.c
 gssapi
 gssapi.def
+kadm
 kdb
 kdb4
 krb4
