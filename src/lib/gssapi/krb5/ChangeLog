@@ -1,3 +1,8 @@
+2003-02-21  Tom Yu  <tlyu@mit.edu>
+
+	* gssapi_krb5.c (kg_get_defcred): Check for invalid or expired
+	defcred if it exists, and call acquire_cred() again if necessary.
+
 2003-02-13  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in ($(GSSAPI_KRB5_HDR)): Use $(S) to avoid problems on
