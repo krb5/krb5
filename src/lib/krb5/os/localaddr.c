@@ -162,8 +162,17 @@ krb5_error_code krb5_os_localaddr(addr)
 		    /* XXX should we perhaps use ns_host instead? */
 
 		    address->length = sizeof(struct ns_addr);
-		    memcpy ((char *)address->contents, (char *)&ns->sns_addr,
-			    address->length);
+		    address->contents = (unsigned char *)malloc(address->length);
+		    if (!address->contents) {
+			free((char *)address);
+			address = 0;
+			mem_err++;
+		    } else {
+			memcpy ((char *)address->contents,
+				(char *)&ns->sns_addr,
+				address->length);
+			break;
+		    }
 		} else mem_err++;
 		break;
 	    }
