@@ -1,3 +1,7 @@
+
+Fri Jul 7 15:56:09 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* pre.in - Add DEPLIBS and LDFLAGS to be provided with each Makefile.
+
 Fri Jun 23 14:24:02 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* pre.in (SRCTOP): Change SRCTOP so that it's defined in configure
