@@ -11,8 +11,8 @@ server: server.o rpc_test_svc.o $(DEPLIBS)
 client.c server.c: rpc_test.h
 
 rpc_test.h rpc_test_clnt.c rpc_test_svc.c: rpc_test.x
-	-rm -f rpc_test_clnt.c rpc_test_svc.c rpc_test.h rpc_test.x
-	ln -s $(srcdir)/rpc_test.x .
+	-rm -f rpc_test_clnt.c rpc_test_svc.c rpc_test.h
+	-ln -s $(srcdir)/rpc_test.x .
 	rpcgen -l rpc_test.x -o rpc_test_clnt.c
 	rpcgen -m rpc_test.x -o rpc_test_svc.c
 	rpcgen -h rpc_test.x -o rpc_test.h

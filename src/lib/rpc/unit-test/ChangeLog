@@ -1,3 +1,12 @@
+Wed Oct 16 16:13:13 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* rpc_test.0/expire.exp: add test for expired credentials
+	[krb5-admin/17]
+	
+	* server.c (log_miscerr): add log_miscerr
+
+	* Makefile.in: don't delete rpc_test.x, we might be in souce tree
+
 Tue Oct 15 16:12:04 1996  Barry Jaspan  <bjaspan@mit.edu>
 
 	* initial changes to make rpc unit tests work with new build/test
