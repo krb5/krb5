@@ -134,7 +134,8 @@ static int right_justify;
 static int do_lencheck;
 
 kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
-     cred, seqno, server_seqno, laddr, faddr, authopts, anyport, suppress_err)
+     cred, seqno, server_seqno, laddr, faddr, authconp, authopts, anyport,
+     suppress_err)
      int *sock;
      char **ahost;
      u_short rport;
@@ -146,6 +147,7 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
      krb5_int32 *seqno;
      krb5_int32 *server_seqno;
      struct sockaddr_in *laddr, *faddr;
+     krb5_auth_context *authconp;
      krb5_flags authopts;
      int anyport;
      int suppress_err;		/* Don't print if authentication fails */
@@ -366,7 +368,8 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
        authentication. */
     status = krb5_sendauth(bsd_context, &auth_context, (krb5_pointer) &s,
                            "KCMDV0.1", ret_cred->client, ret_cred->server,
-			   authopts, &cksumdat, ret_cred, 0,	&error, &rep_ret, NULL);
+			   authopts, &cksumdat, ret_cred, 0,
+			   &error, &rep_ret, NULL);
     free(cksumbuf);
     if (status) {
 	if (!suppress_err)
@@ -444,6 +447,8 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
     /* pass back credentials if wanted */
     if (cred) krb5_copy_creds(bsd_context, ret_cred, cred);
     krb5_free_creds(bsd_context, ret_cred);
+    if (authconp)
+	*authconp = auth_context;
     
     return (0);
   bad2:

@@ -148,6 +148,7 @@ main(argc, argv0)
 #ifdef KERBEROS
     krb5_flags authopts;
     krb5_error_code status;
+    krb5_auth_context auth_context;
     int fflag = 0, Fflag = 0;
 #ifdef KRB5_KRB4_COMPAT
     KTEXT_ST v4_ticket;
@@ -348,7 +349,7 @@ main(argc, argv0)
 	    com_err(argv[0], status, "while initializing krb5");
 	    exit(1);
     }
-    authopts = AP_OPTS_MUTUAL_REQUIRED;
+    authopts = AP_OPTS_MUTUAL_REQUIRED | AP_OPTS_USE_SUBKEY;
 
     /* Piggy-back forwarding flags on top of authopts; */
     /* they will be reset in kcmd */
@@ -367,7 +368,7 @@ main(argc, argv0)
 		  0,           /* No need for sequence number */
 		  0,           /* No need for server seq # */
 		  &local, &foreign,
-		  authopts,
+		  &auth_context, authopts,
 		  1,	/* Always set anyport, there is no need not to. --proven */
 		  suppress);
     if (status) {
@@ -391,8 +392,23 @@ main(argc, argv0)
 #else
 	try_normal(argv0);
 #endif
-    } else
-	rcmd_stream_init_krb5(&cred->keyblock, encrypt_flag, 0);
+    } else {
+	krb5_boolean similar;
+	krb5_keyblock *key = &cred->keyblock;
+
+	if (status = krb5_c_enctype_compare(bsd_context, ENCTYPE_DES_CBC_CRC,
+					    cred->keyblock.enctype, &similar))
+	    try_normal(argv0);
+
+	if (!similar) {
+	    status = krb5_auth_con_getlocalsubkey (bsd_context, auth_context,
+						   &key);
+	    if ((status || !key) && encrypt_flag)
+		try_normal(argv0);
+	}
+
+	rcmd_stream_init_krb5(key, encrypt_flag, 0);
+    }
 
 #ifdef HAVE_ISATTY
     if(encrypt_flag&&isatty(2)) {

@@ -153,6 +153,7 @@ int main(argc, argv)
     krb5_error_code status;	
     int euid;
     char **orig_argv = save_argv(argc, argv);
+    krb5_auth_context auth_context;
 
     status = krb5_init_context(&bsd_context);
     if (status) {
@@ -403,7 +404,7 @@ krb5_creds *cred;
 				   cmd, targ);
 		    host = thost;
 #ifdef KERBEROS
-		    authopts = AP_OPTS_MUTUAL_REQUIRED;
+		    authopts = AP_OPTS_MUTUAL_REQUIRED | AP_OPTS_USE_SUBKEY;
 		    status = kcmd(&sock, &host,
 				  port,
 				  pwd->pw_name,
@@ -418,7 +419,7 @@ krb5_creds *cred;
 				  0,  /* No server seq # */
 				  &local,
 				  &foreign,
-				  authopts,
+				  &auth_context, authopts,
 				  0, /* Not any port # */
 				  0);
 		    if (status) {
@@ -442,8 +443,28 @@ krb5_creds *cred;
 			try_normal(orig_argv);
 #endif
 		    }
-		    else
-			rcmd_stream_init_krb5(&cred->keyblock, encryptflag, 0);
+		    else {
+			krb5_boolean similar;
+			krb5_keyblock *key = &cred->keyblock;
+
+			if (status = krb5_c_enctype_compare(bsd_context,
+							    ENCTYPE_DES_CBC_CRC,
+							    cred->keyblock.enctype,
+							    &similar))
+			    try_normal(orig_argv); /* doesn't return */
+
+			if (!similar) {
+			    status = krb5_auth_con_getlocalsubkey (bsd_context,
+								   auth_context,
+								   &key);
+			    if ((status || !key) && encryptflag)
+				try_normal(orig_argv);
+			}
+			if (key == 0)
+			    key = &cred->keyblock;
+
+			rcmd_stream_init_krb5(key, encryptflag, 0);
+		    }
 		    rem = sock;
 #else
 		    rem = rcmd(&host, port, pwd->pw_name,

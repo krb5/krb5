@@ -1,3 +1,21 @@
+2000-05-15  Ken Raeburn  <raeburn@mit.edu>
+
+	* defines.h (OPTS_FORWARD_CREDS, OPTS_FORWARDABLE_CREDS): Change
+	numbers so they don't conflict with AP_OPTS_USE_SUBKEY.
+	* kcmd.c (kcmd): New argument authconp, used to return the auth
+	context to the caller if desired.
+	* krlogin.c (auth_context): New variable.
+	(main): Request a subkey from sendauth.  Get the auth context from
+	kcmd so we can retrieve the subkey.  If non-DES session key is
+	being used, pass the subkey to rcmd_stream_init_krb5 instead of
+	the session key; fail if no subkey is found and encryption is
+	required.
+	* krlogind.c (recvauth): If a non-DES session key is being used,
+	pass the client-provided subkey to rcmd_stream_init_krb5.
+	* krcp.c (main): Set up and use subkey as above.
+	* krsh.c (main): Set up and use subkey as above.
+	* krshd.c (recvauth): Accept and use subkey as above.
+
 2000-05-08  Ken Raeburn  <raeburn@mit.edu>
 
 	* v4rcp.c (main, case 'k'): Make sure krb_realm is

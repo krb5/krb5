@@ -1772,7 +1772,7 @@ recvauth(netf, peersin, valid_checksum)
     krb5_error_code status;
     struct sockaddr_in laddr;
     char krb_vers[KRB_SENDAUTH_VLEN + 1];
-    int len;
+    int len, new_proto;
     krb5_data inbuf;
 #ifdef KRB5_KRB4_COMPAT
     char v4_instance[INST_SZ];	/* V4 Instance */
@@ -1892,6 +1892,17 @@ recvauth(netf, peersin, valid_checksum)
 
     /* Must be V5  */
 	
+    {
+       krb5_boolean similar;
+
+       if (status = krb5_c_enctype_compare(bsd_context, ENCTYPE_DES_CBC_CRC,
+					   ticket->enc_part2->session->enctype,
+					   &similar))
+	  return(status);
+
+       new_proto = !similar;
+    }
+
     getstr(netf, remuser, sizeof(locuser), "remuser");
 
     if ((status = krb5_unparse_name(bsd_context, ticket->enc_part2->client, 
@@ -1940,7 +1951,19 @@ recvauth(netf, peersin, valid_checksum)
 
     if (!strncmp(cmdbuf, "-x ", 3))
 	do_encrypt = 1;
-    rcmd_stream_init_krb5(ticket->enc_part2->session, do_encrypt, 0);
+
+    if (new_proto) {
+	krb5_keyblock *key;
+	status = krb5_auth_con_getremotesubkey (bsd_context, auth_context,
+						&key);
+	if (status)
+	    fatal (netf, "Server can't get session subkey");
+	if (!key && do_encrypt)
+	    fatal (netf, "No session subkey sent");
+	rcmd_stream_init_krb5 (key, do_encrypt, 0);
+    } else
+	/* old way */
+	rcmd_stream_init_krb5(ticket->enc_part2->session, do_encrypt, 0);
 
     /* Null out the "session" because kcmd.c references the session
      * key here, and we do not want krb5_free_ticket() to destroy it. */

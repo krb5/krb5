@@ -1519,8 +1519,6 @@ recvauth(valid_checksum)
 				      &client)))
 	return status;
 
-    rcmd_stream_init_krb5(ticket->enc_part2->session, do_encrypt, 1);
-
     {
        krb5_boolean similar;
 
@@ -1535,6 +1533,19 @@ recvauth(valid_checksum)
        }
     }
 
+    if (do_inband) {
+	/* new way */
+	krb5_keyblock *key;
+	status = krb5_auth_con_getremotesubkey (bsd_context, auth_context,
+						&key);
+	if (status)
+	    fatal (netf, "Server can't get session subkey");
+	if (!key && do_encrypt)
+	    fatal (netf, "No session subkey sent");
+	rcmd_stream_init_krb5 (key, do_encrypt, 1);
+    } else
+	/* old way */
+	rcmd_stream_init_krb5(ticket->enc_part2->session, do_encrypt, 1);
 
     getstr(netf, rusername, sizeof(rusername), "remuser");
 

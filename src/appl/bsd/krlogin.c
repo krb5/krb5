@@ -177,6 +177,7 @@ int fflag = 0, Fflag = 0;
 krb5_creds *cred;
 struct sockaddr_in local, foreign;
 krb5_context bsd_context;
+krb5_auth_context auth_context;
 
 #ifdef KRB5_KRB4_COMPAT
 Key_schedule v4_schedule;
@@ -617,6 +618,7 @@ main(argc, argv)
 
 #ifdef KERBEROS
     authopts = AP_OPTS_MUTUAL_REQUIRED;
+    authopts |= AP_OPTS_USE_SUBKEY;
 
     /* Piggy-back forwarding flags on top of authopts; */
     /* they will be reset in kcmd */
@@ -633,7 +635,7 @@ main(argc, argv)
 		  0,		/* No need for sequence number */
 		  0,		/* No need for server seq # */
 		  &local, &foreign,
-		  authopts,
+		  &auth_context, authopts,
 		  0,		/* Not any port # */
 		  0);
     if (status) {
@@ -653,8 +655,7 @@ main(argc, argv)
 #endif
     } else {
 	krb5_boolean similar;
-
-	rcmd_stream_init_krb5(&cred->keyblock, encrypt_flag, 1);
+	krb5_keyblock *key = 0;
 
 	if (status = krb5_c_enctype_compare(bsd_context, ENCTYPE_DES_CBC_CRC,
 					    cred->keyblock.enctype, &similar))
@@ -665,6 +666,17 @@ main(argc, argv)
 	    if (debug_port)
 		fprintf(stderr, "DEBUG: setting do_inband\n");
 	}
+
+	if (!similar) {
+	    status = krb5_auth_con_getlocalsubkey (bsd_context, auth_context,
+						   &key);
+	    if ((status || !key) && encrypt_flag)
+		try_normal(orig_argv);
+	}
+	if (key == 0)
+	    key = &cred->keyblock;
+
+	rcmd_stream_init_krb5(key, encrypt_flag, 1);
     }
 	
     rem = sock;
