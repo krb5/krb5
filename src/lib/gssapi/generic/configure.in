@@ -9,6 +9,6 @@ AC_SIZE_T
 AC_CHECK_SIZEOF(short)
 AC_CHECK_SIZEOF(int)
 AC_CHECK_SIZEOF(long)
-CopyHeader(gssapi.h,[$(EHDRDIR)])
-CopySrcHeader(gssapi_generic.h,[$(EHDRDIR)])
+dnl CopyHeader(gssapi.h,[$(EHDRDIR)])
+dnl CopySrcHeader(gssapi_generic.h,[$(EHDRDIR)])
 V5_AC_OUTPUT_MAKEFILE

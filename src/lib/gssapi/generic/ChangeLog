@@ -1,3 +1,11 @@
+Thu Feb  6 11:11:17 1997  Ezra Peisach  (epeisach@mit.edu)
+
+	* configure.in: Remove the CopyHeader and CopySrcHeader rules as
+		they are handled in Makefile.in
+
+	* Makefile.in: Create include/gssapi on unix. Make clean removes
+		built gssapi.h
+
 Wed Feb  5 23:28:47 1997  Richard Basch  <basch@lehman.com>
 
 	* gssapi.hin: Make sure KRB5_EXPORTVAR is defined.

@@ -44,7 +44,7 @@ gssapi.h: gssapi.hin
 	grep SIZEOF $(BUILDTOP)/include/krb5/autoconf.h >> $@
 	grep 'HAVE_.*_H' $(BUILDTOP)/include/krb5/autoconf.h >> $@
 	grep 'USE_.*_H' $(BUILDTOP)/include/krb5/autoconf.h >> $@
-	echo "/* End of gssapi.h prologue. */"
+	echo "/* End of gssapi.h prologue. */" >> $@
 	cat $(srcdir)/gssapi.hin >> $@
 
 #if HasHashLibrary
@@ -94,7 +94,7 @@ EXPORTED_BUILT_HEADERS= gssapi.h
 
 $(OBJS): $(EXPORTED_HEADERS) $(ETHDRS)
 
-all-unix:: shared $(SRCS) $(HDRS) $(ETHDRS) $(OBJS)
+all-unix:: shared includes-unix $(SRCS) $(HDRS) $(ETHDRS) $(OBJS)
 all-mac:: $(SRCS) $(HDRS) $(ETHDRS) $(OBJS)
 all-windows:: win-include $(HDRS) $(OBJFILE)
 
@@ -109,7 +109,7 @@ win-include::
 unixmac: $(SRCS) $(ETHDRS)
 
 clean-unix::
-	$(RM) $(ETHDRS) $(ETSRCS) $(HDRS) shared/*
+	$(RM) $(ETHDRS) $(ETSRCS) $(HDRS) shared/* $(EXPORTED_BUILT_HEADERS) 
 
 clean-mac::
 	$(RM) $(ETHDRS) $(ETSRCS) $(HDRS) shared/*
@@ -117,6 +117,9 @@ clean-mac::
 clean-windows::
 	$(RM) $(HDRS) $(OBJFILE)
 	if exist $(EHDRDIR)\nul rmdir $(EHDRDIR)
+
+includes-unix::
+	@if test -d $(EHDRDIR); then :; else (set -x; mkdir $(EHDRDIR)) fi
 
 # Krb5InstallHeaders($(EXPORTED_HEADERS), $(KRB5_INCDIR)/krb5)
 install::
