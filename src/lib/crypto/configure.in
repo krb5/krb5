@@ -8,10 +8,4 @@ KRB5_BUILD_PROGRAM
 KRB5_BUILD_LIBOBJS
 KRB5_BUILD_LIBRARY
 
-dnl XXX This will go away soon. -- tlyu
-AC_ARG_ENABLE([athena],
-[  --enable-athena         build with MIT Project Athena configuration
-                           -- here meaning use temporary DES3 etype that
-                              includes 32-bit length codings],
-[AC_DEFINE(ATHENA_DES3_KLUDGE)],)
 V5_AC_OUTPUT_MAKEFILE(. crc32 des dk enc_provider hash_provider keyhash_provider md4 md5 old raw sha1 arcfour yarrow aes)

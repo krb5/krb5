@@ -1,3 +1,8 @@
+2004-03-04  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Don't check for --enable-athena and don't define
+	ATHENA_DES3_KLUDGE.
+
 2004-02-25  Ken Raeburn  <raeburn@mit.edu>
 
 	* network.c (setup_a_tcp_listener): Call setreuseaddr before
