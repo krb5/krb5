@@ -191,7 +191,8 @@ int krb5int_encode_v4tkt(v4tkt, buf, encoded_len)
      buflen = *encoded_len;
 
      if (v4tkt->length < MAX_KTXT_LEN)
-	  memset(v4tkt->dat + v4tkt->length, 0, MAX_KTXT_LEN - v4tkt->length);
+	  memset(v4tkt->dat + v4tkt->length, 0, 
+		 (unsigned int) (MAX_KTXT_LEN - v4tkt->length));
      temp = v4tkt->length;
      if ((ret = encode_int32(&buf, &buflen, &temp)))
 	  return ret;
