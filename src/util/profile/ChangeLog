@@ -1,7 +1,7 @@
 2005-03-13  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Check struct stat for fields st_mtimensec,
-	st_mtimespec.tv_nsec, and st_mtim.tv_usec.
+	st_mtimespec.tv_nsec, and st_mtim.tv_nsec.
 	* prof_file.c (profile_update_file_data): If one of them is
 	found, use it as the fractional part of the timestamp.  Do
 	re-read the file if the fractional parts don't match.

@@ -347,8 +347,8 @@ errcode_t profile_update_file_data(prf_data_t data)
 	frac = st.st_mtimensec;
 #elif defined HAVE_STRUCT_STAT_ST_MTIMESPEC_TV_NSEC
 	frac = st.st_mtimespec.tv_nsec;
-#elif defined HAVE_STRUCT_STAT_ST_MTIM_TV_USEC
-	frac = st.st_mtim.tv_usec;
+#elif defined HAVE_STRUCT_STAT_ST_MTIM_TV_NSEC
+	frac = st.st_mtim.tv_nsec;
 #else
 	frac = 0;
 #endif
