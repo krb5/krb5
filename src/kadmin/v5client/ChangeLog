@@ -1,3 +1,10 @@
+Sun Mar 31 17:49:01 1996  Mark Eichin  <eichin@cygnus.com>
+
+	* kadmin5.c (kadmin_extract_snk4): new command to get the key data
+	out for an SNK4 device. Prints the octal digits as they'd be
+	entered into the hardware, and the checksum printed by the device
+	in response.
+
 Fri Sep 29 14:44:24 1995  Mark Eichin  <eichin@cygnus.com>
 
 	* kadmin5.c (kadmin_startup): initialize action before strcat'ing

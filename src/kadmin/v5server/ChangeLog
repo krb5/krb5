@@ -1,3 +1,30 @@
+Mon Apr  8 03:35:08 1996  Ken Raeburn  <raeburn@cygnus.com>
+
+	* srv_key.c (key_init): Only pass one argument to
+	key_get_admin_entry.
+	(key_string2key_keysalt): After calling krb5_string_to_key, fix
+	the length of AFS salts.
+
+	* srv_main.c (main): Initialize def_expiration and def_flags, to
+	keep codecenter happy.
+
+	* srv_output.c (output_krb5_errmsg): Removed unused variable
+	alen.
+
+Tue Apr  2 18:50:51 1996  Chris Provenzano  <proven@cygnus.com>
+
+	* srv_acl.c (acl_load_acl_file()) : Copy the static string to a temporary
+		buffer for hpux 9 before passing it into sscanf. This is a kludge
+		and the correct fix is to rewrite the entire file to not use
+		sscanf and stdio.
+
+Thu Mar 28 20:03:35 1996  Ken Raeburn  <raeburn@cygnus.com>
+
+	* srv_net.c (net_dispatch): New argument DETACHED.  Shut down on
+	SIGHUP if not detached.
+	* srv_main.c (main): Pass extra arg to net_dispatch.
+	* kadm5_defs.h (net_dispatch): Updated prototype.
+
 Sun Mar  3 12:52:49 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* srv_main.c: Move inclusion of k5-int.h before testing if
@@ -26,6 +53,11 @@ Tue Dec 12 19:14:51 1995  Mark Eichin  <eichin@cygnus.com>
 	add and modify (and pass through to admin_merge_dbentries.)
 	(admin_add_principal, admin_modify_principal, admin_change_opwd,
 	admin_change_orandpw): pass flag indicating modify or add.
+
+Thu Nov  9 01:00:51 1995  Mark W. Eichin  <eichin@cygnus.com>
+
+	* srv_key.c (key_string_to_keys): support KRB5_KDB_SALTTYPE_AFS3
+	using the same length -1 trick from lib/krb5/krb/get_in_tkt.c.
 
 Tue Sep 26 22:51:25 1995  Mark Eichin  <eichin@cygnus.com>
 
