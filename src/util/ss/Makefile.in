@@ -87,34 +87,25 @@ includes:: mk_cmds ct_c.sed ct_c.awk ss_err.h
 
 HDRDIR=$(BUILDTOP)/include/ss
 HDRS =	$(HDRDIR)/ss.h \
-	$(HDRDIR)/mit-sipb-copyright.h \
 	$(HDRDIR)/ss_err.h
 
 BUILD_HDRS = ss_err.h
 SRC_HDRS = ss.h 
 SRC_HDRS_DEP = $(srcdir)/ss.h 
 
-includes:: $(SRC_HDRS_DEP) $(BUILD_HDRS)
+includes:: $(HDRS)
+$(HDRDIR)/timestamp:
 	if [ -d $(HDRDIR) ] ; then :; else mkdir -p $(HDRDIR); fi
-	for i in $(SRC_HDRS) ; do \
-		if cmp $(srcdir)/$$i $(HDRDIR)/$$i >/dev/null 2>&1; then :; \
-		else \
-			(set -x; $(RM) $(HDRDIR)/$$i; \
-			 $(CP) $(srcdir)/$$i $(HDRDIR)/$$i) ; \
-		fi ; \
-	done
-	for i in $(BUILD_HDRS) ; do \
-		if cmp $$i $(HDRDIR)/$$i >/dev/null 2>&1; then :; \
-		else \
-			(set -x; $(RM) $(HDRDIR)/$$i; \
-			 $(CP) $$i $(HDRDIR)/$$i) ; \
-		fi ; \
-	done
-
-$(HDRS): includes
+	echo timestamp > $(HDRDIR)/timestamp
+$(HDRDIR)/ss.h: ss.h $(HDRDIR)/timestamp
+	$(RM) $(HDRDIR)/ss.h
+	$(CP) $(srcdir)/ss.h $(HDRDIR)/ss.h
+$(HDRDIR)/ss_err.h: ss_err.h $(HDRDIR)/timestamp
+	$(RM) $(HDRDIR)/ss_err.h
+	$(CP) ss_err.h $(HDRDIR)/ss_err.h
 
 clean-unix::
-	$(RM) $(HDRS)
+	$(RM) $(HDRS) $(HDRDIR)/timestamp
 
 std_rqs.c: std_rqs.ct mk_cmds ct_c.sed ct_c.awk
 

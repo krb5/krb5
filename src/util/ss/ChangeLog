@@ -1,3 +1,13 @@
+2003-06-27  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (HDRS): Remove mit-sipb-copyright.h.
+	(includes): Depend on copied version of the headers, not local
+	versions.  Don't do any copying; instead, move the copying
+	commands to new targets for each header.
+	($(HDRDIR)/timestamp): New target; create the directory here if
+	needed.
+	(clean-unix): Remove the timestamp file.
+
 2003-04-23  Ken Raeburn  <raeburn@mit.edu>
 
 	* ss.h: Don't declare errno.  Include errno.h.
