@@ -8,5 +8,5 @@ HAVE_YYLINENO
 DECLARE_SYS_ERRLIST
 CONFIG_RULES
 CHECK_STDARG
-CopyHeader(com_err.h,$(BUILDTOP)/include)
+CopySrcHeader(com_err.h,$(BUILDTOP)/include)
 AC_OUTPUT(Makefile,[EXTRA_RULES])
