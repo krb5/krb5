@@ -558,6 +558,17 @@
 			settings = {
 			};
 		};
+		00F516F500692E197F000001 = {
+			isa = PBXFileReference;
+			path = gssapiP_generic.h;
+			refType = 4;
+		};
+		00F516F600692E197F000001 = {
+			fileRef = 00F516F500692E197F000001;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
 		00F89ACA0046EFE57F000001 = {
 			isa = PBXFileReference;
 			path = KerberosComErr.h;
@@ -6262,6 +6273,7 @@
 				00CFB471FF6D8BB412120111,
 				41D6B54B0029FA1112120111,
 				00F89AD10046EFE57F000001,
+				00F516F600692E197F000001,
 			);
 			isa = PBXHeadersBuildPhase;
 			name = Headers;
@@ -6392,6 +6404,7 @@
 				5C1372FEFF654A8C12120111,
 				5C1372FFFF654A8C12120111,
 				5C137300FF654A8C12120111,
+				00F516F500692E197F000001,
 				5C137301FF654A8C12120111,
 				5C137302FF654A8C12120111,
 				5C137303FF654A8C12120111,
@@ -6795,7 +6808,6 @@
 			isa = PBXBuildFile;
 			settings = {
 				ATTRIBUTES = (
-					Public,
 				);
 			};
 		};
