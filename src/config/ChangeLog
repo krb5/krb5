@@ -1,3 +1,8 @@
+Mon Oct 20 14:27:19 1997  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* pre.in (INSTALL_SETUID): Explicitly set the owner of the files
+		which are installed setuid root.
+
 Wed Aug  6 20:23:32 1997  Tom Yu  <tlyu@mit.edu>
 
 	* pre.in: Add $(HESIOD_LIBS) to KADMSRV_LIBS.

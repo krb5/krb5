@@ -80,7 +80,7 @@ CLNTDEPLIBS = @CLNTDEPLIBS@
 INSTALL=@INSTALL@
 INSTALL_PROGRAM=@INSTALL_PROGRAM@ -s
 INSTALL_DATA=@INSTALL_DATA@
-INSTALL_SETUID=$(INSTALL) -s -m 4755
+INSTALL_SETUID=$(INSTALL) -s -m 4755 -o root
 ## This is needed because autoconf will sometimes define @exec_prefix@ to be
 ## ${prefix}.
 prefix=@prefix@
