@@ -1,3 +1,9 @@
+Fri Oct 18 17:26:51 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* krsh.c, krlogin.c: don't print our own error message if kcmd
+ 	returns -1 (it always printed something in that case, and
+ 	error_message(-1) prints a mess [krb5-appl/70]
+
 Mon Sep 30 17:15:14 1996  Sam Hartman  <hartmans@mit.edu>
 
 	* login.c: Allow login -f to let you log in as root.

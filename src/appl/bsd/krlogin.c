@@ -593,10 +593,11 @@ main(argc, argv)
 		  0);		/* Not any port # */
     if (status) {
 	/* should check for KDC_PR_UNKNOWN, NO_TKT_FILE here -- XXX */
-	fprintf(stderr,
-		"%s: kcmd to host %s failed - %s\n",orig_argv[0], host,
-		error_message(status));
-	try_normal(orig_argv);
+	 if (status != -1) 
+	      fprintf(stderr,
+		      "%s: kcmd to host %s failed - %s\n",orig_argv[0], host,
+		      error_message(status));
+	 try_normal(orig_argv);
     }
     rem = sock;
     

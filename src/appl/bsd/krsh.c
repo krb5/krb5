@@ -357,10 +357,11 @@ main(argc, argv0)
 		  1);	/* Always set anyport, there is no need not to. --proven */
     if (status) {
         /* check NO_TKT_FILE or equivalent... */
-	fprintf(stderr,
-		"%s: kcmd to host %s failed - %s\n",argv0[0], host,
-		error_message(status));
-	try_normal(argv0);
+	 if (status != -1) 
+	      fprintf(stderr,
+		      "%s: kcmd to host %s failed - %s\n",argv0[0], host,
+		      error_message(status));
+	 try_normal(argv0);
     }
 
     /* Setup for des_read and write */
