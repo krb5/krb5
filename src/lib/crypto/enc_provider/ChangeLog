@@ -1,3 +1,8 @@
+2001-05-31  Ezra Peisach  <epeisach@mit.edu>
+
+	* des.c (k5_des_docrypt): Do not use a variable named "encrypt"
+	* des3.c (k5_des3_docrypt): Likewise.
+
 2001-04-10  Ken Raeburn  <raeburn@mit.edu>
 
 	* des.c (k5_des_docrypt): Add casts when mixing pointer types with

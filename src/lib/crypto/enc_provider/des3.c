@@ -44,7 +44,7 @@ k5_des3_keysize(size_t *keybytes, size_t *keylength)
 
 static krb5_error_code
 k5_des3_docrypt(const krb5_keyblock *key, const krb5_data *ivec,
-		const krb5_data *input, krb5_data *output, int encrypt)
+		const krb5_data *input, krb5_data *output, int enc)
 {
     mit_des3_key_schedule schedule;
 
@@ -73,7 +73,7 @@ k5_des3_docrypt(const krb5_keyblock *key, const krb5_data *ivec,
 			 (krb5_pointer) output->data, input->length,
 			 schedule[0], schedule[1], schedule[2],
 			 ivec?(unsigned char *) ivec->data:(unsigned char *)mit_des_zeroblock,
-			 encrypt);
+			 enc);
 
     memset(schedule, 0, sizeof(schedule));
 
