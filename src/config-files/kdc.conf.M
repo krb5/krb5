@@ -104,14 +104,13 @@ specifies the name of the master key.
 
 .IP master_key_type
 This
-.B integer
-represents the master key's key type (see krb5.h for key type values).
+.B key type string
+represents the master key's key type.
 
 .IP encryption_type
 This
-.B integer
-represents the encryption type used for this realm (see krb5.h for
-encryption type values).
+.B encryption type string
+represents the encryption type used for this realm.
 
 .IP key_stash_file
 This
@@ -133,31 +132,33 @@ realm.
 
 .IP max_life
 This
-.B string
+.B delta time string
 specifes the maximum time period that a ticket may be valid for in
-this realm.  The format of this string may be one of the following:
-.in +1i
-.I <days>-<hours>:<minutes>:<seconds>
+this realm.  
 
-.I <days>d <hours>h <minutes>m <seconds>s
-
-.I <hours>:<minutes>:<seconds>
-
-.I <hours>h <minutes>m <seconds>s
-
-.I <hours>:<minutes>
-
-.I <hours>h <minutes>m
-
-.I <seconds>
-
-.in -1i
 .IP max_renewable_life
 This
-.B string
+.B delta time string
 specifies the maximum time period that a ticket may be renewed for in
-this realm.  The format is the same as for
-.I max_life.
+this realm. 
+
+.IP default_principal_expiration
+This
+.B absolute time string
+specifies the default expiration date of principals created in this realm.
+
+.IP default_principal_flags
+This
+.B flag string
+specifies the default attributes of principals created in this realm.
+
+.IP supported_keytypes
+This list of
+.B key
+:
+.B salt
+strings specifies the default key/salt combinations of principals for this
+realm.
 
 .SH FILES 
 /usr/local/lib/krb5kdc/kdc.conf

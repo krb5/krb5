@@ -1,4 +1,11 @@
 
+Mon Aug 21 16:59:00 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* kdc.conf.M - Change types of master_key_type and encryption_type to
+		be "key type string" and "encryption type string".  Add
+		default_principal_expiration, default_principal_flags and
+		supported_keytypes.
+
+
 Wed Jul 12 12:06:10 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* kdc.conf[.M] - Change syntax.  KDC now has per-realm information in
 		[realms] section and has [kdcdefaults] to contain global data.
