@@ -57,7 +57,7 @@ typedef struct ___krb5_key_salt_tuple krb5_key_salt_tuple;
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_adm_connect
 	(krb5_context,
 	 char *,
-	 char *,
+	 const char *,
 	 char *,
 	 int *,
 	 krb5_auth_context *,

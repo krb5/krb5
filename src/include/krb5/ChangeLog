@@ -1,3 +1,7 @@
+Mon Feb 26 13:22:43 2001  Ezra Peisach  <epeisach@mit.edu>
+
+	* adm_proto.h (krb5_adm_connect): Declare prompt string const char *. 
+
 2001-01-16  Ken Raeburn  <raeburn@mit.edu>
 
 	* adm_proto.h, kdb.h, kdb_dbc.h, kdb_dbm.h, kdb_kt.h: Make all
@@ -10,7 +14,8 @@
 
 2000-5-18	Alexandra Ellwood <lxs@mit.edu>
 
-	* macsock.h: local_addr_fallback_kludge defined to 0 again... fixed gethostname
+	* macsock.h: local_addr_fallback_kludge defined to 0
+ 	again... fixed gethostname
 
 2000-5-9	Alexandra Ellwood <lxs@mit.edu>
 
