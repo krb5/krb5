@@ -1,3 +1,7 @@
+Mon Nov 11 20:52:27 1996  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in: Add AC_CANONICAL_HOST to deal with new pre.in.
+
 Mon Nov 11 14:22:30 1996  Tom Yu  <chaoself@avalanche-breakdown.mit.edu>
 
 	* Makefile.in (client.o, server.o): client.o and server.o, not

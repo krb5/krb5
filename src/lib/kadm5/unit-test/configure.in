@@ -1,5 +1,6 @@
 AC_INIT(init-test.c)
 CONFIG_RULES
+AC_CANONICAL_HOST
 dnl The following are tests for the presence of programs required for testing 
 AC_CHECK_PROG(RUNTEST,runtest,runtest)
 AC_CHECK_PROG(PERL,perl,perl)

@@ -1,6 +1,7 @@
 AC_INIT(client.c)
 CONFIG_RULES
-
+dnl set $(host)
+AC_CANONICAL_HOST
 dnl The following are tests for the presence of programs required for testing 
 AC_CHECK_PROG(RUNTEST,runtest,runtest)
 AC_CHECK_PROG(PERL,perl,perl)
