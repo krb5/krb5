@@ -48,6 +48,7 @@ krb5_fcc_start_seq_get(context, id, cursor)
 {
      krb5_fcc_cursor *fcursor;
      krb5_error_code kret = KRB5_OK;
+     krb5_fcc_data *data = (krb5_fcc_data *)id->data;
      
      fcursor = (krb5_fcc_cursor *) malloc(sizeof(krb5_fcc_cursor));
      if (fcursor == NULL)
@@ -59,16 +60,17 @@ krb5_fcc_start_seq_get(context, id, cursor)
 	      return kret;
 	  }
      }
-     else
-	  /* seek after the version number */
-	  lseek(((krb5_fcc_data *) id->data)->fd, sizeof(krb5_int16), SEEK_SET);
 
      /* Make sure we start reading right after the primary principal */
+     kret = krb5_fcc_skip_header(context, id);
+     if (kret) goto done;
+     kret = krb5_fcc_skip_principal(context, id);
+     if (kret) goto done;
 
-     krb5_fcc_skip_principal(context, id);
-     fcursor->pos = lseek(((krb5_fcc_data *) id->data)->fd, 0, SEEK_CUR);
+     fcursor->pos = lseek(data->fd, 0, SEEK_CUR);
      *cursor = (krb5_cc_cursor) fcursor;
 
+done:
      MAYBE_CLOSE(context, id, kret);
      return kret;
 }

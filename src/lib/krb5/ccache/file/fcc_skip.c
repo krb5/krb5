@@ -29,6 +29,24 @@
 #include "fcc.h"
 
 krb5_error_code
+krb5_fcc_skip_header(context, id)
+   krb5_context context;
+   krb5_ccache id;
+{
+     krb5_fcc_data *data = (krb5_fcc_data *)id->data;
+     krb5_error_code kret;
+     krb5_ui_2 fcc_flen;
+
+     lseek(data->fd, sizeof(krb5_ui_2), SEEK_SET);
+     if (data->version == KRB5_FCC_FVNO_4) {
+	 kret = krb5_fcc_read_ui_2(context, id, &fcc_flen);
+	 if (kret) return kret;
+     }
+     lseek(data->fd, fcc_flen, SEEK_CUR);
+     return KRB5_OK;
+}
+
+krb5_error_code
 krb5_fcc_skip_principal(context, id)
    krb5_context context;
    krb5_ccache id;
@@ -43,5 +61,3 @@ krb5_fcc_skip_principal(context, id)
      krb5_free_principal(context, princ);
      return KRB5_OK;
 }
-
-     

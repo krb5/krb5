@@ -47,13 +47,16 @@ krb5_fcc_get_principal(context, id, princ)
    krb5_principal *princ;
 {
      krb5_error_code kret = KRB5_OK;
+     krb5_fcc_data *data = (krb5_fcc_data *)id->data;
 
      MAYBE_OPEN(context, id, FCC_OPEN_RDONLY);
-     /* make sure we're beyond the vno */
-     lseek(((krb5_fcc_data *) id->data)->fd, sizeof(krb5_int16), SEEK_SET);
-
+     
+     /* make sure we're beyond the header */
+     kret = krb5_fcc_skip_header(context, id);
+     if (kret) goto done;
      kret = krb5_fcc_read_principal(context, id, princ);
 
+done:
      MAYBE_CLOSE(context, id, kret);
      return kret;
 }

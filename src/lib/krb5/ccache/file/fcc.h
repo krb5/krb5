@@ -61,6 +61,16 @@
 #define	FCC_OPEN_RDWR		2
 #define	FCC_OPEN_RDONLY		3
 
+/* Credential file header tags.
+ * The header tags are constructed as:
+ *	krb5_ui_2	tag
+ *	krb5_ui_2	len
+ *	krb5_octet	data[len]
+ * This format allows for older versions of the fcc processing code to skip
+ * past unrecognized tag formats.
+ */
+#define FCC_TAG_DELTATIME	1
+
 #ifndef TKT_ROOT
 #ifdef MSDOS_FILESYSTEM
 #define TKT_ROOT "\\tkt"

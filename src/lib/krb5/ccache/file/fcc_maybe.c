@@ -208,12 +208,16 @@ krb5_fcc_close_file (context, id)
 
 krb5_error_code
 krb5_fcc_open_file (context, id, mode)
-   krb5_context context;
+    krb5_context context;
     krb5_ccache id;
     int mode;
 {
+     krb5_os_context os_ctx = (krb5_os_context)context->os_context;
      krb5_fcc_data *data = (krb5_fcc_data *)id->data;
      krb5_ui_2 fcc_fvno;
+     krb5_ui_2 fcc_flen;
+     krb5_ui_2 fcc_tag;
+     krb5_ui_2 fcc_taglen;
      int fd;
      int open_flag;
      krb5_error_code retval = 0;
@@ -261,43 +265,114 @@ krb5_fcc_open_file (context, id, mode)
 	     (void) close(fd);
 	     return (cnt == -1) ? krb5_fcc_interpret(context, errsave) : KRB5_CC_IO;
 	 }
-     } else {
-	 /* verify a valid version number is there */
-	 if (read(fd, (char *)&fcc_fvno, sizeof(fcc_fvno)) !=
-	     sizeof(fcc_fvno)) {
-	     (void) fcc_lock_file(data, fd, UNLOCK_IT);
-	     (void) close(fd);
-	     return KRB5_CC_FORMAT;
+
+	 data->fd = fd;
+	 
+	 if (data->version == KRB5_FCC_FVNO_4) {
+	     /* V4 of the credentials cache format allows for header tags */
+
+	     fcc_flen = (2*sizeof(krb5_ui_2) + 2*sizeof(krb5_int32));
+
+	     /* Write header length */
+	     retval = krb5_fcc_store_ui_2(context, id, (krb5_int32)fcc_flen);
+	     if (retval) goto done;
+
+	     /* Write time offset tag */
+	     fcc_tag = FCC_TAG_DELTATIME;
+	     fcc_taglen = 2*sizeof(krb5_int32);
+
+	     retval = krb5_fcc_store_ui_2(context, id, (krb5_int32)fcc_tag);
+	     if (retval) goto done;
+	     retval = krb5_fcc_store_ui_2(context, id, (krb5_int32)fcc_taglen);
+	     if (retval) goto done;
+	     retval = krb5_fcc_store_int32(context, id, os_ctx->time_offset);
+	     if (retval) goto done;
+	     retval = krb5_fcc_store_int32(context, id, os_ctx->usec_offset);
+	     if (retval) goto done;
 	 }
-	 if ((fcc_fvno != htons(KRB5_FCC_FVNO_4)) &&
-	     (fcc_fvno != htons(KRB5_FCC_FVNO_3)) &&
-	     (fcc_fvno != htons(KRB5_FCC_FVNO_2)) &&
-	     (fcc_fvno != htons(KRB5_FCC_FVNO_1))) {
-	     (void) fcc_lock_file(data, fd, UNLOCK_IT);
-	     (void) close(fd);
-	     return KRB5_CCACHE_BADVNO;
+	 goto done;
+     }
+
+     /* verify a valid version number is there */
+     if (read(fd, (char *)&fcc_fvno, sizeof(fcc_fvno)) !=
+	 sizeof(fcc_fvno)) {
+	 (void) fcc_lock_file(data, fd, UNLOCK_IT);
+	 (void) close(fd);
+	 return KRB5_CC_FORMAT;
+     }
+     if ((fcc_fvno != htons(KRB5_FCC_FVNO_4)) &&
+	 (fcc_fvno != htons(KRB5_FCC_FVNO_3)) &&
+	 (fcc_fvno != htons(KRB5_FCC_FVNO_2)) &&
+	 (fcc_fvno != htons(KRB5_FCC_FVNO_1)))
+     {
+	 retval = KRB5_CCACHE_BADVNO;
+	 goto done;
+     }
+
+     data->version = ntohs(fcc_fvno);
+     data->fd = fd;
+
+     if (data->version == KRB5_FCC_FVNO_4) {
+	 char buf[1024];
+
+	 if (krb5_fcc_read_ui_2(context, id, &fcc_flen) ||
+	     (fcc_flen > sizeof(buf)))
+	 {
+	     retval = KRB5_CC_FORMAT;
+	     goto done;
 	 }
-	if (fcc_fvno == htons(KRB5_FCC_FVNO_4)) {
-     	    krb5_ui_2 fcc_flen;
-	    char buf[1024];
-	    
-	    if (read(fd, (char *)&fcc_flen, sizeof(fcc_flen)) 
-		!= sizeof(fcc_flen)) {
-		     (void) fcc_lock_file(data, fd, UNLOCK_IT);
-		     (void) close(fd);
-		     return KRB5_CC_FORMAT;
-	    }
-	    /* Skip past the header info for now */
-	    if ((fcc_flen = htons(fcc_flen)) != 0) {
-	        if ((krb5_ui_2) read(fd, buf, fcc_flen) != fcc_flen) {
-		     (void) fcc_lock_file(data, fd, UNLOCK_IT);
-		     (void) close(fd);
-		     return KRB5_CC_FORMAT;
-		}
-	    }
-	}
-	data->version = ntohs(fcc_fvno);
-    }
-    data->fd = fd;
-    return 0;
+
+	 while (fcc_flen) {
+	     if ((fcc_flen < (2 * sizeof(krb5_ui_2))) ||
+		 krb5_fcc_read_ui_2(context, id, &fcc_tag) ||
+		 krb5_fcc_read_ui_2(context, id, &fcc_taglen) ||
+		 (fcc_taglen > (fcc_flen - 2*sizeof(krb5_ui_2))))
+	     {
+		 retval = KRB5_CC_FORMAT;
+		 goto done;
+	     }
+
+	     switch (fcc_tag) {
+	     case FCC_TAG_DELTATIME:
+		 if (fcc_taglen != 2*sizeof(krb5_int32)) {
+		     retval = KRB5_CC_FORMAT;
+		     goto done;
+		 }
+		 if (!(context->library_options & KRB5_LIBOPT_SYNC_KDCTIME) ||
+		     (os_ctx->os_flags & KRB5_OS_TOFFSET_VALID))
+		 {
+		     if (krb5_fcc_read(context, id, buf, fcc_taglen)) {
+			 retval = KRB5_CC_FORMAT;
+			 goto done;
+		     }
+		     break;
+		 }
+		 if (krb5_fcc_read_int32(context, id, &os_ctx->time_offset) ||
+		     krb5_fcc_read_int32(context, id, &os_ctx->usec_offset))
+		 {
+		     retval = KRB5_CC_FORMAT;
+		     goto done;
+		 }
+		 os_ctx->os_flags =
+		     ((os_ctx->os_flags & ~KRB5_OS_TOFFSET_TIME) |
+		      KRB5_OS_TOFFSET_VALID);
+		 break;
+	     default:
+		 if (fcc_taglen && krb5_fcc_read(context,id,buf,fcc_taglen)) {
+		     retval = KRB5_CC_FORMAT;
+		     goto done;
+		 }
+		 break;
+	     }
+	     fcc_flen -= (2*sizeof(krb5_ui_2) + fcc_taglen);
+	 }
+     }
+
+done:
+     if (retval) {
+	 data->fd = -1;
+	 (void) fcc_lock_file(data, fd, UNLOCK_IT);
+	 (void) close(fd);
+     }
+     return retval;
 }
