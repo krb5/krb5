@@ -42,149 +42,6 @@
  #error find some way to use net-byte-order file version numbers.
 #endif
 
-#include <stdio.h>
-
-#define LOCK_IT 0
-#define UNLOCK_IT 1
-
-/* Under SunOS 4 and SunOS 5 and possibly other operating systems, having
-   POSIX fcntl locks doesn't mean that they work on every filesystem. If we
-   get EINVAL, try flock (if we have it) since that might work... */
-
-#ifdef POSIX_FILE_LOCKS
-static krb5_error_code fcc_lock_file_posix PROTOTYPE((krb5_fcc_data *, int, int));
-
-#ifndef unicos61
-#include <fcntl.h>
-#endif /* unicos61 */
-
-#define SHARED_LOCK	F_RDLCK
-#define EXCLUSIVE_LOCK	F_WRLCK
-#define UNLOCK_LOCK	F_UNLCK
-
-static krb5_error_code
-fcc_lock_file_posix(data, fd, lockunlock)
-krb5_fcc_data *data;
-int fd;
-int lockunlock;
-{
-    /* XXX need to in-line lock_file.c here, but it's sort-of OK since
-       we're already unix-dependent for file descriptors */
-
-    int lock_cmd = F_SETLKW;
-    struct flock lock_arg;
-    static struct flock flock_zero;
-
-    lock_arg = flock_zero;
-#define lock_flag lock_arg.l_type
-    lock_flag = -1;
-
-    if (lockunlock == LOCK_IT)
-	switch (data->mode) {
-	case FCC_OPEN_RDONLY:
-	    lock_flag = SHARED_LOCK;
-	    break;
-	case FCC_OPEN_RDWR:
-	case FCC_OPEN_AND_ERASE:
-	    lock_flag = EXCLUSIVE_LOCK;
-	    break;
-	}
-    else
-	lock_flag = UNLOCK_LOCK;
-
-    if (lock_flag == -1)
-	return(KRB5_LIBOS_BADLOCKFLAG);
-
-    lock_arg.l_whence = 0;
-    lock_arg.l_start = 0;
-    lock_arg.l_len = 0;
-    if (fcntl(fd, lock_cmd, &lock_arg) == -1) {
-	if (errno == EACCES || errno == EAGAIN)	/* see POSIX/IEEE 1003.1-1988,
-						   6.5.2.4 */
-	    return(EAGAIN);
-	return(errno);
-    }
-    return 0;
-}
-#undef lock_flag
-
-#undef SHARED_LOCK
-#undef EXCLUSIVE_LOCK
-#undef UNLOCK_LOCK
-
-#endif /* POSIX_FILE_LOCKS */
-
-#ifdef HAVE_FLOCK
-
-#ifndef sysvimp
-#include <sys/file.h>
-#endif /* sysvimp */
-
-#define SHARED_LOCK	LOCK_SH
-#define EXCLUSIVE_LOCK	LOCK_EX
-#define UNLOCK_LOCK	LOCK_UN
-
-static krb5_error_code fcc_lock_file_flock PROTOTYPE((krb5_fcc_data *, int, int));
-static krb5_error_code
-fcc_lock_file_flock(data, fd, lockunlock)
-krb5_fcc_data *data;
-int fd;
-int lockunlock;
-{
-    /* XXX need to in-line lock_file.c here, but it's sort-of OK since
-       we're already unix-dependent for file descriptors */
-
-    int lock_flag = -1;
-
-    if (lockunlock == LOCK_IT)
-	switch (data->mode) {
-	case FCC_OPEN_RDONLY:
-	    lock_flag = SHARED_LOCK;
-	    break;
-	case FCC_OPEN_RDWR:
-	case FCC_OPEN_AND_ERASE:
-	    lock_flag = EXCLUSIVE_LOCK;
-	    break;
-	}
-    else
-	lock_flag = UNLOCK_LOCK;
-
-    if (lock_flag == -1)
-	return(KRB5_LIBOS_BADLOCKFLAG);
-
-    if (flock(fd, lock_flag) == -1)
-	return(errno);
-    return 0;
-}
-
-#undef SHARED_LOCK
-#undef EXCLUSIVE_LOCK
-#undef UNLOCK_LOCK
-
-#endif /* HAVE_FLOCK */
-
-static krb5_error_code fcc_lock_file PROTOTYPE((krb5_fcc_data *, int, int));
-static krb5_error_code
-fcc_lock_file(data, fd, lockunlock)
-krb5_fcc_data *data;
-int fd;
-int lockunlock;
-{
-  krb5_error_code st = 0;
-#ifdef POSIX_FILE_LOCKS
-  st = fcc_lock_file_posix(data, fd, lockunlock);
-  if (st != EINVAL) {
-    return st;
-  }
-#endif /* POSIX_FILE_LOCKS */
-
-#ifdef HAVE_FLOCK
-  return fcc_lock_file_flock(data, fd, lockunlock);
-#else
-  return st;
-#endif
-}
-
 krb5_error_code
 krb5_fcc_close_file (context, id)
    krb5_context context;
@@ -197,7 +54,7 @@ krb5_fcc_close_file (context, id)
      if (data->fd == -1)
 	 return KRB5_FCC_INTERNAL;
 
-     retval = fcc_lock_file(data, data->fd, UNLOCK_IT);
+     retval = krb5_unlock_file(context, data->fd);
      ret = close (data->fd);
      data->fd = -1;
      if (retval)
@@ -219,12 +76,12 @@ krb5_fcc_open_file (context, id, mode)
      krb5_ui_2 fcc_tag;
      krb5_ui_2 fcc_taglen;
      int fd;
-     int open_flag;
+     int open_flag, lock_flag;
      krb5_error_code retval = 0;
 
      if (data->fd != -1) {
 	  /* Don't know what state it's in; shut down and start anew.  */
-	  (void) fcc_lock_file(data, data->fd, UNLOCK_IT);
+	  (void) krb5_unlock_file(context, data->fd);
 	  (void) close (data->fd);
 	  data->fd = -1;
      }
@@ -247,23 +104,27 @@ krb5_fcc_open_file (context, id, mode)
      if (fd == -1)
 	  return krb5_fcc_interpret (context, errno);
 
-     if ((retval = fcc_lock_file(data, fd, LOCK_IT))) {
+     if (data->mode == FCC_OPEN_RDONLY)
+	lock_flag = KRB5_LOCKMODE_SHARED;
+     else 
+	lock_flag = KRB5_LOCKMODE_EXCLUSIVE;
+
+     if ((retval = krb5_lock_file(context, fd, lock_flag))) {
 	 (void) close(fd);
 	 return retval;
      }
 	 
      if (mode == FCC_OPEN_AND_ERASE) {
 	 /* write the version number */
-	 int errsave, cnt;
+	 int cnt;
 
 	 fcc_fvno = htons(context->fcc_default_format);
 	 data->version = context->fcc_default_format;
 	 if ((cnt = write(fd, (char *)&fcc_fvno, sizeof(fcc_fvno))) !=
 	     sizeof(fcc_fvno)) {
-	     errsave = errno;
-	     (void) fcc_lock_file(data, fd, UNLOCK_IT);
-	     (void) close(fd);
-	     return (cnt == -1) ? krb5_fcc_interpret(context, errsave) : KRB5_CC_IO;
+	     retval = ((cnt == -1) ? krb5_fcc_interpret(context, errno) :
+		       KRB5_CC_IO);
+	     goto done;
 	 }
 
 	 data->fd = fd;
@@ -301,9 +162,8 @@ krb5_fcc_open_file (context, id, mode)
      /* verify a valid version number is there */
      if (read(fd, (char *)&fcc_fvno, sizeof(fcc_fvno)) !=
 	 sizeof(fcc_fvno)) {
-	 (void) fcc_lock_file(data, fd, UNLOCK_IT);
-	 (void) close(fd);
-	 return KRB5_CC_FORMAT;
+	 retval = KRB5_CC_FORMAT;
+	 goto done;
      }
      if ((fcc_fvno != htons(KRB5_FCC_FVNO_4)) &&
 	 (fcc_fvno != htons(KRB5_FCC_FVNO_3)) &&
@@ -376,7 +236,7 @@ krb5_fcc_open_file (context, id, mode)
 done:
      if (retval) {
 	 data->fd = -1;
-	 (void) fcc_lock_file(data, fd, UNLOCK_IT);
+	 (void) krb5_unlock_file(context, fd);
 	 (void) close(fd);
      }
      return retval;
