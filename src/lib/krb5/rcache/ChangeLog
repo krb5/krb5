@@ -1,3 +1,14 @@
+Wed Mar 1 12:03:30 1995 Keith Vetter (keithv@fusion.com)
+
+	* *.c, *.h Added windows INTERFACE keyword
+	* Makefile.in: made to work on the PC.
+        * rc_dfl.c: Some int/long changes for the PC
+        * rc_io.c: hack to get Microsoft C in std-c mode to allow
+           low-level i/o routines. Probably not a permanent solution
+           but keep until we decide on a better method.
+        * rc_io.h: added 2 missing prototypes
+        * rc_dfl.h: added 2 missing prototypes
+
 Tue Feb 28 01:03:34 1995  John Gilmore  (gnu at toad.com)
 
 	* *.c:  Avoid <krb5/...> includes.

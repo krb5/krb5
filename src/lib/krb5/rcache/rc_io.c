@@ -13,20 +13,60 @@
 
 
 #define KRB5_RC_VNO	0x0501		/* krb5, rcache v 1 */
+#define NEED_WINSOCK_H
 
 #include <stdio.h> /* for P_tmpdir */
-
+#include <krb5.h>
 #include "rc_base.h"
 #include "rc_dfl.h"
 #include "rc_io.h"
 
+/* Ugly. Microsoft, in stdc mode, doesn't support the low-level i/o
+ * routines directly. Rather, they only export the _<function> version.
+ * The following defines works around this problem. Perhaps this should
+ * go into config.h but leave it here for now until we see how prevalent
+ * this problem is.
+ */
+#ifdef MSDOS_FILESYSTEM
+#include <fcntl.h>
+#include <io.h>
+#include <process.h>
+#define O_RDONLY        _O_RDONLY
+#define O_WRONLY        _O_WRONLY
+#define O_RDWR          _O_RDWR
+#define O_APPEND        _O_APPEND
+#define O_CREAT         _O_CREAT
+#define O_TRUNC         _O_TRUNC
+#define O_EXCL          _O_EXCL
+#define O_TEXT          _O_TEXT
+#define O_BINARY        _O_BINARY
+#define O_NOINHERIT     _O_NOINHERIT
+#define stat            _stat
+#define getpid          _getpid
+#define unlink          _unlink
+#define lseek           _lseek
+#define write           _write
+#define open            _open
+#define close           _close
+#define read            _read
+#define fstat           _fstat
+#endif
+
+#ifndef O_BINARY
+#define O_BINARY    0
+#endif
+
 #ifdef KRB5_USE_INET
+#ifndef _WINSOCKAPI_
 #include <netinet/in.h>
+#endif
 #else
  #error find some way to use net-byte-order file version numbers.
 #endif
 
+#ifndef HAVE_ERRNO
 extern int errno; /* this should be in errno.h, but isn't on some systems */
+#endif
 
 #define FREE(x) ((void) free((char *) (x)))
 #define UNIQUE getpid() /* hopefully unique number */
@@ -55,7 +95,7 @@ static void getdir()
   }
 }
 
-krb5_error_code krb5_rc_io_creat (context, d, fn)
+krb5_error_code INTERFACE krb5_rc_io_creat (context, d, fn)
     krb5_context context;
     krb5_rc_iostuff *d;
     char **fn;
@@ -72,7 +112,7 @@ krb5_error_code krb5_rc_io_creat (context, d, fn)
    (void) strcpy(d->fn,dir);
    (void) strcat(d->fn,"/");
    (void) strcat(d->fn,*fn);
-   d->fd = open(d->fn,O_WRONLY | O_CREAT | O_TRUNC | O_EXCL,0600);
+   d->fd = open(d->fn,O_WRONLY | O_CREAT | O_TRUNC | O_EXCL | O_BINARY,0600);
   }
  else
   {
@@ -86,7 +126,7 @@ krb5_error_code krb5_rc_io_creat (context, d, fn)
    (void) sprintf(d->fn,"%s/krb5_RC%d",dir,UNIQUE);
    c = d->fn + strlen(d->fn);
    (void) strcpy(c,"aaa");
-   while ((d->fd = open(d->fn,O_WRONLY|O_CREAT|O_TRUNC|O_EXCL,0600)) == -1)
+   while ((d->fd = open(d->fn,O_WRONLY|O_CREAT|O_TRUNC|O_EXCL|O_BINARY,0600)) == -1)
     {
      if ((c[2]++) == 'z')
       {
@@ -139,14 +179,16 @@ krb5_error_code krb5_rc_io_creat (context, d, fn)
  return 0;
 }
 
-krb5_error_code krb5_rc_io_open (context, d, fn)
+krb5_error_code INTERFACE krb5_rc_io_open (context, d, fn)
     krb5_context context;
     krb5_rc_iostuff *d;
     char *fn;
 {
  krb5_int16 rc_vno;
  krb5_error_code retval;
+#ifndef NO_USERID
  struct stat statb;
+#endif
 
  GETDIR;
  if (!(d->fn = malloc(strlen(fn) + dirlen + 1)))
@@ -154,6 +196,10 @@ krb5_error_code krb5_rc_io_open (context, d, fn)
  (void) strcpy(d->fn,dir);
  (void) strcat(d->fn,"/");
  (void) strcat(d->fn,fn);
+
+#ifdef NO_USERID
+ d->fd = open(d->fn,O_RDWR | O_BINARY,0600);
+#else
  if ((d->fd = stat(d->fn, &statb)) != -1) {
      uid_t me;
 
@@ -164,8 +210,9 @@ krb5_error_code krb5_rc_io_open (context, d, fn)
 	 FREE(d->fn);
 	 return KRB5_RC_IO_PERM;
      }
-     d->fd = open(d->fn,O_RDWR,0600);
+     d->fd = open(d->fn,O_RDWR | O_BINARY,0600);
  }
+#endif
  if (d->fd == -1) {
    switch(errno)
     {
@@ -210,7 +257,7 @@ krb5_error_code krb5_rc_io_open (context, d, fn)
  return 0;
 }
 
-krb5_error_code krb5_rc_io_move (context, new, old)
+krb5_error_code INTERFACE krb5_rc_io_move (context, new, old)
     krb5_context context;
     krb5_rc_iostuff *new;
     krb5_rc_iostuff *old;
@@ -223,7 +270,7 @@ krb5_error_code krb5_rc_io_move (context, new, old)
  return 0;
 }
 
-krb5_error_code krb5_rc_io_write (context, d, buf, num)
+krb5_error_code INTERFACE krb5_rc_io_write (context, d, buf, num)
     krb5_context context;
     krb5_rc_iostuff *d;
     krb5_pointer buf;
@@ -244,10 +291,11 @@ krb5_error_code krb5_rc_io_write (context, d, buf, num)
  return 0;
 }
 
-krb5_error_code krb5_rc_io_sync (context, d)
+krb5_error_code INTERFACE krb5_rc_io_sync (context, d)
     krb5_context context;
     krb5_rc_iostuff *d;
 {
+#ifndef MSDOS_FILESYSTEM
     if (fsync(d->fd) == -1) {
       switch(errno)
       {
@@ -256,10 +304,11 @@ krb5_error_code krb5_rc_io_sync (context, d)
       default: return KRB5_RC_IO_UNKNOWN; 
       }
     }
+#endif
     return 0;
 }
 
-krb5_error_code krb5_rc_io_read (context, d, buf, num)
+krb5_error_code INTERFACE krb5_rc_io_read (context, d, buf, num)
     krb5_context context;
     krb5_rc_iostuff *d;
     krb5_pointer buf;
@@ -278,7 +327,7 @@ krb5_error_code krb5_rc_io_read (context, d, buf, num)
  return 0;
 }
 
-krb5_error_code krb5_rc_io_close (context, d)
+krb5_error_code INTERFACE krb5_rc_io_close (context, d)
     krb5_context context;
     krb5_rc_iostuff *d;
 {
@@ -289,7 +338,7 @@ krb5_error_code krb5_rc_io_close (context, d)
  return 0;
 }
 
-krb5_error_code krb5_rc_io_destroy (context, d)
+krb5_error_code INTERFACE krb5_rc_io_destroy (context, d)
     krb5_context context;
     krb5_rc_iostuff *d;
 {
@@ -306,7 +355,7 @@ krb5_error_code krb5_rc_io_destroy (context, d)
  return 0;
 }
 
-krb5_error_code krb5_rc_io_mark (context, d)
+krb5_error_code INTERFACE krb5_rc_io_mark (context, d)
     krb5_context context;
     krb5_rc_iostuff *d;
 {
@@ -314,7 +363,7 @@ krb5_error_code krb5_rc_io_mark (context, d)
  return 0;
 }
 
-krb5_error_code krb5_rc_io_unmark (context, d)
+krb5_error_code INTERFACE krb5_rc_io_unmark (context, d)
     krb5_context context;
     krb5_rc_iostuff *d;
 {
@@ -322,7 +371,9 @@ krb5_error_code krb5_rc_io_unmark (context, d)
  return 0;
 }
 
-int krb5_rc_io_size (context, d)
+long INTERFACE
+krb5_rc_io_size (context, d)
+    krb5_context context;
     krb5_rc_iostuff *d;
 {
     struct stat statb;

@@ -1,14 +1,16 @@
 CFLAGS = $(CCOPTS) $(DEFS)
 LDFLAGS = -g
 
-all:: $(OBJS)
+##DOSBUILDTOP = ..\..\..
+##DOSLIBNAME=..\libkrb5.lib
+##DOS!include $(BUILDTOP)\config\windows.in
 
 OBJS=	\
-	rc_base.o	\
-	rc_dfl.o 	\
-	rc_io.o		\
-	rcdef.o		\
-	rc_conv.o
+	rc_base.$(OBJEXT)	\
+	rc_dfl.$(OBJEXT) 	\
+	rc_io.$(OBJEXT)		\
+	rcdef.$(OBJEXT)		\
+	rc_conv.$(OBJEXT)
 
 SRCS=	\
 	$(srcdir)/rc_base.c	\
@@ -16,3 +18,5 @@ SRCS=	\
 	$(srcdir)/rc_io.c	\
 	$(srcdir)/rcdef.c	\
 	$(srcdir)/rc_conv.c
+
+all:: $(OBJS)

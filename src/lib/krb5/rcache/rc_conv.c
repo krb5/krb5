@@ -21,7 +21,7 @@ Local stuff:
   given auth, take important information and make rep; return -1 if failed
 */
 
-krb5_error_code
+krb5_error_code INTERFACE
 krb5_auth_to_rep(context, auth, rep)
     krb5_context context;
     krb5_tkt_authent *auth;

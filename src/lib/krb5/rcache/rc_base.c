@@ -30,7 +30,7 @@ static struct krb5_rc_typelist *typehead = &krb5_rc_typelist_dfl;
 semaphore ex_typelist = 1;
 #endif
 
-krb5_error_code krb5_rc_register_type(context, ops)
+krb5_error_code INTERFACE krb5_rc_register_type(context, ops)
     krb5_context context;
     krb5_rc_ops *ops;
 {
@@ -59,7 +59,7 @@ krb5_error_code krb5_rc_register_type(context, ops)
  return 0;
 }
 
-krb5_error_code krb5_rc_resolve_type(context, id, type)
+krb5_error_code INTERFACE krb5_rc_resolve_type(context, id, type)
     krb5_context context;
     krb5_rcache *id;
     char *type;
@@ -80,14 +80,14 @@ krb5_error_code krb5_rc_resolve_type(context, id, type)
  return 0;
 }
 
-char *krb5_rc_get_type(context, id)
+char * INTERFACE krb5_rc_get_type(context, id)
     krb5_context context;
     krb5_rcache id;
 {
  return id->ops->type;
 }
 
-char *krb5_rc_default_type(context)
+char * INTERFACE krb5_rc_default_type(context)
     krb5_context context;
 {
  char *s;
@@ -97,7 +97,7 @@ char *krb5_rc_default_type(context)
    return "dfl";
 }
 
-char *krb5_rc_default_name(context)
+char * INTERFACE krb5_rc_default_name(context)
     krb5_context context;
 {
  char *s;
@@ -107,7 +107,7 @@ char *krb5_rc_default_name(context)
    return (char *) 0;
 }
 
-krb5_error_code
+krb5_error_code INTERFACE
 krb5_rc_default(context, id)
     krb5_context context;
     krb5_rcache *id;
@@ -129,7 +129,7 @@ krb5_rc_default(context, id)
 }
 
 
-krb5_error_code krb5_rc_resolve_full(context, id, string_name)
+krb5_error_code INTERFACE krb5_rc_resolve_full(context, id, string_name)
     krb5_context context;
     krb5_rcache *id;
     char *string_name;

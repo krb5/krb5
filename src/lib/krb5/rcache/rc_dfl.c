@@ -14,6 +14,7 @@
 #include "rc_base.h"
 #include "rc_dfl.h"
 #include "rc_io.h"
+#include <k5-int.h>
 
 /*
 If NOIOSTUFF is defined at compile time, dfl rcaches will be per-process.
@@ -59,8 +60,8 @@ static int hash(rep, hsize)
 krb5_donot_replay *rep;
 int hsize;
 {
- return (((rep->cusec + rep->ctime + *rep->server + *rep->client)
-	 % hsize) + hsize) % hsize;
+ return (int) ((((rep->cusec + rep->ctime + *rep->server + *rep->client)
+	 % hsize) + hsize) % hsize);
  /* We take this opportunity to once again complain about C's idiotic %. */
 }
 
@@ -164,14 +165,14 @@ static int store(context, id, rep)
  return CMP_HOHUM;
 }
 
-char *krb5_rc_dfl_get_name(context, id)
+char * INTERFACE krb5_rc_dfl_get_name(context, id)
     krb5_context context;
     krb5_rcache id;
 {
  return ((struct dfl_data *) (id->data))->name;
 }
 
-krb5_error_code krb5_rc_dfl_get_span(context, id, lifespan)
+krb5_error_code INTERFACE krb5_rc_dfl_get_span(context, id, lifespan)
     krb5_context context;
     krb5_rcache id;
     krb5_deltat *lifespan;
@@ -180,7 +181,7 @@ krb5_error_code krb5_rc_dfl_get_span(context, id, lifespan)
  return 0;
 }
 
-krb5_error_code krb5_rc_dfl_init(context, id, lifespan)
+krb5_error_code INTERFACE krb5_rc_dfl_init(context, id, lifespan)
     krb5_context context;
 krb5_rcache id;
 krb5_deltat lifespan;
@@ -199,7 +200,7 @@ krb5_deltat lifespan;
     return 0;
 }
 
-krb5_error_code krb5_rc_dfl_close_no_free(context, id)
+krb5_error_code INTERFACE krb5_rc_dfl_close_no_free(context, id)
     krb5_context context;
     krb5_rcache id;
 {
@@ -224,7 +225,7 @@ krb5_error_code krb5_rc_dfl_close_no_free(context, id)
  return 0;
 }
 
-krb5_error_code krb5_rc_dfl_close(context, id)
+krb5_error_code INTERFACE krb5_rc_dfl_close(context, id)
     krb5_context context;
     krb5_rcache id;
 {
@@ -233,7 +234,7 @@ krb5_error_code krb5_rc_dfl_close(context, id)
     return 0;
 }
 
-krb5_error_code krb5_rc_dfl_destroy(context, id)
+krb5_error_code INTERFACE krb5_rc_dfl_destroy(context, id)
     krb5_context context;
 krb5_rcache id;
 {
@@ -244,7 +245,7 @@ krb5_rcache id;
  return krb5_rc_dfl_close(context, id);
 }
 
-krb5_error_code krb5_rc_dfl_resolve(context, id, name)
+krb5_error_code INTERFACE krb5_rc_dfl_resolve(context, id, name)
     krb5_context context;
     krb5_rcache id;
     char *name;
@@ -291,7 +292,7 @@ cleanup:
     return retval;
 }
 
-void krb5_rc_free_entry (context, rep)
+void INTERFACE krb5_rc_free_entry (context, rep)
     krb5_context context;
     krb5_donot_replay **rep;
 {
@@ -311,7 +312,7 @@ void krb5_rc_free_entry (context, rep)
     }
 }
 
-krb5_error_code krb5_rc_io_fetch(context, t, rep, maxlen) 
+static krb5_error_code krb5_rc_io_fetch(context, t, rep, maxlen) 
     krb5_context context;
     struct dfl_data *t;
     krb5_donot_replay *rep;
@@ -376,7 +377,7 @@ errout:
     
 
 
-krb5_error_code krb5_rc_dfl_recover(context, id)
+krb5_error_code INTERFACE krb5_rc_dfl_recover(context, id)
     krb5_context context;
 krb5_rcache id;
 {
@@ -387,7 +388,7 @@ krb5_rcache id;
     struct dfl_data *t = (struct dfl_data *)id->data;
     krb5_donot_replay *rep;
     krb5_error_code retval;
-    int max_size;
+    long max_size;
 
     if (retval = krb5_rc_io_open(context, &t->d,t->name))
 	return retval;
@@ -415,7 +416,7 @@ krb5_rcache id;
 	rep->client = NULL;
 	rep->server = NULL;
 	
-	retval = krb5_rc_io_fetch (context, t, rep, max_size);
+	retval = krb5_rc_io_fetch (context, t, rep, (int) max_size);
 
 	if (retval == KRB5_RC_IO_EOF)
 	    break;
@@ -455,7 +456,8 @@ io_fail:
 #endif
 }
 
-krb5_error_code krb5_rc_io_store (context, t, rep)
+static krb5_error_code
+krb5_rc_io_store (context, t, rep)
     krb5_context context;
     struct dfl_data *t;
     krb5_donot_replay *rep;
@@ -484,7 +486,7 @@ krb5_error_code krb5_rc_io_store (context, t, rep)
     return ret;
 }
 
-krb5_error_code krb5_rc_dfl_store(context, id, rep)
+krb5_error_code INTERFACE krb5_rc_dfl_store(context, id, rep)
     krb5_context context;
 krb5_rcache id;
 krb5_donot_replay *rep;
@@ -520,7 +522,7 @@ krb5_donot_replay *rep;
  return 0;
 }
 
-krb5_error_code krb5_rc_dfl_expunge(context, id)
+krb5_error_code INTERFACE krb5_rc_dfl_expunge(context, id)
     krb5_context context;
 krb5_rcache id;
 {
