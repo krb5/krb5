@@ -1,19 +1,19 @@
 /*
- * $Source$
- * $Author$
+ * $source: /afs/athena.mit.edu/astaff/project/krb5/src/admin/edit/rcs/dump.c,v $
+ * $author: tytso $
  *
- * Copyright 1990 by the Massachusetts Institute of Technology.
+ * copyright 1990 by the massachusetts institute of technology.
  *
- * For copying and distribution information, please see the file
+ * for copying and distribution information, please see the file
  * <krb5/copyright.h>.
  *
- * Dump a KDC database
+ * dump a kdc database
  */
 
-#if !defined(lint) && !defined(SABER)
+#if !defined(lint) && !defined(saber)
 static char rcsid_kdb_edit_c[] =
-"$Id$";
-#endif	/* !lint & !SABER */
+"$id: dump.c,v 1.6 91/01/15 18:25:41 tytso exp locker: tytso $";
+#endif	/* !lint & !saber */
 
 #include <krb5/copyright.h>
 #include <krb5/krb5.h>
@@ -22,7 +22,7 @@ static char rcsid_kdb_edit_c[] =
 #include <krb5/libos-proto.h>
 #include <krb5/asn1.h>
 #include <krb5/config.h>
-#include <krb5/sysincl.h>		/* for MAXPATHLEN */
+#include <krb5/sysincl.h>		/* for maxpathlen */
 #include <krb5/ext-proto.h>
 #include <krb5/func-proto.h>
 
@@ -31,10 +31,7 @@ static char rcsid_kdb_edit_c[] =
 #include <stdio.h>
 
 extern char *progname;
-
-
-#define REALM_SEP	'@'
-#define REALM_SEP_STR	"@"
+extern char *Err_no_database;
 
 struct mblock {
     krb5_deltat max_life;
@@ -97,6 +94,10 @@ void dump_db(argc, argv)
 	
 	if (argc > 2) {
 		com_err(argv[0], 0, "Usage: %s filename", argv[0]);
+		return;
+	}
+	if (!dbactive) {
+		com_err(argv[0], 0, Err_no_database);
 		return;
 	}
 	if (argc == 2) {
@@ -166,6 +167,7 @@ void load_db(argc, argv)
 	int	name_len, mod_name_len,i,one;
 	char	*name, *mod_name;
 	char	*new_dbname;
+	int	load_error = 0;
 	
 	if (argc != 3) {
 		com_err(argv[0], 0, "Usage: %s filename dbname", argv[0]);
@@ -215,12 +217,14 @@ void load_db(argc, argv)
 		if (!(name = malloc(name_len+1))) {
 			com_err(argv[0], errno,
 				"While allocating speace for name");
+			load_error++;
 			break;
 		}
 		if (!(mod_name = malloc(mod_name_len+1))) {
 			free(name);
 			com_err(argv[0], errno,
 				"While allocating speace for name");
+			load_error++;
 			break;
 		}
 		fscanf(f, "%s\t%d\t%d\t", name, &entry.key.keytype,
@@ -230,6 +234,7 @@ void load_db(argc, argv)
 			free(mod_name);
 			com_err(argv[0], errno,
 				"While allocating speace for name");
+			load_error++;
 			break;
 		}
 		for (i=0; i<entry.key.length; i++) {
@@ -243,12 +248,14 @@ void load_db(argc, argv)
 		if (retval=krb5_parse_name(name, &entry.principal)) {
 			com_err(argv[0], retval, "while trying to parse %s",
 				name);
+			load_error++;
 			goto cleanup;
 		}
 		if (retval=krb5_parse_name(mod_name, &entry.mod_name)) {
 			com_err(argv[0], retval,
 				"while trying to parse %s for %s",
 				mod_name, name);
+			load_error++;
 			goto cleanup;
 		}
 		one=1;
@@ -256,6 +263,7 @@ void load_db(argc, argv)
 			com_err(argv[0], retval,
 				"while trying to store principal %s",
 				name);
+			load_error++;
 			goto cleanup;
 		}
 	cleanup:
@@ -268,11 +276,28 @@ void load_db(argc, argv)
 			"while closing database '%s'", new_dbname);
 		exit(1);
 	}
-	if (retval = krb5_db_rename(new_dbname, argv[2])) {
-		com_err(argv[0], retval,
-			"while renaming database from %s to %s",
-			new_dbname, argv[2]);
+	if (load_error) {
+		printf("Error while loading database, aborting load.\n");
+		if (retval = kdb5_db_destroy(new_dbname)) {
+			com_err(argv[0], retval,
+				"while destroying temporary database '%s'",
+				new_dbname);
+			exit(1);
+		}
+		/*
+		 * XXX Kludge alert, but we want to exit with a
+		 * non-zero status, and it's hard to do that in the ss
+		 * framework, since the the do_xxx procedures return
+		 * void.  Grump.
+		 */
 		exit(1);
+	} else {
+		if (retval = krb5_db_rename(new_dbname, argv[2])) {
+			com_err(argv[0], retval,
+				"while renaming database from %s to %s",
+				new_dbname, argv[2]);
+			exit(1);
+		}
 	}
 	if (dbactive) {
 		if (retval = krb5_db_set_name(current_dbname)) {
