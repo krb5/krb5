@@ -249,3 +249,4 @@ EXPORTS
 	krb5_mcc_ops		; gssapi
 	krb5_get_tgs_ktypes	; gssapi
 	krb5_free_ktypes	; gssapi
+	krb5int_cc_default	; gssapi
