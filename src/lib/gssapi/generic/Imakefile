@@ -37,8 +37,8 @@ CCSRCS = \
 	util_canonhost.c \
 	util_dup.c \
 	util_oid.c \
-	util_token.c \
-	util_validate.c
+#	util_validate.c \
+	util_token.c 
 
 CCOBJS = \
 	display_major_status.o \
@@ -50,20 +50,20 @@ CCOBJS = \
 	util_canonhost.o \
 	util_dup.o \
 	util_oid.o \
-	util_token.o \
-	util_validate.o
+#	util_validate.o \
+	util_token.o
 
 EHDRDIR= $(TOP)/include/gssapi
 EXPORTED_HEADERS= gssapi.h gssapi_generic.h
 
-SRCS= $(ETSRCS) $(CSRCS)
-OBJS= $(ETOBJS) $(COBJS)
+SRCS= $(ETSRCS) $(CCSRCS)
+OBJS= $(ETOBJS) $(CCOBJS)
 HDRS= $(ETHDRS)
 
 NormalLibraryObjectRule()
 ErrorTableObjectRule()
 
-all:: ${SRCS} ${HDRS} includes ${OBJS}
+all:: $(SRCS) $(HDRS) includes $(OBJS)
 
 clean::
 	$(RM) $(ETHDRS) $(ETSRCS)
