@@ -1,3 +1,12 @@
+2004-06-21  Jeffrey Altman <jaltman@mit.edu>
+
+    * cc_mslsa.c: Comment out call to FormatMessage() which fails
+      horribly on non-English systems.  We do not need the output
+      or printf statements as part of a library.  Therefore, we 
+      will ignore this for the time being.   When we decide we
+      want to log event to the Event Log then we can properly 
+      implement this function.
+
 2004-06-18  Jeffrey Altman <jaltman@mit.edu>
 
     * cc_mslsa.c: Enforce acceptable enctypes by checking against
