@@ -80,11 +80,11 @@ clean::
 	$(RM) fp.c ip.c key_perm.h odd.h p.c p_table.h s_table.h
 
 verify$(EXEEXT): t_verify.$(OBJEXT) $(DEPKLIB)
-	$(CC) -o $@ t_verify.$(OBJEXT) process_ky.o  key_sched.o\
+	$(CC) -o $@ t_verify.$(OBJEXT) process_ky.o  key_sched.o \
 	../cryptoconf.o ../des_crc.o $(KLIB) $(LIBS) $(CFLAGS) $(LDFLAGS) 
 
 destest$(EXEEXT): destest.$(OBJEXT) $(DEPKLIB)
-	$(CC) -o $@ destest.$(OBJEXT) process_ky.o key_sched.o\
+	$(CC) -o $@ destest.$(OBJEXT) process_ky.o key_sched.o \
 	../cryptoconf.o ../des_crc.o  $(KLIB) $(LIBS) $(CFLAGS) $(LDFLAGS) 
 
 t_random$(EXEEXT): t_random.$(OBJEXT) $(DEPKLIB)

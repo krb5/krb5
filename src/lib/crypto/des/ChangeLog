@@ -1,3 +1,7 @@
+Sat Jun 15 03:51:19 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* Makefile.in (clean): Add space before \
+
 Wed Jun 12 00:08:31 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* des_int.h: Add missing prototypes; needed to make Win-32
@@ -12,7 +16,6 @@ Tue May 21 19:30:10 1996  Sam Hartman  <hartmans@mit.edu>
  	early binding in shared libs, so we porperly overide
  	mit_des_is_weak_key
 
-:reset
 	* Makefile.in (check-unix): Use $(RUN_SETUP) so shared lib paths
  	are happy.
 
