@@ -6,54 +6,6 @@
  *    Provide an interface to assemble and disassemble krb5_cred
  *    structures.
  *
- * MODIFIED
- * $Log$
- * Revision 5.11  1995/05/02 23:31:39  proven
- *         * mk_cred.c (mk_cred()), mk_priv.c (mk_priv()), mk_safe.c (mk_safe()),
- * 	* rd_cred.c (rd_cred()), rd_priv.c (rd_priv()), rd_safe.c (rd_safe()):
- * 		Don't call krb5_make_fulladdrs() if a port isn't specified.
- *
- * Revision 5.10  1995/05/01 20:49:45  proven
- *         * auth_con.c (krb5_auth_con_free()) :
- * 		Free all the data associated with the auth_context.
- *
- * 	* auth_con.c (krb5_auth_con_setkey()) : Removed.
- * 	* mk_rep.c (mk_rep()),
- *                 The krb5_mk_rep() routine must always encode the data in
- *                 the keyblock of the ticket, not the subkey.
- *
- * 	* cleanup.h, auth_con.c (krb5_auth_con_setports()) : Added.
- *         * auth_con.h, mk_cred.c (mk_cred()), mk_priv.c (mk_priv()),
- * 	* mk_safe.c (mk_safe()), rd_cred.c (rd_cred()),
- * 	* rd_priv.c (rd_priv()), rd_safe.c (rd_safe()) :
- * 		Changes to auth_context to better support full addresses.
- *
- * Revision 5.9  1995/04/28 01:18:18  keithv
- * Fixes so that the Unix changes no longer breaks on the PC.
- *
- * Revision 5.8  1995/04/26 03:03:11  proven
- * 	* Makefile.in : Added gc_via_tkt.c and removed get_fcreds.c
- * 	* auth_con.c (krb5_auth_con_setaddrs()) : Fixed so it allocates
- * 		space and copies addresses, not just pointer.
- * 	* mk_cred.c: Completely rewritten from sources donated by asriniva.
- * 	* rd_cred.c: Completely rewritten from sources donated by asriniva.
- * 	* mk_priv.c (krb5_mk_priv()), mk_safe.c (krb5_mk_safe()),
- * 	  rd_priv.c (krb5_rd_priv()), and rd_safe (krb5_rd_safe()) :
- * 		Try using a subkey before using the session key for encryption.
- * 	* recvauth.c (krb5_recvauth()): Don't close the rcache on success.
- *
- * Revision 1.3  1995/01/26  00:09:24  asriniva
- * Completely rewrote API to credential passing code.
- *
- * Revision 1.2  1994/12/30  21:57:17  asriniva
- * Killed compile time warnings/errors.
- * Fixed runtime bugs.
- * Require a ticket when calling krb5_initcred.
- * Cleaned up krb5_addticket.
- *
- * Revision 1.1  1994/12/29  17:03:30  asriniva
- * Initial revision
- *
  */
 #include <k5-int.h>
 #include "cleanup.h"

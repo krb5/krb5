@@ -197,7 +197,7 @@ krb5_rd_safe(context, auth_context, inbuf, outbuf, outdata)
     CLEANUP_INIT(2);
 
     if (auth_context->local_addr) {
-    	if (auth_context->local_addr) {
+    	if (auth_context->local_port) {
             if (!(retval = krb5_make_fulladdr(context, auth_context->local_addr,
                                  	      auth_context->local_port, 
 					      &local_fulladdr))){
@@ -212,7 +212,7 @@ krb5_rd_safe(context, auth_context, inbuf, outbuf, outdata)
     }
 
     if (auth_context->remote_addr) {
-    	if (auth_context->remote_addr) {
+    	if (auth_context->remote_port) {
             if (!(retval = krb5_make_fulladdr(context,auth_context->remote_addr,
                                  	      auth_context->remote_port, 
 					      &remote_fulladdr))){

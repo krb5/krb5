@@ -208,7 +208,7 @@ krb5_mk_priv(context, auth_context, userdata, outbuf, outdata)
     }
 
     if (auth_context->remote_addr) {
-    	if (auth_context->remote_addr) {
+    	if (auth_context->remote_port) {
 	    if (!(retval = krb5_make_fulladdr(context,auth_context->remote_addr,
 				 	      auth_context->remote_port, 
 					      &remote_fulladdr))){
