@@ -143,6 +143,10 @@ char copyright[] =
 #endif /* CRAY */
      
 #include <syslog.h>
+
+#ifdef POSIX_TERMIOS
+#include <termios.h>
+#endif
      
 #ifdef HAVE_SYS_FILIO_H
 /* get FIONBIO from sys/filio.h, so what if it is a compatibility feature */
@@ -159,11 +163,37 @@ char copyright[] =
 #include <com_err.h>
 #include "loginpaths.h"
 
-#define ARGSTR	"rRkKD:?"
+#define ARGSTR	"rRxXeEkKD:?"
+
+#define SECURE_MESSAGE "This rsh session is using DES encryption for all data transmissions.\r\n"
+
+#ifdef BUFSIZ
+#undef BUFSIZ
+#endif
+#define BUFSIZ 5120
+
+#define MAXRETRIES 4
+
+char des_inbuf[2*BUFSIZ];         /* needs to be > largest read size */
+krb5_encrypt_block eblock;        /* eblock for encrypt/decrypt */
+char des_outbuf[2*BUFSIZ];        /* needs to be > largest write size */
+krb5_data desinbuf,desoutbuf;
+
+void fatal();
+int v5_des_read();
+int v5_des_write();
+
+int (*des_read)() = v5_des_read;
+int (*des_write)() = v5_des_write;
+
+int do_encrypt = 0;
+int netf;
 
 #else /* !KERBEROS */
 
 #define ARGSTR	"rRD:?"
+#define (*des_read)  read
+#define (*des_write) write
      
 #endif /* KERBEROS */
      
@@ -278,6 +308,13 @@ main(argc, argv)
 	  must_pass_k5 = 1;
 	  if (must_pass_one)
 	    must_pass_one = 0;
+	  break;
+	  
+        case 'x':
+        case 'X':
+        case 'e':
+        case 'E':
+	  do_encrypt = 1;
 	  break;
 #endif
 	case 'D':
@@ -462,7 +499,7 @@ doit(f, fromp)
     struct hostent *hp;
     char *hostname;
     short port;
-    int pv[2], cc;
+    int pv[2], pw[2], px[2], cc;
     fd_set ready, readfrom;
     char buf[BUFSIZ], sig;
     int one = 1;
@@ -518,6 +555,9 @@ doit(f, fromp)
     }
 #ifdef KERBEROS
     krb5_init_ets();
+    netf = f;
+    desinbuf.data = des_inbuf;
+    desoutbuf.data = des_outbuf;
     if ((must_pass_rhosts || must_pass_one)
 	&& (fromp->sin_port >= IPPORT_RESERVED ||
 	    fromp->sin_port < IPPORT_RESERVED/2))
@@ -627,6 +667,8 @@ doit(f, fromp)
 	error("Authentication failed: %s\n", error_message(status));
 	exit(1);
     }
+    if (!strncmp(cmdbuf, "-x ", 3))
+	do_encrypt = 1;
 #else
     getstr(f, remuser, sizeof(remuser), "remuser");
     getstr(f, locuser, sizeof(locuser), "locuser");
@@ -996,11 +1038,19 @@ doit(f, fromp)
       }
 #endif
     
-    (void) write(2, "\0", 1);
+    (void) write(2, "", 1);
     
     if (port) {
 	if (pipe(pv) < 0) {
 	    error("Can't make pipe.\n");
+	    goto signout_please;
+	}
+	if (pipe(pw) < 0) {
+	    error("Can't make pipe 2.\n");
+	    goto signout_please;
+	}
+	if (pipe(px) < 0) {
+	    error("Can't make pipe 3.\n");
 	    goto signout_please;
 	}
 	pid = fork();
@@ -1029,19 +1079,31 @@ doit(f, fromp)
 #endif
 	    
 	    (void) close(0); (void) close(1); (void) close(2);
-	    (void) close(f); (void) close(pv[1]);
+	    (void) close(pv[1]);
+	    (void) close(pw[1]);
+	    (void) close(px[0]);
+	    
+	    ioctl(pv[0], FIONBIO, (char *)&one);
+	    ioctl(pw[0], FIONBIO, (char *)&one);
+	    /* should set s nbio! */
+
+	    if (do_encrypt)
+		if (((*des_write)(s, SECURE_MESSAGE, sizeof(SECURE_MESSAGE))) < 0)
+		    fatal(pw[0], "Cannot encrypt-write network.");
+	    
 	    FD_ZERO(&readfrom);
+	    FD_SET(f, &readfrom);
 	    FD_SET(s, &readfrom);
 	    FD_SET(pv[0], &readfrom);
-	    ioctl(pv[0], FIONBIO, (char *)&one);
-	    /* should set s nbio! */
+	    FD_SET(pw[0], &readfrom);
+	    
 	    do {
 		ready = readfrom;
 		if (select(8*sizeof(ready), &ready, (fd_set *)0,
 			   (fd_set *)0, (struct timeval *)0) < 0)
 		  break;
 		if (FD_ISSET(s, &ready)) {
-		    if (read(s, &sig, 1) <= 0)
+		    if ((*des_read)(s, &sig, 1) <= 0)
 			FD_CLR(s, &readfrom);
 		    else {
 #ifdef POSIX_SIGNALS
@@ -1054,6 +1116,15 @@ doit(f, fromp)
 #endif
 		    }
 		}
+		if (FD_ISSET(f, &ready)) {
+		    errno = 0;
+		    cc = (*des_read)(f, buf, sizeof(buf));
+		    if (cc <= 0) {
+			(void) close(px[1]);
+			FD_CLR(f, &readfrom);
+		    } else
+			(void) write(px[1], buf, cc);
+		}
 		if (FD_ISSET(pv[0], &ready)) {
 		    errno = 0;
 		    cc = read(pv[0], buf, sizeof (buf));
@@ -1061,9 +1132,21 @@ doit(f, fromp)
 			shutdown(s, 1+1);
 			FD_CLR(pv[0], &readfrom);
 		    } else
-			(void) write(s, buf, cc);
+			(void) (*des_write)(s, buf, cc);
 		}
-	    } while (FD_ISSET(s, &readfrom) || FD_ISSET(pv[0], &readfrom));
+		if (FD_ISSET(pw[0], &ready)) {
+		    errno = 0;
+		    cc = read(pw[0], buf, sizeof (buf));
+		    if (cc <= 0) {
+			shutdown(f, 1+1);
+			FD_CLR(pw[0], &readfrom);
+		    } else
+			(void) (*des_write)(f, buf, cc);
+		}
+	    } while (FD_ISSET(s, &readfrom) ||
+		     FD_ISSET(f, &readfrom) ||
+		     FD_ISSET(pv[0], &readfrom) ||
+		     FD_ISSET(pw[0], &readfrom));
 #ifdef KERBEROS
 	    syslog(LOG_INFO ,
 		   "Shell process completed.");
@@ -1077,8 +1160,18 @@ doit(f, fromp)
 #else
 	setpgrp();
 #endif
-	(void) close(s); (void) close(pv[0]);
-	dup2(pv[1], 2);
+	(void) close(s);
+	(void) close(f);
+	(void) close(pw[0]);
+	(void) close(pv[0]);
+	(void) close(px[1]);
+
+	(void) dup2(px[0], 0);
+	(void) dup2(pw[1], 1);
+	(void) dup2(pv[1], 2);
+
+	(void) close(px[0]);
+	(void) close(pw[1]);
 	(void) close(pv[1]);
     }
     
@@ -1109,8 +1202,13 @@ doit(f, fromp)
       cp++;
     else
       cp = pwd->pw_shell;
-    
-    execl(pwd->pw_shell, cp, "-c", cmdbuf, 0);
+
+    if (do_encrypt && !strncmp(cmdbuf, "-x ", 3)) {
+	execl(pwd->pw_shell, cp, "-c", (char *)cmdbuf + 3, 0);
+    }
+    else
+	execl(pwd->pw_shell, cp, "-c", cmdbuf, 0);
+
     perror(pwd->pw_shell);
     perror(cp);
     exit(1);
@@ -1515,9 +1613,17 @@ recvauth(netf, peersin, peeraddr)
     if (status = krb5_unparse_name(client, &kremuser))
 	return status;
     
+    /* Setup eblock for encrypted sessions. */
+    krb5_use_keytype(&eblock, ticket->enc_part2->session->keytype);
+    if (status = krb5_process_key(&eblock, ticket->enc_part2->session))
+	fatal(netf, "Permission denied");
+
+    /* Null out the "session" because eblock.key references the session
+     * key here, and we do not want krb5_free_ticket() to destroy it. */
+    ticket->enc_part2->session = 0;
+
     if (status = krb5_read_message((krb5_pointer)&netf, &inbuf)) {
-	error("Error reading message: %s\n",
-	      error_message(status));
+	error("Error reading message: %s\n", error_message(status));
 	exit(1);
     }
 
@@ -1532,4 +1638,160 @@ recvauth(netf, peersin, peeraddr)
     return 0;
 }
 
+
+char storage[2*BUFSIZ];                    /* storage for the decryption */
+int nstored = 0;
+char *store_ptr = storage;
+
+int
+v5_des_read(fd, buf, len)
+     int fd;
+     register char *buf;
+     int len;
+{
+    int nreturned = 0;
+    krb5_ui_4 net_len,rd_len;
+    int cc,retry;
+    unsigned char len_buf[4];
+    
+    if (!do_encrypt)
+      return(read(fd, buf, len));
+    
+    if (nstored >= len) {
+	memcpy(buf, store_ptr, len);
+	store_ptr += len;
+	nstored -= len;
+	return(len);
+    } else if (nstored) {
+	memcpy(buf, store_ptr, nstored);
+	nreturned += nstored;
+	buf += nstored;
+	len -= nstored;
+	nstored = 0;
+    }
+    
+    if ((cc = krb5_net_read(fd, (char *)len_buf, 4)) != 4) {
+	if ((cc < 0)  && ((errno == EWOULDBLOCK) || (errno == EAGAIN)))
+	    return(cc);
+	/* XXX can't read enough, pipe must have closed */
+	return(0);
+    }
+    rd_len =
+	((len_buf[0]<<24) |
+	 (len_buf[1]<<16) |
+	 (len_buf[2]<<8) |
+	 len_buf[3]);
+    net_len = krb5_encrypt_size(rd_len, eblock.crypto_entry);
+    if (net_len < 0 || net_len > sizeof(des_inbuf)) {
+	/* XXX preposterous length, probably out of sync.
+	   act as if pipe closed */
+	syslog(LOG_ERR,"Read size problem (rd_len=%d, net_len=%d)",
+	       rd_len, net_len);
+	return(0);
+    }
+    retry = 0;
+  datard:
+    if ((cc = krb5_net_read(fd, desinbuf.data, net_len)) != net_len) {
+	/* XXX can't read enough, pipe must have closed */
+	if ((cc < 0)  && ((errno == EWOULDBLOCK) || (errno == EAGAIN))) {
+	    retry++;
+	    if (retry > MAXRETRIES){
+		syslog(LOG_ERR, "des_read retry count exceeded %d\n", retry);
+		return(0);
+	    }
+	    sleep(1);
+	    goto datard;
+	}
+	syslog(LOG_ERR,
+	       "Read data received %d != expected %d.",
+	       cc, net_len);
+	return(0);
+    }
+
+    /* decrypt info */
+    if (krb5_decrypt(desinbuf.data, (krb5_pointer) storage, net_len,
+		     &eblock, 0)) {
+	syslog(LOG_ERR,"Read decrypt problem.");
+	return(0);
+    }
+
+    store_ptr = storage;
+    nstored = rd_len;
+    if (nstored > len) {
+	memcpy(buf, store_ptr, len);
+	nreturned += len;
+	store_ptr += len;
+	nstored -= len;
+    } else {
+	memcpy(buf, store_ptr, nstored);
+	nreturned += nstored;
+	nstored = 0;
+    }
+    return(nreturned);
+}
+    
+
+int
+v5_des_write(fd, buf, len)
+     int fd;
+     char *buf;
+     int len;
+{
+    unsigned char len_buf[4];
+    
+    if (!do_encrypt)
+      return(write(fd, buf, len));
+    
+    desoutbuf.length = krb5_encrypt_size(len, eblock.crypto_entry);
+    if (desoutbuf.length > sizeof(des_outbuf)){
+	syslog(LOG_ERR,"Write size problem (%d > %d)",
+	       desoutbuf.length, sizeof(des_outbuf));
+	return(-1);
+    }
+
+    if (krb5_encrypt((krb5_pointer)buf, desoutbuf.data, len, &eblock, 0)) {
+	syslog(LOG_ERR,"Write encrypt problem.");
+	return(-1);
+    }
+    
+    len_buf[0] = (len & 0xff000000) >> 24;
+    len_buf[1] = (len & 0xff0000) >> 16;
+    len_buf[2] = (len & 0xff00) >> 8;
+    len_buf[3] = (len & 0xff);
+    (void) write(fd, len_buf, 4);
+
+    if (write(fd, desoutbuf.data, desoutbuf.length) != desoutbuf.length){
+	syslog(LOG_ERR,"Could not write out all data.");
+	return(-1);
+    }
+    else return(len);
+}
+
+
+void fatal(f, msg)
+     int f;
+     char *msg;
+{
+    char buf[512];
+    int out = 1 ;          /* Output queue of f */
+
+    buf[0] = '\01';             /* error indicator */
+    (void) sprintf(buf + 1, "%s: %s.\r\n",progname, msg);
+    if ((f == netf) && (pid > 0))
+      (void) (*des_write)(f, buf, strlen(buf));
+    else
+      (void) write(f, buf, strlen(buf));
+    syslog(LOG_ERR,"%s\n",msg);
+    if (pid > 0) {
+        signal(SIGCHLD,SIG_IGN);
+        kill(pid,SIGKILL);
+#ifdef POSIX_TERMIOS
+        (void) tcflush(1, TCOFLUSH);
+#else
+        (void) ioctl(f, TIOCFLUSH, (char *)&out);
+#endif
+        cleanup();
+    }
+    exit(1);
+}
 #endif /* KERBEROS */

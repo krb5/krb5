@@ -75,12 +75,31 @@ int	nflag;
 krb5_sigtype  sendsig();
 
 #ifdef KERBEROS
-char	*krb_realm = (char *)0;
-void	try_normal();
+
 #ifndef UCB_RSH
 #define UCB_RSH "/usr/ucb/rsh"
 #endif
+#ifdef BUFSIZ
+#undef BUFSIZ
 #endif
+#define BUFSIZ 4096
+
+char des_inbuf[2*BUFSIZ];       /* needs to be > largest read size */
+char des_outbuf[2*BUFSIZ];      /* needs to be > largest write size */
+krb5_data desinbuf,desoutbuf;
+krb5_encrypt_block eblock;      /* eblock for encrypt/decrypt */
+krb5_creds *cred;
+
+int	encrypt_flag = 0;
+char	*krb_realm = (char *)0;
+void	try_normal();
+
+#else /* KERBEROS */
+
+#define des_read read
+#define des_write write
+
+#endif /* KERBEROS */
 
 #ifndef RLOGIN_PROGRAM
 #ifdef KERBEROS
@@ -118,7 +137,6 @@ main(argc, argv0)
     krb5_flags authopts;
     krb5_error_code status;
     int fflag = 0, Fflag = 0;
-    int xflag = 0;
     int debug_port = 0;
 #endif  /* KERBEROS */
    
@@ -179,7 +197,7 @@ main(argc, argv0)
      */
     if (argc > 0 && !strncmp(*argv, "-x", 2)) {
 	argv++, argc--;
-	xflag++;
+	encrypt_flag++;
 	goto another;
     }
     if (argc > 0 && !strncmp(*argv, "-f", 2)) {
@@ -261,17 +279,6 @@ main(argc, argv0)
 	exit(1);
     }
 
-    /* Unlike the other rlogin flags, we should warn if `-x' is
-       given and rlogin is not run, because the user could be
-       dangerously confused otherwise.  He might think he's got a
-       secure rsh channel, and there's no such thing yet.  */
-    if (xflag)
-      {
-	fprintf (stderr, "%s: Encrypted rsh is not yet available.\n",
-		 argv0[0]);
-	return 1;
-      }
-
     pwd = getpwuid(getuid());
     if (pwd == 0) {
 	fprintf(stderr, "who are you?\n");
@@ -280,7 +287,13 @@ main(argc, argv0)
     cc = 0;
     for (ap = argv; *ap; ap++)
       cc += strlen(*ap) + 1;
+    if (encrypt_flag)
+      cc += 3;
     cp = args = (char *) malloc(cc);
+    if (encrypt_flag) {
+      strcpy(args, "-x ");
+      cp += 3;
+    }
     for (ap = argv; *ap; ap++) {
 	(void) strcpy(cp, *ap);
 	while (*cp)
@@ -321,7 +334,7 @@ main(argc, argv0)
 		  pwd->pw_name,
 		  user ? user : pwd->pw_name,
 		  args, &rfd2, "host", krb_realm,
-		  0,		/* No need for returned credentials */
+		  &cred,
 		  0,           /* No need for sequence number */
 		  0,           /* No need for server seq # */
 		  (struct sockaddr_in *) 0,
@@ -333,6 +346,16 @@ main(argc, argv0)
 		"%s: kcmd to host %s failed - %s\n",argv0[0], host,
 		error_message(status));
 	try_normal(argv0);
+    }
+
+    /* Setup for des_read and write */
+    desinbuf.data = des_inbuf;
+    desoutbuf.data = des_outbuf;
+    krb5_use_keytype(&eblock,cred->keyblock.keytype);
+    if (status = krb5_process_key(&eblock,&cred->keyblock)) {
+        fprintf(stderr, "%s: Cannot process session key : %s.\n",
+                argv0, error_message(status));
+        exit(1);
     }
 #else /* !KERBEROS */
     rem = rcmd(&host, sp->s_port, pwd->pw_name,
@@ -393,8 +416,10 @@ main(argc, argv0)
 	    exit(1);
 	}
     }
-    ioctl(rfd2, FIONBIO, &one);
-    ioctl(rem, FIONBIO, &one);
+    if (!encrypt_flag) {
+	ioctl(rfd2, FIONBIO, &one);
+	ioctl(rem, FIONBIO, &one);
+    }
     if (nflag == 0 && pid == 0) {
 	char *bp;
 	int wc;
@@ -419,7 +444,7 @@ main(argc, argv0)
 	}
 	if (FD_ISSET(rem, &rembits) == 0)
 	  goto rewrite;
-	wc = write(rem, bp, cc);
+	wc = des_write(rem, bp, cc);
 	if (wc < 0) {
 	    if ((errno == EWOULDBLOCK) || (errno == EAGAIN))
 	      goto rewrite;
@@ -454,7 +479,7 @@ main(argc, argv0)
 	}
 	if (FD_ISSET(rfd2, &ready)) {
 	    errno = 0;
-	    cc = read(rfd2, buf, sizeof buf);
+	    cc = des_read(rfd2, buf, sizeof buf);
 	    if (cc <= 0) {
 		if ((errno != EWOULDBLOCK) && (errno != EAGAIN))
 		    FD_CLR(rfd2, &readfrom);
@@ -463,7 +488,7 @@ main(argc, argv0)
 	}
 	if (FD_ISSET(rem, &ready)) {
 	    errno = 0;
-	    cc = read(rem, buf, sizeof buf);
+	    cc = des_read(rem, buf, sizeof buf);
 	    if (cc <= 0) {
 		if ((errno != EWOULDBLOCK) && (errno != EAGAIN))
 		    FD_CLR(rem, &readfrom);
@@ -476,9 +501,9 @@ main(argc, argv0)
     exit(0);
   usage:
     fprintf(stderr,
-	    "usage: \trsh host [ -l login ] [ -n ] [ -f / -F] command\n");
+	    "usage: \trsh host [ -l login ] [ -n ] [ -x ] [ -f / -F] command\n");
     fprintf(stderr,
-	    "OR \trsh [ -l login ] [-n ] [ -f / -F ] host command\n");
+	    "OR \trsh [ -l login ] [-n ] [ -x ] [ -f / -F ] host command\n");
     exit(1);
 }
 
@@ -487,7 +512,7 @@ main(argc, argv0)
 krb5_sigtype sendsig(signo)
      char signo;
 {
-    (void) write(rfd2, &signo, 1);
+    (void) des_write(rfd2, &signo, 1);
 }
 
 
@@ -498,13 +523,15 @@ void try_normal(argv)
 {
     char *host;
     
+    if (encrypt_flag)
+	exit(1);
+
     /*
      * if we were invoked as 'rsh host mumble', strip off the rsh
      * from arglist.
      *
      * We always want to call the Berkeley rsh as 'host mumble'
      */
-    
     host = strrchr(argv[0], '/');
     if (host)
       host++;
@@ -520,5 +547,116 @@ void try_normal(argv)
     execv(UCB_RSH, argv);
     perror("exec");
     exit(1);
+}
+
+
+char storage[2*BUFSIZ];
+int nstored = 0;
+char *store_ptr = storage;
+
+int des_read(fd, buf, len)
+     int fd;
+     register char *buf;
+     int len;
+{
+    int nreturned = 0;
+    long net_len,rd_len;
+    int cc;
+    unsigned char len_buf[4];
+    
+    if (!encrypt_flag)
+      return(read(fd, buf, len));
+    
+    if (nstored >= len) {
+	memcpy(buf, store_ptr, len);
+	store_ptr += len;
+	nstored -= len;
+	return(len);
+    } else if (nstored) {
+	memcpy(buf, store_ptr, nstored);
+	nreturned += nstored;
+	buf += nstored;
+	len -= nstored;
+	nstored = 0;
+    }
+    
+    if ((cc = krb5_net_read(fd, len_buf, 4)) != 4) {
+	/* XXX can't read enough, pipe must have closed */
+	return(0);
+    }
+    rd_len =
+	((len_buf[0]<<24) | (len_buf[1]<<16) | (len_buf[2]<<8) | len_buf[3]);
+    net_len = krb5_encrypt_size(rd_len,eblock.crypto_entry);
+    if ((net_len <= 0) || (net_len > sizeof(des_inbuf))) {
+	/* preposterous length; assume out-of-sync; only
+	   recourse is to close connection, so return 0 */
+	fprintf(stderr,"Read size problem.\n");
+	return(0);
+    }
+    if ((cc = krb5_net_read(fd, desinbuf.data, net_len)) != net_len) {
+	/* pipe must have closed, return 0 */
+	fprintf(stderr, "Read error: length received %d != expected %d.\n",
+		cc, net_len);
+	return(0);
+    }
+    /* decrypt info */
+    if (cc = krb5_decrypt(desinbuf.data, (krb5_pointer) storage,
+			  net_len, &eblock, 0)) {
+	fprintf(stderr,"Cannot decrypt data from network\n");
+	fprintf(stderr,"eblock->key = %x\n", *((long *)eblock.key));
+	return(0);
+    }
+    store_ptr = storage;
+    nstored = rd_len;
+    if (nstored > len) {
+	memcpy(buf, store_ptr, len);
+	nreturned += len;
+	store_ptr += len;
+	nstored -= len;
+    } else {
+	memcpy(buf, store_ptr, nstored);
+	nreturned += nstored;
+	nstored = 0;
+    }
+    
+    return(nreturned);
+}
+
+
+
+int des_write(fd, buf, len)
+     int fd;
+     char *buf;
+     int len;
+{
+    unsigned char len_buf[4];
+    
+    if (!encrypt_flag)
+      return(write(fd, buf, len));
+    
+    desoutbuf.length = krb5_encrypt_size(len,eblock.crypto_entry);
+    if (desoutbuf.length > sizeof(des_outbuf)){
+	fprintf(stderr,"Write size problem.\n");
+	return(-1);
+    }
+    if (( krb5_encrypt((krb5_pointer)buf,
+		       desoutbuf.data,
+		       len,
+		       &eblock,
+		       0))){
+	fprintf(stderr,"Write encrypt problem.\n");
+	return(-1);
+    }
+    
+    len_buf[0] = (len & 0xff000000) >> 24;
+    len_buf[1] = (len & 0xff0000) >> 16;
+    len_buf[2] = (len & 0xff00) >> 8;
+    len_buf[3] = (len & 0xff);
+    (void) write(fd, len_buf, 4);
+    if (write(fd, desoutbuf.data,desoutbuf.length) != desoutbuf.length){
+	fprintf(stderr,"Could not write out all data.\n");
+	return(-1);
+    }
+    else return(len); 
 }
 #endif /* KERBEROS */

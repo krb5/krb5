@@ -1,5 +1,11 @@
 Mon Jan  2 12:35:18 1995  Richard Basch  (probe@tardis)
 
+	* krsh.c
+	* krshd.c
+	  	Added encrypted rsh support.
+		It still isn't entirely secure; as the command-line could
+		be spoofed by an active attack, but the data sharing is...
+
 	* krlogind.c
 	  	Ultrix doesn't have a fully functional POSIX termios.
 
