@@ -22,6 +22,8 @@ static char rcsid_extern_c[] =
 #include <krb5/kdb_dbm.h>
 
 /* real declarations of KDC's externs */
+krb5_rcache kdc_rcache;
+
 krb5_data empty_string = {0, ""};
 krb5_timestamp kdc_infinity = KRB5_INT32_MAX; /* XXX */
 
