@@ -21,6 +21,7 @@ static char rcsid_verify_mky_c[] =
 #include <krb5/krb5_err.h>
 #include <krb5/kdb5_err.h>
 #include <errno.h>
+#include <krb5/ext-proto.h>
 
 /*
  * Verify that the master key in *mkey matches the database entry
