@@ -16,7 +16,7 @@
 #ifndef __KRB5_KDB5__
 #define __KRB5_KDB5__
 
-typedef struct _krb5_kdb_principal {
+typedef struct _krb5_db_entry {
     krb5_principal principal;
     krb5_keyblock *key;
     krb5_kvno kvno;
@@ -27,7 +27,7 @@ typedef struct _krb5_kdb_principal {
     krb5_principal mod_name;
     krb5_timestamp mod_date;
     krb5_flags attributes;
-} krb5_kdb_principal;
+} krb5_db_entry;
 
 #define	KRB5_KDB_DISALLOW_POSTDATED	0x00000001
 #define	KRB5_KDB_DISALLOW_FORWARDABLE	0x00000002
@@ -41,37 +41,37 @@ typedef struct _krb5_kdb_principal {
 
 /* libkdb.spec */
 krb5_error_code krb5_db_set_name
-	PROTOTYPE((char *name ));
+	PROTOTYPE((char * ));
 krb5_error_code krb5_db_set_nonblocking
-	PROTOTYPE((krb5_boolean newmode,
-		   krb5_boolean *oldmode ));
+	PROTOTYPE((krb5_boolean,
+		   krb5_boolean * ));
 krb5_error_code krb5_db_init
 	PROTOTYPE((void ));
 krb5_error_code krb5_db_fini
 	PROTOTYPE((void ));
 krb5_error_code krb5_db_get_age
-	PROTOTYPE((char *db_name,
-		   krb5_timestamp *age ));
+	PROTOTYPE((char *,
+		   krb5_timestamp * ));
 krb5_error_code krb5_db_create
-	PROTOTYPE((char *db_name ));
+	PROTOTYPE((char * ));
 krb5_error_code krb5_db_rename
-	PROTOTYPE((char *from,
-		   char *to ));
+	PROTOTYPE((char *,
+		   char * ));
 krb5_error_code krb5_db_get_principal
-	PROTOTYPE((krb5_principal searchfor,
-		   krb5_kdb_principal *principal,
-		   int *nprincs,
-		   krb5_boolean *more ));
+	PROTOTYPE((krb5_principal ,
+		   krb5_db_entry *,
+		   int *,
+		   krb5_boolean * ));
 krb5_error_code krb5_db_free_principal
-	PROTOTYPE((krb5_kdb_principal *principal,
-		   int nprincs ));
+	PROTOTYPE((krb5_db_entry *,
+		   int  ));
 krb5_error_code krb5_db_put_principal
-	PROTOTYPE((krb5_kdb_principal *principal,
-		   int nprincs,
-		   int *nstored ));
+	PROTOTYPE((krb5_db_entry *,
+		   int ,
+		   int * ));
 krb5_error_code krb5_db_iterate
-	PROTOTYPE((krb5_error_code (*func ) PROTOTYPE((krb5_pointer,
-						       krb5_kdb_principal *)),
-		   krb5_pointer iterate_arg ));
+	PROTOTYPE((krb5_error_code (* ) PROTOTYPE((krb5_pointer,
+						   krb5_db_entry *)),
+		   krb5_pointer ));
 
 #endif /* __KRB5_KDB5__ */
