@@ -8,9 +8,11 @@
 
 	Version:	Technology:			Networking
 				Package:			Use with MacTCP 2.0.6 and the Universal
-									Interfaces 2.1b1	
+									Interfaces 2.1
 		
 	Change History (most recent first):
+		<4>	 2/21/96 	rrk		Typecast each instance of gDNRCodePtr so that
+								the selector is passed as a 32-bit value
 		<3>	 1/23/95	rrk  	implemented use of universal procptrs
 		 						Changed selector name HINFO to HXINFO
 		 						due to conflict of name in MacTCP header
@@ -51,8 +53,8 @@
 #include <Traps.h>
 #endif
 
-#ifndef __GESTALTEQU__
-#include <GestaltEqu.h>
+#ifndef __GESTALT__
+#include <Gestalt.h>
 #endif
 
 #ifndef __FOLDERS__
@@ -179,8 +181,8 @@ short SearchFolderForDNRP(long targetType, long targetCreator, short vRefNum, lo
 	fi.fileParam.ioVRefNum = vRefNum;
 	fi.fileParam.ioDirID = dirID;
 	fi.fileParam.ioFDirIndex = 1;
-	
-	while (PBHGetFInfo(&fi, false) == noErr) 
+
+	while (PBHGetFInfoSync(&fi) == noErr) 
 	{
 		/* scan system folder for driver resource files of specific type & creator */
 		if (fi.fileParam.ioFlFndrInfo.fdType == targetType &&
@@ -266,7 +268,7 @@ OSErr OpenResolver(char *fileName)
 	/* call open resolver */
 	// RRK modification 1/95 use CallOpenResolverProc define to call UPP
 	
-	rc = CallOpenResolverProc(gDNRCodePtr, OPENRESOLVER, fileName);
+	rc = CallOpenResolverProc((OpenResolverUPP)gDNRCodePtr, OPENRESOLVER, fileName);
 	if (rc != noErr) 
 	{
 		/* problem with open resolver, flush it */
@@ -289,7 +291,7 @@ OSErr CloseResolver(void)
 	// RRK modification 1/95 use CallCloseResolverProc define to call UPP
 	// (void) (*dnr)(CLOSERESOLVER);
 
-	CallCloseResolverProc(gDNRCodePtr, CLOSERESOLVER);
+	CallCloseResolverProc((CloseResolverUPP)gDNRCodePtr, CLOSERESOLVER);
 	
 	/* release the DNR resource package */
 	HUnlock(gDNRCodeHndl);
@@ -311,7 +313,7 @@ OSErr StrToAddr(char *hostName, struct hostInfo *rtnStruct,
 	// RRK modification 1/95 use CallStrToAddrProc define to call UPP
 	// return((*dnr)(STRTOADDR, hostName, rtnStruct, resultproc, userDataPtr));
 			
-	return (CallStrToAddrProc(gDNRCodePtr, STRTOADDR, hostName, rtnStruct, resultproc, userDataPtr));
+	return (CallStrToAddrProc((StrToAddrUPP)gDNRCodePtr, STRTOADDR, hostName, rtnStruct, resultproc, userDataPtr));
 }
 	
 OSErr AddrToStr(unsigned long addr, char *addrStr)
@@ -324,7 +326,7 @@ OSErr AddrToStr(unsigned long addr, char *addrStr)
 	// RRK modification 1/95 use CallAddrToStrProc define to call UPP
 	// (*dnr)(ADDRTOSTR, addr, addrStr);
 	
-	err = CallAddrToStrProc(gDNRCodePtr, ADDRTOSTR, addr, addrStr);
+	err = CallAddrToStrProc((AddrToStrUPP)gDNRCodePtr, ADDRTOSTR, addr, addrStr);
 	return(noErr);
 }
 	
@@ -338,7 +340,7 @@ OSErr EnumCache(EnumResultUPP resultproc, Ptr userDataPtr)
 	// RRK modification 1/95 use CallEnumCacheProc define to call UPP
 	// return((*dnr)(ENUMCACHE, resultproc, userDataPtr));
 
-	return (CallEnumCacheProc(gDNRCodePtr, ENUMCACHE, resultproc, userDataPtr));
+	return (CallEnumCacheProc((EnumCacheUPP)gDNRCodePtr, ENUMCACHE, resultproc, userDataPtr));
 }
 	
 	
@@ -352,7 +354,7 @@ OSErr AddrToName(unsigned long addr, struct hostInfo *rtnStruct,
 	// RRK modification 1/95 use CallAddrToNameProc define to call UPP
 	// return((*dnr)(ADDRTONAME, addr, rtnStruct, resultproc, userDataPtr));
 
-	return(CallAddrToNameProc(gDNRCodePtr, ADDRTONAME, addr, rtnStruct, resultproc, userDataPtr));
+	return(CallAddrToNameProc((AddrToNameUPP)gDNRCodePtr, ADDRTONAME, addr, rtnStruct, resultproc, userDataPtr));
 }
 
 
@@ -366,7 +368,7 @@ extern OSErr HInfo(char *hostName, struct returnRec *returnRecPtr,
 	// RRK modification 1/95 use CallHInfoProc define to call UPP
 	// return((*dnr)(HINFO, hostName, returnRecPtr, resultProc, userDataPtr));
 
-	return(CallHInfoProc(gDNRCodePtr, HXINFO, hostName, returnRecPtr, resultProc, userDataPtr));
+	return(CallHInfoProc((HInfoUPP)gDNRCodePtr, HXINFO, hostName, returnRecPtr, resultProc, userDataPtr));
 
 }
 	
@@ -380,8 +382,8 @@ extern OSErr MXInfo(char *hostName, struct returnRec *returnRecPtr,
 	// RRK modification 1/95 use CallHInfoProc define to call UPP
 	// return((*dnr)(MXINFO, hostName, returnRecPtr, resultProc, userDataPtr));
 
-	return(CallMXInfoProc(gDNRCodePtr, MXINFO, hostName, returnRecPtr, resultProc, userDataPtr));
+	return(CallMXInfoProc((MXInfoUPP)gDNRCodePtr, MXINFO, hostName, returnRecPtr, resultProc, userDataPtr));
 
 }	/* removed ; (causes syntax err in Think C 5.0 */
-
-#endif /* HAVE_MACSOCK_H */
+	
+#endif HAVE_MACSOCK_H
