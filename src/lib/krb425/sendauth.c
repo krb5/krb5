@@ -250,4 +250,4 @@ char *service;
 	return(cc);
     return(KSUCCESS);
 }
-#endif ATHENA_COMPAT
+#endif /* ATHENA_COMPAT */
