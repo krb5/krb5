@@ -231,6 +231,7 @@ typedef short			nlink_t;
 typedef unsigned long	uid_t;
 typedef unsigned long	gid_t;
 typedef long			off_t;
+
 #ifndef __MWERKS__
 struct stat
 {
@@ -248,9 +249,10 @@ struct stat
 	long		st_blksize;		/* Optimal blocksize */
 	long		st_blocks;		/* blocks allocated for file */
 };
-#endif
 
 int stat(const char *path, struct stat *buf);
+#endif
+
 int fstat(int fildes, struct stat *buf);
 
 #define EFBIG 1000

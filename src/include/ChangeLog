@@ -1,3 +1,9 @@
+Tue Nov 7 12:00:00 1995  John Rivlin <jrivlin@fusion.com>
+
+	* k5-int.h: Place stat declation inside #ifndef __MWERKS__ so
+		as not to conflict with the definition in the 
+		MetroWerks compiler.
+
 Tue Oct 24 17:31:36 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* k5-int.h: Manually defined PROVIDE_* for Macintosh and MS-DOS so
