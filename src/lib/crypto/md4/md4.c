@@ -8,9 +8,14 @@
  * md4.c from RFC1186
  *
  * $Log$
- * Revision 5.0  1990/11/07 14:12:04  jtkohl
- * Initial code from RFC
+ * Revision 5.1  1990/11/08 11:32:24  jtkohl
+ * change to copy onto stack to avoid modifying input in MDupdate
+ * add Kerberos byte-order detection
+ * some compilers will require the "L" qualifier on long constants.
  *
+ * Revision 5.0  90/11/07  14:12:04  jtkohl
+ * Initial code from RFC
+ * 
  */
 
 /*
@@ -47,29 +52,34 @@
 ** If the machine stores the least-significant byte of an int in the
 ** least-addressed byte (e.g., VAX and 8086), then LOWBYTEFIRST
 ** should be set to TRUE.  Otherwise (e.g., SUNS), LOWBYTEFIRST
-** should be set to FALSE.  Note that on machines with LOWBYTEFIRST
-** FALSE the routine MDupdate modifies has a side-effect on its input
-** array (the order of bytes in each word are reversed).  If this is
-** undesired a call to MDreverse(X) can reverse the bytes of X back
-** into order after each call to MDupdate.
+** should be set to FALSE.
 */
 #define TRUE  1
 #define FALSE 0
+#ifdef LSBFIRST
+#define LOWBYTEFIRST TRUE
+#endif
+#ifdef MSBFIRST
 #define LOWBYTEFIRST FALSE
+#endif
+#ifndef LOWBYTEFIRST
+ error: you must define MSBFIRST or LSBFIRST;
+#endif
 
 /* Compile-time includes
 */
 #include <stdio.h>
-#include "md4.h"
+#include <krb5/krb5.h>
+#include <krb5/rsa-md4.h>
 
 /* Compile-time declarations of MD4 "magic constants".
 */
-#define I0  0x67452301       /* Initial values for MD buffer */
-#define I1  0xefcdab89
-#define I2  0x98badcfe
-#define I3  0x10325476
-#define C2  013240474631     /* round 2 constant = sqrt(2) in octal */
-#define C3  015666365641     /* round 3 constant = sqrt(3) in octal */
+#define I0  0x67452301L       /* Initial values for MD buffer */
+#define I1  0xefcdab89L
+#define I2  0x98badcfeL
+#define I3  0x10325476L
+#define C2  013240474631L     /* round 2 constant = sqrt(2) in octal */
+#define C3  015666365641L     /* round 3 constant = sqrt(3) in octal */
 /* C2 and C3 are from Knuth, The Art of Programming, Volume 2
 ** (Seminumerical Algorithms), Second Edition (1981), Addison-Wesley.
 ** Table 2, page 660.
@@ -139,7 +149,8 @@ MDptr MDp;
 ** The macro revx reverses the byte-ordering of the next word of X.
 */
 #define revx { t = (*X << 16) | (*X >> 16); \
-     *X++ = ((t & 0xFF00FF00) >> 8) | ((t & 0x00FF00FF) << 8); }
+     *X++ = ((t & 0xFF00FF00L) >> 8) | ((t & 0x00FF00FFL) << 8); }
+void
 MDreverse(X)
 unsigned int *X;
 { register unsigned int t;
@@ -160,8 +171,12 @@ unsigned int *X;
 {
   register unsigned int tmp, A, B, C, D;
 #if LOWBYTEFIRST == FALSE
+  unsigned int Xtmp[16];
+  memcpy(Xtmp, X, sizeof(Xtmp));
+  X = Xtmp;
   MDreverse(X);
 #endif
+
   A = MDp->buffer[0];
   B = MDp->buffer[1];
   C = MDp->buffer[2];
