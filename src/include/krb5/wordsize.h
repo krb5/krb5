@@ -20,7 +20,11 @@
 #define __OK
 typedef	int	krb5_int16;
 typedef	long	krb5_int32;
+
 typedef	unsigned char	krb5_octet;
+typedef	unsigned char	krb5_ui_1;
+typedef	unsigned int	krb5_ui_2;
+typedef	unsigned long	krb5_ui_4;
 #endif
 
 #ifdef BITS32
@@ -28,6 +32,9 @@ typedef	unsigned char	krb5_octet;
 typedef	short	krb5_int16;
 typedef	int	krb5_int32;
 typedef	unsigned char	krb5_octet;
+typedef	unsigned char	krb5_ui_1;
+typedef	unsigned short	krb5_ui_2;
+typedef	unsigned int	krb5_ui_4;
 #endif
 
 #ifndef __OK
