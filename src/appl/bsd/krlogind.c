@@ -263,7 +263,7 @@ main(argc, argv)
      char **argv;
 {
     extern int opterr, optind;
-    char * optarg;
+    extern char * optarg;
     int on = 1, fromlen, ch, i;
     struct sockaddr_in from;
     char *options;
@@ -1053,7 +1053,8 @@ do_krb_login(host)
     /*  The kerberos authenticated request must pass ruserok also
 	if asked for. */
     
-    if (must_pass_rhosts || (!passed_krb && must_pass_one)) {
+    if (!must_pass_k5 &&
+	(must_pass_rhosts || (!passed_krb && must_pass_one))) {
 	/* Cannot check .rhosts unless connection from a privileged port. */
 	if (non_privileged) 
 	  fatal(netf, "Permission denied - Connection from bad port");
@@ -1071,7 +1072,7 @@ do_krb_login(host)
     
     if (ticket)
 	krb5_free_ticket(ticket);
-    fatal(netf, "User is not authorized to login to specified account.");
+    fatal(netf, "User is not authorized to login to specified account");
 }
 
 
