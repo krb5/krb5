@@ -1,5 +1,5 @@
 2002-02-28 Alexandra Ellwood <lxs@mit.edu>
-    * asn1_get.c; removed unused variable to reduce warnings
+    * asn1_get.c: removed unused variable to reduce warnings
 
 2001-10-29  Miro Jurisic  <meeroh@mit.edu>
 	* pullup from krb5-1-2 branch after krb5-1-2-2-bp
