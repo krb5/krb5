@@ -1,3 +1,15 @@
+Mon Feb 26 03:33:48 1996  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* configure.in: Call USE_ANAME
+
+Sun Feb 25 20:26:00 1996  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* telnetd.c: Use MAXDNAME not MAXHOSTNAMELEN; MAXHOSTNAMELEN is
+        only for gethostname() and sethostname() and has nothing to do
+        with domains.
+
+	* configure.in : Check for arpa/nameser.h for MAXDNAME
+
 Tue Feb 13 16:23:23 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* ext.h, utility.c (fatalperror, fatal): Add const to argument.

@@ -2,6 +2,7 @@ AC_INIT(telnetd.c)
 CONFIG_RULES
 AC_PROG_INSTALL
 AC_CHECK_LIB(util,main)
+USE_ANAME
 AC_CHECK_LIB(termcap,main,AC_DEFINE(TERMCAP)
 LIBS="$LIBS -ltermcap")
 AC_HEADER_CHECK(termios.h,AC_DEFINE(USE_TERMIO) ac_termio=1)
@@ -19,7 +20,7 @@ if test -z "$ac_sysv_termio"; then
 fi
 fi
 AC_HEADER_TIME
-AC_CHECK_HEADERS(string.h)
+AC_CHECK_HEADERS(string.h arpa/nameser.h)
 AC_CHECK_HEADERS(sys/time.h sys/tty.h)
 AC_HAVE_FUNCS(vhangup)
 AC_FUNC_CHECK(grantpt,AC_DEFINE(STREAMSPTY))

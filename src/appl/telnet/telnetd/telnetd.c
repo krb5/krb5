@@ -807,14 +807,17 @@ terminaltypeok(s)
 	return(0);
     return(1);
 }
+#if HAVE_ARPA_NAMESER_H
+#include <arpa/nameser.h>
+#endif
 
-#ifndef	MAXHOSTNAMELEN
-#define	MAXHOSTNAMELEN 64
-#endif	/* MAXHOSTNAMELEN */
+#ifndef MAXDNAME
+#define MAXDNAME 256 /*per the rfc*/
+#endif
 
 char *hostname;
-char host_name[MAXHOSTNAMELEN];
-char remote_host_name[MAXHOSTNAMELEN];
+char host_name[MAXDNAME];
+char remote_host_name[MAXDNAME];
 
 #ifndef	convex
 extern void telnet P((int, int));
