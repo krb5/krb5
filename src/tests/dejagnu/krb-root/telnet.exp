@@ -55,7 +55,7 @@ proc start_telnet_daemon { } {
     # we don't need to use inetd.  The 3023 is the port to listen at.
     # Note that tmppwd here is a shell variable, which is set in
     # setup_root_shell, not a TCL variable.
-    send -i $rlogin_spawn_id "$TELNETD -debug -t \$tmppwd/srvtab -R $REALMNAME -L $LOGINKRB5 -X KERBEROS_V4 3023 &\r"
+    send -i $rlogin_spawn_id "sh -c \"$TELNETD -debug -t \$tmppwd/srvtab -R $REALMNAME -L \\\r$LOGINKRB5 -X KERBEROS_V4 3023\" &\r"
     expect {
 	-i $rlogin_spawn_id 
 	-re "$ROOT_PROMPT" { }
@@ -140,16 +140,17 @@ proc telnet_test { } {
 
     # Start up our telnet connection.  We first try it without
     # authentication, so the daemon should prompt for a login.
-    spawn $TELNET $hostname -3023
+    spawn $TELNET -- $hostname -3023
+    set telnet_pid [exp_pid]
 
     expect_after {
 	timeout {
-	    fail $testname
+	    fail "$testname (timeout)"
 	    catch "expect_after"
 	    return
 	}
 	eof {
-	    fail $testname
+	    fail "$testname (eof)"
 	    catch "expect_after"
 	    return
 	}
@@ -198,6 +199,17 @@ proc telnet_test { } {
 
     expect_after
 
+# on hpux 10.x, the child telnet will hang in an ioctl().  This will
+# wait a while for an EOF, and kill the process if it doesn't exit by
+# itself.  The hang doesn't happen when telnet is run at the shell.
+
+    expect {
+	eof { }
+	timeout {
+	    stop_telnet_daemon
+	}
+    }
+
     if ![check_exit_status "exit status"] {
 	return
     }
@@ -210,11 +222,16 @@ proc telnet_test { } {
 
     # Try an authenticated connection.
     start_telnet_daemon
-    spawn $TELNET -a -k $REALMNAME $hostname -3023
+    spawn $TELNET -a -k $REALMNAME -- $hostname -3023
 
     expect_after {
 	timeout {
 	    fail "$testname (timeout)"
+	    catch "expect_after"
+	    return
+	}
+	"Connection closed by foreign host.\r" {
+	    fail "$testname (connection closed)"
 	    catch "expect_after"
 	    return
 	}
@@ -283,7 +300,7 @@ proc telnet_test { } {
 
     # Try an authenticated encrypted connection.
     start_telnet_daemon
-    spawn $TELNET -a -x -k $REALMNAME $hostname -3023
+    spawn $TELNET -a -x -k $REALMNAME -- $hostname -3023
 
     expect_after {
 	timeout {

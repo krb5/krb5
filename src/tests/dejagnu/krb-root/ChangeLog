@@ -1,3 +1,29 @@
+Fri Mar 29 01:34:47 1996  Marc Horowitz  <marc@mit.edu>
+
+	* telnet.exp (start_telnet_daemon) use sh -c around telnetd
+	invocation to avoid having the rlogin die when the first telnetd
+	exits.
+	(telnet_test) If telnet finishes (prints connection closed), but
+	doesnt exit by an expect timeout, then kill the telnet so the
+	tests can go on.
+
+Fri Mar 29 01:09:14 1996  Ken Raeburn  <raeburn@cygnus.com>
+
+	* rlogin.exp (rlogin_test): Make connection-closed patterns the
+ 	same, so the correct matching will happen when that message is
+ 	really expected.
+
+Thu Mar 28 18:17:31 1996  Ken Raeburn  <raeburn@cygnus.com>
+
+	* rlogin.exp (rlogin_test), telnet.exp (telnet_test): Handle
+	failures from closed connections.
+
+	* telnet.exp (telnet_test): Move -- before hostname.
+
+Thu Mar 28 16:37:36 1996  Mark Eichin  <eichin@cygnus.com>
+
+	* telnet.exp (telnet_test): use -- to end the getopt arguments.
+
 Tue Mar 19 10:03:01 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* telnet.exp: Put back in the encrypted telnet tests.

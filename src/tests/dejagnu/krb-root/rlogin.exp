@@ -54,8 +54,10 @@ proc start_rlogin_daemon { option } {
     # The -p argument tells it to accept a single connection, so we
     # don't need to use inetd.  The 3543 is the port to listen at.
     # Note that tmppwd here is a shell variable, which is set in
-    # setup_root_shell, not a TCL variable.
-    send -i $rlogin_spawn_id "$KRLOGIND -k -c -D 3543 -S \$tmppwd/srvtab -M $REALMNAME -L $LOGINKRB5 $option &\r"
+    # setup_root_shell, not a TCL variable.  The sh -c is to workaround
+    # the broken controlling tty handling in hpux, and shouldn't hurt
+    # anything else.
+    send -i $rlogin_spawn_id "sh -c \"$KRLOGIND -k -c -D 3543 -S \$tmppwd/srvtab -M $REALMNAME -L $LOGINKRB5 $option\" &\r"
     expect {
 	-i $rlogin_spawn_id 
 	-re "$ROOT_PROMPT" { }
@@ -147,6 +149,11 @@ proc rlogin_test { } {
 	    catch "expect_after"
 	    return
 	}
+	"onnection closed." {
+	    fail "$testname (connection closed)"
+	    catch "expect_after"
+	    return
+	}
 	eof {
 	    fail "$testname (eof)"
 	    catch "expect_after"
@@ -186,7 +193,7 @@ proc rlogin_test { } {
     expect -re "$SHELL_PROMPT"
     send "exit\r"
     expect {
-	"Connection closed.\r" {
+	"onnection closed." {
 	    pass $testname
 	}
     }
@@ -208,6 +215,11 @@ proc rlogin_test { } {
     expect_after {
 	timeout {
 	    fail "$testname (timeout)"
+	    catch "expect_after"
+	    return
+	}
+	"onnection closed" {
+	    fail "$testname (connection closed)"
 	    catch "expect_after"
 	    return
 	}
@@ -261,6 +273,9 @@ proc rlogin_test { } {
     send "~."
     expect {
 	"Closed connection.\r" {
+	    pass $testname
+	}
+	"onnection closed" {
 	    pass $testname
 	}
     }
