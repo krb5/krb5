@@ -80,11 +80,15 @@ krb5_get_cred_from_kdc (ccache, cred, tgts)
      * look for ticket with:
      * client == cred->client,
      * server == "krbtgt/realmof(cred->server)@realmof(cred->client)"
+     *
+     * (actually, the ticket may be issued by some other intermediate
+     *  realm's KDC; so we use KRB5_TC_MATCH_SRV_NAMEONLY below)
      */
 
     /*
-     * XXX we're sharing some substructure here, which is
-     * probably not safe...
+     * we're sharing some substructure here, which is dangerous.
+     * Be sure that if you muck with things here that tgtq.* doesn't share
+     * any substructure before you deallocate/clean up/whatever.
      */
     memset((char *)&tgtq, 0, sizeof(tgtq));
     tgtq.client = cred->client;
@@ -96,7 +100,7 @@ krb5_get_cred_from_kdc (ccache, cred, tgts)
 
     /* try to fetch it directly */
     retval = krb5_cc_retrieve_cred (ccache,
-				    0,	/* default is client & server */
+				    KRB5_TC_MATCH_SRV_NAMEONLY,
 				    &tgtq,
 				    &tgt);
 
@@ -193,7 +197,7 @@ krb5_get_cred_from_kdc (ccache, cred, tgts)
 	    if (!next_server) {
 		/* what we got back wasn't in the list! */
 		krb5_free_realm_tree(tgs_list);
-		retval = KRB5_KDCREP_MODIFIED; /* XXX? */
+		retval = KRB5_KDCREP_MODIFIED;
 		goto out;
 	    }
 							   
@@ -217,11 +221,18 @@ krb5_get_cred_from_kdc (ccache, cred, tgts)
     }
     etype = krb5_keytype_array[tgt.keyblock.keytype]->system->proto_enctype;
 
-    retval = krb5_get_cred_via_tgt(&tgt,
-				   flags2options(tgt.ticket_flags),
-				   etype,
-				   krb5_kdc_req_sumtype,
-				   cred);
+    if (cred->second_ticket.length)
+	retval = krb5_get_cred_via_2tgt(&tgt,
+				       KDC_OPT_ENC_TKT_IN_SKEY | flags2options(tgt.ticket_flags),
+				       etype, krb5_kdc_req_sumtype, cred);
+
+    else
+	retval = krb5_get_cred_via_tgt(&tgt,
+				       flags2options(tgt.ticket_flags),
+				       etype,
+				       krb5_kdc_req_sumtype,
+				       cred);
+    
     if (!returning_tgt)
 	krb5_free_cred_contents(&tgt);
 out:
