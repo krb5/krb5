@@ -1,3 +1,9 @@
+2001-10-20  Ken Raeburn  <raeburn@mit.edu>
+
+	* gssapiP_generic.h (g_*): For every g_ function declared here,
+	first define the name as a macro using a gssint_ prefix to avoid
+	conflicting with glib function names.
+
 2001-10-09  Ken Raeburn  <raeburn@mit.edu>
 
 	* gssapi.hin, gssapiP_generic.h: Make prototypes unconditional.

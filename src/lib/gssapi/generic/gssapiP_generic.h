@@ -97,6 +97,38 @@
 
 /** helper functions **/
 
+/* hide names from applications, especially glib applications */
+#define	g_set_init		gssint_g_set_init
+#define	g_set_destroy		gssint_g_set_destroy
+#define	g_set_entry_add		gssint_g_set_entry_add
+#define	g_set_entry_delete	gssint_g_set_entry_delete
+#define	g_set_entry_get		gssint_g_set_entry_get
+#define	g_save_name		gssint_g_save_name
+#define	g_save_cred_id		gssint_g_save_cred_id
+#define	g_save_ctx_id		gssint_g_save_ctx_id
+#define	g_validate_name		gssint_g_validate_name
+#define	g_validate_cred_id	gssint_g_validate_cred_id
+#define	g_validate_ctx_id	gssint_g_validate_ctx_id
+#define	g_delete_name		gssint_g_delete_name
+#define	g_delete_cred_id	gssint_g_delete_cred_id
+#define	g_delete_ctx_id		gssint_g_delete_ctx_id
+#define	g_make_string_buffer	gssint_g_make_string_buffer
+#define	g_copy_OID_set		gssint_g_copy_OID_set
+#define	g_token_size		gssint_g_token_size
+#define	g_make_token_header	gssint_g_make_token_header
+#define	g_verify_token_header	gssint_g_verify_token_header
+#define	g_display_major_status	gssint_g_display_major_status
+#define	g_display_com_err_status gssint_g_display_com_err_status
+#define	g_order_init		gssint_g_order_init
+#define	g_order_check		gssint_g_order_check
+#define	g_order_free		gssint_g_order_free
+#define	g_queue_size		gssint_g_queue_size
+#define	g_queue_externalize	gssint_g_queue_externalize
+#define	g_queue_internalize	gssint_g_queue_internalize
+#define	g_canonicalize_host	gssint_g_canonicalize_host
+#define	g_local_host_name	gssint_g_local_host_name
+#define	g_strdup		gssint_g_strdup
+
 typedef struct _g_set *g_set;
 
 int g_set_init (g_set *s);
