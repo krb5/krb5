@@ -33,11 +33,16 @@
    decrypted keys in the database */
 
 typedef struct _krb5_encrypted_keyblock {
+    krb5_magic magic;
     krb5_keytype keytype;
     int length;
     krb5_octet *contents;
 } krb5_encrypted_keyblock;
 
+/*
+ * Note --- this structure cannot be modified without changing the
+ * database version number in libkdb.a
+ */
 typedef struct _krb5_db_entry {
     krb5_principal principal;
     krb5_encrypted_keyblock key;

@@ -53,7 +53,10 @@ typedef krb5_int32	krb5_timestamp;
 typedef	krb5_int32	krb5_error_code;
 typedef krb5_int32	krb5_deltat;
 
+typedef krb5_error_code	krb5_magic;
+
 typedef struct _krb5_data {
+    krb5_magic magic;
     int length;
     char *data;
 } krb5_data;
@@ -103,6 +106,7 @@ typedef char const * krb5_const_pointer;
 #endif
 
 typedef struct krb5_principal_data {
+    krb5_magic magic;
     krb5_data realm;
     krb5_data *data;		/* An array of strings */
     krb5_int32 length;

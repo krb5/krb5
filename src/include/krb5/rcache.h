@@ -29,11 +29,13 @@
 #define KRB5_RCACHE__
 
 typedef struct krb5_rc_st {
+    krb5_magic magic;
     struct _krb5_rc_ops *ops;
     krb5_pointer data;
 } *krb5_rcache;
 
 typedef struct _krb5_donot_replay {
+    krb5_magic magic;
     char *server;			/* null-terminated */
     char *client;			/* null-terminated */
     krb5_int32 cusec;
@@ -41,6 +43,7 @@ typedef struct _krb5_donot_replay {
 } krb5_donot_replay;
 
 typedef struct _krb5_rc_ops {
+    krb5_magic magic;
     char *type;
     krb5_error_code (*init)NPROTOTYPE((krb5_rcache,krb5_deltat)); /* create */
     krb5_error_code (*recover)NPROTOTYPE((krb5_rcache)); /* open */

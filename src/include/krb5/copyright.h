@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 1989-1992 by the Massachusetts Institute of Technology,
+ * Copyright (C) 1989-1994 by the Massachusetts Institute of Technology,
  * Cambridge, MA, USA.  All Rights Reserved.
  * 
  * This software is being provided to you, the LICENSEE, by the 

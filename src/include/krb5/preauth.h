@@ -42,10 +42,11 @@ typedef krb5_error_code (krb5_preauth_verify_proc)
 	       krb5_data *data));
 
 typedef struct _krb5_preauth_ops {
-        int     type;
-	int	flags;
-	krb5_preauth_obtain_proc	*obtain;
-	krb5_preauth_verify_proc	*verify;
+    krb5_magic magic;
+    int     type;
+    int	flags;
+    krb5_preauth_obtain_proc	*obtain;
+    krb5_preauth_verify_proc	*verify;
 } krb5_preauth_ops;
 
 /*

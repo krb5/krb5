@@ -35,6 +35,7 @@
 typedef krb5_pointer krb5_kt_cursor;	/* XXX */
 
 typedef struct krb5_keytab_entry_st {
+    krb5_magic magic;
     krb5_principal principal;	/* principal of this key */
     krb5_timestamp timestamp;   /* time entry written to keytable */
     krb5_kvno vno;		/* key version number */
@@ -43,8 +44,9 @@ typedef struct krb5_keytab_entry_st {
 
 
 typedef struct _krb5_kt {
-	struct _krb5_kt_ops *ops;
-	krb5_pointer data;
+    krb5_magic magic;
+    struct _krb5_kt_ops *ops;
+    krb5_pointer data;
 } *krb5_keytab;
 
 
@@ -52,30 +54,31 @@ typedef struct _krb5_kt {
 #include <krb5/widen.h>
 
 typedef struct _krb5_kt_ops {
-	char *prefix;
-        /* routines always present */
-	krb5_error_code (*resolve) NPROTOTYPE((char *,
-					      krb5_keytab *));
-	krb5_error_code (*get_name) NPROTOTYPE((krb5_keytab,
-					       char *,
-					       int));
-	krb5_error_code (*close) NPROTOTYPE((krb5_keytab));
-	krb5_error_code (*get) NPROTOTYPE((krb5_keytab,
-					  krb5_principal,
-					  krb5_kvno,
+    krb5_magic magic;
+    char *prefix;
+    /* routines always present */
+    krb5_error_code (*resolve) NPROTOTYPE((char *,
+					   krb5_keytab *));
+    krb5_error_code (*get_name) NPROTOTYPE((krb5_keytab,
+					    char *,
+					    int));
+    krb5_error_code (*close) NPROTOTYPE((krb5_keytab));
+    krb5_error_code (*get) NPROTOTYPE((krb5_keytab,
+				       krb5_principal,
+				       krb5_kvno,
+				       krb5_keytab_entry *));
+    krb5_error_code (*start_seq_get) NPROTOTYPE((krb5_keytab,
+						 krb5_kt_cursor *));	
+    krb5_error_code (*get_next) NPROTOTYPE((krb5_keytab,
+					    krb5_keytab_entry *,
+					    krb5_kt_cursor *));
+    krb5_error_code (*end_get) NPROTOTYPE((krb5_keytab,
+					   krb5_kt_cursor *));
+    /* routines to be included on extended version (write routines) */
+    krb5_error_code (*add) NPROTOTYPE((krb5_keytab,
+				       krb5_keytab_entry *));
+    krb5_error_code (*remove) NPROTOTYPE((krb5_keytab,
 					  krb5_keytab_entry *));
-	krb5_error_code (*start_seq_get) NPROTOTYPE((krb5_keytab,
-						    krb5_kt_cursor *));	
-	krb5_error_code (*get_next) NPROTOTYPE((krb5_keytab,
-					       krb5_keytab_entry *,
-					       krb5_kt_cursor *));
-	krb5_error_code (*end_get) NPROTOTYPE((krb5_keytab,
-					      krb5_kt_cursor *));
-	/* routines to be included on extended version (write routines) */
-	krb5_error_code (*add) NPROTOTYPE((krb5_keytab,
-					  krb5_keytab_entry *));
-	krb5_error_code (*remove) NPROTOTYPE((krb5_keytab,
-					     krb5_keytab_entry *));
 } krb5_kt_ops;
 
 /* and back to narrow */

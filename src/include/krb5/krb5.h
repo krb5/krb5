@@ -55,6 +55,7 @@ typedef struct _krb5_ticket_times {
 
 /* structure for auth data */
 typedef struct _krb5_authdata {
+    krb5_magic magic;
     krb5_authdatatype ad_type;
     int length;
     krb5_octet *contents;
@@ -62,11 +63,13 @@ typedef struct _krb5_authdata {
 
 /* structure for transited encoding */
 typedef struct _krb5_transited {
+    krb5_magic magic;
     krb5_octet tr_type;
     krb5_data tr_contents;
 } krb5_transited;
 
 typedef struct _krb5_enc_tkt_part {
+    krb5_magic magic;
     /* to-be-encrypted portion */
     krb5_flags flags;			/* flags */
     krb5_keyblock *session;		/* session key: includes keytype */
@@ -78,6 +81,7 @@ typedef struct _krb5_enc_tkt_part {
 } krb5_enc_tkt_part;
 
 typedef struct _krb5_ticket {
+    krb5_magic magic;
     /* cleartext portion */
     krb5_principal server;		/* server name/realm */
     krb5_enc_data enc_part;		/* encryption type, kvno, encrypted
@@ -88,6 +92,7 @@ typedef struct _krb5_ticket {
 
 /* the unencrypted version */
 typedef struct _krb5_authenticator {
+    krb5_magic magic;
     krb5_principal client;		/* client name/realm */
     krb5_checksum *checksum;		/* checksum, includes type, optional */
     krb5_int32 cusec;			/* client usec portion */
@@ -98,6 +103,7 @@ typedef struct _krb5_authenticator {
 } krb5_authenticator;
 
 typedef struct _krb5_tkt_authent {
+    krb5_magic magic;
     krb5_ticket *ticket;
     krb5_authenticator *authenticator;
     krb5_flags ap_options;
@@ -105,6 +111,7 @@ typedef struct _krb5_tkt_authent {
 
 /* credentials:  Ticket, session key, etc. */
 typedef struct _krb5_creds {
+    krb5_magic magic;
     krb5_principal client;		/* client's principal identifier */
     krb5_principal server;		/* server's principal identifier */
     krb5_keyblock keyblock;		/* session encryption key info */
@@ -122,18 +129,21 @@ typedef struct _krb5_creds {
 
 /* Last request fields */
 typedef struct _krb5_last_req_entry {
+    krb5_magic magic;
     krb5_octet lr_type;
     krb5_timestamp value;
 } krb5_last_req_entry;
 
 /* pre-authentication data */
 typedef struct _krb5_pa_data {
+    krb5_magic magic;
     krb5_ui_2  pa_type;
     int length;
     krb5_octet *contents;
 } krb5_pa_data;
 
 typedef struct _krb5_kdc_req {
+    krb5_magic magic;
     krb5_msgtype msg_type;		/* AS_REQ or TGS_REQ? */
     krb5_pa_data **padata;		/* e.g. encoded AP_REQ */
     /* real body */
@@ -155,6 +165,7 @@ typedef struct _krb5_kdc_req {
 } krb5_kdc_req;
 
 typedef struct _krb5_enc_kdc_rep_part {
+    krb5_magic magic;
     /* encrypted part: */
     krb5_msgtype msg_type;		/* krb5 message type */
     krb5_keyblock *session;		/* session key */
@@ -169,6 +180,7 @@ typedef struct _krb5_enc_kdc_rep_part {
 } krb5_enc_kdc_rep_part;
 
 typedef struct _krb5_kdc_rep {
+    krb5_magic magic;
     /* cleartext part: */
     krb5_msgtype msg_type;		/* AS_REP or KDC_REP? */
     krb5_pa_data **padata;		/* preauthentication data from KDC */
@@ -181,6 +193,7 @@ typedef struct _krb5_kdc_rep {
 
 /* error message structure */
 typedef struct _krb5_error {
+    krb5_magic magic;
     /* some of these may be meaningless in certain contexts */
     krb5_timestamp ctime;		/* client sec portion; optional */
     krb5_int32 cusec;			/* client usec portion; optional */
@@ -195,16 +208,19 @@ typedef struct _krb5_error {
 } krb5_error;
 
 typedef struct _krb5_ap_req {
+    krb5_magic magic;
     krb5_flags ap_options;		/* requested options */
     krb5_ticket *ticket;		/* ticket */
     krb5_enc_data authenticator;	/* authenticator (already encrypted) */
 } krb5_ap_req;
 
 typedef struct _krb5_ap_rep {
+    krb5_magic magic;
     krb5_enc_data enc_part;
 } krb5_ap_rep;
 
 typedef struct _krb5_ap_rep_enc_part {
+    krb5_magic magic;
     krb5_timestamp ctime;		/* client time, seconds portion */
     krb5_int32 cusec;			/* client time, microseconds portion */
     krb5_keyblock *subkey;		/* true session key, optional */
@@ -212,11 +228,13 @@ typedef struct _krb5_ap_rep_enc_part {
 } krb5_ap_rep_enc_part;
 
 typedef struct _krb5_response {
+    krb5_magic magic;
     krb5_octet message_type;
     krb5_data response;
 } krb5_response;
 
 typedef struct _krb5_safe {
+    krb5_magic magic;
     krb5_data user_data;		/* user data */
     krb5_timestamp timestamp;		/* client time, optional */
     krb5_int32 usec;			/* microsecond portion of time,
@@ -228,10 +246,12 @@ typedef struct _krb5_safe {
 } krb5_safe;
 
 typedef struct _krb5_priv {
+    krb5_magic magic;
     krb5_enc_data enc_part;		/* encrypted part */
 } krb5_priv;
 
 typedef struct _krb5_priv_enc_part {
+    krb5_magic magic;
     krb5_data user_data;		/* user data */
     krb5_timestamp timestamp;		/* client time, optional */
     krb5_int32 usec;			/* microsecond portion of time, opt. */
@@ -241,11 +261,13 @@ typedef struct _krb5_priv_enc_part {
 } krb5_priv_enc_part;
 
 typedef struct _krb5_cred {
+    krb5_magic magic;
     krb5_ticket **tickets;		/* tickets */
     krb5_enc_data enc_part;		/* encrypted part */
 } krb5_cred;
 
 typedef struct _krb5_cred_info {
+    krb5_magic magic;
     krb5_keyblock* session;             /* session key used to encrypt */
 					/* ticket */
     krb5_principal client;              /* client name/realm, optional */
@@ -257,6 +279,7 @@ typedef struct _krb5_cred_info {
 } krb5_cred_info;
 
 typedef struct _krb5_cred_enc_part {
+    krb5_magic magic;
     krb5_int32 nonce;                   /* nonce, optional */
     krb5_timestamp timestamp;           /* client time */
     krb5_int32 usec;                    /* microsecond portion of time */
@@ -275,11 +298,13 @@ typedef struct _krb5_cred_enc_part {
 
 /* Sandia password generation structures */
 typedef struct _passwd_phrase_element {
+    krb5_magic magic;
     krb5_data *passwd;
     krb5_data *phrase;
 } passwd_phrase_element;
 
 typedef struct _krb5_pwd_data {
+    krb5_magic magic;
     int sequence_count;
     passwd_phrase_element **element;
 } krb5_pwd_data;
