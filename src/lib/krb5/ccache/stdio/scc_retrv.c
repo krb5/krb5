@@ -179,7 +179,7 @@ krb5_scc_retrieve(id, whichfields, mcreds, creds)
 	       authdata_match (mcreds->authdata, fetchcreds.authdata))
 	      &&
 	      (! set(KRB5_TC_MATCH_2ND_TKT) ||
-	       data_match (mcreds->second_ticket, fetchcreds.second_ticket))
+	       data_match (&mcreds->second_ticket, &fetchcreds.second_ticket))
 	      )
 	  {
 	       krb5_scc_end_seq_get(id, &cursor);
