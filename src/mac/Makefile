@@ -874,28 +874,35 @@ krb5-globals-data-library Ä {krb5-globals-data-library-output-files}
 ###			Autogenerating classic 68K glue files
 ##############################################################################################################
 
-classic-glue-generation-script = {root-folder}CFMGlue.pl
+classic-glue-generation-script 						= {root-folder}mac:CFMGlue.pl
+gss-library-glue-output-folder						= {root-folder}:GSSLib:ClassicGlue:
+krb5-library-glue-output-folder						= {root-folder}:Kerberos5Lib:ClassicGlue:
+
+gss-library-glue-output								= {gss-library-glue-output-folder}GSSLib.glue.c
+krb5-library-glue-output							= {krb5-library-glue-output-folder}Kerberos5Lib.glue.c
 
 classic-glue-output = ¶
-	{root-folder}K5.CFMglue.c ¶
-	{root-folder}GSS.CFMglue.c
+	{gss-library-glue-output} ¶
+	{krb5-library-glue-output}
 
 glue Ä {classic-glue-output}
 
-glue-gss Ä {root-folder}K5.CFMglue.c
-glue-krb5 Ä {root-folder}GSS.CFMglue.c
+glue-gss Ä {gss-library-glue-output}
+glue-krb5 Ä {krb5-library-glue-output}
 
-{root-folder}mac:K5.CFMglue.c Ä {root-folder}mac:K5.CFMglue.cin {root-folder}mac:K5.CFMglue.proto.h ¶
+{krb5-library-glue-output} Ä {root-folder}mac:K5.CFMglue.cin {root-folder}mac:K5.CFMglue.proto.h ¶
 	{root-folder}mac:CFMglue.c {root-folder}mac:K5.moreCFMglue.cin {classic-glue-generation-script}
+	{create-folder} {gss-library-glue-output-folder}
 	perl {classic-glue-generation-script} < {root-folder}mac:K5.CFMglue.proto.h > {root-folder}mac:K5.CFMglue.c
 	Catenate {root-folder}mac:K5.CFMglue.cin {root-folder}mac:CFMglue.c {root-folder}mac:K5.CFMglue.c ¶
-	{root-folder}mac:K5.moreCFMglue.cin | Catenate > {root-folder}mac:K5.CFMglue.c
+	{root-folder}mac:K5.moreCFMglue.cin | Catenate > {krb5-library-glue-output}
 
-{root-folder}mac:GSS.CFMglue.c Ä {root-folder}mac:GSS.CFMglue.cin {root-folder}mac:GSS.CFMglue.proto.h ¶
+{gss-library-glue-output} Ä {root-folder}mac:GSS.CFMglue.cin {root-folder}mac:GSS.CFMglue.proto.h ¶
 	{root-folder}mac:CFMglue.c {root-folder}mac:GSS.moreCFMglue.cin {classic-glue-generation-script}
+	{create-folder} {krb5-library-glue-output-folder}
 	perl {classic-glue-generation-script} < {root-folder}mac:GSS.CFMglue.proto.h > {root-folder}mac:GSS.CFMglue.c
 	Catenate {root-folder}mac:GSS.CFMglue.cin {root-folder}mac:CFMglue.c {root-folder}mac:GSS.CFMglue.c ¶
-	{root-folder}mac:GSS.moreCFMglue.cin | Catenate > {root-folder}mac:GSS.CFMglue.c
+	{root-folder}mac:GSS.moreCFMglue.cin | Catenate > {gss-library-glue-output}
 
 ##############################################################################################################
 ###			Building the library files from multiple fragments
