@@ -1,3 +1,7 @@
+Wed Jul 24 00:27:59 1996  Sam Hartman  <hartmans@mit.edu>
+
+	* configure.in: Don't replace setenv as it isn't used. 
+
 Thu Jul 25 12:11:49 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* kadmin.c (quit): Return zero so that we return the proper exit
@@ -13,6 +17,7 @@ Wed Jul 24 14:18:13 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* kadmin.c (kadmin_addprinc, kadmin_getprinc, kadmin_modprinc):
 		   Zero out structures before passing to rpc code.
+
 
 Tue Jul 23 17:02:04 1996  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
 

@@ -7,7 +7,7 @@ AC_HAVE_HEADERS(unistd.h sys/timeb.h alloca.h)
 AC_HAVE_FUNCS(ftime timezone)
 AC_CHECK_LIB(ndbm,main)
 AC_CHECK_LIB(dbm,main)
-AC_REPLACE_FUNCS([setenv memmove strftime])
+AC_REPLACE_FUNCS([memmove strftime])
 KRB_INCLUDE
 USE_KADMCLNT_LIBRARY
 USE_GSSAPI_LIBRARY
