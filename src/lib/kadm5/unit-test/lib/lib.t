@@ -25,9 +25,9 @@ proc lib_start_api {} {
 	    error "$test: unexpected failure in init"
 	    return
 	}
-	puts stdout "--- restarted api ($lib_pid) for lib"
+	verbose "+++ restarted api ($lib_pid) for lib"
     } else {
-	puts stdout "+++ api $lib_pid already running for lib"
+	verbose "+++ api $lib_pid already running for lib"
     }	
 }
 
