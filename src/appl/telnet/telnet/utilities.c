@@ -134,7 +134,6 @@ Dump(direction, buffer, length)
 #   define min(x,y)	((x<y)? x:y)
     unsigned char *pThis;
     int offset;
-    extern pettydump;
 
     offset = 0;
 
@@ -819,7 +818,6 @@ printsub(direction, pointer, length)
 			    break;
 
 			default:
-			def_case:
 			    if (isprint(pointer[i]) && pointer[i] != '"') {
 				if (noquote) {
 				    putc('"', NetTrace);

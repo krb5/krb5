@@ -50,6 +50,11 @@ static char sccsid[] = "@(#)commands.c	8.1 (Berkeley) 6/6/93";
 #include <fcntl.h>
 #endif	/* CRAY */
 
+#include <stdio.h>
+#include <string.h>
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 #include <signal.h>
 #include <netdb.h>
 #include <ctype.h>
@@ -293,7 +298,6 @@ sendcmd(argc, argv)
 {
     int count;		/* how many bytes we are going to need to send */
     int i;
-    int question = 0;	/* was at least one argument a question */
     struct sendlist *s;	/* pointer to current command */
     int success = 0;
     int needconnect = 0;
@@ -1089,6 +1093,7 @@ dokludgemode()
     send_wont(TELOPT_LINEMODE, 1);
     send_dont(TELOPT_SGA, 1);
     send_dont(TELOPT_ECHO, 1);
+    return 1;			/* I'm guessing here -- eichin -- XXX */
 }
 #endif
 
@@ -1140,12 +1145,14 @@ dolmmode(bit, on)
 
     int
 setmode(bit)
+    int bit;
 {
     return dolmmode(bit, 1);
 }
 
     int
 clearmode(bit)
+    int bit;
 {
     return dolmmode(bit, 0);
 }
@@ -1840,7 +1847,7 @@ env_default(init, welldefined)
 
 	if (init) {
 		nep = &envlisthead;
-		return;
+		return NULL;	/* guessing here too -- eichin -- XXX */
 	}
 	if (nep) {
 		while (nep = nep->next) {
