@@ -763,10 +763,10 @@ AC_ARG_WITH([shared],
 ,
 withval=yes
 )dnl
-if test $withval = yes; then
+if test "$withval" = yes; then
 	AC_MSG_RESULT(Using shared libraries)
 	LDARGS="$krb5_cv_shlibs_ldflag -L[$](TOPLIBD) $LDARGS"
-	if test $krb5_cv_exe_need_dirs = yes; then
+	if test "$krb5_cv_exe_need_dirs" = yes; then
 		LDARGS="$LDARGS $krb5_cv_shlibs_dirhead [$](KRB5_SHLIBDIR) $krb5_cv_shlibs_dirhead `pwd`[$](S)[$](TOPLIBD)"
 	fi
 	SHLIB_TAIL_COMP=$krb5_cv_shlibs_tail_comp

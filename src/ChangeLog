@@ -1,3 +1,7 @@
+Thu Jun 15 21:59:22 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* aclocal.m4 (V5_USE_SHARED_LIB): Quote arguments to test in
+		case the values are blank.
 
 Thu Jun 15 18:15:54 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* aclocal.m4 - Separate K4 libraries; Separate library specification
