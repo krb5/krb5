@@ -84,4 +84,9 @@ fi
 if $verbose ; then 
 	echo $autoreconf $autoreconfoptions -l $localdir --verbose $force 
 fi
-$autoreconf $autoreconfoptions  -l $localdir --verbose $force 
+$autoreconf $autoreconfoptions  -l $localdir --verbose $force
+if test $? = 0 ; then
+    if test ! -d include/krb5/autoconf.stmp ; then
+	cp /dev/null include/krb5/autoconf.stmp
+    fi
+fi

@@ -1,3 +1,8 @@
+2002-07-17  Ken Raeburn  <raeburn@mit.edu>
+
+	* reconf: Create include/krb5/autoconf.stmp on success if it
+	didn't already exist.
+
 2002-07-05  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (SLIBSH): Use vertical-bar instead of comma for
