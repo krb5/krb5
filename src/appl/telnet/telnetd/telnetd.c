@@ -974,7 +974,7 @@ pty_init();
 	 */
 	*user_name = 0;
 	level = getterminaltype(user_name);
-	setenv("TERM", terminaltype ? terminaltype : "network", 1);
+	setenv("TERM", *terminaltype ? terminaltype : "network", 1);
 
 	/*
 	 * Start up the login process on the slave side of the terminal
