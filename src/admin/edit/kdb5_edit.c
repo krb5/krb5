@@ -133,6 +133,7 @@ char *kdb5_edit_Init(argc, argv)
 	switch(optchar) {
         case 'P':		/* Only used for testing!!! */
 	    mkey_password = optarg;
+	    manual_mkey = TRUE;
 	    break;
 	case 'd':			/* set db name */
 	    dbname = optarg;

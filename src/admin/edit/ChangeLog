@@ -1,3 +1,7 @@
+Fri Feb 23 18:44:10 1996  Mark Eichin  <eichin@cygnus.com>
+
+	* kdb5_edit.c (kdb5_edit_Init): set manual_mkey for testing with -P
+
 Wed Feb 14 09:52:18 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* kdb5_edit.c (enter_master_key, set_dbname_help): If master key
