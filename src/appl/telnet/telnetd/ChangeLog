@@ -1,3 +1,7 @@
+Tue Jun  4 00:27:09 1996  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in: Ezra's changes to allow compiling w/o krb4
+
 Wed May  1 21:14:45 1996  Ken Raeburn  <raeburn@cygnus.com>
 
 	* configure.in: Fix typo in Apr 16 HP-UX change.
