@@ -1119,10 +1119,11 @@ cleanup:
 }
 
 krb5_error_code
-krb5_db2_db_iterate (context, func, func_arg)
+krb5_db2_db_iterate_ext(context, func, func_arg, backwards, recursive)
     krb5_context context;
     krb5_error_code (*func) (krb5_pointer, krb5_db_entry *);
     krb5_pointer func_arg;
+    int backwards, recursive;
 {
     krb5_db2_context *db_ctx;
     DB *db;
@@ -1131,17 +1132,31 @@ krb5_db2_db_iterate (context, func, func_arg)
     krb5_db_entry entries;
     krb5_error_code retval;
     int dbret;
-    
+    void *cookie;
+
+    cookie = NULL;
     if (!k5db2_inited(context))
 	return KRB5_KDB_DBNOTINITED;
 
     db_ctx = (krb5_db2_context *) context->db_context;
     retval = krb5_db2_db_lock(context, KRB5_LOCKMODE_SHARED);
+
     if (retval)
 	return retval;
 
     db = db_ctx->db;
-    dbret = (*db->seq)(db, &key, &contents, R_FIRST);
+    if (recursive && db->type != DB_BTREE) {
+	(void)krb5_db2_db_unlock(context);
+	return KRB5_KDB_UK_RERROR; /* Not optimal, but close enough. */
+    }
+
+    if (!recursive) {
+	dbret = (*db->seq)(db, &key, &contents,
+			   backwards ? R_LAST : R_FIRST);
+    } else {
+	dbret = bt_rseq(db, &key, &contents, &cookie,
+			backwards ? R_LAST : R_FIRST);
+    }
     while (dbret == 0) {
 	contdata.data = contents.data;
 	contdata.length = contents.size;
@@ -1152,7 +1167,13 @@ krb5_db2_db_iterate (context, func, func_arg)
 	krb5_dbe_free_contents(context, &entries);
 	if (retval)
 	    break;
-	dbret = (*db->seq)(db, &key, &contents, R_NEXT);
+	if (!recursive) {
+	    dbret = (*db->seq)(db, &key, &contents,
+			       backwards ? R_PREV : R_NEXT);
+	} else {
+	    dbret = bt_rseq(db, &key, &contents, &cookie,
+			    backwards ? R_PREV : R_NEXT);
+	}
     }
     switch (dbret) {
     case 1:
@@ -1164,6 +1185,15 @@ krb5_db2_db_iterate (context, func, func_arg)
     }
     (void) krb5_db2_db_unlock(context);
     return retval;
+}
+
+krb5_error_code
+krb5_db2_db_iterate(context, func, func_arg)
+    krb5_context context;
+    krb5_error_code (*func) (krb5_pointer, krb5_db_entry *);
+    krb5_pointer func_arg;
+{
+    return krb5_db2_db_iterate_ext(context, func, func_arg, 0, 0);
 }
 
 krb5_boolean
