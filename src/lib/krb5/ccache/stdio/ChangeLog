@@ -1,3 +1,7 @@
+Tue Jul 11 19:22:17 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* scc-proto.h: Add prototype for krb5_scc_read.
+
 Wed Jun 14 23:55:24 1995  Theodore Y. Ts'o  (tytso@dcl)
 
 	* scc_errs.c (krb5_scc_interpret): Add #ifdef around switch

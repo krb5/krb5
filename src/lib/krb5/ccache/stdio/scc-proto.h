@@ -87,6 +87,11 @@ krb5_error_code krb5_scc_next_cred
 		   krb5_creds *creds ));
 
 /* scc_read.c */
+krb5_error_code krb5_scc_read
+	PROTOTYPE((krb5_context, 
+		   krb5_ccache id , 
+		   krb5_pointer buf,
+		   int len));
 krb5_error_code krb5_scc_read_principal 
 	PROTOTYPE((krb5_context, 
 		   krb5_ccache id , 
