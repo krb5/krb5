@@ -58,7 +58,10 @@ des_ecb_encrypt(clear, cipher, schedule, encrypt)
     int encrypt;		/* 0 ==> decrypt, else encrypt */
     register mit_des_key_schedule schedule; /* r11 */
 {
-	return (mit_des_ecb_encrypt(clear, cipher, schedule, encrypt));
+	return (mit_des_ecb_encrypt((mit_des_cblock *) clear,
+				    (mit_des_cblock *) cipher,
+				    schedule,
+				    encrypt));
 }
 
 

@@ -236,7 +236,7 @@ main(argc,argv)
     printf("\t\t\t68 37 88 49 9a 7c 05 f6\n");
 
     printf("ACTUAL CBC\n\tclear \"%s\"\n",input);
-    in_length = strlen(input);
+    in_length = strlen((char *) input);
     des_cbc_encrypt(input,cipher_text,(long) in_length,KS,ivec,1);
     printf("\tciphertext = (low to high bytes)\n");
     for (i = 0; i <= 7; i++) {
@@ -262,7 +262,7 @@ main(argc,argv)
     printf("\tchecksum\t58 d2 e7 7e 86 06 27 33, ");
     printf("or some part thereof\n");
     input = clear_text2;
-    des_cbc_cksum(input,cipher_text,(long) strlen(input),KS,ivec,1);
+    des_cbc_cksum(input,cipher_text,(long) strlen((char *) input),KS,ivec,1);
     printf("ACTUAL CBC checksum\n");
     printf("\t\tencrypted cksum = (low to high bytes)\n\t\t");
     for (j = 0; j<=7; j++)
