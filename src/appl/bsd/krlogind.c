@@ -987,7 +987,8 @@ void protocol(f, p)
     int on = 1;
 #endif
     
-#if defined(TIOCPKT) && !defined(__svr4__) || defined(solaris20)
+#if defined(TIOCPKT) && !(defined(__svr4__) || defined(HAVE_STREAMS)) \
+	|| defined(solaris20)
     /* if system has TIOCPKT, try to turn it on. Some drivers
      * may not support it. Save flag for later. 
      */

@@ -1,3 +1,12 @@
+2001-05-25  Tom Yu  <tlyu@mit.edu>
+
+	* krlogind.c (protocol): Don't do TIOCPKT on systems with STREAMS
+	ptys, even if there is a TIOCPKT, since it may result in hangs on
+	some systems where BSD packet mode is (presumably) not implemented
+	properly, such as AIX 4.3.3.  Should get cleaned up at some later
+	point to actually I_PUSH "pckt" or equivalent and do translation
+	between STREAMS and BSD style packet mode.
+
 2001-05-10  Tom Yu  <tlyu@mit.edu>
 
 	* defines.h: Fix k4cmd prototype to match kcmd.c.
