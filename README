@@ -57,11 +57,32 @@ and logging in as "guest" with password "guest".
 Major changes in 1.4
 --------------------
 
-* [1349, 2578, 2601, 2606, 2613, 2743] Add implementation of the
-  RPCSEC_GSS authentication flavor to the RPC library.  Thanks to
-  Kevin Coffman and the CITI group at the University of Michigan.
+* [841] Merged Athena telnetd changes for creating a new option for
+  requiring encryption.
 
-* [in progress] Thread safety for krb5 libraries.
+* [1349, 2578, 2601, 2606, 2613, 2743, 2775, 2778] Add implementation
+  of the RPCSEC_GSS authentication flavor to the RPC library.  Thanks
+  to Kevin Coffman and the CITI group at the University of Michigan.
+
+* [2061] The kadmind4 backwards-compatibility admin server and the
+  v5passwdd backwards-compatibility password-changing server have been
+  removed.
+
+* [1303(inprogress), 2740, 2755, 2781, 2782] Thread safety for krb5
+  libraries.
+
+* [2410] Yarrow code now uses AES.
+
+* [2678] New client commands kcpytkt and kdeltkt for Windows.
+
+* [2688] New command mit2ms on Windows.
+
+* [2762] Merged Athena changes to allow ftpd to require encrypted
+  passwords.
+
+* [2587] Incorporate gss_krb5_set_allowable_enctypes() and
+  gss_krb5_export_lucid_sec_context(), which are needed for NFSv4,
+  from Kevin Coffman.
 
 Minor changes in 1.4
 --------------------
@@ -71,6 +92,189 @@ Please see
 http://krbdev.mit.edu/rt/NoAuth/krb5-1.4/fixed-1.4.html
 
 for a complete list.
+
+* [249] Install example config files.
+
+* [427] PATH environment variable won't be overwritten by login.krb5
+  if already set.
+
+* [696] Sample KDC propagation script fixed.
+
+* [868] Fixed search for res_search() and friends.
+
+* [927] Compilation on Tru64 now detects GNU linker and chooses
+  whether to use -oldstyle_liblookup accordingly.
+
+* [1044] port-sockets.h explicitly declares h_errno if the declaration
+  is missing.
+
+* [1210] KDC cleans up some per-listener state upon process
+  termination to avoid spurious memory leak indications.
+
+* [1335] The server side of the Horowitz password-change protocol now
+  checks for minimum password life.
+
+* [1345, 2730, 2757] patchlevel.h is now the master version file.
+
+* [1364] GNU sed is no longer required to make depend on Irix.
+
+* [1497] A memory leak in the krb5 context serializer has been fixed.
+
+* [1570] Some team procedures now documented.
+
+* [1588] Automatic rebuilding of configure scripts, etc. are only done
+  if --enable-maintainer-mode is passed to configure.
+
+* [1623] Memory management in the ftp client has been cleaned up.
+
+* [1724] DNS SRV record lookup support is unconditionally built on
+  Unix.
+
+* [1791] Replacement for daemon() is compiled separately each time it
+  is needed, rather than ending up in the krb5 library.
+
+* [1806] Default to building shared libraries on most platforms that
+  support them.
+
+* [1847] Fixed daemon() replacement to build on Tru64.
+
+* [1850] Fixed some 0 vs NULL issues.
+
+* [2066] AES-only configuration now tested in test suite.
+
+* [2219] Fixed memory leak in KDC preauth handling.
+
+* [2256] Use $(CC) rather than ld to build shared libs on Tru64 and
+  Irix.
+
+* [2276] Support for the non-standard enctype
+  ENCTYPE_LOCAL_DES3_HMAC_SHA1 has been removed.
+
+* [2285] Test suite checks TCP access to KDC.
+
+* [2295] Minor stylistic cleanup in gss-client.
+
+* [2296, 2370, 2424] krb5_get_init_creds() APIs avoid multiple queries
+  to master KDC.
+
+* [2379] Remove _XOPEN_EXTENDED hack previously used for HP-UX.
+
+* [2432] Only sanity-check setutent() API if utmpx.h is not present,
+  as this was preventing recent NetBSD from configuring.
+
+* [2525] kvno.exe installed on Windows.
+
+* [2529] Fix some internal type inconsistencies in gssapi library.
+
+* [2530] Fix KRB5_CALLCONV usage in krb5_cc_resolve().
+
+* [2537] Apply fix from John Hascall to make krb5_get_in_tkt()
+  emulation actually honor the lifetimes in the input credentials.
+
+* [2539] Create manpage for krb524d.
+
+* [2573] The rcache code no longer attempts to close a negative file
+  descriptor from a failed open.
+
+* [2591] The gssapi library now requires that the initiator's channel
+  bindings match those provided by the acceptor, if the acceptor
+  provides them at all.
+
+* [2592] Fix some HP-UX 11 compilation issues.
+
+* [2598] Fix some HP-UX 11 foreachaddr() issues.
+
+* [2600] gss_accept_sec_context() no longer leaks rcaches.
+
+* [2603] Clean up some issues relating to use of reserved namespace in
+  k5-platform.h.
+
+* [2614] Rewrite handling of whitespace in profile library to better
+  handle whitespace around tag names.
+
+* [2629] Fix double-negation of a preprocessor test in osconf.h.
+
+* [2637] krb5int_zap_data() uses SecureZeroMemory on Windows instead
+  of memset().
+
+* [2654] krb5_get_init_creds() checks for overflow/underflow on 32-bit
+  timestamps.
+
+* [2655] krb5_get_init_creds() no longer issues requests where the
+  renew_until time precedes the expiration time.
+
+* [2656] krb5_get_init_creds() supports ticket_lifetime libdefault.
+
+* [2657] Default ccache name is evaluated more lazily.
+
+* [2674] libkadm5 acl_init() API renamed to avoid conflict with MacOS
+  X acl API.
+
+* [2684, 2710, 2728] Use BIND 8 parsing API when available.
+
+* [2685] The profile library iterators no longer get confused when
+  modifications are made to the in-memory profile.
+
+* [2694] The krb5-config script now has a manpage.
+
+* [2704] New ccache API flag to request only information, not actual
+  credentials.
+
+* [2705] Support for upcoming read/write MSLSA ccache.
+
+* [2706] resolv.h is included when searching for res_search() and
+  friends, to account for symbol renaming.
+
+* [2715] The install-strip make target no longer attempts to strip
+  scripts.
+
+* [2718] Fix memory leak in arcfour string_to_key.  Reported by
+  Derrick Schommer.
+
+* [2719] Fix memory leak in rd_cred.c.  Reported by Derrick Schommer. 
+
+* [2725] Fix memory leak in mk_req_extended().  Reported by Derrick
+  Schommer.
+
+* [2729] Add some new version strings for Windows.
+
+* [2734] The ticket_lifetime libdefault now uses units of seconds by
+  default, if no units are provided.
+
+* [2741] The profile library's error tables aren't loaded on MacOS X.
+
+* [2750] Calls to the profile library which set values no longer fail
+  if the file is not writable.
+
+* [2751] The profile library has a new API to detect whether the
+  default profile is writable.
+
+* [2753] An initial C implementation of CCAPI has been done.
+
+* [2754] fake-addrinfo.h includes errno.h earlier.
+
+* [2756] The profile library calls stat() less frequently on files.
+
+* [2760, 2780] The keytab implementation checks for cases where
+  fopen() can return NULL without setting errno.  Reported by Roland
+  Dowdeswell.
+
+* [2770] com_err now creates valid prototypes for generated files.
+  Reported by Jeremy Allison.
+
+* [2772, 2797] The krb4 library now honors the dns_fallback libdefault
+  setting.
+
+* [2776, 2779] Solaris patches exist for the pty-close race condition
+  bug.  We check for these patches now checked, and don't apply the
+  priocntl hack if they are present.
+
+* [2783] ftpcmds.y unconditionally defines NBBY to 8.
+
+* [2793] locate_kdc.c can compile if KRB5_DNS_LOOKUP isn't defined,
+  though we removed the configure-time option for this.
+
+* [2795] Fixed some addrinfo problems that affected Irix.
 
 Copyright Notice and Legal Administrivia
 ----------------------------------------
@@ -247,8 +451,8 @@ src/lib/rpc has the following copyright:
   NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-Acknowledgements
-----------------
+Acknowledgments
+---------------
 
 Appreciation Time!!!!  There are far too many people to try to thank
 them all; many people have contributed to the development of Kerberos
@@ -257,6 +461,8 @@ V5.  This is only a partial listing....
 Thanks to Kevin Coffman and the CITI group at the University of
 Michigan for providing patches for implementing RPCSEC_GSS
 authentication in the RPC library.
+
+Thanks to Derrick Schommer for reporting multiple memory leaks.
 
 Thanks to Quanah Gibson-Mount of Stanford University for helping
 exercise the thread support code.
