@@ -82,45 +82,44 @@ krb5_fcc_read_principal(id, princ)
    krb5_ccache id;
    krb5_principal *princ;
 {
-     krb5_error_code kret;
-     krb5_int32 length;
-     int i;
+    krb5_error_code kret;
+    register krb5_principal tmpprinc;
+    krb5_int32 length;
+    int i;
 
-     *princ = 0;
+    /* Read the number of components */
+    kret = krb5_fcc_read_int32(id, &length);
+    if (kret != KRB5_OK)
+	return kret;
 
-     /* Read the number of components */
-     kret = krb5_fcc_read_int32(id, &length);
-     CHECK(kret);
+    tmpprinc = (krb5_principal) malloc(sizeof(krb5_principal_data));
+    if (tmpprinc == NULL)
+	return KRB5_CC_NOMEM;
+    tmpprinc->data = malloc(length * sizeof(krb5_principal_data));
+    if (tmpprinc->data == 0) {
+	free((char *)tmpprinc);
+	return KRB5_CC_NOMEM;
+    }
+    tmpprinc->length = length;
 
-     /*
-      * The # of levels of indirection is confusing.  A krb5_principal
-      * is an array of pointers to krb5_data.  princ is a pointer to
-      * an array of pointers to krb5_data.  (*princ)[i] a pointer to
-      * krb5_data.
-      */
+    kret = krb5_fcc_read_data(id, krb5_princ_realm(tmpprinc));
 
-     /* Make *princ able to hold length pointers to krb5_data structs
-      * Add one extra for a null-terminated list
-      */
-     *princ = (krb5_principal) calloc(length+1, sizeof(krb5_data *));
-     if (*princ == NULL)
-	  return KRB5_CC_NOMEM;
+    i = 0;
+    CHECK(kret);
 
-     for (i=0; i < length; i++) {
-	  (*princ)[i] = (krb5_data *) malloc(sizeof(krb5_data));
-	  if ((*princ)[i] == NULL) {
-	      krb5_free_principal(*princ);
-	      return KRB5_CC_NOMEM;
-          }	  
-	  kret = krb5_fcc_read_data(id, (*princ)[i]);
-	  CHECK(kret);
-     }
+    for (i=0; i < length; i++) {
+	kret = krb5_fcc_read_data(id, krb5_princ_component(tmpprinc, i));
+	CHECK(kret);
+    }
+    *princ = tmpprinc;
+    return KRB5_OK;
 
-     return kret;
  errout:
-     if (*princ)
-	 krb5_free_principal(*princ);
-     return kret;
+    while(--i >= 0)
+	free(krb5_princ_component(tmpprinc, i)->data);
+    free((char *)tmpprinc->data);
+    free((char *)tmpprinc);
+    return KRB5_CC_NOMEM;
 }
 
 krb5_error_code
@@ -212,6 +211,11 @@ krb5_fcc_read_data(id, data)
 
      kret = krb5_fcc_read_int32(id, &data->length);
      CHECK(kret);
+
+     if (data->length == 0) {
+	data->data = 0;
+	return KRB5_OK;
+     }
 
      data->data = (char *) malloc(data->length);
      if (data->data == NULL)
