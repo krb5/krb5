@@ -334,6 +334,8 @@ krb5_error_code krb5_dbe_ark
                    struct __krb5_key_salt_tuple *,
                    int,
                    krb5_db_entry *));
+
+krb5_error_code krb5_ser_db_context_init KRB5_PROTOTYPE((krb5_context));
  
 #define KRB5_KDB_DEF_FLAGS	0
 

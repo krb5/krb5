@@ -1,4 +1,8 @@
 
+Tue Aug 29 13:28:10 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* kdb.h - Add prototype for krb5_ser_db_context_init().
+
+
 Mon Aug 21 17:00:58 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* adm_proto.h - Add krb5_timestamp_to_sfstring() prototype.
 
