@@ -850,7 +850,7 @@ int control(pty, cp, n)
 void protocol(f, p)
      int f, p;
 {
-    unsigned char pibuf[1024], fibuf[1024], *pbp, *fbp;
+    unsigned char pibuf[BUFSIZ], fibuf[BUFSIZ], *pbp, *fbp;
     register pcc = 0, fcc = 0;
     int cc;
     char cntl;

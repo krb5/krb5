@@ -1,3 +1,8 @@
+Tue Jan 20 21:42:06 1998  Tom Yu  <tlyu@mit.edu>
+
+	* krlogind.c (protocol): Declare pibuf and fibuf as being BUFSIZ
+	bytes long, rather than 1024.  Fixes an Irix bug. [krb5-appl/527]
+
 Thu Nov 20 16:42:54 1997  Tom Yu  <tlyu@mit.edu>
 
 	* krlogind.c (recvauth): Fix args in call to
