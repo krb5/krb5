@@ -1,0 +1,13 @@
+#define IHaveSubdirs
+#define PassCDebugFlags
+
+        SUBDIRS = file
+
+MakeSubdirs($(SUBDIRS))
+
+NormalLibraryObjectRule()
+
+OBJS=	default.o	\
+	destroy.o
+
+NormalLibraryTarget(cred,$(OBJS))
