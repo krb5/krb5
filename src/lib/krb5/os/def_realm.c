@@ -103,6 +103,6 @@ char **lrealm;
     
     if (!(*lrealm = cp = malloc((unsigned int) strlen(realm) + 1)))
 	    return ENOMEM;
-    strcpy(cp, realmbuf);
+    strcpy(cp, realm);
     return(0);
 }
