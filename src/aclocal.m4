@@ -1169,8 +1169,8 @@ if test "$enable_static" = no && test "$krb5_force_static" != yes; then
 	LIBLIST=
 	OBJLISTS=
 else
-	LIBLIST='lib$(LIB)$(STLIBEXT)'
-	LIBLINKS='$(TOPLIBD)/lib$(LIB)$(STLIBEXT)'
+	LIBLIST='lib$(LIBBASE)$(STLIBEXT)'
+	LIBLINKS='$(TOPLIBD)/lib$(LIBBASE)$(STLIBEXT)'
 	OBJLISTS=OBJS.ST
 	LIBINSTLIST=install-static
 	DEPLIBEXT=$STLIBEXT
@@ -1208,15 +1208,15 @@ if test "$enable_shared" = yes; then
 				OBJLISTS=
 				LIBINSTLIST=
 			fi
-			LIBLIST="$LIBLIST "'lib$(LIB)$(SHLIBEXT)'
-			LIBLINKS="$LIBLINKS "'$(TOPLIBD)/lib$(LIB)$(SHLIBEXT) $(TOPLIBD)/lib$(LIB)$(SHLIBVEXT)'
+			LIBLIST="$LIBLIST "'lib$(LIBBASE)$(SHLIBEXT)'
+			LIBLINKS="$LIBLINKS "'$(TOPLIBD)/lib$(LIBBASE)$(SHLIBEXT) $(TOPLIBD)/lib$(LIBBASE)$(SHLIBVEXT)'
 			case "$SHLIBSEXT" in
 			.so.s-nobuild)
 				LIBINSTLIST="$LIBINSTLIST install-shared"
 				;;
 			*)
-				LIBLIST="$LIBLIST "'lib$(LIB)$(SHLIBSEXT)'
-				LIBLINKS="$LIBLINKS "'$(TOPLIBD)/lib$(LIB)$(SHLIBSEXT)'
+				LIBLIST="$LIBLIST "'lib$(LIBBASE)$(SHLIBSEXT)'
+				LIBLINKS="$LIBLINKS "'$(TOPLIBD)/lib$(LIBBASE)$(SHLIBSEXT)'
 				LIBINSTLIST="$LIBINSTLIST install-shlib-soname"
 				;;
 			esac
@@ -1247,8 +1247,8 @@ AC_ARG_ENABLE([profiled],
 		;;
 	*)
 		AC_MSG_NOTICE([enabling profiled libraries])
-		LIBLIST="$LIBLIST "'lib$(LIB)$(PFLIBEXT)'
-		LIBLINKS="$LIBLINKS "'$(TOPLIBD)/lib$(LIB)$(PFLIBEXT)'
+		LIBLIST="$LIBLIST "'lib$(LIBBASE)$(PFLIBEXT)'
+		LIBLINKS="$LIBLINKS "'$(TOPLIBD)/lib$(LIBBASE)$(PFLIBEXT)'
 		OBJLISTS="$OBJLISTS OBJS.PF"
 		LIBINSTLIST="$LIBINSTLIST install-profiled"
 		;;

@@ -134,7 +134,7 @@ SRCS=\
 	$(srcdir)/verify_checksum.c
 
 
-LIB=k5crypto
+LIBBASE=k5crypto
 LIBMAJOR=3
 LIBMINOR=0
 LIBINITFUNC=cryptoint_initialize_library

@@ -1,3 +1,7 @@
+2004-06-04  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (LIBBASE): Renamed from LIB.
+
 2004-03-04  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Deleted; configure this dir from parent now.

@@ -16,7 +16,7 @@ SED = sed
 
 STLIBOBJS=error_message.o et_name.o com_err.o
 STOBJLISTS=OBJS.ST
-LIB=com_err
+LIBBASE=com_err
 LIBMAJOR=3
 LIBMINOR=0
 LIBINITFUNC=com_err_initialize

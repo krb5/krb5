@@ -18,7 +18,7 @@ SED = sed
 # avoid having an empty library.
 STLIBOBJS=dummy.o @LIBOBJS@
 STOBJLISTS=OBJS.ST
-LIB=apputils
+LIBBASE=apputils
 
 all-unix:: all-liblinks
 clean-unix:: clean-liblinks clean-libs clean-libobjs

@@ -4,7 +4,7 @@ mydir=clnt
 BUILDTOP=$(REL)..$(S)..$(S)..
 LOCALINCLUDES = -I$(BUILDTOP)/include/kadm5
 
-LIB=kadm5clnt
+LIBBASE=kadm5clnt
 LIBMAJOR=5
 LIBMINOR=1
 STOBJLISTS=../OBJS.ST OBJS.ST

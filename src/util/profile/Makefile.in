@@ -40,7 +40,7 @@ EXTRADEPSRCS=$(srcdir)/test_parse.c $(srcdir)/test_profile.c
 DEPLIBS = $(COM_ERR_DEPLIB) $(SUPPORT_DEPLIB)
 MLIBS = -lcom_err $(SUPPORT_LIB)
 
-LIB=profile
+LIBBASE=profile
 LIBMAJOR=1
 LIBMINOR=1
 SHLIB_EXPDEPS = $(COM_ERR_DEPLIB) $(SUPPORT_DEPLIB)

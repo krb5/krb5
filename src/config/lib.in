@@ -32,82 +32,82 @@ dummy-target-1 $(SUBDIROBJLISTS) $(SUBDIROBJLISTS:.ST=.SH) $(SUBDIROBJLISTS:.ST=
 # Gets invoked as $(PARSE_OBJLISTS) list-of-OBJS.*-files
 PARSE_OBJLISTS= set -x && $(PERL) -p -e '$$e=$$ARGV; $$e =~ s/OBJS\...$$//; s/^/ /; s/ $$//; s/ / $$e/g;'
 
-lib$(LIB)$(STLIBEXT): $(STOBJLISTS)
+lib$(LIBBASE)$(STLIBEXT): $(STOBJLISTS)
 	$(RM) $@
-	@echo "building static $(LIB) library"
+	@echo "building static $(LIBBASE) library"
 	set -x; objlist=`$(PARSE_OBJLISTS) $(STOBJLISTS)` && $(AR) cq $@ $$objlist
 	$(RANLIB) $@
 
-lib$(LIB)$(SHLIBVEXT): $(SHOBJLISTS) $(SHLIB_EXPDEPS) $(SHLIB_EXPORT_FILE_DEP)
+lib$(LIBBASE)$(SHLIBVEXT): $(SHOBJLISTS) $(SHLIB_EXPDEPS) $(SHLIB_EXPORT_FILE_DEP)
 	$(RM) $@
-	@echo "building shared $(LIB) library ($(LIBMAJOR).$(LIBMINOR))"
+	@echo "building shared $(LIBBASE) library ($(LIBMAJOR).$(LIBMINOR))"
 	set -x; objlist=`$(PARSE_OBJLISTS) $(SHOBJLISTS)` && $(MAKE_SHLIB_COMMAND)
 
-lib$(LIB)$(SHLIBSEXT): lib$(LIB)$(SHLIBVEXT)
+lib$(LIBBASE)$(SHLIBSEXT): lib$(LIBBASE)$(SHLIBVEXT)
 	$(RM) $@
-	$(LN_S) lib$(LIB)$(SHLIBVEXT) $@
-lib$(LIB)$(SHLIBEXT): lib$(LIB)$(SHLIBVEXT)
+	$(LN_S) lib$(LIBBASE)$(SHLIBVEXT) $@
+lib$(LIBBASE)$(SHLIBEXT): lib$(LIBBASE)$(SHLIBVEXT)
 	$(RM) $@
-	$(LN_S) lib$(LIB)$(SHLIBVEXT) $@
+	$(LN_S) lib$(LIBBASE)$(SHLIBVEXT) $@
 
-lib$(LIB)$(PFLIBEXT): $(PFOBJLISTS)
+lib$(LIBBASE)$(PFLIBEXT): $(PFOBJLISTS)
 	$(RM) $@
-	@echo "building profiled $(LIB) library"
+	@echo "building profiled $(LIBBASE) library"
 	set -x; objlist=`$(PARSE_OBJLISTS) $(PFOBJLISTS)` && $(AR) cq $@ $$objlist
 	$(RANLIB) $@
 
-$(TOPLIBD)/lib$(LIB)$(STLIBEXT): lib$(LIB)$(STLIBEXT)
+$(TOPLIBD)/lib$(LIBBASE)$(STLIBEXT): lib$(LIBBASE)$(STLIBEXT)
 	$(RM) $@
-	(cd $(TOPLIBD) && $(LN_S) $(RELDIR)/lib$(LIB)$(STLIBEXT) .)
-$(TOPLIBD)/lib$(LIB)$(SHLIBEXT): lib$(LIB)$(SHLIBEXT)
+	(cd $(TOPLIBD) && $(LN_S) $(RELDIR)/lib$(LIBBASE)$(STLIBEXT) .)
+$(TOPLIBD)/lib$(LIBBASE)$(SHLIBEXT): lib$(LIBBASE)$(SHLIBEXT)
 	$(RM) $@
-	(cd $(TOPLIBD) && $(LN_S) $(RELDIR)/lib$(LIB)$(SHLIBEXT) .)
-$(TOPLIBD)/lib$(LIB)$(SHLIBSEXT): lib$(LIB)$(SHLIBSEXT)
+	(cd $(TOPLIBD) && $(LN_S) $(RELDIR)/lib$(LIBBASE)$(SHLIBEXT) .)
+$(TOPLIBD)/lib$(LIBBASE)$(SHLIBSEXT): lib$(LIBBASE)$(SHLIBSEXT)
 	$(RM) $@
-	(cd $(TOPLIBD) && $(LN_S) $(RELDIR)/lib$(LIB)$(SHLIBSEXT) .)
-$(TOPLIBD)/lib$(LIB)$(SHLIBVEXT): lib$(LIB)$(SHLIBVEXT)
+	(cd $(TOPLIBD) && $(LN_S) $(RELDIR)/lib$(LIBBASE)$(SHLIBSEXT) .)
+$(TOPLIBD)/lib$(LIBBASE)$(SHLIBVEXT): lib$(LIBBASE)$(SHLIBVEXT)
 	$(RM) $@
-	(cd $(TOPLIBD) && $(LN_S) $(RELDIR)/lib$(LIB)$(SHLIBVEXT) .)
-$(TOPLIBD)/lib$(LIB)$(PFLIBEXT): lib$(LIB)$(PFLIBEXT)
+	(cd $(TOPLIBD) && $(LN_S) $(RELDIR)/lib$(LIBBASE)$(SHLIBVEXT) .)
+$(TOPLIBD)/lib$(LIBBASE)$(PFLIBEXT): lib$(LIBBASE)$(PFLIBEXT)
 	$(RM) $@
-	(cd $(TOPLIBD) && $(LN_S) $(RELDIR)/lib$(LIB)$(PFLIBEXT) .)
+	(cd $(TOPLIBD) && $(LN_S) $(RELDIR)/lib$(LIBBASE)$(PFLIBEXT) .)
 
 all-libs: $(LIBLIST)
 all-liblinks: $(LIBLINKS)
 
 clean-libs:
-	$(RM) lib$(LIB)$(STLIBEXT)
-	$(RM) lib$(LIB)$(SHLIBVEXT)
-	$(RM) lib$(LIB)$(SHLIBSEXT)
-	$(RM) lib$(LIB)$(SHLIBEXT)
-	$(RM) lib$(LIB)$(PFLIBEXT)
+	$(RM) lib$(LIBBASE)$(STLIBEXT)
+	$(RM) lib$(LIBBASE)$(SHLIBVEXT)
+	$(RM) lib$(LIBBASE)$(SHLIBSEXT)
+	$(RM) lib$(LIBBASE)$(SHLIBEXT)
+	$(RM) lib$(LIBBASE)$(PFLIBEXT)
 
 clean-liblinks:
-	$(RM) $(TOPLIBD)/lib$(LIB)$(STLIBEXT)
-	$(RM) $(TOPLIBD)/lib$(LIB)$(SHLIBVEXT)
-	$(RM) $(TOPLIBD)/lib$(LIB)$(SHLIBSEXT)
-	$(RM) $(TOPLIBD)/lib$(LIB)$(SHLIBEXT)
-	$(RM) $(TOPLIBD)/lib$(LIB)$(PFLIBEXT)
+	$(RM) $(TOPLIBD)/lib$(LIBBASE)$(STLIBEXT)
+	$(RM) $(TOPLIBD)/lib$(LIBBASE)$(SHLIBVEXT)
+	$(RM) $(TOPLIBD)/lib$(LIBBASE)$(SHLIBSEXT)
+	$(RM) $(TOPLIBD)/lib$(LIBBASE)$(SHLIBEXT)
+	$(RM) $(TOPLIBD)/lib$(LIBBASE)$(PFLIBEXT)
 
 install-libs: $(LIBINSTLIST)
 install-static:
-	$(RM) $(DESTDIR)$(KRB5_LIBDIR)/lib$(LIB)$(STLIBEXT)
-	$(INSTALL_DATA) lib$(LIB)$(STLIBEXT) $(DESTDIR)$(KRB5_LIBDIR)
-	$(RANLIB) $(DESTDIR)$(KRB5_LIBDIR)/lib$(LIB)$(STLIBEXT)
+	$(RM) $(DESTDIR)$(KRB5_LIBDIR)/lib$(LIBBASE)$(STLIBEXT)
+	$(INSTALL_DATA) lib$(LIBBASE)$(STLIBEXT) $(DESTDIR)$(KRB5_LIBDIR)
+	$(RANLIB) $(DESTDIR)$(KRB5_LIBDIR)/lib$(LIBBASE)$(STLIBEXT)
 install-shared:
-	$(RM) $(DESTDIR)$(KRB5_LIBDIR)/lib$(LIB)$(SHLIBVEXT)
-	$(RM) $(DESTDIR)$(KRB5_LIBDIR)/lib$(LIB)$(SHLIBEXT)
-	$(INSTALL_SHLIB) lib$(LIB)$(SHLIBVEXT) $(DESTDIR)$(KRB5_LIBDIR)
-	(cd $(DESTDIR)$(KRB5_LIBDIR) && $(LN_S) lib$(LIB)$(SHLIBVEXT) \
-		lib$(LIB)$(SHLIBEXT))
+	$(RM) $(DESTDIR)$(KRB5_LIBDIR)/lib$(LIBBASE)$(SHLIBVEXT)
+	$(RM) $(DESTDIR)$(KRB5_LIBDIR)/lib$(LIBBASE)$(SHLIBEXT)
+	$(INSTALL_SHLIB) lib$(LIBBASE)$(SHLIBVEXT) $(DESTDIR)$(KRB5_LIBDIR)
+	(cd $(DESTDIR)$(KRB5_LIBDIR) && $(LN_S) lib$(LIBBASE)$(SHLIBVEXT) \
+		lib$(LIBBASE)$(SHLIBEXT))
 install-shlib-soname: install-shared
-	$(RM) $(DESTDIR)$(KRB5_LIBDIR)/lib$(LIB)$(SHLIBSEXT)
-	(cd $(DESTDIR)$(KRB5_LIBDIR) && $(LN_S) lib$(LIB)$(SHLIBVEXT) \
-		lib$(LIB)$(SHLIBSEXT))
+	$(RM) $(DESTDIR)$(KRB5_LIBDIR)/lib$(LIBBASE)$(SHLIBSEXT)
+	(cd $(DESTDIR)$(KRB5_LIBDIR) && $(LN_S) lib$(LIBBASE)$(SHLIBVEXT) \
+		lib$(LIBBASE)$(SHLIBSEXT))
 install-profiled:
-	$(RM) $(DESTDIR)$(KRB5_LIBDIR)/lib$(LIB)$(PFLIBEXT)
-	$(INSTALL_DATA) lib$(LIB)$(PFLIBEXT) $(DESTDIR)$(KRB5_LIBDIR)
-	$(RANLIB) $(DESTDIR)$(KRB5_LIBDIR)/lib$(LIB)$(PFLIBEXT)
+	$(RM) $(DESTDIR)$(KRB5_LIBDIR)/lib$(LIBBASE)$(PFLIBEXT)
+	$(INSTALL_DATA) lib$(LIBBASE)$(PFLIBEXT) $(DESTDIR)$(KRB5_LIBDIR)
+	$(RANLIB) $(DESTDIR)$(KRB5_LIBDIR)/lib$(LIBBASE)$(PFLIBEXT)
 
 Makefile: $(SRCTOP)/config/lib.in
 config.status: $(SRCTOP)/config/shlib.conf

@@ -11,7 +11,7 @@ all::
 
 TOP=$(BUILDTOP)
 
-LIB=ss
+LIBBASE=ss
 LIBMAJOR=1
 LIBMINOR=0
 RELDIR=../util/ss

@@ -455,7 +455,7 @@ MAKE_COMMANDS-k5= $(BUILDTOP)/util/ss/mk_cmds
 LN_S=@LN_S@
 AR=@AR@
 
-# Set to "lib$(LIB)$(STEXT) lib$(LIB)$(SHEXT) lib$(LIB)$(PFEXT)" or
+# Set to "lib$(LIBBASE)$(STEXT) lib$(LIBBASE)$(SHEXT) lib$(LIBBASE)$(PFEXT)" or
 # some subset thereof by configure; determines which types of libs get
 # built.
 LIBLIST=@LIBLIST@
@@ -486,7 +486,7 @@ PFLIBEXT=@PFLIBEXT@
 
 # File with symbol names to be exported, both functions and data,
 # currently not distinguished.
-SHLIB_EXPORT_FILE=$(srcdir)/lib$(LIB).exports
+SHLIB_EXPORT_FILE=$(srcdir)/lib$(LIBBASE).exports
 
 # File that needs to be current for building the shared library,
 # usually SHLIB_EXPORT_FILE, but not always, if we have to convert

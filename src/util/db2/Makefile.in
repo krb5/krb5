@@ -4,7 +4,7 @@ mydir=.
 BUILDTOP=$(REL)..$(S)..
 LOCAL_SUBDIRS=hash btree db mpool recno clib test
 
-LIB=db
+LIBBASE=db
 LIBMAJOR=1
 LIBMINOR=1
 STOBJLISTS=hash/OBJS.ST btree/OBJS.ST db/OBJS.ST mpool/OBJS.ST \

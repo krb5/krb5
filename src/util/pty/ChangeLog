@@ -1,3 +1,7 @@
+2004-06-04  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (LIBBASE): Renamed from LIB.
+
 2004-04-12  Ezra Peisach  <epeisach@mit.edu>
 
 	* configure.in: Remove tests for strsave, sys_errlist,

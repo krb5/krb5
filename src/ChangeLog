@@ -1,3 +1,7 @@
+2004-06-04  Ken Raeburn  <raeburn@mit.edu>
+
+	* aclocal.m4 (KRB5_LIB_AUX): Use $(LIBBASE) instead of $(LIB).
+
 2004-06-03  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Check for various _r functions needed for thread

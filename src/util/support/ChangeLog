@@ -1,3 +1,7 @@
+2004-06-04  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (LIBBASE): Renamed from LIB.
+
 2004-05-05  Ken Raeburn  <raeburn@mit.edu>
 
 	* threads.c (krb5int_thread_support_fini) [!ENABLE_THREADS]:
