@@ -1,12 +1,6 @@
 /*
- *	$Source$
- *	$Header$
+ *	appl/bsd/krsh.c
  */
-
-#ifndef lint
-static char *rcsid_rsh_c = 
-  "$Header$";
-#endif /* lint */
 
 /*
  * Copyright (c) 1983 The Regents of the University of California.
@@ -39,16 +33,16 @@ static char sccsid[] = "@(#)rsh.c	5.7 (Berkeley) 9/20/88";
 #include <sys/socket.h>
 #include <sys/ioctl.h>
 #include <sys/file.h>
-     
+
 #include <netinet/in.h>
-     
+
 #include <stdio.h>
-#include <errno.h>
 #include <string.h>
+#include <errno.h>
 #include <signal.h>
 #include <pwd.h>
 #include <netdb.h>
-     
+
 #ifdef HAVE_SYS_FILIO_H
 /* get FIONBIO from sys/filio.h, so what if it is a compatibility feature */
 #include <sys/filio.h>
@@ -63,12 +57,13 @@ static char sccsid[] = "@(#)rsh.c	5.7 (Berkeley) 9/20/88";
 #include "defines.h"
 #endif /* KERBEROS */
      
-     /*
-      * rsh - remote shell
-      */
+/*
+ * rsh - remote shell
+ */
 
 int	error();
      
+/*** XXX -- don't declare this here ever??? ***/
 #ifndef convex
 struct	passwd *getpwuid();
 #endif
@@ -94,7 +89,7 @@ void	try_normal();
      
 #define	mask(s)	(1 << ((s) - 1))
      
-     main(argc, argv0)
+main(argc, argv0)
      int argc;
      char **argv0;
 {
@@ -111,6 +106,7 @@ void	try_normal();
     krb5_flags authopts;
     krb5_error_code status;
     int fflag = 0, Fflag = 0;
+    int xflag = 0;
     int debug_port = 0;
 #endif  /* KERBEROS */
    
@@ -171,6 +167,7 @@ void	try_normal();
      */
     if (argc > 0 && !strncmp(*argv, "-x", 2)) {
 	argv++, argc--;
+	xflag++;
 	goto another;
     }
     if (argc > 0 && !strncmp(*argv, "-f", 2)) {
@@ -251,6 +248,18 @@ void	try_normal();
 	perror(RLOGIN_PROGRAM);
 	exit(1);
     }
+
+    /* Unlike the other rlogin flags, we should warn if `-x' is
+       given and rlogin is not run, because the user could be
+       dangerously confused otherwise.  He might think he's got a
+       secure rsh channel, and there's no such thing yet.  */
+    if (xflag)
+      {
+	fprintf (stderr, "%s: Encrypted rsh is not yet available.\n",
+		 argv0[0]);
+	return 1;
+      }
+
     pwd = getpwuid(getuid());
     if (pwd == 0) {
 	fprintf(stderr, "who are you?\n");
@@ -307,6 +316,7 @@ void	try_normal();
 		  (struct sockaddr_in *) 0,
 		  authopts);
     if (status) {
+        /* check NO_TKT_FILE or equivalent... */
 	fprintf(stderr,
 		"%s: kcmd to host %s failed - %s\n",argv0[0], host,
 		error_message(status));

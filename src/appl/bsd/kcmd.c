@@ -39,6 +39,11 @@ static char sccsid[] = "derived from @(#)rcmd.c	5.17 (Berkeley) 6/27/88";
 #include <sys/types.h>
 #define _TYPES_
 #endif
+#include <fcntl.h>
+#ifdef NEED_SYS_FCNTL_H
+#include <sys/fcntl.h>
+#endif
+
      
      
 #ifndef MAXPATHLEN
@@ -447,6 +452,7 @@ getport(alport)
 
 
 
+#ifdef HAVE_SETREUID
 #if defined(sun)
 /* The IMP  and ultrix do not like multiple defined routines 
    and since it does not have users with NFS filesystems 
@@ -593,7 +599,7 @@ _checkhost(rhost, lhost, len)
 	    nodomain = 1;
 	    return(0);
 	}
-	ldomain[MAXHOSTNAMELEN] = NULL;
+	ldomain[MAXHOSTNAMELEN] = 0;
 	if ((domainp = strchr(ldomain, '.')) == (char *)NULL) {
 	    nodomain = 1;
 	    return(0);
@@ -605,8 +611,8 @@ _checkhost(rhost, lhost, len)
     return(!strcmp(domainp, rhost + len +1));
     
 }
-#endif /* ! sysvimp */
-
+#endif /* ! sun */
+#endif /* HAVE_SETREUID */
 
 
 #if defined (hpux)

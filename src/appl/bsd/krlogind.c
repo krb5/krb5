@@ -1,12 +1,6 @@
 /*
- *	$Source$
- *	$Header$
+ *	appl/bsd/krlogind.c
  */
-
-
-#ifndef lint
-static char *rcsid_rlogind_c = "$Header$";
-#endif	/* lint */
 
 /*
  * Copyright (c) 1983 The Regents of the University of California.
@@ -115,8 +109,15 @@ static char sccsid[] = "@(#)rlogind.c	5.17 (Berkeley) 8/31/88";
 #include <sys/wait.h>
 #include <sys/file.h>
 #include <ctype.h>
-
-/* #include <sys/unistd.h>  ??? What system has a sys/unistd.h? */
+#ifdef NEED_SYS_FCNTL_H
+#include <sys/fcntl.h>
+#endif
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+#ifdef __SCO__
+#include <sys/unistd.h>
+#endif
      
 #include <netinet/in.h>
 #include <errno.h>
@@ -156,9 +157,30 @@ static char sccsid[] = "@(#)rlogind.c	5.17 (Berkeley) 8/31/88";
 #include <sys/param.h>
 #include <utmp.h>
      
+#ifdef __svr4__
+#include <sys/tty.h>
+#ifndef solaris20
+/* These values are over-the-wire protocol, *not* local values */
+#define TIOCPKT_NOSTOP          0x10
+#define TIOCPKT_DOSTOP          0x20
+#define TIOCPKT_FLUSHWRITE      0x02
+#else
+/* but solaris actually uses packet mode, so the real macros are needed too */
+#include <sys/ptyvar.h>
+#endif
+#endif
+
 #ifdef HAVE_SYS_FILIO_H
 /* get FIONBIO from sys/filio.h, so what if it is a compatibility feature */
 #include <sys/filio.h>
+#endif
+
+#ifndef SETPGRP_TWOARG
+#define setpgrp(a,b) setpgrp()
+#endif
+
+#ifndef HAVE_KILLPG
+#define killpg(pid, sig) kill(-(pid), (sig))
 #endif
 
 #ifdef NO_WINSIZE
@@ -616,13 +638,13 @@ void doit(f, fromp)
 #ifdef sysvimp
 	    pid = 0;
 #else
-#ifdef convex
+#ifdef GETGRP_ONEARG
 	    pid = getpgrp();
 #else
 	    pid = getpgrp(getpid());
 #endif
 #endif
-#ifdef POSIX /* solaris */
+#ifdef POSIX_TERMIOS /* solaris */
 	    /* we've already done setsid above. Just do tcsetpgrp here. */
 	    tcsetpgrp(0, pid);
 #else
@@ -759,7 +781,10 @@ void doit(f, fromp)
     (void) fcntl(p,F_SETFL,fcntl(p,F_GETFL,0) | O_NDELAY);
 #endif
     
+/*** XXX -- make this portable ***/
+#if defined(TIOCPKT) && !defined(__svr4__) || defined(solaris20)
     ioctl(p, TIOCPKT, &on);
+#endif
     signal(SIGTSTP, SIG_IGN);
 #ifdef hpux
     setpgrp2(0, 0);

@@ -9,10 +9,19 @@ AC_HAVE_LIBRARY(socket)
 AC_HAVE_LIBRARY(nsl)
 AC_FUNC_CHECK(utimes,AC_DEFINE(HAS_UTIMES))
 AC_FUNC_CHECK(getutent,AC_DEFINE(HAVE_GETUTENT))
-AC_HAVE_HEADERS(sys/filio.h unistd.h sys/label.h ttyent.h)
+AC_FUNC_CHECK(setreuid,AC_DEFINE(HAVE_SETREUID))
+AC_FUNC_CHECK(gettosbyname,AC_DEFINE(HAVE_GETTOSBYNAME))
+AC_FUNC_CHECK(killpg,AC_DEFINE(HAVE_KILLPG))
+AC_FUNC_CHECK(getdtablesize,AC_DEFINE(HAVE_GETDTABLESIZE))
+AC_FUNC_CHECK(initgroups,AC_DEFINE(HAVE_INITGROUPS))
+AC_FUNC_CHECK(setpriority,AC_DEFINE(HAVE_SETPRIORITY))
+AC_HAVE_HEADERS(sys/filio.h sys/sockio.h unistd.h sys/label.h ttyent.h sys/ptyvar.h lastlog.h)
 AC_REPLACE_FUNCS(getdtablesize)
 CHECK_DIRENT
 CHECK_FCNTL
+CHECK_WAIT_TYPE
+AC_WAIT3
+AC_HEADER_CHECK(termios.h,AC_FUNC_CHECK([tcsetattr],AC_DEFINE(POSIX_TERMIOS)))
 AC_COMPILE_CHECK([F_SETOWN],
 [#include <sys/types.h>
 #include <fcntl.h>],
@@ -37,5 +46,13 @@ AC_COMPILE_CHECK([setenv],
 SETENVOBJ=setenv.o
 AC_SUBST([SETENVSRC])
 AC_SUBST([SETENVOBJ])])
+dnl
+AC_COMPILE_CHECK([number of arguments to getpgrp],
+[#include <unistd.h>],[int pid = getpgrp()],
+AC_DEFINE(GETGRP_ONEARG))
+AC_COMPILE_CHECK([number of arguments to setpgrp],
+[#include <unistd.h>],[setpgrp(0,0)],
+AC_DEFINE(SETPGRP_TWOARG))
+dnl
 ADD_DEF(-DKERBEROS)
 AC_OUTPUT(Makefile,[EXTRA_RULES])

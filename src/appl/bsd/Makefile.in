@@ -1,4 +1,4 @@
-CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
+CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE) $(DEFINES)
 SETENVSRC=@SETENVSRC@
 SETENVOBJ=@SETENVOBJ@
 ISODELIB=@ISODELIB@
@@ -12,6 +12,11 @@ SRCS= krcp.c krlogin.c krsh.c kcmd.c forward.c logutil.c $(SETENVSRC) \
 	login.c
 OBJS= krcp.o krlogin.o krsh.o kcmd.o forward.c logutil.o $(SETENVOBJ) \
 	login.o $(LIBOBJS)
+
+RSH=	-DKRB_RLOGIN=\"$(PROGDIR)/rlogin\"
+
+DEFINES= $(RSH) $(RPROGS) \
+ 	-DLOGIN_PROGRAM=\"$(SERVER_BINDIR)/login.krb\" -DKPROGDIR=\"$(CLIENT_BINDIR)\"
 
 all:: rsh rcp rlogin krshd krlogind login.krb5
 

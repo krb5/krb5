@@ -1,10 +1,6 @@
 /*
- *    $Source$!  *    $Author$
- *    $Header$
+ *    appl/bsd/krlogin.c
  */
-#ifndef lint
-static char rcsid_rlogin_c[] = "$Header$";
-#endif /* lint */
 
 /*
  * Copyright (c) 1983 The Regents of the University of California.
@@ -38,56 +34,96 @@ static char sccsid[] = "@(#)rlogin.c	5.12 (Berkeley) 9/19/88";
       * rlogin - remote login
       */
      
-#include <sys/param.h>
-#include <sys/errno.h>
-#ifndef _TYPES
-#include <sys/types.h>
-#define _TYPES_
+#ifdef _AIX
+#undef _BSD
 #endif
+	
+#include <sys/types.h>
+#include <sys/param.h>
+#include <sys/ioctl.h>
+#include <sys/errno.h>
 #include <sys/file.h>
 #include <sys/socket.h>
 #include <sys/time.h>
 #include <sys/resource.h>
 #include <sys/wait.h>
 #include <fcntl.h>
+#ifdef NEED_SYS_FCNTL_H
+#include <sys/fcntl.h>
+#endif
 
 #include <netinet/in.h>
-     
+
 #include <stdio.h>
-     
-#ifdef SYSV
-#ifndef USE_TERMIO
-#define USE_TERMIO
-#endif
-#endif
-     
-#ifdef USE_TERMIO
-#ifdef CRAY
-#include <sys/ttold.h>
-#endif
-#include <sys/termio.h>
-#define sg_flags c_lflag
-#define sg_ospeed c_cflag&CBAUD
-     
-#ifndef TIOCGETP
-#define TIOCGETP TCGETA
-#endif
-#ifndef TIOCSETP
-#define TIOCSETP TCSETA
-#endif
-#ifndef TIOCSETN
-#define TIOCSETN TCSETAW
-#endif
-#else /* !USE_TERMIO */
-#include <sgtty.h>
-#endif /* USE_TERMIO */
-     
+#include <string.h>
 #include <errno.h>
 #include <pwd.h>
 #include <signal.h>
 #include <setjmp.h>
 #include <netdb.h>
-#include <string.h>
+     
+#ifdef HAS_STDLIB_H
+#include <stdlib.h>
+#endif
+
+#ifdef POSIX_TERMIOS
+#include <termios.h>
+#ifdef _AIX
+#include <termio.h>
+#endif
+#endif
+
+#ifdef HAVE_SYS_SOCKIO_H
+/* for SIOCATMARK */
+#include <sys/sockio.h>
+#endif
+
+/****** MWE *****/
+#ifdef __SCO__
+/* for TIOCPKT_* */
+#include <sys/spt.h>
+/* for struct winsize */
+#include <sys/stream.h>
+#include <sys/ptem.h>
+#endif
+/****** MWE *****/
+
+/****** MWE *****/
+#include <sys/tty.h>
+#include <sys/ttold.h>
+#ifdef HAVE_SYS_PTYVAR_H
+/* solaris actually uses packet mode, so the real macros are needed too */
+#include <sys/ptyvar.h>
+#endif
+/****** MWE *****/
+
+/* how do we tell apart irix 5 and irix 4? */
+#if defined(__sgi) && defined(__mips)
+/* IRIX 5: TIOCGLTC doesn't actually work */
+#undef TIOCGLTC
+#endif
+
+#ifndef TIOCPKT_NOSTOP
+/* These values are over-the-wire protocol, *not* local values */
+#define TIOCPKT_NOSTOP          0x10
+#define TIOCPKT_DOSTOP          0x20
+#define TIOCPKT_FLUSHWRITE      0x02
+#endif
+
+#ifdef __386BSD__
+#include <sys/ioctl_compat.h>
+#endif
+
+struct termios deftty;
+
+
+#ifdef POSIX_TERMIOS
+#ifdef CRAY
+#include <sys/ttold.h>
+#endif
+#else /* !POSIX_TERMIOS */
+#include <sgtty.h>
+#endif /* POSIX_TERMIOS */
      
 #ifndef roundup
 #define roundup(x,y) ((((x)+(y)-1)/(y))*(y))
@@ -114,7 +150,7 @@ krb5_encrypt_block eblock;      /* eblock for encrypt/decrypt */
 
 void try_normal();
 char *krb_realm = (char *)0;
-int encrypt = 0;
+int encrypt_flag = 0;
 int fflag = 0, Fflag = 0;
 krb5_creds *cred;
 struct sockaddr_in local, foreign;
@@ -127,6 +163,7 @@ struct sockaddr_in local, foreign;
 #endif
 #endif
 
+#include "rpaths.h"
 #else /* !KERBEROS */
 #define des_read read
 #define des_write write
@@ -136,11 +173,6 @@ struct sockaddr_in local, foreign;
 # ifndef TIOCPKT_WINDOW
 # define TIOCPKT_WINDOW 0x80
 # endif /* TIOCPKT_WINDOW */
-
-/* concession to sun */
-# ifndef SIGUSR1
-# define SIGUSR1 30
-# endif /* SIGUSR1 */
 
 char	*getenv();
 #ifndef convex
@@ -162,7 +194,7 @@ int	flowcontrol;			/* Since emacs can alter the
 int	confirm = 0;			/* ask if ~. is given before dying. */
 int	litout;
 #ifdef hpux
-char    *speeds[] =
+char	*speeds[] =
 { "0", "50", "75", "110", "134", "150", "200", "300", "600",
     "900", "1200", "1800", "2400", "3600", "4800", "7200", "9600",
     "19200", "38400", "EXTA", "EXTB" };
@@ -242,10 +274,16 @@ struct winsize *wp;
 #endif /* TIOCGWINSZ */
 
 
+#ifdef POSIX_TERMIOS
+/* Globals for terminal modes and flow control */
+struct  termios defmodes;
+struct  termios ixon_state;
+#else
 #ifdef USE_TERMIO
 /* Globals for terminal modes and flow control */
 struct  termio defmodes;
 struct  termio ixon_state;
+#endif
 #endif
 
 
@@ -255,10 +293,14 @@ main(argc, argv)
      char **argv;
 {
     char *cp = (char *) NULL;
+#ifdef POSIX_TERMIOS
+    struct termios ttyb;
+#else
 #ifdef USE_TERMIO
     struct termio ttyb;
 #else
     struct sgttyb ttyb;
+#endif
 #endif
     struct passwd *pwd;
     struct servent *sp;
@@ -369,7 +411,7 @@ main(argc, argv)
 	goto another;
     }
     if (argc > 0 && !strcmp(*argv, "-x")) {
-	encrypt++;
+	encrypt_flag++;
 	argv++, argc--;
 	goto another;
     }
@@ -410,13 +452,13 @@ main(argc, argv)
      * attempt to login with Kerberos. 
      * If we fail at any step,  use the standard rlogin
      */
-    if (encrypt)
+    if (encrypt_flag)
       sp = getservbyname("eklogin","tcp");
     else 
       sp = getservbyname("klogin","tcp");
     if (sp == 0) {
 	fprintf(stderr, "rlogin: %s/tcp: unknown service\n",
-		encrypt ? "eklogin" : "klogin");
+		encrypt_flag ? "eklogin" : "klogin");
 	
 	try_normal(orig_argv);
     }
@@ -430,17 +472,42 @@ main(argc, argv)
     if (cp == (char *) NULL) cp = getenv("TERM");
     if (cp)
       (void) strcpy(term, cp);
+#ifdef POSIX_TERMIOS
+	if (tcgetattr(0, &ttyb) == 0) {
+		int ospeed = cfgetospeed (&ttyb);
+
+		(void) strcat(term, "/");
+		if (ospeed >= 50)
+			/* On some systems, ospeed is the baud rate itself,
+			   not a table index.  */
+			sprintf (term + strlen (term), "%d", ospeed);
+		else {
+#ifdef CBAUD
+/* some "posix" systems don't have cfget... so used CBAUD if it's there */
+			(void) strcat(term, speeds[ttyb.c_cflag & CBAUD]);
+#else
+			(void) strcat(term, speeds[cfgetospeed(&ttyb)]);
+#endif
+		}
+	}
+#else
     if (ioctl(0, TIOCGETP, &ttyb) == 0) {
 	(void) strcat(term, "/");
 	(void) strcat(term, speeds[ttyb.sg_ospeed]);
     }
+#endif
     (void) get_window_size(0, &winsize);
     
+#ifdef POSIX_TERMIOS
+    tcgetattr(0, &defmodes);
+    tcgetattr(0, &ixon_state);
+#else
 #ifdef USE_TERMIO
     /**** moved before rcmd call so that if get a SIGPIPE in rcmd **/
     /**** we will have the defmodes set already. ***/
     (void)ioctl(fileno(stdin), TIOCGETP, &defmodes);
     (void)ioctl(fileno(stdin), TIOCGETP,&ixon_state);
+#endif
 #endif
     (void) signal(SIGPIPE, lostpeer);
     
@@ -474,6 +541,7 @@ main(argc, argv)
 		  &local, &foreign,
 		  authopts);
     if (status) {
+	/* should check for KDC_PR_UNKNOWN, NO_TKT_FILE here -- XXX */
 	fprintf(stderr,
 		"%s: kcmd to host %s failed - %s\n",orig_argv[0], host,
 		error_message(status));
@@ -508,11 +576,20 @@ main(argc, argv)
        it to the reader, and the oob() processing code in the reader will
        work properly even if it is called when no oob() data is present.
        */
+#ifdef hpux
+	/* hpux invention */
+	{
+	  int pid = getpid();
+	  ioctl(rem, FIOSSAIOSTAT, &pid); /* trick: pid is non-zero */
+	  ioctl(rem, FIOSSAIOOWN, &pid);
+	}
+#else
 #ifdef HAVE_SETOWN
     (void) fcntl(rem, F_SETOWN, getpid());
 #endif
+#endif
     if (options & SO_DEBUG &&
-	setsockopt(rem, SOL_SOCKET, SO_DEBUG, &on, sizeof (on)) < 0)
+	setsockopt(rem, SOL_SOCKET, SO_DEBUG, (char*)&on, sizeof (on)) < 0)
       perror("rlogin: setsockopt (SO_DEBUG)");
     uid = getuid();
     if (setuid(uid) < 0) {
@@ -590,14 +667,39 @@ struct tchars {
 };
 #endif
 
+#ifdef TIOCGLTC
+/*
+ * POSIX 1003.1-1988 does not define a 'suspend' character.
+ * POSIX 1003.1-1990 does define an optional VSUSP but not a VDSUSP character.
+ * Some termio implementations (A/UX, Ultrix 4.2) include both.
+ *
+ * However, since this is all derived from the BSD ioctl() and ltchars
+ * concept, all these implementations generally also allow for the BSD-style
+ * ioctl().  So we'll simplify the problem by only testing for the ioctl().
+ */
+struct	ltchars defltc;
+struct	ltchars noltc =	{ -1, -1, -1, -1, -1, -1 };
+#endif
+
+#ifndef POSIX_TERMIOS
 struct	tchars deftc;
 struct	tchars notc =	{ -1, -1, -1, -1, -1, -1 };
 struct	ltchars defltc;
 struct	ltchars noltc =	{ -1, -1, -1, -1, -1, -1 };
-
+#endif
 
 doit(oldmask)
 {
+#ifdef POSIX_TERMIOS
+	(void) tcgetattr(0, &deftty);
+#ifdef __svr4__
+	/* there's a POSIX way of doing this, but do we need it general? */
+	deftty.c_cc[VLNEXT] = 0;
+#endif
+#ifdef TIOCGLTC
+	(void) ioctl(0, TIOCGLTC, (char *)&defltc);
+#endif
+#else
 #ifdef USE_TERMIO
     struct termio sb;
 #else
@@ -628,10 +730,11 @@ doit(oldmask)
     (void) ioctl(0, TIOCLGET, (char *)&deflflags);
     (void) ioctl(0, TIOCGETC, (char *)&deftc);
 #endif
-    
+
     notc.t_startc = deftc.t_startc;
     notc.t_stopc = deftc.t_stopc;
     (void) ioctl(0, TIOCGLTC, (char *)&defltc);
+#endif    
     (void) signal(SIGINT, SIG_IGN);
     setsignal(SIGHUP, exit);
     setsignal(SIGQUIT,exit);
@@ -674,7 +777,8 @@ doit(oldmask)
  * Trap a signal, unless it is being ignored.
  */
 setsignal(sig, act)
-     int sig, (*act)();
+     int sig;
+     krb5_sigtype (*act)();
 {
 #ifdef sgi
     int omask = sigignore(sigmask(sig));
@@ -701,7 +805,7 @@ done(status)
 	/* make sure catchild does not snap it up */
 	(void) signal(SIGCHLD, SIG_DFL);
 	if (kill(child, SIGKILL) >= 0)
-	  while ((w = wait((union wait *)0)) > 0 && w != child)
+	  while ((w = wait(0)) > 0 && w != child)
 	    /*void*/;
     }
     exit(status);
@@ -741,22 +845,36 @@ krb5_sigtype
 krb5_sigtype
   catchild()
 {
+#ifdef WAIT_USES_INT
+    int status;
+#else
     union wait status;
+#endif
     int pid;
     
   again:
+#ifdef HAVE_WAIT3
     pid = wait3(&status, WNOHANG|WUNTRACED, (struct rusage *)0);
+#else
+    pid = waitpid(-1, &status, WNOHANG|WUNTRACED);
+#endif
     if (pid == 0)
       return;
     /*
      * if the child (reader) dies, just quit
      */
+#ifdef WAIT_USES_INT
+    if (pid < 0 || (pid == child && !WIFSTOPPED(status)))
+      done(status);
+#else
 #if defined(hpux)
+    /* I think this one is wrong: XXX -- [eichin:19940727.1853EST] */
     if ((pid < 0) || ((pid == child) && (!WIFSTOPPED(status.w_stopval))))
 #else
-      if ((pid < 0) || ((pid == child) && (!WIFSTOPPED( status))))
+    if ((pid < 0) || ((pid == child) && (!WIFSTOPPED( status))))
 #endif
 	done((int)(status.w_termsig | status.w_retcode));
+#endif
     goto again;
 }
 
@@ -821,12 +939,17 @@ writer()
 	    }
 	} else if (local) {
 	    local = 0;
+#ifdef POSIX_TERMIOS
+	    if (c == '.' || c == deftty.c_cc[VEOF]) {
+#else
 	    if (c == '.' || c == deftc.t_eofc) {
+#endif
 		if (confirm_death()) {
 		    echo(c);
 		    break;
 		}
 	    }
+#ifdef TIOCGLTC
 	    if ((c == defltc.t_suspc || c == defltc.t_dsuspc)
 		&& !no_local_escape) {
 		bol = 1;
@@ -834,6 +957,23 @@ writer()
 		stop(c);
 		continue;
 	    }
+#else
+#ifdef POSIX_TERMIOS
+	    if ( (
+		  (c == deftty.c_cc[VSUSP]) 
+#ifdef VDSUSP
+		  || (c == deftty.c_cc[VDSUSP]) 
+#endif
+		  )
+		&& !no_local_escape) {
+	      bol = 1;
+	      echo(c);
+	      stop(c);
+	      continue;
+	    }
+#endif
+#endif
+
 	    if (c != cmdchar)
 	      (void) des_write(rem, &cmdchar, 1);
 	}
@@ -841,9 +981,19 @@ writer()
 	    prf("line gone");
 	    break;
 	}
+#ifdef POSIX_TERMIOS
+	bol = (c == deftty.c_cc[VKILL] ||
+	       c == deftty.c_cc[VINTR] ||
+	       c == '\r' || c == '\n');
+#ifdef TIOCGLTC
+	if (!bol)
+	  bol = (c == defltc.t_suspc);
+#endif
+#else /* !POSIX_TERMIOS */
 	bol = c == defkill || c == deftc.t_eofc ||
 	  c == deftc.t_intrc || c == defltc.t_suspc ||
 	    c == '\r' || c == '\n';
+#endif
     }
 }
 
@@ -877,7 +1027,13 @@ stop(cmdc)
 {
     mode(0);
     (void) signal(SIGCHLD, SIG_IGN);
+#ifdef TIOCGLTC
     (void) kill(cmdc == defltc.t_suspc ? 0 : getpid(), SIGTSTP);
+#else
+#ifdef POSIX_TERMIOS
+    (void) kill(cmdc == deftty.c_cc[VSUSP] ? 0 : getpid(), SIGTSTP);
+#endif
+#endif
     (void) signal(SIGCHLD, catchild);
     mode(1);
     sigwinch();			/* check for size changes */
@@ -938,10 +1094,14 @@ krb5_sigtype
     int out = FWRITE, atmark, n;
     int rcvd = 0;
     char waste[BUFSIZ], mark;
+#ifdef POSIX_TERMIOS
+    struct termios tty;
+#else
 #ifdef USE_TERMIO
     struct termio sb;
 #else
     struct sgttyb sb;
+#endif
 #endif
     
     while (recv(rem, &mark, 1, MSG_OOB) < 0)
@@ -976,6 +1136,18 @@ krb5_sigtype
 	 */
 	(void) kill(ppid, SIGUSR1);
     }
+#ifdef POSIX_TERMIOS
+    if (!eight && (mark & TIOCPKT_NOSTOP)) {
+      (void) tcgetattr(0, &tty);
+      tty.c_iflag &= ~IXON;
+      (void) tcsetattr(0, TCSADRAIN, &tty);
+    }
+    if (!eight && (mark & TIOCPKT_DOSTOP)) {
+      (void) tcgetattr(0, &tty);
+      tty.c_iflag |= IXON;
+      (void) tcsetattr(0, TCSADRAIN, &tty);
+    }
+#else
     if (!eight && (mark & TIOCPKT_NOSTOP)) {
 	(void) ioctl(0, TIOCGETP, (char *)&sb);
 #ifdef USE_TERMIO
@@ -1004,11 +1176,16 @@ krb5_sigtype
 #endif
 	(void) ioctl(0, TIOCSETN, (char *)&sb);
     }
+#endif
     if (mark & TIOCPKT_FLUSHWRITE) {
+#ifdef POSIX_TERMIOS
+        (void) tcflush(1, TCOFLUSH);
+#else
 #ifdef  TIOCFLUSH
 	(void) ioctl(1, TIOCFLUSH, (char *)&out);
 #else
 	(void) ioctl(1, TCFLSH, 1);
+#endif
 #endif
 	for (;;) {
 	    if (ioctl(rem, SIOCATMARK, &atmark) < 0) {
@@ -1101,6 +1278,66 @@ reader(oldmask)
 
 mode(f)
 {
+#ifdef POSIX_TERMIOS
+	struct termios newtty;
+
+	switch(f) {
+	case 0:
+#ifdef TIOCGLTC
+#ifndef solaris20
+		(void) ioctl(0, TIOCSLTC, (char *)&defltc);
+#endif
+#endif
+		(void) tcsetattr(0, TCSADRAIN, &deftty);
+		break;
+	case 1:
+		(void) tcgetattr(0, &newtty);
+#ifdef __svr4__
+	/* there's a POSIX way of doing this, but do we need it general? */
+		newtty.c_cc[VLNEXT] = 0;
+#endif
+		
+		newtty.c_lflag &= ~(ICANON|ISIG|ECHO);
+		if (!flow)
+		{
+			newtty.c_lflag &= ~(ICANON|ISIG|ECHO);
+			newtty.c_iflag &= ~(BRKINT|INLCR|ICRNL|ISTRIP);
+			/* newtty.c_iflag |=  (IXON|IXANY); */
+			newtty.c_iflag &= ~(IXON|IXANY);
+			newtty.c_oflag &= ~(OPOST);
+		} else {
+			newtty.c_lflag &= ~(ICANON|ISIG|ECHO);
+			newtty.c_iflag &= ~(INLCR|ICRNL);
+			/* newtty.c_iflag |=  (BRKINT|ISTRIP|IXON|IXANY); */
+			newtty.c_iflag &= ~(IXON|IXANY);
+			newtty.c_iflag |=  (BRKINT|ISTRIP);
+			newtty.c_oflag &= ~(ONLCR|ONOCR);
+			newtty.c_oflag |=  (OPOST);
+		}
+		/* preserve tab delays, but turn off XTABS */
+		if ((newtty.c_oflag & TABDLY) == TAB3)
+			newtty.c_oflag &= ~TABDLY;
+
+		if (litout)
+			newtty.c_oflag &= ~OPOST;
+
+		newtty.c_cc[VMIN] = 1;
+		newtty.c_cc[VTIME] = 0;
+		(void) tcsetattr(0, TCSADRAIN, &newtty);
+#ifdef TIOCGLTC
+		/* Do this after the tcsetattr() in case this version
+		 * of termio supports the VSUSP or VDSUSP characters */
+#ifndef solaris20
+		/* this forces ICRNL under Solaris... */
+		(void) ioctl(0, TIOCSLTC, (char *)&noltc);
+#endif
+#endif
+		break;
+	default:
+		return;
+		/* NOTREACHED */
+	}
+#else
     struct ltchars *ltc;
 #ifdef USE_TERMIO
     struct termio sb;
@@ -1196,6 +1433,7 @@ mode(f)
     (void) ioctl(0, TIOCLSET, (char *)&lflags);
 #endif
     (void) ioctl(0, TIOCSETN, (char *)&sb);
+#endif /* !POSIX_TERMIOS */
 }
 
 
@@ -1216,7 +1454,7 @@ void try_normal(argv)
 {
     register char *host;
     
-    if (encrypt)
+    if (encrypt_flag)
       exit(1);
     fprintf(stderr,"trying normal rlogin (%s)\n",
 	    UCB_RLOGIN);
@@ -1252,7 +1490,7 @@ int des_read(fd, buf, len)
     long net_len,rd_len;
     int cc;
     
-    if (!encrypt)
+    if (!encrypt_flag)
       return(read(fd, buf, len));
     
     if (nstored >= len) {
@@ -1330,7 +1568,7 @@ int des_write(fd, buf, len)
 {
     long net_len;
     
-    if (!encrypt)
+    if (!encrypt_flag)
       return(write(fd, buf, len));
     
     desoutbuf.length = krb5_encrypt_size(len,eblock.crypto_entry);
@@ -1380,7 +1618,7 @@ int des_read(fd, buf, len)
     long net_len, rd_len;
     int cc;
     
-    if (!encrypt)
+    if (!encrypt_flag)
       return(read(fd, buf, len));
     
     if (nstored >= len) {
@@ -1464,7 +1702,7 @@ int des_write(fd, buf, len)
     static char garbage_buf[8];
     long garbage;
     
-    if (!encrypt)
+    if (!encrypt_flag)
       return(write(fd, buf, len));
     
 #define min(a,b) ((a < b) ? a : b)

@@ -1,12 +1,6 @@
 /*
- *	$Author$
- *	$Header$
+ *	appl/bsd/krshd.c
  */
-
-#ifndef lint
-static char rcsid_rshd_c[] =
-  "$Header$";
-#endif /* lint */
 
 /*
  * Copyright (c) 1983 The Regents of the University of California.
@@ -92,11 +86,25 @@ static char sccsid[] = "@(#)rshd.c	5.12 (Berkeley) 9/12/88";
 #define LOG_REMOTE_REALM
 #define LOG_CMD
      
+#include <sys/types.h>
 #include <sys/ioctl.h>
 #include <sys/param.h>
+#include <sys/socket.h>
+#include <sys/file.h>
+#include <sys/time.h>
      
+#ifdef NEED_SYS_FCNTL_H
+#include <sys/fcntl.h>
+#endif
+#ifdef USE_UNISTD_H
+#include <unistd.h>
+#endif
+#ifdef __SCO__
+#include <sys/unistd.h>
+#endif
+
+/** XXX -- this may be bogus **/
 #if defined(CRAY) || defined(sysvimp) || defined(aux20)
-#include <sys/types.h>
 #ifndef _TYPES_
 #define _TYPES_
 #endif
@@ -104,17 +112,13 @@ static char sccsid[] = "@(#)rshd.c	5.12 (Berkeley) 9/12/88";
 #define F_OK 0
 #endif
 #endif
-     
-#include <sys/socket.h>
-#include <sys/file.h>
-#include <sys/time.h>
-#include <sys/resource.h>
+/** XXX **/     
+
+/* not portable: #include <sys/resource.h> */
      
 #include <netinet/in.h>
      
-#ifndef SYSV
 #include <arpa/inet.h>
-#endif
      
 #include <stdio.h>
 #include <errno.h>
@@ -165,11 +169,42 @@ static char sccsid[] = "@(#)rshd.c	5.12 (Berkeley) 9/12/88";
 
 #include <com_err.h>
 
+#include "loginpaths.h"
+
+/** XXX - make these portable **/
+#ifdef hpux
+/* has no killpg... */
+#define killpg(pid, sig) kill(-(pid), (sig))
+#endif
+
+#ifdef __svr4__
+#define setpgrp(a,b) setpgrp()
+#define getpgrp(a) getpgid(a)
+/* has no killpg... */
+#define killpg(pid, sig) kill(-(pid), (sig))
+#endif
+
+#ifdef linux
+#define setpgrp(a,b) setpgid(a,b) 
+#endif
+
+#ifdef __SCO__
+/* sco has getgroups and setgroups but no initgroups */
+int initgroups(char* name, gid_t basegid) {
+  gid_t others[NGROUPS_MAX+1];
+  int ngrps;
+
+  others[0] = basegid;
+  ngrps = getgroups(NGROUPS_MAX, others+1);
+  return setgroups(ngrps+1, others);
+}
+#endif
+/** XXX **/
+
 #define ARGSTR	"rRkKD:?"
 #else /* !KERBEROS */
 #define ARGSTR	"rRD:?"
      
-char *strsave();
 #endif /* KERBEROS */
      
 int must_pass_rhosts = 0, must_pass_k5 = 0, must_pass_one = 0;
@@ -193,7 +228,7 @@ main(argc, argv)
      int argc;
      char **argv;
 {
-#if defined(BSD) && BSD >= 43
+#if defined(BSD) && BSD+0 >= 43
     struct linger linger;
 #endif
     int on = 1, fromlen;
@@ -322,7 +357,7 @@ main(argc, argv)
 		   sizeof (on)) < 0)
       syslog(LOG_WARNING,
 	     "setsockopt (SO_KEEPALIVE): %m");
-#if defined(BSD) && BSD >= 43
+#if defined(BSD) && BSD+0 >= 43
     linger.l_onoff = 1;
     linger.l_linger = 60;			/* XXX */
     if (setsockopt(fd, SOL_SOCKET, SO_LINGER, (char *)&linger,
@@ -343,30 +378,30 @@ char	username[20] = "USER=";
 char	homedir[64] = "HOME=";
 char	shell[64] = "SHELL=";
 char    term[64] = "TERM=network";
+char	path[128] = "PATH=";
+char	path_rest[64] = RPATH;
 
 #ifdef KERBEROS
 char    *envinit[] =
 #ifdef CRAY
-{homedir, shell, PATH, username, "TZ=GMT0", tmpdir, term, 0};
+{homedir, shell, path, username, "TZ=GMT0", tmpdir, term, 0};
 #define TZENV   4
 #define TMPDIRENV 5
 char    *getenv();
 extern
 #else
-{homedir, shell, "PATH=:/usr/ucb:/bin:/usr/bin:/usr/bin/kerberos",
-   username, term, 0};
+{homedir, shell, path, username, term, 0};
 #endif /* CRAY */
 #else /* !KERBEROS */
 char	*envinit[] =
 #ifdef CRAY
-{homedir, shell, PATH, username, "TZ=GMT0", tmpdir, term, 0};
+{homedir, shell, path, username, "TZ=GMT0", tmpdir, term, 0};
 #define TZENV   4
 #define TMPDIRENV 5
 char    *getenv();
 extern
 #else
-{homedir, shell, "PATH=:/usr/ucb:/bin:/usr/bin:/usr/bin/kerberos",
-   username, term, 0};
+{homedir, shell, path, username, term, 0};
 #endif /* CRAY */
 #endif /* KERBEROS */
 
@@ -378,6 +413,11 @@ char ttyn[12];		/* Line string for wtmp entries */
 int maxlogs;
 #else
 #define SIZEOF_INADDR sizeof(struct in_addr)
+#endif
+
+#ifndef NCARGS
+/* linux doesn't seem to have it... */
+#define NCARGS 1024
 #endif
 
 #define NMAX   16 
@@ -455,6 +495,8 @@ doit(f, fromp)
     int non_privileged = 0;
 
 #ifdef IP_TOS
+/* solaris has IP_TOS, but only IPTOS_* values */
+#ifdef HAVE_GETTOSBYNAME
     struct tosent *tp;
 
     if ((tp = gettosbyname("interactive", "tcp")) &&
@@ -463,6 +505,7 @@ doit(f, fromp)
       syslog(LOG_NOTICE, "setsockopt (IP_TOS): %m");
 #else
     ;       /* silently ignore TOS errors in 6E */
+#endif
 #endif
 #endif /* IP_TOS */
     
@@ -993,7 +1036,7 @@ doit(f, fromp)
 	}
 	pid = fork();
 	if (pid == -1)  {
-	    error("Try again.\n");
+	    error("Fork failed.\n");
 	    goto signout_please;
 	}
 	if (pid) {
@@ -1073,6 +1116,9 @@ doit(f, fromp)
     strncat(homedir, pwd->pw_dir, sizeof(homedir)-6);
     strncat(shell, pwd->pw_shell, sizeof(shell)-7);
     strncat(username, pwd->pw_name, sizeof(username)-6);
+    strcat(path, KPROGDIR);
+    strcat(path, ":");
+    strcat(path, path_rest);
     cp = strrchr(pwd->pw_shell, '/');
     if (cp)
       cp++;
@@ -1098,7 +1144,7 @@ doit(f, fromp)
 /*VARARGS1*/
 error(fmt, a1, a2, a3)
      char *fmt;
-     int a1, a2, a3;
+     char *a1, *a2, *a3;
 {
     char buf[BUFSIZ];
     

@@ -1,7 +1,5 @@
 /*
- *	$Source$
- *	$Author$
- *	$Id$
+ *	appl/bsd/login.c
  */
 
 /*
@@ -59,12 +57,26 @@ static char sccsid[] = "@(#)login.c	5.25 (Berkeley) 1/6/89";
 #include <sys/resource.h>
 #include <sys/file.h>
 #include <sys/ioctl.h>
+#include <fcntl.h>
+#ifdef NEED_SYS_FCNTL_H
+#include <sys/fcntl.h>
+#endif
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 
 #include <utmp.h>
 #include <signal.h>
 
-#if !defined(_AIX)
+#ifdef HAVE_LASTLOG_H
 #include <lastlog.h>
+#endif
+
+#ifdef linux
+/* linux has V* but not C* in headers. Perhaps we shouldn't be
+ * initializing these values anyway -- tcgetattr *should* give
+ * them reasonable defaults... */
+#define NO_INIT_CC
 #endif
 
 #include <errno.h>
@@ -86,9 +98,12 @@ static char sccsid[] = "@(#)login.c	5.25 (Berkeley) 1/6/89";
 #include <arpa/resolv.h>
 #endif /* BIND_HACK */
 #endif /* KRB4 */
+#include "loginpaths.h"
 
 #ifdef POSIX
 #include <stdlib.h>
+#endif
+#ifdef POSIX_TERMIOS
 #include <termios.h>
 #ifdef _AIX
 #include <termio.h>
@@ -100,21 +115,36 @@ static char sccsid[] = "@(#)login.c	5.25 (Berkeley) 1/6/89";
 #include <sys/id.h>
 #endif
 
+#ifndef HAVE_GETDTABLESIZE
+#include <sys/resource.h>
+int getdtablesize() {
+  struct rlimit rl;
+  getrlimit(RLIMIT_NOFILE, &rl);
+  return rl.rlim_cur;
+}
+#endif
+
 #if defined(_AIX)
 #define PRIO_OFFSET 20
 #else
 #define PRIO_OFFSET 0
 #endif
 
-#ifdef UIDGID_T
-uid_t getuid();
+/* XXX -- do we ever need to test for these? */
 #define uid_type uid_t
 #define gid_type gid_t
-#else
-int getuid();
-#define uid_type int
-#define gid_type int
-#endif /* UIDGID_T */
+
+#ifndef HAVE_INITGROUPS
+/* sco has getgroups and setgroups but no initgroups */
+int initgroups(char* name, gid_t basegid) {
+  gid_t others[NGROUPS_MAX+1];
+  int ngrps;
+
+  others[0] = basegid;
+  ngrps = getgroups(NGROUPS_MAX, others+1);
+  return setgroups(ngrps+1, others);
+}
+#endif
 
 #define	TTYGRPNAME	"tty"		/* name of group to own ttys */
 
@@ -138,8 +168,13 @@ int getuid();
 #define REGISTER	"/usr/etc/go_register"
 #define GET_MOTD	"/bin/athena/get_message"
 
+#ifndef NO_UT_HOST
 #define	UT_HOSTSIZE	sizeof(((struct utmp *)0)->ut_host)
+#endif
+#ifndef UT_NAMESIZE
+/* linux defines it directly in <utmp.h> */
 #define	UT_NAMESIZE	sizeof(((struct utmp *)0)->ut_name)
+#endif
 
 #define MAXENVIRON	32
 
@@ -152,7 +187,7 @@ int	timeout = 300;
 struct passwd *pwd;
 char term[64], *hostname, *username;
 
-#ifndef POSIX
+#ifndef POSIX_TERMIOS
 struct sgttyb sgttyb;
 struct tchars tc = {
 	CINTR, CQUIT, CSTART, CSTOP, CEOT, CBRK
@@ -182,7 +217,6 @@ int pagflag = 0;			/* true if setpag() has been called */
 #endif /* KRB4 */
 
 char *getenv();
-char *strsave();
 void dofork();
 
 #ifdef POSIX
@@ -219,9 +253,9 @@ main(argc, argv)
 	char *domain, *salt, **envinit, *ttyn, *tty, *ktty;
 	char tbuf[MAXPATHLEN + 2];
 	char *ttyname(), *stypeof(), *crypt(), *getpass();
-	time_t time(), login_time;
+	time_t login_time;
 	off_t lseek();
-#ifdef POSIX
+#ifdef POSIX_TERMIOS
 	struct termios tc;
 #endif
 
@@ -229,7 +263,9 @@ main(argc, argv)
 	(void)alarm((u_int)timeout);
 	(void)signal(SIGQUIT, SIG_IGN);
 	(void)signal(SIGINT, SIG_IGN);
+#ifdef HAVE_SETPRIORITY
 	(void)setpriority(PRIO_PROCESS, 0, 0 + PRIO_OFFSET);
+#endif
 #ifdef OQUOTA
 	(void)quota(Q_SETUID, 0, 0, 0);
 #endif
@@ -351,7 +387,7 @@ main(argc, argv)
 	(void)ioctl(0, TIOCNXCL, (char *)0);
 	(void)fcntl(0, F_SETFL, ioctlval);
 #endif
-#ifdef POSIX
+#ifdef POSIX_TERMIOS
 	(void)tcgetattr(0, &tc);
 #else
 	(void)ioctl(0, TIOCGETP, (char *)&sgttyb);
@@ -363,11 +399,12 @@ main(argc, argv)
 	 */
 	if (eflag)
 	    	lgetstr(term, sizeof(term), "Terminal type");
-#ifdef POSIX
+#ifdef POSIX_TERMIOS
 	if (rflag || kflag || Kflag || eflag)
 		doremoteterm(&tc);
 	tc.c_cc[VMIN] = 1;
 	tc.c_cc[VTIME] = 0;
+#ifndef NO_INIT_CC
 	tc.c_cc[VERASE] = CERASE;
 	tc.c_cc[VKILL] = CKILL;
 	tc.c_cc[VEOF] = CEOF;
@@ -375,12 +412,20 @@ main(argc, argv)
 	tc.c_cc[VQUIT] = CQUIT;
 	tc.c_cc[VSTART] = CSTART;
 	tc.c_cc[VSTOP] = CSTOP;
+#ifndef CNUL
+#define CNUL CEOL
+#endif
 	tc.c_cc[VEOL] = CNUL;
 	/* The following are common extensions to POSIX */
 #ifdef VEOL2
 	tc.c_cc[VEOL2] = CNUL;
 #endif
 #ifdef VSUSP
+#ifdef hpux
+#ifndef CSUSP
+#define CSUSP CSWTCH
+#endif
+#endif
 	tc.c_cc[VSUSP] = CSUSP;
 #endif
 #ifdef VDSUSP
@@ -398,6 +443,7 @@ main(argc, argv)
 #ifdef VWERSE
 	tc.c_cc[VWERSE] = CWERASE;
 #endif
+#endif /* NO_INIT_CC */
 	tcsetattr(0, TCSANOW, &tc);
 #else
 	if (rflag || kflag || Kflag || eflag)
@@ -498,10 +544,14 @@ main(argc, argv)
 		kpass_ok = 0;
 		lpass_ok = 0;
 
+#ifdef HAVE_SETPRIORITY
 		(void) setpriority(PRIO_PROCESS, 0, -4 + PRIO_OFFSET);
+#endif
 		if (read_long_pw_string(pp2, sizeof(pp2)-1, "Password: ", 0)) {
 		    /* reading password failed... */
+#ifdef HAVE_SETPRIORITY
 		    (void) setpriority(PRIO_PROCESS, 0, 0 + PRIO_OFFSET);
+#endif
 		    goto bad_login;
 		}
 		if (!pwd)		/* avoid doing useless work */
@@ -550,7 +600,9 @@ main(argc, argv)
 						   realm,
 						   DEFAULT_TKT_LIFE, pp2);
 		    memset (pp2, 0, sizeof(pp2));
+#ifdef HAVE_SETPRIORITY
 		    (void) setpriority(PRIO_PROCESS, 0, 0 + PRIO_OFFSET);
+#endif
 		    switch (krbval) {
 		    case INTK_OK:
 			kpass_ok = 1;
@@ -579,7 +631,9 @@ main(argc, argv)
 		    }
 		} else {
 		    (void) memset (pp2, 0, sizeof(pp2));
+#ifdef HAVE_SETPRIORITY
 		    (void) setpriority(PRIO_PROCESS, 0, 0 + PRIO_OFFSET);
+#endif
 		}
 
 		/* Policy: If local password is good, user is good.
@@ -597,9 +651,13 @@ bad_login:
 		if (krbflag)
 		    dest_tkt();		/* clean up tickets if login fails */
 #else /* !KRB4 */
+#ifdef HAVE_SETPRIORITY
 		(void) setpriority(PRIO_PROCESS, 0, -4 + PRIO_OFFSET);
+#endif
 		p = crypt(getpass("password:"), salt);
+#ifdef HAVE_SETPRIORITY
 		(void) setpriority(PRIO_PROCESS, 0, 0 + PRIO_OFFSET);
+#endif
 		if (pwd && !strcmp(p, pwd->pw_passwd))
 			break;
 #endif /* KRB4 */
@@ -607,15 +665,25 @@ bad_login:
 		printf("Login incorrect\n");
 		if (++cnt >= 5) {
 			if (hostname)
+#ifdef UT_HOSTSIZE
 			    syslog(LOG_ERR,
 				"REPEATED LOGIN FAILURES ON %s FROM %.*s, %.*s",
 				tty, UT_HOSTSIZE, hostname, UT_NAMESIZE,
 				username);
+#else
+			    syslog(LOG_ERR,
+				"REPEATED LOGIN FAILURES ON %s FROM %s, %.*s",
+				tty, hostname, UT_NAMESIZE,
+				username);
+#endif
 			else
 			    syslog(LOG_ERR,
 				"REPEATED LOGIN FAILURES ON %s, %.*s",
 				tty, UT_NAMESIZE, username);
+/* irix has no tichpcl */
+#ifdef TIOCHPCL
 			(void)ioctl(0, TIOCHPCL, (char *)0);
+#endif
 			sleepexit(1);
 		}
 	}
@@ -631,8 +699,13 @@ bad_login:
 	 */
 	if (pwd->pw_uid == 0 && !rootterm(tty) && (passwd_req || rflag)) {
 		if (hostname)
+#ifdef UT_HOSTSIZE
 			syslog(LOG_ERR, "ROOT LOGIN REFUSED ON %s FROM %.*s",
 			    tty, UT_HOSTSIZE, hostname);
+#else
+			syslog(LOG_ERR, "ROOT LOGIN REFUSED ON %s FROM %s",
+			    tty, hostname);
+#endif
 		else
 			syslog(LOG_ERR, "ROOT LOGIN REFUSED ON %s", tty);
 		printf("Login incorrect\n");
@@ -672,11 +745,14 @@ bad_login:
 		memset((char *)&utmp, 0, sizeof(utmp));
 		login_time = time(&utmp.ut_time);
 		(void) strncpy(utmp.ut_name, username, sizeof(utmp.ut_name));
+#ifndef NO_UT_HOST
 		if (hostname)
 		    (void) strncpy(utmp.ut_host, hostname,
 				   sizeof(utmp.ut_host));
 		else
 		    memset(utmp.ut_host, 0, sizeof(utmp.ut_host));
+#endif
+		/* Solaris 2.0, 2.1 used ttyn here. Never Again... */
 		(void) strncpy(utmp.ut_line, tty, sizeof(utmp.ut_line));
 		login(&utmp);
 	}
@@ -715,6 +791,10 @@ bad_login:
 #ifdef OQUOTA
 	quota(Q_DOWARN, pwd->pw_uid, (dev_t)-1, 0);
 #endif
+#ifdef __SCO__
+	/* this is necessary when C2 mode is enabled, but not otherwise */
+	setluid((uid_type) pwd->pw_uid);
+#endif
 	/* This call MUST succeed */
 #ifdef _IBMR2
 	setuidx(ID_LOGIN, pwd->pw_uid);
@@ -728,9 +808,12 @@ bad_login:
 		pwd->pw_shell = BSHELL;
 	/* turn on new line discipline for the csh */
 	else if (!strcmp(pwd->pw_shell, "/bin/csh")) {
+#ifdef NTTYDISC
+/* sco, svr4 don't have it */
 #if !defined(_IBMR2)
 		ioctlval = NTTYDISC;
 		(void)ioctl(0, TIOCSETD, (char *)&ioctlval);
+#endif
 #endif
 	}
 
@@ -771,7 +854,7 @@ bad_login:
 	envinit[i++] = NULL;
 
 	setenv("HOME", pwd->pw_dir, 0);
-	setenv("PATH", "/usr/local/krb5/bin:/usr/local/bin:/usr/bin/X11:/usr/ucb:/bin:/usr/bin:.", 0);
+	setenv("PATH", LPATH, 0);
 	setenv("USER", pwd->pw_name, 0);
 	setenv("SHELL", pwd->pw_shell, 0);
 
@@ -799,16 +882,29 @@ bad_login:
 			    /* @*$&@#*($)#@$ syslog doesn't handle very
 			       many arguments */
 			    char buf[BUFSIZ];
+#ifdef UT_HOSTSIZE
 			    (void) sprintf(buf,
 				   "ROOT LOGIN (krb) %s from %.*s, %s.%s@%s",
 				   tty, UT_HOSTSIZE, hostname,
 				   kdata->pname, kdata->pinst,
 				   kdata->prealm);
+#else
+			    (void) sprintf(buf,
+				   "ROOT LOGIN (krb) %s from %s, %s.%s@%s",
+				   tty, hostname,
+				   kdata->pname, kdata->pinst,
+				   kdata->prealm);
+#endif
 			    syslog(LOG_NOTICE, buf);
 		        } else {
 #endif /* KRB4 */
+#ifdef UT_HOSTSIZE
 			syslog(LOG_NOTICE, "ROOT LOGIN %s FROM %.*s",
 			    tty, UT_HOSTSIZE, hostname);
+#else
+			syslog(LOG_NOTICE, "ROOT LOGIN %s FROM %s",
+			    tty, hostname);
+#endif
 #ifdef KRB4
 			}
   		else 
@@ -887,19 +983,19 @@ timedout()
 	exit(0);
 }
 
-#ifdef NOTTYENT
+#ifndef HAVE_TTYENT_H
 int root_tty_security = 1;
 #endif
 rootterm(tty)
 	char *tty;
 {
-#ifdef NOTTYENT
+#ifndef HAVE_TTYENT_H
 	return(root_tty_security);
 #else
 	struct ttyent *t;
 
 	return((t = getttynam(tty)) && t->ty_status&TTY_SECURE);
-#endif /* NOTTYENT */
+#endif /* HAVE_TTYENT_H */
 }
 
 jmp_buf motdinterrupt;
@@ -942,7 +1038,7 @@ dolastlog(quiet, tty)
 	int quiet;
 	char *tty;
 {
-#if !defined(_AIX)
+#ifdef HAVE_LASTLOG_H
 	struct lastlog ll;
 	int fd;
 
@@ -981,7 +1077,7 @@ char *
 stypeof(ttyid)
 	char *ttyid;
 {
-#ifdef NOTTYENT
+#ifndef HAVE_TTYENT_H
 	return(UNKNOWN);
 #else
 	struct ttyent *t;
@@ -1126,8 +1222,18 @@ char *speeds[] = {
 };
 #define	NSPEEDS	(sizeof(speeds) / sizeof(speeds[0]))
 
+#ifdef POSIX_TERMIOS
+#ifndef CBAUD
+/* this must be in sync with the list above */
+speed_t b_speeds[] = {
+	B0, B50, B75, B110, B134, B150, B200, B300, B600,
+	B1200, B1800, B2400, B4800, B9600, B19200, B38400,
+};
+#endif
+#endif
+
 doremoteterm(tp)
-#ifdef POSIX
+#ifdef POSIX_TERMIOS
 	struct termios *tp;
 #else
 	struct sgttyb *tp;
@@ -1144,21 +1250,38 @@ doremoteterm(tp)
 			*cp++ = '\0';
 		for (cpp = speeds; cpp < &speeds[NSPEEDS]; cpp++)
 			if (strcmp(*cpp, speed) == 0) {
-#ifdef POSIX
+#ifdef POSIX_TERMIOS
+#ifdef CBAUD
+/* some otherwise-posix systems seem not to have cfset... for now, leave
+   the old code for those who can use it */
 				tp->c_cflag =
 					(tp->c_cflag & ~CBAUD) | (cpp-speeds);
+#else
+				cfsetispeed(tp, b_speeds[cpp-speeds]);
+				cfsetospeed(tp, b_speeds[cpp-speeds]);
+#endif
 #else
 				tp->sg_ispeed = tp->sg_ospeed = cpp-speeds;
 #endif
 				break;
 			}
 	}
-#ifdef POSIX
+#ifdef POSIX_TERMIOS
  	/* set all standard echo, edit, and job control options */
- 	tp->c_lflag = ECHO|ECHOE|ECHOK|ICANON|ISIG;
+	/* but leave any extensions */
+ 	tp->c_lflag |= ECHO|ECHOE|ECHOK|ICANON|ISIG;
+	tp->c_lflag &= ~(NOFLSH|TOSTOP|IEXTEN);
+#ifdef ECHOCTL
+	/* Not POSIX, but if we have it, we probably want it */
+ 	tp->c_lflag |= ECHOCTL;
+#endif
+#ifdef ECHOKE
+	/* Not POSIX, but if we have it, we probably want it */
+ 	tp->c_lflag |= ECHOKE;
+#endif
  	tp->c_iflag |= ICRNL|BRKINT;
  	tp->c_oflag |= ONLCR|OPOST|TAB3;
-#else /* !POSIX */
+#else /* !POSIX_TERMIOS */
 	tp->sg_flags = ECHO|CRMOD|ANYP|XTABS;
 #endif
 }
@@ -1180,6 +1303,11 @@ sleepexit(eval)
  * It exits only in the child process.
  */
 #include <sys/wait.h>
+#ifdef WAIT_USES_INT
+#define WAIT_TYPE int
+#else
+#define WAIT_TYPE union wait
+#endif
 void
 dofork()
 {
@@ -1195,7 +1323,7 @@ dofork()
     (void) chdir("/");	/* Let's not keep the fs busy... */
     
     /* If we're the parent, watch the child until it dies */
-    while(wait((union wait *)0) != child)
+    while(wait((WAIT_TYPE *)0) != child)
 	    ;
 
     /* Cleanup stuff */
@@ -1214,14 +1342,6 @@ dofork()
 }
 #endif /* KRB4 */
 
-
-char *strsave(s)
-char *s;
-{
-    char *ret = (char *)malloc(strlen(s) + 1);
-    strcpy(ret, s);
-    return(ret);
-}
 
 #ifdef _IBMR2
 update_ref_count(int adj)
