@@ -1,4 +1,6 @@
 thisconfigdir=.
+myfulldir=kdc
+mydir=.
 BUILDTOP=$(REL)$(U)
 CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
 RUN_SETUP = @KRB5_RUN_ENV@
