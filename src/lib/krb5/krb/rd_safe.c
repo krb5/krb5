@@ -150,8 +150,8 @@ krb5_data *outbuf;
 
 
     if (our_cksum.length != his_cksum->length ||
-	bcmp((char *)our_cksum.contents, (char *)his_cksum->contents,
-	     our_cksum.length)) {
+	memcmp((char *)our_cksum.contents, (char *)his_cksum->contents,
+	       our_cksum.length)) {
 	cleanup();
 	return KRB5KRB_AP_ERR_MODIFIED;
     }

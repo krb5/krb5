@@ -32,7 +32,8 @@ const krb5_address *addr2;
 
     if (addr1->length != addr2->length)
 	return(FALSE);
-    if (bcmp((char *)addr1->contents, (char *)addr2->contents, addr1->length))
+    if (memcmp((char *)addr1->contents, (char *)addr2->contents,
+	       addr1->length))
 	return FALSE;
     else
 	return TRUE;
