@@ -1,3 +1,8 @@
+Mon Mar 30 13:50:15 1998  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* resolve.c: Include unistd.h if present on system (for
+	        gethostname prototype). 
+
 Wed Feb 18 16:30:37 1998  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Remove trailing slash from thisconfigdir.  Fix up

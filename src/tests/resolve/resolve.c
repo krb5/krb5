@@ -57,6 +57,10 @@ char *strchr();
 #include <sys/socket.h>
 #endif
 
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+
 #include <netdb.h>
 
 int
@@ -69,7 +73,6 @@ main(argc, argv)
 	char addrcopy[4];
 	struct hostent *host;
 	int quiet = 0;
-	int err;
 
 	argc--; argv++;
 	while (argc) {
