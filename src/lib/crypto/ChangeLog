@@ -1,4 +1,6 @@
 Thu Aug  4 03:40:24 1994  Tom Yu  (tlyu@dragons-lair)
 
+	* configure.in: oops check for install
+
 	* Makefile.in: make install fixes
 

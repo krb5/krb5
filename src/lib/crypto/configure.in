@@ -6,6 +6,7 @@ CONFIG_DIRS(des crc32 md4 md5 os)
 AC_PROG_ARCHIVE
 AC_PROG_ARCHIVE_ADD
 AC_PROG_RANLIB
+AC_PROG_INSTALL
 MAKE_SUBDIRS("making",all)
 MAKE_SUBDIRS("cleaning",clean)
 AppendRule([all:: libcrypto.a])
