@@ -47,6 +47,9 @@ int krb5int_lib_init(void)
     err = krb5int_cc_initialize();
     if (err)
 	return err;
+    err = k5_mutex_finish_init(&krb5int_us_time_mutex);
+    if (err)
+	return err;
     return 0;
 }
 
