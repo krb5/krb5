@@ -1122,7 +1122,7 @@ startslave(host, autologin, autoname)
 	SCPYN(request.gen_id, gen_id);
 	SCPYN(request.tty_id, &line[8]);
 	SCPYN(request.host, host);
-	SCPYN(request.term_type, terminaltype ? terminaltype : "network");
+	SCPYN(request.term_type, *terminaltype ? terminaltype : "network");
 #if	!defined(UNICOS5)
 	request.signal = SIGCLD;
 	request.pid = getpid();
