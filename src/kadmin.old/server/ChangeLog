@@ -1,4 +1,8 @@
 
+Thu Jun 22 11:54:31 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* adm_server.c - Change KDB_CONVERT_KEY_OUTOF_DB to decrypt_key call.
+
+
 Thu Jun 15 17:51:04 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in - Change explicit library names to -l<lib> form, and
 		change target link line to use $(LD) and associated flags.

@@ -356,7 +356,8 @@ init_db(context, dbname, masterkeyname, masterkeyblock)
 	convert server.key into a real key 
 	(it may be encrypted in the database) 
  */
-    if (retval = KDB_CONVERT_KEY_OUTOF_DB(context,&server_entry.key,&tgs_key)) {
+    if (retval = krb5_kdb_decrypt_key(context,&master_encblock,
+				      &server_entry.key,&tgs_key)) {
 	krb5_db_free_principal(context, &server_entry, number_of_entries);
 	(void) krb5_finish_key(context, &master_encblock);
 	memset((char *)&master_encblock, 0, sizeof(master_encblock));

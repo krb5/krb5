@@ -70,7 +70,7 @@ check_padata (client, src_addr, padata, pa_id, flags)
     enckey = &(client->key);
     /* 	Extract client key/alt_key from master key */
    
-    retval = KDB_CONVERT_KEY_OUTOF_DB(kdc_context,enckey,&tmpkey);
+    retval = krb5_kdb_decrypt_key(kdc_context,&master_encblock,enckey,&tmpkey);
     if (retval) {
 	krb5_klog_syslog( LOG_ERR, "AS_REQ: Unable to extract client key: %s",
 	       error_message(retval));
@@ -86,7 +86,8 @@ check_padata (client, src_addr, padata, pa_id, flags)
 	 */
 	enckey = &(client->alt_key);
 	/* Extract client key/alt_key from master key */
-	if ((retval = KDB_CONVERT_KEY_OUTOF_DB(kdc_context,enckey,&tmpkey))) {
+	if ((retval = krb5_kdb_decrypt_key(kdc_context,&master_encblock,
+					   enckey,&tmpkey))) {
 	    krb5_klog_syslog( LOG_ERR, "AS_REQ: Unable to extract client alt_key: %s",
 		   error_message(retval));
 	    return retval;
@@ -405,7 +406,8 @@ krb5_data **response;			/* filled in with a response packet */
 
     /* convert server.key into a real key (it may be encrypted
        in the database) */
-    if ((retval = KDB_CONVERT_KEY_OUTOF_DB(kdc_context, &server.key, &encrypting_key)))
+    if ((retval = krb5_kdb_decrypt_key(kdc_context, &master_encblock,
+				       &server.key, &encrypting_key)))
 	goto errout;
     retval = krb5_encrypt_tkt_part(kdc_context, &eblock, &encrypting_key, &ticket_reply);
     memset((char *)encrypting_key.contents, 0, encrypting_key.length);
@@ -479,7 +481,8 @@ krb5_data **response;			/* filled in with a response packet */
 
     /* convert client.key into a real key (it may be encrypted
        in the database) */
-    if ((retval = KDB_CONVERT_KEY_OUTOF_DB(kdc_context, &client.key, &encrypting_key)))
+    if ((retval = krb5_kdb_decrypt_key(kdc_context, &master_encblock,
+				       &client.key, &encrypting_key)))
 	goto errout;
     reply.enc_part.etype = useetype;
     reply.enc_part.kvno = client.kvno;

@@ -376,7 +376,7 @@ krb5_error_code kdc_get_server_key(context, service, key, kvno)
       * convert server.key into a real key (it is encrypted in the
       * database)
       */
-     ret = KDB_CONVERT_KEY_OUTOF_DB(context, &server.key, key);
+     ret = krb5_kdb_decrypt_key(context, &master_encblock, &server.key, key);
      if (kvno)
 	  *kvno = server.kvno;
      krb5_db_free_principal(context, &server, nprincs);
