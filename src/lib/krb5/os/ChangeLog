@@ -1,3 +1,8 @@
+2002-11-12  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (t_locate_kdc): Use normal CC_LINK rule for linking
+	test program.
+
 2002-10-28  Ken Raeburn  <raeburn@mit.edu>
 
 	* localaddr.c (print_addr) [TEST]: Don't mix size_t and socklen_t,
