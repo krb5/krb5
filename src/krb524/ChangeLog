@@ -1,3 +1,11 @@
+2003-03-16  Sam Hartman  <hartmans@mit.edu>
+
+	* krb524d.c (handle_classic_v4): Do not support 3des enctypes as
+	they are insecure.  Also, by default do not allow krb4
+	cross-realm.
+
+	* cnv_tkt_skey.c (krb524_convert_tkt_skey): Don't support 3des tickets
+
 2002-11-07  Tom Yu  <tlyu@mit.edu>
 
 	* sendmsg.c (krb524_sendto_kdc): Check for *addrlen > 0 (not
