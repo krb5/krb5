@@ -1,3 +1,8 @@
+Wed Jan 25 20:48:50 1995  Mark Eichin  (eichin@tweedledumber.cygnus.com)
+
+	* Makefile.in (SRCS): add com_err.c explicit dependency to work
+	around VPATH bug in Solaris make. Also fix typo in comment.
+
 Fri Nov 18 00:34:29 1994  Mark Eichin  <eichin@cygnus.com>
 
 	* configure.in: add caching to perror check (from epeisach).

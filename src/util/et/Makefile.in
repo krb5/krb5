@@ -33,13 +33,15 @@ SRCS=$(CFILES)
 #
 error_table.o: et_lex.lex.c
 
+# solaris make loses on com_err.c but not on init_et.c, but this helps
+com_err.o: com_err.c
 #
 # real entries...
 #
 
 all:: compile_et includes
 
-# The realm compile_et just isn't portable.  (But then again, anything using 
+# The real compile_et just isn't portable.  (But then again, anything using 
 # lex and yacc isn't portable by definition.  :-(  )
 #
 #compile_et: compile_et.o error_table.o
