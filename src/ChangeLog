@@ -1,3 +1,8 @@
+Tue Aug 12 11:09:30 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* aclocal.m4 (WITH_HESIOD): Fix --with-hesiod support to DTRT if
+	        the option is not specified.
+
 Tue Aug 12 08:58:11 1997  Ezra Peisach  <epeisach@mit.edu>
 
 	* Makefile.in (MACFILES): Remove mac/gss/* as it does not exist.

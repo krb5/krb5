@@ -940,9 +940,9 @@ dnl
 dnl WITH_HESIOD
 dnl
 AC_DEFUN(WITH_HESIOD,
-[AC_ARG_WITH(hesiod, [  --with-hesiod=path      compile with hesiod support],
+[AC_ARG_WITH(hesiod, [  --with-hesiod[=path]    compile with hesiod support],
 	hesiod=$with_hesiod, with_hesiod=no)
-if test "$hesiod" != "no"; then
+if test "$with_hesiod" != "no"; then
 	HESIOD_DEFS=-DHESIOD
 	AC_CHECK_LIB(resolv, res_send, res_lib=-lresolv)
 	if test "$hesiod" != "yes"; then
