@@ -106,6 +106,18 @@ static kdb5_dispatch_table berkeley_dispatch = {
     (int (*)()) NULL		/* Get Database FD num	*/
 };
 
+/*
+ * The following prototypes are necessary in case dbm_error and
+ * dbm_clearerr are in the library but not prototyped
+ * (e.g. NetBSD-1.0)
+ */
+#ifdef MISSING_ERROR_PROTO
+int dbm_error PROTOTYPE((DBM *));
+#endif
+#ifdef MISSING_CLEARERR_PROTO
+int dbm_clearerr PROTOTYPE((DBM *));
+#endif
+
 static kdb5_dispatch_table dbm_dispatch = {
     "Stock [N]DBM Database",
     ".dir",			/* Index file name ext	*/

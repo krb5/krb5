@@ -156,6 +156,18 @@ static kdb5_dispatch_table kdb5_default_dispatch = {
 };
 #else	/* BERK_DB_DBM */
 /*
+ * The following prototypes are necessary in case dbm_error and
+ * dbm_clearerr are in the library but not prototyped
+ * (e.g. NetBSD-1.0)
+ */
+#ifdef MISSING_ERROR_PROTO
+int dbm_error PROTOTYPE((DBM *));
+#endif
+#ifdef MISSING_CLEARERR_PROTO
+int dbm_clearerr PROTOTYPE((DBM *));
+#endif
+
+/*
  * This module contains all of the code which directly interfaces to
  * the underlying representation of the Kerberos database; this
  * implementation uses a DBM or NDBM indexed "file" (actually

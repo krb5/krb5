@@ -1,3 +1,11 @@
+Tue Jul 25 14:06:50 1995  Tom Yu  <tlyu@lothlorien.MIT.EDU>
+
+	* kdb_dbm.c, t_kdb.c: Add prototype for dbm_error and dbm_clearerr
+		in case they're not prototyped in the header files.
+
+	* configure.in: Add test for missing prototypes for dbm_error and
+		dbm_clearerr.
+
 Thu Jul 20 23:59:18 1995  Mark Eichin  <eichin@cygnus.com>
 
 	* kdb_dbm.c (krb5_dbm_db_create): move dirname, pagname
