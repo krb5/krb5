@@ -1279,7 +1279,7 @@ kadmin_startup(argc, argv)
     char 		*action = (char *) NULL;
 
     programname = strrchr(argv[0], (int) '/');
-    programname = (programname) ? programname++ : argv[0];
+    programname = (programname) ? programname+1 : argv[0];
     while ((option = getopt(argc, argv, "r:p:mt:")) != EOF) {
 	switch (option) {
 	case 'r':
