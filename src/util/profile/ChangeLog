@@ -1,3 +1,14 @@
+Mon Jan 25 18:44:26 1999  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* prof_tree.c (profile_node_iterator): Added comments indicating
+		that profile_node_iterator, not being an exported
+		interface, returns pointers into the parse tree, and that
+		values should be strdup()'ed before returning them to a
+		calling application.
+
+	* prof_get.c (profile_iterator): Strdup the name and value strings
+		before returning them to the calling application.
+
 Thu Jan 21 15:21:18 1999  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* profile.hin: Fix definition of PROTOYPE so that it works under
