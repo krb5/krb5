@@ -641,7 +641,8 @@ pty_update_utmp(int process_type, int pid, const char *username,
 
     memset(&ent, 0, sizeof(ent));
 #ifdef HAVE_STRUCT_UTMP_UT_HOST
-    strncpy(ent.ut_host, host, sizeof(ent.ut_host));
+    if (host)
+	strncpy(ent.ut_host, host, sizeof(ent.ut_host));
 #endif
     strncpy(ent.ut_name, username, sizeof(ent.ut_name));
     strncpy(ent.ut_line, line, sizeof(ent.ut_line));

@@ -1,3 +1,8 @@
+2001-06-28  Ken Raeburn  <raeburn@mit.edu>
+
+	* update_utmp.c (pty_update_utmp): Don't copy host if it's a null
+	pointer.
+
 2001-06-21  Ezra Peisach  <epeisach@mit.edu>
 
 	* libpty.h: Change variable line in prototype to tty_line to
