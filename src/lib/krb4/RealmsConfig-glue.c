@@ -352,7 +352,7 @@ krb_get_admhst(
 /*
  * Realm, index -> kpasswd KDC mapping
  */
-int KRB5_CALLCONV
+int
 krb_get_kpasswdhst(
     char	*host,
     char	*realm,
@@ -482,7 +482,7 @@ krb_get_krbhst(
 /*
  * Realm -> string_to_key mapping
  */
-int KRB5_CALLCONV
+int
 krb_get_stk(
     KRB_UINT32	*type,
     char	*realm)

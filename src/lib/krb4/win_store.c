@@ -18,7 +18,7 @@ krb5_context krb5__krb4_context = 0;
 
 char *
 krb__get_srvtabname(default_srvtabname)
-	char *default_srvtabname;
+	const char *default_srvtabname;
 {
 	const char* names[3];
 	char **full_name = 0, **cpp;

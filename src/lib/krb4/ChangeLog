@@ -1,3 +1,9 @@
+2002-12-18  Tom Yu  <tlyu@mit.edu>
+
+	* RealmsConfig-glue.c: Fix up KRB5_CALLCONV.
+
+	* win_store.c (krb__get_srvtabname): Add const to parameter.
+
 2002-12-16  Tom Yu  <tlyu@mit.edu>
 
 	* tkt_string.c (krb5_set_tkt_string): Add KRB5_CALLCONV.
