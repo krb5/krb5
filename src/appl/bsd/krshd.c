@@ -1681,6 +1681,10 @@ recvauth(netf, peersin, peeraddr)
 				   &kremuser))
 	return status;
     
+    if (status = krb5_copy_principal(bsd_context, ticket->enc_part2->client, 
+				     &client))
+	return status;
+
     /* Setup eblock for encrypted sessions. */
     krb5_use_keytype(bsd_context, &eblock, ticket->enc_part2->session->keytype);
     if (status = krb5_process_key(bsd_context, &eblock, ticket->enc_part2->session))

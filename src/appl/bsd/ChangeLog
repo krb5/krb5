@@ -1,5 +1,8 @@
 Thu Apr 27 01:09:19 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
+	* krshd.c (recvauth): extract the client principal from ticket
+		before calling krb5_kuserok on a NULL principal.
+
 	* krcp.c: (main): Missing htons on port number when specified on
 		command line.
 
