@@ -31,52 +31,6 @@
 
 #include "des_int.h"
 
-static krb5_cryptosystem_entry mit_raw_des_cryptosystem_entry = {
-    0,
-    mit_raw_des_encrypt_func,
-    mit_raw_des_decrypt_func,
-    mit_des_process_key,
-    mit_des_finish_key,
-    mit_des_string_to_key,
-    mit_des_init_random_key,
-    mit_des_finish_random_key,
-    mit_des_random_key,
-    sizeof(mit_des_cblock),
-    0,
-    sizeof(mit_des_cblock),
-    ETYPE_RAW_DES_CBC,
-    KEYTYPE_DES
-    };
-
-static krb5_cryptosystem_entry mit_des_cryptosystem_entry = {
-    0,
-    mit_des_encrypt_func,
-    mit_des_decrypt_func, 
-    mit_des_process_key,
-    mit_des_finish_key,
-    mit_des_string_to_key,
-    mit_des_init_random_key,
-    mit_des_finish_random_key,
-    mit_des_random_key,
-    sizeof(mit_des_cblock),
-    CRC32_CKSUM_LENGTH+sizeof(mit_des_cblock),
-    sizeof(mit_des_cblock),
-    ETYPE_DES_CBC_CRC,
-    KEYTYPE_DES
-    };
-
-krb5_cs_table_entry krb5_raw_des_cst_entry = {
-    0,
-    &mit_raw_des_cryptosystem_entry,
-    0
-    };
-
-krb5_cs_table_entry krb5_des_cst_entry = {
-    0,
-    &mit_des_cryptosystem_entry,
-    0
-    };
-
 extern krb5_error_code mit_des_cbc_checksum PROTOTYPE ((krb5_pointer ,
 							size_t ,
 							krb5_pointer ,

@@ -17,7 +17,6 @@ OTHEROBJS=f_cbc.o f_cksum.o f_pcbc.o f_sched.o f_ecb.o f_parity.o f_tables.o
 
 OBJS=	cbc_cksum.o	\
 	cs_entry.o	\
-	krb_glue.o	\
 	finish_key.o	\
 	fin_rndkey.o	\
 	init_rkey.o	\
@@ -31,7 +30,6 @@ OBJS=	cbc_cksum.o	\
 
 SRCS=	$(srcdir)/cs_entry.c	\
 	$(srcdir)/cbc_cksum.c	\
-	$(srcdir)/krb_glue.c	\
 	$(srcdir)/finish_key.c	\
 	$(srcdir)/fin_rndkey.c	\
 	$(srcdir)/init_rkey.c	\

@@ -1,3 +1,15 @@
+Fri Oct 14 00:33:17 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* des_int.h, f_cbc.c, verify.c: Fix function declarations to
+		(slightly) better match the conventions used by the krb5
+		source tree.
+
+	* cs_entry.c: Remove declarations of the cryptosystem specific
+		structures to raw-des.c and des-crc.c in the parent
+		directory.  They're strictly speaking not DES specific.
+
+	* Makefile.in: Remove file krb_glue.c; we don't use it any more.
+
 Thu Oct  6 12:49:29 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* Makefile.in: Make sure the "make check" programs get cleaned up

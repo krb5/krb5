@@ -38,7 +38,7 @@
 
 int
 mit_des_cbc_encrypt(in, out, length, schedule, ivec, encrypt)
-	des_cblock *in;
+	const des_cblock *in;
 	des_cblock *out;
 	long length;
 	des_key_schedule schedule;
