@@ -219,6 +219,11 @@ krb5_locate_kdc(context, realm, addr_pp, naddrs, master_index, nmasters)
 	hostlist[i] = 0;
     }
 
+    if (masterlist) {
+       for (i=0; masterlist[i]; i++)
+	  free(masterlist[i]);
+       free(masterlist);
+    }
 
     free ((char *)hostlist);
 

@@ -63,9 +63,6 @@ const krb5_data FAR * salt;
 #define min(A, B) ((A) < (B) ? (A): (B))
 #endif
 
-    if ( !(keyblock->contents = (krb5_octet *)malloc(sizeof(mit_des_cblock))) )
-	return(ENOMEM);
-
     keyblock->magic = KV5M_KEYBLOCK;
     keyblock->length = sizeof(mit_des_cblock);
     key = keyblock->contents;
