@@ -1,3 +1,8 @@
+2002-09-10  Ken Raeburn  <raeburn@mit.edu>
+
+	* post.in (depfix2.sed): Pass srcdir and BUILDTOP as additional
+	inputs to depgen.sed.  Don't emit any other text.
+
 2002-09-03  Ken Raeburn  <raeburn@mit.edu>
 
 	* libobj.in (.c.so, .c.po): Put LOCALINCLUDES before CPPFLAGS.
