@@ -280,8 +280,7 @@ proc setup_kerberos_files { } {
 	puts $conffile "		profile = $tmppwd/krb5.conf"
 	puts $conffile "		database_name = $tmppwd/db"
 	puts $conffile "		master_key_name = master/key"
-	puts $conffile "		master_key_type = des"
-	puts $conffile "		encryption_type = des-cbc-md5"
+	puts $conffile "		master_key_type = des-cbc-md5"
 	puts $conffile "		port = 3088"
 	puts $conffile "		kadmind_port = 3750"
 	puts $conffile "		key_stash_file = $tmppwd/stash"
@@ -289,7 +288,7 @@ proc setup_kerberos_files { } {
 	puts $conffile "		max_renewable_life = 3:00:00"
 	puts $conffile "		default_principal_expiration = 99.12.31.23.59.59"
 	puts $conffile "		default_principal_flags = -postdateable -forwardable"
-	puts $conffile "		supported_enctypes = des:normal des:v4 des:norealm des:onlyrealm"
+	puts $conffile "		supported_enctypes = des-cbc-crc:normal desdes:normal des:v4 des:norealm des:onlyrealm"
 	puts $conffile "	\}"
 	puts $conffile ""
 	close $conffile

@@ -1,3 +1,8 @@
+Sun Sep 10 10:09:41 1995  Ezra Peisach  (epeisach@dcl)
+
+	* default.exp: Add des-cbc-crc to supported_enctypes as krb5_edit
+		requires it for random keys.
+
 Sat Sep  9 16:28:48 1995  Ezra Peisach  (epeisach@dcl)
 
 	* default.exp: supported_keytypes -> supported_enctypes
