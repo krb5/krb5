@@ -53,31 +53,24 @@
  */
 
 static krb5_error_code
-krb5_locate_kpasswd(context, realm, addr_pp, naddrs, master_index, nmasters)
+krb5_locate_kpasswd(context, realm, addr_pp, naddrs)
     krb5_context context;
     const krb5_data *realm;
     struct sockaddr **addr_pp;
     int *naddrs;
-    int *master_index;
-    int *nmasters;
 {
     krb5_error_code code;
     int i;
-#ifdef KRB5_DNS_LOOKUP
-    struct sockaddr *admin_addr_p, *kdc_addr_p;
-    int nadmin_addrs, nkdc_addrs;
-    int j;
-#endif /* KRB5_DNS_LOOKUP */
 
     /*
      * We always try the local file first
      */
 
-    code = krb5_locate_srv_conf(context, realm, "kpasswd_server", addr_pp, naddrs,
-                                 master_index, nmasters);
+    code = krb5_locate_srv_conf( context, realm, "kpasswd_server", 
+                                 addr_pp, naddrs, 0);
     if (code) {
-        code = krb5_locate_srv_conf(context, realm, "admin_server", addr_pp, naddrs,
-                                     master_index, nmasters);
+        code = krb5_locate_srv_conf( context, realm, "admin_server", 
+                                     addr_pp, naddrs, 0);
         if ( !code ) {
             /* success with admin_server but now we need to change the port */
             /* number to use DEFAULT_KPASSWD_PORT.                          */
@@ -107,10 +100,6 @@ krb5_locate_kpasswd(context, realm, addr_pp, naddrs, master_index, nmasters)
                         sin->sin_port = htons(DEFAULT_KPASSWD_PORT);
                     }
                 }
-            }
-            if ( !code && master_index && nmasters ) {
-                *master_index = 1;
-                *nmasters = *naddrs;
             }
         }
     }
@@ -158,7 +147,7 @@ krb5_change_password(context, creds, newpw, result_code,
 
     if (code = krb5_locate_kpasswd(context, 
                                     krb5_princ_realm(context, creds->client), 
-                                    &addr_p, &naddr_p,NULL,NULL))
+                                    &addr_p, &naddr_p))
         goto cleanup;
 
     /* this is really obscure.  s1 is used for all communications.  it

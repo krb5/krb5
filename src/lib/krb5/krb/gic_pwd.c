@@ -97,7 +97,7 @@ krb5_get_init_creds_password(context, creds, client, password, prompter, data,
      krb5_get_init_creds_opt *options;
 {
    krb5_error_code ret, ret2;
-   int master;
+   int use_master;
    krb5_kdc_rep *as_reply;
    int tries;
    krb5_creds chpw_creds;
@@ -107,7 +107,7 @@ krb5_get_init_creds_password(context, creds, client, password, prompter, data,
    krb5_prompt prompt[2];
    krb5_prompt_type prompt_types[sizeof(prompt)/sizeof(prompt[0])];
 
-   master = 0;
+   use_master = 0;
    as_reply = NULL;
    memset(&chpw_creds, 0, sizeof(chpw_creds));
 
@@ -133,7 +133,7 @@ krb5_get_init_creds_password(context, creds, client, password, prompter, data,
    ret = krb5_get_init_creds(context, creds, client, prompter, data,
 			     start_time, in_tkt_service, options,
 			     krb5_get_as_key_password, (void *) &pw0,
-			     &master, &as_reply);
+			     use_master, &as_reply);
 
    /* check for success */
 
@@ -150,13 +150,13 @@ krb5_get_init_creds_password(context, creds, client, password, prompter, data,
    /* if the reply did not come from the master kdc, try again with
       the master kdc */
 
-   if (!master) {
-      master = 1;
+   if (!use_master) {
+      use_master = 1;
 
       ret2 = krb5_get_init_creds(context, creds, client, prompter, data,
 				 start_time, in_tkt_service, options,
 				 krb5_get_as_key_password, (void *) &pw0,
-				 &master, &as_reply);
+				 use_master, &as_reply);
       
       if (ret2 == 0) {
 	 ret = 0;
@@ -195,7 +195,7 @@ krb5_get_init_creds_password(context, creds, client, password, prompter, data,
 				  prompter, data,
 				  start_time, "kadmin/changepw", &chpw_opts,
 				  krb5_get_as_key_password, (void *) &pw0,
-				  &master, NULL)))
+				  use_master, NULL)))
       goto cleanup;
 
    prompt[0].prompt = "Enter new password";
@@ -282,7 +282,7 @@ krb5_get_init_creds_password(context, creds, client, password, prompter, data,
    ret = krb5_get_init_creds(context, creds, client, prompter, data,
 			     start_time, in_tkt_service, options,
 			     krb5_get_as_key_password, (void *) &pw0,
-			     &master, &as_reply);
+			     use_master, &as_reply);
 
 cleanup:
    krb5int_set_prompt_types(context, 0);

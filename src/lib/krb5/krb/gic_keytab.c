@@ -61,7 +61,7 @@ krb5_get_init_creds_keytab(context, creds, client, arg_keytab,
      krb5_get_init_creds_opt *options;
 {
    krb5_error_code ret, ret2;
-   int master;
+   int use_master;
    krb5_keytab keytab;
 
    if (arg_keytab == NULL) {
@@ -71,14 +71,14 @@ krb5_get_init_creds_keytab(context, creds, client, arg_keytab,
        keytab = arg_keytab;
    }
 
-   master = 0;
+   use_master = 0;
 
    /* first try: get the requested tkt from any kdc */
 
    ret = krb5_get_init_creds(context, creds, client, NULL, NULL,
 			     start_time, in_tkt_service, options,
 			     krb5_get_as_key_keytab, (void *) keytab,
-			     &master, NULL);
+			     use_master,NULL);
 
    /* check for success */
 
@@ -93,13 +93,13 @@ krb5_get_init_creds_keytab(context, creds, client, arg_keytab,
    /* if the reply did not come from the master kdc, try again with
       the master kdc */
 
-   if (!master) {
-      master = 1;
+   if (!use_master) {
+      use_master = 1;
 
       ret2 = krb5_get_init_creds(context, creds, client, NULL, NULL,
 				 start_time, in_tkt_service, options,
 				 krb5_get_as_key_keytab, (void *) keytab,
-				 &master, NULL);
+				 use_master, NULL);
       
       if (ret2 == 0) {
 	 ret = 0;
