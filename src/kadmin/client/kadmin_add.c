@@ -30,9 +30,7 @@ static char rcsid_kadmin_add[] =
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
-#ifndef __convex__
-#include <strings.h>
-#endif
+#include <string.h>
 #include <com_err.h>
 
 #include <sys/param.h>

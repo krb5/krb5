@@ -32,9 +32,7 @@ static char rcsid_kadmin[] =
 #include <netinet/in.h>
 #include <netdb.h>
 #include <signal.h>
-#ifndef __convex__
-#include <strings.h>
-#endif
+#include <string.h>
 #include <com_err.h>
 
 #ifndef MAXPATHLEN
