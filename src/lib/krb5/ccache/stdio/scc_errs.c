@@ -32,7 +32,9 @@ int errnum;
     case EACCES:
     case EISDIR:
     case ENOTDIR:
+#ifdef ELOOP
     case ELOOP:				/* XXX */
+#endif
     case ETXTBSY:
     case EBUSY:
     case EROFS:
@@ -42,7 +44,9 @@ int errnum;
     case EEXIST:			/* XXX */
     case EFAULT:
     case EBADF:
+#ifdef ENAMETOOLONG
     case ENAMETOOLONG:
+#endif
 #ifdef EWOULDBLOCK
     case EWOULDBLOCK:
 #endif
