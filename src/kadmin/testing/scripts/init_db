@@ -33,6 +33,17 @@ DUMMY=${LOCAL_MAKE_KEYTAB=$TESTDIR/scripts/make-host-keytab.pl}
 
 PATH=$ADMIN:$BIN:$ETC:$SBIN:$PATH; export PATH
 
+if [ ! -x $SRVTCL ]; then
+	echo "+++" 1>&2
+	echo "+++ Error!  $SRVTCL does not exist!" 1>&2
+	echo "+++ It was probably not compiled because TCL was not available.  If you" 1>&2
+	echo "+++ now have TCL installed, cd into that directory, re-run configure" 1>&2 
+	echo "+++ with the --with-tcl option, and then re-run make." 1>&2
+	echo "+++" 1>&2
+
+	exit 1
+fi
+
 rm -rf $K5ROOT/*
 if [ -d $K5ROOT ]; then
 	true
