@@ -846,12 +846,11 @@ ovsec_kadm/changepw service, the modify privilege is disregarded.
 
 Change a principal's password.  
 
-This function enforces password policy and dictionary checks.  If the
-new password specified is in the password dictionary,
-OVSEC_KADM_PASS_DICT is returned (even if the policy bit is not set).
-If the principal's POLICY bit is set in aux_attributes, compliance
-with each of the named policy fields is verified and an appropriate
-error code is returned if verification fails.
+This function enforces password policy and dictionary checks.  If the new
+password specified is in the password dictionary, and the policy bit is set
+OVSEC_KADM_PASS_DICT is returned.  If the principal's POLICY bit is set in
+aux_attributes, compliance with each of the named policy fields is verified
+and an appropriate error code is returned if verification fails.
 
 Note that the policy checks are only be performed if the POLICY bit is
 set in the principal's aux_attributes field.
