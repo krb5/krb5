@@ -25,20 +25,7 @@
 
 {\setlength{\parskip}{0pt}\tableofcontents}
 
-\section{Admin API}
-
-This section describes the Admin API that can be used to maintain
-principals and policies.  It describes the data structures used for
-each function and the interpretation of each data type field, the
-semantics of each API function, and the possible return codes.
-
-The Admin API is intended to be used by remote clients using an RPC
-interface.  It is implemented by the admin server running on the
-Kerberos master database.  It may also be possible for a program
-running on the Kerberos master database to use the Admin API directly,
-without going through the admin server.
-
-\subsection{Policies and Password Quality}
+\section{Policies and Password Quality}
 
 The Admin API Password Quality mechanism provides the following
 controls.  Note that two strings are defined to be ``significantly
@@ -67,6 +54,19 @@ in the dictionary will not be accepted.
 \item A password that is not significantly different from each
 component and the realm of the principal's name will not be accepted.
 \end{itemize}
+
+\section{Admin API}
+
+This section describes the Admin API that can be used to maintain
+principals and policies.  It describes the data structures used for
+each function and the interpretation of each data type field, the
+semantics of each API function, and the possible return codes.
+
+The Admin API is intended to be used by remote clients using an RPC
+interface.  It is implemented by the admin server running on the
+Kerberos master server.  It may also be possible for a program running
+on the Kerberos master server to use the Admin API directly, without
+going through the admin server.
 
 \subsection{Data Structures}
 
@@ -119,15 +119,15 @@ follows.
 \item[principal] The name of the principal; must conform to Kerberos
 naming specifications.
 
-\item[princ_expire_time] The expire time of the principal as a Unix
+\item[princ_expire_time] The expire time of the principal as a Kerberos
 timestamp.  No Kerberos tickets will be issued for a principal after
 its expire time.
 
 \item[last_pwd_change] The time this principal's password was last
-changed, as a Unix timestamp.
+changed, as a Kerberos timestamp.
 
 \item[pw_expiration] The expire time of the user's current password, as a
-Unix timestamp.  No application service tickets will be issued for the
+Kerberos timestamp.  No application service tickets will be issued for the
 principal once the password expire time has passed.  Note that the
 user can still obtain ticket-granting tickets.
 
@@ -154,10 +154,59 @@ X & KRB5_KDB_REQUIRES_PWCHANGE      & 0x00000200 \\
   & KRB5_KDB_PWCHANGE_SERVICE       & 0x00002000
 \end{tabular}
 
+The interpretation of each bit is as follows.  For each of the bits
+that disables a corresponding KDC_OPT option, the option is disabled
+on an AS_REQ if the bit is set on either the client or the server, and
+the option is disabled on TGS_REQ if the bit is set on the server (the
+setting of the bit on the client is irrelevant for a TGS_REQ).
+
+\begin{description}
+\item[KRB5_KDB_DISALLOW_POSTDATED]  Disables KDC_OPT_ALLOW_POSTDATE
+and KDC_OPT_POSTDATED on AS_REQ and TGS_REQ.
+
+\item[KRB5_KDB_DISALLOW_FORWARDABLE] Disables KDC_OPT_FORWARDABLE on
+for AS_REQ and TGS_REQ.
+
+\item[KRB5_KDB_DISALLOW_TGT_BASED] All TGS_REQ requests will fail for
+a principal with this bit set.
+
+\item[KRB5_KDB_DISALLOW_RENEWABLE] Disables KDC_OPT_RENEWABLE for
+AS_REQ and TGS_REQ.  
+
+\item[KRB5_KDB_DISALLOW_PROXIABLE] Disables KDC_OPT_PROXIABLE on
+AS_REQ and TGS_REQ.
+
+\item[KRB5_KDB_DISALLOW_DUP_SKEY] Disables KDC_OPT_ENC_TKT_IN_SKEY on
+TGS_REQ.
+
+\item[KRB5_KDB_DISALLOW_ALL_TIX] All AS_REQ requests fail if this bit
+is set for the client or the server, and all TGS_REQ requests fail if
+this bit is set for the server.  Note that this bit can be set
+automatically if the symbol KRBCONF_KDC_MODIFIES_KDC is defined and a
+specified number of pre-authentication attempts fail.
+
+\item[KRB5_KDB_REQUIRES_PRE_AUTH] Any AS_REQ will fail if this bit is
+set and the padata field of the request is empty.  Any TGS_REQ will
+fail if this bit is set and the TKT_FLAG_PRE_AUTH bit is not set in
+the tgt.  Thus, it is possible to have the bit not set on the TGT but
+to have a specific service require pre-authentication.
+
+\item[KRB5_KDB_REQUIRES_HW_AUTH] Unclear.
+
+\item[KRB5_KDB_REQUIRES_PWCHANGE] An AS_REQ will fail if this bit is
+set on the client and the KRB5_KDC_PWCHANGE_SERVICE bit is not set on
+the server.
+
+\item[KRB5_KDB_DISALLOW_SVR] All AS_REQ and TGS_REQ request will fail
+if the server has this bit set.
+
+\item[KRB5_KDB_PWCHANGE_SERVICE] See KRB5_KDC_REQUIRES_PWCHANGE.
+\end{description}
+
 \item[mod_name] The name of the Kerberos principal that most recently
 modified this principal.
 
-\item[mod_date] The time this principal was last modified, as a Unix
+\item[mod_date] The time this principal was last modified, as a Kerberos
 timestamp.
 
 \item[kvno] The version of the principal's current key.
@@ -222,7 +271,7 @@ classes in it.
 stored for the principal; its maximum value is 10.  A principal cannot
 set its password to any of its previous pw_history_num passwords.
 
-\item[refcnt]  The number of principals currently using this policy.
+\item[policy_refcnt]  The number of principals currently using this policy.
 A policy cannot be deleted unless this number is zero.
 \end{description}
 
@@ -262,7 +311,7 @@ aux_attributes.
 {\bf Name} & {\bf Value} & {\bf Field Affected} & {\bf Create} & 
         {\bf Modify} \\
 PRINCIPAL               & 0x000001 & principal & M & F \\
-PRINC_EXPIRE_TIME       & 0x000002 & princ_expire_time & O, never & O \\
+PRINC_EXPIRE_TIME       & 0x000002 & princ_expire_time & O, K/M value & O \\
 PW_EXPIRATION           & 0x000004 & pw_expiration & O, now+pw_max_life & O \\
 LAST_PWD_CHANGE         & 0x000008 & last_pwd_change & F & F \\
 ATTRIBUTES              & 0x000010 & attributes & O, 0 & O \\
@@ -283,7 +332,7 @@ POLICY_CLR              & 0x001000 & policy & F & O
 \begin{tabular}{@{}lclll}
 Name & Value & Field Affected & Create & Modify \\
 POLICY                  & same     & policy & M & F \\
-PW_MAX_LIFE             & 0x004000 & pw_max_life & O, infinite & O \\
+PW_MAX_LIFE             & 0x004000 & pw_max_life & O, 0 (infinite) & O \\
 PW_MIN_LIFE             & 0x008000 & pw_min_life & O, 0 & O \\
 PW_MIN_LENGTH           & 0x010000 & pw_min_length & O, 0 & O \\
 PW_MIN_CLASSES          & 0x020000 & pw_min_classes & O, 1 & O \\
@@ -413,7 +462,7 @@ create_policy & add & Create a new policy. \\
 delete_policy & delete & Delete a policy. \\
 modify_policy & modify & Modify the attributes of a policy. \\
 get_policy & get & Retrieve a policy. \\
-free_princ_ent & none & Free the memory associated with an
+free_principal_ent & none & Free the memory associated with an
                 ovsec_kadm_principal_ent_t. \\
 free_policy_ent & none & Free the memory assocated with an
                 ovsec_kadm_policy_ent_t. \\
@@ -427,7 +476,7 @@ details.}
 
 \begin{verbatim}
 ovsec_kadm_ret_t
-ovsec_kadm_create_principal(ovsec_kadm_princ_ent_t princ, u_int32 mask,
+ovsec_kadm_create_principal(ovsec_kadm_principal_ent_t princ, u_int32 mask,
 		char *pw, int override_qual);
 \end{verbatim}
 
@@ -478,6 +527,8 @@ RETURN CODES:
 operation.
 \item[OVSEC_KADM_DUP] Principal already exists.
 \item[OVSEC_KADM_UNK_POLICY] Policy named in entry does not exist.
+\item[OVSEC_KADM_PASS_Q_*] Specified password does not meet policy
+standards.
 \end{description}
 
 \subsection{ovsec_kadm_delete_principal}
@@ -506,11 +557,11 @@ RETURN CODES:
 
 \begin{verbatim}
 ovsec_kadm_ret_t
-ovsec_kadm_modify_principal(ovsec_kadm_prin_ent_t, u_int32);
+ovsec_kadm_modify_principal(ovsec_kadm_principal_ent_t, u_int32);
 \end{verbatim}
 
 Modify the attributes of the principal named in
-ovsec_kadm_princ_ent_t. This does not allow the principal to be
+ovsec_kadm_principal_ent_t. This does not allow the principal to be
 renamed or for its password to be changed.
 
 AUTHORIZATION REQUIRED: modify
@@ -735,11 +786,11 @@ KRB5_KDB_DISALLOW_ALL_TIX bit in the attributes field.
 
 \begin{verbatim}
 ovsec_kadm_ret_t
-ovsec_kadm_get_principal(krb5_principal princ, ovsec_kadm_princ_ent_t *ent);  
+ovsec_kadm_get_principal(krb5_principal princ, ovsec_kadm_principal_ent_t *ent);  
 \end{verbatim}
 
 Return the principal's attributes in allocated memory.  The caller
-must free the returned entry with ovsec_kadm_free_princ_ent.
+must free the returned entry with ovsec_kadm_free_principal_ent.
 
 AUTHORIZATION REQUIRED: get, or the calling principal being the same
 as the princ argument.
@@ -855,11 +906,11 @@ RETURN CODES:
 \item[OVSEC_KADM_UNK_POLICY] Policy not found.
 \end{description}
 
-\subsection{ovsec_kadm_free_princ_ent, _policy_ent}
+\subsection{ovsec_kadm_free_principal_ent, _policy_ent}
 
 \begin{verbatim}
 ovsec_kadm_ret_t
-ovsec_kadm_free_princ_ent(ovsec_kadm_princ_ent_t *);
+ovsec_kadm_free_principal_ent(ovsec_kadm_principal_ent_t *);
 \end{verbatim}
 
 Free the memory that was allocated by a call to
@@ -1009,7 +1060,8 @@ the policy database from the standard input.
 Each database is represented by a sequence of records.  Each record in
 the database is printed in its ASCII representation, separated by a
 tab character, with each record followed by a newline.  Strings that
-can contain spaces, tabs, or newlines are enclosed in double quotes.
+can contain spaces, tabs, or newlines are enclosed in double quotes; a
+double-quoted string cannot contain double quotes.
 
 The fields within each record are read and written in the same order
 as they appear in the osa_princ_ent_t and osa_policy_ent_t,
