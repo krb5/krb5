@@ -1,6 +1,6 @@
 CFLAGS = $(CCOPTS2) $(DEFS)
 
-##DOSBUILDTOP = ..\..
+BUILDTOP = ..\..
 
 lib-windows: $(OUTPRE)libwin.lib
 

@@ -1,3 +1,7 @@
+Mon May 17 14:26:27 1999  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in: Uncomment BUILDTOP since we always want it.
+
 Mon May 17 09:22:45 1999  Danilo Almeida  <dalmeida@mit.edu>
 
 	* KrbCC32.lib: Remove KrbCC32.lib since we dynamically load the DLL.
