@@ -70,11 +70,12 @@
 #define	HasPosixTypes		YES
 
 #define	HasInet			YES
-#ifdef PS2Architecture
+/* There is a compiler bug on the PS/2 running AIX 1.2.1:
+   extern int f(int); does not match int f(x) int x;{}
+   Therefore, narrow prototypes are needed.  */
 #define	WantPrototypes		YES
-#else
 #define	NeedNarrowPrototypes	YES
-#endif
+#define	UseStdarg		YES
 #ifdef PS2Architecture
 #define DesDefines -DBIG -DLSBFIRST
 #else
