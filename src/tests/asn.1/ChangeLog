@@ -1,3 +1,8 @@
+Sun Mar  3 13:05:57 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* krb5_decode_test.c (main): In krb5_enc_tkt_part (optionals NULL)
+		test, set starttime to authtime. Matches change to
+		lib/krb5/asn.1/krb5_decode.c.
 
 Wed Nov 15 15:28:32 1995  Chris Provenzano  (proven@mit.edu)
 
