@@ -1,4 +1,8 @@
 
+Wed Jul 12 14:10:09 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* default.exp - Correctly set LD_LIBRARY_PATH.  Also set it before
+		using RESOLVE.
+
 Thu Jun 22 12:02:15 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* default.exp - Change argument ordering for KDC.  Realm must come last.
 

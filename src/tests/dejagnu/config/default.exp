@@ -170,21 +170,42 @@ proc get_hostname { } {
     global hostname
     global localhostname
     global domain
+    global SHLIBDIR
+    global env
 
     if {[info exists hostname] && [info exists localhostname]} {
 	return 1
     }
 
+    if [info exists env(LD_LIBRARY_PATH)] {
+	set tmp_ldlib_path $env(LD_LIBRARY_PATH)
+	set env(LD_LIBRARY_PATH) "$SHLIBDIR:$env(LD_LIBRARY_PATH)"
+    } else {
+	catch "unset tmp_ldlib_path"
+	set env(LD_LIBRARY_PATH) "$SHLIBDIR"
+    }
     catch "exec $RESOLVE -q >tmpdir/hostname" exec_output
     if ![string match "" $exec_output] {
 	send_log "$exec_output\n"
 	verbose $exec_output
 	send_error "ERROR: can't get hostname\n"
+	if [info exists tmp_ldlib_path] {
+	    set env(LD_LIBRARY_PATH) $tmp_ldlib_path
+	} else {
+	    catch "unset env(LD_LIBRARY_PATH)"
+	}
+	catch "unset tmp_ldlib_path"
 	return 0
     }
     set file [open tmpdir/hostname r]
     if { [ gets $file hostname ] == -1 } {
 	send_error "ERROR: no output from hostname\n"
+	if [info exists tmp_ldlib_path] {
+	    set env(LD_LIBRARY_PATH) $tmp_ldlib_path
+	} else {
+	    catch "unset env(LD_LIBRARY_PATH)"
+	}
+	catch "unset tmp_ldlib_path"
 	return 0
     }
     close $file
@@ -195,6 +216,12 @@ proc get_hostname { } {
     set localhostname [string tolower $localhostname]
     set domain [string tolower $domain]
     verbose "hostname: $hostname; localhostname: $localhostname; domain $domain"
+    if [info exists tmp_ldlib_path] {
+	set env(LD_LIBRARY_PATH) $tmp_ldlib_path
+    } else {
+	catch "unset env(LD_LIBRARY_PATH)"
+    }
+    catch "unset tmp_ldlib_path"
 
     return 1
 }
@@ -314,7 +341,7 @@ proc setup_kerberos_env { } {
     # Tell the dynamic loader where to get our shared libraries
     if [info exists env(LD_LIBRARY_PATH)] {
 	set oldpath $env(LD_LIBRARY_PATH)
-	set env(LD_LIBRARY_PATH) "$SHLIBDIR $env(LD_LIBRARY_PATH)"
+	set env(LD_LIBRARY_PATH) "$SHLIBDIR:$env(LD_LIBRARY_PATH)"
     } else {
 	catch "unset oldpath"
 	set env(LD_LIBRARY_PATH) "$SHLIBDIR"
@@ -981,7 +1008,7 @@ proc setup_root_shell { testname } {
     # Tell the dynamic loader where to get our shared libraries
     if [info exists env(LD_LIBRARY_PATH)] {
 	set oldpath $env(LD_LIBRARY_PATH)
-	set env(LD_LIBRARY_PATH) "$SHLIBDIR $env(LD_LIBRARY_PATH)"
+	set env(LD_LIBRARY_PATH) "$SHLIBDIR:$env(LD_LIBRARY_PATH)"
     } else {
 	catch "unset oldpath"
 	set env(LD_LIBRARY_PATH) "$SHLIBDIR"
