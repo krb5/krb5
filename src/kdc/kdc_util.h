@@ -39,6 +39,9 @@ krb5_error_code kdc_process_tgs_req PROTOTYPE((krb5_kdc_req *,
 					       const krb5_fulladdr *,
 					       krb5_tkt_authent **));
 
+krb5_error_code kdc_get_server_key PROTOTYPE((krb5_ticket *,
+					      krb5_keyblock **,
+					      krb5_kvno *));
 /* do_as_req.c */
 krb5_error_code process_as_req PROTOTYPE((krb5_kdc_req *,
 					  const krb5_fulladdr *,
