@@ -1,3 +1,9 @@
+2005-03-25  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Don't check for getpwnam_r and getpwuid_r in the
+	thread-safety warnings.  The tests done elsewhere in the tree are
+	stricter and may not agree.
+
 2005-03-04  Ken Raeburn  <raeburn@mit.edu>
 
 	* aclocal.m4 (KRB5_AC_ENABLE_THREADS): Expand on error message if
