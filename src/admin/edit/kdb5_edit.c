@@ -394,6 +394,10 @@ OLDDECLARG(struct saltblock *, salt)
 	newentry.salt_type = salt->salttype;
 	newentry.salt_length = salt->saltdata.length;
 	newentry.salt = (krb5_octet *) salt->saltdata.data;
+    } else {
+	newentry.salt_type = KRB5_KDB_SALTTYPE_NORMAL;
+	newentry.salt_length = 0;
+	newentry.salt = 0;
     }
     
     retval = krb5_db_put_principal(&newentry, &one);
