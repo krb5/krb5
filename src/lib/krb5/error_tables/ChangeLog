@@ -1,3 +1,12 @@
+Fri Mar 17 19:42:45 1995  John Gilmore  (gnu at toad.com)
+
+	* Makefile.in (LDFLAGS):  Eliminate, duplicate.
+	(SRCS):  Eliminate $(srcdir) which causes mac problems.
+	(all-unix):  Eliminate obsolete "includes".
+	(all-mac):  Add.
+	(unixmac):  Add $(SRCS) so that the .c source files will be created
+	here in the original "configure tree on Unix" stage of the build.
+
 Wed Mar 15 12:24:25 1995 Keith Vetter (keithv@fusion.com)
 
 	* Makefile.in: disabled the awk part of the makefile.

@@ -1,5 +1,4 @@
 CFLAGS = $(CCOPTS) $(DEFS)
-LDFLAGS = -g
 
 ##DOSBUILDTOP = ..\..\..
 ##DOSLIBNAME=..\krb5.lib
@@ -11,15 +10,16 @@ HDRS= asn1_err.h kdb5_err.h krb5_err.h kv5m_err.h adm_err.h
 OBJS= asn1_err.$(OBJEXT) kdb5_err.$(OBJEXT) krb5_err.$(OBJEXT) \
       kv5m_err.$(OBJEXT) adm_err.$(OBJEXT) init_ets.$(OBJEXT)
 ETSRCS= asn1_err.c kdb5_err.c krb5_err.c kv5m_err.c adm_err.c
-SRCS=$(ETSRCS) $(srcdir)/init_ets.c
+SRCS=$(ETSRCS) init_ets.c
 
 all:: all-$(WHAT)
 
-all-unix:: $(HDRS) includes $(OBJS)
+all-unix:: $(HDRS) $(OBJS)
+all-mac:: $(HDRS) $(OBJS)
 
 all-windows:: $(OBJS)
 
-unixmac: $(HDRS)
+unixmac: $(HDRS) $(SRCS)
 
 awk-windows:
 	$(AWK) -f $(SRCTOP)/util/et/et_h.awk outfile=asn1_err.h asn1_err.et
