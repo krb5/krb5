@@ -1,3 +1,15 @@
+2000-10-06  Tom Yu  <tlyu@mit.edu>
+
+	* kerberos_v4.c (kerb_get_principal): Modify to take a pointer to
+	a krb5_deltat in order to return the life in seconds.  Also, use
+	time_to_life() to compute krb4 life.
+	(check_princ): Modify to pass a pointer to a krb5_deltat to
+	kerb_get_principal().
+	(set_tgtkey): Update for new kerb_get_principal() call signature.
+	(kerberos_v4): Update for new check_princ() call signature.
+	Modify lifetime computations to use lifetimes in seconds.
+	Back-date issue time if necessary.
+
 2000-09-20  Ezra Peisach  <epeisach@mit.edu>
 
 	* dispatch.c (dispatch): inet_ntop() returns const char *.

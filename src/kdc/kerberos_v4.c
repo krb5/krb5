@@ -71,9 +71,10 @@ extern int errno;
 static int compat_decrypt_key PROTOTYPE((krb5_key_data *, C_Block,
 					 krb5_keyblock *, int));
 static int kerb_get_principal PROTOTYPE((char *, char *, Principal *, int,
-				  int *, krb5_keyblock *, krb5_kvno, int));
-static int check_princ PROTOTYPE((char *, char *, unsigned, Principal *,
-			   krb5_keyblock *, int));
+					 int *, krb5_keyblock *, krb5_kvno,
+					 int, krb5_deltat *));
+static int check_princ PROTOTYPE((char *, char *, int, Principal *,
+				  krb5_keyblock *, int, krb5_deltat *));
 
 #ifdef HAVE_STDARG_H
 char * v4_klog KRB5_PROTOTYPE((int, const char *, ...));
@@ -398,11 +399,10 @@ compat_decrypt_key (in5, out4, out5, issrv)
 
 /* array of name-components + NULL ptr
  */
-#define MIN5 300
-#define HR21 255
 
 static int
-kerb_get_principal(name, inst, principal, maxn, more, k5key, kvno, issrv)
+kerb_get_principal(name, inst, principal, maxn, more, k5key, kvno,
+		   issrv, k5life)
     char   *name;               /* could have wild card */
     char   *inst;               /* could have wild card */
     Principal *principal;
@@ -411,6 +411,7 @@ kerb_get_principal(name, inst, principal, maxn, more, k5key, kvno, issrv)
     krb5_keyblock *k5key;
     krb5_kvno kvno;
     int issrv;			/* true if retrieving a service key */
+    krb5_deltat *k5life;
 {
     /* Note that this structure should not be passed to the
        krb5_free* functions, because the pointers within it point
@@ -422,7 +423,6 @@ kerb_get_principal(name, inst, principal, maxn, more, k5key, kvno, issrv)
     krb5_boolean more5;		/* are there more? */
     C_Block k;
     short toggle = 0;
-    int v4_time;
     unsigned long *date;
     char* text;
     struct tm *tp;
@@ -510,11 +510,14 @@ kerb_get_principal(name, inst, principal, maxn, more, k5key, kvno, issrv)
  	memcpy( &principal->key_low, k, LONGLEN);
        	memcpy( &principal->key_high, (krb5_ui_4 *) k + 1, LONGLEN);
     }
-    /* convert v5's entries struct to v4's Principal struct:
-     * v5's time-unit for lifetimes is 1 sec, while v4 uses 5 minutes.
+    /*
+     * Convert v5's entries struct to v4's Principal struct:
+     * v5's time-unit for lifetimes is 1 sec, while v4 uses 5 minutes,
+     * and gets weirder above (128 * 300) seconds.
      */
-    v4_time = (entries.max_life + MIN5 - 1) / MIN5;
-    principal->max_life = v4_time > HR21 ? HR21 : (unsigned char) v4_time;
+    principal->max_life = krb_time_to_life(0, entries.max_life);
+    if (k5life != NULL)
+	*k5life = entries.max_life;
     /*
      * This is weird, but the intent is that the expiration is the minimum
      * of the principal expiration and key expiration
@@ -601,7 +604,7 @@ kerberos_v4(client, pkt)
     static int swap_bytes;
     static u_char k_flags;
  /* char   *p_name, *instance; */
-    u_long  lifetime = 0;
+    int     lifetime = 0;
     int     i;
     C_Block key;
     Key_schedule key_s;
@@ -609,7 +612,8 @@ kerberos_v4(client, pkt)
 
     krb5_keyblock k5key;
     krb5_kvno kvno;
-
+    krb5_deltat sk5life, ck5life;
+    KRB4_32 v4endtime, v4req_end;
 
     k5key.contents = NULL;	/* in case we have to free it */
 
@@ -664,7 +668,7 @@ kerberos_v4(client, pkt)
 #ifdef notdef
 	    u_long  time_ws;	/* Workstation time */
 #endif
-	    u_long  req_life;	/* Requested liftime */
+	    int    req_life;	/* Requested liftime */
 	    char   *service;	/* Service name */
 	    char   *instance;	/* Service instance */
 #ifdef notdef
@@ -689,7 +693,7 @@ kerberos_v4(client, pkt)
 	    }
 	    ptr = (char *) pkt_time_ws(pkt) + 4;
 
-	    req_life = (u_long) (*ptr++) & 0xff;
+	    req_life = (*ptr++) & 0xff;
 
 	    service = ptr;
 	    str_length_check(service, SNAME_SZ);
@@ -703,7 +707,7 @@ kerberos_v4(client, pkt)
 	       inet_ntoa(client_host), req_name_ptr, req_inst_ptr, 0);
 
 	    if ((i = check_princ(req_name_ptr, req_inst_ptr, 0,
-				 &a_name_data, &k5key, 0))) {
+				 &a_name_data, &k5key, 0, &ck5life))) {
 		kerb_err_reply(client, pkt, i, "check_princ failed");
 		a_name_data.key_low = a_name_data.key_high = 0;
 		krb5_free_keyblock_contents(kdc_context, &k5key);
@@ -718,7 +722,7 @@ kerberos_v4(client, pkt)
 		    req_inst_ptr, service, instance, 0);
 	    /* this does all the checking */
 	    if ((i = check_princ(service, instance, lifetime,
-				 &s_name_data, &k5key, 1))) {
+				 &s_name_data, &k5key, 1, &sk5life))) {
 		kerb_err_reply(client, pkt, i, "check_princ failed");
 		a_name_data.key_high = a_name_data.key_low = 0;
 		s_name_data.key_high = s_name_data.key_low = 0;
@@ -726,8 +730,22 @@ kerberos_v4(client, pkt)
 		return;
 	    }
 	    /* Bound requested lifetime with service and user */
-	    lifetime = min(req_life, ((u_long) s_name_data.max_life));
-	    lifetime = min(lifetime, ((u_long) a_name_data.max_life));
+	    v4req_end = krb_life_to_time(kerb_time.tv_sec, req_life);
+	    if (v4req_end < 0 || v4req_end == KRB_NEVERDATE)
+		v4req_end = kerb_time.tv_sec + ck5life;
+	    else
+		v4req_end = min(v4req_end, kerb_time.tv_sec + ck5life);
+	    v4req_end = min(v4req_end, kerb_time.tv_sec + sk5life);
+	    lifetime = krb_time_to_life(kerb_time.tv_sec, v4req_end);
+	    v4endtime = krb_life_to_time(kerb_time.tv_sec, lifetime);
+	    /*
+	     * Adjust issue time backwards if necessary, due to
+	     * roundup in krb_time_to_life().  XXX This frobs
+	     * kerb_time, which is potentially problematic.
+	     */
+	    if (v4endtime > v4req_end)
+		kerb_time.tv_sec -= v4endtime - v4req_end;
+
 #ifdef NOENCRYPTION
 	    memset(session_key, 0, sizeof(C_Block));
 #else
@@ -800,7 +818,7 @@ kerberos_v4(client, pkt)
     case AUTH_MSG_APPL_REQUEST:
 	{
 	    krb5_ui_4  time_ws;	/* Workstation time */
-	    u_long req_life;	/* Requested liftime */
+	    int    req_life;	/* Requested liftime */
 	    char   *service;	/* Service name */
 	    char   *instance;	/* Service instance */
 	    int     kerno = 0;	/* Kerberos error number */
@@ -861,7 +879,7 @@ kerberos_v4(client, pkt)
 	    memcpy(&time_ws, ptr, 4);
 	    ptr += 4;
 
-	    req_life = (u_long) (*ptr++);
+	    req_life = (*ptr++) & 0xff;
 
 	    service = ptr;
 	    str_length_check(service, SNAME_SZ);
@@ -886,7 +904,7 @@ kerberos_v4(client, pkt)
 		return;
 	    }
 	    kerno = check_princ(service, instance, req_life,
-				&s_name_data, &k5key, 1);
+				&s_name_data, &k5key, 1, &sk5life);
 	    if (kerno) {
 		kerb_err_reply(client, pkt, kerno, "check_princ failed");
 		s_name_data.key_high = s_name_data.key_low = 0;
@@ -894,9 +912,27 @@ kerberos_v4(client, pkt)
 		return;
 	    }
 	    /* Bound requested lifetime with service and user */
-	    lifetime = min(req_life,
-	      (ad->life - ((kerb_time.tv_sec - ad->time_sec) / 300)));
-	    lifetime = min(lifetime, ((u_long) s_name_data.max_life));
+	    v4endtime = krb_life_to_time((KRB4_32)ad->time_sec, ad->life);
+	    v4req_end = krb_life_to_time(kerb_time.tv_sec, req_life);
+	    /*
+	     * Handle special case of req_life == 255, since that will
+	     * return the magic KRB_NEVERDATE value.
+	     */
+	    if (v4req_end < 0 || v4req_end == KRB_NEVERDATE)
+		v4req_end = v4endtime;
+	    else
+		v4req_end = min(v4endtime, v4req_end);
+	    v4req_end = min(v4req_end, kerb_time.tv_sec + sk5life);
+
+	    lifetime = krb_time_to_life(kerb_time.tv_sec, v4req_end);
+	    v4endtime = krb_life_to_time(kerb_time.tv_sec, lifetime);
+	    /*
+	     * Adjust issue time backwards if necessary, due to
+	     * roundup in krb_time_to_life().  XXX This frobs
+	     * kerb_time, which is potentially problematic.
+	     */
+	    if (v4endtime > v4req_end)
+		kerb_time.tv_sec -= v4endtime - v4req_end;
 
 	    /* unseal server's key from master key */
 	    memcpy(key,                &s_name_data.key_low,  4);
@@ -1026,20 +1062,22 @@ static char *krb4_stime(t)
 }
 
 static int
-check_princ(p_name, instance, lifetime, p, k5key, issrv)
+check_princ(p_name, instance, lifetime, p, k5key, issrv, k5life)
     char   *p_name;
     char   *instance;
-    unsigned lifetime;
+    int    lifetime;
 
     Principal *p;
     krb5_keyblock *k5key;
     int issrv;			/* whether this is a server key */
+    krb5_deltat *k5life;
 {
     static int n;
     static int more;
  /* long trans; */
 
-    n = kerb_get_principal(p_name, instance, p, 1, &more, k5key, 0, issrv);
+    n = kerb_get_principal(p_name, instance, p, 1, &more, k5key, 0,
+			   issrv, k5life);
     klog(L_ALL_REQ,
 	 "Principal: \"%s\", Instance: \"%s\" Lifetime = %d n = %d",
 	 p_name, instance, lifetime, n, 0);
@@ -1146,7 +1184,7 @@ set_tgtkey(r, kvno)
 
 /*  log("Getting key for %s", r); */
 
-    n = kerb_get_principal("krbtgt", r, p, 1, &more, &k5key, kvno, 1);
+    n = kerb_get_principal("krbtgt", r, p, 1, &more, &k5key, kvno, 1, NULL);
     if (n == 0)
 	return (KFAILURE);
 
