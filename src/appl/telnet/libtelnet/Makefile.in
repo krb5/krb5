@@ -1,4 +1,6 @@
 thisconfigdir=.
+myfulldir=appl/telnet/libtelnet
+mydir=.
 BUILDTOP=$(REL)$(U)$(S)$(U)$(S)$(U)
 # derived from the original Makefile.generic
 #

@@ -1,4 +1,6 @@
 thisconfigdir=./..
+myfulldir=appl/gssftp/ftpd
+mydir=ftpd
 BUILDTOP=$(REL)$(U)$(S)$(U)$(S)$(U)
 #
 # appl/gssftp/ftpd/Makefile.in
