@@ -1,3 +1,8 @@
+Thu Nov 10 17:20:42 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* decrypt_key.c (krb5_kdb_decrypt_key): Set the keyblock's magic
+		number and ecryption type information appropriately.
+
 Tue Nov  8 18:03:23 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* fetch_mkey.c (krb5_db_fetch_mkey): Set the keyblock's magic

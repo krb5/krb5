@@ -46,6 +46,8 @@ krb5_keyblock *out;
 
     /* the encrypted version is stored as the unencrypted key length
        (4 bytes, MSB first) followed by the encrypted key. */
+    out->magic = KV5M_KEYBLOCK;
+    out->etype = ETYPE_UNKNOWN;
     out->keytype = in->keytype;
     out->length = krb5_encrypt_size(in->length-sizeof(in->length),
 				    eblock->crypto_entry);
