@@ -1,3 +1,7 @@
+2004-07-11  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Use KRB5_AC_INET6.
+
 2004-05-29  Ken Raeburn  <raeburn@mit.edu>
 
 	* setenv.c: Include string.h.

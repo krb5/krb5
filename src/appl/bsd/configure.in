@@ -1,5 +1,6 @@
 AC_INIT(krlogind.c)
 CONFIG_RULES
+KRB5_AC_INET6
 LOGINLIBS=
 AC_ARG_WITH([afs],
 [  --without-afs        don't have afs libraries to build against (default)
