@@ -41,7 +41,7 @@ typedef void (*et_old_error_hook_func) (const char FAR *, errcode_t,
 	
 struct error_table {
 	/*@shared@*/ char const FAR * const FAR * msgs;
-	unsigned long base;
+        long base;
 	unsigned int n_msgs;
 };
 

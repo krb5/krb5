@@ -1,3 +1,8 @@
+2001-03-11  Ezra Peisach  <epeisach@mit.edu>
+
+	* com_err.h: For struct error_table, change the base from an
+	unsigned to signed long (error messages and tables are signed)
+
 2001-03-07  Ken Raeburn  <raeburn@mit.edu>
 
 	* test_et.c (main): Only use sys_nerr tests if HAVE_SYS_ERRLIST.
