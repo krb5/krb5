@@ -1,3 +1,7 @@
+Fri Nov 18 00:37:13 1994  Mark Eichin  <eichin@cygnus.com>
+
+	* configure.in: use WITH_KRB4. (from epeisach)
+
 Mon Nov 14 16:27:29 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* kerberos.c (kerberos4_is): Initialize random number generator on
