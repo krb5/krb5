@@ -83,7 +83,7 @@ typedef char const * krb5_const_pointer;
 #define	STDARG_P(x) x
 #else
 #define STDARG_P(x) ()
-#endif /* defined(__STDC__) || defined(STDARG_PROTOTYPES) */
+#endif /* defined(__STDC__) || defined(HAVE_STDARG_H) */
 #else
 #define PROTOTYPE(x) ()
 #define STDARG_P(x) ()

@@ -1,3 +1,7 @@
+Sun Mar 19 12:51:59 1995  John Gilmore  (gnu at toad.com)
+
+	* base-defs.h:  Fix comment that referred to STDARG_PROTOTYPES.
+
 Fri Mar 17 19:12:13 1995  John Gilmore  (gnu at toad.com)
 
 	* k5-config.h:  Move <sys/types.h> handling from ../krb5.h to
