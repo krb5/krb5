@@ -1,5 +1,8 @@
 2005-01-03  Ken Raeburn  <raeburn@mit.edu>
 
+	* implementor.texinfo (Porting Issues): New chapter with a bunch
+	of notes from email I sent regarding porting to pSOS.
+
 	* build.texinfo (The util Directory): Add the new support
 	library.
 	(Installing the Binaries): Discuss parallel builds under GNU

@@ -72,6 +72,7 @@ This file contains internal implementor's information for the
 * Host Address Lookup::         
 * Thread Safety::               
 * Shared Libraries::            
+* Porting Issues::              
 @end menu
 
 @node Introduction, Compiler and OS Requirements, Top, Top
@@ -746,7 +747,7 @@ will use the @code{krb5int_} prefix.  The shorter @code{k5_} prefix is
 just for convenience, and should not be visible to any application
 code.
 
-@node Shared Libraries,  , Thread Safety, Top
+@node Shared Libraries, Porting Issues, Thread Safety, Top
 @chapter Shared Libraries
 
 (These sections are old -- they should get updated.)
@@ -1007,6 +1008,102 @@ instead of a possibly installed library. The loader uses the contents of
 and complete LD_LIBRARY_PATH in our tests.
 
 The one disadvantage with the method we are using....
+
+@node Porting Issues,  , Shared Libraries, Top
+@chapter Porting Issues
+
+[Snipped from email from Ken Raeburn in reply to email asking about
+porting MIT Kerberos to pSOS; maybe it'll be of use to someone else.]
+
+> - Any Porting issues to be considered?
+
+Yes.  Our build procedure currently assumes that the machine used for
+building is either a UNIX (or similar) system, or running Windows; it
+also assumes that it's a native compilation, not a cross compilation.
+I'm not familiar with pSOS, but assuming that you do cross compilation
+on another OS, how you deal with that depends on the host system.
+
+UNIX host: The configure script attempts to learn a bunch of
+attributes about the host system (program names, availability of
+header files and functions and libraries) and uses them to decide how
+to build the krb5 libraries and programs.  Many attributes are tested
+by running the compiler with various options and test source files, so
+if you tell the configure script to run a cross compiler, it may come
+up with most of the right answers, if you can arrange for success and
+failure indications to be given at compile/link time.  (This probably
+wouldn't work well for VxWorks, for example, where symbol resolution
+is done when the object code is loaded into the OS.)
+
+The configure script generates include/krb5/autoconf.h to influence
+whether certain calls are made or certain headers are included, and
+Makefile in each directory to indicate compilation options.  Each
+source directory has a Makefile.in, and config/pre.in and
+config/post.in are incorporated into each generate Makefile.  Various
+@@FOO@@ sequences are substituted based on the system attributes or
+configure options.  (Aside from always using the config/ fragments,
+this is typical of GNU Autoconf based software configuration.)
+
+Windows host: The "wconfig" program generates the Makefiles in
+subdirectories, with config/win-pre.in and config/win-post.in used in
+combination with each Makefile.in, and lines starting "##WIN32##" are
+uncommented, but @@FOO@@ substitutions are not done.  Instead of
+generating autoconf.h, it's copied from include/win-mac.h, where we've
+hardcoded some of the parameters we care about, and just left a bunch
+of others out.  If you work with a Windows host, you may want to
+provide your own makefile fragments, and a replacement for win-mac.h
+or some additional data to go into it conditionalized on some
+preprocessor symbol for pSOS.
+
+There are also places where we assume that certain header files or
+functions are available, because both (most) UNIX and Windows
+platforms (that we care about currently) provide them.  And probably a
+handful of places where we check for _WIN32 to decide between "the
+Windows way" and "everything else" (i.e., UNIX); you might need to add
+a third branch for pSOS.  And some places where we've got hooks for
+Kerberos for Mac support, which you can probably ignore.
+
+Our build environment assumes that Perl is available, but it's only
+needed in the build process, not for run time.  If Tcl is available,
+on UNIX, a few more programs may be built that are used for testing
+some interfaces, but a cross compiler should notice that it can't link
+against the native Tcl libraries, and configure should choose not to
+build those programs.
+
+In the current 1.4 beta code, our library wants to find routines for
+making DNS queries (SRV and TXT RR queries specifically) that are
+outside the scope of getaddrinfo and friends.  We also look for
+/dev/random as a strong random number source, and text files for
+configuration information.  Our code assumes that allocating and
+reallocating lots of little (or not so little) bits of memory isn't
+too horribly expensive, and we don't take any special pains to keep
+our stack size small.  Depending how pSOS works, you may need to add
+to the thread support code.  (The MIT code doesn't create threads, but
+will do locking and such to allow multiple threads to share global
+data.  The code in include/k5-thread.h is, uh, kind of involved, and
+some pains have been taken to use macros whenever possible to allow
+assert() calls during debugging to report useful line numbers.)  There
+are probably other minor issues to deal with, I'm just making some
+guesses.
+
+> - what type of Data formats exchanged between Client and Server?
+
+If you're aiming for a server implementation only, it'll depend on the
+exact protocol you wish to use, but typically the Kerberos application
+server needs to accept the AP-REQ message and generate the AP-REP
+message.  Protection for the data to be transferred depends on on the
+application protocol.  For example, Kerberos provides some message
+types for encapsulating application data with or without encryption;
+the Kerberos mechanism for GSSAPI uses the Kerberos session key to
+protect application data in a different message format.
+
+The server implementation would also need some secure means of getting
+the service principal's key stored away.
+
+If you want client code support as well under pSOS, then you may have
+to deal with DNS queries to find the KDC,
+AS-REQ/AS-REP/TGS-REQ/TGS-REP message exchanges, and generating AP-REQ
+and accepting AP-REP messages, etc.
+
 
 @contents
 @bye
