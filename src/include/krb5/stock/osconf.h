@@ -19,4 +19,11 @@
 
 #define KRB5_USE_INET		/* Support IP address family */
 
+
+#ifdef POSIX_SIGTYPE
+#define sigtype void
+#else
+typedef int sigtype;
+#endif
+
 #endif /* __krb5_osconf__ */
