@@ -3,7 +3,8 @@
  * $Author$
  * $Id$
  *
- * Copyright 1990 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991 the Massachusetts Institute of Technology.
+ * All Rights Reserved.
  *
  * For copying and distribution information, please see the file
  * <krb5/copyright.h>.
@@ -29,8 +30,8 @@ krb5_error_code krb5_get_cred_via_tgt
 	       const krb5_cksumtype,
 	       krb5_creds * ));
 krb5_error_code krb5_walk_realm_tree
-    PROTOTYPE((krb5_const_principal,
-	       krb5_const_principal,
+    PROTOTYPE((const krb5_data *,
+	       const krb5_data *,
 	       krb5_principal **));
 void krb5_free_realm_tree
     PROTOTYPE((const krb5_principal *));
