@@ -1,7 +1,3 @@
-BUILDTOP=@BUILDTOP@
-srcdir = @srcdir@
-VPATH = @srcdir@
-
 KRB4_HEADERS=krb.h des.h kadm.h mit-copyright.h
 
 all::
@@ -9,10 +5,6 @@ all::
 clean::
 
 depend::
-
-KRB5ROOT = @KRB5ROOT@
-
-KRB5_INCDIR = $(KRB5ROOT)/include
 
 install::
 	@set -x; for f in $(KRB4_HEADERS) ; \
