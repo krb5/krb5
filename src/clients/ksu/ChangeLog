@@ -1,3 +1,9 @@
+Thu Mar  4 18:46:55 1999  Tom Yu  <tlyu@mit.edu>
+
+	* heuristic.c (get_authorized_princ_names): Fix to not call
+	list_union() if cmd is NULL, otherwise freed memory gets
+	referenced.
+
 Mon Feb 22 19:17:15 1999  Tom Yu  <tlyu@mit.edu>
 
 	* configure.in: Actually AC_SUBST(KSU_LIBS).
