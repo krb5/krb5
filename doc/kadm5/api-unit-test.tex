@@ -55,7 +55,7 @@ OpenV*Secure Admin API.  Each API function is listed, followed by the
 tests that shoud be performed on it.
 
 The tests described here are based on the ``OV*Secure Admin Functional
-Specifications'' revision 1.27, dated November 17, 1993.
+Specifications'' revision 1.41, dated August 18, 1994.
 
 Since inter-realm functionality is not a requirement for OpenV*Secure
 1.0, it is not tested.
@@ -98,7 +98,7 @@ This will require a client with a modified version of ovsec_kadm_init
 which doesn't call auth_gssapi_create.  This client should call this
 modified ovsec_kadm_init and then call some other admin API function,
 specifying arguments to both functions that would work if the
-authenciated Sun RPC had been used, but shouldn't if authentication
+authenticated Sun RPC had been used, but shouldn't if authentication
 wasn't used.  The test should verify that the API function call after
 the init doesn't succeed.
 
@@ -227,10 +227,10 @@ the init doesn't succeed.
 \Status{Implemented}
 }
 
-\numtest{21}{
-\Reason{Init fails when called twice in a row.}
-\Status{Implemented}
-}
+%\numtest{21}{
+%\Reason{Init fails when called twice in a row.}
+%\Status{Implemented}
+%}
 
 \numtest{22}{
 \Reason{A null password causes master-key prompting.}
@@ -262,25 +262,25 @@ the init doesn't succeed.
 \Status{Implemented}
 }
 
-\numtest{26}{
-\Reason{Can't do ``get'' operation before calling init.}
-\Status{Implemented}
-}
+%\numtest{26}{
+%\Reason{Can't do ``get'' operation before calling init.}
+%\Status{Implemented}
+%}
 
-\numtest{27}{
-\Reason{Can't do ``add'' operation before calling init.}
-\Status{Implemented}
-}
+%\numtest{27}{
+%\Reason{Can't do ``add'' operation before calling init.}
+%\Status{Implemented}
+%}
 
-\numtest{28}{
-\Reason{Can't do ``modify'' operation before calling init.}
-\Status{Implemented}
-}
+\%numtest{28}{
+%\Reason{Can't do ``modify'' operation before calling init.}
+%\Status{Implemented}
+%}
 
-\numtest{29}{
-\Reason{Can't do ``delete'' operation before calling init.}
-\Status{Implemented}
-}
+%\numtest{29}{
+%\Reason{Can't do ``delete'' operation before calling init.}
+%\Status{Implemented}
+%}
 
 \numtest{30}{
 \Reason{Can init after failed init attempt.}
@@ -295,35 +295,35 @@ the init doesn't succeed.
 \Status{Implemented}
 }
 
-\numtest{2}{
-\Reason{Valid invocation (``get'' not allowed after destroy).}
-\Status{Implemented}
-}
+%\numtest{2}{
+%\Reason{Valid invocation (``get'' not allowed after destroy).}
+%\Status{Implemented}
+%}
 
-\numtest{3}{
-\Reason{Valid invocation (``add'' not allowed after destroy).}
-\Status{Implemented}
-}
+%\numtest{3}{
+%\Reason{Valid invocation (``add'' not allowed after destroy).}
+%\Status{Implemented}
+%}
 
-\numtest{4}{
-\Reason{Valid invocation (``modify'' not allowed after destroy).}
-\Status{Implemented}
-}
+%\numtest{4}{
+%\Reason{Valid invocation (``modify'' not allowed after destroy).}
+%\Status{Implemented}
+%}
 
-\numtest{5}{
-\Reason{Valid invocation (``delete'' not allowed after destroy).}
-\Status{Implemented}
-}
+%\numtest{5}{
+%\Reason{Valid invocation (``delete'' not allowed after destroy).}
+%\Status{Implemented}
+%}
 
-\numtest{6}{
-\Reason{Fails if database not initialized.}
-\Status{Implemented}
-}
+%\numtest{6}{
+%\Reason{Fails if database not initialized.}
+%\Status{Implemented}
+%}
 
-\numtest{7}{
-\Reason{Fails if invoked twice in a row.}
-\Status{Implemented}
-}
+%\numtest{7}{
+%\Reason{Fails if invoked twice in a row.}
+%\Status{Implemented}
+%}
 
 \numtest{8}{
 \Reason{Database can be reinitialized after destroy.}
@@ -362,10 +362,10 @@ the init doesn't succeed.
 %this structure may be changed by the tests, but they should clean up
 %after themselves.
 
-\numtest{1}{
-\Reason{Fails if database not initialized.}
-\Status{Implemented}
-}
+%\numtest{1}{
+%\Reason{Fails if database not initialized.}
+%\Status{Implemented}
+%}
 
 \numtest{2}{
 \Reason{Fails on null princ argument.}
@@ -592,10 +592,10 @@ the init doesn't succeed.
 
 \section{ovsec_kadm_delete_principal}
 
-\numtest{1}{
-\Reason{Fails if database not initialized.}
-\Status{Implemented}
-}
+%\numtest{1}{
+%\Reason{Fails if database not initialized.}
+%\Status{Implemented}
+%}
 
 \numtest{2}{
 \Reason{Fails on null principal.}
@@ -669,10 +669,10 @@ the init doesn't succeed.
 
 \section{ovsec_kadm_modify_principal}
 
-\numtest{1}{
-\Reason{Fails if database not initialized.}
-\Status{Implemented}
-}
+%\numtest{1}{
+%\Reason{Fails if database not initialized.}
+%\Status{Implemented}
+%}
 
 \numtest{2}{
 \Priority{High}
@@ -946,10 +946,10 @@ the init doesn't succeed.
 
 \section{ovsec_kadm_rename_principal}
 
-\numtest{1}{
-\Reason{Fails if database not initialized.}
-\Status{Implemented}
-}
+%\numtest{1}{
+%\Reason{Fails if database not initialized.}
+%\Status{Implemented}
+%}
 
 \numtest{2}{
 \Priority{High}
@@ -1181,9 +1181,9 @@ Base & Modify access? & Own password? & Service & Pass/Fail \\ \hline
 
 \subsection{Other tests}
 
-\numtest{168}{
-\Reason{Fails if database not initialized.}
-}
+%\numtest{168}{
+%\Reason{Fails if database not initialized.}
+%}
 
 \numtest{169}{
 \Reason{Fails for non-existent principal.}
@@ -1275,11 +1275,15 @@ Base & Modify access? & Own password? & Service & Pass/Fail \\ \hline
 %	if override_qual is true.}
 %\Expected{Returns CANNOT_OVERRIDE.}
 %}
+
 \numtest{182}{
 \Priority{High}
 \Reason{Can not change key of ovsec_adm/history principal.}
 \Status{Implemented}
 }
+
+
+
 \section{ovsec_kadm_chpass_principal_util}
 
 Rerun all the tests listed for ovsec_kadm_chpass_principal above in
