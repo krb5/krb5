@@ -2,6 +2,8 @@
 
 	* aclocal.m4 (KRB_INCLUDE): Put in-tree include dirs before
 	previous contents of CPPFLAGS.
+	(KRB5_AC_CHOOSE_SS): Let user specify SS_LIB=..., substitute it
+	into generated makefiles.
 
 2002-09-03  Ezra Peisach  <epeisach@bu.edu>
 

@@ -1435,11 +1435,15 @@ AC_SUBST(COM_ERR_VERSION)
 AC_DEFUN([KRB5_AC_CHOOSE_SS],[
 AC_ARG_WITH(system-ss,
 	    AC_HELP_STRING(--with-system-ss,use system -lss and mk_cmds @<:@default: use a private version@:>@))
+AC_ARG_VAR(SS_LIB,[system libraries for 'ss' package, if --with-system-ss was specified [-lss]])
 if test "x$with_system_ss" = xyes ; then
   SS_VERSION=sys
-  # check for various libraries we might need
+  # todo: check for various libraries we might need
+  # in the meantime...
+  test "x${SS_LIB+set}" = xset || SS_LIB=-lss
 else
   SS_VERSION=k5
 fi
+AC_SUBST(SS_LIB)
 AC_SUBST(SS_VERSION)
 ])

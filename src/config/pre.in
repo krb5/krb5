@@ -246,7 +246,7 @@ SS_DEPS-k5	= $(BUILDTOP)/include/ss/ss.h $(BUILDTOP)/include/ss/ss_err.h
 GEN_LIB		= @GEN_LIB@
 
 SS_LIB		= $(SS_LIB-@SS_VERSION@)
-SS_LIB-sys	= -lss
+SS_LIB-sys	= @SS_LIB@
 SS_LIB-k5	= $(TOPLIBD)/libss.a
 KDB5_LIB	= -lkdb5
 DB_LIB		= -ldb
