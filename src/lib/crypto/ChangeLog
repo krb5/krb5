@@ -3,6 +3,10 @@ Tue Oct 18 15:46:01 1994  Mark Eichin  (eichin@cygnus.com)
 	* des-crc.c (mit_des_crc_decrypt_func): cast key->key->contents to
 	krb5_pointer to satisfy sunos cc about :? argument types.
 	(mit_des_crc_encrypt_funct): ditto.
+	* raw-des.c (mit_raw_des_decrypt_func): ditto.
+	(mit_raw_des_encrypt_func): ditto.
+	* des-md5.c (mit_des_md5_decrypt_funct): cast zero_ivec.
+	(mit_des_md5_encrypt_funct): ditto.
 
 Fri Oct 14 00:37:08 1994  Theodore Y. Ts'o  (tytso@dcl)
 
