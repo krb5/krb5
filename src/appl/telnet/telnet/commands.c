@@ -2377,7 +2377,7 @@ tn(argc, argv)
     char *srp = 0;
     unsigned long sourceroute(), srlen;
 #endif
-    char *cmd, *hostp = 0, *portp = 0, *user = 0;
+    char *cmd, *hostp = 0, *portp = 0, *volatile user = 0;
 
     /* clear the socket address prior to use */
     memset((char *)&sin, 0, sizeof(sin));

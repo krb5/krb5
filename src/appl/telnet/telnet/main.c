@@ -308,7 +308,7 @@ main(argc, argv)
 	argv += optind;
 
 	if (argc) {
-		char *args[7], **argp = args;
+		char *args[7], **volatile argp = args;
 
 		if (argc > 2)
 			usage();

@@ -1,3 +1,8 @@
+2000-12-06  Ken Raeburn  <raeburn@mit.edu>
+
+	* commands.c (tn): Local var "user" should be volatile.
+	* main.c (main): Local var "argp" should be volatile.
+
 2000-11-01  Ezra Peisach  <epeisach@mit.edu>
 
 	* configure.in: Use AC_CHECK_HEADER and AC_FUNC_VFORK instead of
