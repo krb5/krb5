@@ -27,12 +27,11 @@ static char rcsid_kdb_stash_c[] =
 
 #include <stdio.h>
 #include <krb5/ext-proto.h>
+#include <krb5/libos-proto.h>
 
-#include <sys/param.h>			/* XXX */
+#include <sys/file.h>			/* for unlink() */
 
 extern int errno;
-
-#define DEFAULT_KEYFILE_STUB	"/.k5."
 
 krb5_keyblock master_keyblock;
 krb5_principal master_princ;
@@ -43,7 +42,7 @@ usage(who, status)
 char *who;
 int status;
 {
-    fprintf(stderr, "usage: %s [-n dbname] [-r realmname] [-k keytype]\n\
+    fprintf(stderr, "usage: %s [-d dbpathname] [-r realmname] [-k keytype]\n\
 \t[-e etype] [-M mkeyname] [-f keyfile]\n",
 	    who);
     exit(status);
@@ -64,20 +63,21 @@ char *argv[];
     char *mkey_name = 0;
     char *mkey_fullname;
     char defrealm[BUFSIZ];
-    char defkeyfile[MAXPATHLEN];
     char *keyfile = 0;
-    FILE *kf;
 
-    int keytypedone = 0, etypedone = 0;
-    krb5_enctype etype;
+    int keytypedone = 0;
+    krb5_enctype etype = -1;
+
+    if (rindex(argv[0], '/'))
+	argv[0] = rindex(argv[0], '/')+1;
 
     initialize_krb5_error_table();
     initialize_kdb5_error_table();
     initialize_isod_error_table();
 
-    while ((optchar = getopt(argc, argv, "n:r:k:M:e:f:")) != EOF) {
+    while ((optchar = getopt(argc, argv, "d:r:k:M:e:f:")) != EOF) {
 	switch(optchar) {
-	case 'n':			/* set db name */
+	case 'd':			/* set db name */
 	    dbname = optarg;
 	    break;
 	case 'r':
@@ -92,7 +92,6 @@ char *argv[];
 	    break;
 	case 'e':
 	    etype = atoi(optarg);
-	    etypedone++;
 	    break;
 	case 'f':
 	    keyfile = optarg;
@@ -103,23 +102,21 @@ char *argv[];
 	    /*NOTREACHED*/
 	}
     }
-    if (!mkey_name)
-	mkey_name = KRB5_KDB_M_NAME;
 
     if (!keytypedone)
 	master_keyblock.keytype = KEYTYPE_DES;
 
     if (!valid_keytype(master_keyblock.keytype)) {
-	com_err(argv[0], KRB5KDC_ERR_ETYPE_NOSUPP,
+	com_err(argv[0], KRB5_PROG_KEYTYPE_NOSUPP,
 		"while setting up keytype %d", master_keyblock.keytype);
 	exit(1);
     }
 
-    if (!etypedone)
-	etype = keytype_to_etype(master_keyblock.keytype);
+    if (etype == -1)
+	etype = krb5_keytype_array[master_keyblock.keytype]->system->proto_enctype;
 
     if (!valid_etype(etype)) {
-	com_err(argv[0], KRB5KDC_ERR_ETYPE_NOSUPP,
+	com_err(argv[0], KRB5_PROG_ETYPE_NOSUPP,
 		"while setting up etype %d", etype);
 	exit(1);
     }
@@ -142,16 +139,10 @@ char *argv[];
 	realm = defrealm;
     }
 
-    if (!keyfile) {
-	(void) strcpy(defkeyfile, DEFAULT_KEYFILE_STUB);
-	(void) strncat(defkeyfile, realm, sizeof(defkeyfile)-sizeof(DEFAULT_KEYFILE_STUB));
-	keyfile = defkeyfile;
-    }
-
     /* assemble & parse the master key name */
 
-    if (retval = setup_mkey_name(mkey_name, realm, &mkey_fullname,
-				 &master_princ)) {
+    if (retval = krb5_db_setup_mkey_name(mkey_name, realm, &mkey_fullname,
+					 &master_princ)) {
 	com_err(argv[0], retval, "while setting up master key name");
 	exit(1);
     }
@@ -175,36 +166,11 @@ char *argv[];
 	(void) krb5_db_fini();
 	exit(1);
     }	
-    if (!(kf = fopen(keyfile, "w"))) {
-	/* error opening */
-	com_err(argv[0], errno, "while opening keyfile '%s'",keyfile);
+    if (retval = krb5_db_store_mkey(keyfile, master_princ, &master_keyblock)) {
+	com_err(argv[0], errno, "while storing key");
 	bzero((char *)master_keyblock.contents, master_keyblock.length);
 	(void) krb5_db_fini();
 	exit(1);
-    }
-    if ((fwrite((krb5_pointer) &master_keyblock.keytype,
-		sizeof(master_keyblock.keytype),
-		1, kf) != 1) ||
-	(fwrite((krb5_pointer) &master_keyblock.length,
-		sizeof(master_keyblock.length),
-		1, kf) != 1) ||
-	(fwrite((krb5_pointer) master_keyblock.contents,
-		sizeof(master_keyblock.contents[0]),
-		master_keyblock.length, kf) != master_keyblock.length)) {
-	/* error writing */
-	retval = errno;
-	com_err(argv[0], retval, "error writing to keyfile '%s'", keyfile);
-	(void) fclose(kf);
-    cleanup:
-	bzero((char *)master_keyblock.contents, master_keyblock.length);
-	(void) unlink(keyfile);
-	(void) krb5_db_fini();
-	exit(1);
-    }
-    if (fclose(kf) == EOF) {
-	retval = errno;
-	com_err(argv[0], retval, "closing keyfile '%s'", keyfile);
-	goto cleanup;
     }
     bzero((char *)master_keyblock.contents, master_keyblock.length);
     if (retval = krb5_db_fini()) {
