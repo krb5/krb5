@@ -46,14 +46,15 @@
 #endif	/* LOG_AUTH */
 
 #ifdef	LANGUAGES_SUPPORTED
-static const char *usage_format =	"%s: usage is %s [-a aclfile] [-d database] [-e enctype] [-i]\n\t[-k mkeytype] [-l langlist] [-r realm] [-t timeout]\n\t[-D dbg] [-M mkeyname].\n";
-static const char *getopt_string =	"a:d:e:ik:l:r:t:D:M:";
+static const char *usage_format =	"%s: usage is %s [-a aclfile] [-d database] [-e enctype] [-m]\n\t[-k mkeytype] [-l langlist] [-p portnum] [-r realm] [-t timeout] [-n]\n\t[-D dbg] [-M mkeyname] [-T ktabname].\n";
+static const char *getopt_string =	"a:d:e:k:l:mnp:r:t:D:M:T:";
 #else	/* LANGUAGES_SUPPORTED */
-static const char *usage_format =	"%s: usage is %s [-a aclfile] [-d database] [-e enctype] [-i]\n\t[-k mkeytype] [-r realm] [-t timeout]\n\t[-D dbg] [-M mkeyname].\n";
-static const char *getopt_string =	"a:d:e:ik:r:t:D:M:";
+static const char *usage_format =	"%s: usage is %s [-a aclfile] [-d database] [-e enctype] [-m]\n\t[-k mkeytype] [-p portnum] [-r realm] [-t timeout] [-n]\n\t[-D dbg] [-M mkeyname] [-T ktabname].\n";
+static const char *getopt_string =	"a:d:e:k:mnp:r:t:D:M:T:";
 #endif	/* LANGUAGES_SUPPORTED */
 static const char *fval_not_number =	"%s: value (%s) specified for -%c is not numeric.\n";
 static const char *extra_params =	"%s extra paramters beginning with %s... \n";
+static const char *daemon_err =		"%s: cannot spawn and detach.\n";
 static const char *no_memory_fmt =	"%s: cannot allocate %d bytes for %s.\n";
 static const char *begin_op_msg =	"%s starting.";
 static const char *disp_err_fmt =	"dispatch error.";
@@ -144,11 +145,14 @@ main(argc, argv)
     krb5_boolean	mime_enabled = 0;
     int			debug_level = 0;
     int			timeout = -1;
+    int			nofork = 0;
+    krb5_int32		service_port = -1;
     char		*acl_file = (char *) NULL;
     char		*db_file = (char *) NULL;
     char		*language_list = (char *) NULL;
     char		*db_realm = (char *) NULL;
     char		*master_key_name = (char *) NULL;
+    char		*keytab_name = (char *) NULL;
 
     /* Kerberatic contexts */
     krb5_context	kcontext;
@@ -158,17 +162,19 @@ main(argc, argv)
 
     /*
      * usage is:
-     *	kadmind5	[-a aclfile]
-     *			[-d database]
-     *			[-e enctype]
-     *			[-i]
-     *			[-k masterkeytype]
-     *			[-l languagelist]
-     *			[-m yesno]
-     *			[-r realmname]
-     *			[-t timeout]
-     *			[-D debuglevel]
-     *			[-M masterkeyname]
+     *	kadmind5	[-a aclfile]		<acl file>
+     *			[-d database]		<database file>
+     *			[-e enctype]		<encryption type>
+     *			[-k masterkeytype]	<master key type>
+     *			[-l languagelist]	<language list>
+     *			[-m]			<manual master key entry>
+     *			[-n]			<do not fork/disassociate>
+     *			[-p portnumber]		<listen on port>
+     *			[-r realmname]		<realm>
+     *			[-t timeout]		<inactivity timeout>
+     *			[-D debugmask]		<debug mask>
+     *			[-M masterkeyname]	<name of master key>
+     *			[-T keytabname]		<key table file>
      */
     error = 0;
     while ((option = getopt(argc, argv, getopt_string)) != EOF) {
@@ -185,7 +191,7 @@ main(argc, argv)
 		error++;
 	    }
 	    break;
-	case 'i':
+	case 'm':
 	    manual_entry++;
 	    break;
 	case 'k':
@@ -200,6 +206,15 @@ main(argc, argv)
 	    mime_enabled = 1;
 	    break;
 #endif	/* LANGUAGES_SUPPORTED */
+	case 'n':
+	    nofork++;
+	    break;
+	case 'p':
+	    if (sscanf(optarg, "%d", &service_port) != 1) {
+		fprintf(stderr, fval_not_number, argv[0], optarg, 'p');
+		error++;
+	    }
+	    break;
 	case 'r':
 	    db_realm = optarg;
 	    break;
@@ -218,6 +233,9 @@ main(argc, argv)
 	case 'M':
 	    master_key_name = optarg;
 	    break;
+	case 'T':
+	    keytab_name = optarg;
+	    break;
 	default:
 	    error++;
 	    break;
@@ -231,6 +249,18 @@ main(argc, argv)
 	usage(argv[0]);
 	return(1);
     }
+
+#ifndef	DEBUG
+    /*
+     * If we're not debugging and we didn't specify -n, then detach from our
+     * controlling terminal and exit.
+     */
+    if (!nofork && daemon(0, 0)) {
+	fprintf(stderr, daemon_err, argv[0]);
+	perror(argv[0]);
+	return(2);
+    }
+#endif	/* DEBUG */
 
     /*
      * We've come this far.  Our arguments are good.
@@ -265,15 +295,15 @@ main(argc, argv)
 	 * Initialize our modules.
 	 */
 	error = key_init(kcontext, debug_level, enc_type, key_type,
-			 master_key_name, manual_entry, db_file, db_realm);
+			 master_key_name, manual_entry, db_file, db_realm,
+			 keytab_name);
 	if (!error) {
 	    error = acl_init(kcontext, debug_level, acl_file);
 	    if (!error) {
 		error = output_init(kcontext, debug_level,
 				    language_list, mime_enabled);
 		if (!error) {
-		    error = net_init(kcontext,
-				     debug_level);
+		    error = net_init(kcontext, debug_level, service_port);
 		    if (!error) {
 			error = proto_init(kcontext, debug_level, timeout);
 
