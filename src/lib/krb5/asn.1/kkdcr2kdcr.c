@@ -51,7 +51,7 @@ OLDDECLARG(register int *,error)
     if (!retval->crealm) {
 	*error = ENOMEM;
     errout:
-	free_KRB5_KDC__REP(retval);
+	free_KRB5_TGS__REP(retval);
 	return(0);
     }
     retval->cname = krb5_principal2KRB5_PrincipalName(val->client, error);
