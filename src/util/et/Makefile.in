@@ -10,7 +10,7 @@ SED = sed
 STLIBOBJS=error_message.o et_name.o init_et.o com_err.o
 STOBJLISTS=OBJS.ST
 LIB=com_err
-LIBMAJOR=1
+LIBMAJOR=3
 LIBMINOR=0
 
 all-unix:: all-liblinks

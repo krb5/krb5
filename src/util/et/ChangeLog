@@ -1,3 +1,7 @@
+Sat Feb 22 00:34:05 1997  Sam Hartman  <hartmans@luminous.MIT.EDU>
+
+	* Makefile.in (LIBMAJOR):  Bump to 3 so that the krb5 lib is preferred to the NetBSD system library.
+
 Fri Feb 14 13:55:45 1997  Richard Basch  <basch@lehman.com>
 
 	* com_err.c com_err.h error_message.c error_table.h et_c.awk et_h.awk:
