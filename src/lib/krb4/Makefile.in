@@ -232,6 +232,7 @@ $(EHDRDIR)$(S)kadm_err.h: kadm_err.h
 clean-unix::
 	$(RM) $(EHDRDIR)/krb_err.h
 	$(RM) $(EHDRDIR)/kadm_err.h
+	$(RM) krb_err_txt.c
 
 clean::
 	-$(RM) $(OBJS)
@@ -294,7 +295,8 @@ g_ad_tkt.so g_ad_tkt.po $(OUTPRE)g_ad_tkt.$(OBJEXT): g_ad_tkt.c $(SRCTOP)/includ
 g_pw_in_tkt.so g_pw_in_tkt.po $(OUTPRE)g_pw_in_tkt.$(OBJEXT): g_pw_in_tkt.c $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(SRCTOP)/include/kerberosIV/krb.h \
   $(SRCTOP)/include/kerberosIV/des.h $(KRB_ERR_H_DEP) \
-  $(BUILDTOP)/include/profile.h $(SRCTOP)/include/kerberosIV/prot.h
+  $(BUILDTOP)/include/profile.h krb4int.h $(SRCTOP)/include/port-sockets.h \
+  $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/kerberosIV/prot.h
 g_phost.so g_phost.po $(OUTPRE)g_phost.$(OBJEXT): g_phost.c $(SRCTOP)/include/kerberosIV/krb.h \
   $(SRCTOP)/include/kerberosIV/des.h $(KRB_ERR_H_DEP) \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
@@ -436,10 +438,12 @@ tf_util.so tf_util.po $(OUTPRE)tf_util.$(OBJEXT): tf_util.c $(SRCTOP)/include/ke
   krb4int.h
 dest_tkt.so dest_tkt.po $(OUTPRE)dest_tkt.$(OBJEXT): dest_tkt.c $(SRCTOP)/include/kerberosIV/krb.h \
   $(SRCTOP)/include/kerberosIV/des.h $(KRB_ERR_H_DEP) \
-  $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h
+  $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/k5-util.h \
+  $(BUILDTOP)/include/krb5/autoconf.h
 in_tkt.so in_tkt.po $(OUTPRE)in_tkt.$(OBJEXT): in_tkt.c $(SRCTOP)/include/kerberosIV/krb.h \
   $(SRCTOP)/include/kerberosIV/des.h $(KRB_ERR_H_DEP) \
-  $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h
+  $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/k5-util.h \
+  $(BUILDTOP)/include/krb5/autoconf.h
 tkt_string.so tkt_string.po $(OUTPRE)tkt_string.$(OBJEXT): tkt_string.c $(SRCTOP)/include/kerberosIV/krb.h \
   $(SRCTOP)/include/kerberosIV/des.h $(KRB_ERR_H_DEP) \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \

@@ -1,3 +1,10 @@
+2003-02-28  Ezra Peisach  <epeisach@bu.edu>
+
+	* Makefile.in (clean-unix): Remove krb_err_txt.c on clean. Update
+	dependencies
+
+	* g_pw_in_tkt.c: Include krb4int.h for krb_get_keyprocs() prototype.
+
 2003-02-25  Ken Raeburn  <raeburn@mit.edu>
 
 	* in_tkt.c: Include k5-util.h.
