@@ -1,3 +1,8 @@
+Tue Mar 14 16:50:54 1995    <tytso@rsx-11.mit.edu>
+
+	* Makefile.in: Delete definition for KRB5ROOT and KRB5_INCDIR,
+		since those are defined in pre/config.in.
+
 Thu Mar 16 20:58:22 1995  John Gilmore  (gnu at toad.com)
 
 	* configure.in:  Replace nonstandard CHECK_STDARG with
@@ -24,6 +29,7 @@ Tue Mar 14 17:38:28 1995 Keith Vetter (keithv@fusion.com)
 	   krb5_os_localaddr from los-proto to func-proto. They are needed by
 	   the outside world, specifically kinit.c
 
+>>>>>>> /tmp/T4a00196
 Fri Mar 10 14:23:12 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* sysincl.h: Removed definition of FD_SETSIZE, FD_SET, FD_CLR,
