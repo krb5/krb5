@@ -168,6 +168,10 @@ add_error_table(et)
     const struct error_table FAR * et;
 {
     struct et_list *el = _et_list;
+#ifdef _MSDOS
+    static struct et_list etl[32];
+    static int etl_used = 0;
+#endif
 
     while (el) {
 	if (el->table->base == et->base)
@@ -175,8 +179,18 @@ add_error_table(et)
 	el = el->next;
     }
 
-    if (! (el = (struct et_list *)malloc(sizeof(struct et_list))))
-	return ENOMEM;
+#ifdef _MSDOS
+    /*
+     * Win16 applications cannot call malloc while the DLL is being
+     * initialized...  To get around this, we pre-allocate an array
+     * sufficient to hold several error tables.
+     */
+    if (etl_used < sizeof(etl)/sizeof(struct et_list))
+	el = &etl[etl_used++];
+    else
+#endif
+	if (!(el = (struct et_list *)malloc(sizeof(struct et_list))))
+	    return ENOMEM;
 
     el->table = et;
     el->next = _et_list;
