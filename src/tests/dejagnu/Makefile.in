@@ -14,7 +14,7 @@ check-runtest:: t_inetd
 CFLAGS = $(CCOPTS) $(DEFS)
 
 t_inetd:: t_inetd.o $(DEPLIBS)
-	$(LD) $(LDFLAGS) $(LDARGS) -o t_inetd t_inetd.o -lcom_err
+	$(LD) $(LDFLAGS) $(LDARGS) -o t_inetd t_inetd.o $(LIBS)
 
 clean::
 	$(RM) t_inetd t_inetd.o

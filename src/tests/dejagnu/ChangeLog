@@ -1,3 +1,8 @@
+
+Tue Aug 29 14:22:28 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* Makefile.in - Replace explicit library list with $(LIBS).  This
+		gets set with the needed libraries (e.g. -lsocket on Solaris).
+
 Sat Aug 26 18:10:44 1995  Ezra Peisach  (epeisach@kangaroo.mit.edu)
 
 	* .Sanitize: Add t_inetd.c
