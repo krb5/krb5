@@ -1,0 +1,7 @@
+NormalLibraryObjectRule()
+
+OBJS=	crc.o
+
+SRCS=	crc.c
+
+NormalLibraryTarget(crc32,$(OBJS))
