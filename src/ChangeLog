@@ -1,3 +1,8 @@
+2002-03-28  Ken Raeburn  <raeburn@mit.edu>
+
+	* aclocal.m4 (TRY_GETSOCK_INT): Strip trailing spaces from defined
+	macros.
+
 2001-11-19  Danilo Almeida  <dalmeida@mit.edu>
 
 	* Makefile.in: Fix up lib/crypto/yarrow for Windows.

@@ -1371,8 +1371,8 @@ extern int getsockname(int, $1, $2);
 if eval "test \"`echo '$krb5_cv_getsockname_proto_'$krb5_lib_var`\" = yes"; then
 	AC_MSG_RESULT(yes)
 	sock_set=yes
-	res1=`echo "$1" | tr -d '*'`
-	res2=`echo "$2" | tr -d '*'`
+	res1=`echo "$1" | tr -d '*' | sed -e 's/ *$//'`
+	res2=`echo "$2" | tr -d '*' | sed -e 's/ *$//'`
 	AC_DEFINE_UNQUOTED([GETSOCKNAME_ARG2_TYPE],$res1)
 	AC_DEFINE_UNQUOTED([GETSOCKNAME_ARG3_TYPE],$res2)
 else
