@@ -37,6 +37,7 @@ typedef struct _krb5_context {
 	krb5_enctype  FAR *etypes;
 	int		etype_count;
 	void	      FAR *os_context;
+	char	      FAR *default_realm;
 } FAR * krb5_context;
 
 struct _krb5_auth_context;
