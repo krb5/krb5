@@ -24,16 +24,10 @@ credentials cache, or in the cache
 if the
 .B \-c
 option is used.
-
-The default credentials cache may vary between systems; however, if the
-.B KRB5CCNAME
-environment variable is set, its value is used to name the default
-ticket cache.
-.SH FILES
-.TP 2i
-.TP
-/tmp/krb5cc_[uid]
-as the normal default credentials cache ([uid] is the decimal UID of the user).
+.PP
+The
+.IR kinit (1)
+manual page specifies how the default credentials cache is selected.
 .SH SEE ALSO
 kinit(1), kdestroy(1), krb5(3)
 .SH BUGS
