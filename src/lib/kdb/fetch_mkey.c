@@ -67,11 +67,13 @@ krb5_db_fetch_mkey(DECLARG(krb5_principal, mname),
 		   DECLARG(krb5_encrypt_block *, eblock),
 		   DECLARG(krb5_boolean, fromkeyboard),
 		   DECLARG(krb5_boolean, twice),
+		   DECLARG(krb5_data *, salt),
 		   DECLARG(krb5_keyblock *,key))
 OLDDECLARG(krb5_principal, mname)
 OLDDECLARG(krb5_encrypt_block *, eblock)
 OLDDECLARG(krb5_boolean, fromkeyboard)
 OLDDECLARG(krb5_boolean, twice)
+OLDDECLARG(krb5_data *, salt)
 OLDDECLARG(krb5_keyblock *,key)
 {
     krb5_error_code retval;
@@ -91,10 +93,15 @@ OLDDECLARG(krb5_keyblock *,key)
 
 	pwd.data = password;
 	pwd.length = size;
-	if (retval = krb5_principal2salt(mname, &scratch))
-	    return retval;
-	retval = krb5_string_to_key(eblock, key->keytype, key, &pwd, &scratch);
-	xfree(scratch.data);
+	if (!salt) {
+		retval = krb5_principal2salt(mname, &scratch);
+		if (retval)
+			return retval;
+	}
+	retval = krb5_string_to_key(eblock, key->keytype, key, &pwd,
+				    salt ? salt : &scratch);
+	if (!salt)
+		xfree(scratch.data);
 	memset(password, 0, sizeof(password)); /* erase it */
 	return retval;
 
