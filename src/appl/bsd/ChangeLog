@@ -1,3 +1,14 @@
+Wed Dec 28 14:59:58 1994  Richard Basch  (probe@tardis)
+
+	* logutil.c
+	  	Corrected arguments for the utmpx routines.
+
+	* configure.in
+		Changed the PATH for looking for BSD r* commands
+		Use AC_TRY_LINK instead of AC_TRY_COMPILE for the setenv test.
+		Cache results of compile/link tests.
+		Added shadow password support.
+
 Wed Dec 28 13:12:02 1994  Richard Basch  (probe@tardis)
 
 	* configure.in
