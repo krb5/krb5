@@ -886,11 +886,11 @@ krb5_dbm_db_rename(context, from, to)
     context->db_context = (void *) NULL;
     if (!(retval = k5dbm_init_context(context))) {
 	/*
-	 * Set the name of our temporary database context to the source
+	 * Set the name of our temporary database context to the target
 	 * database.  We need to do this so that the database calls do the
 	 * operations to the right lock file.
 	 */
-	retval = krb5_dbm_db_set_name(context, from);
+	retval = krb5_dbm_db_set_name(context, to);
 	db_ctx = (krb5_db_context *) context->db_context;
 	if ((db_ctx->db_lf_name = gen_dbsuffix(db_ctx->db_name,
 					       KDBM_LOCK_EXT(db_ctx)))) {
@@ -952,11 +952,14 @@ krb5_dbm_db_rename(context, from, to)
 	 (fromdir && todir && (rename (fromdir, todir) == 0))) &&
 	((!frompag && !topag) ||
 	 (frompag && topag && (rename (frompag, topag) == 0)))) {
-	if (fromok && took)
-	    (void) rename(fromok, took);
-	retval = 0;
-    } else
-	retval = errno;
+	    /* We only need to unlink the source lock file */
+	    (void) unlink(fromok);
+	    retval = krb5_dbm_db_end_update(context);
+    } else {
+	    (void) krb5_dbm_db_end_update(context);
+	    retval = errno;
+    }
+    
     
 errout:
     if (fromok)
@@ -973,16 +976,17 @@ errout:
 	free_dbsuffix (fromdir);
 
     if (context->db_context) {
-	if (db_ctx->db_lf_file) {
+	if (db_ctx->db_lf_file >= 0) {
 	    krb5_dbm_db_unlock(context);
 	    close(db_ctx->db_lf_file);
 	}
 	k5dbm_clear_context((krb5_db_context *) context->db_context);
 	free (context->db_context);
     }
-    context->db_context = s_context;
 
-    (void) krb5_dbm_db_unlock(context);		/* unlock database */
+    context->db_context = s_context;
+    (void) krb5_dbm_db_unlock(context);		/* unlock saved context db */
+
     return retval;
 }
 
