@@ -79,8 +79,9 @@ realm_compare(realmname, princ)
 krb5_data *realmname;
 krb5_principal princ;
 {
-    return(strncmp(realmname->data, princ[0]->data,
-		   min(realmname->length, princ[0]->length)) ? FALSE : TRUE);
+    return(strncmp(realmname->data, krb5_princ_realm(princ)->data,
+		   min(realmname->length,
+		       krb5_princ_realm(princ)->length)) ? FALSE : TRUE);
 }
 
 krb5_error_code
@@ -181,7 +182,7 @@ kdc_process_tgs_req(request, from)
 krb5_tgs_req *request;
 const krb5_fulladdr *from;
 {
-    register krb5_ap_req *apreq = request->header2;
+    register krb5_ap_req *apreq;
     int nprincs;
     krb5_boolean more;
     krb5_db_entry server;
@@ -191,6 +192,19 @@ const krb5_fulladdr *from;
     krb5_error_code retval;
     krb5_checksum our_cksum;
 
+    if (retval = decode_krb5_ap_req(&request->header, &request->header2))
+	return retval;
+    if (retval = decode_krb5_real_tgs_req(&request->tgs_request, &request->tgs_request2))
+	return retval;
+    krb5_free_data(request->tgs_request2->server[0]);
+    if (retval = krb5_copy_data(request->header2->ticket->server[0],
+				  &request->tgs_request2->server[0])) {
+	request->tgs_request2->server[0] = 0;
+	/* XXX mem leak of rest of server components... */
+	return retval;
+    }
+
+    apreq = request->header2;
     if (isflagset(apreq->ap_options, AP_OPTS_USE_SESSION_KEY) ||
 	isflagset(apreq->ap_options, AP_OPTS_MUTUAL_REQUIRED))
 	return KRB5KDC_ERR_POLICY;
@@ -261,9 +275,7 @@ const krb5_fulladdr *from;
     /* don't need authenticator anymore */
     krb5_free_authenticator(authdat.authenticator);
 
-    /* copy the ptr to enc_part2, then free remaining stuff */
-    apreq->ticket->enc_part2 = authdat.ticket->enc_part2;
-    authdat.ticket->enc_part2 = 0;
+    /* ticket already filled in by rd_req_dec, so free the ticket */
     krb5_free_ticket(authdat.ticket);
 
     return 0;
