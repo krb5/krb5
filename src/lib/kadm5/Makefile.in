@@ -60,9 +60,10 @@ HDRS =	$(HDRDIR)/adb.h \
 	$(HDRDIR)/chpass_util_strings.h \
 	$(HDRDIR)/kadm_err.h
 
-$(OBJS): $(HDRS) shared
-
+$(OBJS): $(HDRS)
+all-unix:: shared
 all-unix:: $(OBJS) DONE
+all-unix:: all-recurse
 all-mac:: $(OBJS)
 all-windows:: $(OBJS)
 
@@ -77,5 +78,3 @@ clean-unix::
 
 clean-mac::
 clean-windows::
-
-all-recurse: $(OBJS) DONE

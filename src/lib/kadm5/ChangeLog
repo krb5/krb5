@@ -1,3 +1,8 @@
+Fri Oct 25 23:47:26 1996  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in, Makefile.in: Tweaks to prevent unecessary
+	rebuilding.
+
 Mon Oct 21 21:23:44 1996  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Fixes for new directory recursion method; also

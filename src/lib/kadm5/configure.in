@@ -43,4 +43,5 @@ CopyHeader(adb_err.h,[$](BUILDTOP)/include/kadm5)
 CopyHeader(chpass_util_strings.h,[$](BUILDTOP)/include/kadm5)
 CopyHeader(kadm_err.h,[$](BUILDTOP)/include/kadm5)
 AppendRule([all:: all-$(WHAT)])
+ALL_RECURSE=
 V5_AC_OUTPUT_MAKEFILE
