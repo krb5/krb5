@@ -1,3 +1,12 @@
+2003-02-11  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in ($(BUILDTOP)/include/gssapi/gssapi.h): Add
+	dependencies and cause to invoke a differently-named target in
+	subdirectory.
+	(generic/gssapi.h): Make separate rule.
+	(generic/gssapi_err_generic.h, krb5/gssapi_err_krb5.h): New rules
+	to generate these files in subdirectories as needed.
+
 2003-02-10  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in ($(BUILDTOP)/include/gssapi/gssapi.h generic/gssapi.h): 

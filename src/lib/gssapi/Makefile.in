@@ -70,8 +70,14 @@ clean-windows::
 	cd ..
 	@echo Making clean in gssapi
 
-$(BUILDTOP)/include/gssapi/gssapi.h generic/gssapi.h:
-	(cd generic && $(MAKE) '$$(BUILDTOP)/include/gssapi/gssapi.h' gssapi.h)
+$(BUILDTOP)/include/gssapi/gssapi.h: generic/gssapi.h
+	(cd generic && $(MAKE) gssapi-include)
+generic/gssapi.h: generic/gssapi.hin
+	(cd generic && $(MAKE) gssapi.h)
+generic/gssapi_err_generic.h: generic/gssapi_err_generic.et
+	(cd generic && $(MAKE) gssapi_err_generic.h)
+krb5/gssapi_err_krb5.h: krb5/gssapi_err_krb5.et
+	(cd krb5 && $(MAKE) gssapi_err_krb5.h)
 
 # @lib_frag@
 # @libobj_frag@

@@ -23,6 +23,8 @@ HDRS=	$(EHDRDIR)$(S)gssapi.h \
 EHDRDIRSTAMP=$(EHDRDIR)/stamp
 ##DOS##EHDRDIRSTAMP=
 
+gssapi-include: $(EHDRDIR)$(S)gssapi.h
+
 $(EHDRDIR)$(S)gssapi.h: gssapi.h $(EHDRDIRSTAMP)
 	$(CP) gssapi.h $@
 $(EHDRDIR)$(S)gssapi_generic.h: $(srcdir)$(S)gssapi_generic.h $(EHDRDIRSTAMP)
