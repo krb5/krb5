@@ -77,6 +77,13 @@ void log_badauth_display_status(char *msg, OM_uint32 major, OM_uint32 minor);
 void log_badauth_display_status_1(char *m, OM_uint32 code, int type,
 				  int rec);
 	
+int schpw;
+void do_schpw(int s, kadm5_config_params *params);
+kadm5_config_params params;
+krb5_error_code process_chpw_request(krb5_context context, void *server_handle,
+				     char *realm, int s, krb5_keytab keytab,
+				     struct sockaddr_in *sin,
+				     krb5_data *req, krb5_data *rep);
 
 /*
  * Function: usage
@@ -115,7 +122,6 @@ int main(int argc, char *argv[])
      int s;
      short port = 0;
      auth_gssapi_name names[4];
-     kadm5_config_params params;
 
      names[0].name = names[1].name = names[2].name = names[3].name = NULL;
      names[0].type = names[1].type = names[2].type = names[3].type =
@@ -222,6 +228,17 @@ int main(int argc, char *argv[])
 	  exit(1);
      }
 
+     if ((schpw = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
+	 krb5_klog_syslog(LOG_ERR,
+			   "cannot create simple chpw socket: %s",
+			   error_message(errno));
+	 fprintf(stderr, "Cannot create simple chpw socket: %s",
+		 error_message(errno));
+	 kadm5_destroy(global_server_handle);
+	 krb5_klog_close();
+	 exit(1);
+     }
+
 #ifdef SO_REUSEADDR
      /* the old admin server turned on SO_REUSEADDR for non-default
 	port numbers.  this was necessary, on solaris, for the tests
@@ -248,8 +265,25 @@ int main(int argc, char *argv[])
 	     krb5_klog_close();	  
 	     exit(1);
 	 }
+	 if (setsockopt(schpw, SOL_SOCKET, SO_REUSEADDR,
+			(char *) &allowed, sizeof(allowed)) < 0) {
+	     krb5_klog_syslog(LOG_ERR, "main",
+			      "cannot set SO_REUSEADDR on simple chpw socket: %s", 
+			      error_message(errno));
+	     fprintf(stderr,
+		     "Cannot set SO_REUSEADDR on simple chpw socket: %s",
+ 		     error_message(errno));
+ 	     kadm5_destroy(global_server_handle);
+ 	     krb5_klog_close();
+	 }
+
      }
 #endif /* SO_REUSEADDR */
+     memset(&addr, 0, sizeof(addr));
+     addr.sin_family = AF_INET;
+     addr.sin_addr.s_addr = INADDR_ANY;
+     addr.sin_port = htons(params.kadmind_port);
+
      if (bind(s, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
 	  int oerrno = errno;
 	  fprintf(stderr, "%s: Cannot bind socket.\n", whoami);
@@ -281,6 +315,40 @@ int main(int argc, char *argv[])
 	  }
 	  kadm5_destroy(global_server_handle);
 	  krb5_klog_close();	  
+	  exit(1);
+     }
+     memset(&addr, 0, sizeof(addr));
+     addr.sin_family = AF_INET;
+     addr.sin_addr.s_addr = INADDR_ANY;
+     /* XXX */
+     addr.sin_port = htons(params.kpasswd_port);
+
+     if (bind(schpw, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
+	  char portbuf[32];
+	  int oerrno = errno;
+	  fprintf(stderr, "%s: Cannot bind socket.\n", whoami);
+	  fprintf(stderr, "bind: %s\n", error_message(oerrno));
+	  errno = oerrno;
+	  sprintf(portbuf, "%d", ntohs(addr.sin_port));
+	  krb5_klog_syslog(LOG_ERR, "cannot bind simple chpw socket: %s",
+			   error_message(oerrno));
+	  if(oerrno == EADDRINUSE) {
+	       char *w = strrchr(whoami, '/');
+	       if (w) {
+		    w++;
+	       }
+	       else {
+		    w = whoami;
+	       }
+	       fprintf(stderr,
+"This probably means that another %s process is already\n"
+"running, or that another program is using the server port (number %d).\n"
+"If another %s is already running, you should kill it before\n"
+"restarting the server.\n",
+		       w, ntohs(addr.sin_port), w);
+ 	  }
+ 	  kadm5_destroy(global_server_handle);
+ 	  krb5_klog_close();
 	  exit(1);
      }
      
@@ -447,6 +515,7 @@ void kadm_svc_run(void)
 	  timeout.tv_sec = TIMEOUT;
 	  timeout.tv_usec = 0;
 	  rfd = svc_fdset;
+	  FD_SET(schpw, &rfd);
 	  switch(select(sz, (fd_set *) &rfd, NULL, NULL, &timeout)) {
 	  case -1:
 	       if(errno == EINTR)
@@ -457,7 +526,10 @@ void kadm_svc_run(void)
 	       reset_db();
 	       break;
 	  default:
-	       svc_getreqset(&rfd);
+	      if (FD_ISSET(schpw, &rfd))
+		  do_schpw(schpw, &params);
+	      else
+		  svc_getreqset(&rfd);
 	  }
      }
 }
@@ -780,4 +852,94 @@ void log_badauth_display_status_1(char *m, OM_uint32 code, int type,
 	  if (!msg_ctx)
 	       break;
      }
+}
+
+void do_schpw(int s1, kadm5_config_params *params)
+{
+    krb5_error_code ret;
+    /* XXX buffer = ethernet mtu */
+    char req[1500];
+    int len;
+    struct sockaddr_in from;
+    int fromlen;
+    krb5_keytab kt;
+    krb5_data reqdata, repdata;
+    int s2;
+
+    fromlen = sizeof(from);
+    if ((len = recvfrom(s1, req, sizeof(req), 0, (struct sockaddr *)&from,
+			&fromlen)) < 0) {
+	krb5_klog_syslog(LOG_ERR, "chpw: Couldn't receive request: %s",
+			 error_message(errno));
+	return;
+    }
+
+    if (ret = krb5_kt_resolve(context, params->admin_keytab, &kt)) {
+	krb5_klog_syslog(LOG_ERR, "chpw: Couldn't open admin keytab %s",
+			 error_message(ret));
+	return;
+    }
+
+    reqdata.length = len;
+    reqdata.data = req;
+
+    /* this is really obscure.  s1 is used for all communications.  it
+       is left unconnected in case the server is multihomed and routes
+       are asymmetric.  s2 is connected to resolve routes and get
+       addresses.  this is the *only* way to get proper addresses for
+       multihomed hosts if routing is asymmetric.  
+
+       A related problem in the server, but not the client, is that
+       many os's have no way to disconnect a connected udp socket, so
+       the s2 socket needs to be closed and recreated for each
+       request.  The s1 socket must not be closed, or else queued
+       requests will be lost.
+
+       A "naive" client implementation (one socket, no connect,
+       hostname resolution to get the local ip addr) will work and
+       interoperate if the client is single-homed. */
+
+    if ((s2 = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
+	krb5_klog_syslog(LOG_ERR, "cannot create connecting socket: %s",
+			 error_message(errno));
+	fprintf(stderr, "Cannot create connecting socket: %s",
+		error_message(errno));
+	kadm5_destroy(global_server_handle);
+	krb5_klog_close();	  
+	exit(1);
+    }
+
+    if (connect(s2, (struct sockaddr *) &from, sizeof(from)) < 0) {
+	krb5_klog_syslog(LOG_ERR, "chpw: Couldn't connect to client: %s",
+			 error_message(errno));
+	return;
+    }
+
+    if (ret = process_chpw_request(context, global_server_handle,
+				   params->realm, s2, kt, &from,
+				   &reqdata, &repdata)) {
+	krb5_klog_syslog(LOG_ERR, "chpw: Error processing request: %s", 
+			 error_message(ret));
+    }
+
+    close(s2);
+
+    if (repdata.length == 0)
+	/* just qreturn.  This means something really bad happened */
+	return;
+
+    len = sendto(s1, repdata.data, repdata.length, 0,
+		 (struct sockaddr *) &from, sizeof(from));
+
+    if (len < repdata.length) {
+	krb5_xfree(repdata.data);
+
+	krb5_klog_syslog(LOG_ERR, "chpw: Error sending reply: %s", 
+			 error_message(errno));
+	return;
+    }
+
+    krb5_xfree(repdata.data);
+
+    return;
 }

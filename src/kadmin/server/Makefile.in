@@ -4,7 +4,7 @@ PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 
 PROG = kadmind
-OBJS = kadm_rpc_svc.o server_stubs.o ovsec_kadmd.o misc.o server_glue_v1.o
+OBJS = kadm_rpc_svc.o server_stubs.o ovsec_kadmd.o schpw.o misc.o server_glue_v1.o
 
 all:: $(PROG)
 

@@ -1,3 +1,11 @@
+Wed Jan 21 00:00:34 1998  Tom Yu  <tlyu@mit.edu>
+
+	* schpw.c: New file.  Support for Cygnus chpw.
+
+	* ovsec_kadmd.c: Add support for Cygnus chpw.
+
+	* Makefile.in (OBJS): Add schpw.o.
+
 Tue Oct 14 21:06:16 1997  Ezra Peisach  <epeisach@mit.edu>
 
 	* server_stubs.c (CHANGEPW_SERVICE): Modify to free allocated
