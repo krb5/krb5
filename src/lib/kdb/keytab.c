@@ -116,6 +116,12 @@ krb5_ktkdb_get_entry(context, id, principal, kvno, enctype, entry)
 	return KRB5_KT_NOTFOUND;
     }
 
+    if (db_entry.attributes & KRB5_KDB_DISALLOW_SVR
+	|| db_entry.attributes & KRB5_KDB_DISALLOW_ALL_TIX) {
+	kerror = KRB5_KT_NOTFOUND;
+	goto error;
+    }
+
     /* match key */
     kerror = krb5_db_get_mkey(context, &master_key);
     if (kerror)
