@@ -2078,8 +2078,9 @@ int rootterm(tty)
 #ifndef NO_MOTD
 sigjmp_buf motdinterrupt;
 
-sigtype
-sigint()
+static sigtype
+sigint(signum)
+    int signum;
 {
     siglongjmp(motdinterrupt, 1);
 }
