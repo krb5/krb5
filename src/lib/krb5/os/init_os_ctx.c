@@ -33,6 +33,11 @@
 #include <PreferencesLib.h>
 #endif /* macintosh */
 
+#if !defined(macintosh) && !defined(_MSDOS) && !defined(_WIN32)
+#define USE_RANDOM_DEVICE
+#include <sys/ioctl.h> /* for FIONBIO */
+#endif
+
 #if defined(_MSDOS) || defined(_WIN32)
 
 static krb5_error_code
@@ -442,6 +447,42 @@ krb5_os_init_context(ctx)
 	os_ctx->os_flags = 0;
 	os_ctx->default_ccname = 0;
 	os_ctx->default_ccprincipal = 0;
+
+#ifdef USE_RANDOM_DEVICE
+	/* If the OS provides us with random or even pseudorandom
+	   data, use it.  It'll be far better than what we've got
+	   above, but not all systems provide it (yet).
+
+	   Typical setup seems to be /dev/urandom is pseudo-random, as
+	   good as the system can provide, but never blocking;
+	   /dev/random is supposedly truly random (the metrics are
+	   sometimes suspect), and may block.  */
+	{
+		char rndbytes[128];
+		krb5_data seed;
+		int tmp;
+
+		tmp = open ("/dev/urandom", O_RDONLY);
+		if (tmp == -1) {
+			int dontblock = 1;
+			tmp = open ("/dev/random", O_RDONLY);
+			(void) ioctl (tmp, FIONBIO, (char *) &dontblock);
+		}
+		if (tmp != -1) {
+			/* If this doesn't work, should we continue or
+			   report an error that'll cause all Kerberos
+			   programs to fail?  */
+			(void) read (tmp, &rndbytes, sizeof (rndbytes));
+			close (tmp);
+		}
+		/* Okay.  Take whatever we've got, and seed the
+		   PRNG.  */
+		seed.length = sizeof(rndbytes);
+		seed.data = (char *) &rndbytes;
+		if ((retval = krb5_c_random_seed(ctx, &seed)))
+			return retval;
+	}
+#endif
 
 	krb5_cc_set_default_name(ctx, NULL);
 
