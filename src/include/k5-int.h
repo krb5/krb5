@@ -1917,4 +1917,8 @@ extern const krb5_kt_ops krb5_kt_dfl_ops;
 
 extern krb5_error_code krb5int_translate_gai_error (int);
 
+/* Not sure it's ready for exposure just yet.  */
+extern krb5_error_code
+krb5int_c_mandatory_cksumtype (krb5_context, krb5_enctype, krb5_cksumtype *);
+
 #endif /* _KRB5_INT_H */
