@@ -37,7 +37,6 @@ krb5int_accessor(internals, version)
   if (version == KRB5INT_ACCESS_VERSION)
   {
     krb5int_access internals_temp;
-    internals_temp.krb5_locate_server = krb5int_locate_server;
     internals_temp.krb5_locate_kdc = krb5_locate_kdc;
     internals_temp.krb5_max_skdc_timeout = krb5_max_skdc_timeout;
     internals_temp.krb5_skdc_timeout_shift = krb5_skdc_timeout_shift;
