@@ -344,7 +344,7 @@ proc ftp_test { } {
 # we know there is no .netrc file.
 if [info exists env(HOME)] {
     set home $env(HOME)
-} else if [info exists home] {
+} elseif [info exists home] {
     unset home
 }
 set env(HOME) $tmppwd
