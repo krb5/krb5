@@ -86,7 +86,7 @@ OLDDECLARG(krb5_principal, princ)
     if ( !(keyblock->contents = (krb5_octet *)malloc(sizeof(des_cblock))) )
 	return(ENOMEM);
 
-#define cleanup() {memset(keyblock->contents, sizeof(des_cblock), 0);\
+#define cleanup() {bzero(keyblock->contents, sizeof(des_cblock));\
 		       (void) free((char *) keyblock->contents);}
 
     keyblock->keytype = KEYTYPE_DES;

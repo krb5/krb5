@@ -60,7 +60,7 @@ OLDDECLARG(krb5_checksum *, cksum)
     krb5_octet 	*contents;
 
     if (key_size != sizeof(des_cblock))
-	return -1;
+	return KRB5_BAD_KEYSIZE;
 
     if (!(schedule = (struct des_ks_struct *) malloc(sizeof(des_key_schedule))))
         return ENOMEM;
@@ -81,10 +81,10 @@ OLDDECLARG(krb5_checksum *, cksum)
         ;
     }
 
-    if (!(contents = (krb5_octet *) malloc(sizeof(des_cblock))))
+    if (!(contents = (krb5_octet *) malloc(sizeof(des_cblock)))) {
+	cleanup();
         return ENOMEM;
-
-#define cleanup2() { free( (char *) schedule); }
+    }
 
     des_cbc_cksum((krb5_octet *)in, contents, in_length,
 		  schedule, (krb5_octet *)key);
