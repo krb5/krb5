@@ -1,3 +1,10 @@
+2005-03-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* prof_tree.c (profile_node_iterator): After checking skip_num
+	counter, also skip over deleted nodes.
+	* prof_test1 (test3): New proc.
+	(top level): Run it.
+
 2005-02-23  Ken Raeburn  <raeburn@mit.edu>
 
 	* prof_tree.c (profile_node_iterator): Check that the root node
