@@ -225,7 +225,9 @@ errcode_t profile_open_file(const_profile_filespec_t filespec,
 
 	retval = profile_update_file(prf);
 	if (retval) {
+#ifndef SHARE_TREE_DATA
 		k5_mutex_destroy(&data->lock);
+#endif
 		profile_close_file(prf);
 		return retval;
 	}

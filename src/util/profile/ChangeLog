@@ -1,3 +1,9 @@
+2004-08-28  Ken Raeburn  <raeburn@mit.edu>
+
+	* prof_file.c (profile_open_file): If an error occurs while
+	updating from the input file, destroy the mutex only if we're not
+	sharing file data.
+
 2004-08-27  Ken Raeburn  <raeburn@mit.edu>
 
 	* prof_parse.c (parse_std_line): Rewrite handling of whitespace in
