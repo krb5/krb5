@@ -28,7 +28,7 @@
  */
 
 #if defined(macintosh) || (defined(__MACH__) && defined(__APPLE__))
-	#include <KerberosSupport/KerberosConditionalMacros.h>
+	#include <KerberosSupport/KerberosSupport.h>
 	
 	#if TARGET_API_MAC_OS8 || (TARGET_API_MAC_CARBON && !TARGET_API_MAC_OSX)
 		#include <Kerberos5/win-mac.h>
