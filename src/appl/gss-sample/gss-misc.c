@@ -143,7 +143,7 @@ int recv_token(s, tok)
      }
 
      while (readsofar < tok->length) {
-	 ret = read(s, (char *) tok->value, tok->length);
+	 ret = read(s, (char *) tok->value + readsofar, tok->length);
 	 readsofar += ret;
 	 if (ret < 0) {
 	     perror("reading token data");

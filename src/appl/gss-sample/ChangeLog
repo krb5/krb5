@@ -1,3 +1,8 @@
+Sun Oct  8 14:26:25 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* gss-misc.c (recv_token): When looping for partial read from
+		network, start reading in the middle of the token.
+
 Wed Sep 27 18:36:06 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* gss-client.c (main): Set display_file to be stdout.
