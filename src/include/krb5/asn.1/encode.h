@@ -222,6 +222,14 @@ krb5_error_code krb5_decode_generic
   TGS_REQ is APPLICATION 5.
   KRB_SAFE is APPLICATION 6.
   KRB_PRIV is APPLICATION 7.
+  Authenticator is APPLICATION 8.
+  EncTicketPart is APPLICATION 9.
+  Ticket is APPLICATION 10.
+  EncKDCRepPart is APPLICATION 11.
+  EncAPRepPart is APPLICATION 12.
+  RealTGS-REQ is APPLICATION 13.
+  EncTgsReqPart is APPLICATION 14.
+  EncKrbPrivPart is APPLICATION 15.
  */
 /* allow either constructed or primitive encoding, so check for bit 6
    set or reset */
@@ -249,6 +257,30 @@ krb5_error_code krb5_decode_generic
 #define krb5_is_krb_priv(dat)\
 	((dat) && (dat)->length && ((dat)->data[0] == 0x67 ||\
 				    (dat)->data[0] == 0x27))
+#define krb5_is_krb_authenticator(dat)\
+	((dat) && (dat)->length && ((dat)->data[0] == 0x68 ||\
+				    (dat)->data[0] == 0x28))
+#define krb5_is_krb_enc_tkt_part(dat)\
+	((dat) && (dat)->length && ((dat)->data[0] == 0x69 ||\
+				    (dat)->data[0] == 0x29))
+#define krb5_is_krb_ticket(dat)\
+	((dat) && (dat)->length && ((dat)->data[0] == 0x6a ||\
+				    (dat)->data[0] == 0x2a))
+#define krb5_is_krb_enc_kdc_rep_part(dat)\
+	((dat) && (dat)->length && ((dat)->data[0] == 0x6b ||\
+				    (dat)->data[0] == 0x2b))
+#define krb5_is_krb_enc_ap_rep_part(dat)\
+	((dat) && (dat)->length && ((dat)->data[0] == 0x6c ||\
+				    (dat)->data[0] == 0x2c))
+#define krb5_is_krb_real_tgs_req(dat)\
+	((dat) && (dat)->length && ((dat)->data[0] == 0x6d ||\
+				    (dat)->data[0] == 0x2d))
+#define krb5_is_krb_enc_tgs_req_part(dat)\
+	((dat) && (dat)->length && ((dat)->data[0] == 0x6e ||\
+				    (dat)->data[0] == 0x2e))
+#define krb5_is_krb_enc_krb_priv_part(dat)\
+	((dat) && (dat)->length && ((dat)->data[0] == 0x6f ||\
+				    (dat)->data[0] == 0x2f))
 
 
 #endif /* KRB5_ENCODE_DEFS__ */
