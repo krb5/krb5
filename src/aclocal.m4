@@ -161,7 +161,7 @@ AC_MSG_CHECKING([for sys_errlist declaration])
 AC_CACHE_VAL(krb5_cv_decl_errlist,
 [AC_TRY_LINK(
 [#include <stdio.h>
-#include <errno.h>], [sys_nerr;],dnl
+#include <errno.h>], [1+sys_nerr;],dnl
  krb5_cv_decl_errlist=yes, krb5_cv_decl_errlist=no)])
 AC_MSG_RESULT($krb5_cv_decl_errlist)
 if test $krb5_cv_decl_errlist = no; then
@@ -253,12 +253,12 @@ AC_CACHE_VAL(krb5_cv_decl_fcntl_ordonly,
 [#include <sys/param.h>
 #include <sys/types.h>
 #include <sys/file.h>],
-[O_RDONLY;], krb5_cv_decl_fcntl_ordonly=no,
+[1+O_RDONLY;], krb5_cv_decl_fcntl_ordonly=no,
 AC_TRY_LINK([#include <sys/param.h>
 #include <sys/types.h>
 #include <sys/file.h>
 #include <sys/fcntl.h>],
-[O_RDONLY;],krb5_cv_decl_fcntl_ordonly=yes,krb5_cv_decl_fcntl_ordonly=no))])
+[1+O_RDONLY;],krb5_cv_decl_fcntl_ordonly=yes,krb5_cv_decl_fcntl_ordonly=no))])
 AC_MSG_RESULT($krb5_cv_decl_fcntl_ordonly)
 if test $krb5_cv_decl_fcntl_ordonly = yes; then
   AC_DEFINE(NEED_SYS_FCNTL_H)
@@ -270,7 +270,7 @@ dnl
 define(CHECK_WAIT_TYPE,[
 AC_MSG_CHECKING([for union wait])
 AC_CACHE_VAL(krb5_cv_struct_wait,
-[AC_TRY_LINK(
+[AC_TRY_COMPILE(
 [#include <sys/wait.h>], [union wait i;], 
 	krb5_cv_struct_wait=yes, krb5_cv_struct_wait=no)])
 AC_MSG_RESULT($krb5_cv_struct_wait)
@@ -285,7 +285,7 @@ define(CHECK_SIGNALS,[
 AC_FUNC_CHECK(sigprocmask,
 AC_MSG_CHECKING(for sigset_t and POSIX_SIGNALS)
 AC_CACHE_VAL(krb5_cv_type_sigset_t,
-[AC_TRY_LINK(
+[AC_TRY_COMPILE(
 [#include <signal.h>],
 [sigset_t x],
 krb5_cv_type_sigset_t=yes, krb5_cv_type_sigset_t=no)])
@@ -301,7 +301,7 @@ define(CHECK_SETJMP,[
 AC_FUNC_CHECK(sigsetjmp,
 AC_MSG_CHECKING(for sigjmp_buf)
 AC_CACHE_VAL(krb5_cv_struct_sigjmp_buf,
-[AC_TRY_LINK(
+[AC_TRY_COMPILE(
 [#include <setjmp.h>],
 [sigjmp_buf x],
 krb5_cv_struct_sigjmp_buf=yes,krb5_cv_struct_sigjmp_buf=no)])
@@ -551,7 +551,7 @@ dnl check for ut_pid in struct utmp
 define(KRB5_UTPID,[
 AC_MSG_CHECKING([ut_pid in struct utmp])
 AC_CACHE_VAL(krb5_cv_struct_ut_pid,
-[AC_TRY_LINK(
+[AC_TRY_COMPILE(
 [#include <utmp.h>],
 [struct utmp ut; ut.ut_pid;],
 krb5_cv_struct_ut_pid=yes, krb5_cv_struct_ut_pid=no)])
@@ -566,7 +566,7 @@ dnl
 define(KRB5_UTTYPE,[
 AC_MSG_CHECKING([ut_type in struct utmp])
 AC_CACHE_VAL(krb5_cv_struct_ut_type,
-[AC_TRY_LINK(
+[AC_TRY_COMPILE(
 [#include <utmp.h>],
 [struct utmp ut; ut.ut_type;],
 krb5_cv_struct_ut_type=yes, krb5_cv_struct_ut_type=no)])
@@ -581,7 +581,7 @@ dnl
 define(KRB5_UTHOST,[
 AC_MSG_CHECKING([ut_host in struct utmp])
 AC_CACHE_VAL(krb5_cv_struct_ut_host,
-[AC_TRY_LINK(
+[AC_TRY_COMPILE(
 [#include <utmp.h>],
 [struct utmp ut; ut.ut_host;],
 krb5_cv_struct_ut_host=yes, krb5_cv_struct_ut_host=no)])
@@ -597,7 +597,7 @@ dnl
 define(KRB5_UTEXIT,[
 AC_MSG_CHECKING([ut_exit in struct utmp])
 AC_CACHE_VAL(krb5_cv_struct_ut_exit,
-[AC_TRY_LINK(
+[AC_TRY_COMPILE(
 [#include <utmp.h>],
 [struct utmp ut; ut.ut_exit;],
 krb5_cv_struct_ut_exit=yes, krb5_cv_struct_ut_exit=no)])

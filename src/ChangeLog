@@ -1,3 +1,12 @@
+Fri Nov 18 15:38:42 1994  Mark Eichin  <eichin@cygnus.com>
+
+	* aclocal.m4 (CHECK_WAIT_TYPE, CHECK_SIGNALS, CHECK_SETJMP,
+	KRB5_UTPID, KRB5_UTTYPE, KRB5_UTHOST, KRB5_UTEXIT): use
+	AC_TRY_COMPILE instead of AC_TRY_LINK.
+	(CHECK_FCNTL): check for 1+O_RDONLY so we aren't fooled into
+	declaring it as a local variable.
+	(DECLARE_SYS_ERRLIST): same thing for 1+sys_nerr.
+
 Fri Nov 18 00:31:43 1994  Mark Eichin  <eichin@cygnus.com>
 
 	* aclocal.m4 (ET_RULES): don't define SRCTOP, pre.in already takes
