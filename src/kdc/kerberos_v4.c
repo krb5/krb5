@@ -396,7 +396,7 @@ krb5_data **resp;
     if (retval = krb5_timeofday((krb5_timestamp *) &kerb_time.tv_sec))
         return(retval);
 
-    if (!*local_realm); {		/* local-realm name already set up */
+    if (!*local_realm) {		/* local-realm name already set up */
 	retval = krb5_get_default_realm(&lrealm);
 	if (!retval) {
 	    if (strlen(lrealm) < sizeof(local_realm))
