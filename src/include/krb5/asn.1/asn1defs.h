@@ -138,12 +138,6 @@ struct type_KRB5_KRB__ERROR *krb5_error2KRB5_KRB__ERROR
 struct type_KRB5_EncTicketPart *krb5_enc_tkt_part2KRB5_EncTicketPart
 	PROTOTYPE((const krb5_enc_tkt_part *, int *));
 
-/* kkdcr2kdcr.c */
-struct type_KRB5_TGS__REP *krb5_kdc_rep2KRB5_KDC__REP
-	PROTOTYPE((const krb5_kdc_rep *,
-		   const krb5_msgtype,
-		   int *));
-
 /* kkey2enck.c */
 struct type_KRB5_EncryptionKey *krb5_keyblock2KRB5_EncryptionKey
 	PROTOTYPE((const krb5_keyblock *, int *));
@@ -225,5 +219,18 @@ struct type_KRB5_TicketFlags *krb5_flags2KRB5_TicketFlags
 	PROTOTYPE((const krb5_flags ,int *));
 krb5_flags KRB5_TicketFlags2krb5_flags
 	PROTOTYPE((const struct type_KRB5_TicketFlags *,int *));
+
+#include <krb5/widen.h>
+
+/* Only put things which don't have pointers to the narrow types in this
+   section */
+
+/* kkdcr2kdcr.c */
+struct type_KRB5_TGS__REP *krb5_kdc_rep2KRB5_KDC__REP
+	PROTOTYPE((const krb5_kdc_rep *,
+		   const krb5_msgtype,
+		   int *));
+
+#include <krb5/narrow.h>
 
 #endif /* KRB5_ASN1DEFS__ */

@@ -45,6 +45,15 @@ static char rcsid_rd_req_c[] =
  returns system errors, encryption errors, replay errors
  */
 
+/* widen prototypes, if needed */
+#include <krb5/widen.h>
+typedef krb5_error_code (*rdreq_key_proc) PROTOTYPE((krb5_pointer, 
+						     krb5_principal,
+						     krb5_kvno,
+						     krb5_keyblock **));
+/* and back to normal... */
+#include <krb5/narrow.h>
+
 krb5_error_code
 krb5_rd_req(inbuf, server, sender_addr, fetchfrom, keyproc, keyprocarg,
 	    rcache, authdat)
@@ -52,10 +61,7 @@ const krb5_data *inbuf;
 krb5_const_principal server;
 const krb5_address *sender_addr;
 krb5_const_pointer fetchfrom;
-krb5_error_code (*keyproc) PROTOTYPE((krb5_pointer, 
-				      krb5_principal,
-				      krb5_kvno,
-				      krb5_keyblock **));
+rdreq_key_proc keyproc;
 krb5_pointer keyprocarg;
 krb5_rcache rcache;
 krb5_tkt_authent *authdat;

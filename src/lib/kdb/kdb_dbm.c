@@ -971,8 +971,8 @@ krb5_pointer func_arg;
 }
 
 krb5_boolean
-krb5_dbm_db_set_lockmode(mode)
-    krb5_boolean mode;
+krb5_dbm_db_set_lockmode(DECLARG(krb5_boolean,mode))
+OLDDECLARG(krb5_boolean,mode)
 {
     krb5_boolean old = non_blocking;
     non_blocking = mode;
