@@ -302,7 +302,7 @@ follows:
 @group
 @b{#} @value{ROOTDIR}/sbin/ktutil
 @b{ktutil:}  rst /etc/krb-srvtab
-@b{ktutil:}  wkt /etc/v5srvtab
+@b{ktutil:}  wkt /etc/krb5.keytab
 @b{ktutil:}  q
 @b{#}
 @end group
