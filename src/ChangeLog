@@ -1,3 +1,8 @@
+Thu Apr 27 23:21:08 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* Makefile.in: Remove util/profile/profile.h after building
+		kerbsrc.zip; this file screws up the Unix build.
+
 Thu Apr 27 17:54:05 1995  Mark Eichin  <eichin@cygnus.com>
 
 	* configure.in: check KRB4_LIB to know if we're building with krb4
