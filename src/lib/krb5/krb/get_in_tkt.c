@@ -410,7 +410,7 @@ make_preauth_list(krb5_context	context,
 }
 
 #define MAX_IN_TKT_LOOPS 16
-static krb5_enctype get_in_tkt_enctypes[] = {
+static const krb5_enctype get_in_tkt_enctypes[] = {
     ENCTYPE_DES3_CBC_SHA1,
     ENCTYPE_ARCFOUR_HMAC,
     ENCTYPE_DES_CBC_MD5,
