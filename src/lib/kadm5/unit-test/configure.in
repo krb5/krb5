@@ -2,12 +2,15 @@ AC_INIT(init-test.c)
 WITH_CCOPTS
 CONFIG_RULES
 KRB_INCLUDE
+dnl The following are tests for the presence of programs required for testing 
 AC_CHECK_PROG(RUNTEST,runtest,runtest)
+AC_CHECK_PROG(PERL,perl,perl)
 AC_KRB5_TCL	
-if test "$TCL_LIB" != "" ;  then
-	DO_TCL=tcl
+if test "$PERL" = perl -a "$RUNTEST" = runtest -a "$TCL_LIB" != ""; then
+ 	DO_TEST=ok
 fi
-AC_SUBST(DO_TCL)
+AC_SUBST(DO_TEST) 
+dnl
 USE_KADMCLNT_LIBRARY
 USE_GSSAPI_LIBRARY
 USE_KADMSRV_LIBRARY

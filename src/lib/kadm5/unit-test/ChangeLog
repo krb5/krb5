@@ -1,4 +1,10 @@
-Fri Oct 25 16:43:52 1996  Ezra Peisach  <epeisach@trane.rose.brandeis.edu>
+Thu Oct 31 08:42:18 1996  Ezra Peisach  <epeisach@mit.edu>
+
+	* Makefile.in (check): Only run tests is Perl, tcl, runtest.
+
+	* configure.in: Check for Perl before running tests.
+
+Fri Oct 25 16:43:52 1996  Ezra Peisach  <epeisach@mit.edu>
 
 	* Makefile.in (init-test): Add -UUSE_KADM5_API_VERSION before the
 		-D of same.  
