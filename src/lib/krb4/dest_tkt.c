@@ -11,6 +11,7 @@
 #include "mit-copyright.h"
 #include "krb.h"
 #include <stdio.h>
+#include <string.h>
 #include <fcntl.h>
 #include <sys/stat.h>
 #ifdef TKT_SHMEM
