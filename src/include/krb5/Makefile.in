@@ -42,8 +42,8 @@ OSCONFSRC = $(srcdir)/stock/osauto.h $(srcdir)/stock/osconf.h
 
 osconf.h: $(OSCONFSRC)
 	cat $(OSCONFSRC) | sed $(PROCESS_REPLACE) > osconf.new
-	if cmp -s osconf.new osconf.h ; then true; \
-	else $(RM) osconf.h ; $(CP) osconf.new osconf.h ; fi
+	@if cmp -s osconf.new osconf.h ; then :; \
+	else (set -x; $(RM) osconf.h ; $(CP) osconf.new osconf.h) fi
 
 CONF_REPLACE = -e "/UnifdefRan/,/SPLIT-HERE/d"
 
@@ -51,8 +51,8 @@ CONFSRC = $(srcdir)/stock/confauto.h $(srcdir)/stock/config.h
 
 config.h: $(CONFSRC)
 	cat $(CONFSRC) | sed $(CONF_REPLACE) > config.new
-	if cmp -s config.new config.h ; then true; \
-	else $(RM) config.h ; $(CP) config.new config.h ; fi
+	@if cmp -s config.new config.h ; then :; \
+	else (set -x; $(RM) config.h ; $(CP) config.new config.h) fi
 
 clean::
 	$(RM) config.h config.new osconf.h osconf.new

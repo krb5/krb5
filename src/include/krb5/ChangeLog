@@ -1,3 +1,7 @@
+Thu Jul 14 03:31:06 1994  Tom Yu  (tlyu at dragons-lair)
+
+	* Makefile.in: some cleanup to not echo cruft
+
 Tue Jun 28 19:09:21 1994  Tom Yu  (tlyu at dragons-lair)
 
 	* error_def.h: folding in Harry's changes
