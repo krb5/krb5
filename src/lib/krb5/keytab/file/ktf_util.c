@@ -218,7 +218,6 @@ krb5_keytab_entry **entryp;
   register FILE *fp = KTFILEP(id);
   int i;	/* index into principal component array; failure cleanup
 		   code uses this to determine how much to free */
-		   
   int count;
   int size;
   int c1, c2;
@@ -236,25 +235,49 @@ krb5_keytab_entry **entryp;
 
   count = (c1 << 8) + c2;
 
-  if (!(entry->principal = (krb5_data **)malloc((count+1) * sizeof(krb5_data *))))
+  if (!(entry->principal = (krb5_principal)malloc(sizeof(krb5_principal_data))))
     return ENOMEM;
-
-  for (i = 0; i < count; i++)
+  if (!(entry->principal->data = (krb5_data *)malloc(count * sizeof(krb5_data))))
     {
-      krb5_data *princ;
+      free((char *)entry->principal);
+      return ENOMEM;
+    }
+  entry->principal->length = count;
 
-      princ = (krb5_data *)malloc(sizeof (krb5_data));
-      if (princ == 0)
+  {
+    char *tmpdata;
+
+    c1 = getc(fp);
+    c2 = getc(fp);
+    if (c1 == EOF || c2 == EOF)
+      {
+	error = KRB5_KT_END;
+	goto fail;
+      }
+      size = (c1 << 8) + c2;
+    krb5_princ_set_realm_length(entry->principal, size);
+    if ((tmpdata = malloc (size)) == 0)
 	{
 	  error = ENOMEM;
 	  goto fail;
 	}
+    if (fread(tmpdata, 1, size, fp) != size)
+      {
+	free (tmpdata);
+	error = KRB5_KT_END;
+	goto fail;
+      }
+    krb5_princ_set_realm_data(entry->principal, tmpdata);
+  }
+
+  for (i = 0; i < count; i++)
+    {
+      krb5_data *princ = krb5_princ_component(entry->principal, i);
 
       c1 = getc(fp);
       c2 = getc(fp);
       if (c1 == EOF || c2 == EOF)
 	{
-	  free(princ);
 	  error = KRB5_KT_END;
 	  goto fail;
 	}
@@ -264,21 +287,16 @@ krb5_keytab_entry **entryp;
       princ->length = size;
       if ((princ->data = malloc (size)) == 0)
 	{
-	  free (princ);
 	  error = ENOMEM;
 	  goto fail;
 	}
       if (fread(princ->data, 1, size, fp) != size)
 	{
-	  free (princ);
 	  free (princ->data);
 	  error = KRB5_KT_END;
 	  goto fail;
 	}
-      entry->principal[i] = princ;
     }
-
-  entry->principal[count] = 0;
 
   /* key version number: 1 byte */
   c1 = getc(fp);
@@ -331,28 +349,25 @@ krb5_keytab_entry **entryp;
   return 0;
 
  fail:
-  while(--i >= 0)
-    free(entry->principal[i]);
-  free(entry->principal);
+  free((char *)entry->principal->data);
+  free((char *)entry->principal);
   return error;
 }
 
 krb5_error_code
 krb5_ktfileint_write_entry(id, entry)
 krb5_keytab id;
-krb5_keytab_entry *entry;
+register krb5_keytab_entry *entry;
 {
   register FILE *fp = KTFILEP(id);
   int count, size;
-  krb5_error_code retval = 0;
-  krb5_data **princp;
-  char c1, c2;
+  unsigned char c1, c2;
+  register int i;
 
   /* Do all I/O and check for error once at the end.  This function isn't
      expensive, and errors should be rare. */
 
-  /* count up principal components */
-  for (count = 0, princp = entry->principal; *princp; princp++, count++);
+  count = krb5_princ_size(entry->principal);
 
   /* 2 byte count of number of components in name, MSB first. */
 
@@ -362,9 +377,8 @@ krb5_keytab_entry *entry;
   putc(c1, fp);
   putc(c2, fp);
 
-  for (princp = entry->principal; *princp; princp++)
     {
-      size = (*princp)->length;
+      size = krb5_princ_realm(entry->principal)->length;
 
       c2 = size;
       c1 = size >> 8;
@@ -372,7 +386,20 @@ krb5_keytab_entry *entry;
       putc(c1, fp);
       putc(c2, fp);
 
-      fwrite((*princp)->data, 1, size, fp);
+      fwrite(krb5_princ_realm(entry->principal)->data, 1, size, fp);
+    }
+
+  for (i = 0; i < count; i++)
+    {
+      size = krb5_princ_component(entry->principal, i)->length;
+
+      c2 = size;
+      c1 = size >> 8;
+
+      putc(c1, fp);
+      putc(c2, fp);
+
+      fwrite(krb5_princ_component(entry->principal, i)->data, 1, size, fp);
     }
   /* Version number is one byte. */
   putc(entry->vno, fp);
