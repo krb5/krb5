@@ -77,6 +77,7 @@ proc rsh_test { } {
     global hostname
     global env
     global spawn_id
+    global tmppwd
 
     # Start up the kerberos and kadmind daemons and get a srvtab and a
     # ticket file.
@@ -154,7 +155,12 @@ proc rsh_test { } {
     set failed no
     start_rsh_daemon -k
     set testname "rsh forwarding tickets"
-    spawn $RSH $hostname -f -k $REALMNAME -D 3544 -A $BINSH -c $KLIST
+
+    # We need a wrapper for klist in order to setup for shared library 
+    # runtime environment
+    setup_wrapper $tmppwd/klist.wrap $KLIST
+
+    spawn $RSH $hostname -f -k $REALMNAME -D 3544 -A $BINSH -c $tmppwd/klist.wrap 
     expect {
 	"Ticket cache:" { }
  	"klist: No credentials cache file found" {
@@ -183,7 +189,7 @@ proc rsh_test { } {
     set failed no
     start_rsh_daemon -e
     set testname "encrypted rsh forwarding tickets"
-    spawn $RSH $hostname -x -f -k $REALMNAME -D 3544 -A $BINSH -c $KLIST
+    spawn $RSH $hostname -x -f -k $REALMNAME -D 3544 -A $BINSH -c $tmppwd/klist.wrap 
     expect {
 	"Ticket cache:" { }
  	"klist: No credentials cache file found" {

@@ -1,3 +1,11 @@
+Mon May  6 08:05:33 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* rsh.exp: Setup a wrapper script in executing klist in the remote
+		shell so that environment variables are properly set.
+
+	* kadmin.exp: (kpasswd_cpw): After giving new password, wait for
+		the newline or we hang waiting for the process to finish. 
+
 Fri May  3 21:44:24 1996  Ken Raeburn  <raeburn@cygnus.com>
 
 	Fri Mar 29 15:05:30 1996  Chris Provenzano  <proven@cygnus.com>

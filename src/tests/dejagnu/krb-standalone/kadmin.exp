@@ -727,6 +727,8 @@ proc kpasswd_cpw { princ opw npw } {
     expect "Enter old password for $princ:" { send "$opw\r" }
     expect "Enter new password:" { send "$npw\r" }
     expect "Re-enter new password:" { send "$npw\r" }
+    expect "\r"
+
     if ![check_exit_status "kpasswd"] {
 	fail "kpasswd $princ $npw"
 	return 0
