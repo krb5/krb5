@@ -1,3 +1,9 @@
+2002-08-15  Tom Yu  <tlyu@mit.edu>
+
+	* krb524d.c (kdc_get_server_key): Check for DISALLOW_ALL_TIX and
+	DISALLOW_SVR when looking up server key.
+	[pullup from trunk]
+
 2002-05-22 Alexandra Ellwood <lxs@mit.edu>
     * conv_creds.c, sendmsg.c: Added return values to krb524_sendto_kdc 
     to return an IPv4 address for the KDC we talked to (if such an address
