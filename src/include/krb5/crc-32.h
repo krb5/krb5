@@ -20,4 +20,6 @@
 
 #define CRC32_CKSUM_LENGTH	(4*sizeof(krb5_octet))
 
+extern krb5_checksum_entry crc32_cksumtable_entry;
+
 #endif /* KRB5_CRC32__ */
