@@ -4,6 +4,7 @@ CFLAGS = $(CCOPTS) $(DEFS) $(DBFLAGS) -DAN_TO_LN_RULES
 ##DOSBUILDTOP = ..\..\..
 ##DOSLIBNAME=..\krb5.lib
 ##DOS!include $(BUILDTOP)\config\windows.in
+##DOSDBFLAGS=
 
 .c.o:
 	$(CC) $(CFLAGS) -c $(srcdir)/$*.c

@@ -1,3 +1,7 @@
+Wed Sep 13 11:01:18 1995 Keith Vetter (keithv@fusion.com)
+
+	* Makefile.in: had to define away DBFLAGS for the PC.
+
 Mon Sep 11 17:46:18 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* genaddrs.c (krb5_auth_con_genaddrs): Replace function
