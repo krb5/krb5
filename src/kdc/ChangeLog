@@ -1,4 +1,18 @@
 
+Tue Aug 15 14:32:54 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* extern.h - Add key/salt list to per-realm data.
+	* main.c - Save or generate per-realm key/salt list.  Use this list
+		to determine which key to use from the list of server keys.
+		Fix gcc -Wall complaints.
+	* do_as_req.c - Batch KRBCONF_KDC_MODIFIES_KDB updates after the
+		response is issued.  Use krb5_dbe_find_keytype() to find the
+		appropriate key in the list of keys.  Find appropriate client
+		key instead of using the key in slot 0.  Fix gcc -Wall moans.
+	* kdc_util.c - Use per-realm key/salt list to determine which key to
+		use from the list of server keys.  Fix gcc -Wall complaints.
+	* kerberos_v4.c - Use krb5_dbe_find_keytype() to find appropriate key.
+		Fix gcc -Wall complaints.
+
 Thu Aug 10 14:52:24 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* do_as_req.c - Add missing variable when KRBCONF_KDC_MODIFIES_KDB on.
 
