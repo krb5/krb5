@@ -51,6 +51,10 @@ static char copyright[] =
 # undef _SC_CRAY_SECURE_SYS
 #endif
 
+#include <stdio.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <netdb.h>
 #include <libpty.h>
 #include <com_err.h>
 #if	defined(_SC_CRAY_SECURE_SYS)
@@ -77,10 +81,15 @@ struct	socket_security ss;
 
 #if	defined(AUTHENTICATION)
 #include <libtelnet/auth.h>
+#include <libtelnet/auth-proto.h>
 int	auth_level = 0;
 #endif
 #if	defined(SecurID)
 int	require_SecurID = 0;
+#endif
+#ifdef ENCRYPTION
+#include <libtelnet/encrypt.h>
+#include <libtelnet/enc-proto.h>
 #endif
 
 extern	int utmp_len;
@@ -97,6 +106,8 @@ int	registerd_host_only = 0;
 #ifdef  HAS_PTYVAR
 # include <sys/ptyvar.h>
 #endif
+
+void doit P((struct sockaddr_in *));
 
 /*
  * Because of the way ptyibuf is used with streams messages, we need
@@ -428,7 +439,7 @@ main(argc, argv)
 		usage();
 		/* NOT REACHED */
 	    } else if (argc == 1) {
-		    if (sp = getservbyname(*argv, "tcp")) {
+		    if ((sp = getservbyname(*argv, "tcp"))) {
 			sin.sin_port = sp->s_port;
 		    } else {
 			sin.sin_port = atoi(*argv);
@@ -569,7 +580,9 @@ main(argc, argv)
 #endif	/* defined(IPPROTO_IP) && defined(IP_TOS) */
 	net = 0;
 	doit(&from);
+	
 	/* NOTREACHED */
+	return 0;
 }  /* end of main */
 
 	void
@@ -618,6 +631,16 @@ usage()
 	exit(1);
 }
 
+static void encrypt_failure()
+{
+    char *error_message =
+	"Encryption was not successfully negotiated.  Goodbye.\r\n\r\n";
+
+    writenet(error_message, strlen(error_message));
+    netflush();
+    exit(1);
+}
+
 /*
  * getterminaltype
  *
@@ -660,6 +683,7 @@ getterminaltype(name)
     while (
 #ifdef	ENCRYPTION
 	   his_do_dont_is_changing(TELOPT_ENCRYPT) ||
+	   his_will_wont_is_changing(TELOPT_ENCRYPT) ||
 #endif	/* ENCRYPTION */
 	   his_will_wont_is_changing(TELOPT_TTYPE) ||
 	   his_will_wont_is_changing(TELOPT_TSPEED) ||
@@ -675,6 +699,22 @@ getterminaltype(name)
      */
     if (his_state_is_will(TELOPT_ENCRYPT)) {
 	encrypt_wait();
+    }
+    if (auth_must_encrypt()) {
+	time_t timeout = time(0) + 60;
+	
+	if (my_state_is_dont(TELOPT_ENCRYPT) ||
+	    my_state_is_wont(TELOPT_ENCRYPT))
+	    encrypt_failure();
+
+	if (!EncryptStartInput() || !EncryptStartOutput())
+	    encrypt_failure();
+
+	while (!encrypt_is_encrypting()) {
+	    if (time(0) > timeout)
+		encrypt_failure();
+	    ttloop();
+	}
     }
 #endif	/* ENCRYPTION */
     if (his_state_is_will(TELOPT_TSPEED)) {
@@ -828,7 +868,7 @@ extern void telnet P((int, int, char *));
 /*
  * Get a pty, scan input lines.
  */
-doit(who)
+void doit(who)
 	struct sockaddr_in *who;
 {
 	char *host, *inet_ntoa();

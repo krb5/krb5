@@ -1,3 +1,11 @@
+Mon Mar 18 20:29:05 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in: Added flags which turn on the encryption option.
+
+	* telnetd.c (getterminaltype): If the authentication option which
+		was negotiated requires that encryption be turned on, then
+		enforce this here.
+
 Mon Feb 26 03:33:48 1996  Sam Hartman  <hartmans@tertius.mit.edu>
 
 	* configure.in: Call USE_ANAME
