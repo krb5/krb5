@@ -1,3 +1,14 @@
+2002-07-03  Alexandra Ellwood <lxs@mit.edu>
+
+	* init_os_ctx.c: krb4 needs to get the os config files so it can use
+	the profile too.  Define these functions on Mac OS X now.
+
+	* init_os_ctx.c: Removed use of FSSpecs because these cause serious
+	performance problems on Mac OS X.  We now search paths the same way
+	the rest of the Unix platforms do.
+
+	[pullups from 1-2-2-branch]
+
 2002-06-22  Tom Yu  <tlyu@mit.edu>
 
 	* c_ustime.c: Remove various things missed in 1-2-2-branch MacOS
