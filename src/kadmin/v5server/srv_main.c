@@ -31,13 +31,13 @@
 #include <stdio.h>
 #include <sys/signal.h>
 #include <setjmp.h>
+#include "k5-int.h"
 #if defined(HAVE_STDARG_H) || defined(_WINDOWS) || defined (_MACINTOSH)
 #include <stdarg.h>
 #else
 #include <varargs.h>
 #define VARARGS
 #endif
-#include "k5-int.h"
 #include "com_err.h"
 #include "adm.h"
 #include "adm_proto.h"
