@@ -3,6 +3,19 @@
 
 WHAT = unix
 
+all:: all-$(WHAT)
+
+clean:: clean-$(WHAT)
+
+install:: install-$(WHAT)
+
+check:: check-$(WHAT)
+
+all-unix::
+clean-unix::
+install-unix::
+check-unix::
+
 # Directory syntax:
 R=/
 C=./

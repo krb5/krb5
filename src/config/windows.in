@@ -3,6 +3,20 @@
 
 WHAT=windows
 
+all:: all-$(WHAT)
+
+clean:: clean-$(WHAT)
+
+install:: install-$(WHAT)
+
+check:: check-$(WHAT)
+
+all-windiws::
+clean-windows::
+install-windows::
+check-windows::
+
+
 # Directory syntax:
 R=\		# root
 C=.\		# current

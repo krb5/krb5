@@ -80,6 +80,19 @@
 
 WHAT = mac
 
+all:: all-$(WHAT)
+
+clean:: clean-$(WHAT)
+
+install:: install-$(WHAT)
+
+check:: check-$(WHAT)
+
+all-mac::
+clean-mac::
+install-mac::
+check-mac::
+
 # Directory syntax:
 R=
 C=:
