@@ -211,4 +211,5 @@ error_code KRB5_LNAME_CANTOPEN,		"Can't open/find lname translation database"
 error_code KRB5_LNAME_NOTRANS,		"No translation available for requested principal"
 error_code KRB5_LNAME_BADFORMAT,	"Improper format of translation database entry"
 
+error_code KRB5_CRYPTO_INTERNAL,	"Cryptosystem internal error"
 end
