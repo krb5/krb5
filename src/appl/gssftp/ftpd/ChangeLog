@@ -1,3 +1,11 @@
+2001-11-30  Tom Yu  <tlyu@mit.edu>
+
+	* ftpcmd.y (pathname): Handle returns from ftpglob() better so
+	that errors get sent via reply(), while causing some match
+	failures to match to simply return $1, so the higher level can
+	deal.  Previously, some failures would cause synch problems since
+	NULL would be returned and no reply was sent.
+
 2001-10-11  Mitchell Berger  <mitchb@mit.edu>
 
 	* ftpd.M: Remove improper formatting from the .SH NAME section, as it

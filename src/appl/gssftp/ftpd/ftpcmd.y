@@ -811,13 +811,16 @@ pathname:	pathstring
 			char **vv;
 
 			vv = ftpglob((char *) $1);
-			if (vv == NULL || globerr != NULL) {
-				reply(550, globerr);
-				$$ = NULL;
+			$$ = (vv != NULL) ? *vv : NULL;
+			if ($$ == NULL) {
+				if (globerr == NULL)
+					$$ = $1;
+				else {
+					reply(550, "%s", globerr);
+					free((char *) $1);
+				}
 			} else
-				$$ = *vv;
-
-			free((char *) $1);
+				free((char *) $1);
 		} else
 			$$ = $1;
 	}
