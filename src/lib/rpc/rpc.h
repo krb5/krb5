@@ -68,7 +68,10 @@
  * defined by <rpc/netdb.h> included in <netdb.h>.
  */
 /* routines for parsing /etc/rpc */
+#if 0 /* netdb.h already included in rpc/types.h */
 #include <netdb.h>
+#endif
+
 #include <rpc/netdb.h>	/* structures and routines to parse /etc/rpc */
 
 #endif /* ndef __RPC_HEADER__ */
