@@ -1,3 +1,8 @@
+Sun Mar  9 13:40:33 1997  Tom Yu  <tlyu@mit.edu>
+
+	* svr_principal.c (add_to_history): Don't call realloc() on a NULL
+	pointer, lest non-ANSI compliant systems like SunOS fail.
+
 Sat Feb 22 01:34:08 1997  Sam Hartman  <hartmans@tertius.mit.edu>
 
 	* Makefile.in (SHLIB_EXPDEPS): s/.so/$(SHLIBEXT)
