@@ -1,5 +1,7 @@
 2002-04-02  Tom Yu  <tlyu@mit.edu>
 
+	* Makefile.in (install-strip): New rule to pass "-s" to install.
+
 	* aclocal.m4 (CONFIG_RULES): Fix to not define KRB5_DEPRECATED; we
 	set it to 1 in krb5.hin now.
 
