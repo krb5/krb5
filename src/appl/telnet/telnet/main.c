@@ -52,6 +52,8 @@ static char sccsid[] = "@(#)main.c	5.5 (Berkeley) 12/18/92";
 #define OPTS_FORWARD_CREDS           0x00000002
 #define OPTS_FORWARDABLE_CREDS       0x00000001
 
+#define FORWARD
+
 /*
  * Initialize variables.
  */
@@ -114,7 +116,9 @@ main(argc, argv)
 	extern int optind;
 	int ch;
 	char *user, *strrchr();
+#ifdef	FORWARD
 	extern int forward_flags;
+#endif	/* FORWARD */
 
 	tninit();		/* Clear out things */
 #if	defined(CRAY) && !defined(__STDC__)
@@ -184,7 +188,7 @@ main(argc, argv)
 			set_escape_char(optarg);
 			break;
 		case 'f':
-#if defined(AUTHENTICATION) && defined(KRB5)
+#if defined(AUTHENTICATION) && defined(KRB5) && defined(FORWARD)
 			if (forward_flags & OPTS_FORWARD_CREDS) {
 			    fprintf(stderr, 
 				    "%s: Only one of -f and -F allowed.\n",
@@ -199,7 +203,7 @@ main(argc, argv)
 #endif
 			break;
 		case 'F':
-#if defined(AUTHENTICATION) && defined(KRB5)
+#if defined(AUTHENTICATION) && defined(KRB5) && defined(FORWARD)
 			if (forward_flags & OPTS_FORWARD_CREDS) {
 			    fprintf(stderr, 
 				    "%s: Only one of -f and -F allowed.\n",
