@@ -1,3 +1,9 @@
+Sat Mar 30 22:52:46 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* cryptoconf.c: Fixed comments describing the various checksum
+	        types.  (Added numbers, and fixed a mistake in a
+		description of an undefined checksum type.)
+
 Thu Mar 28 09:49:08 1996  Richard Basch  <basch@lehman.com>
 
 	* cryptoconf.c: Added support for CKSUMTYPE_RSA_MD5_DES3 and

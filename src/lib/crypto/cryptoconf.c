@@ -137,15 +137,15 @@ krb5_enctype krb5_max_enctype = sizeof(krb5_enctype_array)/sizeof(krb5_enctype_a
 
 krb5_checksum_entry * NEAR krb5_cksumarray[] = {
     0,
-    CRC32_CKENTRY,		/* CKSUMTYPE_CRC32 */
-    MD4_CKENTRY,		/* CKSUMTYPE_RSA_MD4 */
-    MD4_DES_CKENTRY,		/* CKSUMTYPE_RSA_MD4_DES */
-    DES_CBC_CKENTRY,		/* CKSUMTYPE_DESCBC */
-    0,				/* des-mac */
-    0,				/* des-mac-k */
-    MD5_CKENTRY,		/* CKSUMTYPE_RSA_MD5 */
-    MD5_DES_CKENTRY,		/* CKSUMTYPE_RSA_MD5_DES */
-    MD5_DES3_CKENTRY		/* CKSUMTYPE_RSA_MD5_DES3 */
+    CRC32_CKENTRY,		/* 1 - CKSUMTYPE_CRC32 */
+    MD4_CKENTRY,		/* 2 - CKSUMTYPE_RSA_MD4 */
+    MD4_DES_CKENTRY,		/* 3 - CKSUMTYPE_RSA_MD4_DES */
+    DES_CBC_CKENTRY,		/* 4 - CKSUMTYPE_DESCBC */
+    0,				/* 5 - des-mac-k */
+    0,				/* 6 - rsa-md4-des-k */
+    MD5_CKENTRY,		/* 7 - CKSUMTYPE_RSA_MD5 */
+    MD5_DES_CKENTRY,		/* 8 - CKSUMTYPE_RSA_MD5_DES */
+    MD5_DES3_CKENTRY		/* 9 - CKSUMTYPE_RSA_MD5_DES3 */
 };
 
 krb5_cksumtype krb5_max_cksum = sizeof(krb5_cksumarray)/sizeof(krb5_cksumarray[0]);
