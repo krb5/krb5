@@ -457,7 +457,7 @@ get_first_ticket(context, cache, client, my_creds)
 	return(1);
     }
 
-    if ((retval = krb5_os_localaddr(&my_addresses))) {
+    if ((retval = krb5_os_localaddr(context, &my_addresses))) {
 	free(client_name);
 	fprintf(stderr, "Unable to Get Principals Address!\n");
 	return(1);
