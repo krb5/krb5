@@ -1,5 +1,8 @@
 Wed Mar  1 11:56:05 1995  Theodore Y. Ts'o  <tytso@dcl>
 
+	* movemail.c: Add proper #ifdef's to #include the appropriate
+		system header files.
+
 	* configure.in: Replace check for -lsocket and -lnsl with
 	        WITH_NETLIB check.
 
