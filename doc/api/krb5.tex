@@ -582,6 +582,8 @@ Returns system errors, integrity errors.
 \funcarg{krb5_keyblock *}{key}
 \funcarg{krb5_fulladdr *}{sender_addr}
 \funcarg{krb5_fulladdr *}{recv_addr}
+\funcinout
+\funcarg{krb5_pointer}{i_vector}
 \funcout
 \funcarg{krb5_data *}{outbuf}
 \end{funcdecl}
@@ -594,6 +596,10 @@ specifies the key for the encryption; \funcparam{sender_addr} and
 \funcparam{recv_addr} specify the full addresses (host and port) of the
 sender and receiver.
 
+\funcparam{i_vector} is used as an initialization vector for the
+encryption, and if non-NULL its contents are replaced with the last
+block of the encrypted data upon exit.
+
 The \funcparam{outbuf} buffer storage is allocated, and should be freed by the
 caller when finished.
 
@@ -604,6 +610,8 @@ Returns system errors.
 \funcarg{krb5_keyblock *}{key}
 \funcarg{krb5_fulladdr *}{sender_addr}
 \funcarg{krb5_fulladdr *}{recv_addr}
+\funcinout
+\funcarg{krb5_pointer}{i_vector}
 \funcout
 \funcarg{krb5_data *}{outbuf}
 \end{funcdecl}
@@ -618,6 +626,10 @@ addresses (host and port) of the sender and receiver.
 
 \funcparam{outbuf} points to allocated storage which the caller should
 free when finished.
+
+\funcparam{i_vector} is used as an initialization vector for the
+encryption, and if non-NULL its contents are replaced with the last
+block of the encrypted data upon exit.
 
 Returns system errors, integrity errors.
 
