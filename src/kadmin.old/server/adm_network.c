@@ -89,7 +89,7 @@ do_child()
 #endif
     int pid, i, j;
 
-#ifndef OLD_SIGNALS
+#ifdef OLD_SIGNALS
     signal(SIGCHLD, do_child);
 #endif
     
