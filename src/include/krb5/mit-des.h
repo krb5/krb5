@@ -33,4 +33,7 @@ typedef struct des_ks_struct { des_cblock _; } des_key_schedule[16];
 
 #define DES_CBC_CKSUM_LENGTH		(4*sizeof(octet)) /* XXX ? */
 
+/* cryptosystem entry descriptor for MIT's DES encryption library */
+extern krb5_cryptosystem_entry  mit_des_cryptosystem_entry;
+
 #endif /* __KRB5_MIT_DES__ */
