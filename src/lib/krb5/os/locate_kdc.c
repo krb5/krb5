@@ -28,6 +28,7 @@
  */
 
 #define NEED_SOCKETS
+#include "fake-addrinfo.h"
 #include "k5-int.h"
 #include "os-proto.h"
 #include <stdio.h>
@@ -43,8 +44,6 @@
 #ifndef T_SRV
 #define T_SRV 33
 #endif /* T_SRV */
-
-#include "fake-addrinfo.h"
 
 /* for old Unixes and friends ... */
 #ifndef MAXHOSTNAMELEN
@@ -133,7 +132,7 @@ grow_list (struct addrlist *lp, int nmore)
     int i;
     int newspace = lp->space + nmore;
     size_t newsize = newspace * sizeof (struct addrlist);
-    struct sockaddr **newaddrs;
+    struct addrinfo **newaddrs;
 
     /* NULL check a concession to SunOS4 compatibility for now; not
        required for pure ANSI support.  */
@@ -158,56 +157,12 @@ krb5int_free_addrlist (struct addrlist *lp)
 {
     int i;
     for (i = 0; i < lp->naddrs; i++)
-	free (lp->addrs[i]);
+	freeaddrinfo (lp->addrs[i]);
     free (lp->addrs);
     lp->addrs = NULL;
     lp->naddrs = lp->space = 0;
 }
 #define free_list krb5int_free_addrlist
-
-static int
-add_sockaddr_to_list (struct addrlist *lp, const struct sockaddr *addr,
-		      size_t len)
-{
-    struct sockaddr *copy;
-    int err;
-
-#ifdef TEST
-    char name[NI_MAXHOST];
-
-    fprintf (stderr, "\tadding sockaddr family %2d, len %d", addr->sa_family,
-	     len);
-
-    err = getnameinfo (addr, len, name, sizeof (name), NULL, 0,
-		       NI_NUMERICHOST | NI_NUMERICSERV);
-    if (err == 0)
-	fprintf (stderr, "\t%s", name);
-    fprintf (stderr, "\n");
-#endif
-
-    if (lp->naddrs == lp->space) {
-	err = grow_list (lp, 1);
-	if (err) {
-#ifdef TEST
-	    fprintf (stderr, "grow_list failed %d\n", err);
-#endif
-	    return err;
-	}
-    }
-    copy = malloc (len);
-    if (copy == NULL) {
-#ifdef TEST
-	perror ("malloc");
-#endif
-	return errno;
-    }
-    memcpy (copy, addr, len);
-    lp->addrs[lp->naddrs++] = copy;
-#ifdef TEST
-    fprintf (stderr, "count is now %d\n", lp->naddrs);
-#endif
-    return 0;
-}
 
 static int translate_ai_error (int err)
 {
@@ -249,8 +204,8 @@ static int translate_ai_error (int err)
 
 static int add_addrinfo_to_list (struct addrlist *lp, struct addrinfo *a)
 {
-    int r;
-    r = add_sockaddr_to_list (lp, a->ai_addr, a->ai_addrlen);
+    int err;
+
 #ifdef TEST
     switch (a->ai_socktype) {
     case SOCK_DGRAM:
@@ -269,29 +224,31 @@ static int add_addrinfo_to_list (struct addrlist *lp, struct addrinfo *a)
 	break;
     }
 #endif
-    return r;
-}
 
-static void set_port_num (struct sockaddr *addr, int num)
-{
-    switch (addr->sa_family) {
-    case AF_INET:
-	((struct sockaddr_in *)addr)->sin_port = num;
-	break;
-#ifdef KRB5_USE_INET6
-    case AF_INET6:
-	((struct sockaddr_in6 *)addr)->sin6_port = num;
-	break;
+    if (lp->naddrs == lp->space) {
+	err = grow_list (lp, 1);
+	if (err) {
+#ifdef TEST
+	    fprintf (stderr, "grow_list failed %d\n", err);
 #endif
+	    return err;
+	}
     }
+    lp->addrs[lp->naddrs++] = a;
+    a->ai_next = 0;
+#ifdef TEST
+    fprintf (stderr, "count is now %d\n", lp->naddrs);
+#endif
+    return 0;
 }
 
 static int
 add_host_to_list (struct addrlist *lp, const char *hostname,
-		  int port, int secport)
+		  int port, int secport, int socktype)
 {
-    struct addrinfo *addrs, *a, hint;
+    struct addrinfo *addrs, *a, *anext, hint;
     int err;
+    char portbuf[10], secportbuf[10];
 
 #ifdef TEST
     fprintf (stderr, "adding hostname %s, ports %d,%d\n", hostname,
@@ -299,25 +256,29 @@ add_host_to_list (struct addrlist *lp, const char *hostname,
 #endif
 
     memset(&hint, 0, sizeof(hint));
-    hint.ai_socktype = SOCK_DGRAM;
-    err = getaddrinfo (hostname, NULL, &hint, &addrs);
+    hint.ai_socktype = socktype;
+    sprintf(portbuf, "%d", ntohs(port));
+    sprintf(secportbuf, "%d", ntohs(secport));
+    err = getaddrinfo (hostname, portbuf, &hint, &addrs);
     if (err)
 	return translate_ai_error (err);
-    for (a = addrs; a; a = a->ai_next) {
-	set_port_num (a->ai_addr, port);
+    anext = 0;
+    for (a = addrs; a != 0 && err == 0; a = anext) {
+	anext = a->ai_next;
 	err = add_addrinfo_to_list (lp, a);
-	if (err)
-	    break;
-
-	if (secport == 0)
-	    continue;
-
-	set_port_num (a->ai_addr, secport);
-	err = add_addrinfo_to_list (lp, a);
-	if (err)
-	    break;
     }
-    freeaddrinfo (addrs);
+    if (err || secport == 0)
+	goto egress;
+    err = getaddrinfo (hostname, secportbuf, &hint, &addrs);
+    if (err)
+	return translate_ai_error (err);
+    for (a = addrs; a != 0 && err == 0; a = anext) {
+	anext = a->ai_next;
+	err = add_addrinfo_to_list (lp, a);
+    }
+egress:
+    if (anext)
+	freeaddrinfo (anext);
     return err;
 }
 
@@ -470,7 +431,7 @@ krb5_locate_srv_conf_1(krb5_context context, const krb5_data *realm,
 	    p2 = sec_udpport;
 	}
 
-	code = add_host_to_list (addrlist, hostlist[i], p1, p2);
+	code = add_host_to_list (addrlist, hostlist[i], p1, p2, SOCK_DGRAM);
 	if (code) {
 #ifdef TEST
 	    fprintf (stderr, "error %d returned from add_host_to_list\n", code);
@@ -732,7 +693,10 @@ krb5_locate_srv_dns_1 (const krb5_data *realm,
 #ifdef TEST
 	fprintf (stderr, "\tport=%d host=%s\n", entry->port, entry->host);
 #endif
-	code = add_host_to_list (addrlist, entry->host, htons (entry->port), 0);
+	code = add_host_to_list (addrlist, entry->host, htons (entry->port), 0,
+				 (strcmp("_tcp", protocol)
+				  ? SOCK_DGRAM
+				  : SOCK_STREAM));
 	if (code)
 	    break;
     }
@@ -795,9 +759,31 @@ krb5int_locate_server (krb5_context context, const krb5_data *realm,
 #ifdef KRB5_DNS_LOOKUP
     if (code && dnsname != 0) {
 	int use_dns = _krb5_use_dns_kdc(context);
-	if (use_dns)
-	    code = krb5_locate_srv_dns_1(realm, dnsname,
-					 is_stream ? "_tcp" : "_udp", &al);
+	if (use_dns) {
+	    /* Values of is_stream:
+	       0: udp only
+	       1: tcp only
+	       2: udp or tcp
+	       No other values currently allowed.  */
+	    code = 0;
+#ifdef TEST
+	    fprintf(stderr, "is_stream = %d\n", is_stream);
+#endif
+	    if (is_stream != 1) {
+		code = krb5_locate_srv_dns_1(realm, dnsname, "_udp", &al);
+#ifdef TEST
+		if (code)
+		    fprintf(stderr, "dns lookup returned error %d\n", code);
+#endif
+	    }
+	    if (is_stream != 0 && code == 0) {
+		code = krb5_locate_srv_dns_1(realm, dnsname, "_tcp", &al);
+#ifdef TEST
+		if (code)
+		    fprintf(stderr, "dns lookup returned error %d\n", code);
+#endif
+	    }
+	}
     }
 #endif /* KRB5_DNS_LOOKUP */
 #ifdef TEST

@@ -485,8 +485,10 @@ krb5_error_code krb5_find_config_files (void);
 krb5_error_code krb5_os_hostaddr
 	(krb5_context, const char *, krb5_address ***);
 
+/* N.B.: You need to include fake-addrinfo.h *before* k5-int.h if you're
+   going to use this structure.  */
 struct addrlist {
-    struct sockaddr **addrs;
+    struct addrinfo **addrs;
     int naddrs;
     int space;
 };

@@ -26,6 +26,7 @@
  */
 
 #define NEED_SOCKETS
+#include "fake-addrinfo.h"
 #include "k5-int.h"
 #include "os-proto.h"
 #include "adm_err.h"
@@ -75,9 +76,9 @@ krb5_locate_kpasswd(krb5_context context, const krb5_data *realm,
 	       port number to use DEFAULT_KPASSWD_PORT.  */
 	    int i;
 	    for ( i=0;i<addrlist->naddrs;i++ ) {
-		struct sockaddr *a = addrlist->addrs[i];
-		if (a->sa_family == AF_INET)
-		    sa2sin (a)->sin_port = htons(DEFAULT_KPASSWD_PORT);
+		struct addrinfo *a = addrlist->addrs[i];
+		if (a->ai_family == AF_INET)
+		    sa2sin (a->ai_addr)->sin_port = htons(DEFAULT_KPASSWD_PORT);
 	    }
 	}
     }
@@ -169,11 +170,11 @@ krb5_change_password(context, creds, newpw, result_code,
 	struct timeval timeout;
 
 	/* XXX Now the locate_ functions can return IPv6 addresses.  */
-	if (al.addrs[i]->sa_family != AF_INET)
+	if (al.addrs[i]->ai_family != AF_INET)
 	    continue;
 
 	tried_one = 1;
-	if (connect(s2, al.addrs[i], socklen(al.addrs[i])) == SOCKET_ERROR) {
+	if (connect(s2, al.addrs[i]->ai_addr, al.addrs[i]->ai_addrlen) == SOCKET_ERROR) {
 	    if (SOCKET_ERRNO == ECONNREFUSED || SOCKET_ERRNO == EHOSTUNREACH)
 		continue; /* try the next addr */
 
@@ -254,7 +255,7 @@ krb5_change_password(context, creds, newpw, result_code,
 
 	if ((cc = sendto(s1, chpw_req.data, 
 			 (GETSOCKNAME_ARG3_TYPE) chpw_req.length, 0,
-			 al.addrs[i], socklen(al.addrs[i]))) != chpw_req.length)
+			 al.addrs[i]->ai_addr, al.addrs[i]->ai_addrlen)) != chpw_req.length)
 	{
 	    if ((cc < 0) && ((SOCKET_ERRNO == ECONNREFUSED) ||
 			     (SOCKET_ERRNO == EHOSTUNREACH)))

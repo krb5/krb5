@@ -1,3 +1,29 @@
+2002-06-04  Ken Raeburn  <raeburn@mit.edu>
+
+	* locate_kdc.c: Include fake-addrinfo.h before k5-int.h.
+	(grow_list, krb5int_free_addrlist)
+	(add_addrinfo_to_list): Incorporate list-updating code from
+	add_sockaddr_to_list.  Store an addrinfo pointer, and set the
+	ai_next field to null.
+	(add_host_to_list): New arg SOCKTYPE.  Write port numbers into
+	buffers and let getaddrinfo fill in the sin*_port fields.  Call
+	getaddrinfo twice, and use two loops to add entries to the
+	addrlist structure.
+	(add_sockaddr_to_list, set_port_num): Deleted.
+	(krb5_locate_srv_conf_1, krb5_locate_srv_dns_1): Pass extra arg
+	to add_host_to_list.
+	(krb5int_locate_server): New value 2 for is_stream arg means
+	accept both UDP and TCP.
+	* changepw.c: Include fake-addrinfo.h.
+	(krb5_locate_passwd, krb5_change_password): Update for addrlist
+	changes.
+	* sendto_kdc.c: Include fake-addrinfo.h.
+	(krb5_sendto_kdc): Update for addrlist changes.  Skip any
+	addresses that are not SOCK_DGRAM.
+	* t_locate_kdc.c (stypename): New function.
+	(print_addrs): Update for addrlist changes.  Print socket type
+	with address and port.
+
 2002-04-12  Ken Raeburn  <raeburn@mit.edu>
 
 	* lock_file.c (krb5_lock_file) [POSIX_FILE_LOCKS]: Make static

@@ -27,18 +27,34 @@ void kfatal (krb5_error_code err)
     exit (1);
 }
 
+const char *stypename (int stype)
+{
+    static char buf[20];
+    switch (stype) {
+    case SOCK_STREAM:
+	return "stream";
+    case SOCK_DGRAM:
+	return "dgram";
+    case SOCK_RAW:
+	return "raw";
+    default:
+	sprintf(buf, "?%d", stype);
+	return buf;
+    }
+}
+
 void print_addrs ()
 {
     int i;
 
-    struct sockaddr **addrs = al.addrs;
+    struct addrinfo **addrs = al.addrs;
     int naddrs = al.naddrs;
 
     printf ("%d addresses:\n", naddrs);
     for (i = 0; i < naddrs; i++) {
 	int err;
 	char hostbuf[NI_MAXHOST], srvbuf[NI_MAXSERV];
-	err = getnameinfo (addrs[i], socklen(addrs[i]),
+	err = getnameinfo (addrs[i]->ai_addr, addrs[i]->ai_addrlen,
 			   hostbuf, sizeof (hostbuf),
 			   srvbuf, sizeof (srvbuf),
 			   NI_NUMERICHOST | NI_NUMERICSERV);
@@ -46,7 +62,8 @@ void print_addrs ()
 	    printf ("%2d: getnameinfo returns error %d=%s\n",
 		    i, err, gai_strerror (err));
 	else
-	    printf ("%2d: address %s\tport %s\n", i, hostbuf, srvbuf);
+	    printf ("%2d: address %s\t%s\tport %s\n", i, hostbuf,
+		    stypename (addrs[i]->ai_socktype), srvbuf);
     }
 }
 

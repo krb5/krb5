@@ -30,6 +30,7 @@
 
 #define NEED_SOCKETS
 #define NEED_LOWLEVEL_IO
+#include "fake-addrinfo.h"
 #include "k5-int.h"
 
 #ifdef HAVE_SYS_TIME_H
@@ -120,9 +121,11 @@ krb5_sendto_kdc (context, message, realm, reply, use_master)
 	 timeout <<= krb5_skdc_timeout_shift) {
 	sent = 0;
 	for (host = 0; host < addrs.naddrs; host++) {
-	    /* send to the host, wait timeout seconds for a response,
+	    if (addrs.addrs[host]->ai_socktype != SOCK_DGRAM)
+		continue;
+	    /* Send to the host, wait timeout seconds for a response,
 	       then move on. */
-	    /* cache some sockets for each host */
+	    /* Cache some sockets for each host.  */
 	    if (socklist[host] == INVALID_SOCKET) {
 		/* XXX 4.2/4.3BSD has PF_xxx = AF_xxx, so the socket
 		   creation here will work properly... */
@@ -136,22 +139,22 @@ krb5_sendto_kdc (context, message, realm, reply, use_master)
 		 */
 #ifdef DEBUG
 		fprintf (stderr, "getting dgram socket in family %d...",
-			 addrs.addrs[host]->sa_family);
+			 addrs.addrs[host]->ai_family);
 #endif
-		socklist[host] = socket(addrs.addrs[host]->sa_family,
+		socklist[host] = socket(addrs.addrs[host]->ai_family,
 					SOCK_DGRAM, 0);
 		if (socklist[host] == INVALID_SOCKET) {
 #ifdef DEBUG
 		    perror ("socket");
-		    fprintf (stderr, "af was %d\n", addrs.addrs[host]->sa_family);
+		    fprintf (stderr, "af was %d\n", addrs.addrs[host]->ai_family);
 #endif
 		    continue;		/* try other hosts */
 		}
 #ifdef DEBUG
 		{
 		    char addrbuf[NI_MAXHOST], portbuf[NI_MAXSERV];
-		    if (0 != getnameinfo (addrs.addrs[host],
-					  socklen (addrs.addrs[host]),
+		    if (0 != getnameinfo (addrs.addrs[host]->ai_addr,
+					  addrs.addrs[host]->ai_addrlen,
 					  addrbuf, sizeof (addrbuf),
 					  portbuf, sizeof (portbuf),
 					  NI_NUMERICHOST | NI_NUMERICSERV))
@@ -167,7 +170,7 @@ krb5_sendto_kdc (context, message, realm, reply, use_master)
 		   sendto, recvfrom.  The connect here may return an error if
 		   the destination host is known to be unreachable. */
 		if (connect(socklist[host],
-			    addrs.addrs[host], socklen(addrs.addrs[host])) == SOCKET_ERROR) {
+			    addrs.addrs[host]->ai_addr, addrs.addrs[host]->ai_addrlen) == SOCKET_ERROR) {
 #ifdef DEBUG
 		    perror ("connect");
 #endif

@@ -28,6 +28,7 @@
 /* Grab socket stuff.  This might want to go away later. */
 #define NEED_SOCKETS
 #define NEED_LOWLEVEL_IO
+#include "fake-addrinfo.h" /* for custom addrinfo if needed */
 #include "k5-int.h"
 
 #ifndef _WIN32
@@ -101,8 +102,8 @@ krb524_sendto_kdc (context, message, realm, reply)
 	 */
 	if (retval == 0)
 	    for (i = 0; i < al.naddrs; i++) {
-		if (al.addrs[i]->sa_family == AF_INET)
-		    sa2sin (al.addrs[i])->sin_port = port;
+		if (al.addrs[i]->ai_family == AF_INET)
+		    sa2sin (al.addrs[i]->ai_addr)->sin_port = port;
 	    }
     }
     if (retval)
@@ -163,7 +164,7 @@ krb524_sendto_kdc (context, message, realm, reply)
 		 * protocol exists to support a particular socket type
 		 * within a given protocol family.
 		 */
-		socklist[host] = socket(al.addrs[host]->sa_family, SOCK_DGRAM,
+		socklist[host] = socket(al.addrs[host]->ai_family, SOCK_DGRAM,
 					0);
 		if (socklist[host] == INVALID_SOCKET)
 		    continue;		/* try other hosts */
@@ -173,8 +174,8 @@ krb524_sendto_kdc (context, message, realm, reply)
 		   socket will time out, so use connect, send, recv instead of
 		   sendto, recvfrom.  The connect here may return an error if
 		   the destination host is known to be unreachable. */
-		if (connect(socklist[host], al.addrs[host],
-			    socklen(al.addrs[host])) == SOCKET_ERROR)
+		if (connect(socklist[host], al.addrs[host]->ai_addr,
+			    al.addrs[host]->ai_addrlen) == SOCKET_ERROR)
 		  continue;
 	    }
 	    if (send(socklist[host], message->data, (int) message->length, 0)
