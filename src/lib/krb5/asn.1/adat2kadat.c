@@ -80,8 +80,9 @@ register int *error;
 	}
 	retval[i]->ad_type = val->element_KRB5_2[i]->ad__type;
 	retval[i]->length = val->element_KRB5_2[i]->ad__data->qb_forw->qb_len;
-	xbcopy(val->element_KRB5_2[i]->ad__data->qb_forw->qb_data,
-	      &retval[i]->contents[0], retval[i]->length);
+	memcpy(&retval[i]->contents[0],
+	       val->element_KRB5_2[i]->ad__data->qb_forw->qb_data, 
+	       retval[i]->length);
     }
     retval[i] = 0;
     return(retval);
@@ -120,8 +121,9 @@ register int *error;
 	}
 	retval[i]->ad_type = rv->element_KRB5_2->ad__type;
 	retval[i]->length = rv->element_KRB5_2->ad__data->qb_forw->qb_len;
-	xbcopy(rv->element_KRB5_2->ad__data->qb_forw->qb_data,
-	      retval[i]->contents, retval[i]->length);
+	memcpy(retval[i]->contents,
+	       rv->element_KRB5_2->ad__data->qb_forw->qb_data,
+	       retval[i]->length);
     }
     retval[i] = 0;
     return(retval);

@@ -69,8 +69,7 @@ register int *error;
     }
     retval->addrtype = val->addr__type;
     retval->length = val->address->qb_forw->qb_len;
-    xbcopy(val->address->qb_forw->qb_data,
-	   retval->contents, retval->length);
+    memcpy(retval->contents, val->address->qb_forw->qb_data, retval->length);
     return(retval);
 }
 

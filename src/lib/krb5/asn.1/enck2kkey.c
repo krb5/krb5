@@ -71,8 +71,8 @@ register int *error;
     }
     retval->keytype = val->keytype;
     retval->length = val->keyvalue->qb_forw->qb_len;
-    xbcopy(val->keyvalue->qb_forw->qb_data, retval->contents,
-	  val->keyvalue->qb_forw->qb_len);
+    memcpy(retval->contents, val->keyvalue->qb_forw->qb_data,
+	   val->keyvalue->qb_forw->qb_len);
     return(retval);
 }
 

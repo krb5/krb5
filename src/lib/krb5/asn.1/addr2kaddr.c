@@ -81,8 +81,9 @@ register int *error;
 	}
 	retval[i]->addrtype = val->element_KRB5_0[i]->addr__type;
 	retval[i]->length = val->element_KRB5_0[i]->address->qb_forw->qb_len;
-	xbcopy(val->element_KRB5_0[i]->address->qb_forw->qb_data,
-	      retval[i]->contents, retval[i]->length);
+	memcpy(retval[i]->contents,
+	       val->element_KRB5_0[i]->address->qb_forw->qb_data,
+	       retval[i]->length);
     }
     retval[i] = 0;
     return(retval);
@@ -121,8 +122,9 @@ register int *error;
 	}
 	retval[i]->addrtype = rv->element_KRB5_0->addr__type;
 	retval[i]->length = rv->element_KRB5_0->address->qb_forw->qb_len;
-	xbcopy(rv->element_KRB5_0->address->qb_forw->qb_data,
-	      retval[i]->contents, retval[i]->length);
+	memcpy(retval[i]->contents,
+	       rv->element_KRB5_0->address->qb_forw->qb_data,
+	       retval[i]->length);
     }
     retval[i] = 0;
     return(retval);

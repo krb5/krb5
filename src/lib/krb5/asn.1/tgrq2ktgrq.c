@@ -243,8 +243,9 @@ element_KRB5_72krb5_pa_data(val, error)
 		*error = ENOMEM;
 		return(0);
 	    }
-	    xbcopy(rv->PA__DATA->pa__data->qb_forw->qb_data,
-		   retval[i]->contents, retval[i]->length);
+	    memcpy(retval[i]->contents,
+		   rv->PA__DATA->pa__data->qb_forw->qb_data,
+		   retval[i]->length);
 	}
     }
     retval[i] = 0;

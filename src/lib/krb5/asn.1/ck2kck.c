@@ -70,7 +70,7 @@ register int *error;
     }
     retval->checksum_type = val->cksumtype;
     retval->length = val->checksum->qb_forw->qb_len;
-    xbcopy(val->checksum->qb_forw->qb_data, retval->contents,
-	  val->checksum->qb_forw->qb_len);
+    memcpy(retval->contents, val->checksum->qb_forw->qb_data,
+	   val->checksum->qb_forw->qb_len);
     return(retval);
 }

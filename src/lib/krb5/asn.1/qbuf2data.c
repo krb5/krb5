@@ -68,8 +68,8 @@ register int *error;
 	krb5_xfree(retval);
 	goto nomem;
     }
-    xbcopy(val->qb_forw->qb_data, retval->data,
-	  val->qb_forw->qb_len);
+    memcpy(retval->data, val->qb_forw->qb_data,
+	   val->qb_forw->qb_len);
     return(retval);
 }
 

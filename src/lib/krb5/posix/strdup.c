@@ -36,6 +36,6 @@ strdup(str)
 	len = strlen(str) + 1;
 	if (!(copy = malloc((u_int)len)))
 		return((char *)0);
-	bcopy(str, copy, len);
+	memcpy(copy, str, len);
 	return(copy);
 }
