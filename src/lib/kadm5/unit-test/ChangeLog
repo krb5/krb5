@@ -1,3 +1,11 @@
+2004-02-12  Tom Yu  <tlyu@mit.edu>
+
+	* config/unix.exp (PRIOCNTL_HACK): Wrap "spawn" to do priocntl
+	things to work around Solaris 9 pty-close bug.
+
+	* Makefile.in (unit-test-client-body, unit-test-server-body): Add
+	PRIOCNTL_HACK.
+
 2003-10-16  Tom Yu  <tlyu@mit.edu>
 
 	* api.1/lock.exp: Work around a race condition in the Solaris 9

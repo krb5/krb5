@@ -1,3 +1,7 @@
+2004-02-12  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in: Invoke KRB5_AC_PRIOCNTL_HACK.
+
 2003-06-04  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in (kdb_check): Remove uses of "dump -old", etc., since

@@ -1,3 +1,8 @@
+2004-02-12  Tom Yu  <tlyu@mit.edu>
+
+	* default.exp (PRIOCNTL_HACK): Wrap "spawn" to do priocntl things
+	to work around Solaris 9 pty-close bug.
+
 2003-06-05  Ken Raeburn  <raeburn@mit.edu>
 
 	* default.exp (setup_root_shell): Check for "not authorized".  Map

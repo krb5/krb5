@@ -1,3 +1,8 @@
+2004-02-12  Tom Yu  <tlyu@mit.edu>
+
+	* aclocal.m4 (KRB5_AC_PRIOCNTL_HACK): Set PRIOCNTL_HACK=1 on
+	Solaris 9.
+
 2003-05-27  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (KRBHDEP): Add krb524_err header.

@@ -1,3 +1,7 @@
+2004-02-12  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in: Invoke PRIOCNTL_HACK.
+
 2003-06-03  Tom Yu  <tlyu@mit.edu>
 
 	* alt_prof.c (krb5_read_realm_params): Don't bother reading in
