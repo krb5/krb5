@@ -251,7 +251,6 @@ krb5_error_code krb5_get_cred_from_kdc(context, ccache, cred, tgts)
 	etype             = TGT_ETYPE;
 	if(retval = krb5_get_cred_via_tgt(context, &tgt,
 					  FLAGS2OPTS(tgtq.ticket_flags),
-					  etype,
 					  krb5_kdc_req_sumtype,
 					  &tgtq)) {
 	      
@@ -309,7 +308,6 @@ krb5_error_code krb5_get_cred_from_kdc(context, ccache, cred, tgts)
 	      etype             = TGT_ETYPE;
 	      if (retval = krb5_get_cred_via_tgt(context, &tgt,
                                                  FLAGS2OPTS(tgtq.ticket_flags),
-                                                 etype,
                                                  krb5_kdc_req_sumtype,
                                                  &tgtq)) {
 		  continue;
@@ -388,7 +386,6 @@ krb5_error_code krb5_get_cred_from_kdc(context, ccache, cred, tgts)
   else {
       retval = krb5_get_cred_via_tgt(context, &tgt,
                                    FLAGS2OPTS(tgt.ticket_flags), 
-                                   etype,
                                    krb5_kdc_req_sumtype,
                                    cred);
   }

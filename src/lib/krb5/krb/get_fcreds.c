@@ -35,6 +35,7 @@
 #include <netdb.h>
 
 #include <krb5/krb5.h>
+#include <krb5/asn1.h>
 #include <krb5/los-proto.h>
 #include <krb5/ext-proto.h>
 
@@ -44,17 +45,18 @@
 
 /* Get a TGT for use at the remote host */
 krb5_error_code
-krb5_get_for_creds(context, etype, sumtype, rhost, client, enc_key, forwardable, outbuf)
+krb5_get_for_creds(context, sumtype, rhost, client, enc_key, 
+		   forwardable, outbuf)
     krb5_context context;
-     const krb5_enctype etype;
-     const krb5_cksumtype sumtype;
-     char *rhost;
-     krb5_principal client;
-     krb5_keyblock *enc_key;
-     int forwardable;      /* Should forwarded TGT also be forwardable? */
-     krb5_data *outbuf;
+    const krb5_cksumtype sumtype;
+    char *rhost;
+    krb5_principal client;
+    krb5_keyblock *enc_key;
+    int forwardable;      /* Should forwarded TGT also be forwardable? */
+    krb5_data *outbuf;
 {
     struct hostent *hp;
+    krb5_enctype etype;
     krb5_address **addrs;
     krb5_error_code retval;
     krb5_data *scratch;
@@ -165,7 +167,8 @@ krb5_get_for_creds(context, etype, sumtype, rhost, client, enc_key, forwardable,
     if (!forwardable) /* Reset KDC_OPT_FORWARDABLE */
       kdcoptions &= ~(KDC_OPT_FORWARDABLE);
 
-    if (retval = krb5_send_tgs(context, kdcoptions, &creds.times, etype, sumtype,
+    if (retval = krb5_send_tgs(context, kdcoptions, &creds.times, NULL, 
+			       sumtype,
 			       tgt.server,
 			       addrs,
 			       creds.authdata,
@@ -193,6 +196,7 @@ krb5_get_for_creds(context, etype, sumtype, rhost, client, enc_key, forwardable,
 	goto errout;
     }
     
+    etype = tgt.keyblock.etype;
     if (retval = krb5_decode_kdc_rep(context, &tgsrep.response,
 				     &tgt.keyblock,
 				     etype, /* enctype */

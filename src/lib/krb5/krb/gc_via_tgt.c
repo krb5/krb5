@@ -34,17 +34,17 @@
 #include "int-proto.h"
 
 krb5_error_code
-krb5_get_cred_via_tgt (context, tgt, kdcoptions, etype, sumtype, cred)
+krb5_get_cred_via_tgt (context, tgt, kdcoptions, sumtype, cred)
     krb5_context context;
     krb5_creds * tgt;
     const krb5_flags kdcoptions;
-    const krb5_enctype etype;
     const krb5_cksumtype sumtype;
     krb5_creds * cred;
 {
     krb5_error_code retval;
     krb5_principal tempprinc;
     krb5_data *scratch;
+    krb5_enctype etype;
     krb5_kdc_rep *dec_rep;
     krb5_error *err_reply;
     krb5_response tgsrep;
@@ -72,7 +72,8 @@ krb5_get_cred_via_tgt (context, tgt, kdcoptions, etype, sumtype, cred)
     krb5_free_principal(context, tempprinc);
 
 
-    if (retval = krb5_send_tgs(context, kdcoptions, &cred->times, etype, sumtype,
+    if (retval = krb5_send_tgs(context, kdcoptions, &cred->times, NULL, 
+			       sumtype,
 			       cred->server,
 			       tgt->addresses,
 			       cred->authdata,
@@ -113,6 +114,8 @@ krb5_get_cred_via_tgt (context, tgt, kdcoptions, etype, sumtype, cred)
 	cleanup();
 	return retval;
     }
+
+    etype = tgt->keyblock.etype;
     retval = krb5_decode_kdc_rep(context, &tgsrep.response,
 				 &tgt->keyblock,
 				 etype, /* enctype */

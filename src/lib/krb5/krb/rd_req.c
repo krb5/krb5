@@ -54,11 +54,6 @@
  *  returns system errors, encryption errors, replay errors
  */
 
-typedef krb5_error_code (*rdreq_key_proc) PROTOTYPE((krb5_pointer, 
-						     krb5_principal,
-						     krb5_kvno,
-						     krb5_keyblock **));
-
 krb5_error_code
 krb5_rd_req(context, inbuf, server, sender_addr, fetchfrom, keyproc, 
 	    keyprocarg, rcache, authdat)

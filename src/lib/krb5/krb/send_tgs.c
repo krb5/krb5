@@ -49,12 +49,12 @@
  returns system errors
  */
 krb5_error_code
-krb5_send_tgs(context, kdcoptions, timestruct, etype, sumtype, sname, addrs,
+krb5_send_tgs(context, kdcoptions, timestruct, etypes, sumtype, sname, addrs,
 	      authorization_data, padata, second_ticket, usecred, rep)
     krb5_context context;
     const krb5_flags kdcoptions;
     const krb5_ticket_times * timestruct;
-    const krb5_enctype etype;
+    const krb5_enctype * etypes;
     const krb5_cksumtype sumtype;
     krb5_const_principal sname;
     krb5_address * const * addrs;
@@ -70,15 +70,24 @@ krb5_send_tgs(context, kdcoptions, timestruct, etype, sumtype, sname, addrs,
     krb5_data *scratch, scratch2;
     krb5_ticket *sec_ticket = 0;
     krb5_ticket *sec_ticket_arr[2];
-    krb5_enctype etypes[1];
     krb5_timestamp time_now;
     krb5_pa_data **combined_padata;
     krb5_pa_data ap_req_padata;
 
-    if (!valid_etype(etype))
-	return KRB5_PROG_ETYPE_NOSUPP;
-
     memset((char *)&tgsreq, 0, sizeof(tgsreq));
+
+    if (etypes) {
+	/* Check passed etypes and make sure they're valid. */
+   	for (tgsreq.netypes = 0; etypes[tgsreq.netypes]; tgsreq.netypes++) {
+    	    if (!valid_etype(etypes[tgsreq.netypes]))
+		return KRB5_PROG_ETYPE_NOSUPP;
+	}
+    	tgsreq.etype = (krb5_enctype *)etypes;
+    } else {
+        /* Get the default etypes */
+        krb5_get_default_in_tkt_etypes(context, &(tgsreq.etype));
+	for(tgsreq.netypes = 0; tgsreq.etype[tgsreq.netypes]; tgsreq.netypes++);
+    }
 
     tgsreq.kdc_options = kdcoptions;
     tgsreq.server = (krb5_principal) sname;
@@ -91,10 +100,6 @@ krb5_send_tgs(context, kdcoptions, timestruct, etype, sumtype, sname, addrs,
     /* XXX we know they are the same size... */
     tgsreq.nonce = (krb5_int32) time_now;
 
-    etypes[0] = etype;
-    tgsreq.etype = etypes;
-    tgsreq.netypes = 1;
-
     tgsreq.addresses = (krb5_address **) addrs;
 
     if (authorization_data) {
@@ -104,8 +109,8 @@ krb5_send_tgs(context, kdcoptions, timestruct, etype, sumtype, sname, addrs,
 
 	if (retval = encode_krb5_authdata(authorization_data, &scratch))
 	    return(retval);
-	krb5_use_cstype(context, &eblock, etype);
-	tgsreq.authorization_data.etype = etype;
+	krb5_use_cstype(context, &eblock, usecred->keyblock.etype);
+	tgsreq.authorization_data.etype = usecred->keyblock.etype;
 	tgsreq.authorization_data.kvno = 0; /* ticket session key has */
 					    /* no version */
 	tgsreq.authorization_data.ciphertext.length =

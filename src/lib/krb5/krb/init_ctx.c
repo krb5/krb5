@@ -42,8 +42,11 @@ krb5_init_context(context)
 	memset(ctx, 0, sizeof(struct _krb5_context));
 	ctx->magic = KV5M_CONTEXT;
 
-	retval = krb5_os_init_context(ctx);
-	if (retval)
+	/* Set the default encryption types, possible defined in krb5/conf */
+	if (krb5_set_default_in_tkt_etypes(ctx, NULL))
+		goto cleanup;
+
+	if (krb5_os_init_context(ctx))
 		goto cleanup;
 	
 	*context = ctx;
@@ -58,7 +61,75 @@ void
 krb5_free_context(ctx)
 	krb5_context	ctx;
 {
-	krb5_os_free_context(ctx);
-	ctx->magic = 0;
-	free(ctx);
+     krb5_os_free_context(ctx);
+
+     if (ctx->etypes);
+          free(ctx->etypes);
+
+     ctx->magic = 0;
+     free(ctx);
+}
+
+/*
+ * Set the desired default etypes, making sure they are valid.
+ */
+krb5_error_code
+krb5_set_default_in_tkt_etypes(context, etypes)
+	krb5_context context;
+	const krb5_enctype *etypes;
+{
+    krb5_enctype * new_etypes;
+    int i;
+
+    if (etypes) {
+	for (i = 0; etypes[i]; i++) {
+	    if (!valid_etype(etypes[i])) 
+		return KRB5_PROG_ETYPE_NOSUPP;
+	}
+
+	/* Now copy the default etypes into the context pointer */
+	if (new_etypes = (krb5_enctype *)malloc(sizeof(krb5_enctype) * i))
+	    memcpy(new_etypes, etypes, sizeof(krb5_enctype) * i);
+	else
+	    return ENOMEM;
+
+    } else {
+	i = 2;
+
+	/* Should reset the list to the runtime defaults */
+	if (new_etypes = (krb5_enctype *)malloc(sizeof(krb5_enctype) * i)) {
+	    new_etypes[0] = ETYPE_DES_CBC_MD5;
+	    new_etypes[1] = ETYPE_DES_CBC_CRC;
+	} else {
+	    return ENOMEM;
+	}
+    }
+
+    if (context->etypes) 
+        free(context->etypes);
+    context->etypes = new_etypes;
+    context->etype_count = i;
+    return 0;
+}
+
+krb5_error_code
+krb5_get_default_in_tkt_etypes(context, etypes)
+    krb5_context context;
+    krb5_enctype **etypes;
+{
+    krb5_enctype * old_etypes;
+    int i;
+
+    if (old_etypes = (krb5_enctype *)malloc(sizeof(krb5_enctype) *
+				(context->etype_count + 1))) {
+	memcpy(old_etypes, context->etypes, sizeof(krb5_enctype) * 
+		  		context->etype_count);
+	old_etypes[context->etype_count] = NULL;
+    } else {
+	return ENOMEM;
+    }
+
+    *etypes = old_etypes;
+    return 0;
+	
 }

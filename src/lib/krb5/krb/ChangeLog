@@ -1,3 +1,37 @@
+Mon Jan 30 15:46:14 1995 Chris Provenzano (proven@mit.edu)
+
+	* int-proto.h Update prototypes for krb5_get_cred_via_tgt(), and
+		krb5_get_cred_via_2tgt().
+
+	* get_fcreds.c (krb5_get_for_creds()) 
+	* gc_via_tgt.c (krb5_get_cred_via_tgt())
+	* gc_2tgt.c (krb5_get_cred_via_2tgt())
+		Removed krb5_enctype argument. Pass NULL list of encryption
+		types to krb5_send_tgs to get default encryption types.
+
+	* gc_frm_kdc.c Removed krb5_enctype argument passed to 
+		krb5_get_cred_via_tgt()
+
+	* send_tgs.c (krb5_send_tgs()) Changed krb5_enctype arg to
+		krb5_enctype *, a NULL terminated array of encryption 
+		types. If argument is NULL then krb5_send_tgs() will 
+		use defaul list of encryption types.
+
+	* send_tgs.c (krb5_send_tgs()) To encrypt request ticket use
+		usecred->keyblock.etype instead of (and now defunct) 
+		krb5_enctype arg.
+
+	* init_ctx.c Added krb5_set_default_in_tkt_etypes() and
+		krb5_get_default_in_tkt_etypes().
+	
+	* rd_req.c, rd_req_decode.c Removed typedef for rdreq_key_proc
+		and use krb5_rd_req_decoded in its place.
+
+Mon Jan 30 11:26:05 1995 Chris Provenzano (proven@mit.edu)
+
+	* get_fcreds.c Really needs #include<krb5/asn1.h> for definition
+		of krb5_is_krb_error()
+
 Sat Jan 28 14:45:55 1995 Chris Provenzano (proven@mit.edu)
 
 	* in_tkt_sky.c (skey_keyproc()), rd_req_dec.c (krb5_rd_req_decoded())

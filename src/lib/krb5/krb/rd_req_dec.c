@@ -64,9 +64,6 @@
 
 static krb5_error_code decrypt_authenticator
 	PROTOTYPE((krb5_context, const krb5_ap_req *, krb5_authenticator **));
-typedef krb5_error_code (*rdreq_key_proc)
-	PROTOTYPE((krb5_context, krb5_pointer, krb5_principal,
-		   krb5_kvno, krb5_keyblock **));
 
 extern krb5_deltat krb5_clockskew;
 #define in_clock_skew(date) (abs((date)-currenttime) < krb5_clockskew)
@@ -79,11 +76,12 @@ krb5_rd_req_decoded(context, req, server, sender_addr, fetchfrom, keyproc,
     krb5_const_principal server;
     const krb5_address *sender_addr;
     const char * fetchfrom;
-    rdreq_key_proc keyproc;
+    krb5_rdreq_key_proc keyproc;
     krb5_pointer keyprocarg;
     krb5_rcache rcache;
     krb5_tkt_authent **authdat;
 {
+    krb5_keytype keytype;
     krb5_error_code retval = 0;
     krb5_keyblock *tkt_key = NULL;
     krb5_timestamp currenttime, starttime;
@@ -95,10 +93,16 @@ krb5_rd_req_decoded(context, req, server, sender_addr, fetchfrom, keyproc,
     /* if (req->ap_options & AP_OPTS_USE_SESSION_KEY)
        do we need special processing here ?	*/
     
+    /*
+     * OK we know the encryption type req->ticket->enc_part.etype, 
+     * and now we need to get the keytype
+     */
+    keytype = krb5_csarray[req->ticket->enc_part.etype]->system->proto_keytype;
+
     /* fetch a server key */
     if (keyproc) {
 	retval = (*keyproc)(context, keyprocarg, req->ticket->server,
-			    req->ticket->enc_part.kvno, &tkt_key);
+			    req->ticket->enc_part.kvno, keytype, &tkt_key);
     } else {
 	krb5_keytab keytabid;
 	krb5_keytab_entry ktentry;
@@ -111,13 +115,6 @@ krb5_rd_req_decoded(context, req, server, sender_addr, fetchfrom, keyproc,
 	    retval = krb5_kt_default(context, &keytabid);
 	}
 	if (!retval) {
-	    /*
-	     * OK we know the encryption type req->ticket->enc_part.etype, 
-	     * and now we need to get the keytype
-	     */
-	    krb5_keytype keytype = krb5_csarray[req->ticket->enc_part.etype]->
-					system->proto_keytype;
-
 	    retval = krb5_kt_get_entry(context, keytabid, req->ticket->server,
 				       req->ticket->enc_part.kvno, keytype,
 				       &ktentry);

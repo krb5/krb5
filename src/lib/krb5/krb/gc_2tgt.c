@@ -32,11 +32,10 @@
 #include "int-proto.h"
 
 krb5_error_code
-krb5_get_cred_via_2tgt (context, tgt, kdcoptions, etype, sumtype, cred)
+krb5_get_cred_via_2tgt (context, tgt, kdcoptions, sumtype, cred)
     krb5_context context;
     krb5_creds *tgt;
     const krb5_flags kdcoptions;
-    const krb5_enctype etype;
     const krb5_cksumtype sumtype;
     register krb5_creds * cred;
 {
@@ -48,6 +47,7 @@ krb5_get_cred_via_2tgt (context, tgt, kdcoptions, etype, sumtype, cred)
     krb5_kdc_rep *dec_rep;
     krb5_error *err_reply;
     krb5_response tgsrep;
+    krb5_enctype etype;
 
     /* tgt->client must be equal to cred->client */
     /* tgt->server must be equal to krbtgt/realmof(cred->client) */
@@ -75,7 +75,8 @@ krb5_get_cred_via_2tgt (context, tgt, kdcoptions, etype, sumtype, cred)
     if (!(kdcoptions & KDC_OPT_ENC_TKT_IN_SKEY))
 	return KRB5_INVALID_FLAGS;
 
-    if (retval = krb5_send_tgs(context, kdcoptions, &cred->times, etype, sumtype,
+    if (retval = krb5_send_tgs(context, kdcoptions, &cred->times, NULL, 
+			       sumtype,
 			       cred->server,
 			       tgt->addresses,
 			       cred->authdata,
@@ -101,6 +102,7 @@ krb5_get_cred_via_2tgt (context, tgt, kdcoptions, etype, sumtype, cred)
 	free(tgsrep.response.data);
 	return retval;
       }
+    etype = tgt->keyblock.etype;
     retval = krb5_decode_kdc_rep(context, &tgsrep.response, &tgt->keyblock,
 				 etype, &dec_rep);
     free(tgsrep.response.data);
