@@ -4,6 +4,7 @@ CONFIG_RULES
 AC_SET_BUILDTOP
 WITH_KRB5ROOT
 WITH_KRB4
+WITH_NETLIB
 AC_ARG_ENABLE([athena],
 [  --enable-athena         build with MIT Project Athena configuration],,)
 CONFIG_DIRS(util include $isode lib kdc admin kadmin slave clients appl tests)

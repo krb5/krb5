@@ -348,7 +348,7 @@ dnl set $(LD) from --with-linker=value
 dnl
 define(WITH_LINKER,[
 AC_ARG_WITH([linker],
-[  --with-linker=LINKER      select linker to use],
+[  --with-linker=LINKER    select linker to use],
 AC_MSG_RESULT(LD=$withval)
 LD=$withval,
 if test -z "$LD" ; then LD=$CC; fi
@@ -630,3 +630,20 @@ AC_HEADER_CHECK(flock.h,[echo found flock.h for non-posix locks],
     AC_DEFINE(POSIX_FILE_LOCKS)
   fi
 ])])dnl
+dnl
+dnl WITH_NETLIB
+dnl 
+dnl
+define(WITH_NETLIB,[
+AC_ARG_WITH([netlib],
+[  --with-netlib[=libs]    use user defined resolve library],
+  if test "$withval" = yes -o "$withval" = no ; then
+	AC_MSG_RESULT("netlib will link with C library resolver only")
+  else
+	LIBS="$LIBS $withval"
+	AC_MSG_RESULT("netlib will use \'$withval\'")
+  fi
+,dnl
+[AC_CHECK_LIB(socket,main)
+AC_CHECK_LIB(nsl,main)]
+)])dnl

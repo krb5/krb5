@@ -1,3 +1,8 @@
+Wed Mar  1 16:40:23 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* aclocal.m4, configure.in: Folded in Ezra's changes to support
+		--with-netlib, for support of the SGI's.
+
 Tue Feb 28 00:00:22 1995  John Gilmore  (gnu at toad.com)
 
 	* aclocal.m4 (ADD_DEF):  Add -I...include/krb5 so we won't need
