@@ -2,7 +2,8 @@
  * $Source$
  * $Author$
  *
- * Copyright 1990 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991 by the Massachusetts Institute of Technology.
+ * All Rights Reserved.
  *
  * For copying and distribution information, please see the file
  * <krb5/copyright.h>.
@@ -12,10 +13,10 @@
  */
 
 #if !defined(lint) && !defined(SABER)
-static char rcsid_scc_read_c[] = "$Id$";
+static char rcsid_scc_read_c[] =
+"$Id$";
 #endif /* !lint && !SABER */
 
-#include <krb5/copyright.h>
 #include "scc.h"
 
 krb5_error_code

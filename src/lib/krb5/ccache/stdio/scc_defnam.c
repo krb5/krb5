@@ -9,6 +9,7 @@
  * $Author$
  *
  * Copyright 1990 by the Massachusetts Institute of Technology.
+ * All Rights Reserved.
  *
  * For copying and distribution information, please see the file
  * <krb5/copyright.h>.
@@ -17,12 +18,12 @@
  */
 
 #if !defined(lint) && !defined(SABER)
-static char rcsid_scc_defnam_c[] = "$Id$";
+static char rcsid_scc_defnam_c[] =
+"$Id$";
 #endif /* !lint && !SABER */
 
 #include "scc.h"
 
-#include <krb5/copyright.h>
 
 static char krb5_default_name_string[KRB5_SCC_MAXLEN] = "";
 

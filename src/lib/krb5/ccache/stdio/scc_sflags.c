@@ -3,6 +3,7 @@
  * $Author$
  *
  * Copyright 1990,1991 by the Massachusetts Institute of Technology.
+ * All Rights Reserved.
  *
  * For copying and distribution information, please see the file
  * <krb5/copyright.h>.
@@ -11,10 +12,10 @@
  */
 
 #if !defined(lint) && !defined(SABER)
-static char rcsid_scc_set_flags_c[] = "$Id$";
+static char rcsid_scc_set_flags_c[] =
+"$Id$";
 #endif /* !lint && !SABER */
 
-#include <krb5/copyright.h>
 
 #include "scc.h"
 
