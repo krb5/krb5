@@ -21,18 +21,21 @@ STLIBOBJS= \
 	cccopy.o \
 	ccdefault.o \
 	ccdefops.o \
+	cc_retr.o \
 	ser_cc.o
 
 OBJS=	$(OUTPRE)ccbase.$(OBJEXT) \
 	$(OUTPRE)cccopy.$(OBJEXT) \
 	$(OUTPRE)ccdefault.$(OBJEXT) \
 	$(OUTPRE)ccdefops.$(OBJEXT) \
+	$(OUTPRE)cc_retr.$(OBJEXT) \
 	$(OUTPRE)ser_cc.$(OBJEXT)
 
 SRCS=	$(srcdir)/ccbase.c \
 	$(srcdir)/cccopy.c \
 	$(srcdir)/ccdefault.c \
 	$(srcdir)/ccdefops.c \
+	$(srcdir)/cc_retr.c \
 	$(srcdir)/ser_cc.c
 
 all-unix:: all-libobjs

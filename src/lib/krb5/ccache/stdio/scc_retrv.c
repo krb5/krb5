@@ -24,6 +24,8 @@
  * This file contains the source code for krb5_scc_retrieve.
  */
 
+#if 0
+
 #include "scc.h"
 
 #define set(bits) (whichfields & bits)
@@ -217,3 +219,21 @@ krb5_scc_retrieve(context, id, whichfields, mcreds, creds)
      krb5_scc_end_seq_get(context, id, &cursor);
      return KRB5_CC_NOTFOUND;
 }
+
+#else
+
+#include "k5-int.h"
+
+krb5_error_code KRB5_CALLCONV
+krb5_scc_retrieve(context, id, whichfields, mcreds, creds)
+   krb5_context context;
+   krb5_ccache id;
+   krb5_flags whichfields;
+   krb5_creds *mcreds;
+   krb5_creds *creds;
+{
+    return krb5_cc_retrieve_cred_default (context, id, whichfields,
+					  mcreds, creds);
+}
+
+#endif
