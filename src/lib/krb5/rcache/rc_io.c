@@ -11,7 +11,7 @@
  */
 
 #if !defined(lint) && !defined(SABER)
-static char rcsid_rc_base_c[] =
+static char rcsid_rc_io_c[] =
 "$Id$";
 #endif	/* !lint & !SABER */
 
@@ -118,6 +118,7 @@ char **fn;
      case EPERM: FREE(d->fn); return KRB5_RC_IO_PERM; break;
      case EACCES: FREE(d->fn); return KRB5_RC_IO_PERM; break;
      case EROFS: FREE(d->fn); return KRB5_RC_IO_PERM; break;
+     case EEXIST: FREE(d->fn); return KRB5_RC_IO_PERM; break;
      default: FREE(d->fn); return KRB5_RC_IO_UNKNOWN; break;
     }
  if (retval = krb5_rc_io_write(d, (krb5_pointer)&rc_vno, sizeof(rc_vno))) {
@@ -135,14 +136,27 @@ char *fn;
 {
  krb5_int16 rc_vno;
  krb5_error_code retval;
+ struct stat statb;
+
  GETDIR;
  if (!(d->fn = malloc(strlen(fn) + dirlen + 1)))
    return KRB5_RC_IO_MALLOC;
  (void) strcpy(d->fn,dir);
  (void) strcat(d->fn,"/");
  (void) strcat(d->fn,fn);
- d->fd = open(d->fn,O_RDWR,0600);
- if (d->fd == -1)
+ if ((d->fd = stat(d->fn, &statb)) != -1) {
+     uid_t me;
+
+     me = getuid();
+     /* must be owned by this user, to prevent some security problems with
+	other users modifying replay cache stufff */
+     if ((statb.st_uid != me) || ((statb.st_mode & S_IFMT) != S_IFREG)) {
+	 FREE(d->fn);
+	 return KRB5_RC_IO_PERM;
+     }
+     d->fd = open(d->fn,O_RDWR,0600);
+ }
+ if (d->fd == -1) {
    switch(errno)
     {
      case EBADF: FREE(d->fn); return KRB5_RC_IO_UNKNOWN; break;
@@ -157,6 +171,7 @@ char *fn;
      case EROFS: FREE(d->fn); return KRB5_RC_IO_PERM; break;
      default: FREE(d->fn); return KRB5_RC_IO_UNKNOWN; break;
     }
+ }
  if (retval = krb5_rc_io_read(d, (krb5_pointer) &rc_vno,  sizeof(rc_vno))) {
      (void) close(d->fd);
      FREE(d->fn); 
