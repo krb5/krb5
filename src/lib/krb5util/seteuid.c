@@ -32,21 +32,21 @@
 int krb5_seteuid( euid)
   uid_t euid;
 {
-  #if defined(_POSIX_SAVED_IDS) && defined(HAVE_SETEUID)
+#if defined(_POSIX_SAVED_IDS) && defined(HAVE_SETEUID)
   return  (seteuid(euid)) ;
 #else
-# if defined(HAVE_SETRESUID)
+#if defined(HAVE_SETRESUID)
     return (setresuid(getuid(), euid, geteuid())) ;
-# else
-#  if defined(HAVE_SETREUID)
+#else
+#if defined(HAVE_SETREUID)
     return setreuid(geteuid(), euid); 
 #else /*HAVE_SETREUID*/
     /* You need to add a case to deal with this operating system.*/
     errno = EPERM;
   return -1;
   
-#  endif /* HAVE_SETREUID */
-# endif /* HAVE_SETRESUID */
+#endif /* HAVE_SETREUID */
+#endif /* HAVE_SETRESUID */
 #endif /* _POSIX_SAVED_IDS */
 
 
