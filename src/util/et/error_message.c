@@ -61,7 +61,7 @@ KRB5_DLLIMP const char FAR * KRB5_CALLCONV error_message(code)
 
 	l_offset = (unsigned long)code & ((1<<ERRCODE_RANGE)-1);
 	offset = l_offset;
-	table_num = (unsigned long)code - l_offset;
+	table_num = ((unsigned long)code - l_offset) & ERRCODE_MAX;
 	if (!table_num) {
 		if (code == 0)
 			goto oops;
@@ -85,7 +85,7 @@ KRB5_DLLIMP const char FAR * KRB5_CALLCONV error_message(code)
 
 	et = _et_list;
 	while (et) {
-	    if (et->table->base == table_num) {
+	    if ((et->table->base & ERRCODE_MAX) == table_num) {
 			/* This is the right table */
 			if (et->table->n_msgs <= offset)
 				break;

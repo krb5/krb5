@@ -1,3 +1,12 @@
+Mon Jul 21 12:00:24 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* error_message.c (error_message): Mask error code with
+		ERRCODE_MASK to handle case where 32bit ints are zero
+		filed in the gssapi layer.
+
+	* error_table.h: Define ERRCODE_MAX, the maximum allowed error
+		code (32bits).  
+
 Tue Mar 18 15:07:40 1997  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* com_err.h: Add 'extern "C"' for C++ compatibility; also check for
