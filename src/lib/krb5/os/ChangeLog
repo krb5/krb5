@@ -1,3 +1,7 @@
+Mon Sep 15 15:21:12 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* ccdefname.c (krb5_cc_default_name): Returns a const char *.
+
 Sat Aug 16 10:11:20 1997  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* gmt_mktime.c (days_in_month): Now const.
