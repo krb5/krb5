@@ -22,7 +22,7 @@ EHDRDIR=$(TOP)/include/krb5/error_tables
 NormalLibraryObjectRule()
 ErrorTableObjectRule()
 
-all:: ${SRCS} ${HDRS} headers ${OBJS}
+all:: ${SRCS} ${HDRS} includes ${OBJS}
 
 clean::
 	$(RM) $(ETHDRS) $(ETSRCS)

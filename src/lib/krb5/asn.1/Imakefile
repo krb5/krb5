@@ -130,7 +130,7 @@ OBJS= \
 	tkt2ktkt.o	\
 	u2gen.o
 
-all:: headers
+all:: includes
 
 #if HavePerl
 #ifdef TypesObjs
