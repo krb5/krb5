@@ -1,3 +1,7 @@
+Sat Jun  8 09:58:41 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* configure.in: Remove kdb4 library building
+
 Thu Jun  6 00:04:38 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* Makefile.in (all-windows): Don't pass $(LIBCMD) on the command

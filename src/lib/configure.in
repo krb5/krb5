@@ -2,14 +2,12 @@ AC_INIT(configure.in)
 CONFIG_RULES
 if test $krb5_cv_build_krb4_libs = yes ; then
 	AC_MSG_RESULT(building Kerberos 4 libraries)
-	WITH_KDB4(kdb4=kdb4,kdb4=)
 	krb4=krb4
 else
 	AC_MSG_RESULT(skipping Kerberos 4 libraries)
-	kdb4=
 	krb4=
 fi
-CONFIG_DIRS(crypto $kdb4 krb5 des425 $krb4 krb5util kdb gssapi kadm)
+CONFIG_DIRS(crypto krb5 des425 $krb4 krb5util kdb gssapi kadm)
 AC_PROG_ARCHIVE
 AC_PROG_RANLIB
 DO_SUBDIRS
