@@ -1,3 +1,9 @@
+Tue Nov  5 16:14:06 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* install.texinfo (Upgrading existing Master and Slave KDCs to the
+ 	current release): added section on upgrading to new db format with
+ 	dump/load [krb5-doc/119]
+
 Mon Nov  4 16:50:51 1996  Barry Jaspan  <bjaspan@mit.edu>
 
 	* admin.texinfo (Adding or Modifying Principals): update kadmin
