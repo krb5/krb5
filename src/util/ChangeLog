@@ -1,3 +1,7 @@
+Fri Mar 12 15:29:17 1999  Tom Yu  <tlyu@mit.edu>
+
+	* mkrel: Update from trunk.
+
 Thu Nov 13 20:28:31 1997  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* libupdate.sh: Add semicolons to prevent Bash 2.0 from
