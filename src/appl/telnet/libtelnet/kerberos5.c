@@ -529,7 +529,7 @@ kerberos5_is(ap, data, cnt)
 		if ((r = krb5_auth_con_genaddrs(telnet_context, auth_context, 
 			net, KRB5_AUTH_CONTEXT_GENERATE_REMOTE_FULL_ADDR)) || 
 		    (r = rd_and_store_for_creds(telnet_context, auth_context,
-			   &inbuf, ticket, UserNameRequested))) {
+			   &inbuf, ticket))) {
 
 		    char errbuf[128];
 		    
