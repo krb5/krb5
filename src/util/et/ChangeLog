@@ -1,3 +1,9 @@
+Wed Mar 16 17:30:00 1995 Keith Vetter (keithv@fusion.com)
+
+	* com_err.h: problem with this file needing k5-config for windows
+	   stuff but many application programs don't include it. So for
+	   now I've put the windows stuff that is needed directly into it.
+
 Wed Mar 15 23:02:14 1995 Keith Vetter (keithv@fusion.com)
 
 	* com_err.c: made to work on the PC. Biggest changes was that

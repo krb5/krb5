@@ -23,6 +23,20 @@
 #include <varargs.h>
 #endif
 
+/* This should be part of k5-config.h but many application
+ * programs are not including that file. We probably want to
+ * come up with a better way of handling this problem.
+ */
+#ifndef INTERFACE
+#ifdef _WINDOWS
+#define INTERFACE   __far __export __pascal
+#define INTERFACE_C __far __export __cdecl
+#else
+#define INTERFACE
+#define INTERFACE_C
+#endif
+#endif
+
 #ifdef __STDC__
 /* ANSI C -- use prototypes etc */
 extern void INTERFACE_C com_err (const char *, long, const char *, ...);
