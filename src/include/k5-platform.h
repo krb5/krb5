@@ -1,7 +1,7 @@
 /*
  * k5-platform.h
  *
- * Copyright 2003  by the Massachusetts Institute of Technology.
+ * Copyright 2003, 2004 Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -150,12 +150,8 @@
 
 /* Helper macros.  */
 
-# define JOIN4_2(A,B,C,D) A ## B ## C ## D
-# define JOIN4(A,B,C,D) JOIN4_2(A,B,C,D)
-# define JOIN3_2(A,B,C) A ## B ## C
-# define JOIN3(A,B,C) JOIN3_2(A,B,C)
-# define JOIN2_2(A,B) A ## B
-# define JOIN2(A,B) JOIN2_2(A,B)
+# define JOIN__2_2(A,B) A ## _ ## _ ## B
+# define JOIN__2(A,B) JOIN__2_2(A,B)
 
 /* XXX Should test USE_LINKER_INIT_OPTION early, and if it's set,
    always provide a function by the expected name, even if we're
@@ -169,7 +165,7 @@
 typedef struct { k5_once_t once; int error, did_run; void (*fn)(void); } k5_init_t;
 # ifdef USE_LINKER_INIT_OPTION
 #  define MAYBE_DUMMY_INIT(NAME)		\
-	void JOIN2(NAME, __auxinit) () { }
+	void JOIN__2(NAME, auxinit) () { }
 # else
 #  define MAYBE_DUMMY_INIT(NAME)
 # endif
@@ -177,18 +173,18 @@ typedef struct { k5_once_t once; int error, did_run; void (*fn)(void); } k5_init
 	static int NAME(void);					\
 	MAYBE_DUMMY_INIT(NAME)					\
 	/* forward declaration for use in initializer */	\
-	static void JOIN2(NAME, __aux) (void);			\
-	static k5_init_t JOIN2(NAME, __once) =			\
-		{ K5_ONCE_INIT, 0, 0, JOIN2(NAME, __aux) };	\
-	static void JOIN2(NAME, __aux) (void)			\
+	static void JOIN__2(NAME, aux) (void);			\
+	static k5_init_t JOIN__2(NAME, once) =			\
+		{ K5_ONCE_INIT, 0, 0, JOIN__2(NAME, aux) };	\
+	static void JOIN__2(NAME, aux) (void)			\
 	{							\
-	    JOIN2(NAME, __once).did_run = 1;			\
-	    JOIN2(NAME, __once).error = NAME();			\
+	    JOIN__2(NAME, once).did_run = 1;			\
+	    JOIN__2(NAME, once).error = NAME();			\
 	}							\
 	/* so ';' following macro use won't get error */	\
 	static int NAME(void)
 # define CALL_INIT_FUNCTION(NAME)	\
-	k5_call_init_function(& JOIN2(NAME, __once))
+	k5_call_init_function(& JOIN__2(NAME, once))
 static inline int k5_call_init_function(k5_init_t *i)
 {
     int err;
@@ -205,7 +201,7 @@ static inline int k5_call_init_function(k5_init_t *i)
    XXX Could we have problems with memory coherence between
    processors if we don't invoke mutex/once routines?  */
 # define INITIALIZER_RAN(NAME)	\
-	(JOIN2(NAME, __once).did_run && JOIN2(NAME, __once).error == 0)
+	(JOIN__2(NAME, once).did_run && JOIN__2(NAME, once).error == 0)
 
 # define PROGRAM_EXITING()		(0)
 
@@ -215,7 +211,7 @@ static inline int k5_call_init_function(k5_init_t *i)
 
 # ifdef USE_LINKER_INIT_OPTION
 #  define MAYBE_DUMMY_INIT(NAME)		\
-	void JOIN2(NAME, __auxinit) () { }
+	void JOIN__2(NAME, auxinit) () { }
 # else
 #  define MAYBE_DUMMY_INIT(NAME)
 # endif
@@ -223,22 +219,22 @@ static inline int k5_call_init_function(k5_init_t *i)
 typedef struct { int error; unsigned char did_run; } k5_init_t;
 # define MAKE_INIT_FUNCTION(NAME)		\
 	MAYBE_DUMMY_INIT(NAME)			\
-	static k5_init_t JOIN2(NAME, __ran)	\
+	static k5_init_t JOIN__2(NAME, ran)	\
 		= { 0, 2 };			\
-	static void JOIN2(NAME, __aux)(void)	\
+	static void JOIN__2(NAME, aux)(void)	\
 	    __attribute__((constructor));	\
 	static int NAME(void);			\
-	static void JOIN2(NAME, __aux)(void)	\
+	static void JOIN__2(NAME, aux)(void)	\
 	{					\
-	    JOIN2(NAME, __ran).error = NAME();	\
-	    JOIN2(NAME, __ran).did_run = 3;	\
+	    JOIN__2(NAME, ran).error = NAME();	\
+	    JOIN__2(NAME, ran).did_run = 3;	\
 	}					\
 	static int NAME(void)
 # define CALL_INIT_FUNCTION(NAME)		\
-	(JOIN2(NAME, __ran).did_run == 3	\
-	 ? JOIN2(NAME, __ran).error		\
+	(JOIN__2(NAME, ran).did_run == 3	\
+	 ? JOIN__2(NAME, ran).error		\
 	 : (abort(),0))
-# define INITIALIZER_RAN(NAME)	(JOIN2(NAME,__ran).did_run == 3 && JOIN2(NAME, __ran).error == 0)
+# define INITIALIZER_RAN(NAME)	(JOIN__2(NAME,ran).did_run == 3 && JOIN__2(NAME, ran).error == 0)
 
 #elif defined(USE_LINKER_INIT_OPTION) || defined(_WIN32)
 
@@ -246,21 +242,21 @@ typedef struct { int error; unsigned char did_run; } k5_init_t;
    case of WIN32, win_glue.c hard-coded knowledge.  */
 typedef struct { int error; unsigned char did_run; } k5_init_t;
 # define MAKE_INIT_FUNCTION(NAME)		\
-	static k5_init_t JOIN2(NAME, __ran)	\
+	static k5_init_t JOIN__2(NAME, ran)	\
 		= { 0, 2 };			\
 	static int NAME(void);			\
-	void JOIN2(NAME, __auxinit)()		\
+	void JOIN__2(NAME, auxinit)()		\
 	{					\
-	    JOIN2(NAME, __ran).error = NAME();	\
-	    JOIN2(NAME, __ran).did_run = 3;	\
+	    JOIN__2(NAME, ran).error = NAME();	\
+	    JOIN__2(NAME, ran).did_run = 3;	\
 	}					\
 	static int NAME(void)
 # define CALL_INIT_FUNCTION(NAME)		\
-	(JOIN2(NAME, __ran).did_run == 3	\
-	 ? JOIN2(NAME, __ran).error		\
+	(JOIN__2(NAME, ran).did_run == 3	\
+	 ? JOIN__2(NAME, ran).error		\
 	 : (abort(),0))
 # define INITIALIZER_RAN(NAME)	\
-	(JOIN2(NAME, __ran).error == 0)
+	(JOIN__2(NAME, ran).error == 0)
 
 # define PROGRAM_EXITING()		(0)
 

@@ -1,3 +1,11 @@
+2004-06-25  Ken Raeburn  <raeburn@mit.edu>
+
+	* k5-platform.h (JOIN4, JOIN4_2, JOIN3, JOIN3_2): Unused macros
+	deleted.
+	(JOIN__2, JOIN__2_2): Renamed from JOIN2 and JOIN2_2.  Insert
+	two underscores between the tokens supplied.  All uses changed to
+	use new macros, and not use identifiers with leading underscores.
+
 2004-06-22  Ken Raeburn  <raeburn@mit.edu>
 
 	* k5-int.h: Don't test macintosh, __MWERKS__, applec, or THINK_C.
