@@ -22,15 +22,15 @@ libdb_ranlib: libdb.a
 	touch $@
 
 libdb.a: hash/DONE
-	if test -f $@ ; then \
+	@if test -f $@ ; then \
 		for i in $(LIB_SUBDIRS) ; \
 		do \
-			$(LIBUPDATE) $@ $$i/DONE $$i ; \
+			(set -x; $(LIBUPDATE) $@ $$i/DONE $$i) \
 		done ; \
 	else \
 		for i in $(LIB_SUBDIRS) ; \
 		do \
-			$(LIBUPDATE) --force $@ $$i/DONE $$i ; \
+			(set -x; $(LIBUPDATE) --force $@ $$i/DONE $$i) \
 		done ; \
 	fi
 	touch libdb.stamp
