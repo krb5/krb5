@@ -1896,6 +1896,7 @@ char *data;
 	char localname[MAXHOSTNAMELEN];
 	char service_name[MAXHOSTNAMELEN+10];
 	char **service;
+	struct hostent *hp;
 
 	chan.initiator_addrtype = GSS_C_AF_INET;
 	chan.initiator_address.length = 4;
@@ -1920,7 +1921,14 @@ char *data;
 		reply(501, "couldn't get local hostname (%d)\n", errno);
 		syslog(LOG_ERR, "Couldn't get local hostname (%d)", errno);
 		return 0;
-	}		
+	}
+	if (!(hp = gethostbyname(localname))) {
+		extern int h_errno;
+		reply(501, "couldn't canonicalize local hostname (%d)\n", h_errno);
+		syslog(LOG_ERR, "Couldn't canonicalize local hostname (%d)", h_errno);
+		return 0;
+	}
+	strcpy(localname, hp->h_name);
 
 	for (service = gss_services; *service; service++) {
 		sprintf(service_name, "%s@%s", *service, localname);

@@ -41,6 +41,7 @@ install::
 		${DESTDIR}$(SERVER_MANDIR)/`echo $$f|sed '$(transform)'`.8; \
 	done
 
+
 ftpcmd.c: $(srcdir)/ftpcmd.y
 	$(RM) ftpcmd.c y.tab.c
 	$(YACC) $(srcdir)/ftpcmd.y
