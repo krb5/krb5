@@ -1,3 +1,9 @@
+2004-03-14  Ken Raeburn  <raeburn@mit.edu>
+
+	* gssapiP_generic.h (struct _g_set_elt, g_set_elt): Renamed from
+	non-_elt versions.
+	* util_set.c, util_validate.c: Uses updated.
+
 2004-02-08  Ken Raeburn  <raeburn@mit.edu>
 
 	* util_ordering.c (g_queue_externalize, g_queue_internalize):

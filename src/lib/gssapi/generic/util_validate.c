@@ -79,7 +79,7 @@ static int g_save(db, type, ptr)
 
    return((*((*vdb)->put))(*vdb, &key, &dbtone, 0) == 0);
 #else
-   g_set *gs = (g_set *) db;
+   g_set_elt *gs = (g_set_elt *) db;
 
    if (!*gs)
       if (g_set_init(gs))
@@ -118,7 +118,7 @@ static int g_validate(db, type, ptr)
    return((value.size == sizeof(one)) &&
 	  (*((int *) value.data) == one));
 #else
-   g_set *gs = (g_set *) db;
+   g_set_elt *gs = (g_set_elt *) db;
    void *value;
 
    if (!*gs)
@@ -156,7 +156,7 @@ static int g_delete(db, type, ptr)
 
    return((*((*vdb)->del))(*vdb, &key, 0) == 0);
 #else
-   g_set *gs = (g_set *) db;
+   g_set_elt *gs = (g_set_elt *) db;
 
    if (!*gs)
       return(0);

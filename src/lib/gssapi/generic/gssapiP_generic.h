@@ -132,13 +132,13 @@ typedef UINT64_TYPE gssint_uint64;
 #define	g_local_host_name	gssint_g_local_host_name
 #define	g_strdup		gssint_g_strdup
 
-typedef struct _g_set *g_set;
+typedef struct _g_set_elt *g_set_elt;
 
-int g_set_init (g_set *s);
-int g_set_destroy (g_set *s);
-int g_set_entry_add (g_set *s, void *key, void *value);
-int g_set_entry_delete (g_set *s, void *key);
-int g_set_entry_get (g_set *s, void *key, void **value);
+int g_set_init (g_set_elt *s);
+int g_set_destroy (g_set_elt *s);
+int g_set_entry_add (g_set_elt *s, void *key, void *value);
+int g_set_entry_delete (g_set_elt *s, void *key);
+int g_set_entry_get (g_set_elt *s, void *key, void **value);
 
 int g_save_name (void **vdb, gss_name_t *name);
 int g_save_cred_id (void **vdb, gss_cred_id_t *cred);
