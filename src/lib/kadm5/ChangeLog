@@ -1,3 +1,11 @@
+Mon Nov  4 21:16:01 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* alt_prof.c (krb5_aprof_init): If the user specifies the config
+		file using a configuration file, it must exist.
+		Otherwise, krb5_aprof_init will return an error.
+		(kadm5_get_config_params): If aprof_init returns an error,
+		it should return an error as well.
+
 Wed Nov  6 17:45:43 1996  Barry Jaspan  <bjaspan@mit.edu>
 
 	* kadm_rpc_xdr.c (xdr_krb5_principal): handle a NULL principal

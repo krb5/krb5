@@ -55,18 +55,24 @@ krb5_aprof_init(fname, envname, acontextp)
     profile = (profile_t) NULL;
     if (envname) {
 	if ((namelist[0] = getenv(envname))) {
-	    if (!(kret = profile_init(namelist, &profile))) {
-		*acontextp = (krb5_pointer) profile;
-		return(0);
-	    }
+	    kret = profile_init(namelist, &profile);
+	    if (kret)
+		return kret;
+	    *acontextp = (krb5_pointer) profile;
+	    return 0;
 	}
     }
     profile = (profile_t) NULL;
-    if (fname && !(kret = profile_init_path(fname, &profile))) {
+    if (fname) {
+	kret = profile_init_path(fname, &profile);
+	if (kret == ENOENT) {
+	    profile = 0;
+	} else if (kret)
+	    return kret;
 	*acontextp = (krb5_pointer) profile;
-	return(0);
+	return 0;
     }
-    return(kret);
+    return 0;
 }
 
 /*
@@ -319,8 +325,9 @@ krb5_error_code kadm5_get_config_params(context, kdcprofile, kdcenv,
 	 if (context->profile_secure == TRUE) envname = 0;
     }
 
-    /* ignore failures */
-    (void) krb5_aprof_init(filename, envname, &aprofile);
+    kret = krb5_aprof_init(filename, envname, &aprofile);
+    if (kret)
+	    goto cleanup;
     
     /* Initialize realm parameters */
     hierarchy[0] = "realms";
