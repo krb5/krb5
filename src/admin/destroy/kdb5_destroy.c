@@ -62,7 +62,7 @@ char *argv[];
 {
     extern char *optarg;	
     int optchar;
-    char *dbname = 0;
+    char *dbname = DEFAULT_KDB_FILE;
     char buf[5];
     char dbfilename[MAXPATHLEN];
     krb5_error_code retval;
@@ -85,9 +85,6 @@ char *argv[];
 	    /*NOTREACHED*/
 	}
     }
-    if (!dbname)
-	dbname = DEFAULT_DBM_FILE;	/* XXX? */
-
     printf("Deleting KDC database stored in '%s', are you sure?\n", dbname);
     printf("(type 'yes' to confirm)? ");
     if ((fgets(buf, sizeof(buf), stdin) != NULL) && /* typed something */

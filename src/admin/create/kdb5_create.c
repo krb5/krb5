@@ -128,7 +128,7 @@ char *argv[];
     int optchar;
 
     krb5_error_code retval;
-    char *dbname = 0;
+    char *dbname = DEFAULT_KDB_FILE;
     char *realm = 0;
     char *mkey_name = 0;
     char *mkey_fullname;
@@ -186,9 +186,6 @@ char *argv[];
 	exit(1);
     }
     krb5_use_cstype(&master_encblock, etype);
-
-    if (!dbname)
-	dbname = DEFAULT_DBM_FILE;	/* XXX? */
 
     retval = krb5_db_set_name(dbname);
     if (!retval) retval = EEXIST;

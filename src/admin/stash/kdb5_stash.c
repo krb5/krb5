@@ -36,6 +36,7 @@ static char rcsid_kdb_stash_c[] =
 #include <krb5/ext-proto.h>
 #include <krb5/los-proto.h>
 #include <krb5/sysincl.h>
+#include <krb5/osconf.h>
 
 #include <com_err.h>
 #include <stdio.h>
@@ -67,7 +68,7 @@ char *argv[];
     extern char *optarg;
     int optchar;
     krb5_error_code retval;
-    char *dbname = 0;
+    char *dbname = DEFAULT_KDB_FILE;
     char *realm = 0;
     char *mkey_name = 0;
     char *mkey_fullname;
@@ -130,9 +131,6 @@ char *argv[];
     }
 
     krb5_use_cstype(&master_encblock, etype);
-
-    if (!dbname)
-	dbname = DEFAULT_DBM_FILE;	/* XXX? */
 
     if (retval = krb5_db_set_name(dbname)) {
 	com_err(argv[0], retval, "while setting active database to '%s'",
