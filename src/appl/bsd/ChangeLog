@@ -1,3 +1,8 @@
+2001-04-02  Tom Yu  <tlyu@mit.edu>
+
+	* login.M: Don't include "= 0" as part of the "accept_passwd"
+	config option. [pullup from 1.2.2]
+
 2001-03-12  Ezra Peisach  <epeisach@mit.edu>
 
 	* defines.h: Add prototypes for rcmd_stream_init_normal(),
