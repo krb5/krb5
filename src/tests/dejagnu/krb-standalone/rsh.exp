@@ -31,6 +31,7 @@ if {![get_hostname] \
 # A procedure to start up the rsh daemon.
 
 proc start_rsh_daemon { option } {
+    global REALMNAME
     global KRSHD
     global tmppwd
     global krshd_spawn_id
@@ -38,7 +39,7 @@ proc start_rsh_daemon { option } {
 
     # The -D argument tells it to accept a single connection, so we
     # don't need to use inetd.  The 3544 is the port to listen at.
-    spawn $KRSHD -k -c -D 3544 -S $tmppwd/srvtab -M KRBTEST.COM -A $option
+    spawn $KRSHD -k -c -D 3544 -S $tmppwd/srvtab -M $REALMNAME -A $option
     set krshd_spawn_id $spawn_id
     set krshd_pid [exp_pid]
 
@@ -64,6 +65,7 @@ proc stop_rsh_daemon { } {
 # we get some sort of error.
 
 proc rsh_test { } {
+    global REALMNAME
     global RSH
     global KEY
     global BINSH
@@ -86,7 +88,7 @@ proc rsh_test { } {
 
     # Run rsh date.
     set testname "date"
-    spawn $RSH $hostname -k KRBTEST.COM -D 3544 -A date
+    spawn $RSH $hostname -k $REALMNAME -D 3544 -A date
     expect {
 	-re "\[A-Za-z0-9 :\]+\[\r\n\]+$" {
 	    set result $expect_out(0,string)
@@ -119,7 +121,7 @@ proc rsh_test { } {
     set failed no
     start_rsh_daemon -ek
     set testname "encrypted rsh"
-    spawn $RSH $hostname -x -k KRBTEST.COM -D 3544 -A echo hello
+    spawn $RSH $hostname -x -k $REALMNAME -D 3544 -A echo hello
     expect {
 	"hello" { }
 	timeout {
@@ -146,7 +148,7 @@ proc rsh_test { } {
     # Check stderr
     start_rsh_daemon -k
     set testname "rsh to stderr"
-    spawn $RSH $hostname -k KRBTEST.COM -D 3544 -A $BINSH -c "'echo hello 1>&2'"
+    spawn $RSH $hostname -k $REALMNAME -D 3544 -A $BINSH -c "'echo hello 1>&2'"
     expect {
 	"hello" { }
 	timeout {
@@ -167,7 +169,7 @@ proc rsh_test { } {
 
     start_rsh_daemon -e
     set testname "encrypted rsh to stderr"
-    spawn $RSH $hostname -x -k KRBTEST.COM -D 3544 -A $BINSH -c "'echo hello 1>&2'"
+    spawn $RSH $hostname -x -k $REALMNAME -D 3544 -A $BINSH -c "'echo hello 1>&2'"
     expect {
 	"hello" { }
 	timeout {

@@ -42,6 +42,7 @@ if {![get_hostname] \
 # A procedure to start up the telnet daemon.
 
 proc start_telnet_daemon { } {
+    global REALMNAME
     global TELNETD
     global LOGINKRB5
     global ROOT_PROMPT
@@ -54,7 +55,7 @@ proc start_telnet_daemon { } {
     # we don't need to use inetd.  The 3023 is the port to listen at.
     # Note that tmppwd here is a shell variable, which is set in
     # setup_root_shell, not a TCL variable.
-    send -i $rlogin_spawn_id "$TELNETD -debug -t \$tmppwd/srvtab -R KRBTEST.COM -L $LOGINKRB5 -X KERBEROS_V4 3023 &\r"
+    send -i $rlogin_spawn_id "$TELNETD -debug -t \$tmppwd/srvtab -R $REALMNAME -L $LOGINKRB5 -X KERBEROS_V4 3023 &\r"
     expect {
 	-i $rlogin_spawn_id 
 	-re "$ROOT_PROMPT" { }
@@ -115,6 +116,7 @@ proc stop_telnet_daemon { } {
 # we get some sort of error.
 
 proc telnet_test { } {
+    global REALMNAME
     global TELNET
     global BINSH
     global SHELL_PROMPT
@@ -208,7 +210,7 @@ proc telnet_test { } {
 
     # Try an authenticated connection.
     start_telnet_daemon
-    spawn $TELNET -a -k KRBTEST.COM $hostname -3023
+    spawn $TELNET -a -k $REALMNAME $hostname -3023
 
     expect_after {
 	timeout {
@@ -281,7 +283,7 @@ proc telnet_test { } {
 
 #    # Try an authenticated encrypted connection.
 #    start_telnet_daemon
-#    spawn $TELNET -a -x -k KRBTEST.COM $hostname -3023
+#    spawn $TELNET -a -x -k $REALMNAME $hostname -3023
 #
 #    expect_after {
 #	timeout {

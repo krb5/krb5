@@ -26,6 +26,7 @@ if ![info exists KDESTROY] {
 # Adds principal $pname with password $password.  Returns 1 on success.
 #--
 proc kadmin_add { pname password } {
+    global REALMNAME
     global KADMIN
     global KDB5_EDIT
     global KEY
@@ -34,7 +35,7 @@ proc kadmin_add { pname password } {
     global kadmind_spawn_id
 
     set good 0
-    spawn $KADMIN -m -p krbtest/admin@KRBTEST.COM ank $pname
+    spawn $KADMIN -m -p krbtest/admin@$REALMNAME ank $pname
     expect_after {
 	timeout {
 	    fail "kadmin add $pname"
@@ -47,7 +48,7 @@ proc kadmin_add { pname password } {
 	    return 0
 	}
     }
-    expect "Enter password for krbtest/admin@KRBTEST.COM:" {
+    expect "Enter password for krbtest/admin@$REALMNAME:" {
 	send "adminpass$KEY\r"
     }
     expect "Enter new password for $pname :" { send "$password\r" }
@@ -63,13 +64,13 @@ proc kadmin_add { pname password } {
     # and also, on some systems the write to standard error will block if
     # too many messages back up.
     #
-    expect -i $kadmind_spawn_id "Add Principal operation for $pname successfully issued by krbtest/admin@KRBTEST.COM"
+    expect -i $kadmind_spawn_id "Add Principal operation for $pname successfully issued by krbtest/admin@$REALMNAME"
     if { $good == 1 } {
 	#
 	# use kdb5_edit to verify that a principal was created and that its
 	# salt types are 0 (normal).
 	#
-	spawn $KDB5_EDIT -r KRBTEST.COM
+	spawn $KDB5_EDIT -r $REALMNAME
 	expect_after { -i $spawn_id
 	    timeout {
 		fail "kadmin add $pname"
@@ -84,7 +85,7 @@ proc kadmin_add { pname password } {
 	}
 	set good 0
 	expect "kdb5_edit:" { send "show $pname\r" }
-	expect "Name: $pname@KRBTEST.COM" { set good 1 }
+	expect "Name: $pname@$REALMNAME" { set good 1 }
 	expect "kdb5_edit:" { send "q\r" }
 	expect_after
 	expect eof
@@ -112,6 +113,7 @@ proc kadmin_add { pname password } {
 # Adds principal $pname with random key.  Returns 1 on success.
 #--
 proc kadmin_add_rnd { pname } {
+    global REALMNAME
     global KADMIN
     global KDB5_EDIT
     global KEY
@@ -120,7 +122,7 @@ proc kadmin_add_rnd { pname } {
     global kadmind_spawn_id
 
     set good 0
-    spawn $KADMIN -m -p krbtest/admin@KRBTEST.COM ark $pname
+    spawn $KADMIN -m -p krbtest/admin@$REALMNAME ark $pname
     expect_after {
 	timeout {
 	    fail "kadmin add_rnd $pname"
@@ -133,7 +135,7 @@ proc kadmin_add_rnd { pname } {
 	    return 0
 	}
     }
-    expect "Enter password for krbtest/admin@KRBTEST.COM:" {
+    expect "Enter password for krbtest/admin@$REALMNAME:" {
 	send "adminpass$KEY\r"
     }
     expect "principal $pname added" { set good 1 }
@@ -142,13 +144,13 @@ proc kadmin_add_rnd { pname } {
     set k_stat [wait -i $spawn_id]
     verbose "wait -i $spawn_id returned $k_stat (kadmin add_rnt)"
     catch "close -i $spawn_id"
-    expect -i $kadmind_spawn_id "Add Principal operation for $pname successfully issued by krbtest/admin@KRBTEST.COM"
+    expect -i $kadmind_spawn_id "Add Principal operation for $pname successfully issued by krbtest/admin@$REALMNAME"
     if { $good == 1 } {
 	#
 	# use kdb5_edit to verify that a principal was created and that its
 	# salt types are 0 (normal).
 	#
-	spawn $KDB5_EDIT -r KRBTEST.COM
+	spawn $KDB5_EDIT -r $REALMNAME
 	expect_after { -i $spawn_id
 	    timeout {
 		fail "kadmin add_rnd $pname"
@@ -163,7 +165,7 @@ proc kadmin_add_rnd { pname } {
 	}
 	set good 0
 	expect "kdb5_edit:" { send "show $pname\r" }
-	expect "Name: $pname@KRBTEST.COM" { set good 1 }
+	expect "Name: $pname@$REALMNAME" { set good 1 }
 	expect "kdb5_edit:" { send "q\r" }
 	expect_after
 	expect eof
@@ -191,11 +193,12 @@ proc kadmin_add_rnd { pname } {
 # Retrieves entry for $pname.  Returns 1 on success.
 #--
 proc kadmin_show { pname } {
+    global REALMNAME
     global KADMIN
     global KEY
     global spawn_id
 
-    spawn $KADMIN -m -p krbtest/admin@KRBTEST.COM show $pname
+    spawn $KADMIN -m -p krbtest/admin@$REALMNAME show $pname
     expect_after {
 	timeout {
 	    fail "kadmin show $pname"
@@ -208,7 +211,7 @@ proc kadmin_show { pname } {
 	    return 0
 	}
     }
-    expect "Enter password for krbtest/admin@KRBTEST.COM:"
+    expect "Enter password for krbtest/admin@$REALMNAME:"
     send "adminpass$KEY\r"
     expect -re "\r.*-*Principal: $pname.*Flags: .*Key: .*-*"
     expect_after
@@ -226,12 +229,13 @@ proc kadmin_show { pname } {
 # Change password of $pname to $password.  Returns 1 on success.
 #--
 proc kadmin_cpw { pname password } {
+    global REALMNAME
     global KADMIN
     global KEY
     global spawn_id
     global kadmind_spawn_id
 
-    spawn $KADMIN -m -p krbtest/admin@KRBTEST.COM cpw $pname
+    spawn $KADMIN -m -p krbtest/admin@$REALMNAME cpw $pname
     expect_after {
 	timeout {
 	    fail "kadmin cpw $pname"
@@ -244,7 +248,7 @@ proc kadmin_cpw { pname password } {
 	    return 0
 	}
     }
-    expect "Enter password for krbtest/admin@KRBTEST.COM:" {
+    expect "Enter password for krbtest/admin@$REALMNAME:" {
 	send "adminpass$KEY\r"
     }
     expect "Enter new password for $pname:" { send "$password\r" }
@@ -257,7 +261,7 @@ proc kadmin_cpw { pname password } {
     set k_stat [wait -i $spawn_id]
     verbose "wait -i $spawn_id returned $k_stat (kadmin cpw)"
     catch "close -i $spawn_id"
-    expect -i $kadmind_spawn_id "Change Password operation for $pname successfully issued by krbtest/admin@KRBTEST.COM"
+    expect -i $kadmind_spawn_id "Change Password operation for $pname successfully issued by krbtest/admin@$REALMNAME"
     pass "kadmin cpw $pname"
     return 1
 }
@@ -268,12 +272,13 @@ proc kadmin_cpw { pname password } {
 # Changes principal $pname's key to a new random key.  Returns 1 on success.
 #--
 proc kadmin_cpw_rnd { pname } {
+    global REALMNAME
     global KADMIN
     global KEY
     global spawn_id
     global kadmind_spawn_id
 
-    spawn $KADMIN -m -p krbtest/admin@KRBTEST.COM crk $pname
+    spawn $KADMIN -m -p krbtest/admin@$REALMNAME crk $pname
     expect_after {
 	timeout {
 	    fail "kadmin cpw_rnd $pname"
@@ -286,7 +291,7 @@ proc kadmin_cpw_rnd { pname } {
 	    return 0
 	}
     }
-    expect "Enter password for krbtest/admin@KRBTEST.COM:" {
+    expect "Enter password for krbtest/admin@$REALMNAME:" {
 	send "adminpass$KEY\r"
     }
     # When in doubt, jam one of these in there.
@@ -297,7 +302,7 @@ proc kadmin_cpw_rnd { pname } {
     set k_stat [wait -i $spawn_id]
     verbose "wait -i $spawn_id returned $k_stat (kadmin cpw_rnd)"
     catch "close -i $spawn_id"
-    expect -i $kadmind_spawn_id "Change Random Password operation for $pname successfully issued by krbtest/admin@KRBTEST.COM"
+    expect -i $kadmind_spawn_id "Change Random Password operation for $pname successfully issued by krbtest/admin@$REALMNAME"
     pass "kadmin cpw_rnd $pname"
     return 1
 }
@@ -308,12 +313,13 @@ proc kadmin_cpw_rnd { pname } {
 # Modifies principal $pname with flags $flags.  Returns 1 on success.
 #--
 proc kadmin_modify { pname flags } {
+    global REALMNAME
     global KADMIN
     global KEY
     global spawn_id
     global kadmind_spawn_id
 
-    spawn $KADMIN -m -p krbtest/admin@KRBTEST.COM modent $pname $flags
+    spawn $KADMIN -m -p krbtest/admin@$REALMNAME -- modent $pname $flags
     expect_after {
 	timeout {
 	    fail "kadmin modify $pname"
@@ -326,7 +332,7 @@ proc kadmin_modify { pname flags } {
 	    return 0
 	}
     }
-    expect "Enter password for krbtest/admin@KRBTEST.COM:"
+    expect "Enter password for krbtest/admin@$REALMNAME:"
     send "adminpass$KEY\r"
     expect "principal $pname modified"
     expect_after
@@ -334,7 +340,7 @@ proc kadmin_modify { pname flags } {
     set k_stat [wait -i $spawn_id]
     verbose "wait -i $spawn_id returned $k_stat (kadmin modify)"
     catch "close -i $spawn_id"
-    expect -i $kadmind_spawn_id "Modify Principal operation for $pname successfully issued by krbtest/admin@KRBTEST.COM"
+    expect -i $kadmind_spawn_id "Modify Principal operation for $pname successfully issued by krbtest/admin@$REALMNAME"
     pass "kadmin modify $pname"
     return 1
 }
@@ -345,6 +351,7 @@ proc kadmin_modify { pname flags } {
 # Rename principal $pname to $npname.  Returns 1 on success.
 #--
 proc kadmin_rename { pname npname } {
+    global REALMNAME
     global KADMIN
     global KDB5_EDIT
     global KEY
@@ -353,7 +360,7 @@ proc kadmin_rename { pname npname } {
     global kadmind_spawn_id
 
     set good 0
-    spawn $KADMIN -m -p krbtest/admin@KRBTEST.COM renent -force $pname $npname
+    spawn $KADMIN -m -p krbtest/admin@$REALMNAME -- renent -force $pname $npname
     expect_after {
 	timeout {
 	    fail "kadmin renent $pname $npname"
@@ -366,7 +373,7 @@ proc kadmin_rename { pname npname } {
 	    return 0
 	}
     }
-    expect "Enter password for krbtest/admin@KRBTEST.COM:" {
+    expect "Enter password for krbtest/admin@$REALMNAME:" {
 	send "adminpass$KEY\r"
     }
     expect "principal $pname renamed to $npname" { set good 1 }
@@ -375,13 +382,13 @@ proc kadmin_rename { pname npname } {
     set k_stat [wait -i $spawn_id]
     verbose "wait -i $spawn_id returned $k_stat (kadmin rename)"
     catch "close -i $spawn_id"
-    expect -i $kadmind_spawn_id "Rename Principal operation from $pname to $npname successfully issued by krbtest/admin@KRBTEST.COM"
+    expect -i $kadmind_spawn_id "Rename Principal operation from $pname to $npname successfully issued by krbtest/admin@$REALMNAME"
     if { $good == 1 } {
 	#
 	# use kdb5_edit to verify that the new principal was created and that its
 	# salt types are 0 (normal).
 	#
-	spawn $KDB5_EDIT -r KRBTEST.COM
+	spawn $KDB5_EDIT -r $REALMNAME
 	expect_after { -i $spawn_id
 	    timeout {
 		fail "kadmin renent $pname $npname"
@@ -396,7 +403,7 @@ proc kadmin_rename { pname npname } {
 	}
 	set good 0
 	expect "kdb5_edit:" { send "show $npname\r" }
-	expect "Name: $npname@KRBTEST.COM" { set good 1 }
+	expect "Name: $npname@$REALMNAME" { set good 1 }
 	expect "kdb5_edit:" { send "q\r" }
 	expect_after
 	expect eof
@@ -408,7 +415,7 @@ proc kadmin_rename { pname npname } {
 	    #
 	    # use kdb5_edit to verify that the old principal is not present.
 	    #
-	    spawn $KDB5_EDIT -r KRBTEST.COM
+	    spawn $KDB5_EDIT -r $REALMNAME
 	    expect_after {
 		timeout {
 		    fail "kadmin renent $pname $npname"
@@ -454,14 +461,15 @@ proc kadmin_rename { pname npname } {
 # kadmin_list	- Test list database function of kadmin.
 #
 # Lists the database and verifies that output matches regular expression
-# "(.*@KRBTEST.COM)*".  Returns 1 on success.
+# "(.*@$REALMNAME)*".  Returns 1 on success.
 #--
 proc kadmin_list {  } {
+    global REALMNAME
     global KADMIN
     global KEY
     global spawn_id
 
-    spawn $KADMIN -m -p krbtest/admin@KRBTEST.COM ldb
+    spawn $KADMIN -m -p krbtest/admin@$REALMNAME ldb
     expect_after {
 	timeout {
 	    fail "kadmin ldb"
@@ -474,10 +482,10 @@ proc kadmin_list {  } {
 	    return 0
 	}
     }
-    expect "Enter password for krbtest/admin@KRBTEST.COM:" {
+    expect "Enter password for krbtest/admin@$REALMNAME:" {
 	send "adminpass$KEY\r"
     }
-    expect -re "\(.*@KRBTEST.COM\r\n\)*"
+    expect -re "\(.*@$REALMNAME\r\n\)*"
     expect_after
     expect eof
     set k_stat [wait -i $spawn_id]
@@ -494,11 +502,12 @@ proc kadmin_list {  } {
 # 1 on success.
 #--
 proc kadmin_extract { instance name } {
+    global REALMNAME
     global KADMIN
     global KEY
     global spawn_id
 
-    spawn $KADMIN -m -p krbtest/admin@KRBTEST.COM xst $instance $name
+    spawn $KADMIN -m -p krbtest/admin@$REALMNAME xst $instance $name
     expect_after {
 	timeout {
 	    fail "kadmin xst $instance $name"
@@ -511,7 +520,7 @@ proc kadmin_extract { instance name } {
 	    return 0
 	}
     }
-    expect "Enter password for krbtest/admin@KRBTEST.COM:" {
+    expect "Enter password for krbtest/admin@$REALMNAME:" {
 	send "adminpass$KEY\r"
     }
     expect "extracted entry $name to key table $instance-new-srvtab"
@@ -533,11 +542,12 @@ proc kadmin_extract { instance name } {
 # 4 format.  Returns 1 on success.
 #--
 proc kadmin_extractv4 { instance name } {
+    global REALMNAME
     global KADMIN
     global KEY
     global spawn_id
 
-    spawn $KADMIN -m -p krbtest/admin@KRBTEST.COM xst4 $instance $name
+    spawn $KADMIN -m -p krbtest/admin@$REALMNAME xst4 $instance $name
     expect_after {
 	timeout {
 	    fail "kadmin xst4 $instance $name"
@@ -550,7 +560,7 @@ proc kadmin_extractv4 { instance name } {
 	    return 0
 	}
     }
-    expect "Enter password for krbtest/admin@KRBTEST.COM:" {
+    expect "Enter password for krbtest/admin@$REALMNAME:" {
 	send "adminpass$KEY\r"
     }
     expect "extracted entry $name to key table $instance-new-v4-srvtab"
@@ -570,6 +580,7 @@ proc kadmin_extractv4 { instance name } {
 # Deletes principal $pname.  Returns 1 on success.
 #--
 proc kadmin_delete { pname } {
+    global REALMNAME
     global KADMIN
     global KDB5_EDIT
     global KEY
@@ -578,7 +589,7 @@ proc kadmin_delete { pname } {
     global kadmind_spawn_id
 
     set good 0
-    spawn $KADMIN -m -p krbtest/admin@KRBTEST.COM delent -force $pname
+    spawn $KADMIN -m -p krbtest/admin@$REALMNAME -- delent -force $pname
     expect_after {
 	timeout {
 	    fail "kadmin delent $pname"
@@ -591,7 +602,7 @@ proc kadmin_delete { pname } {
 	    return 0
 	}
     }
-    expect "Enter password for krbtest/admin@KRBTEST.COM:" {
+    expect "Enter password for krbtest/admin@$REALMNAME:" {
 	send "adminpass$KEY\r"
     }
     expect "principal $pname deleted" { set good 1 }
@@ -600,12 +611,12 @@ proc kadmin_delete { pname } {
     set k_stat [wait -i $spawn_id]
     verbose "wait -i $spawn_id returned $k_stat (kadmin delent)"
     catch "close -i $spawn_id"
-    expect -i $kadmind_spawn_id "Delete Principal operation for $pname successfully issued by krbtest/admin@KRBTEST.COM"
+    expect -i $kadmind_spawn_id "Delete Principal operation for $pname successfully issued by krbtest/admin@$REALMNAME"
     if { $good == 1 } {
 	#
 	# use kdb5_edit to verify that the old principal is not present.
 	#
-	spawn $KDB5_EDIT -r KRBTEST.COM
+	spawn $KDB5_EDIT -r $REALMNAME
 	expect_after { -i $spawn_id
 	    timeout {
 		fail "kadmin delent $pname"

@@ -96,6 +96,7 @@ proc stop_check_sserver_daemon { } {
 }
 
 proc test_sclient { msg } {
+    global REALMNAME
     global SCLIENT
     global hostname
     global spawn_id
@@ -120,7 +121,7 @@ proc test_sclient { msg } {
      }
 
     expect {
-	"You are krbtest/admin@KRBTEST.COM\r" {
+	"You are krbtest/admin@$REALMNAME\r" {
 		verbose "received valid sample message"}
 	eof {
 		fail $msg 

@@ -8,8 +8,8 @@
 # Kerberos database.  We have to do this such that we don't interfere
 # with any existing Kerberos database.  We will create all the files
 # in the directory tmpdir, which will have been created by the
-# testsuite default script.  We will use KRBTEST.COM as our Kerberos
-# realm name.
+# testsuite default script.  We will use $REALMNAME as our Kerberos
+# realm name, defaulting to KRBTEST.COM.
 
 set timeout 100
 
@@ -64,6 +64,12 @@ if ![info exists env(USER)] {
 	}
     }
 }
+
+# set the realm. The user can override this on the runtest line.
+if ![info exists REALMNAME] {
+    set REALMNAME "KRBTEST.COM"
+}
+verbose "Test realm is $REALMNAME"
 
 # Find some programs we need.  We use the binaries from the build tree
 # if they exist.  If they do not, then they must be in PATH.  We
@@ -241,6 +247,7 @@ proc get_hostname { } {
 # success, 0 on failure.
 
 proc setup_kerberos_files { } {
+    global REALMNAME
     global hostname
     global domain
     global tmppwd
@@ -253,17 +260,17 @@ proc setup_kerberos_files { } {
     if ![file exists tmpdir/krb5.conf] {
     set conffile [open tmpdir/krb5.conf w]
     puts $conffile "\[libdefaults\]"
-    puts $conffile "	default_realm = KRBTEST.COM"
+    puts $conffile "	default_realm = $REALMNAME"
     puts $conffile ""
     puts $conffile "\[realms\]"
-    puts $conffile "	KRBTEST.COM = \{"
+    puts $conffile "	$REALMNAME = \{"
     puts $conffile "		kdc = $hostname:3088"
     puts $conffile "		admin_server = $hostname:3750"
     puts $conffile "	\}"
     puts $conffile ""
     puts $conffile "\[domain_realm\]"
-    puts $conffile "	.$domain = KRBTEST.COM"
-    puts $conffile "	$domain = KRBTEST.COM"
+    puts $conffile "	.$domain = $REALMNAME"
+    puts $conffile "	$domain = $REALMNAME"
     puts $conffile ""
     puts $conffile "\[logging\]"
     puts $conffile "	admin_server = STDERR"
@@ -281,7 +288,7 @@ proc setup_kerberos_files { } {
 	puts $conffile "	kdc_ports = 3085,3086,3087,3088,3089"
 	puts $conffile ""
 	puts $conffile "\[realms\]"
-	puts $conffile "	KRBTEST.COM = \{"
+	puts $conffile "	$REALMNAME = \{"
 	puts $conffile "		database_name = $tmppwd/db"
 	puts $conffile "		master_key_name = master/key"
 	puts $conffile "		master_key_type = des-cbc-md5"
@@ -301,7 +308,7 @@ proc setup_kerberos_files { } {
     # Create ACL file.
     if ![file exists tmpdir/acl] {
 	set aclfile [open tmpdir/acl w]
-	puts $aclfile "krbtest/admin@KRBTEST.COM *"
+	puts $aclfile "krbtest/admin@$REALMNAME *"
 	close $aclfile
     }
 
@@ -348,6 +355,7 @@ if [info exists env(LD_LIBRARY_PATH)] {
 # Set the environment variables needed to run Kerberos programs.
 
 proc setup_kerberos_env { } {
+    global REALMNAME
     global env
     global tmppwd
     global hostname
@@ -368,8 +376,8 @@ proc setup_kerberos_env { } {
     set env(KRB5RCACHEDIR) $tmppwd
     verbose "KRB5RCACHEDIR=$env(KRB5RCACHEDIR)"
 
-    # Tell the Kerberos tools how to contact the KRBTEST.COM server.
-    set env(KERBEROS_SERVER) "KRBTEST.COM:$hostname:3088"
+    # Tell the Kerberos tools how to contact the $REALMNAME server.
+    set env(KERBEROS_SERVER) "$REALMNAME:$hostname:3088"
     verbose "KERBEROS_SERVER=$env(KERBEROS_SERVER)"
 
     # Tell the dynamic loader where to get our shared libraries
@@ -452,12 +460,13 @@ proc restore_kerberos_env { } {
 # may successfully communicate.
 # Returns 1 on success, 0 on failure.
 proc setup_kadmind_srvtab {  } {
+    global REALMNAME
     global KDB5_EDIT
     global KEY
     global tmppwd
 
     catch "exec rm -f tmpdir/cpw_srvtab"
-    spawn $KDB5_EDIT -r KRBTEST.COM
+    spawn $KDB5_EDIT -r $REALMNAME
     expect_after {
 	timeout {
 	    fail "kdb5_edit cpw_srvtab"
@@ -473,8 +482,8 @@ proc setup_kadmind_srvtab {  } {
 	}
     }
     expect "kdb5_edit:"
-    send "xst KRBTEST.COM changepw\r"
-    expect "'changepw/KRBTEST.COM@KRBTEST.COM' added to keytab"
+    send "xst $REALMNAME changepw\r"
+    expect "'changepw/$REALMNAME@$REALMNAME' added to keytab"
     expect "kdb5_edit:"
     send "quit\r"
     expect "\r"
@@ -485,7 +494,7 @@ proc setup_kadmind_srvtab {  } {
 	return 0
     }
 
-    catch "exec mv -f KRBTEST.COM-new-srvtab tmpdir/cpw_srvtab" exec_output
+    catch "exec mv -f $REALMNAME-new-srvtab tmpdir/cpw_srvtab" exec_output
     if ![string match "" $exec_output] {
 	send_log "$exec_output\n"
 	verbose $exec_output
@@ -505,6 +514,7 @@ proc setup_kadmind_srvtab {  } {
 # pass at relevant points.  Returns 1 on success, 0 on failure.
 
 proc setup_kerberos_db { standalone } {
+    global REALMNAME
     global KDB5_CREATE
     global KDB5_STASH
     global KDB5_EDIT
@@ -525,7 +535,7 @@ proc setup_kerberos_db { standalone } {
 	return 0
     }
 
-    spawn $KDB5_CREATE -r KRBTEST.COM
+    spawn $KDB5_CREATE -r $REALMNAME
     expect {
 	"Enter KDC database master key:" {
 	    verbose "kdb5_create started"
@@ -573,7 +583,7 @@ proc setup_kerberos_db { standalone } {
     }
 
     # Stash the master key in a file.
-    spawn $KDB5_STASH -r KRBTEST.COM
+    spawn $KDB5_STASH -r $REALMNAME
     expect {
 	"Enter KDC database master key:" {
 	    verbose "kdb5_stash started"
@@ -613,7 +623,7 @@ proc setup_kerberos_db { standalone } {
     }
 
     # Add an admin user.
-    spawn $KDB5_EDIT -r KRBTEST.COM
+    spawn $KDB5_EDIT -r $REALMNAME
     expect_after {
 	timeout {
 	    catch "expect_after"
@@ -633,13 +643,13 @@ proc setup_kerberos_db { standalone } {
 	}
     }
     expect "kdb5_edit:"
-    send "ank krbtest/admin@KRBTEST.COM\r"
+    send "ank krbtest/admin@$REALMNAME\r"
     expect "Enter password:"
     send "adminpass$KEY\r"
     expect "Re-enter password for verification:"
     send "adminpass$KEY\r"
     expect "kdb5_edit:"
-    send "ark changepw/KRBTEST.COM@KRBTEST.COM\r"
+    send "ark changepw/$REALMNAME@$REALMNAME\r"
     expect "kdb5_edit:"
     send "quit\r"
     expect "\r"
@@ -671,6 +681,7 @@ proc setup_kerberos_db { standalone } {
 # success, 0 on failure.
 
 proc start_kerberos_daemons { standalone } {
+    global REALMNAME
     global KRB5KDC
     global KADMIND
     global KEY
@@ -690,7 +701,7 @@ proc start_kerberos_daemons { standalone } {
     }
 
     # Start up the kerberos daemon
-    spawn $KRB5KDC -r KRBTEST.COM -n
+    spawn $KRB5KDC -r $REALMNAME -n
     set kdc_pid [exp_pid]
     set kdc_spawn_id $spawn_id
 
@@ -721,7 +732,7 @@ proc start_kerberos_daemons { standalone } {
     catch "exec sleep 2"
 
     # Start up the kadmind daemon
-    spawn $KADMIND -a $tmppwd/acl -r KRBTEST.COM -n
+    spawn $KADMIND -a $tmppwd/acl -r $REALMNAME -n
     set kadmind_pid [exp_pid]
     set kadmind_spawn_id $spawn_id
     expect {
@@ -790,12 +801,13 @@ proc stop_kerberos_daemons { } {
 # failure.
 
 proc add_kerberos_key { kkey standalone } {
+    global REALMNAME
     global KADMIN
     global KEY
     global spawn_id
 
     # Use kadmin to add an key.
-    spawn $KADMIN -m -p krbtest/admin@KRBTEST.COM
+    spawn $KADMIN -m -p krbtest/admin@$REALMNAME
     expect_after {
 	timeout {
 	    fail "kadmin $kkey"
@@ -809,18 +821,18 @@ proc add_kerberos_key { kkey standalone } {
 	}
     }
     expect "kadmin5:"
-    send "ank $kkey@KRBTEST.COM\r"
-    expect "Enter password for krbtest/admin@KRBTEST.COM:"
+    send "ank $kkey@$REALMNAME\r"
+    expect "Enter password for krbtest/admin@$REALMNAME:"
     send "adminpass$KEY\r"
-    expect "Enter new password for $kkey@KRBTEST.COM :"
+    expect "Enter new password for $kkey@$REALMNAME :"
     send "$kkey"
     send "$KEY\r"
-    expect "Re-enter new password for $kkey@KRBTEST.COM :"
+    expect "Re-enter new password for $kkey@$REALMNAME :"
     send "$kkey"
     send "$KEY\r"
     expect {
-	"principal $kkey@KRBTEST.COM added" { }
-	"Principal $kkey@KRBTEST.COM already exists" { }
+	"principal $kkey@$REALMNAME added" { }
+	"Principal $kkey@$REALMNAME already exists" { }
     }
     expect "kadmin5:"
     send "q\r"
@@ -844,12 +856,13 @@ proc add_kerberos_key { kkey standalone } {
 # Returns 1 on success, 0 on failure.
 
 proc add_random_key { kkey standalone } {
+    global REALMNAME
     global KADMIN
     global KEY
     global spawn_id
 
     # Use kadmin to add an key.
-    spawn $KADMIN -m -p krbtest/admin@KRBTEST.COM
+    spawn $KADMIN -m -p krbtest/admin@$REALMNAME
     expect_after {
 	timeout {
 	    fail "kadmin $kkey"
@@ -863,12 +876,12 @@ proc add_random_key { kkey standalone } {
 	}
     }
     expect "kadmin5:"
-    send "ark $kkey@KRBTEST.COM\r"
-    expect "Enter password for krbtest/admin@KRBTEST.COM:"
+    send "ark $kkey@$REALMNAME\r"
+    expect "Enter password for krbtest/admin@$REALMNAME:"
     send "adminpass$KEY\r"
     expect {
-	"principal $kkey@KRBTEST.COM added" { }
-	"Principal $kkey@KRBTEST.COM already exists" { }
+	"principal $kkey@$REALMNAME added" { }
+	"Principal $kkey@$REALMNAME already exists" { }
     }
     expect "kadmin5:"
     send "q\r"
@@ -892,6 +905,7 @@ proc add_random_key { kkey standalone } {
 # success, 0 on failure. If the id field is not provided, host is used.
 
 proc setup_srvtab { standalone {id host} } {
+    global REALMNAME
     global KDB5_EDIT
     global KEY
     global tmppwd
@@ -911,7 +925,7 @@ proc setup_srvtab { standalone {id host} } {
 
     catch "exec rm -f $hostname-new-srvtab"
 
-    spawn $KDB5_EDIT -r KRBTEST.COM
+    spawn $KDB5_EDIT -r $REALMNAME
     expect_after {
 	timeout {
 	    fail "kdb5_edit srvtab"
@@ -932,7 +946,7 @@ proc setup_srvtab { standalone {id host} } {
     }
     expect "kdb5_edit:"
     send "xst $hostname $id\r"
-    expect "'$id/$hostname@KRBTEST.COM' added to keytab"
+    expect "'$id/$hostname@$REALMNAME' added to keytab"
     expect "kdb5_edit:"
     send "quit\r"
     expect "\r"
@@ -971,13 +985,14 @@ proc setup_srvtab { standalone {id host} } {
 # at relevant points.  Returns 1 on success, 0 on failure.
 
 proc kinit { name pass standalone } {
+    global REALMNAME
     global KINIT
     global spawn_id
 
     # Use kinit to get a ticket.
-    spawn $KINIT $name@KRBTEST.COM
+    spawn $KINIT $name@$REALMNAME
     expect {
-	"Password for $name@KRBTEST.COM:" {
+	"Password for $name@$REALMNAME:" {
 	    verbose "kinit started"
 	}
 	timeout {

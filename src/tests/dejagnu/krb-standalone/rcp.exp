@@ -32,6 +32,7 @@ if {![get_hostname] \
 # daemon).
 
 proc start_rsh_daemon { } {
+    global REALMNAME
     global KRSHD
     global RCP
     global tmppwd
@@ -40,7 +41,7 @@ proc start_rsh_daemon { } {
 
     # The -D argument tells it to accept a single connection, so we
     # don't need to use inetd.  The 3544 is the port to listen at.
-    spawn $KRSHD -k -c -D 3544 -P [file dirname $RCP] -S $tmppwd/srvtab -M KRBTEST.COM
+    spawn $KRSHD -k -c -D 3544 -P [file dirname $RCP] -S $tmppwd/srvtab -M $REALMNAME
     set krshd_spawn_id $spawn_id
     set krshd_pid [exp_pid]
 
@@ -104,6 +105,7 @@ proc check_file { filename } {
 
 # Test copying one file to another.
 proc rcp_one_test { testname options frompref topref } {
+    global REALMNAME
     global RCP
     global tmppwd
 
@@ -114,9 +116,9 @@ proc rcp_one_test { testname options frompref topref } {
     set from [format "%s%s" $frompref $tmppwd/rcp-test]
     set to [format "%s%s" $topref $tmppwd/copy]
 
-    send_log "$RCP $options -D 3544 -N -k KRBTEST.COM $from $to\n"
-    verbose "$RCP $options -D 3544 -N -k KRBTEST.COM $from $to"
-    catch "exec $RCP $options -D 3544 -N -k KRBTEST.COM $from $to" exec_output
+    send_log "$RCP $options -D 3544 -N -k $REALMNAME $from $to\n"
+    verbose "$RCP $options -D 3544 -N -k $REALMNAME $from $to"
+    catch "exec $RCP $options -D 3544 -N -k $REALMNAME $from $to" exec_output
 
     if ![string match "" $exec_output] {
 	send_log "$exec_output\n"

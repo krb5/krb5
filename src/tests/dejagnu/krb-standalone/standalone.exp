@@ -1,4 +1,4 @@
-# Standalone Kerberos test.
+ # Standalone Kerberos test.
 # This is a DejaGnu test script.
 # This script tests that the Kerberos tools can talk to each other.
 
@@ -28,6 +28,7 @@ if ![setup_kerberos_db 1] {
 # processes when the procedure ends.
 
 proc doit { } {
+    global REALMNAME
     global KLIST
     global KDESTROY
     global KEY
@@ -58,7 +59,7 @@ proc doit { } {
     # Make sure that klist can see the ticket.
     spawn $KLIST
     expect {
-	-re "Ticket cache:\[ 	\]*$tmppwd/tkt.*Default principal:\[ 	\]*krbtest/admin@KRBTEST.COM.*krbtgt/KRBTEST.COM@KRBTEST.COM\r\n" {
+	-re "Ticket cache:\[ 	\]*$tmppwd/tkt.*Default principal:\[ 	\]*krbtest/admin@$REALMNAME.*krbtgt/$REALMNAME@$REALMNAME\r\n" {
 	    verbose "klist started"
 	}
 	timeout {
