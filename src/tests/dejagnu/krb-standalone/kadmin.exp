@@ -37,7 +37,7 @@ proc kadmin_add { pname password } {
     spawn $KADMIN -p krbtest/admin@$REALMNAME -q "ank $pname"
     expect_after {
 	"Cannot contact any KDC" {
-	    fail "kadmin add$pname lost KDC"
+	    fail "kadmin add $pname lost KDC"
 	    catch "expect_after"
 	    return 0
 	}
@@ -162,7 +162,7 @@ proc kadmin_add_rnd { pname } {
     expect_after
     expect eof
     set k_stat [wait -i $spawn_id]
-    verbose "wait -i $spawn_id returned $k_stat (kadmin add_rnt)"
+    verbose "wait -i $spawn_id returned $k_stat (kadmin add_rnd)"
     catch "close -i $spawn_id"
     if { $good == 1 } {
 	#
@@ -645,6 +645,292 @@ proc kpasswd_cpw { princ opw npw } {
 }
 
 #++
+# kadmin_addpol	- Test add new policy function of kadmin.
+#
+# Adds policy $pname.  Returns 1 on success.
+#--
+proc kadmin_addpol { pname } {
+    global REALMNAME
+    global KADMIN
+    global KADMIN_LOCAL
+    global KEY
+    global spawn_id
+    global tmppwd
+
+    set good 0
+    spawn $KADMIN -p krbtest/admin@$REALMNAME -q "addpol $pname"
+    expect_after {
+	"Cannot contact any KDC" {
+	    fail "kadmin addpol $pname lost KDC"
+	    catch "expect_after"
+	    return 0
+	}
+	timeout {
+	    fail "kadmin addpol $pname"
+	    catch "expect_after"
+	    return 0
+	}
+	eof {
+	    fail "kadmin addpol $pname"
+	    catch "expect_after"
+	    return 0
+	}
+    }
+    expect "Enter password:" {
+	send "adminpass$KEY\r"
+    }
+    expect_after
+    expect eof
+    set k_stat [wait -i $spawn_id]
+    verbose "wait -i $spawn_id returned $k_stat (kadmin addpol)"
+    catch "close -i $spawn_id"
+    #
+    # use kadmin.local to verify that a policy was created
+    #
+    spawn $KADMIN_LOCAL -r $REALMNAME
+    expect_after {
+        -i $spawn_id
+        timeout {
+	    fail "kadmin addpol $pname"
+	    catch "expect_after"
+	    return 0
+        }
+        eof {
+	    fail "kadmin addpol $pname"
+	    catch "expect_after"
+	    return 0
+        }
+    }
+    set good 0
+    expect "kadmin.local: " { send "getpol $pname\r" }
+    expect "Policy: $pname" { set good 1 }
+    expect "Maximum password life:" { verbose "got max pw life" }
+    expect "Minimum password life:" { verbose "got min pw life" }
+    expect "Minimum password length:" { verbose "got min pw length" }
+    expect "Minimum number of password character classes:" {
+        verbose "got min pw character classes" }
+    expect "Number of old keys kept:" { verbose "got num old keys kept" }
+    expect "Reference count:" { verbose "got refcount" }
+    expect "kadmin.local: " { send "q\r" }
+
+    expect_after
+    expect eof
+    set k_stat [wait -i $spawn_id]
+    verbose "wait -i $spawn_id returned $k_stat (kadmin.local showpol)"
+    catch "close -i $spawn_id"
+    if { $good == 1 } {
+        pass "kadmin addpol $pname"
+        return 1
+    }
+    else {
+        fail "kadmin addpol $pname"
+        return 0
+    }
+}
+
+#++
+# kadmin_delpol	- Test delete policy function of kadmin.
+#
+# Deletes policy $pname.  Returns 1 on success.
+#--
+proc kadmin_delpol { pname } {
+    global REALMNAME
+    global KADMIN
+    global KADMIN_LOCAL
+    global KEY
+    global spawn_id
+    global tmppwd
+
+    spawn $KADMIN -p krbtest/admin@$REALMNAME -q "delpol -force $pname"
+    expect_after {
+	"Cannot contact any KDC" {
+	    fail "kadmin_delpol $pname lost KDC"
+	    catch "expect_after"
+	    return 0
+	}
+	timeout {
+	    fail "kadmin delpol $pname"
+	    catch "expect_after"
+	    return 0
+	}
+	eof {
+	    fail "kadmin delpol $pname"
+	    catch "expect_after"
+	    return 0
+	}
+    }
+    expect "Enter password:" {
+	send "adminpass$KEY\r"
+    }
+    expect_after
+    expect eof
+    set k_stat [wait -i $spawn_id]
+    verbose "wait -i $spawn_id returned $k_stat (kadmin delpol)"
+    catch "close -i $spawn_id"
+    #
+    # use kadmin.local to verify that the old policy is not present.
+    #
+    spawn $KADMIN_LOCAL -r $REALMNAME
+    expect_after {
+        -i $spawn_id
+        timeout {
+	    fail "kadmin delpol $pname"
+	    catch "expect_after"
+	    return 0
+        }
+        eof {
+	    fail "kadmin delpol $pname"
+	    catch "expect_after"
+	    return 0
+        }
+    }
+    set good 0
+    expect "kadmin.local: " { send "getpol $pname\r" }
+    expect "Policy does not exist while retrieving policy \"$pname\"." {
+	set good 1
+    }
+    expect "kadmin.local: " { send "quit\r" }
+    expect_after
+    expect eof
+    set k_stat [wait -i $spawn_id]
+    verbose "wait -i $spawn_id returned $k_stat (kadmin.local showpol)"
+    catch "close -i $spawn_id"
+    if { $good == 1 } {
+        pass "kadmin delpol $pname"
+        return 1
+    }
+    else {
+        fail "kadmin delpol $pname"
+        return 0
+    }
+}
+
+#++
+# kadmin_listpols	- Test list policy database function of kadmin.
+#
+# Lists the policies.  Returns 1 on success.
+#--
+proc kadmin_listpols {  } {
+    global REALMNAME
+    global KADMIN
+    global KEY
+    global spawn_id
+
+    spawn $KADMIN -p krbtest/admin@$REALMNAME -q "get_policies *"
+    expect_after {
+	"Cannot contact any KDC" {
+	    fail "kadmin lpols lost KDC"
+	    catch "expect_after"
+	    return 0
+	}
+	timeout {
+	    fail "kadmin lpols"
+	    catch "expect_after"
+	    return 0
+	}
+	eof {
+	    fail "kadmin lpols"
+	    catch "expect_after"
+	    return 0
+	}
+    }
+    expect "Enter password:" {
+	send "adminpass$KEY\r"
+    }
+    expect_after
+    expect eof
+    set k_stat [wait -i $spawn_id]
+    verbose "wait -i $spawn_id returned $k_stat (kadmin listpols)"
+    catch "close -i $spawn_id"
+    pass "kadmin lpols"
+    return 1
+}
+
+#++
+# kadmin_modpol	- Test modify policy function of kadmin.
+#
+# Modifies policy $pname with flags $flags.  Returns 1 on success.
+#--
+proc kadmin_modpol { pname flags } {
+    global REALMNAME
+    global KADMIN
+    global KEY
+    global spawn_id
+
+    spawn $KADMIN -p krbtest/admin@$REALMNAME -q "modpol $flags $pname"
+    expect_after {
+	"Cannot contact any KDC" {
+	    fail "kadmin modpol $pname ($flags) lost KDC"
+	    catch "expect_after"
+	    return 0
+	}
+	timeout {
+	    fail "kadmin modpol $pname"
+	    catch "expect_after"
+	    return 0
+	}
+	eof {
+	    fail "kadmin modpol $pname"
+	    catch "expect_after"
+	    return 0
+	}
+    }
+    expect "Enter password:"
+    send "adminpass$KEY\r"
+    # When in doubt, jam one of these in there.
+    expect "\r"
+    # Sadly, kadmin doesn't print a confirmation message for policy operations.
+    expect_after
+    expect eof
+    set k_stat [wait -i $spawn_id]
+    verbose "wait -i $spawn_id returned $k_stat (kadmin modpol)"
+    catch "close -i $spawn_id"
+    pass "kadmin modpol $pname"
+    return 1
+}
+
+#++
+# kadmin_showpol	- Test show policy function of kadmin.
+# 
+# Retrieves entry for $pname.  Returns 1 on success.
+#--
+proc kadmin_showpol { pname } {
+    global REALMNAME
+    global KADMIN
+    global KEY
+    global spawn_id
+
+    spawn $KADMIN -p krbtest/admin@$REALMNAME -q "get_policy $pname"
+    expect_after {
+	"Cannot contact any KDC" {
+	    fail "kadmin showpol $pname lost KDC"
+	    catch "expect_after"
+	    return 0
+	}
+	timeout {
+	    fail "kadmin showpol $pname"
+	    catch "expect_after"
+	    return 0
+	}
+	eof {
+	    fail "kadmin showpol $pname"
+	    catch "expect_after"
+	    return 0
+	}
+    }
+    expect "Enter password:"
+    send "adminpass$KEY\r"
+    expect -re "\r.*Policy: $pname.*Number of old keys kept: .*Reference count: .*\r"
+    expect_after
+    expect eof
+    set k_stat [wait -i $spawn_id]
+    verbose "wait -i $spawn_id returned $k_stat (kadmin showpol)"
+    catch "close -i $spawn_id"
+    pass "kadmin showpol $pname"
+    return 1
+}
+
+#++
 # kdestroy
 #--
 proc kdestroy { } {
@@ -669,6 +955,10 @@ proc kadmin_test { } {
 
     # Test basic kadmin functions.
     if {![kadmin_add v5principal/instance1 v5principal] \
+	|| ![kadmin_addpol standardpol] \
+	|| ![kadmin_showpol standardpol] \
+	|| ![kadmin_listpols] \
+	|| ![kadmin_modpol standardpol "-minlength 5"] \
 	|| ![kadmin_add v4principal/instance2 v4principal] \
 	|| ![kadmin_add_rnd v5random] \
 	|| ![kadmin_show v5principal/instance1] \
@@ -679,11 +969,13 @@ proc kadmin_test { } {
 	|| ![kadmin_cpw_rnd v5random] \
 	|| ![kadmin_modify v5random -allow_tix] \
 	|| ![kadmin_modify v5random +allow_tix] \
+	|| ![kadmin_modify v5random "-policy standardpol"] \
 	|| ![kadmin_list] \
 	|| ![kadmin_extract instance1 v5principal] \
 	|| ![kadmin_delete v5random] \
 	|| ![kadmin_delete v4principal/instance2] \
-	|| ![kadmin_delete v5principal/instance1]} {
+	|| ![kadmin_delete v5principal/instance1] \
+	|| ![kadmin_delpol standardpol]} {
 	return
     }
 
@@ -714,14 +1006,30 @@ proc kadmin_test { } {
 	    || ![kadmin_delete testprinc1/instance]} {
 	return
     }
+
     # now test modify changes.
     if {![kadmin_add testuser longtestpw] \
-            || ![kinit testuser longtestpw 0] \
+	    || ![kinit testuser longtestpw 0] \
 	    || ![kdestroy] \
 	    || ![kadmin_modify testuser "-maxlife \"2500 seconds\""] \
 	    || ![kinit testuser longtestpw 0] \
 	    || ![kdestroy] \
 	    || ![kadmin_delete testuser]} {
+	return
+    }
+
+    # now test that reducing the history number doesn't make kadmind vulnerable.
+    if {![kadmin_addpol crashpol] \
+	    || ![kadmin_modpol crashpol "-history 5"] \
+	    || ![kadmin_add crash first] \
+	    || ![kadmin_modify crash "-policy crashpol"] \
+	    || ![kadmin_cpw crash second] \
+	    || ![kadmin_cpw crash third] \
+	    || ![kadmin_cpw crash fourth] \
+	    || ![kadmin_modpol crashpol "-history 3"] \
+	    || ![kadmin_cpw crash fifth] \
+	    || ![kadmin_delete crash] \
+	    || ![kadmin_delpol crashpol]} {
 	return
     }
 
