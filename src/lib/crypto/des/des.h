@@ -13,8 +13,7 @@
 #ifndef DES_DEFS
 #define DES_DEFS
 
-#include <kerberosIV/mit-copyright.h>
-#include <krb5/osconf.h>
+#include "k5-int.h"
 
 #ifndef KRB_INT32
 #define KRB_INT32 long

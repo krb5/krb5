@@ -1,7 +1,7 @@
 /*
  * lib/crypto/des/cs_entry.c
  *
- * Copyright 1990,1991 by the Massachusetts Institute of Technology.
+ * Copyright 1990, 1991, 1995 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -24,11 +24,7 @@
  * DES encryption interface file
  */
 
-
-
-#include <krb5/krb5.h>
-#include <krb5/crc-32.h>
-
+#include "k5-int.h"
 #include "des_int.h"
 
 extern krb5_error_code mit_des_cbc_checksum PROTOTYPE ((krb5_pointer ,

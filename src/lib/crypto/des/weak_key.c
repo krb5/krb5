@@ -29,9 +29,7 @@
  * Originally written 8/85 by Steve Miller, MIT Project Athena.
  */
 
-
-#include <krb5/krb5.h>
-#include <krb5/ext-proto.h>
+#include "k5-int.h"
 #include "des_int.h"
 
 /*

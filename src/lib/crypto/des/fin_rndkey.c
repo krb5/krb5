@@ -23,10 +23,7 @@
  *
  */
 
-
-#include <krb5/krb5.h>
-#include <krb5/mit-des.h>
-#include <krb5/ext-proto.h>
+#include "k5-int.h"
 
 /*
         free any resources held by "seed" and assigned by init_random_key()

@@ -11,8 +11,7 @@
  * des_make_sched.c - permute a DES key, returning the resulting key schedule
  */
 #include "des.h"
-#include <krb5/krb5.h>
-#include <krb5/mit-des.h>
+#include "k5-int.h"
 
 /*
  * Permuted choice 1 tables.  These are used to extract bits

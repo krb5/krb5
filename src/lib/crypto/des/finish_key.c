@@ -23,11 +23,7 @@
  *
  */
 
-
-#include <krb5/krb5.h>
-#include <krb5/ext-proto.h>
-
-#include <krb5/mit-des.h>
+#include "k5-int.h"
 
 /*
 	does any necessary clean-up on the eblock (such as releasing

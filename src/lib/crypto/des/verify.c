@@ -28,15 +28,11 @@
  * 		-1 ==> error
  */
 
-
-#include <krb5/krb5.h>
-#include <krb5/ext-proto.h>
-#include <krb5/mit-des.h>
+#include "k5-int.h"
 #include "des_int.h"
 #include <stdio.h>
-#include <com_err.h>
+#include "com_err.h"
 
-extern int errno;
 extern krb5_cryptosystem_entry mit_des_cryptosystem_entry;
 
 char *progname;

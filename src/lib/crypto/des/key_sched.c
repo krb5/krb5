@@ -44,11 +44,9 @@
  * Originally written 6/85 by Steve Miller, MIT Project Athena.
  */
 
-
-#include <stdio.h>
-
-#include <krb5/krb5.h>
+#include "k5-int.h"
 #include "des_int.h"
+#include <stdio.h>
 
 void make_key_sched PROTOTYPE((mit_des_cblock, mit_des_key_schedule));
 

@@ -1,3 +1,10 @@
+Wed Jan 25 20:04:39 1995  John Gilmore  (gnu at toad.com)
+
+	* cbc_cksum.c, cs_entry.c, des.h, destest.c, f_sched.c,
+	fin_rndkey.c, finish_key.c, init_rkey.c, key_sched.c,
+	new_rn_key.c, process_ky.c, random_key.c, string2key.c, verify.c,
+	weak_key.c: Replace <.../...> includes with "..."s.
+
 Wed Jan 25 16:54:40 1995  Chris Provenzano (proven@mit.edu)
 
         * Removed all narrow types and references to wide.h and narrow.h

@@ -25,10 +25,8 @@
  */
 
 
-#include <krb5/krb5.h>
-#include <krb5/mit-des.h>
-#include <krb5/ext-proto.h>
-#include <com_err.h>
+#include "k5-int.h"
+#include "com_err.h"
 
 extern int errno;
 extern mit_des_ecb_encrypt();

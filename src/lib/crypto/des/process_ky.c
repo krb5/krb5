@@ -19,15 +19,9 @@
  * permission.  M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
- *
  */
 
-
-
-#include <krb5/krb5.h>
-#include <krb5/ext-proto.h>
-
+#include "k5-int.h"
 #include "des_int.h"
 
 /*

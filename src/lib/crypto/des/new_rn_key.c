@@ -30,10 +30,7 @@
  * without license from the U.S. Commerce department.
  */
 
-
-#include <krb5/krb5.h>
-#include <krb5/ext-proto.h>
-#include <krb5/los-proto.h>
+#include "k5-int.h"
 #include "des_int.h"
 
 #ifndef min
