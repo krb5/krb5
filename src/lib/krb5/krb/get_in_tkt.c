@@ -206,7 +206,24 @@ krb5_get_in_tkt(context, options, addrs, pre_auth_type, etype, keytype,
     }
 
     if (!krb5_is_as_rep(&reply)) {
-	retval = KRB5KRB_AP_ERR_MSG_TYPE;
+/* these are in <kerberosIV/prot.h> as well but it isn't worth including. */
+#define V4_KRB_PROT_VERSION	4
+#define V4_AUTH_MSG_ERR_REPLY	(5<<1)
+	/* check here for V4 reply */
+	unsigned int t_switch;
+
+	/* From v4 g_in_tkt.c: This used to be
+	   switch (pkt_msg_type(rpkt) & ~1) {
+	   but SCO 3.2v4 cc compiled that incorrectly.  */
+	t_switch = reply.data[1]
+	t_switch &= ~1;
+
+	if (reply.data[0] == V4_KRB_PROT_VERSION
+	    && t_switch == V4_AUTH_MSG_ERR_REPLY) {
+	    retval = KRB5KRB_AP_ERR_V4_REPLY;
+	} else {
+	    retval = KRB5KRB_AP_ERR_MSG_TYPE;
+	}
 	goto cleanup;
     }
     if (retval = decode_krb5_as_rep(&reply, &as_reply))

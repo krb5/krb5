@@ -1,3 +1,9 @@
+Thu Feb  2 20:51:55 1995  Mark Eichin  (eichin@cygnus.com)
+
+	* get_in_tkt.c (krb5_get_in_tkt): if krb5_is_as_rep fails, check
+	if the packet might be a V4 error packet. Use modified V4 check so
+	that it compiles under SCO.
+
 Mon Jan 30 15:46:14 1995 Chris Provenzano (proven@mit.edu)
 
 	* int-proto.h Update prototypes for krb5_get_cred_via_tgt(), and
@@ -47,7 +53,7 @@ Wed Jan 25 16:54:40 1995  Chris Provenzano (proven@mit.edu)
 
 Fri Jan 13 15:23:47 1995  Chris Provenzano (proven@mit.edu)
 
-    * Added krb5_context to all krb5_routines
+	* Added krb5_context to all krb5_routines
 
 Mon Dec 19 21:55:44 1994  Theodore Y. Ts'o  (tytso@dcl)
 
