@@ -1,3 +1,29 @@
+Tue Apr 18 21:46:30 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* asn1_k_decode.c (asn1_decode_krb5_flags): Make the function
+		accept bit strings which are less 32 bits long.
+		(RFC-1510 makes no guarantee that the length of the bit
+		string must be 32 bits long; the old code required that
+		the length of the bit string must be exactly 32 bits.)
+
+		Flip the bits with respect to a 32-bit boundary, since
+		that's what the old ASN.1 glue code did.  (The values in 
+		fieldbits.h are encoded backwards, for no good reason.)
+		If BACKWARDS_BITMASK_COMPAT is defined, then only flip the 
+		bits if the high 16 bits are clear and there are some bits set
+		in the low 16 bits.  This preserves interoperabilty with
+		the old beta 4 distribution, which sent the bit string
+		without flipping them around.
+
+	* asn1_k_encode.c (asn1_encode_krb5_flags): Flip the bits with
+		respect to a 32-bit boundary, since that's what the
+		old ASN.1 glue code did.  (The values in fieldbits.h
+		are encoded backwards, for no good reason.)
+
+	* krb_asn1.h: #define BACKWARDS_BITMASK_COMPAT.  Add extern
+		declaration for asn1_swbits, which is needed for the
+		bit reversing code.
+
 Thu Apr 13 20:13:38 1995 Keith Vetter (keithv@fusion.com)
 
 	* asn1_k_decode.c: fixed up 'unreferenced local variable' problems.

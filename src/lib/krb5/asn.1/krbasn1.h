@@ -19,6 +19,14 @@
  */
 #define KRB5_ENCKRB5KDCREPPART_COMPAT
 
+/* 
+ * The hand-coded parser used in the Beta 4 distribution didn't
+ * reverse the order of the bit string fields.  This define allows partial
+ * interoperability with the Beta 4 distribution by doing a bit reversal
+ * on bitfields which have bits set in the high 16 bits.
+ */
+#define BACKWARD_BITMASK_COMPAT
+
 /*
  * If KRB5_MSGTYPE_STRICT is defined, then be strict about checking
  * the msgtype fields.  Unfortunately, there old versions of Kerberos
@@ -38,6 +46,8 @@ typedef enum { UNIVERSAL = 0x00, APPLICATION = 0x40,
 typedef int asn1_tagnum;
 #define ASN1_TAGNUM_CEILING INT_MAX
 #define ASN1_TAGNUM_MAX (ASN1_TAGNUM_CEILING-1)
+
+extern asn1_octet asn1_swbits[256];
 
 /* This is Kerberos Version 5 */
 #define KVNO 5
