@@ -1,3 +1,8 @@
+Sat Jul 16 09:18:49 1994  Tom Yu  (tlyu at dragons-lair)
+
+	* configure.in (in all relevant subdirs): another try at making
+	dbm libs dtrt
+
 Fri Jul  8 00:41:41 1994  Tom Yu  (tlyu at dragons-lair)
 
 	* configure.in (in all relevant subdirs):
