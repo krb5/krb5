@@ -226,6 +226,8 @@ HINSTANCE get_lib_instance(void);
 
 #ifdef macintosh
 
+#include <KerberosConditionalMacros.h>
+
 #define USE_LOGIN_LIBRARY
 
 #define KRB5_CALLCONV
