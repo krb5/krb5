@@ -111,6 +111,10 @@
 #define HasGcc NO
 #endif
 
+#ifdef SunArchitecture
+#define	CcCmd cc -pipe
+#endif
+
 /* The -Z flag is a special loader flag at Athena to unmap page zero on
    some architectures that normally allow p0 references, e.g. VAX BSD.
 
@@ -120,7 +124,7 @@
 #if defined(AIXArchitecture) && OSMajorVersion == 1
 #define	ExtraLoadFlags -T0x400000
 #else
-#if !defined(UltrixArchitecture) && !defined(AIXArchitecture)
+#if !defined(UltrixArchitecture) && !defined(AIXArchitecture) && !defined(SunArchitecture)
 #define ExtraLoadFlags -Z
 #endif
 #endif
