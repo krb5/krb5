@@ -31,14 +31,5 @@ else
 	AC_DEFINE(KRB4)
 fi
 dnl
-dnl For the encryption code we need libdes425
-dnl Fix post beta-6
-withval=no
-AC_ARG_WITH([krb4],[],,withval=yes)
-if test $withval = no; then
-	DES425_LIB='-ldes425'
-	DES425_DEPIB='$(TOPLIBD)/libdes425$(DEPLIBEXT)'
-fi
-dnl
 KRB5_BUILD_PROGRAM
 V5_AC_OUTPUT_MAKEFILE

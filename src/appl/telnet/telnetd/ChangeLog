@@ -1,3 +1,8 @@
+2000-02-24  Ezra Peisach  <epeisach@mit.edu>
+
+	* configure.in: Remove dependency on libdes425 when krb4 support
+		is not compiled in.
+
 2000-02-21  Bear Giles  <bgiles@coyotesong.com>
 	    Ken Raeburn  <raeburn@mit.edu>
 
