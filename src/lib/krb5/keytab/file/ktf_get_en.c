@@ -19,17 +19,22 @@ static char rcsid_krb5_ktfile_get_entry_c[] =
 
 #include <krb5/copyright.h>
 #include <krb5/krb5.h>
+#include <krb5/krb5_err.h>
+#include <krb5/ext-proto.h>
 
 #include "ktfile.h"
 
 krb5_error_code
-krb5_ktfile_get_entry(id, principal, kvno, entry)
-  krb5_keytab id;
-  krb5_principal principal;
-  krb5_kvno kvno;
-  krb5_keytab_entry *entry;
+krb5_ktfile_get_entry(DECLARG(krb5_keytab, id),
+		      DECLARG(krb5_principal, principal),
+		      DECLARG(krb5_kvno, kvno),
+		      DECLARG(krb5_keytab_entry *, entry))
+OLDDECLARG(krb5_keytab, id)
+OLDDECLARG(krb5_principal, principal)
+OLDDECLARG(krb5_kvno, kvno)
+OLDDECLARG(krb5_keytab_entry *, entry)
 {
-    krb5_keytab_entry cur_entry;
+    krb5_keytab_entry *cur_entry;
     krb5_error_code kerror = 0; /* XXX */
 
     bzero((char *)&cur_entry, sizeof(krb5_keytab_entry));
@@ -43,8 +48,24 @@ krb5_ktfile_get_entry(id, principal, kvno, entry)
      * is exited with a break statement.
      */
     while (TRUE) {
-	if (kerror = krb5_ktfileint_read_entry(id, &entry))
+	if (kerror = krb5_ktfileint_read_entry(id, &cur_entry))
 	    break;
 
-	if (((kvno == IGNORE_VNO) || (kvno == entry.kvno)) &&
-	    (principal  XXXXX here XXXXX
+	if (((kvno == IGNORE_VNO) || (kvno == cur_entry->vno)) &&
+	    krb5_principal_compare(principal, cur_entry->principal)) {
+	    /* found a match */
+	    break;
+	}
+	krb5_kt_free_entry(cur_entry);
+    }
+    if (kerror && kerror != KRB5_KT_END) {
+	(void) krb5_ktfileint_close(id);
+	return kerror;
+    }
+    if (!(kerror = krb5_ktfileint_close(id))) {
+	*entry = *cur_entry;
+	xfree(cur_entry);
+    } else
+	krb5_kt_free_entry(cur_entry);
+    return kerror;
+}
