@@ -25,6 +25,7 @@ typedef struct _krb5_keyblock {
 
 typedef struct _krb5_checksum {
     krb5_cksumtype checksum_type;	/* checksum type */
+    int length;
     octet contents[1];			/* actually can be more, depending
 					   on length */
 } krb5_checksum;
@@ -48,6 +49,14 @@ typedef struct _krb5_encrypt_block {
     void *priv;				/* for private use, e.g. DES
 					   key schedules */
 } krb5_encrypt_block;
+
+/* could be used in a table to find a sumtype */
+typedef struct _krb5_checksum_entry {
+    void * (*sum_func)(/* void *in, void *out, void *seed,
+		       size_t in_length, size_t seed_length */);
+    int checksum_length;		/* length of stuff returned by
+					   sum_func */
+} krb5_checksum_entry;
 
 /* per Kerberos v5 protocol spec */
 #define	KEYTYPE_NULL		0x0000
