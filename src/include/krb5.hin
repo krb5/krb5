@@ -1163,7 +1163,7 @@ typedef struct krb5_replay_data {
 	* mk_req*/
 
 typedef krb5_error_code 
-(* KRB5_CALLCONV krb5_mk_req_checksum_func) (krb5_context, krb5_auth_context , void *,
+(KRB5_CALLCONV * krb5_mk_req_checksum_func) (krb5_context, krb5_auth_context , void *,
 			       krb5_data **);
 
 /*
