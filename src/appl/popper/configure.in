@@ -12,13 +12,7 @@ AC_CHECK_LIB(ndbm,main)
 AC_CHECK_LIB(dbm,main)
 CHECK_WAIT_TYPE
 CHECK_FCNTL
-
-AC_HEADER_CHECK(flock.h,[echo found flock.h for non-posix locks],
-AC_COMPILE_CHECK([POSIX file locking -- structs and flags],
-[#include <sys/types.h>
-#include <fcntl.h>],
-[struct flock f; 1+F_SETLK;], 
-AC_DEFINE(POSIX_FILE_LOCKS)))
+KRB5_POSIX_LOCKS
 
 AC_HAVE_HEADERS(strings.h)
 AC_HEADER_CHECK(unistd.h,AC_DEFINE(HAS_UNISTD_H))

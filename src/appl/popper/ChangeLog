@@ -1,3 +1,12 @@
+Fri Nov 18 01:15:58 1994  Mark Eichin  <eichin@cygnus.com>
+
+	* configure.in: use KRB5_POSIX_LOCKS (from epeisach).
+
+Fri Nov 18 00:20:24 1994  Mark Eichin  <eichin@cygnus.com>
+
+	* pop_send.c (pop_send): Only update last_msg if executing a RETR.
+	From John Brezak <brezak@apollo.hp.com>.
+
 Wed Nov  2 21:09:38 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* popper.h: NULL should not be used as a character assignment

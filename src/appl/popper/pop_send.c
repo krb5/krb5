@@ -91,6 +91,11 @@ POP     *   p;
     (void)fputs(".\r\n",p->output);
     (void)fflush(p->output);
 
+    /*  If retrieving, update the last-message-accessed number 
+	if it is lower than the retrieved message */
+    if ((mp->retr_flag == TRUE) && (p->last_msg < msg_num))
+      p->last_msg = msg_num;
+ 
     return(POP_SUCCESS);
 }
 
