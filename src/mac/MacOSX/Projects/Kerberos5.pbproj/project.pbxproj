@@ -8063,8 +8063,6 @@
 				F517358F03F1B65A01120114,
 				F517359003F1B65A01120114,
 				F517359103F1B65A01120114,
-				F517359203F1B65A01120114,
-				F517359303F1B65A01120114,
 				F517359403F1B65A01120114,
 				F517359503F1B65A01120114,
 				F517359603F1B65A01120114,
@@ -8115,22 +8113,6 @@
 			fileEncoding = 30;
 			isa = PBXFileReference;
 			path = memmove.c;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		F517359203F1B65A01120114 = {
-			expectedFileType = sourcecode.c.h;
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			path = "pos-obsolete.h";
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		F517359303F1B65A01120114 = {
-			expectedFileType = sourcecode.c.c;
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			path = setenv.c;
 			refType = 4;
 			sourceTree = "<group>";
 		};
@@ -9631,12 +9613,6 @@
 			settings = {
 			};
 		};
-		F517394903F1BC0F01120114 = {
-			fileRef = F517359303F1B65A01120114;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
 		F517394A03F1BC4801120114 = {
 			fileRef = F51735A003F1B65A01120114;
 			isa = PBXBuildFile;
@@ -10312,7 +10288,7 @@
 			sourceTree = "<group>";
 		};
 		F5C44E900231BD6801120112 = {
-			expectedFileType = archive.ar;
+			expectedFileType = "compiled.mach-o.dylib";
 			fallbackIsa = PBXFileReference;
 			isa = PBXLibraryReference;
 			path = libGSS.a;
@@ -10522,7 +10498,7 @@
 			sourceTree = "<group>";
 		};
 		F5CFD5CC022D86AD01120112 = {
-			expectedFileType = archive.ar;
+			expectedFileType = "compiled.mach-o.dylib";
 			fallbackIsa = PBXFileReference;
 			isa = PBXLibraryReference;
 			path = libKerberosProfile.a;
@@ -10709,7 +10685,7 @@
 			targetProxy = A17D9F6D05409164005D77E5;
 		};
 		F5CFD638022DD45401120112 = {
-			expectedFileType = archive.ar;
+			expectedFileType = "compiled.mach-o.dylib";
 			fallbackIsa = PBXFileReference;
 			isa = PBXLibraryReference;
 			path = libKerberos5.a;
@@ -10961,7 +10937,6 @@
 				F517394603F1BBBB01120114,
 				F517394703F1BBBC01120114,
 				F517394803F1BBBC01120114,
-				F517394903F1BC0F01120114,
 				F517394A03F1BC4801120114,
 				F517394C03F1BC4A01120114,
 				F517394D03F1BC4C01120114,
@@ -11282,7 +11257,7 @@
 			productReference = F5E2686D03F8336601120114;
 		};
 		F5E2686D03F8336601120114 = {
-			expectedFileType = archive.ar;
+			expectedFileType = "compiled.mach-o.dylib";
 			fallbackIsa = PBXFileReference;
 			isa = PBXLibraryReference;
 			path = libKerberosDES.a;
@@ -11479,7 +11454,7 @@
 			productReference = F5E2688503F83E7D01120114;
 		};
 		F5E2688503F83E7D01120114 = {
-			expectedFileType = archive.ar;
+			expectedFileType = "compiled.mach-o.dylib";
 			fallbackIsa = PBXFileReference;
 			isa = PBXLibraryReference;
 			path = libKerberos4.a;
@@ -11911,7 +11886,7 @@
 			sourceTree = "<group>";
 		};
 		F5E59BE303FD832C01120114 = {
-			expectedFileType = file;
+			expectedFileType = text.script.sh;
 			fallbackIsa = PBXFileReference;
 			fileEncoding = 30;
 			isa = PBXExecutableFileReference;
