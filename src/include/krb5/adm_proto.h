@@ -89,14 +89,14 @@ krb5_error_code INTERFACE krb5_send_adm_cmd
 		   krb5_auth_context *,
 		   krb5_int32,
 		   krb5_data *));
-krb5_error_code INTERFACE krb5_send_adm_reply
+krb5_error_code krb5_send_adm_reply
 	PROTOTYPE((krb5_context,
 		   krb5_pointer,
 		   krb5_auth_context *,
 		   krb5_int32,
 		   krb5_int32,
 		   krb5_data *));
-krb5_error_code INTERFACE krb5_read_adm_cmd
+krb5_error_code krb5_read_adm_cmd
 	PROTOTYPE((krb5_context,
 		   krb5_pointer,
 		   krb5_auth_context *,
