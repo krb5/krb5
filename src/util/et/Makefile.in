@@ -1,4 +1,4 @@
-CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
+CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE) $(WFLAGS)
 SED = sed
 
 ##DOSBUILDTOP = ..\..
@@ -29,6 +29,17 @@ FILES=	Makefile et_name.c error_message.c compile_et.c \
 #	init_et.c com_err.c
 SRCS= error_message.c et_name.c init_et.c com_err.c
 
+#
+# Warning flags
+#
+# Uncomment WFLAGS if you want really anal GCC warning messages
+#
+#
+WFLAGS=		-ansi -D_POSIX_SOURCE -pedantic \
+			-Wall -Wwrite-strings -Wpointer-arith \
+			-Wcast-qual -Wcast-align -Wtraditional \
+			-Wstrict-prototypes -Wmissing-prototypes \
+			-Wnested-externs -Winline -DNO_INLINE_FUNCS -Wshadow 
 
 DEPLIBS=
 SHLIB_LIBS=
@@ -46,7 +57,26 @@ all-windows: com_err.obj error_message.obj et_name.obj
 #
 # rules
 #
-error_table.o: et_lex.lex.c
+error_table.c: et_lex.lex.c 
+
+error_table.c: $(srcdir)/error_table.y
+
+error_table.o: error_table.c et_lex.lex.c
+	$(CC) $(CFLAGS) -c error_table.c
+
+et_lex.lex.o: et_lex.lex.c
+	$(CC) $(CFLAGS) -c et_lex.lex.c
+
+test1.o: test1.c
+	$(CC) $(CFLAGS) -c test1.c
+
+test2.o: test2.c
+	$(CC) $(CFLAGS) -c test2.c
+
+test_et.o: test1.h test2.h
+
+test_et: test_et.o test1.o test2.o $(LIBOBJS)
+	$(CC) -o test_et test_et.o test1.o test2.o $(LIBOBJS)
 
 # solaris make loses on com_err.c but not on init_et.c, but this helps
 com_err.o: com_err.c

@@ -115,8 +115,13 @@ c2n["_"]=63
 	print "#define NOARGS" > outfile
 	print "#define const" > outfile
 	print "#endif" > outfile
+	print "#ifdef _MSDOS" > outfile
+	print "#define ET_FAR __far" > outfile
+	print "#else" > outfile
+	print "#define ET_FAR" > outfile
+	print "#endif" > outfile
 	print "" > outfile
-	print "static const char * const text[] = {" > outfile
+	print "static const char ET_FAR * const text[] = {" > outfile
 	table_item_count = 0
 }
 
@@ -176,28 +181,26 @@ c2n["_"]=63
 	skipone=0
 }
 END {
-
-
 	print "    0" > outfile
 	print "};" > outfile
 	print "" > outfile
 	print "struct error_table {" > outfile
-	print "    char const * const * msgs;" > outfile
+	print "    char const ET_FAR * const ET_FAR * msgs;" > outfile
 	print "    long base;" > outfile
 	print "    int n_msgs;" > outfile
 	print "};" > outfile
 	print "struct et_list {" > outfile
-	print "    struct et_list *next;" > outfile
-	print "    const struct error_table * table;" > outfile
+	print "    struct et_list ET_FAR *next;" > outfile
+	print "    const struct error_table ET_FAR * table;" > outfile
 	print "};" > outfile
-	print "extern struct et_list *_et_list;" > outfile
+	print "extern struct et_list ET_FAR *_et_list;" > outfile
 	print "" > outfile
 	if (tab_base_high == 0) {
-	    print "static const struct error_table et = { text, " \
+	    print "const struct error_table et_" table_name "_error_table = { text, " \
 		sprintf("%dL, %d };", tab_base_sign*tab_base_low, \
 		table_item_count) > outfile
 	} else {
-	    print "static const struct error_table et = { text, " \
+	    print "const struct error_table et_" table_name "_error_table = { text, " \
 		sprintf("%d%06dL, %d };", tab_base_sign*tab_base_high, \
 		tab_base_low, table_item_count) > outfile
 	}
@@ -207,10 +210,10 @@ END {
 	print "void initialize_" table_name "_error_table (NOARGS) {" > outfile
 	print "    if (!link.table) {" > outfile
 	print "        link.next = _et_list;" > outfile
-	print "        link.table = &et;" > outfile
+	print "        link.table = &et_" table_name "_error_table ;" > outfile
 	print "        _et_list = &link;" > outfile
 	print "    }" > outfile
 	print "}" > outfile
-	
-
+	print "" > outfile
+	print "#undef ET_FAR" > outfile
 }

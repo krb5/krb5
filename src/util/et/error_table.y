@@ -70,6 +70,7 @@ description	:	QUOTED_STRING
 #include <ctype.h>
 #include <sys/types.h>
 #include <sys/time.h>
+#include "com_err.h"
 #include "internal.h"
 #include "error_table.h"
 #include "mit-sipb-copyright.h"
