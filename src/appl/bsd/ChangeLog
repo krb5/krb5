@@ -1,3 +1,13 @@
+Fri Sep  6 13:22:46 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* login.M: Document that login_krb4_convert is off by default.
+
+	* login.c: Turn login_krb4_convert off by default, since it causes
+		problems if you don't have krb524d running on the KDC.
+		This is necessary because a Solaris socket bug causes
+		login to hang for 45 seconds if krb524d isn't present on
+		the KDC.
+
 Mon Sep  2 12:03:53 1996  Sam Hartman  <hartmans@mit.edu>
 
 	* krlogind.c rlogin.c (v5_des_write): Write out length plus

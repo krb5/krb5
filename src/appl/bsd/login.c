@@ -52,7 +52,7 @@ int login_krb5_get_tickets = 1;
 #define KRB4_GET_TICKETS
 int login_krb4_get_tickets = 1;
 #define KRB4_CONVERT
-int login_krb4_convert = 1;
+int login_krb4_convert = 0;
 #define KRB_RUN_AKLOG
 int login_krb_run_aklog = 1;
 #endif /* KRB5_KRB4_COMPAT */

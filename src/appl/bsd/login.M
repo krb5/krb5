@@ -63,8 +63,13 @@ Use password to get V5 tickets. Default value true.
 Use password to get V4 tickets. Default value true.
 .IP krb4_convert
 Use Kerberos conversion daemon to get V4 tickets. Default value
-true. If false, gets initial ticket directly, which does not currently
-work with non MIT-V4 salt types (such as the AFS3 salt type.)
+false. If false, and krb4_get_tickets is true, then login will get
+the V5 tickets directly using the Kerberos V4 protocol directly.  
+This does not currently work with non MIT-V4 salt types
+(such as the AFS3 salt type.)  Note that if configuration parameter 
+is true, and the krb524d is not running, login will hang for 
+approximately a minute  under Solaris, 
+due to a Solaris socket emulation bug.
 .IP krb_run_aklog
 Attempt to run aklog. Default value true.
 .IP aklog_path
