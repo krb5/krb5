@@ -29,7 +29,7 @@ k5_des3_docrypt(krb5_const krb5_keyblock *key, krb5_const krb5_data *ivec,
 	return(KRB5_BAD_KEYSIZE);
     if ((input->length%8) != 0)
 	return(KRB5_BAD_MSIZE);
-    if (ivec && ((ivec->length%8) != 0))
+    if (ivec && (ivec->length != 8))
 	return(KRB5_BAD_MSIZE);
     if (input->length != output->length)
 	return(KRB5_BAD_MSIZE);

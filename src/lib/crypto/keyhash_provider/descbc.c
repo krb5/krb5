@@ -21,7 +21,7 @@ k5_descbc_hash(krb5_const krb5_keyblock *key, krb5_const krb5_data *ivec,
 	return(KRB5_BAD_KEYSIZE);
     if ((input->length%8) != 0)
 	return(KRB5_BAD_MSIZE);
-    if (ivec && ((ivec->length%8) != 0))
+    if (ivec && (ivec->length != 8))
 	return(KRB5_CRYPTO_INTERNAL);
     if (output->length != 8)
 	return(KRB5_CRYPTO_INTERNAL);
