@@ -155,7 +155,7 @@ hookup(host, port)
 		}
 		hisctladdr.sin_family = hp->h_addrtype;
 		memcpy((caddr_t)&hisctladdr.sin_addr, hp->h_addr_list[0],
-		    hp->h_length);
+		       sizeof(hisctladdr.sin_addr));
 		(void) strncpy(hostnamebuf, hp->h_name, sizeof(hostnamebuf));
 	}
 	hostname = hostnamebuf;
@@ -177,7 +177,8 @@ hookup(host, port)
 			perror((char *) 0);
 			hp->h_addr_list++;
 			memcpy((caddr_t)&hisctladdr.sin_addr,
-			     hp->h_addr_list[0], hp->h_length);
+			       hp->h_addr_list[0], 
+			       sizeof(hisctladdr.sin_addr));
 			fprintf(stdout, "Trying %s...\n",
 				inet_ntoa(hisctladdr.sin_addr));
 			(void) close(s);
@@ -291,7 +292,8 @@ login(host)
 		if (pass == NULL)
 			pass = mygetpass("Password:");
 #ifndef NOENCRYPTION
-		if ((oldlevel = level) == PROT_S) level = PROT_P;
+		oldlevel = level;
+		level = PROT_P;
 #endif
 		n = command("PASS %s", pass);
 #ifndef NOENCRYPTION
@@ -590,7 +592,7 @@ getreply(expecteof)
 		    if (code != 631 && code != 632 && code != 633) {
 			printf("Unknown reply: %d %s\n", code, obuf);
 			n = '5';
-		    } else safe = code;
+		    } else safe = (code == 631);
 		if (obuf[0])	/* if there is a string to decode */
 		    if (!auth_type) {
 			printf("Cannot decode reply:\n%d %s\n", code, obuf);

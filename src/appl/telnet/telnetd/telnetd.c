@@ -140,6 +140,10 @@ int debug = 0;
 int keepalive = 1;
 char *progname;
 
+int maxhostlen = 0;
+int always_ip = 0;
+int stripdomain = 1;
+
 extern void usage P((void));
 
 /*
@@ -149,6 +153,7 @@ extern void usage P((void));
  */
 char valid_opts[] = {
 	'd', ':', 'h', 'k', 'L', ':', 'n', 'S', ':', 'U',
+	'w',
 #ifdef	AUTHENTICATION
 	'a', ':', 'X', ':',
 #endif
@@ -416,6 +421,36 @@ main(argc, argv)
 			auth_disable_name(optarg);
 			break;
 #endif	/* AUTHENTICATION */
+		case 'w':
+			if (!strcmp(optarg, "ip"))
+				always_ip = 1;
+			else {
+				char *cp;
+				cp = strchr(optarg, ',');
+				if (cp == NULL)
+					maxhostlen = atoi(optarg);
+				else if (*(++cp)) {
+					if (!strcmp(cp, "striplocal"))
+						stripdomain = 1;
+					else if (!strcmp(cp, "nostriplocal"))
+						stripdomain = 0;
+					else {
+						usage();
+					}
+					*(--cp) = '\0';
+					maxhostlen = atoi(optarg);
+				}
+			}
+			break;
+		case 'u':
+			maxhostlen = atoi(optarg);
+			break;
+		case 'i':
+			always_ip = 1;
+			break;
+		case 'N':
+			stripdomain = 0;
+			break;
 
 		default:
 			fprintf(stderr, "telnetd: %c: unknown option\n", ch);
@@ -625,7 +660,8 @@ usage()
 #ifdef	AUTHENTICATION
 	fprintf(stderr, " [-X auth-type]");
 #endif
-	fprintf(stderr, " [-u utmp_hostname_length] [-U]");
+	fprintf(stderr, " [-u utmp_hostname_length] [-U]\n");
+	fprintf(stderr, " [-w [ip|maxhostlen[,[no]striplocal]]]\n");
 	fprintf(stderr, " [port]\n");
 	exit(1);
 }
@@ -779,12 +815,14 @@ getterminaltype(name)
 	 * we have to just go with what we (might) have already gotten.
 	 */
 	if (his_state_is_will(TELOPT_TTYPE) && !terminaltypeok(terminaltype)) {
-	    (void) strncpy(first, terminaltype, sizeof(first));
+	    (void) strncpy(first, terminaltype, sizeof(first) - 1);
+	    first[sizeof(first) - 1] = '\0';
 	    for(;;) {
 		/*
 		 * Save the unknown name, and request the next name.
 		 */
-		(void) strncpy(last, terminaltype, sizeof(last));
+		(void) strncpy(last, terminaltype, sizeof(last) - 1);
+		last[sizeof(last) - 1] = '\0';
 		_gettermname();
 		if (terminaltypeok(terminaltype))
 		    break;
@@ -801,9 +839,12 @@ getterminaltype(name)
 		     * RFC1091 compliant telnets will cycle back to
 		     * the start of the list.
 		     */
-		     _gettermname();
-		    if (strncmp(first, terminaltype, sizeof(first)) != 0)
-			(void) strncpy(terminaltype, first, sizeof(first));
+		    _gettermname();
+		    if (strncmp(first, terminaltype, sizeof(first)) != 0) {
+			(void) strncpy(terminaltype, first,
+				       sizeof(terminaltype) - 1);
+			terminaltype[sizeof(terminaltype) - 1] = '\0';
+		    }
 		    break;
 		}
 	    }
@@ -835,7 +876,7 @@ terminaltypeok(s)
 {
     char buf[1024];
 
-    if (terminaltype == NULL)
+    if (!*s)
 	return(1);
 
     /*
@@ -860,6 +901,7 @@ terminaltypeok(s)
 char *hostname;
 char host_name[MAXDNAME];
 char remote_host_name[MAXDNAME];
+char *rhost_sane;
 
 #ifndef	convex
 extern void telnet P((int, int));
@@ -885,11 +927,9 @@ long retval;
 pty_init();
 	
 
-	if ((retval = pty_getpty(&pty, line, 20)) != 0 )
-	    {
+	if ((retval = pty_getpty(&pty, line, 17)) != 0) {
 		fatal(net, error_message(retval));
-	    }
-	
+	}
 
 #if	defined(_SC_CRAY_SECURE_SYS)
 	/*
@@ -907,6 +947,12 @@ pty_init();
 	}
 #endif	/* _SC_CRAY_SECURE_SYS */
 
+	retval = pty_make_sane_hostname(who, maxhostlen,
+					stripdomain, always_ip,
+					&rhost_sane);
+	if (retval) {
+		fatal(net, error_message(retval));
+	}
 	/* get name of connected client */
 	hp = gethostbyaddr((char *)&who->sin_addr, sizeof (struct in_addr),
 		who->sin_family);
@@ -914,24 +960,13 @@ pty_init();
 	if (hp == NULL && registerd_host_only) {
 		fatal(net, "Couldn't resolve your address into a host name.\r\n\
          Please contact your net administrator");
-	} else if (hp ) {
-		host = hp->h_name;
-	} else {
-		host = inet_ntoa(who->sin_addr);
 	}
-	/*
-	 * We must make a copy because Kerberos is probably going
-	 * to also do a gethost* and overwrite the static data...
-	 */
-	strncpy(remote_host_name, host, sizeof(remote_host_name)-1);
-	remote_host_name[sizeof(remote_host_name)-1] = 0;
-	host = remote_host_name;
 
 	(void) gethostname(host_name, sizeof (host_name));
 	hostname = host_name;
 
 #if	defined(AUTHENTICATION) || defined(ENCRYPTION)
-	auth_encrypt_init(hostname, host, "TELNETD", 1);
+	auth_encrypt_init(hostname, rhost_sane, "TELNETD", 1);
 #endif
 
 	init_env();
@@ -949,13 +984,13 @@ pty_init();
 	 */
 	*user_name = 0;
 	level = getterminaltype(user_name);
-	setenv("TERM", terminaltype ? terminaltype : "network", 1);
+	setenv("TERM", *terminaltype ? terminaltype : "network", 1);
 
 	/*
 	 * Start up the login process on the slave side of the terminal
 	 */
 #ifndef	convex
-	startslave(host, level, user_name);
+	startslave(rhost_sane, level, user_name);
 
 #if	defined(_SC_CRAY_SECURE_SYS)
 	if (secflag) {
@@ -968,7 +1003,7 @@ pty_init();
 
 	telnet(net, pty);  /* begin server processing */
 #else
-	telnet(net, pty, host);
+	telnet(net, pty, rhost_sane);
 #endif
 	/*NOTREACHED*/
 }  /* end of doit */

@@ -1,3 +1,21 @@
+1998-08-06  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* prof_tree.c (profile_delete_node_relation): Fix bug where
+		deleting a node would corrupt the linked list.
+		(profile_add_node): Fix another linked list corruption
+		problem where an insertion into the middle of the linked
+		list didn't update a previous link.  [krb5-libs/615]
+
+Fri Jan 23 20:55:06 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* prof_parse.c (parse_std_line, parse_quoted_string,
+ 	 	need_double_quotes, output_quoted_string, dump_profile,
+ 	 	dump_profile_to_file): Vastly improved the profile
+	 	parsing; whitespace at the end of lines are now ignored.
+		Added quoted string parsing, complete with backquote
+	 	processing.  Strings which need to be quoted are properly
+	 	quoted on output.
+
 Mon Nov  4 17:04:51 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* prof_parse.c (parse_std_line): Accept either ';' or '#' on the

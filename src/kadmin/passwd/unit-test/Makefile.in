@@ -1,8 +1,10 @@
 check unit-test:: unit-test-@DO_TEST@
 
 unit-test-:
-	@echo "The kpasswd tests require Perl, Tcl, and runtest"
-	@echo "No tests run here"
+	@echo "+++"
+	@echo "+++ WARNING: kpasswd unit tests not run."
+	@echo "+++ Either tcl, runtest, or Perl is unavailable."
+	@echo "+++"
 
 unit-test-ok:: unit-test-setup unit-test-body unit-test-cleanup
 

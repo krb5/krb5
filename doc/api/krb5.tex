@@ -1479,7 +1479,7 @@ KRB5_AUTH_CONTEXT_RET_SEQUENCE	& Copy sequence numbers\\
 If timestamps are to be used (i.e., if KRB5_AUTH_CONTEXT_DO_TIME is
 set), an entry describing the message will be entered in the replay
 cache so that the caller may detect if this message is sent
-back to him by an attacker.  If KRB5_AUTH_CONTEXT_DO_TIME_NOTIME is not set,
+back to him by an attacker.  If KRB5_AUTH_CONTEXT_DO_TIME is not set,
 the \funcparam{auth_context} replay cache is not used.
 
 If sequence numbers are to be used (i.e., if either

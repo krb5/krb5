@@ -48,7 +48,7 @@ gss_krb5_get_tkt_flags(minor_status, context_handle, ticket_flags)
    }
 
    if (ticket_flags)
-      *ticket_flags = ctx->flags;
+      *ticket_flags = ctx->krb_flags;
 
    *minor_status = 0;
    return(GSS_S_COMPLETE);

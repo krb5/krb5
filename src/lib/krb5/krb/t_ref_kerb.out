@@ -12,5 +12,5 @@ parsed (and unparsed) principal(\/slash/\@atsign/octa\/thorpe@\/slash\@at\/sign)
 425_converted principal(rcmd, lithium, ATHENA.MIT.EDU): 'host/lithium.lcs.mit.edu@ATHENA.MIT.EDU'
 425_converted principal(rcmd, tweedledumb, CYGNUS.COM): 'host/tweedledumb.cygnus.com@CYGNUS.COM'
 425_converted principal(rcmd, uunet, UU.NET): 'host/uunet.uu.net@UU.NET'
-425_converted principal(zephyr, zephyr, ATHENA.MIT.EDU): 'zephyr/zephyr@ATHENA.MIT.EDU'
+425_converted principal(zephyr, zephyr, ATHENA.MIT.EDU): 'zephyr/zephyr.mit.edu@ATHENA.MIT.EDU'
 425_converted principal(kadmin, ATHENA.MIT.EDU, ATHENA.MIT.EDU): 'kadmin/ATHENA.MIT.EDU@ATHENA.MIT.EDU'

@@ -60,7 +60,7 @@ install::
 	fi
 
 kshd: krshd.o kcmd.o  forward.o $(SETENVOBJ) $(LIBOBJS) $(DEPLIBS)
-	$(LD) $(LDFLAGS) $(LDARGS) -o kshd krshd.o kcmd.o  forward.o $(SETENVOBJ) $(LIBOBJS) $(LIBS)
+	$(LD) $(LDFLAGS) $(LDARGS) -o kshd krshd.o kcmd.o  forward.o $(SETENVOBJ) $(LIBOBJS) $(LOGINLIBS) $(LIBS)
 
 klogind: krlogind.o  kcmd.o forward.o $(SETENVOBJ) $(LIBOBJS) $(DEPLIBS)
 	$(LD) $(LDFLAGS) $(LDARGS) -o klogind krlogind.o  kcmd.o forward.o $(SETENVOBJ) $(LIBOBJS) $(LIBS)

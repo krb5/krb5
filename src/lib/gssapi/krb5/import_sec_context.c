@@ -27,6 +27,26 @@
  */
 #include "gssapiP_krb5.h"
 
+/*
+ * Fix up the OID of the mechanism so that uses the static version of
+ * the OID if possible.
+ */
+gss_OID krb5_gss_convert_static_mech_oid(oid)
+     gss_OID	FAR oid;
+{
+	const gss_OID_desc 	*p;
+	OM_uint32		minor_status;
+	
+	for (p = krb5_gss_oid_array; p->length; p++) {
+		if ((oid->length == p->length) &&
+		    (memcmp(oid->elements, p->elements, p->length) == 0)) {
+			gss_release_oid(&minor_status, &oid);
+			return p;
+		}
+	}
+	return oid;
+}
+
 OM_uint32
 krb5_gss_import_sec_context(minor_status, interprocess_token, context_handle)
     OM_uint32		*minor_status;
@@ -65,6 +85,7 @@ krb5_gss_import_sec_context(minor_status, interprocess_token, context_handle)
        *minor_status = (OM_uint32) G_VALIDATE_FAILED;
        return(GSS_S_FAILURE);
     }
+    ctx->mech_used = krb5_gss_convert_static_mech_oid(ctx->mech_used);
     
     *context_handle = (gss_ctx_id_t) ctx;
 

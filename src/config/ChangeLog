@@ -1,3 +1,8 @@
+Tue Apr  8 11:09:20 1997  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* post.in: Fix recursion rule to make bash 2.x happy.
+		[krb5-build/403]  (for patchlevel 1)
+
 Mon Nov 11 20:53:01 1996  Tom Yu  <tlyu@mit.edu>
 
 	* pre.in (DEJAFLAGS): Change gmake-dependent $(shell uname foo) to

@@ -32,7 +32,9 @@ g_copy_OID_set(in, out)
      gss_OID_set *out;
 {
    gss_OID_set copy;
-   size_t i;
+   gss_OID     new_oid;
+   size_t      i;
+   size_t      len;
 
    *out = NULL;
 
@@ -41,15 +43,34 @@ g_copy_OID_set(in, out)
       return(0);
 
    copy->count = in->count;
+   len = sizeof(gss_OID_desc) * copy->count;
 
    if ((copy->elements = 
-	(gss_OID_desc *) xmalloc(sizeof(gss_OID_desc)*copy->count)) == NULL) {
+	(gss_OID_desc *) xmalloc( len )) == NULL) {
       xfree(copy);
       return(0);
    }
 
-   for (i=0; i<in->count; i++)
-      copy->elements[i] = in->elements[i];
+   memset( copy->elements, 0, len );
+   
+   for (i=0; i<in->count; i++) {
+      len = in->elements[i].length;
+      new_oid = &(copy->elements[i]);
+      new_oid->elements = xmalloc( len );
+      if ( new_oid->elements == NULL ) {
+         while( i>0 ) {
+            i--;
+            new_oid = &(copy->elements[i]);
+            if ( new_oid->elements!=NULL )
+               xfree( new_oid->elements );
+         }
+         xfree( copy->elements );
+         xfree( copy );
+         return( 0 );
+      }
+      memcpy( new_oid->elements, in->elements[i].elements, len );
+      new_oid->length = len;
+   }
 
    *out = copy;
    return(1);

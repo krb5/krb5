@@ -1,7 +1,13 @@
+Fri Nov 22 15:52:55 1996  unknown  <bjaspan@mit.edu>
+
+	* gss-client.c (connect_to_server): use sizeof instead of h_length
+ 	to determine number of bytes of addr to copy from DNS response
+ 	[krb5-misc/211]
+
 Tue Oct 29 10:17:25 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* gss-client.c (client_establish_context): Fix typo; service_name
-		really should be nt_service_name.
+ 		really should be nt_service_name.
 
 Thu Jul 25 02:16:56 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 

@@ -68,6 +68,7 @@
 #define KG_TOK_DEL_CTX		0x0102
 
 #define KG_IMPLFLAGS(x) (GSS_C_INTEG_FLAG | GSS_C_CONF_FLAG | \
+			 GSS_C_TRANS_FLAG | GSS_C_PROT_READY_FLAG | \
 			 ((x) & (GSS_C_MUTUAL_FLAG | GSS_C_REPLAY_FLAG | \
 				 GSS_C_SEQUENCE_FLAG | GSS_C_DELEG_FLAG)))
 
@@ -91,6 +92,7 @@ typedef struct _krb5_gss_cred_id_rec {
    /* ccache (init) data */
    krb5_ccache ccache;
    krb5_timestamp tgt_expire;
+   krb5_rcache rcache;
 } krb5_gss_cred_id_rec, *krb5_gss_cred_id_t; 
 
 typedef struct _krb5_gss_enc_desc {
@@ -113,7 +115,7 @@ typedef struct _krb5_gss_ctx_id_rec {
    krb5_gss_enc_desc enc;
    krb5_gss_enc_desc seq;
    krb5_timestamp endtime;
-   krb5_flags flags;
+   krb5_flags krb_flags;
    krb5_int32 seq_send;
    krb5_int32 seq_recv;
    void *seqstate;
@@ -502,4 +504,27 @@ PROTOTYPE( (OM_uint32 *,		/* minor_status */
 	    gss_OID_set *		/* name_types */
 	   ));
 
+OM_uint32 krb5_gss_canonicalize_name
+PROTOTYPE( (OM_uint32  *,		/* minor_status */
+	    const gss_name_t,		/* input_name */
+	    const gss_OID,		/* mech_type */
+	    gss_name_t *		/* output_name */
+	 ));
+	
+OM_uint32 krb5_gss_export_name
+PROTOTYPE( (OM_uint32  *,		/* minor_status */
+	    const gss_name_t,		/* input_name */
+	    gss_buffer_t		/* exported_name */
+	 ));
+
+OM_uint32 krb5_gss_duplicate_name
+PROTOTYPE( (OM_uint32  *,		/* minor_status */
+	    const gss_name_t,		/* input_name */
+	    gss_name_t *		/* dest_name */
+	 ));
+
+gss_OID krb5_gss_convert_static_mech_oid
+PROTOTYPE( (gss_OID FAR oid
+	 ));
+	
 #endif /* _GSSAPIP_KRB5_H_ */

@@ -91,7 +91,7 @@ void asn1buf_sync(buf, subbuf)
      asn1buf * buf;
      asn1buf * subbuf;
 {
-  buf->next = subbuf->next;
+  buf->next = subbuf->bound + 1;
 }
 
 asn1_error_code asn1buf_destroy(buf)
@@ -231,6 +231,10 @@ asn1_error_code asn12krb5_buf(buf, code)
   (*code)->length = 0;
   (*code)->length = asn1buf_len(buf);
   (*code)->data = (char*)calloc(((*code)->length)+1,sizeof(char));
+  if ((*code)->data == NULL) {
+    free(*code);
+    return ENOMEM;
+  }
   for(i=0; i < (*code)->length; i++)
     ((*code)->data)[i] = (buf->base)[((*code)->length)-i-1];
   ((*code)->data)[(*code)->length] = '\0';

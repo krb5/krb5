@@ -36,6 +36,7 @@ typedef struct _krb5_kdc_replay_ent {
     time_t db_age;
     krb5_data *req_packet;
     krb5_data *reply_packet;
+    krb5_address *addr;		/* XXX should these not be pointers? */
 } krb5_kdc_replay_ent;
 
 static krb5_kdc_replay_ent root_ptr = {0};
@@ -46,13 +47,16 @@ static int max_hits_per_entry = 0;
 static int num_entries = 0;
 
 #define STALE_TIME	2*60		/* two minutes */
-#define STALE(ptr) ((abs((ptr)->timein - timenow) >= STALE_TIME) || \
+#define STALE(ptr) ((abs((ptr)->timein - timenow) >= STALE_TIME) ||	\
 		    ((ptr)->db_age != db_age))
 
-#define MATCH(ptr) (((ptr)->req_packet->length == inpkt->length) && \
-		    !memcmp((ptr)->req_packet->data, inpkt->data, inpkt->length) && \
+#define MATCH(ptr) (((ptr)->req_packet->length == inpkt->length) &&	\
+		    !memcmp((ptr)->req_packet->data, inpkt->data,	\
+			    inpkt->length) &&				\
+		    ((ptr)->addr->length == from->address->length) &&	\
+		    !memcmp((ptr)->addr->contents, from->address,	\
+			    from->address->length)&&			\
 		    ((ptr)->db_age == db_age))
-
 /* XXX
    Todo:  quench the size of the queue...
  */
@@ -61,9 +65,10 @@ static int num_entries = 0;
    FALSE if the caller should do the work */
 
 krb5_boolean
-kdc_check_lookaside(inpkt, outpkt)
-register krb5_data *inpkt;
-register krb5_data **outpkt;
+kdc_check_lookaside(inpkt, from, outpkt)
+    register krb5_data *inpkt;
+    register krb5_fulladdr *from;
+    register krb5_data **outpkt;
 {
     krb5_int32 timenow;
     register krb5_kdc_replay_ent *eptr, *last, *hold;
@@ -71,7 +76,7 @@ register krb5_data **outpkt;
 
     if (krb5_timeofday(kdc_context, &timenow) || 
 	krb5_db_get_age(kdc_context, 0, &db_age))
-	    return FALSE;
+	return FALSE;
 
     calls++;
 
@@ -98,6 +103,7 @@ register krb5_data **outpkt;
 		max_hits_per_entry = max(max_hits_per_entry, eptr->num_hits);
 		krb5_free_data(kdc_context, eptr->req_packet);
 		krb5_free_data(kdc_context, eptr->reply_packet);
+		krb5_free_address(kdc_context, eptr->addr);
 		hold = eptr;
 		last->next = eptr->next;
 		eptr = last;
@@ -115,9 +121,10 @@ register krb5_data **outpkt;
    already there, and can fail softly due to other weird errors. */
 
 void
-kdc_insert_lookaside(inpkt, outpkt)
-register krb5_data *inpkt;
-register krb5_data *outpkt;
+kdc_insert_lookaside(inpkt, from, outpkt)
+    register krb5_data *inpkt;
+    register krb5_fulladdr *from;
+    register krb5_data *outpkt;
 {
     register krb5_kdc_replay_ent *eptr;    
     krb5_int32 timenow;
@@ -125,7 +132,7 @@ register krb5_data *outpkt;
 
     if (krb5_timeofday(kdc_context, &timenow) || 
 	krb5_db_get_age(kdc_context, 0, &db_age))
-	    return;
+	return;
 
     /* this is a new entry */
     eptr = (krb5_kdc_replay_ent *)calloc(1, sizeof(*eptr));
@@ -133,6 +140,11 @@ register krb5_data *outpkt;
 	return;
     eptr->timein = timenow;
     eptr->db_age = db_age;
+    /*
+     * This is going to hurt a lot malloc()-wise due to the need to
+     * allocate memory for the krb5_data and krb5_address elements.
+     * ARGH!
+     */
     if (krb5_copy_data(kdc_context, inpkt, &eptr->req_packet)) {
 	krb5_xfree(eptr);
 	return;
@@ -140,6 +152,12 @@ register krb5_data *outpkt;
     if (krb5_copy_data(kdc_context, outpkt, &eptr->reply_packet)) {
 	krb5_free_data(kdc_context, eptr->req_packet);
 	krb5_xfree(eptr);
+	return;
+    }
+    if (krb5_copy_addr(kdc_context, from->address, &eptr->addr)) {
+	krb5_free_data(kdc_context, eptr->req_packet);
+	krb5_free_data(kdc_context, eptr->reply_packet);
+	free(eptr);
 	return;
     }
     eptr->next = root_ptr.next;

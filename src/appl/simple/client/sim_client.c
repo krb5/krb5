@@ -163,7 +163,7 @@ main(argc, argv)
     /* Set server's address */
     (void) memset((char *)&s_sock, 0, sizeof(s_sock));
 
-    memcpy((char *)&s_sock.sin_addr, host->h_addr, host->h_length);
+    memcpy((char *)&s_sock.sin_addr, host->h_addr, sizeof(s_sock.sin_addr));
 #ifdef DEBUG
     printf("s_sock.sin_addr is %s\n", inet_ntoa(s_sock.sin_addr));
 #endif
@@ -198,7 +198,7 @@ main(argc, argv)
 	fprintf(stderr, "%s: unknown host\n", hostname);
 	exit(1);
     }
-    memcpy((char *)&c_sock.sin_addr, host->h_addr, host->h_length);
+    memcpy((char *)&c_sock.sin_addr, host->h_addr, sizeof(c_sock.sin_addr));
 #endif
     
 

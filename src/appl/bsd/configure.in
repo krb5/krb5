@@ -31,7 +31,7 @@ case $krb5_cv_host in
 krb5_cv_has_streams=no
 ;;
 alpha-dec-osf*)
-	AC_CHECK_LIB(security,main,
+	AC_CHECK_LIB(security,setluid,
 		AC_DEFINE(HAVE_SETLUID)
 		LOGINLIBS="$LOGINLIBS -lsecurity"
 	)
@@ -82,7 +82,7 @@ AC_FUNC_CHECK(tcsetpgrp,AC_DEFINE(HAVE_TCSETPGRP))
 AC_FUNC_CHECK(setpgid,AC_DEFINE(HAVE_SETPGID))
 AC_CHECK_HEADERS(unistd.h stdlib.h string.h sys/filio.h sys/sockio.h )
 AC_CHECK_HEADERS(sys/label.h sys/tty.h ttyent.h lastlog.h sys/select.h )
-AC_CHECK_HEADERS(sys/ptyvar.h utmp.h sys/time.h)
+AC_CHECK_HEADERS(sys/ptyvar.h utmp.h sys/time.h arpa/nameser.h sys/ioctl_compat.h paths.h)
 AC_HEADER_STDARG
 AC_REPLACE_FUNCS(getdtablesize)
 KRB5_SIGTYPE

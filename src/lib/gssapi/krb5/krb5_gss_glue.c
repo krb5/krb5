@@ -534,3 +534,39 @@ gss_wrap_size_limit(minor_status, context_handle, conf_req_flag,
 				   conf_req_flag, qop_req,
 				   req_output_size, max_input_size));
 }
+
+/* V2 interface */
+OM_uint32 INTERFACE
+gss_canonicalize_name(minor_status, input_name, mech_type, output_name)
+	OM_uint32  *minor_status;
+	const gss_name_t input_name;
+	const gss_OID mech_type;
+	gss_name_t *output_name;
+{
+	return krb5_gss_canonicalize_name(minor_status, input_name,
+					  mech_type, output_name);
+}
+
+
+/* V2 interface */
+OM_uint32 INTERFACE
+gss_export_name(minor_status, input_name, exported_name)
+	OM_uint32  *minor_status;
+	const gss_name_t input_name;
+	gss_buffer_t exported_name;
+{
+	return krb5_gss_export_name(minor_status, input_name, exported_name);
+}
+
+/* V2 interface */
+OM_uint32 INTERFACE
+gss_duplicate_name(minor_status, input_name, dest_name)
+	OM_uint32  *minor_status;
+	const gss_name_t input_name;
+	gss_name_t *dest_name;
+{
+	return krb5_gss_duplicate_name(minor_status, input_name, dest_name);
+}
+
+
+
