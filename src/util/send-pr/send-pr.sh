@@ -57,7 +57,7 @@ GNATS_SITE=mit
 # host-dependent.
 MAIL_AGENT="/usr/sbin/sendmail -oi -t"
 if [ ! -x `echo $MAIL_AGENT|sed 's/ .*//'` ] ; then
-    ( [-x /usr/lib/sendmail ] && MAIL_AGENT="/usr/lib/sendmail -oi -t" ) || \
+    ( [ -x /usr/lib/sendmail ] && MAIL_AGENT="/usr/lib/sendmail -oi -t" ) || \
      ( [ -x /usr/sbin/sendmail ] && MAIL_AGENT="/usr/sbin/sendmail -oi -t " ) || \
      MAIL_AGENT="sendmail -oi -t "
 fi
