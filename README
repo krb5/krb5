@@ -95,6 +95,8 @@ Notes, Major Changes, and Known Bugs for 1.3
   can be used to help the compiler and linker find the installed
   packages; see the build documentation for details.
 
+* The AES cryptosystem has been implemented.
+
 Major changes listed by ticket ID
 ---------------------------------
 
@@ -123,8 +125,18 @@ Major changes listed by ticket ID
 
 * [1189, 1251] The KfM krb4 library source base has been merged.
 
+* [1191] A new script, k5srvutil, may be used to manipulate keytabs in
+  ways similar to the krb4 ksrvutil utility.
+
+* [1281] The "fakeka" program, which emulates the AFS kaserver, has
+  been integrated.  Thanks to Ken Hornstein.
+
 * [1377, 1442, 1443] The Microsoft set-password protocol has been
   implemented.  Thanks to Paul Nelson.
+
+* [1372] There is no longer a need to create a special keytab for
+  kadmind.  The legacy administration daemons "kadmind4" and
+  "v5passwdd" will still require a keytab, though.
 
 * [1385, 1395, 1410] The krb4 protocol vulnerabilities
   [MITKRB5-SA-2003-004] have been worked around.  Note that this will
@@ -143,6 +155,9 @@ Major changes listed by ticket ID
 
 * [1418, 1429, 1446, 1484, 1486, 1487] The AES cryptosystem has been
   implemented.  It is not usable for GSSAPI, though.
+
+* [1491] The client-side functionality of the krb524 library has been
+  moved into the krb5 library.
 
 Minor changes listed by ticket ID
 ---------------------------------
@@ -197,6 +212,9 @@ Minor changes listed by ticket ID
 
 * [935] des-cbc-md4 now included in default enctypes.
 
+* [939] A minor grammatical error has been fixed in a telnet client
+  error message.
+
 * [953] des3 no longer failing on Windows due to SHA1 implementation
   problems.
 
@@ -240,6 +258,9 @@ Minor changes listed by ticket ID
 * [1164] krb5_auth_con_gen_addrs() now properly returns errno instead
   of -1 if getpeername() fails.
 
+* [1173] Address-less forwardable tickets will remain address-less
+  when forwarded.
+
 * [1178, 1228, 1244, 1246, 1249] Test suite has been stabilized
   somewhat.
 
@@ -250,8 +271,13 @@ Minor changes listed by ticket ID
 * [1194] configure will no longer recurse out of the top of the source
   tree when attempting to locate the top of the source tree.
 
+* [1192] Documentation for the krb5 afs functionality of krb524d has
+  been written.
+
 * [1195] Example krb5.conf file modified to include all enctypes
   supported by the release.
+
+* [1202] The KDC no longer rejects unrecognized flags.
 
 * [1211] The ASN.1 code no longer passes (harmless) uninitialized
   values around.
@@ -266,6 +292,9 @@ Minor changes listed by ticket ID
 
 * [1226] Client-side support for SAM hardware-based preauth
   implemented.
+
+* [1229] The keytab search logic no longer fails prematurely if an
+  incorrect encryption type is found.  Thanks to Wyllys Ingersoll.
 
 * [1232] If the master KDC cannot be resolved, but a slave is
   reachable, the client library now returns the real error from the
@@ -289,6 +318,12 @@ Minor changes listed by ticket ID
 * [1260] Client credential lookup now gets new service tickets in
   preference to attempting to use expired ticketes.  Thanks to Ben
   Cox.
+
+* [1262] Sequence numbers are now unsigned; negative sequence numbers
+  will be accepted for the purposes of backwards compatibility.
+
+* [1263] A heuristic for matching the incorrectly encoded sequence
+  numbers emitted by Heimdal implementations has been written.
 
 * [1284] kshd accepts connections by IPv6 now.
 
@@ -360,7 +395,11 @@ Minor changes listed by ticket ID
 
 * [1440] errno is no longer explicitly declared.
 
-* [1454] The etype-info2 preauth type is now supported.
+* [1441] kadmind should now return useful errors if an unrecognized
+  version is received in a changepw request.
+
+* [1454, 1480, 1517, 1525] The etype-info2 preauth type is now
+  supported.
 
 * [1459] (KfM/KLL internal) config file resolution can now be
   prevented from accessing the user's homedir.
@@ -380,6 +419,27 @@ Minor changes listed by ticket ID
 * [1482] RFC-1964 OIDs now provided using the suggested symbolic
   names.
 
+* [1483, 1528] KRB5_DEPRECATED is now false by default on all
+  platforms.
+
+* [1488] The KDC will now return integrity errors if a decryption
+  error is responsible for preauthentication failure.
+
+* [1492] The autom4te.cache directories are now deleted from the
+  release tarfiles.
+
+* [1501] Writable keytabs are registered by default.
+
+* [1515] The check for cross-realm TGTs no longer reads past the end
+  of an array.
+
+* [1518] The kdc_default_options option is now actually honored.
+
+* [1519] The changepw protocol implementation in kadmind now logs
+  password changes.
+
+* [1520] Documentation of OS-specific build options has been updated.
+
 --[ DELETE BEFORE RELEASE ---changes to unreleased code, etc.--- ]--
 
 * [1054] KRB-CRED messages for RC4 are encrypted now.
@@ -391,6 +451,8 @@ Minor changes listed by ticket ID
 * [1208] install-headers target implemented.
 
 * [1223] asn1_decode_oid, asn1_encode_oid implemented
+
+* [1248] RC4 is explicitly excluded from combine_keys.
 
 * [1276] Generated dependencies handle --without-krb4 properly now.
 
@@ -409,6 +471,12 @@ Minor changes listed by ticket ID
 * [1462] KfM adds exports of set_pw calls.
 
 * [1477] compile_et output not used in err_txt.c.
+
+* [1495] KfM now exports string_to_key_with_params.
+
+* [1512, 1522] afs_string_to_key now works with etype_info2.
+
+* [1514] krb5int_populate_gic_opt returns void now.
 
 Copyright Notice and Legal Administrivia
 ----------------------------------------
