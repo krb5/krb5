@@ -1,3 +1,12 @@
+Tue May 23 15:39:40 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* Makefile.in: Generate krb5.h from krb5.hin in awk-windows, for
+		the Windows port.
+
+		Added kerbsrc-nt.zip, which creates the zip file without
+		the option to truncate the names to the MS-DOS 8.3
+		convention. 
+
 Tue May 16 03:05:30 1995  Tom Yu  (tlyu@dragons-lair)
 
 	* aclocal.m4 (_MAKE_SUBDIRS): fix rule so that MAKEFLAGS gets

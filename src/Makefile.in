@@ -220,6 +220,13 @@ ZIPEXCLUDE= LIB/KRB5.SAB \
 	WINDOWS/CNS/*.ICO WINDOWS/WINTEL/*.ICO WINDOWS/GSS/*.ICO \
 	*.O *.A *.ZIP
 
+ZIPLONGEXCLUDE= lib/krb5.sab \
+	include/krb5/autoconf.h \
+	lib/crypto/md4/t_mddriv lib/crypto/md5/t_mddriv \
+	util/profile/test_par util/profile/test_pro \
+	windows/cns/*.ico windows/wintel/*.ico windows/gss/*.ico \
+	*.o *.a *.zip
+
 ZIPCLEANUP= util/profile/profile.h util/profile/prof_err.[ch] \
 	lib/krb5/error_tables/asn1_err.c lib/krb5/error_tables/kdb5_err.c \
 	lib/krb5/error_tables/krb5_err.c lib/krb5/error_tables/kv5m_err.c \
@@ -240,6 +247,16 @@ kerbsrc.zip: awk-windows
 	cp Makefile.bak Makefile
 	rm -f $(ZIPCLEANUP)
 
+kerbsrc-nt.zip: awk-windows
+	rm -f Makefile.bak
+	mv Makefile Makefile.bak
+	cp Makefile.in Makefile
+	rm -f kerbsrc.zip
+	$(ZIP) -Dl kerbsrc.zip $(ZIPFILES) -x $(ZIPLONGEXCLUDE)
+	$(ZIP) -D kerbsrc.zip $(ZIPBINARYFILES)
+	cp Makefile.bak Makefile
+	rm -f $(ZIPCLEANUP)
+
 #
 # Part of building the PC release has to be done on Unix. This includes
 # anything the requires awk.
@@ -247,6 +264,7 @@ kerbsrc.zip: awk-windows
 AH  = util/et/et_h.awk
 AC  = util/et/et_c.awk
 INC = include/krb5/
+IN  = include/
 ET  = lib/krb5/error_tables/
 GG  = lib/gssapi/generic/
 GK  = lib/gssapi/krb5/
@@ -271,3 +289,5 @@ awk-windows:
 	gawk -f $(AC) outfile=$(PR)prof_err.c $(PR)prof_err.et
 	cat $(PR)/profile.hin $(PR)prof_err.h > $(PR)profile.h
 	cp $(PR)profile.h include/profile.h
+	cat $(IN)/krb5.hin $(INC)/krb5_err.h $(INC)/kdb5_err.h \
+		$(INC)/kv5m_err.h $(INC)/asn1_err.h > $(IN)/krb5.h
