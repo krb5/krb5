@@ -221,6 +221,7 @@ krb5_get_cred_from_kdc (ccache, cred, tgts)
 				   etype,
 				   krb5_kdc_req_sumtype,
 				   cred);
+    krb5_free_cred_contents(&tgt);
 out:
     krb5_free_principal(final_server);
     return retval;
