@@ -5,7 +5,7 @@ AC_PROG_ARCHIVE_ADD
 AC_PROG_RANLIB
 AC_PROG_INSTALL
 AC_HAVE_HEADERS(unistd.h)
-WITH_DB
+WITH_KDB_DB
 V5_USE_SHARED_LIB
 AC_CHECK_FUNCS(srand48 srand srandom umask)
 LinkFileDir(../libkdb5.a, libkdb5.a, ./kdb)

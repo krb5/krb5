@@ -1,3 +1,7 @@
+Sun Mar  3 10:41:04 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* configure.in: Change WITH_DB to WITH_KDB_DB
+
 Fri Feb 23 19:39:52 1996  Mark Eichin  <eichin@cygnus.com>
 
 	* keytab.c (krb5_ktkdb_close): new function, non-optional.
