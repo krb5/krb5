@@ -209,12 +209,6 @@
 			path = GSSKerberos5.intermediates/KerberosComErr.h;
 			refType = 3;
 		};
-		00CC643C009767DA7F000001 = {
-			fileRef = 00CC640000975A877F000001;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
 		00CFB46AFF6D81A212120111 = {
 			isa = PBXFileReference;
 			path = krb5_libinit.c;
@@ -1723,7 +1717,7 @@
 			};
 		};
 		174475FDFF5EFB1212120111 = {
-			buildArgumentsString = "-f $(SRCROOT)/HeaderFiles.jam $(ACTION)";
+			buildArgumentsString = "-d3 -f $(SRCROOT)/HeaderFiles.jam $(ACTION)";
 			buildPhases = (
 			);
 			buildSettings = {
@@ -6551,7 +6545,6 @@
 				00CFB471FF6D8BB412120111,
 				41D6B54B0029FA1112120111,
 				00F516F600692E197F000001,
-				00CC643C009767DA7F000001,
 			);
 			isa = PBXHeadersBuildPhase;
 			name = Headers;
