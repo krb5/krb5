@@ -1,12 +1,7 @@
 /*
  * Copyright 1993 OpenVision Technologies, Inc., All Rights Reserved
  *
- * $Header$
  */
-
-#if !defined(lint) && !defined(__CODECENTER__)
-static char *rcsid = "$Header$";
-#endif
 
 #include    <stdio.h>
 #include    <signal.h>
@@ -21,9 +16,9 @@ static char *rcsid = "$Header$";
 #include    <netinet/in.h>
 #include    <arpa/inet.h>  /* inet_ntoa */
 #include    <netdb.h>
-#include    <rpc/rpc.h>
+#include    <gssrpc/rpc.h>
 #include    <gssapi/gssapi_krb5.h>
-#include    <rpc/auth_gssapi.h>
+#include    <gssrpc/auth_gssapi.h>
 #include    <kadm5/admin.h>
 #include    <kadm5/kadm_rpc.h>
 #include    <string.h>
