@@ -260,6 +260,7 @@ static void end_login(void);
 static int disallowed_user(char *);
 static int restricted_user(char *);
 static int checkuser(char *);
+static char *gunique(char *);
 
 #ifdef SETPROCTITLE
 char	**Argv = NULL;		/* pointer to argument vector */
@@ -1279,7 +1280,6 @@ store_file(name, fmode, unique)
 	FILE *fout, *din;
 	struct stat st;
 	int (*closefunc)();
-	static char *gunique();
 
 	if (logging > 1) syslog(LOG_NOTICE, "put %s", path_expand(name));
 
