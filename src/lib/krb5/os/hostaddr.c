@@ -24,9 +24,8 @@
  *
  */
 
+#include NEED_SOCKETS
 #include "k5-int.h"
-
-#include <netdb.h>
 
 krb5_error_code
 krb5_os_hostaddr(context, name, ret_addrs)
