@@ -1,3 +1,8 @@
+1999-08-26  Danilo Almeida  <dalmeida@mit.edu>
+
+	* localaddr.c (krb5_os_localaddr): Fix memset to clear
+	right address list.  (Thanks to jaltman@columbia.edu).
+
 1999-08-21  Danilo Almeida  <dalmeida@mit.edu>
 
 	* localaddr.c (krb5_os_localaddr): Use multiple addresses, if
