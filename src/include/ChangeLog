@@ -1,3 +1,10 @@
+Wed Feb 22 18:31:12 1995  John Gilmore  (gnu at toad.com)
+
+	* k5-int.h:  Remove commented-out <widen.h> and <narrow.h>.
+	* krb5.h: Same as old krb5/krb5.h, as a start.  Gradually things
+	that don't need to be exported will be moved from krb5.h into
+	k5-int.h (and vice verse for e.g. function prototypes).
+
 Wed Jan 25 19:19:38 1995  John Gilmore  (gnu at toad.com)
 
 	Make it possible to #include "..." without using slashes,
