@@ -84,7 +84,7 @@ struct realm_info {
 static krb5_error_code add_principal PROTOTYPE((krb5_principal, enum ap_op,
 						struct realm_info *));
 void v4fini PROTOTYPE((void));
-int v4init PROTOTYPE((char *, char *, int));
+int v4init PROTOTYPE((char *, char *, int, char *));
 krb5_error_code enter_in_v5_db PROTOTYPE((char *, Principal *));
 krb5_error_code process_v4_dump PROTOTYPE((char *, char *));
 
@@ -300,7 +300,7 @@ master key name '%s'\n",
                 dbname);
         exit(1);
     }
-    if (v4init(PROGNAME, v4dbname, v4manual)) {
+    if (v4init(PROGNAME, v4dbname, v4manual, v4dumpfile)) {
 	(void) krb5_finish_key(&master_encblock);
 	(void) krb5_finish_random_key(&master_encblock, &rblock.rseed);
 	exit(1);
@@ -348,9 +348,10 @@ v4fini()
 }
 
 int
-v4init(pname, name, manual)
+v4init(pname, name, manual, dumpfile)
 char *pname, *name;
 int manual;
+char *dumpfile;
 {
 #ifndef ODBM
     kerb_init();
@@ -369,11 +370,14 @@ int manual;
 	return 1;
     }
 #ifndef ODBM
-    if ((master_key_version = kdb_verify_master_key(master_key,
-						    master_key_schedule,
-						    0)) < 0) {
-	com_err(pname, 0, "Couldn't verify v4 master key (did you type it correctly?).");
-	return 1;
+    if (!dumpfile) {
+	if ((master_key_version = kdb_verify_master_key(master_key,
+							master_key_schedule,
+							stdout)) < 0) {
+	    com_err(pname, 0,
+		    "Couldn't verify v4 master key (did you type it correctly?).");
+	    return 1;
+	}
     }
 #endif
     return 0;
@@ -398,7 +402,6 @@ Principal *princ;
 	printf("\nignoring '%s.%s' ...", princ->name, princ->instance);
 	return 0;
     }
-#ifdef ODBM
     if (!strcmp(princ->name, KERB_M_NAME) &&
 	!strcmp(princ->instance, KERB_M_INST)) {
 	des_cblock key_from_db;
@@ -419,14 +422,8 @@ Principal *princ;
 	if (val) {
 	    return KRB5_KDB_BADMASTERKEY;
 	}
-	return 0;
-    }
-#else
-    if (!strcmp(princ->name, KERB_M_NAME) &&
-	 !strcmp(princ->instance, KERB_M_INST)) {
 	goto ignore;
     }
-#endif
     if (retval = krb5_build_principal(&entry.principal, strlen(realm),
 				      realm, princ->name,
 				      princ->instance[0] ? princ->instance : 0,
@@ -541,9 +538,6 @@ struct realm_info *pblock;
 }
 
 /*
- * $Source$
- * $Author$
- *
  * Convert a struct tm * to a UNIX time.
  */
 
