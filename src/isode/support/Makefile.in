@@ -68,7 +68,7 @@ libisode.a:	isodevrsn.o
 		-rm -f $@ $(TOPDIR)libisode.a
 		-rm -rf tmp
 		-mkdir tmp
-		ln isodevrsn.o tmp || cp isodevrsn.o tmp 
+		sh -c 'ln isodevrsn.o tmp || cp isodevrsn.o tmp'
 		for i in $(LIBES); do (cd tmp; ar x ../$$i; \
 		    ../$(UTILDIR)make-lib.sh -quick $(SYSTEM) ../$@ *.o; \
 		    rm -f *); done
