@@ -53,6 +53,8 @@
 	krb5_free_ticket
 	krb5_free_tickets
 	krb5_free_tkt_authent
+	krb5_free_checksum_contents
+	krb5_free_cksumtypes
 	krb5_fwd_tgt_creds
 	krb5_get_credentials
 	krb5_get_credentials_renew
@@ -118,6 +120,16 @@
 	krb5_finish_random_key
 	krb5_random_key
 #
+	krb5_c_decrypt
+	krb5_c_encrypt
+	krb5_c_encrypt_length
+	krb5_c_checksum_length
+	krb5_c_block_size
+	krb5_c_make_checksum
+	krb5_c_verify_checksum
+	krb5_c_random_make_octets
+	krb5_c_keyed_checksum_types
+#
 	krb5_425_conv_principal
 	krb5_524_conv_principal
 #
@@ -140,6 +152,7 @@
 	krb5_auth_con_getlocalsubkey
 	krb5_auth_con_getremotesubkey
 	krb5_auth_con_init
+	krb5_auth_con_setaddrs
 	krb5_auth_con_setflags
 	krb5_auth_con_getlocalseqnumber
 	krb5_auth_con_getremoteseqnumber
@@ -160,14 +173,15 @@
 	krb5_kt_free_entry
 	krb5_kt_read_service_key
 	krb5_kt_remove_entry
-#Kadm routines
-#	krb5_adm_connect
-#	krb5_adm_disconnect
-#	krb5_free_adm_data
-#	krb5_read_adm_reply
-#	krb5_send_adm_cmd
+	
 #
 	krb5_change_password
+#
+	krb5_realm_iterator_create
+	krb5_realm_iterator
+	krb5_realm_iterator_free
+	krb5_free_realm_string
+
 #Temporary exports (DO NOT USE)
 	decode_krb5_ticket
 	profile_get_values
@@ -192,13 +206,3 @@
 	remove_error_table
 	error_message
 	
-# DES exports
-	mit_des_ecb_encrypt
-	mit_des_init_random_key
-	mit_des_key_sched
-	mit_des_random_key
-#	mit_des_new_random_key
-#	mit_des_pcbc_encrypt
-#	mit_des_quad_cksum
-#	mit_des_string_to_key
-#	mit_des_set_random_generator_seed
