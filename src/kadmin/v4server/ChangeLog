@@ -1,3 +1,7 @@
+Wed Aug  6 20:27:27 1997  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in: Add support for compiling with Hesiod.
+
 Fri Jul 25 15:49:58 1997  Tom Yu  <tlyu@mit.edu>
 
 	* kadm_funcs.c: Remove mention of dbm for now.  It should probably
