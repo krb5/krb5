@@ -1,3 +1,9 @@
+1999-03-31  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* ccdefops.c: Change the default ccache type under windows to be
+		original FILE ccache type; this will get set to ccapi if
+		the krbcc32.dll can be found.
+
 Mon Feb  8 21:53:37 1999  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* Makefile.in: Enable the ccapi directory for windows builds.  

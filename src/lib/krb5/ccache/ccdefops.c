@@ -27,9 +27,14 @@
 
 #include "k5-int.h"
 
-#if defined(macintosh) || defined(_MSDOS) || defined(_WIN32)
+#if defined(macintosh) 
 
-/* Macs and PCs use the shared, memory based credentials cache */
+/*
+ * Macs use the shared, memory based credentials cache
+ * Windows may also use the ccapi cache, but only if the Krbcc32.dll
+ * can be found; otherwise it falls back to using the old 
+ * file-based ccache.
+ */
 #include "stdcc.h" /* from ccapi subdir */
 
 krb5_cc_ops *krb5_cc_dfl_ops = &krb5_cc_stdcc_ops;
