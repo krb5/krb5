@@ -289,8 +289,18 @@ login(host)
 			user = tmp;
 	}
 	n = command("USER %s", user);
-	if (n == COMPLETE)
-		n = command("PASS dummy");
+	if (n == COMPLETE) {
+	        /* determine if we need to send a dummy password */
+		int oldverbose = verbose;
+
+		verbose = 0;
+		if (command("PWD") != COMPLETE) {
+			verbose = oldverbose;
+			command("PASS dummy");
+		} else {
+			verbose = oldverbose;
+		}
+	}
 	else if (n == CONTINUE) {
 #ifndef NOENCRYPTION
 		int oldclevel;

@@ -1564,17 +1564,17 @@ user(argc, argv)
 		n = command("PASS dummy");
 	else if (n == CONTINUE) {
 #ifndef NOENCRYPTION
-		int oldlevel;
+		int oldclevel;
 #endif
-		if (argc < 3 )
+		if (argc < 3)
 			argv[2] = mygetpass("Password: "), argc++;
 #ifndef NOENCRYPTION
-		if ((oldlevel = dlevel) == PROT_S) dlevel = PROT_P;
+		if ((oldclevel = clevel) == PROT_S) clevel = PROT_P;
 #endif
 		n = command("PASS %s", argv[2]);
 #ifndef NOENCRYPTION
 		/* level may have changed */
-		if (dlevel == PROT_P) dlevel = oldlevel;
+		if (clevel == PROT_P) clevel = oldclevel;
 #endif
 	}
 	if (n == CONTINUE) {

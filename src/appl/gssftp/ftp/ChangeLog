@@ -1,3 +1,12 @@
+Fri Aug 28 18:46:35 1998  Geoffrey King  <gjking@mit.edu>
+
+	* cmds.c (user): Replace "oldlevel" with the more descriptive
+	"oldclevel".  Also, replace all occurrences of "dlevel" in this
+	function with "clevel".
+
+	* ftp.c (login): Test whether or not the server actually requires
+	"PASS dummy" by first sending "PWD" and checking the return value.
+	
 Wed Aug 12 02:26:26 1998  Geoffrey King  <gjking@mit.edu>
 
 	* ftp.c, cmds.c, cmdtab.c, main.c, secure.c, ftp_var.h: Replace
