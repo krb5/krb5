@@ -553,7 +553,7 @@ get_new_file:
 	if (ret_value)
 		*ret_value = p->value;
 	return 0;
-};
+}
 
 /* 
  * Remove a particular node.
