@@ -119,6 +119,7 @@ This is edition @value{EDITION}, for Kerberos V5 version @value{VERSION}.
 * How Kerberos Works::          
 * Building Kerberos::           
 * Installation::                
+* Troubleshooting::             
 
  --- The Detailed Node Listing ---
 
@@ -127,9 +128,14 @@ How Kerberos Works: A Schematic Description
 * Network Services ::           
 * Kerberos Tickets::            
 * The Kerberos Database::       
+* Kerberos Realms::             
 * The Ticket-Granting Ticket::  
 * Network Services and the Master Database::  
 * The User-Kerberos Interaction::  
+
+Network Services and the Master Database
+
+* The Keytab File::             
 
 Building Kerberos
 
@@ -153,6 +159,7 @@ Doing the Build
 Operating System Incompatibilities
 
 * Ultrix 4.2/3::                
+* Alpha OSF/1 V1.3::            
 * Alpha OSF/1 V2.0::            
 * BSDI::                        
 * Solaris versions 2.0 through 2.3::  
@@ -168,6 +175,7 @@ Installation
 * Background::                  
 * Installation on any Machine::  
 * Installing the KDC::          
+* Migrating from V4 to V5 Kerberos::  
 * A Sample Application::        
 * Common Kerberos Service Names::  
 
@@ -189,6 +197,8 @@ Installing the KDC
 * Storing the Master Password::  
 * Adding Users to the Database::  
 * Starting the Kerberos Server::  
+* Setting up Slave Kerberos Servers::  
+* Inter-realm Kerberos Operation::  
 * The Administration Server::   
 * Testing the Kerberos Server::  
 
@@ -206,15 +216,16 @@ from the source distribution, and then to install it at a particular
 site.  The reader is assumed to be familiar with C/UNIX development
 tools. 
 
-In any complex software, there will be bugs.  In addition, you
-may find portability problems when you try to build Kerberos V5 on a
-platform on which the developers yet built.  Please send bug reports or other
-problems you may uncover to the e-mail address @b{krb5-bugs@@mit.edu}.
-Please mention which version of the Kerberos V5 distribution you are
-using, and whether you have made any private changes.  Bug reports that 
-include proposed fixes are especially welcome.  If you do include fixes,
-please send them using either context diffs or unified diffs (using
-@samp{diff -c} or @samp{diff -u}, respectively).
+In any complex software, there will be bugs.  In addition, you may
+find portability problems when you try to build Kerberos V5 on a
+platform on which the developers yet built.  Please send bug reports
+or other problems you may uncover to the e-mail address
+@b{krb5-bugs@@mit.edu}.  Please mention which version of the Kerberos
+V5 distribution you are using, and whether you have made any private
+changes.  Bug reports that include proposed fixes are especially
+welcome.  If you do include fixes, please send them using either
+context diffs or unified diffs (using @samp{diff -c} or @samp{diff
+-u}, respectively).
 
 Please note that there are still a number of aspects of Kerberos V5
 which will likely change before the 1.0 release.  In particular, the
@@ -241,6 +252,7 @@ Service for Open Network Systems}, a paper presented at Winter USENIX
 * Network Services ::           
 * Kerberos Tickets::            
 * The Kerberos Database::       
+* Kerberos Realms::             
 * The Ticket-Granting Ticket::  
 * Network Services and the Master Database::  
 * The User-Kerberos Interaction::  
@@ -254,22 +266,24 @@ programs to request service from @dfn{server} programs that are
 somewhere on the network.  Suppose you have logged in to a workstation
 and you want to @samp{rlogin} to another machine.  You use the local
 @samp{rlogin} client program to contact the remote machine's
-@samp{rlogin} service daemon.
+@samp{rlogind} daemon.
 
 @node Kerberos Tickets, The Kerberos Database, Network Services , How Kerberos Works
 @section Kerberos Tickets
 
-Under Kerberos, the @samp{rlogin} service program allows a client to
-login to a remote machine if it can provide a Kerberos @dfn{ticket} for
-the request.  This ticket proves the identity of the person who has used
-the client program to access the server program.
+Under Kerberos, the @samp{rlogind} daemon allows you to login to a
+remote machine if you can provide @samp{rlogind} a Kerberos ticket
+which proves your identity.  In addition to the ticket, you must also
+have possession of the corresponding ticket session key. The
+combination of a ticket a ticket session key is known as a credential.
 
-In order to use a ticket, the client must also have possession of the
-@dfn{ticket session key}.  This combination of the ticket and the ticket
-session key is known as a @dfn{credential}.
+Typically, a client program automatically obtains credentials
+identifiying the person using the client program.  The credentials are
+obtained from a Kerberos server that resides somewhere on the network.
+A Kerberos server maintains a database of user, server, and password
+information.
 
-
-@node The Kerberos Database, The Ticket-Granting Ticket, Kerberos Tickets, How Kerberos Works
+@node The Kerberos Database, Kerberos Realms, Kerberos Tickets, How Kerberos Works
 @section The Kerberos Database
 
 Kerberos will give you tickets only if you have an entry in the Kerberos
@@ -278,15 +292,33 @@ Kerberos @dfn{principal} (which is often just your username), and
 your Kerberos password.  Every Kerberos user must have an entry in this
 database.
 
-@node The Ticket-Granting Ticket, Network Services and the Master Database, The Kerberos Database, How Kerberos Works
+@node Kerberos Realms, The Ticket-Granting Ticket, The Kerberos Database, How Kerberos Works
+@section Kerberos Realms
+
+Each site (or administrative domain within a site) will have their own
+Kerberos database, which contains information about the users and
+services for that particular site or administrative domain.  
+A @dfn{Kerberos Realm} is used to distinguish the users and services in
+one particular area of administrative control from another area of
+administrative control.
+
+Each Kerberos realm will have at least one Kerberos server, where the
+master Kerberos database for that site or administrative domain is
+stored.  A Kerberos realm may also have one or more @dfn{slave servers},
+which have read-only copies of the Kerberos database which are
+periodically propagated from the master server.  For more details on how
+this is done, see @ref{Setting up Slave Kerberos Servers}.
+
+@node The Ticket-Granting Ticket, Network Services and the Master Database, Kerberos Realms, How Kerberos Works
 @section The Ticket-Granting Ticket
 
-The @samp{kinit} command prompts for your password, and if you enter it
-successfully, you will obtain a @dfn{ticket-granting ticket} and a
+The @samp{kinit} command prompts for your password, and if you enter
+it successfully, you will obtain a @dfn{ticket-granting ticket} and a
 @dfn{ticket session key} which gives you the right to use the ticket.
 This combination of the ticket and its associated key is also know as
-your @dfn{credentials}.  As illustrated below, client programs use these
-credentials to get other Kerberos credentials as needed.
+your @dfn{credentials}.  As illustrated below, client programs use
+your ticket-granting ticket credentials in order to obtain
+client-specific credentials as needed.
 
 Your credentials are stored in a @dfn{credentials cache}, which is often
 simply just a file in @file{/tmp}.  The credentials cache is also
@@ -316,13 +348,26 @@ be many different machines, each offering one particular type of
 service, and the second component serves to give each one of these
 servers a different Kerberos name.
 
-For each service, there must also be a @dfn{service key} stored in the
-Kerberos database.  @b{WARNING:} This service key is the equivalent of
-the service's password, and must be kept secure, since data which is
-meant to be read only by the service is encrypted in this key.  Service
-keys are stored in @dfn{key tables}, which are also commonly known as
-@dfn{srvtab files}.  Service keys that are meant to be used by services
-which run as root are often stored in the file @file{/etc/v5srvtab}.
+@menu
+* The Keytab File::             
+@end menu
+
+@node The Keytab File,  , Network Services and the Master Database, Network Services and the Master Database
+@subsection The Keytab File
+
+For each service, there must also be a @dfn{service key} known only by
+Kerberos and the service.  On the Kerberos server, the service key is
+stored in the Kerberos database.
+
+On the server host, these service keys are stored in the @dfn{Key
+tables}, or @dfn{keytab files}.  (Keytab files were previously
+referred to as @dfn{srvtab files} in the V4 literature.)  The service
+keys that are used by services which run as root are often stored in
+the file @file{/etc/v5srvtab}.
+
+@b{WARNING:} This service key is the equivalent of the service's
+password, and must be kept secure, since data which is meant to be
+read only by the service is encrypted using this key.
 
 @node The User-Kerberos Interaction,  , Network Services and the Master Database, How Kerberos Works
 @section The User--Kerberos Interaction
@@ -348,12 +393,12 @@ entry in the Kerberos database.
 
 @item If this entry exists, the Kerberos server creates and returns a
 ticket-granting ticket and the key which allows you to use it, encrypted
-in your password.  If @samp{kinit} can decrypt the Kerberos reply using
+by your password.  If @samp{kinit} can decrypt the Kerberos reply using
 the password you provide, it stores this ticket in a credentials cache
 on your local machine for later use.  The name of the credentials cache
 can be specified in the @samp{KRB5_CCNAME} environment variable.  If
 this variable is not set, the name of the file will be
-@file{/tmp/krb5cc_<uid>}, where <uid> is the UNIX user-id, represented
+@file{/tmp/krb5cc_<uid>}, where <uid> is your UNIX user-id, represented
 in decimal format.
 @end enumerate
 
@@ -361,7 +406,7 @@ in decimal format.
 @samp{laughter}.
 
 @example
-host% @b{rlogin  laughter}
+host% @b{rlogin laughter}
 @end example
 
 @enumerate A
@@ -378,11 +423,12 @@ ticket-granting service issues you a ticket for that service.  That
 ticket is also cached in your credentials cache.
 
 @item The @samp{rlogin} client now sends that ticket to 
-the @samp{laughter} @samp{rlogin} service program.
-The service program checks the ticket by using its own service key.
-If the ticket is valid, it knows the identity of the user.  If that user 
-is permitted to log in on @samp{laughter} (because the user's name 
-matches one in /etc/passwd), it lets the user log in.
+the @samp{laughter} @samp{rlogind} service program.  The service program
+checks the ticket by using its own service key.  If the ticket is valid,
+it now knows your identity.  If the ticket is valid and you are allowed
+to login to @samp{laughter} (because the your name matches one in
+/etc/passwd, or you are in the appropriate @file{.klogin} file), will
+let you login.
 
 @end enumerate
 @end enumerate
@@ -491,9 +537,9 @@ you might use the following procedure:
 @subsection Building Using @samp{lndir}
 
 If you wish to keep separate build directories for each platform, and
-your @samp{make} program does not support @samp{VPATH}, all is not lost.
-You can use the @samp{lndir} program to create symbolic link trees
-in your build directory.
+you do cannot use a @samp{make} program which supports @samp{VPATH},
+all is not lost.  You can use the @samp{lndir} program to create
+symbolic link trees in your build directory.
 
 For example, if you wish to create a build directory for solaris binaries
 you might use the following procedure:
@@ -514,7 +560,8 @@ makes it fail for relative pathnames.
 
 The Kerberos V5 distribution comes with built-in regression tests.  To
 run them, simply type the following command while in the top-level build
-directory: 
+directory (i.e., the directory where you typed @samp{make} to start
+building Kerberos; see @ref{Doing the Build}.): 
 
 @example
 % @b{make check}
@@ -563,6 +610,14 @@ library should be found (@file{/KRB4DIR/lib}).
 
 @end table
 
+For example, in order to configure Kerberos on a Solaris machine using
+the @samp{suncc} with the optimizer turned on, run the configure
+script with the following options:
+
+@example
+% configure --with-cc=suncc --with-ccopts=-O
+@end example
+
 @node OS Incompatibilities, Configuration .h files, Options to Configure, Building Kerberos
 @section Operating System Incompatibilities
 
@@ -573,24 +628,33 @@ send a report to @b{krb5-bugs@@mit.edu}.  Thanks!
 
 @menu
 * Ultrix 4.2/3::                
+* Alpha OSF/1 V1.3::            
 * Alpha OSF/1 V2.0::            
 * BSDI::                        
 * Solaris versions 2.0 through 2.3::  
 * Solaris 2.X::                 
 @end menu
 
-@node Ultrix 4.2/3, Alpha OSF/1 V2.0, OS Incompatibilities, OS Incompatibilities
+@node Ultrix 4.2/3, Alpha OSF/1 V1.3, OS Incompatibilities, OS Incompatibilities
 @subsection Ultrix 4.2/3
 
-On the MIPS platform, @file{md4.c} and @file{md5.c} can not be compiled
-with the optimizer set at level 1.  (Either @samp{-O} or @samp{-g} will
-work; leaving ccopts null won't.)  The optimizer isn't hung; it just
-takes an exponentially long time.  6 out of the 48 algorithmic steps
-takes 3 seconds, 7 steps takes 9 seconds, 8 steps takes 27 seconds, and
-so on.  Calculations estimate it will finish in approximately 3,469
-billion years....
+On the MIPS platform, @file{md4.c} and @file{md5.c} can not be
+compiled with the optimizer set at level 1.  That is, you must specify
+either @samp{--with-ccopts=-O} and @samp{--with-ccopts=-g} to
+configure.  If you don't specify either, the compile will never complete.
 
-@node Alpha OSF/1 V2.0, BSDI, Ultrix 4.2/3, OS Incompatibilities
+The optimizer isn't hung; it just takes an exponentially long time.  6
+out of the 48 algorithmic steps takes 3 seconds, 7 steps takes 9
+seconds, 8 steps takes 27 seconds, and so on.  Calculations estimate
+it will finish in approximately 3,469 billion years....
+
+@node Alpha OSF/1 V1.3, Alpha OSF/1 V2.0, Ultrix 4.2/3, OS Incompatibilities
+@subsection Alpha OSF/1 V1.3
+
+There is a bug in OSF/1's fgrep which causes the @samp{configure}
+script to fail.
+
+@node Alpha OSF/1 V2.0, BSDI, Alpha OSF/1 V1.3, OS Incompatibilities
 @subsection Alpha OSF/1 V2.0
 
 @file{md4.c} can not be compiled with the optimizer on.  (This could possibly
@@ -786,16 +850,16 @@ To install the binaries into a binary tree, do:
 Currently this only works if @samp{somewhere-else} is @file{/krb5}.
 (It's a bug.)
 
-@node Installation,  , Building Kerberos, Top
+@node Installation, Troubleshooting, Building Kerberos, Top
 @chapter Installation
 
 When you are installing Kerberos for the first time at a site, you must
 first decide on the realm name you will use for your site, and select a
-machine to serve as the @dfn{Key Distribution Center}, or @dfn{KDC} for
-short.  The KDC must be located on a secure machine, since its database
-contains the keys for the entire realm.  It is extremely important that
-the database be kept secure, if the realm's Kerberos service is to
-remain secure.
+machine to host the @dfn{Kerberos server}, which is also known as the
+@dfn{KDC} (@dfn{Key Distribution Center}).  The KDC must be located on a
+secure machine, since its database contains the keys for the entire
+realm.  It is extremely important that the database be kept secure, if
+the realm's Kerberos service is to remain secure.
 
 Once a KDC is installed and configured, you may then set up one or more
 client machines, and one or more application machines.
@@ -804,6 +868,7 @@ client machines, and one or more application machines.
 * Background::                  
 * Installation on any Machine::  
 * Installing the KDC::          
+* Migrating from V4 to V5 Kerberos::  
 * A Sample Application::        
 * Common Kerberos Service Names::  
 @end menu
@@ -832,9 +897,10 @@ have the Kerberos configuration files properly installed.
 
 If you are installing Kerberos on a machine that will act only as a
 Kerberos client, this section describes all that you need to do.  If you
-are installing a KDC, or an Kerberos Application server, please see
-@ref{Installing the KDC}, or @ref{A Sample Application}, for additional
-steps.
+are installing a KDC, or an Kerberos Application server, you will also
+need to complete the procedures detailed in @ref{Installing the KDC}, or
+@ref{A Sample Application}, after you finish with the procedures found
+in this section.
 
 @menu
 * Picking a Realm Name::        
@@ -848,10 +914,11 @@ steps.
 Before you install Kerberos V5 at your site, you have to choose a
 @dfn{realm name}, the name that specifies the system's administrative
 domain.  By convention, we suggest that you use your internet domain
-name, in capital letters.  For example, if your internet domain is
-@code{cygnus.com} (so that you have hostnames such as
-@code{ftp.cygnus.com} and @code{tweedledum.cygnus.com}), then your
-Kerberos realm should be @code{CYGNUS.COM}.
+name, in capital letters.  (Kerberos realm names are case-sensitive, so
+it's important that your realm name be in all upper case.)  For example,
+if your internet domain is @code{cygnus.com} (so that you have hostnames
+such as @code{ftp.cygnus.com} and @code{tweedledum.cygnus.com}), then
+your Kerberos realm should be @code{CYGNUS.COM}.
 
 @node Configuration files, Required Programs, Picking a Realm Name, Installation on any Machine
 @comment  node-name,  next,  previous,  up@section 
@@ -869,31 +936,35 @@ Kerberos realm should be @code{CYGNUS.COM}.
 @node krb.conf, krb.realms, Configuration files, Configuration files
 @subsubsection The @file{krb.conf} File
 
+The @file{krb.conf} file is used to specify a system's default Kerberos
+realm, and to specify the locations of the Kerberos servers.
+
 Create a @file{[KRB5ROOT]/krb.conf} file using the following format:
 @example
 <realm_name>
 <realm_name>   <master_server_name> admin server
 @end example
 
-Where @samp{realm_name} specifies the system's realm name,
-and @samp{master_server_name} specifies the machine name on
-which you will run the master server.  The words @samp{admin server} must
-appear next to the name of the server on which you intend to run the
-administration server (which must be a machine with access to the database).
+Where @samp{realm_name} specifies the default realm to be used by that
+particular system, and @samp{master_server_name} specifies the machine
+name on which you will run the master server.  The words @samp{admin
+server} must appear next to the name of the server on which you intend
+to run the administration server (which must be a machine with access to
+the database).
 
-For example,
-if your realm name is @samp{mit.edu} and your master server's name is
-@samp{kerberos.mit.edu}, the file should have these contents:
+For example, if your realm name is @samp{MIT.EDU} and your master
+server's name is @samp{kerberos.mit.edu}, the file should have these
+contents:
 
 @example
-mit.edu
-mit.edu  kerberos.mit.edu admin server
+MIT.EDU
+MIT.EDU  kerberos.mit.edu admin server
 @end example
 
-See the @file{[SOURCE_DIR]/config-files/krb.conf} file for an
-example @file{krb.conf} file.  That file has examples of how to
-provide backup servers for a given realm (additional lines with the same
-leading realm name) and how to designate servers for remote realms.
+See the @file{[SOURCE_DIR]/config-files/krb.conf} file for an example
+@file{krb.conf} file.  That file has examples of how to provide backup
+servers for a given realm (additional lines with the same leading realm
+name) and how to designate servers for remote realms.
 
 @node krb.realms, /etc/services, krb.conf, Configuration files
 @subsubsection The @file{krb.realms} File
@@ -910,8 +981,8 @@ Each line of the translation file specifies either a host name or domain
 name, and its associated realm:
 
 @example
-<.domain.name> kerberos.realm1
-<host.name> kerberos.realm2
+<.domain.name> KERBEROS.REALM1
+<host.name> KERBEROS.REALM2
 @end example
 
 For example, to map all hosts in the domain LSC.MIT.EDU to LCS.MIT.EDU
@@ -932,6 +1003,11 @@ defined in the system's @file{/etc/services} file.  The file
 @file{[SOURCEDIR]/config-files/services.append} contains the entries
 which should be appened to the @file{/etc/services} file.
 
+If you are using the Network Information Services (NIS) or Yellow
+Pages (YP), you will need to add the services in the
+@file{services.append} file to the services exported in the NIS or YP
+server.
+
 @node Required Programs,  , Configuration files, Installation on any Machine
 @subsection Required Programs
 
@@ -939,12 +1015,15 @@ The following files should be installed on all machines which are
 running Kerberos, either as a client, a KDC, or an application server:
 
 @itemize
-@item @file{/krb5/bin/kinit}
-@item @file{/krb5/bin/kdestroy}
-@item @file{/krb5/bin/klist}
+@item @file{/krb5/bin/kinit} --- This program allows you to obtain
+Kerberos credentials.
+@item @file{/krb5/bin/kdestroy} --- This program allows you to destroy
+Kerberos credentials which are no longer needed.
+@item @file{/krb5/bin/klist} ---- This program allows you to list the
+credentials found in your credentials cache.
 @end itemize
 
-@node Installing the KDC, A Sample Application, Installation on any Machine, Installation
+@node Installing the KDC, Migrating from V4 to V5 Kerberos, Installation on any Machine, Installation
 @section Installing the KDC
 
 @menu
@@ -952,6 +1031,8 @@ running Kerberos, either as a client, a KDC, or an application server:
 * Storing the Master Password::  
 * Adding Users to the Database::  
 * Starting the Kerberos Server::  
+* Setting up Slave Kerberos Servers::  
+* Inter-realm Kerberos Operation::  
 * The Administration Server::   
 * Testing the Kerberos Server::  
 @end menu
@@ -1041,7 +1122,7 @@ The @samp{ank} command is short for "add_new_key"; this command adds a
 new user to the database.  To see what other commands which @samp{kdb5_edit}
 supports, type @kbd{? @key{RET}} at the @samp{kdb5_edit} prompt.
 
-@node Starting the Kerberos Server, The Administration Server, Adding Users to the Database, Installing the KDC
+@node Starting the Kerberos Server, Setting up Slave Kerberos Servers, Adding Users to the Database, Installing the KDC
 @subsection Starting the Kerberos Server
 
 In order to start the Kerberos server, run it as a background process
@@ -1062,7 +1143,15 @@ use the following command:
 The server will prompt you to enter the master password before actually
 starting itself.
 
-@node The Administration Server, Testing the Kerberos Server, Starting the Kerberos Server, Installing the KDC
+@node Setting up Slave Kerberos Servers, Inter-realm Kerberos Operation, Starting the Kerberos Server, Installing the KDC
+@subsection Setting up Slave Kerberos Servers
+
+@node Inter-realm Kerberos Operation, The Administration Server, Setting up Slave Kerberos Servers, Installing the KDC
+@subsection Inter-realm Kerberos Operation
+
+@b{To be written.}
+
+@node The Administration Server, Testing the Kerberos Server, Inter-realm Kerberos Operation, Installing the KDC
 @subsection The Administration Server
 
 There is currently an administration server in the Kerberos source tree.
@@ -1110,8 +1199,12 @@ If you have any problems, you can examine the log file
 there was some sort of error.
 @end ignore
 
+@node Migrating from V4 to V5 Kerberos, A Sample Application, Installing the KDC, Installation
+@section Migrating from V4 to V5 Kerberos
 
-@node A Sample Application, Common Kerberos Service Names, Installing the KDC, Installation
+@b{To be written.}
+
+@node A Sample Application, Common Kerberos Service Names, Migrating from V4 to V5 Kerberos, Installation
 @section A Sample Application
 
 This release of Kerberos comes with a sample application server and a
@@ -1303,6 +1396,11 @@ Used by the Kerberos sample applications.
 These service names are used as the first component of the server's
 principal name, with the second component being the server's fully
 qualified domain name, in lower case.
+
+@node Troubleshooting,  , Installation, Top
+@chapter Troubleshooting
+
+@b{To be written.}
 
 @contents
 @bye
