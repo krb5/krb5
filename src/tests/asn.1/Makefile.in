@@ -31,7 +31,7 @@ check:: krb5_decode_test krb5_encode_test
 install::
 
 clean::
-	rm -f *~ *.o krb5_encode_test krb5_decode_test test.out
+	rm -f *~ *.o krb5_encode_test krb5_decode_test test.out trval
 
 
 ################ Dependencies ################

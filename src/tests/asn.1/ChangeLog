@@ -1,3 +1,7 @@
+Fri Sep 29 14:23:47 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in (clean): Remove trval on a make clean
+
 Wed Sep 06 14:20:57 1995   Chris Provenzano (proven@mit.edu)
 
         * ktest.c, ktest_equal.c, ktest_equal.h : 
