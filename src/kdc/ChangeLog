@@ -1,3 +1,122 @@
+2002-08-15  Tom Yu  <tlyu@mit.edu>
+
+	* kerberos_v4.c: For consistency, check for both DISALLOW_ALL_TIX
+	and DISALLOW_SVR when looking up services.
+	[pullup from trunk]
+
+2002-08-12  Sam Hartman  <hartmans@mit.edu>
+
+	* kdc_preauth.c (get_etype_info): We get KRB5_KDB_NO_MATCHING_KEY
+	not ENOENT; per 5.27 of kdb_xdr.c.
+	[pullup from trunk]
+
+2001-10-29  Ken Raeburn  <raeburn@mit.edu>
+
+	* network.c: Don't cause net/if.h to be included multiple times.
+
+2001-10-25  Tom Yu  <tlyu@mit.edu>
+
+	* do_as_req.c (process_as_req: Treat SUPPORT_DESMD5 as if it were
+	always cleared.
+
+	* do_tgs_req.c (process_tgs_req): Treat SUPPORT_DESMD5 as if it
+	were always cleared.
+
+2001-10-24  Tom Yu  <tlyu@mit.edu>
+
+	* kdc_util.c (select_session_keytype): Don't issue session key
+	enctype that is not in permitted_enctypes.
+	(dbentry_supports_enctype): For now, always treat SUPPORT_DESMD5
+	as if it were cleared.
+
+2001-10-12  Tom Yu  <tlyu@mit.edu>
+
+	* kdc_util.c (ktypes2str): New function; construct a string
+	containing a list of enctypes, given a number and list of
+	enctypes.
+	(rep_etypes2str): New function; construct a string indicating all
+	three enctypes associated with a KDC reply.
+	[pullup 5.99->5.101 from trunk]
+
+	* kdc_util.h: Add prototypes for ktypes2str() and
+	rep_etypes2str().
+	[pullup 5.46->5.47 from trunk]
+
+	* do_as_req.c (process_as_req): Call ktypes2str() and
+	rep_etypes2str() as appropriate.
+	[pullup 5.80->5.81 from trunk]
+
+	* do_tgs_req.c (process_tgs_req): Call ktypes2str() and
+	rep_etypes2str() as appropriate.
+	[pullup 5.77->5.78 from trunk]
+
+2001-10-11  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* do_as_req.c: If KRBCONF_KDC_MODIFIES_KDB defined, produce code
+	that compiles and works.
+	[pullup 5.78->5.79 from trunk]
+
+2001-10-05  Ken Raeburn  <raeburn@mit.edu>
+
+	* do_tgs_req.c (process_tgs_req): Fix logging of bad transit path
+	info.
+
+2001-09-25  Ken Raeburn  <raeburn@mit.edu>
+
+	* do_tgs_req.c (process_tgs_req): If disable-transited-check
+	option isn't set, try to verify transit path.  If
+	reject_bad_transit flag is set and transit path isn't verified,
+	reject the request.  Use a temporary variable to simplify
+	references to the second ticket.
+	* extern.h (struct __kdc_realm_data): Add new field
+	realm_reject_bad_transit.
+	(find_realm_data): Declare.
+	(reject_bad_transit): New macro.
+	* main.c (find_realm_data): Delete declaration.
+	(init_realm): Copy reject-bad-transit value or use default.
+	* rtest.c (find_realm_data): Define dummy version.
+
+2001-02-02  Ken Raeburn  <raeburn@mit.edu>
+
+	* network.c (foreach_localaddr): Sync with lib/krb5/os/localaddr.c
+	version.
+
+2000-05-17  Tom Yu  <tlyu@mit.edu>
+
+	* kerberos_v4.c (process_v4): Zero out v4_pkt.mbz.
+	(kerberos_v4): Fix handling of APPL_REQUEST messages to deal with
+	ridiculously long realms, etc.  Fix up some calls to
+	kerb_err_reply() to be more useful.  Set req_*_ptr before any
+	possible calls to kerb_err_reply().
+
+2000-05-11  Nalin Dahyabhai  <nalin@redhat.com>
+
+	* kdc_util.c (add_to_transited): Use strncpy/strncat when building
+        data in buffers so as not to overrun "prev", "current", and "exp".
+	* kerberos_v4.c (process_v4): Don't assume that the realm is null-
+	terminated.
+	(set_tgtkey): Truncate realm name if it's too long.
+
+2000-04-28  Ken Raeburn  <raeburn@mit.edu>
+	    Nalin Dahyabhai  <nalin@redhat.com>
+
+	* kdc_util.c (add_to_transited): Use strncpy/strncat when building
+	data in buffers.  Fix some limit checks.
+	* kerberos_v4.c (kerb_err_reply): Use strncat so as not to overrun
+	error buffer.
+
+2000-04-22  Ken Raeburn  <raeburn@mit.edu>
+
+	* network.c: Include stddef.h.
+	(foreach_localaddr): Check each address against previously used
+	addresses, and skip duplicates, in case multiple interfaces have
+	the same address.
+
+2000-04-21  Ken Raeburn  <raeburn@mit.edu>
+
+	* network.c (foreach_localaddr): If called functions fail, drop
+	out of loop and return nonzero.
+
 2000-03-14  Ken Raeburn  <raeburn@mit.edu>
 
 	* sock2p.c: New file.

@@ -24,35 +24,37 @@
 #include "pty-int.h"
 
 /* 
- * This routine will be called twice.  It's not particularly important
- * that the setsid() or TIOCSTTY ioctls succeed (they may not the
- * second time), but rather that we have a controlling terminal at the
- * end.  It is assumed that vhangup doesn't exist and confuse the
- * process's notion of controlling terminal on any system without
- * TIOCNOTTY.  That is, either vhangup() leaves the controlling
- * terminal in tact, breaks the association completely, or the system
- * provides TIOCNOTTY to get things back into a reasonable state.  In
- * practice, vhangup() either breaks the association completely or
- * doesn't effect controlling terminals, so this condition is met.
+ * This function will be called twice.  The first time it will acquire
+ * a controlling terminal from which to vhangup() or revoke() (see
+ * comments in open_slave.c); the second time, it will be to open the
+ * actual slave device for use by the application.  We no longer call
+ * ptyint_void_association(), as that will be called in
+ * pty_open_slave() to avoid spurious calls to setsid(), etc.
+ *
+ * It is assumed that systems where vhangup() exists and does break
+ * the ctty association will allow the slave to be re-acquired as the
+ * ctty.  Also, if revoke() or vhangup() doesn't break the ctty
+ * association, we assume that we can successfully reopen the slave.
+ *
+ * This function doesn't check whether we actually acquired the ctty;
+ * we assume that the caller will check that, or that it doesn't
+ * matter in the particular case.
  */
 long
-pty_open_ctty (slave, fd)
-    const char * slave;
-    int *fd;
+pty_open_ctty(const char *slave, int *fd)
 {
-    int retval;
 
-/* First, dissociate from previous terminal */
-    if ( (retval = ptyint_void_association()) != 0 )
-	return retval;
 #ifdef ultrix
-    /* The Ultrix (and other BSD tty drivers) require the process group
-     * to be zero, in order to acquire the new tty as a controlling tty. */
+    /*
+     * The Ultrix (and other BSD tty drivers) require the process
+     * group to be zero, in order to acquire the new tty as a
+     * controlling tty.  This may actually belong in
+     * ptyint_void_association().
+     */
     (void) setpgrp(0, 0);
 #endif
-
     *fd = open(slave, O_RDWR);
-    if (*fd < 0 )
+    if (*fd < 0)
 	return PTY_OPEN_SLAVE_OPENFAIL;
 #ifdef ultrix
     setpgrp(0, getpid());

@@ -1,4 +1,195 @@
-2000-01-27  Ken Raeburn  <raeburn@raeburn.org>
+2002-04-16  Danilo Almeida  <dalmeida@mit.edu>
+
+	* accept_sec_context.c (rd_and_store_for_creds): Remove
+	registration of MEMORY cache type since that's already registered.
+
+2002-04-16	Alexandra Ellwood <lxs@mit.edu>
+        * gssapi_krb5.h: Added #include of gssapi.h and gssapi_generic.h for the
+        Mac because we can't assume people will include them and get the OID 
+        macro and the old names on the Mac.
+
+2002-03-03  Sam Hartman  <hartmans@mit.edu>
+
+        * accept_sec_context.c (rd_and_store_for_creds): Patch from Steven
+	        Michaud <smch@midway.uchicago.edu>  to accept encrypted or
+		        unencrypted credentials.  This is important because Heimdal (and
+			        sometimes Microsoft) send encrypted credentials.
+
+2002-03-03 Alexandra Ellwood <lxs@mit.edu>
+    * accept_sec_context.c, ser_sctx.c, util_crypt.c, wrap_size_limit.c: 
+    Removed unused variables.
+    * acquire_cred.c: Added include of k5-int.h to get prototypes.
+    * disp_status.c: Updated Mac OS X header paths.
+    * gssapi_krb5.c: Added include of k5-int.h to get prototypes.
+    * gssapiP_krb5.h: Updated Mac OS X header paths and added prototype on Mac.
+    * init_sec_context.c: Removed unused function on the mac to avoid warning.
+
+2002-02-28 Alexandra Ellwood <lxs@mit.edu>
+    * gssapi_krb5.h: Updated Mac OS X headers to new framework layout
+
+2002-02-19  Danilo Almeida  <dalmeida@mit.edu>
+
+	* init_sec_context.c (krb5_gss_init_sec_context): Remove unsused
+	variables.  Fix fencepost error in loop that prevents duplicates
+	while trying to figure out the desired enctype.  Make the loop
+	structure in a little more readable.
+	(get_credentials): Remove unused variable.
+
+2001-12-07  Ken Raeburn  <raeburn@mit.edu>
+
+	* init_sec_context.c (krb5_gss_init_sec_context): When supplying a
+	list of enctypes to use, use the subset and ordering indicated by
+	krb5.conf.
+
+2001-10-29  Miro Jurisic  <meeroh@mit.edu>
+	* pullup from krb5-1-2 branch after krb5-1-2-2-bp
+	* add_cred.c (krb5_gss_add_cred): Added constness to some char*s to make
+	them compiler with strict compilers.
+	* gssapi_krb5.h, gssapi_krb5.c: Added oids from rfc 1964 using the 
+	suggested names.
+	* gssapi_krb5.h: Added #include of KerberosSupport.h in case this header
+	is included by itself.
+	* disp-status.c, gssapiP_krb5.h, gssapi_krb5.h: Updated Mac OS #defines
+	and #includes for new header layout and Mac OS X frameworks
+	
+2001-10-04  Tom Yu  <tlyu@mit.edu>
+
+	* accept_sec_context.c (krb5_gss_accept_sec_context): Ignore
+	unrecognized options properly. [krb5-libs/738]
+
+2001-10-01  Tom Yu  <tlyu@mit.edu>
+
+	* accept_sec_context.c (rd_and_store_for_creds): Handle error
+	returns from krb5_rd_cred more sanely.
+
+2001-01-30  Ezra Peisach  <epeisach@mit.edu>
+
+	* accept_sec_context.c (krb5_gss_accept_sec_context): If an error
+	occurs after the auth_context is established, but before the
+	krb5_gss_ctx_id_rec is established, release our pointer to the
+	replay cache and invoke krb5_auth_con_free(). [krb5-libs/855]
+
+2000-09-19  Miro Jurisic  <meeroh@mit.edu>
+
+	* accept_sec_context.c (krb5_gss_accept_sec_context)
+	* acquire_cred.c (krb5_gss_acquire_cred)
+	* import_sec_context.c (krb5_gss_convert_static_mech_oid)
+	* init_sec_context.c (krb5_gss_init_sec_context)
+	* inq_cred.c (krb5_gss_inquire_cred)
+		Cast away constness from gss_OID where necessary to compile
+		with strict compilers
+
+2000-06-27  Tom Yu  <tlyu@mit.edu>
+
+	* init_sec_context.c (get_credentials): Add initial iteration of
+	krb5_get_credentials in order to differentiate between an actual
+	missing credential and merely a bad match based on enctype.  This
+	was causing problems with kadmin.
+
+2000-06-09  Tom Yu  <tlyu@mit.edu>
+
+	* init_sec_context.c (get_credentials): The KDC as well as the
+	ccache may indicate that an enctype is not supported; reflect that
+	in the loop breakout condition.
+
+2000-06-07  Tom Yu  <tlyu@mit.edu>
+
+	* init_sec_context.c (get_credentials): Rework the enctype loop
+	again.
+
+	* accept_sec_context.c (krb5_gss_accept_sec_context): Remove
+	explicit check of mech OID against credential.
+
+2000-06-04  Tom Yu  <tlyu@mit.edu>
+
+	* init_sec_context.c (get_credentials): Reverse sense of test;
+	break out of enctype loop if one succeeds.
+
+2000-06-03  Tom Yu  <tlyu@mit.edu>
+
+	* util_crypt.c (kg_encrypt): Copy ivec, since c_encrypt() now
+	updates ivecs.
+	(kg_decrypt): Copy ivec, since c_decrypt() now updates ivecs.
+
+2000-06-02  Ken Raeburn  <raeburn@mit.edu>
+
+	* init_sec_context.c (get_credentials): Don't check each enctype
+	against a list from the krb5 library; instead, just try to use it,
+	and go on to the next if the error code indicates we can't use it.
+
+2000-05-31  Ken Raeburn  <raeburn@mit.edu>
+
+	* gssapiP_krb5.h (KG_USAGE_SEQ): New value.
+	(enum qop): New type, derived from spec but currently not used.
+	* util_crypt.c (kg_encrypt, kg_decrypt): Added key derivation
+	usage value as an argument.  Prototypes and callers updated; all
+	callers use KG_USAGE_SEAL, except KG_USAGE_SEQ when encrypting
+	sequence numbers.
+	* 3des.txt: New file.
+
+2000-5-19	Alexandra Ellwood <lxs@mit.edu>
+
+	* acquire_cred.c: Changed to use krb5int_cc_default.  This function 
+	supports the Kerberos Login Library and pops up a dialog if the cache does 
+	not contain valid tickets.  This is used to automatically get a tgt before
+	obtaining service tickets.  Note that this should be an internal function
+	because callers don't expect krb5_cc_default to pop up a dialog!
+	(We found this out the hard way :-)
+
+2000-05-03  Nalin Dahyabhai  <nalin@redhat.com>
+
+	* add_cred.c (krb5_gss_add_cred): Don't overflow buffers "ktboth"
+	or "ccboth".
+
+2000-04-21  Ken Raeburn  <raeburn@mit.edu>
+
+	* gssapiP_krb5.h (struct _krb5_gss_ctx_id_rec): Delete field
+	gsskrb5_version.
+	(struct _krb5_gss_cred_id_rec): Delete field rfcv2_mech.
+	* accept_sec_context.c, acquire_cred.c, add_cred.c, inq_cred.c,
+	k5seal.c, k5unseal.c, ser_ctx.c:
+	Delete krb5-mech2 support.
+
+	* init_sec_context.c (get_credentials): Enctype argument is now a
+	pointer to a list of enctypes.  Explicitly try each in order until
+	success or an error other than cryptosystem not being supported.
+	(krb5_gss_init_sec_context): Pass list of cryptosystems, starting
+	with 3DES.
+
+	* gssapiP_krb5.h (enum sgn_alg, enum seal_alg): New types,
+	giving symbolic names for values from RFC 1964, a Microsoft win2k
+	I-D, and our proposed 3des-sha1 values.
+	(KG_USAGE_SEAL, KG_USAGE_SIGN): New macros.
+
+	* accept_sec_context.c (rd_req_keyproc): Already-disabled routine
+	deleted.
+	(krb5_gss_accept_sec_context): Use sgn_alg and seal_alg symbolic
+	names.  Add a case for des3-hmac-sha1.
+	* k5seal.c (make_seal_token_v1): Likewise.  Do key derivation for
+	checksums.
+	* k5unseal.c (kg_unseal_v1): Likewise.
+	* util_crypt.c (kg_encrypt, kg_decrypt): Do key derivation for
+	encryption.
+
+	* util_crypt.c (zeros): Unused variable deleted.
+
+2000-04-18  Ken Raeburn  <raeburn@mit.edu>
+
+	* wrap_size_limit.c: Remove mech2 support.  Add MIT copyright.
+
+2000-04-08  Tom Yu  <tlyu@mit.edu>
+
+	* wrap_size_limit.c (krb5_gss_wrap_size_limit): Fix up
+	wrap_size_limit() to deal with integrity wrap tokens properly.
+	The rfc1964 mech always pads and confounds regardless of whether
+	confidentiality is requested.
+
+2000-03-20  Ken Raeburn  <raeburn@mit.edu>
+
+	* accept_sec_context.c, init_sec_context.c: Disable krb5-mech2
+	stuff for now.  (Tom Yu's krb5-1.1 patch.)
+
+2000-01-27  Ken Raeburn  <raeburn@mit.edu>
 
 	* init_sec_context.c (krb5_gss_init_sec_context): Default to
 	des-cbc-crc.

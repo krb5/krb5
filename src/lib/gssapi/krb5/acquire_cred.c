@@ -1,4 +1,28 @@
 /*
+ * Copyright 2000 by the Massachusetts Institute of Technology.
+ * All Rights Reserved.
+ *
+ * Export of this software from the United States of America may
+ *   require a specific license from the United States Government.
+ *   It is the responsibility of any person or organization contemplating
+ *   export to obtain such a license before exporting.
+ * 
+ * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
+ * distribute this software and its documentation for any purpose and
+ * without fee is hereby granted, provided that the above copyright
+ * notice appear in all copies and that both that copyright notice and
+ * this permission notice appear in supporting documentation, and that
+ * the name of M.I.T. not be used in advertising or publicity pertaining
+ * to distribution of the software without specific, written prior
+ * permission.  Furthermore if you modify this software you must label
+ * your software as modified software and not distribute it in such a
+ * fashion that it might be confused with the original M.I.T. software.
+ * M.I.T. makes no representations about the suitability of
+ * this software for any purpose.  It is provided "as is" without express
+ * or implied warranty.
+ * 
+ */
+/*
  * Copyright 1993 by OpenVision Technologies, Inc.
  * 
  * Permission to use, copy, modify, distribute, and sell this software
@@ -47,6 +71,7 @@
  */
 
 #include "gssapiP_krb5.h"
+#include "k5-int.h"
 #ifdef HAVE_STRING_H
 #include <string.h>
 #else
@@ -154,7 +179,7 @@ acquire_init_cred(context, minor_status, desired_name, output_princ, cred)
 
    /* open the default credential cache */
 
-   if ((code = krb5_cc_default(context, &ccache))) {
+   if ((code = krb5int_cc_default(context, &ccache))) {
       *minor_status = code;
       return(GSS_S_CRED_UNAVAIL);
    }
@@ -283,7 +308,7 @@ krb5_gss_acquire_cred(minor_status, desired_name, time_req,
    size_t i;
    krb5_gss_cred_id_t cred;
    gss_OID_set ret_mechs;
-   int req_old, req_new, req_v2;
+   int req_old, req_new;
    OM_uint32 ret;
    krb5_error_code code;
 
@@ -313,22 +338,18 @@ krb5_gss_acquire_cred(minor_status, desired_name, time_req,
    if (desired_mechs == GSS_C_NULL_OID_SET) {
       req_old = 1;
       req_new = 1;
-      req_v2 = 1;
    } else {
       req_old = 0;
       req_new = 0;
-      req_v2 = 0;
 
       for (i=0; i<desired_mechs->count; i++) {
 	 if (g_OID_equal(gss_mech_krb5_old, &(desired_mechs->elements[i])))
 	    req_old++;
 	 if (g_OID_equal(gss_mech_krb5, &(desired_mechs->elements[i])))
 	    req_new++;
-	 if (g_OID_equal(gss_mech_krb5_v2, &(desired_mechs->elements[i])))
-	    req_v2++;
       }
 
-      if (!req_old && !req_new && !req_v2) {
+      if (!req_old && !req_new) {
 	 *minor_status = 0;
 	 return(GSS_S_BAD_MECH);
       }
@@ -347,7 +368,6 @@ krb5_gss_acquire_cred(minor_status, desired_name, time_req,
    cred->princ = NULL;
    cred->prerfc_mech = req_old;
    cred->rfc_mech = req_new;
-   cred->rfcv2_mech = req_v2;
 
    cred->keytab = NULL;
    cred->ccache = NULL;
@@ -442,15 +462,11 @@ krb5_gss_acquire_cred(minor_status, desired_name, time_req,
 							    &ret_mechs)) ||
 	   (cred->prerfc_mech &&
 	    GSS_ERROR(ret = generic_gss_add_oid_set_member(minor_status,
-							   gss_mech_krb5_old,
+							   (gss_OID) gss_mech_krb5_old,
 							   &ret_mechs))) ||
 	   (cred->rfc_mech &&
 	    GSS_ERROR(ret = generic_gss_add_oid_set_member(minor_status,
-							   gss_mech_krb5,
-							   &ret_mechs))) ||
-	   (cred->rfcv2_mech &&
-	    GSS_ERROR(ret = generic_gss_add_oid_set_member(minor_status,
-							   gss_mech_krb5_v2,
+							   (gss_OID) gss_mech_krb5,
 							   &ret_mechs)))) {
 	   if (cred->ccache)
 	       (void)krb5_cc_close(context, cred->ccache);

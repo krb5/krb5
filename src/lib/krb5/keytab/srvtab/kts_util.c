@@ -62,7 +62,7 @@ read_field(fp, s, len)
     char *s;
     int len;
 {
-    int c, n = 0;
+    int c = 0;
 
     while ((c = getc(fp)) != 0) {
 	if (c == EOF || len <= 1)

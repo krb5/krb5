@@ -45,6 +45,7 @@ krb5_ktfile_get_entry(context, id, principal, kvno, enctype, entry)
     krb5_error_code kerror = 0;
     int found_wrong_kvno = 0;
     krb5_boolean similar;
+    int kvno_offset = 0;
 
     /* Open the keyfile for reading */
     if ((kerror = krb5_ktfileint_openr(context, id)))
@@ -81,6 +82,14 @@ krb5_ktfile_get_entry(context, id, principal, kvno, enctype, entry)
 		krb5_kt_free_entry(context, &new_entry);
 		continue;
 	    }
+	    /*
+	     * Coerce the enctype of the output keyblock in case we
+	     * got an inexact match on the enctype; this behavior will
+	     * go away when the key storage architecture gets
+	     * redesigned for 1.3.
+	     */
+	    new_entry.key.enctype = enctype;
+
 	}
 
 	/* if the principal isn't the one requested, free new_entry
@@ -95,9 +104,24 @@ krb5_ktfile_get_entry(context, id, principal, kvno, enctype, entry)
 	    /* if this is the first match, or if the new vno is
 	       bigger, free the current and keep the new.  Otherwise,
 	       free the new. */
-	       
+	    /* A 1.2.x keytab contains only the low 8 bits of the key
+	       version number.  Since it can be much bigger, and thus
+	       the 8-bit value can wrap, we need some heuristics to
+	       figure out the "highest" numbered key if some numbers
+	       close to 255 and some near 0 are used.
+
+	       The heuristic here:
+
+	       If we have any keys with versions over 240, then assume
+	       that all version numbers 0-127 refer to 256+N instead.
+	       Not perfect, but maybe good enough?  */
+
+#define M(VNO) (((VNO) - kvno_offset + 256) % 256)
+
+	    if (new_entry.vno > 240)
+		kvno_offset = 128;
 	    if (! cur_entry.principal ||
-		(new_entry.vno > cur_entry.vno)) {
+		M(new_entry.vno) > M(cur_entry.vno)) {
 		krb5_kt_free_entry(context, &cur_entry);
 		cur_entry = new_entry;
 	    } else {
@@ -108,8 +132,12 @@ krb5_ktfile_get_entry(context, id, principal, kvno, enctype, entry)
 	       be one?), keep the new, and break out.  Otherwise, remember
 	       that we were here so we can return the right error, and
 	       free the new */
+	    /* Yuck.  The krb5-1.2.x keytab format only stores one byte
+	       for the kvno, so we're toast if the kvno requested is
+	       higher than that.  Short-term workaround: only compare
+	       the low 8 bits.  */
 
-	    if (new_entry.vno == kvno) {
+	    if (new_entry.vno == (kvno & 0xff)) {
 		krb5_kt_free_entry(context, &cur_entry);
 		cur_entry = new_entry;
 		break;

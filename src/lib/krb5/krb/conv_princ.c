@@ -137,7 +137,8 @@ krb5_524_conv_principal(context, princ, name, inst, realm)
 {
      const struct krb_convert *p;
      krb5_data *compo;
-     char *c;
+     char *c, *tmp_realm, *tmp_prealm;
+     int tmp_realm_len, retval; 
 
      *name = *inst = '\0';
      switch (krb5_princ_size(context, princ)) {
@@ -146,19 +147,24 @@ krb5_524_conv_principal(context, princ, name, inst, realm)
 	  compo = krb5_princ_component(context, princ, 0);
 	  p = sconv_list;
 	  while (p->v4_str) {
-	       if (strncmp(p->v5_str, compo->data, compo->length) == 0) {
-		    /* It is, so set the new name now, and chop off */
-		    /* instance's domain name if requested */
-		    strcpy(name, p->v4_str);
-		    if (p->flags & DO_REALM_CONVERSION) {
-			 compo = krb5_princ_component(context, princ, 1);
-			 c = strnchr(compo->data, '.', compo->length);
-			 if (!c || (c - compo->data) > INST_SZ - 1)
-			      return KRB5_INVALID_PRINCIPAL;
-			 strncpy(inst, compo->data, c - compo->data);
-			 inst[c - compo->data] = '\0';
-		    }
-		    break;
+	       if (strncmp(p->v5_str, compo->data, compo->length) == 0 && 
+	           strlen(p->v5_str) == compo->length) {
+		   /*
+		    * It is, so set the new name now, and chop off
+		    * instance's domain name if requested.
+		    */
+		   if (strlen (p->v4_str) > ANAME_SZ - 1)
+		       return KRB5_INVALID_PRINCIPAL;
+		   strcpy(name, p->v4_str);
+		   if (p->flags & DO_REALM_CONVERSION) {
+		       compo = krb5_princ_component(context, princ, 1);
+		       c = strnchr(compo->data, '.', compo->length);
+		       if (!c || (c - compo->data) >= INST_SZ - 1)
+			   return KRB5_INVALID_PRINCIPAL;
+		       memcpy(inst, compo->data, c - compo->data);
+		       inst[c - compo->data] = '\0';
+		   }
+		   break;
 	       }
 	       p++;
 	  }
@@ -168,7 +174,7 @@ krb5_524_conv_principal(context, princ, name, inst, realm)
 	       compo = krb5_princ_component(context, princ, 1);
 	       if (compo->length >= INST_SZ - 1)
 		    return KRB5_INVALID_PRINCIPAL;
-	       strncpy(inst, compo->data, compo->length);
+	       memcpy(inst, compo->data, compo->length);
 	       inst[compo->length] = '\0';
 	  }
 	  /* fall through */
@@ -178,7 +184,7 @@ krb5_524_conv_principal(context, princ, name, inst, realm)
 	       compo = krb5_princ_component(context, princ, 0);
 	       if (compo->length >= ANAME_SZ)
 		    return KRB5_INVALID_PRINCIPAL;
-	       strncpy(name, compo->data, compo->length);
+	       memcpy(name, compo->data, compo->length);
 	       name[compo->length] = '\0';
 	  }
 	  break;
@@ -187,11 +193,39 @@ krb5_524_conv_principal(context, princ, name, inst, realm)
      }
 
      compo = krb5_princ_realm(context, princ);
-     if (compo->length > REALM_SZ - 1)
-	  return KRB5_INVALID_PRINCIPAL;
-     strncpy(realm, compo->data, compo->length);
-     realm[compo->length] = '\0';
 
+     tmp_prealm = malloc(compo->length + 1);
+     if (tmp_prealm == NULL)
+	 return ENOMEM;
+     strncpy(tmp_prealm, compo->data, compo->length);
+     tmp_prealm[compo->length] = '\0';
+
+     /* Ask for v4_realm corresponding to 
+	krb5 principal realm from krb5.conf realms stanza */
+
+     if (context->profile == 0)
+       return KRB5_CONFIG_CANTOPEN;
+     retval = profile_get_string(context->profile, "realms",
+				 tmp_prealm, "v4_realm", 0,
+				 &tmp_realm);
+     free(tmp_prealm);
+     if (retval) { 
+	 return retval;
+     } else {
+	 if (tmp_realm == 0) {
+	     if (compo->length > REALM_SZ - 1)
+		 return KRB5_INVALID_PRINCIPAL;
+	     strncpy(realm, compo->data, compo->length);
+	     realm[compo->length] = '\0';
+	 } else {
+	     tmp_realm_len =  strlen(tmp_realm);
+	     if (tmp_realm_len > REALM_SZ - 1)
+		 return KRB5_INVALID_PRINCIPAL;
+	     strncpy(realm, tmp_realm, tmp_realm_len);
+	     realm[tmp_realm_len] = '\0';
+	     profile_release_string(tmp_realm);
+	 }
+     }
      return 0;
 }
 
@@ -207,8 +241,47 @@ krb5_425_conv_principal(context, name, instance, realm, princ)
      char buf[256];		/* V4 instances are limited to 40 characters */
      krb5_error_code retval;
      char *domain, *cp;
-     char **full_name = 0, **cpp;
+     char **full_name = 0;
      const char *names[5];
+     void*	iterator = NULL;
+     char** v4realms = NULL;
+     char* realm_name = NULL;
+     char* dummy_value = NULL;
+     
+     /* First, convert the realm, since the v4 realm is not necessarily the same as the v5 realm
+        To do that, iterate over all the realms in the config file, looking for a matching 
+        v4_realm line */
+     names [0] = "realms";
+     names [1] = NULL;
+     retval = profile_iterator_create (context -> profile, names, PROFILE_ITER_LIST_SECTION | PROFILE_ITER_SECTIONS_ONLY, &iterator);
+     while (retval == 0) {
+     	retval = profile_iterator (&iterator, &realm_name, &dummy_value);
+     	if ((retval == 0) && (realm_name != NULL)) {
+     		names [0] = "realms";
+     		names [1] = realm_name;
+     		names [2] = "v4_realm";
+     		names [3] = NULL;
+
+     		retval = profile_get_values (context -> profile, names, &v4realms);
+     		if ((retval == 0) && (v4realms != NULL) && (v4realms [0] != NULL) && (strcmp (v4realms [0], realm) == 0)) {
+     			realm = realm_name;
+     			break;
+     		} else if (retval == PROF_NO_RELATION) {
+     			/* If it's not found, just keep going */
+     			retval = 0;
+     		}
+     	} else if ((retval == 0) && (realm_name == NULL)) {
+     		break;
+     	}
+     	if (realm_name != NULL) {
+     		profile_release_string (realm_name);
+     		realm_name = NULL;
+     	}
+     	if (dummy_value != NULL) {
+     		profile_release_string (dummy_value);
+     		dummy_value = NULL;
+     	}
+     }
      
      if (instance) {
 	  if (instance[0] == '\0') {
@@ -234,7 +307,8 @@ krb5_425_conv_principal(context, name, instance, realm, princ)
 	      if (retval == 0 && full_name && full_name[0]) {
 		  instance = full_name[0];
 	      } else {
-		  strcpy(buf, instance);
+		  strncpy(buf, instance, sizeof(buf));
+		  buf[sizeof(buf) - 1] = '\0';
 		  retval = krb5_get_realm_domain(context, realm, &domain);
 		  if (retval)
 		      return retval;
@@ -242,8 +316,8 @@ krb5_425_conv_principal(context, name, instance, realm, princ)
 		      for (cp = domain; *cp; cp++)
 			  if (isupper(*cp))
 			      *cp = tolower(*cp);
-		      strcat(buf, ".");
-		      strcat(buf, domain);
+		      strncat(buf, ".", sizeof(buf) - 1 - strlen(buf));
+		      strncat(buf, domain, sizeof(buf) - 1 - strlen(buf));
 		      krb5_xfree(domain);
 		  }
 		  instance = buf;
@@ -254,6 +328,10 @@ krb5_425_conv_principal(context, name, instance, realm, princ)
 not_service:	
      retval = krb5_build_principal(context, princ, strlen(realm), realm, name,
 				   instance, 0);
+     profile_iterator_free (&iterator);
      profile_free_list(full_name);
+     profile_free_list(v4realms);
+     profile_release_string (realm_name);
+     profile_release_string (dummy_value);
      return retval;
 }

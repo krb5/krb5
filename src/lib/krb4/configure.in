@@ -38,7 +38,7 @@ else
 	AC_DEFINE(BITS32)
 fi
 AC_DEFINE(KRB4_USE_KEYTAB)
-AC_HAVE_FUNCS(strsave seteuid setreuid setresuid)
+AC_HAVE_FUNCS(strdup seteuid setreuid setresuid)
 AC_PROG_AWK
 KRB5_BUILD_LIBOBJS
 KRB5_BUILD_LIBRARY_WITH_DEPS

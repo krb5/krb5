@@ -23,32 +23,27 @@
 #include <com_err.h>
 #include "libpty.h"
 #include "pty-int.h"
-/* 
- * This routine will be called twice.  It's not particularly important
- * that the setsid() or TIOCSTTY ioctls succeed (they may not the
- * second time), but rather that we have a controlling terminal at the
- * end.  It is assumed that vhangup doesn't exist and confuse the
- * process's notion of controlling terminal on any system without
- * TIOCNOTTY.  That is, either vhangup() leaves the controlling
- * terminal in tact, breaks the association completely, or the system
- * provides TIOCNOTTY to get things back into a reasonable state.  In
- * practice, vhangup() either breaks the association completely or
- * doesn't effect controlling terminals, so this condition is met.
- */
 
-long ptyint_void_association()
+/*
+ * This function gets called to set up the current process as a
+ * session leader (hence, can't be called except from a process that
+ * isn't already a session leader) and dissociates the controlling
+ * terminal (if any) from the session.
+ */
+long
+ptyint_void_association(void)
 {
-            int con_fd;
+    int fd;
 #ifdef HAVE_SETSID
     (void) setsid();
 #endif
-
-        /* Void tty association first */
+    /* Void tty association first */
 #ifdef TIOCNOTTY
-        if ((con_fd = open("/dev/tty", O_RDWR)) >= 0) {
-          ioctl(con_fd, TIOCNOTTY, 0);
-          close(con_fd);
-	}
+    fd = open("/dev/tty", O_RDWR);
+    if (fd >= 0) {
+	ioctl(fd, TIOCNOTTY, 0);
+	close(fd);
+    }
 #endif
-	    return 0;
+    return 0;
 }

@@ -1,3 +1,54 @@
+2002-08-15  Tom Yu  <tlyu@mit.edu>
+
+	* keytab.c (krb5_ktkdb_get_entry): For consistency, check for
+	DISALLOW_ALL_TIX and DISALLOW_SVR when looking up keys.
+	[pullup from trunk]
+
+2002-08-12  Sam Hartman  <hartmans@mit.edu>
+
+	* kdb_xdr.c (krb5_dbe_search_enctype): Initialize ret to 0; thanks
+	to  Lubos Kejzlar <kejzlar@civ.zcu.cz> 
+	[pullup from trunk]
+
+2001-11-05  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (LIBMINOR): Bump due to some behavior changes
+	regarding enctype similarity.
+
+2001-10-22  Tom Yu  <tlyu@mit.edu>
+
+	* kdb_xdr.c (krb5_dbe_search_enctype): Filter out enctypes that
+	aren't in permitted_enctypes.  This prevents the KDC from issuing
+	a ticket whose enctype that it won't accept.
+
+2001-10-20  Tom Yu  <tlyu@mit.edu>
+
+	* keytab.c (krb5_ktkdb_get_entry): For now, coerce enctype of
+	output keyblock in case we got a match on a similar enctype.
+
+2000-05-11  Nalin Dahyabhai  <nalin@redhat.com>
+
+	* t_kdb.c (gen_principal): Don't overflow "pnamebuf" if bad data was
+	passed in.
+
+2000-05-03  Nalin Dahyabhai  <nalin@redhat.com>
+
+	* setup_mkey.c (krb5_db_setup_mkey_name): Use REALM_SEP_STRING
+	when computing size of buffer that is to include it.
+
+	* fetch_mkey.c (krb5_db_fetch_mkey): Make sure "defkeyfile" is
+	null terminated after construction.
+	* store_mkey.c (krb5_db_store_mkey): Likewise.
+
+2000-04-27  Ken Raeburn  <raeburn@mit.edu>
+	    Ezra Peisach  <epeisach@mit.edu>
+
+	* t_kdb.c (gen_principal): Force argument to isalnum to be in
+	range 0..255.
+	(do_testing): Cast pid_t to long before passing to fprintf, and
+	use %ld format.  Fix argument lists to find_principal and
+	delete_principal.
+
 2000-03-16  Ezra Peisach  <epeisach@mit.edu>
 
 	* kdb_xdr.c (krb5_dbe_lookup_mod_princ_data): Get rid of

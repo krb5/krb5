@@ -68,7 +68,7 @@ krb5_db_store_mkey(context, keyfile, mname, key)
 	(void) strncat(defkeyfile, realm->data,
 		       min(sizeof(defkeyfile)-sizeof(DEFAULT_KEYFILE_STUB)-1,
 			   realm->length));
-	(void) strcat(defkeyfile, "");
+	defkeyfile[sizeof(defkeyfile) - 1] = '\0';
 	keyfile = defkeyfile;
     }
 
