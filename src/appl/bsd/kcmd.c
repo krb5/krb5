@@ -152,7 +152,9 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
     }
 
     if (realm && *realm) {
-	(void) krb5_xfree(krb5_princ_realm(bsd_context,get_cred->server)->data);
+	free(krb5_princ_realm(bsd_context,get_cred->server)->data);
+	/*krb5_xfree(krb5_princ_realm(bsd_context,get_cred->server)->data);*/
+
 	krb5_princ_set_realm_length(bsd_context,get_cred->server,strlen(realm));
 	krb5_princ_set_realm_data(bsd_context,get_cred->server,strdup(realm));
    }
