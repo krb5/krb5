@@ -246,11 +246,16 @@ Minor changes listed by ticket ID
 * [866] lib/krb5/os/localaddr.c and kdc/network.c use a common source
   for local address enumeration now.
 
+* [882] gss-client now correctly deletes the context on error.
+
 * [919] kdc/network.c problems relating to SIOCGIFCONF have been
   fixed.
 
 * [922] An overflow in the string-to-time conversion routines has been
   fixed.
+
+* [933] krb524d now handles single-DES session keys other than of type
+  des-cbc-crc.
 
 * [935] des-cbc-md4 now included in default enctypes.
 
@@ -303,6 +308,8 @@ Minor changes listed by ticket ID
 
 * [1102] gssapi_generic.h should now work with C++.
 
+* [1135] The kadm5 ACL system is better documented.
+
 * [1136] Some documentation for the setup of cross-realm
   authentication has been added.
 
@@ -329,6 +336,8 @@ Minor changes listed by ticket ID
   supported by the release.
 
 * [1202] The KDC no longer rejects unrecognized flags.
+
+* [1203] krb5_get_init_creds_keytab() no longer does a double-free.
 
 * [1211] The ASN.1 code no longer passes (harmless) uninitialized
   values around.
@@ -555,6 +564,11 @@ Minor changes listed by ticket ID
 * [1619] etype_info parser (once again) accepts extra field emitted by
   Heimdal.
 
+* [1643] Some typos in kdc.conf.M have been fixed.
+
+* [1648] For consistency, leading spaces before preprocessor
+  directives in profile.h have been removed.
+
 Copyright Notice and Legal Administrivia
 ----------------------------------------
 
@@ -741,10 +755,11 @@ Thanks to Paul Nelson of Thursby Software Systems for implementing the
 Microsoft set password protocol.
 
 Thanks to the members of the Kerberos V5 development team at MIT, both
-past and present: Danilo Almeida, Jay Berkenbilt, Richard Basch, Mitch
-Berger, John Carr, Don Davis, Alexandra Ellwood, Nancy Gilman, Matt
-Hancher, Sam Hartman, Paul Hill, Marc Horowitz, Eva Jacobus, Miroslav
-Jurisic, Barry Jaspan, Geoffrey King, John Kohl, Peter Litwack, Scott
-McGuire, Kevin Mitchell, Cliff Neuman, Paul Park, Ezra Peisach, Chris
-Provenzano, Ken Raeburn, Jon Rochlis, Jeff Schiller, Jen Selby, Brad
-Thompson, Harry Tsai, Ted Ts'o, Marshall Vale, Tom Yu.
+past and present: Danilo Almeida, Jeffrey Altman, Jay Berkenbilt,
+Richard Basch, Mitch Berger, John Carr, Don Davis, Alexandra Ellwood,
+Nancy Gilman, Matt Hancher, Sam Hartman, Paul Hill, Marc Horowitz, Eva
+Jacobus, Miroslav Jurisic, Barry Jaspan, Geoffrey King, John Kohl,
+Peter Litwack, Scott McGuire, Kevin Mitchell, Cliff Neuman, Paul Park,
+Ezra Peisach, Chris Provenzano, Ken Raeburn, Jon Rochlis, Jeff
+Schiller, Jen Selby, Brad Thompson, Harry Tsai, Ted Ts'o, Marshall
+Vale, Tom Yu.
