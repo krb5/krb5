@@ -53,7 +53,7 @@ libkrb5.dll:: $(LIBS) libkrb5.def win_glue.obj
 	rc /nologo /p /k libkrb5.dll
 
 sap_glue.obj: win_glue.c
-        $(CC) $(CFLAGS) -DSAP_VERSERV -I$(VERS_DIR) /c \
+	$(CC) $(CFLAGS) -DSAP_VERSERV -I$(VERS_DIR) /c \
 		/Fosap_glue.obj win_glue.c
 
 sapkrb5.dll:: $(GLIB) $(LIBS) gssapi.def sap_glue.obj

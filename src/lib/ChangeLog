@@ -1,3 +1,7 @@
+Wed Jun 12 12:52:30 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* Makefile.in (lib-windows): Replace spaces with tab
+
 Mon Jun 10 23:40:48 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* Makefile.in (lib-windows): Add production rule for sapkrb5.dll.
