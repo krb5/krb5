@@ -1,3 +1,12 @@
+Thu Jun 22 16:11:07 1995  Tom Yu  (tlyu@dragons-lair)
+
+	* k5-config.h: remove definition for KRB5_PROVIDE_PROTOTYPES
+		because we've reversed the sense
+
+	* configure.in: KBR5_PROVIDE_PROTOTYPES -> KRB5_NO_PROTOTYPES;
+		NO_NESTED_PROTOTYPES -> KRB5_NO_NESTED_PROTOTYPES
+
+	* rsa-md5.h: reverse sense of KRB5_PROVIDE_PROTOTYPES
 
 Thu Jun 22 11:52:07 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* adm_proto.h - Add prototypes for kadm library profile handling

@@ -60,8 +60,8 @@ AC_CACHE_VAL(krb5_cv_has_prototypes,
 [int x(double y, int z);], [],
 krb5_cv_has_prototypes=yes, krb5_cv_has_prototypes=no)])
 AC_MSG_RESULT($krb5_cv_has_prototypes)
-if test $krb5_cv_has_prototypes = yes; then
-AC_DEFINE(KRB5_PROVIDE_PROTOTYPES)
+if test $krb5_cv_has_prototypes = no; then
+AC_DEFINE(KRB5_NO_PROTOTYPES)
 fi
 dnl *never* set NARROW_PROTOTYPES
 
@@ -73,7 +73,7 @@ AC_CACHE_VAL(krb5_cv_struct_prototypes,
 krb5_cv_struct_prototypes=yes, krb5_cv_struct_prototypes=no)])
 AC_MSG_RESULT($krb5_cv_struct_prototypes)
 if test $krb5_cv_struct_prototypes = no; then
-AC_DEFINE(NO_NESTED_PROTOTYPES)
+AC_DEFINE(KRB5_NO_NESTED_PROTOTYPES)
 fi
 dnl
 
