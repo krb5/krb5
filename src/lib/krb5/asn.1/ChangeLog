@@ -1,3 +1,8 @@
+2003-04-13  Ezra Peisach  <epeisach@mit.edu>
+
+	* asn1_k_decode.c (asn1_decode_kdc_req_body): Fix memory leak if
+	optional server field is lacking,
+
 2003-03-11  Ken Raeburn  <raeburn@mit.edu>
 
 	* asn1_get.c (asn1_get_tag): Deleted.
