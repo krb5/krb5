@@ -122,17 +122,30 @@ krb5_dbe_lookup_tl_data(context, entry, ret_tl_data)
     return(0);
 }
 
-/* You can force the generation number to a particular value by filling in
-   newval.  By default, if newval is zero, the generation number will simply
-   be incremented by 1. */
-
 krb5_error_code
-krb5_dbe_update_generation_number_general(context, entry, newval)
+krb5_dbe_set_generation_number_general(context, entry, newval)
     krb5_context          context;
     krb5_db_entry       * entry;
     krb5_int32            newval;
 {
-    krb5_error_code       ret;
+    krb5_error_code     ret;
+    krb5_tl_data        tl_data;
+    krb5_octet          buf[4]; /* this is the encoded size of an int32 */
+
+    tl_data.tl_data_type = KRB5_TL_GENERATION_NUMBER;
+    tl_data.tl_data_length = sizeof(newval);
+    krb5_kdb_encode_int32(newval, buf);
+    tl_data.tl_data_contents = buf;
+
+    return(krb5_dbe_update_tl_data(context, entry, &tl_data));
+}
+
+krb5_error_code
+krb5_dbe_increment_generation_number_general(context, entry)
+    krb5_context          context;
+    krb5_db_entry       * entry;
+{
+    krb5_error_code     ret;
     krb5_tl_data        tl_data;
     krb5_int32          generation_number;
     krb5_octet          buf[4]; /* this is the encoded size of an int32 */
@@ -140,10 +153,9 @@ krb5_dbe_update_generation_number_general(context, entry, newval)
     if ((ret = krb5_dbe_lookup_generation_number_general(context, entry,
                                                         &generation_number)))
         generation_number = 0; /* Didn't exist before. */
-    generation_number = newval ? newval : (generation_number + 1);
     tl_data.tl_data_type = KRB5_TL_GENERATION_NUMBER;
     tl_data.tl_data_length = sizeof(generation_number);
-    krb5_kdb_encode_int32(generation_number, buf);
+    krb5_kdb_encode_int32(++generation_number, buf);
     tl_data.tl_data_contents = buf;
 
     return(krb5_dbe_update_tl_data(context, entry, &tl_data));

@@ -1,3 +1,9 @@
+2001-06-21  Mitchell Berger  <mitchb@mit.edu>
+
+	* kdb_xdr.c: Replaced function krb5_dbe_update_generation_number_general
+	with similar functions krb5_dbe_set_generation_number_general and
+	krb5_dbe_increment_generation_number_general.
+
 2001-06-20  Mitchell Berger  <mitchb@mit.edu>
 
 	* kdb_xdr.c: Added new functions
