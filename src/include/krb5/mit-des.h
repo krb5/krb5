@@ -19,7 +19,9 @@
 typedef krb5_octet mit_des_cblock[8];	/* crypto-block size */
 
 /* Key schedule--used internally by DES routines to gain some speed */
-typedef struct des_ks_struct { mit_des_cblock _; } mit_des_key_schedule[16];
+typedef struct mit_des_ks_struct {
+    mit_des_cblock _;
+} mit_des_key_schedule[16];
 
 #define MIT_DES_ENCRYPT	1
 #define MIT_DES_DECRYPT	0
