@@ -83,21 +83,35 @@ WITH_NETLIB dnl
 KRB_INCLUDE dnl
 AC_ARG_PROGRAM dnl
 ])dnl
+
+dnl This is somewhat gross and should go away when the build system
+dnl is revamped. -- tlyu
+dnl DECLARE_SYS_ERRLIST - check for sys_errlist in libc
 dnl
-dnl check for sys_errlist -- DECLARE_SYS_ERRLIST
-dnl
-define(DECLARE_SYS_ERRLIST,[
-AC_MSG_CHECKING([for sys_errlist declaration])
-AC_CACHE_VAL(krb5_cv_decl_errlist,
-[AC_TRY_LINK(
-[#include <stdio.h>
-#include <errno.h>], [1+sys_nerr;],dnl
- krb5_cv_decl_errlist=yes, krb5_cv_decl_errlist=no)])
-AC_MSG_RESULT($krb5_cv_decl_errlist)
-if test $krb5_cv_decl_errlist = no; then
-	AC_DEFINE(NEED_SYS_ERRLIST)
-fi
-])dnl
+AC_DEFUN([DECLARE_SYS_ERRLIST],
+[AC_CACHE_CHECK([for sys_errlist declaration], krb5_cv_decl_sys_errlist,
+[AC_TRY_COMPILE([#include <stdio.h>
+#include <errno.h>], [1+sys_nerr;],
+krb5_cv_decl_sys_errlist=yes, krb5_cv_decl_sys_errlist=no)])
+# assume sys_nerr won't be declared w/o being in libc
+if test $krb5_cv_decl_sys_errlist = yes; then
+  AC_DEFINE(SYS_ERRLIST_DECLARED)
+  AC_DEFINE(HAVE_SYS_ERRLIST)
+else
+  # This means that sys_errlist is not declared in errno.h, but may still
+  # be in libc.
+  AC_CACHE_CHECK([for sys_errlist in libc], krb5_cv_var_sys_errlist,
+  [AC_TRY_LINK([extern int sys_nerr;], [1+sys_nerr;],
+  krb5_cv_var_sys_errlist=yes, krb5_cv_var_sys_errlist=no;)])
+  if test $krb5_cv_var_sys_errlist = yes; then
+    AC_DEFINE(HAVE_SYS_ERRLIST)
+    # Do this cruft for backwards compatibility for now.
+    AC_DEFINE(NEED_SYS_ERRLIST)
+  else
+    AC_MSG_WARN([sys_errlist is neither in errno.h nor in libc])
+  fi
+fi])
+
 dnl
 dnl check for sigmask/sigprocmask -- CHECK_SIGPROCMASK
 dnl
