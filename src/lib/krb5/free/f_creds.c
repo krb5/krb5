@@ -33,6 +33,8 @@ krb5_creds *val;
 	xfree(val->ticket.data);
     if (val->second_ticket.data)
 	xfree(val->second_ticket.data);
+    if (val->addresses)
+	krb5_free_address(val->addresses);
     xfree(val);
     return;
 }
