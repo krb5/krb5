@@ -349,9 +349,10 @@ krb5_scc_read(context, id, buf, len)
    int len;
 {
      int ret;
+     unsigned int ulen = len;
 
      errno = 0;
-     ret = fread((char *) buf, 1, len, ((krb5_scc_data *) id->data)->file);
+     ret = fread((char *) buf, 1, ulen, ((krb5_scc_data *) id->data)->file);
      if ((ret == 0) && errno)
 	  return krb5_scc_interpret(context, errno);
      else if (ret != len)
@@ -464,7 +465,8 @@ krb5_scc_read_addrs(context, id, addrs)
      /* Make *addrs able to hold length pointers to krb5_address structs
       * Add one extra for a null-terminated list
       */
-     *addrs = (krb5_address **) calloc(length+1, sizeof(krb5_address *));
+     *addrs = (krb5_address **) calloc((unsigned) length+1, 
+				       sizeof(krb5_address *));
      if (*addrs == NULL)
 	  return KRB5_CC_NOMEM;
 
@@ -563,7 +565,7 @@ krb5_scc_read_data(context, id, data)
 	return KRB5_OK;
      }
 
-     data->data = (char *) malloc(data->length+1);
+     data->data = (char *) malloc((unsigned int) data->length+1);
      if (data->data == NULL)
 	  return KRB5_CC_NOMEM;
 
@@ -608,7 +610,7 @@ krb5_scc_read_addr(context, id, addr)
      if (addr->length == 0)
 	     return KRB5_OK;
 
-     addr->contents = (krb5_octet *) malloc(addr->length);
+     addr->contents = (krb5_octet *) malloc((unsigned) addr->length);
      if (addr->contents == NULL)
 	  return KRB5_CC_NOMEM;
 
@@ -733,7 +735,8 @@ krb5_scc_read_authdata(context, id, a)
      /* Make *a able to hold length pointers to krb5_authdata structs
       * Add one extra for a null-terminated list
       */
-     *a = (krb5_authdata **) calloc(length+1, sizeof(krb5_authdata *));
+     *a = (krb5_authdata **) calloc((unsigned) length+1, 
+				    sizeof(krb5_authdata *));
      if (*a == NULL)
 	  return KRB5_CC_NOMEM;
 
@@ -783,7 +786,7 @@ krb5_scc_read_authdatum(context, id, a)
     if (a->length == 0 )
 	    return KRB5_OK;
 
-    a->contents = (krb5_octet *) malloc(a->length);
+    a->contents = (krb5_octet *) malloc((unsigned) a->length);
     if (a->contents == NULL)
 	return KRB5_CC_NOMEM;
 
@@ -820,9 +823,10 @@ krb5_scc_write(context, id, buf, len)
    int len;
 {
      int ret;
+     unsigned int ulen = len;
 
      errno = 0;
-     ret = fwrite((char *) buf, 1, len, ((krb5_scc_data *)id->data)->file);
+     ret = fwrite((char *) buf, 1, ulen, ((krb5_scc_data *)id->data)->file);
      if ((ret == 0) && errno) {
 	  return krb5_scc_interpret (context, errno);
      } else if (ret != len)
@@ -2004,7 +2008,7 @@ krb5_scc_store(context, id, creds)
      TCHECK(ret);
      ret = krb5_scc_store_times(context, id, &creds->times);
      TCHECK(ret);
-     ret = krb5_scc_store_octet(context, id, creds->is_skey);
+     ret = krb5_scc_store_octet(context, id, (krb5_int32) creds->is_skey);
      TCHECK(ret);
      ret = krb5_scc_store_int32(context, id, creds->ticket_flags);
      TCHECK(ret);

@@ -102,7 +102,7 @@ authdata_match(mdata, data)
       if ((mdatap->ad_type != datap->ad_type) ||
           (mdatap->length != datap->length) ||
           (memcmp ((char *)mdatap->contents,
-		 (char *)datap->contents, mdatap->length) != 0))
+		 (char *)datap->contents, (unsigned) mdatap->length) != 0))
           return FALSE;
       mdata++;
       data++;
@@ -125,7 +125,8 @@ data_match(data1, data2)
     if (data1->length != data2->length)
 	return FALSE;
     else
-	return memcmp(data1->data, data2->data, data1->length) ? FALSE : TRUE;
+	return memcmp(data1->data, data2->data, (unsigned) data1->length) 
+	  ? FALSE : TRUE;
 }
 
 static int

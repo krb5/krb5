@@ -368,7 +368,7 @@ krb5_mcc_next_cred(context, id, cursor, creds)
      return KRB5_OK;
 
 clearticket:
-	memset(creds->ticket.data,0,creds->ticket.length);
+	memset(creds->ticket.data,0, (unsigned) creds->ticket.length);
 cleanticket:
 	krb5_xfree(creds->ticket.data);
 cleanaddrs:

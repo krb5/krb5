@@ -306,8 +306,9 @@ krb5_fcc_read(context, id, buf, len)
    int len;
 {
      int ret;
+     unsigned ulen = len;
 
-     ret = read(((krb5_fcc_data *) id->data)->fd, (char *) buf, len);
+     ret = read(((krb5_fcc_data *) id->data)->fd, (char *) buf, ulen);
      if (ret == -1)
 	  return krb5_fcc_interpret(context, errno);
      else if (ret != len)
@@ -524,7 +525,7 @@ krb5_fcc_read_data(context, id, data)
 	return KRB5_OK;
      }
 
-     data->data = (char *) malloc(data->length+1);
+     data->data = (char *) malloc((unsigned) data->length+1);
      if (data->data == NULL)
 	  return KRB5_CC_NOMEM;
 
@@ -569,7 +570,7 @@ krb5_fcc_read_addr(context, id, addr)
      if (addr->length == 0)
 	     return KRB5_OK;
 
-     addr->contents = (krb5_octet *) malloc(addr->length);
+     addr->contents = (krb5_octet *) malloc((unsigned) addr->length);
      if (addr->contents == NULL)
 	  return KRB5_CC_NOMEM;
 
@@ -752,7 +753,7 @@ krb5_fcc_read_authdatum(context, id, a)
     if (a->length == 0 )
 	    return KRB5_OK;
 
-    a->contents = (krb5_octet *) malloc(a->length);
+    a->contents = (krb5_octet *) malloc((unsigned) a->length);
     if (a->contents == NULL)
 	return KRB5_CC_NOMEM;
 
@@ -789,8 +790,9 @@ krb5_fcc_write(context, id, buf, len)
    int len;
 {
      int ret;
+     unsigned int ulen = len;
 
-     ret = write(((krb5_fcc_data *)id->data)->fd, (char *) buf, len);
+     ret = write(((krb5_fcc_data *)id->data)->fd, (char *) buf, ulen);
      if (ret < 0)
 	  return krb5_fcc_interpret(context, errno);
      if (ret != len)
@@ -1261,11 +1263,11 @@ krb5_fcc_skip_header(context, id)
      krb5_error_code kret;
      krb5_ui_2 fcc_flen;
 
-     lseek(data->fd, sizeof(krb5_ui_2), SEEK_SET);
+     lseek(data->fd, (off_t) sizeof(krb5_ui_2), SEEK_SET);
      if (data->version == KRB5_FCC_FVNO_4) {
 	 kret = krb5_fcc_read_ui_2(context, id, &fcc_flen);
 	 if (kret) return kret;
-	 if(lseek(data->fd, fcc_flen, SEEK_CUR) < 0)
+	 if(lseek(data->fd, (off_t) fcc_flen, SEEK_CUR) < 0)
 		 return errno;
      }
      return KRB5_OK;
@@ -1385,7 +1387,7 @@ krb5_fcc_destroy(context, id)
 	  ((krb5_fcc_data *) id->data)->fd = ret;
      }
      else
-	  lseek(((krb5_fcc_data *) id->data)->fd, 0, SEEK_SET);
+	  lseek(((krb5_fcc_data *) id->data)->fd, (off_t) 0, SEEK_SET);
 
 #ifdef MSDOS_FILESYSTEM
 /* "disgusting bit of UNIX trivia" - that's how the writers of NFS describe
@@ -1592,7 +1594,7 @@ krb5_fcc_start_seq_get(context, id, cursor)
      kret = krb5_fcc_skip_principal(context, id);
      if (kret) goto done;
 
-     fcursor->pos = lseek(data->fd, 0, SEEK_CUR);
+     fcursor->pos = lseek(data->fd, (off_t) 0, SEEK_CUR);
      *cursor = (krb5_cc_cursor) fcursor;
 
 done:
@@ -1669,7 +1671,8 @@ krb5_fcc_next_cred(context, id, cursor, creds)
      kret = krb5_fcc_read_data(context, id, &creds->second_ticket);
      TCHECK(kret);
      
-     fcursor->pos = lseek(((krb5_fcc_data *) id->data)->fd, 0, SEEK_CUR);
+     fcursor->pos = lseek(((krb5_fcc_data *) id->data)->fd, (off_t) 0, 
+			  SEEK_CUR);
      cursor = (krb5_cc_cursor *) fcursor;
 
 lose:
@@ -1918,7 +1921,7 @@ krb5_fcc_store(context, id, creds)
      MAYBE_OPEN(context, id, FCC_OPEN_RDWR);
 
      /* Make sure we are writing to the end of the file */
-     ret = lseek(((krb5_fcc_data *) id->data)->fd, 0, SEEK_END);
+     ret = lseek(((krb5_fcc_data *) id->data)->fd, (off_t) 0, SEEK_END);
      if (ret < 0) {
 	  MAYBE_CLOSE_IGNORE(context, id);
 	  return krb5_fcc_interpret(context, errno);
@@ -1932,7 +1935,7 @@ krb5_fcc_store(context, id, creds)
      TCHECK(ret);
      ret = krb5_fcc_store_times(context, id, &creds->times);
      TCHECK(ret);
-     ret = krb5_fcc_store_octet(context, id, creds->is_skey);
+     ret = krb5_fcc_store_octet(context, id, (krb5_int32) creds->is_skey);
      TCHECK(ret);
      ret = krb5_fcc_store_int32(context, id, creds->ticket_flags);
      TCHECK(ret);

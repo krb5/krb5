@@ -1,3 +1,8 @@
+2000-09-25  Ezra Peisach  <epeisach@mit.edu>
+
+	* cc_file.c ccbase.c, cc_stdio.c, cc_retr.c, cc_memory.c: More
+	signed/unsigned fixes.
+
 Sat Sep 23 23:42:32 2000  Ezra Peisach  <epeisach@mit.edu>
 
 	* t_cc.c: Code cleanup. Test more failure modes of the cache library. 

@@ -88,7 +88,7 @@ krb5_cc_resolve (context, name, cache)
     struct krb5_cc_typelist *tlist;
     char *pfx, *cp;
     const char *resid;
-    int pfxlen;
+    unsigned int pfxlen;
     
     cp = strchr (name, ':');
     if (!cp) {
