@@ -1,3 +1,14 @@
+Mon Aug  7 18:40:34 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* tf_util.c (utimes): If __SVR4 is defined, #include <utime.h>,
+		just as we do if __svr4__ is defined.
+
+	* g_pw_in_tkt.c: If __SVR4 is defined, #include <sgtty.h>, just as
+		we do if __svr4__ is defined.  (WARNING: This code still
+		assumes that the BSD ioctl's are being supported, at least
+		in compatibility mode.  We should really upgrade this code
+		to use POSIX termios calls.)
+
 Tue Jun 27 23:59:28 1995  Mark Eichin  <eichin@cygnus.com>
 
 	* rd_req.c (krb_rd_req): from_addr is an address, so use unsigned

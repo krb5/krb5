@@ -46,7 +46,7 @@ char *shmat();
 #ifdef __SCO__
 #include <utime.h>
 #endif
-#ifdef __svr4__
+#if defined(__svr4__) || defined(__SVR4)
 #include <utime.h>
 #endif
 int utimes(path, times)

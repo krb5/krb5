@@ -174,7 +174,7 @@ krb_get_pw_in_tkt_preauth(user,instance,realm,service,sinstance,life,password)
 char     *strcpy();
 int      strcmp();
 #endif
-#ifdef __svr4__
+#if defined(__svr4__) || defined(__SVR4)
 #include <sgtty.h>
 #endif
 
