@@ -1,3 +1,8 @@
+2001-10-04  Tom Yu  <tlyu@mit.edu>
+
+	* accept_sec_context.c (krb5_gss_accept_sec_context): Ignore
+	unrecognized options properly. [krb5-libs/738]
+
 2001-10-01  Tom Yu  <tlyu@mit.edu>
 
 	* accept_sec_context.c (rd_and_store_for_creds): Handle error
