@@ -168,11 +168,7 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
     sigaddset(&urgmask, SIGURG);
     sigprocmask(SIG_BLOCK, &urgmask, &oldmask);
 #else
-#ifdef sgi
-    oldmask = sigignore(sigmask(SIGURG));
-#else
     oldmask = sigblock(sigmask(SIGURG));
-#endif
 #endif /* POSIX_SIGNALS */
     
     for (;;) {
@@ -185,9 +181,7 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
 #ifdef POSIX_SIGNALS
 	    sigprocmask(SIG_SETMASK, &oldmask, (sigset_t*)0);
 #else
-#ifndef sgi
 	    sigsetmask(oldmask);
-#endif
 #endif /* POSIX_SIGNALS */
 	    if (tmpstr) krb5_xfree(tmpstr);
 	    krb5_free_creds(ret_cred);
@@ -234,9 +228,7 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
 #ifdef POSIX_SIGNALS
 	sigprocmask(SIG_SETMASK, &oldmask, (sigset_t*)0);
 #else
-#ifndef sgi
     	sigsetmask(oldmask);
-#endif
 #endif /* POSIX_SIGNALS */
 	if (tmpstr) krb5_xfree(tmpstr);
 	krb5_free_creds(ret_cred);
@@ -404,9 +396,7 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
 #ifdef POSIX_SIGNALS
     sigprocmask(SIG_SETMASK, &oldmask, (sigset_t*)0);
 #else
-#ifndef sgi
     sigsetmask(oldmask);
-#endif
 #endif /* POSIX_SIGNALS */
     *sock = s;
     if (tmpstr) krb5_xfree(tmpstr);
@@ -426,9 +416,7 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
 #ifdef POSIX_SIGNALS
     sigprocmask(SIG_SETMASK, &oldmask, (sigset_t*)0);
 #else
-#ifndef sgi
     sigsetmask(oldmask);
-#endif
 #endif /* POSIX_SIGNALS */
     if (tmpstr) krb5_xfree(tmpstr);
     if (ret_cred)
