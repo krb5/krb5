@@ -34,11 +34,8 @@
 #include <netdb.h>
 #include <stdio.h>
 
-#include <krb5/krb5.h>
-#include <krb5/ext-proto.h>
-#include <krb5/los-proto.h>
-#include <krb5/sysincl.h>
-#include <com_err.h>
+#include "krb5.h"
+#include "com_err.h"
 
 #include "simple.h"
 
