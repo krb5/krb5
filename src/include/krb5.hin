@@ -2397,32 +2397,5 @@ KRB5_DLLIMP void KRB5_CALLCONV krb5_realm_iterator_free
 KRB5_DLLIMP void KRB5_CALLCONV krb5_free_realm_string
 	PROTOTYPE((krb5_context context, char *str));
 
-/*
- * Kerberos V4 compatibility functions
- */
-#ifndef __alpha
-#define KRB5_K4_U32	unsigned long
-#else
-#define KRB5_K4_U32	unsigned int
-#endif
-typedef struct ktext *KTEXT;
-typedef unsigned char des_cblock[8];	/* crypto-block size */
-
-extern krb5_error_code krb54_get_service_keyblock
-	PROTOTYPE((char FAR *service, char FAR *instance, char FAR *realm,
-		   int kvno, char FAR *file,
-		   krb5_keyblock FAR * keyblock));
-extern int decomp_tkt_krb5
-	PROTOTYPE((KTEXT tkt, unsigned char *flags, char *pname,
-		   char *pinstance, char *prealm, KRB5_K4_U32 *paddress,
-		   des_cblock session, int *life, KRB5_K4_U32 *time_sec, 
-		   char *sname, char *sinstance, krb5_keyblock *k5key));
-extern int krb_set_key_krb5
-	PROTOTYPE ((krb5_context ctx, krb5_keyblock *key));
-void krb_clear_key_krb5
-	PROTOTYPE ((krb5_context ctx));
-
-#undef KRB5_K4_U32
-
-
 #endif /* KRB5_GENERAL__ */
+
