@@ -80,3 +80,56 @@ krb5_address ***outaddr;
     *outaddr = tempaddr;
     return 0;
 }
+
+/*
+ * Append an address array, to another address array, with fresh allocation.
+ * Note that this function may change the value of *outaddr even if it
+ * returns failure, but it will not change the contents of the list.
+ */
+krb5_error_code
+krb5_append_addresses(inaddr, outaddr)
+krb5_address * const * inaddr;
+krb5_address ***outaddr;
+{
+    krb5_error_code retval;
+    krb5_address ** tempaddr;
+    krb5_address ** tempaddr2;
+    register int nelems;
+    register int norigelems;
+
+    if (!inaddr)
+	return 0;
+
+    tempaddr2 = *outaddr;
+
+    for (nelems = 0; inaddr[nelems]; nelems++);
+    for (norigelems = 0; tempaddr2[norigelems]; norigelems++);
+
+    tempaddr = realloc((char *)*outaddr,
+		       (nelems + norigelems + 1) * sizeof(*tempaddr));
+    if (!tempaddr)
+	return ENOMEM;
+
+    /* The old storage has been freed.  */
+    *outaddr = tempaddr;
+
+
+    for (nelems = 0; inaddr[nelems]; nelems++)
+	if (retval = krb5_copy_addr(inaddr[nelems],
+				    &tempaddr[norigelems + nelems]))
+	    goto cleanup;
+
+    tempaddr[norigelems + nelems] = 0;
+    return 0;
+
+  cleanup:
+    while (--nelems >= 0)
+	krb5_free_address(tempaddr[norigelems + nelems]);
+
+    /* Try to allocate a smaller amount of memory for *outaddr.  */
+    tempaddr = realloc((char *)tempaddr, (norigelems + 1) * sizeof(*tempaddr));
+    if (tempaddr)
+	*outaddr = tempaddr;
+    return retval;
+}
+
