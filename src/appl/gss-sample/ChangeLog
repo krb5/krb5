@@ -1,3 +1,11 @@
+2001-11-01  Sam Hartman  <hartmans@mit.edu>
+
+	* gss-server.c  gss-client.c:  ONly free buffers returned from
+	GSSAPI using  gss_release_buffer
+
+	* gss-client.c (client_establish_context): Trailing null should
+	not be part of service name 
+
 2001-10-09  Ken Raeburn  <raeburn@mit.edu>
 
 	* gss-misc.c, gss-misc.h: Make prototypes unconditional.

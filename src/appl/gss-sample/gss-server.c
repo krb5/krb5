@@ -146,7 +146,10 @@ static int server_establish_context(s, server_creds, context, client_name,
      if (recv_token(s, &token_flags, &recv_tok) < 0)
        return -1;
 
-     (void) gss_release_buffer(&min_stat, &recv_tok);
+     if (recv_tok.value) {
+       free (recv_tok.value);
+       recv_tok.value = NULL;
+     }
      if (! (token_flags & TOKEN_NOOP)) {
        if (log)
 	 fprintf(log, "Expected NOOP token, got %d token instead\n",
@@ -179,7 +182,7 @@ static int server_establish_context(s, server_creds, context, client_name,
 				  NULL, 	/* ignore time_rec */
 				  NULL); 	/* ignore del_cred_handle */
 
-	 (void) gss_release_buffer(&min_stat, &recv_tok);
+	 free(recv_tok.value);
 
 	 if (send_tok.length != 0) {
 	   if (verbose && log) {
@@ -429,7 +432,7 @@ static int sign_server(s, server_creds, export)
 	 if (log)
 	   fprintf(log,
 		   "Unauthenticated client requested authenticated services!\n");
-	 (void) gss_release_buffer(&min_stat, &xmit_buf);
+	 free (xmit_buf.value);
 	 return(-1);
        }
 
@@ -438,13 +441,13 @@ static int sign_server(s, server_creds, export)
 			       &conf_state, (gss_qop_t *) NULL);
 	 if (maj_stat != GSS_S_COMPLETE) {
 	   display_status("unsealing message", maj_stat, min_stat);
-	   (void) gss_release_buffer(&min_stat, &xmit_buf);
+	   free (xmit_buf.value);
 	   return(-1);
 	 } else if (! conf_state && (token_flags & TOKEN_ENCRYPTED)) {
 	   fprintf(stderr, "Warning!  Message not encrypted.\n");
 	 }
 
-	 (void) gss_release_buffer(&min_stat, &xmit_buf);
+	 free (xmit_buf.value);
        }
        else {
 	 msg_buf = xmit_buf;
@@ -471,8 +474,8 @@ static int sign_server(s, server_creds, export)
 	   display_status("signing message", maj_stat, min_stat);
 	   return(-1);
 	 }
-
-	 (void) gss_release_buffer(&min_stat, &msg_buf);
+if (token_flags & TOKEN_WRAPPED)
+  free (xmit_buf.value);
 
 	 /* Send the signature block to the client */
 	 if (send_token(s, TOKEN_MIC, &xmit_buf) < 0)
@@ -481,7 +484,8 @@ static int sign_server(s, server_creds, export)
 	 (void) gss_release_buffer(&min_stat, &xmit_buf);
        }
        else {
-	 (void) gss_release_buffer(&min_stat, &msg_buf);
+	 if (token_flags & TOKEN_WRAPPED)
+	   free (xmit_buf.value);
 	 if (send_token(s, TOKEN_NOOP, empty_token) < 0)
 	   return(-1);
        }

@@ -149,7 +149,7 @@ static int client_establish_context(s, service_name, deleg_flag, auth_flag,
 	* local variable space.
 	*/
        send_tok.value = service_name;
-       send_tok.length = strlen(service_name) + 1;
+       send_tok.length = strlen(service_name) ;
        maj_stat = gss_import_name(&min_stat, &send_tok,
 				  (gss_OID) gss_nt_service_name, &target_name);
        if (maj_stat != GSS_S_COMPLETE) {
@@ -199,7 +199,7 @@ static int client_establish_context(s, service_name, deleg_flag, auth_flag,
 				NULL);	/* ignore time_rec */
 
 	 if (token_ptr != GSS_C_NO_BUFFER)
-	   (void) gss_release_buffer(&min_stat, &recv_tok);
+	   free (recv_tok.value);
 
 	 if (send_tok.length != 0) {
 	   if (verbose)
@@ -511,7 +511,7 @@ static int call_server(host, port, oid, service_name, deleg_flag, auth_flag,
 	   printf("Response received.\n");
        }
 
-       (void) gss_release_buffer(&min_stat, &out_buf);
+       free (out_buf.value);
      }
 
      if (use_file)
