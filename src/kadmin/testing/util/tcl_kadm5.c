@@ -345,6 +345,7 @@ static Tcl_DString *unparse_err(kadm5_ret_t code)
      case KADM5_AUTH_CHANGEPW:
 	  code_string = "KADM5_AUTH_CHANGEPW"; break;
      case KADM5_GSS_ERROR: code_string = "KADM5_GSS_ERROR"; break;
+     case KADM5_BAD_TL_TYPE: code_string = "KADM5_BAD_TL_TYPE"; break; 
      case OSA_ADB_DUP: code_string = "OSA_ADB_DUP"; break;
      case OSA_ADB_NOENT: code_string = "ENOENT"; break;
      case OSA_ADB_DBINIT: code_string = "OSA_ADB_DBINIT"; break;
@@ -475,6 +476,7 @@ static Tcl_DString *unparse_tl_data(krb5_tl_data *tl_data, int n_tl_data)
      }
 
      Tcl_DStringInit(str);
+     Tcl_DStringStartSublist(str);
      for (; tl_data; tl_data = tl_data->tl_data_next) {
 	  Tcl_DStringStartSublist(str);
 	  sprintf(buf, "%d", tl_data->tl_data_type);
@@ -484,6 +486,7 @@ static Tcl_DString *unparse_tl_data(krb5_tl_data *tl_data, int n_tl_data)
 	  Tcl_DStringAppendElement(str, tl_data->tl_data_contents);
 	  Tcl_DStringEndSublist(str);
      }
+     Tcl_DStringEndSublist(str);
      
      return str;
 }

@@ -1,3 +1,8 @@
+Fri Nov  1 13:16:43 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* tcl_kadm5.c (unparse_err): update for new tl_data semantics
+ 	[krb5-admin/140]
+
 Mon Oct 21 16:31:35 1996  Barry Jaspan  <bjaspan@mit.edu>
 
 	* tcl_kadm5.c: add unparse ability for V2 principal fields
