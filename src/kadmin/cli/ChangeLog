@@ -1,3 +1,8 @@
+Thu Aug 15 20:56:13 1996  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in: remove check for -ldbm and -lndbm (old old
+		garbage).
+
 Mon Aug 12 20:20:11 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* kadmin.1: Remove rename_principal. Add -maxrenewlife.
