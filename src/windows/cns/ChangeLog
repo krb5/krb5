@@ -1,3 +1,12 @@
+2000-05-08  Ken Raeburn  <raeburn@mit.edu>
+	    Nalin Dahyabhai  <nalin@redhat.com>
+	
+	* cns.c (kwin_push_login): Don't overflow buffer "fullname".
+	(kwin_command): Don't overflow buffer "copyright".
+	* cns_reg.c (cns_load_registry): Don't overflow buffer
+	"cns_res.def_confname".
+	* tktlist.c (ticket_init_list): Don't overflow buffer "buf".
+
 1999-12-03  Danilo Almeida  <dalmeida@mit.edu>
 
 	* Makefile.in: Windows fix for updated win-pre.in.

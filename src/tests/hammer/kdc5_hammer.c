@@ -240,10 +240,11 @@ main(argc, argv)
 	   again given a prefix and count to test the db lib and kdb */
 	ctmp[0] = '\0';
 	for (i = 1; i <= depth; i++) {
-	  ctmp2[0] = '\0';
 	  (void) sprintf(ctmp2, "%s%s%d-DEPTH-%d", (i != 1) ? "/" : "",
 			 prefix, n, i);
-	  strcat(ctmp, ctmp2);
+	  ctmp2[sizeof(ctmp2) - 1] = '\0';
+	  strncat(ctmp, ctmp2, sizeof(ctmp) - 1 - strlen(ctmp));
+	  ctmp[sizeof(ctmp) - 1] = '\0';
 	  sprintf(client, "%s@%s", ctmp, cur_realm);
 
 	  if (get_tgt (test_context, client, &client_princ, ccache)) {
@@ -255,10 +256,11 @@ main(argc, argv)
 
 	  stmp[0] = '\0';
 	  for (j = 1; j <= depth; j++) {
-	    stmp2[0] = '\0';
 	    (void) sprintf(stmp2, "%s%s%d-DEPTH-%d", (j != 1) ? "/" : "",
 			   prefix, n, j);
-	    strcat(stmp, stmp2);
+	    stmp2[sizeof (stmp2) - 1] = '\0';
+	    strncat(stmp, stmp2, sizeof(stmp) - 1 - strlen(stmp));
+	    stmp[sizeof(stmp) - 1] = '\0';
 	    sprintf(server, "%s@%s", stmp, cur_realm);
 	    if (verify_cs_pair(test_context, client, client_princ, 
 			       stmp, cur_realm, n, i, j, ccache))

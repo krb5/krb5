@@ -1,3 +1,9 @@
+2000-05-08  Ken Raeburn  <raeburn@mit.edu>
+	    Nalin Dahyabhai  <nalin@redhat.com>
+
+	* kdb5_mkdums.c (main): Make sure buffer "tmp" is
+	null-terminated.  Don't overflow buffer "tmp" or "tmp2".
+
 1999-10-26  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,

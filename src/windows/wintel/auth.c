@@ -151,10 +151,11 @@ auth_abort(kstream ks, char *errmsg, long r)
   TelnetSend(ks, (LPSTR)buf, 8, 0);
   
   if (errmsg != NULL) {
-    strcpy(strTmp, errmsg);
+    strTmp[sizeof(strTmp) - 1] = '\0';
+    strncpy(strTmp, errmsg, sizeof(strTmp) - 1);
     
     if (r != KSUCCESS) {
-      strcat(strTmp, "\n");
+      strncat(strTmp, "\n", sizeof(strTmp) - 1 - strlen(strTmp));
 #ifdef KRB4
       lstrcat(strTmp, krb_get_err_text((int)r));
 #endif
@@ -423,8 +424,8 @@ k4_auth_send(kstream ks)
 
   if (!realm) {
     strcpy(buf, "Can't find realm for host \"");
-    strcat(buf, szHostName);
-    strcat(buf, "\"");
+    strncat(buf, szHostName, sizeof(buf) - 1 - strlen(buf));
+    strncat(buf, "\"", sizeof(buf) - 1 - strlen(buf));
     auth_abort(ks, buf, 0);
     return KFAILURE;
   }
@@ -436,14 +437,14 @@ k4_auth_send(kstream ks)
 
   if (r) {
     strcpy(buf, "Can't get \"");
-    strcat(buf, KRB_SERVICE_NAME);
+    strncat(buf, KRB_SERVICE_NAME, sizeof(buf) - 1 - strlen(buf));
     if (instance[0] != 0) {
-      strcat(buf, ".");
+      strncat(buf, ".", sizeof(buf) - 1 - strlen(buf));
       lstrcat(buf, instance);
     }
-    strcat(buf, "@");
+    strncat(buf, "@", sizeof(buf) - 1 - strlen(buf));
     lstrcat(buf, realm);
-    strcat(buf, "\" ticket");
+    strncat(buf, "\" ticket", sizeof(buf) - 1 - strlen(buf));
     auth_abort(ks, buf, r);
 
     return r;

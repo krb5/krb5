@@ -230,10 +230,11 @@ printsub(char c, unsigned char *s, size_t len)
 
   *p++ = c;
 
-  for (i = 0 ; i < len ; i++)
+  for (i = 0 ; (i < len) && (p - dbgbuf + 3 < sizeof(dbgbuf)) ; i++)
     p += sprintf(p, "%02x ", s[i]);
+  dbgbuf[sizeof(dbgbuf) - 1] = '\0';
 
-  strcat(p, "\n");
+  strncat(p, "\n", sizeof(dbgbuf) - 1 - (p - dbgbuf));
 
   OutputDebugString(dbgbuf);
 

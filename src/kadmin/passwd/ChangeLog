@@ -1,3 +1,7 @@
+2000-05-08  Nalin Dahyabhai  <nalin@redhat.com>
+
+	* xm_kpasswd.c (motif_com_err): Don't overflow buffer "buf".
+
 1999-10-26  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,

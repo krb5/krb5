@@ -72,7 +72,7 @@ void	get_tickets
 static void usage 
 	PROTOTYPE((void));
 krb5_error_code open_connection 
-	PROTOTYPE((char *, int *, char *));
+	PROTOTYPE((char *, int *, char *, int));
 void	kerberos_authenticate 
 	PROTOTYPE((krb5_context, krb5_auth_context *, 
 		   int, krb5_principal, krb5_creds **));
@@ -116,7 +116,7 @@ main(argc, argv)
 	get_tickets(context);
 
 	database_fd = open_database(context, file, &database_size);
-	if (retval = open_connection(slave_host, &fd, Errmsg)) {
+	if (retval = open_connection(slave_host, &fd, Errmsg, sizeof(Errmsg))) {
 		com_err(progname, retval, "%s while opening connection to %s",
 			Errmsg, slave_host);
 		exit(1);
@@ -307,10 +307,11 @@ void get_tickets(context)
 }
 
 krb5_error_code
-open_connection(host, fd, Errmsg)
+open_connection(host, fd, Errmsg, ErrmsgSz)
 	char	*host;
 	int	*fd;
 	char	*Errmsg;
+	int	 ErrmsgSz;
 {
 	int	s;
 	krb5_error_code	retval;
@@ -331,8 +332,9 @@ open_connection(host, fd, Errmsg)
 	if(!port) {
 		sp = getservbyname(KPROP_SERVICE, "tcp");
 		if (sp == 0) {
-			(void) strcpy(Errmsg, KPROP_SERVICE);
-			(void) strcat(Errmsg, "/tcp: unknown service");
+			(void) strncpy(Errmsg, KPROP_SERVICE, ErrmsgSz - 1);
+			Errmsg[ErrmsgSz - 1] = '\0';
+			(void) strncat(Errmsg, "/tcp: unknown service", ErrmsgSz - 1 - strlen(Errmsg));
 			*fd = -1;
 			return(0);
 		}
@@ -481,7 +483,8 @@ open_database(context, data_fn, size)
 		com_err(progname, ENOMEM, "while trying to malloc data_ok_fn");
 		exit(1);
 	}
-	strcat(strcpy(data_ok_fn, data_fn), ok);
+	strcpy(data_ok_fn, data_fn);
+	strcat(data_ok_fn, ok);
 	if (stat(data_ok_fn, &stbuf_ok)) {
 		com_err(progname, errno, "while trying to stat %s",
 			data_ok_fn);

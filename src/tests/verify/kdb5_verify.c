@@ -199,9 +199,9 @@ char *argv[];
       if (check_princ(context, str_princ)) errors++;
 
       for (i = 2; i <= depth; i++) {
-	tmp2[0] = '\0';
 	(void) sprintf(tmp2, "/%s-DEPTH-%d", principal_string, i);
-	strcat(tmp, tmp2);
+	tmp2[sizeof(tmp2) - 1] = '\0';
+	strncat(tmp, tmp2, sizeof(tmp) - 1 - strlen(tmp));
 	str_princ = tmp;
 	if (check_princ(context, str_princ)) errors++;
       }

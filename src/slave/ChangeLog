@@ -1,3 +1,9 @@
+2000-05-08  Nalin Dahyabhai  <nalin@redhat.com>
+
+	* kprop.c (open_connection): New argument indicates output buffer
+	size.  Don't overrun it.
+	(get_tickets): Pass size of Errmsg.
+
 1999-10-26  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,

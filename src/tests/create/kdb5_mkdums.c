@@ -195,13 +195,14 @@ char *argv[];
 	 again given a prefix and count to test the db lib and kdb */
       (void) sprintf(suffix, "%d", n);
       (void) sprintf(tmp, "%s-DEPTH-1", principal_string);
+      tmp[sizeof(tmp) - 1] = '\0';
       str_newprinc = tmp;
       add_princ(test_context, str_newprinc);
 
       for (i = 2; i <= depth; i++) {
-	tmp2[0] = '\0';
 	(void) sprintf(tmp2, "/%s-DEPTH-%d", principal_string, i);
-	strcat(tmp, tmp2);
+	tmp2[sizeof(tmp2) - 1] = '\0';
+	strncat(tmp, tmp2, sizeof(tmp) - 1 - strlen(tmp));
 	str_newprinc = tmp;
 	add_princ(test_context, str_newprinc);
       }
