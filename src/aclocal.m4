@@ -1247,7 +1247,7 @@ mips-*-netbsd*)
 	PICFLAGS=-fpic
 	if test "x$objformat" = "xelf" ; then
 		SHLIBVEXT='.so.$(LIBMAJOR)'
-		CC_LINK_SHARED='$(CC) $(PROG_LIBPATH) -Wl,-R$(PROG_RPATH)'
+		CC_LINK_SHARED='$(CC) $(PROG_LIBPATH) -Wl,-rpath -Wl,$(PROG_RPATH)'
 	else
 		SHLIBVEXT='.so.$(LIBMAJOR).$(LIBMINOR)'
 		CC_LINK_SHARED='$(CC) $(PROG_LIBPATH) -R$(PROG_RPATH)'
