@@ -1,3 +1,9 @@
+2000-12-15  Ken Raeburn  <raeburn@mit.edu>
+
+	* krlogin.c (main): Add new "-4" option, to use krb4
+	authentication only; useful for testing.
+	* rlogin.M: Updated.
+
 2000-12-06  Ken Raeburn  <raeburn@mit.edu>
 
 	* krlogind.c (doit): Cast first argument to pty_make_sane_hostname

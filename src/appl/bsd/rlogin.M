@@ -25,7 +25,7 @@ rlogin \- remote login
 .I rhost
 [\fB\-e\fP\fI\|c\fP] [\fB\-8\fP] [\fB\-c\fP] [ \fB\-a\fP] [\fB\-f\fP]
 [\fB\-F\fP] [\fB\-t\fP \fItermtype\fP] [\fB\-n\fP] [\fB\-7\fP]
-[\fB\-PN | \-PO\fP]
+[\fB\-PN | \-PO\fP] [\fB\-4\fP]
 [\fB\-d\fP] [\fB\-k\fP \fIrealm\fP] [\fB\-x\fP] [\fB\-L\fP] [\fB\-l\fP
 \fIusername\fP]
 .PP
@@ -144,6 +144,9 @@ old one, but is not interoperable with older servers.  (An
 "input/output error" and a closed connection is the most likely result
 of attempting this combination.)  If neither option is specified, some
 simple heuristics are used to guess which to try.
+.TP
+\fB\-4\fP
+Use Kerberos V4 authentication only; don't try Kerberos V5.
 .SH SEE ALSO
 rsh(1), kerberos(3), krb_sendauth(3), krb_realmofhost(3), rlogin(1) [UCB
 version]

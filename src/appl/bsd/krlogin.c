@@ -375,6 +375,7 @@ main(argc, argv)
 #ifdef KRB5_KRB4_COMPAT
     KTEXT_ST v4_ticket;
     MSG_DAT v4_msg_data;
+    int v4only = 0;
 #endif
 #endif
     int port, debug_port = 0;
@@ -514,11 +515,25 @@ main(argc, argv)
 	argv++, argc--;
 	goto another;
     }
+#ifdef KRB5_KRB4_COMPAT
+    if (argc > 0 && !strcmp(*argv, "-4")) {
+	v4only++;
+	argv++, argc--;
+	goto another;
+    }
+#endif /* krb4 */
 #endif /* KERBEROS */
     if (host == 0)
       goto usage;
     if (argc > 0)
       goto usage;
+#ifdef KRB5_KRB4_COMPAT
+    if (kcmd_proto != KCMD_PROTOCOL_COMPAT_HACK && v4only) {
+	com_err (argv[0], 0,
+		 "-4 is incompatible with -PO/-PN");
+	exit(1);
+    }
+#endif
     pwd = getpwuid(getuid());
     if (pwd == 0) {
 	fprintf(stderr, "Who are you?\n");
@@ -637,6 +652,10 @@ main(argc, argv)
     if (Fflag)
       authopts |= OPTS_FORWARDABLE_CREDS;
 
+#ifdef KRB5_KRB4_COMPAT
+    if (v4only)
+	goto try_v4;
+#endif
     status = kcmd(&sock, &host, port,
 		  null_local_username ? "" : pwd->pw_name,
 		  name ? name : pwd->pw_name, term,
@@ -655,6 +674,7 @@ main(argc, argv)
 	    exit (1);
 #ifdef KRB5_KRB4_COMPAT
 	fprintf(stderr, "Trying krb4 rlogin...\n");
+    try_v4:
 	status = k4cmd(&sock, &host, port,
 		       null_local_username ? "" : pwd->pw_name,
 		       name ? name : pwd->pw_name, term,
@@ -710,7 +730,11 @@ main(argc, argv)
 #ifdef KERBEROS
     fprintf (stderr,
 	     "usage: rlogin host [-option] [-option...] [-k realm ] [-t ttytype] [-l username]\n");
-    fprintf (stderr, "     where option is e, 7, 8, noflow, n, a, x, f, F, or c\n");
+#ifdef KRB5_KRB4_COMPAT
+    fprintf (stderr, "     where option is e, 7, 8, noflow, n, a, x, f, F, c, 4, PO, or PN\n");
+#else
+    fprintf (stderr, "     where option is e, 7, 8, noflow, n, a, x, f, F, c, PO, or PN\n");
+#endif
 #else /* !KERBEROS */
     fprintf (stderr,
 	     "usage: rlogin host [-option] [-option...] [-t ttytype] [-l username]\n");
