@@ -18,6 +18,13 @@
 
 #define	DEFAULT_DBM_FILE		"/krb5/principal"
 
+/* exclusive or shared lock flags */
+#define	KRB5_DBM_SHARED		0
+#define	KRB5_DBM_EXCLUSIVE	1
+
+#define KRB5_DB_SHARED 		KRB5_DBM_SHARED
+#define KRB5_DB_EXCLUSIVE	KRB5_DBM_EXCLUSIVE
+
 /* #define these to avoid an indirection function; for future implementations,
    these may be redirected from a dispatch table/routine */
 #define krb5_dbm_db_set_name krb5_db_set_name
@@ -32,6 +39,8 @@
 #define krb5_dbm_db_put_principal krb5_db_put_principal
 #define krb5_dbm_db_delete_principal krb5_db_delete_principal
 #define krb5_dbm_db_iterate krb5_db_iterate
+#define krb5_dbm_db_lock krb5_db_lock
+#define krb5_dbm_db_unlock krb5_db_unlock
 
 /* libkdb.spec */
 krb5_error_code krb5_dbm_db_set_name PROTOTYPE((char * ));
