@@ -156,7 +156,7 @@ void kdb5_create(argc, argv)
     krb5_error_code retval;
     char *mkey_fullname;
     char *pw_str = 0;
-    int pw_size = 0;
+    unsigned int pw_size = 0;
     int do_stash = 0;
     krb5_int32 crflags = KRB5_KDB_CREATE_BTREE;
     krb5_data pwd, seed;
