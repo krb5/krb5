@@ -170,7 +170,7 @@ char *string;
   unsigned int len = strlen (string);
 
   MDInit (&context);
-  MDUpdate (&context, string, len);
+  MDUpdate (&context, (unsigned char *) string, len);
   MDFinal (&context);
 
   printf ("MD%d (\"%s\") = ", MD, string);
@@ -201,7 +201,7 @@ static void MDTimeTrial ()
   /* Digest blocks */
   MDInit (&context);
   for (i = 0; i < TEST_BLOCK_COUNT; i++)
- MDUpdate (&context, block, TEST_BLOCK_LEN);
+      MDUpdate (&context, block, TEST_BLOCK_LEN);
   MDFinal (&context);
 
   /* Stop timer */
@@ -230,7 +230,7 @@ static void MDTestSuite ()
 	unsigned int len = strlen (entry->string);
 
 	MDInit (&context);
-	MDUpdate (&context, entry->string, len);
+	MDUpdate (&context, (unsigned char *) entry->string, len);
 	MDFinal (&context);
 
 	printf ("MD%d (\"%s\") = ", MD, entry->string);

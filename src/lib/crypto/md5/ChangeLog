@@ -1,3 +1,9 @@
+Fri Oct 14 00:22:19 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* t_mddriver.c (MDString, MDTestSuite): Cast char pointer to the
+		expected unsigned char pointer, since that's what MDUpdate
+		requires. 
+
 Thu Oct 13 17:50:19 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* Makefile.in: Add support for the MDx test driver t_mddriver.
