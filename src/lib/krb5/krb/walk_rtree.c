@@ -33,7 +33,7 @@
  * is allowed by RFC 1510: "If a hierarchical orginization is not used
  * it may be necessary to consult some database in order to construct
  * an authentication path between realms."  The database is contained
- * in the [capath] section of the krb5.conf file.
+ * in the [capaths] section of the krb5.conf file.
  * Client to server paths are defined. There are n**2 possible
  * entries, but only those entries which are needed by the client
  * or server need be present in its krb5.conf file. (n entries or 2*n
@@ -44,10 +44,10 @@
  * other ANL, NERSC and PNL. Each of these orginizations wants to
  * use its DNS name in the realm, ANL.GOV. In addition ANL wants
  * to authenticatite to HAL.COM via a K5.MOON and K5.JUPITER
- * A [capath] section of the krb5.conf file for the ANL.GOV clients
+ * A [capaths] section of the krb5.conf file for the ANL.GOV clients
  * and servers would look like:
  *
- * [capath]
+ * [capaths]
  * ANL.GOV = {
  *		NERSC.GOV = ES.NET
  *		PNL.GOV = ES.NET
