@@ -1,3 +1,11 @@
+2003-12-19  Ken Raeburn  <raeburn@mit.edu>
+
+	* sendto_kdc.c (default_debug_handler, put, putstr): Define only
+	if DEBUG is defined.
+	(DEBUG): Don't define.
+	(krb5int_sendtokdc_debug_handler): Initialize to null if DEBUG is
+	not defined.
+
 2003-12-18  Jeffrey Altman <jaltman@mit.edu>
 
     * accessor.c: Add new functions for use by gssapi

@@ -64,7 +64,6 @@
 #ifdef DEBUG
 int krb5int_debug_sendto_kdc = 0;
 #define debug krb5int_debug_sendto_kdc
-#endif
 
 static void default_debug_handler (const void *data, size_t len)
 {
@@ -82,6 +81,9 @@ static void putstr(const char *str)
 {
     put(str, strlen(str));
 }
+#else
+void (*krb5int_sendtokdc_debug_handler) (const void *, size_t) = 0;
+#endif
 
 #define dprint krb5int_debug_fprint
 static void
