@@ -31,7 +31,7 @@ long pty_update_utmp (process_type, pid, username, line, host)
     char *username, *line, *host;
 {
     struct utmp ent;
-    #ifdef HAVE_SETUTENT
+#ifdef HAVE_SETUTENT
     struct utmp ut;
 #else
     struct stat statb;

@@ -1,3 +1,6 @@
+Tue Aug  8 20:32:08 1995  Tom Yu  <tlyu@dragons-lair.MIT.EDU>
+
+	* update_utmp.c: flush preprocessor directive to left margin.
 
 Tue Aug 8 17:24:27 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* update_utmp.c - getutmpx() requires address of utmpx structure.
