@@ -1,3 +1,9 @@
+Fri Aug 23 14:47:55 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* kadmin.c: add newlines to "invalid date spec" msg
+
+	* getdate.y: add "never" as a valid date specification
+
 Wed Aug 21 14:10:36 1996  Barry Jaspan  <bjaspan@mit.edu>
 
 	* kadmin.c: memset policy structures before passing them to

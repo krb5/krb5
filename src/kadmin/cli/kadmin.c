@@ -683,7 +683,7 @@ int kadmin_parse_princ_args(argc, argv, oprinc, mask, pass, randkey, caller)
 	    else {
 		date = get_date(argv[i], NULL);
  		if (date == (time_t)-1) {
-		     fprintf(stderr, "Invalid date specification \"%s\".",
+		     fprintf(stderr, "Invalid date specification \"%s\".\n",
 			     argv[i]);
 		     return -1;
  		}
@@ -699,7 +699,7 @@ int kadmin_parse_princ_args(argc, argv, oprinc, mask, pass, randkey, caller)
 	    else {
 		date = get_date(argv[i], NULL);
  		if (date == (time_t)-1) {
-		     fprintf(stderr, "Invalid date specification \"%s\".",
+		     fprintf(stderr, "Invalid date specification \"%s\".\n",
 			     argv[i]);
 		     return -1;
  		}
@@ -715,7 +715,7 @@ int kadmin_parse_princ_args(argc, argv, oprinc, mask, pass, randkey, caller)
 	    else {
 		date = get_date(argv[i], NULL);
  		if (date == (time_t)-1) {
-		     fprintf(stderr, "Invalid date specification \"%s\".",
+		     fprintf(stderr, "Invalid date specification \"%s\".\n",
 			     argv[i]);
 		     return -1;
  		}
@@ -731,7 +731,7 @@ int kadmin_parse_princ_args(argc, argv, oprinc, mask, pass, randkey, caller)
 	    else {
 		date = get_date(argv[i], NULL);
  		if (date == (time_t)-1) {
-		     fprintf(stderr, "Invalid date specification \"%s\".",
+		     fprintf(stderr, "Invalid date specification \"%s\".\n",
 			     argv[i]);
 		     return -1;
  		}
@@ -1158,7 +1158,7 @@ int kadmin_parse_policy_args(argc, argv, policy, mask, caller)
 	    else {
 		date = get_date(argv[i], NULL);
  		if (date == (time_t)-1) {
-		     fprintf(stderr, "Invalid date specification \"%s\".",
+		     fprintf(stderr, "Invalid date specification \"%s\".\n",
 			     argv[i]);
 		     return -1;
  		}
@@ -1173,7 +1173,7 @@ int kadmin_parse_policy_args(argc, argv, policy, mask, caller)
 	    else {
 		date = get_date(argv[i], NULL);
  		if (date == (time_t)-1) {
-		     fprintf(stderr, "Invalid date specification \"%s\".",
+		     fprintf(stderr, "Invalid date specification \"%s\".\n",
 			     argv[i]);
 		     return -1;
  		}

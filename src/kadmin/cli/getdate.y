@@ -193,7 +193,7 @@ static time_t	yyRelSeconds;
 }
 
 %token	tAGO tDAY tDAYZONE tID tMERIDIAN tMINUTE_UNIT tMONTH tMONTH_UNIT
-%token	tSEC_UNIT tSNUMBER tUNUMBER tZONE tDST
+%token	tSEC_UNIT tSNUMBER tUNUMBER tZONE tDST tNEVER
 
 %type	<Number>	tDAY tDAYZONE tMINUTE_UNIT tMONTH tMONTH_UNIT
 %type	<Number>	tSEC_UNIT tSNUMBER tUNUMBER tZONE
@@ -203,6 +203,15 @@ static time_t	yyRelSeconds;
 
 spec	: /* NULL */
 	| spec item
+        | tNEVER {
+	    yyYear = 1970;
+	    yyMonth = 1;
+	    yyDay = 1;
+	    yyHour = yyMinutes = yySeconds = 0;
+	    yyDSTmode = DSToff;
+	    yyTimezone = 0; /* gmt */
+	    yyHaveDate++;
+        }
 	;
 
 item	: time {
@@ -466,7 +475,8 @@ static TABLE const OtherTable[] = {
     { "tenth",		tUNUMBER,	10 },
     { "eleventh",	tUNUMBER,	11 },
     { "twelfth",	tUNUMBER,	12 },
-    { "ago",		tAGO,	1 },
+    { "ago",		tAGO,		1 },
+    { "never",		tNEVER,		0 },
     { NULL }
 };
 
@@ -652,7 +662,7 @@ Convert(Month, Day, Year, Hours, Minutes, Seconds, Meridian, DSTmode)
 	Year += 1900;
     DaysInMonth[1] = Year % 4 == 0 && (Year % 100 != 0 || Year % 400 == 0)
 		    ? 29 : 28;
-    if (Year < EPOCH /* XXX DANGER! || Year > 1999 */
+    if (Year < EPOCH
 	|| Month < 1 || Month > 12
 	/* Lint fluff:  "conversion from long may lose accuracy" */
 	|| Day < 1 || Day > DaysInMonth[(int)--Month])
