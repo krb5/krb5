@@ -43,7 +43,7 @@ int KRB5_CALLCONV
 krb_change_password(char *principal, char *instance, char *realm, 
 		    char *oldPassword, char *newPassword)
 {
-    KRB_INT32	err;
+    int		err;
     des_cblock	key;
     KRB_UINT32	tempKey;
     size_t	sendSize;
@@ -83,6 +83,8 @@ krb_change_password(char *principal, char *instance, char *realm,
     /* possible problem with vts_long on a non-multiple of four boundary */
     sendSize = 0;		/* start of our output packet */
     sendStream = malloc(1);	/* to make it reallocable */
+    if (sendStream == NULL)
+	goto disconnect;
     sendStream[sendSize++] = CHANGE_PW;
 
     /* change key to stream */

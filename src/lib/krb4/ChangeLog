@@ -1,3 +1,9 @@
+2003-02-25  Ken Raeburn  <raeburn@mit.edu>
+
+	* change_password.c (krb_change_password): Use int, not KRB_INT32,
+	for krb4 error codes.  Check for malloc failure allocating
+	sendStream.
+
 2003-02-12  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Update dependencies.
