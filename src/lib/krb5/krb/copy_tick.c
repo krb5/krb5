@@ -30,7 +30,7 @@ krb5_enc_tkt_part **partto;
     krb5_enc_tkt_part *tempto;
     krb5_data *scratch;
 
-    if (!(tempto = (krb5_ticket *)malloc(sizeof(*tempto))))
+    if (!(tempto = (krb5_enc_tkt_part *)malloc(sizeof(*tempto))))
 	return ENOMEM;
     *tempto = *partfrom;
     if (!(tempto->session =
@@ -39,7 +39,7 @@ krb5_enc_tkt_part **partto;
 	return ENOMEM;
     }
     if (retval = krb5_copy_keyblock(partfrom->session,
-				    &tempto->session)) {
+				    tempto->session)) {
 	xfree(tempto->session);
 	xfree(tempto);
 	return retval;
@@ -64,22 +64,23 @@ krb5_enc_tkt_part **partto;
 	xfree(tempto);
 	return retval;
     }
-    if (retval = krb5_copy_authdata(partfrom->authorization_data,
-				    &tempto->authorization_data)) {
-	krb5_free_address(tempto->caddrs);
-	xfree(tempto->transited.data);
-	krb5_free_principal(tempto->client);
-	krb5_free_keyblock(tempto->session);
-	xfree(tempto);
-	return retval;
+    if (partfrom->authorization_data) {
+	if (retval = krb5_copy_authdata(partfrom->authorization_data,
+					&tempto->authorization_data)) {
+	    krb5_free_address(tempto->caddrs);
+	    xfree(tempto->transited.data);
+	    krb5_free_principal(tempto->client);
+	    krb5_free_keyblock(tempto->session);
+	    xfree(tempto);
+	    return retval;
+	}
     }
-
     *partto = tempto;
     return 0;
 }
 
 krb5_error_code
-copy_ticket(from, pto)
+krb5_copy_ticket(from, pto)
 const krb5_ticket *from;
 krb5_ticket **pto;
 {
@@ -92,14 +93,14 @@ krb5_ticket **pto;
     *tempto = *from;
     if (retval = krb5_copy_principal(from->server, &tempto->server))
 	return retval;
-    if (retval = krb5_copy_data(from->enc_part, &scratch)) {
+    if (retval = krb5_copy_data(&from->enc_part, &scratch)) {
 	krb5_free_principal(tempto->server);
 	xfree(tempto);
 	return retval;
     }
     tempto->enc_part = *scratch;
     xfree(scratch);
-    if (retval = krb5_copy_enc_tkt_part(from->enc_part2, &to->enc_part2)) {
+    if (retval = krb5_copy_enc_tkt_part(from->enc_part2, &tempto->enc_part2)) {
 	xfree(tempto->enc_part.data);
 	krb5_free_principal(tempto->server);
 	xfree(tempto);
