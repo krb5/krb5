@@ -23,11 +23,6 @@
 #ifndef _GSSAPI_KRB5_H_
 #define _GSSAPI_KRB5_H_
 
-#ifndef macintosh
-#include <gssapi/gssapi_generic.h>
-#else
-#include <gssapi_generic.h>
-#endif
 #include <krb5.h>
 
 /* C++ friendlyness */

@@ -1,3 +1,9 @@
+Thu Apr 29 18:02:00 1999  Miro Jurisic  <meeroh@mit.edu>
+
+	* gssapi_krb5.h: Remove gssapi_generic.h includes because
+		this header file is public interface and gssapi_generic.h
+		isn't and shouldn't be included by clients.
+
 Fri Apr 23 00:31:17 1999  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* wrap_size_limit.c (krb5_gss_wrap_size_limit): Fix wrap_size
