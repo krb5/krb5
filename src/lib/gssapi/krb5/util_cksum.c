@@ -36,11 +36,16 @@ kg_checksum_channel_bindings(context, cb, cksum, bigend)
 {
    int len;
    char *buf, *ptr;
+   size_t sumlen;
+   krb5_data plaind;
    krb5_error_code code;
 
    /* initialize the the cksum and allocate the contents buffer */
+   if (code = krb_c_checksum_length(context, CKSUMTYPE_RSA_MD5, &sumlen))
+       return(code);
+
    cksum->checksum_type = CKSUMTYPE_RSA_MD5;
-   cksum->length = krb5_checksum_size(context, CKSUMTYPE_RSA_MD5);
+   cksum->length = sumlen;
    if ((cksum->contents = (krb5_octet *) xmalloc(cksum->length)) == NULL) {
       return(ENOMEM);
    }
@@ -75,8 +80,11 @@ kg_checksum_channel_bindings(context, cb, cksum, bigend)
 
    /* checksum the data */
 
-   if (code = krb5_calculate_checksum(context, CKSUMTYPE_RSA_MD5, 
-				      buf, len, NULL, 0, cksum)) {
+   plaind.length = len;
+   plaind.data = buf;
+
+   if (code = krb5_c_make_checksum(context, CKSUMTYPE_RSA_MD5, 0, 0,
+				   &plaind, cksum)) {
       xfree(cksum->contents);
       xfree(buf);
       return(code);

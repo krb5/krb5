@@ -422,17 +422,13 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
 
       /* the encryption key is the session key XOR 0xf0f0f0f0f0f0f0f0 */
 
-      krb5_use_enctype(context, &ctx->enc.eblock, enctype);
-      ctx->enc.processed = 0;
-      if ((code = krb5_copy_keyblock(context, ctx->subkey, &ctx->enc.key)))
-	 return(code); 
-      for (i=0; i<ctx->enc.key->length; i++)
+      if ((code = krb5_copy_keyblock(context, ctx->subkey, &ctx->enc)))
+	 return(code);
+      for (i=0; i<ctx->enc->length; i++)
 	 /*SUPPRESS 113*/
-	 ctx->enc.key->contents[i] ^= 0xf0;
+	 ctx->enc->contents[i] ^= 0xf0;
 
-      krb5_use_enctype(context, &ctx->seq.eblock, enctype);
-      ctx->seq.processed = 0;
-      if ((code = krb5_copy_keyblock(context, ctx->subkey, &ctx->seq.key)))
+      if ((code = krb5_copy_keyblock(context, ctx->subkey, &ctx->seq)))
 	  return(code);
 
       /* at this point, the context is constructed and valid,

@@ -23,12 +23,12 @@
 #include "gssapiP_krb5.h"
 
 static krb5_error_code
-make_seal_token(context, enc_ed, seq_ed, seqnum, direction, text, token,
+make_seal_token(context, enc, seq, seqnum, direction, text, token,
 		signalg, cksum_size, sealalg, encrypt, toktype,
 		bigend, oid)
      krb5_context context;
-     krb5_gss_enc_desc *enc_ed;
-     krb5_gss_enc_desc *seq_ed;
+     krb5_keyblock *enc;
+     krb5_keyblock *seq;
      krb5_int32 *seqnum;
      int direction;
      gss_buffer_t text;
@@ -42,7 +42,9 @@ make_seal_token(context, enc_ed, seq_ed, seqnum, direction, text, token,
      gss_OID oid;
 {
    krb5_error_code code;
+   size_t sumlen;
    char *data_ptr;
+   krb5_data plaind;
    krb5_checksum md5cksum;
    krb5_checksum cksum;
    int conflen=0, tmsglen, tlen;
@@ -54,7 +56,7 @@ make_seal_token(context, enc_ed, seq_ed, seqnum, direction, text, token,
       if (bigend && !encrypt) {
 	 tmsglen = text->length;
       } else {
-	 conflen = kg_confounder_size(enc_ed);
+	 conflen = kg_confounder_size(context, enc);
 	 /* XXX knows that des block size is 8 */
 	 tmsglen = (conflen+text->length+8)&(~7);
       }
@@ -97,11 +99,13 @@ make_seal_token(context, enc_ed, seq_ed, seqnum, direction, text, token,
    /* pad the plaintext, encrypt if needed, and stick it in the token */
 
    /* initialize the the cksum and allocate the contents buffer */
+   if (code = krb_c_checksum_length(context, CKSUMTYPE_RSA_MD5, &sumlen))
+       return(code);
+
    md5cksum.checksum_type = CKSUMTYPE_RSA_MD5;
-   md5cksum.length = krb5_checksum_size(context, CKSUMTYPE_RSA_MD5);
-   if ((md5cksum.contents = (krb5_octet *) xmalloc(md5cksum.length)) == NULL) {
+   md5cksum.length = sumlen;
+   if ((md5cksum.contents = (krb5_octet *) xmalloc(md5cksum.length)) == NULL)
       return(ENOMEM);
-   }
  
    if (toktype == KG_TOK_SEAL_MSG) {
       unsigned char *plain;
@@ -114,7 +118,7 @@ make_seal_token(context, enc_ed, seq_ed, seqnum, direction, text, token,
 	    return(ENOMEM);
 	 }
 
-	 if ((code = kg_make_confounder(enc_ed, plain))) {
+	 if ((code = kg_make_confounder(context, enc, plain))) {
 	    xfree(plain);
 	    xfree(md5cksum.contents);
 	    xfree(t);
@@ -133,7 +137,7 @@ make_seal_token(context, enc_ed, seq_ed, seqnum, direction, text, token,
       }
 
       if (encrypt) {
-	 if ((code = kg_encrypt(context, enc_ed, NULL, (krb5_pointer) plain,
+	 if ((code = kg_encrypt(context, enc, NULL, (krb5_pointer) plain,
 				(krb5_pointer) (ptr+cksum_size+14),
 				tmsglen))) {
 	    if (plain)
@@ -165,9 +169,10 @@ make_seal_token(context, enc_ed, seq_ed, seqnum, direction, text, token,
 	  (void) memcpy(data_ptr+8, text->value, text->length);
       else
 	  (void) memcpy(data_ptr+8, plain, tmsglen);
-      code = krb5_calculate_checksum(context, md5cksum.checksum_type, data_ptr,
-				     8 + (bigend ? text->length : tmsglen),
-				     0, 0, &md5cksum);
+      plaind.length = 8 + (bigend ? text->length : tmsglen);
+      plaind.data = data_ptr;
+      code = krb5_c_make_checksum(context, md5cksum.checksum_type,
+				  0, 0, &plaind, &md5cksum);
       xfree(data_ptr);
 
       if (code) {
@@ -191,9 +196,10 @@ make_seal_token(context, enc_ed, seq_ed, seqnum, direction, text, token,
       }
       (void) memcpy(data_ptr, ptr-2, 8);
       (void) memcpy(data_ptr+8, text->value, text->length);
-      code = krb5_calculate_checksum(context, md5cksum.checksum_type, data_ptr,
-				     8 + text->length,
-				     0, 0, &md5cksum);
+      plaind.length = 8 + text->length;
+      plaind.data = data_ptr;
+      code = krb5_c_make_checksum(context, md5cksum.checksum_type, 0, 0,
+				  &plaind, &md5cksum);
       xfree(data_ptr);
       if (code) {
 	  xfree(md5cksum.contents);
@@ -214,16 +220,19 @@ make_seal_token(context, enc_ed, seq_ed, seqnum, direction, text, token,
 	  DES encryption the long way, and keep the last block
 	  as the MAC */
 
+       /* XXX not converted to new api since it's inside an #if 0 */
+
        /* initialize the the cksum and allocate the contents buffer */
        cksum.checksum_type = CKSUMTYPE_DESCBC;
        cksum.length = krb5_checksum_size(context, CKSUMTYPE_DESCBC);
        if ((cksum.contents = (krb5_octet *) xmalloc(cksum.length)) == NULL)
 	   return(ENOMEM);
 
+       /* XXX not converted to new api since it's inside an #if 0 */
        if (code = krb5_calculate_checksum(context, cksum.checksum_type,
 					  md5cksum.contents, 16,
-					  seq_ed->key->contents, 
-					  seq_ed->key->length,
+					  seq->contents, 
+					  seq->length,
 					  &cksum)) {
 	  xfree(cksum.contents);
 	  xfree(md5cksum.contents);
@@ -235,9 +244,9 @@ make_seal_token(context, enc_ed, seq_ed, seqnum, direction, text, token,
 
        xfree(cksum.contents);
 #else
-       if ((code = kg_encrypt(context, seq_ed,
+       if ((code = kg_encrypt(context, seq,
 			      (g_OID_equal(oid, gss_mech_krb5_old) ?
-			       seq_ed->key->contents : NULL),
+			       seq->contents : NULL),
 			      md5cksum.contents, md5cksum.contents, 16))) {
 	  xfree(md5cksum.contents);
 	  xfree(t);
@@ -257,7 +266,7 @@ make_seal_token(context, enc_ed, seq_ed, seqnum, direction, text, token,
 
    /* create the seq_num */
 
-   if ((code = kg_make_seq_num(context, seq_ed, direction?0:0xff, *seqnum,
+   if ((code = kg_make_seq_num(context, seq, direction?0:0xff, *seqnum,
 			       ptr+14, ptr+6))) {
       xfree(t);
       return(code);

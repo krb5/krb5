@@ -55,6 +55,7 @@ kg_unseal(context, minor_status, context_handle, input_token_buffer,
    krb5_checksum cksum;
    krb5_checksum desmac;
    krb5_checksum md5cksum;
+   krb5_data plaind;
    char *data_ptr;
    krb5_timestamp now;
    unsigned char *plain;
@@ -64,6 +65,7 @@ kg_unseal(context, minor_status, context_handle, input_token_buffer,
    int direction;
    krb5_int32 seqnum;
    OM_uint32 retval;
+   size_t sumlen;
 
    if (toktype == KG_TOK_SEAL_MSG) {
       message_buffer->length = 0;
@@ -159,7 +161,7 @@ kg_unseal(context, minor_status, context_handle, input_token_buffer,
 	    return(GSS_S_FAILURE);
 	 }
 
-	 if ((code = kg_decrypt(context, &ctx->enc, NULL,
+	 if ((code = kg_decrypt(context, ctx->enc, NULL,
 				ptr+14+cksum_len, plain, tmsglen))) {
 	    xfree(plain);
 	    *minor_status = code;
@@ -174,7 +176,7 @@ kg_unseal(context, minor_status, context_handle, input_token_buffer,
       if ((sealalg == 0xffff) && ctx->big_endian) {
 	 token.length = tmsglen;
       } else {
-	 conflen = kg_confounder_size(&ctx->enc);
+	 conflen = kg_confounder_size(context, ctx->enc);
 	 token.length = tmsglen - conflen - plain[tmsglen-1];
       }
 
@@ -201,8 +203,11 @@ kg_unseal(context, minor_status, context_handle, input_token_buffer,
    /* compute the checksum of the message */
 
    /* initialize the the cksum and allocate the contents buffer */
+   if (code = krb_c_checksum_length(context, CKSUMTYPE_RSA_MD5, &sumlen))
+       return(code);
+
    md5cksum.checksum_type = CKSUMTYPE_RSA_MD5;
-   md5cksum.length = krb5_checksum_size(context, CKSUMTYPE_RSA_MD5);
+   md5cksum.length = sumlen;
    if ((md5cksum.contents = (krb5_octet *) xmalloc(md5cksum.length)) == NULL) {
       if (sealalg != 0xffff)
 	 xfree(plain);
@@ -235,10 +240,10 @@ kg_unseal(context, minor_status, context_handle, input_token_buffer,
       else
 	  (void) memcpy(data_ptr+8, plain, plainlen);
 
-      code = krb5_calculate_checksum(context, md5cksum.checksum_type,
-				     data_ptr, 8 +
-				     (ctx->big_endian ? token.length :
-				      plainlen), 0, 0, &md5cksum);
+      plaind.length = 8 + (ctx->big_endian ? token.length : plainlen);
+      plaind.data = data_ptr;
+      code = krb5_c_make_checksum(context, md5cksum.checksum_type, 0, 0,
+				  &plaind, &md5cksum);
       xfree(data_ptr);
 
       if (code) {
@@ -264,6 +269,7 @@ kg_unseal(context, minor_status, context_handle, input_token_buffer,
 	  return(GSS_S_FAILURE);
       }
 
+      /* XXX not converted to new api since it's inside an #if 0 */
       if (code = krb5_calculate_checksum(context, cksum.checksum_type,
 					 md5cksum.contents, 16,
 					 ctx->seq.key->contents, 
@@ -281,9 +287,9 @@ kg_unseal(context, minor_status, context_handle, input_token_buffer,
 
       xfree(cksum.contents);
 #else
-      if ((code = kg_encrypt(context, &ctx->seq,
+      if ((code = kg_encrypt(context, ctx->seq,
 			     (g_OID_equal(ctx->mech_used, gss_mech_krb5_old) ?
-			      ctx->seq.key->contents : NULL),
+			      ctx->seq->contents : NULL),
 			     md5cksum.contents, md5cksum.contents, 16))) {
 	 xfree(md5cksum.contents);
 	 if (toktype == KG_TOK_SEAL_MSG)
@@ -333,11 +339,11 @@ kg_unseal(context, minor_status, context_handle, input_token_buffer,
       else
 	  (void) memcpy(data_ptr+8+sizeof(ctx->seed),
 			plain, plainlen);
-      code = krb5_calculate_checksum(context, md5cksum.checksum_type,
-				     data_ptr, 8 + sizeof(ctx->seed) +
-				     (ctx->big_endian ? token.length :
-				      plainlen), 0, 0, &md5cksum);
-
+      plaind.length = 8 + sizeof(ctx->seed) +
+	  (ctx->big_endian ? token.length : plainlen);
+      plaind.data = data_ptr;
+      code = krb5_c_make_checksum(context, md5cksum.checksum_type, 0, 0,
+				  &plaind, &md5cksum);
       xfree(data_ptr);
 
       if (code) {
@@ -394,7 +400,7 @@ kg_unseal(context, minor_status, context_handle, input_token_buffer,
 
    /* do sequencing checks */
 
-   if ((code = kg_get_seq_num(context, &(ctx->seq), ptr+14, ptr+6, &direction,
+   if ((code = kg_get_seq_num(context, ctx->seq, ptr+14, ptr+6, &direction,
 			      &seqnum))) {
       if (toktype == KG_TOK_SEAL_MSG)
 	 xfree(token.value);

@@ -80,15 +80,11 @@ krb5_gss_delete_sec_context(minor_status, context_handle, output_token)
    if (ctx->seqstate)
       g_order_free(&(ctx->seqstate));
 
-   if (ctx->enc.processed)
-      krb5_finish_key(context, &ctx->enc.eblock);
-   if (ctx->enc.key)
-      krb5_free_keyblock(context, ctx->enc.key);
+   if (ctx->enc)
+      krb5_free_keyblock(context, ctx->enc);
 
-   if (ctx->seq.processed)
-      krb5_finish_key(context, &ctx->seq.eblock);
-   if (ctx->seq.key)
-      krb5_free_keyblock(context, ctx->seq.key);
+   if (ctx->seq)
+      krb5_free_keyblock(context, ctx->seq);
 
    if (ctx->here)
       krb5_free_principal(context, ctx->here);

@@ -36,24 +36,20 @@ kg_make_seed(context, key, seed)
      unsigned char *seed;
 {
    krb5_error_code code;
-   krb5_gss_enc_desc ed;
+   krb5_keyblock *tmpkey;
    int i;
 
-   if (code = krb5_copy_keyblock(context, key, &ed.key))
+   if (code = krb5_copy_keyblock(context, key, &tmpkey))
       return(code);
 
    /* reverse the key bytes, as per spec */
 
-   for (i=0; i<ed.key->length; i++)
-      ed.key->contents[i] = key->contents[key->length - 1 - i];
+   for (i=0; i<tmpkey->length; i++)
+      tmpkey->contents[i] = key->contents[key->length - 1 - i];
 
-   krb5_use_enctype(context, &ed.eblock, ENCTYPE_DES_CBC_RAW);
-   ed.processed = 0;
+   code = kg_encrypt(context, tmpkey, NULL, zeros, seed, 16);
 
-   code = kg_encrypt(context, &ed, NULL, zeros, seed, 16);
-
-   krb5_finish_key(context, &ed.eblock);
-   krb5_free_keyblock(context, ed.key);
+   krb5_free_keyblock(context, tmpkey);
 
    return(code);
 }

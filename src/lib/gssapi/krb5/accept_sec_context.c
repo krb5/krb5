@@ -158,6 +158,7 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
    unsigned char *ptr, *ptr2;
    char *sptr;
    long tmp;
+   size_t md5len;
    int bigend;
    krb5_gss_cred_id_t cred = 0;
    krb5_data ap_req;
@@ -203,6 +204,12 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
    /* return a bogus cred handle */
    if (delegated_cred_handle)
       *delegated_cred_handle = GSS_C_NO_CREDENTIAL;
+
+   /* stash this now, for later. */
+   if (code = krb5_c_checksum_length(context, CKSUMTYPE_RSA_MD5, &md5len)) {
+       *minor_status = code;
+       return(GSS_S_FAILURE);
+   }
 
    /*
     * Context handle must be unspecified.  Actually, it must be
@@ -362,13 +369,13 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
 
    TREAD_INT(ptr, tmp, bigend);
 
-   if (tmp != krb5_checksum_size(context, CKSUMTYPE_RSA_MD5)) {
+   if (tmp != md5len) {
        ptr = (unsigned char *) authdat->checksum->contents;
        bigend = 1;
 
        TREAD_INT(ptr, tmp, bigend);
 
-       if (tmp != krb5_checksum_size(context, CKSUMTYPE_RSA_MD5)) {
+       if (tmp != md5len) {
 	   major_status = GSS_S_FAILURE;
 	   code = KG_BAD_LENGTH;
 	   goto fail;
@@ -532,19 +539,14 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
 
    /* fill in the encryption descriptors */
 
-   krb5_use_enctype(context, &ctx->enc.eblock, enctype);
-   ctx->enc.processed = 0;
-
-   if ((code = krb5_copy_keyblock(context, ctx->subkey, &ctx->enc.key)))
+   if ((code = krb5_copy_keyblock(context, ctx->subkey, &ctx->enc)))
 	   goto fail;
 
-   for (i=0; i<ctx->enc.key->length; i++)
+   for (i=0; i<ctx->enc->length; i++)
       /*SUPPRESS 113*/
-      ctx->enc.key->contents[i] ^= 0xf0;
+      ctx->enc->contents[i] ^= 0xf0;
 
-   krb5_use_enctype(context, &ctx->seq.eblock, enctype);
-   ctx->seq.processed = 0;
-   if ((code = krb5_copy_keyblock(context, ctx->subkey, &ctx->seq.key)))
+   if ((code = krb5_copy_keyblock(context, ctx->subkey, &ctx->seq)))
 	   goto fail;
 
    ctx->endtime = ticket->enc_part2->times.endtime;
