@@ -29,7 +29,7 @@ krb5_error_code krb5_fcc_destroy PROTOTYPE((krb5_ccache id ));
 krb5_error_code krb5_fcc_end_seq_get PROTOTYPE((krb5_ccache id , krb5_cc_cursor *cursor ));
 
 /* fcc_gennew.c */
-krb5_error_code krb5_fcc_generate_new PROTOTYPE((krb5_ccache id ));
+krb5_error_code krb5_fcc_generate_new PROTOTYPE((krb5_ccache *id ));
 
 /* fcc_getnam.c */
 char *krb5_fcc_get_name PROTOTYPE((krb5_ccache id ));
@@ -68,6 +68,9 @@ krb5_error_code krb5_fcc_store PROTOTYPE((krb5_ccache id , krb5_creds *creds ));
 
 /* fcc_skip.c */
 krb5_error_code krb5_fcc_skip_principal PROTOTYPE((krb5_ccache id ));
+
+/* fcc_sflags.c */
+krb5_error_code krb5_fcc_set_flags PROTOTYPE((krb5_ccache id , krb5_flags flags ));
 
 /* fcc_ops.c */
 
