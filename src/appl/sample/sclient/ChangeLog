@@ -1,3 +1,11 @@
+2002-04-05  Ken Raeburn  <raeburn@mit.edu>
+
+	* sclient.c: Include fake-addrinfo.h.  Include stdlib.h
+	unconditionally.
+	(net_read): New function, borrowed from krb5_net_read.
+	(main): Use krb5_c_valid_cksumtype, net_read, getaddrinfo,
+	getnameinfo.  Try contacting each address for the host.
+
 2002-03-28  Ken Raeburn  <raeburn@mit.edu>
 
 	* sclient.c: Include errno.h.
