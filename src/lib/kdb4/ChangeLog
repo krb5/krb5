@@ -1,3 +1,8 @@
+Fri Jun  9 19:26:57 1995    <tytso@rsx-11.mit.edu>
+
+	* configure.in: Remove standardized set of autoconf macros, which
+		are now handled by CONFIG_RULES.
+
 Mon May 22 15:14:17 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* krb_dbm.c (kerb_end_update): Use the POSIX  utime instead of utimes.

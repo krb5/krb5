@@ -1,3 +1,8 @@
+Fri Jun  9 19:27:15 1995    <tytso@rsx-11.mit.edu>
+
+	* configure.in: Remove standardized set of autoconf macros, which
+		are now handled by CONFIG_RULES.
+
 Tue Mar  7 19:58:07 1995  Mark Eichin  <eichin@cygnus.com>
 
 	* configure.in: take out ISODE_INCLUDE.
