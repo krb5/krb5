@@ -97,7 +97,7 @@ make_ap_req(context, auth_context, cred, server, endtime, chan_bindings,
 	    checksum_data.length = 24;
 	} else {
 	    if (credmsg.length+28 > KRB5_INT16_MAX) {
-		krb5_xfree(credmsg.data);
+		krb5_free_data_contents(context, &credmsg);
 		return(KRB5KRB_ERR_FIELD_TOOLONG);
 	    }
 
@@ -113,7 +113,7 @@ make_ap_req(context, auth_context, cred, server, endtime, chan_bindings,
     if ((checksum_data.data =
 	 (char *) xmalloc(checksum_data.length)) == NULL) {
 	if (credmsg.data)
-	    krb5_xfree(credmsg.data);
+	    krb5_free_data_contents(context, &credmsg);
 	return(ENOMEM);
     }
 
@@ -132,8 +132,7 @@ make_ap_req(context, auth_context, cred, server, endtime, chan_bindings,
 	TWRITE_STR(ptr, (unsigned char *) credmsg.data, credmsg.length);
 
 	/* free credmsg data */
-
-	krb5_xfree(credmsg.data);
+	krb5_free_data_contents(context, &credmsg);
     }
 
     /* fill in the necessary fields in creds */

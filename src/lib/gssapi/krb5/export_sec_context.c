@@ -90,7 +90,7 @@ krb5_gss_export_sec_context(minor_status, context_handle, interprocess_token)
 error_out:
     if (obuffer && bufsize) {
 	    memset(obuffer, 0, bufsize);
-	    krb5_xfree(obuffer);
+	    xfree(obuffer);
     }
     if (*minor_status == 0) 
 	    *minor_status = (OM_uint32) kret;
