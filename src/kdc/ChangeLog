@@ -1,3 +1,9 @@
+Thu Aug  4 15:13:27 1994  Tom Yu  (tlyu@dragons-lair)
+
+	* configure.in:
+	* kerberos_v4.c: don't include <sgtty.h> if POSIX_TERMIOS is
+	defined.
+
 Sat Jul 16 09:16:33 1994  Tom Yu  (tlyu at dragons-lair)
 
 	* configure.in: hopefully make dbm libs dtrt

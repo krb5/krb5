@@ -46,7 +46,9 @@ static char rcsid_kerberos_v4_c[] =
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <signal.h>
+#ifndef POSIX_TERMIOS
 #include <sgtty.h>
+#endif
 #include <sys/ioctl.h>
 #include <sys/time.h>
 #include <sys/file.h>
