@@ -1,3 +1,7 @@
+2005-01-03  Jeffrey Altman <jaltman@mit.edu>
+
+        * krb5_32.def: export krb5_is_thread_safe()
+
 2004-12-18  Jeffrey Altman <jaltman@mit.edu>
 
         * krb5_32.def: mark krb5_principal2salt as using the wrong 

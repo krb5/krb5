@@ -1,3 +1,7 @@
+2005-01-04  Jeffrey Altman <jaltman@mit.edu>
+
+        * krb5.hin: add prototype for krb5_is_thread_safe
+
 2004-12-21  Tom Yu  <tlyu@mit.edu>
 
 	* krb5.hin: Flag krb5_principal2salt as KRB5_CALLCONV_WRONG.

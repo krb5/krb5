@@ -49,6 +49,7 @@ STLIBOBJS= \
 	send524.o	\
 	sendto_kdc.o	\
 	sn2princ.o	\
+        thread_safe.o   \
 	timeofday.o	\
 	toffset.o	\
 	unlck_file.o	\
@@ -94,6 +95,7 @@ OBJS= \
 	$(OUTPRE)send524.$(OBJEXT)	\
 	$(OUTPRE)sendto_kdc.$(OBJEXT)	\
 	$(OUTPRE)sn2princ.$(OBJEXT)	\
+        $(OUTPRE)thread_safe.$(OBJEXT)  \
 	$(OUTPRE)timeofday.$(OBJEXT)	\
 	$(OUTPRE)toffset.$(OBJEXT)	\
 	$(OUTPRE)unlck_file.$(OBJEXT)	\
@@ -139,6 +141,7 @@ SRCS= \
 	$(srcdir)/send524.c	\
 	$(srcdir)/sendto_kdc.c	\
 	$(srcdir)/sn2princ.c	\
+        $(srcdir)/thread_safe.c \
 	$(srcdir)/timeofday.c	\
 	$(srcdir)/toffset.c	\
 	$(srcdir)/unlck_file.c	\
