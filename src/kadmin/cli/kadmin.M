@@ -87,7 +87,7 @@ order of preference.
 Use a keytab to decrypt the KDC response instead of prompting for a
 password on the TTY.  In this case, the default principal will be
 host/\fIhostname\fP.  If there is not a keytab specified with the
-.B\-t
+.B \-t
 option, then the default keytab will be used.
 .TP
 \fB\-t\fP \fIkeytab\fP
