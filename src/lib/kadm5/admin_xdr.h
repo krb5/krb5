@@ -3,62 +3,6 @@
  *
  * $Header$
  * 
- * $Log$
- * Revision 1.6  2001/02/18 23:00:08  epeisach
- * 	* server_internal.h: Add prototype for
- *         krb5_free_key_data_contents() which really should be in libkdb.
- *
- * 	* kadm_rpc_xdr.c: Include krb5/admin_xdr.h for prototypes.
- *
- * 	* kadm_rpc.h: Add prototypes for client and server stub
- *         functions. Server functions renamed to have _svc appended.
- *
- * 	* alt_prof.c: Clean up warnings. Do not shadow index() with local
- *         variable.
- *
- * 	* admin_xdr.h: Add prototypes for xdr_nulltype(), xdr_krb5_ui_4(),
- *         xdr_krb5_int16(), xdr_krb5_key_data_nocontents(),
- *         xdr_krb5_key_salt_tuple(), xdr_krb5_tl_data(),
- *         xdr_kadm5_principal_ent_rec_v1(), xdr_cprinc3_arg(),
- *         xdr_generic_ret(0, xdr_chpass3_arg(), xdr_setv4key_arg(),
- *         xdr_setkey_arg(), xdr_setkey3_arg(), xdr_chrand3_arg(),
- *         xdr_gprincs_arg(), xdr_grpincs_ret(), xdr_gpols_arg(),
- *         xdr_gpols_ret(), xdr_getprivs_ret(), xdr_krb5_salttype().
- *
- * 	* admin_internal.h: Add prototype for _kadm5_check_handle().
- *
- * 	* admin.h: Add prototypes for kadm5_free_config_params(),
- *         kadm5_decrypt_key(), ovsec_kadm_free_name_list().
- *
- * 	* adb.h: Add prototypes for xdr_osa_pw_hist_ent(),
- *         xdr_krb5_key_data(), osa_adb_rename_db(),
- *         osa_adb_rename_policy_db().
- *
- * Revision 1.5  1996/07/22 20:35:33  marc
- * this commit includes all the changes on the OV_9510_INTEGRATION and
- * OV_MERGE branches.  This includes, but is not limited to, the new openvision
- * admin system, and major changes to gssapi to add functionality, and bring
- * the implementation in line with rfc1964.  before committing, the
- * code was built and tested for netbsd and solaris.
- *
- * Revision 1.4.4.1  1996/07/18 03:08:25  marc
- * merged in changes from OV_9510_BP to OV_9510_FINAL1
- *
- * Revision 1.4.2.1  1996/06/20  02:16:37  marc
- * File added to the repository on a branch
- *
- * Revision 1.4  1996/05/30  16:36:34  bjaspan
- * finish updating to kadm5 naming (oops)
- *
- * Revision 1.3  1996/05/22 00:28:19  bjaspan
- * rename to kadm5
- *
- * Revision 1.2  1996/05/12 06:30:10  marc
- *  - fixup includes and data types to match beta6
- *
- * Revision 1.1  1993/11/09  04:06:01  shanzer
- * Initial revision
- *
  */
 
 #include    <kadm5/admin.h>
@@ -73,6 +17,7 @@ bool_t	    xdr_krb5_deltat(XDR *xdrs, krb5_deltat *objp);
 bool_t	    xdr_krb5_flags(XDR *xdrs, krb5_flags *objp);
 bool_t      xdr_krb5_ui_4(XDR *xdrs, krb5_ui_4 *objp);
 bool_t      xdr_krb5_int16(XDR *xdrs, krb5_int16 *objp);
+bool_t      xdr_krb5_ui_2(XDR *xdrs, krb5_ui_2 *objp);
 bool_t      xdr_krb5_key_data_nocontents(XDR *xdrs, krb5_key_data *objp);
 bool_t      xdr_krb5_key_salt_tuple(XDR *xdrs, krb5_key_salt_tuple *objp);
 bool_t      xdr_krb5_tl_data(XDR *xdrs, krb5_tl_data **tl_data_head);

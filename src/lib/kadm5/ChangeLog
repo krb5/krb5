@@ -1,3 +1,10 @@
+2001-07-25  Ezra Peisach  <epeisach@mit.edu>
+
+	* kadm_rpc_xdr.c: Add xdr_krb5_ui_2. 
+	(xdr_krb5_tl_data): Change local variable from int to unsigned int. 
+
+	* admin_xdr.h: Add prototype for xdr_krb5_ui_2. 
+
 2001-07-08  Ezra Peisach  <epeisach@mit.edu>
 
 	* logger.c (severity2string): Declare as returning const char *.
