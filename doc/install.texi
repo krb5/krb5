@@ -688,9 +688,11 @@ or without optimization.
 @node BSDI, Solaris versions 2.0 through 2.3, Alpha OSF/1 V2.0, OS Incompatibilities
 @subsection BSDI
 
-BSDI reportedly has a bad @samp{sed} which causes it to go into an
-infinite loop during the build.  The work around is to use a @samp{sed}
-from somewhere else, such as GNU.
+BSDI versions 1.0 and 1.1 reportedly has a bad @samp{sed} which causes
+it to go into an infinite loop during the build.  The work around is
+to use a @samp{sed} from somewhere else, such as GNU.  (This may be
+true for some versions of other systems derived from BSD 4.4, such as
+NetBSD and FreeBSD.)
 
 @node Solaris versions 2.0 through 2.3, Solaris 2.X, BSDI, OS Incompatibilities
 @subsection Solaris versions 2.0 through 2.3
@@ -1030,7 +1032,7 @@ If a particular host name matches both a domain name and a host name in
 All hosts which will use Kerberos will need to have certain ports
 defined in the system's @file{/etc/services} file.  The file
 @file{[SOURCEDIR]/config-files/services.append} contains the entries
-which should be appened to the @file{/etc/services} file.
+which should be appended to the @file{/etc/services} file.
 
 If you are using the Network Information Services (NIS) or Yellow
 Pages (YP), you will need to add the services in the
@@ -1422,7 +1424,7 @@ obtain a Kerberos ticket-granting ticket:
 
 @example
 % @b{[K_USER]/kinit [USERNAME]}
-Password for [USERNAME@@[REALMNAME]:            @b{<--- Enter your password}
+Password for [USERNAME]@@[REALMNAME]:            @b{<--- Enter your password}
 @end example
 
 Now use the @samp{sclient} program as follows:
