@@ -1,5 +1,4 @@
 CFLAGS = $(CCOPTS) $(DEFS)
-LDFLAGS = -g
 
 ##DOSBUILDTOP = .
 ##DOS!include $(BUILDTOP)\config\windows.in
@@ -14,9 +13,8 @@ libdir = $(exec_prefix)/lib
 mandir = $(prefix)/man/man1
 manext = 1
 
-SHELL = /bin/sh
-
 SRCS =  
+HDRS = 
 
 DISTFILES = $(SRCS) $(HDRS) COPYING COPYING.LIB ChangeLog Makefile.in
 
@@ -83,13 +81,10 @@ TAGS: $(SRCS)
 
 clean:: clean-$(WHAT)
 
-clean-:: clean-windows
-
+clean-:: clean-unix
+clean-mac:: clean-unix
 clean-unix::
-	rm -f  *.o core
-
-clean-mac::
-	rm -f *.o core
+	$(RM) *.o core
 
 mostlyclean: clean
 
@@ -110,6 +105,18 @@ dist: $(DISTFILES)
 	done
 	tar chzf `cat .fname`.tar.gz `cat .fname`
 	rm -rf `cat .fname` .fname
+
+# Macintosh build process...
+
+# Build all things for the Mac build, which need to be built on 
+# Unix first.
+unixmac:
+	(cd lib/krb5/error_tables; make -f Makefile.in unixmac)
+	(cd lib/gssapi/generic; make -f Makefile.in unixmac)
+
+
+# Microsoft Windows build process...
+
 #
 # Windows configuration
 #

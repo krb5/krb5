@@ -1,3 +1,7 @@
+Tue Mar 28 18:55:12 1995  John Gilmore  (gnu at toad.com)
+
+	* Makefile.in:  Fix up Mac build process somewhat.  Not complete.
+
 Mon Mar 27 20:02:01 1995 Keith Vetter (keithv@fusion.com)
 
 	* Makefile.in: added making and zipping in windows/wintel.
