@@ -204,45 +204,26 @@ krb5_error_code krb5_kt_register
 krb5_error_code krb5_kt_resolve
 	PROTOTYPE((char *,
 		   krb5_keytab * ));
-krb5_error_code krb5_kt_get_name
-	PROTOTYPE((krb5_keytab,
-		   char *,
-		   int ));
 krb5_error_code krb5_kt_default_name
 	PROTOTYPE((char *,
 		   int ));
 krb5_error_code krb5_kt_default
 	PROTOTYPE((krb5_keytab * ));
-krb5_error_code krb5_kt_close
-	PROTOTYPE((krb5_keytab ));
-krb5_error_code krb5_kt_get_entry
-	PROTOTYPE((krb5_keytab,
-		   krb5_principal,
-		   krb5_kvno,
-		   krb5_keytab_entry * ));
 krb5_error_code krb5_kt_free_entry
 	PROTOTYPE((krb5_keytab_entry * ));
-krb5_error_code krb5_kt_start_seq_get
-	PROTOTYPE((krb5_keytab,
-		   krb5_kt_cursor * ));
-krb5_error_code krb5_kt_next_entry
-	PROTOTYPE((krb5_keytab,
-		   krb5_keytab_entry *,
-		   krb5_kt_cursor ));
-krb5_error_code krb5_kt_end_seq_get
-	PROTOTYPE((krb5_keytab,
-		   krb5_kt_cursor ));
+krb5_error_code krb5_kt_read_service_key
+	PROTOTYPE((krb5_pointer,
+		   krb5_principal,
+		   krb5_kvno,
+		   krb5_keyblock **));
+/* remove and add are functions, so that they can return NOWRITE
+   if not a writable keytab */
 krb5_error_code krb5_kt_remove_entry
 	PROTOTYPE((krb5_keytab,
 		   krb5_keytab_entry * ));
 krb5_error_code krb5_kt_add_entry
 	PROTOTYPE((krb5_keytab,
 		   krb5_keytab_entry * ));
-krb5_error_code krb5_kt_read_service_key
-	PROTOTYPE((krb5_pointer,
-		   krb5_principal,
-		   krb5_kvno,
-		   krb5_keyblock **));
 
 /* librc.spec */
 krb5_error_code krb5_rc_initialize
@@ -280,38 +261,6 @@ krb5_error_code krb5_rc_default
 
 
 /* libcc.spec */
-krb5_error_code krb5_cc_initialize
-	PROTOTYPE((krb5_ccache,
-		   krb5_principal ));
-krb5_error_code krb5_cc_destroy
-	PROTOTYPE((krb5_ccache ));
-krb5_error_code krb5_cc_close
-	PROTOTYPE((krb5_ccache ));
-krb5_error_code krb5_cc_store_cred
-	PROTOTYPE((krb5_ccache,
-		   krb5_creds * ));
-krb5_error_code krb5_cc_retrieve_cred
-	PROTOTYPE((krb5_ccache,
-		   krb5_flags,
-		   krb5_creds *,
-		   krb5_creds * ));
-krb5_error_code krb5_cc_get_principal
-	PROTOTYPE((krb5_ccache,
-		   krb5_principal * ));
-krb5_error_code krb5_cc_start_seq_get
-	PROTOTYPE((krb5_ccache,
-		   krb5_cc_cursor * ));
-krb5_error_code krb5_cc_next_cred
-	PROTOTYPE((krb5_ccache,
-		   krb5_creds *,
-		   krb5_cc_cursor * ));
-krb5_error_code krb5_cc_end_seq_get
-	PROTOTYPE((krb5_ccache,
-		   krb5_cc_cursor * ));
-krb5_error_code krb5_cc_remove_cred
-	PROTOTYPE((krb5_ccache,
-		   krb5_flags,
-		   krb5_creds * ));
 krb5_error_code krb5_cc_resolve
 	PROTOTYPE((char *,
 		   krb5_ccache * ));
