@@ -142,8 +142,10 @@ char *argv[];
     char *mkey_fullname;
     char *defrealm;
     char *pw_str = 0;
+    char *keyfile = 0;
     int pw_size = 0;
     int enctypedone = 0;
+    int do_stash = 0;
     krb5_data pwd;
     krb5_context context;
     krb5_realm_params *rparams;
@@ -154,7 +156,7 @@ char *argv[];
     if (strrchr(argv[0], '/'))
 	argv[0] = strrchr(argv[0], '/')+1;
 
-    while ((optchar = getopt(argc, argv, "d:r:k:M:e:P:")) != EOF) {
+    while ((optchar = getopt(argc, argv, "d:r:k:M:e:P:sf:")) != EOF) {
 	switch(optchar) {
 	case 'd':			/* set db name */
 	    dbname = optarg;
@@ -167,6 +169,12 @@ char *argv[];
 		enctypedone++;
 	    else
 		com_err(argv[0], 0, "%s is an invalid enctype", optarg);
+	    break;
+	case 's':
+	    do_stash++;
+	    break;
+	case 'f':
+	    keyfile = optarg;
 	    break;
 	case 'M':			/* master key name in DB */
 	    mkey_name = optarg;
@@ -227,6 +235,10 @@ char *argv[];
 	    rparams->realm_num_keysalts = 0;
 	    rparams->realm_keysalts = (krb5_key_salt_tuple *) NULL;
 	}
+
+	/* Get the value for the stash file */
+	if (rparams->realm_stash_file && !keyfile)
+	    keyfile = strdup(rparams->realm_stash_file);
 
 	krb5_free_realm_params(context, rparams);
     }
@@ -360,6 +372,12 @@ master key name '%s'\n",
 	(void) krb5_finish_random_key(context, &master_encblock, &rblock.rseed);
 	com_err(argv[0], retval, "while adding entries to the database");
 	exit(1);
+    }
+    if (do_stash &&
+	((retval = krb5_db_store_mkey(context, keyfile, master_princ, 
+				    &master_keyblock)))) {
+	com_err(argv[0], errno, "while storing key");
+	printf("Warning: couldn't stash master key.\n");
     }
     /* clean up */
     (void) krb5_db_fini(context);

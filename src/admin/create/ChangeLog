@@ -1,3 +1,10 @@
+Wed Oct 18 14:25:29 1995    <tytso@rsts-11.mit.edu>
+
+	* kdb5_create.c (main): Add new option 's' which automatically
+	        stashes the master key in the key stash file.  This
+	        eliminates the need for the admin to type kdb5_stash right
+	        after kdb5_create.
+
 Wed Sep 13 19:02:50 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* kdb5_create.c (tgt_keysalt_iterate): Don't bash the master key
