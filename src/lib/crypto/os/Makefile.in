@@ -48,6 +48,11 @@ memmove.o: memmove.c
 @SHARED_RULE_LOCAL@
 	
 
-clean::
+clean:: clean-$(WHAT)
 	$(RM) ustime.c localaddr.c memmove.c
+
+clean-unix::
 	$(RM) shared/*
+clean-mac::
+	$(RM) shared/*
+clean-windows::

@@ -13,7 +13,11 @@ OBJS=	md4.$(OBJEXT) md4glue.$(OBJEXT) md4crypto.$(OBJEXT)
 
 SRCS=	$(srcdir)/md4.c $(srcdir)/md4glue.c $(srcdir)/md4crypto.c
 
-all:: shared $(OBJS)
+all:: all-$(WHAT) $(OBJS)
+
+all-unix:: shared
+all-mac:: shared
+all-windows::
 
 shared:
 	mkdir shared
@@ -35,6 +39,11 @@ t_mddriver.exe:
 check:: t_mddriver$(EXEEXT)
 	$(C)t_mddriver$(EXEEXT) -x
 
-clean::
+clean:: clean-$(WHAT)
 	$(RM) t_mddriver$(EXEEXT) t_mddriver.$(OBJEXT) t_mddriver.c
+
+clean-unix::
 	$(RM) shared/*
+clean-mac::
+	$(RM) shared/*
+clean-windows::
