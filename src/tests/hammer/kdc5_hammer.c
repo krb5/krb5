@@ -116,13 +116,13 @@ main(argc, argv)
     int errflg = 0;
     krb5_error_code code;
     int num_to_check, n, i, j, repeat_count, counter;
-    int n_tried, errors, enctypedone;
+    int n_tried, errors;
     char prefix[BUFSIZ], client[4096], server[4096];
     int depth;
     char ctmp[4096], ctmp2[BUFSIZ], stmp[4096], stmp2[BUFSIZ];
     krb5_principal client_princ;
     krb5_error_code retval;
-    krb5_enctype enctype;
+    krb5_enctype enctype = DEFAULT_KDC_ENCTYPE;
 
     krb5_init_context(&test_context);
 
@@ -137,7 +137,6 @@ main(argc, argv)
     brief = 0;
     n_tried = 0;
     errors = 0;
-    enctypedone = 0;
 
     while ((option = getopt(argc, argv, "D:p:n:c:R:k:P:e:bvr:t")) != -1) {
 	switch (option) {
@@ -168,7 +167,6 @@ main(argc, argv)
 	    break;
 	case 'k':
 	    enctype = atoi(optarg);
-	    enctypedone++;
 	    break;
 	case 'P':
 	    patypedata[0] = atoi(optarg);
@@ -196,9 +194,6 @@ main(argc, argv)
     }
 
     if (!(num_to_check && prefix[0])) usage(prog, 1);
-
-    if (!enctypedone)
-	enctype = DEFAULT_KDC_ENCTYPE;
 
     if (!cur_realm) {
 	if ((retval = krb5_get_default_realm(test_context, &cur_realm))) {

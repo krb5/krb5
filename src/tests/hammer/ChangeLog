@@ -1,3 +1,8 @@
+2001-08-29  Ken Raeburn  <raeburn@mit.edu>
+
+	* kdc5_hammer.c (main): Initialize enctype at entry; eliminate
+	enctypedone variable.
+
 2000-07-28  Ezra Peisach  <epeisach@mit.edu>
 
 	* kdc5_hammer.c: Move global (to file) enctype into main to prevent
