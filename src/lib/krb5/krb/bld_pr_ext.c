@@ -83,7 +83,7 @@ va_dcl
     }
     princ_ret->data = princ_data;
     princ_ret->length = count;
-    tmpdata = malloc(rlen);
+    tmpdata = malloc(rlen+1);
     if (!tmpdata) {
 	xfree(princ_data);
 	xfree(princ_ret);
@@ -92,6 +92,7 @@ va_dcl
     krb5_princ_set_realm_length(princ_ret, rlen);
     krb5_princ_set_realm_data(princ_ret, tmpdata);
     memcpy(tmpdata, realm, rlen);
+    tmpdata[rlen] = 0;
 
     /* process rest of components */
 #if __STDC__ || defined(STDARG_PROTOTYPES)
@@ -103,13 +104,15 @@ va_dcl
 	size = va_arg(ap, int);
 	next = va_arg(ap, char *);
 	princ_data[i].length = size;
-	princ_data[i].data = malloc(size);
+	princ_data[i].data = malloc(size+1);
 	if (!princ_data[i].data)
 	    goto free_out;
 	memcpy(princ_data[i].data, next, size);
+	princ_data[i].data[size] = 0;
     }
     va_end(ap);
     *princ = princ_ret;
+    krb5_princ_type(princ_ret) = KRB5_NT_UNKNOWN;
     return 0;
 
 free_out:
