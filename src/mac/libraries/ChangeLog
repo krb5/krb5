@@ -1,3 +1,6 @@
+Fri Feb 21 16:30:00 2003 Alexandra Ellwood <lxs@mit.edu>
+    * Removed Mac OS 9 files.
+
 2001-10-09  Ken Raeburn  <raeburn@mit.edu>
 
 	* autoconf.h (NO_NESTED_PROTOTYPES): Don't define.
