@@ -17,6 +17,6 @@ CHECK_STDARG
 CopySrcHeader(ss.h,$(BUILDTOP)/include/ss)
 CopySrcHeader(mit-sipb-copyright.h,$(BUILDTOP)/include/ss)
 CopySrcHeader(copyright.h,$(BUILDTOP)/include/ss)
-CopySrcHeader(ss_err.h,$(BUILDTOP)/include/ss)
+CopyHeader(ss_err.h,$(BUILDTOP)/include/ss)
 CopySrcHeader(ss_internal.h,$(BUILDTOP)/include/ss)
 AC_OUTPUT(Makefile,[EXTRA_RULES])

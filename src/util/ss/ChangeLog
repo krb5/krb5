@@ -1,3 +1,9 @@
+Wed Jun 22 18:51:50 1994  Mark Eichin  (eichin@cygnus.com)
+
+	* configure.in: ss_err.h is *not* a SrcHeader. Note that there is
+	duplication between the Copy*Header lines and the includes: rule
+	in the Makefile.in, which should later be fixed.
+
 Tue Jun 21 00:21:05 1994  Tom Yu  (tlyu at dragons-lair)
 
 	* configure.in: should be CopySrcHeader
