@@ -12,14 +12,6 @@
 
 #ifndef __COM_ERR_H
 
-/* This should be part of k5-config.h but many application
- * programs are not including that file. We probably want to
- * come up with a better way of handling this problem.
- */
-#if defined(_AIX) && !defined(unix)
-#define unix
-#endif
-
 #if defined(_MSDOS) || defined(_WIN32) || defined(macintosh)
 #include <win-mac.h>
 #if defined(macintosh) && defined(__CFM68K__) && !defined(__USING_STATIC_LIBS__)
@@ -87,7 +79,7 @@ KRB5_DLLIMP extern errcode_t KRB5_CALLCONV add_error_table
 KRB5_DLLIMP extern errcode_t KRB5_CALLCONV remove_error_table
 	ET_P((const struct error_table FAR *));
 
-#ifdef unix
+#if !defined(_MSDOS) && !defined(_WIN32) && !defined(macintosh)
 /*
  * The display routine should be application specific.  A global hook,
  * may cause inappropriate display procedures to be called between

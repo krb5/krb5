@@ -1,4 +1,6 @@
 thisconfigdir=.
+myfulldir=util/et
+mydir=.
 BUILDTOP=$(REL)$(U)$(S)$(U)
 RELDIR=../util/et
 CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
