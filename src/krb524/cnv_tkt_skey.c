@@ -216,7 +216,7 @@ int krb524_convert_tkt_skey(context, v5tkt, v4tkt, v5_skey, v4_skey,
  * Modified functions below to be static.
  *****************************************************************************/
 
-#define          HOST_BYTE_ORDER (* (char *) &temp_ONE)
+#define          HOST_BYTE_ORDER (* (const char *) &temp_ONE)
 static const int temp_ONE = 1;
 
 /*

@@ -1,3 +1,8 @@
+2001-08-08    <epeisach@mit.edu>
+
+	* cnv_tkt_skey.c (HOST_BYTE_ORDER): When casting const int * to
+	const char * instead of simply char *.
+
 2001-06-26  Ezra Peisach  <epeisach@mit.edu>
 
 	* conv_creds.c: Nuke prototype in file.
