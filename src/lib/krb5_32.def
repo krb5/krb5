@@ -4,8 +4,6 @@
 
 ;LIBRARY		KRB5
 DESCRIPTION	'DLL for Kerberos 5'
-CODE		PRELOAD MOVEABLE DISCARDABLE
-DATA		PRELOAD MOVEABLE SINGLE
 HEAPSIZE	8192
 
 EXPORTS
@@ -177,6 +175,7 @@ EXPORTS
 	krb5_cc_default_name
 	krb5_cc_register
 	krb5_cc_resolve
+	krb5_cc_set_default_name
 ;
 	krb5_kt_default
 	krb5_kt_register

@@ -1,3 +1,13 @@
+Sat Apr 17 01:21:15 1999  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* krb5_32.def: Add krb5_cc_set_default_name to the list of
+		exported functions.
+
+	* gssapi32.def: Add krb5 specific extension functions:
+		gss_krb5_get_tkt_flags, gss_krb5_copy_ccache, and 
+		gss_krb5_ccache_name... to the list of exported functions
+		in the DLL.
+
 1999-03-31  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* win_glue.c (control): Call krb5_stdcc_shutdown when detaching
