@@ -5,16 +5,6 @@ ISODE_INCLUDE
 CONFIG_RULES
 AC_SET_BUILDTOP
 AC_PROG_INSTALL
-dnl
-dnl Check for where the BSD rlogin, rcp, and rsh programs live.
-dnl
-save_path=$PATH
-PATH=/usr/bsd:/usr/ucb:/bin:/usr/bin
-AC_PATH_PROG(UCB_RLOGIN,rlogin,/usr/ucb/rlogin)
-AC_PATH_PROG(UCB_RSH,rsh,/usr/ucb/rsh)
-AC_PATH_PROG(UCB_RCP,rcp,/usr/ucb/rcp)
-PATH=$save_path
-dnl
 AC_CHECK_LIB(socket,main)
 AC_CHECK_LIB(nsl,main)
 dnl dbm libs for use of an_to_ln
@@ -44,12 +34,8 @@ AC_FUNC_CHECK(setreuid,AC_DEFINE(HAVE_SETREUID))
 AC_FUNC_CHECK(setresuid,AC_DEFINE(HAVE_SETRESUID))
 AC_FUNC_CHECK(waitpid,AC_DEFINE(HAVE_WAITPID))
 AC_FUNC_CHECK(setsid,AC_DEFINE(HAVE_SETSID))
-AC_HAVE_HEADERS(sys/filio.h sys/sockio.h unistd.h stdlib.h sys/label.h sys/tty.h ttyent.h lastlog.h sys/select.h sys/ptyvar.h)
-AC_COMPILE_CHECK([use streams interface],
-[#include <sys/tty.h>
-#include <sys/ttold.h>
-#include <sys/ptyvar.h>],
-[], AC_DEFINE(HAVE_STREAMS))
+AC_FUNC_CHECK(line_push,AC_DEFINE(HAVE_LINE_PUSH))
+AC_HAVE_HEADERS(sys/filio.h sys/sockio.h unistd.h stdlib.h sys/label.h sys/tty.h ttyent.h lastlog.h sys/select.h sys/ptyvar.h sys/stream.h)
 AC_REPLACE_FUNCS(getdtablesize)
 CHECK_SIGNALS
 CHECK_SETJMP
@@ -57,36 +43,73 @@ CHECK_DIRENT
 CHECK_FCNTL
 CHECK_WAIT_TYPE
 AC_HEADER_CHECK(termios.h,AC_FUNC_CHECK([tcsetattr],AC_DEFINE(POSIX_TERMIOS)))
-AC_COMPILE_CHECK([F_SETOWN],
-[#include <sys/types.h>
-#include <fcntl.h>],
-[1+F_SETOWN;], 
-AC_DEFINE(HAVE_SETOWN))
-KRB5_UTHOST
-KRB5_UTEXIT
-KRB5_UTPID
 KRB_INCLUDE
+CHECK_UTMP
 WITH_KRB5ROOT
 WITH_KRB4
+dnl
+dnl Check for where the BSD rlogin, rcp, and rsh programs live.
+dnl
+save_path=$PATH
+PATH=/usr/bsd:/usr/ucb:/bin:/usr/bin
+AC_PATH_PROG(UCB_RLOGIN,rlogin,/usr/ucb/rlogin)
+AC_PATH_PROG(UCB_RSH,rsh,/usr/ucb/rsh)
+AC_PATH_PROG(UCB_RCP,rcp,/usr/ucb/rcp)
+PATH=$save_path
+dnl
 AC_ARG_WITH([krb4],[include Kerberos V4 support],
 ADD_DEF(-DKRB5_KRB4_COMPAT)
 K4LIB='$(KRB4)/lib/libkrb.a $(KRB4)/lib/libdes.a',
 echo "warning: no krb4 backwards compatibility support"
 K4LIB=)
 AC_SUBST(K4LIB)
-AC_COMPILE_CHECK([setenv],
-[setenv();],[setenv("PATH","/bin",0)],,
-[SETENVSRC=setenv.c
+dnl
+dnl
+AC_MSG_CHECKING([streams interface])
+AC_TRY_COMPILE(
+[#include <sys/tty.h>
+#include <sys/stream.h>
+#include <sys/stropts.h>], [],
+[AC_MSG_RESULT(yes)
+AC_DEFINE(HAVE_STREAMS)],
+AC_MSG_RESULT(no))
+dnl
+dnl
+AC_MSG_CHECKING([F_SETOWN])
+AC_TRY_COMPILE(
+[#include <sys/types.h>
+#include <fcntl.h>], [1+F_SETOWN;],
+[AC_MSG_RESULT(yes)
+AC_DEFINE(HAVE_SETOWN)],
+AC_MSG_RESULT(no))
+dnl
+dnl
+AC_MSG_CHECKING([setenv])
+AC_TRY_COMPILE(
+[setenv();],[setenv("PATH","/bin",0)],
+AC_MSG_RESULT(yes),
+[AC_MSG_RESULT(no)
+SETENVSRC=setenv.c
 SETENVOBJ=setenv.o
 AC_SUBST([SETENVSRC])
 AC_SUBST([SETENVOBJ])])
 dnl
-AC_COMPILE_CHECK([number of arguments to getpgrp],
-[#include <unistd.h>],[int pid = getpgrp()],
-AC_DEFINE(GETGRP_ONEARG))
-AC_COMPILE_CHECK([number of arguments to setpgrp],
+dnl
+AC_MSG_CHECKING([arguments to getpgrp])
+AC_TRY_COMPILE(
+[#include <unistd.h>], [int pid = getpgrp()],
+[AC_MSG_RESULT(void)
+AC_DEFINE(GETGRP_ONEARG)],
+AC_MSG_RESULT(pid))
+dnl
+dnl
+AC_MSG_CHECKING([number of arguments to setpgrp])
+AC_TRY_COMPILE(
 [#include <unistd.h>],[setpgrp(0,0)],
-AC_DEFINE(SETPGRP_TWOARG))
+[AC_MSG_RESULT(two)
+AC_DEFINE(SETPGRP_TWOARG)],
+AC_MSG_RESULT(one))
+dnl
 dnl
 ADD_DEF(-DKERBEROS)
 V5_AC_OUTPUT_MAKEFILE
