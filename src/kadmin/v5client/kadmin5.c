@@ -67,7 +67,7 @@ static char		*re_string = (char *) NULL;
 static const char *help_option		= "-help";
 static const char *verbose_option	= "-verbose";
 static const char *force_option		= "-force";
-static const char *kadmin_instance	= "kadmin";
+static const char *kadmin_instance	= "admin";
 
 static const char *wr_ktab_type		= "WRFILE";
 

@@ -1,3 +1,7 @@
+Fri Jun  9 23:04:56 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* kadmin5.c: Change the default kadmin instance to be "admin"
+
 Fri Jun  9 19:05:57 1995    <tytso@rsx-11.mit.edu>
 
 	* configure.in: Remove standardized set of autoconf macros, which
