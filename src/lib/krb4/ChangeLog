@@ -1,3 +1,12 @@
+Thu Jul  9 19:35:01 1998  Matthew D Hancher  <mdh@mit.edu>
+
+	* tf_util.c (tf_init): Fixed a potential race condition in the opening 
+	of v4 ticket files. tf_init() was calling lstat() followed by fopen().
+	Now it calls fopen() and then calls lstat() and fstat() to check file 
+	ownership and to check that it opened the file it thought it did. I 
+	patched the shared memory code similarly, but since nothing uses it I
+	don't have a good way to test it properly.
+	
 Wed Jun 24 03:09:28 1998  Tom Yu  <tlyu@mit.edu>
 
 	* mk_priv.c (krb_mk_priv): Fix up call to pcbc_encrypt().  By
