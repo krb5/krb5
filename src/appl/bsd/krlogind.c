@@ -176,8 +176,6 @@ struct winsize {
 #undef BUFSIZ
 #endif
 
-#undef KRB5_KRB4_COMPAT
-
 int auth_sys = 0;	/* Which version of Kerberos used to authenticate */
 
 #define KRB5_RECVAUTH_V4	4

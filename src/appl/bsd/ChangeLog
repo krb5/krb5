@@ -1,0 +1,4 @@
+Mon Jun 27 22:03:48 1994  Theodore Y. Ts'o  (tytso at tsx-11)
+
+	* krlogind.c: remove spurious debugging #undef of KRB5_KRB4_COMPAT
+
