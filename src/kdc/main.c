@@ -18,16 +18,12 @@ static char rcsid_main_c[] =
 #include <krb5/copyright.h>
 
 #include <stdio.h>
-#ifdef __STDC__
-#include <stdarg.h>
-#else
-#include <varargs.h>
-#endif
 #include <syslog.h>
 #include <signal.h>
 #include <errno.h>
 
 #include <com_err.h>
+/* com_err gets  varargs */
 
 #include <krb5/krb5.h>
 #include <krb5/osconf.h>
