@@ -344,8 +344,11 @@ int krb5int_thread_support_init (void)
     err = k5_mutex_finish_init(&key_lock);
     if (err)
 	return err;
-    if (K5_PTHREADS_LOADED)
-	return pthread_key_create(&key, thread_termination);
+    if (K5_PTHREADS_LOADED) {
+	err = pthread_key_create(&key, thread_termination);
+	if (err)
+	    return err;
+    }
 
 #endif
 

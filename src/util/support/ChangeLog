@@ -1,3 +1,8 @@
+2004-07-31  Ken Raeburn  <raeburn@mit.edu>
+
+	* threads.c (krb5int_thread_support_init): Do finish
+	initialization after key creation in POSIX case.
+
 2004-07-23  Ken Raeburn  <raeburn@mit.edu>
 
 	* fake-addrinfo.c (krb5int_fac): Initialize the mutex.
