@@ -525,7 +525,7 @@ install:: class.ad							@@\
  * this Imakefile is within the source tree.
  */
 #ifndef DependDependency
-#ifdef UseInstalled
+#ifdef UseMakedependInstalled
 #define DependDependency() /**/
 #else
 #define DependDependency() 						@@\
@@ -536,7 +536,7 @@ $(DEPEND):								@@\
 	cd $(DEPENDSRC); $(MAKE); \					@@\
 	echo "okay, continuing in $(CURRENT_DIR)"
 
-#endif /* UseInstalled */
+#endif /* UseMakedependInstalled */
 #endif /* DependDependency */
 
 
@@ -593,7 +593,7 @@ $(IMAKE):								@@\
 	echo "bootstrapping $@ from Makefile.ini in $(IMAKESRC) first..."; \	@@\
 	$(MAKE) -f Makefile.ini BOOTSTRAPCFLAGS=$(BOOTSTRAPCFLAGS); fi; \	@@\
 	echo "okay, continuing in $(CURRENT_DIR)")
-#endif /* UseInstalled */
+#endif /* UseImakeInstalled */
 #endif /* ImakeDependency */
 
 

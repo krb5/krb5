@@ -675,7 +675,11 @@ STDC_TOP_INCLUDES = STDCTopIncludes
         IMAKE_CMD = $(IMAKE) -DUseInstalled -I$(IRULESRC) $(IMAKE_DEFINES)
 #else
          IRULESRC = $(CONFIGSRC)
+#ifdef UseImakeInstalled
+        IMAKE_CMD = $(IMAKE) -I$(NEWTOP)$(IRULESRC) $(IMAKE_DEFINES)
+#else
         IMAKE_CMD = $(NEWTOP)$(IMAKE) -I$(NEWTOP)$(IRULESRC) $(IMAKE_DEFINES)
+#endif
 #endif
      ICONFIGFILES = $(IRULESRC)/Imake.tmpl $(IRULESRC)/Imake.rules \
 			$(IRULESRC)/Project.tmpl $(IRULESRC)/site.def \
