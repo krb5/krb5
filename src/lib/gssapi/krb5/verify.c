@@ -42,7 +42,6 @@ krb5_gss_verify(minor_status, context_handle,
 	return(GSS_S_FAILURE);
 
 
-   _log("%s:%d: here\n", SFILE, __LINE__);
      return(kg_unseal(context, minor_status, context_handle,
 		      token_buffer, message_buffer,
 		      NULL, qop_state, KG_TOK_SIGN_MSG));
@@ -67,11 +66,9 @@ krb5_gss_verify_mic(minor_status, context_handle,
        return(GSS_S_FAILURE);
 
 
-   _log("%s:%d: here\n", SFILE, __LINE__);
     rstat = kg_unseal(context, minor_status, context_handle,
 		      token_buffer, message_buffer,
 		      NULL, &qstate, KG_TOK_MIC_MSG);
-   _log("%s:%d: here\n", SFILE, __LINE__);
     if (!rstat && qop_state)
 	*qop_state = (gss_qop_t) qstate;
     return(rstat);

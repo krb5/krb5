@@ -492,9 +492,6 @@ kg_unseal(context, minor_status, context_handle, input_token_buffer,
     int err;
     int toktype2;
 
-    _log_block2("token to unseal",
-		input_token_buffer->value, input_token_buffer->length);
-
     /* validate the context handle */
     if (! kg_validate_ctx_id(context_handle)) {
 	*minor_status = (OM_uint32) G_VALIDATE_FAILED;
@@ -537,8 +534,6 @@ kg_unseal(context, minor_status, context_handle, input_token_buffer,
 				!ctx->proto);
     if (err) {
 	*minor_status = err;
-	_log("%s:%d: g_verify_token_header returns %d/%s\n", SFILE, __LINE__,
-	     err, error_message(err));
 	return GSS_S_DEFECTIVE_TOKEN;
     }
 

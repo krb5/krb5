@@ -39,30 +39,6 @@ static const gss_buffer_desc empty_message = { 0, 0 };
 #define FLAG_WRAP_CONFIDENTIAL	0x02
 #define FLAG_ACCEPTOR_SUBKEY	0x04
 
-void
-_log_block(const char *file, int line, const char *label,
-	   void *vptr, size_t len)
-{
-    char b[8 * 4 + 4];
-    int i, j;
-    if (strrchr(file, '/'))
-	file = 1 + strrchr(file, '/');
-#if 0
-    _log("%s:%d: %s: %d at %p\n", file, line, label, len, vptr);
-    for (i = 0; i < (len + 7) / 8; i++) {
-	unsigned char *base = (i * 8) + (unsigned char *)vptr;
-	b[0] = 0;
-	for (j = 0; j < 8 && j < (len - i * 8); j++)
-	    sprintf(b+strlen(b), " %02x", base[j]);
-	_log("\t\t%04x/@%p:%s\n", 8 * i, base, b);
-    }
-#else
-    _log("%s:%d: %s: %d at %p [omitted]\n", file, line, label, len, vptr);
-#endif
-}
-
-#define SFILE (strrchr(__FILE__,'/') ? 1+strrchr(__FILE__,'/') : __FILE__)
-
 krb5_error_code
 gss_krb5int_make_seal_token_v3 (krb5_context context,
 				krb5_gss_ctx_id_rec *ctx,
@@ -93,15 +69,10 @@ gss_krb5int_make_seal_token_v3 (krb5_context context,
 		    ? KG_USAGE_INITIATOR_SIGN
 		    : KG_USAGE_ACCEPTOR_SIGN));
     if (ctx->have_acceptor_subkey) {
-	_log("%s:%d: using acceptor subkey\n", SFILE, __LINE__);
 	key = ctx->acceptor_subkey;
     } else {
-	_log("%s:%d: using main key\n", SFILE, __LINE__);
 	key = ctx->enc;
     }
-
-    _log("%s:%d: wrap input token: %d @%p toktype=0x%x\n", SFILE, __LINE__,
-	 message->length, message->value, toktype);
 
 #ifdef CFX_EXERCISE
     {
@@ -130,7 +101,6 @@ gss_krb5int_make_seal_token_v3 (krb5_context context,
 #else
 	ec = 0;
 #endif
-	_log("%s:%d: ec=%d\n", SFILE, __LINE__, ec);
 	plain.length = message->length + 16 + ec;
 	plain.data = malloc(message->length + 16 + ec);
 	if (plain.data == NULL)
@@ -172,15 +142,6 @@ gss_krb5int_make_seal_token_v3 (krb5_context context,
 	plain.data = 0;
 	if (err)
 	    goto error;
-	_log("%s:%d: just encrypted:\n"
-	     "\t(key=%d/%02x%02x..., usage=%d, plain.length=%d,\n"
-	     "\t ciphertext=%d/%02x%02x...)\n",
-	     SFILE, __LINE__, key->enctype,
-	     key->contents[0], key->contents[1],
-	     key_usage, plain.length,
-	     cipher.ciphertext.length,
-	     0xff & cipher.ciphertext.data[0],
-	     0xff & cipher.ciphertext.data[1]);
 
 	/* Now that we know we're returning a valid token....  */
 	ctx->seq_send++;
@@ -207,7 +168,6 @@ gss_krb5int_make_seal_token_v3 (krb5_context context,
 	if (plain.data == NULL)
 	    return ENOMEM;
 
-	_log("%s:%d: cksumtype=%d\n", SFILE, __LINE__, ctx->cksumtype);
 	if (ctx->cksum_size > 0xffff)
 	    abort();
 
@@ -251,10 +211,6 @@ gss_krb5int_make_seal_token_v3 (krb5_context context,
 
 	sum.contents = outbuf + 16 + message2->length;
 	sum.length = ctx->cksum_size;
-	_log("%s:%d: checksum @%p outbuf @%p offset %d\n", SFILE, __LINE__,
-	     sum.contents, outbuf, sum.contents - outbuf);
-	_log_block(SFILE, __LINE__, "checksum input",
-		   plain.data, plain.length);
 
 	err = krb5_c_make_checksum(context, ctx->cksumtype, key,
 				   key_usage, &plain, &sum);
@@ -266,8 +222,6 @@ gss_krb5int_make_seal_token_v3 (krb5_context context,
 	    free(outbuf);
 	    goto error;
 	}
-	_log_block(SFILE, __LINE__, "checksum result",
-		   sum.contents, sum.length);
 	if (sum.length != ctx->cksum_size)
 	    abort();
 	memcpy(outbuf + 16 + message2->length, sum.contents, ctx->cksum_size);
@@ -302,7 +256,6 @@ gss_krb5int_make_seal_token_v3 (krb5_context context,
 
     token->value = outbuf;
     token->length = bufsize;
-    _log_block(SFILE, __LINE__, "output token", token->value, token->length);
     return 0;
 
 error:
@@ -350,31 +303,20 @@ gss_krb5int_unseal_token_v3(krb5_context *contextptr,
 		    ? KG_USAGE_INITIATOR_SIGN
 		    : KG_USAGE_ACCEPTOR_SIGN));
 
-#define LOG()		_log("%s:%d: here\n", SFILE, __LINE__)
-#define DEFECTIVE	do{LOG();goto defective;}while(0)
-
-    _log ("%s:%d: bodysize %d ptr @%p: %02x %02x\n", SFILE, __LINE__,
-	  bodysize, ptr, ptr[0], ptr[1]);
-
     /* Oops.  I wrote this code assuming ptr would be at the start of
        the token header.  */
     ptr -= 2;
     bodysize += 2;
 
-    _log_block(SFILE, __LINE__, "input token", ptr, bodysize);
-
     if (bodysize < 16) {
-	LOG();
     defective:
 	*minor_status = 0;
 	return GSS_S_DEFECTIVE_TOKEN;
     }
-    LOG();
     if ((ptr[2] & FLAG_SENDER_IS_ACCEPTOR) != acceptor_flag) {
 	*minor_status = G_BAD_DIRECTION;
 	return GSS_S_BAD_SIG;
     }
-    LOG();
 
     /* Two things to note here.
 
@@ -392,18 +334,16 @@ gss_krb5int_unseal_token_v3(krb5_context *contextptr,
        key, the one not asserted by the acceptor, will have the same
        value in that case, though, so we can just ignore the flag.  */
     if (ctx->have_acceptor_subkey && (ptr[2] & FLAG_ACCEPTOR_SUBKEY)) {
-	_log("%s:%d: sender used acceptor subkey\n", SFILE, __LINE__);
 	key = ctx->acceptor_subkey;
     } else {
-	_log("%s:%d: sender used its own key\n", SFILE, __LINE__);
 	key = ctx->enc;
     }
 
     if (toktype == KG_TOK_WRAP_MSG) {
 	if (load_16_be(ptr) != 0x0504)
-	    DEFECTIVE;
+	    goto defective;
 	if (ptr[3] != 0xff)
-	    DEFECTIVE;
+	    goto defective;
 	ec = load_16_be(ptr+4);
 	rrc = load_16_be(ptr+6);
 	seqnum = load_64_be(ptr+8);
@@ -417,7 +357,6 @@ gss_krb5int_unseal_token_v3(krb5_context *contextptr,
 	    krb5_enc_data cipher;
 	    unsigned char *althdr;
 
-    LOG();
 	    if (conf_state)
 		*conf_state = 1;
 	    /* Do we have no decrypt_size function?
@@ -431,50 +370,32 @@ gss_krb5int_unseal_token_v3(krb5_context *contextptr,
 	    plain.data = malloc(plain.length);
 	    if (plain.data == NULL)
 		goto no_mem;
-	    _log("%s:%d: about to decrypt:\n"
-		 "\t(key=%d/%02x%02x..., usage=%d, ciphertext=%d/%02x%02x...)\n",
-		 SFILE, __LINE__, key->enctype,
-		 key->contents[0], key->contents[1],
-		 key_usage,
-		 cipher.ciphertext.length,
-		 0xff & cipher.ciphertext.data[0],
-		 0xff & cipher.ciphertext.data[1]);
 	    err = krb5_c_decrypt(context, key, key_usage, 0,
 				 &cipher, &plain);
 	    if (err) {
 		free(plain.data);
-		_log("%s:%d: error %ld/%s\n", SFILE, __LINE__,
-		     (long) err, error_message(err));
 		goto error;
 	    }
 	    /* Don't use bodysize here!  Use the fact that
 	       cipher.ciphertext.length has been adjusted to the
 	       correct length.  */
-    LOG();
 	    althdr = plain.data + plain.length - 16;
 	    if (load_16_be(althdr) != 0x0504
 		|| althdr[2] != ptr[2]
 		|| althdr[3] != ptr[3]
 		|| memcmp(althdr+8, ptr+8, 8))
-		DEFECTIVE;
+		goto defective;
 	    message_buffer->value = plain.data;
-	    _log("%s:%d: plaintext len=%d, ec=%d\n", SFILE, __LINE__,
-		 plain.length, ec);
 	    message_buffer->length = plain.length - ec - 16;
-	    _log("%s:%d: decrypted token %d @%p\n", SFILE, __LINE__,
-		 message_buffer->length, message_buffer->value);
 	} else {
 	    /* no confidentiality */
-    LOG();
 	    if (conf_state)
 		*conf_state = 0;
 	    if (ec + 16 < ec)
 		/* overflow check */
-		DEFECTIVE;
-    LOG();
+		goto defective;
 	    if (ec + 16 > bodysize)
-		DEFECTIVE;
-    LOG();
+		goto defective;
 	    /* We have: header | msg | cksum.
 	       We need cksum(msg | header).
 	       Rotate the first two.  */
@@ -487,22 +408,15 @@ gss_krb5int_unseal_token_v3(krb5_context *contextptr,
 	    sum.length = ec;
 	    if (sum.length != ctx->cksum_size) {
 		*minor_status = 0;
-    LOG();
 		return GSS_S_BAD_SIG;
 	    }
 	    sum.contents = ptr+bodysize-ec;
 	    sum.checksum_type = ctx->cksumtype;
-	    _log_block(SFILE, __LINE__, "checksum data input",
-		       plain.data, plain.length);
-	    _log_block(SFILE, __LINE__, "checksum to test",
-		       sum.contents, sum.length);
 	    err = krb5_c_verify_checksum(context, key, key_usage,
 					 &plain, &sum, &valid);
 	    if (err)
 		goto error;
-	    _log("%s:%d: valid=%d\n", SFILE, __LINE__, valid);
 	    if (!valid) {
-    LOG();
 		*minor_status = 0;
 		return GSS_S_BAD_SIG;
 	    }
@@ -512,28 +426,18 @@ gss_krb5int_unseal_token_v3(krb5_context *contextptr,
 		goto no_mem;
 	    memcpy(message_buffer->value, plain.data, message_buffer->length);
 	}
-    LOG();
 	err = g_order_check(&ctx->seqstate, seqnum);
 	*minor_status = 0;
-	_log("%s:%d: g_order_check => %d/%s, unseal %s\n", SFILE, __LINE__,
-	     err, err ? error_message(err) : "No error",
-	     err ? "failed" : "passed");
 	return err;
     } else if (toktype == KG_TOK_MIC_MSG) {
 	/* wrap token, no confidentiality */
-    LOG();
 	if (load_16_be(ptr) != 0x0404)
-	    DEFECTIVE;
-    LOG();
+	    goto defective;
     verify_mic_1:
-    LOG();
 	if (ptr[3] != 0xff)
-	    DEFECTIVE;
-	_log("%s:%d: at ptr+4 %p: %02x %02x %02x %02x\n", SFILE, __LINE__,
-	     ptr+4, ptr[4], ptr[5], ptr[6], ptr[7]);
+	    goto defective;
 	if (load_32_be(ptr+4) != 0xffffffffL)
-	    DEFECTIVE;
-    LOG();
+	    goto defective;
 	seqnum = load_64_be(ptr+8);
 	plain.length = message_buffer->length + 16;
 	plain.data = malloc(plain.length);
@@ -545,40 +449,28 @@ gss_krb5int_unseal_token_v3(krb5_context *contextptr,
 	sum.length = bodysize - 16;
 	sum.contents = ptr + 16;
 	sum.checksum_type = ctx->cksumtype;
-	_log("%s:%d: sum.length = %d\n", SFILE, __LINE__, sum.length);
-	    _log_block(SFILE, __LINE__, "checksum data input",
-		       plain.data, plain.length);
-	    _log_block(SFILE, __LINE__, "checksum to test",
-		       sum.contents, sum.length);
 	err = krb5_c_verify_checksum(context, key, key_usage,
 				     &plain, &sum, &valid);
 	if (err) {
 	error:
 	    free(plain.data);
-    LOG();
 	    *minor_status = err;
 	    return GSS_S_BAD_SIG; /* XXX */
 	}
-    LOG();
 	if (!valid) {
 	    free(plain.data);
 	    *minor_status = 0;
-    LOG();
 	    return GSS_S_BAD_SIG;
 	}
-    LOG();
 	err = g_order_check(&ctx->seqstate, seqnum);
 	*minor_status = 0;
 	return err;
     } else if (toktype == KG_TOK_DEL_CTX) {
-    LOG();
 	if (load_16_be(ptr) != 0x0405)
-	    DEFECTIVE;
-    LOG();
+	    goto defective;
 	message_buffer = &empty_message;
 	goto verify_mic_1;
     } else {
-    LOG();
-	DEFECTIVE;
+	goto defective;
     }
 }

@@ -243,18 +243,4 @@ OM_uint32 generic_gss_str_to_oid
 	    gss_OID *		/* oid */
 	   );
 
-#ifdef EXCESSIVE_LOGGING
-#define _log		gssint_log
-#define _log_block	gssint_log_block
-extern void _log(const char *, ...);
-extern void _log_block(const char *, int, const char *, void *, size_t);
-#define _log_block2(LABEL,PTR,SIZE) _log_block(__FILE__,__LINE__,LABEL,PTR,SIZE)
-#define SFILE (strrchr(__FILE__,'/') ? 1+strrchr(__FILE__,'/') : __FILE__)
-#else
-#define _log			(void)
-#define _log_block(A,B,C,D,E)	(void)(A,B,C,D,E)
-#define _log_block2(A,B,C)	(void)(A,B,C)
-#define SFILE			__FILE__
-#endif
-
 #endif /* _GSSAPIP_GENERIC_H_ */

@@ -55,12 +55,10 @@ krb5_gss_process_context_token(minor_status, context_handle,
 
    /* "unseal" the token */
 
-   _log("%s:%d: here\n", SFILE, __LINE__);
    if (GSS_ERROR(majerr = kg_unseal(context, minor_status, ctx, token_buffer,
 				    GSS_C_NO_BUFFER, NULL, NULL,
 				    KG_TOK_DEL_CTX)))
       return(majerr);
-   _log("%s:%d: here\n", SFILE, __LINE__);
 
    /* that's it.  delete the context */
 

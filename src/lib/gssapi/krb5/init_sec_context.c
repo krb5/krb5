@@ -561,11 +561,6 @@ new_connection(
    ctx_free = 0;
 
 #ifdef CFX_EXERCISE
-   {
-       krb5_data *p1 = &ctx->there->data[0];
-       _log("%s:%d: principal's first component is (%d) '%*s'\n",
-	    SFILE, __LINE__, p1->length, p1->length, p1->data);
-   }
    if (ctx->proto == 1
        /* I think the RPC code may be broken.  Don't mess around
 	  if we're authenticating to "kadmin/whatever".  */
@@ -592,15 +587,12 @@ new_connection(
 	   goto resume_after_testing;
        }
        memcpy(token.value, hack_token, sizeof(hack_token));
-       _log("%s:%d: sending bogus token to test unknown-TOK_ID handling\n",
-	    SFILE, __LINE__);
        /* Can just fall through into the normal return path, because
 	  it'll always return GSS_S_CONTINUE_NEEDED because we're
 	  doing mutual authentication.  */
    }
    if (0) {
    resume_after_testing:
-       _log("%s:%d: resuming after bogus-token test\n", SFILE, __LINE__);
        token = ctx->init_token;
        ctx->init_token.value = 0;
        ctx->init_token.length = 0;
@@ -732,7 +724,6 @@ mutual_auth(
 
    ptr = (unsigned char *) input_token->value;
 
-   _log("%s:%d: here\n", SFILE, __LINE__);
    if (g_verify_token_header((gss_OID) ctx->mech_used,
 			     &(ap_rep.length),
 			     &ptr, KG_TOK_CTX_AP_REP,
@@ -761,7 +752,6 @@ mutual_auth(
 	 return(GSS_S_DEFECTIVE_TOKEN);
       }
    }
-   _log("%s:%d: here\n", SFILE, __LINE__);
 
    sptr = (char *) ptr;                      /* PC compiler bug */
    TREAD_STR(sptr, ap_rep.data, ap_rep.length);
@@ -858,9 +848,6 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
    int default_mech = 0;
    OM_uint32 major_status;
    OM_uint32 tmp_min_stat;
-
-   _log("%s:%d: %s input_token len %d\n", SFILE, __LINE__, __func__,
-	input_token == GSS_C_NO_BUFFER ? -1 : input_token->length);
 
    if (GSS_ERROR(kg_get_context(minor_status, &context)))
       return(GSS_S_FAILURE);

@@ -249,9 +249,6 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
    gss_cred_id_t cred_handle = NULL;
    krb5_gss_cred_id_t deleg_cred = NULL;
 
-   _log("%s:%d: accept_sec_context input_token len %d\n",
-	SFILE, __LINE__, input_token->length);
-
    if (GSS_ERROR(kg_get_context(minor_status, &context)))
       return(GSS_S_FAILURE);
 
@@ -289,8 +286,6 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
 					    GSS_C_INDEFINITE, GSS_C_NO_OID_SET,
 					    GSS_C_ACCEPT, &cred_handle,
 					    NULL, NULL);
-       _log("%s:%d: krb5_gss_acquire_cred returns %d, cred_handle %p\n",
-	    SFILE, __LINE__, major_status, cred_handle);
        if (major_status != GSS_S_COMPLETE) {
 	   code = *minor_status;
 	   goto fail;
@@ -306,7 +301,6 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
    }
 
    cred = (krb5_gss_cred_id_t) cred_handle;
-   _log("%s:%d: cred=%p\n", SFILE, __LINE__, cred);
 
    /* make sure the supplied credentials are valid for accept */
 
@@ -322,7 +316,6 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
 
    ptr = (unsigned char *) input_token->value;
 
-   _log("%s:%d: here\n", SFILE, __LINE__);
    if (!(code = g_verify_token_header((gss_OID) gss_mech_krb5,
 				      &(ap_req.length),
 				      &ptr, KG_TOK_CTX_AP_REQ,
@@ -345,14 +338,11 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
        major_status = GSS_S_CONTINUE_NEEDED;
        code = KRB5KRB_AP_ERR_MSG_TYPE;
        mech_used = gss_mech_krb5;
-       _log("%s:%d: ooh, G_WRONG_TOKID! sending AP_ERR_MSG_TYPE\n",
-	    SFILE, __LINE__);
        goto fail;
    } else {
        major_status = GSS_S_DEFECTIVE_TOKEN;
        goto fail;
    }
-   _log("%s:%d: here\n", SFILE, __LINE__);
 
    sptr = (char *) ptr;
    TREAD_STR(sptr, ap_req.data, ap_req.length);
@@ -908,9 +898,6 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
        krb5_free_ap_req(context, request);
    }
 
-   _log("%s:%d: cred=%p mutual=%d major_status=%d (cont-need=%d)\n",
-	SFILE, __LINE__, cred, gss_flags & GSS_C_MUTUAL_FLAG, major_status,
-	GSS_S_CONTINUE_NEEDED);
    if (cred
        && ((gss_flags & GSS_C_MUTUAL_FLAG)
 	   || (major_status == GSS_S_CONTINUE_NEEDED))) {
@@ -921,7 +908,6 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
 	* The client is expecting a response, so we can send an
 	* error token back
 	*/
-       _log("%s:%d: here\n", SFILE, __LINE__);
        memset(&krb_error_data, 0, sizeof(krb_error_data));
 
        code -= ERROR_TABLE_BASE_krb5;
@@ -936,12 +922,10 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
        else {
 	   code = krb5_parse_name(context, "server/principal/name@unknown",
 				  &krb_error_data.server);
-       _log("%s:%d: here\n", SFILE, __LINE__);
 	   if (code)
 	       return major_status;
        }
 	   
-       _log("%s:%d: here\n", SFILE, __LINE__);
        code = krb5_mk_error(context, &krb_error_data, &scratch);
        if (cred == NULL) {
 	   krb5_free_principal(context, krb_error_data.server);
@@ -949,34 +933,25 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
        }
        if (code)
 	   return (major_status);
-       _log("%s:%d: here\n", SFILE, __LINE__);
 
        tmsglen = scratch.length;
        toktype = KG_TOK_CTX_ERROR;
 
-       _log("%s:%d: here\n", SFILE, __LINE__);
        token.length = g_token_size((gss_OID) mech_used, tmsglen);
-       _log("%s:%d: here\n", SFILE, __LINE__);
        token.value = (unsigned char *) xmalloc(token.length);
-       _log("%s:%d: token.length=%d .value=%p\n", SFILE, __LINE__,
-	    token.length, token.value);
        if (!token.value)
 	   return (major_status);
 
-       _log("%s:%d: here\n", SFILE, __LINE__);
        ptr = token.value;
        g_make_token_header((gss_OID) mech_used, tmsglen, &ptr, toktype);
 
        TWRITE_STR(ptr, scratch.data, scratch.length);
        krb5_free_data_contents(context, &scratch);
 
-       _log("%s:%d: sending back error token size %d\n",
-	    SFILE, __LINE__, token.length);
        *output_token = token;
    }
    if (!verifier_cred_handle && cred_handle) {
 	   krb5_gss_release_cred(minor_status, cred_handle);
    }
-   _log("%s:%d: returning major status 0x%x\n", SFILE, __LINE__, major_status);
    return (major_status);
 }
