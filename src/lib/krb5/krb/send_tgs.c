@@ -118,6 +118,9 @@ OLDDECLARG(krb5_response *,rep)
 	if (retval = encode_krb5_authdata(authorization_data, &scratch))
 	    return(retval);
 	krb5_use_cstype(&eblock, etype);
+	tgsreq.authorization_data.etype = etype;
+	tgsreq.authorization_data.kvno = 0; /* ticket session key has */
+					    /* no version */
 	tgsreq.authorization_data.ciphertext.length =
 	    krb5_encrypt_size(scratch->length,
 			      eblock.crypto_entry);
