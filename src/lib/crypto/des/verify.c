@@ -212,7 +212,7 @@ main(argc,argv)
 	    com_err("des verify", retval, "can't finish key2");
 	    exit(-1);
 	}
-	if ( bcmp((char *)cipher_text, (char *)cipher1, 8) ) {
+	if ( memcmp((char *)cipher_text, (char *)cipher1, 8) ) {
 	    printf("verify: error in ECB encryption\n");
 	    exit(-1);
 	}
@@ -240,7 +240,7 @@ main(argc,argv)
 	}
 	printf("\n\n");
 	do_decrypt(output,cipher_text);
-	if ( bcmp((char *)cipher_text, (char *)cipher2, 8) ) {
+	if ( memcmp((char *)cipher_text, (char *)cipher2, 8) ) {
 	    printf("verify: error in ECB encryption\n");
 	    exit(-1);
 	}
@@ -286,7 +286,7 @@ main(argc,argv)
     }
     printf("\tdecrypted clear_text = \"%s\"\n",clear_text);
 
-    if ( bcmp((char *)cipher_text, (char *)cipher3, in_length) ) {
+    if ( memcmp((char *)cipher_text, (char *)cipher3, in_length) ) {
 	printf("verify: error in CBC encryption\n");
 	exit(-1);
     }
@@ -310,7 +310,7 @@ main(argc,argv)
 	com_err("des verify", retval, "can't finish key2");
 	exit(-1);
     }
-    if ( bcmp((char *)cipher_text, (char *)checksum, 8) ) {
+    if ( memcmp((char *)cipher_text, (char *)checksum, 8) ) {
 	printf("verify: error in CBC cheksum\n");
 	exit(-1);
     }

@@ -116,7 +116,7 @@ OLDDECLARG(krb5_pointer, ivec)
                             &cksum)) 
 	return retval;
     
-    bcopy((char *)contents, p, CRC32_CKSUM_LENGTH);
+    memcpy(p, (char *)contents, CRC32_CKSUM_LENGTH);
  
     return (mit_des_encrypt_f(in, out, sumsize, key, ivec));
 }
@@ -187,7 +187,7 @@ OLDDECLARG(krb5_pointer, ivec)
 
     cksum.contents = contents_prd;
     p = (char *)out + size - CRC32_CKSUM_LENGTH;
-    bcopy(p, (char *)contents_get, CRC32_CKSUM_LENGTH);
+    memcpy((char *)contents_get, p, CRC32_CKSUM_LENGTH);
     bzero(p, CRC32_CKSUM_LENGTH);
 
     if (retval = (*krb5_cksumarray[CKSUMTYPE_CRC32]->
@@ -198,7 +198,7 @@ OLDDECLARG(krb5_pointer, ivec)
                             &cksum)) 
 	return retval;
 
-    if ( bcmp((char *)contents_get, (char *)contents_prd, CRC32_CKSUM_LENGTH) )
+    if (memcmp((char *)contents_get, (char *)contents_prd, CRC32_CKSUM_LENGTH) )
         return KRB5KRB_AP_ERR_BAD_INTEGRITY;
 
     return 0;
@@ -247,8 +247,8 @@ mit_des_cbc_encrypt(in,out,length,key,iv,encrypt)
     if (encrypt) {
 #ifdef MUSTALIGN
 	if ((long) ivec & 3) {
-	    bcopy((char *)ivec++, (char *)&t_output[0], sizeof(t_output[0]));
-	    bcopy((char *)ivec, (char *)&t_output[1], sizeof(t_output[1]));
+	    memcpy((char *)&t_output[0], (char *)ivec++, sizeof(t_output[0]));
+	    memcpy((char *)&t_output[1], (char *)ivec, sizeof(t_output[1]));
 	}
 	else
 #endif
@@ -261,8 +261,8 @@ mit_des_cbc_encrypt(in,out,length,key,iv,encrypt)
 	    /* get input */
 #ifdef MUSTALIGN
 	    if ((long) input & 3) {
-		bcopy((char *)input++,(char *)&t_input[0],sizeof(t_input[0]));
-		bcopy((char *)input++,(char *)&t_input[1],sizeof(t_input[1]));
+		memcpy((char *)&t_input[0],(char *)input++,sizeof(t_input[0]));
+		memcpy((char *)&t_input[1],(char *)input++,sizeof(t_input[1]));
 	    }
 	    else
 #endif
@@ -288,10 +288,10 @@ mit_des_cbc_encrypt(in,out,length,key,iv,encrypt)
 	    /* copy temp output and save it for cbc */
 #ifdef MUSTALIGN
 	    if ((long) output & 3) {
-		bcopy((char *)&t_output[0],(char *)output++,
-		      sizeof(t_output[0]));
-		bcopy((char *)&t_output[1],(char *)output++,
-		      sizeof(t_output[1]));
+		memcpy((char *)output++,(char *)&t_output[0],
+		       sizeof(t_output[0]));
+		memcpy((char *)output++,(char *)&t_output[1],
+		       sizeof(t_output[1]));
 	    }
 	    else
 #endif
@@ -314,8 +314,8 @@ mit_des_cbc_encrypt(in,out,length,key,iv,encrypt)
 	/* decrypt */
 #ifdef MUSTALIGN
 	if ((long) ivec & 3) {
-	    bcopy((char *)ivec++,(char *)&xor_0,sizeof(xor_0));
-	    bcopy((char *)ivec,(char *)&xor_1,sizeof(xor_1));
+	    memcpy((char *)&xor_0,(char *)ivec++,sizeof(xor_0));
+	    memcpy((char *)&xor_1,(char *)ivec,sizeof(xor_1));
 	}
 	else
 #endif
@@ -328,8 +328,8 @@ mit_des_cbc_encrypt(in,out,length,key,iv,encrypt)
 	    /* get input */
 #ifdef MUSTALIGN
 	    if ((long) input & 3) {
-		bcopy((char *)input++,(char *)&t_input[0],sizeof(t_input[0]));
-		bcopy((char *)input++,(char *)&t_input[1],sizeof(t_input[0]));
+		memcpy((char *)&t_input[0],(char *)input++,sizeof(t_input[0]));
+		memcpy((char *)&t_input[1],(char *)input++,sizeof(t_input[0]));
 	    }
 	    else
 #endif
@@ -359,9 +359,9 @@ mit_des_cbc_encrypt(in,out,length,key,iv,encrypt)
 	    /* copy temp output */
 #ifdef MUSTALIGN
 	    if ((long) output & 3) {
-		bcopy((char *)&t_output[0],(char *)output++,
+		memcpy((char *)output++,(char *)&t_output[0],
 		      sizeof(t_output[0]));
-		bcopy((char *)&t_output[1],(char *)output++,
+		memcpy((char *)output++,(char *)&t_output[1],
 		      sizeof(t_output[1]));
 	    }
 	    else
