@@ -84,14 +84,14 @@ krb5_pointer seed;
 size_t seed_length;
 krb5_checksum FAR *outcksum;
 {
-    krb5_octet outtmp[RSA_MD4_DES_CKSUM_LENGTH];
+    krb5_octet outtmp[OLD_RSA_MD4_DES_CKSUM_LENGTH];
     krb5_octet *input = (krb5_octet *)in;
     krb5_encrypt_block eblock;
     krb5_keyblock keyblock;
     krb5_error_code retval;
     krb5_MD4_CTX working;
 
-    if (outcksum->length < RSA_MD4_DES_CKSUM_LENGTH)
+    if (outcksum->length < OLD_RSA_MD4_DES_CKSUM_LENGTH)
 	return KRB5_BAD_MSIZE;
 
     krb5_MD4Init(&working);
@@ -99,7 +99,7 @@ krb5_checksum FAR *outcksum;
     krb5_MD4Final(&working);
 
     outcksum->checksum_type = CKSUMTYPE_RSA_MD4_DES;
-    outcksum->length = RSA_MD4_DES_CKSUM_LENGTH;
+    outcksum->length = OLD_RSA_MD4_DES_CKSUM_LENGTH;
 
     memcpy((char *)outtmp, (char *)&working.digest[0], 16);
 
@@ -114,7 +114,7 @@ krb5_checksum FAR *outcksum;
     /* now encrypt it */
     retval = mit_des_cbc_encrypt((mit_des_cblock *)&outtmp[0],
 				 (mit_des_cblock *)outcksum->contents,
-				 RSA_MD4_DES_CKSUM_LENGTH,
+				 OLD_RSA_MD4_DES_CKSUM_LENGTH,
 				 (struct mit_des_ks_struct *)eblock.priv,
 				 keyblock.contents,
 				 MIT_DES_ENCRYPT);
@@ -137,10 +137,8 @@ krb5_pointer seed;
 size_t seed_length;
 krb5_checksum FAR *outcksum;
 {
-    krb5_octet outtmp[RSA_MD4_DES_CKSUM_LENGTH+
-		      RSA_MD4_DES_CONFOUND_LENGTH];
+    krb5_octet outtmp[NEW_RSA_MD4_DES_CKSUM_LENGTH];
     mit_des_cblock	tmpkey;
-    krb5_octet *input = (krb5_octet *)in;
     krb5_encrypt_block eblock;
     krb5_keyblock keyblock;
     krb5_error_code retval;
@@ -149,8 +147,7 @@ krb5_checksum FAR *outcksum;
     krb5_MD4_CTX working;
 
     /* Generate the confounder in place */
-    if (retval = krb5_random_confounder(RSA_MD4_DES_CONFOUND_LENGTH,
-					outtmp))
+    if ((retval = krb5_random_confounder(RSA_MD4_DES_CONFOUND_LENGTH, outtmp)))
 	return(retval);
 
     /* Calculate the checksum */
@@ -161,12 +158,12 @@ krb5_checksum FAR *outcksum;
 			in_length);
 
     outcksum->checksum_type = CKSUMTYPE_RSA_MD4_DES;
-    outcksum->length = RSA_MD4_DES_CKSUM_LENGTH + RSA_MD4_DES_CONFOUND_LENGTH;
+    outcksum->length = NEW_RSA_MD4_DES_CKSUM_LENGTH;
 
     /* Now blast in the digest */
     memcpy((char *) &outtmp[RSA_MD4_DES_CONFOUND_LENGTH],
 	   (char *) &working.digest[0],
-	   RSA_MD4_DES_CKSUM_LENGTH);
+	   RSA_MD4_CKSUM_LENGTH);
 
     /* Clean up droppings */
     memset((char *)&working, 0, sizeof(working));
@@ -185,8 +182,7 @@ krb5_checksum FAR *outcksum;
     /* now encrypt it */
     retval = mit_des_cbc_encrypt((mit_des_cblock *)&outtmp[0],
 				 (mit_des_cblock *)outcksum->contents,
-				 RSA_MD4_DES_CKSUM_LENGTH +
-				 RSA_MD4_DES_CONFOUND_LENGTH,
+				 NEW_RSA_MD4_DES_CKSUM_LENGTH,
 				 (struct mit_des_ks_struct *)eblock.priv,
 				 zero_ivec,
 				 MIT_DES_ENCRYPT);
@@ -205,10 +201,8 @@ size_t in_length;
 krb5_pointer seed;
 size_t seed_length;
 {
-    krb5_octet outtmp[RSA_MD4_DES_CKSUM_LENGTH+
-		      RSA_MD4_DES_CONFOUND_LENGTH];
+    krb5_octet outtmp[NEW_RSA_MD4_DES_CKSUM_LENGTH];
     mit_des_cblock	tmpkey;
-    krb5_octet *input = (krb5_octet *)in;
     krb5_encrypt_block eblock;
     krb5_keyblock keyblock;
     krb5_error_code retval;
@@ -220,13 +214,14 @@ size_t seed_length;
     if (cksum->checksum_type == CKSUMTYPE_RSA_MD4_DES) {
 #ifdef	MD4_K5BETA_COMPAT
 	/*
-	 * We have a backwards compatibility problem here.  Kerberos version 5
-	 * Beta 5 and previous releases did not correctly generate RSA-MD4-DES
-	 * checksums.  The way that we can differentiate is by the length of
-	 * the provided checksum.  If it's only RSA_MD4_DES_CKSUM_LENGTH, then
-	 * it's the old style, otherwise it's the correct implementation.
+	 * We have a backwards compatibility problem here.  Kerberos
+	 * version 5 Beta 5 and previous releases did not correctly
+	 * generate RSA-MD4-DES checksums.  The way that we can
+	 * differentiate is by the length of the provided checksum.
+	 * If it's only OLD_RSA_MD4_DES_CKSUM_LENGTH, then it's the
+	 * old style, otherwise it's the correct implementation.
 	 */
-	if (cksum->length == RSA_MD4_DES_CKSUM_LENGTH) {
+	if (cksum->length == OLD_RSA_MD4_DES_CKSUM_LENGTH) {
 	    /*
 	     * If we're verifying the Old Style (tm) checksum, then we can just
 	     * recalculate the checksum and encrypt it and see if it's the
@@ -250,7 +245,7 @@ size_t seed_length;
 	    /* now encrypt the checksum */
 	    retval = mit_des_cbc_encrypt((mit_des_cblock *)&working.digest[0],
 					 (mit_des_cblock *)&outtmp[0],
-					 RSA_MD4_DES_CKSUM_LENGTH,
+					 OLD_RSA_MD4_DES_CKSUM_LENGTH,
 					 (struct mit_des_ks_struct *)
 					 	eblock.priv,
 					 keyblock.contents,
@@ -259,19 +254,18 @@ size_t seed_length;
 		(void) mit_des_finish_key(&eblock);
 		return retval;
 	    }
-	    if (retval = mit_des_finish_key(&eblock))
+	    if ((retval = mit_des_finish_key(&eblock)))
 		return(retval);
 
 	    /* Compare the encrypted checksums */
 	    if (memcmp((char *) &outtmp[0],
 		       (char *) cksum->contents,
-		       RSA_MD4_DES_CKSUM_LENGTH))
+		       OLD_RSA_MD4_DES_CKSUM_LENGTH))
 		retval = KRB5KRB_AP_ERR_BAD_INTEGRITY;
 	}
 	else
 #endif	/* MD4_K5BETA_COMPAT */
-	if (cksum->length == (RSA_MD4_DES_CKSUM_LENGTH +
-			      RSA_MD4_DES_CONFOUND_LENGTH)) {
+	if (cksum->length == (NEW_RSA_MD4_DES_CKSUM_LENGTH)) {
 	    /*
 	     * If we're verifying the correct implementation, then we have
 	     * to do a little more work because we must decrypt the checksum
@@ -293,8 +287,7 @@ size_t seed_length;
 	    /* now decrypt it */
 	    retval = mit_des_cbc_encrypt((mit_des_cblock *)cksum->contents,
 					 (mit_des_cblock *)&outtmp[0],
-					 RSA_MD4_DES_CKSUM_LENGTH +
-					 RSA_MD4_DES_CONFOUND_LENGTH,
+					 NEW_RSA_MD4_DES_CKSUM_LENGTH,
 					 (struct mit_des_ks_struct *)
 					 	eblock.priv,
 					 zero_ivec,
@@ -303,7 +296,7 @@ size_t seed_length;
 		(void) mit_des_finish_key(&eblock);
 		return retval;
 	    }
-	    if (retval = mit_des_finish_key(&eblock))
+	    if ((retval = mit_des_finish_key(&eblock)))
 		return(retval);
 
 	    /* Now that we have the decrypted checksum, try to regenerate it */
@@ -316,7 +309,7 @@ size_t seed_length;
 	    /* Compare the checksums */
 	    if (memcmp((char *) &outtmp[RSA_MD4_DES_CONFOUND_LENGTH],
 		       (char *) &working.digest[0],
-		       RSA_MD4_DES_CKSUM_LENGTH))
+		       NEW_RSA_MD4_DES_CKSUM_LENGTH))
 		retval = KRB5KRB_AP_ERR_BAD_INTEGRITY;
 	}
 	else 
@@ -336,7 +329,7 @@ krb5_checksum_entry rsa_md4_des_cksumtable_entry =
     0,
     krb5_md4_crypto_compat_sum_func,
     krb5_md4_crypto_verify_func,
-    RSA_MD4_DES_CKSUM_LENGTH,
+    OLD_RSA_MD4_DES_CKSUM_LENGTH,
     1,					/* is collision proof */
     1,					/* uses key */
 };
@@ -345,7 +338,7 @@ krb5_checksum_entry rsa_md4_des_cksumtable_entry =
     0,
     krb5_md4_crypto_sum_func,
     krb5_md4_crypto_verify_func,
-    RSA_MD4_DES_CKSUM_LENGTH+RSA_MD4_DES_CONFOUND_LENGTH,
+    NEW_RSA_MD4_DES_CKSUM_LENGTH,
     1,					/* is collision proof */
     1,					/* uses key */
 };
@@ -362,12 +355,12 @@ krb5_md4_crypto_compat_ctl(scompat)
     if (scompat) {
 	rsa_md4_des_cksumtable_entry.sum_func = krb5_md4_crypto_compat_sum_func;
 	rsa_md4_des_cksumtable_entry.checksum_length =
-	    RSA_MD4_DES_CKSUM_LENGTH;
+	    OLD_RSA_MD4_DES_CKSUM_LENGTH;
     }
     else {
 	rsa_md4_des_cksumtable_entry.sum_func = krb5_md4_crypto_sum_func;
 	rsa_md4_des_cksumtable_entry.checksum_length =
-	    RSA_MD4_DES_CKSUM_LENGTH + RSA_MD4_DES_CONFOUND_LENGTH;
+	    NEW_RSA_MD4_DES_CKSUM_LENGTH;
     }
 }
 #endif	/* MD4_K5BETA_COMPAT */

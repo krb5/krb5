@@ -1,3 +1,9 @@
+Mon May 20 17:16:47 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* md4crypto.c, md4crypto.h: Change use of RSA_MD4_DES_CKSUM_LENGTH
+ 		to use OLD_RSA_MD4_DES_CKSUM_LENGTH and
+ 		NEW_RSA_MD4_DES_CKSUM_LENGTH, as appropriate.
+
 Sat May 18 01:49:33 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* md4crypto.c: Define MD4_K5BETA_COMPAT and MD4_K5BETA_COMP_DEF so

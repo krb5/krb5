@@ -34,7 +34,8 @@
 /* 16 u_char's in the digest */
 #define RSA_MD4_CKSUM_LENGTH	16
 /* des blocksize is 8, so this works nicely... */
-#define RSA_MD4_DES_CKSUM_LENGTH	16
+#define OLD_RSA_MD4_DES_CKSUM_LENGTH	16
+#define NEW_RSA_MD4_DES_CKSUM_LENGTH	24
 #define	RSA_MD4_DES_CONFOUND_LENGTH	8
 
 extern krb5_checksum_entry
