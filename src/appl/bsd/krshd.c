@@ -154,12 +154,8 @@ char copyright[] =
 #endif
 
 #ifdef KERBEROS
-#include <krb5/krb5.h>
-#include <krb5/asn1.h>
-#include <krb5/mit-des.h>
-#include <krb5/ext-proto.h>
-
-#include <com_err.h>
+#include "krb5.h"
+#include "com_err.h"
 #include "loginpaths.h"
 
 #define ARGSTR	"rRxXeEkKD:?"

@@ -207,11 +207,7 @@ struct winsize {
 
 #ifdef KERBEROS
      
-#include <krb5/krb5.h>
-#include <krb5/osconf.h>
-#include <krb5/asn1.h>
-#include <krb5/mit-des.h>
-#include <krb5/los-proto.h>
+#include "krb5.h"
 #include <kerberosIV/krb.h>
 
 #ifdef BUFSIZ
@@ -234,7 +230,7 @@ int v4_des_read(), v4_des_write();
 
 int v5_des_read(), v5_des_write();
 
-#include <com_err.h>
+#include "com_err.h"
      
 #define SECURE_MESSAGE  "This rlogin session is using DES encryption for all data transmissions.\r\n"
 

@@ -1,3 +1,8 @@
+Tue Feb 28 01:41:04 1995  John Gilmore  (gnu at toad.com)
+
+	* forward.c, kcmd.c, krcp.c, krlogin.c, krlogind.c, krsh.c,
+	krshd.c:  Avoid <krb5/...> and <com_err.h> includes.
+
 Tue Feb 14 15:30:55 1995 Chris Provenzano  (proven@mit.edu)
 
         * kcmd.c Call krb5_sendauth() and krb5_get_credentials() with 

@@ -50,9 +50,7 @@
 #include <netdb.h>
      
 #include <errno.h>
-#include <krb5/krb5.h>
-#include <krb5/asn1.h>
-#include <krb5/ext-proto.h>
+#include "krb5.h"
 
 #include "defines.h"
      
