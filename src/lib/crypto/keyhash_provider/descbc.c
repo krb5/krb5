@@ -41,7 +41,6 @@ k5_descbc_hash(krb5_const krb5_keyblock *key, krb5_const krb5_data *ivec,
 	       krb5_const krb5_data *input, krb5_data *output)
 {
     mit_des_key_schedule schedule;
-    int ret;
 
     if (key->length != 8)
 	return(KRB5_BAD_KEYSIZE);
@@ -52,7 +51,7 @@ k5_descbc_hash(krb5_const krb5_keyblock *key, krb5_const krb5_data *ivec,
     if (output->length != 8)
 	return(KRB5_CRYPTO_INTERNAL);
 
-    switch (ret = mit_des_key_sched(key->contents, schedule)) {
+    switch (mit_des_key_sched(key->contents, schedule)) {
     case -1:
 	return(KRB5DES_BAD_KEYPAR);
     case -2:
