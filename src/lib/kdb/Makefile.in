@@ -1,8 +1,7 @@
 DBFLAGS=@DBFLAGS@
 CFLAGS = $(CCOPTS) $(DEFS) $(DBFLAGS)
 
-all:: $(OBJS) all-$(WHAT)
-
+all:: $(OBJS)
 
 SRCS= \
 	$(srcdir)/encrypt_key.c \
