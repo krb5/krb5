@@ -1,3 +1,22 @@
+2004-11-17  Ken Raeburn  <raeburn@mit.edu>
+
+	* prng.c (do_yarrow_init): Move mutex initialization here.
+	(krb5int_prng_init): Don't do it here.
+
+2004-11-15  Sam Hartman  <hartmans@mit.edu>
+
+	* t_prng.expected t_prng.reseedtest-expected :  Update expected
+	PRNG test output and confirm that reseeds and gates happen correctly.
+
+2004-10-29  Ken Raeburn  <raeburn@mit.edu>
+
+	* prng.c (yarrow_lock): Rename to krb5int_yarrow_lock via macro,
+	and change to be non-static.
+	(krb5int_prng_init): Call do_yarrow_init here.
+	(krb5_c_random_add_entropy): Don't call it here.  Don't lock the
+	mutex, either.
+	(krb5_c_random_make_octets): Don't lock the mutex.
+
 2004-06-16  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (MAC_SUBDIRS): Don't set.

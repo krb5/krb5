@@ -1,3 +1,21 @@
+2004-12-16  Ezra Peisach  <epeisach@bu.edu>
+
+	* krb5-config.in: Add krb5support library.
+
+2004-12-15  Jeffrey Altman <jaltman@mit.edu>
+
+        * Makefile.in: build/clean/install/etc kcpytkt,kdeltkt,ms2mit
+
+2004-11-19  Tom Yu  <tlyu@mit.edu>
+
+	* aclocal.m4 (KRB5_AC_PRIOCNTL_HACK): Check for Solaris patch
+	117171-11 (sparc) or 117172-11 (x86), which fixes the Solaris 9
+	bug which can cause final pty output to be on close.
+
+2004-11-18  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (install-headers-mkdirs): Create KRB5_INCDIR/gssrpc.
+
 2004-10-06  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in (INSTALLMKDIRS): Add EXAMPLEDIR.

@@ -155,7 +155,7 @@ END {
 	print "" > outfile
 	print "#if !defined(_WIN32)" > outfile
 	print "/* for compatibility with older versions... */" > outfile
-	print "extern void initialize_" table_name "_error_table () /*@modifies internalState@*/;" > outfile
+	print "extern void initialize_" table_name "_error_table (void) /*@modifies internalState@*/;" > outfile
 	print "#else" > outfile
 	print "#define initialize_" table_name "_error_table()" > outfile
 	print "#endif" > outfile
