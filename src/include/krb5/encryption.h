@@ -105,6 +105,10 @@ typedef struct _krb5_checksum_entry {
 #define	krb5_encrypt_size(length, crypto) \
      krb5_roundup((length)+(crypto)->pad_minimum, (crypto)->block_length)
 
-#define	krb5_keyblock_size(blockp) (sizeof(*blockp)+blockp->length-1)
+extern krb5_cs_table_entry *krb5_csarray[];
+extern int krb5_max_cryptosystem;		/* max entry in array */
+
+#define valid_etype(etype)     ((etype <= krb5_max_cryptosystem) && (etype > 0) && krb5_csarray[etype])
+
 
 #endif /* __KRB5_ENCRYPTION__ */
