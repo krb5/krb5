@@ -55,24 +55,22 @@ cleanup:
 /*----------------------- krb5_rd_cred_basic -----------------------*/
 
 static krb5_error_code 
-krb5_rd_cred_basic(context, pcreddata, pkeyblock, local_addr, remote_addr,
+krb5_rd_cred_basic(context, pcreddata, pkeyblock, 
 		   replaydata, pppcreds)
     krb5_context          context;
     krb5_data		* pcreddata;
     krb5_keyblock 	* pkeyblock;
-    krb5_address  	* local_addr;
-    krb5_address  	* remote_addr;
     krb5_replay_data    * replaydata;
     krb5_creds        *** pppcreds;
 {
-    krb5_error_code       retval;
-    krb5_cred 		* pcred;
+  krb5_error_code       retval;
+  krb5_cred 		* pcred;
     krb5_int32 		  ncreds;
     krb5_int32 		  i = 0;
     krb5_cred_enc_part 	  encpart;
 
     /* decode cred message */
-    if ((retval = decode_krb5_cred(pcreddata, &pcred)))
+        if ((retval = decode_krb5_cred(pcreddata, &pcred)))
     	return retval;
 
     memset(&encpart, 0, sizeof(encpart));
@@ -80,38 +78,6 @@ krb5_rd_cred_basic(context, pcreddata, pkeyblock, local_addr, remote_addr,
     if ((retval = decrypt_credencdata(context, pcred, pkeyblock, &encpart)))
 	goto cleanup_cred;
 
-    /*
-     * Only check the remote address if the KRB_CRED message was
-     * protected by encryption.  If it came in the checksum field of
-     * an init_sec_context message, skip over this check.
-     */
-    if (remote_addr && encpart.s_address && pkeyblock != NULL) {
-	if (!krb5_address_compare(context, remote_addr, encpart.s_address)) {
-	    retval = KRB5KRB_AP_ERR_BADADDR;
-	    goto cleanup_cred;
-	}
-    }
-
-    if (encpart.r_address) {
-        if (local_addr) {
-            if (!krb5_address_compare(context, local_addr, encpart.r_address)) {
-                retval = KRB5KRB_AP_ERR_BADADDR;
-                goto cleanup_cred;
-            }
-        } else {
-            krb5_address **our_addrs;
-
-            if ((retval = krb5_os_localaddr(context, &our_addrs))) {
-                goto cleanup_cred;
-            }
-            if (!krb5_address_search(context, encpart.r_address, our_addrs)) {
-                krb5_free_addresses(context, our_addrs);
-                retval =  KRB5KRB_AP_ERR_BADADDR;
-                goto cleanup_cred;
-            }
-            krb5_free_addresses(context, our_addrs);
-        }
-    }
 
     replaydata->timestamp = encpart.timestamp;
     replaydata->usec = encpart.usec;
@@ -232,53 +198,11 @@ krb5_rd_cred(context, auth_context, pcreddata, pppcreds, outdata)
       (auth_context->rcache == NULL))
         return KRB5_RC_REQUIRED;
 
-{
-    krb5_address * premote_fulladdr = NULL;
-    krb5_address * plocal_fulladdr = NULL;
-    krb5_address remote_fulladdr;
-    krb5_address local_fulladdr;
-    CLEANUP_INIT(2);
-
-    if (auth_context->local_addr) {
-    	if (auth_context->local_port) {
-            if (!(retval = krb5_make_fulladdr(context,auth_context->local_addr,
-                                 	      auth_context->local_port, 
-					      &local_fulladdr))){
-                CLEANUP_PUSH(local_fulladdr.contents, free);
-	        plocal_fulladdr = &local_fulladdr;
-            } else {
-	        return retval;
-            }
-	} else {
-            plocal_fulladdr = auth_context->local_addr;
-        }
-    }
-
-    if (auth_context->remote_addr) {
-    	if (auth_context->remote_port) {
-            if (!(retval = krb5_make_fulladdr(context,auth_context->remote_addr,
-                                 	      auth_context->remote_port, 
-					      &remote_fulladdr))){
-                CLEANUP_PUSH(remote_fulladdr.contents, free);
-	        premote_fulladdr = &remote_fulladdr;
-            } else {
-	        return retval;
-            }
-	} else {
-            premote_fulladdr = auth_context->remote_addr;
-        }
-    }
 
     if ((retval = krb5_rd_cred_basic(context, pcreddata, keyblock,
-				     plocal_fulladdr, premote_fulladdr,
 				     &replaydata, pppcreds))) {
-        CLEANUP_DONE();
-	return retval;
+      return retval;
     }
-
-    CLEANUP_DONE();
-}
-
 
     if (auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_DO_TIME) {
         krb5_donot_replay replay;
@@ -326,5 +250,4 @@ error:;
     	krb5_xfree(*pppcreds);
     return retval;
 }
-
 

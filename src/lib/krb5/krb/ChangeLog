@@ -1,3 +1,8 @@
+2002-03-13  Sam Hartman  <hartmans@mit.edu>
+
+	* rd_cred.c (krb5_rd_cred): Don't  check IP addresses; improves
+	Heimdal compatibility.
+
 2002-02-28 Alexandra Ellwood <lxs@mit.edu>
     * conv_princ.c: removed unused variable cpp to reduce warnings
     * get_creds.c: removed unused variables fields and mcreds to 
