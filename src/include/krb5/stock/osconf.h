@@ -54,8 +54,8 @@
 #define	DEFAULT_KDC_KEYTYPE	KEYTYPE_DES
 #define KDCRCACHE		"dfl:krb5kdc_rcache"
 
-#define KDC_PORTNAME		"kerberos5" /* for /etc/services or equiv. */
-#define KDC_SECONDARY_PORTNAME	"kerberos4" /* For backwards */
+#define KDC_PORTNAME		"kerberos" /* for /etc/services or equiv. */
+#define KDC_SECONDARY_PORTNAME	"kerberos-sec" /* For backwards */
 					    /* compatibility with */
 					    /* port 750 clients */
 

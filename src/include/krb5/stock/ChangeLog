@@ -1,3 +1,9 @@
+Thu Jan  5 17:01:03 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* Use the service names kerberos and kerberos-sec, instead of
+		kerberos5 and kerberos4 --- the official port name is
+		kerberos, after all!
+
 Wed Nov 30 16:18:29 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* osconf.h, config.h: Remove remnants of unifdef support for
