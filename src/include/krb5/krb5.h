@@ -28,14 +28,15 @@
 
 #include <krb5/base-defs.h>
 #include <krb5/hostaddr.h>
+
+typedef	krb5_data **	krb5_principal;	/* array of strings */
+					/* CONVENTION: realm is first elem. */
+
 #include <krb5/encryption.h>
 #include <krb5/fieldbits.h>
 #include <krb5/errors.h>
 #include <krb5/proto.h>
 #include <krb5/tcache.h>
-
-typedef	krb5_data **	krb5_principal;	/* array of strings */
-					/* CONVENTION: realm is first elem. */
 
 /* Time set */
 typedef struct _krb5_ticket_times {
