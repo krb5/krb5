@@ -17,7 +17,7 @@ the name in \funcparam{string_name}.
 Requires that \funcparam{string_name} be of the form ``type:residual'' and
 ``type'' is a type known to the library.
 
-\begin{funcdecl}{krb5_cc_generate_new}{krb5_error_code}{\funcinout}
+\begin{funcdecl}{krb5_cc_gen_new}{krb5_error_code}{\funcinout}
 \funcarg{krb5_context}{context}
 \funcin
 \funcarg{krb5_cc_ops *}{ops}
@@ -91,7 +91,7 @@ Destroys the credentials cache identified by \funcparam{id}, invalidates
 the credentials cache.  Requires that \funcparam{id} identifies a valid
 credentials cache.  After return, \funcparam{id} must not be used unless
 it is first reinitialized using \funcname{krb5_cc_resolve} or
-\funcname{krb5_cc_generate_new}.
+\funcname{krb5_cc_gen_new}.
 
 Errors:  permission errors.
 
@@ -105,7 +105,7 @@ Closes the credentials cache \funcparam{id}, invalidates
 acquired during use of the credentials cache.  Requires that
 \funcparam{id} identifies a valid credentials cache.  After return,
 \funcparam{id} must not be used unless it is first reinitialized using
-\funcname{krb5_cc_resolve} or \funcname{krb5_cc_generate_new}.
+\funcname{krb5_cc_resolve} or \funcname{krb5_cc_gen_new}.
 
 
 \begin{funcdecl}{krb5_cc_store_cred}{krb5_error_code}{\funcinout}

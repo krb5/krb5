@@ -3,7 +3,7 @@ other parts of the \libname{libkrb5.a} libraries and the operating system.
 
 Beware! Any of the functions below are allowed to be implemented as
 macros.  Prototypes for functions can be found in {\tt
-<krb5/libos-proto.h>}; other definitions (including macros, if used) are
+<krb5.h>}; other definitions (including macros, if used) are
 in {\tt <krb5/libos.h>}.
 
 The following global symbols are provided in \libname{libos.a}.  If you
@@ -11,9 +11,6 @@ wish to substitute for any of them, you must substitute for all of them
 (they are all declared and initialized in the same object file):
 \begin{description}
 % These come from src/lib/osconfig.c
-\item[extern char *\globalname{krb5_config_file}:] name of configuration file
-\item[extern char *\globalname{krb5_trans_file}:] name of hostname/realm
-name translation file
 \item[extern char *\globalname{krb5_defkeyname}:] default name of key
 table file
 \item[extern char *\globalname{krb5_lname_file}:] name of aname/lname
@@ -33,6 +30,7 @@ for password reading.
 \end{description}
 
 \begin{funcdecl}{krb5_read_password}{krb5_error_code}{\funcin}
+\funcarg{krb5_context}{context}
 \funcarg{char *}{prompt}
 \funcarg{char *}{prompt2}
 \funcout
@@ -64,7 +62,8 @@ Echoing is turned off when the password is read.
 If there is an error in reading or verifying the password, an error code
 is returned; else zero is returned.
 
-\begin{funcdecl}{krb5_lock_file}{krb5_error_code}{\funcvoid}
+\begin{funcdecl}{krb5_lock_file}{krb5_error_code}{\funcin}
+\funcarg{krb5_context}{context}
 \funcarg{FILE *}{filep}
 \funcarg{char *}{pathname}
 \funcarg{int}{mode}
@@ -80,7 +79,8 @@ file.  The implementation may use whichever is more convenient.
 Modes are given in {\tt <krb5/libos.h>}
 
 
-\begin{funcdecl}{krb5_unlock_file}{krb5_error_code}{\funcvoid}
+\begin{funcdecl}{krb5_unlock_file}{krb5_error_code}{\funcin}
+\funcarg{krb5_context}{context}
 \funcarg{FILE *}{filep}
 \funcarg{char *}{pathname}
 \end{funcdecl}
@@ -93,6 +93,7 @@ The caller should arrange that both \funcparam{filep} and
 use whichever is more convenient.
 
 \begin{funcdecl}{krb5_create_secure_file}{krb5_error_code}{\funcin}
+\funcarg{krb5_context}{context}
 \funcarg{const char *}{pathname}
 \end{funcdecl}
 
@@ -100,6 +101,7 @@ Creates a file named pathname which can only be read by the current
 user.
 
 \begin{funcdecl}{krb5_sync_disk_file}{krb5_error_code}{\funcin}
+\funcarg{krb5_context}{context}
 \funcarg{FILE *}{fp}
 \end{funcdecl}
 
@@ -107,7 +109,10 @@ Assures that the changes made to the file pointed to by the file
 handle
 fp are forced out to disk.
 
-\begin{funcdecl}{krb5_timeofday}{krb5_error_code}{\funcout}
+\begin{funcdecl}{krb5_timeofday}{krb5_error_code}{\funcin}
+\funcarg{krb5_context}{context}
+\funcout
+\funcarg{krb5_context}{context}
 \funcarg{krb5_int32 *}{timeret}
 \end{funcdecl}
 
@@ -116,7 +121,9 @@ epoch.
 [The ASN.1 encoding routines must convert this to the standard ASN.1
 encoding as needed]
 
-\begin{funcdecl}{krb5_us_timeofday}{krb5_error_code}{\funcout}
+\begin{funcdecl}{krb5_us_timeofday}{krb5_error_code}{\funcin}
+\funcarg{krb5_context}{context}
+\funcout
 \funcarg{krb5_int32 *}{seconds}
 \funcarg{krb5_int32 *}{microseconds}
 \end{funcdecl}
@@ -126,10 +133,11 @@ epoch.
 [The ASN.1 encoding routines must convert this to the standard ASN.1
 encoding as needed]
 
-The seconds portion is returned in \funcparam{*seconds}, the
-microseconds portion in \funcparam{*microseconds}.
+{\raggedright The seconds portion is returned in \funcparam{*seconds}, the
+microseconds portion in \funcparam{*microseconds}.}
 
 \begin{funcdecl}{krb5_net_read}{int}{\funcin}
+\funcarg{krb5_context}{context}
 \funcarg{int}{fd}
 \funcout
 \funcarg{char *}{buf}
@@ -144,6 +152,7 @@ or returns -1 and sets errno.
 Only useful on stream sockets and pipes.
 
 \begin{funcdecl}{krb5_net_write}{int}{\funcin}
+\funcarg{krb5_context}{context}
 \funcarg{int}{fd}
 \funcarg{const char *}{buf}
 \funcarg{int}{len}
@@ -155,6 +164,7 @@ or returns -1 and sets errno.
 Only useful on stream sockets and pipes.
 
 \begin{funcdecl}{krb5_write_message}{krb5_error_code}{\funcin}
+\funcarg{krb5_context}{context}
 \funcarg{krb5_pointer}{fd}
 \funcarg{krb5_data *}{data}
 \end{funcdecl}
@@ -164,6 +174,7 @@ Only useful on stream sockets and pipes.
 using the network connection pointed to by \funcparam{fd}.
 
 \begin{funcdecl}{krb5_read_message}{krb5_error_code}{\funcin}
+\funcarg{krb5_context}{context}
 \funcarg{krb5_pointer}{fd}
 \funcout
 \funcarg{krb5_data *}{data}
@@ -172,7 +183,9 @@ using the network connection pointed to by \funcparam{fd}.
 Reads data from the network as a message, using the network connection
 pointed to by fd.
 
-\begin{funcdecl}{krb5_os_localaddr}{krb5_error_code}{\funcout}
+\begin{funcdecl}{krb5_os_localaddr}{krb5_error_code}{\funcin}
+\funcarg{krb5_context}{context}
+\funcout
 \funcarg{krb5_address ***}{addr}
 \end{funcdecl}
 
@@ -187,6 +200,7 @@ when no longer needed.
 
 
 \begin{funcdecl}{krb5_sendto_kdc}{krb5_error_code}{\funcin}
+\funcarg{krb5_context}{context}
 \funcarg{const krb5_data *}{send}
 \funcarg{const krb5_data *}{realm}
 \funcout
@@ -203,6 +217,7 @@ The storage for \funcparam{receive} is allocated and should be freed by
 the caller when finished.
 
 \begin{funcdecl}{krb5_get_krbhst}{krb5_error_code}{\funcin}
+\funcarg{krb5_context}{context}
 \funcarg{const krb5_data *}{realm}
 \funcout
 \funcarg{char ***}{hostlist}
@@ -220,12 +235,14 @@ and should be freed by the caller when finished.
 Returns system errors.
 
 \begin{funcdecl}{krb5_free_krbhst}{krb5_error_code}{\funcin}
+\funcarg{krb5_context}{context}
 \funcarg{char * const *}{hostlist}
 \end{funcdecl}
 
 Frees the storage taken by a host list returned by \funcname{krb5_get_krbhst}.
 
 \begin{funcdecl}{krb5_aname_to_localname}{krb5_error_code}{\funcin}
+\funcarg{krb5_context}{context}
 \funcarg{krb5_const_principal}{aname}
 \funcarg{int}{lnsize}
 \funcout
@@ -242,7 +259,8 @@ The translation will be null terminated in all non-error returns.
 
 Returns system errors.
 
-\begin{funcdecl}{krb5_get_default_realm}{krb5_error_code}
+\begin{funcdecl}{krb5_get_default_realm}{krb5_error_code}{\funcin}
+\funcarg{krb5_context}{context}
 \funcout
 \funcarg{char **}{lrealm}
 \end{funcdecl}
@@ -257,7 +275,22 @@ pointed to be \funcparam{lream} when it is finished with it.
 
 Returns system errors.
 
+\begin{funcdecl}{krb5_set_default_realm}{krb5_error_code}{\funcin}
+\funcarg{krb5_context}{context}
+\funcarg{char *}{realm}
+\end{funcdecl}
+
+Sets the default realm to be used if no user-specified realm is
+available (e.g. to interpret a user-typed principal name with the
+realm omitted for convenience). (c.f. krb5_get_default_realm)
+
+If \funcparam{realm} is NULL, then the operating system default value
+will used.
+
+Returns system errors.
+
 \begin{funcdecl}{krb5_get_host_realm}{krb5_error_code}{\funcin}
+\funcarg{krb5_context}{context}
 \funcarg{const char *}{host}
 \funcout
 \funcarg{char ***}{realmlist}
@@ -278,6 +311,7 @@ and should be freed by the caller when finished.
 Returns system errors.
 
 \begin{funcdecl}{krb5_free_host_realm}{krb5_error_code}{\funcin}
+\funcarg{krb5_context}{context}
 \funcarg{char * const *}{realmlist}
 \end{funcdecl}
 
@@ -285,6 +319,7 @@ Frees the storage taken by a \funcparam{realmlist} returned by
 \funcname{krb5_get_local_realm}.
 
 \begin{funcdecl}{krb5_kuserok}{krb5_boolean}{\funcin}
+\funcarg{krb5_context}{context}
 \funcarg{krb5_principal}{principal}
 \funcarg{const char *}{luser}
 \end{funcdecl}
@@ -295,6 +330,7 @@ determine whether user is authorized to login to the account \funcparam{luser}.
 Returns TRUE if authorized, FALSE if not authorized.
 
 \begin{funcdecl}{krb5_random_confounder}{krb5_error_code}{\funcin}
+\funcarg{krb5_context}{context}
 \funcarg{int}{size}
 \funcout
 \funcarg{krb5_pointer}{fillin}
@@ -305,6 +341,7 @@ Given a length and a pointer, fills in the area pointed to by
 in a confounder.
 
 \begin{funcdecl}{krb5_gen_portaddr}{krb5_error_code}{\funcin}
+\funcarg{krb5_context}{context}
 \funcarg{const krb5_address *}{adr}
 \funcarg{krb5_const_pointer}{ptr}
 \funcout
@@ -322,6 +359,7 @@ number.  Upon success, \funcparam{*outaddr} will point to an allocated
 address which should be freed with \funcname{krb5_free_address}.
 
 \begin{funcdecl}{krb5_gen_replay_name}{krb5_error_code}{\funcin}
+\funcarg{krb5_context}{context}
 \funcarg{const krb5_address *}{inaddr}
 \funcarg{const char *}{uniq}
 \funcout
@@ -344,6 +382,7 @@ finished using it.  When using IP addresses, the components in
 % function to change, the documentation above will have to be updated.
 
 \begin{funcdecl}{krb5_sname_to_principal}{krb5_error_code}{\funcin}
+\funcarg{krb5_context}{context}
 \funcarg{const char *}{hostname}
 \funcarg{const char *}{sname}
 \funcarg{krb5_int32}{type}

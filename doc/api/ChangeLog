@@ -1,4 +1,20 @@
+Wed May  3 01:22:11 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* rcache.tex: Add krb5_rc_get_type, krb5_rc_resolve_type.
+
+	* krb5.tex: API changes finished.
+
+Tue May  2 15:26:11 1995  Ezra Peisach  (epeisach@kangaroo.mit.edu)
+
+	* ccache.tex: krb5_cc_gen_new instead of krb5_cc_generate_new.
+
 Sun Apr 30 15:37:31 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* errors.tex: Formatting fixes
+
+	* intro.tex: Formatting fixes
+
+	* Makefile: Add free.tex to list.
 
 	* rcache.tex: Update to current API specs.
 

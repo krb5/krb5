@@ -39,6 +39,22 @@ Before the cache can be used \funcname{krb5_rc_initialize} or
 
 Errors: error if cannot resolve name.
 
+
+\begin{funcdecl}{krb5_rc_resolve_type}{krb5_error_code}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcarg{krb5_rcache *}{id}
+\funcin
+\funcarg{char *}{type}
+\end{funcdecl}
+
+\internalfunc
+
+Looks up \funcparam{type} in the list of knows cache types and if found
+attaches the operations to \funcparam{*id} which must be previously
+allocated. 
+
+If \funcparam{type} is not found, {\sc krb5_rc_type_notfound} is returned.
+
 \begin{funcdecl}{krb5_rc_register_type}{krb5_error_code}{\funcin}
 \funcarg{krb5_context}{context}
 \funcarg{krb5_rc_ops *}{ops}
@@ -178,6 +194,14 @@ Returns:  allocation errors.
 \end{funcdecl}
 
 Returns the name (excluding the type) of the rcache \funcparam{id}.
+Requires that \funcparam{id} identifies a valid replay cache.
+
+\begin{funcdecl}{krb5_rc_get_type}{char *}{\funcin}
+\funcarg{krb5_context}{context}
+\funcarg{krb5_rcache}{id}
+\end{funcdecl}
+
+Returns the type (excluding the name) of the rcache \funcparam{id}.
 Requires that \funcparam{id} identifies a valid replay cache.
 
 
