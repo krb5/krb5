@@ -68,5 +68,7 @@ krb5_error_code krb5_get_host_realm
 		   char *** ));
 krb5_error_code krb5_free_host_realm
 	PROTOTYPE((char * const * ));
+krb5_boolean krb5_kuserok
+	PROTOTYPE((krb5_principal, const char *));
 
 #endif /* KRB5_LIBOS_PROTO__ */
