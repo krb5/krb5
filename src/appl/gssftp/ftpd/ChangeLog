@@ -1,5 +1,7 @@
 Wed Mar 24 17:11:32 1999  Tom Yu  <tlyu@mit.edu>
 
+	* configure.in: Check for sys/sockio.h.
+
 	* ftpcmd.y (urgsafe_getc): New function; like getc() except it
 	retries once if SIOCATMARK returns TRUE.
 	(getline): Use urgsafe_getc() rather than getc() to avoid problems
