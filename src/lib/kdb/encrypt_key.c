@@ -43,11 +43,11 @@ krb5_encrypt_block *eblock;
 	out->length = 0;
 	return ENOMEM;
     }
-    bcopy(&out->length, out->contents, sizeof(out->length));
+    bcopy((char *)&out->length, (char *)out->contents, sizeof(out->length));
     if (retval = (*eblock->crypto_entry->
 		  encrypt_func)((krb5_pointer) in->contents,
-				((krb5_pointer) out->contents) +
-				sizeof(out->length),
+				(krb5_pointer) (((char *) out->contents) +
+						sizeof(out->length)),
 				in->length, eblock)) {
 	free((char *)out->contents);
 	out->contents = 0;
