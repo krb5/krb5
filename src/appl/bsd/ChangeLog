@@ -1,3 +1,21 @@
+Tue Dec 27 14:42:15 1994  Richard Basch  (probe@tardis)
+
+	* krlogin.c
+	  	Cleaned up some of the includes
+
+	* krlogind.c
+	* krshd.c
+	* logutil.c
+	* login.c
+	  	Revamped the utmp/wtmp handling routines
+
+	* Makefile.in
+	  	Fixed the "krlogin" program define for "krsh"
+
+	* configure.in
+		Changed the HAVE_STREAMS macro to not try <sys/tty.h>
+		Corrected the text for the setpgrp arguments check
+
 Tue Dec 27 06:15:42 1994  Richard Basch  (probe@tardis)
 
 	* krlogind.c
