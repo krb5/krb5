@@ -12,3 +12,8 @@
  */
 
 #include <krb5/mit-copyright.h>
+
+#ifndef __<<< include blocker>>>__
+#define __<<< include blocker>>>__
+
+#endif /* __<<< include blocker>>>__ */
