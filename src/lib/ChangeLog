@@ -1,3 +1,9 @@
+2000-07-19  Danilo Almeida  <dalmeida@mit.edu>
+
+	* krb4_32.def: Add krb_in_tkt.
+
+	* krb5_32.def: Add krb5int_accessor.
+
 2000-06-02  Danilo Almeida  <dalmeida@mit.edu>
 
 	* win_glue.c (GetCallingAppVerInfo, krb5_vercheck): Use
