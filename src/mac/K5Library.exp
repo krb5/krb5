@@ -194,6 +194,7 @@
 
 #Temporary exports (DO NOT USE)
 	krb5_get_time_offsets				# WrappersLib
+	krb5int_cc_default					# GSSAPI
 	krb5_size_opaque					# GSSAPI
 	krb5_internalize_opaque				# GSSAPI
 	krb5_externalize_opaque				# GSSAPI
