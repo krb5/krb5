@@ -1,5 +1,8 @@
 Tue Jul  1 02:38:50 1997  Tom Yu  <tlyu@mit.edu>
 
+	* kadm_funcs.c, kadm_server.c, kadm_ser_wrap.c: Reenable mod and
+	check_pw.
+
 	* kadm_funcs.c, kadm_server.c, kadm_ser_wrap.c: Reenable get and
 	add.
 

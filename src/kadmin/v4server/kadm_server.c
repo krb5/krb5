@@ -39,11 +39,8 @@ extern void *kadm5_handle;
 extern krb5_context kadm_context;
 int fascist_cpw = 0;		/* Be fascist about insecure passwords? */
 
-#ifdef KADM5
 char pw_required[] = "The version of kpasswd that you are using is not compatible with the\nOpenV*Secure V4 Administration Server.  Please contact your security\nadministrator.\n\n";
 
-#else /* !KADM5 */
- 
 char bad_pw_err[] =
 	"\007\007\007ERROR: Insecure password not accepted.  Please choose another.\n\n";
 
@@ -55,8 +52,6 @@ char check_pw_msg[] =
 
 char pw_blurb[] =
 "A good password is something which is easy for you to remember, but that\npeople who know you won't easily guess; so don't use your name, or your\ndog's name, or a word from the dictionary.  Passwords should be at least\n6 characters long, and may contain UPPER- and lower-case letters,\nnumbers, or punctuation.  A good password can be:\n\n   -- some initials, like \"GykoR-66\" for \"Get your kicks on Rte 66.\"\n   -- an easily pronounced nonsense word, like \"slaRooBey\" or \"krang-its\"\n   -- a mis-spelled phrase, like \"2HotPeetzas\" or \"ItzAGurl\"\n\nPlease Note: It is important that you do not tell ANYONE your password,\nincluding your friends, or even people from Athena or Information\nSystems.  Remember, *YOU* are assumed to be responsible for anything\ndone using your password.\n";
-
-#endif /* KADM5 */
 
 /* from V4 month_sname.c --  was not part of API */
 /*
@@ -398,6 +393,8 @@ int *outlen;
   }
 }
 
+#endif /* !KADM5 */
+
 /*
 kadm_ser_mod - the server side of the mod_entry routine
   recieves    : KTEXT, {values, values}
@@ -434,9 +431,6 @@ int *outlen;
   }
 }
 
-#endif /* !KADM5 */
-
-#ifdef KADM5
 /*
 kadm_ser_get
   recieves   : KTEXT, {values, flags}
@@ -475,9 +469,7 @@ int *outlen;
       return status;
   }
 }
-#endif /* KADM5 */
 
-#ifndef KADM5
 /* 
 kadm_ser_ckpw - the server side of the check_password routine
   recieves    : KTEXT, {key}
@@ -541,7 +533,6 @@ int *outlen;
     }
     return(0);
 }
-#endif /* !KADM5 */
 
 /*
 kadm_ser_stab - the server side of the change_srvtab routine

@@ -148,22 +148,17 @@ char *str;
 
 krb5_error_code
 kadm_add_entry (rname, rinstance, rrealm, valsin, valsout)
-    char *rname;				/* requestors name */
-    char *rinstance;			/* requestors instance */
-    char *rrealm;				/* requestors realm */
+    char *rname;		/* requestors name */
+    char *rinstance;		/* requestors instance */
+    char *rrealm;		/* requestors realm */
     Kadm_vals *valsin;
     Kadm_vals *valsout;
 {
-    Principal data_i, data_o;		/* temporary principal */
+    Principal data_i, data_o;	/* temporary principal */
     u_char flags[4];
-    krb5_principal default_princ;
     krb5_error_code retval;
     kadm5_principal_ent_rec newentry, tmpentry;
-    krb5_boolean more;
     krb5_keyblock newpw;
-    krb5_key_data *pkey;
-    krb5_keysalt	sblock;
-    int numfound;
     long mask = 0;
 
     if (!check_access(rname, rinstance, rrealm, ADDACL)) {
@@ -257,7 +252,7 @@ kadm_add_entry (rname, rinstance, rrealm, valsin, valsout)
     if (retval)
 	goto err;
 
-    kadm_entry2princ(tmpentry, &data_o);
+    kadm_entry2princ(&tmpentry, &data_o);
     kadm5_free_principal_ent(kadm5_handle, &tmpentry);
     memset((char *)flags, 0, sizeof(flags));
     SET_FIELD(KADM_NAME,flags);
@@ -341,7 +336,7 @@ Kadm_vals *valsout;
       krb5_db_free_principal(kadm_context, &entry, numfound);
       faildel(KADM_UK_RERROR);
     }
-    kadm_entry2princ(entry, &data_o);
+    kadm_entry2princ(&entry, &data_o);
     krb5_db_free_principal(kadm_context, &entry, numfound);
     memset((char *)flags, 0, sizeof(flags));
     SET_FIELD(KADM_NAME,flags);
@@ -357,8 +352,6 @@ Kadm_vals *valsout;
 #undef faildel
 
 #endif /* !KADM5 */
-
-#ifdef KADM5
 
 krb5_error_code
 kadm_get_entry (rname, rinstance, rrealm, valsin, flags, valsout)
@@ -406,7 +399,7 @@ kadm_get_entry (rname, rinstance, rrealm, valsin, flags, valsout)
     case 0:
 	break;
     }
-    retval = kadm_entry2princ(ent, &data_o);
+    retval = kadm_entry2princ(&ent, &data_o);
     kadm5_free_principal_ent(kadm5_handle, &ent);
     if (retval) {
 	goto err_princ;
@@ -422,167 +415,118 @@ err:
     return retval;
 }
 
-#endif /* KADM5 */
+
+krb5_error_code
+kadm_mod_entry (rname, rinstance, rrealm, valsin1, valsin2, valsout)
+    char *rname;				/* requestors name */
+    char *rinstance;			/* requestors instance */
+    char *rrealm;				/* requestors realm */
+    Kadm_vals *valsin1, *valsin2;		/* holds the parameters being
+						   passed in */
+    Kadm_vals *valsout;		/* the actual record which is returned */
+{
+    Principal data_o, temp_key;
+    u_char fields[4];
+    krb5_keyblock newpw;
+    krb5_error_code retval;
+    krb5_principal theprinc;
+    kadm5_principal_ent_rec entry;
+    long mask = 0;
+
+    if (wildcard(valsin1->name) || wildcard(valsin1->instance)) {
+	retval = KADM_ILL_WILDCARD;
+	goto err;
+    }
+
+    if (!check_access(rname, rinstance, rrealm, MODACL)) {
+	syslog(LOG_WARNING, "WARNING: '%s.%s@%s' tried to change '%s.%s's entry",
+	       rname, rinstance, rrealm, valsin1->name, valsin1->instance);
+	return KADM_UNAUTH;
+    }
+
+    syslog(LOG_INFO, "request to modify '%s.%s's entry from '%s.%s@%s' ",
+	   valsin1->name, valsin1->instance, rname, rinstance, rrealm);
+    retval = krb5_425_conv_principal(kadm_context,
+				     valsin1->name, valsin1->instance,
+				     server_parm.krbrlm, &theprinc);
+    if (retval)
+	goto err;
+    retval = kadm5_get_principal(kadm5_handle, theprinc, &entry,
+				 KADM5_PRINCIPAL_NORMAL_MASK);
+    if (retval)
+	goto err_princ;
+
+    kadm_vals_to_prin(valsin2->fields, &temp_key, valsin2);
+
+    if (IS_FIELD(KADM_EXPDATE,valsin2->fields)) {
+	entry.princ_expire_time = temp_key.exp_date;
+	mask |= KADM5_PRINC_EXPIRE_TIME;
+    }
+
+    if (IS_FIELD(KADM_MAXLIFE,valsin2->fields)) {
+	entry.max_life = temp_key.max_life * (60 * 5);
+	mask |= KADM5_MAX_LIFE;
+    }
+
+    retval = kadm5_modify_principal(kadm5_handle, &entry, mask);
+    if (retval)
+	goto err_entry;
+
+    if (IS_FIELD(KADM_DESKEY,valsin2->fields)) {
+	if ((newpw.contents = (krb5_octet *)malloc(8)) == NULL) {
+	    retval = KADM_NOMEM;
+	    goto err_entry;
+	}
+	newpw.magic = KV5M_KEYBLOCK;
+	newpw.length = 8;
+	newpw.enctype = ENCTYPE_DES_CBC_CRC;
+	temp_key.key_low = ntohl(temp_key.key_low);
+	temp_key.key_high = ntohl(temp_key.key_high);
+	memcpy(newpw.contents, &temp_key.key_low, 4);
+	memcpy(newpw.contents + 4, &temp_key.key_high, 4);
+	memset((char *)&temp_key, 0, sizeof(temp_key));
+
+	retval = kadm5_setv4key_principal(kadm5_handle, entry.principal,
+					  &newpw);
+	krb5_free_keyblock_contents(kadm_context, &newpw);
+	if (retval)
+	    goto err_entry;
+    }
+
+    kadm5_free_principal_ent(kadm5_handle, &entry);
+
+    retval = kadm5_get_principal(kadm5_handle, theprinc, &entry,
+				 KADM5_PRINCIPAL_NORMAL_MASK);
+    if (retval)
+	goto err_princ;
+
+    retval = kadm_entry2princ(&entry, &data_o);
+    kadm5_free_principal_ent(kadm5_handle, &entry);
+    krb5_free_principal(kadm_context, theprinc);
+    if (retval)
+	goto err;
+
+    memset((char *) fields, 0, sizeof(fields));
+    SET_FIELD(KADM_NAME,fields);
+    SET_FIELD(KADM_INST,fields);
+    SET_FIELD(KADM_EXPDATE,fields);
+    SET_FIELD(KADM_ATTR,fields);
+    SET_FIELD(KADM_MAXLIFE,fields);
+    kadm_prin_to_vals(fields, valsout, &data_o);
+    syslog(LOG_INFO, "'%s.%s' modified.", valsin1->name, valsin1->instance);
+    return KADM_DATA;		/* Set all the appropriate fields */
+
+err_entry:
+    kadm5_free_principal_ent(kadm5_handle, &entry);
+err_princ:
+    krb5_free_principal(kadm_context, theprinc);
+err:
+    syslog(LOG_ERR, "FAILED modifying '%s.%s' (%s)",
+	   valsin1->name, valsin1->instance, error_message(retval));
+    return retval;
+}
 
 #ifndef KADM5
-
-#define failmod(code) {  (void) syslog(LOG_ERR, "FAILED modifying '%s.%s' (%s)", valsin1->name, valsin1->instance, error_message(code)); return code; }
-
-kadm_mod_entry (rname, rinstance, rrealm, valsin1, valsin2, valsout)
-char *rname;				/* requestors name */
-char *rinstance;			/* requestors instance */
-char *rrealm;				/* requestors realm */
-Kadm_vals *valsin1, *valsin2;		/* holds the parameters being
-					   passed in */
-Kadm_vals *valsout;		/* the actual record which is returned */
-{
-  int numfound;
-  krb5_boolean more;
-  Principal data_o, temp_key;
-  u_char fields[4];
-  krb5_keyblock newpw;
-  krb5_error_code retval;
-  krb5_principal theprinc;
-  krb5_db_entry newentry, odata;
-  krb5_tl_mod_princ mprinc;
-  krb5_key_data	*pkey;
-  krb5_keysalt sblock;
-
-  if (wildcard(valsin1->name) || wildcard(valsin1->instance)) {
-      failmod(KADM_ILL_WILDCARD);
-  }
-
-  if (!check_access(rname, rinstance, rrealm, MODACL)) {
-    syslog(LOG_WARNING, "WARNING: '%s.%s@%s' tried to change '%s.%s's entry",
-	       rname, rinstance, rrealm, valsin1->name, valsin1->instance);
-    return KADM_UNAUTH;
-  }
-
-  syslog(LOG_INFO, "request to modify '%s.%s's entry from '%s.%s@%s' ",
-	     valsin1->name, valsin1->instance, rname, rinstance, rrealm);
-  retval = krb5_425_conv_principal(kadm_context,
-				   valsin1->name, valsin1->instance,
-				   server_parm.krbrlm, &theprinc);
-  if (retval)
-    failmod(retval);
-  numfound = 1;
-  retval = krb5_db_get_principal(kadm_context, theprinc, &newentry,
-				 &numfound, &more);
-  if (retval) {
-    krb5_free_principal(kadm_context, theprinc);
-    failmod(retval);
-  } else if (numfound == 1) {
-    kadm_vals_to_prin(valsin2->fields, &temp_key, valsin2);
-    krb5_free_principal(kadm_context, newentry.princ);
-    newentry.princ = theprinc;
-    if (IS_FIELD(KADM_EXPDATE,valsin2->fields))
-      newentry.expiration = temp_key.exp_date;
-    if (IS_FIELD(KADM_ATTR,valsin2->fields))
-      newentry.attributes = temp_key.attributes;
-    if (IS_FIELD(KADM_MAXLIFE,valsin2->fields))
-      newentry.max_life = temp_key.max_life; 
-    if (IS_FIELD(KADM_DESKEY,valsin2->fields)) {
-      if ((newpw.contents = (krb5_octet *)malloc(8)) == NULL) {
-	krb5_db_free_principal(kadm_context, &newentry, 1);
-	memset((char *)&temp_key, 0, sizeof (temp_key));
-	failmod(KADM_NOMEM);
-      }
-      newpw.magic = KV5M_KEYBLOCK;
-      newpw.length = 8;
-      newpw.enctype = ENCTYPE_DES_CBC_CRC;
-      temp_key.key_low = ntohl(temp_key.key_low);
-      temp_key.key_high = ntohl(temp_key.key_high);
-      memcpy(newpw.contents, &temp_key.key_low, 4);
-      memcpy(newpw.contents + 4, &temp_key.key_high, 4);
-      if (retval = krb5_dbe_find_enctype(kadm_context,
-					 &newentry,
-					 ENCTYPE_DES_CBC_CRC,
-					 KRB5_KDB_SALTTYPE_V4,
-					 -1,
-					 &pkey)) {
-	krb5_db_free_principal(kadm_context, &newentry, 1);
-	memset((char *)&temp_key, 0, sizeof (temp_key));
-	failmod(retval);
-      }
-      if (pkey->key_data_contents[0]) {
-	krb5_xfree(pkey->key_data_contents[0]);
-	pkey->key_data_contents[0] = (krb5_octet *) NULL;
-      }
-      /* encrypt new key in master key */
-      sblock.type = KRB5_KDB_SALTTYPE_V4;
-      sblock.data.length = 0;
-      sblock.data.data = (char *) NULL;
-      retval = krb5_dbekd_encrypt_key_data(kadm_context,
-					   &server_parm.master_encblock,
-					   &newpw,
-					   &sblock,
-					   (int) pkey->key_data_kvno+1,
-					   pkey);
-      memset(newpw.contents, 0, newpw.length);
-      free(newpw.contents);
-      memset((char *)&temp_key, 0, sizeof(temp_key));
-      if (retval) {
-	krb5_db_free_principal(kadm_context, &newentry, 1);
-	failmod(retval);
-      }
-    }
-    if (retval = krb5_timeofday(kadm_context, &mprinc.mod_date)) {
-	krb5_db_free_principal(kadm_context, &newentry, 1);
-	failmod(retval);
-    }
-    retval = krb5_425_conv_principal(kadm_context, rname, rinstance, rrealm,
-				     &mprinc.mod_princ);
-    if (retval) {
-      krb5_db_free_principal(kadm_context, &newentry, 1);
-      failmod(retval);
-    }
-
-    retval = krb5_dbe_encode_mod_princ_data(kadm_context,
-					    &mprinc,
-					    &newentry);
-    krb5_free_principal(kadm_context, mprinc.mod_princ);
-    if (retval) {
-      krb5_db_free_principal(kadm_context, &newentry, 1);
-      failmod(retval);
-    }
-
-    numfound = 1;
-    retval = krb5_db_put_principal(kadm_context, &newentry, &numfound);
-    memset((char *)&data_o, 0, sizeof(data_o));
-    if (retval) {
-      krb5_db_free_principal(kadm_context, &newentry, 1);
-      failmod(retval);
-    } else {
-      numfound = 1;
-      retval = krb5_db_get_principal(kadm_context, newentry.princ, &odata,
-				     &numfound, &more);
-      krb5_db_free_principal(kadm_context, &newentry, 1);
-      if (retval) {
-	failmod(retval);
-      } else if (numfound != 1 || more) {
-	krb5_db_free_principal(kadm_context, &odata, numfound);
-	failmod(KADM_UK_RERROR);
-      }
-      retval = kadm_entry2princ(odata, &data_o);
-      krb5_db_free_principal(kadm_context, &odata, 1);
-      if (retval)
-	failmod(retval);
-      memset((char *) fields, 0, sizeof(fields));
-      SET_FIELD(KADM_NAME,fields);
-      SET_FIELD(KADM_INST,fields);
-      SET_FIELD(KADM_EXPDATE,fields);
-      SET_FIELD(KADM_ATTR,fields);
-      SET_FIELD(KADM_MAXLIFE,fields);
-      kadm_prin_to_vals(fields, valsout, &data_o);
-      syslog(LOG_INFO, "'%s.%s' modified.", valsin1->name, valsin1->instance);
-      return KADM_DATA;		/* Set all the appropriate fields */
-    }
-  } else {
-    failmod(KADM_NOENTRY);
-  }
-}
-#undef failmod
-
 #define failchange(code) {  syslog(LOG_ERR, "FAILED changing key for '%s.%s@%s' (%s)", rname, rinstance, rrealm, error_message(code)); return code; }
 
 kadm_change (rname, rinstance, rrealm, newpw)
@@ -672,6 +616,7 @@ des_cblock newpw;
   }
 }
 #undef failchange
+#endif /* !KADM5 */
 
 check_pw(newpw, checkstr)
 	des_cblock	newpw;
@@ -842,7 +787,6 @@ char *pwstring;
 	}
 	return(0);
 }
-#endif /* !KADM5 */
 
 /*
  * This routine checks to see if a principal should be considered an
