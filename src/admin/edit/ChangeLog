@@ -1,3 +1,7 @@
+Mon Oct  3 19:10:47 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* Makefile.in: Use $(srcdir) to find manual page for make install.
+
 Thu Sep 29 15:52:22 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* dump.c (update_ok_file): Make sure mod time on the dump_ok file

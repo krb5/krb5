@@ -1,3 +1,7 @@
+Mon Oct  3 19:16:14 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* Makefile.in: Use $(srcdir) to find manual page for make install.
+
 Wed Sep 28 23:49:10 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* Makefile.in: Relink executable when library changes.

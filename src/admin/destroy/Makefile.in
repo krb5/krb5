@@ -23,7 +23,7 @@ kdb5_destroy: kdb5_destroy.o $(DEPLIBS)
 
 install::
 	$(INSTALL_PROGRAM) kdb5_destroy ${DESTDIR}$(ADMIN_BINDIR)/kdb5_destroy
-	$(INSTALL_DATA) kdb5_destroy.M ${DESTDIR}$(ADMIN_MANDIR)/kdb5_destroy.8
+	$(INSTALL_DATA) $(srcdir)/kdb5_destroy.M ${DESTDIR}$(ADMIN_MANDIR)/kdb5_destroy.8
 
 clean::
 	$(RM) kdb5_destroy kdb5_destroy.o

@@ -78,4 +78,4 @@ clean::
 
 install::
 	$(INSTALL_PROGRAM) popper ${DESTDIR}$(SERVER_BINDIR)/popper
-	$(INSTALL_DATA) popper.M ${DESTDIR}$(SERVER_MANDIR)/popper.$(SERVER_MANSUFFIX)
+	$(INSTALL_DATA) $(srcdir)/popper.M ${DESTDIR}$(SERVER_MANDIR)/popper.$(SERVER_MANSUFFIX)

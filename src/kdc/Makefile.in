@@ -60,7 +60,7 @@ krb5kdc: $(OBJS) $(KDBDEPLIB) $(DEPKLIB)
 
 install::
 	$(INSTALL_PROGRAM) krb5kdc ${DESTDIR}$(SERVER_BINDIR)/krb5kdc
-	$(INSTALL_DATA) krb5kdc.M ${DESTDIR}$(SERVER_MANDIR)/krb5kdc.8
+	$(INSTALL_DATA) $(srcdir)/krb5kdc.M ${DESTDIR}$(SERVER_MANDIR)/krb5kdc.8
 
 clean::
 	$(RM) kdc5_err.h kdc5_err.c krb5kdc

@@ -30,14 +30,14 @@ kprop: $(CLIENTOBJS) $(DEPLIBS)
 
 install::
 	$(INSTALL_PROGRAM) kprop ${DESTDIR}$(SERVER_BINDIR)/kprop
-	$(INSTALL_DATA) kprop.M ${DESTDIR}$(SERVER_MANDIR)/kprop.8
+	$(INSTALL_DATA) $(srcdir)/kprop.M ${DESTDIR}$(SERVER_MANDIR)/kprop.8
 
 kpropd: $(SERVEROBJS) $(DEPLIBS)
 	$(CC) $(CFLAGS) -o kpropd $(SERVEROBJS) $(LOCAL_LIBRARIES) $(LIBS)
 
 install::
 	$(INSTALL_PROGRAM) kpropd ${DESTDIR}$(SERVER_BINDIR)/kpropd
-	$(INSTALL_DATA) kpropd.M ${DESTDIR}$(SERVER_MANDIR)/kpropd.8
+	$(INSTALL_DATA) $(srcdir)/kpropd.M ${DESTDIR}$(SERVER_MANDIR)/kpropd.8
 
 clean::
 	$(RM) $(CLIENTOBJS) $(SERVEROBJS)

@@ -23,7 +23,7 @@ kdb5_stash: kdb5_stash.o $(DEPLIBS)
 
 install::
 	$(INSTALL_PROGRAM) kdb5_stash ${DESTDIR}$(ADMIN_BINDIR)/kdb5_stash
-	$(INSTALL_DATA) kdb5_stash.M ${DESTDIR}$(ADMIN_MANDIR)/kdb5_stash.8
+	$(INSTALL_DATA) $(srcdir)/kdb5_stash.M ${DESTDIR}$(ADMIN_MANDIR)/kdb5_stash.8
 
 clean::
 	$(RM) kdb5_stash kdb5_stash.o

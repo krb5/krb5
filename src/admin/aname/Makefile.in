@@ -23,7 +23,7 @@ kdb5_anadd: kdb5_anadd.o $(DEPLIBS)
 
 install::
 	$(INSTALL_PROGRAM) kdb5_anadd $(DESTDIR)$(ADMIN_BINDIR)/kdb5_anadd
-	$(INSTALL_DATA) kdb5_anadd.M $(DESTDIR)$(ADMIN_MANDIR)/kdb5_anadd.8
+	$(INSTALL_DATA) $(srcdir)/kdb5_anadd.M $(DESTDIR)$(ADMIN_MANDIR)/kdb5_anadd.8
 
 clean::
 	$(RM) kdb5_anadd kdb5_anadd.o

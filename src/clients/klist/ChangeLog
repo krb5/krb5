@@ -1,3 +1,7 @@
+Mon Oct  3 19:14:09 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* Makefile.in: Use $(srcdir) to find manual page for make install.
+
 Thu Sep 22 22:41:42 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* klist.c (main): Fix memory leak in klist --- the returned

@@ -43,7 +43,7 @@ kadmin: $(KDBDEPLIB) $(OBJS) $(DEPKLIB)
 
 install::
 	$(INSTALL_PROGRAM) kadmin ${DESTDIR}$(CLIENT_BINDIR)/kadmin
-	$(INSTALL_DATA) kadmin.M ${DESTDIR}$(CLIENT_MANDIR)/kadmin.1
+	$(INSTALL_DATA) $(srcdir)/kadmin.M ${DESTDIR}$(CLIENT_MANDIR)/kadmin.1
 
 clean::
 	$(RM) kadmin

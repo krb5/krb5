@@ -22,5 +22,5 @@ clean::
 
 install::
 	$(INSTALL_PROGRAM) mailquery ${DESTDIR}$(CLIENT_BINDIR)/mailquery
-	$(INSTALL_DATA) mailquery.M ${DESTDIR}$(CLIENT_MANDIR)/mailquery.1
+	$(INSTALL_DATA) $(srcdir)/mailquery.M ${DESTDIR}$(CLIENT_MANDIR)/mailquery.1
 

@@ -1,5 +1,7 @@
 Mon Oct  3 13:13:48 1994  Theodore Y. Ts'o  (tytso@dcl)
 
+	* Makefile.in: Use $(srcdir) to find manual page for make install.
+
 	* Makefile.in: Remove krb5kdc on make clean
 
 Fri Sep 30 22:13:13 1994  Theodore Y. Ts'o  (tytso@dcl)
