@@ -1,3 +1,9 @@
+Mon Feb 10 11:10:02 1997  Ezra Peisach  <epeisach@quest.rose.brandeis.edu>
+
+	* configure.in: Check for sys/uio.h.
+
+	* svc_udp.c: Include sys/uio.h is available for struct iovec.
+
 Mon Feb 10 00:04:36 1997  Tom Yu  <tlyu@mit.edu>
 
 	* svc_udp.c (svcudp_recv): Avoid coredumps under Solaris (and

@@ -43,6 +43,9 @@ static char sccsid[] = "@(#)svc_udp.c 1.24 87/08/11 Copyr 1984 Sun Micro";
 #include <rpc/rpc.h>
 #include <sys/socket.h>
 #include <errno.h>
+#ifdef HAVE_SYS_UIO_H
+#include <sys/uio.h>
+#endif
 
 
 #define rpc_buffer(xprt) ((xprt)->xp_p1)

@@ -6,6 +6,7 @@ AC_PROG_ARCHIVE
 AC_PROG_ARCHIVE_ADD
 AC_PROG_RANLIB
 AC_PROG_INSTALL
+AC_CHECK_HEADERS(sys/uio.h)
 dnl Arrange for types.hin to include stdlib.h
 AC_CHECK_HEADER(stdlib.h, [
      STDLIB_INCLUDE="#include <stdlib.h>"],
