@@ -28,7 +28,7 @@
 #include <krb5/krb5.h>
 #include <krb5/ext-proto.h>
 
-void
+void INTERFACE
 krb5_free_enc_kdc_rep_part(context, val)
     krb5_context context;
     register krb5_enc_kdc_rep_part *val;

@@ -297,14 +297,6 @@ typedef struct _krb5_cred {
     krb5_cred_enc_part *enc_part2; 	/* unencrypted version, if available*/
 } krb5_cred;
 
-/* these need to be here so the typedefs are available for the prototypes */
-#include <krb5/safepriv.h>
-#include <krb5/ccache.h>
-#include <krb5/rcache.h>
-#include <krb5/keytab.h>
-#include <krb5/func-proto.h>
-#include <krb5/free.h>
-
 /* Sandia password generation structures */
 typedef struct _passwd_phrase_element {
     krb5_magic magic;
@@ -317,6 +309,14 @@ typedef struct _krb5_pwd_data {
     int sequence_count;
     passwd_phrase_element **element;
 } krb5_pwd_data;
+
+/* these need to be here so the typedefs are available for the prototypes */
+#include <krb5/safepriv.h>
+#include <krb5/ccache.h>
+#include <krb5/rcache.h>
+#include <krb5/keytab.h>
+#include <krb5/func-proto.h>
+#include <krb5/free.h>
 
 /* The name of the Kerberos ticket granting service... and its size */
 #define	KRB5_TGS_NAME		"krbtgt"

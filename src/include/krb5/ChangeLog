@@ -1,3 +1,8 @@
+Tue Feb 21 0:0:32 1995 Keith Vetter (keithv@fusion.com)
+
+	* func-proto.h: added windows INTERFACE keyword to all functions.
+        * krb5.h: moved two typedefs before inclusion of func-proto.h
+
 Mon Feb 20 16:54:51 1995 Keith Vetter (keithv@fusion.com)
 
 	* encryption.h, los-proto.h, rsa-md5.h: added windows 

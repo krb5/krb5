@@ -29,7 +29,7 @@
 #include <krb5/krb5.h>
 #include <krb5/ext-proto.h>
 
-void
+void INTERFACE
 krb5_free_tgt_creds(context, tgts)
     krb5_context context;
     krb5_creds **tgts;

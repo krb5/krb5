@@ -33,7 +33,7 @@
  * the credentials structures 
  */
 
-void
+void INTERFACE
 krb5_free_cred_contents(context, val)
     krb5_context context;
     krb5_creds *val;

@@ -1,3 +1,8 @@
+Tue Feb 21 0:1:55 1995 Keith Vetter (keithv@fusion.com)
+
+	* Every C file (*.c): added windows INTERFACE keyword
+        * Makefile.in: made to work for PC
+
 Fri Feb  3 01:45:04 1995  John Gilmore  <gnu@cygnus.com>
 
 	Rename files for DOS 8.3 uniqueness:
