@@ -1,3 +1,9 @@
+2003-05-01  Alexandra Ellwood  <lxs@mit.edu>
+   
+    * kadm_stream.c: Fixed vts_long() and vts_short() so they return a
+    pointer to the beginning of the memory they allocate and place 
+    their data at the end of the buffer which was passed in.
+
 2003-04-15  Alexandra Ellwood  <lxs@mit.edu>
    
     * g_ad_tkt.c: accidentally checked a non-space character into
