@@ -1,3 +1,7 @@
+Sun Jan 28 14:31:47 1996  Mark Eichin  <eichin@cygnus.com>
+
+	* dump.c (process_k5_record): t2..t9 is only 8 vars, not 9.
+
 Thu Jan 25 16:07:42 1996  Sam Hartman  <hartmans@tertius.mit.edu>
 
 	* kdb5_edit.c (extract_srvtab): Extract *all* the keys in a

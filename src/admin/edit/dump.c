@@ -1247,7 +1247,7 @@ process_k5_record(fname, kcontext, filep, verbose, linenop)
 		/* Get the fixed principal attributes */
 		nread = fscanf(filep, "%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t",
 			       &t2, &t3, &t4, &t5, &t6, &t7, &t8, &t9);
-		if (nread == 9) {
+		if (nread == 8) {
 		    dbentry.attributes = (krb5_flags) t2;
 		    dbentry.max_life = (krb5_deltat) t3;
 		    dbentry.max_renewable_life = (krb5_deltat) t4;
