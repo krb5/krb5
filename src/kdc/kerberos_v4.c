@@ -25,6 +25,7 @@ static char *rcsid_kerberos_c =
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <arpa/inet.h>
 #include <netdb.h>
 #include <signal.h>
 #include <sgtty.h>
@@ -33,6 +34,7 @@ static char *rcsid_kerberos_c =
 #include <sys/file.h>
 #include <ctype.h>
 #include <syslog.h>
+#include <string.h>
 
 /* v4 include files:
  */
@@ -45,7 +47,9 @@ static char *rcsid_kerberos_c =
 
 extern int errno;
 
+#ifdef notdef
 static struct sockaddr_in sin = {AF_INET};
+#endif
 int     f;
 
 /* XXX several files in libkdb know about this */
@@ -72,11 +76,13 @@ static char log_text[128];
 static char *lt;
 static int more;
 
-/* static int mflag;		/* Are we invoked manually? */
-/* static int lflag;		/* Have we set an alterate log file? */
-/* static char *log_file;	/* name of alt. log file */
-/* static int nflag;		/* don't check max age */
-/* static int rflag;		/* alternate realm specified */
+#ifdef notdef
+static int mflag;		/* Are we invoked manually? */
+static int lflag;		/* Have we set an alterate log file? */
+static char *log_file;	/* name of alt. log file */
+static int nflag;		/* don't check max age */
+static int rflag;		/* alternate realm specified */
+#endif
 
 /* fields within the received request packet */
 static u_char req_msg_type;
@@ -94,9 +100,11 @@ int req_act_vno = KRB_PROT_VERSION; /* Temporary for version skew */
 static char local_realm[REALM_SZ];
 
 /* statistics */
-/* static long q_bytes;		/* current bytes remaining in queue */
-/* static long q_n;		/* how many consecutive non-zero
+#ifdef notdef
+static long q_bytes;		/* current bytes remaining in queue */
+static long q_n;		/* how many consecutive non-zero
 				 * q_bytes   */
+#endif
 /*
 static long max_q_bytes;
 static long max_q_n; */
@@ -466,6 +474,7 @@ char * vklog( type, format, ap)
     retval = type_2_v5err[ type];
     return( log_text);
 }
+
 static
 int sendto(s, msg, len, flags, to, to_len)
 int s;
@@ -514,7 +523,7 @@ extern krb5_encrypt_block master_encblock;
  */
 int
 compat_decrypt_key (in5, out4)
-     krb5_keyblock *in5;
+     krb5_encrypted_keyblock *in5;
      C_Block out4;
 {
     krb5_keyblock out5;
@@ -698,11 +707,15 @@ kerberos_v4(client, pkt)
 
     case AUTH_MSG_KDC_REQUEST:
 	{
-	 /* u_long  time_ws;	/* Workstation time */
+#ifdef notdef
+	    u_long  time_ws;	/* Workstation time */
+#endif
 	    u_long  req_life;	/* Requested liftime */
 	    char   *service;	/* Service name */
 	    char   *instance;	/* Service instance */
-	 /* int     kerno;	/* Kerberos error number */
+#ifdef notdef
+	    int     kerno;	/* Kerberos error number */
+#endif
 	    n_auth_req++;
 	    tk->length = 0;
 	    k_flags = 0;	/* various kerberos flags */
@@ -796,7 +809,8 @@ kerberos_v4(client, pkt)
 	    rpkt = create_auth_reply(req_name_ptr, req_inst_ptr,
 		req_realm_ptr, req_time_ws, 0, a_name_data.exp_date,
 		a_name_data.key_version, ciph);
-	    sendto(f, rpkt->dat, rpkt->length, 0, client, S_AD_SZ);
+	    sendto(f, (char *) rpkt->dat, rpkt->length, 0,
+		   (struct sockaddr *) client, S_AD_SZ);
 	    bzero(&a_name_data, sizeof(a_name_data));
 	    bzero(&s_name_data, sizeof(s_name_data));
 	    break;
@@ -907,7 +921,8 @@ kerberos_v4(client, pkt)
 	    rpkt = create_auth_reply(ad->pname, ad->pinst,
 				     ad->prealm, time_ws,
 				     0, 0, 0, ciph);
-	    sendto(f, rpkt->dat, rpkt->length, 0, client, S_AD_SZ);
+	    sendto(f, (char *) rpkt->dat, rpkt->length, 0,
+		   (struct sockaddr *) client, S_AD_SZ);
 	    bzero(&s_name_data, sizeof(s_name_data));
 	    break;
 	}
@@ -921,7 +936,7 @@ kerberos_v4(client, pkt)
 	        inet_ntoa(client_host), req_name_ptr, req_inst_ptr, 0);
 	    exit(0);
 	}
-#endif notdef_DIE
+#endif /* notdef_DIE */
 
     default:
 	{
@@ -989,7 +1004,8 @@ kerb_err_reply(client, pkt, err, string)
     strcat(e_msg, string);
     cr_err_reply(e_pkt, req_name_ptr, req_inst_ptr, req_realm_ptr,
 		 req_time_ws, err, e_msg);
-    sendto(f, e_pkt->dat, e_pkt->length, 0, client, S_AD_SZ);
+    sendto(f, (char *) e_pkt->dat, e_pkt->length, 0,
+	   (struct sockaddr *) client, S_AD_SZ);
 
 }
 
@@ -1021,7 +1037,7 @@ static void check_db_age()
 }
 #endif /* BACKWARD_COMPAT */
 
-check_princ(p_name, instance, lifetime, p)
+int check_princ(p_name, instance, lifetime, p)
     char   *p_name;
     char   *instance;
     unsigned lifetime;
@@ -1088,7 +1104,7 @@ check_princ(p_name, instance, lifetime, p)
 
 
 /* Set the key for krb_rd_req so we can check tgt */
-set_tgtkey(r)
+int set_tgtkey(r)
     char   *r;			/* Realm for desired key */
 {
     int     n;
