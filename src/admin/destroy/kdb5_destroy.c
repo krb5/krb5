@@ -24,10 +24,14 @@ static char rcsid_kdb_dest_c[] =
 #include <stdio.h>
 
 #include <com_err.h>
+#include <krb5/krb5_err.h>
+#include <krb5/kdb5_err.h>
+#include <krb5/isode_err.h>
 
 #include <krb5/ext-proto.h>
+#include <sys/file.h>			/* for unlink() */
 
-#include <sys/param.h>			/* XXX */
+#include <sys/param.h>			/* XXX for MAXPATHLEN */
 
 extern int errno;
 
@@ -39,10 +43,11 @@ usage(who, status)
 char *who;
 int status;
 {
-    fprintf(stderr, "usage: %s [-n dbname]\n", who);
+    fprintf(stderr, "usage: %s [-d dbpathname]\n", who);
     exit(status);
 }
 
+void
 main(argc, argv)
 int argc;
 char *argv[];
@@ -54,9 +59,16 @@ char *argv[];
     char dbfilename[MAXPATHLEN];
     krb5_error_code retval;
 
+    initialize_krb5_error_table();
+    initialize_kdb5_error_table();
+    initialize_isod_error_table();
+
+    if (rindex(argv[0], '/'))
+	argv[0] = rindex(argv[0], '/')+1;
+
     while ((optchar = getopt(argc, argv, "n:")) != EOF) {
 	switch(optchar) {
-	case 'n':			/* set db name */
+	case 'd':			/* set db name */
 	    dbname = optarg;
 	    break;
 	case '?':
@@ -82,6 +94,15 @@ char *argv[];
 	}
 	(void) strcpy(dbfilename, dbname);
 	(void) strcat(dbfilename, ".pag");
+	if (unlink(dbfilename) == -1) {
+	    retval = errno;
+	    com_err(argv[0], retval, "deleting database file '%s'",dbfilename);
+	    fprintf(stderr,
+		    "Database partially deleted--inspect files manually!\n");
+	    exit(1);
+	}
+	(void) strcpy(dbfilename, dbname);
+	(void) strcat(dbfilename, ".ok");
 	if (unlink(dbfilename) == -1) {
 	    retval = errno;
 	    com_err(argv[0], retval, "deleting database file '%s'",dbfilename);
