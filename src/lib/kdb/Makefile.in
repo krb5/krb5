@@ -5,7 +5,7 @@ PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 
 LIB=kdb5
-LIBMAJOR=1
+LIBMAJOR=2
 LIBMINOR=0
 RELDIR=kdb
 # Depends on libcrypto and libkrb5
@@ -24,7 +24,7 @@ SRCS= \
 	$(srcdir)/encrypt_key.c \
 	$(srcdir)/decrypt_key.c \
 	$(srcdir)/kdb_cpw.c \
-	$(srcdir)/kdb_dbm.c \
+	$(srcdir)/kdb_db2.c \
 	$(srcdir)/kdb_xdr.c \
 	$(srcdir)/verify_mky.c \
 	$(srcdir)/fetch_mkey.c \
@@ -37,7 +37,7 @@ STLIBOBJS= \
 	encrypt_key.o \
 	decrypt_key.o \
 	kdb_cpw.o \
-	kdb_dbm.o \
+	kdb_db2.o \
 	kdb_xdr.o \
 	verify_mky.o \
 	fetch_mkey.o \

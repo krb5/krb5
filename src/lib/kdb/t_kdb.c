@@ -445,7 +445,7 @@ delete_principal(kcontext, principal)
 
 static int
 do_testing(db, passes, verbose, timing, rcases, check, save_db, dontclean,
-	   ptest)
+	   ptest, hash)
     char	*db;
     int		passes;
     int		verbose;
@@ -455,6 +455,7 @@ do_testing(db, passes, verbose, timing, rcases, check, save_db, dontclean,
     int		save_db;
     int		dontclean;
     int		ptest;
+    int		hash;
 {
     krb5_error_code	kret;
     krb5_context	kcontext;
@@ -475,6 +476,7 @@ do_testing(db, passes, verbose, timing, rcases, check, save_db, dontclean,
     char		*pname;
     float		elapsed;
     krb5_keyblock	stat_kb;
+    krb5_int32		crflags;
 
     mkey_name = "master/key";
     realm = master_princ_data.realm.data;
@@ -485,6 +487,7 @@ do_testing(db, passes, verbose, timing, rcases, check, save_db, dontclean,
     db_created = 0;
     linkage = "";
     oparg = "";
+    crflags = hash ? KRB5_KDB_CREATE_HASH : KRB5_KDB_CREATE_BTREE;
 
     /* Set up some initial context */
     op = "initializing krb5";
@@ -542,7 +545,7 @@ do_testing(db, passes, verbose, timing, rcases, check, save_db, dontclean,
 
     /* Create database */
     op = "creating database";
-    if ((kret = krb5_db_create(kcontext, db)))
+    if ((kret = krb5_db_create(kcontext, db, crflags)))
 	goto goodbye;
 
     db_created = 1;
@@ -956,7 +959,7 @@ do_testing(db, passes, verbose, timing, rcases, check, save_db, dontclean,
 	(void) krb5_db_fini(kcontext);
     if (db_created) {
 	if (!kret && !save_db) {
-	    kdb5_db_destroy(kcontext, db);
+	    krb5_db_destroy(kcontext, db);
 	    krb5_db_fini(kcontext);
 	} else {
 	    if (kret && verbose)
@@ -987,7 +990,7 @@ main(argc, argv)
     extern char	*optarg;
 
     int		do_time, do_random, num_passes, check_cont, verbose, error;
-    int		save_db, dont_clean, do_ptest;
+    int		save_db, dont_clean, do_ptest, hash;
     char	*db_name;
 
     programname = argv[0];
@@ -1006,9 +1009,10 @@ main(argc, argv)
     dont_clean = 0;
     error = 0;
     do_ptest = 0;
+    hash = 0;
 
     /* Parse argument list */
-    while ((option = getopt(argc, argv, "cd:n:prstvD")) != EOF) {
+    while ((option = getopt(argc, argv, "cd:n:prstvDh")) != EOF) {
 	switch (option) {
 	case 'c':
 	    check_cont = 1;
@@ -1041,6 +1045,9 @@ main(argc, argv)
 	case 'D':
 	    dont_clean = 1;
 	    break;
+	case 'h':
+	    hash = 1;
+	    break;
 	default:
 	    error++;
 	    break;
@@ -1058,7 +1065,8 @@ main(argc, argv)
 			   check_cont,
 			   save_db,
 			   dont_clean,
-			   do_ptest);
+			   do_ptest,
+			   hash);
     return(error);
 }
 

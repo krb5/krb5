@@ -1,3 +1,17 @@
+Fri Jul 25 15:29:03 1997  Tom Yu  <tlyu@mit.edu>
+
+	* t_kdb.c: Reflect changes in the API, mostly db_create.
+
+	* Makefile.in: Bump version due to major reworking.
+
+	* kdb_db2.h:
+	* kdb_db2.c: Add Berkely DB backend.
+
+	* keytab.c: Add support for new kdb API; delete dead arguments.
+
+	* kdb_xdr.c: Remove dependencies on dbm; encode things to
+	krb5_datas rather than datums.
+
 Mon Mar 24 12:19:03 1997  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* t_kdb.c (do_testing): Clean up error handling for krb5_init_context.
