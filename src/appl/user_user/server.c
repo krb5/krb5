@@ -37,6 +37,7 @@
 #include <fcntl.h>
 #include <errno.h>
 
+#include "port-sockets.h"
 #include "krb5.h"
 #include "com_err.h"
 
