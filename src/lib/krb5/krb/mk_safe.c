@@ -53,16 +53,12 @@ OLDDECLARG(krb5_data *, outbuf)
 {
     krb5_error_code retval;
     krb5_safe safemsg;
-    krb5_address *addrs[2];
     krb5_octet zero_octet = 0;
     krb5_checksum safe_checksum;
     krb5_data *scratch;
 
     if (!valid_cksumtype(sumtype))
 	return KRB5_PROG_SUMTYPE_NOSUPP;
-
-    addrs[0] = sender_addr->address;
-    addrs[1] = 0;
 
     safemsg.user_data = *userdata;
     safemsg.s_address = sender_addr->address;
