@@ -1,5 +1,7 @@
 1999-07-22  Tom Yu  <tlyu@mit.edu>
 
+	* mkinstalldirs: New file; from autoconf-2.13.
+
 	* config.guess, config.sub, install-sh: Update from autoconf-2.13.
 
 Tue May 18 20:06:01 1999  Danilo Almeida  <dalmeida@mit.edu>
