@@ -102,6 +102,7 @@ static krb5_error_code get_credentials(context, cred, server, now,
     krb5_error_code	code;
     krb5_creds 		in_creds;
 
+    k5_mutex_assert_locked(&cred->lock);
     memset((char *) &in_creds, 0, sizeof(krb5_creds));
 
     if ((code = krb5_copy_principal(context, cred->princ, &in_creds.client)))
@@ -262,7 +263,7 @@ make_ap_req_v1(context, ctx, cred, k_cred, chan_bindings, mech_type, token)
     unsigned char *t;
     unsigned int tlen;
 
-
+    k5_mutex_assert_locked(&cred->lock);
     ap_req.data = 0;
 
     /* compute the hash of the channel bindings */
@@ -463,6 +464,7 @@ new_connection(
    krb5_timestamp now;
    gss_buffer_desc token;
 
+   k5_mutex_assert_locked(&cred->lock);
    major_status = GSS_S_FAILURE;
    token.length = 0;
    token.value = NULL;
@@ -647,7 +649,6 @@ fail:
 static OM_uint32
 mutual_auth(
    OM_uint32 *minor_status,
-   krb5_gss_cred_id_t cred,
    gss_ctx_id_t *context_handle,
    gss_name_t target_name,
    gss_OID mech_type,
@@ -890,6 +891,12 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
       }
       cred = (krb5_gss_cred_id_t) claimant_cred_handle;
    }
+   kerr = k5_mutex_lock(&cred->lock);
+   if (kerr) {
+       krb5_free_context(context);
+       *minor_status = kerr;
+       return GSS_S_FAILURE;
+   }
 
    /* verify the mech_type */
 
@@ -914,6 +921,7 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
    }
    
    if (err) {
+      k5_mutex_unlock(&cred->lock);
       if (claimant_cred_handle == GSS_C_NO_CREDENTIAL)
 	 krb5_gss_release_cred(minor_status, (gss_cred_id_t)cred);
       *minor_status = 0;
@@ -932,12 +940,15 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
 				    input_token, actual_mech_type,
 				    output_token, ret_flags, time_rec,
 				    context, default_mech);
+      k5_mutex_unlock(&cred->lock);
       if (*context_handle == GSS_C_NO_CONTEXT)
 	  krb5_free_context(context);
       else
 	  ((krb5_gss_ctx_id_rec *) *context_handle)->k5_context = context;
    } else {
-      major_status = mutual_auth(minor_status, cred, context_handle,
+      /* mutual_auth doesn't care about the credentials */
+      k5_mutex_unlock(&cred->lock);
+      major_status = mutual_auth(minor_status, context_handle,
 				 target_name, mech_type, req_flags,
 				 time_req, input_chan_bindings,
 				 input_token, actual_mech_type,

@@ -141,6 +141,9 @@ enum qop {
 typedef krb5_principal krb5_gss_name_t;
 
 typedef struct _krb5_gss_cred_id_rec {
+   /* protect against simultaneous accesses */
+   k5_mutex_t lock;
+
    /* name/type of credential */
    gss_cred_usage_t usage;
    krb5_principal princ;	/* this is not interned as a gss_name_t */
@@ -607,9 +610,12 @@ OM_uint32 krb5_gss_validate_cred
 	    gss_cred_id_t		/* cred */
          );
 
-gss_OID krb5_gss_convert_static_mech_oid
-(gss_OID oid
-	 );
+OM_uint32
+krb5_gss_validate_cred_1(OM_uint32 * /* minor_status */,
+			 gss_cred_id_t /* cred_handle */,
+			 krb5_context /* context */);
+
+gss_OID krb5_gss_convert_static_mech_oid(gss_OID oid);
 	
 krb5_error_code gss_krb5int_make_seal_token_v3(krb5_context,
 					       krb5_gss_ctx_id_rec *,

@@ -19,19 +19,27 @@ gss_krb5_copy_ccache(minor_status, cred_handle, out_ccache)
        return(stat);
    
    k5creds = (krb5_gss_cred_id_t) cred_handle;
+   code = k5_mutex_lock(&k5creds->lock);
+   if (code) {
+       *minor_status = code;
+       return GSS_S_FAILURE;
+   }
    if (k5creds->usage == GSS_C_ACCEPT) {
+       k5_mutex_unlock(&k5creds->lock);
        *minor_status = (OM_uint32) G_BAD_USAGE;
        return(GSS_S_FAILURE);
    }
 
    code = krb5_init_context(&context);
    if (code) {
+       k5_mutex_unlock(&k5creds->lock);
        *minor_status = code;
        return GSS_S_FAILURE;
    }
 
    code = krb5_cc_start_seq_get(context, k5creds->ccache, &cursor);
    if (code) {
+       k5_mutex_unlock(&k5creds->lock);
        *minor_status = code;
        krb5_free_context(context);
        return(GSS_S_FAILURE);
@@ -39,7 +47,7 @@ gss_krb5_copy_ccache(minor_status, cred_handle, out_ccache)
    while (!code && !krb5_cc_next_cred(context, k5creds->ccache, &cursor, &creds)) 
        code = krb5_cc_store_cred(context, out_ccache, &creds);
    krb5_cc_end_seq_get(context, k5creds->ccache, &cursor);
-
+   k5_mutex_unlock(&k5creds->lock);
    krb5_free_context(context);
    if (code) {
        *minor_status = code;

@@ -425,6 +425,16 @@ krb5_gss_acquire_cred(minor_status, desired_name, time_req,
    cred->keytab = NULL;
    cred->ccache = NULL;
 
+   code = k5_mutex_init(&cred->lock);
+   if (code) {
+       *minor_status = ret;
+       krb5_free_context(context);
+       return GSS_S_FAILURE;
+   }
+   /* Note that we don't need to lock this GSSAPI credential record
+      here, because no other thread can gain access to it until we
+      return it.  */
+
    if ((cred_usage != GSS_C_INITIATE) &&
        (cred_usage != GSS_C_ACCEPT) &&
        (cred_usage != GSS_C_BOTH)) {

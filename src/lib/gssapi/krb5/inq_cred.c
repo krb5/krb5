@@ -129,6 +129,12 @@ krb5_gss_inquire_cred(minor_status, cred_handle, name, lifetime_ret,
       goto fail;
    }
 
+   code = k5_mutex_lock(&cred->lock);
+   if (code != 0) {
+       *minor_status = code;
+       ret = GSS_S_FAILURE;
+       goto fail;
+   }
    if (cred->tgt_expire > 0) {
        if ((lifetime = cred->tgt_expire - now) < 0)
 	   lifetime = 0;
@@ -139,6 +145,7 @@ krb5_gss_inquire_cred(minor_status, cred_handle, name, lifetime_ret,
    if (name) {
       if (cred->princ &&
 	  (code = krb5_copy_principal(context, cred->princ, &ret_name))) {
+	 k5_mutex_unlock(&cred->lock);
 	 *minor_status = code;
 	 ret = GSS_S_FAILURE;
 	 goto fail;
@@ -156,6 +163,7 @@ krb5_gss_inquire_cred(minor_status, cred_handle, name, lifetime_ret,
 	    GSS_ERROR(ret = generic_gss_add_oid_set_member(minor_status,
 							   (gss_OID) gss_mech_krb5,
 							   &mechs)))) {
+	   k5_mutex_unlock(&cred->lock);
 	   krb5_free_principal(context, ret_name);
 	   /* *minor_status set above */
 	   goto fail;
@@ -164,6 +172,7 @@ krb5_gss_inquire_cred(minor_status, cred_handle, name, lifetime_ret,
 
    if (name) {
       if (! kg_save_name((gss_name_t) ret_name)) {
+	 k5_mutex_unlock(&cred->lock);
 	 (void) gss_release_oid_set(minor_status, &mechs);
 	 krb5_free_principal(context, ret_name);
 	 *minor_status = (OM_uint32) G_VALIDATE_FAILED;
@@ -178,6 +187,7 @@ krb5_gss_inquire_cred(minor_status, cred_handle, name, lifetime_ret,
 
    if (cred_usage)
       *cred_usage = cred->usage;
+   k5_mutex_unlock(&cred->lock);
 
    if (mechanisms)
       *mechanisms = mechs;

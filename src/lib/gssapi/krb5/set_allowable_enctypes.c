@@ -95,9 +95,13 @@ gss_krb5_set_allowable_enctypes(OM_uint32 *minor_status,
 	    }
 	}
     } else {
+	kerr = k5_mutex_lock(&cred->lock);
+	if (kerr)
+	    goto error_out;
 	if (cred->req_enctypes)
 	    free(cred->req_enctypes);
 	cred->req_enctypes = NULL;
+	k5_mutex_unlock(&cred->lock);
 	return GSS_S_COMPLETE;
     }
 
@@ -110,9 +114,13 @@ gss_krb5_set_allowable_enctypes(OM_uint32 *minor_status,
 	kerr = ENOMEM;
 	goto error_out;
     }
+    kerr = k5_mutex_lock(&cred->lock);
+    if (kerr)
+	goto error_out;
     if (cred->req_enctypes)
 	free(cred->req_enctypes);
     cred->req_enctypes = new_ktypes;
+    k5_mutex_unlock(&cred->lock);
 
     /* Success! */
     return GSS_S_COMPLETE;

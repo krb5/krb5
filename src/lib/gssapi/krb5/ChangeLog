@@ -1,5 +1,28 @@
 2004-07-28  Ken Raeburn  <raeburn@mit.edu>
 
+	* gssapiP_krb5.h (struct _krb5_gss_cred_id_rec): Add a mutex.
+	(krb5_gss_validate_cred_1): Declare.
+	* accept_sec_context.c (rd_and_store_for_creds): Initialize mutex.
+	* acquire_cred.c (krb5_gss_acquire_cred): Initialize mutex.
+	* add_cred.c (krb5_gss_add_cred): Create the krb5 context
+	earlier.  Call krb5_gss_validate_cred_1.  Make sure the mutex is
+	locked.
+	* copy_ccache.c (gss_krb5_copy_ccache): Lock the mutex in the
+	source credential.
+	* init_sec_context.c (get_credentials, new_connection): Check that
+	the mutex is locked.
+	(mutual_auth): Delete unused credential argument.
+	(krb5_gss_init_sec_context): Lock the mutex.
+	* inq_cred.c (krb5_gss_inquire_cred): Lock the mutex.
+	* rel_cred.c (krb5_gss_release_cred): Destroy the mutex.
+	* set_allowable_enctypes.c (gss_krb5_set_allowable_enctypes): Lock
+	the mutex.
+	* val_cred.c (krb5_gss_validate_cred_1): New function, most of old
+	krb5_gss_validate_cred but requires that the krb5 context be
+	supplied, and returns with the credential mutex still locked if
+	successful, so the caller needn't re-lock it.
+	(krb5_gss_validate_cred): Use it.
+
 	* set_ccache.c (gss_krb5_ccache_name): Don't make a copy of the
 	string returned by kg_get_ccache_name.  Simplify some calls using
 	a temporary error code variable.

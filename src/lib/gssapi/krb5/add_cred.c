@@ -113,12 +113,21 @@ krb5_gss_add_cred(minor_status, input_cred_handle,
 	return(GSS_S_DUPLICATE_ELEMENT);
     }
 
-    /* verify the credential */
-    if (GSS_ERROR(major_status =
-		  krb5_gss_validate_cred(minor_status, input_cred_handle)))
-	return(major_status);
+    code = krb5_init_context(&context);
+    if (code) {
+	*minor_status = code;
+	return GSS_S_FAILURE;
+    }
+
+    major_status = krb5_gss_validate_cred_1(minor_status, input_cred_handle,
+					    context);
+    if (GSS_ERROR(major_status)) {
+	krb5_free_context(context);
+	return major_status;
+    }
 
     cred = (krb5_gss_cred_id_t) input_cred_handle;
+    k5_mutex_assert_locked(&cred->lock);
 
     /* check if the cred_usage is equal or "less" than the passed-in cred
        if copying */
@@ -127,6 +136,7 @@ krb5_gss_add_cred(minor_status, input_cred_handle,
 	  ((cred->usage == GSS_C_BOTH) &&
 	   (output_cred_handle != NULL)))) {
       *minor_status = (OM_uint32) G_BAD_USAGE;
+      krb5_free_context(context);
       return(GSS_S_FAILURE);
     }
 
@@ -135,16 +145,14 @@ krb5_gss_add_cred(minor_status, input_cred_handle,
     if ((g_OID_equal(desired_mech, gss_mech_krb5_old) && cred->prerfc_mech) ||
 	(g_OID_equal(desired_mech, gss_mech_krb5) && cred->rfc_mech)) {
 	*minor_status = 0;
+	krb5_free_context(context);
 	return(GSS_S_DUPLICATE_ELEMENT);
     }
 
-    code = krb5_init_context(&context);
-    if (code) {
-	*minor_status = code;
+    if (GSS_ERROR(kg_sync_ccache_name(context, minor_status))) {
+	krb5_free_context(context);
 	return GSS_S_FAILURE;
     }
-    if (GSS_ERROR(kg_sync_ccache_name(context, minor_status)))
-	return GSS_S_FAILURE;
 
     /* verify the desired_name */
 

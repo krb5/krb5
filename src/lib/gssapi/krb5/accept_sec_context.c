@@ -160,9 +160,17 @@ rd_and_store_for_creds(context, auth_context, inbuf, out_cred)
 	/* zero it out... */
 	memset(cred, 0, sizeof(krb5_gss_cred_id_rec));
 
+	retval = k5_mutex_init(&cred->lock);
+	if (retval) {
+	    xfree(cred);
+	    cred = NULL;
+	    goto cleanup;
+	}
+
 	/* copy the client principle into it... */
 	if ((retval =
 	     krb5_copy_principal(context, creds[0]->client, &(cred->princ)))) {
+	    k5_mutex_destroy(&cred->lock);
 	    retval = ENOMEM; /* out of memory? */
 	    xfree(cred); /* clean up memory on failure */
 	    cred = NULL;
