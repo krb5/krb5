@@ -34,29 +34,6 @@ static char *rcsid = "$Header$";
 /*
  * $Header$
  *
- *
- * $Log$
- * Revision 1.4  1994/06/16 06:43:20  eichin
- * punt USING_BISON
- *
- * Revision 1.3  1994/06/12 23:49:17  tytso
- * Test for YYLINENO so that pepsy will build cleanly on all platforms.
- *
- * Revision 1.2  1994/06/11  08:05:55  tlyu
- * mips yylineno breakage
- *
- * Revision 1.1  1994/06/10  03:31:15  eichin
- * autoconfed isode for kerberos work
- *
- * Revision 1.2  1994/06/07 03:45:37  eichin
- * mips doesn't have yylineno either
- *
- * Revision 1.1  1994/05/31 20:40:05  eichin
- * reduced-isode release from /mit/isode/isode-subset/src
- *
- * Revision 8.0  91/07/17  12:43:08  isode
- * Release 7.0
- * 
  * 
  */
 
@@ -76,7 +53,6 @@ static char *rcsid = "$Header$";
 #include <varargs.h>
 #include "pepsydefs.h"
 #include "pass2.h"
-#include <krb5/autoconf.h>
 
 #if defined(NO_YYLINENO)
 int yylineno = 0;		/* Bison doesn't have yylineno, sigh */
