@@ -341,36 +341,6 @@ pty_init();
     openlog(progname, LOG_PID | LOG_NDELAY, LOG_AUTH);
 #endif /* 4.2 syslog */
     
-    if (argc == 1) { /* Get parameters from program name. */
-	if (strlen(progname) > MAX_PROG_NAME) {
-	    usage();
-	    exit(1);
-	}
-	options = (char *) malloc(MAX_PROG_NAME+1);
-	options[0] = '\0';
-	for (i = 0; (progname[i] != '\0') && (i < MAX_PROG_NAME); i++)
-	  if (!strcmp(progname+i, "logind")) {
-	      char **newargv;
-
-	      newargv = (char **) malloc(sizeof(char *) * 3);
-
-	      strcpy(options, "-");
-	      strncat(options, progname, i);
-
-	      argc = 2;
-	      
-	      newargv[0] = argv[0];
-	      newargv[1] = options;
-	      newargv[2] = NULL;
-
-	      argv = newargv;
-	      break;
-	  }
-	if (options[0] == '\0') {
-	    usage();
-	    exit(1);
-	}
-    }
     
     /* Analyse parameters. */
     opterr = 0;

@@ -63,7 +63,7 @@ mechanisms.  This is the same as including \fB\-4\fP and \fB\-5\fP.
 
 .IP \fB\-r\fP 
 Trust the remote hostname as an authentication system using the 
- \fI.rhosts\fP authorization list.
+ \fI.rhosts\fP authorization list.  This option may be desupported in a future version.
 
 
 .IP \fB\-e\fP
@@ -81,10 +81,6 @@ authentication do not include this checksum.  If this option is
 specified, older Kerberos5 clients that do not send a checksum in the
 authenticator will not be able to authenticate to this server.
 
-.PP
-If no command-line arguments are present, then the presence of the 
-letters kKrR in the program-name before "shd" determine the 
-behaviour of the program exactly as with the command-line arguments.
 .PP
 If the \fB\-r\fP or \fB\-R\fP options are used, the client must
 connect from a privileged port.

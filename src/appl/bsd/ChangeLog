@@ -1,3 +1,7 @@
+Tue Apr 16 11:33:33 1996  Sam Hartman  <hartmans@mit.edu>
+
+	* krlogind.c kshd.c (main): Drop support for handling  options in rlogind's name.
+
 Sun Apr 14 03:41:49 1996  Sam Hartman  <hartmans@zygorthian-space-raiders.MIT.EDU>
 
 	* krlogind.c (fatalperror): Only declar sys_errlist if needed.

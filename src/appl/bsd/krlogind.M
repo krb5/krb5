@@ -61,7 +61,8 @@ mechanisms.  This is the same as including \fB\-4\fP and \fB\-5\fP.
 
 .IP \fB\-r\fP 
 Trust the remote hostname as an authentication system using the 
- \fI.rhosts\fP authorization list.
+ \fI.rhosts\fP authorization list.  This option may
+be desupported in future version of klogind.
 
 .IP \fB\-p\fP
  If all other authorization checks fail, prompt the user
@@ -87,11 +88,6 @@ security, only Kerberos5 should be trusted; Kerberos4 and rhosts
 authentication do not include this checksum.  If this options is
 specified, older Kerberos5 clients that do not send a checksum in the
 authenticator will not be able to authenticate to this server.
-.PP
-If no command-line
-arguments are present, then the presence of the letters kr54cpPe in
-the program-name before "logind" determine the behaviour of the
-program exactly as with the command-line arguments.
 
 .PP
 If the

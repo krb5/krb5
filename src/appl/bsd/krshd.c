@@ -279,31 +279,6 @@ main(argc, argv)
     krb5_init_ets(bsd_context);
 #endif
     
-    if (argc == 1) { /* Get parameters from program name. */
-	if (strlen(progname) > MAX_PROG_NAME) {
-	    usage();
-	    exit(1);
-	}
-	options = (char *) malloc(MAX_PROG_NAME+1);
-	options[0] = '\0';
-	for (i = 0; (progname[i] != '\0') && (i < MAX_PROG_NAME); i++)
-	  if (!strcmp(progname+i, "shd")) {
-	      strcpy(options, "-");
-	      strncat(options, progname, i);
-	      options[i+1] = '\0';
-#if 0
-	      /*
-	       * Since we are just going to break out afterwards, we'll
-	       * re-use the variable "i" to move the command line args.
-	       */
-	      for (i=argc-1; i>0; i--) argv[i+1] = argv[i];
-#endif
-	      argv[++argc] = NULL;
-
-	      argv[1] = options;
-	      break;
-	  }
-    }
     
     /* Analyze parameters. */
     opterr = 0;
