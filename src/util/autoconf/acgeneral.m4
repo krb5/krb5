@@ -902,7 +902,9 @@ EOF
 changequote(, )dnl
 dnl Allow a site initialization script to override cache values.
 # Ultrix sh set writes to stderr and can't be redirected directly.
-(set) 2>&1 |
+# Ultrix sh set also returns variables that were read in from the config file
+# with their high bit set.
+(set) 2>&1 | tr '\201-\377' '\001-\177' |
   sed -n "s/^\([a-zA-Z0-9_]*_cv_[a-zA-Z0-9_]*\)=\(.*\)/: \${\1='\2'}/p" \
   >> $cache_file
 changequote([, ])dnl

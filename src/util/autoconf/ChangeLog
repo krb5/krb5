@@ -1,3 +1,12 @@
+Mon Dec 19 19:20:58 1994  Theodore Y. Ts'o  (tytso at tsx-11)
+
+	* acgeneral.m4 (AC_CACHE_SAVE): Work around yet another really
+		horrible Ultrix sh bug.  The values of variables read in
+		using the ${var='bar'} construction are displayed using
+		the "set" command with the high bit set.  (Someone should
+		just haul off the Ultrix sh and have it shot).  Fixed
+		using tr.
+
 Fri Nov  4 09:08:33 1994  David J. MacKenzie  <djm@duality.gnu.ai.mit.edu>
 
 	* Version 2.1.
