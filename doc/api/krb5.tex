@@ -371,7 +371,7 @@ Returns system errors.
 \end{funcdecl}
 
 Formats a KRB_AP_REQ message into \funcparam{outbuf}, with more complete
-options than \funcname{krb_mk_req}.
+options than \funcname{krb5_mk_req}.a
 
 \funcparam{outbuf}, \funcparam{ap_req_options}, \funcparam{checksum},
 and \funcparam{ccache} are used in the same fashion as for
@@ -489,7 +489,7 @@ Returns system errors, encryption errors, replay errors.
 \funcarg{krb5_tkt_authent *}{authdat}
 \end{funcdecl}
 
-Essentially the same as \funcname{krb_rd_req}, but uses a decoded AP_REQ
+Essentially the same as \funcname{krb5_rd_req}, but uses a decoded AP_REQ
 as the input rather than an encoded input.
 
 \begin{funcdecl}{krb5_mk_error}{krb5_error_code}{\funcin}
