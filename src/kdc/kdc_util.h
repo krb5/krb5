@@ -59,15 +59,18 @@ krb5_error_code kdc_get_server_key PROTOTYPE((krb5_ticket *,
 /* do_as_req.c */
 krb5_error_code process_as_req PROTOTYPE((krb5_kdc_req *,
 					  const krb5_fulladdr *,
+					  int,
 					  krb5_data ** ));
 
 /* do_tgs_req.c */
 krb5_error_code process_tgs_req PROTOTYPE((krb5_kdc_req *,
 					   const krb5_fulladdr *,
+					   int, 
 					   krb5_data ** ));
 /* dispatch.c */
 krb5_error_code dispatch PROTOTYPE((krb5_data *,
 				    const krb5_fulladdr *,
+				    int,
 				    krb5_data **));
 
 /* network.c */
@@ -92,9 +95,10 @@ void kdc_insert_lookaside PROTOTYPE((krb5_data *, krb5_data *));
 #ifdef KRB4
 krb5_error_code process_v4 PROTOTYPE((const krb5_data *,
 				      const krb5_fulladdr *,
+				      int is_secondary,
 				      krb5_data **));
 #else
-#define process_v4(foo,bar,foobar)	KRB5KRB_AP_ERR_BADVERSION
+#define process_v4(foo,bar,quux,foobar)	KRB5KRB_AP_ERR_BADVERSION
 #endif
 
 #define norealm_salt(princ, retdata) krb5_principal2salt(&(princ)[1], retdata)
