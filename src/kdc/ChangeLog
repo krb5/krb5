@@ -1,3 +1,9 @@
+2003-01-12  Ezra Peisach  <epeisach@bu.edu>
+
+	* kdc_util.h, replay.c, main.c: Pass global krb5_context to
+	kdc_free_lookaside() instead of per realm one - which has been
+	freed by time invoked.
+
 2003-01-03  Ezra Peisach  <epeisach@bu.edu>
 
 	* main.c: On exit, free more allocated memory, including:

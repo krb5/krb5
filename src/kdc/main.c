@@ -845,10 +845,10 @@ int main(int argc, char **argv)
     if (kdc_realmlist) 
       free(kdc_realmlist);
 #ifdef USE_RCACHE
-    (void) krb5_rc_close(kdc_context, kdc_rcache);
+    (void) krb5_rc_close(kcontext, kdc_rcache);
 #endif
 #ifndef NOCACHE
-    kdc_free_lookaside();
+    kdc_free_lookaside(kcontext);
 #endif
     krb5_free_context(kcontext);
     return errout;
