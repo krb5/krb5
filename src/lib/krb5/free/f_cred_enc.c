@@ -44,16 +44,19 @@ register krb5_cred_enc_part *val;
     if (val->s_address)
       krb5_free_address(val->s_address);
 
-    for (temp = val->ticket_info; *temp; temp++) {
-	if ((*temp)->session)
-	  krb5_free_keyblock((*temp)->session);
-	if ((*temp)->client)
-	  krb5_free_principal((*temp)->client);
-	if ((*temp)->server)
-	  krb5_free_principal((*temp)->server);
-	if ((*temp)->caddrs)
-	  krb5_free_addresses((*temp)->caddrs);
-	krb5_xfree((*temp));
+    if (val->ticket_info) {
+	for (temp = val->ticket_info; *temp; temp++) {
+	    if ((*temp)->session)
+		krb5_free_keyblock((*temp)->session);
+	    if ((*temp)->client)
+		krb5_free_principal((*temp)->client);
+	    if ((*temp)->server)
+		krb5_free_principal((*temp)->server);
+	    if ((*temp)->caddrs)
+		krb5_free_addresses((*temp)->caddrs);
+	    krb5_xfree((*temp));
+	}
+	krb5_xfree(val->ticket_info);
     }
     krb5_xfree(val);
     return;
