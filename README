@@ -78,7 +78,7 @@ Notes, Major Changes, and Known Bugs for 1.3
   support IPv6.  The support for Kerberos 4 may work with IPv6 in very
   limited ways, if the address checking is turned off.  The FTP client
   and server do not have support for the new protocol messages needed
-  for IPv6 support (RFC 2429).
+  for IPv6 support (RFC 2428).
 
 * We have upgraded to autoconf 2.52 (or later), and the syntax for
   specifying certain configuration options have changed.  For example,
