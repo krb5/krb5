@@ -1,3 +1,9 @@
+Thu Feb 20 23:28:31 1997  Richard Basch  <basch@lehman.com>
+
+	* port-sockets.h: Define SOCKET_INITIALIZE and SOCKET_CLEANUP
+		as no-ops under Windows, since this is now handled by
+		the DLL entry/exit code.
+
 Wed Feb 19 14:25:32 1997  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* krb5.hin: Added function prototype for krb5_set_principal_realm().

@@ -5,8 +5,8 @@
 /* Some of our own infrastructure where the WinSock stuff was too hairy
    to dump into a clean Unix program...  */
 
-#define SOCKET_INITIALIZE()     win_socket_initialize()
-#define SOCKET_CLEANUP()        WSACleanup()
+#define SOCKET_INITIALIZE()     0
+#define SOCKET_CLEANUP()
 #define SOCKET_ERRNO            (WSAGetLastError())
 #define SOCKET_SET_ERRNO(x)     (WSASetLastError (x))
 #define SOCKET_NFDS(f)          (0)     /* select()'s first arg is ignored */
