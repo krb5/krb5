@@ -1456,11 +1456,10 @@ int main(argc, argv)
 #ifdef KRB5_GET_TICKETS
     if (login_krb5_get_tickets)
 	dofork();
-    else
 #endif
 #ifdef KRB4_GET_TICKETS
-	if (login_krb4_get_tickets)
-	    dofork();
+    else if (login_krb4_get_tickets)
+	dofork();
 #endif
 
 /* If the user's shell does not do job control we should put it in a
@@ -1588,11 +1587,10 @@ int main(argc, argv)
 #ifdef KRB5_GET_TICKETS
     if (forwarded_v5_tickets)
 	destroy_tickets();
-    else
 #endif
 #ifdef KRB4_GET_TICKETS
-	if (got_v4_tickets)
-	    destroy_tickets();
+    else if (got_v4_tickets)
+        destroy_tickets();
 #endif
 
 #ifdef OQUOTA
