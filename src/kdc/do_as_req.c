@@ -195,7 +195,7 @@ krb5_data **response;			/* filled in with a response packet */
 	enc_tkt_reply.times.starttime = kdc_time;
     
 
-    until = (request->till == 0) ? infinity : request->till;
+    until = (request->till == 0) ? kdc_infinity : request->till;
 
     enc_tkt_reply.times.endtime =
 	min(until,
@@ -212,7 +212,7 @@ krb5_data **response;			/* filled in with a response packet */
 	setflag(request->kdc_options, KDC_OPT_RENEWABLE);
 	request->rtime = request->till;
     }
-    rtime = (request->rtime == 0) ? infinity : request->rtime;
+    rtime = (request->rtime == 0) ? kdc_infinity : request->rtime;
 
     if (isflagset(request->kdc_options, KDC_OPT_RENEWABLE)) {
 	setflag(enc_tkt_reply.flags, TKT_FLG_RENEWABLE);

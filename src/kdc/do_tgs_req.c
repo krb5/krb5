@@ -302,7 +302,7 @@ krb5_data **response;			/* filled in with a response packet */
     } else {
 	/* not a renew request */
 	enc_tkt_reply.times.starttime = kdc_time;
-	until = (request->till == 0) ? infinity : request->till;
+	until = (request->till == 0) ? kdc_infinity : request->till;
 	enc_tkt_reply.times.endtime =
 	    min(until, min(enc_tkt_reply.times.starttime + server.max_life,
 			   min(enc_tkt_reply.times.starttime + max_life_for_realm,
@@ -317,7 +317,7 @@ krb5_data **response;			/* filled in with a response packet */
 		    header_ticket->enc_part2->times.renew_till);
 	}
     }
-    rtime = (request->rtime == 0) ? infinity : request->rtime;
+    rtime = (request->rtime == 0) ? kdc_infinity : request->rtime;
 
     if (isflagset(request->kdc_options, KDC_OPT_RENEWABLE)) {
 	/* already checked above in policy check to reject request for a
