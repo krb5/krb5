@@ -64,7 +64,6 @@ char *fn;
 	extern int gethostname();
 	int use_set_key = 0;
 	char file_name[MAXPATHLEN];
-	int tmp;
 
 	if (from_addr) {
 		peer.addrtype = ADDRTYPE_INET;

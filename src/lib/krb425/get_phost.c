@@ -42,7 +42,7 @@ char *alias;
 	if ((h = gethostbyname(alias)) != (struct hostent *)0 ) {
 		char *p;
 #ifdef	OLD_CRUFT
-		if (p = index( h->h_name, '.' ))
+		if (p = strchr( h->h_name, '.' ))
 			*p = 0;
 #endif
 		p = phost = h->h_name;
