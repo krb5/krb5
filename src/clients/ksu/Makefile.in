@@ -15,14 +15,16 @@ SRCS = \
 	$(srcdir)/authorization.c \
 	$(srcdir)/main.c \
 	$(srcdir)/heuristic.c \
-	$(srcdir)/xmalloc.c
+	$(srcdir)/xmalloc.c \
+	$(srcdir)/setenv.c
 OBJS = \
 	krb_auth_su.o \
 	ccache.o \
 	authorization.o \
 	main.o \
 	heuristic.o \
-	xmalloc.o
+	xmalloc.o \
+	@SETENVOBJ@
 
 all:: ksu
 

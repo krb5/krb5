@@ -240,3 +240,6 @@ extern krb5_error_code get_best_princ_for_target
 
 extern char *krb5_lname_file;  /* Note: print this out just be sure
 				  that it gets set */   	    
+
+extern void *xmalloc (), *xrealloc (), *xcalloc();
+extern char *xstrdup ();

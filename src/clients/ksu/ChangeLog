@@ -1,8 +1,13 @@
-1999-11-22  Ken Raeburn  <raeburn@mit.edu>
+1999-11-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* setenv.c: New file, copied from appl/bsd.
+	* Makefile.in (OBJS): Add @SETENVOBJ@.
+	(SRCS): Add setenv.c.
 
 	* xmalloc.c: New file, providing versions of malloc, calloc,
 	realloc, and strdup that print messages and exit if memory
 	allocation fails.
+	* ksu.h (xmalloc, xrealloc, xcalloc, xstrdup): Declare.
 	* Makefile.in (SRCS, OBJS): Use it.
 	* authorization.c, ccache.c, heuristic.c, main.c: Change all calls
 	to malloc, calloc, realloc, and strdup to call x* versions if the
