@@ -63,19 +63,18 @@ extern int mit_des_debug;
  */
 KRB5_DLLIMP int KRB5_CALLCONV
 des_string_to_key(str,key)
-    char *str;
+    const char *str;
     register mit_des_cblock key;
 {
-    register char *in_str;
+    const char *in_str;
     register unsigned temp;
     register int j;
-    register long i, length;
+    unsigned long i, length;
     unsigned char *k_p;
     int forward;
     register char *p_char;
     char k_char[64];
     mit_des_key_schedule key_sked;
-    extern void des_cbc_cksum();
 
     in_str = str;
     forward = 1;
@@ -88,7 +87,7 @@ des_string_to_key(str,key)
 #ifdef DEBUG
     if (mit_des_debug)
 	fprintf(stdout,
-		"\n\ninput str length = %d  string = %s\nstring = 0x ",
+		"\n\ninput str length = %ld  string = %s\nstring = 0x ",
 		length,str);
 #endif
 
@@ -129,10 +128,11 @@ des_string_to_key(str,key)
     des_fixup_key_parity(key);
 
     /* Now one-way encrypt it with the folded key */
-    (void) des_key_sched(key, *(Key_schedule *)&key_sked);
-    (void) des_cbc_cksum((des_cblock *)in_str,key,length,key_sked,key);
+    (void) des_key_sched(key, key_sked);
+    (void) des_cbc_cksum((const unsigned char *) in_str, key, length,
+			 key_sked, key);
     /* erase key_sked */
-    memset((char *)key_sked, 0,sizeof(key_sked));
+    memset(key_sked, 0,sizeof(key_sked));
 
     /* now fix up key parity again */
     des_fixup_key_parity(key);

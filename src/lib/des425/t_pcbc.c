@@ -96,7 +96,7 @@ main(argc,argv)
 	des_key_sched (default_key, sked);
 	/* This could lose on alignment... */
 	des_pcbc_encrypt ((des_cblock *)&tests[i].text, out,
-			  strlen(tests[i].text) + 1, sked, ivec, 1);
+			  strlen(tests[i].text) + 1, sked, &ivec, 1);
 	printf ("pcbc_encrypt(\"%s\") = {", tests[i].text);
 	jmax = (strlen (tests[i].text) + 8) & ~7U;
 	for (j = 0; j < jmax; j++) {
@@ -109,7 +109,7 @@ main(argc,argv)
 	printf ("\n}\n");
 
 	/* reverse it */
-	des_pcbc_encrypt (out, out2, jmax, sked, ivec, 0);
+	des_pcbc_encrypt (out, out2, jmax, sked, &ivec, 0);
 	if (strcmp ((char *)out2, tests[i].text)) {
 	    printf ("decrypt failed\n");
 	    wrong = 1;

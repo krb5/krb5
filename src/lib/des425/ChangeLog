@@ -1,5 +1,20 @@
 2001-04-10  Ken Raeburn  <raeburn@mit.edu>
 
+	* cksum.c (des_cbc_cksum): Arguments IN, KEY, and IV now const.
+	* des.c (des_ecb_encrypt): Change type of arg "schedule" to
+	const des_key_schedule and drop register decl.  Make local
+	variable "iv" const.
+	* enc_dec.c (des_cbc_encrypt): Arguments KEY and IV now const.
+	* pcbc_encrypt.c (des_pcbc_encrypt): Argument SCHEDULE now const.
+	Drop some unnecessary casts.
+	* quad_cksum.c (vaxtohl, vaxtohs): Cast to pointer to const.
+	(des_quad_cksum): Argument IN now points to const.
+	* str_to_key.c (des_string_to_key): String argument now const.
+	Delete local declaration of des_cbc_cksum.  Delete or fix some
+	casts.
+	* t_pcbc.c (main): Pass address of ivec to des_pcbc_encrypt.
+	* util.c (des_cblock_print_file): Delete unnecessary cast.
+
 	* Makefile.in (STLIBOBJS, OBJS, SRCS): Delete references to
 	k4_glue.c etc.
 	(clean): Remove t_quad and t_pcbc object files and test programs.

@@ -114,9 +114,9 @@
 /* vax byte order is LSB first. This is not performance critical, and
    is far more readable this way. */
 #define four_bytes_vax_to_nets(x) ((((((x[3]<<8)|x[2])<<8)|x[1])<<8)|x[0])
-#define vaxtohl(x) four_bytes_vax_to_nets(((unsigned char *)(x)))
+#define vaxtohl(x) four_bytes_vax_to_nets(((const unsigned char *)(x)))
 #define two_bytes_vax_to_nets(x) ((x[1]<<8)|x[0])
-#define vaxtohs(x) two_bytes_vax_to_nets(((unsigned char *)(x)))
+#define vaxtohs(x) two_bytes_vax_to_nets(((const unsigned char *)(x)))
 
 /* Externals */
 extern char *errmsg();
@@ -129,7 +129,7 @@ extern int des_debug;
 
 KRB5_DLLIMP unsigned long KRB5_CALLCONV
 des_quad_cksum(in,out,length,out_count,c_seed)
-    unsigned char FAR *in;		/* input block */
+    const unsigned char FAR *in;	/* input block */
     unsigned DES_INT32 FAR *out;	/* optional longer output */
     long length;			/* original length in bytes */
     int out_count;			/* number of iterations */
@@ -147,14 +147,14 @@ des_quad_cksum(in,out,length,out_count,c_seed)
     register unsigned DES_INT32 z2;
     register unsigned DES_INT32 x;
     register unsigned DES_INT32 x2;
-    register unsigned char *p;
+    const unsigned char *p;
     register DES_INT32 len;
     register int i;
 
     /* use all 8 bytes of seed */
 
     z = vaxtohl(c_seed);
-    z2 = vaxtohl((char *)c_seed+4);
+    z2 = vaxtohl((const char *)c_seed+4);
     if (out == NULL)
 	out_count = 1;		/* default */
 
@@ -173,7 +173,7 @@ des_quad_cksum(in,out,length,out_count,c_seed)
 		len -= 2;
 	    }
 	    else {
-		x = (z + *(unsigned char *)p++);
+		x = (z + *(const unsigned char *)p++);
 		len = 0;
 	    }
 	    x2 = z2;

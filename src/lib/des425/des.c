@@ -58,10 +58,10 @@ KRB5_DLLIMP int KRB5_CALLCONV
 des_ecb_encrypt(clear, cipher, schedule, encrypt)
     unsigned long *clear;
     unsigned long *cipher;
-    register mit_des_key_schedule schedule; /* r11 */
+    const mit_des_key_schedule schedule;
     int encrypt;		/* 0 ==> decrypt, else encrypt */
 {
-    static des_cblock iv;
+    const static des_cblock iv;
 
     return (mit_des_cbc_encrypt((const des_cblock *) clear,
 				(des_cblock *) cipher,
