@@ -79,6 +79,7 @@ int krb524_convert_creds_kdc(context, v5creds, v4creds)
 	    case ETIMEDOUT:
 	    case EHOSTDOWN:
 	    case EHOSTUNREACH:
+	    case KRB524_NOTRESP:
 	      continue;
 	    default:
 	      break;		/* out of switch */
