@@ -1,8 +1,8 @@
 /*
  * prototype/prototype.c
  *
- * Copyright 1991 by the Massachusetts Institute of Technology.
- * All Rights Reserved.
+ * Copyright (C) 2001 by the Massachusetts Institute of Technology.
+ * All rights reserved.
  *
  * Export of this software from the United States of America may
  *   require a specific license from the United States Government.
@@ -22,6 +22,7 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
+ * 
  * 
  *
  * <<< Description >>>
