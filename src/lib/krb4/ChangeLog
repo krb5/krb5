@@ -1,5 +1,7 @@
 Fri Apr 28 13:03:23 1995  Theodore Y. Ts'o  <tytso@dcl>
 
+	* tf_util.c: Add #include of fcntl.h
+
 	* month_sname.c, one.c: Remove unnecessary include of conf.h
 
 Fri Apr 28 01:55:18 1995  Mark W. Eichin  <eichin@cygnus.com>

@@ -16,6 +16,7 @@
 #include <errno.h>
 #include <sys/stat.h>
 #include <sys/file.h>
+#include <fcntl.h>
 
 #ifdef TKT_SHMEM
 #include <sys/param.h>
