@@ -139,8 +139,10 @@ int main(int argc, char *argv[])
       exit(2);
    }
 
-   free(result_string.data);
-   free(result_code_string.data);
+   if (result_string.data != NULL) 
+       free(result_string.data);
+   if (result_code_string.data != NULL)
+       free(result_code_string.data);
 
    printf("Password changed.\n");
    exit(0);
