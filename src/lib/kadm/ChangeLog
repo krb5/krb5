@@ -1,0 +1,334 @@
+Thu Jun 13 22:12:21 1996  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
+
+	* configure.in: remove ref to ET_RULES
+
+Mon Jun 10 21:42:26 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* adm_conn.c:
+	* adm_kw_dec.c:
+	* adm_kw_enc.c: Change use of _WINDOWS to _MSDOS, and add check
+		for _WIN32
+
+Tue May 21 20:51:06 1996  Sam Hartman  <hartmans@mit.edu>
+
+	* Makefile.in (check-unix):  Use KRB5_RUN_FLAGS
+
+Sun May 12 00:46:57 1996  Marc Horowitz  <marc@mit.edu>
+
+	* alt_prof.c (krb5_read_realm_params): added "acl_file" variable
+ 	for the admin server.
+
+Wed Mar 13 17:37:00 1996  Ken Raeburn  <raeburn@cygnus.com>
+
+	* configure.in: Use AC_HEADER_STDARG.
+
+Sun Dec 10 11:02:56 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* str_conv.c (krb5_input_flag_to_string): Add new routine.
+
+Wed Nov  8 02:46:54 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* alt_prof.c (krb5_free_realm_params): Free the realm_kdc_ports
+		element of the structure.
+
+Fri Oct  6 00:30:16 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in: Remove ##DOS!include of config/windows.in.
+		config/windows.in is now included by wconfig.
+
+	* logger.c (klog_vsyslog): Make the logs less verbose, by omitting
+		the hostname, pid, etc. information.
+
+Thu Oct  5 19:46:40 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* alt_prof.c (krb5_read_realm_params): Remove the profile
+		relation, since it's really a bad idea.  Removed the
+		"port" and "secondary_port" relations, and replaced them
+		with the "kdc_port" relation, which takes a list of ports.
+
+Mon Oct  2 15:08:53 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* logger.c (krb5_klog_init): If the log file can't be opened,
+		print an intelligent error message.
+
+Thu Oct  5 12:06:35 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* alt_prof.c (krb5_read_realm_params): If secure flag is set in
+		context, do not allow for environment variables to specify
+		configuration files.
+
+Tue Sep 26 02:31:38 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* adm_conn.c (kadm_get_creds): zero out creds->server after
+	freeing it to protect later attempts.
+
+Fri Sep 29 17:06:18 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* logger.c: #ifdef the entire file so it's not built under Windows.
+
+Tue Sep 27 12:00:00 1995    <jrivlin@fusion.com>
+
+	* adm_kw_dec.c (krb5_adm_proto_to_dbent): Routine removed for 
+		Windows and Mac to match with the prototype.
+
+	* adm_kw_dec.c (krb5_adm_dbent_to_proto): Routine removed for 
+		Windows and Mac to match with the prototype.
+
+Tue Sep 26 16:24:00 1995    <tytso@rsts-11.mit.edu>
+
+	* alt_prof.c (krb5_read_realm_params): On an error, initialize the
+		returned rparams pointer to NULL.
+
+Mon Sep 25 16:54:18 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in: Removed "foo:: foo-$(WHAT)" lines from the
+		Makefile. 
+
+Fri Sep 22 12:00:00 1995  James Mattly  <mattly@fusion.com>
+
+	* adm_conn.c:  for sockets changed close to closesocket, sockets on
+		macintosh arn't files.
+
+Fri Sep 22 15:44:02 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* logger.c (klog_com_err_proc): pass whoami in failure messages
+	for error log failures to match format string.
+
+Wed Sep 13 10:45:25 1995 Keith Vetter (keithv@fusion.com)
+
+	* keysalt.c: 16/32 bit integer mismatch.
+	* str_conv.c: 	sftime_format_table is conditional upon HAVE_STRFTIME,
+		cast some constants to long so that math wouldn't overflow,
+		16/32 bit integer size mismatch.
+
+Wed Sep 13 18:17:30 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* alt_prof.c (krb5_read_realm_params): Fix memory leak.  Free the
+		default realm when we're done.  Remove the "profile"
+		parameter from the kdc.conf file.  This is bad idea,
+		architecturally.
+
+Tue Sep 12 13:18:42 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* adm_conn.c: For Macintosh hardwire cache name. Various casting
+		fixes. 
+
+Thu Sep  7 17:50:15 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* adm_conn.c (kadm_get_creds): Use KRB5_ADM_SERVICE_INSTANCE for
+		the instance name, instead of KRB5_ADM_SERVICE_NAME.
+
+Wed Sep 06 14:20:57 1995   Chris Provenzano (proven@mit.edu)
+
+        * adm_kt_dec.c, adm_kt_enc.c, alt_prof.c, keysalt.c, str_conv.c : 
+		s/keytype/enctype/g, s/KEYTYPE/ENCTYPE/g
+
+Tue Sep 05 22:10:34 1995   Chris Provenzano (proven@mit.edu)
+
+        * adm_kt_dec.c, adm_kt_enc.c, alt_prof.c, str_conv.c: 
+		Remove krb5_enctype references, and replace 
+		with krb5_keytype where appropriate
+
+Tue Aug 29 15:31:50 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* .Sanitize, krb5strings.M - Add new manpage describing string syntax
+		for common datatypes handled by str_conv.c.
+
+Thu Aug 24 18:53:32 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* .Sanitize: Update file list
+
+Mon Aug 21 17:07:56 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* str_conv.c - Add krb5_timestamp_to_sfstring().  This converts time
+		to a short string, potentially filled.  Use strftime() for
+		krb5_timestamp_to_string() if present so that locale-dependent
+		time format is used.
+
+
+Tue Aug 8 17:35:10 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* str_conv.c - Fix Purify complaint.
+
+
+Mon Aug 7 17:38:45 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* keysalt.c(krb5_string_to_keysalt) - Don't do the silly whitespace
+		filling logic.  If the string has imbedded whitespace, then
+		it's just tough rocks.  Save replaced string separators and
+		terminators so that they string looks the same coming out as
+		going in.
+
+
+Fri Aug 4 16:21:50 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* Makefile.in, .Sanitize, keysalt.c - Add keysalt.c modules.
+
+
+Thu Aug 3 11:51:14 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* alt_prof.c - Actually pass back the parsed string value in krb5_aprof_
+		get_deltat().
+
+
+Mon Jul 31 15:52:40 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* adm_kw_{enc,dec}.c - Add support for new kadmin protocol.
+	* alt_prof.c - Remove string conversion routine, use the ones in str_
+		conv.c.  Convert krb5_read_realm_params() to use these string
+		conversion routines so that the KDC profile is more textual
+		as opposed to being numeric.
+	* str_conv.c - String conversion routines.
+	* Makefile.in, configure.in - Add support for str_conv.c
+	* t_dbentry.c - Test new kadmin protocol.
+
+Mon Jul 17 15:16:26 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* alt_prof.c - Add krb5_{read,free}_realm_params() to read in per-
+		realm KDC data and to free the allocated structure.
+
+Mon Jul 10 17:59:23 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* adm_kt_dec.c, adm_kt_enc.c, adm_kw_dec.c, adm_kw_enc.c,
+		alt_prof.c, logger.c: Include adm_proto.h for prototypes.
+
+Fri Jul 7 16:23:57 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* Makefile.in - Remove LDFLAGS, it's set by configure.  Find com_err
+		library in TOPLIBD now.
+
+Thu Jul  6 17:34:22 1995  Tom Yu  <tlyu@lothlorien.MIT.EDU>
+
+	* adm_conn.c (kadm_get_creds): Pass kcontext to os_localaddr.
+
+Tue Jun 27 15:50:31 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* alt_prof.c - Change filename and hierarchy lists to be const char.
+
+
+Thu Jun 22 11:56:15 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* alt_prof.c - New jacket routines for handling profiles.  This includes
+		the ability to parse certain string values to appropriate types
+		(e.g. delta time or 32-bit integer).
+	* Makefile.in - Add alt_prof.c
+
+
+Thu Jun 15 18:03:40 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* Makefile.in - Remove explicit copying of archive library to library
+		directory.
+	* configure.in - Create symlink for archive when we build it.
+
+Wed Jun 14 14:36:13 1995  Sam Hartman  <hartmans@tardis.MIT.EDU>
+
+	* t_dbentry.c (main): option should be an int so that comparisons
+        against EOF work when char unsigned.
+
+Tue Jun 13 14:37:25 1995  Sam Hartman  <hartmans@tardis.MIT.EDU>
+
+	* logger.c: Don't check to make sure unix is defined for
+        DEVICE_OPEN et al.  Currently, there are no special cases where
+        special handling is required; if they are, then they should be
+        checked for, and the generic case taken if no special case fits.
+        The previous behavior broke under AIX.
+
+
+Sun Jun 11 09:24:06 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* Makefile.in (clean-unix): Remove $(UNIX_OBJS)
+
+Sat Jun 10 23:05:23 1995  Tom Yu  (tlyu@dragons-lair)
+
+	* adm_conn.c, adm_rw.c: krb5_auth_context redefinitions
+
+Fri Jun  9 19:26:44 1995    <tytso@rsx-11.mit.edu>
+
+	* configure.in: Remove standardized set of autoconf macros, which
+		are now handled by CONFIG_RULES.
+
+Thu Jun  8 23:32:28 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in: $($(WHAT)_OBJS) is not accepted by all Makes!  We
+		assume for now that libkadm.a rule is only used by Unix,
+		which should be a valid assumption, and build handle
+		$(UNIX_OBJS) there.
+
+Thu Jun 8 14:32:33 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* logger.c - New module to provide profile-controlled logging.  This
+		can optionally take over control of com_err(3) output to also
+		direct this output to where the profile specifies.  Also
+		includes a syslog(3) compatible interface which also follows
+		the profile's direction.
+	* Makefile.in, configure.in - update for logger.c
+
+
+Mon Jun 5 14:15:37 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* adm_conn.c - Rework kadm_get_ccache() and kadm_get_creds() so that
+		we can specify differing credentials caches and the lifetime
+		of obtained tickets if not using an existing ccache.  This
+		changes the calling sequence of krb5_adm_connect(), adding
+		two arguments: a ccache name and a (delta) lifetime.  Default
+		ccache name changes formats to tkt_kadm_<pid> and default
+		lifetime is 10 minutes.
+
+Fri Jun 2 17:56:03 1995 Keith Vetter (keithv@fusion.com)
+
+	* adm_conn.c: used SOCKET_ERRNO instead of errno and 
+	   added prototypes for the local functions.
+	* adm_rw.c: added prototypes for the local functions so that
+	   ints get promoted to longs correctly on the PC.
+
+Wed May 31 08:10:13 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* Makefile.in (DB_OBJS): Change DBOBJS to DB_OBJS to match rest of
+		Makefile.in 
+
+Tue May 30 17:36:47 1995 Keith Vetter (keithv@fusion.com)
+
+	* adm_rw.c: removed INTERFACE from two routines.
+
+Tue May 30 10:35:07 1995 Keith Vetter (keithv@fusion.com)
+
+	* adm_conn.c: used Windows specific way of creating a temp file.
+	* Makefile.in: PC doesn't need to compile adm_kw_*.c files.
+
+Thu May 25 17:49:06 1995 Keith Vetter (keithv@fusion.com)
+
+	First pass to make the code compile cleanly on the PC.
+	* Makefile.in: made to work on the PC.
+	* adm_conn.c: used atoi instead of sscanf since it can't be
+	   used in a windows DLL. Why not? Ask Microsoft.
+	* adm_kt_e.c, adm_kw_e.c, adm_rw.c: made the explicit the
+	   cast to a char when pulling out bytes from an int.
+	* adm_kw_d.c: size_t != off_t on the PC. Fixed the equation.
+	* adm_rw.c: two parameters were declared as int but prototyped
+	   as krb5_int32.
+
+Tue May 16 13:58:30 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* configure.in	- Check for srand48, srand and srandom along with
+			  network libraries.
+	* t_ktentry.c, t_dbentry.c - Use available random number generator
+			  and also make sure memory is freed so we don't
+			  chew up memory in tester.
+
+
+Tue May 16 13:19:04 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* t_dbentry.c	- Change isset to is_a_set to keep Ultrix happy.  Also
+			  correctly calculate the length of the standard pwd.
+			  so that we don't overwrite the end of the malloc()ed
+			  string.
+	* t_ktentry.c	- Remove isset logic, no differentiation for keytabs.
+
+
+Tue May 16 10:35:54 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* t_dbentry.c, t_ktentry.c - new test modules for encode/decode
+		functions.  These convert to and from krb5_db_entry and
+		krb5_keytab_entry and verify contents.
+	* adm_kt_enc.c	- Fix bug encoding integer values.
+
+
+Tue May 9 15:21:49 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* adm_conn.c	- use profile information to locate the admin_server.
+			  Also, return the correct value from krb5_adm_connect
+			  instead of always returning zero.
+	* adm_{kw,kt}_{enc,dec}.c - New modules to [en/de]code administrative
+			  protocol keyword=value pairs and keytab entries.
+
+
+Fri Apr 28 09:47:29 EDT 1995	Paul Park	(pjpark@mit.edu)
+
+	Create a new library consisting of functions which communicate with
+	the administrative server here.  These modules replace the originals
+	which used to be in libkrb5.
+
+	adm_rw.c	- Remove ntohl/htonl in favor of byte blasting.
+

@@ -1,0 +1,92 @@
+CFLAGS = $(CCOPTS) $(DEFS) 
+
+##DOSBUILDTOP = ..\..
+##DOSLIBNAME=kadm.lib
+RUN_SETUP=@KRB5_RUN_ENV@
+BASE_OBJS= adm_conn.$(OBJEXT)	\
+	adm_kt_dec.$(OBJEXT)	\
+	adm_kt_enc.$(OBJEXT)	\
+	adm_rw.$(OBJEXT)	\
+	alt_prof.$(OBJEXT)	\
+	str_conv.$(OBJEXT)	\
+	keysalt.$(OBJEXT)
+
+UNIX_OBJS = logger.$(OBJEXT)
+
+DB_OBJS= adm_kw_dec.$(OBJEXT)	\
+	adm_kw_enc.$(OBJEXT)
+
+OBJS=	$(BASE_OBJS) $(DB_OBJS) 
+
+SRCS=	$(srcdir)/adm_conn.c	\
+	$(srcdir)/adm_kt_dec.c	\
+	$(srcdir)/adm_kt_enc.c	\
+	$(srcdir)/adm_rw.c	\
+	$(srcdir)/adm_kw_dec.c	\
+	$(srcdir)/adm_kw_enc.c	\
+	$(srcdir)/logger.c	\
+	$(srcdir)/alt_prof.c	\
+	$(srcdir)/str_conv.c	\
+	$(srcdir)/keysalt.c
+
+all:: $(BASE_OBJS) 
+
+all-unix:: $(DB_OBJS) $(UNIX_OBJS)
+all-unix:: libkadm.a
+all-mac:: $(DB_OBJS)
+all-windows::
+
+libkadm.a: $(OBJS) $(UNIX_OBJS)
+	$(RM) $@
+	$(ARADD) $@ $(OBJS) $(UNIX_OBJS)
+	$(RANLIB) $@
+
+install:: libkadm.a
+	$(INSTALL_DATA) libkadm.a $(DESTDIR)$(KRB5_LIBDIR)/libkadm.a
+	$(RANLIB) $(DESTDIR)$(KRB5_LIBDIR)/libkadm.a
+
+clean-unix::
+	$(RM) libkadm.$(LIBEXT) $(UNIX_OBJS)
+clean-mac::
+	$(RM) libkadm.$(LIBEXT)
+clean-windows::
+	$(RM) kadm.lib kadm.bak
+
+#
+# t_dbentry
+#
+T_DBENTRY_OBJS =  t_dbentry.$(OBJEXT) \
+		$(TOPLIBD)/libkadm.a $(TOPLIBD)/libkdb5.a \
+		$(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a \
+		$(TOPLIBD)/libcom_err.a
+
+t_dbentry:	$(T_DBENTRY_OBJS)
+	$(LD) -o t_dbentry $(T_DBENTRY_OBJS) $(LIBS)
+
+#
+# t_ktentry
+#
+T_KTENTRY_OBJS =  t_ktentry.$(OBJEXT) \
+		$(TOPLIBD)/libkadm.a $(TOPLIBD)/libkrb5.a	\
+		$(TOPLIBD)/libcrypto.a $(TOPLIBD)/libcom_err.a
+
+t_ktentry:	$(T_KTENTRY_OBJS)
+	$(LD) -o t_ktentry $(T_KTENTRY_OBJS) $(LIBS)
+
+TEST_PROGS	= t_dbentry t_ktentry
+
+check-unix::	$(TEST_PROGS)
+	$(RUN_SETUP) ./t_dbentry -r 100
+	$(RUN_SETUP) ./t_ktentry -r 100
+
+check-mac::
+
+check-windows::
+
+clean-unix::
+	$(RM) t_dbentry$(EXEEXT) t_dbentry.$(OBJEXT)
+	$(RM) t_ktentry$(EXEEXT) t_ktentry.$(OBJEXT)
+clean-mac::
+	$(RM) t_dbentry$(EXEEXT) t_dbentry.$(OBJEXT)
+	$(RM) t_ktentry$(EXEEXT) t_ktentry.$(OBJEXT)
+
