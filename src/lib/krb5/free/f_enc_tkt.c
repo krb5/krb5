@@ -11,12 +11,13 @@
  */
 
 #if !defined(lint) && !defined(SABER)
-static char f_enc_tkt_c [] =
+static char rcsid_f_enc_tkt_c [] =
 "$Id$";
 #endif	/* !lint & !SABER */
 
 #include <krb5/copyright.h>
 #include <krb5/krb5.h>
+#include <krb5/ext-proto.h>
 
 void
 krb5_free_enc_tkt_part(val)
