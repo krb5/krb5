@@ -7,26 +7,20 @@
 #include <stdio.h>
 #include "mit-sipb-copyright.h"
 
-/*
- * If we're using gcc, *always* use stdarg. However, there are a small
- * number of native platforms (sun3 and sun4, sunos41) that don't have 
- * stdarg, but only have varargs... they can define VARARGS in the config
- * files, but we'll turn it off here for gcc.
- */
+/* Need <krb5/config.h> for STDARG_PROTOTYPES */
+#include <krb5/krb5.h>
 
-#ifdef __GNUC__
-#undef VARARGS
-#endif
-
-#if defined(__STDC__) && !defined(VARARGS)
+#if __STDC__ || defined(STDARG_PROTOTYPES)
 #include <stdarg.h>
 #else
 #include <varargs.h>
+#define VARARGS
 #endif
 
 #include "error_table.h"
 #include "internal.h"
 
+#ifdef notdef
 /*
  * Protect us from header version (externally visible) of com_err, so
  * we can survive in a <varargs.h> environment.  I think.
@@ -34,6 +28,7 @@
 #define com_err com_err_external
 #include "com_err.h"
 #undef com_err
+#endif
 
 #if ! lint
 static const char rcsid[] =
