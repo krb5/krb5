@@ -1,7 +1,7 @@
 /*
- * lib/crypto/des/string2key.c
+ * lib/crypto/des/des_s2k.c
  *
- * Copyright 1990,1991 by the Massachusetts Institute of Technology.
+ * Copyright 2004 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -22,238 +22,240 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- */
-
-/*
- * Copyright (C) 1998 by the FundsXpress, INC.
  * 
- * All rights reserved.
- * 
- * Export of this software from the United States of America may require
- * a specific license from the United States Government.  It is the
- * responsibility of any person or organization contemplating export to
- * obtain such a license before exporting.
- * 
- * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
- * distribute this software and its documentation for any purpose and
- * without fee is hereby granted, provided that the above copyright
- * notice appear in all copies and that both that copyright notice and
- * this permission notice appear in supporting documentation, and that
- * the name of FundsXpress. not be used in advertising or publicity pertaining
- * to distribution of the software without specific, written prior
- * permission.  FundsXpress makes no representations about the suitability of
- * this software for any purpose.  It is provided "as is" without express
- * or implied warranty.
- * 
- * THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
- * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * Compute encryption key from salt and pass phrase.
  */
 
 #include "k5-int.h"
 #include "des_int.h"
 
-/*
-	converts the string pointed to by "data" into an encryption key
-	of type "enctype".  *keyblock is filled in with the key info;
-	in particular, keyblock->contents is to be set to allocated storage.
-	It is the responsibility of the caller to release this storage
-	when the generated key no longer needed.
-
-	The routine may use "salt" to seed or alter the conversion
-	algorithm.
-
-	If the particular function called does not know how to make a
-	key of type "enctype", an error may be returned.
-
-	returns: errors
- */
-
-/*#define PRINT_TEST_VECTORS*/
-
 krb5_error_code
-mit_des_string_to_key_int (krb5_keyblock *keyblock, const krb5_data *data,
-			   const krb5_data *salt)
+mit_des_string_to_key_int (krb5_keyblock *key,
+			   const krb5_data *pw, const krb5_data *salt)
 {
-    register krb5_octet *str, *copystr;
-    register krb5_octet *key;
+    union {
+	/* 8 "forward" bytes, 8 "reverse" bytes */
+	unsigned char uc[16];
+	krb5_ui_4 ui[4];
+	mit_des_cblock cb;
+    } temp;
+    int i;
+    krb5_ui_4 x, y, z;
+    unsigned char *p;
+    des_key_schedule sched;
+    char *copy;
+    size_t copylen;
 
-    register unsigned temp;
-    register long i;        
-    register int j;
-    register unsigned long length;
-    unsigned char *k_p;
-    int forward;
-    register char *p_char;
-    char k_char[64];
-    mit_des_key_schedule key_sked;
+    /* As long as the architecture is big-endian or little-endian, it
+       doesn't matter which it is.  Think of it as reversing the
+       bytes, and also reversing the bits within each byte.  But this
+       current algorithm is dependent on having four 8-bit char values
+       exactly overlay a 32-bit integral type.  */
+    if (sizeof(temp.uc) != sizeof(temp.ui)
+	|| (unsigned char)~0 != 0xFF
+	|| (krb5_ui_4)~(krb5_ui_4)0 != 0xFFFFFFFF
+	|| (temp.uc[0] = 1, temp.uc[1] = 2, temp.uc[2] = 3, temp.uc[3] = 4,
+	    !(temp.ui[0] == 0x01020304
+	      || temp.ui[0] == 0x04030201)))
+	abort();
+#define FETCH4(VAR, IDX)	VAR = temp.ui[IDX/4]
+#define PUT4(VAR, IDX)		temp.ui[IDX/4] = VAR
 
-#ifdef PRINT_TEST_VECTORS
-    unsigned char tmp_array[56];
-    unsigned char *t_char;
-#endif
+    if (salt
+	&& (salt->length == SALT_TYPE_AFS_LENGTH
+	    /* XXX  Yuck!  Aren't we done with this yet?  */
+	    || salt->length == (unsigned) -1)) {
+	krb5_data afssalt;
+	char *at;
 
-#ifndef min
-#define min(A, B) ((A) < (B) ? (A): (B))
-#endif
-
-    keyblock->magic = KV5M_KEYBLOCK;
-    keyblock->length = sizeof(mit_des_cblock);
-    key = keyblock->contents;
-
-    if (salt) {
-	if (salt->length == SALT_TYPE_AFS_LENGTH || salt->length == (unsigned) -1) {
-	    krb5_data salt2;
-	    char *c;
-	    c = strchr(salt->data, '@');
-	    if (c != NULL) *c = '\0'; /* workaround from krb5-clients/1146 */
-	    salt2.data = salt->data;
-	    salt2.length = strlen (salt2.data);
-	    /* cheat and do AFS string2key instead */
-	    return mit_afs_string_to_key (keyblock, data, &salt2);
-	} else 
-	    length = data->length + salt->length;
-    } else
-	length = data->length;
-
-    copystr = malloc((size_t) length);
-    if (!copystr) {
-	free(keyblock->contents);
-	keyblock->contents = 0;
-	return ENOMEM;
+	afssalt.data = salt->data;
+	at = strchr(afssalt.data, '@');
+	if (at) {
+	    *at = 0;
+	    afssalt.length = at - afssalt.data;
+	} else
+	    afssalt.length = strlen(afssalt.data);
+	return mit_afs_string_to_key(key, pw, &afssalt);
     }
 
-    memcpy(copystr, (char *) data->data, data->length);
+    copylen = pw->length + (salt ? salt->length : 0);
+    /* Don't need NUL termination, at this point we're treating it as
+       a byte array, not a string.  */
+    copy = malloc(copylen);
+    if (copy == NULL)
+	return errno;
+    memcpy(copy, pw->data, pw->length);
     if (salt)
-	memcpy(copystr + data->length, (char *)salt->data, salt->length);
+	memcpy(copy + pw->length, salt->data, salt->length);
 
-    /* convert to des key */
-    forward = 1;
-
-    /* init key array for bits */
-    p_char = k_char;
-    memset(k_char,0,sizeof(k_char));
+    memset(&temp, 0, sizeof(temp));
+    p = temp.uc;
+    /* Handle the fan-fold xor operation by splitting the data into
+       forward and reverse sections, and combine them later, rather
+       than having to do the reversal over and over again.  */
+    for (i = 0; i < copylen; i++) {
+	*p++ ^= copy[i];
+	if (p == temp.uc+16) {
+	    p = temp.uc;
 #ifdef PRINT_TEST_VECTORS
-    t_char = tmp_array;
-#endif
-
-#if 0
-    if (mit_des_debug)
-	fprintf(stdout,
-		"\n\ninput str length = %d  string = %*s\nstring = 0x ",
-		length,length,str);
-#endif
-
-    str = copystr;
-
-    /* get next 8 bytes, strip parity, xor */
-    for (i = 1; i <= length; i++) {
-	/* get next input key byte */
-	temp = (unsigned int) *str++;
-#if 0
-	if (mit_des_debug)
-	    fprintf(stdout,"%02x ",temp & 0xff);
-#endif
-	/* loop through bits within byte, ignore parity */
-	for (j = 0; j <= 6; j++) {
-	    unsigned int x = temp & 1;
-	    if (forward) {
-		*p_char++ ^= x;
-#ifdef PRINT_TEST_VECTORS
-		*t_char++ = x;
-#endif
-	    } else {
-		*--p_char ^= x;
-#ifdef PRINT_TEST_VECTORS
-		*--t_char = x;
-#endif
+	    {
+		int j;
+		printf("after %d input bytes:\nforward block:\t", i+1);
+		for (j = 0; j < 8; j++)
+		    printf(" %02x", temp.uc[j] & 0xff);
+		printf("\nreverse block:\t");
+		for (j = 8; j < 16; j++)
+		    printf(" %02x", temp.uc[j] & 0xff);
+		printf("\n");
 	    }
-	    temp = temp >> 1;
-	}
-
-	/* check and flip direction */
-	if ((i%8) == 0) {
-#ifdef PRINT_TEST_VECTORS
-	    printf("%-20s ",
-		   forward ? "forward block:" : "reversed block:");
-	    for (j = 0; j <= 7; j++) {
-		int k, num = 0;
-		for (k = 0; k <= 6; k++)
-		    num |= tmp_array[j * 7 + k] << k;
-		printf(" %02x", num);
-	    }
-	    printf("\n");
-
-	    printf("%-20s ", "xor result:");
-	    for (j = 0; j <= 7; j++) {
-		int k, num = 0;
-		for (k = 0; k <= 6; k++)
-		    num |= k_char[j * 7 + k] << k;
-		printf(" %02x", num);
-	    }
-	    printf("\n");
 #endif
-	    forward = !forward;
 	}
     }
 
-    /* now stuff into the key mit_des_cblock, and force odd parity */
-    p_char = k_char;
-    k_p = (unsigned char *) key;
-
-    for (i = 0; i <= 7; i++) {
-	temp = 0;
-	for (j = 0; j <= 6; j++)
-	    temp |= *p_char++ << (1+j);
-	*k_p++ = (unsigned char) temp;
+#ifdef PRINT_TEST_VECTORS
+    if (p != temp.uc) {
+	int j;
+	printf("at end, after %d input bytes:\nforward block:\t", i);
+	for (j = 0; j < 8; j++)
+	    printf(" %02x", temp.uc[j] & 0xff);
+	printf("\nreverse block:\t");
+	for (j = 8; j < 16; j++)
+	    printf(" %02x", temp.uc[j] & 0xff);
+	printf("\n");
     }
-
-#ifdef PRINT_TEST_VECTORS
-    printf("%-20s ", "after fanfolding:");
-    for (i = 0; i <= 7; i++)
-	printf(" %02x", i[(unsigned char *)key]);
-    printf("\n");
-
-    printf("%-20s ", "after shifting:");
-    for (i = 0; i <= 7; i++)
-	printf(" %02x", i[(unsigned char *)key]);
-    printf("\n");
 #endif
-
-    /* fix key parity */
-    mit_des_fixup_key_parity(key);
-    if (mit_des_is_weak_key(key))
-	((krb5_octet *)key)[7] ^= 0xf0;
-
-#ifdef PRINT_TEST_VECTORS
-    printf("after fixing parity and weak keys: {");
-    for (i = 0; i <= 7; i++)
-	printf(" %02x", i[(unsigned char *)key]);
-    printf(" }\n");
-#endif
-
-    /* Now one-way encrypt it with the folded key */
-    (void) mit_des_key_sched(key, key_sked);
-    (void) mit_des_cbc_cksum(copystr, key, length, key_sked, key);
-    /* erase key_sked */
-    memset((char *)key_sked, 0, sizeof(key_sked));
-
-    /* clean & free the input string */
-    memset(copystr, 0, length);
-    krb5_xfree(copystr);
-
-    /* now fix up key parity again */
-    mit_des_fixup_key_parity(key);
-    if (mit_des_is_weak_key(key))
-	((krb5_octet *)key)[7] ^= 0xf0;
-
 #if 0
-    if (mit_des_debug)
-	fprintf(stdout,
-		"\nResulting string_to_key = 0x%x 0x%x\n",
-		*((unsigned long *) key),
-		*((unsigned long *) key+1));
+    /* Algorithm described in Dr. Dobbs Journal 1983, reported in "bit
+       twiddling hacks" web page collected by Sean Eron Anderson; see
+       http://graphics.stanford.edu/~seander/bithacks.html for
+       details.
+
+       Avoids loops, uses 7*lg(N)=35 ops instead of 4*N=128 for the
+       obvious mask, ior, shift, shift sequence of each 32-bit
+       quantity.
+
+       If we could rely on 64-bit math, another 7 ops would save us
+       from having to do double the work.  */
+#define REVERSE_STEP(VAR, SHIFT, MASK)			\
+    VAR = ((VAR >> SHIFT) & MASK) | ((VAR << SHIFT) & (0xFFFFFFFFUL & ~MASK))
+#define REVERSE(VAR)						\
+    REVERSE_STEP (VAR, 1, 0x55555555UL); /* swap odd/even bits */	\
+    REVERSE_STEP (VAR, 2, 0x33333333UL); /* swap bitpairs */		\
+    REVERSE_STEP (VAR, 4, 0x0F0F0F0FUL); /* swap nibbles, etc */	\
+    REVERSE_STEP (VAR, 8, 0x00FF00FFUL);				\
+    REVERSE_STEP (VAR, 16, 0x0000FFFFUL);
+#else /* shorter */
+#define REVERSE(VAR)				\
+    {						\
+	krb5_ui_4 old = VAR, temp1 = 0;		\
+	int j;					\
+	for (j = 0; j < 32; j++) {		\
+	    temp1 = (temp1 << 1) | (old & 1);	\
+	    old >>= 1;				\
+	}					\
+	VAR = temp1;				\
+    }
 #endif
-    
+
+    FETCH4 (x, 8);
+    FETCH4 (y, 12);
+    /* Ignore high bits of each input byte.  */
+    x &= 0x7F7F7F7F;
+    y &= 0x7F7F7F7F;
+    /* Reverse the bit strings -- after this, y is "before" x.  */
+    REVERSE (x);
+    REVERSE (y);
+#ifdef PRINT_TEST_VECTORS
+    {
+	int j;
+	union { unsigned char uc[4]; krb5_ui_4 ui; } t2;
+	printf("after reversal, reversed block:\n\t\t");
+	t2.ui = y;
+	for (j = 0; j < 4; j++)
+	    printf(" %02x", t2.uc[j] & 0xff);
+	t2.ui = x;
+	for (j = 0; j < 4; j++)
+	    printf(" %02x", t2.uc[j] & 0xff);
+	printf("\n");
+    }
+#endif
+    /* Ignored bits are now at the bottom of each byte, where we'll
+       put the parity bits.  Good.  */
+    FETCH4 (z, 0);
+    z &= 0x7F7F7F7F;
+    /* Ignored bits for z are at the top of each byte; fix that.  */
+    z <<= 1;
+    /* Finish the fan-fold xor for these four bytes.  */
+    z ^= y;
+    PUT4 (z, 0);
+    /* Now do the second four bytes.  */
+    FETCH4 (z, 4);
+    z &= 0x7F7F7F7F;
+    /* Ignored bits for z are at the top of each byte; fix that.  */
+    z <<= 1;
+    /* Finish the fan-fold xor for these four bytes.  */
+    z ^= x;
+    PUT4 (z, 4);
+
+#ifdef PRINT_TEST_VECTORS
+    {
+	int j;
+	printf("after reversal, combined block:\n\t\t");
+	for (j = 0; j < 8; j++)
+	    printf(" %02x", temp.uc[j] & 0xff);
+	printf("\n");
+    }
+#endif
+
+#define FIXUP(K)					\
+    (mit_des_fixup_key_parity(K),			\
+     mit_des_is_weak_key(K) ? (K[7] ^= 0xF0) : 0)
+
+    /* Now temp.cb is the temporary key, with invalid parity.  */
+    FIXUP(temp.cb);
+
+#ifdef PRINT_TEST_VECTORS
+    {
+	int j;
+	printf("after fixing parity and weak keys:\n\t\t");
+	for (j = 0; j < 8; j++)
+	    printf(" %02x", temp.uc[j] & 0xff);
+	printf("\n");
+    }
+#endif
+
+    mit_des_key_sched(temp.cb, sched);
+    mit_des_cbc_cksum(copy, temp.cb, copylen, sched, temp.cb);
+
+    memset(copy, 0, copylen);
+    free(copy);
+
+#ifdef PRINT_TEST_VECTORS
+    {
+	int j;
+	printf("cbc checksum:\n\t\t");
+	for (j = 0; j < 8; j++)
+	    printf(" %02x", temp.uc[j] & 0xff);
+	printf("\n");
+    }
+#endif
+
+    memset(sched, 0, sizeof(sched));
+    FIXUP (temp.cb);
+
+#ifdef PRINT_TEST_VECTORS
+    {
+	int j;
+	printf("after fixing parity and weak keys:\n\t\t");
+	for (j = 0; j < 8; j++)
+	    printf(" %02x", temp.uc[j] & 0xff);
+	printf("\n");
+    }
+#endif
+
+    memcpy(key->contents, temp.cb, 8);
+    memset(&temp, 0, sizeof(temp));
+
     return 0;
 }
