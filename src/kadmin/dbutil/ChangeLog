@@ -1,3 +1,9 @@
+Mon Aug 12 11:41:57 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* kdb5_util.c: make mkey_password non-static
+
+	* kdb5_create.c: use global mkey_password
+
 Mon Aug  5 21:24:47 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* kdb5_stash.c (kdb5_stash): Ignore (expected) failure in stashing

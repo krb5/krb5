@@ -37,7 +37,7 @@ char	*Err_no_database = "Database not currently opened!\n";
 /*
  * XXX Ick, ick, ick.  These global variables shouldn't be global....
  */
-static char *mkey_password = 0;
+char *mkey_password = 0;
 
 /*
  * I can't figure out any way for this not to be global, given how ss

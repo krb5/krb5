@@ -113,7 +113,7 @@ krb5_principal_data db_create_princ = {
 	KRB5_NT_SRV_INST			/* int type */
 };
 
-static char *mkey_password = 0;
+extern char *mkey_password;
 
 extern char *progname;
 extern int exit_status;
@@ -125,8 +125,6 @@ void kdb5_create(argc, argv)
    int argc;
    char *argv[];
 {
-    extern char *optarg;
-    extern int optind;
     int optchar;
 
     krb5_error_code retval;
@@ -139,15 +137,10 @@ void kdb5_create(argc, argv)
     if (strrchr(argv[0], '/'))
 	argv[0] = strrchr(argv[0], '/')+1;
 
-    mkey_password = NULL;
-    optind = 1;
-    while ((optchar = getopt(argc, argv, "P:s")) != EOF) {
+    while ((optchar = getopt(argc, argv, "s")) != EOF) {
 	switch(optchar) {
 	case 's':
 	    do_stash++;
-	    break;
-        case 'P':		/* Only used for testing!!! */
-	    mkey_password = optarg;
 	    break;
 	case '?':
 	default:
