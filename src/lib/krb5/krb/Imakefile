@@ -24,7 +24,7 @@ SRCS=	decode_kdc.c	\
 	encode_kdc.c	\
 	encode_tkt.c	\
 	encrypt_tk.c	\
-	get_in_tkt.o	\
+	get_in_tkt.c	\
 	in_tkt_pwd.c	\
 	in_tkt_skey.c	\
 	kdc_rep_dc.c	\
