@@ -1,3 +1,9 @@
+2000-08-30  Tom Yu  <tlyu@mit.edu>
+
+	* aclocal.m4 (LIBLINKS): Fix appending of $EXTRA_LIB_TARGETS to
+	LIBLINKS; previously it was setting LIBLINKS to include $LIBLIST
+	instead, which is Just Wrong.
+
 2000-08-30  Ken Raeburn  <raeburn@mit.edu>
 
 	* aclocal.m4 (KRB5_LIB_AUX): Fold in values of EXTRA_LIB_TARGETS,
