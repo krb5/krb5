@@ -53,6 +53,8 @@ typedef struct _krb5_data {
 
 typedef	krb5_data **	krb5_principal;	/* array of strings */
 					/* CONVENTION: realm is first elem. */
+#define krb5_princ_realm(princ) ((princ)[0])
+
 #ifdef __STDC__
 typedef	void * krb5_pointer;
 #define PROTOTYPE(x) x
