@@ -1,3 +1,8 @@
+Tue Dec 24 16:43:45 1996  Tom Yu  <tlyu@mit.edu>
+
+	* config.guess:
+	* config.sub: Update from autoconf-2.12.
+
 Mon Nov 11 20:53:01 1996  Tom Yu  <tlyu@mit.edu>
 
 	* pre.in (DEJAFLAGS): Change gmake-dependent $(shell uname foo) to
