@@ -1,3 +1,8 @@
+1999-07-06  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Delete old and already disabled code relating to
+	shared library support.
+
 1999-06-15  Danilo Almeida  <dalmeida@mit.edu>
 
 	* Makefile.in: Create Makefile.in for srvtab keytab code during
