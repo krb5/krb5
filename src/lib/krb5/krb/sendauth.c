@@ -119,9 +119,12 @@ krb5_sendauth(/* IN */
 	if (!credsp) {
 		if (!ccache)
 			return(KRB5_NOCREDS_SUPPLIED);
-		creds.server = (krb5_principal) server;
-		if (retval = krb5_copy_principal(client, &creds.client))
+		if (retval = krb5_copy_principal(server, &creds.server))
 			return(retval);
+		if (retval = krb5_copy_principal(client, &creds.client)) {
+			krb5_free_principal(creds.server);
+			return(retval);
+		}
 		/* creds.times.endtime = 0; -- memset 0 takes care of this
 					zero means "as long as possible" */
 		/* creds.keyblock.keytype = 0; -- as well as this.
