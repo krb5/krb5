@@ -1,3 +1,8 @@
+2000-06-30  Ezra Peisach  <epeisach@mit.edu>
+
+	* Makefile.in: kprop does not depend on the database libraries. 
+	kpropd does not depend, nor need to link in the database libraries.
+
 2000-05-08  Nalin Dahyabhai  <nalin@redhat.com>
 
 	* kprop.c (open_connection): New argument indicates output buffer
