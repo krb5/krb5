@@ -29,7 +29,7 @@ int add_admin_princ(void *handle, krb5_context context,
 #define ADMIN_LIFETIME 60*60*3 /* 3 hours */
 #define CHANGEPW_LIFETIME 60*5 /* 5 minutes */
 
-extern char *whoami;
+extern char *progname;
 
 extern krb5_encrypt_block master_encblock;
 extern krb5_keyblock master_keyblock;
@@ -63,34 +63,41 @@ int kadm5_create(kadm5_config_params *params)
       */
      if (retval = kadm5_get_config_params(context, NULL, NULL,
 					  params, params)) {
-	  com_err(whoami, retval, str_INITING_KCONTEXT);
+	  com_err(progname, retval, str_INITING_KCONTEXT);
 	  return 1;
      }
 
      if (retval = osa_adb_create_policy_db(params)) {
-	  com_err(whoami, retval, str_CREATING_POLICY_DB);
+	  com_err(progname, retval, str_CREATING_POLICY_DB);
 	  return 1;
      }
 
-     if ((retval = kadm5_init(whoami, NULL, NULL, params,
+     retval = kadm5_create_magic_princs(params, context);
+
+     krb5_free_context(context);
+
+     return retval;
+}
+
+int kadm5_create_magic_princs(kadm5_config_params *params,
+			      krb5_context *context)
+{
+     int retval;
+     void *handle;
+     
+     if ((retval = kadm5_init(progname, NULL, NULL, params,
 			      KADM5_STRUCT_VERSION,
 			      KADM5_API_VERSION_2,
 			      &handle))) {
-	  com_err(whoami, retval, str_INITING_KCONTEXT);
-
-	  krb5_free_context(context);
-	  exit(ERR);
+	  com_err(progname, retval, str_INITING_KCONTEXT);
+	  return retval;
      }
 
      retval = add_admin_princs(handle, context, params->realm);
 
      kadm5_destroy(handle);
-     krb5_free_context(context);
 
-     if (retval)
-	  exit(retval);
-     
-     return 0;
+     return retval;
 }
 
 /*
@@ -202,7 +209,7 @@ int add_admin_princ(void *handle, krb5_context context,
 
      fullname = build_name_with_realm(name, realm);
      if (ret = krb5_parse_name(context, fullname, &ent.principal)) {
-	  com_err(whoami, ret, str_PARSE_NAME);
+	  com_err(progname, ret, str_PARSE_NAME);
 	  return(ERR);
      }
      ent.max_life = lifetime;
@@ -220,7 +227,7 @@ int add_admin_princ(void *handle, krb5_context context,
 						  KADM5_ATTRIBUTES));
 
 	  if (ret) {
-	       com_err(whoami, ret, str_PUT_PRINC, fullname);
+	       com_err(progname, ret, str_PUT_PRINC, fullname);
 	       krb5_free_principal(context, ent.principal);
 	       free(fullname);
 	       return ERR;
@@ -233,7 +240,7 @@ int add_admin_princ(void *handle, krb5_context context,
      free(fullname);
 
      if (ret) {
-	  com_err(whoami, ret, str_RANDOM_KEY, fullname);
+	  com_err(progname, ret, str_RANDOM_KEY, fullname);
 	  return ERR;
      }
 

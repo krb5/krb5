@@ -2040,6 +2040,16 @@ load_db(argc, argv)
     if (!update && (kret = osa_adb_create_policy_db(&newparams))) {
 	 fprintf(stderr, "%s: %s while creating policy database\n",
 		 programname, error_message(kret));
+	 exit_status++;
+	 kadm5_free_config_params(kcontext, &newparams);
+	 if (dumpfile) fclose(f);
+	 return;
+    }
+    if (!update && (load != &beta7_version) &&
+	(kret = kadm5_create_magic_princs(&newparams, kcontext))) {
+	 fprintf(stderr, "%s: %s while creating KADM5 principals\n",
+		 programname, error_message(kret));
+	 exit_status++;
 	 kadm5_free_config_params(kcontext, &newparams);
 	 if (dumpfile) fclose(f);
 	 return;

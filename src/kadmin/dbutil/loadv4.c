@@ -429,8 +429,7 @@ master key name '%s'\n",
     memset((char *)master_keyblock.contents, 0, master_keyblock.length);
 
     /*
-     * Cons up config params for new policy database (which will be
-     * empty).  The policy dbname keys off the dbname.
+     * Cons up config params for new database.
      */
     newparams = global_params;
     newparams.mask &= ~(KADM5_CONFIG_ADBNAME | KADM5_CONFIG_ADB_LOCKFILE);
@@ -442,18 +441,24 @@ master key name '%s'\n",
 		 "parameters");
 	 return;
     }
+
     /*
      * Always create the policy db, even if we are not loading a dump
-     * file with policy info, because they are probably loading an old
-     * dump intending to use it with the new kadm5 system (ie: using
-     * load as create).
+     * file with policy info.
      */
     if (retval = osa_adb_create_policy_db(&newparams)) {
 	 com_err(PROGNAME, retval, "while creating policy database");
 	 kadm5_free_config_params(context, &newparams);
 	 return;
     }
-
+    /*
+     * Create the magic principals in the database.
+     */
+    if (retval = kadm5_create_magic_princs(&newparams, context)) {
+	 com_err(PROGNAME, retval, "while creating KADM5 principals");
+	 return;
+    }
+    
     krb5_free_context(context);
     return;
 }

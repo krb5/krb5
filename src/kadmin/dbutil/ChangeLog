@@ -1,5 +1,8 @@
 Thu Aug  1 14:34:51 1996  Barry Jaspan  <bjaspan@DUN-DUN-NOODLES>
 
+	* dump.c, kadm5_create.c, kdb5_create.c: create policy database
+        and kadm5 principals when loading a databas
+
 	* loadv4.c: create empty policy database after loading V4 dump file
 
 	* dumpv4.c (dump_v4db): use global_params.stash_file

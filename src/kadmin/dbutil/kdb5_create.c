@@ -114,8 +114,8 @@ krb5_principal_data db_create_princ = {
 };
 
 static char *mkey_password = 0;
-char *whoami;
 
+extern char *progname;
 extern int exit_status;
 extern osa_adb_policy_t policy_db;
 extern kadm5_config_params global_params;
@@ -123,7 +123,7 @@ extern krb5_context util_context;
 
 static void usage()
 {
-    fprintf(stderr, "usage: %s [-s]\n", whoami);
+    fprintf(stderr, "usage: %s [-s]\n", progname);
     exit_status++;
 }
 
@@ -144,7 +144,6 @@ void kdb5_create(argc, argv)
 	   
     if (strrchr(argv[0], '/'))
 	argv[0] = strrchr(argv[0], '/')+1;
-    whoami = argv[0];
 
     mkey_password = NULL;
     optind = 1;
