@@ -30,7 +30,9 @@
 
 #include "gssapiP_generic.h"
 
+#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
+#endif
 #include <fcntl.h>
 #include <limits.h>
 #ifdef HAVE_BSD_DB

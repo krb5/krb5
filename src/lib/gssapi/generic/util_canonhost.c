@@ -30,7 +30,7 @@
 
 #include "port-sockets.h"
 
-#ifndef _MACINTOSH
+#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
 #include <ctype.h>

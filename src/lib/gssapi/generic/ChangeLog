@@ -1,3 +1,11 @@
+Wed Aug 28 17:44:06 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* utl_nohash_validate.c: 
+	* util_canonhost.c:
+	* util_validate.c: Only include sys/types.h if present.
+
+	* configure.in: Add check for limits.h and sys/types.h
+
 Fri Aug  2 13:37:10 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* gssapiP_generic.h: If not on a Mac or under Dos, and stdlib.h

@@ -26,8 +26,10 @@
 
 #include "gssapiP_generic.h"
 
-#ifndef _MACINTOSH
+#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
+#endif
+#ifdef HAVE_LIMITS_H
 #include <limits.h>
 #endif
 
