@@ -95,7 +95,14 @@ main ()
 	  krb5_c_decrypt (context, &key, 7, 0, &enc_out, &check));
     test ("free_state",
 	  krb5_c_free_state (context, &key, &state));
+    if(key.contents) {
+	free(key.contents);
+	key.contents = NULL;
+    }
   }
+
+  free(out.data);
+  free(check.data);
   return 0;
 }
 

@@ -1,3 +1,8 @@
+2001-12-05  Ezra Peisach  <epeisach@mit.edu>
+
+	* t_encrypt.c (main): Free memory when finished to test for memory
+	leaks.
+
 2001-11-20  Ezra Peisach  <epeisach@mit.edu>
 
 	* Makefile.in (check-unix): Use $(srcdir) in file specification
