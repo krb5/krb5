@@ -1,3 +1,7 @@
+2004-06-02  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (STLIBOBJS, OBJS, SRCS): Drop init_ets code.
+
 2004-01-06  Jeffrey Altman <jaltman@mit.edu>
 
     * krb5_err.et (KRB5_CC_NOSUPP) new ccache error code

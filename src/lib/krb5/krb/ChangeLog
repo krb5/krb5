@@ -1,5 +1,8 @@
 2004-06-02  Ken Raeburn  <raeburn@mit.edu>
 
+	* init_ctx.c (init_common): Don't call krb5_init_ets.
+	(krb5_free_context): Don't call krb5_free_ets.
+
 	* srv_rcache.c (krb5_get_server_rcache): Use krb5_rc_resolve_full
 	instead of constructing an rcache object locally.
 

@@ -11,15 +11,13 @@ THDRDIR=$(BUILDTOP)$(S)include
 EHDRDIR=$(BUILDTOP)$(S)include$(S)krb5
 
 STLIBOBJS= asn1_err.o kdb5_err.o krb5_err.o \
-      kv5m_err.o krb524_err.o init_ets.o
+      kv5m_err.o krb524_err.o
 
 HDRS= asn1_err.h kdb5_err.h krb5_err.h kv5m_err.h krb524_err.h
 OBJS= $(OUTPRE)asn1_err.$(OBJEXT) $(OUTPRE)kdb5_err.$(OBJEXT) $(OUTPRE)krb5_err.$(OBJEXT) \
-      $(OUTPRE)kv5m_err.$(OBJEXT) $(OUTPRE)krb524_err.$(OBJEXT) \
-      $(OUTPRE)init_ets.$(OBJEXT)
+      $(OUTPRE)kv5m_err.$(OBJEXT) $(OUTPRE)krb524_err.$(OBJEXT)
 ETSRCS= asn1_err.c kdb5_err.c krb5_err.c kv5m_err.c krb524_err.c
-SRCS= asn1_err.c kdb5_err.c krb5_err.c kv5m_err.c krb524_err.c \
-	$(srcdir)/init_ets.c
+SRCS= asn1_err.c kdb5_err.c krb5_err.c kv5m_err.c krb524_err.c
 
 ##DOS##LIBOBJS = $(OBJS)
 

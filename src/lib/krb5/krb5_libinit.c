@@ -18,8 +18,6 @@
 #include "kt-int.h"
 #include "rc-int.h"
 
-static	int		initialized = 0;
-
 /*
  * Initialize the Kerberos v5 library.
  */
@@ -31,6 +29,14 @@ MAKE_FINI_FUNCTION(krb5int_lib_fini);
 int krb5int_lib_init(void)
 {
     int err;
+
+#if !USE_BUNDLE_ERROR_STRINGS
+    add_error_table(&et_krb5_error_table);
+    add_error_table(&et_kv5m_error_table);
+    add_error_table(&et_kdb5_error_table);
+    add_error_table(&et_asn1_error_table);
+#endif
+
     err = krb5int_rc_finish_init();
     if (err)
 	return err;
@@ -46,16 +52,6 @@ int krb5int_lib_init(void)
 /* Always-delayed initialization -- error table linkage, etc.  */
 krb5_error_code krb5int_initialize_library (void)
 {
-    if (!initialized) {
-#if !USE_BUNDLE_ERROR_STRINGS
-	add_error_table(&et_krb5_error_table);
-	add_error_table(&et_kv5m_error_table);
-	add_error_table(&et_kdb5_error_table);
-	add_error_table(&et_asn1_error_table);
-#endif
-	initialized = 1;
-    }
-
     return CALL_INIT_FUNCTION(krb5int_lib_init);
 }
 
@@ -71,9 +67,6 @@ void krb5int_lib_fini(void)
     krb5int_rc_terminate();
     krb5int_kt_finalize();
     krb5int_cc_finalize();
-
-    if (!initialized)
-	return;
 
 #if defined(_WIN32) || defined(USE_CCAPI)
     krb5_stdcc_shutdown();

@@ -1,3 +1,10 @@
+2004-06-02  Ken Raeburn  <raeburn@mit.edu>
+
+	* krb5_libinit.c (initialized): Variable deleted, all references
+	removed.
+	(krb5int_lib_init): Initialize error tables here.
+	(krb5int_initialize_library): Don't do it here.
+
 2004-05-27  Ezra Peisach  <epeisach@mit.edu>
 
 	* Makefile.in (LOCALINCLUDES): Include ccache, keytab and rcache

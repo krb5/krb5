@@ -109,8 +109,9 @@ init_common (krb5_context *context, krb5_boolean secure)
 	krb5_data seed;
 	int tmp;
 
-	/* Initialize error tables */
-	krb5_init_ets(ctx);
+	retval = krb5int_initialize_library();
+	if (retval)
+	    return retval;
 
 #if (defined(_WIN32))
 	/* 
@@ -238,7 +239,6 @@ cleanup:
 void KRB5_CALLCONV
 krb5_free_context(krb5_context ctx)
 {
-     krb5_free_ets(ctx);
      krb5_os_free_context(ctx);
 
      if (ctx->in_tkt_ktypes) {
