@@ -484,10 +484,14 @@ work with a NULL value.
 encryption type of the master principal.  The default is
 DEFAULT_KDC_ENCTYPE.
 
-\item[max_life, max_rlife, expiration, flags] Variables: max_life,
-max_renewable_life, default_principal_expiration,
-default_principal_flags.  MAX_LIFE, MAX_RLIFE, EXPIRATION, FLAGS.
-Server.  Default values for new principals.  All default to 0.
+\item[max_life] Variable: max_life.  MAX_LIFE.  Maximum lifetime for
+all tickets issued to the principal.  The default is 28800, which is 8
+hours.
+
+\item[max_rlife, expiration, flags] Variables: max_renewable_life,
+default_principal_expiration, default_principal_flags.  MAX_LIFE,
+MAX_RLIFE, EXPIRATION, FLAGS.  Server.  Default values for new
+principals.  All default to 0.
 
 \item[keysalts, num_keysalts] Variable: supported_enctypes.  ENCTYPES.
 Server.  The list of supported encryption type/salt type tuples; both
