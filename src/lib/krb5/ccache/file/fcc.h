@@ -63,7 +63,11 @@
 #define	FCC_OPEN_RDONLY		3
 
 #ifndef TKT_ROOT
+#ifdef MSDOS_FILESYSTEM
+#define TKT_ROOT "\\tkt"
+#else
 #define TKT_ROOT "/tmp/tkt"
+#endif
 #endif
 
 /* macros to make checking flags easier */

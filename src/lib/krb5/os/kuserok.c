@@ -136,4 +136,27 @@ krb5_kuserok(context, principal, luser)
     fclose(fp);
     return(isok);
 }
-#endif
+
+#else /* _MSDOS */
+
+/*
+ * If the given Kerberos name "server" translates to the same name as "luser"
+ * (using * krb5_aname_to_lname()), returns TRUE.
+ */
+krb5_boolean INTERFACE
+krb5_kuserok(context, principal, luser)
+    krb5_context context;
+    krb5_principal principal;
+    const char *luser;
+{
+    char kuser[50];
+
+    if (! krb5_aname_to_localname(context, principal, sizeof(kuser), kuser))
+        return FALSE;
+
+    if (strcmp(kuser, luser) == 0)
+	    return TRUE;
+
+    return FALSE;
+}
+#endif /* _MSDOS */

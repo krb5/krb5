@@ -121,6 +121,9 @@ krb5_error_code INTERFACE krb5_fcc_set_flags
 
 /* fcc_ops.c */
 extern krb5_cc_ops krb5_cc_file_ops;
+krb5_error_code krb5_change_cache
+   PROTOTYPE(());
+
 
 /* fcc_write.c */
 krb5_error_code INTERFACE krb5_fcc_write 

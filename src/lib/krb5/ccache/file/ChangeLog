@@ -1,3 +1,9 @@
+Wed Mar 22 11:24:07 1995 Keith Vetter (keithv@fusion.com)
+
+	* fcc-proto.h: added prototype for cache changing hook, 
+	* fcc.h: changed cache file location for the PC (out of /tmp).
+        * fcc_ops.h: made the cache changing hook return an error code.
+
 Tue Mar 21 19:14:49 1995 Keith Vetter (keithv@fusion.com)
 
 	* fcc_destroy.c: open file on the PC in binary mode, worked around

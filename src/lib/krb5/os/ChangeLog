@@ -1,3 +1,7 @@
+Wed Mar 22 13:30:35 1995 Keith Vetter (keithv@fusion.com)
+
+	* an_to_ln.c, kuserok.c: last two os routines ported to the PC.
+
 Fri Mar 17 19:56:39 1995  John Gilmore  (gnu at toad.com)
 
 	* Makefile.in (LDFLAGS):  Eliminate, duplicates config/pre.in.

@@ -56,11 +56,12 @@ krb5_cc_ops krb5_fcc_ops = {
  * we'll communicate to all other processes. 
  */
 
-void 
-krb5_change_cache (int send) {
+krb5_error_code 
+krb5_change_cache (void) {
 
     SendMessage(HWND_BROADCAST, krb5_get_notification_message(), 0, 0);
 
+    return 0;
 }
 
 unsigned int INTERFACE
@@ -74,13 +75,14 @@ krb5_get_notification_message (void) {
 }
 #else /* _WINDOWS */
 
-void INTERFACE
+krb5_error_code
 krb5_change_cache () 
 {
-    return;
+    return 0;
 }
 unsigned int INTERFACE
-krb5_get_notification_message () {
+krb5_get_notification_message ()
+{
     return 0;
 }
 

@@ -25,10 +25,15 @@
  */
 
 #include "k5-int.h"
-#ifndef _MSDOS    /* Not yet for Windows */
+
 #ifndef min
 #define min(a,b) ((a) > (b) ? (b) : (a))
 #endif /* min */
+
+int krb5_lname_username_fallback = 1;
+extern char *krb5_lname_file;
+
+#ifndef _MSDOS    
 
 static krb5_error_code dbm_an_to_ln();
 static krb5_error_code username_an_to_ln();
@@ -44,10 +49,6 @@ static krb5_error_code username_an_to_ln();
 
  returns system errors, NOT_ENOUGH_SPACE
 */
-
-int krb5_lname_username_fallback = 1;
-	
-extern char *krb5_lname_file;
 
 krb5_error_code
 krb5_aname_to_localname(context, aname, lnsize, lname)
@@ -115,6 +116,7 @@ dbm_an_to_ln(context, aname, lnsize, lname)
     (void) dbm_close(db);
     return retval;
 }
+#endif /* _MSDOS */
 
 /*
  * Implementation:  This version checks the realm to see if it is the local
@@ -137,7 +139,7 @@ username_an_to_ln(context, aname, lnsize, lname)
     if (retval = krb5_get_default_realm(context, &def_realm)) {
 	return(retval);
     }
-    if ((realm_length != strlen(def_realm)) ||
+    if (((size_t) realm_length != strlen(def_realm)) ||
         (memcmp(def_realm, krb5_princ_realm(context, aname)->data, realm_length))) {
         free(def_realm);
         return KRB5_LNAME_NOTRANS;
@@ -168,4 +170,19 @@ username_an_to_ln(context, aname, lnsize, lname)
     }
     return retval;
 }
-#endif
+
+#ifdef _MSDOS
+
+krb5_error_code INTERFACE
+krb5_aname_to_localname(context, aname, lnsize, lname)
+    krb5_context context;
+	krb5_const_principal aname;
+	const int lnsize;
+	char *lname;
+{
+	if (krb5_lname_username_fallback)
+		return username_an_to_ln(context, aname, lnsize, lname);
+	return KRB5_LNAME_CANTOPEN;
+}
+
+#endif /* _MSDOS */
