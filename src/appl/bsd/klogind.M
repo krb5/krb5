@@ -111,14 +111,19 @@ If the
 ~/.rhosts check is to be used, then the program verifies that the
 client is connecting from a privileged port, before allowing login.
 
-.PP The parent of the login process manipulates the master side of the
+.PP
+The parent of the login process manipulates the master side of the
 pseduo terminal, operating as an intermediary between the login
-process and the client instance of the .I rlogin(1C) program.  In
-normal operation, the packet protocol described in .IR pty (4) is
-invoked to provide ^S/^Q type facilities and propagate interrupt
+process and the client instance of the
+.I rlogin(1C)
+program.  In normal operation, the packet protocol described in
+.IR pty (4)
+is invoked to provide ^S/^Q type facilities and propagate interrupt
 signals to the remote programs.  The login process propagates the
 client terminal's baud rate and terminal type, as found in the
-environment variable, ``TERM''; see .IR environ (7).  The screen or
+environment variable, ``TERM''; see
+.IR environ (7).
+The screen or
 window size of the terminal is requested from the client, and window
 size changes from the client are propagated to the pseudo terminal.
 
