@@ -1,7 +1,7 @@
 #!/bin/sh
 # Run this from the TOP of the source tree!
 M4=gm4
-configs=`find $1 -name configure.in -print|sed -e 's@/configure.in@@`
+configs=`find $1 -name configure.in -print|sort|sed -e 's@/configure.in@@'`
 for dir in $configs; do
 	syms=""
 	libs=""

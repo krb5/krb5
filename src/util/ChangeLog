@@ -1,3 +1,8 @@
+2001-06-15  Ken Raeburn  <raeburn@mit.edu>
+
+	* getsyms: Fix quoting around find command looking for
+	configure.in files; sort list.
+
 2001-04-17  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (unixmac): Target deleted.
