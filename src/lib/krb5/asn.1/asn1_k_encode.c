@@ -774,7 +774,7 @@ asn1_error_code asn1_encode_sam_flags(asn1buf *buf, const krb5_flags val, unsign
 }
 
 #define add_optstring(val,n,fn) \
-     if ((val).length >= 0) {asn1_addlenfield((val).length,(val).data,n,fn);}
+     if ((val).length > 0) {asn1_addlenfield((val).length,(val).data,n,fn);}
 
 asn1_error_code asn1_encode_sam_challenge(asn1buf *buf, const krb5_sam_challenge *val, unsigned int *retlen)
 {

@@ -1148,11 +1148,9 @@ encode_krb5_sam_challenge:
 .  [0] [Integer] 42
 .  [1] [Bit String] 0x80000000
 .  [2] [Octet String] "type name"
-.  [3] [Octet String] ""
 .  [4] [Octet String] "challenge label"
 .  [5] [Octet String] "challenge ipse"
 .  [6] [Octet String] "response_prompt ipse"
-.  [7] [Octet String] ""
 .  [8] [Integer] 5517840
 .  [9] [Sequence/Sequence Of] 
 .  .  [0] [Integer] 1

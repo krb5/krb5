@@ -1,3 +1,8 @@
+2002-11-07  Ezra Peisach  <epeisach@bu.edu>
+
+	* asn1_k_encode.c (add_optstring): Add optional string only if
+	length > 0.
+
 2002-11-05  Tom Yu  <tlyu@mit.edu>
 
 	* asn1_encode.h (asn1_encode_oid):

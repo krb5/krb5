@@ -1,3 +1,11 @@
+2002-11-07  Ezra Peisach  <epeisach@bu.edu>
+
+	* krb5_decode_test.c: Test for sam_challenege without empty
+	optional strings.
+
+	* trval_reference.out, reference_encode.out: Update to reflect
+	that optional fields in sam_challenge are not being output.
+
 2002-08-29  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in: Revert $(S)=>/ change, for Windows support.
