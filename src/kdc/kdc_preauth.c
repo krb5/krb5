@@ -698,11 +698,9 @@ get_sam_edata(context, request, client, server, pa_data)
 	  }
 	  /* now we can use encrypting_key... */
 	}
-      } else {
-	  /* SAM is not an option - so don't return as hint */
-	  retval = KRB5_PREAUTH_BAD_TYPE;
-	  goto cleanup;
-      }
+      } else
+	/* SAM is not an option - so don't return as hint */
+	return KRB5_PREAUTH_BAD_TYPE;
 
       krb5_princ_component(kdc_context,newp,probeslot)->data = 0;
       krb5_princ_component(kdc_context,newp,probeslot)->length = 0;
