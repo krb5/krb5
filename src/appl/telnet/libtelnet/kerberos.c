@@ -167,7 +167,7 @@ kerberos4_send(ap)
 	CREDENTIALS cred;
 	int r;
 
-	printf("[ Trying KERBEROS4 ... ]\n");	
+	printf("[ Trying KERBEROS4 ... ]\r\n");	
 	if (!UserNameRequested) {
 		if (auth_debug_mode) {
 			printf("Kerberos V4: no user name supplied\r\n");
@@ -377,7 +377,7 @@ kerberos4_reply(ap, data, cnt)
 		auth_send_retry();
 		return;
 	case KRB_ACCEPT:
-		printf("[ Kerberos V4 accepts you ]\n");
+		printf("[ Kerberos V4 accepts you ]\r\n");
 		if ((ap->way & AUTH_HOW_MASK) == AUTH_HOW_MUTUAL) {
 			/*
 			 * Send over the encrypted challenge.

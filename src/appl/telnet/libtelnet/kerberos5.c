@@ -482,14 +482,14 @@ kerberos5_reply(ap, data, cnt)
 	case KRB_ACCEPT:
 		if ((ap->way & AUTH_HOW_MASK) == AUTH_HOW_MUTUAL &&
 		    !mutual_complete) {
-		    printf("[ Kerberos V5 accepted you, but didn't provide mutual authentication! ]\n");
+		    printf("[ Kerberos V5 accepted you, but didn't provide mutual authentication! ]\r\n");
 		    auth_send_retry();
 		    return;
 		}
 		if (cnt)
-		    printf("[ Kerberos V5 accepts you as ``%.*s'' ]\n", cnt, data);
+		    printf("[ Kerberos V5 accepts you as ``%.*s'' ]\r\n", cnt, data);
 		else
-		    printf("[ Kerberos V5 accepts you ]\n");
+		    printf("[ Kerberos V5 accepts you ]\r\n");
 		auth_finished(ap, AUTH_USER);
 #ifdef	FORWARD
 		if (forward_flags & OPTS_FORWARD_CREDS)
@@ -508,7 +508,7 @@ kerberos5_reply(ap, data, cnt)
 
 		    if (r = krb5_rd_rep(telnet_context, auth_context, &inbuf,
 					&reply)) {
-			printf("[ Mutual authentication failed: %s ]\n",
+			printf("[ Mutual authentication failed: %s ]\r\n",
 			       error_message(r));
 			auth_send_retry();
 			return;
@@ -527,7 +527,7 @@ kerberos5_reply(ap, data, cnt)
 		return;
 #ifdef	FORWARD
 	case KRB_FORWARD_ACCEPT:
-		printf("[ Kerberos V5 accepted forwarded credentials ]\n");
+		printf("[ Kerberos V5 accepted forwarded credentials ]\r\n");
 		return;
 	case KRB_FORWARD_REJECT:
 		printf("[ Kerberos V5 refuses forwarded credentials because %.*s ]\r\n",
