@@ -296,11 +296,12 @@ add_key_pwd(context, master_key, ks_tuple, ks_tuple_count, passwd,
 						 &similar)))
 		return(retval);
 
-	    if (similar)
+	    if (similar &&
+		(ks_tuple[j].ks_salttype == ks_tuple[i].ks_salttype))
 		break;
 	}
 
-	if (similar)
+	if (j == i)
 	    continue;
 
 	if (retval = krb5_dbe_create_key_data(context, db_entry)) 
