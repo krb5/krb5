@@ -8,6 +8,10 @@ DONE	* Use dbm as the default database. (HIGH PRIORITY)
 DONE	* KDC does not notice new databases after new db loads (HIGH PRIORITY)
 	* KDC returns wrong starttime if queried too quickly with a TGS req.
 		after a TGT request.
+	* v4kadmind: convert syslog -> log (to real file)
+	* v4kadmind: should store (kvno++ % 256) in database, or there should
+		be a mechanism in ktutil to query the server for the kvno
+		because V4 and V5 kvno's have different limits/wraps.
 
 2.  API changes
 DONE	* context changes (mostly done)
@@ -22,6 +26,12 @@ DONE	* Remove krb5_enctype argument from string_to_key().  (HIGH)
 DONE	* kdb5_edit support (show princal, set attributes)
 DONE	* test DES-MD5
 DONE	* make DES-MD5 default, fall back to DES-CRC
+	* krb5_get_in_tkt_with_keytab needs to pass local ktypes in AS_REQ.
+		It should only be requesting ktypes for which there are
+		local keytab entries.
+	* DES_CBC_* are not being properly treated.
+		Requesting one type does not always return a key of the
+		same type (even if there is another DES key in the db).
 
 4.  Better Kerberos Database
 DONE	* Design encoders/decoders
