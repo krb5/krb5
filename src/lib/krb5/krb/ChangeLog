@@ -1,3 +1,8 @@
+2003-10-30  Tom Yu  <tlyu@mit.edu>
+
+	* gen_seqnum.c (krb5_generate_seq_number): Fix mask; was short by
+	4 bits.
+
 2003-10-08  Tom Yu  <tlyu@mit.edu>
 
 	* rd_safe.c (krb5_rd_safe_basic): Save the encoded KRB-SAFE-BODY
