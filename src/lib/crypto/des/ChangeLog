@@ -1,3 +1,16 @@
+Tue Mar 28 15:09:43 1995  John Gilmore  (gnu at toad.com)
+
+	Bring in portability fixes from Cygnus K4 release.
+
+	* f_cbc.c, f_cksum.c, f_pcbc.c:  Replace individual casts with
+	simpler solution.
+	* f_tables.h:  Insert debugging code, and circumvention for MPW
+	compiler bug.
+	* key_sched.c:  Remove ancient (microvax??!) comments, and dup 
+	prototype.
+	* verify.c:  Small hack for MS-Windows scrolling.  Fix spelling.
+	"register x" -> "register int x".
+
 Thu Mar 16 21:16:24 1995  John Gilmore  (gnu at toad.com)
 
 	* Makefile.in (LDFLAGS):  Remove, conflicts with pre.in.

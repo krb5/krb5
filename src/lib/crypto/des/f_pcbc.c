@@ -79,21 +79,21 @@ mit_des_pcbc_encrypt(in, out, length, schedule, ivec, encrypt)
 				ip += (int) length;
 				switch(length) {
 				case 8:
-					right ^= ((unsigned KRB_INT32) (*(--ip) & 0xff));
+					right ^=  *(--ip) & FF_UINT32;
 				case 7:
-					right ^= ((unsigned KRB_INT32) (*(--ip) & 0xff)) << 8;
+					right ^= (*(--ip) & FF_UINT32) <<  8;
 				case 6:
-					right ^= ((unsigned KRB_INT32) (*(--ip) & 0xff)) << 16;
+					right ^= (*(--ip) & FF_UINT32) << 16;
 				case 5:
-					right ^= ((unsigned KRB_INT32) (*(--ip) & 0xff)) << 24;
+					right ^= (*(--ip) & FF_UINT32) << 24;
 				case 4:
-					left ^=  ((unsigned KRB_INT32) (*(--ip) & 0xff));
+					left  ^=  *(--ip) & FF_UINT32;
 				case 3:
-					left ^=  ((unsigned KRB_INT32) (*(--ip) & 0xff)) << 8;
+					left  ^= (*(--ip) & FF_UINT32) <<  8;
 				case 2:
-					left ^=  ((unsigned KRB_INT32) (*(--ip) & 0xff)) << 16;
+					left  ^= (*(--ip) & FF_UINT32) << 16;
 				case 1:
-					left ^=  ((unsigned KRB_INT32) (*(--ip) & 0xff)) << 24;
+					left  ^= (*(--ip) & FF_UINT32) << 24;
 					break;
 				}
 				length = 0;

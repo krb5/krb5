@@ -35,6 +35,12 @@ extern const unsigned KRB_INT32 des_SP_table[8][64];
 #define	FP	des_FP_table
 #define	SP	des_SP_table
 
+#ifdef DEBUG
+#define	DEB(foofraw)	printf foofraw
+#else
+#define	DEB(foofraw)	/* nothing */
+#endif
+
 /*
  * Code to do a DES round using the tables.  Note that the E expansion
  * is easy to compute algorithmically, especially if done out-of-order.
@@ -115,11 +121,16 @@ extern const unsigned KRB_INT32 des_SP_table[8][64];
  *
  * The follow macros compute the set of bits used to index the
  * table for produce the left and right permuted result.
+ *
+ * The inserted cast to unsigned KRB_INT32 circumvents a bug in
+ * the Macintosh MPW 3.2 C compiler which loses the unsignedness and
+ * propagates the high-order bit in the shift.
  */
 #define	DES_IP_LEFT_BITS(left, right) \
 	((((left) & 0x55555555) << 1) | ((right) & 0x55555555))
 #define	DES_IP_RIGHT_BITS(left, right) \
-	(((left) & 0xaaaaaaaa) | (((right) & 0xaaaaaaaa) >> 1))
+	(((left) & 0xaaaaaaaa) | \
+		( ( (unsigned KRB_INT32) ((right) & 0xaaaaaaaa) ) >> 1))
 
 /*
  * The following macro does an in-place initial permutation given
@@ -141,16 +152,20 @@ extern const unsigned KRB_INT32 des_SP_table[8][64];
 		| (IP[((temp) >>  8) & 0xff] << 2) \
 		| (IP[(temp) & 0xff] << 3)
 
-
 /*
  * Now the final permutation stuff.  The same comments apply to
  * this as to the initial permutation, except that we use different
  * bits and shifts.
+ *
+ * The inserted cast to unsigned KRB_INT32 circumvents a bug in
+ * the Macintosh MPW 3.2 C compiler which loses the unsignedness and
+ * propagates the high-order bit in the shift.
  */
 #define DES_FP_LEFT_BITS(left, right) \
 	((((left) & 0x0f0f0f0f) << 4) | ((right) & 0x0f0f0f0f))
 #define	DES_FP_RIGHT_BITS(left, right) \
-	(((left) & 0xf0f0f0f0) | (((right) & 0xf0f0f0f0) >> 4))
+	(((left) & 0xf0f0f0f0) | \
+		( ( (unsigned KRB_INT32) ((right) & 0xf0f0f0f0) ) >> 4))
 
 
 /*
@@ -185,17 +200,27 @@ extern const unsigned KRB_INT32 des_SP_table[8][64];
  *
  * You can probably do better than these by rewriting for particular
  * situations.  These aren't bad, though.
+ *
+ * The DEB macros enable debugging when this code breaks (typically
+ * when a buggy compiler breaks it), by printing the intermediate values
+ * at each stage of the encryption, so that by comparing the output to
+ * a known good machine, the location of the first error can be found.
  */
 #define	DES_DO_ENCRYPT(left, right, temp, kp) \
 	do { \
 		register int i; \
+		DEB (("do_encrypt %8lX %8lX \n", left, right)); \
 		DES_INITIAL_PERM((left), (right), (temp)); \
+		DEB (("  after IP %8lX %8lX\n", left, right)); \
 		for (i = 0; i < 8; i++) { \
 			DES_SP_ENCRYPT_ROUND((left), (right), (temp), (kp)); \
+			DEB (("  round %2d %8lX %8lX \n", i*2, left, right)); \
 			DES_SP_ENCRYPT_ROUND((right), (left), (temp), (kp)); \
+			DEB (("  round %2d %8lX %8lX \n", 1+i*2, left, right)); \
 		} \
 		DES_FINAL_PERM((left), (right), (temp)); \
 		(kp) -= (2 * 16); \
+		DEB (("  after FP %8lX %8lX \n", left, right)); \
 	} while (0)
 
 #define	DES_DO_DECRYPT(left, right, temp, kp) \
@@ -223,7 +248,11 @@ extern const unsigned KRB_INT32 des_SP_table[8][64];
 #define	PUT_HALF_BLOCK(lr, op) \
 	*(op)++ = (unsigned char) (((lr) >> 24) & 0xff); \
 	*(op)++ = (unsigned char) (((lr) >> 16) & 0xff); \
-	*(op)++ = (unsigned char) (((lr) >> 8) & 0xff); \
-	*(op)++ = (unsigned char) ((lr) & 0xff)
+	*(op)++ = (unsigned char) (((lr) >>  8) & 0xff); \
+	*(op)++ = (unsigned char) ( (lr)        & 0xff)
+
+/* Shorthand that we'll need in several places, for creating values that
+   really can hold 32 bits regardless of the prevailing int size.  */
+#define FF_UINT32	((unsigned KRB_INT32) 0xFF)
 
 #endif	/* __DES_TABLES_H__ */

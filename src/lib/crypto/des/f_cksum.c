@@ -63,14 +63,14 @@ mit_des_cbc_cksum(in, out, length, schedule, ivec)
 		 * forward.  Otherwise we have to fart around.
 		 */
 		if (len >= 8) {
-			left ^=  ((unsigned KRB_INT32) ((*ip++) & 0xff)) << 24;
-			left ^=  ((unsigned KRB_INT32) ((*ip++) & 0xff)) << 16;
-			left ^=  ((unsigned KRB_INT32) ((*ip++) & 0xff)) << 8;
-			left ^=  ((unsigned KRB_INT32) ((*ip++) & 0xff));
-			right ^= ((unsigned KRB_INT32) ((*ip++) & 0xff)) << 24;
-			right ^= ((unsigned KRB_INT32) ((*ip++) & 0xff)) << 16;
-			right ^= ((unsigned KRB_INT32) ((*ip++) & 0xff)) << 8;
-			right ^= ((unsigned KRB_INT32) ((*ip++) & 0xff));
+			left  ^= ((*ip++) & FF_UINT32) << 24;
+			left  ^= ((*ip++) & FF_UINT32) << 16;
+			left  ^= ((*ip++) & FF_UINT32) <<  8;
+			left  ^=  (*ip++) & FF_UINT32;
+			right ^= ((*ip++) & FF_UINT32) << 24;
+			right ^= ((*ip++) & FF_UINT32) << 16;
+			right ^= ((*ip++) & FF_UINT32) <<  8;
+			right ^=  (*ip++) & FF_UINT32;
 			len -= 8;
 		} else {
 			/*
@@ -81,19 +81,19 @@ mit_des_cbc_cksum(in, out, length, schedule, ivec)
 			ip += (int) len;
 			switch(len) {
 			case 7:
-				right ^= ((unsigned KRB_INT32) (*(--ip) & 0xff)) << 8;
+				right ^= (*(--ip) & FF_UINT32) <<  8;
 			case 6:
-				right ^= ((unsigned KRB_INT32) (*(--ip) & 0xff)) << 16;
+				right ^= (*(--ip) & FF_UINT32) << 16;
 			case 5:
-				right ^= ((unsigned KRB_INT32) (*(--ip) & 0xff)) << 24;
+				right ^= (*(--ip) & FF_UINT32) << 24;
 			case 4:
-				left ^=  ((unsigned KRB_INT32) (*(--ip) & 0xff));
+				left  ^=  *(--ip) & FF_UINT32;
 			case 3:
-				left ^=  ((unsigned KRB_INT32) (*(--ip) & 0xff)) << 8;
+				left  ^= (*(--ip) & FF_UINT32) <<  8;
 			case 2:
-				left ^=  ((unsigned KRB_INT32) (*(--ip) & 0xff)) << 16;
+				left  ^= (*(--ip) & FF_UINT32) << 16;
 			case 1:
-				left ^=  ((unsigned KRB_INT32) (*(--ip) & 0xff)) << 24;
+				left  ^= (*(--ip) & FF_UINT32) << 24;
 				break;
 			}
 			len = 0;

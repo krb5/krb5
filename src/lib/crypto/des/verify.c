@@ -110,6 +110,10 @@ main(argc,argv)
     void do_encrypt();
     void do_decrypt();
 
+#ifdef WINDOWS
+    /* Set screen window buffer to infinite size -- MS default is tiny.  */
+    _wsetscreenbuf (fileno (stdout), _WINBUFINF);
+#endif
     progname=argv[0];		/* salt away invoking program */
 
     while (--argc > 0 && (*++argv)[0] == '-')
@@ -236,7 +240,7 @@ main(argc,argv)
 	    exit(-1);
 	}
 	else 
-	    printf("verify: ECB encription is correct\n\n");
+	    printf("verify: ECB encryption is correct\n\n");
     }
 
     /* ECB mode */
@@ -264,7 +268,7 @@ main(argc,argv)
 	    exit(-1);
 	}
 	else 
-	    printf("verify: ECB encription is correct\n\n");
+	    printf("verify: ECB encryption is correct\n\n");
     }
 
     /* CBC mode */
@@ -310,7 +314,7 @@ main(argc,argv)
 	exit(-1);
     }
     else 
-	printf("verify: CBC encription is correct\n\n");
+	printf("verify: CBC encryption is correct\n\n");
 
     printf("EXAMPLE CBC checksum");
     printf("\tkey =  0123456789abcdef\tiv =  1234567890abcdef\n");
@@ -342,7 +346,7 @@ void
 flip(array)
     char *array;
 {
-    register old,new,i,j;
+    register int old,new,i,j;
     /* flips the bit order within each byte from 0 lsb to 0 msb */
     for (i = 0; i<=7; i++) {
 	old = *array;
@@ -415,4 +419,3 @@ mit_des_is_weak_key(key)
 {
     return 0;				/* fake it out for testing */
 }
-
