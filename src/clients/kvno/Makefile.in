@@ -1,4 +1,6 @@
 thisconfigdir=./..
+myfulldir=clients/kvno
+mydir=kvno
 BUILDTOP=$(REL)$(U)$(S)$(U)
 ##DOS##BUILDTOP=..\..
 

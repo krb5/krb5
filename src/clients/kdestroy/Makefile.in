@@ -1,4 +1,6 @@
 thisconfigdir=./..
+myfulldir=clients/kdestroy
+mydir=kdestroy
 BUILDTOP=$(REL)$(U)$(S)$(U)
 ##DOS##BUILDTOP=..\..
 

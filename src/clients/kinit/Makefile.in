@@ -1,4 +1,6 @@
 thisconfigdir=./..
+myfulldir=clients/kinit
+mydir=kinit
 BUILDTOP=$(REL)$(U)$(S)$(U)
 ##DOS##BUILDTOP=..\..
 

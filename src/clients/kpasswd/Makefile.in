@@ -1,4 +1,6 @@
 thisconfigdir=./..
+myfulldir=clients/kpasswd
+mydir=kpasswd
 BUILDTOP=$(REL)$(U)$(S)$(U)
 CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
 PROG_LIBPATH=-L$(TOPLIBD)
