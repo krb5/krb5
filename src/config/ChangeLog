@@ -1,3 +1,9 @@
+2003-09-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* shlib.conf (*-*-linux*): Use $(CC) for linking shared libraries,
+	and -Wl to pass linker flags in, so it can supply the necessary
+	support libraries.
+
 2003-05-27  Ken Raeburn  <raeburn@mit.edu>
 
 	* win-pre.in (CPPFLAGS): Define KRB5_DEPRECATED=1.
