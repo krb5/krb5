@@ -151,7 +151,7 @@ int send_token(s, flags, tok)
 	 if (display_file)
 	     fprintf(display_file, 
 		     "sending token data: %d of %d bytes written\n", 
-		     ret, tok->length);
+		     ret, (int) tok->length);
 	 return -1;
      }
      
@@ -229,7 +229,7 @@ int recv_token(s, flags, tok)
 	  return -1;
      } else if (ret != tok->length) {
 	  fprintf(stderr, "sending token data: %d of %d bytes written\n", 
-		  ret, tok->length);
+		  ret, (int) tok->length);
 	  free(tok->value);
 	  return -1;
      }

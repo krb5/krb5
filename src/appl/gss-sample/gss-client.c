@@ -204,7 +204,7 @@ static int client_establish_context(s, service_name, deleg_flag, auth_flag,
 	 if (send_tok.length != 0) {
 	   if (verbose)
 	     printf("Sending init_sec_context token (size=%d)...",
-		    send_tok.length);
+		    (int) send_tok.length);
 	   if (send_token(s, TOKEN_CONTEXT, &send_tok) < 0) {
 	     (void) gss_release_buffer(&min_stat, &send_tok);
 	     (void) gss_release_name(&min_stat, &target_name);
@@ -271,7 +271,7 @@ static void read_file(file_name, in_buf)
 
     if ((in_buf->value = malloc(in_buf->length)) == 0) {
 	fprintf(stderr, "Couldn't allocate %d byte buffer for reading file\n",
-		in_buf->length);
+		(int) in_buf->length);
 	exit(1);
     }
 
@@ -285,7 +285,7 @@ static void read_file(file_name, in_buf)
     }
     if (count < in_buf->length)
 	fprintf(stderr, "Warning, only read in %d bytes, expected %d\n",
-		count, in_buf->length);
+		count, (int) in_buf->length);
 }
 
 /*
@@ -428,7 +428,7 @@ static int call_server(host, port, oid, service_name, deleg_flag, auth_flag,
 	 }
 	 printf("Mechanism %.*s supports %d names\n",
 		(int) oid_name.length, (char *) oid_name.value,
-		mech_names->count);
+		(int) mech_names->count);
 	 (void) gss_release_buffer(&min_stat, &oid_name);
 
 	 for (i=0; i<mech_names->count; i++) {
@@ -439,7 +439,7 @@ static int call_server(host, port, oid, service_name, deleg_flag, auth_flag,
 	     display_status("converting oid->string", maj_stat, min_stat);
 	     return -1;
 	   }
-	   printf("  %d: %.*s\n", i,
+	   printf("  %d: %.*s\n", (int) i,
 		  (int) oid_name.length, (char *) oid_name.value);
 
 	   (void) gss_release_buffer(&min_stat, &oid_name);
@@ -637,6 +637,7 @@ int main(argc, argv)
 		       deleg_flag, auth_flag, wrap_flag, encrypt_flag, mic_flag,
 		       msg, use_file, mcount) < 0)
 	 exit(1);
+}
      }
 
      if (oid != GSS_C_NULL_OID)

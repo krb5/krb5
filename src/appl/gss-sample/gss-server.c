@@ -166,7 +166,7 @@ static int server_establish_context(s, server_creds, context, client_name,
 	   return -1;
 
 	 if (verbose && log) {
-	   fprintf(log, "Received token (size=%d): \n", recv_tok.length);
+	   fprintf(log, "Received token (size=%d): \n", (int) recv_tok.length);
 	   print_token(&recv_tok);
 	 }
 
@@ -192,7 +192,7 @@ static int server_establish_context(s, server_creds, context, client_name,
 	   if (verbose && log) {
 	     fprintf(log,
 		     "Sending accept_sec_context token (size=%d):\n",
-		     send_tok.length);
+		     (int) send_tok.length);
 	     print_token(&send_tok);
 	   }
 	   if (send_token(s, TOKEN_CONTEXT, &send_tok) < 0) {
@@ -333,7 +333,8 @@ static int test_import_export_context(context)
 	gettimeofday(&tm2, (struct timezone *)0);
 	if (verbose && log)
 		fprintf(log, "Exported context: %d bytes, %7.4f seconds\n",
-			context_token.length, timeval_subtract(&tm2, &tm1));
+			(int) context_token.length, 
+			timeval_subtract(&tm2, &tm1));
 	copied_token.length = context_token.length;
 	copied_token.value = malloc(context_token.length);
 	if (copied_token.value == 0) {
