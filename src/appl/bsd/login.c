@@ -813,6 +813,31 @@ bad_login:
 #endif
 	/* Fork so that we can call kdestroy */
 	dofork();
+
+/* If the user's shell does not do job control we should put it in a
+   different process group than than us, and set the tty process group
+   to match, otherwise stray signals may be delivered to login.krb5 or
+   telnetd or rlogind if they don't properly detach from their
+   controlling tty, which is the case (under SunOS at least.) */
+
+	{ int p = getpid(); 
+          if (setpgrp(p,p) < 0) perror("login.krb5: setpgrp");
+	  if (ioctl(0, TIOCSPGRP, &p) < 0) perror("login.krb5: tiocspgrp");
+        }
+
+/* SunOS has an ioctl which can set the controlling tty and make sure
+   that no other process also has it.  That's exactly what we want to
+   do for the shell we are about to exec, since it is the documented
+   way to avoid the problem noted just above. */
+
+#ifdef sun
+#ifdef TIOCSCTTY
+	{ if (setsid() < 0) perror("login.krb5: setsid");
+	  if (ioctl(0, TIOCSCTTY, 1) < 0) perror("login.krb5: tiocsctty");
+        }
+#endif
+#endif
+
 #endif /* KRB4 */
 	(void)setgid((gid_t) pwd->pw_gid);
 	(void) initgroups(username, pwd->pw_gid);
@@ -1381,6 +1406,22 @@ dofork()
 #endif
     if(!(child=fork()))
 	    return; /* Child process */
+
+    { /* Try and get rid of our controlling tty.  On SunOS, this may or may
+       not work depending on if our parent did a setsid before exec-ing us. */
+#ifdef TIOCNOTTY
+      { int fd;
+        if ((fd = open("/dev/tty", O_RDWR)) >= 0) {
+          ioctl(fd, TIOCNOTTY, 0);
+          close(fd);
+        }
+      }
+#endif
+#ifdef HAVE_SETSID
+      (void)setsid();
+#endif
+      (void)setpgrp(0, 0);
+    } 
 
     /* Setup stuff?  This would be things we could do in parallel with login */
     (void) chdir("/");	/* Let's not keep the fs busy... */

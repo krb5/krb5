@@ -1,3 +1,29 @@
+Fri Dec  1 17:25:02 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* login.c (main, dofork): Applied patch from Scott Schwartz
+	        <schwartz@galapagos.cse.psu.edu>
+
+		Under SunOS, and maybe other systems, there is a a problem
+		with krlogind.c and a similar problem with login.c as
+		distributed with K5.5.
+
+		The bug is that rlogind forks a child but retains a
+		controlling tty.  If the child is in the same process
+		group as the parent, which is will if you don't use a job
+		control shell (chsh /bin/rc), keyboard signals will kill
+		the daemon.  telnetd dissociates itself properly, but then
+		login.krb5 waits for the shell to finish, but login.krb5
+		has the same ctty as the shell and is in the same process
+		group, so it has the same problem.
+
+		In BSD you used to be able to give up your ctty at will,
+		but SunOS seems to have setsid as the only mechanism to
+		perform that action, and setsid can only succeed in
+		limited circumstances.  Rlogind ought to be fixed to
+		behave more like telnetd, but independent of that,
+		login.krb5 needs to be patched if kerberos is to work
+		properly under SunOS.
+
 Sun Nov 12 12:39:23 1995  Sam Hartman  <hartmans@tertius.mit.edu>
 
 	* krlogind.c (doit): Clear iextn for NetBSD and other 4.4-based
