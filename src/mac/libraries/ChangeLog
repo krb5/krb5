@@ -1,3 +1,10 @@
+Wed Sep 20 12:00:00 1995  James Mattly <mattly@fusion.com>
+
+	* libraries.sit.hqx:  Updated project files to exclude verification files so
+		users can link without the benefits of a preimplemented main.
+	* KerberosHeaders.pch:  Updated to handle change password.
+
+
 Sun Sep 10 12:00:00 1995  James Mattly <mattly@fusion.com>
 
 	* ChangeLog created

@@ -2289,8 +2289,10 @@ char	*ptr;
 	else
 	{
 		//jfm failed to get the ticket
-		ParamText("\pTicket refused.", "\p", "\p", "\p");
-		Alert(128, NULL);
+        com_err (NULL, code, "while logging in.");
+
+//		ParamText("\pTicket refused.", "\p", "\p", "\p");
+//		Alert(128, NULL);
 	}
 #endif
 }
@@ -3324,7 +3326,10 @@ char	*text;
 // Change the password from old to new
 		s = k5_change_password(kcontext, username, realm, valcruft.buffer1, valcruft.buffer2, &text);
 		if (s)
+		{
 			SysBeep(10);	// change password failed
+	        com_err (NULL, s, "while logging in.");
+		}
 
 // not sure what "text" represents
 }

@@ -1,3 +1,10 @@
+Wed Sep 20 12:00:00 1995  James Mattly <mattly@fusion.com>
+
+	* kconfig.sit.hqx:  update project files to include kadm source for change
+		password.
+	* KerberosHeaders.pch:  updated to handle compilation of kadm for change
+		password.
+
 Sun Sep 10 12:00:00 1995  James Mattly <mattly@fusion.com>
 
 	* ChangeLog created

@@ -32,6 +32,25 @@ typedef unsigned int size_t;
 #define PROVIDE_DES_CBC_MD5
 #define PROVIDE_RAW_DES_CBC
 
+/* Rename various socket type operations to avoid cluttering the namespace
+ */
+#define socket			mackrb5_socket
+#define closesocket		mackrb5_closesocket
+#define connect			mackrb5_connect
+#define bind			mackrb5_bind
+#define send			mackrb5_send
+#define recv			mackrb5_recv
+#define sendto			mackrb5_sendto
+#define select			mackrb5_select
+#define recvfrom		mackrb5_recvfrom
+#define inet_ntoa		mackrb5_inet_ntoa
+#define gethostbyname	mackrb5_gethostbyname
+#define gethostbyaddr	mackrb5_gethostbyaddr
+#define gethostname		mackrb5_gethostname
+#define getsocketname	mackrb5_getsocketname
+#define getmyipaddr		mackrb5_getmyipaddr
+
+
 typedef int datum;
 
 //jfm need to reimplement
