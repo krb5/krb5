@@ -8,11 +8,14 @@
 #  For copying and distribution information, please see the file
 #  <krb5/copyright.h>.
 # 
+#define IHaveSubdirs
+#define PassCDebugFlags
         DEPLIBS = $(DEPKLIB)
 LOCAL_LIBRARIES = $(KLIB)
+        SUBDIRS = jon
 
            OBJS = test1.o dump.o 
 
            SRCS = test1.c dump.c 
 
-ComplexProgramTarget(test)
+#ComplexProgramTarget(test)
