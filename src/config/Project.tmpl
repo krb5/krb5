@@ -158,6 +158,23 @@ newname: stockname Makefile						@@\
 	-$(UNIFDEF) $(PROCESS_DEFINES) stockname >newname
 #endif /* ProcessStockHeader */
 
+/*
+ * Krb5LibraryTarget - generate rules to create a library, and link to it
+ * in the library dir
+ */
+#ifndef Krb5LibraryTarget
+#define	Krb5LibraryTarget(libname,objlist)				@@\
+AllTarget(lib/**/libname.a)						@@\
+DependTarget()								@@\
+									@@\
+lib/**/libname.a: objlist						@@\
+	$(RM) $@							@@\
+	$(AR) $@ objlist						@@\
+	$(RANLIB) $@							@@\
+	$(RM) $(TOPLIBD)/lib/**/libname.a				@@\
+	$(LN) ../$(CURRENT_DIR)/lib/**/libname.a $(TOP)/lib/lib/**/libname.a
+#endif /* Krb5LibraryTarget */
+
 #if HasPosixTermios
 P_TERMIOS=-DHasPosixTermiosTrue
 #else
@@ -251,20 +268,23 @@ P_PROTOS=-UUseNarrowPrototypes
             ETSRC = $(TOP)/comerr
             SSSRC = $(TOP)/ss
        UNIFDEFSRC = $(TOP)/util/unifdef
-            OSLIB = $(TOP)/lib/os/libos.a
-           DESLIB = $(TOP)/lib/des/libdes.a
-        RSAMD4LIB = $(TOP)/lib/rsa-md4/libmd4.a
-          KRB5LIB = $(TOP)/lib/libkrb5.a
-           CRCLIB = $(TOP)/lib/crc-32/libcrc32.a
-           MD4LIB = $(TOP)/lib/rsa-md4/libmd4.a
+          TOPLIBD = $(TOP)/lib
+            OSLIB = os
+           DESLIB = des
+        RSAMD4LIB = md4
+          KRB5LIB = krb5
+           CRCLIB = crc32
+           MD4LIB = md4
          ISODELIB = IsodeLib
 
            DBMLIB = DbmLib
-          DEPKLIB = $(KRB5LIB) $(RSAMD4LIB) $(DESLIB) $(OSLIB) $(CRCLIB)
-             KLIB = $(DEPKLIB) $(ISODELIB) $(COMERRLIB) $(DBMLIB)
-        DEPKDBLIB = $(TOP)/lib/kdb/libkdb.a
+          DEPKLIB = $(TOPLIBD)/lib$(KRB5LIB).a $(TOPLIBD)/lib$(RSAMD4LIB).a $(TOPLIBD)/lib$(DESLIB).a $(TOPLIBD)/lib$(OSLIB).a $(TOPLIBD)/lib$(CRCLIB).a
+             KLIB = -L$(TOPLIBD) -l$(KRB5LIB) -l$(RSAMD4LIB) -l$(DESLIB) -l$(OSLIB) -l$(CRCLIB) $(ISODELIB) $(COMERRLIB) $(DBMLIB)
+        DEPKDBLIB = $(TOPLIBD)/libkdb.a
+/* ideally, this would be just "kdb", but since it needs to load before
+   the other libs, it misses th e -L$(TOPLIBD) */
            KDBLIB = $(DEPKDBLIB)
-     DEPKRB425LIB = $(TOP)/lib/krb425/libkrb425.a
+     DEPKRB425LIB = $(TOPLIBD)/libkrb425.a
         KRB425LIB = $(DEPKDBLIB)
           KRB4LIB = Krb4LibList
      KRB4INCLUDES = Krb4Includes

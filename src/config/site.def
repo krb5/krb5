@@ -78,7 +78,7 @@
    library.  This might want to be -lisode if you have it installed.
    IsodeDir is put into the 'make' variable ISODE. */
 
-#define IsodeLib /mit/isode/isode-6.0/@sys/lib/libisode.a
+#define IsodeLib -L/mit/isode/isode-6.0/@sys/lib -lisode
 #define IsodeDir /mit/isode/isode-6.0
 
 /* Re-define PepyCmd and PosyCmd if pepy & posy aren't in your search
