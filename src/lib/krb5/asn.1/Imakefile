@@ -11,11 +11,12 @@ PepyPosyRules()
 NormalLibraryObjectRule()
 
 SRCS= \
-	KRB5-asn.py	\
+	$(TYPESSRCS)	\
 	encode.c 	\
 	decode.c	\
 	adat2kadat.c	\
 	addr2kaddr.c	\
+	adr2kadr.c	\
 	aprp2kaprp.c	\
 	aprq2kaprq.c	\
 	arep2karep.c	\
@@ -30,6 +31,7 @@ SRCS= \
 	g2unix.c	\
 	kadat2adat.c	\
 	kaddr2addr.c	\
+	kadr2adr.c	\
 	kaprp2aprp.c	\
 	kaprq2aprq.c	\
 	karep2arep.c	\
@@ -126,6 +128,7 @@ OBJS= \
 
 #ifdef TypesObjs
 #include "KRB5-oflist"
+#include "KRB5-cflist"
 #endif
 
 all:: KRB5-oflist Makefile
@@ -156,7 +159,7 @@ Makefile:: KRB5-oflist Imakefile
 noop::
 
 KRB5-pt0.c KRB5-cflist KRB5-oflist:	KRB5-types.c process.perl
-	$(PERL) process.perl KRB5-types.c KRB5-pt /dev/null KRB5-oflist
+	$(PERL) process.perl KRB5-types.c KRB5-pt KRB5-cflist KRB5-oflist
 
 KRB5-types.c: KRB5-types.py
 
