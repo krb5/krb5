@@ -1,3 +1,8 @@
+2001-01-29  Ken Raeburn  <raeburn@mit.edu>
+
+	* make_checksum.c (krb5_c_make_checksum): Clear checksum contents
+	pointer after freeing it in error case.
+
 2000-06-03  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in(LIBMAJOR, LIBMINOR): Bump library version.
