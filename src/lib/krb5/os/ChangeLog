@@ -1,3 +1,16 @@
+2004-11-19  Ken Raeburn  <raeburn@mit.edu>
+
+	* locate_kdc.c (krb5int_add_host_to_list): If debugging, log the
+	requested family and socket type.  If AI_NUMERICSERV is defined,
+	set it in ai_flags.  If getaddrinfo returns an error with
+	debugging enabled, log the error.
+	(krb5_locate_srv_conf_1): When logging an error from
+	add_host_to_list, include the corresponding error string.
+
+	* t_locate_kdc.c: Include port-sockets.h, instead of sys/socket.h,
+	netdb.h, netinet/in.h, and arpa/inet.h.
+	* Makefile.in ($(OUTPRE)t_locate_kdc.exe): New target.
+
 2004-10-20  Ken Raeburn  <raeburn@mit.edu>
 
 	* locate_kdc.c: Include stdarg.h.
