@@ -7,8 +7,8 @@ type 'vend' {
 		pstring;												/* address */
 		pstring;												/* voice phone */
 		pstring;												/* fax phone */
-		pstring;												/* info URL	*/
-		pstring;												/* update URL */
+		pstring;												/* update URL	*/
+		pstring;												/* info URL */
 		pstring;												/* e-mail URL */
 };
 
@@ -28,7 +28,7 @@ resource 'vend' (-20640, purgeable) {
 	"77 Massachusetts Avenue, E40-318, Cambridge, MA 02139",
 	"",
 	"",
-	"http://mit.edu/macdev/www/",
 	"",
+	"http://mit.edu/macdev/www/",
 	"mailto:macdev@mit.edu"
 };
