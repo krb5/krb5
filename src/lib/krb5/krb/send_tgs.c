@@ -30,8 +30,7 @@
  Sends a request to the TGS and waits for a response.
  options is used for the options in the KRB_TGS_REQ.
  timestruct values are used for from, till, rtime " " "
- etype is used for etype " " ", and to encrypt the authorization data, if present
- sumtype is used for the checksum in the AP_REQ in the KRB_TGS_REQ
+ etype is used for etype " " ", and to encrypt the authorization data, 
  sname is used for sname " " "
  addrs, if non-NULL, is used for addresses " " "
  authorization_dat, if non-NULL, is used for authorization_dat " " "
@@ -45,12 +44,12 @@
 
  returns system errors
  */
+extern krb5_cksumtype krb5_kdc_req_sumtype;
 
 static krb5_error_code 
-krb5_send_tgs_basic(context, in_data, sumtype, in_cred, outbuf)
+krb5_send_tgs_basic(context, in_data, in_cred, outbuf)
     krb5_context          context;
     krb5_data           * in_data;
-    const krb5_cksumtype  sumtype;
     krb5_creds          * in_cred;
     krb5_data           * outbuf;
 {   
@@ -63,11 +62,11 @@ krb5_send_tgs_basic(context, in_data, sumtype, in_cred, outbuf)
     krb5_data           * toutbuf;
 
     /* Generate checksum */
-    if ((checksum.contents = 
-      (krb5_octet *)malloc(krb5_checksum_size(context, sumtype))) == NULL) 
+    if ((checksum.contents = (krb5_octet *)
+	 malloc(krb5_checksum_size(context, krb5_kdc_req_sumtype))) == NULL) 
         return(ENOMEM);
 
-    if (retval = krb5_calculate_checksum(context, sumtype,
+    if (retval = krb5_calculate_checksum(context, krb5_kdc_req_sumtype,
                                       in_data->data, in_data->length,
 				      (krb5_pointer) in_cred->keyblock.contents,
 				      in_cred->keyblock.length, &checksum)) {
@@ -164,13 +163,12 @@ cleanup_scratch:
 }
 
 krb5_error_code
-krb5_send_tgs(context, kdcoptions, timestruct, etypes, sumtype, sname, addrs,
+krb5_send_tgs(context, kdcoptions, timestruct, etypes, sname, addrs,
 	      authorization_data, padata, second_ticket, in_cred, rep)
     krb5_context context;
     const krb5_flags kdcoptions;
     const krb5_ticket_times * timestruct;
     const krb5_enctype * etypes;
-    const krb5_cksumtype sumtype;
     krb5_const_principal sname;
     krb5_address * const * addrs;
     krb5_authdata * const * authorization_data;
@@ -287,8 +285,7 @@ krb5_send_tgs(context, kdcoptions, timestruct, etypes, sumtype, sname, addrs,
     /*
      * Get an ap_req.
      */
-    if (retval = krb5_send_tgs_basic(context, scratch, sumtype,
-				     in_cred, &scratch2)) {
+    if (retval = krb5_send_tgs_basic(context, scratch, in_cred, &scratch2)) {
         krb5_free_data(context, scratch);
 	goto send_tgs_error_2;
     }

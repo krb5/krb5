@@ -96,9 +96,6 @@ cleanup:
     return retval;
 }
  
-/* XXX This is to move to krb5_send_tgs, RSN -- CAP 950411 */
-extern  krb5_cksumtype krb5_kdc_req_sumtype;
-
 krb5_error_code INTERFACE
 krb5_get_cred_via_tkt (context, tkt, kdcoptions, address, in_cred, out_cred)
     krb5_context 	  context;
@@ -145,7 +142,6 @@ krb5_get_cred_via_tkt (context, tkt, kdcoptions, address, in_cred, out_cred)
 */
 
     if (retval = krb5_send_tgs(context, kdcoptions, &in_cred->times, NULL, 
-			       krb5_kdc_req_sumtype, /* To be removed */
 			       in_cred->server, address, in_cred->authdata,
 			       0,		/* no padata */
 			       (kdcoptions & KDC_OPT_ENC_TKT_IN_SKEY) ? 
