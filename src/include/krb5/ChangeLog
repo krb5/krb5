@@ -1,4 +1,9 @@
 
+Thu Aug 03 12:19:52 1995   Chris Provenzano (proven@mit.edu)
+
+	* kdb.h : Added prototype for krb5_dbe_cpw() the new dd entry
+		change password routine.
+
 Mon Jul 31 15:50:25 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* adm.h - Add new protocol definitions.  Also, add krb5_key_salt_tuple
 		and add it to the krb5_read_realm_params structure so that
