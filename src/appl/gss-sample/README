@@ -41,20 +41,26 @@ interfaces.
 
 The server's command line usage is
 
-	gss-server [-port port] service_name
+	gss-server [-port port] [-v2] service_name
 
 where service_name is a GSS-API service name of the form
 "service@host".  The server will accept TCP connections on port
-(default 4444) and establish contexts as service_name.
+(default 4444) and establish contexts as service_name.  The -v2 option
+means that the GSSAPI v2 calls should be used (and tested).
+
 
 The client's command line usage is
 
-	gss-client [-port port] host service_name msg
+	gss-client [-port port] [-v2] [-d] host service_name msg
 
 where host is the host running the server, service_name is the service
 name that the server will establish connections as, and msg is the
 message.  The client connects to the TCP on <host:port> (default 4444)
-and performs the exchange.
+and performs the exchange. The "-d" option specifies delegation -
+a forwardable TGT will be sent to the server, which will put it in
+its credential cache (you must kinit -f for this to work). 
+The -v2 option means that the GSSAPI v2 calls should be used (and
+tested).
 
 If you are using this sample application with OpenVision's Kerberos 5
 GSS-API mechanism:

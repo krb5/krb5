@@ -1,3 +1,9 @@
+Wed Jan  3 21:55:30 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* gss-client.c (main, client_establish_context): If the -d flag is
+		given to the client, then try to delegate credentials when
+		establishing the context.
+
 Thu Oct 12 11:15:28 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* gss-misc.c (recv_token): When continuing partial read, decrease

@@ -41,13 +41,16 @@ int call_server();
 
 int send_token();
 int recv_token();
+
+int deleg_flag;
 void display_status();
 
 extern FILE *display_file;
 
 usage()
 {
-     fprintf(stderr, "Usage: gss-client [-port port] [-v2] host service msg\n");
+     fprintf(stderr, "Usage: gss-client [-port port] [-d] [-v2] host service \
+msg\n");
      exit(1);
 }
 
@@ -60,6 +63,7 @@ main(argc, argv)
      int v2 = 0;
      
      display_file = stdout;
+     deleg_flag = 0;
 
      /* Parse arguments. */
      argc--; argv++;
@@ -70,6 +74,8 @@ main(argc, argv)
 	       port = atoi(*argv);
 	  } else if (strcmp(*argv, "-v2") == 0) {
 	       v2 = 1;
+	  } else if (strcmp(*argv, "-d") == 0) {
+	       deleg_flag = GSS_C_DELEG_FLAG;
 	  } else 
 	       break;
 	  argc--; argv++;
@@ -446,7 +452,8 @@ int client_establish_context(s, service_name, gss_context)
 				    gss_context,
 				    target_name,
 				    GSS_C_NULL_OID,
-				    GSS_C_MUTUAL_FLAG | GSS_C_REPLAY_FLAG,
+				    GSS_C_MUTUAL_FLAG | GSS_C_REPLAY_FLAG |
+							deleg_flag,
 				    0,
 				    NULL,	/* no channel bindings */
 				    token_ptr,
