@@ -1,3 +1,21 @@
+2001-01-19  Ken Raeburn  <raeburn@mit.edu>
+
+	* k5-int.h, krb5.hin: Use prototypes unconditionally.
+
+	* krb5.hin (krb5_const, krb5_pointer, krb5_const_pointer): Always
+	define as ANSI versions.
+
+	* krb5.hin (struct _krb5_safe, struct _krb5_priv, struct
+	_krb5_priv_enc_part, krb5_free_safe, krb5_free_priv,
+	krb5_free_priv_enc_part, struct krb5_rc_st, struct _krb5_rc_ops,
+	krb5_rc_register_type, krb5_rc_dfl_ops): Move from here...
+	* k5-int.h: ...to here.
+
+	* krb5.hin (krb5_rc_initialize, krb5_rc_recover, krb5_rc_destroy,
+	krb5_rc_close, krb5_rc_close, krb5_rc_store, krb5_rc_expunge,
+	krb5_rc_get_lifespan, krb5_rc_get_name, krb5_rc_resolve): Replace
+	macros with function decls.
+
 2000-11-01  Ezra Peisach  <epeisach@mit.edu>
 
 	* configure.in: Use AC_C_CONST instead of AC_CONST and
