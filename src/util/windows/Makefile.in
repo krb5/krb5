@@ -5,7 +5,7 @@ CFLAGS 	 = $(COPTS) $(INCLUDES)
 ##WIN16##LFLAGS	 = /nologo /nod /nopackcode
 ##WIN32##LFLAGS	 = /nologo /nod
 
-##WIN32##all-windows:: libecho.exe
+##WIN32##all-windows:: libecho.exe getopt.obj
 
 libecho.exe: libecho.c
 
