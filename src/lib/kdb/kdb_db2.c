@@ -1154,8 +1154,13 @@ krb5_db2_db_iterate_ext(context, func, func_arg, backwards, recursive)
 	dbret = (*db->seq)(db, &key, &contents,
 			   backwards ? R_LAST : R_FIRST);
     } else {
+#ifdef HAVE_BT_RSEQ
 	dbret = bt_rseq(db, &key, &contents, &cookie,
 			backwards ? R_LAST : R_FIRST);
+#else
+	(void)krb5_db2_db_unlock(context);
+	return KRB5_KDB_UK_RERROR; /* Not optimal, but close enough. */
+#endif
     }
     while (dbret == 0) {
 	contdata.data = contents.data;
@@ -1171,8 +1176,13 @@ krb5_db2_db_iterate_ext(context, func, func_arg, backwards, recursive)
 	    dbret = (*db->seq)(db, &key, &contents,
 			       backwards ? R_PREV : R_NEXT);
 	} else {
+#ifdef HAVE_BT_RSEQ
 	    dbret = bt_rseq(db, &key, &contents, &cookie,
 			    backwards ? R_PREV : R_NEXT);
+#else
+	    (void)krb5_db2_db_unlock(context);
+	    return KRB5_KDB_UK_RERROR; /* Not optimal, but close enough. */
+#endif
 	}
     }
     switch (dbret) {
