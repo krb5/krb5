@@ -1,0 +1,25 @@
+#	$Source$
+#	$Author$
+#	$Id$
+#
+# Copyright 1990 by the Massachusetts Institute of Technology.
+# 
+# For copying and distribution information, please see the file
+# <krb5/copyright.h>.
+# 
+# Command table for Kerberos administration edit
+#
+
+command_table kdb5_edit_cmds;
+
+request add_new_key, "Add new entry to Kerberos database",
+	add_new_key, ank;
+
+# list_requests is generic -- unrelated to Kerberos
+	request	ss_list_requests, "List available requests.",
+		list_requests, lr, "?";
+
+	request	ss_abort_subsystem, "Exit program.",
+		quit, exit, q;
+
+end;
