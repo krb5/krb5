@@ -33,11 +33,65 @@ file.  For a basic description of the syntax, please refer to the
 .I krb5.conf
 description.
 .PP
-Each section in
+The following sections are currently used in the
 .I kdc.conf
-describes a particular realm and the individual tags describe that
-parameter value for that realm.  The following tags are currently
-used:
+file:
+.IP [kdcdefaults]
+Contains parameters which control the overall behaviour of the KDC.
+.IP [realms]
+Contains subsections keyed by Kerberos realm names which describe per-realm
+KDC parameters.
+.SH KDCDEFAULTS SECTION
+The following relations are defined in the
+.I [kdcdefaults]
+section:
+.IP primary_ports
+This relation lists the primary ports (e.g. ports to serve Kerberos version
+5 requests) to listen on.  This list is a comma separated list of integers.
+If supplied, this list serves as a base list of ports to listen on.  If any
+other ports are named in the
+.I [realms]
+section explicitly; or are named by
+.B kdc
+relations specifying this host in the
+.I krb5.conf
+file specified in the
+.B profile
+entry for a particular realm, then these ports are also listened on.
+.IP secondary_ports
+This relation lists the secondary ports (e.g. ports to serve Kerberos version
+4 requests) to listen on.  If supplied, this list serves as a base list of
+ports to listen on.  If any other ports are named in the
+.I [realms]
+section explicitly; or are named by
+.B v4kdc
+relations specifying this host in the
+.I krb5.conf
+file specified in the
+.B profile
+entry for a particular realm, then these ports are also listened on.
+Further, if this list is specified and the first element is
+.I \-1
+then no secondary ports are listened to, even if specified in the
+.I [realms]
+section.
+.SH REALMS SECTION
+Each tag in the
+.I [realms]
+section of the file names a Kerbveros realm.  The value of the tag is a
+subsection where the relations in that subsection define KDC parameters for
+that particular realm.
+.PP
+For each realm, the following tags may be specified in the
+.I [realms]
+subsection:
+.IP profile
+This
+.B string
+specifies the location of the Kerberos configuration file, e.g. 
+.I krb5.conf
+, for that realm.
+
 .IP database_name
 This
 .B string
@@ -69,6 +123,12 @@ specifies the location where the master key has been stored with
 This
 .B integer
 specifies the primary port that the KDC is to listen to for this
+realm.
+
+.IP secondary_port
+This
+.B integer
+specifies the secondary port that the KDC is to listen to for this
 realm.
 
 .IP max_life

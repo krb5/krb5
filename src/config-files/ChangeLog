@@ -1,4 +1,10 @@
 
+Wed Jul 12 12:06:10 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* kdc.conf[.M] - Change syntax.  KDC now has per-realm information in
+		[realms] section and has [kdcdefaults] to contain global data.
+		Add profile and secondary_port per-realm data.
+
+
 Fri Jun 23 10:36:48 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* kdc.conf[.M] - Add description of new KDC configuration file.
 
