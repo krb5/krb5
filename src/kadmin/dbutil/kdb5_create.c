@@ -132,6 +132,7 @@ void kdb5_create(argc, argv)
     char *pw_str = 0;
     int pw_size = 0;
     int do_stash = 0;
+    krb5_int32 crflags = KRB5_KDB_CREATE_BTREE;
     krb5_data pwd;
 	   
     if (strrchr(argv[0], '/'))
@@ -142,6 +143,8 @@ void kdb5_create(argc, argv)
 	case 's':
 	    do_stash++;
 	    break;
+	case 'h':
+	    crflags = KRB5_KDB_CREATE_HASH;
 	case '?':
 	default:
 	    usage();
@@ -232,7 +235,8 @@ master key name '%s'\n",
 	(void) krb5_finish_key(util_context, &master_encblock);
 	exit_status++; return;
     }
-    if ((retval = krb5_db_create(util_context, global_params.dbname))) {
+    if ((retval = krb5_db_create(util_context,
+				 global_params.dbname, crflags))) {
 	(void) krb5_finish_key(util_context, &master_encblock);
 	(void) krb5_finish_random_key(util_context, &master_encblock, &rblock.rseed);
 	com_err(argv[0], retval, "while creating database '%s'",

@@ -91,7 +91,7 @@ kdb5_destroy(argc, argv)
 	com_err(argv[0], retval, "'%s'",dbname);
 	exit_status++; return;
     }
-    retval1 = kdb5_db_destroy(context, dbname);
+    retval1 = krb5_db_destroy(context, dbname);
     retval2 = osa_adb_destroy_policy_db(&global_params);
     if (retval1) {
 	com_err(argv[0], retval1, "deleting database '%s'",dbname);

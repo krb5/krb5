@@ -1,3 +1,10 @@
+Fri Jul 25 15:46:24 1997  Tom Yu  <tlyu@mit.edu>
+
+	* loadv4.c:
+	* kdb5_create.c:
+	* kdb5_destroy.c:
+	* dump.c: Update to new kdb API.
+
 Thu Jul 17 12:25:41 1997  Ezra Peisach  <epeisach@mit.edu>
 
 	* dump.c (process_k5beta_record): Change variables from char to

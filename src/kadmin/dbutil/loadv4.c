@@ -145,6 +145,7 @@ char *argv[];
     kadm5_config_params newparams;
     extern kadm5_config_params global_params;
     long exp_time = 0;
+    krb5_int32 crflags = KRB5_KDB_CREATE_BTREE;
 
     retval = krb5_init_context(&context);
     if (retval) {
@@ -180,6 +181,9 @@ char *argv[];
 	    } else {
 		usage();
 	    }
+	}
+	else if (!strcmp(argv[op_ind], "-h")) {
+	    crflags = KRB5_KDB_CREATE_HASH;
 	}
 	else if ((argc - op_ind) >= 1) {
 	    v4dumpfile = argv[op_ind];
@@ -238,7 +242,7 @@ char *argv[];
 	strcpy(tempdbname, dbname);
 	tempdbname[dbnamelen] = '~';
 	tempdbname[dbnamelen+1] = 0;
-	(void) kdb5_db_destroy(context, tempdbname);
+	(void) krb5_db_destroy(context, tempdbname);
     }
 	
 
@@ -298,10 +302,10 @@ master key name '%s'\n",
 	krb5_free_context(context);
 	return;
     }
-    if (retval = krb5_db_create(context, tempdbname)) {
+    if (retval = krb5_db_create(context, tempdbname, crflags)) {
 	(void) krb5_finish_key(context, &master_encblock);
 	(void) krb5_finish_random_key(context, &master_encblock, &rblock.rseed);
-	(void) krb5_dbm_db_destroy(context, tempdbname);
+	(void) krb5_db_destroy(context, tempdbname);
 	com_err(PROGNAME, retval, "while creating %sdatabase '%s'",
 		tempdb ? "temporary " : "", tempdbname);
 	krb5_free_context(context);
@@ -310,7 +314,7 @@ master key name '%s'\n",
     if (retval = krb5_db_set_name(context, tempdbname)) {
 	(void) krb5_finish_key(context, &master_encblock);
 	(void) krb5_finish_random_key(context, &master_encblock, &rblock.rseed);
-	(void) krb5_dbm_db_destroy(context, tempdbname);
+	(void) krb5_db_destroy(context, tempdbname);
         com_err(PROGNAME, retval, "while setting active database to '%s'",
                 tempdbname);
 	krb5_free_context(context);
@@ -319,15 +323,15 @@ master key name '%s'\n",
     if (v4init(PROGNAME, v4manual, v4dumpfile)) {
 	(void) krb5_finish_key(context, &master_encblock);
 	(void) krb5_finish_random_key(context, &master_encblock, &rblock.rseed);
-	(void) krb5_dbm_db_destroy(context, tempdbname);
+	(void) krb5_db_destroy(context, tempdbname);
 	krb5_free_context(context);
 	return;
     }
     if ((retval = krb5_db_init(context)) || 
-	(retval = krb5_dbm_db_open_database(context))) {
+	(retval = krb5_db_open_database(context))) {
 	(void) krb5_finish_key(context, &master_encblock);
 	(void) krb5_finish_random_key(context, &master_encblock, &rblock.rseed);
-	(void) krb5_dbm_db_destroy(context, tempdbname);
+	(void) krb5_db_destroy(context, tempdbname);
 	com_err(PROGNAME, retval, "while initializing the database '%s'",
 		tempdbname);
 	krb5_free_context(context);
@@ -338,7 +342,7 @@ master key name '%s'\n",
 	(void) krb5_db_fini(context);
 	(void) krb5_finish_key(context, &master_encblock);
 	(void) krb5_finish_random_key(context, &master_encblock, &rblock.rseed);
-	(void) krb5_dbm_db_destroy(context, tempdbname);
+	(void) krb5_db_destroy(context, tempdbname);
 	com_err(PROGNAME, retval, "while adding K/M to the database");
 	krb5_free_context(context);
 	return;
@@ -349,7 +353,7 @@ master key name '%s'\n",
 	(void) krb5_db_fini(context);
 	(void) krb5_finish_key(context, &master_encblock);
 	(void) krb5_finish_random_key(context, &master_encblock, &rblock.rseed);
-	(void) krb5_dbm_db_destroy(context, tempdbname);
+	(void) krb5_db_destroy(context, tempdbname);
 	com_err(PROGNAME, retval, "while adding TGT service to the database");
 	krb5_free_context(context);
 	return;
@@ -372,13 +376,13 @@ master key name '%s'\n",
     if (retval == 0) {
 	if (retval = krb5_db_fini (context))
 	    com_err(PROGNAME, retval, "while shutting down database");
-	else if (tempdb && (retval = krb5_dbm_db_rename(context, tempdbname,
+	else if (tempdb && (retval = krb5_db_rename(context, tempdbname,
 							dbname)))
 	    com_err(PROGNAME, retval, "while renaming temporary database");
     } else {
 	(void) krb5_db_fini (context);
 	if (tempdb)
-		(void) krb5_dbm_db_destroy (context, tempdbname);
+		(void) krb5_db_destroy (context, tempdbname);
     }
     (void) krb5_finish_key(context, &master_encblock);
     (void) krb5_finish_random_key(context, &master_encblock, &rblock.rseed);

@@ -208,6 +208,7 @@ static const char oldoption[] = "-old";
 static const char b6option[] = "-b6";
 static const char verboseoption[] = "-verbose";
 static const char updateoption[] = "-update";
+static const char hashoption[] = "-hash";
 static const char ovoption[] = "-ov";
 static const char dump_tmptrail[] = "~";
 
@@ -1876,7 +1877,7 @@ restore_dump(programname, kcontext, dumpfile, f, verbose, dump, pol_db)
 }
 
 /*
- * Usage: load_db [-old] [-ov] [-b6] [-verbose] [-update] filename
+ * Usage: load_db [-old] [-ov] [-b6] [-verbose] [-update] [-hash] filename
  */
 void
 load_db(argc, argv)
@@ -1897,6 +1898,7 @@ load_db(argc, argv)
     char		buf[BUFSIZ];
     dump_version	*load;
     int			update, verbose;
+    krb5_int32		crflags;
     int			aindex;
 
     /*
@@ -1910,6 +1912,7 @@ load_db(argc, argv)
     load = NULL;
     update = 0;
     verbose = 0;
+    crflags = KRB5_KDB_CREATE_BTREE;
     exit_status = 0;
     dbname_tmp = (char *) NULL;
     tmppol_db = NULL;
@@ -1924,6 +1927,8 @@ load_db(argc, argv)
 	    verbose = 1;
 	else if (!strcmp(argv[aindex], updateoption))
 	    update = 1;
+	else if (!strcmp(argv[aindex], hashoption))
+	    crflags = KRB5_KDB_CREATE_HASH;
 	else
 	    break;
     }
@@ -2033,7 +2038,7 @@ load_db(argc, argv)
      * with policy info, because they may be loading an old dump
      * intending to use it with the new kadm5 system.
      */
-    if (!update && (kret = krb5_db_create(kcontext, dbname_tmp))) {
+    if (!update && (kret = krb5_db_create(kcontext, dbname_tmp, crflags))) {
 	 fprintf(stderr, dbcreaterr_fmt,
 		 programname, dbname_tmp, error_message(kret));
 	 exit_status++;
@@ -2138,7 +2143,7 @@ error:
      */
     if (!update) {
 	 if (exit_status) {
-	      if ((kret = kdb5_db_destroy(kcontext, dbname_tmp))) {
+	      if ((kret = krb5_db_destroy(kcontext, dbname_tmp))) {
 		   fprintf(stderr, dbdelerr_fmt,
 			   programname, dbname_tmp, error_message(kret));
 		   exit_status++;
