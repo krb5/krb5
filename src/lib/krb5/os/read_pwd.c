@@ -75,8 +75,8 @@ intr_routine()
 krb5_error_code
 krb5_read_password(context, prompt, prompt2, return_pwd, size_return)
     krb5_context context;
-    char *prompt;
-    char *prompt2;
+    const char *prompt;
+    const char *prompt2;
     char *return_pwd;
     int *size_return;
 {
