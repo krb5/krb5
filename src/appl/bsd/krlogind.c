@@ -1523,7 +1523,7 @@ recvauth(valid_checksum)
 				  &auth_sys, 	/* which authentication system*/
 				  &v4_kdata, v4_schedule, v4_version)) {
 
-	if (auth_sys == KRB5_RECVAUTH_V5) {
+      if (auth_sys == KRB5_RECVAUTH_V5) {
 	    /*
 	     * clean up before exiting
 	     */
@@ -1536,40 +1536,42 @@ recvauth(valid_checksum)
 
     getstr(netf, lusername, sizeof (lusername), "locuser");
     getstr(netf, term, sizeof(term), "Terminal type");
-    if (status = krb5_auth_con_getauthenticator(bsd_context, auth_context, &authenticator))
-      return status;
+    if (auth_sys == KRB5_RECVAUTH_V5) {
+      
+      if(status = krb5_auth_con_getauthenticator(bsd_context, auth_context, &authenticator))
+	return status;
     
-    if (authenticator->checksum) {
+      if (authenticator->checksum) {
 	struct sockaddr_in adr;
 	int adr_length = sizeof(adr);
-      char * chksumbuf = (char *) malloc(strlen(term)+strlen(lusername)+32);
+	char * chksumbuf = (char *) malloc(strlen(term)+strlen(lusername)+32);
 	if (getsockname(netf, (struct sockaddr *) &adr, &adr_length) != 0)
-    return errno;
-      if (chksumbuf == 0)
-    goto error_cleanup;
+	  return errno;
+	if (chksumbuf == 0)
+	  goto error_cleanup;
 
-      sprintf(chksumbuf,"%u:", ntohs(adr.sin_port));
-      strcat(chksumbuf,term);
-      strcat(chksumbuf,lusername);
+	sprintf(chksumbuf,"%u:", ntohs(adr.sin_port));
+	strcat(chksumbuf,term);
+	strcat(chksumbuf,lusername);
 
-      if ( status = krb5_verify_checksum(bsd_context,
-					 authenticator->checksum->checksum_type,
-					 authenticator->checksum,
-					 chksumbuf, strlen(chksumbuf),
-					 				       ticket->enc_part2->session->contents, 
-				       ticket->enc_part2->session->length))
-	goto error_cleanup;
+	if ( status = krb5_verify_checksum(bsd_context,
+					   authenticator->checksum->checksum_type,
+					   authenticator->checksum,
+					   chksumbuf, strlen(chksumbuf),
+					   ticket->enc_part2->session->contents, 
+					   ticket->enc_part2->session->length))
+	  goto error_cleanup;
 
- error_cleanup:
-krb5_xfree(chksumbuf);
-      if (status) {
-	krb5_free_authenticator(bsd_context, authenticator);
-	return status;
-      }
+      error_cleanup:
+	krb5_xfree(chksumbuf);
+	if (status) {
+	  krb5_free_authenticator(bsd_context, authenticator);
+	  return status;
+	}
 	*valid_checksum = 1;
-}
-    krb5_free_authenticator(bsd_context, authenticator);
-
+      }
+      krb5_free_authenticator(bsd_context, authenticator);
+    }
 
 
 #ifdef KRB5_KRB4_COMPAT

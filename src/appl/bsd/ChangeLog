@@ -1,3 +1,8 @@
+Fri Feb  9 20:18:48 1996  <hartmans@mit.edu>
+
+	* krlogind.c (recvauth): Fix v4 incompatability created by
+        checksum code; if using v4, don't try to verify a v5 checksum.
+
 Thu Feb  1 00:09:13 1996  Sam Hartman  <hartmans@tertius.mit.edu>
 
 	* rcp.M: Fix typo.
