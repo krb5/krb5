@@ -1,3 +1,8 @@
+Fri Oct  6 22:06:14 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in: Remove ##DOS!include of config/windows.in.
+		config/windows.in is now included by wconfig.
+
 Mon Oct  2 14:38:37 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* Makefile.in (check-unix): Changed building of library from check

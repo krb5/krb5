@@ -1,7 +1,6 @@
 TST=if test -n "`cat DONE`" ; then
 
 ##DOSBUILDTOP = ..\..
-##DOS!include $(BUILDTOP)\config\windows.in
 
 all-unix::
 

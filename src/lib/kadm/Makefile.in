@@ -2,7 +2,6 @@ CFLAGS = $(CCOPTS) $(DEFS)
 
 ##DOSBUILDTOP = ..\..
 ##DOSLIBNAME=kadm.lib
-##DOS!include $(BUILDTOP)\config\windows.in
 
 BASE_OBJS= adm_conn.$(OBJEXT)	\
 	adm_kt_dec.$(OBJEXT)	\

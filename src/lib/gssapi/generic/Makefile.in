@@ -2,8 +2,6 @@ CFLAGS = $(CCOPTS) $(DEFS) -I. -I$(srcdir) -DUSE_AUTOCONF_H
 
 ##DOSBUILDTOP = ..\..\..
 ##DOSLIBNAME=..\gssapi.$(LIBEXT)
-##DOSsrcdir = .
-##DOS!include $(BUILDTOP)\config\windows.in
 
 all:: $(OBJS)
 

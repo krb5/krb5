@@ -1,3 +1,8 @@
+Fri Oct  6 22:04:57 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in: Remove ##DOS!include of config/windows.in.
+		config/windows.in is now included by wconfig.
+
 Thu Oct  5 07:49:26 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* init_os_ctx.c (krb5_secure_config_files): New function that 

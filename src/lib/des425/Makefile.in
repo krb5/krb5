@@ -2,7 +2,6 @@ CFLAGS = $(CCOPTS) $(DEFS) -I$(srcdir)/../crypto/des -I$(srcdir)/../../include/k
 
 ##DOSBUILDTOP = ..\..
 ##DOSLIBNAME=libdes425.lib
-##DOS!include $(BUILDTOP)\config\windows.in
 
 .c.o:
 	$(CC) $(CFLAGS) -c $(srcdir)/$*.c

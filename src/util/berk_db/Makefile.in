@@ -1,5 +1,4 @@
 ##DOSBUILDTOP = ..\..
-##DOS!include $(BUILDTOP)\config\windows.in
 
 TST=if test -n "`cat DONE`" ; then
 

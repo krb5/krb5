@@ -2,7 +2,6 @@ CFLAGS = $(CCOPTS) $(DEFS) -I$(srcdir)/crc32 -I$(srcdir)/des -I$(srcdir)/md4 -I$
 
 ##DOSBUILDTOP = ..\..
 ##DOSLIBNAME=crypto.lib
-##DOS!include $(BUILDTOP)\config\windows.in
 
 TST=if test -n "`cat DONE`" ; then
 

@@ -1,3 +1,8 @@
+Fri Oct  6 22:04:42 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in: Remove ##DOS!include of config/windows.in.
+		config/windows.in is now included by wconfig.
+
 Fri Sep 29 00:08:53 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* gc_via_tkt.c (krb5_get_cred_via_tkt): Only check the returned

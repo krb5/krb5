@@ -1,3 +1,8 @@
+Fri Oct  6 21:59:55 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in: Remove ##DOS!include of config/windows.in.
+		config/windows.in is now included by wconfig.
+
 Thu Sep 28 16:00:00 1995  John Rivlin  <jrivlin@fusion.com>
 
 	* Makefile.in: Renamed verify.c to t_verify.c to avoid conflict with 

@@ -2,7 +2,6 @@ CFLAGS = $(CCOPTS) $(DEFS) -I$(srcdir)$(S)file -I$(srcdir)$(S)stdio
 
 ##DOSBUILDTOP = ..\..\..
 ##DOSLIBNAME=..\krb5.lib
-##DOS!include $(BUILDTOP)\config\windows.in
 
 .c.o:
 	$(CC) $(CFLAGS) -c $(srcdir)/$*.c

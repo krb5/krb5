@@ -1,3 +1,8 @@
+Fri Oct  6 21:59:02 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in: Remove ##DOS!include of config/windows.in.
+		config/windows.in is now included by wconfig.
+
 Thu Oct  5 21:31:10 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* krb5.hin: Change types of krb5_max_enctype and

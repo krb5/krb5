@@ -2,7 +2,6 @@ CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
 
 ##DOSBUILDTOP = ..\..
 ##DOSLIBNAME=profile.lib
-##DOS!include $(BUILDTOP)\config\windows.in
 
 LOCALINCLUDE=-I. -I$(srcdir)/../et
 

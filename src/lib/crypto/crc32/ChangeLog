@@ -1,3 +1,8 @@
+Fri Oct  6 21:59:30 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in (CFLAGS): Remove ##DOS!include of config/windows.in.
+		config/windows.in is now included by wconfig.
+
 Mon Sep 25 16:48:23 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in: Removed "foo:: foo-$(WHAT)" lines from the

@@ -2,8 +2,6 @@ CFLAGS = $(CCOPTS) $(DEFS) -I. -I$(srcdir) -I../generic -I$(srcdir)/../generic -
 
 ##DOSBUILDTOP = ..\..\..
 ##DOSLIBNAME=..\gssapi.$(LIBEXT)
-##DOSsrcdir = .
-##DOS!include $(BUILDTOP)\config\windows.in
 
 all:: $(OBJS)
 

@@ -3,7 +3,6 @@ SED = sed
 
 ##DOSBUILDTOP = ..\..
 ##DOSLIBNAME=comerr.lib
-##DOS!include $(BUILDTOP)\config\windows.in
 
 .c.o:
 	$(CC) $(CFLAGS) -c $(srcdir)/$*.c

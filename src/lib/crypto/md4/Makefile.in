@@ -3,7 +3,6 @@ CFLAGS = $(CCOPTS) $(DEFS) -I$(srcdir)/../des -I"$(srcdir)"
 
 ##DOSBUILDTOP = ..\..\..
 ##DOSLIBNAME=..\crypto.lib
-##DOS!include $(BUILDTOP)\config\windows.in
 
 .c.o:
 	$(CC) $(CFLAGS) -c $(srcdir)/$*.c

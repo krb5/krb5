@@ -1,5 +1,4 @@
 ##DOSBUILDTOP = ..
-##DOS!include $(BUILDTOP)\config\windows.in
 
 all-unix:: krb5.h adm_err.h
 all-mac::

@@ -1,5 +1,8 @@
 Fri Oct  6 00:30:16 1995  Theodore Y. Ts'o  <tytso@dcl>
 
+	* Makefile.in: Remove ##DOS!include of config/windows.in.
+		config/windows.in is now included by wconfig.
+
 	* logger.c (klog_vsyslog): Make the logs less verbose, by omitting
 		the hostname, pid, etc. information.
 
