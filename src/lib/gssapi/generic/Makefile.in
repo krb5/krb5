@@ -17,16 +17,16 @@ gssapi_generic_err.c: gssapi_generic_err.et
 # UTIL_VALIDATE_SRC= $(srcdir)/util_validate.c
 # UTIL_VALIDATE_OBJ= util_validate.o
 #else
-UTIL_VALIDATE_SRC= $(srcdir)/util_val_nohash.c
-UTIL_VALIDATE_OBJ= util_val_nohash.o
+UTIL_VALIDATE_SRC= $(srcdir)/utl_nohash_validate.c
+UTIL_VALIDATE_OBJ= utl_nohash_validate.o
 #endif
 
 CCSRCS = \
-	$(srcdir)/display_major_status.c \
-	$(srcdir)/display_com_err_status.c \
+	$(srcdir)/disp_major_status.c \
+	$(srcdir)/disp_com_err_status.c \
 	$(srcdir)/gssapi_generic.c \
-	$(srcdir)/release_buffer.c \
-	$(srcdir)/release_oid_set.c \
+	$(srcdir)/rel_buffer.c \
+	$(srcdir)/rel_oid_set.c \
 	$(srcdir)/util_buffer.c \
 	$(srcdir)/util_canonhost.c \
 	$(srcdir)/util_dup.c \
@@ -35,11 +35,11 @@ CCSRCS = \
 	$(UTIL_VALIDATE_SRC)
 
 CCOBJS = \
-	display_major_status.o \
-	display_com_err_status.o \
+	disp_major_status.o \
+	disp_com_err_status.o \
 	gssapi_generic.o \
-	release_buffer.o \
-	release_oid_set.o \
+	rel_buffer.o \
+	rel_oid_set.o \
 	util_buffer.o \
 	util_canonhost.o \
 	util_dup.o \

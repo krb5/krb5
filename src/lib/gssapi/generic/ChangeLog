@@ -1,3 +1,13 @@
+Fri Feb  3 00:18:11 1995  John Gilmore  <gnu@cygnus.com>
+
+	Rename files for DOS 8.3 uniqueness:
+	* display_com_err_status.c => disp_com_err_status.c
+	* display_major_status.c   => disp_major_status.c
+	* release_buffer.c         => rel_buffer.c
+	* release_oid_set.c        => rel_oid_set.c
+	* util_val_nohash.c        => utl_nohash_validate.c
+	* Makefile.in was changed to match.
+
 Sat Aug 20 01:34:46 1994  Theodore Y. Ts'o  (tytso at tsx-11)
 
 	* gss_generic.c (gss_OID_desc): Fix OID's!
