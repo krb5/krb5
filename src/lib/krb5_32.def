@@ -251,3 +251,16 @@ EXPORTS
 	krb5_free_ktypes	; gssapi
 	krb5int_cc_default	; gssapi
 	krb5int_accessor	; INTERNAL (to end all internals)
+	krb5_cc_get_name
+	krb5_cc_gen_new
+	krb5_cc_initialize
+	krb5_cc_destroy
+	krb5_cc_close
+	krb5_cc_retrieve_cred
+	krb5_cc_get_principal
+	krb5_cc_start_seq_get
+	krb5_cc_next_cred
+	krb5_cc_end_seq_get
+	krb5_cc_remove_cred
+	krb5_cc_set_flags
+	krb5_cc_get_type

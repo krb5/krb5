@@ -1,3 +1,7 @@
+2000-07-20  Danilo Almeida  <dalmeida@mit.edu>
+
+	* krb5_32.def: Add krb5_cc_* functions.
+
 2000-07-19  Danilo Almeida  <dalmeida@mit.edu>
 
 	* krb4_32.def: Add krb_in_tkt.
