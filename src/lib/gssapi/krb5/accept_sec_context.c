@@ -515,16 +515,16 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
 
 	       i -= 4;
 
-	       /* have to use ptr2, since option.data is wrong type and
-		  macro uses ptr as both lvalue and rvalue */
-
 	       if (i < option.length || option.length < 0) {
 		   code = KG_BAD_LENGTH;
 		   major_status = GSS_S_FAILURE;
 		   goto fail;
 	       }
 
-	       TREAD_STR(ptr, ptr2, bigend);
+	       /* have to use ptr2, since option.data is wrong type and
+		  macro uses ptr as both lvalue and rvalue */
+
+	       TREAD_STR(ptr, ptr2, option.length);
 	       option.data = (char *) ptr2;
 
 	       i -= option.length;
