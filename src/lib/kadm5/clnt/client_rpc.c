@@ -302,6 +302,7 @@ init_1(argp, clnt)
      memset((char *)&res, 0, sizeof(res));
      x = clnt_call(clnt, INIT, xdr_u_int32, argp,
 		   xdr_generic_ret, &res, TIMEOUT);
+#define SFILE (strrchr(__FILE__,'/') ? 1+strrchr(__FILE__,'/') : __FILE__)
      if (x != RPC_SUCCESS) {
 	 _log("%s:%d: init_1: clnt_call returned %d\n", SFILE, __LINE__, x);
 	  return (NULL);
