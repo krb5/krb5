@@ -1,3 +1,8 @@
+Wed May 03 03:30:51 1995  Chris Provenzano (proven@mit.edu)
+
+        * krlogind.c, krshd.c: (krb5_compat_recvauth()): 
+		No longer needs the rc_type arg.
+
 Tue May  2 22:12:39 1995  Theodore Y. Ts'o  (tytso@dcl)
 
 	* krcp.c (main): Don't try to play uid swapping games if the

@@ -1577,7 +1577,6 @@ recvauth()
     if (status = krb5_compat_recvauth(bsd_context, &auth_context, &netf,
 				  "KCMDV0.1",
 				  server, 	/* Specify daemon principal */
-				  0, 		/* default rc_type */
 				  0, 		/* no flags */
 				  keytab, /* normally NULL to use v5srvtab */
 
