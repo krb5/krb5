@@ -18,6 +18,7 @@ gssapi_err_krb5.c: gssapi_err_krb5.et
 SRCS = \
 	$(srcdir)/accept_sec_context.c \
 	$(srcdir)/acquire_cred.c \
+	$(srcdir)/add_cred.c \
 	$(srcdir)/canon_name.c \
 	$(srcdir)/compare_name.c \
 	$(srcdir)/context_time.c \
@@ -64,6 +65,7 @@ SRCS = \
 OBJS = \
 	accept_sec_context.$(OBJEXT) \
 	acquire_cred.$(OBJEXT) \
+	add_cred.$(OBJEXT) \
 	canon_name.$(OBJEXT) \
 	compare_name.$(OBJEXT) \
 	context_time.$(OBJEXT) \
@@ -110,6 +112,7 @@ OBJS = \
 STLIBOBJS = \
 	accept_sec_context.o \
 	acquire_cred.o \
+	add_cred.o \
 	canon_name.o \
 	compare_name.o \
 	context_time.o \
