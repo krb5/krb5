@@ -146,9 +146,12 @@ done
 
 cd ..
 
+echo "Build path is `pwd`/$BUILD_PATH"
+echo "contents of build path: "
+ls -l $BUILD_PATH
 PATH=`pwd`/$BUILD_PATH
 export PATH
-echo "Build path is $PATH"
+echo "======"
 
 echo "configuring with: $SRCDIR/configure $CONFIG_OPTS"
 $SRCDIR/configure $CONFIG_OPTS
