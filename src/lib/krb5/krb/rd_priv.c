@@ -25,16 +25,39 @@ static char rcsid_rd_priv_c[] =
 extern krb5_deltat krb5_clockskew;   
 #define in_clock_skew(date) (abs((date)-currenttime) < krb5_clockskew)
 
+/*
+
+Parses a KRB_PRIV message from inbuf, placing the confidential user
+data in *outbuf.
+
+key specifies the key to be used for decryption of the message.
+ 
+sender_addr and recv_addr specify the full
+addresses (host and port) of the sender and receiver.
+
+outbuf points to allocated storage which the caller should
+free when finished.
+
+i_vector is used as an initialization vector for the
+encryption, and if non-NULL its contents are replaced with the last
+block of the encrypted data upon exit.
+
+Returns system errors, integrity errors.
+
+*/
+
 krb5_error_code
 krb5_rd_priv(DECLARG(const krb5_data *, inbuf),
 	     DECLARG(const krb5_keyblock *, key),
 	     DECLARG(const krb5_fulladdr *, sender_addr),
 	     DECLARG(const krb5_fulladdr *, recv_addr),
+	     DECLARG(krb5_pointer, i_vector),
 	     DECLARG(krb5_data *, outbuf))
 OLDDECLARG(const krb5_data *, inbuf)
 OLDDECLARG(const krb5_keyblock *, key)
 OLDDECLARG(const krb5_fulladdr *, sender_addr)
 OLDDECLARG(const krb5_fulladdr *, recv_addr)
+OLDDECLARG(krb5_pointer, i_vector)
 OLDDECLARG(krb5_data *, outbuf)
 {
     krb5_error_code retval;
@@ -83,12 +106,22 @@ OLDDECLARG(krb5_data *, outbuf)
     if (retval =
         (*eblock.crypto_entry->decrypt_func)((krb5_pointer) privmsg->enc_part.data,
                                              (krb5_pointer) scratch.data,
-                                             scratch.length, &eblock, 0)) {
+                                             scratch.length, &eblock,
+					     i_vector)) {
 	cleanup_privmsg();
 	cleanup_scratch();
         cleanup_prockey();
 	return retval;
     }
+
+    /* if i_vector is set, fill it in with the last block of the encrypted
+       input */
+    /* put last block into the i_vector */
+    if (i_vector)
+	bcopy(privmsg->enc_part.data +
+	      (privmsg->enc_part.length - eblock.crypto_entry->block_length),
+	      i_vector,
+	      eblock.crypto_entry->block_length);
 
     /* private message is now decrypted -- do some cleanup */
 
@@ -109,13 +142,6 @@ OLDDECLARG(krb5_data *, outbuf)
 #define cleanup_data() {(void)bzero(privmsg_enc_part->user_data.data,privmsg_enc_part->user_data.length); (void)xfree(privmsg_enc_part->user_data.data);}
 #define cleanup_mesg() {(void)xfree(privmsg_enc_part);}
 
-    if (sender_addr && !krb5_address_compare(sender_addr->address,
-					  privmsg_enc_part->addresses[0])) {
-	cleanup_data();
-	cleanup_mesg();
-	return KRB5KRB_AP_ERR_BADADDR;
-    }
-
     if (retval = krb5_timeofday(&currenttime)) {
 	cleanup_data();
 	cleanup_mesg();
@@ -131,13 +157,38 @@ OLDDECLARG(krb5_data *, outbuf)
      * check with the replay cache should be inserted here !!!! 
      */
 
-    computed_direction = (krb5_fulladdr_order(sender_addr, recv_addr) > 0) ?
-	                 MSEC_DIRBIT : 0; 
-    /* what if sender_addr == 0 ?????*/
-    if (computed_direction != privmsg_enc_part->msec & MSEC_DIRBIT) {
-	cleanup_data();
-	cleanup_mesg();
-	return KRB5KRB_AP_ERR_REPEAT;
+
+    if (sender_addr) {
+	krb5_fulladdr temp_sender;
+	krb5_fulladdr temp_recip;
+	krb5_address **our_addrs;
+	
+	if (retval = krb5_os_localaddr(&our_addrs)) {
+	    cleanup_data();
+	    cleanup_mesg();
+	    return retval;
+	}
+	if (!krb5_address_search(privmsg_enc_part->r_address, our_addrs)) {
+	    krb5_free_address(our_addrs);
+	    cleanup_data();
+	    cleanup_mesg();
+	    return KRB5KRB_AP_ERR_BADADDR;
+	}
+	krb5_free_address(our_addrs);
+
+	temp_recip = *recv_addr;
+	temp_recip.address = privmsg_enc_part->r_address;
+
+	temp_sender = *sender_addr;
+	temp_sender.address = privmsg_enc_part->s_address;
+
+	computed_direction = ((krb5_fulladdr_order(&temp_sender, &temp_recip) >
+			       0) ? MSEC_DIRBIT : 0); 
+	if (computed_direction != (privmsg_enc_part->msec & MSEC_DIRBIT)) {
+	    cleanup_data();
+	    cleanup_mesg();
+	    return KRB5KRB_AP_ERR_BADDIRECTION;
+	}
     }
 
     /* everything is ok - return data to the user */
