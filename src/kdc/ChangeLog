@@ -15,6 +15,7 @@
 	macros instead of casting.  Enable the IPv6 code.
 	* dispatch.c, do_as_req.c, do_tgs_req.c: Define NEED_SOCKETS
 	before including k5-int.h.
+	* network.c: Include fake-addrinfo.h.
 
 2002-07-02  Ken Raeburn  <raeburn@mit.edu>
 

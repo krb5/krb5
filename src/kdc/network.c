@@ -56,6 +56,8 @@
 #include <net/if.h>
 #endif
 
+#include "fake-addrinfo.h"
+
 extern int errno;
 
 static int *udp_port_fds = (int *) NULL;
