@@ -173,7 +173,10 @@ OLDDECLARG(krb5_kdc_rep **, ret_as_reply)
     etypes[0] = etype;
     request.etype = etypes;
     request.netypes = 1;
-    request.addresses = (krb5_address **) addrs;
+    if (!addrs)
+	krb5_os_localaddr(&request.addresses);
+    else
+	request.addresses = (krb5_address **) addrs;
     request.second_ticket = 0;
     request.authorization_data.ciphertext.length = 0;
     request.authorization_data.ciphertext.data = 0;
