@@ -56,7 +56,7 @@ void closedown_network PROTOTYPE((void));
 #define setflag(flagfield, flag) (flagfield |= (flag))
 #define clear(flagfield, flag) (flagfield &= ~(flag))
 
-#define realm_of_tgt(ticket) ((ticket)->server[0])
+#define realm_of_tgt(ticket) krb5_princ_realm(ticket->server)
 
 #ifndef	min
 #define	min(a, b)	((a) < (b) ? (a) : (b))
