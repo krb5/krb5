@@ -38,9 +38,8 @@ static  char sccsid[] = "@(#)getrpcent.c 1.9 87/08/11  Copyr 1984 Sun Micro";
 
 #include <stdio.h>
 #include <sys/types.h>
-#include <rpc/rpc.h>
-#include <rpc/netdb.h>
 #include <netdb.h>
+#include <rpc/rpc.h>
 #include <string.h>
 #include <sys/socket.h>
 
