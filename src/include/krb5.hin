@@ -119,8 +119,7 @@ KRB5INT_BEGIN_DECLS
 
 #if TARGET_OS_MAC
 #    if defined(__MWERKS__)
-#	pragma import on
-#	pragma enumsalwaysint on
+#        pragma import on
 #    endif
 #    pragma options align=mac68k
 #endif
@@ -2555,10 +2554,9 @@ krb5_prompt_type* KRB5_CALLCONV krb5_get_prompt_types
 
 #if TARGET_OS_MAC
 #    if defined(__MWERKS__)
-#	pragma enumsalwaysint reset
-#	pragma import reset
+#        pragma import reset
 #    endif
-#	pragma options align=reset
+#    pragma options align=reset
 #endif
 
 KRB5INT_END_DECLS

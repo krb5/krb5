@@ -174,6 +174,7 @@ typedef unsigned char	u_char;
  */
 #include <errno.h>
 #include "krb5.h"
+#include "profile.h"
 
 #if 1 /* def NEED_SOCKETS */
 #include "port-sockets.h"
@@ -513,6 +514,11 @@ krb5_error_code krb5int_get_fq_local_hostname (char *, size_t);
 krb5_error_code krb5_os_init_context (krb5_context);
 
 void krb5_os_free_context (krb5_context);
+
+/* This function is needed by KfM's KerberosPreferences API 
+ * because it needs to be able to specify "secure" */
+krb5_error_code os_get_default_config_files 
+    (profile_filespec_t **pfiles, krb5_boolean secure);
 
 krb5_error_code krb5_find_config_files (void);
 
@@ -969,12 +975,7 @@ void KRB5_CALLCONV krb5_free_pa_enc_ts
 	(krb5_context, krb5_pa_enc_ts *);
 
 /* #include "krb5/wordsize.h" -- comes in through base-defs.h. */
-#if TARGET_OS_MAC
-#include <Kerberos/profile.h>
-#include <Kerberos/com_err.h>  /* Not included by Kerberos/profile.h */
-#else
-#include "profile.h"
-#endif
+#include "com_err.h"
 
 struct _krb5_context {
 	krb5_magic	magic;

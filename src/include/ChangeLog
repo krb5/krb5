@@ -1,3 +1,16 @@
+2003-03-06  Alexandra Ellwood  <lxs@mit.edu>
+    
+    * krb5.h: Removed enumsalwaysint because there are no typed
+    enums in this header.
+    
+    * k5-int.h: Removed Mac OS header goober. Added prototype for 
+    os_get_default_config_files which will be used by KfM's 
+    preference APIs (KFM needs to get the secure default files as 
+    well as the normal ones). Moved profile.h inclusion higher so 
+    it gets included before this function and thus its types are 
+    defined (the reason I put it where I did was there is another 
+    config file function next to it).
+
 2003-03-04  Ken Raeburn  <raeburn@mit.edu>
 
 	* krb5.h (ENCTYPE_AES128_CTS_HMAC_SHA1_96,
