@@ -1,3 +1,8 @@
+Wed Apr 26 14:29:03 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* aclocal.m4 (HAS_ANSI_VOLATILE): define it here for kdc and
+	kadmin.old to use.
+
 Mon Apr 24 13:30:00 1995 Keith Vetter (keithv@fusion.com)
 
 	* Makefile.in: Fixed a PC work-around for doing a touch command.

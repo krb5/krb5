@@ -612,3 +612,17 @@ AC_ARG_WITH([netlib],
 [AC_CHECK_LIB(socket,main)
 AC_CHECK_LIB(nsl,main)]
 )])dnl
+dnl
+dnl HAS_ANSI_VOLATILE
+dnl
+define(HAS_ANSI_VOLATILE,[
+AC_MSG_CHECKING([volatile])
+AC_CACHE_VAL(krb5_cv_has_ansi_volatile,
+[AC_TRY_COMPILE(
+[volatile int x();], [],
+krb5_cv_has_ansi_volatile=yes, krb5_cv_has_ansi_volatile=no)])
+AC_MSG_RESULT($krb5_cv_has_ansi_volatile)
+if test $krb5_cv_has_ansi_volatile = yes; then
+AC_DEFINE(HAS_ANSI_VOLATILE)
+fi
+])dnl
