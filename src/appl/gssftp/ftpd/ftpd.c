@@ -1832,13 +1832,6 @@ char *data;
 	char buf[FTP_BUFSIZ];
 	u_char out_buf[sizeof(buf)];
 #endif /* KERBEROS */
-#ifdef GSSAPI
-	OM_uint32 maj_stat, min_stat;
-	gss_OID mechid;
-	gss_buffer_desc tok, out_tok;
-	char gbuf[FTP_BUFSIZ];
-	u_char gout_buf[sizeof(gbuf)];
-#endif
 
 	if (auth_type) {
 		reply(503, "Authentication already established");
@@ -1849,223 +1842,227 @@ char *data;
 		return(0);
 	}
 #ifdef KERBEROS
-    if (strcmp(temp_auth_type, "KERBEROS_V4") == 0) {
-	if (kerror = radix_encode(data, out_buf, &length, 1)) {
-		reply(501, "Couldn't decode ADAT (%s)",
-				radix_error(kerror));
-		syslog(LOG_ERR, "Couldn't decode ADAT (%s)",
-				radix_error(kerror));
-		return(0);
+	if (strcmp(temp_auth_type, "KERBEROS_V4") == 0) {
+		if (kerror = radix_encode(data, out_buf, &length, 1)) {
+			reply(501, "Couldn't decode ADAT (%s)",
+			      radix_error(kerror));
+			syslog(LOG_ERR, "Couldn't decode ADAT (%s)",
+			       radix_error(kerror));
+			return(0);
+		}
+		(void) memcpy((char *)ticket.dat, (char *)out_buf, ticket.length = length);
+		strcpy(instance, "*");
+		if (!service) {
+			char realm[REALM_SZ];
+			des_cblock key;
+			
+			service = "ftp";
+			if (krb_get_lrealm(realm, 1) == KSUCCESS &&
+			    read_service_key(service, instance, realm, 0, keyfile, key))
+				service = "rcmd";
+			else
+				(void) memset(key, 0, sizeof(key));
+		}
+		if (kerror = krb_rd_req(&ticket, service, instance,
+					his_addr.sin_addr.s_addr, &kdata, keyfile)) {
+			secure_error("ADAT: Kerberos V4 krb_rd_req: %s",
+				     krb_get_err_text(kerror));
+			return(0);
+		}
+		/* add one to the (formerly) sealed checksum, and re-seal it */
+		cksum = kdata.checksum + 1;
+		cksum = htonl(cksum);
+		key_sched(kdata.session,schedule);
+		if ((length = krb_mk_safe((u_char *)&cksum, out_buf, sizeof(cksum),
+					  &kdata.session,&ctrl_addr, &his_addr)) == -1) {
+			secure_error("ADAT: krb_mk_safe failed");
+			return(0);
+		}
+		if (kerror = radix_encode(out_buf, buf, &length, 0)) {
+			secure_error("Couldn't encode ADAT reply (%s)",
+				     radix_error(kerror));
+			return(0);
+		}
+		reply(235, "ADAT=%s", buf);
+		/* Kerberos V4 authentication succeeded */
+		auth_type = temp_auth_type;
+		temp_auth_type = NULL;
+		return(1);
 	}
-	(void) memcpy((char *)ticket.dat, (char *)out_buf, ticket.length = length);
-	strcpy(instance, "*");
-	if (!service) {
-		char realm[REALM_SZ];
-		des_cblock key;
-
-		service = "ftp";
-		if (krb_get_lrealm(realm, 1) == KSUCCESS &&
-		    read_service_key(service, instance, realm, 0, keyfile, key))
-			service = "rcmd";
-		else	(void) memset(key, 0, sizeof(key));
-	}
-	if (kerror = krb_rd_req(&ticket, service, instance,
-		his_addr.sin_addr.s_addr, &kdata, keyfile)) {
-		secure_error("ADAT: Kerberos V4 krb_rd_req: %s",
-				krb_get_err_text(kerror));
-		return(0);
-	}
-	/* add one to the (formerly) sealed checksum, and re-seal it */
-	cksum = kdata.checksum + 1;
-	cksum = htonl(cksum);
-	key_sched(kdata.session,schedule);
-	if ((length = krb_mk_safe((u_char *)&cksum, out_buf, sizeof(cksum),
-			&kdata.session,&ctrl_addr, &his_addr)) == -1) {
-		secure_error("ADAT: krb_mk_safe failed");
-		return(0);
-	}
-	if (kerror = radix_encode(out_buf, buf, &length, 0)) {
-		secure_error("Couldn't encode ADAT reply (%s)",
-				radix_error(kerror));
-		return(0);
-	}
-	reply(235, "ADAT=%s", buf);
-	/* Kerberos V4 authentication succeeded */
-	auth_type = temp_auth_type;
-	temp_auth_type = NULL;
-	return(1);
-    }
 #endif /* KERBEROS */
 #ifdef GSSAPI
-    if (strcmp(temp_auth_type, "GSSAPI") == 0) {
-        int replied = 0;
-	int found = 0;
-        gss_cred_id_t server_creds;     
-	gss_name_t client;
-	int ret_flags;
-	struct gss_channel_bindings_struct chan;
-	gss_buffer_desc name_buf;
-	gss_name_t server_name;
-	OM_uint32 maj_stat, min_stat, save_stat;
-	char localname[MAXHOSTNAMELEN];
-	char service_name[MAXHOSTNAMELEN+10];
-	char **service;
-	struct hostent *hp;
+	if (strcmp(temp_auth_type, "GSSAPI") == 0) {
+		int replied = 0;
+		int found = 0;
+		gss_cred_id_t server_creds;     
+		gss_name_t client;
+		int ret_flags;
+		struct gss_channel_bindings_struct chan;
+		gss_buffer_desc name_buf;
+		gss_name_t server_name;
+		OM_uint32 acquire_maj, acquire_min, accept_maj, accept_min,
+				stat_maj, stat_min;
+		gss_OID mechid;
+		gss_buffer_desc tok, out_tok;
+		char gbuf[FTP_BUFSIZ];
+		u_char gout_buf[FTP_BUFSIZ];
+		char localname[MAXHOSTNAMELEN];
+		char service_name[MAXHOSTNAMELEN+10];
+		char **service;
+		struct hostent *hp;
 
-	chan.initiator_addrtype = GSS_C_AF_INET;
-	chan.initiator_address.length = 4;
-	chan.initiator_address.value = &his_addr.sin_addr.s_addr;
-	chan.acceptor_addrtype = GSS_C_AF_INET;
-	chan.acceptor_address.length = 4;
-	chan.acceptor_address.value = &ctrl_addr.sin_addr.s_addr;
-	chan.application_data.length = 0;
-	chan.application_data.value = 0;
+		chan.initiator_addrtype = GSS_C_AF_INET;
+		chan.initiator_address.length = 4;
+		chan.initiator_address.value = &his_addr.sin_addr.s_addr;
+		chan.acceptor_addrtype = GSS_C_AF_INET;
+		chan.acceptor_address.length = 4;
+		chan.acceptor_address.value = &ctrl_addr.sin_addr.s_addr;
+		chan.application_data.length = 0;
+		chan.application_data.value = 0;
 
-	if (kerror = radix_encode(data, gout_buf, &length, 1)) {
-		reply(501, "Couldn't decode ADAT (%s)",
-				radix_error(kerror));
-		syslog(LOG_ERR, "Couldn't decode ADAT (%s)",
-				radix_error(kerror));
-		return(0);
-	}
-	tok.value = gout_buf;
-	tok.length = length;
-	
-	if (gethostname(localname, MAXHOSTNAMELEN)) {
-		reply(501, "couldn't get local hostname (%d)\n", errno);
-		syslog(LOG_ERR, "Couldn't get local hostname (%d)", errno);
-		return 0;
-	}
-	if (!(hp = gethostbyname(localname))) {
-		extern int h_errno;
-		reply(501, "couldn't canonicalize local hostname (%d)\n", h_errno);
-		syslog(LOG_ERR, "Couldn't canonicalize local hostname (%d)", h_errno);
-		return 0;
-	}
-	strcpy(localname, hp->h_name);
+		if (kerror = radix_encode(data, gout_buf, &length, 1)) {
+			reply(501, "Couldn't decode ADAT (%s)",
+			      radix_error(kerror));
+			syslog(LOG_ERR, "Couldn't decode ADAT (%s)",
+			       radix_error(kerror));
+			return(0);
+		}
+		tok.value = gout_buf;
+		tok.length = length;
 
-	for (service = gss_services; *service; service++) {
-		sprintf(service_name, "%s@%s", *service, localname);
-		name_buf.value = service_name;
-		name_buf.length = strlen(name_buf.value) + 1;
-		if (debug) syslog(LOG_INFO, "importing <%s>", service_name);
-		maj_stat = gss_import_name(&min_stat, &name_buf, 
-					   gss_nt_service_name,
-					   &server_name);
-		if (maj_stat != GSS_S_COMPLETE) {
-			reply_gss_error(501, maj_stat, min_stat,
-					"importing name");
-			syslog(LOG_ERR, "gssapi error importing name");
+		if (gethostname(localname, MAXHOSTNAMELEN)) {
+			reply(501, "couldn't get local hostname (%d)\n", errno);
+			syslog(LOG_ERR, "Couldn't get local hostname (%d)", errno);
 			return 0;
 		}
+		if (!(hp = gethostbyname(localname))) {
+			extern int h_errno;
+			reply(501, "couldn't canonicalize local hostname (%d)\n", h_errno);
+			syslog(LOG_ERR, "Couldn't canonicalize local hostname (%d)", h_errno);
+			return 0;
+		}
+		strcpy(localname, hp->h_name);
 
-		maj_stat = gss_acquire_cred(&min_stat, server_name, 0,
-					    GSS_C_NULL_OID_SET, GSS_C_ACCEPT,
-					    &server_creds, NULL, NULL);
-		save_stat = min_stat;
-		(void) gss_release_name(&min_stat, &server_name);
-		if (maj_stat != GSS_S_COMPLETE)
-		  continue;
-		found++;
-		/*	}*/
+		for (service = gss_services; *service; service++) {
+			sprintf(service_name, "%s@%s", *service, localname);
+			name_buf.value = service_name;
+			name_buf.length = strlen(name_buf.value) + 1;
+			if (debug)
+				syslog(LOG_INFO, "importing <%s>", service_name);
+			stat_maj = gss_import_name(&stat_min, &name_buf, 
+						   gss_nt_service_name,
+						   &server_name);
+			if (stat_maj != GSS_S_COMPLETE) {
+				reply_gss_error(501, stat_maj, stat_min,
+						"importing name");
+				syslog(LOG_ERR, "gssapi error importing name");
+				return 0;
+			}
+			
+			acquire_maj = gss_acquire_cred(&acquire_min, server_name, 0,
+						       GSS_C_NULL_OID_SET, GSS_C_ACCEPT,
+						       &server_creds, NULL, NULL);
+			(void) gss_release_name(&stat_min, &server_name);
 
-		if (!found && (maj_stat != GSS_S_COMPLETE))
-		{
-			min_stat = save_stat;
-			reply_gss_error(501, maj_stat, min_stat,
+			if (acquire_maj != GSS_S_COMPLETE)
+				continue;
+
+			found++;
+
+			gcontext = GSS_C_NO_CONTEXT;
+
+			accept_maj = gss_accept_sec_context(&accept_min,
+							    &gcontext, /* context_handle */
+							    server_creds, /* verifier_cred_handle */
+							    &tok, /* input_token */
+							    &chan, /* channel bindings */
+							    &client, /* src_name */
+							    &mechid, /* mech_type */
+							    &out_tok, /* output_token */
+							    &ret_flags,
+							    NULL, 	/* ignore time_rec */
+							    NULL   /* ignore del_cred_handle */
+							    );
+			if (accept_maj!=GSS_S_COMPLETE && accept_maj!=GSS_S_CONTINUE_NEEDED)
+				continue;
+		}
+
+		if (found) {
+			if (accept_maj!=GSS_S_COMPLETE && accept_maj!=GSS_S_CONTINUE_NEEDED) {
+				reply_gss_error(535, accept_maj, accept_min,
+						"accepting context");
+				syslog(LOG_ERR, "failed accepting context");
+				(void) gss_release_cred(&stat_min, &server_creds);
+				return 0;
+			}
+		} else {
+			reply_gss_error(501, stat_maj, stat_min,
 					"acquiring credentials");
 			syslog(LOG_ERR, "gssapi error acquiring credentials");
 			return 0;
 		}
-		if (server_creds == GSS_C_NO_CREDENTIAL) {
-			syslog(LOG_ERR, "acquire return GSS_C_NO_CREDENTIAL");
+
+		if (out_tok.length) {
+			if (kerror = radix_encode(out_tok.value, gbuf, &out_tok.length, 0)) {
+				secure_error("Couldn't encode ADAT reply (%s)",
+					     radix_error(kerror));
+				syslog(LOG_ERR, "couldn't encode ADAT reply");
+				return(0);
+			}
+			if (stat_maj == GSS_S_COMPLETE) {
+				reply(235, "ADAT=%s", gbuf);
+				replied = 1;
+			} else {
+				/* If the server accepts the security data, and
+				   requires additional data, it should respond with
+				   reply code 335. */
+				reply(335, "ADAT=%s", gbuf);
+			}
+			(void) gss_release_buffer(&stat_min, &out_tok);
 		}
-
-
-	gcontext = GSS_C_NO_CONTEXT;
-
-	maj_stat = gss_accept_sec_context(&min_stat,
-					  &gcontext, /* context_handle */
-					  server_creds, /* verifier_cred_handle */
-					  &tok, /* input_token */
-					  &chan, /* channel bindings */
-					  &client, /* src_name */
-					  &mechid, /* mech_type */
-					  &out_tok, /* output_token */
-					  &ret_flags,
-					  NULL, 	/* ignore time_rec */
-					  NULL   /* ignore del_cred_handle */
-					  );
-	if (maj_stat!=GSS_S_COMPLETE && maj_stat!=GSS_S_CONTINUE_NEEDED) {
-		reply_gss_error(535, maj_stat, min_stat,
-				"accepting context");
-		syslog(LOG_ERR, "failed accepting context");
-		(void) gss_release_cred(&min_stat, &server_creds);
-		return 0;
-	}
-
-	if (out_tok.length) {
-		if (kerror = radix_encode(out_tok.value, gbuf, &out_tok.length, 0)) {
-			secure_error("Couldn't encode ADAT reply (%s)",
-				     radix_error(kerror));
-			syslog(LOG_ERR, "couldn't encode ADAT reply");
+		if (stat_maj == GSS_S_COMPLETE) {
+			/* GSSAPI authentication succeeded */
+			stat_maj = gss_display_name(&stat_min, client, &client_name, 
+						    &mechid);
+			if (stat_maj != GSS_S_COMPLETE) {
+				/* "If the server rejects the security data (if 
+				   a checksum fails, for instance), it should 
+				   respond with reply code 535." */
+				reply_gss_error(535, stat_maj, stat_min,
+						"extracting GSSAPI identity name");
+				syslog(LOG_ERR, "gssapi error extracting identity");
+				(void) gss_release_cred(&stat_min, &server_creds);
+				return 0;
+			}
+			/* If the server accepts the security data, but does
+				   not require any additional data (i.e., the security
+				   data exchange has completed successfully), it must
+				   respond with reply code 235. */
+			if (!replied) reply(235, "GSSAPI Authentication succeeded");
+				
+			auth_type = temp_auth_type;
+			temp_auth_type = NULL;
+				
+			(void) gss_release_cred(&stat_min, &server_creds);
+			return(1);
+		} else if (stat_maj == GSS_S_CONTINUE_NEEDED) {
+			/* If the server accepts the security data, and
+				   requires additional data, it should respond with
+				   reply code 335. */
+			reply(335, "more data needed");
+			(void) gss_release_cred(&stat_min, &server_creds);
+			return(0);
+		} else {
+			/* "If the server rejects the security data (if 
+				   a checksum fails, for instance), it should 
+				   respond with reply code 535." */
+			reply_gss_error(535, stat_maj, stat_min, 
+					"GSSAPI failed processing ADAT");
+			syslog(LOG_ERR, "GSSAPI failed processing ADAT");
+			(void) gss_release_cred(&stat_min, &server_creds);
 			return(0);
 		}
-		if (maj_stat == GSS_S_COMPLETE) {
-		  reply(235, "ADAT=%s", gbuf);
-		  replied = 1;
-		} else {
-		  /* If the server accepts the security data, and
-		     requires additional data, it should respond with
-		     reply code 335. */
-		  reply(335, "ADAT=%s", gbuf);
-		}
-		(void) gss_release_buffer(&min_stat, &out_tok);
 	}
-	if (maj_stat == GSS_S_COMPLETE) {
-		/* GSSAPI authentication succeeded */
-		maj_stat = gss_display_name(&min_stat, client, &client_name, 
-					    &mechid);
-		if (maj_stat != GSS_S_COMPLETE) {
-			/* "If the server rejects the security data (if 
-			   a checksum fails, for instance), it should 
-			   respond with reply code 535." */
-			reply_gss_error(535, maj_stat, min_stat,
-					"extracting GSSAPI identity name");
-			syslog(LOG_ERR, "gssapi error extracting identity");
-			(void) gss_release_cred(&min_stat, &server_creds);
-			return 0;
-		}
-		/* If the server accepts the security data, but does
-		   not require any additional data (i.e., the security
-		   data exchange has completed successfully), it must
-		   respond with reply code 235. */
-		if (!replied) reply(235, "GSSAPI Authentication succeeded");
-
-		auth_type = temp_auth_type;
-		temp_auth_type = NULL;
-
-		(void) gss_release_cred(&min_stat, &server_creds);
-		return(1);
-	} else if (maj_stat == GSS_S_CONTINUE_NEEDED) {
-		/* If the server accepts the security data, and
-		   requires additional data, it should respond with
-		   reply code 335. */
-		reply(335, "more data needed");
-		(void) gss_release_cred(&min_stat, &server_creds);
-		return(0);
-	} else {
-		/* "If the server rejects the security data (if 
-		   a checksum fails, for instance), it should 
-		   respond with reply code 535." */
-		reply_gss_error(535, maj_stat, min_stat, 
-				"GSSAPI failed processing ADAT");
-		syslog(LOG_ERR, "GSSAPI failed processing ADAT");
-		(void) gss_release_cred(&min_stat, &server_creds);
-		return(0);
-	}
-      }
-    }
 #endif /* GSSAPI */
 	/* Other auth types go here ... */
 	/* Also need to check authorization, but that is done in user() */
