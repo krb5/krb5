@@ -47,7 +47,7 @@ void login(ut)
     struct utmp utmp;
     int tty;
     
-#ifdef HAVE_GETUTENT
+#if defined(HAVE_GETUTENT) && !defined(NO_UT_PID)
     if (!ut->ut_pid)
        ut->ut_pid = getppid();
     ut->ut_type = USER_PROCESS;
@@ -94,7 +94,7 @@ logout(line)
 	memset(ut.ut_host,0, sizeof(ut.ut_host));
 #endif
 	(void)time(&ut.ut_time);
-#ifdef HAVE_GETUTENT
+#if defined(HAVE_GETUTENT) && !defined(NO_UT_PID)
 	memset(ut.ut_id, 0, sizeof(ut.ut_id));
 	ut.ut_pid = 0;
 #ifndef NO_UT_EXIT
@@ -144,7 +144,7 @@ logwtmp(line, name, host, keep_open, logingin)
 	ut.ut_pid = getpid();
 #endif
 	(void)time(&ut.ut_time);
-#ifdef HAVE_GETUTENT
+#if defined(HAVE_GETUTENT) && !defined(NO_UT_PID)
 	if (*name) {
 	    if (!ut.ut_pid)
 		ut.ut_pid = getpid();

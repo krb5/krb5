@@ -37,6 +37,11 @@ AC_COMPILE_CHECK([ut_exit in struct utmp],
 [struct utmp ut; ut.ut_exit;],
 ,
 AC_DEFINE(NO_UT_EXIT))
+AC_COMPILE_CHECK([ut_pid in struct utmp],
+[#include <utmp.h>],
+[struct utmp ut; ut.ut_pid;],
+,
+AC_DEFINE(NO_UT_PID))
 KRB_INCLUDE
 WITH_KRB5ROOT
 WITH_KRB4
