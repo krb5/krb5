@@ -7,10 +7,6 @@ AC_TYPE_UID_T
 AC_TYPE_OFF_T
 dnl
 dnl
-AC_HEADER_STDARG
-AC_CHECK_HEADERS(unistd.h paths.h regex.h regexp.h regexpr.h fcntl.h memory.h ifaddrs.h sys/filio.h)
-AC_CHECK_FUNCS(flock fchmod chmod strftime strptime geteuid setenv unsetenv getenv setsid gethostbyname2 getifaddrs)
-dnl AC_REPLACE_FUNCS(strdup strcasecmp getuid)
 KRB5_AC_REGEX_FUNCS
 KRB5_NEED_PROTO([#include <time.h>],strptime)
 dnl

@@ -1,3 +1,11 @@
+2003-12-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Check for flock, fchmod, chmod, strftime,
+	strptime, geteuid, setenv, unsetenv, getenv, gethostbyname2,
+	getifaddrs, stdarg.h, unistd.h, paths.h, regex.h, regexp.h,
+	regexpr.h, fcntl.h, memory.h, ifaddrs.h, and sys/filio.h, as was
+	previously done in the krb5 library configure script.
+
 2003-12-19  Ken Raeburn  <raeburn@mit.edu>
 
 	* fake-addrinfo.h: Include stdio.h.

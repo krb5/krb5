@@ -1,3 +1,8 @@
+2003-12-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Remove basic checks for header files and
+	functions, now moved into include/configure.in.
+
 2003-08-21  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Don't substitute LIBOBJS, newer autoconfs don't
