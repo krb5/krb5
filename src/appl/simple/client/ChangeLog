@@ -1,4 +1,9 @@
 
+Mon May 01 15:56:32 1995  Chris Provenzano  (proven@mit.edu)
+
+        * sim_client.c (main()): Changes to auth_context to better
+                support full addresses, for mk_safe() and friends.
+
 Mon Mar 27 09:25:21 1995  Chris Provenzano (proven@mit.edu)
 
 	* sim_client.c: Don't set cksumtype because CKSUMTYPE_RSA_MD4_DES

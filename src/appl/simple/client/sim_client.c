@@ -64,7 +64,7 @@ main(argc, argv)
     krb5_error_code retval;
     krb5_data packet, inbuf;
     krb5_ccache ccdef;
-    krb5_address local_addr, foreign_addr, *portlocal_addr;
+    krb5_address addr, *portlocal_addr;
     krb5_rcache rcache;
     extern krb5_deltat krb5_clockskew;
 
@@ -113,10 +113,6 @@ main(argc, argv)
 #endif
     s_sock.sin_family = AF_INET;
     s_sock.sin_port = serv->s_port;
-
-    foreign_addr.addrtype = ADDRTYPE_INET;
-    foreign_addr.length = sizeof(s_sock.sin_addr);
-    foreign_addr.contents = (krb5_octet *)&s_sock.sin_addr;
 
     /* Open a socket */
     if ((sock = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
@@ -173,11 +169,25 @@ main(argc, argv)
 	com_err(PROGNAME, errno, "while getting socket name");
 	exit(1);
     }
-    local_addr.addrtype = ADDRTYPE_INET;
-    local_addr.length = sizeof(c_sock.sin_addr);
-    local_addr.contents = (krb5_octet *)&c_sock.sin_addr;
 
-    if (retval = krb5_gen_portaddr(context, &local_addr,
+    addr.addrtype = ADDRTYPE_IPPORT;
+    addr.length = sizeof(c_sock.sin_port);
+    addr.contents = (krb5_octet *)&c_sock.sin_port;
+    if (retval = krb5_auth_con_setports(context, auth_context, &addr, NULL)) {
+	com_err(PROGNAME, retval, "while setting local port\n");
+	exit(1);
+    }
+
+    addr.addrtype = ADDRTYPE_INET;
+    addr.length = sizeof(c_sock.sin_addr);
+    addr.contents = (krb5_octet *)&c_sock.sin_addr;
+    if (retval = krb5_auth_con_setaddrs(context, auth_context, &addr, NULL)) {
+	com_err(PROGNAME, retval, "while setting local addr\n");
+	exit(1);
+    }
+
+    /* THIS IS UGLY */
+    if (retval = krb5_gen_portaddr(context, &addr,
 				   (krb5_pointer) &c_sock.sin_port,
 				   &portlocal_addr)) {
 	com_err(PROGNAME, retval, "while generating port address");
@@ -210,10 +220,6 @@ main(argc, argv)
 		krb5_rc_get_name(context, rcache));
 	exit(1);
     }
-
-    /* set auth_context data */
-    krb5_auth_con_setaddrs(context, auth_context,
-                           portlocal_addr, &foreign_addr);
 
     /* set auth_context rcache */
     krb5_auth_con_setrcache(context, auth_context, rcache);
