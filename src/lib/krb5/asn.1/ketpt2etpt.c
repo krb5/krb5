@@ -43,7 +43,6 @@ register int *error;
     }
     xbzero(retval, sizeof(*retval));
 
-    retval->confounder = val->confounder;
     retval->flags = krb5_flags2KRB5_TicketFlags(val->flags, error);
     if (*error) {
 	xfree(retval);
