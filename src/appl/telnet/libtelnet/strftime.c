@@ -1,29 +1,51 @@
 /*
- * Copyright (c) 1989 The Regents of the University of California.
- * All rights reserved.
+ * Copyright (c) 1989, 1993
+ *	The Regents of the University of California.  All rights reserved.
  *
- * Redistribution and use in source and binary forms are permitted
- * provided that: (1) source distributions retain this entire copyright
- * notice and comment, and (2) distributions including binaries display
- * the following acknowledgement:  ``This product includes software
- * developed by the University of California, Berkeley and its contributors''
- * in the documentation or other materials provided with the distribution
- * and in all advertising materials mentioning features or use of this
- * software. Neither the name of the University nor the names of its
- * contributors may be used to endorse or promote products derived
- * from this software without specific prior written permission.
- * THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
- * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgement:
+ *	This product includes software developed by the University of
+ *	California, Berkeley and its contributors.
+ * 4. Neither the name of the University nor the names of its contributors
+ *    may be used to endorse or promote products derived from this software
+ *    without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+ * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ * SUCH DAMAGE.
  */
 
 #if defined(LIBC_SCCS) && !defined(lint)
-static char sccsid[] = "@(#)strftime.c	5.8 (Berkeley) 6/1/90";
+static char sccsid[] = "@(#)strftime.c	8.1 (Berkeley) 6/4/93";
 #endif /* LIBC_SCCS and not lint */
 
+#ifndef __STDC__
+#define const
+#endif
+
 #include <sys/types.h>
-#include <time.h>
+#include <sys/time.h>
+#ifdef notdef
+#include <tzfile.h>
+#else
 #define TM_YEAR_BASE	1900	/* from <tzfile.h> */
+#endif
 #ifdef	NO_STRING_H
 #include <strings.h>
 #else
@@ -48,15 +70,21 @@ static char *Bfmt[] = {
 
 static size_t gsize;
 static char *pt;
+#ifndef	__P
+#define	__P(x)	()
+#endif
+static int _add __P((char *));
+static int _conv __P((int, int, int));
+static int _secs __P((const struct tm *));
+static size_t _fmt __P((const char *, const struct tm *));
 
 size_t
 strftime(s, maxsize, format, t)
 	char *s;
-	char *format;
 	size_t maxsize;
-	struct tm *t;
+	const char *format;
+	const struct tm *t;
 {
-	size_t _fmt();
 
 	pt = s;
 	if ((gsize = maxsize) < 1)
@@ -70,8 +98,8 @@ strftime(s, maxsize, format, t)
 
 static size_t
 _fmt(format, t)
-	register char *format;
-	struct tm *t;
+	register const char *format;
+	const struct tm *t;
 {
 	for (; *format; ++format) {
 		if (*format == '%')
@@ -112,16 +140,16 @@ _fmt(format, t)
 				if (!_fmt("%m/%d/%y %H:%M:%S", t))
 					return(0);
 				continue;
-			case 'e':
-				if (!_conv(t->tm_mday, 2, ' '))
-					return(0);
-				continue;
 			case 'D':
 				if (!_fmt("%m/%d/%y", t))
 					return(0);
 				continue;
 			case 'd':
 				if (!_conv(t->tm_mday, 2, '0'))
+					return(0);
+				continue;
+			case 'e':
+				if (!_conv(t->tm_mday, 2, ' '))
 					return(0);
 				continue;
 			case 'H':
@@ -172,6 +200,10 @@ _fmt(format, t)
 				continue;
 			case 'S':
 				if (!_conv(t->tm_sec, 2, '0'))
+					return(0);
+				continue;
+			case 's':
+				if (!_secs(t))
 					return(0);
 				continue;
 			case 'T':
@@ -233,10 +265,26 @@ _fmt(format, t)
 	return(gsize);
 }
 
-static
+static int
+_secs(t)
+	const struct tm *t;
+{
+	static char buf[15];
+	register time_t s;
+	register char *p;
+	struct tm tmp;
+
+	/* Make a copy, mktime(3) modifies the tm struct. */
+	tmp = *t;
+	s = mktime(&tmp);
+	for (p = buf + sizeof(buf) - 2; s > 0 && p > buf; s /= 10)
+		*p-- = s % 10 + '0';
+	return(_add(++p));
+}
+
+static int
 _conv(n, digits, pad)
-	int n, digits;
-	char pad;
+	int n, digits, pad;
 {
 	static char buf[10];
 	register char *p;
@@ -248,7 +296,7 @@ _conv(n, digits, pad)
 	return(_add(++p));
 }
 
-static
+static int
 _add(str)
 	register char *str;
 {
