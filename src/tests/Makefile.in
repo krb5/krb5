@@ -14,7 +14,7 @@ TEST_PREFIX = "foo bar"
 KADMIN_OPTS= -d $(TEST_DB) -r $(TEST_REALM) -P $(TEST_MKEY)
 KTEST_OPTS= $(KADMIN_OPTS) -p $(TEST_PREFIX) -n $(TEST_NUM) -D $(TEST_DEPTH)
 
-old-check-unix:: kdb_check
+check-unix:: kdb_check
 
 kdc.conf: Makefile
 	rm -rf kdc.conf
@@ -45,7 +45,6 @@ kdb_check: kdc.conf
 	cmp $(TEST_DB).sort $(TEST_DB).sort2
 	cmp $(TEST_DB).ovsort $(TEST_DB).ovsort2
 	$(RUN_SETUP) ../kadmin/dbutil/kdb5_util $(KADMIN_OPTS) destroy -f
-	# Quirk with load -old, need to create first - and stash!
 	$(RUN_SETUP) ../kadmin/dbutil/kdb5_util $(KADMIN_OPTS) create -s
 	$(RUN_SETUP) ../kadmin/dbutil/kdb5_util $(KADMIN_OPTS) load -old $(TEST_DB).odump 
 	$(RUN_SETUP) ../tests/verify/kdb5_verify $(KTEST_OPTS) 
