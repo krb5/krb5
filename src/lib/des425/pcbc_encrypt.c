@@ -27,7 +27,7 @@ des_pcbc_encrypt(in, out, length, schedule, ivec, encrypt)
 	des_cblock *out;
 	long length;
 	des_key_schedule schedule;
-	des_cblock ivec;
+	des_cblock *ivec;
 	int encrypt;
 {
 	register unsigned DES_INT32 left, right;

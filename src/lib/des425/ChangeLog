@@ -1,5 +1,11 @@
 Tue Nov 18 18:57:07 1997  Tom Yu  <tlyu@mit.edu>
 
+	* quad_cksum.c (des_quad_cksum): Reorder parameters to match the
+	prototype in include/kerberosIV/des.h.
+
+	* pcbc_encrypt.c: Fix up parameters to use a des_cblock* as the
+	ivec to match the prototype in include/kerberosIV/des.h.
+
 	* Makefile.in: Garbage collect some old library build system
 	stuff.
 
