@@ -1364,8 +1364,16 @@ AC_DEFUN(AC_LIBRARY_NET, [
 	AC_DEFINE(HAVE_RES_NSEARCH,,[Have the RES_NSEARCH function]),
 	[AC_CHECK_DECL(res_search, 
 	    AC_DEFINE(HAVE_RES_SEARCH,,[Have the res_search function]), 
-	    AC_MSG_ERROR(Failed to  find resolver search routine), [#include <resolv.h>])],
-	[#include <resolv.h>])
+	    AC_MSG_ERROR(Failed to find resolver search routine),
+	    [#include <sys/types.h>
+#include <netinet/in.h>
+#include <arpa/nameser.h>
+#include <resolv.h>
+])], [#include <sys/types.h>
+#include <netinet/in.h>
+#include <arpa/nameser.h>
+#include <resolv.h>
+])
   fi
   ])
 dnl

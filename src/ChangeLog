@@ -1,3 +1,8 @@
+2004-09-13  Tom Yu  <tlyu@mit.edu>
+
+	* aclocal.m4: Fix check for resolv.h; some platforms have
+	prerequisite headers.
+
 2004-09-08  Sam Hartman  <hartmans@krbdev-linux.mit.edu>
 
 	* aclocal.m4 : Remove use of resolv_lib; none of the makefiles
