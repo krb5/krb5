@@ -50,7 +50,9 @@ OBJS=	\
 	f_ticket.o	\
 	f_tickets.o	\
 	f_tgt_cred.o	\
-	f_tkt_auth.o
+	f_tkt_auth.o	\
+	f_pwd_data.o	\
+	f_pwd_seq.o
 
 SRCS=	\
 	$(SRCDIR)f_addr.c	\
@@ -78,7 +80,9 @@ SRCS=	\
 	$(SRCDIR)f_ticket.c	\
 	$(SRCDIR)f_tickets.c	\
 	$(SRCDIR)f_tgt_cred.c	\
-	$(SRCDIR)f_tkt_auth.c
+	$(SRCDIR)f_tkt_auth.c	\
+	$(SRCDIR)f_pwd_data.c	\
+	$(SRCDIR)f_pwd_seq.c
 
 OtherdirLibraryTarget($(TOP)/lib,krb5,$(OBJS))
 
