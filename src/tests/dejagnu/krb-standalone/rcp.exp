@@ -173,12 +173,10 @@ proc rcp_test { } {
     # rcp_one_test "rcp between" "" "$hostname:" "$hostname:"
     # stop_rsh_daemon
 
-    setup_xfail "*-*-*"
     start_rsh_daemon
     rcp_one_test "encrypted rcp from" "-x -c $env(KRB5CCNAME) -C $env(KRB5_CONFIG)" "$hostname:" ""
     stop_rsh_daemon
 
-    setup_xfail "*-*-*"
     start_rsh_daemon
     rcp_one_test "encrypted rcp to" "-x -c $env(KRB5CCNAME) -C $env(KRB5_CONFIG)" "" "$hostname:"
     stop_rsh_daemon

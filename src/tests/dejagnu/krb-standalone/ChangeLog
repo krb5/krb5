@@ -1,3 +1,8 @@
+Fri May  5 12:49:19 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* rcp.exp: (rcp_test()): Encrypted rcp are no longer expected to
+		fail. 
+
 Fri May 05 09:21:21 1995  Chris Provenzano (proven@mit.edu)
 
 	* rcp.exp (rcp_test()): Pass -c and -C args to encrypted rcp.
