@@ -1,3 +1,7 @@
+2004-02-02  Jeffrey Altman <jaltman@mit.edu>
+
+    * README: Document PreserveInitialTicketIdentity registry key
+
 2004-01-30  Jeffrey Altman <jaltman@mit.edu>
 
     * README: Update the text to include the details of the new 

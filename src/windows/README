@@ -245,6 +245,43 @@ On Windows XP SP2 Beta 1 the key was specified as
 However, we anticipate that this will be changed to match the Server platforms 
 in time for SP2 RC1.
 
+It has been noted that the Microsoft Kerberos LSA does not provide enough 
+information within its KERB_EXTERNAL_TICKET structure to properly construct
+the Client Principal simply by examining a single ticket. From the MSDN
+Library:
+
+  ClientName 
+    KERB_EXTERNAL_NAME structure that contains the client name in the ticket. 
+    This name is relative to the current domain. 
+
+  DomainName 
+    UNICODE_STRING that contains the name of the domain that corresponds to 
+    the ServiceName member. This is the domain that issued the ticket. 
+
+  TargetDomainName 
+    UNICODE_STRING that contains the name of the domain in which the ticket is
+    valid. For an interdomain ticket, this is the destination domain. 
+
+  AltTargetDomainName 
+    UNICODE_STRING that contains a synonym for the destination domain. Every 
+    domain has two names: a DNS name and a NetBIOS name. If the name returned 
+    in the ticket is different from the name used to request the ticket (the 
+    Kerberos Key Distribution Center (KDC) may do name mapping), this string 
+    contains the original name. 
+
+Unfortunately, there is no field here which contains the domain of the client.
+In order for the krb5_ccache to properly report the client principal name, the 
+client principal name is constructed by utilizing the ClientName and DomainName
+fields of the Initial TGT associated with the Kerberos LSA credential cache.
+To disable the use of the TGT info and instead simply use the "DomainName" field
+of the current ticket define one of the following registry keys depending on
+whether the change should be system global or just for the current user.
+
+   HKLM\Software\MIT\Kerberos5\
+      PreserveInitialTicketIdentity = 0x0 (DWORD)
+
+   HKCU\Software\MIT\Kerberos5\
+      PreserveInitialTicketIdentity = 0x0 (DWORD)
 
 GSSAPI Sample Client:
 ---------------------
