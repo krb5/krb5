@@ -3,7 +3,8 @@
 	* kdc_preauth.c (get_preauth_hint_list): Log a message if preauth
 	is required but no preauth types are available.
 	(return_sam_data): Fix typo in figuring length of data to XOR when
-	merging keys.
+	merging keys.  Just return 0 if no input preauth data is
+	available.
 
 2000-02-06  Ken Raeburn  <raeburn@mit.edu>
 

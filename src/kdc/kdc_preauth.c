@@ -696,6 +696,9 @@ return_sam_data(context, in_padata, client, request, reply, client_key,
     krb5_sam_response		*sr = 0;
     krb5_predicted_sam_response	*psr = 0;
 
+    if (in_padata == 0)
+	return 0;
+
     /*
      * We start by doing the same thing verify_sam_response() does:
      * extract the psr from the padata (which is an sr). Nothing
