@@ -1,0 +1,5 @@
+Wed Jul 24 18:21:28 1996  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
+
+	* Makefile.in, configure.in: break out server lib into a
+		subdirectory
+
