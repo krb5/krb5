@@ -46,7 +46,7 @@ krb5_cc_ops krb5_fcc_ops = {
      krb5_fcc_set_flags,
 };
 
-#ifdef _WINDOWS
+#if defined(_MSDOS) || defined(_WIN32)
 
 /*
  * krb5_change_cache should be called after the cache changes.
@@ -73,7 +73,7 @@ krb5_get_notification_message (void) {
 
     return message;
 }
-#else /* _WINDOWS */
+#else /* _MSDOS || _WIN32 */
 
 krb5_error_code
 krb5_change_cache () 
@@ -86,4 +86,5 @@ krb5_get_notification_message ()
     return 0;
 }
 
-#endif /* _WINDOWS */
+#endif /* _MSDOS || _WIN32 */
+

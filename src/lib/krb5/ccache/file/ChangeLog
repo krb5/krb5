@@ -1,3 +1,18 @@
+Wed Jun 12 01:04:27 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* fcc-proto.h: Change use of PROTOTYPE to KRB5_PROTOTYPE.
+		Change use of INTERFACE to KRB5_CALLCONV and KRB5_DLLIMP.
+
+	* fcc-getnam.c: Change use of INTERFACE to KRB5_CALLCONV and
+		KRB5_DLLIMP, since fcc_getname returns a char * and the
+		old INTERFACE method bombs out when the return type
+		contains an indirection.
+
+Mon Jun 10 21:44:07 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* fcc_read.c:
+	* fcc_ops.c: Change _WINDOWS to _MSDOS, and add check for _WIN32.
+
 Wed Feb 14 10:44:27 1996    <tytso@rsts-11.mit.edu>
 
 	* fcc_read.c (krb5_fcc_read_keyblock, krb5_fcc_read_data,

@@ -214,7 +214,7 @@ krb5_fcc_read_keyblock(context, id, keyblock)
 
      kret = krb5_fcc_read_int32(context, id, &int32);
      CHECK(kret);
-#ifdef _WINDOWS
+#if defined(_MSDOS)
      int32 &= VALID_INT_BITS;    /* Gradient does not write  correctly */     
 #else
      if ((int32 & VALID_INT_BITS) != int32)     /* Overflow size_t??? */
@@ -253,7 +253,7 @@ krb5_fcc_read_data(context, id, data)
 
      kret = krb5_fcc_read_int32(context, id, &len);
      CHECK(kret);
-#ifdef _WINDOWS
+#if defined(_MSDOS)
      len &= VALID_INT_BITS;
 #else
      if ((len & VALID_INT_BITS) != len)
@@ -300,7 +300,7 @@ krb5_fcc_read_addr(context, id, addr)
      
      kret = krb5_fcc_read_int32(context, id, &int32);
      CHECK(kret);
-#ifdef _WINDOWS
+#if defined(_MSDOS)
      int32 &= VALID_INT_BITS;	/* Gradient DCE does this wrong */
 #else
      if ((int32 & VALID_INT_BITS) != int32)     /* Overflow int??? */
@@ -483,7 +483,7 @@ krb5_fcc_read_authdatum(context, id, a)
     a->ad_type = (krb5_authdatatype)ui2;
     kret = krb5_fcc_read_int32(context, id, &int32);
     CHECK(kret);
-#ifdef _WINDOWS
+#ifdef _MSDOS
     int32 &= VALID_INT_BITS;
 #else
     if ((int32 & VALID_INT_BITS) != int32)     /* Overflow int??? */
