@@ -1,3 +1,7 @@
+Tue Sep 24 13:29:40 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* configure.in: add testing to subdirs list
+
 Thu Sep 19 08:06:20 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* configure.in: Do not build in v4server if compiling without
