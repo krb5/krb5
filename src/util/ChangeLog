@@ -1,3 +1,8 @@
+Mon Feb 27 00:01:41 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* lndir: if $0 contains slashes, but does not have a leading
+	slash, prepend `pwd` so that relative invocation works.
+
 Fri Feb  3 16:50:07 1995  Theodore Y. Ts'o  (tytso@dcl)
 
 	* reconf: If util/autoconf isn't built, try to use autoconf

@@ -30,6 +30,12 @@
 
 USAGE="Usage: $0 fromdir [todir]"
 
+case $0 in 
+/*) lndir=$0 ;;
+*/*) lndir=`pwd`/$0 ;;
+*) lndir=$0 ;;
+esac
+
 if [ $# -lt 1 -o $# -gt 2 ]
 then
 	echo "$USAGE"
@@ -90,7 +96,7 @@ do
 				echo "$pwd: FROM and TO are identical!"
 				exit 1
 			 fi
-			 $0 $DIRFROM/$file
+			 $lndir $DIRFROM/$file
 			)
 		fi
 	fi
