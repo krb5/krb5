@@ -1,4 +1,5 @@
 thisconfigdir=.
+mydir=.
 BUILDTOP=$(REL)..
 LOCAL_SUBDIRS = resolve asn.1 create hammer verify gssapi dejagnu
 
