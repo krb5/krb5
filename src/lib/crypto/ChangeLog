@@ -1,3 +1,9 @@
+Tue Oct 18 15:46:01 1994  Mark Eichin  (eichin@cygnus.com)
+
+	* des-crc.c (mit_des_crc_decrypt_func): cast key->key->contents to
+	krb5_pointer to satisfy sunos cc about :? argument types.
+	(mit_des_crc_encrypt_funct): ditto.
+
 Fri Oct 14 00:37:08 1994  Theodore Y. Ts'o  (tytso@dcl)
 
     	* cryptoconf.c: Add support for the new cryptosystem DES/MD5.

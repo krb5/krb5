@@ -126,7 +126,7 @@ OLDDECLARG(krb5_pointer, ivec)
 				out,
 				sumsize, 
 				(struct mit_des_ks_struct *) key->priv, 
-				ivec ? ivec : key->key->contents,
+				ivec ? ivec : (krb5_pointer)key->key->contents,
 				MIT_DES_ENCRYPT));
     
 }
@@ -156,7 +156,7 @@ OLDDECLARG(krb5_pointer, ivec)
 				 out,
 				 size,
 				 (struct mit_des_ks_struct *) key->priv,
-				 ivec ? ivec : key->key->contents,
+				 ivec ? ivec : (krb5_pointer)key->key->contents,
 				 MIT_DES_DECRYPT);
     if (retval)
 	return retval;
