@@ -1,3 +1,13 @@
+Fri Sep  1 00:44:59 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* k5-int.h: Add time offset field to the os_context structure.
+		This offset is added to the system clock time to produce
+		the "true" time.  
+
+		Added prototypes for the functions which manipulate the
+		time offset structures: krb5_set_real_time(),
+		krb5_set_debugging_time(), krb5_use_natural_time(),
+		krb5_get_time_offsets(), and krb5_set_time_offsets().
 
 Tue Aug 29 13:26:22 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* k5-int.h - Add ser_ctx[_count] to krb5_context.  This keeps track

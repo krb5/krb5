@@ -722,6 +722,17 @@ krb5_error_code krb5_make_fulladdr
 	       krb5_address *,
 	       krb5_address *));
 
+krb5_error_code krb5_set_real_time
+    KRB5_PROTOTYPE((krb5_context, krb5_int32, krb5_int32));
+krb5_error_code krb5_set_debugging_time
+    KRB5_PROTOTYPE((krb5_context, krb5_int32, krb5_int32));
+krb5_error_code krb5_use_natural_time
+    KRB5_PROTOTYPE((krb5_context));
+krb5_error_code krb5_get_time_offsets
+    KRB5_PROTOTYPE((krb5_context, krb5_int32 *, krb5_int32 *));
+krb5_error_code krb5_set_time_offsets
+    KRB5_PROTOTYPE((krb5_context, krb5_int32, krb5_int32));
+
 /* in here to deal with stuff from lib/crypto/os */
 
 krb5_error_code krb5_crypto_os_localaddr
@@ -752,7 +763,27 @@ time_t gmt_mktime KRB5_PROTOTYPE((struct tm *));
 
 typedef struct _krb5_os_context {
 	krb5_magic	magic;
+	krb5_int32	time_offset;
+	krb5_int32	usec_offset;
+	krb5_int32	os_flags;
 } *krb5_os_context;
+
+/*
+ * Flags for the os_flags field
+ *
+ * KRB5_OS_TOFFSET_VALID means that the time offset fields are valid.
+ * The intention is that this facility to correct the system clocks so
+ * that they reflect the "real" time, for systems where for some
+ * reason we can't set the system clock.  Instead we calculate the
+ * offset between the system time and real time, and store the offset
+ * in the os context so that we can correct the system clock as necessary.
+ *
+ * KRB5_OS_TOFFSET_TIME means that the time offset fields should be
+ * returned as the time by the krb5 time routines.  This should only
+ * be used for testing purposes (obviously!)
+ */
+#define KRB5_OS_TOFFSET_VALID	1
+#define KRB5_OS_TOFFSET_TIME	2
 
 /* lock mode flags */
 #define	KRB5_LOCKMODE_SHARED	0x0001
