@@ -1,3 +1,7 @@
+2000-08-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* libobj.in (clean-libobjs): Combine "rm" commands into one.
+
 2000-07-20  Danilo Almeida  <dalmeida@mit.edu>
 
 	* win-pre.in: Add KRB4_INCLUDES definition.

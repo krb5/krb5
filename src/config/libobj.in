@@ -49,10 +49,7 @@ OBJS.PF: $(PFLIBOBJS)
 all-libobjs: $(OBJLISTS)
 
 clean-libobjs:
-	$(RM) OBJS.ST OBJS.SH OBJS.PF
-	$(RM) $(STLIBOBJS)
-	$(RM) $(SHLIBOBJS)
-	$(RM) $(PFLIBOBJS)
+	$(RM) OBJS.ST OBJS.SH OBJS.PF $(STLIBOBJS) $(SHLIBOBJS) $(PFLIBOBJS)
 
 Makefile: $(SRCTOP)/config/libobj.in
 
