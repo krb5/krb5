@@ -1,3 +1,8 @@
+Thu Mar 25 18:45:48 1999  Tom Yu  <tlyu@mit.edu>
+
+	* promptusr.c (krb5_os_get_tty_uio): getchar() returns int, not
+	char.
+
 Wed Jan 14 21:12:20 1998  Tom Yu  <tlyu@mit.edu>
 
 	* locate_kdc.c (krb5_locate_kdc): Check return of
