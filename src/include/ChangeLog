@@ -1,3 +1,8 @@
+Fri Apr 21 08:58:50 1995  Theodore Y. Ts'o  <tytso@lurch.mit.edu>
+
+	* krb5.h: krb5_princ_aref() doesn't work, and isn't used anywhere.
+		Removed.
+
 Thu Apr 20 12:15:54 1995 Keith Vetter (keithv@fusion.com)
 
 	* krb5.h: Needs SIZEOF_INT, SIZEOF_LONG defined for the PC.

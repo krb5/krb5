@@ -268,13 +268,9 @@ typedef struct _krb5_fulladdr {
  * end "hostaddr.h"
  */
 
-typedef struct _krb5_context {
-	krb5_magic	magic;
-	krb5_enctype  FAR *etypes;
-	int		etype_count;
-	void	      FAR *os_context;
-	char	      FAR *default_realm;
-} FAR * krb5_context;
+
+struct _krb5_context;
+typedef struct _krb5_context FAR * krb5_context;
 
 struct _krb5_auth_context;
 typedef struct _krb5_auth_context krb5_auth_context;
@@ -670,16 +666,6 @@ extern int krb5_max_cksum;		/* max entry in array */
 
 /*
  * end "proto.h"
- */
-
-/*
- * begin "macros.h"
- */
-
-#define krb5_princ_aref(princ, n, plen) (char FAR *)(*plen = princ[n]->length, princ[n]->data)
-
-/*
- * end "macros.h"
  */
 
 /*

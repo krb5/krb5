@@ -7,6 +7,9 @@
  * John Gilmore, Cygnus Support, Sat Jan 21 22:45:52 PST 1995
  */
 
+#ifndef _KRB5_INT_H
+#define _KRB5_INT_H
+
 #include "k5-config.h"
 
 #include "krb5.h"
@@ -30,3 +33,14 @@
 #include "preauth.h"
 #include "rsa-md5.h"
 /* #include "krb5/wordsize.h" -- comes in through base-defs.h. */
+#include "profile.h"
+
+struct _krb5_context {
+	krb5_magic	magic;
+	krb5_enctype  FAR *etypes;
+	int		etype_count;
+	void	      FAR *os_context;
+	char	      FAR *default_realm;
+	profile_t     profile;
+};
+#endif /* _KRB5_INT_H */
