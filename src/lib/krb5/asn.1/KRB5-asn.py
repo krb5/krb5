@@ -84,8 +84,6 @@ Authenticator ::= SEQUENCE  {
 
 AuthenticatorVersion ::= INTEGER {krb5(5)}
 
-EncryptedAuthenticator ::= OCTET STRING
-
 -- Encrypted part of ticket
 EncTicketPart ::= SEQUENCE {
 	flags[0]			TicketFlags,
@@ -96,7 +94,7 @@ EncTicketPart ::= SEQUENCE {
 	authtime[5]			UTCTime,
 	starttime[6]			UTCTime,
 	endtime[7]			UTCTime,
-	renewTill[8]			UTCTime OPTIONAL,
+	renew-till[8]			UTCTime OPTIONAL,
 	caddr[9]			HostAddresses,
 	authorization-data[10]		AuthorizationData OPTIONAL
 }
@@ -116,7 +114,7 @@ TicketFlags ::= BIT STRING {
 	duplicate-skey(10)
 }
 
-HostAddresses ::= SEQUENCE {
+HostAddresses ::= SEQUENCE OF SEQUENCE {
 	addr-type[0]			AddressType,
 	address[1]			OCTET STRING
 }
