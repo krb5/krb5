@@ -27,7 +27,7 @@ long pty_open_slave ( slave, fd)
     int *fd;
 {
     int vfd;
-long retval;
+    long retval;
 #ifdef POSIX_SIGNALS
     struct sigaction sa;
     /* Initialize "sa" structure. */
@@ -36,10 +36,6 @@ long retval;
     
 #endif
 
-    /* XXX added by Doug Engbert to get things to work under Solaris. */
-#ifdef HAVE_SETSID
-    (void) setsid();
-#endif
 
     /* First, chmod and chown the slave*/
     /*
@@ -53,33 +49,22 @@ long retval;
 #ifdef VHANG_FIRST
     if (( retval = pty_open_ctty ( slave, &vfd )) != 0 )
       return retval;
-#else /*VHANG_FIRST*/
-    if ( (vfd = open(slave, O_RDWR)) < 0 )
-      return errno;
-#endif
-    
         if (vfd < 0)
 	return PTY_OPEN_SLAVE_OPENFAIL;
 
-#ifndef HAVE_FCHMOD
-        if (chmod(line, 0))
+#endif
+    
+
+        if (chmod(slave, 0))
 	    return PTY_OPEN_SLAVE_CHMODFAIL;
-#else
-        if (fchmod(vfd, 0))
-return PTY_OPEN_SLAVE_CHMODFAIL;
-#endif /*HAVE_FCHMOD*/
-#ifdef HAVE_FCHOWN
-    if ( fchown(vfd, 0, 0 ) == -1 ) 
-#else
 	if ( chown(slave, 0, 0 ) == -1 ) 
-#endif /* HAVE_FCHOWN*/
-	    return PTY_OPEN_SLAVE_CHOWNFAIL;
+	  return PTY_OPEN_SLAVE_CHOWNFAIL;
 
 #ifdef VHANG_FIRST
     ptyint_vhangup();
-#endif
-
     (void) close(vfd);
+#endif
+    
     if ( (retval = ptyint_void_association()) != 0)
       return retval;
     
@@ -95,3 +80,5 @@ return PTY_OPEN_SLAVE_CHMODFAIL;
     }
     return pty_initialize_slave (*fd);
 }
+
+

@@ -1,8 +1,20 @@
+Fri Jan 12 16:33:37 1996  Sam Hartman  <hartmans@infocalypse>
+
+	* open_slave.c (pty_open_slave): Don't use fchmod or fchown; they
+ 	don't buy much security unless /dev is world-writable and may
+ 	prevent Solaris lossage.
+
+Thu Dec 21 00:12:58 1995  Sam Hartman  <hartmans@portnoy>
+
+	* open_slave.c (pty_open_slave): Open with no delay.
+
+
 Wed Jan 10 22:20:04 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* open_slave.c (pty_open_slave): Added hack by Doug Engbert to get
 		util/pty to work under Solaris.  We should double check to
 		make sure this is a correct fix.
+
 
 Sun Nov 12 12:44:33 1995  Sam Hartman  <hartmans@tertius.mit.edu>
 
@@ -34,16 +46,14 @@ Mon Oct 16 17:41:45 1995  Sam Hartman  <hartmans@tertius.mit.edu>
 
 Sat Oct 14 20:49:40 1995  Sam Hartman  <hartmans@tertius.mit.edu>
 Fri Aug 11 17:49:36 1995  Samuel D Hartman  (hartmans@vorlon)
->>>>>>> 1.24
 
-<<<<<<< ChangeLog
+
 Fri Sep 29 14:18:03 1995  Theodore Y. Ts'o  <tytso@dcl>
-=======
 	* update_wtmp.c (ptyint_update_wtmp): If EMPTY not defined as a
         utmp type, use DEAD_PROCESS.
->>>>>>> 1.24
 
-<<<<<<< ChangeLog
+
+
 	* configure.in:
 	* Makefile.in: Use the SubdirLibraryRule defined in aclocal.m4 to
 		create the DONE file (and to properly clean it up).
@@ -68,8 +78,8 @@ Tue Aug 15 21:42:16 1995    <tytso@rsts-11.mit.edu>
 	* update_wtmp.c (ptyint_update_wtmp): If EMPTY is not defined,
 		then set ut.ut_type to 0 instead.
 
-=======
->>>>>>> 1.24
+
+
 Fri Aug 11 15:49:30 1995  Sam Hartman  <hartmans@tertius.mit.edu>
 
 	* Makefile.in (CFILES): Rename initialize_slave.c to init_slave.c
