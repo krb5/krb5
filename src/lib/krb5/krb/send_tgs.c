@@ -62,45 +62,52 @@ OLDDECLARG(krb5_creds *,usecred)
 OLDDECLARG(krb5_response *,rep)
 {
     krb5_error_code retval;
-    krb5_tgs_req tgsreq;
-    krb5_real_tgs_req realreq;
-    krb5_tgs_req_enc_part encpart;
+    krb5_kdc_req tgsreq;
     krb5_checksum ap_checksum;
     krb5_data *scratch;
     krb5_ticket *sec_ticket = 0;
+    krb5_ticket *sec_ticket_arr[2];
 
-    bzero((char *)&realreq, sizeof(realreq));
+    bzero((char *)&tgsreq, sizeof(tgsreq));
 
-    realreq.kdc_options = kdcoptions;
-    realreq.from = timestruct->starttime;
-    realreq.till = timestruct->endtime;
-    realreq.rtime = timestruct->renew_till;
-    
-    if (retval = krb5_timeofday(&realreq.ctime))
+    tgsreq.kdc_options = kdcoptions;
+    tgsreq.server = sname;
+
+    tgsreq.from = timestruct->starttime;
+    tgsreq.till = timestruct->endtime;
+    tgsreq.rtime = timestruct->renew_till;
+    if (retval = krb5_timeofday(&tgsreq.ctime))
 	return(retval);
-    realreq.etype = etype;
-    realreq.server = sname;
-    realreq.addresses = (krb5_address **) addrs;
+    /* XXX we know they are the same size... */
+    tgsreq.nonce = (krb5_int32) tgsreq.ctime;
 
-    encpart.authorization_data = (krb5_authdata **)authorization_data;
+    tgsreq.etype = etype;
+    tgsreq.addresses = (krb5_address **) addrs;
+    tgsreq.authorization_data = (krb5_authdata **)authorization_data;
     if (second_ticket) {
-	if (retval = krb5_decode_ticket(second_ticket, &sec_ticket))
+	if (retval = decode_krb5_ticket(second_ticket, &sec_ticket))
 	    return retval;
-	encpart.second_ticket = sec_ticket;
+	sec_ticket_arr[0] = sec_ticket;
+	sec_ticket_arr[1] = 0;
+	tgsreq.second_ticket = sec_ticket_arr;
     } else
-	encpart.second_ticket = 0;
+	tgsreq.second_ticket = 0;
 
-    realreq.enc_part2 = &encpart;
 
-    retval = encode_krb5_real_tgs_req(&realreq, &scratch);
-    if (sec_ticket)
-	krb5_free_ticket(sec_ticket);
-    if (retval)
+    /* encode the body; then checksum it */
+
+    retval = encode_krb5_kdc_req_body(&tgsreq, &scratch);
+    if (retval) {
+	if (sec_ticket)
+	    krb5_free_ticket(sec_ticket);
 	return(retval);
+    }
 
     /* XXX choose a checksum type */
     if (!(ap_checksum.contents = (krb5_octet *)
 	  malloc(krb5_cksumarray[sumtype]->checksum_length))) {
+	if (sec_ticket)
+	    krb5_free_ticket(sec_ticket);
 	krb5_free_data(scratch);
 	return ENOMEM;
     }
@@ -111,17 +118,23 @@ OLDDECLARG(krb5_response *,rep)
 			       (krb5_pointer) usecred->keyblock.contents,
 			       usecred->keyblock.length,
 			       &ap_checksum)) {
+	if (sec_ticket)
+	    krb5_free_ticket(sec_ticket);
 	xfree(ap_checksum.contents);
 	krb5_free_data(scratch);
 	return retval;
     }
-    tgsreq.tgs_request = *scratch;
-    xfree(scratch);
+    /* done with body */
+    krb5_free_data(scratch);
 
-#define cleanup() {(void) free((char *)tgsreq.tgs_request.data); \
-		   xfree(ap_checksum.contents);}
+#define cleanup() {xfree(ap_checksum.contents);\
+		   if (sec_ticket) krb5_free_ticket(sec_ticket);}
+    /* attach ap_req to the tgsreq */
+
+    tgsreq.padata_type = KRB5_PADATA_AP_REQ;
+
     /*
-     * Now get an ap_req.
+     * Get an ap_req.
      */
     if (retval = krb5_mk_req_extended (0L /* no ap options */,
 				       &ap_checksum,
@@ -130,18 +143,21 @@ OLDDECLARG(krb5_response *,rep)
 				       0, /* XXX no ccache */
 				       usecred,
 				       0, /* don't need authenticator */
-				       &tgsreq.header)) {
+				       &tgsreq.padata)) {
 	cleanup();
 	return retval;
     }
-    /* now the TGS_REQ is assembled in tgsreq */
+
+
+    /* the TGS_REQ is assembled in tgsreq, so encode it */
     if (retval = encode_krb5_tgs_req(&tgsreq, &scratch)) {
 	cleanup();
 	return(retval);
     }
+    if (sec_ticket)
+	krb5_free_ticket(sec_ticket);
 #undef cleanup
-#define cleanup() {(void) free(tgsreq.header.data); \
-		   (void) free(tgsreq.tgs_request.data);\
+#define cleanup() {(void) free(tgsreq.padata.data); \
 		   xfree(ap_checksum.contents);}
 
     /* now send request & get response from KDC */
@@ -153,14 +169,8 @@ OLDDECLARG(krb5_response *,rep)
 	return retval;
     }
 #undef cleanup
-    /* here we use some knowledge of ASN.1 encodings */
-    /* first byte is the identifier octet.  KRB_KDC_REP is APPLICATION 1,
-       KRB_ERROR is application 2 */
-    /* allow either constructed or primitive encoding, so check for bit 6
-       set or reset */
 
-    if (krb5_is_kdc_rep(&rep->response))
-	/* it's a KDC_REP--assume TGS_REP */
+    if (krb5_is_tgs_rep(&rep->response))
 	rep->message_type = KRB5_TGS_REP;
     else /* assume it's an error */
 	rep->message_type = KRB5_ERROR;
