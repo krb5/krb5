@@ -433,11 +433,11 @@ krb5_free_pwd_sequences(krb5_context context, passwd_phrase_element **val)
 
     for (temp = val; *temp; temp++) {
 	if ((*temp)->passwd) {
-	   krb5_xfree((*temp)->passwd);
+	   krb5_free_data(context, (*temp)->passwd);
 	   (*temp)->passwd = 0;
 	}
 	if ((*temp)->phrase) {
-	   krb5_xfree((*temp)->phrase);
+	   krb5_free_data(context, (*temp)->phrase);
 	   (*temp)->phrase = 0;
 	}
 	krb5_xfree(*temp);

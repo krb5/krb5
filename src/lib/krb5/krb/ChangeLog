@@ -1,3 +1,8 @@
+2003-04-24  Ezra Peisach  <epeisach@mit.edu>
+
+	* kfree.c (krb5_free_pwd_sequences): Correction to previous
+	fix. Free contents of krb5_data - not just the pointer.
+
 2003-04-23  Ezra Peisach  <epeisach@mit.edu>
 
 	* kfree.c (krb5_free_pwd_sequences): Actually free the entire
