@@ -317,11 +317,21 @@ COMPILE_ET-k5= $(BUILDTOP)/util/et/compile_et -d $(SRCTOP)/util/et
 
 .SUFFIXES:  .h .c .et .ct
 
+# These versions cause both .c and .h files to be generated at once.
+# But GNU make doesn't understand this, and parallel builds can trigger
+# both of them at once, causing them to stomp on each other.  The versions
+# below only update one of the files, so compile_et has to get run twice,
+# but it won't break parallel builds.
+#.et.h: ; $(COMPILE_ET) $<
+#.et.c: ; $(COMPILE_ET) $<
+
 .et.h:
-	$(COMPILE_ET) $<
+	set -x ; d=ettmp$$$$ ; (cp $< $$d.et && $(COMPILE_ET) $$d.et && mv $$d.h $*.h) ; \
+		e=$$? ; rm -f $$d.* ; exit $$e
 
 .et.c:
-	$(COMPILE_ET) $<
+	set -x ; d=ettmp$$$$ ; (cp $< $$d.et && $(COMPILE_ET) $$d.et && mv $$d.c $*.c) ; \
+		e=$$? ; rm -f $$d.* ; exit $$e
 
 # rule to make object files
 #
