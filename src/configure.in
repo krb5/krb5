@@ -33,7 +33,7 @@ case $krb5_cv_host in
 	krb5_cv_shlibs_sym_ufo="-u "
 	krb5_cv_shlibs_dirhead="-Wl,-R -Wl,"
 	krb5_cv_exe_need_dirs=yes
-	krb5_cv_shlibs_use_dirs=no
+	krb5_cv_shlibs_use_dirs=yes
 	krb5_cv_shlibs_use_colon_dirs=no
 	krb5_cv_shlibs_tail_comp=
 	krb5_cv_shlibs_enabled=yes
