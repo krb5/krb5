@@ -67,8 +67,17 @@ int krb5int_debug_sendto_kdc = 0;
 
 static void default_debug_handler (const void *data, size_t len)
 {
+#if 0
+    FILE *logfile;
+    logfile = fopen("/tmp/sendto_kdc.log", "a");
+    if (logfile == NULL)
+	return;
+    fwrite(data, 1, len, logfile);
+    fclose(logfile);
+#else
     fwrite(data, 1, len, stderr);
     /* stderr is unbuffered */
+#endif
 }
 
 void (*krb5int_sendtokdc_debug_handler) (const void *, size_t) = default_debug_handler;
@@ -623,6 +632,19 @@ start_connection (struct conn_state *state, struct select_state *selstate)
 	    state->state = FAILED;
 	    return -3;
 	} else {
+#ifdef DEBUG
+	    struct sockaddr_storage ss;
+	    socklen_t sslen = sizeof(ss);
+	    if (0 == getsockname(state->fd, (struct sockaddr *) &ss, &sslen)) {
+		struct addrinfo hack_ai;
+		memset(&hack_ai, 0, sizeof(hack_ai));
+		hack_ai.ai_addr = (struct sockaddr *) &ss;
+		hack_ai.ai_addrlen = sslen;
+		hack_ai.ai_socktype = SOCK_DGRAM;
+		hack_ai.ai_family = ai->ai_family;
+		dprint("local address used was %A\n", &hack_ai);
+	    }
+#endif
 	    state->state = READING;
 	}
     }

@@ -1,3 +1,8 @@
+2004-08-27  Ken Raeburn  <raeburn@mit.edu>
+
+	* sendto_kdc.c (start_connection) [DEBUG]: Log the local socket
+	address.
+
 2004-08-12  Alexandra Ellwood  <lxs@mit.edu>
 
         * ccdefname.c (krb5_cc_set_default_name, krb5_cc_default_name):
