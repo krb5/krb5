@@ -1,3 +1,8 @@
+2000-04-18  Danilo Almeida  <dalmeida@mit.edu>
+
+	* prompter.c (krb5int_set_prompt_types): Set to actual value
+	intead of 0.
+
 2000-4-13	Alexandra Ellwood <lxs@mit.edu>
 
 	* init_os_ctx.c: Added support to store a krb5_principal in the os_context 
