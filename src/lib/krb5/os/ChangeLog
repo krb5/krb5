@@ -1,3 +1,10 @@
+Wed Jul  1 17:54:56 1998  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* macsock.c(inet_ntoa): Fix obvious bug where we were returning a
+ 		pointer to an automatic variable which should have been a
+ 		static.  Fortunately nothing in the Mac tree was using
+ 		inet_ntoa()....
+
 1998-05-06  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* t_std_conf.c (main): POSIX states that getopt returns -1
