@@ -321,12 +321,9 @@ master key name '%s'\n",
 	com_err(argv[0], retval, "while calculated master key salt");
 	exit(1);
     }
-    retval = krb5_string_to_key(context, &master_encblock, 
-				master_keyblock.enctype, &master_keyblock, 
-				&pwd, &master_salt);
-    if (retval) {
-	com_err(argv[0], retval,
-		"while transforming master key from password");
+    if (retval = krb5_string_to_key(context, &master_encblock, 
+				    &master_keyblock, &pwd, &master_salt)) {
+	com_err(argv[0], retval, "while transforming master key from password");
 	exit(1);
     }
 
@@ -420,10 +417,8 @@ tgt_keysalt_iterate(ksent, ptr)
     krb5_use_enctype(context, &random_encblock, ksent->ks_enctype);
     pwd.data = mkey_password;
     pwd.length = strlen(mkey_password);
-    kret = krb5_string_to_key(context, &random_encblock, 
-				ksent->ks_enctype, &random_keyblock, 
-				&pwd, &master_salt);
-    if (kret)
+    if (kret = krb5_string_to_key(context, &random_encblock, &random_keyblock, 
+			      &pwd, &master_salt))
 	return kret;
     if ((kret = krb5_init_random_key(context, &random_encblock, 
 				       &random_keyblock, &rseed)))
