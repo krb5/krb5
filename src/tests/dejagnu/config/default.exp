@@ -382,6 +382,7 @@ proc setup_kerberos_files { } {
 	}
 	puts $conffile "	krb4_config = $tmppwd/krb.conf"
 	puts $conffile "	krb4_realms = $tmppwd/krb.realms"
+	puts $conffile "	krb4_srvtab = $tmppwd/v4srvtab"
 	puts $conffile ""
 	puts $conffile "\[realms\]"
 	puts $conffile "	$REALMNAME = \{"
