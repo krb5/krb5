@@ -48,6 +48,7 @@ typedef struct _acl_entry {
 static const aop_t acl_op_table[] = {
     { 'a',	ACL_ADD_PRINCIPAL },
     { 'd',	ACL_DELETE_PRINCIPAL },
+    { 'e',	ACL_EXTRACT },
     { 'm',	ACL_MODIFY_PRINCIPAL },
     { 'c',	ACL_CHANGEPW },
     { 'o',	ACL_CHANGE_OWN_PW },
@@ -66,6 +67,12 @@ static const char *acl_default_file = "/etc/krb5_adm.acl";
 static char *acl_acl_file = (char *) NULL;
 static int acl_inited = 0;
 static int acl_debug_level = 0;
+/*
+ * This is the catchall entry.  If nothing else appropriate is found, or in
+ * the case where the ACL file is not present, this entry controls what can
+ * be done.  The default is that everybody can change their own password.
+ */
+static const char *acl_catchall_entry = "* o";
 
 static const char *acl_line2long_msg = "%s: line %d too long, truncated\n";
 static const char *acl_op_bad_msg = "Unrecognized ACL operation '%c' in %s\n";
@@ -234,10 +241,28 @@ acl_load_acl_file()
 	    acl_list_tail = *aentpp;
 	    aentpp = &(*aentpp)->ae_next;
 	}
+	if (*aentpp = acl_parse_line(acl_catchall_entry)) {
+	    acl_list_tail = *aentpp;
+	}
+	else {
+	    retval = 0;
+	    DPRINT(DEBUG_OPERATION, acl_debug_level,
+		   ("> catchall acl entry (%s) load failed\n",
+		    acl_catchall_entry));
+	}
 	fclose(afp);
     }
     else {
 	com_err(acl_acl_file, errno, acl_cantopen_msg);
+	if (acl_list_head = acl_parse_line(acl_catchall_entry)) {
+	    acl_list_tail = acl_list_head;
+	}
+	else {
+	    retval = 0;
+	    DPRINT(DEBUG_OPERATION, acl_debug_level,
+		   ("> catchall acl entry (%s) load failed\n",
+		    acl_catchall_entry));
+	}
     }
 
     if (!retval) {
@@ -354,7 +379,7 @@ acl_init(kcontext, debug_level, acl_file)
     DPRINT(DEBUG_CALLS, acl_debug_level,
 	   ("* acl_init(afile=%s)\n",
 	    ((acl_file) ? acl_file : "(null)")));
-    acl_acl_file = (acl_file) ? acl_file : acl_default_file;
+    acl_acl_file = (acl_file) ? acl_file : (char *) acl_default_file;
     acl_inited = acl_load_acl_file();
     signal(SIGHUP, acl_reload_acl_file);
     DPRINT(DEBUG_CALLS, acl_debug_level, ("X acl_init() = %d\n", kret));
@@ -387,10 +412,10 @@ acl_op_permitted(kcontext, principal, opmask)
     aent_t		*aentry;
 
     DPRINT(DEBUG_CALLS, acl_debug_level, ("* acl_op_permitted()\n"));
-    retval = 1;
+    retval = 0;
     if (aentry = acl_find_entry(kcontext, principal)) {
-	if ((aentry->ae_op_allowed & opmask) != opmask)
-	    retval = 0;
+	if ((aentry->ae_op_allowed & opmask) == opmask)
+	    retval = 1;
     }
     DPRINT(DEBUG_CALLS, acl_debug_level, ("X acl_op_permitted()=%d\n",
 					  retval));
