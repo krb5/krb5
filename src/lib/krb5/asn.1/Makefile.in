@@ -6,6 +6,10 @@ CFLAGS=$(CCOPTS) $(DEFS)
 
 EHDRDIR=$(BUILDTOP)/include/krb5/asn.1
 
+.c.o:
+	$(CC) $(CFLAGS) -c $(srcdir)/$*.c
+@SHARED_RULE@
+
 SRCS= \
 	$(srcdir)asn1_decode.c\
 	$(srcdir)asn1_k_decode.c\
@@ -30,12 +34,19 @@ OBJS= \
 	asn1_k_encode.$(OBJEXT)\
 	asn1_misc.$(OBJEXT)
 
-all:: $(OBJS)
+all:: all-$(WHAT)
+
+all-unix:: shared $(OBJS)
+all-mac::  $(OBJS)
+all-windows:: $(OBJS)
+
+shared:
+	mkdir shared
 
 clean:: clean-$(WHAT)
 
 clean-unix::
-	$(RM) $(OBJS)
+	$(RM) shared/* $(OBJS)
 
 clean-mac::
 	$(RM) $(OBJS)

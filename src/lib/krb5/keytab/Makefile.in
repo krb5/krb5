@@ -4,6 +4,10 @@ CFLAGS = $(CCOPTS) $(DEFS)
 ##DOSLIBNAME=..\krb5.lib
 ##DOS!include $(BUILDTOP)\config\windows.in
 
+.c.o:
+	$(CC) $(CFLAGS) -c $(srcdir)/$*.c
+@SHARED_RULE@
+
 OBJS=	\
 	ktadd.$(OBJEXT)		\
 	ktbase.$(OBJEXT)	\
@@ -20,11 +24,14 @@ SRCS=	\
 	$(srcdir)/ktremove.c	\
 	$(srcdir)/read_servi.c
 
-all:: $(OBJS) all-$(WHAT)
+all:: all-$(WHAT)
 
-all-unix::
-all-mac::
-all-windows::
+shared:
+	mkdir shared
+
+all-unix:: shared $(OBJS)
+all-mac:: $(OBJS)
+all-windows:: $(OBJS)
 	cd file
 	@echo Making in keytab\file
 	-$(MAKE) -$(MFLAGS) LIBCMD=$(LIBCMD)
@@ -33,6 +40,8 @@ all-windows::
 clean:: clean-$(WHAT)
 
 clean-unix::
+	$(RM) shared/*
+
 clean-mac::
 clean-windows::
 	cd file

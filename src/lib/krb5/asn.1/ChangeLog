@@ -1,3 +1,7 @@
+Fri May 26 20:19:15 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* configure.in, Makefile.in: Add support for building shared libraries.
+
 Tue May 23 16:22:57 1995  Theodore Y. Ts'o  (tytso@dcl)
 
 	* asn1_decode.c: Rearrange #include files so that krb5.h gets

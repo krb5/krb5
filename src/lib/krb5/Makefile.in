@@ -6,6 +6,10 @@ TST=if test -n "`cat DONE`" ; then
 LIB_SUBDIRS= error_tables asn.1 ccache ccache/stdio ccache/file \
 	keytab keytab/file krb rcache free os posix $(BUILDTOP)/util/profile
 LIBUPDATE= $(BUILDTOP)/util/libupdate
+LIBDONE= error_tables/DONE asn.1/DONE ccache/DONE ccache/stdio/DONE \
+		ccache/file/DONE keytab/DONE keytab/file/DONE krb/DONE \
+		rcache/DONE free/DONE os/DONE posix/DONE \
+		$(BUILDTOP)/util/profile/DONE
 
 all:: all-$(WHAT)
 
@@ -13,14 +17,7 @@ all-unix::
 
 all-windows::
 
-libkrb5_ranlib: libkrb5.a
-	$(RANLIB) libkrb5.a
-	touch $@
-
-libkrb5.a: error_tables/DONE asn.1/DONE ccache/DONE ccache/stdio/DONE \
-		ccache/file/DONE keytab/DONE keytab/file/DONE krb/DONE \
-		rcache/DONE free/DONE os/DONE posix/DONE \
-		$(BUILDTOP)/util/profile/DONE
+libkrb5.a: $(LIBDONE)
 	if test -f $@ ; then \
 		for i in $(LIB_SUBDIRS) ; \
 		do \
@@ -32,16 +29,16 @@ libkrb5.a: error_tables/DONE asn.1/DONE ccache/DONE ccache/stdio/DONE \
 			$(LIBUPDATE) --force $@ $$i/DONE $$i ; \
 		done ; \
 	fi
-	touch libkrb5.stamp
+	$(RANLIB) libkrb5.a
 
-install:: libkrb5_ranlib
+install:: 
 	$(INSTALL_DATA) libkrb5.a $(DESTDIR)$(KRB5_LIBDIR)/libkrb5.a
 	$(RANLIB) $(DESTDIR)$(KRB5_LIBDIR)/libkrb5.a
 
 clean:: clean-$(WHAT)
 
 clean-unix::
-	$(RM) libkrb5.$(LIBEXT) libkrb5_ranlib libkrb5.stamp
+	$(RM) libkrb5.$(LIBEXT) 
 
 clean-windows::
 	$(RM) krb5.lib krb5.bak

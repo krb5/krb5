@@ -1,5 +1,9 @@
 CFLAGS = $(CCOPTS) $(DEFS)
 
+.c.o:
+	$(CC) $(CFLAGS) -c $(srcdir)/$*.c
+@SHARED_RULE@
+
 OBJS 	= scc_close.o scc_destry.o scc_eseq.o \
 	scc_gennew.o scc_getnam.o scc_gprin.o scc_init.o \
 	scc_nseq.o scc_read.o scc_reslv.o scc_retrv.o \
@@ -15,8 +19,24 @@ SRCS 	= $(srcdir)/scc_close.c $(srcdir)/scc_destry.c $(srcdir)/scc_eseq.c \
 	$(srcdir)/scc_errs.c $(srcdir)/scc_maybe.c
 
 
-all:: $(OBJS)
+all:: all-$(WHAT)
+
+all-unix:: shared $(OBJS)
+all-mac:: $(OBJS)
+all-windows:: $(OBJS)
 
 test: ${OBJS} scc_test.o
 	${CC} -o test ${OBJS} scc_test.o
+
+shared: 
+	mkdir shared
+
+clean:: clean-$(WHAT)
+
+clean-unix::
+	$(RM) shared/*
+
+clean-mac::
+clean-windows::
+
 

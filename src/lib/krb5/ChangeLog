@@ -1,3 +1,7 @@
+Fri May 26 20:12:37 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* configure.in, Makefile.in: Add support for building shared libraries.
+
 Sat Apr 22 10:58:49 1995  Ezra Peisach  (epeisach@kangaroo.mit.edu)
 
 	* configure.in: Add rule for make check to descend to subdirs

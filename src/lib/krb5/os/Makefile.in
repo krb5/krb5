@@ -4,6 +4,10 @@ CFLAGS = $(CCOPTS) $(DEFS)
 ##DOSLIBNAME=..\krb5.lib
 ##DOS!include $(BUILDTOP)\config\windows.in
 
+.c.o:
+	$(CC) $(CFLAGS) -c $(srcdir)/$*.c
+@SHARED_RULE@
+
 OBJS= \
 	an_to_ln.$(OBJEXT)	\
 	def_realm.$(OBJEXT)	\
@@ -78,7 +82,16 @@ SRCS= \
 	$(srcdir)/ustime.c	\
 	$(srcdir)/write_msg.c
 
-all:: $(OBJS)
+all:: all-$(WHAT)
+
+all-unix:: shared $(OBJS)
+
+all-mac:: $(OBJS)
+
+all-windows:: $(OBJS)
+
+shared:
+	mkdir shared
 
 COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
 
@@ -103,5 +116,11 @@ check-unix:: $(TEST_PROGS)
 	cmp test.out $(srcdir)/ref_std_conf.out
 	$(RM) test.out
 
-clean::
+clean:: clean-$(WHAT)
 	$(RM) $(TEST_PROGS) test.out t_std_conf.o
+
+clean-unix::
+	$(RM) shared/*
+clean-mac::
+clean-windows::
+

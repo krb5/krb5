@@ -4,6 +4,10 @@ CFLAGS = $(CCOPTS) $(DEFS)
 ##DOSLIBNAME=..\..\krb5.lib
 ##DOS!include $(BUILDTOP)\config\windows.in
 
+.c.o:
+	$(CC) $(CFLAGS) -c $(srcdir)/$*.c
+@SHARED_RULE@
+
 SRCS= \
 	$(srcdir)/ktf_add.c \
 	$(srcdir)/ktf_endget.c \
@@ -36,4 +40,19 @@ OBJS = \
 	ktf_wreslv.$(OBJEXT)	\
 	ktf_defops.$(OBJEXT)
 
-all:: $(OBJS)
+all:: all-$(WHAT)
+
+all-unix:: shared $(OBJS)
+all-mac:: $(OBJS)
+all-windows:: $(OBJS)
+
+shared:
+	mkdir shared
+
+clean:: clean-$(WHAT)
+
+clean-unix::
+	$(RM) shared/*
+
+clean-mac::
+clean-windows::

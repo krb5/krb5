@@ -4,10 +4,27 @@ CFLAGS = $(CCOPTS) $(DEFS)
 ##DOSLIBNAME=..\krb5.lib
 ##DOS!include $(BUILDTOP)\config\windows.in
 
+.c.o:
+	$(CC) $(CFLAGS) -c $(srcdir)/$*.c
+@SHARED_RULE@
+
 OBJS = @LIBOBJS@
 
 all:: all-$(WHAT)
 
-all-unix:: $(OBJS)
+all-unix:: shared $(OBJS)
 all-mac: $(OBJS)
 all-windows:: syslog.obj
+
+shared:
+	mkdir shared
+
+clean:: clean-$(WHAT)
+
+clean-unix::
+	$(RM) shared/*
+
+clean-mac::
+clean-windows::
+
+

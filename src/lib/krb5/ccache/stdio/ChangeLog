@@ -1,3 +1,7 @@
+Fri May 26 20:19:49 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* configure.in, Makefile.in: Add support for building shared libraries.
+
 Thu Apr 13 16:32:12 1995 Keith Vetter (keithv@fusion.com)
 
 	* scc_genn.c: __STDC__ conditional also checks the _WINDOWS define.

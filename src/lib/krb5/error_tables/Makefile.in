@@ -18,6 +18,10 @@ EHDRDIR=$(BUILDTOP)$(S)include$(S)krb5
 #SRCTOP2 = $(BUILDTOP2)
 #EHDRDIR2=$(BUILDTOP2)/include/krb5
 
+.c.o:
+	$(CC) $(CFLAGS) -c $*.c
+@SHARED_RULE_LOCAL@
+
 HDRS= asn1_err.h kdb5_err.h krb5_err.h kv5m_err.h adm_err.h
 OBJS= asn1_err.$(OBJEXT) kdb5_err.$(OBJEXT) krb5_err.$(OBJEXT) \
       kv5m_err.$(OBJEXT) adm_err.$(OBJEXT) init_ets.$(OBJEXT)
@@ -26,10 +30,13 @@ SRCS=$(ETSRCS) init_ets.c
 
 all:: all-$(WHAT)
 
-all-unix:: $(HDRS) includes $(OBJS)
+all-unix:: $(HDRS) includes shared $(OBJS)
 all-mac:: $(OBJS)
 
 all-windows:: $(OBJS)
+
+shared:
+	mkdir shared
 
 unixmac: $(HDRS) includes $(SRCS)
 
@@ -63,11 +70,14 @@ kv5m_err.$(OBJEXT): kv5m_err.c
 clean:: clean-$(WHAT)
 
 clean-unix:: clean-hdrs
-	$(RM) $(HDRS) $(ETSRCS)
+	$(RM) $(HDRS) $(ETSRCS) shared/*
 clean-mac:: clean-hdrs
 	$(RM) $(HDRS) $(ETSRCS)
 clean-windows::
 
+init_ets.o: $(srcdir)/init_ets.c
+	$(CC) $(CFLAGS) -c $(srcdir)/$*.c
+@SHARED_RULE@
 
 includes:: $(HDRS)
 	for x in $(HDRS); do \

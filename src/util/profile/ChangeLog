@@ -1,6 +1,6 @@
 Fri May 26 20:07:13 1995  Theodore Y. Ts'o  (tytso@dcl)
 
-	* configure.in, Makefile.in: Add support for shared libraries.
+	* configure.in, Makefile.in: Add support for building shared libraries.
 
 Sat May  6 17:21:59 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 

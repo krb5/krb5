@@ -1,9 +1,8 @@
 AC_INIT(configure.in)
 WITH_CCOPTS
-WITH_CPPOPTS dnl since we're not doing CONFIG_RULES
-WITH_CC dnl since we're not doing CONFIG_RULES
-dnl CONFIG_RULES
+CONFIG_RULES
 AC_SET_BUILDTOP
+V5_SHARED_LIB_OBJS
 SubdirLibraryRule([${OBJS}])
 KRB_INCLUDE
 V5_AC_OUTPUT_MAKEFILE

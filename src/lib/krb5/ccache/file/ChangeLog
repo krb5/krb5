@@ -1,3 +1,7 @@
+Fri May 26 20:19:39 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* configure.in, Makefile.in: Add support for building shared libraries.
+
 Thu May 25 15:37:39 1995 Keith Vetter (keithv@fusion.com)
 
 	* fcc_maybe.c: the NEED_SOCKETS has to be before the #include line.

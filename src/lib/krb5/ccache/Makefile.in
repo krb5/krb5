@@ -4,6 +4,10 @@ CFLAGS = $(CCOPTS) $(DEFS) -I$(srcdir)$(S)file -I$(srcdir)$(S)stdio
 ##DOSLIBNAME=..\krb5.lib
 ##DOS!include $(BUILDTOP)\config\windows.in
 
+.c.o:
+	$(CC) $(CFLAGS) -c $(srcdir)/$*.c
+@SHARED_RULE@
+
 OBJS=	ccbase.$(OBJEXT) \
 	ccdefault.$(OBJEXT) \
 	ccdefops.$(OBJEXT)
@@ -12,19 +16,25 @@ SRCS=	$(srcdir)/ccbase.c \
 	$(srcdir)/ccdefault.c \
 	$(srcdir)/ccdefops.c
 
-all:: $(OBJS) all-$(WHAT)
+all:: all-$(WHAT)
 
-all-unix::
-all-mac::
-all-windows::
+all-unix:: shared $(OBJS) 
+
+all-mac:: $(OBJS) 
+all-windows:: $(OBJS) 
 	cd FILE
 	@echo Making in ccache\file
 	-$(MAKE) -$(MFLAGS) LIBCMD=$(LIBCMD)
 	cd ..
 
+shared: 
+	mkdir shared
+
 clean:: clean-$(WHAT)
 
 clean-unix::
+	$(RM) shared/*
+
 clean-mac:
 clean-windows::
 	cd FILE

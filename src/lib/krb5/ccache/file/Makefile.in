@@ -4,6 +4,10 @@ CFLAGS = $(CCOPTS) $(DEFS)
 ##DOSLIBNAME=..\..\krb5.lib
 ##DOS!include $(BUILDTOP)\config\windows.in
 
+.c.o:
+	$(CC) $(CFLAGS) -c $(srcdir)/$*.c
+@SHARED_RULE@
+
 OBJS 	= fcc_close.$(OBJEXT) fcc_destry.$(OBJEXT) fcc_eseq.$(OBJEXT) \
 	fcc_gennew.$(OBJEXT) fcc_getnam.$(OBJEXT) fcc_gprin.$(OBJEXT) \
 	fcc_init.$(OBJEXT) fcc_nseq.$(OBJEXT) fcc_read.$(OBJEXT) \
@@ -20,5 +24,19 @@ SRCS 	= $(srcdir)/fcc_close.c $(srcdir)/fcc_destry.c $(srcdir)/fcc_eseq.c \
 	$(srcdir)/fcc_write.c $(srcdir)/fcc_sflags.c $(srcdir)/fcc_defops.c \
 	$(srcdir)/fcc_errs.c $(srcdir)/fcc_maybe.c
 
-all:: $(OBJS)
+all:: all-$(WHAT)
 
+all-unix:: shared $(OBJS)
+all-mac:: $(OBJS)
+all-windows:: $(OBJS)
+
+shared: 
+	mkdir shared
+
+clean:: clean-$(WHAT)
+
+clean-unix::
+	$(RM) shared/*
+
+clean-mac::
+clean-windows::
