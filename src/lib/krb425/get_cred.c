@@ -42,11 +42,11 @@ CREDENTIALS *c;
 	static krb5_principal client_principal = 0;
 
 	krb5_creds creds;
-	krb5_principal server;
 	krb5_error_code r;
 	krb5_ticket *ticket;
 
-	if (r = krb5_build_principal(&server,
+	memset((char *)&creds, 0, sizeof(creds));
+	if (r = krb5_build_principal(&creds.server,
 				     strlen(realm), realm,
 				     service,
 				     instance,
@@ -59,14 +59,11 @@ CREDENTIALS *c;
 	if (!client_principal)
 		krb5_cc_get_principal(_krb425_ccache, &client_principal);
 
-	memset((char *)&creds, 0, sizeof(creds));
 	creds.client = client_principal;
-	creds.server = server;
 	creds.times.endtime = 0;
 	creds.keyblock.keytype = KEYTYPE_DES;
 
 	r = krb5_get_credentials(0, _krb425_ccache, &creds);
-	krb5_free_principal(server);
 	if (r)
 	    return(krb425error(r));
 	
@@ -102,7 +99,7 @@ CREDENTIALS *c;
 	}
 	set_string(c->realm, REALM_SZ, krb5_princ_realm(creds.server));
 	set_string(c->service, ANAME_SZ, krb5_princ_component(creds.server, 0));
-*	set_string(c->instance, INST_SZ, krb5_princ_component(creds.server, 1));
+	set_string(c->instance, INST_SZ, krb5_princ_component(creds.server, 1));
 
 	c->ticket_st.length = creds.ticket.length;
 	memcpy((char *)c->ticket_st.dat,
