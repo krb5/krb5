@@ -1,3 +1,7 @@
+Tue Oct  7 07:43:05 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* Makefile.in (SRCS): Add $(srcdir) as prefix to srcs.
+
 Mon Jul 21 12:00:24 1997  Ezra Peisach  <epeisach@mit.edu>
 
 	* error_message.c (error_message): Mask error code with

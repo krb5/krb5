@@ -35,7 +35,10 @@ FILES=	Makefile et_name.c error_message.c compile_et.c \
 		com_err.texinfo texinfo.tex
 #SRCS=	compile_et.c error_table.c error_message.c et_name.c \
 #	init_et.c com_err.c
-SRCS= error_message.c et_name.c init_et.c com_err.c
+SRCS= $(srcdir)/error_message.c \
+	$(srcdir)/et_name.c \
+	$(srcdir)/init_et.c \
+	$(srcdir)/com_err.c
 
 #
 # Warning flags
