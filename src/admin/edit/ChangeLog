@@ -1,3 +1,8 @@
+Mon Oct  9 16:35:19 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* kdb5_edit.c (extract_v4_srvtab): Extract a one byte version
+		number for v4 srvtabs (from warlord).
+
 Thu Oct  5 10:35:35 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* cpw.c: Declare std_ks_tuple as extern.

@@ -767,6 +767,8 @@ void extract_v4_srvtab(argc, argv)
 	return;
     }
     for (i = 2; i < argc; i++) {
+	unsigned char kvno;
+
 	/* iterate over the names */
 	pname = malloc(strlen(argv[1])+strlen(argv[i])+strlen(cur_realm)+3);
 	if (!pname) {
@@ -826,8 +828,8 @@ void extract_v4_srvtab(argc, argv)
 	fwrite(argv[i], strlen(argv[i]) + 1, 1, fout); /* p.name */
 	fwrite(argv[1], strlen(argv[1]) + 1, 1, fout); /* p.instance */
 	fwrite(cur_realm, strlen(cur_realm) + 1, 1, fout); /* p.realm */
-	fwrite((char *)&dbentry.key_data[0].key_data_kvno, 
-	       sizeof(dbentry.key_data[0].key_data_kvno), 1, fout);
+        kvno = (unsigned char) dbentry.key_data[0].key_data_kvno;
+        fwrite((char *)&kvno, sizeof(kvno), 1, fout);
 	fwrite((char *)key.contents, 8, 1, fout);
 	printf("'%s' added to V4 srvtab '%s'\n", pname, ktname);
 	memset((char *)key.contents, 0, key.length);
