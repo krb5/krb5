@@ -1,3 +1,8 @@
+2003-06-27  Tom Yu  <tlyu@mit.edu>
+
+	* gic_keytab.c (krb5_get_in_tkt_with_keytab): Pass (void*)keytab,
+	not &keytab, to get_init_creds.  Thanks to Herb Lewis.
+
 2003-06-16  Sam Hartman  <hartmans@mit.edu>
 
 	* fwd_tgt.c (krb5_fwd_tgt_creds): Set use_conf_ktypes to true while getting the TGT key

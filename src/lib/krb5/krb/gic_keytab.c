@@ -174,7 +174,7 @@ krb5_get_in_tkt_with_keytab(krb5_context context, krb5_flags options,
 				  creds, creds->client,  
 				  krb5_prompter_posix,  NULL,
 				  0, server, &opt,
-				  krb5_get_as_key_keytab, &keytab,
+				  krb5_get_as_key_keytab, (void *)keytab,
 				  0, ret_as_reply);
     krb5_free_unparsed_name( context, server);
     if (retval) {
