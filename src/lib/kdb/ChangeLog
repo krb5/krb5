@@ -1,3 +1,9 @@
+2000-06-30  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (SHLIB_EXPDEPS): Add libdb, since we can build this
+	shared now.
+	(SHLIB_EXPLIBS): Add -ldb.
+
 2000-05-11  Nalin Dahyabhai  <nalin@redhat.com>
 
 	* t_kdb.c (gen_principal): Don't overflow "pnamebuf" if bad data was
