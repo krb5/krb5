@@ -1,3 +1,16 @@
+Sun Apr 21 00:30:28 1996  Sam Hartman  <hartmans@mit.edu>
+
+	* krshd.c krlogind.c: Implement -i.  Rewrite error message having
+ 	to do with checksums.
+
+	* krshd.Mkrlogind.M : Document -i, remove documentation about
+ 	taking options from name of daemon.  Clean up checksum
+ 	documentation.
+
+	* krlogind.c (do_krb_login): Fix up error messages for checksums.
+  	Configuration errors are presented for situations where -c and -i
+ 	are used together, or where -4 and -c are used together.
+
 Thu Apr 18 19:48:47 1996  Sam Hartman  <hartmans@mit.edu>
 
 	* Makefile.in: Fix spaces by converting to tabs.

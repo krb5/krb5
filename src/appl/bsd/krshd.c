@@ -155,7 +155,7 @@ char copyright[] =
 #include "com_err.h"
 #include "loginpaths.h"
 
-#define ARGSTR	"rek54cD:S:M:AP:?L:"
+#define ARGSTR	"rek54ciD:S:M:AP:?L:"
 
 
 #define RSHD_BUFSIZ 5120
@@ -206,7 +206,7 @@ int netf;
 #define AUTH_KRB5 (0x2)
 #define AUTH_RHOSTS (0x4)
 int auth_ok = 0, auth_sent = 0;
-int checksum_required = 0;
+int checksum_required = 0, checksum_ignored = 1;
 char *progname;
 
 #define MAX_PROG_NAME 10
@@ -302,6 +302,10 @@ int main(argc, argv)
       case 'c':
 	checksum_required = 1;
 	break;
+      case 'i':
+	checksum_ignored = 1;
+	break;
+	
 #ifdef KRB5_KRB4_COMPAT
       case '4':
 	auth_ok |= AUTH_KRB4;
@@ -408,6 +412,11 @@ int main(argc, argv)
 	
 	fd = 0;
     }
+
+    if (checksum_required&&checksum_ignored) {
+      syslog( LOG_CRIT, "Checksums are required and ignored; these options are mutually exclusive--check the documentation.");
+      fatal(fd, "Configuration error: mutually exclusive options specified");
+    }
     
     if (setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, (char *)&on,
 		   sizeof (on)) < 0)
@@ -420,6 +429,11 @@ int main(argc, argv)
 		   sizeof (linger)) < 0)
       syslog(LOG_WARNING , "setsockopt (SO_LINGER): %m");
 #endif
+    if (checksum_required&&checksum_ignored) {
+      syslog( LOG_CRIT, "Checksums are required and ignored; these options are mutually exclusive--check the documentation.");
+      fatal(fd, "Configuration error: mutually exclusive options specified");
+    }
+
     doit(dup(fd), &from);
     return 0;
 }
@@ -1012,11 +1026,12 @@ void doit(f, fromp)
 
     if (checksum_required && !valid_checksum) {
 	if (auth_sent & AUTH_KRB5) {
-	    syslog(LOG_WARNING, "Client did not supply required checksum.");
+	    syslog(LOG_WARNING, "Client did not supply required checksum--connection rejected.");
 	    error( "You are using an old Kerberos5 without initial connection support; only newer clients are authorized.");
 	    goto signout_please;
 	} else {
-	    syslog(LOG_WARNING, "Checksums are only required for v5 clients; other clients cannot produce initial authenticator checksums.");
+	    syslog(LOG_WARNING,
+   "Configuration error: Requiring checksums with -c is inconsistent with allowing Kerberos V4 connections.");
 	}
     }
     if (require_encrypt&&(!do_encrypt)) {

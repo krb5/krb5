@@ -42,10 +42,9 @@ shell inherits the network connections established
 by
 .IR krshd .
 
-\fIKrshd\fP can be configured either by command-line arguments passed
-by \fIinetd(8)\fP,  
-or by the name of the daemon. If command-line arguments are present, they 
-take priority.  The options are:
+\fIKrshd\fP can be configured  by command-line arguments passed
+by \fIinetd(8)\fP.
+ The options are:
 
 .IP \fB\-5\fP 10
 Allow Kerberos5 authentication with the \fI.k5login\fP access control file
@@ -70,16 +69,37 @@ Trust the remote hostname as an authentication system using the
 Require the client to encrypt the connection.  Only Kerberos5 clients
 support encryption.
 
-.IP \fB\-c\fP
-Require Kerberos5 clients to present a cryptographic checksum of
-initial connection information like the name of the user that the
-client is trying to access in the initial authenticator.  This
-checksum provides additionl security by preventing an attacker from
-changing the initial connection information.  To benefit from this
-security, only Kerberos5 should be trusted; Kerberos4 and rhosts
+.IP \fB\-c\fP 
+Require Kerberos5 clients to present a cryptographic
+checksum of initial connection information like the name of the user
+that the client is trying to access in the initial authenticator.
+This checksum provides additionl security by preventing an attacker
+from changing the initial connection information.  To benefit from
+this security, only Kerberos5 should be trusted; Kerberos4 and rhosts
 authentication do not include this checksum.  If this option is
 specified, older Kerberos5 clients that do not send a checksum in the
-authenticator will not be able to authenticate to this server.
+authenticator will not be able to authenticate to this server.  This
+option is mutually exclusive with the \fB-i\fP option.
+
+	If neither the \fB-c\fP or \fB-i\fP options are specified,then
+checksums are validated if presented.  Since it is difficult to remove
+a checksum from an authenticator without making the authenticator
+invalid, this default mode is almost as significant of a security
+improvement as \fB-c\fP if new clients are used.  It has the additional
+advantage of backwards compatability with some clients.
+Unfortunately, clients before Kerberos V5, Beta5, generate invalid
+checksums; if these clients are used, the \fB-i\fP option must be
+used.
+
+.IP \fB\-i\fP 
+Ignore authenticator checksums if provided.  This option
+ignore authenticator checksusm presented by current Kerberos clients
+to protect initial connection information; it is the opposite of
+\fB-c\fP.  This option is provided because some older
+clients--particularly clients predating the release of Kerberos V5
+Beta5 (May 1995)--present bogus checksums that prevent Kerberos
+authentication from succeeding in the default mode.
+
 
 .PP
 If the \fB\-r\fP or \fB\-R\fP options are used, the client must

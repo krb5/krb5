@@ -239,7 +239,7 @@ krb5_ccache ccache = NULL;
 
 krb5_keytab keytab = NULL;
 
-#define ARGSTR	"rk54cepPD:S:M:L:?"
+#define ARGSTR	"rk54ciepPD:S:M:L:?"
 #else /* !KERBEROS */
 #define ARGSTR	"rpPD:?"
 #define (*des_read)  read
@@ -306,7 +306,7 @@ krb5_error_code recvauth();
 #define AUTH_RHOSTS (0x4)
 int auth_ok = 0, auth_sent = 0;
 int do_encrypt = 0, passwd_if_fail = 0, passwd_req = 0;
-int checksum_required = 0;
+int checksum_required = 0, checksum_ignored = 0;
 
 int main(argc, argv)
      int argc;
@@ -365,6 +365,10 @@ pty_init();
       case 'c':
 	checksum_required = 1;
 	break;
+      case 'i':
+	checksum_ignored = 1;
+	break;
+	
 #ifdef KRB5_KRB4_COMPAT
       case '4':
 	auth_ok |= AUTH_KRB4;
@@ -464,6 +468,11 @@ pty_init();
     if (auth_ok == 0) {
       syslog(LOG_CRIT, "No authentication systems were enabled; all connections will be refused.");
       fatal(fd, "All authentication systems disabled; connection refused.");
+    }
+
+    if (checksum_required&&checksum_ignored) {
+      syslog( LOG_CRIT, "Checksums are required and ignored; these options are mutually exclusive--check the documentation.");
+      fatal(fd, "Configuration error: mutually exclusive options specified");
     }
     
     doit(fd, &from);
@@ -1112,11 +1121,12 @@ do_krb_login(host)
 
     if (checksum_required && !valid_checksum) {
 	if (auth_sent & AUTH_KRB5) {
-	    syslog(LOG_WARNING, "Client did not supply required checksum.");
+	    syslog(LOG_WARNING, "Client did not supply required checksum--connection rejected.");
 	
 	    fatal(netf, "You are using an old Kerberos5 without initial connection support; only newer clients are authorized.");
 	} else {
-	    syslog(LOG_WARNING, "Checksums are only required for v5 clients; other clients cannot produce initial authenticator checksums.");
+	  syslog(LOG_WARNING,
+		 "Configuration error: Requiring checksums with -c is inconsistent with allowing Kerberos V4 connections.");
 	}
     }
     if (auth_ok&auth_sent) /* This should be bitwise.*/
@@ -1447,7 +1457,7 @@ recvauth(valid_checksum)
 
     getstr(netf, lusername, sizeof (lusername), "locuser");
     getstr(netf, term, sizeof(term), "Terminal type");
-    if ((auth_sys == KRB5_RECVAUTH_V5) && checksum_required) {
+    if ((auth_sys == KRB5_RECVAUTH_V5) && !checksum_ignored) {
       
       if ((status = krb5_auth_con_getauthenticator(bsd_context, auth_context,
 						   &authenticator)))
