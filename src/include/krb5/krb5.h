@@ -39,8 +39,10 @@
 
 typedef struct _krb5_context {
 	krb5_magic	magic;
-	void		*os_context;
-} *krb5_context;
+	krb5_enctype  * etypes;
+	int		etype_count;
+	void	      * os_context;
+} * krb5_context;
 
 #include <krb5/encryption.h>
 #include <krb5/fieldbits.h>

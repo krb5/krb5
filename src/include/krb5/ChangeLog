@@ -1,3 +1,16 @@
+Mon Jan 30 15:43:19 1995  Chris Provenzano  (proven@mit.edu)
+
+	* func-proto.h Added krb5_keytype arg to rb5_rdreq_key_proc.
+
+	* func-proto.h (krb5_send_tgs()) Changed krb5_enctype arg to
+		krb5_enctype *, a NULL terminated array of encryption types.
+
+	* func-proto.h Added prototypes for krb5_get_for_creds(),
+		krb5_set_default_in_tkt_etypes(), and
+		krb5_get_default_in_tkt_etypes().
+	
+	* krb5.h Added fields to krb5_context to support default etypes.
+
 Fri Jan 27 00:56:12 1995  Chris Provenzano  (proven@mit.edu)
 
 	* func-proto.h (krb5_kt_read_service_key()) Added krb5_keytype arg.

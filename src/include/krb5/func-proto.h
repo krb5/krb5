@@ -32,6 +32,13 @@ krb5_error_code krb5_init_context
 void krb5_free_context
 	PROTOTYPE((krb5_context));
 
+krb5_error_code	krb5_set_default_in_tkt_etypes
+	PROTOTYPE((krb5_context,
+		   const krb5_enctype *));
+krb5_error_code	krb5_get_default_in_tkt_etypes
+	PROTOTYPE((krb5_context,
+		   krb5_enctype **));
+
 /* This is a hack to find what needs fixing later, when we've all forgotten
  which rotuines still need fixing */
 extern krb5_context global_context;
@@ -73,6 +80,14 @@ krb5_error_code krb5_get_credentials
 		   const krb5_flags,
 		   krb5_ccache,
 		   krb5_creds * ));
+krb5_error_code	krb5_get_for_creds
+	PROTOTYPE((krb5_context,
+		   const krb5_cksumtype,
+		   char *,
+		   krb5_principal,
+		   krb5_keyblock *,
+		   int,
+		   krb5_data * ));
 krb5_error_code krb5_mk_req
 	PROTOTYPE((krb5_context,
 		   krb5_const_principal,
@@ -408,7 +423,7 @@ krb5_error_code krb5_send_tgs
 	PROTOTYPE((krb5_context,
 		   const krb5_flags,
 		   const krb5_ticket_times *,
-		   const krb5_enctype,
+		   const krb5_enctype *,
 		   const krb5_cksumtype,
 		   krb5_const_principal,
 		   krb5_address * const *,
@@ -475,6 +490,7 @@ typedef krb5_error_code (*krb5_rdreq_key_proc) PROTOTYPE((krb5_context,
 							  krb5_pointer, 
 							  krb5_principal,
 							  krb5_kvno,
+							  krb5_keytype,
 							  krb5_keyblock **));
 	
 krb5_error_code krb5_rd_req
