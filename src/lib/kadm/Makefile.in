@@ -1,0 +1,25 @@
+CFLAGS = $(CCOPTS) $(DEFS) 
+LDFLAGS = -g
+
+all:: $(OBJS)
+
+OBJS=	adm_conn.o	\
+	adm_rw.o
+
+SRCS=	$(srcdir)/adm_conn.c	\
+	$(srcdir)/adm_rw.c
+
+libkadm.a: ${OBJS}
+	$(RM) $@
+	$(ARADD) $@ $(OBJS)
+	$(RANLIB) $@
+	$(RM) $(TOPLIBD)/libkadm.a
+	$(CP) libkadm.a $(BUILDTOP)/lib/libkadm.a
+	$(RANLIB) $(BUILDTOP)/lib/libkadm.a
+
+install:: libkadm.a
+	$(INSTALL_DATA) libkadm.a $(KRB5_LIBDIR)/libkadm.a
+	$(RANLIB) $(KRB5_LIBDIR)/libkadm.a
+
+clean::
+	$(RM) libkadm.a

@@ -1,0 +1,9 @@
+
+Fri Apr 28 09:47:29 EDT 1995	Paul Park	(pjpark@mit.edu)
+
+	Create a new library consisting of functions which communicate with
+	the administrative server here.  These modules replace the originals
+	which used to be in libkrb5.
+
+	adm_rw.c	- Remove ntohl/htonl in favor of byte blasting.
+
