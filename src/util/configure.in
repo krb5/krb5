@@ -7,4 +7,5 @@ AC_PROG_ARCHIVE_ADD
 CONFIG_DIRS(et ss profile berk_db)
 MAKE_SUBDIRS("making",all)
 MAKE_SUBDIRS("cleaning",clean)
+MAKE_SUBDIRS("installing",install)
 V5_AC_OUTPUT_MAKEFILE

@@ -1,3 +1,7 @@
+Tue Jun  6 19:46:00 1995  Tom Yu  (tlyu@dragons-lair)
+
+	* configure.in: fix make install
+
 
 Fri May 26 18:43:35 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* configure.in	- Add berk_db
