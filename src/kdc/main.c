@@ -23,7 +23,10 @@ static char rcsid_main_c[] =
 #include <errno.h>
 
 #include <com_err.h>
-/* com_err gets  varargs */
+/* for STDC, com_err gets varargs/stdarg */
+#ifndef __STDC__
+#include <varargs.h>
+#endif
 
 #include <krb5/krb5.h>
 #include <krb5/osconf.h>
