@@ -504,6 +504,7 @@ krb5_error_code krb5_kt_read_service_key
 		   krb5_pointer,
 		   krb5_principal,
 		   krb5_kvno,
+		   krb5_keytype,
 		   krb5_keyblock **));
 krb5_error_code krb5_mk_safe
 	PROTOTYPE((krb5_context,

@@ -71,6 +71,7 @@ typedef struct _krb5_kt_ops {
 		    krb5_keytab,
 		    krb5_principal,
 		    krb5_kvno,
+		    krb5_keytype,
 		    krb5_keytab_entry *));
     krb5_error_code (*start_seq_get) 
 	NPROTOTYPE((krb5_context,
@@ -98,7 +99,7 @@ typedef struct _krb5_kt_ops {
 
 #define krb5_kt_get_name(context, keytab, name, namelen) (*(keytab)->ops->get_name)(context, keytab,name,namelen)
 #define krb5_kt_close(context, keytab) (*(keytab)->ops->close)(context, keytab)
-#define krb5_kt_get_entry(context, keytab, principal, vno, entry) (*(keytab)->ops->get)(context, keytab, principal, vno, entry)
+#define krb5_kt_get_entry(context, keytab, principal, vno, keytype, entry) (*(keytab)->ops->get)(context, keytab, principal, vno, keytype, entry)
 #define krb5_kt_start_seq_get(context, keytab, cursor) (*(keytab)->ops->start_seq_get)(context, keytab, cursor)
 #define krb5_kt_next_entry(context, keytab, entry, cursor) (*(keytab)->ops->get_next)(context, keytab, entry, cursor)
 #define krb5_kt_end_seq_get(context, keytab, cursor) (*(keytab)->ops->end_get)(context, keytab, cursor)

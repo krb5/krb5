@@ -1,5 +1,10 @@
 Fri Jan 27 00:56:12 1995  Chris Provenzano  (proven@mit.edu)
 
+	* func-proto.h (krb5_kt_read_service_key()) Added krb5_keytype arg.
+	* keytab.h (krb5_kt_get_entry()) Add krb5_keytype arg.
+
+Fri Jan 27 00:56:12 1995  Chris Provenzano  (proven@mit.edu)
+
 	* base-defs.h Typedef krb5_boolean, krb5_msgtype, krb5_kvno,
                 krb5_addrtype, krb5_keytyp, krb5_enctype, krb5_cksumtype,
                 and krb5_authdatatype as unsigned int.
