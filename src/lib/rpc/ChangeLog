@@ -1,3 +1,7 @@
+2001-06-19  Ezra Peisach  <epeisach@mit.edu>
+
+	* pmap_prot2.c (xdr_pmaplist): Ensure variable set before use. 
+
 2001-06-18  Ezra Peisach  <epeisach@mit.edu>
 
 	* auth_gssapi.c (auth_gssapi_create): Cast const gss_OID to
