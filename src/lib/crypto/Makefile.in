@@ -153,7 +153,7 @@ t_nfold$(EXEEXT): t_nfold.$(OBJEXT) nfold.$(OBJEXT)
 	$(CC_LINK) -o $@ t_nfold.$(OBJEXT) nfold.$(OBJEXT)
 
 t_encrypt$(EXEEXT): t_encrypt.$(OBJEXT) nfold.$(OBJEXT)
-	$(CC_LINK) -o $@ t_encrypt.$(OBJEXT)  -lk5crypto -lcom_err
+	$(CC_LINK) -o $@ t_encrypt.$(OBJEXT)  -lkrb5 -lk5crypto -lcom_err
 
 t_prng$(EXEEXT): t_prng.$(OBJEXT) 
 	$(CC_LINK) -o $@ t_prng.$(OBJEXT)  -lk5crypto -lcom_err

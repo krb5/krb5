@@ -62,7 +62,7 @@ main ()
   size_t len;
   krb5_enc_data enc_out;
   krb5_error_code retval;
-  krb5_keyblock key;
+  krb5_keyblock *key;
   in.data = "This is a test.\n";
   in.length = strlen (in.data);
 
@@ -75,30 +75,29 @@ main ()
   for (i = 0; interesting_enctypes[i]; i++) {
     krb5_enctype enctype = interesting_enctypes [i];
     printf ("Testing enctype %d\n", enctype);
+    test ("Initializing a keyblock",
+	  krb5_init_keyblock (context, enctype, 0, &key));
     test ("Generating random key",
-	  krb5_c_make_random_key (context, enctype, &key));
+	  krb5_c_make_random_key (context, enctype, key));
     enc_out.ciphertext.data = out.data;
     enc_out.ciphertext.length = out.length;
     /* We use an intermediate `len' because size_t may be different size 
        than `int' */
-    krb5_c_encrypt_length (context, key.enctype, in.length, &len);
+    krb5_c_encrypt_length (context, key->enctype, in.length, &len);
     enc_out.ciphertext.length = len;
     test ("Encrypting",
-	  krb5_c_encrypt (context, &key, 7, 0, &in, &enc_out));
+	  krb5_c_encrypt (context, key, 7, 0, &in, &enc_out));
     test ("Decrypting",
-	  krb5_c_decrypt (context, &key, 7, 0, &enc_out, &check));
+	  krb5_c_decrypt (context, key, 7, 0, &enc_out, &check));
     test ("init_state",
-	  krb5_c_init_state (context, &key, 7, &state));
+	  krb5_c_init_state (context, key, 7, &state));
         test ("Encrypting with state",
-	  krb5_c_encrypt (context, &key, 7, &state, &in, &enc_out));
+	  krb5_c_encrypt (context, key, 7, &state, &in, &enc_out));
     test ("Decrypting",
-	  krb5_c_decrypt (context, &key, 7, 0, &enc_out, &check));
+	  krb5_c_decrypt (context, key, 7, 0, &enc_out, &check));
     test ("free_state",
-	  krb5_c_free_state (context, &key, &state));
-    if(key.contents) {
-	free(key.contents);
-	key.contents = NULL;
-    }
+	  krb5_c_free_state (context, key, &state));
+    krb5_free_keyblock (context, key);
   }
 
   free(out.data);

@@ -1483,6 +1483,15 @@ krb5_boolean KRB5_CALLCONV krb5_principal_compare
 	(krb5_context,
 		krb5_const_principal,
 		krb5_const_principal);
+krb5_error_code KRB5_CALLCONV  krb5_init_keyblock
+		(krb5_context, krb5_enctype enctype,
+		size_t length, krb5_keyblock **out); 
+  		/* Initialize a new keyblock and allocate storage
+		 * for the contents of the key, which will be freed along
+		 * with the keyblock when krb5_free_keyblock is called.
+		 * It is legal to pass in a length of 0, in which
+		 * case contents are left unallocated.
+		 */
 krb5_error_code KRB5_CALLCONV krb5_copy_keyblock
 	(krb5_context,
 		const krb5_keyblock *,
