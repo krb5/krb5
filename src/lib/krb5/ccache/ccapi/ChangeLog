@@ -1,4 +1,7 @@
 2002-02-28 Alexandra Ellwood <lxs@mit.edu>
+    * stdcc.h: Added prototype for krb5_stdcc_shutdown.
+    
+2002-02-28 Alexandra Ellwood <lxs@mit.edu>
     * stdcc.h, stdcc_util.h, stdcc_util.c: Updated Mac OS X headers to new 
     framework layout
     * stdcc.c: Removed unused variables and fixed macros to reduce warnings
