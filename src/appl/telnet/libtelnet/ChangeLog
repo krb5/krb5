@@ -1,3 +1,7 @@
+Thu Jul 31 14:57:05 1997  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* Makefile.in (SRCS): Fix typo s/scrdir/srcdir/
+
 Thu Feb  6 00:14:50 1997  Richard Basch  <basch@lehman.com>
 
 	* kerberos5.c (kerberos5_is): First argument to

@@ -37,7 +37,7 @@ SRCS=   $(srcdir)/auth.c \
 	$(srcdir)/enc_des.c \
 	$(srcdir)/setenv.c \
 	$(srcdir)/getent.c \
-	$(scrdir)/parsetos.c \
+	$(srcdir)/parsetos.c \
 	$(srcdir)/strdup.c \
 	$(srcdir)/strcasecmp.c \
 	$(srcdir)/strchr.c \
