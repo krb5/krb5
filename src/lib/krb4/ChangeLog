@@ -1,3 +1,11 @@
+2003-06-11  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (KRB_ERR_C): New variable; Darwin needs err_txt.o to
+	have a dependency on krb_err.c so that krb_err.c will be generated
+	first.
+
+	* configure.in: Set KRB_ERR_C to krb_err.c on Darwin.
+
 2003-06-09  Ken Raeburn  <raeburn@mit.edu>
 
 	* RealmsConfig-glue.c (krb_get_krbhst): Don't fall back to DNS if
