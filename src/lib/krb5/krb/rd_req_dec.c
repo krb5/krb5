@@ -53,7 +53,7 @@ static char rd_req_dec_c[] =
  returns system errors, encryption errors, replay errors
  */
 
-static krb5_error_code decrypt_authenticator PROTOTYPE((krb5_ap_req *,
+static krb5_error_code decrypt_authenticator PROTOTYPE((const krb5_ap_req *,
 							krb5_authenticator **));
 static krb5_error_code copy_ticket PROTOTYPE((krb5_ticket *, krb5_ticket **));
 
@@ -173,7 +173,7 @@ krb5_tkt_authent *tktauthent;
 
 static krb5_error_code
 decrypt_authenticator(request, authpp)
-krb5_ap_req *request;
+const krb5_ap_req *request;
 krb5_authenticator **authpp;
 {
     krb5_authenticator *local_auth;
