@@ -1126,8 +1126,17 @@ krb5_lcc_resolve (krb5_context context, krb5_ccache *id, const char *residual)
     if (!IsWindows2000())
         return KRB5_FCC_NOFILE;
 
+#ifdef COMMENT
+    /* In at least one case on Win2003 it appears that it is possible 
+     * for the logon session to be authenticated via NTLM and yet for
+     * there to be Kerberos credentials obtained by the LSA on behalf
+     * of the logged in user.  Therefore, we are removing this test
+     * which was meant to avoid the need to perform GetMSTGT() when
+     * there was no possibility of credentials being found.
+     */
     if (!IsKerberosLogon())
         return KRB5_FCC_NOFILE;
+#endif
 
     if(!PackageConnectLookup(&LogonHandle, &PackageId))
         return KRB5_FCC_NOFILE;
