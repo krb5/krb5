@@ -106,10 +106,6 @@ static	struct sgttyb ttyo, ttyb;
 
 static	FILE *fi;
 
-#define sig_t my_sig_t
-#define sigtype krb5_sigtype
-typedef sigtype (*sig_t)();
-
 static sigtype
 intfix(sig)
 	int sig;

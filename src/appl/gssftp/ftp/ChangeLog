@@ -1,3 +1,10 @@
+2001-07-24  Tom Yu  <tlyu@mit.edu>
+
+	* getpass.c: Remove duplicate definitions of sig_t, my_sig_t;
+	they're already declared in ftp_var.h.
+
+	* ftp_var.h (FDOPEN_SOCKET): Fix second arg.
+
 2001-07-23  Danilo Almeida  <dalmeida@mit.edu>
 
 	* Makefile.in, cmds.c, ftp.c, ftp_var.h, getpass.c, glob.c,

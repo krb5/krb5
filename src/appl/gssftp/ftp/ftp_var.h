@@ -46,7 +46,7 @@ FILE* fdopen_socket(SOCKET s, char* mode);
 #define PERROR_SOCKET(str) do { errno = SOCKET_ERRNO; perror(str); } while(0)
 #else
 #define FCLOSE_SOCKET(f) fclose(f)
-#define FDOPEN_SOCKET(s, mode) fdopen(s, fd)
+#define FDOPEN_SOCKET(s, mode) fdopen(s, mode)
 #define SOCKETNO(fd) (fd)
 #define PERROR_SOCKET(str) perror(str)
 #endif
