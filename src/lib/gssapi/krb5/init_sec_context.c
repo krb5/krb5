@@ -194,7 +194,8 @@ make_gss_checksum (krb5_context context, krb5_auth_context auth_context,
 	data->checksum_data.length = 24;
     }
 #ifdef CFX_EXERCISE
-    if (data->ctx->auth_context->keyblock->enctype == 18) {
+    if (data->ctx->auth_context->keyblock != NULL
+	&& data->ctx->auth_context->keyblock->enctype == 18) {
 	srand(time(0) ^ getpid());
 	/* Our ftp client code stupidly assumes a base64-encoded
 	   version of the token will fit in 10K, so don't make this
@@ -477,7 +478,7 @@ new_connection(
    /* complain if the input token is non-null */
 
    if (input_token != GSS_C_NO_BUFFER && input_token->length != 0) {
-#ifdef CFX_EXERCISE
+#if 0 /* def CFX_EXERCISE */
        if (*context_handle != GSS_C_NO_CONTEXT
 	   && ((krb5_gss_ctx_id_t)*context_handle)->testing_unknown_tokid) {
 	   /* XXX Should check for a KRB_ERROR message that we can

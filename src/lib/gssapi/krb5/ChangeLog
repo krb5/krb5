@@ -1,3 +1,14 @@
+2004-01-27  Ken Raeburn  <raeburn@mit.edu>
+
+	* init_sec_context.c (make_gss_checksum) [CFX_EXERCISE]: Don't
+	crash on null pointer in debugging code.
+	(new_connection): Disable CFX_EXERCISE unknown-token-id case
+	detection.
+
+	* accept_sec_context.c (krb5_gss_accept_sec_context)
+	[CFX_EXERCISE]: Log to /tmp/gsslog whether delegation or extra
+	option bytes were present.
+
 2004-01-05  Ken Raeburn  <raeburn@mit.edu>
 
 	* init_sec_context.c: Include auth_con.h if CFX_EXERCISE is

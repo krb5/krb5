@@ -567,7 +567,35 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
 
 	   } /* if i >= 4 */
 	   /* ignore any additional trailing data, for now */
-       } /* if */
+#ifdef CFX_EXERCISE
+	   {
+	       FILE *f = fopen("/tmp/gsslog", "a");
+	       if (f) {
+		   fprintf(f,
+			   "initial context token with delegation, %d extra bytes\n",
+			   i);
+		   fclose(f);
+	       }
+	   }
+#endif
+       } else {
+#ifdef CFX_EXERCISE
+	   {
+	       FILE *f = fopen("/tmp/gsslog", "a");
+	       if (f) {
+		   if (gss_flags & GSS_C_DELEG_FLAG)
+		       fprintf(f,
+			       "initial context token, delegation flag but too small\n");
+		   else
+		       /* no deleg flag, length might still be too big */
+		       fprintf(f,
+			       "initial context token, %d extra bytes\n",
+			       authdat->checksum->length - 24);
+		   fclose(f);
+	       }
+	   }
+#endif
+       }
    }
 
    /* create the ctx struct and start filling it in */
