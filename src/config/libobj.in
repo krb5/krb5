@@ -15,13 +15,13 @@
 
 # rules to generate object file lists
 
-OBJS.ST: $(STLIBOBJS)
+OBJS.ST: $(STLIBOBJS) Makefile
 	@echo $(STLIBOBJS) > $@
 
-OBJS.SH: $(SHLIBOBJS)
+OBJS.SH: $(SHLIBOBJS) Makefile
 	@echo $(SHLIBOBJS) > $@
 
-OBJS.PF: $(PFLIBOBJS)
+OBJS.PF: $(PFLIBOBJS) Makefile
 	@echo $(PFLIBOBJS) > $@
 
 all-libobjs: $(OBJLISTS)
