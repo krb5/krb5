@@ -1245,5 +1245,27 @@ fi dnl stdarg test failure
 
 ])dnl
 dnl
+dnl Set environment variables so that shared library executables can run
+dnl in the build tree.
 dnl
-dnl
+define(KRB5_RUN_FLAGS,[
+if test "$krb5_cv_shlibs_enabled" = yes ; then
+	KRB5_RUN_ENV=
+	if test "$krb5_cv_shlibs_run_ldpath" = default ; then
+		KRB5_RUN_ENV="$KRB5_RUN_ENV LD_LIBRARY_PATH=\$(TOPLIBD) ;  export LD_LIBRARY_PATH;"
+	elif test "$krb5_cv_shlibs_run_ldpath" != no ; then
+		KRB5_RUN_ENV="$KRB5_RUN_ENV LD_LIBRARY_PATH=\$(TOPLIBD):$krb5_cv_shlibs_run_ldpath ; export LD_LIBRARY_PATH;"
+	fi
+	# For OSF/1 this commits us to ignore built in rpath libraries
+	if test "$krb5_cv_shlibs_run_rldroot" = dummy ; then
+		KRB5_RUN_ENV="$KRB5_RUN_ENV _RLD_ROOT=/dev/dummy/d; export _RLD_ROOT;"
+	fi
+	# For AIX
+	if test "$krb5_cv_shlibs_run_libpath" != no ; then
+		KRB5_RUN_ENV="$KRB5_RUN_ENV LIBPATH=\$(TOPLIBD):$krb5_cv_shlibs_run_libpath ; export LIBPATH;"
+	fi
+else
+	KRB5_RUN_ENV=
+fi
+AC_SUBST(KRB5_RUN_ENV)
+])dnl

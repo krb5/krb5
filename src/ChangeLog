@@ -1,3 +1,11 @@
+Mon Mar 18 21:33:15 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* aclocal.m4 (KRB5_RUN_FLAGS): Allows for setting of proper paths
+		for executing programs in the build tree with proper
+		overriding of potentially installed libraries.
+
+	* configure.in: Setup for KRB5_RUN_FLAGS
+
 Fri Mar 15 01:45:54 1996  Tom Yu  <tlyu@dragons-lair.MIT.EDU>
 
 	* aclocal.m4 (V5_OUTPUT_MAKEFILE): nuke some redundant sed rules
