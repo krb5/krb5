@@ -135,17 +135,37 @@ all:: $(OBJS)
 COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
 
 T_WALK_RTREE_OBJS= t_walk_rtree.o walk_rtree.o tgtname.o unparse.o \
-	free_rtree.o bld_pr_ext.o $(COMERRLIB) $(TOPLIBD)/libkrb5.a \
-	$(TOPLIBD)/libcrypto.a
+	free_rtree.o bld_pr_ext.o \
+	$(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(COMERRLIB) 
+
+T_KERB_OBJS= t_kerb.o conv_princ.o unparse.o \
+	$(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(COMERRLIB) 
 
 t_walk_rtree: $(T_WALK_RTREE_OBJS)
-	$(CC) -o t_walk_rtree $(T_WALK_RTREE_OBJS) $(LIBS)
+	$(LD) -o t_walk_rtree $(T_WALK_RTREE_OBJS) $(LIBS)
 
-TEST_PROGS= t_walk_rtree
+t_kerb: $(T_KERB_OBJS)
+	$(LD) -o t_kerb $(T_KERB_OBJS) $(LIBS)
+
+TEST_PROGS= t_walk_rtree t_kerb
 
 check:: check-$(WHAT)
 
 check-unix:: $(TEST_PROGS)
+	KRB5_CONFIG=$(srcdir)/t_krb5.conf ; export KRB5_CONFIG ;\
+	./t_kerb 425_conv_principal rcmd e40-po ATHENA.MIT.EDU \
+		 425_conv_principal rcmd mit ATHENA.MIT.EDU \
+		 425_conv_principal rcmd lithium ATHENA.MIT.EDU \
+		 425_conv_principal rcmd tweedledumb CYGNUS.COM \
+		 425_conv_principal rcmd uunet UU.NET \
+		 425_conv_principal zephyr zephyr ATHENA.MIT.EDU \
+		 425_conv_principal kadmin ATHENA.MIT.EDU ATHENA.MIT.EDU \
+		> test.out
+	cmp test.out $(srcdir)/t_ref_kerb.out
+	$(RM) test.out
+
+
+
 check-mac:: $(TEST_PROGS)
 
 check-windows::

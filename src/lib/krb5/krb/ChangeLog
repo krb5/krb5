@@ -1,3 +1,16 @@
+Fri May  5 00:06:24 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* conv_princ.c (krb5_425_conv_principal): Use new calling
+		convention of krb5_get_realm_domain, which is that it
+		returns the realm *without* the leading dot.
+
+		Also use the profile code to look up individual instance
+		conversions using [realms]/<realm>/v4_instance_covert/<inst>
+		This allows special case handling of mit.edu and
+		lithium.lcs.mit.edu.
+
+	* t_kerb.c: New file for testing krb library functions.  Currently
+		only tests krb5_425_conv_principal.
 
 Wed May 03 03:30:51 1995  Chris Provenzano (proven@mit.edu)
 

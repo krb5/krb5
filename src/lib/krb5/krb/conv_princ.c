@@ -179,6 +179,8 @@ krb5_425_conv_principal(context, name, instance, realm, princ)
      char buf[256];		/* V4 instances are limited to 40 characters */
      krb5_error_code retval;
      char *domain, *cp;
+     char **full_name = 0, **cpp;
+     const char *names[5];
      
      if (instance) {
 	  if (instance[0] == '\0') {
@@ -195,22 +197,41 @@ krb5_425_conv_principal(context, name, instance, realm, princ)
 	  }
 	  name = p->v5_str;
 	  if (p->flags & DO_REALM_CONVERSION) {
-	       strcpy(buf, instance);
-	       retval = krb5_get_realm_domain(context, realm, &domain);
-	       if (retval)
-		   return retval;
-	       if (domain) {
-		   for (cp = domain; *cp; cp++)
-		       if (isupper(*cp))
-			   *cp = tolower(*cp);
-		   strcat(buf, domain);
-		   krb5_xfree(domain);
-	       }
-	       instance = buf;
+	      names[0] = "realms";
+	      names[1] = realm;
+	      names[2] = "v4_instance_convert";
+	      names[3] = instance;
+	      names[4] = 0;
+	      retval = profile_get_values(context->profile, names, &full_name);
+	      if (retval == 0 && full_name && full_name[0]) {
+		  instance = full_name[0];
+	      } else {
+		  strcpy(buf, instance);
+		  retval = krb5_get_realm_domain(context, realm, &domain);
+		  if (retval)
+		      return retval;
+		  if (domain) {
+		      for (cp = domain; *cp; cp++)
+			  if (isupper(*cp))
+			      *cp = tolower(*cp);
+#ifndef OLD_CONFIG_FILES
+		      strcat(buf, ".");
+#endif
+		      strcat(buf, domain);
+		      krb5_xfree(domain);
+		  }
+		  instance = buf;
+	      }
 	  }
      }
      
 not_service:	
-     return(krb5_build_principal(context, princ, strlen(realm), realm, name,
-				 instance, 0));
+     retval = krb5_build_principal(context, princ, strlen(realm), realm, name,
+				   instance, 0);
+     if (full_name) {
+	 for (cpp = full_name; *cpp; cpp++) 
+	     krb5_xfree(*cpp);
+	 krb5_xfree(full_name);
+     }
+     return retval;
 }
