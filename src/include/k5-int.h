@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 1989,1990,1991,1992,1993,1994,1995,2000,2001 by the Massachusetts Institute of Technology,
+ * Copyright (C) 1989,1990,1991,1992,1993,1994,1995,2000,2001, 2003 by the Massachusetts Institute of Technology,
  * Cambridge, MA, USA.  All Rights Reserved.
  * 
  * This software is being provided to you, the LICENSEE, by the 
@@ -934,6 +934,11 @@ krb5_get_init_creds
 		void *gak_data,
 		int master,
 		krb5_kdc_rep **as_reply);
+
+krb5_error_code krb5int_populate_gic_opt (
+    krb5_context, krb5_get_init_creds_opt *,
+    krb5_flags options, krb5_address * const *addrs, krb5_enctype *ktypes,
+    krb5_preauthtype *pre_auth_types);
 
 
 krb5_error_code krb5_do_preauth

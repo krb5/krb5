@@ -116,3 +116,47 @@ cleanup:
 
    return(ret);
 }
+krb5_error_code KRB5_CALLCONV
+krb5_get_in_tkt_with_keytab(krb5_context context, krb5_flags options,
+			      krb5_address *const *addrs, krb5_enctype *ktypes,
+			      krb5_preauthtype *pre_auth_types,
+			      krb5_keytab arg_keytab, krb5_ccache ccache,
+			      krb5_creds *creds, krb5_kdc_rep **ret_as_reply)
+{
+    krb5_error_code retval;
+    krb5_get_init_creds_opt opt;
+    char * server = NULL;
+    krb5_keytab keytab;
+    krb5int_populate_gic_opt(context, &opt,
+			     options, addrs, ktypes,
+			     pre_auth_types);
+    if (arg_keytab == NULL) {
+	retval = krb5_kt_default(context, &keytab);
+	if (retval)
+	    return retval;
+    }
+    else keytab = arg_keytab;
+    
+    retval = krb5_unparse_name( context, creds->server, &server);
+    if (retval)
+	goto cleanup;
+    retval = krb5_get_init_creds (context,
+				  creds, creds->client,  
+				  krb5_prompter_posix,  NULL,
+				  0, server, &opt,
+				  krb5_get_as_key_keytab, &keytab,
+				  0, ret_as_reply);
+    krb5_free_unparsed_name( context, server);
+    if (retval) {
+	goto cleanup;
+    }
+	
+    /* store it in the ccache! */
+    if (ccache)
+	if ((retval = krb5_cc_store_cred(context, ccache, creds)))
+	    goto cleanup;
+ cleanup:    if (arg_keytab == NULL)
+     krb5_kt_close(context, keytab);
+    return retval;
+}
+
