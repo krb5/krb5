@@ -768,7 +768,8 @@ void doit(f, fromp)
     (void) alarm(0);
     if (port != 0) {
 	if (anyport) {
-	    s = getport(0);
+	    int addrfamily = AF_INET;
+	    s = getport(0, &addrfamily);
 	} else {
 	    int lport = IPPORT_RESERVED - 1;
 	    s = rresvport(&lport);

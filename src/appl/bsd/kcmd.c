@@ -93,6 +93,8 @@
 
 #include "defines.h"
 
+#include "fake-addrinfo.c"
+
 extern krb5_context bsd_context;
 #ifdef KRB5_KRB4_COMPAT
 extern Key_schedule v4_schedule;
@@ -189,7 +191,7 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
     krb5_creds *get_cred, *ret_cred = 0;
     char c;
     int lport;
-    struct hostent *hp;
+    struct addrinfo *ap, *ap2;
     int rc;
     char *host_save;
     krb5_error_code status;
@@ -204,6 +206,13 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
     krb5_data cksumdat;
     char *kcmd_version;
     enum kcmd_proto protonum = *protonump;
+    char rport_buf[10];
+    struct addrinfo ai_hints;
+    int addrfamily = AF_INET;
+    int err;
+    int inet6_ok = 1;
+
+    sprintf(rport_buf, "%d", ntohs(rport));
 
     if ((cksumbuf = malloc(strlen(cmd)+strlen(remuser)+64)) == 0 ) {
 	fprintf(stderr, "Unable to allocate memory for checksum buffer.\n");
@@ -216,11 +225,20 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
     cksumdat.length = strlen(cksumbuf);
 	
     pid = getpid();
-    hp = gethostbyname(*ahost);
-    if (hp == 0) {
-	fprintf(stderr, "%s: unknown host\n", *ahost);
-	return (-1);
+    memset(&ai_hints, 0, sizeof (ai_hints));
+    ai_hints.ai_socktype = SOCK_STREAM;
+    ai_hints.ai_flags = AI_CANONNAME;
+    ai_hints.ai_family = AF_INET;
+    err = getaddrinfo(*ahost, rport_buf, &ai_hints, &ap);
+    if (err != 0) {
+	fprintf(stderr, "%s: %s\n", *ahost, gai_strerror (err));
+	return -1;
     }
+    if (ap == 0) {
+	fprintf(stderr, "%s: no addresses?\n", *ahost);
+	return -1;
+    }
+    fixup_addrinfo(ap);
 
 #ifdef POSIX_SIGNALS
     sigemptyset(&urgmask);
@@ -229,47 +247,66 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
 #else
     oldmask = sigblock(sigmask(SIGURG));
 #endif /* POSIX_SIGNALS */
-    
-    for (;;) {
-        s = getport(0);
-    	if (s < 0) {
-	    if (errno == EAGAIN)
-		fprintf(stderr, "socket: All ports in use\n");
-	    else
-		perror("kcmd: socket");
-#ifdef POSIX_SIGNALS
-	    sigprocmask(SIG_SETMASK, &oldmask, (sigset_t*)0);
-#else
-	    sigsetmask(oldmask);
-#endif /* POSIX_SIGNALS */
-	    return (-1);
-    	}
-    	sockin.sin_family = hp->h_addrtype;
-    	memcpy((caddr_t)&sockin.sin_addr,hp->h_addr, sizeof(sockin.sin_addr));
-    	sockin.sin_port = rport;
-    	if (connect(s, (struct sockaddr *)&sockin, sizeof (sockin)) >= 0)
-	    break;
-    	(void) close(s);
-    	if (errno == EADDRINUSE)
-	    continue;
 
-#if !(defined(tek) || defined(ultrix) || defined(sun) || defined(SYSV))
-    	if (hp->h_addr_list[1] != NULL) {
-	    int oerrno = errno;
-	    
-	    fprintf(stderr,
-    		    "connect to address %s: ", inet_ntoa(sockin.sin_addr));
-	    errno = oerrno;
-	    perror(0);
-	    hp->h_addr_list++;
-	    memcpy((caddr_t)&sockin.sin_addr,hp->h_addr_list[0],
-		   sizeof(sockin.sin_addr));
-	    fprintf(stderr, "Trying %s...\n",
-		    inet_ntoa(sockin.sin_addr));
+    for (ap2 = ap; ap2; ap2 = ap2->ai_next) {
+	int af = ap2->ai_family;
+	switch (af) {
+	case AF_INET:
+	    break;
+#ifdef KRB5_USE_INET6
+	case AF_INET6:
+	    if (inet6_ok)
+		break;
 	    continue;
-    	}
-#endif /* !(defined(ultrix) || defined(sun)) */
-    	perror(hp->h_name);
+#endif
+	default:
+	    break;
+	}
+	s = getport(0, &af);
+	if (s < 0) {
+	    char *fam = (af == AF_INET) ? "inet" : "inet6";
+	    char perrorbuf[40];
+	    if (errno == EAGAIN)
+		fprintf(stderr, "socket(%s): All ports in use\n", fam);
+	    else {
+		sprintf(perrorbuf, "kcmd: socket(%s)", fam);
+		perror(perrorbuf);
+	    }
+#ifdef KRB5_USE_INET6
+	    /* Should this be done only for certain error codes?  */
+	    if (af == AF_INET6) {
+		inet6_ok = 0;
+		continue;
+	    }
+#endif
+	    goto fix_signals_and_return;
+	}
+	/* Got a socket, now connect.  */
+	if (connect(s, ap2->ai_addr, ap2->ai_addrlen) >= 0)
+	    break;
+	(void) close(s);
+	if (errno == EADDRINUSE)
+	    continue;
+	/* Print message about failing on this address before moving
+	   on to the next.  */
+	if (ap2->ai_next) {
+	    char naddrbuf[NI_MAXHOST];
+	    int oerrno = errno;
+	    if (getnameinfo(ap2->ai_addr, ap2->ai_addrlen,
+			    naddrbuf, sizeof(naddrbuf), 0, 0,
+			    NI_NUMERICHOST) == 0) {
+		fprintf(stderr, "connect to address %s: ", naddrbuf);
+		errno = oerrno;
+		perror(0);
+	    } else {
+		errno = oerrno;
+		perror("connect failed");
+	    }
+	    fprintf(stderr, "trying next address...\n");
+	}
+    }
+    if (ap2 == 0) {
+    fix_signals_and_return:
 #ifdef POSIX_SIGNALS
 	sigprocmask(SIG_SETMASK, &oldmask, (sigset_t*)0);
 #else
@@ -284,13 +321,13 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
         fprintf(stderr,"kcmd: no memory\n");
         return(-1);
     }
-    host_save = malloc(strlen(hp->h_name) + 1);
+    host_save = malloc(strlen(ap->ai_canonname) + 1);
     if (host_save == NULL) {
 	fprintf(stderr, "kcmd: no memory\n");
 	free(get_cred);
 	return -1;
     }
-    strcpy(host_save, hp->h_name);
+    strcpy(host_save, ap->ai_canonname);
     status = krb5_sname_to_principal(bsd_context, host_save, service,
 				     KRB5_NT_SRV_HST, &get_cred->server);
     if (status) {
@@ -313,7 +350,7 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
     	lport = 0;
     } else {
     	char num[8];
-    	int s2 = getport(&lport), s3;
+    	int s2 = getport(&lport, &addrfamily), s3;
     	int len = sizeof (from);
 	
     	if (s2 < 0) {
@@ -561,6 +598,7 @@ k4cmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, ticket, service, realm,
     GETSOCKNAME_ARG3_TYPE sin_len;
     char *host_save;
     int status;
+    int addrfamily = AF_INET;
 
     pid = getpid();
     hp = gethostbyname(*ahost);
@@ -580,7 +618,7 @@ k4cmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, ticket, service, realm,
     oldmask = sigblock(sigmask(SIGURG));
 #endif /* POSIX_SIGNALS */
     for (;;) {
-	s = getport(&lport);
+	s = getport(&lport, &addrfamily);
 	if (s < 0) {
 	    if (errno == EAGAIN)
 		fprintf(stderr, "socket: All ports in use\n");
@@ -636,7 +674,7 @@ k4cmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, ticket, service, realm,
 	lport = 0;
     } else {
 	char num[8];
-	int s2 = getport(&lport), s3;
+	int s2 = getport(&lport, &addrfamily), s3;
 	int len = sizeof (from);
 
 	if (s2 < 0) {
@@ -769,34 +807,81 @@ reread:
 
 
 int
-getport(alport)
-     int *alport;
+getport(alport, family)
+    int *alport, *family;
 {
-    struct sockaddr_in sockin;
     int s;
-    GETSOCKNAME_ARG3_TYPE len = sizeof(sockin);
-    
-    s = socket(AF_INET, SOCK_STREAM, 0);
-    if (s < 0)
-	return (-1);
 
-    memset((char *) &sockin, 0,sizeof(sockin));
-    sockin.sin_family = AF_INET;
-    sockin.sin_addr.s_addr = INADDR_ANY;
-
-    if (bind(s, (struct sockaddr *)&sockin, sizeof (sockin)) >= 0) {
-	if (alport) {
-	    if (getsockname(s, (struct sockaddr *)&sockin, &len) < 0) {
-		(void) close(s);
-		return -1;
-	    } else {
-		*alport = ntohs(sockin.sin_port);
-	    }
-	}
+    if (*family == 0) {
+#ifdef KRB5_USE_INET6
+	*family = AF_INET6;
+	s = getport (alport, family);
+	if (s >= 0)
+	    return s;
+#endif
+	*family = AF_INET;
+	s = getport (alport, family);
 	return s;
     }
 
-    (void) close(s);
+#ifdef KRB5_USE_INET6
+    if (*family == AF_INET6) {
+	struct sockaddr_in6 sockin6;
+	GETSOCKNAME_ARG3_TYPE len = sizeof(sockin6);
+
+	s = socket(AF_INET6, SOCK_STREAM, 0);
+	if (s < 0)
+	    return (-1);
+
+	memset((char *) &sockin6, 0,sizeof(sockin6));
+	sockin6.sin6_family = AF_INET6;
+	sockin6.sin6_addr = in6addr_any;
+
+	if (bind(s, (struct sockaddr *)&sockin6, sizeof (sockin6)) >= 0) {
+	    if (alport) {
+		if (getsockname(s, (struct sockaddr *)&sockin6, &len) < 0) {
+		    (void) close(s);
+		    return -1;
+		} else {
+		    *alport = ntohs(sockin6.sin6_port);
+		}
+	    }
+	    return s;
+	}
+
+	(void) close(s);
+	return -1;
+    }
+#endif
+
+    if (*family == AF_INET) {
+	struct sockaddr_in sockin;
+	GETSOCKNAME_ARG3_TYPE len = sizeof(sockin);
+
+	s = socket(AF_INET, SOCK_STREAM, 0);
+	if (s < 0)
+	    return (-1);
+
+	memset((char *) &sockin, 0,sizeof(sockin));
+	sockin.sin_family = AF_INET;
+	sockin.sin_addr.s_addr = INADDR_ANY;
+
+	if (bind(s, (struct sockaddr *)&sockin, sizeof (sockin)) >= 0) {
+	    if (alport) {
+		if (getsockname(s, (struct sockaddr *)&sockin, &len) < 0) {
+		    (void) close(s);
+		    return -1;
+		} else {
+		    *alport = ntohs(sockin.sin_port);
+		}
+	    }
+	    return s;
+	}
+
+	(void) close(s);
+	return -1;
+    }
+
     return -1;
 }
 
@@ -1283,8 +1368,8 @@ int secondary;
    into all programs. */
 
 char *
-  strsave(sp)
-const char *sp;
+strsave(sp)
+    const char *sp;
 {
     register char *ret;
     

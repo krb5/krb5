@@ -1,3 +1,16 @@
+2002-02-10  Ken Raeburn  <raeburn@mit.edu>
+
+	* defines.h: Include fake-addrinfo.h.
+	(FAI_PREFIX): Define.
+	(getport): Update.
+	* kcmd.c: Include fake-addrinfo.c.
+	(kcmd): Use getaddrinfo instead of gethostbyname, but only get
+	AF_INET addresses for now.
+	(k4cmd): Update argument list to getport.
+	(getport): Accept new argument, pointer to address family to use.
+	If zero, try inet6 and then inet.
+	* krshd.c (doit): Update argument list to getport.
+
 2001-12-06  Ezra Peisach  <epeisach@mit.edu>
 
 	* krcp.c, krlogin.c, krlogind.c, krsh.c, krshd.c, login.c,

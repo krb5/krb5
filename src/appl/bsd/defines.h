@@ -36,7 +36,7 @@ extern int kcmd (int *sock, char **ahost, int /* u_short */ rport,
 
 extern int rcmd_stream_read (int fd, char *buf, size_t len, int secondary);
 extern int rcmd_stream_write (int fd, char *buf, size_t len, int secondary);
-extern int getport (int *);
+extern int getport (int * /* portnum */, int * /* addrfamily */);
 
 extern void rcmd_stream_init_krb5 (krb5_keyblock *in_keyblock,
 				   int encrypt_flag, int lencheck,
@@ -68,3 +68,6 @@ krb5_error_code rd_and_store_for_creds(krb5_context context,
 #ifdef NEED_SETENV
 extern int setenv(char *, char *, int);
 #endif
+
+#define FAI_PREFIX bsd
+#include "fake-addrinfo.h"
