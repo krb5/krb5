@@ -1,3 +1,9 @@
+Mon Oct 24 14:58:14 1994    (tytso@rsx-11)
+
+	* configure.in:
+	* rnd_confoun.c (krb5_random_confounder): Use the srand48/lrand48
+		functions if available.
+
 Fri Oct 14 00:21:05 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* Makefile.in: Remove symlinked files on make clean.

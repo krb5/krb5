@@ -36,6 +36,28 @@
 #include <time.h>
 #endif
 
+#ifdef HAVE_SRAND48
+#define SRAND	srand48
+#define RAND	lrand48
+#define RAND_TYPE	long
+#endif
+
+#if !defined(RAND_TYPE) && defined(HAVE_SRAND)
+#define SRAND	srand
+#define RAND	rand
+#define RAND_TYPE	int
+#endif
+
+#if !defined(RAND_TYPE) && defined(HAVE_SRANDOM)	
+#define SRAND	srandom
+#define RAND	random
+#define RAND_TYPE	long
+#endif
+
+#if !defined(RAND_TYPE)
+You need a random number generator!
+#endif
+
 /*
  * Generate a random confounder
  */
@@ -45,37 +67,25 @@ int size;
 krb5_pointer fillin;
 {
     static int seeded = 0;
-    register krb5_octet *real_fill; 
+    register krb5_octet *real_fill;
+    RAND_TYPE	rval;
 
-#ifdef __STDC__
-    /* Use the srand/rand calls, see X3.159-1989, section 4.10.2 */
     if (!seeded) {
 	/* time() defined in 4.12.2.4, but returns a time_t, which is an
 	   "arithmetic type" (4.12.1) */
-	srand((unsigned int) time(0));
-	seeded = 1;
-    }
-#else
-    /* assume Berkeley srandom...after all, this is libos! */
-    if (!seeded) {
-	srandom(time(0));
-	seeded = 1;
-    }
+	rval = time(0);
+	SRAND(rval);
+#ifdef HAVE_GETPID
+	rval = RAND();
+	rval ^= getpid();
+	SRAND(rval);
 #endif
+	seeded = 1;
+    }
+
     real_fill = (krb5_octet *)fillin;
     while (size > 0) {
-
-#ifdef __STDC__
-	int rval;
-	rval = rand();
-	/* RAND_MAX is at least 32767, so we assume we can use the lower 16 bits
-	   of the value of rand(). */
-#else
-	long rval;
-	rval = random();
-	/* BSD random number generator generates "in the range from
-	   0 to (2**31)-1" (random(3)).  So we can use the bottom 16 bits. */
-#endif
+	rval = RAND();
 	*real_fill = rval & 0xff;
 	real_fill++;
 	size--;
