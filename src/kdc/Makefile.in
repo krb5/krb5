@@ -14,6 +14,7 @@ SRCS= \
 	$(srcdir)/do_tgs_req.c \
 	$(srcdir)/kdc_util.c \
 	$(srcdir)/kdc_preauth.c \
+	$(SRCTOP)/lib/kadm5/logger.c \
 	$(srcdir)/main.c \
 	$(srcdir)/network.c \
 	$(srcdir)/policy.c \
@@ -28,6 +29,7 @@ OBJS= \
 	do_tgs_req.o \
 	kdc_util.o \
 	kdc_preauth.o \
+	logger.o \
 	main.o \
 	network.o \
 	policy.o \
@@ -38,6 +40,11 @@ OBJS= \
 all::	krb5kdc
 
 depend:: kdc5_err.c
+
+logger.c: $(SRCTOP)/lib/kadm5/logger.c
+	$(CP) $(SRCTOP)/lib/kadm5/logger.c logger.c
+
+logger.o: logger.c
 
 kdc5_err.c: kdc5_err.et
 
@@ -53,5 +60,5 @@ install::
 	$(INSTALL_DATA) $(srcdir)/krb5kdc.M ${DESTDIR}$(SERVER_MANDIR)/krb5kdc.8
 
 clean::
-	$(RM) kdc5_err.h kdc5_err.c krb5kdc
+	$(RM) kdc5_err.h kdc5_err.c krb5kdc logger.c
 

@@ -1,3 +1,14 @@
+Tue Jul 23 22:26:29 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* Makefile.in: Build logger.o from the libkadm5 directory.  This
+ 		is prepatory work towards eliminating the dependency on
+ 		libkadm5.  Ultimately we will probably need to rethink how
+		the library structure for krb5....
+
+	* configure.in: Add -lgssapi and -lgssrpc to libraries linked with
+ 		krb5kdc since they are needed for shared libraries.  This
+ 		is a horrible hack....
+
 Thu Jun 13 22:09:34 1996  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
 
 	* configure.in: remove ref to ET_RULES
