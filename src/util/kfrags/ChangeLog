@@ -1,0 +1,8 @@
+Thu Sep 29 19:55:43 1994  Mark Eichin  (eichin@cygnus.com)
+
+	* base.conf: simplest path, lists all executables.
+	* ucb.conf: add /usr/ucb to the base path.
+	* svr4.conf: add /usr/ccs/bin instead.
+	* athena.conf: sets KRB4 to /usr/athena.
+	* cns.conf: sets KRB4 to /usr/kerberos.
+	* gcc.conf: overrids CC and CC_OPTS for gcc -g -O -Wall.
