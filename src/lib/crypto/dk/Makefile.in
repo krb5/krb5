@@ -52,7 +52,7 @@ clean-unix:: clean-libobjs
 checksum.o: checksum.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(BUILDTOP)/include/krb5.h \
   $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
-  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/lib/crypto/etypes.h \
+  $(SRCTOP)/include/krb5/kdb.h $(srcdir)/../etypes.h \
   dk.h
 dk_decrypt.o: dk_decrypt.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
@@ -67,7 +67,7 @@ dk_encrypt.o: dk_encrypt.c $(SRCTOP)/include/k5-int.h \
 derive.o: derive.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(BUILDTOP)/include/krb5.h \
   $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
-  $(SRCTOP)/include/krb5/kdb.h dk.h $(SRCTOP)/lib/crypto/etypes.h
+  $(SRCTOP)/include/krb5/kdb.h dk.h $(srcdir)/../etypes.h
 stringtokey.o: stringtokey.c dk.h $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \

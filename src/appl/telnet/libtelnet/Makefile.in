@@ -90,19 +90,19 @@ install::
 # Makefile dependencies follow.  This must be the last section in
 # the Makefile.in file
 #
-auth.o: auth.c $(SRCTOP)/appl/telnet/arpa/telnet.h \
-  encrypt.h enc-proto.h auth.h auth-proto.h misc-proto.h
-encrypt.o: encrypt.c $(SRCTOP)/appl/telnet/arpa/telnet.h \
-  encrypt.h enc-proto.h misc.h misc-proto.h
+auth.o: auth.c $(srcdir)/../arpa/telnet.h encrypt.h \
+  enc-proto.h auth.h auth-proto.h misc-proto.h
+encrypt.o: encrypt.c $(srcdir)/../arpa/telnet.h encrypt.h \
+  enc-proto.h misc.h misc-proto.h
 genget.o: genget.c misc.h misc-proto.h
 misc.o: misc.c misc.h misc-proto.h auth.h auth-proto.h \
   encrypt.h enc-proto.h
 kerberos.o: kerberos.c $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
-  $(BUILDTOP)/include/com_err.h $(SRCTOP)/appl/telnet/arpa/telnet.h \
+  $(BUILDTOP)/include/com_err.h $(srcdir)/../arpa/telnet.h \
   $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/kerberosIV/krb.h \
   $(SRCTOP)/include/port-sockets.h encrypt.h enc-proto.h \
   auth.h auth-proto.h misc.h misc-proto.h
-kerberos5.o: kerberos5.c $(SRCTOP)/appl/telnet/arpa/telnet.h \
+kerberos5.o: kerberos5.c $(srcdir)/../arpa/telnet.h \
   $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(BUILDTOP)/include/krb5.h \
   $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
@@ -115,7 +115,7 @@ forward.o: forward.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.
   $(SRCTOP)/include/krb5/kdb.h krb5forw.h
 spx.o: spx.c misc-proto.h
 enc_des.o: enc_des.c $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
-  $(BUILDTOP)/include/com_err.h $(SRCTOP)/appl/telnet/arpa/telnet.h \
+  $(BUILDTOP)/include/com_err.h $(srcdir)/../arpa/telnet.h \
   encrypt.h enc-proto.h key-proto.h misc-proto.h
 setenv.o: setenv.c misc-proto.h
 getent.o: getent.c gettytab.h

@@ -495,7 +495,7 @@ get_in_tkt.o: get_in_tkt.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
   $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h \
-  int-proto.h $(SRCTOP)/lib/krb5/os/os-proto.h
+  int-proto.h $(srcdir)/../os/os-proto.h
 gic_keytab.o: gic_keytab.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
@@ -523,7 +523,7 @@ in_tkt_sky.o: in_tkt_sky.c $(SRCTOP)/include/k5-int.h \
 init_ctx.o: init_ctx.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(BUILDTOP)/include/krb5.h \
   $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
-  $(SRCTOP)/include/krb5/kdb.h brand.c $(SRCTOP)/lib/krb5/krb5_libinit.h
+  $(SRCTOP)/include/krb5/kdb.h brand.c $(srcdir)/../krb5_libinit.h
 kdc_rep_dc.o: kdc_rep_dc.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \

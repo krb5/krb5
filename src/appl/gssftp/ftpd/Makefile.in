@@ -79,7 +79,7 @@ vers.o: $(srcdir)/vers.c
 # Makefile dependencies follow.  This must be the last section in
 # the Makefile.in file
 #
-ftpd.o: ftpd.c $(SRCTOP)/appl/gssftp/arpa/ftp.h $(SRCTOP)/appl/gssftp/arpa/telnet.h \
+ftpd.o: ftpd.c $(srcdir)/../arpa/ftp.h $(srcdir)/../arpa/telnet.h \
   $(SRCTOP)/include/syslog.h pathnames.h $(BUILDTOP)/include/libpty.h \
   $(SRCTOP)/include/k5-util.h $(BUILDTOP)/include/krb5.h \
   $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
@@ -88,19 +88,18 @@ ftpd.o: ftpd.c $(SRCTOP)/appl/gssftp/arpa/ftp.h $(SRCTOP)/appl/gssftp/arpa/telne
   $(BUILDTOP)/include/krb524_err.h $(BUILDTOP)/include/gssapi/gssapi.h \
   $(BUILDTOP)/include/gssapi/gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi_krb5.h \
   ftpd_var.h secure.h
-ftpcmd.o: ftpcmd.c $(SRCTOP)/appl/gssftp/arpa/ftp.h \
-  $(SRCTOP)/include/syslog.h ftpd_var.h $(BUILDTOP)/include/gssapi/gssapi.h \
-  $(BUILDTOP)/include/gssapi/gssapi_generic.h $(SRCTOP)/include/kerberosIV/krb.h \
-  $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/appl/gssftp/arpa/telnet.h
+ftpcmd.o: ftpcmd.c $(srcdir)/../arpa/ftp.h $(SRCTOP)/include/syslog.h \
+  ftpd_var.h $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/gssapi/gssapi_generic.h \
+  $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
+  $(SRCTOP)/include/port-sockets.h $(srcdir)/../arpa/telnet.h
 popen.o: popen.c ftpd_var.h $(BUILDTOP)/include/gssapi/gssapi.h \
   $(BUILDTOP)/include/gssapi/gssapi_generic.h
 vers.o: vers.c
-glob.o: $(srcdir)/../ftp/glob.c $(SRCTOP)/appl/gssftp/ftp/ftp_var.h
-radix.o: $(srcdir)/../ftp/radix.c $(SRCTOP)/appl/gssftp/ftp/ftp_var.h
+glob.o: $(srcdir)/../ftp/glob.c $(srcdir)/../ftp/ftp_var.h
+radix.o: $(srcdir)/../ftp/radix.c $(srcdir)/../ftp/ftp_var.h
 secure.o: $(srcdir)/../ftp/secure.c $(BUILDTOP)/include/gssapi/gssapi.h \
   $(BUILDTOP)/include/gssapi/gssapi_generic.h secure.h \
   $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
-  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/appl/gssftp/arpa/ftp.h
+  $(SRCTOP)/include/port-sockets.h $(srcdir)/../arpa/ftp.h
 getdtablesize.o: $(srcdir)/../../bsd/getdtablesize.c
 
