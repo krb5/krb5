@@ -1,3 +1,8 @@
+2000-10-17  Ezra Peisach  <epeisach@mit.edu>
+
+	* clnt_chpass_util.c (kadm5_chpass_principal_util): Change msg_len
+	to unsigned int.
+
 2000-07-03  Ezra Peisach  <epeisach@mit.edu>
 
 	* Makefile.in: The client library does not depend on the database
