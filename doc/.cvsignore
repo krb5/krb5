@@ -13,4 +13,8 @@
 *.pg
 *.vr
 *.ps
+*.fns
+*.tps
+*.vrs
+*.pdf
 krb5-install
