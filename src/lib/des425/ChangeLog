@@ -1,3 +1,8 @@
+Fri Sep 29 01:28:11 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* pcbc_encrypt.c: #include autoconf.h instead of osconf.h, because
+		that's the file we really care about.
+
 Mon Sep 25 16:51:10 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in: Removed "foo:: foo-$(WHAT)" lines from the
