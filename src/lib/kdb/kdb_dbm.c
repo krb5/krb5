@@ -383,7 +383,9 @@ time_t age;
 	    tv[1].tv_usec = 0;
 	    /* set the mod timetimes.. */
 	    utimes (new_okname, tv);
+#ifndef NOFSYNC
 	    fsync(fd);
+#endif
 	}
 	close(fd);
 	if (rename (new_okname, okname) < 0)
@@ -493,6 +495,11 @@ krb5_db_entry *entry;
     copy_princ.principal = 0;
     copy_princ.mod_name = 0;
     copy_princ.salt = 0;
+    copy_princ.alt_salt = 0;
+    if (!entry->salt)
+	copy_princ.salt_length = 0; /* Safety measures.... */
+    if (!entry->alt_salt)
+	copy_princ.alt_salt_length = 0;
 
     if (retval = krb5_unparse_name(entry->principal, &unparse_princ))
 	return(retval);
@@ -502,8 +509,12 @@ krb5_db_entry *entry;
     }
     princ_size = strlen(unparse_princ)+1;
     mod_size = strlen(unparse_mod_princ)+1;
-    contents->dsize = sizeof(copy_princ)+ princ_size + mod_size
-		      + entry->key.length + entry->salt_length;
+    contents->dsize = (sizeof(copy_princ) + princ_size + mod_size
+		       + sizeof(copy_princ.key.length) 
+		       + copy_princ.key.length + copy_princ.salt_length
+		       + sizeof(copy_princ.alt_key.length)
+		       + copy_princ.alt_key.length
+		       + copy_princ.alt_salt_length);
     contents->dptr = malloc(contents->dsize);
     if (!contents->dptr) {
 	free(unparse_princ);
@@ -519,10 +530,23 @@ krb5_db_entry *entry;
     nextloc += princ_size;
     (void) memcpy(nextloc, unparse_mod_princ, mod_size);
     nextloc += mod_size;
-    (void) memcpy(nextloc, (char *)entry->key.contents, entry->key.length);
-    if (entry->salt) {
+    if (copy_princ.key.length) {
+	(void) memcpy(nextloc, (char *)entry->key.contents, entry->key.length);
 	nextloc += entry->key.length;
+    }
+    if (copy_princ.salt_length) {
 	(void) memcpy(nextloc, (char *)entry->salt, entry->salt_length);
+	nextloc += entry->salt_length;
+    }
+    if (copy_princ.alt_key.length) {
+	(void) memcpy(nextloc, (char *)entry->alt_key.contents,
+		      entry->alt_key.length);
+	nextloc += entry->alt_key.length;
+    }
+    if (copy_princ.alt_salt_length) {
+	(void) memcpy(nextloc, (char *)entry->alt_salt,
+		      entry->alt_salt_length);
+	nextloc += entry->alt_salt_length;
     }
     free(unparse_princ);
     free(unparse_mod_princ);
@@ -547,70 +571,137 @@ krb5_db_entry *entry;
     register char *nextloc;
     krb5_principal princ, mod_princ;
     krb5_error_code retval;
+    int	sizeleft;
     int keysize;
 
     /* undo the effects of encode_princ_contents.
      */
 
-    nextloc = contents->dptr + sizeof(*entry);
-    if (nextloc >= contents->dptr + contents->dsize)
+    sizeleft = contents->dsize - sizeof(*entry);
+    if (sizeleft < 0) 
 	return KRB5_KDB_TRUNCATED_RECORD;
 
     memcpy((char *) entry, contents->dptr, sizeof(*entry));
+    /*
+     * These values should be zero if they are not in use, but just in
+     * case, we clear them to make sure nothing bad happens if we need
+     * to call free_decode_princ_contents().  (What me, paranoid?)
+     */
+    entry->principal = 0;
+    entry->mod_name = 0;
+    entry->salt = 0;
+    entry->alt_salt = 0;
+    entry->key.contents = 0;
+    entry->alt_key.contents = 0;
+    nextloc = contents->dptr + sizeof(*entry); /* Skip past structure */
 
-    if (nextloc + strlen(nextloc)+1 >= contents->dptr + contents->dsize)
-	return KRB5_KDB_TRUNCATED_RECORD;
-
-    if (retval = krb5_parse_name(nextloc, &princ))
-	return(retval);
-    entry->principal = princ;
-
-    nextloc += strlen(nextloc)+1;	/* advance past 1st string */
-    if ((nextloc + strlen(nextloc)+1 >= contents->dptr + contents->dsize)
-	|| (retval = krb5_parse_name(nextloc, &mod_princ))) {
-	krb5_free_principal(princ);
-	(void) memset((char *) entry, 0, sizeof(*entry));
-	return KRB5_KDB_TRUNCATED_RECORD;
+    /*
+     * Get the principal name for the entry (stored as a string which
+     * gets unparsed.)
+     */
+    sizeleft -= strlen(nextloc)+1;
+    if (sizeleft < 0) {
+	retval = KRB5_KDB_TRUNCATED_RECORD;
+	goto error_out;
     }
+    retval = krb5_parse_name(nextloc, &princ);
+    if (retval)
+	goto error_out;
+    entry->principal = princ;
+    nextloc += strlen(nextloc)+1;	/* advance past 1st string */
+    
+    /*
+     * Get the last modified principal for the entry (again stored as
+     * string which gets unparased.)
+     */
+    sizeleft -= strlen(nextloc)+1;	/* check size for 2nd string */
+    if (sizeleft < 0) {
+	retval = KRB5_KDB_TRUNCATED_RECORD;
+	goto error_out;
+    }
+    retval = krb5_parse_name(nextloc, &mod_princ);
+    if (retval)
+	goto error_out;
     entry->mod_name = mod_princ;
     nextloc += strlen(nextloc)+1;	/* advance past 2nd string */
-    keysize = contents->dsize - (nextloc - contents->dptr) -
-	entry->salt_length;
-    if (keysize <= 0) {
-	krb5_free_principal(princ);
-	krb5_free_principal(mod_princ);
-	(void) memset((char *) entry, 0, sizeof(*entry));
-	return KRB5_KDB_TRUNCATED_RECORD;
+    
+    /*
+     * Get the primary key...
+     */
+    if (entry->key.length) {
+	sizeleft -= entry->key.length; 	/* check size for key */
+	if (sizeleft < 0) {
+	    retval = KRB5_KDB_TRUNCATED_RECORD;
+	    goto error_out;
+	}
+	entry->key.contents = (unsigned char *)malloc(entry->key.length);
+	if (!entry->key.contents) {
+	    retval = ENOMEM;
+	    goto error_out;
+	}
+	(void) memcpy((char *)entry->key.contents, nextloc, entry->key.length);
+	nextloc += entry->key.length;	/* advance past key */
     }
-    if (!(entry->key.contents = (unsigned char *)malloc(keysize))) {
-	krb5_free_principal(princ);
-	krb5_free_principal(mod_princ);
-	(void) memset((char *) entry, 0, sizeof(*entry));
-	return ENOMEM;
-    }
-    (void) memcpy((char *)entry->key.contents, nextloc, keysize);
-    if (keysize != entry->key.length) {
-	krb5_free_principal(princ);
-	krb5_free_principal(mod_princ);
-	xfree(entry->key.contents);
-	(void) memset((char *) entry, 0, sizeof(*entry));
-	return KRB5_KDB_TRUNCATED_RECORD;
-    }
+	
+    /*
+     * ...and the salt, if present...
+     */
     if (entry->salt_length) {
-	nextloc += keysize;
-	/* already determined above that sufficient space for this
-	   exists, since we factor entry->salt_length into the keysize
-	   calculations */
-	if (!(entry->salt = (krb5_octet *)malloc(entry->salt_length))) {
-	    krb5_free_principal(princ);
-	    krb5_free_principal(mod_princ);
-	    xfree(entry->key.contents);
-	    (void) memset((char *) entry, 0, sizeof(*entry));
-	    return KRB5_KDB_TRUNCATED_RECORD;
+	sizeleft -= entry->salt_length;
+	if (sizeleft < 0) {
+	    retval = KRB5_KDB_TRUNCATED_RECORD;
+	    goto error_out;
+	}
+	entry->salt = (krb5_octet *)malloc(entry->salt_length);
+	if (!entry->salt) {
+	    retval = KRB5_KDB_TRUNCATED_RECORD;
+	    goto error_out;
 	}
 	(void) memcpy((char *)entry->salt, nextloc, entry->salt_length);
+	nextloc += entry->salt_length; /* advance past salt */
     }
+
+    /*
+     * ... and the alternate key, if present...
+     */
+    if (entry->alt_key.length) {
+	sizeleft -= entry->alt_key.length; 	/* check size for alt_key */
+	if (sizeleft < 0) {
+	    retval = KRB5_KDB_TRUNCATED_RECORD;
+	    goto error_out;
+	}
+	entry->alt_key.contents = (unsigned char *) malloc(entry->alt_key.length);
+	if (!entry->alt_key.contents) {
+	    retval = ENOMEM;
+	    goto error_out;
+	}
+	(void) memcpy((char *)entry->alt_key.contents, nextloc,
+		      entry->alt_key.length);
+	nextloc += entry->alt_key.length;	/* advance past alt_key */
+    }
+	
+    /*
+     * ...and the alternate key's salt, if present.
+     */
+    if (entry->alt_salt_length) {
+	sizeleft -= entry->alt_salt_length;
+	if (sizeleft < 0) {
+	    retval = KRB5_KDB_TRUNCATED_RECORD;
+	    goto error_out;
+	}
+	entry->alt_salt = (krb5_octet *)malloc(entry->alt_salt_length);
+	if (!entry->alt_salt) {
+	    retval = KRB5_KDB_TRUNCATED_RECORD;
+	    goto error_out;
+	}
+	(void) memcpy((char *)entry->alt_salt, nextloc, entry->salt_length);
+	nextloc += entry->salt_length; /* advance past salt */
+    }
+    
     return 0;
+error_out:
+    free_decode_princ_contents(entry);
+    return retval;
 }
 
 static void
@@ -618,13 +709,24 @@ free_decode_princ_contents(entry)
 krb5_db_entry *entry;
 {
     /* erase the key */
-    memset((char *)entry->key.contents, 0, entry->key.length);
-    xfree(entry->key.contents);
-    if (entry->salt_length)
+    if (entry->key.contents) {
+	memset((char *)entry->key.contents, 0, entry->key.length);
+	xfree(entry->key.contents);
+    }
+    if (entry->salt)
 	xfree(entry->salt);
-
-    krb5_free_principal(entry->principal);
-    krb5_free_principal(entry->mod_name);
+    
+    if (entry->alt_key.contents) {
+	memset((char *)entry->alt_key.contents, 0, entry->alt_key.length);
+	xfree(entry->alt_key.contents);
+    }
+    if (entry->alt_salt)
+	xfree(entry->alt_salt);
+    
+    if (entry->principal)
+	krb5_free_principal(entry->principal);
+    if (entry->mod_name)
+	krb5_free_principal(entry->mod_name);
     (void) memset((char *)entry, 0, sizeof(*entry));
     return;
 }
@@ -812,7 +914,9 @@ destroy_file_suffix(dbname, suffix)
 	/* ??? Is fsync really needed?  I don't know of any non-networked
 	   filesystem which will discard queued writes to disk if a file
 	   is deleted after it is closed.  --jfc */
+#ifndef NOFSYNC
 	fsync(fd);
+#endif
 	close(fd);
 
 	if (unlink(filename)) {
