@@ -787,11 +787,12 @@ KRB5_PROTOTYPE((krb5_context context, krb5_const krb5_keyblock *key,
 #define KRB5_LIBOS__
 
 typedef struct _krb5_os_context {
-	krb5_magic	magic;
-	krb5_int32	time_offset;
-	krb5_int32	usec_offset;
-	krb5_int32	os_flags;
-	char *		default_ccname;
+	krb5_magic		magic;
+	krb5_int32		time_offset;
+	krb5_int32		usec_offset;
+	krb5_int32		os_flags;
+	char *			default_ccname;
+	krb5_principal	default_ccprincipal;
 } *krb5_os_context;
 
 /*
