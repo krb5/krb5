@@ -3,6 +3,12 @@ Mon Feb 10 10:41:36 1997  Ezra Peisach  <epeisach@mit.edu>
 	* crypto_glue.c (krb5_calculate_checksum): Add krb5_const to
 	        krb5_pointer of in data to match prototype.
 
+Sat Feb  8 15:02:39 1997  Richard Basch  <basch@lehman.com>
+
+	* get_creds.c:
+		Export krb5_get_credentials_{renew,validate} (win32)
+		Removed unused variable.
+
 Fri Feb  7 09:41:33 1997  Richard Basch  <basch@lehman.com>
 
 	* mk_cred.c (krb5_mk_ncred): Declare ncred as krb5_int32 so that
