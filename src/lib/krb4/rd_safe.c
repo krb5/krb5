@@ -182,7 +182,7 @@ krb_rd_safe protocol err sizeof(u_long) != sizeof(struct in_addr)");
 #else /* Do encryption */
     /* calculate the checksum of the length, timestamps, and
      * input data, on the sending byte order !! */
-    quad_cksum(q,calc_cksum,p-q,2,(C_Block *)&key);
+    quad_cksum(q,calc_cksum,p-q,2,(C_Block *)key);
 #endif /* NOENCRYPTION */
 
     DEB (("\n0: calc %l big %lx\n1: calc %lx big %lx\n2: calc %lx big %lx\n3: calc %lx big %lx\n",
