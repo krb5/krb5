@@ -1,3 +1,7 @@
+Mon Apr 17 17:47:07 1995 Keith Vetter (keithv@fusion.com)
+
+	* Makefile.in: forgot about the rule to make gssapi.lib on the PC.
+
 Wed Apr 12 14:40:30 1995  Theodore Y. Ts'o  (tytso@dcl)
 
 	* Makefile.in, configure.in: Move dependency for all-$WHAT back

@@ -71,7 +71,7 @@ all-windows::
 	@echo Making locally
 	cd ..
 
-all-windows:: libkrb5.lib
+all-windows:: libkrb5.lib gssapi.lib
 
 clean-windows::
 	@echo Making clean in lib\crypto
