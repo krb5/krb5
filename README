@@ -88,8 +88,9 @@ Major Changes:
   get created on Solaris.
 
 * Potential buffer-overrun problems and null-pointer dereferences have
-  been fixed in ftpd, telnetd, and SHA-1.  The first two are probably
-  exploitable; the SHA-1 bug probably isn't, as far as we know.
+  been fixed in ftpd, telnetd, login.krb5, and SHA-1.  The first three
+  may be exploitable under certain conditions; the SHA-1 bug probably
+  isn't, as far as we know.
 
 * For multiple-hop interrealm authentication, the realm transit path
   checking has been rewritten.  The old code had a serious bug where
@@ -132,6 +133,13 @@ Known Bugs:
   includes the tests/dejagnu test suite, which tests the krb4 ftp
   functionality.  The probability of this occuring seems to be less
   than 50%.
+
+* Compilation on Solaris (SPARC) with the SunSoft compiler in 64-bit
+  mode appears to produce some broken executables.  The db2 btree
+  tests fail, which means a KDC built this way may fail also.  Compile
+  in 32-bit mode only for now.  (We are not aware of similar problems
+  on the Alpha, so this is quite possibly not a generic 64-bit
+  problem.)
 
 Notes, Major Changes, and Known Bugs for 1.2.2
 ----------------------------------------------
