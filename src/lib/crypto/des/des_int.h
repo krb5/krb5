@@ -163,12 +163,12 @@ extern krb5_error_code mit_des_process_key
 
 /* random_key.c */
 extern krb5_error_code mit_des_random_key
-    PROTOTYPE(( krb5_pointer ,  krb5_keyblock **));
+    PROTOTYPE(( const krb5_encrypt_block *, krb5_pointer ,  krb5_keyblock **));
 
 /* string2key.c */
 extern krb5_error_code mit_des_string_to_key
-    PROTOTYPE((const krb5_keytype, krb5_keyblock *, const krb5_data *,
-	       const krb5_data *));
+    PROTOTYPE(( const krb5_encrypt_block *, const krb5_keytype,
+	       krb5_keyblock *, const krb5_data *, const krb5_data *));
 
 /* weak_key.c */
 extern int mit_des_is_weak_key PROTOTYPE((mit_des_cblock ));

@@ -31,7 +31,7 @@
 typedef struct _krb5_keyblock {
     krb5_magic magic;
     krb5_keytype keytype;
-    krb5_enctype enctype;	/* hint of what encryption type to use */
+    krb5_enctype etype;	/* hint of what encryption type to use */
     int length;
     krb5_octet *contents;
 } krb5_keyblock;
@@ -76,15 +76,17 @@ typedef struct _krb5_cryptosystem_entry {
     krb5_error_code (*process_key) NPROTOTYPE((krb5_encrypt_block *,
 					      const krb5_keyblock *));
     krb5_error_code (*finish_key) NPROTOTYPE((krb5_encrypt_block *));
-    krb5_error_code (*string_to_key) NPROTOTYPE((const krb5_keytype,
+    krb5_error_code (*string_to_key) NPROTOTYPE((const krb5_encrypt_block *,
+						 const krb5_keytype,
 						krb5_keyblock *,
 						const krb5_data *,
  	                                        const krb5_data *));
     krb5_error_code  (*init_random_key) NPROTOTYPE((const krb5_keyblock *,
 						   krb5_pointer *));
     krb5_error_code  (*finish_random_key) NPROTOTYPE((krb5_pointer *));
-    krb5_error_code (*random_key) NPROTOTYPE((krb5_pointer,
-					     krb5_keyblock **));
+    krb5_error_code (*random_key) NPROTOTYPE((const krb5_encrypt_block *,
+					      krb5_pointer,
+					      krb5_keyblock **));
     int block_length;
     int pad_minimum;			/* needed for cksum size computation */
     int keysize;
@@ -186,10 +188,10 @@ extern int krb5_max_cksum;		/* max entry in array */
 #define krb5_decrypt(inptr, outptr, size, eblock, ivec) (*(eblock)->crypto_entry->decrypt_func)(inptr, outptr, size, eblock, ivec)
 #define krb5_process_key(eblock, key) (*(eblock)->crypto_entry->process_key)(eblock, key)
 #define krb5_finish_key(eblock) (*(eblock)->crypto_entry->finish_key)(eblock)
-#define krb5_string_to_key(eblock, keytype, keyblock, data, princ) (*(eblock)->crypto_entry->string_to_key)(keytype, keyblock, data, princ)
+#define krb5_string_to_key(eblock, keytype, keyblock, data, princ) (*(eblock)->crypto_entry->string_to_key)(eblock, keytype, keyblock, data, princ)
 #define krb5_init_random_key(eblock, keyblock, ptr) (*(eblock)->crypto_entry->init_random_key)(keyblock, ptr)
 #define krb5_finish_random_key(eblock, ptr) (*(eblock)->crypto_entry->finish_random_key)(ptr)
-#define krb5_random_key(eblock, ptr, keyblock) (*(eblock)->crypto_entry->random_key)(ptr, keyblock)
+#define krb5_random_key(eblock, ptr, keyblock) (*(eblock)->crypto_entry->random_key)(eblock, ptr, keyblock)
 
 /*
  * Here's the stuff for the checksum switch:

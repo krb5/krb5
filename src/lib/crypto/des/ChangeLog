@@ -1,3 +1,12 @@
+Tue Nov  8 17:57:47 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* des_int.h:
+	  random_key.c (mit_des_random_key):
+	  string2key.c (mit_des_string_to_key): Change
+		internal calling signature to pass in the encryption
+		block, so that the encryption type in the keyblock
+		structure can be properly initialized.
+
 Thu Nov  3 18:31:55 1994  Mark Eichin  (eichin@cygnus.com)
 
 	* Makefile.in: stop building f_pcbc.c, since it belongs in

@@ -1,3 +1,10 @@
+Tue Nov  8 17:55:47 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* encryption.h (krb5_string_to_key, krb5_random_key): Change
+		internal calling signature to pass in the encryption
+		block, so that the encryption type in the keyblock
+		structure can be properly initialized.
+
 Thu Nov  3 16:38:44 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* encryption.h (krb5_keyblock): Added a field to hold an

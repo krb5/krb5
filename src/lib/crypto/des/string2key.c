@@ -44,10 +44,12 @@
 	returns: errors
  */
 
-krb5_error_code mit_des_string_to_key (DECLARG(const krb5_keytype, keytype),
+krb5_error_code mit_des_string_to_key (DECLARG(const krb5_encrypt_block *, eblock),
+				       DECLARG(const krb5_keytype, keytype),
 				       DECLARG(krb5_keyblock *,keyblock),
 				       DECLARG(const krb5_data *,data),
 				       DECLARG(const krb5_data *, salt))
+OLDDECLARG(const krb5_encrypt_block *, eblock)
 OLDDECLARG(const krb5_keytype, keytype)
 OLDDECLARG(krb5_keyblock *,keyblock)
 OLDDECLARG(const krb5_data *,data)
@@ -73,6 +75,8 @@ OLDDECLARG(const krb5_data *, salt)
     if ( !(keyblock->contents = (krb5_octet *)malloc(sizeof(mit_des_cblock))) )
 	return(ENOMEM);
 
+    keyblock->magic = KV5M_KEYBLOCK;
+    keyblock->etype = eblock->crypto_entry->proto_enctype;
     keyblock->keytype = KEYTYPE_DES;
     keyblock->length = sizeof(mit_des_cblock);
     key = keyblock->contents;
