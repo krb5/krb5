@@ -226,6 +226,8 @@ HINSTANCE get_lib_instance(void);
 
 #ifdef macintosh
 
+#define USE_LOGIN_LIBRARY
+
 #define KRB5_CALLCONV
 #define KRB5_CALLCONV_C
 #define KRB5_DLLIMP
