@@ -1,3 +1,16 @@
+Sat May 18 01:49:33 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* md5crypto.c: Define MD5_K5BETA_COMPAT and MD5_K5BETA_COMP_DEF so
+ 		that we continue doing things the wrong (broken) way.  All
+ 		hail backwards compatibility....  The code now generates
+ 		the old checksum, but it will verify both the old and the
+ 		correct checksum formats.
+
+		Also fixed two bugs in the "correct" MD5_CRYPTO
+		implementation; use a zero initialization vector, and
+		calculate the confounder at the beginning of the message,
+		not at the end.  
+
 Tue May 14 19:32:51 1996  Richard Basch  <basch@lehman.com>
 
 	* md5crypto.c md5glue.c:

@@ -12,6 +12,8 @@ krb5_error_code
 krb5_md5_crypto_verify_func PROTOTYPE((krb5_checksum FAR *cksum, krb5_pointer in,
 	size_t in_length, krb5_pointer seed, size_t seed_length));
 
+static mit_des_cblock zero_ivec = { 0 };
+
 /*
  * In Kerberos V5 Beta 5 and previous releases the RSA-MD5-DES implementation
  * did not follow RFC1510.  The folowing definitions control the compatibility
@@ -25,9 +27,11 @@ krb5_md5_crypto_verify_func PROTOTYPE((krb5_checksum FAR *cksum, krb5_pointer in
  * the compatible behaviour becomes the default.
  *
  */
+#define MD5_K5BETA_COMPAT
+#define MD5_K5BETA_COMPAT_DEF
 
 static void
-krb5_md5_calculate_cksum(md5ctx, in, in_length, confound, confound_length)
+krb5_md5_calculate_cksum(md5ctx, confound, confound_length, in, in_length)
     krb5_MD5_CTX		*md5ctx;
     krb5_pointer	in;
     size_t		in_length;
@@ -151,7 +155,7 @@ krb5_checksum FAR *outcksum;
 				 RSA_MD5_DES_CKSUM_LENGTH +
 				 RSA_MD5_DES_CONFOUND_LENGTH,
 				 (struct mit_des_ks_struct *)eblock.priv,
-				 keyblock.contents,
+				 zero_ivec,
 				 MIT_DES_ENCRYPT);
     if (retval) {
 	(void) mit_des_finish_key(&eblock);
@@ -260,7 +264,7 @@ size_t seed_length;
 					 RSA_MD5_DES_CONFOUND_LENGTH,
 					 (struct mit_des_ks_struct *)
 					 	eblock.priv,
-					 keyblock.contents,
+					 zero_ivec,
 					 MIT_DES_DECRYPT);
 	    if (retval) {
 		(void) mit_des_finish_key(&eblock);
