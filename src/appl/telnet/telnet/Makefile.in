@@ -42,7 +42,7 @@ OBJS=	authenc.o commands.o main.o network.o ring.o sys_bsd.o \
 
 all:: telnet
 
-telnet:	$(OBJS) $(DEPKLIB)
+telnet:	$(OBJS) $(DEPKLIB) ../libtelnet/libtelnet.a
 	$(CC) -o $@ $(CFLAGS) $(OBJS) ../libtelnet/libtelnet.a $(KLIB) $(K4LIB) $(LIBS)
 
 clean::

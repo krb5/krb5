@@ -51,7 +51,7 @@ OBJS=	telnetd.o \
 
 all:: telnetd
 
-telnetd: $(OBJS) $(DEPKLIB)
+telnetd: $(OBJS) $(DEPKLIB) ../libtelnet/libtelnet.a
 	$(CC) -o $@ $(CFLAGS) $(OBJS) ../libtelnet/libtelnet.a $(KLIB) $(K4LIB) $(LIBS)
 
 clean::

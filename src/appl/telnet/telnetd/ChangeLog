@@ -1,3 +1,7 @@
+Wed Mar 29 15:39:39 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* Makefile.in: Add dependency on libtelnet.a
+
 Tue Mar  7 19:59:30 1995  Mark Eichin  <eichin@cygnus.com>
 
 	* configure.in: take out ISODE_INCLUDE.
