@@ -40,7 +40,7 @@ SRCS 	= $(SRCDIR)scc_close.c $(SRCDIR)scc_destry.c $(SRCDIR)scc_eseq.c \
 
 all:: ${OBJS}
 
-OtherdirLibraryTarget($(TOP)/lib,krb5,$(OBJS))
+SubdirLibraryRule($(OBJS))
 
 DependTarget()
 

@@ -88,6 +88,6 @@ SRCS=	\
 	$(SRCDIR)f_cred.c	\
 	$(SRCDIR)f_cred_enc.c
 
-OtherdirLibraryTarget($(TOP)/lib,krb5,$(OBJS))
+SubdirLibraryRule($(OBJS))
 
 DependTarget()

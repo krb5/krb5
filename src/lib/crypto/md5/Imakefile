@@ -6,6 +6,6 @@ SRCS=	$(SRCDIR)md5.c $(SRCDIR)md5glue.c $(SRCDIR)md5crypto.c
 
 DEFINES= $(DESDEFINES)
 
-OtherdirLibraryTarget(..,$(DESLIB),$(OBJS))
+SubdirLibraryRule($(OBJS))
 
 DependTarget()

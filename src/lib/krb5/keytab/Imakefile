@@ -46,6 +46,6 @@ SRCS=	\
 	$(SRCDIR)ktremove.c	\
 	$(SRCDIR)read_servi.c
 
-OtherdirLibraryTarget($(TOP)/lib,krb5,$(OBJS))
+SubdirLibraryRule($(OBJS))
 
 DependTarget()

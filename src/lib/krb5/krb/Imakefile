@@ -140,6 +140,6 @@ SRCS=	$(SRCDIR)addr_comp.c	\
 	$(SRCDIR)unparse.c	\
 	$(SRCDIR)walk_rtree.c
 
-OtherdirLibraryTarget($(TOP)/lib,krb5,$(OBJS))
+SubdirLibraryRule($(OBJS))
 
 DependTarget()

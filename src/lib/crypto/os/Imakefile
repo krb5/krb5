@@ -24,14 +24,19 @@
 # 
 NormalLibraryObjectRule()
 
-OBJS=	crc.o
+OBJS=	rnd_confoun.o localaddr.o ustime.o
 
-SRCS=	$(SRCDIR)crc.c $(SRCDIR)crctest.c
-
-CRCTESTOBJ = crctest.o
+SRCS=	rnd_confoun.c localaddr.c ustime.c
 
 SubdirLibraryRule($(OBJS))
 
-NormalProgramTarget(crctest,$(CRCTESTOBJ),$(OBJS),$(OBJS),)
+depend:: localaddr.c ustime.c
 
 DependTarget()
+
+localaddr.c: ../../krb5/os/localaddr.c
+	$(LN) ../../krb5/os/localaddr.c $@
+
+ustime.c: ../../krb5/os/ustime.c
+	$(LN) ../../krb5/os/ustime.c $@
+

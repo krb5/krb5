@@ -39,4 +39,4 @@ SRCS=	$(SRCDIR)ccbase.c \
 	$(SRCDIR)ccdefault.c \
 	$(SRCDIR)ccdefops.c
 
-OtherdirLibraryTarget($(TOP)/lib,krb5,$(OBJS))
+SubdirLibraryRule($(OBJS))

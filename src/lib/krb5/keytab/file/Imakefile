@@ -56,6 +56,6 @@ OBJS = \
 	ktf_wreslv.o	\
 	ktf_defops.o
 
-OtherdirLibraryTarget($(TOP)/lib,krb5,$(OBJS))
+SubdirLibraryRule($(OBJS))
 
 DependTarget()

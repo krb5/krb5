@@ -24,48 +24,10 @@
 # 
 #define IHaveSubdirs
 #define PassCDebugFlags
-NormalLibraryObjectRule()
 
 SUBDIRS1 = error_tables
-SUBDIRS2 = ccache keytab krb rcache free os kdb des \
-	des425 crc32 krb425 md4 md5 gssapi
+SUBDIRS2 = ccache keytab krb rcache free os posix
 SUBDIRS = $(SUBDIRS1) asn.1 $(SUBDIRS2)
-
-#ifdef HasVfprintf
-VPOBJS=
-VPSRCS=
-#else
-VPOBJS=vfprintf.o vsprintf.o
-VPSRCS=$(SRCDIR)vfprintf.c $(SRCDIR)vsprintf.c
-#endif
-#ifdef HasVsyslog
-VSOBJS=
-VSSRCS=
-#else
-VSOBJS=syslog.o
-VSSRCS=$(SRCDIR)syslog.c
-#endif
-#ifdef HasStrdup
-STOBJS=
-STSRCS=
-#else
-STOBJS=strdup.o
-STSRCS=$(SRCDIR)strdup.c
-#endif
-#ifndef HasStrerror
-PEOBJS=perror.o
-PESRCS=$(SRCDIR)perror.c
-#endif
-
-INCLUDES=$(STDC_TOP_INCLUDES)
-
-OBJS =	\
-	cryptoconf.o \
-	$(PEOBJS) $(VSOBJS) $(VPOBJS) $(STOBJS)
-
-SRCS =	\
-	$(SRCDIR)cryptoconf.c \
-	$(PESRCS) $(VSSRCS) $(VPSRCS) $(STSRCS)
 
 MakeSubdirs($(SUBDIRS))
 
@@ -115,12 +77,27 @@ asn.1/Makefile::
 
 #endif	/* UseSedHack */
 
-AdditiveLibraryTarget(krb5,$(OBJS),-L$(KRB5_LIBDIR) -Lshared $(LDLOCATIONS) -l$(DESLIB) $(ISODELIB) -lcom_err)
+libkrb5.a: error_tables/DONE asn.1/DONE ccache/DONE ccache/stdio/DONE \
+		ccache/file/DONE keytab/DONE keytab/file/DONE krb/DONE \
+		rcache/DONE free/DONE os/DONE posix/DONE
+	(cd error_tables; $(ARADD) ../$@ `cat DONE`)
+	(cd asn.1; $(ARADD) ../$@ `cat DONE`)
+	(cd ccache; $(ARADD) ../$@ `cat DONE`)
+	(cd ccache/stdio; $(ARADD) ../../$@ `cat DONE`)
+	(cd ccache/file; $(ARADD) ../../$@ `cat DONE`)
+	(cd keytab; $(ARADD) ../$@ `cat DONE`)
+	(cd keytab/file; $(ARADD) ../../$@ `cat DONE`)
+	(cd krb; $(ARADD) ../$@ `cat DONE`)
+	(cd rcache; $(ARADD) ../$@ `cat DONE`)
+	(cd free; $(ARADD) ../$@ `cat DONE`)
+	(cd os; $(ARADD) ../$@ `cat DONE`)
+	(cd posix; $(ARADD) ../$@ `cat DONE`)
+	RanLibrary($@)
 
-RanlibLibraryTarget($(DESLIB),)
+all:: libkrb5.a
 
-Krb5InstallLibrary(krb5,$(KRB5_LIBDIR))
 Krb5InstallLibrary($(DESLIB),$(KRB5_LIBDIR))
+Krb5InstallLibrary(krb5,$(KRB5_LIBDIR))
 
-SharedLibraryTarget(kdb5,-L$(KRB5_LIBDIR) -Lshared $(LDLOCATIONS) -lkrb5 -l$(DESLIB) $(ISODELIB) -lcom_err)
+# SharedLibraryTarget(kdb5,-L$(KRB5_LIBDIR) -Lshared $(LDLOCATIONS) -lkrb5 -l$(DESLIB) $(ISODELIB) -lcom_err)
 /* SharedLibraryTarget(des425,-L$(KRB5_LIBDIR) -Lshared $(LDLOCATIONS) -l$(DESLIB)) */

@@ -22,16 +22,41 @@
 # or implied warranty.
 # 
 # 
+#define PassCDebugFlags
 NormalLibraryObjectRule()
 
-OBJS=	crc.o
+#ifdef HasVfprintf
+VPOBJS=
+VPSRCS=
+#else
+VPOBJS=vfprintf.o vsprintf.o
+VPSRCS=$(SRCDIR)vfprintf.c $(SRCDIR)vsprintf.c
+#endif
+#ifdef HasVsyslog
+VSOBJS=
+VSSRCS=
+#else
+VSOBJS=syslog.o
+VSSRCS=$(SRCDIR)syslog.c
+#endif
+#ifdef HasStrdup
+STOBJS=
+STSRCS=
+#else
+STOBJS=strdup.o
+STSRCS=$(SRCDIR)strdup.c
+#endif
+#ifndef HasStrerror
+PEOBJS=perror.o
+PESRCS=$(SRCDIR)perror.c
+#endif
 
-SRCS=	$(SRCDIR)crc.c $(SRCDIR)crctest.c
+INCLUDES=$(STDC_TOP_INCLUDES)
 
-CRCTESTOBJ = crctest.o
+OBJS =	$(PEOBJS) $(VSOBJS) $(VPOBJS) $(STOBJS)
+
+SRCS =	$(PESRCS) $(VSSRCS) $(VPSRCS) $(STSRCS)
 
 SubdirLibraryRule($(OBJS))
-
-NormalProgramTarget(crctest,$(CRCTESTOBJ),$(OBJS),$(OBJS),)
 
 DependTarget()

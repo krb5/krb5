@@ -159,7 +159,7 @@ all:: includes
 
 includes:: KRB5-types.h
 
-OtherdirLibraryTarget($(TOP)/lib,krb5,$(OBJS))
+SubdirLibraryRule($(OBJS))
 
 PepsyTarget(KRB5)
 

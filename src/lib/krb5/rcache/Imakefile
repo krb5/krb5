@@ -40,6 +40,6 @@ SRCS=	\
 	$(SRCDIR)rcdef.c	\
 	$(SRCDIR)rc_conv.c
 
-OtherdirLibraryTarget($(TOP)/lib,krb5,$(OBJS))
+SubdirLibraryRule($(OBJS))
 
 DependTarget()

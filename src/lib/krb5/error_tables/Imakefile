@@ -48,7 +48,7 @@ CopyHeader(kdb5_err.h,$(EHDRDIR))
 CopyHeader(adm_err.h,$(EHDRDIR))
 
 
-OtherdirLibraryTarget($(TOP)/lib,krb5,$(OBJS))
+SubdirLibraryRule($(OBJS))
 
 depend:: $(ETSRCS)
 

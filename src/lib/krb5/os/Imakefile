@@ -24,7 +24,7 @@
 # 
 NormalLibraryObjectRule()
 
-KRBOBJS= \
+OBJS= \
 	an_to_ln.o	\
 	def_realm.o	\
 	ccdefname.o	\
@@ -54,12 +54,6 @@ KRBOBJS= \
 	ustime.o	\
 	write_msg.o
 
-DESOBJS= \
-	rnd_confoun.o
-
-OBJS = $(KRBOBJS) $(DESOBJS)
-
-
 SRCS= \
 	$(SRCDIR)an_to_ln.c	\
 	$(SRCDIR)def_realm.c	\
@@ -83,7 +77,6 @@ SRCS= \
 	$(SRCDIR)read_msg.c	\
 	$(SRCDIR)read_pwd.c	\
 	$(SRCDIR)port2ip.c	\
-	$(SRCDIR)rnd_confoun.c	\
 	$(SRCDIR)sendto_kdc.c	\
 	$(SRCDIR)sn2princ.c	\
 	$(SRCDIR)timeofday.c	\
@@ -91,8 +84,6 @@ SRCS= \
 	$(SRCDIR)ustime.c	\
 	$(SRCDIR)write_msg.c
 
-OtherdirLibraryTarget(..,$(DESLIB),localaddr.o ustime.o $(DESOBJS))
-
-OtherdirLibraryTarget(..,krb5,$(KRBOBJS))
+SubdirLibraryRule($(OBJS))
 
 DependTarget()
