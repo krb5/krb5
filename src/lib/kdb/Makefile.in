@@ -4,6 +4,7 @@ CFLAGS = $(CCOPTS) $(DEFS) $(DBFLAGS)
 all:: $(OBJS)
 
 SRCS= \
+	$(srcdir)/keytab.c \
 	$(srcdir)/encrypt_key.c \
 	$(srcdir)/decrypt_key.c \
 	$(srcdir)/kdb_cpw.c \
@@ -15,6 +16,7 @@ SRCS= \
 	$(srcdir)/store_mkey.c
 
 OBJS= \
+	keytab.o \
 	encrypt_key.o \
 	decrypt_key.o \
 	kdb_cpw.o \

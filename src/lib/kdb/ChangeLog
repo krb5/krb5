@@ -1,3 +1,8 @@
+
+Wed Dec 13 07:09:30 1995  Chris Provenzano (proven@mit.edu)
+
+	* Makefile.in, keytab.c : Move db keytab routines here.
+
 Wed Dec 13 03:51:53 1995  Chris Provenzano (proven@mit.edu)
 
         * kdb_xdr.c : Remove mkvno for krb5_db_entry
