@@ -199,9 +199,6 @@ asn1_error_code asn1_encode_generaltime(buf, val, retlen)
   unsigned int length, sum=0;
   time_t gmt_time = val;
 
-#ifdef macintosh
-  unix_time_to_msl_time (&gmt_time);
-#endif
   gtime = gmtime(&gmt_time);
 
   /*

@@ -1,3 +1,9 @@
+2002-06-24  Tom Yu  <tlyu@mit.edu>
+
+	* asn1_encode.c (asn1_encode_generaltime): Remove call to
+	unix_time_to_msl_time(), as it's Mac OS 9 specific and was missed
+	in the previous change.
+
 2002-06-24 Alexandra Ellwood <lxs@mit.edu>
 
 	* asn1_encode.c: Removed unused Mac OS 9 code
