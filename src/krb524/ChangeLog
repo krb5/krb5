@@ -1,3 +1,9 @@
+2003-06-05  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in: Build krb524.dll on Windows.
+
+	* krb524.c: New file; stub for Windows krb524.dll.
+
 2003-06-05  Ken Raeburn  <raeburn@mit.edu>
 
 	* k524init.c (main): Remove debugging printf.
