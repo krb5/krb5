@@ -76,6 +76,7 @@ krb5_data *outbuf;
     krb5_data *scratch;
     krb5_enctype etype;
     krb5_encrypt_block eblock;
+    krb5_data *toutbuf;
 
     if ((ap_req_options & AP_OPTS_USE_SESSION_KEY) &&
 	!creds->ticket.length)
@@ -110,9 +111,10 @@ krb5_data *outbuf;
     }
     /* encode it before encrypting */
     retval = encode_krb5_authenticator(&authent, &scratch);
-    cleanup_ticket();
-    if (retval)
+    if (retval) {
+	cleanup_ticket();
 	return(retval);
+    }
 
 #define cleanup_scratch() { (void) bzero(scratch->data, scratch->length); krb5_free_data(scratch); }
 
@@ -152,10 +154,13 @@ krb5_data *outbuf;
 	return retval;
     }
 
-    retval = encode_krb5_ap_req(&request, &outbuf);
+    if (!(retval = encode_krb5_ap_req(&request, &toutbuf))) {
+	*outbuf = *toutbuf;
+	xfree(toutbuf);
+    }
+    cleanup_ticket();
     cleanup_encpart();
-    if (retval)
-	return(retval);
+    return retval;
 
  clean_prockey:
     cleanup_prockey();
