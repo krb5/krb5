@@ -1,3 +1,13 @@
+Tue Oct 17 19:23:50 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* .Sanitize (Things-to-keep): Add Makefile
+
+	* Makefile: Simple file to build both dvi and info versions of
+		install and allow for easy cleaning.
+
+	* install.texi (Options to Configure): Updated to reflect current
+		major configuration options.
+
 Wed Oct 11 16:20:58 1995  Ezra Peisach  (epeisach@kangaroo.mit.edu)
 
 	* install.texi: Remove config.h descriptions, describe krb5.conf. 

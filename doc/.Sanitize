@@ -26,6 +26,7 @@ Things-to-keep:
 ChangeLog
 HOW_TO_BUILD
 INCOMPATIBILITY
+Makefile
 OS-notes
 SOURCE-TREE
 TREE-GRAPH

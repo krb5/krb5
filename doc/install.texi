@@ -577,6 +577,17 @@ program.
 
 @table @code
 
+@item --prefix=DIR
+
+By default, Kerberos will install the package's files rooted at
+`/usr/local' as in `/usr/local/bin', `/usr/local/sbin', etc. If you
+desire a different location use this option.
+
+@item --exec-prefix=DIR
+
+This option allows one to separate the architecture independent programs
+from the configuration files and manual pages. 
+
 @item --with-cc=COMPILER
 
 Use @code{COMPILER} as the C compiler.
@@ -596,10 +607,20 @@ Use @code{CPPOPTS} as the default set of C preprocessor flags.  The most
 common use of this option is to select certain @code{#define}'s for use
 with the operating system's include files.
 
-@item --with-krb5-root=DIR
+@item --with-linker=LINKER
 
-By default, Kerberos will expect its configuration files to be in
-the directory @file{/krb5}.  Change it with this option.
+Use @code{LINKER} as the default loader if it should be different from C
+compiler as specified above.
+
+@item --with-ldopts=LDOPTS
+
+This option allows one to specify optional arguments to be passed to the
+linker. This might be used to specify optional library paths.
+
+@item  --with-krb4
+
+This option enables Kerberos V4 backwards compatibility using the
+builtin Kerberos V4 library.
 
 @item  --with-krb4=KRB4DIR 
 
@@ -607,6 +628,33 @@ This option enables Kerberos V4 backwards compatibility.  The directory
 specified by @code{KRB4DIR} specifies where the V4 header files should
 be found (@file{/KRB4DIR/include}) as well as where the V4 Kerberos
 library should be found (@file{/KRB4DIR/lib}).
+
+@item  --without-krb4
+
+Disables Kerberos V4 backwards compatibility. This prevents Kerberos V4
+clients from using the V5 services including the KDC. This would be
+useful if you know you will never install or need to interact with V4
+clients. 
+
+@item --with-netlib[=libs]
+
+Allows for suppression of or replacement of network libraries. By
+default, Kerberos V5 configuration will look for @code{-lnsl} and
+@code{-lsocket}. If your operating system has a broken resolver library
+@xref{Solaris versions 2.0 through 2.3} or fails to pass the tests in
+@file{src/tests/resolv} you will need to use this option.
+
+@item --enable-shared
+
+This option will turn on the building and use of shared library objects
+in the Kerberos build. This option is only supported on certain
+platforms. 
+
+@item --enable-athena
+
+Was used to setup configuration files in such a way as to be compatible
+with the Athena environment at MIT. It currently does not appear to do
+anything useful.
 
 @item --with-vague-errors
 
@@ -621,7 +669,6 @@ database; this allows the last request information to be updated, as
 well as the failure count information.  Note that this doesn't work if
 you're using slave servers!!!  It also causes the database to be
 modified (and thus needing to be locked) frequently.
-
 
 @end table
 
