@@ -56,4 +56,17 @@ typedef struct _krb5_cc_ops {
 /* for set_flags and other functions */
 #define KRB5_TC_OPENCLOSE		0x00000001
 
+#define krb5_cc_initialize(cache, principal) (*(cache)->ops->init)(cache, principal)
+#define krb5_cc_destroy(cache) (*(cache)->ops->destroy)(cache)
+#define krb5_cc_close(cache) (*(cache)->ops->close)(cache)
+#define krb5_cc_store_cred(cache, creds) (*(cache)->ops->store)(cache, creds)
+#define krb5_cc_retrieve_cred(cache, flags, mcreds, creds) (*(cache)->ops->retrieve)(cache, flags, mcreds, creds)
+#define krb5_cc_get_principal(cache, principal) (*(cache)->ops->get_princ)(cache, principal)
+#define krb5_cc_start_seq_get(cache, cursor) (*(cache)->ops->get_first)(cache, cursor)
+#define krb5_cc_next_cred(cache, cursor, creds) (*(cache)->ops->get_next)(cache, cursor, creds)
+#define krb5_cc_end_seq_get(cache, cursor) (*(cache)->ops->end_get)(cache, cursor)
+#define krb5_cc_remove_cred(cache, flags, creds) (*(cache)->ops->remove_cred)(cache,flags, creds)
+#define krb5_cc_set_flags(cache, flags) (*(cache)->ops->set_flags)(cache, flags)
+#define krb5_cc_get_name(cache) (*(cache)->ops->get_name)(cache)
+
 #endif /* KRB5_CCACHE__ */
