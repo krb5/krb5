@@ -1,3 +1,7 @@
+Wed Sep 06 14:20:57 1995   Chris Provenzano (proven@mit.edu)
+
+        * DNR.c : s/keytype/enctype/g, s/KEYTYPE/ENCTYPE/g
+
 Mon Aug  7 18:40:34 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in (SRCS): Include $(NETIO_SRCS) in the list of source
