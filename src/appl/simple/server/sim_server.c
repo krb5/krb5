@@ -65,10 +65,10 @@ char *argv[];
     krb5_data packet, message;
     unsigned char pktbuf[BUFSIZ];
     krb5_address foreign_addr, *portforeign_addr;
-    krb5_rcache rcache;
     krb5_principal sprinc;
     krb5_context context;
-    krb5_tkt_authent *ad;
+    krb5_auth_context *auth_context = NULL;
+    krb5_ticket *ticket = NULL;
 
     if (argc != 2) {
 	fprintf(stderr, "usage: %s <servername>\n",PROGNAME);
@@ -136,27 +136,38 @@ char *argv[];
     packet.length = i;
     packet.data = (krb5_pointer) pktbuf;
 
-    foreign_addr.addrtype = c_sock.sin_family;
-    foreign_addr.length = sizeof(c_sock.sin_addr);
-    foreign_addr.contents = (krb5_octet *)&c_sock.sin_addr;
-
     /* Check authentication info */
-    if (retval = krb5_rd_req_simple(context, &packet, sprinc,
-				    &foreign_addr,
-				    &ad)) {
+    if (retval = krb5_rd_req(context, &auth_context, &packet, 
+			     sprinc, NULL, NULL, &ticket)) {
 	com_err(PROGNAME, retval, "while reading request");
 	exit(1);
     }
-    if (retval = krb5_unparse_name(context,ad->ticket->enc_part2->client,&cp)) {
+    if (retval = krb5_unparse_name(context, ticket->enc_part2->client, &cp)) {
 	com_err(PROGNAME, retval, "while unparsing client name");
 	exit(1);
     }
     printf("Got authentication info from %s\n", cp);
-
     free(cp);
 
-    /* GET KRB_MK_SAFE MESSAGE */
+    /* Set foreign_addr for rd_safe() and rd_priv() */
+    foreign_addr.contents = (krb5_octet *)&c_sock.sin_addr;
+    foreign_addr.length = sizeof(c_sock.sin_addr);
+    foreign_addr.addrtype = c_sock.sin_family;
 
+    if (retval = krb5_gen_portaddr(context, &foreign_addr,
+				   (krb5_pointer) &c_sock.sin_port,
+				   &portforeign_addr)) {
+	com_err(PROGNAME, retval, "while generating port address");
+	exit(1);
+    }
+
+    if (retval = krb5_auth_con_setaddrs(context, auth_context, NULL,
+					portforeign_addr)) {
+	com_err(PROGNAME, retval, "while setting foreign addr");
+        exit(1);
+    }
+
+    /* GET KRB_MK_SAFE MESSAGE */
 
     /* use "recvfrom" so we know client's address */
     i = sizeof(c_sock);
@@ -174,36 +185,13 @@ char *argv[];
     packet.length = i;
     packet.data = (krb5_pointer) pktbuf;
 
-    foreign_addr.addrtype = c_sock.sin_family;
-    foreign_addr.length = sizeof(c_sock.sin_addr);
-    foreign_addr.contents = (krb5_octet *)&c_sock.sin_addr;
-
-    if (retval = krb5_gen_portaddr(context, &foreign_addr,
-				   (krb5_pointer) &c_sock.sin_port,
-				   &portforeign_addr)) {
-	com_err(PROGNAME, retval, "while generating port address");
-	exit(1);
-    }
-
-    if (retval = krb5_get_server_rcache(context, 
-					krb5_princ_component(context,sprinc,0),
-					&rcache)) {
-	com_err(PROGNAME, retval, "while opening replay cache");
-	exit(1);
-    }
-    
-    if (retval = krb5_rd_safe(context, &packet, ad->ticket->enc_part2->session,
-			      portforeign_addr, 0, 0, 0,
-			      rcache,
-			      &message)) {
+    if (retval = krb5_rd_safe(context, auth_context, &packet, &message, NULL)) {
 	com_err(PROGNAME, retval, "while verifying SAFE message");
-	(void) krb5_rc_close(context, rcache);
 	exit(1);
     }
     printf("Safe message is: '%.*s'\n", message.length, message.data);
 
     krb5_xfree(message.data);
-    krb5_free_address(context, portforeign_addr);
 
     /* NOW GET ENCRYPTED MESSAGE */
 
@@ -213,7 +201,6 @@ char *argv[];
 		 (struct sockaddr *)&c_sock, &i);
     if (i < 0) {
 	perror("receiving datagram");
-	(void) krb5_rc_close(context, rcache);
 	exit(1);
     }
     printf("Received %d bytes\n", i);
@@ -221,25 +208,11 @@ char *argv[];
     packet.length = i;
     packet.data = (krb5_pointer) pktbuf;
     
-    if (retval = krb5_gen_portaddr(context, &foreign_addr,
-				   (krb5_pointer) &c_sock.sin_port,
-				   &portforeign_addr)) {
-	com_err(PROGNAME, retval, "while generating port address");
-	(void) krb5_rc_close(context, rcache);
-	exit(1);
-    }
-
-    if (retval = krb5_rd_priv(context, &packet, ad->ticket->enc_part2->session,
-			      portforeign_addr, 0, 0, 0, 0,
-			      rcache,
-			      &message)) {
+    if (retval = krb5_rd_priv(context, auth_context, &packet, &message, NULL)) {
 	com_err(PROGNAME, retval, "while verifying PRIV message");
-	(void) krb5_rc_close(context, rcache);
 	exit(1);
     }
     printf("Decrypted message is: '%.*s'\n", message.length, message.data);
-
-    (void) krb5_rc_close(context, rcache);
 
     exit(0);
 }

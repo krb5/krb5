@@ -1,3 +1,8 @@
+Mon Mar 27 07:56:26 1995 Chris Provenzano (proven@mit.edu)
+
+        * sim_server.c: Use new calling convention for krb5_rd_req(),
+		krb5_rd_safe(), and krb5_rd_priv().
+
 Thu Mar  2 12:27:03 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in (ISODELIB): Remove reference to $(ISODELIB).
@@ -13,7 +18,7 @@ Tue Feb 28 02:01:53 1995  John Gilmore  (gnu at toad.com)
 
 Fri Jan 13 15:23:47 1995  Chris Provenzano (proven@mit.edu)
 
-    * Added krb5_context to all krb5_routines
+    	* Added krb5_context to all krb5_routines
 
 Thu Sep 29 22:46:51 1994  Theodore Y. Ts'o  (tytso@dcl)
 
