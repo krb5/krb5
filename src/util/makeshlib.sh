@@ -38,8 +38,11 @@ ar cq $library $FILES || exit $?
 	stat=$?
 	if [ $stat -eq 0 ]
 	then
-	   ld -o shr.o $library -H512 -T512 -bM:SRE -lc $ldflags -bfilelist -bgcbypass:1 -bnodelcsect -x -bE:${library}.syms $libdirfl $liblist
-	stat=$?
+	if test $HAVE_GCC = "yes" ; then
+		$CC -o shr.o $library -nostartfiles -Xlinker -bgcbypass:1 -Xlinker -bfilelist -Xlinker -bM:SRE -Xlinker -bE:${library}.syms $ldflags $liblist $libdirfl
+		else ld -o shr.o $library -H512 -T512 -bM:SRE -lc $ldflags -bfilelist -bgcbypass:1 -bnodelcsect -x -bE:${library}.syms $libdirfl $liblist
+            fi
+ stat=$?
 	if [ $stat -eq 0 ]
 	      then
 	      rm $library ${library}.syms

@@ -1,3 +1,10 @@
+Sun Jul  2 20:25:58 1995  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* configure.in: For paranoid GPL reasons, don't take the Gcc test
+        directly from the autoconf sources.  Instead, borrow my paraphrase
+        of this test from util/configure.in.  It's slightly cleaner
+        anyway.  Also, adjust AIX shared libs to work with Gcc.
+
 Sun Jul  2 04:40:50 1995  Tom Yu  <tlyu@lothlorien.MIT.EDU>
 	* aclocal.m4 (_MAKE_SUBDIRS): Fixed so that error propogates
 		upward if -[ik] not specified.

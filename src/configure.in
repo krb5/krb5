@@ -6,18 +6,10 @@ dnl We cannot use the autoconf form as it is too generic and sets other
 dnl variables. This is only for the purpose of changing the link options.
 AC_MSG_CHECKING(whether we are using GNU C)
 AC_CACHE_VAL(krb5_cv_prog_gcc,
-[dnl The semicolon is to pacify NeXT's syntax-checking cpp.
-cat > conftest.c <<EOF
-#ifdef __GNUC__
-  yes;
-#endif
-EOF
-if ${CC-cc} -E conftest.c 2>&AC_FD_CC | egrep yes >/dev/null 2>&1; then
-  krb5_cv_prog_gcc=yes
-else
-  krb5_cv_prog_gcc=no
-fi
-rm -f conftest*
+[
+AC_EGREP_CPP(yes,[#ifdef __GNUC__
+yes;
+#endif],krb5_cv_prog_gcc=yes,krb5_cv_prog_gcc=no)
 ])dnl
 AC_MSG_RESULT($krb5_cv_prog_gcc)
 dnl
@@ -51,8 +43,13 @@ case $krb5_cv_host in
 	krb5_cv_shlibs_ext=a
 	krb5_cv_noshlibs_ext=do-not-make
 	krb5_cv_shlibs_dir=
-	krb5_cv_shlibs_ldflag="-bex4:\$(BUILDTOP)/util/aix.bincmds"
+	if test $krb5_cv_prog_gcc = yes ; then
+     krb5_cv_shlibs_ldflag="-Xlinker -bex4:\$(BUILDTOP)/util/aix.bincmds"
+     krb5_cv_noshlibs_ldflag=
+else
+     krb5_cv_shlibs_ldflag="-bex4:\$(BUILDTOP)/util/aix.bincmds"
 	krb5_cv_noshlibs_ldflag=
+fi
 	krb5_cv_shlibs_sym_ufo=
 	krb5_cv_shlibs_dirhead="-L"
 	krb5_cv_exe_need_dirs=yes

@@ -2,14 +2,11 @@ AC_INIT(configure.in)
 CONFIG_RULES
 AC_PROG_ARCHIVE
 AC_PROG_ARCHIVE_ADD
-AC_MSG_CHECKING(whether running Gcc)
-AC_EGREP_CPP(yes,[#ifdef __GNUC__
-yes;
-#endif],HAVE_GCC=yes,HAVE_GCC=)
-if test -n "$HAVE_GCC" ; then
-        AC_MSG_RESULT(yes)
-        else AC_MSG_RESULT(no)
-        fi
+if test $krb5_cv_prog_gcc = yes ; then
+     HAVE_GCC=yes
+     else HAVE_GCC=
+fi
+
 AC_SUBST(HAVE_GCC)
 HOST_TYPE=$krb5_cv_host
 AC_SUBST(HOST_TYPE)

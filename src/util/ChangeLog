@@ -1,3 +1,9 @@
+Sun Jul  2 20:42:45 1995  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* makeshlib.sh (ldflags): Adapt AIX case to work with Gcc.
+
+	* configure.in: Move Gcc test to top level configure.in.
+
 Fri Jun 23 19:11:20 1995  Sam Hartman  <hartmans@tardis.MIT.EDU>
 
 	* configure.in: Add aix.bincmds as target on AIX.
