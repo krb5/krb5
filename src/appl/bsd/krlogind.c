@@ -160,9 +160,11 @@ char copyright[] =
 #include <sys/param.h>
 #include <utmp.h>
      
-#ifdef __svr4__
+#ifdef HAVE_SYS_TTY_H
 #include <sys/tty.h>
-#ifndef solaris20
+#endif
+
+#ifndef HAVE_SYS_PTYVAR_H
 /* These values are over-the-wire protocol, *not* local values */
 #define TIOCPKT_NOSTOP          0x10
 #define TIOCPKT_DOSTOP          0x20
@@ -170,7 +172,6 @@ char copyright[] =
 #else
 /* but solaris actually uses packet mode, so the real macros are needed too */
 #include <sys/ptyvar.h>
-#endif
 #endif
 
 #ifdef HAVE_SYS_FILIO_H

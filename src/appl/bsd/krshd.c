@@ -173,21 +173,12 @@ char copyright[] =
 
 #include "loginpaths.h"
 
-/** XXX - make these portable **/
-#ifdef hpux
-/* has no killpg... */
-#define killpg(pid, sig) kill(-(pid), (sig))
-#endif
-
-#ifdef __svr4__
+#ifndef SETPGRP_TWOARG
 #define setpgrp(a,b) setpgrp()
-#define getpgrp(a) getpgid(a)
-/* has no killpg... */
-#define killpg(pid, sig) kill(-(pid), (sig))
 #endif
 
-#ifdef linux
-#define setpgrp(a,b) setpgid(a,b) 
+#ifndef HAVE_KILLPG
+#define killpg(pid, sig) kill(-(pid), (sig))
 #endif
 
 #ifdef __SCO__

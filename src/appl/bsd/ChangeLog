@@ -1,3 +1,10 @@
+Fri Sep 30 17:04:24 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+        * krshd.c: Use ifdef for SETPGRP_TWOARG and HAVE_KILLPG
+
+	* krlogind.c: Use ifdef include of HAVE_SYS_TTY_H and
+		HAVE_SYS_PTYVAR_H (suncc doesn't #define solaris).
+
 Thu Sep 29 22:50:05 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* Makefile.in: "make clean" should remove the executables
