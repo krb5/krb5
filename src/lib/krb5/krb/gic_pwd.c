@@ -16,7 +16,6 @@ krb5_get_as_key_password(context, client, etype, prompter, prompter_data,
     krb5_data *password;
     krb5_error_code ret;
     krb5_data defsalt;
-    krb5_encrypt_block eblock;
     char *clientstr;
     char promptstr[1024];
     krb5_prompt prompt;
@@ -34,11 +33,6 @@ krb5_get_as_key_password(context, client, etype, prompter, prompter_data,
 	krb5_free_keyblock_contents(context, as_key);
 	as_key->length = 0;
     }
-
-    if (!valid_enctype(etype))
-	return(KRB5_PROG_ETYPE_NOSUPP);
-
-    krb5_use_enctype(context, &eblock, etype);
 
     if (password->data[0] == '\0') {
 	if (prompter == NULL)
@@ -70,7 +64,7 @@ krb5_get_as_key_password(context, client, etype, prompter, prompter_data,
 	defsalt.length = 0;
     }
 
-    ret = krb5_string_to_key(context, &eblock, as_key, password, salt);
+    ret = krb5_c_string_to_key(context, etype, password, salt, as_key);
 
     if (defsalt.length)
 	krb5_xfree(defsalt.data);

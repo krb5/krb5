@@ -47,7 +47,6 @@ krb5_rd_rep(context, auth_context, inbuf, repl)
 {
     krb5_error_code 	  retval;
     krb5_ap_rep 	* reply;
-    krb5_encrypt_block 	  eblock;
     krb5_data 	 	  scratch;
 
     if (!krb5_is_ap_rep(inbuf))
@@ -60,35 +59,15 @@ krb5_rd_rep(context, auth_context, inbuf, repl)
 
     /* put together an eblock for this encryption */
 
-    if (!valid_enctype(reply->enc_part.enctype)) {
-	krb5_free_ap_rep(context, reply);
-	return KRB5_PROG_ETYPE_NOSUPP;
-    }
-    krb5_use_enctype(context, &eblock, reply->enc_part.enctype);
-
     scratch.length = reply->enc_part.ciphertext.length;
     if (!(scratch.data = malloc(scratch.length))) {
 	krb5_free_ap_rep(context, reply);
 	return(ENOMEM);
     }
 
-    /* do any necessary key pre-processing */
-    if ((retval = krb5_process_key(context, &eblock,
-				   auth_context->keyblock))) {
-	goto errout;
-    }
-
-    /* call the encryption routine */
-    if ((retval = krb5_decrypt(context, 
-			       (krb5_pointer) reply->enc_part.ciphertext.data,
-			       (krb5_pointer) scratch.data,
-			       scratch.length, &eblock, 0))) {
-	(void) krb5_finish_key(context, &eblock);
-	goto errout;
-    }
-
-    /* finished with the top-level encoding of the ap_rep */
-    if ((retval = krb5_finish_key(context, &eblock)))
+    if ((retval = krb5_c_decrypt(context, auth_context->keyblock,
+				 KRB5_KEYUSAGE_AP_REP_ENCPART, 0,
+				 &reply->enc_part, &scratch)))
 	goto clean_scratch;
 
     /* now decode the decrypted stuff */

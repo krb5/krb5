@@ -124,6 +124,7 @@ comp_cksum(kcontext, source, ticket, his_cksum)
     krb5_checksum 	* his_cksum;
 {
     krb5_error_code 	  retval;
+    krb5_boolean	  valid;
 
     if (!valid_cksumtype(his_cksum->checksum_type)) 
 	return KRB5KDC_ERR_SUMTYPE_NOSUPP;
@@ -133,14 +134,15 @@ comp_cksum(kcontext, source, ticket, his_cksum)
 	return KRB5KRB_AP_ERR_INAPP_CKSUM;
 
     /* verify checksum */
-    if ((retval = krb5_verify_checksum(kcontext, his_cksum->checksum_type,
-				       his_cksum,
-				       source->data, source->length, 
-				       ticket->enc_part2->session->contents, 
-				       ticket->enc_part2->session->length))) {
-	retval = KRB5KRB_AP_ERR_BAD_INTEGRITY;
-    }
-    return retval;
+    if ((retval = krb5_c_verify_checksum(kcontext, ticket->enc_part2->session,
+					 KRB5_KEYUSAGE_TGS_REQ_AUTH_CKSUM,
+					 source, his_cksum, &valid)))
+	return(retval);
+
+    if (!valid)
+	return(KRB5KRB_AP_ERR_BAD_INTEGRITY);
+
+    return(0);
 }
 
 krb5_error_code 
@@ -397,7 +399,7 @@ kdc_get_server_key(ticket, key, kvno)
 				  
 	*kvno = server_key->key_data_kvno;
 	if ((*key = (krb5_keyblock *)malloc(sizeof **key))) {
-	    retval = krb5_dbekd_decrypt_key_data(kdc_context, &master_encblock,
+	    retval = krb5_dbekd_decrypt_key_data(kdc_context, &master_keyblock,
 					         server_key,
 					         *key, NULL);
 	} else

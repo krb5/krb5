@@ -348,7 +348,7 @@ int compat_decrypt_key (in5, out4)
     int retval = -1;
 
     out5.contents = NULL;
-    if (krb5_dbekd_decrypt_key_data(kdc_context,&master_encblock,in5,&out5,NULL)){
+    if (krb5_dbekd_decrypt_key_data(kdc_context,&master_keyblock,in5,&out5,NULL)){
 	lt = klog(L_DEATH_REQ, "KDC can't decrypt principal's key.");
 	return(retval);
     }

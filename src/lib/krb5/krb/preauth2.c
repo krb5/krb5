@@ -117,12 +117,16 @@ krb5_error_code pa_enc_timestamp(krb5_context context,
     if (ret = encode_krb5_pa_enc_ts(&pa_enc, &tmp))
 	return(ret);
 
-    ret = krb5_encrypt_data(context, as_key, 0, tmp, &enc_data);
+    ret = krb5_encrypt_helper(context, as_key,
+			      KRB5_KEYUSAGE_AS_REQ_PA_ENC_TS,
+			      tmp, &enc_data);
 
     krb5_free_data(context, tmp);
 
-    if (ret)
+    if (ret) {
+	krb5_xfree(enc_data.ciphertext.data);
 	return(ret);
+    }
 
     ret = encode_krb5_enc_data(&enc_data, &tmp);
 
@@ -215,7 +219,6 @@ krb5_error_code pa_sam(krb5_context context,
     char			banner[100], prompt[100], response[100];
     krb5_data			response_data;
     krb5_prompt			kprompt;
-    krb5_encrypt_block		eblock;
     krb5_data			defsalt;
     krb5_sam_challenge		*sam_challenge = 0;
     krb5_sam_response		sam_response;
@@ -281,13 +284,6 @@ krb5_error_code pa_sam(krb5_context context,
 	    as_key->length = 0;
 	}
 
-	/* XXX the server uses this fixed enctype, so we will, too. */
-
-	if (!valid_enctype(ENCTYPE_DES_CBC_MD5))
-	    return(KRB5_PROG_ETYPE_NOSUPP);
-
-	krb5_use_enctype(context, &eblock, ENCTYPE_DES_CBC_MD5);
-
 #if 0
 	if ((salt->length == -1) && (salt->data == NULL)) {
 	    if (ret = krb5_principal2salt(context, request->client,
@@ -305,8 +301,11 @@ krb5_error_code pa_sam(krb5_context context,
 	salt = NULL;
 #endif
 	    
-	ret = krb5_string_to_key(context, &eblock, as_key,
-				     &response_data, salt);
+	/* XXX the server uses this fixed enctype, so we will, too. */
+
+	ret = krb5_c_string_to_key(context, ENCTYPE_DES_CBC_MD5,
+				   &response_data, salt, as_key);
+
 	if (defsalt.length)
 	    krb5_xfree(defsalt.data);
 

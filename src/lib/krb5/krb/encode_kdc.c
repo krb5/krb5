@@ -41,10 +41,12 @@
 /* due to argument promotion rules, we need to use the DECLARG/OLDDECLARG
    stuff... */
 krb5_error_code
-krb5_encode_kdc_rep(context, type, encpart, client_key, dec_rep, enc_rep)
+krb5_encode_kdc_rep(context, type, encpart, using_subkey, client_key,
+		    dec_rep, enc_rep)
     krb5_context context;
     const krb5_msgtype type;
     const krb5_enc_kdc_rep_part * encpart;
+    int using_subkey;
     const krb5_keyblock * client_key;
     krb5_kdc_rep * dec_rep;
     krb5_data ** enc_rep;
@@ -52,14 +54,20 @@ krb5_encode_kdc_rep(context, type, encpart, client_key, dec_rep, enc_rep)
     krb5_data *scratch;
     krb5_error_code retval;
     krb5_enc_kdc_rep_part tmp_encpart;
-    krb5_encrypt_block eblock;
+    krb5_keyusage usage;
 
     if (!valid_enctype(dec_rep->enc_part.enctype))
 	return KRB5_PROG_ETYPE_NOSUPP;
 
     switch (type) {
     case KRB5_AS_REP:
+	usage = KRB5_KEYUSAGE_AS_REP_ENCPART;
+	break;
     case KRB5_TGS_REP:
+	if (using_subkey)
+	    usage = KRB5_KEYUSAGE_TGS_REP_ENCPART_SUBKEY;
+	else
+	    usage = KRB5_KEYUSAGE_TGS_REP_ENCPART_SESSKEY;
 	break;
     default:
 	return KRB5_BADMSGTYPE;
@@ -89,23 +97,8 @@ krb5_encode_kdc_rep(context, type, encpart, client_key, dec_rep, enc_rep)
 #define cleanup_scratch() { (void) memset(scratch->data, 0, scratch->length); \
 krb5_free_data(context, scratch); }
 
-    krb5_use_enctype(context, &eblock, client_key->enctype);
-    dec_rep->enc_part.ciphertext.length =
-	krb5_encrypt_size(scratch->length, eblock.crypto_entry);
-    /* add padding area, and zero it */
-    if (!(scratch->data = realloc(scratch->data,
-				  dec_rep->enc_part.ciphertext.length))) {
-	/* may destroy scratch->data */
-	krb5_xfree(scratch);
-	return ENOMEM;
-    }
-    memset(scratch->data + scratch->length, 0,
-	  dec_rep->enc_part.ciphertext.length - scratch->length);
-    if (!(dec_rep->enc_part.ciphertext.data =
-	  malloc(dec_rep->enc_part.ciphertext.length))) {
-	retval = ENOMEM;
-	goto clean_scratch;
-    }
+    retval = krb5_encrypt_helper(context, client_key, usage, scratch,
+				 &dec_rep->enc_part);
 
 #define cleanup_encpart() { \
 (void) memset(dec_rep->enc_part.ciphertext.data, 0, \
@@ -114,30 +107,10 @@ free(dec_rep->enc_part.ciphertext.data); \
 dec_rep->enc_part.ciphertext.length = 0; \
 dec_rep->enc_part.ciphertext.data = 0;}
 
-    retval = krb5_process_key(context, &eblock, client_key);
-    if (retval) {
-	goto clean_encpart;
-    }
-
-#define cleanup_prockey() {(void) krb5_finish_key(context, &eblock);}
-
-    retval = krb5_encrypt(context, (krb5_pointer) scratch->data,
-			      (krb5_pointer) dec_rep->enc_part.ciphertext.data,
-			      scratch->length, &eblock, 0);
-    if (retval) {
-	goto clean_prockey;
-    }
-
-    dec_rep->enc_part.enctype = krb5_eblock_enctype(context, &eblock);
-
-    /* do some cleanup */
     cleanup_scratch();
 
-    retval = krb5_finish_key(context, &eblock);
-    if (retval) {
-	cleanup_encpart();
-	return retval;
-    }
+    if (retval)
+	return(retval);
 
     /* now it's ready to be encoded for the wire! */
 
@@ -149,18 +122,9 @@ dec_rep->enc_part.ciphertext.data = 0;}
 	retval = encode_krb5_tgs_rep(dec_rep, enc_rep);
 	break;
     }
+
     if (retval)
 	cleanup_encpart();
-    return retval;
-
- clean_prockey:
-    cleanup_prockey();
- clean_encpart:
-    cleanup_encpart();
- clean_scratch:
-    cleanup_scratch();
 
     return retval;
 }
-
-

@@ -66,8 +66,9 @@ krb5_rd_priv_basic(context, inbuf, keyblock, local_addr, remote_addr,
     krb5_error_code 	  retval;
     krb5_priv 		* privmsg;
     krb5_data 		  scratch;
-    krb5_encrypt_block 	  eblock;
     krb5_priv_enc_part  * privmsg_enc_part;
+    size_t		  blocksize;
+    krb5_data		  ivdata;
 
     if (!krb5_is_krb_priv(inbuf))
 	return KRB5KRB_AP_ERR_MSG_TYPE;
@@ -76,43 +77,33 @@ krb5_rd_priv_basic(context, inbuf, keyblock, local_addr, remote_addr,
     if ((retval = decode_krb5_priv(inbuf, &privmsg)))
 	return retval;
     
-    if (!valid_enctype(privmsg->enc_part.enctype)) {
-	retval = KRB5_PROG_ETYPE_NOSUPP;
-	goto cleanup_privmsg;
+    if (i_vector) {
+	if ((retval = krb5_c_block_size(context, keyblock->enctype,
+					&blocksize)))
+	    goto cleanup_privmsg;
+
+	ivdata.length = blocksize;
+	ivdata.data = i_vector;
     }
-			   
-    /* put together an eblock for this decryption */
-    krb5_use_enctype(context, &eblock, privmsg->enc_part.enctype);
+
     scratch.length = privmsg->enc_part.ciphertext.length;
-    
     if (!(scratch.data = malloc(scratch.length))) {
 	retval = ENOMEM;
 	goto cleanup_privmsg;
     }
 
-    /* do any necessary key pre-processing */
-    if ((retval = krb5_process_key(context, &eblock, keyblock)))
+    if ((retval = krb5_c_decrypt(context, keyblock,
+				 KRB5_KEYUSAGE_KRB_PRIV_ENCPART, 
+				 i_vector?&ivdata:0,
+				 &privmsg->enc_part, &scratch)))
 	goto cleanup_scratch;
-
-    /* call the decryption routine */
-    if ((retval = krb5_decrypt(context, 
-			       (krb5_pointer) privmsg->enc_part.ciphertext.data,
-			       (krb5_pointer) scratch.data,
-			       scratch.length, &eblock, i_vector))) {
-    	krb5_finish_key(context, &eblock);
-        goto cleanup_scratch;
-    }
 
     /* if i_vector is set, put last block into the i_vector */
     if (i_vector)
 	memcpy(i_vector,
 	       privmsg->enc_part.ciphertext.data +
-	       (privmsg->enc_part.ciphertext.length -
-	        eblock.crypto_entry->block_length),
-	       eblock.crypto_entry->block_length);
-
-    if ((retval = krb5_finish_key(context, &eblock)))
-        goto cleanup_scratch;
+	       (privmsg->enc_part.ciphertext.length - blocksize),
+	       blocksize);
 
     /*  now decode the decrypted stuff */
     if ((retval = decode_krb5_enc_priv_part(&scratch, &privmsg_enc_part)))

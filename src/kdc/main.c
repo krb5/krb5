@@ -161,8 +161,6 @@ finish_realm(rdp)
 	    memset(rdp->realm_tgskey.contents, 0, rdp->realm_tgskey.length);
 	    free(rdp->realm_tgskey.contents);
 	}
-	if (rdp->realm_encblock.crypto_entry)
-		krb5_finish_key(rdp->realm_context, &rdp->realm_encblock);
 	krb5_db_fini(rdp->realm_context);
 	if (rdp->realm_tgsprinc)
 	    krb5_free_principal(rdp->realm_context, rdp->realm_tgsprinc);
@@ -321,17 +319,11 @@ init_realm(progname, rdp, realm, def_dbname, def_mpname,
 	goto whoops;
     }
 
-    /* Select the specified encryption type */
-    /* krb5_db_fetch_mkey will setup the encblock for stashed keys */
-    if (manual)
-	krb5_use_enctype(rdp->realm_context, &rdp->realm_encblock, 
-			 rdp->realm_mkey.enctype);
-    
     /*
      * Get the master key.
      */
     if ((kret = krb5_db_fetch_mkey(rdp->realm_context, rdp->realm_mprinc,
-				   &rdp->realm_encblock, manual,
+				   rdp->realm_mkey.enctype, manual,
 				   FALSE, rdp->realm_stash,
 				   0, &rdp->realm_mkey))) {
 	com_err(progname, kret,
@@ -358,8 +350,7 @@ init_realm(progname, rdp, realm, def_dbname, def_mpname,
     /* Verify the master key */
     if ((kret = krb5_db_verify_master_key(rdp->realm_context,
 					  rdp->realm_mprinc,
-					  &rdp->realm_mkey,
-					  &rdp->realm_encblock))) {
+					  &rdp->realm_mkey))) {
 	com_err(progname, kret,
 		"while verifying master key for realm %s", realm);
 	goto whoops;
@@ -410,17 +401,7 @@ init_realm(progname, rdp, realm, def_dbname, def_mpname,
     rdp->realm_mkvno = kdata->key_data_kvno;
     krb5_db_free_principal(rdp->realm_context, &db_entry, num2get);
 
-    /* Now preprocess the master key */
-    if ((kret = krb5_process_key(rdp->realm_context,
-				 &rdp->realm_encblock,
-				 &rdp->realm_mkey))) {
-	com_err(progname, kret,
-		"while processing master key for realm %s", realm);
-	goto whoops;
-    }
-
-    if ((kret = krb5_db_set_mkey(rdp->realm_context, 
-				 &rdp->realm_encblock))) {
+    if ((kret = krb5_db_set_mkey(rdp->realm_context, &rdp->realm_mkey))) {
 	com_err(progname, kret,
 		"while setting master key for realm %s", realm);
 	goto whoops;
@@ -486,7 +467,7 @@ init_realm(progname, rdp, realm, def_dbname, def_mpname,
 	goto whoops;
     }
     if (!(kret = krb5_dbekd_decrypt_key_data(rdp->realm_context,
-					     &rdp->realm_encblock,
+					     &rdp->realm_mkey,
 					     kdata,
 					     &rdp->realm_tgskey, NULL))){
 	rdp->realm_tgskvno = kdata->key_data_kvno;
@@ -501,45 +482,40 @@ init_realm(progname, rdp, realm, def_dbname, def_mpname,
     }
 
     if (!rkey_init_done) {
-	krb5_enctype enctype;
-	krb5_encrypt_block temp_eblock;
+	krb5_timestamp now;
+	krb5_data seed;
 #ifdef KRB5_KRB4_COMPAT
-	krb5_keyblock *temp_key;
+	krb5_keyblock temp_key;
 #endif
 	/*
 	 * If all that worked, then initialize the random key
 	 * generators.
 	 */
-	for (enctype = 0; enctype <= krb5_max_enctype; enctype++) {
-	    if (krb5_enctype_array[enctype] &&
-		!krb5_enctype_array[enctype]->random_sequence) {
-		krb5_use_enctype(rdp->realm_context, &temp_eblock, enctype);
-		if ((kret = krb5_init_random_key(
-			 rdp->realm_context, &temp_eblock,
-			 &rdp->realm_mkey,
-			&krb5_enctype_array[enctype]->random_sequence))) {
-		    com_err(progname, kret, 
-			    "while setting up random key generator for enctype %d--enctype disabled",
-			    enctype);
-		    krb5_enctype_array[enctype] = 0;
-		} else {
+
+	if ((kret = krb5_timeofday(rdp->realm_context, &now)))
+	    goto whoops;
+	seed.length = sizeof(now);
+	seed.data = (char *) &now;
+	if ((kret = krb5_c_random_seed(rdp->realm_context, &seed)))
+	    goto whoops;
+
+	seed.length = rdp->realm_mkey.length;
+	seed.data = rdp->realm_mkey.contents;
+
+	if ((kret = krb5_c_random_seed(rdp->realm_context, &seed)))
+	    goto whoops;
+
 #ifdef KRB5_KRB4_COMPAT
-		    if (enctype == ENCTYPE_DES_CBC_CRC) {
-			if ((kret = krb5_random_key(
-			    rdp->realm_context, &temp_eblock,
-				krb5_enctype_array[enctype]->random_sequence,
-				&temp_key)))
-			    com_err(progname, kret,
-				    "while initializing V4 random key generator");
-			else {
-			    (void) des_init_random_number_generator(temp_key->contents);
-			    krb5_free_keyblock(rdp->realm_context, temp_key);
-			}
-		    }
-#endif
-		}
-	    }
+	if ((kret = krb5_c_make_random_key(rdp->realm_context,
+					   ENCTYPE_DES_CBC_CRC, &temp_key))) {
+	    com_err(progname, kret,
+		    "while initializing V4 random key generator");
+	    goto whoops;
 	}
+
+	(void) des_init_random_number_generator(temp_key.contents);
+	krb5_free_keyblock_contents(rdp->realm_context, &temp_key);
+#endif
 	rkey_init_done = 1;
     }
  whoops:

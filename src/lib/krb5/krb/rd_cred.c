@@ -19,7 +19,6 @@ decrypt_credencdata(context, pcred, pkeyblock, pcredenc)
     krb5_cred_enc_part 	* pcredenc;
 {
     krb5_cred_enc_part  * ppart;
-    krb5_encrypt_block 	  eblock;
     krb5_error_code 	  retval;
     krb5_data 		  scratch;
 
@@ -28,28 +27,9 @@ decrypt_credencdata(context, pcred, pkeyblock, pcredenc)
 	return ENOMEM;
 
     if (pkeyblock != NULL) {
-	if (!valid_enctype(pcred->enc_part.enctype)) {
-	    free(scratch.data);
-	    return KRB5_PROG_ETYPE_NOSUPP;
-	}
-
-	/* put together an eblock for this decryption */
-	krb5_use_enctype(context, &eblock, pcred->enc_part.enctype);
-    
-	/* do any necessary key pre-processing */
-	if ((retval = krb5_process_key(context, &eblock, pkeyblock)))
-	    goto cleanup;
-    
-	/* call the decryption routine */
-	if ((retval = krb5_decrypt(context, 
-			   (krb5_pointer) pcred->enc_part.ciphertext.data,
-			   (krb5_pointer) scratch.data,
-			   scratch.length, &eblock, 0))) {
-	    (void)krb5_finish_key(context, &eblock);
-	    goto cleanup;
-	}
-
-	if ((retval = krb5_finish_key(context, &eblock)))
+	if ((retval = krb5_c_decrypt(context, pkeyblock,
+				     KRB5_KEYUSAGE_KRB_CRED_ENCPART, 0,
+				     &pcred->enc_part, &scratch)))
 	    goto cleanup;
     } else {
 	memcpy(scratch.data, pcred->enc_part.ciphertext.data, scratch.length);
