@@ -1,3 +1,9 @@
+Sat Feb 24 21:30:53 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* gssapi.h (GSS_S_DUPLICATE_ELEMENT): New error code function.
+		XXX Need to square number assigment with official C-binds
+		draft once it is issued.
+
 Wed Jan 24 20:48:15 1996  Tom Yu  <tlyu@dragons-lair.MIT.EDU>
 
 	* gssapi.h: Added definition of NPROTOTYPE to dtrt with Ultrix,

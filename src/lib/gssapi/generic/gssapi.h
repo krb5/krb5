@@ -324,6 +324,10 @@ typedef	int		gss_cred_usage_t;
 #define GSS_S_BAD_QOP (14l << GSS_C_ROUTINE_ERROR_OFFSET)
 #define GSS_S_UNAUTHORIZED (15l << GSS_C_ROUTINE_ERROR_OFFSET)
 #define GSS_S_UNAVAILABLE (16l << GSS_C_ROUTINE_ERROR_OFFSET)
+/*
+ * XXX new functions.  Check to get official error number assigments?
+ */
+#define GSS_S_DUPLICATE_ELEMENT (17l << GSS_C_ROUTINE_ERROR_OFFSET)
 
 /*
  * Supplementary info bits:
