@@ -323,7 +323,8 @@ cleanup:
 	  */
 
 	 for (last_req = as_reply->enc_part2->last_req; *last_req; last_req++)
-	    if ((*last_req)->lr_type == KRB5_LRQ_PW_EXPTIME) {
+	    if ((*last_req)->lr_type == KRB5_LRQ_ALL_PW_EXPTIME ||
+		(*last_req)->lr_type == KRB5_LRQ_ONE_PW_EXPTIME) {
 	       krb5_deltat delta;
 	       char ts[256];
 
