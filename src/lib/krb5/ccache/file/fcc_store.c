@@ -48,7 +48,6 @@ krb5_fcc_store(id, creds)
 {
 #define TCHECK(ret) if (ret != KRB5_OK) goto lose;
      krb5_error_code ret;
-     krb5_octet octet;
 
      MAYBE_OPEN(id, FCC_OPEN_RDWR);
 
@@ -67,8 +66,7 @@ krb5_fcc_store(id, creds)
      TCHECK(ret);
      ret = krb5_fcc_store_times(id, &creds->times);
      TCHECK(ret);
-     octet = creds->is_skey;
-     ret = krb5_fcc_store_octet(id, octet);
+     ret = krb5_fcc_store_octet(id, creds->is_skey);
      TCHECK(ret);
      ret = krb5_fcc_store_int32(id, creds->ticket_flags);
      TCHECK(ret);
