@@ -1,3 +1,7 @@
+2003-05-25  Ezra Peisach  <epeisach@mit.edu>
+
+	* kdb.h: Add prototype for krb5_db_iterate_ext.
+
 2003-03-05  Tom Yu  <tlyu@mit.edu>
 
 	* kdb_kt.h: Add krb5_ktkdb_set_context.  Update prototype of

@@ -502,12 +502,6 @@ krb5_locate_srv_conf(krb5_context context, const krb5_data *realm,
 }
 #endif
 
-#ifdef KRB5_DNS_LOOKUP
-
-/*
- * Lookup a KDC via DNS SRV records
- */
-
 static krb5_error_code
 krb5_locate_srv_dns_1 (const krb5_data *realm,
 		       const char *service,
@@ -515,196 +509,14 @@ krb5_locate_srv_dns_1 (const krb5_data *realm,
 		       struct addrlist *addrlist,
 		       int family)
 {
-    union {
-        unsigned char bytes[2048];
-        HEADER hdr;
-    } answer;
-    unsigned char *p=NULL;
-    char host[MAX_DNS_NAMELEN], *h;
-    int type, rrclass;
-    int priority, weight, size, len, numanswers, numqueries, rdlen;
-    unsigned short port;
-    const int hdrsize = sizeof(HEADER);
-    struct srv_dns_entry {
-	struct srv_dns_entry *next;
-	int priority;
-	int weight;
-	unsigned short port;
-	char *host;
-    };
-
     struct srv_dns_entry *head = NULL;
-    struct srv_dns_entry *srv = NULL, *entry = NULL;
+    struct srv_dns_entry *entry = NULL, *next;
     krb5_error_code code = 0;
 
-    /*
-     * First off, build a query of the form:
-     *
-     * service.protocol.realm
-     *
-     * which will most likely be something like:
-     *
-     * _kerberos._udp.REALM
-     *
-     */
+    code = krb5int_make_srv_query_realm(realm, service, protocol, &head);
+    if (code)
+	return 0;
 
-    if ( strlen(service) + strlen(protocol) + realm->length + 6 
-         > MAX_DNS_NAMELEN )
-        goto out;
-    sprintf(host, "%s.%s.%.*s", service, protocol, (int) realm->length,
-	    realm->data);
-
-    /* Realm names don't (normally) end with ".", but if the query
-       doesn't end with "." and doesn't get an answer as is, the
-       resolv code will try appending the local domain.  Since the
-       realm names are absolutes, let's stop that.  
-
-       But only if a name has been specified.  If we are performing
-       a search on the prefix alone then the intention is to allow
-       the local domain or domain search lists to be expanded.  */
-
-    h = host + strlen (host);
-    if ((h > host) && (h[-1] != '.') && ((h - host + 1) < sizeof(host)))
-        strcpy (h, ".");
-
-#ifdef TEST
-    fprintf (stderr, "sending DNS SRV query for %s\n", host);
-#endif
-
-    size = res_search(host, C_IN, T_SRV, answer.bytes, sizeof(answer.bytes));
-
-    if ((size < hdrsize) || (size > sizeof(answer.bytes)))
-	goto out;
-
-    /*
-     * We got an answer!  First off, parse the header and figure out how
-     * many answers we got back.
-     */
-
-    p = answer.bytes;
-
-    numqueries = ntohs(answer.hdr.qdcount);
-    numanswers = ntohs(answer.hdr.ancount);
-
-    p += sizeof(HEADER);
-
-    /*
-     * We need to skip over all of the questions, so we have to iterate
-     * over every query record.  dn_expand() is able to tell us the size
-     * of compress DNS names, so we use it.
-     */
-
-#define INCR_CHECK(x,y) x += y; if (x > size + answer.bytes) goto out
-#define CHECK(x,y) if (x + y > size + answer.bytes) goto out
-#define NTOHSP(x,y) x[0] << 8 | x[1]; x += y
-
-    while (numqueries--) {
-	len = dn_expand(answer.bytes, answer.bytes + size, p, host, sizeof(host));
-	if (len < 0)
-	    goto out;
-	INCR_CHECK(p, len + 4);
-    }
-
-    /*
-     * We're now pointing at the answer records.  Only process them if
-     * they're actually T_SRV records (they might be CNAME records,
-     * for instance).
-     *
-     * But in a DNS reply, if you get a CNAME you always get the associated
-     * "real" RR for that CNAME.  RFC 1034, 3.6.2:
-     *
-     * CNAME RRs cause special action in DNS software.  When a name server
-     * fails to find a desired RR in the resource set associated with the
-     * domain name, it checks to see if the resource set consists of a CNAME
-     * record with a matching class.  If so, the name server includes the CNAME
-     * record in the response and restarts the query at the domain name
-     * specified in the data field of the CNAME record.  The one exception to
-     * this rule is that queries which match the CNAME type are not restarted.
-     *
-     * In other words, CNAMEs do not need to be expanded by the client.
-     */
-
-    while (numanswers--) {
-
-	/* First is the name; use dn_expand to get the compressed size */
-	len = dn_expand(answer.bytes, answer.bytes + size, p, host, sizeof(host));
-	if (len < 0)
-	    goto out;
-	INCR_CHECK(p, len);
-
-	/* Next is the query type */
-        CHECK(p, 2);
-	type = NTOHSP(p,2);
-
-	/* Next is the query class; also skip over 4 byte TTL */
-        CHECK(p, 6);
-	rrclass = NTOHSP(p,6);
-
-	/* Record data length */
-
-        CHECK(p,2);
-	rdlen = NTOHSP(p,2);
-
-	/*
-	 * If this is an SRV record, process it.  Record format is:
-	 *
-	 * Priority
-	 * Weight
-	 * Port
-	 * Server name
-	 */
-
-	if (rrclass == C_IN && type == T_SRV) {
-            CHECK(p,2);
-	    priority = NTOHSP(p,2);
-	    CHECK(p, 2);
-	    weight = NTOHSP(p,2);
-	    CHECK(p, 2);
-	    port = NTOHSP(p,2);
-	    len = dn_expand(answer.bytes, answer.bytes + size, p, host, sizeof(host));
-	    if (len < 0)
-		goto out;
-	    INCR_CHECK(p, len);
-
-	    /*
-	     * We got everything!  Insert it into our list, but make sure
-	     * it's in the right order.  Right now we don't do anything
-	     * with the weight field
-	     */
-
-	    srv = (struct srv_dns_entry *) malloc(sizeof(struct srv_dns_entry));
-	    if (srv == NULL)
-		goto out;
-	
-	    srv->priority = priority;
-	    srv->weight = weight;
-	    srv->port = port;
-	    srv->host = strdup(host);
-
-	    if (head == NULL || head->priority > srv->priority) {
-		srv->next = head;
-		head = srv;
-	    } else
-		/*
-		 * This is confusing.  Only insert an entry into this
-		 * spot if:
-		 * The next person has a higher priority (lower priorities
-		 * are preferred).
-		 * Or
-		 * There is no next entry (we're at the end)
-		 */
-		for (entry = head; entry != NULL; entry = entry->next)
-		    if ((entry->next &&
-			 entry->next->priority > srv->priority) ||
-			entry->next == NULL) {
-			srv->next = entry->next;
-			entry->next = srv;
-			break;
-		    }
-	} else
-	    INCR_CHECK(p, rdlen);
-    }
-	
     /*
      * Okay!  Now we've got a linked list of entries sorted by
      * priority.  Start looking up A records and returning
@@ -712,52 +524,43 @@ krb5_locate_srv_dns_1 (const krb5_data *realm,
      */
 
     if (head == NULL)
-	goto out;
+	return 0;
+
+    /* Check for the "." case indicating no support.  */
+    if (head->next == 0 && head->host[0] == 0) {
+	free(head->host);
+	free(head);
+	return KRB5_ERR_NO_SERVICE;
+    }
 
 #ifdef TEST
     fprintf (stderr, "walking answer list:\n");
 #endif
-    for (entry = head; entry != NULL; entry = entry->next) {
+    for (entry = head; entry != NULL; entry = next) {
 #ifdef TEST
 	fprintf (stderr, "\tport=%d host=%s\n", entry->port, entry->host);
 #endif
+	next = entry->next;
 	code = add_host_to_list (addrlist, entry->host, htons (entry->port), 0,
 				 (strcmp("_tcp", protocol)
 				  ? SOCK_DGRAM
 				  : SOCK_STREAM), family);
 	if (code)
 	    break;
+	if (entry == head) {
+	    free(entry->host);
+	    free(entry);
+	    head = next;
+	    entry = 0;
+	}
     }
 #ifdef TEST
     fprintf (stderr, "[end]\n");
 #endif
 
-    for (entry = head; entry != NULL; ) {
-	free(entry->host);
-        entry->host = NULL;
-	srv = entry;
-	entry = entry->next;
-	free(srv);
-        srv = NULL;
-    }
-
-  out:
-    if (srv)
-        free(srv);
-
+    krb5int_free_srv_dns_data(head);
     return code;
 }
-
-#ifdef TEST
-static krb5_error_code
-krb5_locate_srv_dns(const krb5_data *realm,
-		    const char *service, const char *protocol,
-		    struct addrlist *al)
-{
-    return krb5_locate_srv_dns_1 (realm, service, protocol, al, 0);
-}
-#endif
-#endif /* KRB5_DNS_LOOKUP */
 
 /*
  * Wrapper function for the two backends
@@ -852,7 +655,8 @@ krb5_locate_kdc(krb5_context context, const krb5_data *realm,
 	    sec_udpport = 0;
     }
 
-    return krb5int_locate_server(context, realm, addrlist, get_masters, "kdc",
+    return krb5int_locate_server(context, realm, addrlist, 0,
+				 get_masters ? "master_kdc" : "kdc",
 				 (get_masters
 				  ? "_kerberos-master"
 				  : "_kerberos"),

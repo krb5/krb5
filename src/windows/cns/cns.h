@@ -144,6 +144,7 @@
 #define     IDD_ALERT 312
 #define   IDD_TKOPT 320
 #define   IDD_FORWARDABLE 321
+#define   IDD_NOADDRESSES 322
 
 /*
  * the entire range (400 through 499) is reserved for the blasted variable
@@ -199,6 +200,7 @@ extern krb5_context k5_context;
 extern krb5_ccache k5_ccache;
 extern char ccname[FILENAME_MAX];
 extern BOOL forwardable;
+extern BOOL noaddresses;
 #endif
 
 /*

@@ -2305,6 +2305,18 @@ lose:
 #undef TCHECK
 }
 
+/* 
+ * Non-functional stub implementation for krb5_fcc_remove
+ * 
+ * Errors:
+ *    KRB5_CC_NOSUPP - not implemented
+ */
+static krb5_error_code KRB5_CALLCONV
+krb5_fcc_remove_cred(krb5_context context, krb5_ccache cache, krb5_flags flags,
+                     krb5_creds *creds)
+{
+    return KRB5_CC_NOSUPP;
+}
 
 /*
  * Requires:
@@ -2413,7 +2425,7 @@ const krb5_cc_ops krb5_fcc_ops = {
      krb5_fcc_start_seq_get,
      krb5_fcc_next_cred,
      krb5_fcc_end_seq_get,
-     NULL, /* XXX krb5_fcc_remove, */
+     krb5_fcc_remove_cred,
      krb5_fcc_set_flags,
 };
 
@@ -2473,6 +2485,6 @@ const krb5_cc_ops krb5_cc_file_ops = {
      krb5_fcc_start_seq_get,
      krb5_fcc_next_cred,
      krb5_fcc_end_seq_get,
-     NULL, /* XXX krb5_fcc_remove, */
+     krb5_fcc_remove_cred,
      krb5_fcc_set_flags,
 };

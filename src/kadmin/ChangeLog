@@ -1,3 +1,7 @@
+2004-02-16  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in: Invoke KRB5_AC_PRIOCNTL_HACK.
+
 2003-01-10  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Use V5_AC_OUTPUT_MAKEFILE instead of
