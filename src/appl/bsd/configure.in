@@ -67,6 +67,12 @@ AC_DEFINE(NO_UT_PID))
 KRB_INCLUDE
 WITH_KRB5ROOT
 WITH_KRB4
+AC_WITH([krb4],
+ADD_DEF(-DKRB5_KRB4_COMPAT)
+K4LIB='$(KRB4)/lib/libkrb.a',
+echo "warning: no krb4 backwards compatibility support"
+K4LIB=)
+AC_SUBST(K4LIB)
 AC_COMPILE_CHECK([setenv],
 [setenv();],[setenv("PATH","/bin",0)],,
 [SETENVSRC=setenv.c

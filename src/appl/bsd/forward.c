@@ -163,7 +163,7 @@ get_for_creds(etype, sumtype, rhost, client, enc_key, forwardable, outbuf)
       kdcoptions &= ~(KDC_OPT_FORWARDABLE);
 
     if (retval = krb5_send_tgs(kdcoptions, &creds.times, etype, sumtype,
-			       creds.server,
+			       tgt.server,
 			       addrs,
 			       creds.authdata,
 			       0,		/* no padata */
@@ -393,8 +393,14 @@ rd_and_store_for_creds(inbuf, ticket, lusername)
 	return -1;
     }
 
-    sprintf(ccname, "FILE:/tmp/krb5cc_%d", pwd->pw_uid);
-
+    /* Set the KRB5CCNAME ENV variable to keep sessions 
+     * seperate. Use the process id of this process which is 
+     * the rlogind or rshd. Set the environment variable as well.
+     */
+  
+    sprintf(ccname, "FILE:/tmp/krb5cc_p%d", getpid());
+    setenv("KRB5CCNAME", ccname, 0);
+  
     if (retval = krb5_cc_resolve(ccname, &ccache)) {
 	return(retval);
     }

@@ -1,7 +1,24 @@
+Thu Aug 18 18:57:44 1994  Theodore Y. Ts'o  (tytso at tsx-11)
+
+	* Makefile.in:
+	* configure.in: Fix KRB4 handling; do it here in configure.in
+	instead of in Makefile.in
+
 Thu Aug 18 18:55:36 1994  Mark Eichin  (eichin@perdiem)
 
 	* configure.in (LOGINLIBS): always substitute it, even if it isn't
 	set.
+
+Thu Aug 18 17:09:36 1994  Theodore Y. Ts'o  (tytso at tsx-11)
+
+    	* forward.c (get_for_creds): Fix bug to allow cross-realm
+	forwarded credentials to work.
+
+	* forward.c (rd_and_store_for_creds):  Store the forwarded
+	credentials in a file which is PID dependent, to allow for
+	different sessions in an rlogin session.
+
+	* Makefile: Add $(SETENVOBJ) to all programs that use forward.c
 
 Tue Aug 16 22:41:25 1994  Mark Eichin  (eichin@cygnus.com)
 
