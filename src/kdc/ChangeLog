@@ -1,3 +1,9 @@
+Fri Jul  8 00:33:45 1994  Tom Yu  (tlyu at dragons-lair)
+
+	* configure.in:
+	* Makefile.in: back out changes because of possible breakage under
+	Ultrix, among other things
+
 Wed Jul  6 22:54:59 1994  Tom Yu  (tlyu at dragons-lair)
 
 	* configure.in:
