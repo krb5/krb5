@@ -31,9 +31,9 @@
 #include "string.h"
 #include <stdio.h>
 
-#if defined(_MSDOS) || defined(_WIN32)
 apiCB *gCntrlBlock = NULL;
-#else
+
+#if !defined(_MSDOS) && !defined(_WIN32)
 #define CC_API_VER2
 #endif
 
