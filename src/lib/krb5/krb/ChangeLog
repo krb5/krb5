@@ -1,3 +1,8 @@
+Sat May 20 14:01:16 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* rd_safe.c (krb5_rd_safe): Increment remote_seq_number if
+		KRB5_AUTH_CONTEXT_DO_SEQUENCE is set.
+
 Thu May 11 22:42:30 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* rd_cred.c (krb5_rd_cred_basic): If address don't match, return

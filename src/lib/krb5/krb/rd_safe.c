@@ -267,6 +267,7 @@ krb5_rd_safe(context, auth_context, inbuf, outbuf, outdata)
 	    retval =  KRB5KRB_AP_ERR_BADORDER;
 	    goto error;
 	}
+	auth_context->remote_seq_number++;
     }
 
     if ((auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_RET_TIME) ||
