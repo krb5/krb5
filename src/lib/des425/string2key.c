@@ -1,3 +1,4 @@
+/* THIS FILE DOES NOT GET COMPILED.  AUDIT BEFORE USE.  */
 /*
  * lib/des425/string2key.c
  *
