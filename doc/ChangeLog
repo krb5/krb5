@@ -1,3 +1,8 @@
+2003-04-08  Tom Yu  <tlyu@mit.edu>
+
+	* krb4-xrealm.txt: New file.  Describe the krb4 cross-realm
+	patchkit.  Copied from 2003-004-krb4_patchkit.
+
 2002-02-27  Tom Yu  <tlyu@mit.edu>
 
 	* build.texinfo: Update build quirks for Tru64 4.0 defaulting to
