@@ -19,13 +19,13 @@ static char rcsid_ccbase_c[] =
 #include <krb5/krb5.h>
 #include <krb5/ext-proto.h>
 
+extern krb5_cc_ops *krb5_cc_dfl_ops;
 struct krb5_cc_typelist
  {
   krb5_cc_ops *ops;
   struct krb5_cc_typelist *next;
  };
-static struct krb5_cc_typelist krb5_cc_typelist_dfl = { &krb5_cc_dfl_ops, 0 };
-static struct krb5_cc_typelist *cc_typehead = &krb5_cc_typelist_dfl;
+static struct krb5_cc_typelist *cc_typehead = 0;
 
 /*
  * Register a new credentials cache type
@@ -95,6 +95,10 @@ krb5_error_code krb5_cc_resolve (name, cache)
 	    free(pfx);
 	    return (*tlist->ops->resolve)(cache, resid);
 	}
+    }
+    if (krb5_cc_dfl_ops && !strcmp (pfx, krb5_cc_dfl_ops->prefix)) {
+	free (pfx);
+	return (*krb5_cc_dfl_ops->resolve)(cache, resid);
     }
     free(pfx);
     return KRB5_CC_UNKNOWN_TYPE;
