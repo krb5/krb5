@@ -1,6 +1,10 @@
 Thu Feb 29 16:49:33 1996  Theodore Y. Ts'o  <tytso@dcl>
 
-	* win_glue.c:  Make sure WSACleanup() is called when the DLL exits.
+	* win_glue.c: Make sure WSACleanup() is called when the DLL exits.
+		Note that calls to WSAStartup and WSACleanup must be in
+		matched pairs.  If there is a missing WSACleanup call when
+		a program exits, under Lan Workplace, the name resolver
+		will stop working.
 
 Tue Feb 27 18:47:17 1996  Theodore Y. Ts'o  <tytso@dcl>
 

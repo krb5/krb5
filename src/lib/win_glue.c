@@ -7,6 +7,13 @@
  * The code is pretty much copied from winsock.txt from winsock-1.1,
  * available from:
  * ftp://sunsite.unc.edu/pub/micro/pc-stuff/ms-windows/winsock/winsock-1.1
+ *
+ * Note: WSAStartup and WSACleanup is called here (and only here).
+ * This assumes that under Windows, we only use this library via the
+ * DLL.  Note that calls to WSAStartup and WSACleanup must be in
+ * matched pairs.  If there is a missing WSACleanup call when a
+ * program exits, under Lan Workplace, the name resolver will stop
+ * working. 
  */
 
 /* We can't include winsock.h directly because of /Za (stdc) options */
