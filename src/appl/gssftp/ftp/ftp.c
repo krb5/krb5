@@ -1961,7 +1961,7 @@ char realm[REALM_SZ + 1];
 
 #ifdef GSSAPI
 struct {
-    gss_OID *mech_type;
+    gss_OID mech_type;
     char *service_name;
 } gss_trials[] = {
     { GSS_C_NO_OID, "ftp" },
