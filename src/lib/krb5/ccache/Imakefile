@@ -10,7 +10,7 @@
 #define IHaveSubdirs
 #define PassCDebugFlags
 
-        SUBDIRS = file
+        SUBDIRS = file stdio
 
 MakeSubdirs($(SUBDIRS))
 
