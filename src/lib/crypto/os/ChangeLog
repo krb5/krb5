@@ -1,5 +1,7 @@
 Wed Jul 19 17:17:54 1995  Tom Yu  <tlyu@lothlorien.MIT.EDU>
 
+	* localaddr.c: also add definition of max if it's not there.
+
 	* localaddr.c: fix definition of ifreq_size so it actually works
 
 Mon Jul 17 16:04:00 1995  Sam Hartman  <hartmans@tertius.mit.edu>
