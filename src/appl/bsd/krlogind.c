@@ -1350,7 +1350,7 @@ int default_realm(principal)
      krb5_principal principal;
 {
     char *def_realm;
-    int realm_length;
+    unsigned int realm_length;
     int retval;
     
     realm_length = krb5_princ_realm(bsd_context, principal)->length;

@@ -105,6 +105,9 @@ char *default_service = "host";
 #define KCMD_KEYUSAGE	1026 /* Key usage used   with 3des or any old-protocol enctype*/
 /* New protocol enctypes that use cipher state have keyusage defined later*/
 
+#ifndef GETSOCKNAME_ARG3_TYPE
+#define GETSOCKNAME_ARG3_TYPE int
+#endif
 
 /*
  * Note that the encrypted rlogin packets take the form of a four-byte
@@ -126,17 +129,17 @@ static krb5_keyusage enc_keyusage_i[2], enc_keyusage_o[2];
 static krb5_data encivec_i[2], encivec_o[2];
 
 static krb5_keyblock *keyblock;		 /* key for encrypt/decrypt */
-static int (*input)(int, char *, int, int);
-static int (*output)(int, char *, int, int);
+static int (*input)(int, char *, size_t, int);
+static int (*output)(int, char *, size_t, int);
 static char storage[2*RCMD_BUFSIZ];	 /* storage for the decryption */
-static int nstored = 0;
+static size_t nstored = 0;
 static char *store_ptr = storage;
-static int twrite(int, char *, int, int);
-static int v5_des_read(int, char *, int, int), 
-    v5_des_write(int, char *, int, int);
+static int twrite(int, char *, size_t, int);
+static int v5_des_read(int, char *, size_t, int), 
+    v5_des_write(int, char *, size_t, int);
 #ifdef KRB5_KRB4_COMPAT
-static int v4_des_read(int, char *, int, int), 
-    v4_des_write(int, char *, int, int);
+static int v4_des_read(int, char *, size_t, int), 
+    v4_des_write(int, char *, size_t, int);
 static C_Block v4_session;
 static int right_justify;
 #endif
@@ -192,7 +195,7 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
     krb5_error_code status;
     krb5_ap_rep_enc_part *rep_ret;
     krb5_error	*error = 0;
-    int sin_len;
+    GETSOCKNAME_ARG3_TYPE  sin_len;
     krb5_ccache cc;
     krb5_data outbuf;
     krb5_flags options = authopts;
@@ -431,7 +434,8 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
 	    if (!suppress_err) {
 		fprintf(stderr, "Server returned error code %d (%s)\n",
 			error->error,
-			error_message(ERROR_TABLE_BASE_krb5 + error->error));
+			error_message(ERROR_TABLE_BASE_krb5 + 
+				      (int) error->error));
 		if (error->text.length) {
 		    fprintf(stderr, "Error text sent from server: %s\n",
 			    error->text.data);
@@ -553,7 +557,8 @@ k4cmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, ticket, service, realm,
     char c;
     int lport = START_PORT;
     struct hostent *hp;
-    int rc, sin_len;
+    int rc;
+    GETSOCKNAME_ARG3_TYPE sin_len;
     char *host_save;
     int status;
 
@@ -729,7 +734,7 @@ reread:
 	    cc = 'l';
 	    (void) write(2, &cc, 1);
 	    if (p != check)
-		(void) write(2, check, p - check);
+		(void) write(2, check, (unsigned) (p - check));
 	}
 
 	(void) write(2, &c, 1);
@@ -769,7 +774,7 @@ getport(alport)
 {
     struct sockaddr_in sockin;
     int s;
-    int len = sizeof(sockin);
+    GETSOCKNAME_ARG3_TYPE len = sizeof(sockin);
     
     s = socket(AF_INET, SOCK_STREAM, 0);
     if (s < 0)
@@ -796,7 +801,7 @@ getport(alport)
 }
 
 static int
-normal_read (int fd, char *buf, int len, int secondary)
+normal_read (int fd, char *buf, size_t len, int secondary)
 {
     return read (fd, buf, len);
 }
@@ -930,7 +935,7 @@ void rcmd_stream_init_krb4(session, encrypt_flag, lencheck, justify)
 int rcmd_stream_read(fd, buf, len, sec)
      int fd;
      register char *buf;
-     int len;
+     size_t len;
      int sec;
 {
     return (*input)(fd, buf, len, sec);
@@ -939,7 +944,7 @@ int rcmd_stream_read(fd, buf, len, sec)
 int rcmd_stream_write(fd, buf, len, sec)
      int fd;
      register char *buf;
-     int len;
+     size_t len;
      int sec;
 {
     return (*output)(fd, buf, len, sec);
@@ -949,7 +954,7 @@ int rcmd_stream_write(fd, buf, len, sec)
 static int twrite(fd, buf, len, secondary)
      int fd;
      char *buf;
-     int len;
+     size_t len;
      int secondary;
 {
     return write((fd == 0) ? 1 : fd, buf, len);
@@ -958,7 +963,7 @@ static int twrite(fd, buf, len, secondary)
 static int v5_des_read(fd, buf, len, secondary)
      int fd;
      char *buf;
-     int len;
+     size_t len;
      int secondary;
 {
     int nreturned = 0;
@@ -1069,7 +1074,7 @@ static int v5_des_read(fd, buf, len, secondary)
 static int v5_des_write(fd, buf, len, secondary)
      int fd;
      char *buf;
-     int len;
+     size_t len;
      int secondary;
 {
     krb5_data plain;
@@ -1128,7 +1133,7 @@ static int
 v4_des_read(fd, buf, len, secondary)
 int fd;
 char *buf;
-int len;
+size_t len;
 int secondary;
 {
 	int nreturned = 0;
@@ -1191,7 +1196,7 @@ int secondary;
 	}
 	(void) pcbc_encrypt((des_cblock *) des_inbuf,
 			    (des_cblock *) storage,
-			    (net_len < 8) ? 8 : net_len,
+			    (int) ((net_len < 8) ? 8 : net_len),
 			    v4_schedule,
 			    &v4_session,
 			    DECRYPT);
@@ -1222,7 +1227,7 @@ static int
 v4_des_write(fd, buf, len, secondary)
 int fd;
 char *buf;
-int len;
+size_t len;
 int secondary;
 {
 	static char garbage_buf[8];
@@ -1252,7 +1257,7 @@ int secondary;
 	}
 	(void) pcbc_encrypt((des_cblock *) ((len < 8) ? garbage_buf : buf),
 			    (des_cblock *) (des_outpkt+4),
-			    (len < 8) ? 8 : len,
+			    (int) ((len < 8) ? 8 : len),
 			    v4_schedule,
 			    &v4_session,
 			    ENCRYPT);

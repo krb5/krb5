@@ -160,7 +160,7 @@ static kstream kstream_create_from_fd(read_fd, write_fd, sched, session)
 static int kstream_read(krem, buf, len)
      kstream krem;
      char *buf;
-     int len;
+     unsigned int len;
 {
   if(krem->encrypting) {
     /* when we get a length, we have to read the whole block. However,
@@ -189,7 +189,7 @@ static int kstream_read(krem, buf, len)
       int cc;
       unsigned char clen[4];
       unsigned int x = 0;
-      int sz, off;
+      unsigned int sz, off;
 
       cc = read(krem->read_fd, clen, 4);
       if (cc != 4) return cc;
@@ -197,7 +197,7 @@ static int kstream_read(krem, buf, len)
       x <<= 8; x += clen[1] & 0xff;
       x <<= 8; x += clen[2] & 0xff;
       x <<= 8; x += clen[3] & 0xff;
-      sz = (x + 7) & ~7;
+      sz = (x + 7) & (~7U);
 
       if (krem->retbuflen < sz) {
 	if (krem->retbuflen == 0) 
@@ -219,7 +219,7 @@ static int kstream_read(krem, buf, len)
       /* decrypt it */
       des_pcbc_encrypt ((des_cblock *)krem->retbuf, 
 			(des_cblock *)krem->retbuf, 
-			sz, *krem->sched, krem->ivec, 
+			(int) sz, *krem->sched, krem->ivec, 
 			DECRYPT);
 
       /* now retbuf has sz bytes, return len or x of them to the user */
@@ -242,12 +242,12 @@ static int kstream_read(krem, buf, len)
 static int kstream_write(krem, buf, len)
      kstream krem;
      char *buf;
-     int len;
+     unsigned int len;
 {
   if (krem->encrypting) {
     unsigned long x;
     int st;
-    int outlen = (len + 7) & (~7);
+    unsigned int outlen = (len + 7) & (~7U);
 
     if (krem->writelen < outlen) {
       if (krem->writelen == 0) {
@@ -261,7 +261,7 @@ static int kstream_write(krem, buf, len)
       krem->writelen = outlen;
     }
 
-    outlen = (len + 7) & (~7);
+    outlen = (len + 7) & (~7U);
 
     memcpy(krem->inbuf, buf, len);
     krb5_random_confounder(outlen-len, krem->inbuf+len);
@@ -275,7 +275,8 @@ static int kstream_write(krem, buf, len)
     if (x)
       abort ();
     /* memset(outbuf+4+4, 0x42, BUFSIZ); */
-    st = des_pcbc_encrypt ((des_cblock *)buf, (des_cblock *)(krem->outbuf+4+4), outlen,
+    st = des_pcbc_encrypt ((des_cblock *)buf, (des_cblock *)(krem->outbuf+4+4),
+			   (int) outlen,
 			   *krem->sched, krem->ivec, ENCRYPT);
 
     if (st) abort();
@@ -486,7 +487,8 @@ void source(argc, argv)
 	struct stat stb;
 	static struct buffer buffer;
 	struct buffer *bp;
-	int x, readerr, f, amt;
+	int x, readerr, f;
+	unsigned int amt;
 	off_t i;
 	char buf[BUFSIZ];
 
@@ -648,7 +650,7 @@ int response()
 			*cp++ = c;
 		} while (cp < &rbuf[BUFSIZ] && c != '\n');
 		if (iamremote == 0)
-			(void) write(2, rbuf, cp - rbuf);
+			(void) write(2, rbuf, (unsigned) (cp - rbuf));
 		errs++;
 		if (resp == 1)
 			return (-1);
@@ -695,13 +697,15 @@ void sink(argc, argv)
 {
 	off_t i, j;
 	char *targ, *whopp, *cp;
-	int of, mode, wrerr, exists, first, count, amt;
+	int of, wrerr, exists, first, amt;
+	mode_t mode;
+	unsigned int count;
 	off_t size;
 	struct buffer *bp;
 	static struct buffer buffer;
 	struct stat stb;
 	int targisdir = 0;
-	int mask = umask(0);
+	mode_t mask = umask(0);
 	char *myargv[1];
 	char cmdbuf[BUFSIZ], nambuf[BUFSIZ];
 	int setimes = 0;

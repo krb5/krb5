@@ -2130,7 +2130,7 @@ void checknologin()
 
     if ((fd = open(NOLOGIN, O_RDONLY, 0)) >= 0) {
 	while ((nchars = read(fd, tbuf, sizeof(tbuf))) > 0)
-	    (void)write(fileno(stdout), tbuf, nchars);
+	    (void)write(fileno(stdout), tbuf, (unsigned) nchars);
 	sleepexit(0);
     }
 }

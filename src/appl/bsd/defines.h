@@ -34,8 +34,8 @@ extern int kcmd (int *sock, char **ahost, int /* u_short */ rport,
 		 enum kcmd_proto *protonum /* input and output */
 		 );
 
-extern int rcmd_stream_read (int fd, char *buf, int len, int secondary);
-extern int rcmd_stream_write (int fd, char *buf, int len, int secondary);
+extern int rcmd_stream_read (int fd, char *buf, size_t len, int secondary);
+extern int rcmd_stream_write (int fd, char *buf, size_t len, int secondary);
 extern int getport (int *);
 
 extern void rcmd_stream_init_krb5 (krb5_keyblock *in_keyblock,

@@ -321,7 +321,7 @@ main(argc, argv0)
       cc += strlen(*ap) + 1;
     if (encrypt_flag)
       cc += 3;
-    cp = args = (char *) malloc(cc);
+    cp = args = (char *) malloc((unsigned) cc);
     if (encrypt_flag) {
       strcpy(args, "-x ");
       cp += 3;
@@ -561,7 +561,7 @@ main(argc, argv0)
 		if ((errno != EWOULDBLOCK) && (errno != EAGAIN))
 		    FD_CLR(rfd2, &readfrom);
 	    } else
-	      (void) write(2, buf, cc);
+	      (void) write(2, buf, (unsigned) cc);
 	}
 	if (FD_ISSET(rem, &ready)) {
 	    errno = 0;
@@ -570,7 +570,7 @@ main(argc, argv0)
 		if ((errno != EWOULDBLOCK) && (errno != EAGAIN))
 		    FD_CLR(rem, &readfrom);
 	    } else
-	      (void) write(1, buf, cc);
+	      (void) write(1, buf, (unsigned) cc);
 	}
     } while (FD_ISSET(rem, &readfrom) || FD_ISSET(rfd2, &readfrom));
     if (nflag == 0)

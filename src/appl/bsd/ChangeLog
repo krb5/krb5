@@ -1,3 +1,16 @@
+2001-12-06  Ezra Peisach  <epeisach@mit.edu>
+
+	* krcp.c, krlogin.c, krlogind.c, krsh.c, krshd.c, login.c,
+	setenv.c, v4rcp.c: Signed v.s unsigned int cleanup.
+
+	* defines.h: rcmd_stream_{read,write} take size_t as length argument.
+
+	* kcmd.c: Use GETSOCKNAME_ARG3_TYPE instead of assuming int. input
+	and output handler take size_t as length argument instead of
+	int. Other signed vs. unsigned fixes.
+
+	* configure.in: Add KRB5_GETSOCKNAME_ARGS.
+
 2001-11-06  Sam Hartman  <hartmans@mit.edu>
 
 	* kcmd.c: Define storage for our key usages

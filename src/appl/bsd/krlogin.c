@@ -273,7 +273,7 @@ static void doit(sigset_t *);
 static int reader(int);
 static void doit(int);
 #endif
-static int control(char *, int);
+static int control(char *, unsigned int);
 static void sendwindow(void);
 static void stop(int), echo(int);
 static void writer(void), done(int);
@@ -1137,7 +1137,7 @@ static void writer()
       }
       
       if (!got_esc) {
-	if (rcmd_stream_write(rem, buf, n_read, 0) == 0) {
+	if (rcmd_stream_write(rem, buf, (unsigned) n_read, 0) == 0) {
 	  prf("line gone");
 	  break;
 	}
@@ -1147,7 +1147,7 @@ static void writer()
 	/* This next test is necessary to avoid sending 0 bytes of data
 	   in the event that we got just a cmdchar */
 	if (n_read > 1) {
-	  if (rcmd_stream_write(rem, buf, n_read-1, 0) == 0) {
+	  if (rcmd_stream_write(rem, buf, (unsigned) (n_read-1), 0) == 0) {
 	    prf("line gone");
 	    break;
 	  }
@@ -1227,7 +1227,7 @@ static int read_wrapper(fd,buf,size,got_esc)
   static char *data_start = tbuf;
   static char *data_end = tbuf;
   static int bol = 1;
-  int return_length = 0;
+  unsigned int return_length = 0;
   char c;
 
   /* if we have no data buffered, get more */
@@ -1295,7 +1295,7 @@ static void echo(c)
       *p++ = c;
     *p++ = '\r';
     *p++ = '\n';
-    (void) write(1, buf, p - buf);
+    (void) write(1, buf, (unsigned) (p - buf));
 }
 
 
@@ -1359,7 +1359,7 @@ int signo;
 static void sendwindow()
 {
     char obuf[4 + sizeof (struct winsize)];
-    struct winsize *wp = (struct winsize *)(obuf+4);
+    struct winsize *wp = (struct winsize *)(void *)(obuf+4);
     
     obuf[0] = 0377;
     obuf[1] = 0377;
@@ -1498,7 +1498,7 @@ void oob()
 
 static int control(cp, n)
      char *cp;
-     int n;
+     unsigned int n;
 {
     if ((n >= 5) && (cp[2] == 'o') && (cp[3] == 'o')) {
 	if (server_message(cp[4]))
@@ -1526,7 +1526,8 @@ reader(oldmask)
 #endif
 {
     fd_set readset, excset, writeset;
-    int n, remaining, left;
+    int n, remaining;
+    unsigned int left;
     char *bufp = rcvbuf;
     char *cp;
 
@@ -1594,6 +1595,7 @@ reader(oldmask)
 			    cp[1] == '\377') {
 			    left = (rcvbuf+rcvcnt) - cp;
 			    n = control(cp, left);
+			    /* |n| <= left */
 			    if (n < 0) {
 				left -= (-n);
 				rcvcnt = 0;

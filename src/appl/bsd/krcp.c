@@ -127,7 +127,7 @@ int	userid;
 int	port = 0;
 
 struct buffer {
-    int	cnt;
+    unsigned int cnt;
     char	*buf;
 };
 
@@ -150,7 +150,7 @@ int main(argc, argv)
     char *targ, *host, *src;
     char *suser, *tuser, *thost;
     int i;
-    int cmdsiz = 30;
+    unsigned int cmdsiz = 30;
     char buf[RCP_BUFSIZ], cmdbuf[30];
     char *cmd = cmdbuf;
     struct servent *sp;
@@ -770,7 +770,8 @@ void source(argc, argv)
     struct stat stb;
     static struct buffer buffer;
     struct buffer *bp;
-    int x, readerr, f, amt;
+    int x, readerr, f;
+    unsigned int amt;
     off_t i;
     char buf[RCP_BUFSIZ];
     
@@ -935,7 +936,7 @@ int response()
 	    *cp++ = c;
 	} while (cp < &rbuf[RCP_BUFSIZ] && c != '\n');
 	if (iamremote == 0)
-	  (void) write(2, rbuf, cp - rbuf);
+	  (void) write(2, rbuf, (unsigned) (cp - rbuf));
 	errs++;
 	if (resp == 1)
 	  return (-1);
@@ -987,7 +988,9 @@ void sink(argc, argv)
     mode_t mask = umask(0);
     off_t i, j;
     char *targ, *whopp, *cp;
-    int of, wrerr, exists, first, count, amt, size;
+    int of, wrerr, exists, first;
+    off_t size;
+    unsigned int amt, count;
     struct buffer *bp;
     static struct buffer buffer;
     struct stat stb;

@@ -1276,7 +1276,7 @@ if(port)
 			shutdown(s, 1+1);
 			FD_CLR(pv[0], &readfrom);
 		    } else {
-			(void) rcmd_stream_write(s, buf, cc, 1);
+			(void) rcmd_stream_write(s, buf, (unsigned) cc, 1);
 		    }
 		}
 		if (FD_ISSET(pw[0], &ready)) {
@@ -1287,7 +1287,7 @@ if(port)
 			shutdown(f, 1+1);
 			FD_CLR(pw[0], &readfrom);
 		    } else {
-			(void) rcmd_stream_write(f, buf, cc, 0);
+			(void) rcmd_stream_write(f, buf, (unsigned) cc, 0);
 		    }
 		}
 		if (port&&FD_ISSET(s, &ready)) {
@@ -1314,7 +1314,7 @@ if(port)
 			FD_CLR(f, &readfrom);
 		    } else {
 		        int wcc;
-		        wcc = write(px[1], buf, cc);
+		        wcc = write(px[1], buf, (unsigned) cc);
 			if (wcc == -1) {
 			  /* pipe closed, don't read any more */
 			  /* might check for EPIPE */
@@ -1780,7 +1780,7 @@ int default_realm(principal)
      krb5_principal principal;
 {
     char *def_realm;
-    int realm_length;
+    unsigned int realm_length;
     int retval;
     
     realm_length = krb5_princ_realm(bsd_context, principal)->length;

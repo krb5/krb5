@@ -151,7 +151,7 @@ _findenv(name, offset)
 	int *offset;
 {
 	extern char **environ;
-	register int len;
+	register unsigned int len;
 	register char **P, *C;
 
 	for (C = name, len = 0; *C && *C != '='; ++C, ++len);
