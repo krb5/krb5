@@ -25,9 +25,11 @@ CCSRCS = \
 	$(srcdir)/delete_sec_context.c \
 	$(srcdir)/disp_name.c \
 	$(srcdir)/disp_status.c \
+	$(srcdir)/export_sec_context.c \
 	$(srcdir)/get_tkt_flags.c \
 	$(srcdir)/gssapi_krb5.c \
 	$(srcdir)/import_name.c \
+	$(srcdir)/import_sec_context.c \
 	$(srcdir)/indicate_mechs.c \
 	$(srcdir)/init_sec_context.c \
 	$(srcdir)/inq_context.c \
@@ -39,6 +41,7 @@ CCSRCS = \
 	$(srcdir)/rel_cred.c \
 	$(srcdir)/rel_name.c \
 	$(srcdir)/seal.c \
+	$(srcdir)/ser_sctx.c \
 	$(srcdir)/sign.c \
 	$(srcdir)/unseal.c \
 	$(srcdir)/util_cksum.c \
@@ -55,9 +58,11 @@ CCOBJS = \
 	delete_sec_context.$(OBJEXT) \
 	disp_name.$(OBJEXT) \
 	disp_status.$(OBJEXT) \
+	export_sec_context.$(OBJEXT) \
 	get_tkt_flags.$(OBJEXT) \
 	gssapi_krb5.$(OBJEXT) \
 	import_name.$(OBJEXT) \
+	import_sec_context.$(OBJEXT) \
 	indicate_mechs.$(OBJEXT) \
 	init_sec_context.$(OBJEXT) \
 	inq_context.$(OBJEXT) \
@@ -69,6 +74,7 @@ CCOBJS = \
 	rel_cred.$(OBJEXT) \
 	rel_name.$(OBJEXT) \
 	seal.$(OBJEXT) \
+	ser_sctx.$(OBJEXT) \
 	sign.$(OBJEXT) \
 	unseal.$(OBJEXT) \
 	util_cksum.$(OBJEXT) \

@@ -36,12 +36,14 @@ context_time.c
 delete_sec_context.c
 disp_name.c
 disp_status.c
+export_sec_context.c
 get_tkt_flags.c
 gssapiP_krb5.h
 gssapi_err_krb5.et
 gssapi_krb5.c
 gssapi_krb5.h
 import_name.c
+import_sec_context.c
 indicate_mechs.c
 init_sec_context.c
 inq_context.c
@@ -53,6 +55,7 @@ process_context_token.c
 rel_cred.c
 rel_name.c
 seal.c
+ser_sctx.c
 sign.c
 unseal.c
 util_cksum.c
