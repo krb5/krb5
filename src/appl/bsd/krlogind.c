@@ -156,7 +156,6 @@ static char sccsid[] = "@(#)rlogind.c	5.17 (Berkeley) 8/31/88";
 #include <netdb.h>
 #include <syslog.h>
 #include <strings.h>
-#include <ctype.h>
 #include <sys/param.h>
 #include <utmp.h>
      
