@@ -1,3 +1,7 @@
+2004-02-12  Sam Hartman  <hartmans@mit.edu>
+
+	* kdc_util.c (validate_tgs_request): Fix logic error
+
 2004-02-09  Tom Yu  <tlyu@mit.edu>
 
 	* main.c (init_realm): Apply patch from Will Fiveash to use
