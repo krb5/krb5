@@ -924,8 +924,6 @@ test "modify-principal 24"
 proc test24 {} {
     global test
     global prompt
-#    set prms_id 1358
-#    setup_xfail {*-*-*} $prms_id
     
     if {! ((  [principal_exists "$test/a"]) ||
 	   [create_principal_pol "$test/a" "test-pol" ])} {
@@ -997,9 +995,11 @@ proc test24 {} {
 	    return
 	}
     }
-    if { [expr "$pw_mod_date + $pw_max_life"] != $pw_expire } {
-	fail "$test: pw_expire is wrong"
+    if { $pw_expire != 0 } {
+	fail "$test: pw_expire $pw_expire should be 0"
 	return
+    } else {
+	pass "$test"
     }
     if { ! [cmd {ovsec_kadm_destroy $server_handle}]} { 
 	error "$test: unexpected failure in destroy"
@@ -1159,7 +1159,7 @@ proc test28 {} {
     }
     if { ! [cmd [format {
 	ovsec_kadm_modify_principal $server_handle \
-		{"%s/a" 0 0 900 0 0 0 0 0 0 0 0} {OVSEC_KADM_PW_EXPIRATION}
+		{"%s/a" 0 0 999999999 0 0 0 0 0 0 0 0} {OVSEC_KADM_PW_EXPIRATION}
     } $test]]} {
 	fail "$test: modify failed"
 	return
@@ -1211,8 +1211,8 @@ proc test28 {} {
 	    return
 	}
     }
-    if { [expr "$pw_mod_date + $pw_max_life"] == $pw_expire } {
-	fail "$test: pw_expire is wrong"
+    if { $pw_expire != 999999999 } {
+	fail "$test: pw_expire $pw_expire should be 999999999"
 	return
     }
     pass "$test"

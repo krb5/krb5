@@ -1,6 +1,36 @@
 global timeout
 set timeout 60
 
+set lib_pid 0
+
+#
+# The functions in this library used to be responsible for bazillions
+# of wasted api_starts.  Now, they all just use their own library
+# handle so they are not interrupted when the main tests call init or
+# destroy.  They have to keep track of when the api exists and
+# restarts, though, since the lib_handle needs to be re-opened in that
+# case.
+#
+proc lib_start_api {} {
+    global spawn_id lib_pid
+
+    if {! [api_isrunning $lib_pid]} {
+	api_exit
+	set lib_pid [api_start]
+	if {! [cmd {
+	    ovsec_kadm_init admin admin $OVSEC_KADM_ADMIN_SERVICE null \
+		    $OVSEC_KADM_STRUCT_VERSION $OVSEC_KADM_API_VERSION_1 \
+		    lib_handle
+	}]} {
+	    error "$test: unexpected failure in init"
+	    return
+	}
+	puts stdout "--- restarted api ($lib_pid) for lib"
+    } else {
+	puts stdout "+++ api $lib_pid already running for lib"
+    }	
+}
+
 proc cmd {command} {
     global prompt
     global spawn_id
@@ -12,7 +42,7 @@ proc cmd {command} {
         -re "ERROR .*$prompt$" { return 0 }
 	"wrong # args" { error "$test: wrong number args"; return 0 }
         timeout { fail "$test: timeout"; return 0 }
-        eof { fail "$test: eof"; api_exit; api_start; return 0 }
+        eof { fail "$test: eof"; api_exit; lib_start_api; return 0 }
     }
 }
 
@@ -25,7 +55,7 @@ proc tcl_cmd {command} {
 	-re "$prompt$" { return 1}
 	"wrong # args" { error "$test: wrong number args"; return 0 }
 	timeout { error_and_restart "timeout" }
-	eof { api_exit; api_start; return 0 }
+	eof { api_exit; lib_start_api; return 0 }
     }
 }
 
@@ -42,7 +72,7 @@ proc one_line_succeed_test {command} {
 	}
 	"wrong # args" { error "$test: wrong number args"; return 0 }
 	timeout				{ fail "$test: timeout"; return 0 }
-	eof				{ fail "$test: eof"; api_exit; api_start; return 0 }
+	eof				{ fail "$test: eof"; api_exit; lib_start_api; return 0 }
     }
 }
 
@@ -58,7 +88,7 @@ proc one_line_fail_test {command code} {
 	-re "OK .*$prompt$"		{ fail "$test: bad success"; return 0 }
 	"wrong # args" { error "$test: wrong number args"; return 0 }
 	timeout				{ fail "$test: timeout"; return 0 }
-	eof				{ fail "$test: eof"; api_exit; api_start; return 0 }
+	eof				{ fail "$test: eof"; api_exit; lib_start_api; return 0 }
     }
 }
 
@@ -73,7 +103,7 @@ proc one_line_fail_test_nochk {command} {
 	-re "OK .*$prompt$"		{ fail "$test: bad success"; return 0 }
 	"wrong # args" { error "$test: wrong number args"; return 0 }
 	timeout				{ fail "$test: timeout"; return 0 }
-	eof				{ fail "$test: eof"; api_exit; api_start; return 0 }
+	eof				{ fail "$test: eof"; api_exit; lib_start_api; return 0 }
     }
 }
 
@@ -84,174 +114,83 @@ proc resync {} {
     expect {
 	-re "$prompt$"	{}
 	"wrong # args" { error "$test: wrong number args"; return 0 }
-	eof { api_exit; api_start }
+	eof { api_exit; lib_start_api }
     }
 }
 
 proc create_principal {name} {
-    api_exit
-    api_start
+    lib_start_api
 
-    set ret [expr {
-	[cmd {
-	    ovsec_kadm_init admin admin $OVSEC_KADM_ADMIN_SERVICE null \
-		    $OVSEC_KADM_STRUCT_VERSION $OVSEC_KADM_API_VERSION_1 \
-		    server_handle
-	}] &&
-	[cmd [format {
-	    ovsec_kadm_create_principal $server_handle [simple_principal \
-		    "%s"] {OVSEC_KADM_PRINCIPAL} "%s"
-	} $name $name]]
-    }]
-
-    cmd {ovsec_kadm_destroy $server_handle}
-
-    api_exit
-    api_start
+    set ret [cmd [format {
+	ovsec_kadm_create_principal $lib_handle [simple_principal \
+		"%s"] {OVSEC_KADM_PRINCIPAL} "%s"
+    } $name $name]]
 
     return $ret
 }
 
 proc create_policy {name} {
-    api_exit
-    api_start
+    lib_start_api
 
-    set ret [expr {
-	[cmd {
-	    ovsec_kadm_init admin admin $OVSEC_KADM_ADMIN_SERVICE  null \
-		    $OVSEC_KADM_STRUCT_VERSION $OVSEC_KADM_API_VERSION_1 \
-		    server_handle
-	}] &&
-	[cmd [format {
-	    ovsec_kadm_create_policy $server_handle [simple_policy "%s"] \
+    set ret [cmd [format {
+	    ovsec_kadm_create_policy $lib_handle [simple_policy "%s"] \
 		    {OVSEC_KADM_POLICY}
 	} $name $name]]
-    }]
-
-    cmd {ovsec_kadm_destroy $server_handle}
-
-    api_exit
-    api_start
 
     return $ret
 }
 
 proc create_principal_pol {name policy} {
-    api_exit
-    api_start
+    lib_start_api
 
-    set ret [expr {
-	[cmd {
-	    ovsec_kadm_init admin admin $OVSEC_KADM_ADMIN_SERVICE  null \
-		    $OVSEC_KADM_STRUCT_VERSION $OVSEC_KADM_API_VERSION_1 \
-		    server_handle
-	}] &&
-	[cmd [format {
-	    ovsec_kadm_create_principal $server_handle [princ_w_pol "%s" \
+    set ret [cmd [format {
+	    ovsec_kadm_create_principal $lib_handle [princ_w_pol "%s" \
 		    "%s"] {OVSEC_KADM_PRINCIPAL OVSEC_KADM_POLICY} "%s"
-	} $name $policy $name]]
-    }]
-
-    cmd {ovsec_kadm_destroy $server_handle}
-
-    api_exit
-    api_start
+    } $name $policy $name]]
 
     return $ret
 }
 
 proc delete_principal {name} {
-    api_exit
-    api_start
+    lib_start_api
 
-    set ret [expr {
-	[cmd {
-	    ovsec_kadm_init admin admin $OVSEC_KADM_ADMIN_SERVICE null \
-		    $OVSEC_KADM_STRUCT_VERSION $OVSEC_KADM_API_VERSION_1 \
-		    server_handle
-	}] &&
-	[cmd [format {
-	    ovsec_kadm_delete_principal $server_handle "%s"
-	} $name]]
-    }]
-
-    cmd {ovsec_kadm_destroy $server_handle}
-
-    api_exit
-    api_start
+    set ret [cmd [format {
+	    ovsec_kadm_delete_principal $lib_handle "%s"
+    } $name]]
 
     return $ret
 }
 
 proc delete_policy {name} {
-    api_exit
-    api_start
+    lib_start_api
 
-    set ret [expr {
-	[cmd {
-	    ovsec_kadm_init admin admin $OVSEC_KADM_ADMIN_SERVICE null \
-		    $OVSEC_KADM_STRUCT_VERSION $OVSEC_KADM_API_VERSION_1 \
-		    server_handle
-	}] &&
-	[cmd [format {ovsec_kadm_delete_policy $server_handle "%s"} $name]]
-    }]
-
-    cmd {ovsec_kadm_destroy $server_handle}
-
-    api_exit
-    api_start
+    set ret [cmd [format {ovsec_kadm_delete_policy $lib_handle "%s"} $name]]
 
     return $ret
 }
 
 proc principal_exists {name} {
-    api_exit
-    api_start
-
 #    puts stdout "Starting principal_exists."
 
-    set ret [expr {
-        [cmd {
-	    ovsec_kadm_init admin admin $OVSEC_KADM_ADMIN_SERVICE null \
-		    $OVSEC_KADM_STRUCT_VERSION $OVSEC_KADM_API_VERSION_1 \
-		    server_handle
-	}] &&
-        [cmd [format {
-	    ovsec_kadm_get_principal $server_handle "%s" principal
-	} $name]]
-    }]
+    lib_start_api
 
-    cmd {ovsec_kadm_destroy $server_handle}
+    set ret [cmd [format {
+	ovsec_kadm_get_principal $lib_handle "%s" principal
+    } $name]]
 
-    api_exit
-    api_start
-
-#    puts stdout "Finishing principal_exists."
+#   puts stdout "Finishing principal_exists."
 
     return $ret
 }
 
 proc policy_exists {name} {
-    api_exit
-    api_start
+    lib_start_api
 
 #    puts stdout "Starting policy_exists."
 
-    set ret [expr {
-        [cmd {
-	    ovsec_kadm_init admin admin $OVSEC_KADM_ADMIN_SERVICE null \
-		    $OVSEC_KADM_STRUCT_VERSION $OVSEC_KADM_API_VERSION_1 \
-		    server_handle
-	}] &&
-        [cmd [format {
-	    ovsec_kadm_get_policy $server_handle "%s" policy
+    set ret [cmd [format {
+	    ovsec_kadm_get_policy $lib_handle "%s" policy
 	} $name]]
-    }]
-
-    cmd {ovsec_kadm_destroy $server_handle}
-
-    api_exit
-    api_start
 
 #    puts stdout "Finishing policy_exists."
 

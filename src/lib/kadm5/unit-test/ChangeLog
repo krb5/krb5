@@ -1,3 +1,15 @@
+Thu Oct 17 16:14:11 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* config/unix.exp, lib/lib.t: begin in process of making these
+ 	unit tests less horribly inefficient
+
+	* api.[02]/crte-principal.exp, api.[02].mod-principal: update unit
+ 	tests for new pw_expiration semantics [krb5-admin/87]
+
+	* Makefile.in: ditch the capi and sapi hack, just the api for
+ 	everything, and rename the log files after the tests complete so
+ 	they are both kept around for viewing [krb5-admin/82]
+
 Mon Oct 14 07:04:27 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* Makefile.in: Only try to run tests if both runtest and the tcl

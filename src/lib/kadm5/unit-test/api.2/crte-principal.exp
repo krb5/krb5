@@ -868,9 +868,11 @@ proc test32 {} {
 	    return
 	}
     }
-    if { [expr "$mod_date + $pw_max_life - $pw_expire"] > 5 } {
-	fail "$test: pw_expire is wrong"
+    if { $pw_expire != 0 } {
+	fail "$test: pw_expire $pw_expire should be 0"
 	return
+    } else {
+	pass "$test"
     }
     if { ! [cmd {kadm5_destroy $server_handle}]} {
 	error "$test: unexpected failure in destroy"
@@ -1090,10 +1092,13 @@ proc test36 {} {
 	    return
 	}
     }
-    if { [expr "$mod_date + $pw_max_life - $pw_expire"] > 5 } {
+    if { $pw_expire != 999999999 } {
 	fail "$test: pw_expire is wrong"
 	return
+    } else {
+	pass "$test"
     }
+
     if { ! [cmd {kadm5_destroy $server_handle}]} {
 	error "$test: unexpected failure in destroy"
 	return
