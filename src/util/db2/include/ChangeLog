@@ -1,3 +1,22 @@
+2004-05-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* db-int.h: Include sys/param.h if available.
+
+2004-05-07  Ken Raeburn  <raeburn@mit.edu>
+
+	* db-int.h: Include machine/endian.h if available.  Check for
+	__LITTLE_ENDIAN__ and __BIG_ENDIAN__, _MIPSEB and _MIPSEL.
+
+2004-05-05  Ken Raeburn  <raeburn@mit.edu>
+
+	* db-int.h: Include stdlib.h, and endian.h if available.
+	(LITTLE_ENDIAN, BIG_ENDIAN, BYTE_ORDER): If not defined, and if
+	versions with one or two leading underscores are defined, define
+	the no-underscore form in terms of the with-underscore one.
+	(DB_BYTE_ORDER): Define by checking LITTLE_ENDIAN, BIG_ENDIAN, and
+	BYTE_ORDER; report an error if that doesn't work.  Don't check
+	WORDS_BIGENDIAN.
+
 2002-09-05  Ken Raeburn  <raeburn@mit.edu>
 
 	* db-int.h: If stdint.h or inttypes.h are found, include them.

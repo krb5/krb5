@@ -53,25 +53,51 @@ if( retval) { \
   abort(); \
 } else printf ("OK\n");
   
+int compare_results(krb5_data *d1, krb5_data *d2)
+{
+    if (d1->length != d2->length) {
+	/* Decryption can leave a little trailing cruft.
+	   For the current cryptosystems, this can be up to 7 bytes.  */
+	if (d1->length + 8 <= d2->length)
+	    return EINVAL;
+	if (d1->length > d2->length)
+	    return EINVAL;
+    }
+    if (memcmp(d1->data, d2->data, d1->length)) {
+	return EINVAL;
+    }
+    return 0;
+}
+
 int
 main ()
 {
   krb5_context context = 0;
-  krb5_data  in, out, check, state;
+  krb5_data  in, in2, out, out2, check, check2, state;
   int i;
   size_t len;
-  krb5_enc_data enc_out;
+  krb5_enc_data enc_out, enc_out2;
   krb5_error_code retval;
   krb5_keyblock *key;
+
   in.data = "This is a test.\n";
   in.length = strlen (in.data);
+  in2.data = "This is another test.\n";
+  in2.length = strlen (in2.data);
 
   test ("Seeding random number generator",
 	krb5_c_random_seed (context, &in));
   out.data = malloc(2048);
+  out2.data = malloc(2048);
   check.data = malloc(2048);
+  check2.data = malloc(2048);
+  if (out.data == NULL || out2.data == NULL
+      || check.data == NULL || check2.data == NULL)
+      abort();
   out.length = 2048;
+  out2.length = 2048;
   check.length = 2048;
+  check2.length = 2048;
   for (i = 0; interesting_enctypes[i]; i++) {
     krb5_enctype enctype = interesting_enctypes [i];
     printf ("Testing enctype %d\n", enctype);
@@ -79,8 +105,8 @@ main ()
 	  krb5_init_keyblock (context, enctype, 0, &key));
     test ("Generating random key",
 	  krb5_c_make_random_key (context, enctype, key));
-    enc_out.ciphertext.data = out.data;
-    enc_out.ciphertext.length = out.length;
+    enc_out.ciphertext = out;
+    enc_out2.ciphertext = out2;
     /* We use an intermediate `len' because size_t may be different size 
        than `int' */
     krb5_c_encrypt_length (context, key->enctype, in.length, &len);
@@ -89,14 +115,29 @@ main ()
 	  krb5_c_encrypt (context, key, 7, 0, &in, &enc_out));
     test ("Decrypting",
 	  krb5_c_decrypt (context, key, 7, 0, &enc_out, &check));
+    test ("Comparing", compare_results (&in, &check));
+    enc_out.ciphertext.length = out.length;
+    check.length = 2048;
     test ("init_state",
 	  krb5_c_init_state (context, key, 7, &state));
-        test ("Encrypting with state",
+    test ("Encrypting with state",
 	  krb5_c_encrypt (context, key, 7, &state, &in, &enc_out));
-    test ("Decrypting",
-	  krb5_c_decrypt (context, key, 7, 0, &enc_out, &check));
+    test ("Encrypting again with state",
+	  krb5_c_encrypt (context, key, 7, &state, &in2, &enc_out2));
     test ("free_state",
 	  krb5_c_free_state (context, key, &state));
+    test ("init_state",
+	  krb5_c_init_state (context, key, 7, &state));
+    test ("Decrypting with state",
+	  krb5_c_decrypt (context, key, 7, &state, &enc_out, &check));
+    test ("Decrypting again with state",
+	  krb5_c_decrypt (context, key, 7, &state, &enc_out2, &check2));
+    test ("free_state",
+	  krb5_c_free_state (context, key, &state));
+    test ("Comparing",
+	  compare_results (&in, &check));
+    test ("Comparing",
+	  compare_results (&in2, &check2));
     krb5_free_keyblock (context, key);
   }
 

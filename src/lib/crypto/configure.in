@@ -1,7 +1,7 @@
 AC_INIT(configure.in)
 CONFIG_RULES
 
-AC_CHECK_HEADERS(memory.h unistd.h)
+AC_CHECK_HEADERS(memory.h unistd.h endian.h machine/endian.h)
 
 KRB5_RUN_FLAGS
 KRB5_BUILD_PROGRAM

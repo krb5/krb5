@@ -45,18 +45,11 @@ int main(argc, argv)
     char *argv[];
 {
     krb5_error_code retval;
-    extern krb5_kt_ops krb5_ktf_writable_ops;
     int sci_idx;
 
     retval = krb5_init_context(&kcontext);
     if (retval) {
         com_err(argv[0], retval, "while initializing krb5");
-	exit(1);
-    }
-    retval = krb5_kt_register(kcontext, &krb5_ktf_writable_ops);
-    if (retval) {
-	com_err(argv[0], retval,
-		"while registering writable key table functions");
 	exit(1);
     }
     sci_idx = ss_create_invocation("ktutil", "5.0", (char *)NULL,

@@ -56,6 +56,7 @@ krb5_fwd_tgt_creds(krb5_context context, krb5_auth_context auth_context, char *r
     int free_rhost = 0;
     krb5_enctype enctype = 0;
     krb5_keyblock *session_key;
+    krb5_boolean old_use_conf_ktypes = context->use_conf_ktypes;
 
     memset((char *)&creds, 0, sizeof(creds));
     memset((char *)&tgt, 0, sizeof(creds));
@@ -109,8 +110,10 @@ krb5_fwd_tgt_creds(krb5_context context, krb5_auth_context auth_context, char *r
 	goto errout;
 	
     /* fetch tgt directly from cache */
+    context->use_conf_ktypes = 1;
     retval = krb5_cc_retrieve_cred (context, cc, KRB5_TC_SUPPORTED_KTYPES,
 				    &creds, &tgt);
+    context->use_conf_ktypes = old_use_conf_ktypes;
     if (retval)
 	goto errout;
 
@@ -161,9 +164,15 @@ retval = KRB5_FWD_BAD_PRINCIPAL;
       kdcoptions &= ~(KDC_OPT_FORWARDABLE);
 
     if ((retval = krb5_get_cred_via_tkt(context, &tgt, kdcoptions,
-					addrs, &creds, &pcreds)))
-        goto errout;
-
+					addrs, &creds, &pcreds))) {
+	if (enctype) {
+	    creds.keyblock.enctype = 0;
+	    if ((retval = krb5_get_cred_via_tkt(context, &tgt, kdcoptions,
+						addrs, &creds, &pcreds))) 
+		goto errout;
+	}
+	else goto errout;
+    }
     retval = krb5_mk_1cred(context, auth_context, pcreds,
                            &scratch, &replaydata);
     krb5_free_creds(context, pcreds);

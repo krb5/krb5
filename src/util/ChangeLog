@@ -1,3 +1,35 @@
+2004-02-12  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (all-unix, clean-unix): Add new rule to build fake
+	root directory for _RLD_ROOT hacks.
+
+2003-05-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* depfix.sed: Don't check for krb524 headers.
+
+2003-05-18  Ken Raeburn  <raeburn@mit.edu>
+
+	* depgen.sed: Put print command on separate lines from
+	substitution commands, instead of using s///p form.
+
+2003-05-15  Tom Yu  <tlyu@mit.edu>
+
+	* mkrel: Remote autom4te.cache files.
+
+2003-04-24  Ken Raeburn  <raeburn@mit.edu>
+
+	* reconf: Restore support for 2.52; reject older versions.
+
+2003-04-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* reconf: Drop support for 2.52 and earlier.
+
+2003-04-10  Tom Yu  <tlyu@mit.edu>
+
+	* reconf: Warn if autoconf-2.52 is used, as it generates buggy
+	configure scripts that don't work with BSD /bin/sh, and don't
+	comply with POSIX.2 (no conditions inside "case" statement).
+
 2003-02-05  Tom Yu  <tlyu@mit.edu>
 
 	* mkrel: Exclude .rconf files.

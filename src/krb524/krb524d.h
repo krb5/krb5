@@ -20,4 +20,36 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-int krb524_debug = 0;
+#ifndef KRB524INT_H
+#define KRB524INT_H
+
+#include "port-sockets.h"
+#include "kerberosIV/krb.h"
+
+#ifndef KRB524INT_BEGIN_DECLS
+#ifdef __cplusplus
+#define KRB524INT_BEGIN_DECLS	extern "C" {
+#define KRB524INT_END_DECLS	}
+#else
+#define KRB524INT_BEGIN_DECLS
+#define KRB524INT_END_DECLS
+#endif
+#endif
+
+KRB524INT_BEGIN_DECLS
+
+int krb524_convert_tkt_skey
+	(krb5_context context, krb5_ticket *v5tkt, KTEXT_ST *v4tkt, 
+		   krb5_keyblock *v5_skey, krb5_keyblock *v4_skey,
+			struct sockaddr_in *saddr);
+
+/* conv_princ.c */
+
+int krb524_convert_princs
+	(krb5_context context, krb5_principal client, krb5_principal server,
+	 char *pname, char *pinst, char *prealm,
+	 char *sname, char *sinst, char *srealm);
+
+KRB524INT_END_DECLS
+
+#endif /* KRB524INT_H */

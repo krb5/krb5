@@ -44,10 +44,81 @@
 #define DB_LITTLE_ENDIAN 1234
 #define DB_BIG_ENDIAN 4321
 
+#include <stdlib.h>
+#ifdef HAVE_ENDIAN_H
+# include <endian.h>
+#endif
+#ifdef HAVE_MACHINE_ENDIAN_H
+# include <machine/endian.h>
+#endif
+#ifdef HAVE_SYS_PARAM_H
+# include <sys/param.h>
+#endif
+/* Handle both BIG and LITTLE defined and BYTE_ORDER matches one, or
+   just one defined; both with and without leading underscores.
+
+   Ignore "PDP endian" machines, this code doesn't support them
+   anyways.  */
+#if !defined(LITTLE_ENDIAN) && !defined(BIG_ENDIAN) && !defined(BYTE_ORDER)
+# ifdef __LITTLE_ENDIAN__
+#  define LITTLE_ENDIAN __LITTLE_ENDIAN__
+# endif
+# ifdef __BIG_ENDIAN__
+#  define BIG_ENDIAN __BIG_ENDIAN__
+# endif
+#endif
+#if !defined(LITTLE_ENDIAN) && !defined(BIG_ENDIAN) && !defined(BYTE_ORDER)
+# ifdef _LITTLE_ENDIAN
+#  define LITTLE_ENDIAN _LITTLE_ENDIAN
+# endif
+# ifdef _BIG_ENDIAN
+#  define BIG_ENDIAN _BIG_ENDIAN
+# endif
+# ifdef _BYTE_ORDER
+#  define BYTE_ORDER _BYTE_ORDER
+# endif
+#endif
+#if !defined(LITTLE_ENDIAN) && !defined(BIG_ENDIAN) && !defined(BYTE_ORDER)
+# ifdef __LITTLE_ENDIAN
+#  define LITTLE_ENDIAN __LITTLE_ENDIAN
+# endif
+# ifdef __BIG_ENDIAN
+#  define BIG_ENDIAN __BIG_ENDIAN
+# endif
+# ifdef __BYTE_ORDER
+#  define BYTE_ORDER __BYTE_ORDER
+# endif
+#endif
+
+#if defined(_MIPSEL) && !defined(LITTLE_ENDIAN)
+# define LITTLE_ENDIAN
+#endif
+#if defined(_MIPSEB) && !defined(BIG_ENDIAN)
+# define BIG_ENDIAN
+#endif
+
+#if defined(LITTLE_ENDIAN) && defined(BIG_ENDIAN) && defined(BYTE_ORDER)
+# if LITTLE_ENDIAN == BYTE_ORDER
+#  define DB_BYTE_ORDER DB_LITTLE_ENDIAN
+# elif BIG_ENDIAN == BYTE_ORDER
+#  define DB_BYTE_ORDER DB_BIG_ENDIAN
+# else
+#  error "LITTLE_ENDIAN and BIG_ENDIAN defined, but can't determine byte order"
+# endif
+#elif defined(LITTLE_ENDIAN) && !defined(BIG_ENDIAN)
+# define DB_BYTE_ORDER DB_LITTLE_ENDIAN
+#elif defined(BIG_ENDIAN) && !defined(LITTLE_ENDIAN)
+# define DB_BYTE_ORDER DB_BIG_ENDIAN
+#else
+# error "can't determine byte order from included system headers"
+#endif
+
+#if 0
 #ifdef WORDS_BIGENDIAN
 #define DB_BYTE_ORDER DB_BIG_ENDIAN
 #else
 #define DB_BYTE_ORDER DB_LITTLE_ENDIAN
+#endif
 #endif
 
 /* end autoconf-based stuff */

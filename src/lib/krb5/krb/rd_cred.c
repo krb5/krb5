@@ -33,14 +33,10 @@ decrypt_credencdata(krb5_context context, krb5_cred *pcred, krb5_keyblock *pkeyb
 
     /*  now decode the decrypted stuff */
     if ((retval = decode_krb5_enc_cred_part(&scratch, &ppart)))
-    	goto cleanup_encpart;
+    	goto cleanup;
 
     *pcredenc = *ppart;
     retval = 0;
-
-cleanup_encpart:
-    memset(ppart, 0, sizeof(*ppart));
-    krb5_xfree(ppart);
 
 cleanup:
     memset(scratch.data, 0, scratch.length);
@@ -169,9 +165,8 @@ krb5_rd_cred(krb5_context context, krb5_auth_context auth_context, krb5_data *pc
     krb5_replay_data      replaydata;
 
     /* Get keyblock */
-    if ((keyblock = auth_context->remote_subkey) == NULL)
-	if ((keyblock = auth_context->local_subkey) == NULL)
-            keyblock = auth_context->keyblock;
+    if ((keyblock = auth_context->recv_subkey) == NULL)
+	keyblock = auth_context->keyblock;
 
     if (((auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_RET_TIME) ||
       (auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_RET_SEQUENCE)) &&
