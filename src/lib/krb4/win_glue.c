@@ -44,7 +44,7 @@ krb_end_session(x)
 	return KSUCCESS;
 }
 
-void
+void KRB5_CALLCONV
 krb_set_tkt_string(val)
 char *val;
 {

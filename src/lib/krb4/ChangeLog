@@ -1,3 +1,9 @@
+2002-12-16  Tom Yu  <tlyu@mit.edu>
+
+	* tkt_string.c (krb5_set_tkt_string): Add KRB5_CALLCONV.
+
+	* win_glue.c (krb_set_tkt_string): Add KRB5_CALLCONV.
+
 2002-12-13  Tom Yu  <tlyu@mit.edu>
 
 	* ad_print.c, g_in_tkt.c, g_pw_in_tkt.c, kadm_net.c, klog.c:

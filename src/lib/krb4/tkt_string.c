@@ -90,7 +90,7 @@ const char *tkt_string()
  * and return an undesired ticket file name until this routine is called.
  */
 
-void
+void KRB5_CALLCONV
 krb_set_tkt_string(val)
 char *val;
 {
