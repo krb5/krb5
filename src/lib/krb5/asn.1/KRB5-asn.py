@@ -324,6 +324,13 @@ METHOD-DATA ::= SEQUENCE {
 	method-data[1]	OCTET STRING OPTIONAL
 }
 
+ETYPE-INFO-ENTRY ::= SEQUENCE {
+	etype[0]	INTEGER,
+	salt[1]		OCTET STRING OPTIONAL
+}
+
+ETYPE-INFO ::= SEQUENCE OF ETYPE-INFO-ENTRY
+
 -- These ASN.1 definitions are NOT part of the official Kerberos protocol... 
 
 -- New ASN.1 definitions for the kadmin protocol.

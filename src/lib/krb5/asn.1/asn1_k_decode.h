@@ -138,6 +138,9 @@ asn1_error_code asn1_decode_pa_data
 asn1_error_code asn1_decode_passwdsequence
 	PROTOTYPE((asn1buf *buf, passwd_phrase_element *val));
 
+asn1_error_code asn1_decode_etype_info_entry
+	PROTOTYPE((asn1buf *buf, krb5_etype_info_entry *val));
+
 /* arrays */
 asn1_error_code asn1_decode_authorization_data
 	PROTOTYPE((asn1buf *buf, krb5_authdata ***val));
@@ -157,6 +160,9 @@ asn1_error_code asn1_decode_sequence_of_enctype
 
 asn1_error_code asn1_decode_sequence_of_passwdsequence
 	PROTOTYPE((asn1buf *buf, passwd_phrase_element ***val));
+
+asn1_error_code asn1_decode_etype_info
+	PROTOTYPE((asn1buf *buf, krb5_etype_info_entry ***val));
 
 
 #endif

@@ -1,3 +1,20 @@
+Mon Aug 28 12:54:05 1995    <tytso@rsts-11.mit.edu>
+
+	* krb5_decode.c (decode_krb5_alt_method,
+		decode_krb5_etype_info): New functions for
+		decoding some new data structures.
+
+	* krb5_encode.c (encode_krb5_alt_method, encode_krb5_etype_info):
+		New functions for encoding some new data structures.
+
+	* asn1_k_decode.c (asn1_decode_etype_info_entry,
+		asn1_decode_etype_info): Added new functions to decode 
+		some new data structures.
+
+	* asn1_k_encode.c (asn1_encode_etype_info_entry,
+		asn1_encode_etype_info): Added new functions to encode
+		some new data structures.
+
 Fri Aug 25 21:43:42 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* krb5_encode.c (encode_krb5_padata_sequence): New function which

@@ -697,6 +697,35 @@ krb5_error_code encode_krb5_authdata(rep, code)
   krb5_cleanup();
 }
 
+krb5_error_code encode_krb5_alt_method(rep, code)
+     const krb5_alt_method * rep;
+     krb5_data ** code;
+{
+  krb5_setup();
+
+  /* method-data[1]		OctetString OPTIONAL */
+  if(rep->data != NULL && rep->length > 0)
+    krb5_addlenfield(rep->length,rep->data,1,asn1_encode_octetstring);
+
+  /* method-type[0]		Integer */
+  krb5_addfield(rep->method,0,asn1_encode_integer);
+
+  krb5_makeseq();
+
+  krb5_cleanup();
+}
+
+krb5_error_code encode_krb5_etype_info( rep, code)
+     const krb5_etype_info_entry ** rep;
+     krb5_data ** code;
+{
+  krb5_setup();
+  retval = asn1_encode_etype_info(buf,rep,&length);
+  if(retval) return retval;
+  sum += length;
+  krb5_cleanup();
+}
+
 /* Sandia Additions */
 krb5_error_code encode_krb5_pwd_sequence( rep, code)
      const passwd_phrase_element * rep;

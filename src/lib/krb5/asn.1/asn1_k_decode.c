@@ -657,6 +657,32 @@ asn1_error_code asn1_decode_sequence_of_enctype(buf, num, val)
   cleanup();
 }
 
+asn1_error_code asn1_decode_etype_info_entry(buf, val)
+     asn1buf * buf;
+     krb5_etype_info_entry * val;
+{
+  setup();
+  { begin_structure();
+    get_field(val->etype,0,asn1_decode_ui_4);
+    if (tagnum == 1) {
+	    get_lenfield(val->length,val->salt,1,asn1_decode_octetstring);
+    } else {
+	    val->length = 0;
+	    val->salt = 0;
+    }
+    end_structure();
+    val->magic = KV5M_ETYPE_INFO_ENTRY;
+  }
+  cleanup();
+}
+
+asn1_error_code asn1_decode_etype_info(buf, val)
+     asn1buf * buf;
+     krb5_etype_info_entry *** val;
+{
+  decode_array_body(krb5_etype_info_entry,asn1_decode_etype_info_entry);
+}
+
 asn1_error_code asn1_decode_passwdsequence(buf, val)
      asn1buf * buf;
      passwd_phrase_element * val;

@@ -615,3 +615,37 @@ krb5_error_code decode_krb5_padata_sequence(code, rep)
   cleanup();
 }
 
+krb5_error_code decode_krb5_alt_method(code, rep)
+     const krb5_data * code;
+     krb5_alt_method ** rep;
+{
+  setup();
+  alloc_field(*rep,krb5_alt_method);
+  { begin_structure();
+    get_field((*rep)->method,0,asn1_decode_int);
+    if (tagnum == 1) {
+	get_lenfield((*rep)->length,(*rep)->data,1,asn1_decode_octetstring);
+    } else {
+	(*rep)->length = 0;
+	(*rep)->data = 0;
+    }
+    (*rep)->magic = KV5M_ALT_METHOD;
+    end_structure();
+  }
+  cleanup();
+}
+
+krb5_error_code decode_krb5_etype_info(code, rep)
+     const krb5_data * code;
+     krb5_etype_info_entry ***rep;
+{
+  setup_buf_only();
+  *rep = 0;
+  retval = asn1_decode_etype_info(&buf,rep);
+  if(retval) return (krb5_error_code)retval;
+  cleanup();
+}
+
+  
+    
+	

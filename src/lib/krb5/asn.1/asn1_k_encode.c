@@ -767,6 +767,45 @@ asn1_error_code asn1_encode_krb_cred_info(buf, val, retlen)
   asn1_cleanup();
 }
 
+asn1_error_code asn1_encode_etype_info_entry(buf, val, retlen)
+     asn1buf * buf;
+     const krb5_etype_info_entry * val;
+     int * retlen;
+{
+  asn1_setup();
+
+  if(val == NULL || (val->length != 0 && val->salt == NULL))
+     return ASN1_MISSING_FIELD;
+
+  if (val->length)
+	  asn1_addlenfield(val->length,val->salt,1,
+			   asn1_encode_octetstring);
+  asn1_addfield(val->etype,0,asn1_encode_integer);
+  asn1_makeseq();
+
+  asn1_cleanup();
+}
+
+asn1_error_code asn1_encode_etype_info(buf, val, retlen)
+     asn1buf * buf;
+     const krb5_etype_info_entry ** val;
+     int * retlen;
+{
+    asn1_setup();
+    int i;
+  
+    if (val == NULL) return ASN1_MISSING_FIELD;
+  
+    for(i=0; val[i] != NULL; i++); /* get to the end of the array */
+    for(i--; i>=0; i--){
+	retval = asn1_encode_etype_info_entry(buf,val[i],&length);
+	if(retval) return retval;
+	sum += length;
+    }
+    asn1_makeseq();
+    asn1_cleanup();
+}
+
 asn1_error_code asn1_encode_sequence_of_passwdsequence(buf, val, retlen)
      asn1buf * buf;
      const passwd_phrase_element ** val;
@@ -798,3 +837,4 @@ asn1_error_code asn1_encode_passwdsequence(buf, val, retlen)
   asn1_makeseq();
   asn1_cleanup();
 }
+

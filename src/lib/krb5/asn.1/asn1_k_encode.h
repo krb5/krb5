@@ -206,6 +206,18 @@ asn1_error_code asn1_encode_last_req_entry
 asn1_error_code asn1_encode_pa_data
 	PROTOTYPE((asn1buf *buf, const krb5_pa_data *val, int *retlen));
 
+asn1_error_code asn1_encode_alt_method
+	PROTOTYPE((asn1buf *buf, const krb5_alt_method *val,
+		   int *retlen));
+
+asn1_error_code asn1_encode_etype_info_entry
+	PROTOTYPE((asn1buf *buf, const krb5_etype_info_entry *val,
+		   int *retlen));
+
+asn1_error_code asn1_encode_etype_info
+	PROTOTYPE((asn1buf *buf, const krb5_etype_info_entry **val,
+		   int *retlen));
+
 asn1_error_code asn1_encode_passwdsequence
 	PROTOTYPE((asn1buf *buf, const passwd_phrase_element *val, int *retlen));
 
