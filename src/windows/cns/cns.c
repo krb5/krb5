@@ -384,12 +384,13 @@ kwin_push_login(HWND hwnd, char *name, char *instance, char *realm)
   char menuitem[MAX_K_NAME_SZ + 3];
   BOOL rc;
 
-  strcpy(fullname, "&x ");
-  strcat(fullname, name);
-  strcat(fullname, ".");
-  strcat(fullname, instance);
-  strcat(fullname, "@");
-  strcat(fullname, realm);
+  fullname[sizeof(fullname) - 1] = '\0';
+  strncpy(fullname, "&x ", sizeof(fullname) - 1);
+  strncat(fullname, name, sizeof(fullname) - 1 - strlen(fullname));
+  strncat(fullname, ".", sizeof(fullname) - 1 - strlen(fullname));
+  strncat(fullname, instance, sizeof(fullname) - 1 - strlen(fullname));
+  strncat(fullname, "@", sizeof(fullname) - 1 - strlen(fullname));
+  strncat(fullname, realm, sizeof(fullname) - 1 - strlen(fullname));
 
   hmenu = GetMenu(hwnd);
   assert(hmenu != NULL);
@@ -1339,14 +1340,16 @@ kwin_command(HWND hwnd, int cid, HWND hwndCtl, UINT codeNotify)
     strcpy(copyright, "        Kerberos V5 for Windows ");
 #endif
 #ifdef _WIN32
-    strcat(copyright, "32-bit\n");
+    strncat(copyright, "32-bit\n", sizeof(copyright) - 1 - strlen(copyright));
 #else
-    strcat(copyright, "16-bit\n");
+    strncat(copyright, "16-bit\n", sizeof(copyright) - 1 - strlen(copyright));
 #endif
-    strcat(copyright, "\n                Version 1.12\n\n");
+    strncat(copyright, "\n                Version 1.12\n\n",
+            sizeof(copyright) - 1 - strlen(copyright));
 #ifdef ORGANIZATION
-    strcat(copyright, "          For information, contact:\n");
-    strcat(copyright, ORGANIZATION);
+    strncat(copyright, "          For information, contact:\n",
+	    sizeof(copyright) - 1 - strlen(copyright));
+    strncat(copyright, ORGANIZATION, sizeof(copyright) - 1 - strlen(copyright));
 #endif
     MessageBox(hwnd, copyright, KWIN_DIALOG_NAME, MB_OK);
 
@@ -1469,8 +1472,9 @@ kwin_paint(HWND hwnd)
       sprintf(buf, "%s - %ld hr", KWIN_DIALOG_NAME, dt);
     }
 
+    buf[sizeof(buf) - 1] = '\0';
     if (dt > 1)
-      strcat(buf, "s");
+      strncat(buf, "s", sizeof(buf) - 1 - strlen(buf));
   }
 
   DrawIcon(hdc, r.left, r.top, hicon);

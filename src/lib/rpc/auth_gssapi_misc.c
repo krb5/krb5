@@ -162,15 +162,17 @@ static void auth_gssapi_display_status_1(m, code, type, rec)
 		    auth_gssapi_display_status_1(m,gssstat,GSS_C_GSS_CODE,1); 
 		    auth_gssapi_display_status_1(m, minor_stat,
 						 GSS_C_MECH_CODE, 1);
-	       } else
-		    fprintf(stderr,
-			    "GSS-API authentication error %s: recursive failure!\n",
-			    msg);
+	       } else {
+		   fputs ("GSS-API authentication error ", stderr);
+		   fwrite (msg.value, msg.length, 1, stderr);
+		   fputs (": recursive failure!\n", stderr);
+	       }
 	       return;
 	  }
-	  
-	  fprintf(stderr, "GSS-API authentication error %s: %s\n", m,
-		  (char *)msg.value); 
+
+	  fprintf (stderr, "GSS-API authentication error %s: ", m);
+	  fwrite (msg.value, msg.length, 1, stderr);
+	  putc ('\n', stderr);
 	  (void) gss_release_buffer(&minor_stat, &msg);
 	  
 	  if (!msg_ctx)

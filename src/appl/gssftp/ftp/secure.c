@@ -52,6 +52,11 @@ extern struct	sockaddr_in myaddr;
 extern int	dlevel;
 extern char	*auth_type;
 
+/* Some libc's (GNU libc, at least) define MAX as a macro. Forget that. */
+#ifdef MAX
+#undef MAX
+#endif
+
 #define MAX maxbuf
 extern unsigned int maxbuf; 	/* maximum output buffer size */
 extern unsigned char *ucbuf;	/* cleartext buffer */

@@ -24,7 +24,7 @@ struct _locklist {
 osa_adb_ret_t osa_adb_create_db(char *filename, char *lockfilename,
 				int magic)
 {
-     FILE *lf;
+     int lf;
      DB *db;
      HASHINFO info;
      
@@ -41,10 +41,10 @@ osa_adb_ret_t osa_adb_create_db(char *filename, char *lockfilename,
 	  return errno;
 
      /* only create the lock file if we successfully created the db */
-     lf = fopen(lockfilename, "w+");
-     if (lf == NULL)
+     lf = THREEPARAMOPEN(lockfilename, O_RDWR | O_CREAT | O_EXCL, 0600);
+     if (lf == -1)
 	  return errno;
-     (void) fclose(lf);
+     (void) close(lf);
      
      return OSA_ADB_OK;
 }
@@ -333,7 +333,7 @@ osa_adb_ret_t osa_adb_get_lock(osa_adb_db_t db, int mode)
 
 osa_adb_ret_t osa_adb_release_lock(osa_adb_db_t db)
 {
-     int ret;
+     int ret, fd;
      
      if (!db->lock->lockcnt)		/* lock already unlocked */
 	  return OSA_ADB_NOTLOCKED;
@@ -341,8 +341,9 @@ osa_adb_ret_t osa_adb_release_lock(osa_adb_db_t db)
      if (--db->lock->lockcnt == 0) {
 	  if (db->lock->lockmode == OSA_ADB_PERMANENT) {
 	       /* now we need to create the file since it does not exist */
-	       if ((db->lock->lockfile = fopen(db->lock->filename,
-					       "w+")) == NULL)
+               fd = THREEPARAMOPEN(db->lock->filename,O_RDWR | O_CREAT | O_EXCL,
+                                   0600);
+	       if ((db->lock->lockfile = fdopen(fd, "w+")) == NULL)
 		    return OSA_ADB_NOLOCKFILE;
 	  } else if (ret = krb5_lock_file(db->lock->context,
 					  fileno(db->lock->lockfile),

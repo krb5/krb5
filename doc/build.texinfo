@@ -59,8 +59,8 @@ only need to build Kerberos for one platform, using a single directory
 tree which contains both the source files and the object files is the
 simplest.  However, if you need to maintain Kerberos for a large number
 of platforms, you will probably want to use separate build trees for
-each platform. We recommend that you look at see @ref{OS
-Incompatibilities} for notes that we have on particular operating
+each platform. We recommend that you look at @ref{OS
+Incompatibilities}, for notes that we have on particular operating
 systems. 
 
 @menu
@@ -208,7 +208,7 @@ Kerberos and then want to run the KADM5 tests, you will need to
 re-configure the tree and run @code{make} at the top level again to make
 sure all the proper programs are built.  To save time, you actually only
 need to reconfigure and build in the directories src/kadmin/testing,
-src/lib/rpc, src/lib/kadm5, and src/kpasswd.
+src/lib/rpc, src/lib/kadm5.
 
 @node Options to Configure, osconf.h, Testing the Build, Building Kerberos V5
 @section Options to Configure 
@@ -301,12 +301,6 @@ default, Kerberos V5 configuration will look for @code{-lnsl} and
 (see @ref{Solaris versions 2.0 through 2.3}) or fails to pass the tests in
 @file{src/tests/resolv} you will need to use this option.
 
-@item --enable-shared
-
-This option will turn on the building and use of shared library objects
-in the Kerberos build. This option is only supported on certain
-platforms. 
-
 @item --with-vague-errors
 
 If enabled, gives vague and unhelpful error messages to the client... er,
@@ -329,10 +323,30 @@ Tcl. The directory specified by @code{TCLPATH} specifies where the Tcl
 header file (@file{TCLPATH/include/tcl.h} as well as where the Tcl
 library should be found (@file{TCLPATH/lib}).
 
+@item --enable-shared
+
+This option will turn on the building and use of shared library objects
+in the Kerberos build. This option is only supported on certain
+platforms. 
+
+@item --enable-dns
+@itemx --enable-dns-for-kdc
+@itemx --enable-dns-for-realm
+
+Enable the use of DNS to look up a host's Kerberos realm, or a realm's
+KDCs.  See @x @x @xxxxx.
+
+@item --enable-kdc-replay-cache
+
+Enable a cache in the KDC to detect retransmitted messages, and resend
+the previous responses to them.  This protects against certain types of
+attempts to extract information from the KDC through some of the
+hardware preauthentication systems.
+
 @end table
 
 For example, in order to configure Kerberos on a Solaris machine using
-the @samp{suncc} with the optimizer turned on, run the configure
+the @samp{suncc} compiler with the optimizer turned on, run the configure
 script with the following options:
 
 @example
@@ -464,6 +478,10 @@ was never a problem in using GCC version 2.6.3.
 
 In version 3.2 and beyond of the operating system, we have not seen any
 problems with the native compiler. 
+
+@c @node Alpha Tru64 UNIX 5.0
+@c @subsection Alpha Tru64 UNIX 5.0
+@c ... login.krb5 problems
 
 @node BSDI, HPUX, Alpha OSF/1 (Digital Unix) V2.0++, OS Incompatibilities
 @subsection BSDI

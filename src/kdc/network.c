@@ -1,7 +1,7 @@
 /*
  * kdc/network.c
  *
- * Copyright 1990 by the Massachusetts Institute of Technology.
+ * Copyright 1990,2000 by the Massachusetts Institute of Technology.
  *
  * Export of this software from the United States of America may
  *   require a specific license from the United States Government.
@@ -35,6 +35,7 @@
 #include <sys/ioctl.h>
 #include <syslog.h>
 
+#include <stddef.h>
 #include <ctype.h>
 #ifdef HAVE_NETINET_IN_H
 #include <sys/types.h>
@@ -120,13 +121,14 @@ foreach_localaddr (data, pass1fn, betweenfn, pass2fn)
     int (*betweenfn) (void *);
     int (*pass2fn) (void *, struct sockaddr *);
 {
-    struct ifreq *ifr, ifreq;
+    struct ifreq *ifr, ifreq, *ifr2;
     struct ifconf ifc;
-    int s, code, n, i;
+    int s, code, n, i, j;
     int est_if_count = 8, est_ifreq_size;
     char *buf = 0;
     size_t current_buf_size = 0;
-    
+    int fail = 0;
+
     s = socket (USE_AF, USE_TYPE, USE_PROTO);
     if (s < 0)
 	return SOCKET_ERRNO;
@@ -184,6 +186,7 @@ foreach_localaddr (data, pass1fn, betweenfn, pass2fn)
 
 	    continue;
 	}
+
 #ifdef IFF_LOOPBACK
 	    /* None of the current callers want loopback addresses.  */
 	if (ifreq.ifr_flags & IFF_LOOPBACK)
@@ -193,13 +196,32 @@ foreach_localaddr (data, pass1fn, betweenfn, pass2fn)
 	if (!(ifreq.ifr_flags & IFF_UP))
 	    goto skip;
 
+	/* Make sure we didn't process this address already.  */
+	for (j = 0; j < i; j += ifreq_size(*ifr2)) {
+	    ifr2 = (struct ifreq *)((caddr_t) ifc.ifc_buf+j);
+	    if (ifr2->ifr_name[0] == 0)
+		continue;
+	    if (ifr2->ifr_addr.sa_family == ifr->ifr_addr.sa_family
+		&& ifreq_size (*ifr) == ifreq_size (*ifr2)
+		/* Compare address info.  If this isn't good enough --
+		   i.e., if random padding bytes turn out to differ
+		   when the addresses are the same -- then we'll have
+		   to do it on a per address family basis.  */
+		&& !memcmp (&ifr2->ifr_addr.sa_data, &ifr->ifr_addr.sa_data,
+			    (ifreq_size (*ifr)
+			     - offsetof (struct ifreq, ifr_addr.sa_data))))
+		goto skip;
+	}
+
 	if ((*pass1fn) (data, &ifr->ifr_addr)) {
-	    abort ();
+	    fail = 1;
+	    goto punt;
 	}
     }
 
     if (betweenfn && (*betweenfn)(data)) {
-	abort ();
+	fail = 1;
+	goto punt;
     }
 
     if (pass2fn)
@@ -211,13 +233,15 @@ foreach_localaddr (data, pass1fn, betweenfn, pass2fn)
 		continue;
 
 	    if ((*pass2fn) (data, &ifr->ifr_addr)) {
-		abort ();
+		fail = 1;
+		goto punt;
 	    }
 	}
+ punt:
     closesocket(s);
     free (buf);
 
-    return 0;
+    return fail;
 }
 
 struct socksetup {

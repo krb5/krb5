@@ -1394,13 +1394,15 @@ krb5_error_code krb5_get_default_in_tkt_ktypes
 krb5_error_code krb5_set_default_tgs_ktypes
 	KRB5_PROTOTYPE((krb5_context,
 		krb5_const krb5_enctype *));
-krb5_error_code krb5_get_tgs_ktypes
+krb5_error_code KRB5_CALLCONV krb5_get_tgs_ktypes
 	KRB5_PROTOTYPE((krb5_context,
 		krb5_const_principal,
 		krb5_enctype **));
 
 krb5_error_code krb5_get_permitted_enctypes
 	KRB5_PROTOTYPE((krb5_context, krb5_enctype **));
+void KRB5_CALLCONV krb5_free_ktypes
+	KRB5_PROTOTYPE ((krb5_context, krb5_enctype *));
 
 krb5_boolean krb5_is_permitted_enctype
 	KRB5_PROTOTYPE((krb5_context, krb5_enctype));
@@ -1799,6 +1801,9 @@ KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_get_default_realm
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_set_default_realm
 	KRB5_PROTOTYPE((krb5_context,
 		   krb5_const char FAR * ));
+KRB5_DLLIMP void KRB5_CALLCONV krb5_free_default_realm
+	KRB5_PROTOTYPE((krb5_context,
+		   char FAR * ));
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_sname_to_principal
 	KRB5_PROTOTYPE((krb5_context,
 		krb5_const char FAR *,
@@ -1976,6 +1981,15 @@ KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_recvauth
 		krb5_int32, 
 		krb5_keytab,
 		krb5_ticket FAR * FAR *));
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_recvauth_version
+	KRB5_PROTOTYPE((krb5_context,
+		krb5_auth_context FAR *,
+		krb5_pointer,
+		krb5_principal,
+		krb5_int32, 
+		krb5_keytab,
+		krb5_ticket FAR * FAR *,
+		krb5_data FAR *));
 
 krb5_error_code krb5_walk_realm_tree
 	KRB5_PROTOTYPE((krb5_context,
@@ -2383,6 +2397,24 @@ KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_decode_ticket
 KRB5_PROTOTYPE((const krb5_data *code, 
 		krb5_ticket **rep));
+
+KRB5_DLLIMP void KRB5_CALLCONV
+krb5_appdefault_string
+KRB5_PROTOTYPE((krb5_context context,
+		const char *appname,  
+	        const krb5_data *realm,
+ 		const char *option,
+		const char *default_value,
+		char ** ret_value));
+
+KRB5_DLLIMP void KRB5_CALLCONV
+krb5_appdefault_boolean
+KRB5_PROTOTYPE((krb5_context context,
+		const char *appname,  
+	        const krb5_data *realm,
+ 		const char *option,
+		int default_value,
+		int *ret_value));
 
 /*
  * The realm iterator functions

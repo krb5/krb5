@@ -511,7 +511,7 @@ krb5_error_code krb5_sendto_kdc
 		const krb5_data *,
 		const krb5_data *,
 		krb5_data *,
-		int *));
+		int));
 krb5_error_code krb5_get_krbhst
 	KRB5_PROTOTYPE((krb5_context,
 		const krb5_data *,
@@ -555,9 +555,8 @@ krb5_error_code krb5_locate_srv_conf
 			const krb5_data *,
 			const char *,
 			struct sockaddr **,
-			int *,
-			int *,
-			int *));
+			int*,
+            int));
 
 /* no context? */
 krb5_error_code krb5_locate_srv_dns
@@ -565,7 +564,7 @@ krb5_error_code krb5_locate_srv_dns
 			const char *,
 			const char *,
 			struct sockaddr **,
-			int *));
+			int*));
 
 #endif /* KRB5_LIBOS_PROTO__ */
 
@@ -788,11 +787,12 @@ KRB5_PROTOTYPE((krb5_context context, krb5_const krb5_keyblock *key,
 #define KRB5_LIBOS__
 
 typedef struct _krb5_os_context {
-	krb5_magic	magic;
-	krb5_int32	time_offset;
-	krb5_int32	usec_offset;
-	krb5_int32	os_flags;
-	char *		default_ccname;
+	krb5_magic		magic;
+	krb5_int32		time_offset;
+	krb5_int32		usec_offset;
+	krb5_int32		os_flags;
+	char *			default_ccname;
+	krb5_principal	default_ccprincipal;
 } *krb5_os_context;
 
 /*
@@ -965,7 +965,7 @@ KRB5_PROTOTYPE((krb5_context context,
 		krb5_get_init_creds_opt *options,
 		krb5_gic_get_as_key_fct gak,
 		void *gak_data,
-		int *master,
+		int master,
 		krb5_kdc_rep **as_reply));
 
 
@@ -1506,6 +1506,8 @@ KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_ser_unpack_bytes
 		krb5_octet FAR * FAR *,
 		size_t FAR *));
 
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5int_cc_default
+	KRB5_PROTOTYPE((krb5_context, krb5_ccache FAR *));
 
 krb5_error_code KRB5_CALLCONV krb5_cc_retrieve_cred_default
 	KRB5_PROTOTYPE((krb5_context, krb5_ccache, krb5_flags,

@@ -69,7 +69,8 @@ void acl_canonicalize_principal(principal, canon)
 char *principal;
 char *canon;
 {
-    char *dot, *atsign, *end;
+    char *dot, *atsign, *end, *canon_save = canon;
+    char realm[REALM_SZ];
     int len;
 
     dot = strchr(principal, INST_SEP);
@@ -94,18 +95,33 @@ char *canon;
 
     /* Get the principal name */
     len = MIN(ANAME_SZ, COR(dot, COR(atsign, end)) - principal);
-    strncpy(canon, principal, len);
-    canon += len;
+    if(canon + len < canon_save + MAX_PRINCIPAL_SIZE) {
+    	strncpy(canon, principal, len);
+    	canon += len;
+    } else {
+	strcpy(canon, "");
+	return;
+    }
 
     /* Add INST_SEP */
-    *canon++ = INST_SEP;
+    if(canon + 1 < canon_save + MAX_PRINCIPAL_SIZE) {
+    	*canon++ = INST_SEP;
+    } else {
+	strcpy(canon, "");
+	return;
+    }
 
     /* Get the instance, if it exists */
     if(dot != NULL) {
 	++dot;
 	len = MIN(INST_SZ, COR(atsign, end) - dot);
-	strncpy(canon, dot, len);
-	canon += len;
+        if(canon + len < canon_save + MAX_PRINCIPAL_SIZE) {
+	    strncpy(canon, dot, len);
+	    canon += len;
+	} else {
+	    strcpy(canon, "");
+	    return;
+	}
     }
 
     /* Add REALM_SEP */
@@ -116,11 +132,21 @@ char *canon;
     if(atsign != NULL) {
 	++atsign;
 	len = MIN(REALM_SZ, end - atsign);
-	strncpy(canon, atsign, len);
-	canon += len;
-	*canon++ = '\0';
-    } else if(krb_get_lrealm(canon, 1) != KSUCCESS) {
-	strcpy(canon, KRB_REALM);
+        if(canon + len + 1 < canon_save + MAX_PRINCIPAL_SIZE) {
+	    strncpy(canon, atsign, len);
+	    canon += len;
+	    *canon++ = '\0';
+	} else {
+	    strcpy(canon, "");
+	    return;
+	}
+    } else if(krb_get_lrealm(realm, 1) != KSUCCESS) {
+        if(canon + strlen(realm) < canon_save + MAX_PRINCIPAL_SIZE) {
+	    strcpy(canon, KRB_REALM);
+	} else {
+	    strcpy(canon, "");
+	    return;
+	}
     }
 }
 	    
@@ -399,7 +425,11 @@ char *name;
     }
 
     /* Set up the acl */
-    strcpy(acl_cache[i].filename, name);
+    if (strlen (name) >= sizeof (acl_cache[i].filename) - 1) {
+	return -1;
+    }
+    strncpy(acl_cache[i].filename, name, sizeof(acl_cache[i].filename) - 1);
+    acl_cache[i].filename[sizeof(acl_cache[i].filename) - 1] = '\0';
     if((acl_cache[i].fd = open(name, O_RDONLY, 0)) < 0) return(-1);
     /* Force reload */
     acl_cache[i].acl = (struct hashtbl *) 0;
@@ -426,7 +456,9 @@ char *name;
 	   while(fgets(buf, sizeof(buf), f) != NULL) {
 	       nuke_whitespace(buf);
 	       acl_canonicalize_principal(buf, canon);
-	       add_hash(acl_cache[i].acl, canon);
+	       if(strlen(canon) > 0) {
+	           add_hash(acl_cache[i].acl, canon);
+	       }
 	   }
 	   fclose(f);
 	   acl_cache[i].status = s;
@@ -459,6 +491,9 @@ char *principal;
 
     acl_canonicalize_principal(principal, canon);
 
+    /* Is it an invalid principal name? */
+    if(strlen(canon) == 0) return(0);
+
     /* Is it there? */
     if(acl_exact_match(acl, canon)) return(1);
 
@@ -488,6 +523,9 @@ char *principal;
     char canon[MAX_PRINCIPAL_SIZE];
 
     acl_canonicalize_principal(principal, canon);
+
+    /* Is it an invalid principal name? */
+    if(strlen(canon) == 0) return(-1);
 
     if((new = acl_lock_file(acl)) == NULL) return(-1);
     if((acl_exact_match(acl, canon))
@@ -522,6 +560,9 @@ char *principal;
     char canon[MAX_PRINCIPAL_SIZE];
 
     acl_canonicalize_principal(principal, canon);
+
+    /* Is it an invalid principal name? */
+    if(strlen(canon) == 0) return(-1);
 
     if((new = acl_lock_file(acl)) == NULL) return(-1);
     if((!acl_exact_match(acl, canon))

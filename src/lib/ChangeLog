@@ -1,3 +1,36 @@
+2000-06-02  Danilo Almeida  <dalmeida@mit.edu>
+
+	* win_glue.c (GetCallingAppVerInfo, krb5_vercheck): Use
+	APPVERINFO_SIZE-sized buffers instead of hard-coding a number
+	everywhere.  Document the buffer size in funciton documentation.
+
+	* krb5_32.def: Add krb5int_cc_default for the benefit of GSS API DLL.
+
+2000-05-23  Nalin Dahyabhai  <nalin@redhat.com>
+
+	* win_glue.c (GetCallingAppVerInfo): Don't overfill buffers
+	"AppTitle", "AppVer", and "AppIni".
+
+2000-05-15      Jeffrey Altman          <jaltman@columbia.edu>
+
+        * krb5_32.def -- Added exports for new public functions
+
+               krb5_appdefault_string
+               krb5_appdefault_boolean
+
+2000-05-04  Danilo Almeida  <dalmeida@mit.edu>
+
+	* krb5_32.def: Reflect something closer to the reality of
+	what we would like to do for 1.3.
+
+2000-05-03  Nalin Dahyabhai  <nalin@redhat.com>
+
+	* win_glue.c (do_timebomb): Don't overflow buffer "buf".
+
+2000-04-29  Jeffrey Altman <jaltman@columbia.edu>
+
+        * krb5_32.def: Add krb5_get_tgs_ktypes, krb5_free_ktypes for gssapi
+
 2000-03-15  Danilo Almeida  <dalmeida@mit.edu>
 
 	* krb5_32.def: Add krb5_get_prompt_types.

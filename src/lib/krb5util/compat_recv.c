@@ -193,6 +193,151 @@ krb5_compat_recvauth(context, auth_context,
 	return retval;
 }
 
+krb5_error_code
+krb5_compat_recvauth_version(context, auth_context,
+			     /* IN */
+			     fdp, server, flags, keytab,
+			     v4_options, v4_service, v4_instance, v4_faddr,
+			     v4_laddr,
+			     v4_filename, 
+			     /* OUT */
+			     ticket,
+			     auth_sys, v4_kdata, v4_schedule,
+			     version)
+    krb5_context context;
+    krb5_auth_context  *auth_context;
+	krb5_pointer	fdp;
+	krb5_principal	server;
+	krb5_int32	flags;
+	krb5_keytab    	keytab;
+	krb5_ticket  ** ticket;
+        krb5_int32      *auth_sys;
+
+	/*
+	 * Version 4 arguments
+	 */
+	krb5_int32 v4_options;	 /* bit-pattern of options */
+	char *v4_service;	 /* service expected */
+	char *v4_instance;	 /* inst expected (may be filled in) */
+	struct sockaddr_in *v4_faddr; /* foreign address */
+	struct sockaddr_in *v4_laddr; /* local address */
+	AUTH_DAT **v4_kdata;	 /* kerberos data (returned) */
+	char *v4_filename;	 /* name of file with service keys */
+	Key_schedule v4_schedule; /* key schedule (return) */
+    krb5_data *version;		/* application version filled in */
+{
+	union verslen {
+		krb5_int32	len;
+		char		vers[4];
+	} vers;
+	char	*buf;
+	int	len, length;
+	krb5_int32	retval;
+	int		fd = *( (int *) fdp);
+#ifdef KRB5_KRB4_COMPAT
+	KTEXT		v4_ticket;	 /* storage for client's ticket */
+#endif
+		
+	if ((retval = krb5_net_read(context, fd, vers.vers, 4)) != 4)
+		return((retval < 0) ? errno : ECONNABORTED);
+
+#ifdef KRB5_KRB4_COMPAT
+	if (!strncmp(vers.vers, KRB_V4_SENDAUTH_VERS, 4)) {
+		/*
+		 * We must be talking to a V4 sendauth; read in the
+		 * rest of the version string and make sure.
+		 */
+		if ((retval = krb5_net_read(context, fd, vers.vers, 4)) != 4)
+			return((retval < 0) ? errno : ECONNABORTED);
+		
+		if (strncmp(vers.vers, KRB_V4_SENDAUTH_VERS+4, 4))
+			return KRB5_SENDAUTH_BADAUTHVERS;
+
+		*auth_sys = KRB5_RECVAUTH_V4;
+
+		*v4_kdata = (AUTH_DAT *) malloc( sizeof(AUTH_DAT) );
+		v4_ticket = (KTEXT) malloc(sizeof(KTEXT_ST));
+
+		version->length = KRB_SENDAUTH_VLEN; /* no trailing \0! */
+		version->data = malloc (KRB_SENDAUTH_VLEN + 1);
+		version->data[KRB_SENDAUTH_VLEN] = 0;
+		if (version->data == 0)
+		    return errno;
+		retval = krb_v4_recvauth(v4_options, fd, v4_ticket,
+					 v4_service, v4_instance, v4_faddr,
+					 v4_laddr, *v4_kdata, v4_filename,
+					 v4_schedule, version->data);
+		krb5_xfree(v4_ticket);
+		/*
+		 * XXX error code translation?
+		 */
+		switch (retval) {
+		case RD_AP_OK:
+		    return 0;
+		case RD_AP_TIME:
+		    return KRB5KRB_AP_ERR_SKEW;
+		case RD_AP_EXP:
+		    return KRB5KRB_AP_ERR_TKT_EXPIRED;
+		case RD_AP_NYV:
+		    return KRB5KRB_AP_ERR_TKT_NYV;
+		case RD_AP_NOT_US:
+		    return KRB5KRB_AP_ERR_NOT_US;
+		case RD_AP_UNDEC:
+		    return KRB5KRB_AP_ERR_BAD_INTEGRITY;
+		case RD_AP_REPEAT:
+		    return KRB5KRB_AP_ERR_REPEAT;
+		case RD_AP_MSG_TYPE:
+		    return KRB5KRB_AP_ERR_MSG_TYPE;
+		case RD_AP_MODIFIED:
+		    return KRB5KRB_AP_ERR_MODIFIED;
+		case RD_AP_ORDER:
+		    return KRB5KRB_AP_ERR_BADORDER;
+		case RD_AP_BADD:
+		    return KRB5KRB_AP_ERR_BADADDR;
+		default:
+		    return KRB5_SENDAUTH_BADRESPONSE;
+		}
+	}
+#endif
+
+	/*
+	 * Assume that we're talking to a V5 recvauth; read in the
+	 * the version string, and make sure it matches.
+	 */
+	
+	len = (int) ntohl(vers.len);
+
+	if (len < 0 || len > 255)
+		return KRB5_SENDAUTH_BADAUTHVERS;
+
+	buf = malloc(len);
+	if (!buf)
+		return ENOMEM;
+	
+	length = krb5_net_read(context, fd, buf, len);
+	if (len != length) {
+		krb5_xfree(buf);
+		if (len < 0)
+			return errno;
+		else
+			return ECONNABORTED;
+	}
+
+	if (strcmp(buf, KRB_V5_SENDAUTH_VERS)) {
+		krb5_xfree(buf);
+		return KRB5_SENDAUTH_BADAUTHVERS;
+	}
+	krb5_xfree(buf);
+
+	*auth_sys = KRB5_RECVAUTH_V5;
+	
+	retval = krb5_recvauth_version(context, auth_context, fdp, server,
+				       flags | KRB5_RECVAUTH_SKIP_VERSION, 
+				       keytab, ticket, version);
+
+	return retval;
+}
+
 
 #ifndef max
 #define	max(a,b) (((a) > (b)) ? (a) : (b))

@@ -1,3 +1,7 @@
+2000-05-11  Nalin Dahyabhai  <nalin@redhat.com>
+
+	* ftpd.c (gunique): Make sure that path stored in "new" isn't too long.
+
 2000-02-18  Ken Raeburn  <raeburn@mit.edu>
 
 	* ftpd.c (reply, lreply): Declare with format attribute under

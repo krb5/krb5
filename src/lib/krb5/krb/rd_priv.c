@@ -101,13 +101,6 @@ krb5_rd_priv_basic(context, inbuf, keyblock, local_addr, remote_addr,
 				 &privmsg->enc_part, &scratch)))
 	goto cleanup_scratch;
 
-    /* if i_vector is set, put last block into the i_vector */
-    if (i_vector)
-	memcpy(i_vector,
-	       privmsg->enc_part.ciphertext.data +
-	       (privmsg->enc_part.ciphertext.length - blocksize),
-	       blocksize);
-
     /*  now decode the decrypted stuff */
     if ((retval = decode_krb5_enc_priv_part(&scratch, &privmsg_enc_part)))
         goto cleanup_scratch;

@@ -116,7 +116,7 @@ clnttcp_create(raddr, prog, vers, sockp, sendsz, recvsz)
 	unsigned int recvsz;
 {
 	CLIENT *h;
-	register struct ct_data *ct;
+	register struct ct_data *ct = 0;
 	struct timeval now;
 	struct rpc_msg call_msg;
 

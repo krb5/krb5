@@ -783,8 +783,8 @@ if test "$with_tcl" != no ; then
 	AC_CHECK_LIB(ld, main, DL_LIB=-lld)
 	krb5_save_CPPFLAGS="$CPPFLAGS"
 	krb5_save_LDFLAGS="$LDFLAGS"
-	CPPFLAGS="$TCL_INCLUDES $CPPFLAGS"
-	LDFLAGS="$TCL_LIBPATH $LDFLAGS"
+	CPPFLAGS="$CPPFLAGS $TCL_INCLUDES"
+	LDFLAGS="$LDFLAGS $TCL_LIBPATH"
 	tcl_header=no
 	AC_CHECK_HEADER(tcl.h,AC_DEFINE(HAVE_TCL_H) tcl_header=yes)
 	if test $tcl_header=no; then
@@ -1119,7 +1119,7 @@ CC_LINK_STATIC='$(CC) $(PROG_LIBPATH)'
 
 # Set up architecture-specific variables.
 case $krb5_cv_host in
-alpha-dec-osf*)
+alpha*-dec-osf*)
 	SHLIBVEXT='.so.$(LIBMAJOR).$(LIBMINOR)'
 	SHLIBSEXT='.so.$(LIBMAJOR)'
 	SHLIBEXT=.so
@@ -1129,7 +1129,11 @@ alpha-dec-osf*)
 	SHLIB_EXPFLAGS='-rpath $(SHLIB_RDIRS) $(SHLIB_DIRS) $(SHLIB_EXPLIBS)'
 	PROFFLAGS=-pg
 	CC_LINK_SHARED='$(CC) $(PROG_LIBPATH) -Wl,-rpath -Wl,$(PROG_RPATH)'
-	CC_LINK_STATIC='$(CC) $(PROG_LIBPATH)'
+	# Need -oldstyle_liblookup to avoid picking up shared libs from
+	# other builds.  OSF/1 / Tru64 ld programs look through the entire
+	# library path for shared libs prior to looking through the
+	# entire library path for static libs.
+	CC_LINK_STATIC='$(CC) $(PROG_LIBPATH) -Wl,-oldstyle_liblookup'
 	# $(PROG_RPATH) is here to handle things like a shared tcl library
 	RUN_ENV='LD_LIBRARY_PATH=`echo $(PROG_LIBPATH) | sed -e "s/-L//g" -e "s/ /:/g"`:$(PROG_RPATH):/usr/shlib:/usr/ccs/lib:/usr/lib/cmplrs/cc:/usr/lib:/usr/local/lib; export LD_LIBRARY_PATH; _RLD_ROOT=/dev/dummy/d; export _RLD_ROOT;'
 	;;
@@ -1396,7 +1400,8 @@ AC_DEFUN(AC_LIBRARY_NET, [
           # ugliness is necessary:
           AC_CHECK_LIB(socket, gethostbyname,
              LIBS="-lsocket -lnsl $LIBS",
-               AC_CHECK_LIB(resolv, gethostbyname),
+               AC_CHECK_LIB(resolv, gethostbyname,
+			    LIBS="-lresolv $LIBS" ; RESOLV_LIB=-lresolv),
              -lnsl)
        )
      )
@@ -1406,20 +1411,43 @@ AC_DEFUN(AC_LIBRARY_NET, [
   KRB5_AC_ENABLE_DNS
   if test "$enable_dns" = yes ; then
     AC_CHECK_FUNC(res_search, , AC_CHECK_LIB(resolv, res_search,
-	LIBS="$LIBS -lresolv",
+	LIBS="$LIBS -lresolv" ; RESOLV_LIB=-lresolv,
 	AC_ERROR(Cannot find resolver support routine res_search in -lresolv.)
     ))
   fi
+  AC_SUBST(RESOLV_LIB)
   ])
 dnl
 dnl
 dnl KRB5_AC_ENABLE_DNS
 dnl
 AC_DEFUN(KRB5_AC_ENABLE_DNS, [
+  enable_dns_for_kdc=yes
+  enable_dns_for_realm=no
+
   AC_ARG_ENABLE([dns],
-[  --enable-dns            enable DNS lookups of Kerberos realm and servers], ,
+[  --enable-dns            enable DNS lookups of Kerberos realm and servers],
+[enable_dns_for_kdc="$enable_dns"
+enable_dns_for_realm="$enable_dns"],
 [enable_dns=no])
   if test "$enable_dns" = yes; then
+    AC_DEFINE(KRB5_DNS_LOOKUP)
+  fi
+
+  AC_ARG_ENABLE([dns-for-kdc],
+[  --enable-dns-for-kdc    enable DNS lookups of Kerberos servers only])
+  if test "$enable_dns_for_kdc" = yes; then
+    AC_DEFINE(KRB5_DNS_LOOKUP_KDC)
+  fi
+
+  AC_ARG_ENABLE([dns-for-realm],
+[  --enable-dns-for-realm  enable DNS lookups of Kerberos realm names only])
+  if test "$enable_dns_for_realm" = yes; then
+    AC_DEFINE(KRB5_DNS_LOOKUP_REALM)
+  fi
+
+  if test "$enable_dns_for_kdc" = yes || test "$enable_dns_for_realm" = yes ; then
+    enable_dns=yes
     AC_DEFINE(KRB5_DNS_LOOKUP)
   fi
 ])

@@ -913,8 +913,9 @@ afs_login ()
 	struct stat st;
 	/* construct the name */
 	/* get this from profile later */
-	strcpy (aklog_path, KPROGDIR);
-	strcat (aklog_path, "/aklog");
+	aklog_path[sizeof(aklog_path) - 1] = '\0';
+	strncpy (aklog_path, KPROGDIR, sizeof(aklog_path) - 1);
+	strncat (aklog_path, "/aklog", sizeof(aklog_path) - 1 - strlen(aklog_path));
 	/* only run it if we can find it */
 	if (stat (aklog_path, &st) == 0) {
 	    system(aklog_path);
