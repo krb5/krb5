@@ -285,3 +285,7 @@ synced with 1.2.3
 3.2b2
 from tag Mac_GSSKerberos5_3_2b2
 Separated private and public krb5 APIs
+
+3.2b3
+from tag Mac_GSSKerberos5_3_2b3
+Fixed gssapi_generic.h Mac OS conditionals and synced with 1.2.3b2
