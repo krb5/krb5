@@ -139,7 +139,6 @@ clean::									@@\
 AllTarget(objlist)							@@\
 AllTarget(libdir/lib/**/libname.a)					@@\
 AllTarget(foo/**/libname)						@@\
-DependTarget()								@@\
 									@@\
 foo/**/libname: objlist							@@\
 	$(ARADD) libdir/lib/**/libname.a objlist			@@\
@@ -435,7 +434,7 @@ P_STDARG=-UUseStdarg
            DBMLIB = DbmLib
           DEPKLIB = $(KRB5DEPLIB) $(DESDEPLIB) $(OSDEPLIB)
           KLIBLOC = -L$(TOPLIBD)
-             KLIB = $(KLIBLOC) -l$(KRB5LIB) -l$(DESLIB) -l$(OSLIB) $(ISODELIB) $(COMERRLIB) $(DBMLIB)
+             KLIB = $(KLIBLOC) -l$(KRB5LIB) -l$(DESLIB) $(ISODELIB) $(COMERRLIB) $(DBMLIB)
         KDBDEPLIB = $(TOPLIBD)/libkdb.a
            KDBLIB = $(KLIBLOC) -lkdb
      KRB425DEPLIB = $(TOPLIBD)/libkrb425.a
