@@ -1,3 +1,7 @@
+2000-01-27  Ken Raeburn  <raeburn@mit.edu>
+
+	* pre.in (KADM_COMM_LIBS): Drop krb5util library.
+
 1999-12-03  Danilo Almeida  <dalmeida@mit.edu>
 
 	* win-pre.in: Pull changes from krb5-1-1 branch: a) Make is so
