@@ -1,3 +1,7 @@
+Mon Mar 15 16:01:56 1999  Tom Yu  <tlyu@mit.edu>
+
+	* com_err.h: Fix GSS_DLLIMP.
+
 Mon Feb  1 19:42:45 1999  Tom Yu  <tlyu@mit.edu>
 
 	* et_c.awk: Fix to not depend on CPP symbol "unix".

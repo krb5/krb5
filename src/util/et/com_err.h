@@ -23,6 +23,7 @@
 #define KRB5_CALLCONV
 #define KRB5_CALLCONV_C
 #define KRB5_DLLIMP
+#define GSS_DLLIMP
 #define KRB5_EXPORTVAR
 #endif
 
