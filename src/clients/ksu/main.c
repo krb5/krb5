@@ -132,8 +132,6 @@ char * dir_of_cc_source;
         com_err(argv[0], retval, "while initializing krb5");
 	exit(1);
     }
-
-    krb5_init_ets(ksu_context); 	/* initialize kerberos error tables */
     krb5_secure_config_files(ksu_context);
 
     if (strrchr(argv[0], '/'))

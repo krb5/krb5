@@ -176,7 +176,6 @@ char *kadmin_startup(argc, argv)
 	 com_err(whoami, retval, "while initializing krb5 library");
 	 exit(1);
     }
-    krb5_init_ets(context);
 		     
     while ((optchar = getopt(argc, argv, "r:p:kq:w:d:s:mc:t:e:")) != EOF) {
 	switch (optchar) {
