@@ -486,8 +486,9 @@ int ktest_equal_krb5_etype_info_entry(ref, var)
 	return FALSE;
     if (ref->length != var->length)
 	return FALSE;
-    if (memcmp(ref->salt, var->salt, ref->length) != 0)
-	return FALSE;
+    if (ref->length > 0)
+    	if (memcmp(ref->salt, var->salt, ref->length) != 0)
+	    return FALSE;
     return TRUE;
 }
 

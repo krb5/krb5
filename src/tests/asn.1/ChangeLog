@@ -1,3 +1,9 @@
+
+Wed Nov 15 15:28:32 1995  Chris Provenzano  (proven@mit.edu)
+
+	* ktest_equal.c (ktest_equal_krb5_etype_info_entry()) :
+		Only do emecmp() if ref->length > 0
+
 Wed Nov  8 20:03:51 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* krb5_encode_test.c (main): In case of an error in the encoding
