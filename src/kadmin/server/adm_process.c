@@ -81,7 +81,7 @@ OLDDECLARG(krb5_keyblock **, key)
             syslog(LOG_ERR, 
 		   "cpw_keyproc %d while attempting to parse \"%s\"",
 		   client_server_info.name_of_service, retval);
-            return(0);
+            return(retval);
 	}
 
 	if (retval = krb5_db_get_principal(cpw_krb, &cpw_entry, 
@@ -89,7 +89,7 @@ OLDDECLARG(krb5_keyblock **, key)
             syslog(LOG_ERR, 
 		   "cpw_keyproc %d while extracting %s entry",
 		   client_server_info.name_of_service, retval);
-            return(0);
+            return(retval);
 	}
 
 	if (!nprincs) return(0);
@@ -99,7 +99,7 @@ OLDDECLARG(krb5_keyblock **, key)
 	    krb5_db_free_principal(&cpw_entry, nprincs);
 	    syslog(LOG_ERR, "cpw_keyproc: No Memory for server key");
 	    close(client_server_info.client_socket);
-	    return(0);
+	    return(ENOMEM);
 	}
 
 	/* Extract the real kadmin/<realm> keyblock */
@@ -112,7 +112,7 @@ OLDDECLARG(krb5_keyblock **, key)
 	    syslog(LOG_ERR, 
 		   "cpw_keyproc: Cannot extract %s from master key",
 		   client_server_info.name_of_service);
-	    exit(0);
+	    exit(retval);
 	}
 
 	*key = realkey;

@@ -208,6 +208,7 @@ OLDDECLARG(char *, new_passwd)
 		clear_encodable_data();
 		com_err("adm_negotiate_key", ENOMEM, 
 			"for Additional Passwords");
+		return(1);
 	    }
 
 	    strcpy((*next_passwd_phrase_element)->phrase->data, tmp_phrase);

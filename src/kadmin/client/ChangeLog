@@ -1,0 +1,5 @@
+Fri Jun 24 22:48:29 1994  Theodore Y. Ts'o  (tytso at tsx-11)
+
+	* kadmin_done (kadm_done): fix memory allocation bugs
+
+

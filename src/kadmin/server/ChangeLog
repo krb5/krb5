@@ -1,5 +1,16 @@
 Fri Jun 24 20:39:37 1994  Theodore Y. Ts'o  (tytso at tsx-11)
 
+	* adm_process.c (cpw_keyproc): return error codes on failure
+
+	* adm_nego.c (adm_negotiate_key): added return on memory
+	allocation error
+
+	* adm_fmt_inq.c (adm_fmt_prt, adm_print_exp_time,
+	  adm_print_attributes): Sanitized error return strategies.
+
+	* adm_kadmin.c (adm5_kadmin): Plug memory leaks, fix double
+	  free's, fix message in error syslog.
+
 	* adm_process.c (process_client): Plug memory leaks
 
 	* adm_adm_func. (adm_inq_old_key): Plug memory leaks, return error

@@ -139,7 +139,6 @@ char *principal;
         return(1);
     }
     free(inbuf.data);
-    free(msg_data.data);
 
     if (msg_data.data[2] == KADMBAD) {
 	decode_kadmind_reply(msg_data, &rd_priv_resp);
@@ -149,8 +148,10 @@ char *principal;
 	    free(rd_priv_resp.message);
 	} else
 	    fprintf(stderr, "Generic error from server.\n\n");
+	free(msg_data.data);
         return(0);
     }
+    free(msg_data.data);
 
     kadm_snd_mod(my_creds, rep_ret, local_addr, 
 			foreign_addr, local_socket, seqno);
@@ -186,6 +187,7 @@ char *principal;
          /* write private message to server */
     if (krb5_write_message(local_socket, &msg_data)){
         fprintf(stderr, "Write Error During Second Message Transmission!\n");
+	free(msg_data.data);
         return(1);
     }
     free(msg_data.data);

@@ -119,6 +119,7 @@ char *principal;
 
     /* write private message to server */
     if (krb5_write_message(local_socket, &msg_data)){
+	free(msg_data.data);
         fprintf(stderr, "Write Error During Second Message Transmission!\n");
         return(1);
     } 
@@ -154,6 +155,8 @@ char *principal;
 	    free(rd_priv_resp.message);
 	} else
 	    fprintf(stderr, "Generic error from server.\n\n");
+	memset(msg_data.data, 0, msg_data.length);
+	free(msg_data.data);
         return(0);
     }
 
@@ -167,6 +170,8 @@ char *principal;
     pwsize = msg_data.length;
     if ((password = (char *) calloc (1, pwsize)) == (char *) 0) {
         fprintf(stderr, "No Memory for allocation of password!\n");
+	memset(msg_data.data, 0, msg_data.length);
+	free(msg_data.data);
         return(1);
     }
 

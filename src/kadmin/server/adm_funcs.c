@@ -169,7 +169,7 @@ OLDDECLARG(krb5_db_entry *, entry)
     extern krb5_flags NEW_ATTRIBUTES;
 
     if (!req_type) { /* New entry - initialize */
-	memset((char *) entry, 0, sizeof(*entry));
+	memset((char *) entry, 0, sizeof(krb5_db_entry));
         entry->principal = (krb5_principal) principal;
         entry->kvno = KDB5_VERSION_NUM;
         entry->max_life = KDB5_MAX_TKT_LIFE;
@@ -201,6 +201,11 @@ OLDDECLARG(krb5_db_entry *, entry)
 				      alt_key,
 				      &entry->alt_key);
 	if (retval) {
+	    if (entry->key.contents) {
+		memset((char *) entry->key.contents, 0, entry->key.length);
+		krb5_xfree(entry->key.contents);
+		entry->key.contents = 0;
+	    }
 	    com_err("adm_modify_kdb", retval, 
 		    "while encrypting alt_key for '%s'", newprinc);
 	    return(KADM_NO_ENCRYPT);
@@ -209,12 +214,16 @@ OLDDECLARG(krb5_db_entry *, entry)
 
     if (retval = krb5_timeofday(&entry->mod_date)) {
 	com_err("adm_modify_kdb", retval, "while fetching date");
-	memset((char *) entry->key.contents, 0, entry->key.length);
-	memset((char *) entry->alt_key.contents, 0, entry->alt_key.length);
-	if (entry->key.contents)
+	if (entry->key.contents) {
+	    memset((char *) entry->key.contents, 0, entry->key.length);
 	    krb5_xfree(entry->key.contents);
-	if (entry->alt_key.contents)
+	    entry->key.contents = 0;
+	}
+	if (entry->alt_key.contents) {
 	    krb5_xfree(entry->alt_key.contents);
+	    memset((char *) entry->alt_key.contents, 0, entry->alt_key.length);
+	    entry->alt_key.contents = 0;
+	}
 	return(KRB_ERR_GENERIC);
     }
 
@@ -258,25 +267,34 @@ OLDDECLARG(krb5_db_entry *, entry)
     } else {
 	if (retval = krb5_timeofday(&entry->last_pwd_change)) {
 	    com_err("adm_modify_kdb", retval, "while fetching date");
-	    memset((char *) entry->key.contents, 0, entry->key.length);
-	    memset((char *) entry->alt_key.contents, 0, entry->alt_key.length);
-	    if (entry->key.contents)
+	    if (entry->key.contents) {
+		memset((char *) entry->key.contents, 0, entry->key.length);
 		krb5_xfree(entry->key.contents);
-	    if (entry->alt_key.contents)
+		entry->key.contents = 0;
+	    }
+	    if (entry->alt_key.contents) {
+		memset((char *) entry->alt_key.contents, 0,
+		       entry->alt_key.length);
 		krb5_xfree(entry->alt_key.contents);
+		entry->alt_key.contents = 0;
+	    }
 	    return(5);
 	}
     }
 
     retval = krb5_db_put_principal(entry, &one);
 
-    memset((char *) entry->key.contents, 0, entry->key.length);
-    if (entry->key.contents)
+    if (entry->key.contents) {
+	memset((char *) entry->key.contents, 0, entry->key.length);
 	krb5_xfree(entry->key.contents);
+	entry->key.contents = 0;
+    }
 
-    memset((char *) entry->alt_key.contents, 0, entry->alt_key.length);
-    if (entry->alt_key.contents)
+    if (entry->alt_key.contents) {
+	memset((char *) entry->alt_key.contents, 0, entry->alt_key.length);
 	krb5_xfree(entry->alt_key.contents);
+	entry->alt_key.contents = 0;
+    }
 
     if (retval) {
 	com_err("adm_modify_kdb", retval, 
@@ -320,12 +338,15 @@ OLDDECLARG(krb5_db_entry *, entry)
 
     salt.salttype = salttype;
 
+    tempkey.contents = alttempkey.contents = 0;
+    retval = KRB_ERR_GENERIC;
+
     switch (salttype) {
     case KRB5_KDB_SALTTYPE_NORMAL:
 	if (retval = krb5_principal2salt(string_princ, &salt.saltdata)) {
 	    com_err("adm_enter_pwd_key", retval,
 		    "while converting principal to salt for '%s'", newprinc);
-	    return(KRB_ERR_GENERIC);
+	    goto cleanup;
 	}
 
 	altsalt.salttype = KRB5_KDB_SALTTYPE_V4;
@@ -339,7 +360,7 @@ OLDDECLARG(krb5_db_entry *, entry)
         if (retval = krb5_principal2salt(string_princ, &altsalt.saltdata)) {
             com_err("adm_enter_pwd_key", retval,
                     "while converting principal to altsalt for '%s'", newprinc);
-            return(KRB_ERR_GENERIC);
+	    goto cleanup;
         }
 
 	altsalt.salttype = KRB5_KDB_SALTTYPE_NORMAL;
@@ -350,7 +371,7 @@ OLDDECLARG(krb5_db_entry *, entry)
 						 &salt.saltdata)) {
 	    com_err("adm_enter_pwd_key", retval,
 		    "while converting principal to salt for '%s'", newprinc);
-	    return(KRB_ERR_GENERIC);
+	    goto cleanup;
 	}
 
 	altsalt.salttype = KRB5_KDB_SALTTYPE_V4;
@@ -365,7 +386,7 @@ OLDDECLARG(krb5_db_entry *, entry)
 				    &foo)) {
 	    com_err("adm_enter_pwd_key", retval,
 		    "while converting principal to salt for '%s'", newprinc);
-	    return(KRB_ERR_GENERIC);
+	    goto cleanup;
 	}
 
 	salt.saltdata = *foo;
@@ -379,7 +400,7 @@ OLDDECLARG(krb5_db_entry *, entry)
     default:
 	com_err("adm_enter_pwd_key", 0, 
 		"Don't know how to enter salt type %d", salttype);
-	return(KRB_ERR_GENERIC);
+	goto cleanup;
     }
 
     if (retval = krb5_string_to_key(&master_encblock, 
@@ -388,10 +409,8 @@ OLDDECLARG(krb5_db_entry *, entry)
                                 &pwd,
                                 &salt.saltdata)) {
 	com_err("adm_enter_pwd_key", retval, 
-		"while converting password to alt_key for '%s'", newprinc);
-	memset((char *) new_password, 0, sizeof(new_password)); /* erase it */
-	krb5_xfree(salt.saltdata.data);
-	return(retval);
+		"while converting password to key for '%s'", newprinc);
+	goto cleanup;
     }
 
     if (retval = krb5_string_to_key(&master_encblock, 
@@ -401,10 +420,7 @@ OLDDECLARG(krb5_db_entry *, entry)
                                 &altsalt.saltdata)) {
 	com_err("adm_enter_pwd_key", retval, 
 		"while converting password to alt_key for '%s'", newprinc);
-	krb5_xfree(salt.saltdata.data);
-	free(entry->alt_key.contents);
-	memset((char *) new_password, 0, sizeof(new_password)); /* erase it */
-	return(retval);
+	goto cleanup;
     }
 
     memset((char *) new_password, 0, sizeof(new_password)); /* erase it */
@@ -419,10 +435,20 @@ OLDDECLARG(krb5_db_entry *, entry)
 			&altsalt,
 			entry);
 
-    memset((char *) tempkey.contents, 0, tempkey.length);
-    memset((char *) alttempkey.contents, 0, alttempkey.length);
-    if (entry->alt_key.contents)
-	free(entry->alt_key.contents);
+cleanup:
+    if (salt.saltdata.data)
+	krb5_xfree(salt.saltdata.data);
+    if (altsalt.saltdata.data)
+	krb5_xfree(altsalt.saltdata.data);
+    if (tempkey.contents) {
+	memset((char *) tempkey.contents, 0, tempkey.length);
+	krb5_xfree(tempkey.contents);
+    }
+    if (alttempkey.contents) {
+	memset((char *) alttempkey.contents, 0, alttempkey.length);
+	krb5_xfree(alttempkey.contents);
+    }
+    memset((char *) new_password, 0, pwd.length); /* erase password */
     return(retval);
 }
 
@@ -456,7 +482,11 @@ krb5_ticket *client_creds;
 	return(1);
     }
 
-    retval = krb5_unparse_name(newprinc, &composite_name);
+    if (retval = krb5_unparse_name(newprinc, &composite_name)) {
+	krb5_free_principal(newprinc);
+	krb5_db_free_principal(&entry, nprincs);
+	return retval;
+    }
 
     if (entry.salt_type == KRB5_KDB_SALTTYPE_V4) {
 	entry.salt_type = KRB5_KDB_SALTTYPE_NORMAL;
@@ -563,9 +593,8 @@ OLDDECLARG(krb5_db_entry *, entry)
         goto finish;
     }
 
-    retval = krb5_unparse_name(change_princ, &principal_name);
-    if (retval)
-	return retval;
+    if (retval = krb5_unparse_name(change_princ, &principal_name))
+	goto finish;
     
 		/* Modify Database */
     retval = adm_modify_kdb("adm_enter_rnd_pwd_key", 
@@ -587,12 +616,10 @@ OLDDECLARG(krb5_db_entry *, entry)
 
     finish:
 
-    if(retval) {
+    if (tempkey->contents) {
 	memset((char *) tempkey->contents, 0, tempkey->length);
-	return(retval);
+	krb5_free_keyblock(tempkey);
     }
 
-    memset((char *) tempkey->contents, 0, tempkey->length);
-
-    return(0);
+    return(retval);
 }

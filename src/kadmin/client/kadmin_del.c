@@ -112,6 +112,7 @@ char *principal;
 
     /* write private message to server */
     if (krb5_write_message(local_socket, &msg_data)){
+	free(msg_data.data);
         fprintf(stderr, "Write Error During Second Message Transmission!\n");
         return(1);
     } 

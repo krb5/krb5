@@ -39,7 +39,6 @@ static char rcsid_adm_fmt_inq[] =
 #include <krb5/kdb.h>
 #include <krb5/kdb_dbm.h>
 
-#include <com_err.h>
 #include <stdio.h>
 
 #ifdef USE_SYS_TIME_H
@@ -61,9 +60,8 @@ krb5_flags attribs;
 {
     char *my_data;
 
-    if ((my_data = (char *) calloc (1,255)) == (char *) 0) {
-	com_err("adm_print_attributes", ENOMEM, "");
-    }
+    if ((my_data = (char *) calloc (1,255)) == (char *) 0)
+	return ENOMEM;
 
     sprintf(my_data, "Principal Attributes (PA): ");
     if (attribs & KRB5_KDB_DISALLOW_POSTDATED)
@@ -128,9 +126,8 @@ krb5_timestamp *time_input;
     char *my_data;
     struct tm *exp_time;
 
-    if ((my_data = (char *) calloc (1,255)) == (char *) 0) {
-	com_err("adm_print_attributes", ENOMEM, "");
-    }
+    if ((my_data = (char *) calloc (1,255)) == (char *) 0)
+	return ENOMEM;
 
     exp_time = localtime((time_t *) time_input);
     sprintf(my_data, 
@@ -154,8 +151,8 @@ char *Principal_name;
 char *ret_data;
 {
     struct tm *mod_time;
-#ifdef SANDIA
     krb5_error_code retval;
+#ifdef SANDIA
     struct tm *exp_time;
     int pwd_expire;
     krb5_timestamp now;
@@ -164,9 +161,8 @@ char *ret_data;
     char *my_data;
     char thisline[80];
 
-    if ((my_data = (char *) calloc (1, 2048)) == (char *) 0) {
-	com_err("adm_print_attributes", ENOMEM, "");
-    }
+    if ((my_data = (char *) calloc (1, 2048)) == (char *) 0)
+	return ENOMEM;
 
     (void) sprintf(my_data, "\n\nPrincipal: %s\n\n", Principal_name);
     sprintf(thisline,
@@ -177,7 +173,10 @@ char *ret_data;
     strcat(my_data, thisline);
     sprintf(thisline, "Principal Key Version (PKV) = %d\n", entry->kvno);
     strcat(my_data, thisline);
-    (void) adm_print_exp_time(my_data, &entry->expiration);
+    if (retval = adm_print_exp_time(my_data, &entry->expiration)) {
+	free(my_data);
+	return retval;
+    }
     mod_time = localtime((time_t *) &entry->mod_date);
     sprintf(thisline, 
 	"Last Modification Date (LMD): %02d%02d/%02d/%02d:%02d:%02d:%02d\n",
@@ -189,7 +188,10 @@ char *ret_data;
            mod_time->tm_min,
            mod_time->tm_sec);
     strcat(my_data, thisline);
-    (void) adm_print_attributes(my_data, entry->attributes);
+    if (retval = adm_print_attributes(my_data, entry->attributes)) {
+	free(my_data);
+	return retval;
+    }
     switch (entry->salt_type & 0xff) {
            case 0 : strcat(my_data,
 			"Principal Salt Type (PST) = Version 5 Normal\n");

@@ -51,12 +51,9 @@ krb5_int32 *seqno;
 {
     krb5_data msg_data, inbuf;
     krb5_error_code retval;     /* return code */
+    char buf[16];
 
-    /* XXX 755 was sizeof( char username[755]) */
-    if ((inbuf.data = (char *) calloc(1, 8 + 755)) == (char *) 0) {
-	fprintf(stderr, "No memory for command!\n");
-	exit(1);
-    }
+    inbuf.data = buf;
 
     inbuf.data[0] = KADMIN;
     inbuf.data[1] = COMPLETE;
@@ -79,10 +76,10 @@ krb5_int32 *seqno;
 			error_message(retval));
         return(1);
     }
-    free(inbuf.data);
 
     /* write private message to server */
-    if (krb5_write_message(local_socket, &msg_data)){
+    if (krb5_write_message(local_socket, &msg_data)) {
+	free(msg_data.data);
         fprintf(stderr, "Write Error During Second Message Transmission!\n");
         return(1);
     } 

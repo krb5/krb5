@@ -89,6 +89,7 @@ int *otype;
 		/* Send Acknowledgement Reply to Client */
 	if (retval = krb5_write_message(&client_server_info.client_socket,
 				&msg_data)){
+	    free(msg_data.data);
 	    syslog(LOG_ERR,
 		"adm5_kadmin - Error Performing Acknowledgement Write: %s",
 		error_message(retval));
@@ -283,7 +284,6 @@ int *otype;
 			"Unknown or Non-Implemented Operation Type!",
 			inet_ntoa(client_server_info.client_name.sin_addr));
 	        syslog(LOG_AUTH | LOG_INFO, completion_msg);
-		free(completion_msg);
 		retval = 255;
 		goto send_last;
 	}			/* switch (request_type.oper_code) */
@@ -318,7 +318,6 @@ process_retval:
 			inet_ntoa(client_server_info.client_name.sin_addr),
 			kadmind_kadmin_response[retval]);
 		syslog(LOG_AUTH | LOG_INFO, completion_msg);
-		free(completion_msg);
 		goto send_last;
 
 	    default:
@@ -327,7 +326,7 @@ process_retval:
 		retbuf[2] = KUNKNOWNERR;
 		retbuf[3] = '\0';
 		sprintf(completion_msg, "%s %s from %s FAILED", 
-		    "ksrvutil",
+		    "kadmin",
 		    oper_type[1],
 		    inet_ntoa( client_server_info.client_name.sin_addr));
 		syslog(LOG_AUTH | LOG_INFO, completion_msg);
@@ -359,6 +358,7 @@ send_last:
 			/* Send Final Reply to Client */
 	if (retval = krb5_write_message(&client_server_info.client_socket,
 					&msg_data)){
+	    free(msg_data.data);
 	    syslog(LOG_ERR, "adm5_kadmin - Error Performing Final Write: %s",
 			error_message(retval));
 	    return(1);
