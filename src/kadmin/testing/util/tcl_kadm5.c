@@ -355,6 +355,10 @@ static Tcl_DString *unparse_err(kadm5_ret_t code)
 	  code_string = "KADM5_MISSING_CONF_PARAMS"; break;
      case KADM5_BAD_SERVER_NAME:
 	  code_string = "KADM5_BAD_SERVER_NAME"; break;
+     case KADM5_MISSING_KRB5_CONF_PARAMS:
+	  code_string = "KADM5_MISSING_KRB5_CONF_PARAMS"; break;
+
+
      case OSA_ADB_DUP: code_string = "OSA_ADB_DUP"; break;
      case OSA_ADB_NOENT: code_string = "ENOENT"; break;
      case OSA_ADB_DBINIT: code_string = "OSA_ADB_DBINIT"; break;
@@ -367,6 +371,7 @@ static Tcl_DString *unparse_err(kadm5_ret_t code)
      case OSA_ADB_NOTLOCKED: code_string = "OSA_ADB_NOTLOCKED"; break;
      case OSA_ADB_NOLOCKFILE: code_string = "OSA_ADB_NOLOCKFILE"; break;
      case OSA_ADB_NOEXCL_PERM: code_string = "OSA_ADB_NOEXCL_PERM"; break;
+
      case KRB5_KDB_INUSE: code_string = "KRB5_KDB_INUSE"; break;
      case KRB5_KDB_UK_SERROR: code_string = "KRB5_KDB_UK_SERROR"; break;
      case KRB5_KDB_UK_RERROR: code_string = "KRB5_KDB_UK_RERROR"; break;
@@ -394,6 +399,7 @@ static Tcl_DString *unparse_err(kadm5_ret_t code)
 	  code_string = "KRB5_KDB_BADSTORED_MKEY"; break;
      case KRB5_KDB_CANTLOCK_DB: code_string = "KRB5_KDB_CANTLOCK_DB"; break;
      case KRB5_KDB_DB_CORRUPT: code_string = "KRB5_KDB_DB_CORRUPT"; break;
+
      case KRB5_PARSE_ILLCHAR: code_string = "KRB5_PARSE_ILLCHAR"; break;
      case KRB5_PARSE_MALFORMED: code_string = "KRB5_PARSE_MALFORMED"; break;
      case KRB5KDC_ERR_S_PRINCIPAL_UNKNOWN: code_string = "KRB5KDC_ERR_S_PRINCIPAL_UNKNOWN"; break;
@@ -403,8 +409,10 @@ static Tcl_DString *unparse_err(kadm5_ret_t code)
      case KRB5KRB_AP_ERR_BAD_INTEGRITY: code_string  = "KRB5KRB_AP_ERR_BAD_INTEGRITY"; break;
      case KRB5KDC_ERR_C_PRINCIPAL_UNKNOWN: code_string = "KRB5KDC_ERR_C_PRINCIPAL_UNKNOWN"; break;
      case KRB5_CONFIG_BADFORMAT: code_string = "KRB5_CONFIG_BADFORMAT"; break;
+
      case EINVAL: code_string = "EINVAL"; break;
      case ENOENT: code_string = "ENOENT"; break;
+
      default:
 	 fprintf(stderr, "**** CODE %d (%s) ***\n", code,
 		 error_message (code));
