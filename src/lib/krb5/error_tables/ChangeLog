@@ -1,3 +1,8 @@
+Fri Nov 18 00:23:51 1994  Mark Eichin  <eichin@cygnus.com>
+
+	* Makefile.in (clean): remove $(BOGUS)
+	(HDRS): use ASN1_HDRS, not ASN1_SRCS. (from epeisach)
+
 Thu Nov 17 00:41:39 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* krb5_err.et (KRB5_CC_WRITE_ERR): Add new error code.
