@@ -459,6 +459,21 @@ void main()
       ktest_destroy_etype_info(ref);
   }
 
+  /****************************************************************/
+  /* decode_pa_enc_ts */
+  {
+    setup(krb5_pa_enc_ts,"krb5_pa_enc_ts",ktest_make_sample_pa_enc_ts);
+    decode_run("pa_enc_ts","","30 1A A0 11 18 0F 31 39 39 34 30 36 31 30 30 36 30 33 31 37 5A A1 05 02 03 01 E2 40",decode_krb5_pa_enc_ts,ktest_equal_krb5_pa_enc_ts);
+    ref.pausec = 0;
+    decode_run("pa_enc_ts (no usec)","","30 13 A0 11 18 0F 31 39 39 34 30 36 31 30 30 36 30 33 31 37 5A",decode_krb5_pa_enc_ts,ktest_equal_krb5_pa_enc_ts);
+  }
+  
+  /****************************************************************/
+  /* decode_enc_data */
+  {
+    setup(krb5_enc_data,"krb5_enc_data",ktest_make_sample_enc_data);
+    decode_run("enc_data","","30 23 A0 03 02 01 00 A1 03 02 01 05 A2 17 04 15 6B 72 62 41 53 4E 2E 31 20 74 65 73 74 20 6D 65 73 73 61 67 65",decode_krb5_enc_data,ktest_equal_enc_data);
+  }
   
   exit(error_count);
 }

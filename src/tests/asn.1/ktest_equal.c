@@ -491,6 +491,18 @@ int ktest_equal_krb5_etype_info_entry(ref, var)
     return TRUE;
 }
 
+int ktest_equal_krb5_pa_enc_ts(ref, var)
+    krb5_pa_enc_ts *ref;
+    krb5_pa_enc_ts *var;
+{
+  int p=TRUE;
+  if(ref==var) return TRUE;
+  else if(ref == NULL || var == NULL) return FALSE;
+  p=p&&scalar_equal(patimestamp);
+  p=p&&scalar_equal(pausec);
+  return p;
+}
+
 /**** arrays ****************************************************************/
 
 int ktest_equal_array_of_data(length, ref, var)

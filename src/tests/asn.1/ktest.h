@@ -89,6 +89,8 @@ krb5_error_code ktest_make_sample_alt_method
 
 krb5_error_code ktest_make_sample_etype_info
     KRB5_PROTOTYPE((krb5_etype_info_entry *** p));
+krb5_error_code ktest_make_sample_pa_enc_ts
+	KRB5_PROTOTYPE((krb5_pa_enc_ts *am));
 
 /*----------------------------------------------------------------------*/
 

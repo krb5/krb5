@@ -689,6 +689,15 @@ memfail:
     return ENOMEM;
 }
 
+krb5_error_code ktest_make_sample_pa_enc_ts(pa_enc)
+     krb5_pa_enc_ts * pa_enc;
+{
+  pa_enc->patimestamp = SAMPLE_TIME;
+  pa_enc->pausec = SAMPLE_USEC;
+
+  return 0;
+}
+
 /****************************************************************/
 /* destructors */
 

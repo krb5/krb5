@@ -496,6 +496,25 @@ void main(argc, argv)
 
     free(info);
   }
+
+  /****************************************************************/
+  /* encode_pa_enc_ts */
+  {
+    krb5_pa_enc_ts pa_enc;
+    setup(pa_enc,krb5_pa_enc_ts,"pa_enc_ts",ktest_make_sample_pa_enc_ts);
+    encode_run(pa_enc,krb5_pa_enc_ts,"pa_enc_ts","",encode_krb5_pa_enc_ts);
+    pa_enc.pausec = 0;
+    encode_run(pa_enc,krb5_pa_enc_ts,"pa_enc_ts (no usec)","",encode_krb5_pa_enc_ts);
+  }
+
+  /****************************************************************/
+  /* encode_enc_data */
+  {
+    krb5_enc_data enc_data;
+    setup(enc_data,krb5_enc_data,"enc_data",ktest_make_sample_enc_data);
+    encode_run(enc_data,krb5_enc_data,"enc_data","",encode_krb5_enc_data);
+  }
+
   exit(error_count);
 }
 

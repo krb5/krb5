@@ -1,8 +1,22 @@
+Tue Oct 31 21:30:28 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* krb5_decode_test.c (main): Add tests for
+	        decode_krb5_enc_data and decode_krb5_pa_enc_ts.
+
+	* krb5_encode_test.c (main): Add tests for
+	        encode_krb5_enc_data and encode_krb5_pa_enc_ts.
+
+	* ktest.c (ktest_make_sample_pa_enc_ts): New functions to
+	        test {encode,decode}_krb5_pa_enc_ts().
+
+	* ktest_equal.c (ktest_equal_krb5_pa_enc_ts): New functions to test
+		{encode,decode}_krb5_pa_enc_ts().
+
 Sun Oct 15 10:51:22 1995    <tytso@rsts-11.mit.edu>
 
 	* ktest.c (ktest_make_sample_alt_method,
-		ktest_make_sample_etype_info):  Fixed signed/unsinged
-		-Wall flame.
+		ktest_make_sample_etype_info): Fixed signed/unsinged -Wall
+		flame.
 
 Fri Sep 29 14:23:47 1995  Theodore Y. Ts'o  <tytso@dcl>
 

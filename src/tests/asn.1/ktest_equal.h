@@ -53,6 +53,7 @@ generic(ktest_equal_encryption_key,krb5_keyblock);
 generic(ktest_equal_passwd_phrase_element,passwd_phrase_element);
 generic(ktest_equal_krb5_pwd_data,krb5_pwd_data);
 generic(ktest_equal_krb5_alt_method,krb5_alt_method);
+generic(ktest_equal_krb5_pa_enc_ts,krb5_pa_enc_ts);
 
 int ktest_equal_last_req
 	KRB5_PROTOTYPE((krb5_last_req_entry **ref, krb5_last_req_entry **var));
