@@ -1,3 +1,7 @@
+Tue Feb 22 10:23:19 2000  Ezra Peisach  <epeisach@mit.edu>
+
+	* Makefile.in (clean-unix): Add clean-libobjs.
+
 2000-01-24  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in (STLIBOBJS): Properly add gss_libinit.o to permit

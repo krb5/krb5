@@ -1,3 +1,7 @@
+Tue Feb 22 10:20:57 2000  Ezra Peisach  <epeisach@mit.edu>
+
+	* Makefile.in (clean-unix): Add clean-libobjs.
+
 2000-01-24  Tom Yu  <tlyu@mit.edu>
 
 	* krb5_libinit.c: Conditionalize call to stdcc_shutdown().
