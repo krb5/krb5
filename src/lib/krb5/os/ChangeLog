@@ -1,3 +1,10 @@
+2004-06-01  Sam Hartman  <hartmans@mit.edu>
+
+	* an_to_ln.c (rule_an_to_ln): Fix buffer overflow when parsing
+	principal names into components. 
+	(do_replacement): likewise
+	(aname_replacer): Support error return from do_replacement
+
 2004-03-22  Ken Raeburn  <raeburn@mit.edu>
 
 	* sendto_kdc.c (get_so_error): New function.
