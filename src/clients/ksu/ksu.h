@@ -34,11 +34,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <syslog.h>
-#ifdef STDARG_PROTOTYPES
-#include <stdarg.h>
-#else
-#include <varargs.h>
-#endif
+/* <stdarg.h> or <varargs.h> is already included by com_err.h.  */
 
 #define NO_TARGET_FILE '.'
 #define SOURCE_USER_LOGIN "."

@@ -1,3 +1,11 @@
+Thu Mar 16 20:50:32 1995  John Gilmore  (gnu at toad.com)
+
+	* configure.in:  Replace CHECK_STDARG with AC_CHECK_HEADERS.
+	* main.c (print_status):  Use HAVE_STDARG_H to control whether to
+	declare with ", ..."; not STDARG_PROTOTYPES.
+	* ksu.h:  Don't include <stdarg.h> or <varargs.h>, since they
+	are already included by "com_err.h".
+
 Thu Mar  2 12:32:17 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in (ISODELIB): Remove reference to $(ISODELIB).

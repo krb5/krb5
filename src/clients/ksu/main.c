@@ -41,7 +41,7 @@ int set_env_var();
 void sweep_up();
 char * ontty();
 void init_auth_names();
-#ifdef STDARG_PROTOTYPES
+#ifdef HAVE_STDARG_H
 void print_status( const char *fmt, ...);
 #else
 void print_status();
@@ -946,7 +946,7 @@ return 0;
 
 }
 
-#ifdef STDARG_PROTOTYPES
+#ifdef HAVE_STDARG_H
 void print_status( const char *fmt, ...)
 #else
 void print_status (va_alist)
@@ -954,7 +954,7 @@ void print_status (va_alist)
 #endif
 {
   va_list ap;
-#ifndef STDARG_PROTOTYPES
+#ifndef HAVE_STDARG_H
   char *fmt;
   va_start (ap);
   fmt = va_arg (ap, char*);
