@@ -131,6 +131,7 @@ all-liblinks: $(LIBLINKS)
 clean-libs:
 	$(RM) lib$(LIB)$(STLIBEXT)
 	$(RM) lib$(LIB)$(SHLIBVEXT)
+	$(RM) lib$(LIB)$(SHLIBSEXT)
 	$(RM) lib$(LIB)$(SHLIBEXT)
 	$(RM) lib$(LIB)$(PFLIBEXT)
 
