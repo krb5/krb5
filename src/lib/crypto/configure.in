@@ -19,6 +19,17 @@ if test "$enableval" = yes; then
 else
 	AC_MSG_RESULT(Disabling DES_CBC_MD5)
 fi
+AC_ARG_ENABLE([des3-cbc-md5],
+[ --enable-des3-cbc-md5		enable DES3_CBC_MD5 (DEFAULT).
+ --disable-des3-cbc-md5		disable DES3_CBC_MD5.],
+,
+enableval=yes)dnl
+if test "$enableval" = yes; then
+	AC_MSG_RESULT(Enabling DES3_CBC_MD5)
+	AC_DEFINE(PROVIDE_DES3_CBC_MD5)
+else
+	AC_MSG_RESULT(Disabling DES3_CBC_MD5)
+fi
 AC_ARG_WITH([des-cbc-crc],
 [ --enable-des-cbc-crc		enable DES_CBC_CRC (DEFAULT).
  --disable-des-cbc-crc		disable DES_CBC_CRC.],
