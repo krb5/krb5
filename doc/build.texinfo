@@ -750,6 +750,7 @@ Thanks!
 * HPUX::                        
 * Solaris versions 2.0 through 2.3::  
 * Solaris 2.X::                 
+* Solaris 9::                   
 * SGI Irix 5.X::                
 * Ultrix 4.2/3::                
 @end menu
@@ -847,7 +848,7 @@ environment to break or behave differently.
 
 @end enumerate
 
-@node Solaris 2.X, SGI Irix 5.X, Solaris versions 2.0 through 2.3, OS Incompatibilities
+@node Solaris 2.X, Solaris 9, Solaris versions 2.0 through 2.3, OS Incompatibilities
 @subsection Solaris 2.X
 
 You @b{must} compile Kerberos V5 without the UCB compatibility
@@ -861,7 +862,24 @@ to configure with the option @code{CFLAGS="-D_XOPEN_SOURCE=500
 -D__EXTENSIONS__"}.  This is not well tested; at MIT we work primarily
 with the 32-bit execution environment.
 
-@node SGI Irix 5.X, Ultrix 4.2/3, Solaris 2.X, OS Incompatibilities
+@node Solaris 9, SGI Irix 5.X, Solaris 2.X, OS Incompatibilities
+@subsection Solaris 9
+
+Solaris 9 has a kernel race condition which causes the final output
+written to the slave side of a pty to be lost upon the final close()
+of the slave device.  This causes the dejagnu-based tests to fail
+intermittently.  A workaround exists, but requires some help from the
+scheduler, and the ``make check'' must be executed from a shell with
+elevated priority limits.
+
+Run something like
+
+@code{priocntl -s -c FX -m 30 -p 30 -i pid nnnn}
+
+as root, where @code{nnnn} is the pid of the shell whose priority
+limit you wish to raise.
+
+@node SGI Irix 5.X, Ultrix 4.2/3, Solaris 9, OS Incompatibilities
 @subsection SGI Irix 5.X
 
 If you are building in a tree separate from the source tree, the vendors
