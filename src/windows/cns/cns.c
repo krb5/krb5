@@ -493,43 +493,21 @@ change_password (
 #ifdef KRB5     /* FIXME */
     char *msg;                                  // Message string
     krb5_error_code code;                       // Return value
-
-    krb5_error_code //FIXME INTERFACE
-    krb5_change_password(
-	   krb5_context context,
-	   char *user,
-	   char *realm,
-	   char *old_password,
-	   char *new_password,
-       char **text);
-
-    code = krb5_change_password (k5_context, name, realm, oldpw, newpw, &msg);
+    code = k5_change_password (k5_context, name, realm, oldpw, newpw, &msg);
 
     if (msg != NULL) {
         MessageBox (NULL, msg, NULL, MB_ICONEXCLAMATION);
-        //WHO FREES THIS SPACE??? free (msg);
-    } else if (code)
-        com_err (NULL, code, "while changing password.");
+    } else if (code) {
+		if (code == KRB5KRB_AP_ERR_BAD_INTEGRITY)
+			MessageBox (NULL, "Password incorrect", NULL, MB_ICONEXCLAMATION);
+		else
+			com_err (NULL, code, "while changing password.");
+	}
 
 	return (code == 0);
-#endif
 
-} /* change_password */
-/*+*/
-#ifdef KRB5
-krb5_error_code //FIXME INTERFACE
-krb5_change_password(
-    krb5_context context,
-	char *user,
-	char *realm,
-	char *old_password,
-	char *new_password,
-    char **text)
-{
-    *text = "Changing passwords is not yet implemented";
-    return -1;
-}
 #endif /* KRB5 */
+}
 /*+
  * Function: Process WM_COMMAND messages for the password dialog.
  *

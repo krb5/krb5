@@ -153,6 +153,14 @@ time_t kwin_get_epoch(void);
    static int k5_get_lrealm (char *realm);
    static krb5_error_code k5_init_ccache (krb5_ccache *ccache);
    static int k5_name_from_ccache (krb5_ccache k5_ccache);
+	krb5_error_code k5_change_password (
+		krb5_context context,
+		char *user,
+		char *realm,
+	   char *old_password,
+	   char *new_password,
+		char **text);
+
 #endif
 
 HICON kwin_get_icon(time_t expiration);

@@ -2,7 +2,7 @@
 # Works for both k4 and k5 releases.
 #
 NAME 	 = cns
-OBJS 	 = cns.obj tktlist.obj
+OBJS 	 = cns.obj tktlist.obj kpasswd.obj
 
 ##### Options
 DEBUG 	 = 1

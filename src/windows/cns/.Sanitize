@@ -44,6 +44,7 @@ cns.def
 cns.h
 cns.ico
 cns.rc
+kpasswd.c
 krbini.h
 makefile
 tktlist.c

@@ -1,3 +1,10 @@
+Tue May 30 17:28:04 1995 Keith Vetter (keithv@fusion.com)
+
+	* kpasswd.c: new file for k5 password changing.
+	* makefile: added new file to obj list.
+	* cns.c: added call to kpasswd stuff.
+	* cns.h: added prototype for kpasswd stuff.
+
 Thu Apr 27 11:46:42 1995 Keith Vetter (keithv@fusion.com)
 
 	* cns.c, cns.rc, krbini.h: K5 no longer has conf and realms files
