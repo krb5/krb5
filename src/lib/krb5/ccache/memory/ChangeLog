@@ -1,0 +1,14 @@
+Sat Nov  4 00:45:42 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* mcc_ops.c: Remove excess code which is defined in fcc_ops.c
+		(which may not be the right place for it anyway).
+
+	* mcc.h: Remove use of krb5_ccache_sessions
+
+	* mcc_destry.c (krb5_mcc_destroy): Remove use of krb5_ccache_sessions
+
+	* mcc_gennew.c (krb5_mcc_generate_new): Remove use of
+	        krb5_ccache_sessions
+
+	* mcc_reslv.c (krb5_mcc_resolve): Remove use of krb5_ccache_sessions
+
