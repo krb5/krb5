@@ -109,7 +109,7 @@
 #define ANSI_STDIO
 #endif
 
-
+/* Note, this may shoot us in the foot if we switch to CW compilers for Mach-o builds */
 #ifndef macintosh
 #if defined(__MWERKS__) || defined(applec) || defined(THINK_C)
 #define macintosh
