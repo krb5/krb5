@@ -13,7 +13,7 @@
 NormalLibraryObjectRule()
 
 SUBDIRS = error_tables asn.1 ccache keytab krb rcache free os kdb des \
-	des425 crc-32 krb425 rsa-md4
+	des425 crc-32 krb425 rsa-md4 gssapi
 #ifdef HasVfprintf
 VPOBJS=
 VPSRCS=
