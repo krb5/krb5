@@ -119,13 +119,8 @@ extern struct tm	*localtime();
 #define yylex getdate_yylex
 #define yyerror getdate_yyerror
 
-static int getdate_yylex ();
-static int getdate_yyerror ();
-
-#if	!defined(lint) && !defined(SABER) && !defined(_LINT)
-static char RCS[] =
-	"$Header$";
-#endif	/* !defined(lint) && !defined(SABER) */
+static int getdate_yylex (void);
+static int getdate_yyerror (char *);
 
 
 #define EPOCH		1970
