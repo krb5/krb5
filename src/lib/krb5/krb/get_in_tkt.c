@@ -960,6 +960,12 @@ krb5_get_init_creds(context, creds, client, prompter, prompter_data,
     /* XXX if there's padata on output, something is wrong, but it's
        not obviously an error */
 
+    /* XXX For 1.1.1 and prior KDC's, when SAM is used w/ USE_SAD_AS_KEY,
+       the AS_REP comes back encrypted in the user's longterm key
+       instead of in the SAD. If there was a SAM preauth, there
+       will be an as_key here which will be the SAD. If that fails,
+       use the gak_fct to get the password, and try again. */
+      
     /* XXX because etypes are handled poorly (particularly wrt SAM,
        where the etype is fixed by the kdc), we may want to try
        decrypt_as_reply twice.  If there's an as_key available, try

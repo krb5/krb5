@@ -105,11 +105,6 @@ krb5_error_code pa_enc_timestamp(krb5_context context,
     krb5_enc_data enc_data;
     krb5_pa_data *pa;
    
-    /*
-     * We need to use the password as part or all of the key.
-     * If as_key contains info, it should be the users pass phrase.
-     * If not, get the password before issuing the challenge.
-     */
     if (as_key->length == 0) {
        if (ret = ((*gak_fct)(context, request->client,
 			     request->ktype[0], prompter, prompter_data,
@@ -316,7 +311,9 @@ krb5_error_code pa_sam(krb5_context context,
 	salt = NULL;
 #endif
 	    
-	/* XXX the server uses this fixed enctype, so we will, too. */
+	/* XXX As of the passwords-04 draft, no enctype is specified,
+	   the server uses ENCTYPE_DES_CBC_MD5. In the future the
+	   server should send a PA-SAM-ETYPE-INFO containing the enctype. */
 
 	ret = krb5_c_string_to_key(context, ENCTYPE_DES_CBC_MD5,
 				   &response_data, salt, as_key);
