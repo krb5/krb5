@@ -172,7 +172,7 @@ krb5_rd_cred_basic(context, pcreddata, pkeyblock, local_addr, remote_addr,
 	    goto cleanup;
 
 	pcur->ticket = *pdata;
-	krb5_free_data(context, pdata);
+	krb5_xfree(context, pdata);
 
 
         pcur->is_skey = FALSE;

@@ -1,3 +1,9 @@
+Thu Jun  8 22:48:27 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* rd_cred.c (krb5_rd_cred_basic): Fix problem where the ticket
+		field was assigned with a krb5_data, which was then
+		immediately freed.
+
 Thu Jun  8 16:06:44 1995    <tytso@rsx-11.mit.edu>
 
 	* compat_recv.c, auth_con.c, chk_trans.c, encrypt_tk.c,
