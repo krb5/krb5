@@ -1,3 +1,8 @@
+Sun Oct 15 10:49:35 1995    <tytso@rsts-11.mit.edu>
+
+	* sim_client.c (main): Fixed location where usage() wasn't being
+		called with an argument.
+
 Sat Sep 16 03:45:59 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* sim_client.c (main): Fix optional host parsing so that host is

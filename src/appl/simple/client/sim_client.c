@@ -129,7 +129,7 @@ main(argc, argv)
     argv += optind;
     if (argc > 0) {
 	if (hostname)
-	    usage();
+	    usage(progname);
 	hostname = argv[0];
     }
 
