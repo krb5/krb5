@@ -1,3 +1,9 @@
+2004-02-04  Jeffrey Altman <jaltman@mit.edu>
+
+   * cc_mslsa.c:
+     Remove reference to <ntstatus.h> as it is not present in the August 2001
+     Platform SDK used by Pismere.  Instead copy the error value.
+
 2004-02-02  Jeffrey Altman <jaltman@mit.edu>
 
    * cc_msla.c: 
