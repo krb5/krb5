@@ -442,10 +442,10 @@ kadm5_ret_t    kadm5_get_policies(void *server_handle,
 kadm5_ret_t    kadm5_free_key_data(void *server_handle,
 				   krb5_int16 *n_key_data,
 				   krb5_key_data *key_data);
+#endif
 
 kadm5_ret_t    kadm5_free_name_list(void *server_handle, char **names, 
 				    int count);
-#endif
 
 #if USE_KADM5_API_VERSION == 1
 /*

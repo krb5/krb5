@@ -453,7 +453,8 @@ krb5_klog_init(kcontext, ename, whoami, do_com_err)
 			/*
 			 * Find the end of the severity.
 			 */
-			if (cp2 = strchr(&cp[7], ':')) {
+			cp2 = strchr(&cp[7], ':');
+			if (cp2) {
 			    savec = *cp2;
 			    *cp2 = '\0';
 			    cp2++;
@@ -610,8 +611,9 @@ krb5_klog_init(kcontext, ename, whoami, do_com_err)
 		 * Is this a standard error specification?
 		 */
 		else if (!strcasecmp(cp, "STDERR")) {
-		    if (log_control.log_entries[i].lfu_filep =
-			fdopen(fileno(stderr), "a+")) {
+		    log_control.log_entries[i].lfu_filep =
+			fdopen(fileno(stderr), "a+");
+		    if (log_control.log_entries[i].lfu_filep) {
 			log_control.log_entries[i].log_type = K_LOG_STDERR;
 			log_control.log_entries[i].lfu_fname =
 			    "standard error";
@@ -621,8 +623,9 @@ krb5_klog_init(kcontext, ename, whoami, do_com_err)
 		 * Is this a specification of the console?
 		 */
 		else if (!strcasecmp(cp, "CONSOLE")) {
-		    if (log_control.log_entries[i].ldu_filep =
-			CONSOLE_OPEN("a+")) {
+		    log_control.log_entries[i].ldu_filep =
+			CONSOLE_OPEN("a+");
+		    if (log_control.log_entries[i].ldu_filep) {
 			log_control.log_entries[i].log_type = K_LOG_CONSOLE;
 			log_control.log_entries[i].ldu_devname = "console";
 		    }
@@ -635,8 +638,9 @@ krb5_klog_init(kcontext, ename, whoami, do_com_err)
 		     * We handle devices very similarly to files.
 		     */
 		    if (cp[6] == '=') {
-			if (log_control.log_entries[i].ldu_filep =
-			    DEVICE_OPEN(&cp[7], "w")) {
+			log_control.log_entries[i].ldu_filep = 
+			    DEVICE_OPEN(&cp[7], "w");
+			if (log_control.log_entries[i].ldu_filep) {
 			    log_control.log_entries[i].log_type = K_LOG_DEVICE;
 			    log_control.log_entries[i].ldu_devname = &cp[7];
 			}
@@ -678,10 +682,15 @@ krb5_klog_init(kcontext, ename, whoami, do_com_err)
 	log_control.log_nentries = 1;
     }
     if (log_control.log_nentries) {
-	if (log_control.log_whoami = (char *) malloc(strlen(whoami)+1))
+	log_control.log_whoami = (char *) malloc(strlen(whoami)+1);
+	if (log_control.log_whoami)
 	    strcpy(log_control.log_whoami, whoami);
-	if (log_control.log_hostname = (char *) malloc(MAXHOSTNAMELEN))
+
+	log_control.log_hostname = (char *) malloc(MAXHOSTNAMELEN + 1);
+	if (log_control.log_hostname) {
 	    gethostname(log_control.log_hostname, MAXHOSTNAMELEN);
+	    log_control.log_hostname[MAXHOSTNAMELEN] = '\0';
+	}
 #ifdef	HAVE_OPENLOG
 	if (do_openlog) {
 	    openlog(whoami, LOG_NDELAY|LOG_PID, log_facility);

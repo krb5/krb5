@@ -1,3 +1,15 @@
+2001-06-04  Ezra Peisach  <epeisach@mit.edu>
+
+	* logger.c (krb5_klog_init): Cleanup assignments in
+	conditionals. Ensure that if hostname is MAXHOSTNAMELEN, buffer is
+	\0 terminated.
+
+	* str_conv.c (krb5_string_to_keysalts, krb5_keysalt_iterate):
+	Clean up assignments in conditionals.
+
+	* admin.h: Move kadm5_free_name_list() to version 1 api as it is
+ 	present in the ovsec_glue layer.
+
 2001-03-10  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* str_conv.c: Include adm_proto.h for missing prototypes.
