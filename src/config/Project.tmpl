@@ -138,14 +138,16 @@ clean::									@@\
 #define	OtherdirLibraryTarget(libdir,libname,objlist)			@@\
 AllTarget(objlist)							@@\
 AllTarget(libdir/lib/**/libname.a)					@@\
-AllTarget(libdir/foo/**/libname)					@@\
+AllTarget(foo/**/libname)						@@\
 DependTarget()								@@\
 									@@\
-libdir/foo/**/libname: objlist						@@\
+foo/**/libname: objlist							@@\
 	$(ARADD) libdir/lib/**/libname.a objlist			@@\
 	$(TOUCH) libdir/foo/**/libname					@@\
+	$(TOUCH) foo/**/libname						@@\
 libdir/lib/**/libname.a:						@@\
 	$(ARADD) $@ objlist						@@\
+	$(TOUCH) foo/**/libname						@@\
 	$(TOUCH) libdir/foo/**/libname
 /* The $(RANLIB) is done at the end by the directory itself */
 #endif /* OtherdirLibraryTarget */
@@ -388,6 +390,11 @@ P_NPROTO=-DUseNarrowPrototypes
 #else
 P_NPROTO=-UUseNarrowPrototypes
 #endif
+#if UseStdarg
+P_STDARG=-DUseStdarg
+#else
+P_STDARG=-UUseStdarg
+#endif
 
 /*
  * Default Definitions.
@@ -410,7 +417,7 @@ P_NPROTO=-UUseNarrowPrototypes
          ZEPHLIBS = ZephyrLibs
 #endif
 
-  PROCESS_DEFINES = $(P_TERMIOS) $(P_FLOCKS) $(P_TYPES) $(P_SIGTYPE) $(P_STRINGH) $(P_BITSIZE) $(P_DBM) $(P_INET) $(P_STDLIBH) $(P_TIME_DEFS) $(P_PROTOS) $(P_NPROTO) -DUnifdefRan
+  PROCESS_DEFINES = $(P_TERMIOS) $(P_FLOCKS) $(P_TYPES) $(P_SIGTYPE) $(P_STRINGH) $(P_BITSIZE) $(P_DBM) $(P_INET) $(P_STDLIBH) $(P_TIME_DEFS) $(P_PROTOS) $(P_NPROTO) $(P_STDARG) -DUnifdefRan
        DESDEFINES = DesDefines
           TOPLIBD = $(TOP)/lib
             OSLIB = os
