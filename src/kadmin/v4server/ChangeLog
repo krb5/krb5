@@ -1,3 +1,7 @@
+2000-10-23  Tom Yu  <tlyu@mit.edu>
+
+	* kadm_ser_wrap.c (kadm_ser_in): Update call to mk_priv().
+
 2000-10-10  Tom Yu  <tlyu@mit.edu>
 
 	* kadm_funcs.c: Call life_to_time() and time_to_life() as

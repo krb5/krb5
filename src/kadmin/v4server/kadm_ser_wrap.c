@@ -208,7 +208,7 @@ int *dat_len;
 #else
     des_key_sched(ad.session, sess_sched);
 #endif
-    if (retc = (int) krb_rd_priv(in_st, r_len, sess_sched, ad.session, 
+    if (retc = (int) krb_rd_priv(in_st, r_len, sess_sched, &ad.session, 
 				 &server_parm.recv_addr,
 				 &server_parm.admin_addr, &msg_st)) {
 	clr_cli_secrets();
@@ -277,7 +277,7 @@ int *dat_len;
 				(u_long) (retlen + KADM_VERSIZE +
 					  sizeof(krb5_ui_4)),
 				sess_sched,
-				ad.session, &server_parm.admin_addr,
+				&ad.session, &server_parm.admin_addr,
 				&server_parm.recv_addr)) < 0) {
 	clr_cli_secrets();
 	errpkt(dat, dat_len, KADM_NO_ENCRYPT);
