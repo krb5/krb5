@@ -1,5 +1,8 @@
 2002-04-24  Ken Raeburn  <raeburn@mit.edu>
 
+	* configure.in: If the return type for gethostbyname_r can't be
+	determined, just pretend it's not avaliable.
+
 	* fake-addrinfo.h (getaddrinfo) [_AIX]: Declare and initialize
 	variable "ai".
 
