@@ -54,11 +54,10 @@ krb5_keyblock *out;
     /* copy in real length */
     bcopy((char *)&in->length, (char *)out->contents, sizeof(out->length));
     /* and arrange for encrypted key */
-    if (retval = (*eblock->crypto_entry->
-		  encrypt_func)((krb5_pointer) tmpcontents,
-				(krb5_pointer) (((char *) out->contents) +
-						sizeof(out->length)),
-				in->length, eblock, 0)) {
+    if (retval = krb5_encrypt((krb5_pointer) tmpcontents,
+			      (krb5_pointer) (((char *) out->contents) +
+					      sizeof(out->length)),
+			      in->length, eblock, 0)) {
 	free((char *)out->contents);
 	out->contents = 0;
 	out->length = 0;

@@ -284,8 +284,7 @@ krb5_keyblock *masterkeyblock;
     }
 
     /* do any necessary key pre-processing */
-    if (retval = (*master_encblock.crypto_entry->
-		  process_key)(&master_encblock, masterkeyblock)) {
+    if (retval = krb5_process_key(&master_encblock, masterkeyblock)) {
 	master_encblock.crypto_entry = 0;
 	(void) krb5_db_fini();
 	return(retval);
@@ -300,7 +299,7 @@ closedown_db()
     krb5_error_code retval;
 
     /* clean up master key stuff */
-    retval = (*master_encblock.crypto_entry->finish_key)(&master_encblock);
+    retval = krb5_finish_key(&master_encblock);
 
     bzero((char *)&master_encblock, sizeof(master_encblock));
 

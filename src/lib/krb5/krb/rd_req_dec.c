@@ -196,22 +196,21 @@ krb5_authenticator **authpp;
 	return(ENOMEM);
 
     /* do any necessary key pre-processing */
-    if (retval = (*eblock.crypto_entry->process_key)(&eblock, sesskey)) {
+    if (retval = krb5_process_key(&eblock, sesskey)) {
 	free(scratch.data);
 	return(retval);
     }
 
     /* call the encryption routine */
-    if (retval =
-	(*eblock.crypto_entry->decrypt_func)((krb5_pointer) request->authenticator.data,
-					     (krb5_pointer) scratch.data,
-					     scratch.length, &eblock, 0)) {
-	(void) (*eblock.crypto_entry->finish_key)(&eblock);
+    if (retval = krb5_decrypt((krb5_pointer) request->authenticator.data,
+			      (krb5_pointer) scratch.data,
+			      scratch.length, &eblock, 0)) {
+	(void) krb5_finish_key(&eblock);
 	free(scratch.data);
 	return retval;
     }
 #define clean_scratch() {bzero(scratch.data, scratch.length); free(scratch.data);}
-    if (retval = (*eblock.crypto_entry->finish_key)(&eblock)) {
+    if (retval = krb5_finish_key(&eblock)) {
 
 	clean_scratch();
 	return retval;

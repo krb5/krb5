@@ -75,24 +75,23 @@ register krb5_ticket *dec_ticket;
 #define cleanup_encpart() {(void) bzero(dec_ticket->enc_part.data, dec_ticket->enc_part.length); free(dec_ticket->enc_part.data); dec_ticket->enc_part.length = 0; dec_ticket->enc_part.data = 0;}
 
     /* do any necessary key pre-processing */
-    if (retval = (*eblock.crypto_entry->process_key)(&eblock, srv_key)) {
+    if (retval = krb5_process_key(&eblock, srv_key)) {
 	goto clean_encpart;
     }
 
-#define cleanup_prockey() {(void) (*eblock.crypto_entry->finish_key)(&eblock);}
+#define cleanup_prockey() {(void) krb5_finish_key(&eblock);}
 
     /* call the encryption routine */
-    if (retval =
-	(*eblock.crypto_entry->encrypt_func)((krb5_pointer) scratch->data,
-					     (krb5_pointer) dec_ticket->enc_part.data,
-					     scratch->length, &eblock, 0)) {
+    if (retval = krb5_encrypt((krb5_pointer) scratch->data,
+			      (krb5_pointer) dec_ticket->enc_part.data,
+			      scratch->length, &eblock, 0)) {
 	goto clean_prockey;
     }
 
     /* ticket is now assembled-- do some cleanup */
     cleanup_scratch();
 
-    if (retval = (*eblock.crypto_entry->finish_key)(&eblock)) {
+    if (retval = krb5_finish_key(&eblock)) {
 	cleanup_encpart();
 	return retval;
     }

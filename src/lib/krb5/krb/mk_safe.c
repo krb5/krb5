@@ -87,7 +87,9 @@ OLDDECLARG(krb5_data *, outbuf)
     if (retval = encode_krb5_safe(&safemsg, &scratch))
 	return retval;
 
-#define clean_scratch() {(void) bzero((char *)scratch->data, scratch->length); krb5_free_data(scratch);}
+#define clean_scratch() {(void) memset((char *)scratch->data, 0,\
+				       scratch->length); \
+			  krb5_free_data(scratch);}
 			 
     if (!(safe_checksum.contents = (krb5_octet *)
 	  malloc(krb5_cksumarray[sumtype]->checksum_length))) {

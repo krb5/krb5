@@ -289,8 +289,7 @@ struct realm_info *pblock;
 	    return retval;
 	break;
     case RANDOM_KEY:
-	if (retval = (*pblock->eblock->crypto_entry->random_key)(pblock->rseed,
-								 &rkey))
+	if (retval = krb5_random_key(pblock->eblock, pblock->rseed, &rkey))
 	    return retval;
 	retval = krb5_kdb_encrypt_key(pblock->eblock, rkey, &ekey);
 	krb5_free_keyblock(rkey);

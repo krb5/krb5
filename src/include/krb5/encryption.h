@@ -136,4 +136,13 @@ extern int krb5_max_cksum;		/* max entry in array */
 #define valid_cksumtype(cktype)     ((cktype <= krb5_max_cksum) && (cktype > 0) && krb5_cksumarray[cktype])
 
 
+#define krb5_encrypt(inptr, outptr, size, eblock, ivec) (*(eblock)->crypto_entry->encrypt_func)(inptr, outptr, size, eblock, ivec)
+#define krb5_decrypt(inptr, outptr, size, eblock, ivec) (*(eblock)->crypto_entry->decrypt_func)(inptr, outptr, size, eblock, ivec)
+#define krb5_process_key(eblock, key) (*(eblock)->crypto_entry->process_key)(eblock, key)
+#define krb5_finish_key(eblock) (*(eblock)->crypto_entry->finish_key)(eblock)
+#define krb5_string_to_key(eblock, keytype, keyblock, data, princ) (*(eblock)->crypto_entry->string_to_key)(keytype, keyblock, data, princ)
+#define krb5_init_random_key(eblock, keyblock, ptr) (*(eblock)->crypto_entry->init_random_key)(keyblock, ptr)
+#define krb5_finish_random_key(eblock, ptr) (*(eblock)->crypto_entry->finish_random_key)(ptr)
+#define krb5_random_key(eblock, ptr, keyblock) (*(eblock)->crypto_entry->random_key)(ptr, keyblock)
+
 #endif /* KRB5_ENCRYPTION__ */

@@ -87,23 +87,22 @@ OLDDECLARG(krb5_data **, enc_rep)
 
 #define cleanup_encpart() {(void) bzero(dec_rep->enc_part.data, dec_rep->enc_part.length); free(dec_rep->enc_part.data); dec_rep->enc_part.length = 0; dec_rep->enc_part.data = 0;}
 
-    if (retval = (*eblock.crypto_entry->process_key)(&eblock, client_key)) {
+    if (retval = krb5_process_key(&eblock, client_key)) {
 	goto clean_encpart;
     }
 
-#define cleanup_prockey() {(void) (*eblock.crypto_entry->finish_key)(&eblock);}
+#define cleanup_prockey() {(void) krb5_finish_key(&eblock);}
 
-    if (retval =
-	(*eblock.crypto_entry->encrypt_func)((krb5_pointer) scratch->data,
-					     (krb5_pointer) dec_rep->enc_part.data,
-					     scratch->length, &eblock, 0)) {
+    if (retval = krb5_encrypt((krb5_pointer) scratch->data,
+			      (krb5_pointer) dec_rep->enc_part.data,
+			      scratch->length, &eblock, 0)) {
 	goto clean_prockey;
     }
 
     /* do some cleanup */
     cleanup_scratch();
 
-    if (retval = (*eblock.crypto_entry->finish_key)(&eblock)) {
+    if (retval = krb5_finish_key(&eblock)) {
 	cleanup_encpart();
 	return retval;
     }
