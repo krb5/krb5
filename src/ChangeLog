@@ -1,3 +1,8 @@
+1998-09-22  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* aclocal.m4 (AC_PROG_LEX): Autoconf "fixed" AC_PROG_LEX long
+		ago.  Our own local version is no longer necessary.
+
 Wed Sep 23 15:24:44 1998  Tom Yu  <tlyu@mit.edu>
 
 	* aclocal.m4 (KRB5_LIB_AUX): Do what Sam originally meant to do by

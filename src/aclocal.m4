@@ -388,22 +388,6 @@ AC_CACHE_VAL(krb5_cv_type_yylineno,
   fi
 ])dnl
 dnl
-dnl fix AC_PROG_LEX
-dnl
-undefine([AC_PROG_LEX])dnl
-define(AC_PROG_LEX,
-[AC_PROVIDE([$0])dnl
-AC_PROGRAM_CHECK(LEX, flex, flex, lex)dnl
-if test -z "$LEXLIB"
-then
-   case "$LEX" in
-   flex*) AC_CHECK_LIB(fl,main, LEXLIB="-lfl") ;;
-   *) AC_CHECK_LIB(l,main, LEXLIB="-ll") ;;
-   esac
-fi
-AC_MSG_RESULT(setting LEXLIB to $LEXLIB)
-AC_SUBST(LEX)AC_SUBST(LEXLIB)])dnl
-dnl
 dnl K5_GEN_MAKEFILE([dir, [frags]])
 dnl
 define(K5_GEN_MAKEFILE,[dnl
