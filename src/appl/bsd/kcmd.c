@@ -57,6 +57,8 @@ static char sccsid[] = "derived from @(#)rcmd.c	5.17 (Berkeley) 6/27/88";
 #include <errno.h>
 #include <krb5/krb5.h>
 #include <krb5/asn1.h>
+
+#include "defines.h"
      
 #ifndef MAXHOSTNAMELEN 
 #define MAXHOSTNAMELEN 64
@@ -67,7 +69,7 @@ extern	errno;
 #define	START_PORT	5120	 /* arbitrary */
 char *default_service = "host";
 
-
+extern krb5_cksumtype krb5_kdc_req_sumtype;
 
 kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
      cred, seqno, server_seqno, laddr, faddr, authopts)
@@ -84,7 +86,7 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
      struct sockaddr_in *laddr, *faddr;
      krb5_flags authopts;
 {
-    int s, timo = 1, pid;
+    int i, s, timo = 1, pid;
     long oldmask;
     struct sockaddr_in sin, from, local_laddr;
     krb5_creds *ret_cred = 0;
@@ -97,12 +99,13 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
     krb5_error *err_ret;
     krb5_ap_rep_enc_part *rep_ret;
     krb5_checksum send_cksum;
-    krb5_principal server, client;
     char *tmpstr = 0;
+    krb5_error	*error;
     int sin_len;
     krb5_ccache cc;
     krb5_data outbuf;
-    
+    krb5_flags options = authopts;
+
     pid = getpid();
     hp = gethostbyname(*ahost);
     if (hp == 0) {
@@ -137,7 +140,8 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
         return(-1);
     }
     if ((realm == NULL) || (realm[0] == '\0')) {
-	krb5_sname_to_principal(host_save,service,1,&ret_cred->server);
+	krb5_sname_to_principal(host_save,service,KRB5_NT_SRV_HST,
+				&ret_cred->server);
     }
     else {
         sprintf(tmpstr,"%s/%s@%s",service,host_save,realm);
@@ -290,41 +294,63 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
     status = krb5_get_credentials(0, cc, ret_cred);
     if (status) goto bad3;
 
-    krb5_cc_close(cc);
+    /* Reset internal flags; these should not be sent. */
+    authopts &= (~OPTS_FORWARD_CREDS);
+    authopts &= (~OPTS_FORWARDABLE_CREDS);
 
    /* call Kerberos library routine to obtain an authenticator,
        pass it over the socket to the server, and obtain mutual
        authentication. */
     status = krb5_sendauth((krb5_pointer) &s,
                            "KCMDV0.1", ret_cred->client, ret_cred->server,
-                           AP_OPTS_MUTUAL_REQUIRED,
+			   authopts,
                            &send_cksum,
                            ret_cred,
                            0,		/* We have the credentials */
                            seqno,
                            0,           /* don't need a subsession key */
-                           0,		/* No error return */
+                           &error,		/* No error return */
                            &rep_ret);
-    
+    if (status) {
+	printf("We have a sendauth error %d\n", error->error);
+	if (error->text.length) {
+	    fprintf(stderr, "Text: %s\n", error->text.data);
+	}
+	krb5_free_error(error);
+    }	
     if (status) goto bad3;
     if (rep_ret && server_seqno) {
 	*server_seqno = rep_ret->seq_number;
 	krb5_free_ap_rep_enc_part(rep_ret);
     }
     
-    outbuf.length = 0;
-
-    /* Send two empty messages. These will be used in a later release
-       to send a forwarded TGT and related info. */
-    if (status = krb5_write_message((krb5_pointer)&s, &outbuf))
-	goto bad3;
-    if (status = krb5_write_message((krb5_pointer)&s, &outbuf))
-	goto bad3;
-
     (void) write(s, remuser, strlen(remuser)+1);
     (void) write(s, cmd, strlen(cmd)+1);
     (void) write(s, locuser, strlen(locuser)+1);
     
+    if (options & OPTS_FORWARD_CREDS) {   /* Forward credentials */
+	if (status = get_for_creds(ETYPE_DES_CBC_CRC,
+				   krb5_kdc_req_sumtype,
+				   hp->h_name,
+				   ret_cred->client,
+				   &ret_cred->keyblock,
+				   /* Forwardable TGT? */
+				   options & OPTS_FORWARDABLE_CREDS,
+				   &outbuf)) {
+	    fprintf(stderr, "kcmd: Error getting forwarded creds\n");
+	    goto bad2;
+	}
+	
+	/* Send forwarded credentials */
+	if (status = krb5_write_message((krb5_pointer)&s, &outbuf))
+	  goto bad3;
+    }
+    else { /* Dummy write to signal no forwarding */
+	outbuf.length = 0;
+	if (status = krb5_write_message((krb5_pointer)&s, &outbuf))
+	  goto bad3;
+    }
+
     if ((rc=read(s, &c, 1)) != 1) {
 	if (rc==-1) {
 	    perror(*ahost);
@@ -350,7 +376,7 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
     if (tmpstr) xfree(tmpstr);
     if (host_save) xfree(host_save);
     
-    /* Pass back credentials if wanted */
+    /* pass back credentials if wanted */
     if (cred) krb5_copy_creds(ret_cred,cred);
     krb5_free_creds(ret_cred);
     

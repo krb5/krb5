@@ -33,7 +33,6 @@ char copyright[] =
 static char sccsid[] = "@(#)rlogin.c	5.12 (Berkeley) 9/19/88";
 #endif /* not lint */
 
-#define KERBEROS
      
      /*
       * rlogin - remote login
@@ -94,8 +93,8 @@ static char sccsid[] = "@(#)rlogin.c	5.12 (Berkeley) 9/19/88";
 #include <krb5/crc-32.h>
 #include <krb5/mit-des.h>
 #include <krb5/los-proto.h>
-
 #include <com_err.h>
+#include "defines.h"
      
 #ifdef BUFSIZ
 #undef BUFSIZ
@@ -110,6 +109,7 @@ krb5_encrypt_block eblock;      /* eblock for encrypt/decrypt */
 void try_normal();
 char *krb_realm = (char *)0;
 int encrypt = 0;
+int fflag = 0, Fflag = 0;
 krb5_creds *cred;
 struct sockaddr_in local, foreign;
 
@@ -180,7 +180,7 @@ struct winsize {
 #endif /* NO_WINSIZE */
 struct	winsize winsize;
 krb5_sigtype	sigwinch(), oob();
-char	*host;				/* external, so it can be
+char	*host=0;			/* external, so it can be
 					   reached from confirm_death() */
 
 
@@ -263,13 +263,30 @@ main(argc, argv)
     int sock;
     krb5_flags authopts;
     krb5_error_code status;
+    int debug_port = 0;
 #endif /* KERBEROS */
-    
+   
+    if (rindex(argv[0], '/'))
+      argv[0] = rindex(argv[0], '/')+1;
+
     if ( argc < 2 ) goto usage;
-    host = argv[1];
-    argc -= 2;
-    argv +=2;
+    argc--;
+    argv++;
+
   another:
+    if (argc > 0 && host == 0 && strncmp(*argv, "-", 1)) {
+	host = *argv;
+	argv++, argc--;
+	goto another;
+    }
+
+    if (argc > 0 && !strcmp(*argv, "-D")) {
+	argv++; argc--;
+	debug_port = atoi(*argv);
+	argv++; argc--;
+	goto another;
+    }
+
     if (argc > 0 && !strcmp(*argv, "-d")) {
 	argv++, argc--;
 	options |= SO_DEBUG;
@@ -350,6 +367,24 @@ main(argc, argv)
 	argv++, argc--;
 	goto another;
     }
+    if (argc > 0 && !strcmp(*argv, "-f")) {
+	if (Fflag) {
+	    fprintf(stderr, "rlogin: Only one of -f and -F allowed\n");
+	    goto usage;
+	}
+	fflag++;
+	argv++, argc--;
+	goto another;
+    }
+    if (argc > 0 && !strcmp(*argv, "-F")) {
+	if (fflag) {
+	    fprintf(stderr, "rlogin: Only one of -f and -F allowed\n");
+	    goto usage;
+	}
+	Fflag++;
+	argv++, argc--;
+	goto another;
+    }
 #endif /* KERBEROS */
     if (host == 0)
       goto usage;
@@ -410,8 +445,19 @@ main(argc, argv)
     oldmask = sigblock(sigmask(SIGURG) | sigmask(SIGUSR1));
 #endif
     
+    if (debug_port)
+      sp->s_port = htons(debug_port);
+
 #ifdef KERBEROS
     authopts = AP_OPTS_MUTUAL_REQUIRED;
+
+    /* Piggy-back forwarding flags on top of authopts; */
+    /* they will be reset in kcmd */
+    if (fflag || Fflag)
+      authopts |= OPTS_FORWARD_CREDS;
+    if (Fflag)
+      authopts |= OPTS_FORWARDABLE_CREDS;
+
     status = kcmd(&sock, &host, sp->s_port,
 		  null_local_username ? NULL : pwd->pw_name,
 		  name ? name : pwd->pw_name, term,
@@ -474,7 +520,7 @@ main(argc, argv)
 #ifdef KERBEROS
     fprintf (stderr,
 	     "usage: rlogin host [-option] [-option...] [-k realm ] [-t ttytype] [-l username]\n");
-    fprintf (stderr, "     where option is e, 7, 8, noflow, n, a, x, or c\n");
+    fprintf (stderr, "     where option is e, 7, 8, noflow, n, a, x, f, F, or c\n");
 #else /* !KERBEROS */
     fprintf (stderr,
 	     "usage: rlogin host [-option] [-option...] [-t ttytype] [-l username]\n");

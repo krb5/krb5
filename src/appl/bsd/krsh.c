@@ -35,8 +35,6 @@ char copyright[] =
 static char sccsid[] = "@(#)rsh.c	5.7 (Berkeley) 9/20/88";
 #endif /* not lint */
 
-#define KERBEROS
-     
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/ioctl.h>
@@ -55,6 +53,8 @@ static char sccsid[] = "@(#)rsh.c	5.7 (Berkeley) 9/20/88";
 #include <krb5/asn1.h>
 #include <krb5/crc-32.h>
 #include <krb5/mit-des.h>
+#include <krb5/osconf.h>
+#include "defines.h"
 #endif /* KERBEROS */
      
      /*
@@ -75,9 +75,9 @@ krb5_sigtype  sendsig();
 
 #ifdef KERBEROS
 char	*krb_realm = (char *)0;
-     void	try_normal();
+void	try_normal();
 #define UCB_RSH "/usr/ucb/rsh"
-#define RLOGIN_PROGRAM "/nfs/kerberos/bin/sun3/rlogin"
+#define RLOGIN_PROGRAM KRB5_PATH_RLOGIN
 #else /* KERBEROS */
 #define RLOGIN_PROGRAM "/usr/ucb/rlogin"
 #endif  /* KERBEROS */
@@ -89,7 +89,7 @@ char	*krb_realm = (char *)0;
      char **argv0;
 {
     int rem, pid;
-    char *host, *cp, **ap, buf[BUFSIZ], *args, **argv = argv0, *user = 0;
+    char *host=0, *cp, **ap, buf[BUFSIZ], *args, **argv = argv0, *user = 0;
     register int cc;
     int asrsh = 0;
     struct passwd *pwd;
@@ -100,17 +100,31 @@ char	*krb_realm = (char *)0;
 #ifdef KERBEROS
     krb5_flags authopts;
     krb5_error_code status;
+    int fflag = 0, Fflag = 0;
+    int debug_port = 0;
 #endif  /* KERBEROS */
-    
+   
+    if (rindex(argv[0], '/'))
+      argv[0] = rindex(argv[0], '/')+1; 
+
     if ( argc < 2 ) goto usage;
-    host = argv[1];
-    argc -= 2;
-    argv +=2;	
-    if (!strcmp(host, "rsh")) {
-	host = *argv++, --argc;
-	asrsh = 1;
-    }
+    argc--;
+    argv++;
+
   another:
+    if (argc > 0 && host == 0 && strncmp(*argv, "-", 1)) {
+	host = *argv;
+	argv++, argc--;
+	goto another;
+    }
+
+    if (argc > 0 && !strcmp(*argv, "-D")) {
+	argv++; argc--;
+	debug_port = atoi(*argv);
+	argv++; argc--;
+	goto another;
+    }
+
     if (argc > 0 && !strcmp(*argv, "-l")) {
 	argv++, argc--;
 	if (argc > 0)
@@ -149,7 +163,24 @@ char	*krb_realm = (char *)0;
 	argv++, argc--;
 	goto another;
     }
-    
+    if (argc > 0 && !strncmp(*argv, "-f", 2)) {
+	if (Fflag) {
+	    fprintf(stderr, "rsh: Only one of -f and -F allowed\n");
+	    goto usage;
+	}
+	fflag++;
+	argv++, argc--;
+	goto another;
+    }
+    if (argc > 0 && !strncmp(*argv, "-F", 2)) {
+	if (fflag) {
+	    fprintf(stderr, "rsh: Only one of -f and -F allowed\n");
+	    goto usage;
+	}
+	Fflag++;
+	argv++, argc--;
+	goto another;
+    }
 #endif  /* KERBEROS */
     /*
      * Ignore the -L, -w, -e and -8 flags to allow aliases with rlogin
@@ -206,8 +237,6 @@ char	*krb_realm = (char *)0;
     if (host == 0)
       goto usage;
     if (argv[0] == 0) {
-	if (asrsh)
-	  *argv0 = "rlogin";
 	execv(RLOGIN_PROGRAM, argv0);
 	perror(RLOGIN_PROGRAM);
 	exit(1);
@@ -242,9 +271,21 @@ char	*krb_realm = (char *)0;
 #endif /* KERBEROS */
 	exit(1);
     }
+
+    if (debug_port)
+      sp->s_port = debug_port;
+    
 #ifdef KERBEROS
     krb5_init_ets();
     authopts = AP_OPTS_MUTUAL_REQUIRED;
+
+    /* Piggy-back forwarding flags on top of authopts; */
+    /* they will be reset in kcmd */
+    if (fflag || Fflag)
+      authopts |= OPTS_FORWARD_CREDS;
+    if (Fflag)
+      authopts |= OPTS_FORWARDABLE_CREDS;    
+
     status = kcmd(&rem, &host, sp->s_port,
 		  pwd->pw_name,
 		  user ? user : pwd->pw_name,
@@ -257,7 +298,7 @@ char	*krb_realm = (char *)0;
 		  authopts);
     if (status) {
 	fprintf(stderr,
-		"%s: kcmd to host %s failed - %s\n",argv[0], host,
+		"%s: kcmd to host %s failed - %s\n",argv0[0], host,
 		error_message(status));
 	try_normal(argv0);
     }
@@ -369,7 +410,9 @@ char	*krb_realm = (char *)0;
     exit(0);
   usage:
     fprintf(stderr,
-	    "usage: rsh host [ -l login ] [ -n ] command\n");
+	    "usage: \trsh host [ -l login ] [ -n ] [ -f / -F] command\n");
+    fprintf(stderr,
+	    "OR \trsh [ -l login ] [-n ] [ -f / -F ] host command\n");
     exit(1);
 }
 
