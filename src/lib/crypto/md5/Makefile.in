@@ -1,6 +1,6 @@
 thisconfigdir=./..
 BUILDTOP=$(REL)$(U)$(S)$(U)$(S)$(U)
-CFLAGS = $(CCOPTS) $(DEFS) -I$(srcdir)/../des
+CFLAGS = $(CCOPTS) $(DEFS)
 
 ##DOS##BUILDTOP = ..\..\..
 ##DOS##PREFIXDIR=md5
@@ -10,35 +10,20 @@ CFLAGS = $(CCOPTS) $(DEFS) -I$(srcdir)/../des
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 
-RUN_SETUP = @KRB5_RUN_ENV@
+RUN_SETUP = @KRB5_RUN_ENV@ KRB5_CONFIG=$(SRCTOP)/config-files/krb5.conf
 
-STLIBOBJS=md5.o md5glue.o md5crypto.o
+STLIBOBJS= md5.o
 
-OBJS=	md5.$(OBJEXT) md5glue.$(OBJEXT) md5crypto.$(OBJEXT)
-SRCS=	$(srcdir)/md5.c $(srcdir)/md5glue.c $(srcdir)/md5crypto.c
+OBJS= md5.$(OBJEXT) 
+
+SRCS= $(srcdir)/md5.c
 
 ##DOS##LIBOBJS = $(OBJS)
 
 all-unix:: all-libobjs
 
-t_mddriver: t_mddriver.o md5.o
-	$(CC) $(CFLAGS) $(LDFLAGS) -o t_mddriver t_mddriver.o md5.o
+includes:: depend
 
-t_mddriver.exe:
-	$(CC) $(CFLAGS2) -o t_mddriver.exe t_mddriver.c md5.c
-
-t_cksum: t_cksum.o $(KRB5_BASE_DEPLIBS)
-	$(CC_LINK) -o t_cksum t_cksum.o $(KRB5_BASE_LIBS)
-
-check-unix:: t_mddriver t_cksum
-	$(RUN_SETUP) $(C)t_mddriver -x
-	$(RUN_SETUP) $(C)t_cksum "this is a test"
-
-check-windows:: t_mddriver$(EXEEXT)
-	$(C)t_mddriver$(EXEEXT) -x
-
-clean:: 
-	$(RM) t_mddriver$(EXEEXT) t_mddriver.$(OBJEXT)
-	$(RM) t_cksum$(EXEEXT) t_cksum.$(OBJEXT)
+depend:: $(SRCS)
 
 clean-unix:: clean-libobjs
