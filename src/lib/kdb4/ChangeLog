@@ -1,3 +1,10 @@
+Fri Apr 28 16:24:20 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* configure.in: Add check for KRB5_POSIX_LOCKS
+
+	* krb_dbm.c: Add #include of fcntl.h; if POSIX_FILE_LOCKS is
+		defined, use POSIX-style locking.
+
 Fri Jan 13 18:24:26 1995  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	* krb_kdb_utils.c (kdb_verify_master_key): Don't say ``BEWARE!'',

@@ -17,6 +17,7 @@
 #include <string.h>
 #include <des.h>
 #include <sys/file.h>
+#include <fcntl.h>
 /* before krb_db.h */
 #include <krb.h>
 #include <krb_db.h>
@@ -27,7 +28,7 @@
 #include <dbm.h>
 #endif /*NDBM*/
 
-#ifdef POSIX
+#ifdef POSIX_FILE_LOCKS
 #include <fcntl.h>
 #endif
 
@@ -730,7 +731,7 @@ static void kerb_dbl_fini()
 static int kerb_dbl_lock(mode)
     int     mode;
 {
-#ifdef POSIX
+#ifdef POSIX_FILE_LOCKS
     struct flock f;
     int rv;
 #else
@@ -745,13 +746,13 @@ static int kerb_dbl_lock(mode)
 	fflush(stderr);
 	exit(1);
     }
-#ifdef POSIX
+#ifdef POSIX_FILE_LOCKS
     memset(&f, 0, sizeof(f));
 #endif
 
     switch (mode) {
     case KERB_DBL_EXCLUSIVE:
-#ifdef POSIX
+#ifdef POSIX_FILE_LOCKS
 	f.l_type = F_WRLCK;
 #else
 	flock_mode = LOCK_EX;
@@ -759,7 +760,7 @@ static int kerb_dbl_lock(mode)
 	break;
 
     case KERB_DBL_SHARED:
-#ifdef POSIX
+#ifdef POSIX_FILE_LOCKS
 	f.l_type = F_RDLCK;
 #else
 	flock_mode = LOCK_SH;
@@ -771,7 +772,7 @@ static int kerb_dbl_lock(mode)
 	abort();
     }
 
-#ifdef POSIX
+#ifdef POSIX_FILE_LOCKS
     if (non_blocking)
 	rv = fcntl (dblfd, F_SETLK, &f);
     else
@@ -791,7 +792,7 @@ static int kerb_dbl_lock(mode)
 
 static void kerb_dbl_unlock()
 {
-#ifdef POSIX
+#ifdef POSIX_FILE_LOCKS
     struct flock f;
 #endif
     
@@ -800,7 +801,7 @@ static void kerb_dbl_unlock()
 	fflush(stderr);
 	exit(1);
     }
-#ifdef POSIX
+#ifdef POSIX_FILE_LOCKS
     memset(&f, 0, sizeof (f));
     f.l_type = F_UNLCK;
     if (fcntl(dblfd, F_SETLK, &f) < 0) {
