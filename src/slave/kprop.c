@@ -473,7 +473,7 @@ close_database(fd)
 	com_err(progname, 0, "bad fd passed to close_database");
 	exit(1);
     }
-    err = krb5_file_lock(dbfp, dbpathname, KRB5_LOCKMODE_UNLOCK);
+    err = krb5_lock_file(dbfp, dbpathname, KRB5_LOCKMODE_UNLOCK);
     if (err)
 	com_err(progname, err, "while unlocking database '%s'", dbpathname);
     free(dbpathname);
