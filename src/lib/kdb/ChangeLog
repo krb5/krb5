@@ -1,3 +1,9 @@
+Tue Nov 17 18:19:41 1998  Tom Yu  <tlyu@mit.edu>
+
+	* kdb_cpw.c (krb5_dbe_crk): 
+	(krb5_dbe_cpw): Add "keepold" boolean argument to indicate whether
+	to retain old keys.
+
 1998-10-27  Marc Horowitz  <marc@mit.edu>
 
 	* kdb_xdr.c, kdb_cpw.c: remove the special knowledge of ENCTYPE

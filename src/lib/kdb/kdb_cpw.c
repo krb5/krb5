@@ -191,20 +191,22 @@ add_key_rnd_err:
  * Change random key for a krb5_db_entry 
  * Assumes the max kvno
  *
- * As a side effect all old keys are nuked.
+ * As a side effect all old keys are nuked if keepold is false.
  */
 krb5_error_code
-krb5_dbe_crk(context, master_key, ks_tuple, ks_tuple_count, db_entry)
+krb5_dbe_crk(context, master_key, ks_tuple, ks_tuple_count, keepold, db_entry)
     krb5_context	  context;
     krb5_keyblock       * master_key;
     krb5_key_salt_tuple	* ks_tuple;
     int			  ks_tuple_count;
+    krb5_boolean	  keepold;
     krb5_db_entry	* db_entry;
 {
     int 		  key_data_count;
     krb5_key_data 	* key_data;
     krb5_error_code	  retval;
     int			  kvno;
+    int			  i;
 
     /* First save the old keydata */
     kvno = get_key_data_kvno(context, db_entry->n_key_data, db_entry->key_data);
@@ -216,11 +218,21 @@ krb5_dbe_crk(context, master_key, ks_tuple, ks_tuple_count, db_entry)
     /* increment the kvno */
     kvno++;
 
-    if (retval = add_key_rnd(context, master_key, ks_tuple, 
-			     ks_tuple_count, db_entry, kvno)) {
+    retval = add_key_rnd(context, master_key, ks_tuple,
+			 ks_tuple_count, db_entry, kvno);
+    if (retval) {
 	cleanup_key_data(context, db_entry->n_key_data, db_entry->key_data);
 	db_entry->n_key_data = key_data_count;
 	db_entry->key_data = key_data;
+    } else if (keepold) {
+	for (i = 0; i < key_data_count; i++) {
+	    retval = krb5_dbe_create_key_data(context, db_entry);
+	    if (retval) {
+		cleanup_key_data(context, db_entry->n_key_data,
+				 db_entry->key_data);
+		break;
+	    }
+	}
     } else {
 	cleanup_key_data(context, key_data_count, key_data);
     }
@@ -421,23 +433,25 @@ add_key_pwd(context, master_key, ks_tuple, ks_tuple_count, passwd,
  * Change password for a krb5_db_entry 
  * Assumes the max kvno
  *
- * As a side effect all old keys are nuked.
+ * As a side effect all old keys are nuked if keepold is false.
  */
 krb5_error_code
 krb5_dbe_cpw(context, master_key, ks_tuple, ks_tuple_count, passwd,
-	     new_kvno, db_entry)
+	     new_kvno, keepold, db_entry)
     krb5_context	  context;
     krb5_keyblock       * master_key;
     krb5_key_salt_tuple	* ks_tuple;
     int			  ks_tuple_count;
     char 		* passwd;
     int			  new_kvno;
+    krb5_boolean	  keepold;
     krb5_db_entry	* db_entry;
 {
     int 		  key_data_count;
     krb5_key_data 	* key_data;
     krb5_error_code	  retval;
     int			  old_kvno;
+    int			  i;
 
     /* First save the old keydata */
     old_kvno = get_key_data_kvno(context, db_entry->n_key_data,
@@ -452,11 +466,21 @@ krb5_dbe_cpw(context, master_key, ks_tuple, ks_tuple_count, passwd,
     if (new_kvno < old_kvno+1)
        new_kvno = old_kvno+1;
 
-    if (retval = add_key_pwd(context, master_key, ks_tuple, ks_tuple_count,
-			     passwd, db_entry, new_kvno)) {
+    retval = add_key_pwd(context, master_key, ks_tuple, ks_tuple_count,
+			 passwd, db_entry, new_kvno);
+    if (retval) {
 	cleanup_key_data(context, db_entry->n_key_data, db_entry->key_data);
 	db_entry->n_key_data = key_data_count;
 	db_entry->key_data = key_data;
+    } else if (keepold) {
+	for (i = 0; i < key_data_count; i++) {
+	    retval = krb5_dbe_create_key_data(context, db_entry);
+	    if (retval) {
+		cleanup_key_data(context, db_entry->n_key_data,
+				 db_entry->key_data);
+		break;
+	    }
+	}
     } else {
 	cleanup_key_data(context, key_data_count, key_data);
     }
