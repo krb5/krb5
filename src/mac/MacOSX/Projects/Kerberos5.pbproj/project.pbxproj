@@ -586,6 +586,20 @@
 			settings = {
 			};
 		};
+		A19C454E054860ED00E6CD1F = {
+			expectedFileType = sourcecode.c.c;
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			path = dnssrv.c;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A19C454F054860ED00E6CD1F = {
+			fileRef = A19C454E054860ED00E6CD1F;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
 		A1B21F170417D6BC00120114 = {
 			expectedFileType = sourcecode.c.c;
 			fileEncoding = 30;
@@ -7597,6 +7611,7 @@
 				F517355C03F1B65A01120114,
 				F517355D03F1B65A01120114,
 				F517355E03F1B65A01120114,
+				A19C454E054860ED00E6CD1F,
 				F517355F03F1B65A01120114,
 				F517356003F1B65A01120114,
 				F517356103F1B65A01120114,
@@ -11022,6 +11037,7 @@
 				A16DA36804854EF700120112,
 				A16DA36904854EF700120112,
 				A16DB01404868A7E00120112,
+				A19C454F054860ED00E6CD1F,
 			);
 			isa = PBXSourcesBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
