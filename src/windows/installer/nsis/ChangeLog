@@ -1,6 +1,13 @@
 2004-07-07  Jeffrey Altman <jaltman@mit.edu>
 
 * kfw-fixed.nsi:
+  Create registry entries to provide Terminal Service application
+  compatibility flags for all executables
+  http://support.microsoft.com/default.aspx?scid=kb;EN-US;186499
+
+2004-07-07  Jeffrey Altman <jaltman@mit.edu>
+
+* kfw-fixed.nsi:
   Microsoft did not place the AllowTGTSessionKey in the same place
   for both XP SP2 and the server platforms.  Even though they said
   they would.  Modify the installer to set both locations.
