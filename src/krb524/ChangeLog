@@ -1,3 +1,10 @@
+2001-12-07  Ken Raeburn  <raeburn@mit.edu>
+
+	* krb524d.c (cleanup_and_exit): Don't close keytab if it hasn't
+	been opened yet.
+	(lookup_service_key): Copy key block and free up keytab entry
+	data.
+
 2001-02-05  Tom Yu  <tlyu@mit.edu>
 
 	* cnv_tkt_skey.c (krb524_convert_tkt_skey): Avoid double-free;
