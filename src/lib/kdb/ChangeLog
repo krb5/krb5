@@ -1,3 +1,7 @@
+Sun Jun 11 09:26:48 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* Makefile.in (clean): Remove t_kdb and t_kdb.o
+
 Fri Jun  9 19:26:49 1995    <tytso@rsx-11.mit.edu>
 
 	* configure.in: Remove standardized set of autoconf macros, which

@@ -64,3 +64,5 @@ t_kdb:	t_kdb.o $(KLIBS)
 check::	t_kdb
 	./t_kdb
 
+clean::
+	$(RM) t_kdb t_kdb.o
