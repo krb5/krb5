@@ -256,6 +256,7 @@ EXPORTS
 	krb5_cc_initialize
 	krb5_cc_destroy
 	krb5_cc_close
+	krb5_cc_store_cred
 	krb5_cc_retrieve_cred
 	krb5_cc_get_principal
 	krb5_cc_start_seq_get
