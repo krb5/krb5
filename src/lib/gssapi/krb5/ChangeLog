@@ -1,5 +1,8 @@
 2004-06-09  Sam Hartman  <hartmans@mit.edu>
 
+	* Makefile.in (install-headers-unix install): install
+	gssapi_krb5.h from build directory not source directory 
+
 	* accept_sec_context.c (krb5_gss_accept_sec_context): If the
 	server provides channel bindings, these channel bindings must be
 	matched.  Thus clients can only provide null channel bindings if

@@ -216,7 +216,7 @@ gssapi_krb5.h: gssapi_krb5.hin
 
 install-headers-unix install::
 	@set -x; for f in $(EXPORTED_HEADERS) ; \
-	do $(INSTALL_DATA) $(srcdir)/$$f	\
+	do $(INSTALL_DATA) $$f	\
 		$(DESTDIR)$(KRB5_INCDIR)/gssapi/$$f ; \
 	done
 
