@@ -1,5 +1,14 @@
 Fri Nov 15 00:06:53 1996  Tom Yu  <tlyu@mit.edu>
 
+	* user-guide.texinfo: Changes to put copyright page in its own
+	node in the info file.
+
+	* install.texinfo: Changes to put copyright page in its own node
+	in the info file.
+
+	* admin.texinfo: Changes to put copyright page in its own node in
+	the info file, plus more krb5.keytab name updates.
+
 	* install.texinfo (The Keytab File): 
 	(Extract Host Keytabs for the KDCs): 
 	(The Keytab File): 

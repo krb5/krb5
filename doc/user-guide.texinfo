@@ -32,13 +32,10 @@
 @end titlepage
 
 @comment  node-name,  next,  previous,  up
-@node Top, Introduction, (dir), (dir)
+@node Top, Copyright, (dir), (dir)
 
 @ifinfo
 This file describes how to use the @value{PRODUCT} client programs.
-
-@include copyright.texinfo
-@end ifinfo
 
 @c The master menu is updated using emacs19's M-x texinfo-all-menus-update
 @c function.  Don't forget to run M-x texinfo-every-node-update after
@@ -54,13 +51,20 @@ This file describes how to use the @value{PRODUCT} client programs.
 @c ---------------------------------------------------------------------
 
 @menu
+* Copyright::                   
 * Introduction::                
 * Kerberos V5 Tutorial::        
 * Kerberos V5 Reference::       
 * Kerberos Glossary::           
 @end menu
 
-@node Introduction, Kerberos V5 Tutorial, Top, Top
+@node Copyright, Introduction, Top, Top
+@unnumbered Copyright
+
+@include copyright.texinfo
+@end ifinfo
+
+@node Introduction, Kerberos V5 Tutorial, Copyright, Top
 @chapter Introduction
 
 @value{PRODUCT} is based on the Kerberos V5 authentication system

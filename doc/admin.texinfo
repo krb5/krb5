@@ -33,14 +33,11 @@
 @end titlepage
 
 @comment  node-name,  next,  previous,  up
-@node Top, Introduction, (dir), (dir)
+@node Top, Copyright, (dir), (dir)
 
 @ifinfo
 This document describes how to administrate a @value{PRODUCT}
 installation.
-
-@include copyright.texinfo
-@end ifinfo
 
 @c The master menu is updated using emacs19's M-x texinfo-all-menus-update
 @c function.  Don't forget to run M-x texinfo-every-node-update after
@@ -58,6 +55,7 @@ installation.
 @c ---------------------------------------------------------------------
 
 @menu
+* Copyright::                   
 * Introduction::                
 * How Kerberos Works::          
 * Administrating Kerberos Database Entries::  
@@ -67,16 +65,22 @@ installation.
 * Appendix::                    
 @end menu
 
-@node Introduction, How Kerberos Works, Top, Top
+@node Copyright, Introduction, Top, Top
+@unnumbered Copyright
+@include copyright.texinfo
+@end ifinfo
+
+
+@node Introduction, How Kerberos Works, Copyright, Top
 @chapter Introduction
 
 @menu
 * Why Should I use Kerberos?::  
-* @value{PRODUCT} Documentation::  
+* Documentation for Kerberos V5::  
 * Overview of This Guide::      
 @end menu
 
-@node Why Should I use Kerberos?, @value{PRODUCT} Documentation, Introduction, Introduction
+@node Why Should I use Kerberos?, Documentation for Kerberos V5, Introduction, Introduction
 @section Why Should I use Kerberos?
 
 Since Kerberos negotiates authenticated, and optionally encrypted,
@@ -87,15 +91,12 @@ security breaches in industry happen from @i{inside} firewalls,
 @value{PRODUCT} from @value{COMPANY} will play a vital role in the
 security of your network.
 
-@node @value{PRODUCT} Documentation, Overview of This Guide, Why Should I use Kerberos?, Introduction
-@section @value{PRODUCT} Documentation
-
-This document is one piece of the document set for @value{PRODUCT}.  The
-documents, and their intended audiences, are:
+@node Documentation for Kerberos V5, Overview of This Guide, Why Should I use Kerberos?, Introduction
+@section Documentation for @value{PRODUCT}
 
 @include document-list.texinfo
 
-@node Overview of This Guide,  , @value{PRODUCT} Documentation, Introduction
+@node Overview of This Guide,  , Documentation for Kerberos V5, Introduction
 @section Overview of This Guide
 
 The next chapter describes how Kerberos works.
@@ -251,9 +252,9 @@ On the server host, these service keys are stored in @dfn{key tables},
 which are files known as @dfn{keytabs}.@footnote{Keytabs were called
 @dfn{srvtabs} in Kerberos V4.}  For example, the service keys used by
 services that run as root are usually stored in the keytab file
-@code{/etc/v5srvtab}.  @b{N.B.:} This service key is the equivalent of
-the service's password, and must be kept secure.  Data which is meant to
-be read only by the service is encrypted using this key.
+@code{/etc/krb5.keytab}.  @b{N.B.:} This service key is the equivalent
+of the service's password, and must be kept secure.  Data which is meant
+to be read only by the service is encrypted using this key.
 
 @node The User--Kerberos Interaction, Definitions, Network Services and the Master Database, How Kerberos Works
 @section The User--Kerberos Interaction
@@ -1351,7 +1352,7 @@ the KDCs.
 * Keytabs::                     
 * Clock Skew::                  
 * Getting DNS Information Correct::  
-* Configuring Your Firewall to Work With @value{PRODUCT}::  
+* Configuring Your Firewall to Work With Kerberos V5::  
 @end menu
 
 @node Keytabs, Clock Skew, Application Servers, Application Servers
@@ -1390,7 +1391,7 @@ The @code{ktadd} command takes the following switches:
 @table @b
 @item -k @i{keytab}
 use @i{keytab} as the keytab file.  Otherwise, @code{ktadd} will use the
-default keytab file (@code{/etc/v5srvtab}).
+default keytab file (@code{/etc/krb5.keytab}).
 
 @item -q
 run in quiet mode.  This causes @code{ktadd} to display less verbose
@@ -1410,7 +1411,7 @@ For example:
 @b{kadmin:} ktadd host/@value{RANDOMHOST1}.@value{PRIMARYDOMAIN}@@@value{PRIMARYREALM}
 @b{kadmin: Entry for principal host/@value{RANDOMHOST1}.@value{PRIMARYDOMAIN}@@@value{PRIMARYREALM} with
      kvno 2, encryption type DES-CBC-CRC added to keytab
-     WRFILE:/etc/v5srvtab.
+     WRFILE:/etc/krb5.keytab.
 kadmin:}
 @end group
 @end smallexample
@@ -1440,7 +1441,7 @@ The @code{ktremove} command takes the following switches:
 @table @b
 @item -k @i{keytab}
 use @i{keytab} as the keytab file.  Otherwise, @code{ktremove} will use
-the default keytab file (@code{/etc/v5srvtab}).
+the default keytab file (@code{/etc/krb5.keytab}).
 
 @item -q
 run in quiet mode.  This causes @code{ktremove} to display less verbose
@@ -1496,7 +1497,7 @@ gettime -s @value{KDCSERVER}
 If the host is not likely to be rebooted frequently, you may also want
 to set up a cron job that adjusts the time on a regular basis.
 
-@node Getting DNS Information Correct, Configuring Your Firewall to Work With @value{PRODUCT}, Clock Skew, Application Servers
+@node Getting DNS Information Correct, Configuring Your Firewall to Work With Kerberos V5, Clock Skew, Application Servers
 @section Getting DNS Information Correct
 
 Several aspects of Kerberos rely on name service.  In order for Kerberos
@@ -1537,7 +1538,7 @@ issuing the command @code{klist -k}.  For example:
 @smallexample
 @group
 viola# klist -k
-Keytab name: /etc/v5srvtab
+Keytab name: /etc/krb5.keytab
 KVNO Principal
 ---- ------------------------------------------------------------
    1 host/@value{RANDOMHOST1}.@value{PRIMARYDOMAIN}@@@value{PRIMARYREALM}
@@ -1548,7 +1549,7 @@ If you telnet to the host with a fresh credentials cache (ticket file),
 and then @code{klist}, the host's service principal should be
 @i{host/fully-qualified-hostname@@REALM_NAME}.
 
-@node Configuring Your Firewall to Work With @value{PRODUCT},  , Getting DNS Information Correct, Application Servers
+@node Configuring Your Firewall to Work With Kerberos V5,  , Getting DNS Information Correct, Application Servers
 @section Configuring Your Firewall to Work With @value{PRODUCT}
 
 If you need off-site users to be able to get Kerberos tickets in your
