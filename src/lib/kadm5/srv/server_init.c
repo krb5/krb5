@@ -291,6 +291,7 @@ kadm5_ret_t kadm5_destroy(void *server_handle)
     adb_policy_close(handle);
     krb5_db_fini(handle->context);
     krb5_free_principal(handle->context, handle->current_caller);
+    kadm5_free_config_params(handle->context, &handle->params);
     krb5_free_context(handle->context);
     handle->magic_number = 0;
     free(handle->lhandle);

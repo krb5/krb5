@@ -1,3 +1,11 @@
+Mon Oct 13 10:59:22 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* server_init.c (kadm5_destroy): Call kadm5_free_config_params.
+
+	* server_acl.c: Include <ctype.h> for tolower().
+	(acl_load_acl_file): Close acl file, even when acl_catchall_entry is
+	    not set.
+
 Wed Aug  6 20:22:23 1997  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Add flags to conditionally compile with Hesiod.

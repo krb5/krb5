@@ -32,6 +32,7 @@
 #include "k5-int.h"
 #include "server_acl.h"
 #include <kadm5/server_internal.h>
+#include <ctype.h>
 
 typedef struct _acl_op_table {
     char	ao_op;
@@ -264,6 +265,8 @@ char tmpbuf[10];
 	    aentpp = &(*aentpp)->ae_next;
 	}
 
+	fclose(afp);
+
 	if (acl_catchall_entry) {
 	     strcpy(tmpbuf, acl_catchall_entry);
 	     if (*aentpp = acl_parse_line(tmpbuf)) {
@@ -275,7 +278,6 @@ char tmpbuf[10];
 			 ("> catchall acl entry (%s) load failed\n",
 			  acl_catchall_entry));
 	     }
-	     fclose(afp);
 	}
     }
     else {
