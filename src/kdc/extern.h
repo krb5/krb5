@@ -30,7 +30,7 @@ extern krb5_cryptosystem_entry krb5_des_cs_entry;
 extern krb5_keyblock master_keyblock;
 extern krb5_principal master_princ;
 
-extern char *krb5_mkey_pwd_prompt1;
-extern char *krb5_mkey_pwd_prompt2;
+extern volatile int signal_requests_exit;
+extern char *dbm_db_name;
 
 #endif /* __KRB5_KDC_EXTERN__ */
