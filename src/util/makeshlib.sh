@@ -46,14 +46,15 @@ case $host  in
 		# installed (it could be even if we chose not to use gcc).
 		# Better still would be to do this through $CC -- how do
 		# we get crt0.o left out?
-    echo	/bin/ld -o shr.o.$version $library -H512 -T512 -bM:SRE $LDFLAGS -bgcbypass:1 -bnodelcsect -bE:${library}.syms $libdirfl $liblist -lc
-		/bin/ld -o shr.o.$version $library -H512 -T512 -bM:SRE $LDFLAGS -bgcbypass:1 -bnodelcsect -bE:${library}.syms  -lc
+    echo	/bin/ld -o shr.o.$version $library -H512 -T512 -bnoentry -bM:SRE $LDFLAGS -bgcbypass:1 -bnodelcsect -bE:${library}.syms $libdirfl $liblist -lc
+		/bin/ld -o shr.o.$version $library -H512 -T512 -bnoentry -bM:SRE $LDFLAGS -bgcbypass:1 -bnodelcsect -bE:${library}.syms  -lc
 	    fi
 	    stat=$?
 	    if [ $stat -eq 0 ] ; then
 		rm $library ${library}.syms
 		ar cq $library shr.o.$version
 		stat=$?
+		chmod +x $library
 		rm shr.o.$version
 	    else
 		rm -f $library
