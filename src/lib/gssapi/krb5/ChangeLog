@@ -1,3 +1,16 @@
+Sat Mar  2 02:22:30 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* k5mech.c (krb5_gss_get_context): Initialize the serializers
+		here, instead of in export and import security context.
+		This will speed things up a little.
+
+	* export_sec_context.c (krb5_gss_export_sec_context): 
+	* import_sec_context.c (krb5_gss_import_sec_context): Don't create
+		a serialization context just for importing/exporting
+		credentials.  Use the passed-in gssapi context.  This
+		speeds things up significantly.  Assume the serializers
+		are initialized in krb5_gss_get_context.
+
 Tue Feb 27 17:53:22 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* accept_sec_context.c (krb5_gss_accept_sec_context): Remove dead
@@ -11,7 +24,8 @@ Tue Feb 27 17:53:22 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 Mon Feb 26 18:08:57 1996  Sam Hartman  <hartmans@tertius.mit.edu>
 
-	* k5mech.c : do not declare kg_context static as it is declared in another file, and declared extern in a header.
+	* k5mech.c : do not declare kg_context static as it is declared in
+	        another file, and declared extern in a header.
 
 Sat Feb 24 00:06:37 1996  Theodore Y. Ts'o  <tytso@dcl>
 

@@ -85,15 +85,23 @@ void **	context;
 {
     if (context == NULL)
 	return GSS_S_FAILURE;
-
-    if (kg_context) 
+    if (kg_context) {
 	*context = kg_context;
-    else {
-	if (krb5_init_context(&kg_context))
-	    return GSS_S_FAILURE;
-	else
-	    *context = kg_context;
+	return (GSS_S_COMPLETE);
     }
+    if (krb5_init_context(&kg_context))
+	return GSS_S_FAILURE;
+    if (krb5_ser_context_init(kg_context) ||
+	krb5_ser_auth_context_init(kg_context) ||
+	krb5_ser_ccache_init(kg_context) ||
+	krb5_ser_rcache_init(kg_context) ||
+	krb5_ser_keytab_init(kg_context) ||
+	kg_ser_context_init(kg_context)) {
+	krb5_free_context(kg_context);
+	kg_context = 0;
+	return (GSS_S_FAILURE);
+    }
+    *context = kg_context;
     return GSS_S_COMPLETE;
 }
 

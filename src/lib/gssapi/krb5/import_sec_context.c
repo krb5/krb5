@@ -35,66 +35,52 @@ krb5_gss_import_sec_context(ct,
     gss_buffer_t	interprocess_token;
     gss_ctx_id_t	*context_handle;
 {
-    krb5_context	context = ct;
-    krb5_error_code	kret;
+    krb5_context	ser_ctx = ct;
+    krb5_error_code	kret = 0;
     OM_uint32		retval;
-    krb5_context	ser_ctx;
     size_t		blen;
     krb5_gss_ctx_id_t	*ctx;
     krb5_octet		*ibp;
 
     /* Assume a tragic failure */
-    ser_ctx = (krb5_context) NULL;
     ctx = (krb5_gss_ctx_id_t *) NULL;
     retval = GSS_S_FAILURE;
     *minor_status = 0;
 
-    /* Get a fresh Kerberos context */
-    if (!(kret = krb5_init_context(&ser_ctx))) {
-	/* Initialize the serializers */
-	if (!(kret = krb5_ser_context_init(ser_ctx)) &&
-	    !(kret = krb5_ser_auth_context_init(ser_ctx)) &&
-	    !(kret = krb5_ser_ccache_init(ser_ctx)) &&
-	    !(kret = krb5_ser_rcache_init(ser_ctx)) &&
-	    !(kret = krb5_ser_keytab_init(ser_ctx)) &&
-	    !(kret = kg_ser_context_init(ser_ctx))) {
+    /* Internalize the context */
+    ibp = (krb5_octet *) interprocess_token->value;
+    blen = (size_t) interprocess_token->length;
+    if ((kret = krb5_internalize_opaque(ser_ctx, KG_CONTEXT,
+					(krb5_pointer *) &ctx,
+					&ibp, &blen)))
+	goto error_out;
 
-	    /* Internalize the context */
-	    ibp = (krb5_octet *) interprocess_token->value;
-	    blen = (size_t) interprocess_token->length;
-	    if (!(kret = krb5_internalize_opaque(ser_ctx,
-						 KG_CONTEXT,
-						 (krb5_pointer *) &ctx,
-						 &ibp,
-						 &blen))) {
 
-		/* Make sure that everything is cool. */
-		if (kg_validate_ctx_id((gss_ctx_id_t) ctx)) {
-		    *context_handle = (gss_ctx_id_t) ctx;
-		    retval = GSS_S_COMPLETE;
-		}
-	    }
-	}
-	krb5_free_context(ser_ctx);
-    }
-    if (retval != GSS_S_COMPLETE) {
-	if (ctx) {
-	    (void) kg_delete_ctx_id((gss_ctx_id_t) ctx);
-	    if (ctx->enc.processed)
-		krb5_finish_key(context, &ctx->enc.eblock);
-	    krb5_free_keyblock(context, ctx->enc.key);
-	    if (ctx->seq.processed)
-		krb5_finish_key(context, &ctx->seq.eblock);
-	    krb5_free_principal(context, ctx->here);
-	    krb5_free_principal(context, ctx->there);
-	    krb5_free_keyblock(context, ctx->subkey);
+    /* Make sure that everything is cool. */
+    if (!kg_validate_ctx_id((gss_ctx_id_t) ctx))
+	goto error_out;
+    
+    *context_handle = (gss_ctx_id_t) ctx;
+
+    return (GSS_S_COMPLETE);
+
+error_out:
+    if (ctx) {
+	(void) kg_delete_ctx_id((gss_ctx_id_t) ctx);
+	if (ctx->enc.processed)
+	    krb5_finish_key(ser_ctx, &ctx->enc.eblock);
+	krb5_free_keyblock(ser_ctx, ctx->enc.key);
+	if (ctx->seq.processed)
+	    krb5_finish_key(ser_ctx, &ctx->seq.eblock);
+	krb5_free_principal(ser_ctx, ctx->here);
+	krb5_free_principal(ser_ctx, ctx->there);
+	krb5_free_keyblock(ser_ctx, ctx->subkey);
 	    
-	    /* Zero out context */
-	    memset(ctx, 0, sizeof(*ctx));
-	    xfree(ctx);
-	}
-	if (*minor_status == 0)
-	    *minor_status = (OM_uint32) kret;
+	/* Zero out context */
+	memset(ctx, 0, sizeof(*ctx));
+	xfree(ctx);
     }
+    if (*minor_status == 0)
+	*minor_status = (OM_uint32) kret;
     return(retval);
 }
