@@ -1,3 +1,7 @@
+2001-06-26  Ezra Peisach  <epeisach@mit.edu>
+
+	* prot.h: Flush out prototypes for create_auth_reply(), pkt_cipher().
+
 2001-06-22  Ezra Peisach  <epeisach@mit.edu>
 
 	* krb.h: Don't use "options" and "user" as argument names.

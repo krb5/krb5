@@ -198,9 +198,10 @@ do {						\
 
 /* Routines to create and read packets may be found in prot.c */
 
-KTEXT create_auth_reply();
-KTEXT create_death_packet();
-KTEXT pkt_cipher();
+KTEXT create_auth_reply(char *, char *, char *, long, int, 
+			unsigned long, int, KTEXT);
+KTEXT create_death_packet(char *);
+KTEXT pkt_cipher(KTEXT);
 
 /* getst.c */
 int krb4int_getst(int, char *, int);
