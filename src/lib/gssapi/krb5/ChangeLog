@@ -1,3 +1,10 @@
+Thu Nov 16 17:04:00 1995    <tytso@rsts-11.mit.edu>
+
+	* gssapiP_krb5.h (KG_TOK_MIC_MSG, KG_TOK_WRAP_MSG, KG_DEL_CTX):
+	        Fixed token type numbers so they conform with the protocol
+		spec.  Paul Park didn't realize that he wasn't allowed to
+		change these willy-nilly...
+
 Wed Oct 25 15:38:00 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* init_sec_context.c (make_ap_req): Change the input type of

@@ -52,9 +52,9 @@
 #define KG_TOK_CTX_ERROR	0x0300
 #define KG_TOK_SIGN_MSG		0x0101
 #define KG_TOK_SEAL_MSG		0x0201
-#define	KG_TOK_MIC_MSG		0x0102
+#define	KG_TOK_MIC_MSG		0x0101
 #define	KG_TOK_WRAP_MSG		0x0202
-#define KG_TOK_DEL_CTX		0x0103
+#define KG_TOK_DEL_CTX		0x0102
 
 /** internal types **/
 
@@ -474,7 +474,8 @@ PROTOTYPE( (OM_uint32 *,		/* minor_status */
 	   ));
 
 OM_uint32 krb5_gss_inquire_names_for_mech
-PROTOTYPE( (OM_uint32 *,		/* minor_status */
+PROTOTYPE( (void *,
+	    OM_uint32 *,		/* minor_status */
 	    gss_OID,			/* mechanism */
 	    gss_OID_set *		/* name_types */
 	   ));
