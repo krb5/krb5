@@ -32,5 +32,4 @@ K5_GEN_MAKEFILE(hammer)
 K5_GEN_MAKEFILE(verify)
 K5_GEN_MAKEFILE(gssapi)
 K5_GEN_MAKEFILE(dejagnu)
-K5_OUTPUT_FILES
-dnl AC_OUTPUT to keep autoreconf happy
+K5_AC_OUTPUT

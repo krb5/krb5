@@ -1,3 +1,8 @@
+2002-07-18  Ezra Peisach  <epeisach@bu.edu>
+
+	* configure.in: Change K5_OUTPUT_FILES to K5_AC_OUTPUT (cleanup of
+	obsolete macro).
+
 2002-07-17  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Substitute HAVE_RUNTEST with "yes" or "no".
