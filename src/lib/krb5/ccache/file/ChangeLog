@@ -1,3 +1,8 @@
+Thu Aug 15 16:46:00 1996  Tom Yu  <tlyu@mit.edu>
+
+	* fcc_retrv.c (flags_match): Add parens to def'n of flags_match to
+		make comparison correct. (== has higher precedence than &)
+
 Wed Jun 12 01:04:27 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* fcc-proto.h: Change use of PROTOTYPE to KRB5_PROTOTYPE.
