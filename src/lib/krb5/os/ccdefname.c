@@ -89,11 +89,19 @@ static krb5_error_code get_from_os(char *name_buf, int name_size)
 static krb5_error_code get_from_os(char *name_buf, int name_size)
 {
 	char defname[160];                  /* Default value */
+	char *prefix = krb5_cc_dfl_ops->prefix;
+	int len;
 
-	strcpy (defname, "default_cache_name");
-	strcpy (name_buf, "API:");
+	if (!strcmp(prefix, "FILE") || !strcmp(prefix, "STDIO")) {
+		GetWindowsDirectory (defname, sizeof(defname)-7);
+		strcat (defname, "\\krb5cc");
+	} else {
+		strcpy (defname, "default_cache_name");
+	}
+	sprintf(name_buf, "%s:", prefix);
+	len = strlen(name_buf);
 	GetPrivateProfileString(INI_FILES, INI_KRB_CCACHE, defname,
-				name_buf+4, name_size-4, KERBEROS_INI);
+				name_buf+len, name_size-len, KERBEROS_INI);
 	return 0;
 }
 #endif

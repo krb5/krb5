@@ -1,3 +1,12 @@
+Fri Feb  5 01:05:43 1999  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* ccdefname.c (get_from_os): On the Windows platform,
+		automatically generate the correct default cache name
+		based on what krb5_cc_dfl_ops is set to.
+
+	* realm_dom.c (krb5_get_realm_domain): Add modifiers so that this
+		function can get exported in a Windows DLL.
+
 Tue Feb  2 16:01:58 1999  Tom Yu  <tlyu@mit.edu>
 
 	* read_pwd.c: Remove reference to CPP symbol "unix".
