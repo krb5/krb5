@@ -359,8 +359,6 @@ gss_krb5int_unseal_token_v3(krb5_context *contextptr,
     if (toktype == KG_TOK_WRAP_MSG) {
 	if (load_16_be(ptr) != 0x0504)
 	    DEFECTIVE;
-	if (ptr[2] & ~0xe0)
-	    DEFECTIVE;
 	if (ptr[3] != 0xff)
 	    DEFECTIVE;
 	ec = load_16_be(ptr+4);
@@ -485,9 +483,6 @@ gss_krb5int_unseal_token_v3(krb5_context *contextptr,
 	    DEFECTIVE;
     LOG();
     verify_mic_1:
-    LOG();
-	if (ptr[2] & ~0xe0)
-	    DEFECTIVE;
     LOG();
 	if (ptr[3] != 0xff)
 	    DEFECTIVE;
