@@ -1,3 +1,10 @@
+2004-12-15  Jeffrey Altman <jaltman@mit.edu>
+
+        * cc_mslsa.c: 
+          - Activate support for KerbSubmitTicketMessage
+          - Activate support for KerbQueryTicketCacheEx2Message
+          - Add locale support for regions which use MultiByte characters
+
 2004-11-19  Ken Raeburn  <raeburn@mit.edu>
 
 	* cc_mslsa.c (MSCredToMITCred): Don't create an empty array for
