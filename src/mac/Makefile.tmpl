@@ -28,7 +28,11 @@ create-directories :
 ##
 ################################################################################
 
-glue : /mac/K5.CFMglue.c /mac/GSS.CFMglue.c
+GLUE_OUTPUT = /mac/K5.CFMglue.c /mac/GSS.CFMglue.c
+
+glue : {GLUE_OUTPUT}
+glue-clean :
+	Delete -i {GLUE_OUTPUT}
 
 /mac/K5.CFMglue.c : /mac/K5.CFMglue.cin /mac/K5.CFMglue.proto.h /mac/K5.CFMglue.c /mac/K5.moreCFMglue.cin
 	perl /mac/CFMGlue.pl < /mac/K5.CFMglue.proto.h > /mac/K5.CFMglue.c
@@ -458,7 +462,7 @@ GSSLib : GSSLibraryPPC GSSLibrary68K K5LibraryPPC K5Library68K
 
 # This target punts things that get created during an MPW build
 
-clean : autogenerate-clean
+clean : autogenerate-clean glue-clean
 	Delete -i {GSSOBJS68K} {GSSOBJSPPC} {GSSOBJS68KCFM} \
 		{K5OBJS68K} {K5OBJSPPC} {K5OBJS68KCFM} \
 		{KH68K} {KHPPC} {KHCFM-68K} \
