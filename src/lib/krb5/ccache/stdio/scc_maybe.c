@@ -11,6 +11,7 @@
  */
 
 #include "scc.h"
+#include <netinet/in.h>			/* XXX ip only? */
 
 krb5_error_code
 krb5_scc_close_file (id)

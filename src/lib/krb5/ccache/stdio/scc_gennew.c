@@ -16,6 +16,7 @@ static char rcsid_scc_resolve_c[] = "$Id$";
 
 #include "scc.h"
 
+#include <netinet/in.h>			/* XXX ip only? */
 #include <krb5/copyright.h>
 
 extern krb5_cc_ops krb5_scc_ops;
