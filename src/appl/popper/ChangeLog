@@ -1,5 +1,8 @@
 Tue Aug  9 16:50:08 1994  Tom Yu  (tlyu@dragons-lair)
 
+	* pop_init.c: kill static version string that depended on ANSI
+	string splicing
+
 	* Makefile.in:
 	* configure.in: fix $(ISODELIB), also fix make install
 
