@@ -16,6 +16,7 @@ $(OBJS): import_err.h
 
 install::
 	$(INSTALL_PROGRAM) $(PROG) ${DESTDIR}$(ADMIN_BINDIR)/$(PROG)
+	$(INSTALL_DATA) $(srcdir)/($PROG).M ${DESTDIR}$(ADMIN_MANDIR)/($PROG).8
 
 clean::
 	$(RM) $(PROG) $(OBJS) import_err.c import_err.h
