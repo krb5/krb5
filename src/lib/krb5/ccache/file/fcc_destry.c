@@ -30,7 +30,7 @@ static char rcsid_fcc_destry_c[] =
 "$Id$";
 #endif /* !lint && !SABER */
 
-
+#include <errno.h>
 #include "fcc.h"
 
 /*
