@@ -32,7 +32,7 @@
 
 /* Text describing error codes */
 #define		MAX_KRB_ERRORS	256
-extern char *krb_err_txt[MAX_KRB_ERRORS];
+extern const char *const krb_err_txt[MAX_KRB_ERRORS];
 
 /* These are not defined for at least SunOS 3.3 and Ultrix 2.2 */
 #if defined(ULTRIX022) || (defined(SunOS) && SunOS < 40)
