@@ -1,3 +1,8 @@
+Thu Jun 23 01:13:20 1994  Tom Yu  (tlyu at dragons-lair)
+
+	* aclocal.m4 (CONFIG_RULES): make --with-cc= dtrt and default to
+	CC=cc
+
 Wed Jun 22 16:34:46 1994  Mark Eichin  (eichin at tweedledumber.cygnus.com)
 
 	* aclocal.m4 (CONFIG_RULES): add AC_SUBST([CC]) so that CC gets

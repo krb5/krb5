@@ -151,6 +151,11 @@ dnl
 dnl drop in standard configure rebuild rules -- CONFIG_RULES
 dnl
 define(CONFIG_RULES,[
+AC_WITH([cc],
+echo CC=$withval
+CC=$withval,
+echo CC defaults to cc
+CC=cc)dnl
 AC_SUBST([CC])dnl
 divert(9)dnl
 [
