@@ -84,6 +84,7 @@ krb5_error_code krb5_fcc_store_keytype PROTOTYPE((krb5_ccache id , krb5_keytype 
 krb5_error_code krb5_fcc_store_int PROTOTYPE((krb5_ccache id , int *i ));
 krb5_error_code krb5_fcc_store_bool PROTOTYPE((krb5_ccache id , krb5_boolean *b ));
 krb5_error_code krb5_fcc_store_times PROTOTYPE((krb5_ccache id , krb5_ticket_times *t ));
+krb5_error_code krb5_fcc_store_flags PROTOTYPE((krb5_ccache id , krb5_flags *f ));
 
 /* fcc_test.c */
 void init_test_cred PROTOTYPE((void ));
