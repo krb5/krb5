@@ -1,3 +1,8 @@
+2001-07-31  Ezra Peisach  <epeisach@mit.edu>
+
+	* get_in_tkt.c: Cast to unsigned krb5_error error value to 
+	krb5_error_code before trying to add to ERROR_TABLE_BASE_krb5. 
+
 2001-07-30  Ezra Peisach  <epeisach@mit.edu>
 
 	* sendauth.c (krb5_sendauth): Instead of casting second argument

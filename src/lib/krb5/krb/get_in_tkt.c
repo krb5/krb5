@@ -531,7 +531,8 @@ krb5_get_in_tkt(context, options, addrs, ktypes, ptypes, key_proc, keyseed,
 		    goto cleanup;
 		continue;
 	    } else {
-		retval = err_reply->error + ERROR_TABLE_BASE_krb5;
+		retval = (krb5_error_code) err_reply->error 
+		    + ERROR_TABLE_BASE_krb5;
 		krb5_free_error(context, err_reply);
 		goto cleanup;
 	    }
@@ -958,7 +959,8 @@ krb5_get_init_creds(context, creds, client, prompter, prompter_data,
 		if (ret)
 		    goto cleanup;
 	    } else {
-		ret = err_reply->error + ERROR_TABLE_BASE_krb5;
+		ret = (krb5_error_code) err_reply->error 
+		    + ERROR_TABLE_BASE_krb5;
 		krb5_free_error(context, err_reply);
 		goto cleanup;
 	    }
