@@ -1,3 +1,17 @@
+Wed Aug 12 02:26:26 1998  Geoffrey King  <gjking@mit.edu>
+
+	* ftp.c, cmds.c, cmdtab.c, main.c, secure.c, ftp_var.h: Replace
+ 	global variable level with separate variables clevel and dlevel
+ 	for the control channel and data channel protection levels,
+ 	respectively, so that the user may specify separate protection
+ 	levels for each channel.  Similarly, functions such as getlevel
+ 	and setlevel are now getclevel/getdlevel, and setclevel/setdlevel.
+
+	* cmdtab.c: Add new FTP commands "cprotect" to allow the user to 
+	set the control channel protection level (similar to "protect"), 
+	and "ccc" (Clear Command Channel) which sets the control channel
+	protection level to clear (per the RFC).
+	
 Fri Aug  7 22:39:47 1998  Matthew D Hancher  <mdh@mit.edu>
 
 	* ftp.c (do_auth): Make verbosity not disappear if GSSAPI fails.

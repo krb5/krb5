@@ -77,7 +77,8 @@ extern char	ntout[17];	/* output translation table */
 #include <sys/param.h>
 extern char	mapin[MAXPATHLEN];	/* input map template */
 extern char	mapout[MAXPATHLEN];	/* output map template */
-extern int	level;		/* protection level */
+extern int	clevel;		/* command channel protection level */
+extern int	dlevel;		/* data channel protection level */
 extern int	type;		/* requested file transfer type */
 extern int	curtype;	/* current file transfer type */
 extern int	stru;		/* file transfer structure */

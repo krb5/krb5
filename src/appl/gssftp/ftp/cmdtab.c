@@ -45,7 +45,7 @@ int	setascii(), setbell(), setbinary(), setdebug(), setform();
 int	setglob(), sethash(), setmode(), setpeer(), setport();
 int	setprompt(), setstruct();
 int	settenex(), settrace(), settype(), setverbose();
-int	setlevel(), setclear(), setsafe();
+int	setclevel(), setdlevel(), setclear(), setsafe(), ccc();
 #ifndef NOENCRYPTION
 int	setprivate();
 #endif
@@ -69,6 +69,7 @@ char	asciihelp[] =	"set ascii transfer type";
 char	beephelp[] =	"beep when command completed";
 char	binaryhelp[] =	"set binary transfer type";
 char	casehelp[] =	"toggle mget upper/lower case id mapping";
+char	ccchelp[] =	"set clear protection level for commands";
 char	cdhelp[] =	"change remote working directory";
 char	cduphelp[] = 	"change remote working directory to parent directory";
 char	chmodhelp[] =	"change file permissions of remote file";
@@ -87,6 +88,7 @@ char	helphelp[] =	"print local help information";
 char	idlehelp[] =	"get (set) idle timer on remote side";
 char	lcdhelp[] =	"change local working directory";
 char	levelhelp[] =	"set protection level for file transfer";
+char	clevelhelp[] =	"set protection level for commands";
 char	lshelp[] =	"list contents of remote directory";
 char	macdefhelp[] =  "define a macro";
 char	mdeletehelp[] =	"delete multiple files";
@@ -148,11 +150,13 @@ struct cmd cmdtab[] = {
 	{ "binary",	binaryhelp,	0,	1,	1,	setbinary },
 	{ "bye",	quithelp,	0,	0,	0,	quit },
 	{ "case",	casehelp,	0,	0,	1,	setcase },
+	{ "ccc",	ccchelp,	0,	1,	1,	ccc },
 	{ "cd",		cdhelp,		0,	1,	1,	cd },
 	{ "cdup",	cduphelp,	0,	1,	1,	cdup },
 	{ "chmod",	chmodhelp,	0,	1,	1,	do_chmod },
 	{ "clear",	clearhelp,	0,	1,	1,	setclear },
 	{ "close",	disconhelp,	0,	1,	1,	disconnect },
+	{ "cprotect",	clevelhelp,	0,	1,	1,	setclevel },
 	{ "cr",		crhelp,		0,	0,	0,	setcr },
 	{ "delete",	deletehelp,	0,	1,	1,	delete_file },
 	{ "debug",	debughelp,	0,	0,	0,	setdebug },
@@ -188,7 +192,7 @@ struct cmd cmdtab[] = {
 	{ "private",	privatehelp,	0,	1,	1,	setprivate },
 #endif
 	{ "prompt",	prompthelp,	0,	0,	0,	setprompt },
-	{ "protect",	levelhelp,	0,	1,	1,	setlevel },
+	{ "protect",	levelhelp,	0,	1,	1,	setdlevel },
 	{ "proxy",	proxyhelp,	0,	0,	1,	doproxy },
 	{ "sendport",	porthelp,	0,	0,	0,	setport },
 	{ "put",	sendhelp,	1,	1,	1,	put },
@@ -223,3 +227,4 @@ struct cmd cmdtab[] = {
 };
 
 int	NCMDS = (sizeof (cmdtab) / sizeof (cmdtab[0])) - 1;
+

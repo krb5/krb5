@@ -49,7 +49,7 @@ typedef long ftp_int32;
 
 extern struct	sockaddr_in hisaddr;
 extern struct	sockaddr_in myaddr;
-extern int	level;
+extern int	dlevel;
 extern char	*auth_type;
 
 #define MAX maxbuf
@@ -171,7 +171,7 @@ int fd;
 {
 	int ret;
 
-	if (level == PROT_C)
+	if (dlevel == PROT_C)
 		return(0);
 	if (nout)
 		if (ret = secure_putbuf(fd, ucbuf, nout))
@@ -188,7 +188,7 @@ secure_putc(c, stream)
 char c;
 FILE *stream;
 {
-	if (level == PROT_C)
+	if (dlevel == PROT_C)
 		return(putc(c,stream));
 	return(secure_putbyte(fileno(stream), (unsigned char) c));
 }
@@ -206,7 +206,7 @@ unsigned int nbyte;
 	unsigned int i;
 	int c;
 
-	if (level == PROT_C)
+	if (dlevel == PROT_C)
 		return(write(fd,buf,nbyte));
 	for (i=0; nbyte>0; nbyte--)
 		if ((c = secure_putbyte(fd, buf[i++])) < 0)
@@ -245,13 +245,13 @@ unsigned int nbyte;
 	}
 
 	if (strcmp(auth_type, "KERBEROS_V4") == 0)
-	  if ((length = level == PROT_P ?
+	  if ((length = dlevel == PROT_P ?
 	    krb_mk_priv(buf, (unsigned char *) outbuf, nbyte, schedule,
 			SESSION, &myaddr, &hisaddr)
 	  : krb_mk_safe(buf, (unsigned char *) outbuf, nbyte, SESSION,
 			&myaddr, &hisaddr)) == -1) {
 		secure_error("krb_mk_%s failed for KERBEROS_V4",
-				level == PROT_P ? "priv" : "safe");
+				dlevel == PROT_P ? "priv" : "safe");
 		return(ERR);
 	  }
 #endif /* KRB5_KRB4_COMPAT */
@@ -264,7 +264,7 @@ unsigned int nbyte;
 		in_buf.value = buf;
 		in_buf.length = nbyte;
 		maj_stat = gss_seal(&min_stat, gcontext,
-				    (level == PROT_P), /* confidential */
+				    (dlevel == PROT_P), /* confidential */
 				    GSS_C_QOP_DEFAULT,
 				    &in_buf, &conf_state,
 				    &out_buf);
@@ -272,7 +272,7 @@ unsigned int nbyte;
 			/* generally need to deal */
 			/* ie. should loop, but for now just fail */
 			secure_gss_error(maj_stat, min_stat,
-					 level == PROT_P?
+					 dlevel == PROT_P?
 					 "GSSAPI seal failed":
 					 "GSSAPI sign failed");
 			return(ERR);
@@ -333,13 +333,13 @@ int fd;
 		/* Other auth types go here ... */
 #ifdef KRB5_KRB4_COMPAT
 		if (strcmp(auth_type, "KERBEROS_V4") == 0) {
-		  if (kerror = level == PROT_P ?
+		  if (kerror = dlevel == PROT_P ?
 		    krb_rd_priv(ucbuf, length, schedule, SESSION,
 				&hisaddr, &myaddr, &msg_data)
 		  : krb_rd_safe(ucbuf, length, SESSION,
 				&hisaddr, &myaddr, &msg_data)) {
 			secure_error("krb_rd_%s failed for KERBEROS_V4 (%s)",
-					level == PROT_P ? "priv" : "safe",
+					dlevel == PROT_P ? "priv" : "safe",
 					krb_get_err_text(kerror));
 			return(ERR);
 		  }
@@ -355,13 +355,13 @@ int fd;
 
 		  xmit_buf.value = ucbuf;
 		  xmit_buf.length = length;
-		  conf_state = (level == PROT_P);
+		  conf_state = (dlevel == PROT_P);
 		  /* decrypt/verify the message */
 		  maj_stat = gss_unseal(&min_stat, gcontext, &xmit_buf,
 					&msg_buf, &conf_state, NULL);
 		  if (maj_stat != GSS_S_COMPLETE) {
 		    secure_gss_error(maj_stat, min_stat, 
-				     (level == PROT_P)?
+				     (dlevel == PROT_P)?
 				     "failed unsealing ENC message":
 				     "failed unsealing MIC message");
 		    return ERR;
@@ -386,7 +386,7 @@ int fd;
 secure_getc(stream)
 FILE *stream;
 {
-	if (level == PROT_C)
+	if (dlevel == PROT_C)
 		return(getc(stream));
 	return(secure_getbyte(fileno(stream)));
 }
@@ -405,7 +405,7 @@ int nbyte;
 	static int c;
 	int i;
 
-	if (level == PROT_C)
+	if (dlevel == PROT_C)
 		return(read(fd,buf,nbyte));
 	if (c == EOF)
 		return(c = 0);
