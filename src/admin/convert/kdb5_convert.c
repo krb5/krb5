@@ -499,10 +499,8 @@ Principal *princ;
 	    printf("\nignoring '%s.%s' ...", princ->name, princ->instance);
 	return 0;
     }
-    if (retval = krb5_build_principal(&entry.principal, strlen(realm),
-				      realm, princ->name,
-				      princ->instance[0] ? princ->instance : 0,
-				      0))
+    if (retval = krb5_425_conv_principal(princ->name, princ->instance,
+					 realm, &entry.principal))
 	return retval;
     if (verbose) {
 	if (retval = krb5_unparse_name(entry.principal, &name))
