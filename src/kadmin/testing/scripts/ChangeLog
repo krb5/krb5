@@ -1,3 +1,10 @@
+Tue Oct 15 16:22:52 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* env-setup.shin: set $QUALNAME to the right path
+
+	* start_servers, init_db: use qualname of local host, not
+ 	localhost, in krb5.conf
+
 Tue Oct 15 06:39:58 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* Makefile.in: Added standard rules for .plin -> .pl 
