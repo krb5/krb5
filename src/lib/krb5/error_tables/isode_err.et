@@ -42,5 +42,6 @@ error_code	ISODE_50_PE_ERR_OID, "isode(pe):Malformed object identifier"
 error_code	ISODE_50_PE_ERR_BITS, "isode(pe):Malformed bitstring"
 
 error_code	ISODE_50_LOCAL_ERR_BADDECODE,	"isode: ASN.1 decode failed"
+error_code	ISODE_50_LOCAL_ERR_BADMSGTYPE,	"isode: wrong message type after decoding"
 
 end
