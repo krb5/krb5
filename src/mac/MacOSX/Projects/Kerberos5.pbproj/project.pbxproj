@@ -171,6 +171,28 @@
 			settings = {
 			};
 		};
+		F58602F2022EDA8301120112 = {
+			isa = PBXFileReference;
+			path = prof_threads.c;
+			refType = 4;
+		};
+		F58602F3022EDA8301120112 = {
+			isa = PBXFileReference;
+			path = prof_threads.h;
+			refType = 4;
+		};
+		F58602F4022EDA8301120112 = {
+			fileRef = F58602F3022EDA8301120112;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F58602F5022EDA8301120112 = {
+			fileRef = F58602F2022EDA8301120112;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
 		F5CFD36E022D854401120112 = {
 			buildStyles = (
 				F5CFD370022D854401120112,
@@ -3040,6 +3062,8 @@
 				F5CFD5BC022D86AD01120112,
 				F5CFD5BD022D86AD01120112,
 				F5CFD5C0022D86AD01120112,
+				F58602F2022EDA8301120112,
+				F58602F3022EDA8301120112,
 			);
 			isa = PBXGroup;
 			path = KerberosProfile;
@@ -3147,7 +3171,7 @@
 			buildSettings = {
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
-				HEADER_SEARCH_PATHS = "\"$(SRCROOT)/../../KerberosErrors/Headers\"";
+				HEADER_SEARCH_PATHS = "\"$(SRCROOT)/../../KerberosErrors/Headers\" \"$(SRCROOT)/../../MoreFiles/Headers\"";
 				LIBRARY_STYLE = STATIC;
 				PREFIX_HEADER = "$(SRCROOT)/../Headers/MacOSX/Kerberos5Prefix.h";
 				PRODUCT_NAME = KerberosProfile;
@@ -3182,6 +3206,7 @@
 				F5CFD7D3022DE7DC01120112,
 				F5CFD7D4022DE7DC01120112,
 				F5CFD7D5022DE7DC01120112,
+				F58602F4022EDA8301120112,
 			);
 			isa = PBXHeadersBuildPhase;
 		};
@@ -3196,6 +3221,7 @@
 				F5CFD5D8022D87C301120112,
 				F5CFD60B022D8B6001120112,
 				F5CFD60C022D8B8801120112,
+				F58602F5022EDA8301120112,
 			);
 			isa = PBXSourcesBuildPhase;
 		};
