@@ -19,6 +19,7 @@
 
 #include <krb5/krb5.h>
 #include <krb5/krb5_err.h>
+#include <krb5/ext-proto.h>
 #include "fcc-proto.h"
 #include "fcc-os.h"
 
