@@ -20,7 +20,7 @@
 #	@(#)Makefile.generic	5.5 (Berkeley) 3/1/91
 #
 AUTH_DEF=-DAUTHENTICATION -DKRB5 -DFORWARD -UNO_LOGIN_F -DLOGIN_CAP_F -DLOGIN_PROGRAM=KRB5_PATH_LOGIN
-LOCALINCLUDES=-I..
+LOCALINCLUDES=-I.. -I$(srcdir)/..
 CFLAGS = $(CCOPTS) $(AUTH_DEF) $(DEFS) $(LOCALINCLUDES)
 LIBOBJS=@LIBOBJS@
 
@@ -51,7 +51,7 @@ OBJS=   auth.o encrypt.o genget.o \
 	rsaencpwd.o krb4encpwd.o read_password.o \
 	$(LIBOBJS)
 
-TELNET_H= ../arpa/telnet.h
+TELNET_H= $(srcdir)/../arpa/telnet.h
 
 all:: $(LIB)
 $(LIB): $(OBJS)
