@@ -1,20 +1,28 @@
 \documentstyle[newcen,fixunder,functions,changebar,twoside,fancyheadings]{article}
-\setlength{\oddsidemargin}{0.25in}
-\setlength{\evensidemargin}{-0.25in}
+\setlength{\oddsidemargin}{0in}
+\setlength{\evensidemargin}{1.00in}
+\setlength{\marginparsep}{0.05in}
+\setlength{\marginparwidth}{1.25in}
+\setlength{\textwidth}{5.5in}
 \setlength{\topmargin}{-.5in}
 \setlength{\textheight}{9in}
 \setlength{\parskip}{.1in}
 \setlength{\parindent}{2em}
-\setlength{\textwidth}{6.25in}
 \setlength{\footrulewidth}{0.4pt}
 \setlength{\plainfootrulewidth}{0.4pt}
 \setlength{\plainheadrulewidth}{0.4pt}
 \makeindex
 \newif\ifdraft
 \drafttrue
-\typein{Draft flag? (type \noexpand\draftfalse<CR> if not draft...)}
+%
+% Far, far too inconvenient... it's still very draft-like anyway....
+%   [tytso:19900921.0018EDT]
+%
+%\typein{Draft flag? (type \noexpand\draftfalse<CR> if not draft...)}
 \ifdraft
 \pagestyle{fancyplain}
+\addtolength{\headwidth}{\marginparsep}
+\addtolength{\headwidth}{\marginparwidth}
 \makeatletter
 \renewcommand{\sectionmark}[1]{\markboth {\uppercase{\ifnum \c@secnumdepth >\z@
     \thesection\hskip 1em\relax \fi #1}}{}}%
