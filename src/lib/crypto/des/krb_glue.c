@@ -154,12 +154,12 @@ OLDDECLARG(krb5_pointer, ivec)
     memset(endinput, 0, sumsize - size);
     cksum.contents = contents; 
 
-    if (retval = (*krb5_cksumarray[CKSUMTYPE_CRC32]->
-                  sum_func)((krb5_pointer) in,
-                            sumsize,
-                            (krb5_pointer)key->key->contents,
-                            sizeof(mit_des_cblock),
-                            &cksum)) 
+    if (retval = krb5_calculate_checksum(CKSUMTYPE_CRC32,
+					 (krb5_pointer) in,
+					 sumsize,
+					 (krb5_pointer)key->key->contents,
+					 sizeof(mit_des_cblock),
+					 &cksum)) 
 	return retval;
     
     memcpy(p, (char *)contents, CRC32_CKSUM_LENGTH);
@@ -195,12 +195,12 @@ OLDDECLARG(krb5_pointer, ivec)
     memcpy((char *)contents_get, p, CRC32_CKSUM_LENGTH);
     memset(p, 0, CRC32_CKSUM_LENGTH);
 
-    if (retval = (*krb5_cksumarray[CKSUMTYPE_CRC32]->
-                  sum_func)(out,
-                            size,
-                            (krb5_pointer)key->key->contents,
-                            sizeof(mit_des_cblock),
-                            &cksum)) 
+    if (retval = krb5_calculate_checksum(CKSUMTYPE_CRC32,
+					 out,
+					 size,
+					 (krb5_pointer)key->key->contents,
+					 sizeof(mit_des_cblock),
+					 &cksum)) 
 	return retval;
 
     if (memcmp((char *)contents_get, (char *)contents_prd, CRC32_CKSUM_LENGTH) )
