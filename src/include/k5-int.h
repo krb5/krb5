@@ -914,6 +914,7 @@ typedef krb5_error_code (*krb5_gic_get_as_key_fct)
 		     krb5_prompter_fct,
 		     void *prompter_data,
 		     krb5_data *salt,
+     krb5_data *s2kparams,
 		     krb5_keyblock *as_key,
 		     void *gak_data);
 
@@ -936,7 +937,8 @@ krb5_get_init_creds
 krb5_error_code krb5_do_preauth
 (krb5_context, krb5_kdc_req *,
 		krb5_pa_data **, krb5_pa_data ***,
-		krb5_data *, krb5_enctype *,
+		krb5_data *salt, krb5_data *s2kparams,
+ krb5_enctype *,
 		krb5_keyblock *,
 		krb5_prompter_fct, void *,
 		krb5_gic_get_as_key_fct, void *);

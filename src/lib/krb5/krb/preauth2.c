@@ -35,7 +35,7 @@ typedef krb5_error_code (*pa_function)(krb5_context,
 				       krb5_kdc_req *request,
 				       krb5_pa_data *in_padata,
 				       krb5_pa_data **out_padata,
-				       krb5_data *salt,
+				       krb5_data *salt, krb5_data *s2kparams,
 				       krb5_enctype *etype,
 				       krb5_keyblock *as_key,
 				       krb5_prompter_fct prompter_fct,
@@ -57,7 +57,7 @@ krb5_error_code pa_salt(krb5_context context,
 			krb5_kdc_req *request,
 			krb5_pa_data *in_padata,
 			krb5_pa_data **out_padata,
-			krb5_data *salt,
+			krb5_data *salt, krb5_data *s2kparams,
 			krb5_enctype *etype,
 			krb5_keyblock *as_key,
 			krb5_prompter_fct prompter, void *prompter_data,
@@ -94,6 +94,7 @@ krb5_error_code pa_enc_timestamp(krb5_context context,
 				 krb5_pa_data *in_padata,
 				 krb5_pa_data **out_padata,
 				 krb5_data *salt,
+				 krb5_data *s2kparams,
 				 krb5_enctype *etype,
 				 krb5_keyblock *as_key,
 				 krb5_prompter_fct prompter,
@@ -119,7 +120,7 @@ krb5_error_code pa_enc_timestamp(krb5_context context,
        if ((ret = ((*gak_fct)(context, request->client,
 			      *etype ? *etype : request->ktype[0],
 			      prompter, prompter_data,
-			      salt, as_key, gak_data))))
+			      salt, s2kparams, as_key, gak_data))))
            return(ret);
     }
 
@@ -233,6 +234,7 @@ krb5_error_code pa_sam(krb5_context context,
 		       krb5_pa_data *in_padata,
 		       krb5_pa_data **out_padata,
 		       krb5_data *salt,
+		       krb5_data *s2kparams,
 		       krb5_enctype *etype,
 		       krb5_keyblock *as_key,
 		       krb5_prompter_fct prompter,
@@ -283,7 +285,7 @@ krb5_error_code pa_sam(krb5_context context,
 	   *etype = ENCTYPE_DES_CBC_CRC;
 
 	if ((ret = (gak_fct)(context, request->client, *etype, prompter,
-			prompter_data, salt, as_key, gak_data)))
+			prompter_data, salt, s2kparams, as_key, gak_data)))
 	   return(ret);
     }
     sprintf(name, "%.*s",
@@ -472,6 +474,7 @@ krb5_error_code pa_sam_2(krb5_context context,
 				krb5_pa_data *in_padata,
 				krb5_pa_data **out_padata,
 				krb5_data *salt,
+			 krb5_data *s2kparams,
 				krb5_enctype *etype,
 				krb5_keyblock *as_key,
 				krb5_prompter_fct prompter,
@@ -542,7 +545,7 @@ krb5_error_code pa_sam_2(krb5_context context,
 
 	retval = (gak_fct)(context, request->client,
 			sc2b->sam_etype, prompter,
-			prompter_data, salt, as_key, gak_data);
+			prompter_data, salt, s2kparams, as_key, gak_data);
 	if (retval) {
 	   krb5_free_sam_challenge_2(context, sc2);
 	   krb5_free_sam_challenge_2_body(context, sc2b);
@@ -827,86 +830,18 @@ static const pa_types_t pa_types[] = {
     },
 };
 
-static void
-sort_etype_info(krb5_context  context, krb5_kdc_req *request,
-                krb5_etype_info_entry **etype_info)
-{
-/* Originally adapted from a proposed solution in ticket 1006.  This
- * solution  is  not efficient, but implementing an efficient sort
- * with a comparison function based on order in the kdc request would
- * be difficult.*/
-    krb5_etype_info_entry *tmp;
-    int i, j, e;
-    krb5_boolean similar;
-
-    if (etype_info == NULL)
-	return;
-
-    /* First, move up etype_info_entries whose enctype exactly matches a
-     * requested enctype.
-     */
-    e = 0;
-    for ( i = 0 ; i < request->nktypes && etype_info[e] != NULL ; i++ )
-    {
-	if (request->ktype[i] == etype_info[e]->etype)
-	{
-	    e++;
-	    continue;
-	}
-	for ( j = e+1 ; etype_info[j] ; j++ )
-	    if (request->ktype[i] == etype_info[j]->etype)
-		break;
-	if (etype_info[j] == NULL)
-	    continue;
-
-	tmp = etype_info[j];
-	etype_info[j] = etype_info[e];
-	etype_info[e] = tmp;
-	e++;
-    }
-
-    /* Then move up etype_info_entries whose enctype is similar to a
-     * requested enctype.
-     */
-    for ( i = 0 ; i < request->nktypes && etype_info[e] != NULL ; i++ )
-    {
-	if (krb5_c_enctype_compare(context, request->ktype[i], etype_info[e]->etype, &similar) != 0)
-	    continue;
-
-	if (similar)
-	{
-	    e++;
-	    continue;
-	}
-	for ( j = e+1 ; etype_info[j] ; j++ )
-	{
-	    if (krb5_c_enctype_compare(context, request->ktype[i], etype_info[j]->etype, &similar) != 0)
-		continue;
-
-	    if (similar)
-		break;
-	}
-	if (etype_info[j] == NULL)
-	    continue;
-
-	tmp = etype_info[j];
-	etype_info[j] = etype_info[e];
-	etype_info[e] = tmp;
-	e++;
-    }
-}
-
-
 krb5_error_code
 krb5_do_preauth(krb5_context context,
 		krb5_kdc_req *request,
 		krb5_pa_data **in_padata, krb5_pa_data ***out_padata,
-		krb5_data *salt, krb5_enctype *etype,
+		krb5_data *salt, krb5_data *s2kparams,
+		krb5_enctype *etype,
 		krb5_keyblock *as_key,
 		krb5_prompter_fct prompter, void *prompter_data,
 		krb5_gic_get_as_key_fct gak_fct, void *gak_data)
 {
     int h, i, j, out_pa_list_size;
+    int seen_etype_info2 = 0;
     krb5_pa_data *out_pa, **out_pa_list;
     krb5_data scratch;
     krb5_etype_info etype_info = NULL;
@@ -938,6 +873,7 @@ krb5_do_preauth(krb5_context context,
     for (h=0; h<(sizeof(paorder)/sizeof(paorder[0])); h++) {
 	realdone = 0;
 	for (i=0; in_padata[i] && !realdone; i++) {
+	    int k, l, etype_found, valid_etype_found;
 	    /*
 	     * This is really gross, but is necessary to prevent
 	     * lossge when talking to a 1.0.x KDC, which returns an
@@ -946,8 +882,20 @@ krb5_do_preauth(krb5_context context,
 	     */
 	    switch (in_padata[i]->pa_type) {
 	    case KRB5_PADATA_ETYPE_INFO:
-		if (etype_info)
-		    continue;
+	    case KRB5_PADATA_ETYPE_INFO2:
+	    {
+		krb5_preauthtype pa_type = in_padata[i]->pa_type;
+		if (etype_info) {
+		    if (seen_etype_info2 || pa_type != KRB5_PADATA_ETYPE_INFO2)
+			continue;
+		    if (pa_type == KRB5_PADATA_ETYPE_INFO2) {
+			krb5_free_etype_info( context, etype_info);
+			etype_info = NULL;
+		    }
+		}
+
+		if (pa_type == KRB5_PADATA_ETYPE_INFO2)
+		    seen_etype_info2++;
 		scratch.length = in_padata[i]->length;
 		scratch.data = (char *) in_padata[i]->contents;
 		ret = decode_krb5_etype_info(&scratch, &etype_info);
@@ -963,10 +911,37 @@ krb5_do_preauth(krb5_context context,
 		    etype_info = NULL;
 		    break;
 		}
-                sort_etype_info(context, request, etype_info);
-		salt->data = (char *) etype_info[0]->salt;
-		salt->length = etype_info[0]->length;
-		*etype = etype_info[0]->etype;
+		/*
+		 * Select first etype in our request which is also in
+		 * etype-info (preferring client request ktype order).
+		 */
+		for (etype_found = 0, valid_etype_found = 0, k = 0;
+		     !etype_found && k < request->nktypes; k++) {
+		    for (l = 0; etype_info[l]; l++) {
+			if (etype_info[l]->etype == request->ktype[k]) {
+			    etype_found++;
+			    break;
+			}
+			/* check if program has support for this etype for more
+			 * precise error reporting.
+			 */
+			if (valid_enctype(etype_info[l]->etype))
+			    valid_etype_found++;
+		    }
+		}
+		if (!etype_found) {
+		    if (valid_etype_found)
+			/* supported enctype but not requested */
+			return KRB5_CONFIG_ETYPE_NOSUPP;
+		    else
+			/* unsupported enctype */
+			return KRB5_PROG_ETYPE_NOSUPP;
+
+		}
+		salt->data = (char *) etype_info[l]->salt;
+		salt->length = etype_info[l]->length;
+		*etype = etype_info[l]->etype;
+		*s2kparams = etype_info[l]->s2kparams;
 #ifdef DEBUG
 		for (j = 0; etype_info[j]; j++) {
 		    krb5_etype_info_entry *e = etype_info[j];
@@ -978,6 +953,7 @@ krb5_do_preauth(krb5_context context,
 		}
 #endif
 		break;
+	    }
 	    case KRB5_PADATA_PW_SALT:
 	    case KRB5_PADATA_AFS3_SALT:
 		if (etype_info)
@@ -993,7 +969,7 @@ krb5_do_preauth(krb5_context context,
 
 		    if ((ret = ((*pa_types[j].fct)(context, request,
 						   in_padata[i], &out_pa,
-						   salt, etype, as_key,
+						   salt, s2kparams, etype, as_key,
 						   prompter, prompter_data,
 						   gak_fct, gak_data)))) {
 			if (out_pa_list) {

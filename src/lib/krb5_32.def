@@ -67,6 +67,7 @@ EXPORTS
 	krb5_c_random_make_octets
 	krb5_c_random_seed
 	krb5_c_string_to_key
+krb5_c_string_to_key_with_params
 	krb5_c_valid_cksumtype
 	krb5_c_valid_enctype
 	krb5_c_verify_checksum

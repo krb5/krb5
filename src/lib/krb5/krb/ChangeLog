@@ -1,3 +1,21 @@
+2003-05-09  Sam Hartman  <hartmans@mit.edu>
+
+	* preauth2.c: Patch from Sun to reorganize code   for handling
+	etype_info requests.  More efficient  and easier to implement etype_info2
+	(krb5_do_preauth): Support enctype_info2
+
+2003-05-08  Sam Hartman  <hartmans@mit.edu>
+
+	* preauth2.c: Add s2kparams to the declaration of a preauth
+	function, to every instance of a preauth function and to every
+	call to gak_fct 
+
+	* get_in_tkt.c (krb5_get_init_creds): Add s2kparams support
+
+	* gic_keytab.c (krb5_get_as_key_keytab): Add s2kparams
+
+	* gic_pwd.c (krb5_get_as_key_password): Add s2kparams support
+
 2003-05-09  Ken Raeburn  <raeburn@mit.edu>
 
 	* init_ctx.c (init_common): Copy tgs_ktypes array to

@@ -8,6 +8,7 @@ krb5_get_as_key_keytab(
     krb5_prompter_fct prompter,
     void *prompter_data,
     krb5_data *salt,
+    krb5_data *params,
     krb5_keyblock *as_key,
     void *gak_data)
 {

@@ -1,3 +1,13 @@
+2003-05-08  Sam Hartman  <hartmans@mit.edu>
+
+	* krb5.hin: Add prototype for krb5_c_string_to_key_with_params
+
+	* k5-int.h: Add s2kparams to krb5_gic_get_as_key_fct
+
+2003-05-07  Sam Hartman  <hartmans@mit.edu>
+
+	* krb5.hin: Add KRB5_PADATA_ETYPE_INFO2
+
 2003-05-09  Ken Raeburn  <raeburn@mit.edu>
 
 	* k5-int.h (struct _krb5_context): New fields conf_tgs_ktypes,

@@ -1,3 +1,7 @@
+2003-05-08  Sam Hartman  <hartmans@mit.edu>
+
+	* string_to_key.c: Move krb5_c_string_to_key_with_params to krb5.h
+
 2003-04-13  Ken Raeburn  <raeburn@mit.edu>
 
 	* pbkdf2.c (krb5int_pbkdf2): Provide a temporary buffer for the
