@@ -1,3 +1,8 @@
+Tue Aug 15 21:42:16 1995    <tytso@rsts-11.mit.edu>
+
+	* update_wtmp.c (ptyint_update_wtmp): If EMPTY is not defined,
+		then set ut.ut_type to 0 instead.
+
 Fri Aug 11 15:49:30 1995  Sam Hartman  <hartmans@tertius.mit.edu>
 
 	* Makefile.in (CFILES): Rename initialize_slave.c to init_slave.c

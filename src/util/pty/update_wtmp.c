@@ -57,7 +57,11 @@ long ptyint_update_wtmp (ent)
 	      ut.ut_pid = getpid();
 	    ut.ut_type = USER_PROCESS;
 	  } else {
+#ifdef EMPTY
 	    ut.ut_type = EMPTY;
+#else
+	    ut.ut_type = 0;
+#endif
 	  }
 #endif
 	    if (write(fd, (char *)&ut, sizeof(struct utmp)) !=
