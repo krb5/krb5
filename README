@@ -1,5 +1,5 @@
 
-		  Kerberos Version 5, Release 1.2.2
+		  Kerberos Version 5, Release 1.2.3
 
 			    Release Notes
 
@@ -9,7 +9,7 @@ Unpacking the Source Distribution
 ---------------------------------
 
 The source distribution of Kerberos 5 comes in a gzipped tarfile,
-krb5-1.2.2.tar.gz.  Instruction on how to extract the entire
+krb5-1.2.3.tar.gz.  Instruction on how to extract the entire
 distribution follow.  These directions assume that you want to extract
 into a directory called DIST.
 
@@ -17,17 +17,17 @@ If you have the GNU tar program and gzip installed, you can simply do:
 
 	mkdir DIST
 	cd DIST
-	gtar zxpf krb5-1.2.2.tar.gz
+	gtar zxpf krb5-1.2.3.tar.gz
 
 If you don't have GNU tar, you will need to get the FSF gzip
 distribution and use gzcat:
 
 	mkdir DIST
 	cd DIST
-	gzcat krb5-1.2.2.tar.gz | tar xpf -
+	gzcat krb5-1.2.3.tar.gz | tar xpf -
 
-Both of these methods will extract the sources into DIST/krb5-1.2.2/src
-and the documentation into DIST/krb5-1.2.2/doc.
+Both of these methods will extract the sources into DIST/krb5-1.2.3/src
+and the documentation into DIST/krb5-1.2.3/doc.
 
 Building and Installing Kerberos 5
 ----------------------------------
@@ -59,6 +59,54 @@ V5 (or if you have installed one of our binary distributions).
 If you are not able to use krb5-send-pr because you haven't been able
 compile and install Kerberos V5 on any platform, you may send mail to
 krb5-bugs@mit.edu.
+
+Notes, Major Changes, and Known Bugs for 1.2.3
+----------------------------------------------
+
+Notes:
+
+* This release is a patch release; some non-critical bugs and feature
+  requests have not been incorporated.  We have focussed mainly on
+  important security fixes and usability fixes.
+
+Major Changes:
+
+* Triple-DES should work on Windows now.  The SHA-1 implementation had
+  a Windows-specific bug preventing it from working in most cases.
+
+* Various bugs in pty handling have been fixed.
+
+* Bogus utmp files with garbage characters in their names should not
+  get created on Solaris.
+
+* Potential buffer-overrun problems and null-pointer dereferences have
+  been fixed in ftpd, telnetd, and SHA-1.  The first two are probably
+  exploitable; the SHA-1 bug probably isn't, as far as we know.
+
+* For multiple-hop interrealm authentication, the realm transit path
+  checking has been rewritten.  The old code had a serious bug where
+  some of the transited realms may not have been checked against the
+  computed path.  It was therefore possible to forge a remote client
+  name in certain cases.  We strongly recommend updating application
+  server code where non-local principals may be found on ACLs.
+
+* In conjunction with the above fix, we've implemented KDC checking of
+  the realm transit path, as described in the IETF's current
+  kerberos-revisions draft, and set up the KDC to refuse to issue
+  tickets with unacceptable transit paths.  (Strictly speaking,
+  according to the Kerberos specification, enforcement of these checks
+  is supposed to be left to the application servers.)  Thus, if your
+  application servers can't be updated promptly but your KDC can, you
+  can still prevent such tickets from being issued.  This checking is
+  controlled by a per-realm flag, and is enabled by default.
+
+* The rlogin server should no longer hang on AIX systems.
+
+* New databases will be created in btree format by default.  We
+  believe the btree code to be less buggy than the hash format code we
+  have been using.  This should not affect the use of any existing
+  databases, only newly created ones, and even that should be a
+  transparent change.
 
 Notes, Major Changes, and Known Bugs for 1.2.2
 ----------------------------------------------
