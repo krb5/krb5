@@ -45,7 +45,7 @@ static char rcsid_recvauth_c [] =
 #include <krb5/kdb_dbm.h>
 #include <krb5/ext-proto.h>
 #include <krb5/los-proto.h>
-#include <krb.h>
+#include <kerberosIV/krb.h>
 #include <com_err.h>
 #include <errno.h>
 
