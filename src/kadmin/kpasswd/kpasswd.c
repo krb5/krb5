@@ -31,8 +31,6 @@
 #include <sys/param.h>
 #include <pwd.h>
 
-#include <krb5/adm_defs.h>
-
 #include <sys/stat.h>
 
 #include "krb5.h"
