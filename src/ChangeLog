@@ -1,3 +1,12 @@
+2000-12-05  Ken Raeburn  <raeburn@mit.edu>
+
+	* aclocal.m4 (KRB5_AC_INET6): Look for netdb.h.
+	(KRB5_AC_CHECK_INET6): Require <netinet/in.h>, <netdb.h>,
+	inet_ntop, getaddrinfo, AF_INET6, several NI_* macros,
+	AI_ADDRCONFIG, and AI_NUMERICHOST.  This should be a reasonable
+	test for conformance to certain parts of RFC2553, giving us
+	reasonable generic sockaddr/hostname processing.
+
 2000-11-01  Tom Yu  <tlyu@mit.edu>
 
 	* aclocal.m4 (CONFIG_RULES): Quote AUTOCONFFLAGS properly.

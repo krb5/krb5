@@ -213,7 +213,7 @@ dnl
 dnl Check for IPv6 compile-time support.
 dnl
 AC_DEFUN(KRB5_AC_INET6,[
-AC_CHECK_HEADERS(sys/types.h macsock.h sys/socket.h netinet/in.h)
+AC_CHECK_HEADERS(sys/types.h macsock.h sys/socket.h netinet/in.h netdb.h)
 AC_CHECK_FUNCS(inet_ntop inet_pton getipnodebyname getipnodebyaddr getaddrinfo getnameinfo)
 AC_ARG_ENABLE([ipv6],
 [  --enable-ipv6           enable IPv6 support
@@ -232,6 +232,11 @@ esac
 AC_DEFUN(KRB5_AC_CHECK_INET6,[
 AC_MSG_CHECKING(for IPv6 compile-time support)
 AC_CACHE_VAL(krb5_cv_inet6,[
+dnl NetBSD and Linux both seem to have gotten get*info but not getipnodeby*
+dnl as of the time I'm writing this, so we'll use get*info only.
+if test "$ac_cv_func_inet_ntop/$ac_cv_func_getaddrinfo" != "yes/yes" ; then
+  krb5_cv_inet6=no
+else
 AC_TRY_COMPILE([
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -241,18 +246,19 @@ AC_TRY_COMPILE([
 #else
 #include <sys/socket.h>
 #endif
-#ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
-#endif
+#include <netdb.h>
 ],[
-#if !defined (AF_INET6) || !defined (IN6_IS_ADDR_LINKLOCAL)
-  syntax error;
-#else
   struct sockaddr_in6 in;
   struct sockaddr_storage x;
+  struct addrinfo ai;
+  AF_INET6;
   IN6_IS_ADDR_LINKLOCAL (&in.sin6_addr);
-#endif
+  NI_NOFQDN, NI_NUMERICHOST, NI_NAMEREQD, NI_MAXHOST, EAI_FAIL;
+  AI_ADDRCONFIG;
+  AI_NUMERICHOST; /* RFC 2553 */
 ],krb5_cv_inet6=yes,krb5_cv_inet6=no)])
+fi
 AC_MSG_RESULT($krb5_cv_inet6)
 if test $krb5_cv_inet6 = yes ; then
   AC_DEFINE(KRB5_USE_INET6)
