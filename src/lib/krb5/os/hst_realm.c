@@ -186,12 +186,12 @@ krb5_get_host_realm(context, host, realmsp)
     (void) sprintf(scanstring, "%%%ds %%%ds",
 		   sizeof(trans_host)-1,sizeof(trans_realm)-1);
     while (1) {
-        #ifdef _WINDOWS
+#ifdef _WINDOWS
             scanval = read_2str (trans_file, trans_host, sizeof(trans_host)-1,
                 trans_realm, sizeof(trans_realm)-1);
-        #else
-            scanval = fscanf(trans_file, scanstring, trans_host, trans_realm));
-        #endif
+#else
+            scanval = fscanf(trans_file, scanstring, trans_host, trans_realm);
+#endif
 	if (scanval != 2) {
 	    if (scanval == EOF) {
 		fclose(trans_file);
@@ -230,6 +230,3 @@ krb5_get_host_realm(context, host, realmsp)
     *realmsp = retrealms;
     return 0;
 }
-
-
-

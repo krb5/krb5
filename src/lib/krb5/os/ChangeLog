@@ -1,3 +1,12 @@
+Thu Mar 23 23:11:36 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* realm_dom.c (krb5_get_realm_domain): Don't indent preprocessor
+	        directives.  (Not portable).
+
+	* hst_realm.c (krb5_get_host_realm): Don't indent preprocessor
+		directives.  Removed excess close paren introduced by
+		Keith.
+
 Wed Mar 22 18:59:47 1995 Keith Vetter (keithv@fusion.com)
 
         * hst_realm.c, realm_dom.c: windows DLL can't use fscanf so had
