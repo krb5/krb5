@@ -24,20 +24,7 @@ fi
 dnl
 V5_SHARED_LIB_OBJS
 SubdirLibraryRule([${OBJS}])
-V5_MAKE_SHARED_LIB(libdes425)
-AC_ARG_ENABLE([shared],
-[  --enable-shared         build shared libraries],[
-LinkFileDir(../libdes425.[$](SHEXT), libdes425.[$](SHEXT), ./des425)
-AppendRule([all-unix:: ../libdes425.$(SHEXT)])
-AppendRule([install::	libdes425.[$](SHEXT)
-	[$](INSTALL_DATA) libdes425.[$](SHEXT)	\
-		[$](DESTDIR)[$](KRB5_SHLIBDIR)[$](S)libdes425.[$](SHEXT)])
-])dnl
-if test -n "$krb5_cv_staticlibs_enabled" ; then
-	LinkFileDir(../libdes425.[$](STEXT), libdes425.[$](STEXT), ./des425)
-        AppendRule([install:: 
-	[$](INSTALL_DATA) libdes425.[$](STEXT) [$](DESTDIR)[$](KRB5_LIBDIR)/libdes425.[$](STEXT)
-	[$](RANLIB) [$](DESTDIR)[$](KRB5_LIBDIR)/libdes425.[$](STEXT)]) 
-	AppendRule([all-unix:: ../libdes425.[$](STEXT)])
-fi
+CRYPTO_SH_VERS=$krb5_cv_shlib_version_libcrypto
+AC_SUBST(CRYPTO_SH_VERS)
+V5_MAKE_SHARED_LIB(libdes425,0.1,.., ./des425)
 V5_AC_OUTPUT_MAKEFILE

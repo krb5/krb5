@@ -1,3 +1,11 @@
+Mon Oct  2 11:07:24 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* configure.in (V5_MAKE_SHARED_LIB): Change rule to install
+		version 0.1 of the library. Pass the libcrypto version
+		number to Makefile
+
+	* Makefile.in (CRYPTO_VER): Get the proper libcrypto version number
+
 Fri Sep 29 01:28:11 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* pcbc_encrypt.c: #include autoconf.h instead of osconf.h, because
