@@ -31,7 +31,7 @@ TCLUTIL=$TESTDIR/tcl/util.t; export TCLUTIL
 BSDDB_DUMP=$TESTDIR/util/bsddb_dump; export BSDDB_DUMP
 CLNTTCL=$TESTDIR/util/ovsec_kadm_clnt_tcl; export CLNTTCL
 SRVTCL=$TESTDIR/util/ovsec_kadm_srv_tcl; export SRVTCL
-QUALNAME=$TOP/inst-scripts/qualname; export QUALNAME
+QUALNAME=$TOP/inst-scripts/qualname.pl; export QUALNAME
 
 START_SERVERS=$TESTDIR/scripts/start_servers $TEST_SERVER
 export START_SERVERS

@@ -1,3 +1,13 @@
+Thu Sep 26 11:45:56 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* qualname.pl.in: Renamed old qualname to here as perl path needs
+		updating. 
+
+	* Makefile.in (GEN_SCRIPTS): Add qualname.pl
+
+	* start_servers_local, env-setup.sh (QUALNAME): Replace with
+		qualname.pl. 
+
 Tue Sep 24 13:28:54 1996  Barry Jaspan  <bjaspan@mit.edu>
 
 	* create Makefile.in and configure.in

@@ -93,7 +93,7 @@ fi
 # allow admin to krlogin as root (for cleanup)
 DUMMY=${REALM=SECURE-TEST.OV.COM}; export REALM
 hostname=`hostname`
-QUALNAME=`$TOP/testing/scripts/qualname $hostname`; export QUALNAME
+QUALNAME=`$TOP/testing/scripts/qualname.pl $hostname`; export QUALNAME
 
 eval $SRVTCL <<'EOF' $REDIRECT
 source $env(TOP)/testing/tcl/util.t
