@@ -18,7 +18,7 @@ static char rcsid_scc_defops_c[] = "$Id$";
 
 #include "scc.h"
 
-krb5_cc_ops krb5_cc_dfl_ops = {
+krb5_cc_ops krb5_cc_stdio_ops = {
      "STDIO",
      krb5_scc_get_name,
      krb5_scc_resolve,
