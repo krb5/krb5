@@ -1,3 +1,11 @@
+
+Mon Jul 17 15:03:43 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* adm.h - Add per-realm parameter block data structure
+		(krb5_realm_params).
+	* adm_proto.h - Add dummy declaration for krb5_realm_params if adm.h
+		not included.  Add prototypes for realm parameter functions.
+	* kdb.h - Add stash file parameter to krb5_db_fetch_mkey().
+
 Sun Jul  9 21:47:49 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* los-proto.h: Add krb5_auth_con_genaddrs prototype
