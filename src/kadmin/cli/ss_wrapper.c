@@ -59,6 +59,6 @@ int main(argc, argv)
 		    exit_status++;
 	    }
     } else
-	    ss_listen(sci_idx, &retval);
+            retval = ss_listen(sci_idx);
     return quit() ? 1 : exit_status;
 }
