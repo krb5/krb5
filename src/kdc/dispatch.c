@@ -37,10 +37,11 @@ static char rcsid_dispatch_c[] =
 #include "kdc_util.h"
 
 krb5_error_code
-dispatch(pkt, from, response)
-krb5_data *pkt;
-const krb5_fulladdr *from;
-krb5_data **response;
+dispatch(pkt, from, is_secondary, response)
+    krb5_data *pkt;
+    const krb5_fulladdr *from;
+    int		is_secondary;
+    krb5_data **response;
 {
 
     krb5_error_code retval;
@@ -59,18 +60,18 @@ krb5_data **response;
 
     if (krb5_is_tgs_req(pkt)) {
 	if (!(retval = decode_krb5_tgs_req(pkt, &tgs_req))) {
-	    retval = process_tgs_req(tgs_req, from, response);
+	    retval = process_tgs_req(tgs_req, from, is_secondary, response);
 	    krb5_free_kdc_req(tgs_req);
 	}
     } else if (krb5_is_as_req(pkt)) {
 	if (!(retval = decode_krb5_as_req(pkt, &as_req))) {
-	    retval = process_as_req(as_req, from, response);
+	    retval = process_as_req(as_req, from, is_secondary, response);
 	    krb5_free_kdc_req(as_req);
 	}
     }
 #ifdef KRB4
     else if (pkt->data[0] == 4)		/* old version */
-	retval = process_v4(pkt, from, response);
+	retval = process_v4(pkt, from, is_secondary, response);
 #endif
     else
 	retval = KRB5KRB_AP_ERR_MSG_TYPE;

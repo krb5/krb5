@@ -62,9 +62,10 @@ static krb5_error_code prepare_error_as PROTOTYPE((krb5_kdc_req *,
 
 /*ARGSUSED*/
 krb5_error_code
-process_as_req(request, from, response)
+process_as_req(request, from, is_secondary, response)
 register krb5_kdc_req *request;
 const krb5_fulladdr *from;		/* who sent it ? */
+int	is_secondary;
 krb5_data **response;			/* filled in with a response packet */
 {
 
@@ -110,7 +111,12 @@ krb5_data **response;			/* filled in with a response packet */
     if (!fromstring)
 	fromstring = "<unknown>";
 
-    syslog(LOG_INFO, "AS_REQ: host %s, %s for %s", fromstring, cname, sname);
+    if (is_secondary)
+	syslog(LOG_INFO, "AS_REQ; host %s, %s for %s", fromstring, cname,
+	       sname);
+    else
+	syslog(LOG_INFO, "AS_REQ: host %s, %s for %s", fromstring, cname,
+	       sname);
     free(cname);
     free(sname);
 
@@ -142,6 +148,11 @@ krb5_data **response;			/* filled in with a response packet */
 
 #define cleanup() {krb5_db_free_principal(&client, 1); krb5_db_free_principal(&server, 1); }
 
+    if (retval = check_kdb_flags_as(request, client, server)) {
+	cleanup();
+	return(prepare_error_as(request, retval, response));
+    }
+      
     if (retval = krb5_timeofday(&kdc_time)) {
 	cleanup();
 	return(retval);

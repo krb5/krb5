@@ -62,9 +62,10 @@ static krb5_error_code prepare_error_tgs PROTOTYPE((krb5_kdc_req *,
 						    krb5_data **));
 /*ARGSUSED*/
 krb5_error_code
-process_tgs_req(request, from, response)
+process_tgs_req(request, from, is_secondary, response)
 krb5_kdc_req *request;
 const krb5_fulladdr *from;		/* who sent it ? */
+int	is_secondary;
 krb5_data **response;			/* filled in with a response packet */
 {
 
@@ -135,7 +136,12 @@ krb5_data **response;			/* filled in with a response packet */
 	return(retval);
     }
 
-    syslog(LOG_INFO, "TGS_REQ: host %s, %s for %s", fromstring, cname, sname);
+    if (is_secondary)
+	syslog(LOG_INFO, "TGS_REQ; host %s, %s for %s", fromstring, cname,
+	       sname);
+    else
+	syslog(LOG_INFO, "TGS_REQ: host %s, %s for %s", fromstring, cname,
+	       sname);
     free(cname);
     free(sname);
 
@@ -184,6 +190,15 @@ tgt_again:
 
 #define tkt_cleanup() {krb5_free_tkt_authent(req_authdat); }
 #define cleanup() { krb5_db_free_principal(&server, 1);}
+
+    if (retval = check_kdb_flags_tgs(request, server)) {
+	cleanup();
+	return(prepare_error_tgs(request,
+				 header_ticket,
+				 retval,
+				 fromstring,
+				 response));
+    }
 
     if (retval = krb5_timeofday(&kdc_time)) {
 	tkt_cleanup();
@@ -679,7 +694,6 @@ int *nprincs;
 	return;
 
     /* move to the end */
-    /* SUPPRESS 530 */
     for (pl2 = plist; *pl2; pl2++);
 
     /* the first entry in this array is for krbtgt/local@local, so we
