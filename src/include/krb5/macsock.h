@@ -93,7 +93,7 @@ typedef int SOCKET;
 #define	SOCKET_ERRNO		(GetMITLibError())
 #define	SOCKET_SET_ERRNO(x)	(SetMITLibError(x))
 
-#define local_addr_fallback_kludge() (0)
+#define local_addr_fallback_kludge() gethostaddr()
 
 
 #endif /* macsock_h */
