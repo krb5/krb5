@@ -293,7 +293,7 @@ dnl
 dnl Not used yet, but let's find out what we've got on the platforms
 dnl we're working with....
 AC_CHECK_HEADERS(inttypes.h stdint.h)
-AC_CHECK_TYPES([uint64_t, int64_t, uint_least32_t, uintptr_t, uintmax_t, long long], , , [
+AC_CHECK_TYPES([uint32_t, int32_t, uint64_t, int64_t, uint_least32_t, uintptr_t, uintmax_t, long long], , , [
 #ifdef HAVE_STDINT_H
 # include <stdint.h>
 #elif defined(HAVE_INTTYPES_H)

@@ -1,5 +1,7 @@
 2005-01-04  Ken Raeburn  <raeburn@mit.edu>
 
+	* configure.in: Check for uint32_t and int32_t in system headers.
+
 	* Makefile.in (krb5.h): Don't pull in autoconf SIZEOF macros.
 
 2004-12-21  Tom Yu  <tlyu@mit.edu>
