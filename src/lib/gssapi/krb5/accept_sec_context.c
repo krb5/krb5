@@ -58,14 +58,16 @@ rd_req_keyproc(krb5_pointer keyprocarg, krb5_principal server,
 
 /* Decode, decrypt and store the forwarded creds in the local ccache. */
 static krb5_error_code
-rd_and_store_for_creds(context, auth_context, inbuf)
+rd_and_store_for_creds(context, auth_context, inbuf, out_cred)
     krb5_context context;
     krb5_auth_context auth_context;
     krb5_data *inbuf;
+    krb5_gss_cred_id_t *out_cred;
 {
     krb5_creds ** creds;
     krb5_error_code retval;
     krb5_ccache ccache;
+    krb5_gss_cred_id_t cred = NULL;
 
     if ((retval = krb5_rd_cred(context, auth_context, inbuf, &creds, NULL))) 
 	return(retval);
@@ -79,11 +81,50 @@ rd_and_store_for_creds(context, auth_context, inbuf)
     if ((retval = krb5_cc_store_cred(context, ccache, creds[0])))
 	goto cleanup;
 
-    if ((retval = krb5_cc_close(context, ccache)))
+    /* generate a delegated credential handle */
+    if (out_cred) {
+      /* allocate memory for a cred_t... */
+      if (!(cred =
+	    (krb5_gss_cred_id_t) xmalloc(sizeof(krb5_gss_cred_id_rec)))) {
+	retval = ENOMEM; /* out of memory? */
 	goto cleanup;
+      }
 
+      /* zero it out... */
+      memset(cred, 0, sizeof(krb5_gss_cred_id_rec));
+
+      /* copy the client principle into it... */
+      if ((retval =
+	   krb5_copy_principal(context, creds[0]->client, &(cred->princ)))) {
+	retval = ENOMEM; /* out of memory? */
+	xfree(cred); /* clean up memory on failure */
+	cred = NULL;
+	goto cleanup;
+      }
+
+      cred->usage = GSS_C_INITIATE; /* we can't accept with this */
+      /* cred->princ already set */
+      cred->actual_mechs = gss_mech_set_krb5_both; /* both mechs work */
+      cred->prerfc_mech = cred->rfc_mech = 1; /* Ibid. */
+      cred->keytab = NULL; /* no keytab associated with this... */
+      cred->ccache = ccache; /* but there is a credential cache */
+      cred->tgt_expire = creds[0]->times.endtime; /* store the end time */
+    }
+
+    /* If there were errors, there might have been a memory leak
+    if (!cred)
+      if ((retval = krb5_cc_close(context, ccache)))
+	goto cleanup;
+	*/
 cleanup:
     krb5_free_tgt_creds(context, creds);
+
+    if (!cred && ccache)
+      (void)krb5_cc_close(context, ccache);
+
+    if (out_cred)
+      *out_cred = cred; /* return credential */
+
     return retval;
 }
 
@@ -134,6 +175,7 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
    OM_uint32 major_status = GSS_S_FAILURE;
    krb5_error krb_error_data;
    krb5_data scratch;
+   krb5_gss_cred_id_t deleg_cred = NULL;
 
    if (GSS_ERROR(kg_get_context(minor_status, &context)))
       return(GSS_S_FAILURE);
@@ -320,6 +362,8 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
    md5.contents = 0;
 
    TREAD_INT(ptr, gss_flags, bigend);
+   gss_flags &= ~GSS_C_DELEG_FLAG; /* mask out the delegation flag; if there's
+				      a delegation, we'll set it below */
    decode_req_message = 0;
 
    /* if the checksum length > 24, there are options to process */
@@ -356,11 +400,15 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
 		    /* store the delegated credential in the user's cache */
 
 		    rd_and_store_for_creds(context, auth_context_cred,
-					   &option);
+					   &option,
+					   (delegated_cred_handle) ?
+					   &deleg_cred : NULL);
 
 		    i -= option.length + 4;
 
 		    krb5_auth_con_free(context, auth_context_cred);
+
+		    gss_flags |= GSS_C_DELEG_FLAG; /* got a delegation */
 
 		    break;
 
@@ -540,6 +588,15 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
    if (src_name)
       *src_name = (gss_name_t) name;
 
+   if (delegated_cred_handle && deleg_cred) {
+     if (!kg_save_cred_id((gss_cred_id_t) deleg_cred)) {
+       code = G_VALIDATE_FAILED;
+       goto fail;
+     }
+
+     *delegated_cred_handle = (gss_cred_id_t) deleg_cred;
+   }
+
    /* finally! */
 
    *minor_status = 0;
@@ -559,6 +616,13 @@ fail:
    }
    if (md5.contents)
 	 xfree(md5.contents);
+   if (deleg_cred) { /* free memory associated with the deleg credential */
+     if (deleg_cred->ccache)
+       (void)krb5_cc_close(context, deleg_cred->ccache);
+     if (deleg_cred->princ)
+       krb5_free_principal(context, deleg_cred->princ);
+     xfree(deleg_cred);
+   }
 
    *minor_status = code;
 

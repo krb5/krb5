@@ -1,3 +1,11 @@
+Mon Jun 30 14:05:51 1997  Kevin L Mitchell  <klmitch@mit.edu>
+
+	* accept_sec_context.c: added code to return a valid delegated
+		credential handle if credentials were delegated.  The
+		GSS_C_DELEG_FLAG from the client is ignored, and the
+		option is only set if the client actually delegated
+		credentials.
+
 Fri Jun  6 15:26:27 1997  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* accept_sec_context.c (krb5_gss_accept_sec_context): Reorganized
