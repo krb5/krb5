@@ -25,9 +25,11 @@ SSDIR=
 #else
 SSDIR=ss
 #endif
-all::;	(cd lib/error_tables && make headers)
+all::
+	(cd lib/error_tables && make headers)
+	(cd lib/asn.1 && make headers)
 
-        SUBDIRS = $(COMERRDIR) $(SSDIR) asn.1 lib kdc admin clients appl
+        SUBDIRS = $(COMERRDIR) $(SSDIR) lib kdc admin clients appl
   LNINSTALLDIRS = 
 
 MakeSubdirs($(SUBDIRS))
