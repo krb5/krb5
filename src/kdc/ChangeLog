@@ -1,3 +1,9 @@
+Thu Dec 11 23:29:41 1997  Tom Yu  <tlyu@mit.edu>
+
+	* kerberos_v4.c: Don't include sys/socket.h or netdb.h, as krb.h
+	already gets those and Ultrix doesn't protect them against
+	multiple inclusion.
+
 Mon Nov 24 19:57:48 1997  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* do_tgs_req.c (process_tgs_req): Add check to make sure cname and
