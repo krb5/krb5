@@ -1,5 +1,10 @@
 2002-08-29  Ken Raeburn  <raeburn@mit.edu>
 
+	* Makefile.in (MAYBE_ET-k5, MAYBE_ET-sys, MAYBE_SS-k5,
+	MAYBE_SS-sys): New variables.
+	(MY_SUBDIRS): Refer to them, choosing via new configure
+	substitutions.
+
 	* depfix.sed: Replace in-tree ss header files with $(SS_DEPS).
 
 2002-08-23  Ken Raeburn  <raeburn@mit.edu>
