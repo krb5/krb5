@@ -88,10 +88,14 @@ shared:
 verify: verify.o $(DES425_DEPLIB) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o $@ verify.o $(DES425_LIB) $(KRB5_BASE_LIBS)
 
-check-unix:: verify
+t_quad: t_quad.o quad_cksum.o
+	$(CC_LINK) -o $@ t_quad.o quad_cksum.o
+
+check-unix:: verify t_quad
 	$(RUN_SETUP) ./verify -z
 	$(RUN_SETUP) ./verify -m
 	$(RUN_SETUP) ./verify
+	$(RUN_SETUP) ./t_quad
 
 check-windows::
 
