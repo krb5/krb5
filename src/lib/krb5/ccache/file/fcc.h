@@ -6,7 +6,7 @@
  * Copyright 1990 by the Massachusetts Institute of Technology.
  *
  * For copying and distribution information, please see the file
- * <krb5/mit-copyright.h>.
+ * <krb5/copyright.h>.
  *
  * This file contains constant and function declarations used in the
  * file-based credential cache routines.
@@ -21,6 +21,7 @@
 #include <krb5/ext-proto.h>
 #include "fcc-proto.h"
 #include <krb5/sysincl.h>
+#include <stdio.h>
 
 /* XXX  A hack because I don't feel like updating every file. */
 #define KRB5_OK 0
