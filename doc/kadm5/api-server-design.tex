@@ -249,11 +249,11 @@ specified, database functions return OSA_ADB_OK.
 
 \begin{verbatim}
 osa_adb_ret_t
-osa_adb_open_T(osa_adb_T_t *db);
+osa_adb_open_T(osa_adb_T_t *db, char *filename);
 \end{verbatim}
 %
-Open the database.  Returns OSA_ADB_FAILURE if it cannot open the
-database. 
+Open the database named filename.  Returns OSA_ADB_FAILURE if it
+cannot open the database.
 
 \begin{verbatim}
 osa_adb_ret_t
