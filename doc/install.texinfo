@@ -102,7 +102,7 @@ requesting and granting of these additional tickets is user-transparent.
 @section Why Should I use Kerberos?
 
 Since Kerberos negotiates authenticated, and optionally encrypted,
-communications between two points anywhere on the internet, it provides
+communications between two points anywhere on the Internet, it provides
 a layer of security that is not dependent on which side of a firewall
 either client is on.  Since studies have shown that half of the computer
 security breaches in industry happen from @i{inside} firewalls,
@@ -241,13 +241,10 @@ KDC@footnote{Kerberos V4 used port 750.  If necessary, you can run on
 both ports for backward compatibility.}  and port 749 for the admin
 server.  You can, however, choose to run on other ports, as long as they
 are specified in each host's @code{/etc/services} and @code{krb5.conf}
-files, and the @code{kdc.conf} file on each KDC.  Because the kadmin
-port was recently assigned, @value{COMPANY} recommands that you specify
-it explicitly in your @code{krb5.conf} and @code{kdc.conf} files.  For a
-more thorough treatment of port numbers used by the @value{PRODUCT}
-programs, refer to the ``Configuring Your Firewall to Work With
-@value{PRODUCT}'' section of the @cite{@value{PRODUCT} System
-Administrator's Guide}.
+files, and the @code{kdc.conf} file on each KDC.  For a more thorough
+treatment of port numbers used by the @value{PRODUCT} programs, refer to
+the ``Configuring Your Firewall to Work With @value{PRODUCT}'' section
+of the @cite{@value{PRODUCT} System Administrator's Guide}.
 
 @node Slave KDCs, Hostnames for the Master and Slave KDCs, Ports for the KDC and Admin Services, Realm Configuration Decisions
 @section Slave KDCs
@@ -255,7 +252,7 @@ Administrator's Guide}.
 Slave KDCs provide an additional source of Kerberos ticket-granting
 services in the event of inaccessibility of the master KDC.  The number
 of slave KDCs you need and the decision of where to place them, both
-physically and logically, depend on the specifics of your network.
+physically and logically, depends on the specifics of your network.
 
 All of the Kerberos authentication on your network requires that each
 client be able to contact a KDC.  Therefore, you need to anticipate any
@@ -280,7 +277,7 @@ the master, in case of power outages, fires, or other localized
 disasters.
 @end itemize
 
-If you have a large and/or complex network, @value{COMPANY} will be
+If you have a large or complex network, @value{COMPANY} will be
 happy to work with you to determine the optimal number and placement of
 your slave KDCs.
 
@@ -288,7 +285,7 @@ your slave KDCs.
 @section Hostnames for the Master and Slave KDCs
 
 @value{COMPANY} recommends that your KDCs have a predefined set of
-cnames, such as @code{@value{KDCSERVER}} for the master KDC and
+CNAMEs, such as @code{@value{KDCSERVER}} for the master KDC and
 @code{@value{KDCSLAVE1}}, @code{@value{KDCSLAVE2}}, @dots{} for the
 slave KDCs.  This way, if you need to swap a machine, you only need to
 change a DNS entry, rather than having to change hostnames.
@@ -301,7 +298,7 @@ regularly (usually by a cron job) to the slave KDCs.  In deciding how
 frequently the propagation should happen, you will need to balance the
 amount of time the propagation takes against the maximum reasonable
 amount of time a user should have to wait for a password change to take
-effect.  @value{COMPANY} recommends that this be no longer than an hour.
+effect.
 
 If the propagation time is longer than this maximum reasonable time
 (@i{e.g.,} you have a particularly large database, you have a lot of
@@ -981,7 +978,7 @@ Set up the cron job to propagate the database.  (@xref{Propagate the
 Database to Each Slave KDC}.)
 
 @item
-Switch the cnames of the old and new master KDCs.  (If you don't do
+Switch the CNAMEs of the old and new master KDCs.  (If you don't do
 this, you'll need to change the @code{krb5.conf} file on every client
 machine in your Kerberos realm.)
 @end enumerate
