@@ -1,5 +1,18 @@
 2002-12-20  Ken Raeburn  <raeburn@mit.edu>
 
+	* prof_int.h: Define USE_PTHREADS and include pthread.h if on
+	MacOS X.
+	(struct global_shared_profile_data) [USE_PTHREADS]: Add a mutex.
+	(g_shared_trees_mutex) [USE_PTHREADS]: New macro, references the
+	global mutex.
+	(prof_mutex_lock, prof_mutex_unlock) [SHARE_TREE_DATA]: Define to
+	use pthread functions or do nothing.
+	(profile_free_file_data): Delete declaration.
+	(profile_dereference_data): Declare.
+	* prof_file.c (profile_free_file_data): Now static.
+	(profile_open_file, profile_dereference_data) [SHARE_TREE_DATA]:
+	Grab lock while manipulating global data list or its contents.
+
 	* prof_int.h (SHARE_TREE_DATA): Define.
 	(struct _prf_file_t) [SHARE_TREE_DATA]: Make data field a pointer
 	rather than an array.

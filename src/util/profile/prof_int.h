@@ -8,6 +8,7 @@
 #include <Kerberos/com_err.h>
 #include <Kerberos/FullPOSIXPath.h>
 #include <CoreServices/CoreServices.h>
+#define USE_PTHREADS
 #else
 #include "com_err.h"
 #endif
@@ -66,9 +67,24 @@ typedef struct _prf_file_t *prf_file_t;
 struct global_shared_profile_data {
 	/* This is the head of the global list of shared trees */
 	prf_data_t trees;
+#ifdef USE_PTHREADS
+	/* Lock for above list.  */
+	pthread_mutex_t mutex;
+#endif
 };
 extern struct global_shared_profile_data krb5int_profile_shared_data;
 #define g_shared_trees		(krb5int_profile_shared_data.trees)
+
+#ifdef USE_PTHREADS
+#include <pthread.h>
+#define g_shared_trees_mutex	(krb5int_profile_shared_data.mutex)
+#define prof_mutex_lock(L)	(pthread_mutex_lock(L))
+#define prof_mutex_unlock(L)	(pthread_mutex_unlock(L))
+#else
+#define prof_mutex_lock(L)	(0)
+#define prof_mutex_unlock(L)	(0)
+#endif
+
 #endif /* SHARE_TREE_DATA */
 
 /*
@@ -207,10 +223,11 @@ errcode_t profile_flush_file_data
 
 void profile_free_file
 	(prf_file_t profile);
-void profile_free_file_data (prf_data_t data);
 
 errcode_t profile_close_file
 	(prf_file_t profile);
+
+void profile_dereference_data (prf_data_t);
 
 /* prof_init.c -- included from profile.h */
 errcode_t profile_ser_size

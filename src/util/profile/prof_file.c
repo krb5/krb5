@@ -42,6 +42,8 @@ static OSErr GetMacOSTempFilespec (
 			FSSpec*	outFilespec);
 #endif
 
+static void profile_free_file_data(prf_data_t);
+
 static int rw_access(filespec)
 	profile_filespec_t filespec;
 {
@@ -88,6 +90,7 @@ errcode_t profile_open_file(filespec, ret_prof)
 	prf->magic = PROF_MAGIC_FILE;
 
 #ifdef SHARE_TREE_DATA
+	prof_mutex_lock(&g_shared_trees_mutex);
 	for (data = g_shared_trees; data; data = data->next) {
 	    if (!strcmp(data->filespec, filespec)
 		/* Check that current uid has read access.  */
@@ -97,10 +100,12 @@ errcode_t profile_open_file(filespec, ret_prof)
 	if (data) {
 	    retval = profile_update_file_data(data);
 	    data->refcount++;
+	    prof_mutex_unlock(&g_shared_trees_mutex);
 	    prf->data = data;
 	    *ret_prof = prf;
 	    return retval;
 	}
+	prof_mutex_unlock(&g_shared_trees_mutex);
 	data = malloc(sizeof(struct _prf_data_t));
 	if (data == NULL) {
 	    free(prf);
@@ -140,9 +145,11 @@ errcode_t profile_open_file(filespec, ret_prof)
 	}
 
 #ifdef SHARE_TREE_DATA
-	data->next = g_shared_trees;
 	data->flags |= PROFILE_FILE_SHARED;
+	prof_mutex_lock(&g_shared_trees_mutex);
+	data->next = g_shared_trees;
 	g_shared_trees = data;
+	prof_mutex_unlock(&g_shared_trees_mutex);
 #endif
 
 	*ret_prof = prf;
@@ -316,9 +323,11 @@ errout:
 void profile_dereference_data(prf_data_t data)
 {
 #ifdef SHARE_TREE_DATA
+    prof_mutex_lock(&g_shared_trees_mutex);
     data->refcount--;
     if (data->refcount == 0)
 	profile_free_file_data(data);
+    prof_mutex_unlock(&g_shared_trees_mutex);
 #else
     profile_free_file_data(data);
 #endif
@@ -331,7 +340,8 @@ void profile_free_file(prf)
     free(prf);
 }
 
-void profile_free_file_data(data)
+/* Call with mutex locked!  */
+static void profile_free_file_data(data)
 	prf_data_t data;
 {
 #ifdef SHARE_TREE_DATA
