@@ -1,3 +1,9 @@
+Sat Feb 24 21:46:13 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in (all-windows): hpux make doesn't grok $@, so I'm
+	        told.  Use explicit target names for building errortable
+	        include files.
+
 Fri Feb 23 18:59:18 1996  Mark Eichin  <eichin@cygnus.com>
 
 	* krb5.hin (krb5_x, krb5_xc): wrapper macros to test all function
