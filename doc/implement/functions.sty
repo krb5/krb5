@@ -21,14 +21,17 @@
 \end{tabbing}
 }
 \newcommand{\docomm@}{\ifnum\argc@ount >0, \\\fi}
-\newcommand{\funcvoid}{}
+\newcommand{\funcvoid}{\argc@ount=0}
 \newcommand{\funcin}{\docomm@\argc@ount=0{\it /* IN */}\\}
 \newcommand{\funcinout}{\docomm@\argc@ount=0{\it /* INOUT */}\\}
 \newcommand{\funcout}{\docomm@\argc@ount=0{\it /* OUT */}\\}
 \newcommand{\funcarg}[2]{\docomm@#1 {\argfont #2}\advance\argc@ount by1}
 \newcommand{\funcparam}[1]{{\argfont #1}}
 \newcommand{\funcname}[1]{{\bf #1}()}
+\newcommand{\funcfuncarg}[2]{\docomm@#1 {\argfont #2}(\= \+ \argc@ount=0}
+\newcommand{\funcendfuncarg}{), \- \\ \argc@ount=0}
 \newcommand{\libname}[1]{{\argfont #1}}
 \newcommand{\globalname}[1]{{\argfont #1}}
 \newcommand{\ptsto}{->\discretionary{}{}{}}
 \newcommand{\datatype}[1]{{\bf #1}}
+\newcommand{\filename}[1]{{\sl #1\/}}
