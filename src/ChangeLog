@@ -1,3 +1,8 @@
+Sun Nov 12 04:40:02 1995  Mark W. Eichin  <eichin@cygnus.com>
+
+	* Makefile.in (install-mkdirs): bash needs a semicolon between fi
+	and done.
+
 Thu Nov 09 17:04:02 1995  Chris Provenzano (proven@mit.edu)
 
 	* TODO : Remove krb5_enctype argument from string_to_key() is done.
