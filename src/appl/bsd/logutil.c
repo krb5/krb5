@@ -132,7 +132,6 @@ logwtmp(line, name, host, keep_open, logingin)
     struct utmp ut;
     struct stat buf;
     time_t time();
-    char *strncpy();
     
     if (fd < 0 && (fd = open(WTMP_FILE, O_WRONLY|O_APPEND, 0)) < 0)
       return;

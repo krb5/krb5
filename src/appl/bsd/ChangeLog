@@ -1,3 +1,7 @@
+Mon Oct  3 13:21:51 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* logutil.c (logwtmp): Remove declaration for strncpy().
+
 Fri Sep 30 17:04:24 1994  Theodore Y. Ts'o  (tytso@dcl)
 
         * krshd.c: Use ifdef for SETPGRP_TWOARG and HAVE_KILLPG
