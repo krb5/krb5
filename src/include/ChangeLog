@@ -1,5 +1,14 @@
 2004-07-06  Ken Raeburn  <raeburn@mit.edu>
 
+	* k5-thread.h: Use K5_THREAD_H for multiple inclusion protection.
+	(k5_debug_mutex_stats, k5_mutex_init_stats,
+	k5_mutex_finish_init_stats, K5_MUTEX_STATS_INIT): Add some dummy
+	support for recording statistics on how long mutexes are held,
+	etc.  Incomplete implementation started, but code not enabled.
+	(k5_mutex_t): Add statistics field.
+	(K5_MUTEX_PARTIAL_INITIALIZER, k5_mutex_init_1, k5_mutex_init):
+	Initialize it.
+
 	* configure.in: Check for getpwuid_r.
 
 2004-07-02  Ken Raeburn  <raeburn@mit.edu>

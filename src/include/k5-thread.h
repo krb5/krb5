@@ -27,7 +27,8 @@
  * Preliminary thread support.
  */
 
-#ifndef k5_mutex_init /* handle multiple inclusion */
+#ifndef K5_THREAD_H
+#define K5_THREAD_H
 
 #include "autoconf.h"
 
@@ -142,6 +143,7 @@
 
 #define DEBUG_THREADS
 #define DEBUG_THREADS_LOC
+#undef DEBUG_THREADS_STATS
 
 #include <assert.h>
 
@@ -171,6 +173,58 @@ typedef char k5_debug_loc;
 #endif
 
 #define k5_debug_update_loc(L)	((L) = K5_DEBUG_LOC)
+
+
+
+/* Statistics gathering:
+
+   Currently incomplete, don't try enabling it.
+
+   Eventually: Report number of times locked, total and standard
+   deviation of the time the lock was held, total and std dev time
+   spent waiting for the lock.  "Report" will probably mean "write a
+   line to a file if a magic environment variable is set."  */
+
+#ifdef DEBUG_THREADS_STATS
+
+#if HAVE_TIME_H && (!defined(HAVE_SYS_TIME_H) || defined(TIME_WITH_SYS_TIME))
+# include <time.h>
+#endif
+#if HAVE_SYS_TIME_H
+# include <sys/time.h>
+#endif
+#ifdef HAVE_STDINT_H
+# include <stdint.h>
+#endif
+#include <inttypes.h>
+typedef uint64_t k5_debug_timediff_t;
+typedef struct timeval k5_debug_time_t;
+static inline k5_debug_timediff_t
+timediff(k5_debug_time_t t2, k5_debug_time_t t1)
+{
+    return (t2.tv_sec - t1.tv_sec) * 1000000 + (t2.tv_usec - t1.tv_usec);
+}
+struct k5_timediff_stats {
+    k5_debug_timediff_t valmin, valmax, valsum, valsqsum;
+};
+typedef struct {
+    int count;
+    k5_debug_time_t time_acquired, time_created;
+    struct k5_timediff_stats lockwait, lockheld;
+} k5_debug_mutex_stats;
+#define k5_mutex_init_stats(S) \
+	(memset((S), 0, sizeof(struct k5_debug_mutex_stats)), 0)
+#define k5_mutex_finish_init_stats(S) 	(0)
+#define K5_MUTEX_STATS_INIT	{ 0, {0}, {0}, {0}, {0} }
+
+#else
+
+typedef char k5_debug_mutex_stats;
+#define k5_mutex_init_stats(S)		(*(S) = 's', 0)
+#define k5_mutex_finish_init_stats(S)	(0)
+#define K5_MUTEX_STATS_INIT		's'
+
+#endif
 
 
 
@@ -424,15 +478,18 @@ typedef struct {
 typedef struct {
     k5_debug_loc loc_last, loc_created;
     k5_os_mutex os;
+    k5_debug_mutex_stats stats;
 } k5_mutex_t;
 #define K5_MUTEX_PARTIAL_INITIALIZER		\
 	{ K5_DEBUG_LOC_INIT, K5_DEBUG_LOC_INIT,	\
-	  K5_OS_MUTEX_PARTIAL_INITIALIZER }
+	  K5_OS_MUTEX_PARTIAL_INITIALIZER, K5_MUTEX_STATS_INIT }
 static inline int k5_mutex_init_1(k5_mutex_t *m, k5_debug_loc l)
 {
     int err = k5_os_mutex_init(&m->os);
     if (err) return err;
     m->loc_created = m->loc_last = l;
+    err = k5_mutex_init_stats(&m->stats);
+    assert(err == 0);
     return 0;
 }
 #define k5_mutex_init(M)	k5_mutex_init_1((M), K5_DEBUG_LOC)
@@ -441,6 +498,8 @@ static inline int k5_mutex_finish_init_1(k5_mutex_t *m, k5_debug_loc l)
     int err = k5_os_mutex_finish_init(&m->os);
     if (err) return err;
     m->loc_created = m->loc_last = l;
+    err = k5_mutex_finish_init_stats(&m->stats);
+    assert(err == 0);
     return 0;
 }
 #define k5_mutex_finish_init(M)	k5_mutex_finish_init_1((M), K5_DEBUG_LOC)
@@ -477,7 +536,10 @@ static inline int k5_mutex_unlock_1(k5_mutex_t *m, k5_debug_loc l)
 
 
 /* Thread-specific data; implemented in a support file, because we'll
-   need to keep track of some global data for cleanup purposes.  */
+   need to keep track of some global data for cleanup purposes.
+
+   Note that the callback function type is such that the C library
+   routine free() is a valid callback.  */
 typedef enum {
     K5_KEY_COM_ERR,
     K5_KEY_MAX
