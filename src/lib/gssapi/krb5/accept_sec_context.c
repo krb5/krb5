@@ -214,12 +214,10 @@ krb5_gss_accept_sec_context(context, minor_status, context_handle,
    }
 
    memset(ctx, 0, sizeof(krb5_gss_ctx_id_rec));
-   ctx->context = context;
    ctx->auth_context = auth_context;
    ctx->initiate = 0;
    ctx->mutual = gss_flags & GSS_C_MUTUAL_FLAG;
    ctx->seed_init = 0;
-   ctx->cred = cred;
    ctx->big_endian = bigend;
 
    if (code = krb5_copy_principal(context, cred->princ, &ctx->here)) {
@@ -258,11 +256,12 @@ krb5_gss_accept_sec_context(context, minor_status, context_handle,
 
    krb5_use_enctype(context, &ctx->seq.eblock, ENCTYPE_DES_CBC_RAW);
    ctx->seq.processed = 0;
-   ctx->seq.key = ctx->subkey;
-
+   if (code = krb5_copy_keyblock(context, ctx->subkey, &ctx->seq.key))
+       return(code);
    ctx->endtime = ticket->enc_part2->times.endtime;
-
    ctx->flags = ticket->enc_part2->flags;
+
+   krb5_free_ticket(context, ticket); /* Done with ticket */
 
    krb5_auth_con_getremoteseqnumber(context, auth_context, &ctx->seq_recv);
 

@@ -85,15 +85,16 @@ krb5_gss_export_sec_context(context,
 			    /* Now, clean up the context state */
 			    (void) kg_delete_ctx_id((gss_ctx_id_t) ctx);
 			    if (ctx->enc.processed)
-				krb5_finish_key(ctx->context,
+				krb5_finish_key(context,
 						&ctx->enc.eblock);
-			    krb5_free_keyblock(ctx->context, ctx->enc.key);
+			    krb5_free_keyblock(context, ctx->enc.key);
 			    if (ctx->seq.processed)
-				krb5_finish_key(ctx->context,
+				krb5_finish_key(context,
 						&ctx->seq.eblock);
-			    krb5_free_principal(ctx->context, ctx->here);
-			    krb5_free_principal(ctx->context, ctx->there);
-			    krb5_free_keyblock(ctx->context, ctx->subkey);
+			    krb5_free_keyblock(context, ctx->seq.key);
+			    krb5_free_principal(context, ctx->here);
+			    krb5_free_principal(context, ctx->there);
+			    krb5_free_keyblock(context, ctx->subkey);
 
 			    if (ctx->auth_context)
 				krb5_auth_con_free(context, ctx->auth_context);

@@ -34,7 +34,7 @@ krb5_gss_unseal(context, minor_status, context_handle,
      int *conf_state;
      int *qop_state;
 {
-   return(kg_unseal(minor_status, context_handle,
+   return(kg_unseal(context, minor_status, context_handle,
 		    input_message_buffer, output_message_buffer,
 		    conf_state, qop_state, KG_TOK_SEAL_MSG));
 }
@@ -55,7 +55,7 @@ krb5_gss_unwrap(context, minor_status, context_handle,
     OM_uint32		rstat;
     int			qstate;
 
-    rstat = kg_unseal(minor_status, context_handle,
+    rstat = kg_unseal(context, minor_status, context_handle,
 		      input_message_buffer, output_message_buffer,
 		      conf_state, &qstate, KG_TOK_WRAP_MSG);
     if (!rstat && qop_state)

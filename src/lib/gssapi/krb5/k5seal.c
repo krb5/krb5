@@ -181,8 +181,9 @@ make_seal_token(context, enc_ed, seq_ed, seqnum, direction, text, token,
    and do not encode the ENC_TYPE, MSG_LENGTH, or MSG_TEXT fields */
 
 OM_uint32
-kg_seal(minor_status, context_handle, conf_req_flag, qop_req, 
+kg_seal(context, minor_status, context_handle, conf_req_flag, qop_req, 
 	input_message_buffer, conf_state, output_message_buffer, toktype)
+     krb5_context context;
      OM_uint32 *minor_status;
      gss_ctx_id_t context_handle;
      int conf_req_flag;
@@ -218,12 +219,12 @@ kg_seal(minor_status, context_handle, conf_req_flag, qop_req,
       return(GSS_S_NO_CONTEXT);
    }
 
-   if (code = krb5_timeofday(ctx->context, &now)) {
+   if (code = krb5_timeofday(context, &now)) {
       *minor_status = code;
       return(GSS_S_FAILURE);
    }
 
-   if (code = make_seal_token(ctx->context, &ctx->enc, &ctx->seq,
+   if (code = make_seal_token(context, &ctx->enc, &ctx->seq,
 			      &ctx->seq_send, ctx->initiate,
 			      input_message_buffer, output_message_buffer,
 			      conf_req_flag, toktype, ctx->big_endian)) {
@@ -241,8 +242,9 @@ kg_seal(minor_status, context_handle, conf_req_flag, qop_req,
 }
 
 OM_uint32
-kg_seal_size(minor_status, context_handle, conf_req_flag, qop_req, 
+kg_seal_size(context, minor_status, context_handle, conf_req_flag, qop_req, 
 	     output_size, input_size)
+    krb5_context        context;
     OM_uint32		*minor_status;
     gss_ctx_id_t	context_handle;
     int			conf_req_flag;

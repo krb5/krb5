@@ -69,8 +69,6 @@ krb5_gss_import_sec_context(context,
 
 		/* Make sure that everything is cool. */
 		if (kg_validate_ctx_id((gss_ctx_id_t) ctx)) {
-		    interprocess_token->value = ibp;
-		    interprocess_token->length = blen;
 		    *context_handle = (gss_ctx_id_t) ctx;
 		    retval = GSS_S_COMPLETE;
 		}
@@ -82,13 +80,13 @@ krb5_gss_import_sec_context(context,
 	if (ctx) {
 	    (void) kg_delete_ctx_id((gss_ctx_id_t) ctx);
 	    if (ctx->enc.processed)
-		krb5_finish_key(ctx->context, &ctx->enc.eblock);
-	    krb5_free_keyblock(ctx->context, ctx->enc.key);
+		krb5_finish_key(context, &ctx->enc.eblock);
+	    krb5_free_keyblock(context, ctx->enc.key);
 	    if (ctx->seq.processed)
-		krb5_finish_key(ctx->context, &ctx->seq.eblock);
-	    krb5_free_principal(ctx->context, ctx->here);
-	    krb5_free_principal(ctx->context, ctx->there);
-	    krb5_free_keyblock(ctx->context, ctx->subkey);
+		krb5_finish_key(context, &ctx->seq.eblock);
+	    krb5_free_principal(context, ctx->here);
+	    krb5_free_principal(context, ctx->there);
+	    krb5_free_keyblock(context, ctx->subkey);
 	    
 	    /* Zero out context */
 	    memset(ctx, 0, sizeof(*ctx));

@@ -1,3 +1,56 @@
+Sat Sep 16 03:18:02 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* gssapiP_krb5.h: Remove context and cred from the gssapi security
+		context, as they aren't needed.  kg_seal and kg_unseal now
+		take a krb5_context argument.
+
+	* ser_sctx.c (kg_ctx_size, kg_ctx_externalize,
+		kg_ctx_internalize): No longer serialize the context and
+		cred fields of the gssapi security context.
+
+	* krb5_gss_glue.c: Don't rely on the context field of the gssapi
+		security context.  Use kg_context instead.
+
+	* verify.c (krb5_gss_verify, krb5_gss_verify_mic): 
+	* unseal.c (krb5_gss_unwrap, krb5_gss_unseal): 
+	* sign.c (krb5_gss_sign, krb5_gss_get_mic): 
+	* seal.c (krb5_gss_seal, krb5_gss_wrap): 
+	* process_context_token.c (krb5_gss_process_context_token): 
+	* k5unseal.c (kg_unseal):
+	* k5seal.c (kg_seal_size): Add a krb5_context argument to this
+		function, so we don't have to depend on the context field
+		in the gssapi security context.
+
+	* init_sec_context.c (krb5_gss_init_sec_context): Don't initialize
+		the context and cred fields in the gssapi security
+		context.  Copy ctx->subkey to ctx->seq.key, so they are
+		separately allocated.
+
+	* gssapi_krb5.c (kg_get_context): When initialize kg_context, call
+		krb5_init_ets() so that the error tables are initialized.
+
+	* export_sec_context.c (krb5_gss_export_sec_context): Don't depend
+		on the context field from the gssapi security context.
+		Free ctx->seq.key.
+
+	* delete_sec_context.c (krb5_gss_delete_sec_context): kg_seal()
+		now takes a krb5_context argument.  Free ctx->seq.key.
+
+	* acquire_cred.c (krb5_gss_acquire_cred): Clear the gssapi
+		credential before setting it, to prevent purify from
+		complaining.
+
+	* accept_sec_context.c (krb5_gss_accept_sec_context): Remove
+		context and cred from the gssapi security context.  Make
+		sure the ticket is freed after we're done with it.
+
+Fri Sep 15 22:12:49 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* import_sec_context.c (krb5_gss_import_sec_context): Don't bash
+		the input interprocess_token.  Otherwise, it can't be
+		freed.  Don't depend on the context field in the gss
+		security context.
+
 Tue Sep 12 19:07:52 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* export_sec_context.c (krb5_gss_export_sec_context): Free the

@@ -35,7 +35,7 @@ krb5_gss_seal(context, minor_status, context_handle, conf_req_flag,
      int *conf_state;
      gss_buffer_t output_message_buffer;
 {
-   return(kg_seal(minor_status, context_handle, conf_req_flag,
+   return(kg_seal(context, minor_status, context_handle, conf_req_flag,
 		  qop_req, input_message_buffer, conf_state,
 		  output_message_buffer, KG_TOK_SEAL_MSG));
 }
@@ -54,7 +54,7 @@ krb5_gss_wrap(context, minor_status, context_handle, conf_req_flag,
     int			*conf_state;
     gss_buffer_t	output_message_buffer;
 {
-    return(kg_seal(minor_status, context_handle, conf_req_flag,
+    return(kg_seal(context, minor_status, context_handle, conf_req_flag,
 		   qop_req, input_message_buffer, conf_state,
 		   output_message_buffer, KG_TOK_WRAP_MSG));
 }
@@ -72,6 +72,6 @@ krb5_gss_wrap_size_limit(context, minor_status, context_handle, conf_req_flag,
     OM_uint32		*max_input_size;
 {
     /* XXX - should just put this in k5seal.c */
-    return(kg_seal_size(minor_status, context_handle, conf_req_flag,
+    return(kg_seal_size(context, minor_status, context_handle, conf_req_flag,
 			qop_req, req_output_size, max_input_size));
 }

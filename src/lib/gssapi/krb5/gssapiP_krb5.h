@@ -84,7 +84,6 @@ typedef struct _krb5_gss_ctx_id_rec {
    OM_uint32 mutual;
    int seed_init;
    unsigned char seed[16];
-   krb5_gss_cred_id_t cred;
    krb5_principal here;
    krb5_principal there;
    krb5_keyblock *subkey;
@@ -96,7 +95,6 @@ typedef struct _krb5_gss_ctx_id_rec {
    krb5_int32 seq_recv;
    int established;
    int big_endian;
-   krb5_context context;
    krb5_auth_context auth_context;
 } krb5_gss_ctx_id_rec, krb5_gss_ctx_id_t;
 
@@ -151,7 +149,8 @@ krb5_error_code kg_encrypt PROTOTYPE((krb5_gss_enc_desc *ed,
 krb5_error_code kg_decrypt PROTOTYPE((krb5_gss_enc_desc *ed, 
 			   krb5_pointer iv, krb5_pointer in, krb5_pointer out, int length));
 
-OM_uint32 kg_seal PROTOTYPE((OM_uint32 *minor_status,
+OM_uint32 kg_seal PROTOTYPE((krb5_context context,
+		  OM_uint32 *minor_status,
 		  gss_ctx_id_t context_handle,
 		  int conf_req_flag,
 		  int qop_req,
@@ -160,7 +159,8 @@ OM_uint32 kg_seal PROTOTYPE((OM_uint32 *minor_status,
 		  gss_buffer_t output_message_buffer,
 		  int toktype));
 
-OM_uint32 kg_unseal PROTOTYPE((OM_uint32 *minor_status,
+OM_uint32 kg_unseal PROTOTYPE((krb5_context context,
+		    OM_uint32 *minor_status,
 		    gss_ctx_id_t context_handle,
 		    gss_buffer_t input_token_buffer,
 		    gss_buffer_t message_buffer,

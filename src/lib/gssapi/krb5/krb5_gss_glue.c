@@ -146,6 +146,9 @@ gss_context_time(minor_status, context_handle, time_rec)
 {
    krb5_gss_ctx_id_t * ctx;
 
+   if (!kg_context && kg_get_context())
+	   return GSS_S_FAILURE;
+   
    /* validate the context handle */
    if (! kg_validate_ctx_id(context_handle)) {
       *minor_status = (OM_uint32) G_VALIDATE_FAILED;
@@ -154,7 +157,7 @@ gss_context_time(minor_status, context_handle, time_rec)
 
    ctx = (krb5_gss_ctx_id_rec *) context_handle;
 
-   return(krb5_gss_context_time(ctx->context, minor_status, context_handle,
+   return(krb5_gss_context_time(kg_context, minor_status, context_handle,
 				time_rec));
 }
 
@@ -175,6 +178,9 @@ gss_delete_sec_context(minor_status, context_handle, output_token)
 {
    krb5_gss_ctx_id_t * ctx;
 
+   if (!kg_context && kg_get_context())
+	   return GSS_S_FAILURE;
+   
    /* validate the context handle */
    if (! kg_validate_ctx_id(context_handle)) {
       *minor_status = (OM_uint32) G_VALIDATE_FAILED;
@@ -183,7 +189,7 @@ gss_delete_sec_context(minor_status, context_handle, output_token)
 
    ctx = (krb5_gss_ctx_id_rec *) *context_handle;
 
-   return(krb5_gss_delete_sec_context(ctx->context, minor_status,
+   return(krb5_gss_delete_sec_context(kg_context, minor_status,
 				      context_handle, output_token));
 }
 
@@ -338,6 +344,9 @@ gss_inquire_context(minor_status, context_handle, initiator_name, acceptor_name,
 {
    krb5_gss_ctx_id_t * ctx;
 
+   if (!kg_context && kg_get_context())
+	   return GSS_S_FAILURE;
+   
    /* validate the context handle */
    if (! kg_validate_ctx_id(context_handle)) {
       *minor_status = (OM_uint32) G_VALIDATE_FAILED;
@@ -346,7 +355,7 @@ gss_inquire_context(minor_status, context_handle, initiator_name, acceptor_name,
 
    ctx = (krb5_gss_ctx_id_rec *) context_handle;
 
-   return(krb5_gss_inquire_context(ctx->context, minor_status, context_handle,
+   return(krb5_gss_inquire_context(kg_context, minor_status, context_handle,
 				   initiator_name, acceptor_name, lifetime_rec,
 				   mech_type, ret_flags, locally_initiated,
 				   open));
@@ -419,6 +428,9 @@ gss_process_context_token(minor_status, context_handle, token_buffer)
 {
    krb5_gss_ctx_id_t * ctx;
 
+   if (!kg_context && kg_get_context())
+	   return GSS_S_FAILURE;
+   
    /* validate the context handle */
    if (! kg_validate_ctx_id(context_handle)) {
       *minor_status = (OM_uint32) G_VALIDATE_FAILED;
@@ -427,7 +439,7 @@ gss_process_context_token(minor_status, context_handle, token_buffer)
 
    ctx = (krb5_gss_ctx_id_rec *) context_handle;
 
-   return(krb5_gss_process_context_token(ctx->context, minor_status,
+   return(krb5_gss_process_context_token(kg_context, minor_status,
 					 context_handle, token_buffer));
 }
 
@@ -493,6 +505,9 @@ gss_seal(minor_status, context_handle, conf_req_flag, qop_req,
 {
    krb5_gss_ctx_id_t * ctx;
 
+   if (!kg_context && kg_get_context())
+	   return GSS_S_FAILURE;
+   
    /* validate the context handle */
    if (! kg_validate_ctx_id(context_handle)) {
       *minor_status = (OM_uint32) G_VALIDATE_FAILED;
@@ -501,7 +516,7 @@ gss_seal(minor_status, context_handle, conf_req_flag, qop_req,
 
    ctx = (krb5_gss_ctx_id_rec *) context_handle;
 
-   return(krb5_gss_seal(ctx->context, minor_status, context_handle,
+   return(krb5_gss_seal(kg_context, minor_status, context_handle,
 			conf_req_flag, qop_req, input_message_buffer,
 			conf_state, output_message_buffer));
 }
@@ -517,6 +532,9 @@ gss_sign(minor_status, context_handle, qop_req, message_buffer, message_token)
 {
    krb5_gss_ctx_id_t * ctx;
 
+   if (!kg_context && kg_get_context())
+	   return GSS_S_FAILURE;
+   
    /* validate the context handle */
    if (! kg_validate_ctx_id(context_handle)) {
       *minor_status = (OM_uint32) G_VALIDATE_FAILED;
@@ -525,7 +543,7 @@ gss_sign(minor_status, context_handle, qop_req, message_buffer, message_token)
 
    ctx = (krb5_gss_ctx_id_rec *) context_handle;
 
-   return(krb5_gss_sign(ctx->context, minor_status, context_handle,
+   return(krb5_gss_sign(kg_context, minor_status, context_handle,
 			qop_req, message_buffer, message_token));
 }
 
@@ -564,6 +582,9 @@ gss_unseal(minor_status, context_handle, input_message_buffer,
 {
    krb5_gss_ctx_id_t * ctx;
 
+   if (!kg_context && kg_get_context())
+	   return GSS_S_FAILURE;
+   
    /* validate the context handle */
    if (! kg_validate_ctx_id(context_handle)) {
       *minor_status = (OM_uint32) G_VALIDATE_FAILED;
@@ -572,7 +593,7 @@ gss_unseal(minor_status, context_handle, input_message_buffer,
 
    ctx = (krb5_gss_ctx_id_rec *) context_handle;
 
-   return(krb5_gss_unseal(ctx->context, minor_status, context_handle,
+   return(krb5_gss_unseal(kg_context, minor_status, context_handle,
 			  input_message_buffer, output_message_buffer,
 			  conf_state, qop_state));
 }
@@ -607,6 +628,9 @@ gss_verify(minor_status, context_handle, message_buffer,
 {
    krb5_gss_ctx_id_t * ctx;
 
+   if (!kg_context && kg_get_context())
+	   return GSS_S_FAILURE;
+   
    /* validate the context handle */
    if (! kg_validate_ctx_id(context_handle)) {
       *minor_status = (OM_uint32) G_VALIDATE_FAILED;
@@ -615,7 +639,7 @@ gss_verify(minor_status, context_handle, message_buffer,
 
    ctx = (krb5_gss_ctx_id_rec *) context_handle;
 
-   return(krb5_gss_verify(ctx->context, minor_status, context_handle,
+   return(krb5_gss_verify(kg_context, minor_status, context_handle,
 			  message_buffer, token_buffer, qop_state));
 }
 

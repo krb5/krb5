@@ -121,5 +121,6 @@ kg_get_context()
 		return GSS_S_COMPLETE;
 	if (krb5_init_context(&kg_context))
 		return GSS_S_FAILURE;
+	krb5_init_ets(kg_context);
 	return GSS_S_COMPLETE;
 }

@@ -294,6 +294,7 @@ krb5_gss_acquire_cred(context, minor_status, desired_name, time_req,
       *minor_status = ENOMEM;
       return(GSS_S_FAILURE);
    }
+   memset(cred, 0, sizeof(krb5_gss_cred_id_rec));
 
    cred->usage = cred_usage;
    cred->princ = NULL;

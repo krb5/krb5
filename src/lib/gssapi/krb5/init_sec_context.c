@@ -244,12 +244,10 @@ krb5_gss_init_sec_context(context, minor_status, claimant_cred_handle,
 
       /* fill in the ctx */
       memset(ctx, 0, sizeof(krb5_gss_ctx_id_rec));
-      ctx->context = context;
       ctx->auth_context = NULL;
       ctx->initiate = 1;
       ctx->mutual = req_flags & GSS_C_MUTUAL_FLAG;
       ctx->seed_init = 0;
-      ctx->cred = cred;
       ctx->big_endian = 0;  /* all initiators do little-endian, as per spec */
 
       if (time_req == 0 || time_req == GSS_C_INDEFINITE) {
@@ -277,7 +275,7 @@ krb5_gss_init_sec_context(context, minor_status, claimant_cred_handle,
 	 return(GSS_S_FAILURE);
       }
 
-      if (code = make_ap_req(context, &(ctx->auth_context), ctx->cred, 
+      if (code = make_ap_req(context, &(ctx->auth_context), cred, 
 			     ctx->there, &ctx->endtime, input_chan_bindings, 
 			     ctx->mutual, &ctx->flags, &token)) {
 	 krb5_free_principal(context, ctx->here);
@@ -304,7 +302,8 @@ krb5_gss_init_sec_context(context, minor_status, claimant_cred_handle,
 
       krb5_use_enctype(context, &ctx->seq.eblock, ENCTYPE_DES_CBC_RAW);
       ctx->seq.processed = 0;
-      ctx->seq.key = ctx->subkey;
+      if (code = krb5_copy_keyblock(context, ctx->subkey, &ctx->seq.key))
+	  return(code);
 
       /* at this point, the context is constructed and valid,
 	 hence, releaseable */
@@ -375,7 +374,7 @@ krb5_gss_init_sec_context(context, minor_status, claimant_cred_handle,
 	 arguments are unchanged */
 
       if ((ctx->established) ||
-	  (((gss_cred_id_t) ctx->cred) != claimant_cred_handle) ||
+	  (((gss_cred_id_t) cred) != claimant_cred_handle) ||
 	  ((req_flags & GSS_C_MUTUAL_FLAG) == 0)) {
 	 (void)krb5_gss_delete_sec_context(context, minor_status, 
 					   context_handle, NULL);

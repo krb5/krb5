@@ -29,8 +29,9 @@
    */
 
 OM_uint32
-kg_unseal(minor_status, context_handle, input_token_buffer, message_buffer,
-	  conf_state, qop_state, toktype)
+kg_unseal(context, minor_status, context_handle, input_token_buffer,
+	  message_buffer, conf_state, qop_state, toktype)
+     krb5_context context;
      OM_uint32 *minor_status;
      gss_ctx_id_t context_handle;
      gss_buffer_t input_token_buffer;
@@ -240,7 +241,7 @@ kg_unseal(minor_status, context_handle, input_token_buffer, message_buffer,
    if (qop_state)
       *qop_state = GSS_C_QOP_DEFAULT;
 
-   if (code = krb5_timeofday(ctx->context, &now)) {
+   if (code = krb5_timeofday(context, &now)) {
       *minor_status = code;
       return(GSS_S_FAILURE);
    }
