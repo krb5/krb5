@@ -188,6 +188,10 @@ int ttyfd = -1;
 # endif
 #endif	/* USE_TERMIO */
 
+#ifndef SETPGRP_TWOARG
+#define setpgrp(a,b) setpgrp()
+#endif
+
 /*
  * init_termbuf()
  * copy_termbuf(cp)

@@ -26,4 +26,7 @@ AC_HEADER_CHECK(sys/filio.h,AC_DEFINE(FILIO_H))
 AC_HEADER_CHECK(sys/stream.h,AC_DEFINE(STREAMS))
 AC_HEADER_CHECK(utmpx.h,AC_DEFINE(UTMPX))
 AC_FUNC_CHECK(cgetent,AC_DEFINE(HAS_CGETENT))
+AC_COMPILE_CHECK([number of arguments to setpgrp],
+[#include <unistd.h>],[setpgrp(0,0)],
+AC_DEFINE(SETPGRP_TWOARG))
 AC_OUTPUT(Makefile,[EXTRA_RULES])
