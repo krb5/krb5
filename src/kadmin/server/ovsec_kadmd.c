@@ -397,6 +397,7 @@ int main(int argc, char *argv[])
 			   "failing.");
 	  fprintf(stderr, "%s: Cannot set GSS-API authentication names.\n",
 		  whoami);
+	  _svcauth_gssapi_unset_names();
 	  kadm5_destroy(global_server_handle);
 	  krb5_klog_close();	  
 	  exit(1);
@@ -423,6 +424,7 @@ int main(int argc, char *argv[])
 		 error_message(ret));
 	  fprintf(stderr, "%s: Cannot initialize acl file: %s\n",
 		  whoami, error_message(ret));
+	  _svcauth_gssapi_unset_names();
 	  kadm5_destroy(global_server_handle);
 	  krb5_klog_close();
 	  exit(1);
@@ -433,6 +435,7 @@ int main(int argc, char *argv[])
 	  krb5_klog_syslog(LOG_ERR, "Cannot detach from tty: %s", error_message(ret));
 	  fprintf(stderr, "%s: Cannot detach from tty: %s\n",
 		  whoami, error_message(ret));
+	  _svcauth_gssapi_unset_names();
 	  kadm5_destroy(global_server_handle);
 	  krb5_klog_close();
 	  exit(1);
@@ -453,6 +456,7 @@ int main(int argc, char *argv[])
      krb5_klog_syslog(LOG_INFO, "finished, exiting");
 
      /* Clean up memory, etc */
+     _svcauth_gssapi_unset_names();
      kadm5_destroy(global_server_handle);
      close(s);
      acl_finish(context, 0);
@@ -900,6 +904,7 @@ void do_schpw(int s1, kadm5_config_params *params)
 			 error_message(errno));
 	fprintf(stderr, "Cannot create connecting socket: %s",
 		error_message(errno));
+	_svcauth_gssapi_unset_names();
 	kadm5_destroy(global_server_handle);
 	krb5_klog_close();	  
 	exit(1);
