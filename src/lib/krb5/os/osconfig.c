@@ -5,9 +5,13 @@
  * Copyright 1990 by the Massachusetts Institute of Technology.
  *
  * For copying and distribution information, please see the file
- * <krb5/mit-copyright.h>.
+ * <krb5/copyright.h>.
  *
  * Definition of default config file pathname.
  */
 
-char *krb5_config_file = "/etc/krb.conf";
+#include <krb5/copyright.h>
+#include <krb5/osconf.h>
+
+char *krb5_config_file = DEFAULT_CONFIG_FILENAME;
+
