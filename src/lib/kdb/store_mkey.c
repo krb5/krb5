@@ -59,7 +59,12 @@ krb5_keyblock *key;
 #if defined(unix) || defined(__unix__)
     oumask = umask(077);
 #endif
-    if (!(kf = fopen(keyfile, "w"))) {
+#if defined(__STDC__)
+    if (!(kf = fopen(keyfile, "wb")))
+#else
+    if (!(kf = fopen(keyfile, "w")))
+#endif
+    {
 #if defined(unix) || defined(__unix__)
 	(void) umask(oumask);
 #endif
