@@ -81,7 +81,7 @@ krb5_get_cred_from_kdc_opt(context, ccache, in_cred, out_cred, tgts, kdcopt)
   krb5_principal  *tgs_list = NULL;
   krb5_principal  *top_server = NULL;
   krb5_principal  *next_server = NULL;
-  int             nservers = 0;
+  unsigned int    nservers = 0;
 
   /* in case we never get a TGT, zero the return */
 

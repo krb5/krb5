@@ -1,9 +1,44 @@
+2000-10-17  Ezra Peisach  <epeisach@mit.edu>
+
+	* bld_pr_ext.c, bld_princ.c (krb5_build_principal_ext,
+	krb5_build_principal_va, krb5_build_principal): Take an unsigned
+	int realm length.
+
+	* get_in_tkt.c (krb5_get_init_creds): Use SALT_TYPE_AFS_LENGTH
+	instead of -1.
+
+	* gic_pwd.c (krb5_get_as_key_password): Use SALT_TYPE_AFS_LENGTH
+	instead of -1.
+
+	* in_tkt_pwd.c (pwd_keyproc): Argument to krb5_read_password is
+	unsigned int.
+
+	* pr_to_salt.c (krb5_principal2salt_internal): Declare as
+	static. Unsigned int fix.
+
+	* preauth.c (krb5_obtain_padata): Use SALT_TYPE_AFS_LENGTH instead
+	of -1.
+
+	* preauth2.c (pa_salt): Use SALT_TYPE_AFS_LENGTH instead of -1. 
+
+	* conv_princ.c, copy_auth.c, copy_princ.c, gc_frm_kdc.c, parse.c,
+	send_tgs.c, srv_rcache.c: Unsigned/signed int cleanup.
+
+	* unparse.c (krb5_unparse_name_ext): size parameter changed to
+	unsigned int *.
+
 2000-10-04  Ezra Peisach  <epeisach@mit.edu>
 
 	* rd_req_dec.c (krb5_rd_req_decrypt_tkt_part): Fix memory leak if
 	krb5_decrypt_tkt_part() fails. (krb5-libs/855)
 
 2000-10-03  Ezra Peisach  <epeisach@mit.edu>
+
+	* srv_rcache.c (krb5_get_server_rcache): Signed vs unsigned int
+	warning fix.
+
+	* pr_to_salt.c (krb5_principal2salt_internal): Add prototype for
+	internal function, and declare static.
 
 	* copy_addrs.c (krb5_copy_addresses): Cleanup unsigned vs signed
 	warnings as arguments to malloc().

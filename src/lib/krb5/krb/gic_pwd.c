@@ -66,7 +66,7 @@ krb5_get_as_key_password(context, client, etype, prompter, prompter_data,
 	krb5int_set_prompt_types(context, 0);
     }
 
-    if ((salt->length == -1) && (salt->data == NULL)) {
+    if ((salt->length == -1 || salt->length == SALT_TYPE_AFS_LENGTH) && (salt->data == NULL)) {
 	if ((ret = krb5_principal2salt(context, client, &defsalt)))
 	    return(ret);
 
@@ -270,9 +270,9 @@ krb5_get_init_creds_password(context, creds, client, password, prompter, data,
 	    result_string.length = sizeof(banner)-100;
 
 	 sprintf(banner, "%.*s%s%.*s.  Please try again.\n",
-		 code_string.length, code_string.data,
+		 (int) code_string.length, code_string.data,
 		 result_string.length?": ":"",
-		 result_string.length, result_string.data);
+		 (int) result_string.length, result_string.data);
 
 	 krb5_xfree(code_string.data);
 	 krb5_xfree(result_string.data);

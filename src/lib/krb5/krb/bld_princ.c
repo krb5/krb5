@@ -40,7 +40,7 @@ krb5_error_code
 krb5_build_principal_va(context, princ, rlen, realm, ap)
     krb5_context context;
     krb5_principal princ;
-    int rlen;
+    unsigned int rlen;
     krb5_const char *realm;
     va_list ap;
 {
@@ -101,13 +101,14 @@ krb5_build_principal_va(context, princ, rlen, realm, ap)
 
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV_C
 #ifdef HAVE_STDARG_H
-krb5_build_principal(krb5_context context,  krb5_principal * princ, int rlen,
-    krb5_const char FAR * realm, ...)
+krb5_build_principal(krb5_context context,  krb5_principal * princ, 
+		     unsigned int rlen,
+		     krb5_const char FAR * realm, ...)
 #else
 krb5_build_principal(context, princ, rlen, realm, va_alist)
     krb5_context context;
     krb5_principal *princ;
-    int rlen;
+    unsigned int rlen;
     krb5_const char FAR *realm;
     va_dcl
 #endif

@@ -183,13 +183,19 @@ krb5_error_code krb5_obtain_padata(context, preauth_to_use, key_proc,
 
     enctype = request->ktype[0];
     salt.data = 0;
-    salt.length = -1;
+    salt.length = SALT_TYPE_NO_LENGTH;
     if (etype_info) {
 	enctype = etype_info[0]->etype;
 	salt.data = (char *) etype_info[0]->salt;
-	salt.length = etype_info[0]->length;
+	if(etype_info[0]->length == KRB5_ETYPE_NO_SALT) 
+	  salt.length = SALT_TYPE_NO_LENGTH; /* XXX */
+	else 
+	  salt.length = etype_info[0]->length;
     }
-    if (salt.length == -1) {
+    if (salt.length == SALT_TYPE_NO_LENGTH) {
+        /*
+	 * This will set the salt length 
+	 */
 	if ((retval = krb5_principal2salt(context, request->client, &salt)))
 	    return(retval);
 	f_salt = 1;
@@ -373,7 +379,7 @@ process_pw_salt(context, padata, request, as_reply,
 
     salt.data = (char *) padata->contents;
     salt.length = 
-      (padata->pa_type == KRB5_PADATA_AFS3_SALT)?(-1):(padata->length);
+      (padata->pa_type == KRB5_PADATA_AFS3_SALT)?(SALT_TYPE_AFS_LENGTH):(padata->length);
     
     if ((retval = (*key_proc)(context, as_reply->enc_part.enctype,
 			      &salt, keyseed, decrypt_key))) {
@@ -438,11 +444,11 @@ char *handle_sam_labels(sc)
      krb5_sam_challenge *sc;
 {
     char *label = sc->sam_challenge_label.data;
-    int label_len = sc->sam_challenge_label.length;
+    unsigned int label_len = sc->sam_challenge_label.length;
     char *prompt = sc->sam_response_prompt.data;
-    int prompt_len = sc->sam_response_prompt.length;
+    unsigned int prompt_len = sc->sam_response_prompt.length;
     char *challenge = sc->sam_challenge.data;
-    int challenge_len = sc->sam_challenge.length;
+    unsigned int challenge_len = sc->sam_challenge.length;
     char *prompt1, *p;
     char *sep1 = ": [";
     char *sep2 = "]\n";
@@ -549,7 +555,7 @@ obtain_sam_padata(context, in_padata, etype_info, def_enc_key,
       return retval;
     if (sam_challenge->sam_flags & KRB5_SAM_SEND_ENCRYPTED_SAD) {
       /* encrypt passcode in key by stuffing it here */
-      int pcsize = 256;
+      unsigned int pcsize = 256;
       char *passcode = malloc(pcsize+1);
       if (passcode == NULL)
 	return ENOMEM;

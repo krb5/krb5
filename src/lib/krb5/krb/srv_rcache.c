@@ -41,7 +41,8 @@ krb5_get_server_rcache(context, piece, rcptr)
     char *cachename = 0;
     char tmp[4];
     krb5_error_code retval;
-    int len, p, i;
+    int p, i;
+    unsigned int len;
 
 #ifdef HAVE_GETEUID
     unsigned long tens;

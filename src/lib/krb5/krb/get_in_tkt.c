@@ -918,7 +918,7 @@ krb5_get_init_creds(context, creds, client, prompter, prompter_data,
     if (options && (options->flags & KRB5_GET_INIT_CREDS_OPT_SALT)) {
 	salt = *options->salt;
     } else {
-	salt.length = -1;
+	salt.length = SALT_TYPE_AFS_LENGTH;
 	salt.data = NULL;
     }
 

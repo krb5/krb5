@@ -138,7 +138,8 @@ krb5_524_conv_principal(context, princ, name, inst, realm)
      const struct krb_convert *p;
      krb5_data *compo;
      char *c, *tmp_realm, *tmp_prealm;
-     int tmp_realm_len, retval; 
+     unsigned int tmp_realm_len;
+     int retval; 
 
      *name = *inst = '\0';
      switch (krb5_princ_size(context, princ)) {

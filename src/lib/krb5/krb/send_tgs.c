@@ -236,7 +236,7 @@ krb5_send_tgs(context, kdcoptions, timestruct, ktypes, sname, addrs,
     /* combine in any other supplied padata */
     if (padata) {
 	krb5_pa_data * const * counter;
-	register int i = 0;
+	register unsigned int i = 0;
 	for (counter = padata; *counter; counter++, i++);
 	combined_padata = (krb5_pa_data **)malloc(i+2);
 	if (!combined_padata) {

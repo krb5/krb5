@@ -62,13 +62,13 @@ krb5_unparse_name_ext(context, principal, name, size)
     krb5_context context;
     krb5_const_principal principal;
     register char FAR * FAR *name;
-    int	FAR *size;
+    unsigned int	FAR *size;
 {
 	register char *cp, *q;
 	register int i,j;
 	int	length;
 	krb5_int32 nelem;
-	register int totalsize = 0;
+	register unsigned int totalsize = 0;
 
 	cp = krb5_princ_realm(context, principal)->data;
 	length = krb5_princ_realm(context, principal)->length;

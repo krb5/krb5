@@ -29,17 +29,20 @@
 
 #include "k5-int.h"
 
+static krb5_error_code krb5_principal2salt_internal
+    PROTOTYPE((krb5_context, krb5_const_principal, krb5_data *ret, int));
+
 /*
  * Convert a krb5_principal into the default salt for that principal.
  */
-krb5_error_code
+static krb5_error_code
 krb5_principal2salt_internal(context, pr, ret, use_realm)
     krb5_context context;
     register krb5_const_principal pr;
     krb5_data *ret;
     int use_realm;
 {
-    int size = 0, offset = 0;
+    unsigned int size = 0, offset=0;
     krb5_int32 nelem;
     register int i;
 

@@ -64,7 +64,7 @@ krb5_copy_authdata(context, inauthdat, outauthdat)
 {
     krb5_error_code retval;
     krb5_authdata ** tempauthdat;
-    register int nelems = 0;
+    register unsigned int nelems = 0;
 
     if (!inauthdat) {
 	    *outauthdat = 0;

@@ -75,7 +75,7 @@ krb5_parse_name(context, name, nprincipal)
 	int		components = 0;
 	const char	*parsed_realm = NULL;
 	int		fcompsize[FCOMPNUM];
-	int		realmsize = 0;
+	unsigned int	realmsize = 0;
 	static char	*default_realm = NULL;
 	static int	default_realm_size = 0;
 	char		*tmpdata;

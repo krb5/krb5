@@ -83,7 +83,7 @@ krb5_error_code pa_salt(krb5_context context,
     /* assume that no other salt was allocated */
 
     if (in_padata->pa_type == KRB5_PADATA_AFS3_SALT)
-	salt->length = -1;
+	salt->length = SALT_TYPE_AFS_LENGTH;
 
     return(0);
 }
@@ -322,7 +322,7 @@ krb5_error_code pa_sam(krb5_context context,
 
 	/* generate a salt using the requested principal */
 
-	if ((salt->length == -1) && (salt->data == NULL)) {
+	if ((salt->length == -1 || salt->length == SALT_TYPE_AFS_LENGTH) && (salt->data == NULL)) {
 	    if ((ret = krb5_principal2salt(context, request->client,
 					  &defsalt))) {
 		krb5_xfree(sam_challenge);
@@ -360,7 +360,7 @@ krb5_error_code pa_sam(krb5_context context,
 	}
 
 #if 0
-	if ((salt->length == -1) && (salt->data == NULL)) {
+	if ((salt->length == SALT_TYPE_AFS_LENGTH) && (salt->data == NULL)) {
 	    if (ret = krb5_principal2salt(context, request->client,
 					  &defsalt)) {
 		krb5_xfree(sam_challenge);
@@ -538,7 +538,7 @@ krb5_do_preauth(krb5_context context,
 		    krb5_etype_info_entry *e = etype_info[j];
 		    fprintf (stderr, "etype info %d: etype %d salt len=%d",
 			     j, e->etype, e->length);
-		    if (e->length > 0)
+		    if (e->length > 0 && e->length != KRB5_ETYPE_NO_SALT)
 			fprintf (stderr, " '%*s'", e->length, e->salt);
 		    fprintf (stderr, "\n");
 		}

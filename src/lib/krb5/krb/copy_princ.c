@@ -61,7 +61,7 @@ krb5_copy_principal(context, inprinc, outprinc)
     }
 
     for (i = 0; i < nelems; i++) {
-	int len = krb5_princ_component(context, inprinc, i)->length;
+	unsigned int len = krb5_princ_component(context, inprinc, i)->length;
 	krb5_princ_component(context, tempprinc, i)->length = len;
 	if (((krb5_princ_component(context, tempprinc, i)->data =
 	      malloc(len)) == 0) && len) {

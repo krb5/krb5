@@ -37,18 +37,19 @@
 
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV_C
 #ifdef HAVE_STDARG_H
-krb5_build_principal_ext(krb5_context context,  krb5_principal FAR * princ, int rlen, krb5_const char FAR * realm, ...)
+krb5_build_principal_ext(krb5_context context,  krb5_principal FAR * princ, unsigned int rlen, krb5_const char FAR * realm, ...)
 #else
 krb5_build_principal_ext(context, princ, rlen, realm, va_alist)
     krb5_context context;
     krb5_principal FAR *princ;
-    int rlen;
+    unsigned int rlen;
     krb5_const char FAR *realm;
     va_dcl
 #endif
 {
     va_list ap;
-    register int i, count = 0, size;
+    register int i, count = 0;
+    register unsigned int size;
     register char *next;
     char *tmpdata;
     krb5_data *princ_data;
@@ -97,7 +98,7 @@ krb5_build_principal_ext(context, princ, rlen, realm, va_alist)
     va_start(ap);
 #endif
     for (i = 0; i < count; i++) {
-	size = va_arg(ap, int);
+	size = va_arg(ap, unsigned int);
 	next = va_arg(ap, char *);
 	princ_data[i].length = size;
 	princ_data[i].data = malloc(size+1);

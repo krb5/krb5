@@ -51,7 +51,7 @@ pwd_keyproc(context, type, salt, keyseed, key)
 {
     krb5_error_code retval;
     krb5_data * password;
-    int pwsize;
+    unsigned int pwsize;
 
     password = (krb5_data *)keyseed;
 
