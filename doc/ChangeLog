@@ -1,5 +1,8 @@
 Fri Sep  6 19:59:12 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
+	* copyright.texinfo: Updated copyright dates and modify copyright
+		text to have non-commital words about export licenses.
+
 	* admin.texinfo, install.texinfo: Set edition to "b7-1".
 
 	* user-guide.texinfo: Set edition to "b7-1".  Fix the hoffset and

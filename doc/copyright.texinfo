@@ -11,11 +11,11 @@ Massachusetts Institute of Technology, which includes this copyright
 information:
 @end ifset
 
-Copyright @copyright{} 1995 by the Massachusetts Institute of Technology. 
+Copyright @copyright{} 1990, 1991, 1992, 1993, 1994, 1995, 1996 by the Massachusetts Institute of Technology. 
 
 @quotation  
 Export of software employing encryption from the United States of
-America is assumed to require a specific license from the United States
+America may require a specific license from the United States
 Government.  It is the responsibility of any person or organization
 contemplating export to obtain such a license before exporting.
 @end quotation
