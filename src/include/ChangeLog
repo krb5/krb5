@@ -1,3 +1,11 @@
+2004-08-07  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Look for sched.h and sched_yield.
+	* k5-thread.h: Only include sched.h if it's available.
+	(MAYBE_SCHED_YIELD): Only use sched_yield if sched.h and
+	sched_yield are available; if weak references are supported and
+	sched_yield isn't available by default, check for it at run time.
+
 2004-08-05  Ken Raeburn  <raeburn@mit.edu>
 
 	* k5-thread.h [HAVE_PTHREAD]: Include sched.h if

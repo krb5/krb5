@@ -418,9 +418,14 @@ typedef struct {
 #define k5_pthread_assert_unlocked(M)	(0)
 #define k5_pthread_assert_locked(M)	(0)
 
-#ifdef DEBUG_THREADS_SLOW
+#if defined(DEBUG_THREADS_SLOW) && HAVE_SCHED_H && (HAVE_SCHED_YIELD || HAVE_PRAGMA_WEAK_REF)
 # include <sched.h>
-# define MAYBE_SCHED_YIELD()	((void)sched_yield())
+# if !HAVE_SCHED_YIELD
+#  pragma weak sched_yield
+#  define MAYBE_SCHED_YIELD()	((void)((&sched_yield != NULL) ? sched_yield() : 0))
+# else
+#  define MAYBE_SCHED_YIELD()	((void)sched_yield())
+# endif
 #else
 # define MAYBE_SCHED_YIELD()	((void)0)
 #endif
