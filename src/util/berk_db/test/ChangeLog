@@ -1,0 +1,7 @@
+Tue May 30 06:30:08 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* Makefile.in (CFLAGS): Added $(DEFS) so that configure determined
+		CFLAGS can be included
+
+	* configure.in: Added CHECK_SIGNALS
+
