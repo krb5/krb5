@@ -314,7 +314,8 @@ dnl
 dnl set $(KRB5ROOT) from --with-krb5-root=value -- WITH_KRB5ROOT
 dnl
 define(WITH_KRB5ROOT,[
-AC_ARG_WITH([krb5-root],[set path for Kerberos V5 config files],
+AC_ARG_WITH([krb5-root],
+[  --with-krb5-root=DIR    set path for Kerberos V5 config files],
 AC_MSG_RESULT(krb5-root is $withval)
 KRB5ROOT=$withval,
 AC_MSG_RESULT(krb5-root defaults to /krb5)
@@ -324,7 +325,8 @@ dnl
 dnl set $(KRB4) from --with-krb4=value -- WITH_KRB4
 dnl
 define(WITH_KRB4,[
-AC_ARG_WITH([krb4],[include Kerberos V4 support],
+AC_ARG_WITH([krb4],
+[  --with-krb4=KRB4DIR     build with Kerberos V4 backwards compatibility],
 AC_MSG_RESULT(krb4 is $withval)
 KRB4=$withval,
 AC_MSG_RESULT(no krb4 support; use --with-krb4=krb4dir)
@@ -334,7 +336,8 @@ dnl
 dnl set $(CC) from --with-cc=value
 dnl
 define(WITH_CC,[
-AC_ARG_WITH([cc],[select compiler to use],
+AC_ARG_WITH([cc],
+[  --with-cc=COMPILER      select compiler to use],
 AC_MSG_RESULT(CC=$withval)
 CC=$withval,
 if test -z "$CC" ; then CC=cc; fi
@@ -344,7 +347,8 @@ dnl
 dnl set $(CCOPTS) from --with-ccopts=value
 dnl
 define(WITH_CCOPTS,[
-AC_ARG_WITH([ccopts],[select compiler command line options],
+AC_ARG_WITH([ccopts],
+[  --with-ccopts=CCOPTS    select compiler command line options],
 AC_MSG_RESULT(CCOPTS is $withval)
 CCOPTS=$withval
 CFLAGS="$CFLAGS $withval",
@@ -354,7 +358,8 @@ dnl
 dnl set $(CPPOPTS) from --with-cppopts=value
 dnl
 define(WITH_CPPOPTS,[
-AC_ARG_WITH([cppopts],[select compiler preprocessor command line options],
+AC_ARG_WITH([cppopts],
+[  --with-cppopts=CPPOPTS  select compiler preprocessor command line options],
 AC_MSG_RESULT(CPPOPTS=$withval)
 CPPOPTS=$withval
 CPPFLAGS="$CPPFLAGS $withval",
@@ -482,9 +487,11 @@ dnl
 dnl ISODE/pepsy includes are used -- ISODE_INCLUDE
 dnl
 define(ISODE_INCLUDE,[
-AC_ARG_ENABLE([isode],[build and use ISODE to generate ASN.1 stubs],
+AC_ARG_ENABLE([isode],
+[  --enable-isode          build and use ISODE to generate ASN.1 stubs],
 ISODELIB='[$(TOPLIBD)/libisode.a]'
-ADD_DEF([-I${SRCTOP}/isode/h -I${BUILDTOP}/isode/h]),ISODELIB=)dnl
+ADD_DEF([-DKRB5_USE_ISODE -I${SRCTOP}/isode/h -I${BUILDTOP}/isode/h]),
+ISODELIB=)dnl
 AC_SUBST([ISODELIB])dnl
 ])dnl
 dnl
@@ -529,7 +536,8 @@ dnl
 dnl allow for compilation with isode (yuck!)
 dnl
 define(ISODE_DEFS,
-[AC_ARG_ENABLE([isode],[build and use ISODE to generate ASN.1 stubs],
+[AC_ARG_ENABLE([isode],
+[  --enable-isode          build and use ISODE to generate ASN.1 stubs],
 [ADD_DEF(-DKRB5_USE_ISODE)],)])dnl
 dnl
 dnl make this one deeper...

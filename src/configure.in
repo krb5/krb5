@@ -3,7 +3,12 @@ WITH_CCOPTS
 CONFIG_RULES
 AC_SET_BUILDTOP
 WITH_KRB5ROOT
-AC_ARG_ENABLE([isode],[build and use ISODE to generate ASN.1 stubs], isode=isode,)
+WITH_KRB4
+AC_ARG_ENABLE([isode],
+[  --enable-isode          build and use ISODE to generate ASN.1 stubs], 
+isode=isode,)
+AC_ARG_ENABLE([athena],
+[  --enable-athena         build with MIT Project Athena configuration],,)
 CONFIG_DIRS(util include $isode lib kdc admin kadmin slave clients appl tests)
 MAKE_SUBDIRS("making",all)
 MAKE_SUBDIRS("cleaning",clean)

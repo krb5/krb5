@@ -1,3 +1,12 @@
+Wed Nov 30 17:13:02 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* aclocal.m4, configure.in: Add appropriate help text for the
+		--with-* and --enable-* options.  ISODE_INCLUDES should
+		define KRB5_USE_ISODE if necessary.
+
+	* acconfig.h: Add defines for KRB5_ATHENA_COMPAT and
+		KRB5_KRB4_COMPAT.
+
 Fri Nov 18 15:38:42 1994  Mark Eichin  <eichin@cygnus.com>
 
 	* aclocal.m4 (CHECK_WAIT_TYPE, CHECK_SIGNALS, CHECK_SETJMP,

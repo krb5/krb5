@@ -31,3 +31,9 @@
 #undef KRB5_USE_INET
 #undef ODBM
 #undef TM_IN_SYS_TIME
+
+/* Define if MIT Project Athena default configuration should be used */
+#undef KRB5_ATHENA_COMPAT
+
+/* Define if Kerberos V4 backwards compatibility should be supported */
+#undef KRB5_KRB4_COMPAT
