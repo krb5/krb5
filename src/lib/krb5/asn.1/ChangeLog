@@ -1,4 +1,15 @@
+<<<<<<< ChangeLog
+<<<<<<< ChangeLog
+2001-03-30  Miro Jurisic  <meeroh@mit.edu>
+	* asn1_encode.c: Updated Utilities.h #include
+=======
+2000-10-26  Tom Yu  <tlyu@mit.edu>
+>>>>>>> 5.115
+
 2001-01-31  Tom Yu  <tlyu@mit.edu>
+=======
+2001-01-31  Tom Yu  <tlyu@mit.edu>
+>>>>>>> 5.108.2.2
 
 	* asn1buf.c (asn1buf_sync): Add new arguments to include the full
 	complement of data about a prefetched tag, as well as to indicate

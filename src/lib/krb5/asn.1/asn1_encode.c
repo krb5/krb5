@@ -30,7 +30,7 @@
 #include "asn1_make.h"
 
 #ifdef macintosh
-#include <Utilities.h>
+#include <KerberosSupport/Utilities.h>
 #endif
 
 asn1_error_code asn1_encode_integer(buf, val, retlen)
