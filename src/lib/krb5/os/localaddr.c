@@ -743,7 +743,7 @@ foreach_localaddr (/*@null@*/ void *data,
 	for (i = 0; i < P.buf_size; i+= sizeof (*lifr)) {
 	    lifr = (struct if_laddrreq *)((caddr_t) P.buf+i);
 
-	    strncpy(lifreq.iflr_name, lifr->iflc_name,
+	    strncpy(lifreq.iflr_name, lifr->iflr_name,
 		    sizeof (lifreq.iflr_name));
 	    Tprintf (("interface %s\n", lifreq.iflr_name));
 	    /*@-moduncon@*/ /* ioctl unknown to lclint */
@@ -774,7 +774,7 @@ foreach_localaddr (/*@null@*/ void *data,
 		lifr2 = (struct if_laddrreq *)((caddr_t) P.buf+j);
 		if (lifr2->iflr_name[0] == '\0')
 		    continue;
-		if (lifr2->iflr_addr.ss_family == lifr->iflr_addr.ss_family
+		if (lifr2->iflr_addr.sa_family == lifr->iflr_addr.sa_family
 		    /* Compare address info.  If this isn't good enough --
 		       i.e., if random padding bytes turn out to differ
 		       when the addresses are the same -- then we'll have

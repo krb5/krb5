@@ -1,3 +1,10 @@
+2004-10-05  Ken Raeburn  <raeburn@mit.edu>
+
+	* localaddr.c (foreach_localaddr) [HAVE_STRUCT_IF_LADDRCONF && 0]:
+	Fix if_laddrreq.iflr_name field name not properly adjusted.  The
+	iflr_addr field is an HP-UX specific sockaddr_ext with sa_ field
+	name prefixes.
+
 2004-10-01  Ken Raeburn  <raeburn@mit.edu>
 
 	* localaddr.c (get_if_laddrconf, foreach_localaddr): New
