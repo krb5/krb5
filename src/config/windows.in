@@ -56,7 +56,7 @@ RM=$(BUILDTOP)\config\rm.bat
 CP=copy
 MV=ren
 LN=copy
-LIBCMD=lib
+LIBCMD=lib /PAGESIZE:128
 AWK=rem
 
 ARADD=rem
