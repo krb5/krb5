@@ -1,3 +1,8 @@
+2001-04-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* quad_cksum.c (des_quad_cksum): Add comments.  Force 32-bit
+	arithmetic just to be careful.
+
 2001-04-07  Ken Raeburn  <raeburn@mit.edu>
 
 	* t_quad.c: New file.
