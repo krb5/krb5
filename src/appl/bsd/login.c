@@ -50,11 +50,11 @@ char copyright[] =
 int login_krb5_get_tickets = 1;
 #ifdef KRB5_KRB4_COMPAT
 #define KRB4_GET_TICKETS
-int login_krb4_get_tickets = 1;
+int login_krb4_get_tickets = 0;
 #define KRB4_CONVERT
 int login_krb4_convert = 0;
 #define KRB_RUN_AKLOG
-int login_krb_run_aklog = 1;
+int login_krb_run_aklog = 0;
 #endif /* KRB5_KRB4_COMPAT */
 int login_accept_passwd = 0;
 
@@ -156,6 +156,7 @@ typedef sigtype (*handler)();
 /* #include "krb5.h" */
 /* need k5-int.h to get ->profile from krb5_context */
 #include "k5-int.h"
+#include "com_err.h"
 #include "osconf.h"
 #endif /* KRB5_GET_TICKETS */
 
@@ -164,7 +165,7 @@ typedef sigtype (*handler)();
 #define KRB4
 #endif
 
-#ifdef KRB4_GET_TICKETS
+#if (defined(KRB4_GET_TICKETS) || defined(KRB4_CONVERT))
 /* support for prompting for v4 initial tickets */
 #define KRB4
 #endif
@@ -270,7 +271,7 @@ char term[64], *hostname, *username;
 
 extern int errno;
 
-#ifdef KRB4_GET_TICKETS
+#ifdef KRB4
 #define KRB_ENVIRON	"KRBTKFILE"	/* Ticket file environment variable */
 #define KRB_TK_DIR	"/tmp/tkt_"	/* Where to put the ticket */
 #endif /* KRB4_GET_TICKETS */
@@ -545,7 +546,7 @@ int try_krb5 (me_p, pass)
     /* set up credential cache -- obeying KRB5_ENV_CCNAME 
        set earlier */
     /* (KRB5_ENV_CCNAME == "KRB5CCNAME" via osconf.h) */
-    if (code = krb5_cc_default(kcontext, &ccache)) {
+    if ((code = krb5_cc_default(kcontext, &ccache))) {
 	com_err("login", code, "while getting default ccache");
 	return 0;
     }
@@ -1562,7 +1563,7 @@ int rewrite_ccache = 1; /*try to write out ccache*/
 		    /* Maybe telnetd got tickets for us?  */
 	if (!got_v5_tickets && have_v5_tickets (&me))
 	  got_v5_tickets = 1;
-#endif /*gET_KRB%_TICKETS/*/
+#endif /* GET_KRB_TICKETS */
 
 #ifdef KRB4_GET_TICKETS
 	if ( login_krb4_convert && !got_v4_tickets) {
