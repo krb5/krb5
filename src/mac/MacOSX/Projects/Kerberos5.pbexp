@@ -164,6 +164,9 @@
 	_krb5_425_conv_principal
 	_krb5_524_conv_principal
 #
+	_krb5_get_host_realm
+	_krb5_free_host_realm
+#
 	_krb5_copy_principal
 	_krb5_free_principal
 #
@@ -326,5 +329,3 @@
 #	_krb5_free_priv_enc_part
 #	_krb5_free_safe
 #
-#	_krb5_get_host_realm
-#	_krb5_free_host_realm
