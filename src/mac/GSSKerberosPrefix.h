@@ -12,7 +12,7 @@
 
 #define	krb5_sigtype		void
 
-/*#define USE_CCACHEAPI*/
+#define USE_CCAPI
 
 #define HAVE_NETINET_IN_H	1
 #define HAVE_SYS_STAT_H		1

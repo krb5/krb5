@@ -78,6 +78,109 @@
 				);
 			};
 		};
+		00CFB472FF6EA33F12120111 = {
+			children = (
+				00CFB473FF6EA33F12120111,
+				00CFB474FF6EA33F12120111,
+				00CFB475FF6EA33F12120111,
+				00CFB476FF6EA33F12120111,
+			);
+			isa = PBXGroup;
+			name = ccapi;
+			path = "";
+			refType = 4;
+		};
+		00CFB473FF6EA33F12120111 = {
+			isa = PBXFileReference;
+			name = stdcc.c;
+			path = ../lib/krb5/ccache/ccapi/stdcc.c;
+			refType = 2;
+		};
+		00CFB474FF6EA33F12120111 = {
+			isa = PBXFileReference;
+			name = stdcc.h;
+			path = ../lib/krb5/ccache/ccapi/stdcc.h;
+			refType = 2;
+		};
+		00CFB475FF6EA33F12120111 = {
+			isa = PBXFileReference;
+			name = stdcc_util.c;
+			path = ../lib/krb5/ccache/ccapi/stdcc_util.c;
+			refType = 2;
+		};
+		00CFB476FF6EA33F12120111 = {
+			isa = PBXFileReference;
+			name = stdcc_util.h;
+			path = ../lib/krb5/ccache/ccapi/stdcc_util.h;
+			refType = 2;
+		};
+		00CFB477FF6EA33F12120111 = {
+			fileRef = 00CFB474FF6EA33F12120111;
+			isa = PBXBuildFile;
+			settings = {
+				INCLUDED_OSS = (
+					MACOS,
+					WINDOWS,
+					PDOUNIX,
+				);
+			};
+		};
+		00CFB478FF6EA33F12120111 = {
+			fileRef = 00CFB476FF6EA33F12120111;
+			isa = PBXBuildFile;
+			settings = {
+				INCLUDED_OSS = (
+					MACOS,
+					WINDOWS,
+					PDOUNIX,
+				);
+			};
+		};
+		00CFB479FF6EA33F12120111 = {
+			fileRef = 00CFB473FF6EA33F12120111;
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					Debug,
+				);
+				INCLUDED_OSS = (
+					MACOS,
+					WINDOWS,
+					PDOUNIX,
+				);
+			};
+		};
+		00CFB47AFF6EA33F12120111 = {
+			fileRef = 00CFB475FF6EA33F12120111;
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					Debug,
+				);
+				INCLUDED_OSS = (
+					MACOS,
+					WINDOWS,
+					PDOUNIX,
+				);
+			};
+		};
+		00CFB47BFF6EA3C312120111 = {
+			isa = PBXFrameworkReference;
+			name = CCache.framework;
+			path = ../../CCacheLib/Projects/build/CCache.framework;
+			refType = 2;
+		};
+		00CFB47CFF6EA3C312120111 = {
+			fileRef = 00CFB47BFF6EA3C312120111;
+			isa = PBXBuildFile;
+			settings = {
+				INCLUDED_OSS = (
+					MACOS,
+					WINDOWS,
+					PDOUNIX,
+				);
+			};
+		};
 		174475CAFF5EEEE312120111 = {
 			isa = PBXFileReference;
 			path = GenerateErrorTables.sh;
@@ -721,6 +824,7 @@
 				1744760BFF5FF8DB12120111,
 				174476CCFF60088512120111,
 				174476CDFF60088512120111,
+				00CFB47BFF6EA3C312120111,
 				174476B8FF5FFFA512120111,
 				174476B9FF5FFFA512120111,
 				174476BDFF6001C412120111,
@@ -752,7 +856,7 @@
 				DYLIB_CURRENT_VERSION = 1;
 				FRAMEWORK_VERSION = A;
 				OPTIMIZATION_CFLAGS = "";
-				OTHER_CFLAGS = "-I$(SYMROOT)/ComErr.framework/Headers -I$(SYMROOT)/Profile.framework/Headers -imacros \"$(SRCROOT)/GSSKerberosPrefix.h\"";
+				OTHER_CFLAGS = "-I$(SYMROOT)/ComErr.framework/Headers -I$(SYMROOT)/Profile.framework/Headers -I$(SRCROOT)/../../CCacheLib/Headers -imacros \"$(SRCROOT)/GSSKerberosPrefix.h\"";
 				OTHER_LDFLAGS = "";
 				OTHER_LIBTOOL_FLAGS = "";
 				OTHER_REZFLAGS = "";
@@ -860,6 +964,8 @@
 				5C1373F3FF683B8012120111,
 				5C1373F4FF683B8012120111,
 				00CFB46CFF6D81A212120111,
+				00CFB477FF6EA33F12120111,
+				00CFB478FF6EA33F12120111,
 			);
 			isa = PBXHeadersBuildPhase;
 			name = Headers;
@@ -1172,6 +1278,8 @@
 				5C137415FF683B8012120111,
 				5C137416FF683B8012120111,
 				00CFB46DFF6D81A212120111,
+				00CFB479FF6EA33F12120111,
+				00CFB47AFF6EA33F12120111,
 			);
 			isa = PBXSourcesBuildPhase;
 			name = Sources;
@@ -1181,6 +1289,7 @@
 			files = (
 				1744770EFF60088512120111,
 				1744770FFF60088512120111,
+				00CFB47CFF6EA3C312120111,
 			);
 			isa = PBXFrameworksBuildPhase;
 			name = "Frameworks & Libraries";
@@ -2994,6 +3103,7 @@
 		};
 		174476C6FF60076112120111 = {
 			children = (
+				00CFB472FF6EA33F12120111,
 				5C1373C9FF683B8012120111,
 				5C1373DAFF683B8012120111,
 				5C137387FF682C2F12120111,
