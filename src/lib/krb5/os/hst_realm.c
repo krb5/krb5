@@ -234,14 +234,26 @@ krb5_get_host_realm(context, host, realmsp)
     krb5_error_code retval;
     int l;
     char local_host[MAX_DNS_NAMELEN+1];
+    struct hostent *h;
+
 
     if (host)
-	strncpy(local_host, host, MAX_DNS_NAMELEN);
+	strncpy(local_host, host, sizeof(local_host));
     else {
-	if (gethostname(local_host, sizeof(local_host)-1) == -1)
+	if (gethostname(local_host, sizeof(local_host)) == -1)
 	    return SOCKET_ERRNO;
+	/*
+	 * Try to make sure that we have a fully qualified name if
+	 * possible.  We need to handle the case where the host has a
+	 * dot but is not FQDN, so we call gethostbyname.
+	 */
+	h = gethostbyname(local_host);
+	if (h) {
+	    strncpy(local_host, h->h_name, sizeof(local_host));
+	}
     }
-    local_host[MAX_DNS_NAMELEN] = '\0';
+    local_host[sizeof(local_host) - 1] = '\0';
+
     for (cp = local_host; *cp; cp++) {
 	if (isupper(*cp))
 	    *cp = tolower(*cp);

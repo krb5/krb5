@@ -101,10 +101,26 @@ krb5_get_default_realm(context, lrealm)
 		 */
 		char localhost[MAX_DNS_NAMELEN+1];
 		char * p;
-		localhost[0] = localhost[sizeof(localhost)-1] = 0;
-		gethostname(localhost,MAX_DNS_NAMELEN);
-		
+		struct hostent * h;
+
+		localhost[0] = 0;
+		gethostname(localhost, sizeof(localhost));
+		localhost[sizeof(localhost) - 1] = 0;
+
 		if ( localhost[0] ) {
+		    /*
+		     * Try to make sure that we have a fully qualified
+		     * name if possible.  We want to be able to handle
+		     * the case where gethostname returns a partial
+		     * name (i.e., it has a dot, but it is not a
+		     * FQDN).
+		     */
+		    h = gethostbyname(localhost);
+		    if (h) {
+			strncpy(localhost, h->h_name, sizeof(localhost));
+			localhost[sizeof(localhost) - 1] = '\0';
+		    }
+
 		    p = localhost;
 		    do {
 			retval = krb5_try_realm_txt_rr("_kerberos", p, 

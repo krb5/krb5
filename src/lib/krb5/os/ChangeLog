@@ -1,5 +1,9 @@
 1999-08-06  Danilo Almeida  <dalmeida@mit.edu>
 
+	* def_realm.c (krb5_get_default_realm): 
+	* hst_realm.c (krb5_get_host_realm): Make sure we have FQDN
+	in the case where we use gethostname.
+
 	* def_realm.c (krb5_get_default_realm): Check that we have
 	a realm before trying to copy it (since profile_get_string
 	may return no error but not get anything).
