@@ -1,3 +1,7 @@
+Tue Apr 25 21:58:23 1995  Chris Provenzano  (proven@mit.edu)
+
+        * krb5_err.et: Add new error KRB5_TKT_NOT_FORWARDABLE.
+
 Thu Apr 13 16:36:10 1995 Keith Vetter (keithv@fusion.com)
 
 	* Makefile.in: clean target was cleaning too much for the PC.
