@@ -94,7 +94,7 @@ krb_cr_tkt_int PROTOTYPE((KTEXT tkt, unsigned int flags_in, char *pname,
  */
 int
 krb_create_ticket(tkt, flags, pname, pinstance, prealm, paddress,
-		  session, life, time_sec, sname, sinstance, key, k5key)
+		  session, life, time_sec, sname, sinstance, key)
     KTEXT   tkt;                /* Gets filled in by the ticket */
     unsigned int flags;        /* Various Kerberos flags */
     char    *pname;             /* Principal's name */

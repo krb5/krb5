@@ -1,5 +1,10 @@
 2001-06-08  Ezra Peisach  <epeisach@mit.edu>
 
+	* cr_tkt.c (krb_create_ticket): Get rid of last argument (k5key)
+	which was added erroneously and is not how code is used in tree.
+
+2001-06-08  Ezra Peisach  <epeisach@mit.edu>
+
 	* ad_print.c (ad_print): Cast arguments to printf() to longs to
 	match format string.
 
