@@ -37,21 +37,22 @@ typedef struct _krb5_encrypt_block {
 
 /* could be used in a table to find an etype and initialize a block */
 typedef struct _krb5_cryptosystem_entry {
-    krb5_error_code (*encrypt_func) PROTOTYPE((krb5_pointer /* in */,
+    krb5_error_code (*encrypt_func) PROTOTYPE((const krb5_pointer /* in */,
 					       krb5_pointer /* out */,
-					       size_t,
+					       const size_t,
 					       krb5_encrypt_block *));
-    krb5_error_code (*decrypt_func) PROTOTYPE((krb5_pointer /* in */,
+    krb5_error_code (*decrypt_func) PROTOTYPE((const krb5_pointer /* in */,
 					       krb5_pointer /* out */,
-					       size_t,
+					       const size_t,
 					       krb5_encrypt_block *));
     krb5_error_code (*process_key) PROTOTYPE((krb5_encrypt_block *,
-					      krb5_keyblock *));
+					      const krb5_keyblock *));
     krb5_error_code (*finish_key) PROTOTYPE((krb5_encrypt_block *));
-    krb5_error_code (*string_to_key) PROTOTYPE((krb5_keytype, krb5_keyblock *,
-						krb5_data *,
-						krb5_principal));
-    krb5_error_code  (*init_random_key) PROTOTYPE((krb5_keyblock *,
+    krb5_error_code (*string_to_key) PROTOTYPE((const krb5_keytype,
+						krb5_keyblock *,
+						const krb5_data *,
+						const krb5_principal));
+    krb5_error_code  (*init_random_key) PROTOTYPE((const krb5_keyblock *,
 						   krb5_pointer *));
     krb5_error_code  (*finish_random_key) PROTOTYPE((krb5_pointer *));
     krb5_error_code (*random_key) PROTOTYPE((krb5_pointer,
