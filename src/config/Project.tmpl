@@ -41,7 +41,10 @@
 #define ArAddCmd ar cruv
 #endif
 #ifndef Krb4LibList
-#define Krb4LibList -lkrb -ldes425
+#define Krb4LibList -lkrb $(KLIBLOC) -l$(DES425LIB)
+#endif
+#ifndef Krb4DepList
+#define Krb4DepList $(DES425DEPLIB)
 #endif
 #ifndef Krb4Includes
 #define Krb4Includes -I$(TOP)/include/kerberosIV
@@ -280,9 +283,12 @@ P_PROTOS=-UUseNarrowPrototypes
         KDBDEPLIB = $(TOPLIBD)/libkdb.a
            KDBLIB = $(KLIBLOC) -lkdb
      KRB425DEPLIB = $(TOPLIBD)/libkrb425.a
-        KRB425LIB = $(KRB425DEPLIB)
+        KRB425LIB = krb425
+     DES425DEPLIB = $(TOPLIBD)/libdes425.a
+        DES425LIB = des425
           KRB4LIB = Krb4LibList
      KRB4INCLUDES = Krb4Includes
+       KRB4DEPLIB = Krb4DepList
 
             SSLIB = SSLib
           MK_CMDS = MkCmdsCmd
