@@ -77,6 +77,8 @@ struct cu_data {
 	bool_t		   cu_closeit;
 	struct sockaddr_in cu_raddr;
 	int		   cu_rlen;
+	struct sockaddr_in cu_laddr;
+	int		   cu_llen;
 	struct timeval	   cu_wait;
 	struct timeval     cu_total;
 	struct rpc_err	   cu_error;
@@ -183,6 +185,12 @@ clntudp_bufcreate(raddr, program, version, wait, sockp, sendsz, recvsz)
 	} else {
 		cu->cu_closeit = FALSE;
 	}
+	if (connect(*sockp, raddr, sizeof(*raddr)) < 0)
+	     goto fooy;
+	     cu->cu_llen = sizeof(cu->cu_laddr);
+	if (getsockname(*sockp, &cu->cu_laddr, &cu->cu_llen) < 0)
+	     goto fooy;
+	
 	cu->cu_sock = *sockp;
 	cl->cl_auth = authnone_create();
 	return (cl);
@@ -261,9 +269,7 @@ call_again:
 	outlen = (int)XDR_GETPOS(xdrs);
 
 send_again:
-	if (sendto(cu->cu_sock, cu->cu_outbuf, outlen, 0,
-	    (struct sockaddr *)&(cu->cu_raddr), cu->cu_rlen)
-	    != outlen) {
+	if (send(cu->cu_sock, cu->cu_outbuf, outlen, 0) != outlen) {
 		cu->cu_error.re_errno = errno;
 		return (cu->cu_error.re_status = RPC_CANTSEND);
 	}
@@ -434,11 +440,8 @@ clntudp_control(cl, request, info)
 		*(struct sockaddr_in *)info = cu->cu_raddr;
 		break;
 	case CLGET_LOCAL_ADDR:
-		len = sizeof(struct sockaddr);
-		if (getsockname(cu->cu_sock, (struct sockaddr*)info, &len) < 0)
-		     return FALSE;
-		else
-		     return TRUE;
+		*(struct sockaddr_in *)info = cu->cu_laddr;
+		break;
 	default:
 		return (FALSE);
 	}

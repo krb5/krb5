@@ -85,6 +85,8 @@ typedef struct {
 	SVCAUTH		*xp_auth;	 /* auth flavor of current req */
 	caddr_t		xp_p1;		 /* private */
 	caddr_t		xp_p2;		 /* private */
+	int		xp_laddrlen;	 /* lenght of local address */
+	struct sockaddr_in xp_laddr;	 /* local address */
 } SVCXPRT;
 
 /*

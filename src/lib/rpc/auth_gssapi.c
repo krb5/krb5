@@ -338,11 +338,6 @@ next_token:
 	       AUTH_GSSAPI_DISPLAY_STATUS(("in response from server",
 					   call_res.gss_major,
 					   call_res.gss_minor));
-	       if (GSS_ERROR(call_res.gss_major) == GSS_S_BAD_BINDINGS
-		   && call_arg.version > 2) {
-		    call_arg.version = 2;
-		    goto try_new_version;
-	       }
 	       goto cleanup;
 	  }
 	  

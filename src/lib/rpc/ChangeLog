@@ -1,3 +1,24 @@
+Wed Dec  4 12:42:49 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* Various changes to allow channel bindings to work with both UDP
+ 	and TCP cleanly [krb5-libs/180]:
+
+	* auth_gssapi.c: remove the special-case exception to channel
+ 	bindings failure added in the previous revision, since we now
+ 	solve the problem by making channel bindings not fail
+
+	* clnt_udp.c: use a connected socket so that the client can
+ 	determine its own source address with getsockname
+
+	* svc.h: add xp_laddr and xp_laddrlen fields to SVCXPRT structure
+
+	* svc_tcp.c: set xp_laddr and xp_laddrlen when a connection is
+ 	established
+
+	* svc_udp.c (svcudp_recv): use recvmsg with MSG_PEEK followed by
+ 	recvfrom in order to determine both source and dest address on
+ 	unconnected UDP socket, set xp_laddr and xp_laddrlen
+
 Tue Nov 12 16:27:27 1996  Barry Jaspan  <bjaspan@mit.edu>
 
 	* auth_gssapi.c (auth_gssapi_create): handle channel bindings

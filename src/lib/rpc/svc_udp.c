@@ -174,6 +174,7 @@ svcudp_recv(xprt, msg)
 	register SVCXPRT *xprt;
 	struct rpc_msg *msg;
 {
+        struct msghdr dummy;
 	register struct svcudp_data *su = su_data(xprt);
 	register XDR *xdrs = &(su->su_xdrs);
 	register int rlen;
@@ -181,6 +182,17 @@ svcudp_recv(xprt, msg)
 	rpc_u_int32 replylen;
 
     again:
+	memset((char *) &dummy, 0, sizeof(dummy));
+	dummy.msg_namelen = xprt->xp_laddrlen = sizeof(struct sockaddr_in);
+	dummy.msg_name = (char *) &xprt->xp_laddr;
+	rlen = recvmsg(xprt->xp_sock, &dummy, MSG_PEEK);
+	if (rlen == -1) {
+	     if (errno == EINTR)
+		  goto again;
+	     else
+		  return (FALSE);
+	}
+	
 	xprt->xp_addrlen = sizeof(struct sockaddr_in);
 	rlen = recvfrom(xprt->xp_sock, rpc_buffer(xprt), (int) su->su_iosz,
 	    0, (struct sockaddr *)&(xprt->xp_raddr), &(xprt->xp_addrlen));

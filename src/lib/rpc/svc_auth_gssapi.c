@@ -5,6 +5,26 @@
  * $Source$
  * 
  * $Log$
+ * Revision 1.42  1996/12/04 17:47:18  bjaspan
+ * 	* Various changes to allow channel bindings to work with both UDP
+ *  	and TCP cleanly [krb5-libs/180]:
+ *
+ * 	* auth_gssapi.c: remove the special-case exception to channel
+ *  	bindings failure added in the previous revision, since we now
+ *  	solve the problem by making channel bindings not fail
+ *
+ * 	* clnt_udp.c: use a connected socket so that the client can
+ *  	determine its own source address with getsockname
+ *
+ * 	* svc.h: add xp_laddr and xp_laddrlen fields to SVCXPRT structure
+ *
+ * 	* svc_tcp.c: set xp_laddr and xp_laddrlen when a connection is
+ *  	established
+ *
+ * 	* svc_udp.c (svcudp_recv): use recvmsg with MSG_PEEK followed by
+ *  	recvfrom in order to determine both source and dest address on
+ *  	unconnected UDP socket, set xp_laddr and xp_laddrlen
+ *
  * Revision 1.41  1996/10/16 20:16:10  bjaspan
  * * svc_auth_gssapi.c (_svcauth_gssapi): accept add call_arg version 4
  *
@@ -310,7 +330,6 @@ enum auth_stat _svcauth_gssapi(rqst, msg, no_dispatch)
      gss_buffer_desc output_token, in_buf, out_buf;
      gss_cred_id_t server_creds;
      struct gss_channel_bindings_struct bindings, *bindp;
-     struct sockaddr_in sockname;
      OM_uint32 gssstat, minor_stat, time_rec;
      struct opaque_auth *cred, *verf;
      svc_auth_gssapi_data *client_data;
@@ -497,19 +516,17 @@ enum auth_stat _svcauth_gssapi(rqst, msg, no_dispatch)
 	       bindings.initiator_address.value =
 		    &svc_getcaller(rqst->rq_xprt)->sin_addr.s_addr;
 
-	       len = sizeof(sockname);
-	       if (getsockname(rqst->rq_xprt->xp_sock, 
-			       (struct sockaddr *) &sockname, &len) < 0) {
+	       if (rqst->rq_xprt->xp_laddrlen > 0) {
+		    bindings.acceptor_addrtype = GSS_C_AF_INET;
+		    bindings.acceptor_address.length = 4;
+		    bindings.acceptor_address.value =
+			 &rqst->rq_xprt->xp_laddr.sin_addr.s_addr;
+	       } else {
 		    LOG_MISCERR("cannot get local address");
-		    PRINTF(("svcauth_gssapi: errno %d while getting address",
-			    errno));
 		    ret = AUTH_FAILED;
 		    goto error;
 	       }
 
-	       bindings.acceptor_addrtype = GSS_C_AF_INET;
-	       bindings.acceptor_address.length = 4;
-	       bindings.acceptor_address.value = &sockname.sin_addr.s_addr;
 
 	       bindp = &bindings;
 	  } else {

@@ -174,6 +174,7 @@ svctcp_create(sock, sendsize, recvsize)
 	xprt->xp_ops = &svctcp_rendezvous_op;
 	xprt->xp_port = ntohs(addr.sin_port);
 	xprt->xp_sock = sock;
+	xprt->xp_laddrlen = 0;
 	xprt_register(xprt);
 	return (xprt);
 }
@@ -220,6 +221,7 @@ makefd_xprt(fd, sendsize, recvsize)
 	xprt->xp_p1 = (caddr_t)cd;
 	xprt->xp_verf.oa_base = cd->verf_body;
 	xprt->xp_addrlen = 0;
+	xprt->xp_laddrlen = 0;
 	xprt->xp_ops = &svctcp_op;  /* truely deals with calls */
 	xprt->xp_port = 0;  /* this is a connection, not a rendezvouser */
 	xprt->xp_sock = fd;
@@ -234,24 +236,29 @@ rendezvous_request(xprt)
 {
 	int sock;
 	struct tcp_rendezvous *r;
-	struct sockaddr_in addr;
-	int len;
+	struct sockaddr_in addr, laddr;
+	int len, llen;
 
 	r = (struct tcp_rendezvous *)xprt->xp_p1;
     again:
-	len = sizeof(struct sockaddr_in);
+	len = llen = sizeof(struct sockaddr_in);
 	if ((sock = accept(xprt->xp_sock, (struct sockaddr *)&addr,
 	    &len)) < 0) {
 		if (errno == EINTR)
 			goto again;
 	       return (FALSE);
 	}
+	if (getsockname(sock, &laddr, &llen) < 0)
+	     return (FALSE);
+	
 	/*
 	 * make a new transporter (re-uses xprt)
 	 */
 	xprt = makefd_xprt(sock, r->sendsize, r->recvsize);
 	xprt->xp_raddr = addr;
 	xprt->xp_addrlen = len;
+	xprt->xp_laddr = laddr;
+	xprt->xp_laddrlen = llen;
 	return (FALSE); /* there is never an rpc msg to be processed */
 }
 
