@@ -2,9 +2,6 @@ DBFLAGS=@DBFLAGS@
 CFLAGS = $(CCOPTS) $(DEFS) $(DBFLAGS)
 LDFLAGS = -g
 
-LIB_SUBDIRS= $(BUILDTOP)/util/berk_db/hash
-LIBUPDATE=$(BUILDTOP)/util/libupdate
-
 all:: $(OBJS) all-$(WHAT)
 
 
@@ -26,21 +23,9 @@ OBJS= \
 	setup_mkey.o \
 	store_mkey.o
 
-libkdb5.a: $(OBJS) $(BUILDTOP)/util/berk_db/hash/DONE
+libkdb5.a: $(OBJS)
 	$(RM) $@
 	$(ARADD) $@ $(OBJS)
-	$(RANLIB) $@
-	if test -f $@ ; then \
-		for i in $(LIB_SUBDIRS) ; \
-		do \
-			$(LIBUPDATE) $@ $$i/DONE $$i ; \
-		done ; \
-	else \
-		for i in $(LIB_SUBDIRS) ; \
-		do \
-			$(LIBUPDATE) $@ --force $$i/DONE $$i ; \
-		done ; \
-	fi
 	$(RANLIB) $@
 
 install:: libkdb5.a
