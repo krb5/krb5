@@ -271,7 +271,7 @@ krb5_change_password(context, creds, newpw, result_code,
 			goto cleanup;
 		  }
 
-		if ((cc = sendto(s1, chpw_req.data, chpw_req.length, 0, 
+		if ((cc = sendto(s1, chpw_req.data, (int) chpw_req.length, 0, 
 		                 (struct sockaddr *) &addr_p[i], 
 		                 sizeof(addr_p[i]))) != chpw_req.length) 
 		  {
@@ -312,7 +312,8 @@ krb5_change_password(context, creds, newpw, result_code,
 		   SunOS 4.1.4 or Irix 5.3.  Thus we must actually accept the
 		   value and discard it. */
 		tmp_len = sizeof(tmp_addr);
-		if ((cc = recvfrom(s1, chpw_rep.data, chpw_rep.length, 0, &tmp_addr, &tmp_len)) < 0) 
+		if ((cc = recvfrom(s1, chpw_rep.data, (int) chpw_rep.length, 
+				   0, &tmp_addr, &tmp_len)) < 0) 
 		  {
 		    code = SOCKET_ERRNO;
 		    goto cleanup;

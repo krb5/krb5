@@ -326,7 +326,7 @@ os_get_default_config_files(pfiles, secure)
 #else /* !_MSDOS && !_WIN32 */
     char* filepath = 0;
     int n_entries, i;
-    int ent_len;
+    unsigned int ent_len;
     const char *s, *t;
 
     if (!secure) filepath = getenv("KRB5_CONFIG");

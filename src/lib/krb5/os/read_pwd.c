@@ -56,7 +56,7 @@ krb5_read_password(context, prompt, prompt2, return_pwd, size_return)
     const char *prompt;
     const char *prompt2;
     char *return_pwd;
-    int *size_return;
+    unsigned int *size_return;
 {
     /* adapted from Kerberos v4 des/read_password.c */
     /* readin_string is used after a longjmp, so must be volatile */
@@ -94,7 +94,7 @@ krb5_read_password(context, prompt, prompt2, return_pwd, size_return)
     (void) fflush(stdout);
     (void) memset(return_pwd, 0, *size_return);
 
-    if (fgets(return_pwd, *size_return, stdin) == NULL) {
+    if (fgets(return_pwd, (int) *size_return, stdin) == NULL) {
 	(void) putchar('\n');
 	errcode = KRB5_LIBOS_CANTREADPWD;
 	goto cleanup;
@@ -120,7 +120,7 @@ krb5_read_password(context, prompt, prompt2, return_pwd, size_return)
 	    goto cleanup;
 	}
 	(void) memset((char *)readin_string, 0, *size_return);
-	if (fgets((char *)readin_string, *size_return, stdin) == NULL) {
+	if (fgets((char *)readin_string, (int) *size_return, stdin) == NULL) {
 	    (void) putchar('\n');
 	    errcode = KRB5_LIBOS_CANTREADPWD;
 	    goto cleanup;

@@ -59,5 +59,10 @@ int _krb5_use_dns_realm KRB5_PROTOTYPE((krb5_context));
 int _krb5_use_dns_kdc KRB5_PROTOTYPE((krb5_context));
 int _krb5_conf_boolean KRB5_PROTOTYPE((const char *));
 
+extern unsigned int krb5_max_skdc_timeout;
+extern unsigned int krb5_skdc_timeout_shift;
+extern unsigned int krb5_skdc_timeout_1;
+extern unsigned int krb5_max_dgram_size;
+
 
 #endif /* KRB5_LIBOS_INT_PROTO__ */

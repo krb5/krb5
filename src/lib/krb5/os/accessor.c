@@ -29,11 +29,6 @@
 #include "k5-int.h"
 #include "os-proto.h"
 
-extern int krb5_max_skdc_timeout;
-extern int krb5_skdc_timeout_shift;
-extern int krb5_skdc_timeout_1;
-extern int krb5_max_dgram_size;
-
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5int_accessor(internals, version)
      krb5int_access* internals;

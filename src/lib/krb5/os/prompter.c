@@ -84,7 +84,7 @@ krb5_prompter_posix(krb5_context context,
 	(void) fflush(stdout);
 	(void) memset(prompts[i].reply->data, 0, prompts[i].reply->length);
 
-	if (fgets(prompts[i].reply->data, prompts[i].reply->length, stdin)
+	if (fgets(prompts[i].reply->data, (int) prompts[i].reply->length, stdin)
 	    == NULL) {
 	    if (prompts[i].hidden)
 		(void) putchar('\n');

@@ -1,3 +1,31 @@
+2000-10-17  Ezra Peisach  <epeisach@mit.edu>
+
+	* changepw.c: Cast length argument to recvfrom/sendto to int.
+
+	* os-proto.h: Moved extern definition of krb5_max_dgram_size,
+	krb5_max_skdc_timeout, krb5_skdc_timeout_shift,
+	krb5_skdc_timeout_1 here.
+
+	* accessor.c: Definition for krb5_max_dgram_size,
+	krb5_max_skdc_timeout, krb5_skdc_timeout_shift,
+	krb5_skdc_timeout_1 moved to os-proto.h
+
+	* osconfig.c: Changed definition for krb5_max_dgram_size,
+	krb5_max_skdc_timeout, krb5_skdc_timeout_shift,
+	krb5_skdc_timeout_1 to unsigned int.
+
+	* get_krbhst.c, init_os_context.c, locate_kdc.c, prompter.c:
+	Unsigned/signed int cleanup.
+
+	* read_pwd.c (krb5_read_password): Change size_return to unsigned
+	int *.
+
+	* sendto_kdc.c: Remove definition for krb5_max_dgram_size,
+	krb5_max_skdc_timeout, krb5_skdc_timeout_shift,
+	krb5_skdc_timeout_1. (moved to os-proto.h). Cast arguments to int
+	for send() and recv().
+
+
 2000-10-09  Ken Raeburn  <raeburn@mit.edu>
 
 	Support for getifaddrs() interface added in BSD.

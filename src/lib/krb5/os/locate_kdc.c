@@ -386,7 +386,7 @@ krb5_locate_srv_dns(realm, service, protocol, addr_pp, naddrs)
     if ( strlen(service) + strlen(protocol) + realm->length + 6 
          > MAX_DNS_NAMELEN )
         goto out;
-    sprintf(host, "%s.%s.%.*s", service, protocol, realm->length,
+    sprintf(host, "%s.%s.%.*s", service, protocol, (int) realm->length,
 	    realm->data);
 
     /* Realm names don't (normally) end with ".", but if the query

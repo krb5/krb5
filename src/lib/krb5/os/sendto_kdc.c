@@ -54,11 +54,6 @@
  * when finished.
  */
 
-extern int krb5_max_dgram_size;
-extern int krb5_max_skdc_timeout;
-extern int krb5_skdc_timeout_shift;
-extern int krb5_skdc_timeout_1;
-
 krb5_error_code
 krb5_sendto_kdc (context, message, realm, reply, use_master)
     krb5_context context;
@@ -152,7 +147,8 @@ krb5_sendto_kdc (context, message, realm, reply, use_master)
 		  continue;
 	    }
 	    if (send(socklist[host],
-		       message->data, message->length, 0) != message->length)
+		       message->data, (int) message->length, 0) 
+		!= message->length)
 	      continue;
 	retry:
 	    waitlen.tv_usec = 0;
@@ -171,7 +167,8 @@ krb5_sendto_kdc (context, message, realm, reply, use_master)
 		    goto out;
 		}
 		if ((cc = recv(socklist[host],
-			       reply->data, reply->length, 0)) == SOCKET_ERROR)
+			       reply->data, (int) reply->length, 
+			       0)) == SOCKET_ERROR)
 		  {
 		    /* man page says error could be:
 		       EBADF: won't happen

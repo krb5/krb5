@@ -109,7 +109,7 @@ krb5_get_krbhst(context, realm, hostlist)
         goto cleanup;
     }
     for (i = 0; i < count; i++) {
-	int len = strlen (values[i]) + 1;
+	unsigned int len = strlen (values[i]) + 1;
         rethosts[i] = malloc(len);
         if (!rethosts[i]) {
             retval = ENOMEM;
