@@ -90,8 +90,11 @@ const krb5_data FAR * salt;
 	return EINVAL;
 	
     /* fix key parity */
-    for (j = 0; j < keyblock->length/sizeof(mit_des_cblock); j++)
+    for (j = 0; j < keyblock->length/sizeof(mit_des_cblock); j++) {
 	mit_des_fixup_key_parity(*((mit_des_cblock *)key+j));
+	if (mit_des_is_weak_key(*((mit_des_cblock *)key+j)))
+	    *((unsigned char *)((mit_des_cblock *)key+j)) ^= 0xf0;
+    }
 
     /* Now, CBC encrypt with itself */
     (void) mit_des3_key_sched(*((mit_des3_cblock *)key), ks);
@@ -111,8 +114,11 @@ const krb5_data FAR * salt;
     krb5_xfree(copystr);
 
     /* now fix up key parity again */
-    for (j = 0; j < keyblock->length/sizeof(mit_des_cblock); j++)
+    for (j = 0; j < keyblock->length/sizeof(mit_des_cblock); j++) {
 	mit_des_fixup_key_parity(*((mit_des_cblock *)key+j));
+	if (mit_des_is_weak_key(*((mit_des_cblock *)key+j)))
+	    *((unsigned char *)((mit_des_cblock *)key+j)) ^= 0xf0;
+    }
 
     return 0;
 }
