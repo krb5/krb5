@@ -640,7 +640,7 @@ krb5_error_code ktest_make_sample_alt_method(p)
      krb5_alt_method * p;
 {
     p->method = 42;
-    p->data = "secret";
+    p->data = (krb5_octet *) "secret";
     p->length = strlen(p->data);
     return 0;
 }
@@ -649,7 +649,7 @@ krb5_error_code ktest_make_sample_etype_info_entry(p)
      krb5_etype_info_entry * p;
 {
     p->etype = 1;
-    p->salt = "Morton";
+    p->salt = (krb5_octet *) "Morton";
     p->length = strlen(p->salt);
     return 0;
 }

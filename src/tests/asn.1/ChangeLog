@@ -1,3 +1,9 @@
+Sun Oct 15 10:51:22 1995    <tytso@rsts-11.mit.edu>
+
+	* ktest.c (ktest_make_sample_alt_method,
+		ktest_make_sample_etype_info):  Fixed signed/unsinged
+		-Wall flame.
+
 Fri Sep 29 14:23:47 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in (clean): Remove trval on a make clean
