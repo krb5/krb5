@@ -88,6 +88,16 @@ rd_safe.c
 recvauth.c
 send_tgs.c
 sendauth.c
+ser_actx.c
+ser_addr.c
+ser_adata.c
+ser_auth.c
+ser_cksum.c
+ser_ctx.c
+ser_eblk.c
+ser_key.c
+ser_princ.c
+serialize.c
 srv_rcache.c
 t_walk_rtree.c
 t_kerb.c

@@ -65,6 +65,16 @@ OBJS=	addr_comp.$(OBJEXT)	\
 	recvauth.$(OBJEXT)	\
 	sendauth.$(OBJEXT)	\
 	send_tgs.$(OBJEXT)	\
+	ser_actx.$(OBJEXT)	\
+	ser_adata.$(OBJEXT)	\
+	ser_addr.$(OBJEXT)	\
+	ser_auth.$(OBJEXT)	\
+	ser_cksum.$(OBJEXT)	\
+	ser_ctx.$(OBJEXT)	\
+	ser_eblk.$(OBJEXT)	\
+	ser_key.$(OBJEXT)	\
+	ser_princ.$(OBJEXT)	\
+	serialize.$(OBJEXT)	\
 	srv_rcache.$(OBJEXT)	\
 	tgtname.$(OBJEXT)	\
 	unparse.$(OBJEXT)	\
@@ -127,6 +137,16 @@ SRCS=	$(srcdir)/addr_comp.c	\
 	$(srcdir)/recvauth.c	\
 	$(srcdir)/sendauth.c	\
 	$(srcdir)/send_tgs.c	\
+	$(srcdir)/ser_actx.c	\
+	$(srcdir)/ser_adata.c	\
+	$(srcdir)/ser_addr.c	\
+	$(srcdir)/ser_auth.c	\
+	$(srcdir)/ser_cksum.c	\
+	$(srcdir)/ser_ctx.c	\
+	$(srcdir)/ser_eblk.c	\
+	$(srcdir)/ser_key.c	\
+	$(srcdir)/ser_princ.c	\
+	$(srcdir)/serialize.c	\
 	$(srcdir)/srv_rcache.c	\
 	$(srcdir)/tgtname.c	\
 	$(srcdir)/unparse.c	\
@@ -150,13 +170,20 @@ T_WALK_RTREE_OBJS= t_walk_rtree.o walk_rtree.o tgtname.o unparse.o \
 T_KERB_OBJS= t_kerb.o conv_princ.o unparse.o \
 	$(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(COMERRLIB) 
 
+T_SER_OBJS= t_ser.o ser_actx.o ser_adata.o ser_addr.o ser_auth.o ser_cksum.o \
+	ser_ctx.o ser_eblk.o ser_key.o ser_princ.o serialize.o \
+	$(TOPLIBD)/libkdb5.a $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(COMERRLIB)
+
 t_walk_rtree: $(T_WALK_RTREE_OBJS)
 	$(LD) -o t_walk_rtree $(T_WALK_RTREE_OBJS) $(LIBS)
 
 t_kerb: $(T_KERB_OBJS)
 	$(LD) -o t_kerb $(T_KERB_OBJS) $(LIBS)
 
-TEST_PROGS= t_walk_rtree t_kerb
+t_ser: $(T_SER_OBJS)
+	$(LD) -o t_ser $(T_SER_OBJS) $(LIBS)
+
+TEST_PROGS= t_walk_rtree t_kerb t_ser
 
 check:: check-$(WHAT)
 
@@ -172,8 +199,7 @@ check-unix:: $(TEST_PROGS)
 		> test.out
 	cmp test.out $(srcdir)/t_ref_kerb.out
 	$(RM) test.out
-
-
+	./t_ser
 
 check-mac:: $(TEST_PROGS)
 
@@ -182,6 +208,7 @@ check-windows::
 clean:: clean-$(WHAT)
 	$(RM) t_walk_rtree$(EXEEXT) t_walk_rtree.$(OBJEXT)
 	$(RM) t_kerb$(EXEEXT) t_kerb.$(OBJEXT)
+	$(RM) t_ser$(EXEEXT) t_ser.$(OBJEXT)
 
 clean-unix::
 	$(RM) shared/*
