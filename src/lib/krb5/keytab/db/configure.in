@@ -1,9 +1,0 @@
-AC_INIT(configure.in)
-CONFIG_RULES
-dnl
-dnl We're currently not building this directory, and the shared library
-dnl calls needs to be redone if/when we include this.
-dnl
-dnl V5_SHARED_LIB_OBJS
-dnl SubdirLibraryRule([${OBJS}])
-V5_AC_OUTPUT_MAKEFILE

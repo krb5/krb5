@@ -1,4 +1,4 @@
-thisconfigdir=.
+thisconfigdir=./..
 BUILDTOP=$(REL)$(U)$(S)$(U)$(S)$(U)
 LOCAL_SUBDIRS = file
 

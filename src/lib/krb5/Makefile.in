@@ -1,5 +1,8 @@
 thisconfigdir=.
 BUILDTOP=$(REL)$(U)$(S)$(U)
+LOCAL_SUBDIRS= error_tables asn.1 ccache ccache/stdio ccache/file \
+	ccache/memory keytab keytab/file krb os rcache posix
+
 ##DOSBUILDTOP = ..\..
 ##DOSLIBNAME=krb5.lib
 ##DOSOBJFILEDEP=asn1.lst ccache.lst err_tbls.lst keytab.lst krb.lst os.lst posix.lst rcache.lst

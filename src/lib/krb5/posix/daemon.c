@@ -36,7 +36,7 @@
 #include <sys/types.h>
 #include <sys/file.h>
 #include <unistd.h>
-#ifdef HAS_PATHS_H
+#ifdef HAVE_PATHS_H
 #include <paths.h>
 #endif
 
@@ -54,7 +54,7 @@ daemon(nochdir, noclose)
 		return (-1);
 	if (cpid)
 		exit(0);
-#ifdef HAS_SETSID
+#ifdef HAVE_SETSID
 	(void) setsid();
 #else
 #ifndef TIOCNOTTY

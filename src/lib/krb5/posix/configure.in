@@ -1,9 +1,0 @@
-AC_INIT(configure.in)
-CONFIG_RULES
-AC_CONST
-AC_HEADER_CHECK(paths.h,AC_DEFINE(HAS_PATHS_H))
-AC_HAVE_FUNCS(setenv unsetenv getenv)
-AC_REPLACE_FUNCS(vfprintf vsprintf strdup strcasecmp strerror memmove daemon getuid sscanf syslog)
-AC_FUNC_CHECK(setsid,AC_DEFINE(HAS_SETSID))
-KRB5_BUILD_LIBOBJS
-V5_AC_OUTPUT_MAKEFILE

@@ -1,27 +1,20 @@
-thisconfigdir=.
+thisconfigdir=./../..
 BUILDTOP=$(REL)$(U)$(S)$(U)$(S)$(U)$(S)$(U)
 CFLAGS = $(CCOPTS) $(DEFS)
 
 ##DOSBUILDTOP = ..\..\..\..
 ##DOSLIBNAME=..\..\krb5.lib
+##DOS##PREFIXDIR=keytab\db
+##DOS##OBJFILE= file.lst
 
-.c.o:
-	$(CC) $(CFLAGS) -c $(srcdir)/$*.c
-@SHARED_RULE@
+STLIBOBJS = dbkeytab.o
 
 SRCS= $(srcdir)/dbkeytab.c 
 
 OBJS = dbkeytab.$(OBJEXT)	
 
-all-unix:: shared $(OBJS)
-all-mac:: $(OBJS)
-all-windows:: $(OBJS)
+##DOS##LIBOBJS = $(OBJS)
 
-shared:
-	mkdir shared
 
-clean-unix::
-	$(RM) shared/*
-
-clean-mac::
-clean-windows::
+all-unix:: all-libobjs
+clean-unix:: clean-libobjs

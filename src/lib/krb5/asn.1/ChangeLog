@@ -1,3 +1,9 @@
+Fri Feb 27 18:03:33 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in: Changed thisconfigdir to point at the lib/krb5
+ 		directory, since we've moved the configure.in tests in
+ 		this directory to the toplevel lib/krb5 configure.in
+
 Wed Feb 18 16:18:46 1998  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Remove trailing slash from thisconfigdir.  Fix up

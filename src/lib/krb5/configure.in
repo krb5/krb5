@@ -1,10 +1,56 @@
 AC_INIT(configure.in)
 CONFIG_RULES
-AC_CONFIG_SUBDIRS(error_tables asn.1 ccache keytab krb rcache os posix)
 AC_PROG_INSTALL
+AC_PROG_AWK
+dnl
+AC_CONST
+AC_TYPE_UID_T
+HAS_ANSI_VOLATILE
+AC_HEADER_STDARG
+AC_CHECK_HEADERS(unistd.h paths.h regex.h regexp.h regexpr.h)
+AC_CHECK_FUNCS(flock fchmod chmod strftime strptime geteuid setenv unsetenv getenv setsid re_comp)
+AC_REPLACE_FUNCS(vfprintf vsprintf strdup strcasecmp strerror memmove daemon getuid sscanf syslog)
+dnl
+dnl regcomp is present but non-functional on Solaris 2.4
+dnl
+AC_C_CROSS
+AC_MSG_CHECKING(for working regcomp)
+AC_CACHE_VAL(ac_cv_func_regcomp,[
+AC_TRY_RUN([
+#include <sys/types.h>
+#include <regex.h>
+regex_t x; regmatch_t m;
+int main() { return regcomp(&x,"pat.*",0) || regexec(&x,"pattern",1,&m,0); }
+], ac_cv_func_regcomp=yes, ac_cv_func_regcomp=no)])
+AC_MSG_RESULT($ac_cv_func_regcomp)
+test $ac_cv_func_regcomp = yes && AC_DEFINE(HAVE_REGCOMP)
+save_LIBS="$LIBS"
+LIBS=-lgen
+dnl this will fail if there's no compile/step in -lgen, or if there's
+dnl no -lgen.  This is fine.
+AC_CHECK_FUNCS(compile step)
+LIBS="$save_LIBS"
 dnl
 AC_CHECK_LIB(gen,compile,SHLIB_GEN=-lgen,SHLIB_GEN='')
 AC_SUBST(SHLIB_GEN)
 dnl
 KRB5_BUILD_LIBRARY_WITH_DEPS
-V5_AC_OUTPUT_MAKEFILE
+KRB5_BUILD_LIBOBJS
+KRB5_BUILD_PROGRAM
+KRB5_RUN_FLAGS
+dnl
+K5_GEN_MAKEFILE(., lib)
+K5_GEN_MAKEFILE(error_tables, libobj)
+K5_GEN_MAKEFILE(asn.1, libobj)
+K5_GEN_MAKEFILE(ccache, libobj)
+K5_GEN_MAKEFILE(ccache/stdio, libobj)
+K5_GEN_MAKEFILE(ccache/file, libobj)
+K5_GEN_MAKEFILE(ccache/memory, libobj)
+K5_GEN_MAKEFILE(keytab, libobj)
+K5_GEN_MAKEFILE(keytab/file, libobj)
+K5_GEN_MAKEFILE(keytab/db, libobj)
+K5_GEN_MAKEFILE(krb, libobj)
+K5_GEN_MAKEFILE(rcache, libobj)
+K5_GEN_MAKEFILE(os, libobj)
+K5_GEN_MAKEFILE(posix, libobj)
+K5_AC_OUTPUT

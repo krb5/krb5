@@ -24,6 +24,12 @@
  * krb5_aname_to_localname()
  */
 
+/*
+ * We're only to AN_TO_LN rules at this point, and not doing the
+ * database lookup  (moved from configure script)
+ */
+#define AN_TO_LN_RULES
+
 #include "k5-int.h"
 #include <ctype.h>
 #if	HAVE_REGEX_H
