@@ -1,3 +1,8 @@
+Wed Mar  1 17:45:13 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in: Change config.h -> k5-config.h and free.h ->
+		k5-free.h to reflect renamed header files for Mac/PC port.
+
 Mon Feb 27 23:47:58 1995  John Gilmore  (gnu at toad.com)
 
 	* Makefile.in (osconf.h):  Remove temp file osconf.new.
