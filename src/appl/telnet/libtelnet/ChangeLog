@@ -1,3 +1,7 @@
+Thu Apr 27 14:48:38 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* Makefile.in (LOCALINCLUDES): find kerberosIV headers.
+
 Wed Apr 26 19:52:52 1995  Mark Eichin  <eichin@cygnus.com>
 
 	* kerberos5.c (kerberos5_is): use kt_resolve to get keytab, to
