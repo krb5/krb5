@@ -1,3 +1,7 @@
+Thu Oct 13 17:24:31 1994  Theodore Y. Ts'o  (tytso@maytag)
+
+	* configure.in: Add ISODE_DEFS
+
 Fri Oct  7 13:23:18 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* configure.in: Add test for unistd.h
