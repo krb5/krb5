@@ -18,6 +18,7 @@ static char rcsid_send_tgs_c[] =
 #include <krb5/copyright.h>
 #include <krb5/krb5.h>
 #include <krb5/asn1.h>
+#include <errno.h>
 
 #include <stdio.h>
 #include <krb5/libos-proto.h>
@@ -100,14 +101,20 @@ OLDDECLARG(krb5_response *,rep)
     if (retval)
 	return(retval);
 
-    /* xxx choose a checksum type */
+    /* XXX choose a checksum type */
+    if (!(ap_checksum.contents = (krb5_octet *)
+	  malloc(krb5_cksumarray[sumtype]->checksum_length))) {
+	krb5_free_data(scratch);
+	return ENOMEM;
+    }
+
     if (retval = (*(krb5_cksumarray[sumtype]->
 		    sum_func))(scratch->data,
-			       0, /* XXX? */
-			       (krb5_pointer) usecred->keyblock.contents,
 			       scratch->length,
+			       (krb5_pointer) usecred->keyblock.contents,
 			       usecred->keyblock.length,
 			       &ap_checksum)) {
+	xfree(ap_checksum.contents);
 	krb5_free_data(scratch);
 	return retval;
     }
@@ -115,7 +122,7 @@ OLDDECLARG(krb5_response *,rep)
     xfree(scratch);
 
 #define cleanup() {(void) free((char *)tgsreq.tgs_request.data); \
-		   (void) free((char *)ap_checksum.contents);}
+		   xfree(ap_checksum.contents);}
     /*
      * Now get an ap_req.
      */
@@ -136,7 +143,8 @@ OLDDECLARG(krb5_response *,rep)
     }
 #undef cleanup
 #define cleanup() {(void) free(tgsreq.header.data); \
-		   (void) free(tgsreq.tgs_request.data);}
+		   (void) free(tgsreq.tgs_request.data);\
+		   xfree(ap_checksum.contents);}
 
     /* now send request & get response from KDC */
     retval = krb5_sendto_kdc(scratch, krb5_princ_realm(sname),
