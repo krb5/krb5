@@ -25,4 +25,8 @@
 #define BITS32
 #endif
 
+#if defined(mips) || defined(__mips__)
+#define BITS32
+#endif
+
 #endif /* __KRB5_CONFIG__ */
