@@ -323,14 +323,22 @@ typedef struct _krb5_tl_data {
     krb5_octet          * tl_data_contents;     
 } krb5_tl_data;
 \end{verbatim}
-The currently defined tagged data types are KRB5_TL_LAST_PWD_CHANGE,
-KRB5_TL_MOD_PRINC, and KRB5_TL_ADM_DATA, which store the last password
-modification time, time and modifier of last principal modification,
-and administration system data.  All of these entries are expected by
-the administration system and parsed out into fields of the
-kadm5_principal_ent_rec structure; they are also passed back in the
-tl_data list.  Any additional tagged data fields found in the database
-will also be provided, without interpretation.
+The libkdb library defines the tagged data types
+KRB5_TL_LAST_PWD_CHANGE, KRB5_TL_MOD_PRINC, and KRB5_TL_KADM_DATA,
+which store the last password modification time, time and modifier of
+last principal modification, and administration system data.  All of
+these entries are expected by the administration system and parsed out
+into fields of the kadm5_principal_ent_rec structure; they are also
+left in the tl_data list.
+
+The KADM5 API defines its own tagged data type, KRB5_TL_KADM5_E_DATA,
+which stores the contents of the e_data field of a krb5_db_entry.  The
+tagged data is only present if the database entry has extended data,
+and will only ever exist while KADM5 is implemented on top of the
+DB/DBM database mechansim.
+
+Any additional tagged data fields found in the database will also be
+provided, without interpretation.
 
 \item[key_data] An array of the principal's keys.  The keys contained
 in this array are encrypted in the Kerberos master key.  See section
