@@ -27,8 +27,9 @@
 #include "com_err.h"
 #include "error_table.h"
 
-#ifdef macintosh
-#include <KerberosSupport/ErrorLib.h>
+#if defined(macintosh) || (defined(__MACH__) && defined(__APPLE__))
+    #include <KerberosSupport/KerberosSupport.h>
+    #include <KerberosSupport/ErrorLib.h>
 #endif
 
 #if defined(_MSDOS) || defined(_WIN32)
@@ -150,7 +151,7 @@ KRB5_DLLIMP const char FAR * KRB5_CALLCONV error_message(code)
 
 oops:
 
-#if defined(macintosh)
+#if TARGET_OS_MAC
 	{
 		/* This may be a Mac OS Toolbox error or an MIT Support Library Error.  Ask ErrorLib */
 		if (GetErrorLongString(code, buffer, ET_EBUFSIZ - 1) == noErr) {

@@ -1,3 +1,7 @@
+2001-07-05  Miro Jurisic  <meeroh@mit.edu>
+
+	* error_message.c: call through to ErrorLib on Mac OS X
+
 2001-04-02  Alexandra Ellwood  <lxs@mit.edu>
 
 	* et.pbexp: export com_err() on Mac OS X
