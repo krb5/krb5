@@ -1,6 +1,6 @@
 SnapshotRoot = //GSS-Kerberos5-1.0.5
 
-INCLUDES = {AUTOINCLUDES} -i /mac/TestTrack/
+INCLUDES = {AUTOINCLUDES} -i /mac/TestTrack/ -i "/mac/libraries/CCache API/include/"
 
 ################################################################################
 ##
@@ -244,6 +244,18 @@ OPTIONS = {INCLUDES} -enum int -opt all -strings pool -mapcr \
 
 ################################################################################
 ##
+## Credentials cache API libraries
+##
+################################################################################
+
+CCAPICFM68K = "/mac/libraries/CCache API/bin/CCacheLib.68K" \
+	"/mac/libraries/CCache API/bin/CCacheGlobalsLib.68K"
+
+CCAPICFMPPC = "/mac/libraries/CCache API/bin/CCacheLib.PPC" \
+	"/mac/libraries/CCache API/bin/CCacheGlobalsLib.PPC"
+
+################################################################################
+##
 ## General rules
 ##
 ################################################################################
@@ -322,7 +334,7 @@ link : link-68K link-68KCFM link-PPC link-CFMFAT
 
 ################################################################################
 ##
-## 68 libraries
+## 68K libraries
 ##
 ################################################################################
 
@@ -358,13 +370,13 @@ link-68KCFM : K5Library68K GSSLibrary68K
 #	shared CFM-68K krb5 library
 #
 	
-K5Library68K K5Library68K.MAP :: {AUTOGEN_OUTPUT} /mac/K5Library.exp {K5RTLCFM68K} {K5OBJS68KCFM} {K5SHLIBOBJ68KCFM} {TTOBJ68KCFM}
+K5Library68K K5Library68K.MAP :: {AUTOGEN_OUTPUT} /mac/K5Library.exp {K5RTLCFM68K} {K5OBJS68KCFM} {K5SHLIBOBJ68KCFM} {TTOBJ68KCFM} {CCAPICFM68K}
 	MWLink68K -xm sharedlibrary -name K5Library -m "" \
-		-model cfmflat -@export "/mac/K5Library.exp" -sym on \
+		-model cfmflat -@export "/mac/K5Library.exp" -sym off \
 		-map K5Library68K.MAP -o K5Library68K \
 		-init "__initializeK5" -term "__terminateK5" \
 		-weakimport /mac/TestTrack/MITAthenaLib -initbefore "MIT_*TestTrackLib" \
-		{K5RTLCFM68K} {K5OBJS68KCFM} {K5SHLIBOBJ68KCFM} {TTOBJ68KCFM}
+		{K5RTLCFM68K} {K5OBJS68KCFM} {K5SHLIBOBJ68KCFM} {TTOBJ68KCFM} {CCAPICFM68K}
 K5Library68K :: /mac/version.r
 	Rez "/mac/version.r" -a -o K5Library68K
 
@@ -374,7 +386,7 @@ K5Library68K :: /mac/version.r
 
 GSSLibrary68K GSSLibrary68K.MAP :: {AUTOGEN_OUTPUT}  K5Library68K /mac/GSSLibrary.exp {GSSRTLCFM68K} {GSSOBJS68KCFM} {GSSSHLIBOBJ68KCFM}
 	MWLink68K -xm sharedlibrary -name GSSLibrary -m "" \
-		-model cfmflat -@export "/mac/GSSLibrary.exp" -sym on \
+		-model cfmflat -@export "/mac/GSSLibrary.exp" -sym off \
 		-map GSSLibrary68K.MAP -o GSSLibrary68K \
 		-init "__initializeGSS" -term "__terminateGSS" \
 		{GSSRTLCFM68K} {GSSOBJS68KCFM} {GSSSHLIBOBJ68KCFM} K5Library68K
@@ -403,13 +415,13 @@ libkrb5.PPC :: /mac/version.r
 #		shared PPC krb5 library
 #
 
-K5LibraryPPC K5LibraryPPC.MAP :: {AUTOGEN_OUTPUT}  /mac/K5Library.exp {K5RTLCFMPPC} {K5OBJSPPC} {K5SHLIBOBJPPC} {TTOBJPPC}
+K5LibraryPPC K5LibraryPPC.MAP :: {AUTOGEN_OUTPUT}  /mac/K5Library.exp {K5RTLCFMPPC} {K5OBJSPPC} {K5SHLIBOBJPPC} {TTOBJPPC} {CCAPICFMPPC}
 	MWLinkPPC -sharedlibrary -name K5Library -m "" \
 		-@export "/mac/K5Library.exp" -sym on -init "__initializeK5" \
 		-term "__terminateK5" \
 		-weakimport /mac/TestTrack/MITAthenaLib -initbefore "MIT_*TestTrackLib" \
 		-map K5LibraryPPC.MAP -o K5LibraryPPC \
-		{K5RTLCFMPPC} {K5OBJSPPC} {K5SHLIBOBJPPC} {TTOBJPPC}
+		{K5RTLCFMPPC} {K5OBJSPPC} {K5SHLIBOBJPPC} {TTOBJPPC} {CCAPICFMPPC}
 K5LibraryPPC :: /mac/version.r
 	Rez "/mac/version.r" -a -o K5LibraryPPC
 
@@ -445,16 +457,16 @@ GSSLibraryPPC :: /mac/version.r
 
 link-CFMFAT : GSSLib
 
-GSSLib : GSSLibraryPPC GSSLibrary68K K5LibraryPPC K5Library68K
+GSSLib : GSSLibraryPPC K5LibraryPPC GSSLibrary68K K5Library68K
 	Delete -i GSSLib
 	Duplicate -y GSSLibraryPPC GSSLib
 	MergeFragment GSSLibrary68K GSSLib
+	MergeFragment "/bin/MIT CLib.PPC" GSSLib
+	MergeFragment "/bin/MIT RuntimeLib.PPC" GSSLib
 	MergeFragment K5LibraryPPC GSSLib
 	MergeFragment K5Library68K GSSLib
 	MergeFragment "/bin/MIT CLib.68K" GSSLib
 	MergeFragment "/bin/MIT RuntimeLib.68K" GSSLib
-	MergeFragment "/bin/MIT CLib.PPC" GSSLib
-	MergeFragment "/bin/MIT RuntimeLib.PPC" GSSLib
 	
 ################################################################################
 ##
