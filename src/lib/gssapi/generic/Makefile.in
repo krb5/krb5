@@ -1,4 +1,6 @@
 thisconfigdir=./..
+myfulldir=lib/gssapi/generic
+mydir=generic
 BUILDTOP=$(REL)$(U)$(S)$(U)$(S)$(U)
 CFLAGS = $(CCOPTS) $(DEFS) -I. -I$(srcdir)
 
