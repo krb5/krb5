@@ -53,8 +53,8 @@ all-windows::
 	cd ..\CCACHE
 	@echo Making in lib\ccache
 	-$(MAKE) -$(MFLAGS)
-	cd ..\ERROR_TA
-	@echo Making in lib\error_ta
+	cd ..\error_tables
+	@echo Making in lib\error_tables
 	-$(MAKE) -$(MFLAGS)
 	cd ..\FREE
 	@echo Making in lib\free
@@ -83,8 +83,8 @@ clean-windows::
 	cd ..\CCACHE
 	@echo Making clean in lib\ccache
 	-$(MAKE) -$(MFLAGS) clean
-	cd ..\ERROR_TA
-	@echo Making clean in lib\error_ta
+	cd ..\error_tables
+	@echo Making clean in lib\error_tables
 	-$(MAKE) -$(MFLAGS) clean
 	cd ..\FREE
 	@echo Making clean in lib\free
