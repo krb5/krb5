@@ -1,6 +1,6 @@
 AC_INIT(README.gssftp)
 CONFIG_RULES
-AC_CONST
+AC_C_CONST
 AC_PROG_INSTALL
 AC_PROG_YACC
 KRB5_SIGTYPE
@@ -13,14 +13,13 @@ AC_CHECK_SIZEOF(short)
 AC_CHECK_SIZEOF(int)
 AC_CHECK_SIZEOF(long)
 AC_FUNC_VFORK
-AC_HAVE_FUNCS(getcwd getdtablesize)
 AC_HEADER_STDARG
-AC_HEADER_CHECK(termios.h,AC_FUNC_CHECK(cfsetispeed,AC_DEFINE(POSIX_TERMIOS)))
+AC_CHECK_HEADER(termios.h,AC_CHECK_FUNC(cfsetispeed,AC_DEFINE(POSIX_TERMIOS)))
 AC_CHECK_HEADERS(unistd.h stdlib.h string.h sys/select.h sys/sockio.h paths.h)
 CHECK_UTMP
 DECLARE_SYS_ERRLIST
 AC_REPLACE_FUNCS(getdtablesize)
-AC_HAVE_FUNCS(getcwd getusershell seteuid setreuid setresuid)
+AC_CHECK_FUNCS(getcwd getdtablesize getusershell seteuid setreuid setresuid)
 AC_CHECK_LIB(crypt,crypt) dnl 
 AC_CHECK_LIB(util,logwtmp) dnl
 dnl 
