@@ -1,3 +1,7 @@
+Mon Aug 12 22:58:58 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* default.exp: Rewrite to use kadmin.local instead of kdb5_edit.
+
 Thu Aug  8 23:08:13 1996  Sam Hartman  <hartmans@mit.edu>
 
 	* default.exp: In add_kerberos_key and add_random_key only execute

@@ -80,10 +80,6 @@ if ![info exists KDB5_UTIL] {
     set KDB5_UTIL [findfile $objdir/../../kadmin/dbutil/kdb5_util]
 }
 
-if ![info exists KDB5_EDIT] {
-    set KDB5_EDIT [findfile $objdir/../../admin/edit/kdb5_edit]
-}
-
 if ![info exists KRB5KDC] {
     set KRB5KDC [findfile $objdir/../../kdc/krb5kdc]
 }
@@ -95,6 +91,11 @@ if ![info exists KADMIND] {
 if ![info exists KADMIN] {
     set KADMIN [findfile $objdir/../../kadmin/cli/kadmin]
 }
+
+if ![info exists KADMIN_LOCAL] {
+    set KADMIN_LOCAL [findfile $objdir/../../kadmin/cli/kadmin.local]
+}
+
 
 if ![info exists KINIT] {
     set KINIT [findfile $objdir/../../clients/kinit/kinit]
@@ -498,30 +499,30 @@ proc restore_kerberos_env { } {
 # Returns 1 on success, 0 on failure.
 proc setup_kadmind_srvtab {  } {
     global REALMNAME
-    global KDB5_EDIT
+    global KADMIN_LOCAL
     global KEY
     global tmppwd
 
     catch "exec rm -f tmpdir/admin-keytab"
-    spawn $KDB5_EDIT -r $REALMNAME
+    spawn $KADMIN_LOCAL -r $REALMNAME
     expect_after {
 	timeout {
-	    fail "kdb5_edit admin-keytab (timeout)"
+	    fail "kadmin.local admin-keytab (timeout)"
 	    catch "exec rm -f tmpdir/admin-keytab"
 	    catch "expect_after"
 	    return 0
 	}
 	eof {
-	    fail "kdb5_edit admin-keytab (eof)"
+	    fail "kadmin.local admin-keytab (eof)"
 	    catch "exec rm -f tmpdir/admin-keytab"
 	    catch "expect_after"
 	    return 0
 	}
     }
-    expect "kdb5_edit:"
-    send "xst admin kadmin\r"
-    expect "'kadmin/admin@$REALMNAME' added to keytab"
-    expect "kdb5_edit:"
+    expect "kadmin.local:  "
+    send "xst -k admin-new-srvtab kadmin/admin\r"
+    expect -re ".*Entry for principal kadmin/admin.* added to keytab WRFILE:admin-new-srvtab."
+    expect "kadmin.local:  "
 
     catch "exec mv -f admin-new-srvtab changepw-new-srvtab" exec_output
     if ![string match "" $exec_output] {
@@ -531,15 +532,15 @@ proc setup_kadmind_srvtab {  } {
 	return 0
     }
 
-    send "xst changepw kadmin\r"
-    expect "'kadmin/changepw@$REALMNAME' added to keytab"
-    expect "kdb5_edit:"
+    send "xst -k changepw-new-srvtab kadmin/changepw\r"
+    expect -re ".*Entry for principal kadmin/changepw.* added to keytab WRFILE:changepw-new-srvtab."
+    expect "kadmin.local:  "
     send "quit\r"
     expect "\r"
     expect_after
-    if ![check_exit_status "kdb5_edit admin-keytab"] {
+    if ![check_exit_status "kadmin.local admin-keytab"] {
 	catch "exec rm -f tmpdir/admin-keytab"
-	send_error "ERROR: kdb5_edit admin-keytab exited abnormally\n"
+	send_error "ERROR: kadmin.local admin-keytab exited abnormally\n"
 	return 0
     }
 
@@ -565,7 +566,7 @@ proc setup_kadmind_srvtab {  } {
 proc setup_kerberos_db { standalone } {
     global REALMNAME
     global KDB5_UTIL
-    global KDB5_EDIT
+    global KADMIN_LOCAL
     global KEY
     global tmppwd
     global spawn_id
@@ -678,11 +679,11 @@ proc setup_kerberos_db { standalone } {
     }
 
     # Add an admin user.
-    spawn $KDB5_EDIT -r $REALMNAME
+    spawn $KADMIN_LOCAL -r $REALMNAME
     expect_after {
 	timeout {
 	    catch "expect_after"
-	    fail "kdb5_edit (timeout)"
+	    fail "kadmin.local (timeout)"
 	    if {!$standalone} {
 		catch "exec rm -f tmpdir/db.ok tmpdir/adb.db"
 	    }
@@ -690,24 +691,30 @@ proc setup_kerberos_db { standalone } {
 	}
 	eof {
 	    catch "expect_after"
-	    fail "kdb5_edit (eof)"
+	    fail "kadmin.local (eof)"
 	    if {!$standalone} {
 		catch "exec rm -f tmpdir/db.ok tmpdir/adb.db"
 	    }
 	    return 0
 	}
     }
-    expect "kdb5_edit:"
+    expect "kadmin.local: "
     send "ank krbtest/admin@$REALMNAME\r"
-    expect "Enter password:"
+    # It echos...
+    expect "ank krbtest/admin@$REALMNAME\r"
+    expect "Enter password for principal \"krbtest/admin@$REALMNAME\":"
     send "adminpass$KEY\r"
-    expect "Re-enter password for verification:"
+    expect "Re-enter password for principal \"krbtest/admin@$REALMNAME\":"
     send "adminpass$KEY\r"
-    expect "kdb5_edit:"
+    expect {
+	"Principal \"krbtest/admin@$REALMNAME\" created" { }
+	"Principal or policy already exists while creating*" { expect eof }
+    }
+    expect "kadmin.local: "
     send "quit\r"
     expect "\r"
     expect_after
-    if ![check_exit_status kdb5_edit] {
+    if ![check_exit_status kadmin_local] {
 	if {!$standalone} {
 	    catch "exec rm -f tmpdir/db.ok tmpdir/adb.db"
 	}
@@ -722,7 +729,7 @@ proc setup_kerberos_db { standalone } {
     catch "exec touch tmpdir/adb.lock"
 
     if {$standalone} {
-	pass "kdb5_edit"
+	pass "kadmin_local"
     }
 
     return 1
@@ -997,7 +1004,7 @@ proc add_random_key { kkey standalone } {
 
 proc setup_srvtab { standalone {id host} } {
     global REALMNAME
-    global KDB5_EDIT
+    global KADMIN_LOCAL
     global KEY
     global tmppwd
     global hostname
@@ -1016,10 +1023,10 @@ proc setup_srvtab { standalone {id host} } {
 
     catch "exec rm -f $hostname-new-srvtab"
 
-    spawn $KDB5_EDIT -r $REALMNAME
+    spawn $KADMIN_LOCAL -r $REALMNAME
     expect_after {
 	timeout {
-	    fail "kdb5_edit srvtab"
+	    fail "kadmin.local srvtab"
 	    if {!$standalone} {
 		catch "exec rm -f tmpdir/srvtab"
 	    }
@@ -1027,7 +1034,7 @@ proc setup_srvtab { standalone {id host} } {
 	    return 0
 	}
 	eof {
-	    fail "kdb5_edit srvtab"
+	    fail "kadmin.local srvtab"
 	    if {!$standalone} {
 		catch "exec rm -f tmpdir/srvtab"
 	    }
@@ -1035,14 +1042,14 @@ proc setup_srvtab { standalone {id host} } {
 	    return 0
 	}
     }
-    expect "kdb5_edit:"
-    send "xst $hostname $id\r"
-    expect "'$id/$hostname@$REALMNAME' added to keytab"
-    expect "kdb5_edit:"
+    expect "kadmin.local:  "
+    send "xst -k $hostname-new-srvtab $id/$hostname\r"
+    expect -re ".*Entry for principal $id/$hostname.* added to keytab WRFILE:$hostname-new-srvtab."
+    expect "kadmin.local:  "
     send "quit\r"
     expect "\r"
     expect_after
-    if ![check_exit_status "kdb5_edit srvtab"] {
+    if ![check_exit_status "kadmin.local srvtab"] {
 	if {!$standalone} {
 	    catch "exec rm -f tmpdir/srvtab"
 	}
@@ -1058,7 +1065,7 @@ proc setup_srvtab { standalone {id host} } {
     }
 
     if {$standalone} {
-	pass "kdb5_edit srvtab"
+	pass "kadmin.local srvtab"
     }
 
     # Make the srvtab file globally readable in case we are using a

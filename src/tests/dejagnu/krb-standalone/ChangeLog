@@ -1,3 +1,7 @@
+Mon Aug 12 22:58:09 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* kadmin.exp: Rewrite using kadmin.local instead of kdb5_edit.
+
 Tue Aug  6 11:50:14 1996  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
 
 	* kadmin.exp: Fix to specify "2500 seconds" explictly to avoid

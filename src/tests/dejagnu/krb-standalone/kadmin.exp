@@ -1,6 +1,6 @@
 # Kerberos kadmin test.
 # This is a DejaGnu test script.
-# This script tests Kerberos kadmin5 using kdb5_edit as verification.
+# This script tests Kerberos kadmin5 using kadmin.local as verification.
 
 # Set up the kerberos database.
 if {![get_hostname] \
@@ -28,7 +28,7 @@ if ![info exists KDESTROY] {
 proc kadmin_add { pname password } {
     global REALMNAME
     global KADMIN
-    global KDB5_EDIT
+    global KADMIN_LOCAL
     global KEY
     global spawn_id
     global tmppwd
@@ -65,10 +65,10 @@ proc kadmin_add { pname password } {
     catch "close -i $spawn_id"
     if { $good == 1 } {
 	#
-	# use kdb5_edit to verify that a principal was created and that its
+	# use kadmin.local to verify that a principal was created and that its
 	# salt types are 0 (normal).
 	#
-	spawn $KDB5_EDIT -r $REALMNAME
+	spawn $KADMIN_LOCAL -r $REALMNAME
 	expect_after {
 	    -i $spawn_id
 	    timeout {
@@ -83,23 +83,30 @@ proc kadmin_add { pname password } {
 	    }
 	}
 	set good 0
-	expect "kdb5_edit:" { send "show $pname\r" }
-	expect "Name: $pname@$REALMNAME" { set good 1 }
-
-	expect "Maximum life:" { verbose "got max life" }
+	expect "kadmin.local: " { send "getprinc $pname\r" }
+	expect "Principal: $pname@$REALMNAME" { set good 1 }
+	expect "Expiration date:" { verbose "got expiration date" }
+	expect "Last password change:" { verbose "got last pwchange" }
+	expect "Password expiration date:" { verbose "got pwexpire date" }
+	expect "Maximum ticket life:" { verbose "got max life" }
 	expect "Maximum renewable life:" { verbose "got max rlife" }
-	expect "Expiration:" { verbose "got expiration" }
-	expect "Password expiration:" { verbose "got pw expiration" }
-	expect "Last successful password:" { verbose "last succ pw" }
-	expect "Last failed password attempt:" { verbose "last pw attempt" }
+	expect "Last modified:" { verbose "got last modified" }
+	expect "Last successful authentication:" { verbose "last succ auth" }
+	expect "Last failed authentication:" { verbose "last pw failed" }
 	expect "Failed password attempts:" { verbose "num failed attempts" }
-	expect "Attributes:" { verbose "attributes" }
 	expect "Number of keys:" { verbose "num keys"} 
-	expect "kdb5_edit:" { send "q\r" }
+	expect {
+		"Key: " { verbose "Key listed" 
+			exp_continue
+		}
+		"Attributes:" { verbose "attributes" }
+	}
+	expect "kadmin.local: " { send "q\r" }
+
 	expect_after
 	expect eof
 	set k_stat [wait -i $spawn_id]
-	verbose "wait -i $spawn_id returned $k_stat (kdb5_edit show)"
+	verbose "wait -i $spawn_id returned $k_stat (kadmin.local show)"
 	catch "close -i $spawn_id"
 	if { $good == 1 } {
 	    pass "kadmin add $pname"
@@ -124,7 +131,7 @@ proc kadmin_add { pname password } {
 proc kadmin_add_rnd { pname } {
     global REALMNAME
     global KADMIN
-    global KDB5_EDIT
+    global KADMIN_LOCAL
     global KEY
     global spawn_id
     global tmppwd
@@ -159,10 +166,10 @@ proc kadmin_add_rnd { pname } {
     catch "close -i $spawn_id"
     if { $good == 1 } {
 	#
-	# use kdb5_edit to verify that a principal was created and that its
+	# use kadmin.local to verify that a principal was created and that its
 	# salt types are 0 (normal).
 	#
-	spawn $KDB5_EDIT -r $REALMNAME
+	spawn $KADMIN_LOCAL -r $REALMNAME
 	expect_after {
 	     -i $spawn_id
 	    timeout {
@@ -177,13 +184,13 @@ proc kadmin_add_rnd { pname } {
 	    }
 	}
 	set good 0
-	expect "kdb5_edit:" { send "show $pname\r" }
-	expect "Name: $pname@$REALMNAME" { set good 1 }
-	expect "kdb5_edit:" { send "q\r" }
+	expect "kadmin.local:" { send "getprinc $pname\r" }
+	expect "Principal: $pname@$REALMNAME" { set good 1 }
+	expect "kadmin.local:" { send "q\r" }
 	expect_after
 	expect eof
 	set k_stat [wait -i $spawn_id]
-	verbose "wait -i $spawn_id returned $k_stat (kdb5_edit show)"
+	verbose "wait -i $spawn_id returned $k_stat (kadmin.local show)"
 	catch "close -i $spawn_id"
 	if { $good == 1 } {
 	    pass "kadmin add_rnd $pname"
@@ -363,6 +370,8 @@ proc kadmin_modify { pname flags } {
     }
     expect "Enter password:"
     send "adminpass$KEY\r"
+    # When in doubt, jam one of these in there.
+    expect "\r"
     expect "Principal \"$pname@$REALMNAME\" modified."
     expect_after
     expect eof
@@ -373,121 +382,6 @@ proc kadmin_modify { pname flags } {
     return 1
 }
 
-#++
-# kadmin_rename	- Test rename function of kadmin.
-#
-# Rename principal $pname to $npname.  Returns 1 on success.
-#--
-proc kadmin_rename { pname npname } {
-    global REALMNAME
-    global KADMIN
-    global KDB5_EDIT
-    global KEY
-    global spawn_id
-    global tmppwd
-
-    set good 0
-    spawn $KADMIN -p krbtest/admin@$REALMNAME -q "renprinc -force $pname $npname"
-    expect_after {
-	"Cannot contact any KDC" {
-	    fail "kadmin rename $pname $npname lost KDC"
-	    catch "expect_after"
-	    return 0
-	}
-	timeout {
-	    fail "kadmin renent $pname $npname"
-	    catch "expect_after"
-	    return 0
-	}
-	eof {
-	    fail "kadmin renent $pname $npname"
-	    catch "expect_after"
-	    return 0
-	}
-    }
-    expect "Enter password:" {
-	send "adminpass$KEY\r"
-    }
-    expect "principal $pname renamed to $npname" { set good 1 }
-    expect_after
-    expect eof
-    set k_stat [wait -i $spawn_id]
-    verbose "wait -i $spawn_id returned $k_stat (kadmin rename)"
-    catch "close -i $spawn_id"
-    if { $good == 1 } {
-	#
-	# use kdb5_edit to verify that the new principal was created and that its
-	# salt types are 0 (normal).
-	#
-	spawn $KDB5_EDIT -r $REALMNAME
-	expect_after {
-	    -i $spawn_id
-	    timeout {
-		fail "kadmin renent $pname $npname"
-		catch "expect_after"
-		return 0
-	    }
-	    eof {
-		fail "kadmin renent $pname $npname"
-		catch "expect_after"
-		return 0
-	    }
-	}
-	set good 0
-	expect "kdb5_edit:" { send "show $npname\r" }
-	expect "Name: $npname@$REALMNAME" { set good 1 }
-	expect "kdb5_edit:" { send "q\r" }
-	expect_after
-	expect eof
-	set k_stat [wait -i $spawn_id]
-	verbose "wait -i $spawn_id returned $k_stat (kdb5_edit show)"
-	catch "close -i $spawn_id"
-
-	if { $good == 1 } {
-	    #
-	    # use kdb5_edit to verify that the old principal is not present.
-	    #
-	    spawn $KDB5_EDIT -r $REALMNAME
-	    expect_after {
-		timeout {
-		    fail "kadmin renent $pname $npname"
-		    catch "expect_after"
-		    return 0
-		}
-		eof {
-		    fail "kadmin renent $pname $npname"
-		    catch "expect_after"
-		    return 0
-		}
-	    }
-	    set good 0
-	    expect "kdb5_edit:" { send "show $pname\r" }
-	    expect "Principal $pname not found" { set good 1 }
-	    expect "kdb5_edit:" { send "q\r" }
-	    expect_after
-	    expect eof
-	    set k_stat [wait -i $spawn_id]
-	    verbose "wait -i $spawn_id returned $k_stat (kdb5_edit show)"
-	    catch "close -i $spawn_id"
-	    if { $good == 1 } {
-		pass "kadmin renent $pname $npname"
-		return 1
-	    }
-	    else {
-		fail "kadmin renent $pname $npname"
-		return 0
-	    }
-	}
-	else {
-	    fail "kadmin renent $pname $npname"
-	    return 0
-	}
-    }
-    else {
-	fail "kadmin renent $pname $npname"
-	return 0
-    }
-}
 
 #++
 # kadmin_list	- Test list database function of kadmin.
@@ -631,7 +525,7 @@ proc kadmin_extract { instance name } {
 proc kadmin_delete { pname } {
     global REALMNAME
     global KADMIN
-    global KDB5_EDIT
+    global KADMIN_LOCAL
     global KEY
     global spawn_id
     global tmppwd
@@ -666,9 +560,9 @@ proc kadmin_delete { pname } {
     catch "close -i $spawn_id"
     if { $good == 1 } {
 	#
-	# use kdb5_edit to verify that the old principal is not present.
+	# use kadmin.local to verify that the old principal is not present.
 	#
-	spawn $KDB5_EDIT -r $REALMNAME
+	spawn $KADMIN_LOCAL -r $REALMNAME
 	expect_after {
 	    -i $spawn_id
 	    timeout {
@@ -683,13 +577,13 @@ proc kadmin_delete { pname } {
 	    }
 	}
 	set good 0
-	expect "kdb5_edit:" { send "show $pname\r" }
-	expect "Principal $pname not found" { set good 1 }
-	expect "kdb5_edit:" { send "q\r" }
+	expect "kadmin.local: " { send "getprinc $pname\r" }
+	expect "Principal does not exist while retrieving \"$pname@$REALMNAME\"." { set good 1 }
+	expect "kadmin.local: " { send "quit\r" }
 	expect_after
 	expect eof
 	set k_stat [wait -i $spawn_id]
-	verbose "wait -i $spawn_id returned $k_stat (kdb5_edit show)"
+	verbose "wait -i $spawn_id returned $k_stat (kadmin.local show)"
 	catch "close -i $spawn_id"
 	if { $good == 1 } {
 	    pass "kadmin delprinc $pname"
@@ -788,11 +682,6 @@ proc kadmin_test { } {
 	return
     }
 
-# These tests were removed as you currently cannot rename a random key 
-# This is a bug....
-#	|| ![kadmin_rename v5random randomkey] \
-#	|| ![kadmin_show randomkey] \
-#	|| ![kadmin_delete randomkey] \
 # You cannot extract a v4 key...
 #	|| ![kadmin_extractv4 instance2 v4principal] \
 
