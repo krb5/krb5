@@ -111,6 +111,9 @@ libcompat.a:	compatvrsn.o
 compatvrsn.c:	$(OFILES)
 		@$(UTILDIR)version.sh compat > $@
 
+clean::
+		$(RM) version.major version.minor version.local
+
 l-libcompat:;	$(LINT) $(LFLAGS) -DBINPATH=\"$(BINDIR)\" \
 			-DETCPATH=\"$(ETCDIR)\" -DSBINPATH=\"$(SBINDIR)\" \
 			-DLOGPATH=\"$(LOGDIR)\" $(CFILES) compatvrsn.c \

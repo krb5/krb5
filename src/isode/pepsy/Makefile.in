@@ -125,6 +125,12 @@ pepsy.o:	pepsy.c pepsydefs.h $(HFILES)
 pepsyvrsn.c:	$(PEPSY-O)
 		$(UTILDIR)version.sh pepsy > $@
 
+clean::
+		$(RM) version.major version.minor version.local
+
+clean::
+		$(RM) pepsy pepsy.old xpepsy
+
 pepsy-yacc.o:	pepsy-yacc.c lex.c
 		$(CC) $(CFLAGS) -c pepsy-yacc.c
 

@@ -136,6 +136,9 @@ libpsap.a:	psapvrsn.o
 psapvrsn.c:	$(OFILES)
 		@$(UTILDIR)version.sh psap > $@
 
+clean::
+		$(RM) version.major version.minor version.local
+
 l-libpsap:;	$(LINT) $(LFLAGS) $(CFILES) psapvrsn.c $(LLIBS) \
 			| grep -v "warning: possible pointer alignment problem"
 

@@ -109,6 +109,8 @@ llib-lisode:	$(LLIBS)
 isodevrsn.c:	$(LIBES)
 		@$(UTILDIR)version.sh isode > $@
 
+clean::
+		$(RM) version.major version.minor version.local
 
 ################################################################
 # clean
