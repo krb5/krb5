@@ -886,7 +886,7 @@ krb5_get_init_creds(krb5_context context,
        that would be work. */
     else if (((ret = krb5_libdefault_boolean(context, &client->realm,
 					    "noaddresses", &tempint)) != 0)
-	     || (tempint == 0)) {
+	     || (tempint == 1)) {
 	    ;
     } else {
 	if ((ret = krb5_os_localaddr(context, &request.addresses)))
