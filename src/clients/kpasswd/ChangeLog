@@ -1,3 +1,7 @@
+2002-07-18  Jen Selby <jenselby@mit.edu>
+
+	* kpasswd.M: commented out the inclusion of man1/header.doc
+
 2001-10-30  Ezra Peisach  <epeisach@mit.edu>
 
 	* kpasswd.c (main): Do not free potentially NULL pointers.
