@@ -57,6 +57,9 @@ all-windows::
 	cd ..\krb5
 	@echo Making in gssapi\krb5
 	-$(MAKE) -$(MFLAGS) LIBCMD=$(LIBCMD)
+	cd ..\mechglue
+	@echo Making in gssapi\mechglue
+	-$(MAKE) -$(MFLAGS) LIBCMD=$(LIBCMD)
 	cd ..
 
 clean-windows::
@@ -65,6 +68,9 @@ clean-windows::
 	-$(MAKE) -$(MFLAGS) clean
 	cd ..\krb5
 	@echo Making clean in gssapi\krb5
+	-$(MAKE) -$(MFLAGS) clean
+	cd ..\mechglue
+	@echo Making clean in gssapi\mechglue
 	-$(MAKE) -$(MFLAGS) clean
 	cd ..
 	@echo Making clean in gssapi

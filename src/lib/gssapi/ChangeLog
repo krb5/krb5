@@ -1,3 +1,9 @@
+Tue Feb 27 22:10:48 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in (all-windows, clean-windows): Add mechglue to the
+		list of directories which are recursively handled for
+		Windows.
+
 Wed Feb  7 00:23:18 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in: Folded in danw's changes to allow
