@@ -39,7 +39,6 @@ extern krb5_boolean	multiple;
 extern char		*principal_name;
 extern char		*password_prompt;
 extern char		*ccname2use;
-extern krb5_ccache	ccache2use;
 extern krb5_timestamp	ticket_life;
 extern krb5_boolean	delete_ccache;
 
@@ -54,6 +53,7 @@ void		print_proto_error
 				   krb5_int32,
 				   krb5_int32,
 				   krb5_data *));
+krb5_error_code	net_connect();
 void		net_disconnect
 			PROTOTYPE((krb5_boolean));
 krb5_error_code	net_do_proto
@@ -64,7 +64,8 @@ krb5_error_code	net_do_proto
 				   krb5_data *,
 				   krb5_int32 *,
 				   krb5_int32 *,
-				   krb5_data **));
+				   krb5_data **,
+				   krb5_boolean));
 
 /* convert.c */
 char *		delta2string PROTOTYPE((krb5_deltat));

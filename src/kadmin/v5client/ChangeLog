@@ -1,4 +1,14 @@
 
+Mon Jun 5 16:00:56 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* network.c : add ability to perform net_connect() whenever the caller
+		feels like it.  This controls when the administrator is
+		prompted for his/her password.  Also fix bug when -m is not
+		specified and -c ccache is specified.
+	* kadmin5.c : break out calls to net_connect() to be before krb5_read
+		_password() for kadmin_add_new_key() and kadmin_change_pwd().
+	* kadmin5.h : Add new argument to net_do_proto().
+
+
 Mon Jun 5 14:11:58 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* kadmin5.c - Add support for specifiable credentials caches and
 		ticket lifetimes.

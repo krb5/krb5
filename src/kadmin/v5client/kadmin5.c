@@ -42,7 +42,6 @@
  */
 int		exit_status = 0;
 krb5_context	kcontext;
-krb5_ccache	ccache2use = (krb5_ccache) NULL;
 char		*programname = (char *) NULL;
 char		*requestname = (char *) NULL;
 krb5_boolean	multiple = 0;
@@ -73,6 +72,7 @@ static const char *kadmin_instance	= "kadmin";
 static const char *wr_ktab_type		= "WRFILE";
 
 static const char *gent_opterr_fmt	= "- cannot decode protocol";
+static const char *gen_conn_err_fmt	= "- cannot connect to server";
 static const char *db_print_header	= "------------------------------------\n";
 static const char *db_print_1_fmt	= "Principal: %s (key version %d)\n";
 static const char *db_print_2_fmt	= "Maximum ticket lifetime: %s\n";
@@ -223,7 +223,8 @@ kadmin_get_entry(pname, validp, dbentp, nextp)
 			      (krb5_data *) NULL,
 			      &proto_stat,
 			      &ncomps,
-			      &complist))) {
+			      &complist,
+			      0))) {
 	if (proto_stat == KRB5_ADM_SUCCESS) {
 	    *nextp = (char *) malloc((size_t) complist[0].length + 1);
 	    if (*nextp) {
@@ -391,44 +392,51 @@ kadmin_add_new_key(argc, argv)
 	memset((char *) dbentp, 0, sizeof(krb5_db_entry));
 	valid = 0;
 	if (parse_princ_options(argc, argv, &valid, dbentp)) {
-	    valid |= KRB5_ADM_M_SET;	/* We are setting options */
-	    sprintf(p1, add_prompt1_fmt, principal);
-	    sprintf(p2, add_prompt2_fmt, principal);
-	    nplen = KRB5_ADM_MAX_PASSWORD_LEN;
-	    valid |= KRB5_ADM_M_PASSWORD;	/* We have a password */
-	    if (!(kret = krb5_read_password(kcontext,
-					    p1, p2, npass, &nplen))) {
-		npass[nplen] = '\0';
-		nargs = ncomps = 0;
-		if (!(kret = krb5_adm_dbent_to_proto(kcontext,
-						     valid,
-						     dbentp,
-						     npass,
-						     &nargs,
-						     &arglist)) &&
-		    !(kret = net_do_proto(KRB5_ADM_ADD_PRINC_CMD,
-					  principal,
-					  (char *) NULL,
-					  nargs,
-					  arglist,
-					  &proto_stat,
-					  &ncomps,
-					  &complist))) {
-		    if (proto_stat == KRB5_ADM_SUCCESS) {
-			com_err(programname, 0, add_succ_fmt, principal);
+	    if (!(kret = net_connect())) {
+		valid |= KRB5_ADM_M_SET;	/* We are setting options */
+		sprintf(p1, add_prompt1_fmt, principal);
+		sprintf(p2, add_prompt2_fmt, principal);
+		nplen = KRB5_ADM_MAX_PASSWORD_LEN;
+		valid |= KRB5_ADM_M_PASSWORD;	/* We have a password */
+		if (!(kret = krb5_read_password(kcontext,
+						p1, p2, npass, &nplen))) {
+		    npass[nplen] = '\0';
+		    nargs = ncomps = 0;
+		    if (!(kret = krb5_adm_dbent_to_proto(kcontext,
+							 valid,
+							 dbentp,
+							 npass,
+							 &nargs,
+							 &arglist)) &&
+			!(kret = net_do_proto(KRB5_ADM_ADD_PRINC_CMD,
+					      principal,
+					      (char *) NULL,
+					      nargs,
+					      arglist,
+					      &proto_stat,
+					      &ncomps,
+					      &complist,
+					      1))) {
+			if (proto_stat == KRB5_ADM_SUCCESS) {
+			    com_err(programname, 0, add_succ_fmt, principal);
+			}
 		    }
+		    else {
+			com_err(requestname, kret, add_protoerr_fmt);
+		    }
+		    if (ncomps)
+			krb5_free_adm_data(kcontext, ncomps, complist);
+		    if (nargs) 
+			krb5_free_adm_data(kcontext, nargs, arglist);
+		    memset(npass, 0, KRB5_ADM_MAX_PASSWORD_LEN);
 		}
 		else {
-		    com_err(requestname, kret, add_protoerr_fmt);
+		    com_err(requestname, 0, add_noconf_fmt);
 		}
-		if (ncomps)
-		    krb5_free_adm_data(kcontext, ncomps, complist);
-		if (nargs) 
-		    krb5_free_adm_data(kcontext, nargs, arglist);
-		memset(npass, 0, KRB5_ADM_MAX_PASSWORD_LEN);
+		net_disconnect(0);
 	    }
 	    else {
-		com_err(requestname, 0, add_noconf_fmt);
+		com_err(requestname, kret, gen_conn_err_fmt);
 	    }
 	}
 	else {
@@ -478,26 +486,37 @@ kadmin_change_pwd(argc, argv)
 	sprintf(p1, cpw_prompt1_fmt, argv[1]);
 	sprintf(p2, cpw_prompt2_fmt, argv[1]);
 
-	nplen = KRB5_ADM_MAX_PASSWORD_LEN;
-	if (!(kret = krb5_read_password(kcontext, p1, p2, npass, &nplen))) {
-	    npass[nplen] = '\0';
-	    if (!(kret = net_do_proto(KRB5_ADM_CHG_OPW_CMD,
-				      argv[1],
-				      npass,
-				      0,
-				      (krb5_data *) NULL,
-				      &proto_stat,
-				      &ncomps,
-				      &complist))) {
-		if (proto_stat == KRB5_ADM_SUCCESS) {
-		    com_err(programname, 0, cpw_succ_fmt, argv[1]);
-		    krb5_free_adm_data(kcontext, ncomps, complist);
+	if (!(kret = net_connect())) {
+	    nplen = KRB5_ADM_MAX_PASSWORD_LEN;
+	    if (!(kret = krb5_read_password(kcontext,
+					    p1,
+					    p2,
+					    npass,
+					    &nplen))) {
+		npass[nplen] = '\0';
+		if (!(kret = net_do_proto(KRB5_ADM_CHG_OPW_CMD,
+					  argv[1],
+					  npass,
+					  0,
+					  (krb5_data *) NULL,
+					  &proto_stat,
+					  &ncomps,
+					  &complist,
+					  1))) {
+		    if (proto_stat == KRB5_ADM_SUCCESS) {
+			com_err(programname, 0, cpw_succ_fmt, argv[1]);
+			krb5_free_adm_data(kcontext, ncomps, complist);
+		    }
 		}
+		memset(npass, 0, KRB5_ADM_MAX_PASSWORD_LEN);
 	    }
-	    memset(npass, 0, KRB5_ADM_MAX_PASSWORD_LEN);
+	    else {
+		com_err(argv[0], kret, cpw_nochange_fmt, argv[1]);
+	    }
+	    net_disconnect(0);
 	}
 	else {
-	    com_err(argv[0], kret, cpw_nochange_fmt, argv[1]);
+	    com_err(argv[0], kret, gen_conn_err_fmt);
 	}
     }
     else {
@@ -560,7 +579,8 @@ kadmin_add_rnd_key(argc, argv)
 				      arglist,
 				      &proto_stat,
 				      &ncomps,
-				      &complist))) {
+				      &complist,
+				      0))) {
 		if (proto_stat == KRB5_ADM_SUCCESS) {
 		    com_err(programname, 0, add_succ_fmt, principal);
 		}
@@ -610,7 +630,8 @@ kadmin_change_rnd(argc, argv)
 			      (krb5_data *) NULL,
 			      &proto_stat,
 			      &ncomps,
-			      &complist))) {
+			      &complist,
+			      0))) {
 	if (proto_stat == KRB5_ADM_SUCCESS) {
 	    com_err(programname, 0, cpw_succ_fmt, argv[1]);
 	    krb5_free_adm_data(kcontext, ncomps, complist);
@@ -665,7 +686,8 @@ kadmin_delete_entry(argc, argv)
 				      (krb5_data *) NULL,
 				      &proto_stat,
 				      &ncomps,
-				      &complist))) {
+				      &complist,
+				      0))) {
 		if (proto_stat == KRB5_ADM_SUCCESS) {
 		    com_err(programname, 0, del_princ_fmt, argv[i]);
 		    krb5_free_adm_data(kcontext, ncomps, complist);
@@ -736,6 +758,7 @@ kadmin_extract(argc, argv)
 	return;
     }
     memset((char *) &keytab_entry, 0, sizeof(krb5_keytab_entry));
+
     for (i=0; i<argc; i++) {
 	if (!(kret = net_do_proto(KRB5_ADM_EXT_KEY_CMD,
 				  instance,
@@ -744,7 +767,8 @@ kadmin_extract(argc, argv)
 				  (krb5_data *) NULL,
 				  &proto_stat,
 				  &ncomps,
-				  &complist))) {
+				  &complist,
+				  0))) {
 	    if (proto_stat == KRB5_ADM_SUCCESS) {
 		if (!(kret = krb5_adm_proto_to_ktent(kcontext,
 						     ncomps,
@@ -824,6 +848,7 @@ kadmin_extract_v4(argc, argv)
 	return;
     }
     memset((char *) &keytab_entry, 0, sizeof(krb5_keytab_entry));
+
     for (i=0; i<argc; i++) {
 	if (!(kret = net_do_proto(KRB5_ADM_EXT_KEY_CMD,
 				  instance,
@@ -832,7 +857,8 @@ kadmin_extract_v4(argc, argv)
 				  (krb5_data *) NULL,
 				  &proto_stat,
 				  &ncomps,
-				  &complist))) {
+				  &complist,
+				  0))) {
 	    if (proto_stat == KRB5_ADM_SUCCESS) {
 		if (!(kret = krb5_adm_proto_to_ktent(kcontext,
 						     ncomps,
@@ -934,7 +960,8 @@ kadmin_modify(argc, argv)
 				      arglist,
 				      &proto_stat,
 				      &ncomps,
-				      &complist))) {
+				      &complist,
+				      0))) {
 		if (proto_stat == KRB5_ADM_SUCCESS) {
 		    com_err(programname, 0, mod_succ_fmt, principal);
 		}
@@ -1014,7 +1041,8 @@ kadmin_rename(argc, argv)
 				  (krb5_data *) NULL,
 				  &proto_stat,
 				  &ncomps,
-				  &complist))) {
+				  &complist,
+				  0))) {
 	    if (proto_stat == KRB5_ADM_SUCCESS) {
 		com_err(programname, 0, ren_princ_fmt, argv[0], argv[1]);
 		krb5_free_adm_data(kcontext, ncomps, complist);
@@ -1065,7 +1093,7 @@ kadmin_list(argc, argv)
 	    continue;
 	}
     }
-    
+
     if (!error) {
 	char 		*next;
 	char 		*nnext;
@@ -1192,7 +1220,8 @@ kadmin_language(argc, argv)
 				  (krb5_data *) NULL,
 				  &proto_stat,
 				  &ncomps,
-				  &complist))) {
+				  &complist,
+				  0))) {
 	    if (proto_stat == KRB5_ADM_SUCCESS) {
 		krb5_free_adm_data(kcontext, ncomps, complist);
 	    }
@@ -1203,7 +1232,8 @@ kadmin_language(argc, argv)
 				      (krb5_data *) NULL,
 				      &proto_stat,
 				      &ncomps,
-				      &complist))) {
+				      &complist,
+				      0))) {
 		if (proto_stat == KRB5_ADM_SUCCESS) {
 		    krb5_free_adm_data(kcontext, ncomps, complist);
 		}
@@ -1276,9 +1306,11 @@ kadmin_startup(argc, argv)
     char 		*action = (char *) NULL;
     krb5_boolean	saveit = 0;
     krb5_boolean	delit = 0;
+    krb5_ccache		ccache;
 
     programname = strrchr(argv[0], (int) '/');
     programname = (programname) ? programname+1 : argv[0];
+    ccache = (krb5_ccache) NULL;
     while ((option = getopt(argc, argv, "c:dsl:r:p:m")) != EOF) {
 	switch (option) {
 	case 'c':
@@ -1349,7 +1381,7 @@ kadmin_startup(argc, argv)
 
     /* Verify ccache name if supplied. */
     if (ccname2use) {
-	if (kret = krb5_cc_resolve(kcontext, ccname2use, &ccache2use)) {
+	if (kret = krb5_cc_resolve(kcontext, ccname2use, &ccache)) {
 	    com_err(argv[0], kret, kadmin_ccache_fmt, ccname2use);
 	    exit(4);
 	}
@@ -1369,8 +1401,8 @@ kadmin_startup(argc, argv)
 	user = (char *) NULL;
 
 	/* First try supplied credentials cache */
-	if (ccache2use && 
-	    !(kret = krb5_cc_get_principal(kcontext, ccache2use, &me))) {
+	if (ccache && 
+	    !(kret = krb5_cc_get_principal(kcontext, ccache, &me))) {
 
 	    /* Use our first component, if it exists. */
 	    if (krb5_princ_size(kcontext, me) > 0) {
@@ -1463,6 +1495,9 @@ kadmin_startup(argc, argv)
 	com_err(argv[0], ENOMEM, kadmin_noprompt_msg);
 	exit(1);
     }
+
+    if (ccache)
+	krb5_cc_close(kcontext, ccache);
 
     /* See if something's left, e.g. a request */
     if (argc > optind) {

@@ -61,6 +61,7 @@ static const char *proto_value_req_fmt	= "(%s) value required for option";
 static const char *proto_system_err_fmt	= "(%s) remote system error";
 static const char *proto_ufo_err_fmt	= "- (%s) protocol command %s returned unexpected error %d";
 static const char *net_conn_err_fmt	= "- %s: cannot connect to server";
+static const char *net_ccache_fmt	= "- cannot find credential cache %s";
 
 /*
  * print_proto_sreply()	- Print server's error reply strings.
@@ -141,7 +142,7 @@ print_proto_error(cmd, cstat, ncomps, complist)
  *			  connected or a separate connection is required for
  *			  each transaction.
  */
-static krb5_error_code
+krb5_error_code
 net_connect()
 {
     krb5_error_code	kret = 0;
@@ -155,7 +156,16 @@ net_connect()
     if (!multiple || !server_active) {
 	char opassword[KRB5_ADM_MAX_PASSWORD_LEN];
 
-	server_ccache = (ccache2use) ? ccache2use : (krb5_ccache) NULL;
+	/* Resolve ccache name if supplied. */
+	if (ccname2use) {
+	    if (kret = krb5_cc_resolve(kcontext, ccname2use, &server_ccache)) {
+		com_err(programname, kret, net_ccache_fmt, ccname2use);
+		return(kret);
+	    }
+	}
+	else
+	    server_ccache = (krb5_ccache) NULL;
+
 	if (!(kret = server_stat = krb5_adm_connect(kcontext,
 						    principal_name,
 						    password_prompt,
@@ -175,7 +185,7 @@ net_connect()
 }
 
 /*
- * kadmin_disconnect()	- Disconnect from the server.  If there has been
+ * net_disconnect()	- Disconnect from the server.  If there has been
  *			  a server error, just close the socket.  Otherwise
  *			  engage in the disconnection protocol.
  */
@@ -246,7 +256,7 @@ net_disconnect(force)
  * net_do_proto()	- Perform a protocol request and return the results.
  */
 krb5_error_code
-net_do_proto(cmd, arg1, arg2, nargs, argp, rstatp, ncompp, complistp)
+net_do_proto(cmd, arg1, arg2, nargs, argp, rstatp, ncompp, complistp, caller)
     char	*cmd;
     char	*arg1;
     char	*arg2;
@@ -255,13 +265,14 @@ net_do_proto(cmd, arg1, arg2, nargs, argp, rstatp, ncompp, complistp)
     krb5_int32	*rstatp;
     krb5_int32	*ncompp;
     krb5_data	**complistp;
+    krb5_boolean caller;
 {
     krb5_error_code	kret;
     krb5_int32		nprotoargs;
     krb5_data		*protoargs;
 
     /* Connect to the server, if necessary */
-    if (!(kret = net_connect())) {
+    if (caller || !(kret = net_connect())) {
 
 	/* Figure out how many things we need to prepend to the arguments */
 	nprotoargs = nargs + 1;
@@ -321,7 +332,8 @@ net_do_proto(cmd, arg1, arg2, nargs, argp, rstatp, ncompp, complistp)
 	}
 	else
 	    kret = ENOMEM;
-	net_disconnect(0);
+	if (!caller)
+	    net_disconnect(0);
     }
     return(kret);
 }
