@@ -1,4 +1,9 @@
 
+Thu Aug 3 11:51:14 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* alt_prof.c - Actually pass back the parsed string value in krb5_aprof_
+		get_deltat().
+
+
 Mon Jul 31 15:52:40 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* adm_kw_{enc,dec}.c - Add support for new kadmin protocol.
 	* alt_prof.c - Remove string conversion routine, use the ones in str_

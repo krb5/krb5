@@ -118,7 +118,6 @@ krb5_aprof_get_deltat(acontext, hierarchy, uselast, deltatp)
     char		**values;
     char		*valp;
     int			index;
-    krb5_deltat		dt;
 
     if (!(kret = krb5_aprof_getvals(acontext, hierarchy, &values))) {
 	index = 0;
@@ -127,7 +126,7 @@ krb5_aprof_get_deltat(acontext, hierarchy, uselast, deltatp)
 	    index--;
 	}
 	valp = values[index];
-	kret = krb5_string_to_deltat(valp, &dt);
+	kret = krb5_string_to_deltat(valp, deltatp);
 
 	/* Free the string storage */
 	for (index=0; values[index]; index++)
