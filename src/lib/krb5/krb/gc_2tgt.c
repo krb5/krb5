@@ -37,7 +37,7 @@ static char rcsid_gcv2tgt_c[] = "$Id$";
 #include "int-proto.h"
 
 krb5_error_code
-#if __STDC__ && defined(NARROW_PROTOTYPES)
+#if defined(NARROW_PROTOTYPES)
 krb5_get_cred_via_2tgt (krb5_creds * tgt,
 			const krb5_flags kdcoptions,
 			const krb5_enctype etype,
