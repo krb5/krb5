@@ -91,7 +91,7 @@ kadm_ser_init(inter, realm)
     if (retval)
 	return KADM_NO_MAST;
     krb5_db_fetch_mkey(kadm_context, server_parm.master_princ,
-		       &server_parm.master_keyblock.enctype,
+		       server_parm.master_keyblock.enctype,
 		       (inter == 1), FALSE,
 		       params->stash_file,
 		       NULL,

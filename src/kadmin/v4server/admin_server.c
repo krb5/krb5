@@ -476,7 +476,7 @@ void process_client(fd, who)
     }
 
     status = krb5_dbekd_decrypt_key_data(kadm_context,
-					 &server_parm.master_encblock,
+					 &server_parm.master_keyblock,
 					 kdatap,
 					 &cpw_skey,
 					 (krb5_keysalt *) NULL);

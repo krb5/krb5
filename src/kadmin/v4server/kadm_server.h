@@ -35,7 +35,6 @@ typedef struct {
   char sinst[INST_SZ];
   char krbrlm[REALM_SZ];
   krb5_principal sprinc;
-  krb5_encrypt_block master_encblock;
   krb5_principal master_princ;
   krb5_keyblock master_keyblock;
   krb5_deltat max_life;

@@ -293,9 +293,8 @@ tgt_keysalt_iterate(ksent, ptr)
     krb5_context	context;
     krb5_error_code	kret;
     struct iterate_args	*iargs;
-    krb5_keyblock	random_keyblock, *key;
+    krb5_keyblock	key;
     krb5_int32		ind;
-    krb5_encrypt_block  random_encblock;
     krb5_pointer rseed;
     krb5_data	pwd;
 
@@ -308,32 +307,25 @@ tgt_keysalt_iterate(ksent, ptr)
      * Convert the master key password into a key for this particular
      * encryption system.
      */
-    krb5_use_enctype(context, &random_encblock, ksent->ks_enctype);
     pwd.data = mkey_password;
     pwd.length = strlen(mkey_password);
-    if (kret = krb5_string_to_key(context, &random_encblock, &random_keyblock, 
-			      &pwd, &master_salt))
+    if (kret = krb5_c_random_seed(context, &pwd))
 	return kret;
-    if ((kret = krb5_init_random_key(context, &random_encblock, 
-				       &random_keyblock, &rseed)))
-	return kret;
-    
+
     if (!(kret = krb5_dbe_create_key_data(iargs->ctx, iargs->dbentp))) {
 	ind = iargs->dbentp->n_key_data-1;
-	if (!(kret = krb5_random_key(context,
-				     &random_encblock, rseed,
-				     &key))) {
+	if (!(kret = krb5_c_make_random_key(context, ksent->ks_enctype,
+					    &key))) {
 	    kret = krb5_dbekd_encrypt_key_data(context,
 					       iargs->rblock->key,
-					       key, 
+					       &key, 
 					       NULL,
 					       1,
 					       &iargs->dbentp->key_data[ind]);
-	    krb5_free_keyblock(context, key);
+	    krb5_free_keyblock_contents(context, &key);
 	}
     }
-    memset((char *)random_keyblock.contents, 0, random_keyblock.length);
-    free(random_keyblock.contents);
+
     return(kret);
 }
 
