@@ -1,3 +1,8 @@
+Mon Apr 24 17:20:14 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* locate_kdc.c (krb5_locate_kdc): Don't deref NULL pointer
+	returned from profile_get_values if profile is not set.
+
 Sat Apr 22 00:11:12 1995  Theodore Y. Ts'o  (tytso@dcl)
 
 	* Makefile.in, configure.in, t_std_conf.c: Add test program to

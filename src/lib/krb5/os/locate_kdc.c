@@ -77,7 +77,7 @@ krb5_locate_kdc(context, realm, addr_pp, naddrs)
 	sec_udpport = 0;
 
     count = 0;
-    while (hostlist[count])
+    while (hostlist && hostlist[count])
 	    count++;
     
     if (count == 0) {
