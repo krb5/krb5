@@ -190,7 +190,7 @@ static void MacMessageBox(errbuf)
 	InsetRect(&errOkButtonRect, 4, 4);
 
 	/* Draw the error text */
-	TextBox(errbuf, strlen(errbuf), &errTextRect, teForceLeft);
+	TETextBox(errbuf, strlen(errbuf), &errTextRect, teForceLeft);
 
 	/* Draw the Stop icon */
 	PlotIcon(&errIconRect, GetResource('ICON', 0));
