@@ -254,7 +254,6 @@ int krb5int_yarrow_input( Yarrow_CTX* y, unsigned source_id,
     size_t estimate;
 
     if (!y) { THROW( YARROW_BAD_ARG ); }
-    TRY( Yarrow_detect_fork( y ) );
 
     if (source_id >= y->num_sources) { THROW( YARROW_BAD_SOURCE ); }
   
@@ -395,7 +394,7 @@ static int krb5int_yarrow_output_Block( Yarrow_CTX* y, void* out )
     if (y->out_count >= y->Pg)
     {
 	y->out_count = 0;
-	TRY( krb5int_yarrow_gate( y ) );
+	TRY( yarrow_gate_locked( y ) );
 
 	/* require new seed after reaching gates_limit */
 
@@ -478,11 +477,23 @@ int krb5int_yarrow_status( Yarrow_CTX* y, int *num_sources, unsigned *source_id,
     EXCEP_RET;
 }
 
+static int yarrow_output_locked(Yarrow_CTX*, void*, size_t);
+
 YARROW_DLL
 int krb5int_yarrow_output( Yarrow_CTX* y, void* out, size_t size )
 {
     EXCEP_DECL;
-    int locked = 0;
+    TRY( LOCK() );
+    TRY( yarrow_output_locked(y, out, size));
+CATCH:
+    UNLOCK();
+    EXCEP_RET;
+}
+
+static
+int yarrow_output_locked( Yarrow_CTX* y, void* out, size_t size )
+{
+    EXCEP_DECL;
     size_t left;
     char* outp;
     size_t use;
@@ -494,8 +505,6 @@ int krb5int_yarrow_output( Yarrow_CTX* y, void* out, size_t size )
 
     left = size;
     outp = out;
-
-    TRY( LOCK() );
 
     if (y->out_left > 0)
     {
@@ -521,8 +530,30 @@ int krb5int_yarrow_output( Yarrow_CTX* y, void* out, size_t size )
     }
 
  CATCH:
-    if ( locked ) { TRY( UNLOCK() ); }
+    EXCEP_RET;
+}
+
+static int yarrow_gate_locked(Yarrow_CTX* y)
+{
+    EXCEP_DECL;
+    byte new_K[CIPHER_KEY_SIZE];
+
+    if (!y) { THROW( YARROW_BAD_ARG ); }
   
+    TRACE( printf( "GATE[" ); );
+
+    /* K <- Next k bits of PRNG output */
+
+    TRY( yarrow_output_locked(y, new_K, CIPHER_KEY_SIZE) );
+    mem_copy(y->K, new_K, CIPHER_KEY_SIZE);
+
+    /* need to resetup the key schedule as the key has changed */
+
+    TRY (krb5int_yarrow_cipher_init(&y->cipher, y->K));
+
+ CATCH:
+    TRACE( printf( "]," ); );
+    mem_zero(new_K, sizeof(new_K));
     EXCEP_RET;
 }
 
@@ -837,7 +868,6 @@ int krb5int_yarrow_final(Yarrow_CTX* y)
     int locked = 0;
 
     if (!y) { THROW( YARROW_BAD_ARG ); }
-    TRY( Yarrow_detect_fork(y) );
     TRY( LOCK() );
     locked = 1;
 

@@ -1,3 +1,13 @@
+2004-11-01  Ken Raeburn  <raeburn@mit.edu>
+
+	* yarrow.c (krb5int_yarrow_input, krb5int_yarrow_final): Don't
+	check for forking here.
+	(yarrow_output_locked): Split out from krb5int_yarrow_output,
+	without locking.
+	(krb5int_yarrow_output): Do locking and call yarrow_output_locked.
+	(yarrow_gate_locked): New function; uses yarrow_output_locked.
+	(krb5int_yarrow_output_Block): Use yarrow_gate_locked.
+
 2004-10-29  Ken Raeburn  <raeburn@mit.edu>
 
 	* ylock.h: Include k5-thread.h.
