@@ -1,3 +1,8 @@
+2000-06-09  Tom Yu  <tlyu@mit.edu>
+
+	* admin.texinfo: Add descriptions of the kadmin {ank,cpw,ktadd} -e
+	flag.
+
 2000-06-06  Ken Raeburn  <raeburn@mit.edu>
 
 	* install.texinfo: Describe new DNS support, and 3DES upgrade

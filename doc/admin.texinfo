@@ -1418,6 +1418,12 @@ security-critical.
 Sets the key of the principal to the specified string and does not
 prompt for a password (@code{add_principal} only).  @value{COMPANY} does
 not recommend using this option.
+
+@item -e @i{enc:salt...}
+Uses the specified list of enctype-salttype pairs for setting the key of
+the principal.  The quotes are necessary if there are multiple
+enctype-salttype pairs.  This will not function against kadmin daemons
+earlier than krb5-1.2.
 @end table
 
 If you want to just use the default values, all you need to do is:
@@ -1529,6 +1535,12 @@ Sets the key of the principal to a random value.
 @item @b{-pw} @i{password}
 Sets the password to the string @i{password}.  @value{COMPANY} does not
 recommend using this option.
+
+@item @b{-e} @i{"enc:salt..."}
+Uses the specified list of enctype-salttype pairs for setting the key of
+the principal.  The quotes are necessary if there are multiple
+enctype-salttype pairs.  This will not function against kadmin daemons
+earlier than krb5-1.2.
 @end table
 
 For example:
@@ -2000,6 +2012,12 @@ The @code{ktadd} command takes the following switches:
 @item -k @i{keytab}
 use @i{keytab} as the keytab file.  Otherwise, @code{ktadd} will use the
 default keytab file (@code{/etc/krb5.keytab}).
+
+@item @b{-e} @i{"enc:salt..."}
+Uses the specified list of enctype-salttype pairs for setting the key of
+the principal.  The quotes are necessary if there are multiple
+enctype-salttype pairs.  This will not function against kadmin daemons
+earlier than krb5-1.2.
 
 @item -q
 run in quiet mode.  This causes @code{ktadd} to display less verbose
