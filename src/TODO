@@ -35,6 +35,10 @@ Major projects:
 	* telnet portability
 	* CONFIG_RULES should include more standard rules (WITH_KRB4, etc.)
 		stuff that's in every single configure.in file.
+	* klist and kdestroy drags in the entire libcrypto library
+		unnecessarily; this is because init_ctx references
+		krb5_csarray (via valid_etype) and
+		krb5_max_crypto_system, which drags in cryptoconf.c
 
 7.  Future development
 	* support for realm name changes
