@@ -1,3 +1,8 @@
+2002-04-02  Ken Raeburn  <raeburn@mit.edu>
+
+	* ktfr_entry.c (krb5_kt_free_entry_contents): Rename from
+	krb5_kt_free_entry, keep old name as wrapper.
+
 2000-04-01  Miro Jurisic  <meeroh@mit.edu>
 
 	* ktfns.c: Merged from trunk
