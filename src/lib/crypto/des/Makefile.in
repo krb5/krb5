@@ -9,11 +9,11 @@ all:: $(OBJS)
 KLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(ISODELIB) $(COMERRLIB)
 DEPKLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(COMERRLIB)
 
-OTHERSRCS=$(srcdir)/f_cbc.c $(srcdir)/f_cksum.c $(srcdir)/f_pcbc.c \
+OTHERSRCS=$(srcdir)/f_cbc.c $(srcdir)/f_cksum.c \
 	$(srcdir)/f_sched.c $(srcdir)/f_ecb.c $(srcdir)/f_parity.c \
 	$(srcdir)/f_tables.c
 
-OTHEROBJS=f_cbc.o f_cksum.o f_pcbc.o f_sched.o f_ecb.o f_parity.o f_tables.o
+OTHEROBJS=f_cbc.o f_cksum.o f_sched.o f_ecb.o f_parity.o f_tables.o
 
 OBJS=	cbc_cksum.o	\
 	cs_entry.o	\

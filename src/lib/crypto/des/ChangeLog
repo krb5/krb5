@@ -1,3 +1,8 @@
+Thu Nov  3 18:31:55 1994  Mark Eichin  (eichin@cygnus.com)
+
+	* Makefile.in: stop building f_pcbc.c, since it belongs in
+	libdes425, but leave it here for reference.
+
 Fri Oct 14 00:33:17 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* des_int.h, f_cbc.c, verify.c: Fix function declarations to
