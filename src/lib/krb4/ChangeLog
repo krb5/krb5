@@ -1,3 +1,10 @@
+2000-05-03  Tom Yu  <tlyu@mit.edu>
+
+	* cr_tkt.c: Delete prototype for krb_cr_tkt_int(), since the
+	definition is K&R style and contains narrow types.  Thank you
+	HP/UX for having a compiler that actually makes this a fatal
+	error.
+
 2000-04-28  Ken Raeburn  <raeburn@mit.edu>
 	    Nalin Dahyabhai  <nalin@redhat.com>
 
