@@ -1,3 +1,9 @@
+2003-03-14  Ken Raeburn  <raeburn@mit.edu>
+
+	* default.exp (setup_root_shell): If we get connection refused
+	messages, followed by no unrecognized errors and then eof, report
+	it as an unsupported test.
+
 2003-02-04  Tom Yu  <tlyu@mit.edu>
 
 	* default.exp (start_kerberos_daemons): Use correct argument to

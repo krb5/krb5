@@ -2234,10 +2234,12 @@ proc setup_root_shell { testname } {
     set rlogin_pid [exp_pid]
     set old_timeout $timeout
     set timeout 300
+    set got_refused 0
 
     expect {
 	-re {connect to address [0-9a-fA-F.:]*: Connection refused} {
 	    note $expect_out(buffer)
+	    set got_refused 1
 	    exp_continue
 	}
 	-re "word:|erberos rlogin failed|ection refused|ection reset by peer" {
@@ -2257,7 +2259,14 @@ proc setup_root_shell { testname } {
 	    return 0
 	}
 	eof {
-	    perror "eof from rlogin $hostname -l root"
+	    if $got_refused {
+		# reported some errors, continued, and failed
+		note "$testname test requires ability to log in as root"
+		unsupported $testname
+	    } else {
+		# unknown problem?
+		perror "eof from rlogin $hostname -l root"
+	    }
 	    stop_root_shell
 	    set timeout $old_timeout
 	    catch "expect_after"
