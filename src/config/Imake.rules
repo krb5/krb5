@@ -1255,40 +1255,48 @@ target::								@@\
 #ifndef MakeNsubdirMakefiles
 #define MakeNsubdirMakefiles()						@@\
 subdirMakefiles:							@@\
-	$(RM) $(MAKEFILE_SUBDIR)/Makefile.bak				@@\
+	cd $(MAKEFILE_SUBDIR); $(IMAKE_CMD) -DTOPDIR=$(UPPREFIX)$(TOP) -DCURDIR=$(NEW_CURRENT_DIR) -s Makefile.new; \	@@\
+	$(MAKE) -f Makefile.new noop					@@\
 	-@if [ -f $(MAKEFILE_SUBDIR)/Makefile ]; then \			@@\
-	echo "	$(MV) $(MAKEFILE_SUBDIR)/Makefile $(MAKEFILE_SUBDIR)/Makefile.bak"; \ @@\
+	echo "	$(RM) $(MAKEFILE_SUBDIR)/Makefile.bak; $(MV) $(MAKEFILE_SUBDIR)/Makefile $(MAKEFILE_SUBDIR)/Makefile.bak; $(MV) $(MAKEFILE_SUBDIR)/Makefile $(MAKEFILE_SUBDIR)/Makefile.bak"; \ @@\
+	$(RM) $(MAKEFILE_SUBDIR)/Makefile.bak; \			@@\
 	$(MV) $(MAKEFILE_SUBDIR)/Makefile $(MAKEFILE_SUBDIR)/Makefile.bak; \ @@\
+	$(MV) $(MAKEFILE_SUBDIR)/Makefile.new $(MAKEFILE_SUBDIR)/Makefile; \ @@\
+	cd $(MAKEFILE_SUBDIR); $(MAKE) $(MFLAGS) Makefiles; \ 		@@\
 	else exit 0; fi							@@\
-	cd $(MAKEFILE_SUBDIR); $(IMAKE_CMD) -DTOPDIR=$(UPPREFIX)$(TOP) -DCURDIR=$(NEW_CURRENT_DIR); \	@@\
-	$(MAKE) $(MFLAGS) Makefiles 					@@\
 									@@\
 subsubdirMakefiles:							@@\
-	$(RM) $(MAKEFILE_SUBDIR)/Makefile.bak				@@\
+	cd $(MAKEFILE_SUBDIR); $(IMAKE_CMD) -DTOPDIR=$(UPPREFIX)$(TOP) -DCURDIR=$(NEW_CURRENT_DIR) -s Makefile.new; \	@@\
+	$(MAKE) -f Makefile.new noop					@@\
 	-@if [ -f $(MAKEFILE_SUBDIR)/Makefile ]; then \			@@\
-	echo "	$(MV) $(MAKEFILE_SUBDIR)/Makefile $(MAKEFILE_SUBDIR)/Makefile.bak"; \ @@\
+	echo "	$(RM) $(MAKEFILE_SUBDIR)/Makefile.bak; $(MV) $(MAKEFILE_SUBDIR)/Makefile $(MAKEFILE_SUBDIR)/Makefile.bak; $(MV) $(MAKEFILE_SUBDIR)/Makefile $(MAKEFILE_SUBDIR)/Makefile.bak"; \ @@\
+	$(RM) $(MAKEFILE_SUBDIR)/Makefile.bak; \			@@\
 	$(MV) $(MAKEFILE_SUBDIR)/Makefile $(MAKEFILE_SUBDIR)/Makefile.bak; \ @@\
+	$(MV) $(MAKEFILE_SUBDIR)/Makefile.new $(MAKEFILE_SUBDIR)/Makefile; \ @@\
+	cd $(MAKEFILE_SUBDIR); $(MAKE) $(MFLAGS) Makefiles; \ 		@@\
 	else exit 0; fi							@@\
-	cd $(MAKEFILE_SUBDIR); $(IMAKE_CMD) -DTOPDIR=$(UPPREFIX)$(UPPREFIX)$(TOP) -DCURDIR=$(NEW_CURRENT_DIR); \	@@\
-	$(MAKE) $(MFLAGS) Makefiles 					@@\
 									@@\
 subsubsubdirMakefiles:							@@\
-	$(RM) $(MAKEFILE_SUBDIR)/Makefile.bak				@@\
+	cd $(MAKEFILE_SUBDIR); $(IMAKE_CMD) -DTOPDIR=$(UPPREFIX)$(TOP) -DCURDIR=$(NEW_CURRENT_DIR) -s Makefile.new; \	@@\
+	$(MAKE) -f Makefile.new noop					@@\
 	-@if [ -f $(MAKEFILE_SUBDIR)/Makefile ]; then \			@@\
-	echo "	$(MV) $(MAKEFILE_SUBDIR)/Makefile $(MAKEFILE_SUBDIR)/Makefile.bak"; \ @@\
+	echo "	$(RM) $(MAKEFILE_SUBDIR)/Makefile.bak; $(MV) $(MAKEFILE_SUBDIR)/Makefile $(MAKEFILE_SUBDIR)/Makefile.bak; $(MV) $(MAKEFILE_SUBDIR)/Makefile $(MAKEFILE_SUBDIR)/Makefile.bak"; \ @@\
+	$(RM) $(MAKEFILE_SUBDIR)/Makefile.bak; \			@@\
 	$(MV) $(MAKEFILE_SUBDIR)/Makefile $(MAKEFILE_SUBDIR)/Makefile.bak; \ @@\
-	else exit 0; fi @@\
-	cd $(MAKEFILE_SUBDIR); $(IMAKE_CMD) -DTOPDIR=$(UPPREFIX)$(UPPREFIX)$(UPPREFIX)$(TOP) -DCURDIR=$(NEW_CURRENT_DIR); \	@@\
-	$(MAKE) $(MFLAGS) Makefiles 					@@\
+	$(MV) $(MAKEFILE_SUBDIR)/Makefile.new $(MAKEFILE_SUBDIR)/Makefile; \ @@\
+	cd $(MAKEFILE_SUBDIR); $(MAKE) $(MFLAGS) Makefiles; \ 		@@\
+	else exit 0; fi							@@\
 									@@\
 subsubsubsubdirMakefiles:						@@\
-	$(RM) $(MAKEFILE_SUBDIR)/Makefile.bak				@@\
+	cd $(MAKEFILE_SUBDIR); $(IMAKE_CMD) -DTOPDIR=$(UPPREFIX)$(TOP) -DCURDIR=$(NEW_CURRENT_DIR) -s Makefile.new; \	@@\
+	$(MAKE) -f Makefile.new noop					@@\
 	-@if [ -f $(MAKEFILE_SUBDIR)/Makefile ]; then \			@@\
-	echo "	$(MV) $(MAKEFILE_SUBDIR)/Makefile $(MAKEFILE_SUBDIR)/Makefile.bak"; \ @@\
+	echo "	$(RM) $(MAKEFILE_SUBDIR)/Makefile.bak; $(MV) $(MAKEFILE_SUBDIR)/Makefile $(MAKEFILE_SUBDIR)/Makefile.bak; $(MV) $(MAKEFILE_SUBDIR)/Makefile $(MAKEFILE_SUBDIR)/Makefile.bak"; \ @@\
+	$(RM) $(MAKEFILE_SUBDIR)/Makefile.bak; \			@@\
 	$(MV) $(MAKEFILE_SUBDIR)/Makefile $(MAKEFILE_SUBDIR)/Makefile.bak; \ @@\
-	else exit 0; fi 						@@\
-	cd $(MAKEFILE_SUBDIR); $(IMAKE_CMD) -DTOPDIR=$(UPPREFIX)$(UPPREFIX)$(UPPREFIX)$(UPPREFIX)$(TOP) -DCURDIR=$(NEW_CURRENT_DIR); \	@@\
-	$(MAKE) $(MFLAGS) Makefiles
+	$(MV) $(MAKEFILE_SUBDIR)/Makefile.new $(MAKEFILE_SUBDIR)/Makefile; \ @@\
+	cd $(MAKEFILE_SUBDIR); $(MAKE) $(MFLAGS) Makefiles; \ 		@@\
+	else exit 0; fi
 #endif /* MakeNsubdirMakefiles */
 
 
