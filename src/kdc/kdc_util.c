@@ -29,6 +29,7 @@
 #include "extern.h"
 #include <stdio.h>
 #include <syslog.h>
+#include "adm.h"
 #include "adm_proto.h"
 
 /*
@@ -325,7 +326,9 @@ kdc_get_server_key(ticket, key, kvno)
     krb5_error_code 	  retval;
     krb5_db_entry 	  server;
     krb5_boolean 	  more;
-    int	nprincs, i, last_i;
+    int	nprincs;
+    krb5_key_data	* server_key;
+    int			  i;
 
     if (krb5_principal_compare(kdc_context, tgs_server, ticket->server)) {
 	retval = krb5_copy_keyblock(kdc_context, &tgs_key, key);
@@ -356,16 +359,29 @@ kdc_get_server_key(ticket, key, kvno)
 	/* 
 	 * Get the latest version of the server key_data and
 	 * convert the key into a real key (it may be encrypted in the database)
+	 *
+	 * Search the key list in the order specified by the key/salt list.
 	 */
-	for (*kvno = last_i = i = 0; i < server.n_key_data; i++) {
-	    if (*kvno < server.key_data[i].key_data_kvno) {
-		*kvno = server.key_data[i].key_data_kvno;
-		last_i = i;
-	    }
+	server_key = (krb5_key_data *) NULL;
+	for (i=0; i<kdc_active_realm->realm_nkstypes; i++) {
+	    krb5_key_salt_tuple *kslist;
+
+	    kslist = (krb5_key_salt_tuple *) kdc_active_realm->realm_kstypes;
+	    if (!krb5_dbe_find_keytype(kdc_context,
+				       &server,
+				       kslist[i].ks_keytype,
+				       -1,
+				       -1,
+				       &server_key))
+		break;
 	}
+	if (!server_key)
+	    return(KRB5KDC_ERR_S_PRINCIPAL_UNKNOWN);
+				  
+	*kvno = server_key->key_data_kvno;
 	if ((*key = (krb5_keyblock *)malloc(sizeof **key))) {
 	    retval = krb5_dbekd_decrypt_key_data(kdc_context, &master_encblock,
-					         &server.key_data[last_i],
+					         server_key,
 					         *key, NULL);
 	} else
 	    retval = ENOMEM;
@@ -903,6 +919,7 @@ krb5_data *data;
     int tag;			/* tag number */
     unsigned char savelen;      /* saved length of our field */
 
+    classes = -1;
     /* we assume that the first identifier/length will tell us 
        how long the entire stream is. */
     astream++;
