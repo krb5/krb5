@@ -1,4 +1,4 @@
-SnapshotRoot = //GSS-Kerberos5-1.0.5
+SnapshotRoot = //GSS-Kerberos5-1.1
 
 INCLUDES = {AUTOINCLUDES} -i /mac/TestTrack/ -i "/mac/libraries/CCache API/include/"
 
@@ -560,6 +560,11 @@ MACFILES = {AUTOMACFILES} {GLUE_INPUT} /Makefile.in /patchlevel.h \
 	"/mac/libraries/Metrowerks/CW Pro 2/MIT C.PPC DLL.doc" \
 	"/mac/libraries/Metrowerks/CW Pro 2/MIT RuntimeCFM68K DLL.doc" \
 	"/mac/libraries/Metrowerks/CW Pro 2/MIT RuntimePPC DLL.doc" \
+	"/mac/libraries/CCache API/include/CCache.h" \
+	"/mac/libraries/CCache API/bin/CCacheGlobalsLib.68K" \
+	"/mac/libraries/CCache API/bin/CCacheGlobalsLib.PPC" \
+	"/mac/libraries/CCache API/bin/CCacheLib.68K" \
+	"/mac/libraries/CCache API/bin/CCacheLib.PPC" \
 	/mac/TestTrack/ChangeLog \
 	/mac/TestTrack/GSSforSAP.r \
 	/mac/TestTrack/MITAthenaLib \
@@ -575,6 +580,9 @@ MACDIRS = /config/ /include/ /include/krb5/ /include/krb5/stock/ \
 	/mac/libraries/ \
 	/mac/libraries/Metrowerks/ \
 	"/mac/libraries/Metrowerks/CW Pro 2/" \
+	"/mac/libraries/CCache API/" \
+	"/mac/libraries/CCache API/bin" \
+	"/mac/libraries/CCache API/include" \
 	/mac/testtrack/
 
 snapshot : autogenerate-clean
