@@ -4,6 +4,10 @@
 	(fake_getnameinfo) [__GNUC__ && __mips__]: Use const when
 	referencing bytes of supplied address.
 
+	* krb5.hin: Don't include <sys/types.h> any more.
+	* Makefile.in (krb5.h): Don't put HAVE_STDARG_H or HAVE_SYS_TYPE_H
+	symbols into output.
+
 2002-03-26  Ken Raeburn  <raeburn@mit.edu>
 
 	* fake-addrinfo.h: Incorporate all of fake-addrinfo.c.  Make all
