@@ -1,3 +1,8 @@
+2001-07-06  Ezra Peisach  <epeisach@mit.edu>
+
+	* aclocal.m4 (CHECK_WAIT_TYPE): Need to include sys/types.h for
+	initial test or pid_t might not be defined.
+
 2001-07-05  Ezra Peisach  <epeisach@mit.edu>
 
 	* aclocal.m4 (CHECK_WAIT_TYPE): Improved testing if wait uses int

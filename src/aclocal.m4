@@ -148,7 +148,8 @@ define(CHECK_WAIT_TYPE,[
 AC_MSG_CHECKING([if argument to wait is int *])
 AC_CACHE_VAL(krb5_cv_struct_wait,
 dnl Test for prototype clash - if there is none - then assume int * works
-[AC_TRY_COMPILE([#include <sys/wait.h>
+[AC_TRY_COMPILE([#include <sys/types.h>
+#include <sys/wait.h>
 extern pid_t wait(int *);],[], krb5_cv_struct_wait=no,dnl
 dnl Else fallback on old stuff
 [AC_TRY_COMPILE(
