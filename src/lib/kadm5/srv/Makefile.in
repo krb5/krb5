@@ -39,7 +39,8 @@ SRCS =	$(srcdir)/svr_policy.c \
 	$(srcdir)/adb_xdr.c \
 	$(srcdir)/adb_policy.c \
 	$(srcdir)/adb_free.c \
-	$(srcdir)/adb_openclose.c
+	$(srcdir)/adb_openclose.c \
+	$(srcdir)/svr_generation.c
 
 OBJS =	svr_policy.$(OBJEXT) \
 	svr_principal.$(OBJEXT) \
@@ -53,7 +54,8 @@ OBJS =	svr_policy.$(OBJEXT) \
 	adb_xdr.$(OBJEXT) \
 	adb_policy.$(OBJEXT) \
 	adb_free.$(OBJEXT) \
-	adb_openclose.$(OBJEXT)
+	adb_openclose.$(OBJEXT) \
+	svr_generation.$(OBJEXT)
 
 STLIBOBJS = \
 	svr_policy.o \
@@ -68,7 +70,8 @@ STLIBOBJS = \
 	adb_xdr.o \
 	adb_policy.o \
 	adb_free.o \
-	adb_openclose.o
+	adb_openclose.o \
+	svr_generation.o
 
 all-unix:: includes
 all-unix:: all-liblinks

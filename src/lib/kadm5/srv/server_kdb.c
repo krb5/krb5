@@ -324,20 +324,30 @@ krb5_error_code
 kdb_put_entry(kadm5_server_handle_t handle,
 	      krb5_db_entry *kdb, osa_princ_ent_rec *adb)
 {
+    return kdb_put_entry_internal(handle, kdb, adb, 1, 1);
+}
+
+krb5_error_code
+kdb_put_entry_internal(kadm5_server_handle_t handle,
+	               krb5_db_entry *kdb, osa_princ_ent_rec *adb, int incgen,
+		       int updatemod)
+{
     krb5_error_code ret;
     krb5_int32 now;
     XDR xdrs;
     krb5_tl_data tl_data;
     int one;
 
-    ret = krb5_timeofday(handle->context, &now);
-    if (ret)
-	return(ret);
+    if (updatemod) {
+        ret = krb5_timeofday(handle->context, &now);
+        if (ret)
+	    return(ret);
 
-    ret = krb5_dbe_update_mod_princ_data(handle->context, kdb, now,
-					 handle->current_caller);
-    if (ret)
-	return(ret);
+        ret = krb5_dbe_update_mod_princ_data(handle->context, kdb, now,
+					     handle->current_caller);
+        if (ret)
+	    return(ret);
+    }
     
     xdralloc_create(&xdrs, XDR_ENCODE); 
     if(! xdr_osa_princ_ent_rec(&xdrs, adb)) {
@@ -361,6 +371,13 @@ kdb_put_entry(kadm5_server_handle_t handle,
     if (ret)
 	return(ret);
 
+    if (incgen) {
+        /* The update succeeded, so we should change the generation number */
+        ret = kdb_update_generation_number(handle);
+        if (ret)
+            return(ret);
+    }
+
     return(0);
 }
 
@@ -371,8 +388,15 @@ kdb_delete_entry(kadm5_server_handle_t handle, krb5_principal name)
     krb5_error_code ret;
     
     ret = krb5_db_delete_principal(handle->context, name, &one);
+    if (ret)
+        return(ret);
 
-    return ret;
+    /* The deletion succeeded, so we should change the generation number */
+    ret = kdb_update_generation_number(handle);
+    if (ret)
+        return(ret);
+
+    return(0);
 }
 
 typedef struct _iter_data {
@@ -407,4 +431,31 @@ kdb_iter_entry(kadm5_server_handle_t handle,
     return(0);
 }
 
+krb5_error_code
+kdb_update_generation_number(kadm5_server_handle_t handle)
+{
+    krb5_error_code ret;
+    krb5_db_entry master_kdb;
+    osa_princ_ent_rec master_adb;
+
+    ret = kdb_get_entry(handle, master_princ, &master_kdb, &master_adb);
+    if (ret)
+        return(ret);
+
+    ret = krb5_dbe_update_generation_number_general(handle->context,
+                                                    &master_kdb, NULL);
+    if (ret)
+        return(ret);
+
+    /* Updating the generation number, while a change to the database,
+       is not one that should result in updating the generation number
+       again to avoid an infinite loop. */
+    ret = kdb_put_entry_internal(handle, &master_kdb, &master_adb, 0, 0);
+    if (ret)
+        return(ret);
+
+    kdb_free_entry(handle->context, &master_kdb, &master_adb);
+
+    return(0);
+}
 

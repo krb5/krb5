@@ -1,5 +1,52 @@
 2001-06-20  Mitchell Berger  <mitchb@mit.edu>
 
+	* Makefile.in: Include svr_generation.[co] in the build.
+
+	* adb_openclose.c: Changed to include server_internal.h instead of
+	adb.h.
+	(osa_adb_rename_db): Modified to use the new osa_adb_init_db calling
+	sequence.
+	(osa_adb_init_db): Now takes a pointer to a struct
+	_kadm5_server_handle_t, and puts it in the osa db handle.
+
+	* adb_policy.c: Changed to include server_internal.h instead of adb.h
+	(osa_adb_open_policy): Now takes a pointer to a struct
+	_kadm5_server_handle_t and passes it to osa_adb_init_db.
+	(osa_adb_create_policy): Now makes a call to update the generation
+	number.
+	(osa_adb_destroy_policy): Now makes a call to update the generation
+	number.
+	(osa_adb_put_policy): Now makes a call to update the generation number.
+
+	* server_kdb.c: Renamed kdb_put_entry to kdb_put_entry_internal and
+	added parameters to it to specify whether the modprinc info and the
+	generation number should be updated, wrote a new kdb_put_entry as a
+	wrapper for kdb_put_entry_internal that specifies both modprinc info
+	and the generation number should be updated.
+	(kdb_delete_entry): Now makes a call to update the generation number.
+	Added a new function kdb_update_generation_number which looks up the
+	master principal and calls krb5_dbe_update_generation_number_general
+	to update the generation number.
+
+	* server_misc.c: No longer includes adb.h (server_internal.h already
+	pulls this in).
+	(adb_policy_init): Modified to use the new osa_adb_open_policy
+	calling sequence.
+
+	* svr_iters.c: No longer includes adb.h (server_internal.h already
+	pulls this in).
+
+	* svr_policy.c: No longer includes adb.h (server_internal.h already
+	pulls this in).
+
+	* svr_principal.c: No longer includes adb.h (server_internal.h already
+	pulls this in).
+
+	* svr_generation.c: Added this new file containing the new function
+	kadm5_get_generation_number.
+
+2001-06-20  Mitchell Berger  <mitchb@mit.edu>
+
 	* server_dict.c: Silly typo fixed.
 
 2001-06-18  Ezra Peisach  <epeisach@mit.edu>

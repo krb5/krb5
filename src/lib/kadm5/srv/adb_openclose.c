@@ -11,7 +11,7 @@ static char *rcsid = "$Header$";
 #include	<sys/file.h>
 #include	<fcntl.h>
 #include	<unistd.h>
-#include	"adb.h"
+#include	"server_internal.h"
 #include	<stdlib.h>
 
 #define MAX_LOCK_TRIES 5
@@ -72,9 +72,9 @@ osa_adb_ret_t osa_adb_rename_db(char *filefrom, char *lockfrom,
 	 ret != EEXIST)
 	  return ret;
 
-     if ((ret = osa_adb_init_db(&fromdb, filefrom, lockfrom, magic)))
+     if ((ret = osa_adb_init_db(&fromdb, filefrom, lockfrom, magic, NULL)))
 	  return ret;
-     if ((ret = osa_adb_init_db(&todb, fileto, lockto, magic))) {
+     if ((ret = osa_adb_init_db(&todb, fileto, lockto, magic, NULL))) {
 	  (void) osa_adb_fini_db(fromdb, magic);
 	  return ret;
      }
@@ -109,7 +109,8 @@ osa_adb_ret_t osa_adb_rename_db(char *filefrom, char *lockfrom,
 }
 
 osa_adb_ret_t osa_adb_init_db(osa_adb_db_t *dbp, char *filename,
-			      char *lockfilename, int magic)
+			      char *lockfilename, int magic,
+			      struct _kadm5_server_handle_t *kadm5_handle)
 {
      osa_adb_db_t db;
      static struct _locklist *locklist = NULL;
@@ -216,6 +217,8 @@ osa_adb_ret_t osa_adb_init_db(osa_adb_db_t *dbp, char *filename,
 
      db->filename = strdup(filename);
      db->magic = magic;
+
+     db->kadm5_handle = kadm5_handle;
 
      *dbp = db;
      

@@ -10,7 +10,6 @@ static char *rcsid = "$Header$";
 
 #include	<sys/types.h>
 #include	<kadm5/admin.h>
-#include	"adb.h"
 #include	"server_internal.h"
 #include	<stdlib.h>
 

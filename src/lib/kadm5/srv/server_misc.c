@@ -11,7 +11,6 @@ static char *rcsid = "$Header$";
 #include    "k5-int.h"
 #include    <krb5/kdb.h>
 #include    <ctype.h>
-#include    "adb.h"
 #include    <pwd.h>
 
 /* for strcasecmp */
@@ -25,7 +24,8 @@ adb_policy_init(kadm5_server_handle_t handle)
     osa_adb_ret_t   ret;
     if(handle->policy_db == (osa_adb_policy_t) NULL)
 	if((ret = osa_adb_open_policy(&handle->policy_db,
-				      &handle->params)) != OSA_ADB_OK)
+				      &handle->params,
+				      handle)) != OSA_ADB_OK)
 	     return ret;
     return KADM5_OK;
 }

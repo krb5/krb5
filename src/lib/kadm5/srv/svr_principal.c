@@ -11,7 +11,6 @@ static char *rcsid = "$Header$";
 #include	<sys/types.h>
 #include	<sys/time.h>
 #include	<kadm5/admin.h>
-#include	"adb.h"
 #include	"k5-int.h"
 #include	<krb5/kdb.h>
 #include	<stdio.h>

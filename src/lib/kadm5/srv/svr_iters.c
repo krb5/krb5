@@ -21,7 +21,6 @@ static char *rcsid = "$Header$";
 #include	<sys/types.h>
 #include	<string.h>
 #include	<kadm5/admin.h>
-#include	"adb.h"
 #include	<dyn.h>
 #ifdef SOLARIS_REGEXPS
 #include	<regexpr.h>

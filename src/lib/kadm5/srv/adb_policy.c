@@ -10,7 +10,7 @@ static char *rcsid = "$Header$";
 
 #include	<sys/file.h>
 #include	<fcntl.h>
-#include	"adb.h"
+#include	"server_internal.h"
 #include	<stdlib.h>
 #include	<string.h>
 
@@ -59,11 +59,13 @@ osa_adb_ret_t osa_adb_destroy_policy_db(kadm5_config_params *params)
 }
 
 osa_adb_ret_t osa_adb_open_policy(osa_adb_princ_t *dbp,
-				  kadm5_config_params *rparams)
+				  kadm5_config_params *rparams,
+				  struct _kadm5_server_handle_t *kadm5_handle)
 {
      return osa_adb_init_db(dbp, rparams->admin_dbname,
 			    rparams->admin_lockfile,
-			    OSA_ADB_POLICY_DB_MAGIC);
+			    OSA_ADB_POLICY_DB_MAGIC,
+			    kadm5_handle);
 }
 
 osa_adb_ret_t osa_adb_close_policy(osa_adb_princ_t db)
@@ -140,6 +142,9 @@ osa_adb_create_policy(osa_adb_policy_t db, osa_policy_ent_t entry)
     }
     xdr_destroy(&xdrs);
 
+    /* The create succeeded, so we should increment the generation number. */
+    kdb_update_generation_number(db->kadm5_handle);
+
 error:
     CLOSELOCK(db);
     return ret;
@@ -196,6 +201,9 @@ osa_adb_destroy_policy(osa_adb_policy_t db, kadm5_policy_t name)
 	 ret = OSA_ADB_FAILURE;
 	 goto error;
     }
+
+    /* The destroy succeeded, so we should update the generation number. */
+    kdb_update_generation_number(db->kadm5_handle);
 
 error:
     CLOSELOCK(db);
@@ -335,6 +343,9 @@ osa_adb_put_policy(osa_adb_policy_t db, osa_policy_ent_t entry)
 	break;
     }
     xdr_destroy(&xdrs);
+
+    /* The update succeeded, so we should update the generation number. */
+    kdb_update_generation_number(db->kadm5_handle);
 
 error:
     CLOSELOCK(db);
