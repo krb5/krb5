@@ -43,6 +43,7 @@
 
 #define	DEFAULT_KDC_ETYPE	ETYPE_DES_CBC_CRC
 #define	DEFAULT_KDC_KEYTYPE	KEYTYPE_DES
+#define KDCRCACHE		"dfl:krb5kdc_rcache"
 
 #define KDC_PORTNAME	"kerberos"	/* for /etc/services or equiv. */
 
