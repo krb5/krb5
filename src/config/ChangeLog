@@ -1,5 +1,7 @@
 Tue Nov 18 19:20:59 1997  Tom Yu  <tlyu@mit.edu>
 
+	* pre.in: Clean up up .ct.c rule.
+
 	* lib.in (clean-libs): Remove lib$(LIB)$(SHLIBSEXT) as well.
 
 Mon Oct 20 14:27:19 1997  Theodore Y. Ts'o  <tytso@mit.edu>
