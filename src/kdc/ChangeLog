@@ -1,3 +1,16 @@
+2002-09-26  Ken Raeburn  <raeburn@mit.edu>
+
+	* network.c (struct connection): New field start_time.
+	(tcp_data_counter, max_tcp_data_connections): New variables.
+	(kill_tcp_connection): New function.
+	(process_tcp_connection): Use it.  Log reason for rejecting
+	connection if the requested buffer size is too large.
+	(accept_tcp_connection): If there are too many TCP connections
+	already, shut down the oldest one.
+	(setup_network, listen_and_process, process_tcp_connection,
+	service_conn): Delete debugging code.
+	(process_packet): Use socklen_t where appropriate.
+
 2002-09-19  Ken Raeburn  <raeburn@mit.edu>
 
 	* network.c: Include sys/filio.h if available.

@@ -170,6 +170,8 @@ struct connection {
 	    sg_buf sgbuf[2];
 	    sg_buf *sgp;
 	    int sgnum;
+	    /* crude denial-of-service avoidance support */
+	    time_t start_time;
 	} tcp;
     } u;
 };
@@ -659,15 +661,6 @@ setup_network(const char *prog)
 	com_err(prog, 0, "no sockets set up?");
 	exit (1);
     }
-    {
-	char buf[BUFSIZ];
-
-	buf[0] = 0;
-	for (i = 0; i <= sstate.max; i++)
-	    if (FD_ISSET(i, &sstate.rfds))
-		sprintf(buf+strlen(buf), " %d", i);
-	krb5_klog_syslog (LOG_INFO, "file descriptors (max=%d): %d", sstate.max, buf);
-    }
 
     return 0;
 }
@@ -707,7 +700,8 @@ static void init_addr(krb5_fulladdr *faddr, struct sockaddr *sa)
 static void process_packet(struct connection *conn, const char *prog,
 			   int selflags)
 {
-    int cc, saddr_len;
+    int cc;
+    socklen_t saddr_len;
     krb5_fulladdr faddr;
     krb5_error_code retval;
     struct sockaddr_storage saddr;
@@ -742,7 +736,7 @@ static void process_packet(struct connection *conn, const char *prog,
 	com_err(prog, retval, "while dispatching (udp)");
 	return;
     }
-    cc = sendto(port_fd, response->data, (int) response->length, 0,
+    cc = sendto(port_fd, response->data, (socklen_t) response->length, 0,
 		(struct sockaddr *)&saddr, saddr_len);
     if (cc == -1) {
 	char addrbuf[46];
@@ -764,6 +758,11 @@ static void process_packet(struct connection *conn, const char *prog,
     krb5_free_data(kdc_context, response);
     return;
 }
+
+static int tcp_data_counter;
+static int max_tcp_data_connections = 30;
+
+static void kill_tcp_connection(struct connection *);
 
 static void accept_tcp_connection(struct connection *conn, const char *prog,
 				  int selflags)
@@ -808,6 +807,34 @@ static void accept_tcp_connection(struct connection *conn, const char *prog,
     newconn->u.tcp.addrlen = addrlen;
     newconn->u.tcp.bufsiz = 1024 * 1024;
     newconn->u.tcp.buffer = malloc(newconn->u.tcp.bufsiz);
+    newconn->u.tcp.start_time = time(0);
+
+    if (++tcp_data_counter > max_tcp_data_connections) {
+	struct connection *oldest_tcp = NULL;
+	struct connection *c;
+	int i;
+
+	krb5_klog_syslog(LOG_INFO, "too many connections");
+
+	FOREACH_ELT (connections, i, c) {
+	    if (c->type != CONN_TCP)
+		continue;
+	    if (c == newconn)
+		continue;
+#if 0
+	    krb5_klog_syslog(LOG_INFO, "fd %d started at %ld", c->fd,
+			     c->u.tcp.start_time);
+#endif
+	    if (oldest_tcp == NULL
+		|| oldest_tcp->u.tcp.start_time > c->u.tcp.start_time)
+		oldest_tcp = c;
+	}
+	if (oldest_tcp != NULL) {
+	    krb5_klog_syslog(LOG_INFO, "dropping tcp fd %d from %s",
+			     oldest_tcp->fd, oldest_tcp->u.tcp.addrbuf);
+	    kill_tcp_connection(oldest_tcp);
+	}
+    }
     if (newconn->u.tcp.buffer == 0) {
 	com_err(prog, errno, "allocating buffer for new TCP session from %s",
 		newconn->u.tcp.addrbuf);
@@ -824,6 +851,28 @@ static void accept_tcp_connection(struct connection *conn, const char *prog,
     FD_SET(s, &sstate.rfds);
     if (sstate.max <= s)
 	sstate.max = s + 1;
+}
+
+static void
+kill_tcp_connection(struct connection *conn)
+{
+    delete_fd(conn);
+    if (conn->u.tcp.response)
+	krb5_free_data(kdc_context, conn->u.tcp.response);
+    if (conn->u.tcp.buffer)
+	free(conn->u.tcp.buffer);
+    FD_CLR(conn->fd, &sstate.rfds);
+    FD_CLR(conn->fd, &sstate.wfds);
+    if (sstate.max == conn->fd + 1)
+	while (sstate.max > 0
+	       && ! FD_ISSET(sstate.max-1, &sstate.rfds)
+	       && ! FD_ISSET(sstate.max-1, &sstate.wfds)
+	       /* && ! FD_ISSET(sstate.max-1, &sstate.xfds) */
+	    )
+	    sstate.max--;
+    close(conn->fd);
+    conn->fd = -1;
+    tcp_data_counter--;
 }
 
 static void
@@ -868,7 +917,6 @@ process_tcp_connection(struct connection *conn, const char *prog, int selflags)
 	   data in the buffer, or only an incomplete message.  */
 	size_t len;
 	ssize_t nread;
-	krb5_klog_syslog(LOG_INFO, "buffer offset = %d", conn->u.tcp.offset);
 	if (conn->u.tcp.offset < 4) {
 	    /* msglen has not been computed */
 	    /* XXX Doing at least two reads here, letting the kernel
@@ -883,8 +931,6 @@ process_tcp_connection(struct connection *conn, const char *prog, int selflags)
 	    if (nread == 0)
 		/* eof */
 		goto kill_tcp_connection;
-	    krb5_klog_syslog(LOG_INFO, "read %d bytes from fd %d",
-			     nread, conn->fd);
 	    conn->u.tcp.offset += nread;
 	    if (conn->u.tcp.offset == 4) {
 		unsigned char *p = (unsigned char *)conn->u.tcp.buffer;
@@ -892,9 +938,14 @@ process_tcp_connection(struct connection *conn, const char *prog, int selflags)
 				      | (p[1] << 16)
 				      | (p[2] <<  8)
 				      | p[3]);
-		if (conn->u.tcp.msglen > conn->u.tcp.bufsiz - 4)
+		if (conn->u.tcp.msglen > conn->u.tcp.bufsiz - 4) {
 		    /* message too big */
+		    krb5_klog_syslog(LOG_ERR, "TCP client %s wants %lu bytes, cap is %lu",
+				     conn->u.tcp.addrbuf, (unsigned long) conn->u.tcp.msglen,
+				     (unsigned long) conn->u.tcp.bufsiz - 4);
+		    /* XXX Should return an error.  */
 		    goto kill_tcp_connection;
+		}
 	    }
 	} else {
 	    /* msglen known */
@@ -910,8 +961,6 @@ process_tcp_connection(struct connection *conn, const char *prog, int selflags)
 	    if (nread == 0)
 		/* eof */
 		goto kill_tcp_connection;
-	    krb5_klog_syslog(LOG_INFO, "read %d bytes from fd %d; msglen=%ld",
-			     nread, conn->fd, (long)conn->u.tcp.msglen);
 	    conn->u.tcp.offset += nread;
 	    if (conn->u.tcp.offset < conn->u.tcp.msglen + 4)
 		return;
@@ -941,28 +990,12 @@ process_tcp_connection(struct connection *conn, const char *prog, int selflags)
     return;
 
 kill_tcp_connection:
-    delete_fd(conn);
-    if (conn->u.tcp.response)
-	krb5_free_data(kdc_context, conn->u.tcp.response);
-    if (conn->u.tcp.buffer)
-	free(conn->u.tcp.buffer);
-    FD_CLR(conn->fd, &sstate.rfds);
-    FD_CLR(conn->fd, &sstate.wfds);
-    if (sstate.max == conn->fd + 1)
-	while (sstate.max > 0
-	       && ! FD_ISSET(sstate.max-1, &sstate.rfds)
-	       && ! FD_ISSET(sstate.max-1, &sstate.wfds)
-	       /* && ! FD_ISSET(sstate.max-1, &sstate.xfds) */
-	    )
-	    sstate.max--;
-    close(conn->fd);
+    kill_tcp_connection(conn);
 }
 
 static void service_conn(struct connection *conn, const char *prog,
 			 int selflags)
 {
-    krb5_klog_syslog(LOG_INFO, "select flags 0x%x on fd %d", selflags,
-		     conn->fd);
     conn->service(conn, prog, selflags);
 }
 
@@ -985,31 +1018,12 @@ listen_and_process(const char *prog)
 	sstate.end_time.tv_sec = sstate.end_time.tv_usec = 0;
 	err = krb5int_cm_call_select(&sstate, &sout, &sret);
 	if (err) {
-	    char buf[BUFSIZ], tmpbuf[10];
 	    com_err(prog, err, "while selecting for network input(1)");
-	    buf[0] = 0;
-	    for (i = 0; i <= sstate.max; i++) {
-		int keep = 0;
-		sprintf(tmpbuf, " %d", i);
-		if (FD_ISSET(i, &sstate.rfds))
-		    strcat(tmpbuf, "r"), keep = 1;
-		if (FD_ISSET(i, &sstate.wfds))
-		    strcat(tmpbuf, "w"), keep = 1;
-		if (FD_ISSET(i, &sstate.xfds))
-		    strcat(tmpbuf, "x"), keep = 1;
-		if (keep)
-		    strcat(buf, tmpbuf);
-	    }
-	    krb5_klog_syslog(LOG_INFO, "fd set (max=%d): %s", sstate.max, buf);
-	    krb5int_debug_sendto_kdc = 1;
 	    continue;
 	}
 	if (sret == -1) {
-	    if (errno == EINTR)
-		continue;
-	    if (errno == EINVAL)
-		krb5int_debug_sendto_kdc = 1;
-	    com_err(prog, errno, "while selecting for network input(2)");
+	    if (errno != EINTR)
+		com_err(prog, errno, "while selecting for network input(2)");
 	    continue;
 	}
 	nfound = sret;
