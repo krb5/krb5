@@ -533,6 +533,8 @@ kerberos4_cksum(d, n)
 	}
 	return(ck);
 }
+#else
+#include "k5-int.h"
 #endif
 
 #ifdef notdef
