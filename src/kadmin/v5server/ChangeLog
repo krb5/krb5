@@ -1,3 +1,6 @@
+Tue Jun 27 18:14:33 1995  Sam Hartman  <hartmans@tardis.MIT.EDU>
+
+	* srv_main.c (main): Rearrange code so that we ask for the master key *before* we detach from the controlling terminal.  This causes the Kerberos context to be initialized in the parent before the fork; I'm not sure if this is acceptable or not.
 
 Tue Jun 27 16:02:24 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* srv_net.c, srv_acl.c, proto_serv.c - Add signal name parameter to
