@@ -4,7 +4,10 @@ OBJS=isode_err.o kdb5_err.o krb5_err.o
 
 HDRS=isode_err.h kdb5_err.h krb5_err.h
 
-all:: ${HDRS} ${SRCS} ${OBJS}
+all:: ${SRCS} ${HDRS} ${OBJS}
+
+clean::
+	$(RM) $(HDRS) $(SRCS)
 
 NormalLibraryObjectRule()
 ErrorTableObjectRule()
