@@ -64,7 +64,7 @@ int mode;
     krb5_error_code kerror;
 
     if (!(KTFILEP(id) = fopen(KTFILENAME(id),
-			      (mode == KRB5_LOCKMODE_EXCLUSIVE) ? "w" : "r")))
+			      (mode == KRB5_LOCKMODE_EXCLUSIVE) ? "a" : "r")))
 	return errno;
     if (kerror = krb5_lock_file(KTFILEP(id), KTFILENAME(id),
 				mode)) {
@@ -127,7 +127,7 @@ krb5_keytab_entry **entrypp;
 	return KRB5_KT_END;
     if (!count || (count < 0))
 	return KRB5_KT_END;		/* XXX */
-    if (!(ret_entry->principal = (krb5_data **)calloc(count, sizeof(krb5_data *))))
+    if (!(ret_entry->principal = (krb5_data **)calloc(count+1, sizeof(krb5_data *))))
 	return ENOMEM;
     for (i = 0; i < count; i++) {
 	if (!xfread(&princ_size, sizeof(princ_size), 1, KTFILEP(id)))
@@ -196,7 +196,7 @@ krb5_keytab_entry *entry;
 	if (!xfwrite(&size, sizeof(size), 1, KTFILEP(id))) {
 	    goto abend;
 	}
-	if (!xfwrite((*princp)->data, sizeof(char *), size, KTFILEP(id))) {
+	if (!xfwrite((*princp)->data, sizeof(char), size, KTFILEP(id))) {
 	    goto abend;
 	}
     }
