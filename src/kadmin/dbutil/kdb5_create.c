@@ -1,7 +1,7 @@
 /*
- * admin/create/kdb5_create.c
+ * kadmin/dbutil/kdb5_create.c
  *
- * Copyright 1990,1991 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991,2001 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -238,7 +238,7 @@ master key name '%s'\n",
     pwd.length = strlen(mkey_password);
     retval = krb5_principal2salt(util_context, master_princ, &master_salt);
     if (retval) {
-	com_err(argv[0], retval, "while calculated master key salt");
+	com_err(argv[0], retval, "while calculating master key salt");
 	exit_status++; return;
     }
 

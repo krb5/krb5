@@ -1,7 +1,7 @@
 /*
- * admin/edit/dump.c
+ * kadmin/dbutil/dump.c
  *
- * Copyright 1990,1991 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991,2001 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -712,7 +712,7 @@ dump_k5beta6_iterator_ext(ptr, entry, kadm)
 	 *	n_key_data*[ver kvno ver*(type length <contents>)]
 	 *	<e_data>
 	 * Fields which are not encapsulated by angle-brackets are to appear
-	 * verbatim.  Bracketed fields absence is indicated by a -1 in its
+	 * verbatim.  A bracketed field's absence is indicated by a -1 in its
 	 * place
 	 */
 
@@ -1746,7 +1746,7 @@ process_k5beta6_record(fname, kcontext, filep, verbose, linenop, pol_db)
 		 * and were not supported in the previous version.
 		 * But it's a pain to implement that here, and doing
 		 * it at dump time has almost as good an effect, so
-		 * that's what I did.  [krb5-admin/89/
+		 * that's what I did.  [krb5-admin/89]
 		 */
 		if (!error && dbentry.n_tl_data) {
 		    for (tl = dbentry.tl_data; tl; tl = tl->tl_data_next) {
@@ -1942,7 +1942,7 @@ process_k5beta7_policy(fname, kcontext, filep, verbose, linenop, pol_db)
 }
 
 /*
- * process_k5beta7_record()	- Handle a dump record in krb5b6 format.
+ * process_k5beta7_record()	- Handle a dump record in krb5b7 format.
  *
  * Returns -1 for end of file, 0 for success and 1 for failure.
  */

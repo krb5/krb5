@@ -80,7 +80,7 @@ done:
  * Purpose: parse principal line in db dump file
  *
  * Arguments:
- * 	<return value>	0 on sucsess, error code on failure
+ * 	<return value>	0 on success, error code on failure
  *
  * Requires:
  *	principal database to be opened.
