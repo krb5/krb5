@@ -29,9 +29,11 @@ static char rcsid_lock_file_c [] =
 
 extern int errno;
 
+/*ARGSUSED*/
 krb5_error_code
-krb5_lock_file(filep, mode)
+krb5_lock_file(filep, pathname, mode)
 FILE *filep;
+char *pathname;
 int mode;
 {
     int flock_flag = -1;
