@@ -92,6 +92,21 @@ Major Changes:
   DISALLOW_ALL_TIX and DISALLOW_SVR attributes on the server
   principal.  This also now happens with krb524d.
 
+* krb524d will now, by default, convert krb5 tickets for afs service
+  princpals to special tokens that are actually just the EncryptedData
+  part of a krb5 Ticket structure.  This may be overridden; please
+  consult src/krb524/README for details.
+
+* Patches from Sleepycat have been applied to the btree backend of the
+  Brekeley DB library; these fix potential problems with the page free
+  and page split operations.
+
+* The kdb5_util dump command has additional options to allow for
+  reversed or recursive (for btree only) dumps of the principal
+  database.  This permits the recovery of prinicpals that might
+  otherwise be omitted in a database dump in the presence of certain
+  types of corruption.
+
 * The dump command in kdb5_util now handles master key conversion
   without crashing.
 
