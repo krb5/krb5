@@ -1,3 +1,10 @@
+2001-08-30  Ken Raeburn  <raeburn@mit.edu>
+
+	* aclocal.m4 (AC_KRB5_TCL_FIND_CONFIG): Do put /usr/include/tcl$v
+	in TCL_INCLUDES if that's where tcl.h is found.  Don't include
+	tcl.h when testing to see if Tcl_CreateInterp is available.
+	(KRB5_AC_CHECK_INET6): Don't require getaddrinfo support.
+
 2001-08-21  Ken Raeburn  <raeburn@mit.edu>
 
 	* aclocal.m4 (KRB5_AC_CHECK_INET6): Don't check for

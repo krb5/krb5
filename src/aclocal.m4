@@ -246,7 +246,7 @@ AC_MSG_CHECKING(for IPv6 compile-time support)
 AC_CACHE_VAL(krb5_cv_inet6,[
 dnl NetBSD and Linux both seem to have gotten get*info but not getipnodeby*
 dnl as of the time I'm writing this, so we'll use get*info only.
-if test "$ac_cv_func_inet_ntop/$ac_cv_func_getaddrinfo" != "yes/yes" ; then
+if test "$ac_cv_func_inet_ntop != "yes ; then
   krb5_cv_inet6=no
 else
 AC_TRY_COMPILE([
@@ -263,11 +263,8 @@ AC_TRY_COMPILE([
 ],[
   struct sockaddr_in6 in;
   struct sockaddr_storage x;
-  struct addrinfo ai;
   AF_INET6;
   IN6_IS_ADDR_LINKLOCAL (&in.sin6_addr);
-  NI_NOFQDN, NI_NUMERICHOST, NI_NAMEREQD, NI_MAXHOST, EAI_FAIL;
-  AI_NUMERICHOST; /* RFC 2553 */
 ],krb5_cv_inet6=yes,krb5_cv_inet6=no)])
 fi
 AC_MSG_RESULT($krb5_cv_inet6)
@@ -749,8 +746,7 @@ if test -n "$tcl_conf" ; then
       done
       LIBS="$old_LIBS `eval echo x $TCL_LIB_SPEC $TCL_LIBS | sed 's/^x//'`"
       LDFLAGS="$old_LDFLAGS $TCL_LD_FLAGS"
-      AC_TRY_LINK([#include <tcl.h>
-],[Tcl_CreateInterp ();],
+      AC_TRY_LINK( , [Tcl_CreateInterp ();],
 	tcl_ok_conf=$file
 	tcl_vers_maj=$TCL_MAJOR_VERSION
 	tcl_vers_min=$TCL_MINOR_VERSION
@@ -770,14 +766,14 @@ tcl_lib=no
 if test -n "$tcl_ok_conf" ; then
   . $tcl_ok_conf
   TCL_INCLUDES=
-  if test "$TCL_PREFIX" != /usr ; then
-    for incdir in "$TCL_PREFIX/include/tcl$v" "$TCL_PREFIX/include" ; do
-      if test -r "$incdir/tcl.h" -o -r "$incdir/tcl/tcl.h" ; then
+  for incdir in "$TCL_PREFIX/include/tcl$v" "$TCL_PREFIX/include" ; do
+    if test -r "$incdir/tcl.h" -o -r "$incdir/tcl/tcl.h" ; then
+      if test "$incdir" != "/usr/include" ; then
         TCL_INCLUDES=-I$incdir
-        break
       fi
-    done
-  fi
+      break
+    fi
+  done
   TCL_LIBS="$TCL_LIB_SPEC $TCL_LIBS $TCL_DL_LIBS"
   TCL_LIBPATH=
   TCL_RPATH=
