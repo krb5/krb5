@@ -1,3 +1,8 @@
+2001-10-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* logger.c (krb5_klog_init): Initialize savec to keep compiler
+	happy.
+
 2001-10-05  Ken Raeburn  <raeburn@mit.edu>
 
 	* logger.c: Drop _MSDOS support.
