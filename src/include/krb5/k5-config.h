@@ -129,7 +129,10 @@ typedef unsigned char u_char;
 #define INTERFACE
 #define INTERFACE_C
 #define FAR
+
+#ifndef HAS_LABS
 #define labs(x) abs(x)
+#endif
 
 #endif /* __windows__ */
 

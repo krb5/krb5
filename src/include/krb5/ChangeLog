@@ -1,5 +1,10 @@
 Wed Mar  1 17:45:13 1995  Theodore Y. Ts'o  <tytso@dcl>
 
+	* configure.in, k5-config.h: Only define labs(x) -> abs(x) if
+		labs() is not defined elsewhere.  (This really shouldn't
+		be here at all, but is the expedient way to deal with lack
+		of labs().)
+
 	* Makefile.in: Change config.h -> k5-config.h and free.h ->
 		k5-free.h to reflect renamed header files for Mac/PC port.
 
