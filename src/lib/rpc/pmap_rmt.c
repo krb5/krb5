@@ -44,7 +44,7 @@ static char sccsid[] = "@(#)pmap_rmt.c 1.21 87/08/27 Copyr 1984 Sun Micro";
 #include <rpc/pmap_clnt.h>
 #include <rpc/pmap_rmt.h>
 #include <sys/socket.h>
-#ifdef sparc
+#ifdef sun
 #include <sys/sockio.h>
 #endif
 #include <stdio.h>
@@ -198,7 +198,7 @@ getbroadcastnets(addrs, sock, buf)
 				addrs[i++].s_addr = INADDR_ANY;
 #if 0 /* this is uuuuugly */
 				addrs[i++] = inet_makeaddr(inet_netof
-#if defined(hpux) || (defined(sparc) && defined(__svr4__)) || defined(linux) || (defined(__osf__) && defined(__alpha__))
+#if defined(hpux) || (defined(sun) && defined(__svr4__)) || defined(linux) || (defined(__osf__) && defined(__alpha__))
 							   (sin->sin_addr),
 #else /* hpux or solaris */
 							   (sin->sin_addr.s_addr),

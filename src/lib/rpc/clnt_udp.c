@@ -41,7 +41,7 @@ static char sccsid[] = "@(#)clnt_udp.c 1.39 87/08/11 Copyr 1984 Sun Micro";
 #include <rpc/rpc.h>
 #include <sys/socket.h>
 #include <sys/ioctl.h>
-#if defined(sparc)
+#if defined(sun)
 #include <sys/filio.h>
 #endif
 #include <netdb.h>

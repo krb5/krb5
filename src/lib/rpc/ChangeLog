@@ -1,3 +1,9 @@
+Wed Oct 23 00:08:27 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* pmap_rmt.c:
+	* clnt_udp.c: Change #ifdef sparc to #ifdef sun for more portability.
+		[fixes PR#123]
+
 Mon Oct 21 21:22:42 1996  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in, configure.in: Fixes to work with new directory
