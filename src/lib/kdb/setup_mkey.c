@@ -47,8 +47,8 @@ krb5_db_setup_mkey_name(context, keyname, realm, fullname, principal)
     krb5_principal *principal;
 {
     krb5_error_code retval;
-    int keylen;
-    int rlen = strlen(realm);
+    size_t keylen;
+    size_t rlen = strlen(realm);
     char *fname;
     
     if (!keyname)

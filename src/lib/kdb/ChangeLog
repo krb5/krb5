@@ -1,3 +1,8 @@
+2002-12-23  Ezra Peisach  <epeisach@bu.edu>
+
+	* setup_mkey.c (krb5_db_setup_mkey_name): Use size_t instead of
+	int for lengths.
+
 2002-12-18  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (check): Remove test_db before running tests.
