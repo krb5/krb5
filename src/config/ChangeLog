@@ -1,3 +1,12 @@
+1998-11-13  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* post.in (*-recurse): If $(MY_SUBDIRS) is non-NULL use it instead
+		of $(SUBDIRS) to control which directories are iterated
+		over.  (This is needed so we can fold a directory's
+		configure.in scripts into the parent's configure.in
+		without having to move all of its siblings as well into
+		the parent directory's configure.in.)
+
 1998-05-27  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* windows.in: Remove -DLEHMAN, which doesn't do anything.  (A grep
