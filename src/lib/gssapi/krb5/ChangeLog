@@ -1,3 +1,8 @@
+2001-04-24  Ezra Peisach  <epeisach@mit.edu>
+
+	* util_crypt.c (kg_make_confounder): Change variable random to
+ 	lrandom to prevent shadowing of global function.
+
 2000-12-07  Ken Raeburn  <raeburn@mit.edu>
 
 	* k5seal.c (make_seal_token_v1): Use ANSI-style definition,

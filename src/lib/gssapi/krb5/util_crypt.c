@@ -74,15 +74,15 @@ kg_make_confounder(context, key, buf)
 {
    krb5_error_code code;
    size_t blocksize;
-   krb5_data random;
+   krb5_data lrandom;
 
    if (code = krb5_c_block_size(context, key->enctype, &blocksize))
        return(code);
 
-   random.length = blocksize;
-   random.data = buf;
+   lrandom.length = blocksize;
+   lrandom.data = buf;
 
-   return(krb5_c_random_make_octets(context, &random));
+   return(krb5_c_random_make_octets(context, &lrandom));
 }
 
 int
