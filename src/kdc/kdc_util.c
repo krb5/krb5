@@ -150,11 +150,14 @@ struct kparg {
 };
 
 static krb5_error_code
-kdc_rdreq_keyproc(keyprocarg, principal, vno, key)
-krb5_pointer keyprocarg;
-krb5_principal principal;
-krb5_kvno vno;
-krb5_keyblock **key;
+kdc_rdreq_keyproc(DECLARG(krb5_pointer, keyprocarg),
+		  DECLARG(krb5_principal, principal),
+		  DECLARG(krb5_kvno, vno),
+		  DECLARG(krb5_keyblock **, key))
+OLDDECLARG(krb5_pointer, keyprocarg)
+OLDDECLARG(krb5_principal, principal)
+OLDDECLARG(krb5_kvno, vno)
+OLDDECLARG(krb5_keyblock **, key)
 {
     register struct kparg *whoisit = (struct kparg *)keyprocarg;
     register krb5_keyblock *newkey;
@@ -275,9 +278,9 @@ krb5_keyblock *in, *out;
 int direction;
 {
     if (direction == CONVERT_INTO_DB) {
-	return krb5_kdb_encrypt_key(in, out, &master_encblock);
+	return krb5_kdb_encrypt_key(&master_encblock, in, out);
     } else if (direction == CONVERT_OUTOF_DB) {
-	return krb5_kdb_decrypt_key(in, out, &master_encblock);
+	return krb5_kdb_decrypt_key(&master_encblock, in, out);
     } else
 	return KRB5_KDB_ILLDIRECTION;
 }
