@@ -1,3 +1,7 @@
+2002-02-28 Alexandra Ellwood <lxs@mit.edu>
+    * crypto_libinit.h: Changed macros so you can include crypto_libinit.h
+    and krb5_libinit.h at the same time
+
 2001-01-29  Ken Raeburn  <raeburn@mit.edu>
 
 	* make_checksum.c (krb5_c_make_checksum): Clear checksum contents
