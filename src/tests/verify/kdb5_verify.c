@@ -313,7 +313,7 @@ errout:
     free((char *)pwd_key.contents);
     free((char *)db_key.contents);
 
-    if (kdbe.kvno != 0) {
+    if (kdbe.kvno != 1) {
       fprintf(stderr, "\tkvno did not match stored value for %s.\n", str_princ);
       goto errout;
     }

@@ -1,3 +1,8 @@
+Thu Oct  6 12:42:47 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* kdb5_verify.c (check_princ): Check to make sure key version
+		number is 1, not 0.
+
 Thu Sep 29 23:00:05 1994  Theodore Y. Ts'o  (tytso@dcl)
 
  	* Makefile.in: Relink executable when libraries change
