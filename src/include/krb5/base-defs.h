@@ -57,6 +57,9 @@ typedef	krb5_data **	krb5_principal;	/* array of strings */
 typedef	void * krb5_pointer;
 #define PROTOTYPE(x) x
 #else
+/* make const & volatile available without effect */
+#define const
+#define volatile
 typedef char * krb5_pointer;
 #define PROTOTYPE(x) ()
 #endif /* __STDC__ */
