@@ -26,6 +26,7 @@
 #include "k5-int.h"
 #include "ktutil.h"
 #include <com_err.h>
+#include "adm_proto.h"
 #include <ss/ss.h>
 #include <stdio.h>
 #ifdef HAS_STDLIB_H
@@ -35,9 +36,6 @@
 extern ss_request_table ktutil_cmds;
 krb5_context kcontext;
 krb5_kt_list ktlist = NULL;
-
-static char *Month_names[] = { "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-			       "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
 
 int main(argc, argv)
     int argc;
@@ -203,14 +201,17 @@ void ktutil_list(argc, argv)
 	}
 	printf("%4d %4d ", i, lp->entry->vno);
 	if (show_time) {
+	    char fmtbuf[18];
+	    char fill;
+
 	    stime = localtime((time_t *)&lp->entry->timestamp);
-	    printf("%2d-%s-%2d %02d:%02d:%02d ",
-		   stime->tm_mday,
-		   Month_names[stime->tm_mon],
-		   stime->tm_year,
-		   stime->tm_hour,
-		   stime->tm_min,
-		   stime->tm_sec);
+	    fill = ' ';
+	    if (!krb5_timestamp_to_sfstring((krb5_timestamp)lp->entry->
+					    	timestamp,
+					    fmtbuf,
+					    sizeof(fmtbuf),
+					    &fill))
+		printf(fmtbuf);
 	}
 	printf("%40s", pname);
 	if (show_keys) {
