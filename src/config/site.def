@@ -237,9 +237,6 @@
 #define SharedLibXext NO	/* XXX - haven't made it sharable yet */
 #endif
 
-#define CompileEtCmd compile_et
-#define MkCmdsCmd mk_cmds
-
 #ifdef UltrixArchitecture
 #define DefaultCDebugFlags DebuggableCDebugFlags
 #else
