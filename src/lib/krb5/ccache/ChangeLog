@@ -1,9 +1,20 @@
 2002-08-09  Ken Raeburn  <raeburn@mit.edu>
 
 	* cc_file.c: All functions except krb5_change_cache and
-	krb5_get_notification_message now static.
+	krb5_get_notification_message now static.  Minor other shuffling
+	to become more similar to cc_stdio.c.
+	(krb5_fcc_data): Rename "fd" to "file"; change all uses.
 	* cc_stdio.c: All functions now static.  Rename all krb5_scc_
-	functions and krb5_scc_cursor to use krb5_fcc_ prefix instead.
+	functions, data types and macros to use krb5_fcc_ prefix instead.
+	Minor other shuffling to become more similar to cc_file.c.
+	(krb5_fcc_data): Rename from krb5_scc_data; reorder some fields.
+	(krb5_fcc_close_file): Never call fflush on a read-only file.
+	(BINARY_MODE): New macro.
+	(krb5_fcc_open_file): Combine ANSI_STDIO and non-ANSI cases
+	statements by using BINARY_MODE and compile-time string
+	concatenation.  Choose lock flag value separately from call to
+	krb5_lock_file.
+	(krb5_fcc_generate_new): Use BINARY_MODE.
 
 2002-07-09  Ken Raeburn  <raeburn@mit.edu>
 

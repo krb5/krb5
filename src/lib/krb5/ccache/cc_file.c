@@ -1089,8 +1089,8 @@ krb5_fcc_open_file (context, id, mode)
      krb5_ui_2 fcc_flen;
      krb5_ui_2 fcc_tag;
      krb5_ui_2 fcc_taglen;
-     int fd;
-     int open_flag, lock_flag;
+     int fd, open_flag;
+     int lock_flag;
      krb5_error_code retval = 0;
 
      if (data->file != -1) {
@@ -1179,16 +1179,16 @@ krb5_fcc_open_file (context, id, mode)
 	 retval = KRB5_CC_FORMAT;
 	 goto done;
      }
-     if ((fcc_fvno != htons(KRB5_FCC_FVNO_4)) &&
-	 (fcc_fvno != htons(KRB5_FCC_FVNO_3)) &&
-	 (fcc_fvno != htons(KRB5_FCC_FVNO_2)) &&
-	 (fcc_fvno != htons(KRB5_FCC_FVNO_1)))
+     data->version = ntohs(fcc_fvno);
+     if ((data->version != KRB5_FCC_FVNO_4) &&
+	 (data->version != KRB5_FCC_FVNO_3) &&
+	 (data->version != KRB5_FCC_FVNO_2) &&
+	 (data->version != KRB5_FCC_FVNO_1))
      {
 	 retval = KRB5_CCACHE_BADVNO;
 	 goto done;
      }
 
-     data->version = ntohs(fcc_fvno);
      data->file = fd;
 
      if (data->version == KRB5_FCC_FVNO_4) {
@@ -1315,18 +1315,20 @@ krb5_fcc_initialize(context, id, princ)
 
      MAYBE_OPEN(context, id, FCC_OPEN_AND_ERASE);
 
-#ifndef HAVE_FCHMOD
-#ifdef HAVE_CHMOD
-     reti = chmod(((krb5_fcc_data *) id->data)->filename, S_IREAD | S_IWRITE);
-#endif
+#if defined(HAVE_FCHMOD) || defined(HAVE_CHMOD)
+     {
+#ifdef HAVE_FCHMOD
+	 reti = fchmod(((krb5_fcc_data *) id->data)->file, S_IREAD | S_IWRITE);
 #else
-     reti = fchmod(((krb5_fcc_data *) id->data)->file, S_IREAD | S_IWRITE);
+	 reti = chmod(((krb5_fcc_data *) id->data)->filename, S_IREAD | S_IWRITE);
 #endif
-     if (reti == -1) {
-	 kret = krb5_fcc_interpret(context, errno);
-	 MAYBE_CLOSE(context, id, kret);
-	 return kret;
+	 if (reti == -1) {
+	     kret = krb5_fcc_interpret(context, errno);
+	     MAYBE_CLOSE(context, id, kret);
+	     return kret;
+	 }
      }
+#endif
      kret = krb5_fcc_store_principal(context, id, princ);
 
      MAYBE_CLOSE(context, id, kret);
@@ -1349,12 +1351,13 @@ krb5_fcc_close(context, id)
    krb5_ccache id;
 {
      register int closeval = KRB5_OK;
+     register krb5_fcc_data *data = (krb5_fcc_data *) id->data;
 
-     if (((krb5_fcc_data *) id->data)->file >= 0)
+     if (data->file >= 0)
 	     krb5_fcc_close_file(context, id);
 
-     krb5_xfree(((krb5_fcc_data *) id->data)->filename);
-     krb5_xfree(((krb5_fcc_data *) id->data));
+     krb5_xfree(data->filename);
+     krb5_xfree(data);
      krb5_xfree(id);
 
      return closeval;
@@ -1704,15 +1707,13 @@ krb5_fcc_end_seq_get(context, id, cursor)
    krb5_ccache id;
    krb5_cc_cursor *cursor;
 {
-     krb5_error_code kret = KRB5_OK;
-     
      /* don't close; it may be left open by the caller,
 	and if not, fcc_start_seq_get and/or fcc_next_cred will do the
 	MAYBE_CLOSE.
      MAYBE_CLOSE(context, id, kret); */
      krb5_xfree((krb5_fcc_cursor *) *cursor);
 
-     return kret;
+     return 0;
 }
 
 /*
@@ -1898,8 +1899,6 @@ krb5_fcc_retrieve(context, id, whichfields, mcreds, creds)
 }
 
 
-#define CHECK(ret) if (ret != KRB5_OK) return ret;
-
 /*
  * Modifies:
  * the file cache
@@ -1956,7 +1955,6 @@ lose:
      return ret;
 #undef TCHECK
 }
-#undef CHECK
 
 
 /*
@@ -1979,9 +1977,8 @@ krb5_fcc_set_flags(context, id, flags)
     /* XXX This should check for illegal combinations, if any.. */
     if (flags & KRB5_TC_OPENCLOSE) {
 	/* asking to turn on OPENCLOSE mode */
-	if (!OPENCLOSE(id)) {
+	if (!OPENCLOSE(id))
 	    (void) krb5_fcc_close_file (context, id);
-	}
     } else {
 	/* asking to turn off OPENCLOSE mode, meaning it must be
 	   left open.  We open if it's not yet open */
@@ -2009,7 +2006,7 @@ krb5_fcc_interpret(context, errnum)
     case ENOTDIR:
 #ifdef ELOOP
     case ELOOP:				/* XXX */
-#endif
+#endif /* ELOOP */
 #ifdef ETXTBSY
     case ETXTBSY:
 #endif
