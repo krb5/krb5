@@ -1,3 +1,7 @@
+Wed Jun 12 01:09:01 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* ser_ktf.c: Add #ifdef _WIN32 in places where we had #ifdef _MSDOS
+
 Thu May  9 03:05:51 1996  Richard Basch  <basch@lehman.com>
 
 	* ktf_g_ent.c (krb5_ktfile_get_entry): don't skip over keytab
