@@ -52,6 +52,7 @@
 #define	HAS_UNISTD_H
 #endif
 
+/*** SPLIT-HERE ***/
 #define	USE_DBM_LNAME		/* Use a DBM database for the aname/lname
 				   conversion */
 

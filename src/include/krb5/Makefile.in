@@ -1,6 +1,10 @@
 srcdir = @srcdir@
 VPATH = @srcdir@
 
+KRB5ROOT = @KRB5ROOT@
+KDB5DIR = $(KRB5ROOT)
+KRB5SRVTABDIR = /etc
+
 BUILDTOP = ../..
 
 RM = rm -f
@@ -38,3 +42,16 @@ install:: $(KRB5_HEADERS) config.h osconf.h autoconf.h
 	@set -x; for f in $(KRB5_HEADERS) config.h osconf.h ; \
 	do $(INSTALL) -c $(INSTDATFLAGS) $$f $(KRB5_INCDIR)/krb5/$$f ; \
 	done
+
+PROCESS_REPLACE = -e "s+@KRB5ROOT+$(KRB5ROOT)+" \
+		  -e "s+@KDB5DIR+$(KDB5DIR)+" \
+		  -e "s+@KRB5SRVTABDIR+${KRB5SRVTABDIR}+" \
+		  -e "/UnifdefRan/,/SPLIT-HERE/d"
+
+OSCONFSRC = $(srcdir)/stock/osconf.h $(srcdir)/stock/osauto.h
+
+osconf.h: $(OSCONFSRC)
+	cat $(OSCONFSRC) | sed $(PROCESS_REPLACE) > osconf.new
+	if cmp -s osconf.new osconf.h ; then true; \
+	else $(RM) osconf.h ; $(CP) osconf.new osconf.h ; fi
+
