@@ -2,7 +2,7 @@ CFLAGS = $(CCOPTS) $(DEFS)
 
 ##DOSBUILDTOP = ..\..
 ##DOSLIBNAME=kadm.lib
-
+RUN_SETUP=@KRB5_RUN_ENV@
 BASE_OBJS= adm_conn.$(OBJEXT)	\
 	adm_kt_dec.$(OBJEXT)	\
 	adm_kt_enc.$(OBJEXT)	\
@@ -76,8 +76,8 @@ t_ktentry:	$(T_KTENTRY_OBJS)
 TEST_PROGS	= t_dbentry t_ktentry
 
 check-unix::	$(TEST_PROGS)
-	./t_dbentry -r 100
-	./t_ktentry -r 100
+	$(RUN_SETUP) ./t_dbentry -r 100
+	$(RUN_SETUP) ./t_ktentry -r 100
 
 check-mac::
 

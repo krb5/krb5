@@ -270,11 +270,6 @@ clean-windows::
 	-$(RM) ..\..\floppy\kerberos.lib
 	-$(RM) ..\..\floppy\kerberos.dll
 
-install-unix::
-	$(INSTALL_DATA) $(LIBNAME) $(DESTDIR)$(KRB5_LIBDIR)/$(LIBNAME)
-	$(CHMOD) 644 $(DESTDIR)$(KRB5_LIBDIR)/$(LIBNAME)
-	$(RANLIB)    $(DESTDIR)$(KRB5_LIBDIR)/$(LIBNAME)
-	$(CHMOD) 444 $(DESTDIR)$(KRB5_LIBDIR)/$(LIBNAME)
 
 
 check-unix:: $(TEST_PROGS)
