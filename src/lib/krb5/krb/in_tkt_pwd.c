@@ -60,7 +60,7 @@ pwd_keyproc(context, type, salt, keyseed, key)
 
     if (!password->length) {
 	pwsize = BUFSIZ;
-	if ((password->data = malloc(password->length)) == NULL)
+	if ((password->data = malloc(pwsize)) == NULL)
 	    return ENOMEM;
 	
 	if ((retval = krb5_read_password(context, krb5_default_pwd_prompt1, 0,
