@@ -31,13 +31,11 @@ krb5_get_cred_via_tgt (DECLARG(krb5_creds *, tgt),
 		       DECLARG(const krb5_flags, kdcoptions),
 		       DECLARG(const krb5_enctype, etype),
 		       DECLARG(const krb5_cksumtype, sumtype),
-		       DECLARG(krb5_address * const *, addrs),
 		       DECLARG(krb5_creds *, cred))
 OLDDECLARG(krb5_creds *, tgt)
 OLDDECLARG(const krb5_flags, kdcoptions)
 OLDDECLARG(const krb5_enctype, etype)
 OLDDECLARG(const krb5_cksumtype, sumtype)
-OLDDECLARG(krb5_address * const *, addrs)
 OLDDECLARG(krb5_creds *, cred)
 {
     krb5_error_code retval;
@@ -68,7 +66,7 @@ OLDDECLARG(krb5_creds *, cred)
 
     if (retval = krb5_send_tgs(kdcoptions, &cred->times, etype, sumtype,
 			       cred->server,
-			       addrs,
+			       tgt->addresses,
 			       0,	/* no authorization data */
 			       0,		/* no second ticket */
 			       tgt, &tgsrep))
@@ -124,6 +122,11 @@ OLDDECLARG(krb5_creds *, cred)
     /* check compatibility here first ? XXX */
     cred->ticket_flags = dec_rep->enc_part2->flags;
     cred->is_skey = FALSE;
+    if (retval = krb5_copy_addresses(dec_rep->enc_part2->caddrs,
+				     &cred->addresses)) {
+	cleanup();
+	return retval;
+    }
 
     retval = krb5_encode_ticket(dec_rep->ticket, &scratch);
     if (!retval) {
