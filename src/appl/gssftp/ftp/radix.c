@@ -120,7 +120,7 @@ char *argv[];
 	int c, len = 0, decode = 0;
 	extern int optind;
 
-	while ((c = getopt(argc, argv, "d")) != EOF)
+	while ((c = getopt(argc, argv, "d")) != -1)
 		switch(c) {
 			default:
 				usage(argv[0]);
