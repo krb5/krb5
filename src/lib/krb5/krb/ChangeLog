@@ -4,6 +4,11 @@ Fri Jan 29 22:46:37 1999  Tom Yu  <tlyu@mit.edu>
 	know how much stuff to free upon cleanup.  Fix the up cleanup
 	code.
 
+Tue Jul  7 17:06:13 1998  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* conv_princ.c: Add additional commonly seen Kerberos V4 services
+		to the hard-coded list.
+
 Tue Jul  7 16:59:03 1998  Tom Yu  <tlyu@mit.edu>
 
 	* chk_trans.c: Fix up previous fix; short-circuit out when
