@@ -1,0 +1,10 @@
+Mon Feb  2 17:02:29 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in: Define BUILDTOP and thisconfigdir in the Makefile
+
+Mon Feb  2 17:05:10 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* configure.in: Remove SubDirLibrary rules (we will need to fix
+		this directory when we decide to build it again.)
+
+	* Makefile.in: Define BUILDTOP and thisconfigdir in the Makefile

@@ -6,7 +6,6 @@
  * For copyright information, see mit-sipb-copyright.h.
  */
 
-#include "mit-sipb-copyright.h"
 #include <stdio.h>
 #include "ss_internal.h"
 

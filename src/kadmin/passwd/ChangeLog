@@ -1,3 +1,14 @@
+Thu Feb 12 10:22:47 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* configure.in: Remove unused NetBSD kludge to prevent use of
+		USE_KDB5_LIBRARY, since these macros are obsolete.
+
+Mon Feb  2 17:02:29 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* configure.in: Removed use of DO_SUBDIRS.
+
+	* Makefile.in: Define BUILDTOP and thisconfigdir in the Makefile
+
 Fri Jan 30 15:29:28 1998  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Remove install rules.

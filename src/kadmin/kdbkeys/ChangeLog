@@ -1,3 +1,12 @@
+Thu Feb 12 10:24:16 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* configure.in: Removed obsolete macros: USE_KADMSRV_LIBRARY,n
+		USE_GSSRPC_LIBRARY, USE_DYN_LIBRARY, USE_KDB5_LIBRARY
+
+Mon Feb  2 17:02:29 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in: Define BUILDTOP and thisconfigdir in the Makefile
+
 Thu Jul 18 19:44:10 1996  Marc Horowitz  <marc@mit.edu>
 
 	* configure.in: removed ET_RULES, replaced with AC_PROG_AWK

@@ -1,3 +1,11 @@
+Mon Feb  2 17:02:29 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* pre.in: SUBDIRS now also includes LOCAL_SUBDIRS, which is
+		defined in the Makefile.in to control the recursive
+		descent through the subdirectories.  This is used so
+		that the subdirectories can be defined in Makefile.in,
+		instead of in the individual configure.in files.
+
 Tue Nov 18 19:20:59 1997  Tom Yu  <tlyu@mit.edu>
 
 	* pre.in: Clean up up .ct.c rule.

@@ -1,4 +1,5 @@
-##DOS##BUILDTOP=..\..
+thisconfigdir=./../
+BUILDTOP=$(U)$(U)
 
 CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
 PROG_LIBPATH=-L$(TOPLIBD)

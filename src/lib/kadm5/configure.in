@@ -1,7 +1,6 @@
 AC_INIT(configure.in)
 CONFIG_RULES
 AC_CONFIG_SUBDIRS(clnt srv unit-test)
-DO_SUBDIRS
 AC_PROG_ARCHIVE
 AC_PROG_ARCHIVE_ADD
 AC_PROG_RANLIB
@@ -10,16 +9,5 @@ AC_PROG_LEX
 AC_PROG_AWK
 AC_CHECK_HEADERS(syslog.h)
 AC_CHECK_FUNCS(openlog syslog closelog strftime vsprintf)
-CopySrcHeader(adb.h,[$](BUILDTOP)/include/kadm5)
-CopySrcHeader(admin.h,[$](BUILDTOP)/include/kadm5)
-CopySrcHeader(admin_internal.h,[$](BUILDTOP)/include/kadm5)
-CopySrcHeader(admin_xdr.h,[$](BUILDTOP)/include/kadm5)
-dnl CopySrcHeader(client_internal.h,[$](BUILDTOP)/include/kadm5)
-CopySrcHeader(kadm_rpc.h,[$](BUILDTOP)/include/kadm5)
-dnl CopySrcHeader(server_acl.h,[$](BUILDTOP)/include/kadm5)
-CopySrcHeader(server_internal.h,[$](BUILDTOP)/include/kadm5)
-CopyHeader(adb_err.h,[$](BUILDTOP)/include/kadm5)
-CopyHeader(chpass_util_strings.h,[$](BUILDTOP)/include/kadm5)
-CopyHeader(kadm_err.h,[$](BUILDTOP)/include/kadm5)
 KRB5_BUILD_LIBOBJS
 V5_AC_OUTPUT_MAKEFILE

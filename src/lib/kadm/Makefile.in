@@ -1,3 +1,5 @@
+thisconfigdir=./
+BUILDTOP=$(U)$(U)
 CFLAGS = $(CCOPTS) $(DEFS) 
 
 ##DOS##BUILDTOP = ..\..
@@ -36,9 +38,12 @@ SRCS=	$(srcdir)/adm_conn.c	\
 #	$(srcdir)/adm_kw_dec.c	\
 #	$(srcdir)/adm_kw_enc.c
 
+../libkadm.a: libkadm.a
+	$(RM) $@
+	$(LN) ./kadm/$? $@
 
 all-unix:: $(BASE_OBJS) $(DB_OBJS) $(UNIX_OBJS)
-all-unix:: libkadm.a
+all-unix:: libkadm.a ../libkadm.a
 all-mac:: $(BASE_OBJS) $(DB_OBJS)
 
 ##DOS##LIBOBJS = $(BASE_OBJS)

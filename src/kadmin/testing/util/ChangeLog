@@ -1,3 +1,7 @@
+Mon Feb  2 17:02:29 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in: Define BUILDTOP and thisconfigdir in the Makefile
+
 Wed Oct 22 15:40:34 1997  Ezra Peisach  <epeisach@dumpster.rose.brandeis.edu>
 
 	* test.c, tcl_ovsec_kadm.c, tcl_krb5_hash.c, tcl_kadm5.c: Include

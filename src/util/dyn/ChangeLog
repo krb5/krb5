@@ -1,3 +1,10 @@
+Wed Jan 28 17:50:30 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* configure.in, Makefile.in: Remove CopySrcHeader from
+		configure.in, and move functionality to Makefile.in
+
+	* Makefile.in: Define BUILDTOP and thisconfigdir in the Makefile
+
 Sat Dec  6 22:50:03 1997  Ezra Peisach  <epeisach@mit.edu>
 
 	* dyn_delete.c: Include <string.h>

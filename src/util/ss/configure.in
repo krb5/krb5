@@ -12,9 +12,6 @@ CHECK_SIGPROCMASK
 AC_RETSIGTYPE
 AC_HEADER_STDARG
 AC_CHECK_HEADERS(stdlib.h)
-CopySrcHeader(ss.h,$(BUILDTOP)/include/ss)
-CopySrcHeader(mit-sipb-copyright.h,$(BUILDTOP)/include/ss)
-CopyHeader(ss_err.h,$(BUILDTOP)/include/ss)
 KRB5_BUILD_LIBRARY_STATIC
 KRB5_BUILD_LIBOBJS
 V5_AC_OUTPUT_MAKEFILE

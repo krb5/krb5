@@ -1,3 +1,7 @@
+Mon Feb  2 16:44:41 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in: Define BUILDTOP and thisconfigdir in the Makefile
+
 Wed Feb 26 23:12:24 1997  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Add $(LIBS) so that compile doesn't blow out under

@@ -1,3 +1,7 @@
+Mon Feb  2 17:03:20 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in: Define BUILDTOP and thisconfigdir in the Makefile
+
 Tue Oct 28 10:53:10 1997  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* ktf_wreslv.c, ktf_resolv.c:Initialize version element of

@@ -1,3 +1,7 @@
+thisconfigdir=./
+BUILDTOP=$(U)$(U)$(U)
+LOCAL_SUBDIRS = file
+
 CFLAGS = $(CCOPTS) $(DEFS)
 
 ##DOS##BUILDTOP = ..\..\..

@@ -1,7 +1,6 @@
 AC_INIT(auth_gssapi.c)
 CONFIG_RULES
-CONFIG_DIRS(unit-test)
-DO_SUBDIRS
+AC_CONFIG_SUBDIRS(unit-test)
 AC_PROG_ARCHIVE
 AC_PROG_ARCHIVE_ADD
 AC_PROG_RANLIB
@@ -71,24 +70,9 @@ extern void endrpcent();],
 [int i;], k5_cv_type_endrpcent=void, k5_cv_type_endrpcent=int)])dnl
 AC_MSG_RESULT($k5_cv_type_endrpcent)
 AC_DEFINE_UNQUOTED(ENDRPCENT_TYPE, $k5_cv_type_endrpcent)
-
 DECLARE_SYS_ERRLIST
-
-CopySrcHeader(auth.h,[$](BUILDTOP)/include/rpc)
-CopySrcHeader(auth_gssapi.h,[$](BUILDTOP)/include/rpc)
-CopySrcHeader(auth_unix.h,[$](BUILDTOP)/include/rpc)
-CopySrcHeader(clnt.h,[$](BUILDTOP)/include/rpc)
-CopySrcHeader(netdb.h,[$](BUILDTOP)/include/rpc)
-CopySrcHeader(pmap_clnt.h,[$](BUILDTOP)/include/rpc)
-CopySrcHeader(pmap_prot.h,[$](BUILDTOP)/include/rpc)
-CopySrcHeader(pmap_rmt.h,[$](BUILDTOP)/include/rpc)
-CopySrcHeader(rpc.h,[$](BUILDTOP)/include/rpc)
-CopySrcHeader(rpc_msg.h,[$](BUILDTOP)/include/rpc)
-CopySrcHeader(svc.h,[$](BUILDTOP)/include/rpc)
-CopySrcHeader(svc_auth.h,[$](BUILDTOP)/include/rpc)
-CopyHeader(types.h,[$](BUILDTOP)/include/rpc)
-CopySrcHeader(xdr.h,[$](BUILDTOP)/include/rpc)
-
 KRB5_BUILD_LIBOBJS
 KRB5_BUILD_LIBRARY_WITH_DEPS
-V5_AC_OUTPUT_MAKEFILE( ,types.h:types.hin)
+K5_GEN_MAKEFILE(., lib libobj)
+K5_GEN_FILE(types.h:types.hin)
+K5_OUTPUT_FILES

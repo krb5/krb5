@@ -1,3 +1,12 @@
+Thu Feb 12 10:24:40 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* configure.in: Removed obsolete macros: USE_KDB5_LIBRARY, 
+		USE_KRB4_LIBRARY
+
+Mon Feb  2 17:02:29 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in: Define BUILDTOP and thisconfigdir in the Makefile
+
 Fri Nov 22 15:49:35 1996  unknown  <bjaspan@mit.edu>
 
 	* kadm_ser_wrap.c (kadm_ser_init): use sizeof instead of h_length

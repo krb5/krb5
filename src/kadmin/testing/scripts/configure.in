@@ -7,4 +7,7 @@ RBUILD=`pwd`/../../..
 AC_SUBST(RBUILD)
 dnl The following are substituted into env-setup.sh
 AC_SUBST(SRCTOP)
-V5_AC_OUTPUT_MAKEFILE( ,env-setup.sh:env-setup.shin)
+K5_GEN_MAKEFILE(.)
+K5_GEN_FILE(env-setup.sh:env-setup.shin)
+K5_OUTPUT_FILES
+

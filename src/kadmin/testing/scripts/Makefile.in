@@ -1,3 +1,5 @@
+thisconfigdir=./
+BUILDTOP=$(U)$(U)$(U)
 PERL=@PERL@
 
 .SUFFIXES: .plin .pl

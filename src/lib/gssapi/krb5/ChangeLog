@@ -1,3 +1,12 @@
+Mon Feb  2 17:02:29 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in: Define BUILDTOP and thisconfigdir in the Makefile
+
+Wed Jan 28 16:57:05 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* configure.in, Makefile.in: Remove use of CopySrcHeader from
+		configure.in and move functionality to Makefile.in
+
 Thu Feb  5 22:39:44 1998  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* wrap_size_limit.c (krb5_gss_wrap_size_limit): Fix bug where if

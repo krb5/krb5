@@ -1,8 +1,0 @@
-AC_INIT(configure.in)
-CONFIG_RULES
-AC_PROG_AWK
-AC_PROG_INSTALL
-AC_CHECK_HEADERS(stdlib.h)
-KRB5_BUILD_LIBOBJS
-CopySrcHeader(gssapi_krb5.h,[$](BUILDTOP)/include/gssapi)
-V5_AC_OUTPUT_MAKEFILE

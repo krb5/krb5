@@ -1,5 +1,4 @@
 AC_INIT(configure.in)
 CONFIG_RULES
-CONFIG_DIRS(sample simple user_user bsd gss-sample gssftp telnet)
-DO_SUBDIRS
+AC_CONFIG_SUBDIRS(sample simple user_user bsd gss-sample gssftp telnet)
 V5_AC_OUTPUT_MAKEFILE

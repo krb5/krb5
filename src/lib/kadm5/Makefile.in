@@ -1,3 +1,5 @@
+thisconfigdir=./
+BUILDTOP=$(U)$(U)
 CFLAGS = $(CCOPTS) $(DEFS)
 
 ##DOSBUILDTOP = ..\..
@@ -59,6 +61,30 @@ HDRS =	$(HDRDIR)/adb.h \
 	$(HDRDIR)/adb_err.h \
 	$(HDRDIR)/chpass_util_strings.h \
 	$(HDRDIR)/kadm_err.h
+
+BUILD_HDRS = adb_err.h chpass_util_strings.h kadm_err.h
+SRC_HDRS = adb.h admin.h admin_internal.h admin_xdr.h kadm_rpc.h \
+		server_internal.h 
+
+includes:: $(SRC_HDRS) $(BUILD_HDRS)
+	mkdir -p $(HDRDIR)
+	for i in $(SRC_HDRS) ; do \
+		if cmp $(srcdir)/$$i $(HDRDIR)/$$i >/dev/null 2>&1; then :; \
+		else \
+			(set -x; $(RM) $(HDRDIR)/$$i; \
+			 $(CP) $(srcdir)/$$i $(HDRDIR)/$$i) ; \
+		fi ; \
+	done
+	for i in $(BUILD_HDRS) ; do \
+		if cmp $$i $(HDRDIR)/$$i >/dev/null 2>&1; then :; \
+		else \
+			(set -x; $(RM) $(HDRDIR)/$$i; \
+			 $(CP) $$i $(HDRDIR)/$$i) ; \
+		fi ; \
+	done
+
+clean-unix::
+	$(RM) $(HDRS)
 
 all-prerecurse:: includes
 all-prerecurse:: all-libobjs

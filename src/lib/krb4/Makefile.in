@@ -1,3 +1,5 @@
+thisconfigdir=./
+BUILDTOP=$(U)$(U)
 CFLAGS = $(CCOPTS) $(DEFS) $(DEFINES)
 DEFINES=-I$(srcdir)/../../include/kerberosIV
 
@@ -194,6 +196,18 @@ krb_err.c: krb_err.et
 
 depend:: krb_err.h
 depend:: $(CODE) 
+
+includes:: krb_err.h
+	if cmp /krb_err.h $(EHDRDIR)/krb_err.h >/dev/null 2>&1; then :; \
+	else \
+		(set -x; $(RM) $(EHDRDIR)/krb_err.h; \
+		 $(CP) krb_err.h $(EHDRDIR)/krb_err.h) ; \
+	fi
+
+clean-unix::
+	$(RM) $(EHDRDIR)/krb_err.h
+
+
 
 #install-unix::
 #	$(INSTALL_DATA) krb_err.h $(DESTDIR)$(KRB5_INCDIR)/kerberosIV/krb_err.h

@@ -1,3 +1,5 @@
+thisconfigdir=./
+BUILDTOP=$(U)
 all::
 
 install::

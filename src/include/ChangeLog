@@ -1,3 +1,10 @@
+Mon Feb  2 17:02:29 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* configure.in: Use AC_CONFIG_DIRS instead of CONFIG_DIRS, and
+		remove use of DO_SUBDIRS.
+
+	* Makefile.in: Define BUILDTOP and thisconfigdir in the Makefile
+
 Thu Jan 29 20:15:30 1998  Dan Winship  <danw@mit.edu>
 
 	* krb5.hin: fix #define of krb5_cc_gen_new (takes a krb5_ccache *,

@@ -1,3 +1,5 @@
+thisconfigdir=./
+BUILDTOP=$(U)$(U)
 RELDIR=../util/pty
 CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
 
@@ -53,6 +55,20 @@ clean-mac::
 	$(RM) $(LIBOBJS)
 
 ## 
+
+includes:: libpty.h
+	if cmp $(srcdir)/libpty.h \
+	$(BUILDTOP)/include/libpty.h >/dev/null 2>&1; then :; \
+	else \
+		(set -x; $(RM) $(BUILDTOP)/include/libpty.h; \
+		 $(CP) $(srcdir)/libpty.h \
+			$(BUILDTOP)/include/libpty.h) ; \
+	fi
+
+clean-unix::
+	$(RM) $(BUILDTOP)/include/libpty.h
+
+
 
 clean-unix:: clean-liblinks clean-libs clean-libobjs clean-files
 

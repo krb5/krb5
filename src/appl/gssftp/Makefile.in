@@ -1,2 +1,4 @@
+thisconfigdir=./
+BUILDTOP=$(U)$(U)
 CFLAGS = $(CCOPTS)
 LDFLAGS = -g

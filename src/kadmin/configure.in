@@ -5,6 +5,5 @@ v4server=""
 else
 v4server=v4server
 fi
-CONFIG_DIRS(cli dbutil passwd ktutil server $v4server v5passwdd testing)
-DO_SUBDIRS
+AC_CONFIG_SUBDIRS(cli dbutil passwd ktutil server $v4server v5passwdd testing)
 V5_AC_OUTPUT_MAKEFILE

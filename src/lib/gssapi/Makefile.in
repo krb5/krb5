@@ -1,4 +1,7 @@
-##DOSBUILDTOP = ..\..
+thisconfigdir=./
+BUILDTOP=$(U)$(U)
+LOCAL_SUBDIRS= generic krb5
+
 ##DOSLIBNAME=gssapi.lib
 ##DOSOBJFILELIST=@generic.lst @krb5.lst
 ##DOSOBJFILEDEP=generic.lst krb5.lst

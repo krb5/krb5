@@ -1,3 +1,5 @@
+thisconfigdir=./
+BUILDTOP=$(U)$(U)$(U)
 check unit-test:: unit-test-@DO_TEST@
 
 unit-test-:

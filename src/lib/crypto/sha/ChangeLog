@@ -1,3 +1,7 @@
+Mon Feb  2 17:02:29 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in: Define BUILDTOP and thisconfigdir in the Makefile
+
 Tue Oct 28 16:37:18 1997  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
 
 	* shs.c, sha_glue.c, hmac_sha.c: Fix to deal with LONG wider than

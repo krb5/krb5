@@ -1,4 +1,4 @@
-This is Info file autoconf.info, produced by Makeinfo-1.55 from the
+This is Info file autoconf.info, produced by Makeinfo-1.64 from the
 input file ./autoconf.texi.
 
 START-INFO-DIR-ENTRY
@@ -3101,7 +3101,7 @@ automatically.
      Notify the user of an error that prevents `configure' from
      completing.  This macro prints an error message on the standard
      error output and exits `configure' with a nonzero status.
-     eRROR-DESCRIPTION should be something like `invalid value $HOME
+     ERROR-DESCRIPTION should be something like `invalid value $HOME
      for \$HOME'.
 
  - Macro: AC_MSG_WARN (PROBLEM-DESCRIPTION)
@@ -3338,7 +3338,7 @@ it is considered obsolete.
 
  - Macro: AC_PROVIDE (THIS-MACRO-NAME)
      Record the fact that THIS-MACRO-NAME has been called.
-     tHIS-MACRO-NAME should be the name of the macro that is calling
+     THIS-MACRO-NAME should be the name of the macro that is calling
      `AC_PROVIDE'.  An easy way to get it is from the `m4' builtin
      variable `$0', like this:
 
@@ -5053,12 +5053,12 @@ Autoconf checks.
 
 * Menu:
 
-* AC_MACRODIR:                          Invoking autoupdate.
+* AC_MACRODIR <1>:                      Invoking autoupdate.
+* AC_MACRODIR <2>:                      Invoking autoheader.
+* AC_MACRODIR <3>:                      Invoking autoreconf.
+* AC_MACRODIR <4>:                      Invoking autoconf.
+* AC_MACRODIR <5>:                      Invoking ifnames.
 * AC_MACRODIR:                          Invoking autoscan.
-* AC_MACRODIR:                          Invoking autoreconf.
-* AC_MACRODIR:                          Invoking ifnames.
-* AC_MACRODIR:                          Invoking autoheader.
-* AC_MACRODIR:                          Invoking autoconf.
 * CONFIG_FILES:                         Invoking config.status.
 * CONFIG_HEADERS:                       Invoking config.status.
 * CONFIG_SHELL:                         Invoking config.status.
@@ -5087,18 +5087,17 @@ how this is done.
 * build_cpu:                            System Type Variables.
 * build_os:                             System Type Variables.
 * build_vendor:                         System Type Variables.
+* CC <1>:                               UNIX Variants.
 * CC:                                   Particular Programs.
-* CC:                                   UNIX Variants.
-* CC:                                   Particular Programs.
+* CFLAGS <1>:                           Particular Programs.
 * CFLAGS:                               Preset Output Variables.
-* CFLAGS:                               Particular Programs.
 * configure_input:                      Preset Output Variables.
 * CPP:                                  Particular Programs.
 * CPPFLAGS:                             Preset Output Variables.
 * CXX:                                  Particular Programs.
 * CXXCPP:                               Particular Programs.
+* CXXFLAGS <1>:                         Particular Programs.
 * CXXFLAGS:                             Preset Output Variables.
-* CXXFLAGS:                             Particular Programs.
 * datadir:                              Preset Output Variables.
 * DEFS:                                 Preset Output Variables.
 * exec_prefix:                          Preset Output Variables.
@@ -5115,17 +5114,14 @@ how this is done.
 * KMEM_GROUP:                           Particular Functions.
 * LDFLAGS:                              Preset Output Variables.
 * LEX:                                  Particular Programs.
-* LEXLIB:                               Particular Programs.
 * LEX_OUTPUT_ROOT:                      Particular Programs.
+* LEXLIB:                               Particular Programs.
 * libdir:                               Preset Output Variables.
 * libexecdir:                           Preset Output Variables.
+* LIBOBJS <1>:                          Structures.
+* LIBOBJS <2>:                          Generic Functions.
 * LIBOBJS:                              Particular Functions.
-* LIBOBJS:                              Particular Functions.
-* LIBOBJS:                              Particular Functions.
-* LIBOBJS:                              Generic Functions.
-* LIBOBJS:                              Structures.
-* LIBS:                                 UNIX Variants.
-* LIBS:                                 UNIX Variants.
+* LIBS <1>:                             UNIX Variants.
 * LIBS:                                 Preset Output Variables.
 * LN_S:                                 Particular Programs.
 * localstatedir:                        Preset Output Variables.
@@ -5165,9 +5161,15 @@ use these names in `#if' directives.
 
 * Menu:
 
+* __CHAR_UNSIGNED__:                    Compiler Characteristics.
+* _ALL_SOURCE:                          UNIX Variants.
+* _MINIX:                               UNIX Variants.
+* _POSIX_1_SOURCE:                      UNIX Variants.
+* _POSIX_SOURCE:                        UNIX Variants.
+* _POSIX_VERSION:                       Particular Headers.
+* C_ALLOCA:                             Particular Functions.
 * CLOSEDIR_VOID:                        Particular Functions.
 * const:                                Compiler Characteristics.
-* C_ALLOCA:                             Particular Functions.
 * DGUX:                                 Particular Functions.
 * DIRENT:                               Particular Headers.
 * GETGROUPS_T:                          Particular Typedefs.
@@ -5186,11 +5188,11 @@ use these names in `#if' directives.
 * HAVE_MMAP:                            Particular Functions.
 * HAVE_NDIR_H:                          Particular Headers.
 * HAVE_RESTARTABLE_SYSCALLS:            System Services.
-* HAVE_STRCOLL:                         Particular Functions.
-* HAVE_STRFTIME:                        Particular Functions.
 * HAVE_ST_BLKSIZE:                      Structures.
 * HAVE_ST_BLOCKS:                       Structures.
 * HAVE_ST_RDEV:                         Structures.
+* HAVE_STRCOLL:                         Particular Functions.
+* HAVE_STRFTIME:                        Particular Functions.
 * HAVE_SYS_DIR_H:                       Particular Headers.
 * HAVE_SYS_NDIR_H:                      Particular Headers.
 * HAVE_SYS_WAIT_H:                      Particular Headers.
@@ -5221,9 +5223,9 @@ use these names in `#if' directives.
 * size_t:                               Particular Typedefs.
 * STDC_HEADERS:                         Particular Headers.
 * SVR4:                                 Particular Functions.
+* SYS_SIGLIST_DECLARED:                 Particular Headers.
 * SYSDIR:                               Particular Headers.
 * SYSNDIR:                              Particular Headers.
-* SYS_SIGLIST_DECLARED:                 Particular Headers.
 * TIME_WITH_SYS_TIME:                   Structures.
 * TM_IN_SYS_TIME:                       Structures.
 * uid_t:                                Particular Typedefs.
@@ -5234,13 +5236,6 @@ use these names in `#if' directives.
 * VOID_CLOSEDIR:                        Particular Headers.
 * WORDS_BIGENDIAN:                      Compiler Characteristics.
 * YYTEXT_POINTER:                       Particular Programs.
-* _ALL_SOURCE:                          UNIX Variants.
-* _MINIX:                               UNIX Variants.
-* _POSIX_1_SOURCE:                      UNIX Variants.
-* _POSIX_SOURCE:                        UNIX Variants.
-* _POSIX_SOURCE:                        UNIX Variants.
-* _POSIX_VERSION:                       Particular Headers.
-* __CHAR_UNSIGNED__:                    Compiler Characteristics.
 
 
 File: autoconf.info,  Node: Macro Index,  Prev: Preprocessor Symbol Index,  Up: Top
@@ -5260,12 +5255,17 @@ list easier to use, the macros are listed without their preceding `AC_'.
 * ARG_PROGRAM:                          Transforming Names.
 * ARG_WITH:                             External Software.
 * BEFORE:                               Suggested Ordering.
+* C_BIGENDIAN:                          Compiler Characteristics.
+* C_CHAR_UNSIGNED:                      Compiler Characteristics.
+* C_CONST:                              Compiler Characteristics.
+* C_CROSS:                              Test Programs.
+* C_INLINE:                             Compiler Characteristics.
+* C_LONG_DOUBLE:                        Compiler Characteristics.
 * CACHE_CHECK:                          Caching Results.
 * CACHE_VAL:                            Caching Results.
 * CANONICAL_HOST:                       Canonicalizing.
 * CANONICAL_SYSTEM:                     Canonicalizing.
 * CHAR_UNSIGNED:                        Old Macro Names.
-* CHECKING:                             Printing Messages.
 * CHECK_FUNC:                           Generic Functions.
 * CHECK_FUNCS:                          Generic Functions.
 * CHECK_HEADER:                         Generic Headers.
@@ -5276,18 +5276,13 @@ list easier to use, the macros are listed without their preceding `AC_'.
 * CHECK_SIZEOF:                         Compiler Characteristics.
 * CHECK_TOOL:                           Generic Programs.
 * CHECK_TYPE:                           Generic Typedefs.
+* CHECKING:                             Printing Messages.
 * COMPILE_CHECK:                        Examining Libraries.
 * CONFIG_AUX_DIR:                       Input.
 * CONFIG_HEADER:                        Configuration Headers.
 * CONFIG_SUBDIRS:                       Subdirectories.
 * CONST:                                Old Macro Names.
 * CROSS_CHECK:                          Old Macro Names.
-* C_BIGENDIAN:                          Compiler Characteristics.
-* C_CHAR_UNSIGNED:                      Compiler Characteristics.
-* C_CONST:                              Compiler Characteristics.
-* C_CROSS:                              Test Programs.
-* C_INLINE:                             Compiler Characteristics.
-* C_LONG_DOUBLE:                        Compiler Characteristics.
 * DECL_SYS_SIGLIST:                     Particular Headers.
 * DECL_YYTEXT:                          Particular Programs.
 * DEFINE:                               Defining Symbols.
@@ -5368,11 +5363,6 @@ list easier to use, the macros are listed without their preceding `AC_'.
 * PREFIX:                               Old Macro Names.
 * PREFIX_PROGRAM:                       Default Prefix.
 * PREREQ:                               Versions.
-* PROGRAMS_CHECK:                       Old Macro Names.
-* PROGRAMS_PATH:                        Old Macro Names.
-* PROGRAM_CHECK:                        Old Macro Names.
-* PROGRAM_EGREP:                        Old Macro Names.
-* PROGRAM_PATH:                         Old Macro Names.
 * PROG_AWK:                             Particular Programs.
 * PROG_CC:                              Particular Programs.
 * PROG_CC_C_O:                          Particular Programs.
@@ -5386,6 +5376,11 @@ list easier to use, the macros are listed without their preceding `AC_'.
 * PROG_MAKE_SET:                        Output.
 * PROG_RANLIB:                          Particular Programs.
 * PROG_YACC:                            Particular Programs.
+* PROGRAM_CHECK:                        Old Macro Names.
+* PROGRAM_EGREP:                        Old Macro Names.
+* PROGRAM_PATH:                         Old Macro Names.
+* PROGRAMS_CHECK:                       Old Macro Names.
+* PROGRAMS_PATH:                        Old Macro Names.
 * PROVIDE:                              Prerequisite Macros.
 * REMOTE_TAPE:                          Old Macro Names.
 * REPLACE_FUNCS:                        Generic Functions.
@@ -5396,12 +5391,15 @@ list easier to use, the macros are listed without their preceding `AC_'.
 * REVISION:                             Versions.
 * RSH:                                  Old Macro Names.
 * SCO_INTL:                             UNIX Variants.
-* SETVBUF_REVERSED:                     Old Macro Names.
 * SET_MAKE:                             Old Macro Names.
-* SIZEOF_TYPE:                          Old Macro Names.
+* SETVBUF_REVERSED:                     Old Macro Names.
 * SIZE_T:                               Old Macro Names.
+* SIZEOF_TYPE:                          Old Macro Names.
+* ST_BLKSIZE:                           Old Macro Names.
+* ST_BLOCKS:                            Old Macro Names.
+* ST_RDEV:                              Old Macro Names.
+* STAT_MACROS_BROKEN <1>:               Old Macro Names.
 * STAT_MACROS_BROKEN:                   Structures.
-* STAT_MACROS_BROKEN:                   Old Macro Names.
 * STDC_HEADERS:                         Old Macro Names.
 * STRCOLL:                              Old Macro Names.
 * STRUCT_ST_BLKSIZE:                    Structures.
@@ -5409,9 +5407,6 @@ list easier to use, the macros are listed without their preceding `AC_'.
 * STRUCT_ST_RDEV:                       Structures.
 * STRUCT_TIMEZONE:                      Structures.
 * STRUCT_TM:                            Structures.
-* ST_BLKSIZE:                           Old Macro Names.
-* ST_BLOCKS:                            Old Macro Names.
-* ST_RDEV:                              Old Macro Names.
 * SUBST:                                Setting Output Variables.
 * SUBST_FILE:                           Setting Output Variables.
 * SYS_INTERPRETER:                      System Services.
@@ -5420,8 +5415,8 @@ list easier to use, the macros are listed without their preceding `AC_'.
 * SYS_SIGLIST_DECLARED:                 Old Macro Names.
 * TEST_CPP:                             Old Macro Names.
 * TEST_PROGRAM:                         Old Macro Names.
-* TIMEZONE:                             Old Macro Names.
 * TIME_WITH_SYS_TIME:                   Old Macro Names.
+* TIMEZONE:                             Old Macro Names.
 * TRY_COMPILE:                          Examining Syntax.
 * TRY_CPP:                              Examining Declarations.
 * TRY_LINK:                             Examining Libraries.
@@ -5561,7 +5556,7 @@ Node: Deuteronomy208175
 Node: Old Macro Names210839
 Node: Environment Variable Index213888
 Node: Output Variable Index214890
-Node: Preprocessor Symbol Index219813
-Node: Macro Index224745
+Node: Preprocessor Symbol Index219573
+Node: Macro Index224450
 
 End Tag Table

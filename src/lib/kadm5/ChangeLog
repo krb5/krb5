@@ -1,3 +1,13 @@
+Mon Feb  2 17:02:29 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in: Define BUILDTOP and thisconfigdir in the Makefile
+
+Wed Jan 28 16:32:36 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* configure.in, Makefile.in: Remove the CopySrcHeader and
+		CopyHeader macros from configure.in and substitute
+		equivalent functionality in Makefile.in
+
 Tue Jan 20 23:06:36 1998  Tom Yu  <tlyu@mit.edu>
 
 	* alt_prof.c (kadm5_get_config_params): Add support for Cygnus chpw.

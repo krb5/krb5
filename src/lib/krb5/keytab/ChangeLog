@@ -1,3 +1,11 @@
+Mon Feb  2 16:47:05 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in: Define BUILDTOP and thisconfigdir in the Makefile
+
+	* configure.in: Create the makefiles for the file subdirectory
+		and move all of the configure.in tests from in the
+		subdirectory into this configure.in.
+	
 Thu Nov 21 11:55:16 EST 1996    Richard Basch   <basch@lehman.com>
 
         * Makefile.in: win32 build

@@ -7,7 +7,6 @@
 #ifndef _ss_h
 #define _ss_h __FILE__
 
-#include <ss/mit-sipb-copyright.h>
 #include <ss/ss_err.h>
 
 extern int errno;

@@ -1,3 +1,7 @@
+Mon Feb  2 17:02:29 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in: Define BUILDTOP and thisconfigdir in the Makefile
+
 Thu Sep 25 21:17:00 1997  Tom Yu  <tlyu@mit.edu>
 
 	* srv_net.c (net_init): Replace KRB5_USE_INET with something more

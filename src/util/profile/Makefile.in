@@ -1,3 +1,5 @@
+thisconfigdir=./
+BUILDTOP=$(U)$(U)
 ##DOS##BUILDTOP = ..\..
 ##DOS##OBJFILE=profile.lst
 ##DOS##LIBNAME=profile.lib
@@ -36,6 +38,17 @@ STOBJLISTS=OBJS.ST
 all-unix:: includes test_parse test_profile
 all-unix:: all-libs
 all-windows::
+
+includes:: profile.h
+	if cmp profile.h \
+	$(BUILDTOP)/include/profile.h >/dev/null 2>&1; then :; \
+	else \
+		(set -x; $(RM) $(BUILDTOP)/include/profile.h; \
+		 $(CP) profile.h $(BUILDTOP)/include/profile.h) ; \
+	fi
+
+clean-unix::
+	$(RM) $(BUILDTOP)/include/profile.h
 
 ##DOS##LIBOBJS = $(OBJS)
 

@@ -1,8 +1,7 @@
 AC_INIT(configure.in)
 CONFIG_RULES
-CONFIG_DIRS(error_tables asn.1 ccache keytab krb rcache free os posix)
+AC_CONFIG_SUBDIRS(error_tables asn.1 ccache keytab krb rcache free os posix)
 AC_PROG_INSTALL
-DO_SUBDIRS
 dnl
 USE_ANAME
 ANAME_DBDEP="$kaname_dbdep"

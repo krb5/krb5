@@ -1,3 +1,5 @@
+thisconfigdir=./
+BUILDTOP=$(U)$(U)
 CFLAGS = $(CCOPTS) $(DEFS) -DGSSAPI_KRB5 -DDEBUG_GSSAPI=0
 
 ##DOSBUILDTOP = ..\..
@@ -177,6 +179,34 @@ all-prerecurse:: all-liblinks
 all-windows:: $(OBJS)
 
 install-unix:: install-libs
+
+BUILD_HDRS = types.h
+SRC_HDRS = auth.h auth_gssapi.h auth_unix.h clnt.h netdb.h pmap_clnt.h \
+	pmap_prot.h pmap_rmt.h rpc.h rpc_msg.h svc.h svc_auth.h \
+	xdr.h
+
+includes:: $(SRC_HDRS) $(BUILD_HDRS)
+	mkdir -p $(HDRDIR)
+	for i in $(SRC_HDRS) ; do \
+		if cmp $(srcdir)/$$i $(HDRDIR)/$$i >/dev/null 2>&1; then :; \
+		else \
+			(set -x; $(RM) $(HDRDIR)/$$i; \
+			 $(CP) $(srcdir)/$$i $(HDRDIR)/$$i) ; \
+		fi ; \
+	done
+	for i in $(BUILD_HDRS) ; do \
+		if cmp $$i $(HDRDIR)/$$i >/dev/null 2>&1; then :; \
+		else \
+			(set -x; $(RM) $(HDRDIR)/$$i; \
+			 $(CP) $$i $(HDRDIR)/$$i) ; \
+		fi ; \
+	done
+
+clean-unix::
+	$(RM) $(HDRS)
+	for i in $(SRC_HDRS) $(BUILD_HDRS) ; do \
+		$(RM) $(HDRDIR)/$$i ; \
+	done
 
 check-windows::
 

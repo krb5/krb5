@@ -1,3 +1,5 @@
+thisconfigdir=./
+BUILDTOP=$(C)
 CFLAGS = $(CCOPTS) $(DEFS)
 
 ##DOS##BUILDTOP = .

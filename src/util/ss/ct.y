@@ -6,7 +6,6 @@
  */
 #include <stdio.h>
 #include <string.h>
-#include "mit-sipb-copyright.h"
 
 #ifndef HAS_STRDUP
 extern char *strdup();

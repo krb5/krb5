@@ -1,3 +1,7 @@
+Thu Feb 12 08:37:00 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in: Define BUILDTOP and thisconfigdir in the Makefile
+
 Fri Jan 30 16:06:13 1998  Tom Yu  <tlyu@mit.edu>
 
 	* kpasswd.c:

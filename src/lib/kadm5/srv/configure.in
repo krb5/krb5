@@ -28,6 +28,4 @@ esac
 
 KRB5_BUILD_LIBOBJS
 KRB5_BUILD_LIBRARY_WITH_DEPS
-
-CopySrcHeader(server_acl.h,[$](BUILDTOP)/include/kadm5)
 V5_AC_OUTPUT_MAKEFILE

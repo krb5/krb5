@@ -7,8 +7,7 @@ else
 	AC_MSG_RESULT(skipping Kerberos 4 libraries)
 	krb4=
 fi
-CONFIG_DIRS(crypto krb5 des425 $krb4 krb5util kdb gssapi rpc kadm5)
+AC_CONFIG_SUBDIRS(crypto krb5 des425 $krb4 krb5util kdb gssapi rpc kadm5)
 AC_PROG_ARCHIVE
 AC_PROG_RANLIB
-DO_SUBDIRS
 V5_AC_OUTPUT_MAKEFILE

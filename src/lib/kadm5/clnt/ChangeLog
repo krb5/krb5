@@ -1,3 +1,9 @@
+Wed Jan 28 16:32:36 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* configure.in, Makefile.in: Remove the CopySrcHeader macro
+		from configure.in and substitute equivalent
+		functionality in Makefile.in
+
 Mon Oct 13 10:55:02 1997  Ezra Peisach  <epeisach@mit.edu>
 
 	* client_init.c (kadm5_destroy): Free handle->lhandle field, call

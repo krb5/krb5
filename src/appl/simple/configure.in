@@ -1,5 +1,14 @@
 AC_INIT(configure.in)
 CONFIG_RULES
-CONFIG_DIRS(client server)
-DO_SUBDIRS
-V5_AC_OUTPUT_MAKEFILE
+AC_PROG_INSTALL
+AC_CHECK_HEADERS(stdlib.h)
+if test "$ac_cv_lib_socket" = "yes" -a "$ac_cv_lib_nsl" = "yes"; then
+	AC_DEFINE(BROKEN_STREAMS_SOCKETS)
+fi
+KRB5_BUILD_PROGRAM
+K5_GEN_MAKEFILE(.)
+K5_GEN_MAKEFILE(client)
+K5_GEN_MAKEFILE(server)
+K5_OUTPUT_FILES
+
+

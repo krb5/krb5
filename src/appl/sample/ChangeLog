@@ -1,5 +1,13 @@
+Mon Feb  2 16:47:05 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
+	* Makefile.in: Define BUILDTOP and thisconfigdir in the Makefile
+
+	* configure.in: Create the makefiles for all of the subdirectories
+		and move all of the configure.in tests from the
+		subdirectories into this configure.in.
+	
 Fri Jul 7 15:45:38 EDT 1995	Paul Park	(pjpark@mit.edu)
+
 	* Makefile.in - Remove LDFLAGS.
 
 Fri Jun  9 18:27:34 1995    <tytso@rsx-11.mit.edu>

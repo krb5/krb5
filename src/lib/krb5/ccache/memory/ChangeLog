@@ -1,3 +1,7 @@
+Mon Feb  2 17:02:29 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in: Define BUILDTOP and thisconfigdir in the Makefile
+
 Mon Sep 15 15:15:33 1997  Ezra Peisach  <epeisach@mit.edu>
 
 	* mcc-proto.h, mcc_reslv.c (krb5_mcc_resolve): Incoming name

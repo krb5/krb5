@@ -1,3 +1,7 @@
+Mon Feb  2 17:02:29 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in: Define BUILDTOP and thisconfigdir in the Makefile
+
 Wed Jan 28 09:02:31 1998  Ezra Peisach  <epeisach@mit.edu>
 
 	* kdc.conf.M: Document the v4_mode option. [krb5-kdc/464]

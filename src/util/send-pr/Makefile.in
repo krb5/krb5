@@ -1,3 +1,5 @@
+thisconfigdir=./
+BUILDTOP=$(U)$(U)
 #
 # Makefile for building a standalone send-pr.
 #

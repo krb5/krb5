@@ -1,6 +1,10 @@
-AC_INIT(configure.in)
+AC_INIT(ccbase.c)
 CONFIG_RULES
-CONFIG_DIRS(stdio file memory)
-DO_SUBDIRS
+AC_HAVE_HEADERS(unistd.h)
+AC_HAVE_FUNCS(flock fchmod chmod)
 KRB5_BUILD_LIBOBJS
-V5_AC_OUTPUT_MAKEFILE
+K5_GEN_MAKEFILE(., libobj)
+K5_GEN_MAKEFILE(stdio, libobj)
+K5_GEN_MAKEFILE(file, libobj)
+K5_GEN_MAKEFILE(memory, libobj)
+K5_OUTPUT_FILES

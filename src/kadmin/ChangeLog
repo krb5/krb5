@@ -1,3 +1,10 @@
+Mon Feb  2 17:02:29 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* configure.in: Use AC_CONFIG_DIRS instead of CONFIG_DIRS, and
+		remove use of DO_SUBDIRS.
+
+	* Makefile.in: Define BUILDTOP and thisconfigdir in the Makefile
+
 Wed Nov 13 19:24:36 1996  Tom Yu  <tlyu@mit.edu>
 
 	* testing/Makefile.in (clean): Remove krb5-test-root.

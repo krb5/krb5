@@ -1,5 +1,4 @@
 AC_INIT(configure.in)
 CONFIG_RULES
-CONFIG_DIRS(libtelnet telnet telnetd)
-DO_SUBDIRS
+AC_CONFIG_SUBDIRS(libtelnet telnet telnetd)
 V5_AC_OUTPUT_MAKEFILE

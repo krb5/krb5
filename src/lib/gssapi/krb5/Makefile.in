@@ -1,3 +1,5 @@
+thisconfigdir=./../
+BUILDTOP=$(U)$(U)$(U)
 CFLAGS = $(CCOPTS) $(DEFS) -I. -I$(srcdir) -I../generic -I$(srcdir)/../generic
 
 ##DOS##BUILDTOP = ..\..\..
@@ -158,6 +160,18 @@ all-windows:: win-include $(SRCS) $(HDRS)
 
 all-unix:: $(SRCS) $(HDRS) includes
 all-unix:: all-libobjs
+
+includes:: gssapi_krb5.h
+	if cmp $(srcdir)/gssapi_krb5.h \
+	$(BUILDTOP)/include/gssapi/gssapi_krb5.h >/dev/null 2>&1; then :; \
+	else \
+		(set -x; $(RM) $(BUILDTOP)/include/gssapi/gssapi_krb5.h; \
+		 $(CP) $(srcdir)/gssapi_krb5.h \
+			$(BUILDTOP)/include/gssapi/gssapi_krb5.h) ; \
+	fi
+
+clean-unix::
+	$(RM) $(BUILDTOP)/include/gssapi/gssapi_krb5.h
 
 win-include::
 	if not exist $(EHDRDIR)\nul mkdir $(EHDRDIR)

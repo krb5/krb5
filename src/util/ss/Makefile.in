@@ -1,3 +1,5 @@
+thisconfigdir=./
+BUILDTOP=$(U)$(U)
 CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
 SED = sed
 
@@ -83,6 +85,34 @@ dist:	archives
 install::
 
 includes:: mk_cmds ct_c.sed ct_c.awk ss_err.h
+
+HDRDIR=$(BUILDTOP)/include/ss
+HDRS =	$(HDRDIR)/ss.h \
+	$(HDRDIR)/mit-sipb-copyright.h \
+	$(HDRDIR)/ss_err.h
+
+BUILD_HDRS = ss_err.h
+SRC_HDRS = ss.h 
+
+includes:: $(SRC_HDRS) $(BUILD_HDRS)
+	mkdir -p $(HDRDIR)
+	for i in $(SRC_HDRS) ; do \
+		if cmp $(srcdir)/$$i $(HDRDIR)/$$i >/dev/null 2>&1; then :; \
+		else \
+			(set -x; $(RM) $(HDRDIR)/$$i; \
+			 $(CP) $(srcdir)/$$i $(HDRDIR)/$$i) ; \
+		fi ; \
+	done
+	for i in $(BUILD_HDRS) ; do \
+		if cmp $$i $(HDRDIR)/$$i >/dev/null 2>&1; then :; \
+		else \
+			(set -x; $(RM) $(HDRDIR)/$$i; \
+			 $(CP) $$i $(HDRDIR)/$$i) ; \
+		fi ; \
+	done
+
+clean-unix::
+	$(RM) $(HDRS)
 
 std_rqs.c: std_rqs.ct
 

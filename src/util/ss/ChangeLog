@@ -1,3 +1,14 @@
+Wed Jan 28 17:38:29 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* configure.in, Makefile.in: Remove CopySrcHeader and CopyHeader 
+		from configure.in and move equivalent functionality to
+		Makefile.in 
+
+	* Makefile.in: Define BUILDTOP and thisconfigdir in the Makefile
+
+	* cmd_tbl.lex.l, ct.y, requests.c, ss.h: Remove #include of
+		<mit-sipb-copyright.h>, since it's not needed.
+
 Tue Nov 18 19:22:34 1997  Tom Yu  <tlyu@mit.edu>
 
 	* configure.in: Update to new library build system.

@@ -1,3 +1,7 @@
+Mon Feb  2 17:02:29 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in: Define BUILDTOP and thisconfigdir in the Makefile
+
 Thu Feb  5 22:58:09 1998  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* krb5_err.et: Add a comment about the low 128 error codes being

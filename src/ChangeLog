@@ -1,3 +1,17 @@
+Mon Feb  2 17:02:29 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* configure.in: Use AC_CONFIG_DIRS instead of CONFIG_DIRS, and
+		remove use of DO_SUBDIRS.
+
+Wed Jan 28 18:09:00 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in: Define BUILDTOP and thisconfigdir in the Makefile
+
+	* aclocal.m4: Removed the following (obsolete) functions:
+		LinkFile, LinkFileDir, CopySrcHeader, CopyHeader,
+		Krb5InstallHeaders, AppendRule, AC_PUSH_MAKEFILE,
+		AC_POP_MAKEFILE, CONFIG_DIRS, DO_SUBDIRS, USE_*_LIBRARY
+
 Tue Oct 28 11:49:55 1997  Ezra Peisach  <epeisach@mit.edu>
 
 	* aclocal.m4 (WITH_NETLIB): Use AC_LIBRARY_NET.

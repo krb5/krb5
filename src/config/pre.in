@@ -57,8 +57,9 @@ C=./
 S=/
 U=../
 
-SUBDIRS = @subdirs@
+SUBDIRS = @subdirs@ $(LOCAL_SUBDIRS)
 srcdir = @srcdir@
+SRCTOP = @srcdir@/$(BUILDTOP)
 VPATH = @srcdir@
 
 CPPFLAGS = @CPPFLAGS@

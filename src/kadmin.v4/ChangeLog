@@ -1,3 +1,10 @@
+Mon Feb  2 17:02:29 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* configure.in: Use AC_CONFIG_DIRS instead of CONFIG_DIRS, and
+		remove use of DO_SUBDIRS.
+
+	* Makefile.in: Define BUILDTOP and thisconfigdir in the Makefile
+
 Thu Aug 24 19:18:23 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* .Sanitize (Things-to-keep): Update file list

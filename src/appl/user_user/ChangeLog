@@ -1,3 +1,7 @@
+Mon Feb  2 17:02:29 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in: Define BUILDTOP and thisconfigdir in the Makefile
+
 Tue Feb  4 20:35:45 1997  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in:

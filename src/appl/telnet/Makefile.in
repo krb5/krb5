@@ -1,0 +1,2 @@
+thisconfigdir=./
+BUILDTOP=$(U)$(U)

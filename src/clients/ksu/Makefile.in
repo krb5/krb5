@@ -1,3 +1,5 @@
+thisconfigdir=./../
+BUILDTOP=$(U)$(U)
 DEFINES = -DGET_TGT_VIA_PASSWD -DPRINC_LOOK_AHEAD -DCMD_PATH='"/bin /local/bin"'
 CFLAGS = $(CCOPTS) $(DEFINES) $(DEFS) $(LOCALINCLUDE)
 

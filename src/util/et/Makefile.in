@@ -1,3 +1,5 @@
+thisconfigdir=./
+BUILDTOP=$(U)$(U)
 RELDIR=../util/et
 CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
 SED = sed
@@ -77,6 +79,18 @@ test_et: test_et.o test1.o test2.o $(LIBOBJS)
 	$(CC) -o test_et test_et.o test1.o test2.o $(LIBOBJS)
 
 all-unix:: compile_et includes
+
+includes:: com_err.h
+	if cmp $(srcdir)/com_err.h \
+	$(BUILDTOP)/include/com_err.h >/dev/null 2>&1; then :; \
+	else \
+		(set -x; $(RM) $(BUILDTOP)/include/com_err.h; \
+		 $(CP) $(srcdir)/com_err.h \
+			$(BUILDTOP)/include/com_err.h) ; \
+	fi
+
+clean-unix::
+	$(RM) $(BUILDTOP)/include/com_err.h
 
 # The real compile_et just isn't portable.  (But then again, anything using 
 # lex and yacc isn't portable by definition.  :-(  )

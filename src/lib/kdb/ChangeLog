@@ -1,3 +1,7 @@
+Mon Feb  2 17:02:29 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in: Define BUILDTOP and thisconfigdir in the Makefile
+
 Tue Oct 28 10:18:10 1997  Ezra Peisach  <epeisach@mit.edu>
 
 	* kdb_cpw.c (add_key_pwd): For KRB5_KDB_SALTTYPE_AFS3, the salt

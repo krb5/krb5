@@ -1,3 +1,5 @@
+thisconfigdir=./
+BUILDTOP=$(U)
 CFLAGS = $(CCOPTS)
 
 MAC_SUBDIRS = profile et
@@ -44,6 +46,12 @@ libupdate: $(srcdir)/libupdate.sh
 makeshlib: $(srcdir)/makeshlib.sh Makefile
 	 $(RM) $@ $@.tmp
 	 $(SLIBSH) $(srcdir)/makeshlib.sh >$@.tmp&&chmod a+x $@.tmp&&mv $@.tmp $@
+
+
+#
+# We only need this for AIX, but we generate it for all systems.
+#
+all-unix:: aix.bincmds
 
 aix.bincmds: Makefile
 	 echo libpath $(KRB5_LIBDIR):`pwd`/$(TOPLIBD):/usr/lib:/lib >aix.bincmds

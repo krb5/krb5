@@ -1,3 +1,5 @@
+thisconfigdir=./
+BUILDTOP=$(U)
 ##DOSBUILDTOP = ..
 
 all-unix:: krb5.h adm_err.h

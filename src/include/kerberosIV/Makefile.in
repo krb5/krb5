@@ -1,3 +1,5 @@
+thisconfigdir=./
+BUILDTOP=$(U)$(U)
 KRB4_HEADERS=krb.h des.h kadm.h mit-copyright.h
 
 all-unix:: krb_err.h

@@ -17,8 +17,10 @@ case "$ac_reltopdir" in
 esac
 ac_topdir=$srcdir/$ac_reltopdir
 ac_config_fragdir=$ac_reltopdir/config
-krb5_prepend_frags=$ac_config_fragdir/pre.in
-krb5_append_frags=$ac_config_fragdir/post.in
+krb5_pre_in=$ac_config_fragdir/pre.in
+krb5_post_in=$ac_config_fragdir/post.in
+krb5_prepend_frags=$krb5_pre_in
+krb5_append_frags=$krb5_post_in
 BUILDTOP=$ac_reltopdir
 SRCTOP=$srcdir/$ac_reltopdir
 if test -d "$srcdir/$ac_config_fragdir"; then
@@ -27,33 +29,6 @@ else
   AC_MSG_ERROR([can not find config/ directory in $ac_reltopdir])
 fi
 ])dnl
-dnl
-dnl Does configure need to be run in immediate subdirectories of this
-dnl directory?
-dnl
-dnl XXX we should remove this and replace CONFIG_DIRS with AC_CONFIG_SUBDIRS
-dnl in all of the configure.in files.
-dnl
-define(CONFIG_DIRS,[AC_CONFIG_SUBDIRS($1)])dnl
-dnl
-dnl AC_PUSH_MAKEFILE():
-dnl allow stuff to get tacked on to the end of the makefile
-dnl
-define(AC_PUSH_MAKEFILE,[dnl
-cat>>append.out<<\PUSHEOF
-])dnl
-define(AC_POP_MAKEFILE,[dnl
-PUSHEOF
-])dnl
-
-dnl
-dnl DO_SUBDIRS
-dnl recurse into subdirs by specifying the recursion targets
-dnl the rules are in post.in but the target needs substitution
-AC_DEFUN([DO_SUBDIRS],
-[# this is a noop now
-])
-
 dnl
 dnl drop in standard rules for all configure files -- CONFIG_RULES
 dnl
@@ -319,115 +294,6 @@ CPPFLAGS="$CPPFLAGS $withval",
 [AC_MSG_RESULT(CPPOPTS defaults to $CPPOPTS)])dnl
 AC_SUBST(CPPOPTS)])dnl
 dnl
-dnl Imake LinkFile rule, so they occur in the right place -- LinkFile(dst,src)
-dnl
-define(LinkFile,[
-AC_REQUIRE([AC_LN_S])
-AC_PUSH_MAKEFILE()dnl
-changequote({,})dnl
-
-$1:: $2{
-	$(RM) $}{@
-	$(LN) $}{? $}{@
-
-}
-changequote([,])dnl
-AC_POP_MAKEFILE()dnl
-])dnl
-dnl
-dnl Like above, but specifies how to get from link target to source, e.g.
-dnl LinkFileDir(../foo, blotz, ./bar) issues a:
-dnl	ln -s ../foo ./bar/blotz
-dnl
-define(LinkFileDir,[
-AC_REQUIRE([AC_LN_S])
-AC_PUSH_MAKEFILE()dnl
-changequote({,})dnl
-
-$1:: $2{
-	$(RM) $}{@
-	$(LN) }$3{$(S)$}{? $}{@
-
-}
-changequote([,])dnl
-AC_POP_MAKEFILE()dnl
-])dnl
-dnl
-dnl explicit append text (for non-general things) -- AppendRule(txt)
-dnl
-define(AppendRule,[
-AC_PUSH_MAKEFILE()dnl
-
-$1
-
-AC_POP_MAKEFILE()dnl
-])dnl
-dnl
-dnl create DONE file for lib/krb5 -- SubdirLibraryRule(list)
-define(SubdirLibraryRule,[
-AC_PUSH_MAKEFILE()dnl
-
-all-unix:: DONE
-
-DONE:: $1 $(srcdir)/Makefile.in
-	@if test x'$1' = x && test -r [$]@; then :;\
-	else \
-		(set -x; echo $1 > [$]@) \
-	fi
-
-clean-unix::
-	$(RM) DONE
-AC_POP_MAKEFILE()dnl
-])dnl
-dnl
-dnl copy header file into include dir -- CopyHeader(hfile,hdir)
-dnl
-define(CopyHeader,[
-AC_PUSH_MAKEFILE()dnl
-
-includes:: $2/$1
-$2/$1: $1
-	@if test -d $2; then :; else (set -x; mkdir $2) fi
-	@if cmp $1 $2/$1 >/dev/null 2>&1; then :; \
-	else \
-		(set -x; [$](RM) $2/$1;	[$](CP) $1 $2/$1) \
-	fi
-
-clean-unix::
-	$(RM) $2/$1
-
-AC_POP_MAKEFILE()dnl
-])dnl
-dnl
-dnl copy source header file into include dir -- CopySrcHeader(hfile,hdir)
-dnl
-define(CopySrcHeader,[
-AC_PUSH_MAKEFILE()dnl
-
-includes:: $2/$1
-$2/$1: $(srcdir)/$1
-	@if test -d $2; then :; else (set -x; mkdir $2) fi
-	@if cmp $(srcdir)/$1 $2/$1 >/dev/null 2>&1; then :; \
-	else \
-		(set -x; [$](RM) $2/$1;	[$](CP) $(srcdir)/$1 $2/$1) \
-	fi
-
-clean-unix::
-	$(RM) $2/$1
-
-AC_POP_MAKEFILE()dnl
-])dnl
-dnl
-dnl Krb5InstallHeaders(headers,destdir)
-define(Krb5InstallHeaders,[
-AC_PUSH_MAKEFILE()dnl
-install-unix:: $1
-	@set -x; for f in $1 ; \
-	do [$](INSTALL_DATA) [$$]f $2/[$$]f ; \
-	done
-AC_POP_MAKEFILE()dnl
-])dnl
-dnl
 dnl arbitrary DEFS -- ADD_DEF(value)
 dnl
 define(ADD_DEF,[
@@ -477,83 +343,35 @@ fi
 AC_MSG_RESULT(setting LEXLIB to $LEXLIB)
 AC_SUBST(LEX)AC_SUBST(LEXLIB)])dnl
 dnl
+dnl K5_GEN_MAKEFILE([dir, [frags]])
+dnl
+define(K5_GEN_MAKEFILE,[dnl
+ifelse($1, , x=., x="$1")
+appendlist=''
+ifelse($2, , ,[dnl
+for i in $2
+do
+	appendlist=$appendlist:$ac_config_fragdir/$i.in
+done])
+krb5_output_list="$krb5_output_list $x/Makefile:$krb5_pre_in:$x/Makefile.in$appendlist:$krb5_post_in"])dnl
+dnl
+dnl K5_GEN_FILE( <ac_output arguments> )
+dnl
+define(K5_GEN_FILE,[krb5_output_list="$krb5_output_list $1"])dnl
+dnl
+dnl K5_OUTPUT_FILES
+dnl
+define(K5_OUTPUT_FILES,[AC_OUTPUT($krb5_output_list)])dnl
+dnl
 dnl V5_OUTPUT_MAKEFILE
 dnl
 define(V5_AC_OUTPUT_MAKEFILE,
 [ifelse($1, , ac_v5_makefile_dirs=., ac_v5_makefile_dirs="$1")
 ifelse($2, , filelist="", filelist="$2")
-dnl OPTIMIZE THIS FOR COMMON CASE!!
 for x in $ac_v5_makefile_dirs; do
-  filelist="$filelist $x/Makefile.tmp:$krb5_prepend_frags:$x/Makefile.in:$krb5_append_frags"
+  filelist="$filelist $x/Makefile:$krb5_prepend_frags:$x/Makefile.in:$krb5_append_frags"
 done
-AC_OUTPUT($filelist,
-[EOF
-ac_reltopdir=`echo $ac_reltopdir | sed   \
-	-e ':LOOP'		\
-	-e 's,/\./,/,'		\
-	-e 'tLOOP'		\
-	-e 's,^\./,,'		\
-	-e 's,/\.$,,g'		\
-	`
-test "$ac_reltopdir" = "" && ac_reltopdir=.
-cat >> $CONFIG_STATUS <<EOF
-ac_v5_makefile_dirs="$ac_v5_makefile_dirs"
-ac_reltopdir=$ac_reltopdir
-EOF
-dnl This should be fixed so that the here document produced gets broken up
-dnl into chunks that are the "right" size, in case we run across shells that
-dnl are broken WRT large here documents.
->> append.out
-cat - append.out >> $CONFIG_STATUS <<\EOF
-cat >> append.tmp <<\CEOF
-#
-# rules appended by configure
-
-EOF
-rm append.out
-dnl now back to regular config.status generation
-cat >> $CONFIG_STATUS <<\EOF
-CEOF
-for d in $ac_v5_makefile_dirs; do
-  # If CONFIG_FILES was set from Makefile, skip unprocessed directories.
-  if test -r $d/Makefile.tmp; then
-changequote(,)dnl
-    x=`echo $d/ | sed   \
-	-e 's,//*$,/,'		\
-	-e ':LOOP'		\
-	-e 's,/\./,/,'		\
-	-e 'tLOOP'		\
-	-e 's,^\./,,'		\
-	-e 's,[^/]*/,../,g'	\
-	`
-changequote([,])dnl
-    test "$x" = "" && x=./
-    case $srcdir in
-    /*)  s=$ac_given_srcdir/$ac_reltopdir ;;
-    *)   s=$x$ac_given_srcdir/$ac_reltopdir ;;
-    esac
-    s=`echo $s | sed   \
-	-e 's,//*$,/,'		\
-	-e ':LOOP'		\
-	-e 's,/\./,/,'		\
-	-e 'tLOOP'		\
-	-e 's,^\./,,'		\
-	-e 's,/\.$,,g'		\
-	`
-    test "$s" = "" && s=.
-    echo creating $d/Makefile
-    cat - $d/Makefile.tmp append.tmp > $d/Makefile <<EOX
-thisconfigdir=$x
-SRCTOP=$s
-BUILDTOP=$x$ac_reltopdir
-EOX
-    rm  $d/Makefile.tmp
-# sed -f $CONF_FRAGDIR/mac-mf.sed < Makefile > MakeFile
-  fi
-done
-rm append.tmp
-],
-CONF_FRAGDIR=$srcdir/${ac_config_fragdir} )])dnl
+AC_OUTPUT($filelist)])dnl
 dnl
 dnl KRB5_SOCKADDR_SA_LEN: define HAVE_SA_LEN if sockaddr contains the sa_len
 dnl component
@@ -673,158 +491,6 @@ AC_MSG_RESULT($krb5_cv_has_ansi_volatile)
 if test $krb5_cv_has_ansi_volatile = no; then
 ADD_DEF(-Dvolatile=)
 fi
-])dnl
-dnl
-dnl This rule tells KRB5_LIBRARIES to use the kadm5srv library.
-dnl
-kadmsrv_deplib=''
-kadmsrv_lib=''
-define(USE_KADMSRV_LIBRARY,[
-kadmsrv_deplib="\[$](TOPLIBD)/libkadm5srv.a"
-kadmsrv_lib=-lkadm5srv])
-dnl
-dnl This rule tells KRB5_LIBRARIES to use the kadm5clnt library.
-dnl
-kadmclnt_deplib=''
-kadmclnt_lib=''
-define(USE_KADMCLNT_LIBRARY,[
-kadmclnt_deplib="\[$](TOPLIBD)/libkadm5clnt.a"
-kadmclnt_lib=-lkadm5clnt])
-dnl
-dnl This rule tells KRB5_LIBRARIES to use the gssrpc library.
-dnl
-gssrpc_deplib=''
-gssrpc_lib=''
-define(USE_GSSRPC_LIBRARY,[
-gssrpc_deplib="\[$](TOPLIBD)/libgssrpc.a"
-gssrpc_lib=-lgssrpc])
-dnl
-dnl This rule tells KRB5_LIBRARIES to use the gssapi library.
-dnl
-gssapi_deplib=''
-gssapi_lib=''
-define(USE_GSSAPI_LIBRARY,[
-gssapi_deplib="\[$](TOPLIBD)/libgssapi_krb5.a"
-gssapi_lib=-lgssapi_krb5])
-dnl
-dnl This rule tells KRB5_LIBRARIES to use the krb5util library.
-dnl
-kutil_deplib=''
-kutil_lib=''
-define(USE_KRB5UTIL_LIBRARY,[
-kutil_deplib="\[$](TOPLIBD)/libkrb5util.a"
-kutil_lib=-lkrb5util])
-dnl
-dnl This rule tells KRB5_LIBRARIES to include the aname db library.
-dnl
-define(USE_ANAME,[
-USE_DB_LIBRARY
-])dnl
-dnl
-dnl This rule tells KRB5_LIBRARIES to include the kdb5 and db libraries.
-dnl
-kdb5_deplib=''
-kdb5_lib=''
-define(USE_KDB5_LIBRARY,[
-kdb5_deplib="\[$](TOPLIBD)/libkdb5.a"
-kdb5_lib=-lkdb5
-USE_DB_LIBRARY
-])
-dnl
-dnl This rule tells KRB5_LIBRARIES to include the krb4 libraries.
-dnl
-krb4_deplib=''
-krb5_lib=''
-define(USE_KRB4_LIBRARY,[
-krb4_deplib="$DEPKRB4_LIB $DEPKRB4_CRYPTO_LIB"
-krb4_lib="$KRB4_LIB $KRB4_CRYPTO_LIB"]
-	CPPFLAGS="$CPPFLAGS $KRB4_INCLUDE") dnl
-dnl
-dnl This rule tells KRB5_LIBRARIES to include the ss library.
-dnl
-ss_deplib=''
-ss_lib=''
-define(USE_SS_LIBRARY,[
-ss_deplib="\[$](TOPLIBD)/libss.a"
-ss_lib=-lss
-])
-dnl
-dnl This rule tells KRB5_LIBRARIES to include the dyn library.
-dnl
-dyn_deplib=''
-dyn_lib=''
-define(USE_DYN_LIBRARY,[
-dyn_deplib="\[$](TOPLIBD)/libdyn.a"
-dyn_lib=-ldyn
-])
-dnl
-dnl This rule tells KRB5_LIBRARIES to include the db library.
-dnl
-db_deplib=''
-db_lib=''
-define(USE_DB_LIBRARY,[
-db_deplib="\[$](TOPLIBD)/libdb.a"
-db_lib="\[$](TOPLIBD)/libdb.a"
-])
-dnl
-dnl This rule generates library lists for programs.
-dnl
-define(KRB5_LIBRARIES,[
-dnl
-dnl under solaris, if we use compile() and step(), we need -lgen
-save_LIBS="$LIBS"
-LIBS=-lgen
-dnl this will fail if there's no compile/step in -lgen, or if there's
-dnl no -lgen.  This is fine.
-AC_CHECK_FUNCS(compile step)
-[if test "$ac_cv_func_compile" = yes ; then
-	LIBS="$save_LIBS -lgen"
-else
-	LIBS="$save_LIBS"
-fi]
-dnl this is ugly, but it wouldn't be necessary if krb5 didn't abuse
-dnl configure so badly
-SRVDEPLIBS="\[$](DEPLOCAL_LIBRARIES) $kadmsrv_deplib $gssrpc_deplib $gssapi_deplib $kdb5_deplib $kutil_deplib \[$](TOPLIBD)/libkrb5.a $krb4_deplib \[$](TOPLIBD)/libcrypto.a $ss_deplib $dyn_deplib $db_deplib \[$](TOPLIBD)/libcom_err.a"
-SRVLIBS="\[$](LOCAL_LIBRARIES) $kadmsrv_lib $gssrpc_lib $gssapi_lib $kdb5_lib $kutil_lib $krb4_lib -lkrb5 -lcrypto $ss_lib $dyn_lib $db_lib -lcom_err $LIBS"
-CLNTDEPLIBS="\[$](DEPLOCAL_LIBRARIES) $kadmclnt_deplib $gssrpc_deplib $gssapi_deplib $kdb5_deplib $kutil_deplib \[$](TOPLIBD)/libkrb5.a $krb4_deplib \[$](TOPLIBD)/libcrypto.a $ss_deplib $dyn_deplib $db_deplib \[$](TOPLIBD)/libcom_err.a"
-CLNTLIBS="\[$](LOCAL_LIBRARIES) $kadmclnt_lib $gssrpc_lib $gssapi_lib $kdb5_lib $kutil_lib $krb4_lib -lkrb5 -lcrypto $ss_lib $dyn_lib $db_lib -lcom_err $LIBS"
-DEPLIBS="\[$](DEPLOCAL_LIBRARIES) $kadmclnt_deplib $kadmsrv_deplib $gssrpc_deplib $gssapi_deplib $kdb5_deplib $kutil_deplib \[$](TOPLIBD)/libkrb5.a $krb4_deplib \[$](TOPLIBD)/libcrypto.a $ss_deplib $dyn_deplib $db_deplib \[$](TOPLIBD)/libcom_err.a"
-LIBS="\[$](LOCAL_LIBRARIES) $kadmclnt_lib $kadmsrv_lib $gssrpc_lib $gssapi_lib $kdb5_lib $kutil_lib $krb4_lib -lkrb5 -lcrypto $ss_lib $dyn_lib $db_lib -lcom_err $LIBS"
-LDFLAGS="$LDFLAGS -L\$(TOPLIBD)"
-AC_SUBST(LDFLAGS)
-AC_SUBST(LDARGS)
-AC_SUBST(DEPLIBS)
-AC_SUBST(SRVDEPLIBS)
-AC_SUBST(SRVLIBS)
-AC_SUBST(CLNTDEPLIBS)
-AC_SUBST(CLNTLIBS)])
-dnl
-dnl Defines LDARGS correctly so that we actually link with the shared library
-dnl
-define(V5_USE_SHARED_LIB,[
-AC_ARG_WITH([shared],
-[  --with-shared	use shared libraries (default)
-  --without-shared	don't use shared libraries],
-,
-withval=yes
-)dnl
-if test "$krb5_cv_shlibs_enabled" = yes ; then
-  if test "$withval" = yes; then
-	AC_MSG_RESULT(Using shared libraries)
-	LDARGS="$krb5_cv_shlibs_ldflag -L\$(TOPLIBD) $LDARGS"
-	if test "$krb5_cv_exe_need_dirs" = yes; then
-		LDARGS="$LDARGS ${krb5_cv_shlibs_dirhead}\$(KRB5_SHLIBDIR)"
-	fi
-	SHLIB_TAIL_COMP=$krb5_cv_shlibs_tail_comp
-	AC_SUBST(SHLIB_TAIL_COMP)
-  else
-	AC_MSG_RESULT(Using archive libraries)
-	LDARGS="$krb5_cv_noshlibs_ldflag -L\$(TOPLIBD) $LDARGS"
-  fi
-else
-  LDARGS="-L\$(TOPLIBD) $LDARGS"
-fi
-AC_SUBST(LDARGS)
 ])dnl
 dnl
 dnl

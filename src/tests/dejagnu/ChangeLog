@@ -1,3 +1,7 @@
+Mon Feb  2 16:45:49 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in: Define BUILDTOP and thisconfigdir in the Makefile
+
 Tue Oct  7 08:02:13 1997  Ezra Peisach  <epeisach@mit.edu>
 
 	* Makefile.in (runenv.vars): Use tr to remove newlines in multiple

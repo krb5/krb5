@@ -1,3 +1,12 @@
+Mon Feb  2 16:16:45 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in: Define BUILDTOP and thisconfigdir in the Makefile
+
+Wed Jan 28 17:26:46 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* configure.in, Makefile.in: Remove conditional AppendRule only
+		for AIX, and make it happen all the time in Makefile.in
+
 Wed Nov 19 10:52:38 1997  Ezra Peisach  <epeisach@mit.edu>
 
 	* Makefile.in (clean-unix): Remove db lib symlinks.

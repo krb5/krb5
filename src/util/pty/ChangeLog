@@ -1,3 +1,11 @@
+Mon Feb  2 16:18:08 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in: Define BUILDTOP and thisconfigdir in the Makefile
+
+	* configure.in, Makefile.in: Remove CopySrcHeader and CopyHeader 
+		from configure.in and move equivalent functionality to
+		Makefile.in 
+
 Sun Dec  7 00:05:28 1997  Tom Yu  <tlyu@mit.edu>
 
 	* getpty.c (pty_getpty): Fix goof in previous, which introduced

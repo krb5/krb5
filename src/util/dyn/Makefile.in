@@ -1,3 +1,5 @@
+thisconfigdir=./
+BUILDTOP=$(U)$(U)
 RELDIR=../util/dyn
 CFLAGS = $(CCOPTS) $(DEFS)
 
@@ -40,6 +42,18 @@ all-mac:: $(OBJS)
 all-windows:: $(OBJS)
 
 all-unix:: includes
+
+includes:: dyn.h
+	if cmp $(srcdir)/dyn.h \
+	$(BUILDTOP)/include/dyn.h >/dev/null 2>&1; then :; \
+	else \
+		(set -x; $(RM) $(BUILDTOP)/include/dyn.h; \
+		 $(CP) $(srcdir)/dyn.h \
+			$(BUILDTOP)/include/dyn.h) ; \
+	fi
+
+clean-unix::
+	$(RM) $(BUILDTOP)/include/dyn.h
 
 check-windows::
 clean-mac::

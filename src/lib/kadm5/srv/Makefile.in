@@ -1,3 +1,5 @@
+thisconfigdir=./
+BUILDTOP=$(U)$(U)$(U)
 CFLAGS = $(CCOPTS) $(DEFS) -I$(BUILDTOP)/include/kadm5 @HESIOD_DEFS@
 
 ##DOSBUILDTOP = ..\..\..
@@ -66,6 +68,18 @@ STLIBOBJS = \
 all-unix:: includes
 all-unix:: all-liblinks
 all-windows:: $(OBJS)
+
+includes:: server_acl.h
+	if cmp $(srcdir)/server_acl.h \
+	$(BUILDTOP)/include/kadm5/server_acl.h >/dev/null 2>&1; then :; \
+	else \
+		(set -x; $(RM) $(BUILDTOP)/include/kadm5/server_acl.h; \
+		 $(CP) $(srcdir)/server_acl.h \
+			$(BUILDTOP)/include/kadm5/server_acl.h) ; \
+	fi
+
+clean-unix::
+	$(RM) $(BUILDTOP)/include/kadm5/server_acl.h
 
 check-windows::
 

@@ -1,3 +1,11 @@
+Mon Feb  2 17:02:29 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in: Define BUILDTOP and thisconfigdir in the Makefile
+
+Wed Jan 28 16:12:42 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* configure.in: Remove use of AppendRule and LinkFileDir
+
 Thu Sep 25 21:30:36 1997  Tom Yu  <tlyu@mit.edu>
 
 	* adm_conn.c (kadm_contact_server): Replace KRB5_USE_INET with

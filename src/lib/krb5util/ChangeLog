@@ -1,3 +1,7 @@
+Mon Feb  2 17:01:22 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in: Define BUILDTOP and thisconfigdir in the Makefile
+
 Tue Jan  6 16:51:44 1998  Tom Yu  <tlyu@mit.edu>
 
 	* seteuid.c (krb5_seteuid): Don't check for _POSIX_SAVED_IDS, as

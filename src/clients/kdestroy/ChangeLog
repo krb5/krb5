@@ -1,3 +1,7 @@
+Mon Feb  2 17:02:29 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in: Define BUILDTOP and thisconfigdir in the Makefile
+
 Wed Jan 21 15:12:30 1998  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* kdestroy.c (main): returns int, not void. ANSI X3.159-1989

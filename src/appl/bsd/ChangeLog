@@ -1,3 +1,7 @@
+Mon Feb  2 17:02:29 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in: Define BUILDTOP and thisconfigdir in the Makefile
+
 Tue Jan 20 21:42:06 1998  Tom Yu  <tlyu@mit.edu>
 
 	* krlogind.c (protocol): Declare pibuf and fibuf as being BUFSIZ

@@ -32,7 +32,6 @@ end		return l_end();
  */
 #include <string.h>
 #include "ct.tab.h"
-#include "mit-sipb-copyright.h"
 
 #ifndef HAS_STRDUP
 extern char *strdup();

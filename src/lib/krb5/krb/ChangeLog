@@ -1,3 +1,7 @@
+Mon Feb  2 17:02:29 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in: Define BUILDTOP and thisconfigdir in the Makefile
+
 Thu Feb  5 23:48:34 1998  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* rd_cred.c (krb5_rd_cred): 
