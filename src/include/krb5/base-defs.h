@@ -59,6 +59,9 @@ typedef char * krb5_const_pointer;
 
 #if defined(__STDC__) || defined(KRB5_PROVIDE_PROTOTYPES)
 #define PROTOTYPE(x) x
+#if defined(__STDC__) || defined(STDARG_PROTOTYPES)
+#define	STDARG_P(x) x
+#endif
 #ifdef NARROW_PROTOTYPES
 #define DECLARG(type, val) type val
 #define OLDDECLARG(type, val)

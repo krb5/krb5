@@ -159,9 +159,9 @@ krb5_error_code krb5_generate_seq_number
 krb5_error_code krb5_get_server_rcache
     PROTOTYPE((const char *, krb5_rcache *));
 krb5_error_code krb5_build_principal_ext
-    PROTOTYPE((krb5_principal *, int, const char *, ...));
+    STDARG_P((krb5_principal *, int, const char *, ...));
 krb5_error_code krb5_build_principal
-    PROTOTYPE((krb5_principal *, int, const char *, ...));
+    STDARG_P((krb5_principal *, int, const char *, ...));
 #ifdef va_start
 /* XXX depending on varargs include file defining va_start... */
 krb5_error_code krb5_build_principal_va
