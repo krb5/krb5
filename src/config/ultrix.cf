@@ -10,26 +10,14 @@
 #define HasPutenv YES
 #define HasBsearch YES
 
-#undef ExtensionDefines
-#define ExtensionDefines -DSHAPE -DMITSHM -DMULTIBUFFER -DMITMISC
-
 #ifdef VaxArchitecture
-#define XqvssServer Xqvss
-#define XqdssServer Xqdss
 #define UnalignedReferencesAllowed YES	       /* if arbitrary deref is okay */
 #define HasSaberC YES
-#define ServerDefines StandardDefines ExtensionDefines -DXDMCP -DNOSTDHDRS -DX11R4
-/* gcc is *VERY USEFUL*, especially for the server; GET it */
-/* #define HasGcc YES */
 #endif
 
 #ifdef MipsArchitecture
-#define XmfbpmaxServer Xmfbpmax
-#define XcfbpmaxServer Xcfbpmax
-#define StandardDefines
-#define DefaultCCOptions -Wf,-XNh2000 -Olimit 2000
-#define ServerDefines StandardDefines ExtensionDefines -DXDMCP
-
+#define HasSaberC YES
+/* #define HasGcc YES */
 #endif
 
 /**/# platform:  $XConsortium: ultrix.cf,v 1.20 89/12/22 15:56:14 rws Exp $
