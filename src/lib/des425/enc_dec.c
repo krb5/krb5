@@ -64,7 +64,7 @@ int
 des_cbc_encrypt(in,out,length,key,iv,encrypt)
     krb5_octet   *in;		/* >= length bytes of input text */
     krb5_octet  *out;		/* >= length bytes of output text */
-    register long length;	/* in bytes */
+    register unsigned long length;	/* in bytes */
     mit_des_key_schedule key;		/* precomputed key schedule */
     krb5_octet *iv;		/* 8 bytes of ivec */
     int encrypt;		/* 0 ==> decrypt, else encrypt */

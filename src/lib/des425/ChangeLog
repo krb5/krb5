@@ -1,3 +1,9 @@
+2000-10-17  Ezra Peisach  <epeisach@mit.edu>
+
+	* cksum.c (des_cbc_cksum): Length is unsigned long.
+
+	* enc_dec.c (des_cbc_encrypt): Length is unsigned long. 
+
 Thu Jun 29 17:11:17 2000  Ezra Peisach  <epeisach@mit.edu>
 
 	* random_key.c (des_random_key): Add parentheses around assignment

@@ -59,7 +59,7 @@ void
 des_cbc_cksum(in,out,length,key,iv)
     krb5_octet  *in;		/* >= length bytes of inputtext */
     krb5_octet  *out;		/* >= length bytes of outputtext */
-    register long length;	/* in bytes */
+    register unsigned long length;	/* in bytes */
     mit_des_key_schedule key;		/* precomputed key schedule */
     krb5_octet  *iv;		/* 8 bytes of ivec */
 {
