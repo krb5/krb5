@@ -365,7 +365,7 @@ principal is determined internally by calling \funcname{krb5_get_host_realm}.
 The \funcparam{type} argument controls how
 \funcname{krb5_sname_to_principal} generates the principal name,
 \funcparam{ret_princ}, for the named service, \funcparam{sname}.
-Currently, two values 	are supported: KRB5_NT_SRV_HOST, and
+Currently, two values   are supported: KRB5_NT_SRV_HOST, and
 KRB5_NT_UNKNOWN.  
 
 If \funcparam{type} is set to
@@ -377,7 +377,7 @@ generated in the form
 KRB5_NT_SRV_HOST.  
 
 However, if \funcparam{type} is set to KRB5_NT_UNKNOWN,
-while the generated principal name will have 	the form
+while the generated principal name will have    the form
 "sname/hostname@LOCAL.REALM" the hostname will not be canonicalized
 first.  It will appear exactly as it was passed in \funcparam{hostname}.  
 
@@ -424,7 +424,7 @@ microseconds portion in \funcparam{*microseconds}.}
 \funcout
 \funcarg{char *}{return_pwd}
 \funcinout
-\funcarg{int *}{size_return}
+\funcarg{unsigned int *}{size_return}
 \end{funcdecl}
 
 Read a password from the keyboard.  The first \funcparam{*size_return}

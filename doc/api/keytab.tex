@@ -42,7 +42,7 @@ Requires that \funcparam{string_name} be of the form ``type:residual'' and
 ``type'' is a type known to the library.
 
 Errors: badly formatted name.
-		
+                
 \begin{funcdecl}{krb5_kt_default_name}{krb5_error_code}{\funcinout}
 \funcarg{krb5_context}{context}
 \funcin
@@ -116,7 +116,7 @@ If this routine is not available, then KRB5_KT_NOWRITE is returned.
 \funcout
 \funcarg{char *}{name}
 \funcin
-\funcarg{int}{namesize}
+\funcarg{unsigned int}{namesize}
 \end{funcdecl}
 
 \funcarg{name} is filled in with the first \funcparam{namesize} bytes of

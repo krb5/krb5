@@ -352,7 +352,7 @@ unable to allocate memory).
 \funcarg{krb5_const_principal}{principal}
 \funcinout
 \funcarg{char **}{name}
-\funcarg{int *}{size}
+\funcarg{unsigned int *}{size}
 \end{funcdecl}
 
 \funcname{krb5_unparse_name_ext} is designed for applications which
@@ -454,7 +454,7 @@ May also be used on the left size of an assignment.
 \funcout
 \funcarg{krb5_principal *}{princ}
 \funcin
-\funcarg{int}{rlen}
+\funcarg{unsigned int}{rlen}
 \funcarg{const char *}{realm}
 \funcarg{char}{*s1, *s2, ..., 0}
 \end{funcdecl}
@@ -463,7 +463,7 @@ May also be used on the left size of an assignment.
 \funcout
 \funcarg{krb5_principal *}{princ}
 \funcin
-\funcarg{int}{rlen}
+\funcarg{unsigned int}{rlen}
 \funcarg{const char *}{realm}
 \funcarg{va_list}{ap}
 \end{funcdecl}
@@ -487,7 +487,7 @@ The last string must be followed in the argument list by a null pointer.
 \funcout
 \funcarg{krb5_principal *}{princ}
 \funcin
-\funcarg{int}{rlen}
+\funcarg{unsigned int}{rlen}
 \funcarg{const char *}{realm}
 \funcarg{}{int len1, char *s1, int len2, char *s2, ..., 0}
 \end{funcdecl}
