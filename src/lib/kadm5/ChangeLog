@@ -1,3 +1,34 @@
+Sun Feb 18 16:26:33 2001  Ezra Peisach  <epeisach@mit.edu>
+
+	* server_internal.h: Add prototype for
+        krb5_free_key_data_contents() which really should be in libkdb.
+
+	* kadm_rpc_xdr.c: Include krb5/admin_xdr.h for prototypes.
+
+	* kadm_rpc.h: Add prototypes for client and server stub
+        functions. Server functions renamed to have _svc appended. 
+
+	* alt_prof.c: Clean up warnings. Do not shadow index() with local
+        variable.
+
+	* admin_xdr.h: Add prototypes for xdr_nulltype(), xdr_krb5_ui_4(),
+        xdr_krb5_int16(), xdr_krb5_key_data_nocontents(),
+        xdr_krb5_key_salt_tuple(), xdr_krb5_tl_data(),
+        xdr_kadm5_principal_ent_rec_v1(), xdr_cprinc3_arg(),
+        xdr_generic_ret(0, xdr_chpass3_arg(), xdr_setv4key_arg(),
+        xdr_setkey_arg(), xdr_setkey3_arg(), xdr_chrand3_arg(),
+        xdr_gprincs_arg(), xdr_grpincs_ret(), xdr_gpols_arg(),
+        xdr_gpols_ret(), xdr_getprivs_ret(), xdr_krb5_salttype().
+
+	* admin_internal.h: Add prototype for _kadm5_check_handle().
+
+	* admin.h: Add prototypes for kadm5_free_config_params(),
+        kadm5_decrypt_key(), ovsec_kadm_free_name_list().
+
+	* adb.h: Add prototypes for xdr_osa_pw_hist_ent(),
+        xdr_krb5_key_data(), osa_adb_rename_db(),
+        osa_adb_rename_policy_db().
+
 2001-01-16  Ken Raeburn  <raeburn@mit.edu>
 
 	* str_conv.c (krb5_keysalt_iterate): Always use the prototype for

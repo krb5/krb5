@@ -59,6 +59,10 @@ int		    init_dict(kadm5_config_params *);
 int		    find_word(const char *word);
 void		    destroy_dict(void);
 
+/* XXX this ought to be in libkrb5.a, but isn't */
+kadm5_ret_t krb5_free_key_data_contents(krb5_context context, 
+					krb5_key_data *key);
+
 /*
  * *Warning* 
  * *Warning*	    This is going to break if we     

@@ -57,6 +57,7 @@
 #define _KADM5_CHECK_HANDLE(handle) \
 { int code; if ((code = _kadm5_check_handle((void *)handle))) return code; }
 
+int         _kadm5_check_handle(void *handle);
 kadm5_ret_t _kadm5_chpass_principal_util(void *server_handle,
 					 void *lhandle,
 					 krb5_principal princ,

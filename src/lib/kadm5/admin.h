@@ -253,6 +253,10 @@ krb5_error_code kadm5_get_config_params(krb5_context context,
 					char *kdcprofile, char *kdcenv,
 					kadm5_config_params *params_in,
 					kadm5_config_params *params_out);
+
+krb5_error_code kadm5_free_config_params(krb5_context context, 
+					 kadm5_config_params *params);
+
 krb5_error_code kadm5_free_realm_params(krb5_context kcontext,
 					kadm5_config_params *params);
 #endif
@@ -368,6 +372,12 @@ kadm5_ret_t    kadm5_setkey_principal_3(void *server_handle,
 					krb5_key_salt_tuple *ks_tuple,
 					krb5_keyblock *keyblocks,
 					int n_keys);
+
+kadm5_ret_t    kadm5_decrypt_key(void *server_handle,
+				 kadm5_principal_ent_t entry, krb5_int32
+				 ktype, krb5_int32 stype, krb5_int32
+				 kvno, krb5_keyblock *keyblock,
+				 krb5_keysalt *keysalt, int *kvnop);
 
 kadm5_ret_t    kadm5_create_policy(void *server_handle,
 				   kadm5_policy_ent_t ent,
@@ -627,6 +637,9 @@ ovsec_kadm_ret_t    ovsec_kadm_free_principal_ent(void *server_handle,
 						  ent);
 ovsec_kadm_ret_t    ovsec_kadm_free_policy_ent(void *server_handle,
 					       ovsec_kadm_policy_ent_t ent);
+
+ovsec_kadm_ret_t ovsec_kadm_free_name_list(void *server_handle,
+					   char **names, int count);
 
 ovsec_kadm_ret_t    ovsec_kadm_get_principals(void *server_handle,
 					      char *exp, char ***princs,
