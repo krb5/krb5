@@ -43,7 +43,6 @@ krb5_error_code get_all_princ_from_file (fp, plist)
 	krb5_error_code retval;
 	char * line, * fprinc, * lp, ** temp_list = NULL; 
 	int count = 0, chunk_count = 1; 
-	int i =0;
 
 	if (!(temp_list = (char **) malloc( CHUNK * sizeof(char *)))){
 		 return errno;
@@ -204,9 +203,7 @@ get_authorized_princ_names(luser, cmd, princ_list)
 {
 
     struct passwd *pwd;
-    FILE *fp;
-    int count = 0, chunk_count = 1; 
-    int k5login_flag =0, i=0;
+    int k5login_flag =0;
     int k5users_flag =0;
     FILE * login_fp, * users_fp;
     char **  k5login_list = NULL, ** k5users_list = NULL;
@@ -330,7 +327,6 @@ krb5_error_code get_closest_principal(plist, client, found)
     krb5_boolean *found;
 {
 krb5_error_code retval =0; 
-char * client_name;
 krb5_principal temp_client, best_client = NULL;
 int i = 0, j=0, cnelem, pnelem;
 krb5_boolean got_one; 
@@ -410,10 +406,7 @@ krb5_error_code find_either_ticket (cc, client, end_server, found)
 {
 
 krb5_principal kdc_server; 
-krb5_creds tgt, tgtq;
-krb5_ticket * target_tkt;                 
 krb5_error_code retval;
-char * client_name; 
 krb5_boolean temp_found = FALSE;   
 char * cc_source_name;
 struct stat st_temp;
@@ -457,11 +450,8 @@ krb5_error_code find_ticket (cc, client, server, found)
     krb5_boolean *found;
 {
 
-krb5_principal kdc_server; 
 krb5_creds tgt, tgtq;
-krb5_ticket * target_tkt;                 
 krb5_error_code retval;
-char * client_name; 
 	
 	*found = FALSE;
 

@@ -74,7 +74,6 @@ krb5_error_code krb5_authorization(principal, luser, local_realm_name,
     char **out_fcmd;
 {
     struct passwd *pwd;
-    char * kuser;
     char *princname;
     int k5login_flag =0; 
     int k5users_flag =0; 
@@ -238,7 +237,7 @@ krb5_error_code k5login_lookup (fp, princname, found)
 
 krb5_error_code retval;
 char * line;
-char * fprinc, *cmd;
+char * fprinc;
 char * lp;  
 krb5_boolean loc_found = FALSE; 
 
@@ -385,7 +384,6 @@ char * err;
 char ** tmp_fcmd;
 char * path_ptr, *path; 
 char * lp, * tc;
-krb5_boolean found = FALSE; 
 int i=0;
 	
 	tmp_fcmd = (char **) calloc (MAX_CMD, sizeof(char *));    
@@ -396,9 +394,6 @@ int i=0;
 		*out_fcmd = tmp_fcmd;
 		return TRUE; 	
 	}else{
-		int size;
-		char * cmd_path_str = "";   
-
  		/* must be either full path or just the cmd name */        
 		if (strchr(fcmd, '/')){
 			err = (char *) calloc((strlen(fcmd) +200) ,sizeof(char));

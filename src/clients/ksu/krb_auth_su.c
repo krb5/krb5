@@ -54,17 +54,13 @@ krb5_boolean krb5_auth_check(client_pname, hostname, options,
     krb5_ccache cc;
     int *path_passwd;
 {
-krb5_principal client, server, temp_client; 
+krb5_principal client, server;
 krb5_creds tgt, tgtq, cred;
 krb5_creds **tgts = NULL; /* list of ticket granting tickets */       
 
 krb5_ticket * target_tkt; /* decrypted ticket for server */                
-int default_client = 1 ; 
-struct passwd *pw = NULL;
 krb5_error_code retval =0;
-char ** k5login_plist = NULL;
 int got_it = 0; 
-char * client_name;		
 krb5_boolean zero_password;
 
 	*path_passwd = 0;
@@ -225,7 +221,6 @@ krb5_boolean krb5_fast_auth(client, server, target_user, cc)
 krb5_creds tgt, tgtq;
 krb5_ticket * target_tkt;                 
 krb5_error_code retval;
-char * client_name; 
 
 	memset((char *) &tgtq, 0, sizeof(tgtq)); 
 	memset((char *) &tgt, 0, sizeof(tgt)); 
@@ -659,7 +654,6 @@ krb5_error_code get_best_principal(plist, client)
     krb5_principal *client;
 {
 krb5_error_code retval =0; 
-char * client_name;
 krb5_principal temp_client, best_client = NULL;
 
 int i = 0, nelem;

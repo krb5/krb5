@@ -58,12 +58,8 @@ krb5_ccache  * cc_other;
 char * cc_def_name;
 char * cc_other_name; 
 krb5_error_code retval=0;
-krb5_cc_cursor cur; 
-krb5_creds creds, temp_tktq, temp_tkt;
-int code= 0; 
 krb5_creds ** cc_def_creds_arr = NULL;
 krb5_creds ** cc_other_creds_arr = NULL;
-uid_t eff_uid, eff_gid;
 struct stat st_temp;
 
     cc_other = (krb5_ccache *)  calloc(1, sizeof (krb5_ccache));  	
@@ -524,7 +520,6 @@ krb5_error_code retval=0;
 krb5_principal temp_principal;
 krb5_creds ** ccs_creds_arr = NULL;
 int i=0; 
-uid_t eff_uid, eff_gid;
 struct stat st_temp;
 
     ccs_name = krb5_cc_get_name(ccs);    
@@ -571,10 +566,8 @@ krb5_error_code krb5_store_some_creds(cc, creds_def, creds_other, prst,
 {
 
 int i = 0; 
-int j = 0; 
 krb5_error_code retval = 0;  
 krb5_creds ** temp_creds= NULL;   
-krb5_boolean cmp; 
 krb5_boolean temp_stored = FALSE; 
 
 	
@@ -636,12 +629,8 @@ krb5_ccache  * cc_other;
 char * cc_def_name;
 char * cc_other_name; 
 krb5_error_code retval=0;
-krb5_cc_cursor cur; 
-krb5_creds creds, temp_tktq, temp_tkt;
-int code= 0; 
 krb5_creds ** cc_def_creds_arr = NULL;
 krb5_creds ** cc_other_creds_arr = NULL;
-uid_t eff_uid, eff_gid;
 struct stat st_temp;
 
     cc_other = (krb5_ccache *)  calloc(1, sizeof (krb5_ccache));  	
