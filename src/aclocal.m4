@@ -142,17 +142,17 @@ if test "$enable_thread_support" = yes ; then
 fi
 dnl Maybe this should be inside the conditional above?  Doesn't cache....
 if test "$enable_thread_support" = yes; then
-ACX_PTHREAD(,[AC_MSG_ERROR([cannot determine options for enabling thread support])])
-AC_MSG_NOTICE(PTHREAD_CC = $PTHREAD_CC)
-AC_MSG_NOTICE(PTHREAD_CFLAGS = $PTHREAD_CFLAGS)
-AC_MSG_NOTICE(PTHREAD_LIBS = $PTHREAD_LIBS)
-dnl Not really needed -- if pthread.h isn't found, ACX_PTHREAD will fail.
-dnl AC_CHECK_HEADERS(pthread.h)
-# AIX and Tru64 don't support weak references, and don't have
-# stub versions of the pthread code in libc.
-case "${host_os}" in
-  aix* | osf*) LIBS="$LIBS $PTHREAD_LIBS" ;;
-esac
+  ACX_PTHREAD(,[AC_MSG_ERROR([cannot determine options for enabling thread support])])
+  AC_MSG_NOTICE(PTHREAD_CC = $PTHREAD_CC)
+  AC_MSG_NOTICE(PTHREAD_CFLAGS = $PTHREAD_CFLAGS)
+  AC_MSG_NOTICE(PTHREAD_LIBS = $PTHREAD_LIBS)
+  dnl Not really needed -- if pthread.h isn't found, ACX_PTHREAD will fail.
+  dnl AC_CHECK_HEADERS(pthread.h)
+  # AIX and Tru64 don't support weak references, and don't have
+  # stub versions of the pthread code in libc.
+  case "${host_os}" in
+    aix* | osf*) LIBS="$LIBS $PTHREAD_LIBS" ;;
+  esac
 fi
 dnl We want to know where these routines live, so on systems with weak
 dnl reference support we can figure out whether or not the pthread library
@@ -170,11 +170,10 @@ LIBS="$PTHREAD_LIBS $LIBS"
 AC_MSG_NOTICE(rechecking with PTHREAD_... options)
 AC_CHECK_LIB(c, pthread_mutexattr_setrobust_np,
   [AC_DEFINE(HAVE_PTHREAD_MUTEXATTR_SETROBUST_NP_IN_THREAD_LIB,1,[Define if pthread_mutexattr_setrobust_np is provided in the thread library.])])
-])
 LIBS="$old_LIBS"
 CC="$old_CC"
 CFLAGS="$old_CFLAGS"
-fi
+])
 
 dnl This is somewhat gross and should go away when the build system
 dnl is revamped. -- tlyu

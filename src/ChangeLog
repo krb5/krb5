@@ -2,7 +2,8 @@
 
 	* aclocal.m4 (KRB5_AC_ENABLE_THREADS): Use PTHREAD_CFLAGS and
 	PTHREAD_LIBS when checking for pthread_mutexattr_setrobust_np
-	availability with thread support enabled.
+	availability with thread support enabled.  Fix typo that caused
+	some code to be omitted.
 
 2004-07-09  Ken Raeburn  <raeburn@mit.edu>
 
