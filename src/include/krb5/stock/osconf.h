@@ -64,7 +64,7 @@
 #define	DEFAULT_KDC_PROFILE	"@LOCALSTATEDIR/krb5kdc/kdc.conf"
 #define	KDC_PROFILE_ENV		"KRB5_KDC_PROFILE"
 
-#define	DEFAULT_KDC_ENCTYPE	ENCTYPE_DES_CBC_CRC
+#define	DEFAULT_KDC_ENCTYPE	ENCTYPE_DES3_CBC_SHA1
 #define KDCRCACHE		"dfl:krb5kdc_rcache"
 
 #define KDC_PORTNAME		"kerberos" /* for /etc/services or equiv. */
