@@ -895,6 +895,12 @@ Run something like
 as root, where @code{nnnn} is the pid of the shell whose priority
 limit you wish to raise.
 
+Sun has released kernel patches for this race condition.  Apply patch
+117171-11 for sparc, or patch 117172-11 for x86.  Later revisions of
+the patches should also work.  It is not necessary to run ``make
+check'' from a shell with elevated priority limits once the patch has
+been applied.
+
 @node SGI Irix 5.X, Ultrix 4.2/3, Solaris 9, OS Incompatibilities
 @subsection SGI Irix 5.X
 
