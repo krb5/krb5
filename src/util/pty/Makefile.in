@@ -6,6 +6,10 @@ RELDIR=../util/pty
 
 SED = sed
 
+KRB5_RUN_ENV= @KRB5_RUN_ENV@
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
+
 LIB=pty
 LIBMAJOR=1
 LIBMINOR=1
@@ -48,6 +52,12 @@ all-unix:: all-liblinks
 dump-utmp: dump-utmp.o
 	$(CC) $(LDFLAGS) -o dump-utmp dump-utmp.o
 dump-utmp.o: dump-utmp.c
+
+pty_paranoia: pty_paranoia.o $(COM_ERR_DEPLIB) $(PTY_DEPLIB)
+	$(CC_LINK) -o pty_paranoia pty_paranoia.o $(PTY_LIB) $(COM_ERR_LIB) $(LIBS)
+
+check-paranoia: pty_paranoia
+	$(KRB5_RUN_ENV) ./pty_paranoia
 
 install-unix:: install-libs
 
