@@ -82,10 +82,20 @@ krb5_fcc_read_principal(id, princ)
    krb5_ccache id;
    krb5_principal *princ;
 {
+    krb5_fcc_data *data = (krb5_fcc_data *)id->data;
     krb5_error_code kret;
     register krb5_principal tmpprinc;
-    krb5_int32 length;
+    krb5_int32 length, type;
     int i;
+
+    if (data->version == KRB5_FCC_FVNO_1) {
+	type = KRB5_NT_UNKNOWN;
+    } else {
+        /* Read principal type */
+        kret = krb5_fcc_read_int32(id, &type);
+        if (kret != KRB5_OK)
+	    return kret;
+    }
 
     /* Read the number of components */
     kret = krb5_fcc_read_int32(id, &length);
@@ -101,6 +111,7 @@ krb5_fcc_read_principal(id, princ)
 	return KRB5_CC_NOMEM;
     }
     tmpprinc->length = length;
+    tmpprinc->type = type;
 
     kret = krb5_fcc_read_data(id, krb5_princ_realm(tmpprinc));
 

@@ -33,6 +33,8 @@ static char rcsid_fcc_maybe_c[] =
 #include "fcc.h"
 #include <krb5/osconf.h>
 
+int krb5_fcc_default_format = KRB5_FCC_DEFAULT_FVNO;
+
 #ifdef KRB5_USE_INET
 #include <netinet/in.h>
 #else
@@ -139,7 +141,7 @@ krb5_fcc_open_file (id, mode)
     int mode;
 {
      krb5_fcc_data *data = (krb5_fcc_data *)id->data;
-     krb5_int16 fcc_fvno = htons(KRB5_FCC_FVNO);
+     krb5_int16 fcc_fvno;
      int fd;
      int open_flag;
      krb5_error_code retval;
@@ -177,6 +179,8 @@ krb5_fcc_open_file (id, mode)
 	 /* write the version number */
 	 int errsave, cnt;
 
+	 fcc_fvno = htons(krb5_fcc_default_format);
+	 data->version = krb5_fcc_default_format;
 	 if ((cnt = write(fd, (char *)&fcc_fvno, sizeof(fcc_fvno))) !=
 	     sizeof(fcc_fvno)) {
 	     errsave = errno;
@@ -192,11 +196,13 @@ krb5_fcc_open_file (id, mode)
 	     (void) close(fd);
 	     return KRB5_CCACHE_BADVNO;
 	 }
-	 if (fcc_fvno != htons(KRB5_FCC_FVNO)) {
+	 if ((fcc_fvno != htons(KRB5_FCC_FVNO)) &&
+	     (fcc_fvno != htons(KRB5_FCC_FVNO_1))) {
 	     (void) fcc_lock_file(data, fd, UNLOCK_IT);
 	     (void) close(fd);
 	     return KRB5_CCACHE_BADVNO;
 	 }
+	 data->version = ntohs(fcc_fvno);
      }
      data->fd = fd;
      return 0;

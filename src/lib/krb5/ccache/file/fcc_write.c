@@ -2,7 +2,7 @@
  * $Source$
  * $Author$
  *
- * Copyright 1990,1991 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991,1992 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America is assumed
@@ -73,18 +73,23 @@ krb5_fcc_write(id, buf, len)
  * system errors
  */
 
-/* XXX TODO: write principal type to file XXX */
-
 krb5_error_code
 krb5_fcc_store_principal(id, princ)
    krb5_ccache id;
    krb5_principal princ;
 {
+    krb5_fcc_data *data = (krb5_fcc_data *)id->data;
     krb5_error_code ret;
-    krb5_int32 i, length;
+    krb5_int32 i, length, type;
 
+    type = krb5_princ_type(princ);
     length = krb5_princ_size(princ);
 
+    if (data->version != KRB5_FCC_FVNO_1) {
+	    ret = krb5_fcc_store_int32(id, &type);
+	    CHECK(ret);
+    }
+    
     ret = krb5_fcc_store_int32(id, &length);
     CHECK(ret);
 

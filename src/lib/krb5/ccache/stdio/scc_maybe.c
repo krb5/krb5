@@ -42,6 +42,8 @@ static char rcsid_scc_maybe_c[] =
 #include <krb5/libos.h>
 #include <krb5/los-proto.h>
 
+int krb5_scc_default_format = KRB5_SCC_DEFAULT_FVNO;
+
 krb5_error_code
 krb5_scc_close_file (id)
     krb5_ccache id;
@@ -85,7 +87,7 @@ krb5_scc_open_file (id, mode)
     krb5_ccache id;
     int mode;
 {
-     krb5_int16 scc_fvno = htons(KRB5_SCC_FVNO);
+     krb5_int16 scc_fvno;
      krb5_scc_data *data;
      FILE *f;
      char *open_flag;
@@ -154,6 +156,8 @@ krb5_scc_open_file (id, mode)
 	 /* write the version number */
 	 int errsave;
 
+	 scc_fvno = htons(krb5_scc_default_format);
+	 data->version = krb5_scc_default_format;
 	 if (!fwrite((char *)&scc_fvno, sizeof(scc_fvno), 1, f)) {
 	     errsave = errno;
 	     (void) krb5_unlock_file(f, data->filename);
@@ -167,11 +171,13 @@ krb5_scc_open_file (id, mode)
 	     (void) fclose(f);
 	     return KRB5_CCACHE_BADVNO;
 	 }
-	 if (scc_fvno != (krb5_int16)htons(KRB5_SCC_FVNO)) {
+	 if ((scc_fvno != htons(KRB5_SCC_FVNO)) &&
+	     (scc_fvno != htons(KRB5_SCC_FVNO_1))) {
 	     (void) krb5_unlock_file(f, data->filename);
 	     (void) fclose(f);
 	     return KRB5_CCACHE_BADVNO;
 	 }
+	 data->version = ntohs(scc_fvno);
      }
      data->file = f;
      return 0;

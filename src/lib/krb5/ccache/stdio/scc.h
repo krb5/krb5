@@ -41,7 +41,20 @@
 
 #define KRB5_SCC_MAXLEN 100
 
-#define KRB5_SCC_FVNO 0x0501		/* krb v5, scc v1 */
+/*
+ * SCC version 2 contains type information for principals.  SCC
+ * version 1 does not.  The code will accept either, and depending on
+ * what KRB5_SCC_DEFAULT_FVNO is set to, it will create version 1 or
+ * version 2 SCC caches.
+ *
+ * KRB5_SCC_DEFAULT_FVNO should be set to version 2, unless there is
+ * some overriding compatibility reasons not to do so.
+ */
+
+#define KRB5_SCC_FVNO_1 0x0501		/* krb v5, scc v1 */
+#define KRB5_SCC_FVNO   0x0502		/* krb5 v5, scc v2 */
+
+#define KRB5_SCC_DEFAULT_FVNO KRB5_SCC_FVNO
 
 #define	SCC_OPEN_AND_ERASE	1
 #define	SCC_OPEN_RDWR		2
@@ -59,6 +72,7 @@ typedef struct _krb5_scc_data {
      FILE *file;
      krb5_flags flags;
      char stdio_buffer[BUFSIZ];
+     int version;
 } krb5_scc_data;
 
 /* An off_t can be arbitrarily complex */

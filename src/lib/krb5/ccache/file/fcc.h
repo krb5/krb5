@@ -41,7 +41,21 @@
 
 #define KRB5_FCC_MAXLEN 100
 
-#define KRB5_FCC_FVNO 0x0501		/* krb v5, fcc v1 */
+/*
+ * FCC version 2 contains type information for principals.  FCC
+ * version 1 does not.  The code will accept either, and depending on
+ * what KRB5_FCC_DEFAULT_FVNO is set to, it will create version 1 or
+ * version 2 FCC caches.
+ *
+ * KRB5_FCC_DEFAULT_FVNO should be set to version 2, unless there is
+ * some overriding compatibility reasons not to do so.
+ */
+
+#define KRB5_FCC_FVNO_1 0x0501		/* krb v5, fcc v1 */
+#define KRB5_FCC_FVNO   0x0502		/* krb5 v5, fcc v2 */
+
+#define KRB5_FCC_DEFAULT_FVNO KRB5_FCC_FVNO
+
 #define	FCC_OPEN_AND_ERASE	1
 #define	FCC_OPEN_RDWR		2
 #define	FCC_OPEN_RDONLY		3
@@ -58,6 +72,7 @@ typedef struct _krb5_fcc_data {
      int fd;
      krb5_flags flags;
      int mode;				/* needed for locking code */
+     int version;	      		/* version number of the file */
 } krb5_fcc_data;
 
 /* An off_t can be arbitrarily complex */
