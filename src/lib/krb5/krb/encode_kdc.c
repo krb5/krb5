@@ -38,15 +38,15 @@ static char rcsid_encode_kdc_c [] =
 */
 /* due to promotion rules, we need to play with this... */
 krb5_error_code
-krb5_encode_kdc_rep(DECLARG(krb5_msgtype, type),
+krb5_encode_kdc_rep(DECLARG(const krb5_msgtype, type),
+		    DECLARG(const register krb5_enc_kdc_rep_part *, encpart),
+		    DECLARG(const krb5_keyblock *, client_key),
 		    DECLARG(register krb5_kdc_rep *, dec_rep),
-		    DECLARG(register krb5_enc_kdc_rep_part *, encpart),
-		    DECLARG(krb5_keyblock *, client_key),
 		    DECLARG(krb5_data **, enc_rep))
-OLDDECLARG(krb5_msgtype, type)
+OLDDECLARG(const krb5_msgtype, type)
+OLDDECLARG(const register krb5_enc_kdc_rep_part *, encpart)
+OLDDECLARG(const krb5_keyblock *, client_key)
 OLDDECLARG(register krb5_kdc_rep *, dec_rep)
-OLDDECLARG(register krb5_enc_kdc_rep_part *, encpart)
-OLDDECLARG(krb5_keyblock *, client_key)
 OLDDECLARG(krb5_data **, enc_rep)
 {
     krb5_data *scratch;
