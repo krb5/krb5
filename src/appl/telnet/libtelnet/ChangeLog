@@ -1,3 +1,8 @@
+2002-03-29  Tom Yu  <tlyu@mit.edu>
+
+	* kerberos5.c, kerberos.c (Data): Don't overflow
+	buffer. [telnet/1073] [pullup and reindent from trunk]
+
 2001-02-21  Tom Yu  <tlyu@mit.edu>
 
 	* configure.in: Check for setenv, unsetenv, and getenv.  Compile
