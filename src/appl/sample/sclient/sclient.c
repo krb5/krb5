@@ -66,9 +66,10 @@ char *argv[];
     krb5_ap_rep_enc_part *rep_ret;
     krb5_auth_context auth_context = 0;
     short xmitlen;
+    char *service = 0;
 
-    if (argc != 2 && argc != 3) {
-	fprintf(stderr, "usage: %s <hostname> [port]\n",argv[0]);
+    if (argc != 2 && argc != 3 && argc != 4) {
+	fprintf(stderr, "usage: %s <hostname> [port] [service]\n",argv[0]);
 	exit(1);
     }
 
@@ -84,7 +85,7 @@ char *argv[];
     /* clear out the structure first */
     (void) memset((char *)&sin, 0, sizeof(sin));
 
-    if (argc == 3) {
+    if (argc > 2) {
 	sin.sin_family = AF_INET;
 	sin.sin_port = htons(atoi(argv[2]));
     } else {
@@ -100,6 +101,9 @@ char *argv[];
 	sin.sin_port = sp->s_port;
 	sin.sin_family = AF_INET;
     }
+    if (argc > 3) {
+	service = argv[3];
+    }
 
     /* look up the server host */
     hp = gethostbyname(argv[1]);
@@ -108,10 +112,10 @@ char *argv[];
 	exit(1);
     }
 
-    if (retval = krb5_sname_to_principal(context, argv[1], SAMPLE_SERVICE,
+    if (retval = krb5_sname_to_principal(context, argv[1], service,
 					 KRB5_NT_SRV_HST, &server)) {
-	com_err(argv[0], retval, "while creating server name for %s",
-		argv[1]);
+	com_err(argv[0], retval, "while creating server name for %s/%s",
+		argv[1], service);
 	exit(1);
     }
 

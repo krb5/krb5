@@ -1,3 +1,7 @@
+Sat Sep 16 03:40:41 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* sclient.c (main): Add an optional third argument which allows
+		the user to set the Kerberos service name to be used.
 
 Fri Jul 7 15:46:11 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in - Remove all explicit library handling and LDFLAGS.
