@@ -138,7 +138,12 @@ long atol P((char *));
 int bcmp P((char *, char *, int ));
 int bcopy P((const char *, char *, int ));
 int bzero P((char *, int ));
+#ifdef __GNUC__
+#include <stddef.h>
+void *calloc P((size_t, size_t));
+#else
 char *calloc P((unsigned , unsigned ));
+#endif
 void closelog P((void ));
 int creat P((char *, int ));
 char *crypt P((char *, char *));
@@ -162,7 +167,11 @@ int exect P((char *, char * [], char * []));
 int exit P((int ));
 char *fcvt P((double , int , int *, int *));
 int ffs P((int ));
+#ifdef __GNUC__
+void free P((void *));
+#else
 int free P((char *));
+#endif
 double frexp P((double , int *));
 char *gcvt P((double , int , char *));
 struct disktab *getdiskbyname P((char *));
@@ -221,7 +230,11 @@ long random P((void ));
 int rcmd P((char **, u_short , char *, char *, char *, int *));
 char *re_comp P((char *));
 int re_exec P((char *));
+#ifdef __GNUC__
+void *realloc P((void *, size_t ));
+#else
 char *realloc P((char *, unsigned ));
+#endif
 int rexec P((char **, u_short , char *, char *, char *, int *));
 int rresvport P((int *));
 int ruserok P((char *, int , char *, char *));
