@@ -63,7 +63,6 @@
 /* v4 include files:
  */
 #include <krb.h>
-#include <krb4-proto.h>
 #include <des.h>
 #include <klog.h>
 #include <prot.h>

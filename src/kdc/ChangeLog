@@ -1,3 +1,7 @@
+Tue Feb 18 09:56:16 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* kerberos_v4.c: Remove include of krb4-proto.h
+
 Thu Feb  6 00:09:46 1997  Richard Basch  <basch@lehman.com>
 
 	* Makefile.in: Remove logger.c target before copying over it.
