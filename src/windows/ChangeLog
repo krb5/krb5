@@ -1,3 +1,7 @@
+2000-07-07  Danilo Almeida  <dalmeida@mit.edu>
+
+	* version.rc: No longer pre-release.
+
 2000-06-21  Danilo Almeida  <dalmeida@mit.edu>
 
 	* README: Update documentation with DNS information.  Fix up the

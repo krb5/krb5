@@ -5,8 +5,6 @@
  * BEGIN COMMON VERSION INFO for GSS and Kerberos version resources
  */
 
-#define PRE_RELEASE
-
 #ifdef PRE_RELEASE
 #define BETA_STR  " beta"
 #define BETA_FLAG VS_FF_PRERELEASE
