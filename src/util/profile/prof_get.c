@@ -162,6 +162,11 @@ profile_get_values(profile, names, ret_values)
 			add_to_list(&values, value);
 	} while (state);
 
+	if (values.num == 0) {
+		retval = PROF_NO_RELATION;
+		goto cleanup;
+	}
+
 	end_list(&values, ret_values);
 	return 0;
 	

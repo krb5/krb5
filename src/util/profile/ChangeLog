@@ -1,3 +1,8 @@
+1998-11-17  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* prof_get.c (profile_get_values): If there are no relations
+		found, return PROF_NO_RELATION, instead of an empty list.
+
 1998-11-13  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* Makefile.in: Set the myfulldir and mydir variables (which are
