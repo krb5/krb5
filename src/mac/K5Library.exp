@@ -205,7 +205,7 @@
 	krb5_get_profile
 
 #Temporary exports (DO NOT USE)
-	decode_krb5_ticket
+	decode_krb5_ticket					# remove in next version
 	krb5_random_confounder
 	krb5_size_opaque
 	krb5_internalize_opaque
@@ -219,5 +219,5 @@
 	krb5_ser_ccache_init
 	krb5_ser_keytab_init
 	krb5_ser_rcache_init
-	decode_krb5_ap_req
+	decode_krb5_ap_req					# remove in next version
 	krb5_mcc_ops
