@@ -144,7 +144,7 @@ pty_make_sane_hostname(const struct sockaddr *addr, int maxlen,
     (*out)[ut_host_len - 1] = '\0';
 #else /* old gethostbyaddr interface; how quaint :-) */
     if (addr->sa_family == AF_INET)
-	hp = gethostbyaddr((char *)&((struct sockaddr_in *)addr)->sin_addr,
+	hp = gethostbyaddr((const char *)&((const struct sockaddr_in *)addr)->sin_addr,
 			   sizeof (struct in_addr), addr->sa_family);
     else
 	hp = NULL;

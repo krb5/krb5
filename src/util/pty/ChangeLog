@@ -1,3 +1,8 @@
+2001-05-03  Ezra Peisach  <epeisach@rna.mit.edu>
+
+	* sane_hostname.c (pty_make_sane_hostname): Preserve const
+	property of incomming parameter in casts.
+
 2001-05-03  Ezra Peisach  <epeisach@mit.edu>
 
 	* cleanup.c (pty_cleanup): Delcare local variable only if
