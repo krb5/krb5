@@ -1314,10 +1314,6 @@ KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_ser_unpack_bytes
 
 int krb5_seteuid  KRB5_PROTOTYPE((int));
 
-int krb5_setenv  KRB5_PROTOTYPE((const char *, const char *, int));
-
-void krb5_unsetenv  KRB5_PROTOTYPE((const char *));
-
 /* to keep lint happy */
 #define krb5_xfree(val) free((char FAR *)(val))
 

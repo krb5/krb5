@@ -1,3 +1,10 @@
+Sun Feb 22 19:20:31 1998  Tom Yu  <tlyu@mit.edu>
+
+	* k5-util.h: New file.  Add krb5_seteuid in order to allow
+ 	applications to use it without including k5-int.h.
+
+	* k5-int.h: Remove krb5_seteuid, as it is moving to k5-util.h.
+
 Wed Feb 18 15:50:40 1998  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Remove trailing slash from thisconfigdir.  Fix up
