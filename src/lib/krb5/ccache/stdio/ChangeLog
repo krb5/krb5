@@ -1,3 +1,7 @@
+Thu Oct 13 17:24:00 1994  Theodore Y. Ts'o  (tytso@maytag)
+
+	* configure.in: Add ISODE_DEFS
+
 Fri Sep 30 21:53:31 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* scc_defops.c (krb5_cc_stdio_ops):

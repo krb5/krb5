@@ -1,3 +1,7 @@
+Thu Oct 13 17:26:12 1994  Theodore Y. Ts'o  (tytso@maytag)
+
+	* configure.in: Add ISODE_DEFS
+
 Tue Oct  4 16:20:48 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* ktf_get_en.c (krb5_ktfile_get_entry): Fix to compare using

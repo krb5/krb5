@@ -1,0 +1,4 @@
+Thu Oct 13 17:23:08 1994  Theodore Y. Ts'o  (tytso@maytag)
+
+	* configure.in: Add ISODE_DEFS
+
