@@ -1,3 +1,8 @@
+2001-02-05  Tom Yu  <tlyu@mit.edu>
+
+	* kdb5_util.M: Fix some formatting nits and document new flags
+	controlling dump formats.
+
 2000-06-30  Tom Yu  <tlyu@mit.edu>
 
 	* dump.c: Add a new dump version, r1_3_version, and make it the
