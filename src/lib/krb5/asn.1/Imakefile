@@ -174,7 +174,8 @@ KRB5-pt0.c KRB5-cflist KRB5-oflist:	KRB5-types.c process.perl
 	$(PERL) process.perl KRB5-types.c KRB5-pt KRB5-cflist KRB5-oflist
 #endif
 
-KRB5-types.c: KRB5-types.py
+KRB5-types.c:: KRB5-types.py
+	@echo '***Ignore the warning message "line XXXX: Warning: Can'\''t find UNIV.ph failed"'
 KRB5-types.h: KRB5-types.c
 
 KRB5-types.py:	KRB5-asn.py
