@@ -140,13 +140,15 @@ char **argv;
     int keytypedone = 0;
     char *db_realm = 0;
     char *mkey_name = 0;
+    char *rcname = 0;
     char *lrealm;
     krb5_error_code retval;
     krb5_enctype etype;
+    extern krb5_deltat krb5_clockskew;
 
     extern char *optarg;
 
-    while ((c = getopt(argc, argv, "r:d:mM:k:")) != EOF) {
+    while ((c = getopt(argc, argv, "r:d:mM:k:R:")) != EOF) {
 	switch(c) {
 	case 'r':			/* realm name for db */
 	    db_realm = optarg;
@@ -163,6 +165,9 @@ char **argv;
 	case 'k':			/* keytype for master key */
 	    master_keyblock.keytype = atoi(optarg);
 	    keytypedone++;
+	    break;
+	case 'R':
+	    rcname = optarg;
 	    break;
 	case '?':
 	default:
@@ -186,11 +191,31 @@ char **argv;
     if (!keytypedone)
 	master_keyblock.keytype = KEYTYPE_DES;
 
+    if (!rcname)
+	rcname = KDCRCACHE;
+    if (retval = krb5_rc_resolve_full(&kdc_rcache, rcname)) {
+	com_err(argv[0], retval, "while resolving replay cache '%s'", rcname);
+	exit(1);
+    }
+    if ((retval = krb5_rc_recover(kdc_rcache)) &&
+	(retval = krb5_rc_initialize(kdc_rcache, krb5_clockskew))) {
+	com_err(argv[0], retval, "while initializing replay cache '%s:%s'",
+		kdc_rcache->ops->type,
+		krb5_rc_get_name(kdc_rcache));
+	exit(1);
+    }
+    if ((retval = krb5_rc_expunge(kdc_rcache))) {
+	com_err(argv[0], retval, "while expunging replay cache '%s:%s'",
+		kdc_rcache->ops->type,
+		krb5_rc_get_name(kdc_rcache));
+	exit(1);
+    }
     /* assemble & parse the master key name */
 
     if (retval = krb5_db_setup_mkey_name(mkey_name, db_realm, (char **) 0,
 					 &master_princ)) {
 	com_err(argv[0], retval, "while setting up master key name");
+	(void) krb5_rc_close(kdc_rcache);
 	exit(1);
     }
 
@@ -204,6 +229,7 @@ error(You gotta figure out what cryptosystem to use in the KDC);
 				    FALSE, /* only read it once, if at all */
 				    &master_keyblock)) {
 	com_err(argv[0], retval, "while fetching master key");
+	(void) krb5_rc_close(kdc_rcache);
 	exit(1);
     }
     /* initialize random key generators */
@@ -225,7 +251,12 @@ void
 finish_args(prog)
 char *prog;
 {
-    /* nothing to do at the moment... */
+    krb5_error_code retval;
+    if (retval = krb5_rc_close(kdc_rcache)) {
+	com_err(prog, retval, "while closing replay cache '%s:%s'",
+		kdc_rcache->ops->type,
+		krb5_rc_get_name(kdc_rcache));
+    }
     return;
 }
 
