@@ -1,13 +1,28 @@
 /*
- * tf_util.c
+ * lib/krb4/tf_util.c
  *
- * Copyright 1987, 1988 by the Massachusetts Institute of Technology.
+ * Copyright 1985, 1986, 1987, 1988, 2000, 2001 by the Massachusetts
+ * Institute of Technology.  All Rights Reserved.
  *
- * For copying and distribution information, please see the file
- * <mit-copyright.h>.
+ * Export of this software from the United States of America may
+ *   require a specific license from the United States Government.
+ *   It is the responsibility of any person or organization contemplating
+ *   export to obtain such a license before exporting.
+ * 
+ * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
+ * distribute this software and its documentation for any purpose and
+ * without fee is hereby granted, provided that the above copyright
+ * notice appear in all copies and that both that copyright notice and
+ * this permission notice appear in supporting documentation, and that
+ * the name of M.I.T. not be used in advertising or publicity pertaining
+ * to distribution of the software without specific, written prior
+ * permission.  Furthermore if you modify this software you must label
+ * your software as modified software and not distribute it in such a
+ * fashion that it might be confused with the original M.I.T. software.
+ * M.I.T. makes no representations about the suitability of
+ * this software for any purpose.  It is provided "as is" without express
+ * or implied warranty.
  */
-
-#include "mit-copyright.h"
 
 #include "krb.h"
 #include "k5-int.h"
@@ -15,6 +30,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 #include <sys/stat.h>
 #include <fcntl.h>
 
@@ -44,7 +62,6 @@ char *shmat();
 #ifdef NEED_UTIMES
 
 #include <sys/time.h>
-#include <unistd.h>
 #ifdef __SCO__
 #include <utime.h>
 #endif
@@ -60,6 +77,20 @@ int utimes(path, times)
   tv.modtime = times[1].tv_sec;
   return utime(path,&tv);
 }
+#endif
+
+#ifdef HAVE_SETEUID
+#define do_seteuid(e) seteuid((e))
+#else
+#ifdef HAVE_SETRESUID
+#define do_seteuid(e) setresuid(-1, (e), -1)
+#else
+#ifdef HAVE_SETREUID
+#define do_seteuid(e) setreuid(geteuid(), (e))
+#else
+#define do_seteuid(e) (errno = EPERM, -1)
+#endif
+#endif
 #endif
 
 /*
@@ -149,7 +180,7 @@ int tf_init(tf_name, rw)
     int rw;
 {
     int     wflag;
-    uid_t   me= getuid();
+    uid_t   me, metoo;
     struct stat stat_buf, stat_buffd;
 #ifdef TKT_SHMEM
     char shmidname[MAXPATHLEN]; 
@@ -163,6 +194,7 @@ int tf_init(tf_name, rw)
     }
 
     me = getuid();
+    metoo = geteuid();
 
     switch (rw) {
     case R_TKT_FIL:
@@ -196,8 +228,30 @@ int tf_init(tf_name, rw)
     curpos = sizeof(tfbfr);
 
 #ifdef TKT_SHMEM
+    if (lstat(shmidname, &stat_buf) < 0) {
+	switch (errno) {
+	case ENOENT:
+	    return NO_TKT_FIL;
+	default:
+	    return TKT_FIL_ACC;
+	}
+    }
+    if (stat_buf.st_uid != me || !(stat_buf.st_mode & S_IFREG)
+	|| stat_buf.st_nlink != 1 || stat_buf.st_mode & 077) {
+	return TKT_FIL_ACC;
+    }
+
+    /*
+     * Yes, we do uid twiddling here.  It's not optimal, but some
+     * applications may expect that the ruid is what should really own
+     * the ticket file, e.g. setuid applications.
+     */
+    if (me != metoo && do_seteuid(me) < 0)
+	return KFAILURE;
     sfp = fopen(shmidname, "r");	/* only need read/write on the
 					   actual tickets */
+    if (me != metoo && do_seteuid(metoo) < 0)
+	return KFAILURE;
     if (sfp == 0) {
         switch(errno) {
         case ENOENT:
@@ -207,10 +261,11 @@ int tf_init(tf_name, rw)
 	}
     }
 
-    /* lstat() and fstat() the file to check that the file we opened is the *
-     * one we think it is, and to check ownership.                          */
-    if ((fstat(sfp->_file, &stat_buffd) < 0) || 
-	(lstat(shmidname, &stat_buf) < 0)) {
+    /*
+     * fstat() the file to check that the file we opened is the one we
+     * think it is.
+     */
+    if (fstat(fileno(sfp), &stat_buffd) < 0) {
         (void) close(fd);
 	fd = -1;
 	switch(errno) {
@@ -271,8 +326,25 @@ int tf_init(tf_name, rw)
     tmp_shm_addr = krb_shm_addr;
 #endif /* TKT_SHMEM */
     
+    if (lstat(tf_name, &stat_buf) < 0) {
+	switch (errno) {
+	case ENOENT:
+	    return NO_TKT_FIL;
+	default:
+	    return TKT_FIL_ACC;
+	}
+    }
+    if (stat_buf.st_uid != me || !(stat_buf.st_mode & S_IFREG)
+	|| stat_buf.st_nlink != 1 || stat_buf.st_mode & 077) {
+	return TKT_FIL_ACC;
+    }
+
     if (wflag) {
+	if (me != metoo && do_seteuid(me) < 0)
+	    return KFAILURE;
 	fd = open(tf_name, O_RDWR, 0600);
+	if (me != metoo && do_seteuid(metoo) < 0)
+	    return KFAILURE;
 	if (fd < 0) {
 	    switch(errno) {
 	    case ENOENT:
@@ -281,10 +353,11 @@ int tf_init(tf_name, rw)
 	        return TKT_FIL_ACC;
 	  }
 	}
-	/* lstat() and fstat() the file to check that the file we opened is the *
-	 * one we think it is, and to check ownership.                          */
-	if ((fstat(fd, &stat_buffd) < 0) || 
-	    (lstat(tf_name, &stat_buf) < 0)) {
+	/*
+	 * fstat() the file to check that the file we opened is the
+	 * one we think it is, and to check ownership.
+	 */
+	if (fstat(fd, &stat_buffd) < 0) {
 	    (void) close(fd);
 	    fd = -1;
 	    switch(errno) {
@@ -327,7 +400,11 @@ int tf_init(tf_name, rw)
      * for read-only operations and locked for shared access. 
      */
 
+    if (me != metoo && do_seteuid(me) < 0)
+	return KFAILURE;
     fd = open(tf_name, O_RDONLY, 0600);
+    if (me != metoo && do_seteuid(metoo) < 0)
+	return KFAILURE;
     if (fd < 0) {
         switch(errno) {
 	case ENOENT:
@@ -336,10 +413,11 @@ int tf_init(tf_name, rw)
 	    return TKT_FIL_ACC;
 	}
     }
-    /* lstat() and fstat() the file to check that the file we opened is the *
-     * one we think it is, and to check ownership.                          */
-    if ((fstat(fd, &stat_buffd) < 0) || 
-	(lstat(tf_name, &stat_buf) < 0)) {
+    /*
+     * fstat() the file to check that the file we opened is the one we
+     * think it is, and to check ownership.
+     */
+    if (fstat(fd, &stat_buffd) < 0) {
         (void) close(fd);
 	fd = -1;
 	switch(errno) {

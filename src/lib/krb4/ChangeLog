@@ -1,3 +1,11 @@
+2001-01-26  Tom Yu  <tlyu@mit.edu>
+
+	* dest_tkt.c: Clean up uid handling.  Fix stat checks.
+
+	* in_tkt.c: Clean up uid handling.  Fix stat checks.
+
+	* tf_util.c: Clean up uid handling.  Fix stat checks.
+
 2000-06-09  Tom Yu  <tlyu@mit.edu>
 
 	* configure.in: Check for strdup().
