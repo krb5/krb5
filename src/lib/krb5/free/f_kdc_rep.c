@@ -27,8 +27,8 @@ krb5_kdc_rep *val;
 	krb5_free_principal(val->client);
     if (val->ticket)
 	krb5_free_ticket(val->ticket);
-    if (val->enc_part.data)
-	xfree(val->enc_part.data);
+    if (val->enc_part.ciphertext.data)
+	xfree(val->enc_part.ciphertext.data);
     if (val->enc_part2)
 	krb5_free_enc_kdc_rep_part(val->enc_part2);
     xfree(val);
