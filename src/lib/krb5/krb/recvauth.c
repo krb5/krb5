@@ -202,7 +202,7 @@ krb5_recvauth(/* IN */
 		krb5_us_timeofday(&error.stime, &error.susec);
 		error.server = server;
 		error.error = problem - ERROR_TABLE_BASE_krb5;
-		if (error.error < 0 || error.error > 127)
+		if (error.error > 127)
 			error.error = KRB_ERR_GENERIC;
 		message = error_message(problem);
 		error.text.length  = strlen(message) + 1;
