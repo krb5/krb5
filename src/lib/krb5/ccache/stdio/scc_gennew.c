@@ -42,7 +42,8 @@ krb5_scc_generate_new (id)
 {
      krb5_ccache lid;
      FILE *f;
-     char scratch[100];  /* XXX Is this large enough */
+     char scratch[sizeof(TKT_ROOT)+6+1]; /* +6 for the scratch part, +1 for
+					    NUL */
      
      /* Allocate memory */
      lid = (krb5_ccache) malloc(sizeof(struct _krb5_ccache));
@@ -51,7 +52,8 @@ krb5_scc_generate_new (id)
 
      lid->ops = &krb5_scc_ops;
 
-     sprintf(scratch, "%sXXXXXX", TKT_ROOT);
+     (void) strcpy(scratch, TKT_ROOT);
+     (void) strcat(scratch, "XXXXXX");
      mktemp(scratch);
 
      lid->data = (krb5_pointer) malloc(sizeof(krb5_scc_data));
