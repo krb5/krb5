@@ -1,3 +1,8 @@
+2002-07-12  Ken Raeburn  <raeburn@mit.edu>
+
+	* aclocal.m4 (KRB5_BUILD_LIBRARY_STATIC): Disable installation of
+	library.
+
 2002-07-05  Ezra Peisach  <epeisach@bu.edu>
 
 	* aclocal.m4 (KRB5_AC_INET6): Use the three argument form of

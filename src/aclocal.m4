@@ -995,7 +995,10 @@ dnl Force static library build.
 define(KRB5_BUILD_LIBRARY_STATIC,
 dnl Use define rather than AC_DEFUN to avoid ordering problems.
 [krb5_force_static=yes
-KRB5_BUILD_LIBRARY])
+KRB5_BUILD_LIBRARY
+# If we're only building static libraries, they're for build-time use only,
+# so don't install.
+LIBINSTLIST=])
 
 dnl
 dnl KRB5_BUILD_LIBRARY_WITH_DEPS
