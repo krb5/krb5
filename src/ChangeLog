@@ -1,3 +1,12 @@
+Fri May  5 01:50:08 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* Makefile.in: Remove all files in ZIPCLEANUP after building
+		kerbsrc.zip.  This keeps the source directory clean after
+		building a Windows source distribution.
+
+		Remove miscellaneous targets left over from the bad old
+		imake days.
+
 Tue May  2 21:26:09 1995  Tom Yu  (tlyu@dragons-lair)
 
 	* .rconf: copy kadmin.old as well

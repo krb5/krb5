@@ -44,8 +44,6 @@ all-windows:: makefile-windows
 
 world::
 	date
-	make $(MFLAGS) mastermakefiles
-	make $(MFLAGS) depend
 	make $(MFLAGS) all
 	date
 
@@ -57,9 +55,6 @@ INSTALLMKDIRS = $(KRB5ROOT) $(KRB5MANROOT) $(KRB5OTHERMKDIRS) \
 
 install:: install-mkdirs
 
-depend:: includes
-
-
 install-mkdirs:
 	@for i in $(INSTALLMKDIRS); do \
 		if test -d $(DESTDIR)$$i; then :; else (set -x; mkdir $(DESTDIR)$$i); fi \
@@ -67,12 +62,6 @@ install-mkdirs:
 
 # install::
 #	$(MAKE) $(MFLAGS) install.man
-
-# rebuild the Makefiles in the master source tree
-mastermakefiles::
-	-$(MV) Makefile Makefile.bak
-	$(MAKE) -f Makefile.bak Makefile
-	$(MAKE) Makefiles
 
 .c.o:
 	$(CC) -c $(CPPFLAGS) $(DEFS) -I$(srcdir) $(CFLAGS) $<
@@ -207,6 +196,7 @@ ren2long:
 # Builds the zip file that distributes Kerberos sources for DOS sites
 # from the source tree on Unix.
 #
+ZIP=zip
 ZIPFILES= ./* \
 	config/* include/* include/krb5/* include/krb5/asn.1/* \
 	include/krb5/stock/* include/sys/* lib/* lib/crypto/* \
@@ -230,15 +220,25 @@ ZIPEXCLUDE= LIB/KRB5.SAB \
 	WINDOWS/CNS/*.ICO WINDOWS/WINTEL/*.ICO WINDOWS/GSS/*.ICO \
 	*.O *.A *.ZIP
 
+ZIPCLEANUP= util/profile/profile.h util/profile/prof_err.[ch] \
+	lib/krb5/error_tables/asn1_err.c lib/krb5/error_tables/kdb5_err.c \
+	lib/krb5/error_tables/krb5_err.c lib/krb5/error_tables/kv5m_err.c \
+	lib/krb5/error_tables/adm_err.c \
+	include/krb5/asn1_err.h include/krb5/kdb5_err.h \
+	include/krb5/krb5_err.h include/krb5/kv5m_err.h \
+	include/krb5/adm_err.h include/profile.h \
+	lib/gssapi/generic/gssapi_err_generic.[ch] \
+	lib/gssapi/krb5/gssapi_err_krb5.[ch]
+
 kerbsrc.zip: awk-windows
 	rm -f Makefile.bak
 	mv Makefile Makefile.bak
 	cp Makefile.in Makefile
 	rm -f kerbsrc.zip
-	zip -Dlk kerbsrc.zip $(ZIPFILES) -x $(ZIPEXCLUDE)
-	zip -Dk kerbsrc.zip $(ZIPBINARYFILES)
+	$(ZIP) -Dlk kerbsrc.zip $(ZIPFILES) -x $(ZIPEXCLUDE)
+	$(ZIP) -Dk kerbsrc.zip $(ZIPBINARYFILES)
 	cp Makefile.bak Makefile
-	rm -f util/profile/profile.h util/profile/prof_err.[ch]
+	rm -f $(ZIPCLEANUP)
 
 #
 # Part of building the PC release has to be done on Unix. This includes
