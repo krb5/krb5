@@ -29,10 +29,10 @@ static char rcsid_kdc_rep_dc_c [] =
 /*ARGSUSED*/
 krb5_error_code
 krb5_kdc_rep_decrypt_proc(DECLARG(const krb5_keyblock *, key),
-			  DECLARG(const krb5_pointer, decryptarg),
+			  DECLARG(krb5_const_pointer, decryptarg),
 			  DECLARG(krb5_kdc_rep *, dec_rep))
 OLDDECLARG(const krb5_keyblock *, key)
-OLDDECLARG(const krb5_pointer, decryptarg)
+OLDDECLARG(krb5_const_pointer, decryptarg)
 OLDDECLARG(krb5_kdc_rep *, dec_rep)
 {
     krb5_error_code retval;

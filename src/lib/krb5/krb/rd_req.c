@@ -51,12 +51,12 @@ krb5_rd_req(inbuf, server, sender_addr, fetchfrom, keyproc, keyprocarg,
 const krb5_data *inbuf;
 const krb5_principal server;
 const krb5_address *sender_addr;
-const krb5_pointer fetchfrom;
+krb5_const_pointer fetchfrom;
 krb5_error_code (*keyproc) PROTOTYPE((krb5_pointer, 
 				      krb5_principal,
 				      krb5_kvno,
 				      krb5_keyblock **));
-const krb5_pointer keyprocarg;
+krb5_const_pointer keyprocarg;
 krb5_rcache rcache;
 krb5_tkt_authent *authdat;
 {

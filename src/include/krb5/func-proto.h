@@ -31,7 +31,7 @@ krb5_error_code krb5_decode_kdc_rep
 		   krb5_kdc_rep ** ));
 krb5_error_code krb5_kdc_rep_decrypt_proc
 	PROTOTYPE((const krb5_keyblock *,
-		   const krb5_pointer,
+		   krb5_const_pointer,
 		   krb5_kdc_rep * ));
 krb5_error_code krb5_encode_ticket
 	PROTOTYPE((const krb5_ticket *,
@@ -72,11 +72,11 @@ krb5_error_code krb5_get_in_tkt
 		   krb5_error_code (* )(const krb5_keytype,
 					krb5_keyblock **,
 					krb5_pointer ),
-		   const krb5_pointer,
+		   krb5_const_pointer,
 		   krb5_error_code (* )(const krb5_keyblock *,
-					const krb5_pointer,
+					krb5_const_pointer,
 					krb5_kdc_rep * ),
-		   const krb5_pointer,
+		   krb5_const_pointer,
 		   krb5_creds *,
 		   krb5_ccache ));
 krb5_error_code krb5_get_in_tkt_with_password
@@ -118,24 +118,24 @@ krb5_error_code krb5_rd_req
 	PROTOTYPE((const krb5_data *,
 		   const krb5_principal,
 		   const krb5_address *,
-		   const krb5_pointer,
+		   krb5_const_pointer,
 		   krb5_error_code (* )(krb5_pointer,
 					krb5_principal,
 					krb5_kvno,
 					krb5_keyblock ** ),
-		   const krb5_pointer,
+		   krb5_const_pointer,
 		   krb5_rcache,
 		   krb5_tkt_authent * ));
 krb5_error_code krb5_rd_req_decoded
 	PROTOTYPE((const krb5_ap_req *,
 		   const krb5_principal,
 		   const krb5_address *,
-		   const krb5_pointer,
+		   krb5_const_pointer,
 		   krb5_error_code (* )(krb5_pointer,
 					krb5_principal,
 					krb5_kvno,
 					krb5_keyblock ** ),
-		   const krb5_pointer,
+		   krb5_const_pointer,
 		   krb5_rcache,
 		   krb5_tkt_authent * ));
 krb5_error_code krb5_mk_rep

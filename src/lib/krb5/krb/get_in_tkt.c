@@ -60,7 +60,7 @@ typedef krb5_error_code (*git_key_proc) PROTOTYPE((const krb5_keytype,
 						   krb5_keyblock **,
 						   krb5_pointer ));
 typedef krb5_error_code (*git_decrypt_proc) PROTOTYPE((const krb5_keyblock *,
-						       const krb5_pointer,
+						       krb5_const_pointer,
 						       krb5_kdc_rep * ));
 krb5_error_code
 krb5_get_in_tkt(DECLARG(const krb5_flags, options),
@@ -68,9 +68,9 @@ krb5_get_in_tkt(DECLARG(const krb5_flags, options),
 		DECLARG(const krb5_enctype, etype),
 		DECLARG(const krb5_keytype, keytype),
 		DECLARG(git_key_proc, key_proc),
-		DECLARG(const krb5_pointer, keyseed),
+		DECLARG(krb5_const_pointer, keyseed),
 		DECLARG(git_decrypt_proc, decrypt_proc),
-		DECLARG(const krb5_pointer, decryptarg),
+		DECLARG(krb5_const_pointer, decryptarg),
 		DECLARG(krb5_creds *, creds),
 		DECLARG(krb5_ccache, ccache))
 OLDDECLARG(const krb5_flags, options)
@@ -78,9 +78,9 @@ OLDDECLARG(krb5_address * const *, addrs)
 OLDDECLARG(const krb5_enctype, etype)
 OLDDECLARG(const krb5_keytype, keytype)
 OLDDECLARG(git_key_proc, key_proc)
-OLDDECLARG(const krb5_pointer, keyseed)
+OLDDECLARG(krb5_const_pointer, keyseed)
 OLDDECLARG(git_decrypt_proc, decrypt_proc)
-OLDDECLARG(const krb5_pointer, decryptarg)
+OLDDECLARG(krb5_const_pointer, decryptarg)
 OLDDECLARG(krb5_creds *, creds)
 OLDDECLARG(krb5_ccache, ccache)
 {

@@ -21,12 +21,12 @@ static char rcsid_cs_entry_c[] =
 #include <krb5/mit-des.h>
 #include <krb5/crc-32.h>
 
-extern krb5_error_code mit_des_encrypt_func PROTOTYPE((const krb5_pointer,
+extern krb5_error_code mit_des_encrypt_func PROTOTYPE((krb5_const_pointer,
 						       krb5_pointer,
 						       const size_t,
 						       krb5_encrypt_block *,
 						       krb5_pointer));
-extern krb5_error_code mit_des_decrypt_func PROTOTYPE((const krb5_pointer,
+extern krb5_error_code mit_des_decrypt_func PROTOTYPE((krb5_const_pointer,
 						       krb5_pointer,
 						       const size_t,
 						       krb5_encrypt_block *,

@@ -43,12 +43,12 @@ typedef struct _krb5_enc_data {
 
 /* could be used in a table to find an etype and initialize a block */
 typedef struct _krb5_cryptosystem_entry {
-    krb5_error_code (*encrypt_func) PROTOTYPE((const krb5_pointer /* in */,
+    krb5_error_code (*encrypt_func) PROTOTYPE((krb5_const_pointer /* in */,
 					       krb5_pointer /* out */,
 					       const size_t,
 					       krb5_encrypt_block *,
 					       krb5_pointer));
-    krb5_error_code (*decrypt_func) PROTOTYPE((const krb5_pointer /* in */,
+    krb5_error_code (*decrypt_func) PROTOTYPE((krb5_const_pointer /* in */,
 					       krb5_pointer /* out */,
 					       const size_t,
 					       krb5_encrypt_block *,
