@@ -1,3 +1,8 @@
+Mon May 17 19:55:08 1999  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in: Add included version resouce script to 
+		resource file dependency.
+
 Mon May 17 14:19:30 1999  Danilo Almeida  <dalmeida@mit.edu>
 
 	* Makefile.in: Remove win16 stuff.  Fix resource dependencies.

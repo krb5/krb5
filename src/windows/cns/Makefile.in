@@ -67,7 +67,7 @@ clean::
 
 $(OBJS): cns.h tktlist.h
 
-$(RESFILE): cns.h
+$(RESFILE): cns.h ..\version.rc
 
 $(RESFILE): clock00.ico clock05.ico clock10.ico clock15.ico clock20.ico \
 	 clock25.ico clock30.ico clock35.ico clock40.ico clock45.ico \

@@ -31,6 +31,8 @@ $(OUTPRE)gss.exe: gss.def $(OBJS) $(XOBJS) $(LIBS)
 
 $(OBJS) $(XOBJS): gss.h
 
+$(RESFILE): ..\version.rc
+
 install::
 	copy $(OUTPRE)gss.exe ..\floppy
 

@@ -41,3 +41,5 @@ install::
 
 clean:: 
 	$(RM) $(OUTPRE)*.exe $(OUTPRE)*.res $(OUTPRE)*.map
+
+$(RESFILE): ..\version.rc
