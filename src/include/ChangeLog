@@ -1,5 +1,7 @@
 2004-03-05  Ken Raeburn  <raeburn@mit.edu>
 
+	* krb5.hin (krb5_kt_register): Ops table is now const.
+
 	* k5-thread.h: New file.
 
 2004-02-26  Jeffrey Altman <jaltman@mit.edu>

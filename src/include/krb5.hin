@@ -1625,7 +1625,7 @@ int KRB5_CALLCONV krb5_524_convert_creds
 #if KRB5_PRIVATE
 krb5_error_code KRB5_CALLCONV krb5_kt_register
 	(krb5_context,
-		struct _krb5_kt_ops * );
+		const struct _krb5_kt_ops * );
 #endif
 
 krb5_error_code KRB5_CALLCONV krb5_kt_resolve

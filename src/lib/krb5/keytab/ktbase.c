@@ -35,21 +35,21 @@ extern const krb5_kt_ops krb5_kts_ops;
 
 struct krb5_kt_typelist {
     const krb5_kt_ops *ops;
-    struct krb5_kt_typelist *next;
+    const struct krb5_kt_typelist *next;
 };
-static struct krb5_kt_typelist krb5_kt_typelist_wrfile  = {
+const static struct krb5_kt_typelist krb5_kt_typelist_wrfile  = {
     &krb5_ktf_writable_ops,
     0
 };
-static struct krb5_kt_typelist krb5_kt_typelist_file  = {
+const static struct krb5_kt_typelist krb5_kt_typelist_file  = {
     &krb5_ktf_ops,
     &krb5_kt_typelist_wrfile
 };
-static struct krb5_kt_typelist krb5_kt_typelist_srvtab = {
+const static struct krb5_kt_typelist krb5_kt_typelist_srvtab = {
     &krb5_kts_ops,
     &krb5_kt_typelist_file
 };
-static struct krb5_kt_typelist *kt_typehead = &krb5_kt_typelist_srvtab;
+static const struct krb5_kt_typelist *kt_typehead = &krb5_kt_typelist_srvtab;
 
 
 /*
@@ -58,7 +58,7 @@ static struct krb5_kt_typelist *kt_typehead = &krb5_kt_typelist_srvtab;
  */
 
 krb5_error_code KRB5_CALLCONV
-krb5_kt_register(krb5_context context, krb5_kt_ops *ops)
+krb5_kt_register(krb5_context context, const krb5_kt_ops *ops)
 {
     struct krb5_kt_typelist *t;
     for (t = kt_typehead;t && strcmp(t->ops->prefix,ops->prefix);t = t->next)
