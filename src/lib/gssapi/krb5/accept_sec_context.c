@@ -719,6 +719,7 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
 				       &ctx->seq_send);
 
        /* the reply token hasn't been sent yet, but that's ok. */
+       ctx->gss_flags |= GSS_C_PROT_READY_FLAG;
        ctx->established = 1;
 
        token.length = g_token_size((gss_OID) mech_used, ap_rep.length);
