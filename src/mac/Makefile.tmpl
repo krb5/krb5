@@ -436,7 +436,7 @@ link-CFMFAT : GSSLib
 
 GSSLib : GSSLibraryPPC GSSLibrary68K K5LibraryPPC K5Library68K
 	Delete -i GSSLib
-	MergeFragment GSSLibraryPPC GSSLib
+	Duplicate -y GSSLibraryPPC GSSLib
 	MergeFragment GSSLibrary68K GSSLib
 	MergeFragment K5LibraryPPC GSSLib
 	MergeFragment K5Library68K GSSLib
