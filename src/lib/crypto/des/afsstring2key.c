@@ -4,6 +4,7 @@
  * based on lib/crypto/des/string2key.c from MIT V5 
  * and on lib/des/afs_string_to_key.c from UMD.
  * constructed by Mark Eichin, Cygnus Support, 1995.
+ * made thread-safe by Ken Raeburn, MIT, 2000.
  */
 
 /*
@@ -36,7 +37,7 @@
 #include "des_int.h"
 #include <ctype.h>
 
-static char *afs_crypt PROTOTYPE((char*,char*));
+static char *afs_crypt PROTOTYPE((char*,char*,char*));
 
 krb5_error_code
 mit_afs_string_to_key (keyblock, data, salt)
@@ -54,7 +55,9 @@ mit_afs_string_to_key (keyblock, data, salt)
     register krb5_octet *key = keyblock->contents;
 
     if (data->length <= 8) {
-      char password[9];		/* trailing nul for crypt() */
+      unsigned char password[9]; /* trailing nul for crypt() */
+      char afs_crypt_buf[16];
+
       strncpy(password, realm, 8);
       for (i=0; i<8; i++)
 	if (isupper(password[i]))
@@ -65,7 +68,7 @@ mit_afs_string_to_key (keyblock, data, salt)
 	if (password[i] == '\0')
 	  password[i] = 'X';
       password[8] = '\0';
-      strncpy(key, (char *) afs_crypt(password, "#~") + 2, 8);
+      strncpy(key, (char *) afs_crypt(password, "#~", afs_crypt_buf) + 2, 8);
       for (i=0; i<8; i++)
 	key[i] <<= 1;
       /* now fix up key parity again */
@@ -74,10 +77,9 @@ mit_afs_string_to_key (keyblock, data, salt)
       memset(password, 0, (size_t) sizeof(password));
     } else {
       mit_des_cblock ikey, tkey;
-
-      static mit_des_key_schedule key_sked;
+      mit_des_key_schedule key_sked;
       unsigned int pw_len = strlen(realm)+data->length;
-      char *password = malloc(pw_len+1);
+      unsigned char *password = malloc(pw_len+1);
       if (!password) return ENOMEM;
 
       /* some bound checks from the original code are elided here as
@@ -144,13 +146,13 @@ mit_afs_string_to_key (keyblock, data, salt)
  *	netatalk@terminator.cc.umich.edu
  */
 
-static void krb5_afs_crypt_setkey PROTOTYPE((char*));
-static void krb5_afs_encrypt PROTOTYPE((char*,long));
+static void krb5_afs_crypt_setkey PROTOTYPE((char*, char*, char(*)[48]));
+static void krb5_afs_encrypt PROTOTYPE((char*,long,char*,char (*)[48]));
 
 /*
  * Initial permutation,
  */
-static char	IP[] = {
+static const char	IP[] = {
 	58,50,42,34,26,18,10, 2,
 	60,52,44,36,28,20,12, 4,
 	62,54,46,38,30,22,14, 6,
@@ -164,7 +166,7 @@ static char	IP[] = {
 /*
  * Final permutation, FP = IP^(-1)
  */
-static char	FP[] = {
+static const char	FP[] = {
 	40, 8,48,16,56,24,64,32,
 	39, 7,47,15,55,23,63,31,
 	38, 6,46,14,54,22,62,30,
@@ -179,14 +181,14 @@ static char	FP[] = {
  * Permuted-choice 1 from the key bits to yield C and D.
  * Note that bits 8,16... are left out: They are intended for a parity check.
  */
-static char	PC1_C[] = {
+static const char	PC1_C[] = {
 	57,49,41,33,25,17, 9,
 	 1,58,50,42,34,26,18,
 	10, 2,59,51,43,35,27,
 	19,11, 3,60,52,44,36,
 };
  
-static char	PC1_D[] = {
+static const char	PC1_D[] = {
 	63,55,47,39,31,23,15,
 	 7,62,54,46,38,30,22,
 	14, 6,61,53,45,37,29,
@@ -196,7 +198,7 @@ static char	PC1_D[] = {
 /*
  * Sequence of shifts used for the key schedule.
  */
-static char	shifts[] = {
+static const char	shifts[] = {
 	1,1,2,2,2,2,2,2,1,2,2,2,2,2,2,1,
 };
  
@@ -204,14 +206,14 @@ static char	shifts[] = {
  * Permuted-choice 2, to pick out the bits from
  * the CD array that generate the key schedule.
  */
-static char	PC2_C[] = {
+static const char	PC2_C[] = {
 	14,17,11,24, 1, 5,
 	 3,28,15, 6,21,10,
 	23,19,12, 4,26, 8,
 	16, 7,27,20,13, 2,
 };
  
-static char	PC2_D[] = {
+static const char	PC2_D[] = {
 	41,52,31,37,47,55,
 	30,40,51,45,33,48,
 	44,49,39,56,34,53,
@@ -221,8 +223,7 @@ static char	PC2_D[] = {
 /*
  * The E bit-selection table.
  */
-static char	E[48];
-static char	e[] = {
+static const char	e[] = {
 	32, 1, 2, 3, 4, 5,
 	 4, 5, 6, 7, 8, 9,
 	 8, 9,10,11,12,13,
@@ -237,7 +238,7 @@ static char	e[] = {
  * P is a permutation on the selected combination
  * of the current L and key.
  */
-static char	P[] = {
+static const char	P[] = {
 	16, 7,20,21,
 	29,12,28,17,
 	 1,15,23,26,
@@ -295,39 +296,21 @@ static char	S[8][64] = {
 	  2, 1,14, 7, 4,10, 8,13,15,12, 9, 0, 3, 5, 6,11},
 };
  
-/*
- * The C and D arrays used to calculate the key schedule.
- */
  
-static char	C[28];
-static char	D[28];
-/*
- * The key schedule.
- * Generated from the key.
- */
-static char	KS[16][48];
- 
-/*
- * The current block, divided into 2 halves.
- */
-static char	L[64];
-static char	*R=&L[32];
-
-static char	tempL[32];
-static char	f[32];
- 
-/*
- * The combination of the key and the input, before selection.
- */
-static char	preS[48];
- 
-static char *afs_crypt(pw, salt)
+static char *afs_crypt(pw, salt, iobuf)
      char *pw;
      char *salt;
+     char *iobuf;		/* must be at least 16 bytes */
 {
-	register int i, j, c;
+	int i, j, c;
 	int temp;
-	static char block[66], iobuf[16];
+	char block[66];
+	char E[48];
+	/*
+	 * The key schedule.
+	 * Generated from the key.
+	 */
+	char KS[16][48];
  
 	for(i=0; i<66; i++)
 		block[i] = 0;
@@ -337,11 +320,11 @@ static char *afs_crypt(pw, salt)
 		i++;
 	}
 	
-	krb5_afs_crypt_setkey(block);
-	
+	krb5_afs_crypt_setkey(block, E, KS);
+
 	for(i=0; i<66; i++)
 		block[i] = 0;
- 
+
 	for(i=0;i<2;i++){
 		c = *salt++;
 		iobuf[i] = c;
@@ -358,7 +341,7 @@ static char *afs_crypt(pw, salt)
 		}
 	
 	for(i=0; i<25; i++)
-		krb5_afs_encrypt(block,0);
+		krb5_afs_encrypt(block,0,E,KS);
 	
 	for(i=0; i<11; i++){
 		c = 0;
@@ -381,11 +364,16 @@ static char *afs_crypt(pw, salt)
  * Set up the key schedule from the key.
  */
  
-static void krb5_afs_crypt_setkey(key)
+static void krb5_afs_crypt_setkey(key, E, KS)
      char *key;
+     char *E, (*KS)[48];
 {
 	register int i, j, k;
 	int t;
+	/*
+	 * The C and D arrays used to calculate the key schedule.
+	 */
+	char C[28], D[28];
  
 	/*
 	 * First, generate C and D by permuting
@@ -434,12 +422,24 @@ static void krb5_afs_crypt_setkey(key)
  * The payoff: encrypt a block.
  */
  
-static void krb5_afs_encrypt(block, edflag)
+static void krb5_afs_encrypt(block, edflag, E, KS)
      char *block;
      long edflag;
+     char *E, (*KS)[48];
 {
 	int i, ii;
-	register int t, j, k;
+	int t, j, k;
+	char tempL[32];
+	char f[32];
+	/*
+	 * The current block, divided into 2 halves.
+	 */
+	char L[64];
+	char *const R = &L[32];
+	/*
+	 * The combination of the key and the input, before selection.
+	 */
+	char preS[48];
 
 	/*
 	 * First, permute the bits in the input

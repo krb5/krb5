@@ -1,5 +1,15 @@
 2001-01-20  Ken Raeburn  <raeburn@mit.edu>
 
+	* afsstring2key.c (mit_afs_string_to_key): Allocate and pass
+	buffer for afs_crypt.  Don't use static storage for key schedule.
+	(IP, FP, PC1_C, PC1_D, shifts, PC2_C, PC2_D, E, e, P): Now const.
+	(C, D, KS, L, R, tempL, f, preS): Static variables deleted.
+	(afs_crypt): Allocate them here, and pass pointers to other
+	routines.
+	(krb5_afs_crypt_setkey, krb5_afs_encrypt): Add extra arguments or
+	local variables for additional state, instead of static
+	variables.
+
 	* t_afss2k.c: New file.
 	* Makefile.in (t_afss2k): New target.
 	(TAFSS2KOBJS): New variable.
