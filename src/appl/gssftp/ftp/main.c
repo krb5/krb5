@@ -430,8 +430,15 @@ void makeargv()
 	stringbase = line;		/* scan from first of buffer */
 	argbase = argbuf;		/* store from first of buffer */
 	slrflag = 0;
-	while ((*argp++ = slurpstring()))
+	while ((*argp++ = slurpstring())) {
 		margc++;
+		if (margc == sizeof(margv)/sizeof(margv[0])) {
+			printf("sorry, too many arguments in input line\n");
+			margc = 0;
+			margv[0] = 0;
+			return;
+		}
+	}
 }
 
 /*

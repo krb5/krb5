@@ -131,9 +131,9 @@ extern struct	servent *sp;	/* service spec for tcp/ftp */
 #include <setjmp.h>
 extern jmp_buf	toplevel;	/* non-local goto stuff for cmd scanner */
 
-extern char	line[200];	/* input line buffer */
+extern char	line[500];	/* input line buffer */
 extern char	*stringbase;	/* current scan point in line buffer */
-extern char	argbuf[200];	/* argument storage buffer */
+extern char	argbuf[500];	/* argument storage buffer */
 extern char	*argbase;	/* current storage point in arg buffer */
 extern int	margc;		/* count of arguments on input line */
 extern char	*margv[20];	/* args parsed from input line */
