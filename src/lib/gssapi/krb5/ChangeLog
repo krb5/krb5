@@ -2,6 +2,8 @@
 
 	* gssapi_krb5.c (kg_get_ccache_name): Make a copy of the default
 	ccache name, because calling krb5_free_context will destroy it.
+	Make the copy always, not just in the local-context case.  Check
+	for errors in making the copy.
 
 2004-07-14  Ken Raeburn  <raeburn@mit.edu>
 
