@@ -92,17 +92,14 @@ depend-dependencies:
 # make variables happen in depfix.sed.
 .depfix2.sed: $(BUILDTOP)/.depend-verify-gcc Makefile $(SRCTOP)/util/depgen.sed
 	x=`$(CC) -print-libgcc-file-name` ; \
-	echo '$(SRCTOP)' '$(myfulldir)' '$(srcdir)' '$(BUILDTOP)' "$$x" | sed -f $(SRCTOP)/util/depgen.sed > .depfix2.tmp
+	echo '$(SRCTOP)' '$(myfulldir)' '$(srcdir)' '$(BUILDTOP)' "$$x" '$(STLIBOBJS)' | sed -f $(SRCTOP)/util/depgen.sed > .depfix2.tmp
 	mv -f .depfix2.tmp .depfix2.sed
-
-DEPLIBOBJNAMEFIX = sed -e 's;^\$$(OUTPRE)\([a-zA-Z0-9_\-]*\)\.\$$(OBJEXT):;\1.so \1.po &;'
 
 # NOTE: This will also generate spurious $(OUTPRE) and $(OBJEXT)
 # references in rules for non-library objects in a directory where
 # library objects happen to be built.  It's mostly harmless.
 .depend: .d .depfix2.sed $(SRCTOP)/util/depfix.sed
 	sed -f .depfix2.sed < .d | sed -f $(SRCTOP)/util/depfix.sed | \
-	(if test "x$(STLIBOBJS)" != "x"; then $(DEPLIBOBJNAMEFIX) ; else cat; fi ) | \
 	sed -e '/^$$/d' > .depend
 
 depend-update-makefile: .depend depend-recurse

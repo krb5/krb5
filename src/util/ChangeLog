@@ -1,3 +1,10 @@
+2004-12-30  Ken Raeburn  <raeburn@mit.edu>
+
+	* depfix.sed: Don't change foo.o to $(OUTPRE)foo.$(OBJEXT) here.
+	* depgen.sed: Add new argument for STLIBOBJS.  
+	Do the OUTPRE/OBJEXT substitution here, and if STLIBOBJS is
+	non-empty, add foo.so and foo.po while we're at it.
+
 2004-12-21  Tom Yu  <tlyu@mit.edu>
 
 	* def-check.pl: Check for PRIVATE or INTERNAL annotations in defs

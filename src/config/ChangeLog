@@ -1,9 +1,11 @@
 2004-12-30  Ken Raeburn  <raeburn@mit.edu>
 
-	* post.in (.depend): Delete blank lines in generated file.
+	* post.in (.depend): Delete blank lines in generated file.  Don't
+	do target name munging here.
 	(DEP_CFG_VERIFY, DEP_VERIFY, depend-verify-*, .depend-verify-*,
 	.depfix2.sed): Move all the flag files to $(BUILDTOP) so there'll
 	be only one of each.
+	(.depfix2.sed): Pass extra value $(STLIBOBJS).
 
 2004-12-17  Jeffrey Altman <jaltman@mit.edu>
 

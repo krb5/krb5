@@ -24,9 +24,6 @@ bFIRST
 s/$/ /
 s/  */ /g
 
-# change foo.o -> $(OUTPRE)foo.$(OBJEXT)
-s;^\([a-zA-Z0-9_\-]*\).o:;$(OUTPRE)\1.$(OBJEXT):;
-
 # delete tcl-specific headers
 s;/[^ ]*/tcl\.h ;;g
 s;/[^ ]*/tclDecls\.h ;;g
