@@ -178,9 +178,6 @@ int getaddrinfo (const char *name, const char *serv,
 	size_t numlen = strspn (serv, "0123456789");
 	if (serv[numlen] == '\0') {
 	    /* pure numeric */
-#ifdef sun
-#define strtoul strtol
-#endif
 	    unsigned long p = strtoul (serv, 0, 10);
 	    if (p == 0 || p > 65535)
 		return EAI_NONAME;
@@ -223,12 +220,7 @@ int getaddrinfo (const char *name, const char *serv,
        If it's not set, don't accept such names.  */
     if (flags & AI_NUMERICHOST) {
 	struct in_addr addr4;
-#ifdef sun
-	addr4.s_addr = inet_addr (name);
-	ret = addr4.s_addr != 0 && strcmp("0.0.0.0", name);
-#else
 	ret = inet_aton (name, &addr4);
-#endif
 	if (ret)
 	    return EAI_NONAME;
 	ret = fai_add_entry (&res, &addr4, port, &template);

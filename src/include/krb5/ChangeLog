@@ -1,3 +1,8 @@
+2001-06-26  Ken Raeburn  <raeburn@mit.edu>
+
+	* adm.h (krb5_realm_params): Add fields realm_allow_transit and
+	realm_allow_transit_valid; delete field realm_filler.
+
 2001-04-27  Ezra Peisach  <epeisach@mit.edu>
 
 	* .cvsignore: Add stamp-h.in
