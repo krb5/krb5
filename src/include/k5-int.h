@@ -1562,7 +1562,7 @@ struct _krb5_ccache {
 struct _krb5_cc_ops {
     krb5_magic magic;
     char FAR *prefix;
-    char FAR * (KRB5_CALLCONV *get_name) KRB5_NPROTOTYPE((krb5_context, krb5_ccache));
+    const char FAR * (KRB5_CALLCONV *get_name) KRB5_NPROTOTYPE((krb5_context, krb5_ccache));
     krb5_error_code (KRB5_CALLCONV *resolve) KRB5_NPROTOTYPE((krb5_context, krb5_ccache FAR *,
 					    const char FAR *));
     krb5_error_code (KRB5_CALLCONV *gen_new) KRB5_NPROTOTYPE((krb5_context, krb5_ccache FAR *));

@@ -1146,7 +1146,7 @@ typedef struct _krb5_cc_ops krb5_cc_ops;
 /* for set_flags and other functions */
 #define KRB5_TC_OPENCLOSE		0x00000001
 
-KRB5_DLLIMP char FAR * KRB5_CALLCONV
+KRB5_DLLIMP const char FAR * KRB5_CALLCONV
 krb5_cc_get_name (krb5_context context, krb5_ccache cache);
 
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV

@@ -1,3 +1,7 @@
+2000-10-03  Ezra Peisach  <epeisach@mit.edu>
+
+	* krb5.hin, k5-int.h: krb5_cc_get_name now returns const char *.
+
 Tue Sep 26 18:10:22 2000  Ezra Peisach  <epeisach@mit.edu>
 
 	* krb5.hin: Move prototype for krb5_gen_replay_name()
