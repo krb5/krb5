@@ -150,7 +150,8 @@ krb5_data *outbuf;
      * they were supplied by the caller
      */
     authent.client = NULL;
-    authent.checksum = NULL; 
+    authent.checksum = NULL;
+    authent.authorization_data = NULL;
     if (authentp)
 	    *authentp = authent;
     else
