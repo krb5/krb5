@@ -1,3 +1,11 @@
+Fri Feb 14 13:55:45 1997  Richard Basch  <basch@lehman.com>
+
+	* com_err.c com_err.h error_message.c error_table.h et_c.awk et_h.awk:
+		Removed experimental V2 API
+		Added table register/deregister functions
+		Only make the com_err_hook vars/funcs available on Unix
+		Only expose _et_list on Unix
+
 Tue Feb 11 13:31:49 1997  Richard Basch  <basch@lehman.com>
 
 	* com_err.c: If the application is a console application, simply

@@ -124,9 +124,9 @@ c2n["_"]=63
 	print "" > outfile
 
 	print "#if defined(__STDC__) || defined(_MSDOS) || defined(_WIN32)" > outfile
-	print "#define NOARGS void" > outfile
+	print "#define P(x) x" > outfile
 	print "#else" > outfile
-	print "#define NOARGS" > outfile
+	print "#define P(x) ()" > outfile
 	print "#define const" > outfile
 	print "#endif" > outfile
 	print "" > outfile
@@ -198,11 +198,6 @@ END {
 	print "    long base;" > outfile
 	print "    int n_msgs;" > outfile
 	print "};" > outfile
-	print "struct et_list {" > outfile
-	print "    struct et_list FAR *next;" > outfile
-	print "    const struct error_table FAR *table;" > outfile
-	print "};" > outfile
-	print "extern KRB5_DLLIMP struct et_list KRB5_EXPORTVAR *_et_list;" > outfile
 	print "" > outfile
 	if (tab_base_high == 0) {
 	    print "const struct error_table et_" table_name "_error_table = { text, " \
@@ -214,13 +209,24 @@ END {
 		tab_base_low, table_item_count) > outfile
 	}
 	print "" > outfile
-	print "static struct et_list link = { 0, 0 };" > outfile
+	print "typedef long errcode_t;" > outfile
 	print "" > outfile
-	print "void initialize_" table_name "_error_table (NOARGS) {" > outfile
-	print "    if (!link.table) {" > outfile
-	print "        link.next = _et_list;" > outfile
-	print "        link.table = &et_" table_name "_error_table ;" > outfile
-	print "        _et_list = &link;" > outfile
-	print "    }" > outfile
+	print "extern KRB5_DLLIMP errcode_t KRB5_CALLCONV" > outfile
+	print "   add_error_table P((const struct error_table FAR *));" > outfile
+	print "extern KRB5_DLLIMP errcode_t KRB5_CALLCONV" > outfile
+	print "   remove_error_table P((const struct error_table FAR *));" > outfile
+	print "" > outfile
+	print "static int init = 0;" > outfile
+	print "" > outfile
+	print "void initialize_" table_name "_error_table P((void)) {" > outfile
+	print "    if (init) return;" > outfile
+	print "    init++;" > outfile
+	print "    add_error_table(&et_" table_name "_error_table);" > outfile
+	print "}" > outfile
+	print "" > outfile
+	print "void cleanup_" table_name "_error_table P((void)) {" > outfile
+	print "    if (!init) return;" > outfile
+	print "    init--;" > outfile
+	print "    remove_error_table(&et_" table_name "_error_table);" > outfile
 	print "}" > outfile
 }

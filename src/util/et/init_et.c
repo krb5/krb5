@@ -54,7 +54,6 @@ int init_error_table(msgs, base, count)
     _et_list = &new_et->etl;
     return 0;
 }
-#endif
 
 KRB5_DLLIMP extern errcode_t KRB5_CALLCONV et_init(ectx)
 	et_ctx FAR *ectx;
@@ -103,3 +102,4 @@ KRB5_DLLIMP extern errcode_t KRB5_CALLCONV et_add_error_table(ectx, tbl)
 	return 0;
 }
 
+#endif

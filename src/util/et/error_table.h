@@ -9,21 +9,16 @@
 
 #include <errno.h>
 
-#define ET_EBUFSIZ 32
-
-struct et_context {
-	struct et_list		FAR *tables;
-	et_error_hook_func	hook_func;
-	void			FAR *hook_func_data;
-	char			error_buf[ET_EBUFSIZ];
-};
+#define ET_EBUFSIZ 64
 
 struct et_list {
-    struct et_list FAR *next;
+    struct et_list *next;
     const struct error_table FAR *table;
 };
 
-extern KRB5_DLLIMP struct et_list KRB5_EXPORTVAR * _et_list;
+#ifdef unix
+extern struct et_list * _et_list;
+#endif
 
 #define	ERRCODE_RANGE	8	/* # of bits to shift table number */
 #define	BITS_PER_CHAR	6	/* # bits to shift per character in name */

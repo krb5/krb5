@@ -39,41 +39,31 @@ extern const int sys_nerr;
 
 static char buffer[ET_EBUFSIZ];
 
-KRB5_DLLIMP struct et_list KRB5_EXPORTVAR * _et_list = (struct et_list *) NULL;
+#ifndef unix
+static struct et_list * _et_list = (struct et_list *) NULL;
+#else
+/* Old interface compatibility */
+struct et_list * _et_list = (struct et_list *) NULL;
+#endif
 
-KRB5_DLLIMP const char FAR * KRB5_CALLCONV et_error_message(ectx, code)
-	et_ctx ectx;
+KRB5_DLLIMP const char FAR * KRB5_CALLCONV error_message(code)
 	long code;
 {
-	int offset;
-	long l_offset;
+	unsigned long offset;
+	unsigned long l_offset;
 	struct et_list *et;
 	long table_num;
 	int started = 0;
+	unsigned int divisor = 100;
 	char *cp;
 
-#if defined(_MSDOS) || defined(_WIN32)
-	/*
-	 * Winsock defines errors in the range 10000-10100. These are
-	 * equivalent to 10000 plus the Berkeley error numbers.
-	 *
-	 * (Does windows strerror() work right here?)
-	 *
-	 * XXX NO.  We need to do our own table lookup for Winsock error
-	 * messages!!!  --- TYT
-	 * 
-	 */
-	if (code >= 10000 && code <= 10100)	/* Is it Winsock error? */
-		code -= 10000;			/* Turn into Berkeley errno */
-#endif
-
-	l_offset = code & ((1<<ERRCODE_RANGE)-1);
-	offset = (int) l_offset;
-	table_num = code - l_offset;
+	l_offset = (unsigned long)code & ((1<<ERRCODE_RANGE)-1);
+	offset = l_offset;
+	table_num = (unsigned long)code - l_offset;
 	if (!table_num) {
 		if (code == 0)
 			goto oops;
-	
+
 #ifdef HAVE_STRERROR
 		cp = strerror(offset);
 		if (cp)
@@ -90,10 +80,10 @@ KRB5_DLLIMP const char FAR * KRB5_CALLCONV et_error_message(ectx, code)
 #endif /* HAVE_SYS_ERRLIST */
 #endif /* HAVE_STRERROR */
 	}
-	et = ectx ? ectx->tables : _et_list;
+
+	et = _et_list;
 	while (et) {
-		/* This is to work around a bug in the compiler on the Alpha 
-		    comparing longs */
+		/* Work-around for a DEC/Alpha compiler bug comparing longs */
 		if (((int) (et->table->base - table_num)) == 0) {
 			/* This is the right table */
 			if (et->table->n_msgs <= offset)
@@ -102,8 +92,45 @@ KRB5_DLLIMP const char FAR * KRB5_CALLCONV et_error_message(ectx, code)
 		}
 		et = et->next;
 	}
+
+#if defined(_MSDOS) || defined(_WIN32)
+	{
+		LPVOID msgbuf;
+
+		if (! FormatMessage( FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
+				     NULL /* lpSource */,
+				     (DWORD) code,
+				     MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+				     (LPTSTR) &msgbuf,
+				     (DWORD) 0 /*sizeof(buffer)*/,
+				     NULL /* va_list */ )) {
+			/*
+			 * WinSock errors exist in the 10000 and 11000 ranges
+			 * but might not appear if WinSock is not initialized
+			 */
+			if (code < 12000) {
+			    table_num = 0;
+			    offset = code;
+			    divisor = 10000;
+			}
+
+			goto oops;
+		} else {
+			strncpy(buffer, msgbuf, sizeof(buffer));
+			buffer[sizeof(buffer)-1] = '\0';
+			cp = buffer + strlen(buffer) - 1;
+			if (*cp == '\n') *cp-- = '\0';
+			if (*cp == '\r') *cp-- = '\0';
+			if (*cp == '.') *cp-- = '\0';
+
+			LocalFree(msgbuf);
+			return buffer;
+		}
+	}
+#endif
+	
 oops:
-	cp = ectx ? ectx->error_buf : buffer;
+	cp = buffer;
 	strcpy(cp, "Unknown code ");
 	cp += sizeof("Unknown code ") - 1;
 	if (table_num) {
@@ -112,23 +139,61 @@ oops:
 			cp++;
 		*cp++ = ' ';
 	}
-	if (offset >= 100) {
-		*cp++ = '0' + offset / 100;
-		offset %= 100;
+	while (divisor > 1) {
+	    fprintf(stderr, "divisor %d, offset %d\n", divisor, offset);
+	    if (started || offset >= divisor) {
+		*cp++ = '0' + offset / divisor;
+		offset %= divisor;
 		started++;
+	    }
+	    divisor /= 10;
 	}
-	if (started || offset >= 10) {
-		*cp++ = '0' + offset / 10;
-		offset %= 10;
-	}
+	fprintf(stderr, "divisor %d, offset %d\n", divisor, offset);
 	*cp++ = '0' + offset;
 	*cp = '\0';
 	return(buffer);
 }
 
-KRB5_DLLIMP const char FAR * KRB5_CALLCONV error_message(code)
-	errcode_t	code;
+KRB5_DLLIMP errcode_t KRB5_CALLCONV
+add_error_table(et)
+    const struct error_table FAR * et;
 {
-	return et_error_message(0, code);
+    struct et_list *el = _et_list;
+
+    while (el) {
+	if (el->table->base == et->base)
+	    return EEXIST;
+	el = el->next;
+    }
+
+    if (! (el = (struct et_list *)malloc(sizeof(struct et_list))))
+	return ENOMEM;
+
+    el->table = et;
+    el->next = _et_list;
+    _et_list = el;
+    
+    return 0;
 }
 
+KRB5_DLLIMP errcode_t KRB5_CALLCONV
+remove_error_table(et)
+    const struct error_table FAR * et;
+{
+    struct et_list *el = _et_list;
+    struct et_list *el2 = 0;
+
+    while (el) {
+	if (el->table->base == et->base) {
+	    if (el2)	/* Not the beginning of the list */
+		el2->next = el->next;
+	    else
+		_et_list = el->next;
+	    (void) free(el);
+	    return 0;
+	}
+	el2 = el;
+	el = el->next;
+    }
+    return ENOENT;
+}

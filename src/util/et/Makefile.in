@@ -2,10 +2,10 @@ RELDIR=../util/et
 CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
 SED = sed
 
-##DOSBUILDTOP = ..\..
-##DOSLIBNAME=comerr.lib
-##DOSXTRA=
-##DOSOBJFILE=comerr.lst
+##DOS##BUILDTOP = ..\..
+##DOS##LIBNAME=comerr.lib
+##DOS##XTRA=
+##DOS##OBJFILE=comerr.lst
 
 STLIBOBJS=error_message.o et_name.o init_et.o com_err.o
 STOBJLISTS=OBJS.ST
@@ -63,39 +63,20 @@ all-windows:: $(OBJFILE)
 ##WIN16##	$(CP) nul: $(OBJFILE)
 ##WIN32##	$(LIBECHO) *.obj > $(OBJFILE)
 
-#
-# what to build...
-#
 
-#
-# rules
-#
 error_table.c: et_lex.lex.c 
-
 error_table.c: $(srcdir)/error_table.y
 
 error_table.o: error_table.c et_lex.lex.c
 	$(CC) $(CFLAGS) -c error_table.c
 
 et_lex.lex.o: et_lex.lex.c
-	$(CC) $(CFLAGS) -c et_lex.lex.c
-
 test1.o: test1.c
-	$(CC) $(CFLAGS) -c test1.c
-
 test2.o: test2.c
-	$(CC) $(CFLAGS) -c test2.c
-
 test_et.o: test1.h test2.h
 
 test_et: test_et.o test1.o test2.o $(LIBOBJS)
 	$(CC) -o test_et test_et.o test1.o test2.o $(LIBOBJS)
-
-# solaris make loses on com_err.c but not on init_et.c, but this helps
-com_err.o: com_err.c
-#
-# real entries...
-#
 
 all-unix:: compile_et includes
 
@@ -115,7 +96,6 @@ compile_et: $(srcdir)/compile_et.sh $(srcdir)/config_script
 
 et_c.awk: $(srcdir)/et_c.awk
 	$(CP) $(srcdir)/et_c.awk et_c.awk
-
 et_h.awk: $(srcdir)/et_h.awk
 	$(CP) $(srcdir)/et_h.awk et_h.awk
 
