@@ -1,7 +1,7 @@
 Fri Oct  4 08:38:16 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* client_principal.c (kadm5_randkey_principal): Do not assume that
-		malloc(0) returns non-NULL. [krb5-admin/46]
+		malloc(0) returns non-NULL. [krb5-admin/29]
 
 Mon Aug 26 16:33:31 1996  Barry Jaspan  <bjaspan@mit.edu>
 
