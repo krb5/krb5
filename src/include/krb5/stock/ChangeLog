@@ -1,3 +1,9 @@
+2002-07-03  Alexandra Ellwood <lxs@mit.edu>
+
+	* osconf.h (DEFAULT_PROFILE_PATH): Conditionalized for Mac OS X
+	to look in Mac OS X Preferences file locations.
+	[pullup from 1-2-2-branch]
+
 2001-10-05  Ken Raeburn  <raeburn@mit.edu>
 
 	* osconf.h: Drop _MSDOS support.

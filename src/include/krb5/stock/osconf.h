@@ -43,7 +43,11 @@
 #define	DEFAULT_LNAME_FILENAME	"/aname"
 #define	DEFAULT_KEYTAB_NAME	"FILE:%s\\krb5kt"
 #else /* !_WINDOWS */
+#if TARGET_OS_MAC
+#define DEFAULT_PROFILE_PATH	"/Library/Preferences/edu.mit.Kerberos:~/Library/Preferences/edu.mit.Kerberos"
+#else
 #define DEFAULT_PROFILE_PATH	"/etc/krb5.conf:@SYSCONFDIR/krb5.conf"
+#endif
 #define	DEFAULT_KEYTAB_NAME	"FILE:/etc/krb5.keytab"
 #define	DEFAULT_LNAME_FILENAME	"@PREFIX/lib/krb5.aname"
 #endif /* _WINDOWS  */
