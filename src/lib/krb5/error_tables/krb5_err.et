@@ -298,4 +298,6 @@ error_code KRB5_FWD_BAD_PRINCIPAL, "Bad principal name while trying to forward c
 error_code KRB5_GET_IN_TKT_LOOP,  "Looping detected inside krb5_get_in_tkt"
 error_code KRB5_CONFIG_NODEFREALM,	"Configuration file does not specify default realm"
 
+error_code KRB5_SAM_UNSUPPORTED,  "Bad SAM flags in obtain_sam_padata"
+
 end

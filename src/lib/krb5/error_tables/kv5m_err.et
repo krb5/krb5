@@ -72,5 +72,11 @@ error_code KV5M_KEYTAB,		"Bad magic number for krb5_keytab structure"
 error_code KV5M_RCACHE,		"Bad magic number for krb5_rcache structure"
 error_code KV5M_CCACHE,		"Bad magic number for krb5_ccache structure"
 error_code KV5M_PREAUTH_OPS,	"Bad magic number for krb5_preauth_ops"
+error_code KV5M_SAM_CHALLENGE,	"Bad magic number for krb5_sam_challenge"
+error_code KV5M_SAM_KEY,	"Bad magic number for krb5_sam_key"
+error_code KV5M_ENC_SAM_RESPONSE_ENC,	"Bad magic number for krb5_enc_sam_response_enc"
+error_code KV5M_SAM_RESPONSE,	"Bad magic number for krb5_sam_response"
+error_code KV5M_PREDICTED_SAM_RESPONSE,	"Bad magic number for krb5_predicted_sam_response"
 error_code KV5M_PASSWD_PHRASE_ELEMENT,	"Bad magic number for passwd_phrase_element"
+
 end
