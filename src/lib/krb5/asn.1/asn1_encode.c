@@ -225,7 +225,7 @@ asn1_error_code asn1_encode_generaltime(asn1buf *buf, time_t val,
 					unsigned int *retlen)
 {
   asn1_error_code retval;
-  struct tm *gtime;
+  struct tm *gtime, gtimebuf;
   char s[16], *sp;
   unsigned int length, sum=0;
   time_t gmt_time = val;
@@ -241,10 +241,18 @@ asn1_error_code asn1_encode_generaltime(asn1buf *buf, time_t val,
        * Sanity check this just to be paranoid, as gmtime can return NULL,
        * and some bogus implementations might overrun on the sprintf.
        */
+#ifdef HAVE_GMTIME_R
+      if (gmtime_r(&gmt_time, &gtimebuf) == NULL)
+	  return ASN1_BAD_GMTIME;
+#else
       gtime = gmtime(&gmt_time);
+      if (gtime == NULL)
+	  return ASN1_BAD_GMTIME;
+      memcpy(gtimebuf, gtime, sizeof(gtimebuf));
+#endif
+      gtime = &gtimebuf;
 
-      if (gtime == NULL ||
-	  gtime->tm_year > 8099 || gtime->tm_mon > 11 ||
+      if (gtime->tm_year > 8099 || gtime->tm_mon > 11 ||
 	  gtime->tm_mday > 31 || gtime->tm_hour > 23 ||
 	  gtime->tm_min > 59 || gtime->tm_sec > 59)
 	  return ASN1_BAD_GMTIME;
