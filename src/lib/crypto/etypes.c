@@ -66,8 +66,8 @@ struct krb5_keytypes krb5_enctypes_list[] = {
       krb5_raw_encrypt_length, krb5_raw_encrypt, krb5_raw_decrypt,
       krb5_dk_string_to_key },
 
-    { ENCTYPE_DES3_HMAC_SHA1,
-      "des3-hmac-sha1", "Triple DES with HMAC/sha1",
+    { ENCTYPE_DES3_CBC_SHA1,
+      "des3-cbc-sha1", "Triple DES cbc mode with HMAC/sha1",
       &krb5_enc_des3, &krb5_hash_sha1,
       krb5_dk_encrypt_length, krb5_dk_encrypt, krb5_dk_decrypt,
       krb5_dk_string_to_key },

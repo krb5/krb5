@@ -63,8 +63,8 @@ struct krb5_cksumtypes krb5_cksumtypes_list[] = {
       0, NULL,
       &krb5_hash_sha1 },
 
-    { CKSUMTYPE_HMAC_SHA1, KRB5_CKSUMFLAG_DERIVE,
-      "hmac-sha1", "HMAC-SHA1",
+    { CKSUMTYPE_HMAC_SHA1_DES3, KRB5_CKSUMFLAG_DERIVE,
+      "hmac-sha1-des3", "HMAC-SHA1 DES3 key",
       0, NULL,
       &krb5_hash_sha1 },
 };
