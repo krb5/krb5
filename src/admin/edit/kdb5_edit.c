@@ -59,10 +59,10 @@ char	*current_dbname = NULL;
 
 /* krb5_kvno may be narrow */
 #include <krb5/widen.h>
-void add_key PROTOTYPE((char * const *, krb5_const_principal,
+void add_key PROTOTYPE((char const *, char const *, krb5_const_principal,
 			const krb5_keyblock *, krb5_kvno, struct saltblock *));
 void enter_rnd_key PROTOTYPE((char **, const krb5_principal, krb5_kvno));
-void enter_pwd_key PROTOTYPE((char **, krb5_const_principal,
+void enter_pwd_key PROTOTYPE((char *, char *, krb5_const_principal,
 			      krb5_const_principal, krb5_kvno, int));
 int set_dbname_help PROTOTYPE((char *, char *));
 
@@ -251,12 +251,11 @@ krb5_principal principal;
 	com_err(pname, retval, "while attempting to verify principal's existence");
 	return 0;
     }
+    if (!nprincs)
+	    return 0;
     vno = entry.kvno;
     krb5_db_free_principal(&entry, nprincs);
-    if (nprincs)
-	return vno;
-    else
-	return 0;
+    return(vno);
 }
 
 void
@@ -266,26 +265,39 @@ char *argv[];
 {
     krb5_error_code retval;
     krb5_principal newprinc;
+    int		salttype = KRB5_KDB_SALTTYPE_NORMAL;
+    char	*cmdname = argv[0];
 
-    if (argc < 2) {
-	com_err(argv[0], 0, "Too few arguments");
-	com_err(argv[0], 0, "Usage: %s principal", argv[0]);
+    if (argc > 2) {
+	    if (!strcmp(argv[1], "-onlyrealmsalt")) {
+		    salttype = KRB5_KDB_SALTTYPE_ONLYREALM;
+		    argc--;
+		    argv++;
+	    } else if (!strcmp(argv[1], "-norealmsalt")) {
+		    salttype = KRB5_KDB_SALTTYPE_NOREALM;
+		    argc--;
+		    argv++;
+	    }
+    }
+    if (argc != 2) {
+	com_err(cmdname, 0,
+		"Usage: %s [-onlyrealmsalt|-norealmsalt] principal", argv[0]);
 	return;
     }
     if (!valid_master_key) {
-	    com_err(argv[0], 0, Err_no_master_msg);
+	    com_err(cmdname, 0, Err_no_master_msg);
 	    return;
     }
     if (retval = krb5_parse_name(argv[1], &newprinc)) {
-	com_err(argv[0], retval, "while parsing '%s'", argv[1]);
+	com_err(cmdname, retval, "while parsing '%s'", argv[1]);
 	return;
     }
-    if (princ_exists(argv[0], newprinc)) {
-	com_err(argv[0], 0, "principal '%s' already exists", argv[1]);
+    if (princ_exists(cmdname, newprinc)) {
+	com_err(cmdname, 0, "principal '%s' already exists", argv[1]);
 	krb5_free_principal(newprinc);
 	return;
     }
-    enter_pwd_key(argv, newprinc, newprinc, 0, KRB5_KDB_SALTTYPE_NORMAL);
+    enter_pwd_key(cmdname, argv[1], newprinc, newprinc, 0, salttype);
     krb5_free_principal(newprinc);
     return;
 }
@@ -316,7 +328,8 @@ char *argv[];
 	krb5_free_principal(newprinc);
 	return;
     }
-    enter_pwd_key(argv, newprinc, newprinc, 0, KRB5_KDB_SALTTYPE_V4);
+    enter_pwd_key(argv[0], argv[1], newprinc, newprinc, 0,
+		  KRB5_KDB_SALTTYPE_V4);
     krb5_free_principal(newprinc);
     return;
 }
@@ -353,12 +366,14 @@ char *argv[];
 }
 
 void
-add_key(DECLARG(char * const *, argv),
+add_key(DECLARG(char const *, cmdname),
+	DECLARG(char const *, newprinc),
 	DECLARG(krb5_const_principal, principal),
 	DECLARG(const krb5_keyblock *, key),
 	DECLARG(krb5_kvno, vno),
 	DECLARG(struct saltblock *, salt))
-OLDDECLARG(char * const *, argv)
+OLDDECLARG(char const *, cmdname)
+OLDDECLARG(char const *, newprinc)
 OLDDECLARG(krb5_const_principal, principal)
 OLDDECLARG(const krb5_keyblock *, key)
 OLDDECLARG(krb5_kvno, vno)
@@ -372,7 +387,7 @@ OLDDECLARG(struct saltblock *, salt)
 				  key,
 				  &newentry.key);
     if (retval) {
-	com_err(argv[0], retval, "while encrypting key for '%s'", argv[1]);
+	com_err(cmdname, retval, "while encrypting key for '%s'", newprinc);
 	return;
     }
     newentry.principal = (krb5_principal) principal;
@@ -383,7 +398,7 @@ OLDDECLARG(struct saltblock *, salt)
     newentry.expiration = mblock.expiration;
     newentry.mod_name = master_princ;
     if (retval = krb5_timeofday(&newentry.mod_date)) {
-	com_err(argv[0], retval, "while fetching date");
+	com_err(cmdname, retval, "while fetching date");
 	memset((char *)newentry.key.contents, 0, newentry.key.length);
 	xfree(newentry.key.contents);
 	return;
@@ -403,11 +418,11 @@ OLDDECLARG(struct saltblock *, salt)
     memset((char *)newentry.key.contents, 0, newentry.key.length);
     xfree(newentry.key.contents);
     if (retval) {
-	com_err(argv[0], retval, "while storing entry for '%s'\n", argv[1]);
+	com_err(cmdname, retval, "while storing entry for '%s'\n", newprinc);
 	return;
     }
     if (one != 1)
-	com_err(argv[0], 0, "entry not stored in database (unknown failure)");
+	com_err(cmdname, 0, "entry not stored in database (unknown failure)");
     return;
 }
 
@@ -964,7 +979,7 @@ OLDDECLARG(krb5_kvno, vno)
 	com_err(argv[0], retval, "while generating random key");
 	return;
     }
-    add_key(argv, princ, tempkey, ++vno, 0);
+    add_key(argv[0], argv[1], princ, tempkey, ++vno, 0);
     memset((char *)tempkey->contents, 0, tempkey->length);
     krb5_free_keyblock(tempkey);
     return;
@@ -978,10 +993,22 @@ char *argv[];
     krb5_error_code retval;
     krb5_principal newprinc;
     krb5_kvno vno;
+    int		salttype = KRB5_KDB_SALTTYPE_NORMAL;
 
-    if (argc < 2) {
-	com_err(argv[0], 0, "Too few arguments");
-	com_err(argv[0], 0, "Usage: %s principal", argv[0]);
+    if (argc > 2) {
+	    if (!strcmp(argv[1], "-onlyrealmsalt")) {
+		    salttype = KRB5_KDB_SALTTYPE_ONLYREALM;
+		    argc--;
+		    argv++;
+	    } else if (!strcmp(argv[1], "-norealmsalt")) {
+		    salttype = KRB5_KDB_SALTTYPE_NOREALM;
+		    argc--;
+		    argv++;
+	    }
+    }
+    if (argc != 2) {
+	com_err(argv[0], 0,
+		"Usage: %s [-onlyrealmsalt|-norealmsalt] principal", argv[0]);
 	return;
     }
     if (!dbactive) {
@@ -1001,7 +1028,7 @@ char *argv[];
 	krb5_free_principal(newprinc);
 	return;
     }
-    enter_pwd_key(argv, newprinc, newprinc, vno, KRB5_KDB_SALTTYPE_NORMAL);
+    enter_pwd_key(argv[0], argv[1], newprinc, newprinc, vno+1, salttype);
     krb5_free_principal(newprinc);
     return;
 }
@@ -1037,18 +1064,21 @@ char *argv[];
 	krb5_free_principal(newprinc);
 	return;
     }
-    enter_pwd_key(argv, newprinc, newprinc, vno, KRB5_KDB_SALTTYPE_V4);
+    enter_pwd_key(argv[0], argv[1], newprinc, newprinc, vno+1,
+		  KRB5_KDB_SALTTYPE_V4);
     krb5_free_principal(newprinc);
     return;
 }
 
 void
-enter_pwd_key(DECLARG(char **, argv),
+enter_pwd_key(DECLARG(char *, cmdname),
+	      DECLARG(char *, newprinc),
 	      DECLARG(krb5_const_principal, princ),
 	      DECLARG(krb5_const_principal, string_princ),
 	      DECLARG(krb5_kvno, vno),
 	      DECLARG(int, salttype))
-OLDDECLARG(char **, argv)
+OLDDECLARG(char *, cmdname)
+OLDDECLARG(char *, newprinc)
 OLDDECLARG(krb5_const_principal, princ)
 OLDDECLARG(krb5_const_principal, string_princ)
 OLDDECLARG(krb5_kvno, vno)
@@ -1064,7 +1094,7 @@ OLDDECLARG(int, salttype)
     if (retval = krb5_read_password(krb5_default_pwd_prompt1,
 				    krb5_default_pwd_prompt2,
 				    password, &pwsize)) {
-	com_err(argv[0], retval, "while reading password for '%s'", argv[1]);
+	com_err(cmdname, retval, "while reading password for '%s'", newprinc);
 	return;
     }
     pwd.data = password;
@@ -1075,8 +1105,8 @@ OLDDECLARG(int, salttype)
     switch (salttype) {
     case KRB5_KDB_SALTTYPE_NORMAL:
 	if (retval = krb5_principal2salt(string_princ, &salt.saltdata)) {
-	    com_err(argv[0], retval,
-		    "while converting principal to salt for '%s'", argv[1]);
+	    com_err(cmdname, retval,
+		    "while converting principal to salt for '%s'", newprinc);
 	    return;
 	}
 	break;
@@ -1086,8 +1116,8 @@ OLDDECLARG(int, salttype)
 	break;
     case KRB5_KDB_SALTTYPE_NOREALM:
 	if (retval = norealm_salt(string_princ, &salt.saltdata)) {
-	    com_err(argv[0], retval,
-		    "while converting principal to salt for '%s'", argv[1]);
+	    com_err(cmdname, retval,
+		    "while converting principal to salt for '%s'", newprinc);
 	    return;
 	}
 	break;
@@ -1096,15 +1126,15 @@ OLDDECLARG(int, salttype)
 	krb5_data *foo;
 	if (retval = krb5_copy_data(krb5_princ_realm(string_princ),
 				    &foo)) {
-	    com_err(argv[0], retval,
-		    "while converting principal to salt for '%s'", argv[1]);
+	    com_err(cmdname, retval,
+		    "while converting principal to salt for '%s'", newprinc);
 	    return;
 	}
 	salt.saltdata = *foo;
 	xfree(foo);
     }
     default:
-	com_err(argv[0], 0, "Don't know how to enter salt type %d", salttype);
+	com_err(cmdname, 0, "Don't know how to enter salt type %d", salttype);
 	return;
     }
     retval = krb5_string_to_key(&master_encblock, master_keyblock.keytype,
@@ -1113,11 +1143,13 @@ OLDDECLARG(int, salttype)
 				&salt.saltdata);
     memset(password, 0, sizeof(password)); /* erase it */
     if (retval) {
-	com_err(argv[0], retval, "while converting password to key for '%s'", argv[1]);
+	com_err(cmdname, retval, "while converting password to key for '%s'",
+		newprinc);
 	xfree(salt.saltdata.data);
 	return;
     }
-    add_key(argv, princ, &tempkey, ++vno, &salt);
+    add_key(cmdname, newprinc, princ, &tempkey, ++vno,
+	    (salttype == KRB5_KDB_SALTTYPE_NORMAL) ? 0 : &salt);
     xfree(salt.saltdata.data);
     memset((char *)tempkey.contents, 0, tempkey.length);
     xfree(tempkey.contents);
