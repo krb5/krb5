@@ -370,7 +370,6 @@ gss_release_buffer(minor_status, buffer)
 				     buffer));
 }
 
-#if 0
 /* V2 */
 OM_uint32 INTERFACE
 gss_release_oid(minor_status, oid)
@@ -379,7 +378,6 @@ gss_release_oid(minor_status, oid)
 {
     return(krb5_gss_release_oid(minor_status, oid));
 }
-#endif
 
 OM_uint32 INTERFACE
 gss_release_oid_set(minor_status, set)

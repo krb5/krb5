@@ -22,6 +22,7 @@
 
 #include "gssapiP_krb5.h"
 #include <memory.h>
+#include <stdlib.h>
 
 /*
  * $Id$
@@ -261,11 +262,19 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
 
    /* verify the mech_type */
 
+   err = 0;
    if (mech_type == GSS_C_NULL_OID) {
       mech_type = cred->rfc_mech?gss_mech_krb5:gss_mech_krb5_old;
-   } else if ((g_OID_equal(mech_type, gss_mech_krb5) && !cred->rfc_mech) ||
-	      (g_OID_equal(mech_type, gss_mech_krb5_old) &&
-	       !cred->prerfc_mech)) {
+  } else if (g_OID_equal(mech_type, gss_mech_krb5)) {
+      if (!cred->rfc_mech)
+	  err = 1;
+  } else if (g_OID_equal(mech_type, gss_mech_krb5_old)) {
+      if (!cred->prerfc_mech)
+	  err = 1;
+  } else
+      err = 1;
+   
+   if (err) {
       *minor_status = 0;
       return(GSS_S_BAD_MECH);
    }
@@ -495,9 +504,9 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
 
       ptr = (unsigned char *) input_token->value;
 
-      if (err = g_verify_token_header((gss_OID) mech_type, &(ap_rep.length),
-				      &ptr, KG_TOK_CTX_AP_REP,
-				      input_token->length)) {
+      if ((err = g_verify_token_header((gss_OID) mech_type, &(ap_rep.length),
+				       &ptr, KG_TOK_CTX_AP_REP,
+				       input_token->length))) {
 	 *minor_status = err;
 	 return(GSS_S_DEFECTIVE_TOKEN);
       }

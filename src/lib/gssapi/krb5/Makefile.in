@@ -53,6 +53,7 @@ SRCS = \
 	$(srcdir)/krb5_gss_glue.c \
 	$(srcdir)/process_context_token.c \
 	$(srcdir)/rel_cred.c \
+	$(srcdir)/rel_oid.c \
 	$(srcdir)/rel_name.c \
 	$(srcdir)/seal.c \
 	$(srcdir)/ser_sctx.c \
@@ -68,7 +69,6 @@ SRCS = \
 
 #	$(srcdir)/pname_to_uid.c \
 #	$(srcdir)/k5mech.c \
-#	$(srcdir)/rel_oid.c
 
 OBJS = \
 	accept_sec_context.$(OBJEXT) \
@@ -93,6 +93,7 @@ OBJS = \
 	krb5_gss_glue.$(OBJEXT) \
 	process_context_token.$(OBJEXT) \
 	rel_cred.$(OBJEXT) \
+	rel_oid.$(OBJEXT) \
 	rel_name.$(OBJEXT) \
 	seal.$(OBJEXT) \
 	ser_sctx.$(OBJEXT) \
@@ -108,7 +109,6 @@ OBJS = \
 
 #	k5mech.$(OBJEXT) \
 #	pname_to_uid.$(OBJEXT) \
-#	rel_oid.$(OBJEXT)
 
 HDRS= $(ETHDRS)
 
@@ -117,7 +117,9 @@ EXPORTED_HEADERS= gssapi_krb5.h
 
 all-unix:: $(SRCS) $(HDRS) includes $(OBJS)
 all-mac:: $(SRCS) $(HDRS) includes $(OBJS)
-all-windows:: $(SRCS) $(HDRS) includes $(OBJS)
+all-windows:: win-include $(SRCS) $(HDRS) $(OBJS)
+
+win-include::
 	if not exist $(EHDRDIR)\nul mkdir $(EHDRDIR)
 	copy gssapi_krb5.h $(EHDRDIR)
 

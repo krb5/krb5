@@ -1,9 +1,18 @@
+Thu Jul 25 02:08:17 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* init_sec_context.c (krb5_gss_init_sec_context): Fixed error
+ 		checking so that if you pass a bad mechanism type, it
+ 		*will* get flagged as an error.
+
 Wed Jul 24 22:54:37 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* acquire_cred.c (krb5_gss_acquire_cred): Initialize variable
 		before use if GSS_C_NULL_OID_SET.
 
 Wed Jul 24 19:40:55 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* rel_oid.c (krb5_gss_release_oid): 
+	* krb5_gss_glue.c(gss_release_oid): Re-enable function
 
 	* ser_sctx.c (kg_oid_externalize): Add proper return code
 

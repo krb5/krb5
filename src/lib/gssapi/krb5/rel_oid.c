@@ -27,11 +27,6 @@
  */
 #include "gssapiP_krb5.h"
 
-#if 0
-/*
- * Don't compile this, since nothing is actually using it.  The 
- * mechanism glue layer will just use the internal release function.
- */
 OM_uint32
 krb5_gss_release_oid(minor_status, oid)
     OM_uint32	*minor_status;
@@ -46,8 +41,7 @@ krb5_gss_release_oid(minor_status, oid)
      * descriptor.  This allows applications to freely mix their own heap-
      * allocated OID values with OIDs returned by GSS-API.
      */
-    if (krb5_gss_internal_release_oid(NULL, minor_status,
-				           oid) != GSS_S_COMPLETE) {
+    if (krb5_gss_internal_release_oid(minor_status, oid) != GSS_S_COMPLETE) {
 	/* Pawn it off on the generic routine */
 	return(generic_gss_release_oid(minor_status, oid));
     }
@@ -57,16 +51,13 @@ krb5_gss_release_oid(minor_status, oid)
 	return(GSS_S_COMPLETE);
     }
 }
-#endif
 
 
 OM_uint32
-krb5_gss_internal_release_oid(ct, minor_status, oid)
-    void *ct;
+krb5_gss_internal_release_oid(minor_status, oid)
     OM_uint32	*minor_status;
     gss_OID	*oid;
 {
-    krb5_context context = ct;
     /*
      * This function only knows how to release internal OIDs. It will
      * return GSS_S_CONTINUE_NEEDED for any OIDs it does not recognize.
