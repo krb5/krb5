@@ -1,3 +1,11 @@
+2002-02-20  Ezra Peisach  <epeisach@mit.edu>
+
+	* default.exp (start_kerberos_daemons): In starting the kadmin
+	daemon, the last line in the log file might read "Seeding random
+	number" for a second. If that is the case, wait three seconds and
+	refetch the last line of the log file to look for the "starting
+	kadmind message"
+
 2002-01-08  Ken Raeburn  <raeburn@mit.edu>
 
 	* default.exp (start_kerberos_daemons): When standalone, delete

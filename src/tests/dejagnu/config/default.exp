@@ -1364,7 +1364,16 @@ proc start_kerberos_daemons { standalone } {
         unset start_save_ktname
     }
 
-    switch -regexp [tail1 $kadmind_lfile] {
+    set line [tail1 $kadmind_lfile]
+    switch -regexp $line {
+	"Seeding random number" {
+	    # Wait a few seconds and get the new line
+	    sleep 3
+  	    set line [tail1 $kadmind_lfile]
+	}
+    }
+
+    switch -regexp $line {
 	"cannot initialize network" {
 	    if {$standalone} {
 		verbose -log "kadmind failed network init"
