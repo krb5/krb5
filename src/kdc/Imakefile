@@ -1,4 +1,23 @@
-SRCS= dispatch.c do_as_req.c do_tgs_req.c kdc_util.c main.c policy.c extern.c
-all::
-	/*placebo*/
-	@echo nothing to build yet.
+SRCS= \
+	dispatch.c \
+	do_as_req.c \
+	do_tgs_req.c \
+	kdc_util.c \
+	main.c \
+	network.c \
+	policy.c \
+	extern.c
+
+OBJS= \
+ 	dispatch.o \
+	do_as_req.o \
+	do_tgs_req.o \
+	kdc_util.o \
+	main.o \
+	network.o \
+	policy.o \
+	extern.o
+
+all::	krb5kdc
+
+NormalProgramTarget(krb5kdc,$(OBJS),,$(KDBLIB) $(KLIB),)
