@@ -91,6 +91,7 @@ static char des_inbuf[2*RCMD_BUFSIZ];	 /* needs to be > largest read size */
 static char des_outpkt[2*RCMD_BUFSIZ+4]; /* needs to be > largest write size */
 static krb5_data desinbuf;
 static krb5_data desoutbuf;
+static krb5_data encivec;
 static krb5_keyblock *keyblock;		 /* key for encrypt/decrypt */
 static int (*input)();
 static int (*output)();
@@ -721,6 +722,7 @@ void rcmd_stream_init_krb5(in_keyblock, encrypt_flag, lencheck)
      int lencheck;
 {
     krb5_error_code status;
+    size_t blocksize;
 
     if (!encrypt_flag) {
 	rcmd_stream_init_normal();
@@ -733,6 +735,22 @@ void rcmd_stream_init_krb5(in_keyblock, encrypt_flag, lencheck)
     do_lencheck = lencheck;
     input = v5_des_read;
     output = v5_des_write;
+
+    if (status = krb5_c_block_size(bsd_context, keyblock->enctype,
+				   &blocksize)) {
+	/* XXX what do I do? */
+	abort();
+    }
+
+    encivec.length = blocksize;
+
+    if ((encivec.data = malloc(encivec.length)) == NULL) {
+	/* XXX what do I do? */
+	abort();
+    }
+
+    /* is there a better way to initialize this? */
+    memset(encivec.data, '\0', blocksize);
 }
 
 #ifdef KRB5_KRB4_COMPAT
@@ -848,7 +866,7 @@ static int v5_des_read(fd, buf, len)
     plain.data = storage;
 
     /* decrypt info */
-    if (krb5_c_decrypt(bsd_context, keyblock, KCMD_KEYUSAGE, 0,
+    if (krb5_c_decrypt(bsd_context, keyblock, KCMD_KEYUSAGE, &encivec,
 		       &cipher, &plain)) {
 	/* probably out of sync */
 	errno = EIO;
@@ -887,7 +905,7 @@ static int v5_des_write(fd, buf, len)
     cipher.ciphertext.length = sizeof(des_outpkt)-4;
     cipher.ciphertext.data = desoutbuf.data;
 
-    if (krb5_c_encrypt(bsd_context, keyblock, KCMD_KEYUSAGE, 0,
+    if (krb5_c_encrypt(bsd_context, keyblock, KCMD_KEYUSAGE, &encivec,
 		       &plain, &cipher)) {
 	errno = EIO;
 	return(-1);
