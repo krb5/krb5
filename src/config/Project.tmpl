@@ -58,6 +58,14 @@
 #ifndef HesiodLibs
 #define HesiodLibs /**/
 #endif
+#if 0
+#ifndef ZephyrDefines
+#define ZephyrDefines /**/
+#endif
+#ifndef ZephyrLibs
+#define ZephyrLibs /**/
+#endif
+#endif
 #ifndef DesDefines
 #define DesDefines YouMustFigureOutYourDesDefines
 #endif
@@ -268,6 +276,10 @@ P_PROTOS=-UUseNarrowPrototypes
           UNIFDEF = UnifdefCmd
           HESDEFS = HesiodDefines
           HESLIBS = HesiodLibs
+#if 0
+         ZEPHDEFS = ZephyrDefines
+         ZEPHLIBS = ZephyrLibs
+#endif
 
   PROCESS_DEFINES = $(P_TERMIOS) $(P_FLOCKS) $(P_TYPES) $(P_SIGTYPE) $(P_STRINGH) $(P_BITSIZE) $(P_DBM) $(P_INET) $(P_STDLIBH) $(P_TIME_DEFS) $(P_PROTOS) -DUnifdefRan
        DESDEFINES = DesDefines

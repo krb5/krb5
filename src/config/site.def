@@ -80,6 +80,18 @@
 #define HesiodDefines -DHESIOD
 #define HesiodLibs -lhesiod
 
+#if 0
+/* not yet in use, but maybe someday... */
+/* If you have the Zephyr software and libraries installed, and want to
+   use it in some application programs, then turn these on.  If they're
+   not turned on, they are left empty in Project.tmpl.
+
+   NOTE:  You must have Kerberos v4 in order to use Zephyr.
+ */
+#define ZephyrDefines -DZEPHYR
+#define ZephyrLibs -lzephyr
+#endif
+
 /* define IsodeLib to be what you pass to the loader to find the ISODE
    library.  This might want to be -lisode if you have it installed.
    IsodeDir is put into the 'make' variable ISODE. */
