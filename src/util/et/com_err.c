@@ -99,12 +99,14 @@ void KRB5_CALLCONV default_com_err_proc(ectx, priv, whoami, code, fmt, ap)
 	MacMessageBox(errbuf);
 #else
 	/* For Windows */
+#ifdef _WIN32
 	if (_isatty(_fileno(stderr))) {
 	    fputs(errbuf, stderr);
 	    fputc('\r', stderr);
 	    fputc('\n', stderr);
 	    fflush(stderr);
 	} else
+#endif /* _WIN32 */
 	    MessageBox ((HWND)NULL, errbuf, "Kerberos", MB_ICONEXCLAMATION);
 #endif
 }
