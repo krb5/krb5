@@ -1,3 +1,10 @@
+2000-04-22  Ken Raeburn  <raeburn@mit.edu>
+
+	* network.c: Include stddef.h.
+	(foreach_localaddr): Check each address against previously used
+	addresses, and skip duplicates, in case multiple interfaces have
+	the same address.
+
 2000-04-21  Ken Raeburn  <raeburn@mit.edu>
 
 	* network.c (foreach_localaddr): If called functions fail, drop
