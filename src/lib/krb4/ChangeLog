@@ -1,3 +1,8 @@
+2001-09-28  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (LOCALINCLUDES): Renamed from DEFINES.  Add
+	build-tree version of kerberosIV include directory.
+
 2001-07-08  Ezra Peisach  <epeisach@mit.edu>
 
 	* fgetst.c: Include krb4int.h.

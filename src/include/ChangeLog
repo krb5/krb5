@@ -1,3 +1,10 @@
+2001-09-28  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (all-unix): Depend directly on kerberosIV/krb_err.h
+	instead of on krb_err.h.
+	(krb_err.h): Target and rule deleted.
+	(clean-unix): Don't delete krb_err.h.
+
 2001-09-06  Ken Raeburn  <raeburn@mit.edu>
 
 	* krb5.hin (TKT_FLG_TRANSIT_POLICY_CHECKED,

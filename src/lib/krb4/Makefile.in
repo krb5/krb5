@@ -2,7 +2,7 @@ thisconfigdir=.
 myfulldir=lib/krb4
 mydir=.
 BUILDTOP=$(REL)$(U)$(S)$(U)
-DEFINES = -I$(srcdir)/../../include/kerberosIV
+LOCALINCLUDES = -I$(BUILDTOP)/include/kerberosIV -I$(srcdir)/../../include/kerberosIV
 
 ##DOS##BUILDTOP = ..\..
 ##DOS##LIBNAME=$(OUTPRE)krb4.lib
@@ -266,7 +266,7 @@ g_pw_in_tkt.o: g_pw_in_tkt.c $(SRCTOP)/include/kerberosIV/mit-copyright.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
   $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/kerberosIV/krb.h \
   $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/port-sockets.h \
-  $(BUILDTOP)/include/krb_err.h $(SRCTOP)/include/kerberosIV/prot.h \
+  $(BUILDTOP)/include/kerberosIV/krb_err.h $(SRCTOP)/include/kerberosIV/prot.h \
   $(SRCTOP)/include/kerberosIV/krb_conf.h
 g_phost.o: g_phost.c $(SRCTOP)/include/kerberosIV/krb.h \
   $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/port-sockets.h
