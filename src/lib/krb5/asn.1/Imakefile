@@ -159,12 +159,16 @@ Krb5InstallHeaders(KRB5_defs.h KRB5_pre_defs.h KRB5-types.h, $(KRB5_INCDIR)/krb5
 clean::
 	$(RM) KRB5.ph KRB5_defs.h KRB5_pre_defs.h KRB5-types.h KRB5_tables.c
 
+SpecialObjectRule(KRB5_tables.o,KRB5_tables.c,)
+
 DependTarget()
+
+#ifdef UseSedHack
 
 #define IHaveSpecialMakefileTarget
 
 Makefile:: Imakefile
-	$(IMAKE_CMD) -DTOPDIR=$(TOP) -DCURDIR=$(CURRENT_DIR) -s Makefile.new
+	$(IMAKE_CMD) -DTOPDIR=$(TOP) -DCURDIR=$(CURRENT_DIR) $(SRCSUBDIR)Imakefile -s Makefile.new
 	$(MAKE) -f Makefile.new noop
 	-@if [ -f Makefile ]; then \
 		echo "$(RM) Makefile.bak; $(MV) Makefile Makefile.bak";\
@@ -172,5 +176,7 @@ Makefile:: Imakefile
 	fi
 	sed 's/^@/	@/' Makefile.new > Makefile || $(MV) Makefile.new Makefile
 	-$(RM) Makefile.new
+
+#endif
 
 noop::
