@@ -1,3 +1,7 @@
+Wed May 28 13:33:40 1997  Barry Jaspan  <bjaspan@mit.edu>
+
+	* keytab.c (add_principal): use kadm5_free_key_data
+
 Tue Feb  4 20:56:47 1997  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in:
