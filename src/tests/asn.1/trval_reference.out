@@ -130,7 +130,7 @@ encode_krb5_enc_tkt_part:
 [APPL 3 Krb5 Encrypted ticket part] 
 .  [Sequence/Sequence Of] 
 .  .  [0] [Bit String] <5>
-         00 19 5d 3b 7f              ..];.
+         00 fe dc ba 98              .....
 .  .  [1] [Sequence/Sequence Of] 
 .  .  .  [0] [Integer] <1>
             01                          .
@@ -196,7 +196,7 @@ encode_krb5_enc_tkt_part(optionals NULL):
 [APPL 3 Krb5 Encrypted ticket part] 
 .  [Sequence/Sequence Of] 
 .  .  [0] [Bit String] <5>
-         00 19 5d 3b 7f              ..];.
+         00 fe dc ba 98              .....
 .  .  [1] [Sequence/Sequence Of] 
 .  .  .  [0] [Integer] <1>
             01                          .
@@ -257,7 +257,7 @@ encode_krb5_enc_kdc_rep_part:
          31 39 39 34 30 36 31 30     19940610
          30 36 30 33 31 37 5a        060317Z
 .  .  [4] [Bit String] <5>
-         00 19 5d 3b 7f              ..];.
+         00 fe dc ba 98              .....
 .  .  [5] [Generalized Time] <15>
          31 39 39 34 30 36 31 30     19940610
          30 36 30 33 31 37 5a        060317Z
@@ -318,7 +318,7 @@ encode_krb5_enc_kdc_rep_part(optionals NULL):
 .  .  [2] [Integer] <1>
          2a                          *
 .  .  [4] [Bit String] <5>
-         00 19 5d 3a 7f              ..]:.
+         00 fe 5c ba 98              ..\..
 .  .  [5] [Generalized Time] <15>
          31 39 39 34 30 36 31 30     19940610
          30 36 30 33 31 37 5a        060317Z
@@ -580,7 +580,7 @@ encode_krb5_ap_req:
 .  .  [1] [Integer] <1>
          0e                          .
 .  .  [2] [Bit String] <5>
-         00 19 5d 3b 7f              ..];.
+         00 fe dc ba 98              .....
 .  .  [3] [APPL 1 Krb5 Ticket] 
 .  .  .  [Sequence/Sequence Of] 
 .  .  .  .  [0] [Integer] <1>
@@ -681,7 +681,7 @@ encode_krb5_as_req:
                70 61 2d 64 61 74 61        pa-data
 .  .  [4] [Sequence/Sequence Of] 
 .  .  .  [0] [Bit String] <5>
-            00 09 5d 3b 7f              ..];.
+            00 fe dc ba 90              .....
 .  .  .  [1] [Sequence/Sequence Of] 
 .  .  .  .  [0] [Integer] <1>
                01                          .
@@ -797,7 +797,7 @@ encode_krb5_as_req(optionals NULL except second_ticket):
          0a                          .
 .  .  [4] [Sequence/Sequence Of] 
 .  .  .  [0] [Bit String] <5>
-            00 19 5d 3b 7f              ..];.
+            00 fe dc ba 98              .....
 .  .  .  [2] [General string] <14>
             41 54 48 45 4e 41 2e 4d     ATHENA.M
             49 54 2e 45 44 55           IT.EDU
@@ -871,7 +871,7 @@ encode_krb5_as_req(optionals NULL except server):
          0a                          .
 .  .  [4] [Sequence/Sequence Of] 
 .  .  .  [0] [Bit String] <5>
-            00 09 5d 3b 7f              ..];.
+            00 fe dc ba 90              .....
 .  .  .  [2] [General string] <14>
             41 54 48 45 4e 41 2e 4d     ATHENA.M
             49 54 2e 45 44 55           IT.EDU
@@ -915,7 +915,7 @@ encode_krb5_tgs_req:
                70 61 2d 64 61 74 61        pa-data
 .  .  [4] [Sequence/Sequence Of] 
 .  .  .  [0] [Bit String] <5>
-            00 09 5d 3b 7f              ..];.
+            00 fe dc ba 90              .....
 .  .  .  [1] [Sequence/Sequence Of] 
 .  .  .  .  [0] [Integer] <1>
                01                          .
@@ -1031,7 +1031,7 @@ encode_krb5_tgs_req(optionals NULL except second_ticket):
          0c                          .
 .  .  [4] [Sequence/Sequence Of] 
 .  .  .  [0] [Bit String] <5>
-            00 19 5d 3b 7f              ..];.
+            00 fe dc ba 98              .....
 .  .  .  [2] [General string] <14>
             41 54 48 45 4e 41 2e 4d     ATHENA.M
             49 54 2e 45 44 55           IT.EDU
@@ -1105,7 +1105,7 @@ encode_krb5_tgs_req(optionals NULL except server):
          0c                          .
 .  .  [4] [Sequence/Sequence Of] 
 .  .  .  [0] [Bit String] <5>
-            00 09 5d 3b 7f              ..];.
+            00 fe dc ba 90              .....
 .  .  .  [2] [General string] <14>
             41 54 48 45 4e 41 2e 4d     ATHENA.M
             49 54 2e 45 44 55           IT.EDU
@@ -1132,7 +1132,7 @@ encode_krb5_kdc_req_body:
 
 [Sequence/Sequence Of] 
 .  [0] [Bit String] <5>
-      00 09 5d 3b 7f              ..];.
+      00 fe dc ba 90              .....
 .  [1] [Sequence/Sequence Of] 
 .  .  [0] [Integer] <1>
          01                          .
@@ -1242,7 +1242,7 @@ encode_krb5_kdc_req_body(optionals NULL except second_ticket):
 
 [Sequence/Sequence Of] 
 .  [0] [Bit String] <5>
-      00 19 5d 3b 7f              ..];.
+      00 fe dc ba 98              .....
 .  [2] [General string] <14>
       41 54 48 45 4e 41 2e 4d     ATHENA.M
       49 54 2e 45 44 55           IT.EDU
@@ -1310,7 +1310,7 @@ encode_krb5_kdc_req_body(optionals NULL except server):
 
 [Sequence/Sequence Of] 
 .  [0] [Bit String] <5>
-      00 09 5d 3b 7f              ..];.
+      00 fe dc ba 90              .....
 .  [2] [General string] <14>
       41 54 48 45 4e 41 2e 4d     ATHENA.M
       49 54 2e 45 44 55           IT.EDU
@@ -1533,7 +1533,7 @@ encode_krb5_enc_cred_part:
 .  .  .  .  .  .  [General string] <5>
                      65 78 74 72 61              extra
 .  .  .  .  [3] [Bit String] <5>
-               00 19 5d 3b 7f              ..];.
+               00 fe dc ba 98              .....
 .  .  .  .  [4] [Generalized Time] <15>
                31 39 39 34 30 36 31 30     19940610
                30 36 30 33 31 37 5a        060317Z
@@ -1586,7 +1586,7 @@ encode_krb5_enc_cred_part:
 .  .  .  .  .  .  [General string] <5>
                      65 78 74 72 61              extra
 .  .  .  .  [3] [Bit String] <5>
-               00 19 5d 3b 7f              ..];.
+               00 fe dc ba 98              .....
 .  .  .  .  [4] [Generalized Time] <15>
                31 39 39 34 30 36 31 30     19940610
                30 36 30 33 31 37 5a        060317Z
@@ -1668,7 +1668,7 @@ encode_krb5_enc_cred_part(optionals NULL):
 .  .  .  .  .  .  [General string] <5>
                      65 78 74 72 61              extra
 .  .  .  .  [3] [Bit String] <5>
-               00 19 5d 3b 7f              ..];.
+               00 fe dc ba 98              .....
 .  .  .  .  [4] [Generalized Time] <15>
                31 39 39 34 30 36 31 30     19940610
                30 36 30 33 31 37 5a        060317Z
