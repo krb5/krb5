@@ -48,7 +48,7 @@ actions Configure
     cd "$(1:D)" && /bin/sh "$(2)" --prefix=/usr --localstatedir=/var/db "$(KerberosCFLAGS)" "$(KerberosLDFLAGS)" || rm -f "$(1)"
 }
 
-# Make <stamp file> <build dir> : <makefile>
+# Make <stamp file> : <makefile>
 rule Make
 {
     DEPENDS "$(1)" : "$(2)" ;
@@ -61,7 +61,6 @@ actions Make
     cd "$(1:D)" && make && touch "$(1)" && echo "### HAPPINESS ###"
 }
 
-<<<<<<< Kerberos5ServerBuild.jam
 # InstallProgram <destination executable> : <source executable>
 rule InstallProgram
 {
@@ -89,16 +88,10 @@ actions InstallFile
 }
 
 Make "$(MakeStamp)" : "$(Makefile)" ;
-=======
-Make "$(IntermediateBuild)/make.stamp" : "$(Makefile)" ;
->>>>>>> 1.4
 
-<<<<<<< Kerberos5ServerBuild.jam
 InstallProgram "$(DSTROOT)/usr/sbin/kadmin"          : "$(IntermediateBuild)/kadmin/cli/kadmin" ;
 InstallProgram "$(DSTROOT)/usr/sbin/kadmin.local"    : "$(IntermediateBuild)/kadmin/cli/kadmin.local" ;
 InstallProgram "$(DSTROOT)/usr/sbin/kadmind"         : "$(IntermediateBuild)/kadmin/server/kadmind" ;
-InstallProgram "$(DSTROOT)/usr/sbin/kadmind4"        : "$(IntermediateBuild)/kadmin/v4server/kadmind4" ;
-InstallProgram "$(DSTROOT)/usr/sbin/v5passwdd"       : "$(IntermediateBuild)/kadmin/v5passwdd/v5passwdd" ;
 InstallProgram "$(DSTROOT)/usr/sbin/ktutil"          : "$(IntermediateBuild)/kadmin/ktutil/ktutil" ;
 InstallProgram "$(DSTROOT)/usr/sbin/kdb5_util"       : "$(IntermediateBuild)/kadmin/dbutil/kdb5_util" ;
 InstallProgram "$(DSTROOT)/usr/sbin/kprop"           : "$(IntermediateBuild)/slave/kprop" ;
@@ -146,8 +139,4 @@ DEPENDS install : all
                   "$(DSTROOT)/usr/share/man/man8/krb5kdc.8"
                   "$(DSTROOT)/usr/share/man/man8/ktutil.8" ;
                   
-=======
-DEPENDS all : "$(IntermediateBuild)/make.stamp" ;
-DEPENDS install : all ;
->>>>>>> 1.4
 DEPENDS installhdrs : all ;
