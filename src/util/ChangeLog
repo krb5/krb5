@@ -1,5 +1,7 @@
 Tue Nov  1 14:49:00 1994    (tytso@rsx-11)
 
+	* libupdate.sh: Change use of "head -1" to "sed 1q"
+
 	* configure.in: 
 	* Makefile.in:
 	* libupdate.sh: Add support for the new libupdate shell script.

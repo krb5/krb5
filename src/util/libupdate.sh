@@ -22,7 +22,7 @@ oblist=$2
 dir=$3
 
 if test "$force" != yes -a -f $library && \
-   ls -lt $library $oblist | head -1 | grep $library$ > /dev/null || \
+   ls -lt $library $oblist | sed 1q | grep $library$ > /dev/null || \
    test -z "`cat $oblist`"
 then
 	exit 0
