@@ -5,7 +5,7 @@
  * Copyright 1990 by the Massachusetts Institute of Technology.
  *
  * For copying and distribution information, please see the file
- * <krb5/mit-copyright.h>.
+ * <krb5/copyright.h>.
  *
  * decoding glue routines.
  */
@@ -19,8 +19,6 @@ static char rcsid_decode_c[] =
 #include <isode/psap.h>
 #include "KRB5-types.h"
 #include <krb5/krb5.h>
-#include <errno.h>
-#include <krb5/isode_err.h>
 #include "encode.h"
 #include "asn1defs.h"
 
