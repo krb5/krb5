@@ -93,6 +93,12 @@ sections.
 .SH LIBDEFAULTS SECTION
 The following relations are defined in the [libdefaults] section:
 
+.IP default_keytab_name
+This relation specifies the default keytab name to be used by
+application severs such as telnetd and rlogind.  The default is
+"/etc/krb5.keytab".  This formerly defaulted to "/etc/v5srvtab", but
+was changed to the current value.
+
 .IP default_realm
 This relation identifies the default realm to be used in a client host's
 Kerberos activity.
