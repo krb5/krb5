@@ -200,12 +200,8 @@
 
 #if HasGcc
 #ifndef CcCmd
-#ifdef UseInstalled		/* if outside the tree */
-#define CcCmd gcc -DNOSTDHDRS -fstrength-reduce -fpcc-struct-return -fwritable-strings -traditional
-#else				/* server won't compile with -traditional */
 #define CcCmd gcc -DNOSTDHDRS -fstrength-reduce -fpcc-struct-return -pedantic -ansi -Wall
 #define STDCTopIncludes -I$(TOP)/include/stdc-incl
-#endif
 #endif
 #endif
 
@@ -262,11 +258,20 @@
 #define IsodeLib /mit/isode/isode-6.0/@sys/lib/libisode.a
 #define IsodeDir /mit/isode/isode-6.0
 
-/* #define HasVfprintf -- turn on if you have vfprintf/vsprintf in libc
-   			  (might want to be in the architecture-specific
-			   configuration file) */
-
 #define UseSSInstalled /* -- turn on if you have the SS library &c installed */
 			
 #define UseComErrInstalled /* -- turn on if you have the com_err library
    				 &c installed */
+#define UseImakeInstalled /* -- turn on if you have imake installed */
+#define UseMakedependInstalled /* -- turn on if you have makedepend installed */
+
+/* the following might want to be put into a specific architecture
+   definition file */
+
+/* #define HasVfprintf -- turn on if you have vfprintf/vsprintf in libc
+   			  (might want to be in the architecture-specific
+			   configuration file) */
+/* #define LdLibLocations -L/foo/bar -- alternate library search paths,
+					if needed for some system libraries */
+/* #define StandardIncludes -I/foo/bar -- additional include paths, if
+					needed */
