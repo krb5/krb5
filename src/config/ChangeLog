@@ -1,3 +1,8 @@
+2000-06-30  Tom Yu  <tlyu@mit.edu>
+
+	* pre.in: Twiddle things around to support building libdb under
+	krb5 build system.
+
 2000-06-08  Tom Yu  <tlyu@mit.edu>
 
 	* config.guess: Update to 2000-05-30 from FSF.
