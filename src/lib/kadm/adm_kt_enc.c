@@ -72,13 +72,13 @@ krb5_adm_ktent_to_proto(kcontext, ktentp, ncompp, complistp)
 	    (char *) malloc(sizeof(krb5_ui_4))) {
 	    clist[KRB5_ADM_KT_TIMESTAMP].length = sizeof(krb5_ui_4);
 	    clist[KRB5_ADM_KT_TIMESTAMP].data[0] =
-		(ktentp->timestamp >> 24) && 0xff;
+		(ktentp->timestamp >> 24) & 0xff;
 	    clist[KRB5_ADM_KT_TIMESTAMP].data[1] =
-		(ktentp->timestamp >> 16) && 0xff;
+		(ktentp->timestamp >> 16) & 0xff;
 	    clist[KRB5_ADM_KT_TIMESTAMP].data[2] =
-		(ktentp->timestamp >> 8) && 0xff;
+		(ktentp->timestamp >> 8) & 0xff;
 	    clist[KRB5_ADM_KT_TIMESTAMP].data[3] =
-		ktentp->timestamp && 0xff;
+		ktentp->timestamp & 0xff;
 	    nents++;
 	}
 	else {
@@ -92,10 +92,10 @@ krb5_adm_ktent_to_proto(kcontext, ktentp, ncompp, complistp)
 	if (clist[KRB5_ADM_KT_VNO].data = 
 	    (char *) malloc(sizeof(krb5_ui_4))) {
 	    clist[KRB5_ADM_KT_VNO].length = sizeof(krb5_ui_4);
-	    clist[KRB5_ADM_KT_VNO].data[0] = (ktentp->vno >> 24) && 0xff;
-	    clist[KRB5_ADM_KT_VNO].data[1] = (ktentp->vno >> 16) && 0xff;
-	    clist[KRB5_ADM_KT_VNO].data[2] = (ktentp->vno >> 8) && 0xff;
-	    clist[KRB5_ADM_KT_VNO].data[3] = ktentp->vno && 0xff;
+	    clist[KRB5_ADM_KT_VNO].data[0] = (ktentp->vno >> 24) & 0xff;
+	    clist[KRB5_ADM_KT_VNO].data[1] = (ktentp->vno >> 16) & 0xff;
+	    clist[KRB5_ADM_KT_VNO].data[2] = (ktentp->vno >> 8) & 0xff;
+	    clist[KRB5_ADM_KT_VNO].data[3] = ktentp->vno & 0xff;
 	    nents++;
 	}
 	else {
@@ -110,13 +110,13 @@ krb5_adm_ktent_to_proto(kcontext, ktentp, ncompp, complistp)
 	    (char *) malloc(sizeof(krb5_ui_4))) {
 	    clist[KRB5_ADM_KT_KEY_KEYTYPE].length = sizeof(krb5_ui_4);
 	    clist[KRB5_ADM_KT_KEY_KEYTYPE].data[0] =
-		(ktentp->key.keytype >> 24) && 0xff;
+		(ktentp->key.keytype >> 24) & 0xff;
 	    clist[KRB5_ADM_KT_KEY_KEYTYPE].data[1] =
-		(ktentp->key.keytype >> 16) && 0xff;
+		(ktentp->key.keytype >> 16) & 0xff;
 	    clist[KRB5_ADM_KT_KEY_KEYTYPE].data[2] =
-		(ktentp->key.keytype >> 8) && 0xff;
+		(ktentp->key.keytype >> 8) & 0xff;
 	    clist[KRB5_ADM_KT_KEY_KEYTYPE].data[3] =
-		ktentp->key.keytype && 0xff;
+		ktentp->key.keytype & 0xff;
 	    nents++;
 	}
 	else {
@@ -131,13 +131,13 @@ krb5_adm_ktent_to_proto(kcontext, ktentp, ncompp, complistp)
 	    (char *) malloc(sizeof(krb5_ui_4))) {
 	    clist[KRB5_ADM_KT_KEY_ETYPE].length = sizeof(krb5_ui_4);
 	    clist[KRB5_ADM_KT_KEY_ETYPE].data[0] =
-		(ktentp->key.etype >> 24) && 0xff;
+		(ktentp->key.etype >> 24) & 0xff;
 	    clist[KRB5_ADM_KT_KEY_ETYPE].data[1] =
-		(ktentp->key.etype >> 16) && 0xff;
+		(ktentp->key.etype >> 16) & 0xff;
 	    clist[KRB5_ADM_KT_KEY_ETYPE].data[2] =
-		(ktentp->key.etype >> 8) && 0xff;
+		(ktentp->key.etype >> 8) & 0xff;
 	    clist[KRB5_ADM_KT_KEY_ETYPE].data[3] =
-		ktentp->key.etype && 0xff;
+		ktentp->key.etype & 0xff;
 	    nents++;
 	}
 	else {
