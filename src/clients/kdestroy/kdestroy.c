@@ -53,7 +53,7 @@ extern char *optarg;
 #ifndef _WIN32
 #define GET_PROGNAME(x) (strrchr((x), '/') ? strrchr((x), '/')+1 : (x))
 #else
-#define GET_PROGNAME(x) (max(strrchr((x), '/'), strrchr((x), '\\')) + 1, (x))
+#define GET_PROGNAME(x) max(max(strrchr((x), '/'), strrchr((x), '\\')) + 1,(x))
 #endif
 
 int
@@ -99,12 +99,12 @@ main(argc, argv)
 	    }
 	    break;
 #ifdef KRB5_KRB4_COMPAT
-        case '4':
-            use_k4_only = 1;
-            break;
-        case '5':
-            use_k5_only = 1;
-            break;
+	case '4':
+	    use_k4_only = 1;
+	    break;
+	case '5':
+	    use_k5_only = 1;
+	    break;
 #endif
 	case '?':
 	default:
@@ -115,8 +115,8 @@ main(argc, argv)
 
     if (use_k4_only && use_k5_only)
     {
-        fprintf(stderr, "Only one of -4 and -5 allowed\n");
-        errflg++;
+	fprintf(stderr, "Only one of -4 and -5 allowed\n");
+	errflg++;
     }
 
     if (optind != argc)
@@ -129,9 +129,9 @@ main(argc, argv)
     }
 
     if (use_k4_only)
-        got_k5 = 0;
+	got_k5 = 0;
     if (use_k5_only)
-        got_k4 = 0;
+	got_k4 = 0;
 
     if (got_k5) {
 	retval = krb5_init_context(&kcontext);
