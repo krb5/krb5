@@ -805,12 +805,12 @@ proto_serv(kcontext, my_id, cl_sock, sv_p, cl_p)
 	alarm(0);
     if (ticket)
 	krb5_free_ticket(kcontext, ticket);
-    if (rcache) {
-	krb5_rc_close(kcontext, rcache);
-	/* krb5_rc_destroy(kcontext, rcache); */
-    }
+    /*
+     * Don't need to close the replay cache because it's attached to the
+     * auth context.
+     */
     if (auth_context)
-	krb5_xfree(auth_context);
+	krb5_auth_con_free(kcontext, auth_context);
     if (curr_lang)
 	free(curr_lang);
     if (num_args)
