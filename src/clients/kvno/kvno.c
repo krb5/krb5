@@ -31,7 +31,7 @@
 extern int optind;
 extern char *optarg;
 
-void usage(char *argv0)
+static void usage(char *argv0)
 {
     char *cmd;
 
@@ -57,7 +57,8 @@ int main(int argc, char *argv[])
     krb5_ticket *ticket;
     char *princ;
 
-    if (ret = krb5_init_context(&context)) {
+    ret = krb5_init_context(&context);
+    if (ret) {
 	com_err(argv[0], ret, "while initializing krb5 library");
 	exit(1);
     }
@@ -83,7 +84,8 @@ int main(int argc, char *argv[])
 	usage(argv[0]);
 
     if (etypestr) {
-	if (ret = krb5_string_to_enctype(etypestr, &etype)) {
+        ret = krb5_string_to_enctype(etypestr, &etype);
+	if (ret) {
 	    com_err(argv[0], ret, "while converting etype");
 	    exit(1);
 	}
@@ -91,12 +93,14 @@ int main(int argc, char *argv[])
 	etype = 0;
     }
 
-    if (ret = krb5_cc_default(context, &ccache)) {
+    ret = krb5_cc_default(context, &ccache);
+    if (ret) {
 	com_err(argv[0], ret, "while opening ccache");
 	exit(1);
     }
 
-    if (ret = krb5_cc_get_principal(context, ccache, &me)) {
+    ret = krb5_cc_get_principal(context, ccache, &me);
+    if (ret) {
 	com_err(argv[0], ret, "while getting client principal name");
 	exit(1);
     }
@@ -108,7 +112,8 @@ int main(int argc, char *argv[])
 
 	in_creds.client = me;
 
-	if (ret = krb5_parse_name(context, argv[i], &in_creds.server)) {
+	ret = krb5_parse_name(context, argv[i], &in_creds.server);
+	if (ret) {
 	    if (!quiet)
 		fprintf(stderr, "%s: %s while parsing principal name\n",
 			argv[i], error_message(ret));
@@ -116,7 +121,8 @@ int main(int argc, char *argv[])
 	    continue;
 	}
 
-	if (ret = krb5_unparse_name(context, in_creds.server, &princ)) {
+	ret = krb5_unparse_name(context, in_creds.server, &princ);
+	if (ret) {
 	    fprintf(stderr, "%s: %s while printing principal name\n",
 		    argv[i], error_message(ret));
 	    errors++;
@@ -140,7 +146,8 @@ int main(int argc, char *argv[])
 	}
 
 	/* we need a native ticket */
-	if (ret = krb5_decode_ticket(&out_creds->ticket, &ticket)) {
+	ret = krb5_decode_ticket(&out_creds->ticket, &ticket);
+	if (ret) {
 	    fprintf(stderr, "%s: %s while decoding ticket\n",
 		    princ, error_message(ret));
 

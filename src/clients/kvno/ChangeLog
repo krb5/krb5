@@ -1,3 +1,8 @@
+2000-08-02  Ezra Peisach  <epeisach@mit.edu>
+
+	* kvno.c (main): Compiler warning fixes - declare usage as static, and 
+	break out assignments within conditionals.
+
 2000-02-01  Danilo Almeida  <dalmeida@mit.edu>
 
 	* kvno.c (main): Use krb5_decode_ticket() instead of
