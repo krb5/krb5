@@ -25,6 +25,9 @@
  */
 
 #include <stdio.h>
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 #include <string.h>
 #include <krb5.h>
 

@@ -31,6 +31,9 @@
 #include <com_err.h>
 #include <string.h>
 #include <stdio.h>
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 
 #ifdef KRB5_KRB4_COMPAT
 #include <kerberosIV/krb.h>

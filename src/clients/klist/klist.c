@@ -33,6 +33,9 @@
 #endif
 #include <com_err.h>
 #include <stdlib.h>
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 #include <string.h>
 #include <stdio.h>
 #include <time.h>
