@@ -583,6 +583,26 @@ PurgeMSTGT(HANDLE LogonHandle, ULONG  PackageId)
     return TRUE;
 }
 
+krb5_boolean
+krb5_is_permitted_tgs_enctype(krb5_context context, krb5_const_principal princ, krb5_enctype etype)
+{
+    krb5_enctype *list, *ptr;
+    krb5_boolean ret;
+
+    if (krb5_get_tgs_ktypes(context, princ, &list))
+        return(0);
+    
+    ret = 0;
+
+    for (ptr = list; *ptr; ptr++)
+	if (*ptr == etype)
+	    ret = 1;
+
+    krb5_free_ktypes (context, list);
+
+    return(ret);
+}
+
 #define ENABLE_PURGING 1
 // to allow the purging of expired tickets from LSA cache.  This is necessary
 // to force the retrieval of new TGTs.  Microsoft does not appear to retrieve
@@ -592,7 +612,7 @@ PurgeMSTGT(HANDLE LogonHandle, ULONG  PackageId)
 // (ms calls this refresh).
 
 static BOOL
-GetMSTGT(krb5_context context, HANDLE LogonHandle, ULONG PackageId,KERB_EXTERNAL_TICKET **ticket)
+GetMSTGT(krb5_context context, HANDLE LogonHandle, ULONG PackageId, KERB_EXTERNAL_TICKET **ticket, BOOL enforce_tgs_enctypes)
 {
     //
     // INVARIANTS:
@@ -615,6 +635,7 @@ GetMSTGT(krb5_context context, HANDLE LogonHandle, ULONG PackageId,KERB_EXTERNAL
     int    purge_cache = 0;
 #endif /* ENABLE_PURGING */
     int    ignore_cache = 0;
+    krb5_enctype *etype_list = NULL, *ptr = NULL, etype = 0;
 
     memset(&CacheRequest, 0, sizeof(KERB_QUERY_TKT_CACHE_REQUEST));
     CacheRequest.MessageType = KerbRetrieveTicketMessage;
@@ -710,7 +731,8 @@ GetMSTGT(krb5_context context, HANDLE LogonHandle, ULONG PackageId,KERB_EXTERNAL
         purge_cache = 1;
 #else
         /* Check Supported Enctypes */
-        if ( krb5_is_permitted_enctype(context, pTicketResponse->Ticket.SessionKey.KeyType) ) {
+        if ( !enforce_tgs_enctypes ||
+             krb5_is_permitted_tgs_enctype(context, NULL, pTicketResponse->Ticket.SessionKey.KeyType) ) {
             FILETIME Now, MinLife, EndTime, LocalEndTime;
             __int64  temp;
             // FILETIME is in units of 100 nano-seconds
@@ -788,15 +810,14 @@ GetMSTGT(krb5_context context, HANDLE LogonHandle, ULONG PackageId,KERB_EXTERNAL
     pTicketRequest->TicketFlags = 0L;
     pTicketRequest->EncryptionType = 0L;
 
-    Status = LsaCallAuthenticationPackage(
-        LogonHandle,
-        PackageId,
-        pTicketRequest,
-        RequestSize,
-        &pTicketResponse,
-        &ResponseSize,
-        &SubStatus
-        );
+    Status = LsaCallAuthenticationPackage( LogonHandle,
+                                           PackageId,
+                                           pTicketRequest,
+                                           RequestSize,
+                                           &pTicketResponse,
+                                           &ResponseSize,
+                                           &SubStatus
+                                           );
 
     if (FAILED(Status) || FAILED(SubStatus))
     {
@@ -809,40 +830,64 @@ GetMSTGT(krb5_context context, HANDLE LogonHandle, ULONG PackageId,KERB_EXTERNAL
     //
 
     /* Check Supported Enctypes */
-    if ( krb5_is_permitted_enctype(context, pTicketResponse->Ticket.SessionKey.KeyType) ) {
+    if ( !enforce_tgs_enctypes ||
+         krb5_is_permitted_tgs_enctype(context, NULL, pTicketResponse->Ticket.SessionKey.KeyType) ) {
         goto cleanup;       // we have a valid ticket, all done
     }
 
-    //
-    // Try once more but this time specify the Encryption Type
-    // (This will not store the retrieved tickets in the LSA cache)
-    //
-    pTicketRequest->EncryptionType = ENCTYPE_DES_CBC_CRC;
-    pTicketRequest->CacheOptions = KERB_RETRIEVE_TICKET_DONT_USE_CACHE;
-
-    if ( pTicketResponse ) {
-        memset(pTicketResponse,0,sizeof(KERB_RETRIEVE_TKT_RESPONSE));
-        LsaFreeReturnBuffer(pTicketResponse);
-        pTicketResponse = NULL;
+    if (krb5_get_tgs_ktypes(context, NULL, &etype_list)) {
+        ptr = etype_list = NULL;
+        etype = ENCTYPE_DES_CBC_CRC;
+    } else {
+        ptr = etype_list + 1;
+        etype = *etype_list;
     }
 
-    Status = LsaCallAuthenticationPackage(
-        LogonHandle,
-        PackageId,
-        pTicketRequest,
-        RequestSize,
-        &pTicketResponse,
-        &ResponseSize,
-        &SubStatus
-        );
+    while ( etype ) {
+        // Try once more but this time specify the Encryption Type
+        // (This will not store the retrieved tickets in the LSA cache unless
+        // 0 is supported.)
+        pTicketRequest->EncryptionType = etype;
+        pTicketRequest->CacheOptions = 0;
 
-    if (FAILED(Status) || FAILED(SubStatus))
-    {
-        bIsLsaError = TRUE;
-        goto cleanup;
+        if ( pTicketResponse ) {
+            memset(pTicketResponse,0,sizeof(KERB_RETRIEVE_TKT_RESPONSE));
+            LsaFreeReturnBuffer(pTicketResponse);
+            pTicketResponse = NULL;
+        }
+
+        Status = LsaCallAuthenticationPackage( LogonHandle,
+                                               PackageId,
+                                               pTicketRequest,
+                                               RequestSize,
+                                               &pTicketResponse,
+                                               &ResponseSize,
+                                               &SubStatus
+                                               );
+
+        if (FAILED(Status) || FAILED(SubStatus))
+        {
+            bIsLsaError = TRUE;
+            goto cleanup;
+        }
+
+        if ( pTicketResponse->Ticket.SessionKey.KeyType == etype && 
+             (!enforce_tgs_enctypes ||
+             krb5_is_permitted_tgs_enctype(context, NULL, pTicketResponse->Ticket.SessionKey.KeyType)) ) {
+            goto cleanup;       // we have a valid ticket, all done
+        }
+
+        if ( ptr ) {
+            etype = *ptr++;
+        } else {
+            etype = 0;
+        }
     }
 
   cleanup:
+    if ( etype_list )
+        krb5_free_ktypes(context, etype_list);
+
     if ( pTicketRequest )
         LocalFree(pTicketRequest);
 
@@ -915,7 +960,8 @@ FreeQueryResponse(PKERB_QUERY_TKT_CACHE_RESPONSE  pResponse)
 
 static BOOL
 GetMSCacheTicketFromMITCred( HANDLE LogonHandle, ULONG PackageId,
-                  krb5_context context, krb5_creds *creds, PKERB_EXTERNAL_TICKET *ticket)
+                             krb5_context context, krb5_creds *creds, 
+                             PKERB_EXTERNAL_TICKET *ticket)
 {
     NTSTATUS Status = 0;
     NTSTATUS SubStatus = 0;
@@ -942,15 +988,14 @@ GetMSCacheTicketFromMITCred( HANDLE LogonHandle, ULONG PackageId,
     pTicketRequest->TicketFlags = creds->ticket_flags;
     pTicketRequest->EncryptionType = creds->keyblock.enctype;
 
-    Status = LsaCallAuthenticationPackage(
-        LogonHandle,
-        PackageId,
-        pTicketRequest,
-        RequestSize,
-        &pTicketResponse,
-        &ResponseSize,
-        &SubStatus
-        );
+    Status = LsaCallAuthenticationPackage( LogonHandle,
+                                           PackageId,
+                                           pTicketRequest,
+                                           RequestSize,
+                                           &pTicketResponse,
+                                           &ResponseSize,
+                                           &SubStatus
+                                           );
 
     LocalFree(pTicketRequest);
 
@@ -1163,7 +1208,7 @@ krb5_lcc_resolve (krb5_context context, krb5_ccache *id, const char *residual)
     /*
      * we must obtain a tgt from the cache in order to determine the principal
      */
-    if (GetMSTGT(context, data->LogonHandle, data->PackageId, &msticket)) {
+    if (GetMSTGT(context, data->LogonHandle, data->PackageId, &msticket, FALSE)) {
         /* convert the ticket */
         krb5_creds creds;
         MSCredToMITCred(msticket, msticket->DomainName, context, &creds);
@@ -1285,7 +1330,7 @@ krb5_lcc_start_seq_get(krb5_context context, krb5_ccache id, krb5_cc_cursor *cur
     /*
      * obtain a tgt to refresh the ccache in case the ticket is expired
      */
-    if (!GetMSTGT(context, data->LogonHandle, data->PackageId, &lcursor->mstgt)) {
+    if (!GetMSTGT(context, data->LogonHandle, data->PackageId, &lcursor->mstgt, TRUE)) {
         free(lcursor);
         *cursor = 0;
         return KRB5_FCC_INTERNAL;
@@ -1504,7 +1549,7 @@ krb5_lcc_retrieve(krb5_context context, krb5_ccache id, krb5_flags whichfields,
     }
 
     /* convert the ticket */
-    GetMSTGT(context, data->LogonHandle, data->PackageId, &mstgt);
+    GetMSTGT(context, data->LogonHandle, data->PackageId, &mstgt, FALSE);
 
     MSCredToMITCred(msticket, mstgt ? mstgt->DomainName : msticket->DomainName, context, &fetchcreds);
 
@@ -1542,19 +1587,28 @@ krb5_lcc_store(krb5_context context, krb5_ccache id, krb5_creds *creds)
 {
     krb5_error_code kret = KRB5_OK;
     krb5_lcc_data *data = (krb5_lcc_data *)id->data;
-    KERB_EXTERNAL_TICKET *msticket = 0;
+    KERB_EXTERNAL_TICKET *msticket = 0, *msticket2 = 0;
     krb5_creds * creds_noflags;
 
     if (!IsWindows2000())
         return KRB5_FCC_NOFILE;
 
-    /* if not, we must try to get a ticket without specifying any flags or etypes */
-    krb5_copy_creds(context, creds, &creds_noflags);
-    creds_noflags->ticket_flags = 0;
-    creds_noflags->keyblock.enctype = 0;
+    if ( creds->ticket_flags != 0 && creds->keyblock.enctype != 0 ) {
+        /* if not, we must try to get a ticket without specifying any flags or etypes */
+        krb5_copy_creds(context, creds, &creds_noflags);
+        creds_noflags->ticket_flags = 0;
+        creds_noflags->keyblock.enctype = 0;
 
-    if (GetMSCacheTicketFromMITCred(data->LogonHandle, data->PackageId, context, creds_noflags, &msticket)) {
-        LsaFreeReturnBuffer(msticket);
+        GetMSCacheTicketFromMITCred(data->LogonHandle, data->PackageId, context, creds_noflags, &msticket2);
+        krb5_free_creds(context, creds_noflags);
+    }
+
+    GetMSCacheTicketFromMITCred(data->LogonHandle, data->PackageId, context, creds, &msticket);
+    if (msticket || msticket2) {
+        if (msticket)
+            LsaFreeReturnBuffer(msticket);
+        if (msticket2)
+            LsaFreeReturnBuffer(msticket2);
         return KRB5_OK;
     }
     return KRB5_CC_READONLY;
