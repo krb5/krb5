@@ -48,12 +48,15 @@ void display_status();
 extern FILE *display_file;
 FILE *log;
 
+
+void
 usage()
 {
      fprintf(stderr, "Usage: gss-server [-port port] [-v2] [-inetd] [-logfile file] service_name\n");
      exit(1);
 }
 
+int
 main(argc, argv)
      int argc;
      char **argv;
@@ -63,6 +66,7 @@ main(argc, argv)
      int s;
      int do_inetd = 0;
      int dov2 = 0;
+     int once = 0;
 
      log = stdout;
      argc--; argv++;
@@ -75,6 +79,8 @@ main(argc, argv)
 	      do_inetd = 1;
 	  } else if (strcmp(*argv, "-v2") == 0) {
 	      dov2 = 1;
+	  } else if (strcmp(*argv, "-once") == 0) {
+	      once = 1;
 	  } else if (strcmp(*argv, "-logfile") == 0) {
 	      argc--; argv++;
 	      if (!argc) usage();
@@ -102,7 +108,7 @@ main(argc, argv)
 	 close(2);
      }
 
-     if (sign_server(s, service_name, dov2) < 0)
+     if (sign_server(s, service_name, dov2, once) < 0)
 	  exit(1);
      
      /*NOTREACHED*/
@@ -130,6 +136,7 @@ int create_socket(port)
 {
      struct sockaddr_in saddr;
      int s;
+     int on = 1;
      
      saddr.sin_family = AF_INET;
      saddr.sin_port = htons(port);
@@ -139,6 +146,8 @@ int create_socket(port)
 	  perror("creating socket");
 	  return -1;
      }
+     /* Let the socket be reused right away */
+     (void) setsockopt(s, SOL_SOCKET, SO_REUSEADDR, (char *)&on, sizeof(on));
      if (bind(s, (struct sockaddr *) &saddr, sizeof(saddr)) < 0) {
 	  perror("binding socket");
 	  return -1;
@@ -164,7 +173,9 @@ int create_socket(port)
  * 			establish a context as
  *	dov2		(r) a boolean indicating whether we should use GSSAPI
  *			V2 interfaces, if available.
- *
+ *	once		(r) a boolean indicating whether we should
+ * 			only accept one connection, then exit.
+ * 
  * Returns: -1 on error
  *
  * Effects:
@@ -180,10 +191,11 @@ int create_socket(port)
  *
  * If any error occurs, -1 is returned.
  */
-int sign_server(s, service_name, dov2)
+int sign_server(s, service_name, dov2, once)
      int s;
      char *service_name;
      int dov2;
+     int once;
 {
      gss_cred_id_t server_creds;     
      gss_buffer_desc client_name, xmit_buf, msg_buf, context_token;
@@ -212,27 +224,30 @@ int sign_server(s, service_name, dov2)
 	  
 	  time(&now);
 	  fprintf(log, "Accepted connection: \"%s\" at %s", 
-		  client_name.value, ctime(&now));
+		  (char *) client_name.value, ctime(&now));
 	  (void) gss_release_buffer(&min_stat, &client_name);
 
-	  /*
-	   * Attempt to save and then restore the context.
-	   */
-	  maj_stat = gss_export_sec_context(&min_stat,
-					    &context,
-					    &context_token);
-	  if (maj_stat != GSS_S_COMPLETE) {
-	       display_status("exporting context", maj_stat, min_stat);
-	       break;
+	  if (dov2) {
+	      /*
+	       * Attempt to save and then restore the context.
+	       */
+	      maj_stat = gss_export_sec_context(&min_stat,
+						&context,
+						&context_token);
+	      if (maj_stat != GSS_S_COMPLETE) {
+		  display_status("exporting context", maj_stat, min_stat);
+		  break;
+	      }
+	      fprintf(log, "Exported context: %d bytes\n", context_token.length);
+	      maj_stat = gss_import_sec_context(&min_stat,
+						&context_token,
+						&context);
+	      if (maj_stat != GSS_S_COMPLETE) {
+		  display_status("importing context", maj_stat, min_stat);
+		  break;
+	      }
+	      (void) gss_release_buffer(&min_stat, &context_token);
 	  }
-	  maj_stat = gss_import_sec_context(&min_stat,
-					    &context_token,
-					    &context);
-	  if (maj_stat != GSS_S_COMPLETE) {
-	       display_status("importing context", maj_stat, min_stat);
-	       break;
-	  }
-	  (void) gss_release_buffer(&min_stat, &context_token);
 
 	  /* Receive the sealed message token */
 	  if (recv_token(s2, &xmit_buf) < 0)
@@ -254,7 +269,7 @@ int sign_server(s, service_name, dov2)
 
 	  (void) gss_release_buffer(&min_stat, &xmit_buf);
 
-	  fprintf(log, "Received message: \"%s\"\n", msg_buf.value);
+	  fprintf(log, "Received message: \"%s\"\n", (char *) msg_buf.value);
 
 	  /* Produce a signature block for the message */
 #ifdef	GSSAPI_V2
@@ -292,7 +307,7 @@ int sign_server(s, service_name, dov2)
 
 	  fflush(log);
 
-	  if (s < 0)
+	  if (s < 0 || once)
 	       break;
      }
 
@@ -427,7 +442,11 @@ int server_establish_context(s, server_creds, context, client_name)
 	  display_status("displaying name", maj_stat, min_stat);
 	  return -1;
      }
-     
+     maj_stat = gss_release_name(&min_stat, &client);
+     if (maj_stat != GSS_S_COMPLETE) {
+	  display_status("releasing name", maj_stat, min_stat);
+	  return -1;
+     }
      return 0;
 }
 

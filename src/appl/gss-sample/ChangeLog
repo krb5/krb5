@@ -1,3 +1,18 @@
+Sat Sep 16 03:34:59 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* gss-server.c (sign_server): Only try using gss_export_context
+		and gss_import_context if the dov2 flag has been set.
+		(server_establish_context): Make sure the client
+		gss_name_t is released.
+		(main): Add a -once option which causes the gss-server to
+		exit after processing one client.  Allows purify to report
+		memory leaks.
+
+Thu Sep 14 22:44:44 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* gss-server.c (create_socket): add setsockopt SO_REUSEADDR so
+		that the socket can be reused right away.
+
 Mon Sep  4 14:19:03 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* gss-misc.c: Either include stdlib.h or declare malloc.
