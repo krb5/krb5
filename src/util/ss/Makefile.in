@@ -72,14 +72,6 @@ install:: libss.a
 
 
 includes:: mk_cmds ss_err.h
-	-$(RM) -rf $(TOP)/include/ss
-	mkdir $(TOP)/include/ss
-	cp $(srcdir)/ss.h $(TOP)/include/ss
-	cp $(srcdir)/mit-sipb-copyright.h $(TOP)/include/ss
-	cp $(srcdir)/copyright.h $(TOP)/include/ss
-	cp ss_err.h $(TOP)/include/ss
-	cp $(srcdir)/ss_internal.h $(TOP)/include/ss
-
 
 install:: $(HFILES) copyright.h
 	for i in $(HFILES) copyright.h; do \
