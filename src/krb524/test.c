@@ -135,7 +135,8 @@ void krb4_print_ticket(KTEXT ticket, krb5_keyblock *secret_key)
      char pname[ANAME_SZ], pinst[INST_SZ], prealm[REALM_SZ];
      char sname[ANAME_SZ], sinst[INST_SZ];
      unsigned char flags;
-     unsigned long addr, issue_time;
+     unsigned long addr;
+     unsigned KRB4_32 issue_time;
      C_Block session_key;
      int life;
      Key_schedule keysched;
@@ -292,7 +293,7 @@ void do_remote(krb5_context context, krb5_creds *v5creds, char *server,
 		 sizeof(struct in_addr));
 	  
 	  if ((ret = krb524_convert_creds_addr(context, v5creds, &v4creds, 
-					      &saddr))) {
+					      (struct sockaddr *) &saddr))) {
 	       com_err("test", ret, "converting credentials on %s",
 		       server);
 	       exit(1);

@@ -1,3 +1,14 @@
+Tue Jun  6 20:59:56 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* test.c (do_remote): Case sockaddr_in * to sockaddr * in calling
+		krb524_convert_creds_addr. 
+		(krb4_print_ticket): issue_time should be a KRB4_32
+
+	* encode.c (encode_v4tkt): Cast a the unsigned long mbz field of
+		KTEXT to krb5_int32 for call to encode_int32.
+
+	* conv_creds.c (krb524_convert_creds_addr): Cast sockaddr * to
+		sockaddr_in *. 
 
 Tue Jun 6 17:25:20 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in : Change $(ARCHIVE) to $(ARADD) so that updates to the

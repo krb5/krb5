@@ -49,7 +49,7 @@ int krb524_convert_creds_addr(context, v5creds, v4creds, saddr)
      return krb524_convert_tkt(v5creds->server, &v5creds->ticket,
 			       &v4creds->ticket_st,
 			       &v4creds->kvno,
-			       saddr);
+			       (struct sockaddr_in *) saddr);
 }
 
 int krb524_convert_creds_kdc(context, v5creds, v4creds)
