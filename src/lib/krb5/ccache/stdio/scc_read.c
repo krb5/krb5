@@ -225,7 +225,7 @@ krb5_scc_read_data(id, data)
      kret = krb5_scc_read_int32(id, &data->length);
      CHECK(kret);
 
-     data->data = (char *) malloc(data->length);
+     data->data = (char *) malloc(data->length+1);
      if (data->data == NULL)
 	  return KRB5_CC_NOMEM;
 
@@ -240,11 +240,8 @@ krb5_scc_read_data(id, data)
 	 xfree(data->data);
 	 return KRB5_CC_END;
      }
+     data->data[data->length] = 0; /* Null terminate just in case.... */
      return KRB5_OK;
- errout:
-     if (data->data)
-	 xfree(data->data);
-     return kret;
 }
 
 krb5_error_code
