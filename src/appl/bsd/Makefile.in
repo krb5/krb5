@@ -100,47 +100,51 @@ kcmd.o krcp.o krlogin.o krlogind.o krsh.o krshd.o forward.o: defines.h
 # Makefile dependencies follow.  This must be the last section in
 # the Makefile.in file
 #
-krcp.o: krcp.c $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
-  $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/k5-util.h \
+$(OUTPRE)krcp.$(OBJEXT): krcp.c $(BUILDTOP)/include/krb5.h \
+  $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
+  $(SRCTOP)/include/k5-util.h $(SRCTOP)/include/kerberosIV/krb.h \
+  $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/port-sockets.h \
+  defines.h
+$(OUTPRE)krlogin.$(OBJEXT): krlogin.c $(BUILDTOP)/include/krb5.h \
+  $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
+  $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
+  $(SRCTOP)/include/port-sockets.h defines.h rpaths.h
+$(OUTPRE)krsh.$(OBJEXT): krsh.c $(BUILDTOP)/include/krb5.h \
+  $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
   $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
   $(SRCTOP)/include/port-sockets.h defines.h
-krlogin.o: krlogin.c $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
-  $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/kerberosIV/krb.h \
-  $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/port-sockets.h \
-  defines.h rpaths.h
-krsh.o: krsh.c $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
-  $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/kerberosIV/krb.h \
-  $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/port-sockets.h \
-  defines.h
-kcmd.o: kcmd.c $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
-  $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/kerberosIV/krb.h \
-  $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/port-sockets.h \
-  defines.h
-forward.o: forward.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
-  $(BUILDTOP)/include/krb5/autoconf.h $(BUILDTOP)/include/krb5.h \
+$(OUTPRE)kcmd.$(OBJEXT): kcmd.c $(BUILDTOP)/include/krb5.h \
   $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
-  $(SRCTOP)/include/krb5/kdb.h defines.h
-login.o: login.c $(BUILDTOP)/include/libpty.h $(SRCTOP)/include/syslog.h \
-  $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
-  $(BUILDTOP)/include/krb5/autoconf.h $(BUILDTOP)/include/krb5.h \
-  $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
-  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/kerberosIV/krb.h \
-  $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/port-sockets.h \
-  $(BUILDTOP)/include/krb524.h $(BUILDTOP)/include/krb524_err.h \
-  loginpaths.h
-krshd.o: krshd.c $(BUILDTOP)/include/libpty.h $(SRCTOP)/include/syslog.h \
+  $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
+  $(SRCTOP)/include/port-sockets.h defines.h
+$(OUTPRE)forward.$(OBJEXT): forward.c $(SRCTOP)/include/k5-int.h \
+  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
-  $(BUILDTOP)/include/com_err.h loginpaths.h $(SRCTOP)/include/kerberosIV/krb.h \
-  $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/k5-util.h defines.h
-krlogind.o: krlogind.c $(SRCTOP)/include/syslog.h $(BUILDTOP)/include/krb5.h \
+  $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h \
+  defines.h
+$(OUTPRE)login.$(OBJEXT): login.c $(BUILDTOP)/include/libpty.h \
+  $(SRCTOP)/include/syslog.h $(SRCTOP)/include/k5-int.h \
+  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h \
+  $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
+  $(SRCTOP)/include/port-sockets.h $(BUILDTOP)/include/krb524.h \
+  $(BUILDTOP)/include/krb524_err.h loginpaths.h
+$(OUTPRE)krshd.$(OBJEXT): krshd.c $(BUILDTOP)/include/libpty.h \
+  $(SRCTOP)/include/syslog.h $(BUILDTOP)/include/krb5.h \
   $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
-  $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
-  $(SRCTOP)/include/port-sockets.h $(BUILDTOP)/include/libpty.h \
-  $(SRCTOP)/include/k5-util.h defines.h
-v4rcp.o: v4rcp.c $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
-  $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/k5-util.h \
-  $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
-  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/kerberosIV/krbports.h \
-  rpaths.h
+  loginpaths.h $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
+  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/k5-util.h \
+  defines.h
+$(OUTPRE)krlogind.$(OBJEXT): krlogind.c $(SRCTOP)/include/syslog.h \
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/kerberosIV/krb.h \
+  $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/port-sockets.h \
+  $(BUILDTOP)/include/libpty.h $(SRCTOP)/include/k5-util.h \
+  defines.h
+$(OUTPRE)v4rcp.$(OBJEXT): v4rcp.c $(BUILDTOP)/include/krb5.h \
+  $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
+  $(SRCTOP)/include/k5-util.h $(SRCTOP)/include/kerberosIV/krb.h \
+  $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/kerberosIV/krbports.h rpaths.h
 

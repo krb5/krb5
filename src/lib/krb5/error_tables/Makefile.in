@@ -68,13 +68,13 @@ clean-unix:: clean-libobjs
 # Makefile dependencies follow.  This must be the last section in
 # the Makefile.in file
 #
-asn1_err.o: asn1_err.c $(BUILDTOP)/include/com_err.h
-kdb5_err.o: kdb5_err.c $(BUILDTOP)/include/com_err.h
-krb5_err.o: krb5_err.c $(BUILDTOP)/include/com_err.h
-kv5m_err.o: kv5m_err.c $(BUILDTOP)/include/com_err.h
-adm_err.o: adm_err.c $(BUILDTOP)/include/com_err.h
-init_ets.o: init_ets.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
-  $(BUILDTOP)/include/krb5/autoconf.h $(BUILDTOP)/include/krb5.h \
-  $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
-  $(SRCTOP)/include/krb5/kdb.h
+$(OUTPRE)asn1_err.$(OBJEXT): asn1_err.c $(BUILDTOP)/include/com_err.h
+$(OUTPRE)kdb5_err.$(OBJEXT): kdb5_err.c $(BUILDTOP)/include/com_err.h
+$(OUTPRE)krb5_err.$(OBJEXT): krb5_err.c $(BUILDTOP)/include/com_err.h
+$(OUTPRE)kv5m_err.$(OBJEXT): kv5m_err.c $(BUILDTOP)/include/com_err.h
+$(OUTPRE)adm_err.$(OBJEXT): adm_err.c $(BUILDTOP)/include/com_err.h
+$(OUTPRE)init_ets.$(OBJEXT): init_ets.c $(SRCTOP)/include/k5-int.h \
+  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h
 

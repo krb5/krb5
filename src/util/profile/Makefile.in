@@ -119,17 +119,17 @@ check-windows:: $(OUTPRE)test_profile.exe $(OUTPRE)test_parse.exe
 # Makefile dependencies follow.  This must be the last section in
 # the Makefile.in file
 #
-prof_tree.o: prof_tree.c prof_int.h $(BUILDTOP)/include/com_err.h \
-  prof_err.h $(BUILDTOP)/include/profile.h
-prof_file.o: prof_file.c prof_int.h $(BUILDTOP)/include/com_err.h \
-  prof_err.h $(BUILDTOP)/include/profile.h
-prof_parse.o: prof_parse.c prof_int.h $(BUILDTOP)/include/com_err.h \
-  prof_err.h $(BUILDTOP)/include/profile.h
-prof_get.o: prof_get.c prof_int.h $(BUILDTOP)/include/com_err.h \
-  prof_err.h $(BUILDTOP)/include/profile.h
-prof_set.o: prof_set.c prof_int.h $(BUILDTOP)/include/com_err.h \
-  prof_err.h $(BUILDTOP)/include/profile.h
-prof_err.o: prof_err.c $(BUILDTOP)/include/com_err.h
-prof_init.o: prof_init.c prof_int.h $(BUILDTOP)/include/com_err.h \
-  prof_err.h $(BUILDTOP)/include/profile.h
+$(OUTPRE)prof_tree.$(OBJEXT): prof_tree.c prof_int.h \
+  $(BUILDTOP)/include/com_err.h prof_err.h $(BUILDTOP)/include/profile.h
+$(OUTPRE)prof_file.$(OBJEXT): prof_file.c prof_int.h \
+  $(BUILDTOP)/include/com_err.h prof_err.h $(BUILDTOP)/include/profile.h
+$(OUTPRE)prof_parse.$(OBJEXT): prof_parse.c prof_int.h \
+  $(BUILDTOP)/include/com_err.h prof_err.h $(BUILDTOP)/include/profile.h
+$(OUTPRE)prof_get.$(OBJEXT): prof_get.c prof_int.h \
+  $(BUILDTOP)/include/com_err.h prof_err.h $(BUILDTOP)/include/profile.h
+$(OUTPRE)prof_set.$(OBJEXT): prof_set.c prof_int.h \
+  $(BUILDTOP)/include/com_err.h prof_err.h $(BUILDTOP)/include/profile.h
+$(OUTPRE)prof_err.$(OBJEXT): prof_err.c $(BUILDTOP)/include/com_err.h
+$(OUTPRE)prof_init.$(OBJEXT): prof_init.c prof_int.h \
+  $(BUILDTOP)/include/com_err.h prof_err.h $(BUILDTOP)/include/profile.h
 

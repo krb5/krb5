@@ -75,33 +75,34 @@ utilities.o: defines.h externs.h fdset.h general.h ring.h $(ARPA_TELNET)
 # Makefile dependencies follow.  This must be the last section in
 # the Makefile.in file
 #
-authenc.o: authenc.c $(srcdir)/../arpa/telnet.h $(srcdir)/../libtelnet/encrypt.h \
-  $(srcdir)/../libtelnet/enc-proto.h $(srcdir)/../libtelnet/misc.h \
-  $(srcdir)/../libtelnet/misc-proto.h general.h ring.h \
-  externs.h defines.h types.h
-commands.o: commands.c $(srcdir)/../arpa/telnet.h general.h \
-  ring.h externs.h defines.h types.h $(srcdir)/../libtelnet/auth.h \
+$(OUTPRE)authenc.$(OBJEXT): authenc.c $(srcdir)/../arpa/telnet.h \
+  $(srcdir)/../libtelnet/encrypt.h $(srcdir)/../libtelnet/enc-proto.h \
+  $(srcdir)/../libtelnet/misc.h $(srcdir)/../libtelnet/misc-proto.h \
+  general.h ring.h externs.h defines.h types.h
+$(OUTPRE)commands.$(OBJEXT): commands.c $(srcdir)/../arpa/telnet.h \
+  general.h ring.h externs.h defines.h types.h $(srcdir)/../libtelnet/auth.h \
   $(srcdir)/../libtelnet/auth-proto.h $(srcdir)/../libtelnet/encrypt.h \
   $(srcdir)/../libtelnet/enc-proto.h $(srcdir)/../libtelnet/misc-proto.h \
   $(SRCTOP)/include/fake-addrinfo.c $(SRCTOP)/include/fake-addrinfo.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
   $(BUILDTOP)/include/krb5/autoconf.h
-main.o: main.c $(srcdir)/../libtelnet/auth.h $(srcdir)/../libtelnet/auth-proto.h \
-  $(srcdir)/../libtelnet/encrypt.h $(srcdir)/../libtelnet/enc-proto.h \
-  ring.h externs.h defines.h
-network.o: network.c $(srcdir)/../arpa/telnet.h ring.h \
-  defines.h externs.h fdset.h
-ring.o: ring.c ring.h general.h
-sys_bsd.o: sys_bsd.c $(srcdir)/../arpa/telnet.h ring.h \
-  fdset.h defines.h externs.h types.h
-telnet.o: telnet.c $(srcdir)/../arpa/telnet.h ring.h \
-  defines.h externs.h types.h general.h $(srcdir)/../libtelnet/auth.h \
+$(OUTPRE)main.$(OBJEXT): main.c $(srcdir)/../libtelnet/auth.h \
+  $(srcdir)/../libtelnet/auth-proto.h $(srcdir)/../libtelnet/encrypt.h \
+  $(srcdir)/../libtelnet/enc-proto.h ring.h externs.h \
+  defines.h
+$(OUTPRE)network.$(OBJEXT): network.c $(srcdir)/../arpa/telnet.h \
+  ring.h defines.h externs.h fdset.h
+$(OUTPRE)ring.$(OBJEXT): ring.c ring.h general.h
+$(OUTPRE)sys_bsd.$(OBJEXT): sys_bsd.c $(srcdir)/../arpa/telnet.h \
+  ring.h fdset.h defines.h externs.h types.h
+$(OUTPRE)telnet.$(OBJEXT): telnet.c $(srcdir)/../arpa/telnet.h \
+  ring.h defines.h externs.h types.h general.h $(srcdir)/../libtelnet/auth.h \
   $(srcdir)/../libtelnet/auth-proto.h $(srcdir)/../libtelnet/encrypt.h \
   $(srcdir)/../libtelnet/enc-proto.h $(srcdir)/../libtelnet/misc-proto.h
-terminal.o: terminal.c $(srcdir)/../arpa/telnet.h ring.h \
-  externs.h types.h $(srcdir)/../libtelnet/encrypt.h \
+$(OUTPRE)terminal.$(OBJEXT): terminal.c $(srcdir)/../arpa/telnet.h \
+  ring.h externs.h types.h $(srcdir)/../libtelnet/encrypt.h \
   $(srcdir)/../libtelnet/enc-proto.h
-utilities.o: utilities.c $(srcdir)/../arpa/telnet.h \
+$(OUTPRE)utilities.$(OBJEXT): utilities.c $(srcdir)/../arpa/telnet.h \
   general.h fdset.h ring.h defines.h externs.h $(srcdir)/../libtelnet/auth.h \
   $(srcdir)/../libtelnet/auth-proto.h $(srcdir)/../libtelnet/encrypt.h \
   $(srcdir)/../libtelnet/enc-proto.h

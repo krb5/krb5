@@ -113,72 +113,72 @@ install-unix:: install-libs
 # Makefile dependencies follow.  This must be the last section in
 # the Makefile.in file
 #
-cksum.o: cksum.c $(srcdir)/../crypto/des/des_int.h \
+$(OUTPRE)cksum.$(OBJEXT): cksum.c $(srcdir)/../crypto/des/des_int.h \
   $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(BUILDTOP)/include/krb5.h \
   $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
   $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/kerberosIV/des.h
-des.o: des.c $(srcdir)/../crypto/des/des_int.h $(SRCTOP)/include/k5-int.h \
-  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
-  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
-  $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h \
-  $(SRCTOP)/include/kerberosIV/des.h
-enc_dec.o: enc_dec.c $(srcdir)/../crypto/des/des_int.h \
+$(OUTPRE)des.$(OBJEXT): des.c $(srcdir)/../crypto/des/des_int.h \
   $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(BUILDTOP)/include/krb5.h \
   $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
   $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/kerberosIV/des.h
-key_parity.o: key_parity.c $(srcdir)/../crypto/des/des_int.h \
+$(OUTPRE)enc_dec.$(OBJEXT): enc_dec.c $(srcdir)/../crypto/des/des_int.h \
   $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(BUILDTOP)/include/krb5.h \
   $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
   $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/kerberosIV/des.h
-key_sched.o: key_sched.c $(srcdir)/../crypto/des/des_int.h \
+$(OUTPRE)key_parity.$(OBJEXT): key_parity.c $(srcdir)/../crypto/des/des_int.h \
   $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(BUILDTOP)/include/krb5.h \
   $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
   $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/kerberosIV/des.h
-new_rnd_key.o: new_rnd_key.c $(srcdir)/../crypto/des/des_int.h \
+$(OUTPRE)key_sched.$(OBJEXT): key_sched.c $(srcdir)/../crypto/des/des_int.h \
   $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(BUILDTOP)/include/krb5.h \
   $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
   $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/kerberosIV/des.h
-pcbc_encrypt.o: pcbc_encrypt.c $(srcdir)/../crypto/des/des_int.h \
+$(OUTPRE)new_rnd_key.$(OBJEXT): new_rnd_key.c $(srcdir)/../crypto/des/des_int.h \
+  $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
+  $(BUILDTOP)/include/krb5/autoconf.h $(BUILDTOP)/include/krb5.h \
+  $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/kerberosIV/des.h
+$(OUTPRE)pcbc_encrypt.$(OBJEXT): pcbc_encrypt.c $(srcdir)/../crypto/des/des_int.h \
   $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(BUILDTOP)/include/krb5.h \
   $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
   $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/kerberosIV/des.h \
   $(srcdir)/../crypto/des/f_tables.h
-quad_cksum.o: quad_cksum.c $(srcdir)/../crypto/des/des_int.h \
+$(OUTPRE)quad_cksum.$(OBJEXT): quad_cksum.c $(srcdir)/../crypto/des/des_int.h \
   $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(BUILDTOP)/include/krb5.h \
   $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
   $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/kerberosIV/des.h
-random_key.o: random_key.c $(srcdir)/../crypto/des/des_int.h \
+$(OUTPRE)random_key.$(OBJEXT): random_key.c $(srcdir)/../crypto/des/des_int.h \
   $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(BUILDTOP)/include/krb5.h \
   $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
   $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/kerberosIV/des.h
-read_passwd.o: read_passwd.c $(srcdir)/../crypto/des/des_int.h \
+$(OUTPRE)read_passwd.$(OBJEXT): read_passwd.c $(srcdir)/../crypto/des/des_int.h \
   $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(BUILDTOP)/include/krb5.h \
   $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
   $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/kerberosIV/des.h
-str_to_key.o: str_to_key.c $(srcdir)/../crypto/des/des_int.h \
+$(OUTPRE)str_to_key.$(OBJEXT): str_to_key.c $(srcdir)/../crypto/des/des_int.h \
   $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(BUILDTOP)/include/krb5.h \
   $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
   $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/kerberosIV/des.h
-unix_time.o: unix_time.c $(SRCTOP)/include/k5-int.h \
+$(OUTPRE)unix_time.$(OBJEXT): unix_time.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
   $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h
-util.o: util.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
-  $(BUILDTOP)/include/krb5/autoconf.h $(BUILDTOP)/include/krb5.h \
-  $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
-  $(SRCTOP)/include/krb5/kdb.h $(srcdir)/../crypto/des/des_int.h \
-  $(SRCTOP)/include/kerberosIV/des.h
-weak_key.o: weak_key.c $(srcdir)/../crypto/des/des_int.h \
+$(OUTPRE)util.$(OBJEXT): util.c $(SRCTOP)/include/k5-int.h \
+  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h \
+  $(srcdir)/../crypto/des/des_int.h $(SRCTOP)/include/kerberosIV/des.h
+$(OUTPRE)weak_key.$(OBJEXT): weak_key.c $(srcdir)/../crypto/des/des_int.h \
   $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(BUILDTOP)/include/krb5.h \
   $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \

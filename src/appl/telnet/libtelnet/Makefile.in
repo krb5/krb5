@@ -90,40 +90,42 @@ install::
 # Makefile dependencies follow.  This must be the last section in
 # the Makefile.in file
 #
-auth.o: auth.c $(srcdir)/../arpa/telnet.h encrypt.h \
-  enc-proto.h auth.h auth-proto.h misc-proto.h
-encrypt.o: encrypt.c $(srcdir)/../arpa/telnet.h encrypt.h \
-  enc-proto.h misc.h misc-proto.h
-genget.o: genget.c misc.h misc-proto.h
-misc.o: misc.c misc.h misc-proto.h auth.h auth-proto.h \
-  encrypt.h enc-proto.h
-kerberos.o: kerberos.c $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
-  $(BUILDTOP)/include/com_err.h $(srcdir)/../arpa/telnet.h \
-  $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/kerberosIV/krb.h \
-  $(SRCTOP)/include/port-sockets.h encrypt.h enc-proto.h \
-  auth.h auth-proto.h misc.h misc-proto.h
-kerberos5.o: kerberos5.c $(srcdir)/../arpa/telnet.h \
+$(OUTPRE)auth.$(OBJEXT): auth.c $(srcdir)/../arpa/telnet.h \
+  encrypt.h enc-proto.h auth.h auth-proto.h misc-proto.h
+$(OUTPRE)encrypt.$(OBJEXT): encrypt.c $(srcdir)/../arpa/telnet.h \
+  encrypt.h enc-proto.h misc.h misc-proto.h
+$(OUTPRE)genget.$(OBJEXT): genget.c misc.h misc-proto.h
+$(OUTPRE)misc.$(OBJEXT): misc.c misc.h misc-proto.h \
+  auth.h auth-proto.h encrypt.h enc-proto.h
+$(OUTPRE)kerberos.$(OBJEXT): kerberos.c $(BUILDTOP)/include/krb5.h \
+  $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
+  $(srcdir)/../arpa/telnet.h $(SRCTOP)/include/kerberosIV/des.h \
+  $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/port-sockets.h \
+  encrypt.h enc-proto.h auth.h auth-proto.h misc.h misc-proto.h
+$(OUTPRE)kerberos5.$(OBJEXT): kerberos5.c $(srcdir)/../arpa/telnet.h \
   $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(BUILDTOP)/include/krb5.h \
   $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
   $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/syslog.h \
   encrypt.h enc-proto.h auth.h auth-proto.h misc.h misc-proto.h \
   krb5forw.h
-forward.o: forward.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
-  $(BUILDTOP)/include/krb5/autoconf.h $(BUILDTOP)/include/krb5.h \
+$(OUTPRE)forward.$(OBJEXT): forward.c $(SRCTOP)/include/k5-int.h \
+  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h \
+  krb5forw.h
+$(OUTPRE)spx.$(OBJEXT): spx.c misc-proto.h
+$(OUTPRE)enc_des.$(OBJEXT): enc_des.c $(BUILDTOP)/include/krb5.h \
   $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
-  $(SRCTOP)/include/krb5/kdb.h krb5forw.h
-spx.o: spx.c misc-proto.h
-enc_des.o: enc_des.c $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
-  $(BUILDTOP)/include/com_err.h $(srcdir)/../arpa/telnet.h \
-  encrypt.h enc-proto.h key-proto.h misc-proto.h
-setenv.o: setenv.c misc-proto.h
-getent.o: getent.c gettytab.h
-parsetos.o: parsetos.c misc-proto.h
-strdup.o: strdup.c
-strcasecmp.o: strcasecmp.c
-strchr.o: strchr.c
-strrchr.o: strrchr.c
-strftime.o: strftime.c
-strerror.o: strerror.c
+  $(srcdir)/../arpa/telnet.h encrypt.h enc-proto.h key-proto.h \
+  misc-proto.h
+$(OUTPRE)setenv.$(OBJEXT): setenv.c misc-proto.h
+$(OUTPRE)getent.$(OBJEXT): getent.c gettytab.h
+$(OUTPRE)parsetos.$(OBJEXT): parsetos.c misc-proto.h
+$(OUTPRE)strdup.$(OBJEXT): strdup.c
+$(OUTPRE)strcasecmp.$(OBJEXT): strcasecmp.c
+$(OUTPRE)strchr.$(OBJEXT): strchr.c
+$(OUTPRE)strrchr.$(OBJEXT): strrchr.c
+$(OUTPRE)strftime.$(OBJEXT): strftime.c
+$(OUTPRE)strerror.$(OBJEXT): strerror.c
 

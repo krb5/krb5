@@ -1,3 +1,13 @@
+2001-10-10  Ken Raeburn  <raeburn@mit.edu>
+	    Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in (KRB524_ERR_HDR): New variable.
+	(includes): Depend on headers in include directory, not local
+	ones.  Don't define any commands to run here.
+	($(KRB524_HDR), $(KRB524_ERR_HDR)): Define UNIX and Windows
+	versions of commands to run for these targets.
+	(../include/krb524_err.h): Delete dependence on "includes".
+
 2001-09-28  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in: Put "##WIN32##" prefix on lines added in last

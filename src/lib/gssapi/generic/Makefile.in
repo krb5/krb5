@@ -139,44 +139,45 @@ depend:: $(ETSRCS)
 # Makefile dependencies follow.  This must be the last section in
 # the Makefile.in file
 #
-disp_com_err_status.o: disp_com_err_status.c gssapiP_generic.h \
+$(OUTPRE)disp_com_err_status.$(OBJEXT): disp_com_err_status.c \
+  gssapiP_generic.h gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  gssapi_err_generic.h $(BUILDTOP)/include/com_err.h
+$(OUTPRE)disp_major_status.$(OBJEXT): disp_major_status.c \
+  gssapiP_generic.h gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  gssapi_err_generic.h $(BUILDTOP)/include/com_err.h
+$(OUTPRE)gssapi_generic.$(OBJEXT): gssapi_generic.c \
+  gssapiP_generic.h gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  gssapi_err_generic.h $(BUILDTOP)/include/com_err.h
+$(OUTPRE)oid_ops.$(OBJEXT): oid_ops.c gssapiP_generic.h \
   gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi.h \
   gssapi_err_generic.h $(BUILDTOP)/include/com_err.h
-disp_major_status.o: disp_major_status.c gssapiP_generic.h \
+$(OUTPRE)rel_buffer.$(OBJEXT): rel_buffer.c gssapiP_generic.h \
   gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi.h \
   gssapi_err_generic.h $(BUILDTOP)/include/com_err.h
-gssapi_generic.o: gssapi_generic.c gssapiP_generic.h \
+$(OUTPRE)rel_oid_set.$(OBJEXT): rel_oid_set.c gssapiP_generic.h \
   gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi.h \
   gssapi_err_generic.h $(BUILDTOP)/include/com_err.h
-oid_ops.o: oid_ops.c gssapiP_generic.h gssapi_generic.h \
-  $(BUILDTOP)/include/gssapi/gssapi.h gssapi_err_generic.h \
-  $(BUILDTOP)/include/com_err.h
-rel_buffer.o: rel_buffer.c gssapiP_generic.h gssapi_generic.h \
-  $(BUILDTOP)/include/gssapi/gssapi.h gssapi_err_generic.h \
-  $(BUILDTOP)/include/com_err.h
-rel_oid_set.o: rel_oid_set.c gssapiP_generic.h gssapi_generic.h \
-  $(BUILDTOP)/include/gssapi/gssapi.h gssapi_err_generic.h \
-  $(BUILDTOP)/include/com_err.h
-util_buffer.o: util_buffer.c gssapiP_generic.h gssapi_generic.h \
-  $(BUILDTOP)/include/gssapi/gssapi.h gssapi_err_generic.h \
-  $(BUILDTOP)/include/com_err.h
-util_dup.o: util_dup.c gssapiP_generic.h gssapi_generic.h \
-  $(BUILDTOP)/include/gssapi/gssapi.h gssapi_err_generic.h \
-  $(BUILDTOP)/include/com_err.h
-util_oid.o: util_oid.c gssapiP_generic.h gssapi_generic.h \
-  $(BUILDTOP)/include/gssapi/gssapi.h gssapi_err_generic.h \
-  $(BUILDTOP)/include/com_err.h
-util_ordering.o: util_ordering.c gssapiP_generic.h \
+$(OUTPRE)util_buffer.$(OBJEXT): util_buffer.c gssapiP_generic.h \
   gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi.h \
   gssapi_err_generic.h $(BUILDTOP)/include/com_err.h
-util_set.o: util_set.c gssapiP_generic.h gssapi_generic.h \
-  $(BUILDTOP)/include/gssapi/gssapi.h gssapi_err_generic.h \
-  $(BUILDTOP)/include/com_err.h
-util_token.o: util_token.c gssapiP_generic.h gssapi_generic.h \
-  $(BUILDTOP)/include/gssapi/gssapi.h gssapi_err_generic.h \
-  $(BUILDTOP)/include/com_err.h
-util_validate.o: util_validate.c gssapiP_generic.h \
+$(OUTPRE)util_dup.$(OBJEXT): util_dup.c gssapiP_generic.h \
   gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi.h \
   gssapi_err_generic.h $(BUILDTOP)/include/com_err.h
-gssapi_err_generic.o: gssapi_err_generic.c $(BUILDTOP)/include/com_err.h
+$(OUTPRE)util_oid.$(OBJEXT): util_oid.c gssapiP_generic.h \
+  gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  gssapi_err_generic.h $(BUILDTOP)/include/com_err.h
+$(OUTPRE)util_ordering.$(OBJEXT): util_ordering.c gssapiP_generic.h \
+  gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  gssapi_err_generic.h $(BUILDTOP)/include/com_err.h
+$(OUTPRE)util_set.$(OBJEXT): util_set.c gssapiP_generic.h \
+  gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  gssapi_err_generic.h $(BUILDTOP)/include/com_err.h
+$(OUTPRE)util_token.$(OBJEXT): util_token.c gssapiP_generic.h \
+  gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  gssapi_err_generic.h $(BUILDTOP)/include/com_err.h
+$(OUTPRE)util_validate.$(OBJEXT): util_validate.c gssapiP_generic.h \
+  gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  gssapi_err_generic.h $(BUILDTOP)/include/com_err.h
+$(OUTPRE)gssapi_err_generic.$(OBJEXT): gssapi_err_generic.c \
+  $(BUILDTOP)/include/com_err.h
 

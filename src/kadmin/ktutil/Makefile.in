@@ -40,14 +40,15 @@ clean::
 # Makefile dependencies follow.  This must be the last section in
 # the Makefile.in file
 #
-ktutil.o: ktutil.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
-  $(BUILDTOP)/include/krb5/autoconf.h $(BUILDTOP)/include/krb5.h \
-  $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
-  $(SRCTOP)/include/krb5/kdb.h ktutil.h $(SRCTOP)/include/krb5/adm_proto.h \
-  $(BUILDTOP)/include/ss/ss.h $(BUILDTOP)/include/ss/ss_err.h
-ktutil_ct.o: ktutil_ct.c $(BUILDTOP)/include/ss/ss.h \
+$(OUTPRE)ktutil.$(OBJEXT): ktutil.c $(SRCTOP)/include/k5-int.h \
+  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h \
+  ktutil.h $(SRCTOP)/include/krb5/adm_proto.h $(BUILDTOP)/include/ss/ss.h \
+  $(BUILDTOP)/include/ss/ss_err.h
+$(OUTPRE)ktutil_ct.$(OBJEXT): ktutil_ct.c $(BUILDTOP)/include/ss/ss.h \
   $(BUILDTOP)/include/ss/ss_err.h $(BUILDTOP)/include/com_err.h
-ktutil_funcs.o: ktutil_funcs.c $(SRCTOP)/include/k5-int.h \
+$(OUTPRE)ktutil_funcs.$(OBJEXT): ktutil_funcs.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
   $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h \

@@ -55,18 +55,18 @@ clean-unix:: clean-libobjs
 # Makefile dependencies follow.  This must be the last section in
 # the Makefile.in file
 #
-descbc.o: descbc.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
-  $(BUILDTOP)/include/krb5/autoconf.h $(BUILDTOP)/include/krb5.h \
-  $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
-  $(SRCTOP)/include/krb5/kdb.h $(srcdir)/../des/des_int.h \
-  keyhash_provider.h
-k5_md4des.o: k5_md4des.c $(SRCTOP)/include/k5-int.h \
+$(OUTPRE)descbc.$(OBJEXT): descbc.c $(SRCTOP)/include/k5-int.h \
+  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h \
+  $(srcdir)/../des/des_int.h keyhash_provider.h
+$(OUTPRE)k5_md4des.$(OBJEXT): k5_md4des.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
   $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h \
   $(srcdir)/../des/des_int.h $(srcdir)/../md4/rsa-md4.h \
   keyhash_provider.h
-k5_md5des.o: k5_md5des.c $(SRCTOP)/include/k5-int.h \
+$(OUTPRE)k5_md5des.$(OBJEXT): k5_md5des.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
   $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h \

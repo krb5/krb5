@@ -218,224 +218,226 @@ install::
 # Makefile dependencies follow.  This must be the last section in
 # the Makefile.in file
 #
-accept_sec_context.o: accept_sec_context.c $(SRCTOP)/include/k5-int.h \
-  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
-  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
-  $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h \
-  gssapiP_krb5.h $(srcdir)/../generic/gssapiP_generic.h \
-  $(srcdir)/../generic/gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi.h \
-  ../generic/gssapi_err_generic.h gssapi_krb5.h gssapi_err_krb5.h
-acquire_cred.o: acquire_cred.c $(SRCTOP)/include/k5-int.h \
-  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
-  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
-  $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h \
-  gssapiP_krb5.h $(srcdir)/../generic/gssapiP_generic.h \
-  $(srcdir)/../generic/gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi.h \
-  ../generic/gssapi_err_generic.h gssapi_krb5.h gssapi_err_krb5.h
-add_cred.o: add_cred.c gssapiP_krb5.h $(BUILDTOP)/include/krb5.h \
-  $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
-  $(srcdir)/../generic/gssapiP_generic.h $(srcdir)/../generic/gssapi_generic.h \
-  $(BUILDTOP)/include/gssapi/gssapi.h ../generic/gssapi_err_generic.h \
-  gssapi_krb5.h gssapi_err_krb5.h
-canon_name.o: canon_name.c gssapiP_krb5.h $(BUILDTOP)/include/krb5.h \
-  $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
-  $(srcdir)/../generic/gssapiP_generic.h $(srcdir)/../generic/gssapi_generic.h \
-  $(BUILDTOP)/include/gssapi/gssapi.h ../generic/gssapi_err_generic.h \
-  gssapi_krb5.h gssapi_err_krb5.h
-compare_name.o: compare_name.c gssapiP_krb5.h $(BUILDTOP)/include/krb5.h \
-  $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
-  $(srcdir)/../generic/gssapiP_generic.h $(srcdir)/../generic/gssapi_generic.h \
-  $(BUILDTOP)/include/gssapi/gssapi.h ../generic/gssapi_err_generic.h \
-  gssapi_krb5.h gssapi_err_krb5.h
-context_time.o: context_time.c gssapiP_krb5.h $(BUILDTOP)/include/krb5.h \
-  $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
-  $(srcdir)/../generic/gssapiP_generic.h $(srcdir)/../generic/gssapi_generic.h \
-  $(BUILDTOP)/include/gssapi/gssapi.h ../generic/gssapi_err_generic.h \
-  gssapi_krb5.h gssapi_err_krb5.h
-copy_ccache.o: copy_ccache.c gssapiP_krb5.h $(BUILDTOP)/include/krb5.h \
-  $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
-  $(srcdir)/../generic/gssapiP_generic.h $(srcdir)/../generic/gssapi_generic.h \
-  $(BUILDTOP)/include/gssapi/gssapi.h ../generic/gssapi_err_generic.h \
-  gssapi_krb5.h gssapi_err_krb5.h
-delete_sec_context.o: delete_sec_context.c gssapiP_krb5.h \
-  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
-  $(BUILDTOP)/include/com_err.h $(srcdir)/../generic/gssapiP_generic.h \
-  $(srcdir)/../generic/gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi.h \
-  ../generic/gssapi_err_generic.h gssapi_krb5.h gssapi_err_krb5.h
-disp_name.o: disp_name.c gssapiP_krb5.h $(BUILDTOP)/include/krb5.h \
-  $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
-  $(srcdir)/../generic/gssapiP_generic.h $(srcdir)/../generic/gssapi_generic.h \
-  $(BUILDTOP)/include/gssapi/gssapi.h ../generic/gssapi_err_generic.h \
-  gssapi_krb5.h gssapi_err_krb5.h
-disp_status.o: disp_status.c gssapiP_krb5.h $(BUILDTOP)/include/krb5.h \
-  $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
-  $(srcdir)/../generic/gssapiP_generic.h $(srcdir)/../generic/gssapi_generic.h \
-  $(BUILDTOP)/include/gssapi/gssapi.h ../generic/gssapi_err_generic.h \
-  gssapi_krb5.h gssapi_err_krb5.h
-duplicate_name.o: duplicate_name.c gssapiP_krb5.h $(BUILDTOP)/include/krb5.h \
-  $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
-  $(srcdir)/../generic/gssapiP_generic.h $(srcdir)/../generic/gssapi_generic.h \
-  $(BUILDTOP)/include/gssapi/gssapi.h ../generic/gssapi_err_generic.h \
-  gssapi_krb5.h gssapi_err_krb5.h
-export_name.o: export_name.c gssapiP_krb5.h $(BUILDTOP)/include/krb5.h \
-  $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
-  $(srcdir)/../generic/gssapiP_generic.h $(srcdir)/../generic/gssapi_generic.h \
-  $(BUILDTOP)/include/gssapi/gssapi.h ../generic/gssapi_err_generic.h \
-  gssapi_krb5.h gssapi_err_krb5.h
-export_sec_context.o: export_sec_context.c gssapiP_krb5.h \
-  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
-  $(BUILDTOP)/include/com_err.h $(srcdir)/../generic/gssapiP_generic.h \
-  $(srcdir)/../generic/gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi.h \
-  ../generic/gssapi_err_generic.h gssapi_krb5.h gssapi_err_krb5.h
-get_tkt_flags.o: get_tkt_flags.c gssapiP_krb5.h $(BUILDTOP)/include/krb5.h \
-  $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
-  $(srcdir)/../generic/gssapiP_generic.h $(srcdir)/../generic/gssapi_generic.h \
-  $(BUILDTOP)/include/gssapi/gssapi.h ../generic/gssapi_err_generic.h \
-  gssapi_krb5.h gssapi_err_krb5.h
-gssapi_krb5.o: gssapi_krb5.c $(SRCTOP)/include/k5-int.h \
-  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
-  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
-  $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h \
-  gssapiP_krb5.h $(srcdir)/../generic/gssapiP_generic.h \
-  $(srcdir)/../generic/gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi.h \
-  ../generic/gssapi_err_generic.h gssapi_krb5.h gssapi_err_krb5.h
-import_name.o: import_name.c gssapiP_krb5.h $(BUILDTOP)/include/krb5.h \
-  $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
-  $(srcdir)/../generic/gssapiP_generic.h $(srcdir)/../generic/gssapi_generic.h \
-  $(BUILDTOP)/include/gssapi/gssapi.h ../generic/gssapi_err_generic.h \
-  gssapi_krb5.h gssapi_err_krb5.h
-import_sec_context.o: import_sec_context.c gssapiP_krb5.h \
-  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
-  $(BUILDTOP)/include/com_err.h $(srcdir)/../generic/gssapiP_generic.h \
-  $(srcdir)/../generic/gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi.h \
-  ../generic/gssapi_err_generic.h gssapi_krb5.h gssapi_err_krb5.h
-indicate_mechs.o: indicate_mechs.c gssapiP_krb5.h $(BUILDTOP)/include/krb5.h \
-  $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
-  $(srcdir)/../generic/gssapiP_generic.h $(srcdir)/../generic/gssapi_generic.h \
-  $(BUILDTOP)/include/gssapi/gssapi.h ../generic/gssapi_err_generic.h \
-  gssapi_krb5.h gssapi_err_krb5.h
-init_sec_context.o: init_sec_context.c gssapiP_krb5.h \
-  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
-  $(BUILDTOP)/include/com_err.h $(srcdir)/../generic/gssapiP_generic.h \
-  $(srcdir)/../generic/gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi.h \
-  ../generic/gssapi_err_generic.h gssapi_krb5.h gssapi_err_krb5.h
-inq_context.o: inq_context.c gssapiP_krb5.h $(BUILDTOP)/include/krb5.h \
-  $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
-  $(srcdir)/../generic/gssapiP_generic.h $(srcdir)/../generic/gssapi_generic.h \
-  $(BUILDTOP)/include/gssapi/gssapi.h ../generic/gssapi_err_generic.h \
-  gssapi_krb5.h gssapi_err_krb5.h
-inq_cred.o: inq_cred.c gssapiP_krb5.h $(BUILDTOP)/include/krb5.h \
-  $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
-  $(srcdir)/../generic/gssapiP_generic.h $(srcdir)/../generic/gssapi_generic.h \
-  $(BUILDTOP)/include/gssapi/gssapi.h ../generic/gssapi_err_generic.h \
-  gssapi_krb5.h gssapi_err_krb5.h
-inq_names.o: inq_names.c gssapiP_krb5.h $(BUILDTOP)/include/krb5.h \
-  $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
-  $(srcdir)/../generic/gssapiP_generic.h $(srcdir)/../generic/gssapi_generic.h \
-  $(BUILDTOP)/include/gssapi/gssapi.h ../generic/gssapi_err_generic.h \
-  gssapi_krb5.h gssapi_err_krb5.h
-k5seal.o: k5seal.c gssapiP_krb5.h $(BUILDTOP)/include/krb5.h \
-  $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
-  $(srcdir)/../generic/gssapiP_generic.h $(srcdir)/../generic/gssapi_generic.h \
-  $(BUILDTOP)/include/gssapi/gssapi.h ../generic/gssapi_err_generic.h \
-  gssapi_krb5.h gssapi_err_krb5.h
-k5unseal.o: k5unseal.c gssapiP_krb5.h $(BUILDTOP)/include/krb5.h \
-  $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
-  $(srcdir)/../generic/gssapiP_generic.h $(srcdir)/../generic/gssapi_generic.h \
-  $(BUILDTOP)/include/gssapi/gssapi.h ../generic/gssapi_err_generic.h \
-  gssapi_krb5.h gssapi_err_krb5.h
-krb5_gss_glue.o: krb5_gss_glue.c gssapiP_krb5.h $(BUILDTOP)/include/krb5.h \
-  $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
-  $(srcdir)/../generic/gssapiP_generic.h $(srcdir)/../generic/gssapi_generic.h \
-  $(BUILDTOP)/include/gssapi/gssapi.h ../generic/gssapi_err_generic.h \
-  gssapi_krb5.h gssapi_err_krb5.h
-process_context_token.o: process_context_token.c gssapiP_krb5.h \
-  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
-  $(BUILDTOP)/include/com_err.h $(srcdir)/../generic/gssapiP_generic.h \
-  $(srcdir)/../generic/gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi.h \
-  ../generic/gssapi_err_generic.h gssapi_krb5.h gssapi_err_krb5.h
-rel_cred.o: rel_cred.c gssapiP_krb5.h $(BUILDTOP)/include/krb5.h \
-  $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
-  $(srcdir)/../generic/gssapiP_generic.h $(srcdir)/../generic/gssapi_generic.h \
-  $(BUILDTOP)/include/gssapi/gssapi.h ../generic/gssapi_err_generic.h \
-  gssapi_krb5.h gssapi_err_krb5.h
-rel_oid.o: rel_oid.c gssapiP_krb5.h $(BUILDTOP)/include/krb5.h \
-  $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
-  $(srcdir)/../generic/gssapiP_generic.h $(srcdir)/../generic/gssapi_generic.h \
-  $(BUILDTOP)/include/gssapi/gssapi.h ../generic/gssapi_err_generic.h \
-  gssapi_krb5.h gssapi_err_krb5.h
-rel_name.o: rel_name.c gssapiP_krb5.h $(BUILDTOP)/include/krb5.h \
-  $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
-  $(srcdir)/../generic/gssapiP_generic.h $(srcdir)/../generic/gssapi_generic.h \
-  $(BUILDTOP)/include/gssapi/gssapi.h ../generic/gssapi_err_generic.h \
-  gssapi_krb5.h gssapi_err_krb5.h
-seal.o: seal.c gssapiP_krb5.h $(BUILDTOP)/include/krb5.h \
-  $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
-  $(srcdir)/../generic/gssapiP_generic.h $(srcdir)/../generic/gssapi_generic.h \
-  $(BUILDTOP)/include/gssapi/gssapi.h ../generic/gssapi_err_generic.h \
-  gssapi_krb5.h gssapi_err_krb5.h
-ser_sctx.o: ser_sctx.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
+$(OUTPRE)accept_sec_context.$(OBJEXT): accept_sec_context.c \
+  $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(BUILDTOP)/include/krb5.h \
   $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
   $(SRCTOP)/include/krb5/kdb.h gssapiP_krb5.h $(srcdir)/../generic/gssapiP_generic.h \
   $(srcdir)/../generic/gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi.h \
   ../generic/gssapi_err_generic.h gssapi_krb5.h gssapi_err_krb5.h
-set_ccache.o: set_ccache.c gssapiP_krb5.h $(BUILDTOP)/include/krb5.h \
-  $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
-  $(srcdir)/../generic/gssapiP_generic.h $(srcdir)/../generic/gssapi_generic.h \
-  $(BUILDTOP)/include/gssapi/gssapi.h ../generic/gssapi_err_generic.h \
-  gssapi_krb5.h gssapi_err_krb5.h
-sign.o: sign.c gssapiP_krb5.h $(BUILDTOP)/include/krb5.h \
-  $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
-  $(srcdir)/../generic/gssapiP_generic.h $(srcdir)/../generic/gssapi_generic.h \
-  $(BUILDTOP)/include/gssapi/gssapi.h ../generic/gssapi_err_generic.h \
-  gssapi_krb5.h gssapi_err_krb5.h
-unseal.o: unseal.c gssapiP_krb5.h $(BUILDTOP)/include/krb5.h \
-  $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
-  $(srcdir)/../generic/gssapiP_generic.h $(srcdir)/../generic/gssapi_generic.h \
-  $(BUILDTOP)/include/gssapi/gssapi.h ../generic/gssapi_err_generic.h \
-  gssapi_krb5.h gssapi_err_krb5.h
-util_cksum.o: util_cksum.c gssapiP_krb5.h $(BUILDTOP)/include/krb5.h \
-  $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
-  $(srcdir)/../generic/gssapiP_generic.h $(srcdir)/../generic/gssapi_generic.h \
-  $(BUILDTOP)/include/gssapi/gssapi.h ../generic/gssapi_err_generic.h \
-  gssapi_krb5.h gssapi_err_krb5.h
-util_crypt.o: util_crypt.c $(SRCTOP)/include/k5-int.h \
+$(OUTPRE)acquire_cred.$(OBJEXT): acquire_cred.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
   $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h \
   gssapiP_krb5.h $(srcdir)/../generic/gssapiP_generic.h \
   $(srcdir)/../generic/gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi.h \
   ../generic/gssapi_err_generic.h gssapi_krb5.h gssapi_err_krb5.h
-util_ctxsetup.o: util_ctxsetup.c gssapiP_krb5.h $(BUILDTOP)/include/krb5.h \
-  $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
-  $(srcdir)/../generic/gssapiP_generic.h $(srcdir)/../generic/gssapi_generic.h \
-  $(BUILDTOP)/include/gssapi/gssapi.h ../generic/gssapi_err_generic.h \
-  gssapi_krb5.h gssapi_err_krb5.h
-util_seed.o: util_seed.c gssapiP_krb5.h $(BUILDTOP)/include/krb5.h \
-  $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
-  $(srcdir)/../generic/gssapiP_generic.h $(srcdir)/../generic/gssapi_generic.h \
-  $(BUILDTOP)/include/gssapi/gssapi.h ../generic/gssapi_err_generic.h \
-  gssapi_krb5.h gssapi_err_krb5.h
-util_seqnum.o: util_seqnum.c gssapiP_krb5.h $(BUILDTOP)/include/krb5.h \
-  $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
-  $(srcdir)/../generic/gssapiP_generic.h $(srcdir)/../generic/gssapi_generic.h \
-  $(BUILDTOP)/include/gssapi/gssapi.h ../generic/gssapi_err_generic.h \
-  gssapi_krb5.h gssapi_err_krb5.h
-val_cred.o: val_cred.c gssapiP_krb5.h $(BUILDTOP)/include/krb5.h \
-  $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
-  $(srcdir)/../generic/gssapiP_generic.h $(srcdir)/../generic/gssapi_generic.h \
-  $(BUILDTOP)/include/gssapi/gssapi.h ../generic/gssapi_err_generic.h \
-  gssapi_krb5.h gssapi_err_krb5.h
-verify.o: verify.c gssapiP_krb5.h $(BUILDTOP)/include/krb5.h \
-  $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
-  $(srcdir)/../generic/gssapiP_generic.h $(srcdir)/../generic/gssapi_generic.h \
-  $(BUILDTOP)/include/gssapi/gssapi.h ../generic/gssapi_err_generic.h \
-  gssapi_krb5.h gssapi_err_krb5.h
-wrap_size_limit.o: wrap_size_limit.c gssapiP_krb5.h \
+$(OUTPRE)add_cred.$(OBJEXT): add_cred.c gssapiP_krb5.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
   $(BUILDTOP)/include/com_err.h $(srcdir)/../generic/gssapiP_generic.h \
   $(srcdir)/../generic/gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi.h \
   ../generic/gssapi_err_generic.h gssapi_krb5.h gssapi_err_krb5.h
-gssapi_err_krb5.o: gssapi_err_krb5.c $(BUILDTOP)/include/com_err.h
+$(OUTPRE)canon_name.$(OBJEXT): canon_name.c gssapiP_krb5.h \
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(srcdir)/../generic/gssapiP_generic.h \
+  $(srcdir)/../generic/gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  ../generic/gssapi_err_generic.h gssapi_krb5.h gssapi_err_krb5.h
+$(OUTPRE)compare_name.$(OBJEXT): compare_name.c gssapiP_krb5.h \
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(srcdir)/../generic/gssapiP_generic.h \
+  $(srcdir)/../generic/gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  ../generic/gssapi_err_generic.h gssapi_krb5.h gssapi_err_krb5.h
+$(OUTPRE)context_time.$(OBJEXT): context_time.c gssapiP_krb5.h \
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(srcdir)/../generic/gssapiP_generic.h \
+  $(srcdir)/../generic/gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  ../generic/gssapi_err_generic.h gssapi_krb5.h gssapi_err_krb5.h
+$(OUTPRE)copy_ccache.$(OBJEXT): copy_ccache.c gssapiP_krb5.h \
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(srcdir)/../generic/gssapiP_generic.h \
+  $(srcdir)/../generic/gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  ../generic/gssapi_err_generic.h gssapi_krb5.h gssapi_err_krb5.h
+$(OUTPRE)delete_sec_context.$(OBJEXT): delete_sec_context.c \
+  gssapiP_krb5.h $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(srcdir)/../generic/gssapiP_generic.h \
+  $(srcdir)/../generic/gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  ../generic/gssapi_err_generic.h gssapi_krb5.h gssapi_err_krb5.h
+$(OUTPRE)disp_name.$(OBJEXT): disp_name.c gssapiP_krb5.h \
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(srcdir)/../generic/gssapiP_generic.h \
+  $(srcdir)/../generic/gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  ../generic/gssapi_err_generic.h gssapi_krb5.h gssapi_err_krb5.h
+$(OUTPRE)disp_status.$(OBJEXT): disp_status.c gssapiP_krb5.h \
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(srcdir)/../generic/gssapiP_generic.h \
+  $(srcdir)/../generic/gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  ../generic/gssapi_err_generic.h gssapi_krb5.h gssapi_err_krb5.h
+$(OUTPRE)duplicate_name.$(OBJEXT): duplicate_name.c \
+  gssapiP_krb5.h $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(srcdir)/../generic/gssapiP_generic.h \
+  $(srcdir)/../generic/gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  ../generic/gssapi_err_generic.h gssapi_krb5.h gssapi_err_krb5.h
+$(OUTPRE)export_name.$(OBJEXT): export_name.c gssapiP_krb5.h \
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(srcdir)/../generic/gssapiP_generic.h \
+  $(srcdir)/../generic/gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  ../generic/gssapi_err_generic.h gssapi_krb5.h gssapi_err_krb5.h
+$(OUTPRE)export_sec_context.$(OBJEXT): export_sec_context.c \
+  gssapiP_krb5.h $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(srcdir)/../generic/gssapiP_generic.h \
+  $(srcdir)/../generic/gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  ../generic/gssapi_err_generic.h gssapi_krb5.h gssapi_err_krb5.h
+$(OUTPRE)get_tkt_flags.$(OBJEXT): get_tkt_flags.c gssapiP_krb5.h \
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(srcdir)/../generic/gssapiP_generic.h \
+  $(srcdir)/../generic/gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  ../generic/gssapi_err_generic.h gssapi_krb5.h gssapi_err_krb5.h
+$(OUTPRE)gssapi_krb5.$(OBJEXT): gssapi_krb5.c $(SRCTOP)/include/k5-int.h \
+  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h \
+  gssapiP_krb5.h $(srcdir)/../generic/gssapiP_generic.h \
+  $(srcdir)/../generic/gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  ../generic/gssapi_err_generic.h gssapi_krb5.h gssapi_err_krb5.h
+$(OUTPRE)import_name.$(OBJEXT): import_name.c gssapiP_krb5.h \
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(srcdir)/../generic/gssapiP_generic.h \
+  $(srcdir)/../generic/gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  ../generic/gssapi_err_generic.h gssapi_krb5.h gssapi_err_krb5.h
+$(OUTPRE)import_sec_context.$(OBJEXT): import_sec_context.c \
+  gssapiP_krb5.h $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(srcdir)/../generic/gssapiP_generic.h \
+  $(srcdir)/../generic/gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  ../generic/gssapi_err_generic.h gssapi_krb5.h gssapi_err_krb5.h
+$(OUTPRE)indicate_mechs.$(OBJEXT): indicate_mechs.c \
+  gssapiP_krb5.h $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(srcdir)/../generic/gssapiP_generic.h \
+  $(srcdir)/../generic/gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  ../generic/gssapi_err_generic.h gssapi_krb5.h gssapi_err_krb5.h
+$(OUTPRE)init_sec_context.$(OBJEXT): init_sec_context.c \
+  gssapiP_krb5.h $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(srcdir)/../generic/gssapiP_generic.h \
+  $(srcdir)/../generic/gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  ../generic/gssapi_err_generic.h gssapi_krb5.h gssapi_err_krb5.h
+$(OUTPRE)inq_context.$(OBJEXT): inq_context.c gssapiP_krb5.h \
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(srcdir)/../generic/gssapiP_generic.h \
+  $(srcdir)/../generic/gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  ../generic/gssapi_err_generic.h gssapi_krb5.h gssapi_err_krb5.h
+$(OUTPRE)inq_cred.$(OBJEXT): inq_cred.c gssapiP_krb5.h \
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(srcdir)/../generic/gssapiP_generic.h \
+  $(srcdir)/../generic/gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  ../generic/gssapi_err_generic.h gssapi_krb5.h gssapi_err_krb5.h
+$(OUTPRE)inq_names.$(OBJEXT): inq_names.c gssapiP_krb5.h \
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(srcdir)/../generic/gssapiP_generic.h \
+  $(srcdir)/../generic/gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  ../generic/gssapi_err_generic.h gssapi_krb5.h gssapi_err_krb5.h
+$(OUTPRE)k5seal.$(OBJEXT): k5seal.c gssapiP_krb5.h \
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(srcdir)/../generic/gssapiP_generic.h \
+  $(srcdir)/../generic/gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  ../generic/gssapi_err_generic.h gssapi_krb5.h gssapi_err_krb5.h
+$(OUTPRE)k5unseal.$(OBJEXT): k5unseal.c gssapiP_krb5.h \
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(srcdir)/../generic/gssapiP_generic.h \
+  $(srcdir)/../generic/gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  ../generic/gssapi_err_generic.h gssapi_krb5.h gssapi_err_krb5.h
+$(OUTPRE)krb5_gss_glue.$(OBJEXT): krb5_gss_glue.c gssapiP_krb5.h \
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(srcdir)/../generic/gssapiP_generic.h \
+  $(srcdir)/../generic/gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  ../generic/gssapi_err_generic.h gssapi_krb5.h gssapi_err_krb5.h
+$(OUTPRE)process_context_token.$(OBJEXT): process_context_token.c \
+  gssapiP_krb5.h $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(srcdir)/../generic/gssapiP_generic.h \
+  $(srcdir)/../generic/gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  ../generic/gssapi_err_generic.h gssapi_krb5.h gssapi_err_krb5.h
+$(OUTPRE)rel_cred.$(OBJEXT): rel_cred.c gssapiP_krb5.h \
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(srcdir)/../generic/gssapiP_generic.h \
+  $(srcdir)/../generic/gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  ../generic/gssapi_err_generic.h gssapi_krb5.h gssapi_err_krb5.h
+$(OUTPRE)rel_oid.$(OBJEXT): rel_oid.c gssapiP_krb5.h \
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(srcdir)/../generic/gssapiP_generic.h \
+  $(srcdir)/../generic/gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  ../generic/gssapi_err_generic.h gssapi_krb5.h gssapi_err_krb5.h
+$(OUTPRE)rel_name.$(OBJEXT): rel_name.c gssapiP_krb5.h \
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(srcdir)/../generic/gssapiP_generic.h \
+  $(srcdir)/../generic/gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  ../generic/gssapi_err_generic.h gssapi_krb5.h gssapi_err_krb5.h
+$(OUTPRE)seal.$(OBJEXT): seal.c gssapiP_krb5.h $(BUILDTOP)/include/krb5.h \
+  $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
+  $(srcdir)/../generic/gssapiP_generic.h $(srcdir)/../generic/gssapi_generic.h \
+  $(BUILDTOP)/include/gssapi/gssapi.h ../generic/gssapi_err_generic.h \
+  gssapi_krb5.h gssapi_err_krb5.h
+$(OUTPRE)ser_sctx.$(OBJEXT): ser_sctx.c $(SRCTOP)/include/k5-int.h \
+  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h \
+  gssapiP_krb5.h $(srcdir)/../generic/gssapiP_generic.h \
+  $(srcdir)/../generic/gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  ../generic/gssapi_err_generic.h gssapi_krb5.h gssapi_err_krb5.h
+$(OUTPRE)set_ccache.$(OBJEXT): set_ccache.c gssapiP_krb5.h \
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(srcdir)/../generic/gssapiP_generic.h \
+  $(srcdir)/../generic/gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  ../generic/gssapi_err_generic.h gssapi_krb5.h gssapi_err_krb5.h
+$(OUTPRE)sign.$(OBJEXT): sign.c gssapiP_krb5.h $(BUILDTOP)/include/krb5.h \
+  $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
+  $(srcdir)/../generic/gssapiP_generic.h $(srcdir)/../generic/gssapi_generic.h \
+  $(BUILDTOP)/include/gssapi/gssapi.h ../generic/gssapi_err_generic.h \
+  gssapi_krb5.h gssapi_err_krb5.h
+$(OUTPRE)unseal.$(OBJEXT): unseal.c gssapiP_krb5.h \
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(srcdir)/../generic/gssapiP_generic.h \
+  $(srcdir)/../generic/gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  ../generic/gssapi_err_generic.h gssapi_krb5.h gssapi_err_krb5.h
+$(OUTPRE)util_cksum.$(OBJEXT): util_cksum.c gssapiP_krb5.h \
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(srcdir)/../generic/gssapiP_generic.h \
+  $(srcdir)/../generic/gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  ../generic/gssapi_err_generic.h gssapi_krb5.h gssapi_err_krb5.h
+$(OUTPRE)util_crypt.$(OBJEXT): util_crypt.c $(SRCTOP)/include/k5-int.h \
+  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h \
+  gssapiP_krb5.h $(srcdir)/../generic/gssapiP_generic.h \
+  $(srcdir)/../generic/gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  ../generic/gssapi_err_generic.h gssapi_krb5.h gssapi_err_krb5.h
+$(OUTPRE)util_ctxsetup.$(OBJEXT): util_ctxsetup.c gssapiP_krb5.h \
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(srcdir)/../generic/gssapiP_generic.h \
+  $(srcdir)/../generic/gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  ../generic/gssapi_err_generic.h gssapi_krb5.h gssapi_err_krb5.h
+$(OUTPRE)util_seed.$(OBJEXT): util_seed.c gssapiP_krb5.h \
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(srcdir)/../generic/gssapiP_generic.h \
+  $(srcdir)/../generic/gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  ../generic/gssapi_err_generic.h gssapi_krb5.h gssapi_err_krb5.h
+$(OUTPRE)util_seqnum.$(OBJEXT): util_seqnum.c gssapiP_krb5.h \
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(srcdir)/../generic/gssapiP_generic.h \
+  $(srcdir)/../generic/gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  ../generic/gssapi_err_generic.h gssapi_krb5.h gssapi_err_krb5.h
+$(OUTPRE)val_cred.$(OBJEXT): val_cred.c gssapiP_krb5.h \
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(srcdir)/../generic/gssapiP_generic.h \
+  $(srcdir)/../generic/gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  ../generic/gssapi_err_generic.h gssapi_krb5.h gssapi_err_krb5.h
+$(OUTPRE)verify.$(OBJEXT): verify.c gssapiP_krb5.h \
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(srcdir)/../generic/gssapiP_generic.h \
+  $(srcdir)/../generic/gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  ../generic/gssapi_err_generic.h gssapi_krb5.h gssapi_err_krb5.h
+$(OUTPRE)wrap_size_limit.$(OBJEXT): wrap_size_limit.c \
+  gssapiP_krb5.h $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(srcdir)/../generic/gssapiP_generic.h \
+  $(srcdir)/../generic/gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  ../generic/gssapi_err_generic.h gssapi_krb5.h gssapi_err_krb5.h
+$(OUTPRE)gssapi_err_krb5.$(OBJEXT): gssapi_err_krb5.c \
+  $(BUILDTOP)/include/com_err.h
 

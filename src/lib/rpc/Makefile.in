@@ -233,17 +233,17 @@ clean-windows::
 # Makefile dependencies follow.  This must be the last section in
 # the Makefile.in file
 #
-auth_none.o: auth_none.c $(BUILDTOP)/include/gssrpc/types.h \
+$(OUTPRE)auth_none.$(OBJEXT): auth_none.c $(BUILDTOP)/include/gssrpc/types.h \
   $(BUILDTOP)/include/gssrpc/xdr.h $(BUILDTOP)/include/gssrpc/auth.h
-auth_unix.o: auth_unix.c $(BUILDTOP)/include/gssrpc/types.h \
+$(OUTPRE)auth_unix.$(OBJEXT): auth_unix.c $(BUILDTOP)/include/gssrpc/types.h \
   $(BUILDTOP)/include/gssrpc/xdr.h $(BUILDTOP)/include/gssrpc/auth.h \
   $(BUILDTOP)/include/gssrpc/auth_unix.h
-auth_any.o: auth_any.c $(BUILDTOP)/include/gssrpc/types.h \
+$(OUTPRE)auth_any.$(OBJEXT): auth_any.c $(BUILDTOP)/include/gssrpc/types.h \
   $(BUILDTOP)/include/gssrpc/xdr.h $(BUILDTOP)/include/gssrpc/auth.h
-authunix_prot.o: authunix_prot.c $(BUILDTOP)/include/gssrpc/types.h \
+$(OUTPRE)authunix_prot.$(OBJEXT): authunix_prot.c $(BUILDTOP)/include/gssrpc/types.h \
   $(BUILDTOP)/include/gssrpc/xdr.h $(BUILDTOP)/include/gssrpc/auth.h \
   $(BUILDTOP)/include/gssrpc/auth_unix.h
-auth_gssapi.o: auth_gssapi.c $(BUILDTOP)/include/gssapi/gssapi.h \
+$(OUTPRE)auth_gssapi.$(OBJEXT): auth_gssapi.c $(BUILDTOP)/include/gssapi/gssapi.h \
   $(BUILDTOP)/include/gssapi/gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi_krb5.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
   $(BUILDTOP)/include/com_err.h $(BUILDTOP)/include/gssrpc/rpc.h \
@@ -252,176 +252,182 @@ auth_gssapi.o: auth_gssapi.c $(BUILDTOP)/include/gssapi/gssapi.h \
   $(BUILDTOP)/include/gssrpc/rpc_msg.h $(BUILDTOP)/include/gssrpc/auth_unix.h \
   $(BUILDTOP)/include/gssrpc/svc_auth.h $(BUILDTOP)/include/gssrpc/svc.h \
   $(BUILDTOP)/include/gssrpc/auth_gssapi.h
-auth_gssapi_misc.o: auth_gssapi_misc.c $(BUILDTOP)/include/gssrpc/rpc.h \
-  $(BUILDTOP)/include/gssrpc/types.h $(BUILDTOP)/include/gssrpc/xdr.h \
-  $(BUILDTOP)/include/gssrpc/auth.h $(BUILDTOP)/include/gssrpc/clnt.h \
-  $(BUILDTOP)/include/gssrpc/rpc_msg.h $(BUILDTOP)/include/gssrpc/auth_unix.h \
-  $(BUILDTOP)/include/gssrpc/svc_auth.h $(BUILDTOP)/include/gssrpc/svc.h \
-  $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/gssrpc/auth_gssapi.h
-bindresvport.o: bindresvport.c $(BUILDTOP)/include/gssrpc/rpc.h \
-  $(BUILDTOP)/include/gssrpc/types.h $(BUILDTOP)/include/gssrpc/xdr.h \
-  $(BUILDTOP)/include/gssrpc/auth.h $(BUILDTOP)/include/gssrpc/clnt.h \
-  $(BUILDTOP)/include/gssrpc/rpc_msg.h $(BUILDTOP)/include/gssrpc/auth_unix.h \
-  $(BUILDTOP)/include/gssrpc/svc_auth.h $(BUILDTOP)/include/gssrpc/svc.h
-clnt_generic.o: clnt_generic.c $(BUILDTOP)/include/gssrpc/rpc.h \
+$(OUTPRE)auth_gssapi_misc.$(OBJEXT): auth_gssapi_misc.c \
+  $(BUILDTOP)/include/gssrpc/rpc.h $(BUILDTOP)/include/gssrpc/types.h \
+  $(BUILDTOP)/include/gssrpc/xdr.h $(BUILDTOP)/include/gssrpc/auth.h \
+  $(BUILDTOP)/include/gssrpc/clnt.h $(BUILDTOP)/include/gssrpc/rpc_msg.h \
+  $(BUILDTOP)/include/gssrpc/auth_unix.h $(BUILDTOP)/include/gssrpc/svc_auth.h \
+  $(BUILDTOP)/include/gssrpc/svc.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  $(BUILDTOP)/include/gssrpc/auth_gssapi.h
+$(OUTPRE)bindresvport.$(OBJEXT): bindresvport.c $(BUILDTOP)/include/gssrpc/rpc.h \
   $(BUILDTOP)/include/gssrpc/types.h $(BUILDTOP)/include/gssrpc/xdr.h \
   $(BUILDTOP)/include/gssrpc/auth.h $(BUILDTOP)/include/gssrpc/clnt.h \
   $(BUILDTOP)/include/gssrpc/rpc_msg.h $(BUILDTOP)/include/gssrpc/auth_unix.h \
   $(BUILDTOP)/include/gssrpc/svc_auth.h $(BUILDTOP)/include/gssrpc/svc.h
-clnt_perror.o: clnt_perror.c $(BUILDTOP)/include/gssrpc/types.h \
+$(OUTPRE)clnt_generic.$(OBJEXT): clnt_generic.c $(BUILDTOP)/include/gssrpc/rpc.h \
+  $(BUILDTOP)/include/gssrpc/types.h $(BUILDTOP)/include/gssrpc/xdr.h \
+  $(BUILDTOP)/include/gssrpc/auth.h $(BUILDTOP)/include/gssrpc/clnt.h \
+  $(BUILDTOP)/include/gssrpc/rpc_msg.h $(BUILDTOP)/include/gssrpc/auth_unix.h \
+  $(BUILDTOP)/include/gssrpc/svc_auth.h $(BUILDTOP)/include/gssrpc/svc.h
+$(OUTPRE)clnt_perror.$(OBJEXT): clnt_perror.c $(BUILDTOP)/include/gssrpc/types.h \
   $(BUILDTOP)/include/gssrpc/auth.h $(BUILDTOP)/include/gssrpc/xdr.h \
   $(BUILDTOP)/include/gssrpc/clnt.h
-clnt_raw.o: clnt_raw.c $(BUILDTOP)/include/gssrpc/rpc.h \
+$(OUTPRE)clnt_raw.$(OBJEXT): clnt_raw.c $(BUILDTOP)/include/gssrpc/rpc.h \
   $(BUILDTOP)/include/gssrpc/types.h $(BUILDTOP)/include/gssrpc/xdr.h \
   $(BUILDTOP)/include/gssrpc/auth.h $(BUILDTOP)/include/gssrpc/clnt.h \
   $(BUILDTOP)/include/gssrpc/rpc_msg.h $(BUILDTOP)/include/gssrpc/auth_unix.h \
   $(BUILDTOP)/include/gssrpc/svc_auth.h $(BUILDTOP)/include/gssrpc/svc.h
-clnt_simple.o: clnt_simple.c $(BUILDTOP)/include/gssrpc/rpc.h \
+$(OUTPRE)clnt_simple.$(OBJEXT): clnt_simple.c $(BUILDTOP)/include/gssrpc/rpc.h \
   $(BUILDTOP)/include/gssrpc/types.h $(BUILDTOP)/include/gssrpc/xdr.h \
   $(BUILDTOP)/include/gssrpc/auth.h $(BUILDTOP)/include/gssrpc/clnt.h \
   $(BUILDTOP)/include/gssrpc/rpc_msg.h $(BUILDTOP)/include/gssrpc/auth_unix.h \
   $(BUILDTOP)/include/gssrpc/svc_auth.h $(BUILDTOP)/include/gssrpc/svc.h
-clnt_tcp.o: clnt_tcp.c $(BUILDTOP)/include/gssrpc/rpc.h \
+$(OUTPRE)clnt_tcp.$(OBJEXT): clnt_tcp.c $(BUILDTOP)/include/gssrpc/rpc.h \
   $(BUILDTOP)/include/gssrpc/types.h $(BUILDTOP)/include/gssrpc/xdr.h \
   $(BUILDTOP)/include/gssrpc/auth.h $(BUILDTOP)/include/gssrpc/clnt.h \
   $(BUILDTOP)/include/gssrpc/rpc_msg.h $(BUILDTOP)/include/gssrpc/auth_unix.h \
   $(BUILDTOP)/include/gssrpc/svc_auth.h $(BUILDTOP)/include/gssrpc/svc.h \
   $(BUILDTOP)/include/gssrpc/pmap_clnt.h
-clnt_udp.o: clnt_udp.c $(BUILDTOP)/include/gssrpc/rpc.h \
+$(OUTPRE)clnt_udp.$(OBJEXT): clnt_udp.c $(BUILDTOP)/include/gssrpc/rpc.h \
   $(BUILDTOP)/include/gssrpc/types.h $(BUILDTOP)/include/gssrpc/xdr.h \
   $(BUILDTOP)/include/gssrpc/auth.h $(BUILDTOP)/include/gssrpc/clnt.h \
   $(BUILDTOP)/include/gssrpc/rpc_msg.h $(BUILDTOP)/include/gssrpc/auth_unix.h \
   $(BUILDTOP)/include/gssrpc/svc_auth.h $(BUILDTOP)/include/gssrpc/svc.h \
   $(BUILDTOP)/include/gssrpc/pmap_clnt.h
-rpc_dtablesize.o: rpc_dtablesize.c $(BUILDTOP)/include/gssrpc/rpc.h \
-  $(BUILDTOP)/include/gssrpc/types.h $(BUILDTOP)/include/gssrpc/xdr.h \
-  $(BUILDTOP)/include/gssrpc/auth.h $(BUILDTOP)/include/gssrpc/clnt.h \
-  $(BUILDTOP)/include/gssrpc/rpc_msg.h $(BUILDTOP)/include/gssrpc/auth_unix.h \
-  $(BUILDTOP)/include/gssrpc/svc_auth.h $(BUILDTOP)/include/gssrpc/svc.h
-get_myaddress.o: get_myaddress.c $(BUILDTOP)/include/gssrpc/types.h \
+$(OUTPRE)rpc_dtablesize.$(OBJEXT): rpc_dtablesize.c \
+  $(BUILDTOP)/include/gssrpc/rpc.h $(BUILDTOP)/include/gssrpc/types.h \
+  $(BUILDTOP)/include/gssrpc/xdr.h $(BUILDTOP)/include/gssrpc/auth.h \
+  $(BUILDTOP)/include/gssrpc/clnt.h $(BUILDTOP)/include/gssrpc/rpc_msg.h \
+  $(BUILDTOP)/include/gssrpc/auth_unix.h $(BUILDTOP)/include/gssrpc/svc_auth.h \
+  $(BUILDTOP)/include/gssrpc/svc.h
+$(OUTPRE)get_myaddress.$(OBJEXT): get_myaddress.c $(BUILDTOP)/include/gssrpc/types.h \
   $(BUILDTOP)/include/gssrpc/rpc.h $(BUILDTOP)/include/gssrpc/xdr.h \
   $(BUILDTOP)/include/gssrpc/auth.h $(BUILDTOP)/include/gssrpc/clnt.h \
   $(BUILDTOP)/include/gssrpc/rpc_msg.h $(BUILDTOP)/include/gssrpc/auth_unix.h \
   $(BUILDTOP)/include/gssrpc/svc_auth.h $(BUILDTOP)/include/gssrpc/svc.h \
   $(BUILDTOP)/include/gssrpc/pmap_prot.h $(BUILDTOP)/include/krb5.h \
   $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h
-getrpcport.o: getrpcport.c $(BUILDTOP)/include/gssrpc/rpc.h \
+$(OUTPRE)getrpcport.$(OBJEXT): getrpcport.c $(BUILDTOP)/include/gssrpc/rpc.h \
   $(BUILDTOP)/include/gssrpc/types.h $(BUILDTOP)/include/gssrpc/xdr.h \
   $(BUILDTOP)/include/gssrpc/auth.h $(BUILDTOP)/include/gssrpc/clnt.h \
   $(BUILDTOP)/include/gssrpc/rpc_msg.h $(BUILDTOP)/include/gssrpc/auth_unix.h \
   $(BUILDTOP)/include/gssrpc/svc_auth.h $(BUILDTOP)/include/gssrpc/svc.h \
   $(BUILDTOP)/include/gssrpc/pmap_clnt.h
-pmap_clnt.o: pmap_clnt.c $(BUILDTOP)/include/gssrpc/rpc.h \
+$(OUTPRE)pmap_clnt.$(OBJEXT): pmap_clnt.c $(BUILDTOP)/include/gssrpc/rpc.h \
   $(BUILDTOP)/include/gssrpc/types.h $(BUILDTOP)/include/gssrpc/xdr.h \
   $(BUILDTOP)/include/gssrpc/auth.h $(BUILDTOP)/include/gssrpc/clnt.h \
   $(BUILDTOP)/include/gssrpc/rpc_msg.h $(BUILDTOP)/include/gssrpc/auth_unix.h \
   $(BUILDTOP)/include/gssrpc/svc_auth.h $(BUILDTOP)/include/gssrpc/svc.h \
   $(BUILDTOP)/include/gssrpc/pmap_prot.h $(BUILDTOP)/include/gssrpc/pmap_clnt.h
-pmap_getmaps.o: pmap_getmaps.c $(BUILDTOP)/include/gssrpc/rpc.h \
+$(OUTPRE)pmap_getmaps.$(OBJEXT): pmap_getmaps.c $(BUILDTOP)/include/gssrpc/rpc.h \
   $(BUILDTOP)/include/gssrpc/types.h $(BUILDTOP)/include/gssrpc/xdr.h \
   $(BUILDTOP)/include/gssrpc/auth.h $(BUILDTOP)/include/gssrpc/clnt.h \
   $(BUILDTOP)/include/gssrpc/rpc_msg.h $(BUILDTOP)/include/gssrpc/auth_unix.h \
   $(BUILDTOP)/include/gssrpc/svc_auth.h $(BUILDTOP)/include/gssrpc/svc.h \
   $(BUILDTOP)/include/gssrpc/pmap_prot.h $(BUILDTOP)/include/gssrpc/pmap_clnt.h
-pmap_getport.o: pmap_getport.c $(BUILDTOP)/include/gssrpc/rpc.h \
+$(OUTPRE)pmap_getport.$(OBJEXT): pmap_getport.c $(BUILDTOP)/include/gssrpc/rpc.h \
   $(BUILDTOP)/include/gssrpc/types.h $(BUILDTOP)/include/gssrpc/xdr.h \
   $(BUILDTOP)/include/gssrpc/auth.h $(BUILDTOP)/include/gssrpc/clnt.h \
   $(BUILDTOP)/include/gssrpc/rpc_msg.h $(BUILDTOP)/include/gssrpc/auth_unix.h \
   $(BUILDTOP)/include/gssrpc/svc_auth.h $(BUILDTOP)/include/gssrpc/svc.h \
   $(BUILDTOP)/include/gssrpc/pmap_prot.h $(BUILDTOP)/include/gssrpc/pmap_clnt.h
-pmap_prot.o: pmap_prot.c $(BUILDTOP)/include/gssrpc/types.h \
+$(OUTPRE)pmap_prot.$(OBJEXT): pmap_prot.c $(BUILDTOP)/include/gssrpc/types.h \
   $(BUILDTOP)/include/gssrpc/xdr.h $(BUILDTOP)/include/gssrpc/pmap_prot.h
-pmap_prot2.o: pmap_prot2.c $(BUILDTOP)/include/gssrpc/types.h \
+$(OUTPRE)pmap_prot2.$(OBJEXT): pmap_prot2.c $(BUILDTOP)/include/gssrpc/types.h \
   $(BUILDTOP)/include/gssrpc/xdr.h $(BUILDTOP)/include/gssrpc/pmap_prot.h
-pmap_rmt.o: pmap_rmt.c $(BUILDTOP)/include/gssrpc/rpc.h \
+$(OUTPRE)pmap_rmt.$(OBJEXT): pmap_rmt.c $(BUILDTOP)/include/gssrpc/rpc.h \
   $(BUILDTOP)/include/gssrpc/types.h $(BUILDTOP)/include/gssrpc/xdr.h \
   $(BUILDTOP)/include/gssrpc/auth.h $(BUILDTOP)/include/gssrpc/clnt.h \
   $(BUILDTOP)/include/gssrpc/rpc_msg.h $(BUILDTOP)/include/gssrpc/auth_unix.h \
   $(BUILDTOP)/include/gssrpc/svc_auth.h $(BUILDTOP)/include/gssrpc/svc.h \
   $(BUILDTOP)/include/gssrpc/pmap_prot.h $(BUILDTOP)/include/gssrpc/pmap_clnt.h \
   $(BUILDTOP)/include/gssrpc/pmap_rmt.h
-rpc_prot.o: rpc_prot.c $(BUILDTOP)/include/gssrpc/rpc.h \
+$(OUTPRE)rpc_prot.$(OBJEXT): rpc_prot.c $(BUILDTOP)/include/gssrpc/rpc.h \
   $(BUILDTOP)/include/gssrpc/types.h $(BUILDTOP)/include/gssrpc/xdr.h \
   $(BUILDTOP)/include/gssrpc/auth.h $(BUILDTOP)/include/gssrpc/clnt.h \
   $(BUILDTOP)/include/gssrpc/rpc_msg.h $(BUILDTOP)/include/gssrpc/auth_unix.h \
   $(BUILDTOP)/include/gssrpc/svc_auth.h $(BUILDTOP)/include/gssrpc/svc.h
-rpc_commondata.o: rpc_commondata.c $(BUILDTOP)/include/gssrpc/rpc.h \
-  $(BUILDTOP)/include/gssrpc/types.h $(BUILDTOP)/include/gssrpc/xdr.h \
-  $(BUILDTOP)/include/gssrpc/auth.h $(BUILDTOP)/include/gssrpc/clnt.h \
-  $(BUILDTOP)/include/gssrpc/rpc_msg.h $(BUILDTOP)/include/gssrpc/auth_unix.h \
-  $(BUILDTOP)/include/gssrpc/svc_auth.h $(BUILDTOP)/include/gssrpc/svc.h
-rpc_callmsg.o: rpc_callmsg.c $(BUILDTOP)/include/gssrpc/rpc.h \
-  $(BUILDTOP)/include/gssrpc/types.h $(BUILDTOP)/include/gssrpc/xdr.h \
-  $(BUILDTOP)/include/gssrpc/auth.h $(BUILDTOP)/include/gssrpc/clnt.h \
-  $(BUILDTOP)/include/gssrpc/rpc_msg.h $(BUILDTOP)/include/gssrpc/auth_unix.h \
-  $(BUILDTOP)/include/gssrpc/svc_auth.h $(BUILDTOP)/include/gssrpc/svc.h
-svc.o: svc.c $(BUILDTOP)/include/gssrpc/rpc.h $(BUILDTOP)/include/gssrpc/types.h \
+$(OUTPRE)rpc_commondata.$(OBJEXT): rpc_commondata.c \
+  $(BUILDTOP)/include/gssrpc/rpc.h $(BUILDTOP)/include/gssrpc/types.h \
   $(BUILDTOP)/include/gssrpc/xdr.h $(BUILDTOP)/include/gssrpc/auth.h \
   $(BUILDTOP)/include/gssrpc/clnt.h $(BUILDTOP)/include/gssrpc/rpc_msg.h \
   $(BUILDTOP)/include/gssrpc/auth_unix.h $(BUILDTOP)/include/gssrpc/svc_auth.h \
-  $(BUILDTOP)/include/gssrpc/svc.h $(BUILDTOP)/include/gssrpc/pmap_clnt.h
-svc_auth.o: svc_auth.c $(BUILDTOP)/include/gssrpc/rpc.h \
+  $(BUILDTOP)/include/gssrpc/svc.h
+$(OUTPRE)rpc_callmsg.$(OBJEXT): rpc_callmsg.c $(BUILDTOP)/include/gssrpc/rpc.h \
   $(BUILDTOP)/include/gssrpc/types.h $(BUILDTOP)/include/gssrpc/xdr.h \
   $(BUILDTOP)/include/gssrpc/auth.h $(BUILDTOP)/include/gssrpc/clnt.h \
   $(BUILDTOP)/include/gssrpc/rpc_msg.h $(BUILDTOP)/include/gssrpc/auth_unix.h \
   $(BUILDTOP)/include/gssrpc/svc_auth.h $(BUILDTOP)/include/gssrpc/svc.h
-svc_auth_unix.o: svc_auth_unix.c $(BUILDTOP)/include/gssrpc/rpc.h \
-  $(BUILDTOP)/include/gssrpc/types.h $(BUILDTOP)/include/gssrpc/xdr.h \
-  $(BUILDTOP)/include/gssrpc/auth.h $(BUILDTOP)/include/gssrpc/clnt.h \
-  $(BUILDTOP)/include/gssrpc/rpc_msg.h $(BUILDTOP)/include/gssrpc/auth_unix.h \
-  $(BUILDTOP)/include/gssrpc/svc_auth.h $(BUILDTOP)/include/gssrpc/svc.h
-svc_auth_any.o: svc_auth_any.c $(BUILDTOP)/include/gssrpc/rpc.h \
-  $(BUILDTOP)/include/gssrpc/types.h $(BUILDTOP)/include/gssrpc/xdr.h \
-  $(BUILDTOP)/include/gssrpc/auth.h $(BUILDTOP)/include/gssrpc/clnt.h \
-  $(BUILDTOP)/include/gssrpc/rpc_msg.h $(BUILDTOP)/include/gssrpc/auth_unix.h \
-  $(BUILDTOP)/include/gssrpc/svc_auth.h $(BUILDTOP)/include/gssrpc/svc.h
-svc_auth_gssapi.o: svc_auth_gssapi.c $(BUILDTOP)/include/gssrpc/rpc.h \
-  $(BUILDTOP)/include/gssrpc/types.h $(BUILDTOP)/include/gssrpc/xdr.h \
-  $(BUILDTOP)/include/gssrpc/auth.h $(BUILDTOP)/include/gssrpc/clnt.h \
-  $(BUILDTOP)/include/gssrpc/rpc_msg.h $(BUILDTOP)/include/gssrpc/auth_unix.h \
-  $(BUILDTOP)/include/gssrpc/svc_auth.h $(BUILDTOP)/include/gssrpc/svc.h \
-  $(BUILDTOP)/include/gssapi/gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi.h \
-  $(BUILDTOP)/include/gssrpc/auth_gssapi.h $(BUILDTOP)/include/krb5.h \
-  $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h
-svc_raw.o: svc_raw.c $(BUILDTOP)/include/gssrpc/rpc.h \
-  $(BUILDTOP)/include/gssrpc/types.h $(BUILDTOP)/include/gssrpc/xdr.h \
-  $(BUILDTOP)/include/gssrpc/auth.h $(BUILDTOP)/include/gssrpc/clnt.h \
-  $(BUILDTOP)/include/gssrpc/rpc_msg.h $(BUILDTOP)/include/gssrpc/auth_unix.h \
-  $(BUILDTOP)/include/gssrpc/svc_auth.h $(BUILDTOP)/include/gssrpc/svc.h
-svc_run.o: svc_run.c $(BUILDTOP)/include/gssrpc/rpc.h \
-  $(BUILDTOP)/include/gssrpc/types.h $(BUILDTOP)/include/gssrpc/xdr.h \
-  $(BUILDTOP)/include/gssrpc/auth.h $(BUILDTOP)/include/gssrpc/clnt.h \
-  $(BUILDTOP)/include/gssrpc/rpc_msg.h $(BUILDTOP)/include/gssrpc/auth_unix.h \
-  $(BUILDTOP)/include/gssrpc/svc_auth.h $(BUILDTOP)/include/gssrpc/svc.h
-svc_simple.o: svc_simple.c $(BUILDTOP)/include/gssrpc/rpc.h \
+$(OUTPRE)svc.$(OBJEXT): svc.c $(BUILDTOP)/include/gssrpc/rpc.h \
   $(BUILDTOP)/include/gssrpc/types.h $(BUILDTOP)/include/gssrpc/xdr.h \
   $(BUILDTOP)/include/gssrpc/auth.h $(BUILDTOP)/include/gssrpc/clnt.h \
   $(BUILDTOP)/include/gssrpc/rpc_msg.h $(BUILDTOP)/include/gssrpc/auth_unix.h \
   $(BUILDTOP)/include/gssrpc/svc_auth.h $(BUILDTOP)/include/gssrpc/svc.h \
   $(BUILDTOP)/include/gssrpc/pmap_clnt.h
-svc_tcp.o: svc_tcp.c $(BUILDTOP)/include/gssrpc/rpc.h \
+$(OUTPRE)svc_auth.$(OBJEXT): svc_auth.c $(BUILDTOP)/include/gssrpc/rpc.h \
   $(BUILDTOP)/include/gssrpc/types.h $(BUILDTOP)/include/gssrpc/xdr.h \
   $(BUILDTOP)/include/gssrpc/auth.h $(BUILDTOP)/include/gssrpc/clnt.h \
   $(BUILDTOP)/include/gssrpc/rpc_msg.h $(BUILDTOP)/include/gssrpc/auth_unix.h \
   $(BUILDTOP)/include/gssrpc/svc_auth.h $(BUILDTOP)/include/gssrpc/svc.h
-svc_udp.o: svc_udp.c $(BUILDTOP)/include/gssrpc/rpc.h \
+$(OUTPRE)svc_auth_unix.$(OBJEXT): svc_auth_unix.c $(BUILDTOP)/include/gssrpc/rpc.h \
   $(BUILDTOP)/include/gssrpc/types.h $(BUILDTOP)/include/gssrpc/xdr.h \
   $(BUILDTOP)/include/gssrpc/auth.h $(BUILDTOP)/include/gssrpc/clnt.h \
   $(BUILDTOP)/include/gssrpc/rpc_msg.h $(BUILDTOP)/include/gssrpc/auth_unix.h \
   $(BUILDTOP)/include/gssrpc/svc_auth.h $(BUILDTOP)/include/gssrpc/svc.h
-xdr.o: xdr.c $(BUILDTOP)/include/gssrpc/types.h $(BUILDTOP)/include/gssrpc/xdr.h
-xdr_array.o: xdr_array.c $(BUILDTOP)/include/gssrpc/types.h \
+$(OUTPRE)svc_auth_any.$(OBJEXT): svc_auth_any.c $(BUILDTOP)/include/gssrpc/rpc.h \
+  $(BUILDTOP)/include/gssrpc/types.h $(BUILDTOP)/include/gssrpc/xdr.h \
+  $(BUILDTOP)/include/gssrpc/auth.h $(BUILDTOP)/include/gssrpc/clnt.h \
+  $(BUILDTOP)/include/gssrpc/rpc_msg.h $(BUILDTOP)/include/gssrpc/auth_unix.h \
+  $(BUILDTOP)/include/gssrpc/svc_auth.h $(BUILDTOP)/include/gssrpc/svc.h
+$(OUTPRE)svc_auth_gssapi.$(OBJEXT): svc_auth_gssapi.c \
+  $(BUILDTOP)/include/gssrpc/rpc.h $(BUILDTOP)/include/gssrpc/types.h \
+  $(BUILDTOP)/include/gssrpc/xdr.h $(BUILDTOP)/include/gssrpc/auth.h \
+  $(BUILDTOP)/include/gssrpc/clnt.h $(BUILDTOP)/include/gssrpc/rpc_msg.h \
+  $(BUILDTOP)/include/gssrpc/auth_unix.h $(BUILDTOP)/include/gssrpc/svc_auth.h \
+  $(BUILDTOP)/include/gssrpc/svc.h $(BUILDTOP)/include/gssapi/gssapi_generic.h \
+  $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/gssrpc/auth_gssapi.h \
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h
+$(OUTPRE)svc_raw.$(OBJEXT): svc_raw.c $(BUILDTOP)/include/gssrpc/rpc.h \
+  $(BUILDTOP)/include/gssrpc/types.h $(BUILDTOP)/include/gssrpc/xdr.h \
+  $(BUILDTOP)/include/gssrpc/auth.h $(BUILDTOP)/include/gssrpc/clnt.h \
+  $(BUILDTOP)/include/gssrpc/rpc_msg.h $(BUILDTOP)/include/gssrpc/auth_unix.h \
+  $(BUILDTOP)/include/gssrpc/svc_auth.h $(BUILDTOP)/include/gssrpc/svc.h
+$(OUTPRE)svc_run.$(OBJEXT): svc_run.c $(BUILDTOP)/include/gssrpc/rpc.h \
+  $(BUILDTOP)/include/gssrpc/types.h $(BUILDTOP)/include/gssrpc/xdr.h \
+  $(BUILDTOP)/include/gssrpc/auth.h $(BUILDTOP)/include/gssrpc/clnt.h \
+  $(BUILDTOP)/include/gssrpc/rpc_msg.h $(BUILDTOP)/include/gssrpc/auth_unix.h \
+  $(BUILDTOP)/include/gssrpc/svc_auth.h $(BUILDTOP)/include/gssrpc/svc.h
+$(OUTPRE)svc_simple.$(OBJEXT): svc_simple.c $(BUILDTOP)/include/gssrpc/rpc.h \
+  $(BUILDTOP)/include/gssrpc/types.h $(BUILDTOP)/include/gssrpc/xdr.h \
+  $(BUILDTOP)/include/gssrpc/auth.h $(BUILDTOP)/include/gssrpc/clnt.h \
+  $(BUILDTOP)/include/gssrpc/rpc_msg.h $(BUILDTOP)/include/gssrpc/auth_unix.h \
+  $(BUILDTOP)/include/gssrpc/svc_auth.h $(BUILDTOP)/include/gssrpc/svc.h \
+  $(BUILDTOP)/include/gssrpc/pmap_clnt.h
+$(OUTPRE)svc_tcp.$(OBJEXT): svc_tcp.c $(BUILDTOP)/include/gssrpc/rpc.h \
+  $(BUILDTOP)/include/gssrpc/types.h $(BUILDTOP)/include/gssrpc/xdr.h \
+  $(BUILDTOP)/include/gssrpc/auth.h $(BUILDTOP)/include/gssrpc/clnt.h \
+  $(BUILDTOP)/include/gssrpc/rpc_msg.h $(BUILDTOP)/include/gssrpc/auth_unix.h \
+  $(BUILDTOP)/include/gssrpc/svc_auth.h $(BUILDTOP)/include/gssrpc/svc.h
+$(OUTPRE)svc_udp.$(OBJEXT): svc_udp.c $(BUILDTOP)/include/gssrpc/rpc.h \
+  $(BUILDTOP)/include/gssrpc/types.h $(BUILDTOP)/include/gssrpc/xdr.h \
+  $(BUILDTOP)/include/gssrpc/auth.h $(BUILDTOP)/include/gssrpc/clnt.h \
+  $(BUILDTOP)/include/gssrpc/rpc_msg.h $(BUILDTOP)/include/gssrpc/auth_unix.h \
+  $(BUILDTOP)/include/gssrpc/svc_auth.h $(BUILDTOP)/include/gssrpc/svc.h
+$(OUTPRE)xdr.$(OBJEXT): xdr.c $(BUILDTOP)/include/gssrpc/types.h \
   $(BUILDTOP)/include/gssrpc/xdr.h
-xdr_float.o: xdr_float.c $(BUILDTOP)/include/gssrpc/types.h \
+$(OUTPRE)xdr_array.$(OBJEXT): xdr_array.c $(BUILDTOP)/include/gssrpc/types.h \
   $(BUILDTOP)/include/gssrpc/xdr.h
-xdr_mem.o: xdr_mem.c $(BUILDTOP)/include/gssrpc/types.h \
+$(OUTPRE)xdr_float.$(OBJEXT): xdr_float.c $(BUILDTOP)/include/gssrpc/types.h \
   $(BUILDTOP)/include/gssrpc/xdr.h
-xdr_rec.o: xdr_rec.c $(BUILDTOP)/include/gssrpc/types.h \
+$(OUTPRE)xdr_mem.$(OBJEXT): xdr_mem.c $(BUILDTOP)/include/gssrpc/types.h \
   $(BUILDTOP)/include/gssrpc/xdr.h
-xdr_reference.o: xdr_reference.c $(BUILDTOP)/include/gssrpc/types.h \
+$(OUTPRE)xdr_rec.$(OBJEXT): xdr_rec.c $(BUILDTOP)/include/gssrpc/types.h \
   $(BUILDTOP)/include/gssrpc/xdr.h
-xdr_stdio.o: xdr_stdio.c $(BUILDTOP)/include/gssrpc/types.h \
+$(OUTPRE)xdr_reference.$(OBJEXT): xdr_reference.c $(BUILDTOP)/include/gssrpc/types.h \
   $(BUILDTOP)/include/gssrpc/xdr.h
-xdr_alloc.o: xdr_alloc.c $(BUILDTOP)/include/gssrpc/types.h \
+$(OUTPRE)xdr_stdio.$(OBJEXT): xdr_stdio.c $(BUILDTOP)/include/gssrpc/types.h \
+  $(BUILDTOP)/include/gssrpc/xdr.h
+$(OUTPRE)xdr_alloc.$(OBJEXT): xdr_alloc.c $(BUILDTOP)/include/gssrpc/types.h \
   $(BUILDTOP)/include/gssrpc/xdr.h $(BUILDTOP)/include/dyn.h
 

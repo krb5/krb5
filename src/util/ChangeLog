@@ -1,3 +1,8 @@
+2001-10-10  Ken Raeburn  <raeburn@mit.edu>
+
+	* depfix.sed: Change "foo.o" to "$(OUTPRE)foo.$(OBJEXT)" so that
+	generated dependencies will take effect on Windows too.
+
 2001-09-06  Ken Raeburn  <raeburn@mit.edu>
 
 	* depgen.sed: New file.

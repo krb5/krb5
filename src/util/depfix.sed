@@ -24,6 +24,9 @@ bFIRST
 s/$/ /
 s/  */ /g
 
+# change foo.o -> $(OUTPRE)foo.$(OBJEXT)
+s;^\([a-zA-Z0-9_\-]*\).o:;$(OUTPRE)\1.$(OBJEXT):;
+
 # delete system-specific or compiler-specific files from list
 s;/usr/include/[^ ]* ;;g
 s;/usr/lib/[^ ]* ;;g

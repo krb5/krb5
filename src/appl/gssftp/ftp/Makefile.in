@@ -74,23 +74,25 @@ secure.o: $(srcdir)/secure.c
 # Makefile dependencies follow.  This must be the last section in
 # the Makefile.in file
 #
-cmds.o: cmds.c $(SRCTOP)/include/port-sockets.h $(srcdir)/../arpa/ftp.h \
-  ftp_var.h pathnames.h
-cmdtab.o: cmdtab.c ftp_var.h
-domacro.o: domacro.c ftp_var.h
-ftp.o: ftp.c $(srcdir)/../arpa/ftp.h $(srcdir)/../arpa/telnet.h \
+$(OUTPRE)cmds.$(OBJEXT): cmds.c $(SRCTOP)/include/port-sockets.h \
+  $(srcdir)/../arpa/ftp.h ftp_var.h pathnames.h
+$(OUTPRE)cmdtab.$(OBJEXT): cmdtab.c ftp_var.h
+$(OUTPRE)domacro.$(OBJEXT): domacro.c ftp_var.h
+$(OUTPRE)ftp.$(OBJEXT): ftp.c $(srcdir)/../arpa/ftp.h \
+  $(srcdir)/../arpa/telnet.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
+  $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/gssapi/gssapi_generic.h \
+  $(BUILDTOP)/include/gssapi/gssapi_krb5.h $(BUILDTOP)/include/krb5.h \
+  $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
+  ftp_var.h secure.h
+$(OUTPRE)getpass.$(OBJEXT): getpass.c ftp_var.h
+$(OUTPRE)glob.$(OBJEXT): glob.c ftp_var.h
+$(OUTPRE)main.$(OBJEXT): main.c ftp_var.h $(srcdir)/../arpa/ftp.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/kerberosIV/krb.h \
-  $(SRCTOP)/include/kerberosIV/des.h $(BUILDTOP)/include/gssapi/gssapi.h \
-  $(BUILDTOP)/include/gssapi/gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi_krb5.h \
-  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
-  $(BUILDTOP)/include/com_err.h ftp_var.h secure.h
-getpass.o: getpass.c ftp_var.h
-glob.o: glob.c ftp_var.h
-main.o: main.c ftp_var.h $(srcdir)/../arpa/ftp.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h
-radix.o: radix.c ftp_var.h
-ruserpass.o: ruserpass.c ftp_var.h
-secure.o: secure.c $(BUILDTOP)/include/gssapi/gssapi.h \
+  $(SRCTOP)/include/kerberosIV/des.h
+$(OUTPRE)radix.$(OBJEXT): radix.c ftp_var.h
+$(OUTPRE)ruserpass.$(OBJEXT): ruserpass.c ftp_var.h
+$(OUTPRE)secure.$(OBJEXT): secure.c $(BUILDTOP)/include/gssapi/gssapi.h \
   $(BUILDTOP)/include/gssapi/gssapi_generic.h secure.h \
   $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
   $(SRCTOP)/include/port-sockets.h $(srcdir)/../arpa/ftp.h

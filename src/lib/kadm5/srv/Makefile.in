@@ -99,7 +99,7 @@ install:: install-libs
 # Makefile dependencies follow.  This must be the last section in
 # the Makefile.in file
 #
-svr_policy.o: svr_policy.c $(BUILDTOP)/include/kadm5/admin.h \
+$(OUTPRE)svr_policy.$(OBJEXT): svr_policy.c $(BUILDTOP)/include/kadm5/admin.h \
   $(BUILDTOP)/include/gssrpc/rpc.h $(BUILDTOP)/include/gssrpc/types.h \
   $(BUILDTOP)/include/gssrpc/xdr.h $(BUILDTOP)/include/gssrpc/auth.h \
   $(BUILDTOP)/include/gssrpc/clnt.h $(BUILDTOP)/include/gssrpc/rpc_msg.h \
@@ -112,7 +112,7 @@ svr_policy.o: svr_policy.c $(BUILDTOP)/include/kadm5/admin.h \
   $(BUILDTOP)/include/kadm5/chpass_util_strings.h $(BUILDTOP)/include/kadm5/adb.h \
   $(BUILDTOP)/include/db.h $(BUILDTOP)/include/db-config.h \
   $(BUILDTOP)/include/kadm5/server_internal.h $(BUILDTOP)/include/kadm5/admin_internal.h
-svr_principal.o: svr_principal.c $(BUILDTOP)/include/kadm5/admin.h \
+$(OUTPRE)svr_principal.$(OBJEXT): svr_principal.c $(BUILDTOP)/include/kadm5/admin.h \
   $(BUILDTOP)/include/gssrpc/rpc.h $(BUILDTOP)/include/gssrpc/types.h \
   $(BUILDTOP)/include/gssrpc/xdr.h $(BUILDTOP)/include/gssrpc/auth.h \
   $(BUILDTOP)/include/gssrpc/clnt.h $(BUILDTOP)/include/gssrpc/rpc_msg.h \
@@ -125,7 +125,7 @@ svr_principal.o: svr_principal.c $(BUILDTOP)/include/kadm5/admin.h \
   $(BUILDTOP)/include/kadm5/chpass_util_strings.h $(BUILDTOP)/include/kadm5/adb.h \
   $(BUILDTOP)/include/db.h $(BUILDTOP)/include/db-config.h \
   $(BUILDTOP)/include/kadm5/server_internal.h $(BUILDTOP)/include/kadm5/admin_internal.h
-server_acl.o: server_acl.c $(SRCTOP)/include/syslog.h \
+$(OUTPRE)server_acl.$(OBJEXT): server_acl.c $(SRCTOP)/include/syslog.h \
   $(BUILDTOP)/include/gssapi/gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi.h \
   $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(BUILDTOP)/include/krb5.h \
@@ -141,7 +141,7 @@ server_acl.o: server_acl.c $(SRCTOP)/include/syslog.h \
   $(BUILDTOP)/include/kadm5/adb.h $(BUILDTOP)/include/db.h \
   $(BUILDTOP)/include/db-config.h $(SRCTOP)/include/krb5/adm_proto.h \
   server_acl.h
-server_kdb.o: server_kdb.c $(SRCTOP)/include/k5-int.h \
+$(OUTPRE)server_kdb.$(OBJEXT): server_kdb.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
   $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h \
@@ -154,7 +154,7 @@ server_kdb.o: server_kdb.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/kadm5/chpass_util_strings.h $(BUILDTOP)/include/kadm5/server_internal.h \
   $(BUILDTOP)/include/kadm5/admin_internal.h $(BUILDTOP)/include/kadm5/adb.h \
   $(BUILDTOP)/include/db.h $(BUILDTOP)/include/db-config.h
-server_misc.o: server_misc.c $(SRCTOP)/include/k5-int.h \
+$(OUTPRE)server_misc.$(OBJEXT): server_misc.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
   $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h \
@@ -167,7 +167,7 @@ server_misc.o: server_misc.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/gssrpc/svc.h $(BUILDTOP)/include/kadm5/kadm_err.h \
   $(BUILDTOP)/include/kadm5/adb_err.h $(BUILDTOP)/include/kadm5/chpass_util_strings.h \
   $(BUILDTOP)/include/kadm5/server_internal.h $(BUILDTOP)/include/kadm5/admin_internal.h
-server_init.o: server_init.c $(BUILDTOP)/include/com_err.h \
+$(OUTPRE)server_init.$(OBJEXT): server_init.c $(BUILDTOP)/include/com_err.h \
   $(BUILDTOP)/include/kadm5/admin.h $(BUILDTOP)/include/gssrpc/rpc.h \
   $(BUILDTOP)/include/gssrpc/types.h $(BUILDTOP)/include/gssrpc/xdr.h \
   $(BUILDTOP)/include/gssrpc/auth.h $(BUILDTOP)/include/gssrpc/clnt.h \
@@ -180,7 +180,7 @@ server_init.o: server_init.c $(BUILDTOP)/include/com_err.h \
   $(BUILDTOP)/include/kadm5/chpass_util_strings.h $(BUILDTOP)/include/kadm5/server_internal.h \
   $(BUILDTOP)/include/kadm5/admin_internal.h $(BUILDTOP)/include/kadm5/adb.h \
   $(BUILDTOP)/include/db.h $(BUILDTOP)/include/db-config.h
-server_dict.o: server_dict.c $(BUILDTOP)/include/kadm5/admin.h \
+$(OUTPRE)server_dict.$(OBJEXT): server_dict.c $(BUILDTOP)/include/kadm5/admin.h \
   $(BUILDTOP)/include/gssrpc/rpc.h $(BUILDTOP)/include/gssrpc/types.h \
   $(BUILDTOP)/include/gssrpc/xdr.h $(BUILDTOP)/include/gssrpc/auth.h \
   $(BUILDTOP)/include/gssrpc/clnt.h $(BUILDTOP)/include/gssrpc/rpc_msg.h \
@@ -194,7 +194,7 @@ server_dict.o: server_dict.c $(BUILDTOP)/include/kadm5/admin.h \
   $(SRCTOP)/include/syslog.h $(BUILDTOP)/include/kadm5/server_internal.h \
   $(BUILDTOP)/include/kadm5/admin_internal.h $(BUILDTOP)/include/kadm5/adb.h \
   $(BUILDTOP)/include/db.h $(BUILDTOP)/include/db-config.h
-svr_iters.o: svr_iters.c $(BUILDTOP)/include/kadm5/admin.h \
+$(OUTPRE)svr_iters.$(OBJEXT): svr_iters.c $(BUILDTOP)/include/kadm5/admin.h \
   $(BUILDTOP)/include/gssrpc/rpc.h $(BUILDTOP)/include/gssrpc/types.h \
   $(BUILDTOP)/include/gssrpc/xdr.h $(BUILDTOP)/include/gssrpc/auth.h \
   $(BUILDTOP)/include/gssrpc/clnt.h $(BUILDTOP)/include/gssrpc/rpc_msg.h \
@@ -208,33 +208,34 @@ svr_iters.o: svr_iters.c $(BUILDTOP)/include/kadm5/admin.h \
   $(BUILDTOP)/include/db.h $(BUILDTOP)/include/db-config.h \
   $(BUILDTOP)/include/dyn.h $(BUILDTOP)/include/kadm5/server_internal.h \
   $(BUILDTOP)/include/kadm5/admin_internal.h
-svr_chpass_util.o: svr_chpass_util.c $(BUILDTOP)/include/kadm5/admin.h \
-  $(BUILDTOP)/include/gssrpc/rpc.h $(BUILDTOP)/include/gssrpc/types.h \
-  $(BUILDTOP)/include/gssrpc/xdr.h $(BUILDTOP)/include/gssrpc/auth.h \
-  $(BUILDTOP)/include/gssrpc/clnt.h $(BUILDTOP)/include/gssrpc/rpc_msg.h \
-  $(BUILDTOP)/include/gssrpc/auth_unix.h $(BUILDTOP)/include/gssrpc/svc_auth.h \
-  $(BUILDTOP)/include/gssrpc/svc.h $(BUILDTOP)/include/krb5.h \
-  $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
-  $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
-  $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/krb5/kdb.h \
-  $(BUILDTOP)/include/kadm5/kadm_err.h $(BUILDTOP)/include/kadm5/adb_err.h \
-  $(BUILDTOP)/include/kadm5/chpass_util_strings.h $(BUILDTOP)/include/kadm5/server_internal.h \
-  $(BUILDTOP)/include/kadm5/admin_internal.h $(BUILDTOP)/include/kadm5/adb.h \
-  $(BUILDTOP)/include/db.h $(BUILDTOP)/include/db-config.h
-adb_xdr.o: adb_xdr.c $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
-  $(BUILDTOP)/include/com_err.h $(BUILDTOP)/include/gssrpc/rpc.h \
+$(OUTPRE)svr_chpass_util.$(OBJEXT): svr_chpass_util.c \
+  $(BUILDTOP)/include/kadm5/admin.h $(BUILDTOP)/include/gssrpc/rpc.h \
   $(BUILDTOP)/include/gssrpc/types.h $(BUILDTOP)/include/gssrpc/xdr.h \
   $(BUILDTOP)/include/gssrpc/auth.h $(BUILDTOP)/include/gssrpc/clnt.h \
   $(BUILDTOP)/include/gssrpc/rpc_msg.h $(BUILDTOP)/include/gssrpc/auth_unix.h \
   $(BUILDTOP)/include/gssrpc/svc_auth.h $(BUILDTOP)/include/gssrpc/svc.h \
-  $(BUILDTOP)/include/kadm5/adb.h $(SRCTOP)/include/k5-int.h \
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
-  $(SRCTOP)/include/krb5/kdb.h $(BUILDTOP)/include/db.h \
-  $(BUILDTOP)/include/db-config.h $(BUILDTOP)/include/kadm5/admin.h \
-  $(BUILDTOP)/include/kadm5/kadm_err.h $(BUILDTOP)/include/kadm5/adb_err.h \
-  $(BUILDTOP)/include/kadm5/chpass_util_strings.h $(BUILDTOP)/include/kadm5/admin_xdr.h \
-  $(BUILDTOP)/include/kadm5/kadm_rpc.h
-adb_policy.o: adb_policy.c $(BUILDTOP)/include/kadm5/adb.h \
+  $(SRCTOP)/include/krb5/kdb.h $(BUILDTOP)/include/kadm5/kadm_err.h \
+  $(BUILDTOP)/include/kadm5/adb_err.h $(BUILDTOP)/include/kadm5/chpass_util_strings.h \
+  $(BUILDTOP)/include/kadm5/server_internal.h $(BUILDTOP)/include/kadm5/admin_internal.h \
+  $(BUILDTOP)/include/kadm5/adb.h $(BUILDTOP)/include/db.h \
+  $(BUILDTOP)/include/db-config.h
+$(OUTPRE)adb_xdr.$(OBJEXT): adb_xdr.c $(BUILDTOP)/include/krb5.h \
+  $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
+  $(BUILDTOP)/include/gssrpc/rpc.h $(BUILDTOP)/include/gssrpc/types.h \
+  $(BUILDTOP)/include/gssrpc/xdr.h $(BUILDTOP)/include/gssrpc/auth.h \
+  $(BUILDTOP)/include/gssrpc/clnt.h $(BUILDTOP)/include/gssrpc/rpc_msg.h \
+  $(BUILDTOP)/include/gssrpc/auth_unix.h $(BUILDTOP)/include/gssrpc/svc_auth.h \
+  $(BUILDTOP)/include/gssrpc/svc.h $(BUILDTOP)/include/kadm5/adb.h \
+  $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
+  $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/krb5/kdb.h \
+  $(BUILDTOP)/include/db.h $(BUILDTOP)/include/db-config.h \
+  $(BUILDTOP)/include/kadm5/admin.h $(BUILDTOP)/include/kadm5/kadm_err.h \
+  $(BUILDTOP)/include/kadm5/adb_err.h $(BUILDTOP)/include/kadm5/chpass_util_strings.h \
+  $(BUILDTOP)/include/kadm5/admin_xdr.h $(BUILDTOP)/include/kadm5/kadm_rpc.h
+$(OUTPRE)adb_policy.$(OBJEXT): adb_policy.c $(BUILDTOP)/include/kadm5/adb.h \
   $(BUILDTOP)/include/gssrpc/types.h $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
@@ -246,7 +247,7 @@ adb_policy.o: adb_policy.c $(BUILDTOP)/include/kadm5/adb.h \
   $(BUILDTOP)/include/gssrpc/auth_unix.h $(BUILDTOP)/include/gssrpc/svc_auth.h \
   $(BUILDTOP)/include/gssrpc/svc.h $(BUILDTOP)/include/kadm5/kadm_err.h \
   $(BUILDTOP)/include/kadm5/adb_err.h $(BUILDTOP)/include/kadm5/chpass_util_strings.h
-adb_free.o: adb_free.c $(BUILDTOP)/include/kadm5/adb.h \
+$(OUTPRE)adb_free.$(OBJEXT): adb_free.c $(BUILDTOP)/include/kadm5/adb.h \
   $(BUILDTOP)/include/gssrpc/types.h $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
@@ -258,7 +259,7 @@ adb_free.o: adb_free.c $(BUILDTOP)/include/kadm5/adb.h \
   $(BUILDTOP)/include/gssrpc/auth_unix.h $(BUILDTOP)/include/gssrpc/svc_auth.h \
   $(BUILDTOP)/include/gssrpc/svc.h $(BUILDTOP)/include/kadm5/kadm_err.h \
   $(BUILDTOP)/include/kadm5/adb_err.h $(BUILDTOP)/include/kadm5/chpass_util_strings.h
-adb_openclose.o: adb_openclose.c $(BUILDTOP)/include/kadm5/adb.h \
+$(OUTPRE)adb_openclose.$(OBJEXT): adb_openclose.c $(BUILDTOP)/include/kadm5/adb.h \
   $(BUILDTOP)/include/gssrpc/types.h $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \

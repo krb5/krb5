@@ -115,7 +115,7 @@ install-unix:: install-libs
 # Makefile dependencies follow.  This must be the last section in
 # the Makefile.in file
 #
-krb5_libinit.o: krb5_libinit.c $(BUILDTOP)/include/krb5.h \
+$(OUTPRE)krb5_libinit.$(OBJEXT): krb5_libinit.c $(BUILDTOP)/include/krb5.h \
   $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
   $(BUILDTOP)/include/krb5_err.h $(BUILDTOP)/include/kv5m_err.h \
   $(BUILDTOP)/include/asn1_err.h $(BUILDTOP)/include/kdb5_err.h \

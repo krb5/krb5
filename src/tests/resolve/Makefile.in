@@ -27,5 +27,5 @@ clean::
 # Makefile dependencies follow.  This must be the last section in
 # the Makefile.in file
 #
-resolve.o: resolve.c
+$(OUTPRE)resolve.$(OBJEXT): resolve.c
 

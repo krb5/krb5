@@ -74,7 +74,7 @@ clean-windows::
 # Makefile dependencies follow.  This must be the last section in
 # the Makefile.in file
 #
-gss_libinit.o: gss_libinit.c generic/gssapi_err_generic.h \
+$(OUTPRE)gss_libinit.$(OBJEXT): gss_libinit.c generic/gssapi_err_generic.h \
   $(BUILDTOP)/include/com_err.h krb5/gssapi_err_krb5.h \
   $(srcdir)/krb5/gssapiP_krb5.h $(BUILDTOP)/include/krb5.h \
   $(BUILDTOP)/include/profile.h $(srcdir)/generic/gssapiP_generic.h \
