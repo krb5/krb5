@@ -82,7 +82,6 @@ krb5_error_code
 krb5_principal2salt(pr, ret)
 register krb5_const_principal pr;
 krb5_data *ret;
-int use_realm;
 {
 	return krb5_principal2salt_internal(pr, ret, 1);
 }
@@ -91,7 +90,6 @@ krb5_error_code
 krb5_principal2salt_norealm(pr, ret)
 register krb5_const_principal pr;
 krb5_data *ret;
-int use_realm;
 {
 	return krb5_principal2salt_internal(pr, ret, 0);
 }
