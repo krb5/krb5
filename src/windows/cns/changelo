@@ -1,3 +1,7 @@
+Tue Mar 28 12:00:00  1995 Keith Vetter (keithv@fusion.com)
+
+	* ChangeLog renamed to changelo to avoid having to always rename it.
+
 Mon Mar 27 20:31:04 1995 Keith Vetter (keithv@fusion.com)
 
 	* cns.c. cns.rc: removed debugging menu item
