@@ -57,36 +57,6 @@ The result is in allocated storage pointed to by
 This function is suitable for use as the \funcparam{decrypt_proc}
 argument to \funcname{krb5_get_in_tkt}.
 
-\begin{funcdecl}{krb5_encode_ticket}{krb5_error_code}{\funcin}
-\funcarg{krb5_ticket *}{dec_ticket}
-\funcout
-\funcarg{krb5_data **}{enc_ticket}
-\end{funcdecl}
-
-Takes \funcparam{dec_ticket} (with associated encrypted part
-\funcparam{dec_ticket{\ptsto}enc_part}),
-and encodes for transmission, placing result in \funcparam{*enc_ticket}.
-The string \funcparam{*enc_ticket} will be allocated before formatting;
-they should be freed by calling \funcname{krb5_free_ticket()} on
-\funcparam{*enc_ticket}.
-
-Returns errors from encryption routines, system errors.
-
-\begin{funcdecl}{krb5_decode_ticket}{krb5_error_code}{\funcin}
-\funcarg{krb5_data *}{enc_ticket}
-\funcout
-\funcarg{krb5_ticket **}{dec_ticket}
-\end{funcdecl}
-
-Decodes formatted ticket \funcparam{enc_ticket},
-filling in \funcparam{*dec_ticket} with a pointer to the results.
-\funcparam{*dec_ticket} is set to allocated storage which should be
-freed by the caller (by using \funcname{krb5_free_ticket}) when finished with
-the ticket.
-
-Returns system errors.
-
-
 \begin{funcdecl}{krb5_encrypt_tkt_part}{krb5_error_code}{ \funcin}
 \funcarg{krb5_keyblock *}{srv_key}
 \funcinout
