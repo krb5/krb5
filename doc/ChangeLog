@@ -1,3 +1,7 @@
+Wed Oct 11 16:20:58 1995  Ezra Peisach  (epeisach@kangaroo.mit.edu)
+
+	* install.texi: Remove config.h descriptions, describe krb5.conf. 
+
 Tue Jul 11 13:07:00 1995    <tytso@rsx-11.mit.edu>
 
 	* install.texi: BSDI fixes.

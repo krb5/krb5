@@ -126,7 +126,7 @@ This is edition @value{EDITION}, for Kerberos V5 version @value{VERSION}.
 
 How Kerberos Works: A Schematic Description
 
-* Network Services ::           
+* Network Services::           
 * Kerberos Tickets::            
 * The Kerberos Database::       
 * Kerberos Realms::             
@@ -169,7 +169,6 @@ Operating System Incompatibilities
 Configuration Header Files 
 
 * osconf.h::                    
-* config.h::                    
 
 Installation
 
@@ -188,8 +187,8 @@ Installation on any Machine
 
 Configuration files
 
-* krb.conf::                    
-* krb.realms::                  
+* krb5.conf::   
+* Converting V4 configuration files::                 
 * /etc/services::               
 
 Installing the KDC
@@ -234,15 +233,7 @@ context diffs or unified diffs (using @samp{diff -c} or @samp{diff
 -u}, respectively).
 
 Please note that there are still a number of aspects of Kerberos V5
-which will likely change before the 1.0 release.  In particular, the
-syntax and the names of the configuration files, @file{krb.conf} and
-@file{krb.realms}, are very likely to change in the near future.
-(@strong{Actually}, they've changed already; this documentation hasn't
-been updated yet to reflect this yet, though.  See the @file{krb5.conf}
-man page for a description of the new configuration file format.)  In
-addition the location of the executable programs may also change as
-well.
-
+which will likely change before the 1.0 release. 
 As these changes occur, we will update the documentation accordingly.
 
 @node How Kerberos Works, Building Kerberos, Introduction, Top
@@ -258,7 +249,7 @@ Service for Open Network Systems}, a paper presented at Winter USENIX
 1988, in Dallas, Texas.
 
 @menu
-* Network Services ::           
+* Network Services::           
 * Kerberos Tickets::            
 * The Kerberos Database::       
 * Kerberos Realms::             
@@ -617,6 +608,21 @@ specified by @code{KRB4DIR} specifies where the V4 header files should
 be found (@file{/KRB4DIR/include}) as well as where the V4 Kerberos
 library should be found (@file{/KRB4DIR/lib}).
 
+@item --with-vague-errors
+
+If enabled, gives vague and unhelpful error messages to the client... er,
+attacker.  (Needed to meet silly government regulations; most other
+sites will want to keep this undefined.)
+
+@item --with-kdc-kdb-update
+
+Set this option if you want to allow the KDC to modify the Kerberos
+database; this allows the last request information to be updated, as
+well as the failure count information.  Note that this doesn't work if
+you're using slave servers!!!  It also causes the database to be
+modified (and thus needing to be locked) frequently.
+
+
 @end table
 
 For example, in order to configure Kerberos on a Solaris machine using
@@ -740,31 +746,31 @@ you can use the @code{-i} option to @samp{cc}, by using the specifiying
 @node Configuration .h files, Using Autoconf, OS Incompatibilities, Building Kerberos
 @section Configuration Header Files 
 
-There are two configuration files which you may wish to edit to control
+There is one configuration file which you may wish to edit to control
 various compile-time parameters in the Kerberos distribution:
-@file{osconf.h} and @file{config.h}.
+@file{osconf.h}. 
+
+Please note: The former configuration file @file{config.h} no longer
+exists as its functionality has been merged into the autoconfiguration
+process. @xref{Options to Configure}
 
 @menu
 * osconf.h::                    
-* config.h::                    
 @end menu
 
-@node osconf.h, config.h, Configuration .h files, Configuration .h files
+@node osconf.h, , Configuration .h files, Configuration .h files
 @subsection @file{osconf.h}
 
 This file is found in @file{include/krb5/stock/osconf.h}.
 
 @table @code
 
-@item DEFAULT_CONFIG_FILENAME
+@item DEFAULT_PROFILE_PATH
 
-The pathname to the file which defines the known realms and their KDCs.
-It currently uses the same format as Kerberos V4's @file{krb.conf} file.
+The pathname to the file which contains the profiles for the known
+realms, their KDCs, etc.
 
-@item DEFAULT_TRANS_FILENAME
-
-The pathname to the file which assigns hosts to realms.  It currently
-uses the same format as Kerberos V4's @file{krb.realms}.
+It is no longer the same format as Kerberos V4's @file{krb.conf} file.
 
 @item DEFAULT_LNAME_FILENAME
 
@@ -776,13 +782,9 @@ account names.  See kdb5_anadd(8).
 The type and pathname to the default server keytab file (the equivalent
 of Kerberos V4's @file{/etc/srvtab}).  
 
-@item DEFAULT_KDC_ETYPE
+@item DEFAULT_KDC_ENCTYPE
 
 The default encryption type for the KDC.
-
-@item DEFAULT_KDC_KEYTYPE
-
-The default keytype for the KDC.
 
 @item KDCRCACHE
 
@@ -792,28 +794,9 @@ The name of the replay cache used by the KDC.
 
 The directory which stores replay caches.
 
-@end table
+@item DEFAULT_KDB_FILE
 
-@node config.h,  , osconf.h, Configuration .h files
-@subsection @file{config.h}
-
-This file is located in @file{include/krb5/stock/config.h}.
-
-@table @code
-
-@item KRBCONF_VAGUE_ERRORS
-
-If defined, gives vague and unhelpful error messages to the client... er,
-attacker.  (Needed to meet silly government regulations; most other
-sites will want to keep this undefined.)
-
-@item KRBCONF_KDC_MODIFIES_KDB
-
-Define this if you want to allow the KDC to modify the Kerberos
-database; this allows the last request information to be updated, as
-well as the failure count information.  Note that this doesn't work if
-you're using slave servers!!!  It also causes the database to be
-modified (and thus needing to be locked) frequently.
+The location of the default database
 
 @end table
 
@@ -950,55 +933,69 @@ your Kerberos realm should be @code{CYGNUS.COM}.
 @comment  node-name,  next,  previous,  up@section 
 @subsection Configuration files
 
-@strong{WARNING:} The @file{krb.conf} and @file{krb.realms} files are no
-longer used by this release; this documentation hasn't been updated yet
-to describe the new @file{krb5.conf} file, so please disregard the next
-two subsections.  Information about the contents of the @file{krb5.conf} file
-can be found in @file{krb5.conf} manual page, which is located in the
-source tree in the @file{src/config-files} subdirectory.
-
 
 @menu
-* krb.conf::                    
-* krb.realms::                  
+* krb5.conf::                    
+* Converting V4 configuration files::                 
 * /etc/services::               
 @end menu
 
-@node krb.conf, krb.realms, Configuration files, Configuration files
-@subsubsection The @file{krb.conf} File
+@node krb5.conf, Converting V4 configuration files,  Configuration files, Configuration files
+@subsubsection The @file{krb5.conf} File
 
-The @file{krb.conf} file is used to specify a system's default Kerberos
-realm, and to specify the locations of the Kerberos servers.
+The @file{krb5.conf} file contains information needed by the Kerberos V5
+library including a system's default Kerberos
+realm, and the locations of the Kerberos servers.
 
-Create a @file{[KRB5ROOT]/krb.conf} file using the following format:
+The @file{krb5.conf} uses an INI-stye format.  Sections are delimited by
+square braces; within each section, there are relations where tags can
+be assigned to have specific values.  Tags can also contain a
+subsection, which contains further relations or subsections.  A tag can
+be assigned to multiple values.
+
+Create a @file{/etc/krb5.conf} file using the following format:
+
 @example
-<realm_name>
-<realm_name>   <master_server_name> admin server
+[libdefaults]
+	default_realm = <realm_name>
+
+[realms]
+	<realm_name> = @{
+		kdc = <master_server_name>
+		admin_server = <master_server_name>
+		default_domain = <domain_name>
+	@}
+
+[domain_realm]
+	<.domain.name> = <realm_name>
 @end example
 
 Where @samp{realm_name} specifies the default realm to be used by that
 particular system, and @samp{master_server_name} specifies the machine
-name on which you will run the master server.  The words @samp{admin
-server} must appear next to the name of the server on which you intend
-to run the administration server (which must be a machine with access to
-the database).
+name on which you will run the master server.  The keywords @samp{kdc}
+and @samp{admin_server} lists the location of the realms KDC and
+administration servers. 
 
-For example, if your realm name is @samp{MIT.EDU} and your master
+For example, if your realm name is @samp{ATHENA.MIT.EDU} and your master
 server's name is @samp{kerberos.mit.edu}, the file should have these
 contents:
 
 @example
-MIT.EDU
-MIT.EDU  kerberos.mit.edu admin server
+[libdefaults]
+	default_realm = ATHENA.MIT.EDU
+
+[realms]
+	ATHENA.MIT.EDU = @{
+		kdc = KERBEROS.MIT.EDU
+		admin_server = KERBEROS.MIT.EDU
+		default_domain = MIT.EDU
+	@}
+
+[domain_realm]
+	.mit.edu = ATHENA.MIT.EDU
+	mit.edu = ATHENA.MIT.EDU
 @end example
 
-See the @file{[SOURCE_DIR]/config-files/krb.conf} file for an example
-@file{krb.conf} file.  That file has examples of how to provide backup
-servers for a given realm (additional lines with the same leading realm
-name) and how to designate servers for remote realms.
-
-@node krb.realms, /etc/services, krb.conf, Configuration files
-@subsubsection The @file{krb.realms} File
 
 In many situations, the default realm in which a host operates will be
 identical to its Internet domain name, with the first component removed
@@ -1006,27 +1003,50 @@ and all letters capitalized.  For example, @code{ftp.cygnus.com} is
 traditionally in the realm @code{CYGNUS.COM}.
 If this is not the case, you will need to establish a translation from
 host name or domain name to realm name.  This is accomplished with the
-@samp{[KRB5ROOT]/krb.realms} file.
+@samp{[domain_realm]} stanza
 
 Each line of the translation file specifies either a host name or domain
 name, and its associated realm:
 
 @example
-<.domain.name> KERBEROS.REALM1
-<host.name> KERBEROS.REALM2
+[domain_realm]
+	<.domain.name> = KERBEROS.REALM1
+	<host.name> = KERBEROS.REALM2
 @end example
 
 For example, to map all hosts in the domain LSC.MIT.EDU to LCS.MIT.EDU
 but the host FILMS.LSC.MIT.EDU to MIT.EDU your file would read:
 @example
-.LSC.MIT.EDU LSC.MIT.EDU
-FILMS.LSC.MIT.EDU MIT.EDU
+[domain_realm]
+	.LSC.MIT.EDU = LSC.MIT.EDU
+	FILMS.LSC.MIT.EDU = MIT.EDU
 @end example
 
 If a particular host name matches both a domain name and a host name in
-@file{krb.realms}, the entry containing the host name takes precedence.
+@samp{[domain_realm]}, the entry containing the host name takes precedence.
 
-@node     /etc/services,  , krb.realms, Configuration files
+See the @file{[SOURCE_DIR]/config-files/krb5.conf} file for an example
+@file{krb5.conf} file.  That file has examples of how to provide backup
+servers for a given realm (additional lines with the same leading realm
+name) and how to designate servers for remote realms.
+The @file{krb5.conf} file is used to specify a system's default Kerberos
+realm, and to specify the locations of the Kerberos servers.
+
+@node Converting V4 configuration files, /etc/services, krb5.conf, Configuration files
+@subsubsection Conversion of V4 configuration files
+
+Kerberos V4's @file{krb.conf} and @file{krb.realms} files formats are no
+longer used by the V5 library. A Perl script has been provided to allow
+for "easy" generation of an initial @file{krb5.conf}. It is located in 
+@file{[SOURCE_DIR]/config-files/convert-config-files}. The produced file
+should be checked for errors.
+
+Note that if you are planning on using certain applications with
+Kerberos V4 compatibilty compiled in, the V4 library still needs the
+files @file{krb.conf} and @file{krb.realms}. 
+
+
+@node     /etc/services,  , Converting V4 configuration files, Configuration files
 @subsubsection /etc/services
 
 All hosts which will use Kerberos will need to have certain ports
@@ -1045,7 +1065,7 @@ server.
 The following files should be installed on all machines which are
 running Kerberos, either as a client, a KDC, or an application server:
 
-@itemize
+@itemize @bullet
 @item @file{/krb5/bin/kinit} --- This program allows you to obtain
 Kerberos credentials.
 @item @file{/krb5/bin/kdestroy} --- This program allows you to destroy
