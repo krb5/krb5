@@ -22,8 +22,8 @@ static char rcsid_copy_checksum_c[] =
 
 static krb5_error_code
 krb5_copy_checksum(ckfrom, ckto)
-const krb5_authenticator *ckfrom;
-krb5_authenticator **ckto;
+const krb5_checksum *ckfrom;
+krb5_checksum **ckto;
 {
     krb5_error_code retval;
     krb5_checksum *tempto;
