@@ -2134,8 +2134,8 @@ error:
 		   exit_status++;
 	      }
 			   
-	      if (kret = osa_adb_rename_policy(&newparams,
-					       &global_params)) {
+	      if (kret = osa_adb_rename_policy_db(&newparams,
+						  &global_params)) {
 		   fprintf(stderr,
 			   "%s: %s while renaming policy db %s to %s\n",
 			   programname, error_message(kret),

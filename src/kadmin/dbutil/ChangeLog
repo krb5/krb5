@@ -7,6 +7,8 @@ Tue Oct  8 13:35:56 1996  Barry Jaspan  <bjaspan@mit.edu>
  	directly, and will create a policy db if one does not already
  	exist.  Automated testing is needed. [krb5-admin/62]
 
+	* dump.c (load_db): rename osa_adb_rename_policy to *_db
+
 Thu Oct  3 18:17:36 1996  Barry Jaspan  <bjaspan@mit.edu>
 
 	* kdb5_util.c (ARG_VAL): case second half of ?: operator to char *
