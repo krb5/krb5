@@ -108,11 +108,11 @@ extern struct sysv sysv;
 #include <sys/resource.h>
 #include <sys/proc.h>
 #endif
-#ifndef linux
+	/* For what platforms do we really need sys/tty.h? */
+#ifdef HAVE_SYS_TTY_H
 #include <sys/tty.h>
-#else
-#include <linux/tty.h>
 #endif
+	
 #ifdef	t_erase
 #undef	t_erase
 #undef	t_kill

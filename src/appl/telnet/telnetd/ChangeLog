@@ -1,5 +1,9 @@
 Mon Nov  7 22:16:51 1994  Theodore Y. Ts'o  (tytso@dcl)
 
+	* configure.in: 
+	  sys_term.c: Only include <sys/tty.h> if HAVE_SYS_TTY_H is
+	  	  defined by configure.
+
         * configure.in: Check for sys/time.h and time.h.
 
 	* defs.h: Pull in <sys/time.h> and <time.h> as necessary.
