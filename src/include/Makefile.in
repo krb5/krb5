@@ -68,7 +68,5 @@ clean-windows::
 	cd ..
 	@echo Making clean locally
 
-install:: krb5.h k5-int.h
+install:: krb5.h
 	$(INSTALL_DATA) $(C)krb5.h $(DESTDIR)$(KRB5_INCDIR)$(S)krb5.h
-	$(INSTALL_DATA) $(srcdir)$(S)k5-int.h \
-		$(DESTDIR)$(KRB5_INCDIR)$(S)k5-int.h
