@@ -1,3 +1,7 @@
+Thu Jul 25 17:24:18 1996  Marc Horowitz  <marc@mit.edu>
+
+	* configure.in (CONFIG_DIRS): added v5passwdd
+
 Fri Jul 12 14:38:30 1996  Marc Horowitz  <marc@mit.edu>
 
 	* configure.in (CONFIG_DIRS): ktutil is still useful
