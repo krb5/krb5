@@ -31,7 +31,7 @@ SRCS=	$(srcdir)/cryptoconf.c \
 	$(srcdir)/des3_raw.c \
 	$(srcdir)/raw_des.c 
 
-LIB=crypto
+LIB=k5crypto
 LIBMAJOR=2
 LIBMINOR=0
 RELDIR=crypto

@@ -1,3 +1,7 @@
+Wed Apr 15 18:02:44 1998  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (LIB): Rename to k5crypto.
+
 Wed Feb 18 16:05:11 1998  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Remove trailing slash from thisconfigdir.  Fix up
