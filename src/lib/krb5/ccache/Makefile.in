@@ -50,7 +50,7 @@ SRCS=	$(srcdir)/ccbase.c \
 all-unix:: all-libobjs
 
 t_stdio: t_stdio.o
-	${CC} -o t_stdio ${OBJS} t_stdio.o
+	$(CC) -o t_stdio $(OBJS) t_stdio.o
 
 all-windows:: subdirs $(OBJFILE) 
 

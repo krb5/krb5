@@ -1,3 +1,8 @@
+2000-07-20  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in: Change ${CC} and ${OBJS} to $(CC) and $(OBJS) so
+	nmake does not freak out.
+
 2000-07-19  Ken Raeburn  <raeburn@mit.edu>
 
 	* cc_memory.c (mcc_head): Combine static declaration and
