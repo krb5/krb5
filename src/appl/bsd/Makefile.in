@@ -1,0 +1,50 @@
+CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
+SETENVSRC=@SETENVSRC@
+SETENVOBJ=@SETENVOBJ@
+ISODELIB=@ISODELIB@
+COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
+K4LIB = $(KRB4)/lib/libkrb.a
+KLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(ISODELIB) $(COMERRLIB)
+
+SRCS= krcp.c krlogin.c krsh.c kcmd.c forward.c logutil.c $(SETENVSRC) \
+	login.c
+OBJS= krcp.o krlogin.o krsh.o kcmd.o forward.c logutil.o $(SETENVOBJ) \
+	login.o
+
+all:: rsh rcp rlogin krshd krlogind login.krb5
+
+rsh: krsh.o kcmd.o forward.o
+	$(CC) $(CFLAGS) -o rsh krsh.o kcmd.o forward.o $(KLIB) $(LIBS)
+
+install::
+	cp rsh $(DESTDIR)$(CLIENT_BINDIR)/rsh
+
+rcp: krcp.o kcmd.o forward.o
+	$(CC) $(CFLAGS) -o rcp krcp.o kcmd.o forward.o $(KLIB) $(LIBS)
+
+install::
+	cp rcp $(DESTDIR)$(CLIENT_BINDIR)/rcp
+
+rlogin: krlogin.o kcmd.o forward.o
+	$(CC) $(CFLAGS) -o rlogin krlogin.o kcmd.o forward.o $(KLIB) $(LIBS)
+
+install::
+	cp rlogin $(DESTDIR)$(CLIENT_BINDIR)/rlogin
+
+krshd: krshd.o kcmd.o logutil.o forward.o
+	$(CC) $(CFLAGS) -o krshd krshd.o kcmd.o logutil.o forward.o $(KLIB) $(K4LIB) $(LIBS)
+
+install::
+	cp krshd $(DESTDIR)$(SERVER_BINDIR)/krshd
+
+krlogind: krlogind.o logutil.o kcmd.o forward.o
+	$(CC) $(CFLAGS) -o krlogind krlogind.o logutil.o kcmd.o forward.o $(KLIB) $(K4LIB) $(LIBS)
+
+install::
+	cp krlogind $(DESTDIR)$(SERVER_BINDIR)/krlogind
+
+login.krb5: login.o logutil.o $(SETENVOBJ)
+	$(CC) $(CFLAGS) -o login.krb5 login.o logutil.o $(SETENVOBJ) $(KLIB) $(LIBS)
+
+install::
+	cp login.krb5 $(DESTDIR)$(SERVER_BINDIR)/login.krb5
