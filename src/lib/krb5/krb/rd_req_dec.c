@@ -57,7 +57,8 @@
  */
 
 static krb5_error_code decrypt_authenticator
-	PROTOTYPE((krb5_context, const krb5_ap_req *, krb5_authenticator **));
+	PROTOTYPE((krb5_context, const krb5_ap_req *, krb5_authenticator **,
+		   int));
 
 #define in_clock_skew(date) (labs((date)-currenttime) < context->clockskew)
 
@@ -119,8 +120,12 @@ krb5_rd_req_decoded_opt(context, auth_context, req, server, keytab,
 	    return retval;
     }
 
+    /* XXX this is an evil hack.  check_valid_flag is set iff the call
+       is not from inside the kdc.  we can use this to determine which
+       key usage to use */
     if ((retval = decrypt_authenticator(context, req, 
-					&((*auth_context)->authentp))))
+					&((*auth_context)->authentp),
+					check_valid_flag)))
 	goto cleanup;
 
     if (!krb5_principal_compare(context, (*auth_context)->authentp->client,
@@ -243,14 +248,66 @@ krb5_rd_req_decoded_opt(context, auth_context, req, server, keytab,
       }
     }
 
+    /* check if the various etypes are permitted */
+
+    if ((*auth_context)->auth_context_flags & KRB5_AUTH_CONTEXT_PERMIT_ALL) {
+	/* no etype check needed */;
+    } else if ((*auth_context)->permitted_etypes == NULL) {
+	/* check against the default set */
+	if ((!krb5_is_permitted_enctype(context,
+					req->ticket->enc_part.enctype)) ||
+	    (!krb5_is_permitted_enctype(context,
+					req->ticket->enc_part2->session->enctype)) ||
+	    (((*auth_context)->authentp->subkey) &&
+	     !krb5_is_permitted_enctype(context,
+					(*auth_context)->authentp->subkey->enctype))) {
+	    retval = KRB5_NOPERM_ETYPE;
+	    goto cleanup;
+	}
+    } else {
+	/* check against the set in the auth_context */
+	int i;
+
+	for (i=0; (*auth_context)->permitted_etypes[i]; i++)
+	    if ((*auth_context)->permitted_etypes[i] ==
+		req->ticket->enc_part.enctype)
+		break;
+	if (!(*auth_context)->permitted_etypes[i]) {
+	    retval = KRB5_NOPERM_ETYPE;
+	    goto cleanup;
+	}
+	
+	for (i=0; (*auth_context)->permitted_etypes[i]; i++)
+	    if ((*auth_context)->permitted_etypes[i] ==
+		req->ticket->enc_part2->session->enctype)
+		break;
+	if (!(*auth_context)->permitted_etypes[i]) {
+	    retval = KRB5_NOPERM_ETYPE;
+	    goto cleanup;
+	}
+	
+	if ((*auth_context)->authentp->subkey) {
+	    for (i=0; (*auth_context)->permitted_etypes[i]; i++)
+		if ((*auth_context)->permitted_etypes[i] ==
+		    (*auth_context)->authentp->subkey->enctype)
+		    break;
+	    if (!(*auth_context)->permitted_etypes[i]) {
+		retval = KRB5_NOPERM_ETYPE;
+		goto cleanup;
+	    }
+	}
+    }
+
     (*auth_context)->remote_seq_number = (*auth_context)->authentp->seq_number;
     if ((*auth_context)->authentp->subkey) {
 	if ((retval = krb5_copy_keyblock(context,
 					 (*auth_context)->authentp->subkey,
 					 &((*auth_context)->remote_subkey))))
 	    goto cleanup;
-    } else
+    } else {
 	(*auth_context)->remote_subkey = 0;
+    }
+
     if ((retval = krb5_copy_keyblock(context, req->ticket->enc_part2->session,
 				     &((*auth_context)->keyblock))))
 	goto cleanup;
@@ -322,52 +379,34 @@ krb5_rd_req_decoded_anyflag(context, auth_context, req, server, keytab,
 }
 
 static krb5_error_code
-decrypt_authenticator(context, request, authpp)
+decrypt_authenticator(context, request, authpp, is_ap_req)
     krb5_context context;
     const krb5_ap_req *request;
     krb5_authenticator **authpp;
+    int is_ap_req;
 {
     krb5_authenticator *local_auth;
     krb5_error_code retval;
-    krb5_encrypt_block eblock;
     krb5_data scratch;
     krb5_keyblock *sesskey;
 
     sesskey = request->ticket->enc_part2->session;
 
-    if (!valid_enctype(sesskey->enctype))
-	return KRB5_PROG_ETYPE_NOSUPP;
-
-    /* put together an eblock for this encryption */
-
-    krb5_use_enctype(context, &eblock, request->authenticator.enctype);
-
     scratch.length = request->authenticator.ciphertext.length;
     if (!(scratch.data = malloc(scratch.length)))
 	return(ENOMEM);
 
-    /* do any necessary key pre-processing */
-    if ((retval = krb5_process_key(context, &eblock, sesskey))) {
+    if ((retval = krb5_c_decrypt(context, sesskey,
+				 is_ap_req?KRB5_KEYUSAGE_AP_REQ_AUTH:
+				 KRB5_KEYUSAGE_TGS_REQ_AUTH, 0,
+				 &request->authenticator, &scratch))) {
 	free(scratch.data);
 	return(retval);
     }
 
-    /* call the encryption routine */
-    if ((retval = krb5_decrypt(context, 
-			       (krb5_pointer)request->authenticator.ciphertext.data,
-			       (krb5_pointer)scratch.data,
-			       scratch.length, &eblock, 0))) {
-	(void) krb5_finish_key(context, &eblock);
-	free(scratch.data);
-	return retval;
-    }
 #define clean_scratch() {memset(scratch.data, 0, scratch.length); \
 free(scratch.data);}
-    if ((retval = krb5_finish_key(context, &eblock))) {
 
-	clean_scratch();
-	return retval;
-    }
     /*  now decode the decrypted stuff */
     if (!(retval = decode_krb5_authenticator(&scratch, &local_auth))) {
 	*authpp = local_auth;
