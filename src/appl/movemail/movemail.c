@@ -55,8 +55,16 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <sys/file.h>
 #include <errno.h>
 #define NO_SHORTNAMES   /* Tell config not to load remap.h */
-#include "../src/config.h"
+/* #include "../src/config.h" */
 
+#ifdef KERBEROS
+#ifdef KRB5
+/* these need to be here to declare the functions which are used by
+   non-kerberos specific code */
+#include <krb5/krb5.h>
+#include <krb5/ext-proto.h>
+#endif
+#endif
 #ifdef USG
 #include <fcntl.h>
 #include <unistd.h>
@@ -301,6 +309,7 @@ concat (s1, s2, s3)
      char *s1, *s2, *s3;
 {
   int len1 = strlen (s1), len2 = strlen (s2), len3 = strlen (s3);
+  char *xmalloc();
   char *result = (char *) xmalloc (len1 + len2 + len3 + 1);
 
   strcpy (result, s1);
@@ -313,11 +322,11 @@ concat (s1, s2, s3)
 
 /* Like malloc but get fatal error if memory is exhausted.  */
 
-int
+char *
 xmalloc (size)
      int size;
 {
-  int result = malloc (size);
+  char *result = malloc (size);
   if (!result)
     fatal ("virtual memory exhausted", 0);
   return result;
@@ -332,9 +341,19 @@ xmalloc (size)
 #include <netdb.h>
 #include <stdio.h>
 #ifdef KERBEROS
+#define	POP_SERVICE	"pop"
+#ifdef KRB4
+#ifdef KRB5
+ #error can only use one of KRB4 or KRB5
+#endif
 #include <krb.h>
 #include <des.h>
-#endif
+#endif /* KRB4 */
+#ifdef KRB5
+#include <com_err.h>
+#include <ctype.h>
+#endif /* KRB5 */
+#endif /* KERBEROS */
 #ifdef HESIOD
 #include <hesiod.h>
 #endif
@@ -476,16 +495,27 @@ char *host;
     register struct servent *sp;
     int lport = IPPORT_RESERVED - 1;
     struct sockaddr_in sin;
-    register int s;
+    int s;
     char *get_errmsg();
 #ifdef KERBEROS
+#ifdef KRB4
     KTEXT ticket;
     MSG_DAT msg_data;
     CREDENTIALS cred;
     Key_schedule schedule;
     int rem;
-#endif
-    
+#endif /* KRB4 */
+#ifdef KRB5
+    krb5_error_code retval;
+    char **hrealms;
+    krb5_data aserver[3], *server[4];
+    krb5_ccache ccdef;
+    krb5_principal client;
+    krb5_error *err_ret;
+    char *remote_host;
+    register char *cp;
+#endif /* KRB5 */
+#endif /* KERBEROS */
     hp = gethostbyname(host);
     if (hp == NULL) {
 	sprintf(Errmsg, "MAILHOST unknown: %s", host);
@@ -527,8 +557,9 @@ char *host;
     }
 
 #ifdef KERBEROS
+#ifdef KRB4
     ticket = (KTEXT) malloc(sizeof(KTEXT_ST));
-    rem = krb_sendauth(0L, s, ticket, "pop", hp->h_name,
+    rem = krb_sendauth(0L, s, ticket, POP_SERVICE, hp->h_name,
 		       (char *) krb_realmofhost(hp->h_name),
 		       (unsigned long)0, &msg_data, &cred, schedule,
 		       (struct sockaddr_in *)0,
@@ -539,6 +570,66 @@ char *host;
 	 close(s);
 	 return(NOTOK);
     }
+#endif /* KRB4 */
+#ifdef KRB5
+    krb5_init_ets();
+
+    if (retval = krb5_cc_default(&ccdef)) {
+    krb5error:
+	sprintf(Errmsg, "krb5 error: %s", error_message(retval));
+	close(s);
+	return(NOTOK);
+    }
+    if (retval = krb5_cc_get_principal(ccdef, &client)) {
+	goto krb5error;
+    }
+
+    /* copy the hostname into non-volatile storage */
+    remote_host = malloc(strlen(hp->h_name) + 1);
+    (void) strcpy(remote_host, hp->h_name);
+
+    if (retval = krb5_get_host_realm(remote_host, &hrealms)) {
+	goto krb5error;
+    }
+
+    /* lower-case to get name for "instance" part of service name */
+    for (cp = remote_host; *cp; cp++)
+	if (isupper(*cp))
+	    *cp = tolower(*cp);
+
+    aserver[0].length = strlen(hrealms[0]);
+    aserver[0].data = hrealms[0];
+    aserver[1].length = strlen(POP_SERVICE);
+    aserver[1].data = POP_SERVICE;
+    aserver[2].length = strlen(remote_host);
+    aserver[2].data = remote_host;
+    server[0] = &aserver[0];
+    server[1] = &aserver[1];
+    server[2] = &aserver[2];
+    server[3] = 0;
+
+    retval = krb5_sendauth((krb5_pointer) &s, "KPOPV1.0", client, server,
+			   AP_OPTS_MUTUAL_REQUIRED,
+			   0,		/* no checksum */
+			   0,		/* no creds, use ccache instead */
+			   ccdef,
+			   0,		/* don't need seq # */
+			   0,		/* don't need a subsession key */
+			   &err_ret,
+			   0);		/* don't need reply */
+    if (retval) {
+	if (err_ret && err_ret->text.length) {
+	    sprintf(Errmsg, "krb5 error: %s [server says '%*s'] ",
+		    error_message(retval),
+		    err_ret->text.length,
+		    err_ret->text.data);
+	    krb5_free_error(err_ret);
+	} else
+	    sprintf(Errmsg, "krb5 error: %s", error_message(retval));
+	close(s);
+	return(NOTOK);
+    }
+#endif /* KRB5 */
 #endif /* KERBEROS */
 		       
     sfi = fdopen(s, "r");
