@@ -1,3 +1,8 @@
+1999-11-02  Ken Raeburn  <raeburn@raeburn.org>
+
+	* klist.c (one_addr): Always use indicated address family and
+	length in gethostbyaddr or getipnodebyaddr calls.
+
 1999-10-26  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,

@@ -551,16 +551,21 @@ void one_addr(a)
 	|| (a->addrtype == ADDRTYPE_INET6 && a->length == 16)
 #endif
 	) {
+	int af = AF_INET;
+#ifdef AF_INET6
+	if (a->addrtype == ADDRTYPE_INET6)
+	    af = AF_INET6;
+#endif
 	if (!no_resolve) {
 #ifdef HAVE_GETIPNODEBYADDR
 	    int err;
-	    h = getipnodebyaddr(a->contents, 16, AF_INET6, &err);
+	    h = getipnodebyaddr(a->contents, a->length, af, &err);
 	    if (h) {
 		printf("%s", h->h_name);
 		freehostent(h);
 	    }
 #else
-	    h = gethostbyaddr(a->contents, 4, AF_INET);
+	    h = gethostbyaddr(a->contents, a->length, af);
 	    if (h) {
 		printf("%s", h->h_name);
 	    }
