@@ -1,3 +1,10 @@
+2001-12-06  Ezra Peisach  <epeisach@mit.edu>
+
+	* configure.in: Add KRB5_GETSOCKNAME_ARGS and KRB5_GETPEERNAME_ARGS
+
+	* kprop.c, kpropd.c: Use GETSOCKNAME_ARG3_TYPE and
+	GETPEERNAME_ARG3_TYPE. 
+
 2001-10-09  Ken Raeburn  <raeburn@mit.edu>
 
 	* kprop.c, kpropd.c: Make prototypes unconditional.

@@ -46,6 +46,10 @@
 #include "com_err.h"
 #include "kprop.h"
 
+#ifndef GETSOCKNAME_ARG3_TYPE
+#define GETSOCKNAME_ARG3_TYPE unsigned int
+#endif
+
 static char *kprop_version = KPROP_PROT_VERSION;
 
 char	*progname = 0;
@@ -329,7 +333,7 @@ open_connection(host, fd, Errmsg, ErrmsgSz)
 	struct hostent	*hp;
 	register struct servent *sp;
 	struct sockaddr_in my_sin;
-	unsigned int	socket_length;
+	GETSOCKNAME_ARG3_TYPE socket_length;
 
 	hp = gethostbyname(host);
 	if (hp == NULL) {

@@ -82,6 +82,13 @@
 
 #include "kprop.h"
 
+#ifndef GETSOCKNAME_ARG3_TYPE
+#define GETSOCKNAME_ARG3_TYPE unsigned int
+#endif
+#ifndef GETPEERNAME_ARG3_TYPE
+#define GETPEERNAME_ARG3_TYPE unsigned int
+#endif
+
 #if defined(NEED_DAEMON_PROTO)
 extern int daemon(int, int);
 #endif
@@ -173,7 +180,7 @@ void do_standalone()
 	struct	sockaddr_in	my_sin, frominet;
 	struct servent *sp;
 	int	finet, s;
-	unsigned int fromlen;
+	GETPEERNAME_ARG3_TYPE fromlen;
 	int	ret;
 	
 	finet = socket(AF_INET, SOCK_STREAM, 0);
@@ -264,7 +271,7 @@ void doit(fd)
 {
 	struct sockaddr_in from;
 	int on = 1;
-	unsigned int fromlen;
+	GETPEERNAME_ARG3_TYPE fromlen;
 	struct hostent	*hp;
 	krb5_error_code	retval;
 	krb5_data confmsg;
@@ -542,7 +549,7 @@ kerberos_authenticate(context, fd, clientp, etype, my_sin)
     krb5_error_code	  retval;
     krb5_ticket		* ticket;
     struct sockaddr_in	  r_sin;
-    unsigned int	  sin_length;
+    GETSOCKNAME_ARG3_TYPE sin_length;
     krb5_keytab		  keytab = NULL;
 
     /*
