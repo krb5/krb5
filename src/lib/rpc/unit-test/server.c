@@ -11,6 +11,9 @@ static char *rcsid = "$Header$";
 
 #include <stdio.h>
 #include <stdlib.h>
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 #include <string.h>
 #include <signal.h>
 #include <gssrpc/rpc.h>
@@ -27,7 +30,7 @@ extern void rpc_test_prog_1();
 extern int svc_debug_gssapi, misc_debug_gssapi;
 
 void rpc_test_badauth(OM_uint32 major, OM_uint32 minor,
-		 struct sockaddr_in *addr, void *data);
+		 struct sockaddr_in *addr, caddr_t data);
 void log_miscerr(struct svc_req *rqst, struct rpc_msg *msg, char
 		 *error, char *data);
 void log_badauth_display_status(OM_uint32 major, OM_uint32 minor);
@@ -46,11 +49,16 @@ void usage()
      exit(1);
 }
 
+#ifdef POSIX_SIGNALS
+void handlesig(int dummy)
+#else
 void handlesig(void)
+#endif
 {
     exit(0);
 }
 
+int
 main(int argc, char **argv)
 {
      int c, prot;
@@ -194,7 +202,7 @@ static void rpc_test_badverf(gss_name_t client, gss_name_t server,
  * Logs the GSS-API error to stdout.
  */
 void rpc_test_badauth(OM_uint32 major, OM_uint32 minor,
-		 struct sockaddr_in *addr, void *data)
+		 struct sockaddr_in *addr, caddr_t data)
 {
      char *a;
      

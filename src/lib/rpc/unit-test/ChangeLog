@@ -1,3 +1,14 @@
+2001-06-08  Ezra Peisach  <epeisach@mit.edu>
+
+	* client.c: Include unistd.h for getopt() prototype. 
+
+	* configure.in: Check for unistd.h.
+
+	* server.c: Include unistd.h for getopt() prototype. Fix
+	rpc_test_badauth() prototype to be consistant with error
+	handler. Declare main as returning int. If POSIX_SIGNALS is
+	defined, the handler expects an argument.
+
 2001-06-07  Ezra Peisach  <epeisach@mit.edu>
 
 	* server.c (log_badauth_display_status_1): Do not assume that
