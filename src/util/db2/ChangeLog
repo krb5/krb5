@@ -1,3 +1,8 @@
+Fri Jul 26 00:41:45 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* Makefile.in (install): Add a blank install target to keep the
+		top-level "make install" happy.
+
 Tue Jul 23 16:08:43 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* hash/dbm.c: Copy elements from the datum to an internal

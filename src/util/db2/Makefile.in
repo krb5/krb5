@@ -8,5 +8,7 @@ all clean distclean realclean check::
 distclean::
 	rm -rf config.status config.log config.cache db-config.h
 
+install::
+
 realclean::
 	rm -rf configure db-config.h.in
