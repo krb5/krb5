@@ -1,3 +1,24 @@
+2000-08-30  Ken Raeburn  <raeburn@mit.edu>
+
+	* lib.in (EXTRA_CLEAN_TARGETS, EXTRA_CLEAN_LINKS): New variables.
+	(clean-libs, clean-liblinks): Depend on targets specified in those
+	variables.
+	(config.status): Depend on shlib.conf.
+	(all-framework, link-framework, clean-framework,
+	clean-framework-link, install-framework): New targets, details to
+	be filled in later.
+
+	* pre.in (KRB5_LIB_libopt): Renamed from KDB5_LIB.
+	(KRB5_LIB_frameworkopt): Tentative framework version for Mac OS X,
+	details to be tuned later.
+	(KRB5_LIB): Select between them using @LIB_LINK_OPT@.
+	(KRB5CRYPTO_LIB*, COM_ERR_LIB*, GSS_KRB5_LIB*): Similarly.
+	(KRB5_BASE_LIBS, GSS_LIBS): Use them.
+	(KRB4COMPAT_LIBS): Use KRB5_BASE_LIBS.
+
+	* shlib.conf: Set LIB_LINK_OPT.  Set new EXTRA_* variables for
+	darwin target.
+
 2000-08-29  Tom Yu  <tlyu@mit.edu>
 
 	* post.in: Test for existing Makefile in directory before

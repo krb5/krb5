@@ -240,27 +240,49 @@ SS_LIB		= $(TOPLIBD)/libss.a
 KDB5_LIB	= -lkdb5
 DB_LIB		= -ldb
 
+KRB5_LIB			= $(KRB5_LIB_@LIB_LINK_OPT@)
+KRB5_LIB_libopt			= -lkrb5
+KRB5_LIB_frameworkopt		= -framework Kerberos5
+
+KRB5CRYPTO_LIB			= $(KRB5CRYPTO_LIB_@LIB_LINK_OPT@)
+KRB5CRYPTO_LIB_libopt		= -lk5crypto
+KRB5CRYPTO_LIB_frameworkopt	= -framework Kerberos5Crypto
+
+COM_ERR_LIB			= $(COMERR_LIB_@LIB_LINK_OPT@)
+COM_ERR_LIB_libopt		= -lcom_err
+COM_ERR_LIB_frameworkopt	= -framework FooComErr
+
+GSS_KRB5_LIB			= $(GSS_KRB5_LIB_@LIB_LINK_OPT@)
+GSS_KRB5_LIB_libopt		= -lgssapi_krb5
+GSS_KRB5_LIB_frameworkopt	= -framework Krb5GSSAPILib
+
 # KRB4_LIB is -lkrb4 if building --with-krb4
+# needs fixing if ever used on Mac OS X!
 KRB4_LIB	= @KRB4_LIB@
 
 # DES425_LIB is -ldes425 if building --with-krb4
+# needs fixing if ever used on Mac OS X!
 DES425_LIB	= @DES425_LIB@
 
 # KRB524_LIB is $(BUILDTOP)/krb524/libkrb524.a if building --with-krb4
+# needs fixing if ever used on Mac OS X!
 KRB524_LIB	= @KRB524_LIB@
 
 # HESIOD_LIBS is -lhesiod...
 HESIOD_LIBS	= @HESIOD_LIBS@
 
-KRB5_BASE_LIBS	= -lkrb5 -lk5crypto -lcom_err $(GEN_LIB) $(LIBS)
-KRB4COMPAT_LIBS	= $(KRB4_LIB) -lkrb5 $(DES425_LIB) -lk5crypto -lcom_err $(GEN_LIB) $(LIBS)
+KRB5_BASE_LIBS	= $(KRB5_LIB) $(K5CRYPTO_LIB) $(COM_ERR_LIB) $(GEN_LIB) $(LIBS)
+KRB4COMPAT_LIBS	= $(KRB4_LIB) $(DES425_LIB) $(KRB5_BASE_LIBS)
 KDB5_LIBS	= $(KDB5_LIB) $(DB_LIB)
-GSS_LIBS	= -lgssapi_krb5
+GSS_LIBS	= $(GSS_KRB5_LIB)
+# needs fixing if ever used on Mac OS X!
 GSSRPC_LIBS	= -lgssrpc -ldyn $(GSS_LIBS)
 KADM_COMM_LIBS	= $(GSSRPC_LIBS)
+# need fixing if ever used on Mac OS X!
 KADMSRV_LIBS	= -lkadm5srv $(HESIOD_LIBS) $(KDB5_LIBS) $(KADM_COMM_LIBS)
 KADMCLNT_LIBS	= -lkadm5clnt $(KADM_COMM_LIBS)
 
+# need fixing if ever used on Mac OS X!
 UTIL_LIB	= -lkrb5util
 PTY_LIB		= -lpty
 
