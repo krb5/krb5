@@ -1,3 +1,8 @@
+Tue Oct 21 14:31:33 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* svc_auth_gssapi.c (destroy_client): Fix to not lose entries in
+        the chain linked list.
+
 Mon Aug 18 09:48:06 1997  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* get_myaddress.c: Include string.h for memcpy prototype.

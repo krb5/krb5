@@ -5,6 +5,14 @@
  * $Source$
  * 
  * $Log$
+ * Revision 1.43  1997/10/21 18:33:55  epeisach
+ * Fix to not lose entries in the chain linked client list.
+ *
+ * A pointer was not being updated resulting in the situation where
+ * random clients would sudenly fail with a misc. rpc. error as the client
+ * handle could not be found. The scenario required three active clients
+ * to trigger the problem.
+ *
  * Revision 1.42  1996/12/04 17:47:18  bjaspan
  * 	* Various changes to allow channel bindings to work with both UDP
  *  	and TCP cleanly [krb5-libs/180]:
@@ -1015,8 +1023,10 @@ static void destroy_client(client_data)
 		    c2->next = c->next;
 		    free(c);
 		    goto done;
-	       } else
+	       } else {
+		    c2 = c;
 		    c = c->next;
+	       }
 	  }
 	  PRINTF(("destroy_client: client_handle delete failed\n"));
 	  abort();
