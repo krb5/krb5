@@ -61,7 +61,7 @@ krb5_address ***outaddr;
     for (nelems = 0; inaddr[nelems]; nelems++)
 	if (retval = krb5_copy_addr(inaddr[nelems], &tempaddr[nelems])) {
 	    krb5_free_address(tempaddr);
-	    return ENOMEM;
+	    return retval;
 	}
 
     *outaddr = tempaddr;
