@@ -1,3 +1,9 @@
+Tue Oct 29 15:39:12 1996  Tom Yu  <tlyu@mit.edu>
+
+	* makeshlib.sh: Allow stuffing of SONAME field in shared lib if
+	gcc is being used; this requires newer (2.7.0?) gcc and possibly
+	binutils (2.6?)
+
 Mon Oct 21 21:23:15 1996  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Fixes for new subdir recursion method.

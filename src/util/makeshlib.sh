@@ -58,6 +58,10 @@ mips-sni-sysv4)
 	optflags=""
 	if test "$HAVE_GCC"x = "x" ; then
 		optflags="-h $library"
+	else
+		# XXX assumes that we're either using
+		# recent gld (binutils 2.7?) or else using native ld
+		optflags="-Wl,-h -Wl,$library"
 	fi
 	ldflags="`echo $ldflags | sed -e 's/-R /-R/g'`"
 
@@ -74,6 +78,10 @@ mips-sni-sysv4)
 	optflags=""
 	if test "$HAVE_GCC"x = "x" ; then
 		optflags="-h $library"
+	else
+		# XXX assumes that we're either using
+		# recent gld (binutils 2.7?) or else using native ld
+		optflags="-Wl,-h -Wl,$library"
 	fi
 
 	echo $CC -G $ldflags -o $library $optflags $FILES $libdirfl $liblist 
@@ -89,6 +97,10 @@ mips-sni-sysv4)
 	optflags=""
 	if test "$HAVE_GCC"x = "x" ; then
 		optflags="-h $library"
+	else
+		# XXX assumes that we're either using
+		# recent gld (binutils 2.7?) or else using native ld
+		optflags="-Wl,-h -Wl,$library"
 	fi
 
 	echo ld -dp -assert pure-text $ldflags -o $library $optflags $FILES $libdirfl
