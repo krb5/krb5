@@ -882,8 +882,11 @@ char *argv[];
      * reporting.  The per-realm operations use the "realm_context"
      * associated with each realm.
      */
-    krb5_init_context(&kcontext);
-    krb5_init_ets(kcontext);
+    retval = krb5_init_context(&kcontext);
+    if (retval) {
+	    com_err(argv[0], retval, "while initializing krb5");
+	    exit(1);
+    }
     krb5_klog_init(kcontext, "kdc", argv[0], 1);
 
     /*

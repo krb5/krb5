@@ -234,9 +234,10 @@ check_padata (context, client, request, enc_tkt_reply)
     krb5_kdc_req *	request;
     krb5_enc_tkt_part * enc_tkt_reply;
 {
-    krb5_error_code retval;
+    krb5_error_code retval = 0;
     krb5_pa_data **padata;
     krb5_preauth_systems *pa_sys;
+    int			pa_ok = 0, pa_found = 0;
 
     if (request->padata == 0)
 	return 0;
@@ -246,20 +247,26 @@ check_padata (context, client, request, enc_tkt_reply)
 	    continue;
 	if (pa_sys->verify_padata == 0)
 	    continue;
+	pa_found++;
 	retval = pa_sys->verify_padata(context, client, request,
 				       enc_tkt_reply, *padata);
 	if (retval) {
-	    if (pa_sys->flags & PA_REQUIRED)
+	    com_err("krb5kdc", retval, "pa verify failure");
+	    if (pa_sys->flags & PA_REQUIRED) {
+		pa_ok = 0;
 		break;
+	    }
 	} else {
-	    if (pa_sys->flags & PA_SUFFICIENT)
+	    pa_ok = 1;
+	    if (pa_sys->flags & PA_SUFFICIENT) 
 		break;
 	}
     }
-if (retval) com_err("krb5kdc", retval, "pa verify failure");
-    if (retval)
-	retval = KRB5KDC_ERR_PREAUTH_FAILED;
-    return retval;
+    if (pa_ok)
+	return 0;
+    if (!pa_found)
+	com_err("krb5kdc", retval, "no valid preauth type found");
+    return KRB5KDC_ERR_PREAUTH_FAILED;
 }
 
 /*
