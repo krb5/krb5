@@ -153,4 +153,4 @@ CopyHeader(KRB5_defs.h,$(EHDRDIR))
 CopyHeader(KRB5_pre_defs.h,$(EHDRDIR))
 
 clean::
-	$(RM) KRB5.ph KRB5-types.py KRB5-types.h KRB5-???.c
+	$(RM) KRB5.ph KRB5_defs.h KRB5_pre_defs.h KRB5-types.h KRB5_tables.c
