@@ -1,3 +1,7 @@
+Fri Oct 14 23:12:00 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* configure.in: Add ISODE_DEFS rule.
+
 Mon Oct  3 19:32:59 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* rc_def.c (krb5_rc_dfl_recover): krb5_rc_io_size was being called

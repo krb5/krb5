@@ -1,3 +1,7 @@
+Fri Oct 14 23:09:02 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* configure.in: Add ISODE_DEFS rule.
+
 Tue Oct  4 22:06:15 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* ktfr_entry.c (krb5_kt_free_entry): Only try to free
