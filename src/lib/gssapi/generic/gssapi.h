@@ -37,9 +37,14 @@
 #define GSS_SIZEOF_INT      2
 #define GSS_SIZEOF_SHORT    2
 #define GSS_SIZEOF_LONG     4
+
+#ifndef INTERFACE
+#define INTERFACE   __far __export __pascal
+#define INTERFACE_C __far __export __cdecl
+#endif /* INTERFACE */
+
 #ifndef FAR
 #define FAR     _far
-#define INTERFACE   __far __export __pascal
 #endif /* FAR */
 #else /* _MSDOS */
 /*

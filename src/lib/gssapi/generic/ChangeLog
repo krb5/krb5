@@ -1,3 +1,7 @@
+Thu Apr 20 14:23:14 1995 Keith Vetter (keithv@fusion.com)
+
+	* gssapi.h: fixed up the "windows specific hackery".
+
 Thu Apr 20 11:41:04 1995    <tytso@rsx-11.mit.edu>
 
 	* configure.in: Add checking for SIZEOF_SHORT, SIZEOF_INT, and
