@@ -5,10 +5,22 @@ Mon Jun 17 18:34:10 1996  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
 		linked against while checking for function existence.
 		This may need some more testing.
 
+Fri Jun 14 13:10:26 1996  Sam Hartman  <hartmans@mit.edu>
+
+	* aclocal.m4 (USE_KRB4_LIBRARY)): Include appropriate include
+ 	files for the krb4 library we are actually using.  This way,
+ 	KEYFILE is a constant string if we are using Athena Kerberos libs.
+	(LDFLAGS): Force TOPLIBD to be expanded in the configure script
+ 	for LDFLAGS, so they are valid for autoconf AC_HAVE_FUNCS
+	tests. Note you cannot actually use libraries out of the top level
+	library directory; this just gets around some gcc complaints with
+	$(TOPLIBD) not being a bvalid path.
+
 Thu Jun 13 23:03:03 1996  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
 
 	* aclocal.m4: break some stuff out into pre.in and post.in in
 		preparation for doing away with PUSH_MAKEFILE cruft
+
 
 Wed Jun 12 15:27:14 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 

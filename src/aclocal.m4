@@ -221,6 +221,7 @@ else
  ADD_DEF(-DKRB5_KRB4_COMPAT)
  if test $withval = yes; then
 	AC_MSG_RESULT(built in krb4 support)
+	KRB4_INCLUDE="-I$SRCTOP/include/kerberosIV"
 	KRB4_LIB='-lkrb4'
 	DEPKRB4_LIB='$(TOPLIBD)/libkrb4.a'
 	KRB4_CRYPTO_LIB='-ldes425'
@@ -230,6 +231,7 @@ else
 	krb5_cv_krb4_libdir=
  else
 	AC_MSG_RESULT(preinstalled krb4 in $withval)
+	KRB4_INCLUDE="-I$withval/include"
 	KRB4_LIB="-lkrb"
 	DEPKRB4_LIB="$withval/lib/libkrb.a"
 	KRB4_CRYPTO_LIB='-ldes425'
@@ -728,7 +730,8 @@ krb4_deplib=''
 krb5_lib=''
 define(USE_KRB4_LIBRARY,[
 krb4_deplib="$DEPKRB4_LIB $DEPKRB4_CRYPTO_LIB"
-krb4_lib="$KRB4_LIB $KRB4_CRYPTO_LIB"])
+krb4_lib="$KRB4_LIB $KRB4_CRYPTO_LIB"]
+	CPPFLAGS="$CPPFLAGS $KRB4_INCLUDE") dnl
 dnl
 dnl This rule tells KRB5_LIBRARIES to include the ss library.
 dnl
@@ -747,7 +750,7 @@ USE_ANAME
 fi
 DEPLIBS="\[$](DEPLOCAL_LIBRARIES) $kadm_deplib $kdb5_deplib $kutil_deplib \[$](TOPLIBD)/libkrb5.a $krb4_deplib $kdbm_deplib $kaname_deplib \[$](TOPLIBD)/libcrypto.a $ss_deplib \[$](TOPLIBD)/libcom_err.a"
 LIBS="\[$](LOCAL_LIBRARIES) $kadm_lib $kdb5_lib $kutil_lib $krb4_lib -lkrb5 $kdbm_libs $kaname_libs -lcrypto $ss_lib -lcom_err $LIBS"
-LDFLAGS="$LDFLAGS -L\$(TOPLIBD)"
+LDFLAGS="$LDFLAGS -L${BUILDTOP}/lib"
 AC_SUBST(LDFLAGS)
 AC_SUBST(LDARGS)
 AC_SUBST(DEPLIBS)])
