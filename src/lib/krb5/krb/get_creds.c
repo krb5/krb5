@@ -226,7 +226,7 @@ krb5_validate_or_renew_creds(context, creds, client, ccache, in_tkt_service,
 {
     krb5_error_code ret;
     krb5_creds in_creds; /* only client and server need to be filled in */
-    krb5_creds *out_creds;
+    krb5_creds *out_creds = 0; /* for check before dereferencing below */
     krb5_creds **tgts;
 
     memset((char *)&in_creds, 0, sizeof(krb5_creds));
@@ -277,9 +277,10 @@ krb5_validate_or_renew_creds(context, creds, client, ccache, in_tkt_service,
 					   &in_creds, &out_creds, &tgts);
    
     /* ick.  copy the struct contents, free the container */
-
-    *creds = *out_creds;
-    krb5_xfree(out_creds);
+    if (out_creds) {
+	*creds = *out_creds;
+	krb5_xfree(out_creds);
+    }
 
 cleanup:
 

@@ -1,3 +1,10 @@
+1999-08-03  Danilo Almeida  <dalmeida@mit.edu>
+
+	* get_creds.c (krb5_validate_or_renew_creds): Intialize out_creds
+	pointer to 0 and then check whether it is 0 before trying to 
+	dereference it, in case lower-level routine failed to assign
+	a value to it.
+
 1999-07-22  Jeffrey Altman <jaltman@columbia.edu>
 
         get_in_tkt.c:  rename conf_boolean to krb5_conf_boolean so that
