@@ -14,7 +14,8 @@ STLIBOBJS = \
 	rc_io.o		\
 	rcdef.o		\
 	rc_conv.o	\
-	ser_rc.o
+	ser_rc.o	\
+	rcfns.o
 
 OBJS=	\
 	$(OUTPRE)rc_base.$(OBJEXT)	\
@@ -22,7 +23,8 @@ OBJS=	\
 	$(OUTPRE)rc_io.$(OBJEXT)		\
 	$(OUTPRE)rcdef.$(OBJEXT)		\
 	$(OUTPRE)rc_conv.$(OBJEXT)	\
-	$(OUTPRE)ser_rc.$(OBJEXT)
+	$(OUTPRE)ser_rc.$(OBJEXT)	\
+	$(OUTPRE)rcfns.$(OBJEXT)
 
 SRCS=	\
 	$(srcdir)/rc_base.c	\
@@ -30,7 +32,8 @@ SRCS=	\
 	$(srcdir)/rc_io.c	\
 	$(srcdir)/rcdef.c	\
 	$(srcdir)/rc_conv.c	\
-	$(srcdir)/ser_rc.c
+	$(srcdir)/ser_rc.c	\
+	$(srcdir)/rcfns.c
 
 ##DOS##LIBOBJS = $(OBJS)
 

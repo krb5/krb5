@@ -1,3 +1,9 @@
+2001-01-16  Ken Raeburn  <raeburn@mit.edu>
+
+	* rcfns.c: New file, with function versions of former dispatch
+	macros from krb5.h.
+	* Makefile.in (STLIBOBJS, OBJS, SRCS): Add it.
+
 2000-09-21  Ezra Peisach  <epeisach@mit.edu>
 
 	* rc_io.h (struct krb5_rc_iostuff): Internal structure - change
