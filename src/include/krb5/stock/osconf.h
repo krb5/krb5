@@ -67,10 +67,13 @@
 #define	DEFAULT_KDC_KEYTYPE	KEYTYPE_DES
 #define KDCRCACHE		"dfl:krb5kdc_rcache"
 
-#define KDC_PORTNAME		"kerberos" /* for /etc/services or equiv. */
-#define KDC_SECONDARY_PORTNAME	"kerberos-sec" /* For backwards */
-					       /* compatibility with */
-					       /* port 750 clients */
+#define KDC_PORTNAME		"kerberos5" /* for /etc/services or equiv. */
+#define KDC_SECONDARY_PORTNAME	"kerberos4" /* For backwards */
+					    /* compatibility with */
+					    /* port 750 clients */
+
+#define KRB5_DEFAULT_PORT	88
+#define KRB5_DEFAULT_SEC_PORT	750
 
 #define MAX_DGRAM_SIZE	4096
 #define MAX_SKDC_TIMEOUT 30
@@ -82,6 +85,8 @@
 #define KRB5_PATH_TTY	"/dev/tty"
 #define KRB5_PATH_LOGIN	"@KRB5ROOT/sbin/login.krb5"
 #define KRB5_PATH_RLOGIN "@KRB5ROOT/bin/rlogin"
+
+#define KRB5_ENV_CCNAME	"KRB5CCNAME"
 
 /*
  * krb4 kadmin stuff follows
