@@ -1,3 +1,10 @@
+Wed Feb 12 20:47:30 1997  Tom Yu  <tlyu@mit.edu>
+
+	* fwd_tgt.c (krb5_fwd_tgt_creds): Use the client's realm rather
+	than the server's realm for constructing the tgs principal.
+	Remove TC_MATCH_SRV_NAMEONLY from call to retrieve_cred() because
+	we want to get an exact match.
+
 Mon Feb 10 10:41:36 1997  Ezra Peisach  <epeisach@mit.edu>
 
 	* crypto_glue.c (krb5_calculate_checksum): Add krb5_const to
