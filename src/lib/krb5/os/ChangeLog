@@ -1,3 +1,8 @@
+2003-05-06  Alexandra Ellwood  <lxs@mit.edu>
+        * init_os_ctx.c: Added support for KLL's __KLAllowHomeDirectoryAccess()
+        function so that krb4, krb5 and gssapi will not access the user's homedir
+        if the application forbids it.
+
 2003-04-28  Sam Hartman  <hartmans@mit.edu>
 
 	* changepw.c (krb5_change_set_password): Locate server in realm of
