@@ -30,7 +30,7 @@
 /* General-purpose forwarding routines. These routines may be put into */
 /* libkrb5.a to allow widespread use */ 
 
-#define NEED_WINSOCK_H
+#define NEED_SOCKETS
 #include "k5-int.h"
 #include <stdio.h>
 #ifndef _WINSOCKAPI_

@@ -25,7 +25,7 @@
  */
 
 
-#define NEED_WINSOCK_H
+#define NEED_SOCKETS
 #include "k5-int.h"
 
 #include "com_err.h"

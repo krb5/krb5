@@ -33,7 +33,7 @@
  * to a V4 sendauth.
  */
 
-#define NEED_WINSOCK_H
+#define NEED_SOCKETS
 #include "k5-int.h"
 #ifndef _MSDOS
 #include <kerberosIV/krb.h>
