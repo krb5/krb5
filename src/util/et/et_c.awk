@@ -209,24 +209,19 @@ END {
 		tab_base_low, table_item_count) > outfile
 	}
 	print "" > outfile
-	print "typedef long errcode_t;" > outfile
-	print "" > outfile
-	print "extern KRB5_DLLIMP errcode_t KRB5_CALLCONV" > outfile
-	print "   add_error_table P((const struct error_table FAR *));" > outfile
-	print "extern KRB5_DLLIMP errcode_t KRB5_CALLCONV" > outfile
-	print "   remove_error_table P((const struct error_table FAR *));" > outfile
-	print "" > outfile
-	print "static int init = 0;" > outfile
-	print "" > outfile
-	print "void initialize_" table_name "_error_table P((void)) {" > outfile
-	print "    if (init) return;" > outfile
-	print "    init++;" > outfile
-	print "    add_error_table(&et_" table_name "_error_table);" > outfile
+	print "#ifdef unix" > outfile
+	print "struct et_list {" > outfile
+	print "	   struct et_list *next;" > outfile
+	print "	   const struct error_table * table;" > outfile
+	print "};" > outfile
+	print "extern struct et_list *_et_list;" > outfile
+	print "static struct et_list link = { 0, 0 };" > outfile
+	print "void initialize_" table_name "_error_table (NOARGS) {" > outfile
+	print "	   if (!link.table) {" > outfile
+	print "	       link.next = _et_list;" > outfile
+	print "	       link.table = &et;" > outfile
+	print "	       _et_list = &link;" > outfile
+	print "	   }" > outfile
 	print "}" > outfile
-	print "" > outfile
-	print "void cleanup_" table_name "_error_table P((void)) {" > outfile
-	print "    if (!init) return;" > outfile
-	print "    init--;" > outfile
-	print "    remove_error_table(&et_" table_name "_error_table);" > outfile
-	print "}" > outfile
+	print "#endif" > outfile
 }
