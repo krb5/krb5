@@ -65,7 +65,7 @@ Krb5GlobalsGetDefaultCacheName (
 		BlockMoveData (gKerberos5SystemDefaultCacheName, inName, inLength);
 		inName [inLength] = '\0';
 	}
-	return strlen (gKerberos5SystemDefaultCacheName);
+	return strlen (gKerberos5SystemDefaultCacheName) + 1;
 }
 
 /*
