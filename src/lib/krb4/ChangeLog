@@ -1,3 +1,9 @@
+2001-06-28  Ezra Peisach  <epeisach@mit.edu>
+
+	* krb4int.h: Provide prototype for krb_get_default_user and
+	krb_set_default_user if _WINDOWS is not defined. There is a
+	conditional prototype in krb.h for them.
+
 2001-06-27  Ezra Peisach  <epeisach@mit.edu>
 
 	* krb4int.h: Add prototypes for ad_print, krb_svc_init,

@@ -56,9 +56,12 @@ int krb_start_session(char *);
 
 int krb_end_session(char *);
 
-char FAR *krb_get_default_user (void);
+#ifndef _WINDOWS
+/* For windows users, these are defined in krb.h */
+char *krb_get_default_user (void);
 
 int krb_set_default_user (char *);
+#endif
 
 
 
