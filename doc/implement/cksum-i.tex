@@ -1,0 +1,31 @@
+Kerberos v5 has the ability to use multiple checksum algorithms.  Any
+checksum implementation which desires to link with and be usable from the MIT
+Kerberos v5 implementation must implement this interface:
+
+\subsection{Functional interface}
+
+\begin{funcdecl}{sum_func}{krb5_error_code}{\funcin}
+\funcarg{krb5_pointer}{in}
+\funcarg{size_t}{in_length}
+\funcarg{krb5_pointer}{seed}
+\funcarg{size_t}{seed_length}
+\funcout
+\funcarg{krb5_checksum *}{outcksum}
+\end{funcdecl}
+
+This routine computes the desired checksum over \funcparam{in_length} bytes
+at \funcparam{in}. \funcparam{seed_length} bytes of a seed (usually an
+encryption key) are pointed to by \funcparam{seed}.  Some checksum
+algorithms may choose to ignore \funcparam{seed}.  If
+\funcparam{seed_length} is zero, then there is no seed available.
+The routine places the resulting value into \funcparam{outcksum{\ptsto}contents}.
+
+\funcparam{outcksum{\ptsto}contents} must be set by the caller to point
+to enough storage to contain the checksum; the size necessary is an
+element of the \datatype{krb5_checksum_entry} structure.
+
+\subsection{Other data elements}
+In addition to the above listed function entry point, each checksum algorithm
+should have an entry in \globalname{krb5_cksumarray} and a
+\datatype{krb5_checksum_entry} structure describing the entry points
+and checksum size for the algorithm.
