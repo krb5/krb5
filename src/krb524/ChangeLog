@@ -1,3 +1,8 @@
+2002-04-03 Alexandra Ellwood <lxs@mit.edu>
+    * krb524.h: Updated C++ protection to not interfere with emacs 
+    auto indentation and added KRB524_PRIVATE macro for Mac OS X
+    to control visibility of function prototypes
+
 2002-03-28 Alexandra Ellwood <lxs@mit.edu>
     * krb524.h: Added C++ protection and Mac pragmas
 

@@ -28,12 +28,22 @@
 
 #if defined(macintosh) || (defined(__MACH__) && defined(__APPLE__))
 	#include <TargetConditionals.h>
+    #ifndef KRB524_PRIVATE /* Allow e.g. build system to override */
+		#define KRB524_PRIVATE 0
+	#endif
 #else
     #include "krb524_err.h"
-#endif
+	#ifndef KRB524_PRIVATE
+		#define KRB524_PRIVATE 1
+	#endif
+#endif	
 
-#ifdef __cplusplus
-extern "C" {
+#if defined(__cplusplus) && !defined(KRB524INT_BEGIN_DECLS)
+#define KRB524INT_BEGIN_DECLS	extern "C" {
+#define KRB524INT_END_DECLS	}
+#else
+#define KRB524INT_BEGIN_DECLS
+#define KRB524INT_END_DECLS
 #endif
 
 #if TARGET_OS_MAC
@@ -44,6 +54,9 @@ extern "C" {
     #pragma options align=mac68k
 #endif
 
+KRB524INT_BEGIN_DECLS
+
+#if KRB524_PRIVATE
 extern int krb524_debug;
 
 int krb524_convert_tkt_skey
@@ -63,11 +76,13 @@ int krb524_convert_princs
 int krb524_convert_creds_addr
 	KRB5_PROTOTYPE((krb5_context context, krb5_creds *v5creds, 
 		   CREDENTIALS *v4creds, struct sockaddr *saddr));
+#endif /* KRB524_PRIVATE */
 
 int krb524_convert_creds_kdc
 	KRB5_PROTOTYPE((krb5_context context, krb5_creds *v5creds, 
 		   CREDENTIALS *v4creds));
 
+#if KRB524_PRIVATE
 /* conv_tkt.c */
 
 int krb524_convert_tkt
@@ -93,6 +108,7 @@ void krb524_init_ets
 int krb524_send_message 
 	KRB5_PROTOTYPE((const struct sockaddr * addr, const krb5_data * message,
 		   krb5_data * reply));
+#endif /* KRB524_PRIVATE */
 
 #if TARGET_OS_MAC
     #if defined(__MWERKS__)
@@ -102,8 +118,6 @@ int krb524_send_message
 	#pragma options align=reset
 #endif
 
-#ifdef __cplusplus
-};
-#endif
+KRB524INT_END_DECLS
 
 #endif /* __KRB524_H__ */
