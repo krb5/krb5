@@ -89,23 +89,26 @@ static u_long const crc_table[256] = {
     };
 
 static krb5_error_code
-crc32_sum_func(in, out, seed, in_length, seed_length, outcksum)
+crc32_sum_func(in, in_length, seed, seed_length, outcksum)
 krb5_pointer in;
-krb5_pointer out;
-krb5_pointer seed;
 size_t in_length;
+krb5_pointer seed;
 size_t seed_length;
 krb5_checksum *outcksum;
 {
-    register u_char *data = (u_char *)in;
+    register u_char *data;
     register u_long c = 0;
     register int idx;
     int i;
 
-    outcksum->contents = (krb5_octet *)malloc(4);
-    if (!outcksum->contents)
-	return ENOMEM;
-
+    data = (u_char *)seed;
+    for (i=0; i<seed_length;i++) {
+	idx = (data[i] ^ c);
+	idx &= 0xff;
+	c >>= 8;
+	c ^= crc_table[idx];
+    }
+    data = (u_char *)in;
     for (i=0; i<in_length;i++) {
 	idx = (data[i] ^ c);
 	idx &= 0xff;
