@@ -12,7 +12,7 @@
  */
 
 
-int LOCK( void ) {  return (YARROW_OK); }
-int UNLOCK( void ) {  return (YARROW_OK); }
+static int LOCK( void ) {  return (YARROW_OK); }
+static int UNLOCK( void ) {  return (YARROW_OK); }
 
 #endif /* YLOCK_H */

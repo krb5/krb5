@@ -7,6 +7,7 @@
 #define YARROW_DETECT_FORK
 #include <unistd.h>
 #endif
+#define YARROW_NO_MATHLIB
 
 #include "ytypes.h"
 #include "yhash.h"

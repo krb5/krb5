@@ -1,5 +1,7 @@
 2001-11-09  Sam Hartman  <hartmans@mit.edu>
 
+	* Makefile.in: New file
+
 	* yhash.h :  Use krb5 shaa1
 
 	* yarrow.c (Yarrow_Reseed):  For all calls to cipher_init, use TRY

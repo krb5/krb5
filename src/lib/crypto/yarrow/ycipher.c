@@ -35,7 +35,7 @@
 
 int krb5int_yarrow_cipher_init
 (CIPHER_CTX *ctx,
- const char * key)
+ unsigned const char * key)
 {
   size_t keybytes, keylength;
   const struct krb5_enc_provider *enc = &yarrow_enc_provider;
@@ -60,18 +60,17 @@ int krb5int_yarrow_cipher_init
 }
 
 int krb5int_yarrow_cipher_encrypt_block
-(CIPHER_CTX *ctx, const char *in,
- char *out)
+(CIPHER_CTX *ctx, const unsigned char *in,
+ unsigned char *out)
 {
   krb5_error_code ret;
-  krb5_data ind;
-  krb5_enc_data outd;
+  krb5_data ind, outd;
   const struct krb5_enc_provider *enc = &yarrow_enc_provider;
   ind.data = (char *) in;
   ind.length = CIPHER_BLOCK_SIZE;
   outd.data = out;
   outd.length = CIPHER_BLOCK_SIZE;
-  ret = enc->encrypt (ctx->key, 0, ind, outd);
+  ret = enc->encrypt (&ctx->key, 0, &ind, &outd);
   if (ret)
     return YARROW_FAIL;
   return YARROW_OK;

@@ -1,0 +1,36 @@
+thisconfigdir=./..
+myfulldir=lib/crypto/yarrow
+mydir=yarrow
+BUILDTOP=$(REL)$(U)$(S)$(U)$(S)$(U)
+LOCALINCLUDES = -I$(srcdir)/.. -I$(srcdir)/../sha1 -I$(srcdir)/../enc_provider
+
+##DOS##BUILDTOP = ..\..\..
+##DOS##PREFIXDIR=yarrow
+##DOS##OBJFILE=..\$(OUTPRE)yarrow.lst
+##WIN16##LIBNAME=..\crypto.lib
+
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
+
+RUN_SETUP = @KRB5_RUN_ENV@ KRB5_CONFIG=$(SRCTOP)/config-files/krb5.conf
+
+STLIBOBJS=\
+	yarrow.o \
+	ycipher.o
+OBJS=\
+	$(OUTPRE)yarrow.$(OBJEXT) \
+	$(OUTP)ycipher.$(OBJEXT)
+
+SRCS=\
+	$(srcdir)/yarrow.c \
+	$(srcdir)/ycipher.c 
+
+##DOS##LIBOBJS = $(OBJS)
+
+all-unix:: all-libobjs
+
+includes:: depend
+
+depend:: $(SRCS)
+
+clean-unix:: clean-libobjs
