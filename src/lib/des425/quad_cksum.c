@@ -98,10 +98,10 @@ static char rcsid_quad_cksum_c[] =
 
 /* vax byte order is LSB first. This is not performance critical, and
    is far more readable this way. */
-#define four_bytes_vax_to_nets(x) (((x[3]<<8|x[2])<<8|x[1]<<8)|x[0])
-#define vaxtohl(x) four_bytes_vax_to_nets(((char *)(x)))
+#define four_bytes_vax_to_nets(x) ((((((x[3]<<8)|x[2])<<8)|x[1])<<8)|x[0])
+#define vaxtohl(x) four_bytes_vax_to_nets(((unsigned char *)(x)))
 #define two_bytes_vax_to_nets(x) ((x[1]<<8)|x[0])
-#define vaxtohs(x) two_bytes_vax_to_nets(((char *)(x)))
+#define vaxtohs(x) two_bytes_vax_to_nets(((unsigned char *)(x)))
 
 /* Externals */
 extern char *errmsg();
