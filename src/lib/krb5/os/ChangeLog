@@ -5,6 +5,11 @@
 	(do_replacement): likewise
 	(aname_replacer): Support error return from do_replacement
 
+2004-05-07  Sam Hartman  <hartmans@mit.edu>
+
+	* an_to_ln.c: Patch from Matt Crawford  to allow matching on
+	realms of cross-realm principals.
+
 2004-03-22  Ken Raeburn  <raeburn@mit.edu>
 
 	* sendto_kdc.c (get_so_error): New function.

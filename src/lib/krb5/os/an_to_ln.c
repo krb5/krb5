@@ -488,7 +488,7 @@ rule_an_to_ln(krb5_context context, char *rule, krb5_const_principal aname, cons
     int			num_comps, compind;
     size_t selstring_used;
     char		*cout;
-    krb5_data		*datap;
+    krb5_const krb5_data *datap;
     char		*outstring;
 
     /*
@@ -522,9 +522,11 @@ rule_an_to_ln(krb5_context context, char *rule, krb5_const_principal aname, cons
 			    if (*current == '$') {
 				if ((sscanf(current+1, "%d", &compind) == 1) &&
 				    (compind <= num_comps) &&
-				    (datap = krb5_princ_component(context,
-								  aname,
-								  compind-1))
+				    (datap =
+				     (compind > 0)
+				     ? krb5_princ_component(context, aname,
+							    compind-1)
+				     : krb5_princ_realm(context, aname))
 				    ) {
 				    if ((datap->length < MAX_FORMAT_BUFFER)
 					&&  (selstring_used+datap->length
