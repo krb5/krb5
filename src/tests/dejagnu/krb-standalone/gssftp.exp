@@ -199,6 +199,11 @@ proc ftp_test { } {
     spawn $FTP $hostname 3021
 
     expect_after {
+	"GSSAPI authentication failed" {
+	    fail "$testname (auth failed)"
+	    catch "expect_after"
+	    return
+	}
 	timeout {
 	    fail "$testname (timeout)"
 	    catch "expect_after"

@@ -1,3 +1,8 @@
+2003-12-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* gssftp.exp (ftp_test): Look for "GSSAPI authentication failed"
+	error.
+
 2003-05-21  Tom Yu  <tlyu@mit.edu>
 
 	* kadmin.exp: Be slightly more lenient about matching password
