@@ -47,10 +47,6 @@ typedef struct _krb5_data {
 } krb5_data;
 
 
-typedef	krb5_data **	krb5_principal;	/* array of strings */
-					/* CONVENTION: realm is first elem. */
-#define krb5_princ_realm(princ) ((princ)[0])
-
 #ifdef __STDC__
 typedef	void * krb5_pointer;
 typedef void const * krb5_const_pointer;
@@ -67,5 +63,11 @@ typedef char * krb5_const_pointer;
 #define DECLARG(type, val) val
 #define OLDDECLARG(type, val) type val;
 #endif /* __STDC__ */
+
+typedef	krb5_data **	krb5_principal;	/* array of strings */
+					/* CONVENTION: realm is first elem. */
+typedef	const krb5_data ** krb5_const_principal;	/* array of strings */
+					/* CONVENTION: realm is first elem. */
+#define krb5_princ_realm(princ) ((princ)[0])
 
 #endif /* KRB5_BASE_DEFS__ */
