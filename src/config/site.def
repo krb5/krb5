@@ -243,6 +243,10 @@
 #ifdef UltrixArchitecture
 #define DefaultCDebugFlags DebuggableCDebugFlags
 #else
+#if HasGcc
+#define DefaultCDebugFlags DebuggableCDebugFlags
+#else
 #define DefaultCDebugFlags OptimizedCDebugFlags DebuggableCDebugFlags
+#endif
 #define ExtraLoadFlags -Z
 #endif
