@@ -1,3 +1,8 @@
+2003-01-12  Ezra Peisach  <epeisach@bu.edu>
+
+	* svr_iters.c (kadm5_get_either): For POSIX_REGEXPS
+	(i.e. regcomp), call regfree() to cleanup memory.
+
 2003-01-10  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in: Add AC_SUBST_FILE marker for lib_frag and libobj_frag.

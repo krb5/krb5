@@ -236,6 +236,9 @@ static kadm5_ret_t kadm5_get_either(int princ,
      }
      
      free(regexp);
+#ifdef POSIX_REGEXPS
+     regfree(&data.preg);
+#endif
      if (ret == OSA_ADB_OK && data.malloc_failed)
 	  ret = ENOMEM;
      if (ret != OSA_ADB_OK) {
