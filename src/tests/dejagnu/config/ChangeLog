@@ -1,3 +1,7 @@
+Fri Jun  9 23:45:08 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* default.exp: Use the principal "krbtest/admin@KRBTEST.COM" for
+		kadmin 
 
 Thu Jun 8 14:58:15 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* default.exp - Add logging section to the profile.  Also, export

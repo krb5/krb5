@@ -236,7 +236,7 @@ proc setup_kerberos_files { } {
     # Create ACL file.
     if ![file exists tmpdir/acl] {
 	set aclfile [open tmpdir/acl w]
-	puts $aclfile "krbtest/kadmin@KRBTEST.COM *"
+	puts $aclfile "krbtest/admin@KRBTEST.COM *"
 	close $aclfile
     }
 
@@ -529,12 +529,6 @@ proc setup_kerberos_db { standalone } {
     }
     send "masterkey$KEY\r"
     expect "kdb5_edit:"
-    send "ank krbtest/kadmin@KRBTEST.COM\r"
-    expect "Enter password:"
-    send "adminpass$KEY\r"
-    expect "Re-enter password for verification:"
-    send "adminpass$KEY\r"
-    expect "kdb5_edit:"
     send "ank krbtest/admin@KRBTEST.COM\r"
     expect "Enter password:"
     send "adminpass$KEY\r"
@@ -721,7 +715,7 @@ proc add_kerberos_key { kkey standalone } {
     global spawn_id
 
     # Use kadmin to add an key.
-    spawn $KADMIN -m -p krbtest/kadmin@KRBTEST.COM
+    spawn $KADMIN -m -p krbtest/admin@KRBTEST.COM
     expect_after {
 	timeout {
 	    fail "kadmin $kkey"
@@ -736,7 +730,7 @@ proc add_kerberos_key { kkey standalone } {
     }
     expect "kadmin5:"
     send "ank $kkey@KRBTEST.COM\r"
-    expect "Enter password for krbtest/kadmin@KRBTEST.COM:"
+    expect "Enter password for krbtest/admin@KRBTEST.COM:"
     send "adminpass$KEY\r"
     expect "Enter new password for $kkey@KRBTEST.COM :"
     send "$kkey"
@@ -775,7 +769,7 @@ proc add_random_key { kkey standalone } {
     global spawn_id
 
     # Use kadmin to add an key.
-    spawn $KADMIN -m -p krbtest/kadmin@KRBTEST.COM
+    spawn $KADMIN -m -p krbtest/admin@KRBTEST.COM
     expect_after {
 	timeout {
 	    fail "kadmin $kkey"
@@ -790,7 +784,7 @@ proc add_random_key { kkey standalone } {
     }
     expect "kadmin5:"
     send "ark $kkey@KRBTEST.COM\r"
-    expect "Enter password for krbtest/kadmin@KRBTEST.COM:"
+    expect "Enter password for krbtest/admin@KRBTEST.COM:"
     send "adminpass$KEY\r"
     expect {
 	"principal $kkey@KRBTEST.COM added" { }
