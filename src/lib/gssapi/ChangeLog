@@ -1,3 +1,10 @@
+2003-03-08  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in ($(BUILDTOP)/include/gssapi/gssapi.h,
+	generic/gssapi.h, generic/gssapi_err_generic.h,
+	krb5/gssapi_err_krb5.h): Comment out old rules and dependencies;
+	depend on all-recurse and supply a no-op rule.
+
 2003-03-07  Alexandra Ellwood  <lxs@mit.edu>
 
     * gss_libinit.c: Changed USE_HARDCODED_FALLBACK_ERROR_TABLES macro 
