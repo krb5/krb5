@@ -1,3 +1,8 @@
+2002-09-15  Tom Yu  <tlyu@mit.edu>
+
+	* aclocal.m4 (AC_KRB5_TCL_FIND_CONFIG): Set TCL_LIBPATH and
+	TCL_RPATH.
+
 2002-09-13  Ken Raeburn  <raeburn@mit.edu>
 
 	* aclocale.m4 (WITH_CC): Substitute @HAVE_GCC@.  Set
