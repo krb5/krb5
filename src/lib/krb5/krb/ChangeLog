@@ -1,3 +1,9 @@
+1999-06-18  Ken Raeburn  <raeburn@mit.edu>
+
+	* init_ctx.c (krb5_free_context): Set field pointers to NULL after
+	freeing targets, in case higher-level code retains pointers into
+	the context structure.  (From Jeffrey Altman.)
+
 Thu May 13 17:31:34 1999  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* init_ctx.c (krb5_init_context): Pass the context to

@@ -184,17 +184,25 @@ krb5_free_context(ctx)
      krb5_free_ets(ctx);
      krb5_os_free_context(ctx);
 
-     if (ctx->in_tkt_ktypes)
+     if (ctx->in_tkt_ktypes) {
           free(ctx->in_tkt_ktypes);
+	  ctx->in_tkt_ktypes = 0;
+     }
 
-     if (ctx->tgs_ktypes)
+     if (ctx->tgs_ktypes) {
           free(ctx->tgs_ktypes);
+	  ctx->tgs_ktypes = 0;
+     }
 
-     if (ctx->default_realm)
+     if (ctx->default_realm) {
 	  free(ctx->default_realm);
+	  ctx->default_realm = 0;
+     }
 
-     if (ctx->ser_ctx_count && ctx->ser_ctx)
-	 free(ctx->ser_ctx);
+     if (ctx->ser_ctx_count && ctx->ser_ctx) {
+	  free(ctx->ser_ctx);
+	  ctx->ser_ctx = 0;
+     }
 
      ctx->magic = 0;
      free(ctx);
