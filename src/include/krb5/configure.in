@@ -18,28 +18,8 @@ KRB5_POSIX_LOCKS
 dnl time_t, only used in lib/krb5/os/timeofday.c
 AC_EGREP_HEADER(time_t, sys/types.h, AC_DEFINE(POSIX_TYPES))
 
+KRB5_SIGTYPE
 
-dnl AC_RETSIGTYPE isn't quite right, but almost.
-AC_MSG_CHECKING([POSIX signal handlers])
-AC_CACHE_VAL(krb5_cv_has_posix_signals,
-[AC_TRY_COMPILE(
-[#include <sys/types.h>
-#include <signal.h>
-#ifdef signal
-#undef signal
-#endif
-extern void (*signal ()) ();], [],
-krb5_cv_has_posix_signals=yes, krb5_cv_has_posix_signals=no)])
-AC_MSG_RESULT($krb5_cv_has_posix_signals)
-if test $krb5_cv_has_posix_signals = yes; then
-AC_DEFINE(krb5_sigtype, void) AC_DEFINE(POSIX_SIGTYPE)
-else
-if test $ac_cv_type_signal = void; then
-AC_DEFINE(krb5_sigtype, void)
-else
-AC_DEFINE(krb5_sigtype, int)
-fi
-fi
 dnl
 dnl
 AC_HEADER_CHECK(string.h,AC_DEFINE(USE_STRING_H))

@@ -1,3 +1,8 @@
+Wed Jun 21 17:39:25 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* configure.in: Replace krb5_sigtype tests with KRB5_SIGTYPE which
+		has been moved to aclocal.m4
+
 Wed Jun 21 10:44:06 1995    <tytso@rsx-11.mit.edu>
 
 	* Makefile.in: Don't remove autoconf.h when doing a make clean;
