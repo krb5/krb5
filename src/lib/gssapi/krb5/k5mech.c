@@ -72,7 +72,8 @@ static struct gss_config krb5_mechanism =
 	krb5_gss_inquire_cred_by_mech,
 	krb5_gss_inquire_names_for_mech,
 	krb5_gss_inquire_context,
-	krb5_gss_internal_release_oid,	 
+	krb5_gss_internal_release_oid,
+	krb5_gss_wrap_size_limit,     
 	krb5_pname_to_uid,
 	};
 

@@ -3,6 +3,7 @@ Sat Feb 24 00:06:37 1996  Theodore Y. Ts'o  <tytso@dcl>
 	* k5mech.c (krb5_gss_initialize): No longer need to call
 		name-type/mechanism registration function.  This is now
 		done for us by the generic intialization function.
+		Add support for new V2 call gss_wrap_size_limit.
 
 Sat Feb 24 11:45:05 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
