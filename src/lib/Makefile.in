@@ -31,6 +31,12 @@ KLIBS = krb5\krb5.lib crypto\crypto.lib \
 GLIBS = gssapi\gssapi.lib
 K4LIBS = krb4\krb4.lib
 
+##WIN16##VERLIBS=..\mit\windows\lib\vswin.lib c:\msvc\lib\ver.lib
+##WIN32##VERLIBS=..\mit\windows\lib\vsnt.lib \
+##WIN32##	"c:\program files\devstudio\vc\lib\version.lib"
+##MIT##MITLIBS= $(VERLIBS)
+##MIT##MITFLAGS=-I..\mit\windows\include /DVERSERV=1
+
 ##WIN16##CDEF = comerr16.def
 ##WIN32##CDEF = comerr32.def
 ##WIN16##KDEF = krb5_16.def
@@ -62,22 +68,22 @@ $(CLIB): $(CLIBS) $(WLIB) $(CDEF) no_glue.obj
 $(KLIB): $(KLIBS) $(CLIB) $(WLIB) $(KDEF) k5_glue.obj $(KRB5RC)
 ##WIN16##	link /co /seg:400 /noe /nod /nol \
 ##WIN16##	   k5_glue, $*.dll, $*.map, \
-##WIN16##	   $(KLIBS) $(CLIB) $(WINLIBS), $(KDEF)
+##WIN16##	   $(MITLIBS) $(KLIBS) $(CLIB) $(WINLIBS), $(KDEF)
 ##WIN16##	rc /nologo /p /k $(CPPFLAGS) -D_MSDOS -DRES_ONLY \
 ##WIN16##	   $(KRB5RC) $*.dll
 ##WIN16##	implib /nologo $@ $*.dll
 ##WIN32##	link $(WINDLLFLAGS) /def:$(KDEF) /out:$*.dll \
-##WIN32##	   k5_glue.obj $(KRB5RC) $(KLIBS) $(CLIB) $(WINLIBS) \
-##WIN32##	   advapi32.lib gdi32.lib
+##WIN32##	   k5_glue.obj $(KRB5RC) $(MITLIBS) $(KLIBS) $(CLIB) \
+##WIN32##	   $(WINLIBS) advapi32.lib gdi32.lib
 
 $(GLIB): $(GLIBS) $(KLIB) $(CLIB) $(GDEF) gss_glue.obj
 ##WIN16##	link /co /seg:400 /noe /nod /nol \
 ##WIN16##	   gss_glue, $*.dll, $*.map, \
-##WIN16##	   $(GLIBS) $(KLIB) $(CLIB) $(WINLIBS), $(GDEF)
+##WIN16##	   $(MITLIBS) $(GLIBS) $(KLIB) $(CLIB) $(WINLIBS), $(GDEF)
 ##WIN16##	rc /nologo /p /k $*.dll
 ##WIN16##	implib /nologo $@ $*.dll
 ##WIN32##	link $(WINDLLFLAGS) /def:$(GDEF) /out:$*.dll \
-##WIN32##	   gss_glue.obj $(GLIBS) $(KLIB) $(CLIB) $(WINLIBS)
+##WIN32##	   gss_glue.obj $(MITLIBS) $(GLIBS) $(KLIB) $(CLIB) $(WINLIBS)
 
 $(K4LIB): $(K4LIBS) $(KLIB) $(CLIB) $(K4DEF) k4_glue.obj
 ##WIN16##	link /co /seg:400 /noe /nod /nol \
@@ -89,11 +95,11 @@ $(K4LIB): $(K4LIBS) $(KLIB) $(CLIB) $(K4DEF) k4_glue.obj
 ##WIN32##	   k4_glue.obj $(K4LIBS) $(KLIB) $(CLIB) $(WINLIBS)
 
 k5_glue.obj: win_glue.c
-	$(CC) $(CFLAGS) /c /DKRB5=1 /Fo$@ $**
+	$(CC) $(CFLAGS) $(MITFLAGS) /c /DKRB5=1 /Fo$@ $**
 k4_glue.obj: win_glue.c
 	$(CC) $(CFLAGS) /c /DKRB4=1 /Fo$@ $**
 gss_glue.obj: win_glue.c
-	$(CC) $(CFLAGS) /c /DGSSAPI=1 /Fo$@ $**
+	$(CC) $(CFLAGS) $(MITFLAGS) /c /DGSSAPI=1 /Fo$@ $**
 no_glue.obj: win_glue.c
 	$(CC) $(CFLAGS) /c /Fo$@ $**
 

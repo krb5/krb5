@@ -79,8 +79,123 @@
 
 #ifdef VERSERV
 #define WINDOWS
+#include <ver.h>
 #include <vs.h>
 #include <v.h>
+
+
+/*
+ * This function will get the version resource information from the
+ * application using the DLL.  This allows us to Version Serve
+ * arbitrary third party applications.  If there is an error, or we
+ * decide that we should not version check the calling application
+ * then VSflag will be FALSE when the function returns.
+ */
+	
+void GetCallingAppVerInfo( char *AppTitle, char *AppVer, char *AppIni,
+			  BOOL *VSflag)
+{
+	char CallerFilename[_MAX_PATH];
+	LONG FAR *lpLangInfo;
+	DWORD hVersionInfoID, size;
+	GLOBALHANDLE hVersionInfo;
+	LPSTR lpVersionInfo;
+	int dumint, retval;
+	char *cp;
+	char *revAppTitle;
+	char szVerQ[90];
+	LPBYTE locAppTitle;
+	LPBYTE locAppVer;
+	char locAppIni[_MAX_PATH];
+#ifndef _WIN32
+	WORD wStackSeg;
+#endif /* !_WIN32 */
+
+	/* first we need to get the calling module's filename */
+#ifndef _WIN32
+	_asm {
+		mov wStackSeg, ss
+	};
+	retval = GetModuleFileName((HMODULE)wStackSeg, CallerFilename,
+		_MAX_PATH);
+#else
+	/*
+	 * Note: this may only work for single threaded applications,
+	 * we'll live and learn ...
+	 */
+        retval = GetModuleFileName( NULL, CallerFilename, _MAX_PATH);
+#endif
+
+	if ( retval == 0 ) {
+		VSflag = FALSE;
+		return;
+	}
+
+	size = GetFileVersionInfoSize( CallerFilename, &hVersionInfoID);
+
+	if( size == 0 ) {
+		/*
+		 * hey , I bet we don't have a version resource, let's
+		 * punt
+		 */
+#if 0
+		/* let's see what we have? (1813 means no resource) */
+		size = GetLastError(); 		/*  WIN32 only */
+#endif
+		*VSflag = FALSE;
+		return;
+	}
+
+	hVersionInfo = GlobalAlloc(GHND, size);
+	lpVersionInfo = GlobalLock(hVersionInfo);
+
+	retval = GetFileVersionInfo( CallerFilename, hVersionInfoID, size,
+				    lpVersionInfo);
+
+	retval = VerQueryValue(lpVersionInfo, "\\VarFileInfo\\Translation",
+			       (LPSTR FAR *)&lpLangInfo, &dumint);
+	wsprintf(szVerQ,
+		 "\\StringFileInfo\\%04x%04x\\",
+		 LOWORD(*lpLangInfo), HIWORD(*lpLangInfo));
+	
+	cp = szVerQ + lstrlen(szVerQ);
+
+	lstrcpy(cp, "ProductName");
+
+
+	/* try a localAppTitle and then a strcpy 4/2/97 */
+
+	retval = VerQueryValue(lpVersionInfo, szVerQ, &locAppTitle,
+			       &dumint);
+
+	lstrcpy(cp, "ProductVersion");
+
+
+	retval = VerQueryValue(lpVersionInfo, szVerQ, &locAppVer,
+			       &dumint);
+
+	/*
+	 * We don't have a way to determine that INI file of the
+	 * application at the moment so let's just use krb5.ini
+	 */
+	strcpy( locAppIni, KERBEROS_INI );
+
+	strcpy( AppTitle, locAppTitle);
+	strcpy( AppVer, locAppVer);
+	strcpy( AppIni, locAppIni);
+
+	/*
+	 * We also need to determine if we want to suppress version
+	 * checking of this application.  Does the tail of the
+	 * AppTitle end in a "-v" ?
+	 */
+	revAppTitle = _strrev( _strdup(AppTitle));
+	if( revAppTitle[0] == 'v' || revAppTitle[0] == 'V'  &&
+	   revAppTitle[1] == '-' ) {
+		VSflag = FALSE;
+	}
+	return;
+}
 
 
 /*
@@ -98,8 +213,14 @@ static int CallVersionServer(app_title, app_version, app_ini, code_cover)
 
 	SetCursor(LoadCursor(NULL, IDC_WAIT));
 
-	vrequest = VSFormRequest(app_title, app_version, app_ini,
-				 code_cover, NULL, V_CHECK_AND_LOG);
+	/*
+	 * We should be able to pass in code_cover below, but things
+	 * are breaking under Windows 16 for no good reason.
+	 */
+	vrequest = VSFormRequest((LPSTR) app_title, (LPSTR) app_version,
+				 (LPSTR) app_ini,
+				 NULL /* code_cover */, NULL,
+				 V_CHECK_AND_LOG);
 
 	SetCursor(LoadCursor(NULL, IDC_ARROW));
 	/*
@@ -180,8 +301,24 @@ krb5_error_code krb5_vercheck()
 		return retval;
 #endif
 #ifdef VERSERV
+#if 0
+	/* Check library ? */
 	if (CallVersionServer(APP_TITLE, APP_VER, APP_INI, NULL))
-		return VERSERV_ERROR;
+		return KRB5_LIB_EXPIRED;
+#endif
+	{
+		char AppTitle[256];
+		char AppVer[256];
+		char AppIni[256];
+		BOOL VSflag=TRUE;
+
+		GetCallingAppVerInfo( AppTitle, AppVer, AppIni, &VSflag);
+
+		if (VSflag) {
+			if (CallVersionServer(AppTitle, AppVer, AppIni, NULL))
+				return KRB5_APPL_EXPIRED;
+		}
+	}
 #endif
 	return 0;
 }
