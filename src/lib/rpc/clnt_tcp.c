@@ -60,8 +60,6 @@ static char sccsid[] = "@(#)clnt_tcp.c 1.37 87/10/05 Copyr 1984 Sun Micro";
 
 #define MCALL_MSG_SIZE 24
 
-extern int errno;
-
 static enum clnt_stat	clnttcp_call(CLIENT *, rpc_u_int32, xdrproc_t, void *,
 				     xdrproc_t, void *, struct timeval);
 static void		clnttcp_abort(CLIENT *);
