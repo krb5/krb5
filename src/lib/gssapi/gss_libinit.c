@@ -2,6 +2,7 @@
 
 #include "gssapi_err_generic.h"
 #include "gssapi_err_krb5.h"
+#include "gssapiP_krb5.h"
 
 #include "gss_libinit.h"
 

@@ -1,3 +1,8 @@
+2001-06-04  Ezra Peisach  <epeisach@mit.edu>
+
+	* gss_libinit.c: Include gssapiP_krb5.h for kg_release_defcred()
+ 	prototype.
+
 2000-11-01  Ezra Peisach  <epeisach@mit.edu>
 
 	* configure.in: Use AC_TYPE_SIZE_T instead of AC_SIZE_T.
