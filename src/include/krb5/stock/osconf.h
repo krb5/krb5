@@ -40,7 +40,7 @@
 #define	DEFAULT_LNAME_FILENAME	"/aname"
 #define	DEFAULT_KEYTAB_NAME	"FILE:%s\\v5srvtab"
 #else /* !_WINDOWS */
-#define DEFAULT_PROFILE_PATH "/etc/krb5.conf:@PREFIX/lib/krb5.conf"
+#define DEFAULT_PROFILE_PATH	"/etc/krb5.conf:@PREFIX/lib/krb5.conf"
 #define	DEFAULT_KEYTAB_NAME	"FILE:/etc/v5srvtab"
 #define	DEFAULT_LNAME_FILENAME	"@PREFIX/lib/krb5.aname"
 #endif /* _WINDOWS  */
