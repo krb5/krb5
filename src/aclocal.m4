@@ -149,6 +149,9 @@ AC_MSG_NOTICE(PTHREAD_CFLAGS = $PTHREAD_CFLAGS)
 AC_MSG_NOTICE(PTHREAD_LIBS = $PTHREAD_LIBS)
 dnl Not really needed -- if pthread.h isn't found, ACX_PTHREAD will fail.
 AC_CHECK_HEADERS(pthread.h)
+case "${host_os}" in
+  aix*) LIBS="$LIBS $PTHREAD_LIBS" ;;
+esac
 fi
 dnl We want to know where these routines live, so on systems with weak
 dnl reference support we can figure out whether or not the pthread library
@@ -156,11 +159,12 @@ dnl has been linked in.
 dnl If we don't add any libraries for thread support, don't bother.
 AC_CHECK_FUNCS(pthread_once pthread_mutexattr_setrobust_np)
 old_CC="$CC"
-test "$PTHREAD_CC" != "" && CC=$PTHREAD_CC
+test "$PTHREAD_CC" != "" && test "$ac_cv_c_compiler_gnu" = no && CC=$PTHREAD_CC
 old_CFLAGS="$CFLAGS"
-CFLAGS="$CFLAGS $PTHREAD_CFLAGS"
+#CFLAGS="$CFLAGS $PTHREAD_CFLAGS"
+AC_SUBST(PTHREAD_CFLAGS)
 old_LIBS="$LIBS"
-LIBS="$PTHREAD_LIBS $LIBS"
+#LIBS="$PTHREAD_LIBS $LIBS"
 AC_MSG_NOTICE(rechecking with PTHREAD_... options)
 AC_CHECK_LIB(c, pthread_mutexattr_setrobust_np,
   [AC_DEFINE(HAVE_PTHREAD_MUTEXATTR_SETROBUST_NP_IN_THREAD_LIB,1,[Define if pthread_mutexattr_setrobust_np is provided in the thread library.])])
@@ -544,6 +548,10 @@ if test "$GCC" = yes ; then
       AC_MSG_NOTICE(disabling the use of common storage on Darwin)
       CFLAGS="$CFLAGS -fno-common"
       ;;
+    esac
+    case "$LD $LDFLAGS" in
+    *-Wl,-search_paths_first*) ;;
+    *) LDFLAGS="${LDFLAGS} -Wl,-search_paths_first" ;;
     esac
   fi
 fi

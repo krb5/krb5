@@ -1,5 +1,12 @@
 2004-06-18  Ken Raeburn  <raeburn@mit.edu>
 
+	* aclocal.m4 (WITH_CC): Use -Wl,-search_paths_first for linking on
+	Darwin.
+	(KRB5_AC_ENABLE_THREADS): On AIX, add PTHREAD_LIBS to LIBS; don't
+	do it on other platforms.  Override CC with PTHREAD_CC only if CC
+	is not gcc.  Don't add PTHREAD_CFLAGS to CFLAGS; substitute
+	PTHREAD_CFLAGS separately.
+
 	* Makefile.in (all-windows): Make autoconf.h in include\krb5
 	before building anything else.
 	(WINMAKEFILES): Add util\support\Makefile.
