@@ -64,7 +64,13 @@ krb524d: libkrb524.a krb524d.o $(DEPKDBLIB) $(DEPKLIB)
 k524init: libkrb524.a k524init.o $(DEPKLIB)
 	$(CC) -o k524init $(LDFLAGS) k524init.o $(KLIB) $(LIBS)
 
+install::
+	$(INSTALL_DATA) libkrb524.a $(DESTDIR)$(KRB5_LIBDIR)/libkrb524.a
+	$(RANLIB) $(DESTDIR)$(KRB5_LIBDIR)/libkrb524.a
+	$(INSTALL_PROGRAM) krb524d $(DESTDIR)$(SERVER_BINDIR)/krb524d
+	$(INSTALL_PROGRAM) k524init $(DESTDIR)$(CLIENT_BINDIR)/krb524init
+
 clean::
-	-rm -f libkrb524.a $(OBJS) $(GENS) core *~ *.bak #*
-	-rm -f test krb524d k524init test.o krb524d.o k524init.o
+	$(RM) libkrb524.a $(OBJS) $(GENS) core *~ *.bak #*
+	$(RM) test krb524d k524init test.o krb524d.o k524init.o
 

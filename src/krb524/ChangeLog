@@ -1,3 +1,7 @@
+Wed Jun 14 19:28:33 1995  Tom Yu  (tlyu@dragons-lair)
+
+	* Makefile.in: added install rules
+
 Fri Jun  9 19:16:49 1995    <tytso@rsx-11.mit.edu>
 
 	* configure.in: Remove standardized set of autoconf macros, which
