@@ -600,7 +600,7 @@ send_error(fd, err_text, err_code)
 	error.server = my_creds.server;
 	error.client = my_principal;
 	error.error = err_code - ERROR_TABLE_BASE_krb5;
-	if (error.error < 0 || error.error > 127)
+	if (error.error > 127)
 		error.error = KRB_ERR_GENERIC;
 	if (err_text)
 		text = err_text;

@@ -721,7 +721,7 @@ send_error(fd, err_code, err_text)
 		text = error_message(err_code);
 	
 	error.error = err_code - ERROR_TABLE_BASE_krb5;
-	if (error.error < 0 || error.error > 127) {
+	if (error.error > 127) {
 		error.error = KRB_ERR_GENERIC;
 		if (err_text) {
 			sprintf(buf, "%s %s", error_message(err_code),
