@@ -35,18 +35,18 @@
  * effects: If keyprocarg is not NULL, it is taken to be the name of a 
  *	keytab.  Otherwise, the default keytab will be used.  This 
  *	routine opens the keytab and finds the principal associated with
- *	principal, vno, and keytype and returns the resulting key in *key 
+ *	principal, vno, and enctype and returns the resulting key in *key 
  *	or returning an error code if it is not	found. 
  * returns: Either KSUCCESS or error code.
  * errors: error code if not found or keyprocarg is invalid.
  */
 krb5_error_code
-krb5_kt_read_service_key(context, keyprocarg, principal, vno, keytype, key)
+krb5_kt_read_service_key(context, keyprocarg, principal, vno, enctype, key)
     krb5_context context;
     krb5_pointer keyprocarg;
     krb5_principal principal;
     krb5_kvno vno;
-    krb5_keytype keytype;
+    krb5_enctype enctype;
     krb5_keyblock ** key;
 {
     krb5_error_code kerror = KSUCCESS;
@@ -70,7 +70,7 @@ krb5_kt_read_service_key(context, keyprocarg, principal, vno, keytype, key)
     if ((kerror = krb5_kt_resolve(context, (char *)keytabname, &id)))
 	return (kerror);
 
-    kerror = krb5_kt_get_entry(context, id, principal, vno, keytype, &entry);
+    kerror = krb5_kt_get_entry(context, id, principal, vno, enctype, &entry);
     krb5_kt_close(context, id);
 
     if (kerror)

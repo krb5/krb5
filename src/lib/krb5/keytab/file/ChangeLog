@@ -1,3 +1,17 @@
+Mon Sep 11 21:22:44 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* ser_ktf.c (krb5_ktf_keytab_externalize): On Macintosh, keytab
+		file is not left open
+
+Wed Sep 06 14:20:57 1995   Chris Provenzano (proven@mit.edu)
+
+        * ktf_g_ent.c, ktf_remove.c, ktf_util.c, ktfile.h : 
+		s/keytype/enctype/g, s/KEYTYPE/ENCTYPE/g
+
+Tue Sep 05 22:10:34 1995   Chris Provenzano (proven@mit.edu)
+
+        * ktf_util.c : Remove krb5_enctype references, and replace with
+                krb5_keytype where appropriate
 
 Tue Aug 29 13:38:58 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in, .Sanitize, ser_ktf.c - Add new module to support
