@@ -83,6 +83,7 @@ rule GenerateCompileEt
 
 actions GenerateCompileEt
 {
+    chmod 755 "$(2)" ;
     "$(2)" "$(AWK)" "$(SED)" > "$(1)";
     chmod 755 "$(1)" ;
 }
