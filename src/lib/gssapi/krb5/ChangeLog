@@ -1,5 +1,10 @@
 Wed Nov 20 19:55:29 1996  Marc Horowitz  <marc@cygnus.com>
 
+	* init_sec_context.c (make_ap_req), (krb5_gss_init_sec_context):
+ 	If delegation is requested, but forwarding the credentials fails,
+	instead of aborting the context setup, just don't forward
+	credentials.
+
 	* gssapiP_krb5.h (krb5_gss_ctx_id_t), ser_sctx.c
  	(kg_ctx_externalize, kg_ctx_internalize), init_sec_context.c
  	(krb5_gss_init_sec_context), get_tkt_flags.c
