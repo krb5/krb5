@@ -30,8 +30,6 @@
 #ifndef KRB5_KDB5_DBM__
 #define KRB5_KDB5_DBM__
 
-#define	DEFAULT_DBM_FILE		"/krb5/principal"
-
 /* exclusive or shared lock flags */
 #define	KRB5_DBM_SHARED		0
 #define	KRB5_DBM_EXCLUSIVE	1
