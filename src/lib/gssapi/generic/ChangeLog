@@ -1,3 +1,10 @@
+Tue Nov  5 18:47:44 1996  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (HDRS): Changes so that $(OBJS) will not get
+	recompiled gratuitously if someone touches the include directory.
+
+	* configure.in: Revert previous change re: CopySrcHeader.
+
 Tue Oct 29 10:20:58 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* Makefile.in: Use $(S) instead of / for productions which could

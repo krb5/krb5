@@ -17,16 +17,9 @@ ETOBJS= gssapi_err_generic.$(OBJEXT)
 ETHDRS= gssapi_err_generic.h
 
 EHDRDIR= $(BUILDTOP)$(S)include$(S)gssapi
-$(EHDRDIR):
-	mkdir $(EHDRDIR)
 
 HDRS=	$(EHDRDIR)/gssapi.h \
 	$(EHDRDIR)/gssapi_generic.h
-
-$(EHDRDIR)/gssapi.h: $(EHDRDIR) $(srcdir)/gssapi.h
-	$(CP) $(srcdir)$(S)gssapi.h $@
-$(EHDRDIR)/gssapi_generic.h: $(EHDRDIR) $(srcdir)/gssapi_generic.h
-	$(CP) $(srcdir)$(S)gssapi_generic.h $@
 
 gssapi_err_generic.$(OBJEXT): gssapi_err_generic.c
 	$(CC) $(CFLAGS) -c $*.c
@@ -84,7 +77,7 @@ $(OBJS): $(HDRS) $(ETHDRS)
 
 EXPORTED_HEADERS= gssapi.h gssapi_generic.h
 
-all-unix:: shared $(SRCS) $(EHDRDIR) $(ETHDRS) $(OBJS)
+all-unix:: shared $(SRCS) $(ETHDRS) $(OBJS)
 
 all-mac:: $(SRCS) $(HDRS) $(ETHDRS) $(OBJS)
 
