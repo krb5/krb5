@@ -1,3 +1,4 @@
+#include <stdio.h>
 /* ASN.1 primitive decoders */
 #include "asn1_decode.h"
 #include "asn1_get.h"
@@ -176,6 +177,7 @@ asn1_error_code asn1_decode_generaltime(DECLARG(asn1buf *, buf),
   t = mktime(&ts);
   if(t == -1) return ASN1_BAD_TIMEFORMAT;
 
+#define HAVE_GMTOFF
 #ifdef HAVE_GMTOFF
   t += ts.tm_gmtoff;		/* Convert back to UTC timezone */
 #else
@@ -190,6 +192,11 @@ asn1_error_code asn1_decode_generaltime(DECLARG(asn1buf *, buf),
     delta = (zl.tm_sec + 60*(zl.tm_min+60*(zl.tm_hour + 24*zl.tm_yday)))
       - (zg.tm_sec + 60*(zg.tm_min+60*(zg.tm_hour + 24*zg.tm_yday)));
 
+    if (ts.tm_isdst > 0) {
+      delta += 60*60;
+    }
+
+fprintf(stderr, "ASN1 DECODE: delta = %d\n", delta);
     t += delta;
   }
 #endif
