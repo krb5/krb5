@@ -4,7 +4,8 @@ KRB5SRVTABDIR = /etc
 ##DOSBUILDTOP = ..\..
 ##DOS!include $(BUILDTOP)\config\windows.in
 
-KRB5_HEADERS = asn1.h base-defs.h ccache.h k5-config.h encryption.h \
+KRB5_HEADERS = adm.h adm_proto.h \
+		asn1.h base-defs.h ccache.h k5-config.h encryption.h \
 		error_def.h k5-errors.h ext-proto.h fieldbits.h \
 		k5-free.h func-proto.h hostaddr.h kdb.h kdb_dbm.h \
 		keytab.h libos.h los-proto.h macros.h mit-des.h \
