@@ -1361,7 +1361,7 @@ proc start_kerberos_daemons { standalone } {
 
     envstack_push
     setup_kerberos_env kdc
-    spawn $KRB5KDC -r $REALMNAME -n
+    spawn $KRB5KDC -r $REALMNAME -n -4 enable
     envstack_pop
     set kdc_pid [exp_pid]
     set kdc_spawn_id $spawn_id

@@ -110,7 +110,7 @@ These instruct the KDC to not respond to V4 packets, to
 respond with a version skew error, to issue tickets for all database
 entries, and to issue tickets for all but preauthentication required
 database entries respectively. The default behaviour is as if 
-.I nopreauth
+.I none
 was specified.
 .PP
 The

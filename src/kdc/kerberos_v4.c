@@ -160,7 +160,7 @@ static int set_tgtkey (char *, krb5_kvno);
 #define	KDC_V4_FULL		2	/* Preauth required go through */
 #define KDC_V4_NOPREAUTH	3	/* Preauth required disallowed */
 
-#define KDC_V4_DEFAULT_MODE KDC_V4_NOPREAUTH
+#define KDC_V4_DEFAULT_MODE KDC_V4_NONE
 /* Flag on how to handle v4 */
 static int		kdc_v4;
 

@@ -206,6 +206,8 @@ in the @value{PRODUCT} Installation Guide.  When you get to the section
 that tells you to start the @code{krb5kdc} and @code{kadmind} daemons,
 first find and kill the Kerberos V4 @code{kerberos} daemon on each of
 the KDCs.  Then start the @code{krb5kdc} and @code{kadmind} daemons as
+You will need to specify an argument to the @code{-4} command line option to enable Kerberos 4 compatibility.
+See the @code{krb5kdc} man page for details.
 directed.  Finally, start the Kerberos V5 to V4 ticket translator
 daemon, @code{krb524d}, by issuing the command:
 

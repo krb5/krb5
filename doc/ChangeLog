@@ -1,3 +1,7 @@
+2003-02-04  Sam Hartman  <hartmans@mit.edu>
+
+	* krb425.texinfo (Upgrading KDCs): Note that -4 needs to be specified
+
 2003-01-30  Sam Hartman  <hartmans@mit.edu>
 
 	* definitions.texinfo: Remove bogus sample IPs and domains.
