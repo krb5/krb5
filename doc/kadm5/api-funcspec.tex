@@ -1016,105 +1016,20 @@ error code.
 
 \section{Tools}
 
-This section describes the tools that will create and maintain the
-admin databases on the Kerberos master server.  Some of the
-information described here depends on design details; it is included
-as part of the functional specifications because these tools are part
-of the external interface of the administration system.
+Three tools will be provided to create and manage the admin databases.
+This need only run on the admin server machine and do not need to
+operate remotely.  The tools are:
 
-\subsection{ovsec_adm_create}
+\begin{description}
+\item[ovsec_adm_create] create the admin service principal, the admin
+history principal, and empty admin policy database, and an admin
+principal database with an empty entry for every exist principal.
+\item[ovsec_adm_db_export/import] dump or load the admin policy and
+principal databases
+\item[ovsec_adm_check] check the kdc and admin databases for
+inconsistencies and repair them.
+\end{description}
 
-ovsec_adm_create creates and initializes the databases necessary for
-the operation of the admin server.  It accepts no command line
-arguments.  It should be run on the Kerberos master server.
-
-\begin{enumerate}
-\item It creates the databases ``/krb5/ovsec_adm_princ'' and
-``/krb5/ovsec_adm_policy''.
-
-\item It creates the principal ``kadmin@LOCAL.REALM'' with a random
-key in the Kerberos database if it does not already exist.  It sets
-the KRB5_KDB_DISALLOW_TGT_BASED bit in the principal's attributes
-field.
-
-\item It creates entries in the admin principal database for all
-principals already defined in the Kerberos database, but does not
-assign a policy to any principal.
-\end{enumerate}
-
-\subsection{ovsec_adm_edit}
-
-ovsec_adm_edit allows for low-level maintainance of the admin
-principal and policy da\-ta\-ba\-ses.\footnote{We expect this program to
-have more functionality in the future.} Its command line usage is
-
-\begin{verbatim}
-ovsec_adm_edit [-dump admin|policy] [-restore admin|policy]
-\end{verbatim}
-
-If the -dump argument is specified, it dumps either the admin
-principal database or the policy database to the standard output.  If
-the -restore argument is specified, it reads the principal database or
-the policy database from the standard input.
-
-Each database is represented by a sequence of records.  Each record in
-the database is printed in its ASCII representation, separated by a
-tab character, with each record followed by a newline.  Strings that
-can contain spaces, tabs, or newlines are enclosed in double quotes; a
-double-quoted string cannot contain double quotes.
-
-The fields within each record are read and written in the same order
-as they appear in the osa_princ_ent_t and osa_policy_ent_t,
-respectively (see the design document).
-% \ref{sec:db-types}
-
-\subsection{ovsec_check}
-
-ovsec_check checks the integrity of the Kerberos and \secure{}
-databases.  Its command line usage is
-
-\begin{verbatim}
-ovsec_check [-p] [-n]
-\end{verbatim}
-
-If the -n (``no corrections'') argument is specified, it only prints
-warnings for detected inconsistencies and makes no attempt to correct
-them.  If the -p (``preen'') argument is specified, it will
-automatically repair a specific subset of inconsistencies and print a
-warning about other inconsistencies.  If neither argument is
-specified, it asks the user whether or not it should fix each
-inconsistency, and prompts the user for any information it needs to do
-so.
-
-The operations that are performed automatically if -p is specified
-are:
-
-\begin{itemize}
-\item  If a principal exists in the Kerberos database that
-does not exist in the admin principal database, it is added to the
-admin principal database.
-
-\item  If a policy's reference count does not equal the
-number of principals that use the policy, the reference count is
-corrected.
-
-\item  If a principal has the POLICY bit set in aux_attributes, and
-its (pw_expiration - last_pwd_change) $>$ pw_max_life, the pw_expiration
-field is set to last_pwd_change + pw_max_life.
-\end{itemize}
-
-The operations that are only performed if -p is not specified are:
-
-\begin{itemize}
-\item If a principal exists in the principal admin
-database that does not exist in the Kerberos database, it is either
-created in the Kerberos database with a password specified by the
-user or removed from the principal admin database, at the user's
-option.
-
-\item If a principal references a policy that does not exist, the user
-is prompted to specify a new policy for the user or to specify that
-the user should have no policy.
-\end{itemize}
+The details of these tools are described in their own documents.
 
 \end{document}
