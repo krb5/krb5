@@ -80,7 +80,7 @@ void INTERFACE des_generate_random_block();
 int INTERFACE des_pcbc_encrypt();
 unsigned long INTERFACE des_quad_cksum();
 int INTERFACE des_random_key();
-int INTERFACE des_read_password();
+krb5_error_code INTERFACE des_read_password();
 int INTERFACE des_string_to_key();
 int INTERFACE des_is_weak_key();
 

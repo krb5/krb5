@@ -1,3 +1,10 @@
+Wed Mar 22 11:21:38 1995 Keith Vetter (keithv@fusion.com)
+
+	* read_passwd.c: changed return value to krb5_error_code
+        * des.h: same as above
+        * unix_time.c: didn't work on the PC. Copied PC time code from 
+           krb5\os\ustime.c.
+
 Mon Mar 20 21:14:40 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in, unix_time.c(unix_time_gmt_unixsec): Added function
