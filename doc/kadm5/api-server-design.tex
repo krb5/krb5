@@ -221,12 +221,14 @@ intelligence, such as maintaining policy reference counts or sanity
 checking, must be implemented above this layer.
 
 Prototypes for the osa functions are supplied in
-$<$ovsec_admin/adb.h$>$. The routines can be found (in the first
-relase) in ``stage/lib/libadb.a''. They require linking with the
-Berkely DB library (``stage/lib/libdb.a''). [Note: We needed to remove
-the dbm compatibility routines from libdb.a because we want to leave
-KDB library alone in case somebody wants to run a stock MIT KDC with
-our admin server.]
+$<$ovsec_admin/adb.h$>$. The routines can be found in
+``install/lib/libadmsrv.a''. They require linking with the Berkely DB
+library (``install/lib/libdb.a''). [Note: We needed to remove the dbm
+compatibility routines from libdb.a because we want to leave KDB
+library alone in case somebody wants to run a stock MIT KDC with our
+admin server.]
+
+\subsubsection{Error codes}
 
 The database routines use com_err for error codes.  The error code
 table name is ``adb'' and the offsets are the same as the order
@@ -243,10 +245,43 @@ init_adb_err_tbl() to initialize the database table.
 \item[OSA_ADB_BAD_POLICY] The specified policy name is invalid.
 \item[OSA_ADB_XDR_FAILURE] The principal or policy structure cannot be
 encoded for storage.
+\item[OSA_ADB_BADLOCKMODE] Bad lock mode specified.
+\item[OSA_ADB_CANTLOCK_DB] Cannot lock database, presumably because it
+is already locked.
+\item[OSA_ADB_NOTLOCKED] Internal error, database not locked when
+unlock is called.
+\item[OSA_ADB_NOLOCKFILE] OpenV*Secure administration database lock
+file (/krb5/ovsec_adm.lock) missing.
 \end{description}
 
 Database functions can also return system errors.  Unless otherwise
 specified, database functions return OSA_ADB_OK.
+
+\subsubsection{Locking}
+
+All of the osa_adb functions except open and close lock and unlock the
+database to prevent concurrency collisions.  The overall locking
+algorithm is as follows:
+
+\begin{enumerate}
+\item osa_adb_open_T calls osa_adb_init_db to allocate the osa_adb_T_t
+structure and open the locking file for further use.
+
+\item Each osa_adb functions locks the locking file and opens the
+appropriate database with osa_adb_open_and_lock, performs its action,
+and then closes the database and unlocks the locking file with
+osa_adb_close_and_unlock.
+
+\item osa_adb_close_T calls osa_adb_fini_db to close the locking file
+and deallocate the db structure.
+\end{enumerate}
+
+Functions which modify the database acquire an exclusive lock, others
+acqure a shared lock.  osa_adb_iter_T acquires an exclusive lock for
+safety but as stated below consequences of modifying the database in
+the iteration function are undefined.
+
+\subsubsection{Function descriptions}
 
 \begin{verbatim}
 osa_adb_ret_t
