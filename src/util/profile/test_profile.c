@@ -83,8 +83,11 @@ static void do_batchmode(profile)
 			retval = profile_rename_section(profile, names+1,
 							*names);
 		} else if (!strcmp(cmd, "add")) {
+			value = *names;
+			if (strcmp(value, "NULL") == 0)
+				value = NULL;
 			retval = profile_add_relation(profile, names+1,
-						      *names);
+						      value);
 		} else if (!strcmp(cmd, "flush")) {
 			retval = profile_flush(profile);
 		} else {

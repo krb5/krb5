@@ -476,7 +476,7 @@ errcode_t profile_node_iterator(iter_p, ret_node, ret_name, ret_value)
 		iter->node = 0;
 	}
 get_new_file:
-	while (iter->node == 0) {
+	if (iter->node == 0) {
 		if (iter->file == 0 ||
 		    (iter->flags & PROFILE_ITER_FINAL_SEEN)) {
 			profile_node_iterator_free(iter_p);
@@ -513,7 +513,7 @@ get_new_file:
 		if (!section) {
 			iter->file = iter->file->next;
 			skip_num = 0;
-			continue;
+			goto get_new_file;
 		}
 		iter->name = *cpp;
 		iter->node = section->first_child;

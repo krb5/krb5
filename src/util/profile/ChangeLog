@@ -1,3 +1,12 @@
+Mon Mar  8 14:38:24 1999  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* prof_tree.c (profile_node_iterator): Fix bug where it will loop
+		endlessly when searching an empty section.
+
+	* test_profile.c: Add code so that the "add" code will interpret
+		"NULL" as calling profile_add_relation with a null pointer
+		for the value.
+
 Wed Mar  3 18:23:47 1999  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* prof_file.c (profile_flush_file): On the Macintosh, fopen()
