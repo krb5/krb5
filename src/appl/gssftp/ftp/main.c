@@ -175,7 +175,7 @@ main(argc, argv)
 	cpend = 0;	/* no pending replies */
 	proxy = 0;	/* proxy not active */
 #ifndef NO_PASSIVE_MODE
-	passivemode = 1; /* passive mode active */
+	passivemode = 0; /* passive mode not active */
 #endif
 	crflag = 1;	/* strip c.r. on ascii gets */
 	sendport = -1;	/* not using ports */

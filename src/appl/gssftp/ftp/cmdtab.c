@@ -137,7 +137,7 @@ char	umaskhelp[] =	"get (set) umask on remote side";
 char	userhelp[] =	"send new user information";
 char	verbosehelp[] =	"toggle verbose mode";
 #ifndef NO_PASSIVE_MODE
-char	setpassivehelp[] = "enter passive transfer mode";
+char	setpassivehelp[] = "toggle passive transfer mode";
 #endif
 
 struct cmd cmdtab[] = {

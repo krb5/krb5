@@ -1,3 +1,10 @@
+Fri Oct  2 16:16:13 1998  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* cmdtab.c: Update help message for passive mode so that it
+ 		indicates that the "passive" command toggles passive mode.
+
+	* main.c (main): Make passive mode off by default.
+
 Fri Aug 28 18:46:35 1998  Geoffrey King  <gjking@mit.edu>
 
 	* cmds.c (user): Replace "oldlevel" with the more descriptive
