@@ -170,6 +170,23 @@ OLDDECLARG(krb5_db_entry *, entry)
     krb5_timestamp KDB5_EXP_DATE  = KRB5_KDB_EXPIRATION;
     extern krb5_flags NEW_ATTRIBUTES;
 
+    if (!req_type) { /* New entry - initialize */
+	memset((char *) entry, 0, sizeof(*entry));
+        entry->principal = (krb5_principal) principal;
+        entry->kvno = KDB5_VERSION_NUM;
+        entry->max_life = KDB5_MAX_TKT_LIFE;
+        entry->max_renewable_life = KDB5_MAX_REN_LIFE;
+        entry->mkvno = mblock.mkvno;
+        entry->expiration = KDB5_EXP_DATE;
+        entry->mod_name = master_princ;
+    } else { /* Modify existing entry */
+	entry->kvno++;
+#ifdef SANDIA
+	entry->attributes &= ~KRB5_KDB_REQUIRES_PWCHANGE;
+#endif
+	entry->mod_name = (krb5_principal) principal;
+    }
+
     if (key && key->length) {
 	retval = krb5_kdb_encrypt_key(&master_encblock,
 				      key,
@@ -190,23 +207,6 @@ OLDDECLARG(krb5_db_entry *, entry)
 		    "while encrypting alt_key for '%s'", newprinc);
 	    return(KADM_NO_ENCRYPT);
 	}
-    }
-
-    if (!req_type) { /* New entry - initialize */
-	memset((char *) entry, 0, sizeof(*entry));
-        entry->principal = (krb5_principal) principal;
-        entry->kvno = KDB5_VERSION_NUM;
-        entry->max_life = KDB5_MAX_TKT_LIFE;
-        entry->max_renewable_life = KDB5_MAX_REN_LIFE;
-        entry->mkvno = mblock.mkvno;
-        entry->expiration = KDB5_EXP_DATE;
-        entry->mod_name = master_princ;
-    } else { /* Modify existing entry */
-	entry->kvno++;
-#ifdef SANDIA
-	entry->attributes &= ~KRB5_KDB_REQUIRES_PWCHANGE;
-#endif
-	entry->mod_name = (krb5_principal) principal;
     }
 
     if (retval = krb5_timeofday(&entry->mod_date)) {
