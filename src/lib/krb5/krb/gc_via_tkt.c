@@ -179,7 +179,7 @@ krb5_get_cred_via_tkt (context, tkt, kdcoptions, address, in_cred, out_cred)
 	if (retval) 			/* neither proper reply nor error! */
 	    goto error_4;
 
-	retval = err_reply->error + ERROR_TABLE_BASE_krb5;
+	retval = (krb5_error_code) err_reply->error + ERROR_TABLE_BASE_krb5;
 
 	krb5_free_error(context, err_reply);
 	goto error_4;

@@ -130,7 +130,8 @@ krb5_walk_realm_tree(context, client, server, tree, realm_branch_char)
     cap_names[2] = cap_server;
     cap_names[3] = 0;
     cap_code = profile_get_values(context->profile, cap_names, &cap_nodes);
-    krb5_xfree(cap_names[1]);    /* done with client string */
+    krb5_xfree(cap_client);  /* done with client string */
+    cap_names[1] = 0;
     if (cap_code == 0) {     /* found a path, so lets use it */
 	links = 0;
 	if (*cap_nodes[0] != '.') { /* a link of . means direct */
@@ -143,7 +144,8 @@ krb5_walk_realm_tree(context, client, server, tree, realm_branch_char)
 	/* cleanup eaiser as well */
 	links++;		/* count the null entry at end */
     } else {			/* no path use hierarchical method */
-	krb5_xfree(cap_names[2]); /* failed, don't need server string */
+	krb5_xfree(cap_server); /* failed, don't need server string */
+	cap_names[2] = 0;
 #endif
 	clen = client->length;
 	slen = server->length;

@@ -53,8 +53,8 @@ krb5_mk_safe_basic(context, userdata, keyblock, replaydata, local_addr,
     const krb5_data 	* userdata;
     const krb5_keyblock * keyblock;
     krb5_replay_data    * replaydata;
-    const krb5_address 	* local_addr;
-    const krb5_address 	* remote_addr;
+    krb5_address 	* local_addr;
+    krb5_address 	* remote_addr;
     const krb5_cksumtype  sumtype;
     krb5_data 		* outbuf;
 {
