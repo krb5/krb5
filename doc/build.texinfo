@@ -37,14 +37,18 @@ link tree for your build tree.
 
 The first step in each of these build procedures is to unpack the source
 distribution.  The Kerberos V5 distribution comes in two compressed tar
-files.  The first file, which is generally named @file{krb5.src.tar.gz},
-contains the sources for all of Kerberos except for the crypto library,
-which is found in the file @file{krb5.crypto.tar.gz}.
+files.  The first file, which is generally named
+@file{krb5-1.0.src.tar.gz}, contains the sources for all of Kerberos
+except for the crypto library, which is found in the file
+@file{krb5-1.0.crypto.tar.gz}.
 
 Both files should be unpacked in the same directory, such as
-@file{/u1/krb5}.  (In the rest of this document, we will assume that you
-have chosen to unpack the Kerberos V5 source distribution in this
-directory.)
+@file{/u1/krb5-1.0}.  (In the rest of this document, we will assume that
+you have chosen to unpack the Kerberos V5 source distribution in this
+directory.  Note that the tarfiles will by default all unpack into the
+@file{./krb5-1.0} directory, so that if your current directory is
+@file{/u1} when you unpack the tarfiles, you will get
+@file{/u1/krb5-1.0/src}, etc.)
 
 
 @node Doing the Build, Testing the Build, Unpacking the Sources, Building Kerberos V5
@@ -73,7 +77,7 @@ use the following abbreviated procedure.
 
 @enumerate
 @item
- @code{cd /u1/krb5/src}
+ @code{cd /u1/krb5-1.0/src}
 @item
  @code{./configure}
 @item
@@ -96,9 +100,9 @@ you might use the following procedure:
 
 @enumerate
 @item 
-@code{mkdir /u1/krb5/pmax}
+@code{mkdir /u1/krb5-1.0/pmax}
 @item
- @code{cd /u1/krb5/pmax}
+ @code{cd /u1/krb5-1.0/pmax}
 @item
  @code{../src/configure}
 @item
@@ -118,11 +122,11 @@ you might use the following procedure:
 
 @enumerate
 @item
- @code{mkdir /u1/krb5/solaris}
+ @code{mkdir /u1/krb5-1.0/solaris}
 @item
- @code{cd /u1/krb5/solaris}
+ @code{cd /u1/krb5-1.0/solaris}
 @item
- @code{/u1/krb5/src/util/lndir `pwd`/../src}
+ @code{/u1/krb5-1.0/src/util/lndir `pwd`/../src}
 @item
  @code{./configure}
 @item
@@ -202,6 +206,13 @@ desire a different location use this option.
 
 This option allows one to separate the architecture independent programs
 from the configuration files and manual pages. 
+
+@item --localstatedir=DIR
+
+This option sets the directory for locally modifiable single-machine
+data.  In Kerberos, this mostly is useful for setting a location for the
+KDC data files, as they will be installed in LOCALSTATEDIR/krb5kdc,
+which is by default PREFIX/var/krb5kdc.
 
 @item --with-cc=COMPILER
 
@@ -321,11 +332,6 @@ realms, their KDCs, etc.
 The profile file format is no longer the same format as Kerberos V4's
 @file{krb.conf} file. 
 
-@item DEFAULT_LNAME_FILENAME
-
-The pathname to the database that maps authentication names to local
-account names.  See kdb5_anadd(8).
-
 @item DEFAULT_KEYTAB_NAME
 
 The type and pathname to the default server keytab file (the equivalent
@@ -362,7 +368,7 @@ of the libraries may be installed on the same system and continue to
 work.
 
 Currently the supported platforms are: NetBSD 1.0A, AIX 3.2.5, AIX 4.1,
-Solaris 5.3, Alpha OSF/1 >= 2.1, HP-UX >= 9.X.
+Solaris 2.4 (aka SunOS 5.4), Alpha OSF/1 >= 2.1, HP-UX >= 9.X.
 
 To enable shared libraries on the above platforms, run the configure
 script with the option @samp{--enable-shared}.
@@ -494,10 +500,6 @@ LD_LIBRARY_PATH environment variable when you compile it.  Alternatively
 you can use the @code{-i} option to @samp{cc}, by using the specifying
 @code{--with-ccopts=-i} option to @samp{configure}.
 
-Shared library support only works when using the Sunsoft C compiler. We
-are currently using version 3.0.1.   (The latest GCC may work; this
-needs to be tested.)
-
 @node SGI Irix 5.X, Ultrix 4.2/3, Solaris 2.X, OS Incompatibilities
 @subsection SGI Irix 5.X
 
@@ -572,7 +574,7 @@ that you have made a change that will require that all the
 @code{--force} option:
 
 @example
-% cd /u1/krb5/src
+% cd /u1/krb5-1.0/src
 % ./util/reconf --force
 @end example
 
@@ -592,7 +594,7 @@ Then follow the instructions for building packaged source trees (above).
 To install the binaries into a binary tree, do:
 
 @example
-% cd /u1/krb5/src
+% cd /u1/krb5-1.0/src
 % make all
 % make install DESTDIR=somewhere-else
 @end example

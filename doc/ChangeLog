@@ -1,5 +1,15 @@
 Fri Nov 29 19:47:38 1996  Tom Yu  <tlyu@mit.edu>
 
+	* build.texinfo (Unpacking the Sources): Mention that ./krb5-1.0
+	is the default directory that the tarballs will unpack into.
+	Also, "/u1/krb5" -> "/u1/krb5-1.0".
+	(osconf.h): Remove reference to DEFAULT_LNAME_FILENAME, as we're
+	no longer using the aname database code.
+	(Options to Configure): Add mention of --localstatedir
+	(Shared Library Support): It's Solaris 2.4/SunOS 5.4, not Solaris
+	5.4.
+	(Solaris 2.X): Shared libs work with gcc.
+
 	* install.texinfo (Mapping Hostnames onto Kerberos Realms): Fix
 	spacing error.
 
