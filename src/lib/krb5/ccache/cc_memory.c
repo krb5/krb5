@@ -139,7 +139,6 @@ krb5_error_code KRB5_CALLCONV
 krb5_mcc_close(krb5_context context, krb5_ccache id)
 {
      krb5_xfree(id);
-
      return KRB5_OK;
 }
 
@@ -158,7 +157,6 @@ krb5_mcc_free(krb5_context context, krb5_ccache id)
     }
     d->link = NULL;
     krb5_free_principal(context, d->prin);
-    k5_mutex_destroy(&d->lock);
 }
 
 /*

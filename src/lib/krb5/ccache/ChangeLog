@@ -1,3 +1,7 @@
+2004-06-29  Ken Raeburn  <raeburn@mit.edu>
+
+	* cc_memory.c (krb5_mcc_free): Don't destroy the mutex here.
+
 2004-06-28  Ken Raeburn  <raeburn@mit.edu>
 
 	* cc_memory.c: Include k5-thread.h.
