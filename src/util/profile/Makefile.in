@@ -52,7 +52,7 @@ STOBJLISTS=OBJS.ST
 
 PROFILE_HDR=$(BUILDTOP)$(S)include$(S)profile.h
 
-all-unix:: includes test_parse test_profile
+all-unix:: includes 
 all-unix:: all-libs
 all-windows:: $(PROFILE_HDR)
 
@@ -114,6 +114,8 @@ clean-unix:: clean-libs clean-libobjs
 clean-windows::
 	$(RM) $(PROFILE_HDR)
 
+check-unix:: test_parse test_profile
+
 check-windows:: $(OUTPRE)test_profile.exe $(OUTPRE)test_parse.exe
 	$(RM) $(OUTPRE)*.obj
 	$(OUTPRE)test_parse test.ini
@@ -140,4 +142,5 @@ test_parse.so test_parse.po $(OUTPRE)test_parse.$(OBJEXT): test_parse.c prof_int
   $(COM_ERR_DEPS) prof_err.h profile.h
 test_profile.so test_profile.po $(OUTPRE)test_profile.$(OBJEXT): test_profile.c prof_int.h \
   $(COM_ERR_DEPS) prof_err.h profile.h argv_parse.h
+
 
