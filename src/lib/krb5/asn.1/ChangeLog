@@ -1,3 +1,8 @@
+1999-06-15  Tom Yu  <tlyu@mit.edu>
+
+	* asn1_encode.c (asn1_encode_generaltime): Fix minor bug in
+	bounds-checking for tm_year: 1900 + 8099 = 9999.
+
 Mon May 10 15:23:51 1999  Danilo Almeida  <dalmeida@mit.edu>
 
 	* Makefile.in: Do win32 build in subdir.

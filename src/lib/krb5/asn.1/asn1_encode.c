@@ -210,7 +210,7 @@ asn1_error_code asn1_encode_generaltime(buf, val, retlen)
    * and some bogus implementations might overrun on the sprintf.
    */
   if (gtime == NULL ||
-      gtime->tm_year > 9999 || gtime->tm_mon > 11 ||
+      gtime->tm_year > 8099 || gtime->tm_mon > 11 ||
       gtime->tm_mday > 31 || gtime->tm_hour > 23 ||
       gtime->tm_min > 59 || gtime->tm_sec > 59)
     return ASN1_BAD_GMTIME;
