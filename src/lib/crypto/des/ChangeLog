@@ -1,3 +1,10 @@
+2004-02-17  Ken Raeburn  <raeburn@mit.edu>
+
+	* afsstring2key.c (krb5_afs_encrypt): Drop EDFLAG as an argument,
+	make it local instead, since we always pass 0.
+	(afs_crypt): Call changed.
+	(krb5_afs_crypt_setkey, krb5_afs_encrypt): Use memcpy.
+
 2003-12-19  Ken Raeburn  <raeburn@mit.edu>
 
 	* f_cbc.c (mit_des_zeroblock): Define, as a single cblock, not the
