@@ -1,3 +1,8 @@
+Thu Aug  7 15:53:13 1997  Tom Yu  <tlyu@mit.edu>
+
+	* g_cnffile.c: Check to see if context is NULL prior to calling
+	profile_get_values.  Fixes krb5-libs/317.
+
 Wed Apr  9 23:15:39 1997  Tom Yu  <tlyu@mit.edu>
 
 	* realmofhost.c (krb_realmofhost): Add bounds checking to various

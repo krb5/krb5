@@ -33,14 +33,16 @@ krb__v5_get_file(s)
 	names[0] = "libdefaults";
 	names[1] = s;
 	names[2] = 0;
-	retval = profile_get_values(context->profile, names, &full_name);
-	if (retval == 0 && full_name && full_name[0]) {
+	if (context) {
+	    retval = profile_get_values(context->profile, names, &full_name);
+	    if (retval == 0 && full_name && full_name[0]) {
 		cnffile = fopen(full_name[0],"r");
 		for (cpp = full_name; *cpp; cpp++) 
-			krb5_xfree(*cpp);
+		    krb5_xfree(*cpp);
 		krb5_xfree(full_name);
+	    }
+	    krb5_free_context(context);
 	}
-	krb5_free_context(context);
 	return cnffile;
 }
 
@@ -58,14 +60,15 @@ krb__get_srvtabname(default_srvtabname)
 	names[0] = "libdefaults";
 	names[1] = "krb4_srvtab";
 	names[2] = 0;
-	retval = profile_get_values(context->profile, names, &full_name);
-	if (retval == 0 && full_name && full_name[0]) {
-		retname = strdup(full_name[0]);
-		for (cpp = full_name; *cpp; cpp++) 
-			krb5_xfree(*cpp);
-		krb5_xfree(full_name);
-	} else {
-		retname = strdup(default_srvtabname);
+	if (context &&
+	    (retval = profile_get_values(context->profile, names, &full_name))
+	    && retval == 0 && full_name && full_name[0]) {
+	    retname = strdup(full_name[0]);
+	    for (cpp = full_name; *cpp; cpp++) 
+		krb5_xfree(*cpp);
+	    krb5_xfree(full_name);
+	}else {
+	    retname = strdup(default_srvtabname);
 	}
 	krb5_free_context(context);
 	return retname;
