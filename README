@@ -81,17 +81,32 @@ Major Changes:
 
 Minor Changes:
 
+* [1218] ftpcmd.y now compiles successfully using more recent versions
+  of bison.
+
 * [1206] Fixed memory leak in padata handling in KDC.  Thanks to Ben
   Cox.
 
 * [1207] Clients can now successfully specify explicit keysalt tuples
   to password-changing kadm5 functions.  Thanks to Ben Cox.
 
+* [1008] Clients can now successfully pass an empty set of keysalt
+  tuples to the setkey kadm5 function.  Thanks to Emily Ratliff.
+
 * [1216] Fixed client-side read overruns in calls to res_search().
   Thanks to Nalin Dahyabhai.
 
 * [1241] The test suite has been stabilized somewhat to work better
   with modern versions of tcl and expect.
+
+* [1246] A race condition in the rpc unit tests has been worked
+  around.
+
+* [1249] The tests/dejagnu test suite has been fixed to leak ptys less
+  often.
+
+* [1185] sendmsg.c no longer checks that a pointer value is greater
+  than zero.  Thanks to Dan Riley.
 
 Known Bugs:
 
