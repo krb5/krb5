@@ -47,15 +47,14 @@ krb5_int32 *seqno;
 {
     krb5_pointer random_state;
     krb5_encrypt_block eblock;
-    krb5_keyblock *subkey;
+    krb5_keyblock *subkey = 0;
     krb5_error_code retval;
     struct tval {
 	krb5_int32 seconds;
 	krb5_int32 microseconds;
     } timenow;
-    krb5_octet *intmp, *outtmp;
+    krb5_octet *intmp = 0, *outtmp = 0;
     int esize;
-    char *outseqno;
 
     if (!valid_keytype(key->keytype))
 	return KRB5_PROG_KEYTYPE_NOSUPP;
@@ -78,19 +77,17 @@ krb5_int32 *seqno;
     esize = krb5_encrypt_size(sizeof(timenow), eblock.crypto_entry);
     intmp = (krb5_octet *)malloc(esize);
     if (!intmp) {
-	krb5_free_keyblock(subkey);
-	return ENOMEM;
+	    retval = ENOMEM;
+	    goto cleanup;
     }
     outtmp = (krb5_octet *)malloc(esize);
     if (!outtmp) {
-	krb5_xfree(intmp);
-	krb5_free_keyblock(subkey);
-	return ENOMEM;
+	    retval = ENOMEM;
+	    goto cleanup;
     }
     if (retval = krb5_process_key(&eblock, subkey)) {
 	goto cleanup;
     }
-    outseqno = (char *)seqno;
 
     if (retval = krb5_us_timeofday(&timenow.seconds,
 				   &timenow.microseconds)) {
@@ -98,28 +95,21 @@ krb5_int32 *seqno;
     }
     memcpy((char *)intmp, (char *)&timenow, sizeof(timenow));
 
-    while (outseqno < (char *)(seqno+1)) {
-	memset((char *)intmp, 0, esize);
-
-	if (retval = krb5_encrypt((krb5_pointer)intmp,
-				  (krb5_pointer)outtmp,
-				  sizeof(timenow),
-				  &eblock,
-				  0)) {
-	    (void) krb5_finish_key(&eblock);
-	    goto cleanup;
-	}
-	memcpy(outseqno, (char *)outtmp, MIN((char *)(seqno+1)-outseqno,
-					     esize));
-	outseqno += MIN((char *)(seqno+1)-outseqno, esize);
-	/* chain along */
-	memcpy((char *)intmp,(char *)outtmp,esize);
-    }
+    retval = krb5_encrypt((krb5_pointer)intmp, (krb5_pointer)outtmp,
+			  sizeof(timenow), &eblock, 0);
     (void) krb5_finish_key(&eblock);
- cleanup:
-    krb5_free_keyblock(subkey);
-    krb5_xfree(intmp);
-    krb5_xfree(outtmp);
+    if (retval)
+	    goto cleanup;
+
+    memcpy((char *) seqno, (char *)outtmp, sizeof(krb5_int32));
+    
+cleanup:
+    if (subkey)
+	    krb5_free_keyblock(subkey);
+    if (intmp)
+	    krb5_xfree(intmp);
+    if (outtmp)
+	    krb5_xfree(outtmp);
     return retval;
 }
 
