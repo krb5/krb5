@@ -2,7 +2,8 @@
  * $Source$
  * $Author$
  *
- * Copyright 1990 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991 by the Massachusetts Institute of Technology.
+ * All Rights Reserved.
  *
  * For copying and distribution information, please see the file
  * <krb5/copyright.h>.
@@ -31,24 +32,24 @@ static char rcsid_walk_rtree_c[] =
 
 krb5_error_code
 krb5_walk_realm_tree(client, server, tree)
-krb5_const_principal client, server;
+const krb5_data *client, *server;
 krb5_principal **tree;
 {
     krb5_error_code retval;
     krb5_principal *rettree;
     register char *ccp, *scp;
-    register char *prevccp, *prevscp;
+    register char *prevccp = 0, *prevscp = 0;
     char *com_sdot = 0, *com_cdot = 0;
     register int i, links = 0;
     int clen, slen;
     krb5_data tmpcrealm, tmpsrealm;
     int nocommon = 1;
 
-    clen = krb5_princ_realm(client)->length;
-    slen = krb5_princ_realm(server)->length;
+    clen = client->length;
+    slen = server->length;
 
-    for (com_cdot = ccp = krb5_princ_realm(client)->data + clen - 1,
-	 com_sdot = scp = krb5_princ_realm(server)->data + slen - 1;
+    for (com_cdot = ccp = client->data + clen - 1,
+	 com_sdot = scp = server->data + slen - 1;
 	 clen && slen && *ccp == *scp ;
 	 ccp--, scp--, 	clen--, slen--) {
 	if (*ccp == REALM_BRANCH_CHAR) {
@@ -69,7 +70,7 @@ krb5_principal **tree;
 	    return KRB5_NO_TKT_IN_RLM;
 	if (*scp == REALM_BRANCH_CHAR) {
 	    /* one is a subdomain of the other */
-	    com_cdot = krb5_princ_realm(client)->data;
+	    com_cdot = client->data;
 	    com_sdot = scp;
 	} /* else normal case of two sharing parents */
     }
@@ -77,7 +78,7 @@ krb5_principal **tree;
 	/* construct path from client to server, up the tree */
 	if (*ccp == REALM_BRANCH_CHAR) {
 	    /* one is a subdomain of the other */
-	    com_sdot = krb5_princ_realm(server)->data;
+	    com_sdot = server->data;
 	    com_cdot = ccp;
 	} /* else normal case of two sharing parents */
     }
@@ -88,25 +89,31 @@ krb5_principal **tree;
 	links = 2;
     /* if no common ancestor, artificially set up common root at the last
        component, then join with special code */
-    for (ccp = krb5_princ_realm(client)->data; ccp < com_cdot; ccp++) {
+    for (ccp = client->data; ccp < com_cdot; ccp++) {
 	if (*ccp == REALM_BRANCH_CHAR) {
 	    links++;
 	    if (nocommon)
-		com_cdot = prevccp = ccp;
+		prevccp = ccp;
 	}
     }
 
-    for (scp = krb5_princ_realm(server)->data; scp < com_sdot; scp++) {
+    for (scp = server->data; scp < com_sdot; scp++) {
 	if (*scp == REALM_BRANCH_CHAR) {
 	    links++;
 	    if (nocommon)
-		com_sdot = prevscp = scp;
+		prevscp = scp;
 	}
     }
-    if (nocommon && links == 3) {
-	/* no components, and not the same */
-	com_cdot = krb5_princ_realm(client)->data;
-	com_sdot = krb5_princ_realm(server)->data;
+    if (nocommon) {
+	if (prevccp)
+	    com_cdot = prevccp;
+	if (prevscp)
+	    com_sdot = prevscp;
+
+	if(com_cdot == client->data + client->length -1)
+	   com_cdot = client->data - 1 ;
+	if(com_sdot == server->data + server->length -1)
+	   com_sdot = server->data - 1 ;
     }
 
     if (!(rettree = (krb5_principal *)calloc(links+2,
@@ -114,23 +121,23 @@ krb5_principal **tree;
 	return ENOMEM;
     }
     i = 1;
-    if (retval = krb5_tgtname(krb5_princ_realm(client),
-			      krb5_princ_realm(client), &rettree[0])) {
+    if (retval = krb5_tgtname(client,
+			      client, &rettree[0])) {
 	xfree(rettree);
 	return retval;
     }
-    for (prevccp = ccp = krb5_princ_realm(client)->data;
+    for (prevccp = ccp = client->data;
 	 ccp <= com_cdot;
 	 ccp++) {
 	if (*ccp != REALM_BRANCH_CHAR)
 	    continue;
 	++ccp;				/* advance past dot */
 	tmpcrealm.data = prevccp;
-	tmpcrealm.length = krb5_princ_realm(client)->length -
-	    (prevccp - krb5_princ_realm(client)->data);
+	tmpcrealm.length = client->length -
+	    (prevccp - client->data);
 	tmpsrealm.data = ccp;
-	tmpsrealm.length = krb5_princ_realm(client)->length -
-	    (ccp - krb5_princ_realm(client)->data);
+	tmpsrealm.length = client->length -
+	    (ccp - client->data);
 	if (retval = krb5_tgtname(&tmpsrealm, &tmpcrealm, &rettree[i])) {
 	    while (i) {
 		krb5_free_principal(rettree[i-1]);
@@ -144,11 +151,11 @@ krb5_principal **tree;
     }
     if (nocommon) {
 	tmpcrealm.data = com_cdot + 1;
-	tmpcrealm.length = krb5_princ_realm(client)->length -
-	    (com_cdot + 1 - krb5_princ_realm(client)->data);
+	tmpcrealm.length = client->length -
+	    (com_cdot + 1 - client->data);
 	tmpsrealm.data = com_sdot + 1;
-	tmpsrealm.length = krb5_princ_realm(server)->length -
-	    (com_sdot + 1 - krb5_princ_realm(server)->data);
+	tmpsrealm.length = server->length -
+	    (com_sdot + 1 - server->data);
 	if (retval = krb5_tgtname(&tmpsrealm, &tmpcrealm, &rettree[i])) {
 	    while (i) {
 		krb5_free_principal(rettree[i-1]);
@@ -161,18 +168,18 @@ krb5_principal **tree;
     }
 
     for (prevscp = com_sdot + 1, scp = com_sdot - 1;
-	 scp > krb5_princ_realm(server)->data;
+	 scp > server->data;
 	 scp--) {
 	if (*scp != REALM_BRANCH_CHAR)
 	    continue;
-	if (scp - 1 < krb5_princ_realm(server)->data)
+	if (scp - 1 < server->data)
 	    break;			/* XXX only if . starts realm? */
 	tmpcrealm.data = prevscp;
-	tmpcrealm.length = krb5_princ_realm(server)->length -
-	    (prevscp - krb5_princ_realm(server)->data);
+	tmpcrealm.length = server->length -
+	    (prevscp - server->data);
 	tmpsrealm.data = scp + 1;
-	tmpsrealm.length = krb5_princ_realm(server)->length -
-	    (scp + 1 - krb5_princ_realm(server)->data);
+	tmpsrealm.length = server->length -
+	    (scp + 1 - server->data);
 	if (retval = krb5_tgtname(&tmpsrealm, &tmpcrealm, &rettree[i])) {
 	    while (i) {
 		krb5_free_principal(rettree[i-1]);
@@ -184,12 +191,15 @@ krb5_principal **tree;
 	prevscp = scp + 1;
 	i++;
     }
-    if (slen) {
+    if (slen && com_sdot >= server->data) {
 	/* only necessary if building down tree from ancestor or client */
+	/* however, we can get here if we have only one component
+	   in the server realm name, hence we make sure we found a component
+	   separator there... */
 	tmpcrealm.data = prevscp;
-	tmpcrealm.length = krb5_princ_realm(server)->length -
-	    (prevscp - krb5_princ_realm(server)->data);
-	if (retval = krb5_tgtname(krb5_princ_realm(server), &tmpcrealm,
+	tmpcrealm.length = server->length -
+	    (prevscp - server->data);
+	if (retval = krb5_tgtname(server, &tmpcrealm,
 				  &rettree[i])) {
 	    while (i) {
 		krb5_free_principal(rettree[i-1]);
