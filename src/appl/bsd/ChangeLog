@@ -1,3 +1,9 @@
+2001-11-06  Sam Hartman  <hartmans@mit.edu>
+
+	* kcmd.c: Define storage for our key usages
+	(rcmd_stream_init_krb5): Support c_init_state for non-des non-des3 enctypes
+	(v5_des_write v5_des_read):  support variable keyusage
+
 2001-10-09  Ken Raeburn  <raeburn@mit.edu>
 
 	* krlogin.c: Make prototypes unconditional.

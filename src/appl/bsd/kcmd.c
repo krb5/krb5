@@ -102,7 +102,9 @@ extern Key_schedule v4_schedule;
 #define START_PORT      5120     /* arbitrary */
 char *default_service = "host";
 
-#define KCMD_KEYUSAGE	1026
+#define KCMD_KEYUSAGE	1026 /* Key usage used   with 3des or any old-protocol enctype*/
+/* New protocol enctypes that use cipher state have keyusage defined later*/
+
 
 /*
  * Note that the encrypted rlogin packets take the form of a four-byte
@@ -120,6 +122,7 @@ static krb5_data desoutbuf;
 
 /* XXX Overloaded: use_ivecs!=0 -> new protocol, inband signalling, etc.  */
 static int use_ivecs;
+static krb5_keyusage enc_keyusage_i[2], enc_keyusage_o[2];
 static krb5_data encivec_i[2], encivec_o[2];
 
 static krb5_keyblock *keyblock;		 /* key for encrypt/decrypt */
@@ -814,6 +817,8 @@ void rcmd_stream_init_krb5(in_keyblock, encrypt_flag, lencheck, am_client,
 {
     krb5_error_code status;
     size_t blocksize;
+    int i;
+    krb5_error_code ret;
 
     if (!encrypt_flag) {
 	rcmd_stream_init_normal();
@@ -826,6 +831,10 @@ void rcmd_stream_init_krb5(in_keyblock, encrypt_flag, lencheck, am_client,
     do_lencheck = lencheck;
     input = v5_des_read;
     output = v5_des_write;
+    enc_keyusage_i[0] = KCMD_KEYUSAGE;
+    enc_keyusage_i[1] = KCMD_KEYUSAGE;
+    enc_keyusage_o[0] = KCMD_KEYUSAGE;
+    enc_keyusage_o[1] = KCMD_KEYUSAGE;
 
     if (protonum == KCMD_OLD_PROTOCOL) {
 	use_ivecs = 0;
@@ -833,31 +842,71 @@ void rcmd_stream_init_krb5(in_keyblock, encrypt_flag, lencheck, am_client,
     }
 
     use_ivecs = 1;
-
-    status = krb5_c_block_size(bsd_context, keyblock->enctype,
-			       &blocksize);
-    if (status) {
+    switch (in_keyblock->enctype) {
+      /* 
+       * For the DES-based enctypes and the 3DES enctype we  want to use
+       *  a non-zero  IV because that's what we did.  In the future we
+       * use different keyusage for each channel and direction and a fresh
+       * cipher state
+       */
+    case ENCTYPE_DES_CBC_CRC:
+    case ENCTYPE_DES_CBC_MD4:
+    case ENCTYPE_DES_CBC_MD5:
+    case ENCTYPE_DES3_CBC_SHA1:
+      
+      status = krb5_c_block_size(bsd_context, keyblock->enctype,
+				 &blocksize);
+      if (status) {
 	/* XXX what do I do? */
 	abort();
-    }
+      }
 
-    encivec_i[0].length = encivec_i[1].length = encivec_o[0].length
+      encivec_i[0].length = encivec_i[1].length = encivec_o[0].length
 	= encivec_o[1].length = blocksize;
 
-    if ((encivec_i[0].data = malloc(encivec_i[0].length * 4)) == NULL) {
+      if ((encivec_i[0].data = malloc(encivec_i[0].length * 4)) == NULL) {
 	/* XXX what do I do? */
 	abort();
-    }
-    encivec_i[1].data = encivec_i[0].data + encivec_i[0].length;
-    encivec_o[0].data = encivec_i[1].data + encivec_i[0].length;
-    encivec_o[1].data = encivec_o[0].data + encivec_i[0].length;
+      }
+      encivec_i[1].data = encivec_i[0].data + encivec_i[0].length;
+      encivec_o[0].data = encivec_i[1].data + encivec_i[0].length;
+      encivec_o[1].data = encivec_o[0].data + encivec_i[0].length;
 
     /* is there a better way to initialize this? */
-    memset(encivec_i[0].data, am_client, blocksize);
-    memset(encivec_o[0].data, 1 - am_client, blocksize);
-    memset(encivec_i[1].data, 2 | am_client, blocksize);
-    memset(encivec_o[1].data, 2 | (1 - am_client), blocksize);
-}
+      memset(encivec_i[0].data, am_client, blocksize);
+      memset(encivec_o[0].data, 1 - am_client, blocksize);
+      memset(encivec_i[1].data, 2 | am_client, blocksize);
+      memset(encivec_o[1].data, 2 | (1 - am_client), blocksize);
+      break;
+    default:
+      if (am_client) {
+	enc_keyusage_i[0] = 1028;
+	enc_keyusage_i[1] = 1030;
+	enc_keyusage_o[0] = 1032;
+	enc_keyusage_o[1] = 1034;
+      } else { /*am_client*/
+	enc_keyusage_i[0] = 1032;
+	enc_keyusage_i[1] = 1034;
+	enc_keyusage_o[0] = 1028;
+	enc_keyusage_o[1] = 1030;
+      }
+      for (i = 0; i < 2; i++) {
+	ret = krb5_c_init_state (bsd_context, in_keyblock, enc_keyusage_i[i],
+				 &encivec_i[i]);
+	if (ret)
+	  goto fail;
+	ret = krb5_c_init_state (bsd_context, in_keyblock, enc_keyusage_o[i],
+				 &encivec_o[i]);
+	if (ret)
+	  goto fail;
+      }
+      break;
+    }
+    return;
+ fail:
+    com_err ("kcmd", ret, "Initializing cipher state");
+    abort();
+    }
 
 #ifdef KRB5_KRB4_COMPAT
 void rcmd_stream_init_krb4(session, encrypt_flag, lencheck, justify)
@@ -978,7 +1027,7 @@ static int v5_des_read(fd, buf, len, secondary)
     plain.data = storage;
 
     /* decrypt info */
-    ret = krb5_c_decrypt(bsd_context, keyblock, KCMD_KEYUSAGE,
+    ret = krb5_c_decrypt(bsd_context, keyblock, enc_keyusage_i[secondary],
 			 use_ivecs ? encivec_i + secondary : 0,
 			 &cipher, &plain);
     if (ret) {
@@ -1048,7 +1097,7 @@ static int v5_des_write(fd, buf, len, secondary)
     cipher.ciphertext.length = sizeof(des_outpkt)-4;
     cipher.ciphertext.data = desoutbuf.data;
 
-    if (krb5_c_encrypt(bsd_context, keyblock, KCMD_KEYUSAGE,
+    if (krb5_c_encrypt(bsd_context, keyblock, enc_keyusage_o[secondary],
 		       use_ivecs ? encivec_o + secondary : 0,
 		       &plain, &cipher)) {
 	errno = EIO;
