@@ -1,3 +1,7 @@
+2002-06-19  Ezra Peisach  <epeisach@bu.edu>
+
+	* Makefile.in (clean-unix): Remove t_crc.o and t_crc.
+
 2002-01-07  Tom Yu  <tlyu@mit.edu>
 
 	* crc.pl: New file; perl script to do generate some test vectors

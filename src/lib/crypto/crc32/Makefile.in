@@ -28,6 +28,7 @@ includes:: depend
 depend:: $(SRCS)
 
 clean-unix:: clean-libobjs
+	$(RM) t_crc.o t_crc
 
 check-unix:: t_crc
 	./t_crc
