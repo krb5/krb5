@@ -577,7 +577,7 @@ void kadmin_cpw(argc, argv)
 	krb5_free_principal(context, princ);
    usage:
 	fprintf(stderr,
-		"usage: change_password [-randkey] [-pw passowrd] "
+		"usage: change_password [-randkey] [-pw password] "
 		"principal\n");
 	return;
    }

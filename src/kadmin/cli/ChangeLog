@@ -1,3 +1,7 @@
+Fri Nov  1 11:52:52 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* kadmin.c (kadmin_cpw): fix typo [krb5-admin/139]
+
 Wed Oct 30 17:35:19 1996  Barry Jaspan  <bjaspan@mit.edu>
 
 	* kadmin.M: update ktadd's description [krb5-doc/137]
