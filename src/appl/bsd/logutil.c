@@ -40,6 +40,11 @@
 #endif
 #endif
      
+#ifndef EMPTY
+/* linux has UT_UNKNOWN but not EMPTY */
+#define EMPTY UT_UNKNOWN
+#endif
+
 void login(ut)
      struct utmp *ut;
 {

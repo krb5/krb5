@@ -1,6 +1,8 @@
 Sun Aug  7 04:43:24 1994  Mark Eichin  (eichin@cygnus.com)
 
 	* krlogin.c (oob): FWRITE (and out) not needed w/POSIX_TERMIOS
+	* logutil.c: if EMPTY is missing, use UT_UNKNOWN instead.
+	* login.c (main): some systems just don't have TIOCLSET
 
 Fri Aug  5 18:47:00 1994  Mark Eichin  (eichin@cygnus.com)
 

@@ -141,6 +141,7 @@ static char sccsid[] = "@(#)rlogind.c	5.17 (Berkeley) 8/31/88";
 #include <sys/stropts.h>
 #endif
      
+#ifndef POSIX_TERMIOS
 #ifdef SYSV
 #define USE_TERMIO
 #endif
@@ -150,6 +151,7 @@ static char sccsid[] = "@(#)rlogind.c	5.17 (Berkeley) 8/31/88";
 #else
 #include <sgtty.h>
 #endif /* USE_TERMIO */
+#endif /* POSIX_TERMIOS */
      
 #include <netdb.h>
 #include <syslog.h>
@@ -264,7 +266,10 @@ krb5_ticket     *ticket = 0;
 
 struct utmp	wtmp;
 #define MAXRETRIES 4
+#ifndef UT_NAMESIZE
+/* linux defines it directly in <utmp.h> */
 #define	UT_NAMESIZE	sizeof(((struct utmp *)0)->ut_name)
+#endif
 #define MAX_PROG_NAME 16
 
 char		lusername[UT_NAMESIZE+1];
