@@ -55,7 +55,6 @@ SRCS = \
 	$(srcdir)/rel_buffer.c \
 	$(srcdir)/rel_oid_set.c \
 	$(srcdir)/util_buffer.c \
-	$(srcdir)/util_canonhost.c \
 	$(srcdir)/util_dup.c \
 	$(srcdir)/util_oid.c \
 	$(srcdir)/util_ordering.c \
@@ -72,7 +71,6 @@ OBJS = \
 	$(OUTPRE)rel_buffer.$(OBJEXT) \
 	$(OUTPRE)rel_oid_set.$(OBJEXT) \
 	$(OUTPRE)util_buffer.$(OBJEXT) \
-	$(OUTPRE)util_canonhost.$(OBJEXT) \
 	$(OUTPRE)util_dup.$(OBJEXT) \
 	$(OUTPRE)util_oid.$(OBJEXT) \
 	$(OUTPRE)util_ordering.$(OBJEXT) \
@@ -89,7 +87,6 @@ STLIBOBJS = \
 	rel_buffer.o \
 	rel_oid_set.o \
 	util_buffer.o \
-	util_canonhost.o \
 	util_dup.o \
 	util_oid.o \
 	util_ordering.o \

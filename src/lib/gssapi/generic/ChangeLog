@@ -1,3 +1,9 @@
+2000-08-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (SRCS, OBJS, STLIBOBJS): Remove util_canonhost.
+	* gssapiP_generic (g_canonicalize_host, g_local_host_name): Delete
+	declarations.
+
 2000-05-31  Wilfredo Sanchez  <tritan@mit.edu>
 
 	* util_token.c: Check for existance of <memory.h>.

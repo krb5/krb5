@@ -151,9 +151,6 @@ gss_uint32 g_queue_externalize(void *vqueue, unsigned char **buf,
 gss_uint32 g_queue_internalize(void **vqueue, unsigned char **buf,
 			       size_t *lenremain);
 
-char *g_canonicalize_host PROTOTYPE((char *hostname));
-char *g_local_host_name PROTOTYPE((void));
-
 char *g_strdup PROTOTYPE((char *str));
 
 /** declarations of internal name mechanism functions **/
