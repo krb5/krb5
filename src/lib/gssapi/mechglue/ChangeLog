@@ -1,3 +1,7 @@
+Tue Feb 27 18:44:51 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* oid_ops.c: Protect include of unistd.h with HAVE_UNISTD_H
+
 Sun Feb 25 15:39:08 1996  Mark W. Eichin  <eichin@cygnus.com>
 
 	* g_acquire_cred.c, g_delete_sec_context.c, g_dsp_name.c,
