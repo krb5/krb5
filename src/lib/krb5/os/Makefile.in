@@ -15,6 +15,7 @@ OBJS= \
 	gen_rname.o	\
 	gmt_mktime.o	\
 	hst_realm.o	\
+	init_ctx.o	\
 	krbfileio.o	\
 	ktdefname.o	\
 	kuserok.o	\
@@ -47,6 +48,7 @@ SRCS= \
 	$(srcdir)/gen_rname.c	\
 	$(srcdir)/gmt_mktime.c	\
 	$(srcdir)/hst_realm.c	\
+	$(srcdir)/init_ctx.c	\
 	$(srcdir)/krbfileio.c	\
 	$(srcdir)/ktdefname.c	\
 	$(srcdir)/kuserok.c	\
