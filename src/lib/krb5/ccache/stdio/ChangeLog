@@ -1,3 +1,8 @@
+Wed Oct 29 15:57:31 1997  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* scc_maybe.c: Added kludge for the Macintosh, since fopen()
+		doesn't set errno, although open() does.
+
 Thu Sep 25 21:04:47 1997  Tom Yu  <tlyu@mit.edu>
 
 	* scc_maybe.c (krb5_scc_open_file): Replace HAS_SETVBUF with

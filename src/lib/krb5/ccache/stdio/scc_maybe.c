@@ -29,6 +29,44 @@
 #include "scc.h"
 #include "k5-int.h"
 
+#ifdef _MACINTOSH
+/*
+ * Kludge for the Macintosh, since fopen doesn't set errno, but open
+ * does...
+ */
+static FILE *my_fopen(char *path, char *mode)
+{
+	int	fd, open_flags;
+	FILE	*f;
+
+	f = fopen(path, mode);
+	if (f)
+		return f;
+	/*
+	 * OK, fopen failed; let's try to figure out why....
+	 */
+	if (strchr(mode, '+'))
+		open_flags = O_RDWR;
+	else if (strchr(mode, 'w') || strchr(mode, 'a'))
+		open_flags = O_WRONLY;
+	else
+		open_flags = O_RDONLY;
+	if (strchr(mode, 'a'))
+		open_flags  |= O_APPEND;
+
+	fd = open(path, open_flags);
+	if (fd == -1)
+		return NULL;
+	/*
+	 * fopen failed, but open succeeded?   W*E*I*R*D.....
+	 */
+	close(fd);
+	errno = KRB5_CC_IO;
+	
+	return NULL;
+}
+#endif
+
 krb5_error_code
 krb5_scc_close_file (context, id)
    krb5_context context;
@@ -77,7 +115,6 @@ krb5_scc_open_file (context, id, mode)
     krb5_os_context os_ctx = (krb5_os_context) context->os_context;
     krb5_scc_data *data = (krb5_scc_data *) id->data;
     char fvno_bytes[2];		/* In nework byte order */
-    krb5_ui_2 scc_vno;
     krb5_ui_2 scc_tag;
     krb5_ui_2 scc_taglen;
     krb5_ui_2 scc_hlen;
@@ -125,7 +162,11 @@ krb5_scc_open_file (context, id, mode)
     }
 #endif
 
+#ifdef _MACINTOSH
+    f = my_fopen (data->filename, open_flag);
+#else
     f = fopen (data->filename, open_flag);
+#endif    
     if (!f)
 	return krb5_scc_interpret (context, errno);
 #ifdef HAVE_SETVBUF
@@ -151,7 +192,6 @@ krb5_scc_open_file (context, id, mode)
     }
     if (mode == SCC_OPEN_AND_ERASE) {
 	/* write the version number */
-	int errsave;
 
 	data->file = f;
 	data->version = context->scc_default_format;
