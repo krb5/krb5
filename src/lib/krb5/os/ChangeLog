@@ -1,3 +1,8 @@
+Fri Feb  3 08:24:18 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* gmt_mktime.c (gmt_mktime): Don't double count the leap day in a
+		leap year.
+
 Sun Jan 22 18:23:37 1995  John Gilmore  (gnu@cygnus.com)
 
 	* get_krbhst.c (krb5_get_krbhst):  Declare realm argument const,

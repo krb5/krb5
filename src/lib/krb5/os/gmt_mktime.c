@@ -60,7 +60,7 @@ time_t gmt_mktime(t)
   accum *= 365;			/* 365 days/normal year */
 
   /* add in leap day for all previous years */
-  accum += (t->tm_year - 68) / 4;
+  accum += (t->tm_year - 69) / 4;
   /* add in leap day for this year */
   if(t->tm_mon >= 2)		/* march or later */
     if(hasleapday(t->tm_year)) accum += 1;
