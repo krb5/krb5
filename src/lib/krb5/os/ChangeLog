@@ -3,6 +3,15 @@ Sun Apr 30 16:03:59 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 	* osconfig.c: Global variables krb5_config_file and
 		krb5_trans_file conditionalized on OLD_CONFIG_FILES.
 
+Sat Apr 29 07:07:22 1995  Theodore Y. Ts'o  <tytso@lurch.mit.edu>
+
+	* init_os_ctx.c (krb5_set_config_files): New function.  Provides a
+		way to set a new set of config files for a particular OS
+		context.
+
+	* init_os_ctx.c (krb5_os_init_context): Don't return an error if 
+		profile_init() returns an error.
+
 Fri Apr 28 09:58:31 EDT 1995	Paul Park	(pjpark@mit.edu)
 
 	Move adm_conn.c from libkrb5 to libkadm.

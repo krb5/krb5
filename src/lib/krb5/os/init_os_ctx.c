@@ -79,8 +79,32 @@ krb5_os_init_context(ctx)
 	if (retval)
 	    ctx->profile = 0;
 #endif
+	/*
+	 * We ignore errors if the profile can not be initialized,
+	 * since there must be a way to get a context even if the
+	 * default krb5.conf file doesn't exist.
+	 */
 
-	return retval;
+	return 0;
+}
+
+krb5_error_code INTERFACE
+krb5_set_config_files(ctx, filenames)
+	krb5_context ctx;
+	char	**filenames;
+{
+	krb5_error_code retval;
+	profile_t	profile;
+	
+	retval = profile_init(filenames, &profile);
+	if (retval)
+		return retval;
+
+	if (ctx->profile)
+		profile_release(ctx->profile);
+	ctx->profile = profile;
+
+	return 0;
 }
 
 void
