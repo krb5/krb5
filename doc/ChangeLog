@@ -1,3 +1,13 @@
+2005-01-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* build.texinfo (The util Directory): Add the new support
+	library.
+	(Installing the Binaries): Discuss parallel builds under GNU
+	make.
+
+	* implementor.texinfo (Host Address Lookup): Document Mac OS X
+	issues.
+
 2004-11-19  Tom Yu  <tlyu@mit.edu>
 
 	* build.texinfo (Solaris 9): Document Solaris patches for pty
