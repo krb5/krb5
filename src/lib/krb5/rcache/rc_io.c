@@ -31,7 +31,7 @@
 #define O_BINARY    0
 #endif
 
-#ifdef KRB5_USE_INET
+#ifdef HAVE_NETINET_IN_H
 #if !defined(_WINSOCKAPI_) && !defined(HAVE_MACSOCK_H)
 #include <netinet/in.h>
 #endif

@@ -1,3 +1,7 @@
+Thu Sep 25 21:50:44 1997  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in: Replace KRB5_USE_INET, HAS_UNISTD_H, HAS_SETVBUF.
+
 Thu Sep 18 20:42:03 1997  Tom Yu  <tlyu@mit.edu>
 
 	* configure.in: Replace USE_STRING_H, HAS_STRDUP, HAS_LABS

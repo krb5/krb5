@@ -28,13 +28,13 @@
 #include "com_err.h"
 
 #include <syslog.h>
-#ifdef KRB5_USE_INET
+#ifdef HAVE_NETINET_IN_H
 #include <sys/types.h>
 #include <netinet/in.h>
 #ifndef hpux
 #include <arpa/inet.h>
 #endif	/* hpux */
-#endif /* KRB5_USE_INET */
+#endif /* HAVE_NETINET_IN_H */
 
 #include "kdc_util.h"
 #include "policy.h"
@@ -83,7 +83,7 @@ krb5_data **response;			/* filled in with a response packet */
     e_data.data = 0;
     encrypting_key.contents = 0;
 
-#ifdef KRB5_USE_INET
+#ifdef HAVE_NETINET_IN_H
     if (from->address->addrtype == ADDRTYPE_INET)
 	fromstring = (char *) inet_ntoa(*(struct in_addr *)from->address->contents);
 #endif

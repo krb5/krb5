@@ -1,3 +1,9 @@
+Thu Sep 25 21:23:11 1997  Tom Yu  <tlyu@mit.edu>
+
+	* fcc_maybe.c: Replace KRB5_USE_INET with something more sane.
+
+	* fcc_gennew.c: Replace KRB5_USE_INET with something more sane.
+
 Mon Sep 15 15:15:33 1997  Ezra Peisach  <epeisach@mit.edu>
 
 	* fcc-proto.h, fcc_reslv.c (krb5_fcc_resolve): Incoming name

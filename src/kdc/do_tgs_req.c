@@ -28,7 +28,7 @@
 #include "com_err.h"
 
 #include <syslog.h>
-#ifdef KRB5_USE_INET
+#ifdef HAVE_NETINET_IN_H
 #include <sys/types.h>
 #include <netinet/in.h>
 #ifndef hpux
@@ -99,7 +99,7 @@ krb5_data **response;			/* filled in with a response packet */
     if ((retval = setup_server_realm(request->server)))
 	return retval;
 
-#ifdef KRB5_USE_INET
+#ifdef HAVE_NETINET_IN_H
     if (from->address->addrtype == ADDRTYPE_INET)
 	fromstring =
 	    (char *) inet_ntoa(*(struct in_addr *)from->address->contents);

@@ -47,7 +47,7 @@ krb5_locate_kdc(context, realm, addr_pp, naddrs)
     struct sockaddr_in *sin_p;
     struct hostent *hp;
     struct servent *sp;
-#ifdef KRB5_USE_INET
+#ifdef HAVE_NETINET_IN_H
     u_short udpport = htons(KRB5_DEFAULT_PORT);
     u_short sec_udpport = htons(KRB5_DEFAULT_SEC_PORT);
 #endif
@@ -74,7 +74,7 @@ krb5_locate_kdc(context, realm, addr_pp, naddrs)
     if (code)
 	return code;
 
-#ifdef KRB5_USE_INET
+#ifdef HAVE_NETINET_IN_H
     if ((sp = getservbyname(KDC_PORTNAME, "udp")))
 	udpport = sp->s_port;
     if ((sp = getservbyname(KDC_SECONDARY_PORTNAME, "udp")))
@@ -92,7 +92,7 @@ krb5_locate_kdc(context, realm, addr_pp, naddrs)
 	return 0;
     }
     
-#ifdef KRB5_USE_INET
+#ifdef HAVE_NETINET_IN_H
     if (sec_udpport)
 	    count = count * 2;
 #endif
@@ -118,7 +118,7 @@ krb5_locate_kdc(context, realm, addr_pp, naddrs)
 	hp = gethostbyname(hostlist[i]);
 	if (hp != 0) {
 	    switch (hp->h_addrtype) {
-#ifdef KRB5_USE_INET
+#ifdef HAVE_NETINET_IN_H
 	    case AF_INET:
 		for (j=0; hp->h_addr_list[j]; j++) {
 		    sin_p = (struct sockaddr_in *) &addr_p[out++];

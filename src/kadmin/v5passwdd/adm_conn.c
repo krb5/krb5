@@ -332,7 +332,7 @@ kadm_contact_server(kcontext, realmp, sockp, local, remote)
     /*
      * XXX - only know ADDRTYPE_INET.
      */
-#ifdef	KRB5_USE_INET
+#ifdef	HAVE_NETINET_IN_H
     *local = (krb5_address *) malloc(sizeof(krb5_address));
     *remote = (krb5_address *) malloc(sizeof(krb5_address));
     realm_name = (char *) malloc((size_t) realmp->length + 1);
@@ -539,9 +539,9 @@ kadm_contact_server(kcontext, realmp, sockp, local, remote)
 	if (!found)
 	    kret = KRB5_SERVICE_UNKNOWN;
     }
-#else	/* KRB5_USE_INET */
+#else	/* HAVE_NETINET_IN_H */
     kret = ENOENT;
-#endif	/* KRB5_USE_INET */
+#endif	/* HAVE_NETINET_IN_H */
 
  cleanup:
     if (kret) {

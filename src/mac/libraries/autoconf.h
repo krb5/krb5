@@ -1,6 +1,6 @@
 /* autoconf.h.  DO NOT DELETE -- this version of autoconf.h is specific for macintosh. */
 
-#define HAS_SETVBUF 1
+#define HAVE_SETVBUF 1
 #define HAS_ANSI_CONST 1
 #define HAS_STDLIB_H 1
 #define HAS_VOID_TYPE 1
@@ -12,7 +12,7 @@
 #define HAVE_STRING_H 1
 #define WAIT_USES_INT 1
 #define krb5_sigtype void
-#define KRB5_USE_INET 1
+#define HAVE_NETINET_IN_H 1
 #define ODBM 1
 /* Define to empty if the keyword does not work.  */
 #define const 

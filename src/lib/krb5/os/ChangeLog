@@ -1,3 +1,21 @@
+Thu Sep 25 21:24:54 1997  Tom Yu  <tlyu@mit.edu>
+
+	* mk_faddr.c: Replace KRB5_USE_INET with something more sane.
+
+	* port2ip.c: Replace KRB5_USE_INET with something more sane.
+
+	* os-proto.h: Replace KRB5_USE_INET with something more sane.
+
+	* locate_kdc.c: Replace KRB5_USE_INET with something more sane.
+
+	* genaddrs.c (krb5_auth_con_genaddrs): Replace KRB5_USE_INET with
+	something more sane.
+
+	* gen_port.c (krb5_gen_portaddr): Replace KRB5_USE_INET with
+	something more sane.
+
+	* full_ipadr.c: Replace KRB5_USE_INET with something more sane.
+
 Thu Sep 18 17:56:00 1997  Tom Yu  <tlyu@mit.edu>
 
 	* hst_realm.c: Replace USE_STRING_H with something more sane.

@@ -375,7 +375,7 @@ extern char *getenv();
 extern char *strdup KRB5_PROTOTYPE((const char *));
 #endif
 
-#ifdef HAS_UNISTD_H
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 

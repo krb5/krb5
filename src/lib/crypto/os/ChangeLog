@@ -1,3 +1,7 @@
+Thu Sep 25 21:53:11 1997  Tom Yu  <tlyu@mit.edu>
+
+	* c_localaddr.c: Replace KRB5_USE_INET with something more sane.
+
 Tue Aug 12 09:09:14 1997  Ezra Peisach  <epeisach@mit.edu>
 
 	* Makefile.in (SRCS): Add $(srcdir) as needed.

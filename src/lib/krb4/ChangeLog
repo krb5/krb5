@@ -1,3 +1,11 @@
+Thu Sep 25 21:11:16 1997  Tom Yu  <tlyu@mit.edu>
+
+	* put_svc_key.c: Replace HAS_UNISTD_H with something more sane.
+
+	* kuserok.c: Replace HAS_UNISTD_H with something more sane.
+
+	* configure.in: Replace HAS_UNISTD_H with something more sane.
+
 Mon Sep  1 21:37:36 1997  Tom Yu  <tlyu@mit.edu>
 
 	* decomp_tkt.c (decomp_ticket): Fix swapped args to memset.

@@ -46,7 +46,7 @@ krb5_auth_con_genaddrs(context, auth_context, infd, flags)
     krb5_address	* rport;
     SOCKET		fd = (SOCKET) infd;
 
-#ifdef KRB5_USE_INET
+#ifdef HAVE_NETINET_IN_H
     struct sockaddr_in lsaddr, rsaddr;
     krb5_address lcaddr, rcaddr;
     krb5_address lcport, rcport;

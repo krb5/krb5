@@ -128,7 +128,7 @@ krb5_scc_open_file (context, id, mode)
     f = fopen (data->filename, open_flag);
     if (!f)
 	return krb5_scc_interpret (context, errno);
-#ifdef HAS_SETVBUF
+#ifdef HAVE_SETVBUF
     setvbuf(f, data->stdio_buffer, _IOFBF, sizeof (data->stdio_buffer));
 #else
     setbuf (f, data->stdio_buffer);

@@ -34,7 +34,7 @@ krb5_gen_portaddr(context, addr, ptr, outaddr)
     krb5_const_pointer ptr;
     krb5_address **outaddr;
 {
-#ifdef KRB5_USE_INET
+#ifdef HAVE_NETINET_IN_H
     krb5_int32 adr;
     krb5_int16 port;
 

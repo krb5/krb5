@@ -35,7 +35,7 @@ krb5_error_code krb5_locate_kdc
 	       int *));
 #endif
 
-#ifdef KRB5_USE_INET
+#ifdef HAVE_NETINET_IN_H
 krb5_error_code krb5_unpack_full_ipaddr
     PROTOTYPE((krb5_context,
 	       const krb5_address *,
@@ -49,6 +49,6 @@ krb5_error_code krb5_make_full_ipaddr
 					   int */
 	       krb5_address **));
 
-#endif /* KRB5_USE_INET */
+#endif /* HAVE_NETINET_IN_H */
 
 #endif /* KRB5_LIBOS_INT_PROTO__ */

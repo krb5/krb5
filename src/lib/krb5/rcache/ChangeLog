@@ -1,3 +1,7 @@
+Thu Sep 25 21:28:41 1997  Tom Yu  <tlyu@mit.edu>
+
+	* rc_io.c: Replace KRB5_USE_INET with something more sane.
+
 Tue Mar 25 01:15:39 1997  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* rc_io.c (krb5_rc_io_open): rcache owner should be checked against

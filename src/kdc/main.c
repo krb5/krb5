@@ -37,7 +37,7 @@
 #include "extern.h"
 #include "kdc5_err.h"
 #include "kdb_kt.h"
-#ifdef KRB5_USE_INET
+#ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
 

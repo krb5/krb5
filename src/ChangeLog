@@ -1,3 +1,7 @@
+Thu Sep 25 21:06:40 1997  Tom Yu  <tlyu@mit.edu>
+
+	* acconfig.h: Punt HAS_SETVBUF, HAS_UNISTD_H, KRB5_USE_INET.
+
 Thu Sep 18 17:51:39 1997  Tom Yu  <tlyu@mit.edu>
 
 	* acconfig.h: Remove USE_STRING_H, HAS_STRDUP, HAS_LABS

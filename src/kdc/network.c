@@ -30,7 +30,7 @@
 #include "kdc5_err.h"
 
 #include <ctype.h>
-#ifdef KRB5_USE_INET
+#ifdef HAVE_NETINET_IN_H
 #include <sys/types.h>
 #include <netinet/in.h>
 #include <sys/socket.h>

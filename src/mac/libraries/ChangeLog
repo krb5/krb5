@@ -1,3 +1,8 @@
+Thu Sep 25 21:05:23 1997  Tom Yu  <tlyu@mit.edu>
+
+	* autoconf.h: Change HAS_SETVBUF, KRB5_USE_INET to something more
+ 	sane.
+
 Thu Sep 18 17:59:05 1997  Tom Yu  <tlyu@mit.edu>
 
 	* autoconf.h: Replace USE_STRING_H with something more sane.

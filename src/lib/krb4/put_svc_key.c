@@ -27,7 +27,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <fcntl.h>
-#ifdef HAS_UNISTD_H
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 

@@ -481,7 +481,7 @@ net_init(kcontext, realm, debug_level, port)
     }
     net_service_princ_init = 1;
 
-#ifdef	KRB5_USE_INET
+#ifdef	HAVE_NETINET_IN_H
     /* Now get our host name/entry */
     if (gethostname(our_host_name, sizeof(our_host_name))) {
 	kret = errno;
@@ -661,10 +661,10 @@ net_init(kcontext, realm, debug_level, port)
 	       ("- bound socket %d on port\n", net_listen_socket));
 	kret = 0;
     }
-#else	/* KRB5_USE_INET */
+#else	/* HAVE_NETINET_IN_H */
     /* Don't know how to do anything else. */
     kret = ENOENT;
-#endif	/* KRB5_USE_INET */
+#endif	/* HAVE_NETINET_IN_H */
 
  done:
     DPRINT(DEBUG_CALLS, net_debug_level, ("X net_init() = %d\n", kret));

@@ -1,3 +1,13 @@
+Thu Sep 25 21:19:08 1997  Tom Yu  <tlyu@mit.edu>
+
+	* network.c: Replace KRB5_USE_IENT with something more sane.
+
+	* do_tgs_req.c: Replace KRB5_USE_INET with something more sane.
+
+	* main.c: Replace KRB5_USE_INET with something more sane.
+
+	* do_as_req.c: Replace KRB5_USE_INET with something more sane.
+
 Wed Sep 24 11:56:50 1997  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* kdc_util.c (add_to_transited): Fix up memory leaks, clean out

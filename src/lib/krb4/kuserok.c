@@ -21,7 +21,7 @@
 #include <sys/stat.h>
 #include <sys/file.h>
 #include <string.h>
-#ifdef HAS_UNISTD_H
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 #ifdef __SCO__

@@ -96,7 +96,7 @@ typedef unsigned char	u_char;
 #define MAXHOSTNAMELEN  512
 #define MAXPATHLEN      256            /* Also for Windows temp files */
 
-#define KRB5_USE_INET
+#define HAVE_NETINET_IN_H
 #define MSDOS_FILESYSTEM
 #define HAVE_STRING_H 
 #define HAVE_SRAND

@@ -4,7 +4,7 @@ AC_CONFIG_HEADER(autoconf.h)
 AC_PROG_LEX
 AC_PROG_INSTALL
 HAVE_YYLINENO
-AC_CHECK_FUNCS(strdup labs)
+AC_CHECK_FUNCS(strdup labs setvbuf)
 CHECK_DIRENT
 CHECK_WAIT_TYPE
 AC_TYPE_UID_T
@@ -20,12 +20,11 @@ KRB5_SIGTYPE
 
 dnl
 dnl
-AC_CHECK_HEADERS(string.h)
+AC_CHECK_HEADERS(string.h unistd.h)
 AC_HEADER_CHECK(stdlib.h,AC_DEFINE(HAS_STDLIB_H),AC_DEFINE(NO_STDLIB_H))
 AC_CHECK_HEADERS(sys/types.h sys/file.h sys/param.h sys/stat.h macsock.h stddef.h xom.h dbm.h ndbm.h)
 AC_HEADER_STDARG
 
-AC_FUNC_CHECK([setvbuf],AC_DEFINE(HAS_SETVBUF))
 dnl check for ANSI stdio, esp "b" option to fopen().  This (unfortunately)
 dnl requires a run check...
 AC_C_CROSS
@@ -86,8 +85,7 @@ dnl then from osconf.h, we have
 AC_TIME_WITH_SYS_TIME
 AC_CHECK_HEADERS(sys/time.h)
 
-AC_HEADER_CHECK(netinet/in.h,AC_DEFINE(KRB5_USE_INET))
-AC_HEADER_CHECK(unistd.h,AC_DEFINE(HAS_UNISTD_H))
+AC_CHECK_HEADERS(netinet/in.h)
 
 AC_CHECK_LIB(ndbm,main)
 AC_CHECK_LIB(dbm,main)

@@ -47,7 +47,7 @@
  * type; you have to ask for one with a valid type.
  *
  */
-#ifdef KRB5_USE_INET
+#ifdef HAVE_NETINET_IN_H
 
 #include <netinet/in.h>
 
@@ -153,7 +153,7 @@ n_found = 0;
 
 	/* ifr->ifr_addr has what we want! */
 	switch (ifr->ifr_addr.sa_family) {
-#ifdef KRB5_USE_INET
+#ifdef HAVE_NETINET_IN_H
 	case AF_INET:
 	    {
 		struct sockaddr_in *in =

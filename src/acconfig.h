@@ -7,7 +7,6 @@
    handle it on some systems.  */
 
 #undef ANSI_STDIO
-#undef HAS_SETVBUF
 #undef HAS_STDLIB_H
 #undef HAS_VOID_TYPE
 #undef KRB5_NO_PROTOTYPES
@@ -23,8 +22,6 @@
 #undef USE_DIRENT_H
 #undef WAIT_USES_INT
 #undef krb5_sigtype
-#undef HAS_UNISTD_H
-#undef KRB5_USE_INET
 
 #undef HAVE_STDARG_H
 #undef HAVE_VARARGS_H

@@ -1,3 +1,11 @@
+Thu Sep 25 21:17:00 1997  Tom Yu  <tlyu@mit.edu>
+
+	* srv_net.c (net_init): Replace KRB5_USE_INET with something more
+ 	sane.
+
+	* adm_conn.c (kadm_contact_server): Replace KRB5_USE_INET with
+	something more sane.
+
 Thu Sep 18 17:54:40 1997  Tom Yu  <tlyu@mit.edu>
 
 	* kpasswd.c: Replace USE_STRING_H with something more sane.
