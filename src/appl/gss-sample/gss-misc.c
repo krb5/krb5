@@ -188,12 +188,15 @@ static void display_status_1(m, code, type)
      gss_buffer_desc msg;
      int msg_ctx;
      
+     if (display_file == 0)
+	 display_file = stderr;
+
      msg_ctx = 0;
      while (1) {
 	  maj_stat = gss_display_status(&min_stat, code,
 				       type, GSS_C_NULL_OID,
 				       &msg_ctx, &msg);
-	  fprintf(stderr, "GSS-API error %s: %s\n", m,
+	  fprintf(display_file, "GSS-API error %s: %s\n", m,
 		  (char *)msg.value); 
 	  (void) gss_release_buffer(&min_stat, &msg);
 	  
