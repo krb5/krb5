@@ -30,6 +30,8 @@ klist \- list cached Kerberos tickets
 .I cachename
 ] [
 .B \-f
+] [
+.B \-e
 ]
 .br
 .SH DESCRIPTION
@@ -56,6 +58,11 @@ R	Renewable
 I	Initial
 .in -.5i
 .fi
+.PP
+If the
+.B \-e
+option is specified, then the encryption type in the ticket will be
+printed.
 .PP
 The
 .IR kinit (1)

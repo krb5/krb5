@@ -100,7 +100,7 @@ main(argc, argv)
 	errflg++;
     
     if (errflg) {
-	fprintf(stderr, "Usage: %s [ -c cache ]\n", argv[0]);
+	fprintf(stderr, "Usage: %s [ -c cache ] [-e] [-f]\n", argv[0]);
 	exit(2);
     }
     if (cache == NULL) {

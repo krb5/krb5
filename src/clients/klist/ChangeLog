@@ -1,3 +1,8 @@
+Thu May 11 07:31:42 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* klist.c (main): Update usage message to include -e and -f.
+
+	* klist.M: -e flag documented.
 
 Thu May 04 04:24:38 1995  Chris Provenzano (proven@mit.edu)
 
