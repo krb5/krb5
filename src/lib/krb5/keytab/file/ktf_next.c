@@ -37,7 +37,7 @@ krb5_keytab_entry *entry;
 krb5_kt_cursor *cursor;
 {
     long *fileoff = (long *)*cursor;
-    krb5_keytab_entry *cur_entry;
+    krb5_keytab_entry cur_entry;
     krb5_error_code kerror;
 
     if (fseek(KTFILEP(id), *fileoff, 0) == -1)
@@ -45,7 +45,6 @@ krb5_kt_cursor *cursor;
     if (kerror = krb5_ktfileint_read_entry(id, &cur_entry))
 	return kerror;
     *fileoff = ftell(KTFILEP(id));
-    *entry = *cur_entry;
-    krb5_xfree(cur_entry);
+    *entry = cur_entry;
     return 0;
 }

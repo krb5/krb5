@@ -1,4 +1,15 @@
 Thu Sep 22 21:51:53 1994  Theodore Y. Ts'o  (tytso@dcl)
+    
+    	* ktf_get_en.c (krb5_ktfile_get_entry):
+	* ktf_next.c (krb5_ktfile_get_next):
+	* ktf_remove.c (krb5_ktfile_remove):
+	* ktf_util.c (krb5_ktfileint_read_entry,
+		krb5_ktfileint_internal_read_entry):
+	* ktfile.h: Change the interface of krb5_ktfile_read_entry and
+		krb5_ktfile_internal_read_entry so that they don't
+		allocate memory for the top-level structure.  All of their
+		callers didn't need it and were freeing it anyway.
+		
 
 	* ktf_remove.c (krb5_ktfile_remove): Fix memory leak caused by not
 		freeing the top-level structure.

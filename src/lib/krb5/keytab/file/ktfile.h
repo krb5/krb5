@@ -93,13 +93,13 @@ krb5_error_code krb5_ktfileint_openr PROTOTYPE((krb5_keytab));
 krb5_error_code krb5_ktfileint_openw PROTOTYPE((krb5_keytab));
 krb5_error_code krb5_ktfileint_close PROTOTYPE((krb5_keytab));
 krb5_error_code krb5_ktfileint_read_entry PROTOTYPE((krb5_keytab,
-						     krb5_keytab_entry **));
+						     krb5_keytab_entry *));
 krb5_error_code krb5_ktfileint_write_entry PROTOTYPE((krb5_keytab,
 						      krb5_keytab_entry *));
 krb5_error_code krb5_ktfileint_delete_entry PROTOTYPE((krb5_keytab,
                                                       krb5_int32));
 krb5_error_code krb5_ktfileint_internal_read_entry PROTOTYPE((krb5_keytab,
-						     krb5_keytab_entry **,
+						     krb5_keytab_entry *,
                                                      krb5_int32 *));
 krb5_error_code krb5_ktfileint_size_entry PROTOTYPE((krb5_keytab_entry *,
                                                       krb5_int32 *));

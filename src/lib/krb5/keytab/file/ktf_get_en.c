@@ -42,7 +42,7 @@ OLDDECLARG(krb5_principal, principal)
 OLDDECLARG(krb5_kvno, kvno)
 OLDDECLARG(krb5_keytab_entry *, entry)
 {
-    krb5_keytab_entry *cur_entry;
+    krb5_keytab_entry cur_entry;
     krb5_error_code kerror = 0;
 
     /* Open the keyfile for reading */
@@ -54,30 +54,26 @@ OLDDECLARG(krb5_keytab_entry *, entry)
      * is exited with a break statement.
      */
     while (TRUE) {
-	cur_entry = 0;
 	if (kerror = krb5_ktfileint_read_entry(id, &cur_entry))
 	    break;
 
-	if (((kvno == IGNORE_VNO) || (kvno == cur_entry->vno)) &&
-	    krb5_principal_compare(principal, cur_entry->principal)) {
+	if (((kvno == IGNORE_VNO) || (kvno == cur_entry.vno)) &&
+	    krb5_principal_compare(principal, cur_entry.principal)) {
 	    /* found a match */
 	    break;
 	}
-	krb5_kt_free_entry(cur_entry);
-	krb5_xfree(cur_entry);
+	krb5_kt_free_entry(&cur_entry);
     }
-    if (kerror && kerror != KRB5_KT_END) {
+    if (kerror) {
+	if (kerror == KRB5_KT_END)
+	    kerror = KRB5_KT_NOTFOUND;
 	(void) krb5_ktfileint_close(id);
 	return kerror;
     }
     if ((kerror = krb5_ktfileint_close(id)) != 0) {
-	krb5_kt_free_entry(cur_entry);
-	krb5_xfree(cur_entry);
+	krb5_kt_free_entry(&cur_entry);
 	return kerror;
     }
-    if (!cur_entry)
-	return KRB5_KT_NOTFOUND;
-    *entry = *cur_entry;
-    krb5_xfree(cur_entry);
+    *entry = cur_entry;
     return 0;
 }

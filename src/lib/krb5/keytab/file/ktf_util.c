@@ -243,12 +243,11 @@ krb5_int32 delete_point;
 }
 
 krb5_error_code
-krb5_ktfileint_internal_read_entry(id, entrypp, delete_point)
+krb5_ktfileint_internal_read_entry(id, ret_entry, delete_point)
 krb5_keytab id;
-krb5_keytab_entry **entrypp;
+krb5_keytab_entry *ret_entry;
 krb5_int32 *delete_point;
 {
-    register krb5_keytab_entry *ret_entry;
     krb5_int16 count;
     krb5_int16 princ_size;
     register int i;
@@ -258,8 +257,7 @@ krb5_int32 *delete_point;
     char	*tmpdata;
     krb5_data	*princ;
 
-    if (!(ret_entry = (krb5_keytab_entry *)calloc(1, sizeof(*ret_entry))))
-	return ENOMEM;
+    memset(ret_entry, 0, sizeof(krb5_keytab_entry));
 
     /* fseek to synchronise buffered I/O on the key table. */
 
@@ -308,7 +306,8 @@ krb5_int32 *delete_point;
     ret_entry->principal->length = count;
     ret_entry->principal->data = (krb5_data *)calloc(count, sizeof(krb5_data));
     if (!ret_entry->principal->data) {
-	free(ret_entry->principal);    
+	free(ret_entry->principal);
+	ret_entry->principal = 0;
 	return ENOMEM;
     }
 
@@ -422,8 +421,6 @@ krb5_int32 *delete_point;
 	goto fail;
     }
 
-    *entrypp = ret_entry;
-
     /*
      * Reposition file pointer to the next inter-record length field.
      */
@@ -437,18 +434,20 @@ fail:
 		    free(princ->data);
     }
     free(ret_entry->principal->data);
+    ret_entry->principal->data = 0;
     free(ret_entry->principal);
+    ret_entry->principal = 0;
     return error;
 }
 
 krb5_error_code
-krb5_ktfileint_read_entry(id, entrypp)
+krb5_ktfileint_read_entry(id, entryp)
 krb5_keytab id;
-krb5_keytab_entry **entrypp;
+krb5_keytab_entry *entryp;
 {
     krb5_int32 delete_point;
 
-    return krb5_ktfileint_internal_read_entry(id, entrypp, &delete_point);
+    return krb5_ktfileint_internal_read_entry(id, entryp, &delete_point);
 }
 
 krb5_error_code
