@@ -345,22 +345,6 @@ typedef struct _krb5_sam_response {
 
 
 /*
- * Begin "dbm.h"
- */
-#if !defined(_MACINTOSH) && !defined(_MSDOS) && !defined(_WIN32)
-
-/*
- * Since we are always using db, use the db-ndbm include header file.
- */	
-
-#include "db-ndbm.h"
-	
-#endif /* !MSDOS && !MACINTOSH */
-/*
- * End "dbm.h"
- */
-
-/*
  * Begin "ext-proto.h"
  */
 #ifndef KRB5_EXT_PROTO__
@@ -619,7 +603,6 @@ time_t gmt_mktime KRB5_PROTOTYPE((struct tm *));
  * Include the KDB definitions.
  */
 #include "kdb.h"
-#include "kdb_dbm.h"
 
 /*
  * Begin "libos.h"

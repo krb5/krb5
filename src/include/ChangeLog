@@ -1,3 +1,7 @@
+Fri Jul 25 15:21:26 1997  Tom Yu  <tlyu@mit.edu>
+
+	* k5-int.h: Don't include anything related to dbm.
+
 Tue Jul 15 12:35:41 1997  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* win-mac.h: Remove (probably unneeded) size_t definition.
