@@ -1,3 +1,8 @@
+2002-01-08  Sam Hartman  <hartmans@mit.edu>
+
+	* ovsec_kadmd.c (main): Get random data from /dev/random
+	(main): If we can't set gssapi names, hint that the keytab might be at fault
+
 2001-10-26  Ezra Peisach  <epeisach@mit.edu>
 
 	* schpw.c (process_chpw_request): Use GETSOCKNAME_ARG3_TYPE

@@ -264,6 +264,15 @@ int main(int argc, char *argv[])
 
      krb5_klog_init(context, "admin_server", whoami, 1);
 
+
+     krb5_klog_syslog(LOG_INFO, "Seeding random number generator");
+          ret = krb5_c_random_os_entropy(context, 1, NULL);
+	  if(ret) {
+	    krb5_klog_syslog(LOG_ERR, "Error getting random seed: %s, aborting",
+			     error_message(ret));
+	    exit(1);
+	  }
+	  
      if((ret = kadm5_init("kadmind", NULL,
 			  NULL, &params,
 			  KADM5_STRUCT_VERSION,
@@ -489,7 +498,7 @@ int main(int argc, char *argv[])
 	  oldnames++;
      if (!oldnames && _svcauth_gssapi_set_names(names, 2) == FALSE) {
 	  krb5_klog_syslog(LOG_ERR,
-			   "Cannot set GSS-API authentication names, "
+			   "Cannot set GSS-API authentication names (keytab not present?), "
 			   "failing.");
 	  fprintf(stderr, "%s: Cannot set GSS-API authentication names.\n",
 		  whoami);
