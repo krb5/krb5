@@ -58,7 +58,7 @@ krb5_db_entry server;
 krb5_ticket *ticket;
 char **status;
 {
-#ifdef 0
+#if 0
     /*
      * For example, if your site wants to disallow ticket forwarding,
      * you might do something like this:
