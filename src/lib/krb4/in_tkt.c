@@ -46,19 +46,8 @@ extern int krb_debug;
  * success, or KFAILURE if something goes wrong.
  */
 
-#ifdef HAVE_SETEUID
-#define do_seteuid(e) seteuid((e))
-#else
-#ifdef HAVE_SETRESUID
-#define do_seteuid(e) setresuid(-1, (e), -1)
-#else
-#ifdef HAVE_SETREUID
-#define do_seteuid(e) setreuid(geteuid(), (e))
-#else
-#define do_seteuid(e) (errno = EPERM, -1)
-#endif
-#endif
-#endif
+#include "k5-util.h"
+#define do_seteuid krb5_seteuid
 
 #ifndef O_SYNC
 #define O_SYNC 0

@@ -1,5 +1,10 @@
 2003-02-25  Ken Raeburn  <raeburn@mit.edu>
 
+	* in_tkt.c: Include k5-util.h.
+	(do_seteuid): Define as krb5_seteuid instead of testing system
+	characteristics here.
+	* dest_tkt.c: Likewise.
+
 	* change_password.c (krb_change_password): Use int, not KRB_INT32,
 	for krb4 error codes.  Check for malloc failure allocating
 	sendStream.

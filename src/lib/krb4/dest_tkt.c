@@ -29,6 +29,10 @@
 #include <string.h>
 #include <fcntl.h>
 #include <sys/stat.h>
+
+#include "k5-util.h"
+#define do_seteuid krb5_seteuid
+
 #ifdef TKT_SHMEM
 #include <sys/param.h>
 #endif
@@ -39,20 +43,6 @@
 
 #ifndef O_SYNC
 #define O_SYNC 0
-#endif
-
-#ifdef HAVE_SETEUID
-#define do_seteuid(e) seteuid((e))
-#else
-#ifdef HAVE_SETRESUID
-#define do_seteuid(e) setresuid(-1, (e), -1)
-#else
-#ifdef HAVE_SETREUID
-#define do_seteuid(e) setreuid(geteuid(), (e))
-#else
-#define do_seteuid(e) (errno = EPERM, -1)
-#endif
-#endif
 #endif
 
 /*
