@@ -754,13 +754,21 @@ ADD_DEF(-Dvolatile=)
 fi
 ])dnl
 dnl
-dnl This rule tells KRB5_LIBRARIES to use the kadm librarh.
+dnl This rule tells KRB5_LIBRARIES to use the kadm library.
 dnl
 kadm_deplib=''
 kadm_lib=''
 define(USE_KADM_LIBRARY,[
 kadm_deplib="\[$](TOPLIBD)/libkadm.a"
 kadm_lib=-lkadm])
+dnl
+dnl This rule tells KRB5_LIBRARIES to use the krb5util library.
+dnl
+kutil_deplib=''
+kutil_lib=''
+define(USE_KRB5UTIL_LIBRARY,[
+kutil_deplib="\[$](TOPLIBD)/libkrb5util.a"
+kutil_lib=-lkrb5util])
 dnl
 dnl This rule tells KRB5_LIBRARIES to include the kdb5 library.
 dnl
@@ -798,8 +806,8 @@ dnl
 dnl This rule generates library lists for programs.
 dnl
 define(KRB5_LIBRARIES,[
-DEPLIBS="\[$](DEPLOCAL_LIBRARIES) $kadm_deplib $kdb5_deplib \[$](TOPLIBD)/libkrb5.a $kdb4_deplib $krb4_deplib \[$](TOPLIBD)/libcrypto.a $ss_deplib \[$](TOPLIBD)/libcom_err.a"
-LIBS="\[$](LOCAL_LIBRARIES) $kadm_lib $kdb5_lib -lkrb5 $kdb4_lib $krb4_lib -lcrypto $ss_lib -lcom_err $LIBS"
+DEPLIBS="\[$](DEPLOCAL_LIBRARIES) $kadm_deplib $kdb5_deplib $kutil_deplib \[$](TOPLIBD)/libkrb5.a $kdb4_deplib $krb4_deplib \[$](TOPLIBD)/libcrypto.a $ss_deplib \[$](TOPLIBD)/libcom_err.a"
+LIBS="\[$](LOCAL_LIBRARIES) $kadm_lib $kdb5_lib $kdb4_lib $kutil_lib $krb4_lib -lkrb5 -lcrypto $ss_lib -lcom_err $LIBS"
 LDFLAGS="$LDFLAGS -L\$(TOPLIBD)"
 AC_SUBST(LDFLAGS)
 AC_SUBST(LDARGS)

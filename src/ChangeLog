@@ -1,3 +1,8 @@
+Tue Dec  5 20:48:56 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* aclocal.m4 (kutil_lib): Add USE_KRB5UTIL_LIBRARY. Change
+		library link order to -lkrb4 -lkrb5.
+
 Sun Nov 12 04:40:02 1995  Mark W. Eichin  <eichin@cygnus.com>
 
 	* Makefile.in (install-mkdirs): bash needs a semicolon between fi
