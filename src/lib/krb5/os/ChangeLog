@@ -14,7 +14,6 @@
 	* c_ustime.c, timeofday.c: Don't declare errno.
 	* hst_realm.c (krb5_try_realm_txt_rr), locate_kdc.c
 	(krb5_locate_srv_dns_1): Avoid variable name "class".
-	* lock_file.c (krb5_lock_file): Initialize flock_zero.
 	* sendto_kdc.c (enum conn_states): Define separately from
 	conn_state 'state' field declaration.
 
