@@ -193,6 +193,8 @@ int ttyfd = -1;
 #define setpgrp(a,b) setpgrp()
 #endif
 
+int dup_tty(int);
+
 /*
  * init_termbuf()
  * copy_termbuf(cp)
@@ -904,7 +906,7 @@ tty_isnewmap()
  * that is necessary.  The return value is a file descriptor
  * for the slave side.
  */
-	int
+void
 getptyslave()
 {
      int t = -1;
@@ -1188,7 +1190,7 @@ init_env()
 	char **envp;
 
 	envp = envinit;
-	if (*envp = getenv("TZ"))
+	if ((*envp = getenv("TZ")))
 		*envp++ -= 3;
 #if	defined(CRAY) || defined(__hpux)
 	else
@@ -1213,11 +1215,9 @@ start_login(host, autologin, name)
 	int autologin;
 	char *name;
 {
-	register char *cp;
 	register char **argv;
 	char **addarg();
 	extern char *getenv();
-	register int pid = getpid();
 
 #ifdef SOLARIS
 	char *term;

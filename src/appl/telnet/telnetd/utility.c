@@ -40,6 +40,13 @@
 #include <sys/utsname.h>
 #endif
 
+#if	defined(AUTHENTICATION)
+#include <libtelnet/auth.h>
+#endif
+#ifdef ENCRYPTION
+#include <libtelnet/encrypt.h>
+#endif
+
 /*
  * utility functions performing io related tasks
  */
@@ -1143,12 +1150,12 @@ printsub(direction, pointer, length)
 		break;
 
 	    case ENCRYPT_ENC_KEYID:
-		sprintf(nfrontp, " ENC_KEYID", pointer[1]);
+		sprintf(nfrontp, " ENC_KEYID");
 		nfrontp += strlen(nfrontp);
 		goto encommon;
 
 	    case ENCRYPT_DEC_KEYID:
-		sprintf(nfrontp, " DEC_KEYID", pointer[1]);
+		sprintf(nfrontp, " DEC_KEYID");
 		nfrontp += strlen(nfrontp);
 		goto encommon;
 

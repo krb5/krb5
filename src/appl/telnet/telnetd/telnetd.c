@@ -74,6 +74,7 @@ struct	socket_security ss;
 # endif /* SO_SEC_MULTI */
 #endif	/* _SC_CRAY_SECURE_SYS */
 
+
 #ifdef KRB5
 #include "krb5.h"
 #endif
@@ -85,6 +86,9 @@ struct	socket_security ss;
 #ifdef ENCRYPTION
 #include <libtelnet/encrypt.h>
 #include <libtelnet/enc-proto.h>
+#endif
+#if	defined(AUTHENTICATION) || defined(ENCRYPTION)
+#include <libtelnet/misc-proto.h>
 #endif
 
 int	registerd_host_only = 0;
@@ -128,6 +132,7 @@ char	ptyibuf2[BUFSIZ];
 #endif /* ! STREAMPTY */
 
 void doit P((struct sockaddr_in *));
+int terminaltypeok P((char *));
 
 int	hostinfo = 1;			/* do we print login banner? */
 
@@ -206,6 +211,7 @@ get_default_IM()
 	return banner;
 }
 
+int
 main(argc, argv)
 	int argc;
 	char *argv[];
@@ -945,16 +951,18 @@ extern void telnet P((int, int, char *));
 void doit(who)
 	struct sockaddr_in *who;
 {
-	char *host, *inet_ntoa();
+	char *inet_ntoa();
 	struct hostent *hp;
 	int level;
+#if	defined(_SC_CRAY_SECURE_SYS)
 	int ptynum;
+#endif
 	char user_name[256];
-long retval;
+	long retval;
 	/*
 	 * Find an available pty to use.
 	 */
-pty_init();
+	pty_init();
 	
 
 	if ((retval = pty_getpty(&pty, line, 17)) != 0) {

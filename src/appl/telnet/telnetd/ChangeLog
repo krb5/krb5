@@ -1,3 +1,19 @@
+2001-06-07  Ezra Peisach  <epeisach@mit.edu>
+
+	* ext.h: Remove unused prototype for start_slave() and replace
+	with one for startslave().
+
+	* state.c: Add libtlnet/encrypt.h for missing prototypes.
+
+	* sys_term.c: Add prototype for dup_tty(). Change getptyslave()
+	from int to void. Cleanup an assignment in conditional warning. 
+
+	* telnetd.c: Include libtelnet/misc-proto.h. Declare return from
+	terminaltypeok() and main() as int.
+
+	* utility.c: Include libtelnet/auth.h and libtelnet/encrypt.h for
+	prototypes.
+
 2001-04-27  Ken Raeburn  <raeburn@mit.edu>
 
 	* telnetd.c (valid_opts): Note that 'w' takes a parameter.

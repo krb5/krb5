@@ -141,11 +141,7 @@ extern void
 	set_termbuf P((void)),
 	start_login P((char *, int, char *)),
 	start_slc P((int)),
-#if	defined(AUTHENTICATION)
-	start_slave P((char *)),
-#else
-	start_slave P((char *, int, char *)),
-#endif
+	startslave P((char *, int, char *)),
 	suboption P((void)),
 	telrcv P((void)),
 	ttloop P((void)),

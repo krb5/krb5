@@ -37,6 +37,9 @@
 #if	defined(AUTHENTICATION)
 #include <libtelnet/auth.h>
 #endif
+#if defined(ENCRYPTION)
+#include <libtelnet/encrypt.h>
+#endif
 
 unsigned char	doopt[] = { IAC, DO, '%', 'c', 0 };
 unsigned char	dont[] = { IAC, DONT, '%', 'c', 0 };
