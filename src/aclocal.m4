@@ -1422,32 +1422,50 @@ dnl
 dnl KRB5_AC_ENABLE_DNS
 dnl
 AC_DEFUN(KRB5_AC_ENABLE_DNS, [
-  enable_dns_for_kdc=yes
-  enable_dns_for_realm=no
+AC_MSG_CHECKING(if DNS Kerberos lookup support should be compiled in)
 
   AC_ARG_ENABLE([dns],
-[  --enable-dns            enable DNS lookups of Kerberos realm and servers],
-[enable_dns_for_kdc="$enable_dns"
-enable_dns_for_realm="$enable_dns"],
-[enable_dns=no])
-  if test "$enable_dns" = yes; then
-    AC_DEFINE(KRB5_DNS_LOOKUP)
-  fi
+[  --enable-dns            build in support for Kerberos-related DNS lookups], ,
+[enable_dns=default])
 
   AC_ARG_ENABLE([dns-for-kdc],
-[  --enable-dns-for-kdc    enable DNS lookups of Kerberos servers only])
+[  --enable-dns-for-kdc    enable DNS lookups of Kerberos KDCs (default=YES)], ,
+[case "$enable_dns" in
+  yes | no) enable_dns_for_kdc=$enable_dns ;;
+  *) enable_dns_for_kdc=yes ;;
+esac])
   if test "$enable_dns_for_kdc" = yes; then
     AC_DEFINE(KRB5_DNS_LOOKUP_KDC)
   fi
 
   AC_ARG_ENABLE([dns-for-realm],
-[  --enable-dns-for-realm  enable DNS lookups of Kerberos realm names only])
+[  --enable-dns-for-realm  enable DNS lookups of Kerberos realm names], ,
+[case "$enable_dns" in
+  yes | no) enable_dns_for_realm=$enable_dns ;;
+  *) enable_dns_for_realm=no ;;
+esac])
   if test "$enable_dns_for_realm" = yes; then
     AC_DEFINE(KRB5_DNS_LOOKUP_REALM)
   fi
 
-  if test "$enable_dns_for_kdc" = yes || test "$enable_dns_for_realm" = yes ; then
+  if test "$enable_dns_for_kdc,$enable_dns_for_realm" != no,no
+  then
+    # must compile in the support code
+    if test "$enable_dns" = no ; then
+      AC_MSG_ERROR(cannot both enable some DNS options and disable DNS support)
+    fi
     enable_dns=yes
-    AC_DEFINE(KRB5_DNS_LOOKUP)
   fi
+  if test "$enable_dns" = yes ; then
+    AC_DEFINE(KRB5_DNS_LOOKUP)
+  else
+    enable_dns=no
+  fi
+
+AC_MSG_RESULT($enable_dns)
+dnl AC_MSG_CHECKING(if DNS should be used to find KDCs by default)
+dnl AC_MSG_RESULT($enable_dns_for_kdc)
+dnl AC_MSG_CHECKING(if DNS should be used to find realm name by default)
+dnl AC_MSG_RESULT($enable_dns_for_realm)
+
 ])
