@@ -1,1 +1,0 @@
-autoconf_test AC_CHECK_SIZEOF "AC_CHECK_SIZEOF(long *)"

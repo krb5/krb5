@@ -1,1 +1,0 @@
-autoconf_test AC_SIZEOF_TYPE "AC_SIZEOF_TYPE(long *)"

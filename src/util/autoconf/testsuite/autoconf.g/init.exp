@@ -1,2 +1,0 @@
-# Test whether AC_INIT and AC_OUTPUT compile.
-autoconf_test AC_INIT ""
