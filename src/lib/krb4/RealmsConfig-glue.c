@@ -342,8 +342,8 @@ krb_get_admhst(
 	    i++;
     }
     fclose(cnffile);
-    if (result == KSUCCESS && strlen(thost) < MAXHOSTNAMELEN)
-	strncpy(host, thost, MAXHOSTNAMELEN);
+    if (result == KSUCCESS && strlen(thost) < MAX_HSTNM)
+	strcpy(host, thost);
     else
 	result = KFAILURE;
     return result;
