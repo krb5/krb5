@@ -1,5 +1,10 @@
 2001-03-09  Ken Raeburn  <raeburn@mit.edu>
 
+	* old_decrypt.c (memmove): Delete macro definition.
+	(krb5_old_decrypt): Define with prototype form.
+	* old_encrypt.c (krb5_old_encrypt_length, krb5_old_encrypt):
+	Define with prototype form.
+
 	* Makefile.in (STLIBOBJS): Nothing uses des_stringtokey.o, drop
 	it.
 
