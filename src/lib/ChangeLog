@@ -1,3 +1,7 @@
+2003-04-15  Sam Hartman  <hartmans@mit.edu>
+
+	* krb5_32.def: Add krb5_set_password and krb5_set_password_using_ccache
+
 2003-02-10  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in (K4LIBS): Revert previous.

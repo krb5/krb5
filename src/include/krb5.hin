@@ -1658,18 +1658,6 @@ krb5_error_code KRB5_CALLCONV krb5_524_conv_principal
 	(krb5_context context, krb5_const_principal princ, 
 		char *name, char *inst, char *realm);
 
-#if KRB5_PRIVATE
-krb5_error_code KRB5_CALLCONV krb5_mk_chpw_req
-	(krb5_context context, krb5_auth_context auth_context,
- 			krb5_data *ap_req, char *passwd, krb5_data *packet);
-krb5_error_code KRB5_CALLCONV krb5_rd_chpw_rep
-	(krb5_context context, krb5_auth_context auth_context,
-		       krb5_data *packet, int *result_code,
-		       krb5_data *result_data);
-krb5_error_code KRB5_CALLCONV krb5_chpw_result_code_string
-	(krb5_context context, int result_code,
-			char **result_codestr);
-#endif
 
 /* libkt.spec */
 #if KRB5_PRIVATE
@@ -1871,6 +1859,14 @@ krb5_change_password
 	(krb5_context context, krb5_creds *creds, char *newpw,
 			int *result_code, krb5_data *result_code_string,
 			krb5_data *result_string);
+krb5_error_code KRB5_CALLCONV
+krb5_set_password
+	(krb5_context context, krb5_creds *creds, char *newpw, krb5_principal change_password_for,
+			int *result_code, krb5_data *result_code_string, krb5_data *result_string);
+krb5_error_code KRB5_CALLCONV
+krb5_set_password_using_ccache
+	(krb5_context context, krb5_ccache ccache, char *newpw, krb5_principal change_password_for,
+			int *result_code, krb5_data *result_code_string, krb5_data *result_string);
 
 #if KRB5_PRIVATE
 #ifndef macintosh

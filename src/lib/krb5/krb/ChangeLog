@@ -1,3 +1,22 @@
+2003-04-27  Sam Hartman  <hartmans@mit.edu>
+
+	* chpw.c (krb5int_setpw_result_code_string): Make internal 
+
+2003-04-25  Sam Hartman  <hartmans@mit.edu>
+
+	* chpw.c (krb5int_rd_setpw_rep): Fix error handling; allow
+	krberrors to be read correctly; fix memory alloctaion so that
+	allocated structures are freed. 
+
+2003-04-16  Sam Hartman  <hartmans@mit.edu>
+
+	* chpw.c (krb5int_mk_setpw_req): Use encode_krb5_setpw_req.  Fix
+	memory handling to free data that is allocated  
+
+2003-04-15  Sam Hartman  <hartmans@mit.edu>
+
+	* chpw.c (krb5int_mk_setpw_req krb5int_rd_setpw_rep): New function
+
 2003-04-01  Nalin Dahyabhai  <nalin@redhat.com>
 
 	* gc_frm_kdc.c (krb5_get_cred_from_kdc_opt): Check principal name
