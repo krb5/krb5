@@ -1,3 +1,9 @@
+Thu Feb 19 19:03:20 1998  Tom Yu  <tlyu@mit.edu>
+
+	* recvauth.c (krb5_recvauth): Add some bookkeeping flags so we
+	know how much stuff to free upon cleanup.  Fix the up cleanup
+	code.
+
 Wed Feb 18 16:24:02 1998  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Remove trailing slash from thisconfigdir.  Fix up
