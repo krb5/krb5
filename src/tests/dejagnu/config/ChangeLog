@@ -1,3 +1,8 @@
+2003-02-04  Tom Yu  <tlyu@mit.edu>
+
+	* default.exp (start_kerberos_daemons): Use correct argument to
+	"-4" flag.
+
 2003-02-04  Sam Hartman  <hartmans@mit.edu>
 
 	* default.exp (start_kerberos_daemons): Enable  krb4 
