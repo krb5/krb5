@@ -60,7 +60,7 @@ rule MakeInclude
 }
 actions MakeInclude
 {
-    cd "$(1:D)/util/et" && make && cd "$(1:D)/include" && make && touch "$(1)" && echo "### HAPPINESS ###"
+    cd "$(1:D)/util/et" && make && cd "$(1:D)/include" && make && cd "$(1:D)/lib/gssapi/krb5" && make gssapi_krb5.h && touch "$(1)" && echo "### HAPPINESS ###"
 }
 
 # Make <stamp file>
