@@ -6,6 +6,10 @@
 	the mutex while manipulating krb5_gss_keytab.
 	* gssapiP_krb5.h (gssint_krb5_keytab_lock): Declare.
 
+	* set_ccache.c (gss_krb5_ccache_name): Check thread-specific data
+	for the saved "old" name to free.  Save the new old name in
+	thread-specific data.
+
 2004-07-08  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (LOCALINCLUDES): Add $(srcdir)/.. to the list.

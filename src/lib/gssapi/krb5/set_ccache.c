@@ -36,11 +36,19 @@ gss_krb5_ccache_name(minor_status, name, out_name)
 	const char *name;
 	const char **out_name;
 {
-    static char *gss_out_name = NULL;
-    
     char *old_name = NULL;
     OM_uint32 err = 0;
     OM_uint32 minor = 0;
+
+    char *gss_out_name;
+
+    err = gssint_initialize_library();
+    if (err) {
+	*minor_status = err;
+	return GSS_S_FAILURE;
+    }
+
+    gss_out_name = k5_getspecific(K5_KEY_GSS_KRB5_SET_CCACHE_OLD_NAME);
 
     if (out_name) {
         const char *tmp_name = NULL;
@@ -61,8 +69,8 @@ gss_krb5_ccache_name(minor_status, name, out_name)
         }
         
         if (!err) {
-            char *swap = NULL;
-            
+	    char *swap = NULL;
+
             swap = gss_out_name;
             gss_out_name = old_name;
             old_name = swap;
@@ -74,7 +82,20 @@ gss_krb5_ccache_name(minor_status, name, out_name)
             err = minor;
         }
     }
-    
+
+    minor = k5_setspecific(K5_KEY_GSS_KRB5_SET_CCACHE_OLD_NAME, gss_out_name);
+    if (minor) {
+	/* Um.  Now what?  */
+	if (err == 0) {
+	    err = minor;
+	    if (out_name != NULL) {
+		*out_name = NULL;
+		out_name = NULL;
+	    }
+	}
+	free(gss_out_name);
+    }
+
     if (!err) {
         if (out_name) {
             *out_name = gss_out_name;
