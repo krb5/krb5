@@ -1,4 +1,8 @@
 
+Fri Aug 4 16:13:20 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* kadmin5.c - Replace explicit hand-decoded integers with macros.
+
+
 Thu Aug 3 11:37:39 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* kadmin5,convert.c - Update to use new database entry format and string
 		conversion functions.

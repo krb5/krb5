@@ -313,17 +313,11 @@ kadmin_print_entry(name, valid, dbentp)
     for (tl=dbentp->tl_data; tl; tl = tl->tl_data_next) {
 	switch (tl->tl_data_type) {
 	case KRB5_TL_LAST_PWD_CHANGE:
-	    *(((krb5_octet *) (&now))) = tl->tl_data_contents[0];
-	    *(((krb5_octet *) (&now)) + 1) = tl->tl_data_contents[1];
-	    *(((krb5_octet *) (&now)) + 2) = tl->tl_data_contents[2];
-	    *(((krb5_octet *) (&now)) + 3) = tl->tl_data_contents[3];
+	    krb5_kdb_decode_int32(tl->tl_data_contents, now);
 	    printf(db_print_4_fmt, abs2string(now));
 	    break;
 	case KRB5_TL_MOD_PRINC:
-	    *(((krb5_octet *) (&now))) = tl->tl_data_contents[0];
-	    *(((krb5_octet *) (&now)) + 1) = tl->tl_data_contents[1];
-	    *(((krb5_octet *) (&now)) + 2) = tl->tl_data_contents[2];
-	    *(((krb5_octet *) (&now)) + 3) = tl->tl_data_contents[3];
+	    krb5_kdb_decode_int32(tl->tl_data_contents, now);
 	    printf(db_print_7_fmt, &tl->tl_data_contents[4], abs2string(now));
 	    break;
 	default:
