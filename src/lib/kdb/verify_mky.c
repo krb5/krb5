@@ -69,6 +69,8 @@ krb5_encrypt_block *eblock;
     } else
 	retval = krb5_finish_key(eblock);
 
+    memset((char *)tempkey.contents, 0, tempkey.length);
+    xfree(tempkey.contents);
     krb5_db_free_principal(&master_entry, nprinc);
     
     return retval;
