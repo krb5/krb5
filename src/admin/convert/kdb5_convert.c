@@ -159,7 +159,7 @@ char *argv[];
     /* The kdb library will default to this, but it is convenient to
        make it explicit (error reporting and temporary filename generation
        use it).  */
-    char *dbname = DEFAULT_DBM_FILE;
+    char *dbname = DEFAULT_KDB_FILE;
     char *v4dbname = 0;
     char *v4dumpfile = 0;
     char *realm = 0;
