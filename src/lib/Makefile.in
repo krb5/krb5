@@ -49,9 +49,9 @@ K4LIBS = krb4\krb4.lib
 ##WIN32##K4DEF = krb4_32.def
 
 ##WIN16##WINLIBS = $(WLIB) ldllcew libw oldnames
-##WIN32##WINLIBS = msvcrt.lib kernel32.lib wsock32.lib \
+##WIN32##WINLIBS = kernel32.lib wsock32.lib \
 ##WIN32##	user32.lib shell32.lib oldnames.lib
-##WIN32##WINDLLFLAGS = /nodefaultlib /incremental:no /pdb:none /release \
+##WIN32##WINDLLFLAGS = /incremental:no /pdb:none /debug \
 ##WIN32##		/nologo /align:0x1000 /base:0x1c000000 /dll \
 ##WIN32##		/entry:DllMain
 
@@ -100,7 +100,7 @@ $(K4LIB): $(K4LIBS) $(KLIB) $(CLIB) $(K4DEF) k4_glue.obj
 
 ##WIN16##SGDEF = sapgss16.def
 ##WIN16##SKDEF = sapkrb16.def
-##WIN32##SGDEF = gssapi.def
+##WIN32##SGDEF = gssapi32.def
 ##WIN32##SKDEF = krb5_32.def
 ##WIN16##SGLIB = sapgss16.lib
 ##WIN16##SKLIB = sapkrb16.lib

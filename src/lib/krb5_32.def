@@ -182,3 +182,4 @@ EXPORTS
 	krb5_ser_ccache_init
 	krb5_ser_keytab_init
 	krb5_ser_rcache_init
+	decode_krb5_ap_req

@@ -1,3 +1,14 @@
+Tue Jul 29 23:09:31 1997  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* Makefile.in: Remove msvcrt.lib from the explicit WINLIBS link
+ 		line since we're now using /MD and have removed the
+ 		/nodefaultlibs switch.  For now, build debug versions of
+		the libraries.
+
+	* krb5_16.def, krb5_32.def, sapkrb16.def: Add decode_krb5_ap_req
+ 		to the exported functions list, since the GSSAPI krb5
+ 		mechanism routine needs access to this internal routine.
+		
 Thu May  1 22:56:04 1997  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* Makefile.in, win_glue.c, sapkrb16.def, sapkrb32.def: Write
