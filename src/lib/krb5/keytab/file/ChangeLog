@@ -1,3 +1,8 @@
+Fri Jan 27 12:54:54 1995  Chris Provenzano (proven@mit.edu)
+
+	* ktf_get_en.c, ktfile.h (krb5_ktfile_get_entry()) Added 
+		krb5_keytype arg.
+
 Wed Jan 25 16:54:40 1995  Chris Provenzano (proven@mit.edu)
 
         * Removed all narrow types and references to wide.h and narrow.h
