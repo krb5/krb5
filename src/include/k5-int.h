@@ -90,6 +90,15 @@
 #define HAVE_STDARG_H
 #define HAVE_SYS_TYPES_H
 
+/* This controls which encryption routines libcrypto will provide */
+#define PROVIDE_DES_CBC_MD5
+#define PROVIDE_DES_CBC_CRC
+#define PROVIDE_RAW_DES_CBC
+#define PROVIDE_DES_CBC_CKSUM
+#define PROVIDE_CRC32
+#define PROVIDE_RSA_MD4
+#define PROVIDE_RSA_MD5
+
 #ifndef _SIZE_T_DEFINED
 typedef unsigned int size_t;
 #define _SIZE_T_DEFINED
@@ -204,6 +213,15 @@ typedef unsigned int size_t;
 #ifdef NEED_LOWLEVEL_IO
 #include <fcntl.h>
 #endif
+
+/* This controls which encryption routines libcrypto will provide */
+#define PROVIDE_DES_CBC_MD5
+#define PROVIDE_DES_CBC_CRC
+#define PROVIDE_RAW_DES_CBC
+#define PROVIDE_DES_CBC_CKSUM
+#define PROVIDE_CRC32
+#define PROVIDE_RSA_MD4
+#define PROVIDE_RSA_MD5
 
 /* there is no <stat.h> for mpw */
 typedef unsigned long	mode_t;

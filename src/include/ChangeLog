@@ -1,3 +1,10 @@
+Tue Oct 24 17:31:36 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* k5-int.h: Manually defined PROVIDE_* for Macintosh and MS-DOS so
+		that libcrypto knows which encryption systems to include.
+		Otherwise, we would be building an exportable (and
+		useless) krb5 library for the Mac and PC.
+
 Fri Oct  6 21:59:02 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in: Remove ##DOS!include of config/windows.in.
