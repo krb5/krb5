@@ -395,7 +395,7 @@ main(argc, argv)
 	     exit(2);
 	 }
 	 
-	 bzero((char *) &sin,sizeof(sin));
+	 memset((char *) &sin, 0,sizeof(sin));
 	 sin.sin_family = AF_INET;
 	 sin.sin_port = htons(debug_port);
 	 sin.sin_addr.s_addr = INADDR_ANY;

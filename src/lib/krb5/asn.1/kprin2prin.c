@@ -70,7 +70,7 @@ register int *error;
 	}
 	if (rv1)
 	    rv1->next = rv2;
-	xbzero((char *)rv2, sizeof (*rv2));
+	memset((char *)rv2, 0, sizeof (*rv2));
 	if (!namestring)
 	    namestring = rv2;
 

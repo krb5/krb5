@@ -49,7 +49,7 @@ main(int argc, char **argv)
 	  exit(1);
      }
 
-     bzero((char *) &v5creds, sizeof(v5creds));
+     memset((char *) &v5creds, 0, sizeof(v5creds));
      v5creds.client = client;
      v5creds.server = server;
      v5creds.times.endtime = 0;

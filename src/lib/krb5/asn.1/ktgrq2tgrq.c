@@ -54,7 +54,7 @@ register int *error;
 	return(0);
     }
 
-    xbzero(retval, sizeof(*retval));
+    memset(retval, 0, sizeof(*retval));
 
     retval->kdc__options =
 	krb5_kdcoptions2KRB5_KDCOptions(val->kdc_options,
@@ -123,7 +123,7 @@ register int *error;
 	    }
 	    if (rv1)
 		rv1->next = rv2;
-	    xbzero((char *)rv2, sizeof (*rv2));
+	    memset((char *)rv2, 0, sizeof (*rv2));
 	    if (!retval->etype)
 		retval->etype = rv2;
 	    rv2->element_KRB5_9 = val->etype[i];
@@ -161,7 +161,7 @@ register int *error;
 	    *error = ENOMEM;
 	    goto errout;
 	}
-	xbzero(adtk, sizeof(*adtk));
+	memset(adtk, 0, sizeof(*adtk));
 	adtk->nelem = i;
 	for (i = 0; i < adtk->nelem; i++) {
 	    adtk->Ticket[i] = krb5_ticket2KRB5_Ticket(val->second_ticket[i],
@@ -191,7 +191,7 @@ register int *error;
 	    }
 	    if (rv1)
 		rv1->next = rv2;
-	    xbzero((char *)rv2, sizeof (*rv2));
+	    memset((char *)rv2, 0, sizeof (*rv2));
 	    if (!adtk)
 		adtk = rv2;
 
@@ -218,7 +218,7 @@ register int *error;
 	    *error = ENOMEM;
 	    goto errout;
 	}
-	xbzero(adtk, sizeof(*adtk));
+	memset(adtk, 0, sizeof(*adtk));
 	adtk->nelem = 0;
 	retval->additional__tickets = adtk;
 #endif
@@ -260,7 +260,7 @@ struct element_KRB5_7 *krb5_pa_data2element_KRB5_7(val, error)
 	}
 	if (rv1)
 	    rv1->next = rv2;
-	xbzero((char *)rv2, sizeof (*rv2));
+	memset((char *)rv2, 0, sizeof (*rv2));
 	if (!retval)
 	    retval = rv2;
 
@@ -293,7 +293,7 @@ register int *error;
 	*error = ENOMEM;
 	return(0);
     }
-    xbzero(retval, sizeof(*retval));
+    memset(retval, 0, sizeof(*retval));
     retval->pvno = KRB5_PVNO;
     retval->msg__type = val->msg_type;
     if (val->padata) {

@@ -9,6 +9,9 @@ static char *rcsid = "$Header$";
  *
  *
  * $Log$
+ * Revision 1.2  1994/06/15 20:59:41  eichin
+ * step 1: bzero->memset(,0,)
+ *
  * Revision 1.1  1994/06/10 03:30:33  eichin
  * autoconfed isode for kerberos work
  *
@@ -1611,7 +1614,7 @@ char  **ppstr;
     char   *buf;
 
     buf = malloc(NBPI / NBPC + 1);
-    bzero(buf, NBPI / NBPC + 1);
+    memset(buf, 0, NBPI / NBPC + 1);
     lastb = -1;
     ibits = yv->yv_number;
     for (i = 0; i < NBPI; i++) {
@@ -1649,7 +1652,7 @@ char  **ppstr;
     if ((buf = malloc((unsigned)size)) == NULL) {
 	ferrd(1, "valisttobs:malloc:failed on %d\n", size);
     }
-    bzero(buf, size);
+    memset(buf, 0, size);
     for (yv1 = yv->yv_idlist; yv1 != NULL; yv1 = yv1->yv_next) {
 	if ((yv2 = calc_yv(yp, yv1->yv_identifier)) == NULL) {
 	    return (-1);
@@ -1661,7 +1664,7 @@ char  **ppstr;
 	    if ((buf = realloc(buf, (unsigned)nsize)) == NULL) {
 		ferrd(1, "valisttobs:realloc:failed on %d\n", nsize);
 	    }
-	    bzero(buf + size, nsize - size);
+	    memset(buf + size, 0, nsize - size);
 	    size = nsize;
 	}
 	buf[val / NBPC] |= 1 << (NBPC - 1 - (val % NBPC));

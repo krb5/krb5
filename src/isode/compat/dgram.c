@@ -9,6 +9,9 @@ static char *rcsid = "$Header$";
  *
  *
  * $Log$
+ * Revision 1.2  1994/06/15 20:59:12  eichin
+ * step 1: bzero->memset(,0,)
+ *
  * Revision 1.1  1994/06/10 03:27:11  eichin
  * autoconfed isode for kerberos work
  *
@@ -430,7 +433,7 @@ struct  sockaddr *sock;
     }
 
     if (sock == NULL) {
-	bzero ((caddr_t) &up -> dgram_peer, sizeof up -> dgram_peer);
+	memset ((caddr_t) &up -> dgram_peer, 0, sizeof up -> dgram_peer);
 	return OK;
     }
 
@@ -493,7 +496,7 @@ int	fd;
     action ("CLOSE", fd, &up -> dgram_peer.sa);
 
     up -> dgram_parent = NOTOK;
-    bzero ((char *) &up -> dgram_peer, sizeof up -> dgram_peer);
+    memset ((char *) &up -> dgram_peer, 0, sizeof up -> dgram_peer);
     QBFREE (&up -> dgram_queue);
     
     for (vp = (up = peers) + maxpeers; up < vp; up++)

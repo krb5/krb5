@@ -70,7 +70,7 @@ int krb524_convert_creds_plain(krb5_creds *v5creds, CREDENTIALS *v4creds)
      krb5_data *comp;
      int ret;
      
-     bzero((char *) v4creds, sizeof(CREDENTIALS));
+     memset((char *) v4creds, 0, sizeof(CREDENTIALS));
 
      if (ret = krb524_convert_princs(v5creds->client, v5creds->server,
 				     v4creds->pname, v4creds->pinst,

@@ -9,6 +9,9 @@ static char *rcsid = "$Header$";
  *
  *
  * $Log$
+ * Revision 1.2  1994/06/15 20:59:20  eichin
+ * step 1: bzero->memset(,0,)
+ *
  * Revision 1.1  1994/06/10 03:27:36  eichin
  * autoconfed isode for kerberos work
  *
@@ -92,7 +95,7 @@ struct isoservent  *getisoservent () {
 	    && (servf = fopen (isodefile (isoservices, 0), "r")) == NULL)
 	return NULL;
 
-    bzero ((char *) is, sizeof *is);
+    memset ((char *) is, 0, sizeof *is);
 
     while (fgets (buffer, sizeof buffer, servf) != NULL) {
 	if (*buffer == '#')

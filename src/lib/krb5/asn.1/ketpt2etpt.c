@@ -49,7 +49,7 @@ register int *error;
 	*error = ENOMEM;
 	return(0);
     }
-    xbzero(retval, sizeof(*retval));
+    memset(retval, 0, sizeof(*retval));
 
     retval->flags = krb5_flags2KRB5_TicketFlags(val->flags, error);
     if (*error) {

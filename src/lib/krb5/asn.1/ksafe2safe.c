@@ -54,7 +54,7 @@ register int *error;
 	*error = ENOMEM;
 	return(0);
     }
-    xbzero(retval, sizeof(*retval));
+    memset(retval, 0, sizeof(*retval));
 
     rv2 = (struct type_KRB5_KRB__SAFE__BODY *)xmalloc(sizeof(*rv2));
     if (!rv2) {
@@ -62,7 +62,7 @@ register int *error;
 	*error = ENOMEM;
 	return(0);
     }
-    xbzero(rv2, sizeof(*rv2));
+    memset(rv2, 0, sizeof(*rv2));
 
     retval->pvno = KRB5_PVNO;
     retval->msg__type = KRB5_SAFE;

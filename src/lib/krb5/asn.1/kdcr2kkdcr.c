@@ -107,7 +107,7 @@ register int *error;
 	*error = ENOMEM;
 	return(0);
     }
-    xbzero(retval, sizeof(*retval));
+    memset(retval, 0, sizeof(*retval));
 
     retval->msg_type = val->msg__type;
 

@@ -54,7 +54,7 @@ register int *error;
 	*error = ENOMEM;
 	return(0);
     }
-    xbzero(retval, sizeof(*retval));
+    memset(retval, 0, sizeof(*retval));
 
     retval->tr_type = val->tr__type;
     temp = qbuf2krb5_data(val->contents, error);

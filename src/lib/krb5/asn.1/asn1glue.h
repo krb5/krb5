@@ -39,7 +39,6 @@
 
 /* to keep lint happy */
 #define xbcopy(src,dst,size) memcpy((char *)(dst), (char *)(src), size)
-#define xbzero(targ, size) memset((char *)(targ), 0, size)
 #define xmalloc(n) malloc((unsigned) (n))
 #define xcalloc(n,s) calloc((unsigned)(n), (unsigned)(s))
 

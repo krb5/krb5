@@ -185,7 +185,7 @@ kerberos4_send(ap)
 		return(0);
 	}
 
-	bzero(instance, sizeof(instance));
+	memset(instance, 0, sizeof(instance));
 
 	if (realm = krb_get_phost(RemoteHostName))
 		strncpy(instance, realm, sizeof(instance));

@@ -53,7 +53,7 @@ register int *error;
 	*error = ENOMEM;
 	return(0);
     }
-    xbzero(retval, sizeof(*retval));
+    memset(retval, 0, sizeof(*retval));
 
     retval->pvno = KRB5_PVNO;
     retval->msg__type = KRB5_AP_REP;

@@ -56,7 +56,7 @@ register int *error;
 	*error = ENOMEM;
 	return(0);
     }
-    xbzero((char *)retval, sizeof(*retval));
+    memset((char *)retval, 0, sizeof(*retval));
 
     /* Count tickets */
     for (i = 0, rv = val->tickets; rv; i++, rv = rv->next);
@@ -78,7 +78,7 @@ register int *error;
 	    krb5_xfree(retval);
 	    return(0);
 	}
-	xbzero((char *)retval->tickets[i], sizeof(*retval->tickets[i]));
+	memset((char *)retval->tickets[i], 0, sizeof(*retval->tickets[i]));
 
 	retval->tickets[i] = KRB5_Ticket2krb5_ticket(rv->Ticket, error);
 	if (!retval->tickets[i]) {

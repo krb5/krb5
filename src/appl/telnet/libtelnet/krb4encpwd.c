@@ -311,7 +311,7 @@ krb4encpwd_reply(ap, data, cnt)
 		gethostname(hostname, sizeof(hostname));
 		realm = krb_realmofhost(hostname);
 		bcopy((void *)data, (void *)challenge, cnt);
-		bzero(user_passwd, sizeof(user_passwd));
+		memset(user_passwd, 0, sizeof(user_passwd));
 		local_des_read_pw_string(user_passwd, sizeof(user_passwd)-1, "Password: ", 0);
 		UserPassword = user_passwd;
 		Challenge = challenge;

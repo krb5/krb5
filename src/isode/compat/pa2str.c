@@ -9,6 +9,9 @@ static char *rcsid = "$Header$";
  *
  *
  * $Log$
+ * Revision 1.2  1994/06/15 20:59:23  eichin
+ * step 1: bzero->memset(,0,)
+ *
  * Revision 1.1  1994/06/10 03:27:54  eichin
  * autoconfed isode for kerberos work
  *
@@ -72,7 +75,7 @@ register struct PSAPaddr *px;
 	    n > 2 && n <= m - 2) 
 	{						/* encoded! */
 	    tz = &px -> pa_addr.sa_addr;
-	    bzero ((char *)ta, sizeof *ta);
+	    memset ((char *)ta, 0, sizeof *ta);
 	    if ((ta -> ta_selectlen = m - n - 2) > 0)
 		    bcopy (&tz -> ta_selector[n+2], ta -> ta_selector,
 			   ta -> ta_selectlen);
@@ -95,7 +98,7 @@ register struct PSAPaddr *px;
 			    paddr2str (pa, NULLNA));
 	    bp += strlen (bp);
 
-	    bzero ((char *) pa, sizeof *pa);
+	    memset ((char *) pa, 0, sizeof *pa);
 	    *ta = px -> pa_addr.sa_addr;    /* struct copy */
 	    ta -> ta_selectlen = 0;
 	}

@@ -61,6 +61,6 @@ des_read_password/*_v4_compat_crock*/(k,prompt,verify)
     if (ok == 0)
 	des_string_to_key(key_string, k);
 
-    bzero(key_string, sizeof (key_string));
+    memset(key_string, 0, sizeof (key_string));
     return ok;
 }

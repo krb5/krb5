@@ -515,7 +515,7 @@ main(argc, argv)
 		(void) strncpy(pp, pp2, sizeof(pp));
 		pp[8]='\0';
 		namep = crypt(pp, pwd->pw_passwd);
-		bzero (pp, sizeof(pp));	/* To the best of my recollection, Senator... */
+		memset (pp, 0, sizeof(pp));	/* To the best of my recollection, Senator... */
 		lpass_ok = !strcmp (namep, pwd->pw_passwd);
 		
 		if (pwd->pw_uid != 0) { /* Don't get tickets for root */
@@ -553,7 +553,7 @@ main(argc, argv)
 						   realm, "krbtgt",
 						   realm,
 						   DEFAULT_TKT_LIFE, pp2);
-		    bzero (pp2, sizeof(pp2));
+		    memset (pp2, 0, sizeof(pp2));
 		    (void) setpriority(PRIO_PROCESS, 0, 0 + PRIO_OFFSET);
 		    switch (krbval) {
 		    case INTK_OK:
@@ -582,7 +582,7 @@ main(argc, argv)
 			break;
 		    }
 		} else {
-		    (void) bzero (pp2, sizeof(pp2));
+		    (void) memset (pp2, 0, sizeof(pp2));
 		    (void) setpriority(PRIO_PROCESS, 0, 0 + PRIO_OFFSET);
 		}
 
@@ -673,14 +673,14 @@ bad_login:
 	{
 		struct utmp utmp;
 
-		bzero((char *)&utmp, sizeof(utmp));
+		memset((char *)&utmp, 0, sizeof(utmp));
 		login_time = time(&utmp.ut_time);
 		(void) strncpy(utmp.ut_name, username, sizeof(utmp.ut_name));
 		if (hostname)
 		    (void) strncpy(utmp.ut_host, hostname,
 				   sizeof(utmp.ut_host));
 		else
-		    bzero(utmp.ut_host, sizeof(utmp.ut_host));
+		    memset(utmp.ut_host, 0, sizeof(utmp.ut_host));
 		(void) strncpy(utmp.ut_line, tty, sizeof(utmp.ut_line));
 		login(&utmp);
 	}
@@ -971,7 +971,7 @@ dolastlog(quiet, tty)
 		if (hostname)
 		    (void) strncpy(ll.ll_host, hostname, sizeof(ll.ll_host));
 		else
-		    (void) bzero(ll.ll_host, sizeof(ll.ll_host));
+		    (void) memset(ll.ll_host, 0, sizeof(ll.ll_host));
 		(void)write(fd, (char *)&ll, sizeof(ll));
 		(void)close(fd);
 	}
@@ -1026,7 +1026,7 @@ do_krb_login(host, strict)
 	 * Kerberos autologin protocol.
 	 */
 
-	(void) bzero((char *) &sin, (int) sizeof(sin));
+	(void) memset((char *) &sin, 0, (int) sizeof(sin));
 
         if (hp)
                 (void) bcopy (hp->h_addr, (char *)&sin.sin_addr,

@@ -150,7 +150,7 @@ notify_recipient(name)
     if ((ret = ZInitialize()) == ZERR_NONE)
       init = 0;
 
-  bzero(&notice, sizeof(notice));
+  memset(&notice, 0, sizeof(notice));
   notice.z_kind = UNSAFE;
   notice.z_class          = "message";
   notice.z_class_inst     = "pop";

@@ -70,7 +70,7 @@ struct element_KRB5_11 *krb5_pa_data2element_KRB5_11(val, error)
 	}
 	if (rv1)
 	    rv1->next = rv2;
-	xbzero((char *)rv2, sizeof (*rv2));
+	memset((char *)rv2, 0, sizeof (*rv2));
 	if (!retval)
 	    retval = rv2;
 
@@ -104,7 +104,7 @@ OLDDECLARG(register int *,error)
 	*error = ENOMEM;
 	return(0);
     }
-    xbzero(retval, sizeof(*retval));
+    memset(retval, 0, sizeof(*retval));
 
     retval->pvno = KRB5_PVNO;
     retval->msg__type = val->msg_type;

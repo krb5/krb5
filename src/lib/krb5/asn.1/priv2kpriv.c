@@ -54,7 +54,7 @@ register int *error;
 	*error = ENOMEM;
 	return(0);
     }
-    xbzero(retval, sizeof(*retval));
+    memset(retval, 0, sizeof(*retval));
 
     temp = KRB5_EncryptedData2krb5_enc_data(val->enc__part, error);
     if (temp) {

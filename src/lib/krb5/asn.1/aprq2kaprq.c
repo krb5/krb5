@@ -54,7 +54,7 @@ register int *error;
 	*error = ENOMEM;
 	return(0);
     }
-    xbzero(retval, sizeof(*retval));
+    memset(retval, 0, sizeof(*retval));
     
     retval->ap_options = KRB5_APOptions2krb5_apoptions(val->ap__options,
 						       error);

@@ -54,7 +54,7 @@ register int *error;
 	return(0);
     }
 
-    xbzero(retval, sizeof(*retval));
+    memset(retval, 0, sizeof(*retval));
     retval->authenticator__vno = KRB5_PVNO;
     retval->crealm = krb5_data2qbuf(krb5_princ_realm(val->client));
     if (!retval->crealm) {

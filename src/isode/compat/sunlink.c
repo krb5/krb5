@@ -13,6 +13,9 @@ static char *rcsid = "$Header$";
  *
  *
  * $Log$
+ * Revision 1.2  1994/06/15 20:59:28  eichin
+ * step 1: bzero->memset(,0,)
+ *
  * Revision 1.1  1994/06/10 03:28:39  eichin
  * autoconfed isode for kerberos work
  *
@@ -120,7 +123,7 @@ int     backlog,
 	    return NOTOK;
 	if (ioctl (sd, X25_SET_FACILITY, &f) == NOTOK)
 	    return NOTOK;
-	bzero ((char *)xs, sizeof *xs);
+	memset ((char *)xs, 0, sizeof *xs);
 	if (bind (sd, (struct sockaddr *)xs, sizeof *xs) == NOTOK) {
 	    SLOG (compat_log, LLOG_EXCEPTIONS, "failed", ("bind"));
 	    (void) close_x25_socket (sd);
@@ -141,7 +144,7 @@ int     backlog,
 	    if (local -> na_pidlen > NPSIZE)
 		local -> na_pidlen = NPSIZE;
 	    *sock = *xs;	/* struct copy */
-	    bzero((char *) sock -> data, NPSIZE);
+	    memset((char *) sock -> data, 0, NPSIZE);
 	    bcopy (local -> na_pid, (char *) sock -> data, local -> na_pidlen);
 	    bcopy (local -> na_cudf, (char *) sock -> data + NPSIZE,
 		   local -> na_cudflen);
@@ -316,7 +319,7 @@ char *caption;
 {
     FACILITY_DB facilities;
 
-    bzero ((char *) &facilities, sizeof facilities);
+    memset ((char *) &facilities, 0, sizeof facilities);
 
     if (coc != CALLED
 	    && ioctl (sd, X25_RD_FACILITY, (char *) &facilities) == NOTOK) {

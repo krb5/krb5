@@ -308,8 +308,8 @@ main(argc, argv)
     kerror = kdb_verify_master_key (master_key, master_key_schedule, stdout);
     if (kerror < 0) {
       klog (L_KRB_PERR, "Can't verify master key.");
-      bzero (master_key, sizeof (master_key));
-      bzero (master_key_schedule, sizeof (master_key_schedule));
+      memset (master_key, 0, sizeof (master_key));
+      memset (master_key_schedule, 0, sizeof (master_key_schedule));
       exit (-1);
     }
 
@@ -391,9 +391,6 @@ main(argc, argv)
 
 static krb5_error_code retval; 
 static krb5_data *response;
-#ifndef bzero
-void bzero();
-#endif
 #ifndef bcopy
 void bcopy();
 #endif
@@ -436,7 +433,7 @@ krb5_data **resp;
     client_sockaddr.sin_port	= client_fulladdr->port;
     bcopy( addr->contents, &client_sockaddr.sin_addr, 
 		     sizeof client_sockaddr.sin_addr);
-    bzero( client_sockaddr.sin_zero, sizeof client_sockaddr.sin_zero);
+    memset( client_sockaddr.sin_zero, 0, sizeof client_sockaddr.sin_zero);
 
     /* convert v5 packet structure to v5's.
      * this copy is gross, but necessary:
@@ -570,7 +567,7 @@ compat_decrypt_key (in5, out4)
 	retval = 0;
 	bcopy(	out5.contents, out4, out5.length);
     }
-    bzero(	out5.contents,       out5.length);
+    memset(	out5.contents, 0,    out5.length);
     krb5_xfree(	out5.contents);
     return( retval);
 }
@@ -814,7 +811,7 @@ kerberos_v4(client, pkt)
 	    lifetime = min(req_life, ((u_long) s_name_data.max_life));
 	    lifetime = min(lifetime, ((u_long) a_name_data.max_life));
 #ifdef NOENCRYPTION
-	    bzero(session_key, sizeof(C_Block));
+	    memset(session_key, 0, sizeof(C_Block));
 #else
 	    /* random session key */
 	    random_key(session_key);
@@ -831,8 +828,8 @@ kerberos_v4(client, pkt)
 		a_name_data.instance, local_realm,
 		 client_host.s_addr, session_key, lifetime, kerb_time.tv_sec,
 			 s_name_data.name, s_name_data.instance, key);
-	    bzero(key, sizeof(key));
-	    bzero(key_s, sizeof(key_s));
+	    memset(key, 0, sizeof(key));
+	    memset(key_s, 0, sizeof(key_s));
 
 	    /*
 	     * get the user's key, unseal it from the server's key, and
@@ -853,9 +850,9 @@ kerberos_v4(client, pkt)
 		  s_name_data.key_version, tk, kerb_time.tv_sec, key);
 
 	    /* clear session key */
-	    bzero(session_key, sizeof(session_key));
+	    memset(session_key, 0, sizeof(session_key));
 
-	    bzero(key, sizeof(key));
+	    memset(key, 0, sizeof(key));
 
 
 
@@ -865,8 +862,8 @@ kerberos_v4(client, pkt)
 		a_name_data.key_version, ciph);
 	    krb4_sendto(f, (char *) rpkt->dat, rpkt->length, 0,
 		   (struct sockaddr *) client, S_AD_SZ);
-	    bzero(&a_name_data, sizeof(a_name_data));
-	    bzero(&s_name_data, sizeof(s_name_data));
+	    memset(&a_name_data, 0, sizeof(a_name_data));
+	    memset(&s_name_data, 0, sizeof(s_name_data));
 	    break;
 	}
     case AUTH_MSG_APPL_REQUEST:
@@ -953,7 +950,7 @@ kerberos_v4(client, pkt)
 	    /* construct and seal the ticket */
 
 #ifdef NOENCRYPTION
-	    bzero(session_key, sizeof(C_Block));
+	    memset(session_key, 0, sizeof(C_Block));
 #else
 	    /* random session key */
 	    random_key(session_key);
@@ -964,8 +961,8 @@ kerberos_v4(client, pkt)
 			      session_key, lifetime, kerb_time.tv_sec,
 			      s_name_data.name, s_name_data.instance,
 			      key);
-	    bzero(key, sizeof(key));
-	    bzero(key_s, sizeof(key_s));
+	    memset(key, 0, sizeof(key));
+	    memset(key_s, 0, sizeof(key_s));
 
 	    create_ciph(ciph, session_key, service, instance,
 			local_realm,
@@ -973,16 +970,16 @@ kerberos_v4(client, pkt)
 			kerb_time.tv_sec, ad->session);
 
 	    /* clear session key */
-	    bzero(session_key, sizeof(session_key));
+	    memset(session_key, 0, sizeof(session_key));
 
-	    bzero(ad->session, sizeof(ad->session));
+	    memset(ad->session, 0, sizeof(ad->session));
 
 	    rpkt = create_auth_reply(ad->pname, ad->pinst,
 				     ad->prealm, time_ws,
 				     0, 0, 0, ciph);
 	    krb4_sendto(f, (char *) rpkt->dat, rpkt->length, 0,
 		   (struct sockaddr *) client, S_AD_SZ);
-	    bzero(&s_name_data, sizeof(s_name_data));
+	    memset(&s_name_data, 0, sizeof(s_name_data));
 	    break;
 	}
 

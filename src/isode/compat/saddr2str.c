@@ -9,6 +9,9 @@ static char *rcsid = "$Header$";
  *
  *
  * $Log$
+ * Revision 1.2  1994/06/15 20:59:24  eichin
+ * step 1: bzero->memset(,0,)
+ *
  * Revision 1.1  1994/06/10 03:27:59  eichin
  * autoconfed isode for kerberos work
  *
@@ -52,7 +55,7 @@ register struct SSAPaddr *sa;
 
     if (!sa)
 	return NULL;
-    bzero ((char *) pa, sizeof *pa);
+    memset ((char *) pa, 0, sizeof *pa);
     pa -> pa_addr = *sa;		/* struct copy */
 
     return paddr2str (pa, NULLNA);

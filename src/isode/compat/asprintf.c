@@ -9,6 +9,9 @@ static char *rcsid = "$Header$";
  *
  *
  * $Log$
+ * Revision 1.2  1994/06/15 20:59:08  eichin
+ * step 1: bzero->memset(,0,)
+ *
  * Revision 1.1  1994/06/10 03:26:54  eichin
  * autoconfed isode for kerberos work
  *
@@ -80,7 +83,7 @@ va_list	ap;
 
 #ifndef	VSPRINTF
 #ifdef	pyr
-	bzero ((char *) &iob, sizeof iob);
+	memset ((char *) &iob, 0, sizeof iob);
 	iob._file = _NFILE;
 #endif
 	iob._flag = _IOWRT | _IOSTRG;

@@ -9,6 +9,9 @@ static char *rcsid = "$Header$";
  *
  *
  * $Log$
+ * Revision 1.2  1994/06/15 20:59:53  eichin
+ * step 1: bzero->memset(,0,)
+ *
  * Revision 1.1  1994/06/10 03:32:25  eichin
  * autoconfed isode for kerberos work
  *
@@ -128,7 +131,7 @@ register int	n,
 	    if (pe -> pe_len < (PElementLen) (len = i + 1)) {
 		if ((bp = PEDalloc (len)) == NULLPED)
 		    return NULLPED;
-		bzero ((char *) bp, len);
+		memset ((char *) bp, 0, len);
 		if (pe -> pe_prim) {
 		    PEDcpy (pe -> pe_prim, bp, pe -> pe_len);
 		    if (pe -> pe_inline)
@@ -151,7 +154,7 @@ register int	n,
 		pe_free (r);
 		return NULLPED;
 	    }
-	    bzero ((char *) r -> pe_prim, len);
+	    memset ((char *) r -> pe_prim, 0, len);
 	    r -> pe_nbits = j + 1;
 	    *mask = 1 << (7 - (j % 8));
 	    for (p = &pe -> pe_cons; q = *p; p = &q -> pe_next)

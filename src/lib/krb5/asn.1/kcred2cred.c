@@ -57,7 +57,7 @@ register int *error;
 	*error = ENOMEM;
 	return(0);
     }
-    xbzero((char *)retval, sizeof(*retval));
+    memset((char *)retval, 0, sizeof(*retval));
 
     retval->pvno = KRB5_PVNO;
     retval->msg__type = KRB5_CRED;
@@ -79,7 +79,7 @@ register int *error;
         }
         if (rv1)
             rv1->next = rv2;
-        xbzero((char *)rv2, sizeof (*rv2));
+        memset((char *)rv2, 0, sizeof (*rv2));
         if (!retval->tickets)
             retval->tickets = rv2;
 

@@ -204,7 +204,7 @@ kerberos5_send(ap)
 	ksum.checksum_type = CKSUMTYPE_CRC32;
 	ksum.contents = sum;
 	ksum.length = sizeof(sum);
-	bzero((Voidptr )sum, sizeof(sum));
+	memset((Voidptr )sum, 0, sizeof(sum));
 	
         if (!UserNameRequested) {
                 if (auth_debug_mode) {
@@ -220,7 +220,7 @@ kerberos5_send(ap)
 		return(0);
 	}
 
-	bzero((char *)&creds, sizeof(creds));
+	memset((char *)&creds, 0, sizeof(creds));
 	if (r = krb5_sname_to_principal(RemoteHostName,"host",KRB5_NT_SRV_HST,
 					&creds.server)) {
 	    if (auth_debug_mode)

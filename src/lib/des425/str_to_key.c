@@ -77,7 +77,7 @@ des_string_to_key(str,key)
     length = strlen(str);
 
     /* init key array for bits */
-    bzero(k_char,sizeof(k_char));
+    memset(k_char, 0,sizeof(k_char));
 
 #ifdef DEBUG
     if (mit_des_debug)
@@ -126,7 +126,7 @@ des_string_to_key(str,key)
     (void) des_key_sched(key,key_sked);
     (void) des_cbc_cksum((des_cblock *)in_str,key,length,key_sked,key);
     /* erase key_sked */
-    bzero((char *)key_sked,sizeof(key_sked));
+    memset((char *)key_sked, 0,sizeof(key_sked));
 
     /* now fix up key parity again */
     des_fixup_key_parity(key);

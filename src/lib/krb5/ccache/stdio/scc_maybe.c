@@ -65,7 +65,7 @@ krb5_scc_close_file (id)
 	(failed) syscall */
      if (ret == EOF && !errno) ret = 0;
 #endif
-     bzero (data->stdio_buffer, sizeof (data->stdio_buffer));
+     memset (data->stdio_buffer, 0, sizeof (data->stdio_buffer));
      if (ret == EOF) {
 	  int errsave = errno;
 	  (void) krb5_unlock_file(data->file, data->filename);

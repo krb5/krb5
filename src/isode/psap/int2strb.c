@@ -9,6 +9,9 @@ static char *rcsid = "$Header$";
  *
  *
  * $Log$
+ * Revision 1.2  1994/06/15 20:59:55  eichin
+ * step 1: bzero->memset(,0,)
+ *
  * Revision 1.1  1994/06/10 03:32:42  eichin
  * autoconfed isode for kerberos work
  *
@@ -46,7 +49,7 @@ int     len;
     register int    i;
     static char buffer[sizeof (int) + 1];
 
-    bzero (buffer, sizeof (buffer));
+    memset (buffer, 0, sizeof (buffer));
     for (i = 0; i < len; i++)
 	if (n & (1 << i))
 	    buffer[i / 8] |= (1 << (7 - (i % 8)));

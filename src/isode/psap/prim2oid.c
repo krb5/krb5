@@ -9,6 +9,9 @@ static char *rcsid = "$Header$";
  *
  *
  * $Log$
+ * Revision 1.2  1994/06/15 20:59:57  eichin
+ * step 1: bzero->memset(,0,)
+ *
  * Revision 1.1  1994/06/10 03:33:45  eichin
  * autoconfed isode for kerberos work
  *
@@ -54,7 +57,7 @@ register PE	pe;
     register OID	o = &oid;
 
     if (once_only) {
-	bzero ((char *) o, sizeof *o);
+	memset ((char *) o, 0, sizeof *o);
 	once_only = 0;
     }
 

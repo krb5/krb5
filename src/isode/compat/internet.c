@@ -9,6 +9,9 @@ static char *rcsid = "$Header$";
  *
  *
  * $Log$
+ * Revision 1.2  1994/06/15 20:59:16  eichin
+ * step 1: bzero->memset(,0,)
+ *
  * Revision 1.1  1994/06/10 03:27:24  eichin
  * autoconfed isode for kerberos work
  *
@@ -377,7 +380,7 @@ char   *s;
     h -> h_length = sizeof (iaddr);
 #ifdef	h_addr
     h -> h_addr_list = addrs;
-    bzero ((char *) addrs, sizeof addrs);
+    memset ((char *) addrs, 0, sizeof addrs);
 #endif
     h -> h_addr = (char *) &iaddr;
 

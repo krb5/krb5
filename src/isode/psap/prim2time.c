@@ -9,6 +9,9 @@ static char *rcsid = "$Header$";
  *
  *
  * $Log$
+ * Revision 1.2  1994/06/15 20:59:59  eichin
+ * step 1: bzero->memset(,0,)
+ *
  * Revision 1.1  1994/06/10 03:33:56  eichin
  * autoconfed isode for kerberos work
  *
@@ -88,7 +91,7 @@ register int	len;
     static UTCtime  ut;
     register UTC    u = &ut;
 
-    bzero ((char *) u, sizeof *u);
+    memset ((char *) u, 0, sizeof *u);
 
     if (sscanf (cp, "%2d%2d%2d%2d%2d", &year, &u -> ut_mon,
 		&u -> ut_mday, &u -> ut_hour, &u -> ut_min) != 5)
@@ -142,7 +145,7 @@ int	len;
     static UTCtime    ut;
     register UTC      u = &ut;
 
-    bzero ((char *) u, sizeof *u);
+    memset ((char *) u, 0, sizeof *u);
 
     if (sscanf (cp, "%4d%2d%2d%2d", &u -> ut_year, &u -> ut_mon,
 		&u -> ut_mday, &u -> ut_hour) != 4)

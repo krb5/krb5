@@ -56,7 +56,7 @@ register int *error;
 	*error = ENOMEM;
 	return(0);
     }
-    xbzero((char *)retval, sizeof (*retval));
+    memset((char *)retval, 0, sizeof (*retval));
 
     if (val->nonce) {
 	retval->nonce = val->nonce;
@@ -98,7 +98,7 @@ register int *error;
 	if (!rv2)
 	  goto errout;
 
-        xbzero((char *)rv2, sizeof (*rv2));
+        memset((char *)rv2, 0, sizeof (*rv2));
 
         if (rv1)
             rv1->next = rv2;
@@ -110,7 +110,7 @@ register int *error;
             xmalloc(sizeof(*(rv2->KRB__CRED__INFO)));
         if (!rv2->KRB__CRED__INFO)
             goto errout;
-        xbzero((char *)rv2->KRB__CRED__INFO, sizeof (*rv2->KRB__CRED__INFO));
+        memset((char *)rv2->KRB__CRED__INFO, 0, sizeof (*rv2->KRB__CRED__INFO));
 
 	rv2->KRB__CRED__INFO->key =
 	  krb5_keyblock2KRB5_EncryptionKey(val->ticket_info[i]->session, 

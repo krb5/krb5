@@ -109,7 +109,7 @@ memmove(dst, src, length)
 #define	WIDEVAL	0
 
 void
-bzero(dst0, length)
+memset(dst0, 0, length)
 	void *dst0;
 	register size_t length;
 #else

@@ -143,7 +143,7 @@ ofb64_init(server)
 fb64_init(fbp)
 	register struct fb *fbp;
 {
-	bzero((void *)fbp, sizeof(*fbp));
+	memset((void *)fbp, 0, sizeof(*fbp));
 	fbp->state[0] = fbp->state[1] = FAILED;
 	fbp->fb_feed[0] = IAC;
 	fbp->fb_feed[1] = SB;
@@ -374,7 +374,7 @@ fb64_reply(data, cnt, fbp)
 		break;
 
 	case FB64_IV_BAD:
-		bzero(fbp->temp_feed, sizeof(Block));
+		memset(fbp->temp_feed, 0, sizeof(Block));
 		fb64_stream_iv(fbp->temp_feed, &fbp->streams[DIR_ENCRYPT-1]);
 		state = FAILED;
 		break;

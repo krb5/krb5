@@ -9,6 +9,9 @@ static char *rcsid = "$Header$";
  *
  *
  * $Log$
+ * Revision 1.2  1994/06/15 20:59:26  eichin
+ * step 1: bzero->memset(,0,)
+ *
  * Revision 1.1  1994/06/10 03:28:26  eichin
  * autoconfed isode for kerberos work
  *
@@ -75,7 +78,7 @@ char *dlmstr;           /* Delimiting character */
     if (srcptr == 0)
 	return (NOTOK);
 
-    bzero (idex, sizeof idex);
+    memset (idex, 0, sizeof idex);
     for (destptr = dlmstr; *destptr; destptr++)
 	idex[*destptr] = 1;
 

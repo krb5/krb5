@@ -9,6 +9,9 @@ static char *rcsid = "$Header$";
  *
  *
  * $Log$
+ * Revision 1.2  1994/06/15 20:59:21  eichin
+ * step 1: bzero->memset(,0,)
+ *
  * Revision 1.1  1994/06/10 03:27:46  eichin
  * autoconfed isode for kerberos work
  *
@@ -70,7 +73,7 @@ register struct NSAPaddr *na;
 	return ca;
     }
 
-    bzero ((char *) ca, sizeof *ca);
+    memset ((char *) ca, 0, sizeof *ca);
     ca -> na_stack = NA_NSAP;
 
     for (ts = ts_interim; ts -> ts_name; ts++)

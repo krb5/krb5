@@ -222,7 +222,7 @@ main(int argc, char **argv)
 	  exit(1);
      }
      
-     bzero((char *) &v5creds, sizeof(v5creds));
+     memset((char *) &v5creds, 0, sizeof(v5creds));
      v5creds.client = client;
      v5creds.server = server;
      v5creds.times.endtime = 0;
@@ -276,7 +276,7 @@ void do_remote(krb5_creds *v5creds, char *server, krb5_keyblock *key)
 	       fprintf(stderr, "test: host %s does not exist.\n", server);
 	       exit(1);
 	  }
-	  bzero((char *) &saddr, sizeof(struct sockaddr_in));
+	  memset((char *) &saddr, 0, sizeof(struct sockaddr_in));
 	  saddr.sin_family = AF_INET;
 	  bcopy(hp->h_addr, (char *) &saddr.sin_addr.s_addr,
 		sizeof(struct in_addr));

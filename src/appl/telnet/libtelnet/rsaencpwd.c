@@ -158,7 +158,7 @@ rsaencpwd_init(ap, server)
 
 	if (server) {
 		str_data[3] = TELQUAL_REPLY;
-		bzero(key_file, sizeof(key_file));
+		memset(key_file, 0, sizeof(key_file));
 		gethostname(lhostname, sizeof(lhostname));
 		if ((cp = index(lhostname, '.')) != 0)  *cp = '\0';
 		strcpy(key_file, "/etc/.");
@@ -363,7 +363,7 @@ rsaencpwd_reply(ap, data, cnt)
 		pubkey_len = DecodeValueLength(ptr);
 		ptr += NumEncodeLengthOctets(pubkey_len);
 		bcopy(ptr, pubkey, pubkey_len);
-		bzero(user_passwd, sizeof(user_passwd));
+		memset(user_passwd, 0, sizeof(user_passwd));
 		local_des_read_pw_string(user_passwd, sizeof(user_passwd)-1, "Password: ", 0);
 		UserPassword = user_passwd;
 		Challenge = challenge;

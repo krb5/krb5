@@ -127,7 +127,7 @@ local_des_read_pw_string(s,max,prompt,verify)
 
 lose:
     if (!ok)
-	bzero(s, max);
+	memset(s, 0, max);
     printf("\n");
     /* turn echo back on */
     tty_state.sg_flags |= ECHO;
@@ -138,7 +138,7 @@ lose:
 */
     bcopy((char *)env, (char *)old_env, sizeof(env));
     if (verify)
-	bzero(key_string, sizeof (key_string));
+	memset(key_string, 0, sizeof (key_string));
     s[max-1] = 0;		/* force termination */
     return !ok;			/* return nonzero if not okay */
 }

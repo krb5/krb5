@@ -632,7 +632,7 @@ defer_terminit()
 	if (def_col || def_row) {
 		struct winsize ws;
 
-		bzero((char *)&ws, sizeof(ws));
+		memset((char *)&ws, 0, sizeof(ws));
 		ws.ws_col = def_col;
 		ws.ws_row = def_row;
 		(void) ioctl(pty, TIOCSWINSZ, (char *)&ws);

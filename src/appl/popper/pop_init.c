@@ -65,7 +65,7 @@ char    **      argmessage;
     char                *   trace_file_name;
 
     /*  Initialize the POP parameter block */
-    bzero ((char *)p,(int)sizeof(POP));
+    memset ((char *)p, 0,(int)sizeof(POP));
 
     /*  Save my name in a global variable */
     p->myname = argmessage[0];

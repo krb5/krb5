@@ -9,6 +9,9 @@ static char *rcsid = "$Header$";
  *
  *
  * $Log$
+ * Revision 1.2  1994/06/15 21:00:01  eichin
+ * step 1: bzero->memset(,0,)
+ *
  * Revision 1.1  1994/06/10 03:35:19  eichin
  * autoconfed isode for kerberos work
  *
@@ -49,7 +52,7 @@ void	tm2ut (tm, ut)
 register struct tm *tm;
 register UTC	ut;
 {
-    bzero ((char *) ut, sizeof *ut);
+    memset ((char *) ut, 0, sizeof *ut);
 
     ut -> ut_year = YEAR (tm -> tm_year);
     ut -> ut_mon = tm -> tm_mon + 1;

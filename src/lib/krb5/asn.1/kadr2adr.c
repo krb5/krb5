@@ -54,7 +54,7 @@ register int *error;
 	*error = ENOMEM;
 	return(0);
     }
-    xbzero(retval, sizeof(*retval));
+    memset(retval, 0, sizeof(*retval));
     retval->addr__type = val->addrtype;
     retval->address = str2qb((char *)val->contents, val->length, 1);
     if (!retval->address) {

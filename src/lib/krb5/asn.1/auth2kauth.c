@@ -54,7 +54,7 @@ register int *error;
 	return(0);
     }
 
-    xbzero(retval, sizeof(*retval));
+    memset(retval, 0, sizeof(*retval));
 
     retval->client = KRB5_PrincipalName2krb5_principal(val->cname,
 						       val->crealm,

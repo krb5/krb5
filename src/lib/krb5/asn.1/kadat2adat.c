@@ -63,7 +63,7 @@ register int *error;
 	*error = ENOMEM;
 	return(0);
     }
-    xbzero(retval, sizeof(*retval));
+    memset(retval, 0, sizeof(*retval));
     retval->nelem = i;
     for (i = 0; i < retval->nelem; i++) {
 	retval->element_KRB5_2[i] = (struct element_KRB5_3 *)
@@ -103,7 +103,7 @@ register int *error;
 	}
 	if (rv1)
 	    rv1->next = rv2;
-	xbzero((char *)rv2, sizeof (*rv2));
+	memset((char *)rv2, 0, sizeof (*rv2));
 	if (!retval)
 	    retval = rv2;
 

@@ -56,7 +56,7 @@ register int *error;
 	*error = ENOMEM;
 	return 0;
     }
-    xbzero(retval, sizeof(*retval));
+    memset(retval, 0, sizeof(*retval));
 
     if (qb_pullup(val->address) != OK) {
 	krb5_xfree(retval);

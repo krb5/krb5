@@ -53,7 +53,7 @@ void login(ut)
     (void) strncpy(ut->ut_id, ut->ut_line, sizeof(ut->ut_id));
 
     (void) setutent();
-    (void) bzero((char *)&utmp, sizeof(utmp));
+    (void) memset((char *)&utmp, 0, sizeof(utmp));
     (void) strncpy(utmp.ut_id, ut->ut_id, sizeof(utmp.ut_id));
     utmp.ut_type = DEAD_PROCESS;
     (void) getutid(&utmp);

@@ -9,6 +9,9 @@ static char *rcsid = "$Header$";
  *
  *
  * $Log$
+ * Revision 1.2  1994/06/15 21:00:04  eichin
+ * step 1: bzero->memset(,0,)
+ *
  * Revision 1.1  1994/06/10 03:35:24  eichin
  * autoconfed isode for kerberos work
  *
@@ -54,7 +57,7 @@ register UTC	ut;
     static struct tm   tms;
     register struct tm *tm = &tms;
 
-    bzero ((char *) tm, sizeof *tm);
+    memset ((char *) tm, 0, sizeof *tm);
 
     tm -> tm_sec = ut -> ut_sec;
     tm -> tm_min = ut -> ut_min;

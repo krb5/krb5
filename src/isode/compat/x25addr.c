@@ -11,6 +11,9 @@ static char *rcsid = "$Header$";
  *
  *
  * $Log$
+ * Revision 1.2  1994/06/15 20:59:33  eichin
+ * step 1: bzero->memset(,0,)
+ *
  * Revision 1.1  1994/06/10 03:28:53  eichin
  * autoconfed isode for kerberos work
  *
@@ -90,7 +93,7 @@ int             context;
 	 */
 
 	if (generic -> na_stack == NA_NSAP) {
-	    bzero ((char *)specific, sizeof *specific);
+	    memset ((char *)specific, 0, sizeof *specific);
 	    return specific;
 	}
 #endif
@@ -172,7 +175,7 @@ int             context;
 
 
 #if !defined(CAMTEC_CCL) && !defined(HPUX_X25)
-    bzero ((char *)specific, sizeof *specific);
+    memset ((char *)specific, 0, sizeof *specific);
 #endif
 
 #ifdef UBC_X25
@@ -200,7 +203,7 @@ int             context;
 		  ("PID too long (%d > %d)", generic -> na_pidlen, NPSIZE));
 	    return (CONN_DB *)0;
 	} else {
-	    bzero((char *)specific -> addr.x25pid, NPSIZE);
+	    memset((char *)specific -> addr.x25pid, 0, NPSIZE);
 	    bcopy (generic -> na_pid, (char *)specific -> addr.x25pid,
 		   specific -> addr.x25pidlen = generic -> na_pidlen);
 	    bcopy (generic -> na_pid, (char *)specific -> cudf.x25_cu_data,
@@ -252,7 +255,7 @@ int             context;
 		  ("PID too long (%d > %d)", generic -> na_pidlen, NPSIZE));
 	    return (CONN_DB *)0;
 	} else {
-	    bzero((char *)specific -> data, NPSIZE);
+	    memset((char *)specific -> data, 0, NPSIZE);
 	    bcopy (generic -> na_pid, (char *)specific -> data,
 		   generic -> na_pidlen);
 	    bcopy (generic -> na_cudf, (char *) specific -> data + NPSIZE,
@@ -276,7 +279,7 @@ int             context;
 		int i;
 
 		iov -> iov_len = dtelen + 4;
-		bzero(iov -> iov_base, iov -> iov_len + 1);
+		memset(iov -> iov_base, 0, iov -> iov_len + 1);
 		a = iov -> iov_base;
 		b = dte;
 		*a++ = '#';
@@ -326,14 +329,14 @@ int             context;
     }
     /*
      * CUDF & PID must be merged. malloc initailly PIDsize space
-     * and bzero it. this may be UK net specific action which
+     * and zero it. this may be UK net specific action which
      * ensures we do NOT fall foul of listeners which use pid
      * to match as well as "true" cudf & DTE.
      */
 
     (iov = &(specific -> ccl_iovec[2])) -> iov_len = 0;
     if (generic -> na_faclen != 0)
-	bcopy (generic -> na_fac, iov -> iov_base,
+	bcopy (generic -> na_fac, 0, iov -> iov_base,
 	    iov -> iov_len = min( generic -> na_faclen, FACSIZE) );
     iov++;
     if ( (iov -> iov_len = generic -> na_pidlen) != 0)
@@ -395,8 +398,8 @@ int             context;
 
     if (generic == NULLNA || specific == (CONN_DB *) 0)
 	return NULLNA;
-    bzero ((char *)generic, sizeof *generic);
-    bzero (dte, sizeof dte);
+    memset ((char *)generic, 0, sizeof *generic);
+    memset (dte, 0, sizeof dte);
     dtelen = 0;
 
     generic -> na_stack = NA_X25;

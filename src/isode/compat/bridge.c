@@ -11,6 +11,9 @@ static char *rcsid = "$Header$";
  *
  *
  * $Log$
+ * Revision 1.2  1994/06/15 20:59:09  eichin
+ * step 1: bzero->memset(,0,)
+ *
  * Revision 1.1  1994/06/10 03:26:59  eichin
  * autoconfed isode for kerberos work
  *
@@ -101,7 +104,7 @@ u_short port;
 	return NOTOK;
     }
 
-    bzero ((char *) isock, sizeof *isock);
+    memset ((char *) isock, 0, sizeof *isock);
     isock -> sin_family = hp -> h_addrtype;
     isock -> sin_port = port;
     inaddr_copy (hp, isock);
@@ -254,7 +257,7 @@ int	backlog,
 	return NOTOK;
     }
 
-    bzero ((char *) lsock, sizeof *lsock);
+    memset ((char *) lsock, 0, sizeof *lsock);
     lsock -> sin_family = hp -> h_addrtype;
     inaddr_copy (hp, lsock);
 

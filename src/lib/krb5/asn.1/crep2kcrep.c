@@ -55,7 +55,7 @@ register int *error;
 	*error = ENOMEM;
 	return(0);
     }
-    xbzero((char *)retval, sizeof(*retval));
+    memset((char *)retval, 0, sizeof(*retval));
 
     /* Count ticket_info */
     for (i = 0, rv = val->ticket__info; rv; i++, rv = rv->next);
@@ -118,7 +118,7 @@ register int *error;
 	    *error = ENOMEM;
 	    goto errout;
 	}
-	xbzero((char *)retval->ticket_info[i], 
+	memset((char *)retval->ticket_info[i], 0, 
 	       sizeof(*retval->ticket_info[i]));
 
 	retval->ticket_info[i]->session = 

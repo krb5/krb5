@@ -9,6 +9,9 @@ static char *rcsid = "$Header$";
  *
  *
  * $Log$
+ * Revision 1.2  1994/06/15 20:59:18  eichin
+ * step 1: bzero->memset(,0,)
+ *
  * Revision 1.1  1994/06/10 03:27:26  eichin
  * autoconfed isode for kerberos work
  *
@@ -141,7 +144,7 @@ static int  read_macros ()
 	return;
     inited = 1;
 
-    bzero ((char *) Mbuckets, sizeof Mbuckets);
+    memset ((char *) Mbuckets, 0, sizeof Mbuckets);
 
     read_file (isodefile (isomacros, 0));
 
@@ -321,7 +324,7 @@ char   *str;
     LLOG (addr_log, LLOG_DEBUG, ("str2paddr: %s", str));
     i = i % 2;
 
-    bzero ((char *) pa, sizeof *pa);
+    memset ((char *) pa, 0, sizeof *pa);
     (void) strcpy (buf1, str);
 
     state = PS_INIT;

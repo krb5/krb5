@@ -116,7 +116,7 @@ main(int argc, char **argv)
      if (use_master)
 	  init_master();
 
-     bzero((char *) &saddr, sizeof(struct sockaddr_in));
+     memset((char *) &saddr, 0, sizeof(struct sockaddr_in));
      saddr.sin_family = AF_INET;
      saddr.sin_addr.s_addr = INADDR_ANY;
      serv = getservbyname(KRB524_SERVICE, "udp");

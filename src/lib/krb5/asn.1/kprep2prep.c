@@ -53,7 +53,7 @@ register int *error;
 	*error = ENOMEM;
 	return(0);
     }
-    xbzero(retval, sizeof(*retval));
+    memset(retval, 0, sizeof(*retval));
 
     retval->user__data = krb5_data2qbuf(&(val->user_data));
     if (!retval->user__data) {

@@ -9,6 +9,9 @@ static char *rcsid = "$Header$";
  *
  *
  * $Log$
+ * Revision 1.2  1994/06/15 20:59:52  eichin
+ * step 1: bzero->memset(,0,)
+ *
  * Revision 1.1  1994/06/10 03:32:22  eichin
  * autoconfed isode for kerberos work
  *
@@ -53,7 +56,7 @@ register char   *addr;
     static struct SSAPref   srs;
     register struct SSAPref *sr = &srs;
 
-    bzero ((char *) sr, sizeof *sr);
+    memset ((char *) sr, 0, sizeof *sr);
 
     if ((pe = t61s2prim (addr, strlen (addr))) == NULLPE)
 	return NULL;

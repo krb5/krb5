@@ -9,6 +9,9 @@ static char *rcsid = "$Header$";
  *
  *
  * $Log$
+ * Revision 1.2  1994/06/15 20:59:56  eichin
+ * step 1: bzero->memset(,0,)
+ *
  * Revision 1.1  1994/06/10 03:33:20  eichin
  * autoconfed isode for kerberos work
  *
@@ -105,7 +108,7 @@ PElementID id;
         pe_list = pe -> pe_next;
     }
 
-    bzero ((char *)pe, sizeof *pe);
+    memset ((char *)pe, 0, sizeof *pe);
     pe -> pe_class = class;
     pe -> pe_form = form;
     pe -> pe_id = id;

@@ -12,6 +12,9 @@ static char *rcsid = "$Header$";
  *
  *
  * $Log$
+ * Revision 1.2  1994/06/15 20:59:14  eichin
+ * step 1: bzero->memset(,0,)
+ *
  * Revision 1.1  1994/06/10 03:27:18  eichin
  * autoconfed isode for kerberos work
  *
@@ -110,7 +113,7 @@ int     backlog,
     int		sd, onoff, pgrp;
     char	cudfbuf [NPSIZE + CUDFSIZE];
 
-    bzero(&sbuf, sizeof(CONN_DB));
+    memset(&sbuf, 0, sizeof(CONN_DB));
     sbuf.addr.x25_family = AF_CCITT;
     if ((sd = socket (AF_CCITT, SOCK_STREAM, 0)) == NOTOK) {
 	SLOG (compat_log, LLOG_EXCEPTIONS, "failed", ("socket"));
@@ -199,7 +202,7 @@ register struct NSAPaddr *remote;
     CONN_DB *sock = &sbuf;
     register int nfd;
 
-    bzero(&sbuf, sizeof(CONN_DB));
+    memset(&sbuf, 0, sizeof(CONN_DB));
     sbuf.addr.x25_family = AF_CCITT;
     sock = gen2if (remote, sock, ADDR_REMOTE);
 
@@ -238,7 +241,7 @@ struct  NSAPaddr *remote;
     int     len = sizeof *sock;
     int     nfd;
 
-    bzero(&sbuf, sizeof(CONN_DB));
+    memset(&sbuf, 0, sizeof(CONN_DB));
     sbuf.addr.x25_family = AF_CCITT;
     if ((nfd = accept (fd, (X25_ADDR *) &sock->addr, &len)) == NOTOK) {
 	return nfd;
@@ -380,8 +383,8 @@ char *caption;
     FACILITY_DB		facilities;
     CCITT_FACILITY_DB	ccitt_facilities;
 
-    bzero ((char *) &facilities, sizeof (FACILITY_DB));
-    bzero ((char *) &ccitt_facilities, sizeof (CCITT_FACILITY_DB));
+    memset ((char *) &facilities, 0, sizeof (FACILITY_DB));
+    memset ((char *) &ccitt_facilities, 0, sizeof (CCITT_FACILITY_DB));
 
     if (ioctl (sd, X25_RD_FACILITIES, (char *) &ccitt_facilities) == NOTOK) {
 	SLOG (x25_log, LLOG_EXCEPTIONS, "failed", ("X25_RD_FACILITIES"));

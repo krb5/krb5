@@ -9,6 +9,9 @@ static char *rcsid = "$Header$";
  *
  *
  * $Log$
+ * Revision 1.2  1994/06/15 20:59:27  eichin
+ * step 1: bzero->memset(,0,)
+ *
  * Revision 1.1  1994/06/10 03:28:31  eichin
  * autoconfed isode for kerberos work
  *
@@ -74,7 +77,7 @@ int	quoted,
 		i = r;
 	    i = implode ((u_char *) sel, s, i);
 	    if ((r = (n - i)) > 0)
-		bzero (sel + i, r);
+		memset (sel + i, 0, r);
 	    return i;
 	}
 	if (*s == '#') {	/* gosip style, network byte-order */
