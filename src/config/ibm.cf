@@ -72,8 +72,11 @@
 #define	HasPosixFileLocks	YES
 #define	HasPosixTypes		YES
 #define	HasStrdup		YES
+#define	HasStrerror		YES
 #define	HasVfprintf		YES
 #define	HasAnsiStdio		YES
+#define	HasUnistdH		YES
+
 
 #define	HasInet			YES
 /* There is a compiler bug on the PS/2 running AIX 1.2.1:
@@ -100,9 +103,14 @@
 #define	UseSysTimeH
 #define DesDefines -DBIG -DMSBFIRST -DMUSTALIGN
 #define	UseConst		YES
+#define	LibraryRules		"ibmLib.rules"
+#define	HasSharedLibraries	YES
+#define IsPOSIX			YES
 #endif
 
 #define	RanlibCmd		\:
+
+#define	UseSedHack
 
 #endif /* RT */
 
