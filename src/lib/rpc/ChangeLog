@@ -5,6 +5,10 @@ Wed Jul 24 07:58:38 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 	* Makefile.in (DEPLIBS): Use correct version number for
 		gssapi_krb5 dependency. 
 
+Tue Jul 23 23:49:47 1996  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* clnt_perror.c: Don't declare strcpy.
+
 Tue Jul 23 11:24:32 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* xdr.c: Do not declare malloc().

@@ -50,7 +50,7 @@ extern char *sys_errlist[];
 #endif
 static char *auth_errmsg();
 
-extern char *strcpy();
+
 
 static char *buf;
 
