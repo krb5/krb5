@@ -70,7 +70,6 @@ kg_unseal_v1(context, minor_status, ctx, ptr, bodysize, message_buffer,
     int toktype;
 {
     krb5_error_code code;
-    int tmsglen;
     int conflen = 0;
     int signalg;
     int sealalg;
@@ -154,9 +153,6 @@ kg_unseal_v1(context, minor_status, ctx, ptr, bodysize, message_buffer,
 	return GSS_S_DEFECTIVE_TOKEN;
     }
 
-    if (toktype == KG_TOK_SEAL_MSG)
-	tmsglen = bodysize-(14+cksum_len);
-
     /* get the token parameters */
 
     if ((code = kg_get_seq_num(context, ctx->seq, ptr+14, ptr+6, &direction,
@@ -168,6 +164,7 @@ kg_unseal_v1(context, minor_status, ctx, ptr, bodysize, message_buffer,
     /* decode the message, if SEAL */
 
     if (toktype == KG_TOK_SEAL_MSG) {
+	int tmsglen = bodysize-(14+cksum_len);
 	if (sealalg != 0xffff) {
 	    if ((plain = (unsigned char *) xmalloc(tmsglen)) == NULL) {
 		*minor_status = ENOMEM;

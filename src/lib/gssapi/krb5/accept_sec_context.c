@@ -93,7 +93,7 @@ rd_and_store_for_creds(context, auth_context, inbuf, out_cred)
     krb5_auth_context new_auth_ctx = NULL;
 	krb5_int32 flags_org;
 
-	if (retval = krb5_auth_con_getflags(context, auth_context, &flags_org))
+	if ((retval = krb5_auth_con_getflags(context, auth_context, &flags_org)))
 		return retval;
 	krb5_auth_con_setflags(context, auth_context,
 			       KRB5_AUTH_CONTEXT_DO_SEQUENCE);
@@ -120,10 +120,10 @@ rd_and_store_for_creds(context, auth_context, inbuf, out_cred)
 	 * containing the KRB_CRED message does get encrypted.)
 	 */
 	if (krb5_rd_cred(context, auth_context, inbuf, &creds, NULL)) {
-		if (retval = krb5_auth_con_init(context, &new_auth_ctx))
+		if ((retval = krb5_auth_con_init(context, &new_auth_ctx)))
 			goto cleanup;
 		krb5_auth_con_setflags(context, new_auth_ctx, 0);
-		if (retval = krb5_rd_cred(context, new_auth_ctx, inbuf, &creds, NULL))
+		if ((retval = krb5_rd_cred(context, new_auth_ctx, inbuf, &creds, NULL)))
 			goto cleanup;
 		}
 
@@ -277,19 +277,23 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
 
    /* handle default cred handle */
    if (verifier_cred_handle == GSS_C_NO_CREDENTIAL) {
-       major_status = krb5_gss_acquire_cred(&code, GSS_C_NO_NAME,
+       major_status = krb5_gss_acquire_cred(minor_status, GSS_C_NO_NAME,
 					    GSS_C_INDEFINITE, GSS_C_NO_OID_SET,
 					    GSS_C_ACCEPT, &cred_handle,
 					    NULL, NULL);
-       if (major_status != GSS_S_COMPLETE)
+       if (major_status != GSS_S_COMPLETE) {
+	   code = *minor_status;
 	   goto fail;
+       }
    } else {
        cred_handle = verifier_cred_handle;
    }
 
-   major_status = krb5_gss_validate_cred(&code, verifier_cred_handle);
-   if (GSS_ERROR(major_status))
+   major_status = krb5_gss_validate_cred(minor_status, verifier_cred_handle);
+   if (GSS_ERROR(major_status)) {
+       code = *minor_status;
        goto fail;
+   }
 
    cred = (krb5_gss_cred_id_t) cred_handle;
 
