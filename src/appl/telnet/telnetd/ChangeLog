@@ -1,3 +1,11 @@
+Fri Jan 23 22:13:02 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* telnetd.c (telnet, get_default_IM): Instead of using a hardcoded
+		IM variable, use one which is dynamically generated from
+		the uname() system call.
+
+	* ext.h: Remove definition of DEFAULT_IM, since it's no longer used.
+
 Thu Dec  4 21:32:37 1997  Tom Yu  <tlyu@mit.edu>
 
 	* telnetd.c (doit): Fix up slave buffer length.

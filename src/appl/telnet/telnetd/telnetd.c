@@ -179,6 +179,28 @@ char valid_opts[] = {
 	'\0'
 };
 
+#include <sys/utsname.h>
+static char *
+get_default_IM()
+{
+	struct utsname name;
+	static char banner[1024];
+	
+	if (uname(&name) < 0)
+		sprintf(banner, "\r\nError getting hostname: %s\r\n",
+		    strerror(errno));
+        else {
+#if defined(_AIX)
+		sprintf(banner, "\r\n    %%h (%s release %s.%s) (%%t)\r\n\r\n",
+		    name.sysname, name.version, name.release);
+#else
+		sprintf(banner, "\r\n    %%h (%s release %s %s) (%%t)\r\n\r\n",
+		    name.sysname, name.release, name.version);
+#endif
+	}
+	return banner;
+}
+
 main(argc, argv)
 	int argc;
 	char *argv[];
@@ -1205,7 +1227,7 @@ telnet(f, p, host)
 		if (IM == 0)
 			IM = "";
 	} else {
-		IM = DEFAULT_IM;
+		IM = get_default_IM();
 		HEstr = 0;
 	}
 	edithost(HEstr, host_name);

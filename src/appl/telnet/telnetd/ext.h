@@ -220,22 +220,3 @@ extern struct {
 extern int	needtermstat;
 #endif
 
-#ifndef	DEFAULT_IM
-# ifdef CRAY
-#  define DEFAULT_IM	"\r\n\r\nCray UNICOS (%h) (%t)\r\n\r\r\n\r"
-# else
-#  ifdef sun
-#   ifdef __SVR4
-#    define DEFAULT_IM	"\r\n\r\nUNIX(r) System V Release 4.0 (%h) (%t)\r\n\r\r\n\r"
-#   else
-#    define DEFAULT_IM	"\r\n\r\nSunOS UNIX (%h) (%t)\r\n\r\r\n\r"
-#   endif
-#  else
-#   ifdef ultrix
-#    define DEFAULT_IM	"\r\n\r\nULTRIX (%h) (%t)\r\n\r\r\n\r"
-#   else
-#    define DEFAULT_IM	"\r\n\r\n4.4 BSD UNIX (%h) (%t)\r\n\r\r\n\r"
-#   endif
-#  endif
-# endif
-#endif
