@@ -32,9 +32,6 @@ static char rcsid_kpasswd_c[] =
 #include <netinet/in.h>
 #include <netdb.h>
 #include <signal.h>
-#ifndef __convex__
-#include <strings.h>
-#endif
 
 #ifndef MAXPATHLEN
 #define MAXPATHLEN 1024
@@ -48,6 +45,11 @@ static char rcsid_kpasswd_c[] =
 #include <sys/stat.h>
 
 #include <krb5/krb5.h>
+#ifdef USE_STRING_H
+#include <string.h>
+#else
+#include <strings.h>
+#endif
 #include <krb5/kdb.h>
 #include <krb5/kdb_dbm.h>
 #include <krb5/ext-proto.h>
