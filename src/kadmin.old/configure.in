@@ -1,5 +1,0 @@
-AC_INIT(configure.in)
-CONFIG_RULES
-CONFIG_DIRS(client kpasswd server)
-DO_SUBDIRS
-V5_AC_OUTPUT_MAKEFILE
