@@ -141,6 +141,7 @@ Imake.tmpl provides defaults for the following variables:
 	InstLibFlags		install flags for libraries
 	InstManFlags		install flags for manual pages
 	InstPgmFlags		install flags for normal programs
+	InstScrFlags		install flags for scripts
 	InstUidFlags		install flags for xterm to chown /dev/ptys
 	InstallCmd		command to install files
 	LdCmd			command to run loader
