@@ -30,6 +30,11 @@ check::	dbtest
 	else \
 		/bin/sh $(srcdir)/run.test hash ; \
 	fi
+	if [ "X$$TMPDIR" != "X" ] ; then \
+		rm -f $$TMPDIR/__dbtest ; \
+	else \
+		rm -f /var/tmp/__dbtest ; \
+	fi
 
 all::
 

@@ -1,3 +1,7 @@
+
+Fri Sep 1 11:18:25 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* Makefile.in - Remove __dbtest after done with make check.
+
 Thu Aug 24 18:40:48 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* .Sanitize: Update file list
