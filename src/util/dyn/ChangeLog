@@ -1,3 +1,8 @@
+Thu Nov  9 15:31:31 2000  Ezra Peisach  <epeisach@mit.edu>
+
+	* dyn_create.c (DynCopy): Arguments to memcpy were reversed. Found
+ 	while playing with lclint.
+
 2000-11-09  Ezra Peisach  <epeisach@mit.edu>
 
 	* Makefile.in (check-unix): Built and execture dyntest.

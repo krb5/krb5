@@ -67,7 +67,7 @@ DynObjectP DynCopy(obj)
 	  free(obj1);
 	  return NULL;
      }
-     memcpy(obj->array, obj1->array, 
+     memcpy(obj1->array, obj->array, 
 	    (size_t) (obj1->el_size * obj1->size));
 
      return obj1;
