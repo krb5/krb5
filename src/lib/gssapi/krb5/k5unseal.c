@@ -213,6 +213,7 @@ kg2_unwrap_integ(context, minor_status, ctx, ptr, bodysize, output, qop_state)
 
     tcksum.length = (ptr[0]<<8) | ptr[1];
     ptr += 2;
+    bodysize -= 2;
 
     if (bodysize != tcksum.length) {
 	*minor_status = G_TOK_TRUNC;
@@ -834,7 +835,8 @@ kg_unseal(context, minor_status, context_handle, input_token_buffer,
 						   message_buffer, qop_state)))
 	       return(retval);
 
-	   *conf_state = 0;
+	   if (conf_state)
+	       *conf_state = 0;
 	   return(GSS_S_COMPLETE);
        } else if (!(err = g_verify_token_header((gss_OID) ctx->mech_used,
 						&bodysize, &ptr,
@@ -845,7 +847,8 @@ kg_unseal(context, minor_status, context_handle, input_token_buffer,
 						  message_buffer, qop_state)))
 	       return(retval);
 
-	   *conf_state = 1;
+	   if (conf_state)
+	       *conf_state = 1;
 	   return(GSS_S_COMPLETE);
        }
    } else {
