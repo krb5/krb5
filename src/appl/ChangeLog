@@ -1,3 +1,7 @@
+Tue Aug  9 20:18:27 1994  Tom Yu  (tlyu@dragons-lair)
+
+	* configure.in: nuked zmailnotify
+
 Sat Jul 23 08:25:48 1994  Tom Yu  (tlyu@dragons-lair)
 
 	* configure.in: autoconf'ing telnet

@@ -1,7 +1,7 @@
 AC_INIT(configure.in)
 WITH_CCOPTS
 AC_SET_BUILDTOP
-CONFIG_DIRS(sample simple user_user bsd gss-sample telnet popper movemail mailquery zmailnotify)
+CONFIG_DIRS(sample simple user_user bsd gss-sample telnet popper movemail mailquery)
 MAKE_SUBDIRS("making",all)
 MAKE_SUBDIRS("cleaning",clean)
 MAKE_SUBDIRS("installing",install)
