@@ -1,3 +1,7 @@
+2001-03-31  Ken Raeburn  <raeburn@mit.edu>
+
+	* t_gifconf.c: New file.
+
 2001-03-10  Ezra Peisach  <epeisach@mit.edu>
 
 	* def_realm.c: Move prototype for krb5_try_realm_txt_rr() to
