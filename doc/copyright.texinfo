@@ -69,6 +69,80 @@ been performed by MIT and the Kerberos community.
 @vskip 12pt
 @end iftex
 
+The implementation of the Yarrow pseudo-random number generator
+in src/lib/crypto/yarrow has the following copyright:
+
+@quotation
+
+Copyright 2000 by Zero-Knowledge Systems, Inc.
+
+Permission to use, copy, modify, distribute, and sell this software
+and its documentation for any purpose is hereby granted without fee,
+provided that the above copyright notice appear in all copies and that
+both that copyright notice and this permission notice appear in
+supporting documentation, and that the name of Zero-Knowledge Systems,
+Inc. not be used in advertising or publicity pertaining to
+distribution of the software without specific, written prior
+permission.  Zero-Knowledge Systems, Inc. makes no representations
+about the suitability of this software for any purpose.  It is
+provided "as is" without express or implied warranty.
+
+ZERO-KNOWLEDGE SYSTEMS, INC. DISCLAIMS ALL WARRANTIES WITH REGARD TO
+THIS SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
+FITNESS, IN NO EVENT SHALL ZERO-KNOWLEDGE SYSTEMS, INC. BE LIABLE FOR
+ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTUOUS ACTION, ARISING OUT
+OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+@end quotation
+
+@iftex
+@vskip 12pt
+@hrule
+@vskip 12pt
+@end iftex
+
+The implementation of the AES encryption algorithm in
+src/lib/crypto/aes has the following copyright:
+
+@quotation
+
+Copyright (c) 2001, Dr Brian Gladman <brg@@gladman.uk.net>, Worcester, UK.
+All rights reserved.
+
+LICENSE TERMS
+
+The free distribution and use of this software in both source and binary 
+form is allowed (with or without changes) provided that:
+
+@enumerate
+@item
+distributions of this source code include the above copyright 
+notice, this list of conditions and the following disclaimer;
+@item
+distributions in binary form include the above copyright
+notice, this list of conditions and the following disclaimer
+in the documentation and/or other associated materials;
+@item
+the copyright holder's name is not used to endorse products 
+built using this software without specific written permission. 
+@end enumerate
+
+DISCLAIMER
+
+This software is provided 'as is' with no explcit or implied warranties
+in respect of any properties, including, but not limited to, correctness 
+and fitness for purpose.
+
+@end quotation
+
+@iftex
+@vskip 12pt
+@hrule
+@vskip 12pt
+@end iftex
+
 @value{PRODUCT} includes documentation and software developed at the
 University of California at Berkeley, which includes this copyright
 notice:
