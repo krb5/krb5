@@ -200,6 +200,7 @@ key_get_admin_entry(kcontext)
 		    madmin_entry.princ = admin_principal;
 		    madmin_entry.max_life = KEY_DEF_MAX_LIFE;
 		    madmin_entry.max_renewable_life = KEY_DEF_MAX_RLIFE;
+		    madmin_entry.len = KRB5_KDB_V1_BASE_LENGTH;
 		    number_of_entries = 1;
 
 		    krb5_timeofday(kcontext, &now);
@@ -531,13 +532,6 @@ key_init(kcontext, debug_level, enc_type, key_type, master_key_name, manual,
     }
     mrand_init = 1;
 
-    /*
-     * We're almost home.  We now want to find our service entry and if there
-     * is none, then we want to create it.  This way, kadmind5 becomes just
-     * a plug in and go kind of utility.
-     */
-    kret = key_get_admin_entry(kcontext, debug_level);
-
     if (!kret) {
 	if (key_num_ktents = nktent)
 	    key_ktents = ktents;
@@ -547,6 +541,13 @@ key_init(kcontext, debug_level, enc_type, key_type, master_key_name, manual,
 	}
 	key_ktents_inited = 1;
     }
+
+    /*
+     * We're almost home.  We now want to find our service entry and if there
+     * is none, then we want to create it.  This way, kadmind5 becomes just
+     * a plug in and go kind of utility.
+     */
+    kret = key_get_admin_entry(kcontext, debug_level);
 
  cleanup:
     if (kret) {

@@ -1,4 +1,9 @@
 
+Fri Aug 25 17:40:52 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* srv_key.c - Fix automatic generation of changepw service which got
+		screwed up when the database changes went in.
+
+
 Thu Aug 17 13:50:28 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* srv_key.c, kadm5_defs.h - Add key_{open,close}_db().  Close database
 		after initialization.
