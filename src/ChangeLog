@@ -1,3 +1,7 @@
+2004-09-07  Alexandra Ellwood  <lxs@mit.edu>
+
+	* krb5-config.M: Added a man page for krb5-config.
+
 2004-08-24  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Don't test for pthread_rwlock_init.
