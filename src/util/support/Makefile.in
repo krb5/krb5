@@ -23,10 +23,12 @@ LIBINITFUNC=krb5int_thread_support_init
 LIBFINIFUNC=krb5int_thread_support_fini
 
 STLIBOBJS= \
-	threads.o
+	threads.o \
+	fake-addrinfo.o
 
 LIBOBJS= \
-	$(OUTPRE)threads.$(OBJEXT)
+	$(OUTPRE)threads.$(OBJEXT) \
+	$(OUTPRE)fake-addrinfo.$(OBJEXT)
 
 STOBJLISTS=OBJS.ST
 
@@ -35,7 +37,8 @@ INSTALLFILE = cp
 LOCALINCLUDES=-I. -I$(srcdir)
 
 SRCS=\
-	$(srcdir)/threads.c
+	$(srcdir)/threads.c \
+	$(srcdir)/fake-addrinfo.c
 SHLIB_EXPDEPS =
 SHLIB_EXPLIBS= $(LIBS)
 SHLIB_DIRS=
@@ -65,4 +68,8 @@ $(BUILDTOP)/include/krb5/autoconf.h: $(SRCTOP)/include/krb5/autoconf.h.in
 #
 threads.so threads.po $(OUTPRE)threads.$(OBJEXT): threads.c $(SRCTOP)/include/k5-thread.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h
+fake-addrinfo.so fake-addrinfo.po $(OUTPRE)fake-addrinfo.$(OBJEXT): fake-addrinfo.c $(SRCTOP)/include/fake-addrinfo.h \
+  $(SRCTOP)/include/port-sockets.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-thread.h
 

@@ -1,3 +1,8 @@
+2004-07-19  Ken Raeburn  <raeburn@mit.edu>
+
+	* fake-addrinfo.c: New file.
+	* Makefile.in (STLIBOBJS, LIBOBJS, SRCS): Add it.
+
 2004-07-06  Ken Raeburn  <raeburn@mit.edu>
 
 	* threads.c (struct tsd_block) [_WIN32]: Define.
