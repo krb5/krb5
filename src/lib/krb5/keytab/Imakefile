@@ -17,20 +17,18 @@ NormalLibraryObjectRule()
 
 OBJS=	\
 	ktadd.o		\
+	ktbase.o	\
 	ktdefault.o	\
-	ktdir.o		\
 	ktfr_entry.o	\
-	ktregister.o	\
 	ktremove.o	\
 	ktresolve.o	\
 	read_servi.o
 
 SRCS=	\
 	ktadd.c		\
-	ktdir.c		\
+	ktbase.c	\
 	ktdefault.c	\
 	ktfr_entry.c	\
-	ktregister.c	\
 	ktremove.c	\
 	ktresolve.c	\
 	read_servi.c
