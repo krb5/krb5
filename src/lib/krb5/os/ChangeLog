@@ -1,3 +1,7 @@
+2001-12-05  Ezra Peisach  <epeisach@mit.edu>
+
+	* sendto_kdc.c (krb5_sendto_kdc): Get rid of unecessary casts.
+
 2001-10-24  Sam Hartman  <hartmans@mit.edu>
 
 	* accessor.c (krb5int_accessor):  Add fields for struct version 4

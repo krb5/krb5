@@ -178,7 +178,7 @@ krb5_sendto_kdc (context, message, realm, reply, use_master)
 	    fprintf (stderr, "sending...");
 #endif
 	    if (send(socklist[host],
-		       message->data, (int) message->length, 0) 
+		       message->data, message->length, 0) 
 		!= message->length) {
 #ifdef DEBUG
 		perror ("sendto");
@@ -205,7 +205,7 @@ krb5_sendto_kdc (context, message, realm, reply, use_master)
 		    goto out;
 		}
 		if ((cc = recv(socklist[host],
-			       reply->data, (int) reply->length, 
+			       reply->data, reply->length, 
 			       0)) == SOCKET_ERROR)
 		  {
 		    /* man page says error could be:
