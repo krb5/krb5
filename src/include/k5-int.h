@@ -993,6 +993,8 @@ struct _krb5_context {
 	void	      	FAR *ser_ctx;
 	krb5_deltat 	clockskew; /* allowable clock skew */
 	krb5_cksumtype	kdc_req_sumtype;
+	krb5_cksumtype	default_ap_req_sumtype;
+	krb5_cksumtype	default_safe_sumtype;
 	krb5_flags 	kdc_default_options;
 	krb5_flags	library_options;
 	krb5_boolean	profile_secure;
@@ -1424,4 +1426,10 @@ krb5_error_code krb5_ser_unpack_bytes KRB5_PROTOTYPE((krb5_octet *,
 						      size_t,
 						      krb5_octet **,
 						      size_t *));
+/*
+ * Convenience function for structure magic number
+ */
+#define KRB5_VERIFY_MAGIC(structure,magic_number) \
+    if ((structure)->magic != (magic_number)) return (magic_number);
+    
 #endif /* _KRB5_INT_H */

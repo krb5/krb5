@@ -1914,7 +1914,12 @@ krb5_error_code krb5_auth_con_getlocalsubkey
 		   krb5_auth_context,
 		   krb5_keyblock **));
 
-krb5_error_code krb5_auth_con_setcksumtype
+krb5_error_code krb5_auth_con_set_req_cksumtype
+	KRB5_PROTOTYPE((krb5_context,
+		   krb5_auth_context,
+		   krb5_cksumtype));
+
+krb5_error_code krb5_auth_con_set_safe_cksumtype
 	KRB5_PROTOTYPE((krb5_context,
 		   krb5_auth_context,
 		   krb5_cksumtype));
