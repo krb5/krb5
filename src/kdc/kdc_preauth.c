@@ -301,6 +301,13 @@ check_padata (context, client, request, enc_tkt_reply)
     }
     if (pa_ok)
 	return 0;
+
+    /* pa system was not found, but principal doesn't require preauth */
+    if (!pa_found &&
+        !isflagset(client->attributes, KRB5_KDB_REQUIRES_PRE_AUTH) &&
+        !isflagset(client->attributes, KRB5_KDB_REQUIRES_HW_AUTH))
+       return 0;
+
     if (!pa_found)
 	com_err("krb5kdc", retval, "no valid preauth type found");
     return KRB5KDC_ERR_PREAUTH_FAILED;
