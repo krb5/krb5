@@ -27,9 +27,14 @@ clean-windows::
 
 # Windows stuff to make krb5 and gssapi DLLs.
 
-VERLIBS=..\mit\windows\lib\$(CPU)\vsnt.lib
-##MIT##MITLIBS= $(VERLIBS)
-##MIT##MITFLAGS=-I..\mit\windows\include /DVERSERV=1
+VERLIBS=$(BUILDTOP)\mit\windows\lib\$(CPU)\vsnt.lib
+!if defined(KRB5_USE_DNS)
+DNSLIBS= $(BUILDTOP)\mit\windows\lib\$(CPU)\wshelp32.lib
+!else
+DNSLIBS=
+!endif
+##MIT##MITLIBS= $(VERLIBS) $(DNSLIBS)
+##MIT##MITFLAGS=-I$(BUILDTOP)\mit\windows\include /DVERSERV=1
 
 CLIBS = $(BUILDTOP)\util\et\$(OUTPRE)comerr.lib
 PLIBS = $(BUILDTOP)\util\profile\$(OUTPRE)profile.lib
@@ -154,7 +159,7 @@ all-windows::
 	$(MAKE) -$(MFLAGS)
 	@echo Making in lib\krb5
 	cd ..\krb5
-	$(MAKE) -$(MFLAGS) 
+	$(MAKE) -$(MFLAGS)
 	@echo Making in lib\des425
 	cd ..\des425
 	$(MAKE) -$(MFLAGS) 
