@@ -37,14 +37,10 @@
 #include <netinet/in.h>
 #include <sys/param.h>
 #include <netdb.h>
+#include <fcntl.h>
 
 #include "k5-int.h"
 #include "com_err.h"
-
-#ifdef NEED_SYS_FCNTL_H
-#include <sys/fcntl.h>
-#endif
-
 #include "kprop.h"
 
 static char *kprop_version = KPROP_PROT_VERSION;
