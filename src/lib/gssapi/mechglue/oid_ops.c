@@ -70,6 +70,31 @@ generic_gss_release_oid(minor_status, oid)
 }
 
 OM_uint32
+generic_gss_copy_oid(minor_status, oid, new_oid)
+	OM_uint32	*minor_status;
+	gss_OID		oid, *new_oid;
+{
+	gss_OID		p;
+
+	p = (gss_OID) malloc(sizeof(gss_OID_desc));
+	if (!p) {
+		*minor_status = ENOMEM;
+		return GSS_S_FAILURE;
+	}
+	p->length = oid->length;
+	p->elements = malloc(p->length);
+	if (!p->elements) {
+		free(p);
+		*minor_status = ENOMEM;
+		return GSS_S_FAILURE;
+	}
+	memcpy(p->elements, oid->elements, p->length);
+	*new_oid = p;
+	return(GSS_S_COMPLETE);
+}
+
+
+OM_uint32
 generic_gss_create_empty_oid_set(minor_status, oid_set)
     OM_uint32	*minor_status;
     gss_OID_set	*oid_set;

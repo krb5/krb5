@@ -43,7 +43,8 @@ SRCS	= $(srcdir)/g_acquire_cred.c \
 	  $(srcdir)/g_glue.c \
 	  $(srcdir)/gssd_pname_to_uid.c \
 	  $(srcdir)/gen_oids.c \
-	  $(srcdir)/oid_ops.c
+	  $(srcdir)/oid_ops.c \
+	  $(srcdir)/g_mechname.c 
 
 OBJS	= g_acquire_cred.$(OBJEXT) \
 	  g_rel_cred.$(OBJEXT) \
@@ -74,7 +75,8 @@ OBJS	= g_acquire_cred.$(OBJEXT) \
 	  g_glue.$(OBJEXT) \
 	  gssd_pname_to_uid.$(OBJEXT) \
 	  gen_oids.$(OBJEXT) \
-	  oid_ops.$(OBJEXT)
+	  oid_ops.$(OBJEXT) \
+	  g_mechname.$(OBJEXT)
 
 EHDRDIR= $(BUILDTOP)$(S)include$(S)gssapi
 EXPORTED_HEADERS = mechglue.h

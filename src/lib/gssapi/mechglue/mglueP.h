@@ -21,12 +21,28 @@ typedef struct gss_union_ctx_id_t {
 } gss_union_ctx_id_desc, *gss_union_ctx_id_t;
 
 /*
- * Array of names typed by the name OID (XXX - mechanism OID?)
+ * Generic GSSAPI names.  A name can either be a generic name, or a
+ * mechanism specific name....
  */
 typedef struct gss_union_name_t {
 	gss_OID			name_type;
 	gss_buffer_t		external_name;
+	/*
+	 * These last two fields are only filled in for mechanism
+	 * names.
+	 */
+	gss_OID			mech_type;
+	gss_name_t		mech_name;
 } gss_union_name_desc, *gss_union_name_t;
+
+/*
+ * Structure for holding list of mechanism-specific name types
+ */
+typedef struct gss_mech_spec_name_t {
+    gss_OID	name_type;
+    gss_OID	mech;
+    struct gss_mech_spec_name_t	*next, *prev;
+} gss_mech_spec_name_desc, *gss_mech_spec_name;
 
 /*
  * Credential auxiliary info, used in the credential structure
@@ -332,6 +348,12 @@ PROTOTYPE( (OM_uint32 *,	/* minor_status */
 	    gss_OID *		/* oid */
 	   ));
 
+OM_uint32 generic_gss_copy_oid
+PROTOTYPE( (OM_uint32 *,	/* minor_status */
+	    gss_OID,		/* oid */
+	    gss_OID *		/* new_oid */
+	    ));
+
 OM_uint32 generic_gss_create_empty_oid_set
 PROTOTYPE( (OM_uint32 *,	/* minor_status */
 	    gss_OID_set *	/* oid_set */
@@ -363,5 +385,14 @@ PROTOTYPE( (OM_uint32 *,	/* minor_status */
 	   ));
 
 
+gss_OID gss_find_mechanism_from_name_type
+PROTOTYPE ( (gss_OID		/* name_type */
+	     ));
+
+OM_uint32 gss_add_mech_name_type
+PROTOTYPE ( (OM_uint32 *,	/* minor_status */
+	     gss_OID,		/* name_type */
+	     gss_OID		/* mech */
+	     ));
 
 #endif /* _GSS_MECHGLUEP_H */

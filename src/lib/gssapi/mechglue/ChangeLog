@@ -1,4 +1,35 @@
-=======
+Sat Feb 24 00:00:27 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* g_imp_name.c (gss_import_name): If the user passes in a
+		name-type which is mechanism specific, then import it
+		immediately; don't lazy evaluate it.
+
+	* g_mechname.c (gss_add_mech_name_type): New file for maintaining
+		a registry of name-types which are mechanism specific.
+
+	* g_dsp_name.c (gss_display_name): If there is a mechanism
+		specific name, use it when displaying the name.
+
+	* oid_ops.c (generic_gss_copy_oid): New function used to copy an
+		OID object.
+
+Fri Feb 23 18:27:20 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* g_rel_name.c (gss_release_name): Release the OID in the
+		mechanism name, as it is now allocated.  Release the
+		mechanism-specific name if it is present.
+
+	* g_imp_name.c (gss_import_name):  Copy the input OID, so we don't
+		have to worry about memory allocation problems later.
+		Initialize mech_type and mech_name in the union name to be
+		zero.  (for now)
+
+	* oid_ops.c (generic_gss_copy_oid): Added new function to copy OIDs.
+
+Thu Feb 22 21:48:44 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* mglueP.h: Add space for the mechanism name in gss_union_name.
+
 Sat Feb 10 18:38:43 1996  Tom Yu  <tlyu@dragons-lair.MIT.EDU>
 
 	* g_glue.c: grab stdlib.h to get NULL
