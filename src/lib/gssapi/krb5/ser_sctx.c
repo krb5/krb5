@@ -155,7 +155,6 @@ kg_queue_internalize(kcontext, argp, buffer, lenremain)
     size_t		*lenremain;
 {
      krb5_error_code	kret;
-     gss_OID oid;
      krb5_int32 ibuf;
      krb5_octet		*bp;
      size_t		remain;

@@ -156,7 +156,7 @@ kg_decrypt(context, key, usage, iv, in, out, length)
      int length;
 {
    krb5_error_code code;
-   size_t blocksize, enclen;
+   size_t blocksize;
    krb5_data ivd, *pivd, outputd;
    krb5_enc_data inputd;
 

@@ -71,6 +71,7 @@
  */
 
 #include "gssapiP_krb5.h"
+#include "k5-int.h"
 #ifdef HAVE_STRING_H
 #include <string.h>
 #else

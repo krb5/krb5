@@ -51,6 +51,7 @@
  */
 
 #include "gssapiP_krb5.h"
+#include "k5-int.h"
 
 /** exported constants defined in gssapi_krb5{,_nx}.h **/
 

@@ -1,3 +1,12 @@
+2002-03-03 Alexandra Ellwood <lxs@mit.edu>
+    * accept_sec_context.c, ser_sctx.c, util_crypt.c, wrap_size_limit.c: 
+    Removed unused variables.
+    * acquire_cred.c: Added include of k5-int.h to get prototypes.
+    * disp_status.c: Updated Mac OS X header paths.
+    * gssapi_krb5.c: Added include of k5-int.h to get prototypes.
+    * gssapiP_krb5.h: Updated Mac OS X header paths and added prototype on Mac.
+    * init_sec_context.c: Removed unused function on the mac to avoid warning.
+
 2002-02-28 Alexandra Ellwood <lxs@mit.edu>
     * gssapi_krb5.h: Updated Mac OS X headers to new framework layout
 

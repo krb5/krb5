@@ -52,7 +52,7 @@
  */
 
 #if TARGET_OS_MAC
-#include <Kerberos5/Kerberos5.h>
+#include <Kerberos/krb5.h>
 #else
 #include <krb5.h>
 #endif
@@ -67,11 +67,7 @@
 #undef minor
 #endif
 
-#ifndef macintosh
-#include "../generic/gssapiP_generic.h"
-#else
 #include "gssapiP_generic.h"
-#endif
 
 /* The include of gssapi_krb5.h will dtrt with the above #defines in
  * effect.
@@ -583,7 +579,8 @@ PROTOTYPE( (OM_uint32 *,		/* minor_status */
 	    gss_ctx_id_t *		/* context_handle */
 	    ));
 
-#if 0
+#if TARGET_OS_MAC 
+/* need prototypes on Mac OS X -- why *was* this #if 0? */
 OM_uint32 krb5_gss_release_oid
 PROTOTYPE( (OM_uint32 *,		/* minor_status */
 	    gss_OID *			/* oid */

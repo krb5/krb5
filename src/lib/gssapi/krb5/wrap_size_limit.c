@@ -89,7 +89,6 @@ krb5_gss_wrap_size_limit(minor_status, context_handle, conf_req_flag,
 {
     krb5_context	context;
     krb5_gss_ctx_id_rec	*ctx;
-    krb5_error_code code;
     OM_uint32		data_size, conflen;
     OM_uint32		ohlen;
     int			overhead;

@@ -203,10 +203,8 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
    krb5_ui_4 gss_flags = 0;
    int decode_req_message = 0;
    krb5_gss_ctx_id_rec *ctx = 0;
-   krb5_enctype enctype;
    krb5_timestamp now;
    gss_buffer_desc token;
-   int err;
    krb5_auth_context auth_context = NULL;
    krb5_ticket * ticket = NULL;
    int option_id;
@@ -217,10 +215,7 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
    krb5_data scratch;
    gss_cred_id_t cred_handle = NULL;
    krb5_gss_cred_id_t deleg_cred = NULL;
-   int token_length;
-   int nctypes;
    krb5_cksumtype *ctypes = 0;
-   struct kg2_option fwcred;
 
    if (GSS_ERROR(kg_get_context(minor_status, &context)))
       return(GSS_S_FAILURE);
