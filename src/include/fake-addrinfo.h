@@ -119,6 +119,14 @@ gai_strerror (int code) /*@*/;
 /* #  define WRAP_GETNAMEINFO */
 #endif
 
+#ifdef __linux__
+# define COPY_FIRST_CANONNAME
+#endif
+
+#ifdef COPY_FIRST_CANONNAME
+# include <string.h>
+#endif
+
 #ifdef _WIN32
 #define HAVE_GETADDRINFO
 #define HAVE_GETNAMEINFO
@@ -765,7 +773,6 @@ getaddrinfo (const char *name, const char *serv, const struct addrinfo *hint,
     if (aierr || *result == 0)
 	return aierr;
 
-#ifdef __linux__
     /* Linux libc version 6 (libc-2.2.4.so on Debian) is broken.
 
        RFC 2553 says that when AI_CANONNAME is set, the ai_canonname
@@ -797,7 +804,7 @@ getaddrinfo (const char *name, const char *serv, const struct addrinfo *hint,
        for at configure time.  Always do it on Linux for now.  When
        they get around to fixing it, add a compile-time or run-time
        check for the glibc version in use.  */
-#define COPY_FIRST_CANONNAME
+#ifdef COPY_FIRST_CANONNAME
     if (/* name && hint && (hint->ai_flags & AI_CANONNAME) */ (*result)->ai_canonname) {
 	struct hostent *hp;
 	const char *name2 = 0;
