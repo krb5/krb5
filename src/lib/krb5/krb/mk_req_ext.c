@@ -132,6 +132,15 @@ krb5_data *outbuf;
 	cleanup_ticket();
 	return retval;
     }
+    
+    /* encode the authenticator */
+    retval = encode_krb5_authenticator(&authent, &scratch);
+    if (retval) {
+	cleanup_key();
+	cleanup_ticket();
+	return(retval);
+    }
+    
     if (authentp) {
 	    *authentp = authent;
 	    /* Null out these fields, to prevent pointer sharing problems 
@@ -140,14 +149,8 @@ krb5_data *outbuf;
 	     */
 	    authentp->client = NULL;
 	    authentp->checksum = NULL; 
-    }
-    /* encode it before encrypting */
-    retval = encode_krb5_authenticator(&authent, &scratch);
-    if (retval) {
-	cleanup_key();
-	cleanup_ticket();
-	return(retval);
-    }
+    } else
+	    krb5_free_authenticator_contents(&authent);
 
 #define cleanup_scratch() { (void) memset(scratch->data, 0, scratch->length); \
 krb5_free_data(scratch); }
@@ -163,7 +166,7 @@ krb5_free_data(scratch); }
     if (!(scratch->data = realloc(scratch->data,
 				  request.authenticator.ciphertext.length))) {
 	/* may destroy scratch->data */
-	xfree(scratch);
+	krb5_xfree(scratch);
 	retval = ENOMEM;
 	goto clean_ticket;
     }
@@ -206,7 +209,7 @@ request.authenticator.ciphertext.data = 0;}
 
     if (!(retval = encode_krb5_ap_req(&request, &toutbuf))) {
 	*outbuf = *toutbuf;
-	xfree(toutbuf);
+	krb5_xfree(toutbuf);
     }
     cleanup_ticket();
     cleanup_encpart();
