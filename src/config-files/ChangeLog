@@ -1,3 +1,7 @@
+
+Thu Jun 8 15:00:39 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* krb5.conf.M - Add description of logging profile entries.
+
 Fri May  5 00:58:55 1995  Theodore Y. Ts'o  (tytso@dcl)
 
 	* krb5.conf: Add example of the new [realms]/<realm>/

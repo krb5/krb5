@@ -74,6 +74,10 @@ Contains relations which map subdomains and domain names to Kerberos
 realm names.  This is used by programs to determine what realm a host
 should be in, given its fully qualified domain name.
 
+.IP [logging]
+Contains relations which determine how Kerberos entities are to
+perform their logging.
+
 .PP 
 
 Each of these sections will be covered in more details in the
@@ -166,6 +170,84 @@ UCSC.EDU domain into the CATS.UCSC.EDU realm.  ucbvax.berkeley.edu
 would be mapped by the default rules to the BERKELEY.EDU realm, while
 sage.lcs.mit.edu would be mapped to the LCS.MIT.EDU realm.
 
+.SH LOGGING SECTION
+
+The [logging] section indicates how a particular entity is to perform its
+logging.  The relations specified in this section assign one or more values
+to the entity name.
+.PP
+Currently, the following entities are used:
+.IP kdc
+These entries specify how the KDC is to perform its logging.
+.IP admin_server
+These entries specify how the administrative server is to perform its logging.
+.IP default
+These entries specify how to perform logging in the absence of explicit
+specifications otherwise.
+.PP
+Values are of the following forms:
+.IP FILE=<filename>
+.IP FILE:<filename>
+This value causes the entity's logging messages to go to the specified file.
+If the
+.B =
+form is used, then the file is overwritten.  Otherwise, the file is appended
+to.
+.IP STDERR
+This value causes the entity's logging messages to go to its standard error
+stream.
+.IP CONSOLE
+This value causes the entity's logging messages to go to the console, if
+the system supports it.
+.IP DEVICE=<devicename>
+This causes the entity's logging messages to go to the specified device.
+.IP SYSLOG[:<severity>[:<facility>]]
+This causes the entity's logging messages to go to the system log.
+
+The
+.B severity
+argument specifies the default severity of system log messages.  This may
+be any of the following severities supported by the
+.I syslog(3)
+call minus the LOG_ prefix: LOG_EMERG, LOG_ALERT, LOG_CRIT, LOG_ERR,
+LOG_WARNING, LOG_NOTICE, LOG_INFO, and LOG_DEBUG.
+For example, to specify LOG_CRIT severity, one
+would use CRIT for
+.B severity.
+
+The
+.B facility
+argument specifies the facility under which the messages are logged.  This
+may be any of the following facilities supported by the
+.I syslog(3)
+call minus the LOG_ prefix: LOG_KERN, LOG_USER, LOG_MAIL, LOG_DAEMON, LOG_AUTH,
+LOG_LPR, LOG_NEWS, LOG_UUCP, LOG_CRON, and LOG_LOCAL0 through LOG_LOCAL7.
+
+If no
+.B severity
+is specified, the default is ERR, and if no
+.B facility
+is specified, the default is AUTH.
+.PP
+In the following example, the logging messages from the KDC will go to the
+console and to the system log under the facility LOG_DAEMON with default
+severity of LOG_INFO; and the logging messages from the administrative server
+will be appended to the file /var/adm/kadmin.log and sent to the device
+/dev/tty04.
+.sp
+.nf
+.in +1i
+[logging]
+	kdc = CONSOLE
+	kdc = SYSLOG:INFO:DAEMON
+	admin_server = FILE:/var/adm/kadmin.log
+	admin_server = DEVICE=/dev/tty04
+.in -1i
+.fi
+.sp
+
 .SH FILES 
 /etc/krb5.conf
 
+.SH SEE ALSO
+syslog(3)
