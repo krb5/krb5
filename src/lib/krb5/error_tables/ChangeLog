@@ -1,3 +1,8 @@
+Tue Mar 21 21:06:06 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in (all-unix): The "includes" target is *not* obsolete;
+		it's necessary to copy the header files to the build tree.
+
 Fri Mar 17 19:42:45 1995  John Gilmore  (gnu at toad.com)
 
 	* Makefile.in (LDFLAGS):  Eliminate, duplicate.

@@ -14,7 +14,7 @@ SRCS=$(ETSRCS) init_ets.c
 
 all:: all-$(WHAT)
 
-all-unix:: $(HDRS) $(OBJS)
+all-unix:: $(HDRS) includes $(OBJS)
 all-mac:: $(HDRS) $(OBJS)
 
 all-windows:: $(OBJS)
