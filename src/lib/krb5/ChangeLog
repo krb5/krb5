@@ -1,3 +1,8 @@
+2003-08-20  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Don't replace any missing system functions.  Just
+	set LIBOBJS empty for now and substitute it.
+
 2003-08-13  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Don't check for or replace vfprintf, vsprintf,
