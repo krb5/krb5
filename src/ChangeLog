@@ -1,3 +1,9 @@
+2001-12-18  Tom Yu  <tlyu@mit.edu>
+
+	* aclocal.m4 (KRB5_LIB_PARAMS): Fix hpux to deal with building
+	shared libs with gcc.  Patch from Doug Engert; fixes
+	krb5-build/1021.
+
 2001-11-27  Ken Raeburn  <raeburn@mit.edu>
 
 	* aclocal.m4 (KRB5_LIB_PARAMS): On Linux, add "-lc" to shared

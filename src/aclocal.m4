@@ -1161,13 +1161,22 @@ alpha*-dec-osf*)
 # (compiled-in or SHLIB_PATH) will be searched first.
 #
 *-*-hpux*)
-	PICFLAGS=+z
+	if test "$krb5_cv_prog_gcc" = yes; then
+		PICFLAGS=-fPIC
+	else
+		PICFLAGS=+z
+	fi
 	INSTALL_SHLIB='$(INSTALL)'
 	SHLIBEXT=.sl
 	SHLIBVEXT='.$(LIBMAJOR).$(LIBMINOR)'
 	SHLIBSEXT='.$(LIBMAJOR)'
-	SHLIB_EXPFLAGS='+s +b $(SHLIB_RDIRS) $(SHLIB_DIRS) $(SHLIB_EXPLIBS)'
-	LDCOMBINE='ld -b +h lib$(LIB)$(SHLIBSEXT)'
+	if test "$krb5_cv_prog_gcc" = yes; then
+		SHLIB_EXPFLAGS='-Wl,+s -Wl,+b,$(SHLIB_RDIRS) $(SHLIB_DIRS) $(SHLIB_EXPLIBS)'
+		LDCOMBINE='gcc -fPIC -shared -Wl,+h,lib$(LIB)$(SHLIBSEXT)'
+	else
+		SHLIB_EXPFLAGS='+s +b $(SHLIB_RDIRS) $(SHLIB_DIRS) $(SHLIB_EXPLIBS)'
+		LDCOMBINE='ld -b +h lib$(LIB)$(SHLIBSEXT)'
+	fi
 	CC_LINK_SHARED='$(CC) $(PROG_LIBPATH) -Wl,+s -Wl,+b,$(PROG_RPATH)'
 	CC_LINK_STATIC='$(CC) $(PROG_LIBPATH)'
 	RUN_ENV='SHLIB_PATH=`echo $(PROG_LIBPATH) | sed -e "s/-L//g" -e "s/ /:/g"`; export SHLIB_PATH;'
