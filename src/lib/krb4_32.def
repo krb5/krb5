@@ -1,13 +1,10 @@
 ;-----------------------------
-;   KERBEROS.DEF - module definition file
+;   KRB4_32.DEF - module definition file
 ;-----------------------------
 
-;LIBRARY   KRB4_16
-DESCRIPTION 'DLL for Kerberos support'
-;EXETYPE   WINDOWS
-CODE	  PRELOAD MOVEABLE DISCARDABLE
-DATA	  PRELOAD MOVEABLE SINGLE
-HEAPSIZE  8192
+;LIBRARY		KRB4_32
+DESCRIPTION	'DLL for Kerberos support'
+HEAPSIZE	8192
 
 EXPORTS
 	dest_tkt

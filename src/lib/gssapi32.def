@@ -1,11 +1,9 @@
 ;----------------------------------------------------
-;   GSSAPI.DEF - GSSAPI.DLL module definition file
+;   GSSAPI32.DEF - GSSAPI32.DLL module definition file
 ;----------------------------------------------------
 
-;LIBRARY		GSSAPI
+;LIBRARY		GSSAPI32
 DESCRIPTION	'Base Generic Security Service API'
-CODE		PRELOAD MOVEABLE DISCARDABLE
-DATA		PRELOAD MOVEABLE SINGLE
 HEAPSIZE	8192
 
 EXPORTS

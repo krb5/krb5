@@ -1,3 +1,8 @@
+Fri May  7 18:27:08 1999  Danilo Almeida  <dalmeida@mit.edu>
+
+	* xpprof32.def, krb4_32.def, gssapi32.def, comerr32.del: Remove
+		Win16 directives to get rid of warnings.
+
 Fri May  7 12:10:50 1999  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* xpprof32.def: Add profile_abandon to the list of exported
