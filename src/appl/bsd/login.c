@@ -727,8 +727,7 @@ try_convert524(kctx, me, use_ccache)
 
 #ifdef KRB4_GET_TICKETS
 static int
-try_krb4 (me, user_pwstring, realm)
-    krb5_principal me;
+try_krb4 (user_pwstring, realm)
     char *user_pwstring;
     char *realm;
 {
@@ -1335,7 +1334,7 @@ int main(argc, argv)
 #ifdef KRB4_GET_TICKETS
 		if (login_krb4_get_tickets &&
 		    !(got_v5_tickets && login_krb4_convert))
-		    try_krb4(me, user_pwstring, realm);
+		    try_krb4(user_pwstring, realm);
 #endif
 		krbflag = (got_v5_tickets
 #ifdef KRB4_GET_TICKETS

@@ -1,3 +1,8 @@
+2003-01-30  Ken Raeburn  <raeburn@mit.edu>
+
+	* login.c (try_krb4): Delete unused krb5 principal name argument.
+	(main): Don't pass it.
+
 2003-01-09  Ken Raeburn  <raeburn@mit.edu>
 
 	* krlogind.c (main, recvauth): Use socklen_t when passing
