@@ -1,3 +1,14 @@
+Sun Jul  2 04:40:50 1995  Tom Yu  <tlyu@lothlorien.MIT.EDU>
+
+	* aclocal.m4 (SubdirLibRule): don't recreate DONE if list of objs
+		is null to avoid re-making lotsa stuff.
+		(_MAKE_SUBDIRS): really gross sh hack for subdir
+		recursion; make -[ik] should dtrt now even with broken
+		makes (like Ultrix) that do sh -ce "rule".  Basically,
+		throw an "if" test around the recursion line so that even
+		if the -e option to sh is set by make, an error in a
+		subdir below won't cause for loop to exit unless we want
+		it to.
 
 Fri Jun 30 14:26:01 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* aclocal.m4(V5_SHARED_LIB_OBJS) - Change explicit $(srcdir)/$*.c to

@@ -86,11 +86,12 @@ changequote(<<<,>>>)dnl
 
 $2::<<<
 	@case "`echo '$(MAKEFLAGS)'|sed -e 's/ --.*$$//'`" in \
-		*[ik]*) set +e;; *) set -e;; esac; \
+		*[ik]*) e=:;; *) e=break;; esac; \
 	for i in $(SUBDIRS) ; do \
-		(cd $$i ; echo>>> $1 <<<"in $(CURRENT_DIR)$$i..."; \
+		if (cd $$i ; echo>>> $1 <<<"in $(CURRENT_DIR)$$i..."; \
 			$(MAKE) CC="$(CC)" CCOPTS="$(CCOPTS)" \
-			CURRENT_DIR=$(CURRENT_DIR)$$i/ >>>$3<<<) \
+			CURRENT_DIR=$(CURRENT_DIR)$$i/ >>>$3<<<) then :; \
+		else $$e; fi; \
 	done>>>
 changequote([,])dnl
 AC_POP_MAKEFILE()dnl
@@ -486,7 +487,10 @@ AC_PUSH_MAKEFILE()dnl
 all:: DONE
 
 DONE:: $1
-	echo $1 > [$]@
+	@if test x'$1' = x && test -r [$]@; then :;\
+	else \
+		(set -x; echo $1 > [$]@) \
+	fi
 
 clean::
 	$(RM) DONE
