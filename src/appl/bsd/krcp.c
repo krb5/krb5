@@ -54,6 +54,9 @@ static char sccsid[] = "@(#)rcp.c	5.10 (Berkeley) 9/20/88";
 #include <netdb.h>
 #include <errno.h>
 #include <string.h>
+#ifdef HAVE_VFORK_H
+#include <vfork.h>
+#endif
      
 #ifdef HAVE_SETRESUID
 #ifndef HAVE_SETREUID

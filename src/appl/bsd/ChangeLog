@@ -1,3 +1,9 @@
+Tue Aug 16 17:58:09 1994  Mark Eichin  (eichin@cygnus.com)
+
+	* krcp.c: check HAVE_VFORK_H
+	configure.in: use AC_VFORK (runtime test -- consider just using
+	fork instead.)
+
 Sat Aug 13 02:04:37 1994  Mark Eichin  (eichin@perdiem)
 
 	* Makefile.in (DEFINES): set LOGIN_PROGRAM correctly.
