@@ -14,7 +14,7 @@ static char rcsid_net_write_c[] =
 "$Id$";
 #endif	/* !lint & !SABER */
 
-#include <krb5/config.h>		/* ext-proto.h needs this */
+#include <krb5/krb5.h>
 #include <krb5/ext-proto.h>
 
 /*
