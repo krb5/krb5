@@ -84,8 +84,6 @@ Notes, Major Changes, and Known Bugs
     this area mean that enabling 3DES support must be done with
     caution; see below.
 
-  * kdc.conf vs krb5.conf XXXXXXXXXXXXXXXXXXXXXXXXX
-
   * doc on upgrade path? XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 * DNS support for locating KDCs is enabled by default.  DNS support
@@ -100,7 +98,7 @@ Notes, Major Changes, and Known Bugs
   requirements as much as is possible, without compromising security.
 
   See the administrator's guide for information on setting up DNS
-  information for your realm.  XXXXXXXXXXXXXXXXXXXXXXXXXX
+  information for your realm.
 
   One important effect of this for developers is that on many systems,
   "-lresolv" must be added to the compiler command line when linking
@@ -110,9 +108,6 @@ Notes, Major Changes, and Known Bugs
   DNS code and the setting of the defaults.  Entries in krb5.conf will
   also modify the behavior if the code has been compiled in.
   XXXXXXXXXXXXXXXXXX details; man pages?
-  --enable-dns
-  --enable-dns-for-kdc
-  --enable-dns-for-realm
   [libdefaults] ...
 
 * Numerous buffer-overrun problems have been found and fixed.  Many of
@@ -188,9 +183,6 @@ Minor changes
   libraries.
 
 * Many compile-time warnings have been fixed.
-
-XXXXXXXXXXXXXXXXXXXXXXXXXXX login.c krb5_cc_set_default_name patch
-from 1.1.1 needs including
 
 * The GSS sample programs have been updated to exercise more of the
   API.
