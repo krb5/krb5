@@ -1,3 +1,14 @@
+2004-06-18  Jeffrey Altman <jaltman@mit.edu>
+
+    * cc_mslsa.c: Enforce acceptable enctypes by checking against
+      the default_tgs_enctypes list instead of the permitted_enctypes
+      list;  only enforce the desired enctype when retrieving tickets
+      to deliver to an application.  do not enforce when attempting 
+      to determine the current principal name.  this is important
+      because specifying an enctype results in a TGS_REQ being sent
+      to the KDC;  close memory leak of krb5_cred objects in 
+      krb5_lcc_retrieve().
+
 2004-06-16  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (MAC_SUBDIRS): Don't set.
