@@ -1,3 +1,9 @@
+Thu Mar 27 15:36:32 1997  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* gssapi.hin: Add the GSS_C_PROT_READY_FLAG and GSS_C_TRANS_FLAG
+		Add prototypes for the V2 functions gss_export_name(),
+		gss_duplicate_name(), and gss_canonicalize_name().
+
 Tue Mar 18 13:52:29 1997  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* gssapi.hin: Add 'extern "C"' for C++ compatibility; also check
