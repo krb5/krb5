@@ -73,9 +73,7 @@ char copyright[] =
 #define SERVE_NON_KRB     
 #define LOG_REMOTE_REALM
 #define LOG_CMD
-#include "defines.h"
    
-  
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -161,6 +159,8 @@ char copyright[] =
 #include <kerberosIV/krb.h>
 Key_schedule v4_schedule;
 #endif
+
+#include "defines.h"
 
 #if HAVE_ARPA_NAMESER_H
 #include <arpa/nameser.h>

@@ -1,3 +1,8 @@
+2000-05-18  Tom Yu  <tlyu@mit.edu>
+
+	* krshd.c: Shuffle inclusion of defines.h so that some krb5
+	structures are declared prior to the kcmd() prototype.
+
 2000-05-16  Ken Raeburn  <raeburn@mit.edu>
 
 	* defines.h (kcmd): Add prototype.
