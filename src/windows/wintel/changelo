@@ -1,3 +1,9 @@
+Thu May 25 12:52:50 1995 Keith Vetter (keithv@fusion.com)
+
+	* auth.c, intern.c, negotiat.c, screen.c, screen.h, telnet.c,
+	   telnet.h, changelo: forgot to specify DOS eol when unzipped
+ 	   on Unix so had to remove the extra blank lines.
+
 Thu May 25 11:26:14 1995 John Rivlin  <jrvlin@fusion.com>
 
 	* emul.c - make the eol wrapping to work properly. This fixed 
