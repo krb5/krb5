@@ -1,3 +1,11 @@
+Tue Sep 12 19:07:52 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* export_sec_context.c (krb5_gss_export_sec_context): Free the
+		auth context when freeing the GSSAPI context structure.
+
+	* delete_sec_context.c (krb5_gss_delete_sec_context): Free the
+		auth context when freeing the GSSAPI context structure.
+
 Tue Sep 12 13:05:51 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* k5seal.c, k5unseal.c, accept_sec_context.c: Undo MACINTOSH

@@ -95,6 +95,9 @@ krb5_gss_export_sec_context(context,
 			    krb5_free_principal(ctx->context, ctx->there);
 			    krb5_free_keyblock(ctx->context, ctx->subkey);
 
+			    if (ctx->auth_context)
+				krb5_auth_con_free(context, ctx->auth_context);
+
 			    /* Zero out context */
 			    memset(ctx, 0, sizeof(*ctx));
 			    xfree(ctx);
