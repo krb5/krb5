@@ -379,7 +379,6 @@ krb5_data **response;			/* filled in with a response packet */
     reply_encpart.times.authtime = authtime = kdc_time;
 
     reply_encpart.caddrs = enc_tkt_reply.caddrs;
-    reply.enc_part.kvno = client_key->key_data_kvno;
 
     /* Fetch the padata info to be returned */
     errcode = return_padata(kdc_context, &client, request, &reply, client_key,
@@ -397,6 +396,7 @@ krb5_data **response;			/* filled in with a response packet */
 				  0, &encrypting_key,  &reply, response);
     krb5_free_keyblock_contents(kdc_context, &encrypting_key);
     encrypting_key.contents = 0;
+    reply.enc_part.kvno = client_key->key_data_kvno;
 
     if (errcode) {
 	status = "ENCODE_KDC_REP";

@@ -1,3 +1,9 @@
+Wed Feb 17 17:07:43 1999  Tom Yu  <tlyu@mit.edu>
+
+	* do_as_req.c (process_as_req): Fix to assign kvno to
+	reply.enc_part after encryption, since krb5_c_encrypt() now
+	explicitly initializes all fields of a krb5_enc_data.
+
 1998-12-17  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* kdc_preauth.c (check_padata): If preauth fails because the
