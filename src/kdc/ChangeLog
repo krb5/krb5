@@ -1,3 +1,10 @@
+Fri Oct 14 00:31:14 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* main.c (process_args): Select the cryptosystem to be used using
+		krb5_use_cstype() instead of using a implementation
+		specific assignment.  Also, allow the encryption type to
+		be specified using a command line option.
+
 Tue Oct 11 22:11:09 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* do_as_req.c (process_as_req): Don't assume that the request

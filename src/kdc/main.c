@@ -150,12 +150,13 @@ char **argv;
     char *rcname = 0;
     char *lrealm;
     krb5_error_code retval, retval2;
+    krb5_enctype kdc_etype = DEFAULT_KDC_ETYPE;
     krb5_enctype etype;
     extern krb5_deltat krb5_clockskew;
 
     extern char *optarg;
 
-    while ((c = getopt(argc, argv, "r:d:mM:k:R:")) != EOF) {
+    while ((c = getopt(argc, argv, "r:d:mM:k:R:e:")) != EOF) {
 	switch(c) {
 	case 'r':			/* realm name for db */
 	    db_realm = optarg;
@@ -175,6 +176,9 @@ char **argv;
 	    break;
 	case 'R':
 	    rcname = optarg;
+	    break;
+	case 'e':
+	    kdc_etype = atoi(optarg);
 	    break;
 	case '?':
 	default:
@@ -229,11 +233,12 @@ char **argv;
 	exit(1);
     }
 
-#ifdef PROVIDE_DES_CBC_CRC
-    master_encblock.crypto_entry = krb5_des_cst_entry.system;
-#else
-error(You gotta figure out what cryptosystem to use in the KDC);
-#endif
+    if (!valid_etype(kdc_etype)) {
+	com_err(argv[0], KRB5_PROG_ETYPE_NOSUPP,
+		"while setting up etype %d", kdc_etype);
+	exit(1);
+    }
+    krb5_use_cstype(&master_encblock, kdc_etype);
 
     if (retval = krb5_db_fetch_mkey(master_princ, &master_encblock, manual,
 				    FALSE, /* only read it once, if at all */
