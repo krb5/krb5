@@ -24,7 +24,11 @@ static char rcsid_setup_mkey_c[] =
 /*
  * Given a key name and a realm name, construct a principal which can be used
  * to fetch the master key from the database.
+ * 
+ * If the key name is NULL, the default key name will be used.
  */
+
+#define	REALM_SEP_STRING	"@"
 
 krb5_error_code
 krb5_db_setup_mkey_name(keyname, realm, fullname, principal)
@@ -34,47 +38,28 @@ char **fullname;
 krb5_principal *principal;
 {
     krb5_error_code retval;
-    krb5_principal retprinc;
-    int keylen = strlen(keyname);
+    int keylen;
     int rlen = strlen(realm);
+    char *fname;
     
-    retprinc = (krb5_principal) calloc(3, sizeof(krb5_data));
-    if (!retprinc)
+    if (!keyname)
+	keyname = KRB5_KDB_M_NAME;	/* XXX external? */
+
+    keylen = strlen(keyname);
+	 
+    fname = malloc(keylen+rlen+2);
+    if (!fname)
 	return ENOMEM;
-    retprinc[0] = (krb5_data *) malloc(sizeof(krb5_data));
-    if (!retprinc[0]) {
-	goto freeprinc;
-    }
-    retprinc[1] = (krb5_data *) malloc(sizeof(krb5_data));
-    if (!retprinc[1]) {
-	goto free0;
-    }
-    if (!(retprinc[0]->data = malloc(rlen))) {
-	goto free1;
-    }
-    if (!(retprinc[1]->data = malloc(keylen))) {
-	xfree(retprinc[0]->data);
-	goto free1;
-    }
-    bcopy(realm, retprinc[0]->data, rlen);
-    retprinc[0]->length = rlen;
 
-    bcopy(keyname, retprinc[1]->data, keylen);
-    retprinc[1]->length = keylen;
+    strcpy(fname, keyname);
+    strcat(fname, REALM_SEP_STRING);
+    strcat(fname, realm);
 
-    if (fullname && (retval = krb5_unparse_name(retprinc, fullname))) {
-	xfree(retprinc[1]);
-	xfree(retprinc[0]);
-	xfree(retprinc);
+    if (retval = krb5_parse_name(fname, principal))
 	return retval;
-    }
+    if (fullname)
+	*fullname = fname;
+    else
+	free(fname);
     return 0;
-
- free1:
-    xfree(retprinc[1]);
- free0:
-    xfree(retprinc[0]);
- freeprinc:
-    xfree(retprinc);
-    return ENOMEM;
 }
