@@ -2,7 +2,8 @@ Fri Feb  7 08:08:39 1997  Richard Basch  <basch@lehman.com>
 
 	* cns.c (blocking_hook_proc): Additional logic is required to
 		prevent instantaneous timeouts when GetTickCount()
-		wraps every 49.7 days.
+		wraps every 49.7 days.  Declared function with old
+		__export convention so that it works properly in Win16.
 
 Sun Feb  2 11:22:57 1997  Richard Basch  <basch@lehman.com>
 
