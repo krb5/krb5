@@ -1,3 +1,10 @@
+2002-07-12  Ken Raeburn  <raeburn@mit.edu>
+
+	* ad_print.c, cr_tkt.c, decomp_tkt.c, g_krbhst.c, g_phost.c,
+	g_tkt_svc.c, mk_priv.c, mk_safe.c, netread.c, netwrite.c,
+	prot_kdc.c, rd_priv.c, rd_safe.c, realmofhost.c, recvauth.c,
+	send_to_kdc.c, sendauth.c, tkt_string.c: Include port-sockets.h.
+
 2002-06-21  Ken Raeburn  <raeburn@mit.edu>
 
 	* mk_priv.c (krb4int_address_less): Put braces around v4mapped

@@ -21,6 +21,7 @@
 #else
 extern char *malloc();
 #endif
+#include "port-sockets.h"
 #include "krb4int.h"
 
 /*

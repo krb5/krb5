@@ -1,3 +1,7 @@
+2002-07-12  Ken Raeburn  <raeburn@mit.edu>
+
+	* krb.h: Don't include port-sockets.h.
+
 2002-04-10  Danilo Almeida  <dalmeida@mit.edu>
 
 	* krb.h: Do not include winsock.h for Win32, since we already use

@@ -30,6 +30,7 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <string.h>
+#include "port-sockets.h"
 
 /*
  * This routine takes an alias for a host name and returns the first

@@ -29,6 +29,7 @@
 #include "krb.h"
 #include "prot.h"
 #include <string.h>
+#include "port-sockets.h"
 
 /*
  * encode_kdc_reply

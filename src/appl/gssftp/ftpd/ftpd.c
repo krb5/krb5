@@ -125,6 +125,7 @@ char *ftpusers;
 extern int yyparse(void);
 
 #include <k5-util.h>
+#include "port-sockets.h"
 
 #ifdef KRB5_KRB4_COMPAT
 #include <krb5.h>

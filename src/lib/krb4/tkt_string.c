@@ -13,6 +13,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/types.h>
+#include "port-sockets.h" /* XXX this gets us MAXPATHLEN but we should find
+			     a better way */
 
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>

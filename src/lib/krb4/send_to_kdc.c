@@ -21,6 +21,7 @@
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#include "port-sockets.h"
 
 #define S_AD_SZ sizeof(struct sockaddr_in)
 

@@ -7,6 +7,7 @@
 #include <string.h>
 #define	DEFINE_SOCKADDR
 #include "krb.h"
+#include "port-sockets.h"
 
 /* FIXME -- this should probably be calling mk_auth nowadays.  */
 #define	KRB_SENDAUTH_VERS "AUTHV0.1" 	/* MUST be KRB_SENDAUTH_VLEN chars */

@@ -61,6 +61,9 @@ KRB524INT_BEGIN_DECLS
 #if KRB524_PRIVATE
 extern int krb524_debug;
 
+struct sockaddr;
+struct sockaddr_in;
+
 int krb524_convert_tkt_skey
 	(krb5_context context, krb5_ticket *v5tkt, KTEXT_ST *v4tkt, 
 		   krb5_keyblock *v5_skey, krb5_keyblock *v4_skey,

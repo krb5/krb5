@@ -14,6 +14,7 @@
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#include "port-sockets.h"
 
 #ifndef _WINDOWS
 extern int errno;

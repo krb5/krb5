@@ -15,6 +15,7 @@
 #include "des.h"
 #include "krb4int.h"
 #include <stdio.h>
+#include "port-sockets.h"
 
 #ifndef _WINDOWS
 

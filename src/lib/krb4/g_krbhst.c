@@ -13,6 +13,7 @@
 #include "krb.h"
 #include <string.h>
 #include "krb4int.h"
+#include "port-sockets.h"
 
 /*
  * Given a Kerberos realm, find a host on which the Kerberos authenti-

@@ -37,9 +37,6 @@
 #include <time.h>
 #endif /* _WINDOWS */
 
-#include <port-sockets.h>
-
-
 /* Text describing error codes */
 #define		MAX_KRB_ERRORS	256
 extern const char *const krb_err_txt[MAX_KRB_ERRORS];

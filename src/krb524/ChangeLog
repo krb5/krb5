@@ -1,3 +1,9 @@
+2002-07-12  Ken Raeburn  <raeburn@mit.edu>
+
+	* conv_creds.c: Include port-sockets.h instead of winsock.h or
+	netinet/in.h.
+	* krb524.h: Forward-declare struct types sockaddr, sockaddr_in.
+
 2002-07-09  Ken Raeburn  <raeburn@mit.edu>
 
 	* krb524.h: Put # for cpp directives in first column.

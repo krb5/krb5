@@ -79,6 +79,8 @@ static char sccsid[] = "@(#)rcp.c	5.10 (Berkeley) 9/20/88";
 #include <varargs.h>
 #endif
 
+#include "port-sockets.h"
+
 #ifdef KERBEROS
 #include <krb.h>
 #include <krbports.h>

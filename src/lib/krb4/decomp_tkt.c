@@ -30,6 +30,7 @@
 #include <string.h>
 #include <krb5.h>
 #include "krb54proto.h"
+#include "port-sockets.h"
 
 #ifdef KRB_CRYPT_DEBUG
 extern int krb_debug;

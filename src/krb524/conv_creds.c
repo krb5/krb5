@@ -24,11 +24,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/types.h>
-#ifdef _WIN32
-#include <winsock.h>
-#else
-#include <netinet/in.h>
-#endif
+#include "port-sockets.h"
 #if TARGET_OS_MAC
 #include <Kerberos/krb.h>
 #include <Kerberos/krb524.h>

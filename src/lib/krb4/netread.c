@@ -17,6 +17,7 @@
 #ifndef _WINDOWS
 extern int errno;
 #endif
+#include "port-sockets.h"
 
 /*
  * krb_net_read() reads from the file descriptor "fd" to the buffer

@@ -40,6 +40,7 @@
 #include "des.h"
 #include "prot.h"
 #include "lsb_addr_cmp.h"
+#include "port-sockets.h"
 
 extern int krb_debug;
 

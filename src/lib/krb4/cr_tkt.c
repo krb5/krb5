@@ -29,6 +29,7 @@
 #include "krb.h"
 #include "prot.h"
 #include <string.h>
+#include "port-sockets.h"
 
 static int
 krb_cr_tkt_int (KTEXT tkt, unsigned int flags_in, char *pname, 

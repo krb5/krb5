@@ -1,3 +1,7 @@
+2002-07-12  Ken Raeburn  <raeburn@mit.edu>
+
+	* v4rcp.c: Include port-sockets.h.
+
 2002-07-09  Jen Selby <jenselby@mit.edu>
 
 	* login.M: added information about different command line options;
