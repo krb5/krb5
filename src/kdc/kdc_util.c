@@ -1398,33 +1398,10 @@ select_session_keytype(context, server, nktypes, ktype)
 	if (!valid_enctype(ktype[i]))
 	    continue;
 
-	if (dbentry_supports_enctype(context, server, ktype[i])) {
-	    switch (ktype[i]) {
-	    case ENCTYPE_NULL:
-	    case ENCTYPE_DES_CBC_CRC:
-	    case ENCTYPE_DES_CBC_MD4:
-	    case ENCTYPE_DES_CBC_MD5:
-	    case ENCTYPE_DES_CBC_RAW:
-	    case ENCTYPE_DES_HMAC_SHA1:
-		return ktype[i];
-
-	    default:
-		/* For now, too much of our code supports only
-		   single-DES.  For example, the GSSAPI Kerberos
-		   mechanism needs to be modified.  If someone tries
-		   using other key types, force single-DES for the
-		   session key.
-
-		   This weird way of setting it here is so that a
-		   requested single-DES enctype listed after DES3 can
-		   be used, and this fallback enctype will be used
-		   only if *no* single-DES enctypes were requested.  */
-		dfl = ENCTYPE_DES_CBC_CRC;
-		break;
-	    }
-	}
+	if (dbentry_supports_enctype(context, server, ktype[i]))
+	    return ktype[i];
     }
-    return dfl;
+    return 0;
 }
 
 /*
