@@ -1,0 +1,340 @@
+# Kerberos ftp test.
+# This is a DejaGnu test script.
+# This script tests Kerberos ftp.
+# Originally written by Ian Lance Taylor, Cygnus Support, <ian@cygnus.com>.
+# Modified bye Ezra Peisach for GSSAPI support.
+
+# Find the programs we need.  We use the binaries from the build tree
+# if they exist.  If they do not, then they must be in PATH.  We
+# expect $objdir to be .../kerberos/build/tests/dejagnu
+
+if ![info exists FTP] {
+    set FTP [findfile $objdir/../../appl/gssftp/ftp/ftp]
+}
+
+if ![info exists FTPD] {
+    set FTPD [findfile $objdir/../../appl/gssftp/ftpd/ftpd]
+}
+
+# Make sure .klogin is reasonable.
+if ![check_k5login ftp] {
+    return
+}
+
+# Set up the kerberos database.
+if {![get_hostname] \
+    || ![setup_kerberos_files] \
+    || ![setup_kerberos_env] \
+    || ![setup_kerberos_db 0]} {
+    return
+}
+
+# A procedure to start up the ftp daemon.
+
+proc start_ftp_daemon { } {
+    global FTPD
+    global tmppwd
+    global ftpd_spawn_id
+    global ftpd_pid
+
+    # The -p argument tells it to accept a single connection, so we
+    # don't need to use inetd.  The 3021 is the port to listen at.
+    # We rely on KRB5_KTNAME being set to the proper keyfile as there is
+    # no way to cleanly set it with the gssapi API.
+    spawn $FTPD -p 3021 -r $tmppwd/krb.conf
+    set ftpd_spawn_id $spawn_id
+    set ftpd_pid [exp_pid]
+
+    # Give the ftp daemon a few seconds to get set up.
+    catch "exec sleep 2"
+}
+
+# A procedure to stop the ftp daemon.
+
+proc stop_ftp_daemon { } {
+    global ftpd_spawn_id
+    global ftpd_pid
+
+    if [info exists ftpd_pid] {
+	catch "close -i $ftpd_spawn_id"
+	catch "exec kill $ftpd_pid"
+	catch "wait -i $ftpd_spawn_id"
+	unset ftpd_pid
+    }
+}
+
+# Create a file to use for ftp testing.
+set file [open tmpdir/ftp-test w]
+puts $file "This file is used for ftp testing."
+close $file
+
+# Test that a file was copied correctly.
+proc check_file { filename } {
+    if ![file exists $filename] {
+	verbose "$filename does not exist"
+	send_log "$filename does not exist\n"
+	return 0
+    }
+
+    set file [open $filename r]
+    if { [gets $file line] == -1 } {
+	verbose "$filename is empty"
+	send_log "$filename is empty\n"
+	close $file
+	return 0
+    }
+
+    if ![string match "This file is used for ftp testing." $line] {
+	verbose "$filename contains $line"
+	send_log "$filename contains $line\n"
+	close $file
+	return 0
+    }
+
+    if { [gets $file line] != -1} {
+	verbose "$filename is too long ($line)"
+	send_log "$filename is too long ($line)\n"
+	close $file
+	return 0
+    }
+
+    close $file
+
+    return 1
+}
+
+#
+# Restore environment variables possibly set.
+#
+proc ftp_restore_env { } {
+    global env
+    global ftp_save_ktname
+
+    catch "unset env(KRB5_KTNAME)"
+    if [info exists ftp_save_ktname] {
+	set env(KRB5_KTNAME) $ftp_save_ktname
+	unset ftp_save_ktname
+    }
+}
+
+# Wrap the tests in a procedure, so that we can kill the daemons if
+# we get some sort of error.
+
+proc ftp_test { } {
+    global FTP
+    global KEY
+    global hostname
+    global localhostname
+    global env
+    global ftpd_spawn_id
+    global ftpd_pid
+    global spawn_id
+    global tmppwd
+    global ftp_save_ktname
+
+    # Start up the kerberos and kadmind daemons and get a srvtab and a
+    # ticket file.
+    if {![start_kerberos_daemons 0] \
+        || ![add_random_key ftp/$hostname 0] \
+        || ![setup_srvtab 0 ftp] \
+	|| ![add_kerberos_key $env(USER) 0] \
+	|| ![kinit $env(USER) $env(USER)$KEY 0]} {
+	return
+    }
+
+    #
+    # Save settings of KRB5_KTNAME
+    #
+    if [info exists env(KRB5_KTNAME)] {
+	set ftp_save_ktname $env(KRB5_KTNAME)
+    }
+
+    #
+    # set KRB5_KTNAME
+    #
+    set env(KRB5_KTNAME) FILE:$tmppwd/srvtab
+    verbose "KRB5_KTNAME=$env(KRB5_KTNAME)"
+
+
+    # Start the ftp daemon.
+    start_ftp_daemon
+
+    # Make an ftp client connection to it.
+    spawn $FTP $hostname 3021
+
+    expect_after {
+	timeout {
+	    fail "$testname (timeout)"
+	    catch "expect_after"
+	    return
+	}
+	eof {
+	    fail "$testname (eof)"
+	    catch "expect_after"
+	    return
+	}
+    }
+
+    set testname "ftp connection"
+    expect "Connected to $hostname"
+    expect -re "$hostname FTP server .Version \[0-9.\]*. ready."
+    expect -re "Using authentication type GSSAPI; ADAT must follow"
+    expect "GSSAPI accepted as authentication type"
+    expect "GSSAPI authentication succeeded"
+    expect "Name ($hostname:$env(USER)): "
+    send "$env(USER)\r"
+    expect "User $env(USER) logged in."
+    expect "Remote system type is UNIX."
+    expect "Using binary mode to transfer files."
+    expect "ftp> " {
+	pass $testname
+    }
+
+    set testname "status"
+    send "status\r"
+    expect "Connected to $hostname."
+    expect "Authentication type: GSSAPI"
+    expect "ftp> " {
+	pass $testname
+    }
+
+    set testname "get"
+    catch "exec rm -f tmpdir/copy"
+    send "get $tmppwd/ftp-test $tmppwd/copy\r"
+    expect "Opening BINARY mode data connection for $tmppwd/ftp-test"
+    expect "Transfer complete"
+    expect -re "\[0-9\]+ bytes received in \[0-9.e-\]+ seconds"
+    expect "ftp> "
+    if [check_file tmpdir/copy] {
+	pass $testname
+    } else {
+	fail $testname
+    }
+
+    set testname "put"
+    catch "exec rm -f tmpdir/copy"
+    send "put $tmppwd/ftp-test $tmppwd/copy\r"
+    expect "Opening BINARY mode data connection for $tmppwd/copy"
+    expect "Transfer complete"
+    expect -re "\[0-9\]+ bytes sent in \[0-9.e-\]+ seconds"
+    expect "ftp> "
+    if [check_file tmpdir/copy] {
+	pass $testname
+    } else {
+	fail $testname
+    }
+
+    set testname "cd"
+    send "cd $tmppwd\r"
+    expect "CWD command successful."
+    expect "ftp> " {
+	pass $testname
+    }
+
+    set testname "lcd"
+    send "lcd tmpdir\r"
+    expect "Local directory now $tmppwd"
+    expect "ftp> " {
+	pass $testname
+    }
+
+    set testname "local get"
+    catch "exec rm -f tmpdir/copy"
+    send "get ftp-test copy\r"
+    expect "Opening BINARY mode data connection for ftp-test"
+    expect "Transfer complete"
+    expect -re "\[0-9\]+ bytes received in \[0-9.e-\]+ seconds"
+    expect "ftp> "
+    if [check_file tmpdir/copy] {
+	pass $testname
+    } else {
+	fail $testname
+    }
+
+    set testname "start encryption"
+    send "private\r"
+    expect "Protection level set to Private"
+    expect "ftp> " {
+	pass $testname
+    }
+
+    set testname "status"
+    send "status\r"
+    expect "Protection Level: private"
+    expect "ftp> " {
+	pass $testname
+    }
+
+    set testname "encrypted get"
+    catch "exec rm -f tmpdir/copy"
+    send "get ftp-test copy\r"
+    expect "Opening BINARY mode data connection for ftp-test"
+    expect "Transfer complete"
+    expect -re "\[0-9\]+ bytes received in \[0-9.e-\]+ seconds"
+    expect "ftp> "
+    if [check_file tmpdir/copy] {
+	pass $testname
+    } else {
+	fail $testname
+    }
+
+    set testname "close"
+    send "close\r"
+    expect "Goodbye."
+    expect "ftp> "
+    set status_list [wait -i $ftpd_spawn_id]
+    verbose "wait -i $ftpd_spawn_id returned $status_list ($testname)"
+    catch "close -i $ftpd_spawn_id"
+    if { [lindex $status_list 2] != 0 || [lindex $status_list 3] != 0 } {
+	send_log "exit status: $status_list\n"
+	verbose "exit status: $status_list"
+	fail $testname
+    } else {
+	pass $testname
+	unset ftpd_pid
+    }
+
+    set testname "quit"
+    send "quit\r"
+    expect "\r"
+    if [check_exit_status $testname] {
+	pass $testname
+    }
+}
+
+# The ftp client will look in $HOME/.netrc for the user name to use.
+# To avoid confusing the testsuite, point $HOME at a directory where
+# we know there is no .netrc file.
+if [info exists env(HOME)] {
+    set home $env(HOME)
+} else if [info exists home] {
+    unset home
+}
+set env(HOME) $tmppwd
+
+# Run the test.  Logging in sometimes takes a while, so increase the
+# timeout.
+set oldtimeout $timeout
+set timeout 60
+set status [catch ftp_test msg]
+set timeout $oldtimeout
+
+# Shut down the kerberos daemons and the ftp daemon.
+stop_kerberos_daemons
+
+stop_ftp_daemon
+
+ftp_restore_env
+
+# Reset $HOME, for safety in case we are going to run more tests.
+if [info exists home] {
+    set env(HOME) $home
+} else {
+    unset env(HOME)
+}
+
+if { $status != 0 } {
+    send_error "ERROR: error in ftp.exp\n"
+    send_error "$msg\n"
+    exit 1
+}

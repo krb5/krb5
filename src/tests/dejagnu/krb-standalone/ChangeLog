@@ -1,3 +1,7 @@
+Fri Mar 15 15:09:17 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* gssftp.exp: Add dejagnu for GSS-API ftp.
+
 Sun Mar  3 14:35:27 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* rcp.exp, rsh.exp: Change name of kshd to match current executable

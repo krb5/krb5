@@ -25,6 +25,7 @@ Things-to-keep:
 
 ChangeLog
 gssapi.exp
+gssftp.exp
 kadmin.exp
 rcp.exp
 rsh.exp
