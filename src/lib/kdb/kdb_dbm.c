@@ -138,14 +138,6 @@ static void free_decode_princ_dbmkey PROTOTYPE((krb5_principal ));
  * retry the operation.
  */
 
-/* Macros to convert ndbm names to dbm names.
- * Note that dbm_nextkey() cannot be simply converted using a macro, since
- * it is invoked giving the database, and nextkey() needs the previous key.
- *
- * Instead, all routines call "dbm_next" instead.
- */
-
-
 #define free_dbsuffix(name) free(name)
 
 /*
@@ -747,7 +739,6 @@ int *nentries;				/* how much room/how many found */
 krb5_boolean *more;			/* are there more? */
 {
     int     found = 0;
-    extern int errorproc();
     datum   key, contents;
     time_t	transaction;
     int try;
@@ -884,6 +875,71 @@ register int *nentries;			/* number of entry structs to
     (void) krb5_dbm_db_unlock();		/* unlock database */
     *nentries = i;
     return (retval);
+}
+
+/*
+ * delete a principal from the data base.
+ * returns number of entries removed
+ */
+
+krb5_error_code
+krb5_dbm_db_delete_principal(searchfor, nentries)
+krb5_principal searchfor;
+int *nentries;				/* how many found & deleted */
+{
+    int     found = 0;
+    datum   key, contents, contents2;
+    krb5_db_entry entry;
+    DBM    *db;
+    krb5_error_code retval;
+
+    if (!inited)
+	return KRB5_KDB_DBNOTINITED;
+
+    if (retval = krb5_dbm_db_lock(KRB5_DBM_EXCLUSIVE))
+	return(retval);
+
+    db = dbm_open(current_db_name, O_RDWR, 0600);
+    if (db == NULL) {
+	retval = errno;
+	(void) krb5_dbm_db_unlock();
+	return retval;
+    }
+    if (retval = encode_princ_dbmkey(&key, searchfor))
+	goto cleanup;
+
+    contents = dbm_fetch(db, key);
+    if (contents.dptr == NULL) {
+	found = 0;
+	retval = KRB5_KDB_NOENTRY;
+    } else {
+	if (retval = decode_princ_contents(&contents, &entry))
+	    goto cleankey;
+	found = 1;
+	bzero((char *)entry.key.contents, entry.key.length);
+	if (retval = encode_princ_contents(&contents2, &entry))
+	    goto cleancontents;
+
+	if (dbm_store(db, key, contents2, DBM_REPLACE))
+	    retval = errno;
+	else {
+	    if (dbm_delete(db, key))
+		retval = errno;
+	    else
+		retval = 0;
+	}
+	free_encode_princ_contents(&contents2);
+    cleancontents:
+	free_decode_princ_contents(&entry);
+    cleankey:
+	free_encode_princ_dbmkey(&key);
+    }
+
+ cleanup:
+    (void) dbm_close(db);
+    (void) krb5_dbm_db_unlock();	/* unlock write lock */
+    *nentries = found;
+    return retval;
 }
 
 krb5_error_code
