@@ -621,8 +621,10 @@ done
 AC_OUTPUT($filelist,
 [EOF
 ac_reltopdir=`echo $ac_reltopdir | sed   \
-	-e 's,^\(\./\)*,,g'	\
-	-e 's,/\(\./\)*,/,g'	\
+	-e ':LOOP'		\
+	-e 's,/\./,/,'		\
+	-e 'tLOOP'		\
+	-e 's,^\./,,'		\
 	-e 's,/\.$,,g'		\
 	`
 test "$ac_reltopdir" = "" && ac_reltopdir=.
@@ -650,8 +652,10 @@ for d in $ac_v5_makefile_dirs; do
 changequote(,)dnl
     x=`echo $d/ | sed   \
 	-e 's,//*$,/,'		\
-	-e 's,^\(\./\)*,,g'	\
-	-e 's,/\(\./\)*,/,g'	\
+	-e ':LOOP'		\
+	-e 's,/\./,/,'		\
+	-e 'tLOOP'		\
+	-e 's,^\./,,'		\
 	-e 's,/\./$,/,g'	\
 	-e 's,^\./$,,'		\
 	-e 's,[^/]*/,../,g'	\
@@ -664,8 +668,9 @@ changequote([,])dnl
     esac
     s=`echo $s | sed   \
 	-e 's,//*$,/,'		\
-	-e 's,^\(\./\)*,,g'	\
-	-e 's,/\(\./\)*,/,g'	\
+	-e ':LOOP'		\
+	-e 's,/\./,/,'		\
+	-e 'tLOOP'		\
 	-e 's,^\./$,,'		\
 	-e 's,/\.$,,g'		\
 	`
