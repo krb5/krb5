@@ -60,11 +60,6 @@ authorization check is passed, then the user is allowed to log in.
 Allow Kerberos5 and Kerberos4 as acceptable authentication
 mechanisms.  This is the same as including \fB\-4\fP and \fB\-5\fP.
 
-.IP \fB\-r\fP 
-Trust the remote hostname as an authentication system using the 
- \fI.rhosts\fP authorization list.  This option may be desupported in a future version.
-
-
 .IP \fB\-e\fP
 Require the client to encrypt the connection.  Only Kerberos5 clients
 support encryption.

@@ -41,7 +41,6 @@ char copyright[] =
  * 1) Check authentication.
  * 2) Check authorization via the access-control files: 
  *    ~/.k5login (using krb5_kuserok) and/or
- *    ~/.rhosts  (using ruserok).
  * Execute command if configured authoriztion checks pass, else deny 
  * permission.
  *
@@ -50,12 +49,8 @@ char copyright[] =
  * take priority. The options are:
  * -k means trust krb4 or krb5
 * -5 means trust krb5
-* -4 means trust krb4
- * -r means trust .rhosts  (using ruserok).
+* -4 means trust krb4 (using .klogin)
  * 
- *     If no command-line arguments are present, then the presence of the 
- * letters kKrR in the program-name before "shd" determine the 
- * behaviour of the program exactly as with the command-line arguments.
  */
      
 /* DEFINES:
@@ -155,7 +150,7 @@ char copyright[] =
 #include "com_err.h"
 #include "loginpaths.h"
 
-#define ARGSTR	"rek54ciD:S:M:AP:?L:"
+#define ARGSTR	"ek54ciD:S:M:AP:?L:"
 
 
 #define RSHD_BUFSIZ 5120
@@ -184,7 +179,7 @@ int netf;
 
 #else /* !KERBEROS */
 
-#define ARGSTR	"rRD:?"
+#define ARGSTR	"RD:?"
 #define (*des_read)  read
 #define (*des_write) write
      
@@ -204,7 +199,6 @@ int netf;
 */
 #define AUTH_KRB4 (0x1)
 #define AUTH_KRB5 (0x2)
-#define AUTH_RHOSTS (0x4)
 int auth_ok = 0, auth_sent = 0;
 int checksum_required = 0, checksum_ignored = 0;
 char *progname;
@@ -285,9 +279,6 @@ int main(argc, argv)
     opterr = 0;
     while ((ch = getopt(argc, argv, ARGSTR)) != EOF)
       switch (ch) {
-	case 'r':         
-	auth_ok |= AUTH_RHOSTS;
-	  break;
 #ifdef KERBEROS
 	case 'k':
 #ifdef KRB5_KRB4_COMPAT
@@ -1005,17 +996,6 @@ void doit(f, fromp)
 	}
 
 	
-    if (auth_ok&AUTH_RHOSTS) {
-	/* Cannot check .rhosts unless connection from privileged port */
-	if (!non_privileged) {
-	    if (ruserok(hostname, pwd->pw_uid == 0,
-			remuser, locuser) < 0) {
-		syslog(LOG_ERR ,
-		       "Principal %s (%s@%s) for local user %s failed ruserok.\n",
-		       kremuser, remuser, hostname, locuser);
-	    } else auth_sent |=AUTH_RHOSTS;
-	}
-    }
 #else
     if (pwd->pw_passwd != 0 && *pwd->pw_passwd != '\0' &&
 	ruserok(hostname, pwd->pw_uid == 0, remuser, locuser) < 0) {
@@ -1614,7 +1594,7 @@ loglogin(host, flag, failures, ue)
 void usage()
 {
 #ifdef KERBEROS
-    syslog(LOG_ERR, "usage: kshd [-rRkK] or [r/R][k/K]shd");
+    syslog(LOG_ERR, "usage: kshd [-54ecikK]  ");
 #else
     syslog(LOG_ERR, "usage: rshd");
 #endif

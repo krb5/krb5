@@ -1,3 +1,20 @@
+Thu Oct 31 22:14:00 1996  Sam Hartman  <hartmans@planet-zorp.MIT.EDU>
+
+	* krlogind.c (doit): Remove tab3 because it isn't very useful and
+ 	isn't always present.
+
+Thu Oct 31 19:19:54 1996  Sam Hartman  <hartmans@mit.edu>
+
+	* klogind.M kshd.M:  document -r goes away [138]
+
+	* krshd.c (doit): Do not support rhosts authentication.  This was
+ 	never used by any clients and the cruft in kcmd.c was creating
+ 	problems. [138]
+
+	* krlogind.c (do_krb_login): Remove broken rhosts support. [138]
+
+	* kcmd.c: Remove ruserok and associated cruft along with killpg. [138]
+
 Tue Oct 29 10:09:39 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* login.c: Make the defaults be to *not* to get Kerberos V4
