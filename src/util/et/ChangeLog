@@ -1,3 +1,8 @@
+2004-07-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* error_message.c (remove_error_table) [!ENABLE_THREADS &&
+	DEBUG_THREADS]: Update test for 'initialized' field in mutex.
+
 2004-06-22  Ken Raeburn  <raeburn@mit.edu>
 
 	* vfprintf.c: Don't test macintosh.
