@@ -189,3 +189,7 @@ Changes in 1.1a3:
  from tag Mac_GSSKerberos5_3_0b1
  Kerberos5Lib now uses PreferencesLib
  fixed get_credentials [BZ 323]
+
+3.0b2
+ from tag Mac_GSSKerberos5_3_0b2
+ changed error in krb5_init_context from ENFILE to ENOENT when file not found
