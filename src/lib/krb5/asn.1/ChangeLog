@@ -1,3 +1,9 @@
+Mon Sep 18 14:17:15 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* asn1_encode.c (asn1_encode_generaltime): Don't modify a const
+		input variable val; copy it to a scratch variable and
+		modify that.
+
 Wed Sep 13 19:53:30 1995  Mark Eichin  <eichin@cygnus.com>
 
 	* krb5_decode.c (clean_krb5_authenticator, clean_krb5_ticket,

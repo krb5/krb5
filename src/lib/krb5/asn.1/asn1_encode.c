@@ -198,9 +198,10 @@ asn1_error_code asn1_encode_generaltime(buf, val, retlen)
   struct tm *gtime;
   char s[16];
   int length, sum=0;
+  time_t gmt_time;
 
-  val += EPOCH;
-  gtime = gmtime(&val);
+  gmt_time = val + EPOCH;
+  gtime = gmtime(&gmt_time);
 
   /* Time encoding: YYYYMMDDhhmmssZ */
   sprintf(s, "%04d%02d%02d%02d%02d%02dZ",
