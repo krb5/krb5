@@ -172,6 +172,9 @@ errcode_t profile_update_file
 errcode_t profile_flush_file
 	PROTOTYPE ((prf_file_t profile));
 
+void profile_free_file
+	PROTOTYPE ((prf_file_t profile));
+
 errcode_t profile_close_file
 	PROTOTYPE ((prf_file_t profile));
 

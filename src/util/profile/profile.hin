@@ -45,6 +45,9 @@ KRB5_DLLIMP long KRB5_CALLCONV profile_init_path
 KRB5_DLLIMP long KRB5_CALLCONV profile_flush
 	PROTOTYPE ((profile_t profile));
 
+KRB5_DLLIMP void KRB5_CALLCONV profile_abandon
+	PROTOTYPE ((profile_t profile));
+
 KRB5_DLLIMP void KRB5_CALLCONV profile_release
 	PROTOTYPE ((profile_t profile));
 

@@ -132,6 +132,19 @@ profile_flush(profile)
 	return 0;
 }
 
+KRB5_DLLIMP void KRB5_CALLCONV
+profile_abandon(profile)
+	profile_t	profile;
+{
+	prf_file_t	p, next;
+
+	for (p = profile->first_file; p; p = next) {
+		next = p->next;
+		profile_free_file(p);
+	}
+	profile->magic = 0;
+	free(profile);
+}
 
 KRB5_DLLIMP void KRB5_CALLCONV
 profile_release(profile)

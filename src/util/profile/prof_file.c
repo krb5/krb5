@@ -211,14 +211,9 @@ errout:
 }
 
 
-errcode_t profile_close_file(prf)
+void profile_free_file(prf)
 	prf_file_t prf;
 {
-	errcode_t	retval;
-	
-	retval = profile_flush_file(prf);
-	if (retval)
-		return retval;
 	if (prf->filename)
 		free(prf->filename);
 	if (prf->root)
@@ -228,6 +223,18 @@ errcode_t profile_close_file(prf)
 	prf->magic = 0;
 	free(prf);
 
+	return;
+}
+
+errcode_t profile_close_file(prf)
+	prf_file_t prf;
+{
+	errcode_t	retval;
+	
+	retval = profile_flush_file(prf);
+	if (retval)
+		return retval;
+	profile_free_file(prf);
 	return 0;
 }
 

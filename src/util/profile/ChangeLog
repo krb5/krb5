@@ -1,3 +1,12 @@
+1999-04-14    <tytso@rsts-11.mit.edu>
+
+	* prof_init.c (profile_abandon): New function which frees the
+		profile handle and throwing away any changes that might
+		have been made before they are flushed to disk.
+
+	* prof_file.c (profile_close_file): Move functionality of freeing
+		the profile file to the new function profile_free_file().
+
 Mon Mar 15 16:03:34 1999  Tom Yu  <tlyu@mit.edu>
 
 	* profile.hin: Fix GSS_DLLIMP.
