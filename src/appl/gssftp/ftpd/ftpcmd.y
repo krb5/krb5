@@ -805,11 +805,15 @@ pathname:	pathstring
 		 * This is a valid reply in some cases but not in others.
 		 */
 		if (logged_in && $1 && strncmp((char *) $1, "~", 1) == 0) {
-			*(char **)&($$) = *ftpglob((char *) $1);
-			if (globerr != NULL) {
+			char **vv;
+
+			vv = ftpglob((char *) $1);
+			if (vv == NULL || globerr != NULL) {
 				reply(550, globerr);
 				$$ = NULL;
-			}
+			} else
+				$$ = *vv;
+
 			free((char *) $1);
 		} else
 			$$ = $1;

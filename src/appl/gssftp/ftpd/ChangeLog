@@ -1,3 +1,12 @@
+2001-04-25  Tom Yu  <tlyu@mit.edu>
+
+	* ftpcmd.y: Don't dereference a NULL pointer returned from
+	ftpglob().
+
+	* ftpd.c: Be more paranoid about return values from ftpglob().
+	Police uses of sprintf().  Account for expansion in
+	radix_encode().
+
 2001-03-07  Ken Raeburn  <raeburn@mit.edu>
 
 	* ftpd.c (strerror): Only define if not HAVE_STRERROR.
