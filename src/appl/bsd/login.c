@@ -2428,8 +2428,13 @@ update_ref_count(int adj)
 		    putgroupattr(grp, (char *)0, (void *)0, SEC_COMMIT);
 		} else {
 		    putgroupattr(grp, S_USERS, (void *)empty, SEC_LIST);
+#ifdef HAVE_RMUFILE /* pre-4.3.0 AIX */
 		    putgroupattr(grp, (char *)0, (void *)0, SEC_COMMIT);
 		    rmufile(grp, 0, GROUP_TABLE);
+#else
+		    putgroupattr(grp, (char *)0, (void *)0, SEC_DELETE);
+		    putgroupattr(grp, (char *)0, (void *)0, SEC_COMMIT);
+#endif
 		}
 	    }
 	    while (*grp) grp++;

@@ -1,3 +1,11 @@
+1999-07-09  Ken Raeburn  <raeburn@mit.edu>
+
+	AIX 4.3.2 changes based on bug report from Joshua Lackey,
+	lackeyj@austin.ibm.com:
+	* configure.in: Check for rmufile function.
+	* login.c (update_ref_count) [! HAVE_RMUFILE]: Call putgroupattr
+	with SEC_DELETE before SEC_COMMIT; don't call rmufile.
+
 Fri Mar 12 19:01:35 1999  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in (kshd): Add $(LOGINLIBS).
