@@ -1,3 +1,9 @@
+2004-12-18  Jeffrey Altman <jaltman@mit.edu>
+
+* kfw-fixed.nsi:
+    Add "Debug Symbols" as a new category.  It defaults to on
+    in debug builds and off in release builds.
+
 2004-12-15  Jeffrey Altman <jaltman@mit.edu>
 
 * kfw-fixed.nsi
