@@ -1,3 +1,8 @@
+1999-11-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* mcc.h (mcc_head): Define as macro to give exported name a krb5
+	prefix.
+
 1999-10-26  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,
