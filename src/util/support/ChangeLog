@@ -1,3 +1,17 @@
+2004-06-21  Ken Raeburn  <raeburn@mit.edu>
+
+	* threads.c (key_lock): Change to a k5_mutex_t.
+	(k5_key_register): Use k5_ lock routines.
+	(pthread_getspecific, pthread_setspecific, pthread_key_create,
+	pthread_key_delete) [HAVE_PRAGMA_WEAK_REF]: Declare weak.
+	(tsd_if_single) [HAVE_PRAGMA_WEAK_REF]: New variable.
+	(krb5int_thread_support_init): Do pthread key creation only if
+	pthread code is loaded.
+	(krb5int_thread_support_fini): Do pthread key deletion only if
+	pthread code is loaded.
+	(k5_key_register, k5_getspecific, k5_setspecific): Use
+	tsd_if_single when pthread code is not loaded.
+
 2004-06-17  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (BUILDTOP, LIBNAME, XTRA, OBJFILE): Define for

@@ -148,7 +148,7 @@ void krb5int_thread_detach_hook (void)
    loaded so this support code stays in the process, and gssapi is
    loaded, unloaded, and loaded again.  */
 
-static pthread_mutex_t key_lock = PTHREAD_MUTEX_INITIALIZER;
+static k5_mutex_t key_lock = K5_MUTEX_PARTIAL_INITIALIZER;
 static void (*destructors[K5_KEY_MAX])(void *);
 static unsigned char destructors_set[K5_KEY_MAX];
 
@@ -167,19 +167,37 @@ struct tsd_block {
     void *values[K5_KEY_MAX];
 };
 
+#ifdef HAVE_PRAGMA_WEAK_REF
+# pragma weak pthread_getspecific
+# pragma weak pthread_setspecific
+# pragma weak pthread_key_create
+# pragma weak pthread_key_delete
+static struct tsd_block tsd_if_single;
+#endif
+
 static pthread_key_t key;
 static void thread_termination(void *);
 
 int krb5int_thread_support_init(void)
 {
-    return pthread_key_create(&key, thread_termination);
+    int err;
+    err = k5_mutex_finish_init(&key_lock);
+    if (err)
+	return err;
+    if (K5_PTHREADS_LOADED)
+	return pthread_key_create(&key, thread_termination);
+    else
+	return 0;
 }
 
 void krb5int_thread_support_fini(void)
 {
-    /* ... delete stuff ... */
-    if (INITIALIZER_RAN(krb5int_thread_support_init))
+    if (! INITIALIZER_RAN(krb5int_thread_support_init))
+	return;
+    if (K5_PTHREADS_LOADED)
 	pthread_key_delete(key);
+    /* ... delete stuff ... */
+    k5_mutex_destroy(&key_lock);
 }
 
 static void thread_termination (void *tptr)
@@ -215,14 +233,17 @@ int k5_key_register (k5_key_t keynum, void (*destructor)(void *))
 {
     int err;
 
-    err = pthread_mutex_lock(&key_lock);
+    err = CALL_INIT_FUNCTION(krb5int_thread_support_init);
+    if (err)
+	return err;
+    err = k5_mutex_lock(&key_lock);
     if (err)
 	return err;
     assert(keynum >= 0 && keynum < K5_KEY_MAX);
     assert(destructors_set[keynum] == 0);
     destructors_set[keynum] = 1;
     destructors[keynum] = destructor;
-    err = pthread_mutex_unlock(&key_lock);
+    err = k5_mutex_unlock(&key_lock);
     if (err)
 	return err;
     return 0;
@@ -240,7 +261,15 @@ void *k5_getspecific (k5_key_t keynum)
     assert(keynum >= 0 && keynum < K5_KEY_MAX);
     assert(destructors_set[keynum] != 0);
 
-    t = pthread_getspecific(key);
+    if (K5_PTHREADS_LOADED)
+	t = pthread_getspecific(key);
+    else {
+#ifdef HAVE_PRAGMA_WEAK_REF
+	t = &tsd_if_single;
+#else
+	abort();
+#endif
+    }
     if (t == NULL)
 	return NULL;
 
@@ -259,21 +288,29 @@ int k5_setspecific (k5_key_t keynum, void *value)
     assert(keynum >= 0 && keynum < K5_KEY_MAX);
     assert(destructors_set[keynum] != 0);
 
-    t = pthread_getspecific(key);
-    if (t == NULL) {
-	int i;
-	t = malloc(sizeof(*t));
-	if (t == NULL)
-	    return errno;
-	for (i = 0; i < K5_KEY_MAX; i++)
-	    t->values[i] = 0;
-	/* add to global linked list */
-	t->next = 0;
-	err = pthread_setspecific(key, t);
-	if (err) {
-	    free(t);
-	    return err;
+    if (K5_PTHREADS_LOADED) {
+	t = pthread_getspecific(key);
+	if (t == NULL) {
+	    int i;
+	    t = malloc(sizeof(*t));
+	    if (t == NULL)
+		return errno;
+	    for (i = 0; i < K5_KEY_MAX; i++)
+		t->values[i] = 0;
+	    /* add to global linked list */
+	    t->next = 0;
+	    err = pthread_setspecific(key, t);
+	    if (err) {
+		free(t);
+		return err;
+	    }
 	}
+    } else {
+#ifdef HAVE_PRAGMA_WEAK_REF
+	t = &tsd_if_single;
+#else
+	abort();
+#endif
     }
 
     t->values[keynum] = value;
