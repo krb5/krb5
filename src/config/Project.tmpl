@@ -192,6 +192,11 @@ P_INET=-DHasInetTrue
 #else
 P_INET=-UHasInetTrue
 #endif
+#if HasStdlibH
+P_STDLIBH=-DHasStdlibHTrue
+#else
+P_STDLIBH=-UHasStdlibHTrue
+#endif
 
 /*
  * Default Definitions.
@@ -210,7 +215,7 @@ P_INET=-UHasInetTrue
             TOUCH = TouchCmd
              PERL = PerlCmd
           UNIFDEF = UnifdefCmd
-  PROCESS_DEFINES = $(P_TERMIOS) $(P_FLOCKS) $(P_TYPES) $(P_SIGTYPE) $(P_STRINGH) $(P_BITSIZE) $(P_DBM) $(P_INET) -DUnifdefRan
+  PROCESS_DEFINES = $(P_TERMIOS) $(P_FLOCKS) $(P_TYPES) $(P_SIGTYPE) $(P_STRINGH) $(P_BITSIZE) $(P_DBM) $(P_INET) $(P_STDLIBH) -DUnifdefRan
        DESDEFINES = DesDefines
             ETSRC = $(TOP)/comerr
             SSSRC = $(TOP)/ss

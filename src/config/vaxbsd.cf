@@ -16,7 +16,7 @@
 
 /* Saber bug doesn't allow deref through const *'s */
 #ifdef VaxArchitecture
-#define SaberDefines -I/mit/gnu/vaxlib/gcc-include -Dconst= -DBITS32 -DNO_STDLIB_H
+#define SaberDefines -I/mit/gnu/vaxlib/gcc-include -Dconst= -DBITS32
 #else
 #define SaberDefines -Dconst= -DBITS32
 #endif
@@ -25,13 +25,14 @@
 #define HasPosixTermios NO
 #define HasPosixFileLocks NO
 #define HasStringH YES
+#define HasStdlibH NO
 #define Bitsize32
 
 #define HasSaberC YES
 
 #ifdef VaxArchitecture
 #define UnalignedReferencesAllowed YES	       /* if arbitrary deref is okay */
-#define StandardDefines -DBITS32 -DNO_STDLIB_H
+#define StandardDefines -DBITS32
 #define DesDefines -DBIG -DLSBFIRST
 #undef HasGcc
 #define HasGcc YES

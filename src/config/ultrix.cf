@@ -16,6 +16,7 @@
 #define HasPosixTermios YES
 #define HasPosixFileLocks YES
 #define HasStringH YES
+#define HasStdlibH NO
 #define HasInet YES
 #define HasPutenv YES
 #define HasBsearch YES
