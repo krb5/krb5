@@ -32,8 +32,6 @@
 #include <unistd.h>
 #endif
 
-extern char *krb__get_srvtabname();
-
 #define KEYSZ sizeof(C_Block)
 /* strict put_svc_key.
    The srvtab must already exist;

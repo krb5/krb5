@@ -1,3 +1,17 @@
+
+2001-06-20  Ezra Peisach  <epeisach@mit.edu>
+
+	* kname_parse.c (k_isrealm, k_isname, k_isrealm): Add
+	KRB5_DLLIMP/KRB5_CALLCONV definitions for function with exported
+	prototype in krb.h.
+
+	* g_cnffile.c (krb__get_srvtabname, krb__v5_get_file): Declare
+	argument as const.
+
+	* g_svc_in_tkt.c, put_svc_key.c, rd_req.c, rd_svc_key.c: Get rid
+	of krb__get_srvtabname() prototype - in krb.h now.
+
+
 2001-06-18  Ezra Peisach  <epeisach@mit.edu>
 
 	* kparse.c (strutol): Cast argument to isupper()/tolower() to int.
