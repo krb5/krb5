@@ -740,8 +740,8 @@ initialize_realms(kcontext, argc, argv)
       conf_names[2] = 0;
 
       retval = profile_get_values(kcontext->profile, conf_names, &conf_val);
-      if(!retval && conf_val) {
-	db_prof = strdup(conf_val);
+      if(!retval && conf_val && conf_val[0]) {
+	db_prof = strdup(conf_val[0]);
       } else {
 	db_prof = strdup(DEFAULT_KDC_PROFILE);
       }
