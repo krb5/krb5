@@ -138,6 +138,11 @@ krb5_mk_req_extended(krb5_context context, krb5_auth_context *auth_context,
 	*auth_context = new_auth_context;
     }
 
+    if ((*auth_context)->keyblock != NULL) {
+	krb5_free_keyblock(context, (*auth_context)->keyblock);
+	(*auth_context)->keyblock = NULL;
+    }
+
     /* set auth context keyblock */
     if ((retval = krb5_copy_keyblock(context, &in_creds->keyblock, 
 				     &((*auth_context)->keyblock))))
