@@ -149,6 +149,7 @@ krb5_send_tgs(context, kdcoptions, timestruct, ktypes, sname, addrs,
     krb5_timestamp time_now;
     krb5_pa_data **combined_padata;
     krb5_pa_data ap_req_padata;
+    int tcp_only = 0;
 
     /* 
      * in_creds MUST be a valid credential NOT just a partially filled in
@@ -270,15 +271,27 @@ krb5_send_tgs(context, kdcoptions, timestruct, ktypes, sname, addrs,
     krb5_xfree(combined_padata);
 
     /* now send request & get response from KDC */
+send_again:
     retval = krb5_sendto_kdc(context, scratch, 
 			     krb5_princ_realm(context, sname),
-			     &rep->response, 0);
-    krb5_free_data(context, scratch);
-
+			     &rep->response, 0, tcp_only);
     if (retval == 0) {
-        if (krb5_is_tgs_rep(&rep->response))
+	if (krb5_is_krb_error(&rep->response)) {
+	    if (!tcp_only) {
+		krb5_error *err_reply;
+		retval = decode_krb5_error(&rep->response, &err_reply);
+		if (err_reply->error == KRB_ERR_RESPONSE_TOO_BIG) {
+		    tcp_only = 1;
+		    krb5_free_error(context, err_reply);
+		    free(rep->response.data);
+		    rep->response.data = 0;
+		    goto send_again;
+		}
+		krb5_free_error(context, err_reply);
+	    }
+	} else if (krb5_is_tgs_rep(&rep->response))
 	    rep->message_type = KRB5_TGS_REP;
-        else /* assume it's an error */
+        else /* XXX: assume it's an error */
 	    rep->message_type = KRB5_ERROR;
     }
 
@@ -294,7 +307,6 @@ send_tgs_error_1:;
                tgsreq.authorization_data.ciphertext.length); 
 	krb5_xfree(tgsreq.authorization_data.ciphertext.data);
     }
-
 
     return retval;
 }

@@ -96,9 +96,10 @@ send_as_request(context, request, time_now, ret_err_reply, ret_as_reply,
 {
     krb5_kdc_rep *as_reply = 0;
     krb5_error_code retval;
-    krb5_data *packet;
+    krb5_data *packet = 0;
     krb5_data reply;
     char k4_version;		/* same type as *(krb5_data::data) */
+    int tcp_only = 0;
 
     reply.data = 0;
     
@@ -116,10 +117,10 @@ send_as_request(context, request, time_now, ret_err_reply, ret_as_reply,
 	goto cleanup;
 
     k4_version = packet->data[0];
+send_again:
     retval = krb5_sendto_kdc(context, packet, 
 			     krb5_princ_realm(context, request->client),
-			     &reply, use_master);
-    krb5_free_data(context, packet);
+			     &reply, use_master, tcp_only);
     if (retval)
 	goto cleanup;
 
@@ -131,9 +132,17 @@ send_as_request(context, request, time_now, ret_err_reply, ret_as_reply,
 	    /* some other error code--??? */	    
 	    goto cleanup;
     
-	if (ret_err_reply)
+	if (ret_err_reply) {
+	    if (err_reply->error == KRB_ERR_RESPONSE_TOO_BIG
+		&& tcp_only == 0) {
+		tcp_only = 1;
+		krb5_free_error(context, err_reply);
+		free(reply.data);
+		reply.data = 0;
+		goto send_again;
+	    }
 	    *ret_err_reply = err_reply;
-	else
+	} else
 	    krb5_free_error(context, err_reply);
 	goto cleanup;
     }
@@ -181,6 +190,8 @@ send_as_request(context, request, time_now, ret_err_reply, ret_as_reply,
 	krb5_free_kdc_rep(context, as_reply);
 
 cleanup:
+    if (packet)
+	krb5_free_data(context, packet);
     if (reply.data)
 	free(reply.data);
     return retval;

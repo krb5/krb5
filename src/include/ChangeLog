@@ -1,3 +1,10 @@
+2002-06-10  Ken Raeburn  <raeburn@mit.edu>
+
+	* k5-int.h (KRB_AP_PATH_NOT_ACCEPTED, KRB_ERR_RESPONSE_TOO_BIG):
+	New error number macros.
+	(krb5int_sendto_kdc): Update for new argument.
+	(krb5int_sendto_tcp): Declare.
+
 2002-06-04  Ken Raeburn  <raeburn@mit.edu>
 
 	* k5-int.h (krb5int_sendto_udp): Declare.

@@ -1,3 +1,12 @@
+2002-06-10  Ken Raeburn  <raeburn@mit.edu>
+
+	* get_in_tkt.c (send_as_request): Update arg list for
+	sendto_kdc.  If a RESPONSE_TOO_BIG error is returned from the KDC,
+	use a TCP connection.
+	* send_tgs.c (krb5_send_tgs): Update arg list for sendto_kdc.  If
+	a RESPONSE_TOO_BIG error is returned from the KDC, use a TCP
+	connection.
+
 2002-04-12  Ezra Peisach  <epeisach@bu.edu>
 
 	* Makefile.in (clean): Remove t_expand and t_expand.o

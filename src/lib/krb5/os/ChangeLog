@@ -1,5 +1,19 @@
 2002-06-10  Ken Raeburn  <raeburn@mit.edu>
 
+	* sendto_kdc.c: Include sys/ioctl.h and sys/filio.h if
+	available.  Define ENABLE_TCP as 0 on Windows, 1 otherwise.
+	(debug_log_connect): New function.
+	(dperror, dfprintf): New macros.
+	(krb5int_sendto_udp): Use dperror, dfprintf, and
+	debug_log_connect.
+	(state_strings): New variable.
+	(struct conn_state, struct select_state): New types.
+	(print_fdsets, call_select, make_nonblocking,
+	start_tcp_connection, iov_advance, service_tcp_fd, service_fds,
+	krb5int_sendto_tcp): New functions.
+	(krb5_sendto_kdc): New argument TCP_ONLY.  Try UDP first unless
+	told otherwise, then try TCP.
+
 	* t_std_conf.c: Include fake-addrinfo.h.
 	(test_locate_kdc): Update arg list to locate_kdc.  Print IPv6 as
 	well as IPv4 addresses.

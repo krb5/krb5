@@ -258,6 +258,9 @@ struct sockaddr;
 					/* in message */
 #define KRB_AP_ERR_INAPP_CKSUM	50	/* Inappropriate type of */
 					/* checksum in message */
+#define KRB_AP_PATH_NOT_ACCEPTED 51	/* Policy rejects transited path */
+#define KRB_ERR_RESPONSE_TOO_BIG 52	/* Response too big for UDP, */
+					/*   retry with TCP */
 
 /* other errors */
 #define KRB_ERR_GENERIC		60 	/* Generic error (description */
@@ -470,8 +473,10 @@ struct addrlist;
 krb5_error_code krb5_lock_file (krb5_context, int, int);
 krb5_error_code krb5_unlock_file (krb5_context, int);
 krb5_error_code krb5_sendto_kdc (krb5_context, const krb5_data *,
-				 const krb5_data *, krb5_data *, int);
+				 const krb5_data *, krb5_data *, int, int);
 krb5_error_code krb5int_sendto_udp (krb5_context, const krb5_data *,
+				    const struct addrlist *, krb5_data *);
+krb5_error_code krb5int_sendto_tcp (krb5_context context, const krb5_data *,
 				    const struct addrlist *, krb5_data *);
 krb5_error_code krb5_get_krbhst (krb5_context, const krb5_data *, char *** );
 krb5_error_code krb5_free_krbhst (krb5_context, char * const * );
