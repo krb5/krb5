@@ -106,12 +106,28 @@ in_tkt (
         return KSUCCESS;
 }
 
+int KRB5_CALLCONV
+krb_save_credentials(
+    char	*service,
+    char	*instance,
+    char	*realm,
+    C_Block	session,
+    int		lifetime,
+    int		kvno,
+    KTEXT	ticket,
+    long	issue_date)
+{
+    return krb4int_save_credentials_addr(service, instance, realm,
+					 session, lifetime, kvno,
+					 ticket, issue_date, 0);
+}
+
 /*
  * Store a ticket into the default credentials cache
  * cache must exist (if it didn't exist, it would have been created by in_tkt)
  */
 int
-krb_save_credentials (
+krb4int_save_credentials_addr(
 	char*			service,
 	char*			instance,
 	char*			realm,

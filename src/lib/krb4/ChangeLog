@@ -1,3 +1,39 @@
+2003-02-10  Tom Yu  <tlyu@mit.edu>
+
+	* CCache-glue.c (krb4int_save_credentials_addr): Renamed from
+	krb_save_credentials().
+	(krb_save_credentials): Implement in terms of
+	krb4int_save_credentials_addr().
+
+	* Makefile.in (SRCS, OBJS): Add password_to_key.
+
+	* g_ad_tkt.c (get_ad_tkt): Call krb4int_send_to_kdc_addr() instead
+	of send_to_kdc().  Call krb4int_save_credentials_addr() instead of
+	krb_save_credentials().  These changes deal with Mac-specific
+	storage of the local address without introducing more
+	conditionally compiled code.
+
+	* g_in_tkt.c: Fix to minimize Mac-specific code.  Basically, pass
+	around local address in lots of places.  There is still a
+	Mac-specific difference involving krb_get_in_tkt_creds().
+
+	* krb4int.h: Include port-sockets.h to get some socket stuff for
+	some prototypes.  Update prototype for
+	krb_get_in_tkt_preauth_creds().  Add prototypes for
+	krb4int_save_credentials_addr() and krb4int_send_to_kdc_addr().
+
+	* password_to_key.c (krb_get_keyprocs): Fix typo.
+	(mit_passwd_to_key, krb5_passwd_to_key): mit_string_to_key ->
+	des_string_to_key.
+
+	* save_creds.c (krb_save_credentials): Re-implement in terms of
+	krb4itn_save_credentials_addr(), which is what library internals
+	will call.
+	(krb4int_save_credentials_addr): Renamed from
+	krb_save_credentials.
+
+	* tkt_string.c (krb_set_tkt_string): Fix to take const char *.
+
 2003-02-10  Alexandra Ellwood <lxs@mit.edu>
     Note: these checkins are partial progress for Tom Yu.
     They probably don't build; Tom is expecting that.

@@ -26,6 +26,7 @@
 
 #include "krb.h"
 #include "des.h"
+#include "krb4int.h"
 #include "prot.h"
 #include <string.h>
 
@@ -249,6 +250,8 @@ get_ad_tkt(service, sinstance, realm, lifetime)
     char rlm[REALM_SZ];
     unsigned char *ptr;
     KRB4_32 t_local;
+    struct sockaddr_in laddr;
+    socklen_t addrlen;
     unsigned KRB4_32 kdc_time;   /* KDC time */
     size_t snamelen, sinstlen;
 
@@ -331,7 +334,9 @@ get_ad_tkt(service, sinstance, realm, lifetime)
 
     /* Send the request to the local ticket-granting server */
     rpkt->length = 0;
-    kerror = send_to_kdc(pkt, rpkt, realm);
+    addrlen = sizeof(laddr);
+    kerror = krb4int_send_to_kdc_addr(pkt, rpkt, realm,
+				      (struct sockaddr *)&laddr, &addrlen);
 
     if (!kerror) {
 	/* No error; parse return packet from KDC. */
@@ -355,8 +360,10 @@ get_ad_tkt(service, sinstance, realm, lifetime)
 	return kerror;
     }
 
-    kerror = krb_save_credentials(s_name, s_instance, rlm,
-				  ses, lifetime, kvno, tkt, t_local);
+    kerror = krb4int_save_credentials_addr(s_name, s_instance, rlm,
+					   ses, lifetime, kvno, tkt,
+					   t_local,
+					   laddr.sin_addr.s_addr);
     /*
      * Unconditionally stomp on ses because we don't need it anymore.
      */

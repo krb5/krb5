@@ -92,7 +92,7 @@ const char *tkt_string()
 
 void KRB5_CALLCONV
 krb_set_tkt_string(val)
-char *val;
+    const char *val;
 {
     (void) strncpy(krb_ticket_string, val, sizeof(krb_ticket_string)-1);
     krb_ticket_string[sizeof(krb_ticket_string)-1] = '\0';

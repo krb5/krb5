@@ -27,6 +27,8 @@
  * be available for self consistancy in the library.
  */
 
+#include "port-sockets.h"
+
 /* ad_print.c */
 void ad_print(AUTH_DAT *x);
 
@@ -54,7 +56,8 @@ int k_gethostname(char *, int);
 int krb_get_in_tkt_preauth_creds(char *, char *, char *,
 				 char *, char *, int,
 				 key_proc_type, decrypt_tkt_type,
-				 char *, char *, int, CREDENTIALS *);
+				 char *, char *, int, CREDENTIALS *,
+				 KRB_UINT32 *);
 
 /* klog.c */
 void kset_logfile(char *);
@@ -109,3 +112,9 @@ int krb_get_stk(KRB_UINT32 *type, char *realm);
 /* err_txt.c */
 void krb4int_et_init(void);
 void krb4int_et_fini(void);
+
+int krb4int_save_credentials_addr(
+    char *, char *, char *, C_Block, int, int, KTEXT, long, KRB_UINT32);
+
+int krb4int_send_to_kdc_addr(KTEXT, KTEXT, char *,
+			     struct sockaddr *, socklen_t *);

@@ -56,6 +56,7 @@ OBJS	= \
 	$(OUTPRE)mk_req.$(OBJEXT) \
 	$(OUTPRE)mk_safe.$(OBJEXT) \
 	$(OUTPRE)month_sname.$(OBJEXT) \
+	$(OUTPRE)password_to_key.$(OBJEXT) \
 	$(OUTPRE)prot_client.$(OBJEXT) \
 	$(OUTPRE)prot_common.$(OBJEXT) \
 	$(OUTPRE)prot_kdc.$(OBJEXT) \
@@ -99,6 +100,7 @@ SRCS = \
 	mk_req.c \
 	mk_safe.c \
 	month_sname.c \
+	password_to_key.c \
 	pkt_cipher.c \
 	pkt_clen.c \
 	prot_client.c \

@@ -150,7 +150,6 @@ des_string_to_key(str,key)
 				/* can do dumb things sometimes */
 }
 
-#if TARGET_OS_MAC
 char *mit_afs_crypt (const char *, const char *, const char *);
 
 void afs_string_to_key(char *str, char *cell, des_cblock key)
@@ -170,6 +169,7 @@ void afs_string_to_key(char *str, char *cell, des_cblock key)
     mit_afs_string_to_key(&keyblock, &str_data, &cell_data);
 }
 
+#if TARGET_OS_MAC
 char *des_crypt(const char *str, const char *salt)
 {
     char afs_buf[16];

@@ -159,9 +159,7 @@ krb_mk_in_tkt_preauth(user, instance, realm, service, sinstance, life,
 
     int msg_byte_order;
     int kerror;
-#if TARGET_OS_MAC
     socklen_t addrlen;
-#endif
 #if 0
     unsigned long exp_date;
 #endif
@@ -218,13 +216,10 @@ krb_mk_in_tkt_preauth(user, instance, realm, service, sinstance, life,
 
     /* SEND THE REQUEST AND RECEIVE THE RETURN PACKET */
     rpkt->length = 0;
-#if TARGET_OS_MAC
-    addrlen = sizeof(struct sockaddr_in)
+    addrlen = sizeof(struct sockaddr_in);
     kerror = krb4int_send_to_kdc_addr(pkt, rpkt, realm,
-				      local_addr, &addrlen);
-#else
-    kerror = send_to_kdc(pkt, rpkt, realm);
-#endif
+				      (struct sockaddr *)local_addr,
+				      &addrlen);
     if (kerror)
 	return kerror;
 
@@ -397,7 +392,7 @@ krb_parse_in_tkt_creds(user, instance, realm, service, sinstance, life, cip,
 int
 krb_get_in_tkt_preauth_creds(user, instance, realm, service, sinstance, life,
 			     key_proc, decrypt_proc,
-			     arg, preauth_p, preauth_len, creds)
+			     arg, preauth_p, preauth_len, creds, laddrp)
     char *user;
     char *instance;
     char *realm;
@@ -410,6 +405,7 @@ krb_get_in_tkt_preauth_creds(user, instance, realm, service, sinstance, life,
     char *preauth_p;
     int   preauth_len;
     CREDENTIALS *creds;
+    KRB_UINT32 *laddrp;
 {
     KTEXT_ST cip_st;
     KTEXT cip = &cip_st;	/* Returned Ciphertext */
@@ -417,21 +413,12 @@ krb_get_in_tkt_preauth_creds(user, instance, realm, service, sinstance, life,
     int byteorder;
     key_proc_type *keyprocs = krb_get_keyprocs (key_proc);
     int i = 0;
-#if TARGET_OS_MAC
     struct sockaddr_in local_addr;
-#endif
 
-#if TARGET_OS_MAC
     kerror = krb_mk_in_tkt_preauth(user, instance, realm, 
 				   service, sinstance,
 				   life, preauth_p, preauth_len,
 				   cip, &byteorder, &local_addr);
-#else
-    kerror = krb_mk_in_tkt_preauth(user, instance, realm, 
-				   service, sinstance,
-				   life, preauth_p, preauth_len,
-				   cip, &byteorder, NULL);
-#endif
     if (kerror)
 	return kerror;
     
@@ -445,12 +432,11 @@ krb_get_in_tkt_preauth_creds(user, instance, realm, service, sinstance, life,
         }
         kerror = krb_parse_in_tkt_creds(user, instance, realm,
                     service, sinstance, life, cip, byteorder, creds);
-    } while ((keyprocs [++i] != NULL) && (kerror == INTK_BADPW))
-    
-#if TARGET_OS_MAC
-    /* Do this here to avoid OS dependency in parse_in_tkt prototype. */
-    creds->address = local_addr->sin_addr.s_addr;
-#endif
+    } while ((keyprocs [++i] != NULL) && (kerror == INTK_BADPW));
+
+    if (laddrp != NULL)
+	*laddrp = local_addr.sin_addr.s_addr;
+
     /* stomp stomp stomp */
     memset(cip->dat, 0, (size_t)cip->length);
     return kerror;
@@ -470,10 +456,17 @@ krb_get_in_tkt_creds(user, instance, realm, service, sinstance, life,
     char *arg;
     CREDENTIALS *creds;
 {
+#if TARGET_OS_MAC /* XXX */
     return krb_get_in_tkt_preauth_creds(user, instance, realm,
 					service, sinstance, life,
 					key_proc, decrypt_proc, arg,
-					NULL, 0, creds);
+					NULL, 0, creds, &creds.address);
+#else
+    return krb_get_in_tkt_preauth_creds(user, instance, realm,
+					service, sinstance, life,
+					key_proc, decrypt_proc, arg,
+					NULL, 0, creds, NULL);
+#endif
 }
 
 int KRB5_CALLCONV
@@ -493,6 +486,7 @@ krb_get_in_tkt_preauth(user, instance, realm, service, sinstance, life,
     int   preauth_len;
 {
     int retval;
+    KRB_UINT32 laddr;
     CREDENTIALS creds;
 
     do {
@@ -500,24 +494,17 @@ krb_get_in_tkt_preauth(user, instance, realm, service, sinstance, life,
 					      service, sinstance, life,
 					      key_proc, decrypt_proc,
 					      arg, preauth_p, preauth_len,
-					      &creds);
+					      &creds, &laddr);
 	if (retval != KSUCCESS) break;
 	if (in_tkt(user, instance) != KSUCCESS) {
 	    retval = INTK_ERR;
 	    break;
 	}
-#if TARGET_OS_MAC /* XXX */
-	retval = krb_save_credentials_addr(creds.service, creds.instance,
-					   creds.realm, creds.session,
-					   creds.lifetime, creds.kvno,
-					   &creds.ticket_st, creds.issue_date,
-					   creds.address);
-#else
-	retval = krb_save_credentials(creds.service, creds.instance,
-				      creds.realm, creds.session,
-				      creds.lifetime, creds.kvno,
-				      &creds.ticket_st, creds.issue_date);
-#endif
+	retval = krb4int_save_credentials_addr(creds.service, creds.instance,
+					       creds.realm, creds.session,
+					       creds.lifetime, creds.kvno,
+					       &creds.ticket_st,
+					       creds.issue_date, laddr);
 	if (retval != KSUCCESS) break;
     } while (0);
     memset(&creds, 0, sizeof(creds));

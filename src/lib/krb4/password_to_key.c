@@ -64,7 +64,7 @@ key_proc_type *krb_get_keyprocs (key_proc_type keyproc)
     static key_proc_type user_keyprocs[2] = { NULL, NULL };
     
     /* generate the list of key procs */
-    if (key_proc == NULL) {
+    if (keyproc == NULL) {
         return default_keyprocs; /* use the default */
     } else {
         user_keyprocs[0] = keyproc;
@@ -80,7 +80,7 @@ int mit_passwd_to_key(char *user, char *instance, char *realm,
 #pragma unused(realm)
 
     if (passwd) {
-        mit_string_to_key(passwd, key);
+        des_string_to_key(passwd, key);
     } else {
 #if !(defined(_WIN32) || defined(USE_LOGIN_LIBRARY))
         des_read_password((des_cblock *)key, "Password: ", 0);
@@ -101,7 +101,7 @@ int krb5_passwd_to_key(char *user, char *instance, char *realm,
         if (p != NULL) {
             snprintf (p, len, "%s%s%s%s", passwd, realm, user, instance);
             p[len - 1] = '\0';
-            mit_string_to_key (p, key);
+            des_string_to_key (p, key);
             free (p);
             return 0;
         }

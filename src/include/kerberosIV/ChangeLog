@@ -1,3 +1,10 @@
+2003-02-10  Tom Yu  <tlyu@mit.edu>
+
+	* krb.h: Add KRB_PRIVATE conditionals around lots of stuff that
+	doesn't belong in krb.h, and historically hasn't been in krb.h on
+	KfM.  For now, everything except MacOS will define KRB_PRIVATE to
+	1.
+
 2003-02-07  Tom Yu  <tlyu@mit.edu>
 
 	* krb.h: Declare krb_err_txt differently on Mac.

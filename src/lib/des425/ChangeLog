@@ -1,3 +1,8 @@
+2003-02-10  Tom Yu  <tlyu@mit.edu>
+
+	* str_to_key.c (afs_string_to_key): Move out from under
+	TARGET_OS_MAC conditional.
+
 2003-01-10  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Don't explicitly invoke AC_PROG_INSTALL, or check

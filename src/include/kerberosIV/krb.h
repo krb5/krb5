@@ -37,6 +37,20 @@
 #	endif
 #endif
 
+/*
+ * For MacOS, don't expose prototypes of various private functions.
+ * Unfortuantely, they've leaked out everywhere else.
+ */
+#if defined(macintosh) || (defined(__MACH__) && defined(__APPLE__))
+#	ifndef KRB_PRIVATE
+#		define KRB_PRIVATE 0
+#	endif
+#else
+#	ifndef KRB_PRIVATE
+#		define KRB_PRIVATE 1
+#	endif
+#endif
+
 /* Define u_char, u_short, u_int, and u_long. */
 /* XXX these typdef names are not standardized! */
 #include <sys/types.h>
@@ -446,12 +460,14 @@ int KRB5_CALLCONV krb_get_in_tkt
 	(char *k_user, char *instance, char *realm,
 		   char *service, char *sinst, int life,
 		   key_proc_type, decrypt_tkt_type, char *arg);
+#if KRB_PRIVATE
 /* Previously not KRB5_CALLCONV */
 int KRB5_CALLCONV krb_get_in_tkt_preauth
 	(char *k_user, char *instance, char *realm,
 		   char *service, char *sinst, int life,
 		   key_proc_type, decrypt_tkt_type, char *arg,
 		   char *preauth_p, int preauth_len);
+#endif
 /* From KfM */
 int KRB5_CALLCONV krb_get_in_tkt_creds(char *, char *, char *, char *, char *,
     int, key_proc_type, decrypt_tkt_type, char *, CREDENTIALS *);
@@ -473,10 +489,12 @@ int KRB5_CALLCONV krb_get_pw_in_tkt
 	(char *k_user, char *instance, char *realm,
 		   char *service, char *sinstance,
 		   int life, char *password);
+#if KRB_PRIVATE
 int KRB5_CALLCONV krb_get_pw_in_tkt_preauth
 	(char *k_user, char *instance, char *realm,
 		   char *service, char *sinstance,
 		   int life, char *password);
+#endif
 int KRB5_CALLCONV
 krb_get_pw_in_tkt_creds(char *, char *, char *,
 	char *, char *, int, char *, CREDENTIALS *);
@@ -499,11 +517,14 @@ int KRB5_CALLCONV krb_get_ticket_for_service
 		   char *buf, unsigned KRB4_32 *buflen,
 		   int checksum, des_cblock, Key_schedule,
 		   char *version, int includeVersion);
+#if KRB_PRIVATE
 /* in_tkt.c */
 int KRB5_CALLCONV in_tkt
 	(char *name, char *inst);
 int KRB5_CALLCONV krb_in_tkt
         (char *pname, char *pinst, char *realm);
+#endif
+
 /* kname_parse.c */
 int KRB5_CALLCONV kname_parse
 	(char *name, char *inst, char *realm,
@@ -543,6 +564,7 @@ int KRB5_CALLCONV krb_mk_auth
 /* mk_err.c */
 long KRB5_CALLCONV krb_mk_err
 	(u_char *out, KRB4_32 k4_code, char *text);
+#if KRB_PRIVATE
 /* mk_preauth.c */
 int krb_mk_preauth
 	(char **preauth_p, int *preauth_len, key_proc_type,
@@ -550,6 +572,7 @@ int krb_mk_preauth
 		   C_Block);
 void krb_free_preauth
 	(char * preauth_p, int len);
+#endif
 /* mk_priv.c */
 long KRB5_CALLCONV krb_mk_priv
 	(u_char *in, u_char *out,
@@ -574,18 +597,18 @@ long KRB5_CALLCONV krb_mk_safe
 		   C_Block *,
 		   struct sockaddr_in *sender,
 		   struct sockaddr_in *receiver);
+#if KRB_PRIVATE
 /* netread.c */
-/* XXX private */
 int krb_net_read
 	(int fd, char *buf, int len);
 /* netwrite.c */
-/* XXX private */
 int krb_net_write
 	(int fd, char *buf, int len);
 /* pkt_clen.c */
-/* XXX private */
 int pkt_clen
 	(KTEXT);
+#endif
+
 /* put_svc_key.c */
 int KRB5_CALLCONV put_svc_key
 	(char *sfile,
@@ -647,6 +670,7 @@ int KRB5_CALLCONV krb_sendauth
 	 struct sockaddr_in *laddr, struct sockaddr_in *faddr, 
 	 char *version);
 
+#if KRB_PRIVATE
 /* save_creds.c */
 int KRB5_CALLCONV krb_save_credentials
 	(char *service, char *instance, char *realm,
@@ -656,15 +680,17 @@ int KRB5_CALLCONV krb_save_credentials
 /* XXX PRIVATE? KfM doesn't export. */
 int send_to_kdc
 	(KTEXT pkt, KTEXT rpkt, char *realm);
+#endif
 
 /* tkt_string.c */
 /* Used to return pointer to non-const char */
 const char * KRB5_CALLCONV tkt_string
 	(void);
-/* Previously not KRB5_CALLCONV */
+/* Previously not KRB5_CALLCONV, and previously took pointer to non-const. */
 void KRB5_CALLCONV krb_set_tkt_string
-	(char *);
+	(const char *);
 
+#if KRB_PRIVATE
 /* tf_util.c */
 int KRB5_CALLCONV tf_init (const char *tf_name, int rw);
 
@@ -675,7 +701,9 @@ int KRB5_CALLCONV tf_get_pinst (char *p);
 int KRB5_CALLCONV tf_get_cred (CREDENTIALS *c);
 
 void KRB5_CALLCONV tf_close (void);
+#endif
 
+#if KRB_PRIVATE
 /* unix_time.c */
 unsigned KRB4_32 KRB5_CALLCONV unix_time_gmt_unixsec 
         (unsigned KRB4_32 *);
@@ -723,6 +751,8 @@ extern int krb_cr_tkt_krb5(KTEXT tkt, unsigned int flags, char *pname,
 extern int krb_set_key_krb5(krb5_context ctx, krb5_keyblock *key);
 
 #endif
+
+#endif /* KRB_PRIVATE */
 
 /* FSp-glue.c */
 #if TARGET_OS_MAC && defined(__FILES__)
