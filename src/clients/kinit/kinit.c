@@ -31,13 +31,13 @@ static char rcsid_kinit_c [] =
 #endif	/* !lint & !SABER */
 
 #include <stdio.h>
+#include <com_err.h>
+#include <pwd.h>
 
 #include <krb5/krb5.h>
 #include <krb5/kdb.h>			/* for TGTNAME */
 #include <krb5/ext-proto.h>
 #include <krb5/los-proto.h>
-
-#include <com_err.h>
 
 #define KRB5_DEFAULT_OPTIONS 0
 #define KRB5_DEFAULT_LIFE 60*60*8 /* 8 hours */
@@ -79,6 +79,9 @@ main(argc, argv)
     krb5_principal server;
     krb5_creds my_creds;
     krb5_timestamp now;
+    struct passwd *pw = 0;
+    int pwsize;
+    char password[255], *client_name, prompt[255];
 
     krb5_init_ets();
 
@@ -104,7 +107,7 @@ main(argc, argv)
 	case 'l':
 	    code = krb5_parse_lifetime(optarg, &lifetime);
 	    if (code != 0 || lifetime == 0) {
-		fprintf(stderr, "Bad lifetime value (%s hours?\n", optarg);
+		fprintf(stderr, "Bad lifetime value (%s hours?)\n", optarg);
 		errflg++;
 	    }
 	    break;
@@ -128,21 +131,46 @@ main(argc, argv)
 	    break;
 	}
     }
-    if (optind != argc-1)
-	errflg++;
-    
+
     if (errflg) {
-	fprintf(stderr, "Usage: %s [ -r time ] [ -puf ] [ -l lifetime ] [ -c cachename ] principal\n", argv[0]);
+	fprintf(stderr, "Usage: %s [ -r time ] [ -puf ] [ -l lifetime ] [ -c cachename ] [principal]\n", argv[0]);
 	exit(2);
     }
+
     if (ccache == NULL) {
 	if (code = krb5_cc_default(&ccache)) {
 	    com_err(argv[0], code, "while getting default ccache");
 	    exit(1);
 	}
     }
-    if (code = krb5_parse_name (argv[optind], &me)) {
-	com_err (argv[0], code, "when parsing name %s",argv[optind]);
+    
+    if (optind != argc-1) {       /* No principal name specified */
+	/* Get default principal from cache if one exists */
+	code = krb5_cc_get_principal(ccache, &me);
+	/* Else search passwd file for client */
+	if (code) {
+	    pw = getpwuid((int) getuid());
+	    if (pw) {
+		if (code = krb5_parse_name (pw->pw_name, &me)) {
+		    com_err (argv[0], code, "when parsing name %s", pw->pw_name);
+		    exit(1);
+		}
+	    } 
+	    else {
+		fprintf(stderr, 
+			"Unable to identify user from password file\n");
+		exit(1);
+	    }
+	}
+    }
+    else /* Use specified name */
+      if (code = krb5_parse_name (argv[optind], &me)) {
+	  com_err (argv[0], code, "when parsing name %s",argv[optind]);
+	  exit(1);
+      }
+    
+    if (code = krb5_unparse_name(me, &client_name)) {
+	com_err (argv[0], code, "when unparsing name");
 	exit(1);
     }
 
@@ -187,19 +215,35 @@ main(argc, argv)
     } else
 	my_creds.times.renew_till = 0;
 
-    code = krb5_get_in_tkt_with_password(options, my_addresses,
-					 ETYPE_DES_CBC_CRC,
-					 KEYTYPE_DES,
-					 0, /* let lib read pwd from kbd */
-					 ccache,
-					 &my_creds);
-    krb5_free_principal(server);
-    if (code == KRB5KRB_AP_ERR_BAD_INTEGRITY) {
-	fprintf (stderr, "%s: Password incorrect\n", argv[0]);
+    (void) sprintf(prompt,"Password for %s: ", (char *) client_name);
+
+    pwsize = sizeof(password);
+
+    code = krb5_read_password(prompt, 0, password, &pwsize);
+    if (code || pwsize == 0) {
+	fprintf(stderr, "Error while reading password for '%s'\n",
+		client_name);
+	memset(password, 0, sizeof(password));
+	krb5_free_addresses(my_addresses);
 	exit(1);
     }
-    if (code != 0) {
-	com_err (argv[0], code, "while getting initial credentials");
+
+    code = krb5_get_in_tkt_with_password(options, my_addresses,
+					 KRB5_PADATA_ENC_TIMESTAMP,
+					 ETYPE_DES_CBC_CRC,
+					 KEYTYPE_DES,
+					 password,
+					 ccache,
+					 &my_creds, 0);
+    memset(password, 0, sizeof(password));
+    krb5_free_principal(server);
+    krb5_free_addresses(my_addresses);
+    
+    if (code) {
+	if (code == KRB5KRB_AP_ERR_BAD_INTEGRITY)
+	    fprintf (stderr, "%s: Password incorrect\n", argv[0]);
+	else
+	    com_err (argv[0], code, "while getting initial credentials");
 	exit(1);
     }
     exit(0);
