@@ -628,6 +628,7 @@ char *host;
 			   &err_ret, 0,
 			   NULL);	/* don't need reply */
     krb5_free_principal(context, server);
+    krb5_auth_con_free(context, auth_context);
     if (retval) {
 	if (err_ret && err_ret->text.length) {
 	    sprintf(Errmsg, "krb5 error: %s [server says '%*s'] ",
