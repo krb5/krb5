@@ -1,3 +1,5 @@
+#ifndef _PORT_SOCKET_H
+#define _PORT_SOCKET_H
 #if defined(_MSDOS) || defined(_WIN32)
 
 #include <winsock.h>
@@ -37,7 +39,7 @@ int win_socket_initialize();
 #define SOCKET_EINTR		WSAEINTR
 
 #else  /* ! HAVE_MACSOCK_H */	/* Sockets stuff for Unix machines */
-
+#include <sys/types.h>
 #include <netinet/in.h>		/* For struct sockaddr_in and in_addr */
 #include <arpa/inet.h>		/* For inet_ntoa */
 #include <netdb.h>		/* For struct hostent, gethostbyname, etc */
@@ -70,3 +72,4 @@ int win_socket_initialize();
 #endif /* HAVE_MACSOCK_H */
 
 #endif /* _MSDOS */
+#endif /*_PORT_SOCKET_H*/
