@@ -28,6 +28,7 @@ static char rcsid_rc_base_c[] =
 #include "rc_dfl.h"
 #include "rc_io.h"
 #include <krb5/sysincl.h>
+#include <netinet/in.h>			/* XXX ip only? */
 
 extern int errno; /* this should be in errno.h, but isn't on some systems */
 
