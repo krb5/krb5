@@ -1,3 +1,31 @@
+1999-11-22  Ken Raeburn  <raeburn@mit.edu>
+
+	* xmalloc.c: New file, providing versions of malloc, calloc,
+	realloc, and strdup that print messages and exit if memory
+	allocation fails.
+	* Makefile.in (SRCS, OBJS): Use it.
+	* authorization.c, ccache.c, heuristic.c, main.c: Change all calls
+	to malloc, calloc, realloc, and strdup to call x* versions if the
+	return value is not checked before use.
+
+	* authorization.c (auth_cleanup): Ditch int arguments, check for
+	null pointers instead.
+	(krb5_authorization): Update calls.  Initialize file pointers to
+	null.
+	(init_auth_names): Check for buffer overflow.
+
+	* krb_auth_su.c (dump_principal, plain_dump_principal): Reformat
+	slightly.
+
+	* ksu.h (get_dir_of_file): Argument now points to const.
+
+	* main.c (cc_source_tag, cc_source_tag_tmp): Now point to const.
+	(main): Unset environment variable KRB5_CONFIG.  Delete -C
+	option.  Force an error if lifetime strings are over 14
+	characters.  Fix error message string if setluid fails.  Cast pid
+	to long for printing.
+	(get_dir_of_file): Argument now points to const.
+
 1999-10-26  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,

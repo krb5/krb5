@@ -485,29 +485,26 @@ void dump_principal (context, str, p)
     krb5_context context;
     char *str;
     krb5_principal p;
-{    
-char * stname;
-krb5_error_code retval; 
+{
+    char * stname;
+    krb5_error_code retval; 
 
-		if ((retval = krb5_unparse_name(context, p, &stname))){
-			fprintf(stderr," %s while unparsing name \n",
-				error_message(retval));    	
-		}
-		fprintf(stderr, " %s: %s\n", str, stname );
+    if ((retval = krb5_unparse_name(context, p, &stname))) {
+	fprintf(stderr, " %s while unparsing name\n", error_message(retval));
+    }
+    fprintf(stderr, " %s: %s\n", str, stname);
 }
 
 void plain_dump_principal (context, p)
     krb5_context context;
     krb5_principal p;
 {    
-char * stname;
-krb5_error_code retval; 
+    char * stname;
+    krb5_error_code retval; 
 
-		if ((retval = krb5_unparse_name(context, p, &stname))){
-			fprintf(stderr," %s while unparsing name \n",
-				error_message(retval));    	
-		}
-		fprintf(stderr, "%s ",  stname );
+    if ((retval = krb5_unparse_name(context, p, &stname)))
+	fprintf(stderr, " %s while unparsing name\n", error_message(retval));
+    fprintf(stderr, "%s ", stname);
 }
 
 #if 0

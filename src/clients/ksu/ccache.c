@@ -64,7 +64,7 @@ krb5_creds ** cc_def_creds_arr = NULL;
 krb5_creds ** cc_other_creds_arr = NULL;
 struct stat st_temp;
 
-    cc_other = (krb5_ccache *)  calloc(1, sizeof (krb5_ccache));  	
+    cc_other = (krb5_ccache *)  xcalloc(1, sizeof (krb5_ccache));  	
 
     if ((retval = krb5_cc_resolve(context, cc_other_tag, cc_other))){
                com_err (prog_name, retval, "resolving ccache %s",
@@ -655,7 +655,7 @@ krb5_creds ** cc_def_creds_arr = NULL;
 krb5_creds ** cc_other_creds_arr = NULL;
 struct stat st_temp;
 
-    cc_other = (krb5_ccache *)  calloc(1, sizeof (krb5_ccache));  	
+    cc_other = (krb5_ccache *)  xcalloc(1, sizeof (krb5_ccache));  	
 
     if ((retval = krb5_cc_resolve(context, cc_other_tag, cc_other))){
                com_err (prog_name, retval, "resolving ccache %s",

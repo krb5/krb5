@@ -92,9 +92,9 @@ char * target_user = NULL;
 char * source_user;
 
 krb5_ccache cc_source = NULL;
-char * cc_source_tag = NULL; 
+const char * cc_source_tag = NULL; 
 uid_t source_gid, target_gid;
-char * cc_source_tag_tmp = NULL;
+const char * cc_source_tag_tmp = NULL;
 char * cc_target_tag_tmp=NULL; 
 char * cmd = NULL, * exec_cmd = NULL;
 int errflg = 0;
@@ -123,9 +123,11 @@ char * dir_of_cc_source;
     options.rlife =0; 
     options.princ =0;	
 
-    params = (char **) calloc (2, sizeof (char *));
+    params = (char **) xcalloc (2, sizeof (char *));
     params[1] = NULL;
 
+
+    unsetenv ("KRB5_CONFIG");
 
     retval = krb5_init_context(&ksu_context);
     if (retval) {
@@ -151,11 +153,11 @@ char * dir_of_cc_source;
 
       
     if (( argc == 1) || (argv[1][0] == '-')){
-                target_user = strdup("root");
+                target_user = xstrdup("root");
                 pargc = argc;
                 pargv = argv;
         } else {
-                target_user = strdup(argv[1]);
+                target_user = xstrdup(argv[1]);
                 pargc = argc -1;
 
                 if ((pargv =(char **) calloc(pargc +1,sizeof(char *)))==NULL){
@@ -172,10 +174,12 @@ char * dir_of_cc_source;
         }
 
 
-    while(!done && ((option = getopt(pargc, pargv,"n:c:C:r:a:zZDfpkql:e:")) != -1)){
+    while(!done && ((option = getopt(pargc, pargv,"n:c:r:a:zZDfpkql:e:")) != -1)){
 	switch (option) {
 	case 'r':
 	    options.opt |= KDC_OPT_RENEWABLE;
+	    if (strlen (optarg) >= 14)
+		optarg = "bad-time";
 	    retval = krb5_string_to_deltat(optarg, &options.rlife);
 	    if (retval != 0 || options.rlife == 0) {
 		fprintf(stderr, "Bad lifetime value (%s hours?)\n", optarg);
@@ -208,6 +212,8 @@ char * dir_of_cc_source;
 	    quiet =1;
 	    break;
         case 'l':
+	    if (strlen (optarg) >= 14)
+		optarg = "bad-time";
 	    retval = krb5_string_to_deltat(optarg, &options.lifetime);
 	    if (retval != 0 || options.lifetime == 0) {
 		fprintf(stderr, "Bad lifetime value (%s hours?)\n", optarg);
@@ -242,43 +248,9 @@ char * dir_of_cc_source;
 		errflg++;
 	    } 	
 	    break;	
-	case 'C':
-	    if (cc_target_tag == NULL) {
-		cc_target_tag = strdup(optarg);
-
-		if ((strlen(cc_target_tag) == 1) &&
-		    	(*cc_target_tag == NO_TARGET_FILE)){
-			use_source_cache = 1; 
-	    		if(some_rest_copy || all_rest_copy){  	
-			   fprintf(stderr, 
-			   "-C . option is mutually exclusive with -z and -Z\n"); 
-		 	   errflg++;
-	    		} 	
-		}
-		else {
-			if ( strchr(cc_target_tag, ':')){
-				cc_target_tag_tmp=strchr(cc_target_tag,':') + 1;
-				if(!stat(cc_target_tag_tmp, &st_temp )){
-					fprintf(stderr,"File %s exists\n",
-						cc_target_tag_tmp);	
-					errflg++;
-				}
-			}
-			else { 
-				fprintf(stderr,
-					"malformed credential cache name %s\n",
-					cc_target_tag); 
-				errflg++;
-			}
-		}
-	    } else {
-		fprintf(stderr, "Only one -C option allowed\n");
-		errflg++;
-	    }
-	    break;
 	case 'c':
 	    if (cc_source_tag == NULL) {
-		cc_source_tag = strdup(optarg);
+		cc_source_tag = xstrdup(optarg);
 		if ( strchr(cc_source_tag, ':')){
 			cc_source_tag_tmp = strchr(cc_source_tag, ':') + 1;
 
@@ -301,7 +273,7 @@ char * dir_of_cc_source;
 	    }
 	    break;
 	case 'e': 
-	    cmd = strdup(optarg);
+	    cmd = xstrdup(optarg);
             if(auth_debug){printf("Before get_params optind=%d\n", optind);}
             if ((retval = get_params( & optind, pargc, pargv, &params))){
                 com_err(prog_name, retval, "when gathering parameters");
@@ -354,13 +326,13 @@ char * dir_of_cc_source;
 	}
 
 	/* allocate space and copy the usernamane there */        
-	source_user = strdup(pwd->pw_name);
+	source_user = xstrdup(pwd->pw_name);
 	source_uid = pwd->pw_uid;
 	source_gid = pwd->pw_gid;
 
 
 	if (!strcmp(SOURCE_USER_LOGIN, target_user)){
-		target_user = strdup (source_user);			
+		target_user = xstrdup (source_user);			
 	}
 
 	if ((target_pwd = getpwnam(target_user)) == NULL){ 
@@ -376,9 +348,11 @@ char * dir_of_cc_source;
 
 	if (cc_source_tag == NULL){
 		cc_source_tag = krb5_cc_default_name(ksu_context);
-		cc_source_tag_tmp = strchr(cc_source_tag, ':') + 1;
-		if (cc_source_tag_tmp == (char *) 1) 
+		cc_source_tag_tmp = strchr(cc_source_tag, ':');
+		if (cc_source_tag_tmp == 0)
 			cc_source_tag_tmp = cc_source_tag;
+		else
+			cc_source_tag_tmp++;
 	}
 	if (krb5_seteuid(source_uid)) {
 	  com_err ( prog_name, errno, "while setting euid to source user");
@@ -457,15 +431,16 @@ char * dir_of_cc_source;
 
 	if (cc_target_tag == NULL) {
 
-		cc_target_tag = (char *)calloc(KRB5_SEC_BUFFSIZE ,sizeof(char));
+		cc_target_tag = (char *)xcalloc(KRB5_SEC_BUFFSIZE ,sizeof(char));
 		/* make sure that the new ticket file does not already exist
 		   This is run as source_uid because it is reasonable to
 		   require the source user to have write to where the target
 		   cache will be created.*/
 		
 		do {
-			sprintf(cc_target_tag, "%s%d.%d", KRB5_SECONDARY_CACHE,
-				target_uid, gen_sym());
+			sprintf(cc_target_tag, "%s%ld.%d",
+				KRB5_SECONDARY_CACHE,
+				(long) target_uid, gen_sym());
 			cc_target_tag_tmp = strchr(cc_target_tag, ':') + 1;
 
 		}while ( !stat ( cc_target_tag_tmp, &st_temp)); 
@@ -528,8 +503,8 @@ char * dir_of_cc_source;
 	}
 	else{
 		cc_target = cc_source;
-		cc_target_tag = cc_source_tag;
-		cc_target_tag_tmp = cc_source_tag_tmp;
+		cc_target_tag = (char *) cc_source_tag;
+		cc_target_tag_tmp = (char *) cc_source_tag_tmp;
 
 		if ((retval=krb5_find_princ_in_cache(ksu_context, cc_target,client, &stored))){
 	    			com_err (prog_name, retval, 
@@ -726,7 +701,7 @@ krb5_seteuid(0); /*So we have some chance of sweeping up*/
 	target_pwd = getpwnam(target_user);
 
 	if (target_pwd->pw_shell)
-		shell = strdup(target_pwd->pw_shell);
+		shell = xstrdup(target_pwd->pw_shell);
 	else {
 		shell = _DEF_CSH;  /* default is cshell */   
     	}
@@ -806,7 +781,7 @@ krb5_seteuid(0); /*So we have some chance of sweeping up*/
  	 * with C2 enabled.
 	 */
  	if (setluid((uid_t) pwd->pw_uid) < 0) {
-		perror("setuid");
+		perror("setluid");
 		sweep_up(ksu_context, use_source_cache, cc_target);
 		exit(1);
 	}
@@ -860,7 +835,7 @@ krb5_seteuid(0); /*So we have some chance of sweeping up*/
 	switch ((child_pid = fork())) {
 	default:
 	    if (auth_debug){
-	 	printf(" The child pid is %d\n", child_pid);
+	 	printf(" The child pid is %ld\n", (long) child_pid);
         	printf(" The parent pid is %d\n", getpid());
 	    }
             while ((ret_pid = waitpid(child_pid, &statusp, WUNTRACED)) != -1) {
@@ -929,7 +904,7 @@ static int set_env_var(name, value)
 char * env_var_buf;
 
 	/* allocate extra two spaces, one for the = and one for the \0 */  
-	env_var_buf = (char *) calloc(2 + strlen(name) + strlen(value),
+	env_var_buf = (char *) xcalloc(2 + strlen(name) + strlen(value),
 					sizeof(char)); 
 
         sprintf(env_var_buf,"%s=%s",name, value);  
@@ -1021,18 +996,18 @@ void print_status (va_alist)
 
 
 char *get_dir_of_file(path)
-    char *path;
+    const char *path;
 {
     char * temp_path;      
     char * ptr;
 
-    temp_path =  strdup(path);
+    temp_path =  xstrdup(path);
 
     if ((ptr = strrchr( temp_path, '/'))) {
 	*ptr = '\0';  
     } else {
 	free (temp_path);
-	temp_path = malloc(MAXPATHLEN);
+	temp_path = xmalloc(MAXPATHLEN);
 	if (temp_path)
 	    getcwd(temp_path, MAXPATHLEN);
     }
