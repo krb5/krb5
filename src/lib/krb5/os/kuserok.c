@@ -26,23 +26,21 @@ static char rcsid_kuserok_c [] =
 #include <sys/stat.h>
 #include <pwd.h>
 
-#define OK 0
-#define NOTOK 1
 #define MAX_USERNAME 10
 
 /*
  * Given a Kerberos principal "principal", and a local username "luser",
  * determine whether user is authorized to login according to the
- * authorization file ("~luser/.klogin" by default).  Returns OK
- * if authorized, NOTOK if not authorized.
+ * authorization file ("~luser/.klogin" by default).  Returns TRUE
+ * if authorized, FALSE if not authorized.
  *
  * If there is no account for "luser" on the local machine, returns
- * NOTOK.  If there is no authorization file, and the given Kerberos
+ * FALSE.  If there is no authorization file, and the given Kerberos
  * name "server" translates to the same name as "luser" (using
- * krb5_aname_to_lname()), returns OK.  Otherwise, if the authorization file
- * can't be accessed, returns NOTOK.  Otherwise, the file is read for
+ * krb5_aname_to_lname()), returns TRUE.  Otherwise, if the authorization file
+ * can't be accessed, returns FALSE.  Otherwise, the file is read for
  * a matching principal name, instance, and realm.  If one is found,
- * returns OK, if none is found, returns NOTOK.
+ * returns TRUE, if none is found, returns FALSE.
  *
  * The file entries are in the format produced by krb5_unparse_name(),
  * one entry per line.
