@@ -29,8 +29,16 @@ SRCTOP = $(srcdir)/$(BUILDTOP)
 # /* The name of the C compiler for the target */
 CC=cl /nologo
 CL=
-CCOPTS=/ALw /Zp /GD2s /Os /Zi /Od /W3 $(XTRA)
-CCOPTS2=/AL /Zp /G2s  /Os /Zi /Od /W3 -DINTERFACE= -DINTERFACE_C= $(XTRA)
+#
+# CCOPTS for DLL functions
+#
+##WIN16##CCOPTS=/ALw /Zp /GD2s /Os /Zi /Od /W3 $(XTRA)
+##WIN32##CCOPTS=/Os /Zi /Od /W3 $(XTRA) -DKRB5_DLL_FILE
+#
+# CCOPTS for non-DLL compiles
+#
+##WIN16##CCOPTS2=/AL /Zp /G2s  /Os /Zi /Od /W3 -DINTERFACE= -DINTERFACE_C= $(XTRA)
+##WIN32##CCOPTS2=/Os /Zi /Od /W3 -DINTERFACE= -DINTERFACE_C= $(XTRA)
 CPPFLAGS =  -I$(SRCTOP)/include -I$(SRCTOP)/include/krb5
 DEFS = $(CPPFLAGS)
 CFLAGS2 = $(CCOPTS2) $(DEFS)
@@ -56,7 +64,7 @@ RM=$(BUILDTOP)\config\rm.bat
 CP=copy
 MV=ren
 LN=copy
-LIBCMD=lib /PAGESIZE:128
+LIBCMD=lib
 AWK=rem
 
 ARADD=rem

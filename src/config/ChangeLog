@@ -1,3 +1,9 @@
+Mon Jun 10 17:18:34 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* windows.in (CCOPTS): Windows-32 CCOPTS
+	
+	* win-post.in: Use a Windows-32 specific LIB command line syntax
+
 Thu Jun  6 15:54:57 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* windows.in (LIBCMD): Add the option /PAGESIZE:128 to the library
