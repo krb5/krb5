@@ -42,6 +42,7 @@ main()
 
     int bad = 0;
 
+    outck.length = sizeof(ckout);
     outck.contents = ckout;
 
     while (scanf("%s %s", input, expected_crc) == 2) {

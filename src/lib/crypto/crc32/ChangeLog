@@ -1,3 +1,9 @@
+Tue May 14 19:33:27 1996  Richard Basch  <basch@lehman.com>
+
+	* crc.c: ensure the cksum content length is sufficient
+
+	* crctest.c: set the cksum length field.
+
 Sat Mar 30 22:54:12 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in (SRCS): Removed crctest.c from the SRCS list, since
