@@ -498,12 +498,8 @@
 #ifndef MvCmd
 #define MvCmd mv
 #endif
-#ifndef RanlibCmd
-#if SystemV
-#define RanlibCmd /bin/true
-#else
+#if !defined(RanlibCmd) && !SystemV
 #define RanlibCmd ranlib
-#endif
 #endif
 #ifndef RanlibInstFlags
 #define RanlibInstFlags /**/
@@ -604,7 +600,11 @@
              MAKE = MakeCmd
                MV = MvCmd
                CP = CpCmd
+#ifdef RanlibCmd
            RANLIB = RanlibCmd
+#else
+           RANLIB = \:
+#endif
   RANLIBINSTFLAGS = RanlibInstFlags
                RM = RmCmd
      STD_INCLUDES = StandardIncludes
