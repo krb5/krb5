@@ -40,22 +40,48 @@
 #include <string.h>
 
 static int copy_file (char *path, char *fname);
+void add_ignore_list(char *str);
+
+int mit_specific = 0;
 
 int main(int argc, char *argv[])
 {
+	char *ignore_str = "--ignore=";
+	int ignore_len;
+	
+	ignore_len = strlen(ignore_str);
+	argc--; argv++;
+	while ((argc > 1) && *argv[0] == '-') {
+		if (!strcmp(*argv, "--mit")) {
+			mit_specific = 1;
+			argc--; argv++;
+			continue;
+		}
+		if (!strcmp(*argv, "--nomit")) {
+			mit_specific = 0;
+			argc--; argv++;
+			continue;
+		}
+		if (!strncmp(*argv, ignore_str, ignore_len)) {
+			add_ignore_list((*argv)+ignore_len);
+			argc--; argv++;
+		}
+	}
 
-    if (argc == 2)                              /* Config directory given */
-        copy_file (argv[1], "\\windows.in");        /* Send out prefix */
+	if (mit_specific)
+		add_ignore_list("MIT##");
+		
+	if (argc > 0)                              /* Config directory given */
+		copy_file (*argv, "\\windows.in");        /* Send out prefix */
 
-    copy_file("", "-");
+	copy_file("", "-");
     
-    if (argc == 2)                              /* Config directory given */
-        copy_file (argv[1], "\\win-post.in");       /* Send out postfix */
-
-    return 0;
+	if (argc > 0)                          /* Config directory given */
+		copy_file (*argv, "\\win-post.in");    /* Send out postfix */
+	return 0;
 }
 
-char *ignore_list[] = {
+char *ignore_list[32] = {
 	"DOS##",
 	"DOS",
 #ifdef _MSDOS
@@ -64,8 +90,20 @@ char *ignore_list[] = {
 #ifdef _WIN32
 	"WIN32##",
 #endif
-	0
 	};
+
+/*
+ * Add a new item to the ignore list
+ */
+void add_ignore_list(char *str)
+{
+	char **cpp;
+
+	for (cpp = ignore_list; *cpp; cpp++)
+		;
+	*cpp = str;
+}
+
 		
 /*
  * 

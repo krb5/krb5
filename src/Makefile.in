@@ -121,6 +121,7 @@ config-windows:: makefile-windows
 
 ##DOS##MKFDEP= wconfig.exe config\pre.in config\post.in \
 ##DOS##	config\windows.in config\win-post.in
+##DOS##WCONFIG= .\wconfig $(WFLAGS)
 
 ##DOS##makefile-windows:: $(MKFDEP) makefile \
 ##DOS##		clients\makefile clients\kdestroy\makefile \
@@ -150,91 +151,91 @@ config-windows:: makefile-windows
 ##DOS##	config\rm.bat wconfig.obj msvc.pdb
 
 ##DOS##makefile: makefile.in $(MKFDEP)
-##DOS##	.\wconfig config < $@.in > $@
+##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##clients\makefile: clients\makefile.in $(MKFDEP)
-##DOS##	.\wconfig config < $@.in > $@
+##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##clients\kdestroy\makefile: clients\kdestroy\makefile.in $(MKFDEP)
-##DOS##	.\wconfig config < $@.in > $@
+##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##clients\kinit\makefile: clients\kinit\makefile.in $(MKFDEP)
-##DOS##	.\wconfig config < $@.in > $@
+##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##clients\klist\makefile: clients\klist\makefile.in $(MKFDEP)
-##DOS##	.\wconfig config < $@.in > $@
+##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##include\makefile: include\makefile.in $(MKFDEP)
-##DOS##	.\wconfig config < $@.in > $@
+##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##include\krb5\makefile: include\krb5\makefile.in $(MKFDEP)
-##DOS##	.\wconfig config < $@.in > $@
+##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##lib\makefile: lib\makefile.in $(MKFDEP)
-##DOS##	.\wconfig config < $@.in > $@
+##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##lib\crypto\makefile: lib\crypto\makefile.in $(MKFDEP)
-##DOS##	.\wconfig config < $@.in > $@
+##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##lib\crypto\crc32\makefile: lib\crypto\crc32\makefile.in $(MKFDEP)
-##DOS##	.\wconfig config < $@.in > $@
+##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##lib\crypto\des\makefile: lib\crypto\des\makefile.in $(MKFDEP)
-##DOS##	.\wconfig config < $@.in > $@
+##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##lib\crypto\sha\makefile: lib\crypto\sha\makefile.in $(MKFDEP)
-##DOS##	.\wconfig config < $@.in > $@
+##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##lib\crypto\md4\makefile: lib\crypto\md4\makefile.in $(MKFDEP)
-##DOS##	.\wconfig config < $@.in > $@
+##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##lib\crypto\md5\makefile: lib\crypto\md5\makefile.in $(MKFDEP)
-##DOS##	.\wconfig config < $@.in > $@
+##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##lib\crypto\os\makefile: lib\crypto\os\makefile.in $(MKFDEP)
-##DOS##	.\wconfig config < $@.in > $@
+##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##lib\des425\makefile: lib\des425\makefile.in $(MKFDEP)
-##DOS##	.\wconfig config < $@.in > $@
+##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##lib\gssapi\makefile: lib\gssapi\makefile.in $(MKFDEP)
-##DOS##	.\wconfig config < $@.in > $@
+##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##lib\gssapi\generic\makefile: lib\gssapi\generic\makefile.in $(MKFDEP)
-##DOS##	.\wconfig config < $@.in > $@
+##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##lib\gssapi\mechglue\makefile: lib\gssapi\mechglue\makefile.in $(MKFDEP)
-##DOS##	.\wconfig config < $@.in > $@
+##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##lib\gssapi\krb5\makefile: lib\gssapi\krb5\makefile.in $(MKFDEP)
-##DOS##	.\wconfig config < $@.in > $@
+##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##lib\kadm\makefile: lib\kadm\makefile.in $(MKFDEP)
-##DOS##	.\wconfig config < $@.in > $@
+##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##lib\krb4\makefile: lib\krb4\makefile.in $(MKFDEP)
-##DOS##	.\wconfig config < $@.in > $@
+##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##lib\krb5\makefile: lib\krb5\makefile.in $(MKFDEP)
-##DOS##	.\wconfig config < $@.in > $@
+##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##lib\krb5\asn.1\makefile: lib\krb5\asn.1\makefile.in $(MKFDEP)
-##DOS##	.\wconfig config < $@.in > $@
+##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##lib\krb5\ccache\makefile: lib\krb5\ccache\makefile.in $(MKFDEP)
-##DOS##	.\wconfig config < $@.in > $@
+##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##lib\krb5\ccache\file\makefile: lib\krb5\ccache\file\makefile.in $(MKFDEP)
-##DOS##	.\wconfig config < $@.in > $@
+##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##lib\krb5\ccache\stdio\makefile: lib\krb5\ccache\stdio\makefile.in $(MKFDEP)
-##DOS##	.\wconfig config < $@.in > $@
+##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##lib\krb5\error_tables\makefile: lib\krb5\error_tables\makefile.in $(MKFDEP)
-##DOS##	.\wconfig config < $@.in > $@
+##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##lib\krb5\free\makefile: lib\krb5\free\makefile.in $(MKFDEP)
-##DOS##	.\wconfig config < $@.in > $@
+##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##lib\krb5\keytab\makefile: lib\krb5\keytab\makefile.in $(MKFDEP)
-##DOS##	.\wconfig config < $@.in > $@
+##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##lib\krb5\keytab\file\makefile: lib\krb5\keytab\file\makefile.in $(MKFDEP)
-##DOS##	.\wconfig config < $@.in > $@
+##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##lib\krb5\krb\makefile: lib\krb5\krb\makefile.in $(MKFDEP)
-##DOS##	.\wconfig config < $@.in > $@
+##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##lib\krb5\os\makefile: lib\krb5\os\makefile.in $(MKFDEP)
-##DOS##	.\wconfig config < $@.in > $@
+##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##lib\krb5\posix\makefile: lib\krb5\posix\makefile.in $(MKFDEP)
-##DOS##	.\wconfig config < $@.in > $@
+##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##lib\krb5\rcache\makefile: lib\krb5\rcache\makefile.in $(MKFDEP)
-##DOS##	.\wconfig config < $@.in > $@
+##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##util\et\makefile: util\et\makefile.in $(MKFDEP)
-##DOS##	.\wconfig config < $@.in > $@
+##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##util\profile\makefile: util\profile\makefile.in $(MKFDEP)
-##DOS##	.\wconfig config < $@.in > $@
+##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##util\windows\makefile: util\windows\makefile.in $(MKFDEP)
-##DOS##	.\wconfig config < $@.in > $@
+##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##windows\Makefile:  windows\Makefile.in $(MKFDEP)
-##DOS##	.\wconfig config < $@.in > $@
+##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##windows\cns\Makefile:  windows\cns\Makefile.in $(MKFDEP)
-##DOS##	.\wconfig config < $@.in > $@
+##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##windows\gina\Makefile:  windows\gina\Makefile.in $(MKFDEP)
-##DOS##	.\wconfig config < $@.in > $@
+##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##windows\gss\Makefile:  windows\gss\Makefile.in $(MKFDEP)
-##DOS##	.\wconfig config < $@.in > $@
+##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##windows\wintel\Makefile:  windows\wintel\Makefile.in $(MKFDEP)
-##DOS##	.\wconfig config < $@.in > $@
+##DOS##	$(WCONFIG) config < $@.in > $@
 
 ##DOS##wconfig.exe: wconfig.c
 ##DOS##	SET CL=/nologo
@@ -294,6 +295,9 @@ MACFILES= mac/* mac/kconfig/* mac/libraries/* mac/telnet-k5-auth/* \
 	include/krb5/stock/* include/sys/* \
 	./patchlevel.h
 
+MITWINFILES= mit/windows/include/* 
+MITWINBINARYFILES= mit/windows/lib/*
+
 WINBINARYFILES=	windows/*/*.ico windows/*/*.doc windows/*/*.hlp windows/*/*.hpj
 
 #
@@ -331,6 +335,10 @@ kerbsrc.win: kerbsrc.zip
 winfile.list:
 	echo $(FILES) $(WINFILES) | tr ' ' \\012 | \
 		sed -f config/winexclude.sed > winfile.list
+	if test -d mit ; then \
+		echo $(MITWINFILES) | tr ' ' \\012 | \
+		sed -f config/winexclude.sed >> winfile.list ; \
+	fi
 
 MAC_SUBDIRS = lib util
 macfile.list:
@@ -346,21 +354,33 @@ kerbsrc.zip: dos-Makefile awk-windows-mac winfile.list
 	rm -f kerbsrc.zip
 	$(ZIP) -Dlk kerbsrc.zip `cat winfile.list`
 	$(ZIP) -Dk kerbsrc.zip $(WINBINARYFILES)
+	if test -d mit ; then \
+		$(ZIP) -Dk kerbsrc.zip $(MITWINBINARYFILES) ; \
+	fi
 	rm -f $(CLEANUP)
 
 kerbsrc-nt.zip: awk-windows-mac winfile.list
 	rm -f kerbsrc-nt.zip
 	$(ZIP) -Dl kerbsrc-nt.zip `cat winfile.list`
 	$(ZIP) -D kerbsrc-nt.zip $(WINBINARYFILES)
+	if test -d mit ; then \
+		$(ZIP) -D kerbsrc-nt.zip $(MITWINBINARYFILES) ; \
+	fi
 	rm -f $(CLEANUP)
 
 dos-zipfiles: dos-Makefile awk-windows-mac winfile.list
 	rm -f kerbsrc.zip
 	$(ZIP) -Dlk kerbsrc.zip `cat winfile.list`
 	$(ZIP) -Dk kerbsrc.zip $(WINBINARYFILES)
+	if test -d mit ; then \
+		$(ZIP) -Dk kerbsrc.zip $(MITWINBINARYFILES) ; \
+	fi
 	rm -f kerbsrc-nt.zip
 	$(ZIP) -Dl kerbsrc-nt.zip `cat winfile.list`
 	$(ZIP) -D kerbsrc-nt.zip $(WINBINARYFILES)
+	if test -d mit ; then \
+		$(ZIP) -D kerbsrc-nt.zip $(MITWINBINARYFILES) ; \
+	fi
 	rm -f $(CLEANUP)
 
 Macfile: macfile.list 
