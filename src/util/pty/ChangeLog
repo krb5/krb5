@@ -1,3 +1,7 @@
+Thu Aug 24 18:40:48 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* .Sanitize: Update file list
+
 Tue Aug 15 21:42:16 1995    <tytso@rsts-11.mit.edu>
 
 	* update_wtmp.c (ptyint_update_wtmp): If EMPTY is not defined,

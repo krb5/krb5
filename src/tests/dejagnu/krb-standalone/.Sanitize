@@ -23,6 +23,7 @@ Do-first:
 
 Things-to-keep:
 
+ChangeLog
 gssapi.exp
 kadmin.exp
 rcp.exp

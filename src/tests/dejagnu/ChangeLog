@@ -1,3 +1,7 @@
+Thu Aug 24 18:48:01 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* .Sanitize: Update file list
+
 Wed Jun 21 18:13:11 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* configure.in: Remove AC_CONFIG_FRAGMENTS call, since it's no

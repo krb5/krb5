@@ -29,7 +29,7 @@ Makefile.in
 configure.in
 cleanup.c
 getpty.c
-initialize_slave.c
+init_slave.c
 libpty.h
 init.c
 logwtmp.c

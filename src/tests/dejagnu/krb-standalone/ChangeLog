@@ -1,3 +1,6 @@
+Thu Aug 24 18:48:01 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* .Sanitize: Update file list
 
 Thu Aug 3 11:57:28 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* kadmin.exp - Gut expected string handling for kadmin5 until we

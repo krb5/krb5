@@ -1,3 +1,7 @@
+Thu Aug 24 18:40:48 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* .Sanitize: Update file list
+
 Mon Aug  7 19:36:01 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* reconf: If using the autoconf in the local tree, invoke it using

@@ -1,3 +1,7 @@
+Thu Aug 24 18:40:48 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* .Sanitize: Update file list
+
 Tue Jun 27 20:49:50 1995  Mark Eichin  <eichin@cygnus.com>
 
 	* db.h: *int*_t are likely to collide with native types,

@@ -28,6 +28,9 @@ ChangeLog
 Makefile.in
 Sanitize
 autoconf
+berk_db
+getsyms
+getsyms.sed
 configure
 configure.in
 depfix.sed
@@ -37,10 +40,11 @@ kfrags
 libupdate.sh
 lndir
 makedepend
+makeshlib.sh
 profile
+pty
 reconf
 ss
-unifdef
 
 Things-to-lose:
 

@@ -1,3 +1,7 @@
+Thu Aug 24 18:40:48 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* .Sanitize: Update file list
+
 Fri Jul 14 13:51:42 1995  Sam Hartman  <hartmans@screw-loose.MIT.EDU>
 
 	* configure.in: Implement test for pgno_t that works under NetBSD

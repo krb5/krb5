@@ -25,7 +25,6 @@ Things-to-keep:
 
 .cvsignore
 ChangeLog
-Imakefile
 Makefile.in
 asn.1
 configure

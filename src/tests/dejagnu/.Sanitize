@@ -23,6 +23,7 @@ Do-first:
 
 Things-to-keep:
 
+.cvsignore
 ChangeLog
 config
 configure

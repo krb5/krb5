@@ -1,3 +1,7 @@
+Thu Aug 24 18:40:48 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* .Sanitize: Update file list
+
 Tue Jul 18 21:57:52 1995  Sam Hartman  <hartmans@screw-loose.MIT.EDU>
 
 	* configure.in: Don't depend on libdb_ranlib.

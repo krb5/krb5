@@ -23,6 +23,7 @@ Do-first:
 
 Things-to-keep:
 
+ChangeLog
 db.h
 mpool.h
 

@@ -1,3 +1,6 @@
+Thu Aug 24 18:48:01 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* .Sanitize: Update file list
 
 Fri Jul 7 16:35:30 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in - Remove LDFLAGS.
