@@ -13,7 +13,8 @@
 
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
-# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+# 02111-1307, USA.
 
 #### Start of system configuration section. ####
 
@@ -60,7 +61,7 @@ M4FILES = autoconf.m4 acgeneral.m4 acoldnames.m4 acspecific.m4 autoheader.m4
 # Files that can be generated, but should be up to date for a distribution.
 DISTDEP = info Makefile
 # Files to distribute.
-DISTFILES = COPYING ChangeLog ChangeLog.1 INSTALL \
+DISTFILES = AUTHORS COPYING ChangeLog ChangeLog.1 INSTALL \
 	Makefile.in NEWS README TODO $(M4FILES) \
 	acconfig.h acfunctions acheaders acidentifiers \
 	acmakevars acprograms autoconf.info* \

@@ -14,7 +14,8 @@
 
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
-# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+# 02111-1307, USA.
 
 # If given no args, create `configure' from template file `configure.in'.
 # With one arg, create a configure script on standard output from
@@ -25,11 +26,14 @@ Usage: autoconf [-h] [--help] [-m dir] [--macrodir=dir]
        [-l dir] [--localdir=dir] [--version] [template-file]"
 
 # NLS nuisances.
-# Only set `LANG' and `LC_ALL' to "C" if already set.
-# These must not be set unconditionally because not all systems understand
-# e.g. LANG=C (notably SCO).
-if test "${LC_ALL+set}" = set; then LC_ALL=C; export LC_ALL; fi
+# Only set these to C if already set.  These must not be set unconditionally
+# because not all systems understand e.g. LANG=C (notably SCO).
+# Fixing LC_MESSAGES prevents Solaris sh from translating var values in `set'!
+# Non-C LC_CTYPE values break the ctype check.
 if test "${LANG+set}"   = set; then LANG=C;   export LANG;   fi
+if test "${LC_ALL+set}" = set; then LC_ALL=C; export LC_ALL; fi
+if test "${LC_MESSAGES+set}" = set; then LC_MESSAGES=C; export LC_MESSAGES; fi
+if test "${LC_CTYPE+set}"    = set; then LC_CTYPE=C;    export LC_CTYPE;    fi
 
 : ${AC_MACRODIR=@datadir@}
 : ${M4=@M4@}
@@ -121,7 +125,7 @@ $M4 -I$AC_MACRODIR $use_localdir $r autoconf.m4$f $infile > $tmpout ||
   { rm -f $tmpin $tmpout; exit 2; }
 
 # You could add your own prefixes to pattern if you wanted to check for
-# them too, e.g. pattern="AC_\|ILT_", except that UNIX sed doesn't do
+# them too, e.g. pattern='\(AC_\|ILT_\)', except that UNIX sed doesn't do
 # alternation.
 pattern="AC_"
 

@@ -1,6 +1,6 @@
 #! /bin/sh
 # autoheader -- create `config.h.in' from `configure.in'
-# Copyright (C) 1992, 1993, 1994 Free Software Foundation, Inc.
+# Copyright (C) 1992, 1993, 1994, 1996 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -14,7 +14,8 @@
 
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
-# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+# 02111-1307, USA.
 
 # Written by Roland McGrath.
 
@@ -23,15 +24,18 @@
 # the given template file.
 
 usage="\
-Usage: autoheader [-h] [--help] [-m dir] [--macrodir=dir] 
-       [-l dir] [--localdir=dir] [--version] [template-file]" 
+Usage: autoheader [-h] [--help] [-m dir] [--macrodir=dir]
+       [-l dir] [--localdir=dir] [--version] [template-file]"
 
 # NLS nuisances.
-# Only set `LANG' and `LC_ALL' to "C" if already set.
-# These must not be set unconditionally because not all systems understand
-# e.g. LANG=C (notably SCO).
-if test "${LC_ALL+set}" = set; then LC_ALL=C; export LC_ALL; fi
+# Only set these to C if already set.  These must not be set unconditionally
+# because not all systems understand e.g. LANG=C (notably SCO).
+# Fixing LC_MESSAGES prevents Solaris sh from translating var values in `set'!
+# Non-C LC_CTYPE values break the ctype check.
 if test "${LANG+set}"   = set; then LANG=C;   export LANG;   fi
+if test "${LC_ALL+set}" = set; then LC_ALL=C; export LC_ALL; fi
+if test "${LC_MESSAGES+set}" = set; then LC_MESSAGES=C; export LC_MESSAGES; fi
+if test "${LC_CTYPE+set}"    = set; then LC_CTYPE=C;    export LC_CTYPE;    fi
 
 test -z "${AC_MACRODIR}" && AC_MACRODIR=@datadir@
 test -z "${M4}" && M4=@M4@
@@ -45,7 +49,7 @@ localdir=.
 show_version=no
 
 while test $# -gt 0 ; do
-   case "${1}" in 
+   case "${1}" in
       -h | --help | --h* )
          echo "${usage}"; exit 0 ;;
       --localdir=* | --l*=* )
@@ -59,7 +63,7 @@ while test $# -gt 0 ; do
       --macrodir=* | --m*=* )
          AC_MACRODIR="`echo \"${1}\" | sed -e 's/^[^=]*=//'`"
          shift ;;
-      -m | --macrodir | --m* ) 
+      -m | --macrodir | --m* )
          shift
          test $# -eq 0 && { echo "${usage}" 1>&2; exit 1; }
          AC_MACRODIR="${1}"
@@ -85,7 +89,6 @@ if test $show_version = yes; then
 fi
 
 TEMPLATES="${AC_MACRODIR}/acconfig.h"
-test -r ./acconfig.h && TEMPLATES="${TEMPLATES} ./acconfig.h"
 test -r $localdir/acconfig.h && TEMPLATES="${TEMPLATES} $localdir/acconfig.h"
 
 case $# in
@@ -151,7 +154,9 @@ esac
 
 # Don't write "do not edit" -- it will get copied into the
 # config.h, which it's ok to edit.
-echo "/* ${config_h_in}.  Generated automatically from $infile by autoheader.  */"
+cat <<EOF
+/* ${config_h_in}.  Generated automatically from $infile by autoheader.  */
+EOF
 
 test -r ${config_h}.top && cat ${config_h}.top
 test -r $localdir/acconfig.h &&
@@ -160,14 +165,23 @@ test -r $localdir/acconfig.h &&
 
 # This puts each template paragraph on its own line, separated by @s.
 if test -n "$syms"; then
-   # Make sure the boundary of template files is also the boundary
-   # of the paragraph.  Extra newlines don't hurt since they will
-   # be removed.
-   for t in $TEMPLATES; do cat $t; echo; echo; done |
-   # The sed script is suboptimal because it has to take care of
-   # some broken seds (e.g. AIX) that remove '\n' from the
-   # pattern/hold space if the line is empty. (junio@twinsun.com).
-   sed -n -e '
+  # Make sure the boundary of template files is also the boundary
+  # of the paragraph.  Extra newlines don't hurt since they will
+  # be removed.
+  # Undocumented useless feature: stuff outside of @TOP@ and @BOTTOM@ 
+  # is ignored in the systemwide acconfig.h too.
+  for t in $TEMPLATES; do
+    sedscript=""
+    grep @TOP@ $t >/dev/null && sedscript="1,/@TOP@/d;"
+    grep @BOTTOM@ $t >/dev/null && sedscript="$sedscript /@BOTTOM@/,\$d;"
+    # This substitution makes "#undef<TAB>FOO" in acconfig.h work.
+    sed -n -e "$sedscript s/	/ /g; p" $t
+    echo; echo
+  done |
+  # The sed script is suboptimal because it has to take care of
+  # some broken seds (e.g. AIX) that remove '\n' from the
+  # pattern/hold space if the line is empty. (junio@twinsun.com).
+  sed -n -e '
 	/^[ 	]*$/{
 		x
 		s/\n/@/g
@@ -176,9 +190,18 @@ if test -n "$syms"; then
 		x
 	}
 	H' | sed -e 's/@@*/@/g' |
-   # Select each paragraph that refers to a symbol we picked out above.
-   fgrep "$syms" |
-   tr @ \\012
+  # Select each paragraph that refers to a symbol we picked out above.
+  # Some fgrep's have limits on the number of lines that can be in the
+  # pattern on the command line, so use a temporary file containing the
+  # pattern.
+  (fgrep_tmp=${TMPDIR-/tmp}/autoh$$
+   trap "rm -f $fgrep_tmp; exit 1" 1 2 15
+   cat > $fgrep_tmp <<EOF
+$syms
+EOF
+   fgrep -f $fgrep_tmp
+   rm -f $fgrep_tmp) |
+  tr @ \\012
 fi
 
 echo "$types" | tr , \\012 | sort | uniq | while read ctype; do
@@ -239,8 +262,8 @@ fi
 
 if test $# -eq 0; then
   if test $status -eq 0; then
-    if cmp -s $tmpout ${config_h_in}; then
-      rm -f $tmpout
+    if test -f ${config_h_in} && cmp -s $tmpout ${config_h_in}; then
+      rm -f $tmpout # File didn't change, so don't update its mod time.
     else
       mv -f $tmpout ${config_h_in}
     fi

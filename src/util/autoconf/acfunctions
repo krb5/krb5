@@ -14,12 +14,16 @@ memset		AC_HEADER_STDC
 index		AC_HEADER_STDC
 rindex		AC_HEADER_STDC
 getgroups	AC_TYPE_GETGROUPS
+getpgrp		AC_FUNC_GETPGRP
+setpgrp		AC_FUNC_SETPGRP
 signal		AC_TYPE_SIGNAL
 alloca		AC_FUNC_ALLOCA
+fnmatch		AC_FUNC_FNMATCH
 getloadavg	AC_FUNC_GETLOADAVG
 mmap		AC_FUNC_MMAP
 setvbuf		AC_FUNC_SETVBUF_REVERSED
 strcoll		AC_FUNC_STRCOLL
+strftime	AC_FUNC_STRFTIME
 utime		AC_FUNC_UTIME_NULL
 vfork		AC_FUNC_VFORK
 vprintf		AC_FUNC_VPRINTF
@@ -28,7 +32,6 @@ vsprintf	AC_FUNC_VPRINTF
 wait3		AC_FUNC_WAIT3
 
 # Others.
-fnmatch		AC_CHECK_FUNCS
 ftime		AC_CHECK_FUNCS
 gethostname	AC_CHECK_FUNCS
 gettimeofday	AC_CHECK_FUNCS
@@ -49,7 +52,6 @@ stime		AC_CHECK_FUNCS
 strcspn		AC_CHECK_FUNCS
 strdup		AC_CHECK_FUNCS
 strerror	AC_CHECK_FUNCS
-strftime	AC_CHECK_FUNCS
 strspn		AC_CHECK_FUNCS
 strstr		AC_CHECK_FUNCS
 strtod		AC_CHECK_FUNCS

@@ -28,7 +28,7 @@ File: standards.info,  Node: Top,  Next: Preface,  Prev: (dir),  Up: (dir)
 Version
 *******
 
-   Last updated 27 February 1996.
+   Last updated 9 September 1996.
 
 * Menu:
 
@@ -60,8 +60,8 @@ suggested new wording for it; our time is limited.  We prefer a context
 diff to the `standards.texi' or `make-stds.texi' files, but if you
 don't have those files, please mail your suggestion anyway.
 
-   This release of the GNU Coding Standards was last updated 27
-February 1996.
+   This release of the GNU Coding Standards was last updated 9
+September 1996.
 
 
 File: standards.info,  Node: Intellectual Property,  Next: Design Advice,  Prev: Preface,  Up: Top
@@ -322,6 +322,7 @@ how libraries should behave.
 * Libraries::			Library behavior
 * Errors::			Formatting error messages
 * User Interfaces::		Standards for command line interfaces
+* Option Table::                Table of long options.
 * Memory Usage::                When and how to care about memory needs
 
 
@@ -472,7 +473,7 @@ usage messages, should start with a capital letter.  But they should not
 end with a period.
 
 
-File: standards.info,  Node: User Interfaces,  Next: Memory Usage,  Prev: Errors,  Up: Program Behavior
+File: standards.info,  Node: User Interfaces,  Next: Option Table,  Prev: Errors,  Up: Program Behavior
 
 Standards for Command Line Interfaces
 =====================================
@@ -520,27 +521,111 @@ consistent from program to program.  For example, users should be able
 to expect the "verbose" option of any GNU program which has one, to be
 spelled precisely `--verbose'.  To achieve this uniformity, look at the
 table of common long-option names when you choose the option names for
-your program.  The table appears below.
-
-   If you use names not already in the table, please send
-`gnu@prep.ai.mit.edu' a list of them, with their meanings, so we can
-update the table.
+your program (*note Option Table::.).
 
    It is usually a good idea for file names given as ordinary arguments
 to be input files only; any output files would be specified using
-options (preferably `-o').  Even if you allow an output file name as an
-ordinary argument for compatibility, try to provide a suitable option
-as well.  This will lead to more consistency among GNU utilities, so
-that there are fewer idiosyncracies for users to remember.
+options (preferably `-o' or `--output').  Even if you allow an output
+file name as an ordinary argument for compatibility, try to provide an
+option as another way to specify it.  This will lead to more consistency
+among GNU utilities, and fewer idiosyncracies for users to remember.
 
-   Programs should support an option `--version' which prints the
-program's version number on standard output and exits successfully, and
-an option `--help' which prints option usage information on standard
-output and exits successfully.  These options should inhibit the normal
-function of the command; they should do nothing except print the
-requested information.
+   All programs should support two standard options: `--version' and
+`--help'.
 
-   Here is the table of long options used by GNU programs.
+`--version'
+     This option should direct the program to information about its
+     name, version, origin and legal status, all on standard output,
+     and then exit successfully.  Other options and arguments should be
+     ignored once this is seen, and the program should not perform its
+     normal function.
+
+     The first line is meant to be easy for a program to parse; the
+     version number proper starts after the last space.  In addition,
+     it contains the canonical name for this program, in this format:
+
+          GNU Emacs 19.30
+
+     The program's name should be a constant string; *don't* compute it
+     from `argv[0]'.  The idea is to state the standard or canonical
+     name for the program, not its file name.  There are other ways to
+     find out the precise file name where a command is found in `PATH'.
+
+     If the program is a subsidiary part of a larger package, mention
+     the package name in parentheses, like this:
+
+          emacsserver (GNU Emacs) 19.30
+
+     If the package has a version number which is different from this
+     program's version number, you can mention the package version
+     number just before the close-parenthesis.
+
+     If you *need* to mention the version numbers of libraries which
+     are distributed separately from the package which contains this
+     program, you can do so by printing an additional line of version
+     info for each library you want to mention.  Use the same format
+     for these lines as for the first line.
+
+     Please don't mention all the libraries that the program uses "just
+     for completeness"--that would produce a lot of unhelpful clutter.
+     Please mention library version numbers only if you find in
+     practice that they are very important to you in debugging.
+
+     The following line, after the version number line or lines, should
+     be a copyright notice.  If more than one copyright notice is
+     called for, put each on a separate line.
+
+     Next should follow a brief statement that the program is free
+     software, and that users are free to copy and change it on certain
+     conditions.  If the program is covered by the GNU GPL, say so
+     here.  Also mention that there is no warranty, to the extent
+     permitted by law.
+
+     It is ok to finish the output with a list of the major authors of
+     the program, as a way of giving credit.
+
+     Here's an example of output that follows these rules:
+
+          GNU Emacs 19.34.5
+          Copyright (C) 1996 Free Software Foundation, Inc.
+          GNU Emacs comes with NO WARRANTY, to the extent permitted by law.
+          You may redistribute copies of GNU Emacs
+          under the terms of the GNU General Public License.
+          For more information about these matters, see the files named COPYING.
+
+     You should adapt this to your program, of course, filling in the
+     proper year, copyright holder, name of program, and the references
+     to distribution terms, and changing the rest of the wording as
+     necessary.
+
+     This copyright notice only needs to mention the most recent year in
+     which changes were made--there's no need to list the years for
+     previous versions' changes.  You don't have to mention the name of
+     the program in these notices, if that is inconvenient, since it
+     appeared in the first line.
+
+`--help'
+     This option should output brief documentation for how to invoke the
+     program, on standard output, then exit successfully.  Other
+     options and arguments should be ignored once this is seen, and the
+     program should not perform its normal function.
+
+     Near the end of the `--help' option's output there should be a line
+     that says where to mail bug reports.  It should have this format:
+
+          Report bugs to MAILING-ADDRESS.
+
+
+File: standards.info,  Node: Option Table,  Next: Memory Usage,  Prev: User Interfaces,  Up: Program Behavior
+
+Table of Long Options
+=====================
+
+   Here is a table of long options used by GNU programs.  It is surely
+incomplete, but we aim to list all the options that a new program might
+want to be compatible with.  If you use names not already in the table,
+please send `gnu@prep.ai.mit.edu' a list of them, with their meanings,
+so we can update the table.
 
 `after-date'
      `-N' in `tar'.
@@ -1137,6 +1222,9 @@ requested information.
 `no-validate'
      Used in `makeinfo'.
 
+`no-wait'
+     Used in `emacsclient'.
+
 `no-warn'
      Used in various programs to inhibit warnings.
 
@@ -1583,7 +1671,7 @@ requested information.
      `-z' in `gprof'.
 
 
-File: standards.info,  Node: Memory Usage,  Prev: User Interfaces,  Up: Program Behavior
+File: standards.info,  Node: Memory Usage,  Prev: Option Table,  Up: Program Behavior
 
 Memory Usage
 ============
@@ -1622,6 +1710,7 @@ writing GNU software.
 * System Portability::		Portability between different operating systems
 * CPU Portability::             Supporting the range of CPU types
 * System Functions::            Portability and "standard" library functions
+* Internationalization::        Techniques for internationalization
 
 
 File: standards.info,  Node: Formatting,  Next: Comments,  Up: Writing C
@@ -1895,7 +1984,7 @@ instead, write this:
 
    Don't make the program ugly to placate `lint'.  Please don't insert
 any casts to `void'.  Zero without a cast is perfectly fine as a null
-pointer constant.
+pointer constant, except when calling a varargs function.
 
 
 File: standards.info,  Node: Names,  Next: System Portability,  Prev: Syntactic Conventions,  Up: Writing C
@@ -1991,11 +2080,11 @@ Thus, don't make the following mistake:
        write(file_descriptor, &c, 1);
 
    When calling functions, you need not worry about the difference
-between pointers of various types, or between pointers an integers.  On
-most machines, there's no difference anyway.  As for the few machines
-where there is a difference, all of them support ANSI C, so you can use
-prototypes (conditionalized to be active only in ANSI C) to make the
-code work on those systems.
+between pointers of various types, or between pointers and integers.
+On most machines, there's no difference anyway.  As for the few
+machines where there is a difference, all of them support ANSI C, so
+you can use prototypes (conditionalized to be active only in ANSI C) to
+make the code work on those systems.
 
    In certain cases, it is ok to pass integer and pointer arguments
 indiscriminately to the same function, and use no prototype on any
@@ -2011,7 +2100,8 @@ that pass their arguments along to `printf' and friends:
      }
 
 In practice, this works on all machines, and it is much simpler than any
-"correct" alternative.
+"correct" alternative.  Be sure *not* to use a prototype for such
+functions.
 
    However, avoid casting pointers to integers unless you really need
 to.  These assumptions really reduce portability, and in most programs
@@ -2021,7 +2111,7 @@ information as well as an address in one word--it is ok to do so, but
 you'll have to make explicit provisions to handle different word sizes.
 
 
-File: standards.info,  Node: System Functions,  Prev: CPU Portability,  Up: Writing C
+File: standards.info,  Node: System Functions,  Next: Internationalization,  Prev: CPU Portability,  Up: Writing C
 
 Calling System Functions
 ========================
@@ -2129,6 +2219,86 @@ defined in systems where the corresponding functions exist.  One way to
 get them properly defined is to use Autoconf.
 
 
+File: standards.info,  Node: Internationalization,  Prev: System Functions,  Up: Writing C
+
+Internationalization
+====================
+
+   GNU has a library called GNU gettext that makes it easy to translate
+the messages in a program into various languages.  You should use this
+library in every program.  Use English for the messages as they appear
+in the program, and let gettext provide the way to translate them into
+other languages.
+
+   Using GNU gettext involves putting a call to the `gettext' macro
+around each string that might need translation--like this:
+
+     printf (gettext ("Processing file `%s'..."));
+
+This permits GNU gettext to replace the string `"Processing file
+`%s'..."' with a translated version.
+
+   Once a program uses gettext, please make a point of writing calls to
+`gettext' when you add new strings that call for translation.
+
+   Using GNU gettext in a package involves specifying a "text domain
+name" for the package.  The text domain name is used to separate the
+translations for this package from the translations for other packages.
+Normally, the text domain name should be the same as the name of the
+package--for example, `fileutils' for the GNU file utilities.
+
+   To enable gettext to work well, avoid writing code that makes
+assumptions about the structure of words or sentences.  When you want
+the precise text of a sentence to vary depending on the data, use two or
+more alternative string constants each containing a complete sentences,
+rather than inserting conditionalized words or phrases into a single
+sentence framework.
+
+   Here is an example of what not to do:
+
+     printf ("%d file%s processed", nfiles,
+             nfiles != 1 ? "s" : "");
+
+The problem with that example is that it assumes that plurals are made
+by adding `s'.  If you apply gettext to the format string, like this,
+
+     printf (gettext ("%d file%s processed"), nfiles,
+             nfiles != 1 ? "s" : "");
+
+the message can use different words, but it will still be forced to use
+`s' for the plural.  Here is a better way:
+
+     printf ((nfiles != 1 ? "%d files processed"
+              : "%d file processed"),
+             nfiles);
+
+This way, you can apply gettext to each of the two strings
+independently:
+
+     printf ((nfiles != 1 ? gettext ("%d files processed")
+              : gettext ("%d file processed")),
+             nfiles);
+
+This can any method of forming the plural of the word for "file", and
+also handles languages that require agreement in the word for
+"processed".
+
+   A similar problem appears at the level of sentence structure with
+this code:
+
+     printf ("#  Implicit rule search has%s been done.\n",
+             f->tried_implicit ? "" : " not");
+
+Adding `gettext' calls to this code cannot give correct results for all
+languages, because negation in some languages requires adding words at
+more than one place in the sentence.  By contrast, adding `gettext'
+calls does the job straightfowardly if the code starts out like this:
+
+     printf (f->tried_implicit
+             ? "#  Implicit rule search has been done.\n",
+             : "#  Implicit rule search has not been done.\n");
+
+
 File: standards.info,  Node: Documentation,  Next: Managing Releases,  Prev: Writing C,  Up: Top
 
 Documenting Programs
@@ -2186,6 +2356,10 @@ documentation; they are a bad example to follow.
 documentation; use "file name" (two words) instead.  We use the term
 "path" only for search paths, which are lists of file names.
 
+   Please do not use the term "illegal" to refer to erroneous input to a
+computer program.  Use "invalid" instead, and reserve the term
+"illegal" for violations of law.
+
 
 File: standards.info,  Node: Manual Structure Details,  Next: NEWS File,  Prev: GNU Manuals,  Up: Documentation
 
@@ -2240,27 +2414,65 @@ File: standards.info,  Node: Change Logs,  Next: Man Pages,  Prev: NEWS File,  U
 Change Logs
 ===========
 
-   Keep a change log for each directory, describing the changes made to
-source files in that directory.  The purpose of this is so that people
-investigating bugs in the future will know about the changes that might
-have introduced the bug.  Often a new bug can be found by looking at
-what was recently changed.  More importantly, change logs can help
-eliminate conceptual inconsistencies between different parts of a
-program; they can give you a history of how the conflicting concepts
-arose.
+   Keep a change log to describe all the changes made to program source
+files.  The purpose of this is so that people investigating bugs in the
+future will know about the changes that might have introduced the bug.
+Often a new bug can be found by looking at what was recently changed.
+More importantly, change logs can help you eliminate conceptual
+inconsistencies between different parts of a program, by giving you a
+history of how the conflicting concepts arose and who they came from.
 
-   Use the Emacs command `M-x add-change-log-entry' to start a new
-entry in the change log.  An entry should have an asterisk, the name of
-the changed file, and then in parentheses the name of the changed
-functions, variables or whatever, followed by a colon.  Then describe
-the changes you made to that function or variable.
+* Menu:
 
-   Separate unrelated entries with blank lines.  When two entries
-represent parts of the same change, so that they work together, then
-don't put blank lines between them.  Then you can omit the file name
-and the asterisk when successive entries are in the same file.
+* Change Log Concepts::
+* Style of Change Logs::
+* Simple Changes::
+* Conditional Changes::
 
-   Here are some examples:
+
+File: standards.info,  Node: Change Log Concepts,  Next: Style of Change Logs,  Up: Change Logs
+
+Change Log Concepts
+-------------------
+
+   You can think of the change log as a conceptual "undo list" which
+explains how earlier versions were different from the current version.
+People can see the current version; they don't need the change log to
+tell them what is in it.  What they want from a change log is a clear
+explanation of how the earlier version differed.
+
+   The change log file is normally called `ChangeLog' and covers an
+entire directory.  Each directory can have its own change log, or a
+directory can use the change log of its parent directory-it's up to you.
+
+   Another alternative is to record change log information with a
+version control system such as RCS or CVS.  This can be converted
+automatically to a `ChangeLog' file.
+
+   There's no need to describe the full purpose of the changes or how
+they work together.  If you think that a change calls for explanation,
+you're probably right.  Please do explain it--but please put the
+explanation in comments in the code, where people will see it whenever
+they see the code.  For example, "New function" is enough for the
+change log when you add a function, because there should be a comment
+before the function definition to explain what it does.
+
+   However, sometimes it is useful to write one line to describe the
+overall purpose of a batch of changes.
+
+   The easiest way to add an entry to `ChangeLog' is with the Emacs
+command `M-x add-change-log-entry'.  An entry should have an asterisk,
+the name of the changed file, and then in parentheses the name of the
+changed functions, variables or whatever, followed by a colon.  Then
+describe the changes you made to that function or variable.
+
+
+File: standards.info,  Node: Style of Change Logs,  Next: Simple Changes,  Prev: Change Log Concepts,  Up: Change Logs
+
+Style of Change Logs
+--------------------
+
+   Here are some examples of change log entries:
 
      * register.el (insert-register): Return nil.
      (jump-to-register): Likewise.
@@ -2277,40 +2489,84 @@ and the asterisk when successive entries are in the same file.
 
    It's important to name the changed function or variable in full.
 Don't abbreviate function or variable names, and don't combine them.
-Subsequent maintainers will often search for a function name to find
-all the change log entries that pertain to it; if you abbreviate the
-name, they won't find it when they search.  For example, some people
-are tempted to abbreviate groups of function names by writing `*
-register.el ({insert,jump-to}-register)'; this is not a good idea,
-since searching for `jump-to-register' or `insert-register' would not
-find the entry.
+Subsequent maintainers will often search for a function name to find all
+the change log entries that pertain to it; if you abbreviate the name,
+they won't find it when they search.
 
-   There's no need to describe the full purpose of the changes or how
-they work together.  It is better to put such explanations in comments
-in the code.  That's why just "New function" is enough; there is a
-comment with the function in the source to explain what it does.
+   For example, some people are tempted to abbreviate groups of function
+names by writing `* register.el ({insert,jump-to}-register)'; this is
+not a good idea, since searching for `jump-to-register' or
+`insert-register' would not find that entry.
 
-   However, sometimes it is useful to write one line to describe the
-overall purpose of a large batch of changes.
+   Separate unrelated change log entries with blank lines.  When two
+entries represent parts of the same change, so that they work together,
+then don't put blank lines between them.  Then you can omit the file
+name and the asterisk when successive entries are in the same file.
 
-   You can think of the change log as a conceptual "undo list" which
-explains how earlier versions were different from the current version.
-People can see the current version; they don't need the change log to
-tell them what is in it.  What they want from a change log is a clear
-explanation of how the earlier version differed.
+
+File: standards.info,  Node: Simple Changes,  Next: Conditional Changes,  Prev: Style of Change Logs,  Up: Change Logs
+
+Simple Changes
+--------------
+
+   Certain simple kinds of changes don't need much detail in the change
+log.
 
    When you change the calling sequence of a function in a simple
 fashion, and you change all the callers of the function, there is no
-need to make individual entries for all the callers.  Just write in the
-entry for the function being called, "All callers changed."
+need to make individual entries for all the callers that you changed.
+Just write in the entry for the function being called, "All callers
+changed."
+
+     * keyboard.c (Fcommand_execute): New arg SPECIAL.
+     All callers changed.
 
    When you change just comments or doc strings, it is enough to write
-an entry for the file, without mentioning the functions.  Write just,
-"Doc fix."  There's no need to keep a change log for documentation
-files.  This is because documentation is not susceptible to bugs that
-are hard to fix.  Documentation does not consist of parts that must
-interact in a precisely engineered fashion; to correct an error, you
-need not know the history of the erroneous passage.
+an entry for the file, without mentioning the functions.  Just "Doc
+fixes" is enough for the change log.
+
+   There's no need to make change log entries for documentation files.
+This is because documentation is not susceptible to bugs that are hard
+to fix.  Documentation does not consist of parts that must interact in a
+precisely engineered fashion.  To correct an error, you need not know
+the history of the erroneous passage; it is enough to compare what the
+documentation says with the way the program actually works.
+
+
+File: standards.info,  Node: Conditional Changes,  Prev: Simple Changes,  Up: Change Logs
+
+Conditional Changes
+-------------------
+
+   C programs often contain compile-time `#if' conditionals.  Many
+changes are conditional; sometimes you add a new definition which is
+entirely contained in a conditional.  It is very useful to indicate in
+the change log the conditions for which the change applies.
+
+   Our convention for indicating conditional changes is to use square
+brackets around the name of the condition.
+
+   Here is a simple example, describing a change which is conditional
+but does not have a function or entity name associated with it:
+
+     * xterm.c [SOLARIS2]: Include string.h.
+
+   Here is an entry describing a new definition which is entirely
+conditional.  This new definition for the macro `FRAME_WINDOW_P' is
+used only when `HAVE_X_WINDOWS' is defined:
+
+     * frame.h [HAVE_X_WINDOWS] (FRAME_WINDOW_P): Macro defined.
+
+   Here is an entry for a change within the function `init_display',
+whose definition as a whole is unconditional, but the changes themselves
+are contained in a `#ifdef HAVE_LIBNCURSES' conditional:
+
+     * dispnew.c (init_display) [HAVE_LIBNCURSES]: If X, call tgetent.
+
+   Here is an entry for a change that takes affect only when a certain
+macro is *not* defined:
+
+     (gethostname) [!HAVE_SOCKETS]: Replace with winsock version.
 
 
 File: standards.info,  Node: Man Pages,  Next: Reading other Manuals,  Prev: Change Logs,  Up: Documentation
@@ -2553,6 +2809,8 @@ programs.
 * Command Variables::		Variables for Specifying Commands
 * Directory Variables::		Variables for Installation Directories
 * Standard Targets::		Standard Targets for Users
+* Install Command Categories::  Three categories of commands in the `install'
+                                  rule: normal, pre-install and post-install.
 
 
 File: standards.info,  Node: Makefile Basics,  Next: Utilities in Makefiles,  Up: Makefile Conventions
@@ -2586,14 +2844,16 @@ part of the make or `$(srcdir)/' if the file is an unchanging part of
 the source code.  Without one of these prefixes, the current search
 path is used.
 
-   The distinction between `./' and `$(srcdir)/' is important when
-using the `--srcdir' option to `configure'.  A rule of the form:
+   The distinction between `./' (the "build directory") and
+`$(srcdir)/' (the "source directory") is important because users can
+build in a separate directory using the `--srcdir' option to
+`configure'.  A rule of the form:
 
      foo.1 : foo.man sedscript
              sed -e sedscript foo.man > foo.1
 
-will fail when the current directory is not the source directory,
-because `foo.man' and `sedscript' are not in the current directory.
+will fail when the build directory is not the source directory, because
+`foo.man' and `sedscript' are in the the source directory.
 
    When using GNU `make', relying on `VPATH' to find the source file
 will work in the case where there is a single dependency file, since
@@ -2617,6 +2877,18 @@ is best written as:
      foo.1 : foo.man sedscript
              sed -e $(srcdir)/sedscript $(srcdir)/foo.man > $@
 
+   GNU distributions usually contain some files which are not source
+files--for example, Info files, and the output from Autoconf, Automake,
+Bison or Flex.  Since these files normally appear in the source
+directory, they should always appear in the source directory, not in the
+build directory.  So Makefile rules to update them should put the
+updated files in the source directory.
+
+   However, if a file does not appear in the distribution, then the
+Makefile should not put it in the source directory, because building a
+program in ordinary circumstances should not modify the source directory
+in any way.
+
    Try to make the build and installation targets, at least (and all
 their subtargets) work correctly with a parallel `make'.
 
@@ -2633,8 +2905,10 @@ features of `ksh' or `bash'.
    The `configure' script and the Makefile rules for building and
 installation should not use any utilities directly except these:
 
-     cat cmp cp echo egrep expr false grep
-     ln mkdir mv pwd rm rmdir sed test touch true
+     cat cmp cp diff echo egrep expr false grep install-info
+     ln ls mkdir mv pwd rm rmdir sed sleep sort tar test touch true
+
+   The compression program `gzip' can be used in the `dist' rule.
 
    Stick to the generally supported options for these programs.  For
 example, don't use `mkdir -p', convenient as it may be, because most
@@ -2648,22 +2922,26 @@ compilers and related programs, but should do so via `make' variables
 so that the user can substitute alternatives.  Here are some of the
 programs we mean:
 
-     ar bison cc flex install ld lex
+     ar bison cc flex install ld ldconfig lex
      make makeinfo ranlib texi2dvi yacc
 
-   Use the following `make' variables:
+   Use the following `make' variables to run those programs:
 
-     $(AR) $(BISON) $(CC) $(FLEX) $(INSTALL) $(LD) $(LEX)
+     $(AR) $(BISON) $(CC) $(FLEX) $(INSTALL) $(LD) $(LDCONFIG) $(LEX)
      $(MAKE) $(MAKEINFO) $(RANLIB) $(TEXI2DVI) $(YACC)
 
-   When you use `ranlib', you should make sure nothing bad happens if
-the system does not have `ranlib'.  Arrange to ignore an error from
-that command, and print a message before the command to tell the user
-that failure of the `ranlib' command does not mean a problem.  (The
-Autoconf `AC_PROG_RANLIB' macro can help with this.)
+   When you use `ranlib' or `ldconfig', you should make sure nothing
+bad happens if the system does not have the program in question.
+Arrange to ignore an error from that command, and print a message before
+the command to tell the user that failure of this command does not mean
+a problem.  (The Autoconf `AC_PROG_RANLIB' macro can help with this.)
 
    If you use symbolic links, you should implement a fallback for
 systems that don't have symbolic links.
+
+   Additional utilities that can be used via Make variables are:
+
+     chgrp chmod chown mknod
 
    It is ok to use other utilities in Makefile portions (or scripts)
 intended only for particular systems where you know those utilities
@@ -2860,6 +3138,18 @@ directories:
      as `$(prefix)/info'.  (If you are using Autoconf, write it as
      `@infodir@'.)
 
+`lispdir'
+     The directory for installing any Emacs Lisp files in this package.
+     By default, it should be `/usr/local/share/emacs/site-lisp', but
+     it should be written as `$(prefix)/share/emacs/site-lisp'.
+
+     If you are using Autoconf, write the default as `@lispdir@'.  In
+     order to make `@lispdir@' work, you need the following lines in
+     your `configure.in' file:
+
+          lispdir='${datadir}/emacs/site-lisp'
+          AC_SUBST(lispdir)
+
 `includedir'
      The directory for installing header files to be included by user
      programs with the C `#include' preprocessor directive.  This
@@ -2964,7 +3254,7 @@ order for this to be useful, all the packages must be designed so that
 they will work sensibly when the user does so.
 
 
-File: standards.info,  Node: Standard Targets,  Prev: Directory Variables,  Up: Makefile Conventions
+File: standards.info,  Node: Standard Targets,  Next: Install Command Categories,  Prev: Directory Variables,  Up: Makefile Conventions
 
 Standard Targets for Users
 --------------------------
@@ -3016,6 +3306,7 @@ Makefiles:
      Here is a sample rule to install an Info file:
 
           $(infodir)/foo.info: foo.info
+                  $(POST_INSTALL)
           # There may be a newer info file in . than in srcdir.
                   -if test -f foo.info; then d=.; \
                    else d=$(srcdir); fi; \
@@ -3031,17 +3322,26 @@ Makefiles:
                                  $(infodir)/foo.info; \
                   else true; fi
 
+     When writing the `install' target, you must classify all the
+     commands into three categories: normal ones, "pre-installation"
+     commands and "post-installation" commands.  *Note Install Command
+     Categories::.
+
 `uninstall'
-     Delete all the installed files that the `install' target would
-     create (but not the noninstalled files such as `make all' would
-     create).
+     Delete all the installed files--the copies that the `install'
+     target creates.
 
      This rule should not modify the directories where compilation is
      done, only the directories where files are installed.
 
+     The uninstallation commands are divided into three categories,
+     just like the installation commands.  *Note Install Command
+     Categories::.
+
 `install-strip'
      Like `install', but strip the executable files while installing
-     them.  The definition of this target can be very simple:
+     them.  In many cases, the definition of this target can be very
+     simple:
 
           install-strip:
                   $(MAKE) INSTALL_PROGRAM='$(INSTALL_PROGRAM) -s' \
@@ -3118,6 +3418,12 @@ Makefiles:
      run the `makeinfo' program, which is part of the Texinfo
      distribution.
 
+     Normally a GNU distribution comes with Info files, and that means
+     the Info files are present in the source directory.  Therefore,
+     the Make rule for an info file should update it in the source
+     directory.  When users build the package, ordinarily Make will not
+     update the Info files because they will already be up to date.
+
 `dvi'
      Generate DVI files for all Texinfo documentation.  For example:
 
@@ -3186,6 +3492,112 @@ programs in which they are useful.
 
    (1)  `texi2dvi' uses TeX to do the real work of formatting. TeX is
 not distributed with Texinfo.
+
+
+File: standards.info,  Node: Install Command Categories,  Prev: Standard Targets,  Up: Makefile Conventions
+
+Install Command Categories
+--------------------------
+
+   When writing the `install' target, you must classify all the
+commands into three categories: normal ones, "pre-installation"
+commands and "post-installation" commands.
+
+   Normal commands move files into their proper places, and set their
+modes.  They may not alter any files except the ones that come entirely
+from the package they belong to.
+
+   Pre-installation and post-installation commands may alter other
+files; in particular, they can edit global configuration files or data
+bases.
+
+   Pre-installation commands are typically executed before the normal
+commands, and post-installation commands are typically run after the
+normal commands.
+
+   The most common use for a post-installation command is to run
+`install-info'.  This cannot be done with a normal command, since it
+alters a file (the Info directory) which does not come entirely and
+solely from the package being installed.  It is a post-installation
+command because it needs to be done after the normal command which
+installs the package's Info files.
+
+   Most programs don't need any pre-installation commands, but we have
+the feature just in case it is needed.
+
+   To classify the commands in the `install' rule into these three
+categories, insert "category lines" among them.  A category line
+specifies the category for the commands that follow.
+
+   A category line consists of a tab and a reference to a special Make
+variable, plus an optional comment at the end.  There are three
+variables you can use, one for each category; the variable name
+specifies the category.  Category lines are no-ops in ordinary execution
+because these three Make variables are normally undefined (and you
+*should not* define them in the makefile).
+
+   Here are the three possible category lines, each with a comment that
+explains what it means:
+
+             $(PRE_INSTALL)     # Pre-install commands follow.
+             $(POST_INSTALL)    # Post-install commands follow.
+             $(NORMAL_INSTALL)  # Normal commands follow.
+
+   If you don't use a category line at the beginning of the `install'
+rule, all the commands are classified as normal until the first category
+line.  If you don't use any category lines, all the commands are
+classified as normal.
+
+   These are the category lines for `uninstall':
+
+             $(PRE_UNINSTALL)     # Pre-uninstall commands follow.
+             $(POST_UNINSTALL)    # Post-uninstall commands follow.
+             $(NORMAL_UNINSTALL)  # Normal commands follow.
+
+   Typically, a pre-uninstall command would be used for deleting entries
+from the Info directory.
+
+   If the `install' or `uninstall' target has any dependencies which
+act as subroutines of installation, then you should start *each*
+dependency's commands with a category line, and start the main target's
+commands with a category line also.  This way, you can ensure that each
+command is placed in the right category regardless of which of the
+dependencies actually run.
+
+   Pre-installation and post-installation commands should not run any
+programs except for these:
+
+     [ basename bash cat chgrp chmod chown cmp cp dd diff echo
+     egrep expand expr false fgrep find getopt grep gunzip gzip
+     hostname install install-info kill ldconfig ln ls md5sum
+     mkdir mkfifo mknod mv printenv pwd rm rmdir sed sort tee
+     test touch true uname xargs yes
+
+   The reason for distinguishing the commands in this way is for the
+sake of making binary packages.  Typically a binary package contains
+all the executables and other files that need to be installed, and has
+its own method of installing them--so it does not need to run the normal
+installation commands.  But installing the binary package does need to
+execute the pre-installation and post-installation commands.
+
+   Programs to build binary packages work by extracting the
+pre-installation and post-installation commands.  Here is one way of
+extracting the pre-installation commands:
+
+     make -n install -o all \
+           PRE_INSTALL=pre-install \
+           POST_INSTALL=post-install \
+           NORMAL_INSTALL=normal-install \
+       | gawk -f pre-install.awk
+
+where the file `pre-install.awk' could contain this:
+
+     $0 ~ /^\t[ \t]*(normal_install|post_install)[ \t]*$/ {on = 0}
+     on {print $0}
+     $0 ~ /^\t[ \t]*pre_install[ \t]*$/ {on = 1}
+
+   The resulting file of pre-installation commands is executed as a
+shell script as part of installing the binary package.
 
 
 File: standards.info,  Node: Releases,  Prev: Makefile Conventions,  Up: Managing Releases
@@ -3268,34 +3680,41 @@ Node: Using Extensions8338
 Node: ANSI C9840
 Node: Source Language11076
 Node: Program Behavior12210
-Node: Semantics12802
-Node: Libraries16556
-Node: Errors17791
-Node: User Interfaces19014
-Node: Memory Usage36015
-Node: Writing C37012
-Node: Formatting37654
-Node: Comments40926
-Node: Syntactic Conventions43719
-Node: Names46617
-Node: System Portability47929
-Node: CPU Portability49705
-Node: System Functions51812
-Node: Documentation56684
-Node: GNU Manuals57228
-Node: Manual Structure Details59270
-Node: NEWS File60675
-Node: Change Logs61356
-Node: Man Pages65109
-Node: Reading other Manuals66728
-Node: Managing Releases67512
-Node: Configuration68218
-Node: Makefile Conventions75158
-Node: Makefile Basics75682
-Node: Utilities in Makefiles78153
-Node: Command Variables80027
-Node: Directory Variables82863
-Node: Standard Targets92968
-Node: Releases102716
+Node: Semantics12857
+Node: Libraries16611
+Node: Errors17846
+Node: User Interfaces19069
+Node: Option Table25791
+Node: Memory Usage39895
+Node: Writing C40889
+Node: Formatting41599
+Node: Comments44871
+Node: Syntactic Conventions47664
+Node: Names50602
+Node: System Portability51914
+Node: CPU Portability53690
+Node: System Functions55851
+Node: Internationalization60752
+Node: Documentation63884
+Node: GNU Manuals64428
+Node: Manual Structure Details66640
+Node: NEWS File68045
+Node: Change Logs68726
+Node: Change Log Concepts69443
+Node: Style of Change Logs71211
+Node: Simple Changes72765
+Node: Conditional Changes73956
+Node: Man Pages75333
+Node: Reading other Manuals76952
+Node: Managing Releases77736
+Node: Configuration78442
+Node: Makefile Conventions85382
+Node: Makefile Basics86062
+Node: Utilities in Makefiles89231
+Node: Command Variables91367
+Node: Directory Variables94203
+Node: Standard Targets104772
+Node: Install Command Categories115273
+Node: Releases119846
 
 End Tag Table

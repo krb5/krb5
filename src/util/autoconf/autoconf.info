@@ -34,7 +34,7 @@ File: autoconf.info,  Node: Top,  Next: Introduction,  Up: (dir)
 
    This file documents the GNU Autoconf package for creating scripts to
 configure source code packages using templates and an `m4' macro
-package.  This is edition 2.8, for Autoconf version 2.8.
+package.  This is edition 2.12, for Autoconf version 2.12.
 
 * Menu:
 
@@ -52,7 +52,7 @@ package.  This is edition 2.8, for Autoconf version 2.8.
 * Questions::                   Questions about Autoconf, with answers.
 * Upgrading::                   Tips for upgrading from version 1.
 * History::                     History of Autoconf.
-* Old Macro Names::		Backward compatibility macros.
+* Old Macro Names::             Backward compatibility macros.
 * Environment Variable Index::  Index of environment variables used.
 * Output Variable Index::       Index of variables set in output files.
 * Preprocessor Symbol Index::   Index of C preprocessor symbols defined.
@@ -62,16 +62,16 @@ package.  This is edition 2.8, for Autoconf version 2.8.
 
 Making `configure' Scripts
 
-* Writing configure.in::	What to put in an Autoconf input file.
+* Writing configure.in::        What to put in an Autoconf input file.
 * Invoking autoscan::           Semi-automatic `configure.in' writing.
 * Invoking ifnames::            Listing the conditionals in source code.
-* Invoking autoconf::		How to create configuration scripts.
+* Invoking autoconf::           How to create configuration scripts.
 * Invoking autoreconf::         Remaking multiple `configure' scripts.
 
 Initialization and Output Files
 
 * Input::                       Where Autoconf should find files.
-* Output::			Creating output files.
+* Output::                      Creating output files.
 * Makefile Substitutions::      Using output variables in `Makefile's.
 * Configuration Headers::       Creating a configuration header file.
 * Subdirectories::              Configuring independent packages together.
@@ -80,26 +80,26 @@ Initialization and Output Files
 
 Substitutions in Makefiles
 
-* Preset Output Variables::	Output variables that are always set.
-* Build Directories::   	Supporting multiple concurrent compiles.
-* Automatic Remaking::		Makefile rules for configuring.
+* Preset Output Variables::     Output variables that are always set.
+* Build Directories::           Supporting multiple concurrent compiles.
+* Automatic Remaking::          Makefile rules for configuring.
 
 Configuration Header Files
 
 * Header Templates::            Input for the configuration headers.
-* Invoking autoheader::		How to create configuration templates.
+* Invoking autoheader::         How to create configuration templates.
 
 Existing Tests
 
-* Alternative Programs::	Selecting between alternative programs.
+* Alternative Programs::        Selecting between alternative programs.
 * Libraries::                   Library archives that might be missing.
-* Library Functions::		C library functions that might be missing.
-* Header Files::		Header files that might be missing.
-* Structures::			Structures or members that might be missing.
-* Typedefs::			`typedef's that might be missing.
-* Compiler Characteristics::	C compiler or machine architecture features.
-* System Services::		Operating system services.
-* UNIX Variants::		Special kludges for specific UNIX variants.
+* Library Functions::           C library functions that might be missing.
+* Header Files::                Header files that might be missing.
+* Structures::                  Structures or members that might be missing.
+* Typedefs::                    `typedef's that might be missing.
+* Compiler Characteristics::    C compiler or machine architecture features.
+* System Services::             Operating system services.
+* UNIX Variants::               Special kludges for specific UNIX variants.
 
 Alternative Programs
 
@@ -123,44 +123,44 @@ Typedefs
 
 Writing Tests
 
-* Examining Declarations::	Detecting header files and declarations.
+* Examining Declarations::      Detecting header files and declarations.
 * Examining Syntax::            Detecting language syntax features.
 * Examining Libraries::         Detecting functions and global variables.
-* Run Time::		        Testing for run-time features.
+* Run Time::                    Testing for run-time features.
 * Portable Shell::              Shell script portability pitfalls.
 * Testing Values and Files::    Checking strings and files.
-* Multiple Cases::		Tests for several possible values.
+* Multiple Cases::              Tests for several possible values.
 * Language Choice::             Selecting which language to use for testing.
 
 Checking Run Time Behavior
 
 * Test Programs::               Running test programs.
-* Guidelines::			General rules for writing test programs.
-* Test Functions::		Avoiding pitfalls in test programs.
+* Guidelines::                  General rules for writing test programs.
+* Test Functions::              Avoiding pitfalls in test programs.
 
 Results of Tests
 
 * Defining Symbols::            Defining C preprocessor symbols.
-* Setting Output Variables::	Replacing variables in output files.
+* Setting Output Variables::    Replacing variables in output files.
 * Caching Results::             Speeding up subsequent `configure' runs.
 * Printing Messages::           Notifying users of progress or problems.
 
 Caching Results
 
 * Cache Variable Names::        Shell variables used in caches.
-* Cache Files::	        	Files `configure' uses for caching.
+* Cache Files::                 Files `configure' uses for caching.
 
 Writing Macros
 
-* Macro Definitions::		Basic format of an Autoconf macro.
+* Macro Definitions::           Basic format of an Autoconf macro.
 * Macro Names::                 What to call your new macros.
-* Quoting::			Protecting macros from unwanted expansion.
-* Dependencies Between Macros::	What to do when macros depend on other macros.
+* Quoting::                     Protecting macros from unwanted expansion.
+* Dependencies Between Macros:: What to do when macros depend on other macros.
 
 Dependencies Between Macros
 
-* Prerequisite Macros::		Ensuring required information.
-* Suggested Ordering::		Warning about possible ordering problems.
+* Prerequisite Macros::         Ensuring required information.
+* Suggested Ordering::          Warning about possible ordering problems.
 * Obsolete Macros::             Warning about old ways of doing things.
 
 Manual Configuration
@@ -213,11 +213,11 @@ Upgrading From Version 1
 
 History of Autoconf
 
-* Genesis::			Prehistory and naming of `configure'.
-* Exodus::			The plagues of `m4' and Perl.
-* Leviticus::			The priestly code of portability arrives.
-* Numbers::			Growth and contributors.
-* Deuteronomy::			Approaching the promises of easy configuration.
+* Genesis::                     Prehistory and naming of `configure'.
+* Exodus::                      The plagues of `m4' and Perl.
+* Leviticus::                   The priestly code of portability arrives.
+* Numbers::                     Growth and contributors.
+* Deuteronomy::                 Approaching the promises of easy configuration.
 
 
 File: autoconf.info,  Node: Introduction,  Next: Making configure Scripts,  Prev: Top,  Up: Top
@@ -360,10 +360,10 @@ Files used in configuring a software package:
 
 * Menu:
 
-* Writing configure.in::	What to put in an Autoconf input file.
+* Writing configure.in::        What to put in an Autoconf input file.
 * Invoking autoscan::           Semi-automatic `configure.in' writing.
 * Invoking ifnames::            Listing the conditionals in source code.
-* Invoking autoconf::		How to create configuration scripts.
+* Invoking autoconf::           How to create configuration scripts.
 * Invoking autoreconf::         Remaking multiple `configure' scripts.
 
 
@@ -595,6 +595,14 @@ you can make `autoreconf' remake *all* of the files by giving it the
 options, it passes them down to `autoconf' and `autoheader' (with
 relative paths adjusted properly).
 
+   `autoreconf' does not support having, in the same directory tree,
+both directories that are parts of a larger package (sharing
+`aclocal.m4' and `acconfig.h'), and directories that are independent
+packages (each with their own `aclocal.m4' and `acconfig.h').  It
+assumes that they are all part of the same package, if you use
+`--localdir', or that each directory is a separate package, if you
+don't use it.  This restriction may be removed in the future.
+
    *Note Automatic Remaking::, for `Makefile' rules to automatically
 remake `configure' scripts when their source files change.  That method
 handles the timestamps of configuration header templates properly, but
@@ -614,7 +622,8 @@ does not pass `--macrodir=DIR' or `--localdir=DIR'.
 
 `--localdir=DIR'
 `-l DIR'
-     Look for the package files `aclocal.m4' and `acconfig.h' (but not
+     Have `autoconf' and `autoheader' look for the package files
+     `aclocal.m4' and (`autoheader' only) `acconfig.h' (but not
      `FILE.top' and `FILE.bot') in directory DIR instead of in the
      directory containing each `configure.in'.
 
@@ -646,7 +655,7 @@ initialization and creating output files.
 * Menu:
 
 * Input::                       Where Autoconf should find files.
-* Output::			Creating output files.
+* Output::                      Creating output files.
 * Makefile Substitutions::      Using output variables in `Makefile's.
 * Configuration Headers::       Creating a configuration header file.
 * Subdirectories::              Configuring independent packages together.
@@ -699,17 +708,18 @@ Creating Output Files
 other files resulting from configuration.  The only other required
 macro is `AC_INIT' (*note Input::.).
 
- - Macro: AC_OUTPUT ([FILE...] [,EXTRA-CMDS] [,INIT-CMDS])
-     Create output files.  The FILE... argument is a
-     whitespace-separated list of output files; it may be empty.  This
-     macro creates each file `FILE' by copying an input file (by default
-     named `FILE.in'), substituting the output variable values.  *Note
-     Makefile Substitutions::, for more information on using output
-     variables.  *Note Setting Output Variables::, for more information
-     on creating them.  This macro creates the directory that the file
-     is in if it doesn't exist (but not the parents of that directory).
-     Usually, `Makefile's are created this way, but other files, such
-     as `.gdbinit', can be specified as well.
+ - Macro: AC_OUTPUT ([FILE... [, EXTRA-CMDS [, INIT-CMDS]]])
+     Create output files.  Call this macro once, at the end of
+     `configure.in'.  The FILE... argument is a whitespace-separated
+     list of output files; it may be empty.  This macro creates each
+     file `FILE' by copying an input file (by default named `FILE.in'),
+     substituting the output variable values.  *Note Makefile
+     Substitutions::, for more information on using output variables.
+     *Note Setting Output Variables::, for more information on creating
+     them.  This macro creates the directory that the file is in if it
+     doesn't exist (but not the parents of that directory).  Usually,
+     `Makefile's are created this way, but other files, such as
+     `.gdbinit', can be specified as well.
 
      If `AC_CONFIG_HEADER', `AC_LINK_FILES', or `AC_CONFIG_SUBDIRS' has
      been called, this macro also creates the files named as their
@@ -718,20 +728,31 @@ macro is `AC_INIT' (*note Input::.).
      A typical call to `AC_OUTPUT' looks like this:
           AC_OUTPUT(Makefile src/Makefile man/Makefile X/Imakefile)
 
-     You can override an input file name by appending it to FILE,
-     separated by a colon.  For example,
+     You can override an input file name by appending to FILE a
+     colon-separated list of input files.  Examples:
           AC_OUTPUT(Makefile:templates/top.mk lib/Makefile:templates/lib.mk)
-
-     You can also generate an output file from multiple input files by
-     separating the input files by a plus sign.  For example,
-          AC_OUTPUT(Makefile:templates/pre.in+Makefile.in+templates/post.in)
+          AC_OUTPUT(Makefile:templates/vars.mk:Makefile.in:templates/rules.mk)
+     Doing this allows you to keep your file names acceptable to
+     MS-DOS, or to prepend and/or append boilerplate to the file.
 
      If you pass EXTRA-CMDS, those commands will be inserted into
      `config.status' to be run after all its other processing.  If
      INIT-CMDS are given, they are inserted just before EXTRA-CMDS,
      with shell variable, command, and backslash substitutions
      performed on them in `configure'.  You can use INIT-CMDS to pass
-     variables from `configure' to the EXTRA-CMDS.
+     variables from `configure' to the EXTRA-CMDS.  If
+     `AC_OUTPUT_COMMANDS' has been called, the commands given to it are
+     run just before the commands passed to this macro.
+
+ - Macro: AC_OUTPUT_COMMANDS (EXTRA-CMDS [, INIT-CMDS])
+     Specify additional shell commands to run at the end of
+     `config.status', and shell commands to initialize any variables
+     from `configure'.  This macro may be called multiple times.  Here
+     is an unrealistic example:
+
+          fubar=27
+          AC_OUTPUT_COMMANDS([echo this is extra $fubar, and so on.], fubar=$fubar)
+          AC_OUTPUT_COMMANDS([echo this is another, extra, bit], [echo init bit])
 
    If you run `make' on subdirectories, you should run it using the
 `make' variable `MAKE'.  Most versions of `make' set `MAKE' to the name
@@ -781,9 +802,9 @@ more information on what to put in `Makefile's.
 
 * Menu:
 
-* Preset Output Variables::	Output variables that are always set.
-* Build Directories::   	Supporting multiple concurrent compiles.
-* Automatic Remaking::		Makefile rules for configuring.
+* Preset Output Variables::     Output variables that are always set.
+* Build Directories::           Supporting multiple concurrent compiles.
+* Automatic Remaking::          Makefile rules for configuring.
 
 
 File: autoconf.info,  Node: Preset Output Variables,  Next: Build Directories,  Up: Makefile Substitutions
@@ -1035,16 +1056,18 @@ finding the `config.h' from the source directory.
      object files that depend on the header file to be recompiled.
 
      Usually the input file is named `HEADER-TO-CREATE.in'; however,
-     you can override the input file name by appending it to
-     HEADER-TO-CREATE, separated by a colon.  For example,
+     you can override the input file name by appending to
+     HEADER-TO-CREATE, a colon-separated list of input files.  Examples:
           AC_CONFIG_HEADER(defines.h:defines.hin)
+          AC_CONFIG_HEADER(defines.h:defs.pre:defines.h.in:defs.post)
 
-     Doing this allows you to keep your filenames acceptable to MS-DOS.
+     Doing this allows you to keep your file names acceptable to
+     MS-DOS, or to prepend and/or append boilerplate to the file.
 
 * Menu:
 
 * Header Templates::            Input for the configuration headers.
-* Invoking autoheader::		How to create configuration templates.
+* Invoking autoheader::         How to create configuration templates.
 
 
 File: autoconf.info,  Node: Header Templates,  Next: Invoking autoheader,  Up: Configuration Headers
@@ -1162,13 +1185,16 @@ to run `configure' scripts for other packages in subdirectories.
      error is reported, so a `configure' script can configure whichever
      parts of a large source tree are present.  If a given DIR contains
      `configure.in' but no `configure', the Cygnus `configure' script
-     found by `AC_CONFIG_AUXDIR' is used.  The subdirectory `configure'
-     scripts are given the same command line options that were given to
-     this `configure' script, with minor changes if needed (e.g., to
-     adjust a relative path for the cache file or source directory).
-     This macro also sets the output variable `subdirs' to the list of
-     directories `DIR ...'.  `Makefile' rules can use this variable to
-     determine which subdirectories to recurse into.
+     found by `AC_CONFIG_AUXDIR' is used.
+
+     The subdirectory `configure' scripts are given the same command
+     line options that were given to this `configure' script, with
+     minor changes if needed (e.g., to adjust a relative path for the
+     cache file or source directory).  This macro also sets the output
+     variable `subdirs' to the list of directories `DIR ...'.
+     `Makefile' rules can use this variable to determine which
+     subdirectories to recurse into.  This macro may be called multiple
+     times.
 
 
 File: autoconf.info,  Node: Default Prefix,  Next: Versions,  Prev: Subdirectories,  Up: Setup
@@ -1275,15 +1301,15 @@ definitions into your program.
 
 * Menu:
 
-* Alternative Programs::	Selecting between alternative programs.
+* Alternative Programs::        Selecting between alternative programs.
 * Libraries::                   Library archives that might be missing.
-* Library Functions::		C library functions that might be missing.
-* Header Files::		Header files that might be missing.
-* Structures::			Structures or members that might be missing.
-* Typedefs::			`typedef's that might be missing.
-* Compiler Characteristics::	C compiler or machine architecture features.
-* System Services::		Operating system services.
-* UNIX Variants::		Special kludges for specific UNIX variants.
+* Library Functions::           C library functions that might be missing.
+* Header Files::                Header files that might be missing.
+* Structures::                  Structures or members that might be missing.
+* Typedefs::                    `typedef's that might be missing.
+* Compiler Characteristics::    C compiler or machine architecture features.
+* System Services::             Operating system services.
+* UNIX Variants::               Special kludges for specific UNIX variants.
 
 
 File: autoconf.info,  Node: Alternative Programs,  Next: Libraries,  Up: Existing Tests
@@ -1327,13 +1353,21 @@ in some cases whether they support certain features.
 
  - Macro: AC_PROG_CC
      Determine a C compiler to use.  If `CC' is not already set in the
-     environment, check for `gcc', and use `cc' if it's not found.  Set
-     output variable `CC' to the name of the compiler found.
+     environment, check for `gcc', and use `cc' if that's not found.
+     Set output variable `CC' to the name of the compiler found.
 
      If using the GNU C compiler, set shell variable `GCC' to `yes',
      empty otherwise.  If output variable `CFLAGS' was not already set,
-     set it to `-g -O' for the GNU C compiler (`-O' on systems where
+     set it to `-g -O2' for the GNU C compiler (`-O2' on systems where
      GCC does not accept `-g'), or `-g' for other compilers.
+
+     If the C compiler being used does not produce executables that can
+     run on the system where `configure' is being run, set the shell
+     variable `cross_compiling' to `yes', otherwise `no'.  In other
+     words, this tests whether the build system type is different from
+     the host system type (the target system type is irrelevant to this
+     test).  *Note Manual Configuration::, for more on support for
+     cross compiling.
 
  - Macro: AC_PROG_CC_C_O
      If the C compiler does not accept the `-c' and `-o' options
@@ -1353,13 +1387,21 @@ in some cases whether they support certain features.
      Determine a C++ compiler to use.  Check if the environment variable
      `CXX' or `CCC' (in that order) is set; if so, set output variable
      `CXX' to its value.  Otherwise search for a C++ compiler under
-     likely names (`c++', `g++', `gcc', `CC', and `cxx').  If none of
-     those checks succeed, as a last resort set `CXX' to `gcc'.
+     likely names (`c++', `g++', `gcc', `CC', `cxx', and `cc++').  If
+     none of those checks succeed, as a last resort set `CXX' to `gcc'.
 
      If using the GNU C++ compiler, set shell variable `GXX' to `yes',
      empty otherwise.  If output variable `CXXFLAGS' was not already
-     set, set it to `-g -O' for the GNU C++ compiler (`-O' on systems
+     set, set it to `-g -O2' for the GNU C++ compiler (`-O2' on systems
      where G++ does not accept `-g'), or `-g' for other compilers.
+
+     If the C++ compiler being used does not produce executables that
+     can run on the system where `configure' is being run, set the shell
+     variable `cross_compiling' to `yes', otherwise `no'.  In other
+     words, this tests whether the build system type is different from
+     the host system type (the target system type is irrelevant to this
+     test).  *Note Manual Configuration::, for more on support for
+     cross compiling.
 
  - Macro: AC_PROG_CXXCPP
      Set output variable `CXXCPP' to a command that runs the C++
@@ -1418,6 +1460,19 @@ in some cases whether they support certain features.
      If `ln -s' works on the current filesystem (the operating system
      and filesystem support symbolic links), set output variable `LN_S'
      to `ln -s', otherwise set it to `ln'.
+
+     If the link is put in a directory other than the current
+     directory, its meaning depends on whether `ln' or `ln -s' is used.
+     To safely create links using `$(LN_S)', either find out which
+     form is used and adjust the arguments, or always invoke `ln' in
+     the directory where the link is to be created.
+
+     In other words, it does not work to do
+          $(LN_S) foo /x/bar
+
+     Instead, do
+
+          (cd /x && $(LN_S) foo bar)
 
  - Macro: AC_PROG_RANLIB
      Set output variable `RANLIB' to `ranlib' if `ranlib' is found,
@@ -1602,6 +1657,10 @@ and in some cases how they respond when given certain arguments.
      define `CLOSEDIR_VOID'.  Otherwise, callers ought to check its
      return value for an error indicator.
 
+ - Macro: AC_FUNC_FNMATCH
+     If the `fnmatch' function is available and works (unlike the one on
+     SunOS 5.4), define `HAVE_FNMATCH'.
+
  - Macro: AC_FUNC_GETLOADAVG
      Check how to get the system load averages.  If the system has the
      `getloadavg' function, this macro defines `HAVE_GETLOADAVG', and
@@ -1647,8 +1706,16 @@ and in some cases how they respond when given certain arguments.
      variable `LIBOBJS'.
 
  - Macro: AC_FUNC_MMAP
-     If the `mmap' function exists and works correctly on memory mapped
-     files, define `HAVE_MMAP'.
+     If the `mmap' function exists and works correctly, define
+     `HAVE_MMAP'.  Only checks private fixed mapping of already-mapped
+     memory.
+
+ - Macro: AC_FUNC_SETPGRP
+     If `setpgrp' takes no argument (the POSIX.1 version), define
+     `SETPGRP_VOID'.  Otherwise, it is the BSD version, which takes two
+     process ID as arguments.  This macro does not check whether
+     `setpgrp' exists at all; if you need to work in that situation,
+     first call `AC_CHECK_FUNC' for `setpgrp'.
 
  - Macro: AC_FUNC_SETVBUF_REVERSED
      If `setvbuf' takes the buffering type as its second argument and
@@ -1723,10 +1790,14 @@ Writing Tests::.).
      ACTION-IF-NOT-FOUND is given, it is executed when one of the
      functions is not found.
 
- - Macro: AC_REPLACE_FUNCS (FUNCTION-NAME...)
-     For each given FUNCTION-NAME in the whitespace-separated argument
-     list that is not in the C library, add `FUNCTION-NAME.o' to the
-     value of the output variable `LIBOBJS'.
+ - Macro: AC_REPLACE_FUNCS (FUNCTION...)
+     Like calling `AC_CHECK_FUNCS' using an ACTION-IF-NOT-FOUND that
+     adds `FUNCTION.o' to the value of the output variable `LIBOBJS'.
+     You can declare a function for which your replacement version is
+     used by enclosing the prototype in `#ifndef HAVE_FUNCTION'.  If
+     the system has the function, it probably declares it in a header
+     file you should be including, so you shouldn't redeclare it, lest
+     your declaration conflict.
 
 
 File: autoconf.info,  Node: Header Files,  Next: Structures,  Prev: Library Functions,  Up: Existing Tests
@@ -2091,9 +2162,9 @@ Generic Typedef Checks
 particular test macros.
 
  - Macro: AC_CHECK_TYPE (TYPE, DEFAULT)
-     If the type TYPE is not defined in `sys/types.h' or `stdlib.h' (if
-     it exists), define it to be the C (or C++) builtin type DEFAULT;
-     e.g., `short' or `unsigned'.
+     If the type TYPE is not defined in `sys/types.h', or `stdlib.h' or
+     `stddef.h' if they exist, define it to be the C (or C++) builtin
+     type DEFAULT; e.g., `short' or `unsigned'.
 
 
 File: autoconf.info,  Node: Compiler Characteristics,  Next: System Services,  Prev: Typedefs,  Up: Existing Tests
@@ -2294,13 +2365,13 @@ macro.  *Note Writing Macros::, for how to do that.
 
 * Menu:
 
-* Examining Declarations::	Detecting header files and declarations.
+* Examining Declarations::      Detecting header files and declarations.
 * Examining Syntax::            Detecting language syntax features.
 * Examining Libraries::         Detecting functions and global variables.
-* Run Time::		        Testing for run-time features.
+* Run Time::                    Testing for run-time features.
 * Portable Shell::              Shell script portability pitfalls.
 * Testing Values and Files::    Checking strings and files.
-* Multiple Cases::		Tests for several possible values.
+* Multiple Cases::              Tests for several possible values.
 * Language Choice::             Selecting which language to use for testing.
 
 
@@ -2452,8 +2523,8 @@ cross-compiling.
 * Menu:
 
 * Test Programs::               Running test programs.
-* Guidelines::			General rules for writing test programs.
-* Test Functions::		Avoiding pitfalls in test programs.
+* Guidelines::                  General rules for writing test programs.
+* Test Functions::              Avoiding pitfalls in test programs.
 
 
 File: autoconf.info,  Node: Test Programs,  Next: Guidelines,  Up: Run Time
@@ -2477,8 +2548,7 @@ system while configuring.
      If the C compiler being used does not produce executables that run
      on the system where `configure' is being run, then the test
      program is not run.  If the optional shell commands
-     ACTION-IF-CROSS-COMPILING are given, they are run instead and this
-     macro calls `AC_C_CROSS' if it has not already been called.
+     ACTION-IF-CROSS-COMPILING are given, they are run instead.
      Otherwise, `configure' prints an error message and exits.
 
    Try to provide a pessimistic default value to use when
@@ -2497,14 +2567,12 @@ the correct values for the target system (*note Caching Results::.).
 
    To provide a default for calls of `AC_TRY_RUN' that are embedded in
 other macros, including a few of the ones that come with Autoconf, you
-can call `AC_C_CROSS' before running them.  Then, if the shell variable
+can call `AC_PROG_CC' before running them.  Then, if the shell variable
 `cross_compiling' is set to `yes', use an alternate method to get the
 results instead of calling the macros.
 
  - Macro: AC_C_CROSS
-     If the C compiler being used does not produce executables that can
-     run on the system where `configure' is being run, set the shell
-     variable `cross_compiling' to `yes', otherwise `no'.
+     This macro is obsolete; it does nothing.
 
 
 File: autoconf.info,  Node: Guidelines,  Next: Test Functions,  Prev: Test Programs,  Up: Run Time
@@ -2693,11 +2761,15 @@ is used in tests that follow in `configure.in'.
 
  - Macro: AC_LANG_C
      Do compilation tests using `CC' and `CPP' and use extension `.c'
-     for test programs.
+     for test programs.  Set the shell variable `cross_compiling' to
+     the value computed by `AC_PROG_CC' if it has been run, empty
+     otherwise.
 
  - Macro: AC_LANG_CPLUSPLUS
      Do compilation tests using `CXX' and `CXXCPP' and use extension
-     `.C' for test programs.
+     `.C' for test programs.  Set the shell variable `cross_compiling'
+     to the value computed by `AC_PROG_CXX' if it has been run, empty
+     otherwise.
 
  - Macro: AC_LANG_SAVE
      Remember the current language (as set by `AC_LANG_C' or
@@ -2734,7 +2806,7 @@ a message letting the user know the result of the test.
 * Menu:
 
 * Defining Symbols::            Defining C preprocessor symbols.
-* Setting Output Variables::	Replacing variables in output files.
+* Setting Output Variables::    Replacing variables in output files.
 * Caching Results::             Speeding up subsequent `configure' runs.
 * Printing Messages::           Notifying users of progress or problems.
 
@@ -2894,7 +2966,7 @@ of the checks every time.
 * Menu:
 
 * Cache Variable Names::        Shell variables used in caches.
-* Cache Files::	        	Files `configure' uses for caching.
+* Cache Files::                 Files `configure' uses for caching.
 
 
 File: autoconf.info,  Node: Cache Variable Names,  Next: Cache Files,  Up: Caching Results
@@ -2933,11 +3005,9 @@ ADDITIONAL-OPTIONS
      applies to.  For example, `broken' or `set'.  This part of the
      name may be omitted if it does not apply.
 
-   Like their names, the values that may be assigned to cache variables
-have a few restrictions.  The values may not contain single quotes or
-curly braces.  Usually, their values will be boolean (`yes' or `no') or
-the names of files or functions; so this is not an important
-restriction.
+   The values assigned to cache variables may not contain newlines.
+Usually, their values will be boolean (`yes' or `no') or the names of
+files or functions; so this is not an important restriction.
 
 
 File: autoconf.info,  Node: Cache Files,  Prev: Cache Variable Names,  Up: Caching Results
@@ -2993,7 +3063,10 @@ Printing Messages
 information.  The following macros print messages in ways appropriate
 for each kind.  The arguments to all of them get enclosed in shell
 double quotes, so the shell performs variable and backquote substitution
-on them.
+on them.  You can print a message containing a comma by quoting the
+message with the `m4' quote characters:
+
+     AC_MSG_RESULT([never mind, I found the BASIC compiler])
 
    These macros are all wrappers around the `echo' shell command.
 `configure' scripts should rarely need to run `echo' directly to print
@@ -3069,10 +3142,10 @@ macros.
 
 * Menu:
 
-* Macro Definitions::		Basic format of an Autoconf macro.
+* Macro Definitions::           Basic format of an Autoconf macro.
 * Macro Names::                 What to call your new macros.
-* Quoting::			Protecting macros from unwanted expansion.
-* Dependencies Between Macros::	What to do when macros depend on other macros.
+* Quoting::                     Protecting macros from unwanted expansion.
+* Dependencies Between Macros:: What to do when macros depend on other macros.
 
 
 File: autoconf.info,  Node: Macro Definitions,  Next: Macro Names,  Up: Writing Macros
@@ -3232,8 +3305,8 @@ macros are called in an order that might cause incorrect operation.
 
 * Menu:
 
-* Prerequisite Macros::		Ensuring required information.
-* Suggested Ordering::		Warning about possible ordering problems.
+* Prerequisite Macros::         Ensuring required information.
+* Suggested Ordering::          Warning about possible ordering problems.
 * Obsolete Macros::             Warning about old ways of doing things.
 
 
@@ -3470,7 +3543,8 @@ together, like in this fragment:
      Make `AC_OUTPUT' link each of the existing files SOURCE to the
      corresponding link name DEST.  Makes a symbolic link if possible,
      otherwise a hard link.  The DEST and SOURCE names should be
-     relative to the top level source or build directory.
+     relative to the top level source or build directory.  This macro
+     may be called multiple times.
 
      For example, this call:
 
@@ -3527,6 +3601,15 @@ neither `yes' nor `no' could include a name or number of a version of
 the other package, to specify more precisely which other package this
 program is supposed to work with.  If no argument is given, it defaults
 to `yes'.  `--without-PACKAGE' is equivalent to `--with-PACKAGE=no'.
+
+   `configure' scripts do not complain about `--with-PACKAGE' options
+that they do not support.  This behavior permits configuring a source
+tree containing multiple packages with a top-level `configure' script
+when the packages support different options, without spurious error
+messages about options that some of the packages support.  An
+unfortunate side effect is that option spelling errors are not
+diagnosed.  No better approach to this problem has been suggested so
+far.
 
    For each external software package that may be used, `configure.in'
 should call `AC_ARG_WITH' to detect whether the `configure' user asked
@@ -3585,6 +3668,15 @@ and the argument.  Giving an argument of `no' requests that the feature
 `--enable-debug=stabs'.  If no argument is given, it defaults to `yes'.
 `--disable-FEATURE' is equivalent to `--enable-FEATURE=no'.
 
+   `configure' scripts do not complain about `--enable-FEATURE' options
+that they do not support.  This behavior permits configuring a source
+tree containing multiple packages with a top-level `configure' script
+when the packages support different options, without spurious error
+messages about options that some of the packages support.  An
+unfortunate side effect is that option spelling errors are not
+diagnosed.  No better approach to this problem has been suggested so
+far.
+
    For each optional feature, `configure.in' should call
 `AC_ARG_ENABLE' to detect whether the `configure' user asked to include
 it.  Whether each feature is included or not by default, and which
@@ -3600,7 +3692,7 @@ arguments are valid, is up to you.
 
      The option's argument is available to the shell commands
      ACTION-IF-GIVEN in the shell variable `enableval', which is
-     actually just the value of the shell variable `enable_PACKAGE',
+     actually just the value of the shell variable `enable_FEATURE',
      with any `-' characters changed into `_'.  You may use that
      variable instead, if you wish.  The HELP-STRING argument is like
      that of `AC_ARG_WITH' (*note External Software::.).
@@ -3817,9 +3909,11 @@ command `configure --prefix=/usr/share/local/gnu' would read this file
 
      # config.site for configure
      #
-     # Default --prefix and --exec-prefix.
+     # Change some defaults.
      test "$prefix" = NONE && prefix=/usr/share/local/gnu
      test "$exec_prefix" = NONE && exec_prefix=/usr/local/gnu
+     test "$sharedstatedir" = '${prefix}/com' && sharedstatedir=/var
+     test "$localstatedir" = '${prefix}/var' && localstatedir=/var
      #
      # Give Autoconf 2.x generated configure scripts a shared default
      # cache file for feature test results, architecture-specific.
@@ -4044,7 +4138,9 @@ operates.
 `--quiet'
 `--silent'
 `-q'
-     Do not print messages saying which checks are being made.
+     Do not print messages saying which checks are being made.  To
+     suppress all normal output, redirect it to `/dev/null' (any error
+     messages will still be shown).
 
 `--srcdir=DIR'
      Look for the package's source code in directory DIR.  Usually
@@ -4550,11 +4646,11 @@ let there be light...
 
 * Menu:
 
-* Genesis::			Prehistory and naming of `configure'.
-* Exodus::			The plagues of `m4' and Perl.
-* Leviticus::			The priestly code of portability arrives.
-* Numbers::			Growth and contributors.
-* Deuteronomy::			Approaching the promises of easy configuration.
+* Genesis::                     Prehistory and naming of `configure'.
+* Exodus::                      The plagues of `m4' and Perl.
+* Leviticus::                   The priestly code of portability arrives.
+* Numbers::                     Growth and contributors.
+* Deuteronomy::                 Approaching the promises of easy configuration.
 
 
 File: autoconf.info,  Node: Genesis,  Next: Exodus,  Up: History
@@ -4958,11 +5054,11 @@ Autoconf checks.
 * Menu:
 
 * AC_MACRODIR:                          Invoking autoupdate.
-* AC_MACRODIR:                          Invoking autoheader.
-* AC_MACRODIR:                          Invoking autoreconf.
-* AC_MACRODIR:                          Invoking autoconf.
-* AC_MACRODIR:                          Invoking ifnames.
 * AC_MACRODIR:                          Invoking autoscan.
+* AC_MACRODIR:                          Invoking autoreconf.
+* AC_MACRODIR:                          Invoking ifnames.
+* AC_MACRODIR:                          Invoking autoheader.
+* AC_MACRODIR:                          Invoking autoconf.
 * CONFIG_FILES:                         Invoking config.status.
 * CONFIG_HEADERS:                       Invoking config.status.
 * CONFIG_SHELL:                         Invoking config.status.
@@ -4991,8 +5087,8 @@ how this is done.
 * build_cpu:                            System Type Variables.
 * build_os:                             System Type Variables.
 * build_vendor:                         System Type Variables.
-* CC:                                   UNIX Variants.
 * CC:                                   Particular Programs.
+* CC:                                   UNIX Variants.
 * CC:                                   Particular Programs.
 * CFLAGS:                               Preset Output Variables.
 * CFLAGS:                               Particular Programs.
@@ -5025,11 +5121,12 @@ how this is done.
 * libexecdir:                           Preset Output Variables.
 * LIBOBJS:                              Particular Functions.
 * LIBOBJS:                              Particular Functions.
+* LIBOBJS:                              Particular Functions.
 * LIBOBJS:                              Generic Functions.
 * LIBOBJS:                              Structures.
+* LIBS:                                 UNIX Variants.
+* LIBS:                                 UNIX Variants.
 * LIBS:                                 Preset Output Variables.
-* LIBS:                                 UNIX Variants.
-* LIBS:                                 UNIX Variants.
 * LN_S:                                 Particular Programs.
 * localstatedir:                        Preset Output Variables.
 * mandir:                               Preset Output Variables.
@@ -5119,6 +5216,7 @@ use these names in `#if' directives.
 * off_t:                                Particular Typedefs.
 * pid_t:                                Particular Typedefs.
 * RETSIGTYPE:                           Particular Typedefs.
+* SETPGRP_VOID:                         Particular Functions.
 * SETVBUF_REVERSED:                     Particular Functions.
 * size_t:                               Particular Typedefs.
 * STDC_HEADERS:                         Particular Headers.
@@ -5206,11 +5304,13 @@ list easier to use, the macros are listed without their preceding `AC_'.
 * FUNC_ALLOCA:                          Particular Functions.
 * FUNC_CHECK:                           Old Macro Names.
 * FUNC_CLOSEDIR_VOID:                   Particular Functions.
+* FUNC_FNMATCH:                         Particular Functions.
 * FUNC_GETLOADAVG:                      Particular Functions.
 * FUNC_GETMNTENT:                       Particular Functions.
 * FUNC_GETPGRP:                         Particular Functions.
 * FUNC_MEMCMP:                          Particular Functions.
 * FUNC_MMAP:                            Particular Functions.
+* FUNC_SETPGRP:                         Particular Functions.
 * FUNC_SETVBUF_REVERSED:                Particular Functions.
 * FUNC_STRCOLL:                         Particular Functions.
 * FUNC_STRFTIME:                        Particular Functions.
@@ -5351,117 +5451,117 @@ list easier to use, the macros are listed without their preceding `AC_'.
 
 Tag Table:
 Node: Top1173
-Node: Introduction9312
-Node: Making configure Scripts13152
-Node: Writing configure.in16217
-Node: Invoking autoscan19917
-Node: Invoking ifnames22222
-Node: Invoking autoconf23712
-Node: Invoking autoreconf25550
-Node: Setup27870
-Node: Input28756
-Node: Output30479
-Node: Makefile Substitutions33440
-Node: Preset Output Variables35024
-Node: Build Directories39526
-Node: Automatic Remaking41159
-Node: Configuration Headers43245
-Node: Header Templates45612
-Node: Invoking autoheader46791
-Node: Subdirectories49939
-Node: Default Prefix51282
-Node: Versions52686
-Node: Existing Tests54590
-Node: Alternative Programs56055
-Node: Particular Programs56719
-Node: Generic Programs62569
-Node: Libraries65395
-Node: Library Functions67224
-Node: Particular Functions67782
-Node: Generic Functions74085
-Node: Header Files75928
-Node: Particular Headers76487
-Node: Generic Headers83458
-Node: Structures84760
-Node: Typedefs86997
-Node: Particular Typedefs87501
-Node: Generic Typedefs88701
-Node: Compiler Characteristics89144
-Node: System Services91769
-Node: UNIX Variants94118
-Node: Writing Tests96137
-Node: Examining Declarations98103
-Node: Examining Syntax100573
-Node: Examining Libraries101630
-Node: Run Time104189
-Node: Test Programs105150
-Node: Guidelines107687
-Node: Test Functions108876
-Node: Portable Shell110419
-Node: Testing Values and Files112351
-Node: Multiple Cases114006
-Node: Language Choice115204
-Node: Results116762
-Node: Defining Symbols117521
-Node: Setting Output Variables120530
-Node: Caching Results122376
-Node: Cache Variable Names124657
-Node: Cache Files126206
-Node: Printing Messages128304
-Node: Writing Macros131591
-Node: Macro Definitions132210
-Node: Macro Names133315
-Node: Quoting135766
-Node: Dependencies Between Macros137668
-Node: Prerequisite Macros138300
-Node: Suggested Ordering139755
-Node: Obsolete Macros141285
-Node: Manual Configuration142509
-Node: Specifying Names143408
-Node: Canonicalizing145280
-Node: System Type Variables146594
-Node: Using System Type147341
-Node: Site Configuration148788
-Node: External Software149561
-Node: Package Options152259
-Node: Site Details154526
-Node: Transforming Names155749
-Node: Transformation Options156927
-Node: Transformation Examples157393
-Node: Transformation Rules158961
-Node: Site Defaults160370
-Node: Invoking configure164154
-Node: Basic Installation165103
-Node: Compilers and Options167683
-Node: Multiple Architectures168332
-Node: Installation Names169318
-Node: Optional Features170502
-Node: System Type171272
-Node: Sharing Defaults172294
-Node: Operation Controls172918
-Node: Invoking config.status173793
-Node: Questions177181
-Node: Distributing177713
-Node: Why GNU m4178839
-Node: Bootstrapping179652
-Node: Why Not Imake180268
-Node: Upgrading184677
-Node: Changed File Names186198
-Node: Changed Makefiles186934
-Node: Changed Macros188030
-Node: Invoking autoupdate189277
-Node: Changed Results190868
-Node: Changed Macro Writing192970
-Node: History194233
-Node: Genesis194940
-Node: Exodus196113
-Node: Leviticus199162
-Node: Numbers200685
-Node: Deuteronomy202601
-Node: Old Macro Names205265
-Node: Environment Variable Index208314
-Node: Output Variable Index209316
-Node: Preprocessor Symbol Index214177
-Node: Macro Index219047
+Node: Introduction9666
+Node: Making configure Scripts13506
+Node: Writing configure.in16587
+Node: Invoking autoscan20287
+Node: Invoking ifnames22592
+Node: Invoking autoconf24082
+Node: Invoking autoreconf25920
+Node: Setup28756
+Node: Input29661
+Node: Output31384
+Node: Makefile Substitutions35021
+Node: Preset Output Variables36624
+Node: Build Directories41126
+Node: Automatic Remaking42759
+Node: Configuration Headers44845
+Node: Header Templates47359
+Node: Invoking autoheader48538
+Node: Subdirectories51686
+Node: Default Prefix53081
+Node: Versions54485
+Node: Existing Tests56389
+Node: Alternative Programs57943
+Node: Particular Programs58607
+Node: Generic Programs65809
+Node: Libraries68635
+Node: Library Functions70464
+Node: Particular Functions71022
+Node: Generic Functions77854
+Node: Header Files79958
+Node: Particular Headers80517
+Node: Generic Headers87488
+Node: Structures88790
+Node: Typedefs91027
+Node: Particular Typedefs91531
+Node: Generic Typedefs92731
+Node: Compiler Characteristics93188
+Node: System Services95813
+Node: UNIX Variants98162
+Node: Writing Tests100181
+Node: Examining Declarations102174
+Node: Examining Syntax104644
+Node: Examining Libraries105701
+Node: Run Time108260
+Node: Test Programs109248
+Node: Guidelines111559
+Node: Test Functions112748
+Node: Portable Shell114291
+Node: Testing Values and Files116223
+Node: Multiple Cases117878
+Node: Language Choice119076
+Node: Results120889
+Node: Defining Symbols121651
+Node: Setting Output Variables124660
+Node: Caching Results126506
+Node: Cache Variable Names128794
+Node: Cache Files130254
+Node: Printing Messages132352
+Node: Writing Macros135800
+Node: Macro Definitions136446
+Node: Macro Names137551
+Node: Quoting140002
+Node: Dependencies Between Macros141904
+Node: Prerequisite Macros142551
+Node: Suggested Ordering144006
+Node: Obsolete Macros145536
+Node: Manual Configuration146760
+Node: Specifying Names147659
+Node: Canonicalizing149531
+Node: System Type Variables150845
+Node: Using System Type151592
+Node: Site Configuration153086
+Node: External Software153859
+Node: Package Options157035
+Node: Site Details159782
+Node: Transforming Names161005
+Node: Transformation Options162183
+Node: Transformation Examples162649
+Node: Transformation Rules164217
+Node: Site Defaults165626
+Node: Invoking configure169532
+Node: Basic Installation170481
+Node: Compilers and Options173061
+Node: Multiple Architectures173710
+Node: Installation Names174696
+Node: Optional Features175880
+Node: System Type176650
+Node: Sharing Defaults177672
+Node: Operation Controls178296
+Node: Invoking config.status179282
+Node: Questions182670
+Node: Distributing183202
+Node: Why GNU m4184328
+Node: Bootstrapping185141
+Node: Why Not Imake185757
+Node: Upgrading190166
+Node: Changed File Names191687
+Node: Changed Makefiles192423
+Node: Changed Macros193519
+Node: Invoking autoupdate194766
+Node: Changed Results196357
+Node: Changed Macro Writing198459
+Node: History199722
+Node: Genesis200514
+Node: Exodus201687
+Node: Leviticus204736
+Node: Numbers206259
+Node: Deuteronomy208175
+Node: Old Macro Names210839
+Node: Environment Variable Index213888
+Node: Output Variable Index214890
+Node: Preprocessor Symbol Index219813
+Node: Macro Index224745
 
 End Tag Table

@@ -1,3 +1,27 @@
+Major changes in release 2.12:
+
+* AC_OUTPUT and AC_CONFIG_HEADER can create output files by
+  concatenating multiple input files separated by colons, like so:
+  AC_CONFIG_HEADER(config.h:conf.pre:config.h.in:conf.post)
+  AC_OUTPUT(Makefile:Makefile.in:Makefile.rules)
+  The arguments may be shell variables, to compute the lists on the fly.
+* AC_LINK_FILES and AC_CONFIG_SUBDIRS may be called multiple times.
+* New macro AC_OUTPUT_COMMANDS adds more commands to run in config.status.
+* Bug fixes.
+
+Major changes in release 2.11:
+
+* AC_PROG_CC and AC_PROG_CXX check whether the compiler works.
+  They also default CFLAGS/CXXFLAGS to "-g -O2" for gcc, instead of "-g -O".
+* AC_REPLACE_FUNCS defines HAVE_foo if the system has the function `foo'.
+* AC_CONFIG_HEADER expands shell variables in its argument.
+* New macros: AC_FUNC_FNMATCH, AC_FUNC_SETPGRP.
+* The "checking..." messages and the source code for test programs that
+  fail are saved in config.log. 
+* Another workaround has been added for seds with small command length limits.
+* config.sub and config.guess recognize more system types.
+* Bug fixes.
+
 Major changes in release 2.10:
 
 * Bug fixes.

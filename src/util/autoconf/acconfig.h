@@ -67,6 +67,9 @@
 /* Define if you don't have vprintf but do have _doprnt.  */
 #undef HAVE_DOPRNT
 
+/* Define if your system has a working fnmatch function.  */
+#undef HAVE_FNMATCH
+
 /* Define if your system has its own `getloadavg' function.  */
 #undef HAVE_GETLOADAVG
 
@@ -179,6 +182,9 @@
 /* Define as the return type of signal handlers (int or void).  */
 #undef RETSIGTYPE
 
+/* Define if the `setpgrp' function takes no argument.  */
+#undef SETPGRP_VOID
+
 /* Define if the setvbuf function takes the buffering type as its second
    argument and the buffer pointer as the third, as on System V
    before release 3.  */
@@ -242,6 +248,9 @@
 /* Define if your processor stores words with the most significant
    byte first (like Motorola and SPARC, unlike Intel and VAX).  */
 #undef WORDS_BIGENDIAN
+
+/* Define if the X Window System is missing or not being used.  */
+#undef X_DISPLAY_MISSING
 
 /* Define if lex declares yytext as a char * by default, not a char[].  */
 #undef YYTEXT_POINTER

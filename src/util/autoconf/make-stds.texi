@@ -28,6 +28,8 @@ describes conventions for writing the Makefiles for GNU programs.
 * Command Variables::		Variables for Specifying Commands
 * Directory Variables::		Variables for Installation Directories
 * Standard Targets::		Standard Targets for Users
+* Install Command Categories::  Three categories of commands in the `install'
+                                  rule: normal, pre-install and post-install.
 @end menu
 
 @node Makefile Basics
@@ -65,9 +67,10 @@ part of the make or @file{$(srcdir)/} if the file is an unchanging part
 of the source code.  Without one of these prefixes, the current search
 path is used.
 
-The distinction between @file{./} and @file{$(srcdir)/} is important
-when using the @samp{--srcdir} option to @file{configure}.  A rule of
-the form:
+The distinction between @file{./} (the @dfn{build directory}) and
+@file{$(srcdir)/} (the @dfn{source directory}) is important because
+users can build in a separate directory using the @samp{--srcdir} option
+to @file{configure}.  A rule of the form:
 
 @smallexample
 foo.1 : foo.man sedscript
@@ -75,9 +78,8 @@ foo.1 : foo.man sedscript
 @end smallexample
 
 @noindent
-will fail when the current directory is not the source directory,
-because @file{foo.man} and @file{sedscript} are not in the current
-directory.
+will fail when the build directory is not the source directory, because
+@file{foo.man} and @file{sedscript} are in the the source directory.
 
 When using GNU @code{make}, relying on @samp{VPATH} to find the source
 file will work in the case where there is a single dependency file,
@@ -109,6 +111,18 @@ foo.1 : foo.man sedscript
         sed -e $(srcdir)/sedscript $(srcdir)/foo.man > $@@
 @end smallexample
 
+GNU distributions usually contain some files which are not source
+files---for example, Info files, and the output from Autoconf, Automake,
+Bison or Flex.  Since these files normally appear in the source
+directory, they should always appear in the source directory, not in the
+build directory.  So Makefile rules to update them should put the
+updated files in the source directory.
+
+However, if a file does not appear in the distribution, then the
+Makefile should not put it in the source directory, because building a
+program in ordinary circumstances should not modify the source directory
+in any way.
+
 Try to make the build and installation targets, at least (and all their
 subtargets) work correctly with a parallel @code{make}.
 
@@ -122,10 +136,16 @@ special features of @code{ksh} or @code{bash}.
 The @code{configure} script and the Makefile rules for building and
 installation should not use any utilities directly except these:
 
+@c dd find
+@c gunzip gzip md5sum
+@c mkfifo mknod tee uname 
+
 @example
-cat cmp cp echo egrep expr false grep
-ln mkdir mv pwd rm rmdir sed test touch true
+cat cmp cp diff echo egrep expr false grep install-info
+ln ls mkdir mv pwd rm rmdir sed sleep sort tar test touch true
 @end example
+
+The compression program @code{gzip} can be used in the @code{dist} rule.
 
 Stick to the generally supported options for these programs.  For
 example, don't use @samp{mkdir -p}, convenient as it may be, because
@@ -140,25 +160,32 @@ user can substitute alternatives.  Here are some of the programs we
 mean:
 
 @example
-ar bison cc flex install ld lex
+ar bison cc flex install ld ldconfig lex
 make makeinfo ranlib texi2dvi yacc
 @end example
 
-Use the following @code{make} variables:
+Use the following @code{make} variables to run those programs:
 
 @example
-$(AR) $(BISON) $(CC) $(FLEX) $(INSTALL) $(LD) $(LEX)
+$(AR) $(BISON) $(CC) $(FLEX) $(INSTALL) $(LD) $(LDCONFIG) $(LEX)
 $(MAKE) $(MAKEINFO) $(RANLIB) $(TEXI2DVI) $(YACC)
 @end example
 
-When you use @code{ranlib}, you should make sure nothing bad happens if
-the system does not have @code{ranlib}.  Arrange to ignore an error
-from that command, and print a message before the command to tell the
-user that failure of the @code{ranlib} command does not mean a problem.
-(The Autoconf @samp{AC_PROG_RANLIB} macro can help with this.)
+When you use @code{ranlib} or @code{ldconfig}, you should make sure
+nothing bad happens if the system does not have the program in question.
+Arrange to ignore an error from that command, and print a message before
+the command to tell the user that failure of this command does not mean
+a problem.  (The Autoconf @samp{AC_PROG_RANLIB} macro can help with
+this.)
 
 If you use symbolic links, you should implement a fallback for systems
 that don't have symbolic links.
+
+Additional utilities that can be used via Make variables are:
+
+@example
+chgrp chmod chown mknod
+@end example
 
 It is ok to use other utilities in Makefile portions (or scripts)
 intended only for particular systems where you know those utilities
@@ -366,6 +393,20 @@ default, it should be @file{/usr/local/info}, but it should be written
 as @file{$(prefix)/info}.
 (If you are using Autoconf, write it as @samp{@@infodir@@}.)
 
+@item lispdir
+The directory for installing any Emacs Lisp files in this package.  By
+default, it should be @file{/usr/local/share/emacs/site-lisp}, but it
+should be written as @file{$(prefix)/share/emacs/site-lisp}.
+
+If you are using Autoconf, write the default as @samp{@@lispdir@@}.
+In order to make @samp{@@lispdir@@} work, you need the following lines
+in your @file{configure.in} file:
+
+@example
+lispdir='$@{datadir@}/emacs/site-lisp'
+AC_SUBST(lispdir)
+@end example
+
 @item includedir
 @c rewritten to avoid overfull hbox --roland
 The directory for installing header files to be included by user
@@ -527,6 +568,7 @@ Here is a sample rule to install an Info file:
 @comment Please do not reformat it without talking to roland@gnu.ai.mit.edu.
 @smallexample
 $(infodir)/foo.info: foo.info
+        $(POST_INSTALL)
 # There may be a newer info file in . than in srcdir.
         -if test -f foo.info; then d=.; \
          else d=$(srcdir); fi; \
@@ -543,17 +585,24 @@ $(infodir)/foo.info: foo.info
         else true; fi
 @end smallexample
 
+When writing the @code{install} target, you must classify all the
+commands into three categories: normal ones, @dfn{pre-installation}
+commands and @dfn{post-installation} commands.  @xref{Install Command
+Categories}.
+
 @item uninstall
-Delete all the installed files that the @samp{install} target would
-create (but not the noninstalled files such as @samp{make all} would
-create).
+Delete all the installed files---the copies that the @samp{install}
+target creates.
 
 This rule should not modify the directories where compilation is done,
 only the directories where files are installed.
 
+The uninstallation commands are divided into three categories, just like
+the installation commands.  @xref{Install Command Categories}.
+
 @item install-strip
 Like @code{install}, but strip the executable files while installing
-them.  The definition of this target can be very simple:
+them.  In many cases, the definition of this target can be very simple:
 
 @smallexample
 install-strip:
@@ -638,6 +687,12 @@ You must define the variable @code{MAKEINFO} in the Makefile.  It should
 run the @code{makeinfo} program, which is part of the Texinfo
 distribution.
 
+Normally a GNU distribution comes with Info files, and that means the
+Info files are present in the source directory.  Therefore, the Make
+rule for an info file should update it in the source directory.  When
+users build the package, ordinarily Make will not update the Info files
+because they will already be up to date.
+
 @item dvi
 Generate DVI files for all Texinfo documentation.
 For example:
@@ -720,3 +775,119 @@ installdirs: mkinstalldirs
 This rule should not modify the directories where compilation is done.
 It should do nothing but create installation directories.
 @end table
+
+@node Install Command Categories
+@section Install Command Categories
+
+@cindex pre-installation commands
+@cindex post-installation commands
+When writing the @code{install} target, you must classify all the
+commands into three categories: normal ones, @dfn{pre-installation}
+commands and @dfn{post-installation} commands.
+
+Normal commands move files into their proper places, and set their
+modes.  They may not alter any files except the ones that come entirely
+from the package they belong to.
+
+Pre-installation and post-installation commands may alter other files;
+in particular, they can edit global configuration files or data bases.
+
+Pre-installation commands are typically executed before the normal
+commands, and post-installation commands are typically run after the
+normal commands.
+
+The most common use for a post-installation command is to run
+@code{install-info}.  This cannot be done with a normal command, since
+it alters a file (the Info directory) which does not come entirely and
+solely from the package being installed.  It is a post-installation
+command because it needs to be done after the normal command which
+installs the package's Info files.
+
+Most programs don't need any pre-installation commands, but we have the
+feature just in case it is needed.
+
+To classify the commands in the @code{install} rule into these three
+categories, insert @dfn{category lines} among them.  A category line
+specifies the category for the commands that follow.
+
+A category line consists of a tab and a reference to a special Make
+variable, plus an optional comment at the end.  There are three
+variables you can use, one for each category; the variable name
+specifies the category.  Category lines are no-ops in ordinary execution
+because these three Make variables are normally undefined (and you
+@emph{should not} define them in the makefile).
+
+Here are the three possible category lines, each with a comment that
+explains what it means:
+
+@smallexample
+        $(PRE_INSTALL)     # @r{Pre-install commands follow.}
+        $(POST_INSTALL)    # @r{Post-install commands follow.}
+        $(NORMAL_INSTALL)  # @r{Normal commands follow.}
+@end smallexample
+
+If you don't use a category line at the beginning of the @code{install}
+rule, all the commands are classified as normal until the first category
+line.  If you don't use any category lines, all the commands are
+classified as normal.
+
+These are the category lines for @code{uninstall}:
+
+@smallexample
+        $(PRE_UNINSTALL)     # @r{Pre-uninstall commands follow.}
+        $(POST_UNINSTALL)    # @r{Post-uninstall commands follow.}
+        $(NORMAL_UNINSTALL)  # @r{Normal commands follow.}
+@end smallexample
+
+Typically, a pre-uninstall command would be used for deleting entries
+from the Info directory.
+
+If the @code{install} or @code{uninstall} target has any dependencies
+which act as subroutines of installation, then you should start
+@emph{each} dependency's commands with a category line, and start the
+main target's commands with a category line also.  This way, you can
+ensure that each command is placed in the right category regardless of
+which of the dependencies actually run.
+
+Pre-installation and post-installation commands should not run any
+programs except for these:
+
+@example
+[ basename bash cat chgrp chmod chown cmp cp dd diff echo
+egrep expand expr false fgrep find getopt grep gunzip gzip
+hostname install install-info kill ldconfig ln ls md5sum
+mkdir mkfifo mknod mv printenv pwd rm rmdir sed sort tee
+test touch true uname xargs yes
+@end example
+
+@cindex binary packages
+The reason for distinguishing the commands in this way is for the sake
+of making binary packages.  Typically a binary package contains all the
+executables and other files that need to be installed, and has its own
+method of installing them---so it does not need to run the normal
+installation commands.  But installing the binary package does need to
+execute the pre-installation and post-installation commands.
+
+Programs to build binary packages work by extracting the
+pre-installation and post-installation commands.  Here is one way of
+extracting the pre-installation commands:
+
+@smallexample
+make -n install -o all \
+      PRE_INSTALL=pre-install \
+      POST_INSTALL=post-install \
+      NORMAL_INSTALL=normal-install \
+  | gawk -f pre-install.awk
+@end smallexample
+
+@noindent
+where the file @file{pre-install.awk} could contain this:
+
+@smallexample
+$0 ~ /^\t[ \t]*(normal_install|post_install)[ \t]*$/ @{on = 0@}
+on @{print $0@}
+$0 ~ /^\t[ \t]*pre_install[ \t]*$/ @{on = 1@}
+@end smallexample
+
+The resulting file of pre-installation commands is executed as a shell
+script as part of installing the binary package.

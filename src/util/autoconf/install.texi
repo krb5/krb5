@@ -193,6 +193,8 @@ Print a summary of the options to @code{configure}, and exit.
 @itemx --silent
 @itemx -q
 Do not print messages saying which checks are being made.
+To suppress all normal output, redirect it to @file{/dev/null}
+(any error messages will still be shown).
 
 @item --srcdir=@var{dir}
 Look for the package's source code in directory @var{dir}.  Usually

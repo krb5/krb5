@@ -40,8 +40,13 @@ all:
 info:
 dvi:
 
-check: site.exp all
-	@echo This only works if you have the DejaGNU runtest program installed...
+dejacheck:
+	@if $(SHELL) -c 'runtest --version' > /dev/null 2>&1; then :; else \
+	  echo ERROR: the autoconf tests require the DejaGNU runtest program; \
+	  exit 1; \
+	fi
+
+check: dejacheck site.exp all
 	$(RUNTEST) $(RUNTESTFLAGS) --tool autoconf AUTOCONF=${AUTOCONF} \
 	AUTOCONFFLAGS="${AUTOCONFFLAGS}" --srcdir $(srcdir)
 

@@ -1,26 +1,296 @@
-Tue Jul  9 18:24:12 1996  Marc Horowitz  <marc@mit.edu>
+Tue Nov 26 13:00:28 1996  David J MacKenzie  <djm@catapult.va.pubnix.com>
 
-	* autoheader.sh (TEMPLATES): add ./acconfig.h to the list of
- 	header templates used.  This is necessary when a subpackage is
- 	being autoreconf'd.
+	* Version 2.12.
 
-	* acgeneral.m4 (AC_CACHE_CHECK): added, from autoconf 2.7.  db2
- 	needs it.
+Wed Nov 20 13:00:21 1996  David J MacKenzie  <djm@catapult.va.pubnix.com>
 
-Wed Jun 12 18:17:17 1996  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
+	* Test release 2.11.2.
 
-	* autoconf.texi (Output): document changes to AC_OUTPUT
+	* acgeneral.m4 (AC_OUTPUT): Remove a now-wrong test for whether to
+	make an unquoted here document.
+	(AC_CACHE_SAVE): Double-up backslashes in double quotes.
+	From Paul Eggert.
 
-Tue Jun 11 23:41:10 1996  Tom Yu  <tlyu@mit.edu>
+	* Test release 2.11.1.
 
-	* acgeneral.m4 (AC_OUTPUT_FILES): allow for multiple files in
-		AC_OUTPUT; this is done via
-		AC_OUTPUT(outfile[:infile1[+infile2[+infile3...]]]).  The
-		source files are concatenated and substituted over.
+	* acgeneral.m4 (AC_TRY_COMPILE, AC_TRY_LINK): Make the final
+	newline consistent with the other AC_TRY_* macros: no final dnl
+	is needed to avoid extraneous blank lines.
+	(AC_CHECK_LIB, AC_HAVE_LIBRARY, AC_COMPILE_CHECK): Remove
+	extraneous dnl's.
+	(AC_DIVERSION_CMDS, AC_DIVERSION_ICMDS): New macros.
+	(AC_OUTPUT_COMMANDS, AC_OUTPUT): Use them instead of appending to
+	list macros.
+
+	* acgeneral.m4 (AC_CACHE_SAVE): Handle cache variable values
+	correctly even if they contain single quote, or are quoted by
+	the shell.  From Paul Eggert <eggert@twinsun.com>.
+	(AC_INIT_PREPARE): Set LC_MESSAGES to C if set.
+	From Hans Olsson <Hans.Olsson@dna.lth.se>.
+	Set LC_CTYPE to C if set.
+	From tom@vlsivie.tuwien.ac.AT (Thomas Winder).
+	* autoconf.sh, autoheader.sh: Likewise set LC_MESSAGES and LC_CTYPE.
+
+Tue Nov 19 10:29:06 1996  David J MacKenzie  <djm@catapult.va.pubnix.com>
+
+	* testsuite/autoconf.g/sizeof.exp: Use the v2 macro name.
+
+	* acgeneral.m4 (AC_OUTPUT_FILES, AC_OUTPUT_HEADER): Support
+	creating output files from multiple pieces, concatenated.
+	Suggested by "Theodore Ts'o" <tytso@MIT.EDU>.
+	(AC_LINK_FILES): If called more than once, concatenate the
+	arguments.  From Roland McGrath.
+	(AC_CONFIG_SUBDIRS): Likewise.
+	(AC_OUTPUT_COMMANDS): New macro.  Suggested by
+	Tom Tromey <tromey@creche.cygnus.com>.
+	(AC_OUTPUT): Use the lists it sets.
+
+	* acgeneral.m4 (AC_TRY_RUN_NATIVE): Fail if linking fails, like
+	AC_TRY_LINK.
+	(AC_TRY_RUN): Don't require AC_C_CROSS.
+	(AC_TRY_COMPILER): New macro.
+	(AC_LANG_C, AC_LANG_CPLUSPLUS): Set cross_compiling.
+	* acspecific.m4 (AC_PROG_CC_WORKS, AC_PROG_CXX_WORKS): Use
+	AC_TRY_COMPILER instead of AC_TRY_LINK.
+	(AC_PROG_CC_GNU, AC_PROG_CC_G): Split out of AC_PROG_CC.
+	(AC_PROG_CXX_GNU, AC_PROG_CXX_G): Split out of AC_PROG_CXX.
+	For the *_G macros, make the cache variable names non-GNU-specific.
+	(AC_C_CROSS): Mark obsolete, and otherwise a no-op.
+
+	* AUTHORS: New file.
+	* Makefile.in (DISTFILES): Add it.
+
+	* acspecific.m4 (AC_FUNC_MMAP): Update the getpagesize
+	declarations from getpagesize.h.  Check for unistd.h.
+
+	* acgeneral.m4 (AC_OUTPUT_FILES): Run the eval in a subshell.
+
+	* acfunctions: Map fnmatch, strftime, getpgrp, setpgrp to their
+	own macros.
+
+	* acgeneral.m4 (AC_OUTPUT_HEADER): Check that $CONFIG_HEADERS is
+	unset, not that it's empty.
+
+Mon Nov 18 10:24:50 1996  David J MacKenzie  <djm@catapult.va.pubnix.com>
+
+	* Version 2.11.
+
+Sun Nov 17 20:12:05 1996  David J MacKenzie  <djm@catapult.va.pubnix.com>
+
+	* acspecific.m4 (AC_FUNC_STRCOLL): Make the checking message more
+	accurate.
+
+Thu Nov 14 11:15:27 1996  David J MacKenzie  <djm@catapult.va.pubnix.com>
+
+	* acheaders: Add entry for malloc.h.  Make the strings.h entry
+ 	suggest AC_CHECK_HEADERS instead of AC_HEADER_STDC.
+
+	* acgeneral.m4 (AC_INIT_PARSE_ARGS): Move initialization of
+	ac_max_here_lines here from AC_OUTPUT_HEADER.
+
+	* autoheader.sh: Take the multiple-include protection back out.
+	It's not needed for a file that just #defines stuff, and, as Ken
+	Raeburn pointed out in Apr 1994:
+	Since you don't make it optional, and you don't give the writer of
+	configure.in much control over the name of the symbol, it also would
+	prevent one "config.h" file in a subdirectory from including
+	"../config.h" as a way to avoid duplicating some common tests.
+
+	* acspecific.m4 (AC_PROG_CC_WORKS, AC_PROG_CXX_WORKS): Don't try
+	running a program, just try linking.
+	(AC_C_CROSS): Make the wording clearer.
+
+Wed Nov 13 10:07:14 1996  David J MacKenzie  <djm@catapult.va.pubnix.com>
+
+	* acspecific.m4 (AC_PROG_CC, AC_PROG_CXX): Check whether the
+	compiler works before checking whether it's a GNU compiler.
+	(AC_FUNC_VFORK): Call _exit after perror.
+	(AC_PATH_XTRA): Go back to using -R, as setting an env var as part
+	of CC doesn't get eval'd correctly to actually work.
+	Directly test whether a space is needed after -R.
+	Don't add "-L" to LDFLAGS if $x_libraries is empty.
+	(AC_FUNC_STRFTIME): Check for it in -lintl only if it's not in the
+	normal libraries.
+
+	* Test release 2.10.3.
+
+	* testsuite/Makefile.in (dejacheck): New target, suggested by Tom
+	Tromey <tromey@creche.cygnus.com>.
+	(check): Depend on dejacheck.
+
+Tue Nov 12 00:06:14 1996  David J MacKenzie  <djm@catapult.va.pubnix.com>
+
+	* acgeneral.m4 (AC_OUTPUT_FILES): Split the list of sed commands in
+	conftest.subs into multiple files named conftest.s[1-9][0-9]*.
+	Create a pipeline of sed commands that use these files, then delete
+	the temporary files.  From John W. Eaton <jwe@bevo.che.wisc.edu>.
+
+	* acspecific.m4 (AC_AIX, AC_MINIX): Remove warnings about AC_TRY_LINK.
+	These macros don't change the linkage options.
+
+	* Test release 2.10.2.
+	
+	* acspecific.m4 (AC_PROG_CC, AC_PROG_CXX) [GCC]: Use -O2 instead
+	of -O.  Suggested by fnf@ninemoons.com (Fred Fish).
+	
+	* acgeneral.m4 (AC_OUTPUT_HEADER): Support passing
+ 	AC_CONFIG_HEADER a value containing shell variables.  Suggested by
+ 	Markku Savela <msa@msa.tte.vtt.fi> and Julian Onions
+	<j.onions@nexor.co.uk>.
+	* acgeneral.m4 (AC_TRY_RUN_NATIVE, AC_TRY_LINK, AC_TRY_COMPILE,
+        AC_TRY_CPP): Show the test program in config.log if the test fails.
+	From Karl Berry <karl@cs.umb.edu>.
+	
+	* testsuite/config/unix.exp: Run the configure script as "./script"
+	in case the user doesn't have "." in their PATH.
+	
+Mon Nov 11 18:02:58 1996  David J MacKenzie  <djm@catapult.va.pubnix.com>
+
+	* acgeneral.m4 (AC_TRY_COMPILE, AC_TRY_LINK): Deal with smart
+	compilers that know that an unused function doesn't have to be
+	linked in: call the function directly from main().
+	(Removing a legacy from when they tried to run the code, I think-djm.)
+	From fnf@ninemoons.com (Fred Fish).
+
+	* acspecific.m4 (AC_FUNC_GETLOADAVG): Rename ac_save_LIBS to avoid
+	a clash with AC_CHECK_LIB.
+	From Jim Meyering <meyering@asic.sc.ti.com>.
+	(AC_FUNC_FNMATCH, AC_FUNC_MMAP, AC_FUNC_VFORK, AC_FUNC_WAIT3,
+	AC_FUNC_STRCOLL, AC_FUNC_MEMCMP): Rename cache variables to avoid
+	wrong results if someone calls AC_CHECK_FUNC for these functions.
+
+	* autoheader.sh: Don't cmp with config.h.in if it doesn't exist yet.
+	Don't frob lines 1-@TOP@ or @BOTTOM@-end of acconfig.h's.
+	Accept TAB as well as SPC after #undef in acconfig.h's.
+	
+Sat Nov  9 01:54:04 1996  David J MacKenzie  <djm@catapult.va.pubnix.com>
+
+	* Test release 2.10.1.
+
+	* acspecific.m4 (AC_PROG_CC_WORKS, AC_PROG_CXX_WORKS): New macros
+	adapted from Bruno Haible <haible@ilog.fr>.
+	(AC_PROG_CC, AC_PROG_CXX): Use them.
+	* acgeneral.m4 (AC_TRY_RUN_NATIVE): Split out of AC_TRY_RUN.
+	(AC_TRY_LINK): Check that the executable exists after linking.
+	(AC_EGREP_CPP): Disable m4 quote chars around egrep, so [] in regexps
+	isn't eaten.
+
+	* autoheader.sh: Add multiple-inclusion protection for config.h.
+	
+	* acgeneral.m4 (AC_PREFIX_PROGRAM): Pretty up the output.
+	(AC_CHECK_LIB): Include the function being tested in the message.
+	(AC_CHECK_PROG, AC_PATH_PROG): Add a dummy variable to force word
+	splitting on the path.
+
+	* acspecific.m4 (AC_FUNC_MMAP): Remove check and uses of valloc.
+	It turns out it's a separate issue, for GNU grep.
+	Replace the test program with a new version from Mike Haertel.
+
+	* acgeneral.m4 (AC_CACHE_SAVE): Accept the HP-UX sh 'set' output
+	format.  From Marcus Daniels <marcus@sysc.pdx.edu>.
+	
+	* acgeneral.m4 (AC_MSG_CHECKING, AC_CHECKING): Write a message to
+	config.log also.  From "T.E.Dickey" <dickey@clark.net>.
+	(AC_CHECK_LIB, AC_CHECK_HEADER, AC_CHECK_HEADERS): Replace use of
+	tr with sed, to avoid a bug in the AIX 4.1.3.0 tr reported by
+	Alain KNAFF <Alain.Knaff@imag.fr>.  He says that version of
+	tr interprets \055 as a range specifier, like an unquoted -.
+	* acspecific.m4 (AC_PROG_MAKE_SET, AC_CHECK_HEADER_DIRENT,
+	AC_CHECK_HEADERS_DIRENT): Ditto.
+	
+	* acspecific.m4 (AC_FUNC_SETPGRP): New macro.
+        * acconfig.h (SETPGRP_VOID): New entry.
+	From "T.E.Dickey" <dickey@clark.net>.
+
+        * acspecific.m4 (AC_PATH_X_DIRECT): Try /lib/usr/lib/X11 for A/UX.
+        From Guillermo Gomez <gomez@mi.uni-erlangen.de>.
+	(AC_PATH_XTRA): Replace -R with adding LD_RUN_PATH to CC in the
+	Solaris kludge.  Suggested by Paul Eggert <eggert@twinsun.com>.
+	Define X_DISPLAY_MISSING with AC_DEFINE, and
+	if not using X, clear out the X variables.
+	Check system-dependent libs before system-independent ones.
+	Check for more system-dependent libs.
+	From Karl Berry.
+	Use AC_CHECK_FUNC in the system-dependent libs tests.
+	From Larry Schwimmer <rosebud@cyclone.stanford.edu>.
+	Wart removal: Don't require AC_ISC_POSIX.
+	(AC_ISC_POSIX): Require AC_PROG_CC, since it uses $GCC.
+	From gvran@uddeborg.pp.se.
+	Don't blather about being called before AC_TRY_LINK,
+	which is now called in AC_PROG_CC.  Don't encourage using this macro.
+        * acconfig.h (X_DISPLAY_MISSING): Add entry.
+	
+Fri Nov  8 16:02:08 1996  David J MacKenzie  <djm@catapult.va.pubnix.com>
+
+	* acspecific.m4 (AC_PATH_X_DIRECT): Search for /usr/X11 before
+	/usr/X11Rn, etc.  From bostic@bsdi.com (Keith Bostic).
+
+	* acgeneral.m4 (AC_CHECK_TYPE) [STDC_HEADERS]: Check in stddef.h, too.
+	From "Glenn P. Davis" <davis@unidata.ucar.edu>.
+	Don't require the second char after the type name to be a space.
+	(AC_TRY_RUN): Remove the test files before executing the "failure"
+	case code.
+
+	* acspecific.m4 (AC_PROG_CXX): Check for cc++ for NexT.
+	From Carl Edman <cedman@princeton.edu>.
+	(AC_PROG_CC, AC_PROG_CXX): Check whether -g works even if
+	C[XX]FLAGS is set.  From T.E.Dickey <dickey@clark.net>
+	(AC_FUNC_FNMATCH): New macro.
+	* acconfig.h (HAVE_FNMATCH): New entry.
+	
+	* acgeneral.m4 (AC_REPLACE_FUNCS): Call AC_CHECK_FUNCS to do the work.
+	
+Tue Oct 29 13:03:44 1996  Doug Evans  <dje@canuck.cygnus.com>
+
+	* acgeneral.m4 (AC_OUTPUT_SUBDIRS): Fix thinko in computation of
+	ac_sub_srcdir in relative but not "." case.
+
+Thu Oct 10 22:29:37 1996  David J MacKenzie  <djm@catapult.va.pubnix.com>
+
+	* acgeneral.m4 (AC_CANONICAL_HOST, AC_CANONICAL_TARGET,
+	AC_CANONICAL_BUILD): Allow the os part of the string returned by
+	config.sub to contain dashes, as in "linux-gnu".
+
+Fri Jul 19 16:59:00 1996  Roland McGrath  <roland@delasyd.gnu.ai.mit.edu>
+
+	* acgeneral.m4 (AC_CHECK_TYPE): Add dnl so regexp doesn't have a
+	leading newline.
+
+Wed Jun 12 13:56:57 1996  David J MacKenzie  <djm@catapult.va.pubnix.com>
+
+	* acgeneral.m4 (AC_CHECK_TYPE): Remove extra ')'.
+
+	* Many files: Update the FSF street address.
+
+Sun Jun  9 17:54:23 1996  Roland McGrath  <roland@delasyd.gnu.ai.mit.edu>
+
+	* acgeneral.m4 (AC_CHECK_LIB): Add missing \ in last change.
+
+Fri Jun  7 11:54:58 1996  Roland McGrath  <roland@delasyd.gnu.ai.mit.edu>
+
+	* acgeneral.m4 (AC_CHECK_LIB): Identifierize lib name in $ac_tr_lib.
+
+Mon May 27 13:49:02 1996  Roland McGrath  <roland@delasyd.gnu.ai.mit.edu>
+
+	* acspecific.m4 (AC_SYS_LONG_FILE_NAMES): If $TMPDIR names an
+	existing, writable directory, then test it instead of /tmp, /var/tmp,
+	and /usr/tmp for long file name support.
+
+	* acgeneral.m4 (AC_PREREQ): Prepend "FATAL ERROR: " to msg.
+
+Sun May 26 19:07:15 1996  Roland McGrath  <roland@delasyd.gnu.ai.mit.edu>
+
+	* acspecific.m4 (AC_PROG_MAKE_SET): Sanitize $MAKE for use as
+	identifier.
+
+	* acgeneral.m4 (AC_CHECK_TYPE): Tighten regexp so ulong doesn't match
+	ulong_t.
+
+	* autoheader.sh: Put $syms in a temporary file and use fgrep -f.
 
 Tue May  7 13:20:33 1996  Roland McGrath  <roland@delasyd.gnu.ai.mit.edu>
 
-	* acgeneral.m4: Verion 2.10 released.
+	* acgeneral.m4: Version 2.10 released.
 
 Tue Mar 26 13:03:12 1996  Roland McGrath  <roland@charlie-brown.gnu.ai.mit.edu>
 
@@ -1483,8 +1753,6 @@ Tue May 24 18:49:35 1994  David J. Mackenzie  (djm@rtl.cygnus.com)
 	cross-compiling default.
 	(AC_CACHE_WRITE): Set the cache values only if not already set.
 	(AC_PARSEARGS, AC_OUTPUT): Allow giving an empty prefix or exec_prefix.
-
-	AC_CONFIG_AUXDIR*.
 
 	* acgeneral.m4, acspecific.m4: Rename AC_CONFIG_AUX* to
 	AC_CONFIG_AUXDIR*.

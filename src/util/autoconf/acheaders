@@ -5,7 +5,6 @@ sys/dir.h	AC_HEADER_DIRENT
 ndir.h		AC_HEADER_DIRENT
 sys/mkdev.h	AC_HEADER_MAJOR
 string.h	AC_HEADER_STDC
-strings.h	AC_HEADER_STDC
 stdlib.h	AC_HEADER_STDC
 stddef.h	AC_HEADER_STDC
 stdarg.h	AC_HEADER_STDC
@@ -16,8 +15,10 @@ X11/Xlib.h	AC_PATH_X
 # Others.
 fcntl.h		AC_CHECK_HEADERS
 limits.h	AC_CHECK_HEADERS
+malloc.h	AC_CHECK_HEADERS
 paths.h		AC_CHECK_HEADERS
 sgtty.h		AC_CHECK_HEADERS
+strings.h	AC_CHECK_HEADERS
 sys/file.h	AC_CHECK_HEADERS
 sys/ioctl.h	AC_CHECK_HEADERS
 sys/time.h	AC_CHECK_HEADERS

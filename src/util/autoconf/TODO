@@ -38,7 +38,7 @@ these suggestions... their presence here doesn't imply my endorsement.
 
 ------------------------------------------------------------------------------
 
-* Doc: Add concept index.
+* Doc: Add a concept index.
 
 ------------------------------------------------------------------------------
 
@@ -52,17 +52,10 @@ these suggestions... their presence here doesn't imply my endorsement.
   I'm not sure whether the limit is on lines or bytes; if bytes, it
   will be less of a problem than it was with the long lines used for
   creating a header file.
-  There has also been a report that HPUX and OSF/1 seds only allow 100
-  commands.
 
 ------------------------------------------------------------------------------
 
-* Allow [ and ] in egrep patterns and AC_DEFINE args.
-
-------------------------------------------------------------------------------
-
-* Add a Makefile generator that supports the standard GNU targets.
-  (Being worked on.)
+* Allow [ and ] in AC_DEFINE args.
 
 ------------------------------------------------------------------------------
 
@@ -76,9 +69,6 @@ these suggestions... their presence here doesn't imply my endorsement.
 config.site.
 
 *** Distribute a config.site corresponding to a hypothetical bare POSIX system with c89.
-
-*** Cache consistency checking: ignore cache if environment
-(CC or PATH) differs.
 
 ** Site defaults:
 
@@ -94,7 +84,7 @@ in a dnl comment.  (Seems to be hard.)
 * Look at user contributed macros:
 	prototypes
 	IEEE double precision math
-	shared libraries
+	more
 
 ------------------------------------------------------------------------------
 
@@ -108,22 +98,11 @@ In config.status comment, put the host/target/build types, if used.
 
 ------------------------------------------------------------------------------
 
-Support a way of including makefile fragments that then have @var@
-substitutions done on them.
-
-------------------------------------------------------------------------------
-
 Have AC_CANONICAL_* cache the host/build/target types.
 They have to be overridden by the command line arguments,
 just as for X includes and libraries.  Should they be cached
 all in one variable, or three?  In that case, what if only one
 or two of the cache variables are set?
-
-------------------------------------------------------------------------------
-
-Look at contributions:
-	ac_include (Karl Berry)
-	aclocal.h tom@basil.icce.rug.NL (Tom R.Hageman)
 
 ------------------------------------------------------------------------------
 
@@ -142,15 +121,6 @@ The default of unlimited permission is fine, but there should be some easy
 way for configure to have copyright terms passed through from configure.in.
 Maybe AC_LICENSE([...]).
 From: roland@gnu.ai.mit.edu (Roland McGrath)
-
-------------------------------------------------------------------------------
-
-autoconf-2.1 AC_EGREP_HEADER does not work if [square brackets] 
-are used in the egrep pattern.  This makes egrep fairly useless to
-find, for example, a space or tab followed by something.
-
-Putting changequotes around the PATTERN parameter makes no difference.
--Jim Avera (jima@netcom.com)
 
 ------------------------------------------------------------------------------
 
@@ -178,6 +148,16 @@ is conftest.c -> <ctype.h> -> <sys/localedef.h> -> <sys/lc_core.h>
 	#include <ctype.h>
 	#undef $ac_func
 From: kwzh@gnu.ai.mit.edu (Karl Heuer)
+
+The test for the isascii function was failing because that function is
+also a macro.  He proposed that the test file look like this:
+
+/* Remove any macro definition. */
+#undef isascii
+/* Override any gcc2 internal prototype to avoid an error.  */
+char isascii(); isascii();
+
+Andreas Schwab
 
 ------------------------------------------------------------------------------
 
@@ -307,18 +287,7 @@ From Paul Eggert.
 
 ------------------------------------------------------------------------------
 
-Make easy macros for checking for X functions and libraries.
-
-------------------------------------------------------------------------------
-
-Testing for ANSI header files (AC_HEADER_STDC) fails under linux when
-using the latest libraries (libc-4.6.30, at least libc-4.6.27 works
-ok) when LC_CTYPE is set to ISO-8859-1. The islower/toupper test
-reports errors.
-Anyway, adding a line like 
-if test "${LC_CTYPE+set}"   = set; then LC_CTYPE=C;   export LC_CTYPE;   fi
-to the configure script can solve the problem.
-From: tom@vlsivie.tuwien.ac.AT (Thomas Winder)
+Make easy macros for checking for X functions and libraries, such as Motif.
 
 ------------------------------------------------------------------------------
 
@@ -328,3 +297,284 @@ From: tom@vlsivie.tuwien.ac.AT (Thomas Winder)
    and so does AC_CONFIG_HEADER when autoconf is run.
 
 ------------------------------------------------------------------------------
+
+Autoheader in autoconf-2.4 doesn't produce entries for:
+
+        AC_CHECK_TYPE(ssize_t, int)
+
+and it seems like it could easily do so.
+
+In general, it seems to me like autoconf isn't set up to
+let me periodically run autoheader, and then include my
+"local" tests -- autoheader gets most stuff right, I'd like
+to rerun it periodically without losing my local changes
+to config.h.in.
+
+One of the things that I need is to know is the type to use
+for a fixed size on disk, e.g., what is the system's name
+for an unsigned-32-bit integer?
+
+I can use:
+
+        AC_CHECK_SIZEOF(unsigned int)
+
+and, in fact, that's what I do.  But I still have to build
+sets of #if tests to get from there to the name of the type.
+
+From:    bostic@bsdi.com (Keith Bostic)
+
+------------------------------------------------------------------------------
+
+There are basically three ways to lock files
+        lockf, fnctl, flock
+I'd be interested in adding a macro to pick the "right one" if you're
+interested.
+
+From:    Rich Salz <rsalz@osf.org>
+
+------------------------------------------------------------------------------
+
+It is IMHO a bug that `config.status' cannot handle multiple
+simultaneous invocations.  It should include the process id (`$$' in sh)
+as part of the name of any temporary files it creates.
+
+From:    fjh@kryten.cs.mu.oz.au (Fergus Henderson)
+
+------------------------------------------------------------------------------
+
+Timezone calculations checks.
+
+------------------------------------------------------------------------------
+
+Support different default filesystem layouts, e.g. SVR4, Linux.
+Of course, this can be done locally with config.site.
+
+------------------------------------------------------------------------------
+
+Mention automake, libtool, etc. in the autoconf manual.
+
+------------------------------------------------------------------------------
+
+I wonder if it is possible to get the path for X11's app-defaults
+directory by autoconf. Moreover, I'd like to have a general way of
+accessing imake variables by autoconf, something like
+
+AC_DEFINE(WINE_APP_DEFAULTS, AC_IMAKE_VAR(XAPPLOADDIR))
+
+Slaven Rezic <eserte@cabulja.herceg.de>
+
+------------------------------------------------------------------------------
+
+Question: at least one common UNIX variant has a "cc" that is old K&R
+and "c89" for ANSI C.  Is there any reason why AC_PROG_CC couldn't
+check for c89 before cc if it can't find gcc?
+
+hpa@yggdrasil.com (H. Peter Anvin)
+
+------------------------------------------------------------------------------
+
+Cache consistency checking: ignore cache if environment
+(CC or PATH) differs.
+From Mike Haertel
+
+So we need a general mechanism for storing variables' values in the cache,
+and checking if they are the same after reading the cache.  Then we can add
+to the list of variables as we come across the need.  So far we want
+LD_LIBRARY_PATH and the internal variables for some of (all?) the args.
+From: roland@gnu.ai.mit.edu (Roland McGrath)
+
+Hmm.  That list might include LD_LIBRARY_PATH, LD_RUN_PATH (for solaris),
+and PATH.  I can't think of any others so far.
+From: friedman@splode.com (Noah Friedman)
+
+------------------------------------------------------------------------------
+
+So how about an option to configure --reset-cache, that says to ignore all
+existing cached values for tests that configure runs, and then update the
+cache normally.  This should be utterly trivial to do in AC_CACHE_VAL;
+check the flag variable and always compute the value if it's set.
+
+------------------------------------------------------------------------------
+
+A number of people have tried to fix configuration problems by editing
+acconfig.h. (Despite comments at the top of the file.) I think they're
+confused because anything.h looks like a regular source file name.
+Maybe acconfig.h could be called acconfig.extra or something?
+
+From: kb@cs.umb.edu (K. Berry)
+
+------------------------------------------------------------------------------
+
+Every user running
+X11 usually has a directory like *X11* in his PATH variable. By replacing
+bin by include, you can find good places to look for the include files
+or libraries.
+
+From: rcb5@win.tue.nl (Richard Verhoeven)
+
+------------------------------------------------------------------------------
+
+When using CONFIG_FILES= and CONFIG_HEADERS= for controlling
+partial configuration, any AC_LINK_FILES is repeated in each case
+(that is, usually, once for config.h and once per subdirectory).
+This is not elegant.
+
+Maybe Autoconf could use some kind of CONFIG_LINKS=<file-list>,
+having all such AC_LINK(ed)_FILES by default, but usable by each
+Makefile.in in rules for updating the particular links they need.
+
+From: pinard@iro.umontreal.ca
+
+------------------------------------------------------------------------------
+
+Perhaps autoconf could have a single @magic@ frob that gets replaced with
+assignments for all the *dir variables?  There is quite a plethora for each
+Makefile.in to have foodir = @foodir@.
+
+From: Roland McGrath <roland@gnu.ai.mit.edu>
+
+------------------------------------------------------------------------------
+
+In most cases, when autoscan suggests something, using the search
+or index command into the Info reader for autoconf manual quickly
+explains me what the test is about.  However, for header files
+and functions, the search might fail, because the test is not of
+the specific kind.  The Autoconf manual should reflect somewhere
+all header files or functions (non-specific features, generally)
+triggering autoscan to generate tests, and tell in a few words
+what is the problem, and the suggested approach for a solution;
+that is, how one should use the result of testing the feature.
+
+From: pinard@iro.umontreal.ca
+
+------------------------------------------------------------------------------
+
+It would be nice if the configure script would handle an option such as
+--x-libraries="/usr/openwin/lib /usr/dt/lib".
+
+Rick Boykin <rboykin@cscsun3.larc.nasa.gov>
+
+Under Solaris 2.4, the regular X includes and libs and the Motif
+includes and libs are in different places.  The Emacs configure script
+actually allows dir1:dir2:dir3 --
+
+    if test "${x_libraries}" != NONE && test -n "${x_libraries}"; then
+      LD_SWITCH_X_SITE=-L`echo ${x_libraries} | sed -e "s/:/ -L/g"`
+      LD_SWITCH_X_SITE_AUX=-R`echo ${x_libraries} | sed -e "s/:/ -R/g"`
+    fi
+    if test "${x_includes}" != NONE && test -n "${x_includes}"; then
+      C_SWITCH_X_SITE=-I`echo ${x_includes} | sed -e "s/:/ -I/g"`
+    fi
+
+------------------------------------------------------------------------------
+
+    What messages should be produced by default, if any?
+
+Probably only the few most important ones, like which configuration
+name was used, whether X or Xt are in use, etc. The specific
+decisions, and progress messages, should be recorded on the terminal
+only if --verbose is used.
+
+    --silent just supresses the "checking for...result"
+    messages, not the "creating FOO" messages.
+
+I think the default should be to suppress both.
+From: Richard Stallman <rms@gnu.ai.mit.edu>
+
+There is no distinction now between
+important decisions (we have X) vs minor decisions (we have lstat).
+However, there are probably only a few things you deem important enough to
+announce and only those few things will need to be changed.
+Perhaps config.status could be written with comments saying what was
+decided.
+From: Roland McGrath <roland@gnu.ai.mit.edu>
+
+------------------------------------------------------------------------------
+
+Use automake to generate autoconf's Makefile.in's?
+
+------------------------------------------------------------------------------
+
+about the idea of using small configure.in/aclocal.m4 snippets:
+this is the one idea in metaconfig (the autoconf-like program used by
+Perl) that I like.  metaconfig looks for a "U" directory, and includes
+each ".U" file into the generated Configure script (according to
+various complicated rules).
+From: Tom Tromey <tromey@creche.cygnus.com>
+
+------------------------------------------------------------------------------
+
+I'd much prefer to see the absolute paths substituted for all the
+standard "dir" variables.  It would be nice to have variables in
+configure that held the absolute paths.  And it is nice to be able to
+substitute them into other files without relying on the destination
+file supporting ${...}  syntax.  (It works in Perl, sh, and make --
+but not guile)
+
+From: Tom Tromey <tromey@creche.cygnus.com>
+
+------------------------------------------------------------------------------
+
+Another thing I wish for is a macro which figures out which libraries are 
+needed for BSD-sytle sockets.  AC_PATH_X already detects this 
+correctly...so it's just a matter of seperating out the socket-related code.
+From: "Joel N. Weber II" <nemo@koa.iolani.honolulu.hi.us>
+
+------------------------------------------------------------------------------
+
+Merge the two lex macros, AC_PROG_LEX and AC_DECL_YYTEXT?
+
+------------------------------------------------------------------------------
+
+in order to use the AC_CANONICAL_SYSTEM macro, I have to
+have install-sh somewhere nearby --- why is this?  I have no real
+reason to distribute install-sh, other than that its absence breaks
+this code.
+
+Shouldn't the above loop be looking for config.sub and config.guess?
+From: jimb@totoro.bio.indiana.edu (Jim Blandy)
+
+adding AC_CANONICAL_HOST to my configure.in script caused
+all sorts of odd/unexplained errors.  Obviously, I had to go
+get copies of config.guess, config.sub and install-sh from the
+autoconf distribution, but the error messages and autoconf docs
+didn't explain that very well.
+From: bostic@bsdi.com (Keith Bostic)
+
+------------------------------------------------------------------------------
+
+Perhaps also have AC_TRY_COMPILER try to link an invalid program, and
+die if the compiler seemed to succeed--in which case it's not usable
+with autoconf scripts.
+
+------------------------------------------------------------------------------
+
+there is absolutely no guarantee that 'a' to 'z' are
+contiguous, and the ISLOWER macro is not guaranteed to correctly
+reproduce the result of islower. In all variants of ASCII however, it
+will work correctly in the C locale.
+
+There is also no guarantee that toupper(i) - i is the same constant if
+non-zero. TOUPPER, hence, is not correct either. But, in all variants
+of ASCII in the C locale, it works.
+
+Tanmoy Bhattacharya (tanmoy@qcd.lanl.gov>
+
+------------------------------------------------------------------------------
+
+autoreconf doesn't support having (in the same tree) both directories
+that are parts of a larger package (sharing aclocal.m4 and acconfig.h),
+and directories that are independent packages (each with their own ac*).
+It assumes that they are all part of the same package, if you use --localdir,
+or that each directory is a separate package, if you don't use it.
+
+autoreconf should automatically figure out which ac* files to use--the
+closest ones up the tree from each directory, probably, unless
+overridden by --localdir.
+
+Also, autoreconf recurses on all subdirectories containing a
+configure.in, not just those given by an AC_CONFIG_SUBDIRS directive.
+This may not be a problem in practice.
+
+------------------------------------------------------------------------------
+

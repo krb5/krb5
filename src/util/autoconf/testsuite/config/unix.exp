@@ -88,8 +88,20 @@ proc autoconf_load { args } {
 	return 0
     }
 
+    # Check whether m4 processing left any icky residue.
+    # The autoconf script does this already, pretty much.
+    # catch "exec sed -n -e /dnl/p -e /AC_/p $args" exec_output
+    # if $verbose>1 then {
+    #	send_user "Checked $args for unexpanded m4 macros\n"
+    # }
+    # if ![string match "" $exec_output] then {
+    #	fail "$args, unexpanded m4 macros"
+    #	send_log "$exec_output\n"
+    #	return 0
+    # }
+
     # Capture only stderr in exec_output, not "creating Makefile" etc.
-    catch "exec $args --cache=/dev/null >/dev/null" exec_output
+    catch "exec ./$args --cache=/dev/null >/dev/null" exec_output
     if $verbose>1 then {
 	send_user "Executed $args --cache=/dev/null\n"
     }

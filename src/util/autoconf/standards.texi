@@ -3,7 +3,7 @@
 @setfilename standards.info
 @settitle GNU Coding Standards
 @c UPDATE THIS DATE WHENEVER YOU MAKE CHANGES!
-@set lastupdate 27 February 1996
+@set lastupdate 9 September 1996
 @c %**end of header
 
 @ifinfo
@@ -359,6 +359,7 @@ and how libraries should behave.
 * Libraries::			Library behavior
 * Errors::			Formatting error messages
 * User Interfaces::		Standards for command line interfaces
+* Option Table::                Table of long options.
 * Memory Usage::                When and how to care about memory needs
 @end menu
 
@@ -554,26 +555,117 @@ consistent from program to program.  For example, users should be able
 to expect the ``verbose'' option of any GNU program which has one, to be
 spelled precisely @samp{--verbose}.  To achieve this uniformity, look at
 the table of common long-option names when you choose the option names
-for your program.  The table appears below.
+for your program (@pxref{Option Table}).
 
-If you use names not already in the table, please send
-@samp{gnu@@prep.ai.mit.edu} a list of them, with their meanings, so we
-can update the table.
+It is usually a good idea for file names given as ordinary arguments to
+be input files only; any output files would be specified using options
+(preferably @samp{-o} or @samp{--output}).  Even if you allow an output
+file name as an ordinary argument for compatibility, try to provide an
+option as another way to specify it.  This will lead to more consistency
+among GNU utilities, and fewer idiosyncracies for users to remember.
 
-It is usually a good idea for file names given as ordinary arguments
-to be input files only; any output files would be specified using
-options (preferably @samp{-o}).  Even if you allow an output file name
-as an ordinary argument for compatibility, try to provide a suitable
-option as well.  This will lead to more consistency among GNU
-utilities, so that there are fewer idiosyncracies for users to
-remember.
+All programs should support two standard options: @samp{--version}
+and @samp{--help}.
 
-Programs should support an option @samp{--version} which prints the
-program's version number on standard output and exits successfully, and
-an option @samp{--help} which prints option usage information on
-standard output and exits successfully.  These options should inhibit
-the normal function of the command; they should do nothing except print
-the requested information.
+@table @code
+@item --version
+This option should direct the program to information about its name,
+version, origin and legal status, all on standard output, and then exit
+successfully.  Other options and arguments should be ignored once this
+is seen, and the program should not perform its normal function.
+
+The first line is meant to be easy for a program to parse; the version
+number proper starts after the last space.  In addition, it contains
+the canonical name for this program, in this format:
+
+@example
+GNU Emacs 19.30
+@end example
+
+@noindent
+The program's name should be a constant string; @emph{don't} compute it
+from @code{argv[0]}.  The idea is to state the standard or canonical
+name for the program, not its file name.  There are other ways to find
+out the precise file name where a command is found in @code{PATH}.
+
+If the program is a subsidiary part of a larger package, mention the
+package name in parentheses, like this:
+
+@example
+emacsserver (GNU Emacs) 19.30
+@end example
+
+@noindent
+If the package has a version number which is different from this
+program's version number, you can mention the package version number
+just before the close-parenthesis.
+
+If you @strong{need} to mention the version numbers of libraries which
+are distributed separately from the package which contains this program,
+you can do so by printing an additional line of version info for each
+library you want to mention.  Use the same format for these lines as for
+the first line.
+
+Please don't mention all the libraries that the program uses ``just for
+completeness''---that would produce a lot of unhelpful clutter.  Please
+mention library version numbers only if you find in practice that they
+are very important to you in debugging.
+
+The following line, after the version number line or lines, should be a
+copyright notice.  If more than one copyright notice is called for, put
+each on a separate line.
+
+Next should follow a brief statement that the program is free software,
+and that users are free to copy and change it on certain conditions.  If
+the program is covered by the GNU GPL, say so here.  Also mention that
+there is no warranty, to the extent permitted by law.
+
+It is ok to finish the output with a list of the major authors of the
+program, as a way of giving credit.
+
+Here's an example of output that follows these rules:
+
+@smallexample
+GNU Emacs 19.34.5
+Copyright (C) 1996 Free Software Foundation, Inc.
+GNU Emacs comes with NO WARRANTY, to the extent permitted by law.
+You may redistribute copies of GNU Emacs
+under the terms of the GNU General Public License.
+For more information about these matters, see the files named COPYING.
+@end smallexample
+
+You should adapt this to your program, of course, filling in the proper
+year, copyright holder, name of program, and the references to
+distribution terms, and changing the rest of the wording as necessary.
+
+This copyright notice only needs to mention the most recent year in
+which changes were made---there's no need to list the years for previous
+versions' changes.  You don't have to mention the name of the program in
+these notices, if that is inconvenient, since it appeared in the first
+line.
+
+@item --help
+This option should output brief documentation for how to invoke the
+program, on standard output, then exit successfully.  Other options and
+arguments should be ignored once this is seen, and the program should
+not perform its normal function.
+
+Near the end of the @samp{--help} option's output there should be a line
+that says where to mail bug reports.  It should have this format:
+
+@example
+Report bugs to @var{mailing-address}.
+@end example
+@end table
+
+@node Option Table
+@section Table of Long Options
+
+Here is a table of long options used by GNU programs.  It is surely
+incomplete, but we aim to list all the options that a new program might
+want to be compatible with.  If you use names not already in the table,
+please send @samp{gnu@@prep.ai.mit.edu} a list of them, with their
+meanings, so we can update the table.
 
 @c Please leave newlines between items in this table; it's much easier
 @c to update when it isn't completely squashed together and unreadable.
@@ -581,10 +673,7 @@ the requested information.
 @c a semicolon between the lists of the programs that use them, not a
 @c period.   --friedman
 
-Here is the table of long options used by GNU programs.
-
 @table @samp
-
 @item after-date
 @samp{-N} in @code{tar}.
 
@@ -1195,6 +1284,9 @@ Used in @code{makeinfo}.
 @item no-validate
 Used in @code{makeinfo}.
 
+@item no-wait
+Used in @code{emacsclient}.
+
 @item no-warn
 Used in various programs to inhibit warnings.
 
@@ -1679,6 +1771,7 @@ when writing GNU software.
 * System Portability::		Portability between different operating systems
 * CPU Portability::             Supporting the range of CPU types
 * System Functions::            Portability and ``standard'' library functions
+* Internationalization::        Techniques for internationalization
 @end menu
 
 @node Formatting
@@ -2002,7 +2095,7 @@ if (foo == 0)
 
 Don't make the program ugly to placate @code{lint}.  Please don't insert any
 casts to @code{void}.  Zero without a cast is perfectly fine as a null
-pointer constant.
+pointer constant, except when calling a varargs function.
 
 @node  Names
 @section Naming Variables and Functions
@@ -2096,7 +2189,7 @@ while ((c = getchar()) != EOF)
 @end example
 
 When calling functions, you need not worry about the difference between
-pointers of various types, or between pointers an integers.  On most
+pointers of various types, or between pointers and integers.  On most
 machines, there's no difference anyway.  As for the few machines where
 there is a difference, all of them support @sc{ansi} C, so you can use
 prototypes (conditionalized to be active only in @sc{ansi} C) to make
@@ -2119,7 +2212,8 @@ error (s, a1, a2, a3)
 
 @noindent
 In practice, this works on all machines, and it is much simpler than any
-``correct'' alternative.
+``correct'' alternative.  Be sure @emph{not} to use a prototype
+for such functions.
 
 However, avoid casting pointers to integers unless you really need to.
 These assumptions really reduce portability, and in most programs they
@@ -2244,6 +2338,104 @@ Here we assume that @code{HAVE_STRCHR} and @code{HAVE_STRRCHR} are
 macros defined in systems where the corresponding functions exist.
 One way to get them properly defined is to use Autoconf.
 
+@node Internationalization
+@section Internationalization
+
+GNU has a library called GNU gettext that makes it easy to translate the
+messages in a program into various languages.  You should use this
+library in every program.  Use English for the messages as they appear
+in the program, and let gettext provide the way to translate them into
+other languages.
+
+Using GNU gettext involves putting a call to the @code{gettext} macro
+around each string that might need translation---like this:
+
+@example
+printf (gettext ("Processing file `%s'..."));
+@end example
+
+@noindent
+This permits GNU gettext to replace the string @code{"Processing file
+`%s'..."} with a translated version.
+
+Once a program uses gettext, please make a point of writing calls to
+@code{gettext} when you add new strings that call for translation.
+
+Using GNU gettext in a package involves specifying a @dfn{text domain
+name} for the package.  The text domain name is used to separate the
+translations for this package from the translations for other packages.
+Normally, the text domain name should be the same as the name of the
+package---for example, @samp{fileutils} for the GNU file utilities.
+
+To enable gettext to work well, avoid writing code that makes
+assumptions about the structure of words or sentences.  When you want
+the precise text of a sentence to vary depending on the data, use two or
+more alternative string constants each containing a complete sentences,
+rather than inserting conditionalized words or phrases into a single
+sentence framework.
+
+Here is an example of what not to do:
+
+@example
+printf ("%d file%s processed", nfiles,
+        nfiles != 1 ? "s" : "");
+@end example
+
+@noindent
+The problem with that example is that it assumes that plurals are made
+by adding `s'.  If you apply gettext to the format string, like this,
+
+@example
+printf (gettext ("%d file%s processed"), nfiles,
+        nfiles != 1 ? "s" : "");
+@end example
+
+@noindent
+the message can use different words, but it will still be forced to use
+`s' for the plural.  Here is a better way:
+
+@example
+printf ((nfiles != 1 ? "%d files processed"
+         : "%d file processed"),
+        nfiles);
+@end example
+
+@noindent
+This way, you can apply gettext to each of the two strings
+independently:
+
+@example
+printf ((nfiles != 1 ? gettext ("%d files processed")
+         : gettext ("%d file processed")),
+        nfiles);
+@end example
+
+@noindent
+This can any method of forming the plural of the word for ``file'', and
+also handles languages that require agreement in the word for
+``processed''.
+
+A similar problem appears at the level of sentence structure with this
+code:
+
+@example
+printf ("#  Implicit rule search has%s been done.\n",
+        f->tried_implicit ? "" : " not");
+@end example
+
+@noindent
+Adding @code{gettext} calls to this code cannot give correct results for
+all languages, because negation in some languages requires adding words
+at more than one place in the sentence.  By contrast, adding
+@code{gettext} calls does the job straightfowardly if the code starts
+out like this:
+
+@example
+printf (f->tried_implicit
+        ? "#  Implicit rule search has been done.\n",
+        : "#  Implicit rule search has not been done.\n");
+@end example
+
 @node Documentation
 @chapter Documenting Programs
 
@@ -2296,6 +2488,10 @@ Please do not use the term ``pathname'' that is used in Unix
 documentation; use ``file name'' (two words) instead.  We use the term
 ``path'' only for search paths, which are lists of file names.
 
+Please do not use the term ``illegal'' to refer to erroneous input to a
+computer program.  Use ``invalid'' instead, and reserve the term
+``illegal'' for violations of law.
+
 @node Manual Structure Details
 @section Manual Structure Details
 
@@ -2341,28 +2537,60 @@ user to that file.
 @node Change Logs
 @section Change Logs
 
-Keep a change log for each directory, describing the changes made to
-source files in that directory.  The purpose of this is so that people
-investigating bugs in the future will know about the changes that
-might have introduced the bug.  Often a new bug can be found by
-looking at what was recently changed.  More importantly, change logs
-can help eliminate conceptual inconsistencies between different parts
-of a program; they can give you a history of how the conflicting
-concepts arose.
+Keep a change log to describe all the changes made to program source
+files.  The purpose of this is so that people investigating bugs in the
+future will know about the changes that might have introduced the bug.
+Often a new bug can be found by looking at what was recently changed.
+More importantly, change logs can help you eliminate conceptual
+inconsistencies between different parts of a program, by giving you a
+history of how the conflicting concepts arose and who they came from.
 
-Use the Emacs command @kbd{M-x add-change-log-entry} to start a new
-entry in the
-change log.  An entry should have an asterisk, the name of the changed
-file, and then in parentheses the name of the changed functions,
-variables or whatever, followed by a colon.  Then describe the changes
-you made to that function or variable.
+@menu
+* Change Log Concepts::
+* Style of Change Logs::
+* Simple Changes::
+* Conditional Changes::
+@end menu
 
-Separate unrelated entries with blank lines.  When two entries
-represent parts of the same change, so that they work together, then
-don't put blank lines between them.  Then you can omit the file name
-and the asterisk when successive entries are in the same file.
+@node Change Log Concepts
+@subsection Change Log Concepts
 
-Here are some examples:
+You can think of the change log as a conceptual ``undo list'' which
+explains how earlier versions were different from the current version.
+People can see the current version; they don't need the change log
+to tell them what is in it.  What they want from a change log is a
+clear explanation of how the earlier version differed.
+
+The change log file is normally called @file{ChangeLog} and covers an
+entire directory.  Each directory can have its own change log, or a
+directory can use the change log of its parent directory--it's up to
+you.
+
+Another alternative is to record change log information with a version
+control system such as RCS or CVS.  This can be converted automatically
+to a @file{ChangeLog} file.
+
+There's no need to describe the full purpose of the changes or how they
+work together.  If you think that a change calls for explanation, you're
+probably right.  Please do explain it---but please put the explanation
+in comments in the code, where people will see it whenever they see the
+code.  For example, ``New function'' is enough for the change log when
+you add a function, because there should be a comment before the
+function definition to explain what it does.
+
+However, sometimes it is useful to write one line to describe the
+overall purpose of a batch of changes.
+
+The easiest way to add an entry to @file{ChangeLog} is with the Emacs
+command @kbd{M-x add-change-log-entry}.  An entry should have an
+asterisk, the name of the changed file, and then in parentheses the name
+of the changed functions, variables or whatever, followed by a colon.
+Then describe the changes you made to that function or variable.
+
+@node Style of Change Logs
+@subsection Style of Change Logs
+
+Here are some examples of change log entries:
 
 @example
 * register.el (insert-register): Return nil.
@@ -2381,41 +2609,87 @@ Restart the tex shell if process is gone or stopped.
 
 It's important to name the changed function or variable in full.  Don't
 abbreviate function or variable names, and don't combine them.
-Subsequent maintainers will often
-search for a function name to find all the change log entries that
-pertain to it; if you abbreviate the name, they won't find it when they
-search.  For example, some people are tempted to abbreviate groups of
-function names by writing @samp{* register.el
-(@{insert,jump-to@}-register)}; this is not a good idea, since searching
-for @code{jump-to-register} or @code{insert-register} would not find the
-entry.
+Subsequent maintainers will often search for a function name to find all
+the change log entries that pertain to it; if you abbreviate the name,
+they won't find it when they search.
 
-There's no need to describe the full purpose of the changes or how they
-work together.  It is better to put such explanations in comments in the
-code.  That's why just ``New function'' is enough; there is a comment
-with the function in the source to explain what it does.
+For example, some people are tempted to abbreviate groups of function
+names by writing @samp{* register.el (@{insert,jump-to@}-register)};
+this is not a good idea, since searching for @code{jump-to-register} or
+@code{insert-register} would not find that entry.
 
-However, sometimes it is useful to write one line to describe the
-overall purpose of a large batch of changes.
+Separate unrelated change log entries with blank lines.  When two
+entries represent parts of the same change, so that they work together,
+then don't put blank lines between them.  Then you can omit the file
+name and the asterisk when successive entries are in the same file.
 
-You can think of the change log as a conceptual ``undo list'' which
-explains how earlier versions were different from the current version.
-People can see the current version; they don't need the change log
-to tell them what is in it.  What they want from a change log is a
-clear explanation of how the earlier version differed.
+@node Simple Changes
+@subsection Simple Changes
 
-When you change the calling sequence of a function in a simple
-fashion, and you change all the callers of the function, there is no
-need to make individual entries for all the callers.  Just write in
+Certain simple kinds of changes don't need much detail in the change
+log.
+
+When you change the calling sequence of a function in a simple fashion,
+and you change all the callers of the function, there is no need to make
+individual entries for all the callers that you changed.  Just write in
 the entry for the function being called, ``All callers changed.''
 
+@example
+* keyboard.c (Fcommand_execute): New arg SPECIAL.
+All callers changed.
+@end example
+
 When you change just comments or doc strings, it is enough to write an
-entry for the file, without mentioning the functions.  Write just,
-``Doc fix.''  There's no need to keep a change log for documentation
-files.  This is because documentation is not susceptible to bugs that
-are hard to fix.  Documentation does not consist of parts that must
-interact in a precisely engineered fashion; to correct an error, you
-need not know the history of the erroneous passage.
+entry for the file, without mentioning the functions.  Just ``Doc
+fixes'' is enough for the change log.
+
+There's no need to make change log entries for documentation files.
+This is because documentation is not susceptible to bugs that are hard
+to fix.  Documentation does not consist of parts that must interact in a
+precisely engineered fashion.  To correct an error, you need not know
+the history of the erroneous passage; it is enough to compare what the
+documentation says with the way the program actually works.
+
+@node Conditional Changes
+@subsection Conditional Changes
+
+C programs often contain compile-time @code{#if} conditionals.  Many
+changes are conditional; sometimes you add a new definition which is
+entirely contained in a conditional.  It is very useful to indicate in
+the change log the conditions for which the change applies.
+
+Our convention for indicating conditional changes is to use square
+brackets around the name of the condition.
+
+Here is a simple example, describing a change which is conditional but
+does not have a function or entity name associated with it:
+
+@example
+* xterm.c [SOLARIS2]: Include string.h.
+@end example
+
+Here is an entry describing a new definition which is entirely
+conditional.  This new definition for the macro @code{FRAME_WINDOW_P} is
+used only when @code{HAVE_X_WINDOWS} is defined:
+
+@example
+* frame.h [HAVE_X_WINDOWS] (FRAME_WINDOW_P): Macro defined.
+@end example
+
+Here is an entry for a change within the function @code{init_display},
+whose definition as a whole is unconditional, but the changes themselves
+are contained in a @samp{#ifdef HAVE_LIBNCURSES} conditional:
+
+@example
+* dispnew.c (init_display) [HAVE_LIBNCURSES]: If X, call tgetent.
+@end example
+
+Here is an entry for a change that takes affect only when
+a certain macro is @emph{not} defined:
+
+@example
+(gethostname) [!HAVE_SOCKETS]: Replace with winsock version.
+@end example
 
 @node Man Pages
 @section Man Pages
