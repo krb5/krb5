@@ -220,4 +220,5 @@ error_code KRB5_KT_END,			"End of key table reached"
 error_code KRB5_KT_NOWRITE,		"Cannot write to specified key table"
 error_code KRB5_KT_IOERR,		"Error writing to key table"
 
+error_code KRB5_NO_TKT_IN_RLM,		"Cannot find ticket for requested realm"
 end
