@@ -1,3 +1,11 @@
+Mon Mar 27 07:56:26 1995 Chris Provenzano (proven@mit.edu)
+
+        * kprop.c : Use new calling conventions for krb5_sendauth(),
+		krb5_mk_safe(), krb5_rd_safe() and krb5_mk_priv().
+
+        * kpropd.c : Use new calling conventions for krb5_recvauth(),
+		krb5_mk_safe(), krb5_rd_safe() and krb5_rd_priv().
+
 Fri Mar 24 14:49:41 1995    <tytso@rsx-11.mit.edu>
 
 	* kpropd.c (PRS): Don't bother initializing server_addrs since

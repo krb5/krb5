@@ -67,9 +67,8 @@ int	standalone;
 
 krb5_principal	server;		/* This is our server principal name */
 krb5_principal	client;		/* This is who we're talking to */
-krb5_keyblock	*session_key;	/* Here is the session key */
-krb5_pointer	kerb_keytab = 0; /* Use default */
 krb5_context kpropd_context;
+krb5_auth_context * auth_context;
 char	*realm = NULL;		/* Our realm */
 char	*file = KPROPD_DEFAULT_FILE;
 char	*temp_file_name;
@@ -77,8 +76,6 @@ char	*kdb5_edit = KPROPD_DEFAULT_KDB5_EDIT;
 char	*kerb_database = KPROPD_DEFAULT_KRB_DB;
 
 int		database_fd;
-krb5_int32	my_seq_num;	/* Sequence number */
-krb5_int32	his_seq_num;	/* The remote's sequence number */
 krb5_address	sender_addr;
 krb5_address	receiver_addr;
 
@@ -249,10 +246,6 @@ void doit(fd)
 		       name);
 		free(name);
 		exit(1);
-	}
-	if (debug) {
-		printf("My sequence number: %d\n", my_seq_num);
-		printf("His sequence number: %d\n", his_seq_num);
 	}
 	omask = umask(077);
 	lock_fp = fopen(temp_file_name, "a");
@@ -437,73 +430,90 @@ void PRS(argv)
  */
 void
 kerberos_authenticate(context, fd, clientp, sin)
-    krb5_context context;
-    int	fd;
-    krb5_principal	*clientp;
-    struct sockaddr_in	sin;
+    krb5_context 	  context;
+    int		 	  fd;
+    krb5_principal	* clientp;
+    struct sockaddr_in	  sin;
 {
-	krb5_error_code	retval;
-	krb5_ticket	*ticket;
-	krb5_authenticator	*authent;
-	struct sockaddr_in	r_sin;
-	int			sin_length;
+    krb5_error_code	  retval;
+    krb5_ticket		* ticket;
+    struct sockaddr_in	  r_sin;
+    int			  sin_length;
 
-	/*
-	 * Set recv_addr and send_addr
-	 */
-	sender_addr.addrtype = ADDRTYPE_INET;
-	sender_addr.length = sizeof(sin.sin_addr);
-	sender_addr.contents = (krb5_octet *) malloc(sizeof(sin.sin_addr));
-	memcpy((char *) sender_addr.contents, (char *) &sin.sin_addr,
-	       sizeof(sin.sin_addr));
+    /*
+     * Set recv_addr and send_addr
+     */
+    sender_addr.addrtype = ADDRTYPE_INET;
+    sender_addr.length = sizeof(sin.sin_addr);
+    sender_addr.contents = (krb5_octet *) malloc(sizeof(sin.sin_addr));
+    memcpy((char *) sender_addr.contents, (char *) &sin.sin_addr,
+           sizeof(sin.sin_addr));
 
-	sin_length = sizeof(r_sin);
-	if (getsockname(fd, (struct sockaddr *) &r_sin, &sin_length)) {
-		com_err(progname, errno, "while getting local socket address");
-		exit(1);
+    sin_length = sizeof(r_sin);
+    if (getsockname(fd, (struct sockaddr *) &r_sin, &sin_length)) {
+	com_err(progname, errno, "while getting local socket address");
+	exit(1);
+    }
+
+    receiver_addr.addrtype = ADDRTYPE_INET;
+    receiver_addr.length = sizeof(r_sin.sin_addr);
+    receiver_addr.contents = (krb5_octet *) malloc(sizeof(r_sin.sin_addr));
+    memcpy((char *) receiver_addr.contents, (char *) &r_sin.sin_addr,
+           sizeof(r_sin.sin_addr));
+
+    if (debug) {
+	char *name;
+	if (retval = krb5_unparse_name(context, server, &name)) {
+	    com_err(progname, retval, "While unparsing client name");
+	    exit(1);
 	}
+	printf("krb5_recvauth(%d, %s, %s, ...)\n", fd, kprop_version, name);
+	free(name);
+    }
 
-	receiver_addr.addrtype = ADDRTYPE_INET;
-	receiver_addr.length = sizeof(r_sin.sin_addr);
-	receiver_addr.contents = (krb5_octet *) malloc(sizeof(r_sin.sin_addr));
-	memcpy((char *) receiver_addr.contents, (char *) &r_sin.sin_addr,
-	       sizeof(r_sin.sin_addr));
+    if (retval = krb5_auth_con_init(context, &auth_context)) {
+	syslog(LOG_ERR, "Error in krb5_auth_con_ini: %s",error_message(retval));
+    	exit(1);
+    }
 
-	if (debug) {
-		char *name;
-		if (retval = krb5_unparse_name(context, server, &name)) {
-			com_err(progname, retval,
-				"While unparsing client name");
-			exit(1);
-		}
-		printf("krb5_recvauth(%d, %s, %s, ...)\n", fd,
-		       kprop_version, name);
-		free(name);
+    if (retval = krb5_auth_con_setflags(context, auth_context, 
+					KRB5_AUTH_CONTEXT_DO_SEQUENCE)) {
+	syslog(LOG_ERR, "Error in krb5_auth_con_setflags: %s",
+	       error_message(retval));
+	exit(1);
+    }
+
+    if (retval = krb5_auth_con_setaddrs(context, auth_context, &receiver_addr,
+				        &sender_addr)) {
+	syslog(LOG_ERR, "Error in krb5_auth_con_setaddrs: %s",
+	       error_message(retval));
+	exit(1);
+    }
+
+    if (retval = krb5_recvauth(context, &auth_context, (void *) &fd,
+			       kprop_version, server, "dfl", 0, NULL, &ticket)){
+	syslog(LOG_ERR, "Error in krb5_recvauth: %s", error_message(retval));
+	exit(1);
+    }
+
+    if (retval = krb5_copy_principal(context, 
+				     ticket->enc_part2->client, clientp)) {
+	syslog(LOG_ERR, "Error in krb5_copy_prinicpal: %s", 
+	       error_message(retval));
+	exit(1);
+    }
+
+    if (debug) {
+	char * name;
+
+	if (retval = krb5_unparse_name(context, *clientp, &name)) {
+	    com_err(progname, retval, "While unparsing client name");
+	    exit(1);
 	}
-
-	if (retval = krb5_recvauth(context, (void *) &fd, kprop_version, server,
-				   &sender_addr, kerb_keytab, NULL, NULL,
-				   "dfl", 0, &my_seq_num, clientp, &ticket,
-				   &authent)) {
-		syslog(LOG_ERR, "Error in krb5_recvauth: %s",
-		       error_message(retval));
-		exit(1);
-	}
-	if (debug) {
-		char	*name;
-
-		if (retval = krb5_unparse_name(context, *clientp, &name)) {
-			com_err(progname, retval,
-				"While unparsing client name");
-			exit(1);
-		}
-		printf("authenticated client: %s\n", name);
-		free(name);
-	}
-	his_seq_num = authent->seq_number;
-	krb5_copy_keyblock(context, ticket->enc_part2->session, &session_key);
-	krb5_free_ticket(context, ticket);
-	krb5_free_authenticator(context, authent);
+	printf("authenticated client: %s\n", name);
+	free(name);
+    }
+    krb5_free_ticket(context, ticket);
 }
 
 krb5_boolean
@@ -551,10 +561,8 @@ recv_database(context, fd, database_fd)
 	int	database_size;
 	int	received_size, n;
 	char		buf[1024];
-	char		*i_vector;
 	krb5_data	inbuf, outbuf;
 	krb5_error_code	retval;
-	int		eblock_size;
 
 	/*
 	 * Receive and decode size from client
@@ -567,10 +575,7 @@ recv_database(context, fd, database_fd)
 	}
 	if (krb5_is_krb_error(&inbuf))
 		recv_error(context, &inbuf);
-	if (retval = krb5_rd_safe(context, &inbuf, session_key, &sender_addr,
-				  &receiver_addr, his_seq_num++,
-				  KRB5_SAFE_DOSEQUENCE|KRB5_SAFE_NOTIME,
-				  0, &outbuf)) {
+	if (retval = krb5_rd_safe(context,auth_context,&inbuf,&outbuf,NULL)) {
 		send_error(context, fd, retval, "while decoding database size");
 		krb5_xfree(inbuf.data);
 		com_err(progname, retval,
@@ -581,18 +586,16 @@ recv_database(context, fd, database_fd)
 	krb5_xfree(inbuf.data);
 	krb5_xfree(outbuf.data);
 	database_size = ntohl(database_size);
-	/*
-	 * Initialize the initial vector.
-	 */
-	eblock_size = krb5_keytype_array[session_key->keytype]->
-		system->block_length;
-	if (!(i_vector=malloc(eblock_size))) {
-		com_err(progname, ENOMEM, "while allocating i_vector");
-		send_error(context, fd, ENOMEM,
-			   "malloc failed while allocating i_vector");
-		exit(1);
-	}
-	memset(i_vector, 0, eblock_size);
+
+    /*
+     * Initialize the initial vector.
+     */
+    if (retval = krb5_auth_con_initivector(context, auth_context)) {
+	send_error(context, fd, retval, "failed while initializing i_vector");
+	com_err(progname, retval, "while initializing i_vector");
+	exit(1);
+    }
+
 	/*
 	 * Now start receiving the database from the net
 	 */
@@ -608,11 +611,8 @@ recv_database(context, fd, database_fd)
 		}
 		if (krb5_is_krb_error(&inbuf))
 			recv_error(context, &inbuf);
-		if (retval = krb5_rd_priv(context, &inbuf, session_key,
-					  &sender_addr, &receiver_addr,
-					  his_seq_num++,
-					  KRB5_PRIV_DOSEQUENCE|KRB5_PRIV_NOTIME,
-					  i_vector, 0, &outbuf)) {
+		if (retval = krb5_rd_priv(context, auth_context, &inbuf, 
+					  &outbuf, NULL)) {
 			sprintf(buf,
 				"while decoding database block starting at offset %d",
 				received_size);
@@ -652,15 +652,7 @@ recv_database(context, fd, database_fd)
 	database_size = htonl(database_size);
 	inbuf.data = (char *) &database_size;
 	inbuf.length = sizeof(database_size);
-	if (retval = krb5_mk_safe(context, &inbuf, KPROP_CKSUMTYPE,
-				  session_key,
-				  /* Note these are reversed because */
-				  /* we are sending, not receiving! */
-				  &receiver_addr, &sender_addr, 
-				  my_seq_num++,
-				  KRB5_PRIV_DOSEQUENCE|KRB5_PRIV_NOTIME,
-				  0,	/* no rcache when NOTIME */
-				  &outbuf)) {
+	if (retval = krb5_mk_safe(context,auth_context,&inbuf,&outbuf,NULL)) {
 		com_err(progname, retval,
 			"while encoding # of receieved bytes");
 		send_error(context, fd, retval,

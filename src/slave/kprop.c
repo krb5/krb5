@@ -61,8 +61,6 @@ krb5_principal	my_principal;		/* The Kerberos principal we'll be */
 krb5_ccache	ccache;		/* Credentials cache which we'll be using */
 /* krb5_creds 	my_creds;	/* My credentials */
 krb5_creds	creds;
-krb5_int32	my_seq_num;	/* Sequence number to use for connection */
-krb5_int32	his_seq_num;	/* Remote sequence number */
 krb5_address	sender_addr;
 krb5_address	receiver_addr;
 
@@ -75,13 +73,15 @@ static void usage
 krb5_error_code open_connection 
 	PROTOTYPE((char *, int *, char *));
 void	kerberos_authenticate 
-	PROTOTYPE((krb5_context, int, krb5_principal, krb5_creds **));
+	PROTOTYPE((krb5_context, krb5_auth_context **, 
+		   int, krb5_principal, krb5_creds **));
 int	open_database 
 	PROTOTYPE((krb5_context, char *, int *));
 void	close_database 
 	PROTOTYPE((krb5_context, int));
 void	xmit_database 
-	PROTOTYPE((krb5_context, krb5_creds *, int, int, int));
+	PROTOTYPE((krb5_context, krb5_auth_context *, krb5_creds *, 
+		   int, int, int));
 void	send_error 
 	PROTOTYPE((krb5_context, krb5_creds *, int, char *, krb5_error_code));
 void	update_last_prop_file 
@@ -102,10 +102,12 @@ main(argc, argv)
 	int	fd, database_fd, database_size;
 	krb5_error_code	retval;
 	krb5_context context;
-	krb5_creds my_creds;
+	krb5_creds *my_creds;
+	krb5_auth_context * auth_context;
 	char	Errmsg[256];
 	
 	PRS(context, argv);
+	krb5_init_context(&context);
 	get_tickets(context);
 
 	database_fd = open_database(context, file, &database_size);
@@ -119,15 +121,13 @@ main(argc, argv)
 			progname, Errmsg, slave_host);
 		exit(1);
 	}
-	kerberos_authenticate(context, fd, my_principal, &my_creds);
-	if (debug) {
-		printf("My sequence number: %d\n", my_seq_num);
-		printf("His sequence number: %d\n", his_seq_num);
-	}
-	xmit_database(context, & my_creds, fd, database_fd, database_size);
+	kerberos_authenticate(context, &auth_context, fd, my_principal, 
+			      &my_creds);
+	xmit_database(context, auth_context, my_creds, fd, database_fd, 
+		      database_size);
 	update_last_prop_file(slave_host, file);
 	printf("Database propagation to %s: SUCCEEDED\n", slave_host);
-	krb5_free_cred_contents(context, &my_creds);
+	krb5_free_cred_contents(context, my_creds);
 	close_database(context, database_fd);
 	exit(0);
 }
@@ -356,8 +356,9 @@ open_connection(host, fd, Errmsg)
 }
 
 
-void kerberos_authenticate(context, fd, me, new_creds)
+void kerberos_authenticate(context, auth_context, fd, me, new_creds)
     krb5_context context;
+    krb5_auth_context **auth_context;
     int	fd;
     krb5_principal me;
     krb5_creds ** new_creds;
@@ -366,9 +367,15 @@ void kerberos_authenticate(context, fd, me, new_creds)
 	krb5_error	*error = NULL;
 	krb5_ap_rep_enc_part	*rep_result;
 
-	if (retval = krb5_sendauth(context, (void *)&fd, kprop_version, me,
-				   creds.server, AP_OPTS_MUTUAL_REQUIRED,
-				   NULL, &creds, NULL, &my_seq_num, NULL,
+    if (retval = krb5_auth_con_init(context, auth_context)) 
+	exit(1);
+
+    krb5_auth_con_setflags(context, *auth_context, 
+			   KRB5_AUTH_CONTEXT_DO_SEQUENCE);
+
+	if (retval = krb5_sendauth(context, auth_context, (void *)&fd, 
+				   kprop_version, me, creds.server,
+				   AP_OPTS_MUTUAL_REQUIRED, NULL, &creds, NULL,
 				   &error, &rep_result, new_creds)) {
 		com_err(progname, retval, "while authenticating to server");
 		if (error) {
@@ -390,7 +397,6 @@ void kerberos_authenticate(context, fd, me, new_creds)
 		}
 		exit(1);
 	}
-	his_seq_num = rep_result->seq_number;
 	krb5_free_ap_rep_enc_part(context, rep_result);
 }
 
@@ -493,17 +499,17 @@ close_database(context, fd)
  * will abort the entire operation.
  */
 void
-xmit_database(context, my_creds, fd, database_fd, database_size)
+xmit_database(context, auth_context, my_creds, fd, database_fd, database_size)
     krb5_context context;
+    krb5_auth_context * auth_context;
     krb5_creds *my_creds;
     int	fd;
     int	database_fd;
     int	database_size;
 {
-	int	send_size, sent_size, n, eblock_size;
+	int	send_size, sent_size, n;
 	krb5_data	inbuf, outbuf;
 	char		buf[KPROP_BUFSIZ];
-	char		*i_vector;
 	krb5_error_code	retval;
 	krb5_error	*error;
 	
@@ -513,13 +519,9 @@ xmit_database(context, my_creds, fd, database_fd, database_size)
 	send_size = htonl(database_size);
 	inbuf.data = (char *) &send_size;
 	inbuf.length = sizeof(send_size); /* must be 4, really */
-	if (retval = krb5_mk_safe(context, &inbuf, KPROP_CKSUMTYPE,
-				  &my_creds->keyblock, 
-				  &sender_addr, &receiver_addr,
-				  my_seq_num++,
-				  KRB5_PRIV_DOSEQUENCE|KRB5_SAFE_NOTIME,
-				  0,	/* no rcache when NOTIME */
-				  &outbuf)) {
+	/* KPROP_CKSUMTYPE */
+	if (retval = krb5_mk_safe(context, auth_context, &inbuf, 
+				  &outbuf, NULL)) {
 		com_err(progname, retval, "while encoding database size");
 		send_error(context, my_creds, fd, "while encoding database size", retval);
 		exit(1);
@@ -530,18 +532,15 @@ xmit_database(context, my_creds, fd, database_fd, database_size)
 		exit(1);
 	}
 	krb5_xfree(outbuf.data);
-	/*
-	 * Initialize the initial vector.
-	 */
-	eblock_size = krb5_keytype_array[my_creds->keyblock.keytype]->
-		system->block_length;
-	if (!(i_vector=malloc(eblock_size))) {
-		com_err(progname, ENOMEM, "while allocating i_vector");
-		send_error(context, my_creds, fd, 
-			   "malloc failed while allocating i_vector", ENOMEM);
-		exit(1);
-	}
-	memset(i_vector, 0, eblock_size);
+    /*
+     * Initialize the initial vector.
+     */
+    if (retval = krb5_auth_con_initivector(context, auth_context)) {
+	send_error(context, my_creds, fd, 
+		   "failed while initializing i_vector", retval);
+	com_err(progname, retval, "while allocating i_vector");
+	exit(1);
+    }
 	/*
 	 * Send over the file, block by block....
 	 */
@@ -549,15 +548,8 @@ xmit_database(context, my_creds, fd, database_fd, database_size)
 	sent_size = 0;
 	while (n = read(database_fd, buf, sizeof(buf))) {
 		inbuf.length = n;
-		if (retval = krb5_mk_priv(context, &inbuf, ETYPE_DES_CBC_CRC,
-					  &my_creds->keyblock,
-					  &sender_addr,
-					  &receiver_addr,
-					  my_seq_num++,
-					  KRB5_PRIV_DOSEQUENCE|KRB5_PRIV_NOTIME,
-					  0, /* again, no rcache */
-					  i_vector,
-					  &outbuf)) {
+		if (retval = krb5_mk_priv(context, auth_context, &inbuf,
+					  &outbuf, NULL)) {
 			sprintf(buf,
 				"while encoding database block starting at %d",
 				sent_size);
@@ -618,10 +610,7 @@ xmit_database(context, my_creds, fd, database_fd, database_size)
 		krb5_free_error(context, error);
 		exit(1);
 	}
-	if (retval = krb5_rd_safe(context, &inbuf, &my_creds->keyblock, 	
-				  &receiver_addr, &sender_addr, his_seq_num++,
-				  KRB5_SAFE_DOSEQUENCE|KRB5_SAFE_NOTIME,
-				  0, &outbuf)) {
+	if (retval = krb5_rd_safe(context,auth_context,&inbuf,&outbuf,NULL)) {
 		com_err(progname, retval,
 			"while decoding final size packet from server");
 		exit(1);
