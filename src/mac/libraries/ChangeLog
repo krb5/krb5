@@ -1,3 +1,8 @@
+Wed Mar 27 00:07:46 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* KerberosHeaders.h: Add #define of HAVE_STDLIB_H, since
+		Macintoshes have it!
+
 Wed Wed 27 18:00:00 1995  John Rivlin <jrivlin@fusion.com>
 
 	* KerberosHeaders.h: Created the file with the contents of 

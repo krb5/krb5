@@ -99,3 +99,4 @@ ENXIO
 #define HAVE_STRFTIME 1
 #define MAXPATHLEN 255
 #define HAVE_SYSLOG_H 1
+#define HAVE_STDLIB_H 1
