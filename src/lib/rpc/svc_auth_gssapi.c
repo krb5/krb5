@@ -5,6 +5,9 @@
  * $Source$
  * 
  * $Log$
+ * Revision 1.41  1996/10/16 20:16:10  bjaspan
+ * * svc_auth_gssapi.c (_svcauth_gssapi): accept add call_arg version 4
+ *
  * Revision 1.40  1996/10/15 21:05:10  bjaspan
  * 	* configure.in: add DO_SUBDIRS so make will descend into unit-test
  *
@@ -469,6 +472,8 @@ enum auth_stat _svcauth_gssapi(rqst, msg, no_dispatch)
 	       call_res.version = 1;
 	       break;
 	  case 3:
+	  case 4:
+	       /* 3 and 4 are essentially the same, don't bother warning */
 	       call_res.version = call_arg.version;
 	       break;
 	  default:
@@ -482,7 +487,7 @@ enum auth_stat _svcauth_gssapi(rqst, msg, no_dispatch)
 	  krb5_gss_set_backward_mode(&minor_stat, call_arg.version == 1);
 #endif
 
-	  if (call_arg.version == 3) {
+	  if (call_arg.version >= 3) {
 	       int len;
 
 	       memset(&bindings, 0, sizeof(bindings));
