@@ -1,3 +1,9 @@
+2002-06-11  Danilo Almeida  <dalmeida@mit.edu>
+
+	* cns.c: Do not use krb_get_notification_message() or
+	krb5_get_notification_message().
+	[pullup from 1-2-2-branch]
+
 2001-10-03  Ken Raeburn  <raeburn@mit.edu>
 
 	* cns.c: Don't declare pointers or functions FAR any more.
