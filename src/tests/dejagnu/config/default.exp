@@ -1169,7 +1169,7 @@ proc kinit { name pass standalone } {
 	# tests that distiguish between forwardable tickets and otherwise
 	# we should but another option to this proc. --proven
 	#
-    spawn $KINIT -f $name@$REALMNAME
+    spawn $KINIT -5 -f $name@$REALMNAME
     expect {
 	"Password for $name@$REALMNAME:" {
 	    verbose "kinit started"
