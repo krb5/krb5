@@ -60,6 +60,8 @@ EXPORTS
 	krb5_free_ticket
 	krb5_free_tickets
 	krb5_free_tkt_authent
+	krb5_free_checksum_contents
+	krb5_free_cksumtypes
 	krb5_fwd_tgt_creds
 	krb5_get_credentials
 	krb5_get_credentials_renew
@@ -125,6 +127,16 @@ EXPORTS
 	krb5_finish_random_key
 	krb5_random_key
 ;
+	krb5_c_decrypt
+	krb5_c_encrypt
+	krb5_c_encrypt_length
+	krb5_c_checksum_length
+	krb5_c_block_size
+	krb5_c_make_checksum
+	krb5_c_verify_checksum
+	krb5_c_random_make_octets
+	krb5_c_keyed_checksum_types
+;
 	krb5_425_conv_principal
 	krb5_524_conv_principal
 ;
@@ -147,6 +159,7 @@ EXPORTS
 	krb5_auth_con_getlocalsubkey
 	krb5_auth_con_getremotesubkey
 	krb5_auth_con_init
+	krb5_auth_con_setaddrs
 	krb5_auth_con_setflags
 	krb5_auth_con_getlocalseqnumber
 	krb5_auth_con_getremoteseqnumber
@@ -183,7 +196,7 @@ EXPORTS
 	des_pcbc_encrypt
 	des_quad_cksum
 	des_string_to_key
-	des_set_random_generator_seed
+;	des_set_random_generator_seed
 	profile_get_values
 	krb5_random_confounder
 	krb5_size_opaque

@@ -1,3 +1,8 @@
+Sat Dec  5 01:11:00 1998  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* krb5_32.def: Fixed exports file to reflect new crypto library
+		and related changes.
+
 1998-05-26  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* krb5_32.def: Change the DLL export list to include
