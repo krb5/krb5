@@ -1,3 +1,9 @@
+2003-02-10  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in ($(BUILDTOP)/include/gssapi/gssapi.h generic/gssapi.h): 
+	Don't depend on all-recurse, as it causes spurious rebuilds of
+	these header files.
+
 2003-01-10  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Don't explicitly invoke AC_PROG_ARCHIVE,

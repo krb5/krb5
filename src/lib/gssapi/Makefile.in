@@ -70,8 +70,8 @@ clean-windows::
 	cd ..
 	@echo Making clean in gssapi
 
-$(BUILDTOP)/include/gssapi/gssapi.h generic/gssapi.h: all-recurse
-
+$(BUILDTOP)/include/gssapi/gssapi.h generic/gssapi.h:
+	(cd generic && $(MAKE) '$$(BUILDTOP)/include/gssapi/gssapi.h' gssapi.h)
 
 # @lib_frag@
 # @libobj_frag@

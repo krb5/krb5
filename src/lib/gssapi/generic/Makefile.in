@@ -20,9 +20,9 @@ EHDRDIR= $(BUILDTOP)$(S)include$(S)gssapi
 HDRS=	$(EHDRDIR)$(S)gssapi.h \
 	$(EHDRDIR)$(S)gssapi_generic.h
 
-$(EHDRDIR)$(S)gssapi.h: gssapi.h create-ehdrdir
+$(EHDRDIR)$(S)gssapi.h: gssapi.h $(EHDRDIR)$(S)stamp
 	$(CP) gssapi.h $@
-$(EHDRDIR)$(S)gssapi_generic.h: $(srcdir)$(S)gssapi_generic.h create-ehdrdir
+$(EHDRDIR)$(S)gssapi_generic.h: $(srcdir)$(S)gssapi_generic.h $(EHDRDIR)$(S)stamp
 	$(CP) $(srcdir)$(S)gssapi_generic.h $@
 
 $(OUTPRE)gssapi_err_generic.$(OBJEXT): gssapi_err_generic.c
@@ -104,23 +104,27 @@ all-unix:: all-libobjs
 
 ##DOS##LIBOBJS = $(OBJS)
 
-all-windows:: create-ehdrdir $(HDRS)
+all-windows:: $(EHDRDIR)$(S)stamp $(HDRS)
 
-##DOS##create-ehdrdir:
-##DOS##	if not exist $(EHDRDIR)\nul mkdir $(EHDRDIR)
-##DOS##!if 0
-create-ehdrdir: includes-unix
-##DOS##!endif
+# windows
+$(EHDRDIR)\stamp:
+	if not exist $(EHDRDIR)\nul mkdir $(EHDRDIR)
+	echo. > $@
+
+# unix
+$(EHDRDIR)/stamp:
+	@if test -d $(EHDRDIR); then :; \
+		else (set -x; mkdir $(EHDRDIR)) fi; touch $@
+
+includes-unix: $(EHDRDIR)$(S)stamp
 
 clean-unix:: clean-libobjs
 	$(RM) $(ETHDRS) $(ETSRCS) $(HDRS) $(EXPORTED_BUILT_HEADERS)
 
 clean-windows::
 	$(RM) $(HDRS)
+	-if exist $(EHDRDIR)\stamp $(RM) $(EHDRDIR)\stamp
 	-if exist $(EHDRDIR)\nul rmdir $(EHDRDIR)
-
-includes-unix::
-	@if test -d $(EHDRDIR); then :; else (set -x; mkdir $(EHDRDIR)) fi
 
 # Krb5InstallHeaders($(EXPORTED_HEADERS), $(KRB5_INCDIR)/krb5)
 install-headers-unix install:: gssapi.h
