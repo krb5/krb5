@@ -1,3 +1,7 @@
+2000-06-02  Ken Raeburn  <raeburn@mit.edu>
+
+	* definitions.texinfo: Update for 1.2 release.
+
 2000-05-31  Ken Raeburn  <raeburn@mit.edu>
 
 	* krb425.texinfo (libdefaults): Add description of v4_realm.
