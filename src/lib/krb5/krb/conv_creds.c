@@ -186,14 +186,19 @@ int krb5int_encode_v4tkt(v4tkt, buf, encoded_len)
      unsigned int *encoded_len;
 {
      int buflen, ret;
+     krb5_int32 temp;
 
      buflen = *encoded_len;
 
-     if ((ret = encode_int32(&buf, &buflen, &v4tkt->length)))
+     if (v4tkt->length < MAX_KTXT_LEN)
+	  memset(v4tkt->dat + v4tkt->length, 0, MAX_KTXT_LEN - v4tkt->length);
+     temp = v4tkt->length;
+     if ((ret = encode_int32(&buf, &buflen, &temp)))
 	  return ret;
      if ((ret = encode_bytes(&buf, &buflen, (char *)v4tkt->dat, MAX_KTXT_LEN)))
 	  return ret;
-     if ((ret = encode_int32(&buf, &buflen, (krb5_int32 *) &v4tkt->mbz)))
+     temp = v4tkt->mbz;
+     if ((ret = encode_int32(&buf, &buflen, &temp)))
 	  return ret;
 
      *encoded_len -= buflen;
@@ -236,14 +241,17 @@ static int decode_v4tkt(v4tkt, buf, encoded_len)
      unsigned int *encoded_len;
 {
      int buflen, ret;
+     krb5_int32 temp;
 
      buflen = *encoded_len;
-     if ((ret = decode_int32(&buf, &buflen, &v4tkt->length)))
+     if ((ret = decode_int32(&buf, &buflen, &temp)))
 	  return ret;
+     v4tkt->length = temp;
      if ((ret = decode_bytes(&buf, &buflen, (char *)v4tkt->dat, MAX_KTXT_LEN)))
 	  return ret;
-     if ((ret = decode_int32(&buf, &buflen, (krb5_int32 *) &v4tkt->mbz)))
+     if ((ret = decode_int32(&buf, &buflen, &temp)))
 	  return ret;
+     v4tkt->mbz = temp;
      *encoded_len -= buflen;
      return 0;
 }

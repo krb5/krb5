@@ -1,3 +1,9 @@
+2003-12-16  Ken Raeburn  <raeburn@mit.edu>
+
+	* conv_creds.c (krb5int_encode_v4tkt): Zero out unused parts of
+	ticket.  Use a temorary in case krb5_int32 isn't "int".
+	(decode_v4tkt): Use a temorary in case krb5_int32 isn't "int".
+
 2003-12-13  Ken Raeburn  <raeburn@mit.edu>
 
 	* mk_req_ext.c (krb5int_generate_and_save_subkey): New function,
