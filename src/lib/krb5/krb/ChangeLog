@@ -1,3 +1,10 @@
+1999-10-14  Tom Yu  <tlyu@mit.edu>
+
+	* preauth2.c (krb5_do_preauth): Add gross workaround for 1.0.x KDC
+	returning a bogus PA-PW-SALT in a KRB-ERROR message when a
+	principal requires preauth: ignore salt hints if an etype_info is
+	present.
+
 1999-10-12  Ken Raeburn  <raeburn@mit.edu>
 
 	* conv_princ.c (sconv_list): Don't do conversion for "zephyr"
