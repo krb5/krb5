@@ -63,16 +63,17 @@ krb5_address ***outaddr;
 {
     krb5_error_code retval;
     krb5_address ** tempaddr;
-    register int nelems;
+    register int nelems = 0;
 
-    for (nelems = 0; inaddr[nelems]; nelems++);
+    while (inaddr[nelems]) nelems++;
 
     /* one more for a null terminated list */
     if (!(tempaddr = (krb5_address **) calloc(nelems+1, sizeof(*tempaddr))))
 	return ENOMEM;
 
     for (nelems = 0; inaddr[nelems]; nelems++)
-	if (retval = krb5_copy_addr(inaddr[nelems], &tempaddr[nelems])) {
+	retval = krb5_copy_addr(inaddr[nelems], &tempaddr[nelems]);
+        if (retval) {
 	    krb5_free_addresses(tempaddr);
 	    return retval;
 	}
@@ -94,16 +95,16 @@ krb5_address ***outaddr;
     krb5_error_code retval;
     krb5_address ** tempaddr;
     krb5_address ** tempaddr2;
-    register int nelems;
-    register int norigelems;
+    register int nelems = 0;
+    register int norigelems = 0;
 
     if (!inaddr)
 	return 0;
 
     tempaddr2 = *outaddr;
 
-    for (nelems = 0; inaddr[nelems]; nelems++);
-    for (norigelems = 0; tempaddr2[norigelems]; norigelems++);
+    while (inaddr[nelems]) nelems++;
+    while (tempaddr2[norigelems]) norigelems++;
 
     tempaddr = realloc((char *)*outaddr,
 		       (nelems + norigelems + 1) * sizeof(*tempaddr));
@@ -114,10 +115,12 @@ krb5_address ***outaddr;
     *outaddr = tempaddr;
 
 
-    for (nelems = 0; inaddr[nelems]; nelems++)
-	if (retval = krb5_copy_addr(inaddr[nelems],
-				    &tempaddr[norigelems + nelems]))
+    for (nelems = 0; inaddr[nelems]; nelems++) {
+	retval = krb5_copy_addr(inaddr[nelems],
+				&tempaddr[norigelems + nelems]);
+	if (retval)
 	    goto cleanup;
+    }
 
     tempaddr[norigelems + nelems] = 0;
     return 0;

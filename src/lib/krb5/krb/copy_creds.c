@@ -51,21 +51,26 @@ krb5_creds **outcred;
 	return ENOMEM;
 
     *tempcred = *incred;		/* copy everything quickly */
-    if (retval = krb5_copy_principal(incred->client, &tempcred->client))
+    retval = krb5_copy_principal(incred->client, &tempcred->client);
+    if (retval)
 	goto cleanlast;
-    if (retval = krb5_copy_principal(incred->server, &tempcred->server))
+    retval = krb5_copy_principal(incred->server, &tempcred->server);
+    if (retval)
 	goto cleanclient;
-    if (retval = krb5_copy_keyblock_contents(&incred->keyblock,
-					     &tempcred->keyblock))
+    retval = krb5_copy_keyblock_contents(&incred->keyblock,
+					 &tempcred->keyblock);
+    if (retval)
 	goto cleanserver;
-    if (retval = krb5_copy_addresses(incred->addresses, &tempcred->addresses))
+    retval = krb5_copy_addresses(incred->addresses, &tempcred->addresses);
+    if (retval)
 	goto cleanblock;
-    if (retval = krb5_copy_data(&incred->ticket, &scratch))
+    retval = krb5_copy_data(&incred->ticket, &scratch);
+    if (retval)
 	goto cleanaddrs;
     tempcred->ticket = *scratch;
     xfree(scratch);
-    if (retval = krb5_copy_data(&incred->second_ticket,
-				&scratch))
+    retval = krb5_copy_data(&incred->second_ticket, &scratch);
+    if (retval)
 	goto cleanticket;
 
     tempcred->second_ticket = *scratch;

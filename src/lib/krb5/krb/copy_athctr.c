@@ -46,7 +46,8 @@ krb5_authenticator **authto;
 	return ENOMEM;
     *tempto = *authfrom;
 
-    if (retval = krb5_copy_principal(authfrom->client, &tempto->client)) {
+    retval = krb5_copy_principal(authfrom->client, &tempto->client);
+    if (retval) {
 	xfree(tempto);
 	return retval;
     }
@@ -59,8 +60,8 @@ krb5_authenticator **authto;
     }
     
     if (authfrom->subkey) {
-	    if (retval = krb5_copy_keyblock(authfrom->subkey,
-					    &tempto->subkey)) {
+	    retval = krb5_copy_keyblock(authfrom->subkey, &tempto->subkey);
+	    if (retval) {
 		    xfree(tempto->subkey);
 		    krb5_free_checksum(tempto->checksum);
 		    krb5_free_principal(tempto->client);    

@@ -63,21 +63,23 @@ krb5_authdata ***outauthdat;
 {
     krb5_error_code retval;
     krb5_authdata ** tempauthdat;
-    register int nelems;
+    register int nelems = 0;
 
-    for (nelems = 0; inauthdat[nelems]; nelems++);
+    while (inauthdat[nelems]) nelems++;
 
     /* one more for a null terminated list */
     if (!(tempauthdat = (krb5_authdata **) calloc(nelems+1,
 						  sizeof(*tempauthdat))))
 	return ENOMEM;
 
-    for (nelems = 0; inauthdat[nelems]; nelems++)
-	if (retval = krb5_copy_authdatum(inauthdat[nelems],
-					 &tempauthdat[nelems])) {
+    for (nelems = 0; inauthdat[nelems]; nelems++) {
+	retval = krb5_copy_authdatum(inauthdat[nelems],
+				     &tempauthdat[nelems]);
+	if (retval) {
 	    krb5_free_authdata(tempauthdat);
 	    return retval;
 	}
+    }
 
     *outauthdat = tempauthdat;
     return 0;
