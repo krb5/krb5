@@ -34,6 +34,7 @@
 /* based on @(#)genget.c	8.1 (Berkeley) 6/4/93 */
 
 #include <ctype.h>
+#include "misc.h"
 
 #define	LOWER(x) (isupper((int) x) ? tolower((int) x) : (x))
 /*
@@ -95,7 +96,7 @@ genget(name, table, stlen)
  */
 	int
 Ambiguous(s)
-	char *s;
+	void *s;
 {
 	return((char **)s == &ambiguous);
 }

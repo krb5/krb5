@@ -42,10 +42,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifndef	__P
-#define __P(x)	()
-#endif
-static char *__findenv __P((const char *, int *)); 
+#include "misc-proto.h"
+
+static char *__findenv P((const char *, int *)); 
 
 /*
  * setenv --

@@ -214,7 +214,7 @@ encrypt_init(name, server)
 	str_send[str_suplen++] = SE;
 }
 
-	void
+static	void
 encrypt_list_types()
 {
 	Encryptions *ep = encryptions;
@@ -730,7 +730,7 @@ encrypt_request_start(data, cnt)
 
 static unsigned char str_keyid[(MAXKEYLEN*2)+5] = { IAC, SB, TELOPT_ENCRYPT };
 
-void encrypt_keyid();
+static void encrypt_keyid P((struct key_info *kp, unsigned char *, int));
 		
 void encrypt_enc_keyid(keyid, len)
 	unsigned char *keyid;
@@ -746,7 +746,7 @@ void encrypt_dec_keyid(keyid, len)
 	encrypt_keyid(&ki[0], keyid, len);
 }
 
-void encrypt_keyid(kp, keyid, len)
+static void encrypt_keyid(kp, keyid, len)
 	struct key_info *kp;
 	unsigned char *keyid;
 	int len;

@@ -9,7 +9,8 @@
 #include <sys/types.h>
 #include <netdb.h>
 #include <errno.h>
-
+#define NEED_PARSETOS
+#include "misc-proto.h"
 
 #define	MIN_TOS	0
 #define	MAX_TOS	255

@@ -149,6 +149,8 @@ int fb64_reply P((unsigned char *, int, struct fb *));
 static void fb64_session P((Session_Key *, int, struct fb *));
 void fb64_stream_key P((Block, struct stinfo *));
 int fb64_keyid P((int, unsigned char *, int *, struct fb *));
+void fb64_printsub P((unsigned char *, int, unsigned char *, int, 
+		     unsigned char *));
 
 static void ecb_encrypt(stp, in, out)
      struct stinfo *stp;

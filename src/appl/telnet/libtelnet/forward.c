@@ -28,6 +28,7 @@
 #include <netdb.h>
  
 #include "k5-int.h"
+#include "krb5forw.h"
  
 #ifdef NEED_SETENV
 extern int setenv(char *, char *, int);

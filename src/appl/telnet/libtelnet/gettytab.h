@@ -107,10 +107,12 @@ struct gettyflags {
 #define DX	gettyflags[20].value
 #define RM	gettyflags[21].value
 
-int	getent();
+int	getent (char *, char *);
 long	getnum();
 int	getflag();
-char	*getstr();
+#ifndef SOLARIS
+char	*getstr(char *, char **);
+#endif
 
 extern	struct gettyflags gettyflags[];
 extern	struct gettynums gettynums[];

@@ -80,4 +80,17 @@ void net_encrypt P((void));
 int telnet_spin P((void));
 char *telnet_getenv P((char *));
 char *telnet_gets P((char *, char *, int, int));
+
+
+#ifdef NEED_PARSETOS
+int parsetos(char *, char *);
+#endif
+
+#ifdef NEED_SETENV
+int setenv(const char *, const char *, int);
+#ifndef HAVE_UNSETENV
+void unsetenv(const char *);
+#endif
+#endif
+
 #endif

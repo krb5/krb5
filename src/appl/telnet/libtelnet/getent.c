@@ -33,6 +33,8 @@
 
 /* based on @(#)getent.c	8.1 (Berkeley) 6/4/93 */
 
+#include "gettytab.h"
+
 #ifdef	HAVE_CGETENT
 static char *area;
 #endif

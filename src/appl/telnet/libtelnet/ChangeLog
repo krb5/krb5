@@ -1,3 +1,36 @@
+2001-07-02  Ezra Peisach  <epeisach@mit.edu>
+
+	* krb5forw.h: File with prototype for rd_and_store_for_creds().
+
+	* kerberos5.c: Include krb5forw.h for rd_and_store_for_creds()
+	prototype which is removed from this file.
+
+	* forward.c: Include krb5forw.h for prototype.
+
+	* setenv.c: Include misc-proto.h for setenv/unsetenv prototypes.
+
+	* parsetos.c: Include misc-proto.h for parsetos prototype.
+
+	* misc-proto.h: Add prototype for parsetos(), setenv(), unsetenv()
+	as needed.
+
+	* kerberos5.c: Declare kerberos5_forward() static and flush out
+	prototype.
+
+	* gettytab.h: Flush out prototypes for getent() and getstr().
+
+	* getent.c: Include gettytab.h for prototypes.
+
+	* genget.c: Include misc.h for prototypes.
+
+	* enc_des.c: Add prototype for fb64_printsub.
+
+	* enc-proto.h: Add prototypes for encrypt_debug(),
+	finddecryption(), EncryptAuthEnc(), EncryptAutoDec(),
+	EncryptDebug(), EncryptVerbose().
+
+	* encrypt.c: Declare encrypt_list_types() and encrypt_keyid() static.
+
 2001-06-22  Ezra Peisach  <epeisach@mit.edu>
 
 	* enc_des.c: Change local variable index to idx to not shadown

@@ -91,11 +91,9 @@ extern int net;
 #ifdef	FORWARD
 int forward_flags = 0;  /* Flags get set in telnet/main.c on -f and -F */
 
-void kerberos5_forward();
+static void kerberos5_forward(Authenticator *);
 
-extern krb5_error_code
-rd_and_store_for_creds(krb5_context, krb5_auth_context, krb5_data *, 
-		       krb5_ticket *);
+#include "krb5forw.h"
 
 #endif	/* FORWARD */
 
@@ -802,7 +800,7 @@ kerberos5_printsub(data, cnt, buf, buflen)
 
 #ifdef	FORWARD
 
-void
+static void
 kerberos5_forward(ap)
      Authenticator *ap;
 {
