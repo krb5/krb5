@@ -530,6 +530,7 @@ krb5_decode_princ_contents(context, content, entry)
 	    goto error_out;
 	}
 	key_data = entry->key_data + i;
+	memset(key_data, 0, sizeof(krb5_key_data));
 	krb5_kdb_decode_int16(nextloc, key_data->key_data_ver);
 	nextloc += 2;
 	krb5_kdb_decode_int16(nextloc, key_data->key_data_kvno);
