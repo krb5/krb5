@@ -38,22 +38,49 @@ krb5_cc_default(context, ccache)
    krb5_context context;
    krb5_ccache FAR *ccache;
 {
-	krb5_error_code retval, err;
+    krb5_error_code retval;
 	krb5_os_context	os_ctx;
 
 	if (!context || context->magic != KV5M_CONTEXT)
 		return KV5M_CONTEXT;
 	
 	os_ctx = context->os_context;
+	
+    retval = krb5_cc_resolve(context, krb5_cc_default_name(context), ccache);
+    if (!retval && ccache && !os_ctx->default_ccprincipal) {
+    	/* We got a ccache... remember what principal is associated with it */
+    	if (krb5_cc_get_principal (context, *ccache, &os_ctx->default_ccprincipal) != 0)
+    		os_ctx->default_ccprincipal = 0;
+    }
+    return retval; 
+}
 
+/* This is the internal function which opens the default ccache.  On platforms supporting
+   the login library's automatic popup dialog to get tickets, this function also updated the
+   library's internal view of the current principal associated with this cache. 
+   
+   All krb5 and GSS functions which need to open a cache to get a tgt to obtain service tickets
+   should call this function, not krb5_cc_default() */
+
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5int_cc_default(context, ccache)
+	krb5_context context;
+	krb5_ccache FAR *ccache;
+{
 #ifdef USE_LOGIN_LIBRARY
 	{
-		/* this is the best place to do this: 
-		 * make sure the default cache has tix before you open it */
-		char 			*outCacheName;
-		KLPrincipal		desiredPrincipal = nil;
-		krb5_principal	desiredKrb5Principal;
-		
+		/* make sure the default cache has tix before you open it */
+		char 				*outCacheName;
+		KLPrincipal			desiredPrincipal = nil;
+		krb5_principal		desiredKrb5Principal;
+		krb5_error_code 	err;
+		krb5_os_context		os_ctx;
+
+		if (!context || context->magic != KV5M_CONTEXT)
+			return KV5M_CONTEXT;
+	
+		os_ctx = context->os_context;
+				
 		desiredKrb5Principal = os_ctx->default_ccprincipal;
 		
 		/* do we want a specific client principal? */
@@ -88,12 +115,5 @@ krb5_cc_default(context, ccache)
 	}
 #endif
 
-    retval = krb5_cc_resolve(context, krb5_cc_default_name(context), ccache);
-    if (!retval && ccache && !os_ctx->default_ccprincipal) {
-    	/* We got a ccache... remember what principal is associated with it */
-    	err = krb5_cc_get_principal (context, *ccache, &os_ctx->default_ccprincipal);
-    	if (err)
-    		os_ctx->default_ccprincipal = 0;
-    }
-    return retval;
+    return krb5_cc_default (context, ccache);
 }
