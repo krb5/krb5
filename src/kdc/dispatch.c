@@ -61,7 +61,8 @@ krb5_data **response;
     else
 	retval = KRB5KRB_AP_ERR_MSG_TYPE;
     /* put the response into the lookaside buffer */
-    kdc_insert_lookaside(pkt, *response);
+    if (!retval)
+	kdc_insert_lookaside(pkt, *response);
 
     return retval;
 }
