@@ -104,6 +104,7 @@ main()
     puts( "passed, result= 3232AFFA48628A26653B5AAA44541FD90D690603" );
 #endif /* NEW_SHS */
 
+#if 0
     printf( "\nTesting speed for 100MB data... " );
     shsInit( &shsInfo );
     secondCount = time( NULL );
@@ -112,6 +113,7 @@ main()
     secondCount = time( NULL ) - secondCount;
     printf( "done.  Time = %ld seconds, %ld kbytes/second.\n", \
             secondCount, 100500L / secondCount );
+#endif
 
     puts( "\nAll SHS tests passed" );
     exit( OK );
