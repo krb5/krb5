@@ -50,15 +50,18 @@ register int *error;
     }
     retval->timestamp = unix2gentime(val->timestamp, error);
     if (!retval->timestamp) {
+    errout:
 	free_KRB5_EncKrbPrivPart(retval);
 	return(0);
     }
     retval->msec = val->msec;
-    retval->addresses = krb5_address2KRB5_HostAddresses(val->addresses, error);
-    if (!retval->addresses) {
-	free_KRB5_EncKrbPrivPart(retval);
-	return(0);
+    retval->s__address = krb5_addr2KRB5_HostAddress(val->s_address, error);
+    if (!retval->s__address) {
+	goto errout;
     }
-
+    retval->r__address = krb5_addr2KRB5_HostAddress(val->r_address, error);
+    if (!retval->r__address) {
+	goto errout;
+    }
     return(retval);
 }
