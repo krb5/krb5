@@ -27,12 +27,16 @@
 #include "com_err.h"
 #include "error_table.h"
 
+#ifdef macintosh
+#include <ErrorLib.h>
+#endif
+
 #if defined(_MSDOS) || defined(_WIN32)
 #define HAVE_STRERROR
 #endif
 
 #ifdef macintosh
-#define sys_nerr 100
+#define sys_nerr 100   /* XXX - What is this? */
 #endif
 
 #if !defined(HAVE_STRERROR) && !defined(SYS_ERRLIST_DECLARED)
@@ -143,8 +147,18 @@ KRB5_DLLIMP const char FAR * KRB5_CALLCONV error_message(code)
 		}
 	}
 #endif
-	
+
 oops:
+
+#if defined(macintosh)
+	{
+		/* This may be a Mac OS Toolbox error or an MIT Support Library Error.  Ask ErrorLib */
+		if (GetErrorLongString(code, buffer, ET_EBUFSIZ - 1) == noErr) {
+			return buffer;
+		}
+	}
+#endif
+	
 	cp = buffer;
 	strcpy(cp, "Unknown code ");
 	cp += sizeof("Unknown code ") - 1;

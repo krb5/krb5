@@ -9,7 +9,11 @@
 
 #include <errno.h>
 
+#if defined(macintosh)
+#define ET_EBUFSIZ 256
+#else
 #define ET_EBUFSIZ 64
+#endif
 
 struct et_list {
     struct et_list *next;
