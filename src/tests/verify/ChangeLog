@@ -1,5 +1,9 @@
 Thu Oct  6 12:42:47 1994  Theodore Y. Ts'o  (tytso@dcl)
 
+	* kdb5_verify.c (main, set_dbname_help): Allow master key password
+		to be passed in on the command line; to make testing
+		scripts simpler.
+
 	* kdb5_verify.c (check_princ): Check to make sure key version
 		number is 1, not 0.
 

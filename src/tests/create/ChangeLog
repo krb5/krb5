@@ -1,5 +1,9 @@
 Thu Oct  6 12:41:28 1994  Theodore Y. Ts'o  (tytso@dcl)
 
+	* kdb5_mkdums.c (main, set_dbname_help): Allow master key password
+		to be passed in on the command line; to make testing
+		scripts simpler.
+
 	* kdb5_mkdums.c (add_princ): Initialize all the fields of the
 		principal. 
 

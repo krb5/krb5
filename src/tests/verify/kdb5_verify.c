@@ -81,6 +81,7 @@ char *str_master_princ;
 static char *progname;
 static char *cur_realm = 0;
 static char *mkey_name = 0;
+static char *mkey_password = 0;
 static krb5_boolean manual_mkey = FALSE;
 static krb5_boolean dbactive = FALSE;
 
@@ -128,10 +129,13 @@ char *argv[];
     num_to_check = 0;
     depth = 1;
 
-    while ((optchar = getopt(argc, argv, "D:p:n:d:r:R:k:M:e:m")) != EOF) {
+    while ((optchar = getopt(argc, argv, "D:P:p:n:d:r:R:k:M:e:m")) != EOF) {
 	switch(optchar) {
 	case 'D':
 	    depth = atoi(optarg);       /* how deep to go */
+	    break;
+        case 'P':		/* Only used for testing!!! */
+	    mkey_password = optarg;
 	    break;
 	case 'p':                       /* prefix name to check */
 	    strcpy(principal_string, optarg);
@@ -376,6 +380,7 @@ char *dbname;
     int nentries;
     krb5_boolean more;
     register krb5_cryptosystem_entry *csentry;
+    krb5_data pwd, scratch;
 
     csentry = master_encblock.crypto_entry;
 
@@ -391,10 +396,29 @@ char *dbname;
 	com_err(pname, retval, "while setting up master key name");
 	return(1);
     }
-    if (retval = krb5_db_fetch_mkey(master_princ, &master_encblock,
-				    manual_mkey, FALSE, 0, &master_keyblock)) {
-	com_err(pname, retval, "while reading master key");
-	return(1);
+    if (mkey_password) {
+	pwd.data = mkey_password;
+	pwd.length = strlen(mkey_password);
+	retval = krb5_principal2salt(master_princ, &scratch);
+	if (retval) {
+	    com_err(pname, retval, "while calculated master key salt");
+	    return(1);
+	}
+	retval = krb5_string_to_key(&master_encblock, master_keyblock.keytype,
+				    &master_keyblock, &pwd, &scratch);
+	if (retval) {
+	    com_err(pname, retval,
+		    "while transforming master key from password");
+	    return(1);
+	}
+	free(scratch.data);
+    } else {
+	if (retval = krb5_db_fetch_mkey(master_princ, &master_encblock,
+					manual_mkey, FALSE, 0,
+					&master_keyblock)) {
+	    com_err(pname, retval, "while reading master key");
+	    return(1);
+	}
     }
     if (retval = krb5_db_init()) {
 	com_err(pname, retval, "while initializing database");
