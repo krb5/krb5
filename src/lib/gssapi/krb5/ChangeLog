@@ -1,3 +1,9 @@
+Fri Mar 26 22:17:20 1999  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* acquire_cred.c (krb5_gss_acquire_cred): Don't use strcmp to
+ 		compare against principal components (they aren't null
+ 		terminated!)
+
 Thu Mar 25 22:43:54 1999  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* gssapi_krb5.c: Rearrange OID's so that the V1V2 mechanism set
