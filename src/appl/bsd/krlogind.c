@@ -229,6 +229,8 @@ struct winsize {
 #define roundup(x,y) ((((x)+(y)-1)/(y))*(y))
 #endif
 
+#include "fake-addrinfo.h"
+
 #ifdef KERBEROS
      
 #include <krb5.h>
@@ -253,7 +255,7 @@ Key_schedule v4_schedule;
 #include "com_err.h"
 #include "defines.h"
      
-#define SECURE_MESSAGE  "This rlogin session is using DES encryption for all data transmissions.\r\n"
+#define SECURE_MESSAGE  "This rlogin session is encrypting all data transmissions.\r\n"
 
 krb5_authenticator      *kdata;
 krb5_ticket     *ticket = 0;
@@ -322,7 +324,7 @@ extern int daemon(int, int);
 #define VHANG_LAST		/* vhangup must occur on close, not open */
 #endif
 
-void	fatal(int, const char *), fatalperror(int, const char *), doit(int, struct sockaddr_in *), usage(void), do_krb_login(char *, char *), getstr(int, char *, int, char *);
+void	fatal(int, const char *), fatalperror(int, const char *), doit(int, struct sockaddr *), usage(void), do_krb_login(char *, char *), getstr(int, char *, int, char *);
 void	protocol(int, int);
 int	princ_maps_to_lname(krb5_principal, char *), default_realm(krb5_principal);
 krb5_sigtype	cleanup(int);
@@ -353,7 +355,7 @@ int main(argc, argv)
     extern int opterr, optind;
     extern char * optarg;
     int on = 1, fromlen, ch;
-    struct sockaddr_in from;
+    struct sockaddr_storage from;
     int debug_port = 0;
     int fd;
     int do_fork = 0;
@@ -542,7 +544,7 @@ int main(argc, argv)
 		    syslog(LOG_ERR, "fork: %s", error_message(errno));
 		case 0:
 		    (void) close(s);
-		    doit(fd, &from);
+		    doit(fd, (struct sockaddr *) &from);
 		    close(fd);
 		    exit(0);
 		default:
@@ -570,7 +572,7 @@ int main(argc, argv)
 	fd = 0;
     }
 
-    doit(fd, &from);
+    doit(fd, (struct sockaddr *) &from);
     return 0;
 }
 
@@ -593,11 +595,11 @@ int pid; /* child process id */
 
 void doit(f, fromp)
   int f;
-  struct sockaddr_in *fromp;
+  struct sockaddr *fromp;
 {
     int p, t, on = 1;
-    register struct hostent *hp;
     char c;
+    char hname[NI_MAXHOST];
     char buferror[255];
     struct passwd *pwd;
 #ifdef POSIX_SIGNALS
@@ -640,22 +642,25 @@ void doit(f, fromp)
     sa.sa_flags = 0;
 #endif
 
-    fromp->sin_port = ntohs((u_short)fromp->sin_port);
-    hp = gethostbyaddr((char *) &fromp->sin_addr, sizeof (struct in_addr),
-		       fromp->sin_family);
-    strncpy(rhost_addra, inet_ntoa(fromp->sin_addr), sizeof (rhost_addra));
+    retval = getnameinfo(fromp, socklen(fromp), hname, sizeof(hname), 0, 0,
+			 NI_NUMERICHOST);
+    if (retval)
+	fatal(f, gai_strerror(retval));
+    strncpy(rhost_addra, hname, sizeof(rhost_addra));
     rhost_addra[sizeof (rhost_addra) -1] = '\0';
-    if (hp != NULL) {
-	/* Save hostent information.... */
-	strncpy(rhost_name,hp->h_name,sizeof (rhost_name));
-	rhost_name[sizeof (rhost_name) - 1] = '\0';
-    } else
-	rhost_name[0] = '\0';
     
+    retval = getnameinfo(fromp, socklen(fromp), hname, sizeof(hname), 0, 0, 0);
+    if (retval)
+	fatal(f, gai_strerror(retval));
+    strncpy(rhost_name, hname, sizeof(rhost_name));
+    rhost_name[sizeof (rhost_name) - 1] = '\0';
+
+#ifndef KERBEROS
     if (fromp->sin_family != AF_INET)
+	/* Not a real problem, we just haven't bothered to update
+	   the port number checking code to handle ipv6.  */
       fatal(f, "Permission denied - Malformed from address\n");
     
-#ifndef KERBEROS
     if (fromp->sin_port >= IPPORT_RESERVED ||
 	fromp->sin_port < IPPORT_RESERVED/2)
       fatal(f, "Permission denied - Connection from bad port");

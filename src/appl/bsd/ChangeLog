@@ -1,3 +1,14 @@
+2002-06-25  Ken Raeburn  <raeburn@mit.edu>
+
+	* krlogind.c: Include fake-addrinfo.h.
+	(SECURE_MESSAGE): Don't say it's DES that's used for encryption.
+	(main): "from" is now sockaddr_storage; cast pointers when calling
+	doit.
+	(doit): Take sockaddr pointer instead of sockaddr_in.  Use
+	getnameinfo instead of inet_ntoa and gethostbyaddr.  Only complain
+	about non-IPv4 addresses if not doing Kerberos, and only right
+	before checking port numbers.
+
 2002-06-17 Jen Selby <jenselby@mit.edu>
 
 	* klogind.M: documented the -D and -f options
