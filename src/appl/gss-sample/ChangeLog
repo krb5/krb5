@@ -1,3 +1,7 @@
+Wed Oct 19 12:32:41 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* Makefile.in: Obey CCOPTS in CFLAGS declaration
+
 Wed Oct 12 02:29:38 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* Makefile.in: Add OBJS definition so that object files get
