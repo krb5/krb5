@@ -2174,7 +2174,7 @@ char *data;
 	int kerror, length;
 #ifdef KRB5_KRB4_COMPAT
 	int i;
-	static char *service;
+	static char **service=NULL;
 	char instance[INST_SZ];
 	u_long cksum;
 	char buf[FTP_BUFSIZ];
@@ -2200,23 +2200,22 @@ char *data;
 		}
 		(void) memcpy((char *)ticket.dat, (char *)out_buf, ticket.length = length);
 		strcpy(instance, "*");
-		if (!service) {
-			char realm[REALM_SZ];
-			des_cblock key;
-			
-			service = "ftp";
-			if (krb_get_lrealm(realm, 1) == KSUCCESS &&
-			    read_service_key(service, instance, realm, 0, keyfile, key))
-				service = "rcmd";
-			else
-				(void) memset(key, 0, sizeof(key));
+
+		kerror = 255;
+		for (service = krb4_services; *service; service++) {
+		  kerror = krb_rd_req(&ticket, *service, instance,
+				      his_addr.sin_addr.s_addr, 
+				      &kdata, keyfile);
+		  /* Success */
+		  if(!kerror) break;
+		} 
+		/* rd_req failed.... */
+		if(kerror) {
+		  secure_error("ADAT: Kerberos V4 krb_rd_req: %s",
+			       krb_get_err_text(kerror));
+		  return(0);
 		}
-		if (kerror = krb_rd_req(&ticket, service, instance,
-					his_addr.sin_addr.s_addr, &kdata, keyfile)) {
-			secure_error("ADAT: Kerberos V4 krb_rd_req: %s",
-				     krb_get_err_text(kerror));
-			return(0);
-		}
+
 		/* add one to the (formerly) sealed checksum, and re-seal it */
 		cksum = kdata.checksum + 1;
 		cksum = htonl(cksum);

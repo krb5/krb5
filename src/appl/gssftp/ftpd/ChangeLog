@@ -1,3 +1,9 @@
+Tue Aug 22 11:37:35 2000  Ezra Peisach  <epeisach@mit.edu>
+
+	* ftpd.c (auth_data): Iterate over all krb4 services instead of
+ 	trying to examine the srvtab file for a particular key (which
+ 	failes when falling back on the v5 keytab for des3 services).
+
 2000-06-14  Tom Yu  <tlyu@mit.edu>
 
 	* ftpcmd.y (nonguest): Return $1, not 1, if (!guest).
