@@ -1,3 +1,17 @@
+2000-10-09  Ken Raeburn  <raeburn@mit.edu>
+
+	Support for getifaddrs() interface added in BSD.
+	* localaddr.c (printaddr, printifaddr) [HAVE_IFADDRS_H && DEBUG]:
+	New functions for debugging new ifaddrs code.
+	(addr_eq) [HAVE_IFADDRS_H]: New function, for comparing addresses
+	found with getifaddrs.
+	(foreach_localaddr) [HAVE_IFADDRS_H]: New implementation, relies
+	on C library function to retrieve data.
+	(foreach_localaddr) [!HAVE_IFADDRS_H && TEST]: Print info about
+	each address and why it might not be used.
+	(print_addr, main) [TEST]: Print out the local addresses.
+	* Makefile.in (t_localaddr): New target.
+
 2000-09-26  Ezra Peisach  <epeisach@mit.edu>
 
 	* an_to_ln.c: Unsigned vs signed int fixes.
