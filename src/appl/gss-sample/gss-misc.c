@@ -30,6 +30,12 @@
 #include <gssapi/gssapi.h>
 #include <gssapi/gssapi_generic.h>
 
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#else
+extern char *malloc();
+#endif
+
 static void display_status_1();
 
 FILE *display_file = NULL;

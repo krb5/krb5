@@ -1,3 +1,8 @@
+Mon Sep  4 14:19:03 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* gss-misc.c: Either include stdlib.h or declare malloc.
+
+	* configure.in: Check for stdlib.h
 
 Thu Aug 31 11:35:07 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in - Add -DUSE_AUTOCONF_H and -DGSSAPI_V2 to enable usage
