@@ -207,7 +207,7 @@ krb5_ticket **ticket;
 				 0,	/* no fetchfrom */
 				 kdc_rdreq_keyproc,
 				 (krb5_pointer)&who,
-				 0,	/* no replay cache */
+				 kdc_rcache,
 				 &authdat);
     if (freeprinc) {
 	krb5_db_free_principal(&server, nprincs);
