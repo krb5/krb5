@@ -20,7 +20,7 @@ static char rcsid_copy_checksum_c[] =
 
 #include <krb5/ext-proto.h>
 
-static krb5_error_code
+krb5_error_code
 krb5_copy_checksum(ckfrom, ckto)
 const krb5_checksum *ckfrom;
 krb5_checksum **ckto;
