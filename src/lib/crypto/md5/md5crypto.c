@@ -283,6 +283,63 @@ size_t seed_length;
 	else 
 	    retval = KRB5KRB_AP_ERR_BAD_INTEGRITY;
     }
+    else if (cksum->checksum_type == CKSUMTYPE_RSA_MD5_DES3) {
+	if (cksum->length == (RSA_MD5_DES_CKSUM_LENGTH +
+			      RSA_MD5_DES_CONFOUND_LENGTH)) {
+	    /*
+	     * If we're verifying the correct implementation, then we have
+	     * to do a little more work because we must decrypt the checksum
+	     * because it contains the confounder in it.  So, figure out
+	     * what our key variant is and then do it!
+	     */
+
+	    /* Set up the variant of the key (see RFC 1510 section 6.4.5) */
+	    memset((char *) tmpkey, 0, sizeof(mit_des_cblock));
+	    for (i=0; (i<seed_length) && (i<sizeof(mit_des_cblock)); i++)
+		tmpkey[i] = (((krb5_octet *) seed)[i]) ^ 0xf0;
+
+	    keyblock.length = sizeof(mit_des3_cblock);
+	    keyblock.contents = (krb5_octet *) tmpkey;
+	    keyblock.enctype = ENCTYPE_DES3_CBC_MD5;
+
+	    if ((retval = mit_des3_process_key(&eblock, &keyblock)))
+		return retval;
+	    /* now decrypt it */
+	    retval = mit_des3_cbc_encrypt((mit_des_cblock *)cksum->contents,
+					  (mit_des_cblock *)&outtmp[0],
+					  RSA_MD5_DES_CKSUM_LENGTH +
+					  RSA_MD5_DES_CONFOUND_LENGTH,
+					  (struct mit_des_ks_struct *)
+					 	eblock.priv,
+					  ((struct mit_des_ks_struct *)
+					 	eblock.priv) + 1,
+					  ((struct mit_des_ks_struct *)
+					 	eblock.priv) + 2,
+					  keyblock.contents,
+					  MIT_DES_DECRYPT);
+	    if (retval) {
+		(void) mit_des_finish_key(&eblock);
+		return retval;
+	    }
+	    if (retval = mit_des_finish_key(&eblock))
+		return(retval);
+
+	    /* Now that we have the decrypted checksum, try to regenerate it */
+	    md5_calculate_cksum(&working,
+				(krb5_pointer) outtmp,
+				(size_t) RSA_MD5_DES_CONFOUND_LENGTH,
+				in,
+				in_length);
+
+	    /* Compare the checksums */
+	    if (memcmp((char *) &outtmp[RSA_MD5_DES_CONFOUND_LENGTH],
+		       (char *) &working.digest[0],
+		       RSA_MD5_DES_CKSUM_LENGTH))
+		retval = KRB5KRB_AP_ERR_BAD_INTEGRITY;
+	}
+	else 
+	    retval = KRB5KRB_AP_ERR_BAD_INTEGRITY;
+    }
     else
 	retval = KRB5KRB_AP_ERR_INAPP_CKSUM;
 

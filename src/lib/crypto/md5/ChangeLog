@@ -1,3 +1,7 @@
+Thu Mar 28 09:50:58 1996  Richard Basch  <basch@lehman.com>
+
+	* md5crypto.c: Added support for CKSUMTYPE_RSA_MD5_DES3
+
 Sat Jan 27 00:56:38 1996  Mark Eichin  <eichin@cygnus.com>
 
 	* t_cksum.c (main): use proper old-style definition.
