@@ -1203,7 +1203,8 @@ int hosteq(h1, h2)
     
     if ((h_ptr = gethostbyname(h1)) == NULL)
       return(0);
-    strcpy(hname1, h_ptr->h_name);
+    strncpy(hname1, h_ptr->h_name, sizeof (hname1));
+    hname1[sizeof (hname1) - 1] = '\0';
     if ((h_ptr = gethostbyname(h2)) == NULL)
       return(0);
     

@@ -1,3 +1,12 @@
+Mon Nov  3 15:25:48 1997  Tom Yu  <tlyu@mit.edu>
+
+	* krlogind.c (doit): Fix up potential buffer overrun.
+	[krb5-appl/488]
+
+	* krlogin.c (main): Fix up potential buffer overrun.
+
+	* krcp.c (hosteq): Fix up potential buffer overrun.
+
 Tue Oct  7 18:01:15 1997  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* v4rcp.M: Removed useless .so to a non-existent macro file.

@@ -509,8 +509,10 @@ main(argc, argv)
 
 
     if (cp == (char *) NULL) cp = getenv("TERM");
-    if (cp)
-      (void) strcpy(term, cp);
+    if (cp) {
+      (void) strncpy(term, cp, sizeof (term));
+      term[sizeof (term) - 1] = '\0';
+    }
 #ifdef POSIX_TERMIOS
 	if (tcgetattr(0, &ttyb) == 0) {
 		int ospeed = cfgetospeed (&ttyb);

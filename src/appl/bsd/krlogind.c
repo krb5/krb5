@@ -596,7 +596,10 @@ int syncpipe[2];
     }
     
     /* Save hostent information.... */
-    else strcpy(rhost_name,hp->h_name);
+    else {
+	strncpy(rhost_name,hp->h_name,sizeof (rhost_name));
+	rhost_name[sizeof (rhost_name) - 1] = '\0';
+    }
     
     if (fromp->sin_family != AF_INET)
       fatal(f, "Permission denied - Malformed from address\n");
