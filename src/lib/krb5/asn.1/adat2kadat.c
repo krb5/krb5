@@ -101,7 +101,7 @@ register int *error;
 	*error = ENOMEM;
 	return(0);
     }
-    for (i = 0, rv = val; rv->next; rv = rv->next, i++) {
+    for (i = 0, rv = val; rv; rv = rv->next, i++) {
 	if (qb_pullup(rv->element_KRB5_2->ad__data) != OK) {
 	    xfree(retval);
 	    goto nomem;
