@@ -16,8 +16,8 @@
 #define USE_LOGIN_LIBRARY	1
 #define NO_PASSWORD			1
 
-#define HAVE_SRAND		1
-#define HAVE_LABS		1
+#define HAVE_SRAND			1
+#define HAVE_LABS			1
 
 #define HAVE_NETINET_IN_H	1
 #define HAVE_ARPA_INET_H	1

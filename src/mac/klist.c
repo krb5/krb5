@@ -578,7 +578,7 @@ show_credential(cred)
 	    extra_field++;
     }
     
-    if (cred->times.renew_till) {
+    if (cred->ticket_flags & TKT_FLG_RENEWABLE) {
 	if (!extra_field)
 		fputs("\t",stdout);
 	else
