@@ -1,3 +1,8 @@
+2000-06-22  Tom Yu  <tlyu@mit.edu>
+
+	* build.texinfo (HPUX): Update note for HPUX compiler flags.
+	(Shared Library Support): Update shared lib support info.
+
 2000-06-16  Ken Raeburn  <raeburn@mit.edu>
 
 	* admin.texinfo: Update descriptions to indicate full support for
