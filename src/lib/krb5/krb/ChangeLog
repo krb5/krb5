@@ -1,3 +1,11 @@
+2000-05-15      Jeffrey Altman          <jaltman@columbia.edu>
+
+        * Added new source file appdefault.c
+          Implements new public functions
+
+               krb5_appdefault_string
+               krb5_appdefault_boolean
+
 2000-05-12  Ken Raeburn  <raeburn@mit.edu>
 
 	* t_kerb.c (test_524_conv_principal): New test code, to exercise
