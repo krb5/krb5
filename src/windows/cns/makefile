@@ -20,21 +20,17 @@ INCLUDES = /I$(BUILDTOP)\include
 !endif
 
 !if $(KVERSION) == 5
-BUILDTOP	 =..\..
+BUILDTOP =..\..
 LIBDIR	 = $(BUILDTOP)\lib
 KLIB	 = $(LIBDIR)\libkrb5.lib
 WLIB	 = $(LIBDIR)\winsock.lib
 INCLUDES = /I$(BUILDTOP)\include /I$(BUILDTOP)\include\krb5
-
-RM 	 = $(BUILDTOP)\config\rm.bat
-WHAT 	 = windows
-OBJEXT	 = obj
 !endif
 
 ##### C Compiler
 CC 	 = cl
-CFLAGS_RELEASE = /f- /nologo /W3 /AL /Gw /Gy /Zp /O2 /DNDEBUG=1
-CFLAGS_DEBUG   = /f  /nologo /W3 /AL /Gw /Gy /Zp /O2 /Od /Zi
+CFLAGS_RELEASE = /f- /nologo /W3 /AL /Gw /Gsy /Zp /O2 /DNDEBUG=1
+CFLAGS_DEBUG   = /f  /nologo /W3 /AL /Gw /Gsy /Zp /O2 /Od /Zi
 !if $(DEBUG)
 CFLAGS 	 = $(CFLAGS_DEBUG) $(INCLUDES) /D$(KRB)=1
 !else
@@ -66,11 +62,9 @@ $(OBJS) cns.res: cns.h tktlist.h
 install:
 	copy cns.exe ..\floppy
 
-clean:: tidy
+clean:: 
 	if exist *.exe del *.exe
 	if exist ..\floppy\cns.exe del ..\floppy\cns.exe
-
-tidy::
 	if exist *.obj del *.obj
 	if exist *.res del *.res
 	if exist *.map del *.map

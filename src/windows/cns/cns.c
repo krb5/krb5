@@ -1940,8 +1940,10 @@ kwin_command (
                 principal = server = NULL;
 	    		memset(&creds, 0, sizeof(creds));
 
-                code = krb5_parse_name(k5_context, name, &principal);
+                sprintf (menuitem, "%s@%s", name, realm);
+                code = krb5_parse_name(k5_context, menuitem, &principal);
                 if (code) break;
+
 	    		code = krb5_cc_initialize(k5_context, k5_ccache, principal);
                 if (code) break;
 
@@ -2048,11 +2050,6 @@ kwin_command (
 		WinHelp(hwnd, KERBEROS_HLP, HELP_INDEX, 0);
 
 		return TRUE;
-
-    case 1234:
-		ticket_init_list(GetDlgItem(hwnd, IDD_TICKET_LIST));
-
-        return TRUE;
 
 	case IDM_ABOUT:
 		if (isblocking)
@@ -2872,16 +2869,20 @@ k5_kname_parse (char *name, char *realm, char *fullname) {
 
     ptr = strchr (fullname, '@');               /* Name, realm separator */
 
+    if (ptr != NULL)                            /* Get realm */
+        strcpy (realm, ptr + 1);
+    else
+        *realm = '\0';
+
     if (ptr != NULL) {                          /* Get the name */
         strncpy (name, fullname, ptr - fullname);
         name[ptr - fullname] = '\0';
     } else
         strcpy (name, fullname);
 
-    if (ptr != NULL)                            /* Get realm */
-        strcpy (realm, ptr + 1);
-    else
-        *realm = '\0';
+    ptr = strchr (name, '.');                   /* K4 compatability */
+    if (ptr != NULL)
+        *ptr = '\0';
 
     return 0;
 }

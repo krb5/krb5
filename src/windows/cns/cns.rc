@@ -30,7 +30,6 @@ BEGIN
 	POPUP "&Help"
 	BEGIN
 		MENUITEM "&Index\tF1", IDM_HELP_INDEX
-		MENUITEM "&Debug",     1234
 		MENUITEM SEPARATOR
 		MENUITEM "&About Kerberos...", IDM_ABOUT
 	END

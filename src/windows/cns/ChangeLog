@@ -1,3 +1,10 @@
+Mon Mar 27 20:31:04 1995 Keith Vetter (keithv@fusion.com)
+
+	* cns.c. cns.rc: removed debugging menu item
+        * cns.c: fixed up parsing and unparsing of user name
+        * makefile: removed some configuration crud
+        
+
 Wed Mar 22 16:27:48 1995 Keith Vetter (keithv@fusion.com)
 
 	* cns.c: added some error checking code to catch missing realms files
