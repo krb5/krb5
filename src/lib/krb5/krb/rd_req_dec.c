@@ -98,7 +98,7 @@ krb5_tkt_authent *tktauthent;
 
 	if (fetchfrom) {
 	    /* use the named keytab */
-	    retval = krb5_kt_resolve((char *)fetchfrom, &keytabid);
+	    retval = krb5_kt_resolve(fetchfrom, &keytabid);
 	} else {
 	    /* use default keytab */
 	    retval = krb5_kt_default(&keytabid);
