@@ -25,15 +25,24 @@
 #define IHaveSubdirs
 #define PassCDebugFlags
 
-SUBDIRS = krb5 kdb des425 krb425 crypto gssapi 
+#if BuildGssapi
+GSSAPI= gssapi
+#endif
+
+SUBDIRS = krb5 kdb des425 krb425 crypto $(GSSAPI)
 
 MakeSubdirs($(SUBDIRS))
 
-all:: libkrb5.a libcrypto.a libgssapi_krb5.a
+all:: libkrb5.a libcrypto.a 
+
 
 LinkFile(libkrb5.a, krb5/libkrb5.a)
 LinkFile(libcrypto.a, crypto/libcrypto.a)
+
+#if BuildGssapi
+all:: libgssapi_krb5.a
 LinkFile(libgssapi_krb5.a, gssapi/libgssapi_krb5.a)
+#endif
 
 Krb5InstallLibrary(krb425,$(KRB5_LIBDIR))
 Krb5InstallLibrary(des425,$(KRB5_LIBDIR))
