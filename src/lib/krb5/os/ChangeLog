@@ -1,3 +1,11 @@
+Fri Jan  2 21:28:56 1998  Tom Yu  <tlyu@mit.edu>
+
+	* locate_kdc.c (krb5_locate_kdc): Check return of
+	malloc. [krb5-libs/518]
+
+	* changepw.c (krb5_change_password): Check return of
+	malloc. [krb5-libs/518]
+
 Tue Dec 16 11:00:18 1997  Ezra Peisach  <epeisach@mit.edu>
 
 	* locate_kdc.c (krb5_locate_kdc): Free hostlist array elements

@@ -149,6 +149,8 @@ krb5_locate_kdc(context, realm, addr_pp, naddrs, master_index, nmasters)
 #endif
 
     addr_p = (struct sockaddr *)malloc (sizeof (struct sockaddr) * count);
+    if (addr_p == NULL)
+	return ENOMEM;
 
     for (i=0, out=0; hostlist[i]; i++) {
 	host = hostlist[i];
@@ -195,6 +197,8 @@ krb5_locate_kdc(context, realm, addr_pp, naddrs, master_index, nmasters)
 		    addr_p = (struct sockaddr *)
 			realloc ((char *)addr_p,
 				 sizeof(struct sockaddr) * count);
+		    if (addr_p == NULL)
+			return ENOMEM;
 		}
 		if (sec_udpport && !port) {
 		    addr_p[out] = addr_p[out-1];

@@ -126,6 +126,8 @@ krb5_change_password(context, creds, newpw, result_code,
 	return(KADM_NO_HOST);
     
     addr_p = (struct sockaddr *) malloc(sizeof(struct sockaddr) * count);
+    if (addr_p == NULL)
+        return ENOMEM;
 
     host = hostlist[0];
     out = 0;
@@ -167,6 +169,8 @@ krb5_change_password(context, creds, newpw, result_code,
 		    addr_p = (struct sockaddr *)
 			realloc ((char *)addr_p,
 				 sizeof(struct sockaddr) * count);
+		    if (addr_p == NULL)
+			return ENOMEM;
 		}
 	    }
 	    break;
