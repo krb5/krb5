@@ -1,6 +1,13 @@
 //#include "k5-int.h"
 #include "krb5.h"
+	
+#if defined(macintosh)
 #include "CCache.h"
+#endif
+
+#if defined(_MSDOS) || defined(_WIN32)
+#include "cacheapi.h"
+#endif
 
 #define kStringLiteralLen 255
 

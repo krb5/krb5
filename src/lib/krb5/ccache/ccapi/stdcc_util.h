@@ -2,7 +2,14 @@
 // 
 // Frank Dabek, July 1998
 
+#if defined(macintosh)
 #include "CCache.h"
+#endif
+
+#if defined(_MSDOS) || defined(_WIN32)
+#include "cacheapi.h"
+#endif
+
 #include "krb5.h"
 
 //protoypes for private functions declared in stdcc_util.c
