@@ -16,13 +16,15 @@ static char rcsid_bld_princ_c [] =
 "$Id$";
 #endif	/* !lint & !SABER */
 
+/* Need <krb5/config.h> for STDARG_PROTOTYPES */
+#include <krb5/krb5.h>
+
 #if __STDC__ || defined(STDARG_PROTOTYPES)
 #include <stdarg.h>
 #else
 #include <varargs.h>
 #endif
 
-#include <krb5/krb5.h>
 #include <krb5/ext-proto.h>
 
 krb5_error_code
