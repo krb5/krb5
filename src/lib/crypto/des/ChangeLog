@@ -1,3 +1,7 @@
+Fri Feb  3 06:33:22 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* verify.c: Fix typo; "%02 X" --> "%02X"
+
 Wed Jan 25 20:04:39 1995  John Gilmore  (gnu at toad.com)
 
 	* cbc_cksum.c, cs_entry.c, des.h, destest.c, f_sched.c,

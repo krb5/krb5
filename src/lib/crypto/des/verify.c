@@ -373,7 +373,7 @@ do_encrypt(in,out)
 	if (mit_des_debug) {
 	    printf("\nclear %s\n",in);
 	    for (j = 0; j<=7; j++)
-		printf("%02 X ",in[j] & 0xff);
+		printf("%02X ",in[j] & 0xff);
 	    printf("\tcipher ");
 	    for (j = 0; j<=7; j++)
 		printf("%02X ",out[j] & 0xff);
