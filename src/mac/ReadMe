@@ -35,7 +35,7 @@ To build the Macintosh version of Kerberos 5 and GSS:
 
 	7) Build target "create-directories" in MPW.
 	
-	8) Open the projects in "[kerb5 src]:mac:libraries:Metrowerks:CW Pro 2:"
+	8) Open the projects in "[krb5 src]:mac:libraries:Metrowerks:CW Pro 2:"
 	   in your CW Pro 2 IDE (the projects will not work correctly with CW Pro 3),
 	   and build them.
 	
@@ -54,13 +54,13 @@ To build the Macintosh version of Kerberos 5 and GSS:
 	   You may receive some compile warnings about an ignored pragma, and some
 	   link warnings.  These are normal and can be ignored.
 	   
-	   On certain machines we have experienced an MPW crash during the link stage
-	   of the build.  If this happens to you, you should restart MPW and start
-	   the build again.  We are investigating the causes of this. 
+	   We used to see MPW crash during the link stage of the build. We think this 
+	   has been fixed. If this happens to you, you should restart MPW and start
+	   the build again, and report the problem to macdev@mit.edu.
 
 --- Building the Cygnus Network Security Application ---
 
-	10) Open the project file "[kerb5 src]:mac:kconfig:kconfig.prj" in the
+	10) Open the project file "[krb5 src]:mac:kconfig:kconfig.prj" in the
 	    CodeWarrior Pro 2 IDE.
 
 	11) Select "Make" from the "Project" menu.
