@@ -1189,7 +1189,11 @@ mips-sgi-irix6.3)	# This is a Kludge; see below
 	PROFFLAGS=-p
 	CC_LINK_SHARED='$(CC) $(PROG_LIBPATH) -Wl,-rpath -Wl,$(PROG_RPATH)'
 	CC_LINK_STATIC='$(CC) $(PROG_LIBPATH)'
-	RUN_ENV='LD_LIBRARY_PATH=`echo $(PROG_LIBPATH) | sed -e "s/-L//g" -e "s/ /:/g"`; export LD_LIBRARY_PATH;'
+	# This grossness is necessary due to the presence of *three*
+	# supported ABIs on Irix, and the precedence of the rpath over
+	# LD_LIBRARY*_PATH.  Like OSF/1, _RLD*_ROOT needs to be set to
+	# work around this lossage.
+	RUN_ENV='KRB5_LIBPATH_ADD=`echo $(PROG_LIBPATH) | sed -e "s/-L//g" -e "s/ /:/g"`; LD_LIBRARY_PATH=$$KRB5_LIBPATH_ADD:/usr/lib:/usr/lib/internal:/lib:/lib/cmplrs/cc:/usr/lib/cmplrs/cc:/opt/lib; export LD_LIBRARY_PATH; _RLD_ROOT=/dev/dummy/d; export _RLD_ROOT; LD_LIBRARYN32_PATH=$$KRB5_LIBPATH_ADD:/usr/lib32:/usr/lib32/internal:/lib32:/opt/lib32; export LD_LIBRARYN32_PATH; _RLDN32_ROOT=$$_RLD_ROOT; export _RLDN32_ROOT; LD_LIBRARY64_PATH=$$KRB5_LIBPATH_ADD:/usr/lib64:/usr/lib64/internal:/lib64:/opt/lib64; export LD_LIBRARY64_PATH; _RLD64_ROOT=$$_RLDROOT; export _RLD64_ROOT;'
 	;;
 
 mips-sgi-irix*)
@@ -1203,7 +1207,11 @@ mips-sgi-irix*)
 	PROFFLAGS=-p
 	CC_LINK_SHARED='$(CC) $(PROG_LIBPATH) -Wl,-rpath -Wl,$(PROG_RPATH)'
 	CC_LINK_STATIC='$(CC) $(PROG_LIBPATH)'
-	RUN_ENV='LD_LIBRARY_PATH=`echo $(PROG_LIBPATH) | sed -e "s/-L//g" -e "s/ /:/g"`; export LD_LIBRARY_PATH;'
+	# This grossness is necessary due to the presence of *three*
+	# supported ABIs on Irix, and the precedence of the rpath over
+	# LD_LIBRARY*_PATH.  Like OSF/1, _RLD*_ROOT needs to be set to
+	# work around this lossage.
+	RUN_ENV='KRB5_LIBPATH_ADD=`echo $(PROG_LIBPATH) | sed -e "s/-L//g" -e "s/ /:/g"`; LD_LIBRARY_PATH=$$KRB5_LIBPATH_ADD:/usr/lib:/usr/lib/internal:/lib:/lib/cmplrs/cc:/usr/lib/cmplrs/cc:/opt/lib; export LD_LIBRARY_PATH; _RLD_ROOT=/dev/dummy/d; export _RLD_ROOT; LD_LIBRARYN32_PATH=$$KRB5_LIBPATH_ADD:/usr/lib32:/usr/lib32/internal:/lib32:/opt/lib32; export LD_LIBRARYN32_PATH; _RLDN32_ROOT=$$_RLD_ROOT; export _RLDN32_ROOT; LD_LIBRARY64_PATH=$$KRB5_LIBPATH_ADD:/usr/lib64:/usr/lib64/internal:/lib64:/opt/lib64; export LD_LIBRARY64_PATH; _RLD64_ROOT=$$_RLDROOT; export _RLD64_ROOT;'
 	;;
 
 # untested...
