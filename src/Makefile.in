@@ -23,6 +23,11 @@ all-prerecurse: update-autoconf-h
 update-autoconf-h:
 	(cd include && $(MAKE) krb5/autoconf.h)
 
+##DOS##!if 0
+# This makefile doesn't use lib.in, but we still need shlib.conf here.
+config.status: $(SRCTOP)/config/shlib.conf
+##DOS##!endif
+
 all-windows:: maybe-awk Makefile-windows
 	@echo Making autoconf.h in include\krb5
 	cd include\krb5

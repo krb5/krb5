@@ -1,5 +1,7 @@
 2005-02-04  Ken Raeburn  <raeburn@mit.edu>
 
+	* Makefile.in (config.status): Depend on shlib.conf.
+
 	* aclocal.m4 (KRB5_AC_ENABLE_THREADS): If thread support is not
 	enabled, zap the PTHREAD_ variables.
 
