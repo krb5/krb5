@@ -1,0 +1,143 @@
+/*
+ * $Source$
+ * $Author$
+ *
+ * Copyright 1990 by the Massachusetts Institute of Technology.
+ *
+ * For copying and distribution information, please see the file
+ * <krb5/copyright.h>.
+ *
+ * krb5_aname_to_localname()
+ */
+
+#if !defined(lint) && !defined(SABER)
+static char rcsid_an_to_ln_c[] =
+"$Id$";
+#endif	/* !lint & !SABER */
+
+#include <krb5/copyright.h>
+
+#include <krb5/osconf.h>
+
+#include <krb5/krb5.h>
+#include <krb5/krb5_err.h>
+#include <errno.h>
+#include <stdio.h>
+#include <krb5/libos-proto.h>
+#include <krb5/ext-proto.h>
+
+#ifdef USE_DBM_LNAME
+#include <krb5/dbm.h>
+#include <sys/file.h>
+#endif
+
+#ifndef min
+#define min(a,b) ((a) > (b) ? (b) : (a))
+#endif /* min */
+
+/*
+ Converts an authentication name to a local name suitable for use by
+ programs wishing a translation to an environment-specific name (e.g.
+ user account name).
+
+ lnsize specifies the maximum length name that is to be filled into
+ lname.
+
+ returns system errors, NOT_ENOUGH_SPACE
+*/
+
+#ifdef USE_DBM_LNAME
+extern char *krb5_lname_file;
+
+/*
+ * Implementation:  This version uses a DBM database, indexed by aname,
+ * to generate a lname.
+ *
+ * The entries in the database are normal C strings, and include the trailing
+ * null in the DBM datum.size.
+ */
+krb5_error_code
+krb5_aname_to_localname(aname, lnsize, lname)
+const krb5_principal aname;
+const int lnsize;
+char *lname;
+{
+    DBM *db;
+    krb5_error_code retval;
+    datum key, contents;
+    char *princ_name;
+
+    if (retval = krb5_unparse_name(aname, &princ_name))
+	return(retval);
+    key.dptr = princ_name;
+    key.dsize = strlen(princ_name)+1;	/* need to store the NULL for
+					   decoding */
+
+    db = dbm_open(krb5_lname_file, O_RDONLY, 0600);
+    if (!db) {
+	xfree(princ_name);
+	return KRB5_LNAME_CANTOPEN;
+    }
+
+    contents = dbm_fetch(db, key);
+
+    xfree(princ_name);
+    (void) dbm_close(db);
+
+    if (contents.dptr == NULL) {
+	retval = KRB5_LNAME_NOTRANS;
+    } else {
+	strncpy(lname, contents.dptr, lnsize);
+	if (lnsize < contents.dsize-1)	/* -1 for the null */
+	    retval = KRB5_CONFIG_NOTENUFSPACE;
+	else
+	    retval = 0;
+    }
+    return retval;
+}
+#else
+/*
+ * Implementation:  This version checks the realm to see if it is the local
+ * realm; if so, and there is exactly one non-realm component to the name,
+ * that name is returned as the lname.
+ */
+krb5_error_code
+krb5_aname_to_localname(aname, lnsize, lname)
+const krb5_principal aname;
+const int lnsize;
+char *lname;
+{
+    krb5_error_code retval;
+    char *def_realm;
+    int realm_length;
+
+    if (!aname[1] || aname[2]) {
+	/* no components or more than one component to non-realm part of name
+	   --no translation. */
+	return KRB5_LNAME_NOTRANS;
+    }
+
+    realm_length = krb5_princ_realm(aname)->length;
+    if (!(def_realm = malloc(realm_length + 1)))
+	return ENOMEM;
+    
+    if (retval = krb5_get_default_realm(realm_length+1,def_realm)) {
+	free(def_realm);
+	return KRB5_LNAME_NOTRANS;
+    }
+
+    if (strncmp(def_realm, krb5_princ_realm(aname)->data, realm_length)) {
+	free(def_realm);
+	return KRB5_LNAME_NOTRANS;
+    }	
+    free(def_realm);
+    strncpy(lname, aname[1]->data, min(aname[1]->length,lnsize));
+    if (lnsize < aname[1]->length+1) {
+	retval = KRB5_CONFIG_NOTENUFSPACE;
+    } else {
+	lname[aname[1]->length] = '\0';
+	retval = 0;
+    }
+    return retval;
+}
+#endif
