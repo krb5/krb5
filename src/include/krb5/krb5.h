@@ -13,8 +13,8 @@
 
 #include <krb5/copyright.h>
 
-#ifndef __KRB5_GENERAL__
-#define __KRB5_GENERAL__
+#ifndef KRB5_GENERAL__
+#define KRB5_GENERAL__
 
 #include <sys/types.h>
 
@@ -221,5 +221,6 @@ typedef struct _krb5_priv_enc_part {
 #include <krb5/rcache.h>
 #include <krb5/keytab.h>
 #include <krb5/func-proto.h>
+#include <krb5/free.h>
 
-#endif /* __KRB5_GENERAL__ */
+#endif /* KRB5_GENERAL__ */
