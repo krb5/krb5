@@ -1,7 +1,7 @@
 /*
- * admin/edit/loadv4.c
+ * kadmin/dbutil/loadv4.c
  *
- * Copyright 1990,1991 by the Massachusetts Institute of Technology.
+ * Copyright 1996 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -351,18 +351,10 @@ master key name '%s'\n",
     memset((char *)master_keyblock.contents, 0, master_keyblock.length);
 
     /*
-     * Cons up config params for new database.
+     * Cons up config params for new database; using the global_params
+     * is just fine.
      */
     newparams = global_params;
-    newparams.mask &= ~(KADM5_CONFIG_ADBNAME | KADM5_CONFIG_ADB_LOCKFILE);
-    newparams.dbname = dbname;
-    newparams.mask |= KADM5_CONFIG_DBNAME;
-    if (retval = kadm5_get_config_params(context, NULL, NULL, &newparams,
-				       &newparams)) {
-	 com_err(PROGNAME, retval, "while retrieiving configuration "
-		 "parameters");
-	 return;
-    }
 
     /*
      * Always create the policy db, even if we are not loading a dump

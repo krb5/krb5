@@ -1,3 +1,9 @@
+Mon Sep  9 11:06:29 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* loadv4.c: Don't call get_config_params again, since it's not
+ 		necessary, and breaks the policy database name if it is
+ 		manually set.
+
 Wed Sep  4 17:34:58 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* loadv4.c (load_v4db): Fix argument parsing so that it actually works!
