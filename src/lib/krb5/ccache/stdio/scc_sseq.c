@@ -68,5 +68,5 @@ krb5_scc_start_seq_get(id, cursor)
      *cursor = (krb5_cc_cursor) fcursor;
 
      MAYBE_CLOSE (id, ret);
-     return KRB5_OK;
+     return(ret);
 }
