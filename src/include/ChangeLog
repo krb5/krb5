@@ -1,3 +1,8 @@
+2003-10-30  Ken Raeburn  <raeburn@mit.edu>
+
+	* k5-platform.h (load_64_be, load_64_le): Use UINT64_TYPE, not
+	unsigned long long.
+
 2003-10-10  Ken Raeburn  <raeburn@mit.edu>
 
 	* k5-int.h (struct krb5_keytypes): Added field required_ctype.

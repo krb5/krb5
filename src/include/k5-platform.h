@@ -125,12 +125,12 @@ load_32_le (unsigned char *p)
 static inline UINT64_TYPE
 load_64_be (unsigned char *p)
 {
-    return ((unsigned long long)load_32_be(p) << 32) | load_32_be(p+4);
+    return ((UINT64_TYPE)load_32_be(p) << 32) | load_32_be(p+4);
 }
 static inline UINT64_TYPE
 load_64_le (unsigned char *p)
 {
-    return ((unsigned long long)load_32_le(p+4) << 32) | load_32_le(p);
+    return ((UINT64_TYPE)load_32_le(p+4) << 32) | load_32_le(p);
 }
 
 #endif /* K5_PLATFORM_H */
