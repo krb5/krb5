@@ -97,8 +97,9 @@ krb5_error_code krb5_os_localaddr(addr)
 
     code = ioctl (s, SIOCGIFCONF, (char *)&ifc);
     if (code < 0) {
+	int retval = errno;
 	close(s);
-	return errno;
+	return retval;
     }
     n = ifc.ifc_len / sizeof (struct ifreq);
     
