@@ -42,6 +42,8 @@ static char copyright[] =
 #include "telnetd.h"
 #include "pathnames.h"
 
+#define FAI_PREFIX telnetd
+#include "fake-addrinfo.c"
 
 extern int getent(char *, char *);
 extern int tgetent(char *, char *);
@@ -134,7 +136,7 @@ char	ptyibuf2[BUFSIZ];
 
 #endif /* ! STREAMPTY */
 
-void doit P((struct sockaddr_in *));
+static void doit P((struct sockaddr *));
 int terminaltypeok P((char *));
 static void _gettermname(void);
 
@@ -220,7 +222,7 @@ main(argc, argv)
 	int argc;
 	char *argv[];
 {
-	struct sockaddr_in from;
+	struct sockaddr_storage from;
 	int on = 1, fromlen;
 	register int ch;
 	extern char *optarg;
@@ -486,6 +488,7 @@ main(argc, argv)
 	argc -= optind;
 	argv += optind;
 
+	/* XXX Convert this to support getaddrinfo, ipv6, etc.  */
 	if (debug) {
 	    int s, ns, foo;
 	    struct servent *sp;
@@ -607,6 +610,7 @@ main(argc, argv)
 
 	openlog("telnetd", LOG_PID | LOG_ODELAY, LOG_DAEMON);
 	fromlen = sizeof (from);
+	memset(&from, 0, sizeof(from));
 	if (getpeername(0, (struct sockaddr *)&from, &fromlen) < 0) {
 		fprintf(stderr, "%s: ", progname);
 		perror("getpeername");
@@ -619,7 +623,7 @@ main(argc, argv)
 	}
 
 #if	defined(IPPROTO_IP) && defined(IP_TOS)
-	{
+	if (fromlen == sizeof (struct in_addr)) {
 # if	defined(HAVE_GETTOSBYNAME)
 		struct tosent *tp;
 		if (tos < 0 && (tp = gettosbyname("telnet", "tcp")))
@@ -635,7 +639,7 @@ main(argc, argv)
 	}
 #endif	/* defined(IPPROTO_IP) && defined(IP_TOS) */
 	net = 0;
-	doit(&from);
+	doit((struct sockaddr *)&from);
 	
 	/* NOTREACHED */
 	return 0;
@@ -922,11 +926,9 @@ extern void telnet P((int, int, char *));
 /*
  * Get a pty, scan input lines.
  */
-void doit(who)
-	struct sockaddr_in *who;
+static void doit(who)
+	struct sockaddr *who;
 {
-	char *inet_ntoa();
-	struct hostent *hp;
 	int level;
 #if	defined(_SC_CRAY_SECURE_SYS)
 	int ptynum;
@@ -965,13 +967,19 @@ void doit(who)
 	if (retval) {
 		fatal(net, error_message(retval));
 	}
-	/* get name of connected client */
-	hp = gethostbyaddr((char *)&who->sin_addr, sizeof (struct in_addr),
-		who->sin_family);
-
-	if (hp == NULL && registerd_host_only) {
-		fatal(net, "Couldn't resolve your address into a host name.\r\n\
-         Please contact your net administrator");
+	if (registerd_host_only) {
+	    /* Get name of connected client -- but we don't actually
+	       use it.  Just confirm that we can get it.  */
+	    int aierror;
+	    char hostnamebuf[NI_MAXHOST];
+	    aierror = getnameinfo (who, socklen (who),
+				   hostnamebuf, sizeof (hostnamebuf), 0, 0,
+				   NI_NAMEREQD);
+	    if (aierror != 0) {
+		fatal(net,
+		      "Couldn't resolve your address into a host name.\r\n"
+		      "Please contact your net administrator");
+	    }
 	}
 
 	(void) gethostname(host_name, sizeof (host_name));

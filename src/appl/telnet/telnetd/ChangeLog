@@ -1,5 +1,14 @@
 2001-08-29  Ken Raeburn  <raeburn@mit.edu>
 
+	* defs.h: Include socket-utils.h.
+	* telnetd.c: Include fake-addrinfo.c.
+	(FAI_PREFIX): Define.
+	(doit): Now static, and takes sockaddr pointer rather than
+	sockaddr_in pointer.  Use getnameinfo instead of gethostbyaddr to
+	verify that host name was available.
+	(main): Use sockaddr_storage for remote address buffer; clear
+	before using.  Only do IP_TOS processing for IPv4.
+
 	* termio-tn.c, termios-tn.c: Define dummy variables if STREAMSPTY
 	isn't defined, to silence compiler complaints about empty files.
 
