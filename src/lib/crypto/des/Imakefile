@@ -128,3 +128,7 @@ s_table.h: make_st
 	./make_st s_table.h
 
 NormalLintTarget($(SRCS))
+
+depend:: key_perm.h odd.h p_table.h s_table.h
+
+depend:: fp.c ip.c p.c
