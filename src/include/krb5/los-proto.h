@@ -16,7 +16,7 @@
 #ifndef KRB5_LIBOS_PROTO__
 #define KRB5_LIBOS_PROTO__
 
-/* requires <stdio.h> */
+#include <stdio.h>
 
 /* libos.spec */
 krb5_error_code krb5_read_password
