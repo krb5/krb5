@@ -39,9 +39,12 @@
 #define SIZEOF_SHORT    2
 #define SIZEOF_LONG     4
 
+#define KRB5_USE_INET
+#define MSDOS_FILESYSTEM
 #define USE_STRING_H 
 #define HAVE_SRAND
 #define HAVE_ERRNO
+#define NO_USERID
 
 #ifndef _SIZE_T_DEFINED
 typedef unsigned int size_t;
@@ -58,7 +61,7 @@ typedef unsigned char u_char;
 #define INTERFACE   __far __export __pascal
 #define INTERFACE_C __far __export __cdecl
 #endif
-#define FAR __far
+#define FAR _far
 
 /*
  * The following defines are needed to make <windows.h> work
@@ -69,6 +72,19 @@ typedef unsigned char u_char;
 #define _pascal __pascal
 #define _cdecl  __cdecl
 #define _huge   __huge
+
+#ifdef NEED_WINSOCK_H
+#include <winsock.h>
+#endif
+
+/* XXX these should be parameterized soon... */
+#define PROVIDE_DES_CBC_MD5
+#define PROVIDE_DES_CBC_CRC
+#define PROVIDE_RAW_DES_CBC
+#define PROVIDE_CRC32
+#define PROVIDE_DES_CBC_CKSUM
+#define PROVIDE_RSA_MD4
+#define PROVIDE_RSA_MD5
 
 #else 		/* Rest of include file is for non-Microloss-Windows */
 

@@ -1,3 +1,9 @@
+Wed Mar 1 12:48:20 1995 Keith Vetter (keithv@fusion.com)
+
+	* config.h: added defines to pull in winsock.h as needed
+        * rcache.h: added windows INTERFACE keyword to all functions
+        * winsock.h: new file--for windows socket stuff
+
 Wed Mar  1 17:45:13 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* configure.in, k5-config.h: Only define labs(x) -> abs(x) if

@@ -45,37 +45,37 @@ typedef struct _krb5_donot_replay {
 typedef struct _krb5_rc_ops {
     krb5_magic magic;
     char *type;
-    krb5_error_code (*init)NPROTOTYPE((krb5_context, krb5_rcache,krb5_deltat)); /* create */
-    krb5_error_code (*recover)NPROTOTYPE((krb5_context, krb5_rcache)); /* open */
-    krb5_error_code (*destroy)NPROTOTYPE((krb5_context, krb5_rcache));
-    krb5_error_code (*close)NPROTOTYPE((krb5_context, krb5_rcache));
-    krb5_error_code (*store)NPROTOTYPE((krb5_context, krb5_rcache,krb5_donot_replay *));
-    krb5_error_code (*expunge)NPROTOTYPE((krb5_context, krb5_rcache));
-    krb5_error_code (*get_span)NPROTOTYPE((krb5_context, krb5_rcache,krb5_deltat *));
-    char *(*get_name)NPROTOTYPE((krb5_context, krb5_rcache));
-    krb5_error_code (*resolve)NPROTOTYPE((krb5_context, krb5_rcache, char *));
+    krb5_error_code (INTERFACE *init)NPROTOTYPE((krb5_context, krb5_rcache,krb5_deltat)); /* create */
+    krb5_error_code (INTERFACE *recover)NPROTOTYPE((krb5_context, krb5_rcache)); /* open */
+    krb5_error_code (INTERFACE *destroy)NPROTOTYPE((krb5_context, krb5_rcache));
+    krb5_error_code (INTERFACE *close)NPROTOTYPE((krb5_context, krb5_rcache));
+    krb5_error_code (INTERFACE *store)NPROTOTYPE((krb5_context, krb5_rcache,krb5_donot_replay *));
+    krb5_error_code (INTERFACE *expunge)NPROTOTYPE((krb5_context, krb5_rcache));
+    krb5_error_code (INTERFACE *get_span)NPROTOTYPE((krb5_context, krb5_rcache,krb5_deltat *));
+    char *(INTERFACE *get_name)NPROTOTYPE((krb5_context, krb5_rcache));
+    krb5_error_code (INTERFACE *resolve)NPROTOTYPE((krb5_context, krb5_rcache, char *));
 } krb5_rc_ops;
 
-krb5_error_code krb5_rc_default 
+krb5_error_code INTERFACE krb5_rc_default 
 	PROTOTYPE((krb5_context,
 		   krb5_rcache *));
-krb5_error_code krb5_rc_register_type 
+krb5_error_code INTERFACE krb5_rc_register_type 
 	PROTOTYPE((krb5_context,
 		   krb5_rc_ops *));
-krb5_error_code krb5_rc_resolve_type 
+krb5_error_code INTERFACE krb5_rc_resolve_type 
 	PROTOTYPE((krb5_context,
 		   krb5_rcache *,char *));
-krb5_error_code krb5_rc_resolve_full 
+krb5_error_code INTERFACE krb5_rc_resolve_full 
 	PROTOTYPE((krb5_context,
 		   krb5_rcache *,char *));
-char *krb5_rc_get_type 
+char * INTERFACE krb5_rc_get_type 
 	PROTOTYPE((krb5_context,
 		   krb5_rcache));
-char *krb5_rc_default_type 
+char * INTERFACE krb5_rc_default_type 
 	PROTOTYPE((krb5_context));
-char *krb5_rc_default_name 
+char * INTERFACE krb5_rc_default_name 
 	PROTOTYPE((krb5_context));
-krb5_error_code krb5_auth_to_rep 
+krb5_error_code INTERFACE krb5_auth_to_rep 
 	PROTOTYPE((krb5_context,
 		   krb5_tkt_authent *,
 		   krb5_donot_replay *));
