@@ -703,7 +703,9 @@ proc test45_46 {service} {
 	    server_handle}] "SECURE_PRINC_MISSING"
 
     # this leaves the keytab with an incorrect entry
-    exec $kadmin_local -q "ank -randkey $service"
+    spawn $kadmin_local -q "ank -randkey $service"
+    expect eof
+    wait
 
     # restart the api so it gets a new ccache
     api_exit
