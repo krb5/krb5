@@ -731,10 +731,7 @@ kerberos_v4(client, pkt)
 	    }
 	    /* Bound requested lifetime with service and user */
 	    v4req_end = krb_life_to_time(kerb_time.tv_sec, req_life);
-	    if (v4req_end < 0 || v4req_end == KRB_NEVERDATE)
-		v4req_end = kerb_time.tv_sec + ck5life;
-	    else
-		v4req_end = min(v4req_end, kerb_time.tv_sec + ck5life);
+	    v4req_end = min(v4req_end, kerb_time.tv_sec + ck5life);
 	    v4req_end = min(v4req_end, kerb_time.tv_sec + sk5life);
 	    lifetime = krb_time_to_life(kerb_time.tv_sec, v4req_end);
 	    v4endtime = krb_life_to_time(kerb_time.tv_sec, lifetime);
@@ -914,14 +911,7 @@ kerberos_v4(client, pkt)
 	    /* Bound requested lifetime with service and user */
 	    v4endtime = krb_life_to_time((KRB4_32)ad->time_sec, ad->life);
 	    v4req_end = krb_life_to_time(kerb_time.tv_sec, req_life);
-	    /*
-	     * Handle special case of req_life == 255, since that will
-	     * return the magic KRB_NEVERDATE value.
-	     */
-	    if (v4req_end < 0 || v4req_end == KRB_NEVERDATE)
-		v4req_end = v4endtime;
-	    else
-		v4req_end = min(v4endtime, v4req_end);
+	    v4req_end = min(v4endtime, v4req_end);
 	    v4req_end = min(v4req_end, kerb_time.tv_sec + sk5life);
 
 	    lifetime = krb_time_to_life(kerb_time.tv_sec, v4req_end);

@@ -1,3 +1,8 @@
+2001-02-08  Tom Yu  <tlyu@mit.edu>
+
+	* kerberos_v4.c (kerberos_v4): Remove references to
+	KRB_NEVERDATE.
+
 2000-12-12  Ken Raeburn  <raeburn@mit.edu>
 
 	* network.c: Don't include net/if.h if ARPHRD_ETHER is defined.
