@@ -88,7 +88,7 @@ char copyright[] =
 #include <stdio.h>
 #include <string.h>
 
-#ifdef HAS_SHADOW
+#ifdef HAVE_SHADOW
 #include <shadow.h>
 #endif
 
@@ -162,7 +162,7 @@ int	timeout = 300;
 
 struct passwd *pwd;
 #ifdef HAVE_SHADOW
-struct spwd *spwd
+struct spwd *spwd;
 #endif
 
 char term[64], *hostname, *username;
@@ -526,7 +526,7 @@ main(argc, argv)
 			salt = "xx";
 #ifdef HAVE_SHADOW
 		if (spwd = getspnam(username))
-		    salt = sp_pwdp;
+		    salt = spwd->sp_pwdp;
 #endif
 
 		/* if user not super-user, check for disabled logins */
