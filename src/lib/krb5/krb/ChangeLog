@@ -1,3 +1,9 @@
+Wed Nov 30 17:10:39 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* configure.in: Add appropriate help text for the --with-krb4
+		option.  Remove ISODE_DEFS call, since ISODE_INCLUDES now
+		defines ISODE automatically.
+
 Mon Nov 21 15:30:07 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* mk_req_ext.c (krb5_mk_req_extended): Sanitize how memory is
