@@ -109,9 +109,9 @@ krb5_error_code krb5_mk_req_extended
 		   krb5_checksum *,
 		   krb5_ticket_times *,
 		   krb5_flags,
+		   krb5_ccache,
 		   krb5_creds *,
-		   krb5_data *,
-		   int ));
+		   krb5_data * ));
 krb5_error_code krb5_rd_req
 	PROTOTYPE((krb5_data *,
 		   krb5_principal,
@@ -191,6 +191,14 @@ krb5_error_code krb5_get_krbhst
 		   char *** ));
 krb5_error_code krb5_free_krbhst
 	PROTOTYPE((char ** ));
+krb5_boolean krb5_address_search
+	PROTOTYPE((krb5_address *,
+		   krb5_address **));
+krb5_boolean krb5_address_compare
+	PROTOTYPE((krb5_address *,
+		   krb5_address *));
+krb5_boolean krb5_principal_compare
+	PROTOTYPE((krb5_principal, krb5_principal));
 
 /* libkt.spec */
 krb5_error_code krb5_kt_register
@@ -359,8 +367,5 @@ void krb5_free_priv
 void krb5_free_priv_enc_part
 	PROTOTYPE((krb5_priv_enc_part * ));
 
-/* internal functions */
-krb5_boolean krb5_principal_compare
-	PROTOTYPE((krb5_principal, krb5_principal));
 
 #endif /* __KRB5_FUNC_PROTO__ */
