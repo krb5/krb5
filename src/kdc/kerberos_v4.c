@@ -50,7 +50,11 @@ static char rcsid_kerberos_v4_c[] =
 #include <sgtty.h>
 #endif
 #include <sys/ioctl.h>
+#ifdef USE_SYS_TIME_H
 #include <sys/time.h>
+#else
+#include <time.h>
+#endif
 #include <sys/file.h>
 #include <ctype.h>
 #include <syslog.h>
@@ -137,7 +141,6 @@ static long n_appl_req;
 static long n_user;
 static long n_server; */
 
-extern char *sys_errlist[];
 /* static long max_age = -1; */
 static long pause_int = -1;
 
@@ -583,10 +586,9 @@ kerb_get_principal(name, inst, principal, maxn, more)
     unsigned int maxn;          /* max number of name structs to return */
     int    *more;               /* more tuples than room for */
 {
-    /* Note that neither of these structures should be passed to the
-       krb5_free* functions, because the pointers within them point
+    /* Note that this structure should not be passed to the
+       krb5_free* functions, because the pointers within it point
        to data with other references.  */
-    krb5_data search_stg[2];
     krb5_principal search;
 
     krb5_db_entry entries;	/* filled in by krb5_db_get_principal() */
@@ -594,7 +596,7 @@ kerb_get_principal(name, inst, principal, maxn, more)
     krb5_boolean more5;		/* are there more? */
     C_Block k;
     short toggle = 0;
-    int i, time;
+    int v4_time;
     unsigned long *date;
     char* text;
     struct tm *tp;
@@ -658,8 +660,8 @@ kerb_get_principal(name, inst, principal, maxn, more)
     /* convert v5's entries struct to v4's Principal struct:
      * v5's time-unit for lifetimes is 1 sec, while v4 uses 5 minutes.
      */
-    time = (entries.max_life + MIN5 - 1) / MIN5;
-    principal->max_life = time > HR21 ? HR21 : (unsigned char) time;
+    v4_time = (entries.max_life + MIN5 - 1) / MIN5;
+    principal->max_life = v4_time > HR21 ? HR21 : (unsigned char) v4_time;
     principal->exp_date = (unsigned long) entries.expiration;
     principal->mod_date = (unsigned long) entries.mod_date;
     principal->attributes = 0;
@@ -1099,12 +1101,6 @@ static void check_db_age()
  *
  * "25-Jan-88 10:17:56"
  */
-
-#ifdef USE_SYS_TIME_H
-#include <sys/time.h>
-#else
-#include <time.h>
-#endif
 
 static char *krb4_stime(t)
     long *t;

@@ -1019,7 +1019,6 @@ char **status;
 	 * Realm B is the "client realm"; this is what should be
 	 * added to the transited field.  (which is done elsewhere)
 	 */
-	char 	*destination_realm;
 
 	/* Make sure there are two components... */
 	if (krb5_princ_size(ticket->server) != 2) {
