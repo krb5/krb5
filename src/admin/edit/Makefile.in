@@ -24,8 +24,8 @@ KLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(ISODELIB) $(SSLIB) $(COMERR
 DEPLIBS = $(DEPKDBLIB) $(DEPKLIB)
 LOCAL_LIBRARIES = $(KDBLIB) $(KLIB)
 
-OBJS= kdb5_edit.o kdb5_ed_ct.o util.o dump.o
-SRCS= $(srcdir)/kdb5_edit.c $(srcdir)/kdb5_ed_ct.c $(srcdir)/util.c $(srcdir)/dump.c
+OBJS= kdb5_edit.o kdb5_ed_ct.o util.o dump.o ss_wrapper.o
+SRCS= $(srcdir)/kdb5_edit.c $(srcdir)/kdb5_ed_ct.c $(srcdir)/util.c $(srcdir)/dump.c $(srcdir)/ss_wrapper.c
 
 all:: kdb5_edit
 
