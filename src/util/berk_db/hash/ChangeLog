@@ -1,3 +1,8 @@
+Sat Jul  1 23:15:59 1995  Tom Yu  <tlyu@lothlorien.MIT.EDU>
+
+	* configure.in: Don't check for pgno_t; it's not in sys/types.h on
+		any system I've seen, and it breaks the following check
+		for datum.dsize under netbsd.
 
 Fri Jun 30 14:49:53 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* configure.in - Add shared library object rule.
