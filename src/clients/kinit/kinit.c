@@ -849,6 +849,9 @@ int try_convert524(k5)
 
     increds.client = k5->me;
     increds.server = kpcserver;
+    /* Prevent duplicate free calls.  */
+    kpcserver = 0;
+
     increds.times.endtime = 0;
     increds.keyblock.enctype = ENCTYPE_DES_CBC_CRC;
     if ((code = krb5_get_credentials(k5->ctx, 0, 

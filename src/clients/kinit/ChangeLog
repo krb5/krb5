@@ -1,3 +1,7 @@
+2000-02-07  Ken Raeburn  <raeburn@mit.edu>
+
+	* kinit.c (try_convert524): Avoid duplicate free calls.
+
 2000-02-04  Danilo Almeida  <dalmeida@mit.edu>
 
 	* kinit.c: Only free stuff if it's not NULL.
