@@ -1,3 +1,11 @@
+Wed Jun 18 16:13:11 1997  Tom Yu  <tlyu@mit.edu>
+
+	* acgeneral.m4 (AC_CHECK_PROG, AC_PATH_PROG): Assign the path to
+	ac_dummy and then expand it, rather than simply tacking on
+	$ac_dummy to the path.  This works around POSIX.2 word splitting
+	semantics, in which even things like a:b:c:$PATH don't get
+	word-split as you might expect on a pre-POSIX shell.
+
 Tue Nov 26 13:00:28 1996  David J MacKenzie  <djm@catapult.va.pubnix.com>
 
 	* Version 2.12.
