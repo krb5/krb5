@@ -1,3 +1,7 @@
+@c Set the "MIT" flag for the MIT edition; set the "CYGNUS" flag for
+@c the Cygnus edition.
+@set MIT
+@clear CYGNUS
 @set ADMINUSER joeadmin
 @set COMPANY MIT
 @set KDCSERVER kerberos
@@ -24,5 +28,3 @@
 @set SECONDDOMAIN fubar.org
 @set SECONDREALM FUBAR.ORG
 @set UPDATED @today
-
-
