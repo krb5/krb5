@@ -46,5 +46,6 @@ struct _krb5_context {
 	void	      FAR *os_context;
 	char	      FAR *default_realm;
 	profile_t     profile;
+	void	      FAR *db_context;
 };
 #endif /* _KRB5_INT_H */
