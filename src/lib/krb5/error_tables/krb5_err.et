@@ -52,8 +52,8 @@ error_code KRB5KDC_ERR_SERVICE_REVOKED,	"Credentials for server have been revoke
 error_code KRB5KDC_ERR_TGT_REVOKED,	"TGT has been revoked"
 error_code KRB5KDC_ERR_CLIENT_NOTYET,	"Client not yet valid - try again later"
 error_code KRB5KDC_ERR_SERVICE_NOTYET,	"Server not yet valid - try again later"
-error_code KRB5KDC_ERR_KEY_EXP,  	"Password has expired."
-error_code KRB5KDC_PREAUTH_FAILED,  	"Preauthentication information was invalid"
+error_code KRB5KDC_ERR_KEY_EXP,  	"Password has expired"
+error_code KRB5KDC_PREAUTH_FAILED,  	"Preauthentication failed"
 # ^^ 24
 error_code KRB5KDC_SERVER_NOMATCH,	"Requested server and ticket don't match"
 error_code KRB5PLACEHOLD_26,		"KRB5 error code 26"
