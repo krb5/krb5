@@ -1,3 +1,8 @@
+Tue Oct  7 08:02:13 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* Makefile.in (runenv.vars): Use tr to remove newlines in multiple
+	        lines of variables.
+
 Fri Oct  3 02:26:45 1997  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Fix up site.exp generation to reduce the quoting

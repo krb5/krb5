@@ -39,5 +39,5 @@ runenv.vals: runenv.vars
 		eval echo "{$$i=\$$$$i}"; done > runenv.vals
 
 site.exp: runenv.vals
-	echo "set runvarlist [list `cat runenv.vals`]" | \
+	echo "set runvarlist [list `cat runenv.vals | tr '\n' ' '`]" | \
 		sed -e 's%=\.%='`pwd`'/.%g' > site.exp
