@@ -131,4 +131,6 @@ krb5_error_code krb5_make_fulladdr
 	       krb5_address *,
 	       krb5_address *));
 
+time_t gmt_mktime PROTOTYPE((struct tm *));
+
 #endif /* KRB5_LIBOS_PROTO__ */

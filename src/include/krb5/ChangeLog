@@ -1,3 +1,8 @@
+Fri May 26 10:17:12 1995 Keith Vetter (keithv@fusion.com)
+
+	* adm_proto.h: added more missing INTERFACE.
+	* los-proto.h: moved in prototype for gmt_mktime().
+
 Thu May 25 19:27:45 1995 Keith Vetter (keithv@fusion.com)
 
 	* adm_proto.h: two function's prototype were missing INTERFACE.
