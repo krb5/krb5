@@ -55,7 +55,8 @@ OLDDECLARG(krb5_creds *, cred)
     if (!tgt->ticket.length)
 	return(KRB5_NO_TKT_SUPPLIED);
 
-    if (retval = krb5_tgtname(cred->server, cred->client, &tempprinc))
+    if (retval = krb5_tgtname(krb5_princ_realm(cred->server),
+			      krb5_princ_realm(cred->client), &tempprinc))
 	return(retval);
     
     if (!krb5_principal_compare(tempprinc, tgt->server)) {
