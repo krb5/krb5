@@ -53,7 +53,7 @@ PEPYPATH=	-DPEPYPATH -DPEPSYPATH=\".:$(PEPSYDIRM)\"
 # to prevent a lot of unnecessary re-loading
 PEPSYLIBES=	$(PSAPDIR)/sprintoid.o $(PSAPDIR)/pl_tables.o \
 		$(PSAPDIR)/oid_cmp.o $(PSAPDIR)/oid_cpy.o \
-		$(PSAPDIR)/oid_free.o ../compat/libcompat.a $(LEXLIB)
+		$(PSAPDIR)/oid_free.o ../compat/libcompat.a
 LIBES   =	$(TOPDIR)lib/libpsap.a $(TOPDIR)lib/libcompat.a
 LLIBS   =	$(TOPDIR)lib/llib-lpsap $(TOPDIR)lib/llib-lcompat
 HFILES	=	$(HDIR)psap.h \
@@ -114,7 +114,7 @@ pepsy:		xpepsy
 
 xpepsy:		pepsyvrsn.o $(PEPSYLIBES)
 		$(LDCC) $(LDFLAGS) -o $@ $(PEPSY-O) \
-			pepsyvrsn.o $(PEPSYLIBES) -lm
+			pepsyvrsn.o $(PEPSYLIBES) $(LEXLIB) -lm
 
 pepsy.o:	pepsy.c pepsydefs.h $(HFILES)
 		$(CC) $(CFLAGS) -c $(srcdir)/pepsy.c
