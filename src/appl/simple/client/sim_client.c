@@ -71,7 +71,7 @@ char *argv[];
     krb5_data packet, inbuf;
     krb5_checksum send_cksum;
     krb5_ccache ccdef;
-    krb5_creds creds;
+    krb5_creds creds, *new_creds;
     krb5_address local_addr, foreign_addr, *portlocal_addr;
     krb5_rcache rcache;
     krb5_context context;
@@ -274,8 +274,7 @@ char *argv[];
     }
 
     if (retval = krb5_get_credentials(context, 0, /* no flags */
-				      ccdef,
-				      &creds)) {
+				      ccdef, &creds, &new_creds)) {
 	com_err(PROGNAME, retval, "while fetching credentials");
 	exit(1);
     }
@@ -286,7 +285,7 @@ char *argv[];
 
     if (retval = krb5_mk_safe(context, &inbuf,
 			      CKSUMTYPE_RSA_MD4_DES,
-			      &creds.keyblock, 
+			      &new_creds->keyblock, 
 			      portlocal_addr, 
 			      &foreign_addr,
 			      0, 0,	/* no seq number or special flags */
@@ -309,7 +308,7 @@ char *argv[];
     /* Make the encrypted message */
     if (retval = krb5_mk_priv(context, &inbuf,
 			      ETYPE_DES_CBC_CRC,
-			      &creds.keyblock, 
+			      &new_creds->keyblock, 
 			      portlocal_addr, 
 			      &foreign_addr,
 			      0, 0,	/* no seq number or special flags */
