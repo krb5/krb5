@@ -1,26 +1,15 @@
 AC_INIT(configure.in)
 WITH_CCOPTS
-ISODE_DEFS
 CONFIG_RULES
 AC_SET_BUILDTOP
 ET_RULES
 SS_RULES
 KRB_INCLUDE
-AC_ARG_ENABLE([isode],[build and use ISODE to generate ASN.1 stubs],[
-ASN1_HDRS=isode_err.h
-ASN1_OBJS=isode_err.o
-ASN1_SRCS=isode_err.c
-BOGUS=nosuchtarget],[
-ASN1_HDRS=asn1_err.h
-ASN1_OBJS=asn1_err.o
-ASN1_SRCS=asn1_err.c
-BOGUS="isode_err.c isode_err.h"])
 AC_SUBST(ASN1_HDRS)
 AC_SUBST(ASN1_OBJS)
 AC_SUBST(ASN1_SRCS)
 AC_SUBST(BOGUS)
 SubdirLibraryRule([${OBJS}])
-CopyHeader(isode_err.h,[$(EHDRDIR)])
 CopyHeader(krb5_err.h,[$(EHDRDIR)])
 CopyHeader(kv5m_err.h,[$(EHDRDIR)])
 CopyHeader(kdb5_err.h,[$(EHDRDIR)])

@@ -1,3 +1,9 @@
+Fri Feb 10 14:56:57 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile:
+	* configure.in: 
+	* init_ets.c (krb5_init_ets): Remove isode cruft.
+
 Thu Feb  2 20:49:10 1995  Mark Eichin  (eichin@cygnus.com)
 
 	* krb5_err.et (KRB5KRB_AP_ERR_V4_REPLY): new error code for V4

@@ -1,16 +1,11 @@
-ASN1_HDRS=@ASN1_HDRS@
-ASN1_OBJS=@ASN1_OBJS@
-ASN1_SRCS=@ASN1_SRCS@
-BOGUS=@BOGUS@
- 
 CFLAGS = $(CCOPTS) $(DEFS)
 LDFLAGS = -g
 
 EHDRDIR=$(BUILDTOP)/include/krb5
 
-HDRS=$(ASN1_HDRS) kdb5_err.h krb5_err.h kv5m_err.h adm_err.h
-OBJS=$(ASN1_OBJS) kdb5_err.o krb5_err.o kv5m_err.o adm_err.o init_ets.o
-ETSRCS=$(ASN1_SRCS) kdb5_err.c krb5_err.c kv5m_err.c adm_err.c
+HDRS= asn1_err.h kdb5_err.h krb5_err.h kv5m_err.h adm_err.h
+OBJS= asn1_err.o kdb5_err.o krb5_err.o kv5m_err.o adm_err.o init_ets.o
+ETSRCS= asn1_err.c kdb5_err.c krb5_err.c kv5m_err.c adm_err.c
 SRCS=$(ETSRCS) $(srcdir)/init_ets.c
 
 all:: ${HDRS} includes ${OBJS}
@@ -25,8 +20,5 @@ krb5_err.o: krb5_err.c
 adm_err.o: adm_err.c
 kv5m_err.o: kv5m_err.c
 
-$(BOGUS)::
-	echo '/* not using isode */' > $@
-
 clean::
-	$(RM) $(HDRS) $(ETSRCS) $(BOGUS)
+	$(RM) $(HDRS) $(ETSRCS)
