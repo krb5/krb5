@@ -245,7 +245,7 @@ size_t seed_length;
 	    /* now encrypt the checksum */
 	    retval = mit_des_cbc_encrypt((mit_des_cblock *)&working.digest[0],
 					 (mit_des_cblock *)&outtmp[0],
-					 OLD_RSA_MD4_DES_CKSUM_LENGTH,
+					 RSA_MD4_CKSUM_LENGTH,
 					 (struct mit_des_ks_struct *)
 					 	eblock.priv,
 					 keyblock.contents,
@@ -309,7 +309,7 @@ size_t seed_length;
 	    /* Compare the checksums */
 	    if (memcmp((char *) &outtmp[RSA_MD4_DES_CONFOUND_LENGTH],
 		       (char *) &working.digest[0],
-		       NEW_RSA_MD4_DES_CKSUM_LENGTH))
+		       RSA_MD4_CKSUM_LENGTH))
 		retval = KRB5KRB_AP_ERR_BAD_INTEGRITY;
 	}
 	else 
