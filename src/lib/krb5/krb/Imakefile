@@ -117,4 +117,4 @@ SRCS=	addr_comp.c	\
 	walk_rtree.c
 
 OtherdirLibraryTarget($(TOP)/lib,krb5,$(OBJS))
-INCLUDES=-I../../include
+
