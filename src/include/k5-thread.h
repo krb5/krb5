@@ -237,7 +237,7 @@ typedef struct {
    The C library doesn't provide pthread_once; we can use weak
    reference support for that.  */
 #if defined(__GNUC__) && __GNUC__ < 3
-# error "Please update to a newer gcc with weak symbol support, reconfigure and recompile."
+# error "Please update to a newer gcc with weak symbol support, or switch to native cc; reconfigure and recompile."
 #endif
 #undef k5_mutex_lock
 #undef k5_mutex_unlock
