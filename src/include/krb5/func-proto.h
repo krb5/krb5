@@ -223,7 +223,7 @@ krb5_error_code krb5_rc_close
 	PROTOTYPE((krb5_rcache id ));
 krb5_error_code krb5_rc_store
 	PROTOTYPE((krb5_rcache id,
-		   krb5_authent *auth,
+		   krb5_tkt_authent *auth,
 		   krb5_boolean expunge ));
 krb5_error_code krb5_rc_expunge
 	PROTOTYPE((krb5_rcache id ));
@@ -292,5 +292,44 @@ char *krb5_cc_default_name
 	PROTOTYPE((void ));
 krb5_ccache krb5_cc_default
 	PROTOTYPE((void ));
+
+
+/* krb5_free.c */
+void krb5_free_principal
+	PROTOTYPE((krb5_principal val ));
+void krb5_free_authenticator
+	PROTOTYPE((krb5_authenticator *val ));
+void krb5_free_address
+	PROTOTYPE((krb5_address **val ));
+void krb5_free_authdata
+	PROTOTYPE((krb5_authdata **val ));
+void krb5_free_enc_tkt_part
+	PROTOTYPE((krb5_enc_tkt_part *val ));
+void krb5_free_ticket
+	PROTOTYPE((krb5_ticket *val ));
+void krb5_free_as_req
+	PROTOTYPE((krb5_as_req *val ));
+void krb5_free_kdc_rep
+	PROTOTYPE((krb5_kdc_rep *val ));
+void krb5_free_last_req
+	PROTOTYPE((krb5_last_req_entry **val ));
+void krb5_free_enc_kdc_rep_part
+	PROTOTYPE((krb5_enc_kdc_rep_part *val ));
+void krb5_free_error
+	PROTOTYPE((krb5_error *val ));
+void krb5_free_ap_req
+	PROTOTYPE((krb5_ap_req *val ));
+void krb5_free_ap_rep
+	PROTOTYPE((krb5_ap_rep *val ));
+void krb5_free_tgs_req
+	PROTOTYPE((krb5_tgs_req *val ));
+void krb5_free_tgs_req_enc_part
+	PROTOTYPE((krb5_tgs_req_enc_part *val ));
+void krb5_free_safe
+	PROTOTYPE((krb5_safe *val ));
+void krb5_free_priv
+	PROTOTYPE((krb5_priv *val ));
+void krb5_free_priv_enc_part
+	PROTOTYPE((krb5_priv_enc_part *val ));
 
 #endif /* __KRB5_FUNC_PROTO__ */
