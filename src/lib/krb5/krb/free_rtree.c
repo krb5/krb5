@@ -26,7 +26,7 @@ const krb5_principal *realms;
     register const krb5_principal *nrealms = realms;
     while (*nrealms) {
 	krb5_free_principal(*nrealms);
-	realms++;
+	nrealms++;
     }
     xfree(realms);
 }
