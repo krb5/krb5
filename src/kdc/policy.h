@@ -17,7 +17,8 @@
 #define __KRB5_KDC_POLICY__
 
 extern krb5_boolean against_postdate_policy PROTOTYPE((krb5_timestamp));
-extern krb5_boolean against_flag_policy_as PROTOTYPE((krb5_as_req *));
-extern krb5_boolean against_flag_policy_tgs PROTOTYPE((krb5_tgs_req *));
+extern krb5_boolean against_flag_policy_as PROTOTYPE((const krb5_kdc_req *));
+extern krb5_boolean against_flag_policy_tgs PROTOTYPE((const krb5_kdc_req *,
+						       const krb5_ticket *));
 
 #endif /* __KRB5_KDC_POLICY__ */

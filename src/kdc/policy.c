@@ -33,7 +33,7 @@ krb5_timestamp fromtime;
 
 krb5_boolean
 against_flag_policy_as(request)
-register krb5_as_req *request;
+const register krb5_kdc_req *request;
 {
     if (isflagset(request->kdc_options, KDC_OPT_FORWARDED) ||
 	isflagset(request->kdc_options, KDC_OPT_PROXY) ||
@@ -47,36 +47,36 @@ register krb5_as_req *request;
 }
 
 krb5_boolean
-against_flag_policy_tgs(request)
-register krb5_tgs_req *request;
+against_flag_policy_tgs(request, ticket)
+const register krb5_kdc_req *request;
+const register krb5_ticket *ticket;
 {
-    register krb5_real_tgs_req *realreq = request->tgs_request2;
 
-    if (((isflagset(realreq->kdc_options, KDC_OPT_FORWARDED) ||
-	  isflagset(realreq->kdc_options, KDC_OPT_FORWARDABLE)) &&
-	 !isflagset(request->header2->ticket->enc_part2->flags,
+    if (((isflagset(request->kdc_options, KDC_OPT_FORWARDED) ||
+	  isflagset(request->kdc_options, KDC_OPT_FORWARDABLE)) &&
+	 !isflagset(ticket->enc_part2->flags,
 		TKT_FLG_FORWARDABLE)) || /* TGS must be forwardable to get
 					    forwarded or forwardable ticket */
 
-	((isflagset(realreq->kdc_options, KDC_OPT_PROXY) ||
-	  isflagset(realreq->kdc_options, KDC_OPT_PROXIABLE)) &&
-	 !isflagset(request->header2->ticket->enc_part2->flags,
+	((isflagset(request->kdc_options, KDC_OPT_PROXY) ||
+	  isflagset(request->kdc_options, KDC_OPT_PROXIABLE)) &&
+	 !isflagset(ticket->enc_part2->flags,
 		TKT_FLG_PROXIABLE)) ||	/* TGS must be proxiable to get
 					   proxiable ticket */
 
-	((isflagset(realreq->kdc_options, KDC_OPT_ALLOW_POSTDATE) ||
-	  isflagset(realreq->kdc_options, KDC_OPT_POSTDATED)) &&
-	 !isflagset(request->header2->ticket->enc_part2->flags,
+	((isflagset(request->kdc_options, KDC_OPT_ALLOW_POSTDATE) ||
+	  isflagset(request->kdc_options, KDC_OPT_POSTDATED)) &&
+	 !isflagset(ticket->enc_part2->flags,
 		TKT_FLG_MAY_POSTDATE)) || /* TGS must allow postdating to get
 					   postdated ticket */
 	 
-	(isflagset(realreq->kdc_options, KDC_OPT_VALIDATE) &&
-	 !isflagset(request->header2->ticket->enc_part2->flags,
+	(isflagset(request->kdc_options, KDC_OPT_VALIDATE) &&
+	 !isflagset(ticket->enc_part2->flags,
 		TKT_FLG_INVALID)) || 	/* can only validate invalid tix */
 
-	((isflagset(realreq->kdc_options, KDC_OPT_RENEW) ||
-	  isflagset(realreq->kdc_options, KDC_OPT_RENEWABLE)) &&
-	 !isflagset(request->header2->ticket->enc_part2->flags,
+	((isflagset(request->kdc_options, KDC_OPT_RENEW) ||
+	  isflagset(request->kdc_options, KDC_OPT_RENEWABLE)) &&
+	 !isflagset(ticket->enc_part2->flags,
 		TKT_FLG_RENEWABLE))) 	/* can only renew renewable tix */
 
 	return TRUE;			/* against policy */
