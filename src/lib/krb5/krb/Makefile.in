@@ -161,24 +161,21 @@ shared:
 COMERRLIB=$(TOPLIBD)/libcom_err.a
 
 T_WALK_RTREE_OBJS= t_walk_rtree.o walk_rtree.o tgtname.o unparse.o \
-	free_rtree.o bld_pr_ext.o \
-	$(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(COMERRLIB) 
+	free_rtree.o bld_pr_ext.o 
 
-T_KERB_OBJS= t_kerb.o conv_princ.o unparse.o \
-	$(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(COMERRLIB) 
+T_KERB_OBJS= t_kerb.o conv_princ.o unparse.o 
 
 T_SER_OBJS= t_ser.o ser_actx.o ser_adata.o ser_addr.o ser_auth.o ser_cksum.o \
-	ser_ctx.o ser_eblk.o ser_key.o ser_princ.o serialize.o \
-	$(TOPLIBD)/libkdb5.a $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(COMERRLIB)
+	ser_ctx.o ser_eblk.o ser_key.o ser_princ.o serialize.o 
 
-t_walk_rtree: $(T_WALK_RTREE_OBJS)
-	$(LD) -o t_walk_rtree $(T_WALK_RTREE_OBJS) $(LIBS)
+t_walk_rtree: $(T_WALK_RTREE_OBJS) $(DEPLIBS)
+	$(LD) $(LDFLAGS) $(LDARGS) -o t_walk_rtree $(T_WALK_RTREE_OBJS) $(LIBS)
 
-t_kerb: $(T_KERB_OBJS)
-	$(LD) -o t_kerb $(T_KERB_OBJS) $(LIBS)
+t_kerb: $(T_KERB_OBJS) $(DEPLIBS)
+	$(LD) $(LDFLAGS) $(LDARGS) -o t_kerb $(T_KERB_OBJS) $(LIBS)
 
-t_ser: $(T_SER_OBJS)
-	$(LD) -o t_ser $(T_SER_OBJS) $(LIBS)
+t_ser: $(T_SER_OBJS) $(DEPLIBS)
+	$(LD) $(LDFLAGS) $(LDARGS) -o t_ser $(T_SER_OBJS) $(LIBS)
 
 TEST_PROGS= t_walk_rtree t_kerb t_ser
 
