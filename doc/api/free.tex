@@ -2,20 +2,21 @@ The free functions deal with deallocation of memory that has been
 allocated by various routines. It is recommended that the developer use
 these routines as they will know about the contents of the structures.
 
-\begin{funcdecl}{krb5_auth_con_free}{krb5_auth_con_free}{\funcinout}
-\funcarg{krb5_context}{context}
-\funcarg{krb5_auth_context *}{auth_context}
+\begin{funcdecl}{krb5_xfree}{void}{\funcinout}
+\funcarg{void *}{ptr}
 \end{funcdecl}
 
-Frees the auth_context \funcparam{auth_context} returned by
-\funcname{krb5_auth_con_init}.
+Frees the pointer \funcarg{ptr}. This is a wrapper macro to
+\funcname{free} that is designed to keep lint ``happy.''
 
-\begin{funcdecl}{krb5_free_context}{void}{\funcinout}
+\begin{funcdecl}{krb5_free_data}{void}{\funcinout}
 \funcarg{krb5_context}{context}
+\funcarg{krb5_data *}{val}
 \end{funcdecl}
 
-Frees the context returned by \funcname{krb5_init_context}. Internally
-calls \funcname{krb5_os_free_context}.
+Frees the data structure \funcparam{val}, including the pointer
+\funcparam{val} which has been allocate by any of numerous routines.
+
 
 \begin{funcdecl}{krb5_free_princial}{void}{\funcinout}
 \funcarg{krb5_context}{context}

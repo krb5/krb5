@@ -1,6 +1,15 @@
 The main functions deal with the nitty-gritty details: verifying
 tickets, creating authenticators, and the like.
 
+\subsubsection{The krb5_context}
+The \datatype{krb5_context} is designed to represent the per process
+state. When the library is made thread-safe, the context will represent
+the per-thread state. Global parameters which are ``context'' specific
+are stored in this structure, including default realm, default
+encryption type, default configuration files and the like. Functions
+exist to provide full access to the data structures stored in the
+context and should not be accessed directly by developers.
+
 \begin{funcdecl}{krb5_init_context}{krb5_error_code}{\funcinout}
 \funcarg{krb5_context *}{context}
 \end{funcdecl}
@@ -12,6 +21,44 @@ the context may be also contain thread specific data.  The data in the
 context should be freed with \funcname{krb5_free_context}.
 
 Returns system errors.
+
+\begin{funcdecl}{krb5_free_context}{void}{\funcinout}
+\funcarg{krb5_context}{context}
+\end{funcdecl}
+
+Frees the context returned by \funcname{krb5_init_context}. Internally
+calls \funcname{krb5_os_free_context}.
+
+\begin{funcdecl}{krb5_set_default_in_tkt_etypes}{krb5_error_code}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcin
+\funcarg{const krb5_enctype *}{etypes}
+\end{funcdecl}
+
+Sets the desired default encryption type \funcparam{etypes} for the context
+if valid.
+
+Returns {\sc enomem}, {\sc krb5_prog_etype_nosupp}.
+
+\begin{funcdecl}{krb5_get_default_in_tkt_etypes}{krb5_error_code}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcout
+\funcarg{krb5_enctype **}{etypes}
+\end{funcdecl}
+
+Retrieves the default encryption types from the context and stores them
+in \funcarg{etypes} which should be freed by the caller.
+
+Returns {\sc enomem}.
+
+\subsubsection{The krb5_auth_context}
+
+While the \datatype{krb5_context} represents a per-process or per-thread
+contex, the \datatype{krb5_auth_context} represents a per-connection
+context are are used by the various functions involved directly in
+client/server authentication.  Some of the data stored in this context
+include keyblocks, addresses, sequence numbers, authenticators, checksum
+type, and replay cache pointer. 
 
 \begin{funcdecl}{krb5_auth_con_init}{krb5_error_code}{\funcinout}
 \funcarg{krb5_context}{context}
@@ -41,6 +88,14 @@ changed with \funcname{krb5_auth_con_setcksumtype}.
 The auth_context structure should be freed with
 \funcname{krb5_auth_con_free}.
 
+\begin{funcdecl}{krb5_auth_con_free}{krb5_error_code}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcarg{krb5_auth_context *}{auth_context}
+\end{funcdecl}
+
+Frees the auth_context \funcparam{auth_context} returned by
+\funcname{krb5_auth_con_init}.
+
 \begin{funcdecl}{krb5_auth_con_setflags}{krb5_error_code}{\funcinout}
 \funcarg{krb5_context}{context}
 \funcarg{krb5_auth_context *}{auth_context}
@@ -52,38 +107,177 @@ Sets the flags of \funcparam{auth_context} to funcparam{flags}. Valid
 flags are listed above.
 
 
-%\begin{funcdecl}{krb5_auth_con_getflags}{krb5_error_code}{\funcinout}
-%\funcarg{krb5_context}{context}
-%\funcin
-%\funcarg{krb5_auth_context *}{auth_context}
-%\funcout
-%\funcarg{krb5_int32 *}{flags}
-%\end{funcdecl}
-%
-%Retrievs the flags of \funcparam{auth_context}.
-
-
-\begin{funcdecl}{krb5_set_default_in_tkt_etypes}{krb5_error_code}{\funcinout}
+\begin{funcdecl}{krb5_auth_con_getflags}{krb5_error_code}{\funcinout}
 \funcarg{krb5_context}{context}
 \funcin
-\funcarg{const krb5_enctype *}{etypes}
-\end{funcdecl}
-
-Sets the desired default encryption type \funcparam{etypes} for the context
-if valid.
-
-Returns {\sc enomem}, {\sc krb5_prog_etype_nosupp}.
-
-\begin{funcdecl}{krb5_get_default_in_tkt_etypes}{krb5_error_code}{\funcinout}
-\funcarg{krb5_context}{context}
+\funcarg{krb5_auth_context *}{auth_context}
 \funcout
-\funcarg{krb5_enctype **}{etypes}
+\funcarg{krb5_int32 *}{flags}
 \end{funcdecl}
 
-Retrieves the default encryption types from the context and stores them
-in \funcarg{etypes} which should be freed by the caller.
+Retrievs the flags of \funcparam{auth_context}.
 
-Returns {\sc enomem}.
+\begin{funcdecl}{krb5_auth_con_setaddrs}{krb5_error_code}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcarg{krb5_auth_context *}{auth_context}
+\funcin
+\funcarg{krb5_address *}{local_addr}
+\funcarg{krb5_address *}{remote_addr}
+\end{funcdecl}
+
+Copies the \funcparam{local_addr} and \funcparam{remote_addr} into the
+\funcparam{auth_context}. If either address is NULL, the previous
+address remains in place.
+
+\begin{funcdecl}{krb5_auth_con_getaddrs}{krb5_error_code}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcarg{krb5_auth_context *}{auth_context}
+\funcout
+\funcarg{krb5_address **}{local_addr}
+\funcarg{krb5_address **}{remote_addr}
+\end{funcdecl}
+
+Retrieves  \funcparam{local_addr} and \funcparam{remote_addr} from the
+\funcparam{auth_context}. If \funcparam{local_addr} or
+\funcparam{remote_addr} is not NULL, the memory is first freed with
+\funcname{krb5_free_address} and then newly allocated. It is the callers
+responsibility to free the returned addresses in this way.
+
+
+\begin{funcdecl}{krb5_auth_con_setaddrs}{krb5_error_code}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcarg{krb5_auth_context *}{auth_context}
+\funcin
+\funcarg{krb5_address *}{local_port}
+\funcarg{krb5_address *}{remote_port}
+\end{funcdecl}
+
+Copies the \funcparam{local_port} and \funcparam{remote_port} addresses
+into the \funcparam{auth_context}. If either address is NULL, the previous
+address remains in place. These addresses are set by
+\funcname{krb5_auth_con_genaddrs}. 
+
+\begin{funcdecl}{krb5_auth_con_setuserkey}{krb5_error_code}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcarg{krb5_auth_context *}{auth_context}
+\funcin
+\funcarg{krb5_keyblock *}{keyblock}
+\end{funcdecl}
+
+This function overloads the keyblock field. It is only useful prior to a
+\funcname{krb5_rd_req_decode} call for user to user authentication where
+the server has the key and needs to use it to decrypt the incoming
+request.  Once decrypted this key is no longer necessary and is then
+overwritten with the session key sent by the client. 
+
+\begin{funcdecl}{krb5_auth_con_getkey}{krb5_error_code}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcarg{krb5_auth_context *}{auth_context}
+\funcout
+\funcarg{krb5_keyblock **}{keyblock}
+\end{funcdecl}
+
+Retrieves the keyblock stored in \funcparam{auth_context}. The memory
+allocated in this function should be freed with a call to
+\funcname{krb5_free_keyblock}. 
+
+\begin{funcdecl}{krb5_auth_con_getkey}{krb5_error_code}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcarg{krb5_auth_context *}{auth_context}
+\funcout
+\funcarg{krb5_keyblock **}{keyblock}
+\end{funcdecl}
+
+Retrieves the local_subkey keyblock stored in
+\funcparam{auth_context}. The memory allocated in this function should
+be freed with a call to \funcname{krb5_free_keyblock}.
+
+\begin{funcdecl}{krb5_auth_con_getkey}{krb5_error_code}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcarg{krb5_auth_context *}{auth_context}
+\funcout
+\funcarg{krb5_keyblock **}{keyblock}
+\end{funcdecl}
+
+Retrieves the remote_subkey keyblock stored in
+\funcparam{auth_context}. The memory allocated in this function should
+be freed with a call to \funcname{krb5_free_keyblock}.
+
+
+\begin{funcdecl}{krb5_auth_setcksumtype}{krb5_error_code}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcarg{krb5_auth_context *}{auth_context}
+\funcin
+\funcarg{krb5_cksumtype}{cksumtype}
+\end{funcdecl}
+
+Sets the checksum type used by the other functions in the library. 
+
+\begin{funcdecl}{krb5_auth_getlocalseqnumber}{krb5_error_code}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcarg{krb5_auth_context *}{auth_context}
+\funcin
+\funcarg{krb5_int32 *}{seqnumber}
+\end{funcdecl}
+
+Retrieves the local sequence number that was used during authentication
+and stores it in \funcparam{seqnumber}.
+
+\begin{funcdecl}{krb5_auth_getremoteseqnumber}{krb5_error_code}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcarg{krb5_auth_context *}{auth_context}
+\funcin
+\funcarg{krb5_int32 *}{seqnumber}
+\end{funcdecl}
+
+Retrieves the remote sequence number that was used during authentication
+and stores it in \funcparam{seqnumber}.
+
+\begin{funcdecl}{krb5_auth_getauthenticator}{krb5_error_code}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcarg{krb5_auth_context *}{auth_context}
+\funcout
+\funcarg{krb5_authenticator **}{authenticator}
+\end{funcdecl}
+
+Retrieves the authenticator that was used during mutual
+authentication. It is the callers responsibility to free the memory
+allocated to \funcparam{authenticator} by calling
+\funcname{krb5_free_authenticator}. 
+
+\begin{funcdecl}{krb5_auth_initivector}{krb5_error_code}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcarg{krb5_auth_context *}{auth_context}
+\end{funcdecl}
+
+Allocates memory for and zeros the initial vector in the
+\funcparam{auth_context} keyblock.
+
+\begin{funcdecl}{krb5_set_initivector}{krb5_error_code}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcarg{krb5_auth_context *}{auth_context}
+\funcin
+\funcarg{krb5_pointer}{ivector}
+\end{funcdecl}
+
+Sets the i_vector portion of \funcparam{auth_context} to
+\funcparam{ivector}. 
+
+\begin{funcdecl}{krb5_set_rcache}{krb5_error_code}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcarg{krb5_auth_context *}{auth_context}
+\funcin
+\funcarg{krb5_rcache}{rcache}
+\end{funcdecl}
+
+Sets the replay cache that is used by the authentication routines to \funcparam{rcache}.
+
+%%
+%% The following prototypes exist, but there is no code at this time
+%% krb5_auth_con_getcksumtype, krb5_auth_con_getivector,
+%% krb5_auth_con_getrcache. -- Ezra
+
+\subsubsection{The application functions}
 
 \begin{funcdecl}{krb5_encode_kdc_rep}{krb5_error_code}{\funcin}
 \funcarg{const krb5_msgtype}{type}
@@ -737,8 +931,8 @@ AP_REQ message and allocated data holding it.
 caller when it is no longer needed. 
 
 If the flags in \funcparam{auth_context} indicate that a sequence number
-should be used (KRB5_AUTH_CONTEXT_DO_SEQUENCE or
-KRB5_AUTH_CONTEXT_RET_SEQUENCE) and the local sequqnce number in the
+should be used (either {\sc KRB5_AUTH_CONTEXT_DO_SEQUENCE} or
+{\sc KRB5_AUTH_CONTEXT_RET_SEQUENCE}) and the local sequqnce number in the
 \funcparam{auth_context} is 0, a new number will be generated with
 \funcname{krb5_generate_seq_number}.
 
@@ -940,11 +1134,6 @@ server's private key.
 If \funcparam{server} is non-null, the princicpal component of it is
 ysed to determine the replay cache to use. Otherwise,
 \funcname{krb5_recvauth} will use a default replay cache.
-%\funcparam{rc_type} is a string which determins which type of replay
-%cache \funcname{krb5_recvauth} should use.  If it is null, the default
-%replay cache type will be used.  \funcname{krb5_recvauth} uses a
-%standard convention for determining the name of the replay cache to be
-%used.
 
 The \funcparam{flags} argument allows the caller to modify the behavior of
 \funcname{krb5_recvauth}.  For non-library callers, \funcparam{flags}
@@ -987,11 +1176,13 @@ listed below.
 
 \begin{tabular}{ll}
 \multicolumn{1}{c}{Symbol} & Meaning \\
-KRB5_AUTH_CONTEXT_DO_TIME		& Use timestamps and replay cache\\
-KRB5_AUTH_CONTEXT_RET_TIME	& Copy timestamp to \funcparam{*outdata} \\
+KRB5_AUTH_CONTEXT_DO_TIME		& Use timestamps\\
+	&\  and replay cache\\
+KRB5_AUTH_CONTEXT_RET_TIME	& Copy timestamp \\
+	&\ to \funcparam{*outdata} \\
 KRB5_AUTH_CONTEXT_DO_SEQUENCE	& Use sequence numbers \\
 KRB5_AUTH_CONTEXT_RET_SEQUENCE	& Copy sequence numbers\\
-	& to \funcparam{*outdata} \\
+	&\ to \funcparam{*outdata} \\
 \end{tabular}
 
 If timestamps are to be used (i.e., if KRB5_AUTH_CONTEXT_DO_TIME is
@@ -1088,9 +1279,10 @@ integrity-protected rather than just integrity-protected.
 \funcparam{outdata} and
 \funcparam{outbuf} function as in \funcname{krb5_mk_safe}.
 
-As in \funcname{krb5_mk_safe}, the remote_addr part of the \funcparam{auth_context} is optional; if
-the receiver's address is not known, it may be replaced by NULL.
-The local_addr, however, is mandatory.
+As in \funcname{krb5_mk_safe}, the remote_addr and remote_port part of
+the \funcparam{auth_context} is optional; if the receiver's address is
+not known, it may be replaced by NULL.  The local_addr, however, is
+mandatory.
 
 The encryption type is taken from the \funcparam{auth_context} keyblock
 portion. If i_vector portion of the \funcparam{auth_context}

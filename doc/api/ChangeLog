@@ -1,5 +1,10 @@
 Wed May  3 01:22:11 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
+	* krb5.tex (subsubsection{The krb5_auth_context}): Added
+	auth_context routines. 
+
+	* free.tex: Add krb5_xfree and krb5_free_data.
+
 	* rcache.tex: Add krb5_rc_get_type, krb5_rc_resolve_type.
 
 	* krb5.tex: API changes finished.
