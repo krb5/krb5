@@ -1,4 +1,4 @@
-x\input texinfo-suppl.tex        % contains @doubleleftarrow{} definition
+\input texinfo-suppl.tex        % contains @doubleleftarrow{} definition
                                 % this line must come *before* \input texinfo
 \input texinfo @c -*-texinfo-*-
 @c %**start of header
@@ -543,6 +543,28 @@ UDP if the size of the message is above @code{udp_preference_list}.
 If the message is smaller than @code{udp_preference_list}, then UDP
 will be tried before TCP.  Regardless of the size, both protocols will
 be tried if the first attempt fails.
+
+@itemx verify_ap_req_nofail
+If this flag is set, then an attempt to get initial credentials will
+fail if the client machine does not have a keytab.  The default for the
+flag is @value{DefaultVerifyApReqNofail}.
+
+@itemx renew_lifetime
+The value of this tag is the default renewable lifetime for
+initial tickets.  The default value for the tag is
+@value{DefaultRenewLifetime}.
+
+@itemx noaddresses
+Setting this flag causes the initial Kerberos ticket to be addressless.
+The default for the flag is @value{DefaultNoaddresses}.
+
+@itemx forwardable
+If this flag is set, initial tickets by default will be forwardable.
+The default value for this flag is @value{DefaultForwardable}.
+
+@itemx proxiable
+If this flag is set, initial tickets by default will be proxiable.
+The default value for this flag is @value{DefaultProxiable}.
 
 @end table
 
