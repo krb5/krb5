@@ -161,6 +161,7 @@ format_kw_tagged(datap, kwordp, ntags, taglist, vallen, val)
     return(retval);
 }
 
+#if ! defined(_WINDOWS) && ! defined(_MACINTOSH)
 /*
  * krb5_adm_dbent_to_proto()	- Convert database a database entry into
  *				  an external attribute list.
@@ -428,4 +429,5 @@ krb5_adm_dbent_to_proto(kcontext, valid, dbentp, password, nentp, datap)
     *nentp = outindex;
     return(kret);
 }
+#endif
 

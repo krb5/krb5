@@ -1,3 +1,8 @@
+Wed Sep 27 16:00:00 1995  John Rivlin <jrivlin@fusion.com>
+
+	* adm_proto.h: Removed use of prototypes using krb5_db_entry
+		on the Macintosh. 
+
 Tue Sep 26 15:36:20 1995    <tytso@rsts-11.mit.edu>
 
 	* kdb.h, kdb_dbm.h: Add #if !defined(_MSDOS) &&

@@ -199,7 +199,7 @@ FILES= ./* \
 
 WINFILES= windows/* windows/cns/* windows/wintel/* windows/gss/*
 
-MACFILES= mac/* mac/kconfig/* mac/libraries/* mac/telnet/*
+MACFILES= mac/* mac/kconfig/* mac/libraries/* mac/telnet-k5-auth/*
 
 WINBINARYFILES=windows/cns/*.ico windows/wintel/*.ico windows/gss/*.ico
 
@@ -250,8 +250,10 @@ kerbsrc-nt.zip: awk-windows-mac
 	rm -f $(CLEANUP)
 
 kerbsrc.mac: awk-windows-mac
+	cp mac/libraries/autoconf.h include/autoconf.h
 	tar cvf kerbsrc.tar `find $(FILES) $(MACFILES) -prune -type f -print | grep -v kerbsrc`
 	rm -f $(CLEANUP)
+	rm -f include/autoconf.h
 
 #
 # Part of building the PC release has to be done on Unix. This includes

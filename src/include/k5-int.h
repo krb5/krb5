@@ -177,7 +177,27 @@ int sscanf(const char *str, char const *fmt0, ...);
 
 #else 		/* Rest of include file is for non-Microloss-Windows */
 
+#ifndef _MACINTOSH
+#if defined(__MWERKS__) || defined(applec) || defined(THINK_C)
+#define _MACINTOSH
+#define SIZEOF_INT 4
+#define SIZEOF_SHORT 2
+#define HAVE_SRAND
+#define NO_PASSWORD
+#define HAS_LABS
+#define ENOMEM -1
+#define ANSI_STDIO
+#ifndef _SIZET
+typedef unsigned int size_t;
+#define _SIZET
+#endif
+#include <unix.h>
+#include <ctype.h>
+#endif
+#endif
+
 #if defined(_MACINTOSH)
+
 
 #ifdef NEED_LOWLEVEL_IO
 #include <fcntl.h>
@@ -191,7 +211,7 @@ typedef short			nlink_t;
 typedef unsigned long	uid_t;
 typedef unsigned long	gid_t;
 typedef long			off_t;
-#ifndef _MWERKS
+#ifndef __MWERKS__
 struct stat
 {
 	mode_t		st_mode;		/* File mode; see #define's below */

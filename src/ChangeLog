@@ -1,3 +1,11 @@
+Wed Sep 27 16:00:00 1995  John Rivlin  <jrivlin@fusion.com>
+
+	* Makefile.in: Temporarily move autoconf.h file to include
+		directory while creating kerbsrc.mac tar file.
+
+	* Makefile.in: Include telnet-k5-auth directory in download.
+		Eliminate telnet directory.
+
 Wed Sep 27 11:47:38 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* Makefile.in (install-unix): Changed install to install-unix so

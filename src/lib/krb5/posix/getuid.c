@@ -1,5 +1,5 @@
 /* Very simple getuid() for systems that don't have one.  */
-#ifndef _MWERKS
+#ifndef __MWERKS__
 int
 getuid()
 {

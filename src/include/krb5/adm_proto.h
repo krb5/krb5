@@ -62,7 +62,7 @@ void INTERFACE krb5_adm_disconnect
 		   krb5_auth_context,
 		   krb5_ccache));
 
-#if ! defined(_WINDOWS)
+#if ! defined(_WINDOWS) && ! defined(_MACINTOSH)
 /* adm_kw_dec.c */
 krb5_error_code krb5_adm_proto_to_dbent
 	KRB5_PROTOTYPE((krb5_context,

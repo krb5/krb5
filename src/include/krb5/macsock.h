@@ -122,7 +122,7 @@ struct	servent {
 	char	*s_proto;	/* protocol to use */
 };
 
-#ifndef _MWERKS
+#ifndef __MWERKS__
 /* Timeout values */
 struct timeval {
 	long tv_sec;			/* Seconds */

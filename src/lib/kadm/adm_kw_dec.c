@@ -226,6 +226,7 @@ decode_kw_tagged(dataentp, keyword, ntags, taglist, lenp, datap)
     return(kret);
 }
 
+#if ! defined(_WINDOWS) && ! defined(_MACINTOSH)
 /*
  * krb5_adm_proto_to_dbent()	- Convert external attribute list into a
  *				  database entry.
@@ -574,3 +575,4 @@ krb5_adm_proto_to_dbent(kcontext, nent, data, validp, dbentp, pwordp)
     *validp |= parsed_mask;
     return(retval);
 }
+#endif
