@@ -23,6 +23,8 @@
 #include <Errors.h>
  
 #include <CCache.h>
+
+#include <string.h>
  
 #include "Krb5Globals.h"
 #include "Krb5GlobalsData.h"

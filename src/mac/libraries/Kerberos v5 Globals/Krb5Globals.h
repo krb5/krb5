@@ -36,7 +36,7 @@ Krb5GlobalsSetDefaultCacheName (
  * returns: length of default cache name
  */
 
-void
+UInt32
 Krb5GlobalsGetDefaultCacheName (
 	char*	inName,
 	UInt32	inLength);
