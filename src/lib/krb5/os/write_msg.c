@@ -41,7 +41,7 @@ krb5_write_message(context, fdp, outbuf)
 	if (krb5_net_write(context, fd, (char *)&len, 4) < 0) {
 		return(errno);
 	}
-	if (len && (krb5_net_write(context, fd, outbuf->data, outbuf->length) < 0)) {
+	if (outbuf->length && (krb5_net_write(context, fd, outbuf->data, outbuf->length) < 0)) {
 		return(errno);
 	}
 	return(0);

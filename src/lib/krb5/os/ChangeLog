@@ -1,3 +1,8 @@
+Fri Sep 22 15:57:33 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* write_msg.c (krb5_write_message): check the real length
+	variable, not the net version.
+
 Wed Sep 13 11:01:18 1995 Keith Vetter (keithv@fusion.com)
 
 	* Makefile.in: had to define away DBFLAGS for the PC.
@@ -130,7 +135,6 @@ Fri Jun 30 14:44:17 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* configure.in - Add --with-aname-dbm to select between Berkeley and
 		DBM aname database format.
 	* Makefile.in - Add definitions to select aname rules.
-
 
 Tue Jun 27 15:48:41 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* read_pwd.c(intr_routine) - Add signal name argument to signal handler
