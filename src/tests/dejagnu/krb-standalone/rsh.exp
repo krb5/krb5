@@ -97,7 +97,7 @@ proc rsh_test { } {
     set testname "date"
     spawn $RSH $hostname -k $REALMNAME -D 3544 -A date
     expect {
-	-re "\[A-Za-z0-9 :\]+\[\r\n\]+$" {
+	-re "\[A-Za-z0-9\]+ \[A-Za-z0-9\]+ +\[0-9\]+ \[0-9\]{2}:\[0-9\]{2}:\[0-9\]{2} \[A-Za-z0-9\]+ \[0-9\]{4}\r\n" {
 	    set result $expect_out(0,string)
 	}
 	timeout {
@@ -130,7 +130,7 @@ proc rsh_test { } {
     set testname "encrypted rsh"
     spawn $RSH $hostname -x -k $REALMNAME -D 3544 -A echo hello
     expect {
-	"hello" { }
+	"hello" { expect eof }
 	timeout {
 	    fail "$testname (timeout)"
 	    set failed yes
@@ -225,7 +225,7 @@ proc rsh_test { } {
     set testname "rsh to stderr"
     spawn $RSH $hostname -k $REALMNAME -D 3544 -A $BINSH -c "'echo hello 1>&2'"
     expect {
-	"hello" { }
+	"hello" { expect eof }
 	timeout {
 	    fail "$testname (timeout)"
 	    return
@@ -248,7 +248,7 @@ proc rsh_test { } {
     set testname "encrypted rsh to stderr"
     spawn $RSH $hostname -x -k $REALMNAME -D 3544 -A $BINSH -c "'echo hello 1>&2'"
     expect {
-	"hello" { }
+	"hello" { expect eof }
 	timeout {
 	    fail "$testname (timeout)"
 	    return
