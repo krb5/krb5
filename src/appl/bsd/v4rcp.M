@@ -1,5 +1,4 @@
 .\" appl/bsd/v4rcp.M
-.so man1/header.doc
 .TH RCP 1 \*h
 .SH NAME
 v4rcp \- back end for Kerberos V4 rcp

@@ -1,3 +1,7 @@
+Tue Oct  7 18:01:15 1997  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* v4rcp.M: Removed useless .so to a non-existent macro file.
+
 Tue Sep  2 19:44:21 1997  Tom Yu  <tlyu@mit.edu>
 
 	* krlogind.c (main): Changes to allow for standalone daemon
