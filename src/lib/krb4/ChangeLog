@@ -1,3 +1,10 @@
+2001-01-25  Tom Yu  <tlyu@mit.edu>
+
+	* prot_client.c: New file; client-side protocol support.
+
+	* prot_common.c (krb4prot_decode_header): Decode the first two
+	bytes of a krb4 packet.
+
 2001-01-24  Tom Yu  <tlyu@mit.edu>
 
 	* prot_common.c: Fix up some error returns.

@@ -118,3 +118,19 @@ krb4prot_decode_naminstrlm(KTEXT pkt, /* buffer to decode from */
     return KRB4PROT_OK;
 #undef PKT_REMAIN
 }
+
+int KRB5_CALLCONV
+krb4prot_decode_header(KTEXT pkt,
+		       int *pver, int *msgtype, int *le)
+{
+    unsigned char *p;
+
+    p = pkt->dat;
+    if (pkt->length < 2)
+	return KRB4PROT_ERR_UNDERRUN;
+    *pver = *p++;
+    *msgtype = *p++;
+    *le = *msgtype & 1;
+    *msgtype &= ~1;
+    return KRB4PROT_OK;
+}
