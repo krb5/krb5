@@ -3,6 +3,8 @@
 	* Makefile.in (SHLIB_DIRS, SHLIB_EXPLIBS, SHLIB_EXPDEPLIBS): Set
 	to depend on the new support library.
 	(SHLIB_LIBS): Don't define.
+	(SHLIB_RDIRS): Set.
+
 	* configure.in: Use BUILD_LIBRARY_WITH_DEPS instead of the no-deps
 	version.
 
