@@ -1,3 +1,9 @@
+2001-01-30  Ezra Peisach  <epeisach@mit.edu>
+
+	* rd_req_dec.c (krb5_rd_req_decrypt_tkt_part): Free
+	krb5_keytab_entry if call to krb5_decrypt_tkt_part()
+	fails. [krb5-libs/855 reported by guy@packeteer.com]
+
 2001-01-19  Ken Raeburn  <raeburn@mit.edu>
 
 	* preauth.c: Don't use PROTOTYPE macro, just always use the
@@ -53,7 +59,7 @@
 2000-10-04  Ezra Peisach  <epeisach@mit.edu>
 
 	* rd_req_dec.c (krb5_rd_req_decrypt_tkt_part): Fix memory leak if
-	krb5_decrypt_tkt_part() fails. (krb5-libs/855)
+	krb5_decrypt_tkt_part() fails. [krb5-libs/855]
 
 2000-10-03  Ezra Peisach  <epeisach@mit.edu>
 

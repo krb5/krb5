@@ -84,7 +84,7 @@ krb5_rd_req_decrypt_tkt_part(context, req, keytab)
 	return retval;
 
     retval = krb5_decrypt_tkt_part(context, &ktent.key, req->ticket);
-    /* If error, we will return after freeing memory */
+    /* Upon error, Free keytab entry first, then return */
 
     (void) krb5_kt_free_entry(context, &ktent);
     return retval;
