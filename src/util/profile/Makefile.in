@@ -38,7 +38,7 @@ all-unix:: all-libs
 
 all-windows:: $(OBJFILE)
 
-##DOS$(OBJFILE): $(LIBOBJS)
+##DOS$(OBJFILE): $(OBJS)
 ##DOS	$(RM) $(OBJFILE)
 ##WIN16##	$(CP) nul: $(OBJFILE)
 ##WIN32##	$(LIBECHO) *.obj > $(OBJFILE)
