@@ -1,3 +1,16 @@
+Wed Oct 18 09:55:25 2000  Ezra Peisach  <epeisach@mit.edu>
+
+	* library.tex: Update to latex2e. Include krb5idx.sty.
+
+	* Makefile (lib1.stamp): Use makeindex to generate index instead
+ 	of an antiquated texindex program - which is not the same texindex
+ 	as in the texinfo package.
+
+	* krb5idx.sty: Style for generating indexes. Provides definitions
+ 	for use with krb5.ist.
+
+	* krb5.ist: makeindex macros. Based on gind.ist.
+
 2000-10-17  Ezra Peisach  <epeisach@mit.edu>
 
 	* krb5.tex: krb5_unparse_name_ext(), krb5_build_principal(),

@@ -1,4 +1,14 @@
-\documentstyle[fixunder,functions,changebar,twoside,fancyheadings]{article}
+\documentclass[twoside]{article}
+\usepackage{fixunder,functions,changebar,fancyheadings}
+\usepackage{krb5idx}
+%\usepackage{hyperref}
+
+%\hypersetup{letterpaper,
+%    bookmarks=true,
+%pdfpagemode=UseOutlines,
+%}
+
+%
 %\setlength{\oddsidemargin}{1in}
 %\setlength{\evensidemargin}{1.00in}
 %\setlength{\textwidth}{6.5in}
@@ -100,5 +110,5 @@ programming, maintenance, and porting.
 
 \appendix
 \cleardoublepage
-\input{\jobname.ind}
+\printindex
 \end{document}

@@ -2,7 +2,7 @@
 
 SHELL=/bin/sh
 
-STYLES=changebar.sty fixunder.sty functions.sty
+STYLES=changebar.sty fixunder.sty functions.sty krb5idx.sty
 LIBTEX= library.tex intro.tex tables.tex errors.tex krb5.tex ccache.tex \
 	rcache.tex keytab.tex libos.tex free.tex
 
@@ -28,7 +28,7 @@ library.dvi:  lib1.stamp $(LIBTEX) $(STYLES)
 lib1.stamp: $(LIBTEX) $(STYLES)
 	touch library.ind
 	latex library
-	texindex library.idx
+	makeindex -s krb5.ist library.idx
 	date > lib1.stamp
 
 .tex.dvi:
