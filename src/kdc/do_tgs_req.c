@@ -164,7 +164,7 @@ tgt_again:
 	 * might be a request for a TGT for some other realm; we
 	 * should do our best to find such a TGS in this db
 	 */
-	if (firstpass && krb5_princ_size(kdc_context, request->server) == 2) {
+	if (firstpass && krb5_is_tgs_principal(request->server) == TRUE) {
 	    krb5_data *server_1 = krb5_princ_component(kdc_context, request->server, 1);
 	    krb5_data *tgs_1 = krb5_princ_component(kdc_context, tgs_server, 1);
 

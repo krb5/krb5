@@ -1,3 +1,9 @@
+Thu Nov 13 20:40:01 1997  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* do_tgs_req.c (process_tgs_req): Only try to return a TGT for a
+		"closer" realm if the request was for a TGT in the first
+		place.  [krb5-kdc/459]
+
 Wed Nov 12 14:47:46 1997  Ezra Peisach  <epeisach@mit.edu>
 
 	* do_as_req.c (process_as_req): Reset master key after closing and
