@@ -25,6 +25,7 @@
  * Routines to contact an administrative protocol server.
  */
 #define	NEED_SOCKETS
+#define	NEED_LOWLEVEL_IO
 #include "k5-int.h"
 #include "adm.h"
 #include "adm_proto.h"
@@ -208,8 +209,6 @@ kadm_contact_server(kcontext, realmp, sockp, local, remote)
     struct hostent	*remote_host;
     struct servent	*service;
     char 		**hostlist;
-    int			host_count;
-    int			namelen;
     int			i, count;
 
     krb5_error_code	kret;

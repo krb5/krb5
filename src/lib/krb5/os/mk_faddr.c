@@ -28,13 +28,13 @@
 #include "k5-int.h"
 
 #ifdef KRB5_USE_INET
-
+   
 #include "os-proto.h"
 #ifndef _WINSOCKAPI_
 #include <netinet/in.h>
 #endif
 
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_make_fulladdr(context, saddr, kaddr)
     krb5_context 	  context;
     struct sockaddr_in 	* saddr;
@@ -58,14 +58,14 @@ krb5_make_fulladdr(context, saddr, kaddr)
     tmp16 = ADDRTYPE_INET;
     *marshal++ = 0x00;
     *marshal++ = 0x00;
-    *marshal++ = tmp16 & 0xff;
-    *marshal++ = (tmp16 >> 8) & 0xff;
+    *marshal++ = (krb5_octet) (tmp16 & 0xff);
+    *marshal++ = (krb5_octet) ((tmp16 >> 8) & 0xff);
 
     tmp32 = sizeof(smushaddr);
-    *marshal++ = tmp32 & 0xff;
-    *marshal++ = (tmp32 >> 8) & 0xff;
-    *marshal++ = (tmp32 >> 16) & 0xff;
-    *marshal++ = (tmp32 >> 24) & 0xff;
+    *marshal++ = (krb5_octet) (tmp32 & 0xff);
+    *marshal++ = (krb5_octet) ((tmp32 >> 8) & 0xff);
+    *marshal++ = (krb5_octet) ((tmp32 >> 16) & 0xff);
+    *marshal++ = (krb5_octet) ((tmp32 >> 24) & 0xff);
 
     (void) memcpy((char *)marshal, (char *)&smushaddr, sizeof(smushaddr));
     marshal += sizeof(smushaddr);
@@ -73,14 +73,14 @@ krb5_make_fulladdr(context, saddr, kaddr)
     tmp16 = ADDRTYPE_IPPORT;
     *marshal++ = 0x00;
     *marshal++ = 0x00;
-    *marshal++ = tmp16 & 0xff;
-    *marshal++ = (tmp16 >> 8) & 0xff;
+    *marshal++ = (krb5_octet) (tmp16 & 0xff);
+    *marshal++ = (krb5_octet) ((tmp16 >> 8) & 0xff);
 
     tmp32 = sizeof(smushport);
-    *marshal++ = tmp32 & 0xff;
-    *marshal++ = (tmp32 >> 8) & 0xff;
-    *marshal++ = (tmp32 >> 16) & 0xff;
-    *marshal++ = (tmp32 >> 24) & 0xff;
+    *marshal++ = (krb5_octet) (tmp32 & 0xff);
+    *marshal++ = (krb5_octet) ((tmp32 >> 8) & 0xff);
+    *marshal++ = (krb5_octet) ((tmp32 >> 16) & 0xff);
+    *marshal++ = (krb5_octet) ((tmp32 >> 24) & 0xff);
 
     (void) memcpy((char *)marshal, (char *)&smushport, sizeof(smushport));
     marshal += sizeof(smushport);

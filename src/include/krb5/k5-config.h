@@ -49,6 +49,7 @@
 #define SIZEOF_SHORT    2
 #define SIZEOF_LONG     4
 #define MAXHOSTNAMELEN  512
+#define MAXPATHLEN	128
 
 #define KRB5_USE_INET
 #define MSDOS_FILESYSTEM

@@ -25,6 +25,7 @@
 /*
  * Routines to engage in the administrative (password changing) protocol.
  */
+#define NEED_SOCKETS
 #include "k5-int.h"
 #include "auth_con.h"
 #include "adm_proto.h"
@@ -79,7 +80,7 @@ kadm_copyout_int32(outint, cp)
 void INTERFACE
 krb5_free_adm_data(kcontext, ncomp, datap)
     krb5_context	kcontext;
-    int			ncomp;
+    krb5_int32		ncomp;
     krb5_data		*datap;
 {
     int i;
@@ -329,12 +330,12 @@ krb5_read_adm_cmd(kcontext, sock, ctx, nargs, arglist)
 
 		    /* Get the memory for the list */
 		    if (*arglist = (krb5_data *)
-			malloc((*nargs) * sizeof(krb5_data))) {
+			malloc((size_t) (*nargs) * sizeof(krb5_data))) {
 			krb5_data *xarglist;
 
 			xarglist = *arglist;
-			memset((char *) (xarglist), 0, 
-			       (*nargs) * sizeof(krb5_data));
+			memset((char *) (xarglist), 0,
+				(size_t) (*nargs) * sizeof(krb5_data));
 
 			replyok = 1;
 			/* Copy out each list entry */
@@ -454,12 +455,12 @@ krb5_read_adm_reply(kcontext, sock, ctx, cmd_stat, ncomps, complist)
 
 		    /* Get the memory for the list */
 		    if (*complist = (krb5_data *)
-			malloc((*ncomps) * sizeof(krb5_data))) {
+			malloc((size_t) ((*ncomps) * sizeof(krb5_data)))) {
 			krb5_data *xcomplist;
 
 			xcomplist = *complist;
 			memset((char *) (xcomplist), 0, 
-			       (*ncomps) * sizeof(krb5_data));
+			       (size_t) ((*ncomps) * sizeof(krb5_data)));
 
 			replyok = 1;
 			/* Copy out each list entry */

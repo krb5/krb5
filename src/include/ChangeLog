@@ -1,3 +1,6 @@
+Thu Apr 27 17:57:36 1995 Keith Vetter (keithv@fusion.com)
+
+	* krb5.h: krb5_mk_req somehow got INTERFACE added to it--removed it.
 
 Tue Apr 25 21:58:23 1995  Chris Provenzano  (proven@mit.edu)
 

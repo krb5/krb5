@@ -1,3 +1,8 @@
+Thu Apr 27 17:39:04 1995 Keith Vetter (keithv@fusion.com)
+
+	* k5-config.h: Added MAXPATHLEN constant.
+	* adm_prot.h: updated prototype.
+
 Thu Apr 27 11:24:24 1995 Keith Vetter (keithv@fusion.com)
 
 	* k5-config.h: Changed over to the new single config file on the PC.

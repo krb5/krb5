@@ -8,6 +8,9 @@
  *
  * MODIFIED
  * $Log$
+ * Revision 5.9  1995/04/28 01:18:18  keithv
+ * Fixes so that the Unix changes no longer breaks on the PC.
+ *
  * Revision 5.8  1995/04/26 03:03:11  proven
  * 	* Makefile.in : Added gc_via_tkt.c and removed get_fcreds.c
  * 	* auth_con.c (krb5_auth_con_setaddrs()) : Fixed so it allocates
@@ -146,14 +149,14 @@ krb5_mk_ncred_basic(context, ppcreds, nppcreds, keyblock,
 
     /* Get memory for creds and initialize it */
     if ((credenc.ticket_info = (krb5_cred_info **)
-		malloc(sizeof(krb5_cred_info *) * (nppcreds + 1))) == NULL) {
+		malloc((size_t) (sizeof(krb5_cred_info *) * (nppcreds + 1)))) == NULL) {
         return ENOMEM;
     }
-    if ((tmp = (char *)malloc(sizeof(krb5_cred_info) * nppcreds)) == NULL) {
+    if ((tmp = (char *)malloc((size_t) (sizeof(krb5_cred_info) * nppcreds))) == NULL) {
 	retval = ENOMEM;
 	goto cleanup_info;
     }
-    memset(tmp, 0, sizeof(krb5_cred_info) * nppcreds);
+    memset(tmp, 0, (size_t) (sizeof(krb5_cred_info) * nppcreds));
 
     /*
      * For each credential in the list, initialize a cred info

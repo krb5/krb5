@@ -126,8 +126,9 @@ krb5_rd_cred_basic(context, pcreddata, pkeyblock, local_addr, remote_addr,
     * krb5_free_tgt_creds can be used to free the list.
     */
     for (ncreds = 0; pcred->tickets[ncreds]; ncreds++);
+	
     if ((*pppcreds = 
-        (krb5_creds **)malloc(sizeof(krb5_creds *) * ncreds + 1)) == NULL) {
+        (krb5_creds **)malloc((size_t)(sizeof(krb5_creds *) * ncreds + 1))) == NULL) {
         retval = ENOMEM;
         goto cleanup_cred;
     }

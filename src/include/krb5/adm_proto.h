@@ -46,7 +46,7 @@ void INTERFACE krb5_adm_disconnect
 /* adm_proto.c */
 void INTERFACE krb5_free_adm_data
 	PROTOTYPE((krb5_context,
-		   int,
+		   krb5_int32,
 		   krb5_data *));
 
 krb5_error_code INTERFACE krb5_send_adm_cmd

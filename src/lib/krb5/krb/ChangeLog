@@ -1,3 +1,8 @@
+Thu Apr 27 17:40:20 1995 Keith Vetter (keithv@fusion.com)
+
+	* adm_rw.c, mk_cred.c, rd_cred.c:
+	   malloc on the PC must be size SIZE_T not int32.
+	* adm_rw.c: krb5_free_adm_data second argument now a krb5_int32.
 
 Thu Apr 27 16:33:17 EDT 1995	Paul Park	(pjpark@mit.edu)
 

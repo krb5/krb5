@@ -1266,7 +1266,7 @@ krb5_error_code INTERFACE krb5_get_cred_via_tkt
                    krb5_address * const *,
                    krb5_creds *,
                    krb5_creds **));
-krb5_error_code INTERFACE krb5_mk_req
+krb5_error_code krb5_mk_req
 	PROTOTYPE((krb5_context,
 		   krb5_auth_context **,
 		   const krb5_flags,

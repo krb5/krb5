@@ -1,3 +1,11 @@
+Thu Apr 27 17:50:14 1995 Keith Vetter (keithv@fusion.com)
+
+	* adm_conn.c: added constant to pull in needed PC code, and
+	   removed two unused variables.
+	* genaddrs.c: needed casts on getsockname and getpeername calls.
+	* mk_faddr.c: the int->byte code needed explicit casts.
+	* os-proto.h: added missing prototype for krb5_make_fulladdr.
+
 Wed Apr 26 16:00:52 EDT 1995	Paul Park	(pjpark@mit.edu)
 
 	* Add adm_conn.c - module to provide a connection to an administrative
