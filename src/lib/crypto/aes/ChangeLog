@@ -1,3 +1,7 @@
+2004-09-28  Ken Raeburn  <raeburn@mit.edu>
+
+	* vbaxam.doc: File deleted.
+
 2004-05-25  Tom Yu  <tlyu@mit.edu>
 
 	* aesopt.h (PLATFORM_BYTE_ORDER): Treat _WIN32 as always
