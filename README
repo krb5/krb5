@@ -123,6 +123,9 @@ Major changes listed by ticket ID
 
 * [1189, 1251] The KfM krb4 library source base has been merged.
 
+* [1377, 1442, 1443] The Microsoft set-password protocol has been
+  implemented.  (needs confirmation)  Thanks to Paul Nelson.
+
 * [1385, 1395, 1410] The krb4 protocol vulnerabilities
   [MITKRB5-SA-2003-004] have been worked around.  Note that this will
   disable krb4 cross-realm functionality, as well as krb4 triple-DES
@@ -271,6 +274,9 @@ Minor changes listed by ticket ID
 * [1240] Windows calling conventions for krb5int_c_combine_keys() have
   been aligned.
 
+* [1242] Build system incompatibilities with Debian's chimeric
+  autoconf installation have been worked around.
+
 * [1256] Incorrect sizes passed to memset() in combine_keys()
   operations have been corrected.
 
@@ -334,6 +340,37 @@ Minor changes listed by ticket ID
 
 * [1414] libtelnet is now built using the same library build framework
   as the rest of the tree.
+
+* [1417] A minor memory leak in krb5_read_password() has been fixed.
+
+* [1419] A memory leak in asn1_decode_kdc_req_body() has been fixed.
+
+* [1439] krb5_free_pwd_sequences() now correctly frees the entire
+  sequence of elements.
+
+--[ DELETE BEFORE RELEASE ---changes to unreleased code, etc.--- ]--
+
+* [1054] KRB-CRED messages for RC4 are encrypted now.
+
+* [1177] krb5-1-2-2-branch merged onto trunk.
+
+* [1193] Punted comment about reworking key storage architecture.
+
+* [1208] install-headers target implemented.
+
+* [1223] asn1_decode_oid, asn1_encode_oid implemented
+
+* [1276] Generated dependencies handle --without-krb4 properly now.
+
+* [1384, 1413] Use of autoconf-2.52 in util/reconf will now cause a
+  warning.
+
+* [1388] DNS support is turned on in KfM.
+
+* [1391] Fix kadmind startup failure with krb4 vuln patch.
+
+* [1409] get_ad_tkt() now prompts for password if there are no tickets
+  (in KfM).
 
 Copyright Notice and Legal Administrivia
 ----------------------------------------
