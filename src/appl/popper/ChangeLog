@@ -1,3 +1,7 @@
+Thu Sep 29 22:52:35 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* Makefile.in: Relink executables if libraries change
+
 Thu Sep 22 20:47:25 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* configure.in: Fix order of configure so that cc can be found.

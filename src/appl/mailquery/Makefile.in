@@ -4,10 +4,11 @@ COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
 all::
 
 KLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(ISODELIB) $(COMERRLIB) $(DBMLIB)
+DEPKLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(COMERRLIB) $(DBMLIB)
 
 HESIODLIB =
 
-mailquery: mailquery.o poplib.o
+mailquery: mailquery.o poplib.o $(DEPKLIB)
 	$(CC) $(CFLAGS) -o mailquery mailquery.o poplib.o $(KLIB) \
 		$(HESIODLIB) $(LIBS)
 

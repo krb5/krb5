@@ -8,8 +8,9 @@ DBMLIB=
 all::
 
 KLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(ISODELIB) $(COMERRLIB) $(DBMLIB)
+DEPKLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(COMERRLIB) $(DBMLIB)
 
-uuclient: client.o
+uuclient: client.o $(DEPKLIB)
 	$(CC) $(CFLAGS) -o uuclient client.o $(KLIB) $(LIBS)
 
 client.o:	$(srcdir)/client.c
@@ -20,7 +21,7 @@ all:: uuclient
 clean::
 	$(RM) client.o uuclient
 
-uuserver: server.o
+uuserver: server.o $(DEPKLIB)
 	$(CC) $(CFLAGS) -o uuserver server.o $(KLIB) $(LIBS)
 
 server.o:	$(srcdir)/server.c

@@ -5,6 +5,7 @@ ISODELIB=@ISODELIB@
 COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
 K4LIB = @K4LIB@
 KLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(ISODELIB) $(COMERRLIB)
+DEPKLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(COMERRLIB)
 
 LOGINLIBS = @LOGINLIBS@
 LIBOBJS=@LIBOBJS@
@@ -23,37 +24,37 @@ all:: rsh rcp rlogin krshd krlogind login.krb5
 
 clean:: 
 
-rsh: krsh.o kcmd.o forward.o $(SETENVOBJ)
+rsh: krsh.o kcmd.o forward.o $(SETENVOBJ) $(DEPKLIB)
 	$(CC) $(CFLAGS) -o rsh krsh.o kcmd.o forward.o $(SETENVOBJ) $(KLIB) $(LIBS)
 
 install::
 	$(INSTALL_PROGRAM) rsh $(DESTDIR)$(CLIENT_BINDIR)/rsh
 
-rcp: krcp.o kcmd.o forward.o $(SETENVOBJ) $(LIBOBJS)
+rcp: krcp.o kcmd.o forward.o $(SETENVOBJ) $(LIBOBJS) $(DEPKLIB)
 	$(CC) $(CFLAGS) -o rcp krcp.o kcmd.o forward.o $(SETENVOBJ) $(LIBOBJS) $(KLIB) $(LIBS)
 
 install::
 	$(INSTALL_PROGRAM) rcp $(DESTDIR)$(CLIENT_BINDIR)/rcp
 
-rlogin: krlogin.o kcmd.o forward.o $(SETENVOBJ)
+rlogin: krlogin.o kcmd.o forward.o $(SETENVOBJ) $(DEPKLIB)
 	$(CC) $(CFLAGS) -o rlogin krlogin.o kcmd.o forward.o $(SETENVOBJ) $(KLIB) $(LIBS)
 
 install::
 	$(INSTALL_PROGRAM) rlogin $(DESTDIR)$(CLIENT_BINDIR)/rlogin
 
-krshd: krshd.o kcmd.o logutil.o forward.o $(SETENVOBJ)
+krshd: krshd.o kcmd.o logutil.o forward.o $(SETENVOBJ) $(DEPKLIB)
 	$(CC) $(CFLAGS) -o krshd krshd.o kcmd.o logutil.o forward.o $(SETENVOBJ) $(K4LIB) $(KLIB) $(LIBS)
 
 install::
 	$(INSTALL_PROGRAM) krshd $(DESTDIR)$(SERVER_BINDIR)/krshd
 
-krlogind: krlogind.o logutil.o kcmd.o forward.o $(SETENVOBJ)
+krlogind: krlogind.o logutil.o kcmd.o forward.o $(SETENVOBJ) $(DEPKLIB)
 	$(CC) $(CFLAGS) -o krlogind krlogind.o logutil.o kcmd.o forward.o $(SETENVOBJ) $(K4LIB) $(KLIB) $(LIBS)
 
 install::
 	$(INSTALL_PROGRAM) krlogind $(DESTDIR)$(SERVER_BINDIR)/krlogind
 
-login.krb5: login.o logutil.o $(SETENVOBJ) $(LIBOBJS)
+login.krb5: login.o logutil.o $(SETENVOBJ) $(LIBOBJS) $(DEPKLIB)
 	$(CC) $(CFLAGS) -o login.krb5 login.o logutil.o $(SETENVOBJ) $(LIBOBJS) $(KLIB) $(LIBS) $(LOGINLIBS)
 
 install::

@@ -1,3 +1,7 @@
+Thu Sep 29 22:48:20 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* Makefile.in: Relink executable when libraries change
+
 Wed Sep 14 21:47:00 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* Makefile.in: Fixed stupid typo (uusrever) in the install target.

@@ -1,3 +1,7 @@
+Thu Sep 29 22:50:05 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* Makefile.in: Relink executables if libraries change
+
 Thu Sep 29 17:55:57 1994  Mark Eichin  (eichin@tweedledumber.cygnus.com)
 
 	* krlogin.c (mode): ifdef VLNEXT instead of svr4 for ^V fixing.

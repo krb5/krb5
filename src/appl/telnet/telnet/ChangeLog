@@ -1,3 +1,7 @@
+Thu Sep 29 22:51:39 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* Makefile.in: Relink executables if libraries change
+
 Tue Aug 16 18:07:54 1994  Mark Eichin  (eichin@cygnus.com)
 
 	* externs.h: don't hide termdata under defined(unix).

@@ -1,3 +1,7 @@
+Thu Sep 29 22:53:17 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* Makefile.in: Relink executables if libraries change
+
 Thu Sep 15 11:34:46 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* configure.in: Moved CONFIG_RULES before AC_HAVE_LIBRARY() rules,

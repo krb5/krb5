@@ -34,6 +34,7 @@ DBMLIB=
 all::
 
 KLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(ISODELIB) $(COMERRLIB) $(DBMLIB)
+DEPKLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(COMERRLIB) $(DBMLIB)
 
 OBJS		=	pop_dele.o pop_dropcopy.o pop_dropinfo.o \
 			pop_get_command.o pop_get_subcommand.o pop_init.o \
@@ -42,7 +43,7 @@ OBJS		=	pop_dele.o pop_dropcopy.o pop_dropinfo.o \
 			pop_rset.o pop_send.o pop_stat.o pop_updt.o \
 			pop_user.o pop_xtnd.o pop_xmit.o popper.o
 
-popper: $(OBJS)
+popper: $(OBJS) $(DEPKLIB)
 	$(CC) $(CFLAGS) -o popper $(OBJS) $(KLIB) $(LIBS)
 
 all:: popper
