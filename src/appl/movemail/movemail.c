@@ -50,6 +50,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
  * 
  */
 
+#include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/file.h>
@@ -339,7 +340,6 @@ xmalloc (size)
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
-#include <stdio.h>
 #ifdef KERBEROS
 #define	POP_SERVICE	"pop"
 #ifdef KRB4
@@ -548,7 +548,7 @@ char *host;
 	return(NOTOK);
     }
 
-    if (connect(s, (char *)&sin, sizeof sin) < 0) {
+    if (connect(s, (struct sockaddr *)&sin, sizeof sin) < 0) {
 	sprintf(Errmsg, "error during connect: %s", get_errmsg());
 	close(s);
 	return(NOTOK);
