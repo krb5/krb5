@@ -49,17 +49,6 @@ static char rcsid_get_krbhst_c [] =
 extern char *krb5_config_file;		/* extern so can be set at
 					   load/runtime */
 
-static char *
-strsave(string)
-char *string;
-{
-    register char *cp;
-    cp = malloc(strlen(string)+1);
-    if (cp)
-	(void) strcpy(cp, string);
-    return(cp);
-}
-
 krb5_error_code
 krb5_get_krbhst(realm, hostlist)
 krb5_data *realm;
@@ -94,7 +83,7 @@ char ***hostlist;
 		retval = KRB5_CONFIG_BADFORMAT;
 		break;
 	    }
-	    rethlist[hlindex] = strsave(&filebuf[realm->length+1]);
+	    rethlist[hlindex] = strdup(&filebuf[realm->length+1]);
 	    if (!rethlist[hlindex]) {
 		for (--hlindex; hlindex >= 0; hlindex--)
 		    free(rethlist[hlindex]);

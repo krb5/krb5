@@ -23,18 +23,6 @@ static char rcsid_sn2princ_c[] =
 #include <netdb.h>
 #include <ctype.h>
 
-#ifndef	HAVE_STRDUP
-static char *
-strdup(s)
-register char *s;
-{
-	register char *ret;
-	if (ret = (char *)malloc(strlen(s)+1))
-		strcpy(ret, s);
-	return(ret);
-}
-#endif
-
 krb5_error_code
 krb5_sname_to_principal(DECLARG(const char *,hostname),
 			DECLARG(const char *,sname),
