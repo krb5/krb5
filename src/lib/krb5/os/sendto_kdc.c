@@ -777,7 +777,8 @@ service_tcp_fd (struct conn_state *conn, struct select_state *selstate,
 	}
 	if (conn->x.out.sg_count == 0) {
 	    /* Done writing, switch to reading.  */
-	    shutdown(conn->fd, SHUTDOWN_WRITE);
+	    /* Don't call shutdown at this point because
+	     * some implementations cannot deal with half-closed connections.*/
 	    FD_CLR(conn->fd, &selstate->wfds);
 	    /* Q: How do we detect failures to send the remaining data
 	       to the remote side, since we're in non-blocking mode?
