@@ -34,6 +34,9 @@ main(argc, argv)
 	    printf("%s: parse_name returns %s\n", programname,
 		   error_message(kret));
 	}
+	if (kret)
+	    break;
     }
     krb5_free_context(kcontext);
+    return((kret) ? 1 : 0);
 }

@@ -1,3 +1,8 @@
+
+Thu Aug 31 17:24:48 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* t_an_to_ln.c - Translate until error and return status.
+	* Makefile.in - Test aname_to_lname under check-unix.
+
 Thu Aug 24 18:56:35 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* .Sanitize: Update file list.
