@@ -1347,6 +1347,10 @@ void change_working_dir(argc, argv)
 	}
 }
 
+#ifdef HAVE_GETCWD
+#define getwd(x) getcwd(x,MAXPATHLEN)
+#endif
+
 void print_working_dir(argc, argv)
 	int	argc;
 	char	**argv;
@@ -1360,6 +1364,10 @@ void print_working_dir(argc, argv)
 	}
 	puts(buf);
 }
+
+#ifdef HAVE_GETCWD
+#undef getwd
+#endif
 
 int quit()
 {
