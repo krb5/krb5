@@ -304,7 +304,16 @@ void krb5_dbe_free_contents
 krb5_error_code krb5_dbe_find_enctype
 	KRB5_PROTOTYPE((krb5_context,
 			krb5_db_entry *,
-			krb5_enctype,
+			krb5_int32,
+			krb5_int32,
+			krb5_int32,
+			krb5_key_data **));
+
+krb5_error_code krb5_dbe_search_enctype
+	KRB5_PROTOTYPE((krb5_context,
+			krb5_db_entry *,
+			krb5_int32 *,
+			krb5_int32,
 			krb5_int32,
 			krb5_int32,
 			krb5_key_data **));

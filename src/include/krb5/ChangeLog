@@ -1,3 +1,9 @@
+Tue Nov  7 16:41:14 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* kdb.h: Added prototype for krb5_dbe_search_enctype().  Changed
+		prototype of krb5_dbe_find_enctype() so that ktype is of
+		type krb5_int32.  (krb5_enctype is unsigned, so -1 doesn't
+		work!) 
 
 Fri Nov 03 04:37:56 1995   Chris Provenzano (proven@mit.edu)
 
