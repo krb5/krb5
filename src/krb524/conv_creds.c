@@ -98,7 +98,7 @@ int krb524_convert_creds_plain(context, v5creds, v4creds)
      krb5_creds *v5creds;
      CREDENTIALS *v4creds;
 {
-     unsigned long addr;
+     krb5_ui_4 addr;
      int ret;
      krb5_timestamp lifetime;
      
