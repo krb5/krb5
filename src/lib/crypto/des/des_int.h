@@ -35,7 +35,7 @@ extern krb5_error_code INTERFACE mit_des_cbc_checksum
     PROTOTYPE((krb5_pointer, size_t,krb5_pointer,size_t, krb5_checksum FAR * ));
 
 /* cksum.c */
-extern void INTERFACE mit_des_cbc_cksum
+extern long INTERFACE mit_des_cbc_cksum
     PROTOTYPE((krb5_octet *, krb5_octet *, long , mit_des_key_schedule ,
 	       krb5_octet *));
 /* des.c */

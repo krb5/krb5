@@ -1,5 +1,4 @@
 CFLAGS = $(CCOPTS) $(DEFS)
-LDFLAGS = -g
 
 ##DOSBUILDTOP = ..\..\..
 ##DOSLIBNAME=..\crypto.lib
@@ -48,16 +47,19 @@ includes:: depend
 
 depend:: $(SRCS)
 
+# FIXME, this is left from the previous DES implementation.
 clean::
 	$(RM) fp.c ip.c key_perm.h odd.h p.c p_table.h s_table.h
 
-verify: verify.$(OBJEXT) $(DEPKLIB)
-	$(CC) -o $@ verify.$(OBJEXT) $(KLIB) $(LIBS) $(LDFLAGS) 
+verify$(EXEEXT): verify.$(OBJEXT) $(DEPKLIB)
+	$(CC) -o $@ verify.$(OBJEXT) $(KLIB) $(LIBS) $(CFLAGS) $(LDFLAGS) 
 
-destest: destest.$(OBJEXT) $(DEPKLIB)
-	$(CC) -o $@ destest.$(OBJEXT) $(KLIB) $(LIBS) $(LDFLAGS) 
+destest$(EXEEXT): destest.$(OBJEXT) $(DEPKLIB)
+	$(CC) -o $@ destest.$(OBJEXT) $(KLIB) $(LIBS) $(CFLAGS) $(LDFLAGS) 
 
 check:: check-$(WHAT)
+
+check-mac: check-unix
 
 check-unix:: destest verify
 	./verify -z
@@ -68,4 +70,4 @@ check-unix:: destest verify
 check-windows::
 
 clean::
-	$(RM) destest verify destest.$(OBJEXT) verify.$(OBJEXT)
+	$(RM) destest$(EXEEXT) verify$(EXEEXT) destest.$(OBJEXT) verify.$(OBJEXT)

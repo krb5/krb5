@@ -1,3 +1,13 @@
+Thu Mar 16 21:16:24 1995  John Gilmore  (gnu at toad.com)
+
+	* Makefile.in (LDFLAGS):  Remove, conflicts with pre.in.
+	(clean):  Insert FIXME.
+	(verify$(EXEEXT), destest$(EXEEXT)):  Make them work on Mac.
+	(check-mac):  Add, identical to Unix.
+	(clean):  Use $(EXEEXT).
+	* des_int.h (mit_des_cbc_cksum):  Fix prototype from void to long,
+	to match the actual function.
+
 Tue Mar 14 17:28:35 1995 Keith Vetter (keithv@fusion.com)
 
 	* f_cbc.c, f_cksum.c, f_pcbc.c: added casts so that chars get promoted
