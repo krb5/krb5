@@ -1,3 +1,8 @@
+Tue May 30 10:59:13 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* Makefile.in (clean-unix): Remove built header files krb5.h
+		krb5_err.h kdb5_err.h kv5m_err.h asn1_err.h 
+
 Wed May 24 10:54:34 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in	- Change $< to explicit target names when generating
 			  error table header files.  OSF/1 and Ultrix-native
