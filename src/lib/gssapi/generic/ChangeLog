@@ -1,3 +1,9 @@
+2004-06-02  Ken Raeburn  <raeburn@mit.edu>
+
+	* disp_com_err_status.c (init_et): Variable deleted.
+	(g_display_com_err_status): Don't call initialize_ggss_error_table
+	conditionally; instead, always call gssint_initialize_library.
+
 2004-04-24  Ken Raeburn  <raeburn@mit.edu>
 
 	* gssapiP_generic.h (G_SET_INIT): Use the new mutex partial
