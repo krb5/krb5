@@ -241,3 +241,8 @@ Changes in 1.1a3:
  no longer prevents idle sleep
  override carbon errno with Kerberos Support Library
  fix NULL prompter crash
+ 
+3.1a3
+ from tag Mac_GSSKerberos5_3_1a3
+ updated for new Mac OS X header layout
+ fixed bug on newline conversion in profile when reading files bigger than 1K
