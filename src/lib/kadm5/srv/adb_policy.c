@@ -62,6 +62,16 @@ osa_adb_ret_t osa_adb_close_policy(osa_adb_princ_t db)
      return osa_adb_fini_db(db, OSA_ADB_POLICY_DB_MAGIC);
 }
 
+osa_adb_ret_t osa_adb_rename_policy(kadm5_config_params *fromparams,
+				    kadm5_config_params *toparams)
+{
+     return osa_adb_rename_db(fromparams->admin_dbname,
+			      fromparams->admin_lockfile,
+			      toparams->admin_dbname,
+			      toparams->admin_lockfile,
+			      OSA_ADB_POLICY_DB_MAGIC);
+}
+
 /*
  * Function: osa_adb_create_policy
  * 

@@ -28,11 +28,6 @@ osa_adb_ret_t osa_adb_create_db(char *filename, char *lockfilename,
      DB *db;
      HASHINFO info;
      
-     lf = fopen(lockfilename, "w+");
-     if (lf == NULL)
-	  return errno;
-     (void) fclose(lf);
-
      memset(&info, 0, sizeof(info));
      info.hash = NULL;
      info.bsize = 256;
@@ -44,6 +39,13 @@ osa_adb_ret_t osa_adb_create_db(char *filename, char *lockfilename,
 	  return errno;
      if (db->close(db) < 0)
 	  return errno;
+
+     /* only create the lock file if we successfully created the db */
+     lf = fopen(lockfilename, "w+");
+     if (lf == NULL)
+	  return errno;
+     (void) fclose(lf);
+     
      return OSA_ADB_OK;
 }
 
@@ -55,6 +57,48 @@ osa_adb_ret_t osa_adb_destroy_db(char *filename, char *lockfilename,
 	 unlink(lockfilename) < 0)
 	  return errno;
      return OSA_ADB_OK;
+}
+
+osa_adb_ret_t osa_adb_rename_db(char *filefrom, char *lockfrom,
+				char *fileto, char *lockto, int magic)
+{
+     osa_adb_db_t fromdb, todb;
+     osa_adb_ret_t ret;
+
+     if (ret = osa_adb_init_db(&fromdb, filefrom, lockfrom, magic))
+	  return ret;
+     if (ret = osa_adb_init_db(&todb, fileto, lockto, magic)) {
+	  (void) osa_adb_fini_db(fromdb, magic);
+	  return ret;
+     }
+     if (ret = osa_adb_get_lock(fromdb, OSA_ADB_PERMANENT)) {
+	  (void) osa_adb_fini_db(fromdb, magic);
+	  (void) osa_adb_fini_db(todb, magic);
+	  return ret;
+     }
+     if (ret = osa_adb_get_lock(todb, OSA_ADB_PERMANENT)) {
+	  (void) osa_adb_fini_db(fromdb, magic);
+	  (void) osa_adb_fini_db(todb, magic);
+	  return ret;
+     }
+     if (rename(filefrom, fileto) < 0) {
+	  (void) osa_adb_fini_db(fromdb, magic);
+	  (void) osa_adb_fini_db(todb, magic);
+	  return errno;
+     }
+     /*
+      * Do not release the lock on fromdb because it is being renamed
+      * out of existence; no one can ever use it again.
+      */
+     if (ret = osa_adb_release_lock(todb)) {
+	  (void) osa_adb_fini_db(fromdb, magic);
+	  (void) osa_adb_fini_db(todb, magic);
+	  return ret;
+     }
+	  
+     (void) osa_adb_fini_db(fromdb, magic);
+     (void) osa_adb_fini_db(todb, magic);
+     return 0;
 }
 
 osa_adb_ret_t osa_adb_init_db(osa_adb_db_t *dbp, char *filename,
