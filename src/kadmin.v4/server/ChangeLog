@@ -1,4 +1,9 @@
 
+Tue Sep 05 22:10:34 1995   Chris Provenzano (proven@mit.edu)
+
+        * admin_server.c, kadm_funcs.c, kadm_ser_wrap.c : Remove krb5_enctype 
+		references, and replace with krb5_keytype where appropriate.
+
 Tue Aug 15 14:31:37 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* admin_server,kadm_funcs,kadm_ser_wrap.c - Replace kadm_find_keytype()
 		with krb5_dbe_find_keytype().

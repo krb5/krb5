@@ -48,7 +48,6 @@ kadm_ser_init(inter, realm)
     int numfound = 1;
     krb5_boolean more;
     krb5_db_entry master_entry;
-    krb5_enctype kdc_etype = DEFAULT_KDC_ETYPE;
     krb5_key_data *kdatap;
     
     if (gethostname(hostname, sizeof(hostname)))
@@ -77,11 +76,10 @@ kadm_ser_init(inter, realm)
     server_parm.admin_addr.sin_port = sep->s_port;
     /* setting up the database */
     mkey_name = KRB5_KDB_M_NAME;
-    server_parm.master_keyblock.keytype = KEYTYPE_DES;
+    server_parm.master_keyblock.keytype = KEYTYPE_DES_CBC_MD5;
     
-    if (!valid_etype(kdc_etype))
-	return KRB5_PROG_ETYPE_NOSUPP;
-    krb5_use_cstype(kadm_context, &server_parm.master_encblock, kdc_etype);
+    krb5_use_keytype(kadm_context, &server_parm.master_encblock, 
+		    server_parm.master_keyblock.keytype);
     
     retval = krb5_db_setup_mkey_name(kadm_context, mkey_name, realm,
 				     (char **) 0,
@@ -110,7 +108,7 @@ kadm_ser_init(inter, realm)
 
     retval = krb5_dbe_find_keytype(kadm_context,
 				   &master_entry,
-				   KEYTYPE_DES,
+				   KEYTYPE_DES_CBC_MD5,
 				   -1,
 				   -1,
 				   &kdatap);

@@ -382,7 +382,7 @@ struct sockaddr_in *who;
 
     status = krb5_dbe_find_keytype(kadm_context,
 				   &sprinc_entries,
-				   KEYTYPE_DES,
+				   KEYTYPE_DES_CBC_MD5,
 				   -1,
 				   -1,
 				   &kdatap);
