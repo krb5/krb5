@@ -1,0 +1,5 @@
+Fri Jun 17 18:22:32 1994  Theodore Y. Ts'o  (tytso at tsx-11)
+
+	* Fixed bug in crep2kcrep.c which caused ticket forwarding to
+	break.  The wrong ISODE optional field flag was being tested.
+
