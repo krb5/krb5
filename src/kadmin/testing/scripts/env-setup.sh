@@ -16,12 +16,11 @@ if [ "$TOP" = "" ]; then
 	exit 1
 fi
 
-if [ "$K5ROOT" = "" ]; then
-	# XXX this should default to --prefix, no?
-	K5ROOT="/krb5"; export K5ROOT
-fi
-
 TESTDIR=$TOP/testing; export TESTDIR
+if [ "$K5ROOT" = "" ]; then
+	K5ROOT="`cd $TESTDIR; pwd`/krb5-test-root"
+	export K5ROOT
+fi
 COMPARE_DUMP=$TESTDIR/scripts/compare_dump.pl; export COMPARE_DUMP
 FIX_CONF_FILES=$TESTDIR/scripts/fixup-conf-files.pl
 export FIX_CONF_FILES
