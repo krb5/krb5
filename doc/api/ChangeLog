@@ -1,3 +1,13 @@
+Tue Apr 11 14:21:21 1995  Ezra Peisach  (epeisach@kangaroo.mit.edu)
+
+	* Makefile Cleaned up two pass processing through latex of library
+		document.
+
+Tue Apr  4 15:22:11 1995  Ezra Peisach  <epeisach@mit.edu>
+
+	* errors.tex Added missing entries in existing tables. Removed
+		isode table. Added asn.1 table and magic number table.
+
 Tue Feb 07 18:31:58 1995 Chris Provenzano (proven@mit.edu)
 
 	* krb5.tex Documented API changes to krb5_get_in_tkt*() routines

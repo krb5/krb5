@@ -34,8 +34,10 @@ code number.  Other error codes start at ERROR_TABLE_BASE_krb5 + 128.
 {\sc krb5kdc_err_service_notyet }& Server not yet valid - try again later \\
 {\sc krb5kdc_err_key_exp }&  	 Password has expired \\
 {\sc krb5kdc_preauth_failed }&  	 Preauthentication failed \\
+{\sc krb5kdc_err_preauth_require }&	Additional pre-authentication required \\
+{\sc krb5kdc_err_server_nomatch }&	Requested server and ticket don't match \\
 
- & \multicolumn{1}{c}{error codes 25-30 are currently placeholders} \\
+ & \multicolumn{1}{c}{error codes 27-30 are currently placeholders} \\
 \end{tabular}
 
 \begin{tabular}{ll}
@@ -88,11 +90,16 @@ code number.  Other error codes start at ERROR_TABLE_BASE_krb5 + 128.
 {\sc krb5krb_ap_err_tkt_invalid }& Ticket has invalid flag set \\
 {\sc krb5_princ_nomatch }&	 Requested principal and ticket don't match \\
 {\sc krb5_kdcrep_modified }& KDC reply did not match expectations \\
+{\sc krb5_kdcrep_skew }&	Clock skew too great in KDC reply \\
+{\sc krb5_in_tkt_realm_mismatch }&	Client/server realm mismatch in
+initial ticket requst \\
+
 {\sc krb5_prog_etype_nosupp }& Program lacks support for encryption type \\
 {\sc krb5_prog_keytype_nosupp }& Program lacks support for key type \\
 {\sc krb5_wrong_etype }&	 Requested encryption type not used in message \\
 {\sc krb5_prog_sumtype_nosupp }& Program lacks support for checksum type \\
 {\sc krb5_realm_unknown }&	 Cannot find KDC for requested realm \\
+{\sc krb5_service_unknown }&	Kerberos service unknown \\
 {\sc krb5_kdc_unreach }&	 Cannot contact any KDC for requested realm \\
 {\sc krb5_no_localname }&	 No local name found for principal name \\
 
@@ -227,45 +234,72 @@ The Kerberos v5 database library error code table
 \end{tabular}
 \end{small}
 
-\subsection{error_table isod}
-
 % $Source$
 % $Author$
 
- The Kerberos v5/ISODE 5.0 error table mappings --- see $<$isode/psap.h$>$
+\subsection{The Kerberos v5 magic numbers errircode table}
 
 \begin{small}
 \begin{tabular}{ll} 
-{\sc isode_50_ps_err_none}& isode (ps): No error \\
-{\sc isode_50_ps_err_overid}& isode (ps):Overflow in ID \\
-{\sc isode_50_ps_err_overlen}& isode (ps):Overflow in length \\
-{\sc isode_50_ps_err_nmem}& isode (ps):Out of memory \\
-{\sc isode_50_ps_err_eof}& isode (ps):End of file \\
-{\sc isode_50_ps_err_eofid}& isode (ps):End of file reading extended ID \\
-{\sc isode_50_ps_err_eoflen}& isode (ps):End of file reading extended length \\
-{\sc isode_50_ps_err_len}& isode (ps):Length mismatch \\
-{\sc isode_50_ps_err_trnc}& isode (ps):Truncated \\
-{\sc isode_50_ps_err_indf}& isode (ps):Indefinite length in primitive form \\
-{\sc isode_50_ps_err_io}& isode (ps):I/O error \\
-{\sc isode_50_ps_err_extra}& isode (ps): Extraneous octets \\
-{\sc isode_50_ps_err_xxx}& isode (ps):XXX \\
-{\sc isode_50_pe_err_none}& isode(pe):No error \\
-{\sc isode_50_pe_err_over}& isode(pe):Overflow \\
-{\sc isode_50_pe_err_nmem}& isode(pe):Out of memory \\
-{\sc isode_50_pe_err_bit}& isode(pe):No such bit \\
-{\sc isode_50_pe_err_utct}& isode(pe):Malformed universal timestring \\
-{\sc isode_50_pe_err_gent}& isode(pe):Malformed generalized timestring \\
-{\sc isode_50_pe_err_mber}& isode(pe):No such member \\
-{\sc isode_50_pe_err_prim}& isode(pe):Not a primitive form \\
-{\sc isode_50_pe_err_cons}& isode(pe):Not a constructor form \\
-{\sc isode_50_pe_err_type}& isode(pe):Class/ID mismatch in constructor \\
-{\sc isode_50_pe_err_oid}& isode(pe):Malformed object identifier \\
-{\sc isode_50_pe_err_bits}& isode(pe):Malformed bitstring \\
-{\sc isode_50_pe_err_nosupp}& isode(pe):Type not supported \\
-{\sc isode_50_pe_err_signed}& isode(pe):Signed integer not expected \\
-{\sc isode_50_local_err_baddecode}&	isode: ASN.1 decode failed \\
-{\sc isode_50_local_err_badmsgtype}&	isode: wrong message type after decoding \\
-{\sc isode_50_local_err_badcombo}&	isode: unacceptable combination of options \\
-{\sc isode_local_err_missing_part}&	isode: missing element during translation \\
+{\sc kv5m_none }&		Kerberos V5 magic number table \\
+{\sc kv5m_principal }&	Bad magic number for krb5_principal structure \\
+{\sc kv5m_data }&		Bad magic number for krb5_data structure \\
+{\sc kv5m_keyblock }&	Bad magic number for krb5_keyblock structure \\
+{\sc kv5m_checksum }&	Bad magic number for krb5_checksum structure \\
+{\sc kv5m_encrypt_block }&	Bad magic number for krb5_encrypt_block structure \\
+{\sc kv5m_enc_data }&	Bad magic number for krb5_enc_data structure \\
+{\sc kv5m_cryptosystem_entry }&	Bad magic number for krb5_cryptosystem_entry structure \\
+{\sc kv5m_cs_table_entry }&	Bad magic number for krb5_cs_table_entry structure \\
+{\sc kv5m_checksum_entry }&	Bad magic number for krb5_checksum_entry structure \\
+
+{\sc kv5m_authdata }&	Bad magic number for krb5_authdata structure \\
+{\sc kv5m_transited }&	Bad magic number for krb5_transited structure \\
+{\sc kv5m_enc_tkt_parT }&	Bad magic number for krb5_enc_tkt_part structure \\
+{\sc kv5m_ticket }&		Bad magic number for krb5_ticket structure \\
+{\sc kv5m_authenticator }&	Bad magic number for krb5_authenticator structure \\
+{\sc kv5m_tkt_authent }&	Bad magic number for krb5_tkt_authent structure \\
+{\sc kv5m_creds }&		Bad magic number for krb5_creds structure \\
+{\sc kv5m_last_req_entry }&	Bad magic number for krb5_last_req_entry structure \\
+{\sc kv5m_pa_data }&		Bad magic number for krb5_pa_data structure \\
+{\sc kv5m_kdc_req }&		Bad magic number for krb5_kdc_req structure \\
+{\sc kv5m_enc_kdc_rep_part }& Bad magic number for krb5_enc_kdc_rep_part structure \\
+{\sc kv5m_kdc_rep }&		Bad magic number for krb5_kdc_rep structure \\
+{\sc kv5m_error }&		Bad magic number for krb5_error structure \\
+{\sc kv5m_ap_req }&		Bad magic number for krb5_ap_req structure \\
+{\sc kv5m_ap_rep }&		Bad magic number for krb5_ap_rep structure \\
+{\sc kv5m_ap_rep_enc_part }&	Bad magic number for krb5_ap_rep_enc_part structure \\
+{\sc kv5m_response }&	Bad magic number for krb5_response structure \\
+{\sc kv5m_safe }&		Bad magic number for krb5_safe structure \\
+{\sc kv5m_priv }&		Bad magic number for krb5_priv structure \\
+{\sc kv5m_priv_enc_part }&	Bad magic number for krb5_priv_enc_part structure \\
+{\sc kv5m_cred }&		Bad magic number for krb5_cred structure \\
+{\sc kv5m_cred_info }&	Bad magic number for krb5_cred_info structure \\
+{\sc kv5m_cred_enc_part }&	Bad magic number for krb5_cred_enc_part structure \\
+{\sc kv5m_pwd_data }&	Bad magic number for krb5_pwd_data structure \\
+{\sc kv5m_address }&	Bad magic number for krb5_address structure \\
+{\sc kv5m_keytab_entry }&	Bad magic number for krb5_keytab_entry structure \\
+{\sc kv5m_context }&	Bad magic number for krb5_context structure \\
+{\sc kv5m_os_context }&	Bad magic number for krb5_os_context structure \\
+
 \end{tabular}
 \end{small}
+
+\subsection{error_table asn1}
+
+The Kerberos v5/ASN.1 error table mappings
+
+\begin{small}
+\begin{tabular}{ll}
+{\sc asn1_bad_timeformat }&	ASN.1 failed call to system time library \\
+{\sc asn1_missing_field }&	ASN.1 structure is missing a required field \\
+{\sc asn1_misplaced_field }&	ASN.1 unexpected field number \\
+{\sc asn1_type_mismatch }&	ASN.1 type numbers are inconsistent \\
+{\sc asn1_overflow }&	ASN.1 value too large \\
+{\sc asn1_overrun }&	ASN.1 encoding ended unexpectedly \\
+{\sc asn1_bad_id }&	ASN.1 identifier doesn't match expected value \\
+{\sc asn1_bad_length }&	ASN.1 length doesn't match expected value \\
+{\sc asn1_bad_format }&	ASN.1 badly-formatted encoding \\
+{\sc asn1_parse_error }&	ASN.1 parse error \\
+\end{tabular}
+\end{small}
+
