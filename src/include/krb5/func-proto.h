@@ -278,7 +278,7 @@ krb5_error_code krb5_get_in_tkt_with_skey
 		   krb5_creds * ));
 
 krb5_error_code krb5_decode_kdc_rep
-	PROTOTYPE((const krb5_data *,
+	PROTOTYPE((krb5_data *,
 		   const krb5_keyblock *,
 		   const krb5_enctype,
 		   krb5_kdc_rep ** ));
