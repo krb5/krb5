@@ -1,3 +1,8 @@
+2001-11-05  Ezra Peisach  <epeisach@mit.edu>
+
+	* alt_prof.c (krb5_aprof_get_boolean): Return krb5_boolean *
+	instead of int *.
+
 2001-10-09  Ken Raeburn  <raeburn@mit.edu>
 
 	* logger.c (krb5_klog_init): Initialize savec to keep compiler

@@ -148,7 +148,7 @@ string_to_boolean (const char *string, krb5_boolean *out)
 
 krb5_error_code
 krb5_aprof_get_boolean(krb5_pointer acontext, const char **hierarchy,
-		       int uselast, int *retdata)
+		       int uselast, krb5_boolean *retdata)
 {
     krb5_error_code kret;
     char **values;
