@@ -10,10 +10,13 @@
 #define CompileEtCmd $(ETSRC)/compile_et
 #endif
 #ifndef MkCmdsCmd
-#define MkCmdsCmd $(SSMKSRC)/mk_cmds
+#define MkCmdsCmd $(SSSRC)/mk_cmds
 #endif
 #ifndef SSLib
-#define SSLib -lss /* $(TOP)/lib/ss/libss.a */
+#define SSLib $(SSSRC)/libss.a
+#endif
+#ifndef ComErrLib
+#define ComErrLib $(SSSRC)/libcom_err.a
 #endif
 #ifndef PosyFlags
 #define PosyFlags -f -h2 -a -s
@@ -112,8 +115,8 @@ libdir/lib/**/libname.a:						@@\
              PEPY = PepyCmd
              POSY = PosyCmd
             TOUCH = TouchCmd
-            ETSRC = $(TOP)/lib/comerr/compile_et
-         SSCMDSRC = $(TOP)/lib/ss/mk_cmds
+            ETSRC = $(TOP)/comerr
+            SSSRC = $(TOP)/ss
             OSLIB = $(TOP)/lib/os/libos.a
            DESLIB = $(TOP)/lib/des/libdes.a
           KRB5LIB = $(TOP)/lib/libkrb5.a
@@ -121,7 +124,7 @@ libdir/lib/**/libname.a:						@@\
          ISODELIB = $(ISODE)/@sys/lib/libisode.a
 
           DEPKLIB = $(KRB5LIB) $(OSLIB) $(DESLIB) $(CRCLIB)
-             KLIB = $(DEPKLIB) $(ISODELIB) -lcom_err
+             KLIB = $(DEPKLIB) $(ISODELIB) $(COMERRLIB)
         DEPKDBLIB = $(TOP)/lib/kdb/libkdb.a
            KDBLIB = $(DEPKDBLIB) DbmLib
 
@@ -132,6 +135,7 @@ libdir/lib/**/libname.a:						@@\
        COMPILE_ET = compile_et
           MK_CMDS = mk_cmds
             SSLIB = -lss
+        COMERRLIB = -lcom_err
 #else
             IMAKE = $(IMAKESRC)/imake
            DEPEND = DependCmd
@@ -139,5 +143,6 @@ libdir/lib/**/libname.a:						@@\
        COMPILE_ET = CompileEtCmd
           MK_CMDS = MkCmdsCmd
             SSLIB = SSLib
+        COMERRLIB = ComErrLib
 #endif
 
