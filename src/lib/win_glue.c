@@ -24,18 +24,21 @@
  * #defines for MIT-specific time-based timebombs and/or version
  * server for the Kerberos DLL.
  */
+
 #ifdef SAP_TIMEBOMB
-#define TIMEBOMB 853304400      /* 15-Jan-97 */
+#define TIMEBOMB 865141200	/* 1-Jun-97 */
 #define TIMEBOMB_PRODUCT "SAPGUI"
 #define TIMEBOMB_WARN  15
 #define TIMEBOMB_INFO "  Please see the web page at:\nhttp://web.mit.edu/reeng/www/saphelp for more information"
+#define TIMEBOMB_ERROR KRB5_APPL_EXPIRED
 #endif
 
 #ifdef KRB_TIMEBOMB
-#define TIMEBOMB 853304400      /* 15-Jan-97 */
+#define TIMEBOMB 865141200	/* 1-Jun-97 */
 #define TIMEBOMB_PRODUCT "Kerberos V5"
 #define TIMEBOMB_WARN 15
 #define TIMEBOMB_INFO "  Please see the web page at:\nhttp://web.mit.edu/reeng/www/saphelp for more information"
+#define TIMEBOMB_ERROR KRB5_LIB_EXPIRED
 #endif
 
 /*
@@ -46,6 +49,7 @@
 #define APP_TITLE "KRB5-SAP"
 #define APP_VER "3.0c"
 #define APP_INI "krb5sap.ini"
+#define VERSERV_ERROR 	KRB5_APPL_EXPIRED
 #endif
 
 #ifdef VERSERV
@@ -101,45 +105,40 @@ static int CallVersionServer(app_title, app_version, app_ini, code_cover)
 #endif
 
 #ifdef TIMEBOMB
-static void do_timebomb()
+static krb5_error_code do_timebomb()
 {
 	char buf[1024];
 	long timeleft;
+	static first_time = 1;
 
 	timeleft = TIMEBOMB - time(0);
 	if (timeleft <= 0) {
-		sprintf(buf, "Your version of %s has expired.\n",
-			TIMEBOMB_PRODUCT);
-		strcat(buf, "Please upgrade it.");
+		if (first_time) {
+			sprintf(buf, "Your version of %s has expired.\n",
+				TIMEBOMB_PRODUCT);
+			strcat(buf, "Please upgrade it.");
 #ifdef TIMEBOMB_INFO
-		strcat(buf, TIMEBOMB_INFO);
+			strcat(buf, TIMEBOMB_INFO);
 #endif
-		MessageBox(NULL, buf, "", MB_OK);
-#ifdef SAP_TIMEBOMB
-		/* 
-		 * The SAP R/3 application doesn't listen to a polite
-		 * request to quit, so we hit it over the head with a
-		 * large club.  Unfortunately, this leaves the baby
-		 * seal with dangling system resources that don't get
-		 * freed, so the user will have to reboot (or at least
-		 * restart windows).
-		 */
-		FatalAppExit(0, "Note: you should reboot now.");
-		return;
-#else
-		PostQuitMessage(0);
-#endif
+			MessageBox(NULL, buf, "", MB_OK);
+			first_time = 0;
+		}
+		return TIMEBOMB_ERROR;
 	}
 	timeleft = timeleft / ((long) 60*60*24);
 	if (timeleft < TIMEBOMB_WARN) {
-		sprintf(buf, "Your version of %s will expire in %ld days.\n",
-			TIMEBOMB_PRODUCT, timeleft);
-		strcat(buf, "Please upgrade it soon.");
+		if (first_time) {
+			sprintf(buf, "Your version of %s will expire in %ld days.\n",
+				TIMEBOMB_PRODUCT, timeleft);
+			strcat(buf, "Please upgrade it soon.");
 #ifdef TIMEBOMB_INFO
-		strcat(buf, TIMEBOMB_INFO);
+			strcat(buf, TIMEBOMB_INFO);
 #endif
-		MessageBox(NULL, buf, "", MB_OK);
+			MessageBox(NULL, buf, "", MB_OK);
+			first_time = 0;
+		}
 	}
+	return 0;
 }
 #endif
 
@@ -148,16 +147,20 @@ static void do_timebomb()
  * doesn't allow you to make messaging calls from LibMain.  So, we now
  * do the timebomb/version server stuff from krb5_init_context().
  */
-void krb5_win_do_init()
+krb5_error_code krb5_vercheck()
 {
+	krb5_error_code retval;
+	
 #ifdef TIMEBOMB
-	do_timebomb();
+	retval = do_timebomb();
+	if (retval)
+		return retval;
 #endif
 #ifdef VERSERV
-   if (CallVersionServer(APP_TITLE, APP_VER, APP_INI, NULL))
-	   PostQuitMessage(0);
+	if (CallVersionServer(APP_TITLE, APP_VER, APP_INI, NULL))
+		return VERSERV_ERROR;
 #endif
-
+	return 0;
 }
 
 int
