@@ -51,6 +51,7 @@ proc expect_kadm_ok {} {
     expect {
 	-i $kadmin_tcl_spawn_id
 	-re "^OK OVSEC_KADM_OK \[^\n\]*\n" {}
+	-re "^ERROR \[^\n\]*\n" { perror "kadmin tcl subprocess reported unexpected error" }
 	-re "^marshall_new_creds: \[^\n\]*\n" { exp_continue }
 	-re "^gssapi_\[^\n\]*\n" { exp_continue }
 	-re "^\r?\n" { exp_continue }
