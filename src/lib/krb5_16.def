@@ -69,10 +69,25 @@ EXPORTS
 	krb5_get_credentials_validate
 	krb5_get_default_realm
 	krb5_get_host_realm
+	krb5_get_realm_domain
 	krb5_get_in_tkt
 	krb5_get_in_tkt_with_keytab
 	krb5_get_in_tkt_with_password
 	krb5_get_in_tkt_with_skey
+	krb5_get_init_creds_opt_init
+	krb5_get_init_creds_opt_set_tkt_life
+	krb5_get_init_creds_opt_set_renew_life
+	krb5_get_init_creds_opt_set_forwardable
+	krb5_get_init_creds_opt_set_proxiable
+	krb5_get_init_creds_opt_set_etype_list
+	krb5_get_init_creds_opt_set_address_list
+	krb5_get_init_creds_opt_set_preauth_list
+	krb5_get_init_creds_opt_set_salt
+	krb5_get_init_creds_password
+	krb5_get_init_creds_keytab
+	krb5_get_init_creds_opt_init
+	krb5_get_validated_creds
+	krb5_get_renewed_creds
 	krb5_get_notification_message
 	krb5_init_context
 	krb5_mk_error
@@ -84,6 +99,7 @@ EXPORTS
 	krb5_os_localaddr
 	krb5_parse_name
 	krb5_principal_compare
+	krb5_prompter_posix
 	krb5_rd_cred
 	krb5_rd_error
 	krb5_rd_priv
@@ -97,6 +113,7 @@ EXPORTS
 	krb5_timeofday
 	krb5_unparse_name
 	krb5_unparse_name_ext
+	krb5_free_unparsed_name
 	krb5_us_timeofday
 ;
 	krb5_use_enctype
@@ -171,7 +188,8 @@ EXPORTS
 	des_pcbc_encrypt
 	des_quad_cksum
 	des_string_to_key
-	des_set_random_generator_seed
+;	des_set_random_generator_seed
+	des_init_random_number_generator
 	profile_get_values
 	krb5_random_confounder
 	krb5_size_opaque

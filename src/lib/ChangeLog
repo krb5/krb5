@@ -1,3 +1,11 @@
+Mon Feb  8 22:08:22 1999  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* Makefile.in: Link in the ccapi import library under windows.
+
+	* krb5_16.def, krb5_32.def: Added a number of miscellaneous
+ 		functions to the DLL exports list so that things build
+ 		under Windows again.
+
 1999-01-27  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* Makefile.in, configure.in: Move the responsibility for
