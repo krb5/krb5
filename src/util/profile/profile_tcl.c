@@ -1099,6 +1099,7 @@ SWIGEXPORT(int) SWIG_init(Tcl_Interp *);
 #include "com_err.h"
 #include "profile.h"
 
+#ifdef SWIGTCL
 /* Reduce warnings about cast discarding const to just this one, from
    every SWIG-generated call to Tcl_SetResult.  */
 static void my_tcl_setresult(Tcl_Interp *i, const char *str, Tcl_FreeProc *f)
@@ -1107,6 +1108,7 @@ static void my_tcl_setresult(Tcl_Interp *i, const char *str, Tcl_FreeProc *f)
 }
 #undef Tcl_SetResult
 #define Tcl_SetResult my_tcl_setresult
+#endif
 
 
 typedef void **iter_t; /* ick */
@@ -1231,7 +1233,7 @@ _wrap_profile_init_path(ClientData clientData, Tcl_Interp *interp, int objc, Tcl
     profile_t tmp2 ;
     
     {
-        arg2 = &tmp2;
+        /*generic swigtype hack*/ arg2 = &tmp2;
     }
     if (SWIG_GetArgs(interp, objc, objv,"|s:profile_init_path ?path? ",&arg1) == TCL_ERROR) SWIG_fail;
     result = (errcode_t)profile_init_path((char const *)arg1,arg2);
@@ -1245,7 +1247,7 @@ _wrap_profile_init_path(ClientData clientData, Tcl_Interp *interp, int objc, Tcl
             SWIG_fail;
         }
     }
-    /*foo*/Tcl_SetObjResult(interp,SWIG_NewInstanceObj((void *) *arg2, SWIGTYPE_profile_t,0));
+    /*generic swigtype hack*/ Tcl_SetObjResult(interp,SWIG_NewInstanceObj((void *) *arg2, SWIGTYPE_profile_t,0));
     return TCL_OK;
     fail:
     return TCL_ERROR;
@@ -1260,7 +1262,7 @@ _wrap_profile_init(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj 
     profile_t tmp2 ;
     
     {
-        arg2 = &tmp2;
+        /*generic swigtype hack*/ arg2 = &tmp2;
     }
     if (SWIG_GetArgs(interp, objc, objv,"|o:profile_init ?nullterm? ",0) == TCL_ERROR) SWIG_fail;
     if (objc > 1) {
@@ -1281,7 +1283,7 @@ _wrap_profile_init(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj 
             SWIG_fail;
         }
     }
-    /*foo*/Tcl_SetObjResult(interp,SWIG_NewInstanceObj((void *) *arg2, SWIGTYPE_profile_t,0));
+    /*generic swigtype hack*/ Tcl_SetObjResult(interp,SWIG_NewInstanceObj((void *) *arg2, SWIGTYPE_profile_t,0));
     {
         /* freearg char **nullterm */
         if (arg1) {
@@ -1677,7 +1679,7 @@ _wrap_profile_iterator_create(ClientData clientData, Tcl_Interp *interp, int obj
     iter_t tmp4 ;
     
     {
-        arg4 = &tmp4;
+        /*generic swigtype hack*/ arg4 = &tmp4;
     }
     if (SWIG_GetArgs(interp, objc, objv,"ooi:profile_iterator_create p nullterm flags ",0,0,&arg3) == TCL_ERROR) SWIG_fail;
     if ((SWIG_ConvertPtr(objv[1], (void **) &arg1, SWIGTYPE_profile_t,SWIG_POINTER_EXCEPTION | 0) != TCL_OK)) SWIG_fail;
@@ -1697,7 +1699,7 @@ _wrap_profile_iterator_create(ClientData clientData, Tcl_Interp *interp, int obj
             SWIG_fail;
         }
     }
-    /*foo*/Tcl_SetObjResult(interp,SWIG_NewInstanceObj((void *) *arg4, SWIGTYPE_iter_t,0));
+    /*generic swigtype hack*/ Tcl_SetObjResult(interp,SWIG_NewInstanceObj((void *) *arg4, SWIGTYPE_iter_t,0));
     {
         /* freearg char **nullterm */
         if (arg2) {
