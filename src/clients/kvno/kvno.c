@@ -40,10 +40,10 @@ static void xusage()
 {
 #ifdef KRB5_KRB4_COMPAT
     fprintf(stderr, 
-            "xusage: %s [-4 | -c ccache -e etype] service1 service2 ...\n", 
+            "usage: %s [-4 | [-c ccache] [-e etype]] service1 service2 ...\n", 
             prog);
 #else
-    fprintf(stderr, "xusage: %s [-c ccache -e etype] service1 service2 ...\n",
+    fprintf(stderr, "usage: %s [-c ccache] [-e etype] service1 service2 ...\n",
             prog);
 #endif
     exit(1);
