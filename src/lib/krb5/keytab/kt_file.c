@@ -1008,10 +1008,10 @@ krb5_ktfileint_open(krb5_context context, krb5_keytab id, int mode)
             krb5_create_secure_file(context, KTFILENAME(id));
 	    KTFILEP(id) = fopen(KTFILENAME(id), fopen_mode_rbplus);
 	    if (!KTFILEP(id))
-		return errno;
+		return errno ? errno : ENFILE;
 	    writevno = 1;
 	} else				/* some other error */
-	    return errno;
+	    return errno ? errno : ENFILE;
     }
     if ((kerror = krb5_lock_file(context, fileno(KTFILEP(id)), mode))) {
 	(void) fclose(KTFILEP(id));
