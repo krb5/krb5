@@ -86,7 +86,7 @@ SRCS = \
 
 
 LIB_SUBDIRS= .
-LIBDONE= ./DONE
+LIBDONE= DONE
 #
 # Depends on libcrypto and KRB4_CRYPTO_LIB, expect one unresolved symbol:
 #	_et_list.
