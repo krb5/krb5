@@ -1,6 +1,7 @@
-//stdcc_util.h
-// 
-// Frank Dabek, July 1998
+/* stdcc_util.h
+ *
+ * Frank Dabek, July 1998
+ */
 
 #if defined(macintosh)
 #include "CCache2.h"
@@ -12,7 +13,7 @@
 
 #include "krb5.h"
 
-//protoypes for private functions declared in stdcc_util.c
+/* protoypes for private functions declared in stdcc_util.c */
 int copyCCDataArrayToK5(cc_creds *cc, krb5_creds *kc, char whichArray);
 int copyK5DataArrayToCC(krb5_creds *kc, cc_creds *cc, char whichArray);
 void dupCCtoK5(krb5_context context, cc_creds *src, krb5_creds *dest);
