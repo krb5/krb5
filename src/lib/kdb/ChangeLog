@@ -1,3 +1,9 @@
+Fri Feb 23 19:39:52 1996  Mark Eichin  <eichin@cygnus.com>
+
+	* keytab.c (krb5_ktkdb_close): new function, non-optional.
+	(krb5_kt_kdb_ops): include _close method, comment what the other
+	slots are.
+
 Tue Feb 13 21:33:03 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* kdb_dbm.c (krb5_dbm_db_rename): Initialize pointer before use

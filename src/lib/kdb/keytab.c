@@ -25,21 +25,23 @@
 #include "k5-int.h"
 #include "kdb_dbc.h"
 
+krb5_error_code krb5_ktkdb_close KRB5_PROTOTYPE((krb5_context, krb5_keytab));
+
 krb5_error_code krb5_ktkdb_get_entry KRB5_PROTOTYPE((krb5_context, krb5_keytab, krb5_principal,
-			krb5_kvno, krb5_enctype, krb5_keytab_entry *));
+		   krb5_kvno, krb5_enctype, krb5_keytab_entry *));
 
 krb5_kt_ops krb5_kt_kdb_ops = {
     0,
     "KDB", 	/* Prefix -- this string should not appear anywhere else! */
-    NULL,
-    NULL,
-    NULL,
-    krb5_ktkdb_get_entry,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
+    NULL,			/* resolve */
+    NULL,			/* get_name */
+    krb5_ktkdb_close,		/* close */
+    krb5_ktkdb_get_entry,	/* get */
+    NULL,			/* start_seq_get */
+    NULL,			/* get_next */
+    NULL,			/* end_get */
+    NULL,			/* add (extended) */
+    NULL,			/* remove (extended) */
     NULL, 		/* (void *) &krb5_ktfile_ser_entry */
 };
 
@@ -68,6 +70,15 @@ krb5_ktkdb_resolve(context, kdb, id)
     (*id)->ops = &krb5_kt_kdb_ops;
     (*id)->magic = KV5M_KEYTAB;
     return(0);
+}
+
+krb5_error_code
+krb5_ktkdb_close(context, kt)
+     krb5_context context;
+     krb5_keytab kt;
+{
+  /* no state outstanding... */
+  return 0;
 }
 
 krb5_error_code
