@@ -113,7 +113,8 @@ typedef struct {
 enum acl_types {
 ADDACL,
 GETACL,
-MODACL
+MODACL,
+STABACL
 };
 
 /* Various opcodes for the admin server's functions */
@@ -121,6 +122,8 @@ MODACL
 #define ADD_ENT      3
 #define MOD_ENT      4
 #define GET_ENT      5
+#define CHECK_PW     6
+#define CHG_STAB     7
 
 extern long kdb_get_master_key();	/* XXX should be in krb_db.h */
 extern long kdb_verify_master_key();	/* XXX ditto */
@@ -138,4 +141,4 @@ typedef void sigtype;
 typedef int sigtype;
 #endif
 
-#endif KADM_DEFS
+#endif /* KADM_DEFS */
