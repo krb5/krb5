@@ -1,3 +1,13 @@
+2001-06-21  Ezra Peisach  <epeisach@mit.edu>
+
+	* configure.in: Test for parsetos() prototype and presence of
+	curses.h and term.h header files.
+
+	* telnet.c: Include term.h and curses.h if present for setupterm()
+	prototype.
+
+	* main.c: Declare prototype for parsetos() if needed.
+
 2001-06-19  Ezra Peisach  <epeisach@mit.edu>
 
 	* telnet.c (telrcv): Ensure variable set before use.

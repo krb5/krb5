@@ -2,7 +2,7 @@ AC_INIT(telnet.c)
 CONFIG_RULES
 AC_PROG_INSTALL
 AC_FUNC_VFORK
-AC_CHECK_HEADERS(string.h arpa/nameser.h unistd.h sys/select.h stdlib.h arpa/inet.h sys/filio.h)
+AC_CHECK_HEADERS(string.h arpa/nameser.h unistd.h sys/select.h stdlib.h arpa/inet.h sys/filio.h curses.h term.h)
 AC_CHECK_LIB(termcap,main,AC_DEFINE(TERMCAP)
 LIBS="$LIBS -ltermcap",
   AC_CHECK_LIB(curses,setupterm,LIBS="$LIBS -lcurses",
@@ -23,6 +23,8 @@ if test -z "$ac_sysv_termio"; then
   fi
 fi
 fi
+KRB5_NEED_PROTO([#include <unistd.h>
+#include <stdlib.h>],parsetos,1)
 CHECK_SIGNALS
 if test "$KRB4_LIB" = ''; then
 	AC_MSG_RESULT(No Kerberos 4 authentication)

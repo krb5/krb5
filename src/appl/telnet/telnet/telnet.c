@@ -48,6 +48,14 @@
  */
 #endif	/* defined(unix) */
 
+#ifdef HAVE_CURSES_H
+#include <curses.h>
+#endif
+
+#ifdef HAVE_TERM_H
+#include <term.h>
+#endif
+
 #include <arpa/telnet.h>
 
 #include <ctype.h>

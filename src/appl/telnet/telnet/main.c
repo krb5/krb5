@@ -54,7 +54,9 @@ char copyright[] =
 #include "externs.h"
 #include "defines.h"
 
-
+#ifdef NEED_PARSETOS_PROTO
+extern int parsetos(char *, char *);
+#endif
 
 #if 0
 #define FORWARD
