@@ -26,8 +26,8 @@ typedef struct _krb5_ccache {
 typedef struct _krb5_cc_ops {
 	char *prefix;
 	char *(*get_name) PROTOTYPE((krb5_ccache));
-	krb5_error_code (*resolve) PROTOTYPE((krb5_ccache, char *));
-	krb5_error_code (*gen_new) PROTOTYPE((krb5_ccache));
+	krb5_error_code (*resolve) PROTOTYPE((krb5_ccache *, char *));
+	krb5_error_code (*gen_new) PROTOTYPE((krb5_ccache *));
 	krb5_error_code (*init) PROTOTYPE((krb5_ccache, krb5_principal));
 	krb5_error_code (*destroy) PROTOTYPE((krb5_ccache));
 	krb5_error_code (*close) PROTOTYPE((krb5_ccache));
