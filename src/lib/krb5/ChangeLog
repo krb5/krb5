@@ -1,3 +1,8 @@
+Wed Nov  2 02:35:44 1994  Mark W. Eichin  (eichin@paycheck.cygnus.com)
+
+	* Makefile.in (libkrb5.a): done needs a trailing semicolon if it
+	isn't followed by a newline, as does fi, with certain shells.
+
 Tue Nov  1 14:56:47 1994    (tytso@rsx-11)
 
 	* Makefile.in: Change the way libupdate works so that we use

@@ -17,12 +17,12 @@ libkrb5.a: error_tables/DONE asn.1/DONE ccache/DONE ccache/stdio/DONE \
 		for i in $(LIB_SUBDIRS) ; \
 		do \
 			$(LIBUPDATE) $@ $$i/DONE $$i ; \
-		done \
+		done ; \
 	else \
 		for i in $(LIB_SUBDIRS) ; \
 		do \
 			$(LIBUPDATE) --force $@ $$i/DONE $$i ; \
-		done \
+		done ; \
 	fi
 	touch libkrb5.stamp
 		
