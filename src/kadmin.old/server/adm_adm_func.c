@@ -109,9 +109,9 @@ adm_build_key (context, auth_context, new_passwd, oper_type, entry)
     
     if (oper_type == CHGOPER || oper_type == CH4OPER) {
 	key_data = (krb5_key_data *) NULL;
-	if (krb5_dbe_find_keytype(context,
+	if (krb5_dbe_find_enctype(context,
 				  &entry,
-				  KEYTYPE_DES_CBC_MD5,
+				  ENCTYPE_DES_CBC_MD5,
 				  ((oper_type == CHGOPER) ? 
 				   KRB5_KDB_SALTTYPE_NORMAL : 
 				   KRB5_KDB_SALTTYPE_V4),
@@ -601,30 +601,30 @@ adm_mod_old_key(context, auth_context, cmdname, customer_name)
 	     * We could loop through all the supported key/salt types, but
 	     * we don't have that technology yet.
 	     */
-	    if (!krb5_dbe_find_keytype(context,
+	    if (!krb5_dbe_find_enctype(context,
 				       &entry,
-				       KEYTYPE_DES_CBC_MD5,
+				       ENCTYPE_DES_CBC_MD5,
 				       KRB5_KDB_SALTTYPE_NORMAL,
 				       -1,
 				       &kdata))
 		kdata->key_data_kvno = atoi(tempstr);
-	    if (!krb5_dbe_find_keytype(context,
+	    if (!krb5_dbe_find_enctype(context,
 				       &entry,
-				       KEYTYPE_DES_CBC_CRC,
+				       ENCTYPE_DES_CBC_CRC,
 				       KRB5_KDB_SALTTYPE_V4,
 				       -1,
 				       &kdata))
 		kdata->key_data_kvno = atoi(tempstr);
-	    if (!krb5_dbe_find_keytype(context,
+	    if (!krb5_dbe_find_enctype(context,
 				       &entry,
-				       KEYTYPE_DES_CBC_MD5,
+				       ENCTYPE_DES_CBC_MD5,
 				       KRB5_KDB_SALTTYPE_NOREALM,
 				       -1,
 				       &kdata))
 		kdata->key_data_kvno = atoi(tempstr);
-	    if (!krb5_dbe_find_keytype(context,
+	    if (!krb5_dbe_find_enctype(context,
 				       &entry,
-				       KEYTYPE_DES_CBC_MD5,
+				       ENCTYPE_DES_CBC_MD5,
 				       KRB5_KDB_SALTTYPE_ONLYREALM,
 				       -1,
 				       &kdata))

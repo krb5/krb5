@@ -80,9 +80,9 @@ cpw_keyproc(context, keyblock)
 	}
 
 	/* Find our key */
-	if (retval = krb5_dbe_find_keytype(context,
+	if (retval = krb5_dbe_find_enctype(context,
 					   &cpw_entry,
-					   KEYTYPE_DES_CBC_MD5,
+					   ENCTYPE_DES_CBC_MD5,
 					   -1,
 					   -1,
 					   &kdatap)) {
@@ -208,9 +208,9 @@ process_client(context, prog)
     }
 
     /* Find our key */
-    if (retval = krb5_dbe_find_keytype(context,
+    if (retval = krb5_dbe_find_enctype(context,
 				       &server_entry,
-				       KEYTYPE_DES_CBC_MD5,
+				       ENCTYPE_DES_CBC_MD5,
 				       -1,
 				       -1,
 				       &kdatap)) {

@@ -103,7 +103,7 @@ void
 usage(name)
 char *name;
 {
-    fprintf(stderr, "Usage: %s\t[-a aclfile] [-d dbname] [-k masterkeytype]", 
+    fprintf(stderr, "Usage: %s\t[-a aclfile] [-d dbname] [-k masterenctype]", 
 			name);
     fprintf(stderr, "\n\t[-h] [-m] [-M masterkeyname] [-r realm] [-p port]\n");
     return;
@@ -118,10 +118,10 @@ process_args(context, argc, argv)
     krb5_error_code retval;
     int c;
     krb5_boolean manual = FALSE;
-    int keytypedone = 0;
+    int enctypedone = 0;
     char *mkey_name = 0;
     char *local_realm;
-    krb5_keytype ktype;
+    krb5_enctype ktype;
 
 #ifdef SANDIA
     char input_string[80];
@@ -164,9 +164,9 @@ process_args(context, argc, argv)
 		}
 		break;
 
-	    case 'k':			/* keytype for master key */
-		if (!krb5_string_to_keytype(optarg, &master_keyblock.keytype))
-		    keytypedone++;
+	    case 'k':			/* enctype for master key */
+		if (!krb5_string_to_enctype(optarg, &master_keyblock.enctype))
+		    enctypedone++;
 		else
 		    fprintf(stderr, "%s: %s is an invalid key type\n",
 			    argv[0], optarg);
@@ -214,8 +214,8 @@ process_args(context, argc, argv)
 	mkey_name = KRB5_KDB_M_NAME;
     }
  
-    if (!keytypedone) {
-	master_keyblock.keytype = KEYTYPE_DES_CBC_MD5;
+    if (!enctypedone) {
+	master_keyblock.enctype = ENCTYPE_DES_CBC_MD5;
     }
  
     /* assemble & parse the master key name */
@@ -227,7 +227,7 @@ process_args(context, argc, argv)
 	exit(1);
     }
 
-    krb5_use_keytype(context, &master_encblock, master_keyblock.keytype);
+    krb5_use_enctype(context, &master_encblock, master_keyblock.enctype);
  
     if ((retval = krb5_db_fetch_mkey(context, 
 		master_princ, 
@@ -242,15 +242,15 @@ process_args(context, argc, argv)
     }
 
     /* initialize random key generators */
-    for (ktype = 0; ktype <= krb5_max_keytype; ktype++) {
-	if (krb5_keytype_array[ktype]) {
-		if (retval = (*krb5_keytype_array[ktype]->system->
+    for (ktype = 0; ktype <= krb5_max_enctype; ktype++) {
+	if (krb5_enctype_array[ktype]) {
+		if (retval = (*krb5_enctype_array[ktype]->system->
 				init_random_key)(&master_keyblock,
-				&krb5_keytype_array[ktype]->random_sequence)) {
+				&krb5_enctype_array[ktype]->random_sequence)) {
 			com_err(argv[0], retval, 
 	"while setting up random key generator for ktype %d--ktype disabled", 
 				ktype);
-			krb5_keytype_array[ktype] = 0;
+			krb5_enctype_array[ktype] = 0;
 		}
 	}
     }
@@ -354,9 +354,9 @@ init_db(context, dbname, masterkeyname, masterkeyblock)
 	convert server.key into a real key 
 	(it may be encrypted in the database) 
  */
-    if (retval = krb5_dbe_find_keytype(context,
+    if (retval = krb5_dbe_find_enctype(context,
 				       &server_entry,
-				       KEYTYPE_DES_CBC_MD5,
+				       ENCTYPE_DES_CBC_MD5,
 				       -1,
 				       -1,
 				       &kdatap)) {

@@ -169,9 +169,9 @@ adm_fmt_prt(context, entry, Principal_name, ret_data)
 			entry->max_renewable_life);
     strcat(my_data, thisline);
     pkey = (krb5_key_data *) NULL;
-    if (retval = krb5_dbe_find_keytype(context,
+    if (retval = krb5_dbe_find_enctype(context,
 				       entry,
-				       KEYTYPE_DES_CBC_MD5,
+				       ENCTYPE_DES_CBC_MD5,
 				       KRB5_KDB_SALTTYPE_NORMAL,
 				       -1,
 				       &pkey)) {

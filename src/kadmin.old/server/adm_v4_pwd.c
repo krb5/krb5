@@ -357,7 +357,7 @@ int *outlen;
         return(1);
     }  
  
-    v5_keyblock->keytype = KEYTYPE_DES_CBC_MD5;
+    v5_keyblock->enctype = ENCTYPE_DES_CBC_MD5;
     v5_keyblock->length = 8;
     if (!(v5_keyblock->contents = (krb5_octet *) calloc (1,
                 8))) {
