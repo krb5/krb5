@@ -208,3 +208,11 @@
 	decode_krb5_ap_req					# GSSAPI
 	krb5_mcc_ops						# GSSAPI
 	krb5_c_keyed_checksum_types 		# GSSAPI
+	krb5_c_random_make_octets			# GSSAPI
+	krb5_c_encrypt						# GSSAPI
+	krb5_c_make_checksum				# GSSAPI
+	krb5_c_decrypt						# GSSAPI
+	krb5_c_verify_checksum				# GSSAPI
+	krb5_c_block_size					# GSSAPI
+	krb5_c_checksum_length				# GSSAPI
+	krb5_c_encrypt_length				# GSSAPI
