@@ -109,7 +109,7 @@ char *argv[];
 	if (isupper(*cp))
 	    *cp = tolower(*cp);
 
-    bzero(sbuf, sizeof(sbuf));
+    memset(sbuf, 0, sizeof(sbuf));
     strcpy(sbuf, SAMPLE_SERVICE);
     strcat(sbuf, "/");
     strcat(sbuf, remote_host);
@@ -123,9 +123,9 @@ char *argv[];
 
     /* set up the address of the foreign socket for connect() */
     sin.sin_family = hp->h_addrtype;
-    (void) bcopy((char *)hp->h_addr,
-		 (char *)&sin.sin_addr,
-		 sizeof(hp->h_addr));
+    (void) memcpy((char *)&sin.sin_addr,
+		  (char *)hp->h_addr,
+		  sizeof(hp->h_addr));
 
     /* open a TCP socket */
     sock = socket(PF_INET, SOCK_STREAM, 0);
