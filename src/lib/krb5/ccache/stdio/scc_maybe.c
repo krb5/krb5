@@ -127,15 +127,15 @@ krb5_scc_open_file (context, id, mode)
 #endif
      switch (mode) {
      case SCC_OPEN_RDONLY:
-	 if (retval = krb5_lock_file(context, f, data->filename, KRB5_LOCKMODE_SHARED)) {
+	 if ((retval = krb5_lock_file(context, f, data->filename, KRB5_LOCKMODE_SHARED))) {
 	     (void) fclose(f);
 	     return retval;
 	 }
 	 break;
      case SCC_OPEN_RDWR:
      case SCC_OPEN_AND_ERASE:
-	 if (retval = krb5_lock_file(context, f, data->filename,
-				     KRB5_LOCKMODE_EXCLUSIVE)) {
+	 if ((retval = krb5_lock_file(context, f, data->filename,
+				      KRB5_LOCKMODE_EXCLUSIVE))) {
 	     (void) fclose(f);
 	     return retval;
 	 }
