@@ -49,10 +49,10 @@ extern const int sys_nerr;
 static char buffer[ET_EBUFSIZ];
 
 #if (defined(_MSDOS) || defined(_WIN32) || defined(macintosh))
-static struct et_list * _et_list = (struct et_list *) NULL;
+/*@null@*/ static struct et_list * _et_list = (struct et_list *) NULL;
 #else
 /* Old interface compatibility */
-struct et_list * _et_list = (struct et_list *) NULL;
+/*@null@*/ struct et_list * _et_list = (struct et_list *) NULL;
 #endif
 
 /*@null@*//*@only@*/static struct dynamic_et_list * et_list_dynamic;
@@ -117,6 +117,8 @@ error_message(long code)
 
 	dprintf (("scanning static list for %x\n", table_num));
 	for (et = _et_list; et != NULL; et = et->next) {
+	    if (et->table == NULL)
+		continue;
 	    dprintf (("\t%x = %s\n", et->table->base & ERRCODE_MAX,
 		      et->table->msgs[0]));
 	    if ((et->table->base & ERRCODE_MAX) == table_num) {
@@ -240,7 +242,7 @@ add_error_table(et)
        wouldn't check the dynamically maintained list before adding an
        entry to the static list.  */
     for (el = _et_list; el != NULL; el = el->next)
-	if (el->table->base == et->base)
+	if (el->table != NULL && el->table->base == et->base)
 	    return EEXIST;
     for (del = et_list_dynamic; del != NULL; del = del->next)
 	if (del->table->base == et->base)
@@ -286,7 +288,7 @@ remove_error_table(et)
 	    break;
 	}
     for (el = &_et_list; *el; el = &(*el)->next)
-	if ((*el)->table->base == et->base) {
+	if ((*el)->table != NULL && (*el)->table->base == et->base) {
 	    struct et_list *old = *el;
 	    *el = old->next;
 	    old->next = NULL;

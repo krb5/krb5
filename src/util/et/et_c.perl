@@ -1,5 +1,5 @@
-#!/afs/athena/contrib/perl5/p
-eval 'exec /afs/athena/contrib/perl5/arch/sun4x_55/bin/perl -S $0 ${1+"$@"}'
+#!/usr/athena/bin/perl
+eval 'exec /usr/athena/bin/perl -S $0 ${1+"$@"}'
     if $running_under_some_shell;
 			# this emulates #! processing on NIH machines.
 			# (remove #! line above if indigestible)
@@ -79,8 +79,8 @@ $c2n{'9'} = 62;
 $c2n{'_'} = 63;
 
 line: while (<>) {
-    chop;	# strip record separator
-    @Fld = split(' ', $_, 9999);
+    chomp;	# strip record separator
+    @Fld = split($FS, $_, 9999);
     if (/^#/) {
 	next line;
     }
@@ -139,48 +139,37 @@ line: while (<>) {
 	&Pick('>', $outfile) &&
 	    (print $fh '#if defined(_MSDOS) || defined(_WIN32)');
 	&Pick('>', $outfile) &&
-	    (print $fh "#include \"win-mac.h\"");
+	    (print $fh "# include \"win-mac.h\"");
 	&Pick('>', $outfile) &&
 	    (print $fh '#else');
-	&Pick('>', $outfile) &&
-	    (print $fh '# ifndef KRB5_CALLCONV');
-	&Pick('>', $outfile) &&
-	    (print $fh '# define KRB5_CALLCONV');
-	&Pick('>', $outfile) &&
-	    (print $fh '# define KRB5_CALLCONV_C');
-	&Pick('>', $outfile) &&
-	    (print $fh '# define KRB5_DLLIMP');
-	&Pick('>', $outfile) &&
-	    (print $fh '# define KRB5_EXPORTVAR');
 	&Pick('>', $outfile) &&
 	    (print $fh '# define FAR');
 	&Pick('>', $outfile) &&
-	    (print $fh '# define NEAR');
-	&Pick('>', $outfile) &&
-	    (print $fh '# endif');
-	&Pick('>', $outfile) &&
-	    (print $fh '#endif');
-	&Pick('>', $outfile) &&
-	    (print $fh '');
-
-	&Pick('>', $outfile) &&
-	    (print $fh
-
-	      '#if defined(__STDC__) || defined(_MSDOS) || defined(_WIN32)');
-	&Pick('>', $outfile) &&
-	    (print $fh '#define P(x) x');
-	&Pick('>', $outfile) &&
-	    (print $fh '#else');
-	&Pick('>', $outfile) &&
-	    (print $fh '#define P(x) ()');
-	&Pick('>', $outfile) &&
-	    (print $fh '#define const');
-	&Pick('>', $outfile) &&
 	    (print $fh '#endif');
 	&Pick('>', $outfile) &&
 	    (print $fh '');
 	&Pick('>', $outfile) &&
-	    (print $fh 'static const char FAR * const text[] = {');
+	    (print $fh 'extern void initialize_' . $table_name .
+
+	      '_error_table (void);');
+	&Pick('>', $outfile) &&
+	    (print $fh '');
+	&Pick('>', $outfile) &&
+	    (print $fh "/* Lclint doesn't handle null annotations on arrays");
+	&Pick('>', $outfile) &&
+	    (print $fh '   properly, so we need this typedef in each');
+	&Pick('>', $outfile) &&
+	    (print $fh '   generated .c file.  */');
+	&Pick('>', $outfile) &&
+	    (print $fh '/*@-redef@*/');
+	&Pick('>', $outfile) &&
+	    (print $fh 'typedef /*@null@*/ const char FAR *ncptr;');
+	&Pick('>', $outfile) &&
+	    (print $fh '/*@=redef@*/');
+	&Pick('>', $outfile) &&
+	    (print $fh '');
+	&Pick('>', $outfile) &&
+	    (print $fh 'static ncptr const text[] = {');
 	$table_item_count = 0;
     }
 
@@ -249,15 +238,7 @@ line: while (<>) {
 &Pick('>', $outfile) &&
     (print $fh '');
 &Pick('>', $outfile) &&
-    (print $fh 'struct error_table {');
-&Pick('>', $outfile) &&
-    (print $fh '    char const FAR * const FAR * msgs;');
-&Pick('>', $outfile) &&
-    (print $fh '    long base;');
-&Pick('>', $outfile) &&
-    (print $fh '    int n_msgs;');
-&Pick('>', $outfile) &&
-    (print $fh '};');
+    (print $fh '#include <com_err.h>');
 &Pick('>', $outfile) &&
     (print $fh '');
 if ($tab_base_high == 0) {
@@ -279,21 +260,13 @@ else {
 &Pick('>', $outfile) &&
     (print $fh '');
 &Pick('>', $outfile) &&
-    (print $fh '#if defined(unix) || defined(_AIX)');
-&Pick('>', $outfile) &&
-    (print $fh 'struct et_list {');
-&Pick('>', $outfile) &&
-    (print $fh '	   struct et_list *next;');
-&Pick('>', $outfile) &&
-    (print $fh '	   const struct error_table * table;');
-&Pick('>', $outfile) &&
-    (print $fh '};');
-&Pick('>', $outfile) &&
-    (print $fh 'extern struct et_list *_et_list;');
+    (print $fh
+
+      '#if !defined(_MSDOS) && !defined(_WIN32) && !defined(macintosh)');
 &Pick('>', $outfile) &&
     (print $fh 'static struct et_list link = { 0, 0 };');
 &Pick('>', $outfile) &&
-    (print $fh 'void initialize_' . $table_name . '_error_table (NOARGS) {');
+    (print $fh 'void initialize_' . $table_name . '_error_table (void) {');
 &Pick('>', $outfile) &&
     (print $fh '	   if (!link.table) {');
 &Pick('>', $outfile) &&

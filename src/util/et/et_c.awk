@@ -110,31 +110,21 @@ c2n["_"]=63
 	print " */" > outfile
 
 	print "#if defined(_MSDOS) || defined(_WIN32)" > outfile
-	print "#include \"win-mac.h\"" > outfile
+	print "# include \"win-mac.h\"" > outfile
 	print "#else" > outfile
-	print "# ifndef KRB5_CALLCONV" > outfile
-	print "# define KRB5_CALLCONV" > outfile
-	print "# define KRB5_CALLCONV_C" > outfile
-	print "# define KRB5_DLLIMP" > outfile
-	print "# define KRB5_EXPORTVAR" > outfile
 	print "# define FAR" > outfile
-	print "# define NEAR" > outfile
-	print "# endif" > outfile
 	print "#endif" > outfile
 	print "" > outfile
-
-	print "#if defined(__STDC__) || defined(_MSDOS) || defined(_WIN32)" > outfile
-	print "#define P(x) x" > outfile
-	print "#define NOARGS void" > outfile
-	print "#else" > outfile
-	print "#define P(x) ()" > outfile
-	print "#define NOARGS" > outfile
-	print "#define const" > outfile
-	print "#endif" > outfile
+	print "extern void initialize_" table_name "_error_table (void);" > outfile
 	print "" > outfile
-	print "extern void initialize_" table_name "_error_table (NOARGS);" > outfile
+	print "/* Lclint doesn't handle null annotations on arrays" > outfile
+	print "   properly, so we need this typedef in each" > outfile
+	print "   generated .c file.  */" > outfile
+	print "/*@-redef@*/" > outfile
+	print "typedef /*@null@*/ const char FAR *ncptr;" > outfile
+	print "/*@=redef@*/" > outfile
 	print "" > outfile
-	print "static const char FAR * const text[] = {" > outfile
+	print "static ncptr const text[] = {" > outfile
 	table_item_count = 0
 }
 
@@ -197,11 +187,7 @@ END {
 	print "    0" > outfile
 	print "};" > outfile
 	print "" > outfile
-	print "struct error_table {" > outfile
-	print "    char const FAR * const FAR * msgs;" > outfile
-	print "    long base;" > outfile
-	print "    int n_msgs;" > outfile
-	print "};" > outfile
+	print "#include <com_err.h>" > outfile
 	print "" > outfile
 	if (tab_base_high == 0) {
 	    print "const struct error_table et_" table_name "_error_table = { text, " \
@@ -214,13 +200,8 @@ END {
 	}
 	print "" > outfile
 	print "#if !defined(_MSDOS) && !defined(_WIN32) && !defined(macintosh)" > outfile
-	print "struct et_list {" > outfile
-	print "	   struct et_list *next;" > outfile
-	print "	   const struct error_table * table;" > outfile
-	print "};" > outfile
-	print "extern struct et_list *_et_list;" > outfile
 	print "static struct et_list link = { 0, 0 };" > outfile
-	print "void initialize_" table_name "_error_table (NOARGS) {" > outfile
+	print "void initialize_" table_name "_error_table (void) {" > outfile
 	print "	   if (!link.table) {" > outfile
 	print "	       link.next = _et_list;" > outfile
 	print "	       link.table = &et_" table_name "_error_table;" > outfile

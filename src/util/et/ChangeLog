@@ -1,5 +1,27 @@
 2000-12-05  Ken Raeburn  <raeburn@mit.edu>
 
+	* et_c.awk: Don't generate macros we won't use.  Assume ANSI C
+	prototypes.  Include com_err.h in output file, rather than
+	duplicating declarations.
+
+	* com_err.c: Assume ANSI C; drop conditional-prototype macros and
+	varargs.h support.
+
+	* com_err.h: Get rid of old 68k-Mac pragmas.
+	(GSS_DLLIMP, KRB5_EXPORTVAR, HAVE_STDARG_H, ET_P, NEAR,
+	ET_STDARG_P, ET_VARARGS): Don't define.
+	(struct et_list, _et_list): Declare, with annotations.
+	* error_table.h (struct et_list, _et_list): Don't declare here.
+
+	* error_message.c (_et_list): Annotate.
+	(error_message, add_error_table, remove_error_table): Check
+	'table' field of et_list for null pointer.
+
+	* t_com_err.c: Include string.h.
+	(try_one): Check strcmp value against zero explicitly.
+	(main): Annotate arguments as unused.  Cast add_error_table and
+	remove_error_table return values to void.
+
 	* Makefile.in (clean-unix): Clean up lclint files too.
 	(cleant-lclint): New target.
 	(et1.c, et2.c, et1.h, et2.h, test1.c, test1.h, test2.h, test2.c):
@@ -13,6 +35,7 @@
 	(rebuild, rebuild-c, rebuild-h): New targets: Rebuild perl
 	versions of awk scripts.
 	(clean-files): Get more generated files from test cases.
+	* et_c.perl, et_h.perl: Rebuilt.
 
 2000-11-14  Ken Raeburn  <raeburn@mit.edu>
 

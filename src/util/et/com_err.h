@@ -14,49 +14,23 @@
 
 #if defined(_MSDOS) || defined(_WIN32) || defined(macintosh)
 #include <win-mac.h>
-#if defined(macintosh) && defined(__CFM68K__) && !defined(__USING_STATIC_LIBS__)
-#pragma import on
-#endif
 #endif
 
 #ifndef KRB5_CALLCONV
 #define KRB5_CALLCONV
 #define KRB5_CALLCONV_C
 #define KRB5_DLLIMP
-#define GSS_DLLIMP
-#define KRB5_EXPORTVAR
 #endif
 
 #ifndef FAR
 #define FAR
-#define NEAR
 #endif
 
-#if defined(__STDC__) || defined(__cplusplus) || defined(_MSDOS) || defined(_WIN32) || defined(macintosh)
-
-/* End-user programs may need this -- oh well */
-#ifndef HAVE_STDARG_H
-#define HAVE_STDARG_H 1
-#endif
-
-#define ET_P(x) x
-
-#else
-#define ET_P(x) ()
-#endif /* __STDC__ */
-
-#ifdef HAVE_STDARG_H
 #include <stdarg.h>
-#define	ET_STDARG_P(x) x
-#else
-#include <varargs.h>
-#define ET_STDARG_P(x) ()
-#define ET_VARARGS
-#endif
 
 typedef long errcode_t;
-typedef void (*et_old_error_hook_func) ET_P((const char FAR *, errcode_t,
-					     const char FAR *, va_list ap));
+typedef void (*et_old_error_hook_func) (const char FAR *, errcode_t,
+					const char FAR *, va_list ap);
 	
 struct error_table {
 	/*@shared@*/ char const FAR * const FAR * msgs;
@@ -64,22 +38,35 @@ struct error_table {
 	unsigned int n_msgs;
 };
 
+/* These are for INTERNAL USE ONLY!  Don't rely on them, we're trying
+   to eliminate them.  They're currently used for some internal stuff
+   in generated files.  */
+struct et_list {
+    /*@dependent@*//*@null@*/ struct et_list *next;
+    /*@dependent@*//*@null@*/ const struct error_table FAR *table;
+};
+#if !defined(_MSDOS) && !defined(_WIN32) && !defined(macintosh)
+/*@null@*//*@dependent@*/ extern struct et_list * _et_list;
+#endif
+/* end INTERNAL stuff */
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+/* Public interfaces */
 KRB5_DLLIMP extern void KRB5_CALLCONV_C com_err
-	ET_STDARG_P((const char FAR *, errcode_t, const char FAR *, ...));
+	(const char FAR *, errcode_t, const char FAR *, ...);
 KRB5_DLLIMP extern void KRB5_CALLCONV com_err_va
-	ET_P((const char FAR *whoami, errcode_t code, const char FAR *fmt,
-	      va_list ap));
+	(const char FAR *whoami, errcode_t code, const char FAR *fmt,
+	 va_list ap);
 KRB5_DLLIMP extern /*@observer@*//*@dependent@*/ const char FAR * KRB5_CALLCONV error_message
-	ET_P((errcode_t))
+	(errcode_t)
        /*@modifies internalState@*/;
 KRB5_DLLIMP extern errcode_t KRB5_CALLCONV add_error_table
-	ET_P((const struct error_table FAR *));
+	(/*@dependent@*/ const struct error_table FAR *);
 KRB5_DLLIMP extern errcode_t KRB5_CALLCONV remove_error_table
-	ET_P((const struct error_table FAR *));
+	(const struct error_table FAR *);
 
 #if !defined(_MSDOS) && !defined(_WIN32) && !defined(macintosh)
 /*
@@ -88,18 +75,12 @@ KRB5_DLLIMP extern errcode_t KRB5_CALLCONV remove_error_table
  * applications under non-Unix environments.
  */
 
-extern et_old_error_hook_func set_com_err_hook
-	ET_P((et_old_error_hook_func));
-extern et_old_error_hook_func reset_com_err_hook
-	ET_P((void));
+extern et_old_error_hook_func set_com_err_hook (et_old_error_hook_func);
+extern et_old_error_hook_func reset_com_err_hook (void);
 #endif
 
 #ifdef __cplusplus
 }
-#endif
-
-#if defined(macintosh) && defined(__CFM68K__) && !defined(__USING_STATIC_LIBS__)
-#pragma import reset
 #endif
 
 #define __COM_ERR_H

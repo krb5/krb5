@@ -1,5 +1,5 @@
-#!/afs/athena/contrib/perl5/p
-eval 'exec /afs/athena/contrib/perl5/arch/sun4x_55/bin/perl -S $0 ${1+"$@"}'
+#!/usr/athena/bin/perl
+eval 'exec /usr/athena/bin/perl -S $0 ${1+"$@"}'
     if $running_under_some_shell;
 			# this emulates #! processing on NIH machines.
 			# (remove #! line above if indigestible)
@@ -192,11 +192,15 @@ else {
 &Pick('>', $outfile) &&
     (print $fh '');
 &Pick('>', $outfile) &&
-    (print $fh '#if defined(unix) || defined(_AIX)');
+    (print $fh
+
+      '#if !defined(_MSDOS) && !defined(_WIN32) && !defined(macintosh)');
 &Pick('>', $outfile) &&
     (print $fh '/* for compatibility with older versions... */');
 &Pick('>', $outfile) &&
-    (print $fh 'extern void initialize_' . $table_name . '_error_table ();');
+    (print $fh 'extern void initialize_' . $table_name .
+
+      '_error_table () /*@modifies internalState@*/;');
 &Pick('>', $outfile) &&
     (print $fh '#define init_' . $table_name . '_err_tbl initialize_' .
 

@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 #include "com_err.h"
 #include "et1.h"
 #include "et2.h"
@@ -14,7 +15,7 @@ try_one (errcode_t code, int known, int table, int msgno)
     char buffy[1024];
 
     sprintf (buffy, "error table %d message %d", table, msgno);
-    if (!strcmp (buffy, msg)) {
+    if (0 == strcmp (buffy, msg)) {
 	if (!known) {
 	    known_err++;
 	}
@@ -58,49 +59,49 @@ try_em_1 (int t1_known, int t2_known, int lineno)
 }
 #define try_em(A,B) try_em_1(A,B,__LINE__)
 
-int main (int argc, char *argv[])
+int main (/*@unused@*/ int argc, /*@unused@*/ char *argv[])
 {
     try_em (0, 0);
-    add_error_table (&et_et1_error_table);
+    (void) add_error_table (&et_et1_error_table);
     try_em (1, 0);
-    add_error_table (&et_et2_error_table);
+    (void) add_error_table (&et_et2_error_table);
     try_em (1, 1);
-    remove_error_table (&et_et1_error_table);
+    (void) remove_error_table (&et_et1_error_table);
     try_em (0, 1);
-    remove_error_table (&et_et1_error_table);
+    (void) remove_error_table (&et_et1_error_table);
     try_em (0, 1);
-    remove_error_table (&et_et2_error_table);
+    (void) remove_error_table (&et_et2_error_table);
     try_em (0, 0);
 
     initialize_et1_error_table ();
     try_em (1, 0);
-    add_error_table (&et_et1_error_table);
+    (void) add_error_table (&et_et1_error_table);
     try_em (1, 0);
-    remove_error_table (&et_et1_error_table);
+    (void) remove_error_table (&et_et1_error_table);
     try_em (0, 0);
 
     initialize_et1_error_table ();
     try_em (1, 0);
-    add_error_table (&et_et1_error_table);
+    (void) add_error_table (&et_et1_error_table);
     try_em (1, 0);
-    add_error_table (&et_et2_error_table);
+    (void) add_error_table (&et_et2_error_table);
     try_em (1, 1);
-    remove_error_table (&et_et1_error_table);
+    (void) remove_error_table (&et_et1_error_table);
     try_em (0, 1);
-    remove_error_table (&et_et2_error_table);
+    (void) remove_error_table (&et_et2_error_table);
     try_em (0, 0);
-    remove_error_table (&et_et2_error_table);
+    (void) remove_error_table (&et_et2_error_table);
     try_em (0, 0);
 
-    add_error_table (&et_et2_error_table);
+    (void) add_error_table (&et_et2_error_table);
     try_em (0, 1);
     initialize_et2_error_table ();
     try_em (0, 1);
-    add_error_table (&et_et1_error_table);
+    (void) add_error_table (&et_et1_error_table);
     try_em (1, 1);
-    remove_error_table (&et_et1_error_table);
+    (void) remove_error_table (&et_et1_error_table);
     try_em (0, 1);
-    remove_error_table (&et_et2_error_table);
+    (void) remove_error_table (&et_et2_error_table);
     try_em (0, 0);
 
     return fail;
