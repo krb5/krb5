@@ -76,3 +76,9 @@ Changes in 1.1a3:
 2.0fc2
  updated to CCache 2.0fc2
  removed 68K builds which snuck in somehow
+
+2.0fc3
+ updated to CCache 2.0fc3
+ added 68K des library
+ removed all traces of CW builds
+ forced 68K version of krb globals to build
