@@ -35,7 +35,7 @@ krb5_error_code krb5_timeofday
 	PROTOTYPE((krb5_int32 * ));
 krb5_error_code krb5_ms_timeofday
 	PROTOTYPE((krb5_int32 *,
-		   krb5_int16 * ));
+		   krb5_ui_2 * ));
 int krb5_net_read
 	PROTOTYPE((int ,
 		   char *,
