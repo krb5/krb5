@@ -1,3 +1,8 @@
+Thu Aug 10 09:54:52 2000  Ezra Peisach  <epeisach@mit.edu>
+
+	* rlogin.exp: Change RLOGIN to KRLOGIN so we do not use the
+ 	incorrect binary as used for the root login in default.exp.
+
 Thu Nov 14 15:20:19 1996  Barry Jaspan  <bjaspan@mit.edu>
 
 	* telnet.exp: telnet may output fqdn in upper-case
