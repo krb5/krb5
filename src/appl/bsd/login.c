@@ -2103,6 +2103,7 @@ void dolastlog(quiet, tty)
 {
 #if defined(HAVE_LASTLOG_H) || (defined(BSD) && (BSD >= 199103))
     struct lastlog ll;
+    time_t lltime;
     int fd;
 
     if ((fd = open(LASTLOG, O_RDWR, 0)) >= 0) {
@@ -2111,7 +2112,9 @@ void dolastlog(quiet, tty)
 	    if ((read(fd, (char *)&ll, sizeof(ll)) == sizeof(ll)) &&
 		(ll.ll_time != 0)) {
 
-		printf("Last login: %.*s ", 24-5, (char *)ctime(&ll.ll_time));
+		/* .ll_time may not be a time_t.  */
+		lltime = ll.ll_time;
+		printf("Last login: %.*s ", 24-5, (char *)ctime(&lltime));
 
 		if (*ll.ll_host != '\0')
 		    printf("from %.*s\n", sizeof(ll.ll_host), ll.ll_host);
@@ -2120,7 +2123,8 @@ void dolastlog(quiet, tty)
 	    }
 	    (void)lseek(fd, (off_t)pwd->pw_uid * sizeof(ll), SEEK_SET);
 	}
-	(void) time(&ll.ll_time);
+	(void) time(&lltime);
+	ll.ll_time = lltime;
 
 	(void) strncpy(ll.ll_line, tty, sizeof(ll.ll_line));
 	ll.ll_line[sizeof(ll.ll_line) - 1] = '\0';

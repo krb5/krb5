@@ -4,6 +4,7 @@
 	redefining them.
 	* login.c (main): If the supplied name is longer than the utmp
 	buffer, don't bother trying it as a username.
+	(dolastlog): Don't assume lastlog.ll_time is a time_t.
 
 2001-01-13  Sam Hartman  <hartmans@mit.edu>
 
