@@ -18,7 +18,7 @@ static char rcsid_u2gen_c[] =
 #include <krb5/copyright.h>
 #include <krb5/krb5.h>
 
-/*#include <time.h> */
+#include <time.h>
 #include <isode/psap.h>
 #include <krb5/asn1.h>
 #include "asn1glue.h"
