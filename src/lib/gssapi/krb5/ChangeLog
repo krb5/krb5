@@ -21,7 +21,7 @@
 	* ser_sctx.c (kg_oid_externalize): Check for errors.
 	(kg_oid_internalize): Check for errors.  Free allocated storage on
 	error.
-	(kg_queue_externalize): Check for errorrs.
+	(kg_queue_externalize): Check for errors.
 	(kg_queue_internalize): Check for errors.  Free allocated storage
 	on error.
 	(kg_ctx_size): Update for new context data.
