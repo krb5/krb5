@@ -105,7 +105,7 @@ main(argc, argv)
 	exit(1);
     }
     printf("Ticket cache: %s\nDefault principal: %s\n",
-	   (*cache->ops->get_name)(cache), name);
+	   krb5_cc_get_name(cache), name);
     free(name);
     if (code = krb5_cc_start_seq_get(cache, &cur)) {
 	com_err(argv[0], code, "while starting to retrieve tickets");
@@ -124,6 +124,8 @@ main(argc, argv)
 	    continue;
 	}
 	printf("C: %s\tS:%s\n", name, sname);
+	free(name);
+	free(sname);
     }
     if (code == KRB5_CC_END) {
 	if (code = krb5_cc_end_seq_get(cache, &cur)) {
