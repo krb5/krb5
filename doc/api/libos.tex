@@ -102,8 +102,8 @@ epoch.
 encoding as needed]
 
 \begin{funcdecl}{krb5_ms_timeofday}{krb5_error_code}{\funcout}
-\funcarg{int32 *}{seconds}
-\funcarg{int16 *}{milliseconds}
+\funcarg{krb5_int32 *}{seconds}
+\funcarg{krb5_ui_2 *}{milliseconds}
 \end{funcdecl}
 
 Retrieves the system time of day, in seconds since the local system's
