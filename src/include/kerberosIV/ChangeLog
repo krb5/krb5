@@ -1,3 +1,8 @@
+Mon Oct 20 14:09:45 1997  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* krb.h: If we are using prototypes, add a forward declaration for
+		struct sockaddr_in.
+
 Tue Oct 14 15:39:28 1997  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
 
 	* des.h: Define KRB_INT32 for the purposes of dealing with the key

@@ -445,6 +445,10 @@ typedef int (KRB5_CALLCONV *decrypt_tkt_type)
  * Function Prototypes for Kerberos V4.
  */
 
+#if (defined(__STDC__) || defined(_WINDOWS)) && !defined(KRB5_NO_PROTOTYPES)
+struct sockaddr_in;
+#endif
+
 /* dest_tkt.c */
 KRB5_DLLIMP int KRB5_CALLCONV dest_tkt
 	PROTOTYPE((void));
