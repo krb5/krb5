@@ -60,33 +60,13 @@ krb5_tkt_authent **authdat;
 	    return(retval);
 	}
     }
-    if (rcache = (krb5_rcache) malloc(sizeof(*rcache))) {
-	if (!(retval = krb5_rc_resolve_type(&rcache, "dfl"))) {
-	    char *cachename;
-	    extern krb5_deltat krb5_clockskew;
-
-	    if (cachename = malloc(server[1]->length+1+3)) {
-		strcpy(cachename, "rc_");
-		strncat(cachename, server[1]->data, server[1]->length);
-		cachename[server[1]->length+3] = '\0';
-
-		if (!(retval = krb5_rc_resolve(rcache, cachename))) {
-		    if (!((retval = krb5_rc_recover(rcache)) &&
-			  (retval = krb5_rc_initialize(rcache,
-						       krb5_clockskew)))) {
-			retval = krb5_rd_req_decoded(request, server,
-						     sender_addr, 0,
-						     0, 0, rcache, authdat);
-			krb5_rc_close(rcache);
-		    }
-		}
-		free(cachename);
-	    } else
-		retval = ENOMEM;
-	}
+    if (!(retval = krb5_get_server_rcache(server[1]->data, &rcache))) {
+	retval = krb5_rd_req_decoded(request, server,
+				     sender_addr, 0,
+				     0, 0, rcache, authdat);
+	krb5_rc_close(rcache);
 	xfree(rcache);
-    } else
-	retval = ENOMEM;
+    }
     krb5_free_ap_req(request);
 
     return retval;
