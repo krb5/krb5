@@ -51,14 +51,14 @@ unit-test-body-tcp:
 		$(RUNTEST) SERVER=./server CLIENT=./client \
 		KINIT=$(BUILDTOP)/clients/kinit/kinit \
 		KDESTROY=$(BUILDTOP)/clients/kdestroy/kdestroy \
-		PROT=-t --tool rpc_test
+		PROT=-t --tool rpc_test $(RUNTESTFLAGS)
 
 unit-test-body-udp:
 	RPC_TEST_SRVTAB=/tmp/rpc_test_v5srvtab $(ENV_SETUP) \
 		$(RUNTEST) SERVER=./server CLIENT=./client \
 		KINIT=$(BUILDTOP)/clients/kinit/kinit \
 		KDESTROY=$(BUILDTOP)/clients/kdestroy/kdestroy \
-		PROT=-u --tool rpc_test
+		PROT=-u --tool rpc_test $(RUNTESTFLAGS)
 
 unit-test-setup::
 	$(ENV_SETUP) $(START_SERVERS)
