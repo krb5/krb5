@@ -258,6 +258,7 @@ int main(argc, argv)
 	char tbuf[MAXPATHLEN + 2];
 	char *ttyname(), *stypeof(), *crypt(), *getpass();
 	time_t login_time;
+	char *ccname = 0;   /* name of forwarded cache */
 int retval;
 	
 	off_t lseek();
@@ -500,7 +501,6 @@ int retval;
 	(void)ioctl(0, TIOCSETC, (char *)&tc);
 	(void)ioctl(0, TIOCSETP, (char *)&sgttyb);
 #endif
-
 	for (cnt = getdtablesize(); cnt > 2; cnt--)
 		(void) close(cnt);
 
@@ -878,6 +878,8 @@ bad_login:
 	}
 #endif
 
+	ccname = getenv("KRB5CCNAME");  /* save cache */
+
 	/* destroy environment unless user has requested preservation */
 	envinit = (char **)malloc(MAXENVIRON * sizeof(char *));
 	if (envinit == 0) {
@@ -907,12 +909,35 @@ bad_login:
 	    }
 	}
 #endif
+/* Set login timezone for date information (PDG) */
+#ifdef __sgi__
+    {
+        FILE *fp;
+        if ((fp = fopen("/etc/TIMEZONE", "r")) != NULL) {
+        while(fgets(tbuf, sizeof(tbuf), fp)) {
+            if ((tbuf[0] == '#') || (strchr(tbuf, '=') == 0))
+            continue;
+            for (p = tbuf; *p; p++)
+            if (*p == '\n') {
+                *p = '\0';
+                break;
+            }
+            envinit[i++] = strsave(tbuf);
+        }
+        fclose(fp);
+        }
+    }
+#endif
+
 	sprintf(tbuf,"LOGNAME=%s",pwd->pw_name);
 	envinit[i++] = strsave(tbuf);
 	sprintf(tbuf,"LOGIN=%s",pwd->pw_name);
 	envinit[i++] = strsave(tbuf);
 
 	envinit[i++] = NULL;
+
+	if (ccname)
+		setenv("KRB5CCNAME", ccname, 0);
 
 	setenv("HOME", pwd->pw_dir, 0);
 	setenv("PATH", LPATH, 0);
@@ -987,7 +1012,9 @@ bad_login:
 		if (!krbflag && !fflag && !Fflag && !eflag )
 		    printf("\nWarning: No Kerberos tickets obtained.\n\n");
 #endif /* KRB4 */
+#ifndef NO_MOTD
 		motd();
+#endif
 		(void)sprintf(tbuf, "%s/%s", MAILDIR, pwd->pw_name);
 		if (stat(tbuf, &st) == 0 && st.st_size != 0)
 			printf("You have %smail.\n",

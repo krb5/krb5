@@ -402,6 +402,7 @@ getport(alport)
     struct sockaddr_in sin;
     int s;
     
+    memset((char *) &sin, 0,sizeof(sin));
     sin.sin_family = AF_INET;
     sin.sin_addr.s_addr = INADDR_ANY;
     s = socket(AF_INET, SOCK_STREAM, 0);

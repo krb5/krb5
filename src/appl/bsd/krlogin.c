@@ -309,6 +309,7 @@ main(argc, argv)
 #endif
     struct passwd *pwd;
     struct servent *sp;
+	struct servent defaultservent = {0,0,0,0};
     int uid, options = 0;
 #ifdef POSIX_SIGNALS
     struct sigaction sa;
@@ -474,10 +475,8 @@ main(argc, argv)
       else 
 	sp = getservbyname("klogin","tcp");
       if (sp == 0) {
-	fprintf(stderr, "rlogin: %s/tcp: unknown service\n",
-		encrypt_flag ? "eklogin" : "klogin");
-	
-	try_normal(orig_argv);
+		sp = &defaultservent;   /* ANL */
+		sp->s_port = encrypt_flag ? htons(2105) : htons(543);
       }
 #else
       sp = getservbyname("login", "tcp");

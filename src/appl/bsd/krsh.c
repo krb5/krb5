@@ -130,6 +130,7 @@ main(argc, argv0)
     fd_set readfrom, ready;
     int one = 1;
     struct servent *sp;
+	struct servent defaultservent = {0,0,0,0};
 
 #ifdef POSIX_SIGNALS
     sigset_t omask, igmask;
@@ -319,8 +320,8 @@ main(argc, argv0)
 #endif  /* KERBEROS */
       if (sp == 0) {
 #ifdef KERBEROS
-	fprintf(stderr, "rsh: kshell/tcp: unknown service\n");
-	try_normal(argv0);
+	sp = &defaultservent;
+	sp->s_port = htons(544);
 #else 
 	fprintf(stderr, "rsh: shell/tcp: unknown service\n");
 #endif /* KERBEROS */
