@@ -1,3 +1,8 @@
+2001-03-10  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* make_random_key.c, old_api_glue.c: Do not use a variable named
+	random that might shadow a system header file definition.
+
 2001-03-09  Ken Raeburn  <raeburn@mit.edu>
 
 	* cksumtypes.c, etypes.c, prng.c: Use krb5int_ prefix for internal

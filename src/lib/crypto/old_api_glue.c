@@ -301,12 +301,12 @@ krb5_random_confounder(size, ptr)
      size_t size;
      krb5_pointer ptr;
 {
-    krb5_data random;
+    krb5_data random_data;
 
-    random.length = size;
-    random.data = ptr;
+    random_data.length = size;
+    random_data.data = ptr;
 
-    return(krb5_c_random_make_octets(/* XXX */ 0, &random));
+    return(krb5_c_random_make_octets(/* XXX */ 0, &random_data));
 }
 
 krb5_error_code krb5_encrypt_data(context, key, ivec, data, enc_data)
