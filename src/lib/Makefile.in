@@ -11,7 +11,7 @@ all-mac::
 
 CLEANLIBS = libkrb5.a libkdb5.a libcrypto.a libgssapi_krb5.a libdes425.a \
 	libkrb425.a libkadm.a libkrb4.a libkdb4.a libcom_err.a libpty.a \
-	libss.a \
+	libss.a libkrb5util.a libgssapi.a \
 	libkrb5.so libcrypto.so libkrb4.so libdes425.so
 
 clean-mac:: clean-unix
