@@ -29,6 +29,7 @@
  */
 
 #include "gssapiP_generic.h"
+#include <string.h>
 
 #define QUEUE_LENGTH 20
 
