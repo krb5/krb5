@@ -31,12 +31,12 @@ krb5_gss_compare_name(context, minor_status, name1, name2, name_equal)
      int *name_equal;
 { 
    if (! kg_validate_name(name1)) {
-      *minor_status = G_VALIDATE_FAILED;
+      *minor_status = (OM_uint32) G_VALIDATE_FAILED;
       return(GSS_S_CALL_BAD_STRUCTURE|GSS_S_BAD_NAME);
    }
 
    if (! kg_validate_name(name2)) {
-      *minor_status = G_VALIDATE_FAILED;
+      *minor_status = (OM_uint32) G_VALIDATE_FAILED;
       return(GSS_S_CALL_BAD_STRUCTURE|GSS_S_BAD_NAME);
    }
 

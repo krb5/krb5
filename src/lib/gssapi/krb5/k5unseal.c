@@ -61,7 +61,7 @@ kg_unseal(minor_status, context_handle, input_token_buffer, message_buffer,
 
    /* validate the context handle */
    if (! kg_validate_ctx_id(context_handle)) {
-      *minor_status = G_VALIDATE_FAILED;
+      *minor_status = (OM_uint32) G_VALIDATE_FAILED;
       return(GSS_S_NO_CONTEXT);
    }
 

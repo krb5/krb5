@@ -54,7 +54,7 @@ krb5_gss_inquire_cred(context, minor_status, cred_handle, name, lifetime_ret,
       }
    } else {
       if (! kg_validate_cred_id(cred_handle)) {
-	 *minor_status = G_VALIDATE_FAILED;
+	 *minor_status = (OM_uint32) G_VALIDATE_FAILED;
 	 return(GSS_S_CALL_BAD_STRUCTURE|GSS_S_NO_CRED);
       }
    }
@@ -87,7 +87,7 @@ krb5_gss_inquire_cred(context, minor_status, cred_handle, name, lifetime_ret,
       if (! kg_save_name((gss_name_t) ret_name)) {
 	 (void)gss_release_oid_set(minor_status, &mechs);
 	 krb5_free_principal(context, ret_name);
-	 *minor_status = G_VALIDATE_FAILED;
+	 *minor_status = (OM_uint32) G_VALIDATE_FAILED;
 	 return(GSS_S_FAILURE);
       }
       *name = (gss_name_t) ret_name;

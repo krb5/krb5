@@ -35,7 +35,7 @@ krb5_gss_release_cred(context, minor_status, cred_handle)
       return(kg_release_defcred(minor_status));
 
    if (! kg_delete_cred_id(*cred_handle)) {
-      *minor_status = G_VALIDATE_FAILED;
+      *minor_status = (OM_uint32) G_VALIDATE_FAILED;
       return(GSS_S_CALL_BAD_STRUCTURE|GSS_S_NO_CRED);
    }
 

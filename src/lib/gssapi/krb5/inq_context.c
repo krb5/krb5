@@ -49,7 +49,7 @@ krb5_gss_inquire_context(context, minor_status, context_handle, initiator_name,
 
    /* validate the context handle */
    if (! kg_validate_ctx_id(context_handle)) {
-      *minor_status = G_VALIDATE_FAILED;
+      *minor_status = (OM_uint32) G_VALIDATE_FAILED;
       return(GSS_S_NO_CONTEXT);
    }
 
@@ -80,7 +80,7 @@ krb5_gss_inquire_context(context, minor_status, context_handle, initiator_name,
       }
       if (! kg_save_name((gss_name_t) init)) {
 	 krb5_free_principal(context, init);
-	 *minor_status = G_VALIDATE_FAILED;
+	 *minor_status = (OM_uint32) G_VALIDATE_FAILED;
 	 return(GSS_S_FAILURE);
       }
    }
@@ -99,7 +99,7 @@ krb5_gss_inquire_context(context, minor_status, context_handle, initiator_name,
 	    kg_delete_name((gss_name_t) accept);
 	    krb5_free_principal(context, init);
 	 }
-	 *minor_status = G_VALIDATE_FAILED;
+	 *minor_status = (OM_uint32) G_VALIDATE_FAILED;
 	 return(GSS_S_FAILURE);
       }
    }

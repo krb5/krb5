@@ -1,3 +1,13 @@
+Tue Mar 7 20:48:03 1995 Keith Vetter (keithv@fusion.com)
+
+	* accept_s.c, acqire_s.c, compare_.c, context_.c, delete_s.c,
+          disp_nam.c, disp_sta.c, get_tkt_.c, init_sec.c, inq_cont.c, 
+          inq_cred.c, k5seal.c, k5unseal.c, process_.c, rel_cred.c, 
+          rel_name.c, util_cks.c, util_cry.c: added casts on signed ->
+            unsigned assignments.
+        * util_seq.c: added casts on bit extraction code.
+        * gssapip_.h: pulls in los-proto.h for prototypes.
+
 Tue Feb 28 00:27:44 1995  John Gilmore  (gnu at toad.com)
 
 	* gssapi_krb5.h, gssapiP_krb5.h: Avoid <krb5/...> includes.

@@ -21,6 +21,11 @@
  */
 
 #include "gssapiP_krb5.h"
+#ifdef USE_STRING_H
+#include <string.h>
+#else
+#include <strings.h>
+#endif
 
 /* get credentials corresponding to a key in the krb5 keytab.
    If the default name is requested, return the name in output_princ.
@@ -265,7 +270,7 @@ krb5_gss_acquire_cred(context, minor_status, desired_name, time_req,
    /*SUPPRESS 29*/
    if ((desired_name != GSS_C_NO_NAME) &&
        (! kg_validate_name(desired_name))) {
-      *minor_status = G_VALIDATE_FAILED;
+      *minor_status = (OM_uint32) G_VALIDATE_FAILED;
       return(GSS_S_CALL_BAD_STRUCTURE|GSS_S_BAD_NAME);
    }
 
@@ -300,7 +305,7 @@ krb5_gss_acquire_cred(context, minor_status, desired_name, time_req,
        (cred_usage != GSS_C_ACCEPT) &&
        (cred_usage != GSS_C_BOTH)) {
       xfree(cred);
-      *minor_status = G_BAD_USAGE;
+      *minor_status = (OM_uint32) G_BAD_USAGE;
       return(GSS_S_FAILURE);
    }
 
@@ -407,7 +412,7 @@ krb5_gss_acquire_cred(context, minor_status, desired_name, time_req,
       if (cred->princ)
 	 krb5_free_principal(context, cred->princ);
       xfree(cred);
-      *minor_status = G_VALIDATE_FAILED;
+      *minor_status = (OM_uint32) G_VALIDATE_FAILED;
       return(GSS_S_FAILURE);
    }
 

@@ -62,7 +62,7 @@ krb5_gss_display_status(context, minor_status, status_value, status_type,
       }
 
       if (*message_context) {
-	 *minor_status = G_BAD_MSG_CTX;
+	 *minor_status = (OM_uint32) G_BAD_MSG_CTX;
 	 return(GSS_S_FAILURE);
       }
 

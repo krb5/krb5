@@ -39,8 +39,6 @@ kg_make_confounder(ed, buf)
      krb5_gss_enc_desc *ed;
      unsigned char *buf;
 {
-   krb5_error_code code;
-
    return(krb5_random_confounder( ed->eblock.crypto_entry->block_length, buf));
 }
 

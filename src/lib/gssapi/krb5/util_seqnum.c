@@ -32,10 +32,10 @@ kg_make_seq_num(ed, direction, seqnum, cksum, buf)
 {
    unsigned char plain[8];
 
-   plain[0] = seqnum&0xff;
-   plain[1] = (seqnum>>8)&0xff;
-   plain[2] = (seqnum>>16)&0xff;
-   plain[3] = (seqnum>>24)&0xff;
+   plain[0] = (unsigned char) (seqnum&0xff);
+   plain[1] = (unsigned char) ((seqnum>>8)&0xff);
+   plain[2] = (unsigned char) ((seqnum>>16)&0xff);
+   plain[3] = (unsigned char) ((seqnum>>24)&0xff);
 
    plain[4] = direction;
    plain[5] = direction;

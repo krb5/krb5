@@ -173,7 +173,7 @@ krb5_gss_accept_sec_context(context, minor_status, context_handle,
       return(GSS_S_NO_CRED);
    } else {
       if (! kg_validate_cred_id(verifier_cred_handle)) {
-	 *minor_status = G_VALIDATE_FAILED;
+	 *minor_status = (OM_uint32) G_VALIDATE_FAILED;
 	 return(GSS_S_CALL_BAD_STRUCTURE|GSS_S_DEFECTIVE_CREDENTIAL);
       }
    }
@@ -439,7 +439,7 @@ krb5_gss_accept_sec_context(context, minor_status, context_handle,
 	    xfree(token.value);
 	 (void)krb5_gss_delete_sec_context(context, minor_status,
 					   (gss_ctx_id_t *) &ctx, NULL);
-	 *minor_status = G_VALIDATE_FAILED;
+	 *minor_status = (OM_uint32) G_VALIDATE_FAILED;
 	 return(GSS_S_FAILURE);
       }
 
@@ -454,7 +454,7 @@ krb5_gss_accept_sec_context(context, minor_status, context_handle,
 	 xfree(token.value);
       (void)krb5_gss_delete_sec_context(context, minor_status, 
 					(gss_ctx_id_t *) &ctx, NULL);
-      *minor_status = G_VALIDATE_FAILED;
+      *minor_status = (OM_uint32) G_VALIDATE_FAILED;
       return(GSS_S_FAILURE);
    }
 

@@ -42,7 +42,6 @@ make_ap_req(context, cred, server, endtime, chan_bindings, do_mutual,
     krb5_creds in_creds, * out_creds;
     krb5_authenticator authent;
     krb5_data ap_req;
-    long tmp;
     unsigned char *ptr;
     unsigned char ckbuf[24];		/* see the token formats doc */
     unsigned char *t;
@@ -193,7 +192,7 @@ krb5_gss_init_sec_context(context, minor_status, claimant_cred_handle,
       }
    } else {
       if (! kg_validate_cred_id(claimant_cred_handle)) {
-	 *minor_status = G_VALIDATE_FAILED;
+	 *minor_status = (OM_uint32) G_VALIDATE_FAILED;
 	 return(GSS_S_CALL_BAD_STRUCTURE|GSS_S_DEFECTIVE_CREDENTIAL);
       }
    }
@@ -203,7 +202,7 @@ krb5_gss_init_sec_context(context, minor_status, claimant_cred_handle,
    /* verify that the target_name is valid and usable */
 
    if (! kg_validate_name(target_name)) {
-      *minor_status = G_VALIDATE_FAILED;
+      *minor_status = (OM_uint32) G_VALIDATE_FAILED;
       return(GSS_S_CALL_BAD_STRUCTURE|GSS_S_BAD_NAME);
    }
 
@@ -307,7 +306,7 @@ krb5_gss_init_sec_context(context, minor_status, claimant_cred_handle,
 	 krb5_free_principal(context, ctx->there);
 	 xfree(ctx);
 
-	 *minor_status = G_VALIDATE_FAILED;
+	 *minor_status = (OM_uint32) G_VALIDATE_FAILED;
 	 return(GSS_S_FAILURE);
       }
 
@@ -354,7 +353,7 @@ krb5_gss_init_sec_context(context, minor_status, claimant_cred_handle,
       /* validate the context handle */
       /*SUPPRESS 29*/
       if (! kg_validate_ctx_id(*context_handle)) {
-	 *minor_status = G_VALIDATE_FAILED;
+	 *minor_status = (OM_uint32) G_VALIDATE_FAILED;
 	 return(GSS_S_NO_CONTEXT);
       }
 

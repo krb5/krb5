@@ -38,7 +38,7 @@ krb5_gss_display_name(context, minor_status, input_name, output_name_buffer,
    output_name_buffer->value = NULL;
 
    if (! kg_validate_name(input_name)) {
-      *minor_status = G_VALIDATE_FAILED;
+      *minor_status = (OM_uint32) G_VALIDATE_FAILED;
       return(GSS_S_CALL_BAD_STRUCTURE|GSS_S_BAD_NAME);
    }
 
@@ -50,7 +50,7 @@ krb5_gss_display_name(context, minor_status, input_name, output_name_buffer,
    if (! g_make_string_buffer(str, output_name_buffer)) {
       xfree(str);
 
-      *minor_status = G_BUFFER_ALLOC;
+      *minor_status = (OM_uint32) G_BUFFER_ALLOC;
       return(GSS_S_FAILURE);
    }
 

@@ -29,7 +29,7 @@ krb5_gss_release_name(context, minor_status, input_name)
      gss_name_t *input_name;
 {
    if (! kg_validate_name(*input_name)) {
-      *minor_status = G_VALIDATE_FAILED;
+      *minor_status = (OM_uint32) G_VALIDATE_FAILED;
       return(GSS_S_CALL_BAD_STRUCTURE|GSS_S_BAD_NAME);
    }
 

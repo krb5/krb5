@@ -42,7 +42,7 @@ gss_accept_sec_context(minor_status, context_handle, verifier_cred_handle,
 
    /* validate the context handle */
    if (! kg_validate_ctx_id(context_handle)) {
-      *minor_status = G_VALIDATE_FAILED;
+      *minor_status = (OM_uint32) G_VALIDATE_FAILED;
       return(GSS_S_NO_CONTEXT);
    }
 
@@ -113,7 +113,7 @@ gss_context_time(minor_status, context_handle, time_rec)
 
    /* validate the context handle */
    if (! kg_validate_ctx_id(context_handle)) {
-      *minor_status = G_VALIDATE_FAILED;
+      *minor_status = (OM_uint32) G_VALIDATE_FAILED;
       return(GSS_S_NO_CONTEXT);
    }
 
@@ -133,7 +133,7 @@ gss_delete_sec_context(minor_status, context_handle, output_token)
 
    /* validate the context handle */
    if (! kg_validate_ctx_id(context_handle)) {
-      *minor_status = G_VALIDATE_FAILED;
+      *minor_status = (OM_uint32) G_VALIDATE_FAILED;
       return(GSS_S_NO_CONTEXT);
    }
 
@@ -247,7 +247,7 @@ gss_inquire_context(minor_status, context_handle, initiator_name, acceptor_name,
 
    /* validate the context handle */
    if (! kg_validate_ctx_id(context_handle)) {
-      *minor_status = G_VALIDATE_FAILED;
+      *minor_status = (OM_uint32) G_VALIDATE_FAILED;
       return(GSS_S_NO_CONTEXT);
    }
 
@@ -285,7 +285,7 @@ gss_process_context_token(minor_status, context_handle, token_buffer)
 
    /* validate the context handle */
    if (! kg_validate_ctx_id(context_handle)) {
-      *minor_status = G_VALIDATE_FAILED;
+      *minor_status = (OM_uint32) G_VALIDATE_FAILED;
       return(GSS_S_NO_CONTEXT);
    }
 
@@ -349,7 +349,7 @@ gss_seal(minor_status, context_handle, conf_req_flag, qop_req,
 
    /* validate the context handle */
    if (! kg_validate_ctx_id(context_handle)) {
-      *minor_status = G_VALIDATE_FAILED;
+      *minor_status = (OM_uint32) G_VALIDATE_FAILED;
       return(GSS_S_NO_CONTEXT);
    }
 
@@ -372,7 +372,7 @@ gss_sign(minor_status, context_handle, qop_req, message_buffer, message_token)
 
    /* validate the context handle */
    if (! kg_validate_ctx_id(context_handle)) {
-      *minor_status = G_VALIDATE_FAILED;
+      *minor_status = (OM_uint32) G_VALIDATE_FAILED;
       return(GSS_S_NO_CONTEXT);
    }
 
@@ -396,7 +396,7 @@ gss_unseal(minor_status, context_handle, input_message_buffer,
 
    /* validate the context handle */
    if (! kg_validate_ctx_id(context_handle)) {
-      *minor_status = G_VALIDATE_FAILED;
+      *minor_status = (OM_uint32) G_VALIDATE_FAILED;
       return(GSS_S_NO_CONTEXT);
    }
 
@@ -420,7 +420,7 @@ gss_verify(minor_status, context_handle, message_buffer,
 
    /* validate the context handle */
    if (! kg_validate_ctx_id(context_handle)) {
-      *minor_status = G_VALIDATE_FAILED;
+      *minor_status = (OM_uint32) G_VALIDATE_FAILED;
       return(GSS_S_NO_CONTEXT);
    }
 

@@ -24,6 +24,7 @@
 #define _GSSAPIP_KRB5_H_
 
 #include "krb5.h"
+#include "los-proto.h"
 #include <memory.h>
 
 /* work around sunos braindamage */
