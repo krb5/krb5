@@ -8,7 +8,9 @@ CFLAGS = $(CCOPTS) $(DEFS) -I. -I$(srcdir)
 LIBDONE=DONE
 LIB_SUBDIRS=.
 DEPLIBS=
-SHLIB_LDFLAGS= $(LDFLAGS) @SHLIB_RPATH_DIRS@
+SHLIB_LDFLAGS= $(LDFLAGS) @SHLIB_RPATH_DIRS@ \
+	$(LD_UNRESOLVED_PREFIX)krb5_gss_initialize
+
 SHLIB_LIBDIRS= @SHLIB_LIBDIRS@
 
 SRCS	= $(srcdir)/g_acquire_cred.c \
@@ -44,7 +46,7 @@ SRCS	= $(srcdir)/g_acquire_cred.c \
 	  $(srcdir)/add_mechanism.c \
 	  $(srcdir)/gen_oids.c \
 	  $(srcdir)/oid_ops.c
-	  
+
 OBJS	= g_acquire_cred.$(OBJEXT) \
 	  g_rel_cred.$(OBJEXT) \
 	  g_init_sec_context.$(OBJEXT) \

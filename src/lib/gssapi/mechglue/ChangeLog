@@ -1,0 +1,7 @@
+Tue Jan 23 11:52:24 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* Makefile.in (SRCS): Remove extraneous line with only a tab.
+		(SHLIB_LDFLAGS): Declare that krb5_gss_initialize is to be
+		unresolved. 
+
+
