@@ -382,7 +382,7 @@ void load_db(argc, argv)
 				load_error++;
 				break;
 			}
-			entry.key.contents[i] = tmp1;
+			entry.alt_key.contents[i] = tmp1;
 		}
 		if (fscanf(f, "\t%u\t", &stype) != 1) {
 		    fprintf(stderr, "Couldn't parse line #%d\n",
