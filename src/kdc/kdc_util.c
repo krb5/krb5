@@ -136,10 +136,43 @@ OLDDECLARG(krb5_keyblock **, key)
 }
 
 
+/*
+ * given authentication data (provides seed for checksum), calculate checksum
+ * for source data and compare to authdata checksum.  Storage for checksum
+ * is provided.
+ */
+static krb5_error_code
+comp_cksum(type, source, authdat, dest)
+krb5_cksumtype type;
+krb5_data *source;
+krb5_tkt_authent *authdat;
+krb5_checksum *dest;
+{
+	krb5_error_code retval;
+
+	/* first compute checksum */
+	if (retval = krb5_calculate_checksum(type, 
+ 					     source->data, 
+ 					     source->length,
+					     authdat->ticket->enc_part2->session->contents, /* seed */
+					     authdat->ticket->enc_part2->session->length,   /* seed length */
+					     dest)) {
+		return retval;
+	}
+        if (dest->length != authdat->authenticator->checksum->length ||
+	    memcmp((char *)dest->contents,
+	           (char *)authdat->authenticator->checksum->contents,
+	           dest->length)) {
+	    return KRB5KRB_AP_ERR_BAD_INTEGRITY;
+    }
+    return 0;	
+}
+
 krb5_error_code 
-kdc_process_tgs_req(request, from, ret_authdat)
+kdc_process_tgs_req(request, from, pkt, ret_authdat)
 krb5_kdc_req *request;
 const krb5_fulladdr *from;
+krb5_data *pkt;
 krb5_tkt_authent **ret_authdat;
 {
     krb5_ap_req *apreq;
@@ -147,7 +180,7 @@ krb5_tkt_authent **ret_authdat;
     struct kparg who;
     krb5_error_code retval;
     krb5_checksum our_cksum;
-    krb5_data *scratch, scratch2;
+    krb5_data *scratch, scratch1, scratch2;
     krb5_pa_data **tmppa;
     krb5_boolean local_client = TRUE;
     krb5_enc_tkt_part *ticket_enc;
@@ -260,37 +293,26 @@ krb5_tkt_authent **ret_authdat;
 	return ENOMEM; /* XXX cktype nosupp */
     }
 
-    /* encode the body, verify the checksum */
+    /* we try checksumming the req-body two different ways: first 
+       try encoding using our local asn.1 library.  If that fails,
+       then reach into the raw asn.1 stream (if available), and checksum
+       that directly. */
     if (retval = encode_krb5_kdc_req_body(request, &scratch)) {
 	krb5_free_ap_req(apreq);
+        xfree(our_cksum.contents);
 	return retval; /* XXX should be in kdc range */
     }
-
-    if (retval = krb5_calculate_checksum(our_cksum.checksum_type,
-					 scratch->data,
-					 scratch->length,
-					 ticket_enc->session->contents, /* seed */
-					 ticket_enc->session->length,	/* seed length */
-					 &our_cksum)) {
-	xfree(our_cksum.contents);
-	krb5_free_data(scratch);
-	krb5_free_ap_req(apreq);
-	return retval;
+    if ((retval = comp_cksum(our_cksum.checksum_type, scratch, authdat, &our_cksum)) && (pkt)) {
+	if (fetch_asn1_field(pkt->data, 1, 4, &scratch1) < 0) {
+	    retval = KRB5KRB_AP_ERR_BAD_INTEGRITY; 
+	} else {
+            retval = comp_cksum(our_cksum.checksum_type, &scratch1, authdat, &our_cksum);
     }
-    if (our_cksum.length != authdat->authenticator->checksum->length ||
-	memcmp((char *)our_cksum.contents,
-	       (char *)authdat->authenticator->checksum->contents,
-	       our_cksum.length)) {
-	xfree(our_cksum.contents);
-	krb5_free_data(scratch);
-	krb5_free_ap_req(apreq);
-	return KRB5KRB_AP_ERR_BAD_INTEGRITY;
     }
+    krb5_free_ap_req(apreq); 
     krb5_free_data(scratch);
     xfree(our_cksum.contents);
-
-    krb5_free_ap_req(apreq);
-    return 0;
+    return retval;
 }
 
 krb5_error_code
@@ -749,6 +771,143 @@ char	**status;
     return 0;
 }
 
+#define ASN1_ID_CLASS	(0xc0)
+#define ASN1_ID_TYPE    (0x20)
+#define ASN1_ID_TAG	(0x1f)	
+#define ASN1_CLASS_UNIV	(0)
+#define ASN1_CLASS_APP	(1)
+#define ASN1_CLASS_CTX	(2)
+#define ASN1_CLASS_PRIV	(3)
+#define asn1_id_constructed(x) 	(x & ASN1_ID_TYPE)
+#define asn1_id_primitive(x) 	(!asn1_id_constructed(x))
+#define asn1_id_class(x)	((x & ASN1_ID_CLASS) >> 6)
+#define asn1_id_tag(x)		(x & ASN1_ID_TAG)
+
+/*
+ * asn1length - return encoded length of value.
+ *
+ * passed a pointer into the asn.1 stream, which is updated
+ * to point right after the length bits.
+ *
+ * returns -1 on failure.
+ */
+static int
+asn1length(astream)
+unsigned char **astream;
+{
+    int length;		/* resulting length */
+    int sublen;		/* sublengths */
+    int blen;		/* bytes of length */ 
+    unsigned char *p;	/* substring searching */	
+
+    if (**astream & 0x80) {
+        blen = **astream & 0x7f;
+	if (blen > 3) {
+	   return(-1);
+	}
+	for (++*astream, length = 0; blen; ++*astream, blen--) {
+	    length = (length << 8) | **astream;
+	}
+	if (length == 0) {
+		/* indefinite length, figure out by hand */
+	    p = *astream;
+	    p++;
+	    while (1) {
+		/* compute value length. */
+		if ((sublen = asn1length(&p)) < 0) {
+		    return(-1);
+		}
+		p += sublen;
+                /* check for termination */
+		if ((!*p++) && (!*p)) {
+		    p++;
+		    break;
+		}
+	    }
+	    length = p - *astream;	 
+	}
+    } else {
+	length = **astream;
+	++*astream;
+    } 
+   return(length);
+}
+
+/*
+ * fetch_asn1_field - return raw asn.1 stream of subfield.
+ *
+ * this routine is passed a context-dependent tag number and "level" and returns
+ * the size and length of the corresponding level subfield.
+ *
+ * levels and are numbered starting from 1.  
+ *
+ * returns 0 on success, -1 otherwise.
+ */
+int
+fetch_asn1_field(astream, level, field, data)
+unsigned char *astream;
+unsigned int level;
+unsigned int field;
+krb5_data *data;
+{
+    unsigned char *estream;	/* end of stream */
+    int classes;		/* # classes seen so far this level */
+    int levels = 0;		/* levels seen so far */
+    int lastlevel = 1000;       /* last level seen */
+    int length;			/* various lengths */
+    int tag;			/* tag number */
+
+    /* we assume that the first identifier/length will tell us 
+       how long the entire stream is. */
+    astream++;
+    estream = astream;
+    if ((length = asn1length(&astream)) < 0) {
+	return(-1);
+    }
+    estream += length;
+    /* search down the stream, checking identifiers.  we process identifiers
+       until we hit the "level" we want, and then process that level for our
+       subfield, always making sure we don't go off the end of the stream.  */
+    while (astream < estream) {
+	if (!asn1_id_constructed(*astream)) {
+	    return(-1);
+	}
+        if (asn1_id_class(*astream) == ASN1_CLASS_CTX) {
+            if ((tag = (int)asn1_id_tag(*astream)) <= lastlevel) {
+                levels++;
+                classes = -1;
+            }
+            lastlevel = tag; 
+            if (levels == level) {
+	        /* in our context-dependent class, is this the one we're looking for ? */
+	        if (tag == field) {
+		    /* return length and data */ 
+		    astream++;
+		    if ((data->length = asn1length(&astream)) < 0) {
+		        return(-1);
+	 	    }
+		    data->data = (char *)astream;
+		    return(0);
+	        } else if (tag <= classes) {
+		    /* we've seen this class before, something must be wrong */
+		    return(-1);
+	        } else {
+		    classes = tag;
+	        }
+	    }
+        }
+        /* if we're not on our level yet, process this value.  otherwise skip over it */
+	astream++;
+	if ((length = asn1length(&astream)) < 0) {
+	    return(-1);
+	}
+	if (levels == level) {
+	    astream += length;
+	}
+    }
+    return(-1);
+}
+
 /*
  * Routines that validate a TGS request; checks a lot of things.  :-)
  *
@@ -886,7 +1045,7 @@ char **status;
     /* Server must allow DUP SKEY requests */
     if (isflagset(request->kdc_options, KDC_OPT_ENC_TKT_IN_SKEY) &&
 	isflagset(server.attributes, KRB5_KDB_DISALLOW_DUP_SKEY)) {
-	*status = "DUP_SKEY DISALLOED";
+	*status = "DUP_SKEY DISALLOWED";
 	return(KDC_ERR_POLICY);
     }
 
