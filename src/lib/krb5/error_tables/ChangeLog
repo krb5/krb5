@@ -1,3 +1,7 @@
+Fri Oct 14 23:07:48 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* init_ets.c (krb5_init_ets): Fix typo in spelling of KRB5_USE_ISODE.
+
 Thu Sep 29 15:09:03 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* krb5_err.et (KRB5_KDCREP_SKEW, KRB5_IN_TKT_REALM_MISMATCH,
