@@ -4,6 +4,7 @@ mydir=.
 BUILDTOP=$(REL)..$(S)..
 PROG_LIBPATH=-L$(TOPLIBD) $(TCL_LIBPATH)
 PROG_RPATH=$(KRB5_LIBDIR)$(TCL_RPATH)
+KRB5_RUN_ENV=@KRB5_RUN_ENV@
 ##DOS##BUILDTOP = ..\..
 ##DOS##OBJFILE=$(OUTPRE)profile.lst
 ##DOS##LIBNAME=$(OUTPRE)profile.lib
@@ -139,7 +140,7 @@ check-unix-tcl-:
 
 check-unix-tcl-ok: profile_tcl
 	cp $(srcdir)/test.ini test2.ini
-	./profile_tcl $(srcdir)/prof_test1
+	$(KRB5_RUN_ENV) ./profile_tcl $(srcdir)/prof_test1
 
 check-windows:: $(OUTPRE)test_profile.exe $(OUTPRE)test_parse.exe
 	$(RM) $(OUTPRE)*.obj

@@ -1,3 +1,9 @@
+2004-09-26  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (check-unix-tcl-ok): Use KRB5_RUN_ENV.
+
+	* configure.in: Use KRB5_RUN_FLAGS.
+
 2004-09-23  Ken Raeburn  <raeburn@mit.edu>
 
 	* prof_tree.c (struct profile_node): Add new bitfield DELETED.
