@@ -1,3 +1,12 @@
+Wed May 22 07:48:21 1996  Sam Hartman  <hartmans@mit.edu>
+
+	* Makefile.in (libgssapi.$(STEXT)): Remove unnecessary install rule for libgssapi.a.
+
+Mon May 20 23:56:46 1996  Sam Hartman  <hartmans@mit.edu>
+
+	* configure.in: Don't make libgssapi.a on AIX.  It is handled incorrectly becaus all symbols are not resolved, and it isn't useful as a non-shared library.
+	
+
 Fri May  3 16:43:43 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* g_inq_cred.c (gss_inquire_cred): Add code to support appropriate

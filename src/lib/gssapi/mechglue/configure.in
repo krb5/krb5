@@ -8,9 +8,19 @@ AC_CHECK_HEADERS(stdlib.h)
 V5_SHARED_LIB_OBJS
 SubdirLibraryRule([${OBJS}])
 CopySrcHeader(mechglue.h,[$(EHDRDIR)])
-AppendRule([install:: libgssapi.[$](LIBEXT)
-	[$](INSTALL_DATA) libgssapi.[$](LIBEXT) [$](DESTDIR)[$](KRB5_LIBDIR)[$](S)libgssapi.[$](LIBEXT)])
-LinkFileDir([$](TOPLIBD)/libgssapi.[$](LIBEXT),libgssapi.[$](LIBEXT),./gssapi/mechglue)
-AppendRule([all:: [$](TOPLIBD)/libgssapi.[$](LIBEXT)])
-V5_MAKE_SHARED_LIB(libgssapi,0.1,.., ./mechglue)
+AC_CANONICAL_HOST
+case $host in
+     *-*-aix*) # don't build libgssapi.a on AIX
+       ;;
+     *)
+       V5_MAKE_SHARED_LIB(libgssapi,0.1,.., ./mechglue)
+       AppendRule([install:: libgssapi.[$](LIBEXT)
+	       [$](INSTALL_DATA) libgssapi.[$](LIBEXT) [$](DESTDIR)[$](KRB5_LIBDIR)[$](S)libgssapi.[$](LIBEXT)])
+       LinkFileDir([$](TOPLIBD)/libgssapi.[$](LIBEXT),libgssapi.[$](LIBEXT),./gssapi/mechglue)
+       AppendRule([all:: [$](TOPLIBD)/libgssapi.[$](LIBEXT)])
+
+      ;;
+esac
+
 V5_AC_OUTPUT_MAKEFILE
+

@@ -105,9 +105,6 @@ libgssapi.$(STEXT): $(OBJS)
 	$(ARADD) $@ $(OBJS)
 	$(RANLIB) $@
 
-install:: libgssapi.a
-	$(INSTALL_DATA) libgssapi.a $(DESTDIR)$(KRB5_LIBDIR)/libgssapi.a
-	$(RANLIB) $(DESTDIR)$(KRB5_LIBDIR)/libgssapi.a
 
 #libgssapi.$(LIBEXT): $(OBJS)
 #	$(ARCHIVE) $@ $(OBJS)
