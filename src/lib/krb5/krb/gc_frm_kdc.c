@@ -84,6 +84,7 @@ krb5_get_cred_from_kdc (ccache, cred, tgts)
      * XXX we're sharing some substructure here, which is
      * probably not safe...
      */
+    bzero((char *)&tgtq, sizeof(tgtq));
     tgtq.client = cred->client;
 
     if (retval = krb5_tgtname(krb5_princ_realm(cred->client),
@@ -153,6 +154,7 @@ krb5_get_cred_from_kdc (ccache, cred, tgts)
 		goto out;
 	    }
 	    /* now get the TGTs */
+	    bzero((char *)&tgtq, sizeof(tgtq));
 	    tgtq.times = tgt.times;
 	    tgtq.client = tgt.client;
 	    tgtq.server = *next_server;
@@ -173,8 +175,10 @@ krb5_get_cred_from_kdc (ccache, cred, tgts)
 		krb5_free_realm_tree(tgs_list);
 		goto out;
 	    }
-	    /* XXX need to clean up stuff pointed to by tgtq? */
-	    tgt = tgtq;
+	    tgt = ret_tgts[nservers];
+	    tgtq.client = 0;
+	    tgtq.server = 0;
+	    krb5_free_cred_contents(&tgtq);
 	}
 	krb5_free_realm_tree(tgs_list);
     }
