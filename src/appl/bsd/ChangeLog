@@ -1,3 +1,8 @@
+
+Mon Aug 7 11:26:46 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* configure.in - Add checks for utmp[x].h so that the inclusion of
+		libpty.h does the right thing.
+
 Fri Aug  4 00:50:41 1995  Tom Yu  <tlyu@dragons-lair.MIT.EDU>
 
 	* krlogind.c: don't include utmp.h, since libty.h grabs it.
