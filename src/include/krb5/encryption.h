@@ -30,24 +30,18 @@ typedef struct _krb5_cryptosystem_entry {
     int (*decrypt_func)(/* void *in, void *out, size_t length,
 			   krb5_encrypt_block *block */);
     int (*process_key)(/* krb5_encrypt_block *block, krb5_keyblock *key */);
+    int (*finish_key)(/* krb5_encrypt_block *block */);
     int block_length;
     int pad_minimum;			/* needed for cksum size computation */
     int keysize;
 } krb5_cryptosystem_entry;
 
 typedef struct _krb5_encrypt_block {
-    krb5_cryptosystem_entry crypto_entry;
+    krb5_cryptosystem_entry *crypto_entry;
     krb5_keyblock *key;
     void *priv;				/* for private use, e.g. DES
 					   key schedules */
 } krb5_encrypt_block;
-
-#define efunc crypto_entry.encrypt_func
-#define dfunc crypto_entry.decrypt_func
-#define prkey crypto_entry.process_key
-#define blength crypto_entry.block_length
-#define padmin crypto_entry.pad_minimum
-#define ksize crypto_entry.keysize
 
 /* per Kerberos v5 protocol spec */
 #define	KEYTYPE_NULL		0x0000
