@@ -95,8 +95,11 @@ OLDDECLARG(const krb5_data *, salt)
 	length = data->length;
 
     copystr = malloc(length);
-    if (!copystr)
+    if (!copystr) {
+	free(keyblock->contents);
+	keyblock->contents = 0;
 	return ENOMEM;
+    }
 
     memcpy(copystr, (char *) data->data, data->length);
     if (salt)
