@@ -1,3 +1,8 @@
+Fri Jun  9 00:01:35 1995  Tom Yu  (tlyu@dragons-lair)
+
+	* Makefile.in, configure.in: use CopyHeader rather than hand-coded
+		header install rule.
+
 Fri May 26 21:11:38 1995  Theodore Y. Ts'o  (tytso@dcl)
 
 	* cr_err_repl.c (cr_err_reply): Remove backward compatibility code
