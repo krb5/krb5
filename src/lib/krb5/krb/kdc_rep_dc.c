@@ -7,7 +7,7 @@
  * For copying and distribution information, please see the file
  * <krb5/mit-copyright.h>.
  *
- * krb5_kdc_rep_tkt_decrypt()
+ * krb5_kdc_rep_decrypt_proc()
  */
 
 #if !defined(lint) && !defined(SABER)
@@ -21,12 +21,20 @@ static char rcsid_kdc_rep_dc_c [] =
 #include <krb5/ext-proto.h>
 #include <errno.h>
 
+/*
+ * Decrypt the encrypted portion of the KDC_REP message, using the key
+ * passed.
+ *
+ */
+
 /*ARGSUSED*/
 krb5_error_code
-krb5_kdc_rep_decrypt_proc(dec_rep, key, decryptarg)
-krb5_kdc_rep *dec_rep;
-krb5_keyblock *key;
-krb5_pointer decryptarg;
+krb5_kdc_rep_decrypt_proc(DECLARG(krb5_keyblock *, key),
+			  DECLARG(krb5_pointer, decryptarg),
+			  DECLARG(krb5_kdc_rep *, dec_rep))
+OLDDECLARG(krb5_keyblock *, key)
+OLDDECLARG(krb5_pointer, decryptarg)
+OLDDECLARG(krb5_kdc_rep *, dec_rep)
 {
     krb5_error_code retval;
     krb5_encrypt_block eblock;
@@ -34,7 +42,9 @@ krb5_pointer decryptarg;
     krb5_enc_kdc_rep_part *local_encpart;
 
     if (!valid_etype(dec_rep->etype))
-	return KRB5KDC_ERR_ETYPE_NOSUPP;
+	return KRB5KDC_ERR_ETYPE_NOSUPP; /* XXX */
+
+    /* set up scratch decrypt/decode area */
 
     scratch.length = dec_rep->enc_part.length;
     if (!(scratch.data = malloc(dec_rep->enc_part.length))) {
@@ -51,7 +61,7 @@ krb5_pointer decryptarg;
 	return(retval);
     }
 
-    /* call the encryption routine */
+    /* call the decryption routine */
     if (retval =
 	(*eblock.crypto_entry->decrypt_func)((krb5_pointer) dec_rep->enc_part.data,
 					     (krb5_pointer) scratch.data,
@@ -65,6 +75,8 @@ krb5_pointer decryptarg;
 	clean_scratch();
 	return retval;
     }
+
+    /* and do the decode */
     retval = decode_krb5_enc_kdc_rep_part(&scratch, &local_encpart);
     clean_scratch();
     if (retval)
