@@ -1,3 +1,8 @@
+2001-03-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (STLIBOBJS): Nothing uses des_stringtokey.o, drop
+	it.
+
 2001-03-05  Ken Raeburn  <raeburn@mit.edu>
 
 	* des_stringtokey.c, old.h, old_decrypt.c, old_encrypt.c: Use

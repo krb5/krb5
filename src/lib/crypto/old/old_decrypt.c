@@ -27,21 +27,14 @@
 #include "k5-int.h"
 #include "old.h"
 
-#ifndef HAVE_MEMMOVE
-#ifdef HAVE_BCOPY
-#define memmove(dst,src,size) bcopy(src,dst,size)
-#endif
-#endif
-
 krb5_error_code
-krb5_old_decrypt(enc, hash, key, usage, ivec, input, arg_output)
-     const struct krb5_enc_provider *enc;
-     const struct krb5_hash_provider *hash;
-     const krb5_keyblock *key;
-     krb5_keyusage usage;
-     const krb5_data *ivec;
-     const krb5_data *input;
-     krb5_data *arg_output;
+krb5_old_decrypt(const struct krb5_enc_provider *enc,
+		 const struct krb5_hash_provider *hash,
+		 const krb5_keyblock *key,
+		 krb5_keyusage usage,
+		 const krb5_data *ivec,
+		 const krb5_data *input,
+		 krb5_data *arg_output)
 {
     krb5_error_code ret;
     size_t blocksize, hashsize, plainsize;
