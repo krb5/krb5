@@ -21,7 +21,7 @@ OM_uint32 gss_release_cred(minor_status, cred_handle)
 {
 	krb5_free_principal(cred_handle->principal);
 	if (*minor_status = krb5_cc_close(cred_handle->ccache))
-		return(gss_make_re(GSS_RE_FAILURE));
+		return(GSS_S_FAILURE);
 	xfree(cred_handle->srvtab.contents);
 	return(GSS_S_COMPLETE);
 }

@@ -66,7 +66,7 @@ OM_uint32 gss_acquire_cred(minor_status, desired_name, time_req,
 	 * Should we return failure here?
 	 */
 	if (!do_kerberos)
-		return(gss_make_re(GSS_RE_FAILURE));
+		return(GSS_S_FAILURE);
 	output_cred_handle->cred_flags = 0;
 
 	/*
@@ -78,7 +78,7 @@ OM_uint32 gss_acquire_cred(minor_status, desired_name, time_req,
 	 */
 	if (*minor_status = krb5_copy_principal(desired_name,
 						&output_cred_handle->principal)) {
-		return(gss_make_re(GSS_RE_FAILURE));
+		return(GSS_S_FAILURE);
 	}
 	if (gss_krb5_fetchfrom) {
 		/* use the named keytab */
@@ -117,7 +117,7 @@ OM_uint32 gss_acquire_cred(minor_status, desired_name, time_req,
 		if (!(set = (gss_OID_set)
 		      malloc (sizeof(struct gss_OID_set_desc)))) {
 			*minor_status = ENOMEM;
-			return(gss_make_re(GSS_RE_FAILURE));
+			return(GSS_S_FAILURE);
 		}
 		set->count = 1;
 		set->elements = &gss_OID_krb5;

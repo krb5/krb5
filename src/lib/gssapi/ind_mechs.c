@@ -27,7 +27,7 @@ OM_uint32 gss_indicate_mechs(minor_status, mech_set)
 	*minor_status = 0;
 	if (!(set = (gss_OID_set) malloc (sizeof(struct gss_OID_set_desc)))) {
 		*minor_status = ENOMEM;
-		return(gss_make_re(GSS_RE_FAILURE));
+		return(GSS_S_FAILURE);
 	}
 	set->count = 1;
 	set->elements = &gss_OID_krb5;

@@ -33,10 +33,10 @@ OM_uint32 gss_unseal(minor_status, context, input_message_buffer,
 	if (retval = gss_check_token(minor_status, input_message_buffer,
 				     GSS_API_KRB5_TYPE, 0))
 		return(retval);
-	token_type = ((char *) input_message_buffer->value)[4];
+	token_type = ((char *) input_message_buffer->value)[2];
 	if ((token_type != GSS_API_KRB5_SAFE) &&
 	    (token_type != GSS_API_KRB5_PRIV))
-		return(gss_make_re(GSS_RE_DEFECTIVE_TOKEN));
+		return(GSS_S_DEFECTIVE_TOKEN);
 	inbuf.length = input_message_buffer->length-4;
 	inbuf.data = ( (char *) input_message_buffer->value)+4;
 	if (token_type == GSS_API_KRB5_PRIV) {
@@ -53,7 +53,7 @@ OM_uint32 gss_unseal(minor_status, context, input_message_buffer,
 			krb5_keytype_array[context->session_key->keytype]->
 				system->block_length;
 		if (!(i_vector=malloc(eblock_size))) {
-			return(gss_make_re(GSS_RE_FAILURE));
+			return(GSS_S_FAILURE);
 		}
 		memset(i_vector, 0, eblock_size);
 		if (*minor_status = krb5_rd_priv(&inbuf, 
@@ -65,7 +65,7 @@ OM_uint32 gss_unseal(minor_status, context, input_message_buffer,
 						 i_vector,
 						 0, /* no rcache */
 						 &outbuf))
-			return(gss_make_re(GSS_RE_FAILURE));
+			return(GSS_S_FAILURE);
 		if (conf_state)
 			*conf_state = 1;
 	} else {
@@ -81,7 +81,7 @@ OM_uint32 gss_unseal(minor_status, context, input_message_buffer,
 						 safe_flags,
 						 0, /* no rcache */
 						 &outbuf))
-			return(gss_make_re(GSS_RE_FAILURE));
+			return(GSS_S_FAILURE);
 		if (conf_state)
 			*conf_state = 0;
 	}
@@ -92,6 +92,7 @@ OM_uint32 gss_unseal(minor_status, context, input_message_buffer,
 	return(GSS_S_COMPLETE);
 }
 	
+#ifdef notdef
 OM_uint32 gss_verify(minor_status, context, message_buffer,  
 		   token_buffer, qop_state)
 	OM_uint32	*minor_status;
@@ -109,12 +110,13 @@ OM_uint32 gss_verify(minor_status, context, message_buffer,
 		     output_message_buffer, NULL, qop_state))
 		return(retval);
 	if (token_buffer->length != output_message_buffer->length)
-		ret = gss_make_re(GSS_RE_BAD_SIG);
+		ret = GSS_S_BAD_SIG;
 	else if (!memcmp(token_buffer->value, output_message_buffer->value,
 			 token_buffer->length))
-		ret = gss_make_re(GSS_RE_BAD_SIG);
+		ret = GSS_S_BAD_SIG;
 	if (retval = gss_release_buffer(minor_status, output_message_buffer))
 		return(retval);
 	return(ret);
 }
 
+#endif

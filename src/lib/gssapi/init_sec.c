@@ -76,7 +76,7 @@ OM_uint32 gss_init_sec_context(minor_status, claimant_cred_handle,
 		 */
 		if ((mech_type != GSS_C_NULL_OID) &&
 		    !gss_compare_OID(mech_type, &gss_OID_krb5)) {
-			return(gss_make_re(GSS_RE_BAD_MECH));
+			return(GSS_S_BAD_MECH);
 		}
 		if (actual_mech_type)
 			*actual_mech_type = &gss_OID_krb5;
@@ -98,20 +98,21 @@ OM_uint32 gss_init_sec_context(minor_status, claimant_cred_handle,
 			 * fill in with defaults.
 			 */
 			if (*minor_status = krb5_cc_default(&ccache)) {
-				return(gss_make_re(GSS_RE_FAILURE));
+				return(GSS_S_FAILURE);
 			}
 			claimant_cred_handle.ccache = ccache;
 			if (*minor_status =
 			    krb5_cc_get_principal(ccache,
 						  &claimant_cred_handle.principal))
-				return(gss_make_re(GSS_RE_FAILURE));
+				return(GSS_S_FAILURE);
 		}
 		/*
 		 * Allocate the context handle structure
 		 */
-		if (!(context = malloc(sizeof(struct gss_ctx_id_desc)))) {
+		if (!(context = (gss_ctx_id_t)
+		      malloc(sizeof(struct gss_ctx_id_desc)))) {
 			*minor_status = ENOMEM;
-			return(gss_make_re(GSS_RE_FAILURE));
+			return(GSS_S_FAILURE);
 		}
 		context->mech_type = &gss_OID_krb5;
 		context->state =  GSS_KRB_STATE_DOWN;
@@ -121,34 +122,35 @@ OM_uint32 gss_init_sec_context(minor_status, claimant_cred_handle,
 		if (*minor_status =
 		    krb5_copy_principal(claimant_cred_handle.principal,
 					&context->me))
-			return(gss_make_re(GSS_RE_FAILURE));
+			return(GSS_S_FAILURE);
 		if (*minor_status =
 		    krb5_copy_principal(target_name,
 					&context->him))
-			return(gss_make_re(GSS_RE_FAILURE));
+			return(GSS_S_FAILURE);
 		context->flags = req_flags | GSS_C_CONF_FLAG;;
 		context->am_client = 1;
 		context->session_key = NULL;
-		context->my_address.addrtype = channel.sender_addrtype;
-		context->my_address.length = channel.sender_address.length;
-		if (!(context->my_address.contents =
+		context->rcache = NULL;
+		context->my_address.addrtype = channel->initiator_addrtype;
+		context->my_address.length = channel->initiator_address.length;
+		if (!(context->my_address.contents = (krb5_octet *)
 		      malloc(context->my_address.length))) {
 			xfree(context);
-			return(gss_make_re(GSS_RE_FAILURE));
+			return(GSS_S_FAILURE);
 		}
 		memcpy((char *) context->my_address.contents,
-		       (char *) channel.sender_address.value,
+		       (char *) channel->initiator_address.value,
 		       context->my_address.length);
-		context->his_address.addrtype = channel.receiver_addrtype;
-		context->his_address.length = channel.receiver_address.length;
-		if (!(context->his_address.contents =
+		context->his_address.addrtype = channel->acceptor_addrtype;
+		context->his_address.length = channel->acceptor_address.length;
+		if (!(context->his_address.contents = (krb5_octet *)
 		      malloc(context->my_address.length))) {
 			xfree(context->my_address.contents);
 			xfree(context);
-			return(gss_make_re(GSS_RE_FAILURE));
+			return(GSS_S_FAILURE);
 		}
 		memcpy((char *) context->his_address.contents,
-		       (char *) channel.receiver_address.value,
+		       (char *) channel->acceptor_address.value,
 		       context->his_address.length);
 		/*
 		 * Generate a random sequence number
@@ -159,7 +161,7 @@ OM_uint32 gss_init_sec_context(minor_status, claimant_cred_handle,
 			xfree(context->his_address.contents);
 			xfree(context->my_address.contents);
 			free((char *)context);
-			return(make_gss_re(GSS_RE_FAILURE));
+			return(GSS_S_FAILURE);
 		}
 		context->his_seq_num = 0;
 		/*
@@ -178,7 +180,7 @@ OM_uint32 gss_init_sec_context(minor_status, claimant_cred_handle,
 							 &creds)) {
 			krb5_free_cred_contents(&creds);
 			free((char *)context);
-			return(gss_make_re(GSS_RE_FAILURE));
+			return(GSS_S_FAILURE);
 		}
 		/*
 		 * Setup the ap_req_options
@@ -190,7 +192,6 @@ OM_uint32 gss_init_sec_context(minor_status, claimant_cred_handle,
 		 * OK, get the authentication header!
 		 */
 		if (*minor_status = krb5_mk_req_extended(ap_req_options, 0,
-						  &creds.times,
 						  kdc_options,
 						  context->my_seq_num, 0,
 						  ccache, &creds, &authent,
@@ -198,7 +199,7 @@ OM_uint32 gss_init_sec_context(minor_status, claimant_cred_handle,
 			memset((char *)&authent, 0, sizeof(authent));
 			krb5_free_cred_contents(&creds);
 			free((char *)context);
-			return(gss_make_re(GSS_RE_FAILURE));	
+			return(GSS_S_FAILURE);	
 		}
 		context->cusec = authent.cusec;
 		context->ctime = authent.ctime;
@@ -210,7 +211,7 @@ OM_uint32 gss_init_sec_context(minor_status, claimant_cred_handle,
 			xfree(outbuf.data);
 			krb5_free_cred_contents(&creds);
 			free((char *)context);
-			return(gss_make_re(GSS_RE_FAILURE));
+			return(GSS_S_FAILURE);
 		}
 		
 		if (*minor_status = gss_make_token(minor_status,
@@ -222,7 +223,7 @@ OM_uint32 gss_init_sec_context(minor_status, claimant_cred_handle,
 			xfree(outbuf.data);
 			krb5_free_cred_contents(&creds);
 			free((char *) context);
-			return(gss_make_re(GSS_RE_FAILURE));
+			return(GSS_S_FAILURE);
 		}
 		/*
 		 * Send over the requested flags information
@@ -241,7 +242,7 @@ OM_uint32 gss_init_sec_context(minor_status, claimant_cred_handle,
 		krb5_free_cred_contents(&creds);
 		if (ap_req_options & AP_OPTS_MUTUAL_REQUIRED) {
 			context->state = GSS_KRB_STATE_MUTWAIT;
-			return(GSS_SS_CONTINUE_NEEDED);
+			return(GSS_S_CONTINUE_NEEDED);
 		} else {
 			context->state = GSS_KRB_STATE_UP;
 			return(GSS_S_COMPLETE);
@@ -251,7 +252,7 @@ OM_uint32 gss_init_sec_context(minor_status, claimant_cred_handle,
 		context = *context_handle;
 
 		if (context->state != GSS_KRB_STATE_MUTWAIT)
-			return(gss_make_re(GSS_RE_FAILURE));
+			return(GSS_S_FAILURE);
 		if (retval = gss_check_token(minor_status, input_token,
 					     GSS_API_KRB5_TYPE,
 					     GSS_API_KRB5_REP))
@@ -261,11 +262,11 @@ OM_uint32 gss_init_sec_context(minor_status, claimant_cred_handle,
 		
 		if (*minor_status = krb5_rd_rep(&inbuf, context->session_key,
 						&repl))
-			return(gss_make_re(GSS_RE_FAILURE));
+			return(GSS_S_FAILURE);
 		if ((repl->ctime != context->ctime) ||
 		    (repl->cusec != context->cusec)) {
 			*minor_status = KRB5_SENDAUTH_MUTUAL_FAILED;
-			return(gss_make_re(GSS_RE_FAILURE));
+			return(GSS_S_FAILURE);
 		}
 		context->his_seq_num = repl->seq_number;
 		context->state = GSS_KRB_STATE_UP;

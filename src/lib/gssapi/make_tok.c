@@ -18,10 +18,10 @@
 OM_uint32 gss_make_token(minor_status, mechanism, type, length, data,
 			 output_token)
 	OM_uint32	*minor_status;
-	unsigned char	mechanism;
-	unsigned char	type;
+	unsigned int	mechanism;
+	unsigned int	type;
 	size_t		length;
-	void		*data;
+	Voidptr		data;
 	gss_buffer_t	output_token;
 {
 	char	*buf;
@@ -36,9 +36,9 @@ OM_uint32 gss_make_token(minor_status, mechanism, type, length, data,
 		offset++;
 	if (!(buf = malloc(length+offset))) {
 		*minor_status = ENOMEM;
-		return(gss_make_re(GSS_RE_FAILURE));
+		return(GSS_S_FAILURE);
 	}
-	output_token->value = buf;
+	output_token->value = (Voidptr) buf;
 	output_token->length = length+4;
 	buf[0] = GSS_API_IMPL_VERSION;
 	buf[1] = mechanism;		/* Authentication mechanism */

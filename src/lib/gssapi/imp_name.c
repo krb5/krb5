@@ -39,14 +39,14 @@ OM_uint32 gss_import_name(minor_status, input_name_buffer, input_name_type,
 		}
 		if (*minor_status = krb5_parse_name(input_name_buffer->value,
 						    output_name))
-			return(gss_make_re(GSS_RE_FAILURE));
+			return(GSS_S_FAILURE);
 		else 
 			return(GSS_S_COMPLETE);
 	}
 	/*
 	 * It's of an unknown type.  We don't know how to deal.
 	 */
-	return(gss_make_re(GSS_RE_BAD_NAMETYPE));
+	return(GSS_S_BAD_NAMETYPE);
 }
 	
 			     
@@ -62,7 +62,7 @@ OM_uint32 gss_service_import_name(minor_status, input_name_buffer, output_name)
 	
 	if (!(str = malloc(input_name_buffer->length+1))) {
 		*minor_status = ENOMEM;
-		return(gss_make_re(GSS_RE_FAILURE));
+		return(GSS_S_FAILURE);
 	}
 	memcpy(str, input_name_buffer->value, input_name_buffer->length);
 	str[input_name_buffer->length] = '\0';
@@ -73,7 +73,7 @@ OM_uint32 gss_service_import_name(minor_status, input_name_buffer, output_name)
 	service = cp = str + 8;
 	if (!(cp = index(cp, '@'))) {
 		free(str);
-		return(gss_make_re(GSS_RE_BAD_NAME));
+		return(GSS_S_BAD_NAME);
 	}
 	*cp++ = 0;
 	host = cp;
@@ -85,7 +85,7 @@ OM_uint32 gss_service_import_name(minor_status, input_name_buffer, output_name)
 	sprintf(buf, "%s/%s", kservice, host);
 	
 	if (*minor_status = krb5_parse_name(buf, output_name)) 
-		return(gss_make_re(GSS_RE_FAILURE));
+		return(GSS_S_FAILURE);
 	else 
 		return(GSS_S_COMPLETE);
 }	
