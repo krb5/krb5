@@ -263,9 +263,6 @@ void _log(const char *fmt, ...) {
     if (logf == 0)
 	return;
     va_start(x, fmt);
-#if 0
-    fprintf(logf,"[%d]", getpid());
-#else
     {
 	struct timeval tv;
 	struct tm tm;
@@ -285,7 +282,6 @@ void _log(const char *fmt, ...) {
 	strcat(buf, "]");
 	fprintf(logf, "%s", buf);
     }
-#endif
     vfprintf(logf, fmt, x);
     va_end(x);
 #endif
