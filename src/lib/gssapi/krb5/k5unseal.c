@@ -486,7 +486,7 @@ kg_unseal(context, minor_status, context_handle, input_token_buffer,
 {
     krb5_gss_ctx_id_rec *ctx;
     unsigned char *ptr;
-    int bodysize;
+    unsigned int bodysize;
     int err;
 
     /* validate the context handle */

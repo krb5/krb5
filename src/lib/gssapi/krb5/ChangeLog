@@ -1,3 +1,11 @@
+2002-07-15  Ezra Peisach  <epeisach@bu.edu>
+
+	* k5unseal.c (kg_unseal): Pass unsigned int * instead of int *
+	length return argument to g_verify_token_header.
+
+	* accept_sec_context.c (krb5_gss_accept_sec_context): Pass
+	OM_uint32 * instead of krb5_error_code * to krb5_gss_release_cred.
+
 2002-07-14  Alexandra Ellwood <lxs@mit.edu>
 
 	* gssapi_krb5.h: Added #include of gssapi.h and gssapi_generic.h

@@ -880,7 +880,7 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
        *output_token = token;
    }
    if (!verifier_cred_handle && cred_handle) {
-	   krb5_gss_release_cred(&code, cred_handle);
+	   krb5_gss_release_cred(minor_status, cred_handle);
    }
    return (major_status);
 }
