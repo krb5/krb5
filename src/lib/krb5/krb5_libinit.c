@@ -34,13 +34,15 @@ krb5_error_code krb5int_initialize_library (void)
 void krb5int_cleanup_library (void)
 {
 	assert (initialized);
-	
+
+#if defined(_MSDOS) || defined(_WIN32) || defined(macintosh)
 	krb5_stdcc_shutdown();
+#endif
 	
-    remove_error_table(&et_krb5_error_table);
-    remove_error_table(&et_kv5m_error_table);
-    remove_error_table(&et_kdb5_error_table);
-    remove_error_table(&et_asn1_error_table);
+	remove_error_table(&et_krb5_error_table);
+	remove_error_table(&et_kv5m_error_table);
+	remove_error_table(&et_kdb5_error_table);
+	remove_error_table(&et_asn1_error_table);
 	
 	initialized = 0;
 }

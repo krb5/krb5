@@ -1,5 +1,7 @@
 2000-01-24  Tom Yu  <tlyu@mit.edu>
 
+	* krb5_libinit.c: Conditionalize call to stdcc_shutdown().
+
 	* configure.in: Fix to build library objects in this directory.
 
 	* Makefile.in (STOBJLISTS): Fix to actually build krb5_libinit.o.
