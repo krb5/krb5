@@ -19,6 +19,9 @@ static char rcsid_rc_base_c[] =
  * I/O functions for the replay cache default implementation.
  */
 
+
+#define KRB5_RC_VNO	0x0501		/* krb5, rcache v 1 */
+
 #include <stdio.h> /* for P_tmpdir */
 
 #include "rc_base.h"
@@ -60,6 +63,8 @@ krb5_rc_iostuff *d;
 char **fn;
 {
  char *c;
+ krb5_int16 rc_vno = htons(KRB5_RC_VNO);
+ krb5_error_code retval;
 
  GETDIR;
  if (fn && *fn)
@@ -114,6 +119,12 @@ char **fn;
      case EROFS: FREE(d->fn); return KRB5_RC_IO_PERM; break;
      default: FREE(d->fn); return KRB5_RC_IO_UNKNOWN; break;
     }
+ if (retval = krb5_rc_io_write(d, (krb5_pointer)&rc_vno, sizeof(rc_vno))) {
+     (void) unlink(d->fn);
+     FREE(d->fn);
+     (void) close(d->fd);
+     return retval;
+ }
  return 0;
 }
 
@@ -121,6 +132,8 @@ krb5_error_code krb5_rc_io_open (d, fn)
 krb5_rc_iostuff *d;
 char *fn;
 {
+ krb5_int16 rc_vno;
+ krb5_error_code retval;
  GETDIR;
  if (!(d->fn = malloc(strlen(fn) + dirlen + 1)))
    return KRB5_RC_IO_MALLOC;
@@ -143,6 +156,17 @@ char *fn;
      case EROFS: FREE(d->fn); return KRB5_RC_IO_PERM; break;
      default: FREE(d->fn); return KRB5_RC_IO_UNKNOWN; break;
     }
+ if (retval = krb5_rc_io_read(d, (krb5_pointer) &rc_vno,  sizeof(rc_vno))) {
+     (void) close(d->fd);
+     FREE(d->fn); 
+     return retval;
+ }
+ if (ntohs(rc_vno) != KRB5_RC_VNO) {
+     (void) close(d->fd);
+     FREE(d->fn); 
+     return KRB5_RCACHE_BADVNO;
+ }
+
  return 0;
 }
 
