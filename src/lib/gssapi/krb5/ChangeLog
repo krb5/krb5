@@ -1,3 +1,9 @@
+2001-10-26  Ezra Peisach  <epeisach@mit.edu>
+
+	* k5seal.c (make_seal_token_v1): Correct errors in code pertaining
+	to case when signing message only. Fixes buffer overflows as found
+	by gssapi dejagnu testsuite.
+
 2001-10-25  Sam Hartman  <hartmans@mit.edu>
 
 	* k5unseal.c (kg_unseal_v1): same here.

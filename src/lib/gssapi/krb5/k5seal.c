@@ -91,6 +91,7 @@ make_seal_token_v1 (krb5_context context,
     if (encrypt || (!bigend && (toktype == KG_TOK_SEAL_MSG)))
       conflen = kg_confounder_size(context, enc);
     else conflen = 0;
+
     if (toktype == KG_TOK_SEAL_MSG) {
       switch (sealalg) {
       case SEAL_ALG_MICROSOFT_RC4:
@@ -177,23 +178,26 @@ make_seal_token_v1 (krb5_context context,
     }
 
     memcpy(plain+conflen, text->value, text->length);
-    memset(plain+conflen+text->length, pad, pad);
+    if (pad) memset(plain+conflen+text->length, pad, pad);
 
-	/* compute the checksum */
+    /* compute the checksum */
 
     /* 8 = head of token body as specified by mech spec */
     if (! (data_ptr =
-	   (char *) xmalloc(8 + (bigend ? text->length : tmsglen)))) {
+	   (char *) xmalloc(8 + 
+			    ((bigend || (toktype != KG_TOK_SEAL_MSG))
+			     ? text->length : tmsglen)))) {
       xfree(plain);
       xfree(t);
       return(ENOMEM);
     }
     (void) memcpy(data_ptr, ptr-2, 8);
-    if (bigend)
+    if (bigend || (toktype != KG_TOK_SEAL_MSG))
       (void) memcpy(data_ptr+8, text->value, text->length);
     else
       (void) memcpy(data_ptr+8, plain, msglen);
-    plaind.length = 8 + (bigend ? text->length : msglen);
+    plaind.length = 8 + 
+	((bigend || (toktype != KG_TOK_SEAL_MSG))? text->length : msglen);
     plaind.data = data_ptr;
     code = krb5_c_make_checksum(context, md5cksum.checksum_type, seq,
 				sign_usage, &plaind, &md5cksum);
