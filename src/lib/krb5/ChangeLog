@@ -1,3 +1,7 @@
+2000-10-10  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Check for getifaddrs and ifaddrs.h.
+
 2000-09-21  Ezra Peisach  <epeisach@mit.edu>
 
 	* configure.in: Add AC_TYPE_OFF_T for off_t declaraion.
