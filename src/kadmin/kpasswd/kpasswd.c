@@ -564,6 +564,7 @@ main(argc,argv)
 
 
 krb5_data cpwname = {
+        0,
 	sizeof(CPWNAME)-1,
 	CPWNAME
 };
