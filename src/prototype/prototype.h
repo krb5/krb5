@@ -13,7 +13,7 @@
 
 #include <krb5/copyright.h>
 
-#ifndef __<<< include blocker>>>__
-#define __<<< include blocker>>>__
+#ifndef <<< include blocker>>>__
+#define <<< include blocker>>>__
 
 #endif /* __<<< include blocker>>>__ */
