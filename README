@@ -10,8 +10,9 @@ Unpacking the Source Distribution
 The source distribution of Kerberos 5 comes in three gzipped tarfiles,
 krb5-1.0.src.tar.gz, krb5-1.0.doc.tar.gz, and krb5-1.0.crypto.tar.gz.
 The krb5-1.0.doc.tar.gz contains the doc/ directory and this README
-file.  The krb5-1.0.src.tar.gz contains all of doc/ and src/, except
-for the crypto library sources, which are in krb5-1.0.crypto.tar.gz.
+file.  The krb5-1.0.src.tar.gz contains the src/ directory and this
+README file, except for the crypto library sources, which are in
+krb5-1.0.crypto.tar.gz.
 
 Instruction on how to extract the entire distribution follow.  These
 directions assume that you want to extract into a directory called
@@ -23,6 +24,7 @@ If you have the GNU tar program and gzip installed, you can simply do:
 	cd DIST
 	gtar zxpf krb5-1.0.src.tar.gz
 	gtar zxpf krb5-1.0.crypto.tar.gz
+	gtar zxpf krb5-1.0.doc.tar.gz
 
 If you don't have GNU tar, you will need to get the FSF gzip
 distribution and use gzcat:
@@ -31,6 +33,7 @@ distribution and use gzcat:
 	cd DIST
 	gzcat krb5-1.0.src.tar.gz | tar xpf -
 	gzcat krb5-1.0.crypto.tar.gz | tar xpf -
+	gzcat krb5-1.0.doc.tar.gz | tar xpf -
 
 Both of these methods will extract the sources into DIST/krb5-1.0/src
 and the documentation into DIST/krb5-1.0/doc.
@@ -38,7 +41,37 @@ and the documentation into DIST/krb5-1.0/doc.
 Unpacking the Binary Distribution
 ---------------------------------
 
-XXX add real directions here
+Binary distributions of Kerberos V5 are provided merely as convenience
+to those people who wish to try out Kerberos V5 without needing to do
+a full compile of Kerberos.
+
+MIT and the MIT Kerberos V5 development team make no guarantees that
+we will continue to supply binary distributions for future releases of
+Kerberos V5, or for any operating system/platform in particular.
+These binary distributions have been prepared by members of the MIT
+Kerberos V5 development team, or by volunteers who have graciously
+agreed to test the pre-release snapshot.  Each binary build is PGP
+signed by the person who prepared the binary distribution for that
+particular platform.  
+
+While the binary distribution is *supposed* to correspond exactly to
+the 1.0 Kerberos V5 source release, you have no way of knowing whether
+the person who prepared the binary release might have inserted a
+trojan horse, or a trapdoor.  For all you know, the binary
+distribution might be mailing all of your Kerberos keys to
+kremvax!boris.  (The same is true for the source distribution, but at
+least you can audit the code yourself!)
+
+For this reason, if you are planning on using Kerberos V5 in
+production, we strongly suggest that you obtain the source
+distribution and compile it from source yourself.
+
+The binary distributions have been compiled so that they will install
+in /usr/local.  To install, su to root and and type the command:
+
+	cd /usr/local
+	gunzip < /tmp/krb5-1.0.<platform>.tar.gz | tar xvf -
+
 
 Building and Installing Kerberos 5
 ----------------------------------
@@ -54,19 +87,38 @@ which contain the system administrator's guide, and the user's guide,
 respectively.  They are also available as info files
 kerberos-admin.info and krb5-user.info, respectively.
 
->>									     <<
->> Please report any problems/bugs/comments by using krb5-send-pr            <<
->>									     <<
+Reporting Bugs
+--------------
+
+Please report any problems/bugs/comments using the krb5-send-pr
+program.  The krb5-send-pr program will be installed in the sbin
+directory once you have successfully compiled and installed Kerberos
+V5 (or if you have installed one of our binary distributions).
+
+If you are not able to use krb5-send-pr because you haven't been able
+compile and install Kerberos V5 on any platform, you may send mail to
+krb5-bugs@mit.edu.
 
 Notes and Major Changes
 -----------------------
+
+* We are now using the GNATS system to track bug reports for Kerberos
+V5.  It is therefore helpful for people to use the krb5-send-pr
+program when reporting bugs.  The old interface of sending mail to
+krb5-bugs@mit.edu will still work; however, bug reports sent in this
+fashion may experience a delay in being processed.
 
 * The default keytab name has changed from /etc/v5srvtab to
 /etc/krb5.keytab.
 
 * login.krb5 no longer defaults to getting krb4 tickets.
 
-* Windows DLL names have changed. XXX need more info here
+* The Windows (win16) DLL, LIBKRB5.DLL, has been renamed to
+KRB5_16.DLL.  This change was necessary to distinguish it from the
+win32 version, which will be named KRB5_32.DLL.  Note that the
+GSSAPI.DLL file has not been renamed, because this name was specified
+in a draft standard for the Windows 16 GSSAPI bindings.  (The 32-bit
+version of the GSSAPI DLL will be named GSSAPI32.DLL.)
 
 * The directory structure used for installations has changed.  In
 particular, files previously located in $prefix/lib/krb5kdc are now
@@ -178,7 +230,7 @@ Technologies, Inc., who donated their administration server for use in
 the MIT release of Kerberos.
 
 Thanks to Paul Vixie and the Internet Software Consortium for
-supporting the OV administration server integration work.
+supporting the OV administration server integration work as well as 
 
 Thanks to Jeff Bigler, Mark Eichin, Marc Horowitz, Nancy Gilman, Ken
 Raeburn, and all of the folks at Cygnus Support, who provided
@@ -188,6 +240,9 @@ administrator's documentation.
 
 Thanks to Doug Engert from ANL for providing many bug fixes, as well
 as testing to ensure DCE interoperability.
+
+Thanks to Ken Hornstein at NRL for providing many bug fixes and
+suggestions.
 
 Thanks to Sean Mullan and Bill Sommerfeld from Hewlett Packard for
 their many suggestions and bug fixes.
