@@ -1,3 +1,8 @@
+2003-10-08  Tom Yu  <tlyu@mit.edu>
+
+	* k5-int.h: Add prototypes for decode_krb5_safe_with_body and
+	encode_krb5_safe_with_body.
+
 2003-08-29  Ken Raeburn  <raeburn@mit.edu>
 
 	* fake-addrinfo.h (WRAP_GETADDRINFO, COPY_FIRST_CANONNAME): Don't

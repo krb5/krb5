@@ -1,3 +1,10 @@
+2003-10-08  Tom Yu  <tlyu@mit.edu>
+
+	* rd_safe.c (krb5_rd_safe_basic): Save the encoded KRB-SAFE-BODY
+	to avoid trouble caused by re-encoding.  Also, handle correctly
+	implemented RFC 1510 KRB-SAFE, i.e., checksummed over
+	KRB-SAFE-BODY only.
+
 2003-09-02  Tom Yu  <tlyu@mit.edu>
 
 	* conv_creds.c (krb524_convert_creds_plain): Apply patch from

@@ -90,6 +90,7 @@ if((var) == NULL) clean_return(ENOMEM)
   construction = t2.construction;		\
   tagnum = t2.tagnum;				\
   indef = t2.indef;				\
+  taglen = t2.length;				\
 }
 
 #define get_eoc()						\
@@ -107,6 +108,7 @@ if((var) == NULL) clean_return(ENOMEM)
 
 /* decode sequence header and initialize tagnum with the first field */
 #define begin_structure()\
+unsigned int taglen;\
 asn1buf subbuf;\
 int seqindef;\
 int indef;\
@@ -494,8 +496,26 @@ krb5_error_code decode_krb5_kdc_req_body(const krb5_data *code, krb5_kdc_req **r
   cleanup(free);
 }
 
-krb5_error_code decode_krb5_safe(const krb5_data *code, krb5_safe **rep)
+/*
+ * decode_krb5_safe_with_body
+ *
+ * Like decode_krb5_safe(), but grabs the encoding of the
+ * KRB-SAFE-BODY as well, in case re-encoding would produce a
+ * different encoding.  (Yes, we're using DER, but there's this
+ * annoying problem with pre-1.3.x code using signed sequence numbers,
+ * which we permissively decode and cram into unsigned 32-bit numbers.
+ * When they're re-encoded, they're no longer negative if they started
+ * out negative, so checksum verification fails.)
+ *
+ * This does *not* perform any copying; the returned pointer to the
+ * encoded KRB-SAFE-BODY points into the input buffer.
+ */
+krb5_error_code decode_krb5_safe_with_body(
+  const krb5_data *code,
+  krb5_safe **rep,
+  krb5_data *body)
 {
+  krb5_data tmpbody;
   setup();
   alloc_field(*rep,krb5_safe);
   clear_field(rep,checksum);
@@ -511,12 +531,26 @@ krb5_error_code decode_krb5_safe(const krb5_data *code, krb5_safe **rep)
       if(msg_type != KRB5_SAFE) clean_return(KRB5_BADMSGTYPE);
 #endif
     }
+    /*
+     * Gross kludge to extract pointer to encoded safe-body.  Relies
+     * on tag prefetch done by next_tag().  Don't handle indefinite
+     * encoding, as it's too much work.
+     */
+    if (!indef) {
+      tmpbody.length = taglen;
+      tmpbody.data = subbuf.next;
+    } else {
+      tmpbody.length = 0;
+      tmpbody.data = NULL;
+    }
     get_field(**rep,2,asn1_decode_krb_safe_body);
     alloc_field((*rep)->checksum,krb5_checksum);
     get_field(*((*rep)->checksum),3,asn1_decode_checksum);
   (*rep)->magic = KV5M_SAFE;
     end_structure();
   }
+  if (body != NULL)
+    *body = tmpbody;
   cleanup_manual();
 error_out:
   if (rep && *rep) {
@@ -524,6 +558,11 @@ error_out:
       free(*rep);
   }
   return retval;
+}
+
+krb5_error_code decode_krb5_safe(const krb5_data *code, krb5_safe **rep)
+{
+  return decode_krb5_safe_with_body(code, rep, NULL);
 }
 
 krb5_error_code decode_krb5_priv(const krb5_data *code, krb5_priv **rep)

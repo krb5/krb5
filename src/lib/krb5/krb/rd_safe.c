@@ -51,6 +51,7 @@ krb5_rd_safe_basic(krb5_context context, const krb5_data *inbuf, const krb5_keyb
 {
     krb5_error_code 	  retval;
     krb5_safe 		* message;
+    krb5_data safe_body;
     krb5_checksum our_cksum, *his_cksum;
     krb5_octet zero_octet = 0;
     krb5_data *scratch;
@@ -59,7 +60,7 @@ krb5_rd_safe_basic(krb5_context context, const krb5_data *inbuf, const krb5_keyb
     if (!krb5_is_krb_safe(inbuf))
 	return KRB5KRB_AP_ERR_MSG_TYPE;
 
-    if ((retval = decode_krb5_safe(inbuf, &message)))
+    if ((retval = decode_krb5_safe_with_body(inbuf, &message, &safe_body)))
 	return retval;
 
     if (!krb5_c_valid_cksumtype(message->checksum->checksum_type)) {
@@ -113,7 +114,7 @@ krb5_rd_safe_basic(krb5_context context, const krb5_data *inbuf, const krb5_keyb
 
     message->checksum = &our_cksum;
 
-    if ((retval = encode_krb5_safe(message, &scratch)))
+    if ((retval = encode_krb5_safe_with_body(message, &safe_body, &scratch)))
 	goto cleanup;
 
     message->checksum = his_cksum;
@@ -126,8 +127,17 @@ krb5_rd_safe_basic(krb5_context context, const krb5_data *inbuf, const krb5_keyb
     krb5_free_data(context, scratch);
     
     if (!valid) {
-	retval = KRB5KRB_AP_ERR_MODIFIED;
-	goto cleanup;
+	/*
+	 * Checksum over only the KRB-SAFE-BODY, like RFC 1510 says, in
+	 * case someone actually implements it correctly.
+	 */
+	retval = krb5_c_verify_checksum(context, keyblock,
+					KRB5_KEYUSAGE_KRB_SAFE_CKSUM,
+					&safe_body, his_cksum, &valid);
+	if (!valid) {
+	    retval = KRB5KRB_AP_ERR_MODIFIED;
+	    goto cleanup;
+	}
     }
 
     replaydata->timestamp = message->timestamp;
