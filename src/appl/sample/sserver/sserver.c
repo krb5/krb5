@@ -65,7 +65,11 @@ char *argv[];
     krb5_init_ets();
     /* open a log connection */
 
+#ifdef ultrix
+    openlog("sserver", 0);
+#else
     openlog("sserver", 0, LOG_DAEMON);
+#endif
 
     if (argc < 2) {
 	syslog(LOG_ERR, "needs server argument");
