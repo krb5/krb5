@@ -91,6 +91,8 @@
 #include "socket-utils.h"
 #include "k5-platform.h"
 
+#include <stdio.h>		/* for sprintf */
+
 #ifdef S_SPLINT_S
 /*@-incondefs@*/
 extern int
