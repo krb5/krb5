@@ -81,6 +81,10 @@ if(tagnum > (tagexpect)) return ASN1_MISSING_FIELD;\
 if(tagnum < (tagexpect)) return ASN1_MISPLACED_FIELD;\
 get_lenfield_body(len,var,decoder)
 
+#define opt_lenfield(len,var,tagexpect,decoder)\
+if(tagnum == (tagexpect)){\
+  get_lenfield_body(len,var,decoder); }\
+else { len = 0; var = 0; }
 
 
 #define begin_structure()\
@@ -706,4 +710,110 @@ asn1_error_code asn1_decode_sequence_of_passwdsequence(buf, val)
      passwd_phrase_element *** val;
 {
   decode_array_body(passwd_phrase_element,asn1_decode_passwdsequence);
+}
+
+asn1_error_code asn1_decode_sam_flags(buf,val)
+     asn1buf * buf;
+     krb5_flags *val;
+{ return asn1_decode_krb5_flags(buf,val); }
+
+#define opt_string(val,n,fn) opt_lenfield((val).length,(val).data,n,fn)
+#define opt_cksum(var,tagexpect,decoder)\
+if(tagnum == (tagexpect)){\
+  get_field_body(var,decoder); }\
+else var.length = 0
+
+asn1_error_code asn1_decode_sam_challenge(buf,val)
+     asn1buf * buf;
+     krb5_sam_challenge *val;
+{
+  setup();
+  { begin_structure();
+    get_field(val->sam_type,0,asn1_decode_int32);
+    get_field(val->sam_flags,1,asn1_decode_sam_flags);
+    opt_string(val->sam_type_name,2,asn1_decode_charstring);
+    opt_string(val->sam_track_id,3,asn1_decode_charstring);
+    opt_string(val->sam_challenge_label,4,asn1_decode_charstring);
+    opt_string(val->sam_challenge,5,asn1_decode_charstring);
+    opt_string(val->sam_response_prompt,6,asn1_decode_charstring);
+    opt_string(val->sam_pk_for_sad,7,asn1_decode_charstring);
+    opt_field(val->sam_nonce,8,asn1_decode_int32,0);
+    opt_cksum(val->sam_cksum,9,asn1_decode_checksum);
+    end_structure();
+    val->magic = KV5M_SAM_CHALLENGE;
+  }
+  cleanup();
+}
+asn1_error_code asn1_decode_enc_sam_key(buf, val)
+     asn1buf * buf;
+     krb5_sam_key * val;
+{
+  setup();
+  { begin_structure();
+    /* alloc_field(val->sam_key,krb5_keyblock); */
+    get_field(val->sam_key,0,asn1_decode_encryption_key);
+    end_structure();
+    val->magic = KV5M_SAM_KEY;
+  }
+  cleanup();
+}
+
+asn1_error_code asn1_decode_enc_sam_response_enc(buf, val)
+     asn1buf * buf;
+     krb5_enc_sam_response_enc * val;
+{
+  setup();
+  { begin_structure();
+    opt_field(val->sam_nonce,0,asn1_decode_int32,0);
+    opt_field(val->sam_timestamp,1,asn1_decode_kerberos_time,0);
+    opt_field(val->sam_usec,2,asn1_decode_int32,0);
+    opt_string(val->sam_passcode,3,asn1_decode_charstring);
+    end_structure();
+    val->magic = KV5M_ENC_SAM_RESPONSE_ENC;
+  }
+  cleanup();
+}
+
+#define opt_encfield(fld,tag,fn) \
+    if(tagnum == tag){ \
+      get_field(fld,tag,fn); } \
+    else{\
+      fld.magic = 0;\
+      fld.enctype = 0;\
+      fld.kvno = 0;\
+      fld.ciphertext.data = NULL;\
+      fld.ciphertext.length = 0;\
+    }
+
+asn1_error_code asn1_decode_sam_response(buf, val)
+     asn1buf * buf;
+     krb5_sam_response * val;
+{
+  setup();
+  { begin_structure();
+    get_field(val->sam_type,0,asn1_decode_int32);
+    get_field(val->sam_flags,1,asn1_decode_sam_flags);
+    opt_string(val->sam_track_id,2,asn1_decode_charstring);
+    opt_encfield(val->sam_enc_key,3,asn1_decode_encrypted_data);
+    get_field(val->sam_enc_nonce_or_ts,4,asn1_decode_encrypted_data);
+    opt_field(val->sam_nonce,5,asn1_decode_int32,0);
+    opt_field(val->sam_patimestamp,6,asn1_decode_kerberos_time,0);
+    end_structure();
+    val->magic = KV5M_SAM_RESPONSE;
+  }
+  cleanup();
+}
+
+
+asn1_error_code asn1_decode_predicted_sam_response(buf, val)
+     asn1buf * buf;
+     krb5_predicted_sam_response * val;
+{
+  setup();
+  { begin_structure();
+    get_field(val->sam_key,0,asn1_decode_encryption_key);
+    end_structure();
+    val->magic = KV5M_PREDICTED_SAM_RESPONSE;
+  }
+  cleanup();
 }

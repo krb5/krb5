@@ -792,3 +792,58 @@ krb5_error_code encode_krb5_padata_sequence(rep, code)
   krb5_cleanup();
 }
 
+/* sam preauth additions */
+krb5_error_code encode_krb5_sam_challenge(rep, code)
+     const krb5_sam_challenge * rep;
+     krb5_data ** code;
+{
+  krb5_setup();
+  retval = asn1_encode_sam_challenge(buf,rep,&length);
+  if(retval) return retval;
+  sum += length;
+  krb5_cleanup();
+}
+
+krb5_error_code encode_krb5_sam_key(rep, code)
+     const krb5_sam_key * rep;
+     krb5_data ** code;
+{
+  krb5_setup();
+  retval = asn1_encode_sam_key(buf,rep,&length);
+  if(retval) return retval;
+  sum += length;
+  krb5_cleanup();
+}
+
+krb5_error_code encode_krb5_enc_sam_response_enc(rep, code)
+     const krb5_enc_sam_response_enc * rep;
+     krb5_data ** code;
+{
+  krb5_setup();
+  retval = asn1_encode_enc_sam_response_enc(buf,rep,&length);
+  if(retval) return retval;
+  sum += length;
+  krb5_cleanup();
+}
+
+krb5_error_code encode_krb5_sam_response(rep, code)
+     const krb5_sam_response * rep;
+     krb5_data ** code;
+{
+  krb5_setup();
+  retval = asn1_encode_sam_response(buf,rep,&length);
+  if(retval) return retval;
+  sum += length;
+  krb5_cleanup();
+}
+
+krb5_error_code encode_krb5_predicted_sam_response(rep, code)
+     const krb5_predicted_sam_response * rep;
+     krb5_data ** code;
+{
+  krb5_setup();
+  retval = asn1_encode_predicted_sam_response(buf,rep,&length);
+  if(retval) return retval;
+  sum += length;
+  krb5_cleanup();
+}

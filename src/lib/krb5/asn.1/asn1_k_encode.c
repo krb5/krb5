@@ -838,3 +838,107 @@ asn1_error_code asn1_encode_passwdsequence(buf, val, retlen)
   asn1_cleanup();
 }
 
+asn1_error_code asn1_encode_sam_flags(buf, val, retlen)
+     asn1buf * buf;
+     const krb5_flags val;
+     int * retlen;
+{
+  return asn1_encode_krb5_flags(buf,val,retlen);
+}
+
+#define add_optstring(val,n,fn) \
+     if ((val).length >= 0) {asn1_addlenfield((val).length,(val).data,n,fn);}
+
+asn1_error_code asn1_encode_sam_challenge(buf, val, retlen)
+     asn1buf * buf;
+     const krb5_sam_challenge * val;
+     int * retlen;
+{
+  asn1_setup();
+  /* possibly wrong */
+  if (val->sam_cksum.length)
+    asn1_addfield(&(val->sam_cksum),9,asn1_encode_checksum);
+
+  if (val->sam_nonce)
+    asn1_addfield(val->sam_nonce,8,asn1_encode_integer);
+
+  add_optstring(val->sam_pk_for_sad,7,asn1_encode_charstring);
+  add_optstring(val->sam_response_prompt,6,asn1_encode_charstring);
+  add_optstring(val->sam_challenge,5,asn1_encode_charstring);
+  add_optstring(val->sam_challenge_label,4,asn1_encode_charstring);
+  add_optstring(val->sam_track_id,3,asn1_encode_charstring);
+  add_optstring(val->sam_type_name,2,asn1_encode_charstring);
+
+  asn1_addfield(val->sam_flags,1,asn1_encode_sam_flags);
+  asn1_addfield(val->sam_type,0,asn1_encode_integer);
+
+  asn1_makeseq();
+  asn1_cleanup();
+}
+
+asn1_error_code asn1_encode_sam_key(buf, val, retlen)
+     asn1buf * buf;
+     const krb5_sam_key * val;
+     int * retlen;
+{
+  asn1_setup();
+  asn1_addfield(&(val->sam_key),0,asn1_encode_encryption_key);
+
+  asn1_makeseq();
+
+  asn1_cleanup();
+}
+
+
+asn1_error_code asn1_encode_enc_sam_response_enc(buf, val, retlen)
+     asn1buf * buf;
+     const krb5_enc_sam_response_enc * val;
+     int * retlen;
+{
+  asn1_setup();
+  add_optstring(val->sam_passcode,3,asn1_encode_charstring);
+  asn1_addfield(val->sam_usec,2,asn1_encode_integer);
+  asn1_addfield(val->sam_timestamp,1,asn1_encode_kerberos_time);
+  asn1_addfield(val->sam_nonce,0,asn1_encode_integer);
+
+  asn1_makeseq();
+
+  asn1_cleanup();
+}
+
+asn1_error_code asn1_encode_sam_response(buf, val, retlen)
+     asn1buf * buf;
+     const krb5_sam_response * val;
+     int * retlen;
+{
+  asn1_setup();
+
+  if (val->sam_patimestamp)
+    asn1_addfield(val->sam_patimestamp,6,asn1_encode_kerberos_time);
+  if (val->sam_nonce)
+    asn1_addfield(val->sam_nonce,5,asn1_encode_integer);
+  asn1_addfield(&(val->sam_enc_nonce_or_ts),4,asn1_encode_encrypted_data);
+  if (val->sam_enc_key.ciphertext.length)
+    asn1_addfield(&(val->sam_enc_key),3,asn1_encode_encrypted_data);
+  add_optstring(val->sam_track_id,2,asn1_encode_charstring);
+  asn1_addfield(val->sam_flags,1,asn1_encode_sam_flags);
+  asn1_addfield(val->sam_type,0,asn1_encode_integer);
+
+  asn1_makeseq();
+
+  asn1_cleanup();
+}
+
+asn1_error_code asn1_encode_predicted_sam_response(buf, val, retlen)
+     asn1buf * buf;
+     const krb5_predicted_sam_response * val;
+     int * retlen;
+{
+  asn1_setup();
+
+  asn1_addfield(&(val->sam_key),0,asn1_encode_encryption_key);
+
+  asn1_makeseq();
+
+  asn1_cleanup();
+}
