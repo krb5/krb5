@@ -204,43 +204,48 @@ static int translate_ai_error (int err)
     }
 }
 
+#include <stdarg.h>
+static inline void Tprintf(const char *fmt, ...)
+{
+#ifdef TEST
+    va_list ap;
+    va_start(ap, fmt);
+    vfprintf(stderr, fmt, ap);
+    va_end(ap);
+#endif
+}
+
 static int add_addrinfo_to_list (struct addrlist *lp, struct addrinfo *a)
 {
     int err;
 
-#ifdef TEST
     switch (a->ai_socktype) {
     case SOCK_DGRAM:
-	fprintf(stderr, "\tdgram\n");
+	Tprintf("\tdgram\n");
 	break;
     case SOCK_STREAM:
-	fprintf(stderr, "\tstream\n");
+	Tprintf("\tstream\n");
 	break;
     case SOCK_RAW:
-	fprintf(stderr, "\traw\n");
+	Tprintf("\traw\n");
 	break;
     case 0:
 	break;
     default:
-	fprintf(stderr, "\tsocket type %d\n", a->ai_socktype);
+	Tprintf("\tsocket type %d\n", a->ai_socktype);
 	break;
     }
-#endif
 
     if (lp->naddrs == lp->space) {
 	err = grow_list (lp, 1);
 	if (err) {
-#ifdef TEST
-	    fprintf (stderr, "grow_list failed %d\n", err);
-#endif
+	    Tprintf ("grow_list failed %d\n", err);
 	    return err;
 	}
     }
     lp->addrs[lp->naddrs++] = a;
     a->ai_next = 0;
-#ifdef TEST
-    fprintf (stderr, "count is now %d\n", lp->naddrs);
-#endif
+    Tprintf ("count is now %d\n", lp->naddrs);
     return 0;
 }
 
@@ -255,10 +260,8 @@ krb5int_add_host_to_list (struct addrlist *lp, const char *hostname,
     int err;
     char portbuf[10], secportbuf[10];
 
-#ifdef TEST
-    fprintf (stderr, "adding hostname %s, ports %d,%d\n", hostname,
+    Tprintf ("adding hostname %s, ports %d,%d\n", hostname,
 	     ntohs (port), ntohs (secport));
-#endif
 
     memset(&hint, 0, sizeof(hint));
     hint.ai_family = family;
@@ -312,11 +315,8 @@ krb5_locate_srv_conf_1(krb5_context context, const krb5_data *realm,
     krb5_error_code code;
     int i, j, count, ismaster;
 
-#ifdef TEST
-    fprintf (stderr,
-	     "looking in krb5.conf for realm %s entry %s; ports %d,%d\n",
+    Tprintf ("looking in krb5.conf for realm %s entry %s; ports %d,%d\n",
 	     realm->data, name, ntohs (udpport), ntohs (sec_udpport));
-#endif
 
     if ((host = malloc(realm->length + 1)) == NULL) 
 	return ENOMEM;
@@ -335,10 +335,8 @@ krb5_locate_srv_conf_1(krb5_context context, const krb5_data *realm,
     code = profile_get_values(context->profile, realm_srv_names, &hostlist);
 
     if (code) {
-#ifdef TEST
-	fprintf (stderr, "config file lookup failed: %s\n",
+	Tprintf ("config file lookup failed: %s\n",
 		 error_message(code));
-#endif
         if (code == PROF_NO_SECTION || code == PROF_NO_RELATION)
 	    code = KRB5_REALM_UNKNOWN;
  	krb5_xfree(host);
@@ -348,9 +346,7 @@ krb5_locate_srv_conf_1(krb5_context context, const krb5_data *realm,
     count = 0;
     while (hostlist && hostlist[count])
 	    count++;
-#ifdef TEST
-    fprintf (stderr, "found %d entries under 'kdc'\n", count);
-#endif
+    Tprintf ("found %d entries under 'kdc'\n", count);
     
     if (count == 0) {
         profile_free_list(hostlist);
@@ -405,9 +401,7 @@ krb5_locate_srv_conf_1(krb5_context context, const krb5_data *realm,
 	int p1, p2;
 
 	host = hostlist[i];
-#ifdef TEST
-	fprintf (stderr, "entry %d is '%s'\n", i, host);
-#endif
+	Tprintf ("entry %d is '%s'\n", i, host);
 	/*
 	 * Strip off excess whitespace
 	 */
@@ -466,9 +460,7 @@ krb5_locate_srv_conf_1(krb5_context context, const krb5_data *realm,
 					 SOCK_STREAM, family);
 	}
 	if (code) {
-#ifdef TEST
-	    fprintf (stderr, "error %d returned from add_host_to_list\n", code);
-#endif
+	    Tprintf ("error %d returned from add_host_to_list\n", code);
 	    if (hostlist)
 		profile_free_list (hostlist);
 	    if (masterlist)
@@ -534,13 +526,9 @@ krb5_locate_srv_dns_1 (const krb5_data *realm,
 	return KRB5_ERR_NO_SERVICE;
     }
 
-#ifdef TEST
-    fprintf (stderr, "walking answer list:\n");
-#endif
+    Tprintf ("walking answer list:\n");
     for (entry = head; entry != NULL; entry = next) {
-#ifdef TEST
-	fprintf (stderr, "\tport=%d host=%s\n", entry->port, entry->host);
-#endif
+	Tprintf ("\tport=%d host=%s\n", entry->port, entry->host);
 	next = entry->next;
 	code = add_host_to_list (addrlist, entry->host, htons (entry->port), 0,
 				 (strcmp("_tcp", protocol)
@@ -555,9 +543,7 @@ krb5_locate_srv_dns_1 (const krb5_data *realm,
 	    entry = 0;
 	}
     }
-#ifdef TEST
-    fprintf (stderr, "[end]\n");
-#endif
+    Tprintf ("[end]\n");
 
     krb5int_free_srv_dns_data(head);
     return code;
@@ -597,32 +583,24 @@ krb5int_locate_server (krb5_context context, const krb5_data *realm,
 	    if (socktype == SOCK_DGRAM || socktype == 0) {
 		code = krb5_locate_srv_dns_1(realm, dnsname, "_udp",
 					     &al, family);
-#ifdef TEST
 		if (code)
-		    fprintf(stderr, "dns udp lookup returned error %d\n",
-			    code);
-#endif
+		    Tprintf("dns udp lookup returned error %d\n", code);
 	    }
 	    if ((socktype == SOCK_STREAM || socktype == 0) && code == 0) {
 		code = krb5_locate_srv_dns_1(realm, dnsname, "_tcp",
 					     &al, family);
-#ifdef TEST
 		if (code)
-		    fprintf(stderr, "dns tcp lookup returned error %d\n",
-			    code);
-#endif
+		    Tprintf("dns tcp lookup returned error %d\n", code);
 	    }
 	}
     }
 #endif /* KRB5_DNS_LOOKUP */
-#ifdef TEST
     if (code == 0)
-	fprintf (stderr, "krb5int_locate_server found %d addresses\n",
+	Tprintf ("krb5int_locate_server found %d addresses\n",
 		 al.naddrs);
     else
-	fprintf (stderr, "krb5int_locate_server returning error code %d\n",
+	Tprintf ("krb5int_locate_server returning error code %d\n",
 		 code);
-#endif
     if (code != 0) {
 	if (al.space)
 	    free_list (&al);
