@@ -1788,9 +1788,9 @@ int rewrite_ccache = 1; /*try to write out ccache*/
 			 error_message(retval));
 
 	     }
-	skip_output_tkfile: /*null*/;
 	}
 #endif /* KRB4_GET_TICKETS */
+	skip_output_tkfile: /*null*/;
 
 
 	if (*pwd->pw_shell == '\0')

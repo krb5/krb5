@@ -1,3 +1,7 @@
+Sun Sep 29 20:49:47 1996  Sam Hartman  <hartmans@mit.edu>
+
+	* login.c: Fix so it works with --without-krb4 option
+
 Fri Sep 20 18:23:53 1996  Sam Hartman  <hartmans@planet-zorp.MIT.EDU>
 
 	* login.c: Update so that we try to convert krb524 tickets after
