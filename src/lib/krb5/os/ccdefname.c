@@ -31,8 +31,8 @@
 #include "k5-int.h"
 #include <stdio.h>
 
-#if defined(macintosh) || defined(__MACH__)
-#include "CCache.h"
+#if TARGET_OS_MAC
+#include <CredentialsCache/CredentialsCache.h>
 #endif
 
 #if defined(_WIN32)
