@@ -36,11 +36,27 @@ t_mddriver.exe:
 	$(CC) -DMD=4 $(CFLAGS2) -o t_mddriver t_mddriver.c md4.c
 	$(RM) md4.obj
 
-check:: t_mddriver$(EXEEXT)
+t_cksum.c: $(srcdir)/../md5/t_cksum.c
+	$(CP) $(srcdir)/../md5/t_cksum.c t_cksum.c
+
+t_cksum.o: t_cksum.c
+	$(CC) -DMD=4 $(CFLAGS) -c  t_cksum.c
+
+t_cksum: t_cksum.o $(TOPLIBD)/libcrypto.a
+	$(CC) $(CFLAGS) -o t_cksum t_cksum.o $(TOPLIBD)/libcrypto.a $(LIBS)
+
+check-unix:: t_mddriver t_cksum
+	$(C)t_mddriver -x
+	$(C)t_cksum "this is a test"
+
+check-windows:: t_mddriver$(EXEEXT)
 	$(C)t_mddriver$(EXEEXT) -x
+
+check:: check-$(WHAT)
 
 clean:: clean-$(WHAT)
 	$(RM) t_mddriver$(EXEEXT) t_mddriver.$(OBJEXT) t_mddriver.c
+	$(RM) t_cksum$(EXEEXT) t_cksum.$(OBJEXT) t_cksum.c
 
 clean-unix::
 	$(RM) shared/*
