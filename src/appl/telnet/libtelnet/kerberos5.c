@@ -221,54 +221,20 @@ kerberos5_send(ap)
 		return(0);
 	}
 
-	if ((name = malloc(strlen(RemoteHostName)+1)) == NULL) {
-		if (auth_debug_mode)
-			printf("Out of memory for hostname in Kerberos V5\r\n");
-		return(0);
-	}
-
-	if (r = krb5_get_host_realm(RemoteHostName, &realms)) {
-		if (auth_debug_mode)
-			printf("Kerberos V5: no realm for %s\r\n", RemoteHostName);
-		free(name);
-		return(0);
-	}
-
-	p1 = RemoteHostName;
-	p2 = name;
-
-	while (*p2 = *p1++) {
-		if (isupper(*p2))
-			*p2 |= 040;
-		++p2;
-	}
-
-	if (r = krb5_build_principal_ext(&server,
-					 strlen(realms[0]), realms[0],
-					 4, "host",
-					 p2 - name, name,
-					 0)) {
-		if (auth_debug_mode) {
-			printf("Kerberos V5: failure setting up principal (%s)\r\n",
-			       error_message(r));
-		}
-		free(name);
-		krb5_free_host_realm(realms);
-		return(0);
-	}
-					 
-
 	bzero((char *)&creds, sizeof(creds));
-	creds.server = server;
+	if (r = krb5_sname_to_principal(RemoteHostName,"host",KRB5_NT_SRV_HST,
+					&creds.server)) {
+	    if (auth_debug_mode)
+		printf("Kerberos V5: error while constructing service name: %s\r\n", error_message(r));
+	    return(0);
+	}
 
 	if (r = krb5_cc_get_principal(ccache, &creds.client)) {
 		if (auth_debug_mode) {
 			printf("Kerberos V5: failure on principal (%s)\r\n",
 				error_message(r));
 		}
-		free(name);
-		krb5_free_principal(server);
-		krb5_free_host_realm(realms);
+		krb5_free_cred_contents(&creds);
 		return(0);
 	}
 
@@ -276,9 +242,7 @@ kerberos5_send(ap)
 		if (auth_debug_mode) {
 			printf("Kerberos V5: failure on credentials(%d)\r\n",r);
 		}
-		free(name);
-		krb5_free_host_realm(realms);
-		krb5_free_principal(server);
+		krb5_free_cred_contents(&creds);
 		return(0);
 	}
 
@@ -297,9 +261,6 @@ kerberos5_send(ap)
 	/* don't let the key get freed if we clean up the authenticator */
 	authenticator.subkey = 0;
 
-	free(name);
-	krb5_free_host_realm(realms);
-	krb5_free_principal(server);
 #ifdef	ENCRYPTION
 	if (newkey) {
 	    /* keep the key in our private storage, but don't use it
@@ -318,6 +279,7 @@ kerberos5_send(ap)
 	    krb5_free_keyblock(newkey);
 	}
 #endif	/* ENCRYPTION */
+	krb5_free_cred_contents(&creds);
 	if (r) {
 		if (auth_debug_mode) {
 			printf("Kerberos V5: mk_req failed (%s)\r\n",
@@ -369,47 +331,13 @@ kerberos5_is(ap, data, cnt)
 		auth.data = (char *)data;
 		auth.length = cnt;
 
-		if (!(hp = gethostbyname(LocalHostName))) {
-			if (auth_debug_mode)
-				printf("Cannot resolve local host name\r\n");
-			Data(ap, KRB_REJECT, "Unknown local hostname.", -1);
-			auth_finished(ap, AUTH_REJECT);
-			return;
-		}
-
-		if (!realm && (krb5_get_default_realm(&realm))) {
-			if (auth_debug_mode)
-				printf("Could not get default realm\r\n");
-			Data(ap, KRB_REJECT, "Could not get default realm.", -1);
-			auth_finished(ap, AUTH_REJECT);
-			return;
-		}
-
-		if ((name = malloc(strlen(hp->h_name)+1)) == NULL) {
-			if (auth_debug_mode)
-				printf("Out of memory for hostname in Kerberos V5\r\n");
-			Data(ap, KRB_REJECT, "Out of memory.", -1);
-			auth_finished(ap, AUTH_REJECT);
-			return;
-		}
-
-		p1 = hp->h_name;
-		p2 = name;
-
-		while (*p2 = *p1++) {
-			if (isupper(*p2))
-				*p2 |= 040;
-			++p2;
-		}
-
+		r = krb5_sname_to_principal(0,  "host",
+					    KRB5_NT_SRV_HST,
+					    &server);
+		
 		if (authdat)
 			krb5_free_tkt_authent(authdat);
 
-	        r = krb5_build_principal_ext(&server,
-					     strlen(realm), realm,
-					     4, "host",
-					     p2 - name, name,
-					     0);
 		if (!r) {
 		    r = krb5_rd_req_simple(&auth, server, 0, &authdat);
 		    krb5_free_principal(server);
