@@ -912,6 +912,8 @@ krb5_free_realm_params(kcontext, rparams)
 	    krb5_xfree(rparams->realm_keysalts);
 	if (rparams->realm_kdc_ports)
 	    krb5_xfree(rparams->realm_kdc_ports);
+	if (rparams->realm_acl_file)
+	    krb5_xfree(rparams->realm_acl_file);
 	krb5_xfree(rparams);
     }
     return(0);

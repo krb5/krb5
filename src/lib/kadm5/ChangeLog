@@ -7,6 +7,11 @@ Fri Feb 27 22:30:41 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 	* Makefile.in: Add a LOCAL_SUBDIRS macro for all subdirectories in
 		the kadm5 library.
 
+Wed Feb 25 15:00:10 1998  Ezra Peisach  <epeisach@mit.edu>
+
+	* alt_prof.c (krb5_free_realm_params): Free realm_acl_file portion
+	of structure. 
+
 Wed Feb 18 16:13:56 1998  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Remove trailing slash from thisconfigdir.  Fix up
