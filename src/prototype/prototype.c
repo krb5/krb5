@@ -13,6 +13,6 @@
 #ifndef	lint
 static char <<< rcsid_module_c >>>[] =
 "$Id$";
-#endif	lint
+#endif	/* lint */
 
 #include <krb5/copyright.h>
