@@ -1,3 +1,7 @@
+Wed Mar  1 17:57:44 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* verify.c: Remove declaration of exit().
+
 Tue Feb 28 01:30:11 1995  John Gilmore  (gnu at toad.com)
 
 	* cksum.c, des.c, des.h, enc_dec.c, pcbc_encrypt.c, quad_cksum.c,

@@ -39,7 +39,6 @@ extern int des_string_to_key();
 extern int des_key_sched();
 extern int des_ecb_encrypt();
 extern int des_cbc_encrypt();
-extern exit();
 char *progname;
 int nflag = 2;
 int vflag;
