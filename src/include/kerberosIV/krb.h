@@ -40,6 +40,7 @@
 #define KRB5_CALLCONV
 #define KRB5_CALLCONV_C
 #define KRB5_DLLIMP
+#define KRB5_EXPORTVAR
 #endif
 #ifndef FAR
 #define FAR

@@ -1,3 +1,7 @@
+Thu Feb  6 00:22:22 1997  Richard Basch  <basch@lehman.com>
+
+	* krb.h: Make sure KRB5_EXPORTVAR is defined
+
 Fri Nov 22 11:34:46 1996  Sam Hartman  <hartmans@mit.edu>
 
 	* Makefile.in:  Install krb_err.h [218]
