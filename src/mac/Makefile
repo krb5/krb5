@@ -16,17 +16,17 @@ library-kind-debug						= .debug
 library-kind-final						=
 
 ##############################################################################################################
-###			Top-level targets -- abstract targets for convinient grouping
+###			Top-level targets -- abstract targets for convenient grouping
 ##############################################################################################################
 
 #	Everything
-all Ä glue all-debug all-final headers
+all Ä glue all-debug all-final
 
 #	Debugging versions
-all-debug Ä ppc-debug 68k-debug
+all-debug Ä ppc-debug 68k-debug headers
 
 #	Final versions
-all-final Ä ppc-final 68k-final
+all-final Ä ppc-final 68k-final headers
 
 #	Clasic 68K glue
 glue Ä glue-gss glue-krb5
