@@ -1,3 +1,8 @@
+2000-11-08  Tom Yu  <tlyu@mit.edu>
+
+	* default.exp: Use $KRBIV rather than $KRB4 since dejagnu-1.3
+	doesn't deal with digits in passed-in variables.
+
 Thu Oct 12 12:06:03 2000  Ezra Peisach  <epeisach@mit.edu>
 
 	* default.exp: Add dict_file entry (and create one) for kdc.conf

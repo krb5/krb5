@@ -1334,13 +1334,13 @@ proc kinit { name pass standalone } {
 # Returns 1 if v4 testing is enabled this passes encryption types are compatable with kerberos 4 work
 proc v4_compatible_enctype {} {
     global supported_enctypes
-    global KRB4
+    global KRBIV
 
-    if ![info exists KRB4] {
+    if ![info exists KRBIV] {
 	return 0;
     }
 
-    if { $KRB4 && [string first des-cbc-crc:v4 "$supported_enctypes"] >= 0} {
+    if { $KRBIV && [string first des-cbc-crc:v4 "$supported_enctypes"] >= 0} {
 	return 1
     } else {
 	return 0
