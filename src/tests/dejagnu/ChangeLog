@@ -1,3 +1,6 @@
+Fri Sep 29 14:23:01 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in (clean-unix): Remove the dejagnu temporary files.
 
 Tue Aug 29 14:22:28 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in - Replace explicit library list with $(LIBS).  This
