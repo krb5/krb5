@@ -29,9 +29,9 @@ error_code KRB5KDC_ERR_NEVER_VALID,		"Requested effective lifetime is negative o
 error_code KRB5KDC_ERR_POLICY,			"KDC policy rejects request"
 error_code KRB5KDC_ERR_BADOPTION,		"KDC can't fulfill requested option"
 error_code KRB5KDC_ERR_ETYPE_NOSUPP,	"KDC has no support for encryption type"
-# ^^ 14
-error_code KRB5PLACEHOLD_15,		"KRB5 error code 15"
-error_code KRB5PLACEHOLD_16,		"KRB5 error code 16"
+error_code KRB5KDC_ERR_SUMTYPE_NOSUPP,	"KDC has no support for checksum type"
+error_code KRB5KDC_ERR_PADATA_TYPE_NOSUPP,	"KDC has no support for padata type"
+# ^^ 16
 error_code KRB5PLACEHOLD_17,		"KRB5 error code 17"
 error_code KRB5PLACEHOLD_18,		"KRB5 error code 18"
 error_code KRB5PLACEHOLD_19,		"KRB5 error code 19"
