@@ -20,7 +20,7 @@ static char rcsid_addr_order_c[] =
 #include <krb5/ext-proto.h>
 
 #ifndef min
-#define min(a,b) ((a) > (b) ? (a) : (b))
+#define min(a,b) ((a) < (b) ? (a) : (b))
 #endif
 
 /*
