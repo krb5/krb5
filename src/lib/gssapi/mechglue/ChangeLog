@@ -1,3 +1,11 @@
+Fri May  3 16:43:43 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* g_inq_cred.c (gss_inquire_cred): Add code to support appropriate
+		behavior when the input credentials is NULL (i.e., the
+		default credential).  We use the default credential for
+		the "default mechanism", which is the first mechanism
+		registered with the library.
+
 Thu Apr 11 20:11:00 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* g_acquire_cred.c (gss_add_cred): Fixed code to correctly handle

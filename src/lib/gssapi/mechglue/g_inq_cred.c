@@ -50,28 +50,58 @@ int *			cred_usage;
 gss_OID_set *		mechanisms;
 
 {
-    OM_uint32		elapsed_time, temp_minor_status;
+    OM_uint32		status, elapsed_time, temp_minor_status;
     gss_union_cred_t	union_cred;
+    gss_mechanism	mech;
+    gss_name_t		internal_name;
     int			i;
     
     gss_initialize();
 
-    if(cred_handle == GSS_C_NO_CREDENTIAL)
-	
-	/* This action doesn't conform to the spec. We are supposed
-	 * to return information about the default credential.
-	 * However, we don't know what mechanism the default
-	 * credential is associated with, so we can't call
-	 * the mechanism specific version of gss_inquire_cred().
-	 * Consequently, we just return NO_CRED.
+    if (cred_handle == GSS_C_NO_CREDENTIAL) {
+	/*
+	 * No credential was supplied. This means we can't get a mechanism
+	 * pointer to call the mechanism specific gss_inquire_cred.
+	 * So, call get_mechanism with an arguement of GSS_C_NULL_OID.
+	 * get_mechanism will return the first mechanism in the mech
+	 * array, which becomes the default mechanism.
 	 */
+
+	if ((mech = __gss_get_mechanism(GSS_C_NULL_OID)) == NULL)
+	    return(GSS_S_NO_CRED);
+
+	if (!mech->gss_inquire_cred)
+		return (GSS_S_FAILURE);
 	
-	return(GSS_S_NO_CRED);
-    else
+	status = mech->gss_inquire_cred(mech->context, minor_status,
+					GSS_C_NO_CREDENTIAL,
+					name ? &internal_name : NULL,
+					lifetime, cred_usage, mechanisms);
+
+	if (status != GSS_S_COMPLETE)
+	    return(status);
+
+	if (name) {
+	    /*
+	     * Convert internal_name into a union_name equivalent.
+	     */
+	    status = __gss_convert_name_to_union_name(&temp_minor_status,
+						      mech, internal_name,
+						      name);
+	    if (status != GSS_S_COMPLETE) {
+		if (minor_status)
+		    *minor_status = temp_minor_status;
+		__gss_release_internal_name(&temp_minor_status,
+					    &mech->mech_type, &internal_name);
+		return (status);
+	    }
+	}
+	return(GSS_S_COMPLETE);
+    } 
 	
-	/* get the cred_handle cast as a union_credentials structure */
+    /* get the cred_handle cast as a union_credentials structure */
 	
-	union_cred = (gss_union_cred_t) cred_handle;
+    union_cred = (gss_union_cred_t) cred_handle;
     
     /*
      * get the information out of the union_cred structure that was
