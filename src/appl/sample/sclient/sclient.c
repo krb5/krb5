@@ -30,6 +30,7 @@
 #include "com_err.h"
 
 #include <stdio.h>
+#include <string.h>
 #include <ctype.h>
 
 #include <sys/types.h>
@@ -37,6 +38,12 @@
 #include <netinet/in.h>
 #include <netdb.h>
 #include <signal.h>
+
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#else
+extern char *malloc();
+#endif
 
 #include "../sample.h"
 

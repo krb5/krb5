@@ -1,3 +1,8 @@
+Wed May 10 15:13:09 1995  Ezra Peisach  (epeisach@kangaroo.mit.edu)
+
+	* sclient.c: Include <stdlib.h> if present on system. Else define
+		malloc. 
+
 Fri Mar 24 23:49:22 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* sclient.c (main): Initialize auth_context to NULL before calling
