@@ -1,4 +1,10 @@
 
+Mon Aug 7 13:05:53 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* kdb_cpw.c(add_key_rnd) - Manually initialize krbtgt_princ.data to
+		point to krbtgt_princ_entries since some compilers do not
+		support dynamic initializers.
+
+
 Mon Aug 07 11:27:37 1995  Chris Provenzano (proven@mit.edu)
 
 	* kdb_cpw.c: New routines for changing passwords of db_entried.

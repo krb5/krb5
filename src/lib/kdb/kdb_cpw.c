@@ -82,7 +82,7 @@ add_key_rnd(context, master_eblock, ks_tuple, ks_tuple_count, db_entry, kvno)
     krb5_principal_data	  krbtgt_princ = {
 	0,					/* magic number */
         {0, 0, 0},                      	/* krb5_data realm */
-        krbtgt_princ_entries,           	/* krb5_data *data */
+	(krb5_data *) NULL,           		/* krb5_data *data */
         2,                              	/* int length */
         KRB5_NT_SRV_INST                	/* int type */
     };
@@ -94,6 +94,7 @@ add_key_rnd(context, master_eblock, ks_tuple, ks_tuple_count, db_entry, kvno)
     int			  max_kvno, one, i, j;
     krb5_error_code	  retval;
 
+    krbtgt_princ.data = krbtgt_princ_entries;
     krb5_princ_set_realm_length(context, &krbtgt_princ, 
 				db_entry->princ->realm.length);
     krb5_princ_set_realm_data(context, &krbtgt_princ, 
