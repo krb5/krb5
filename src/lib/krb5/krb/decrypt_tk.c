@@ -49,9 +49,7 @@ register krb5_ticket *ticket;
     krb5_data scratch;
     krb5_error_code retval;
 
-    if (ticket->etype > max_cryptosystem ||
-	ticket->etype < 0 ||
-	!csarray[ticket->etype])
+    if (!valid_etype(ticket->etype))
 	return KRB5KDC_ERR_ETYPE_NOSUPP;
 
     /* put together an eblock for this encryption */

@@ -26,6 +26,7 @@ static char rcsid_encode_kdc_c [] =
 
 /* array of pointers into encryption systems */
 extern krb5_cs_table_entry *csarray[];
+extern int max_cryptosystem;		/* max entry in array */
 
 /*
  Takes KDC rep parts in *rep and *encpart, and formats it into *enc_rep,
@@ -50,6 +51,9 @@ krb5_data **enc_rep;
     krb5_data *scratch;
     krb5_encrypt_block eblock;
     krb5_error_code retval;
+
+    if (!valid_etype(dec_rep->etype))
+	return KRB5KDC_ERR_ETYPE_NOSUPP;
 
     switch (type) {
     case KRB5_AS_REP:

@@ -51,9 +51,7 @@ register krb5_ticket *dec_ticket;
 
     /* encrypt the encrypted part */
 
-    if (dec_ticket->etype > max_cryptosystem ||
-	dec_ticket->etype < 0 ||
-	!csarray[dec_ticket->etype])
+    if (!valid_etype(dec_ticket->etype))
 	return KRB5KDC_ERR_ETYPE_NOSUPP;
 
     /*  start by encoding the to-be-encrypted part. */
