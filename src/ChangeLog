@@ -3,6 +3,17 @@
 	* config.guess, config.sub: Clean up Rhapsody and Mac OS X guesses.
 	Use powerpc-apple-darwin1.x on Mac OS X.
 
+	* aclocal.m4: Clean up to Rhapsody/Darwin compile options:
+	- Set the compatibility version of libraries to 0.1 for now so
+	binaries don't blow up every time a new library version rolls
+	out. We can add a compat variable to the lib makefiles if we think
+	this is needed.
+	- Don't forget LDFLAGS in CC_LINK_* and LDCOMBINE macros. This is
+	probably a good idea for all platforms. We'll need it in Darwin
+	for building multi-architecture binaries.
+	- The default for SHOBJEXT works, so there is no need to define it
+	again.
+
 2000-04-18  Danilo Almeida  <dalmeida@mit.edu>
 
 	* Makefile.in (clean-windows): Actually clean gss-sample on Windows.
