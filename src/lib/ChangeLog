@@ -1,3 +1,8 @@
+2000-05-04  Danilo Almeida  <dalmeida@mit.edu>
+
+	* krb5_32.def: Reflect something closer to the reality of
+	what we would like to do for 1.3.
+
 2000-05-03  Nalin Dahyabhai  <nalin@redhat.com>
 
 	* win_glue.c (do_timebomb): Don't overflow buffer "buf".

@@ -13,10 +13,6 @@
 ; !CALLCONV - entrypoint that should have used KRB5_CALLCONV, but did not due
 ;             developer error
 
-;LIBRARY		KRB5
-DESCRIPTION	'DLL for Kerberos 5'
-HEAPSIZE	8192
-
 EXPORTS
 ; Kerberos 5
 	krb5_build_principal
@@ -42,7 +38,7 @@ EXPORTS
 	krb5_free_authenticator
 	krb5_free_authenticator_contents
 	krb5_free_checksum
-        krb5_free_config_files
+	krb5_free_config_files
 	krb5_free_context
 	krb5_free_cred
 	krb5_free_cred_contents
@@ -76,7 +72,7 @@ EXPORTS
 	krb5_get_credentials
 	krb5_get_credentials_renew
 	krb5_get_credentials_validate
-        krb5_get_default_config_files
+	krb5_get_default_config_files
 	krb5_get_default_realm
 	krb5_get_host_realm
 	krb5_get_realm_domain
@@ -208,48 +204,46 @@ EXPORTS
 
 	krb5_change_password
 ;
-        krb5_write_message
-        krb5_read_message
-        krb5_net_write
-        krb5_net_read
-        krb5_encrypt
-        krb5_decrypt
-        krb5_encrypt_size
+	krb5_write_message
+	krb5_read_message
+	krb5_net_write
+	krb5_net_read
+	krb5_encrypt
+	krb5_decrypt
+	krb5_encrypt_size
 ;
 ; Added for Kermit 95
-        krb5_address_search	; !CALLCONV
-        krb5_auth_con_getrcache	; !CALLCONV
-        krb5_c_enctype_compare
+	krb5_address_search	; !CALLCONV
+	krb5_auth_con_getrcache	; !CALLCONV
+	krb5_c_enctype_compare
 ;
 	krb5_kuserok
 ;
 ; Added for 1.2:
 	krb5_decode_ticket
-        krb5_get_tgs_ktypes
-        krb5_free_ktypes
 ;
 ; Temporary exports (DO NOT USE)
-;	decode_krb5_ticket	-- no longer in library
 	des_ecb_encrypt
 	des_new_random_key
 	des_key_sched
 	des_pcbc_encrypt
 	des_quad_cksum
 	des_string_to_key
-;	des_set_random_generator_seed     -- no longer in library
 	des_init_random_number_generator
 	krb5_random_confounder
-	krb5_size_opaque
-	krb5_internalize_opaque
-	krb5_externalize_opaque
-	krb5_ser_pack_int32
-	krb5_ser_unpack_int32
-	krb5_ser_pack_bytes
-	krb5_ser_unpack_bytes
-	krb5_ser_auth_context_init
-	krb5_ser_context_init
-	krb5_ser_ccache_init
-	krb5_ser_keytab_init
-	krb5_ser_rcache_init
+	krb5_size_opaque	; gssapi
+	krb5_internalize_opaque	; gssapi
+	krb5_externalize_opaque	; gssapi
+	krb5_ser_pack_int32	; gssapi
+	krb5_ser_unpack_int32	; gssapi
+	krb5_ser_pack_bytes	; gssapi
+	krb5_ser_unpack_bytes	; gssapi
+	krb5_ser_auth_context_init	; gssapi
+	krb5_ser_context_init	; gssapi
+	krb5_ser_ccache_init	; gssapi
+	krb5_ser_keytab_init	; gssapi
+	krb5_ser_rcache_init	; gssapi
 	decode_krb5_ap_req	; gssapi
-	krb5_mcc_ops
+	krb5_mcc_ops		; gssapi
+	krb5_get_tgs_ktypes	; gssapi
+	krb5_free_ktypes	; gssapi
