@@ -1,3 +1,7 @@
+2003-01-12  Ezra Peisach  <epeisach@bu.edu>
+
+	* send_tgs.c (krb5_send_tgs): Free memory leak of TGS_REQ.
+
 2003-01-10  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in: Add AC_SUBST_FILE marker for libobj_frag.

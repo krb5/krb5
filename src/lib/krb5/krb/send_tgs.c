@@ -284,6 +284,8 @@ send_again:
 	    rep->message_type = KRB5_ERROR;
     }
 
+    krb5_free_data(context, scratch);
+    
 send_tgs_error_2:;
     if (sec_ticket) 
 	krb5_free_ticket(context, sec_ticket);
