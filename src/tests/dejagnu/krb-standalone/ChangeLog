@@ -1,3 +1,9 @@
+2004-02-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* gssapi.exp (doit): Run server with additional options to export
+	and re-import the GSSAPI context, and log info to a file in
+	tmpdir.
+
 2003-12-13  Ken Raeburn  <raeburn@mit.edu>
 
 	* gssftp.exp (ftp_test): Look for "GSSAPI authentication failed"
