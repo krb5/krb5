@@ -1,3 +1,8 @@
+Fri Apr 28 15:54:40 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* prof_parse.c (strip_line): Don't try to strip an empty line.
+		This causes memory reference error.
+
 Thu Apr 27 20:26:48 1995    <tytso@rsx-11.mit.edu>
 
 	* Makefile.in (clean-unix): Remove profile.h and test_profile

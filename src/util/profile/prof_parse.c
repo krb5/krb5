@@ -32,7 +32,7 @@ void strip_line(line)
 {
 	char	*p;
 
-	while (1) {
+	while (*line) {
 		p = line + strlen(line) - 1;
 		if ((*p == '\n') || (*p == '\r'))
 			*p = 0;
