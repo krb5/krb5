@@ -173,6 +173,7 @@
 
 #define IsodeDir /mit/isode/isode-7.0
 #define IsodeLib -L/mit/isode/isode-7.0/@sys/lib -lisode
+#define IsodeIncls /mit/isode/isode-7.0/@sys/include
 
 /* Re-define PepsyCmd if pepsy isn't in your search path. */
 
