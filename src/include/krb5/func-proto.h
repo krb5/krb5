@@ -13,8 +13,8 @@
 
 #include <krb5/copyright.h>
 
-#ifndef __KRB5_FUNC_PROTO__
-#define __KRB5_FUNC_PROTO__
+#ifndef KRB5_FUNC_PROTO__
+#define KRB5_FUNC_PROTO__
 
 
 /* libkrb.spec */
@@ -374,4 +374,4 @@ void krb5_free_priv_enc_part
 	PROTOTYPE((krb5_priv_enc_part * ));
 
 
-#endif /* __KRB5_FUNC_PROTO__ */
+#endif /* KRB5_FUNC_PROTO__ */

@@ -13,8 +13,8 @@
 
 #include <krb5/copyright.h>
 
-#ifndef __KRB5_PROTO__
-#define __KRB5_PROTO__
+#ifndef	KRB5_PROTO__
+#define KRB5_PROTO__
 
 /* Protocol version number */
 #define	KRB5_PVNO	5
@@ -31,4 +31,4 @@
 #define	KRB5_TGS_REP	((krb5_msgtype)16) /* Response to KRB_TGS_REQ req */
 #define	KRB5_ERROR	((krb5_msgtype)32) /* Error response */
 
-#endif /* __KRB5_PROTO__ */
+#endif /* KRB5_PROTO__ */

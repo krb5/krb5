@@ -13,8 +13,8 @@
 
 #include <krb5/copyright.h>
 
-#ifndef __KRB5_CCACHE__
-#define __KRB5_CCACHE__
+#ifndef KRB5_CCACHE__
+#define KRB5_CCACHE__
 
 typedef	krb5_pointer	krb5_cc_cursor;	/* cursor for sequential lookup */
 
@@ -56,4 +56,4 @@ typedef struct _krb5_cc_ops {
 /* for set_flags and other functions */
 #define KRB5_TC_OPENCLOSE		0x00000001
 
-#endif /* __KRB5_CCACHE__ */
+#endif /* KRB5_CCACHE__ */

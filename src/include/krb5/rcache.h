@@ -13,8 +13,8 @@
 
 #include <krb5/copyright.h>
 
-#ifndef __KRB5_RCACHE__
-#define __KRB5_RCACHE__
+#ifndef KRB5_RCACHE__
+#define KRB5_RCACHE__
 
 typedef struct krb5_rc_st {
 	struct krb5_rc_ops *ops;
@@ -41,4 +41,4 @@ typedef struct _krb5_rc_ops {
 } krb5_rc_ops;
 
 
-#endif /* __KRB5_RCACHE__ */
+#endif /* KRB5_RCACHE__ */

@@ -14,8 +14,8 @@
 
 #include <krb5/copyright.h>
 
-#ifndef __KRB5_FIELDBITS__
-#define __KRB5_FIELDBITS__
+#ifndef KRB5_FIELDBITS__
+#define KRB5_FIELDBITS__
 
 /* kdc_options for kdc_request */
 /* options is 32 bits; each host is responsible to put the 4 bytes
@@ -151,6 +151,6 @@
 #define	MSEC_DIRBIT		0x8000
 #define	MSEC_VAL_MASK		0x7fff
 
-#endif /* __KRB5_FIELDBITS__ */
+#endif /* KRB5_FIELDBITS__ */
 
 

@@ -14,8 +14,8 @@
 
 #include <krb5/copyright.h>
 
-#ifndef __krb5_osconf__
-#define __krb5_osconf__
+#ifndef KRB5_OSCONF__
+#define KRB5_OSCONF__
 
 #define KRB5_USE_INET		/* Support IP address family */
 
@@ -26,4 +26,4 @@
 typedef int sigtype;
 #endif
 
-#endif /* __krb5_osconf__ */
+#endif /* KRB5_OSCONF__ */

@@ -14,8 +14,8 @@
 
 #include <krb5/copyright.h>
 
-#ifndef __KRB5_CONFIG__
-#define __KRB5_CONFIG__
+#ifndef KRB5_CONFIG__
+#define KRB5_CONFIG__
 
 #if defined(vax) || defined(__vax__)
 #define BITS32
@@ -29,4 +29,4 @@
 #define BITS32
 #endif
 
-#endif /* __KRB5_CONFIG__ */
+#endif /* KRB5_CONFIG__ */

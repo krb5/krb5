@@ -13,8 +13,8 @@
 
 #include <krb5/copyright.h>
 
-#ifndef __KRB5_HOSTADDR__
-#define __KRB5_HOSTADDR__
+#ifndef KRB5_HOSTADDR__
+#define KRB5_HOSTADDR__
 
 /* structure for address */
 typedef struct _krb5_address {
@@ -40,6 +40,6 @@ typedef struct _krb5_fulladdr {
 					   large enough for most protos? */
 } krb5_fulladdr;
 
-#endif /* __KRB5_HOSTADDR__ */
+#endif /* KRB5_HOSTADDR__ */
 
 

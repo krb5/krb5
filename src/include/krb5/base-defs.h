@@ -13,8 +13,8 @@
 
 #include <krb5/copyright.h>
 
-#ifndef __KRB5_BASE_DEFS__
-#define __KRB5_BASE_DEFS__
+#ifndef KRB5_BASE_DEFS__
+#define KRB5_BASE_DEFS__
 
 #include <krb5/wordsize.h>
 
@@ -70,4 +70,4 @@ typedef char * krb5_pointer;
 #define OLDDECLARG(type, val) type val;
 #endif /* __STDC__ */
 
-#endif /* __KRB5_BASE_DEFS__ */
+#endif /* KRB5_BASE_DEFS__ */

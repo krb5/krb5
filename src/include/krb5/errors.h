@@ -13,8 +13,8 @@
 
 #include <krb5/copyright.h>
 
-#ifndef __KRB5_ERRORS__
-#define __KRB5_ERRORS__
+#ifndef KRB5_ERRORS__
+#define KRB5_ERRORS__
 
 
 /* Error codes used in KRB_ERROR protocol messages.
@@ -58,4 +58,4 @@
 /* other errors */
 #define	KRB_ERR_FIELD_TOOLONG	50	/* Field is too long for impl. */
 
-#endif /* __KRB5_ERRORS__ */
+#endif /* KRB5_ERRORS__ */

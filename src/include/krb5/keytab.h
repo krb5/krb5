@@ -13,8 +13,8 @@
 
 #include <krb5/copyright.h>
 
-#ifndef __KRB5_KEYTAB__
-#define __KRB5_KEYTAB__
+#ifndef KRB5_KEYTAB__
+#define KRB5_KEYTAB__
 
 
 /* XXX */
@@ -62,4 +62,4 @@ typedef struct _krb5_kt_ops {
 				  krb5_kt_cursor));
 } krb5_kt_ops;
 
-#endif /* __KRB5_KEYTAB__ */
+#endif /* KRB5_KEYTAB__ */

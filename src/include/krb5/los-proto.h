@@ -13,8 +13,8 @@
 
 #include <krb5/copyright.h>
 
-#ifndef __KRB5_LIBOS_PROTO__
-#define __KRB5_LIBOS_PROTO__
+#ifndef KRB5_LIBOS_PROTO__
+#define KRB5_LIBOS_PROTO__
 
 /* requires <stdio.h> */
 
@@ -49,4 +49,4 @@ krb5_error_code krb5_os_localaddr
 	PROTOTYPE((krb5_address ***));
 
 
-#endif /* __KRB5_LIBOS_PROTO__ */
+#endif /* KRB5_LIBOS_PROTO__ */

@@ -13,8 +13,8 @@
 
 #include <krb5/copyright.h>
 
-#ifndef __KRB5_KDB5_DBM__
-#define __KRB5_KDB5_DBM__
+#ifndef KRB5_KDB5_DBM__
+#define KRB5_KDB5_DBM__
 
 #define	DEFAULT_DBM_FILE		"/krb5/principal"
 
@@ -52,4 +52,4 @@ krb5_error_code krb5_dbm_db_iterate
     PROTOTYPE((krb5_error_code (*) PROTOTYPE((krb5_pointer,
 					      krb5_db_entry *)),
 	       krb5_pointer ));
-#endif /* __KRB5_KDB5_DBM__ */
+#endif /* KRB5_KDB5_DBM__ */

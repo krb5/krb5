@@ -13,8 +13,8 @@
 
 #include <krb5/copyright.h>
 
-#ifndef __KRB5_WORDSIZE__
-#define __KRB5_WORDSIZE__
+#ifndef KRB5_WORDSIZE__
+#define KRB5_WORDSIZE__
 
 #ifdef BITS16
 #define __OK
@@ -41,4 +41,4 @@ typedef	unsigned char	krb5_octet;
    indicator */
 #define KRB5_INT32_MIN	(-KRB5_INT32_MAX-1)
 
-#endif /* __KRB5_WORDSIZE__ */
+#endif /* KRB5_WORDSIZE__ */

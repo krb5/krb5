@@ -13,8 +13,8 @@
 
 #include <krb5/copyright.h>
 
-#ifndef __KRB5_KDB5__
-#define __KRB5_KDB5__
+#ifndef KRB5_KDB5__
+#define KRB5_KDB5__
 
 typedef struct _krb5_db_entry {
     krb5_principal principal;
@@ -100,4 +100,4 @@ krb5_error_code krb5_kdb_decrypt_key
 /* XXX THIS REALLY BELONGS ELSEWHERE */
 #define	TGTNAME	"krbtgt"
 
-#endif /* __KRB5_KDB5__ */
+#endif /* KRB5_KDB5__ */

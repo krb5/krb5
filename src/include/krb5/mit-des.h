@@ -13,8 +13,8 @@
 
 #include <krb5/copyright.h>
 
-#ifndef __KRB5_MIT_DES__
-#define __KRB5_MIT_DES__
+#ifndef KRB5_MIT_DES__
+#define KRB5_MIT_DES__
 
 typedef krb5_krb5_octet des_cblock[8];	/* crypto-block size */
 
@@ -36,4 +36,4 @@ typedef struct des_ks_struct { des_cblock _; } des_key_schedule[16];
 /* cryptosystem entry descriptor for MIT's DES encryption library */
 extern krb5_cryptosystem_entry  mit_des_cryptosystem_entry;
 
-#endif /* __KRB5_MIT_DES__ */
+#endif /* KRB5_MIT_DES__ */

@@ -13,7 +13,7 @@
 
 #include <krb5/copyright.h>
 
-#ifndef __KRB5_MACROS__
-#define __KRB5_MACROS__
+#ifndef KRB5_MACROS__
+#define KRB5_MACROS__
 
-#endif /* __KRB5_MACROS__ */
+#endif /* KRB5_MACROS__ */
