@@ -1,3 +1,12 @@
+2001-04-11  Ezra Peisach  <epeisach@rna.mit.edu>
+
+	* aclocal.m4 (WITH_CC): Reorganize test: Do not use cache variable
+	that conflicts with an autoconf internal variable (prefix with
+	krb5_ instead of ac_). Ensure that the first time AC_PROG_CC is
+	invoked, is not within a conditional cache block. Autoconf 2.49
+	only include the compiler test code once in the configure script
+	instead of everytime it is seen. 
+
 Fri Feb 16 16:23:25 2001  Ezra Peisach  <epeisach@mit.edu>
 
 	* Makefile.in: Add $(datadir) to INSTALLMKDIRS for util/et.

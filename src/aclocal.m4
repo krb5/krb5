@@ -372,23 +372,24 @@ define(WITH_CC,[
 AC_ARG_WITH([cc],
 [  --with-cc=COMPILER      select compiler to use])
 AC_MSG_CHECKING(for C compiler)
+dnl Default assumed compiler
+test -z "$CC" && CC=cc
 if test "$with_cc" != ""; then
-  if test "$ac_cv_prog_cc" != "" && test "$ac_cv_prog_cc" != "$with_cc"; then
+  if test "$krb5_cv_prog_cc" != "" && test "$krb5_cv_prog_cc" != "$with_cc"; then
     AC_MSG_ERROR(Specified compiler doesn't match cached compiler name;
 	remove cache and try again.)
   else
     CC="$with_cc"
   fi
 fi
-AC_CACHE_VAL(ac_cv_prog_cc,[dnl
-  test -z "$CC" && CC=cc
-  AC_TRY_LINK([#include <stdio.h>],[printf("hi\n");], ,
-    AC_MSG_ERROR(Can't find a working compiler.))
-  ac_cv_prog_cc="$CC"
-])
-CC="$ac_cv_prog_cc"
 AC_MSG_RESULT($CC)
 AC_PROG_CC
+dnl Test compiler once. Newer versions of autoconf already does a similar test.
+AC_CACHE_VAL(krb5_cv_prog_cc,[dnl
+  AC_TRY_LINK([#include <stdio.h>],[printf("hi\n");], ,
+    AC_MSG_ERROR(Can't find a working compiler.))
+  krb5_cv_prog_cc="$CC"
+])
 # maybe add -Waggregate-return, or can we assume that actually works by now?
 extra_gcc_warn_opts="-Wall -Wmissing-prototypes -Wcast-qual \
  -Wcast-align -Wconversion -Wshadow -pedantic"
