@@ -1,4 +1,29 @@
-/* A series of private prototypes that we are not exporting but should
+/*
+ * lib/krb4/krb4int.h
+ *
+ * Copyright 2001-2002 by the Massachusetts Institute of Technology.
+ * All Rights Reserved.
+ *
+ * Export of this software from the United States of America may
+ *   require a specific license from the United States Government.
+ *   It is the responsibility of any person or organization contemplating
+ *   export to obtain such a license before exporting.
+ * 
+ * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
+ * distribute this software and its documentation for any purpose and
+ * without fee is hereby granted, provided that the above copyright
+ * notice appear in all copies and that both that copyright notice and
+ * this permission notice appear in supporting documentation, and that
+ * the name of M.I.T. not be used in advertising or publicity pertaining
+ * to distribution of the software without specific, written prior
+ * permission.  Furthermore if you modify this software you must label
+ * your software as modified software and not distribute it in such a
+ * fashion that it might be confused with the original M.I.T. software.
+ * M.I.T. makes no representations about the suitability of
+ * this software for any purpose.  It is provided "as is" without express
+ * or implied warranty.
+ *
+ * A series of private prototypes that we are not exporting but should
  * be available for self consistancy in the library.
  */
 
@@ -24,6 +49,12 @@ int krb_get_svc_in_tkt_preauth(char *, char *, char *, char *, char *, int, char
 
 /* gethostname.c */
 int k_gethostname(char *, int);
+
+/* g_in_tkt.c */
+int krb_get_in_tkt_preauth_creds(char *, char *, char *,
+				 char *, char *, int,
+				 key_proc_type, decrypt_tkt_type,
+				 char *, char *, int, CREDENTIALS *);
 
 /* klog.c */
 void kset_logfile(char *);
@@ -55,12 +86,17 @@ int krb_start_session(char *);
 
 int krb_end_session(char *);
 
-#ifndef _WINDOWS
+#ifndef _WIN32
 /* For windows users, these are defined in krb.h */
 char *krb_get_default_user (void);
 
 int krb_set_default_user (char *);
 #endif
 
+/* RealmConfig-glue.c */
+int krb_get_kpasswdhst(char *, char *, int);
+int krb_get_stk(KRB_UINT32 *type, char *realm);
 
-
+/* err_txt.c */
+void krb4int_et_init(void);
+void krb4int_et_fini(void);

@@ -43,14 +43,12 @@
 
 /* Need some defs from des.h	 */
 #include <kerberosIV/des.h>
-
-#include <kerberosIV/krb_err.h>		/* XXX FIXME! */
-
+#include <kerberosIV/krb_err.h>
 #include <profile.h>
 
-#ifdef _WINDOWS
+#ifdef _WIN32
 #include <time.h>
-#endif /* _WINDOWS */
+#endif /* _WIN32 */
 
 #ifdef __cplusplus
 #ifndef KRBINT_BEGIN_DECLS
@@ -75,9 +73,8 @@ KRBINT_BEGIN_DECLS
 #define KRB_INT32	DES_INT32
 #define KRB_UINT32	DES_UINT32
 
-/* Text describing error codes */
 #define		MAX_KRB_ERRORS	256
-extern const char *const krb_err_txt[MAX_KRB_ERRORS];
+extern const char * const * const krb_err_txt;
 
 /* General definitions */
 #define		KSUCCESS	0
@@ -212,12 +209,12 @@ typedef struct msg_dat MSG_DAT;
 
 
 /* Location of ticket file for save_cred and get_cred */
-#ifdef _WINDOWS
+#ifdef _WIN32
 #define TKT_FILE        "\\kerberos\\ticket.ses"
 #else
 #define TKT_FILE        tkt_string()
 #define TKT_ROOT        "/tmp/tkt"
-#endif /* PC */
+#endif /* _WIN32 */
 
 /*
  * Error codes are now defined as offsets from com_err (krb_err.et)
@@ -355,7 +352,7 @@ typedef struct msg_dat MSG_DAT;
 #endif /* ATHENA_COMPAT */
 
 
-#ifdef _WINDOWS
+#ifdef _WIN32
 #define	TIME_GMT_UNIXSEC	win_time_gmt_unixsec((unsigned KRB4_32 *)0)
 #define	TIME_GMT_UNIXSEC_US(us)	win_time_gmt_unixsec((us))
 #define	CONVERT_TIME_EPOCH	win_time_get_epoch()
@@ -368,8 +365,22 @@ typedef struct msg_dat MSG_DAT;
 #define	TIME_GMT_UNIXSEC	unix_time_gmt_unixsec((unsigned KRB4_32 *)0)
 #define	TIME_GMT_UNIXSEC_US(us)	unix_time_gmt_unixsec((us))
 #define	CONVERT_TIME_EPOCH	((long)0)	/* Unix epoch is Krb epoch */
-#endif /*_WINDOWS*/
+#endif /* _WIN32 */
 
+/* Constants for KerberosProfileLib */
+#define	REALMS_V4_PROF_REALMS_SECTION		"v4 realms"
+#define	REALMS_V4_PROF_KDC			"kdc"
+#define	REALMS_V4_PROF_ADMIN_KDC		"admin_server"
+#define	REALMS_V4_PROF_KPASSWD_KDC		"kpasswd_server"
+#define	REALMS_V4_PROF_DOMAIN_SECTION		"v4 domain_realm"
+#define	REALMS_V4_PROF_LIBDEFAULTS_SECTION	"libdefaults"
+#define	REALMS_V4_PROF_LOCAL_REALM		"default_realm"
+#define	REALMS_V4_PROF_STK			"string_to_key_type"
+#define	REALMS_V4_MIT_STK			"mit_string_to_key"
+#define	REALMS_V4_AFS_STK			"afs_string_to_key"
+#define	REALMS_V4_COLUMBIA_STK			"columbia_string_to_key"
+#define	REALMS_V4_DEFAULT_REALM			"default_realm"
+#define	REALMS_V4_NO_ADDRESSES			"noaddresses"
 
 /* ask to disable IP address checking in the library */
 extern int krb_ignore_ip_address;
@@ -382,14 +393,6 @@ extern int krb_ignore_ip_address;
 extern int krb_debug;
 #else
 #define	DEB(x)	/* nothing */
-#endif
-
-/*
- * Some Unixes don't declare errno in <errno.h>...
- * Move this out to individual c-*.h files if it becomes troublesome.
- */
-#if !defined(errno) && !defined(_WINDOWS)
-extern int errno;
 #endif
 
 /* Define a couple of function types including parameters.  These
@@ -449,7 +452,7 @@ int KRB5_CALLCONV krb_get_in_tkt_creds(char *, char *, char *, char *, char *,
 
 /* g_krbhst.c */
 int KRB5_CALLCONV krb_get_krbhst
-	(char *host, char *realm, int idx);
+	(char *host, const char *realm, int idx);
 /* g_krbrlm.c */
 int KRB5_CALLCONV krb_get_lrealm
 	(char *realm, int idx);
@@ -477,18 +480,13 @@ int KRB5_CALLCONV krb_get_svc_in_tkt
 	(char *k_user, char *instance, char *realm,
 		   char *service, char *sinstance,
 		   int life, char *srvtab);
-#if TARGET_OS_MAC && defined(__FILES__)
-int KRB5_CALLCONV
-FSp_krb_get_svc_in_tkt(char *, char *, char *, char *, char *,
-    int, const FSSpec *);
-#endif
 
 /* g_tf_fname.c */
 int KRB5_CALLCONV krb_get_tf_fullname
-	(char *ticket_file, char *name, char *inst, char *realm);
+	(const char *ticket_file, char *name, char *inst, char *realm);
 /* g_tf_realm.c */
 int KRB5_CALLCONV krb_get_tf_realm
-	(char *ticket_file, char *realm);
+	(const char *ticket_file, char *realm);
 /* g_tkt_svc.c */
 int KRB5_CALLCONV krb_get_ticket_for_service
 	(char *serviceName,
@@ -504,7 +502,7 @@ int KRB5_CALLCONV krb_in_tkt
 int KRB5_CALLCONV kname_parse
 	(char *name, char *inst, char *realm,
 		   char *fullname);
-/* From KfM XXX to be merged*/
+/* Merged from KfM */
 int KRB5_CALLCONV kname_unparse
 	(char *, const char *, const char *, const char *);
 
@@ -587,10 +585,6 @@ int KRB5_CALLCONV put_svc_key
 	(char *sfile,
 		   char *name, char *inst, char *realm,
 		   int newvno, char *key);
-#if TARGET_OS_MAC && defined(__FILES__)
-int KRB5_CALLCONV FSp_put_svc_key(const FSSpec *, char *, char *, char *,
-    int, char *);
-#endif
 
 /* rd_err.c */
 int KRB5_CALLCONV krb_rd_err
@@ -626,10 +620,6 @@ int KRB5_CALLCONV read_service_key
 int KRB5_CALLCONV get_service_key
 	(char *service, char *instance, char *realm,
 		   int *kvno, char *file, char *key);
-#if TARGET_OS_MAC && defined(__FILES__)
-int KRB5_CALLCONV FSp_read_service_key(char *, char *, char *,
-    int, const FSSpec*, char *);
-#endif
 
 /* realmofhost.c */
 char * KRB5_CALLCONV krb_realmofhost
@@ -669,7 +659,7 @@ void KRB5_CALLCONV krb_set_tkt_string
 	(char *);
 
 /* tf_util.c */
-int KRB5_CALLCONV tf_init (char *tf_name, int rw);
+int KRB5_CALLCONV tf_init (const char *tf_name, int rw);
 
 int KRB5_CALLCONV tf_get_pname (char *p);
 
@@ -727,6 +717,16 @@ extern int krb_set_key_krb5(krb5_context ctx, krb5_keyblock *key);
 
 #endif
 
+/* FSp-glue.c */
+#if TARGET_OS_MAC && defined(__FILES__)
+int KRB5_CALLCONV FSp_krb_get_svc_in_tkt(char *, char *, char *, char *,
+					 char *, int, const FSSpec *);
+int KRB5_CALLCONV FSp_put_svc_key(const FSSpec *, char *, char *, char *,
+				  int, char *);
+int KRB5_CALLCONV FSp_read_service_key(char *, char *, char *,
+				       int, const FSSpec*, char *);
+#endif
+
 #if TARGET_OS_MAC
 /*
  * KfM krb.hin had the following, probably inherited from CNS:
@@ -756,11 +756,11 @@ dest_all_tkts(void);
 int KRB5_CALLCONV krb_change_password(char *, char *, char *, char *, char *);
 
 /*
- * RealmConfig-glue.c from KfM XXX to be merged
+ * RealmsConfig-glue.c -- merged from KfM
  */
-extern int KRB5_CALLCONV krb_get_profile(profile_t *profile);
+int KRB5_CALLCONV krb_get_profile(profile_t *);
 
-#ifdef _WINDOWS
+#ifdef _WIN32
 HINSTANCE get_lib_instance(void);
 unsigned int krb_get_notification_message(void);
 char * KRB5_CALLCONV krb_get_default_user(void);

@@ -110,10 +110,7 @@ KRBINT_END_DECLS
 #ifndef KRB5INT_CRYPTO_DES_INT
 #define DES_DEFS
 
-#if defined(_WIN32) && !defined(_WINDOWS)
-#define _WINDOWS
-#endif
-#if defined(_WINDOWS)
+#if defined(_WIN32)
 #ifndef KRB4
 #define KRB4 1
 #endif

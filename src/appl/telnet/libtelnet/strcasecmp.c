@@ -35,7 +35,7 @@
 #define const
 #endif
 
-#include <sys/cdefs.h>
+#include <sys/types.h>
 #ifdef HAVE_STRING_H
 #include <string.h>
 #else

@@ -1,3 +1,10 @@
+2002-12-12  Tom Yu  <tlyu@mit.edu>
+
+	* kerberos.c (kerberos4_send, kerberos4_is): Use
+	krb_get_err_text() instead of krb_err_txt array.
+
+	* strcasecmp.c: Include sys/types.h rather than sys/cdefs.h.
+
 2002-11-15  Ezra Peisach  <epeisach@bu.edu>
 
 	* enc-proto.h, enc_des.c, encrypt.c: Unsigned/signed cleanups.

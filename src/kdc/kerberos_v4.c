@@ -837,7 +837,7 @@ kerberos_v4(struct sockaddr_in *client, KTEXT pkt)
 
 	    if (kerno) {
 		klog(L_ERR_UNK, "FAILED krb_rd_req from %s: %s",
-		     inet_ntoa(client_host), krb_err_txt[kerno]);
+		     inet_ntoa(client_host), krb_get_err_text(kerno));
 		req_name_ptr = req_inst_ptr = req_realm_ptr = "";
 		kerb_err_reply(client, pkt, kerno, "krb_rd_req failed");
 		return;

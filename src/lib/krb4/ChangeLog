@@ -1,3 +1,52 @@
+2002-12-12  Tom Yu  <tlyu@mit.edu>
+
+	* FSp-glue.c: Extracted and ported from various files from KfM.
+	Not built on Unix.
+
+	* Makefile.in: Removed srcdir references from various SRCS
+	variables.  Stop building krb_err.o because of gross hack in
+	err_txt.c.  Adjust some dependency generation things.
+	(REALMDBOBJS): Use RealmsConfig-glue instead of lots of other
+	files.
+	(LOCALINCLUDES): Use current directory, so we can pick up
+	krb_err.c as an include file.
+
+	* RealmsConfig-glue.c: Ported from KfM and cleaned up.  Old
+	REALMDBSRCS inlined here too.
+
+	* g_admhst.c, g_in_tkt.c, g_krbhst.c, g_krbrlm.c, realmofhost.c:
+	Removed.  Functionality is now in RealmsConfig-glue.c.
+
+	* g_in_tkt.c (krb_get_in_tkt_creds): Add KRB5_CALLCONV.
+
+	* dest_tkt.c (dest_tkt): TKT_FILE now assigned to a const char *,
+	due to change in tkt_string() return type.
+
+	* err_txt.c: Much grossness.  Suck in krb_err.c here, so we can
+	use the static array to initialize the krb_err_txt array.
+
+	* g_in_tkt.c: Call krb4int_send_to_kdc_addr() on MacOS.
+
+	* g_svc_in_tkt.c: Fix up copyright notice; punt gratuitous
+	definition of NULL.
+
+	* g_tf_fname.c (krb_get_tf_fullname): Takes a const char * for
+	ticket file name now, due to change in tkt_string() return type.
+
+	* g_tf_realm.c (krb_get_tf_realm): Takes a const char * for ticket
+	file name now, due to change in tkt_string() return type.
+
+	* in_tkt.c: Include errno.h.
+	(in_tkt): TKT_FILE now assigned to a const char *, due to change
+	in tkt_string() return type.
+
+	* krb4int.h: Add prototype for krb_get_in_tkt_preauth_creds().
+	Fix _WINDOWS->_WIN32.
+
+	* krb_err.et: Sync somewhat with old contents of err_txt.c.
+
+	* tf_util.c (tf_init): Takes const char *tf_name now.
+
 2002-12-06  Tom Yu  <tlyu@mit.edu>
 
 	* g_ad_tkt.c (get_ad_tkt): Add KRB5_CALLCONV.

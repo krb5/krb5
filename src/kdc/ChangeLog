@@ -1,3 +1,8 @@
+2002-12-12  Tom Yu  <tlyu@mit.edu>
+
+	* kerberos_v4.c (kerberos_v4): Use krb_get_err_text() instead of
+	krb_err_txt array.
+
 2002-11-26  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Update dependencies.

@@ -28,7 +28,7 @@
 
 int KRB5_CALLCONV
 krb_get_tf_fullname(ticket_file, name, instance, realm)
-  char *ticket_file;
+  const char *ticket_file;
   char *name;
   char *instance;
   char *realm;

@@ -67,7 +67,7 @@
 int KRB5_CALLCONV
 dest_tkt()
 {
-    char *file = TKT_FILE;
+    const char *file = TKT_FILE;
     int i,fd;
     extern int errno;
     int ret;

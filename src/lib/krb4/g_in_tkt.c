@@ -1,8 +1,8 @@
 /*
  * lib/krb4/g_in_tkt.c
  *
- * Copyright 1986, 1987, 1988, 2000, 2001 by the Massachusetts
- * Institute of Technology.  All Rights Reserved.
+ * Copyright 1986-2002 by the Massachusetts Institute of Technology.
+ * All Rights Reserved.
  *
  * Export of this software from the United States of America may
  *   require a specific license from the United States Government.
@@ -157,6 +157,9 @@ krb_mk_in_tkt_preauth(user, instance, realm, service, sinstance, life,
 
     int msg_byte_order;
     int kerror;
+#if TARGET_OS_MAC
+    socklen_t addrlen;
+#endif
 #if 0
     unsigned long exp_date;
 #endif
@@ -213,8 +216,10 @@ krb_mk_in_tkt_preauth(user, instance, realm, service, sinstance, life,
 
     /* SEND THE REQUEST AND RECEIVE THE RETURN PACKET */
     rpkt->length = 0;
-#if 0 /* XXX */
-    kerror = send_to_kdc_addr(pkt, rpkt, realm, local_addr);
+#if TARGET_OS_MAC
+    addrlen = sizeof(struct sockaddr_in)
+    kerror = krb4int_send_to_kdc_addr(pkt, rpkt, realm,
+				      local_addr, &addrlen);
 #else
     kerror = send_to_kdc(pkt, rpkt, realm);
 #endif
@@ -443,7 +448,7 @@ krb_get_in_tkt_preauth_creds(user, instance, realm, service, sinstance, life,
     return kerror;
 }
 
-int
+int KRB5_CALLCONV
 krb_get_in_tkt_creds(user, instance, realm, service, sinstance, life,
 		     key_proc, decrypt_proc, arg, creds)
     char *user;

@@ -184,7 +184,7 @@ static int tf_gets (char *, int), tf_read (char *, int);
  */
 
 int KRB5_CALLCONV tf_init(tf_name, rw)
-    char   *tf_name;
+    const char   *tf_name;
     int rw;
 {
     int     wflag;

@@ -1,3 +1,12 @@
+2002-12-12  Tom Yu  <tlyu@mit.edu>
+
+	* krb.h: Change _WINDOWS->_WIN32.  Add symbols for
+	RealmsConfig-glue.c.  Remove explicit errno declaration.  Fix some
+	prototypes of functions in RealmsConfig-glue.c to take const char*
+	for realm.  Update prorotypes of functions that may take a ticket
+	file name to take const char*.  Collect prototypes of FSp-glue.c
+	functions together.
+
 2002-12-04  Tom Yu  <tlyu@mit.edu>
 
 	* des.h: Move explicit definition of _WINDOWS to precede

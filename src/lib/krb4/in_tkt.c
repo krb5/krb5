@@ -26,6 +26,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <errno.h>
 #include "krb.h"
 #include <fcntl.h>
 #include <sys/stat.h>
@@ -72,7 +73,7 @@ in_tkt(pname,pinst)
     uid_t me, metoo, getuid(), geteuid();
     struct stat statpre, statpost;
     int count;
-    char *file = TKT_FILE;
+    const char *file = TKT_FILE;
     int fd;
     register int i;
     char charbuf[BUFSIZ];
