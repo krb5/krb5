@@ -1,3 +1,16 @@
+2002-10-08  Tom Yu  <tlyu@mit.edu>
+
+	* misc.c (chpass_principal_wrapper_3): Renamed from
+	chpass_principal_wrapper; calls chpass_principal_3 now.
+	(randkey_principal_wrapper_3): Renamed from
+	randkey_principal_wrapper; calls randkey_principal_3 now.  Patch
+	from Ben Cox.
+
+	* server_stubs.c (chpass_principal_1_svc)
+	(chpass_principal3_1_svc): Call chpass_principal_wrapper_3.
+	(chrand_principal_1_svc, chrand_principal3_1_svc): Call
+	randkey_principal_wrapper_3.  Patch from Ben Cox.
+
 2002-08-29  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in: Revert $(S)=>/ change, for Windows support.
