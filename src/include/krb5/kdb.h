@@ -74,6 +74,6 @@ krb5_error_code krb5_db_iterate
 						   krb5_db_entry *)),
 		   krb5_pointer ));
 krb5_error_code krb5_db_verify_master_key
-	PROTOTYPE((krb5_principal, krb5_keyblock *));
+	PROTOTYPE((krb5_principal, krb5_keyblock *, krb5_encrypt_block *));
 
 #endif /* __KRB5_KDB5__ */
