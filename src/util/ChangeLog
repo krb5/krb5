@@ -1,3 +1,8 @@
+Sun Nov  3 21:07:35 1996  Tom Yu  <tlyu@mit.edu>
+
+	* mkrel: Run make in doc so that .info and .ps files get created.
+	[krb5-misc/143]
+
 Thu Oct 31 12:51:13 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* kbuild: Add an option SHARED for configuring --enable-shared. 
