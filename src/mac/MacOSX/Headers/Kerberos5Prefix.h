@@ -3,6 +3,7 @@
 
 #define USE_CCAPI                    1
 #define USE_LOGIN_LIBRARY            1
+#define USE_BUNDLE_ERROR_STRINGS     1
 
 #define KRB_PRIVATE                  1
 #define KRB5_PRIVATE                 1
