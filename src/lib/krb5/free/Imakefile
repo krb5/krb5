@@ -10,6 +10,7 @@
 NormalLibraryObjectRule()
 
 OBJS=	\
+	f_addr.o	\
 	f_address.o	\
 	f_ap_rep.o	\
 	f_ap_req.o	\
@@ -34,6 +35,7 @@ OBJS=	\
 	f_ticket.o
 
 SRCS=	\
+	f_addr.c	\
 	f_address.c	\
 	f_ap_rep.c	\
 	f_ap_req.c	\
