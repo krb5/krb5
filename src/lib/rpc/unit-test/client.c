@@ -5,6 +5,13 @@
  * $Source$
  * 
  * $Log$
+ * Revision 1.16  1998/02/14 02:29:42  tlyu
+ * 	* client.c: Update header locations.  Rename of xdr_free.
+ *
+ * 	* rpc_test.h: Update header locations.
+ *
+ * 	* server.c: Update header locations.
+ *
  * Revision 1.15  1998/02/12 21:40:16  tlyu
  * 	* client.c (main): Tweak the kludge variable
  * 	krb5_gss_dbg_clietn_expcreds so we can send expired creds to the
@@ -88,10 +95,10 @@ static char *rcsid = "$Header$";
 #endif
 
 #include <stdio.h>
-#include <rpc/rpc.h>
+#include <gssrpc/rpc.h>
 #include <gssapi/gssapi.h>
-#include <rpc/rpc.h>
-#include <rpc/auth_gssapi.h>
+#include <gssrpc/rpc.h>
+#include <gssrpc/auth_gssapi.h>
 #include "rpc_test.h"
 
 #define BIG_BUF 4096
@@ -211,7 +218,7 @@ main(argc, argv)
 	      strcmp(echo_arg, (*echo_resp) + 6) != 0)
 	       fprintf(stderr, "RPC_TEST_ECHO call %d response wrong: "
 		       "arg = %s, resp = %s\n", echo_arg, *echo_resp);
-	  xdr_free(xdr_wrapstring, echo_resp);
+	  gssrpc_xdr_free(xdr_wrapstring, echo_resp);
      }
 
      /*
@@ -317,7 +324,7 @@ main(argc, argv)
 		   strcmp(echo_arg, (*echo_resp) + 6) != 0)
 		    fprintf(stderr,
 			    "RPC_TEST_LENGTHS call %d response wrong\n");
-	       xdr_free(xdr_wrapstring, echo_resp);
+	       gssrpc_xdr_free(xdr_wrapstring, echo_resp);
 	  }
 	  
 	  /* cycle from 1 to 255 */

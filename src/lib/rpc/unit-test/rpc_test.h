@@ -1,7 +1,7 @@
 #ifndef _RPC_TEST_H_RPCGEN
 #define	_RPC_TEST_H_RPCGEN
 
-#include <rpc/rpc.h>
+#include <gssrpc/rpc.h>
 
 #define	RPC_TEST_PROG ((unsigned long)(1000001))
 #define	RPC_TEST_VERS_1 ((unsigned long)(1))

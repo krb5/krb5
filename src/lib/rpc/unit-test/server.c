@@ -12,11 +12,11 @@ static char *rcsid = "$Header$";
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <rpc/rpc.h>
+#include <gssrpc/rpc.h>
 #include <arpa/inet.h>  /* inet_ntoa */
 #include <gssapi/gssapi.h>
 #include <gssapi/gssapi_generic.h>
-#include <rpc/auth_gssapi.h>
+#include <gssrpc/auth_gssapi.h>
 #include <sys/param.h>	/* MAXHOSTNAMELEN */
 #include "rpc_test.h"
 
