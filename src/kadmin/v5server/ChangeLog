@@ -1,4 +1,11 @@
 
+Thu Aug 17 13:50:28 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* srv_key.c, kadm5_defs.h - Add key_{open,close}_db().  Close database
+		after initialization.
+	* proto_serv.c - Open the database after reading a command and close
+		it before sending a response.
+
+
 Tue Aug 15 14:28:03 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* kadm5_defs.h, admin.c, passwd.c, srv_key.c - Replace key_name_to_data
 		with krb5_dbe_find_keytype().
