@@ -80,7 +80,7 @@ struct _profile_t {
  */
 
 #ifdef PROFILE_USES_PATHS
-#define	PROFILE_LAST_FILESPEC(x) (((x) == NULL) || ((x)[0] == NULL))
+#define	PROFILE_LAST_FILESPEC(x) (((x) == NULL) || ((x)[0] == '\0'))
 #else
 #define PROFILE_LAST_FILESPEC(x) (((x).vRefNum == 0) && ((x).parID == 0) && ((x).name[0] == '\0'))
 #endif
@@ -173,7 +173,7 @@ errcode_t profile_rename_node
 /* prof_file.c */
 
 errcode_t profile_open_file
-	PROTOTYPE ((profile_filespec_t file, prf_file_t *ret_prof));
+	PROTOTYPE ((const_profile_filespec_t file, prf_file_t *ret_prof));
 
 errcode_t profile_update_file
 	PROTOTYPE ((prf_file_t profile));
