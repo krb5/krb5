@@ -1,3 +1,7 @@
+Wed Mar 1 20:00:00 1995 Keith Vetter (keithv@fusion.com)
+
+	* func-proto.h: fixed up a const attribute to krb5_send_tgs.
+
 Wed Mar 1 17:40:00 1995 Keith Vetter (keithv@fusion.com)
 
 	* func-proto.h: added missing prototype for krb5_mk_cred.

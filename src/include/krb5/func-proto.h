@@ -439,7 +439,7 @@ krb5_error_code INTERFACE krb5_send_tgs
 		   const krb5_cksumtype,
 		   krb5_const_principal,
 		   krb5_address * const *,
-		   const krb5_authdata **,
+		   krb5_authdata * const *,
 		   krb5_pa_data * const *,
 		   const krb5_data *,
 		   krb5_creds *,
