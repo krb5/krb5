@@ -2,6 +2,7 @@
  * lib/crypto/des/fin_rndkey.c
  *
  * Copyright 1990,1991 by the Massachusetts Institute of Technology.
+ * Copyright 1996 by Lehman Brothers, Inc.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -14,13 +15,12 @@
  * without fee is hereby granted, provided that the above copyright
  * notice appear in all copies and that both that copyright notice and
  * this permission notice appear in supporting documentation, and that
- * the name of M.I.T. not be used in advertising or publicity pertaining
- * to distribution of the software without specific, written prior
- * permission.  M.I.T. makes no representations about the suitability of
- * this software for any purpose.  It is provided "as is" without express
- * or implied warranty.
- * 
- *
+ * the name of M.I.T. or Lehman Brothers not be used in advertising or
+ * publicity pertaining to distribution of the software without
+ * specific, written prior permission.  M.I.T. and Lehman Brothers
+ * make no representations about the suitability of this software for
+ * any purpose.  It is provided "as is" without express or implied
+ * warranty.
  */
 
 #include "k5-int.h"
@@ -30,11 +30,22 @@
         free any resources held by "seed" and assigned by init_random_key()
  */
 
-krb5_error_code mit_des_finish_random_key (seed)
-    krb5_pointer * seed;
+krb5_error_code mit_des_finish_random_key (eblock, p_state)
+    const krb5_encrypt_block * eblock;
+    krb5_pointer * p_state;
 {
-    memset((char *)*seed, 0, sizeof(mit_des_random_key_seed) );
-    krb5_xfree(*seed);
-    *seed = 0;
+    mit_des_random_state * state = *p_state;
+
+    if (! state) return 0;
+
+    if (state->sequence.data) {
+	memset((char *)state->sequence.data, 0, state->sequence.length);
+	krb5_xfree(state->sequence.data);
+    }
+
+    mit_des_finish_key(&state->eblock);
+
+    krb5_xfree(state);
+    *p_state = 0;
     return 0;
 }

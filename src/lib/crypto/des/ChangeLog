@@ -1,3 +1,28 @@
+Thu May  2 18:29:01 1996  Richard Basch  <basch@lehman.com>
+
+	* d3_rndky.c new_rn_key.c: Removed (obsolete).
+
+	* u_rn_key.c: New file
+		Support routines to set the seed/sequence number of the
+		random stream.
+
+	* Makefile.in: new/removed file changes
+
+	* des_int.h: Changed prototypes for all the random routines.
+
+	* fin_rndkey.c: rewrote mit_des_finish_random_key to use the new
+		random state structure and to accept an eblock as arg 1.
+
+	* init_rkey.c: rewritten to be a common DES, 3-DES random stream
+		initialization routine.  it uses the eblock to determine
+		the random key type to generate.
+		
+	* random_key.c: rewritten to be a common DES, 3-DES random stream
+		generator, using the former DES algorithm (encrypting an
+		incrementing sequence number with a unique key schedule)
+		[3-DES uses DES3-CBC-CRC to increment a 192 bit sequence
+		number, instead of being only as secure as DES.]
+
 Wed Apr 10 17:46:40 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in (SRCS,OBJS): Added afsstring2key.c to the list of

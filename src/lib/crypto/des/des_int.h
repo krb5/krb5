@@ -57,9 +57,9 @@ typedef mit_des_key_schedule	mit_des3_key_schedule[3];
 #define MIT_DES_DECRYPT	0
 
 typedef struct mit_des_ran_key_seed {
-    krb5_octet sequence_number[8];
-    mit_des_key_schedule random_sequence_key;
-} mit_des_random_key_seed;
+    krb5_encrypt_block eblock;
+    krb5_data sequence;
+} mit_des_random_state;
 
 /* the first byte of the key is already in the keyblock */
 
@@ -118,7 +118,8 @@ extern int mit_des_cbc_encrypt
     
 /* fin_rndkey.c */
 extern krb5_error_code mit_des_finish_random_key
-    PROTOTYPE(( krb5_pointer FAR *));
+    PROTOTYPE(( const krb5_encrypt_block FAR *,
+		krb5_pointer FAR *));
 
 /* finish_key.c */
 extern krb5_error_code mit_des_finish_key
@@ -126,7 +127,9 @@ extern krb5_error_code mit_des_finish_key
 
 /* init_rkey.c */
 extern krb5_error_code mit_des_init_random_key
-    PROTOTYPE(( const krb5_keyblock FAR *,  krb5_pointer FAR *));
+    PROTOTYPE(( const krb5_encrypt_block FAR *,
+		const krb5_keyblock FAR *,
+		krb5_pointer FAR *));
 
 /* key_parity.c */
 extern void mit_des_fixup_key_parity PROTOTYPE((mit_des_cblock ));
@@ -135,18 +138,6 @@ extern int mit_des_check_key_parity PROTOTYPE((mit_des_cblock ));
 /* key_sched.c */
 extern int mit_des_key_sched
     PROTOTYPE((mit_des_cblock , mit_des_key_schedule ));
-
-/* new_rnd_key.c */
-extern int mit_des_new_random_key
-    PROTOTYPE((mit_des_cblock , mit_des_random_key_seed FAR *));
-extern void mit_des_init_random_number_generator
-    PROTOTYPE((mit_des_cblock, mit_des_random_key_seed FAR *));
-extern void mit_des_set_random_generator_seed
-    PROTOTYPE((mit_des_cblock , mit_des_random_key_seed FAR *));
-extern void mit_des_set_sequence_number
-    PROTOTYPE((mit_des_cblock , mit_des_random_key_seed FAR *));
-extern void mit_des_generate_random_block
-    PROTOTYPE((mit_des_cblock , mit_des_random_key_seed FAR *));
 
 /* process_ky.c */
 extern krb5_error_code mit_des_process_key
@@ -218,12 +209,6 @@ extern krb5_error_code mit_des3_process_key
 	PROTOTYPE((krb5_encrypt_block * eblock,
 		   const krb5_keyblock * keyblock));
 
-/* d3_rndkey.c */
-extern krb5_error_code mit_des3_random_key
-	PROTOTYPE((const krb5_encrypt_block * eblock,
-		   krb5_pointer seed,
-		   krb5_keyblock ** keyblock));
-
 /* d3_kysched.c */
 extern int mit_des3_key_sched
 	PROTOTYPE((mit_des3_cblock key,
@@ -242,5 +227,14 @@ extern krb5_error_code mit_des_n_fold
 		   const size_t in_len,
 		   krb5_octet * output,
 		   const size_t out_len));
+
+/* u_rn_key.c */
+extern krb5_error_code mit_des_set_random_generator_seed
+	PROTOTYPE((const krb5_data * seed,
+		   krb5_pointer random_state));
+
+extern krb5_error_code mit_des_set_random_sequence_number
+	PROTOTYPE((const krb5_data * sequence,
+		   krb5_pointer random_state));
 
 #endif	/*DES_INTERNAL_DEFS*/

@@ -21,7 +21,6 @@ OBJS=	afsstring2key.$(OBJEXT) \
 	process_ky.$(OBJEXT)	\
 	random_key.$(OBJEXT)	\
 	string2key.$(OBJEXT)	\
-	new_rn_key.$(OBJEXT)	\
 	key_sched.$(OBJEXT)	\
 	weak_key.$(OBJEXT)	\
 	f_cbc.$(OBJEXT) 	\
@@ -34,9 +33,9 @@ OBJS=	afsstring2key.$(OBJEXT) \
 	d3_ecb.$(OBJEXT)	\
 	d3_kysched.$(OBJEXT)	\
 	d3_procky.$(OBJEXT) 	\
-	d3_rndky.$(OBJEXT)	\
-	d3_str2ky.$(OBJEXT) \
-	u_nfold.$(OBJEXT)
+	d3_str2ky.$(OBJEXT)	\
+	u_nfold.$(OBJEXT)	\
+	u_rn_key.$(OBJEXT)
 
 SRCS=	$(srcdir)/afsstring2key.c \
 	$(srcdir)/cs_entry.c	\
@@ -47,7 +46,6 @@ SRCS=	$(srcdir)/afsstring2key.c \
 	$(srcdir)/process_ky.c	\
 	$(srcdir)/random_key.c	\
 	$(srcdir)/string2key.c	\
-	$(srcdir)/new_rn_key.c	\
 	$(srcdir)/key_sched.c	\
 	$(srcdir)/weak_key.c	\
 	$(srcdir)/f_cbc.c \
@@ -60,9 +58,9 @@ SRCS=	$(srcdir)/afsstring2key.c \
 	$(srcdir)/d3_ecb.c \
 	$(srcdir)/d3_kysched.c \
 	$(srcdir)/d3_procky.c \
-	$(srcdir)/d3_rndky.c \
 	$(srcdir)/d3_str2ky.c \
-	$(srcdir)/u_nfold.c
+	$(srcdir)/u_nfold.c \
+	$(srcdir)/u_rn_key.c
 
 
 all:: $(OBJS)
