@@ -9,12 +9,12 @@
 \fi
 \newcount\argc@ount
 % funcdecl is used as \begin{funcdecl}[funcname]{return type}{firstline}
-\def\funcdecl{\makeunderletter\@moreindex}
+\def\funcdecl{\underrealtrue\@moreindex}
 %
 % this isn't quite right; we need to have \@morefuncdecl{#1} get #1
 % expanded and then re-scanned by TeX to reassign catcodes to _'s in it.
 %
-\def\@moreindex[#1]{\index{#1}\makeunderactive\@morefuncdecl{#1}}
+\def\@moreindex[#1]{\index{#1}\underrealfalse\@morefuncdecl{#1}}
 \def\@morefuncdecl#1#2#3{\argc@ount=0\begin{tabbing}
 #2 \\
 {\bf #1}(\= \+ #3%\doindex%
@@ -31,14 +31,6 @@
 \newcommand{\funcparam}[1]{{\argfont #1}}
 \newcommand{\funcname}[1]{{\bf #1}()}
 \newcommand{\libname}[1]{{\argfont #1}}
+\newcommand{\globalname}[1]{{\argfont #1}}
 \newcommand{\ptsto}{->\discretionary{}{}{}}
 \newcommand{\datatype}[1]{{\bf #1}}
-
-
-
-
-
-
-
-
-
