@@ -1,5 +1,5 @@
 AC_INIT(configure.in)
 CONFIG_RULES
-CONFIG_DIRS(klist kinit kdestroy ksu)
+CONFIG_DIRS(klist kinit kdestroy kpasswd ksu)
 DO_SUBDIRS
 V5_AC_OUTPUT_MAKEFILE
