@@ -4,6 +4,20 @@ Tue Mar 26 14:45:03 1996  Richard Basch  <basch@lehman.com>
 	requiring domain conversion for the instance.  (imap/<host> is used
 	by some of the new imap mail implementations)
 
+Wed Mar 27 17:05:47 1996  Richard Basch  <basch@lehman.com>
+
+	* in_tkt_ktb.c (keytab_keyproc): Do not check to see that the
+	enctype of the key is identical; there are several equivalent
+	DES enctypes.
+
+	* in_tkt_ktb.c (krb5_get_in_tkt_with_keytab): Removed the fancy
+	logic to only request the keytypes that correspond to those in
+	the keytab.  There were too many fencepost conditions that could
+	get you into trouble.  Either it should be there and *fully*
+	functional, or not in there at all.  Besides, there are too many
+	other components in Kerberos that expect the end-service to know
+	all its keys that this sanity check is overkill.
+
 Sun Mar 24 01:34:14 1996  Sam Hartman  <hartmans@tertius.mit.edu>
 
 	* send_tgs.c (krb5_send_tgs_basic): You want to setup the eblock
