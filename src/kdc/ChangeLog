@@ -1,3 +1,9 @@
+2002-02-20  Ken Raeburn  <raeburn@mit.edu>
+
+	* network.c: Include foreachaddr.c.
+	(printaddr, printifaddr, addr_eq, foreach_localaddr): Deleted.
+	* Makefile.in ($(OUTPRE)network.$(OBJEXT)): Updated dependencies.
+
 2002-01-08  Sam Hartman  <hartmans@mit.edu>
 
 	* dispatch.c (dispatch): Add timing data between requests to PRNG

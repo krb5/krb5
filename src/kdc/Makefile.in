@@ -141,7 +141,7 @@ $(OUTPRE)network.$(OBJEXT): network.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
   kdc_util.h extern.h kdc5_err.h $(SRCTOP)/include/krb5/adm_proto.h \
-  $(SRCTOP)/include/syslog.h
+  $(SRCTOP)/include/syslog.h $(SRCTOP)/include/foreachaddr.c
 $(OUTPRE)sock2p.$(OBJEXT): sock2p.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
