@@ -122,7 +122,8 @@ static char sccsid[] = "@(#)rshd.c	5.12 (Berkeley) 9/12/88";
 #include <ctype.h>
 #include <string.h>
      
-#ifdef sun
+#ifdef HAVE_SYS_LABEL_H
+/* only SunOS 4? */
 #include <sys/label.h>
 #include <sys/audit.h>
 #include <pwdadj.h>

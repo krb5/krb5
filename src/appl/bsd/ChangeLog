@@ -1,5 +1,8 @@
 Wed Jul 27 12:52:04 1994  Mark Eichin  (eichin@tweedledumber.cygnus.com)
 
+	* krshd.c: HAVE_SYS_LABEL_H, which seems to be SunOS 4 specific.
+	* configure.in: test for add sys/label.h to HEADERS test.
+
 	* krcp.c (rsource): USE_DIRENT_H.
 
 	* configure.in: test for HAVE_UNISTD_H.
