@@ -4,6 +4,7 @@
  * $Id$
  *
  * Copyright 1990,1991 by the Massachusetts Institute of Technology.
+ * All Rights Reserved.
  *
  * For copying and distribution information, please see the file
  * <krb5/copyright.h>.
@@ -12,7 +13,6 @@
  * file-based credential cache routines.
  */
 
-#include <krb5/copyright.h>
 
 #ifndef __KRB5_FILE_CCACHE__
 #define __KRB5_FILE_CCACHE__
