@@ -958,10 +958,9 @@ getptyslave()
 	waslm = tty_linemode();
 # endif
 
-	if ( (retval = pty_open_slave (line, &t)) < 0 )
+	if ( (retval = pty_open_slave (line, &t)) != 0 )
 	    {
-		com_err(retval, "telnetd", "while opening slave terminal");
-		fatalperror(net, line);
+		fatalperror(net, error_message(retval));
 	    }
 
 #ifdef  STREAMSPTY
@@ -1126,25 +1125,14 @@ slavepid = i; /* So we can clean it up later */
 #endif
 
 		/* Wait for child before writing to parent side of pty.*/
+(void) close(syncpipe[1]);
 		read(syncpipe[0], &c, 1);
 		close(syncpipe[0]);
-		close(syncpipe[1]);
+
 		
 			} else {
-		/*
-		 * Create utmp entry for child
-		 */
-#ifdef	UTMPX
-		(void) time(&wtmp.ut_tv.tv_sec);
-		wtmp.ut_tv.tv_usec = 0;
-#else	/* UTMPX */
-		(void) time(&wtmp.ut_time);
-#endif	/* UTMPX */
-		wtmp.ut_type = LOGIN_PROCESS;
-		wtmp.ut_pid = getpid();
-
-
-pty_update_utmp (&wtmp, "LOGIN", line, host);
+		
+		pty_update_utmp (PTY_LOGIN_PROCESS, getpid(), "LOGIN", line, host);
 		getptyslave(autologin);
 
 /* Notify our parent we're ready to continue.*/

@@ -1,3 +1,8 @@
+Mon Aug  7 18:29:21 1995  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* sys_term.c: Use new interface to pty_update_utmp.
+	(getptyslave): Handle error return from pty_open_slave
+	Close syncpipe[1] before we read from it.
 
 Mon Aug 7 14:44:21 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* configure.in, sys_term.c - Use utmpx.h if present, then check for
