@@ -25,5 +25,13 @@
 #define IHaveSubdirs
 #define PassCDebugFlags
 
-SUBDIRS=create destroy edit stash aname
+#if HasNdbm
+/* the conversion program requires that you have the NDBM package rather
+   than the older DBM. */
+CONVERT=convert
+#else
+CONVERT=
+#endif
+
+SUBDIRS=create destroy edit stash aname $(CONVERT)
 MakeSubdirs($(SUBDIRS))
