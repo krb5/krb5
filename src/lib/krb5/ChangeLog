@@ -1,3 +1,7 @@
+2001-03-05  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in: Check for sys/filio.h for FIONBIO.
+
 2000-12-18  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Look for socklen_t, define HAVE_SOCKLEN_T if
