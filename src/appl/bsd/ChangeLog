@@ -1,3 +1,8 @@
+Sun Apr  7 22:46:07 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* krshd.c: Add an option -L to pass certain environment variables
+		to the client.
+
 Wed Apr  3 17:09:19 1996  Richard Basch  <basch@lehman.com>
 
 	* krlogind.c: Under Solaris, when the connection pipe goes away,

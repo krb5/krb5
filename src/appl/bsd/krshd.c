@@ -155,7 +155,7 @@ char copyright[] =
 #include "com_err.h"
 #include "loginpaths.h"
 
-#define ARGSTR	"rek54cD:S:M:AP:?"
+#define ARGSTR	"rek54cD:S:M:AP:?L:"
 
 
 #define RSHD_BUFSIZ 5120
@@ -210,6 +210,11 @@ int checksum_required = 0;
 char *progname;
 
 #define MAX_PROG_NAME 10
+
+/* Leave room for 4 environment variables to be passed */
+#define MAXENV 4
+char *save_env[MAXENV];
+int num_env = 0;
 
 #ifdef CRAY
 int     secflag;
@@ -351,6 +356,20 @@ main(argc, argv)
 	case 'P':
 	  kprogdir = optarg;
 	  break;
+
+        case 'L':
+	  if (num_env < MAXENV) {
+		  save_env[num_env] = strdup(optarg);
+		  if(!save_env[num_env++]) {
+			  com_err(progname, ENOMEM, "in saving environment");
+			  exit(2);
+		  }		  
+	  } else  {
+		  fprintf(stderr, "%s: Only %d -L arguments allowed\n",
+			  progname, MAXENV);
+		  exit(2);
+	  }
+	  break;
 #endif
 	case 'D':
 	  debug_port = atoi(optarg);
@@ -442,20 +461,21 @@ char	shell[64] = "SHELL=";
 char    term[64] = "TERM=network";
 char	path_rest[] = RPATH;
 
+/* The following include extra space for TZ and MAXENV pointers... */
 #ifdef CRAY
 char    *envinit[] =
-{homedir, shell, 0, username, "TZ=GMT0", tmpdir, term, 0,0};
+{homedir, shell, 0, username, "TZ=GMT0", tmpdir, term, 0, 0, 0, 0, 0, 0};
 #define TZENV   4
 #define TMPDIRENV 5
 char    *getenv();
 #else /* CRAY */
 #ifdef KERBEROS
 char    *envinit[] =
-{homedir, shell, 0, username, term, 0, 0, 0};
+{homedir, shell, 0, username, term, 0, 0, 0, 0, 0, 0, 0};
 #define TZENV 5
 #else /* KERBEROS */
 char	*envinit[] =
-{homedir, shell, 0, username, term, 0, 0};
+{homedir, shell, 0, username, term, 0, 0, 0, 0, 0, 0};
 #define TZENV 5
 #endif /* KERBEROS */
 #endif /* CRAY */
@@ -1285,12 +1305,30 @@ if (ccache)
 	int i;
 	char *buf = (char *)malloc(strlen(getenv("KRB5CCNAME"))
 					  +strlen("KRB5CCNAME=")+1);
-	if (buf) {
-	    sprintf(buf, "KRB5CCNAME=%s",getenv("KRB5CCNAME"));
-	    
-	    for (i = 0; envinit[i]; i++);
-	    envinit[i] =buf;
-	}
+					  if (buf) {
+						  sprintf(buf, "KRB5CCNAME=%s",getenv("KRB5CCNAME"));
+
+						  for (i = 0; envinit[i]; i++);
+						  envinit[i] =buf;
+					  }
+    }
+
+    /* If we do anything else, make sure there is space in the array. */
+
+    for(cnt=0; cnt < num_env; cnt++) {
+	    int i;
+	    char *buf;
+
+	    if(getenv(save_env[cnt])) {
+		    buf = (char *)malloc(strlen(getenv(save_env[cnt]))
+					 +strlen(save_env[cnt]+2));
+		    if (buf) {
+			    sprintf(buf, "%s=%s", save_env[cnt], 
+				    getenv(save_env[cnt]));
+			    for (i = 0; envinit[i]; i++);
+			    envinit[i] =buf;
+		    }
+	    }
     }
 
     /* XXX - If we do anything else, make sure there is space in the array. */
