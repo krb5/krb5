@@ -401,6 +401,9 @@ errout:
 
 
 static krb5_error_code
+krb5_rc_dfl_expunge_locked(krb5_context context, krb5_rcache id);
+
+static krb5_error_code
 krb5_rc_dfl_recover_locked(krb5_context context, krb5_rcache id)
 {
 #ifdef NOIOSTUFF
