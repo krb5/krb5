@@ -1,5 +1,8 @@
 2001-08-31  Ken Raeburn  <raeburn@mit.edu>
 
+	* fake-addrinfo.c: Test only HAVE_FAKE_GETADDRINFO.
+	* fake-addrinfo.h: Define it, when remapping symbols.
+
 	* socket-utils.h (struct krb5int_sockaddr_storage,
 	sockaddr_storage): Conditionalize on HAVE_STRUCT_SOCKADDR_STORAGE
 	instead of KRB5_USE_INET6.

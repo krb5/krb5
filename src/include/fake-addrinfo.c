@@ -48,7 +48,7 @@
 
 #include "fake-addrinfo.h"
 
-#if !defined (HAVE_GETADDRINFO) || defined (BROKEN_GETADDRINFO)
+#ifdef HAVE_FAKE_GETADDRINFO
 
 static int translate_h_errno (int h);
 

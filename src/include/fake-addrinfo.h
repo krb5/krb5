@@ -146,6 +146,7 @@ void freeaddrinfo (struct addrinfo *ai);
 
 char *gai_strerror (int code);
 
+#define HAVE_FAKE_GETADDRINFO
 #define HAVE_GETADDRINFO
 #undef  HAVE_GETNAMEINFO
 #define HAVE_GETNAMEINFO
