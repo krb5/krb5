@@ -1,3 +1,10 @@
+1999-04-14    <tytso@rsts-11.mit.edu>
+
+	* update_wtmp.c: Don't use updwtmpx() even if it exists for glibc
+		2.1, since it's the same as updwtmp(), and glibc doesn't
+		define PATH_WTMPX.  updwtmpx() is not part of the XPG
+		standard anyway.  (Needed for RedHat 6.0.)
+
 Wed Mar 31 17:12:14 1999  Tom Yu  <tlyu@mit.edu>
 
 	* cleanup.c (pty_cleanup): Temporary hack to not call revoke()

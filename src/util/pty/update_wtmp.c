@@ -34,6 +34,13 @@
 #define	WTMP_FILE	"/usr/adm/wtmp"
 #endif
 
+#if defined(__GLIBC__) && (__GLIBC__ >= 2) && (__GLIBC_MINOR__ >= 1)
+/* This is ugly, but the lack of standardization in the utmp/utmpx
+ * space, and what glibc implements and doesn't make available, is
+ * even worse.
+ */
+#undef HAVE_UPDWTMPX		/* Don't use updwtmpx for glibc 2.1 */
+#endif
 
 long ptyint_update_wtmp (ent , host, user)
     struct utmp *ent;
