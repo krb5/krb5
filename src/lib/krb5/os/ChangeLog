@@ -1,5 +1,8 @@
 2003-06-03  Ken Raeburn  <raeburn@mit.edu>
 
+	* accessor.c (krb5int_accessor): Initialize restored locate_server
+	field.
+
 	* locate_kdc.c (struct srv_dns_entry): Move to top level.
 	(make_srv_query_realm): Separate from krb5_locate_srv_dns_1; just
 	do query and return results.
