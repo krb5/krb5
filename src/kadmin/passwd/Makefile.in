@@ -3,21 +3,17 @@ CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE) -I. -DUSE_KADM5_API_VERSION=1
 PROG = kpasswd
 OBJS = tty_kpasswd.o kpasswd.o kpasswd_strings.o
 
-all:: $(PROG).local $(PROG)
+all:: $(PROG)
 
 kpasswd_strings.c kpasswd_strings.h: $(srcdir)/kpasswd_strings.et
 
 $(OBJS): kpasswd_strings.h
 
-$(PROG).local: $(OBJS) $(SRVDEPLIBS)
-	$(CC) $(LDFLAGS) $(LDARGS) -o $(PROG).local $(OBJS) $(SRVLIBS)
-
 $(PROG): $(OBJS) $(CLNTDEPLIBS)
 	$(CC) $(LDFLAGS) $(LDARGS) -o $(PROG) $(OBJS) $(CLNTLIBS)
 
 install::
-	$(INSTALL_PROGRAM) $(PROG).local ${DESTDIR}$(ADMIN_BINDIR)/$(PROG)
 	$(INSTALL_PROGRAM) $(PROG) ${DESTDIR}$(ADMIN_BINDIR)/$(PROG)
 
 clean::
-	$(RM) kpasswd_strings.c kpasswd_strings.h $(PROG).local $(PROG) $(OBJS)
+	$(RM) kpasswd_strings.c kpasswd_strings.h $(PROG) $(OBJS)

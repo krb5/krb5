@@ -1,3 +1,8 @@
+Mon Aug 12 12:01:28 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* configure.in, Makefile.in: don't build kpasswd.local (not really
+ 	needed)
+
 Tue Aug  6 11:35:45 1996  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
 
 	* kpasswd.c (kpasswd): call ovsec_kadm_init with
