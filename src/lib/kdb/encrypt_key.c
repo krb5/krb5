@@ -28,10 +28,10 @@ static char rcsid_encrypt_key_c [] =
  */
 
 krb5_error_code
-krb5_kdb_encrypt_key(in, out, eblock)
+krb5_kdb_encrypt_key(eblock, in, out)
+krb5_encrypt_block *eblock;
 krb5_keyblock *in;
 krb5_keyblock *out;
-krb5_encrypt_block *eblock;
 {
     /* encrypted rep has a length encrypted along with the key,
        so that we win if the keysize != blocksize.
