@@ -1,3 +1,8 @@
+2000-11-27	Alexandra Ellwood <lxs@mit.edu>
+
+	* read_pwd.c: Removed #defines for Mac OS X (__MACH__) because we 
+    now export krb5_read_password on Mac OS X
+
 2001-10-29  Miro Jurisic  <meeroh@mit.edu>
 	* pullup from krb5-1-2 branch after krb5-1-2-2-bp
 	* localaddr.c: Fixed typo.
