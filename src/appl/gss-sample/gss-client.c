@@ -43,6 +43,8 @@ int send_token();
 int recv_token();
 void display_status();
 
+extern FILE *display_file;
+
 usage()
 {
      fprintf(stderr, "Usage: gss-client [-port port] [-v2] host service msg\n");
@@ -57,6 +59,8 @@ main(argc, argv)
      u_short port = 4444;
      int v2 = 0;
      
+     display_file = stdout;
+
      /* Parse arguments. */
      argc--; argv++;
      while (argc) {

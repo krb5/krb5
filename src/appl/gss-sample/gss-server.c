@@ -69,6 +69,7 @@ main(argc, argv)
      int once = 0;
 
      log = stdout;
+     display_file = stdout;
      argc--; argv++;
      while (argc) {
 	  if (strcmp(*argv, "-port") == 0) {
@@ -77,6 +78,7 @@ main(argc, argv)
 	       port = atoi(*argv);
 	  } else if (strcmp(*argv, "-inetd") == 0) {
 	      do_inetd = 1;
+	      display_file = 0;
 	  } else if (strcmp(*argv, "-v2") == 0) {
 	      dov2 = 1;
 	  } else if (strcmp(*argv, "-once") == 0) {

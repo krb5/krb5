@@ -1,3 +1,14 @@
+Wed Sep 27 18:36:06 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* gss-client.c (main): Set display_file to be stdout.
+
+	* gss-server.c (main): Set display_file to 0 if using inetd;
+		otherwise, set it to be stdout.
+
+	* gss-misc.c (send_token, recv_token, display_status): If
+	        display_file is null, don't set it to stderr; just don't
+		print the log message instead.  Needed for inetd operation.
+
 Sat Sep 16 03:34:59 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* gss-server.c (sign_server): Only try using gss_export_context

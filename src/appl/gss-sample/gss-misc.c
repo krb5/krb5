@@ -64,9 +64,6 @@ int send_token(s, tok)
 {
      int len, ret;
 
-     if (display_file == 0)
-	 display_file = stderr;
-
      len = htonl(tok->length);
 
      ret = write(s, (char *) &len, 4);
@@ -74,9 +71,10 @@ int send_token(s, tok)
 	  perror("sending token length");
 	  return -1;
      } else if (ret != 4) {
-	  fprintf(display_file, 
-		  "sending token length: %d of %d bytes written\n", 
-		  ret, 4);
+	 if (display_file)
+	     fprintf(display_file, 
+		     "sending token length: %d of %d bytes written\n", 
+		     ret, 4);
 	  return -1;
      }
 
@@ -85,10 +83,11 @@ int send_token(s, tok)
 	  perror("sending token data");
 	  return -1;
      } else if (ret != tok->length) {
-	  fprintf(display_file, 
-		  "sending token data: %d of %d bytes written\n", 
-		  ret, tok->length);
-	  return -1;
+	 if (display_file)
+	     fprintf(display_file, 
+		     "sending token data: %d of %d bytes written\n", 
+		     ret, tok->length);
+	 return -1;
      }
      
      return 0;
@@ -122,25 +121,24 @@ int recv_token(s, tok)
      int ret;
      int readsofar = 0;
 
-     if (display_file == 0)
-	 display_file = stderr;
-
      ret = read(s, (char *) &tok->length, 4);
      if (ret < 0) {
 	  perror("reading token length");
 	  return -1;
      } else if (ret != 4) {
-	  fprintf(display_file, 
-		  "reading token length: %d of %d bytes read\n", 
-		  ret, 4);
-	  return -1;
+	 if (display_file)
+	     fprintf(display_file, 
+		     "reading token length: %d of %d bytes read\n", 
+		     ret, 4);
+	 return -1;
      }
 	  
      tok->length = ntohl(tok->length);
      tok->value = (char *) malloc(tok->length);
      if (tok->value == NULL) {
-	  fprintf(display_file, 
-		  "Out of memory allocating token data\n");
+	 if (display_file)
+	     fprintf(display_file, 
+		     "Out of memory allocating token data\n");
 	  return -1;
      }
 
@@ -196,16 +194,14 @@ static void display_status_1(m, code, type)
      int msg_ctx;
 #endif	/* GSSAPI_V2 */
      
-     if (display_file == 0)
-	 display_file = stderr;
-
      msg_ctx = 0;
      while (1) {
 	  maj_stat = gss_display_status(&min_stat, code,
 				       type, GSS_C_NULL_OID,
 				       &msg_ctx, &msg);
-	  fprintf(display_file, "GSS-API error %s: %s\n", m,
-		  (char *)msg.value); 
+	  if (display_file)
+	      fprintf(display_file, "GSS-API error %s: %s\n", m,
+		      (char *)msg.value); 
 	  (void) gss_release_buffer(&min_stat, &msg);
 	  
 	  if (!msg_ctx)
