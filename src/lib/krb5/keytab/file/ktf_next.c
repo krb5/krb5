@@ -41,7 +41,7 @@ krb5_keytab id;
 krb5_keytab_entry *entry;
 krb5_kt_cursor *cursor;
 {
-    long *fileoff = (long *)cursor;
+    long *fileoff = (long *)*cursor;
     krb5_keytab_entry *cur_entry;
     krb5_error_code kerror;
 
