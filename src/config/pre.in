@@ -2,6 +2,7 @@
 ## common prefix for all Makefile.in in the Kerberos V5 tree.
 
 WHAT = unix
+SHELL=/bin/sh
 
 all:: all-$(WHAT)
 
@@ -90,6 +91,31 @@ TOPLIBD = $(BUILDTOP)/lib
 OBJEXT = o
 LIBEXT = a
 EXEEXT =
+
+# error table rules
+#
+### /* these are invoked as $(...) foo.et, which works, but could be better */
+COMPILE_ET_H= $(AWK) -f $(SRCTOP)/util/et/et_h.awk outfile=$@
+COMPILE_ET_C= $(AWK) -f $(SRCTOP)/util/et/et_c.awk outfile=$@
+
+.SUFFIXES:  .h .c .et .ct
+
+.et.h:
+	$(AWK) -f $(SRCTOP)/util/et/et_h.awk outfile=$*.h $<
+
+.et.c:
+	$(AWK) -f $(SRCTOP)/util/et/et_c.awk outfile=$*.c $<
+
+# ss command table rules
+#
+MAKE_COMMANDS= $(BUILDTOP)/util/ss/mk_cmds
+
+.ct.c:
+	@if [ $< != "$*.ct" ]; then \
+		(set -x; cp $< "$*.ct" && $(MAKE_COMMANDS) "$*.ct" && $(RM) "$*.ct") || exit 1; \
+	else \
+		(set -x; $(MAKE_COMMANDS) "$*.ct") || exit 1; \
+	fi
 
 all::
 clean::

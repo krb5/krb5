@@ -1,3 +1,8 @@
+Thu Jun 13 23:02:23 1996  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
+
+	* post.in,pre.in: break some things out from aclocal.m4 and put
+		them here
+
 Wed Jun 12 20:19:49 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* windows.in (PAGESIZE): New variable which is used to control the
