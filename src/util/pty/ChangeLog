@@ -1,3 +1,8 @@
+Wed Aug  2 11:59:19 1995  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* init.c (pty_init): New file to handle initialization--currently only error tables.
+
+	* getpty.c (pty_getpty): Reverse sense of logic tests so they work.  
 
 Tue Aug  1 08:20:06 1995  Sam Hartman  <hartmans@tertius.mit.edu>
 

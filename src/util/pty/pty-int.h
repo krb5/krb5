@@ -1,6 +1,7 @@
 /* Includes needed by libpty*/
 #ifndef __PTY_INT_H__
 #include <pty_err.h>
+#include <sys/types.h>
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -12,7 +13,7 @@
 #endif
 
 #include <stdio.h>
-#include <sys/types.h>
+
 #include <sys/stat.h>
 #include <sys/socket.h>
 #include <sys/ioctl.h>
@@ -83,6 +84,7 @@
 
 /* Internal functions */
 #ifdef __STDC__
+void initialize_pty_error_table(void);
 long ptyint_void_association(void);
 long ptyint_open_ctty (char *slave, int *fd);
 void ptyint_vhangup(void);
@@ -90,6 +92,7 @@ void ptyint_vhangup(void);
 
 long ptyint_void_association();
 void ptyint_vhangup();
+void initialize_pty_error_table();
 #endif /* __STDC__*/
 
 #define __PTY_INT_H__

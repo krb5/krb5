@@ -24,6 +24,7 @@
 
 #ifdef __STDC__ /* use prototypes */
 
+long pty_init(void);
 long pty_getpty ( int *fd, char *slave, int slavelength);
 
 long pty_open_slave (const char *slave, int *fd);
@@ -37,6 +38,7 @@ long pty_logwtmp (char *tty, char * user, char *host);
 
 long pty_cleanup(char *slave, int pid, int update_utmp);
 #else /*__STDC__*/
+long pty_init();
 long pty_getpty();
 
 long pty_open_slave();

@@ -31,6 +31,7 @@ cleanup.c
 getpty.c
 initialize_slave.c
 libpty.h
+init.c
 logwtmp.c
 open_ctty.c
 open_slave.c

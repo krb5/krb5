@@ -63,7 +63,7 @@ close(slavefd);
 #endif
 #endif
 	if (p) {
-	    if ( strlen(p) < slavelength)
+	    if ( strlen(p) > slavelength)
 		{
 		    close (*fd);
 		    *fd = -1;
@@ -80,7 +80,7 @@ close(slavefd);
 	}
 	ptynum = (int)(stb.st_rdev&0xFF);
     sprintf(slavebuf, "/dev/ttyp%x", ptynum);
-    if ( strlen(slavebuf) < slavelength) {
+    if ( strlen(slavebuf) > slavelength) {
 	close(*fd);
 	*fd = -1;
 	return PTY_GETPTY_SLAVE_TOOLONG;
