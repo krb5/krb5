@@ -74,6 +74,20 @@
  * Add more address families here.
  */
 
+/*
+ * BSD 4.4 defines the size of an ifreq to be max(sizeof(ifreq), sizeof(ifr.ifr_name)+ifreq.ifr_ifr_addr.sa_len
+ * However, under earlier systems, sa_len isn't present, so the size is 
+ * just sizeof(struct ifreq)
+ */
+#ifdef HAVE_SA_LEN
+#define ifreq_size(i) max(sizeof(struct ifreq),\
+     sizeof(i.ifr_name)+i.ifr_addr.sa_len)
+#else
+#define ifreq_size(i) sizeof(struct ifreq)
+#endif /* HAVE_SA_LEN*/
+
+
+
 extern int errno;
 
 /*
@@ -112,11 +126,12 @@ krb5_crypto_os_localaddr(addr)
 	closesocket (s);
 	return retval;
     }
-    n = ifc.ifc_len / sizeof (struct ifreq);
+    n = ifc.ifc_len;
     
-    for (n_found=0, i=0; i<n && ! mem_err; i++) {
+n_found = 0;
+    for (i = 0; i < n; i+= ifreq_size(*ifr) ) {
 	krb5_address *address;
-	ifr = &ifc.ifc_req[i];
+	ifr = (struct ifreq *)((caddr_t) ifc.ifc_buf+i);
 	
 	if (ioctl (s, SIOCGIFFLAGS, (char *)ifr) < 0)
 	    continue;

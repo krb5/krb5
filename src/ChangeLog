@@ -1,3 +1,7 @@
+Sun Jul 16 05:02:41 1995  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* aclocal.m4 : Defined KRB5_SOCKADDR_SA_LEN, a test to determine
+        if sockaddr has the sa_len field.  
 
 Wed Jul 12 11:47:43 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* aclocal.m4 - Add LDFLAGS setting to KRB5_LIBRARIES.  This allows

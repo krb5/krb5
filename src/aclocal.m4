@@ -628,6 +628,25 @@ rm pre.out Makefile.out post.out
 ],
 CONF_FRAGDIR=$srcdir/${ac_config_fragdir} )])dnl
 dnl
+dnl KRB5_SOCKADDR_SA_LEN: define HAVE_SA_LEN if sockaddr contains the sa_len
+dnl component
+dnl
+AC_DEFUN([KRB5_SOCKADDR_SA_LEN],[ dnl
+AC_MSG_CHECKING(Whether struct sockaddr contains sa_len)
+AC_CACHE_VAL(krb5_cv_sockaddr_sa_len,
+[AC_TRY_COMPILE([#include <sys/types.h>
+#include <sys/socket.h>
+],
+[struct sockaddr sa;
+sa.sa_len;],
+krb5_cv_sockaddr_sa_len=yes,krb5_cv_sockaddr_sa_len=no)])
+AC_MSG_RESULT([$]krb5_cv_sockaddr_sa_len)
+if $krb5_cv_sockaddr_sa_len= yes; then
+   AC_DEFINE_UNQUOTED(HAVE_SA_LEN)
+   fi
+])
+dnl
+dnl
 dnl CHECK_UTMP: check utmp structure and functions
 dnl
 define(CHECK_UTMP,[

@@ -5,4 +5,5 @@ SubdirLibraryRule([${OBJS}])
 AC_LN_S
 AC_REPLACE_FUNCS(memmove)
 AC_HAVE_FUNCS(srand48 srand srandom getpid)
+KRB5_SOCKADDR_SA_LEN
 V5_AC_OUTPUT_MAKEFILE
