@@ -68,7 +68,6 @@ int	standalone;
 krb5_principal	server;		/* This is our server principal name */
 krb5_principal	client;		/* This is who we're talking to */
 krb5_keyblock	*session_key;	/* Here is the session key */
-krb5_address	**server_addrs;
 krb5_pointer	kerb_keytab = 0; /* Use default */
 krb5_context kpropd_context;
 char	*realm = NULL;		/* Our realm */
@@ -418,11 +417,6 @@ void PRS(argv)
 	if (retval = krb5_parse_name(kpropd_context, buf, &server)) {
 		com_err(progname, retval,
 			"While trying to parse %s for service name");
-		exit(1);
-	}
-	if (retval = krb5_os_localaddr(&server_addrs)) {
-		com_err(progname, retval,
-			"While trying to get local server address");
 		exit(1);
 	}
 	/*

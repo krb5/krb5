@@ -190,7 +190,6 @@ void get_tickets(context)
 	char   buf[BUFSIZ];
 	char   *cp;
 	struct hostent *hp;
-	krb5_address **my_addresses;
 	krb5_error_code retval;
 	static char tkstring[] = "/tmp/kproptktXXXXXX";
 
@@ -271,16 +270,7 @@ void get_tickets(context)
 		com_err(progname, retval, "While copying client principal");
 		exit(1);
 	}
-	/*
-	 * Get my addresses
-	 */
-	retval = krb5_os_localaddr(&my_addresses);
-	if (retval != 0) {
-		com_err(progname, retval,
-			"when getting my address");
-		exit(1);
-	}
-	retval = krb5_get_in_tkt_with_keytab(context, 0, my_addresses, NULL,
+	retval = krb5_get_in_tkt_with_keytab(context, 0, 0, NULL,
 					     NULL, NULL, ccache, &creds, 0);
 	if (retval) {
 		com_err(progname, retval, "while getting initial ticket\n");

@@ -1,3 +1,11 @@
+Fri Mar 24 14:49:41 1995    <tytso@rsx-11.mit.edu>
+
+	* kpropd.c (PRS): Don't bother initializing server_addrs since
+		it's not used.
+
+	* kprop.c (get_tickets): Remove the call to krb5_os_localaddr() since
+		get_in_tkt_XXXX will default appropriately.
+
 Thu Mar  2 12:26:08 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in (ISODELIB): Remove reference to $(ISODELIB).
