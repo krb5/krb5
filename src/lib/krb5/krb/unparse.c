@@ -44,7 +44,7 @@ static char rcsid_unparse_c[] =
 
 krb5_error_code
 krb5_unparse_name_ext(principal, name, size)
-const krb5_principal principal;
+krb5_const_principal principal;
 register char **name;
 int	*size;
 {
@@ -78,7 +78,8 @@ int	*size;
 		}
 	} else {
 		*name = malloc(totalsize);	/* room for null */
-		*size = totalsize;
+		if (size)
+			*size = totalsize;
 	}
 	
 	if (!*name)
@@ -136,9 +137,10 @@ int	*size;
 
 krb5_error_code
 krb5_unparse_name(principal, name)
-const krb5_principal principal;
+krb5_const_principal principal;
 register char **name;
 {
+	*name = NULL;
 	return(krb5_unparse_name_ext(principal, name, NULL));
 }
 
