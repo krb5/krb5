@@ -29,12 +29,11 @@ static char rcsid_tgrq2ktgrq_c[] =
 /* ISODE defines max(a,b) */
 
 krb5_kdc_req *
-KRB5_TGS__REQ2krb5_kdc_req(val, error)
-const register struct type_KRB5_TGS__REQ *val;
+KRB5_KDC__REQ__BODY2krb5_kdc_req(val, error)
+const register struct type_KRB5_KDC__REQ__BODY *val;
 register int *error;
 {
     register krb5_kdc_req *retval;
-    krb5_data *temp;
 
     retval = (krb5_kdc_req *)xmalloc(sizeof(*retval));
     if (!retval) {
@@ -43,81 +42,69 @@ register int *error;
     }
     xbzero(retval, sizeof(*retval));
 
-    retval->msg_type = val->msg__type;
-    retval->padata_type = val->padata__type;
-    if (val->padata) {
-	temp = qbuf2krb5_data(val->padata, error);
-	if (temp) {
-	    retval->padata = *temp;
-	    xfree(temp);
-	} else {
-	    goto errout;
-	}
-    }	
-
     retval->kdc_options =
-	KRB5_KDCOptions2krb5_kdcoptions(val->req__body->kdc__options,
+	KRB5_KDCOptions2krb5_kdcoptions(val->kdc__options,
 					error);
     if (*error) {
     errout:
 	krb5_free_kdc_req(retval);
 	return(0);
     }
-    if (val->req__body->cname)
+    if (val->cname)
 	retval->client =
-	    KRB5_PrincipalName2krb5_principal(val->req__body->cname,
-					      val->req__body->realm,
+	    KRB5_PrincipalName2krb5_principal(val->cname,
+					      val->realm,
 					      error);
-    retval->server = KRB5_PrincipalName2krb5_principal(val->req__body->sname,
-						       val->req__body->realm,
+    retval->server = KRB5_PrincipalName2krb5_principal(val->sname,
+						       val->realm,
 						       error);
     if (!retval->server) {
 	goto errout;
     }
-    retval->from = gentime2unix(val->req__body->from, error);
+    retval->from = gentime2unix(val->from, error);
     if (*error) {
 	goto errout;
     }
-    retval->till = gentime2unix(val->req__body->till, error);
+    retval->till = gentime2unix(val->till, error);
     if (*error) {
 	goto errout;
     }
     if (retval->kdc_options & KDC_OPT_RENEWABLE) {
-	retval->rtime = gentime2unix(val->req__body->rtime, error);
+	retval->rtime = gentime2unix(val->rtime, error);
 	if (*error) {
 	    goto errout;
 	}
     }
-    retval->ctime = gentime2unix(val->req__body->ctime, error);
+    retval->ctime = gentime2unix(val->ctime, error);
     if (*error) {
 	goto errout;
     }
-    retval->nonce = val->req__body->nonce;
+    retval->nonce = val->nonce;
 
-    retval->etype = val->req__body->etype;
+    retval->etype = val->etype;
 
 
-    if (val->req__body->addresses) {
+    if (val->addresses) {
 	retval->addresses =
-	    KRB5_HostAddresses2krb5_address(val->req__body->addresses, error);
+	    KRB5_HostAddresses2krb5_address(val->addresses, error);
 	if (!retval->addresses) {
 	    goto errout;
 	}
     }
-    if (val->req__body->authorization__data) {
+    if (val->authorization__data) {
 	retval->authorization_data =
-	    KRB5_AuthorizationData2krb5_authdata(val->req__body->
+	    KRB5_AuthorizationData2krb5_authdata(val->
 						 authorization__data,
 						 error);
 	if (*error)
 	    goto errout;
     }
-    if (val->req__body->additional__tickets) {
+    if (val->additional__tickets) {
 	register krb5_ticket **aticks;
-        register struct element_KRB5_9 *tptr;
+        register struct element_KRB5_6 *tptr;
 	register int i;
 
-	tptr = val->req__body->additional__tickets;
+	tptr = val->additional__tickets;
 	/* plus one for null terminator */
 	aticks = (krb5_ticket **) xcalloc(tptr->nelem + 1,
 					  sizeof(*aticks));
@@ -133,5 +120,31 @@ register int *error;
 	}
 	retval->second_ticket = aticks;
     }
+    return retval;
+}
+
+krb5_kdc_req *
+KRB5_TGS__REQ2krb5_kdc_req(val, error)
+const register struct type_KRB5_TGS__REQ *val;
+register int *error;
+{
+    register krb5_kdc_req *retval;
+    krb5_data *temp;
+
+    if (!(retval = KRB5_KDC__REQ__BODY2krb5_kdc_req(val->req__body, error)))
+	return retval;
+
+    retval->msg_type = val->msg__type;
+    retval->padata_type = val->padata__type;
+    if (val->padata) {
+	temp = qbuf2krb5_data(val->padata, error);
+	if (temp) {
+	    retval->padata = *temp;
+	    xfree(temp);
+	} else {
+	    krb5_free_kdc_req(retval);
+	    return(0);
+	}
+    }	
     return(retval);
 }
