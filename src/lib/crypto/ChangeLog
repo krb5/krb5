@@ -1,3 +1,10 @@
+2001-03-14  Ken Raeburn  <raeburn@mit.edu>
+
+	* t_nfold.c: Include assert.h.
+	(printhex, printstringhex, rfc_tests): New routines.
+	(ASIZE): New macro.
+	(main): Call rfc_tests.
+
 2001-03-10  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* make_random_key.c, old_api_glue.c: Do not use a variable named

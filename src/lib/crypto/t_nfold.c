@@ -32,8 +32,68 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <assert.h>
 
 #include "k5-int.h"
+
+#define ASIZE(ARRAY) (sizeof(ARRAY)/sizeof(ARRAY[0]))
+
+void printhex (size_t len, const char *p)
+{
+    while (len--)
+	printf ("%02x", 0xff & *p++);
+}
+
+void printstringhex (const char *p) { printhex (strlen (p), p); }
+
+void rfc_tests ()
+{
+    int i;
+    struct {
+	char *input;
+	int n;
+	unsigned char exp[192/8];
+    } tests[] = {
+	{ "012345", 64,
+	  { 0xbe,0x07,0x26,0x31,0x27,0x6b,0x19,0x55, }
+	},
+	{ "password", 56,
+	  { 0x78,0xa0,0x7b,0x6c,0xaf,0x85,0xfa, }
+	},
+	{ "Rough Consensus, and Running Code", 64,
+	  { 0xbb,0x6e,0xd3,0x08,0x70,0xb7,0xf0,0xe0, }
+	},
+	{ "password", 168,
+	  { 0x59,0xe4,0xa8,0xca,0x7c,0x03,0x85,0xc3,
+	    0xc3,0x7b,0x3f,0x6d,0x20,0x00,0x24,0x7c,
+	    0xb6,0xe6,0xbd,0x5b,0x3e, }
+	},
+	{ "MASSACHVSETTS INSTITVTE OF TECHNOLOGY", 192,
+	  { 0xdb,0x3b,0x0d,0x8f,0x0b,0x06,0x1e,0x60,
+	    0x32,0x82,0xb3,0x08,0xa5,0x08,0x41,0x22,
+	    0x9a,0xd7,0x98,0xfa,0xb9,0x54,0x0c,0x1b, }
+	},
+    };
+    unsigned char outbuf[192/8];
+
+    printf ("RFC tests:\n");
+    for (i = 0; i < ASIZE (tests); i++) {
+	char *p = tests[i].input;
+	assert (tests[i].n / 8 <= sizeof (outbuf));
+	krb5_nfold (8 * strlen (p), p, tests[i].n, outbuf);
+	printf ("%d-fold(\"%s\") =\n", tests[i].n, p);
+	printf ("%d-fold(", tests[i].n);
+	printstringhex (p);
+	printf (") =\n\t");
+	printhex (tests[i].n / 8, outbuf);
+	printf ("\n\n");
+	if (memcmp (outbuf, tests[i].exp, tests[i].n/8) != 0) {
+	    printf ("wrong value! expected:\n\t");
+	    printhex (tests[i].n / 8, tests[i].exp);
+	    exit (1);
+	}
+    }
+}
 
 unsigned char *nfold_in[] = {
     "basch",
@@ -73,7 +133,7 @@ main(argc, argv)
 	    exit(-1);
 	};
     }
+    rfc_tests ();
     printf("verify: N-fold is correct\n\n");
-
     exit(0);
 }
