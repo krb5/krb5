@@ -586,8 +586,8 @@ be one of the constants OVSEC_KADM_ADMIN_SERVICE or
 OVSEC_KADM_CHANGEPW_SERVICE.
 \item If realm is NULL, client_name's realm is used.
 \item The ticket is decoded with the password pass, which must be
-client_name's password.  If pass is NULL, the user is prompted (via
-the tty) for a password.
+client_name's password.  If pass is NULL or an empty string,
+the user is prompted (via the tty) for a password.
 \end{enumerate}
 
 \item Create a GSS-API authenticated connection to the Admin server,
@@ -603,10 +603,10 @@ machine.  If ovsec_kadm_init is invoked locally its semantics are:
 \item Initializes all the com_err error tables used by the Admin
 system.
 
-\item Initializes direct access to the KDC database.  If pass is NULL,
-reads the master password from /.k5.REALM-NAME (created by kstash).
-Otherwise, the non-NULL password is ignored and the user is prompted
-for it via the tty.
+\item Initializes direct access to the KDC database.  If pass is NULL or an
+empty string, reads the master password from /.k5.REALM-NAME (created by
+kstash).  Otherwise, the non-NULL password is ignored and the user is
+prompted for it via the tty.
 
 \item Initializes the dictionary (if present) for dictionary checks.
 
