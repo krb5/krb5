@@ -146,7 +146,7 @@ krb5_tkt_authent *tktauthent;
     tktauthent->ticket = req->ticket;	/* only temporarily...allocated
 					   below */
 
-    if ((retval = krb5_rc_store(rcache, tktauthent, TRUE))) {
+    if ((retval = krb5_rc_store(rcache, tktauthent))) {
 	tktauthent->ticket = 0;
 	clean_authenticator();
 	return retval;
