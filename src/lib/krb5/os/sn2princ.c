@@ -99,6 +99,18 @@ krb5_sname_to_principal(context, hostname, sname, type, ret_princ)
 		if (isupper(*cp))
 		    *cp = tolower(*cp);
 
+	/*
+	 * Windows NT5's broken resolver gratuitously tacks on a
+	 * trailing period to the hostname (at least it does in
+	 * Beta2).  Find and remove it.
+	 */
+	if (remote_host[0]) {
+		cp = remote_host + strlen(remote_host)-1;
+		if (*cp == '.')
+			*cp = 0;
+	}
+	
+
 	if (retval = krb5_get_host_realm(context, remote_host, &hrealms)) {
 	    free(remote_host);
 	    return retval;

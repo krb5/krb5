@@ -1,3 +1,10 @@
+Tue Jan  5 00:11:49 1999  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* sn2princ.c (krb5_sname_to_principal): Windows NT5's broken
+ 	 	 resolver gratuitously tacks on a trailing period to the
+ 	 	 hostname (at least it does in Beta2).  Deal with this
+ 	 	 brain-damage.
+
 Tue Dec 22 01:22:24 1998  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* changepw.c: Add a test for _WIN16 as well as _WIN32 for sockets
