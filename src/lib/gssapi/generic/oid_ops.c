@@ -59,7 +59,9 @@ generic_gss_release_oid(minor_status, oid)
     if ((*oid != gss_nt_user_name) &&
 	(*oid != gss_nt_machine_uid_name) &&
 	(*oid != gss_nt_string_uid_name) &&
-	(*oid != gss_nt_service_name)) {
+	(*oid != gss_nt_service_name) &&
+	(*oid != gss_nt_exported_name) &&
+	(*oid != gss_nt_service_name_v2)) {
 	free((*oid)->elements);
 	free(*oid);
     }

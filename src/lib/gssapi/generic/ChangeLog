@@ -1,3 +1,9 @@
+1998-06-08  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* oid_ops.c (generic_gss_release_oid): Recognize our own "self"
+		oids so that we don't free static oid's.  (exported_name
+		and nt_service_name_v2).
+
 Sun May 24 22:01:29 1998  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* util_buffer.c (g_make_string_buffer): Don't include the trailing
