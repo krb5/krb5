@@ -1,3 +1,9 @@
+2002-07-31  Tom Yu  <tlyu@mit.edu>
+
+	* client_init.c (_kadm5_init_any): Use
+	KADM5_MISSING_KRB5_CONF_PARAMS in order to be less confusing to
+	someone running kadmin rather than kadmin.local.
+
 2002-07-17  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (SHLIB_EXPDEPS, SHLIB_EXPLIBS): Drop references to

@@ -270,7 +270,7 @@ static kadm5_ret_t _kadm5_init_any(char *client_name,
      if ((handle->params.mask & REQUIRED_PARAMS) != REQUIRED_PARAMS) {
 	  krb5_free_context(handle->context);
 	  free(handle);
-	  return KADM5_MISSING_CONF_PARAMS;
+	  return KADM5_MISSING_KRB5_CONF_PARAMS;
      }
      
      /*
