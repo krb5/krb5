@@ -10,6 +10,8 @@ LOCALINCLUDES = -I. -I$(srcdir) -I../generic -I$(srcdir)/../generic
 
 ##DOS##DLL_EXP_TYPE=GSS
 
+include_stdint=@include_stdint@
+##DOS##include_stdint=
 ETSRCS= gssapi_err_krb5.c
 ETOBJS= $(OUTPRE)gssapi_err_krb5.$(OBJEXT)
 ETHDRS= gssapi_err_krb5.h
@@ -45,11 +47,13 @@ SRCS = \
 	$(srcdir)/k5sealv3.c \
 	$(srcdir)/k5unseal.c \
 	$(srcdir)/krb5_gss_glue.c \
+	$(srcdir)/lucid_context.c \
 	$(srcdir)/process_context_token.c \
 	$(srcdir)/rel_cred.c \
 	$(srcdir)/rel_oid.c \
 	$(srcdir)/rel_name.c \
 	$(srcdir)/seal.c \
+	$(srcdir)/set_allowable_enctypes.c \
 	$(srcdir)/ser_sctx.c \
 	$(srcdir)/set_ccache.c \
 	$(srcdir)/sign.c \
@@ -93,11 +97,13 @@ OBJS = \
 	$(OUTPRE)k5sealv3.$(OBJEXT) \
 	$(OUTPRE)k5unseal.$(OBJEXT) \
 	$(OUTPRE)krb5_gss_glue.$(OBJEXT) \
+	$(OUTPRE)lucid_context.$(OBJEXT) \
 	$(OUTPRE)process_context_token.$(OBJEXT) \
 	$(OUTPRE)rel_cred.$(OBJEXT) \
 	$(OUTPRE)rel_oid.$(OBJEXT) \
 	$(OUTPRE)rel_name.$(OBJEXT) \
 	$(OUTPRE)seal.$(OBJEXT) \
+	$(OUTPRE)set_allowable_enctypes.$(OBJEXT) \
 	$(OUTPRE)ser_sctx.$(OBJEXT) \
 	$(OUTPRE)set_ccache.$(OBJEXT) \
 	$(OUTPRE)sign.$(OBJEXT) \
@@ -141,11 +147,13 @@ STLIBOBJS = \
 	k5sealv3.o \
 	k5unseal.o \
 	krb5_gss_glue.o \
+	lucid_context.o \
 	process_context_token.o \
 	rel_cred.o \
 	rel_oid.o \
 	rel_name.o \
 	seal.o \
+	set_allowable_enctypes.o \
 	ser_sctx.o \
 	set_ccache.o \
 	sign.o \
@@ -181,13 +189,14 @@ MK_EHDRDIR=if test -d $(EHDRDIR); then :; else (set -x; mkdir $(EHDRDIR)); fi
 
 $(GSSAPI_KRB5_HDR): gssapi_krb5.h
 	@$(MK_EHDRDIR)
-	$(CP) $(srcdir)$(S)gssapi_krb5.h "$@"
+	$(CP) gssapi_krb5.h "$@"
 
 all-unix:: $(SRCS) $(HDRS) $(GSSAPI_KRB5_HDR) includes
 all-unix:: all-libobjs
 
 clean-unix::
 	$(RM) $(BUILDTOP)/include/gssapi/gssapi_krb5.h
+	-$(RM) gssapi_krb5.h
 
 clean-unix:: clean-libobjs
 	$(RM) $(ETHDRS) $(ETSRCS)
@@ -195,6 +204,15 @@ clean-unix:: clean-libobjs
 clean-windows::
 	$(RM) $(EHDRDIR)\gssapi_krb5.h
 	-if exist $(EHDRDIR)\nul rmdir $(EHDRDIR)
+
+gssapi_krb5.h: gssapi_krb5.hin
+	@echo "Creating gssapi.h" ; \
+	h=gss$$$$; $(RM) $$h; \
+	(echo "/* This is the gssapi_krb5.h prologue. */"; \
+	echo "$(include_stdint)" ; \
+	echo "/* End of gssapi_krb5.h prologue. */"; \
+	cat $(srcdir)/gssapi_krb5.hin )> $$h && \
+	(set -x; $(MV) $$h $@) ; e=$$?; $(RM) $$h; exit $$e
 
 install-headers-unix install::
 	@set -x; for f in $(EXPORTED_HEADERS) ; \
@@ -204,7 +222,7 @@ install-headers-unix install::
 
 depend:: $(ETSRCS)
 
-includes:: 
+includes::  gssapi_krb5.h
 
 install::
 

@@ -497,6 +497,15 @@ new_connection(
       goto fail;
    krb5_auth_con_setflags(context, ctx->auth_context,
 			  KRB5_AUTH_CONTEXT_DO_SEQUENCE);
+
+   /* limit the encryption types negotiated (if requested) */
+   if (cred->req_enctypes) {
+	if ((code = krb5_set_default_tgs_enctypes(context,
+						  cred->req_enctypes))) {
+	    goto fail;
+	}
+   }
+
    ctx->initiate = 1;
    ctx->gss_flags = (GSS_C_INTEG_FLAG | GSS_C_CONF_FLAG |
                      GSS_C_TRANS_FLAG | 

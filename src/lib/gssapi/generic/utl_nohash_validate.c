@@ -58,6 +58,12 @@ int g_save_ctx_id(vdb, ctx)
 {
 	return 1;
 }
+int g_save_lucidctx_id(vdb, lctx)
+     void **vdb;
+     void *lctx;
+{
+	return 1;
+}
 
 /* validate */
 
@@ -79,6 +85,12 @@ int g_validate_ctx_id(vdb, ctx)
 {
 	return 1;
 }
+int g_validate_lucidctx_id(vdb, lctx)
+     void **vdb;
+     void *lctx;
+{
+	return 1;
+}
 
 /* delete */
 
@@ -97,6 +109,12 @@ int g_delete_cred_id(vdb, cred)
 int g_delete_ctx_id(vdb, ctx)
      void **vdb;
      gss_ctx_id_t *ctx;
+{
+	return 1;
+}
+int g_delete_lucidctx_id(vdb, lctx)
+     void **vdb;
+     void *lctx;
 {
 	return 1;
 }

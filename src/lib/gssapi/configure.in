@@ -6,6 +6,9 @@ AC_TYPE_SIZE_T
 AC_CHECK_SIZEOF(short)
 AC_CHECK_SIZEOF(int)
 AC_CHECK_SIZEOF(long)
+AC_CHECK_HEADER(stdint.h,[
+	include_stdint="\\#include <stdint.h>"], )
+AC_SUBST(include_stdint)
 KRB5_BUILD_LIBOBJS
 KRB5_BUILD_LIBRARY_WITH_DEPS
 V5_AC_OUTPUT_MAKEFILE(. generic krb5)

@@ -154,6 +154,7 @@ typedef struct _krb5_gss_cred_id_rec {
    /* ccache (init) data */
    krb5_ccache ccache;
    krb5_timestamp tgt_expire;
+   krb5_enctype *req_enctypes;	/* limit negotiated enctypes to this list */
 } krb5_gss_cred_id_rec, *krb5_gss_cred_id_t; 
 
 typedef struct _krb5_gss_ctx_id_rec {
@@ -200,14 +201,17 @@ extern g_set kg_vdb;
 #define kg_save_name(name)		g_save_name(&kg_vdb,name)
 #define kg_save_cred_id(cred)		g_save_cred_id(&kg_vdb,cred)
 #define kg_save_ctx_id(ctx)		g_save_ctx_id(&kg_vdb,ctx)
+#define kg_save_lucidctx_id(lctx)	g_save_lucidctx_id(&kg_vdb,lctx)
 
 #define kg_validate_name(name)		g_validate_name(&kg_vdb,name)
 #define kg_validate_cred_id(cred)	g_validate_cred_id(&kg_vdb,cred)
 #define kg_validate_ctx_id(ctx)		g_validate_ctx_id(&kg_vdb,ctx)
+#define kg_validate_lucidctx_id(lctx)	g_validate_lucidctx_id(&kg_vdb,lctx)
 
 #define kg_delete_name(name)		g_delete_name(&kg_vdb,name)
 #define kg_delete_cred_id(cred)		g_delete_cred_id(&kg_vdb,cred)
 #define kg_delete_ctx_id(ctx)		g_delete_ctx_id(&kg_vdb,ctx)
+#define kg_delete_lucidctx_id(lctx)	g_delete_lucidctx_id(&kg_vdb,lctx)
 
 /** helper functions **/
 

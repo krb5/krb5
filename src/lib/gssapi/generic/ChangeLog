@@ -1,3 +1,8 @@
+2004-06-08  Sam Hartman  <hartmans@mit.edu>
+
+	* util_validate.c utl_nohash_validate.c gssapiP_generic.h:
+	Support for lucid context validation 
+
 2004-06-02  Ken Raeburn  <raeburn@mit.edu>
 
 	* disp_com_err_status.c (init_et): Variable deleted.

@@ -52,6 +52,7 @@ typedef struct _vkey {
 #define V_NAME		1
 #define V_CRED_ID	2
 #define V_CTX_ID	3
+#define V_LCTX_ID	4
 
 /* All these functions return 0 on failure, and non-zero on success */
 
@@ -249,6 +250,13 @@ int g_save_ctx_id(vdb, ctx)
 {
    return(g_save(vdb, V_CTX_ID, (void *) ctx));
 }
+int g_save_lucidctx_id(vdb, lctx)
+     g_set *vdb;
+     void *lctx;
+{
+   return(g_save(vdb, V_LCTX_ID, (void *) lctx));
+}
+
 
 /* validate */
 
@@ -270,6 +278,12 @@ int g_validate_ctx_id(vdb, ctx)
 {
    return(g_validate(vdb, V_CTX_ID, (void *) ctx));
 }
+int g_validate_lucidctx_id(vdb, lctx)
+     g_set *vdb;
+     void *lctx;
+{
+   return(g_validate(vdb, V_LCTX_ID, (void *) lctx));
+}
 
 /* delete */
 
@@ -290,5 +304,11 @@ int g_delete_ctx_id(vdb, ctx)
      gss_ctx_id_t *ctx;
 {
    return(g_delete(vdb, V_CTX_ID, (void *) ctx));
+}
+int g_delete_lucidctx_id(vdb, lctx)
+     g_set *vdb;
+     void *lctx;
+{
+   return(g_delete(vdb, V_LCTX_ID, (void *) lctx));
 }
 
