@@ -80,6 +80,19 @@ int auth_must_encrypt P((void));
 void auth_disable_name P((char *));
 void auth_gen_printsub P((unsigned char *, int, unsigned char *, int));
 
+
+int getauthmask P((char *, int *));
+int auth_enable P((char *));
+int auth_disable P((char *));
+int auth_onoff P((char *, int));
+int auth_togdebug P((int));
+int auth_status P((void));
+void auth_name P((unsigned char *, int));
+int auth_sendname P((unsigned char *, int));
+void auth_debug P((int));
+void auth_printsub P((unsigned char *, int, unsigned char *, int));
+
+
 #ifdef	KRB4
 int kerberos4_init P((Authenticator *, int));
 int kerberos4_send P((Authenticator *));

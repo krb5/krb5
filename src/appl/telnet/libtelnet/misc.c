@@ -33,8 +33,11 @@
 
 /* based on @(#)misc.c	8.1 (Berkeley) 6/4/93 */
 
-#include "misc.h"
 #include <stdio.h>
+#include <stdlib.h>
+#include "misc.h"
+#include "auth.h"
+#include "encrypt.h"
 
 char *RemoteHostName;
 char *LocalHostName;

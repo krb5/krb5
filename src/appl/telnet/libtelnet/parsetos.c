@@ -5,6 +5,7 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <sys/types.h>
 #include <netdb.h>
 #include <errno.h>
@@ -18,7 +19,9 @@ parsetos(name, proto)
 char	*name;
 char	*proto;
 {
+#if 0
 	register char	*c;
+#endif
 	int		tos;
 
 #ifdef HAVE_GETTOSBYNAME

@@ -58,6 +58,7 @@
 
 #ifdef	ENCRYPTION
 
+#include <stdio.h>
 #define	ENCRYPT_NAMES
 #include <arpa/telnet.h>
 
@@ -249,7 +250,7 @@ EncryptDisable(type, mode)
 	if (isprefix(type, "help") || isprefix(type, "?")) {
 		printf("Usage: encrypt disable <type> [input|output]\n");
 		encrypt_list_types();
-	} else if ((ep = (Encryptions *)genget(type, encryptions,
+	} else if ((ep = (Encryptions *)genget(type, (char **) encryptions,
 						sizeof(Encryptions))) == 0) {
 		printf("%s: invalid encryption type\n", type);
 	} else if (Ambiguous(ep)) {
@@ -284,7 +285,7 @@ EncryptType(type, mode)
 	if (isprefix(type, "help") || isprefix(type, "?")) {
 		printf("Usage: encrypt type <type> [input|output]\n");
 		encrypt_list_types();
-	} else if ((ep = (Encryptions *)genget(type, encryptions,
+	} else if ((ep = (Encryptions *)genget(type, (char **) encryptions,
 						sizeof(Encryptions))) == 0) {
 		printf("%s: invalid encryption type\n", type);
 	} else if (Ambiguous(ep)) {
@@ -644,7 +645,7 @@ encrypt_start(data, cnt)
 		return;
 	}
 
-	if (ep = finddecryption(decrypt_mode)) {
+	if ((ep = finddecryption(decrypt_mode))) {
 		decrypt_input = ep->input;
 		if (encrypt_verbose)
 			printf("[ Input is now decrypted with type %s ]\r\n",

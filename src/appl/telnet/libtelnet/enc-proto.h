@@ -81,13 +81,25 @@ void encrypt_send_request_end P((void));
 void encrypt_send_end P((void));
 void encrypt_wait P((void));
 int encrypt_is_encrypting P((void));
+int EncryptEnable P((char *, char *));
+int EncryptDisable P((char *, char *));
+int EncryptType P((char *, char *));
+int EncryptStart P((char *));
+int EncryptStartInput P((void));
+int EncryptStartOutput P((void));
+int EncryptStop P((char *));
+int EncryptStopInput P((void));
+int EncryptStopOutput P((void));
+int EncryptStatus P((void));
 void encrypt_send_support P((void));
 void encrypt_send_keyid P((int, unsigned char *, int, int));
 int net_write P((unsigned char *, int));
+void encrypt_gen_printsub P((unsigned char *, int, unsigned char *, int));
 
 #ifdef	TELENTD
 void encrypt_wait P((void));
 #else
+void printsub P((int, unsigned char *, int));
 int encrypt_cmd P((int, char **));
 void encrypt_display P((void));
 #endif

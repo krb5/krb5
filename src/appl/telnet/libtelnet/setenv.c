@@ -53,6 +53,7 @@ static char *__findenv __P((const char *, int *));
  *	"value".  If rewrite is set, replace any current value.
  */
 #ifndef HAVE_SETENV
+int
 setenv(name, value, rewrite)
 	register const char *name;
 	register const char *value;
@@ -70,7 +71,7 @@ setenv(name, value, rewrite)
 		if (!rewrite)
 			return (0);
 		if (strlen(c) >= l_value) {	/* old larger; copy over */
-			while (*c++ = *value++);
+			while ((*c++ = *value++));
 			return (0);
 		}
 	} else {					/* create new slot */
@@ -100,7 +101,7 @@ setenv(name, value, rewrite)
 	    malloc((size_t)((int)(c - name) + l_value + 2))))
 		return (-1);
 	for (c = environ[offset]; (*c = *name++) && *c != '='; ++c);
-	for (*c++ = '='; *c++ = *value++;);
+	for (*c++ = '='; (*c++ = *value++););
 	return (0);
 }
 #endif

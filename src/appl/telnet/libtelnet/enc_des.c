@@ -78,7 +78,7 @@
 #include "key-proto.h"
 #include "misc-proto.h"
 
-extern encrypt_debug_mode;
+extern int encrypt_debug_mode;
 
 extern krb5_context telnet_context;
 
@@ -234,7 +234,6 @@ fb64_start(fbp, dir, server)
 	int dir;
 	int server;
 {
-	Block b;
 	int x;
 	unsigned char *p;
 	register int state;
@@ -276,8 +275,8 @@ fb64_start(fbp, dir, server)
 			d.data = fbp->temp_feed;
 			d.length = sizeof(fbp->temp_feed);
 
-			if (code = krb5_c_random_make_octets(telnet_context,
-							     &d))
+			if ((code = krb5_c_random_make_octets(telnet_context,
+							     &d)))
 				return(FAILED);
 		}
 
@@ -327,9 +326,7 @@ fb64_is(data, cnt, fbp)
 	int cnt;
 	struct fb *fbp;
 {
-	int x;
 	unsigned char *p;
-	Block b;
 	register int state = fbp->state[DIR_DECRYPT-1];
 
 	if (cnt-- < 1)
@@ -419,9 +416,6 @@ fb64_reply(data, cnt, fbp)
 	int cnt;
 	struct fb *fbp;
 {
-	int x;
-	unsigned char *p;
-	Block b;
 	register int state = fbp->state[DIR_ENCRYPT-1];
 
 	if (cnt-- < 1)

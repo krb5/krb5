@@ -85,7 +85,7 @@ extern char *malloc();
 #include "auth.h"
 #include "misc.h"
 
-extern auth_debug_mode;
+extern int auth_debug_mode;
 extern int net;
 
 #ifdef	FORWARD

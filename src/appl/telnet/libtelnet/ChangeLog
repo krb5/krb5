@@ -1,3 +1,39 @@
+2001-06-06  Ezra Peisach  <epeisach@rna.mit.edu>
+
+	* auth-proto.h: Add prototypes for getauthmask(), auth_enable,
+	auth_disable(), auth_onoff(), auth_togdebug(), auth_status(),
+	auth_name(), auth_sendname(), auth_debug(), and auth_printsub().
+
+	* auth.c: Include unistd.h and cleanup some assignments in
+	conditionals.
+
+	* auth.h: Explicitly declare auth_debug mode as an int.
+
+	* enc-proto.h: Add prototypes for EncryptDisable(), EncryptType(),
+	EncryptStart(), EncryptStartInput(), EncryptStartOutput(),
+	EncryptStop(), EncryptStopInput(), EncryptStopOutput(),
+	EncryptStatus(), encrypt_gen_printsub(), printsub().
+
+	* enc_des.c: Declare encrypt_debug_mode as int. Cleanup unused
+	variables and assignments in conditionals. 
+
+	* encrypt.c: Include stdio.h for sprintf prototype. Cleanup
+	assignments in conditionals.
+
+	* getent.c: Conditionalize definition of some variables.
+
+	* kerberos5.c: Explicitly declare auth_debug_mode an int.
+
+	* misc-proto.h: Add prototype for auth_encrypt_user().
+
+	* misc.c: Include auth.h and encrypt.h for prototypes.
+
+	* misc.h: Add prototypes for isprfix(), genget(), Ambiguous().
+
+	* parsetos.c: Include stdlib.h for strtol() prototype.
+
+	* forward.c, kerberos.c, setenv.c: Assignment in conditional cleanup.
+
 2001-04-03  Tom Yu  <tlyu@mit.edu>
 
 	* configure.in: Check for setenv, unsetenv, and getenv.  Compile

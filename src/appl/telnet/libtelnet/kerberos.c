@@ -106,13 +106,17 @@
 #include "auth.h"
 #include "misc.h"
 
-extern auth_debug_mode;
+extern int auth_debug_mode;
 extern krb5_context telnet_context;
+
+int kerberos4_cksum P((unsigned char *, int));
 
 static unsigned char str_data[1024] = { IAC, SB, TELOPT_AUTHENTICATION, 0,
 			  		AUTHTYPE_KERBEROS_V4, };
+#if 0
 static unsigned char str_name[1024] = { IAC, SB, TELOPT_AUTHENTICATION,
 					TELQUAL_NAME, };
+#endif
 
 #define	KRB_AUTH	0		/* Authentication data follows */
 #define	KRB_REJECT	1		/* Rejected (reason might follow) */
@@ -127,7 +131,6 @@ static	char name[ANAME_SZ];
 static	AUTH_DAT adat = { 0 };
 #ifdef	ENCRYPTION
 static Block	session_key	= { 0 };
-static Schedule sched;
 static krb5_keyblock krbkey;
 static Block	challenge	= { 0 };
 #endif	/* ENCRYPTION */
@@ -219,7 +222,7 @@ kerberos4_send(ap)
 
 	memset(instance, 0, sizeof(instance));
 
-	if (realm = krb_get_phost(RemoteHostName))
+	if ((realm = krb_get_phost(RemoteHostName)))
 		strncpy(instance, realm, sizeof(instance));
 
 	instance[sizeof(instance)-1] = '\0';
@@ -230,11 +233,11 @@ kerberos4_send(ap)
 		printf("Kerberos V4: no realm for %s\r\n", RemoteHostName);
 		return(0);
 	}
-	if (r = krb_mk_req(&auth, KRB_SERVICE_NAME, instance, realm, 0)) {
+	if ((r = krb_mk_req(&auth, KRB_SERVICE_NAME, instance, realm, 0))) {
 		printf("mk_req failed: %s\r\n", krb_err_txt[r]);
 		return(0);
 	}
-	if (r = krb_get_cred(KRB_SERVICE_NAME, instance, realm, &cred)) {
+	if ((r = krb_get_cred(KRB_SERVICE_NAME, instance, realm, &cred))) {
 		printf("get_cred failed: %s\r\n", krb_err_txt[r]);
 		return(0);
 	}
@@ -261,15 +264,15 @@ kerberos4_send(ap)
 		data.data = cred.session;
 		data.length = 8; /* sizeof(cred.session) */;
 
-		if (code = krb5_c_random_seed(telnet_context, &data)) {
+		if ((code = krb5_c_random_seed(telnet_context, &data))) {
 		    com_err("libtelnet", code,
 			    "while seeding random number generator");
 		    return(0);
 		}
 
-		if (code = krb5_c_make_random_key(telnet_context,
-						  ENCTYPE_DES_CBC_RAW,
-						  &random_key)) {
+		if ((code = krb5_c_make_random_key(telnet_context,
+						   ENCTYPE_DES_CBC_RAW,
+						   &random_key))) {
 		    com_err("libtelnet", code,
 			    "while creating random session key");
 		    return(0);
@@ -327,8 +330,8 @@ kerberos4_send(ap)
 		encdata.ciphertext.length = 8;
 		encdata.enctype = ENCTYPE_UNKNOWN;
 
-		if (code = krb5_c_encrypt(telnet_context, &krbkey, 0, 0, &data,
-					  &encdata)) {
+		if ((code = krb5_c_encrypt(telnet_context, &krbkey, 0, 0, 
+					   &data, &encdata))) {
 		    com_err("libtelnet", code, "while encrypting random key");
 		    return(0);
 		}
@@ -380,8 +383,8 @@ kerberos4_is(ap, data, cnt)
 			printf("\r\n");
 		}
 		instance[0] = '*'; instance[1] = 0;
-		if (r = krb_rd_req(&auth, KRB_SERVICE_NAME,
-				   instance, 0, &adat, "")) {
+		if ((r = krb_rd_req(&auth, KRB_SERVICE_NAME,
+				    instance, 0, &adat, ""))) {
 			if (auth_debug_mode)
 				printf("Kerberos failed him as %s\r\n", name);
 			Data(ap, KRB_REJECT, (void *)krb_err_txt[r], -1);
@@ -423,7 +426,7 @@ kerberos4_is(ap, data, cnt)
 		kdata.data = session_key;
 		kdata.length = 8;
 
-		if (code = krb5_c_random_seed(telnet_context, &kdata)) {
+		if ((code = krb5_c_random_seed(telnet_context, &kdata))) {
 		    com_err("libtelnet", code,
 			    "while seeding random number generator");
 		    return;
@@ -446,8 +449,8 @@ kerberos4_is(ap, data, cnt)
 		encdata.ciphertext.length = 8;
 		encdata.enctype = ENCTYPE_UNKNOWN;
 
-		if (code = krb5_c_encrypt(telnet_context, &krbkey, 0, 0,
-					  &kdata, &encdata)) {
+		if ((code = krb5_c_encrypt(telnet_context, &krbkey, 0, 0,
+					   &kdata, &encdata))) {
 		    com_err("libtelnet", code, "while encrypting random key");
 		    return;
 		}
@@ -467,8 +470,8 @@ kerberos4_is(ap, data, cnt)
 		kdata.data = challenge;
 		kdata.length = 8;
 
-		if (code = krb5_c_decrypt(telnet_context, &krbkey, 0, 0, 
-					  &encdata, &kdata)) {
+		if ((code = krb5_c_decrypt(telnet_context, &krbkey, 0, 0, 
+					   &encdata, &kdata))) {
 		    com_err("libtelnet", code, "while decrypting challenge");
 		    return;
 		}
@@ -488,8 +491,8 @@ kerberos4_is(ap, data, cnt)
 		encdata.ciphertext.length = 8;
 		encdata.enctype = ENCTYPE_UNKNOWN;
 
-		if (code = krb5_c_encrypt(telnet_context, &krbkey, 0, 0,
-					  &kdata, &encdata)) {
+		if ((code = krb5_c_encrypt(telnet_context, &krbkey, 0, 0,
+					   &kdata, &encdata))) {
 		    com_err("libtelnet", code, "while decrypting challenge");
 		    return;
 		}
@@ -550,8 +553,8 @@ kerberos4_reply(ap, data, cnt)
 			encdata.ciphertext.length = 8;
 			encdata.enctype = ENCTYPE_UNKNOWN;
 
-			if (code = krb5_c_encrypt(telnet_context, &krbkey,
-						  0, 0, &kdata, &encdata)) {
+			if ((code = krb5_c_encrypt(telnet_context, &krbkey,
+						   0, 0, &kdata, &encdata))) {
 				com_err("libtelnet", code,
 					"while encrypting session_key");
 				return;

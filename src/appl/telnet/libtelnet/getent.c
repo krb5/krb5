@@ -33,9 +33,12 @@
 
 /* based on @(#)getent.c	8.1 (Berkeley) 6/4/93 */
 
+#ifdef	HAVE_CGETENT
 static char *area;
+#endif
 
 /*ARGSUSED*/
+int
 getent(cp, name)
 char *cp, *name;
 {

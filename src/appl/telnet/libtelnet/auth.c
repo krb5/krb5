@@ -65,6 +65,7 @@
 #include <arpa/telnet.h>
 #ifdef	__STDC__
 #include <stdlib.h>
+#include <unistd.h>
 #endif
 #ifdef	HAVE_STRING_H
 #include <string.h>
@@ -468,7 +469,7 @@ auth_is(data, cnt)
 		return;
 	}
 
-	if (ap = findauthenticator(data[0], data[1])) {
+	if ((ap = findauthenticator(data[0], data[1]))) {
 		if (ap->is)
 			(*ap->is)(ap, data+2, cnt-2);
 	} else if (auth_debug_mode)
@@ -486,7 +487,7 @@ auth_reply(data, cnt)
 	if (cnt < 2)
 		return;
 
-	if (ap = findauthenticator(data[0], data[1])) {
+	if ((ap = findauthenticator(data[0], data[1]))) {
 		if (ap->reply)
 			(*ap->reply)(ap, data+2, cnt-2);
 	} else if (auth_debug_mode)
