@@ -1,3 +1,12 @@
+2004-06-18  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (OBJFILELIST, OBJFILEDEP) [DOS]: Depend on locally
+	built objects too.
+	(OBJFILE, LIBOBJS) [DOS]: Define.
+	($(BUILDTOP)/include/gssapi/gssapi.h generic/gssapi.h
+	krb5/gssapi_err_krb5.h generic/gssapi_err_generic.h
+	krb5/gssapi_krb5.h) [DOS]: Disable dependencies on Windows.
+
 2004-06-16  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (MAC_SUBDIRS): Don't set.

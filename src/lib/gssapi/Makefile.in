@@ -5,8 +5,11 @@ BUILDTOP=$(REL)..$(S)..
 LOCAL_SUBDIRS= generic krb5
 
 ##DOSLIBNAME=$(OUTPRE)gssapi.lib
-##DOSOBJFILELIST=@$(OUTPRE)generic.lst @$(OUTPRE)krb5.lst
-##DOSOBJFILEDEP=$(OUTPRE)generic.lst $(OUTPRE)krb5.lst
+##DOSOBJFILELIST=@$(OUTPRE)generic.lst @$(OUTPRE)krb5.lst @$(OUTPRE)gssapi.lst
+##DOSOBJFILEDEP=$(OUTPRE)generic.lst $(OUTPRE)krb5.lst $(OUTPRE)gssapi.lst
+
+##DOSOBJFILE=$(OUTPRE)gssapi.lst
+##DOSLIBOBJS=$(OBJS)
 
 ##DOS##DLL_EXP_TYPE=GSS
 
@@ -105,8 +108,11 @@ clean-windows::
 # repeated rebuilds in certain cases.  With the no-op command, it
 # appears to be properly serializing the subdir processing and local
 # compiles... so far.
+##DOS##!if 0
 $(BUILDTOP)/include/gssapi/gssapi.h generic/gssapi.h krb5/gssapi_err_krb5.h generic/gssapi_err_generic.h krb5/gssapi_krb5.h: all-recurse
 	: $@ updated by recursion rule
+##DOS##!endif
+
 
 # @lib_frag@
 # @libobj_frag@
