@@ -4,7 +4,7 @@
 TST=if test -n "`cat DONE`" ; then
 
 LIB_SUBDIRS= error_tables asn.1 ccache ccache/stdio ccache/file \
-	keytab keytab/file krb rcache free os posix
+	keytab keytab/file krb rcache free os posix $(BUILDTOP)/util/profile
 LIBUPDATE= $(BUILDTOP)/util/libupdate
 
 all:: all-$(WHAT)
@@ -19,7 +19,8 @@ libkrb5_ranlib: libkrb5.a
 
 libkrb5.a: error_tables/DONE asn.1/DONE ccache/DONE ccache/stdio/DONE \
 		ccache/file/DONE keytab/DONE keytab/file/DONE krb/DONE \
-		rcache/DONE free/DONE os/DONE posix/DONE
+		rcache/DONE free/DONE os/DONE posix/DONE \
+		$(BUILDTOP)/util/profile/DONE
 	if test -f $@ ; then \
 		for i in $(LIB_SUBDIRS) ; \
 		do \
