@@ -1,3 +1,7 @@
+Tue May 30 17:38:47 1995 Keith Vetter (keithv@fusion.com)
+
+	* libkrb5.def: added missing kadm routine name.
+
 Tue May 30 10:21:21 1995 Keith Vetter (keithv@fusion.com)
 
 	* libkrb5.def: added kadm exported routines.
