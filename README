@@ -1,5 +1,5 @@
 
-		  Kerberos Version 5, Release 1.2.7
+		  Kerberos Version 5, Release 1.2.8
 
 			    Release Notes
 
@@ -9,7 +9,7 @@ Unpacking the Source Distribution
 ---------------------------------
 
 The source distribution of Kerberos 5 comes in a gzipped tarfile,
-krb5-1.2.7.tar.gz.  Instruction on how to extract the entire
+krb5-1.2.8.tar.gz.  Instruction on how to extract the entire
 distribution follow.  These directions assume that you want to extract
 into a directory called DIST.
 
@@ -17,17 +17,17 @@ If you have the GNU tar program and gzip installed, you can simply do:
 
 	mkdir DIST
 	cd DIST
-	gtar zxpf krb5-1.2.7.tar.gz
+	gtar zxpf krb5-1.2.8.tar.gz
 
 If you don't have GNU tar, you will need to get the FSF gzip
 distribution and use gzcat:
 
 	mkdir DIST
 	cd DIST
-	gzcat krb5-1.2.7.tar.gz | tar xpf -
+	gzcat krb5-1.2.8.tar.gz | tar xpf -
 
-Both of these methods will extract the sources into DIST/krb5-1.2.7/src
-and the documentation into DIST/krb5-1.2.7/doc.
+Both of these methods will extract the sources into DIST/krb5-1.2.8/src
+and the documentation into DIST/krb5-1.2.8/doc.
 
 Building and Installing Kerberos 5
 ----------------------------------
@@ -59,6 +59,29 @@ V5 (or if you have installed one of our binary distributions).
 If you are not able to use krb5-send-pr because you haven't been able
 compile and install Kerberos V5 on any platform, you may send mail to
 krb5-bugs@mit.edu.
+
+Notes, Major Changes, and Known Bugs for 1.2.8
+----------------------------------------------
+
+Notes:
+
+* This release includes several significant security patches.  Please
+  see http://web.mit.edu/kerberos/www/advisories/index.html for
+  security advisories.
+
+Major Changes:
+
+* [1402, 1385, 1395, 1410, 1411] The krb4 protocol vulnerabilities
+  [MITKRB5-SA-2003-004] have been worked around.  Note that this will
+  disable krb4 cross-realm functionality, as well as krb4 triple-DES
+  functionality.  Please see doc/krb4-xrealm.txt for details of the
+  patch.
+
+* [1403, 1393] The xdrmem integer overflows [MITKRB5-SA-2003-003] have
+  been fixed.
+
+* [1405, 1397] The krb5_principal buffer bounds problems
+  [MITKRB5-SA-2003-005] have been fixed.  Thanks to Nalin Dahyabhai.
 
 Notes, Major Changes, and Known Bugs for 1.2.7
 ----------------------------------------------
