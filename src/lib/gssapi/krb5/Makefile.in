@@ -93,7 +93,7 @@ OBJS = \
 	util_crypt.$(OBJEXT) \
 	util_seed.$(OBJEXT) \
 	util_seqnum.$(OBJEXT) \
-	val_cred.$(OBJECT) \
+	val_cred.$(OBJEXT) \
 	verify.$(OBJEXT) \
 	wrap_size_limit.$(OBJEXT) \
 	gssapi_err_krb5.$(OBJEXT)

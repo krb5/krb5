@@ -1,3 +1,8 @@
+Mon Dec 29 10:30:43 1997  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* Makefile.in (OBJS): Changed val_cred.$(OBJECT) to
+	        val_cred.$(OBJEXT) for windows building.
+
 Sun Dec  7 10:42:32 1997  Ezra Peisach  <epeisach@mit.edu>
 
 	* val_cred.c (krb5_gss_validate_cred): Free principal extracted
