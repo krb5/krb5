@@ -1,3 +1,8 @@
+2001-02-02  Tom Yu  <tlyu@mit.edu>
+
+	* krb5.conf: Test with trailing whitespace on "default_realm"
+	line.
+
 2000-11-01  Ezra Peisach  <epeisach@mit.edu>
 
 	* configure.in: Use AC_C_CONST instead of AC_CONST and
