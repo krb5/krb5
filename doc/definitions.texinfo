@@ -108,7 +108,7 @@ krb5/src/lib/kadm5/alt_prof.c
 @comment line 622
 @set DefaultDefaultPrincipalExpiration 0 
 @comment line 639
-@set DefaultSupportedEnctypes aes256-cts-hmac-sha1:normal des3-hmac-sha1:normal des-cbc-crc:normal
+@set DefaultSupportedEnctypes des3-hmac-sha1:normal des-cbc-crc:normal
 @comment line 705
 
 @ignore

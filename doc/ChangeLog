@@ -1,3 +1,7 @@
+2003-05-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* definitions.texinfo: Updated DefaultSupportedEnctypes.
+
 2003-05-12  Sam Hartman  <hartmans@mit.edu>
 
 	* definitions.texinfo: Default v4 mode is now none
