@@ -1201,7 +1201,7 @@ process_k5_record(fname, kcontext, filep, verbose, linenop)
     nread = fscanf(filep, "%d\t%d\t%d\t%d\t%d\t", &t1, &t2, &t3, &t4, &t5);
     if (nread == 5) {
 	/* Get memory for flattened principal name */
-	if (!(name = (char *) malloc((size_t) t2)))
+	if (!(name = (char *) malloc((size_t) t2 + 1)))
 	    error++;
 
 	/* Get memory for and form tagged data linked list */
