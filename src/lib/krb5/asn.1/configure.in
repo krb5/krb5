@@ -1,17 +1,20 @@
 AC_INIT(configure.in)
 WITH_CCOPTS
-CONFIG_RULES
+WITH_CC dnl since we're not doing CONFIG_RULES
+dnl CONFIG_RULES
 AC_SET_BUILDTOP
 SubdirLibraryRule([${OBJS}])
 AC_ENABLE([isode],[
 UsePepsy
 PepsyTarget(KRB5)
-cp ${srcdir}/Makefile.in.isode Makefile.in],[
+ISODEMAKEFILE=Makefile.isode],[
+ISODEMAKEFILE=Makefile.sane
 PEPSY='@echo'
 PSYFLAGS='not using pepsy'
 AC_SUBST(PEPSY)dnl
 AC_SUBST(PSYFLAGS)dnl
-cp ${srcdir}/Makefile.in.sane Makefile.in])
+])
+AC_SUBST(ISODEMAKEFILE)
 CopyHeader(KRB5-types.h,[$(EHDRDIR)])
 CopyHeader(KRB5_defs.h,[$(EHDRDIR)])
 CopyHeader(KRB5_pre_defs.h,[$(EHDRDIR)])
@@ -20,10 +23,10 @@ dnl
 dnl ok this is broken but necessary because we're using autoconf
 dnl ...and we can't conditionalize the generation of make rules
 dnl
-CopyHeader(krb5_encode.h,[$(EHDRDIR)])
-CopyHeader(krb5_decode.h,[$(EHDRDIR)])
+CopySrcHeader(krb5_encode.h,[$(EHDRDIR)])
+CopySrcHeader(krb5_decode.h,[$(EHDRDIR)])
 Krb5InstallHeaders(krb5_encode.h krb5_decode.h, [$(KRB5_INCDIR)/krb5/asn.1])
 KRB_INCLUDE
 ISODE_INCLUDE
 WITH_KRB5ROOT
-AC_OUTPUT(Makefile,[EXTRA_RULES])
+AC_OUTPUT(Makefile Makefile.isode Makefile.sane,[EXTRA_RULES_IN($ISODEMAKEFILE)])
