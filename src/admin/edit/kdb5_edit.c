@@ -112,7 +112,6 @@ char *argv[];
     char defrealm[BUFSIZ];
     int keytypedone = 0;
     krb5_enctype etype = -1;
-    register krb5_cryptosystem_entry *csentry;
     int sci_idx, code;
     extern krb5_kt_ops krb5_ktf_writable_ops;
     char	*request = NULL;
@@ -179,8 +178,7 @@ char *argv[];
 		"while setting up etype %d", etype);
 	exit(1);
     }
-    master_encblock.crypto_entry = krb5_csarray[etype]->system;
-    csentry = master_encblock.crypto_entry;
+    krb5_use_cstype(&master_encblock, etype);
 
     if (!dbname)
 	dbname = DEFAULT_DBM_FILE;	/* XXX? */
@@ -208,8 +206,8 @@ char *argv[];
 		    ss_perror(sci_idx, code, request);
     } else
 	    ss_listen(sci_idx, &retval);
-    (void) (*csentry->finish_key)(&master_encblock);
-    (void) (*csentry->finish_random_key)(&master_random);
+    (void) krb5_finish_key(&master_encblock);
+    (void) krb5_finish_random_key(&master_encblock, &master_random);
     retval = krb5_db_fini();
     memset((char *)master_keyblock.contents, 0, master_keyblock.length);
     if (retval && retval != KRB5_KDB_DBNOTINITED) {
@@ -344,7 +342,7 @@ OLDDECLARG(krb5_kvno, vno)
 	com_err(argv[0], retval, "while encrypting key for '%s'", argv[1]);
 	return;
     }
-    newentry.principal = principal;
+    newentry.principal = (krb5_principal) principal;
     newentry.kvno = vno;
     newentry.max_life = mblock.max_life;
     newentry.max_renewable_life = mblock.max_rlife;
@@ -379,9 +377,6 @@ int sci_idx;
 krb5_pointer infop;
 {
     krb5_error_code retval;
-    register krb5_cryptosystem_entry *csentry;
-
-    csentry = master_encblock.crypto_entry;
 
     if (argc < 3) {
 	com_err(argv[0], 0, "Too few arguments");
@@ -393,8 +388,8 @@ krb5_pointer infop;
 	    com_err(argv[0], retval, "while closing previous database");
 	    return;
 	}
-	(void) (*csentry->finish_key)(&master_encblock);
-	(void) (*csentry->finish_random_key)(&master_random);
+	(void) krb5_finish_key(&master_encblock);
+	(void) krb5_finish_random_key(&master_encblock, &master_random);
 	krb5_free_principal(master_princ);
 	dbactive = FALSE;
     }
@@ -418,9 +413,6 @@ char *dbname;
     krb5_error_code retval;
     int nentries;
     krb5_boolean more;
-    register krb5_cryptosystem_entry *csentry;
-
-    csentry = master_encblock.crypto_entry;
 
     if (retval = krb5_db_set_name(dbname)) {
 	com_err(pname, retval, "while setting active database to '%s'",
@@ -467,16 +459,17 @@ char *dbname;
 	return(1);
     }
 
-    if (retval = (*csentry->process_key)(&master_encblock,
-					 &master_keyblock)) {
+    if (retval = krb5_process_key(&master_encblock,
+				  &master_keyblock)) {
 	com_err(pname, retval, "while processing master key");
 	(void) krb5_db_fini();
 	return(1);
     }
-    if (retval = (*csentry->init_random_key)(&master_keyblock,
-					     &master_random)) {
+    if (retval = krb5_init_random_key(&master_encblock,
+				      &master_keyblock,
+				      &master_random)) {
 	com_err(pname, retval, "while initializing random key generator");
-	(void) (*csentry->finish_key)(&master_encblock);
+	(void) krb5_finish_key(&master_encblock);
 	(void) krb5_db_fini();
 	return(1);
     }
