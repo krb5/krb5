@@ -487,7 +487,7 @@ int main(int argc, char *argv[])
 void kadm_svc_run(void)
 {
      fd_set	rfd;
-     int	sz = _rpc_dtablesize();
+     int	sz = _gssrpc_rpc_dtablesize();
      struct	timeval	    timeout;
      
      while(signal_request_exit == 0) {

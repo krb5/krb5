@@ -1,3 +1,8 @@
+Sat Feb 14 22:01:30 1998  Tom Yu  <tlyu@mit.edu>
+
+	* ovsec_kadmd.c (kadm_svc_run): Fix naming of _rpc_dtablesize()
+	that was missed earlier.
+
 Fri Feb 13 21:37:28 1998  Tom Yu  <tlyu@mit.edu>
 
 	* kadm_rpc_svc.c: Punt naughty RCS keywords.  Update header
