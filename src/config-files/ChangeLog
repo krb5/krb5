@@ -1,3 +1,8 @@
+2003-06-27  Jen Selby <jenselby@mit.edu>
+
+	* kdc.conf.M: replaced the @LOCALSTATEDIR typos with
+	/usr/local/var
+
 2003-06-20  Tom Yu  <tlyu@mit.edu>
 
 	* krb5.conf.M: Sync with doc/krb5conf.texinfo.
