@@ -26,6 +26,7 @@
 
 #define NEED_SOCKETS
 #include "k5-int.h"
+#include "auth_con.h"
 #include "com_err.h"
 #include <errno.h>
 #include <stdio.h>
@@ -36,37 +37,29 @@ extern krb5_flags	krb5_kdc_default_options;
 static char *sendauth_version = "KRB5_SENDAUTH_V1.0";
 
 krb5_error_code INTERFACE
-krb5_recvauth(context, 
+krb5_recvauth(context, auth_context,
 	      /* IN */
-	      fd, appl_version, server, sender_addr, fetch_from,
-	      keyproc, keyprocarg, rc_type, flags,
+	      fd, appl_version, server, rc_type, flags, keytab,
 	      /* OUT */
-	      seq_number, client, ticket, authent)
-    	krb5_context context;
-	krb5_pointer	fd;
-	char	*appl_version;
-	krb5_principal	server;
-	krb5_address	*sender_addr;
-	krb5_pointer	fetch_from;
-	krb5_int32	*seq_number;
-	char		*rc_type;
-	krb5_int32	flags;
-	krb5_rdreq_key_proc keyproc;
-	krb5_pointer keyprocarg;
-	krb5_principal	*client;
-	krb5_ticket	**ticket;
-	krb5_authenticator	**authent;
+	      ticket)
+    krb5_context 	  context;
+    krb5_auth_context  ** auth_context;
+    krb5_pointer	  fd;
+    char		* appl_version;
+    krb5_principal	  server;
+    char		* rc_type;
+    krb5_int32		  flags;
+    krb5_keytab		  keytab;
+    krb5_ticket	       ** ticket;
 {
-	krb5_error_code		retval, problem;
-	krb5_data		inbuf;
-	krb5_tkt_authent	*authdat;
-	krb5_data		outbuf;
-	krb5_rcache 		rcache;
-	krb5_octet		response;
-	krb5_data		*server_name, null_server;
-	char			*cachename;
-	extern krb5_deltat krb5_clockskew;
-	static char		*rc_base = "rc_";
+    krb5_flags		  ap_option;
+    krb5_error_code	  retval, problem;
+    krb5_data		  inbuf;
+    krb5_data		  outbuf;
+    krb5_rcache 	  rcache;
+    krb5_octet		  response;
+    krb5_data		  null_server;
+    extern krb5_deltat 	  krb5_clockskew;
 	
 	/*
 	 * Zero out problem variable.  If problem is set at the end of
@@ -133,71 +126,60 @@ krb5_recvauth(context,
 	 * Now we actually write the response.  If the response is non-zero,
 	 * exit with a return value of problem
 	 */
-	if ((krb5_net_write(context, *((int *) fd), (char *)&response, 1)) < 0) {
+	if ((krb5_net_write(context, *((int *)fd), (char *)&response, 1)) < 0) {
 		return(problem); /* We'll return the top-level problem */
 	}
 	if (problem)
 		return(problem);
-	rcache = NULL;
 	/*
 	 * Setup the replay cache.
 	 */
-	if (!(rcache = (krb5_rcache) malloc(sizeof(*rcache)))) 
-		problem = ENOMEM;
-	if (!problem) 
-		problem = krb5_rc_resolve_type(context, &rcache,
-					       rc_type ? rc_type : "dfl");
-	cachename = NULL;
 	if (server) {
-	    server_name = krb5_princ_component(context, server, 0);
+	    problem = krb5_get_server_rcache(context, 
+			krb5_princ_component(context, server, 0), &rcache);
 	} else {
-	    null_server.data = "default";
 	    null_server.length = 7;
-	    server_name = &null_server;
+	    null_server.data = "default";
+	    problem = krb5_get_server_rcache(context, &null_server, &rcache);
 	}
-	
-	if (!problem && !(cachename = malloc(server_name->length+1+strlen(rc_base))))
-	    problem = ENOMEM;
-	if (!problem) {
-	    strcpy(cachename, rc_base ? rc_base : "rc_");
-	    strncat(cachename, server_name->data, server_name->length);
-	    cachename[server_name->length+strlen(rc_base)] = '\0';
-	    problem = krb5_rc_resolve(context, rcache, cachename);
+
+    if (!problem) {
+	if (krb5_rc_recover(context, rcache)) {
+	    /*
+	     * If the rc_recover() didn't work, then try
+	     * initializing the replay cache.
+	     */
+	    if (krb5_rc_initialize(context, rcache, krb5_clockskew)) {
+	        krb5_rc_close(context, rcache);
+		rcache = NULL;
+	    }
 	}
-	if (!problem) {
-		if (krb5_rc_recover(context, rcache))
-			/*
-			 * If the rc_recover didn't work, then try
-			 * initializing the replay cache.
-			 */
-			problem = krb5_rc_initialize(context, rcache, krb5_clockskew);
-		if (problem) {
-			krb5_rc_close(context, rcache);
-			rcache = NULL;
-		}
-	}
+    }
 
 	/*
 	 * Now, let's read the AP_REQ message and decode it
 	 */
 	if (retval = krb5_read_message(context, fd, &inbuf)) {
+		if (rcache)
 		(void) krb5_rc_close(context, rcache);
-		if (cachename)
-			free(cachename);
 		return(retval);
 	}
-	authdat = 0;			/* so we can tell if we need to
-					   free it later... */
+
+	if (*auth_context == NULL) {
+		if (retval = krb5_auth_con_init(context, auth_context))
+			return(retval);
+	}
+
+	krb5_auth_con_setrcache(context, *auth_context, rcache);
+
 	if (!problem)
-		problem = krb5_rd_req(context, &inbuf, server, sender_addr, fetch_from,
-				      keyproc, keyprocarg, rcache, &authdat);
+		problem = krb5_rd_req(context, auth_context, &inbuf, server,
+				      keytab, &ap_option, ticket);
 	krb5_xfree(inbuf.data);
 	if (rcache)
 	    retval = krb5_rc_close(context, rcache);
 	if (!problem && retval)
 		problem = retval;
-	if (cachename)
-		free(cachename);
 	
 	/*
 	 * If there was a problem, send back a krb5_error message,
@@ -231,86 +213,22 @@ krb5_recvauth(context,
 	if (retval = krb5_write_message(context, fd, &outbuf)) {
 		if (outbuf.data)
 			krb5_xfree(outbuf.data);
-		if (!problem)
-			krb5_free_tkt_authent(context, authdat);
 		return(retval);
 	}
 	if (problem) {
 		/*
 		 * We sent back an error, we need to return
 		 */
-		if (authdat) krb5_free_tkt_authent(context, authdat);
 		return(problem);
 	}
-	/*
-	 * Here lies the mutual authentication stuff...
-	 *
-	 * We're going to compose and send a AP_REP message.
-	 */
-	if ((authdat->ap_options & AP_OPTS_MUTUAL_REQUIRED)) {
-		krb5_ap_rep_enc_part	repl;
 
-		/*
-		 * Generate a random sequence number
-		 */
-		if (seq_number &&
-		    (retval = krb5_generate_seq_number(context,
-			authdat->ticket->enc_part2->session, seq_number))) {
-		    krb5_free_tkt_authent(context, authdat);
-		    return(retval);
-		}
-
-		repl.ctime = authdat->authenticator->ctime;
-		repl.cusec = authdat->authenticator->cusec;
-		repl.subkey = authdat->authenticator->subkey;
-		if (seq_number)
-		    repl.seq_number = *seq_number;
-		else
-		    repl.seq_number = 0;
-
-		if (retval = krb5_mk_rep(context, &repl,
-					 authdat->ticket->enc_part2->session,
-					 &outbuf)) {
-			krb5_free_tkt_authent(context, authdat);
-			return(retval);
-		}
-		if (retval = krb5_write_message(context, fd, &outbuf)) {
-			krb5_xfree(outbuf.data);
-			krb5_free_tkt_authent(context, authdat);
-			return(retval);
-		}
-		krb5_xfree(outbuf.data);
+    /* Here lies the mutual authentication stuff... */
+    if ((ap_option & AP_OPTS_MUTUAL_REQUIRED)) {
+	if (retval = krb5_mk_rep(context, *auth_context, &outbuf)) {
+	    return(retval);
 	}
-	/*
-	 * At this point, we've won.  We just need to copy whatever
-	 * parts of the authdat structure which the user wants, clean
-	 * up, and exit.
-	 */
-	if (client)
-	    if (retval =
-		krb5_copy_principal(context, authdat->ticket->enc_part2->client,
-				    client)) {
-		krb5_free_tkt_authent(context, authdat);
-		return(retval);
-	    }
-	/*
-	 * The following efficiency hack assumes knowledge about the
-	 * structure of krb5_tkt_authent.  If we later add additional
-	 * allocated substructures to krb5_tkt_authent, they will have
-	 * to be reflected here; otherwise, we will probably have a
-	 * memory leak.
-	 *
-	 * If the user wants that part of the authdat structure,
-	 * return it; otherwise free it.
-	 */
-	if (ticket)
-		*ticket = authdat->ticket;
-	else
-		krb5_free_ticket(context, authdat->ticket);
-	if (authent)
-		*authent = authdat->authenticator;
-	else
-		krb5_free_authenticator(context, authdat->authenticator);
-	krb5_xfree(authdat);
-	return 0;
+	retval = krb5_write_message(context, fd, &outbuf);
+	krb5_xfree(outbuf.data);
+    }
+    return retval;
 }

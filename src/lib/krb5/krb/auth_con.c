@@ -14,7 +14,8 @@ krb5_auth_con_init(context, auth_context)
 	(*auth_context)->auth_context_flags = 
 	  KRB5_AUTH_CONTEXT_DO_TIME |  KRB5_AUTH_CONN_INITIALIZED;
 
-	(*auth_context)->cksumtype = CKSUMTYPE_CRC32;
+	(*auth_context)->cksumtype = CKSUMTYPE_RSA_MD4_DES;
+	/* (*auth_context)->cksumtype = CKSUMTYPE_CRC32; */
 	return 0;
     }
     return ENOMEM;
@@ -61,13 +62,58 @@ krb5_auth_con_setkey(context, auth_context, keyblock)
     return(krb5_copy_keyblock(context, keyblock, &(auth_context->keyblock)));
 }
 
+/*
+ * This function overloads the keyblock field. It is only useful prior to
+ * a krb5_rd_req_decode() call for user to user authentication where the
+ * server has the key and needs to use it to decrypt the incoming request.
+ * Once decrypted this key is no longer necessary and is then overwritten
+ * with the session key sent by the client.
+ */
+krb5_error_code INTERFACE
+krb5_auth_con_setuseruserkey(context, auth_context, keyblock)
+    krb5_context      	  context;
+    krb5_auth_context 	* auth_context;
+    krb5_keyblock       * keyblock;		
+{
+    if (auth_context->keyblock)
+	krb5_free_keyblock(context, auth_context->keyblock);
+    return(krb5_copy_keyblock(context, keyblock, &(auth_context->keyblock)));
+}
+
+krb5_error_code INTERFACE
+krb5_auth_con_getkey(context, auth_context, keyblock)
+    krb5_context      	  context;
+    krb5_auth_context 	* auth_context;
+    krb5_keyblock      ** keyblock;		
+{
+    if (auth_context->keyblock)
+    	return krb5_copy_keyblock(context, auth_context->keyblock, keyblock);
+    *keyblock = NULL;
+    return 0;
+}
+
 krb5_error_code INTERFACE
 krb5_auth_con_getlocalsubkey(context, auth_context, keyblock)
     krb5_context      	  context;
     krb5_auth_context 	* auth_context;
     krb5_keyblock      ** keyblock;		
 {
-    return(krb5_copy_keyblock(context, auth_context->local_subkey, keyblock));
+    if (auth_context->local_subkey)
+    	return krb5_copy_keyblock(context,auth_context->local_subkey,keyblock);
+    *keyblock = NULL;
+    return 0;
+}
+
+krb5_error_code INTERFACE
+krb5_auth_con_getremotesubkey(context, auth_context, keyblock)
+    krb5_context      	  context;
+    krb5_auth_context 	* auth_context;
+    krb5_keyblock      ** keyblock;		
+{
+    if (auth_context->remote_subkey)
+    	return krb5_copy_keyblock(context,auth_context->remote_subkey,keyblock);
+    *keyblock = NULL;
+    return 0;
 }
 
 krb5_error_code INTERFACE
@@ -88,6 +134,44 @@ krb5_auth_con_getlocalseqnumber(context, auth_context, seqnumber)
 {
     *seqnumber = auth_context->local_seq_number;
     return 0;
+}
+
+krb5_error_code INTERFACE
+krb5_auth_con_getauthenticator(context, auth_context, authenticator)
+    krb5_context      	  context;
+    krb5_auth_context 	* auth_context;
+    krb5_authenticator ** authenticator;		
+{
+    return (krb5_copy_authenticator(context, auth_context->authentp,
+				    authenticator));
+}
+
+krb5_error_code INTERFACE
+krb5_auth_con_getremoteseqnumber(context, auth_context, seqnumber)
+    krb5_context      	  context;
+    krb5_auth_context 	* auth_context;
+    krb5_int32	  	* seqnumber;		
+{
+    *seqnumber = auth_context->remote_seq_number;
+    return 0;
+}
+
+krb5_error_code INTERFACE
+krb5_auth_con_initivector(context, auth_context)
+    krb5_context      	  context;
+    krb5_auth_context 	* auth_context;
+{
+    if (auth_context->keyblock) {
+	int size = krb5_keytype_array[auth_context->keyblock->keytype]->
+		      system->block_length;
+
+	if (auth_context->i_vector = (krb5_pointer)malloc(size)) {
+	    memset(auth_context->i_vector, 0, size);
+	    return 0;
+	}
+	return ENOMEM;
+    }
+    return EINVAL; /* XXX need an error for no keyblock */
 }
 
 krb5_error_code INTERFACE

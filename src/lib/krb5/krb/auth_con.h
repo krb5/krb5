@@ -12,9 +12,9 @@ struct _krb5_auth_context {
     krb5_int32		auth_context_flags;
     krb5_int32		remote_seq_number;
     krb5_int32		local_seq_number;
-    krb5_authenticator *authentp;		/* mk_req, rd_rep */
+    krb5_authenticator *authentp;		/* mk_req, rd_req, mk_rep, ...*/
     krb5_cksumtype	cksumtype;		/* mk_safe, ... */
-    krb5_pointer	i_vector;		/* mk_priv only */
+    krb5_pointer	i_vector;		/* mk_priv, rd_priv only */
     krb5_rcache		rcache;
 };
 

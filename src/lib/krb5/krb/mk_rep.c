@@ -25,12 +25,10 @@
  */
 
 #include "k5-int.h"
+#include "auth_con.h"
 
 /*
  Formats a KRB_AP_REP message into outbuf.
-
- The reply in repl is encrypted under the key in kblock, and the resulting
- message encoded and left in outbuf.
 
  The outbuf buffer storage is allocated, and should be freed by the
  caller when finished.
@@ -39,37 +37,54 @@
 */
 
 krb5_error_code INTERFACE
-krb5_mk_rep(context, repl, kblock, outbuf)
-    krb5_context context;
-    const krb5_ap_rep_enc_part *repl;
-    const krb5_keyblock *kblock;
-    krb5_data *outbuf;
+krb5_mk_rep(context, auth_context, outbuf)
+    krb5_context 	  context;
+    krb5_auth_context	* auth_context;
+    krb5_data 		* outbuf;
 {
-    krb5_error_code retval;
-    krb5_data *scratch;
-    krb5_ap_rep reply;
-    krb5_enctype etype;
-    krb5_encrypt_block eblock;
-    krb5_data *toutbuf;
+    krb5_error_code 	  retval;
+    krb5_keyblock	* keyblock;
+    krb5_keytype 	  keytype;
+    krb5_enctype 	  etype;
+    krb5_ap_rep_enc_part  repl;
+    krb5_encrypt_block 	  eblock;
+    krb5_ap_rep 	  reply;
+    krb5_data 		* scratch;
+    krb5_data 		* toutbuf;
+
+    if (auth_context->remote_subkey)
+	keyblock = auth_context->remote_subkey;
+    else
+	keyblock = auth_context->keyblock;
 
     /* verify a valid etype is available */
-    if (!valid_keytype(kblock->keytype))
+    if (!valid_keytype(keytype = keyblock->keytype))
 	return KRB5_PROG_KEYTYPE_NOSUPP;
 
-    etype = krb5_keytype_array[kblock->keytype]->system->proto_enctype;
+    etype = krb5_keytype_array[keytype]->system->proto_enctype;
 
     if (!valid_etype(etype))
 	return KRB5_PROG_ETYPE_NOSUPP;
 
+    /* Make the reply */
+    if (((auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_DO_SEQUENCE) ||
+	(auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_RET_SEQUENCE)) &&
+	(auth_context->local_seq_number == 0)) {
+	if (retval = krb5_generate_seq_number(context, keyblock,
+                                              &auth_context->local_seq_number))
+            return(retval);
+    }
+
+    repl.ctime = auth_context->authentp->ctime;    
+    repl.cusec = auth_context->authentp->cusec;    
+    repl.subkey = auth_context->authentp->subkey;    
+    repl.seq_number = auth_context->local_seq_number;
+
     /* encode it before encrypting */
-    if (retval = encode_krb5_ap_rep_enc_part(repl, &scratch))
+    if (retval = encode_krb5_ap_rep_enc_part(&repl, &scratch))
 	return retval;
 
-#define cleanup_scratch() { (void) memset(scratch->data, 0, scratch->length); \
-krb5_free_data(context, scratch); }
-
     /* put together an eblock for this encryption */
-
     krb5_use_cstype(context, &eblock, etype);
     reply.enc_part.etype = etype;
     reply.enc_part.kvno = 0;		/* XXX user set? */
@@ -88,50 +103,38 @@ krb5_free_data(context, scratch); }
     if (!(reply.enc_part.ciphertext.data =
 	  malloc(reply.enc_part.ciphertext.length))) {
 	retval = ENOMEM;
-	goto clean_scratch;
+	goto cleanup_scratch;
     }
-
-#define cleanup_encpart() {\
-(void) memset(reply.enc_part.ciphertext.data, 0,\
-	     reply.enc_part.ciphertext.length); \
-free(reply.enc_part.ciphertext.data); \
-reply.enc_part.ciphertext.length = 0; reply.enc_part.ciphertext.data = 0;}
 
     /* do any necessary key pre-processing */
-    if (retval = krb5_process_key(context, &eblock, kblock)) {
-	goto clean_encpart;
-    }
-
-#define cleanup_prockey() {(void) krb5_finish_key(context, &eblock);}
+    if (retval = krb5_process_key(context, &eblock, keyblock)) 
+	goto cleanup_encpart;
 
     /* call the encryption routine */
     if (retval = krb5_encrypt(context, (krb5_pointer) scratch->data,
 			      (krb5_pointer) reply.enc_part.ciphertext.data,
 			      scratch->length, &eblock, 0)) {
-	goto clean_prockey;
+	krb5_finish_key(context, &eblock);
+	goto cleanup_encpart;
     }
 
-    /* encrypted part now assembled-- do some cleanup */
-    cleanup_scratch();
-
-    if (retval = krb5_finish_key(context, &eblock)) {
-	cleanup_encpart();
-	return retval;
-    }
+    if (retval = krb5_finish_key(context, &eblock)) 
+	goto cleanup_encpart;
 
     if (!(retval = encode_krb5_ap_rep(&reply, &toutbuf))) {
 	*outbuf = *toutbuf;
 	krb5_xfree(toutbuf);
     }
-    cleanup_encpart();
-    return retval;
 
- clean_prockey:
-    cleanup_prockey();
- clean_encpart:
-    cleanup_encpart();
- clean_scratch:
-    cleanup_scratch();
+cleanup_encpart:
+    memset(reply.enc_part.ciphertext.data, 0, reply.enc_part.ciphertext.length);
+    free(reply.enc_part.ciphertext.data); 
+    reply.enc_part.ciphertext.length = 0; 
+    reply.enc_part.ciphertext.data = 0;
+
+cleanup_scratch:
+    memset(scratch->data, 0, scratch->length); 
+    krb5_free_data(context, scratch);
 
     return retval;
 }

@@ -1,8 +1,46 @@
+
+Mon Mar 27 08:34:49 1995 Chris Provenzano (proven@mit.edu)
+
+	* Makefile.in: Removed rd_req_sim.c
+
+	* auth_con.c: Default cksumtype is now CKSUMTYPE_RSA_MD4_DES.
+
+	* auth_con.c: Added krb5_auth_con_setuseruserkey(), 
+		krb5_auth_con_getkey(), 
+		krb5_auth_con_getremotesubkey(),
+		krb5_auth_con_getauthenticator(), 
+		krb5_auth_con_getremoteseqnumber(),
+		krb5_auth_con_initivector().
+
+	* auth_con.c: Fixed krb5_auth_con_getlocalsubkey() to check for
+		a valid local_subkey before calling krb5_copy_keyblock().
+
+	* auth_con.h: Fixed some comments.
+
+	* mk_req_ext.c (krb5_mk_req_extended()): Always pass in a seed
+		(the keyblock contents) to krb5_calculate_checksum()
+
+	* rd_rep.c (krb5_rd_rep()): Use appropriate key to decode reply.
+
+	* rd_safe.c (krb5_rd_safe()): Don't pass checksum to 
+		krb5_rd_safe_basic(), it's unnecessary.
+
+	* compat_recv.c (krb5_compat_recvauth()):
+	* mk_rep.c (krb5_mk_rep()):
+	* rd_req.c (krb5_rd_req()):
+	* rd_req_dec.c (krb5_rd_req_decode()):
+	* recvauth.c (krb5_recvauth()):
+		Added a krb5_auth_context argument and eliminated many of 
+		the other arguments because they are included in the
+		krb5_auth_context structure.
+
+
 Tue Mar 21 19:22:51 1995 Keith Vetter (keithv@fusion.com)
 
 	* mk_safe.c: fixed signed/unsigned mismatch.
 	* rd_safe.c: removed unused local variable currentime.
         * mk_req_e.c: fixed signed/unsigned mismatch.
+
 Sat Mar 18 18:58:02 1995  John Gilmore  (gnu at toad.com)
 
 	* bld_pr_ext.c, bld_princ.c:  Replace STDARG_PROTOTYPES with

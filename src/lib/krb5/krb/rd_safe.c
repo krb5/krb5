@@ -164,7 +164,7 @@ cleanup:
 krb5_error_code INTERFACE
 krb5_rd_safe(context, auth_context, inbuf, outbuf, outdata)
     krb5_context 	context;
-    krb5_auth_context *  auth_context;
+    krb5_auth_context * auth_context;
     const krb5_data   * inbuf;
     krb5_data 	      * outbuf;
     krb5_replay_data  * outdata;
@@ -184,7 +184,7 @@ krb5_rd_safe(context, auth_context, inbuf, outbuf, outdata)
 
     if (retval = krb5_rd_safe_basic(context, inbuf, auth_context->keyblock,
       auth_context->local_addr, auth_context->remote_addr,
-      auth_context->cksumtype, &replaydata, outbuf))
+      &replaydata, outbuf))
 	return retval;
 
     if (auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_DO_TIME) {

@@ -132,16 +132,18 @@ krb5_mk_req_extended(context, auth_context, ap_req_options, in_data, in_creds,
 
 
     /* Generate checksum, XXX What should the seed be? */
-    if ((checksum.contents = (krb5_octet *)malloc(krb5_checksum_size(
-      					  context, CKSUMTYPE_CRC32))) == NULL) {
+    if ((checksum.contents = (krb5_octet *)malloc(krb5_checksum_size(context,
+			     (*auth_context)->cksumtype))) == NULL) {
 	retval = ENOMEM;
 	goto cleanup;
     }
 
     if (in_data == NULL) {
     	if (retval = krb5_calculate_checksum(context, 
-					     (*auth_context)->cksumtype, 
-					     0, 0, 0, 0, &checksum))
+					   (*auth_context)->cksumtype, 0, 0,
+					   (*auth_context)->keyblock->contents,
+                                           (*auth_context)->keyblock->length,
+                                           &checksum))
 	    goto cleanup_cksum;
     } else 
         if ((*auth_context)->cksumtype == 0x8003) {
@@ -151,9 +153,11 @@ krb5_mk_req_extended(context, auth_context, ap_req_options, in_data, in_creds,
 	    checksum.contents = (krb5_octet *) in_data->data;
         } else 
     	    if (retval = krb5_calculate_checksum(context, 
-					         (*auth_context)->cksumtype, 
-					         in_data->data, in_data->length,
-					         0, 0, &checksum))
+					    (*auth_context)->cksumtype, 
+					    in_data->data, in_data->length,
+					    (*auth_context)->keyblock->contents,
+					    (*auth_context)->keyblock->length,
+					    &checksum))
 	        goto cleanup_cksum;
 
     /* Generate authenticator */

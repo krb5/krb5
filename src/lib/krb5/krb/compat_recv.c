@@ -52,30 +52,25 @@ static int krb_v4_recvauth();
 #define KRB5_RECVAUTH_V5	5
 
 krb5_error_code
-krb5_compat_recvauth(context, 
-	         /* IN */
-		     fdp, appl_version, server, sender_addr, fetch_from,
-		     keyproc, keyprocarg, rc_type, flags,
+krb5_compat_recvauth(context, auth_context,
+	             /* IN */
+		     fdp, appl_version, server, rc_type, flags, keytab,
 		     v4_options, v4_service, v4_instance, v4_faddr, v4_laddr,
 		     v4_filename, 
 		     /* OUT */
-		     auth_sys, seq_number, client, ticket, authent,
-		     v4_kdata, v4_schedule, v4_version)
+		     ticket,
+		     auth_sys, v4_kdata, v4_schedule, v4_version)
     krb5_context context;
+    krb5_auth_context **auth_context;
 	krb5_pointer	fdp;
 	char	*appl_version;
 	krb5_principal	server;
-	krb5_address	*sender_addr;
-	krb5_pointer	fetch_from;
-	krb5_int32	*seq_number;
 	char		*rc_type;
 	krb5_int32	flags;
-	krb5_rdreq_key_proc keyproc;
-	krb5_pointer keyprocarg;
-	krb5_principal	*client;
-	krb5_ticket	**ticket;
-	krb5_authenticator	**authent;
-	krb5_int32	*auth_sys;
+	krb5_keytab    	keytab;
+	krb5_ticket  ** ticket;
+        krb5_int32      *auth_sys;
+
 	/*
 	 * Version 4 arguments
 	 */
@@ -189,11 +184,9 @@ krb5_compat_recvauth(context,
 
 	*auth_sys = KRB5_RECVAUTH_V5;
 	
-	retval = krb5_recvauth(context, fdp, appl_version, server, sender_addr,
-			       fetch_from,
-			       keyproc, keyprocarg, rc_type,
-			       flags | KRB5_RECVAUTH_SKIP_VERSION,
-			       seq_number, client, ticket, authent);
+	retval = krb5_recvauth(context, auth_context, fdp, appl_version, server,
+			       rc_type, flags | KRB5_RECVAUTH_SKIP_VERSION, 
+			       keytab, ticket);
 
 	return retval;
 }
