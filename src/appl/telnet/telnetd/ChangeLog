@@ -1,3 +1,7 @@
+Tue Feb 13 16:23:23 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* ext.h, utility.c (fatalperror, fatal): Add const to argument.
+
 Mon Jan 15 17:35:25 1996  Sam Hartman  <hartmans@tertius.mit.edu>
 
 	* sys_term.c: Call pty_update_utmp with PTY_TTYSLOT_USABLE flag.

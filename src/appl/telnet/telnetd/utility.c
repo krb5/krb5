@@ -339,7 +339,7 @@ writenet(ptr, len)
 	void
 fatal(f, msg)
 	int f;
-	char *msg;
+	const char *msg;
 {
 	char buf[BUFSIZ];
 
@@ -362,7 +362,7 @@ fatal(f, msg)
 	void
 fatalperror(f, msg)
 	int f;
-	char *msg;
+	const char *msg;
 {
 	char buf[BUFSIZ], *strerror();
 
