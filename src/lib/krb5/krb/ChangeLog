@@ -1,3 +1,8 @@
+Thu May 25 09:58:42 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* gc_via_tkt.c (krb5_kdcrep2creds): Fix syntax error in the
+		freeing of the keyblock.
+
 Wed May 24 18:19:17 1995  Theodore Y. Ts'o  (tytso@dcl)
 
 	* Makefile.in, configure.in: Add rules for building shared library.
