@@ -139,12 +139,6 @@ static int right_justify;
 #endif
 static int do_lencheck;
 
-/* XXX: These should be internal to krb5 library, or declared in krb5.h.  */
-extern krb5_error_code krb5_write_message (krb5_context, krb5_pointer,
-					   krb5_data *);
-extern int krb5_net_read (krb5_context, int , char *, int);
-extern int krb5_net_write (krb5_context, int , const char *, int);
-/* XXX: And these should be declared in krb.h, or private.  */
 #ifdef KRB5_KRB4_COMPAT
 extern int
 krb_sendauth(long options, int fd, KTEXT ticket,
