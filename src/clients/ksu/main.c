@@ -369,7 +369,8 @@ char * dir_of_cc_source;
 	init_auth_names(target_pwd->pw_dir);
 
 	if (gethostname (localhostname, MAXHOSTNAMELEN)){
-		fprintf (stderr, " failed to get localhostname\n");    
+		fprintf (stderr, " failed to get localhostname\n");
+		exit(1);
 	}
 
 	/***********************************/
