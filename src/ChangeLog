@@ -1,3 +1,8 @@
+2000-10-27  Ezra Peisach  <epeisach@mit.edu>
+
+	* aclocal.m4 (ac_config_fragdir): Set AUTOCONFFLAGS to use the
+	local util/autoconf macrodir if we are using the shipped autoconf.
+
 2000-08-30  Tom Yu  <tlyu@mit.edu>
 
 	* aclocal.m4 (LIBLINKS): Fix appending of $EXTRA_LIB_TARGETS to
