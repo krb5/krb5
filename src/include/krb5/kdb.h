@@ -96,6 +96,7 @@ typedef struct _krb5_db_entry {
 #define	KRB5_KDB_REQUIRES_PWCHANGE	0x00000200
 #define KRB5_KDB_DISALLOW_SVR		0x00001000
 #define KRB5_KDB_PWCHANGE_SERVICE	0x00002000
+#define KRB5_KDB_SUPPORT_DESMD5         0x00004000
 
 /* XXX depends on knowledge of krb5_parse_name() formats */
 #define KRB5_KDB_M_NAME		"K/M"	/* Kerberos/Master */

@@ -1,3 +1,8 @@
+Fri Nov 18 17:53:38 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* kdb.h (KRB5_KDB_SUPPORT_DESMD5): Add new attribute which defines
+		whether or not a server supports DES/MD5.
+
 Fri Nov 18 01:28:47 1994  Mark Eichin  <eichin@cygnus.com>
 
 	* Makefile.in (install): elide dependency so $(srcdir) works; use
