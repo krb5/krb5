@@ -1,3 +1,7 @@
+Wed Jul 31 14:55:38 1996  Tom Yu  <tlyu@mit.edu>
+
+	* kdb5_stash.c (kdb5_stash): Declare optind.
+
 Sat Jul 27 02:16:01 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* kdb5_create.c (kdb5_create): Ignore (expected) failure in

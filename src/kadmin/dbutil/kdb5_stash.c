@@ -54,6 +54,7 @@ int argc;
 char *argv[];
 {
     extern char *optarg;
+    extern int optind;
     int optchar;
     krb5_error_code retval;
     char *dbname = (char *) NULL;
