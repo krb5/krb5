@@ -1,7 +1,7 @@
 #include <assert.h>
 
 #if TARGET_OS_MAC
-    #include <Kerberos/com_err.h>
+#    include <Kerberos/com_err.h>
 #endif
 
 #include "krb5.h"

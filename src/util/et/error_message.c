@@ -28,8 +28,8 @@
 #include "error_table.h"
 
 #if defined(macintosh) || (defined(__MACH__) && defined(__APPLE__))
-    #include <KerberosSupport/KerberosSupport.h>
-    #include <KerberosSupport/ErrorLib.h>
+#    include <KerberosSupport/KerberosSupport.h>
+#    include <KerberosSupport/ErrorLib.h>
 #endif
 
 #if defined(_WIN32)

@@ -61,23 +61,23 @@
 #endif
 
 #if defined(macintosh) || (defined(__MACH__) && defined(__APPLE__))
-	#include <TargetConditionals.h>
-    #if TARGET_RT_MAC_CFM
-        #error "Use KfM 4.0 SDK headers for CFM compilation."
-    #endif
+#	include <TargetConditionals.h>
+#    if TARGET_RT_MAC_CFM
+#	error "Use KfM 4.0 SDK headers for CFM compilation."
+#    endif
 
-	#ifndef KRB5_PRIVATE /* Allow e.g. build system to override */
-		#define KRB5_PRIVATE 0
-	#endif
+#	ifndef KRB5_PRIVATE /* Allow e.g. build system to override */
+#		define KRB5_PRIVATE 0
+#	endif
 #else
 #if defined(_WIN32)
-	#ifndef KRB5_PRIVATE
-		#define KRB5_PRIVATE 0
-	#endif
+#	ifndef KRB5_PRIVATE
+#		define KRB5_PRIVATE 0
+#	endif
 #else
-	#ifndef KRB5_PRIVATE
-		#define KRB5_PRIVATE 1
-	#endif
+#	ifndef KRB5_PRIVATE
+#		define KRB5_PRIVATE 1
+#	endif
 #endif
 #endif
 
@@ -118,11 +118,11 @@
 KRB5INT_BEGIN_DECLS
 
 #if TARGET_OS_MAC
-    #if defined(__MWERKS__)
-        #pragma import on
-        #pragma enumsalwaysint on
-    #endif
-    #pragma options align=mac68k
+#    if defined(__MWERKS__)
+#	pragma import on
+#	pragma enumsalwaysint on
+#    endif
+#    pragma options align=mac68k
 #endif
 
 /* from profile.h */
@@ -2519,11 +2519,11 @@ krb5_prompt_type* KRB5_CALLCONV krb5_get_prompt_types
 	(krb5_context context);
 
 #if TARGET_OS_MAC
-    #if defined(__MWERKS__)
-        #pragma enumsalwaysint reset
-        #pragma import reset
-    #endif
-	#pragma options align=reset
+#    if defined(__MWERKS__)
+#	pragma enumsalwaysint reset
+#	pragma import reset
+#    endif
+#	pragma options align=reset
 #endif
 
 KRB5INT_END_DECLS

@@ -91,7 +91,7 @@ fcc_nseq.c and fcc_read don't check return values a lot.
 #include "port-sockets.h"
 #endif
 #else
- #error find some way to use net-byte-order file version numbers.
+# error find some way to use net-byte-order file version numbers.
 #endif
 
 krb5_error_code KRB5_CALLCONV krb5_fcc_close

@@ -27,15 +27,15 @@
 #define KRB524_PORT 4444
 
 #if defined(macintosh) || (defined(__MACH__) && defined(__APPLE__))
-	#include <TargetConditionals.h>
-    #ifndef KRB524_PRIVATE /* Allow e.g. build system to override */
-		#define KRB524_PRIVATE 0
-	#endif
+#	include <TargetConditionals.h>
+#    ifndef KRB524_PRIVATE /* Allow e.g. build system to override */
+#		define KRB524_PRIVATE 0
+#	endif
 #else
-    #include "krb524_err.h"
-	#ifndef KRB524_PRIVATE
-		#define KRB524_PRIVATE 1
-	#endif
+#    include "krb524_err.h"
+#	ifndef KRB524_PRIVATE
+#		define KRB524_PRIVATE 1
+#	endif
 #endif	
 
 #ifndef KRB524INT_BEGIN_DECLS
@@ -49,11 +49,11 @@
 #endif
 
 #if TARGET_OS_MAC
-    #if defined(__MWERKS__)
-        #pragma import on
-        #pragma enumsalwaysint on
-    #endif
-    #pragma options align=mac68k
+#    if defined(__MWERKS__)
+#	pragma import on
+#	pragma enumsalwaysint on
+#    endif
+#    pragma options align=mac68k
 #endif
 
 KRB524INT_BEGIN_DECLS
@@ -113,11 +113,11 @@ int krb524_sendto_kdc
 #endif /* KRB524_PRIVATE */
 
 #if TARGET_OS_MAC
-    #if defined(__MWERKS__)
-        #pragma enumsalwaysint reset
-        #pragma import reset
-    #endif
-	#pragma options align=reset
+#    if defined(__MWERKS__)
+#	pragma enumsalwaysint reset
+#	pragma import reset
+#    endif
+#	pragma options align=reset
 #endif
 
 KRB524INT_END_DECLS
