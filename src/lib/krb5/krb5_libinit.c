@@ -6,7 +6,7 @@
 #include "asn1_err.h"
 #include "kdb5_err.h"
 
-static	int		initialized = false;
+static	int		initialized = 0;
 
 /*
  * Initialize the Kerberos v5 library.
@@ -21,7 +21,7 @@ krb5_error_code krb5int_initialize_library (void)
 	    add_error_table(&et_kdb5_error_table);
 	    add_error_table(&et_asn1_error_table);
 
-		initialized = true;
+		initialized = 1;
 	}
 	
 	return 0;
@@ -42,5 +42,5 @@ void krb5int_cleanup_library (void)
     remove_error_table(&et_kdb5_error_table);
     remove_error_table(&et_asn1_error_table);
 	
-	initialized = false;
+	initialized = 0;
 }

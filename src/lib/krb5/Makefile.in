@@ -29,11 +29,14 @@ LIBDONE= error_tables/DONE asn.1/DONE ccache/DONE ccache/stdio/DONE \
 #	$(LD_UNRESOLVED_PREFIX)_et_list $(LD_UNRESOLVED_PREFIX)error_message
 #SHLIB_LIBDIRS= @SHLIB_LIBDIRS@
 
+STLIBOBJS=krb5_libinit.o
+
 LIB=krb5
 LIBMAJOR=2
 LIBMINOR=2
 
 STOBJLISTS= \
+	OBJS.ST \
 	error_tables/OBJS.ST \
 	asn.1/OBJS.ST \
 	ccache/OBJS.ST ccache/stdio/OBJS.ST ccache/file/OBJS.ST \
