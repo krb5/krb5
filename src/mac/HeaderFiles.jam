@@ -3,7 +3,7 @@ include "/Developer/Makefiles/pbx_jamfiles/Jambase" ;
 PROFILE_DIR = "$(SRCROOT)/../util/profile" ;
 GSS_DIR = "$(SRCROOT)/../lib/gssapi" ;
 INCLUDE_DIR = "$(SRCROOT)/../include" ;
-ERROR_TABLE_DIR = "$(SRCROOT)/../lib/krb5/error_tables" ;
+ERROR_TABLES_DIR = "$(SRCROOT)/../lib/krb5/error_tables" ;
 
 DEPENDS all : 
     "$(PROFILE_DIR)/profile.h"
@@ -14,6 +14,7 @@ DEPENDS all :
     "$(INCLUDE_DIR)/kv5m_err.h"
     "$(INCLUDE_DIR)/krb5.h"
     "$(GSS_DIR)/gssapi.h"
+    "$(INCLUDE_DIR)/autoconf.h"
 ;
 
 DEPENDS install all ;
@@ -27,6 +28,7 @@ Clean.Remove clean :
     "$(INCLUDE_DIR)/kv5m_err.h"
     "$(INCLUDE_DIR)/krb5.h"
     "$(GSS_DIR)/gssapi.h"
+    "$(INCLUDE_DIR)/autoconf.h"
 ;
 
 rule profile.h
@@ -86,9 +88,19 @@ gssapi.h "$(GSS_DIR)/gssapi.h" :
     "$(GSS_DIR)/generic/gssapi.hin"
 ;
 
-Cp "$(INCLUDE_DIR)/adm_err.h" "$(ERROR_TABLES_DIR)/adm_err.h" ;
-Cp "$(INCLUDE_DIR)/asn1_err.h" "$(ERROR_TABLES_DIR)/asn1_err.h" ;
-Cp "$(INCLUDE_DIR)/kdb5_err.h" "$(ERROR_TABLES_DIR)/kdb5_err.h" ;
-Cp "$(INCLUDE_DIR)/krb5_err.h" "$(ERROR_TABLES_DIR)/krb5_err.h" ;
-Cp "$(INCLUDE_DIR)/kv5m_err.h" "$(ERROR_TABLES_DIR)/kv5m_err.h" ;
+Cp "$(INCLUDE_DIR)/adm_err.h" : "$(ERROR_TABLES_DIR)/adm_err.h" ;
+Cp "$(INCLUDE_DIR)/asn1_err.h" : "$(ERROR_TABLES_DIR)/asn1_err.h" ;
+Cp "$(INCLUDE_DIR)/kdb5_err.h" : "$(ERROR_TABLES_DIR)/kdb5_err.h" ;
+Cp "$(INCLUDE_DIR)/krb5_err.h" : "$(ERROR_TABLES_DIR)/krb5_err.h" ;
+Cp "$(INCLUDE_DIR)/kv5m_err.h" : "$(ERROR_TABLES_DIR)/kv5m_err.h" ;
 
+rule autoconf.h
+{
+}
+
+actions autoconf.h
+{
+    touch "$(1)" ;
+}
+
+autoconf.h "$(INCLUDE_DIR)/autoconf.h" ;
