@@ -100,14 +100,16 @@ krb5_tkt_authent *tktauthent;
 	    /* use default keytab */
 	    retval = krb5_kt_default(&keytabid);
 	}
-	retval = krb5_kt_get_entry(keytabid, req->ticket->server,
-				   req->ticket->skvno, &ktentry);
-	(void) krb5_kt_close(keytabid);
 	if (!retval) {
-	    retval = krb5_copy_keyblock(&ktentry.key, &tkt_key_real);
-	    tkt_key = &tkt_key_real;
+	    retval = krb5_kt_get_entry(keytabid, req->ticket->server,
+				       req->ticket->skvno, &ktentry);
+	    (void) krb5_kt_close(keytabid);
+	    if (!retval) {
+		retval = krb5_copy_keyblock(&ktentry.key, &tkt_key_real);
+		tkt_key = &tkt_key_real;
+	    }
+	    (void) krb5_kt_free_entry(&ktentry);
 	}
-	(void) krb5_kt_free_entry(&ktentry);
     }
     if (retval)
 	return retval;			/* some error in getting the key */
