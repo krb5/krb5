@@ -417,7 +417,7 @@ cc_source_name = krb5_cc_get_name(context, cc);
 
 if ( ! stat(cc_source_name, &st_temp)){
 
-	if (retval = find_ticket (cc, client, end_server, &temp_found)) {
+	if (retval = find_ticket (context, cc, client, end_server, &temp_found)) {
 		return retval;
 	}
  	
@@ -430,7 +430,7 @@ if ( ! stat(cc_source_name, &st_temp)){
        		           return retval ;
   		}
 
-		if(retval = find_ticket (cc,client, kdc_server, &temp_found)) {
+		if(retval = find_ticket (context, cc,client, kdc_server, &temp_found)) {
 			return retval;
 		}
 	}
@@ -684,14 +684,14 @@ for (i= 0; i < count; i ++){
 
 for (i= 0; i < count; i ++){      
    if(princ_trials[i].p){	
-	if (retval= find_princ_in_list(princ_trials[i].p, aplist, &found)){
+	if (retval= find_princ_in_list(context, princ_trials[i].p, aplist, &found)){
 		return retval;	
 	}
 	
 	if ( found == TRUE){     
 		princ_trials[i].found = TRUE; 
 
- 		if (retval = find_either_ticket (cc_source, princ_trials[i].p,
+ 		if (retval = find_either_ticket (context, cc_source, princ_trials[i].p,
 					 end_server, &found)){ 
 			return retval;
 		}
@@ -716,7 +716,7 @@ while (aplist[i]){
 		return retval;
         }  
 
-	if (retval = find_either_ticket (cc_source, temp_client,
+	if (retval = find_either_ticket (context, cc_source, temp_client,
 				 end_server, &found)){ 
 		return retval;
 	}
@@ -762,7 +762,7 @@ for (i=0; i < count; i ++){
 		/* get the client name that is the closest
 		  to the three princ in trials */
 
-		if(retval=get_closest_principal(aplist, &temp_client, & found)){
+		if(retval=get_closest_principal(context, aplist, &temp_client, & found)){
 			return retval; 	
 		}
 

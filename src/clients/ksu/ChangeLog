@@ -1,3 +1,12 @@
+Tue May  9 15:52:15 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* heuristic.c (get_best_princ_for_target): Missing context cuased
+		coredump. 
+		(get_best_princ_for_target): Missing contexts in call to
+		 		find_either_ticket. 
+		(find_either_ticket): Missing context in call of find_ticket
+		(get_best_princ_for_target): Add missing context
+
 Thu Mar 16 20:50:32 1995  John Gilmore  (gnu at toad.com)
 
 	* configure.in:  Replace CHECK_STDARG with AC_CHECK_HEADERS.
