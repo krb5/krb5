@@ -1,0 +1,4 @@
+Thu Aug  4 03:42:04 1994  Tom Yu  (tlyu@dragons-lair)
+
+	* Makefile.in: make install fixes
+

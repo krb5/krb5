@@ -31,8 +31,7 @@ libkdb5.a: $(OBJS)
 	$(RANLIB) $(BUILDTOP)/lib/libkdb5.a
 
 install:: libkdb5.a
-	$(RM) $(KRB5_LIBDIR)/libkdb5.a
-	$(CP) libkdb5.a $(KRB5_LIBDIR)/libkdb5.a
+	$(INSTALL_DATA) libkdb5.a $(KRB5_LIBDIR)/libkdb5.a
 	$(RANLIB) $(KRB5_LIBDIR)/libkdb5.a
 
 clean::

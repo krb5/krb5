@@ -20,8 +20,7 @@ libkrb5.a: error_tables/DONE asn.1/DONE ccache/DONE ccache/stdio/DONE \
 	$(RANLIB) $@
 
 install:: libkrb5.a
-	$(RM) $(KRB5_LIBDIR)/libkrb5.a
-	$(CP) libkrb5.a $(KRB5_LIBDIR)/libkrb5.a
+	$(INSTALL_DATA) libkrb5.a $(KRB5_LIBDIR)/libkrb5.a
 	$(RANLIB) $(KRB5_LIBDIR)/libkrb5.a
 
 clean::

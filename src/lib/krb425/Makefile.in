@@ -64,8 +64,7 @@ libkrb425.a: ${OBJS}
 	$(RANLIB) $(BUILDTOP)/lib/libkrb425.a
 
 install:: libkrb425.a
-	$(RM) $(KRB5_LIBDIR)/libkrb425.a
-	$(CP) libkrb425.a $(KRB5_LIBDIR)/libkrb425.a
+	$(INSTALL_DATA) libkrb425.a $(KRB5_LIBDIR)/libkrb425.a
 	$(RANLIB) $(KRB5_LIBDIR)/libkrb425.a
 
 clean::

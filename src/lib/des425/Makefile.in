@@ -48,8 +48,7 @@ libdes425.a: $(OBJS)
 	$(RANLIB) $(BUILDTOP)/lib/libdes425.a
 
 install:: libdes425.a
-	$(RM) $(KRB5_LIBDIR)/libdes425.a
-	$(CP) libdes425.a $(KRB5_LIBDIR)/libdes425.a
+	$(INSTALL_DATA) libdes425.a $(KRB5_LIBDIR)/libdes425.a
 	$(RANLIB) $(KRB5_LIBDIR)/libdes425.a
 
 clean::
