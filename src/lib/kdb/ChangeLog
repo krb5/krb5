@@ -1,3 +1,12 @@
+2000-04-27  Ken Raeburn  <raeburn@mit.edu>
+	    Ezra Peisach  <epeisach@mit.edu>
+
+	* t_kdb.c (gen_principal): Force argument to isalnum to be in
+	range 0..255.
+	(do_testing): Cast pid_t to long before passing to fprintf, and
+	use %ld format.  Fix argument lists to find_principal and
+	delete_principal.
+
 2000-03-16  Ezra Peisach  <epeisach@mit.edu>
 
 	* kdb_xdr.c (krb5_dbe_lookup_mod_princ_data): Get rid of

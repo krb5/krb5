@@ -363,7 +363,7 @@ gen_principal(kcontext, realm, do_rand, n, princp, namep)
 	    complen = RANDOM(1,MAX_COMP_SIZE);
 	    for (j=0; j<complen; j++) {
 		*cp = (char) RANDOM(0,256);
-		while (!isalnum(*cp))
+		while (!isalnum(*cp & 0xff))
 		    *cp = (char) RANDOM(0,256);
 		cp++;
 	    }
@@ -894,45 +894,40 @@ do_testing(db, passes, verbose, timing, rcases, check, save_db, dontclean,
 					      &stat_kb,
 					      rseed))) {
 			fprintf(stderr,
-				"%d: (%d,%d) Failed add of %s with %s\n",
-				getpid(), i, j, playback_name(base+j),
+				"%ld: (%d,%d) Failed add of %s with %s\n",
+				(long) getpid(), i, j, playback_name(base+j),
 				error_message(kret));
 			break;
 		    }
 		    if (verbose > 4)
-			fprintf(stderr, "*A[%d](%s)\n", getpid(),
+			fprintf(stderr, "*A[%ld](%s)\n", (long) getpid(),
 				playback_name(base+j));
 		}   
 		for (j=0; (j<nper) && (!kret); j++) {
 		    if ((kret = find_principal(ccontext,
 					       playback_principal(base+j),
-					       &master_encblock,
-					       &stat_kb,
-					       rseed))) {
+					       check))) {
 			fprintf(stderr,
-				"%d: (%d,%d) Failed lookup of %s with %s\n",
-				getpid(), i, j, playback_name(base+j),
+				"%ld: (%d,%d) Failed lookup of %s with %s\n",
+				(long) getpid(), i, j, playback_name(base+j),
 				error_message(kret));
 			break;
 		    }
 		    if (verbose > 4)
-			fprintf(stderr, "-S[%d](%s)\n", getpid(),
+			fprintf(stderr, "-S[%ld](%s)\n", (long) getpid(),
 				playback_name(base+j));
 		}   
 		for (j=0; (j<nper) && (!kret); j++) {
 		    if ((kret = delete_principal(ccontext,
-						 playback_principal(base+j),
-						 &master_encblock,
-						 &stat_kb,
-						 rseed))) {
+					       playback_principal(base+j)))) {
 			fprintf(stderr,
-				"%d: (%d,%d) Failed delete of %s with %s\n",
-				getpid(), i, j, playback_name(base+j),
+				"%ld: (%d,%d) Failed delete of %s with %s\n",
+				(long) getpid(), i, j, playback_name(base+j),
 				error_message(kret));
 			break;
 		    }
 		    if (verbose > 4)
-			fprintf(stderr, "XD[%d](%s)\n", getpid(),
+			fprintf(stderr, "XD[%ld](%s)\n", (long) getpid(),
 				playback_name(base+j));
 		}
 		krb5_db_fini(ccontext);
@@ -949,13 +944,13 @@ do_testing(db, passes, verbose, timing, rcases, check, save_db, dontclean,
 	for (i=0; i<nprocs; i++) {
 	    if (waitpid(children[i], &existat, 0) == children[i]) {
 		if (verbose) 
-		    fprintf(stderr, "%d finished with %d\n", children[i],
-			    existat);
+		    fprintf(stderr, "%ld finished with %d\n",
+			    (long) children[i], existat);
 		if (existat)
 		    kret = KRB5KRB_ERR_GENERIC;
 	    }
 	    else
-		fprintf(stderr, "Wait for %d failed\n", children[i]);
+		fprintf(stderr, "Wait for %ld failed\n", (long) children[i]);
 	}
     }
 
