@@ -1,3 +1,6 @@
+Sat Jul 29 04:37:33 1995  Tom Yu  <tlyu@dragons-lair.MIT.EDU>
+
+	* configure.in: Don't link with -lkadm
 
 Thu Jul 27 15:02:03 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* krshd.c - Check for interrupted select.  Should fix bug #1555.

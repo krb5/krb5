@@ -1,3 +1,7 @@
+Sat Jul 29 04:41:07 1995  Tom Yu  <tlyu@dragons-lair.MIT.EDU>
+
+	* configure.in: Don't link with -lkadm.
+
 Tue Jul 11 11:10:13 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* main.c (main): Remove extraneous argument to call to
