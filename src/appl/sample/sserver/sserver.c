@@ -38,6 +38,7 @@
 #include "com_err.h"
 
 #include <stdio.h>
+#include <string.h>
 #include <ctype.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -50,6 +51,13 @@
 extern krb5_deltat krb5_clockskew;
 
 #define DEBUG
+
+void
+usage(name)
+    char *name;
+{
+	fprintf(stderr, "usage: %s [-p port] [-S keytab]\n");
+}	
 
 void
 main(argc, argv)
@@ -69,6 +77,14 @@ main(argc, argv)
     krb5_principal server, client;
     char repbuf[BUFSIZ];
     char *cname;
+    short port = 0;		/* If user specifies port */
+    extern int opterr, optind;
+    extern char * optarg;
+    int ch;
+    krb5_keytab keytab = NULL;	/* Allow specification on command line */
+    char *progname;
+
+    progname = *argv;
 
     krb5_init_context(&context);
     krb5_init_ets(context);
@@ -84,10 +100,44 @@ main(argc, argv)
     }
     
     /*
-     * If user specified a port, then listen on that port; otherwise,
-     * assume we've been started out of inetd.
+     * Parse command line arguments
+     *  
      */
+    opterr = 0;
+    while ((ch = getopt(argc, argv, "p:S:")) != EOF)
+      switch (ch) {
+      case 'p':
+	      port = atoi(optarg);
+	      break;
+	case 'S':
+	      if (retval = krb5_kt_resolve(context, optarg, &keytab)) {
+		      com_err(progname, retval,
+			      "while resolving keytab file %s", optarg);
+		      exit(2);
+	      }
+	  break;
+
+      case '?':
+      default:
+	      usage(progname);
+	      exit(1);
+	      break;
+      }
+
+    argc -= optind;
+    argv += optind;
+
+    /* Backwards compatibility, allow port to be specified at end */
     if (argc > 1) {
+	    port = atoi(argv[1]);
+    }
+
+    /*
+     * If user specified a port, then listen on that port; otherwise,
+     * assume we've been started out of inetd. 
+     */
+
+    if (port) {
 	int acc;
 	struct sockaddr_in sin;
 
@@ -98,8 +148,8 @@ main(argc, argv)
 
 	sin.sin_family = AF_INET;
 	sin.sin_addr.s_addr = 0;
-	sin.sin_port = htons(atoi(argv[1]));
-	if (bind(sock, &sin, sizeof(sin))) {
+	sin.sin_port = htons(port);
+	if (bind(sock, (struct sockaddr *) &sin, sizeof(sin))) {
 	    syslog(LOG_ERR, "bind: %m");
 	    exit(3);
 	}
@@ -132,7 +182,7 @@ main(argc, argv)
     if (retval = krb5_recvauth(context, &auth_context, (krb5_pointer)&sock,
 			       SAMPLE_VERSION, server, 
 			       0,	/* no flags */
-			       NULL,	/* default keytab */
+			       keytab,	/* default keytab is NULL */
 			       &ticket)) {
 	syslog(LOG_ERR, "recvauth failed--%s", error_message(retval));
 	exit(1);

@@ -26,6 +26,10 @@ sserver \- sample Kerberos version 5 server
 .SH SYNOPSIS
 .B sserver
 [
+.I \-p
+port ] [
+.I \-S
+keytab ] [
 .I server_port
 ]
 .br
@@ -45,6 +49,10 @@ the
 .IR krb5_edit(8)
 program.  The srvtab file is installed in whatever
 directory is defined by V5Srvtabdir (usually /etc) as "v5srvtab".
+.PP
+The 
+.B \-S
+option allows for a different srvtab than the default.
 .PP
 \fIsserver\fP is normally invoked out of 
 .IR inetd(8), 

@@ -1,3 +1,10 @@
+Wed May 10 15:18:19 1995  Ezra Peisach  (epeisach@kangaroo.mit.edu)
+
+	* sserver.M: Document options.
+
+	* sserver.c: (main): Add options -p port, -S keytab for use by
+		dejagnu. Cleaned up warnings in compile.
+
 Wed May 03 03:30:51 1995  Chris Provenzano (proven@mit.edu)
 
         * sserver.c: (krb5_recvauth()): No longer needs the rc_type arg.
