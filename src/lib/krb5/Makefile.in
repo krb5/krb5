@@ -8,9 +8,25 @@ CC = @CC@
 CCOPTS = @CCOPTS@
 
 SUBDIRS = @SUBDIRS@
+KRB5ROOT = @KRB5ROOT@
 
 RM = rm -f
 CP = cp
+KRB5MANROOT = $(KRB5ROOT)/man
+ADMIN_BINDIR = $(KRB5ROOT)/admin
+SERVER_BINDIR = $(KRB5ROOT)/sbin
+CLIENT_BINDIR = $(KRB5ROOT)/bin
+ADMIN_MANDIR = $(KRB5MANROOT)/man8
+SERVER_MANDIR = $(KRB5MANROOT)/man8
+CLIENT_MANDIR = $(KRB5MANROOT)/man1
+FILE_MANDIR = $(KRB5MANROOT)/man5
+KRB5_LIBDIR = $(KRB5ROOT)/lib
+KRB5_INCDIR = $(KRB5ROOT)/include
+KRB5_INCSUBDIRS = \
+	$(KRB5_INCDIR)/krb5 \
+	$(KRB5_INCDIR)/asn.1 \
+	$(KRB5_INCDIR)/kerberosIV
+
 RANLIB = @RANLIB@
 
 TST=if test -n "`cat DONE`" ; then
@@ -35,9 +51,9 @@ libkrb5.a: error_tables/DONE asn.1/DONE ccache/DONE ccache/stdio/DONE \
 	$(RANLIB) $@
 
 install:: libkrb5.a
-	$(RM) $(KRB5_LIBDIR)/lib/libkrb5.a
-	$(CP) libkrb5.a $(KRB5_LIBDIR)/lib/libkrb5.a
-	$(RANLIB) $(KRB5_LIBDIR)/lib/libkrb5.a
+	$(RM) $(KRB5_LIBDIR)/libkrb5.a
+	$(CP) libkrb5.a $(KRB5_LIBDIR)/libkrb5.a
+	$(RANLIB) $(KRB5_LIBDIR)/libkrb5.a
 
 clean::
 	$(RM) libkrb5.a

@@ -7,9 +7,25 @@ CC = @CC@
 CCOPTS = @CCOPTS@
 LIBS = @LIBS@
 KRB4 = @KRB4@
+KRB5ROOT = @KRB5ROOT@
 
 CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
 LDFLAGS = -g
+
+KRB5MANROOT = $(KRB5ROOT)/man
+ADMIN_BINDIR = $(KRB5ROOT)/admin
+SERVER_BINDIR = $(KRB5ROOT)/sbin
+CLIENT_BINDIR = $(KRB5ROOT)/bin
+ADMIN_MANDIR = $(KRB5MANROOT)/man8
+SERVER_MANDIR = $(KRB5MANROOT)/man8
+CLIENT_MANDIR = $(KRB5MANROOT)/man1
+FILE_MANDIR = $(KRB5MANROOT)/man5
+KRB5_LIBDIR = $(KRB5ROOT)/lib
+KRB5_INCDIR = $(KRB5ROOT)/include
+KRB5_INCSUBDIRS = \
+	$(KRB5_INCDIR)/krb5 \
+	$(KRB5_INCDIR)/asn.1 \
+	$(KRB5_INCDIR)/kerberosIV
 
 SRCTOP = $(srcdir)/$(BUILDTOP)
 TOPLIBD = $(BUILDTOP)/lib
@@ -37,8 +53,8 @@ kdb5_convert: kdb5_convert.o $(DEPLIBS)
 	$(CC) $(CFLAGS) -o kdb5_convert kdb5_convert.o $(LOCAL_LIBRARIES) $(LIBS)
 
 install::
-	$(INSTALLPROG) kdb5_convert ${DESTDIR}$(ADMIN_BINDIR)/kdb5_convert
-	$(INSTALLPROG) kdb5_convert.M ${DESTDIR}$(ADMIN_MANDIR)/kdb5_convert.$(ADMIN_MANSUFFIX)
+	cp kdb5_convert ${DESTDIR}$(ADMIN_BINDIR)/kdb5_convert
+	cp kdb5_convert.M ${DESTDIR}$(ADMIN_MANDIR)/kdb5_convert.8
 
 clean::
 	$(RM) kdb5_convert kdb5_convert.o

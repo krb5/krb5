@@ -11,6 +11,20 @@ KRB5ROOT = @KRB5ROOT@
 KDB5DIR = $(KRB5ROOT)
 KRB5SRVTABDIR = /etc
 
+KRB5MANROOT = $(KRB5ROOT)/man
+ADMIN_BINDIR = $(KRB5ROOT)/admin
+SERVER_BINDIR = $(KRB5ROOT)/sbin
+CLIENT_BINDIR = $(KRB5ROOT)/bin
+ADMIN_MANDIR = $(KRB5MANROOT)/man8
+SERVER_MANDIR = $(KRB5MANROOT)/man8
+CLIENT_MANDIR = $(KRB5MANROOT)/man1
+FILE_MANDIR = $(KRB5MANROOT)/man5
+KRB5_LIBDIR = $(KRB5ROOT)/lib
+KRB5_INCDIR = $(KRB5ROOT)/include
+KRB5_INCSUBDIRS = \
+	$(KRB5_INCDIR)/krb5 \
+	$(KRB5_INCDIR)/asn.1 \
+	$(KRB5_INCDIR)/kerberosIV
 
 RM = rm -f
 
@@ -45,7 +59,7 @@ KRB5_INCDIR = $(KRB5ROOT)/include
 
 install:: $(KRB5_HEADERS) config.h osconf.h autoconf.h
 	@set -x; for f in $(KRB5_HEADERS) config.h osconf.h ; \
-	do $(INSTALL) -c $(INSTDATFLAGS) $$f $(KRB5_INCDIR)/krb5/$$f ; \
+	do cp $$f $(KRB5_INCDIR)/krb5/$$f ; \
 	done
 
 PROCESS_REPLACE = -e "s+@KRB5ROOT+$(KRB5ROOT)+" \

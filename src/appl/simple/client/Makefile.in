@@ -6,6 +6,7 @@ DEFS = @DEFS@
 CC = @CC@
 CCOPTS = @CCOPTS@
 LIBS = @LIBS@
+KRB5ROOT = @KRB5ROOT@
  
 CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
 LDFLAGS = -g
@@ -29,6 +30,8 @@ sim_client.o:	$(srcdir)/sim_client.c
 
 all:: sim_client
 
+install::
+	cp sim_client $(DESTDIR)$(CLIENT_BINDIR)/sim_client
 
 clean::
 	$(RM) sim_client.o sim_client

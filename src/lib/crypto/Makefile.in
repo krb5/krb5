@@ -11,9 +11,25 @@ DEFS = @DEFS@
 CC = @CC@
 CCOPTS = @CCOPTS@
 LIBS = @LIBS@
+KRB5ROOT = @KRB5ROOT@
  
 CFLAGS = $(CCOPTS) $(DEFS)
 LDFLAGS = -g
+
+KRB5MANROOT = $(KRB5ROOT)/man
+ADMIN_BINDIR = $(KRB5ROOT)/admin
+SERVER_BINDIR = $(KRB5ROOT)/sbin
+CLIENT_BINDIR = $(KRB5ROOT)/bin
+ADMIN_MANDIR = $(KRB5MANROOT)/man8
+SERVER_MANDIR = $(KRB5MANROOT)/man8
+CLIENT_MANDIR = $(KRB5MANROOT)/man1
+FILE_MANDIR = $(KRB5MANROOT)/man5
+KRB5_LIBDIR = $(KRB5ROOT)/lib
+KRB5_INCDIR = $(KRB5ROOT)/include
+KRB5_INCSUBDIRS = \
+	$(KRB5_INCDIR)/krb5 \
+	$(KRB5_INCDIR)/asn.1 \
+	$(KRB5_INCDIR)/kerberosIV
 
 RM = rm -f
 CP = cp
@@ -38,6 +54,6 @@ libcrypto.a: des/DONE md4/DONE md5/DONE crc32/DONE os/DONE $(OBJS)
 	$(RANLIB) $@
 
 install:: libcrypto.a
-	$(RM) $(KRB5_LIBDIR)/lib/libcrypto.a
-	$(CP) libcrypto.a $(KRB5_LIBDIR)/lib/libcrypto.a
-	$(RANLIB) $(KRB5_LIBDIR)/lib/libcrypto.a
+	$(RM) $(KRB5_LIBDIR)/libcrypto.a
+	$(CP) libcrypto.a $(KRB5_LIBDIR)/libcrypto.a
+	$(RANLIB) $(KRB5_LIBDIR)/libcrypto.a

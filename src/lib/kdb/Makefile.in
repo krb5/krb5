@@ -10,7 +10,23 @@ DEFS = @DEFS@
 CC = @CC@
 CCOPTS = @CCOPTS@
 LIBS = @LIBS@
+KRB5ROOT = @KRB5ROOT@
  
+KRB5MANROOT = $(KRB5ROOT)/man
+ADMIN_BINDIR = $(KRB5ROOT)/admin
+SERVER_BINDIR = $(KRB5ROOT)/sbin
+CLIENT_BINDIR = $(KRB5ROOT)/bin
+ADMIN_MANDIR = $(KRB5MANROOT)/man8
+SERVER_MANDIR = $(KRB5MANROOT)/man8
+CLIENT_MANDIR = $(KRB5MANROOT)/man1
+FILE_MANDIR = $(KRB5MANROOT)/man5
+KRB5_LIBDIR = $(KRB5ROOT)/lib
+KRB5_INCDIR = $(KRB5ROOT)/include
+KRB5_INCSUBDIRS = \
+	$(KRB5_INCDIR)/krb5 \
+	$(KRB5_INCDIR)/asn.1 \
+	$(KRB5_INCDIR)/kerberosIV
+
 CFLAGS = $(CCOPTS) $(DEFS)
 LDFLAGS = -g
 
@@ -51,9 +67,9 @@ libkdb5.a: $(OBJS)
 	$(RANLIB) $(BUILDTOP)/lib/libkdb5.a
 
 install:: libkdb5.a
-	$(RM) $(KRB5_LIBDIR)/lib/libkdb5.a
-	$(CP) libkdb5.a $(KRB5_LIBDIR)/lib/libkdb5.a
-	$(RANLIB) $(KRB5_LIBDIR)/lib/libkdb5.a
+	$(RM) $(KRB5_LIBDIR)/libkdb5.a
+	$(CP) libkdb5.a $(KRB5_LIBDIR)/libkdb5.a
+	$(RANLIB) $(KRB5_LIBDIR)/libkdb5.a
 
 clean::
 	$(RM) $(OBJS)

@@ -12,5 +12,5 @@ LDFLAGS = -g
 
 SUBDIRS = @SUBDIRS@
 
-
-
+install::
+	@echo nothing to install in util

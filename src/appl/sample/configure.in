@@ -4,5 +4,6 @@ AC_SET_BUILDTOP
 CONFIG_DIRS(sclient sserver)
 MAKE_SUBDIRS("making",all)
 MAKE_SUBDIRS("cleaning",clean)
+MAKE_SUBDIRS("installing",install)
 CONFIG_RULES
 AC_OUTPUT(Makefile,[EXTRA_RULES])

@@ -1,3 +1,9 @@
+Sat Jun 25 00:33:56 1994  Tom Yu  (tlyu at dragons-lair)
+
+	* Makefile.in (in all relevant subdirs): make install will dtrt
+	now (mostly)
+	* configure.in (in all relevant subdirs): ditto
+
 Thu Jun 23 01:13:20 1994  Tom Yu  (tlyu at dragons-lair)
 
 	* aclocal.m4 (CONFIG_RULES): make --with-cc= dtrt and default to

@@ -5,5 +5,7 @@ CC = @CC@
 CCOPTS = @CCOPTS@
 
 all::
+install::
+	@echo "nothing to install in isode (thankfully!)"
 
 SUBDIRS = @SUBDIRS@

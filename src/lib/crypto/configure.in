@@ -10,4 +10,5 @@ MAKE_SUBDIRS("cleaning",clean)
 AppendRule([all:: libcrypto.a])
 KRB_INCLUDE
 CONFIG_RULES
+WITH_KRB5ROOT
 AC_OUTPUT(Makefile,[EXTRA_RULES])

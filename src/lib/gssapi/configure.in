@@ -9,4 +9,5 @@ MAKE_SUBDIRS("cleaning",clean)
 AppendRule([all:: libgssapi_krb5.a])
 WITH_CCOPTS
 CONFIG_RULES
+WITH_KRB5ROOT
 AC_OUTPUT(Makefile,[EXTRA_RULES])
