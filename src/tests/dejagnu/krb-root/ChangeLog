@@ -1,3 +1,8 @@
+Mon May  6 11:44:18 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* telnet.exp: Use a wrapper script for login.krb5 to setup shared
+		libraries properly. 
+
 Fri Mar 29 01:34:47 1996  Marc Horowitz  <marc@mit.edu>
 
 	* telnet.exp (start_telnet_daemon) use sh -c around telnetd

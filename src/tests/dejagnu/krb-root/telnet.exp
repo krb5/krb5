@@ -19,6 +19,9 @@ if ![info exists LOGINKRB5] {
     set LOGINKRB5 [findfile $objdir/../../appl/bsd/login.krb5]
 }
 
+# Remove old wrapper script
+    catch "exec rm -f $tmppwd/login.wrap"
+
 # Start up a root shell.
 if ![setup_root_shell telnet] {
     return
@@ -51,11 +54,16 @@ proc start_telnet_daemon { } {
     global rlogin_spawn_id
     global telnetd_pid
 
+    # Setup the shared library wrapper for login.krb5
+    if ![file exists $tmppwd/login.wrap] {
+	    setup_wrapper $tmppwd/login.wrap "$LOGINKRB5 $*"
+    }
+
     # The -debug argument tells it to accept a single connection, so
     # we don't need to use inetd.  The 3023 is the port to listen at.
     # Note that tmppwd here is a shell variable, which is set in
     # setup_root_shell, not a TCL variable.
-    send -i $rlogin_spawn_id "sh -c \"$TELNETD -debug -t \$tmppwd/srvtab -R $REALMNAME -L \\\r$LOGINKRB5 -X KERBEROS_V4 3023\" &\r"
+    send -i $rlogin_spawn_id "sh -c \"$TELNETD -debug -t \$tmppwd/srvtab -R $REALMNAME -L $tmppwd/login.wrap -X KERBEROS_V4 3023\" &\r"
     expect {
 	-i $rlogin_spawn_id 
 	-re "$ROOT_PROMPT" { }
