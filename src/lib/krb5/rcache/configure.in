@@ -1,0 +1,6 @@
+AC_INIT(configure.in)
+CONFIG_RULES
+SubdirLibraryRule([${OBJS}])
+KRB_INCLUDE
+ISODE_INCLUDE
+AC_OUTPUT(Makefile,[EXTRA_RULES])

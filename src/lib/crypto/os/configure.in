@@ -1,0 +1,7 @@
+AC_INIT(configure.in)
+CONFIG_RULES
+SubdirLibraryRule([${OBJS}])
+KRB_INCLUDE
+AC_LN_S
+AC_REPLACE_FUNCS(memmove)
+AC_OUTPUT(Makefile,[EXTRA_RULES])

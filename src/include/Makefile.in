@@ -1,0 +1,3 @@
+# nothing needed here
+srcdir = @srcdir@
+SUBDIRS = @SUBDIRS@

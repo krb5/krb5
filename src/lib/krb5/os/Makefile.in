@@ -1,0 +1,79 @@
+SUBDIRS = @SUBDIRS@
+
+srcdir = @srcdir@
+VPATH = @srcdir@
+
+DEFS = @DEFS@
+LIBS = @LIBS@
+ 
+CFLAGS = -g $(DEFS)
+LDFLAGS = -g
+
+RM = rm -f
+CP = cp
+
+BUILDTOP = ../../..
+SRCTOP = $(srcdir)/$(BUILDTOP)
+
+all:: $(OBJS)
+
+OBJS= \
+	an_to_ln.o	\
+	def_realm.o	\
+	ccdefname.o	\
+	free_krbhs.o	\
+	free_hstrl.o	\
+	full_ipadr.o	\
+	get_krbhst.o	\
+	gen_port.o	\
+	gen_rname.o	\
+	hst_realm.o	\
+	krbfileio.o	\
+	ktdefname.o	\
+	kuserok.o	\
+	localaddr.o	\
+	locate_kdc.o	\
+	lock_file.o	\
+	net_read.o	\
+	net_write.o	\
+	osconfig.o	\
+	port2ip.o	\
+	read_msg.o	\
+	read_pwd.o	\
+	sendto_kdc.o	\
+	sn2princ.o	\
+	timeofday.o	\
+	unlck_file.o	\
+	ustime.o	\
+	write_msg.o
+
+SRCS= \
+	$(srcdir)/an_to_ln.c	\
+	$(srcdir)/def_realm.c	\
+	$(srcdir)/ccdefname.c	\
+	$(srcdir)/free_krbhs.c	\
+	$(srcdir)/free_hstrl.c	\
+	$(srcdir)/full_ipadr.c	\
+	$(srcdir)/get_krbhst.c	\
+	$(srcdir)/gen_port.c	\
+	$(srcdir)/gen_rname.c	\
+	$(srcdir)/hst_realm.c	\
+	$(srcdir)/krbfileio.c	\
+	$(srcdir)/ktdefname.c	\
+	$(srcdir)/kuserok.c	\
+	$(srcdir)/localaddr.c	\
+	$(srcdir)/locate_kdc.c	\
+	$(srcdir)/lock_file.c	\
+	$(srcdir)/net_read.c	\
+	$(srcdir)/net_write.c	\
+	$(srcdir)/osconfig.c	\
+	$(srcdir)/read_msg.c	\
+	$(srcdir)/read_pwd.c	\
+	$(srcdir)/port2ip.c	\
+	$(srcdir)/sendto_kdc.c	\
+	$(srcdir)/sn2princ.c	\
+	$(srcdir)/timeofday.c	\
+	$(srcdir)/unlck_file.c	\
+	$(srcdir)/ustime.c	\
+	$(srcdir)/write_msg.c
+

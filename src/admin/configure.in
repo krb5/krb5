@@ -1,0 +1,7 @@
+AC_INIT(configure.in)
+CONFIG_DIRS(create destroy edit stash aname convert)
+MAKE_SUBDIRS("making",all)
+MAKE_SUBDIRS("cleaning",clean)
+CONFIG_RULES
+WITH_KRB5ROOT
+AC_OUTPUT(Makefile,[EXTRA_RULES])

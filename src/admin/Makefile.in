@@ -1,0 +1,22 @@
+srcdir = @srcdir@
+VPATH = @srcdir@
+
+DEFS = @DEFS@
+LIBS = @LIBS@
+
+CFLAGS = -g
+LDFLAGS = -g
+
+SUBDIRS = @SUBDIRS@
+
+RM = rm -f
+CP  = cp
+RANLIB = @RANLIB@
+ARCHIVE = @ARCHIVE@
+LN = @LN_S@
+
+KRB5ROOT = @KRB5ROOT@
+KRB5_LIBDIR = $(KRB5ROOT)/lib
+
+all::
+

@@ -1,0 +1,33 @@
+srcdir = @srcdir@
+VPATH = @srcdir@
+ 
+DEFS = @DEFS@
+LIBS = @LIBS@
+ 
+CFLAGS = -g $(DEFS) $(LOCALINCLUDE)
+LDFLAGS = -g
+
+BUILDTOP=../..
+SRCTOP = $(srcdir)/$(BUILDTOP)
+TOPLIBD = $(BUILDTOP)/lib
+ISODELIB=$(TOPLIBD)/libisode.a
+COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
+DBMLIB=
+KDBLIB=$(TOPLIBD)/libkdb5.a 
+
+all::
+
+KLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(ISODELIB) $(COMERRLIB) $(DBMLIB)
+
+
+DEPLIBS = $(DEPKDBLIB) $(DEPKLIB)
+LOCAL_LIBRARIES = $(KDBLIB) $(KLIB)
+
+all:: kdb5_create
+
+kdb5_create: kdb5_create.o $(DEPLIBS)
+	$(CC) $(CFLAGS) -o kdb5_create kdb5_create.o $(LOCAL_LIBRARIES) $(LIBS)
+
+install::
+	$(INSTALLPROG) kdb5_create ${DESTDIR}$(ADMIN_BINDIR)/kdb5_create
+	$(INSTALLPROG) kdb5_create.M ${DESTDIR}$(ADMIN_MANDIR)/kdb5_create.$(ADMIN_MANSUFFIX)

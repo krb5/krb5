@@ -1,0 +1,28 @@
+SUBDIRS = @SUBDIRS@
+
+srcdir = @srcdir@
+VPATH = @srcdir@
+
+DEFS = @DEFS@
+LIBS = @LIBS@
+ 
+CFLAGS = -g $(DEFS)
+LDFLAGS = -g
+
+RM = rm -f
+CP = cp
+
+BUILDTOP = ../../..
+SRCTOP = $(srcdir)/$(BUILDTOP)
+
+all:: $(OBJS)
+
+
+
+OBJS=	crc.o
+
+SRCS=	$(srcdir)/crc.c $(srcdir)/crctest.c
+
+crctest: crctest.o $(OBJS)
+	$(RM) crctest
+	$(CC) -o $@ crctest.o $(LDFLAGS) $(OBJS)

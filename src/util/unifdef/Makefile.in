@@ -1,0 +1,26 @@
+srcdir = @srcdir@
+VPATH = @srcdir@
+ 
+DEFS = @DEFS@
+LIBS = @LIBS@
+ 
+CFLAGS = -g $(DEFS) $(LOCALINCLUDE)
+LDFLAGS = -g
+
+all::
+
+unifdef: unifdef.o
+	$(CC) $(CFLAGS) -o unifdef unifdef.o
+
+unifdef.o:	unifdef.c
+
+all:: unifdef
+
+
+clean::
+	$(RM) unifdef.o unifdef
+
+includes:: unifdef
+
+install::
+	$(INSTALLPROG) unifdef ${DESTDIR}$(PROGDIR)/unifdef

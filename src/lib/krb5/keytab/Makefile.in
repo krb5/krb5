@@ -1,0 +1,37 @@
+SUBDIRS = @SUBDIRS@
+
+srcdir = @srcdir@
+VPATH = @srcdir@
+
+DEFS = @DEFS@
+LIBS = @LIBS@
+ 
+CFLAGS = -g $(DEFS)
+LDFLAGS = -g
+
+RM = rm -f
+CP = cp
+
+BUILDTOP = ../../..
+SRCTOP = $(srcdir)/$(BUILDTOP)
+
+all:: $(OBJS)
+
+
+
+OBJS=	\
+	ktadd.o		\
+	ktbase.o	\
+	ktdefault.o	\
+	ktfr_entry.o	\
+	ktremove.o	\
+	read_servi.o
+
+SRCS=	\
+	$(srcdir)/ktadd.c	\
+	$(srcdir)/ktbase.c	\
+	$(srcdir)/ktdefault.c	\
+	$(srcdir)/ktfr_entry.c	\
+	$(srcdir)/ktremove.c	\
+	$(srcdir)/read_servi.c
+

@@ -1,0 +1,32 @@
+SUBDIRS = @SUBDIRS@
+
+srcdir = @srcdir@
+VPATH = @srcdir@
+
+DEFS = @DEFS@
+LIBS = @LIBS@
+ 
+CFLAGS = -g $(DEFS)
+LDFLAGS = -g
+
+RM = rm -f
+CP = cp
+
+BUILDTOP = ../../..
+SRCTOP = $(srcdir)/$(BUILDTOP)
+
+all:: $(OBJS)
+
+OBJS=	\
+	rc_base.o	\
+	rc_dfl.o 	\
+	rc_io.o		\
+	rcdef.o		\
+	rc_conv.o
+
+SRCS=	\
+	$(srcdir)/rc_base.c	\
+	$(srcdir)/rc_dfl.c 	\
+	$(srcdir)/rc_io.c	\
+	$(srcdir)/rcdef.c	\
+	$(srcdir)/rc_conv.c

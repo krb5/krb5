@@ -1,0 +1,36 @@
+srcdir = @srcdir@
+VPATH = @srcdir@
+ 
+DEFS = @DEFS@
+LIBS = @LIBS@
+ 
+CFLAGS = -g $(DEFS) $(LOCALINCLUDE)
+LDFLAGS = -g
+
+BUILDTOP=../..
+SRCTOP = $(srcdir)/$(BUILDTOP)
+TOPLIBD = $(BUILDTOP)/lib
+ISODELIB=$(TOPLIBD)/libisode.a
+COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
+DBMLIB=
+KDBLIB=$(TOPLIBD)/libkdb5.a 
+KDB4LIB=/usr/kerberos/lib/libkdb.a
+KRB4LIB=/usr/kerberos/lib/libkrb.a /usr/kerberos/lib/libdes.a
+
+all::
+
+KLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(ISODELIB) $(COMERRLIB) $(DBMLIB)
+
+
+DEPLIBS = $(DEPKDBLIB) $(DEPKLIB)
+LOCAL_LIBRARIES = $(KDBLIB) $(KLIB) $(KDB4LIB) $(KRB4LIB)
+LOCALINCLUDE=-I$(SRCTOP)/include/kerberosIV -I$(BUILDTOP)/include/kerberosIV
+
+all:: kdb5_convert
+
+kdb5_convert: kdb5_convert.o $(DEPLIBS)
+	$(CC) $(CFLAGS) -o kdb5_convert kdb5_convert.o $(LOCAL_LIBRARIES) $(LIBS)
+
+install::
+	$(INSTALLPROG) kdb5_convert ${DESTDIR}$(ADMIN_BINDIR)/kdb5_convert
+	$(INSTALLPROG) kdb5_convert.M ${DESTDIR}$(ADMIN_MANDIR)/kdb5_convert.$(ADMIN_MANSUFFIX)

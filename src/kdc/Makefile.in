@@ -1,0 +1,80 @@
+srcdir = @srcdir@
+VPATH = @srcdir@
+ 
+DEFS = @DEFS@
+LIBS = @LIBS@
+ 
+CFLAGS = -g $(DEFS) $(LOCALINCLUDE)
+LDFLAGS = -g
+
+BUILDTOP=..
+SRCTOP = $(srcdir)/$(BUILDTOP)
+TOPLIBD = $(BUILDTOP)/lib
+ISODELIB=$(TOPLIBD)/libisode.a
+COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
+DBMLIB=
+KDBLIB=$(TOPLIBD)/libkdb5.a 
+
+RM = rm -f
+CP = cp
+
+AWK = @AWK@
+
+KLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(ISODELIB) $(COMERRLIB) $(DBMLIB)
+
+all::
+
+
+#ifdef Krb4KDCCompat
+KRB4DEF = -DKRB4
+K4LIB=$(KRB4LIB)
+#endif
+DEFINES = -DBACKWARD_COMPAT $(KRB4DEF)
+
+INCLUDES = $(KRB4INCLUDES) -I.
+SRCS= \
+	kdc5_err.c \
+	$(srcdir)/dispatch.c \
+	$(srcdir)/do_as_req.c \
+	$(srcdir)/do_tgs_req.c \
+	$(srcdir)/kdc_util.c \
+	$(srcdir)/main.c \
+	$(srcdir)/network.c \
+	$(srcdir)/policy.c \
+	$(srcdir)/extern.c \
+	$(srcdir)/replay.c \
+	$(srcdir)/kerberos_v4.c
+
+OBJS= \
+	kdc5_err.o \
+ 	dispatch.o \
+	do_as_req.o \
+	do_tgs_req.o \
+	kdc_util.o \
+	main.o \
+	network.o \
+	policy.o \
+	extern.o \
+	replay.o \
+	kerberos_v4.o
+
+all::	krb5kdc
+
+depend:: kdc5_err.c
+
+kdc5_err.c: kdc5_err.et
+
+kdc5_err.h: kdc5_err.et
+
+kdc5_err.o: kdc5_err.h
+
+krb5kdc: $(OBJS) $(KDBDEPLIB) $(DEPKLIB)
+	$(CC) $(CFLAGS) -o krb5kdc $(OBJS) $(KDBLIB) $(KLIB) $(K4LIB) $(LIBS)
+
+install::
+	$(INSTALLPROG) krb5kdc ${DESTDIR}$(SERVER_BINDIR)/krb5kdc
+	$(INSTALLPROG) krb5kdc.M ${DESTDIR}$(SERVER_MANDIR)/krb5kdc.$(SERVER_MANSUFFIX)
+
+clean::
+	$(RM) kdc5_err.h kdc5_err.c
+

@@ -1,0 +1,41 @@
+srcdir = @srcdir@
+VPATH = @srcdir@
+ 
+DEFS = @DEFS@
+LIBS = @LIBS@
+ 
+CFLAGS = -g $(DEFS)
+LDFLAGS = -g
+
+RM = rm -f
+CP = cp
+
+AWK = @AWK@
+
+BUILDTOP = ../../..
+
+EHDRDIR=$(BUILDTOP)/include/krb5
+
+HDRS=isode_err.h kdb5_err.h krb5_err.h adm_err.h
+OBJS=isode_err.o kdb5_err.o krb5_err.o adm_err.o init_ets.o
+ETSRCS=isode_err.c kdb5_err.c krb5_err.c adm_err.c
+SRCS=$(ETSRCS) $(srcdir)/init_ets.c
+
+all:: ${HDRS} includes ${OBJS}
+
+#
+# dependencies for traditional makes
+#
+isode_err.o: isode_err.c
+kdb5_err.o: kdb5_err.c
+krb5_err.o: krb5_err.c
+adm_err.o: adm_err.c
+
+
+clean::
+	$(RM) $(HDRS) $(ETSRCS)
+
+clean::
+	$(RM) $(OBJS)
+
+

@@ -1,0 +1,16 @@
+KRB4_HEADERS=krb.h des.h kadm.h mit-copyright.h
+
+all::
+
+clean::
+
+depend::
+
+KRB5ROOT = @KRB5ROOT@
+
+KRB5_INCDIR = $(KRB5ROOT)/include
+
+install:: $(KRB4_HEADERS)
+	@set -x; for f in $(KRB4_HEADERS) ; \
+	do $(INSTALL) -c $(INSTDATFLAGS) $$f $(KRB5_INCDIR)/kerberosIV/$$f ; \
+	done

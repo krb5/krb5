@@ -1,0 +1,10 @@
+AC_INIT(configure.in)
+CONFIG_DIRS(error_tables asn.1 ccache keytab krb rcache free os posix)
+AC_PROG_ARCHIVE
+AC_PROG_ARCHIVE_ADD
+AC_PROG_RANLIB
+MAKE_SUBDIRS("making",all)
+MAKE_SUBDIRS("cleaning",clean)
+AppendRule([all:: libkrb5.a])
+CONFIG_RULES
+AC_OUTPUT(Makefile,[EXTRA_RULES])

@@ -1,0 +1,100 @@
+SUBDIRS = @SUBDIRS@
+
+srcdir = @srcdir@
+VPATH = @srcdir@
+
+DEFS = @DEFS@
+LIBS = @LIBS@
+ 
+CFLAGS = -g $(DEFS)
+LDFLAGS = -g
+
+RM = rm -f
+CP = cp
+
+AWK = @AWK@
+
+BUILDTOP = ../../..
+SRCTOP = $(srcdir)/$(BUILDTOP)
+
+all:: $(OBJS)
+
+ETSRCS= gssapi_krb5_err.c
+ETOBJS= gssapi_krb5_err.o
+ETHDRS= gssapi_krb5_err.h
+
+CCSRCS = \
+	$(srcdir)/accept_sec_context.c \
+	$(srcdir)/acquire_cred.c \
+	$(srcdir)/compare_name.c \
+	$(srcdir)/context_time.c \
+	$(srcdir)/delete_sec_context.c \
+	$(srcdir)/display_name.c \
+	$(srcdir)/display_status.c \
+	$(srcdir)/get_tkt_flags.c \
+	$(srcdir)/gssapi_krb5.c \
+	$(srcdir)/import_name.c \
+	$(srcdir)/indicate_mechs.c \
+	$(srcdir)/init_sec_context.c \
+	$(srcdir)/inquire_context.c \
+	$(srcdir)/inquire_cred.c \
+	$(srcdir)/k5seal.c \
+	$(srcdir)/k5unseal.c \
+	$(srcdir)/krb5_gss_glue.c \
+	$(srcdir)/process_context_token.c \
+	$(srcdir)/release_cred.c \
+	$(srcdir)/release_name.c \
+	$(srcdir)/seal.c \
+	$(srcdir)/sign.c \
+	$(srcdir)/unseal.c \
+	$(srcdir)/util_cksum.c \
+	$(srcdir)/util_crypt.c \
+	$(srcdir)/util_seed.c \
+	$(srcdir)/util_seqnum.c \
+	$(srcdir)/verify.c
+
+CCOBJS = \
+	accept_sec_context.o \
+	acquire_cred.o \
+	compare_name.o \
+	context_time.o \
+	delete_sec_context.o \
+	display_name.o \
+	display_status.o \
+	get_tkt_flags.o \
+	gssapi_krb5.o \
+	import_name.o \
+	indicate_mechs.o \
+	init_sec_context.o \
+	inquire_context.o \
+	inquire_cred.o \
+	k5seal.o \
+	k5unseal.o \
+	krb5_gss_glue.o \
+	process_context_token.o \
+	release_cred.o \
+	release_name.o \
+	seal.o \
+	sign.o \
+	unseal.o \
+	util_cksum.o \
+	util_crypt.o \
+	util_seed.o \
+	util_seqnum.o \
+	verify.o
+
+SRCS= $(ETSRCS) $(CCSRCS)
+OBJS= $(ETOBJS) $(CCOBJS)
+HDRS= $(ETHDRS)
+
+EHDRDIR=$(TOP)/include/gssapi
+
+all:: $(SRCS) $(HDRS) includes $(OBJS)
+
+clean::
+	$(RM) $(ETHDRS) $(ETSRCS)
+
+depend:: $(ETSRCS)
+
+includes:: 
+

@@ -1,0 +1,27 @@
+SUBDIRS = @SUBDIRS@
+
+srcdir = @srcdir@
+VPATH = @srcdir@
+
+DEFS = @DEFS@
+LIBS = @LIBS@
+ 
+CFLAGS = -g $(DEFS)
+LDFLAGS = -g
+
+RM = rm -f
+CP = cp
+
+BUILDTOP = ../../..
+SRCTOP = $(srcdir)/$(BUILDTOP)
+
+all:: $(OBJS)
+
+OBJS=	ccbase.o \
+	ccdefault.o \
+	ccdefops.o
+
+SRCS=	$(srcdir)/ccbase.c \
+	$(srcdir)/ccdefault.c \
+	$(srcdir)/ccdefops.c
+

@@ -1,0 +1,31 @@
+srcdir = @srcdir@
+VPATH = @srcdir@
+
+DEFS = @DEFS@
+LIBS = @LIBS@
+
+CFLAGS = -g
+LDFLAGS = -g
+
+SUBDIRS = @SUBDIRS@
+
+RM = rm -f
+CP  = cp
+RANLIB = @RANLIB@
+ARCHIVE = @ARCHIVE@
+LN = @LN_S@
+
+KRB5ROOT = @KRB5ROOT@
+KRB5_LIBDIR = $(KRB5ROOT)/lib
+
+all::
+
+install:: libkrb425.a
+	$(RM) $(KRB5_LIBDIR)/libkrb425.a
+	$(CP) libkrb425.a $(KRB5_LIBDIR)/libkrb425.a
+	$(RANLIB) $(KRB5_LIBDIR)/libkrb425.a
+
+install:: libdes425.a
+	$(RM) $(KRB5_LIBDIR)/libdes425.a
+	$(CP) libdes425.a $(KRB5_LIBDIR)/libdes425.a
+	$(RANLIB) $(KRB5_LIBDIR)/libdes425.a

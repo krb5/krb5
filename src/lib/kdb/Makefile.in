@@ -1,0 +1,54 @@
+RANLIB = @RANLIB@
+ARCHIVE = @ARCHIVE@
+ARADD = @ARADD@
+
+srcdir = @srcdir@
+VPATH = @srcdir@
+
+DEFS = @DEFS@
+LIBS = @LIBS@
+ 
+CFLAGS = -g $(DEFS)
+LDFLAGS = -g
+
+RM = rm -f
+CP = cp
+
+BUILDTOP = ../..
+SRCTOP = $(srcdir)/$(BUILDTOP)
+
+all:: $(OBJS)
+
+
+SRCS= \
+	$(srcdir)/encrypt_key.c \
+	$(srcdir)/decrypt_key.c \
+	$(srcdir)/kdb_dbm.c \
+	$(srcdir)/verify_mky.c \
+	$(srcdir)/fetch_mkey.c \
+	$(srcdir)/setup_mkey.c \
+	$(srcdir)/store_mkey.c
+
+OBJS= \
+	encrypt_key.o \
+	decrypt_key.o \
+	kdb_dbm.o \
+	verify_mky.o \
+	fetch_mkey.o \
+	setup_mkey.o \
+	store_mkey.o
+
+TOPLIBD = $(BUILDTOP)/lib
+
+libkdb5.a: $(OBJS)
+	$(RM) $@
+	$(ARADD) $@ $(OBJS)
+	$(RANLIB) $@
+	$(RM) $(TOPLIBD)/libkdb5.a
+	$(CP) libkdb5.a $(BUILDTOP)/lib/libkdb5.a
+	$(RANLIB) $(BUILDTOP)/lib/libkdb5.a
+
+install:: libkdb5.a
+	$(RM) $(KRB5_LIBDIR)/lib/libkdb5.a
+	$(CP) libkdb5.a $(KRB5_LIBDIR)/lib/libkdb5.a
+	$(RANLIB) $(KRB5_LIBDIR)/lib/libkdb5.a

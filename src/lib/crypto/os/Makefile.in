@@ -1,0 +1,39 @@
+SUBDIRS = @SUBDIRS@
+
+srcdir = @srcdir@
+VPATH = @srcdir@
+
+DEFS = @DEFS@
+LIBS = @LIBS@
+ 
+CFLAGS = -g $(DEFS)
+LDFLAGS = -g
+
+RM = rm -f
+CP = cp
+LN = @LN_S@
+
+LIBOBJS = @LIBOBJS@
+
+BUILDTOP = ../../..
+SRCTOP = $(srcdir)/$(BUILDTOP)
+
+all:: $(OBJS)
+
+
+
+OBJS=	rnd_confoun.o localaddr.o ustime.o $(LIBOBJS)
+
+SRCS=	rnd_confoun.c localaddr.c ustime.c 
+
+localaddr.c: ../../krb5/os/localaddr.c
+	$(LN) ../../krb5/os/localaddr.c $@
+
+ustime.c: ../../krb5/os/ustime.c
+	$(LN) ../../krb5/os/ustime.c $@
+
+memmove.c: ../../krb5/posix/memmove.c
+	$(LN) ../../krb5/posix/memmove.c $@
+
+
+

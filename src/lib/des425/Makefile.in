@@ -1,0 +1,71 @@
+RANLIB = @RANLIB@
+ARCHIVE = @ARCHIVE@
+ARADD = @ARADD@
+
+SUBDIRS = @SUBDIRS@
+
+srcdir = @srcdir@
+VPATH = @srcdir@
+
+DEFS = @DEFS@
+LIBS = @LIBS@
+ 
+CFLAGS = -g $(DEFS)
+LDFLAGS = -g
+
+RM = rm -f
+CP = cp
+
+BUILDTOP = ../..
+SRCTOP = $(srcdir)/$(BUILDTOP)
+
+all:: $(OBJS)
+
+OBJS=	cksum.o		\
+	des.o		\
+	enc_dec.o	\
+	key_parity.o	\
+	key_sched.o	\
+	new_rnd_key.o	\
+	pcbc_encrypt.o	\
+	quad_cksum.o	\
+	random_key.o	\
+	read_passwd.o \
+	str_to_key.o	\
+	weak_key.o	
+
+SRCS=	$(srcdir)/cksum.c	\
+	$(srcdir)/des.c		\
+	$(srcdir)/enc_dec.c	\
+	$(srcdir)/key_parity.c	\
+	$(srcdir)/key_sched.c	\
+	$(srcdir)/new_rnd_key.c	\
+	$(srcdir)/pcbc_encrypt.c	\
+	$(srcdir)/quad_cksum.c	\
+	$(srcdir)/random_key.c	\
+	$(srcdir)/read_passwd.c \
+	$(srcdir)/str_to_key.c \
+	$(srcdir)/weak_key.c	
+
+
+EXT_LIB= $(TOPDIR)/lib/cryptoconf.o $(TOPDIR)/lib/crypto/libcrypto.a libdes425.a $(COMERRLIB)
+
+verify: verify.o libdes425.o
+	$(RM) verify.o
+	$(CC) -o $@ verify.o $(LDFLAGS) $(EXT_LIB)
+
+clean::
+	$(RM) verify
+
+libdes425.a: $(OBJS)
+	$(RM) $@
+	$(ARADD) $@ $(OBJS)
+	$(RANLIB) $@
+	$(RM) $(TOPLIBD)/libdes425.a
+	$(CP) libdes425.a $(BUILDTOP)/lib/libdes425.a
+	$(RANLIB) $(BUILDTOP)/lib/libdes425.a
+
+install:: libdes425.a
+	$(RM) $(KRB5_LIBDIR)/lib/libdes425.a
+	$(CP) libdes425.a $(KRB5_LIBDIR)/lib/libdes425.a
+	$(RANLIB) $(KRB5_LIBDIR)/lib/libdes425.a

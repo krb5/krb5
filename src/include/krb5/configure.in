@@ -1,0 +1,76 @@
+AC_INIT(config.h)
+AC_CONFIG_HEADER(autoconf.h)
+HAVE_YYLINENO
+AC_FUNC_CHECK(strdup,AC_DEFINE(HAS_STRDUP))
+CHECK_DIRENT
+CHECK_FCNTL
+CHECK_WAIT_TYPE
+
+dnl stuff from config.h
+AC_HEADER_CHECK(termios.h,AC_FUNC_CHECK([tcsetattr],AC_DEFINE(POSIX_TERMIOS)))
+
+AC_HEADER_CHECK(flock.h,[echo found flock.h for non-posix locks],
+AC_COMPILE_CHECK([POSIX file locking -- structs and flags],
+[#include <sys/types.h>
+#include <fcntl.h>],
+[struct flock f; 1+F_SETLK;], 
+AC_DEFINE(POSIX_FILE_LOCKS)))
+
+dnl time_t, only used in lib/krb5/os/timeofday.c
+AC_HEADER_EGREP(time_t, sys/types.h, AC_DEFINE(POSIX_TYPES))
+
+
+dnl AC_RETSIGTYPE isn't quite right, but almost.
+AC_COMPILE_CHECK([POSIX signal handlers],
+[#include <sys/types.h>
+#include <signal.h>
+#ifdef signal
+#undef signal
+#endif
+extern void (*signal ()) ();], ,
+[AC_DEFINE(krb5_sigtype, void) AC_DEFINE(POSIX_SIGTYPE)],
+[AC_DEFINE(krb5_sigtype, int)])
+
+AC_HEADER_CHECK(string.h,AC_DEFINE(USE_STRING_H))
+AC_HEADER_CHECK(stdlib.h,AC_DEFINE(HAS_STDLIB_H),AC_DEFINE(NO_STDLIB_H))
+CHECK_STDARG
+
+dnl this is misused to *also* mean that "b" is needed to fopen binary...
+AC_FUNC_CHECK([setvbuf],AC_DEFINE(ANSI_STDIO))
+
+
+AC_COMPILE_CHECK([prototype support],
+[int x(double y, int z);],,AC_DEFINE(KRB5_PROVIDE_PROTOTYPES))
+dnl *never* set NARROW_PROTOTYPES
+
+AC_COMPILE_CHECK([prototypes in structs],
+[typedef int i_t; typedef struct foo { int (*foofn)(i_t, i_t); } *footype;],,,
+AC_DEFINE(NO_NESTED_PROTOTYPES))
+
+AC_COMPILE_CHECK([void],[void x();], , AC_DEFINE(HAS_VOID_TYPE))
+
+
+dnl base-defs.h tries to do the same thing anyhow.
+dnl HAS_ANSI_CONST is here, but -Dconst= is better...
+AC_CONST
+AC_DEFINE(HAS_ANSI_CONST)
+
+AC_COMPILE_CHECK([volatile],[volatile int x();], ,AC_DEFINE(HAS_ANSI_VOLATILE))
+
+dnl BITS16, BITS32, BITS64
+AC_DEFINE(BITS32)
+
+dnl then from osconf.h, we have
+AC_TIME_WITH_SYS_TIME
+AC_HEADER_CHECK(sys/time.h,AC_DEFINE(USE_SYS_TIME_H))
+
+AC_HEADER_CHECK(netinet/in.h,AC_DEFINE(KRB5_USE_INET))
+AC_HEADER_CHECK(unistd.h,AC_DEFINE(HAS_UNISTD_H))
+
+AC_HAVE_LIBRARY(-lndbm)
+AC_HAVE_LIBRARY(-ldbm)
+AC_FUNC_CHECK([dbm_open], , AC_DEFINE(ODBM))
+
+CONFIG_RULES
+WITH_KRB5ROOT
+AC_OUTPUT(Makefile,[EXTRA_RULES])

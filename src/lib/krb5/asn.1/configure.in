@@ -1,0 +1,13 @@
+AC_INIT(configure.in)
+UsePepsy
+CONFIG_RULES
+SubdirLibraryRule([${OBJS}])
+CopyHeader(KRB5-types.h,[$(EHDRDIR)])
+CopyHeader(KRB5_defs.h,[$(EHDRDIR)])
+CopyHeader(KRB5_pre_defs.h,[$(EHDRDIR)])
+Krb5InstallHeaders(KRB5_defs.h KRB5_pre_defs.h KRB5-types.h, [$(KRB5_INCDIR)/krb5/asn.1])
+PepsyTarget(KRB5)
+KRB_INCLUDE
+ISODE_INCLUDE
+WITH_KRB5ROOT
+AC_OUTPUT(Makefile,[EXTRA_RULES])

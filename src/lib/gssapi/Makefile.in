@@ -1,0 +1,24 @@
+srcdir = @srcdir@
+VPATH = @srcdir@
+
+ARCHIVE = @ARCHIVE@
+ARADD = @ARADD@
+
+SUBDIRS = @SUBDIRS@
+
+RM = rm -f
+CP = cp
+RANLIB = @RANLIB@
+
+all::
+
+libgssapi_krb5.a: generic/DONE krb5/DONE
+	(cd generic; $(ARADD) ../$@ `cat DONE`)
+	(cd krb5; $(ARADD) ../$@ `cat DONE`)
+	$(RANLIB) $@
+
+install:: libgssapi_krb5.a
+	$(RM) $(KRB5_LIBDIR)/lib/libgssapi_krb5.a
+	$(CP) libgssapi_krb5.a $(KRB5_LIBDIR)/lib/libgssapi_krb5.a
+	$(RANLIB) $(KRB5_LIBDIR)/lib/libgssapi_krb5.a
+

@@ -1,0 +1,139 @@
+SUBDIRS = @SUBDIRS@
+
+srcdir = @srcdir@
+VPATH = @srcdir@
+
+DEFS = @DEFS@
+LIBS = @LIBS@
+ 
+CFLAGS = -g $(DEFS)
+LDFLAGS = -g
+
+RM = rm -f
+CP = cp
+
+BUILDTOP = ../../..
+SRCTOP = $(srcdir)/$(BUILDTOP)
+
+all:: $(OBJS)
+
+
+
+OBJS=	addr_comp.o	\
+	addr_order.o	\
+	addr_srch.o	\
+	bld_pr_ext.o	\
+	bld_princ.o	\
+	compat_recv.o	\
+	conv_princ.o	\
+	copy_addrs.o	\
+	copy_auth.o	\
+	copy_athctr.o	\
+	copy_cksum.o    \
+	copy_creds.o	\
+	copy_data.o	\
+	copy_key.o	\
+	copy_princ.o	\
+	copy_tick.o	\
+	cp_key_cnt.o	\
+	decode_kdc.o	\
+	decrypt_tk.o	\
+	encode_kdc.o	\
+	encrypt_tk.o	\
+	free_rtree.o	\
+	faddr_ordr.o	\
+	gc_frm_kdc.o	\
+	gc_via_tgt.o	\
+	gc_2tgt.o	\
+	gen_seqnum.o	\
+	gen_subkey.o	\
+	get_creds.o	\
+	get_in_tkt.o	\
+	in_tkt_pwd.o	\
+	in_tkt_sky.o	\
+	kdc_rep_dc.o	\
+	krbconfig.o	\
+	mk_error.o	\
+	mk_priv.o	\
+	mk_rep.o	\
+	mk_req.o	\
+	mk_req_ext.o	\
+	mk_safe.o	\
+	parse.o		\
+	pr_to_salt.o	\
+	preauth.o	\
+	princ_comp.o	\
+	rd_error.o	\
+	rd_priv.o	\
+	rd_rep.o	\
+	rd_req.o	\
+	rd_req_sim.o	\
+	rd_req_dec.o	\
+	rd_safe.o	\
+	recvauth.o	\
+	sendauth.o	\
+	send_tgs.o	\
+	srv_rcache.o	\
+	tgtname.o	\
+	unparse.o	\
+	walk_rtree.o
+
+SRCS=	$(srcdir)/addr_comp.c	\
+	$(srcdir)/addr_order.c	\
+	$(srcdir)/addr_srch.c	\
+	$(srcdir)/bld_pr_ext.c	\
+	$(srcdir)/bld_princ.c	\
+	$(srcdir)/compat_recv.c	\
+	$(srcdir)/conv_princ.c	\
+	$(srcdir)/copy_addrs.c	\
+	$(srcdir)/copy_auth.c	\
+	$(srcdir)/copy_athctr.c	\
+	$(srcdir)/copy_cksum.c   \
+	$(srcdir)/copy_creds.c	\
+	$(srcdir)/copy_data.c	\
+	$(srcdir)/copy_key.c	\
+	$(srcdir)/copy_princ.c	\
+	$(srcdir)/copy_tick.c	\
+	$(srcdir)/cp_key_cnt.c	\
+	$(srcdir)/decode_kdc.c	\
+	$(srcdir)/decrypt_tk.c	\
+	$(srcdir)/encode_kdc.c	\
+	$(srcdir)/encrypt_tk.c	\
+	$(srcdir)/free_rtree.c	\
+	$(srcdir)/faddr_ordr.c	\
+	$(srcdir)/gc_frm_kdc.c	\
+	$(srcdir)/gc_via_tgt.c	\
+	$(srcdir)/gc_2tgt.c	\
+	$(srcdir)/gen_seqnum.c	\
+	$(srcdir)/gen_subkey.c	\
+	$(srcdir)/get_creds.c	\
+	$(srcdir)/get_in_tkt.c	\
+	$(srcdir)/in_tkt_pwd.c	\
+	$(srcdir)/in_tkt_sky.c	\
+	$(srcdir)/kdc_rep_dc.c	\
+	$(srcdir)/krbconfig.c	\
+	$(srcdir)/mk_error.c	\
+	$(srcdir)/mk_priv.c	\
+	$(srcdir)/mk_rep.c	\
+	$(srcdir)/mk_req.c	\
+	$(srcdir)/mk_req_ext.c	\
+	$(srcdir)/mk_safe.c	\
+	$(srcdir)/parse.c	\
+	$(srcdir)/pr_to_salt.c	\
+	$(srcdir)/preauth.c	\
+	$(srcdir)/princ_comp.c	\
+	$(srcdir)/rd_error.c	\
+	$(srcdir)/rd_priv.c	\
+	$(srcdir)/rd_rep.c	\
+	$(srcdir)/rd_req.c	\
+	$(srcdir)/rd_req_sim.c	\
+	$(srcdir)/rd_req_dec.c	\
+	$(srcdir)/rd_safe.c	\
+	$(srcdir)/recvauth.c	\
+	$(srcdir)/sendauth.c	\
+	$(srcdir)/send_tgs.c	\
+	$(srcdir)/srv_rcache.c	\
+	$(srcdir)/tgtname.c	\
+	$(srcdir)/unparse.c	\
+	$(srcdir)/walk_rtree.c
+

@@ -1,0 +1,53 @@
+srcdir = @srcdir@
+VPATH = @srcdir@
+ 
+DEFS = @DEFS@
+LIBS = @LIBS@
+ 
+CFLAGS = -g $(DEFS) $(LOCALINCLUDE)
+LDFLAGS = -g
+
+BUILDTOP=../../..
+SRCTOP = $(srcdir)/$(BUILDTOP)
+TOPLIBD = $(BUILDTOP)/lib
+ISODELIB=$(TOPLIBD)/libisode.a
+COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
+DBMLIB=
+
+all::
+
+KLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(ISODELIB) $(COMERRLIB) $(DBMLIB)
+
+
+#
+# Everything happens in ../Makefile.config and Makefile.generic
+#
+
+all:
+	@-if [ -f ../Config.local ]; \
+	then \
+		echo make -f ../Config.local WHAT="" CC="${CC}" \
+			KLIB="$(KLIB)" DEPKLIB="$(DEPKLIB)"; \
+		make -f ../Config.local WHAT="" CC="${CC}" \
+			KLIB="$(KLIB)" DEPKLIB="$(DEPKLIB)"; \
+	else \
+		echo make -f ../Config.generic WHAT="" CC="${CC}" \
+			KLIB="$(KLIB)" DEPKLIB="$(DEPKLIB)" $(TELNET_OPSYS); \
+		make -f ../Config.generic WHAT="" CC="${CC}" \
+			KLIB="$(KLIB)" DEPKLIB="$(DEPKLIB)" $(TELNET_OPSYS); \
+	fi
+
+.DEFAULT:
+	@-if [ -f ../Config.local ]; \
+	then \
+		echo make -f ../Config.local WHAT=$@ CC="${CC}" \
+			DESTDIR=$(DESTDIR) DEST=$(DEST) $(TELNET_OPSYS); \
+		make -f ../Config.local WHAT=$@ CC="${CC}" \
+			DESTDIR=$(DESTDIR) DEST=$(DEST) $(TELNET_OPSYS); \
+	else \
+		echo make -f ../Config.generic WHAT=$@ CC="${CC}" \
+			DESTDIR=$(DESTDIR) DEST=$(DEST) $(TELNET_OPSYS); \
+		make -f ../Config.generic WHAT=$@ CC="${CC}" \
+			DESTDIR=$(DESTDIR) DEST=$(DEST) $(TELNET_OPSYS); \
+	fi
+

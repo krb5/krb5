@@ -1,0 +1,40 @@
+srcdir = @srcdir@
+VPATH = @srcdir@
+
+BUILDTOP = ../..
+
+RM = rm -f
+
+CP = cp
+
+KRB5_HEADERS = asn1.h base-defs.h ccache.h crc-32.h encryption.h \
+		error_def.h errors.h ext-proto.h fieldbits.h \
+		free.h func-proto.h hostaddr.h kdb.h kdb_dbm.h \
+		keytab.h krb5.h libos.h los-proto.h macros.h mit-des.h \
+		narrow.h proto.h rcache.h rsa-md4.h safepriv.h \
+		sysincl.h widen.h wordsize.h
+
+all:: autoconf.h
+
+includes:: autoconf.h
+
+# Run a header through a preprocessor to generate an architecture/environment
+# specific header file.  note that unifdef's exit status will normally be 1,
+# indicating some adjustment of the file took place.
+
+autoconf.h: $(srcdir)/configure
+	$(srcdir)/configure
+
+clean::
+	$(RM) autoconf.h
+
+depend::
+
+KRB5ROOT = @KRB5ROOT@
+
+KRB5_INCDIR = $(KRB5ROOT)/include
+
+install:: $(KRB5_HEADERS) config.h osconf.h autoconf.h
+	@set -x; for f in $(KRB5_HEADERS) config.h osconf.h ; \
+	do $(INSTALL) -c $(INSTDATFLAGS) $$f $(KRB5_INCDIR)/krb5/$$f ; \
+	done

@@ -1,0 +1,54 @@
+srcdir = @srcdir@
+VPATH = @srcdir@
+
+DEFS = @DEFS@
+LIBS = @LIBS@
+ 
+CFLAGS = -g $(DEFS)
+LDFLAGS = -g
+
+RM = rm -f
+CP = cp
+
+BUILDTOP = ../../../..
+SRCTOP = $(srcdir)/$(BUILDTOP)
+
+all:: $(OBJS)
+
+clean::
+	$(RM) $(OBJS)
+
+
+
+SRCS= \
+	$(srcdir)/ktf_add.c \
+	$(srcdir)/ktf_endget.c \
+	$(srcdir)/ktf_next.c \
+	$(srcdir)/ktf_resolv.c \
+	$(srcdir)/ktf_wops.c \
+	$(srcdir)/ktf_close.c \
+	$(srcdir)/ktf_get_en.c \
+	$(srcdir)/ktf_ops.c \
+	$(srcdir)/ktf_ssget.c \
+	$(srcdir)/ktf_wreslv.c \
+	$(srcdir)/ktf_defops.c \
+	$(srcdir)/ktf_get_na.c \
+	$(srcdir)/ktf_remove.c \
+	$(srcdir)/ktf_util.c
+
+OBJS = \
+	ktf_add.o	\
+	ktf_close.o	\
+	ktf_endget.o	\
+	ktf_get_en.o	\
+	ktf_get_na.o	\
+	ktf_next.o	\
+	ktf_resolv.o	\
+	ktf_remove.o	\
+	ktf_ssget.o	\
+	ktf_util.o	\
+	ktf_ops.o	\
+	ktf_wops.o	\
+	ktf_wreslv.o	\
+	ktf_defops.o
+

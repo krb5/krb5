@@ -1,0 +1,61 @@
+srcdir = @srcdir@
+VPATH = @srcdir@
+ 
+DEFS = @DEFS@
+LIBS = @LIBS@
+ 
+CFLAGS = -g $(DEFS) $(LOCALINCLUDE)
+LDFLAGS = -g
+
+BUILDTOP=../..
+SRCTOP = $(srcdir)/$(BUILDTOP)
+TOPLIBD = $(BUILDTOP)/lib
+ISODELIB=$(TOPLIBD)/libisode.a
+COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
+SSLIB=$(BUILDTOP)/util/ss/libss.a
+DBMLIB=
+KDBLIB=$(TOPLIBD)/libkdb5.a 
+
+all::
+
+KLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(ISODELIB) $(SSLIB) $(COMERRLIB) $(DBMLIB)
+
+DEPLIBS = $(DEPKDBLIB) $(DEPKLIB)
+LOCAL_LIBRARIES = $(KDBLIB) $(KLIB)
+
+
+SRCS = \
+	$(srcdir)/kadmin.c \
+	$(srcdir)/kadmin_add.c \
+	$(srcdir)/kadmin_adr.c \
+	$(srcdir)/kadmin_cpr.c \
+	$(srcdir)/kadmin_inq.c \
+	$(srcdir)/kadmin_msnd.c \
+	$(srcdir)/kadmin_mod.c \
+	$(srcdir)/kadmin_cpw.c \
+	$(srcdir)/kadmin_del.c \
+	$(srcdir)/kadmin_done.c
+
+OBJS = \
+	kadmin.o \
+	kadmin_add.o \
+	kadmin_adr.o \
+	kadmin_cpr.o \
+	kadmin_inq.o \
+	kadmin_msnd.o \
+	kadmin_mod.o \
+	kadmin_cpw.o \
+	kadmin_del.o \
+	kadmin_done.o
+
+all::	kadmin
+
+kadmin: $(KDBDEPLIB) $(OBJS) $(DEBKLIB)
+	$(CC) $(CFLAGS) -o kadmin $(OBJS) $(KLIB) $(LIBS)
+
+install::
+	$(INSTALLPROG) kadmin ${DESTDIR}$(CLIENT_BINDIR)/kadmin
+	$(INSTALLPROG) kadmin.M ${DESTDIR}$(CLIENT_MANDIR)/kadmin.$(CLIENT_MANSUFFIX)
+
+clean::
+

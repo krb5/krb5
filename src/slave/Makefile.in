@@ -1,0 +1,52 @@
+srcdir = @srcdir@
+VPATH = @srcdir@
+ 
+DEFS = @DEFS@
+LIBS = @LIBS@
+ 
+CFLAGS = -g $(DEFS) $(LOCALINCLUDE)
+LDFLAGS = -g
+
+BUILDTOP=..
+SRCTOP = $(srcdir)/$(BUILDTOP)
+TOPLIBD = $(BUILDTOP)/lib
+ISODELIB=$(TOPLIBD)/libisode.a
+COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
+DBMLIB=
+KDBLIB=$(TOPLIBD)/libkdb5.a 
+
+RM = rm -f
+CP = cp
+
+KLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(ISODELIB) $(COMERRLIB) $(DBMLIB)
+
+all::
+
+
+        DEPLIBS = $(DEPKLIB)
+LOCAL_LIBRARIES = $(KLIB)
+
+CLIENTSRCS= $(srcdir)/kprop.c 
+CLIENTOBJS= kprop.o 
+
+SERVERSRCS= $(srcdir)/kpropd.c 
+SERVEROBJS= kpropd.o 
+
+SRCS= $(CLIENTSRCS) $(SERVERSRCS)
+
+all::	kprop kpropd
+
+kprop: $(CLIENTOBJS) $(DEPLIBS)
+	$(CC) $(CFLAGS) -o kprop $(CLIENTOBJS) $(LOCAL_LIBRARIES) $(LIBS)
+
+install::
+	$(INSTALLPROG) kprop ${DESTDIR}$(SERVER_BINDIR)/kprop
+	$(INSTALLPROG) kprop.M ${DESTDIR}$(SERVER_MANDIR)/kprop.$(SERVER_MANSUFFIX)
+
+kpropd: $(SERVEROBJS) $(DEPLIBS)
+	$(CC) $(CFLAGS) -o kpropd $(SERVEROBJS) $(LOCAL_LIBRARIES) $(LIBS)
+
+install::
+	$(INSTALLPROG) kpropd ${DESTDIR}$(SERVER_BINDIR)/kpropd
+	$(INSTALLPROG) kpropd.M ${DESTDIR}$(SERVER_MANDIR)/kpropd.$(SERVER_MANSUFFIX)
+

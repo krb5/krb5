@@ -1,0 +1,85 @@
+SUBDIRS = @SUBDIRS@
+
+srcdir = @srcdir@
+VPATH = @srcdir@
+
+DEFS = @DEFS@
+LIBS = @LIBS@
+ 
+CFLAGS = -g $(DEFS)
+LDFLAGS = -g
+
+RM = rm -f
+CP = cp
+
+BUILDTOP = ../../..
+SRCTOP = $(srcdir)/$(BUILDTOP)
+
+all:: $(OBJS)
+
+OTHERSRCS=$(srcdir)/f_cbc.c $(srcdir)/f_cksum.c $(srcdir)/f_pcbc.c \
+	$(srcdir)/f_sched.c $(srcdir)/f_ecb.c $(srcdir)/f_parity.c \
+	$(srcdir)/f_tables.c
+
+OTHEROBJS=f_cbc.o f_cksum.o f_pcbc.o f_sched.o f_ecb.o f_parity.o f_tables.o
+
+OBJS=	cksum.o		\
+	cbc_cksum.o	\
+	cs_entry.o	\
+	enc_dec.o	\
+	krb_glue.o	\
+	finish_key.o	\
+	fin_rndkey.o	\
+	init_rkey.o	\
+	process_ky.o	\
+	random_key.o	\
+	string2key.o	\
+	new_rn_key.o	\
+	key_sched.o	\
+	weak_key.o	\
+	$(OTHEROBJS)
+
+SRCS=	$(srcdir)/cksum.c	\
+	$(srcdir)/cs_entry.c	\
+	$(srcdir)/cbc_cksum.c	\
+	$(srcdir)/enc_dec.c	\
+	$(srcdir)/krb_glue.c	\
+	$(srcdir)/finish_key.c	\
+	$(srcdir)/fin_rndkey.c	\
+	$(srcdir)/init_rkey.c	\
+	$(srcdir)/process_ky.c	\
+	$(srcdir)/random_key.c	\
+	$(srcdir)/string2key.c	\
+	$(srcdir)/new_rn_key.c	\
+	$(srcdir)/key_sched.c	\
+	$(srcdir)/weak_key.c	\
+	$(OTHERSRCS)
+
+includes:: depend
+
+all::
+depend:: $(SRCS)
+
+clean::
+	$(RM) fp.c ip.c key_perm.h odd.h p.c p_table.h s_table.h
+
+EXT_LIB = $(TOP)/lib/krb5/error_tables/krb5_err.o \
+                  $(TOP)/lib/krb5/error_tables/isode_err.o \
+                  $(TOP)/lib/crypto/cryptoconf.o \
+                  $(TOP)/lib/crypto/crc-32/libcrc32.a \
+                  libdes.a $(OSLIB) $(COMERRLIB)
+
+verify: verify.o libdes.o
+	$(RM) verify.o
+	$(CC) -o $@ verify.o $(LDFLAGS) $(EXT_LIB)
+
+clean::
+	$(RM) verify
+
+destest: destest.o libdes.o
+	$(RM) destest.o
+	$(CC) -o $@ destest.o $(LDFLAGS) $(EXT_LIB)
+
+clean::
+	$(RM) destest
+

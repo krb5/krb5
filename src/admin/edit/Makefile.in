@@ -1,0 +1,48 @@
+srcdir = @srcdir@
+VPATH = @srcdir@
+ 
+DEFS = @DEFS@
+LIBS = @LIBS@
+ 
+CFLAGS = -g $(DEFS) $(LOCALINCLUDE)
+LDFLAGS = -g
+
+BUILDTOP=../..
+SRCTOP = $(srcdir)/$(BUILDTOP)
+TOPLIBD = $(BUILDTOP)/lib
+ISODELIB=$(TOPLIBD)/libisode.a
+COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
+SSLIB=$(BUILDTOP)/util/ss/libss.a
+DBMLIB=
+KDBLIB=$(TOPLIBD)/libkdb5.a 
+
+all::
+
+KLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(ISODELIB) $(SSLIB) $(COMERRLIB) $(DBMLIB)
+
+
+DEPLIBS = $(DEPKDBLIB) $(DEPKLIB)
+LOCAL_LIBRARIES = $(KDBLIB) $(KLIB)
+
+OBJS= kdb5_edit.o kdb5_ed_ct.o util.o dump.o
+SRCS= $(srcdir)/kdb5_edit.c $(srcdir)/kdb5_ed_ct.c $(srcdir)/util.c $(srcdir)/dump.c
+
+all:: kdb5_edit
+
+kdb5_edit: kdb5_edit.o $(DEPLIBS) $(OBJS)
+	$(CC) $(CFLAGS) -o kdb5_edit $(OBJS) $(LOCAL_LIBRARIES) $(LIBS)
+
+install::
+	$(INSTALLPROG) kdb5_edit ${DESTDIR}$(ADMIN_BINDIR)/kdb5_edit
+	$(INSTALLPROG) kdb5_edit.M ${DESTDIR}$(ADMIN_MANDIR)/kdb5_edit.$(ADMIN_MANSUFFIX)
+
+# needed until we run makedepend
+kdb5_ed_ct.c: kdb5_ed_ct.ct
+
+kdb5_ed_ct.o: kdb5_ed_ct.c
+
+clean::
+	$(RM) kdb5_ed_ct.c
+
+depend:: kdb5_ed_ct.c
+

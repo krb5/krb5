@@ -1,0 +1,35 @@
+srcdir = @srcdir@
+VPATH = @srcdir@
+
+DEFS = @DEFS@
+LIBS = @LIBS@
+ 
+CFLAGS = -g $(DEFS)
+LDFLAGS = -g
+
+RM = rm -f
+CP = cp
+
+BUILDTOP = ../../../..
+SRCTOP = $(srcdir)/$(BUILDTOP)
+
+all:: $(OBJS)
+
+clean::
+	$(RM) $(OBJS)
+
+OBJS 	= fcc_close.o fcc_destry.o fcc_eseq.o \
+	fcc_gennew.o fcc_getnam.o fcc_gprin.o fcc_init.o \
+	fcc_nseq.o fcc_read.o fcc_reslv.o fcc_retrv.o \
+	fcc_sseq.o fcc_store.o fcc_skip.o fcc_ops.o fcc_write.o \
+	fcc_sflags.o fcc_defops.o fcc_errs.o fcc_maybe.o
+
+SRCS 	= $(srcdir)/fcc_close.c $(srcdir)/fcc_destry.c $(srcdir)/fcc_eseq.c \
+	$(srcdir)/fcc_gennew.c $(srcdir)/fcc_getnam.c $(srcdir)/fcc_gprin.c \
+	$(srcdir)/fcc_init.c $(srcdir)/fcc_nseq.c $(srcdir)/fcc_read.c      \
+	$(srcdir)/fcc_reslv.c $(srcdir)/fcc_retrv.c $(srcdir)/fcc_sseq.c    \
+	$(srcdir)/fcc_store.c $(srcdir)/fcc_skip.c $(srcdir)/fcc_ops.c      \
+	$(srcdir)/fcc_write.c $(srcdir)/fcc_sflags.c $(srcdir)/fcc_defops.c \
+	$(srcdir)/fcc_errs.c $(srcdir)/fcc_maybe.c
+
+

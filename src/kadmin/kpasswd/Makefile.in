@@ -1,0 +1,46 @@
+srcdir = @srcdir@
+VPATH = @srcdir@
+ 
+DEFS = @DEFS@
+LIBS = @LIBS@
+ 
+CFLAGS = -g $(DEFS) $(LOCALINCLUDE)
+LDFLAGS = -g
+
+BUILDTOP=../..
+SRCTOP = $(srcdir)/$(BUILDTOP)
+TOPLIBD = $(BUILDTOP)/lib
+ISODELIB=$(TOPLIBD)/libisode.a
+COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
+SSLIB=$(BUILDTOP)/util/ss/libss.a
+DBMLIB=
+KDBLIB=$(TOPLIBD)/libkdb5.a 
+
+all::
+
+KLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(ISODELIB) $(SSLIB) $(COMERRLIB) $(DBMLIB)
+
+DEPLIBS = $(DEPKDBLIB) $(DEPKLIB)
+LOCAL_LIBRARIES = $(KDBLIB) $(KLIB)
+
+SRCS = \
+	$(srcdir)/networked.c \
+	$(srcdir)/kpasswd.c
+
+OBJS = \
+	networked.o \
+	kpasswd.o
+
+
+all::	kpasswd
+
+kpasswd: $(KDBDEPLIB) $(OBJS) $(DEBKLIB)
+	$(CC) $(CFLAGS) -o kpasswd $(OBJS) $(KLIB) $(LIBS)
+
+install::
+	$(INSTALLPROG) kpasswd ${DESTDIR}$(CLIENT_BINDIR)/kpasswd
+	$(INSTALLPROG) kpasswd.M ${DESTDIR}$(CLIENT_MANDIR)/kpasswd.$(CLIENT_MANSUFFIX)
+
+clean::
+
+

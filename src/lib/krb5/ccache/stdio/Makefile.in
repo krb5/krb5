@@ -1,0 +1,38 @@
+srcdir = @srcdir@
+VPATH = @srcdir@
+
+DEFS = @DEFS@
+LIBS = @LIBS@
+ 
+CFLAGS = -g $(DEFS)
+LDFLAGS = -g
+
+RM = rm -f
+CP = cp
+
+BUILDTOP = ../../../..
+SRCTOP = $(srcdir)/$(BUILDTOP)
+
+all:: $(OBJS)
+
+clean::
+	$(RM) $(OBJS)
+
+OBJS 	= scc_close.o scc_destry.o scc_eseq.o \
+	scc_gennew.o scc_getnam.o scc_gprin.o scc_init.o \
+	scc_nseq.o scc_read.o scc_reslv.o scc_retrv.o \
+	scc_sseq.o scc_store.o scc_skip.o scc_ops.o scc_write.o \
+	scc_sflags.o scc_defops.o scc_errs.o scc_maybe.o
+
+SRCS 	= $(srcdir)/scc_close.c $(srcdir)/scc_destry.c $(srcdir)/scc_eseq.c \
+	$(srcdir)/scc_gennew.c $(srcdir)/scc_getnam.c $(srcdir)/scc_gprin.c \
+	$(srcdir)/scc_init.c $(srcdir)/scc_nseq.c $(srcdir)/scc_read.c      \
+	$(srcdir)/scc_reslv.c $(srcdir)/scc_retrv.c $(srcdir)/scc_sseq.c    \
+	$(srcdir)/scc_store.c $(srcdir)/scc_skip.c $(srcdir)/scc_ops.c      \
+	$(srcdir)/scc_write.c $(srcdir)/scc_sflags.c $(srcdir)/scc_defops.c \
+	$(srcdir)/scc_errs.c $(srcdir)/scc_maybe.c
+
+
+test: ${OBJS} scc_test.o
+	${CC} -o test ${OBJS} scc_test.o
+

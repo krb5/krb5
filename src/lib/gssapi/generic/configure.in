@@ -1,0 +1,8 @@
+AC_INIT(configure.in)
+ET_RULES
+CONFIG_RULES
+SubdirLibraryRule([${OBJS}])
+KRB_INCLUDE
+CopyHeader(gssapi.h,[$(EHDRDIR)])
+CopyHeader(gssapi_generic.h,[$(EHDRDIR)])
+AC_OUTPUT(Makefile,[EXTRA_RULES])

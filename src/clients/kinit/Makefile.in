@@ -1,0 +1,34 @@
+srcdir = @srcdir@
+VPATH = @srcdir@
+ 
+DEFS = @DEFS@
+LIBS = @LIBS@
+ 
+CFLAGS = -g $(DEFS) $(LOCALINCLUDE)
+LDFLAGS = -g
+
+BUILDTOP=../..
+SRCTOP = $(srcdir)/$(BUILDTOP)
+TOPLIBD = $(BUILDTOP)/lib
+ISODELIB=$(TOPLIBD)/libisode.a
+COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
+DBMLIB=
+
+all::
+
+KLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(ISODELIB) $(COMERRLIB) $(DBMLIB)
+
+kinit: kinit.o
+	$(CC) $(CFLAGS) -o kinit kinit.o $(KLIB) $(LIBS)
+
+kinit.o:	$(srcdir)/kinit.c
+
+all:: kinit
+
+
+clean::
+	$(RM) kinit.o kinit
+
+install::
+	$(INSTALLPROG) kinit ${DESTDIR}$(CLIENT_BINDIR)/kinit
+	$(INSTALLPROG) kinit.M ${DESTDIR}$(CLIENT_MANDIR)/kinit.$(CLIENT_MANSUFFIX)

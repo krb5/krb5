@@ -1,0 +1,85 @@
+SUBDIRS = @SUBDIRS@
+
+srcdir = @srcdir@
+VPATH = @srcdir@
+
+DEFS = @DEFS@
+LIBS = @LIBS@
+ 
+CFLAGS = -g $(DEFS)
+LDFLAGS = -g
+
+RM = rm -f
+CP = cp
+
+BUILDTOP = ../../..
+SRCTOP = $(srcdir)/$(BUILDTOP)
+
+all:: $(OBJS)
+
+OBJS=	\
+	f_addr.o	\
+	f_address.o	\
+	f_ap_rep.o	\
+	f_ap_req.o	\
+	f_arep_enc.o	\
+	f_authdata.o	\
+	f_authent.o	\
+	f_auth_cnt.o	\
+	f_cksum.o	\
+	f_creds.o	\
+	f_cred_cnt.o	\
+	f_enc_kdc.o	\
+	f_enc_tkt.o	\
+	f_error.o	\
+	f_kdc_rep.o	\
+	f_kdc_req.o	\
+	f_keyblock.o	\
+	f_last_req.o	\
+	f_padata.o	\
+	f_princ.o	\
+	f_priv.o	\
+	f_priv_enc.o	\
+	f_safe.o	\
+	f_ticket.o	\
+	f_tickets.o	\
+	f_tgt_cred.o	\
+	f_tkt_auth.o	\
+	f_pwd_data.o	\
+	f_pwd_seq.o	\
+	f_cred.o	\
+	f_cred_enc.o
+
+SRCS=	\
+	$(srcdir)/f_addr.c	\
+	$(srcdir)/f_address.c	\
+	$(srcdir)/f_arep_enc.c	\
+	$(srcdir)/f_ap_rep.c	\
+	$(srcdir)/f_ap_req.c	\
+	$(srcdir)/f_authdata.c	\
+	$(srcdir)/f_authent.c	\
+	$(srcdir)/f_auth_cnt.c	\
+	$(srcdir)/f_cksum.c	\
+	$(srcdir)/f_creds.c	\
+	$(srcdir)/f_cred_cnt.c	\
+	$(srcdir)/f_enc_kdc.c	\
+	$(srcdir)/f_enc_tkt.c	\
+	$(srcdir)/f_error.c	\
+	$(srcdir)/f_kdc_rep.c	\
+	$(srcdir)/f_kdc_req.c	\
+	$(srcdir)/f_keyblock.c	\
+	$(srcdir)/f_last_req.c	\
+	$(srcdir)/f_padata.c	\
+	$(srcdir)/f_princ.c	\
+	$(srcdir)/f_priv.c	\
+	$(srcdir)/f_priv_enc.c	\
+	$(srcdir)/f_safe.c	\
+	$(srcdir)/f_ticket.c	\
+	$(srcdir)/f_tickets.c	\
+	$(srcdir)/f_tgt_cred.c	\
+	$(srcdir)/f_tkt_auth.c	\
+	$(srcdir)/f_pwd_data.c	\
+	$(srcdir)/f_pwd_seq.c	\
+	$(srcdir)/f_cred.c	\
+	$(srcdir)/f_cred_enc.c
+

@@ -1,0 +1,11 @@
+AC_INIT(configure.in)
+CONFIG_DIRS(file)
+AC_PROG_ARCHIVE
+AC_PROG_ARCHIVE_ADD
+AC_PROG_RANLIB
+MAKE_SUBDIRS("making",all)
+MAKE_SUBDIRS("cleaning",clean)
+CONFIG_RULES
+SubdirLibraryRule([$(OBJS)])
+KRB_INCLUDE
+AC_OUTPUT(Makefile,[EXTRA_RULES])

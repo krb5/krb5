@@ -1,0 +1,26 @@
+SUBDIRS = @SUBDIRS@
+
+srcdir = @srcdir@
+VPATH = @srcdir@
+
+DEFS = @DEFS@
+LIBS = @LIBS@
+ 
+CFLAGS = -g $(DEFS)
+LDFLAGS = -g
+
+RM = rm -f
+CP = cp
+
+BUILDTOP = ../../..
+SRCTOP = $(srcdir)/$(BUILDTOP)
+
+all:: $(OBJS)
+
+
+
+OBJS=	md4.o md4glue.o md4crypto.o
+
+SRCS=	$(srcdir)/md4.c $(srcdir)/md4glue.c $(srcdir)/md4crypto.c
+
+

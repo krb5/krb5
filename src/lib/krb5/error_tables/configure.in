@@ -1,0 +1,11 @@
+AC_INIT(configure.in)
+ET_RULES
+SS_RULES
+CONFIG_RULES
+KRB_INCLUDE
+SubdirLibraryRule([${OBJS}])
+CopyHeader(isode_err.h,[$(EHDRDIR)])
+CopyHeader(krb5_err.h,[$(EHDRDIR)])
+CopyHeader(kdb5_err.h,[$(EHDRDIR)])
+CopyHeader(adm_err.h,[$(EHDRDIR)])
+AC_OUTPUT(Makefile,[EXTRA_RULES])
