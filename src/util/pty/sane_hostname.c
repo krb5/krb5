@@ -44,7 +44,6 @@ pty_make_sane_hostname(struct sockaddr_in *addr,
 #else
     struct utmpx utx;
 #endif
-    char *scratch;
     char *cp, *domain;
     char lhost[MAXHOSTNAMELEN];
     size_t ut_host_len;
