@@ -346,6 +346,10 @@ static Tcl_DString *unparse_err(kadm5_ret_t code)
 	  code_string = "KADM5_AUTH_CHANGEPW"; break;
      case KADM5_GSS_ERROR: code_string = "KADM5_GSS_ERROR"; break;
      case KADM5_BAD_TL_TYPE: code_string = "KADM5_BAD_TL_TYPE"; break; 
+     case KADM5_MISSING_CONF_PARAMS:
+	  code_string = "KADM5_MISSING_CONF_PARAMS"; break;
+     case KADM5_BAD_SERVER_NAME:
+	  code_string = "KADM5_BAD_SERVER_NAME"; break;
      case OSA_ADB_DUP: code_string = "OSA_ADB_DUP"; break;
      case OSA_ADB_NOENT: code_string = "ENOENT"; break;
      case OSA_ADB_DBINIT: code_string = "OSA_ADB_DBINIT"; break;

@@ -2,6 +2,7 @@ Thu Nov  7 13:09:33 1996  Barry Jaspan  <bjaspan@mit.edu>
 
 	* tcl_kadm5.c: don't assume tl_data_contents is null-terminated,
  	and zero allocated princ before parsing it
+	(unparse_err): add new finer-grained conf file error codes
 
 Thu Nov  7 11:36:15 1996  Ezra Peisach  <epeisach@mit.edu>
 
