@@ -1364,8 +1364,6 @@ krb5_sigtype
 char *makejtmp(uid, gid, jid)
      register int uid, gid, jid;
 {
-    extern int errno;
-    
     register char *endc, *tdp = &tmpdir[strlen(tmpdir)];
     register int i;
     

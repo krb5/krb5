@@ -196,7 +196,6 @@ char    *speeds[] =
     "600", "1200", "1800", "2400", "4800", "9600", "19200", "38400" };
 #endif
 char	term[256] = "network";
-extern	int errno;
 
 #ifndef POSIX_SIGNALS
 #ifndef sigmask

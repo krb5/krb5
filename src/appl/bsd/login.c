@@ -186,8 +186,6 @@ struct ltchars ltc = {
 };
 #endif
 
-extern int errno;
-
 #ifdef KRB4
 #define KRB_ENVIRON	"KRBTKFILE"	/* Ticket file environment variable */
 #define KRB_TK_DIR	"/tmp/tkt_"	/* Where to put the ticket */

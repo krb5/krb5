@@ -108,7 +108,6 @@ int	rem;
 char	*colon();
 int	errs;
 krb5_sigtype	lostconn();
-extern int	errno;
 #ifdef NEED_SYS_ERRLIST
 extern char	*sys_errlist[];
 #endif

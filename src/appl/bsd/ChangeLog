@@ -1,5 +1,9 @@
 Wed Jul  5 20:03:37 1995  Theodore Y. Ts'o  (tytso@dcl)
 
+	* krcp.c, krlogin.c, krlogind.c, krshd.c, login.c: Remove
+		declaration of errno altoghether.  "extern int errno;" is
+		always wrong.
+
 	* login.c (main): Don't use the TIOCLSET ioctl unless we're not
 		using POSIX_TERMIOS.  Don't just blindly set the file
 		status flags to 0.  Instead, do a fcntl(0, F_GETFL), and

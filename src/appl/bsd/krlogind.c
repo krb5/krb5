@@ -278,7 +278,6 @@ char		term[64];
 char            rhost_name[128];
 krb5_principal  client;
 
-extern	int errno;
 int	reapchild();
 char 	*progname;
 
