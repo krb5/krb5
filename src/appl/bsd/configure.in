@@ -7,6 +7,7 @@ WITH_NETLIB
 dnl dbm libs for use of an_to_ln
 AC_CHECK_LIB(ndbm,main)
 AC_CHECK_LIB(dbm,main)
+AC_CHECK_LIB(util,main)
 dnl
 dnl AIX has them all; SCO might too
 LOGINLIBS=

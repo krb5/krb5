@@ -1,3 +1,11 @@
+Wed Apr 26 09:41:35 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* krlogind.c (main): LOG_AUTH in openlog arguments in wrong place.
+		(recvauth): Do not copy principal on a V4 request. The
+		ticket portion is not set by krb5_compat_recvauth for these.
+
+	* configure.in: Check for libutil. Under OSF/1, logwtmp is stored
+		there. 
 
 Wed Apr 26 07:19:18 1995  Chris Provenzano  (proven@mit.edu)
 

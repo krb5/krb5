@@ -329,7 +329,7 @@ main(argc, argv)
 #ifndef LOG_AUTH /* 4.2 syslog */
     openlog(progname, LOG_PID | LOG_NDELAY);
 #else
-    openlog(progname, LOG_PID | LOG_AUTH | LOG_NDELAY, LOG_AUTH);
+    openlog(progname, LOG_PID | LOG_NDELAY, LOG_AUTH);
 #endif /* 4.2 syslog */
     
     if (argc == 1) { /* Get parameters from program name. */
@@ -1599,10 +1599,6 @@ recvauth()
     getstr(netf, lusername, sizeof (lusername), "locuser");
     getstr(netf, term, sizeof(term), "Terminal type");
 
-    if (status = krb5_copy_principal(bsd_context, ticket->enc_part2->client, 
-				     &client))
-	return status;
-
 #ifdef KRB5_KRB4_COMPAT
     if (auth_sys == KRB5_RECVAUTH_V4) {
 
@@ -1628,6 +1624,10 @@ recvauth()
 
     /* Must be V5  */
 	
+    if (status = krb5_copy_principal(bsd_context, ticket->enc_part2->client, 
+				     &client))
+	return status;
+
     des_read  = v5_des_read;
     des_write = v5_des_write;
 
