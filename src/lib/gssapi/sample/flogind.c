@@ -277,8 +277,8 @@ protocol(f, p, pipe)
 	    pcc = write(pipe, fibuf, cc);
 	    if (pcc <= 0) {
 		done = 1;
-		syslog(LOG_INFO, "write(pipe [%d], fibuf, %d): %d:
-%m",pipe, cc, pcc);
+		syslog(LOG_INFO, "write(pipe [%d], fibuf, %d): %d: %m",
+		       pipe, cc, pcc);
 	    }
 	    while (!done && len > 0) {
 		char *fbp = fibuf;
@@ -293,8 +293,8 @@ protocol(f, p, pipe)
 	   	    pcc = write(pipe, fbp, cc);
 		    if (pcc <= 0) {
 			done = 1;
-			syslog(LOG_INFO, "write(pipe [%d], fbp, %d):
-%d: %m",pipe, cc, pcc);
+			syslog(LOG_INFO, "write(pipe [%d], fbp, %d): %d: %m",
+			       pipe, cc, pcc);
 			break;
 		    }
 		    cc -= pcc;

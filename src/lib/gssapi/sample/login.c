@@ -41,7 +41,7 @@ static char sccsid[] = "@(#)login.c	5.25 (Berkeley) 1/6/89";
 #include <sys/param.h>
 #ifndef VFS
 #include <sys/quota.h>
-#endif VFS
+#endif /* VFS */
 #include <sys/stat.h>
 #include <sys/time.h>
 #include <sys/resource.h>
@@ -75,11 +75,11 @@ char userlocalname[GSS_C_MAX_PRINTABLE_NAME];
 gss_cred_id_t gss_delegated_cred_handle;
 
 #ifdef UIDGID_T
-uid_t getuid();
+/* uid_t getuid(); */
 #define uid_type uid_t
 #define gid_type gid_t
 #else
-int getuid();
+/* int getuid(); */
 #define uid_type int
 #define gid_type int
 #endif /* UIDGID_T */
@@ -95,7 +95,7 @@ int getuid();
 
 #ifdef VFS
 #define QUOTAWARN	"/usr/ucb/quota" /* warn user about quotas */
-#endif VFS
+#endif /* VFS */
 
 #define	UT_HOSTSIZE	sizeof(((struct utmp *)0)->ut_host)
 #define	UT_NAMESIZE	sizeof(((struct utmp *)0)->ut_name)
@@ -130,8 +130,7 @@ typedef int sigtype;
 #define EXCL_TEST if (rflag || kflag || Kflag || eflag || \
 			    fflag || hflag) { \
 				fprintf(stderr, \
-				    "login: only one of -r, -k, -K, -e,
--h and -f allowed.\n"); \
+				    "login: only one of -r, -k, -K, -e, -h and -f allowed.\n"); \
 				exit(1);\
 			}
 main(argc, argv)
@@ -163,7 +162,7 @@ main(argc, argv)
 	(void)setpriority(PRIO_PROCESS, 0, 0);
 #ifndef VFS
 	(void)quota(Q_SETUID, 0, 0, 0);
-#endif VFS
+#endif /* VFS */
 
 	/*
 	 * -s is used by flogind to cause the SPX autologin protocol;
@@ -462,7 +461,7 @@ main(argc, argv)
 
 #ifdef VFS
 	if (! access( QUOTAWARN, X_OK)) (void) system(QUOTAWARN);
-#endif VFS
+#endif /* VFS */
 	(void)signal(SIGALRM, SIG_DFL);
 	(void)signal(SIGQUIT, SIG_DFL);
 	(void)signal(SIGINT, SIG_DFL);
@@ -522,7 +521,7 @@ rootterm(tty)
 	struct ttyent *t;
 
 	return((t = getttynam(tty)) && t->ty_status&TTY_SECURE);
-#endif NOTTYENT
+#endif /* NOTTYENT */
 }
 
 jmp_buf motdinterrupt;
@@ -631,7 +630,7 @@ do_gss_login(host)
 	char *host;
 {
         int j, tokenlen, partlen, numbuf, i, debugflag = 0, auth_valid;
-	unsigned char token[GSS_C_MAX_TOKEN], *charp, *cp;
+	unsigned char token[GSS_C_MAX_TOKEN], *charp, *cp, *address;
 	unsigned char tokenheader[4], send_tokenheader[4];
 	char targ_printable[GSS_C_MAX_PRINTABLE_NAME];
 	char  lhostname[GSS_C_MAX_PRINTABLE_NAME];
@@ -655,15 +654,14 @@ do_gss_login(host)
 
 
 	j = sphinx_net_read(3, tokenheader, 4);
-	if ((tokenheader[0] != TOKEN_MAJIC_NUMBER_BYTE0) ||
-(tokenheader[1] != TOKEN_MAJIC_NUMBER_BYTE1)) {
+	if ((tokenheader[0] != TOKEN_MAJIC_NUMBER_BYTE0) || (tokenheader[1] != TOKEN_MAJIC_NUMBER_BYTE1)) { 
 	  exit(0);
 	}
 	tokenlen = tokenheader[2] * 256 + tokenheader[3];
 
 	if (tokenlen > sizeof(token)) {
-	  syslog(LOG_INFO, "token is too large, size is %d, buffer size
-is %d", tokenlen, sizeof(token));
+	  syslog(LOG_INFO, "token is too large, size is %d, buffer size is %d",
+		 tokenlen, sizeof(token));
 	  exit(0);
 	}
 
@@ -783,28 +781,24 @@ is %d", tokenlen, sizeof(token));
 	  }
 
 	  input_chan_bindings = (gss_channel_bindings)
-	    malloc(sizeof(gss_channel_bindings_desc));
+	    malloc(sizeof(struct gss_channel_bindings_desc));
 
 	  input_chan_bindings->initiator_addrtype = GSS_C_AF_INET;
 	  input_chan_bindings->initiator_address.length = 4;
-	  input_chan_bindings->initiator_address.value = (char *) malloc(4);
-	  input_chan_bindings->initiator_address.value[0] = ((from_addr
-& 0xff000000) >> 24);
-	  input_chan_bindings->initiator_address.value[1] = ((from_addr
-& 0xff0000) >> 16);
-	  input_chan_bindings->initiator_address.value[2] = ((from_addr
-& 0xff00) >> 8);
-	  input_chan_bindings->initiator_address.value[3] = (from_addr & 0xff);
+	  address = (char *) malloc(4);
+	  input_chan_bindings->initiator_address.value = (char *) address;
+	  address[0] = ((from_addr & 0xff000000) >> 24);
+	  address[1] = ((from_addr & 0xff0000) >> 16);
+	  address[2] = ((from_addr & 0xff00) >> 8);
+	  address[3] = (from_addr & 0xff);
 	  input_chan_bindings->acceptor_addrtype = GSS_C_AF_INET;
 	  input_chan_bindings->acceptor_address.length = 4;
-	  input_chan_bindings->acceptor_address.value = (char *) malloc(4);
-	  input_chan_bindings->acceptor_address.value[0] = ((to_addr &
-0xff000000) >> 24);
-	  input_chan_bindings->acceptor_address.value[1] = ((to_addr &
-0xff0000) >> 16);
-	  input_chan_bindings->acceptor_address.value[2] = ((to_addr &
-0xff00) >> 8);
-	  input_chan_bindings->acceptor_address.value[3] = (to_addr & 0xff);
+	  address = (char *) malloc(4);
+	  input_chan_bindings->acceptor_address.value = (char *) address;
+	  address[0] = ((to_addr & 0xff000000) >> 24);
+	  address[1] = ((to_addr & 0xff0000) >> 16);
+	  address[2] = ((to_addr & 0xff00) >> 8);
+	  address[3] = (to_addr & 0xff); 
 	  input_chan_bindings->application_data.length = 0;
 	}
 
@@ -944,8 +938,9 @@ is %d", tokenlen, sizeof(token));
 	  if (major_status != GSS_S_COMPLETE) {
 	    if (strcmp(lusername, "root")==0)
 	      syslog(LOG_INFO, "root authorization denied - '%s'", src_name);
-	    fprintf(stderr, "SPX : authorization denied to user account
-'%s' - ", lusername);
+	    fprintf(stderr,
+		    "SPX : authorization denied to user account '%s' - ",
+		    lusername);
 	    return(-1);
 	  } else {
 	    strcpy(userfullname, src_name);

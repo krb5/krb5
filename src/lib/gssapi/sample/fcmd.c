@@ -79,16 +79,13 @@ context_handle, mutual_flag, deleg_flag, debugflag)
 	unsigned char *charp;
 	char tokenheader[4], recv_tokenheader[4];
 	int  tokenlen, i, j, status = 0, hostlen, xcc, cc, mutual_len;
-	int  chanbinding_len, replay_flag=0, seq_flag=0;
-        char hostname[GSS_C_MAX_PRINTABLE_NAME];
+	int  replay_flag=0, seq_flag=0;
         char mutual_resp[GSS_C_MAX_TOKEN];
         char targ_printable[GSS_C_MAX_PRINTABLE_NAME];
 /*
  * GSS API support
  */
-	gss_OID_set   actual_mechs;
 	gss_OID       actual_mech_type, output_name_type;
-	gss_cred_id_t gss_cred_handle;
         gss_ctx_id_t  actual_ctxhandle;
 	int           msg_ctx = 0, new_status;
 	int           req_flags = 0, ret_flags, lifetime_rec, major_status;
@@ -119,7 +116,7 @@ context_handle, mutual_flag, deleg_flag, debugflag)
 		sin.sin_family = hp->h_addrtype;
 		bcopy(hp->h_addr_list[0], (caddr_t)&sin.sin_addr, hp->h_length);
 		sin.sin_port = rport;
-		if (connect(s, (caddr_t)&sin, sizeof (sin), 0) >= 0)
+		if (connect(s, (caddr_t)&sin, sizeof (sin)) >= 0)
 			break;
 		(void) close(s);
 		if (errno == EADDRINUSE) {
@@ -182,7 +179,7 @@ context_handle, mutual_flag, deleg_flag, debugflag)
 			(void) close(s2);
 			goto bad;
 		}
-		s3 = accept(s2, &from, &len, 0);
+		s3 = accept(s2, &from, &len);
 		(void) close(s2);
 		if (s3 < 0) {
 			perror("accept");
@@ -208,6 +205,7 @@ context_handle, mutual_flag, deleg_flag, debugflag)
  */
 	{
 	  char  myhost[32];
+	  char	*address;
 	  int  from_addr=0, to_addr=0, myhostlen, j;
 	  struct hostent *my_hp;
 
@@ -254,28 +252,24 @@ context_handle, mutual_flag, deleg_flag, debugflag)
 	  to_addr = htonl(to_addr);
 
 	  input_chan_bindings = (gss_channel_bindings)
-	    malloc(sizeof(gss_channel_bindings_desc));
+	    malloc(sizeof(struct gss_channel_bindings_desc));
 
 	  input_chan_bindings->initiator_addrtype = GSS_C_AF_INET;
 	  input_chan_bindings->initiator_address.length = 4;
-	  input_chan_bindings->initiator_address.value = (char *) malloc(4);
-	  input_chan_bindings->initiator_address.value[0] = ((from_addr
-& 0xff000000) >> 24);
-	  input_chan_bindings->initiator_address.value[1] = ((from_addr
-& 0xff0000) >> 16);
-	  input_chan_bindings->initiator_address.value[2] = ((from_addr
-& 0xff00) >> 8);
-	  input_chan_bindings->initiator_address.value[3] = (from_addr & 0xff);
+	  address = (char *) malloc(4);
+	  input_chan_bindings->initiator_address.value = (char *) address;
+	  address[0] = ((from_addr & 0xff000000) >> 24);
+	  address[1] = ((from_addr & 0xff0000) >> 16);
+	  address[2] = ((from_addr & 0xff00) >> 8);
+	  address[3] = (from_addr & 0xff);
 	  input_chan_bindings->acceptor_addrtype = GSS_C_AF_INET;
 	  input_chan_bindings->acceptor_address.length = 4;
-	  input_chan_bindings->acceptor_address.value = (char *) malloc(4);
-	  input_chan_bindings->acceptor_address.value[0] = ((to_addr &
-0xff000000) >> 24);
-	  input_chan_bindings->acceptor_address.value[1] = ((to_addr &
-0xff0000) >> 16);
-	  input_chan_bindings->acceptor_address.value[2] = ((to_addr &
-0xff00) >> 8);
-	  input_chan_bindings->acceptor_address.value[3] = (to_addr & 0xff);
+	  address = (char *) malloc(4);
+	  input_chan_bindings->acceptor_address.value = (char *) address;
+	  address[0] = ((to_addr & 0xff000000) >> 24);
+	  address[1] = ((to_addr & 0xff0000) >> 16);
+	  address[2] = ((to_addr & 0xff00) >> 8);
+	  address[3] = (to_addr & 0xff);
 	  input_chan_bindings->application_data.length = 0;
 	}
 

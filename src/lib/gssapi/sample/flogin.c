@@ -62,7 +62,6 @@ static char sccsid[] = "@(#)rlogin.c	5.29 (Berkeley) 6/27/90";
 #include <sgtty.h>
 #include <setjmp.h>
 #include <errno.h>
-#include <varargs.h>
 #include <pwd.h>
 #include <stdio.h>
 #ifdef ultrix
@@ -106,8 +105,6 @@ struct	winsize winsize;
 #ifndef sun
 #define	get_window_size(fd, wp)	ioctl(fd, TIOCGWINSZ, wp)
 #endif
-
-void exit();
 
 main(argc, argv)
 	int argc;
