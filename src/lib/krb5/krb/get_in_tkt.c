@@ -113,6 +113,7 @@ OLDDECLARG(krb5_ccache, ccache)
     request.etype = etype;
     request.addresses = (krb5_address **) addrs;
     request.second_ticket = 0;
+    request.authorization_data = 0;
 
     /* encode & send to KDC */
     if (retval = encode_krb5_as_req(&request, &packet))
