@@ -43,12 +43,11 @@ clean::
 #
 $(OUTPRE)kprop.$(OBJEXT): kprop.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
-  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
-  $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h \
-  kprop.h
+  $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(SRCTOP)/include/krb5/kdb.h \
+  $(BUILDTOP)/include/profile.h kprop.h
 $(OUTPRE)kpropd.$(OBJEXT): kpropd.c $(SRCTOP)/include/syslog.h \
   $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(BUILDTOP)/include/krb5.h \
-  $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
-  $(SRCTOP)/include/krb5/kdb.h kprop.h
+  $(COM_ERR_DEPS) $(SRCTOP)/include/krb5/kdb.h $(BUILDTOP)/include/profile.h \
+  kprop.h
 

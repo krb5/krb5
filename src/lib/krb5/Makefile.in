@@ -116,7 +116,7 @@ install-unix:: install-libs
 # the Makefile.in file
 #
 krb5_libinit.so krb5_libinit.po $(OUTPRE)krb5_libinit.$(OBJEXT): krb5_libinit.c $(BUILDTOP)/include/krb5.h \
-  $(BUILDTOP)/include/com_err.h $(BUILDTOP)/include/krb5_err.h \
-  $(BUILDTOP)/include/kv5m_err.h $(BUILDTOP)/include/asn1_err.h \
-  $(BUILDTOP)/include/kdb5_err.h krb5_libinit.h
+  $(COM_ERR_DEPS) $(BUILDTOP)/include/krb5_err.h $(BUILDTOP)/include/kv5m_err.h \
+  $(BUILDTOP)/include/asn1_err.h $(BUILDTOP)/include/kdb5_err.h \
+  krb5_libinit.h
 

@@ -75,9 +75,8 @@ clean-windows::
 # the Makefile.in file
 #
 gss_libinit.so gss_libinit.po $(OUTPRE)gss_libinit.$(OBJEXT): gss_libinit.c generic/gssapi_err_generic.h \
-  $(BUILDTOP)/include/com_err.h krb5/gssapi_err_krb5.h \
-  $(srcdir)/krb5/gssapiP_krb5.h $(BUILDTOP)/include/krb5.h \
-  $(BUILDTOP)/include/profile.h $(srcdir)/generic/gssapiP_generic.h \
+  $(COM_ERR_DEPS) krb5/gssapi_err_krb5.h $(srcdir)/krb5/gssapiP_krb5.h \
+  $(BUILDTOP)/include/krb5.h $(srcdir)/generic/gssapiP_generic.h \
   $(srcdir)/generic/gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi.h \
   $(srcdir)/krb5/gssapi_krb5.h gss_libinit.h generic/gssapi.h
 

@@ -88,12 +88,11 @@ utility.o: telnetd.h defs.h ext.h $(ARPA_TELNET)
 $(OUTPRE)telnetd.$(OBJEXT): telnetd.c telnetd.h defs.h \
   $(srcdir)/../arpa/telnet.h $(SRCTOP)/include/socket-utils.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/syslog.h \
-  ext.h pathnames.h $(BUILDTOP)/include/libpty.h $(BUILDTOP)/include/com_err.h \
+  ext.h pathnames.h $(BUILDTOP)/include/libpty.h $(COM_ERR_DEPS) \
   $(SRCTOP)/include/fake-addrinfo.h $(SRCTOP)/include/port-sockets.h \
-  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
-  $(srcdir)/../libtelnet/auth.h $(srcdir)/../libtelnet/auth-proto.h \
-  $(srcdir)/../libtelnet/encrypt.h $(srcdir)/../libtelnet/enc-proto.h \
-  $(srcdir)/../libtelnet/misc-proto.h
+  $(BUILDTOP)/include/krb5.h $(srcdir)/../libtelnet/auth.h \
+  $(srcdir)/../libtelnet/auth-proto.h $(srcdir)/../libtelnet/encrypt.h \
+  $(srcdir)/../libtelnet/enc-proto.h $(srcdir)/../libtelnet/misc-proto.h
 $(OUTPRE)termio-tn.$(OBJEXT): termio-tn.c
 $(OUTPRE)termios-tn.$(OBJEXT): termios-tn.c
 $(OUTPRE)state.$(OBJEXT): state.c telnetd.h defs.h \
@@ -111,11 +110,11 @@ $(OUTPRE)slc.$(OBJEXT): slc.c telnetd.h defs.h $(srcdir)/../arpa/telnet.h \
 $(OUTPRE)sys_term.$(OBJEXT): sys_term.c telnetd.h defs.h \
   $(srcdir)/../arpa/telnet.h $(SRCTOP)/include/socket-utils.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/syslog.h \
-  ext.h pathnames.h $(BUILDTOP)/include/com_err.h $(BUILDTOP)/include/libpty.h \
+  ext.h pathnames.h $(COM_ERR_DEPS) $(BUILDTOP)/include/libpty.h \
   $(srcdir)/../libtelnet/auth.h $(srcdir)/../libtelnet/auth-proto.h \
   $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
-  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
-  $(SRCTOP)/include/krb5/kdb.h
+  $(BUILDTOP)/include/krb5.h $(SRCTOP)/include/krb5/kdb.h \
+  $(BUILDTOP)/include/profile.h
 $(OUTPRE)utility.$(OBJEXT): utility.c telnetd.h defs.h \
   $(srcdir)/../arpa/telnet.h $(SRCTOP)/include/socket-utils.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/syslog.h \

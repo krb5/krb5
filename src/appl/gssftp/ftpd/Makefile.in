@@ -82,8 +82,7 @@ vers.o: $(srcdir)/vers.c
 $(OUTPRE)ftpd.$(OBJEXT): ftpd.c $(srcdir)/../arpa/ftp.h \
   $(srcdir)/../arpa/telnet.h $(SRCTOP)/include/syslog.h \
   pathnames.h $(BUILDTOP)/include/libpty.h $(SRCTOP)/include/k5-util.h \
-  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
-  $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/kerberosIV/krb.h \
+  $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(SRCTOP)/include/kerberosIV/krb.h \
   $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/port-sockets.h \
   $(BUILDTOP)/include/krb524.h $(BUILDTOP)/include/krb524_err.h \
   $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/gssapi/gssapi_generic.h \

@@ -245,8 +245,7 @@ authunix_prot.so authunix_prot.po $(OUTPRE)authunix_prot.$(OBJEXT): authunix_pro
   $(BUILDTOP)/include/gssrpc/auth_unix.h
 auth_gssapi.so auth_gssapi.po $(OUTPRE)auth_gssapi.$(OBJEXT): auth_gssapi.c $(BUILDTOP)/include/gssapi/gssapi.h \
   $(BUILDTOP)/include/gssapi/gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi_krb5.h \
-  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
-  $(BUILDTOP)/include/com_err.h $(BUILDTOP)/include/gssrpc/rpc.h \
+  $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(BUILDTOP)/include/gssrpc/rpc.h \
   $(BUILDTOP)/include/gssrpc/types.h $(BUILDTOP)/include/gssrpc/xdr.h \
   $(BUILDTOP)/include/gssrpc/auth.h $(BUILDTOP)/include/gssrpc/clnt.h \
   $(BUILDTOP)/include/gssrpc/rpc_msg.h $(BUILDTOP)/include/gssrpc/auth_unix.h \
@@ -306,7 +305,7 @@ get_myaddress.so get_myaddress.po $(OUTPRE)get_myaddress.$(OBJEXT): get_myaddres
   $(BUILDTOP)/include/gssrpc/rpc_msg.h $(BUILDTOP)/include/gssrpc/auth_unix.h \
   $(BUILDTOP)/include/gssrpc/svc_auth.h $(BUILDTOP)/include/gssrpc/svc.h \
   $(BUILDTOP)/include/gssrpc/pmap_prot.h $(BUILDTOP)/include/krb5.h \
-  $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h
+  $(COM_ERR_DEPS)
 getrpcport.so getrpcport.po $(OUTPRE)getrpcport.$(OBJEXT): getrpcport.c $(BUILDTOP)/include/gssrpc/rpc.h \
   $(BUILDTOP)/include/gssrpc/types.h $(BUILDTOP)/include/gssrpc/xdr.h \
   $(BUILDTOP)/include/gssrpc/auth.h $(BUILDTOP)/include/gssrpc/clnt.h \
@@ -386,8 +385,7 @@ svc_auth_gssapi.so svc_auth_gssapi.po $(OUTPRE)svc_auth_gssapi.$(OBJEXT): svc_au
   $(BUILDTOP)/include/gssrpc/auth_unix.h $(BUILDTOP)/include/gssrpc/svc_auth.h \
   $(BUILDTOP)/include/gssrpc/svc.h $(BUILDTOP)/include/gssapi/gssapi_generic.h \
   $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/gssrpc/auth_gssapi.h \
-  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
-  $(BUILDTOP)/include/com_err.h
+  $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS)
 svc_raw.so svc_raw.po $(OUTPRE)svc_raw.$(OBJEXT): svc_raw.c $(BUILDTOP)/include/gssrpc/rpc.h \
   $(BUILDTOP)/include/gssrpc/types.h $(BUILDTOP)/include/gssrpc/xdr.h \
   $(BUILDTOP)/include/gssrpc/auth.h $(BUILDTOP)/include/gssrpc/clnt.h \

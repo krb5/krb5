@@ -49,5 +49,5 @@ site.exp: runenv.vals
 # Makefile dependencies follow.  This must be the last section in
 # the Makefile.in file
 #
-$(OUTPRE)t_inetd.$(OBJEXT): t_inetd.c $(BUILDTOP)/include/com_err.h
+$(OUTPRE)t_inetd.$(OBJEXT): t_inetd.c $(COM_ERR_DEPS)
 
