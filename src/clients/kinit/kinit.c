@@ -69,10 +69,13 @@ main(argc, argv)
     if (rindex(argv[0], '/'))
 	argv[0] = rindex(argv[0], '/')+1;
 
-    while ((option = getopt(argc, argv, "rpl:c:")) != EOF) {
+    while ((option = getopt(argc, argv, "rpul:c:")) != EOF) {
 	switch (option) {
 	case 'r':
 	    options |= KDC_OPT_RENEWABLE;
+	    break;
+        case 'u':
+	    options |= KDC_OPT_DUPLICATE_SKEY;
 	    break;
 	case 'p':
 	    options |= KDC_OPT_PROXIABLE;
@@ -108,7 +111,7 @@ main(argc, argv)
 	errflg++;
     
     if (errflg) {
-	fprintf(stderr, "Usage: %s [ -rp ] [ -l lifetime ] [ -c cachename ] principal\n", argv[0]);
+	fprintf(stderr, "Usage: %s [ -rpu ] [ -l lifetime ] [ -c cachename ] principal\n", argv[0]);
 	exit(2);
     }
     if (ccache == NULL) {
