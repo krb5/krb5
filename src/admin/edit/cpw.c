@@ -57,7 +57,7 @@ extern FILE *scriptfile;
 static krb5_key_salt_tuple ks_tuple_rnd_def[] =
 	{{ ENCTYPE_DES_CBC_CRC, 0 },
 	 { ENCTYPE_DES_CBC_MD5, 0 },
-	 { ENCTYPE_DES_CBC_CRC, KRB5_KDB_SALTTYPE_V4}};
+	 { ENCTYPE_DES_CBC_CRC, KRB5_KDB_SALTTYPE_V4},
 	 { ENCTYPE_DES_CBC_MD5, KRB5_KDB_SALTTYPE_V4}};
 static int ks_tuple_rnd_def_count = 4;
 

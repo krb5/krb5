@@ -1074,7 +1074,7 @@ void show_principal(argc, argv)
     }
 
     printf("Name: %s\n", pr_name);
-/*    printf("Key version: %d\n", entry.kvno); */
+    printf("Key version: %d\n", entry.mkvno); 
     printf("Maximum life: %s\n", strdur(entry.max_life));
     printf("Maximum renewable life: %s\n", strdur(entry.max_renewable_life));
     printf("Master key version: %d\n", entry.mkvno);
@@ -1085,7 +1085,7 @@ void show_principal(argc, argv)
     printf("Password expiration: %s\n", buffer);
 /*    (void) krb5_timestamp_to_string(entry.last_pw_change,
 				    buffer, sizeof(buffer)); */
-    printf("Last password change: %s\n", buffer);
+/*    printf("Last password change: %s\n", buffer); */
     (void) krb5_timestamp_to_string(entry.last_success,
 				    buffer, sizeof(buffer));
     printf("Last successful password: %s\n", buffer);

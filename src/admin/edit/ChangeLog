@@ -1,3 +1,11 @@
+Mon Sep 18 03:59:47 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* kdb5_edit.c (show_principal): Show key version and last password
+		change. 
+
+	* cpw.c: Fix typo in below change in which list was terminated
+		after third entry. (extra } removed)
+
 Fri Sep 15 14:21:25 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* cpw.c: Add DES_CBC_MD5 and DES_CBC_CRC with the V4 salt as
