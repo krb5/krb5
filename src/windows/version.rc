@@ -8,7 +8,7 @@
 #define PRE_RELEASE
 
 #ifdef PRE_RELEASE
-#define BETA_STR  " beta 1"
+#define BETA_STR  " beta 2"
 #define BETA_FLAG VS_FF_PRERELEASE
 #else
 #define BETA_STR  ""
