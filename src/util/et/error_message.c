@@ -28,7 +28,7 @@
 #include "error_table.h"
 
 #ifdef macintosh
-#include <ErrorLib.h>
+#include <KerberosSupport/ErrorLib.h>
 #endif
 
 #if defined(_MSDOS) || defined(_WIN32)

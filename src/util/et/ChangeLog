@@ -1,3 +1,7 @@
+2001-03-19	Miro Jurisic <meeroh@mit.edu>
+
+	* error_massage.c: #include <KerberosSupport/ErrorLib.h> on Mac OS
+
 2001-03-18	Miro Jurisic <meeroh@mit.edu>
 
 	* com_err.h: #include <Kerberos5/win-mac.h> on Mac OS
