@@ -394,8 +394,7 @@ void main()
   /* decode_pwd_sequence */
   {
     setup(krb5_alt_method,"krb5_alt_method",ktest_make_sample_alt_method);
-    decode_run("alt_method","","30 0F A0 03 02 01 2A A1 08 04 06 73 65
-63 72 65 74",decode_krb5_alt_method,ktest_equal_krb5_alt_method);
+    decode_run("alt_method","","30 0F A0 03 02 01 2A A1 08 04 06 73 65 63 72 65 74",decode_krb5_alt_method,ktest_equal_krb5_alt_method);
     ref.length = 0;
     decode_run("alt_method (no data)","","30 05 A0 03 02 01 2A",decode_krb5_alt_method,ktest_equal_krb5_alt_method);
     

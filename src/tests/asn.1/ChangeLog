@@ -1,3 +1,9 @@
+
+Tue Aug 29 14:20:52 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* krb5_decode_test.c - Fix string constant.
+	* trval.c - Remove definitions of malloc and realloc.  They should come
+		in from stdlib.h.
+
 Mon Aug 28 16:35:22 1995    <tytso@rsts-11.mit.edu>
 
 	* krb5_decode_test.c (main): Add tests for

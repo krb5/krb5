@@ -37,8 +37,6 @@
 #include <stdio.h>
 #include <ctype.h>
 
-extern char *malloc(), *realloc();
-
 #define OK 0
 #define NOTOK (-1)
 	
