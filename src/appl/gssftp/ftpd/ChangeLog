@@ -1,3 +1,15 @@
+Wed Aug 19 06:47:46 1998  Geoffrey King  <gjking@mit.edu>
+
+	* ftpd.c: Add a new command line option, -c, which tells the
+	server to accept the CCC command.
+
+	* ftpcmd.y: If the -c option was given, check to make sure the CCC
+	command itself was integrity protected, and then set ccc_ok to
+	allow future commands to be transmitted as cleartext.
+	(getline): Now that CCC is potentially allowed, we must check to
+	see if we are parsing an unprotected command even if a security
+	context is established (i.e. auth_type is set).
+
 Wed Aug 12 02:57:07 1998  Geoffrey King  <gjking@mit.edu>
 
 	* ftpcmd.y, ftpd.c: Replace global variable level with clevel and

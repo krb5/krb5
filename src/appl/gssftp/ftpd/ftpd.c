@@ -172,6 +172,8 @@ sigjmp_buf urgcatch;
 int	logged_in;
 struct	passwd *pw;
 int	debug;
+int	allow_ccc = 0;    /* whether or not the CCC command is allowed */
+int	ccc_ok = 0;       /* whether or not to accept cleartext commands */
 int	timeout = 900;    /* timeout after 15 minutes of inactivity */
 int	maxtimeout = 7200;/* don't allow idle time to be set beyond 2 hours */
 int	logging;
@@ -281,6 +283,10 @@ main(argc, argv, envp)
 
 		case 'a':
 			authenticate = 1;
+			break;
+
+		case 'c':
+			allow_ccc = 1;
 			break;
 
 		case 'p':

@@ -116,6 +116,10 @@ extern	int type;
 extern	int form;
 extern	int clevel;
 extern	int debug;
+
+
+extern	int allow_ccc;
+extern	int ccc_ok;
 extern	int timeout;
 extern	int maxtimeout;
 extern  int pdata;
@@ -234,7 +238,17 @@ cmd:		USER SP username CRLF
 		}
 	|	CCC CRLF
 		= {
-			reply(534, "CCC not supported");
+			if (!allow_ccc) {
+			    reply(534, "CCC not supported");
+			}
+			else {
+			    if(clevel == PROT_C && !ccc_ok) {
+			        reply(533, "CCC command must be integrity protected");
+			    } else {
+			        reply(200, "CCC command successful.");
+				ccc_ok = 1;
+			    }
+			}
 		}
 	|	PBSZ SP STRING CRLF
 		= {
@@ -979,9 +993,29 @@ getline(s, n, iop)
 	    char out[sizeof(cbuf)], *cp;
 	    int len, mic;
 
-	    if ((cs = strpbrk(s, " \r\n")))
-	    	*cs++ = '\0';
+
+	    /* Check to see if we have a protected command. */
+	    if (!((mic = strncmp(s, "ENC", 3)) && strncmp(s, "MIC", 3)
+#ifndef NOCONFIDENTIAL
+	        && strncmp(s, "CONF", 4)
+#endif
+	        ) && (cs = strpbrk(s, " \r\n"))) {
+	    	    *cs++ = '\0'; /* If so, split it into s and cs. */
+	    } else { /* If not, check if unprotected commands are allowed. */
+		if(ccc_ok) {
+		    clevel = PROT_C;
+		    upper(s);
+		    return(s);
+		} else {
+		    reply(533, "All commands must be protected.");
+		    syslog(LOG_ERR, "Unprotected command received");
+		    *s = '\0';
+		    return(s);
+		}
+	    }
 	    upper(s);
+	    if (debug)
+	        syslog(LOG_INFO, "command %s received (mic=%d)", s, mic);
 #ifdef NOCONFIDENTIAL
 	    if (!strcmp(s, "CONF")) {
 		reply(537, "CONF protected commands not supported.");
@@ -989,17 +1023,6 @@ getline(s, n, iop)
 		return(s);
 	    }
 #endif
-	    if ((mic = strcmp(s, "ENC")) && strcmp(s, "MIC")
-#ifndef NOCONFIDENTIAL
-		&& strcmp(s, "CONF")
-#endif
-					) {
-		reply(533, "All commands must be protected.");
-		syslog(LOG_ERR, "Unprotected command received");
-		*s = '\0';
-		return(s);
-	    } else if (debug)
-		syslog(LOG_INFO, "command %s received (mic=%d)", s, mic);
 /* Some paranoid sites may want to require that commands be encrypted. */
 #ifdef PARANOID
 	    if (mic) {
