@@ -67,11 +67,6 @@ static struct krb_convert sconv_list[] = {
     0,		0,
 };
 
-static struct krb_convert rconv_list[] = {
-	"ATHENA.MIT.EDU",	".mit.edu",
-	0,			0
-};
-
 /*
  * char *strnchr(s, c, n)
  *   char *s;
@@ -178,6 +173,8 @@ krb5_error_code krb5_425_conv_principal(name, instance, realm, princ)
 {
      struct krb_convert *p;
      char buf[256];		/* V4 instances are limited to 40 characters */
+     krb5_error_code retval;
+     char *domain, *cp;
      
      if (instance) {
 	  if (instance[0] == '\0') {
@@ -195,16 +192,16 @@ krb5_error_code krb5_425_conv_principal(name, instance, realm, princ)
 	  name = p->v5_str;
 	  if (p->flags & DO_REALM_CONVERSION) {
 	       strcpy(buf, instance);
-	       p = rconv_list;
-	       while (1) {
-		    if (!p->v4_str)
-			 break;
-		    if (!strcmp(p->v4_str, realm))
-			 break;
-		    p++;
+	       retval = krb5_get_realm_domain(realm, &domain);
+	       if (retval)
+		   return retval;
+	       if (domain) {
+		   for (cp = domain; *cp; cp++)
+		       if (isupper(*cp))
+			   *cp = tolower(*cp);
+		   strcat(buf, domain);
+		   krb5_xfree(domain);
 	       }
-	       if (p->v5_str)
-		    strcat(buf, p->v5_str);
 	       instance = buf;
 	  }
      }
