@@ -89,7 +89,9 @@ int	registerd_host_only = 0;
 # include <stropts.h>
 # include <termio.h>
 /* make sure we don't get the bsd version */
+#ifdef HAVE_SYS_TTY_H
 # include "/usr/include/sys/tty.h"
+#endif
 #ifdef  HAS_PTYVAR
 # include <sys/ptyvar.h>
 #endif

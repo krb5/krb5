@@ -1,3 +1,7 @@
+Wed May  3 16:50:05 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* telnetd.c: respect HAVE_SYS_TTY_H.
+
 Mon May  1 11:33:28 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* defs.h: Temporary hack for the alpha. Undefine STREAMSPTY if
