@@ -1,3 +1,18 @@
+2004-11-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* kt_file.c (struct _krb5_ktfile_data): Add mutex and buffer.
+	(KTFILEBUFP, KTLOCK, KTUNLOCK, KTCHECKLOCK): New macros.
+	(krb5_ktfile_resolve): Initialize mutex.
+	(krb5_ktfile_close): Zap data buffer before freeing.
+	(krb5_ktfile_get_entry, krb5_ktfile_start_seq_get,
+	krb5_ktfile_get_next, krb5_ktfile_end_get, krb5_ktfile_add,
+	krb5_ktfile_remove): Lock and unlock the mutex.
+	(krb5_ktfileint_open): Check that the mutex is locked.  Set the
+	stdio buffer to the new buffer in the ktfile data.
+	(krb5_ktfileint_write_entry, krb5_ktfileint_find_slot): Check that
+	the mutex is locked.  Don't call setbuf.  Flush the stdio buffer
+	after writing.
+
 2004-11-23  Tom Yu  <tlyu@mit.edu>
 
 	* kt_file.c (krb5_ktfileint_open): Update previous change by
