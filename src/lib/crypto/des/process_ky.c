@@ -44,10 +44,9 @@
         returns: errors
  */
 
-krb5_error_code mit_des_process_key (DECLARG(krb5_encrypt_block *, eblock),
-				     DECLARG(const krb5_keyblock *,keyblock))
-OLDDECLARG(krb5_encrypt_block *, eblock)
-OLDDECLARG(const krb5_keyblock *,keyblock)
+krb5_error_code mit_des_process_key (eblock, keyblock)
+    krb5_encrypt_block * eblock;
+    const krb5_keyblock * keyblock;
 {
     struct mit_des_ks_struct       *schedule;      /* pointer to key schedules */
     

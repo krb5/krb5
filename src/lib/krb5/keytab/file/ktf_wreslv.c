@@ -32,7 +32,8 @@
 #include "ktfile.h"
 
 krb5_error_code
-krb5_ktfile_wresolve(name, id)
+krb5_ktfile_wresolve(context, name, id)
+    krb5_context context;
   const char *name;
   krb5_keytab *id;
 {

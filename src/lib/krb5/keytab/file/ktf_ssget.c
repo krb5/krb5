@@ -31,18 +31,19 @@
 #include "ktfile.h"
 
 krb5_error_code
-krb5_ktfile_start_seq_get(id, cursorp)
+krb5_ktfile_start_seq_get(context, id, cursorp)
+    krb5_context context;
 krb5_keytab id;
 krb5_kt_cursor *cursorp;
 {
     krb5_error_code retval;
     long *fileoff;
 
-    if (retval = krb5_ktfileint_openr(id))
+    if (retval = krb5_ktfileint_openr(context, id))
 	return retval;
 
     if (!(fileoff = (long *)malloc(sizeof(*fileoff)))) {
-	krb5_ktfileint_close(id);
+	krb5_ktfileint_close(context, id);
 	return ENOMEM;
     }
     *fileoff = ftell(KTFILEP(id));

@@ -31,7 +31,8 @@
 #include "ktfile.h"
 
 krb5_error_code
-krb5_ktfile_get_name(id, name, len)
+krb5_ktfile_get_name(context, id, name, len)
+    krb5_context context;
   krb5_keytab id;
   char *name;
   int len;

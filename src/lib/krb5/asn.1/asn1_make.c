@@ -23,32 +23,23 @@
 
 #include "asn1_make.h"
 
-asn1_error_code asn1_make_etag(DECLARG(asn1buf *, buf),
-			       DECLARG(const asn1_class , class),
-			       DECLARG(const asn1_tagnum , tagnum),
-			       DECLARG(const int , in_len),
-			       DECLARG(int *, retlen))
-     OLDDECLARG(asn1buf *, buf)
-     OLDDECLARG(const asn1_class , class)
-     OLDDECLARG(const asn1_tagnum , tagnum)
-     OLDDECLARG(const int , in_len)
-     OLDDECLARG(int *, retlen)
+asn1_error_code asn1_make_etag(buf, class, tagnum, in_len, retlen)
+     asn1buf * buf;
+     const asn1_class class;
+     const asn1_tagnum tagnum;
+     const int in_len;
+     int * retlen;
 {
   return asn1_make_tag(buf,class,CONSTRUCTED,tagnum,in_len,retlen);
 }
 
-asn1_error_code asn1_make_tag(DECLARG(asn1buf *, buf),
-			      DECLARG(const asn1_class , class),
-			      DECLARG(const asn1_construction , construction),
-			      DECLARG(const asn1_tagnum , tagnum),
-			      DECLARG(const int , in_len),
-			      DECLARG(int *, retlen))
-     OLDDECLARG(asn1buf *, buf)
-     OLDDECLARG(const asn1_class , class)
-     OLDDECLARG(const asn1_construction , construction)
-     OLDDECLARG(const asn1_tagnum , tagnum)
-     OLDDECLARG(const int , in_len)
-     OLDDECLARG(int *, retlen)
+asn1_error_code asn1_make_tag(buf, class, construction, tagnum, in_len, retlen)
+     asn1buf * buf;
+     const asn1_class class;
+     const asn1_construction construction;
+     const asn1_tagnum tagnum;
+     const int in_len;
+     int * retlen;
 {
   asn1_error_code retval;
   int sumlen=0, length;
@@ -66,12 +57,10 @@ asn1_error_code asn1_make_tag(DECLARG(asn1buf *, buf),
   return 0;
 }
 
-asn1_error_code asn1_make_length(DECLARG(asn1buf *, buf),
-				 DECLARG(const int , in_len),
-				 DECLARG(int *, retlen))
-     OLDDECLARG(asn1buf *, buf)
-     OLDDECLARG(const int , in_len)
-     OLDDECLARG(int *, retlen)
+asn1_error_code asn1_make_length(buf, in_len, retlen)
+     asn1buf * buf;
+     const int in_len;
+     int * retlen;
 {
   asn1_error_code retval;
 
@@ -97,16 +86,12 @@ asn1_error_code asn1_make_length(DECLARG(asn1buf *, buf),
   return 0;
 }
 
-asn1_error_code asn1_make_id(DECLARG(asn1buf *, buf),
-			     DECLARG(const asn1_class , class),
-			     DECLARG(const asn1_construction , construction),
-			     DECLARG(const asn1_tagnum , tagnum),
-			     DECLARG(int *, retlen))
-     OLDDECLARG(asn1buf *, buf)
-     OLDDECLARG(const asn1_class , class)
-     OLDDECLARG(const asn1_construction , construction)
-     OLDDECLARG(const asn1_tagnum , tagnum)
-     OLDDECLARG(int *, retlen)
+asn1_error_code asn1_make_id(buf, class, construction, tagnum, retlen)
+     asn1buf * buf;
+     const asn1_class class;
+     const asn1_construction construction;
+     const asn1_tagnum tagnum;
+     int * retlen;
 {
   asn1_error_code retval;
 
@@ -139,12 +124,10 @@ asn1_error_code asn1_make_id(DECLARG(asn1buf *, buf),
   return 0;
 }
 
-asn1_error_code asn1_make_sequence(DECLARG(asn1buf *, buf),
-				   DECLARG(const int , seq_len),
-				   DECLARG(int *, retlen))
-     OLDDECLARG(asn1buf *, buf)
-     OLDDECLARG(const int , seq_len)
-     OLDDECLARG(int *, retlen)
+asn1_error_code asn1_make_sequence(buf, seq_len, retlen)
+     asn1buf * buf;
+     const int seq_len;
+     int * retlen;
 {
   asn1_error_code retval;
   int len, sum=0;
@@ -160,12 +143,10 @@ asn1_error_code asn1_make_sequence(DECLARG(asn1buf *, buf),
   return 0;
 }
 
-asn1_error_code asn1_make_set(DECLARG(asn1buf *, buf),
-			      DECLARG(const int , set_len),
-			      DECLARG(int *, retlen))
-     OLDDECLARG(asn1buf *, buf)
-     OLDDECLARG(const int , set_len)
-     OLDDECLARG(int *, retlen)
+asn1_error_code asn1_make_set(buf, set_len, retlen)
+     asn1buf * buf;
+     const int set_len;
+     int * retlen;
 {
   asn1_error_code retval;
   int len, sum=0;
@@ -181,14 +162,11 @@ asn1_error_code asn1_make_set(DECLARG(asn1buf *, buf),
   return 0;
 }
 
-asn1_error_code asn1_make_string(DECLARG(asn1buf *, buf),
-				 DECLARG(const int , length),
-				 DECLARG(const char *, string),
-				 DECLARG(int *, retlen))
-     OLDDECLARG(asn1buf *, buf)
-     OLDDECLARG(const int , length)
-     OLDDECLARG(const char *, string)
-     OLDDECLARG(int *, retlen)
+asn1_error_code asn1_make_string(buf, length, string, retlen)
+     asn1buf * buf;
+     const int length;
+     const char * string;
+     int * retlen;
 {
   asn1_error_code retval;
 

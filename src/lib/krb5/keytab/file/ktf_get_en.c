@@ -33,20 +33,18 @@
 #include "ktfile.h"
 
 krb5_error_code
-krb5_ktfile_get_entry(DECLARG(krb5_keytab, id),
-		      DECLARG(krb5_principal, principal),
-		      DECLARG(krb5_kvno, kvno),
-		      DECLARG(krb5_keytab_entry *, entry))
-OLDDECLARG(krb5_keytab, id)
-OLDDECLARG(krb5_principal, principal)
-OLDDECLARG(krb5_kvno, kvno)
-OLDDECLARG(krb5_keytab_entry *, entry)
+krb5_ktfile_get_entry(context, id, principal, kvno, entry)
+   krb5_context context;
+   krb5_keytab id;
+   krb5_principal principal;
+   krb5_kvno kvno;
+   krb5_keytab_entry * entry;
 {
     krb5_keytab_entry cur_entry, new_entry;
     krb5_error_code kerror = 0;
 
     /* Open the keyfile for reading */
-    if (kerror = krb5_ktfileint_openr(id))
+    if (kerror = krb5_ktfileint_openr(context, id))
 	return(kerror);
     
     /* 
@@ -57,13 +55,13 @@ OLDDECLARG(krb5_keytab_entry *, entry)
     cur_entry.vno = 0;
     cur_entry.key.contents = 0;
     while (TRUE) {
-	if (kerror = krb5_ktfileint_read_entry(id, &new_entry))
+	if (kerror = krb5_ktfileint_read_entry(context, id, &new_entry))
 	    break;
 
-	if (krb5_principal_compare(principal, new_entry.principal)) {
+	if (krb5_principal_compare(context, principal, new_entry.principal)) {
 		if (kvno == IGNORE_VNO) {
 			if (cur_entry.vno < new_entry.vno) {
-				krb5_kt_free_entry(&cur_entry);
+				krb5_kt_free_entry(context, &cur_entry);
 				cur_entry = new_entry;
 			}
 		} else {
@@ -71,18 +69,18 @@ OLDDECLARG(krb5_keytab_entry *, entry)
 			break;
 		}
 	} else {
-		krb5_kt_free_entry(&new_entry);
+		krb5_kt_free_entry(context, &new_entry);
 	}
     }
     if (kerror == KRB5_KT_END)
 	    kerror = cur_entry.principal ? 0 : KRB5_KT_NOTFOUND;
     if (kerror) {
-	(void) krb5_ktfileint_close(id);
-	krb5_kt_free_entry(&cur_entry);
+	(void) krb5_ktfileint_close(context, id);
+	krb5_kt_free_entry(context, &cur_entry);
 	return kerror;
     }
-    if ((kerror = krb5_ktfileint_close(id)) != 0) {
-	krb5_kt_free_entry(&cur_entry);
+    if ((kerror = krb5_ktfileint_close(context, id)) != 0) {
+	krb5_kt_free_entry(context, &cur_entry);
 	return kerror;
     }
     *entry = cur_entry;

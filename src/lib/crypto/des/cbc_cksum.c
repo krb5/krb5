@@ -46,16 +46,12 @@
 
 	returns: errors
 */
-krb5_error_code mit_des_cbc_checksum(DECLARG(krb5_pointer, in),
-				     DECLARG(size_t, in_length),
-				     DECLARG(krb5_pointer, key),
-				     DECLARG(size_t, key_size),
-				     DECLARG(krb5_checksum *, cksum))
-OLDDECLARG(krb5_pointer, in)
-OLDDECLARG(size_t, in_length)
-OLDDECLARG(krb5_pointer, key)
-OLDDECLARG(size_t, key_size)
-OLDDECLARG(krb5_checksum *, cksum)
+krb5_error_code mit_des_cbc_checksum(in, in_length, key, key_size, cksum)
+    krb5_pointer in;
+    size_t in_length;
+    krb5_pointer key;
+    size_t key_size;
+    krb5_checksum * cksum;
 {
     struct mit_des_ks_struct       *schedule;      /* pointer to key schedules */
     krb5_octet 	*contents;

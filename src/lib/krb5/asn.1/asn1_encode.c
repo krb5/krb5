@@ -26,12 +26,10 @@
 #include "asn1_encode.h"
 #include "asn1_make.h"
 
-asn1_error_code asn1_encode_integer(DECLARG(asn1buf *, buf),
-				    DECLARG(const long , val),
-				    DECLARG(int *, retlen))
-     OLDDECLARG(asn1buf *, buf)
-     OLDDECLARG(const long , val)
-     OLDDECLARG(int *, retlen)
+asn1_error_code asn1_encode_integer(buf, val, retlen)
+     asn1buf * buf;
+     const long val;
+     int * retlen;
 {
   asn1_error_code retval;
   int length = 0, partlen;
@@ -65,12 +63,10 @@ asn1_error_code asn1_encode_integer(DECLARG(asn1buf *, buf),
   return 0;
 }
 
-asn1_error_code asn1_encode_unsigned_integer(DECLARG(asn1buf *, buf),
-					     DECLARG(const unsigned long , val),
-					     DECLARG(int *, retlen))
-     OLDDECLARG(asn1buf *, buf)
-     OLDDECLARG(const unsigned long , val)
-     OLDDECLARG(int *, retlen)
+asn1_error_code asn1_encode_unsigned_integer(buf, val, retlen)
+     asn1buf * buf;
+     const unsigned long val;
+     int * retlen;
 {
   asn1_error_code retval;
   int length = 0, partlen;
@@ -100,14 +96,11 @@ asn1_error_code asn1_encode_unsigned_integer(DECLARG(asn1buf *, buf),
   return 0;
 }
 
-asn1_error_code asn1_encode_octetstring(DECLARG(asn1buf *, buf),
-					DECLARG(const int , len),
-					DECLARG(const asn1_octet *, val),
-					DECLARG(int *, retlen))
-     OLDDECLARG(asn1buf *, buf)
-     OLDDECLARG(const int , len)
-     OLDDECLARG(const asn1_octet *, val)
-     OLDDECLARG(int *, retlen)
+asn1_error_code asn1_encode_octetstring(buf, len, val, retlen)
+     asn1buf * buf;
+     const int len;
+     const asn1_octet * val;
+     int * retlen;
 {
   asn1_error_code retval;
   int length;
@@ -121,14 +114,11 @@ asn1_error_code asn1_encode_octetstring(DECLARG(asn1buf *, buf),
   return 0;
 }
 
-asn1_error_code asn1_encode_charstring(DECLARG(asn1buf *, buf),
-				       DECLARG(const int , len),
-				       DECLARG(const char *, val),
-				       DECLARG(int *, retlen))
-     OLDDECLARG(asn1buf *, buf)
-     OLDDECLARG(const int , len)
-     OLDDECLARG(const char *, val)
-     OLDDECLARG(int *, retlen)
+asn1_error_code asn1_encode_charstring(buf, len, val, retlen)
+     asn1buf * buf;
+     const int len;
+     const char * val;
+     int * retlen;
 {
   asn1_error_code retval;
   int length;
@@ -142,10 +132,9 @@ asn1_error_code asn1_encode_charstring(DECLARG(asn1buf *, buf),
   return 0;
 }
 
-asn1_encode_null(DECLARG(asn1buf *, buf),
-		 DECLARG(int *, retlen))
-     OLDDECLARG(asn1buf *, buf)
-     OLDDECLARG(int *, retlen)
+asn1_encode_null(buf, retlen)
+     asn1buf * buf;
+     int * retlen;
 {
   asn1_error_code retval;
   
@@ -158,14 +147,11 @@ asn1_encode_null(DECLARG(asn1buf *, buf),
   return 0;
 }
 
-asn1_error_code asn1_encode_printablestring(DECLARG(asn1buf *, buf),
-					    DECLARG(const int , len),
-					    DECLARG(const char *, val),
-					    DECLARG(int *, retlen))
-     OLDDECLARG(asn1buf *, buf)
-     OLDDECLARG(const int , len)
-     OLDDECLARG(const char *, val)
-     OLDDECLARG(int *, retlen)
+asn1_error_code asn1_encode_printablestring(buf, len, val, retlen)
+     asn1buf * buf;
+     const int len;
+     const char * val;
+     int * retlen;
 {
   asn1_error_code retval;
   int length;
@@ -179,14 +165,11 @@ asn1_error_code asn1_encode_printablestring(DECLARG(asn1buf *, buf),
   return 0;
 }
 
-asn1_error_code asn1_encode_ia5string(DECLARG(asn1buf *, buf),
-				      DECLARG(const int , len),
-				      DECLARG(const char *, val),
-				      DECLARG(int *, retlen))
-     OLDDECLARG(asn1buf *, buf)
-     OLDDECLARG(const int , len)
-     OLDDECLARG(const char *, val)
-     OLDDECLARG(int *, retlen)
+asn1_error_code asn1_encode_ia5string(buf, len, val, retlen)
+     asn1buf * buf;
+     const int len;
+     const char * val;
+     int * retlen;
 {
   asn1_error_code retval;
   int length;
@@ -200,12 +183,10 @@ asn1_error_code asn1_encode_ia5string(DECLARG(asn1buf *, buf),
   return 0;
 }
 
-asn1_error_code asn1_encode_generaltime(DECLARG(asn1buf *, buf),
-					DECLARG(const time_t , val),
-					DECLARG(int *, retlen))
-     OLDDECLARG(asn1buf *, buf)
-     OLDDECLARG(const time_t , val)
-     OLDDECLARG(int *, retlen)
+asn1_error_code asn1_encode_generaltime(buf, val, retlen)
+     asn1buf * buf;
+     const time_t val;
+     int * retlen;
 {
   asn1_error_code retval;
   struct tm *gtime = gmtime(&val);
@@ -229,14 +210,11 @@ asn1_error_code asn1_encode_generaltime(DECLARG(asn1buf *, buf),
   return 0;
 }
 
-asn1_error_code asn1_encode_generalstring(DECLARG(asn1buf *, buf),
-					  DECLARG(const int , len),
-					  DECLARG(const char *, val),
-					  DECLARG(int *, retlen))
-     OLDDECLARG(asn1buf *, buf)
-     OLDDECLARG(const int , len)
-     OLDDECLARG(const char *, val)
-     OLDDECLARG(int *, retlen)
+asn1_error_code asn1_encode_generalstring(buf, len, val, retlen)
+     asn1buf * buf;
+     const int len;
+     const char * val;
+     int * retlen;
 {
   asn1_error_code retval;
   int length;

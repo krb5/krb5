@@ -32,8 +32,8 @@
         free any resources held by "seed" and assigned by init_random_key()
  */
 
-krb5_error_code mit_des_finish_random_key (DECLARG(krb5_pointer *, seed))
-OLDDECLARG(krb5_pointer *, seed)
+krb5_error_code mit_des_finish_random_key (seed)
+    krb5_pointer * seed;
 {
     memset((char *)*seed, 0, sizeof(mit_des_random_key_seed) );
     krb5_xfree(*seed);

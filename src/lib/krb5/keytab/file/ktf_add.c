@@ -31,17 +31,18 @@
 #include "ktfile.h"
 
 krb5_error_code
-krb5_ktfile_add(id, entry)
-krb5_keytab id;
-krb5_keytab_entry *entry;
+krb5_ktfile_add(context, id, entry)
+   krb5_context context;
+   krb5_keytab id;
+   krb5_keytab_entry *entry;
 {
     krb5_error_code retval;
 
-    if (retval = krb5_ktfileint_openw(id))
+    if (retval = krb5_ktfileint_openw(context, id))
 	return retval;
     if (fseek(KTFILEP(id), 0, 2) == -1)
 	return KRB5_KT_END;
-    retval = krb5_ktfileint_write_entry(id, entry);
-    krb5_ktfileint_close(id);
+    retval = krb5_ktfileint_write_entry(context, id, entry);
+    krb5_ktfileint_close(context, id);
     return retval;
 }

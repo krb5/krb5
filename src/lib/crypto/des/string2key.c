@@ -44,16 +44,12 @@
 	returns: errors
  */
 
-krb5_error_code mit_des_string_to_key (DECLARG(const krb5_encrypt_block *, eblock),
-				       DECLARG(const krb5_keytype, keytype),
-				       DECLARG(krb5_keyblock *,keyblock),
-				       DECLARG(const krb5_data *,data),
-				       DECLARG(const krb5_data *, salt))
-OLDDECLARG(const krb5_encrypt_block *, eblock)
-OLDDECLARG(const krb5_keytype, keytype)
-OLDDECLARG(krb5_keyblock *,keyblock)
-OLDDECLARG(const krb5_data *,data)
-OLDDECLARG(const krb5_data *, salt)
+krb5_error_code mit_des_string_to_key (eblock, keytype, keyblock, data, salt)
+const krb5_encrypt_block * eblock;
+const krb5_keytype keytype;
+krb5_keyblock * keyblock;
+const krb5_data * data;
+const krb5_data * salt;
 {
     register char *str, *copystr;
     register krb5_octet *key;

@@ -23,10 +23,9 @@
 
 #include "asn1_misc.h"
 
-asn1_error_code asn1_krb5_realm_copy(DECLARG(krb5_principal, target),
-				     DECLARG(krb5_principal, source))
-     OLDDECLARG(krb5_principal, target)
-     OLDDECLARG(krb5_principal, source)
+asn1_error_code asn1_krb5_realm_copy(target, source)
+     krb5_principal target;
+     krb5_principal source;
 {
   target->realm.length = source->realm.length;
   target->realm.data = (char*)calloc(target->realm.length,

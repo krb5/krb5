@@ -31,7 +31,8 @@
 #include "ktfile.h"
 
 krb5_error_code
-krb5_ktfile_get_next(id, entry, cursor)
+krb5_ktfile_get_next(context, id, entry, cursor)
+    krb5_context context;
 krb5_keytab id;
 krb5_keytab_entry *entry;
 krb5_kt_cursor *cursor;
@@ -42,7 +43,7 @@ krb5_kt_cursor *cursor;
 
     if (fseek(KTFILEP(id), *fileoff, 0) == -1)
 	return KRB5_KT_END;
-    if (kerror = krb5_ktfileint_read_entry(id, &cur_entry))
+    if (kerror = krb5_ktfileint_read_entry(context, id, &cur_entry))
 	return kerror;
     *fileoff = ftell(KTFILEP(id));
     *entry = cur_entry;

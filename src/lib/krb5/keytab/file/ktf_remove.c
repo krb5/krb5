@@ -31,7 +31,8 @@
 #include "ktfile.h"
 
 krb5_error_code
-krb5_ktfile_remove(id, entry)
+krb5_ktfile_remove(context, id, entry)
+    krb5_context context;
 krb5_keytab id;
 krb5_keytab_entry *entry;
 {
@@ -39,7 +40,7 @@ krb5_keytab_entry *entry;
     krb5_error_code     kerror;
     krb5_int32          delete_point;
 
-    if (kerror = krb5_ktfileint_openw(id)) {
+    if (kerror = krb5_ktfileint_openw(context, id)) {
 	return kerror;
     }
 
@@ -48,34 +49,34 @@ krb5_keytab_entry *entry;
      * is exited with a break statement.
      */
     while (TRUE) {
-	if (kerror = krb5_ktfileint_internal_read_entry(id, &cur_entry,
+	if (kerror = krb5_ktfileint_internal_read_entry(context, id, &cur_entry,
                                                             &delete_point))
   	    break;
 
 	if ((entry->vno == cur_entry.vno) &&
             (entry->key.keytype == cur_entry.key.keytype) &&
-	    krb5_principal_compare(entry->principal, cur_entry.principal)) {
+	    krb5_principal_compare(context, entry->principal, cur_entry.principal)) {
 	    /* found a match */
-            krb5_kt_free_entry(&cur_entry);
+            krb5_kt_free_entry(context, &cur_entry);
 	    break;
 	}
-	krb5_kt_free_entry(&cur_entry);
+	krb5_kt_free_entry(context, &cur_entry);
     }
 
     if (kerror == KRB5_KT_END)
 	kerror = KRB5_KT_NOTFOUND;
 
     if (kerror) {
-	(void) krb5_ktfileint_close(id);
+	(void) krb5_ktfileint_close(context, id);
 	return kerror;
     }
 
-    kerror = krb5_ktfileint_delete_entry(id, delete_point);
+    kerror = krb5_ktfileint_delete_entry(context, id, delete_point);
 
     if (kerror) {
-	(void) krb5_ktfileint_close(id);
+	(void) krb5_ktfileint_close(context, id);
     } else {
-        kerror = krb5_ktfileint_close(id);
+        kerror = krb5_ktfileint_close(context, id);
     }
 
     return kerror;

@@ -31,10 +31,11 @@
 #include "ktfile.h"
 
 krb5_error_code
-krb5_ktfile_end_get(id, cursor)
+krb5_ktfile_end_get(context, id, cursor)
+    krb5_context context;
 krb5_keytab id;
 krb5_kt_cursor *cursor;
 {
     krb5_xfree(*cursor);
-    return krb5_ktfileint_close(id);
+    return krb5_ktfileint_close(context, id);
 }

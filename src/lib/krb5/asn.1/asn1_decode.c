@@ -50,10 +50,9 @@ if(class != UNIVERSAL || construction != PRIMITIVE || tagnum != type)\
 #define cleanup()\
 return 0
 
-asn1_error_code asn1_decode_integer(DECLARG(asn1buf *, buf),
-				    DECLARG(long *, val))
-     OLDDECLARG(asn1buf *, buf)
-     OLDDECLARG(long *, val)
+asn1_error_code asn1_decode_integer(buf, val)
+     asn1buf * buf;
+     long * val;
 {
   setup();
   asn1_octet o;
@@ -70,10 +69,9 @@ asn1_error_code asn1_decode_integer(DECLARG(asn1buf *, buf),
   cleanup();
 }
 
-asn1_error_code asn1_decode_unsigned_integer(DECLARG(asn1buf *, buf),
-					     DECLARG(unsigned long *, val))
-     OLDDECLARG(asn1buf *, buf)
-     OLDDECLARG(unsigned long *, val)
+asn1_error_code asn1_decode_unsigned_integer(buf, val)
+     asn1buf * buf;
+     unsigned long * val;
 {
   setup();
   asn1_octet o;
@@ -90,12 +88,10 @@ asn1_error_code asn1_decode_unsigned_integer(DECLARG(asn1buf *, buf),
   cleanup();
 }
 
-asn1_error_code asn1_decode_octetstring(DECLARG(asn1buf *, buf),
-					DECLARG(int *, retlen),
-					DECLARG(asn1_octet **, val))
-     OLDDECLARG(asn1buf *, buf)
-     OLDDECLARG(int *, retlen)
-     OLDDECLARG(asn1_octet **, val)
+asn1_error_code asn1_decode_octetstring(buf, retlen, val)
+     asn1buf * buf;
+     int * retlen;
+     asn1_octet ** val;
 {
   setup();
   tag(ASN1_OCTETSTRING);
@@ -105,12 +101,10 @@ asn1_error_code asn1_decode_octetstring(DECLARG(asn1buf *, buf),
   cleanup();
 }
 
-asn1_error_code asn1_decode_charstring(DECLARG(asn1buf *, buf),
-				       DECLARG(int *, retlen),
-				       DECLARG(char **, val))
-     OLDDECLARG(asn1buf *, buf)
-     OLDDECLARG(int *, retlen)
-     OLDDECLARG(char **, val)
+asn1_error_code asn1_decode_charstring(buf, retlen, val)
+     asn1buf * buf;
+     int * retlen;
+     char ** val;
 {
   setup();
   tag(ASN1_OCTETSTRING);
@@ -121,12 +115,10 @@ asn1_error_code asn1_decode_charstring(DECLARG(asn1buf *, buf),
 }
 
 
-asn1_error_code asn1_decode_generalstring(DECLARG(asn1buf *, buf),
-					  DECLARG(int *, retlen),
-					  DECLARG(char **, val))
-     OLDDECLARG(asn1buf *, buf)
-     OLDDECLARG(int *, retlen)
-     OLDDECLARG(char **, val)
+asn1_error_code asn1_decode_generalstring(buf, retlen, val)
+     asn1buf * buf;
+     int * retlen;
+     char ** val;
 {
   setup();
   tag(ASN1_GENERALSTRING);
@@ -137,8 +129,8 @@ asn1_error_code asn1_decode_generalstring(DECLARG(asn1buf *, buf),
 }
 
 
-asn1_error_code asn1_decode_null(DECLARG(asn1buf *, buf))
-     OLDDECLARG(asn1buf *, buf)
+asn1_error_code asn1_decode_null(buf)
+     asn1buf * buf;
 {
   setup();
   tag(ASN1_NULL);
@@ -146,12 +138,10 @@ asn1_error_code asn1_decode_null(DECLARG(asn1buf *, buf))
   cleanup();
 }
 
-asn1_error_code asn1_decode_printablestring(DECLARG(asn1buf *, buf),
-					    DECLARG(int *, retlen),
-					    DECLARG(char **, val))
-     OLDDECLARG(asn1buf *, buf)
-     OLDDECLARG(int *, retlen)
-     OLDDECLARG(char **, val)
+asn1_error_code asn1_decode_printablestring(buf, retlen, val)
+     asn1buf * buf;
+     int * retlen;
+     char ** val;
 {
   setup();
   tag(ASN1_PRINTABLESTRING);
@@ -161,12 +151,10 @@ asn1_error_code asn1_decode_printablestring(DECLARG(asn1buf *, buf),
   cleanup();
 }
 
-asn1_error_code asn1_decode_ia5string(DECLARG(asn1buf *, buf),
-				      DECLARG(int *, retlen),
-				      DECLARG(char **, val))
-     OLDDECLARG(asn1buf *, buf)
-     OLDDECLARG(int *, retlen)
-     OLDDECLARG(char **, val)
+asn1_error_code asn1_decode_ia5string(buf, retlen, val)
+     asn1buf * buf;
+     int * retlen;
+     char ** val;
 {
   setup();
   tag(ASN1_IA5STRING);
@@ -176,10 +164,9 @@ asn1_error_code asn1_decode_ia5string(DECLARG(asn1buf *, buf),
   cleanup();
 }
 
-asn1_error_code asn1_decode_generaltime(DECLARG(asn1buf *, buf),
-					DECLARG(time_t *, val))
-     OLDDECLARG(asn1buf *, buf)
-     OLDDECLARG(time_t *, val)
+asn1_error_code asn1_decode_generaltime(buf, val)
+     asn1buf * buf;
+     time_t * val;
 {
   setup();
   char *s;

@@ -90,6 +90,7 @@ void mit_des_init_random_number_generator(key,p_seed)
     mit_des_cblock new_key;
 
     krb5_address **addrs = 0;
+    krb5_context context;
 
     /*
      * use a host id in generating the seed to ensure
@@ -128,7 +129,7 @@ void mit_des_init_random_number_generator(key,p_seed)
      * use a time stamp to ensure that a server started later does not reuse
      * an old stream:
      */
-    (void) krb5_us_timeofday(&timenow.seconds,
+    (void) krb5_us_timeofday(context, &timenow.seconds,
 			     &timenow.microseconds); /* XXX return value */
     mit_des_set_sequence_number((unsigned char *)&timenow, p_seed);
 

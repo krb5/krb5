@@ -51,8 +51,8 @@
 #include "asn1buf.h"
 #include <stdio.h>
 
-asn1_error_code asn1buf_create(DECLARG(asn1buf **, buf))
-     OLDDECLARG(asn1buf **, buf)
+asn1_error_code asn1buf_create(buf)
+     asn1buf ** buf;
 {
   *buf = (asn1buf*)calloc(1,sizeof(asn1buf));
   if (*buf == NULL) return ENOMEM;
@@ -62,10 +62,9 @@ asn1_error_code asn1buf_create(DECLARG(asn1buf **, buf))
   return 0;
 }
 
-asn1_error_code asn1buf_wrap_data(DECLARG(asn1buf *, buf),
-				  DECLARG(const krb5_data *, code))
-     OLDDECLARG(asn1buf *, buf)
-     OLDDECLARG(const krb5_data *, code)
+asn1_error_code asn1buf_wrap_data(buf, code)
+     asn1buf * buf;
+     const krb5_data * code;
 {
   if(code == NULL || code->data == NULL) return ASN1_MISSING_FIELD;
   buf->next = buf->base = code->data;
@@ -73,12 +72,10 @@ asn1_error_code asn1buf_wrap_data(DECLARG(asn1buf *, buf),
   return 0;
 }
 
-asn1_error_code asn1buf_imbed(DECLARG(asn1buf *, subbuf),
-			      DECLARG(const asn1buf *, buf),
-			      DECLARG(const int , length))
-     OLDDECLARG(asn1buf *, subbuf)
-     OLDDECLARG(const asn1buf *, buf)
-     OLDDECLARG(const int , length)
+asn1_error_code asn1buf_imbed(subbuf, buf, length)
+     asn1buf * subbuf;
+     const asn1buf * buf;
+     const int length;
 {
   subbuf->base = subbuf->next = buf->next;
   subbuf->bound = subbuf->base + length - 1;
@@ -86,16 +83,15 @@ asn1_error_code asn1buf_imbed(DECLARG(asn1buf *, subbuf),
   return 0;
 }
 
-void asn1buf_sync(DECLARG(asn1buf *, buf),
-		  DECLARG(asn1buf *, subbuf))
-     OLDDECLARG(asn1buf *, buf)
-     OLDDECLARG(asn1buf *, subbuf)
+void asn1buf_sync(buf, subbuf)
+     asn1buf * buf;
+     asn1buf * subbuf;
 {
   buf->next = subbuf->next;
 }
 
-asn1_error_code asn1buf_destroy(DECLARG(asn1buf **, buf))
-     OLDDECLARG(asn1buf **, buf)
+asn1_error_code asn1buf_destroy(buf)
+     asn1buf ** buf;
 {
   if (*buf != NULL) {
     if ((*buf)->base != NULL) free((*buf)->base);
@@ -105,10 +101,9 @@ asn1_error_code asn1buf_destroy(DECLARG(asn1buf **, buf))
   return 0;
 }
 
-asn1_error_code asn1buf_insert_octet(DECLARG(asn1buf *, buf),
-				     DECLARG(const asn1_octet , o))
-     OLDDECLARG(asn1buf *, buf)
-     OLDDECLARG(const asn1_octet , o)
+asn1_error_code asn1buf_insert_octet(buf, o)
+     asn1buf * buf;
+     const asn1_octet o;
 {
   asn1_error_code retval;
 
@@ -119,12 +114,10 @@ asn1_error_code asn1buf_insert_octet(DECLARG(asn1buf *, buf),
   return 0;
 }
 
-asn1_error_code asn1buf_insert_octetstring(DECLARG(asn1buf *, buf),
-					   DECLARG(const int , len),
-					   DECLARG(const krb5_octet *, s))
-     OLDDECLARG(asn1buf *, buf)
-     OLDDECLARG(const int , len)
-     OLDDECLARG(const krb5_octet *, s)
+asn1_error_code asn1buf_insert_octetstring(buf, len, s)
+     asn1buf * buf;
+     const int len;
+     const krb5_octet * s;
 {
   asn1_error_code retval;
   int length;
@@ -136,12 +129,10 @@ asn1_error_code asn1buf_insert_octetstring(DECLARG(asn1buf *, buf),
   return 0;
 }
 
-asn1_error_code asn1buf_insert_charstring(DECLARG(asn1buf *, buf),
-					  DECLARG(const int , len),
-					  DECLARG(const char *, s))
-     OLDDECLARG(asn1buf *, buf)
-     OLDDECLARG(const int , len)
-     OLDDECLARG(const char *, s)
+asn1_error_code asn1buf_insert_charstring(buf, len, s)
+     asn1buf * buf;
+     const int len;
+     const char * s;
 {
   asn1_error_code retval;
   int length;
@@ -153,22 +144,19 @@ asn1_error_code asn1buf_insert_charstring(DECLARG(asn1buf *, buf),
   return 0;
 }
 
-asn1_error_code asn1buf_remove_octet(DECLARG(asn1buf *, buf),
-				     DECLARG(asn1_octet *, o))
-     OLDDECLARG(asn1buf *, buf)
-     OLDDECLARG(asn1_octet *, o)
+asn1_error_code asn1buf_remove_octet(buf, o)
+     asn1buf * buf;
+     asn1_octet * o;
 {
   if(buf->next > buf->bound) return ASN1_OVERRUN;
   *o = (asn1_octet)(*((buf->next)++));
   return 0;
 }
 
-asn1_error_code asn1buf_remove_octetstring(DECLARG(asn1buf *, buf),
-					   DECLARG(const int , len),
-					   DECLARG(asn1_octet **, s))
-     OLDDECLARG(asn1buf *, buf)
-     OLDDECLARG(const int , len)
-     OLDDECLARG(asn1_octet **, s)
+asn1_error_code asn1buf_remove_octetstring(buf, len, s)
+     asn1buf * buf;
+     const int len;
+     asn1_octet ** s;
 {
   int i;
 
@@ -186,12 +174,10 @@ asn1_error_code asn1buf_remove_octetstring(DECLARG(asn1buf *, buf),
   return 0;
 }
 
-asn1_error_code asn1buf_remove_charstring(DECLARG(asn1buf *, buf),
-					  DECLARG(const int , len),
-					  DECLARG(char **, s))
-     OLDDECLARG(asn1buf *, buf)
-     OLDDECLARG(const int , len)
-     OLDDECLARG(char **, s)
+asn1_error_code asn1buf_remove_charstring(buf, len, s)
+     asn1buf * buf;
+     const int len;
+     char ** s;
 {
   int i;
 
@@ -208,17 +194,16 @@ asn1_error_code asn1buf_remove_charstring(DECLARG(asn1buf *, buf),
   return 0;
 }
 
-int asn1buf_remains(DECLARG(const asn1buf *, buf))
-     OLDDECLARG(const asn1buf *, buf)
+int asn1buf_remains(buf)
+     const asn1buf * buf;
 {
   if(buf == NULL || buf->base == NULL) return 0;
   else return buf->bound - buf->next + 1;
 }
 
-asn1_error_code asn12krb5_buf(DECLARG(const asn1buf *, buf),
-			      DECLARG(krb5_data **, code))
-     OLDDECLARG(const asn1buf *, buf)
-     OLDDECLARG(krb5_data **, code)
+asn1_error_code asn12krb5_buf(buf, code)
+     const asn1buf * buf;
+     krb5_data ** code;
 {
   int i;
   *code = (krb5_data*)calloc(1,sizeof(krb5_data));
@@ -238,10 +223,9 @@ asn1_error_code asn12krb5_buf(DECLARG(const asn1buf *, buf),
 /* These parse and unparse procedures should be moved out. They're
    useful only for debugging and superfluous in the production version. */
 
-asn1_error_code asn1buf_unparse(DECLARG(const asn1buf *, buf),
-				DECLARG(char **, s))
-     OLDDECLARG(const asn1buf *, buf)
-     OLDDECLARG(char **, s)
+asn1_error_code asn1buf_unparse(buf, s)
+     const asn1buf * buf;
+     char ** s;
 {
   if(*s != NULL) free(*s);
   if(buf == NULL){
@@ -259,16 +243,15 @@ asn1_error_code asn1buf_unparse(DECLARG(const asn1buf *, buf),
     *s = calloc(length+1, sizeof(char));
     if(*s == NULL) return ENOMEM;
     (*s)[length] = '\0';
-    for(i=0; i<length; i++)
-      OLDDECLARG( (*s)[i] = , (buf->base)[length-i-1])
+    for(i=0; i<length; i++) ;
+/*      OLDDECLARG( (*s)[i] = , (buf->base)[length-i-1]) */
   }
   return 0;
 }
 
-asn1_error_code asn1buf_hex_unparse(DECLARG(const asn1buf *, buf),
-				    DECLARG(char **, s))
-     OLDDECLARG(const asn1buf *, buf)
-     OLDDECLARG(char **, s)
+asn1_error_code asn1buf_hex_unparse(buf, s)
+     const asn1buf * buf;
+     char ** s;
 {
 #define hexchar(d) ((d)<=9 ? ('0'+(d)) :\
 		    ((d)<=15 ? ('A'+(d)-10) :\
@@ -303,24 +286,23 @@ asn1_error_code asn1buf_hex_unparse(DECLARG(const asn1buf *, buf),
 /****************************************************************/
 /* Private Procedures */
 
-int asn1buf_size(DECLARG(const asn1buf *, buf))
-     OLDDECLARG(const asn1buf *, buf)
+int asn1buf_size(buf)
+     const asn1buf * buf;
 {
   if(buf == NULL || buf->base == NULL) return 0;
   return buf->bound - buf->base + 1;
 }
 
-int asn1buf_free(DECLARG(const asn1buf *, buf))
-     OLDDECLARG(const asn1buf *, buf)
+int asn1buf_free(buf)
+     const asn1buf * buf;
 {
   if(buf == NULL || buf->base == NULL) return 0;
   else return buf->bound - buf->next + 1;
 }
 
-asn1_error_code asn1buf_ensure_space(DECLARG(asn1buf *, buf),
-				     DECLARG(const int , amount))
-     OLDDECLARG(asn1buf *, buf)
-     OLDDECLARG(const int , amount)
+asn1_error_code asn1buf_ensure_space(buf, amount)
+     asn1buf * buf;
+     const int amount;
 {
   int free = asn1buf_free(buf);
   if(free < amount){
@@ -330,10 +312,9 @@ asn1_error_code asn1buf_ensure_space(DECLARG(asn1buf *, buf),
   return 0;
 }
 
-asn1_error_code asn1buf_expand(DECLARG(asn1buf *, buf),
-			       DECLARG(const int , inc))
-     OLDDECLARG(asn1buf *, buf)
-     OLDDECLARG(const int , inc)
+asn1_error_code asn1buf_expand(buf, inc)
+     asn1buf * buf;
+     const int inc;
 {
 #define STANDARD_INCREMENT 200
   int next_offset = buf->next - buf->base;
@@ -356,8 +337,8 @@ asn1_error_code asn1buf_expand(DECLARG(asn1buf *, buf),
   return 0;
 }
 
-int asn1buf_len(DECLARG(const asn1buf *, buf))
-     OLDDECLARG(const asn1buf *, buf)
+int asn1buf_len(buf)
+     const asn1buf * buf;
 {
   return buf->next - buf->base;
 }

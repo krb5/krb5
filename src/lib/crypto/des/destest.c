@@ -47,6 +47,7 @@ char *argv[];
 
     krb5_encrypt_block eblock;
     krb5_keyblock keyblock;
+    krb5_context context;
     mit_des_cblock key, input, output, output2;
     krb5_error_code retval;
     int num = 0;
@@ -56,7 +57,7 @@ char *argv[];
     /* do some initialisation */
     initialize_krb5_error_table();
 
-    krb5_use_cstype(&eblock, ETYPE_DES_CBC_CRC);
+    krb5_use_cstype(context, &eblock, ETYPE_DES_CBC_CRC);
     keyblock.magic = KV5M_KEYBLOCK;
     keyblock.etype = ETYPE_DES_CBC_CRC;
     keyblock.keytype = KEYTYPE_DES;
@@ -68,7 +69,7 @@ char *argv[];
 	convert(block2, input);
 	convert(block3, output);
 
-        if (retval = krb5_process_key(&eblock,&keyblock)) {
+        if (retval = krb5_process_key(context, &eblock,&keyblock)) {
             com_err("des test", retval, "can't process key");
             exit(-1);
         }
@@ -99,7 +100,7 @@ char *argv[];
 	    error++;
 	}
 
-        if (retval = krb5_finish_key(&eblock)) {
+        if (retval = krb5_finish_key(context, &eblock)) {
             com_err("des verify", retval, "can't finish key");
             exit(-1);
         }

@@ -64,48 +64,104 @@ extern struct _krb5_kt_ops krb5_ktf_writable_ops;
 /* widen prototypes, if needed */
 #include <krb5/widen.h>
 
-krb5_error_code krb5_ktfile_resolve PROTOTYPE((const char *,
-					       krb5_keytab *));
-krb5_error_code krb5_ktfile_wresolve PROTOTYPE((const char *,
-					       krb5_keytab *));
-krb5_error_code krb5_ktfile_get_name PROTOTYPE((krb5_keytab,
-						char *,
-						int));
-krb5_error_code krb5_ktfile_close PROTOTYPE((krb5_keytab));
-krb5_error_code krb5_ktfile_get_entry PROTOTYPE((krb5_keytab,
-						 krb5_principal,
-						 krb5_kvno,
-						 krb5_keytab_entry *));
-krb5_error_code krb5_ktfile_start_seq_get PROTOTYPE((krb5_keytab,
-						     krb5_kt_cursor *));
-krb5_error_code krb5_ktfile_get_next PROTOTYPE((krb5_keytab,
-						krb5_keytab_entry *,
-						krb5_kt_cursor *));
-krb5_error_code krb5_ktfile_end_get PROTOTYPE((krb5_keytab,
-					       krb5_kt_cursor *));
-/* routines to be included on extended version (write routines) */
-krb5_error_code krb5_ktfile_add PROTOTYPE((krb5_keytab,
-					   krb5_keytab_entry *));
-krb5_error_code krb5_ktfile_remove PROTOTYPE((krb5_keytab,
-					      krb5_keytab_entry *));
+krb5_error_code krb5_ktfile_resolve 
+	PROTOTYPE((krb5_context,
+		   const char *,
+		   krb5_keytab *));
 
-krb5_error_code krb5_ktfileint_openr PROTOTYPE((krb5_keytab));
-krb5_error_code krb5_ktfileint_openw PROTOTYPE((krb5_keytab));
-krb5_error_code krb5_ktfileint_close PROTOTYPE((krb5_keytab));
-krb5_error_code krb5_ktfileint_read_entry PROTOTYPE((krb5_keytab,
-						     krb5_keytab_entry *));
-krb5_error_code krb5_ktfileint_write_entry PROTOTYPE((krb5_keytab,
-						      krb5_keytab_entry *));
-krb5_error_code krb5_ktfileint_delete_entry PROTOTYPE((krb5_keytab,
-                                                      krb5_int32));
-krb5_error_code krb5_ktfileint_internal_read_entry PROTOTYPE((krb5_keytab,
-						     krb5_keytab_entry *,
-                                                     krb5_int32 *));
-krb5_error_code krb5_ktfileint_size_entry PROTOTYPE((krb5_keytab_entry *,
-                                                      krb5_int32 *));
-krb5_error_code krb5_ktfileint_find_slot PROTOTYPE((krb5_keytab,
-                                                      krb5_int32 *,
-                                                      krb5_int32 *));
+krb5_error_code krb5_ktfile_wresolve 
+	PROTOTYPE((krb5_context,
+		   const char *,
+		   krb5_keytab *));
+
+krb5_error_code krb5_ktfile_get_name 
+	PROTOTYPE((krb5_context,
+		   krb5_keytab,
+		   char *,
+		   int));
+
+krb5_error_code krb5_ktfile_close 
+	PROTOTYPE((krb5_context,
+		   krb5_keytab));
+
+krb5_error_code krb5_ktfile_get_entry 
+	PROTOTYPE((krb5_context,
+		   krb5_keytab,
+		   krb5_principal,
+		   krb5_kvno,
+		   krb5_keytab_entry *));
+
+krb5_error_code krb5_ktfile_start_seq_get 
+	PROTOTYPE((krb5_context,
+		   krb5_keytab,
+		   krb5_kt_cursor *));
+
+krb5_error_code krb5_ktfile_get_next 
+	PROTOTYPE((krb5_context,
+		   krb5_keytab,
+		   krb5_keytab_entry *,
+		   krb5_kt_cursor *));
+
+krb5_error_code krb5_ktfile_end_get 
+	PROTOTYPE((krb5_context,
+		   krb5_keytab,
+		   krb5_kt_cursor *));
+
+/* routines to be included on extended version (write routines) */
+krb5_error_code krb5_ktfile_add 
+	PROTOTYPE((krb5_context,
+		   krb5_keytab,
+		   krb5_keytab_entry *));
+
+krb5_error_code krb5_ktfile_remove 
+	PROTOTYPE((krb5_context,
+		   krb5_keytab,
+		   krb5_keytab_entry *));
+
+krb5_error_code krb5_ktfileint_openr 
+	PROTOTYPE((krb5_context,
+		   krb5_keytab));
+
+krb5_error_code krb5_ktfileint_openw 
+	PROTOTYPE((krb5_context,
+		   krb5_keytab));
+
+krb5_error_code krb5_ktfileint_close 
+	PROTOTYPE((krb5_context,
+		   krb5_keytab));
+
+krb5_error_code krb5_ktfileint_read_entry 
+	PROTOTYPE((krb5_context,
+		   krb5_keytab,
+		   krb5_keytab_entry *));
+
+krb5_error_code krb5_ktfileint_write_entry 
+	PROTOTYPE((krb5_context,
+		   krb5_keytab,
+		   krb5_keytab_entry *));
+
+krb5_error_code krb5_ktfileint_delete_entry 
+	PROTOTYPE((krb5_context,
+		   krb5_keytab,
+                   krb5_int32));
+
+krb5_error_code krb5_ktfileint_internal_read_entry 
+	PROTOTYPE((krb5_context,
+		   krb5_keytab,
+		   krb5_keytab_entry *,
+                   krb5_int32 *));
+
+krb5_error_code krb5_ktfileint_size_entry 
+	PROTOTYPE((krb5_context,
+		   krb5_keytab_entry *,
+                   krb5_int32 *));
+
+krb5_error_code krb5_ktfileint_find_slot 
+	PROTOTYPE((krb5_context,
+		   krb5_keytab,
+                   krb5_int32 *,
+                   krb5_int32 *));
+
 /* and back to normal... */
 #include <krb5/narrow.h>
 

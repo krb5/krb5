@@ -61,16 +61,12 @@ krb5_cs_table_entry krb5_raw_des_cst_entry = {
     };
 
 static krb5_error_code
-    mit_raw_des_decrypt_func(DECLARG(krb5_const_pointer, in),
-			     DECLARG(krb5_pointer, out),
-			     DECLARG(const size_t, size),
-			     DECLARG(krb5_encrypt_block *, key),
-			     DECLARG(krb5_pointer, ivec))
-OLDDECLARG(krb5_const_pointer, in)
-OLDDECLARG(krb5_pointer, out)
-OLDDECLARG(const size_t, size)
-OLDDECLARG(krb5_encrypt_block *, key)
-OLDDECLARG(krb5_pointer, ivec)
+mit_raw_des_decrypt_func(in, out, size, key, ivec)
+    krb5_const_pointer in;
+    krb5_pointer out;
+    const size_t size;
+    krb5_encrypt_block * key;
+    krb5_pointer ivec;
 {
     return (mit_des_cbc_encrypt (in, 
 				 out, 
@@ -81,16 +77,12 @@ OLDDECLARG(krb5_pointer, ivec)
 }
 
 static krb5_error_code
-    mit_raw_des_encrypt_func(DECLARG(krb5_const_pointer, in),
-			     DECLARG(krb5_pointer, out),
-			     DECLARG(const size_t, size),
-			     DECLARG(krb5_encrypt_block *, key),
-			     DECLARG(krb5_pointer, ivec))
-OLDDECLARG(krb5_const_pointer, in)
-OLDDECLARG(krb5_pointer, out)
-OLDDECLARG(const size_t, size)
-OLDDECLARG(krb5_encrypt_block *, key)
-OLDDECLARG(krb5_pointer, ivec)
+mit_raw_des_encrypt_func(in, out, size, key, ivec)
+    krb5_const_pointer in;
+    krb5_pointer out;
+    const size_t size;
+    krb5_encrypt_block * key;
+    krb5_pointer ivec;
 {
    int sumsize;
 

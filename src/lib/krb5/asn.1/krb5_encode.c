@@ -141,10 +141,9 @@
 \
   return 0
 
-krb5_error_code encode_krb5_authenticator(DECLARG(const krb5_authenticator *, rep),
-					  DECLARG(krb5_data **, code))
-     OLDDECLARG(const krb5_authenticator *, rep)
-     OLDDECLARG(krb5_data **, code)
+krb5_error_code encode_krb5_authenticator(rep, code)
+     const krb5_authenticator * rep;
+     krb5_data ** code;
 {
   krb5_setup();
 
@@ -199,10 +198,9 @@ krb5_error_code encode_krb5_authenticator(DECLARG(const krb5_authenticator *, re
   krb5_cleanup();
 }
 
-krb5_error_code encode_krb5_ticket(DECLARG(const krb5_ticket *, rep),
-				   DECLARG(krb5_data **, code))
-     OLDDECLARG(const krb5_ticket *, rep)
-     OLDDECLARG(krb5_data **, code)
+krb5_error_code encode_krb5_ticket(rep, code)
+     const krb5_ticket * rep;
+     krb5_data ** code;
 {
   krb5_setup();
 
@@ -225,10 +223,9 @@ krb5_error_code encode_krb5_ticket(DECLARG(const krb5_ticket *, rep),
   krb5_cleanup();
 }
 
-krb5_error_code encode_krb5_encryption_key(DECLARG(const krb5_keyblock *, rep),
-					   DECLARG(krb5_data **, code))
-     OLDDECLARG(const krb5_keyblock *, rep)
-     OLDDECLARG(krb5_data **, code)
+krb5_error_code encode_krb5_encryption_key(rep, code)
+     const krb5_keyblock * rep;
+     krb5_data ** code;
 {
   krb5_setup();
 
@@ -244,10 +241,9 @@ krb5_error_code encode_krb5_encryption_key(DECLARG(const krb5_keyblock *, rep),
   krb5_cleanup();
 }
 
-krb5_error_code encode_krb5_enc_tkt_part(DECLARG(const krb5_enc_tkt_part *, rep),
-					 DECLARG(krb5_data **, code))
-     OLDDECLARG(const krb5_enc_tkt_part *, rep)
-     OLDDECLARG(krb5_data **, code)
+krb5_error_code encode_krb5_enc_tkt_part(rep, code)
+     const krb5_enc_tkt_part * rep;
+     krb5_data ** code;
 {
   krb5_setup();
 
@@ -297,10 +293,9 @@ krb5_error_code encode_krb5_enc_tkt_part(DECLARG(const krb5_enc_tkt_part *, rep)
   krb5_cleanup();
 }
 
-krb5_error_code encode_krb5_enc_kdc_rep_part(DECLARG(const krb5_enc_kdc_rep_part *, rep),
-					     DECLARG(krb5_data **, code))
-     OLDDECLARG(const krb5_enc_kdc_rep_part *, rep)
-     OLDDECLARG(krb5_data **, code)
+krb5_error_code encode_krb5_enc_kdc_rep_part(rep, code)
+     const krb5_enc_kdc_rep_part * rep;
+     krb5_data ** code;
 {
   asn1_error_code retval;
   asn1buf *buf=NULL;
@@ -326,10 +321,9 @@ krb5_error_code encode_krb5_enc_kdc_rep_part(DECLARG(const krb5_enc_kdc_rep_part
 }
 
 /* yes, the translation is identical to that used for KDC__REP */ 
-krb5_error_code encode_krb5_as_rep(DECLARG(const krb5_kdc_rep *, rep),
-				   DECLARG(krb5_data **, code))
-     OLDDECLARG(const krb5_kdc_rep *, rep)
-     OLDDECLARG(krb5_data **, code)
+krb5_error_code encode_krb5_as_rep(rep, code)
+     const krb5_kdc_rep * rep;
+     krb5_data ** code;
 {
   krb5_setup();
 
@@ -344,10 +338,9 @@ krb5_error_code encode_krb5_as_rep(DECLARG(const krb5_kdc_rep *, rep),
 }
 
 /* yes, the translation is identical to that used for KDC__REP */ 
-krb5_error_code encode_krb5_tgs_rep(DECLARG(const krb5_kdc_rep *, rep),
-				    DECLARG(krb5_data **, code))
-     OLDDECLARG(const krb5_kdc_rep *, rep)
-     OLDDECLARG(krb5_data **, code)
+krb5_error_code encode_krb5_tgs_rep( rep, code)
+     const krb5_kdc_rep * rep;
+     krb5_data ** code;
 {
   krb5_setup();
 
@@ -361,10 +354,9 @@ krb5_error_code encode_krb5_tgs_rep(DECLARG(const krb5_kdc_rep *, rep),
   krb5_cleanup();
 }
 
-krb5_error_code encode_krb5_ap_req(DECLARG(const krb5_ap_req *, rep),
-				   DECLARG(krb5_data **, code))
-     OLDDECLARG(const krb5_ap_req *, rep)
-     OLDDECLARG(krb5_data **, code)
+krb5_error_code encode_krb5_ap_req(rep, code)
+     const krb5_ap_req * rep;
+     krb5_data ** code;
 {
   krb5_setup();
 
@@ -390,10 +382,9 @@ krb5_error_code encode_krb5_ap_req(DECLARG(const krb5_ap_req *, rep),
   krb5_cleanup();
 }
 
-krb5_error_code encode_krb5_ap_rep(DECLARG(const krb5_ap_rep *, rep),
-				   DECLARG(krb5_data **, code))
-     OLDDECLARG(const krb5_ap_rep *, rep)
-     OLDDECLARG(krb5_data **, code)
+krb5_error_code encode_krb5_ap_rep(rep, code)
+     const krb5_ap_rep * rep;
+     krb5_data ** code;
 {
   krb5_setup();
 
@@ -414,10 +405,9 @@ krb5_error_code encode_krb5_ap_rep(DECLARG(const krb5_ap_rep *, rep),
 }
 
 
-krb5_error_code encode_krb5_ap_rep_enc_part(DECLARG(const krb5_ap_rep_enc_part *, rep),
-					    DECLARG(krb5_data **, code))
-     OLDDECLARG(const krb5_ap_rep_enc_part *, rep)
-     OLDDECLARG(krb5_data **, code)
+krb5_error_code encode_krb5_ap_rep_enc_part(rep, code)
+     const krb5_ap_rep_enc_part * rep;
+     krb5_data ** code;
 {
   krb5_setup();
 
@@ -442,10 +432,9 @@ krb5_error_code encode_krb5_ap_rep_enc_part(DECLARG(const krb5_ap_rep_enc_part *
   krb5_cleanup();
 }
 
-krb5_error_code encode_krb5_as_req(DECLARG(const krb5_kdc_req *, rep),
-				   DECLARG(krb5_data **, code))
-     OLDDECLARG(const krb5_kdc_req *, rep)
-     OLDDECLARG(krb5_data **, code)
+krb5_error_code encode_krb5_as_req(rep, code)
+     const krb5_kdc_req * rep;
+     krb5_data ** code;
 {
   krb5_setup();
 
@@ -459,10 +448,9 @@ krb5_error_code encode_krb5_as_req(DECLARG(const krb5_kdc_req *, rep),
   krb5_cleanup();
 }
 
-krb5_error_code encode_krb5_tgs_req(DECLARG(const krb5_kdc_req *, rep),
-				    DECLARG(krb5_data **, code))
-     OLDDECLARG(const krb5_kdc_req *, rep)
-     OLDDECLARG(krb5_data **, code)
+krb5_error_code encode_krb5_tgs_req(rep, code)
+     const krb5_kdc_req * rep;
+     krb5_data ** code;
 {
   krb5_setup();
 
@@ -476,10 +464,9 @@ krb5_error_code encode_krb5_tgs_req(DECLARG(const krb5_kdc_req *, rep),
   krb5_cleanup();
 }
 
-krb5_error_code encode_krb5_kdc_req_body(DECLARG(const krb5_kdc_req *, rep),
-					 DECLARG(krb5_data **, code))
-     OLDDECLARG(const krb5_kdc_req *, rep)
-     OLDDECLARG(krb5_data **, code)
+krb5_error_code encode_krb5_kdc_req_body(rep, code)
+     const krb5_kdc_req * rep;
+     krb5_data ** code;
 {
   krb5_setup();
 
@@ -491,10 +478,9 @@ krb5_error_code encode_krb5_kdc_req_body(DECLARG(const krb5_kdc_req *, rep),
 }
 
 
-krb5_error_code encode_krb5_safe(DECLARG(const krb5_safe *, rep),
-				 DECLARG(krb5_data **, code))
-     OLDDECLARG(const krb5_safe *, rep)
-     OLDDECLARG(krb5_data **, code)
+krb5_error_code encode_krb5_safe(rep, code)
+     const krb5_safe * rep;
+     krb5_data ** code;
 {
   krb5_setup();
 
@@ -517,10 +503,9 @@ krb5_error_code encode_krb5_safe(DECLARG(const krb5_safe *, rep),
   krb5_cleanup();
 }
 
-krb5_error_code encode_krb5_priv(DECLARG(const krb5_priv *, rep),
-				 DECLARG(krb5_data **, code))
-     OLDDECLARG(const krb5_priv *, rep)
-     OLDDECLARG(krb5_data **, code)
+krb5_error_code encode_krb5_priv(rep, code)
+     const krb5_priv * rep;
+     krb5_data ** code;
 {
   krb5_setup();
 
@@ -540,10 +525,9 @@ krb5_error_code encode_krb5_priv(DECLARG(const krb5_priv *, rep),
   krb5_cleanup();
 }
 
-krb5_error_code encode_krb5_enc_priv_part(DECLARG(const krb5_priv_enc_part *, rep),
-					  DECLARG(krb5_data **, code))
-     OLDDECLARG(const krb5_priv_enc_part *, rep)
-     OLDDECLARG(krb5_data **, code)
+krb5_error_code encode_krb5_enc_priv_part(rep, code)
+     const krb5_priv_enc_part * rep;
+     krb5_data ** code;
 {
   krb5_setup();
 
@@ -575,10 +559,9 @@ krb5_error_code encode_krb5_enc_priv_part(DECLARG(const krb5_priv_enc_part *, re
   krb5_cleanup();
 }
 
-krb5_error_code encode_krb5_cred(DECLARG(const krb5_cred *, rep),
-				 DECLARG(krb5_data **, code))
-     OLDDECLARG(const krb5_cred *, rep)
-     OLDDECLARG(krb5_data **, code)
+krb5_error_code encode_krb5_cred(rep, code)
+     const krb5_cred * rep;
+     krb5_data ** code;
 {
   krb5_setup();
 
@@ -601,10 +584,9 @@ krb5_error_code encode_krb5_cred(DECLARG(const krb5_cred *, rep),
   krb5_cleanup();
 }
 
-krb5_error_code encode_krb5_enc_cred_part(DECLARG(const krb5_cred_enc_part *, rep),
-					  DECLARG(krb5_data **, code))
-     OLDDECLARG(const krb5_cred_enc_part *, rep)
-     OLDDECLARG(krb5_data **, code)
+krb5_error_code encode_krb5_enc_cred_part(rep, code)
+     const krb5_cred_enc_part * rep;
+     krb5_data ** code;
 {
   krb5_setup();
 
@@ -638,10 +620,9 @@ krb5_error_code encode_krb5_enc_cred_part(DECLARG(const krb5_cred_enc_part *, re
   krb5_cleanup();
 }
 
-krb5_error_code encode_krb5_error(DECLARG(const krb5_error *, rep),
-				  DECLARG(krb5_data **, code))
-     OLDDECLARG(const krb5_error *, rep)
-     OLDDECLARG(krb5_data **, code)
+krb5_error_code encode_krb5_error(rep, code)
+     const krb5_error * rep;
+     krb5_data ** code;
 {
   krb5_setup();
 
@@ -696,10 +677,9 @@ krb5_error_code encode_krb5_error(DECLARG(const krb5_error *, rep),
   krb5_cleanup();
 }
 
-krb5_error_code encode_krb5_authdata(DECLARG(const krb5_authdata **, rep),
-				     DECLARG(krb5_data **, code))
-     OLDDECLARG(const krb5_authdata **, rep)
-     OLDDECLARG(krb5_data **, code)
+krb5_error_code encode_krb5_authdata(rep, code)
+     const krb5_authdata ** rep;
+     krb5_data ** code;
 {
   asn1_error_code retval;
   asn1buf *buf=NULL;
@@ -718,10 +698,9 @@ krb5_error_code encode_krb5_authdata(DECLARG(const krb5_authdata **, rep),
 }
 
 /* Sandia Additions */
-krb5_error_code encode_krb5_pwd_sequence(DECLARG(const passwd_phrase_element *, rep),
-					 DECLARG(krb5_data **, code))
-     OLDDECLARG(const passwd_phrase_element *, rep)
-     OLDDECLARG(krb5_data **, code)
+krb5_error_code encode_krb5_pwd_sequence( rep, code)
+     const passwd_phrase_element * rep;
+     krb5_data ** code;
 {
   krb5_setup();
   retval = asn1_encode_passwdsequence(buf,rep,&length);
@@ -730,10 +709,9 @@ krb5_error_code encode_krb5_pwd_sequence(DECLARG(const passwd_phrase_element *, 
   krb5_cleanup();
 }
 
-krb5_error_code encode_krb5_pwd_data(DECLARG(const krb5_pwd_data *, rep),
-				     DECLARG(krb5_data **, code))
-     OLDDECLARG(const krb5_pwd_data *, rep)
-     OLDDECLARG(krb5_data **, code)
+krb5_error_code encode_krb5_pwd_data(rep, code)
+     const krb5_pwd_data * rep;
+     krb5_data ** code;
 {
   krb5_setup();
   krb5_addfield((const passwd_phrase_element**)rep->element,1,asn1_encode_sequence_of_passwdsequence);

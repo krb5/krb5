@@ -36,8 +36,8 @@
 	returns: errors
  */
 
-krb5_error_code mit_des_finish_key (DECLARG(krb5_encrypt_block *,eblock))
-OLDDECLARG(krb5_encrypt_block *,eblock)
+krb5_error_code mit_des_finish_key (eblock)
+    krb5_encrypt_block * eblock;
 {
     memset((char *)eblock->priv, 0, sizeof(mit_des_key_schedule));
     free(eblock->priv);

@@ -23,16 +23,12 @@
 
 #include "asn1_get.h"
 
-asn1_error_code asn1_get_tag(DECLARG(asn1buf *, buf),
-			     DECLARG(asn1_class *, class),
-			     DECLARG(asn1_construction *, construction),
-			     DECLARG(asn1_tagnum *, tagnum),
-			     DECLARG(int *, retlen))
-     OLDDECLARG(asn1buf *, buf)
-     OLDDECLARG(asn1_class *, class)
-     OLDDECLARG(asn1_construction *, construction)
-     OLDDECLARG(asn1_tagnum *, tagnum)
-     OLDDECLARG(int *, retlen)
+asn1_error_code asn1_get_tag(buf, class, construction, tagnum, retlen)
+     asn1buf * buf;
+     asn1_class * class;
+     asn1_construction * construction;
+     asn1_tagnum * tagnum;
+     int * retlen;
 {
   asn1_error_code retval;
   
@@ -47,10 +43,9 @@ asn1_error_code asn1_get_tag(DECLARG(asn1buf *, buf),
   return 0;
 }
 
-asn1_error_code asn1_get_sequence(DECLARG(asn1buf *, buf),
-				  DECLARG(int *, retlen))
-     OLDDECLARG(asn1buf *, buf)
-     OLDDECLARG(int *, retlen)
+asn1_error_code asn1_get_sequence(buf, retlen)
+     asn1buf * buf;
+     int * retlen;
 {
   asn1_error_code retval;
   asn1_class class;
@@ -68,14 +63,11 @@ asn1_error_code asn1_get_sequence(DECLARG(asn1buf *, buf),
 /****************************************************************/
 /* Private Procedures */
 
-asn1_error_code asn1_get_id(DECLARG(asn1buf *, buf),
-			    DECLARG(asn1_class *, class),
-			    DECLARG(asn1_construction *, construction),
-			    DECLARG(asn1_tagnum *, tagnum))
-     OLDDECLARG(asn1buf *, buf)
-     OLDDECLARG(asn1_class *, class)
-     OLDDECLARG(asn1_construction *, construction)
-     OLDDECLARG(asn1_tagnum *, tagnum)
+asn1_error_code asn1_get_id(buf, class, construction, tagnum)
+     asn1buf * buf;
+     asn1_class * class;
+     asn1_construction * construction;
+     asn1_tagnum * tagnum;
 {
   asn1_error_code retval;
   asn1_tagnum tn=0;
@@ -107,10 +99,9 @@ asn1_error_code asn1_get_id(DECLARG(asn1buf *, buf),
   return 0;
 }
 
-asn1_error_code asn1_get_length(DECLARG(asn1buf *, buf),
-				DECLARG(int *, retlen))
-     OLDDECLARG(asn1buf *, buf)
-     OLDDECLARG(int *, retlen)
+asn1_error_code asn1_get_length(buf, retlen)
+     asn1buf * buf;
+     int * retlen;
 {
   asn1_error_code retval;
   asn1_octet o;

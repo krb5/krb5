@@ -33,12 +33,10 @@
         filling in the keyblock address in *keyblock
  */
 
-krb5_error_code mit_des_random_key (DECLARG(const krb5_encrypt_block *, eblock),
-				    DECLARG(krb5_pointer, seed),
-				    DECLARG(krb5_keyblock **, keyblock))
-OLDDECLARG(const krb5_encrypt_block *, eblock)
-OLDDECLARG(krb5_pointer, seed)
-OLDDECLARG(krb5_keyblock **, keyblock)
+krb5_error_code mit_des_random_key (eblock, seed, keyblock)
+    const krb5_encrypt_block * eblock;
+    krb5_pointer seed;
+    krb5_keyblock ** keyblock;
 {
     krb5_keyblock *randkey;
 
