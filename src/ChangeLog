@@ -1,3 +1,7 @@
+2000-04-18  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in (clean-windows): Actually clean gss-sample on Windows.
+
 2000-04-11  Danilo Almeida  <dalmeida@mit.edu>
 
 	* Makefile.in (clean-windows): Clean gss-sample on Windows.

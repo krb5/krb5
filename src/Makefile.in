@@ -292,7 +292,7 @@ clean-windows:: Makefile-windows
 	$(MAKE) -$(MFLAGS) clean
 	@echo Making in appl\gss-sample
 	cd ..\appl\gss-sample
-	$(MAKE) -$(MFLAGS)
+	$(MAKE) -$(MFLAGS) clean
 	cd ..\..
 	@echo Making clean in root
 
