@@ -33,7 +33,7 @@
 #include "k5-int.h"
 #include "./kdb5_edit.h"
 
-#if defined(sysvimp) || ( defined(mips) && defined(SYSTYPE_BSD43)) || (defined(vax) && !defined(ultrix))
+#ifndef HAVE_STRSTR
 char *
 strstr(s1, s2)
 char *s1;
@@ -50,7 +50,7 @@ char *s2;
    }
    return ((char *) 0);
 }
-#endif	/* sysvimp */
+#endif	/* HAVE_STRSTR */
 
 void
 parse_token(token_in, must_be_first_char, num_tokens, tokens_out)

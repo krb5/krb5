@@ -233,7 +233,16 @@ found_one:;
 	if (i == 3) fputc(' ', arg->f);
     }
 
+    if (entry->expiration == 0) {
+        /* 0 means "never" expire. V4 didn't support that, so rather than
+	   having everything appear to have expired in 1970, we nail in the
+	   Cygnus 96q1 default value.  The value quoted here is directly 
+	   from src/admin/kdb_init.c in Cygnus CNS V4 96q1, and is
+	   roughly 12/31/2009. */
+        v4_print_time(arg->f, 946702799+((365*10+3)*24*60*60));
+    } else {
     v4_print_time(arg->f, entry->expiration);
+    }
     v4_print_time(arg->f, mod_time);
 
     fprintf(arg->f, " %s %s\n", principal->mod_name, principal->mod_instance);

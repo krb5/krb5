@@ -1,3 +1,45 @@
+Mon Nov 11 16:50:25 1996  Mark Eichin  <eichin@cygnus.com>
+
+	* kadmin/dbutil dumpv4 expiration ("never") fixes
+	* kadmin/dbutil loadv4 stashfile, default fixes
+
+	Fri Sep 27 18:45:43 1996  Mark Eichin  <eichin@cygnus.com>
+
+	* dump.c (read_string): fgetc doesn't return char.
+	
+	Wed Sep 11 23:45:11 1996  Mark Eichin  <eichin@cygnus.com>
+
+	* loadv4.c (enter_in_v5_db): set last_pwd_change from the
+	mod_time, not only the mod_princ_data.
+	
+	Wed Sep 11 00:02:33 1996  Mark Eichin  <eichin@cygnus.com>
+
+	* dumpv4.c (dump_v4_iterator): detect expiration time of "never"
+	and fill in a reasonable default (namely, the Cygnus 96q1 default
+	of 12/31/2009.)
+
+	* loadv4.c (v4_dump_find_default): New function. Scans a dumpfile
+ 	for a "default" entry, which was probably created at kdb_init time
+ 	and probably hasn't changed from either the MIT default of
+ 	12/31/1999 or the Cygnus 96q1 default of 12/31/2009.  Check for
+ 	either value, and replace it with 0, which is understood as
+ 	"never" in V5.  If verbose is set (-v flag), log either the match
+	or the non-matching value.
+	(process_v4_dump): new argument default_exp_time, the value found
+ 	by v4_dump_find_default, actually performs the replacement of
+	matching entries.
+	(load_v4db): call v4_dump_find_default to get the default
+	expiration time.
+	* kdb5_util.M: document the above changes.
+
+	Sun Sep  8 01:02:47 1996  Mark W. Eichin  <eichin@kitten.gen.ma.us>
+
+	* kdb5_util.c (usage): document load_v4 -s stashfile.
+	(main): fix typo in usage message.
+	* kdb5_util.M: document load_v4, including new options, removing
+	previously eliminated -f option.
+	* loadv4.c (load_v4db): support -s stashfile option.
+
 Thu Nov  7 20:53:17 1996  Tom Yu  <tlyu@mit.edu>
 
 	* configure.in: Remove spurious WITH_KRB4.

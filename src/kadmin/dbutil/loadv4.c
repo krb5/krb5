@@ -83,7 +83,9 @@ static int v4init PROTOTYPE((char *, int, char *));
 static krb5_error_code enter_in_v5_db PROTOTYPE((krb5_context,
 						 char *, Principal *));
 static krb5_error_code process_v4_dump PROTOTYPE((krb5_context, char *,
-						  char *));
+						  char *, long));
+static krb5_error_code v4_dump_find_default PROTOTYPE((krb5_context, char *,
+						       char *, long *));
 static krb5_error_code fixup_database PROTOTYPE((krb5_context, char *));
 	
 static int create_local_tgt = 0;
@@ -142,6 +144,7 @@ char *argv[];
     int	persist, op_ind;
     kadm5_config_params newparams;
     extern kadm5_config_params global_params;
+    long exp_time = 0;
 
     krb5_init_context(&context);
 
@@ -167,6 +170,14 @@ char *argv[];
 	}
 	else if (!strcmp(argv[op_ind], "-n")) {
 	    v4manual++;
+	}
+	else if (!strcmp(argv[op_ind], "-s")) {
+	    if ((argc - op_ind) >= 1) {
+	        v4_mkeyfile = argv[op_ind+1];
+		op_ind++;
+	    } else {
+		usage();
+	    }
 	}
 	else if ((argc - op_ind) >= 1) {
 	    v4dumpfile = argv[op_ind];
@@ -326,7 +337,12 @@ master key name '%s'\n",
 	return;
     }
 
-    retval = process_v4_dump(context, v4dumpfile, realm);
+    retval = v4_dump_find_default(context, v4dumpfile, realm, &exp_time);
+    if (retval) {
+        com_err(PROGNAME, retval, "warning: default entry not found");
+    }
+
+    retval = process_v4_dump(context, v4dumpfile, realm, exp_time);
     putchar('\n');
     if (retval)
 	com_err(PROGNAME, retval, "while translating entries to the database");
@@ -514,6 +530,9 @@ Principal *princ;
     if (!retval)
 	retval = krb5_dbe_update_mod_princ_data(context, &entry,
 						mod_time, mod_princ);
+    if (!retval)
+        retval = krb5_dbe_update_last_pwd_change(context, &entry, mod_time);
+
     if (retval) {
 	krb5_db_free_principal(context, &entry, 1);
 	krb5_free_principal(context, mod_princ);
@@ -731,10 +750,11 @@ register char *cp;
 }
 
 static krb5_error_code
-process_v4_dump(context, dumpfile, realm)
+process_v4_dump(context, dumpfile, realm, default_exp_time)
 krb5_context context;
 char *dumpfile;
 char *realm;
+long default_exp_time;
 {
     krb5_error_code retval;
     FILE *input_file;
@@ -776,6 +796,8 @@ char *realm;
 	aprinc.kdc_key_ver = (unsigned char) temp2;
 	aprinc.key_version = (unsigned char) temp3;
 	aprinc.exp_date = time_explode(exp_date_str);
+	if (aprinc.exp_date == default_exp_time)
+	    aprinc.exp_date = 0;
 	aprinc.mod_date = time_explode(mod_date_str);
 	if (aprinc.instance[0] == '*')
 	    aprinc.instance[0] = '\0';
@@ -785,6 +807,94 @@ char *realm;
 	    aprinc.mod_instance[0] = '\0';
 	if (retval = enter_in_v5_db(context, realm, &aprinc))
 	    break;
+    }
+    (void) fclose(input_file);
+    return retval;
+}
+
+static krb5_error_code
+v4_dump_find_default(context, dumpfile, realm, exptime)
+krb5_context context;
+char *dumpfile;
+char *realm;
+long *exptime;
+{
+    krb5_error_code retval = 0;
+    FILE *input_file;
+    Principal aprinc;
+    char    exp_date_str[50];
+    char    mod_date_str[50];
+    int     temp1, temp2, temp3;
+    long time_explode();
+    long foundtime, guess1, guess2;
+
+    /* kdb_init is usually the only thing to touch the time in the 
+       default entry, and everything else just copies that time.  If
+       the site hasn't changed it, we can assume that "never" is an
+       appropriate value for V5.  There have been two values compiled
+       in, typically:
+
+       MIT V4 had the code
+       principal.exp_date = 946702799;
+       strncpy(principal.exp_date_txt, "12/31/99", DATE_SZ);
+
+       Cygnus CNS V4 had the code
+       principal.exp_date = 946702799+((365*10+3)*24*60*60);
+       strncpy(principal.exp_date_txt, "12/31/2009", DATE_SZ);
+
+       However, the dump files only store minutes -- so these values
+       are 59 seconds high.
+
+       Other values could be added later, but in practice these are
+       likely to be the only ones. */
+
+    guess1 = 946702799-59;
+    guess2 = 946702799+((365*10+3)*24*60*60);
+
+    input_file = fopen(dumpfile, "r");
+    if (!input_file)
+	return errno;
+
+    for (;;) {			/* explicit break on eof from fscanf */
+	int nread;
+
+	memset((char *)&aprinc, 0, sizeof(aprinc));
+	nread = fscanf(input_file,
+		       "%s %s %d %d %d %hd %x %x %s %s %s %s\n",
+		       aprinc.name,
+		       aprinc.instance,
+		       &temp1,
+		       &temp2,
+		       &temp3,
+		       &aprinc.attributes,
+		       &aprinc.key_low,
+		       &aprinc.key_high,
+		       exp_date_str,
+		       mod_date_str,
+		       aprinc.mod_name,
+		       aprinc.mod_instance);
+	if (nread != 12) {
+	    retval = nread == EOF ? 0 : KRB5_KDB_DB_CORRUPT;
+	    break;
+	}
+	if (!strcmp(aprinc.name, "default")
+	    && !strcmp(aprinc.instance, "*")) {
+	    foundtime = time_explode(exp_date_str);
+	    if (foundtime == guess1 || foundtime == guess2)
+	        *exptime = foundtime;
+	    if (verbose) {
+	        printf("\ndefault expiration found: ");
+	        if (foundtime == guess1) {
+		    printf("MIT or pre96q1 value (1999)");
+		} else if (foundtime == guess2) {
+		    printf("Cygnus CNS post 96q1 value (2009)");
+		} else {
+		    printf("non-default start time (%d,%s)",
+			   foundtime, exp_date_str);
+		}
+	    }
+	    break;
+	}
     }
     (void) fclose(input_file);
     return retval;

@@ -1012,7 +1012,7 @@ read_string(f, buf, len, lp)
 
     retval = 0;
     for (i=0; i<len; i++) {
-	c = (char) fgetc(f);
+	c = fgetc(f);
 	if (c < 0) {
 	    retval = 1;
 	    break;

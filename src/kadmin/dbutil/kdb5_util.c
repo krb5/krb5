@@ -60,7 +60,7 @@ usage()
 	     "\tdump	[-old] [-ov] [-b6] [-verbose] [filename	[princs...]]\n"
 	     "\tload	[-old] [-ov] [-b6] [-verbose] [-update] filename\n"
 	     "\tdump_v4	[filename]\n"
-	     "\tload_v4	[-t] [-n] [-v] [-K] inputfile\n");
+	     "\tload_v4	[-t] [-n] [-v] [-K] [-s stashfile] inputfile\n");
      exit(1);
 }
 
