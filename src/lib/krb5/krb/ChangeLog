@@ -1,3 +1,15 @@
+2003-12-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* mk_req_ext.c (krb5int_generate_and_save_subkey): New function,
+	split out from krb5_mk_req_extended.
+	(krb5_mk_req_extended): Call it.
+	* mk_rep.c (krb5_mk_rep): If KRB5_AUTH_CONTEXT_USE_SUBKEY flag is
+	set, call krb5int_generate_and_save_subkey to set up a new subkey
+	to send to the client.
+
+	* serialize.c (krb5_ser_pack_int64, krb5_ser_unpack_int64): New
+	functions.
+
 2003-10-30  Tom Yu  <tlyu@mit.edu>
 
 	* gen_seqnum.c (krb5_generate_seq_number): Fix mask; was short by

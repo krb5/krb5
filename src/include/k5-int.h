@@ -138,6 +138,13 @@ typedef unsigned char	u_char;
 #endif /* HAVE_SYS_TYPES_H */
 #endif /* KRB5_SYSTYPES__ */
 
+
+#include "k5-platform.h"
+/* not used in krb5.h (yet) */
+typedef UINT64_TYPE krb5_ui_8;
+typedef INT64_TYPE krb5_int64;
+
+
 #define DEFAULT_PWD_STRING1 "Enter password"
 #define DEFAULT_PWD_STRING2 "Re-enter password for verification"
 
@@ -641,6 +648,7 @@ struct krb5_keytypes {
     krb5_crypt_func encrypt;
     krb5_crypt_func decrypt;
     krb5_str2key_func str2key;
+    krb5_cksumtype required_ctype;
 };
 
 struct krb5_cksumtypes {
@@ -1582,6 +1590,11 @@ krb5_error_code KRB5_CALLCONV krb5_ser_unpack_int32
 	(krb5_int32 *,
 		krb5_octet **,
 		size_t *);
+/* [De]serialize 8-byte integer */
+krb5_error_code KRB5_CALLCONV krb5_ser_pack_int64
+	(krb5_int64, krb5_octet **, size_t *);
+krb5_error_code KRB5_CALLCONV krb5_ser_unpack_int64
+	(krb5_int64 *, krb5_octet **, size_t *);
 /* [De]serialize byte string */
 krb5_error_code KRB5_CALLCONV krb5_ser_pack_bytes
 	(krb5_octet *,
@@ -1603,6 +1616,10 @@ krb5_error_code KRB5_CALLCONV krb5_cc_retrieve_cred_default
 
 void krb5int_set_prompt_types
 	(krb5_context, krb5_prompt_type *);
+
+krb5_error_code
+krb5int_generate_and_save_subkey (krb5_context, krb5_auth_context,
+				  krb5_keyblock * /* Old keyblock, not new!  */);
 
 /* set and change password helpers */
 
@@ -1856,5 +1873,9 @@ typedef struct _krb5_kt_ops {
 extern const krb5_kt_ops krb5_kt_dfl_ops;
 
 extern krb5_error_code krb5int_translate_gai_error (int);
+
+/* Not sure it's ready for exposure just yet.  */
+extern krb5_error_code
+krb5int_c_mandatory_cksumtype (krb5_context, krb5_enctype, krb5_cksumtype *);
 
 #endif /* _KRB5_INT_H */

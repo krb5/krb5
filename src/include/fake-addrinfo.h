@@ -89,6 +89,7 @@
 #define FAI_DEFINED
 #include "port-sockets.h"
 #include "socket-utils.h"
+#include "k5-platform.h"
 
 #ifdef S_SPLINT_S
 /*@-incondefs@*/
