@@ -37,6 +37,8 @@ typedef	unsigned char	krb5_octet;
 #undef __OK
 
 #define KRB5_INT32_MAX	2147483647
-#define KRB5_INT32_MIN	(-2147483648)
+/* this strange form is necessary since - is a unary operator, not a sign
+   indicator */
+#define KRB5_INT32_MIN	(-KRB5_INT32_MAX-1)
 
 #endif /* __KRB5_WORDSIZE__ */
