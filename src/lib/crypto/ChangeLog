@@ -1,3 +1,12 @@
+2004-10-29  Ken Raeburn  <raeburn@mit.edu>
+
+	* prng.c (yarrow_lock): Rename to krb5int_yarrow_lock via macro,
+	and change to be non-static.
+	(krb5int_prng_init): Call do_yarrow_init here.
+	(krb5_c_random_add_entropy): Don't call it here.  Don't lock the
+	mutex, either.
+	(krb5_c_random_make_octets): Don't lock the mutex.
+
 2004-06-16  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (MAC_SUBDIRS): Don't set.

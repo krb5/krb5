@@ -31,7 +31,8 @@
 #include "yarrow.h"
 static Yarrow_CTX y_ctx;
 static int inited, init_error;
-static k5_mutex_t yarrow_lock = K5_MUTEX_PARTIAL_INITIALIZER;
+#define yarrow_lock krb5int_yarrow_lock
+k5_mutex_t yarrow_lock = K5_MUTEX_PARTIAL_INITIALIZER;
 
 /* Helper function to estimate entropy based on sample length
  * and where it comes from.
@@ -56,8 +57,12 @@ entropy_estimate (unsigned int randsource, size_t length)
 return (0);
 }
 
+static void do_yarrow_init(void);
 int krb5int_prng_init(void)
 {
+    do_yarrow_init();
+    if (init_error)
+	return KRB5_CRYPTO_INTERNAL;
     return k5_mutex_finish_init(&yarrow_lock);
 }
 
@@ -95,21 +100,11 @@ krb5_c_random_add_entropy (krb5_context context, unsigned int randsource,
   if (yerr)
       return yerr;
   /* Now, finally, feed in the data.  */
-  yerr = k5_mutex_lock(&yarrow_lock);
-  if (yerr)
-      return yerr;
-  if (!inited)
-      do_yarrow_init();
-  if (init_error) {
-      k5_mutex_unlock(&yarrow_lock);
-      return KRB5_CRYPTO_INTERNAL;
-  }
   yerr = krb5int_yarrow_input (&y_ctx, randsource,
 			       data->data, data->length,
 			       entropy_estimate (randsource, data->length));
-  k5_mutex_unlock(&yarrow_lock);
   if (yerr != YARROW_OK)
-    return (KRB5_CRYPTO_INTERNAL);
+      return (KRB5_CRYPTO_INTERNAL);
   return (0);
 }
 
@@ -124,16 +119,12 @@ krb5_c_random_make_octets(krb5_context context, krb5_data *data)
 {
     int yerr;
     assert (inited);
-    yerr = k5_mutex_lock(&yarrow_lock);
-    if (yerr)
-	return yerr;
     yerr = krb5int_yarrow_output (&y_ctx, data->data, data->length);
     if (yerr == YARROW_NOT_SEEDED) {
       yerr = krb5int_yarrow_reseed (&y_ctx, YARROW_SLOW_POOL);
       if (yerr == YARROW_OK)
 	yerr = krb5int_yarrow_output (&y_ctx, data->data, data->length);
     }
-    k5_mutex_unlock(&yarrow_lock);
     if ( yerr != YARROW_OK)
       return (KRB5_CRYPTO_INTERNAL);
     return(0);
