@@ -575,10 +575,6 @@ request_hup(signo)
     int signo;
 {
     signal_requests_hup = 1;
-#ifndef POSIX_SIGNALS
-    signal(SIGHUP, request_hup);    /* System V's signal() requires
-				       resetting each time */
-#endif
 
 #ifdef POSIX_SIGTYPE
     return;
@@ -592,7 +588,7 @@ setup_signal_handlers()
 {
 #ifdef POSIX_SIGNALS
     (void) sigemptyset(&s_action.sa_mask);
-    s_action.saflags = 0;
+    s_action.sa_flags = 0;
     s_action.sa_handler = request_exit;
     (void) sigaction(SIGINT, &s_action, (struct sigaction *) NULL);
     (void) sigaction(SIGTERM, &s_action, (struct sigaction *) NULL);

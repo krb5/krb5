@@ -1,3 +1,13 @@
+Wed Jul 15 18:32:07 1998  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in: Add CHECK_SIGNALS so that POSIX_SIGNALS gets
+	defined.
+
+	* main.c (request_hup): Remove call to signal, as this isn't
+	needed on BSD-ish systems and for sysV-ish systems we use
+	sigaction anyway.
+	(setup_signal_handlers): Fix typo.
+
 Sat Jul 11 01:38:05 1998  Geoffrey King  <gjking@mit.edu>
 
 	* main.c: Added a call to signal() in request_hup()
