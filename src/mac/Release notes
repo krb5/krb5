@@ -213,3 +213,8 @@ Changes in 1.1a3:
  from tag Mac_GSSKerberos5_3_1d2
  Fixed epoch conversion throughout
  Rebuilt with fixed CWP 6 fcntl.h
+ 
+3.1d3
+ from tag Mac_GSSKerberos5_3_1d3
+ Fixed profile library to support FSpecs under X
+ Fixed build system to work with UNIX newlines under 9
