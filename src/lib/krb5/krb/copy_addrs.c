@@ -26,7 +26,7 @@
 
 #include "k5-int.h"
 
-static krb5_error_code
+krb5_error_code
 krb5_copy_addr(context, inad, outad)
     krb5_context context;
 const krb5_address *inad;

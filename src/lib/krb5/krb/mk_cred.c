@@ -124,8 +124,11 @@ krb5_mk_ncred_basic(context, ppcreds, nppcreds, keyblock,
 
     credenc.magic = KV5M_CRED_ENC_PART;
 
-    credenc.s_address = local_addr;
-    credenc.r_address = remote_addr;
+    credenc.s_address = 0;
+    credenc.r_address = 0;
+    if (local_addr) krb5_copy_addr(context, local_addr, &credenc.s_address);
+    if (remote_addr) krb5_copy_addr(context, remote_addr, &credenc.r_address);
+
     credenc.nonce = replaydata->seq;
     credenc.usec = replaydata->usec;
     credenc.timestamp = replaydata->timestamp;
