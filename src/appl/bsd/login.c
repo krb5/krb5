@@ -482,7 +482,7 @@ void k_init (ttyn)
 
     /* Set up the credential cache environment variable */
     if (!getenv(KRB5_ENV_CCNAME)) {
-	sprintf(ccfile, "FILE:/tmp/krb5cc_%s", strrchr(ttyn, '/')+1);
+	sprintf(ccfile, "FILE:/tmp/krb5cc_p%d", getpid());
 	setenv(KRB5_ENV_CCNAME, ccfile, 1);
 	unlink(ccfile+strlen("FILE:"));
     } else {
