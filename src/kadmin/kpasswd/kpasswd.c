@@ -31,10 +31,11 @@
 #include <sys/param.h>
 #include <pwd.h>
 
+#include <krb5/adm_defs.h>
+
 #include <sys/stat.h>
 
-#include "k5-int.h"
-
+#include "krb5.h"
 #ifdef USE_STRING_H
 #include <string.h>
 #else
@@ -96,14 +97,15 @@ main(argc,argv)
 
     kadmin_requests rd_priv_resp;
 
-    krb5_checksum send_cksum;
-    int cksum_alloc = 0;
     krb5_data msg_data, inbuf;
     krb5_int32 seqno;
 
     krb5_creds my_creds, * new_creds;
     char *new_password;
     int new_pwsize;
+
+    krb5_auth_context * new_auth_context;
+    krb5_replay_data replaydata;
 
 #ifdef SANDIA
     extern int networked();
@@ -296,40 +298,29 @@ main(argc,argv)
     foreign_addr.length = SIZEOF_INADDR ;
     foreign_addr.contents = (krb5_octet *)&remote_sin.sin_addr;
 
-   /* compute checksum, using CRC-32 */
-    if (!(send_cksum.contents = (krb5_octet *)
-          malloc(krb5_checksum_size(context, CKSUMTYPE_CRC32)))) {
-        fprintf(stderr, "Insufficient Memory while Allocating Checksum!\n");
-        goto finish;
-    }
-    cksum_alloc++;
-    /* choose some random stuff to compute checksum from */
-    if (retval = krb5_calculate_checksum(context, CKSUMTYPE_CRC32,
-					ADM_CPW_VERSION,
-					strlen(ADM_CPW_VERSION),
-					0,
-					0, /* if length is 0, crc-32 doesn't
-                                               use the seed */
-					&send_cksum)) {
-        fprintf(stderr, "Error while Computing Checksum: %s!\n",
-		error_message(retval));
-        goto finish;
-    }
+    krb5_auth_con_init(context, &new_auth_context);
+    krb5_auth_con_setflags(context, new_auth_context,
+			   KRB5_AUTH_CONTEXT_RET_SEQUENCE);
+
+    krb5_auth_con_setaddrs(context, new_auth_context, 
+			   &local_addr, &foreign_addr);
 
     /* call Kerberos library routine to obtain an authenticator,
        pass it over the socket to the server, and obtain mutual
        authentication. */
 
-   if ((retval = krb5_sendauth(context, (krb5_pointer) &local_socket,
+   inbuf.data = ADM_CPW_VERSION;
+   inbuf.length = strlen(ADM_CPW_VERSION);
+
+   if ((retval = krb5_sendauth(context, &new_auth_context,
+			(krb5_pointer) &local_socket,
 			ADM_CPW_VERSION, 
 			my_creds.client, 
 			my_creds.server,
 			AP_OPTS_MUTUAL_REQUIRED,
-			&send_cksum,
-			0,           
+			&inbuf,
+			NULL,
 			cache,
-			&seqno, 
-			0,           /* don't need a subsession key */
 			&err_ret,
 			&rep_ret, NULL))) {
 	fprintf(stderr, "Error while performing sendauth: %s!\n",
@@ -358,20 +349,11 @@ main(argc,argv)
 	goto finish;
     }
 
+    inbuf.length = 2;
     inbuf.data[0] = KPASSWD;
     inbuf.data[1] = CHGOPER;
-    inbuf.length = 2;
-
-    if ((retval = krb5_mk_priv(context, &inbuf,
-			ETYPE_DES_CBC_CRC,
-			&new_creds->keyblock, 
-			&local_addr, 
-			&foreign_addr,
-			seqno,
-			KRB5_PRIV_DOSEQUENCE|KRB5_PRIV_NOTIME,
-			0,
-			0,
-			&msg_data))) {
+    if ((retval = krb5_mk_priv(context, new_auth_context, &inbuf, 
+		  	       &msg_data, &replaydata))) {
         fprintf(stderr, "Error during First Message Encoding: %s!\n",
 			error_message(retval));
         goto finish;
@@ -395,15 +377,8 @@ main(argc,argv)
         goto finish;
     }
 
-    if ((retval = krb5_rd_priv(context, &inbuf,
-			&new_creds->keyblock,
-    			&foreign_addr, 
-			&local_addr,
-			rep_ret->seq_number, 
-			KRB5_PRIV_DOSEQUENCE|KRB5_PRIV_NOTIME,
-			0,
-			0,
-			&msg_data))) {
+    if ((retval = krb5_rd_priv(context, new_auth_context, &inbuf,
+			       &msg_data, &replaydata))) {
         fprintf(stderr, "Error during First Read Decoding: %s!\n", 
 			error_message(retval));
         goto finish;
@@ -448,16 +423,8 @@ main(argc,argv)
     inbuf.data = new_password;
     inbuf.length = strlen(new_password);
 
-    if ((retval = krb5_mk_priv(context, &inbuf,
-			ETYPE_DES_CBC_CRC,
-			&new_creds->keyblock, 
-			&local_addr, 
-			&foreign_addr,
-			seqno,
-			KRB5_PRIV_DOSEQUENCE|KRB5_PRIV_NOTIME,
-			0,
-			0,
-			&msg_data))) {
+    if ((retval = krb5_mk_priv(context, new_auth_context, &inbuf, 
+			       &msg_data, &replaydata))) {
         fprintf(stderr, "Error during Second Message Encoding: %s!\n",
 			error_message(retval));
         goto finish;
@@ -481,15 +448,8 @@ main(argc,argv)
         goto finish;
     }
 
-    if ((retval = krb5_rd_priv(context, &inbuf,
-			&new_creds->keyblock,
-    			&foreign_addr, 
-			&local_addr,
-			rep_ret->seq_number, 
-			KRB5_PRIV_DOSEQUENCE|KRB5_PRIV_NOTIME,
-			0,
-			0,
-			&msg_data))) {
+    if ((retval = krb5_rd_priv(context, new_auth_context, &inbuf,
+			        &msg_data, &replaydata))) {
         fprintf(stderr, "Error during Second Read Decoding :%s!\n", 
 			error_message(retval));
         goto finish;
@@ -535,7 +495,6 @@ main(argc,argv)
     free(client_name);
     free(requested_realm.data);
 
-    if (cksum_alloc) free(send_cksum.contents);
     if (retval) {
 	fprintf(stderr, "\n\nProtocol Failure - Password NOT changed\n\n");
 	exit(1);
@@ -639,11 +598,9 @@ get_first_ticket(context, cache, client, my_creds)
 
 #ifdef MACH_PASS /* Machine-generated Passwords */
 krb5_error_code
-print_and_choose_password(DECLARG(char *, new_password),
-			DECLARG(krb5_data *, decodable_pwd_string))
-OLDDECLARG(char *, new_password)
-OLDDECLARG(krb5_data *, decodable_pwd_string)
-
+print_and_choose_password(new_password, decodable_pwd_string)
+    char * new_password;
+    krb5_data * decodable_pwd_string;
 {
 krb5_error_code retval;
    krb5_pwd_data *pwd_data;
