@@ -89,8 +89,7 @@ krb5_gss_add_cred(minor_status, input_cred_handle,
 
     /* check if the desired_mech is bogus */
 
-    if (!g_OID_equal(desired_mech, gss_mech_krb5_v2) &&
-	!g_OID_equal(desired_mech, gss_mech_krb5) &&
+    if (!g_OID_equal(desired_mech, gss_mech_krb5) &&
 	!g_OID_equal(desired_mech, gss_mech_krb5_old)) {
 	*minor_status = 0;
 	return(GSS_S_BAD_MECH);

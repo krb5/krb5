@@ -1,5 +1,17 @@
 2002-07-01  Ken Raeburn  <raeburn@mit.edu>
 
+	* gssapi_krb5.c (gss_mech_krb5_v2, gss_mech_set_krb5_v2,
+	gss_mech_set_krb5_v1v2): Delete variables.
+	* gssapi_krb5.h (gss_mech_krb5_v2, gss_mech_set_krb5_v2,
+	gss_mech_set_krb5_v1v2): Delete declarations.
+	* add_cred.c (krb5_gss_add_cred): Delete uses of them.
+	* canon_name.c (krb5_gss_canonicalize_name): Ditto.
+	* disp_status.c (krb5_gss_display_status): Ditto.
+	* indicate_mechs.c (krb5_gss_indicate_mechs): Ditto.
+	* inq_cred.c (krb5_gss_inquire_cred_by_mech): Ditto.
+	* inq_names.c (krb5_gss_inquire_names_for_mech): Ditto.
+	* rel_oid.c (krb5_gss_internal_release_oid): Ditto.
+
 	* accept_sec_context.c (rd_and_store_for_creds): Extra parens
 	around assignments to quiet gcc.
 	(krb5_gss_accept_sec_context): Fix some type mismatches between
