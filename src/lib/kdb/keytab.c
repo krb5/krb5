@@ -217,7 +217,7 @@ is_xrealm_tgt(krb5_context context, krb5_const_principal princ)
     dat = krb5_princ_component(context, princ, 1);
     if (dat->length != princ->realm.length)
 	return 1;
-    if (strcmp(dat->data, princ->realm.data) == 0)
+    if (strncmp(dat->data, princ->realm.data, dat->length) == 0)
 	return 0;
     return 1;
 
