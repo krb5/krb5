@@ -4,6 +4,10 @@ CFLAGS = $(CCOPTS) $(DEFS)
 ##DOSLIBNAME=..\krb5.lib
 ##DOS!include $(BUILDTOP)\config\windows.in
 
+.c.o:
+	$(CC) $(CFLAGS) -c $(srcdir)/$*.c
+@SHARED_RULE@
+
 OBJS=	addr_comp.$(OBJEXT)	\
 	addr_order.$(OBJEXT)	\
 	addr_srch.$(OBJEXT)	\
@@ -130,7 +134,10 @@ SRCS=	$(srcdir)/addr_comp.c	\
 	$(srcdir)/unparse.c	\
 	$(srcdir)/walk_rtree.c
 
-all:: $(OBJS)
+all:: shared $(OBJS)
+
+shared:
+	mkdir shared
 
 COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
 
@@ -173,3 +180,4 @@ check-windows::
 clean::
 	$(RM) t_walk_rtree$(EXEEXT) t_walk_rtree.$(OBJEXT)
 	$(RM) t_kerb$(EXEEXT) t_kerb.$(OBJEXT)
+	$(RM) shared/*

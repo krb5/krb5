@@ -89,7 +89,7 @@ krb5_kdcrep2creds(context, pkdcrep, address, psectkt, ppcreds)
     return 0;
 
 cleanup_keyblock:
-    memset((*ppcreds)->keyblock.contents, 0, (*ppcreds)->keyblock.length);
+    krb5_free_keyblock(context, (*ppcreds)->keyblock);
 
 cleanup:
     free (*ppcreds);
