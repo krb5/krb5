@@ -2,6 +2,8 @@ NormalLibraryObjectRule()
 
 OBJS = ktf_close.o	\
 	ktf_get_na.o	\
-	ktf_util.o	
+	ktf_util.o	\
+	ktf_ops.o	\
+	ktf_wops.o
 
 NormalLibraryTarget(ktfile,$(OBJS))
