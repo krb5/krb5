@@ -30,7 +30,7 @@ AppendRule([install::	libdes425.[$](SHEXT)
 		[$](DESTDIR)[$](KRB5_SHLIBDIR)[$](S)libdes425.[$](SHEXT)])
 ])dnl
 if test -n "$krb5_cv_staticlibs_enabled" ; then
-	LinkFileDir(../libdes425.[$](STEXT), libdes425.[$](STEXT), ./krb5)
+	LinkFileDir(../libdes425.[$](STEXT), libdes425.[$](STEXT), ./des425)
         AppendRule([install:: 
 	[$](INSTALL_DATA) libdes425.[$](STEXT) [$](DESTDIR)[$](KRB5_LIBDIR)/libdes425.[$](STEXT)
 	[$](RANLIB) [$](DESTDIR)[$](KRB5_LIBDIR)/libdes425.[$](STEXT)]) 

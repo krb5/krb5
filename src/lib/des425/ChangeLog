@@ -1,3 +1,8 @@
+Fri Jun 23 18:16:09 1995  Tom Yu  (tlyu@dragons-lair)
+
+	* configure.in: fix Sam's typo so libdes425.a gets symlinked
+		properly.
+
 Fri Jun 23 12:45:43 1995  Sam Hartman  <hartmans@tardis.MIT.EDU>
 
 	* configure.in: New static library targets.
