@@ -164,7 +164,8 @@ void acl_finish
 krb5_boolean acl_op_permitted
 	KRB5_PROTOTYPE((krb5_context,
 		   krb5_principal,
-		   krb5_int32));
+		   krb5_int32,
+		   char *));
 
 /* srv_output.c */
 krb5_error_code output_init

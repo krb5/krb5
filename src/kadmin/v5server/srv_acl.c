@@ -40,9 +40,12 @@ typedef struct _acl_op_table {
 typedef struct _acl_entry {
     struct _acl_entry	*ae_next;
     char		*ae_name;
-    int			ae_name_bad;
+    krb5_boolean	ae_name_bad;
     krb5_principal	ae_principal;
     krb5_int32		ae_op_allowed;
+    char		*ae_target;
+    krb5_boolean	ae_target_bad;
+    krb5_principal	ae_target_princ;
 } aent_t;
 
 static const aop_t acl_op_table[] = {
@@ -125,22 +128,30 @@ acl_parse_line(lp)
 {
     static char acle_principal[BUFSIZ];
     static char acle_ops[BUFSIZ];
+    static char acle_object[BUFSIZ];
     aent_t	*acle;
     char	*op;
-    int		t, found, opok;
+    int		t, found, opok, nmatch;
 
     DPRINT(DEBUG_CALLS, acl_debug_level,
 	   ("* acl_parse_line(line=%20s)\n", lp));
     /*
      * Format is very simple:
-     *	entry ::=	<whitespace> <principal> <whitespace> <opstring>
+     *	entry ::= <whitespace> <principal> <whitespace> <opstring> <whitespace>
+     *		  [<target> <whitespace>]
      */
     acle = (aent_t *) NULL;
-    if (sscanf(lp, "%s %s", acle_principal, acle_ops) == 2) {
+    acle_object[0] = '\0';
+    nmatch = sscanf(lp, "%s %s %s", acle_principal, acle_ops, acle_object);
+    if (nmatch >= 2) {
 	acle = (aent_t *) malloc(sizeof(aent_t));
 	if (acle) {
 	    acle->ae_next = (aent_t *) NULL;
 	    acle->ae_op_allowed = (krb5_int32) 0;
+	    acle->ae_target =
+		(nmatch >= 3) ? strdup(acle_object) : (char *) NULL;
+	    acle->ae_target_bad = 0;
+	    acle->ae_target_princ = (krb5_principal) NULL;
 	    opok = 1;
 	    for (op=acle_ops; *op; op++) {
 		char rop;
@@ -172,11 +183,15 @@ acl_parse_line(lp)
 			    acle->ae_name, acle->ae_op_allowed));
 		}
 		else {
+		    if (acle->ae_target)
+			free(acle->ae_target);
 		    free(acle);
 		    acle = (aent_t *) NULL;
 		}
 	    }
 	    else {
+		if (acle->ae_target)
+		    free(acle->ae_target);
 		free(acle);
 		acle = (aent_t *) NULL;
 	    }
@@ -202,6 +217,10 @@ acl_free_entries()
 	    free(ap->ae_name);
 	if (ap->ae_principal)
 	    krb5_free_principal((krb5_context) NULL, ap->ae_principal);
+	if (ap->ae_target)
+	    free(ap->ae_target);
+	if (ap->ae_target_princ)
+	    krb5_free_principal((krb5_context) NULL, ap->ae_target_princ);
 	np = ap->ae_next;
 	free(ap);
     }
@@ -319,9 +338,10 @@ acl_match_data(e1, e2)
  * acl_find_entry()	- Find a matching entry.
  */
 static aent_t *
-acl_find_entry(kcontext, principal)
+acl_find_entry(kcontext, principal, object)
     krb5_context	kcontext;
     krb5_principal	principal;
+    char		*object;
 {
     aent_t		*entry;
     krb5_error_code	kret;
@@ -346,6 +366,21 @@ acl_find_entry(kcontext, principal)
 		   ("A Bad ACL entry %s\n", entry->ae_name));
 	    continue;
 	}
+	if (entry->ae_target &&
+	    !entry->ae_target_princ &&
+	    !entry->ae_target_bad) {
+	    kret = krb5_parse_name(kcontext,
+				   entry->ae_target,
+				   &entry->ae_target_princ);
+	    if (kret)
+		entry->ae_target_bad = 1;
+	}
+	if (entry->ae_target_bad) {
+	    DPRINT(DEBUG_ACL, acl_debug_level,
+		   ("A Bad target in an ACL entry for %s\n", entry->ae_name));
+	    entry->ae_name_bad = 1;
+	    continue;
+	}
 	matchgood = 0;
 	if (acl_match_data(&entry->ae_principal->realm,
 			   &principal->realm) &&
@@ -359,6 +394,33 @@ acl_find_entry(kcontext, principal)
 		}
 	    }
 	}
+	if (!matchgood)
+	    continue;
+
+	/* We've matched the principal.  If we have a target, then try it */
+	if (entry->ae_target && entry->ae_target_princ && object) {
+	    krb5_principal	oprinc;
+
+	    if (!(kret = krb5_parse_name(kcontext, object, &oprinc))) {
+		if (acl_match_data(&entry->ae_target_princ->realm,
+				   &oprinc->realm) &&
+		    (entry->ae_target_princ->length == oprinc->length)) {
+		    for (i=0; i<oprinc->length; i++) {
+			if (!acl_match_data(&entry->ae_target_princ->data[i],
+					    &oprinc->data[i])) {
+			    matchgood = 0;
+			    break;
+			}
+		    }
+		}
+		else
+		    matchgood = 0;
+		krb5_free_principal(kcontext, oprinc);
+	    }
+	    else
+		matchgood = 0;
+	}
+
 	if (matchgood)
 	    break;
     }
@@ -391,7 +453,7 @@ acl_init(kcontext, debug_level, acl_file)
     (void) sigemptyset(&s_action.sa_mask);
     s_action.sa_flags = 0;
     s_action.sa_handler = acl_reload_acl_file;
-    (void) sigaction(SIGALRM, &s_action, (struct sigaction *) NULL);
+    (void) sigaction(SIGHUP, &s_action, (struct sigaction *) NULL);
 #else	/* POSIX_SIGNALS */
     signal(SIGHUP, acl_reload_acl_file);
 #endif	/* POSIX_SIGNALS */
@@ -416,17 +478,18 @@ acl_finish(kcontext, debug_level)
  * acl_op_permitted()	- Is this operation permitted for this principal?
  */
 krb5_boolean
-acl_op_permitted(kcontext, principal, opmask)
+acl_op_permitted(kcontext, principal, opmask, object)
     krb5_context	kcontext;
     krb5_principal	principal;
     krb5_int32		opmask;
+    char		*object;
 {
     krb5_boolean	retval;
     aent_t		*aentry;
 
     DPRINT(DEBUG_CALLS, acl_debug_level, ("* acl_op_permitted()\n"));
     retval = 0;
-    if (aentry = acl_find_entry(kcontext, principal)) {
+    if (aentry = acl_find_entry(kcontext, principal, object)) {
 	if ((aentry->ae_op_allowed & opmask) == opmask)
 	    retval = 1;
     }
