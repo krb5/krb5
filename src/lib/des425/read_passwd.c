@@ -49,7 +49,6 @@ des_read_password/*_v4_compat_crock*/(k,prompt,verify)
     char key_string[BUFSIZ];
     char prompt2[BUFSIZ];
     int string_size = sizeof(key_string);
-    krb5_error_code retval;
 
     if (verify) {
 	strcpy(prompt2, "Verifying, please re-enter ");
