@@ -75,6 +75,11 @@
 #define gssrpc__null_auth	_null_auth
 #endif
 
+/* auth_gss.c */
+
+#define auth_debug_gss		gssrpc_auth_debug_gss
+#define misc_debug_gss		gssrpc_misc_debug_gss
+
 /* auth_gss.h */
 
 #define xdr_rpc_gss_cred	gssrpc_xdr_rpc_gss_cred
@@ -87,6 +92,17 @@
 #define authgss_create		gssrpc_authgss_create
 #define authgss_create_default	gssrpc_authgss_create_default
 #define authgss_service		gssrpc_authgss_service
+
+#ifdef GSSRPC__IMPL
+#define log_debug		gssrpc_log_debug
+#define log_status		gssrpc_log_status
+#define	log_hexdump		gssrpc_log_hexdump
+#endif
+
+/* auth_gssapi.c */
+
+#define auth_debug_gssapi	gssrpc_auth_debug_gssapi
+#define misc_debug_gssapi	gssrpc_misc_debug_gssapi
 
 /* auth_gssapi.h */
 
@@ -109,17 +125,9 @@
 #define svcauth_gssapi_set_log_badverf_func	gssrpc_svcauth_gssapi_set_log_badverf_func
 #define svcauth_gssapi_set_log_miscerr_func	gssrpc_svcauth_gssapi_set_log_miscerr_func
 
-#if 0
-/* Unfortunately, code outside the library calls these... */
-#define gssrpc__svcauth_gssapi_set_names	_svcauth_gssapi_set_names
-#define gssrpc__svcauth_gssapi_unset_names	_svcauth_gssapi_unset_names
-#define gssrpc__svcauth_gssapi_set_log_badauth_func	\
-	_svcauth_gssapi_set_log_badauth_func
-#define gssrpc__svcauth_gssapi_set_log_badverf_func	\
-	_svcauth_gssapi_set_log_badverf_func
-#define gssrpc__svcauth_gssapi_set_log_miscerr_func	\
-	_svcauth_gssapi_set_log_miscerr_func
-#endif
+#define svcauth_gss_set_log_badauth_func	gssrpc_svcauth_gss_set_log_badauth_func
+#define svcauth_gss_set_log_badverf_func	gssrpc_svcauth_gss_set_log_badverf_func
+#define svcauth_gss_set_log_miscerr_func	gssrpc_svcauth_gss_set_log_miscerr_func
 
 /* auth_unix.h */
 
@@ -238,6 +246,16 @@
 #define gssrpc__svcauth_gssapi	_svcauth_gssapi
 #define gssrpc__svcauth_gss	_svcauth_gss
 #endif
+
+/* svc_auth_gss.c */
+
+#define svc_debug_gss		gssrpc_svc_debug_gss
+
+#define svcauth_gss_creds	gssrpc_svc_auth_gss_creds
+
+/* svc_auth_gssapi.c */
+
+#define svc_debug_gssapi	gssrpc_svc_debug_gssapi
 
 /* svc_auth_none.c */
 

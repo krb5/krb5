@@ -128,10 +128,11 @@ AUTH   *authgss_create		(CLIENT *, gss_name_t, struct rpc_gss_sec *);
 AUTH   *authgss_create_default	(CLIENT *, char *, struct rpc_gss_sec *);
 bool_t authgss_service(AUTH *auth, int svc);
 
-
+#ifdef GSSRPC__IMPL
 void	log_debug		(const char *fmt, ...);
 void	log_status		(char *m, OM_uint32 major, OM_uint32 minor);
 void	log_hexdump		(const u_char *buf, int len, int offset);
+#endif
 
 GSSRPC__END_DECLS
 #endif /* !defined(GSSRPC_AUTH_GSS_H) */

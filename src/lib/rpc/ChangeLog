@@ -1,3 +1,10 @@
+2004-06-16  Tom Yu  <tlyu@mit.edu>
+
+	* auth_gss.h: Conditionalize log_debug, log_status, log_hexdump
+	prototypes on GSSRPC__IMPL.
+
+	* rename.h: More namespace fixes.
+
 2004-06-15  Tom Yu  <tlyu@mit.edu>
 
 	* auth_gss.c (print_rpc_gss_sec): Use gss_oid_to_str().
