@@ -92,21 +92,8 @@ krb5_cc_default_name(context)
     
     if (name == 0) {
 
-/* meeroh: I have no idea why we're using HAVE_MACSOCK_H here instead of macintosh,
-	but since I am not sure it is worng I will leave it that way. */
-#ifdef HAVE_MACSOCK_H
+#ifdef macintosh
 {
-//short	vRefnum;
-//long	parID;
-//OSErr	theErr;
-//FSSpec	krbccSpec;
-//char	pathbuf[255];
-
-//	theErr = FindFolder(kOnSystemDisk, kPreferencesFolderType, kDontCreateFolder, &vRefnum, &parID);
-//	FSMakeFSSpec(vRefnum, parID, "\pkrb5cc", &krbccSpec);
-//	GetPathname(&krbccSpec, &pathbuf);
-//	sprintf(name_buf, "STDIO:%s", pathbuf);
-//	strcpy (name_buf, "STDIO:krb5cc");
 	strcpy (name_buf, "API:default_cache_name");
 }
 #else
@@ -154,17 +141,19 @@ krb5_cc_default_name(context)
 	    if(!(found)) {
 #endif
 		
-		GetWindowsDirectory (defname, sizeof(defname)-7);
-		strcat (defname, "\\krb5cc");
-		strcpy (name_buf, "FILE:");
+		//GetWindowsDirectory (defname, sizeof(defname)-7);
+		strcpy (defname, "default_cache_name");
+		strcpy (name_buf, "API:");
 		GetPrivateProfileString(INI_FILES, INI_KRB_CCACHE, defname,
-					name_buf+5, sizeof(name_buf)-5, KERBEROS_INI);
+					name_buf+4, sizeof(name_buf)-4,
+					KERBEROS_INI);
 #if defined(_WIN32)
 	    }
 #endif
 	}
 #else
-	sprintf(name_buf, "FILE:/tmp/krb5cc_%d", getuid());
+	sprintf(name_buf, "API:default_cache_name");
+	//sprintf(name_buf, "FILE:/tmp/krb5cc_%d", getuid());
 #endif
 #endif
 	name = name_buf;

@@ -1,3 +1,10 @@
+Tue Sep  1 15:44:11 1998  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* ccdefname.c (krb5_cc_default_name): Changed the PC version to
+ 		use the CCache API by default.  Removed the old Macintosh
+ 		code that had been commented out.  (If we need to
+ 		ressurect it, we'll get it from CVS.)
+
 Fri Aug 21 17:37:00 1998  Miro Jurisic  <meeroh@mit.edu>
 
 	* ccdefname.c.c (krb5_cc_default_name): Changed the Mac
