@@ -1887,6 +1887,1148 @@
 			refType = 4;
 			sourceTree = "<group>";
 		};
+		A1908D5906878C780039CAD8 = {
+			children = (
+				A1908D5A06878C780039CAD8,
+				A1908D5B06878C780039CAD8,
+				A1908D5C06878C780039CAD8,
+				A1908D8506878C790039CAD8,
+				A1908D8B06878C790039CAD8,
+				A1908D9906878C790039CAD8,
+				A1908DA606878C790039CAD8,
+				A1908DB006878C790039CAD8,
+				A1908DB106878C790039CAD8,
+				A1908DB506878C790039CAD8,
+				A1908DB606878C790039CAD8,
+				A1908DB706878C790039CAD8,
+			);
+			isa = PBXGroup;
+			path = windows;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908D5A06878C780039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			path = .Sanitize;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908D5B06878C780039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			path = ChangeLog;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908D5C06878C780039CAD8 = {
+			children = (
+				A1908D5D06878C780039CAD8,
+				A1908D5E06878C780039CAD8,
+				A1908D5F06878C780039CAD8,
+				A1908D6006878C780039CAD8,
+				A1908D6106878C780039CAD8,
+				A1908D6206878C780039CAD8,
+				A1908D6306878C780039CAD8,
+				A1908D6406878C780039CAD8,
+				A1908D6506878C780039CAD8,
+				A1908D6606878C780039CAD8,
+				A1908D6706878C780039CAD8,
+				A1908D6806878C780039CAD8,
+				A1908D6906878C780039CAD8,
+				A1908D6A06878C780039CAD8,
+				A1908D6B06878C780039CAD8,
+				A1908D6C06878C780039CAD8,
+				A1908D6D06878C780039CAD8,
+				A1908D6E06878C780039CAD8,
+				A1908D6F06878C780039CAD8,
+				A1908D7006878C780039CAD8,
+				A1908D7106878C780039CAD8,
+				A1908D7206878C780039CAD8,
+				A1908D7306878C780039CAD8,
+				A1908D7406878C780039CAD8,
+				A1908D7506878C780039CAD8,
+				A1908D7606878C780039CAD8,
+				A1908D7706878C780039CAD8,
+				A1908D7806878C780039CAD8,
+				A1908D7906878C780039CAD8,
+				A1908D7A06878C780039CAD8,
+				A1908D7B06878C780039CAD8,
+				A1908D7C06878C780039CAD8,
+				A1908D7D06878C780039CAD8,
+				A1908D7E06878C780039CAD8,
+				A1908D7F06878C780039CAD8,
+				A1908D8006878C790039CAD8,
+				A1908D8106878C790039CAD8,
+				A1908D8206878C790039CAD8,
+				A1908D8306878C790039CAD8,
+				A1908D8406878C790039CAD8,
+			);
+			isa = PBXGroup;
+			path = cns;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908D5D06878C780039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			path = .Sanitize;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908D5E06878C780039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			path = ChangeLog;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908D5F06878C780039CAD8 = {
+			isa = PBXFileReference;
+			lastKnownFileType = image.ico;
+			path = clock00.ico;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908D6006878C780039CAD8 = {
+			isa = PBXFileReference;
+			lastKnownFileType = image.ico;
+			path = clock05.ico;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908D6106878C780039CAD8 = {
+			isa = PBXFileReference;
+			lastKnownFileType = image.ico;
+			path = clock10.ico;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908D6206878C780039CAD8 = {
+			isa = PBXFileReference;
+			lastKnownFileType = image.ico;
+			path = clock15.ico;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908D6306878C780039CAD8 = {
+			isa = PBXFileReference;
+			lastKnownFileType = image.ico;
+			path = clock20.ico;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908D6406878C780039CAD8 = {
+			isa = PBXFileReference;
+			lastKnownFileType = image.ico;
+			path = clock25.ico;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908D6506878C780039CAD8 = {
+			isa = PBXFileReference;
+			lastKnownFileType = image.ico;
+			path = clock30.ico;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908D6606878C780039CAD8 = {
+			isa = PBXFileReference;
+			lastKnownFileType = image.ico;
+			path = clock35.ico;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908D6706878C780039CAD8 = {
+			isa = PBXFileReference;
+			lastKnownFileType = image.ico;
+			path = clock40.ico;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908D6806878C780039CAD8 = {
+			isa = PBXFileReference;
+			lastKnownFileType = image.ico;
+			path = clock45.ico;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908D6906878C780039CAD8 = {
+			isa = PBXFileReference;
+			lastKnownFileType = image.ico;
+			path = clock50.ico;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908D6A06878C780039CAD8 = {
+			isa = PBXFileReference;
+			lastKnownFileType = image.ico;
+			path = clock55.ico;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908D6B06878C780039CAD8 = {
+			isa = PBXFileReference;
+			lastKnownFileType = image.ico;
+			path = clock60.ico;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908D6C06878C780039CAD8 = {
+			isa = PBXFileReference;
+			lastKnownFileType = image.ico;
+			path = clockexp.ico;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908D6D06878C780039CAD8 = {
+			isa = PBXFileReference;
+			lastKnownFileType = image.ico;
+			path = clocktkt.ico;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908D6E06878C780039CAD8 = {
+			isa = PBXFileReference;
+			lastKnownFileType = file;
+			path = "cns-help.doc";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908D6F06878C780039CAD8 = {
+			isa = PBXFileReference;
+			lastKnownFileType = file;
+			path = "cns-help.hlp";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908D7006878C780039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			path = "cns-help.hpj";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908D7106878C780039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.c;
+			path = cns.c;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908D7206878C780039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			path = cns.h;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908D7306878C780039CAD8 = {
+			isa = PBXFileReference;
+			lastKnownFileType = image.ico;
+			path = cns.ico;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908D7406878C780039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.c;
+			path = cns_reg.c;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908D7506878C780039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			path = cns_reg.h;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908D7606878C780039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			path = cnsres4.rc;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908D7706878C780039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			path = cnsres5.rc;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908D7806878C780039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.c;
+			path = debug.c;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908D7906878C780039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.c;
+			path = heap.c;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908D7A06878C780039CAD8 = {
+			isa = PBXFileReference;
+			lastKnownFileType = file;
+			path = kerbnet.doc;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908D7B06878C780039CAD8 = {
+			isa = PBXFileReference;
+			lastKnownFileType = file;
+			path = kerbnet.hlp;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908D7C06878C780039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			path = kerbnet.hpj;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908D7D06878C780039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.c;
+			path = kpasswd.c;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908D7E06878C780039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			path = krb5.def;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908D7F06878C780039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			path = krbini.h;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908D8006878C790039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			path = Makefile.in;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908D8106878C790039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.c;
+			path = options.c;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908D8206878C790039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.c;
+			path = password.c;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908D8306878C790039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.c;
+			path = tktlist.c;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908D8406878C790039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			path = tktlist.h;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908D8506878C790039CAD8 = {
+			children = (
+				A1908D8606878C790039CAD8,
+				A1908D8706878C790039CAD8,
+				A1908D8806878C790039CAD8,
+				A1908D8906878C790039CAD8,
+				A1908D8A06878C790039CAD8,
+			);
+			isa = PBXGroup;
+			path = gina;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908D8606878C790039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			path = ChangeLog;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908D8706878C790039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			path = gina.def;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908D8806878C790039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.c;
+			path = ginastub.c;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908D8906878C790039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			path = ginastub.h;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908D8A06878C790039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			path = Makefile.in;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908D8B06878C790039CAD8 = {
+			children = (
+				A1908D8C06878C790039CAD8,
+				A1908D8D06878C790039CAD8,
+				A1908D8E06878C790039CAD8,
+				A1908D8F06878C790039CAD8,
+				A1908D9006878C790039CAD8,
+				A1908D9106878C790039CAD8,
+				A1908D9206878C790039CAD8,
+				A1908D9306878C790039CAD8,
+				A1908D9406878C790039CAD8,
+				A1908D9506878C790039CAD8,
+				A1908D9606878C790039CAD8,
+				A1908D9706878C790039CAD8,
+				A1908D9806878C790039CAD8,
+			);
+			isa = PBXGroup;
+			path = gss;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908D8C06878C790039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			path = .Sanitize;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908D8D06878C790039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			path = ChangeLog;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908D8E06878C790039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.c;
+			path = "gss-client.c";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908D8F06878C790039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.c;
+			path = "gss-misc.c";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908D9006878C790039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			path = "gss-misc.h";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908D9106878C790039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.c;
+			path = gss.c;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908D9206878C790039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			path = gss.def;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908D9306878C790039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			path = gss.h;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908D9406878C790039CAD8 = {
+			isa = PBXFileReference;
+			lastKnownFileType = image.ico;
+			path = gss.ico;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908D9506878C790039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			path = gss.rc;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908D9606878C790039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			path = Makefile.in;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908D9706878C790039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			path = resource.h;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908D9806878C790039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			path = ver_serv.txt;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908D9906878C790039CAD8 = {
+			children = (
+				A1908D9A06878C790039CAD8,
+			);
+			isa = PBXGroup;
+			path = installer;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908D9A06878C790039CAD8 = {
+			children = (
+				A1908D9B06878C790039CAD8,
+				A1908D9C06878C790039CAD8,
+				A1908D9D06878C790039CAD8,
+				A1908D9E06878C790039CAD8,
+				A1908D9F06878C790039CAD8,
+				A1908DA006878C790039CAD8,
+				A1908DA106878C790039CAD8,
+				A1908DA206878C790039CAD8,
+				A1908DA306878C790039CAD8,
+				A1908DA406878C790039CAD8,
+				A1908DA506878C790039CAD8,
+			);
+			isa = PBXGroup;
+			path = nsis;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908D9B06878C790039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			path = ChangeLog;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908D9C06878C790039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			path = "kfw-fixed.nsi";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908D9D06878C790039CAD8 = {
+			isa = PBXFileReference;
+			lastKnownFileType = image.ico;
+			path = kfw.ico;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908D9E06878C790039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			path = kfw.nsi;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908D9F06878C790039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			path = KfWConfigPage.ini;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908DA006878C790039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			path = KfWConfigPage2.ini;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908DA106878C790039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.cpp.cpp;
+			path = killer.cpp;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908DA206878C790039CAD8 = {
+			isa = PBXFileReference;
+			lastKnownFileType = text.rtf;
+			path = licenses.rtf;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908DA306878C790039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			path = "nsi-includes.nsi";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908DA406878C790039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			path = "site-local.nsi";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908DA506878C790039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			path = utils.nsi;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908DA606878C790039CAD8 = {
+			children = (
+				A1908DA706878C790039CAD8,
+				A1908DA806878C790039CAD8,
+				A1908DA906878C790039CAD8,
+				A1908DAA06878C790039CAD8,
+				A1908DAB06878C790039CAD8,
+				A1908DAC06878C790039CAD8,
+				A1908DAD06878C790039CAD8,
+				A1908DAE06878C790039CAD8,
+				A1908DAF06878C790039CAD8,
+			);
+			isa = PBXGroup;
+			path = lib;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908DA706878C790039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			path = cacheapi.h;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908DA806878C790039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			path = ChangeLog;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908DA906878C790039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.c;
+			path = gic.c;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908DAA06878C790039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			path = gic.h;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908DAB06878C790039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			path = Makefile.in;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908DAC06878C790039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.c;
+			path = registry.c;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908DAD06878C790039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			path = registry.h;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908DAE06878C790039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.c;
+			path = vardlg.c;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908DAF06878C790039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			path = vardlg.h;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908DB006878C790039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			path = Makefile.in;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908DB106878C790039CAD8 = {
+			children = (
+				A1908DB206878C790039CAD8,
+				A1908DB306878C790039CAD8,
+				A1908DB406878C790039CAD8,
+			);
+			isa = PBXGroup;
+			path = ms2mit;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908DB206878C790039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			path = ChangeLog;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908DB306878C790039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			path = Makefile.in;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908DB406878C790039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.c;
+			path = ms2mit.c;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908DB506878C790039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			path = README;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908DB606878C790039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			path = version.rc;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908DB706878C790039CAD8 = {
+			children = (
+				A1908DB806878C790039CAD8,
+				A1908DB906878C790039CAD8,
+				A1908DBA06878C790039CAD8,
+				A1908DBB06878C790039CAD8,
+				A1908DBC06878C790039CAD8,
+				A1908DBD06878C790039CAD8,
+				A1908DBE06878C790039CAD8,
+				A1908DBF06878C790039CAD8,
+				A1908DC006878C790039CAD8,
+				A1908DC106878C790039CAD8,
+				A1908DC206878C790039CAD8,
+				A1908DC306878C790039CAD8,
+				A1908DC406878C790039CAD8,
+				A1908DC506878C790039CAD8,
+				A1908DC606878C790039CAD8,
+				A1908DC706878C790039CAD8,
+				A1908DC806878C790039CAD8,
+				A1908DC906878C790039CAD8,
+				A1908DCA06878C790039CAD8,
+				A1908DCB06878C790039CAD8,
+				A1908DCC06878C790039CAD8,
+				A1908DCD06878C790039CAD8,
+				A1908DCE06878C790039CAD8,
+				A1908DCF06878C790039CAD8,
+				A1908DD006878C790039CAD8,
+				A1908DD106878C790039CAD8,
+				A1908DD206878C790039CAD8,
+				A1908DD306878C790039CAD8,
+				A1908DD406878C790039CAD8,
+				A1908DD506878C790039CAD8,
+				A1908DD606878C790039CAD8,
+				A1908DD706878C790039CAD8,
+				A1908DD806878C790039CAD8,
+				A1908DD906878C790039CAD8,
+				A1908DDA06878C790039CAD8,
+			);
+			isa = PBXGroup;
+			path = wintel;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908DB806878C790039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			path = .Sanitize;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908DB906878C790039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.c;
+			path = auth.c;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908DBA06878C790039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			path = auth.h;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908DBB06878C790039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			path = ChangeLog;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908DBC06878C790039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			path = dialog.h;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908DBD06878C790039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.c;
+			path = edit.c;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908DBE06878C790039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.c;
+			path = emul.c;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908DBF06878C790039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.c;
+			path = enc_des.c;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908DC006878C790039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			path = enc_des.h;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908DC106878C790039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.c;
+			path = encrypt.c;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908DC206878C790039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			path = encrypt.h;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908DC306878C790039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.c;
+			path = font.c;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908DC406878C790039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.c;
+			path = genget.c;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908DC506878C790039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			path = ini.h;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908DC606878C790039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.c;
+			path = intern.c;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908DC706878C790039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.c;
+			path = k5stream.c;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908DC806878C790039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			path = k5stream.h;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908DC906878C790039CAD8 = {
+			isa = PBXFileReference;
+			lastKnownFileType = file;
+			path = ktelnet.doc;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908DCA06878C790039CAD8 = {
+			isa = PBXFileReference;
+			lastKnownFileType = file;
+			path = ktelnet.hlp;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908DCB06878C790039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			path = ktelnet.hpj;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908DCC06878C790039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			path = Makefile.in;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908DCD06878C790039CAD8 = {
+			isa = PBXFileReference;
+			lastKnownFileType = image.ico;
+			path = ncsa.ico;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908DCE06878C790039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.c;
+			path = negotiat.c;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908DCF06878C790039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			path = resource.h;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908DD006878C790039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.c;
+			path = screen.c;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908DD106878C790039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			path = screen.h;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908DD206878C790039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			path = struct.h;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908DD306878C790039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.c;
+			path = telnet.c;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908DD406878C790039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			path = telnet.def;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908DD506878C790039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			path = telnet.h;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908DD606878C790039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			path = telnet.rc;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908DD706878C790039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			path = telnet_arpa.h;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908DD806878C790039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			path = telopts.h;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908DD906878C790039CAD8 = {
+			isa = PBXFileReference;
+			lastKnownFileType = image.ico;
+			path = terminal.ico;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1908DDA06878C790039CAD8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			path = "wt-proto.h";
+			refType = 4;
+			sourceTree = "<group>";
+		};
 		A198BBE10406D04A00120114 = {
 			children = (
 				A198BBE60406D04A00120114,
@@ -3357,7 +4499,6 @@
 				A1AB1F5305DDC47800526345,
 				A1AB1F5405DDC47800526345,
 				A1AB1F5505DDC47800526345,
-				A1AB1F5605DDC47800526345,
 				A1AB1F5705DDC47800526345,
 				A1AB1F5805DDC47800526345,
 				A1AB1F5905DDC47800526345,
@@ -4381,12 +5522,6 @@
 		};
 		A1AB1F5505DDC47800526345 = {
 			fileRef = F517355003F1B65A01120114;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		A1AB1F5605DDC47800526345 = {
-			fileRef = F517359303F1B65A01120114;
 			isa = PBXBuildFile;
 			settings = {
 			};
@@ -5464,6 +6599,22 @@
 			refType = 4;
 			sourceTree = "<group>";
 		};
+		A1F1429E067E5BD500A82808 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			path = foreachaddr.h;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		A1F1429F067E5BD500A82808 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			path = "k5-thread.h";
+			refType = 4;
+			sourceTree = "<group>";
+		};
 //A10
 //A11
 //A12
@@ -5476,6 +6627,7 @@
 //F54
 		F5172F7B03F1B65801120114 = {
 			children = (
+				A1908D5906878C780039CAD8,
 				F5E59C0D03FD95A101120114,
 				F517307F03F1B65801120114,
 				F5E59C0E03FD95A101120114,
@@ -5506,9 +6658,10 @@
 				F51730E303F1B65801120114,
 				A1BBFF1604226DBD00120114,
 				F51730E503F1B65801120114,
-				F51730E603F1B65801120114,
+				A1F1429E067E5BD500A82808,
 				F51730E703F1B65801120114,
 				A181DA5405CF0BD800E4C246,
+				A1F1429F067E5BD500A82808,
 				F51730E803F1B65801120114,
 				F51730E903F1B65801120114,
 				F51730FB03F1B65801120114,
@@ -5547,14 +6700,6 @@
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.c.h;
 			path = "fake-addrinfo.h";
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		F51730E603F1B65801120114 = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.c.c;
-			path = foreachaddr.c;
 			refType = 4;
 			sourceTree = "<group>";
 		};
@@ -12298,12 +13443,9 @@
 		F517358B03F1B65A01120114 = {
 			children = (
 				F517358D03F1B65A01120114,
-				F517358E03F1B65A01120114,
 				F517358F03F1B65A01120114,
 				F517359003F1B65A01120114,
 				F517359103F1B65A01120114,
-				F517359203F1B65A01120114,
-				F517359303F1B65A01120114,
 				F517359403F1B65A01120114,
 				F517359503F1B65A01120114,
 				F517359603F1B65A01120114,
@@ -12322,14 +13464,6 @@
 			isa = PBXFileReference;
 			lastKnownFileType = text;
 			path = ChangeLog;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		F517358E03F1B65A01120114 = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.c.c;
-			path = daemon.c;
 			refType = 4;
 			sourceTree = "<group>";
 		};
@@ -12354,22 +13488,6 @@
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.c.c;
 			path = memmove.c;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		F517359203F1B65A01120114 = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.c.h;
-			path = "pos-obsolete.h";
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		F517359303F1B65A01120114 = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.c.c;
-			path = setenv.c;
 			refType = 4;
 			sourceTree = "<group>";
 		};
