@@ -52,7 +52,7 @@ DESTESTOBJ = destest.o
 all::
 depend:: des.c $(SRCS)
 
-NormalLibraryTarget(des,$(OBJS))
+Krb5LibraryTarget(des5,$(OBJS))
 
 $(SRCS): fp.c ip.c key_perm.h odd.h p.c p_table.h s_table.h
 

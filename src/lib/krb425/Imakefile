@@ -61,4 +61,4 @@ SRCS=	425data.c \
 	sendauth.c \
 	set_key.c
 
-NormalLibraryTarget(krb425,${OBJS})
+Krb5LibraryTarget(krb425,${OBJS})

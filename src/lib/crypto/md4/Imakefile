@@ -15,4 +15,4 @@ SRCS=	md4.c md4glue.c md4crypto.c
 
 DEFINES= $(DESDEFINES)
 
-NormalLibraryTarget(md4,$(OBJS))
+Krb5LibraryTarget(md4,$(OBJS))

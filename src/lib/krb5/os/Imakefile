@@ -56,4 +56,4 @@ SRCS= \
 	ustime.c
 
 
-NormalLibraryTarget(os,${OBJS})
+Krb5LibraryTarget(os,${OBJS})
