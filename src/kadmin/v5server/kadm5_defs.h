@@ -57,6 +57,8 @@
 #define	ACL_CHANGEPW		8
 #define	ACL_CHANGE_OWN_PW	16
 #define	ACL_INQUIRE		32
+#define	ACL_EXTRACT		64
+#define	ACL_RENAME_PRINCIPAL	(ACL_ADD_PRINCIPAL+ACL_DELETE_PRINCIPAL)
 
 #define	ACL_PRINCIPAL_MASK	(ACL_ADD_PRINCIPAL|ACL_DELETE_PRINCIPAL|\
 				 ACL_MODIFY_PRINCIPAL)
@@ -66,7 +68,19 @@
 				 ACL_MODIFY_PRINCIPAL	| \
 				 ACL_CHANGEPW		| \
 				 ACL_CHANGE_OWN_PW	| \
-				 ACL_INQUIRE)
+				 ACL_INQUIRE		| \
+				 ACL_EXTRACT)
+/*
+ * Subcodes.
+ */
+#define	KADM_BAD_ARGS		10
+#define	KADM_BAD_CMD		11
+#define	KADM_NO_CMD		12
+#define	KADM_BAD_PRINC		20
+#define	KADM_PWD_TOO_SHORT	21
+#define	KADM_PWD_WEAK		22
+#define	KADM_NOT_ALLOWED	100
+
 /*
  * Inter-module function prototypes
  */
@@ -80,6 +94,7 @@ krb5_error_code key_init
 		   char *,
 		   int,
 		   char *,
+		   char *,
 		   char *));
 void key_finish
 	PROTOTYPE((krb5_context,
@@ -91,6 +106,11 @@ krb5_error_code key_string_to_keys
 		   krb5_int32,
 		   krb5_int32,
 		   krb5_keyblock *,
+		   krb5_keyblock *,
+		   krb5_data *,
+		   krb5_data *));
+krb5_error_code key_random_key
+	PROTOTYPE((krb5_context,
 		   krb5_keyblock *));
 krb5_error_code key_encrypt_keys
 	PROTOTYPE((krb5_context,
@@ -112,6 +132,9 @@ krb5_boolean key_pwd_is_weak
 		   krb5_data *,
 		   krb5_int32,
 		   krb5_int32));
+krb5_db_entry *key_master_entry();
+char *key_master_realm();
+krb5_keytab key_keytab_id();
 
 /* srv_acl.c */
 krb5_error_code acl_init
@@ -152,7 +175,8 @@ char *output_adm_error
 /* srv_net.c */
 krb5_error_code net_init
 	PROTOTYPE((krb5_context,
-		   int));
+		   int,
+		   krb5_int32));
 void net_finish
 	PROTOTYPE((krb5_context,
 		   int));
@@ -191,5 +215,62 @@ krb5_int32 passwd_change
 		   krb5_data *,
 		   krb5_data *,
 		   krb5_int32 *));
+krb5_boolean passwd_check_npass_ok
+	PROTOTYPE((krb5_context,
+		   int,
+		   krb5_principal,
+		   krb5_db_entry *,
+		   krb5_data *,
+		   krb5_int32 *));
 
+/* admin.c */
+krb5_error_code admin_add_principal
+	PROTOTYPE((krb5_context,
+		   int,
+		   krb5_ticket *,
+		   krb5_int32,
+		   krb5_data *));
+krb5_error_code admin_delete_principal
+	PROTOTYPE((krb5_context,
+		   int,
+		   krb5_ticket *,
+		   krb5_data *));
+krb5_error_code admin_rename_principal
+	PROTOTYPE((krb5_context,
+		   int,
+		   krb5_ticket *,
+		   krb5_data *,
+		   krb5_data *));
+krb5_error_code admin_modify_principal
+	PROTOTYPE((krb5_context,
+		   int,
+		   krb5_ticket *,
+		   krb5_int32,
+		   krb5_data *));
+krb5_error_code admin_change_opw
+	PROTOTYPE((krb5_context,
+		   int,
+		   krb5_ticket *,
+		   krb5_data *,
+		   krb5_data *));
+krb5_error_code admin_change_orandpw
+	PROTOTYPE((krb5_context,
+		   int,
+		   krb5_ticket *,
+		   krb5_data *));
+krb5_error_code admin_inquire
+	PROTOTYPE((krb5_context,
+		   int,
+		   krb5_ticket *,
+		   krb5_data *,
+		   krb5_int32 *,
+		   krb5_data **));
+krb5_error_code admin_extract_key
+	PROTOTYPE((krb5_context,
+		   int,
+		   krb5_ticket *,
+		   krb5_data *,
+		   krb5_data *,
+		   krb5_int32 *,
+		   krb5_data **));
 #endif	/* KADM5_DEFS_H__ */
