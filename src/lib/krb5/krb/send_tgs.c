@@ -71,7 +71,7 @@ OLDDECLARG(krb5_response *,rep)
     bzero((char *)&tgsreq, sizeof(tgsreq));
 
     tgsreq.kdc_options = kdcoptions;
-    tgsreq.server = sname;
+    tgsreq.server = (krb5_principal) sname;
 
     tgsreq.from = timestruct->starttime;
     tgsreq.till = timestruct->endtime;
