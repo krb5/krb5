@@ -1,3 +1,8 @@
+Mon Oct 27 01:04:24 1997  Tom Yu  <tlyu@mit.edu>
+
+	* des.h: Replace KRB_INT32 with DES_INT32 to avoid temptation to
+	misuse.
+
 Mon Oct 20 14:09:45 1997  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* krb.h: If we are using prototypes, add a forward declaration for
