@@ -586,14 +586,17 @@ below, as well as all Admin API data structures, type definitions and
 defines mentioned in this document.  
 
 Before \v{\#include}ing $<$kadm5/admin.h$>$, the programmer can
-\v{\#define} the version symbol that the program will use, such as
-KADM5_API_VERSION_2.  This will ensure that the correct functional
-protoypes and data structures are defined.  If no version symbol is
-defined, the most recent version supported by the header files will be
-used.
+\v{\#define} the version symbol that the program will use prefixed by
+USE_, such as USE_KADM5_API_VERSION_2.  This will ensure that the
+correct functional protoypes and data structures are defined.  If no
+version symbol is defined, the most recent version supported by the
+header files will be used.
 
 Some of the defines and their values contained in $<$kadm5/admin.h$>$
-include the following (whose KADM5_ prefixes have been removed):
+include the following, whose KADM5_ prefixes have been removed.
+Symbols that do not exist in KADM5_API_VERSION_2 do not have a KADM5_
+prefix, but instead retain only with OVSEC_KADM_ prefix for
+compatibility.
 \begin{description}
 \item[admin service principal] ADMIN_SERVICE (``kadmin/admin'')
 \item[admin history key] HIST_PRINCIPAL (``kadmin/history'')
@@ -1719,7 +1722,7 @@ values returned from one of those two functions.
 \subsection{kadm5_free_key_data}
 
 \begin{verbatim}
-void kadm5_free_key_data(void *server_handle, krb5_key_data
+void kadm5_free_key_data(void *server_handle,
                          krb5_int16 *n_key_data, krb5_key_data *key_data)
 \end{verbatim}
 
