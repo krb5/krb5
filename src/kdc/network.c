@@ -262,10 +262,9 @@ setup_network(prog)
     return 0;
 }
 
-void process_packet(port_fd, prog, portnum)
+static void process_packet(port_fd, prog)
     int	port_fd;
     const char	*prog;
-    int		portnum;
 {
     int cc, saddr_len;
     krb5_fulladdr faddr;
@@ -372,7 +371,7 @@ const char *prog;
 	}
 	for (i=0; i<n_sockets; i++) {
 	    if (FD_ISSET(udp_port_fds[i], &readfds)) {
-		process_packet(udp_port_fds[i], prog, udp_port_nums[i]);
+		process_packet(udp_port_fds[i], prog);
 		nfound--;
 		if (nfound == 0)
 		    break;

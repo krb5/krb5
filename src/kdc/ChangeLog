@@ -1,5 +1,9 @@
 2002-07-02  Ken Raeburn  <raeburn@mit.edu>
 
+	* network.c (process_packet): Now static.  Drop unused "portnum"
+	argument.  Change caller.
+	* kdc_util.h (process_packet): Delete declaration.
+
 	* sock2p.c (inet_ntop): Disable definition; it should be provided
 	by the socket support header files.
 	* kdc_util.h (inet_ntop): Delete declaration. 

@@ -127,7 +127,6 @@ krb5_error_code setup_server_realm (krb5_principal);
 krb5_error_code listen_and_process (const char *);
 krb5_error_code setup_network (const char *);
 krb5_error_code closedown_network (const char *);
-void process_packet (int, const char *, int);
 
 /* policy.c */
 int against_local_policy_as (krb5_kdc_req *, krb5_db_entry,
