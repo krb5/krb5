@@ -29,8 +29,8 @@ INCLUDES = /I$(BUILDTOP)\include /I$(BUILDTOP)\include\krb5
 
 ##### C Compiler
 CC 	 = cl
-CFLAGS_RELEASE = /f- /nologo /W3 /AL /Gw /Gsy /Zp /O2 /DNDEBUG=1
-CFLAGS_DEBUG   = /f  /nologo /W3 /AL /Gw /Gsy /Zp /O2 /Od /Zi
+CFLAGS_RELEASE = /f- /nologo /W3 /AL /GAs /G2 /Zp /O2 /DNDEBUG=1
+CFLAGS_DEBUG   = /f  /nologo /W3 /AL /GAs /G2 /Zp /O2 /Od /Zi
 !if $(DEBUG)
 CFLAGS 	 = $(CFLAGS_DEBUG) $(INCLUDES) /D$(KRB)=1
 !else
