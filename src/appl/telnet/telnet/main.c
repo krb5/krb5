@@ -81,7 +81,7 @@ tninit()
 #endif
 }
 
-	void
+static void
 usage()
 {
 	fprintf(stderr, "Usage: %s %s%s%s%s\n",

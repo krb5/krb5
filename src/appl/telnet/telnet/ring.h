@@ -101,8 +101,8 @@ extern void
 #endif	/* ENCRYPTION */
 
 extern void
-    ring_clear_mark(),
-    ring_mark();
+    ring_clear_mark P((Ring *ring)),
+    ring_mark P((Ring *ring));
 
 extern int
     ring_at_mark P((Ring *));

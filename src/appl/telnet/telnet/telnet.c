@@ -644,7 +644,7 @@ dontoption(option)
 static char *name_unknown = "UNKNOWN";
 static char *unknown[] = { 0, 0 };
 
-	char **
+static	char **
 mklist(buf, name)
 	char *buf, *name;
 {
@@ -795,7 +795,7 @@ extern char ttytype[];
 
 int resettermname = 1;
 
-	char *
+static	char *
 gettermname()
 {
 	char *tname;
@@ -2333,7 +2333,7 @@ telnet(user)
      */
     if (wantencryption) {
 	extern int auth_has_failed;
-	time_t timeout = time(0) + 60;
+	time_t time_out = time(0) + 60;
 
 	send_do(TELOPT_ENCRYPT, 1);
 	send_will(TELOPT_ENCRYPT, 1);
@@ -2355,7 +2355,7 @@ telnet(user)
 	    }
 	    if (encrypt_is_encrypting())
 		break;
-	    if (time(0) > timeout) {
+	    if (time(0) > time_out) {
 		printf("\nEncryption could not be enabled.  Good-bye.\n\r");
 		Exit(1);
 	    }

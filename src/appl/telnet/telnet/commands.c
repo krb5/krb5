@@ -123,10 +123,11 @@ extern int isprefix();
 extern char **genget();
 extern int Ambiguous();
 
-static int call();
+static int call ();
 void cmdrc P((char *, char *));
 static    int
 send_tncmd P((void (*func)(), char *, char *));
+static int help(int, char **);
 
 typedef struct {
 	char	*name;		/* command name */
@@ -1193,7 +1194,7 @@ struct modelist {
 	int	arg1;
 };
 
-extern int modehelp();
+static int modehelp(void);
 
 static struct modelist ModeList[] = {
     { "character", "Disable LINEMODE option",	docharmode, 1 },
@@ -1228,7 +1229,7 @@ static struct modelist ModeList[] = {
 };
 
 
-    int
+static int
 modehelp()
 {
     struct modelist *mt;
@@ -1386,7 +1387,7 @@ togcrmod()
 }
 
     /*VARARGS*/
-    int
+static int
 suspend()
 {
 #ifdef	SIGTSTP
@@ -1417,7 +1418,7 @@ suspend()
 
 #if	!defined(TN3270)
     /*ARGSUSED*/
-    int
+static int
 shell(argc, argv)
     int argc;
     char *argv[];
@@ -1509,7 +1510,7 @@ quit()
 }
 
 /*VARARGS*/
-	int
+static int
 logout()
 {
 	send_do(TELOPT_LOGOUT, 1);
@@ -1529,7 +1530,7 @@ struct slclist {
 	int	arg;
 };
 
-static void slc_help();
+static void slc_help(void);
 
 struct slclist SlcList[] = {
     { "export",	"Use local special character definitions",
@@ -1663,7 +1664,7 @@ getenvcmd(name)
 		genget(name, (char **) EnvList, sizeof(struct envlist));
 }
 
-int
+static int
 env_cmd(argc, argv)
     int  argc;
     char *argv[];
@@ -1708,7 +1709,7 @@ struct env_lst {
 
 struct env_lst envlisthead;
 
-	struct env_lst *
+static	struct env_lst *
 env_find(var)
 	unsigned char *var;
 {
@@ -2231,7 +2232,7 @@ forw_help()
     return 0;
 }
 
-int
+static int
 forw_cmd(argc, argv)
     int  argc;
     char *argv[];

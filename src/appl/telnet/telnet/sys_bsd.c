@@ -206,8 +206,6 @@ extern int kludgelinemode;
  *	1	Do add this character
  */
 
-extern void xmitAO(), xmitEL(), xmitEC(), intp(), sendbrk();
-
     int
 TerminalSpecialChars(c)
     int	c;
@@ -639,7 +637,7 @@ TerminalNewMode(f)
 
     if (f != -1) {
 #ifdef	SIGTSTP
-	SIG_FUNC_RET susp();
+	static SIG_FUNC_RET susp();
 #endif	/* SIGTSTP */
 #ifdef	SIGINFO
 	SIG_FUNC_RET ayt();
@@ -814,7 +812,7 @@ NetClose(fd)
 }
 
 
-    void
+static void
 NetNonblockingIO(fd, onoff)
     int fd;
     int onoff;
@@ -847,7 +845,7 @@ NetSetPgrp(fd)
  */
 
     /* ARGSUSED */
-    SIG_FUNC_RET
+static  SIG_FUNC_RET
 deadpeer(sig)
     int sig;
 {
@@ -859,7 +857,7 @@ int intr_happened = 0;
 int intr_waiting = 0;
 
     /* ARGSUSED */
-    SIG_FUNC_RET
+static SIG_FUNC_RET
 intr(sig)
     int sig;
 {
@@ -876,7 +874,7 @@ intr(sig)
 }
 
     /* ARGSUSED */
-    SIG_FUNC_RET
+static SIG_FUNC_RET
 intr2(sig)
     int sig;
 {
@@ -893,7 +891,7 @@ intr2(sig)
 
 #ifdef	SIGTSTP
     /* ARGSUSED */
-    SIG_FUNC_RET
+static SIG_FUNC_RET
 susp(sig)
     int sig;
 {
@@ -906,7 +904,7 @@ susp(sig)
 
 #ifdef	SIGWINCH
     /* ARGSUSED */
-    SIG_FUNC_RET
+static  SIG_FUNC_RET
 sendwin(sig)
     int sig;
 {

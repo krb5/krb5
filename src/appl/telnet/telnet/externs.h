@@ -295,6 +295,13 @@ extern void
     send_wont P((int, int));
 
 extern void
+    sendbrk P((void)),
+    intp P((void)),
+    xmitAO P((void)),
+    xmitEL P((void)),
+    xmitEC P((void));
+
+extern void
     lm_will P((unsigned char *, int)),
     lm_wont P((unsigned char *, int)),
     lm_do P((unsigned char *, int)),
