@@ -30,7 +30,7 @@ Returns system errors.
 \end{funcdecl}
 
 Takes a KDC_REP message and decrypts encrypted part using
-\funcparam{etype} and \funcparam{*key}, putting result in \funcparam{*rep}.
+\funcparam{etype} and \funcparam{*key}, putting result in \funcparam{*dec_rep}.
 The pointers in \funcparam{dec_rep}
 are all set to allocated storage which should be freed by the caller
 when finished with the response (by using \funcname{krb5_free_kdc_rep}).
@@ -41,17 +41,21 @@ the decoding routines (usually ISODE_50_LOCAL_ERR_BADDECODE).
 
 Returns errors from encryption routines, system errors.
 
-\begin{funcdecl}{krb5_kdc_rep_decrypt_proc}{\funcin}
+\begin{funcdecl}{krb5_kdc_rep_decrypt_proc}{krb5_error_code}{\funcin}
 \funcarg{krb5_keyblock *}{key}
 \funcarg{krb5_pointer}{decryptarg}
 \funcinout
 \funcarg{krb5_kdc_rep *}{dec_rep}
 \end{funcdecl}
+
 Decrypt the encrypted portion of \funcparam{dec_rep}, using the
-encryption key \funcparam{key}.
+encryption key \funcparam{key}.  \funcparam{decryptarg} is ignored.
 
 The result is in allocated storage pointed to by
 \funcparam{dec_rep{\ptsto}enc_part2}, unless some error occurs.
+
+This function is suitable for use as the \funcparam{decrypt_proc}
+argument to \funcname{krb5_get_in_tkt}.
 
 \begin{funcdecl}{krb5_encode_ticket}{krb5_error_code}{\funcin}
 \funcarg{krb5_ticket *}{dec_ticket}
@@ -62,7 +66,9 @@ The result is in allocated storage pointed to by
 Takes \funcparam{dec_ticket} (with associated encrypted part
 \funcparam{dec_ticket{\ptsto}enc_part}),
 and encodes for transmission, placing result in \funcparam{*enc_ticket}.
-The string \funcparam{*enc_ticket} will be allocated before formatting.
+The string \funcparam{*enc_ticket} will be allocated before formatting;
+they should be freed by calling \funcname{krb5_free_ticket()} on
+\funcparam{*enc_ticket}.
 
 Returns errors from encryption routines, system errors.
 
@@ -134,7 +140,7 @@ Sends a request to the TGS and waits for a response.
 \funcparam{timestruct} values are used for from, till, and rtime in the
 KRB_TGS_REQ.
 \funcparam{etype} is used for etype in the KRB_TGS_REQ.
-\funcparam{sumtype} is used for the checksum in the AP_REQ in the KRB_TGS_REQ
+\funcparam{sumtype} is used for the checksum in the AP_REQ in the KRB_TGS_REQ.
 \funcparam{sname} is used for sname in the KRB_TGS_REQ.
 \funcparam{addrs}, if non-NULL, is used for addresses in the KRB_TGS_REQ.
 \funcparam{authorization_dat}, if non-NULL, is used for authorization_dat in the KRB_TGS_REQ.
