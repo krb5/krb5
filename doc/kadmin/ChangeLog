@@ -1,7 +1,0 @@
-Thu Sep  7 15:51:56 1995  Theodore Y. Ts'o  <tytso@dcl>
-
-	* kpasswd.protocol: Added official IANA port assignment.  (We've
-		actually had it for quite a while, but I never got around
-		to adding it to the document.)
-
-

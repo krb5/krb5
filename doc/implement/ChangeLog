@@ -1,6 +1,0 @@
-Wed Oct 12 02:19:07 1994  Theodore Y. Ts'o  (tytso@dcl)
-
-	* Makefile: Added better dependencies to do two-pass latex runs
-		automatically.  Make "make clean" clean up the tex temp
-		files. 
-
