@@ -1,5 +1,7 @@
 2003-06-03  Ken Raeburn  <raeburn@mit.edu>
 
+	* t_locate_kdc.c (main): Call krb5_locate_srv_dns_1.
+
 	* changepw.c (krb5_locate_kpasswd): Check specifically for certain
 	errors before using fallback heuristics.
 
