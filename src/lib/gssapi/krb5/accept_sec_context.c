@@ -611,7 +611,10 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
    ctx->mech_used = (gss_OID) mech_used;
    ctx->auth_context = auth_context;
    ctx->initiate = 0;
-   ctx->gss_flags = KG_IMPLFLAGS(gss_flags);
+   ctx->gss_flags = (GSS_C_TRANS_FLAG |
+                    ((gss_flags) & (GSS_C_INTEG_FLAG | GSS_C_CONF_FLAG |
+                            GSS_C_MUTUAL_FLAG | GSS_C_REPLAY_FLAG |
+                            GSS_C_SEQUENCE_FLAG | GSS_C_DELEG_FLAG)));
    ctx->seed_init = 0;
    ctx->big_endian = bigend;
 
