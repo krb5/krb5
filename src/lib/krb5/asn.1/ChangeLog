@@ -1,3 +1,8 @@
+Fri Oct  7 15:05:35 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* Makefile.isode.in: Add -DKRB5_USE_ISODE so that include files
+		are right.
+
 Tue Oct  4 16:13:45 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* asn1_decode_k.c (asn1_decode_kerberos_time): Don't assume that
