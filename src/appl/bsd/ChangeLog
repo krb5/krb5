@@ -161,19 +161,19 @@ Thu Jan 11 11:27:04 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 Wed Jan 10 21:26:20 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* kcmd.c (getport): Clear the sin structure to be zero.  (From
-		Doug Engbert.)
+		Doug Engert.)
 
 	* krsh.c (main): Added code to default port to 544 if service not
-	        found.  (From Doug Engbert.)
+	        found.  (From Doug Engert.)
 
 	* krlogin.c (main): Added code to default port to 543 or 2105 if
-	        service not found.  (From Doug Engbert.)
+	        service not found.  (From Doug Engert.)
 
 	* login.c (main): Save KRB5CCNAME environment variable, which may
 	        have been set by forward.c.  Add code for SGI to set
 	        environment for its /etc/TIMEZONE (untested).  Don't print
 	        MOTD twice on Suns, added #ifdef NO_MOTD.  (Patches from
-		Doug Engbert).
+		Doug Engert).
 
 	* kcmd.c: Removed extern global of krb5_kdc_req_sumtype, which
 		wasn't being used anyway.

@@ -45,7 +45,7 @@ Thu Dec 21 00:12:58 1995  Sam Hartman  <hartmans@portnoy>
 
 Wed Jan 10 22:20:04 1996  Theodore Y. Ts'o  <tytso@dcl>
 
-	* open_slave.c (pty_open_slave): Added hack by Doug Engbert to get
+	* open_slave.c (pty_open_slave): Added hack by Doug Engert to get
 		util/pty to work under Solaris.  We should double check to
 		make sure this is a correct fix.
 
