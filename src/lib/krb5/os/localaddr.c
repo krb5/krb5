@@ -327,7 +327,7 @@ krb5_os_localaddr (krb5_context context, krb5_address ***addr) {
         goto cleanup;
     }
 
-    memset(addr, 0, sizeof(krb5_address *) * (count+1));
+    memset(paddr, 0, sizeof(krb5_address *) * (count+1));
 
     for (i = 0; i < count; i++)
     {
