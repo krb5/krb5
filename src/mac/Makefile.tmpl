@@ -296,8 +296,7 @@ ccache-ppc-debug = \
 ################################################################################
 
 all : link-all glue
-compile : compile-ppc compile-cfm68k compile-cfm-gss \
-	compile-cfm-krb5 compile-testtrack
+compile : compile-ppc compile-cfm-gss compile-cfm-krb5 compile-testtrack # compile-cfm68k
 
 ################################################################################
 ##
@@ -501,8 +500,8 @@ compile-testtrack : {testtrack-obj-cfm68k} {testtrack-obj-ppc}
 ## Linking
 ##
 ################################################################################
-link : link-cfm68k link-ppc link-fat
-link-debug : link-cfm68k-debug link-ppc-debug link-fat-debug
+link : link-ppc link-fat # link-cfm68k 
+link-debug : link-ppc-debug link-fat-debug # link-cfm68k-debug
 link-all : link link-debug
 
 ################################################################################
@@ -781,7 +780,8 @@ all-mac-files = \
 	/mac/TestTrack/ShlibTestTrack.h \
 	/mac/TestTrack/TestTrackLib.h \
 	/mac/TestTrack/testtrack.h \
-	/mac/templatify.pl
+	/mac/templatify.pl \
+	"/mac/MIT Kerberos.r"
 all-mac-folders = /config/ /include/ /include/krb5/ /include/krb5/stock/ \
 	/include/sys/ /lib/ /lib/krb5/ /lib/gssapi/ /util/ {mac-folders} \
 	/mac/ \
@@ -830,3 +830,4 @@ Makefile : /mac/Makefile.tmpl
 
 template :
 	setfile -a l /mac/Makefile.tmpl
+	perl /mac/templatify.pl < /Makefile > /mac/Makefile.tmpl
