@@ -1,3 +1,8 @@
+Wed Mar 24 17:14:06 1999  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in: Check for sys/sockio.h for systems that need it
+	for SIOCATMARK.
+
 Thu Feb 18 18:35:00 1999  Tom Yu  <tlyu@mit.edu>
 
 	* configure.in: Add check for setluid.

@@ -16,7 +16,7 @@ AC_FUNC_VFORK
 AC_HAVE_FUNCS(getcwd getdtablesize)
 AC_HEADER_STDARG
 AC_HEADER_CHECK(termios.h,AC_FUNC_CHECK(cfsetispeed,AC_DEFINE(POSIX_TERMIOS)))
-AC_CHECK_HEADERS(unistd.h stdlib.h string.h sys/select.h paths.h)
+AC_CHECK_HEADERS(unistd.h stdlib.h string.h sys/select.h sys/sockio.h paths.h)
 CHECK_UTMP
 DECLARE_SYS_ERRLIST
 AC_REPLACE_FUNCS(getdtablesize)
