@@ -130,7 +130,6 @@ rd_and_store_for_creds(context, auth_context, inbuf, out_cred)
     /* Lots of kludging going on here... Some day the ccache interface
        will be rewritten though */
 
-    krb5_cc_register(context, &krb5_mcc_ops, 0);
     if ((retval = krb5_cc_resolve(context, "MEMORY:GSSAPI", &ccache)))
         goto cleanup;
 

@@ -1,3 +1,8 @@
+2002-07-12  Ken Raeburn  <raeburn@mit.edu>
+
+	* accept_sec_context.c (rd_and_store_for_creds): Remove
+	registration of memory ccache type.
+
 2002-07-01  Ken Raeburn  <raeburn@mit.edu>
 
 	* gssapi_krb5.c (gss_mech_krb5_v2, gss_mech_set_krb5_v2,
