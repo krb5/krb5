@@ -61,18 +61,17 @@ krb5_keyblock *out;
 	out->length = 0;
 	return ENOMEM;
     }
-    /* copy out the real length count */
-    length  = ((unsigned char *)in->contents)[0] << 24;
-    length += ((unsigned char *)in->contents)[1] << 16;
-    length += ((unsigned char *)in->contents)[2] << 8;
-    length += ((unsigned char *)in->contents)[3];
-    out->length = length;
 
-    /* remember the contents of the encrypted version has a sizeof(in->length)
+    /* copy out the real length count */
+    out->length  = (((unsigned char *)in->contents)[0] << 24)
+		 + (((unsigned char *)in->contents)[1] << 16)
+		 + (((unsigned char *)in->contents)[2] << 8)
+		 +  ((unsigned char *)in->contents)[3];
+
+    /* remember the contents of the encrypted version has a 4 byte
        integer length of the real embedded key, followed by the
        encrypted key, so the offset here is needed */
-    if (retval = krb5_decrypt((krb5_pointer) (((char *) in->contents) +
-					      sizeof(in->length)),
+    if (retval = krb5_decrypt((krb5_pointer) ((char *) in->contents + 4),
 			      (krb5_pointer) out->contents,
 			      in->length-sizeof(in->length), eblock, 0)) {
 	xfree(out->contents);
