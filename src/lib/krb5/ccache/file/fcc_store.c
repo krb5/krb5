@@ -41,11 +41,11 @@ krb5_fcc_store(id, creds)
 
      /* Make sure we are writing to the end of the file */
      if (OPENCLOSE(id)) {
-	  ((krb5_fcc_data *) id->data)->fd = open(((krb5_fcc_data *) id->data)
-						  ->filename,
-						  O_RDWR | O_APPEND, 0);
+	  ret = open(((krb5_fcc_data *) id->data)->filename,
+		     O_RDWR | O_APPEND, 0);
 	  if (((krb5_fcc_data *) id->data)->fd < 0)
 	       return errno;
+	  ((krb5_fcc_data *) id->data)->fd = ret;
      }
 
      ret = lseek(((krb5_fcc_data *) id->data)->fd, 0, L_XTND);
@@ -71,9 +71,10 @@ krb5_fcc_store(id, creds)
 
 lose:
           
-     if (OPENCLOSE(id))
+     if (OPENCLOSE(id)) {
 	  close(((krb5_fcc_data *) id->data)->fd);
-
+	  ((krb5_fcc_data *) id->data)->fd = -1;
+     }
      return ret;
 #undef TCHECK
 }

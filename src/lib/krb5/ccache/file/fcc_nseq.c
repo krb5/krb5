@@ -84,9 +84,10 @@ krb5_fcc_next_cred(id, cursor, creds)
      fcursor->pos = tell(((krb5_fcc_data *) id->data)->fd);
      cursor = (krb5_cc_cursor *) fcursor;
 
-     if (OPENCLOSE(id))
+     if (OPENCLOSE(id)) {
 	  close(((krb5_fcc_data *) id->data)->fd);
-
+	  ((krb5_fcc_data *) id->data)->fd = -1;
+     }
 lose:
      
      return kret;

@@ -34,8 +34,27 @@ krb5_fcc_set_flags(id, flags)
    krb5_ccache id;
    krb5_flags flags;
 {
-     /* XXX This should check for illegal combinations, if any.. */
-     ((krb5_fcc_data *) id->data)->flags = flags;
-     return KRB5_OK;
+    krb5_error_code ret;
+
+    /* XXX This should check for illegal combinations, if any.. */
+    if (flags & KRB5_TC_OPENCLOSE) {
+	/* asking to turn on OPENCLOSE mode */
+	if (!OPENCLOSE(id)) {
+	    (void) close(((krb5_fcc_data *) id->data)->fd);
+	    ((krb5_fcc_data *) id->data)->fd = -1;
+	}
+    } else {
+	/* asking to turn off OPENCLOSE mode, meaning it must be
+	   left open.  We open if it's not yet open */
+	if (OPENCLOSE(id)) {
+	    ret = open(((krb5_fcc_data *) id->data)->filename, O_RDONLY, 0);
+	    if (ret < 0)
+		return errno;
+	    ((krb5_fcc_data *) id->data)->fd = ret;
+	}
+    }
+
+    ((krb5_fcc_data *) id->data)->flags = flags;
+    return KRB5_OK;
 }
 

@@ -11,7 +11,7 @@
  */
 
 #if !defined(lint) && !defined(SABER)
-static char fcc_resolve_c[] = "$Id$";
+static char fcc_init_c[] = "$Id$";
 #endif /* !lint && !SABER */
 
 #include <krb5/copyright.h>
@@ -49,9 +49,10 @@ krb5_fcc_initialize(id, princ)
 
      krb5_fcc_store_principal(id, princ);
 
-     if (OPENCLOSE(id))
+     if (OPENCLOSE(id)) {
 	  close(((krb5_fcc_data *) id->data)->fd);
-
+	  ((krb5_fcc_data *) id->data)->fd = -1;
+     }
      return KRB5_OK;
 }
 
