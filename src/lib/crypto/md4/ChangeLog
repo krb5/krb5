@@ -1,3 +1,9 @@
+
+Tue Jun 27 15:53:02 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* md4.c(Transform) - Add 'register' to scratch variable names.  Helps
+		out compiler so that DEC native compilers can now optimize
+		this module within our lifetimes.
+
 Thu Jun 22 16:13:29 1995  Tom Yu  (tlyu@dragons-lair)
 
 	* md4.c: reverse sense of KRB5_PROVIDE_PROTOTYPES

@@ -179,7 +179,7 @@ static void Transform (buf, in)
 krb5_ui_4 FAR *buf;
 krb5_ui_4 FAR *in;
 {
-  krb5_ui_4 a = buf[0], b = buf[1], c = buf[2], d = buf[3];
+  register krb5_ui_4 a = buf[0], b = buf[1], c = buf[2], d = buf[3];
 
   /* Round 1 */
   FF (a, b, c, d, in[ 0],  3);
