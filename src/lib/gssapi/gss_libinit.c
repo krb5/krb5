@@ -16,7 +16,7 @@ OM_uint32 gssint_initialize_library (void)
 {
 	
 	if (!initialized) {
-#if !TARGET_OS_MAC || USE_HARDCODED_FALLBACK_ERROR_TABLES
+#if !USE_BUNDLE_ERROR_STRINGS
 	    add_error_table(&et_k5g_error_table);
 	    add_error_table(&et_ggss_error_table);
 #endif
@@ -39,7 +39,7 @@ void gssint_cleanup_library (void)
 	
 	(void) kg_release_defcred (&min_stat);
 	
-#if !TARGET_OS_MAC || USE_HARDCODED_FALLBACK_ERROR_TABLES
+#if !USE_BUNDLE_ERROR_STRINGS
 	remove_error_table(&et_k5g_error_table);
 	remove_error_table(&et_ggss_error_table);
 #endif
