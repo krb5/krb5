@@ -1,3 +1,17 @@
+2000-02-18  Tom Yu  <tlyu@mit.edu>
+
+	* keytab.c (add_usage): Update usage message.
+	(kadmin_keytab_add): Update to deal with explicit keysalt lists.
+	(add_principal): Update to deal with explicit keysalt lists.
+
+	* kadmin.c (kadmin_cpw): Add support for new api.
+	(kadmin_parse_princ_args): Add support for new api, particularly
+	-keepold to keep old keys around and -e to explicitly specify
+	key-salt tuples.
+	(kadmin_addprinc_usage): Update usage accordingly.
+	(kadmin_addprinc): Add support for new api.
+	(kadmin_modprinc): Update to call new parse_princ_args reasonably.
+
 1999-10-26  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,

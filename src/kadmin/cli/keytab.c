@@ -44,6 +44,8 @@ static char *rcsid = "$Header$";
 #include <kadm5/admin.h>
 
 static int add_principal(void *handle, char *keytab_str, krb5_keytab keytab,
+			 int keepold,
+			 int n_ks_tuple, krb5_key_salt_tuple *ks_tuple,
 			 char *princ_str);
 static int remove_principal(char *keytab_str, krb5_keytab keytab, char
 			    *princ_str, char *kvno_str);
@@ -57,7 +59,7 @@ static int quiet;
 
 void add_usage()
 {
-     fprintf(stderr, "Usage: ktadd [-k[eytab] keytab] [-q] [principal | -glob princ-exp] [...]\n");
+     fprintf(stderr, "Usage: ktadd [-k[eytab] keytab] [-q] [-e keysaltlist] [principal | -glob princ-exp] [...]\n");
 }
      
 void rem_usage()
@@ -119,6 +121,9 @@ void kadmin_keytab_add(int argc, char **argv)
      krb5_keytab keytab = 0;
      char *princ_str, *keytab_str = NULL, **princs;
      int code, num, i;
+     krb5_error_code retval;
+     int keepold = 0, n_ks_tuple = 0;
+     krb5_key_salt_tuple *ks_tuple = NULL;
 
      argc--; argv++;
      quiet = 0;
@@ -132,6 +137,20 @@ void kadmin_keytab_add(int argc, char **argv)
 	       keytab_str = *argv;
 	  } else if (strcmp(*argv, "-q") == 0) {
 	       quiet++;
+	  } else if (strcmp(*argv, "-e") == 0) {
+	       argc--;
+	       if (argc < 1) {
+		    add_usage();
+		    return;
+	       }
+	       retval = krb5_string_to_keysalts(*++argv, ", \t", ":.-", 0,
+						&ks_tuple, &n_ks_tuple);
+	       if (retval) {
+		    com_err("ktadd", retval, "while parsing keysalts %s",
+			    *argv);
+
+		    return;
+	       }
 	  } else
 	       break;
 	  argc--; argv++;
@@ -161,10 +180,13 @@ void kadmin_keytab_add(int argc, char **argv)
 	       
 	       for (i = 0; i < num; i++) 
 		    (void) add_principal(handle, keytab_str, keytab,
+					 keepold, n_ks_tuple, ks_tuple,
 					 princs[i]); 
 	       kadm5_free_name_list(handle, princs, num);
 	  } else
-	       (void) add_principal(handle, keytab_str, keytab, *argv);
+	       (void) add_principal(handle, keytab_str, keytab,
+				    keepold, n_ks_tuple, ks_tuple,
+				    *argv);
 	  argv++;
      }
 	  
@@ -215,6 +237,8 @@ void kadmin_keytab_remove(int argc, char **argv)
 }
 
 int add_principal(void *handle, char *keytab_str, krb5_keytab keytab,
+		  int keepold, int n_ks_tuple,
+		  krb5_key_salt_tuple *ks_tuple,
 		  char *princ_str) 
 {
      kadm5_principal_ent_rec princ_rec;
@@ -236,7 +260,13 @@ int add_principal(void *handle, char *keytab_str, krb5_keytab keytab,
 	  goto cleanup;
      }
 
-     code = kadm5_randkey_principal(handle, princ, &keys, &nkeys);
+     if (keepold || ks_tuple != NULL) {
+	 code = kadm5_randkey_principal_3(handle, princ,
+					  keepold, n_ks_tuple, ks_tuple,
+					  &keys, &nkeys);
+     } else {
+	 code = kadm5_randkey_principal(handle, princ, &keys, &nkeys);
+     }
      if (code != 0) {
 	  if (code == KADM5_UNK_PRINC) {
 	       fprintf(stderr, "%s: Principal %s does not exist.\n",
