@@ -1,3 +1,17 @@
+2002-06-24 Alexandra Ellwood <lxs@mit.edu>
+
+	* asn1_encode.c: Removed unused Mac OS 9 code
+	[pullup from 1-2-2-branch]
+
+2000-06-24  Miro Jurisic  <meeroh@mit.edu>
+
+	* asn1_encode.c (asn1_encode_generaltime): Fixed the Mac code to
+	use the correct epoch.
+
+	* asn1_encode.c: Updated Utilities.h #include
+
+	[pullups from 1-2-2-branch]
+
 2002-06-24  Tom Yu  <tlyu@mit.edu>
 
 	* asn1_get.c (asn1_get_length): Check for negative length.
