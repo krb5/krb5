@@ -1,8 +1,6 @@
 \input texinfo @c -*-texinfo-*-
 
-@c $Header$
-@c $Source$
-@c $Locker$
+@c util/et/com_err.texinfo
 
 @c Note that although this source file is in texinfo format (more
 @c or less), it is not yet suitable for turning into an ``info''

@@ -3,9 +3,7 @@
 #	For copying and distribution information, see the file
 #	"mit-copyright.h".
 # 
-#	$Source$
-#	$Author$
-#	$Header$
+#	lib/krb425/krb_err.et
 #
 	error_table	krb
 

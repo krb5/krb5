@@ -1,6 +1,5 @@
-.\" $Source$
-.\" $Author$
-.\" $Id$
+.\" admin/stash/kdb5_stash.M
+.\"
 .\" Copyright 1990 by the Massachusetts Institute of Technology.
 .\"
 .\" Export of this software from the United States of America may

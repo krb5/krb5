@@ -1,6 +1,4 @@
-.\" $Source$
-.\" $Author$
-.\" $Header$
+.\" appl/bsd/rsh.M
 .\"
 .\" Copyright (c) 1983 The Regents of the University of California.
 .\" All rights reserved.

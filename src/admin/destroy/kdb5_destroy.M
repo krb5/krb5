@@ -1,6 +1,5 @@
-.\" $Source$
-.\" $Author$
-.\" $Id$
+.\" admin/destroy/kdb5_destroy.M
+.\"
 .\" Copyright 1990 by the Massachusetts Institute of Technology.
 .\"
 .\" Export of this software from the United States of America may

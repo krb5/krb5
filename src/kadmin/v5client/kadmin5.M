@@ -1,6 +1,5 @@
-.\" $Source$
-.\" $Author$
-.\" $Id$
+.\" kadmin/v5client/kadmin5.M
+.\"
 .\" Copyright 1995 by the Massachusetts Institute of Technology.
 .\"
 .\" Export of this software from the United States of America may

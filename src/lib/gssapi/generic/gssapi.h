@@ -124,7 +124,7 @@ typedef unsigned long gss_uint32;
  * correctly.
  */
 #if sizeof(gss_uint32) != sizeof(OM_uint32)
-#error Incompatible definition of OM_uint32 from xom.h
+/**/#error Incompatible definition of OM_uint32 from xom.h
 #endif
 
 typedef OM_object_identifier	gss_OID_desc, *gss_OID;
@@ -248,7 +248,7 @@ typedef	int		gss_cred_usage_t;
  * Expiration time of 2^32-1 seconds means infinite lifetime for a
  * credential or security context
  */
-#define GSS_C_INDEFINITE 0xfffffffful
+#define GSS_C_INDEFINITE 0xffffffffl
 
 
 /* Major status codes */
@@ -261,9 +261,9 @@ typedef	int		gss_cred_usage_t;
 #define GSS_C_CALLING_ERROR_OFFSET 24
 #define GSS_C_ROUTINE_ERROR_OFFSET 16
 #define GSS_C_SUPPLEMENTARY_OFFSET 0
-#define GSS_C_CALLING_ERROR_MASK 0377ul
-#define GSS_C_ROUTINE_ERROR_MASK 0377ul
-#define GSS_C_SUPPLEMENTARY_MASK 0177777ul
+#define GSS_C_CALLING_ERROR_MASK 0377l
+#define GSS_C_ROUTINE_ERROR_MASK 0377l
+#define GSS_C_SUPPLEMENTARY_MASK 0177777l
 
 /*
  * The macros that test status codes for error conditions.  Note that the
@@ -288,39 +288,39 @@ typedef	int		gss_cred_usage_t;
  * Calling errors:
  */
 #define GSS_S_CALL_INACCESSIBLE_READ \
-                             (1ul << GSS_C_CALLING_ERROR_OFFSET)
+                             (1l << GSS_C_CALLING_ERROR_OFFSET)
 #define GSS_S_CALL_INACCESSIBLE_WRITE \
-                             (2ul << GSS_C_CALLING_ERROR_OFFSET)
+                             (2l << GSS_C_CALLING_ERROR_OFFSET)
 #define GSS_S_CALL_BAD_STRUCTURE \
-                             (3ul << GSS_C_CALLING_ERROR_OFFSET)
+                             (3l << GSS_C_CALLING_ERROR_OFFSET)
 
 /*
  * Routine errors:
  */
-#define GSS_S_BAD_MECH (1ul << GSS_C_ROUTINE_ERROR_OFFSET)
-#define GSS_S_BAD_NAME (2ul << GSS_C_ROUTINE_ERROR_OFFSET)
-#define GSS_S_BAD_NAMETYPE (3ul << GSS_C_ROUTINE_ERROR_OFFSET)
-#define GSS_S_BAD_BINDINGS (4ul << GSS_C_ROUTINE_ERROR_OFFSET)
-#define GSS_S_BAD_STATUS (5ul << GSS_C_ROUTINE_ERROR_OFFSET)
-#define GSS_S_BAD_SIG (6ul << GSS_C_ROUTINE_ERROR_OFFSET)
-#define GSS_S_NO_CRED (7ul << GSS_C_ROUTINE_ERROR_OFFSET)
-#define GSS_S_NO_CONTEXT (8ul << GSS_C_ROUTINE_ERROR_OFFSET)
-#define GSS_S_DEFECTIVE_TOKEN (9ul << GSS_C_ROUTINE_ERROR_OFFSET)
-#define GSS_S_DEFECTIVE_CREDENTIAL (10ul << GSS_C_ROUTINE_ERROR_OFFSET)
-#define GSS_S_CREDENTIALS_EXPIRED (11ul << GSS_C_ROUTINE_ERROR_OFFSET)
-#define GSS_S_CONTEXT_EXPIRED (12ul << GSS_C_ROUTINE_ERROR_OFFSET)
-#define GSS_S_FAILURE (13ul << GSS_C_ROUTINE_ERROR_OFFSET)
-#define GSS_S_BAD_QOP (14ul << GSS_C_ROUTINE_ERROR_OFFSET)
-#define GSS_S_UNAUTHORIZED (15ul << GSS_C_ROUTINE_ERROR_OFFSET)
-#define GSS_S_UNAVAILABLE (16ul << GSS_C_ROUTINE_ERROR_OFFSET)
+#define GSS_S_BAD_MECH (1l << GSS_C_ROUTINE_ERROR_OFFSET)
+#define GSS_S_BAD_NAME (2l << GSS_C_ROUTINE_ERROR_OFFSET)
+#define GSS_S_BAD_NAMETYPE (3l << GSS_C_ROUTINE_ERROR_OFFSET)
+#define GSS_S_BAD_BINDINGS (4l << GSS_C_ROUTINE_ERROR_OFFSET)
+#define GSS_S_BAD_STATUS (5l << GSS_C_ROUTINE_ERROR_OFFSET)
+#define GSS_S_BAD_SIG (6l << GSS_C_ROUTINE_ERROR_OFFSET)
+#define GSS_S_NO_CRED (7l << GSS_C_ROUTINE_ERROR_OFFSET)
+#define GSS_S_NO_CONTEXT (8l << GSS_C_ROUTINE_ERROR_OFFSET)
+#define GSS_S_DEFECTIVE_TOKEN (9l << GSS_C_ROUTINE_ERROR_OFFSET)
+#define GSS_S_DEFECTIVE_CREDENTIAL (10l << GSS_C_ROUTINE_ERROR_OFFSET)
+#define GSS_S_CREDENTIALS_EXPIRED (11l << GSS_C_ROUTINE_ERROR_OFFSET)
+#define GSS_S_CONTEXT_EXPIRED (12l << GSS_C_ROUTINE_ERROR_OFFSET)
+#define GSS_S_FAILURE (13l << GSS_C_ROUTINE_ERROR_OFFSET)
+#define GSS_S_BAD_QOP (14l << GSS_C_ROUTINE_ERROR_OFFSET)
+#define GSS_S_UNAUTHORIZED (15l << GSS_C_ROUTINE_ERROR_OFFSET)
+#define GSS_S_UNAVAILABLE (16l << GSS_C_ROUTINE_ERROR_OFFSET)
 
 /*
  * Supplementary info bits:
  */
-#define GSS_S_CONTINUE_NEEDED (1ul << (GSS_C_SUPPLEMENTARY_OFFSET + 0))
-#define GSS_S_DUPLICATE_TOKEN (1ul << (GSS_C_SUPPLEMENTARY_OFFSET + 1))
-#define GSS_S_OLD_TOKEN (1ul << (GSS_C_SUPPLEMENTARY_OFFSET + 2))
-#define GSS_S_UNSEQ_TOKEN (1ul << (GSS_C_SUPPLEMENTARY_OFFSET + 3))
+#define GSS_S_CONTINUE_NEEDED (1l << (GSS_C_SUPPLEMENTARY_OFFSET + 0))
+#define GSS_S_DUPLICATE_TOKEN (1l << (GSS_C_SUPPLEMENTARY_OFFSET + 1))
+#define GSS_S_OLD_TOKEN (1l << (GSS_C_SUPPLEMENTARY_OFFSET + 2))
+#define GSS_S_UNSEQ_TOKEN (1l << (GSS_C_SUPPLEMENTARY_OFFSET + 3))
 
 
 /*

@@ -1,6 +1,4 @@
--- $Source$
--- $Author$
--- $Id$
+-- lib/krb5/asn.1/KRB5-asn.py
 --
 -- Copyright 1989 by the Massachusetts Institute of Technology.
 --

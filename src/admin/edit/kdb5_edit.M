@@ -1,6 +1,5 @@
-.\" $Source$
-.\" $Author$
-.\" $Id$
+.\" admin/edit/kdb5_edit.M
+.\"
 .\" Copyright 1990 by the Massachusetts Institute of Technology.
 .\"
 .\" Export of this software from the United States of America may

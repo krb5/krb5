@@ -1,6 +1,5 @@
-.\" $Source$
-.\" $Author$
-.\" $Id$
+.\" clients/klist/klist.M
+.\"
 .\" Copyright 1990 by the Massachusetts Institute of Technology.
 .\"
 .\" Export of this software from the United States of America may

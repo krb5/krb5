@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * lib/des425/util.c
  *
  * Copyright 1988 by the Massachusetts Institute of Technology.
  *
@@ -9,11 +8,6 @@
  *
  * Miscellaneous debug printing utilities
  */
-
-#ifndef	lint
-static char rcsid_util_c[] =
-"$Header$";
-#endif	/* lint */
 
 #include <stdio.h>
 

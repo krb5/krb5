@@ -1,6 +1,5 @@
-.\" $Source$
-.\" $Author$
-.\" $Id$
+.\" slave/kprop.M
+.\"
 .\" Copyright 1992 by the Massachusetts Institute of Technology.
 .\"
 .\" Export of this software from the United States of America may

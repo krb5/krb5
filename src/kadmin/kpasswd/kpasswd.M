@@ -1,6 +1,4 @@
-.\" $Source$
-.\" $Author$
-.\" $Id$
+.\" kadmin/kpasswd/kpasswd.M
 .\" 
 .\" Copyright 1995 by the Massachusetts Institute of Technology.
 .\"

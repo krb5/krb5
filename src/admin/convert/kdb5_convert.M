@@ -1,6 +1,5 @@
-.\" $Source$
-.\" $Author$
-.\" $Id$
+.\" admin/convert/kdb5_convert.M
+.\"
 .\" Copyright 1991 by the Massachusetts Institute of Technology.
 .\"
 .\" Export of this software from the United States of America may

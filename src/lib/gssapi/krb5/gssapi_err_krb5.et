@@ -20,10 +20,6 @@
 # PERFORMANCE OF THIS SOFTWARE.
 # 
 
-#
-# $Id$
-#
-
 error_table k5g
 
 error_code KG_CCACHE_NOMATCH, "Principal in credential cache does not match desired name"

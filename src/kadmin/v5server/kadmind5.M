@@ -1,6 +1,4 @@
-.\" $Source$
-.\" $Author$
-.\" $Id$
+.\" kadmin/v5server/kadmind5.M
 .\" 
 .\" Copyright 1995 by the Massachusetts Institute of Technology.
 .\"

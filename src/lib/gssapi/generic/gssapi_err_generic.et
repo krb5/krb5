@@ -20,10 +20,6 @@
 # PERFORMANCE OF THIS SOFTWARE.
 # 
 
-#
-# $Id$
-#
-
 error_table ggss
 
 error_code G_BAD_SERVICE_NAME, "No @ in SERVICE-NAME name string"
