@@ -713,7 +713,7 @@ long FAR PASCAL ScreenWndProc(
       strcat(strTmp, "   Cygnus Support - (415) 903-1400\n");
 #else /* CYGNUS */
       strcpy(strTmp, "   Kerberos 5 Telnet for Windows\n");
-      strcat(strTmp, "               ALPHA SNAPSHOT 1\n\n");
+      strcat(strTmp, "               ALPHA SNAPSHOT 2\n\n");
 #endif /* CYGNUS */
       if (encrypt_flag) {
 	strcat(strTmp, "\n[Encryption of output requested.  State: ");
