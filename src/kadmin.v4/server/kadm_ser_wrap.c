@@ -109,7 +109,7 @@ kadm_ser_init(inter, realm)
     server_parm.max_life = master_entry.max_life;
     server_parm.max_rlife = master_entry.max_renewable_life;
     server_parm.expiration = master_entry.expiration;
-    server_parm.mkvno = master_entry.kvno;
+    server_parm.mkvno = master_entry.key_data[0].key_data_kvno;
     /* don't set flags, as master has some extra restrictions
        (??? quoted from kdb_edit.c) */
     krb5_db_free_principal(kadm_context, &master_entry, numfound);

@@ -379,9 +379,11 @@ struct sockaddr_in *who;
 	cleanexit(2);
     }
 
-    status = krb5_kdb_decrypt_key(kadm_context, &server_parm.master_encblock,
-				  &sprinc_entries.key,
-				  &cpw_skey);
+    status = krb5_dbekd_decrypt_key_data(kadm_context,
+					 &server_parm.master_encblock,
+					 &sprinc_entries.key_data[0],
+					 &cpw_skey,
+					 (krb5_keysalt *) NULL);
     if (status) {
 	syslog(LOG_ERR, "decrypt_key failed: %s", error_message(status));
 	cleanexit(1);

@@ -1,4 +1,9 @@
 
+Mon Aug 7 13:30:46 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* admin_server,kadm_funcs,kadm_ser_wrap.c - Brute force substitutions
+		to get this to compile. 
+
+
 Mon Jul 17 15:12:30 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* kadm_ser_wrap.c - Add NULL stash file argument to krb5_db_fetch_mkey.
 
