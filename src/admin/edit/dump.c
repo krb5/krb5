@@ -1665,7 +1665,7 @@ load_db(argc, argv)
 					       dbname_tmp,
 					       dbname))) {
 			fprintf(stderr, dbrenerr_fmt,
-				programname, dbname, dbname_tmp,
+				programname, dbname_tmp, dbname,
 				error_message(kret));
 			exit_status++;
 		    }

@@ -1,3 +1,8 @@
+Tue Jan 30 18:28:57 1996  Mark Eichin  <eichin@cygnus.com>
+
+	* dump.c (load_db): dbrenerr_fmt prints "from" first, so pass it
+	to fprintf correctly.
+
 Sun Jan 28 14:31:47 1996  Mark Eichin  <eichin@cygnus.com>
 
 	* dump.c (process_k5_record): t2..t9 is only 8 vars, not 9.
