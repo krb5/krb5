@@ -1,3 +1,7 @@
+Mon Mar 27 07:56:26 1995 Chris Provenzano (proven@mit.edu)
+
+        * sserver.c: Use new calling convention for krb5_recvauth().
+
 Thu Mar  2 12:27:36 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in (ISODELIB): Remove reference to $(ISODELIB).

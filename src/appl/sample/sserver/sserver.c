@@ -53,14 +53,16 @@ extern krb5_deltat krb5_clockskew;
 
 void
 main(argc, argv)
-int argc;
-char *argv[];
+    int argc;
+    char *argv[];
 {
     krb5_context context;
-    struct sockaddr_in peername;
+    krb5_auth_context * auth_context;
+    krb5_ticket * ticket;
     krb5_address peeraddr;
+    struct sockaddr_in peername;
     int namelen = sizeof(peername);
-    int sock = 0;			/* incoming connection fd */
+    int sock = -1;			/* incoming connection fd */
     krb5_data recv_data;
     short xmitlen;
     krb5_error_code retval;
@@ -105,7 +107,7 @@ char *argv[];
 	    syslog(LOG_ERR, "listen: %m");
 	    exit(3);
 	}
-	if ((acc = accept(sock, (struct sockaddr *)&peername, &namelen)) == -1) {
+	if ((acc = accept(sock, (struct sockaddr *)&peername, &namelen)) == -1){
 	    syslog(LOG_ERR, "accept: %m");
 	    exit(3);
 	}
@@ -127,28 +129,24 @@ char *argv[];
     peeraddr.length = sizeof(peername.sin_addr);
     peeraddr.contents = (krb5_octet *)&peername.sin_addr;
 
-    if (retval = krb5_recvauth(context, (krb5_pointer)&sock,
-			       SAMPLE_VERSION, server, &peeraddr,
-			       0, 0, 0,	/* no fetchfrom, keyproc or arg */
-			       0,	/* default rc type */
+    if (retval = krb5_recvauth(context, &auth_context, (krb5_pointer)&sock,
+			       SAMPLE_VERSION, server, 
+			       NULL,	/* default rc type */
 			       0,	/* no flags */
-			       0,	/* don't need seq number */
-			       &client,
-			       0, 0	/* don't care about ticket or
-					   authenticator */
-			       )) {
+			       NULL,	/* default keytab */
+			       &ticket)) {
 	syslog(LOG_ERR, "recvauth failed--%s", error_message(retval));
 	exit(1);
     }
 
-    if (retval = krb5_unparse_name(context, client, &cname)) {
+    /* Get client name */
+    if (retval = krb5_unparse_name(context, ticket->enc_part2->client, &cname)){
 	syslog(LOG_ERR, "unparse failed: %s", error_message(retval));
-	cname = "<unparse error>";
-    }
-
-    sprintf(repbuf, "You are %s\n", cname);
-    if (!retval)
+        sprintf(repbuf, "You are <unparse error>\n", cname);
+    } else {
+        sprintf(repbuf, "You are %s\n", cname);
 	free(cname);
+    }
     xmitlen = htons(strlen(repbuf));
     recv_data.length = strlen(repbuf);
     recv_data.data = repbuf;
