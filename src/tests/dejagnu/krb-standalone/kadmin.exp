@@ -649,7 +649,7 @@ proc kpasswd_cpw { princ opw npw } {
 proc kdestroy { } {
     global KDESTROY
 
-    spawn $KDESTROY
+    spawn $KDESTROY -5
     if ![check_exit_status "kdestroy"] {
 	return 0
     }

@@ -1,3 +1,7 @@
+2000-02-07  Tom Yu  <tlyu@mit.edu>
+
+	* kadmin.exp: Use $KDESTROY -5 to deal with changed behavior.
+
 2000-02-06  Tom Yu  <tlyu@mit.edu>
 
 	* standalone.exp: Use $KLIST -5 and $KDESTROY -5 to deal with
