@@ -243,6 +243,7 @@ void DeleteTopLine(
   pScr->buffer_top = pScr->buffer_top->next;
   assert(pScr->buffer_top != NULL);
 
+  free(pScr->buffer_top->prev);
   pScr->buffer_top->prev = NULL;
 
   pScr->numlines--;
