@@ -1,3 +1,8 @@
+2001-06-18  Ezra Peisach  <epeisach@mit.edu>
+
+	* loginpaths.h: If _PATH_DEFPATH is defined, undefine LPATH and
+	RPATH before redefining.
+
 2001-06-11  Ezra Peisach  <epeisach@mit.edu>
 
 	* configure.in (SETENVOBJ): If setenv is not present on system,
