@@ -193,3 +193,7 @@ Changes in 1.1a3:
 3.0b2
  from tag Mac_GSSKerberos5_3_0b2
  changed error in krb5_init_context from ENFILE to ENOENT when file not found
+
+3.0fc1
+ from tag Mac_GSSKerberos5_3_0fc1
+ no changes on the Mac side
