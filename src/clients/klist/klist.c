@@ -30,8 +30,13 @@
 #include <string.h>
 #include <stdio.h>
 #include <time.h>
+
+#if (defined(_MSDOS) || defined(_WIN32))
+#include <winsock.h>
+#else
 #include <sys/socket.h>
 #include <netdb.h>
+#endif
 
 extern int optind;
 extern char *optarg;

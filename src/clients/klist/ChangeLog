@@ -1,3 +1,11 @@
+Mon Feb  8 22:11:50 1999  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* klist.c: Under Windows, #include winsock.h instead of
+		sys/socket.h and netdb.h
+
+	* Makefile.in: Under Windows, link against wsock32.lib to get
+	 	gethostbyaddr().
+
 1998-11-13  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* Makefile.in: Set the myfulldir and mydir variables (which are
