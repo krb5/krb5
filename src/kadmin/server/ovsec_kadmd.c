@@ -255,7 +255,8 @@ int main(int argc, char *argv[])
 	  fprintf(stderr, "%s: Cannot bind socket.\n", whoami);
 	  fprintf(stderr, "bind: %s\n", error_message(oerrno));
 	  errno = oerrno;
-	  krb5_klog_syslog(LOG_ERR, "Cannot bind socket: %m");
+	  krb5_klog_syslog(LOG_ERR, "Cannot bind socket: %s",
+			   error_message(errno));
 	  if(oerrno == EADDRINUSE) {
 	       char *w = strrchr(whoami, '/');
 	       if (w) {
