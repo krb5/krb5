@@ -1,2 +1,1 @@
 copy syslog.h
-link kerberosIV
