@@ -395,6 +395,8 @@ operations requiring the ``add'' privilege.
 operations requiring the ``modify'' privilege.
 \item[* OVSEC_KADM_AUTH_DELETE] Caller is not authorized to perform
 operations requiring the ``delete'' privilege.
+\item[* OVSEC_KADM_AUTH_INSUFFICIENT] Caller is not authorized to
+perform more than one of the operations required by the function.
 \item[* OVSEC_KADM_BAD_DB] A database inconsistency was detected.
 \item[OVSEC_KADM_DUP] The operation would create a duplicate principal or
 policy.
@@ -495,6 +497,8 @@ policy, so the policy check is not performed.
 \\
 {\bf Function Name} & {\bf Authorization} & {\bf Operation} \\
 
+init & none & Open a connection with the ovsec_kadm library. \\
+destroy & none & Close the connection with the ovsec_kadm library. \\
 create_principal & add & Create a new principal. \\
 delete_principal & delete & Delete a principal. \\
 modify_principal & modify & Modify the attributes of an existing
@@ -520,6 +524,83 @@ get_privs & none & Return the caller's admin server privileges.
 \footnotetext[\thefootnote]{These functions also allow a principal to
 perform the operation on itself; see the function's semantics for
 details.}
+
+\subsection{ovsec_kadm_init}
+
+\begin{verbatim}
+ovsec_kadm_ret_t ovsec_kadm_init(char *client_name, char *pass,
+				 char *service_name, char *realm)
+\end{verbatim}
+
+AUTHORIZATION REQUIRED: none
+
+Open a connection to the ovsec_kadm library and initialize any
+neccessary state information.  This function behaves differently when
+called from local and remote clients.
+
+For remote clients, the semantics are:
+
+\begin{enumerate}
+\item Initializes all the com_err error tables defined by the Admin
+system.
+
+\item Acquire a Kerberos ticket for the specified service.
+
+\begin{enumerate}
+\item The ticket's client is client_name, which can be any valid
+Kerberos principal.  If client_name does not include a realm, the
+default realm of the local host is used
+\item The ticket's service is service_name@realm.  service_name must
+be one of the constants OVSEC_KADM_ADMIN_SERVICE or
+OVSEC_KADM_CHANGEPW_SERVICE.
+\item If realm is NULL, client_name's realm is used.
+\item The ticket is decoded with the password pass, which must be
+client_name's password.  If pass is NULL, the user is prompted (via
+the tty) for a password.
+\end{enumerate}
+
+\item Create a GSS-API authenticated connection to the Admin server,
+using the just-acquired Kerberos ticket.
+\end{enumerate}
+
+For local clients, the function does nothing.
+
+RETURN CODES: 
+
+\begin{description}
+\item[OVSEC_KADM_NO_SRV] No Admin server can be found for the
+specified realm.
+
+\item[OVSEC_KADM_RPC_ERROR] The RPC connection to the server cannot be
+initiated.
+\end{description}
+
+\subsection{ovsec_kadm_destroy}
+
+\begin{verbatim}
+ovsec_kadm_ret_t ovsec_kadm_destroy()
+\end{verbatim}
+
+AUTHORIZATION REQUIRED: none
+
+Close the connection to the Admin server and releases all related
+resources.  This function behaves differently when called by local and
+remote clients.
+
+For remote clients, the semantics are:
+
+\begin{enumerate}
+\item Destroy the temporary credential cache created by
+ovsec_kadm_init.
+
+\item Tear down the GSS-API context negotiated with the server.
+
+\item Close the RPC connection.
+\end{enumerate}
+
+For local clients, this function does nothing.
+
+RETURN CODES:
 
 \subsection{ovsec_kadm_create_principal}
 
