@@ -124,7 +124,7 @@ Major changes listed by ticket ID
 * [1189, 1251] The KfM krb4 library source base has been merged.
 
 * [1377, 1442, 1443] The Microsoft set-password protocol has been
-  implemented.  (needs confirmation)  Thanks to Paul Nelson.
+  implemented.  Thanks to Paul Nelson.
 
 * [1385, 1395, 1410] The krb4 protocol vulnerabilities
   [MITKRB5-SA-2003-004] have been worked around.  Note that this will
@@ -137,6 +137,12 @@ Major changes listed by ticket ID
 
 * [1397] The krb5_principal buffer bounds problems
   [MITKRB5-SA-2003-005] have been fixed.  Thanks to Nalin Dahyabhai.
+
+* [1415] Subsession key negotiation has been fixed to allow for
+  server-selected subsession keys in the future.
+
+* [1418, 1429, 1446, 1484, 1486, 1487] The AES cryptosystem has been
+  implemented.  It is not usable for GSSAPI, though.
 
 Minor changes listed by ticket ID
 ---------------------------------
@@ -292,6 +298,8 @@ Minor changes listed by ticket ID
 
 * [1304] kadmind4 no longer leaves sa_flags uninitialized.
 
+* [1305] Expired tickets now cause KfM to pop up a password dialog.
+
 * [1309] krb5_send_tgs() no longer leaks the storage associated with
   the TGS-REQ.
 
@@ -345,8 +353,32 @@ Minor changes listed by ticket ID
 
 * [1419] A memory leak in asn1_decode_kdc_req_body() has been fixed.
 
+* [1435] inet_ntop() is now emulated when needed.
+
 * [1439] krb5_free_pwd_sequences() now correctly frees the entire
   sequence of elements.
+
+* [1440] errno is no longer explicitly declared.
+
+* [1454] The etype-info2 preauth type is now supported.
+
+* [1459] (KfM/KLL internal) config file resolution can now be
+  prevented from accessing the user's homedir.
+
+* [1463] Preauth handling in the KDC has been reorganized.
+
+* [1470] Double-free in client-side preauth code fixed.
+
+* [1473] Ticket forwarding when the TGS and the end service have
+  different enctypes should work somewhat better now.
+
+* [1474] ASN.1 testsuite memory management has been cleaned up a
+  little to allow for memory leak checking.
+
+* [1476] Documentation updated to reflect default krb4 mode.
+
+* [1482] RFC-1964 OIDs now provided using the suggested symbolic
+  names.
 
 Copyright Notice and Legal Administrivia
 ----------------------------------------
