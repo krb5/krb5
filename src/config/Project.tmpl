@@ -12,6 +12,9 @@
 #ifndef PerlCmd
 #define PerlCmd perl
 #endif
+#ifndef UnifdefCmd
+#define UnifdefCmd unifdef
+#endif
 #ifndef CompileEtCmd
 #define CompileEtCmd $(ETSRC)/compile_et
 #endif
@@ -136,6 +139,60 @@ includes:: hfile							@@\
 #define CopyHeader(hfile,hdir) CopyHeaderNewName(hfile,hdir,hfile)
 #endif /* CopyHeader */
 
+/* Run a header through a preprocessor to generate an architecture/environment
+   specific header file.  note that unifdef's exit status will normally be 1,
+   indicating some adjustment of the file took place. */
+#ifndef ProcessStockHeader
+#define ProcessStockHeader(stockname,newname)				@@\
+newname: stockname							@@\
+	-$(UNIFDEF) $(PROCESS_DEFINES) stockname >newname
+#endif /* ProcessStockHeader */
+
+#if HasPosixTermios
+P_TERMIOS=-DHasPosixTermiosTrue
+#else
+P_TERMIOS=-UHasPosixTermiosTrue
+#endif
+#if HasPosixFileLocks
+P_FLOCKS=-DHasPosixFileLocksTrue
+#else
+P_FLOCKS=-UHasPosixFileLocksTrue
+#endif
+#if HasPosixTypes
+P_TYPES=-DHasPosixTypesTrue
+#else
+P_TYPES=-UHasPosixTypesTrue
+#endif
+#if HasVoidSignalReturn
+P_SIGTYPE=-DHasVoidSignalReturnTrue
+#else
+P_SIGTYPE=-UHasVoidSignalReturnTrue
+#endif
+#if HasStringH
+P_STRINGH=-DHasStringHTrue
+#else
+P_STRINGH=-UHasStringHTrue
+#endif
+#ifdef Bitsize16
+P_BITSIZE=-DBitsize16 -UBitsize32 -UBitsize64
+#endif
+#ifdef Bitsize32
+P_BITSIZE=-DBitsize32 -UBitsize16 -UBitsize64
+#endif
+#ifdef Bitsize64
+P_BITSIZE=-DBitsize64 -UBitsize16 -UBitsize32
+#endif
+#if HasNdbm
+P_DBM=-DHasNdbmTrue
+#else
+P_DBM=-UHasNdbmTrue
+#endif
+#if HasInet
+P_INET=-DHasInetTrue
+#else
+P_INET=-UHasInetTrue
+#endif
+
 /*
  * Default Definitions.
  */
@@ -152,6 +209,8 @@ includes:: hfile							@@\
              POSY = PosyCmd
             TOUCH = TouchCmd
              PERL = PerlCmd
+          UNIFDEF = UnifdefCmd
+  PROCESS_DEFINES = $(P_TERMIOS) $(P_FLOCKS) $(P_TYPES) $(P_SIGTYPE) $(P_STRINGH) $(P_BITSIZE) $(P_DBM) $(P_INET) -DUnifdefRan
        DESDEFINES = DesDefines
             ETSRC = $(TOP)/comerr
             SSSRC = $(TOP)/ss
