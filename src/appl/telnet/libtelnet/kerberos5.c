@@ -344,7 +344,7 @@ kerberos5_is(ap, data, cnt)
 		
 		if (!r) {
 		    krb5_rcache rcache;
-		    krb5_keytab keytabid;
+		    krb5_keytab keytabid = NULL;
 
 		    r = krb5_get_server_rcache(telnet_context,
 					krb5_princ_component(telnet_context,
