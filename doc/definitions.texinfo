@@ -1,5 +1,5 @@
 @set ADMINUSER joeadmin
-@set COMPANY Cygnus Support
+@set COMPANY MIT
 @set KDCSERVER kerberos
 @set KDCSLAVE1 @value{KDCSERVER}-1
 @set KDCSLAVE2 @value{KDCSERVER}-2
