@@ -192,7 +192,7 @@ static const char sftime_short_fmt[]	= "%x %X";
 static const char sftime_last_fmt[]	= "%d/%m/%y %R";
 #endif	/* HAVE_STRFTIME */
 static const char sftime_default_fmt[]	= "%02d/%02d/%02d %02d:%02d";
-static const int sftime_default_len	= 2+1+2+1+2+1+2+1+2+1;
+static const size_t sftime_default_len	= 2+1+2+1+2+1+2+1+2+1;
 
 /* Delta time strings */
 static const char dtscan_dhms_notext[]	= "%d-%02d:%02d:%02d";
@@ -214,6 +214,7 @@ static const char dt_output_hms[]	= "%d:%02d:%02d";
 /*
  * Lookup tables.
  */
+
 static const struct enctype_lookup_entry enctype_table[] = {
 /* krb5_enctype		input specifier		output string		*/
 /*-------------		-----------------------	------------------------*/
@@ -288,6 +289,7 @@ atime_full_text_nos	/* dd-month-yyyy:hh:mm		*/
 static const int atime_format_table_nents = sizeof(atime_format_table)/
 					    sizeof(atime_format_table[0]);
 
+#ifdef HAVE_STRFTIME
 static const char * const sftime_format_table[] = {
 sftime_ldep_time,	/* Default locale-dependent date and time	*/
 sftime_med_fmt,		/* dd mon yy hh:mm:ss				*/
@@ -296,6 +298,7 @@ sftime_last_fmt		/* dd/mm/yy hh:mm				*/
 };
 static const int sftime_format_table_nents = sizeof(sftime_format_table)/
 					    sizeof(sftime_format_table[0]);
+#endif /* HAVE_STRFTIME */
 
 static const struct deltat_match_entry deltat_table[] = {
 /* scan format		nmatch	daypos	hourpos	minpos	secpos	*/
@@ -506,7 +509,7 @@ krb5_string_to_flags(string, positive, negative, flagsp)
     for (i=0; i<flags_table_nents; i++) {
 	if (!strcasecmp(&string[cpos], flags_table[i].fl_specifier)) {
 	    found = 1;
-	    if (sense == flags_table[i].fl_sense)
+	    if (sense == (int) flags_table[i].fl_sense)
 		*flagsp |= flags_table[i].fl_flags;
 	    else
 		*flagsp &= ~flags_table[i].fl_flags;
@@ -749,7 +752,7 @@ krb5_timestamp_to_sfstring(timestamp, buffer, buflen, pad)
     char		* pad;
 {
     struct tm	*tmp;
-    int		i;
+    size_t i;
     size_t	ndone;
 
     tmp = localtime((time_t *) &timestamp);
@@ -786,12 +789,12 @@ krb5_deltat_to_string(deltat, buffer, buflen)
     krb5_deltat		dt;
     krb5_error_code	retval;
 
-    days = deltat / (24*3600);
-    dt = deltat % (24*3600);
-    hours = dt / 3600;
+    days = (int) (deltat / (24*3600l));
+    dt = deltat % (24*3600l);
+    hours = (int) (dt / 3600);
     dt %= 3600;
-    minutes = dt / 60;
-    seconds = dt % 60;
+    minutes = (int) (dt / 60);
+    seconds = (int) (dt % 60);
 
     retval = 0;
     if (days) {

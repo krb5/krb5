@@ -1,3 +1,10 @@
+Wed Sep 13 10:45:25 1995 Keith Vetter (keithv@fusion.com)
+
+	* keysalt.c: 16/32 bit integer mismatch.
+	* str_conv.c: 	sftime_format_table is conditional upon HAVE_STRFTIME,
+		cast some constants to long so that math wouldn't overflow,
+		16/32 bit integer size mismatch.
+
 Wed Sep 13 18:17:30 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* alt_prof.c (krb5_read_realm_params): Fix memory leak.  Free the

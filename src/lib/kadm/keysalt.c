@@ -118,6 +118,7 @@ krb5_string_to_keysalts(string, tupleseps, ksaltseps, dups, ksaltp, nksaltp)
     const char		*tseplist;
     const char		*ksseplist;
     const char		*septmp;
+    size_t		len;
     
     kret = 0;
     kp = string;
@@ -171,15 +172,16 @@ krb5_string_to_keysalts(string, tupleseps, ksaltseps, dups, ksaltp, nksaltp)
 
 	    /* Squirrel away old keysalt array */
 	    savep = *ksaltp;
+	    len = (size_t) *nksaltp;
 
 	    /* Get new keysalt array */
 	    if (*ksaltp = (krb5_key_salt_tuple *)
-		malloc(((*nksaltp)+1) * sizeof(krb5_key_salt_tuple))) {
+		malloc((len + 1) * sizeof(krb5_key_salt_tuple))) {
 
 		/* Copy old keysalt if appropriate */
 		if (savep) {
 		    memcpy(*ksaltp, savep,
-			   (*nksaltp) * sizeof(krb5_key_salt_tuple));
+			   len * sizeof(krb5_key_salt_tuple));
 		    krb5_xfree(savep);
 		}
 
