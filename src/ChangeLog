@@ -1,3 +1,7 @@
+Tue Mar 19 22:40:59 1996  Richard Basch  <basch@lehman.com>
+
+	* configure.in: do not bother with kadmin.old
+
 Mon Mar 18 21:33:15 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* aclocal.m4 (KRB5_RUN_FLAGS): Allows for setting of proper paths

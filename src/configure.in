@@ -231,7 +231,7 @@ dnl
 WITH_ANAME_DB
 WITH_KDB_DB
 dnl
-CONFIG_DIRS(util include lib kdc admin kadmin $kadminv4 kadmin.old $krb524 slave clients appl tests config-files)
+CONFIG_DIRS(util include lib kdc admin kadmin $kadminv4 $krb524 slave clients appl tests config-files)
 DO_SUBDIRS
 dnl dnl AC_OUTPUT(Makefile,[EXTRA_RULES])
 V5_AC_OUTPUT_MAKEFILE
