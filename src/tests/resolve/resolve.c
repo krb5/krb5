@@ -59,12 +59,14 @@ char *strchr();
 
 #include <netdb.h>
 
+int
 main(argc, argv)
-int argc;
-char **argv;
+     int argc;
+     char **argv;
 {
 	char myname[MAXHOSTNAMELEN+1];
 	char *ptr;
+	char addrcopy[4];
 	struct hostent *host;
 	int err;
 
@@ -96,8 +98,10 @@ char **argv;
 	printf("Host address: %d.%d.%d.%d\n", 
 	       UC(ptr[0]), UC(ptr[1]), UC(ptr[2]), UC(ptr[3]));
 
+	memcpy(addrcopy, ptr, 4);
+
 	/* Convert back to full name */
-	if((host = gethostbyaddr(ptr, 4, AF_INET)) == NULL) {
+	if((host = gethostbyaddr(addrcopy, 4, AF_INET)) == NULL) {
 		fprintf(stderr, "Error looking up IP address - fatal\n");
 		exit(2);
 	}

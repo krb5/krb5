@@ -1,0 +1,6 @@
+Tue Apr 25 22:16:38 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* resolve.c (main): copy the address sent back by gethostbyname
+	before calling gethostbyaddr, since the return is *static*.
+	(main): reindent declaration to make add-change-log-entry happy.
+
