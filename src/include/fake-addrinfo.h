@@ -51,8 +51,6 @@
 #define FAI_CONCAT(A,B) FAI_CONCAT2(A,B)
 #define FAI_CONCAT2(A,B) A ## B
 
-#define fixup_addrinfo	do not call me!
-
 #if defined (__linux__) || defined (_AIX)
 /* See comments in fake-addrinfo.c.  */
 #  define WRAP_GETADDRINFO
