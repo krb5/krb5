@@ -6,33 +6,23 @@
 Unpacking the Source Distribution
 ---------------------------------
 
-The source distribution of Kerberos 5 comes in three gzipped tarfiles,
-krb5-1.3.src.tar.gz, krb5-1.3.doc.tar.gz, and krb5-1.3.crypto.tar.gz.
-The krb5-1.3.doc.tar.gz contains the doc/ directory and this README
-file.  The krb5-1.3.src.tar.gz contains the src/ directory and this
-README file, except for the crypto library sources, which are in
-krb5-1.3.crypto.tar.gz.
-
-Instruction on how to extract the entire distribution follow.  These
-directions assume that you want to extract into a directory called
-DIST.
+The source distribution of Kerberos 5 comes in a gzipped tarfile,
+krb5-1.3.tar.gz.  Instructions on how to extract the entire
+distribution follow.  These directions assume that you want to extract
+into a directory called DIST.
 
 If you have the GNU tar program and gzip installed, you can simply do:
 
 	mkdir DIST
 	cd DIST
-	gtar zxpf krb5-1.3.src.tar.gz
-	gtar zxpf krb5-1.3.crypto.tar.gz
-	gtar zxpf krb5-1.3.doc.tar.gz
+	gtar zxpf krb5-1.3.tar.gz
 
 If you don't have GNU tar, you will need to get the FSF gzip
 distribution and use gzcat:
 
 	mkdir DIST
 	cd DIST
-	gzcat krb5-1.3.src.tar.gz | tar xpf -
-	gzcat krb5-1.3.crypto.tar.gz | tar xpf -
-	gzcat krb5-1.3.doc.tar.gz | tar xpf -
+	gzcat krb5-1.3.tar.gz | tar xpf -
 
 Both of these methods will extract the sources into DIST/krb5-1.3/src
 and the documentation into DIST/krb5-1.3/doc.
@@ -297,20 +287,6 @@ Minor changes listed by ticket ID
 
 * [1373] Handling of SAM preauth no longer attempts to stuff a size_t
   into an unsigned int.
-
-[ DELETE BEFORE RELEASE ---changes to unreleased code, etc.--- ]
-
-* [1054] KRB-CRED messages for RC4 are encrypted now.
-
-* [1177] krb5-1-2-2-branch merged onto trunk.
-
-* [1193] Punted comment about reworking key storage architecture.
-
-* [1208] install-headers target implemented.
-
-* [1223] asn1_decode_oid, asn1_encode_oid implemented
-
-* [1276] Generated dependencies handle --without-krb4 properly now.
 
 Copyright Notice and Legal Administrivia
 ----------------------------------------
