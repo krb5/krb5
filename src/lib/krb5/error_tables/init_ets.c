@@ -24,8 +24,7 @@
  * Initialize Kerberos library error tables.
  */
 
-
-#include <krb5/krb5.h>
+#include "k5-int.h"
 
 void INTERFACE
 krb5_init_ets (context)
