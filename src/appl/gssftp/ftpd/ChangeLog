@@ -1,5 +1,8 @@
 Fri Aug  7 00:56:30 1998  Matthew D Hancher  <mdh@mit.edu>
 
+	* ftpcmd.y: Replace old KERBEROS #ifdef's with KRB5_KRB4_COMPAT
+	so that K4 compatibility support actually gets compiled in.
+	
 	* ftpd.c: (pass): Make daemon not lose for homedirs on 
 	root-squashing filesystems.
 	(auth_data): Fix that godawful "error: No error" message 

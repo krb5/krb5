@@ -74,13 +74,13 @@ extern lreply(int, char *, ...);
 #endif
 
 static int kerror;	/* XXX needed for all auth types */
-#ifdef KERBEROS
+#ifdef KRB5_KRB4_COMPAT
 extern	struct sockaddr_in his_addr, ctrl_addr;
 #include <krb.h>
 extern AUTH_DAT kdata;
 extern Key_schedule schedule;
 extern MSG_DAT msg_data;
-#endif /* KERBEROS */
+#endif /* KRB5_KRB4_COMPAT */
 #ifdef GSSAPI
 #include <gssapi/gssapi.h>
 #include <gssapi/gssapi_generic.h>
@@ -1024,7 +1024,7 @@ getline(s, n, iop)
 	    }
 	    if (debug) syslog(LOG_DEBUG, "getline got %d from %s <%s>\n", 
 			      len, cs, mic?"MIC":"ENC");
-#ifdef KERBEROS
+#ifdef KRB5_KRB4_COMPAT
 	    if (strcmp(auth_type, "KERBEROS_V4") == 0) {
 		if ((kerror = mic ?
 		    krb_rd_safe((unsigned char *)out, len, &kdata.session,
@@ -1044,7 +1044,7 @@ getline(s, n, iop)
 		(void) memcpy(s, msg_data.app_data, msg_data.app_length);
 		(void) strcpy(s+msg_data.app_length, "\r\n");
 	    }
-#endif /* KERBEROS */
+#endif /* KRB5_KRB4_COMPAT */
 #ifdef GSSAPI
 /* we know this is a MIC or ENC already, and out/len already has the bits */
 	    if (strcmp(auth_type, "GSSAPI") == 0) {
@@ -1080,7 +1080,7 @@ getline(s, n, iop)
 #endif /* GSSAPI */
 	    /* Other auth types go here ... */
 	}
-#if defined KERBEROS || defined GSSAPI	/* or other auth types */
+#if defined KRB5_KRB4_COMPAT || defined GSSAPI	/* or other auth types */
 	else {	/* !auth_type */
 	    if ( (!(strncmp(s, "ENC", 3))) || (!(strncmp(s, "MIC", 3)))
 #ifndef NOCONFIDENTIAL
@@ -1092,7 +1092,7 @@ getline(s, n, iop)
                 return(s);
 	    }
 	}
-#endif /* KERBEROS */
+#endif /* KRB5_KRB4_COMPAT || GSSAPI */
 
 	if (debug) {
 		if (!strncmp(s, "PASS ", 5) && !guest)
