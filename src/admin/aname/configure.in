@@ -1,40 +1,7 @@
 AC_INIT(kdb5_anadd.c)
 CONFIG_RULES
 AC_PROG_INSTALL
-AC_ARG_WITH([aname-dbm],
-[  --with-aname-dbm		use native dbm for aname_to_lname database
-  --without-aname-dbm		use included version of Berkeley db (default)],
-,
-withval=no)dnl
-did_dbm_lib=no
-if test "$withval" = yes; then
-	AC_MSG_RESULT(Using native dbm for aname_to_lname database)
-	DBFLAGS=
-	AC_CHECK_LIB(ndbm,main)
-	AC_CHECK_LIB(dbm,main)
-	did_dbm_lib=yes
-else
-	AC_MSG_RESULT(Using Berkeley db for aname_to_lname database)
-	DBFLAGS=-DBERK_DB_DBM
-fi
-AC_SUBST(DBFLAGS)dnl
-dnl
-AC_ARG_WITH([dbm],
-[  --with-dbm		use native dbm for kdc database
-  --without-dbm		use included version of Berkeley db (default)],
-,
-withval=no)dnl
-if test "$withval" = yes; then
-	AC_MSG_RESULT(Using native dbm)
-	if test "$did_dbm_lib" = no; then
-		AC_CHECK_LIB(ndbm,main)
-		AC_CHECK_LIB(dbm,main)
-	fi
-else
-	AC_MSG_RESULT(Using Berkeley db)
-fi
-AC_SUBST(DBFLAGS)dnl
-dnl
+USE_ANAME
 KRB5_LIBRARIES
 V5_USE_SHARED_LIB
 V5_AC_OUTPUT_MAKEFILE

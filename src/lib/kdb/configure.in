@@ -5,54 +5,7 @@ AC_PROG_ARCHIVE_ADD
 AC_PROG_RANLIB
 AC_PROG_INSTALL
 AC_HAVE_HEADERS(unistd.h)
-AC_ARG_WITH([dbm],
-[  --with-dbm		use native dbm for kdc database
-  --without-dbm		use included version of Berkeley db (default)],
-,
-withval=no)dnl
-if test "$withval" = yes; then
-	AC_MSG_RESULT(Using native dbm)
-	DBFLAGS=
-else
-	AC_MSG_RESULT(Using Berkeley db)
-	DBFLAGS=-DBERK_DB_DBM
-fi
-AC_SUBST(DBFLAGS)dnl
-AC_CHECK_LIB(ndbm,main)
-AC_CHECK_LIB(dbm,main)
-AC_MSG_CHECKING([for missing dbm_error prototype])
-if test "$ac_cv_func_dbm_open" = yes; then
-	AC_EGREP_HEADER([dbm_error], [ndbm.h],
-	AC_MSG_RESULT(no), AC_TRY_LINK(
-[#include <ndbm.h>
-int dbm_error();],
-[dbm_error();], AC_DEFINE([MISSING_ERROR_PROTO])
-AC_MSG_RESULT(yes), AC_MSG_RESULT(no)))
-else
-	AC_EGREP_HEADER([dbm_error], [ndbm.h],
-	AC_MSG_RESULT(no), AC_TRY_LINK(
-[#include <dbm.h>
-int dbm_error();],
-[dbm_error();], AC_DEFINE([MISSING_ERROR_PROTO])
-AC_MSG_RESULT(yes), AC_MSG_RESULT(no)))
-fi
-AC_MSG_CHECKING([for missing dbm_clearerr prototype])
-if test "$ac_cv_func_dbm_open" = yes; then
-	AC_EGREP_HEADER([dbm_error], [ndbm.h],
-	AC_MSG_RESULT(no), AC_TRY_LINK(
-[#include <ndbm.h>
-int dbm_clearerr();],
-[dbm_clearerr();], AC_DEFINE([MISSING_CLEARERR_PROTO])
-AC_MSG_RESULT(yes), AC_MSG_RESULT(no)))
-else
-	AC_EGREP_HEADER([dbm_error], [ndbm.h],
-	AC_MSG_RESULT(no), AC_TRY_LINK(
-[#include <dbm.h>
-int dbm_clearerr();],
-[dbm_clearerr();], AC_DEFINE([MISSING_CLEARERR_PROTO])
-AC_MSG_RESULT(yes), AC_MSG_RESULT(no)))
-fi
-dnl
+WITH_DB
 V5_USE_SHARED_LIB
 AC_CHECK_FUNCS(srand48 srand srandom umask)
 LinkFileDir(../libkdb5.a, libkdb5.a, ./kdb)

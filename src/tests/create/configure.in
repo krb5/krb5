@@ -3,19 +3,4 @@ CONFIG_RULES
 AC_PROG_INSTALL
 USE_KDB5_LIBRARY
 KRB5_LIBRARIES
-dnl
-dnl --with-dbm uses native DBM for the KDC database.
-dnl
-AC_ARG_WITH([dbm],
-[  --with-dbm		use native dbm for kdc database
-  --without-dbm		use included version of Berkeley db (default)],
-,
-withval=no)dnl
-if test "$withval" = yes; then
-	AC_MSG_RESULT(Using native dbm)
-	AC_CHECK_LIB(ndbm,main)
-	AC_CHECK_LIB(dbm,main)
-else
-	AC_MSG_RESULT(Using Berkeley db)
-fi
 V5_AC_OUTPUT_MAKEFILE

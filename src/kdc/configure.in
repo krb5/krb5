@@ -23,29 +23,13 @@ dnl information and failure information.
 dnl
 AC_ARG_WITH([kdc-kdb-update],
 [  --with-kdc-kdb-update	Update the database
-  --without-kdc-kdb-update1	Do not update the database (default)],
+  --without-kdc-kdb-update	Do not update the database (default)],
 ,
 withval=no)dnl
 if test "$withval" = yes; then
 	AC_MSG_RESULT(Updating KDC database with each request)
 	AC_DEFINE(KRBCONF_KDC_MODIFIES_KDB)
 fi
-dnl
-dnl --with-dbm uses native DBM for the KDC database.
-dnl
-AC_ARG_WITH([dbm],
-[  --with-dbm		use native dbm for kdc database
-  --without-dbm		use included version of Berkeley db (default)],
-,
-withval=no)dnl
-if test "$withval" = yes; then
-	AC_MSG_RESULT(Using native dbm)
-	AC_CHECK_LIB(ndbm,main)
-	AC_CHECK_LIB(dbm,main)
-else
-	AC_MSG_RESULT(Using Berkeley db)
-fi
-AC_SUBST(DBFLAGS)dnl
 dnl
 USE_KADM_LIBRARY
 USE_KDB5_LIBRARY

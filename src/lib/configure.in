@@ -2,16 +2,7 @@ AC_INIT(configure.in)
 CONFIG_RULES
 if test $krb5_cv_build_krb4_libs = yes ; then
 	AC_MSG_RESULT(building Kerberos 4 libraries)
-	AC_ARG_WITH([kdb4],
-	[  --with-kdb4		use Kerberos version 4 database library.
-	  --without-kdb4	Avoid using Kerberos version 4 database library.],
-	,
-	withval=no)dnl
-	if test "$withval" = no; then
-		kdb4=
-	else
-		kdb4=kdb4
-	fi
+	WITH_KDB4(kdb4=kdb4,kdb4=)
 	krb4=krb4
 else
 	AC_MSG_RESULT(skipping Kerberos 4 libraries)

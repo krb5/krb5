@@ -1,7 +1,4 @@
-DBFLAGS=@DBFLAGS@
-CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE) $(DBFLAGS)
-
-all::
+CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
 
 all:: kdb5_anadd
 

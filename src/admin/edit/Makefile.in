@@ -1,3 +1,4 @@
+DEFS = @DEFS@
 CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
 
 all::
