@@ -1,3 +1,8 @@
+2003-05-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* etypes.c (krb5_enctypes_list): Add names aes128-cts and
+	aes256-cts as aliases.
+
 2003-05-13  Sam Hartman  <hartmans@mit.edu>
 
 	* t_encrypt.c: Add aes enctypes
