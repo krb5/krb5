@@ -1,3 +1,7 @@
+Thu Oct 23 12:08:24 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* aclocal.m4 (TCL_WITH): Check for libtcl8.0.
+
 Wed Oct 22 15:03:26 1997  Ezra Peisach  <epeisach@mit.edu>
 
 	* aclocal.m4 (AC_KRB5_TCL): Rewritten for clearer
