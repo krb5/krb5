@@ -120,7 +120,7 @@ char copyright[] =
 #define TIOCPKT_FLUSHWRITE      0x02
 #endif
 
-#ifdef __386BSD__
+#ifdef HAVE_SYS_IOCTL_COMPAT_H
 #include <sys/ioctl_compat.h>
 #endif
 

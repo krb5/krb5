@@ -1,3 +1,21 @@
+1998-05-26  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* login.c (dolastlog): BSD 4.4 systems don't have lastlog.h, but
+		still define struct lastlog somewhere.  Included from Dima
+		Ruban's FreeBSD patches.
+
+	* krlogin.c: Include sys/ioctl_compat.h if it is present (instead
+		of just for 386BSD).  
+
+	* loginpaths.h (LPATH): If the OS provides _PATH_DEFPATH, use it
+		to define LPATH and RPATH.
+
+	* login.c: #include paths.h if present, and use it to set the
+		pathnames for certain common files.
+
+	* configure.in (withval): Check for <sys/ioctl_compat.h> and
+	   <paths.h>
+
 Sat May 16 16:07:42 1998  Tom Yu  <tlyu@mit.edu>
 
 	* login.c: Replace strcpy with strncpy in places.  Add nul
