@@ -45,6 +45,8 @@ char copyright[] =
  * only one of: -r -h -k -K
  */
 
+#include <libpty.h>
+
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -782,12 +784,8 @@ bad_login:
 	{
 		struct utmp utmp;
 
-#ifndef NO_UT_PID
-		utmp.ut_type = USER_PROCESS;
-		utmp.ut_pid = getppid();
-#endif
 		login_time = time(&utmp.ut_time);
-		if ( (retval = pty_update_utmp(&utmp, username, ttyn, hostname)) < 0 )
+		if ( (retval = pty_update_utmp(PTY_USER_PROCESS, getpid(),  username, ttyn, hostname)) < 0 )
 		    com_err (argv[0], retval, "while updating utmp");
 	}
 

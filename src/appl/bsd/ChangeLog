@@ -1,7 +1,14 @@
+Mon Aug  7 17:32:29 1995  Sam Hartman  <hartmans@tertius.mit.edu>
 
-Mon Aug 7 11:26:46 EDT 1995	Paul Park	(pjpark@mit.edu)
-	* configure.in - Add checks for utmp[x].h so that the inclusion of
-		libpty.h does the right thing.
+	* krlogind.c: Close the write side of the syncpipe in the parent
+        so we get SIGPIPE if child dies. 
+
+	* login.c (main): Use new interface to pty_update_utmp
+
+	* configure.in (LOGINLIBS): Check for utmp.h and utmpx.h.
+
+	* krlogind.c (doit): Use new format for pty_update_utmp
+	* Include utmp.h because libpty.h no longer does.
 
 Fri Aug  4 00:50:41 1995  Tom Yu  <tlyu@dragons-lair.MIT.EDU>
 

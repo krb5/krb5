@@ -210,6 +210,9 @@ struct winsize {
 #include "krb5.h"
 #include <kerberosIV/krb.h>
 #include <libpty.h>
+#ifdef HAVE_UTMP_H
+#include <utmp.h>
+#endif
 
 int auth_sys = 0;	/* Which version of Kerberos used to authenticate */
 
@@ -611,7 +614,7 @@ int syncpipe[2];
 	struct sgttyb b;
 #endif /* POSIX_TERMIOS */
 	if ( retval = pty_open_slave(line, &t)) {
-	    com_err(progname,retval, "while opening slave");
+	    fatal(f, error_message(retval));
 	    exit(1);
 	}
 	
@@ -699,11 +702,8 @@ int syncpipe[2];
 
 #ifndef NO_UT_PID
 	{
-	    struct utmp ent;
 
-	    ent.ut_pid = getpid();
-	    ent.ut_type = LOGIN_PROCESS;
-	    pty_update_utmp(&ent, "rlogin", line, ""/*host*/);
+	    pty_update_utmp(PTY_LOGIN_PROCESS, getpid(), "rlogin", line, ""/*host*/);
 	}
 #endif
 
@@ -727,6 +727,7 @@ int syncpipe[2];
      **      The master blocks here until it reads a byte.
      */
     
+(void) close(syncpipe[1]);
     if (read(syncpipe[0], &c, 1) != 1) {
 	/*
 	 * Problems read failed ...
@@ -735,7 +736,7 @@ int syncpipe[2];
 	fatalperror(p,buferror);
     }
     close(syncpipe[0]);
-    close(syncpipe[1]);
+
     
 #if defined(KERBEROS) 
     if (do_encrypt) {
