@@ -200,7 +200,7 @@ init_realm(char *progname, kdc_realm_t *rdp, char *realm, char *def_dbname,
     else
 	rdp->realm_ports = strdup(def_udp_ports);
     if (rparams && rparams->realm_kdc_tcp_ports)
-	rdp->realm_tcp_ports = strdup(rparams->realm_kdc_ports);
+	rdp->realm_tcp_ports = strdup(rparams->realm_kdc_tcp_ports);
     else
 	rdp->realm_tcp_ports = strdup(def_tcp_ports);
 
