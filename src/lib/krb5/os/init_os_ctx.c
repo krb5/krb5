@@ -147,6 +147,7 @@ krb5_os_init_context(ctx)
 	 * When the profile routines are later enhanced, we will try
 	 * including a config file from user's home directory here.
 	 */
+        name = getenv("KRB5_CONFIG");
 	if(!name) name = DEFAULT_PROFILE_PATH;
 
 	retval = profile_init_path(name, &ctx->profile);

@@ -1,3 +1,8 @@
+Mon Oct  2 17:36:38 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* init_os_ctx.c (krb5_os_init_context): Put back in the
+		KRB5_CONFIG environment before setting to default.
+
 Tue Sep 26 22:46:01 1995  Mark Eichin  <eichin@cygnus.com>
 
 	* init_os_ctx.c (krb5_os_init_context): use profile_init_path for
