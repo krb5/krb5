@@ -1,3 +1,9 @@
+Thu Jul 25 18:42:47 1996  Sam Hartman  <hartmans@mit.edu>
+
+	* configure.in (LIBS): Link against -ldb under AIX for shared
+ 	library construction; we should eventually make libdb a shared
+ 	library.
+
 Wed Jul 24 18:21:28 1996  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
 
 	* Makefile.in, configure.in: break out server lib into a

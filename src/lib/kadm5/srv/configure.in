@@ -17,6 +17,14 @@ else
 fi
 
 AC_CHECK_FUNCS(re_comp re_exec regcomp regexec)
+dnl AIX is unusual in that it wants all symbols resolved at link time
+dnl  Fortunately, it will allow us to link the kdb library now, even if
+dnl it is linked again later.
+case $krb5_cv_host in
+*-*-aix*)
+	LIBS="$LIBS -ldb"
+	;;
+esac
 
 V5_SHARED_LIB_OBJS
 V5_MAKE_SHARED_LIB(libkadm5srv, 1.0, ../.., ./kadm5/srv)
