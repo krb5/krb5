@@ -95,8 +95,8 @@ int krb524_convert_creds_plain(context, v5creds, v4creds)
      /* Check keytype too */
      if (v5creds->keyblock.length != sizeof(C_Block)) {
 	  if (krb524_debug)
-	       fprintf(stderr, "v5 session keyblock length %d != "
-		       "C_Block size %d\n", v5creds->keyblock.length,
+	       fprintf(stderr, "v5 session keyblock length %d != C_Block size %d\n",
+		       v5creds->keyblock.length,
 		       sizeof(C_Block));
 	  return KRB524_BADKEY;
      } else
