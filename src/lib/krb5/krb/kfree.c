@@ -246,6 +246,7 @@ void krb5_free_etype_info(krb5_context context, krb5_etype_info info)
   for(i=0; info[i] != NULL; i++) {
       if (info[i]->salt)
 	  free(info[i]->salt);
+      krb5_free_data_contents( context, &info[2]->s2kparams);
       free(info[i]);
   }
   free(info);

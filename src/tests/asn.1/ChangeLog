@@ -1,3 +1,10 @@
+2003-05-06  Sam Hartman  <hartmans@mit.edu>
+
+	* krb5_encode_test.c (main): Add etype_info2 support
+
+	* ktest.c (ktest_make_sample_etype_info): Initialize s2kparams to be null.
+	(ktest_make_sample_etype_info2): New function
+
 2002-11-07  Ezra Peisach  <epeisach@bu.edu>
 
 	* krb5_decode_test.c: Test for sam_challenege without empty

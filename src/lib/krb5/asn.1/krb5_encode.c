@@ -678,11 +678,21 @@ krb5_error_code encode_krb5_alt_method(const krb5_alt_method *rep, krb5_data **c
 krb5_error_code encode_krb5_etype_info(const krb5_etype_info_entry **rep, krb5_data **code)
 {
   krb5_setup();
-  retval = asn1_encode_etype_info(buf,rep,&length);
+  retval = asn1_encode_etype_info(buf,rep,&length, 0);
   if(retval) return retval;
   sum += length;
   krb5_cleanup();
 }
+
+krb5_error_code encode_krb5_etype_info2(const krb5_etype_info_entry **rep, krb5_data **code)
+{
+  krb5_setup();
+  retval = asn1_encode_etype_info(buf,rep,&length, 1);
+  if(retval) return retval;
+  sum += length;
+  krb5_cleanup();
+}
+  
 
 krb5_error_code encode_krb5_enc_data(const krb5_enc_data *rep, krb5_data **code)
 {

@@ -1,3 +1,9 @@
+2003-05-06  Sam Hartman  <hartmans@mit.edu>
+
+	* k5-int.h: Add s2kparams to 
+	krb5_etype_info_entry
+	Add encode_etype_info2 and decode_etype_info2
+
 2003-05-02  Ken Raeburn  <raeburn@mit.edu>
 
 	* port-sockets.h (inet_ntop) [!_WIN32 && !HAVE_MACSOCK_H]: Define
