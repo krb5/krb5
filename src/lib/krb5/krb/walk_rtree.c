@@ -84,6 +84,7 @@ char realm_branch_char;
 	    /* one is a subdomain of the other */
 	    com_cdot = client->data;
 	    com_sdot = scp;
+	    nocommon = 0;
 	} /* else normal case of two sharing parents */
     }
     if (!slen) {
@@ -92,6 +93,7 @@ char realm_branch_char;
 	    /* one is a subdomain of the other */
 	    com_sdot = server->data;
 	    com_cdot = ccp;
+	    nocommon = 0;
 	} /* else normal case of two sharing parents */
     }
     /* determine #links to/from common ancestor */

@@ -130,3 +130,18 @@ SRCS=	$(srcdir)/addr_comp.c	\
 	$(srcdir)/tgtname.c	\
 	$(srcdir)/unparse.c	\
 	$(srcdir)/walk_rtree.c
+
+COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
+
+T_WALK_RTREE_OBJS= t_walk_rtree.o walk_rtree.o tgtname.o unparse.o \
+	free_rtree.o bld_pr_ext.o $(COMERRLIB) $(TOPLIBD)/libkrb5.a
+
+t_walk_rtree: $(T_WALK_RTREE_OBJS)
+	$(CC) -o t_walk_rtree $(T_WALK_RTREE_OBJS)
+
+TEST_PROGS= t_walk_rtree
+
+check:: $(TEST_PROGS)
+
+clean::
+	$(RM) t_walk_rtree t_walk_rtree.o

@@ -1,5 +1,16 @@
 Wed Nov 30 17:10:39 1994  Theodore Y. Ts'o  (tytso@dcl)
 
+        * Makefile.in: Build new test driver (t_walk_rtree) for
+		krb5_walk_realm_tree.
+
+ 	* walk_realm_tree.c (krb5_walk_realm_tree): Fix bug which occured
+		when the client or the server is a subdomain of the other;
+		walk_realm_tree would return the wrong answer, and suffer
+		from memory access errors.
+
+	* unparse.c (krb5_unparse_name_ext): Quote the '/' and '@'
+		characters properly.
+
 	* configure.in: Add appropriate help text for the --with-krb4
 		option.  Remove ISODE_DEFS call, since ISODE_INCLUDES now
 		defines ISODE automatically.

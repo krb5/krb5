@@ -121,7 +121,7 @@ int	*size;
 		    case REALM_SEP:
 		    case '\0':
 			*q++ = '\\';
-			*q++ = '0';
+			*q++ = *cp;
 			break;
 		    case '\\':
 			*q++ = '\\';
