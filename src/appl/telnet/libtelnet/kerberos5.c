@@ -165,6 +165,8 @@ kerberos5_init(ap, server)
 	else
 		str_data[3] = TELQUAL_IS;
 	memset(&session_key, 0, sizeof(session_key));
+	session_key.magic = KV5M_MAGIC;
+	session_key.etype = ETYPE_UNKNOWN;
         krb5_init_ets();
 	return(1);
 }
@@ -246,9 +248,9 @@ kerberos5_send(ap)
 	authenticator.subkey = 0;
 
 #ifdef	ENCRYPTION
-	if (session_key.contents)
-	    free(session_key.contents);
 	if (newkey) {
+	    if (session_key.contents)
+		free(session_key.contents);
 	    /* keep the key in our private storage, but don't use it
 	       yet---see kerberos5_reply() below */
 	    if (newkey->keytype != KEYTYPE_DES) {

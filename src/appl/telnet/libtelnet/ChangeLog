@@ -1,3 +1,8 @@
+Fri Nov 18 15:19:26 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* kerberos5.c (kerberos5_init): Initialize magic variable and
+		encryption type.  
+
 Fri Nov 18 00:37:13 1994  Mark Eichin  <eichin@cygnus.com>
 
 	* configure.in: use WITH_KRB4. (from epeisach)
