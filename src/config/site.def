@@ -153,6 +153,7 @@
    not turned on, they are left empty in Project.tmpl */
 #define HesiodDefines -DHESIOD
 #define HesiodLibs /usr/athena/lib/libhesiod.a
+#define HesiodIncludes -I/usr/athena/include
 
 #if 0
 /* not yet in use, but maybe someday... */
@@ -230,7 +231,9 @@
 /* additional include paths, if needed, such as those needed
    to get special include files, like <ss/ss.h> or <com_err.h>,
    or Kerberos V4 include files */
+#ifdef notdef
 #define	StandardIncludes -I/usr/athena/include
+#endif
 
 #if defined(AIXArchitecture) && OSMajorVersion == 3
 #define	StandardDefines	-D_ALL_SOURCE
