@@ -1,3 +1,34 @@
+2001-06-06  Ezra Peisach  <epeisach@mit.edu>
+
+	* ftpcmd.y: Include "ftpd_var.h" and remove prototype for reply()
+	and lreply(). Add prototypes and declare as returning void
+	sizecmd(), help() and yylex(). Cleanup assignments in
+	conditionals.
+
+	* ftpd.c: Include <grp.h> for initgroups() prototype. Move
+	reply(), lreply() prototypes to ftpd_var.h (and include
+	same). Include "krb524.h" for krb524_convert_creds_kdc()
+	prototype. Include secure.h. Provide static prototypes for
+	ftpd_gss_convert_creds(), ftpd_gss_userok(), dolog(),
+	receive_data(), login(), end_login(), disallowed_user(),
+	restricted_user(), checkuser(). Declare main(), checkuser(),
+	disallowed_user(), restricted_user(), end_login(), kpass(),
+	retreive_data(), auth_data(), secure_printf(), ftpd_gss_userok(),
+	as returning int. Declare setdlevel(), user(), pass(), login(),
+	retreive(), store_file(), secure_error(), statfilecmd(),
+	stat_cmd(), fatal(), reply(), lreply(), ack(), nack(), yyerror(),
+	delete_file(), cwd(), makedir(), removedir(), pwd(), renamecmd(),
+	dolog(), dologout(), passive(), perror_reply(), auth(),
+	send_file_list(), reply_gss_error(), secure_gss_error(),
+	ftpd_gss_convert_creds(), as returning void. Cleanup printf
+	argument mismatches.
+
+	* ftpd_var.h: New header file with many prototypes from ftpd.c.
+
+	* popen.c (ftpd_popen): Add parenthesis in conditional to
+	distinguish || vs &&. Add prototype for blkfree(). 
+	(ftpd_pclose): Declare as returning int.
+
 2001-04-25  Tom Yu  <tlyu@mit.edu>
 
 	* ftpcmd.y: Don't dereference a NULL pointer returned from

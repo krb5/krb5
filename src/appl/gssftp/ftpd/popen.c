@@ -70,8 +70,9 @@ ftpd_popen(program, type)
 	int argc, gargc, pdes[2], pid;
 	char **pop, *argv[MAX_ARGV], *gargv[MAX_GARGV], *vv[2];
 	extern char **ftpglob(), **copyblk();
+	extern void blkfree(char **);
 
-	if (*type != 'r' && *type != 'w' || type[1])
+	if ((*type != 'r' && *type != 'w') || type[1])
 		return(NULL);
 
 	if (!pids) {
@@ -148,6 +149,7 @@ pfree:	for (argc = 1; argv[argc] != NULL; argc++) {
 	return(iop);
 }
 
+int
 ftpd_pclose(iop)
 	FILE *iop;
 {
