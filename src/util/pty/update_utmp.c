@@ -136,7 +136,7 @@ long pty_update_utmp (process_type, pid, username, line, host, flags)
     strncpy(utx.ut_user, ent.ut_user, sizeof(ent.ut_user));
     strncpy(utx.ut_id, ent.ut_id, sizeof(ent.ut_id));
     strncpy(utx.ut_line, ent.ut_line, sizeof(ent.ut_line));
-    utx.ut_pid = ent.ut_pid;
+    utx.ut_pid = pid;		/* kludge for Irix, etc. to avoid trunc. */
     utx.ut_type = ent.ut_type;
 #ifdef UT_EXIT_STRUCTURE_DIFFER
     utx.ut_exit.ut_exit = ent.ut_exit.e_exit;
