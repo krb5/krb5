@@ -36,7 +36,7 @@ error_code KV5M_CRYPTOSYSTEM_ENTRY,	"Bad magic number for krb5_cryptosystem_entr
 error_code KV5M_CS_TABLE_ENTRY,	"Bad magic number for krb5_cs_table_entry structure"
 error_code KV5M_CHECKSUM_ENTRY,	"Bad magic number for krb5_checksum_entry structure"
 
-error_code KV5M_AUTH_DATA,	"Bad magic number for krb5_authdata structure"
+error_code KV5M_AUTHDATA,	"Bad magic number for krb5_authdata structure"
 error_code KV5M_TRANSITED,	"Bad magic number for krb5_transited structure"
 error_code KV5M_ENC_TKT_PART,	"Bad magic number for krb5_enc_tkt_part structure"
 error_code KV5M_TICKET,		"Bad magic number for krb5_ticket structure"
@@ -60,4 +60,5 @@ error_code KV5M_CRED,		"Bad magic number for krb5_cred structure"
 error_code KV5M_CRED_INFO,	"Bad magic number for krb5_cred_info structure"
 error_code KV5M_CRED_ENC_PART,	"Bad magic number for krb5_cred_enc_part structure"
 error_code KV5M_PWD_DATA,	"Bad magic number for krb5_pwd_data structure"
+error_code  KV5M_ADDRESS,	"Bad magic number for krb5_address structure"
 end
