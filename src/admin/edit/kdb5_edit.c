@@ -1045,6 +1045,7 @@ void show_principal(argc, argv)
     krb5_error_code retval;
     char *pr_name = 0;
     char buffer[256];
+    int i;
 
     if (argc < 2) {
 	com_err(argv[0], 0, "Too few arguments");
@@ -1089,7 +1090,6 @@ void show_principal(argc, argv)
     }
 
     printf("Name: %s\n", pr_name);
-    printf("Key version: %d\n", entry.key_data[0].key_data_kvno); 
     printf("Maximum life: %s\n", strdur(entry.max_life));
     printf("Maximum renewable life: %s\n", strdur(entry.max_renewable_life));
     printf("Master key version: %d\n", entry.mkvno);
@@ -1113,13 +1113,32 @@ void show_principal(argc, argv)
     (void) krb5_flags_to_string(entry.attributes, ", ",
 				buffer, sizeof(buffer));
     printf("Attributes: %s\n", buffer);
- /*   printf("Salt: %d\n", entry.salt_type);
-    printf("Alt salt: %d\n", entry.salt_type); */
-    
-    if (!nprincs) {
-	com_err(argv[0], 0, "Principal '%s' does not exist", argv[1]);
-	exit_status++;
-	goto errout;
+
+    printf("Number of keys: %d\n", entry.n_key_data);
+    for (i = 0; i < entry.n_key_data; i++) {
+	char enctype[64], salttype[32];
+	krb5_keyblock key;
+	krb5_keysalt salt;
+
+	if ((retval = krb5_dbekd_decrypt_key_data(edit_context,
+						  &master_encblock,
+						  &entry.key_data[i],
+						  &key, &salt))) {
+	    com_err(argv[0], retval, "while reading key information");
+	    continue;
+	}
+
+	/* Paranoia... */
+	memset((char *)key.contents, 0, key.length);
+	krb5_xfree(key.contents);
+
+	if (krb5_enctype_to_string(key.enctype, enctype, sizeof(enctype)))
+	    sprintf(enctype, "<Encryption type 0x%x>", key.enctype);
+	if (krb5_salttype_to_string(salt.type, salttype, sizeof(salttype)))
+	    sprintf(salttype, "<Salt type 0x%x>", salt.type);
+	
+	printf("Key: Version %d, Type %s/%s\n",
+	       entry.key_data[i].key_data_kvno, enctype, salttype);
     }
     
 errout:
