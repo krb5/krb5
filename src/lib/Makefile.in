@@ -63,7 +63,8 @@ $(KLIB): $(KLIBS) $(CLIB) $(WLIB) $(KDEF) k5_glue.obj $(KRB5RC)
 ##WIN16##	link /co /seg:400 /noe /nod /nol \
 ##WIN16##	   k5_glue, $*.dll, $*.map, \
 ##WIN16##	   $(KLIBS) $(CLIB) $(WINLIBS), $(KDEF)
-##WIN16##	rc /nologo /p /k $(CPPFLAGS) $(KRB5RC) $*.dll
+##WIN16##	rc /nologo /p /k $(CPPFLAGS) -D_MSDOS -DRES_ONLY \
+##WIN16##	   $(KRB5RC) $*.dll
 ##WIN16##	implib /nologo $@ $*.dll
 ##WIN32##	link $(WINDLLFLAGS) /def:$(KDEF) /out:$*.dll \
 ##WIN32##	   k5_glue.obj $(KRB5RC) $(KLIBS) $(CLIB) $(WINLIBS) gdi32.lib
