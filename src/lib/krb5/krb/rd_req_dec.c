@@ -290,10 +290,18 @@ krb5_rd_req_decoded_opt(krb5_context context, krb5_auth_context *auth_context, c
     if ((*auth_context)->authentp->subkey) {
 	if ((retval = krb5_copy_keyblock(context,
 					 (*auth_context)->authentp->subkey,
-					 &((*auth_context)->remote_subkey))))
+					 &((*auth_context)->recv_subkey))))
 	    goto cleanup;
+	retval = krb5_copy_keyblock(context, (*auth_context)->authentp->subkey,
+				    &((*auth_context)->send_subkey));
+	if (retval) {
+	    krb5_free_keyblock(context, (*auth_context)->recv_subkey);
+	    (*auth_context)->recv_subkey = NULL;
+	    goto cleanup;
+	}
     } else {
-	(*auth_context)->remote_subkey = 0;
+	(*auth_context)->recv_subkey = 0;
+	(*auth_context)->send_subkey = 0;
     }
 
     if ((retval = krb5_copy_keyblock(context, req->ticket->enc_part2->session,

@@ -71,6 +71,7 @@ fi
 AC_SUBST(V4SERVER)
 dnl
 KRB5_BUILD_PROGRAM
+KRB5_AC_PRIOCNTL_HACK
 dnl
 K5_GEN_FILE(testing/scripts/env-setup.sh:testing/scripts/env-setup.shin)
 V5_AC_OUTPUT_MAKEFILE(. cli dbutil passwd passwd/unit-test ktutil server v4server v4server/unit-test v5passwdd testing testing/scripts testing/util)

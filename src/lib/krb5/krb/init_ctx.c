@@ -1,7 +1,7 @@
 /*
  * lib/krb5/krb/init_ctx.c
  *
- * Copyright 1994,1999,2000, 2002  by the Massachusetts Institute of Technology.
+ * Copyright 1994,1999,2000, 2002, 2003  by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -65,8 +65,14 @@
    them.  This'll be fixed, but for better compatibility, let's prefer
    des-crc for now.  */
 #define DEFAULT_ETYPE_LIST	\
+	"aes256-cts-hmac-sha1-96 " \
+	"aes128-cts-hmac-sha1-96 " \
 	"des3-cbc-sha1 arcfour-hmac-md5 " \
 	"des-cbc-crc des-cbc-md5 des-cbc-md4 "
+
+/* Not included:
+	"aes128-cts-hmac-sha1-96 " \
+ */
 
 #if (defined(_WIN32))
 extern krb5_error_code krb5_vercheck();
@@ -142,6 +148,13 @@ init_common (krb5_context *context, krb5_boolean secure)
 	if ((retval = krb5_set_default_tgs_ktypes(ctx, NULL)))
 		goto cleanup;
 
+	ctx->conf_tgs_ktypes = calloc(ctx->tgs_ktype_count, sizeof(krb5_enctype));
+	if (ctx->conf_tgs_ktypes == NULL && ctx->tgs_ktype_count != 0)
+	    goto cleanup;
+	memcpy(ctx->conf_tgs_ktypes, ctx->tgs_ktypes,
+	       sizeof(krb5_enctype) * ctx->tgs_ktype_count);
+	ctx->conf_tgs_ktypes_count = ctx->tgs_ktype_count;
+
 	if ((retval = krb5_os_init_context(ctx)))
 		goto cleanup;
 
@@ -189,11 +202,7 @@ init_common (krb5_context *context, krb5_boolean secure)
 			    "kdc_default_options", 0,
 			    KDC_OPT_RENEWABLE_OK, &tmp);
 	ctx->kdc_default_options = tmp;
-#if TARGET_OS_MAC
 #define DEFAULT_KDC_TIMESYNC 1
-#else
-#define DEFAULT_KDC_TIMESYNC 0
-#endif
 	profile_get_integer(ctx->profile, "libdefaults",
 			    "kdc_timesync", 0, DEFAULT_KDC_TIMESYNC,
 			    &tmp);
@@ -207,16 +216,13 @@ init_common (krb5_context *context, krb5_boolean secure)
 	 * Note: DCE 1.0.3a only supports a cache type of 1
 	 * 	DCE 1.1 supports a cache type of 2.
 	 */
-#if TARGET_OS_MAC
 #define DEFAULT_CCACHE_TYPE 4
-#else
-#define DEFAULT_CCACHE_TYPE 3
-#endif
 	profile_get_integer(ctx->profile, "libdefaults", "ccache_type",
 			    0, DEFAULT_CCACHE_TYPE, &tmp);
 	ctx->fcc_default_format = tmp + 0x0500;
 	ctx->scc_default_format = tmp + 0x0500;
 	ctx->prompt_types = 0;
+	ctx->use_conf_ktypes = 0;
 
 	ctx->udp_pref_limit = -1;
 	*context = ctx;
@@ -241,6 +247,11 @@ krb5_free_context(krb5_context ctx)
      if (ctx->tgs_ktypes) {
           free(ctx->tgs_ktypes);
 	  ctx->tgs_ktypes = 0;
+     }
+
+     if (ctx->conf_tgs_ktypes) {
+	 free(ctx->conf_tgs_ktypes);
+	 ctx->conf_tgs_ktypes = 0;
      }
 
      if (ctx->default_realm) {
@@ -291,7 +302,8 @@ krb5_set_default_in_tkt_ktypes(krb5_context context, const krb5_enctype *ktypes)
 }
 
 static krb5_error_code
-get_profile_etype_list(krb5_context context, krb5_enctype **ktypes, char *profstr, int ctx_count, krb5_enctype *ctx_list)
+get_profile_etype_list(krb5_context context, krb5_enctype **ktypes, char *profstr,
+		       int ctx_count, krb5_enctype *ctx_list)
 {
     krb5_enctype *old_ktypes;
 
@@ -426,12 +438,19 @@ krb5_error_code
 KRB5_CALLCONV
 krb5_get_tgs_ktypes(krb5_context context, krb5_const_principal princ, krb5_enctype **ktypes)
 {
-    return(get_profile_etype_list(context, ktypes, "default_tgs_enctypes",
-				  context->tgs_ktype_count,
-				  context->tgs_ktypes));
+    if (context->use_conf_ktypes)
+	/* This one is set *only* by reading the config file; it's not
+	   set by the application.  */
+	return(get_profile_etype_list(context, ktypes, "default_tgs_enctypes",
+				      context->conf_tgs_ktypes_count,
+				      context->conf_tgs_ktypes));
+    else
+	return(get_profile_etype_list(context, ktypes, "default_tgs_enctypes",
+				      context->tgs_ktype_count,
+				      context->tgs_ktypes));
 }
 
-krb5_error_code
+krb5_error_code KRB5_CALLCONV
 krb5_get_permitted_enctypes(krb5_context context, krb5_enctype **ktypes)
 {
     return(get_profile_etype_list(context, ktypes, "permitted_enctypes",

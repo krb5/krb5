@@ -111,10 +111,6 @@ extern char *malloc(), *calloc(), *realloc();
 
 #define	SUBBUFSIZE	256
 
-#ifndef CRAY
-extern int errno;		/* outside this world */
-#endif /* !CRAY */
-
 extern int
     autologin,		/* Autologin enabled */
     skiprc,		/* Don't process the ~/.telnetrc file */
