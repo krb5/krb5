@@ -220,6 +220,8 @@ verify_as_reply(context, time_now, request, as_reply)
     krb5_kdc_req		*request;
     krb5_kdc_rep		*as_reply;
 {
+    krb5_error_code		retval;
+    
     /* check the contents for sanity: */
     if (!as_reply->enc_part2->times.starttime)
 	as_reply->enc_part2->times.starttime =
@@ -245,11 +247,17 @@ verify_as_reply(context, time_now, request, as_reply)
 	)
 	return KRB5_KDCREP_MODIFIED;
 
-    if ((request->from == 0) &&
-	(labs(as_reply->enc_part2->times.starttime - time_now)
-	 > context->clockskew))
-	return (KRB5_KDCREP_SKEW);
-
+    if (context->library_options & KRB5_LIBOPT_SYNC_KDCTIME) {
+	retval = krb5_set_real_time(context,
+				    as_reply->enc_part2->times.authtime, 0);
+	if (retval)
+	    return retval;
+    } else {
+	if ((request->from == 0) &&
+	    (labs(as_reply->enc_part2->times.starttime - time_now)
+	     > context->clockskew))
+	    return (KRB5_KDCREP_SKEW);
+    }
     return 0;
 }
 
@@ -264,12 +272,6 @@ stash_as_reply(context, time_now, request, as_reply, creds, ccache)
 {
     krb5_error_code 		retval;
     krb5_data *			packet;
-
-   if (context->library_options & KRB5_LIBOPT_SYNC_KDCTIME)
-       krb5_set_time_offsets(context,
-			     (as_reply->enc_part2->times.authtime -
-			      time_now),
-			     0);
 
     /* XXX issue warning if as_reply->enc_part2->key_exp is nearby */
 	

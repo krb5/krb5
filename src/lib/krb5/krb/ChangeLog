@@ -1,3 +1,9 @@
+Thu Apr 11 21:30:23 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* get_in_tkt.c (stash_as_reply, verify_as_reply): Move time offset
+		code from stash_as_reply to verify_as_reply, and fix it so
+		that it actually works.
+
 Wed Apr  3 16:04:36 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* rd_req_dec.c (krb5_rd_req_decoded): Move code which
