@@ -1,5 +1,8 @@
 2001-06-21  Ken Raeburn  <raeburn@mit.edu>
 
+	* derive.c: Include etypes.h.
+	(krb5_derive_random, krb5_random2key): New functions.
+
 	* checksum.c (krb5_dk_make_checksum): Cast 0x99 to char explicitly
 	to silence warnings.
 
