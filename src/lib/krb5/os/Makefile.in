@@ -16,7 +16,6 @@ STLIBOBJS= \
 	an_to_ln.o	\
 	c_ustime.o	\
 	def_realm.o	\
-	DNR.o	\
 	ccdefname.o	\
 	changepw.o	\
 	free_krbhs.o	\
@@ -37,7 +36,6 @@ STLIBOBJS= \
 	localaddr.o	\
 	locate_kdc.o	\
 	lock_file.o	\
-	macsock.o	\
 	net_read.o	\
 	net_write.o	\
 	osconfig.o	\
@@ -60,7 +58,6 @@ OBJS= \
 	$(OUTPRE)an_to_ln.$(OBJEXT)	\
 	$(OUTPRE)c_ustime.$(OBJEXT)	\
 	$(OUTPRE)def_realm.$(OBJEXT)	\
-	$(OUTPRE)DNR.$(OBJEXT)	\
 	$(OUTPRE)ccdefname.$(OBJEXT)	\
 	$(OUTPRE)changepw.$(OBJEXT)	\
 	$(OUTPRE)free_krbhs.$(OBJEXT)	\
@@ -81,7 +78,6 @@ OBJS= \
 	$(OUTPRE)localaddr.$(OBJEXT)	\
 	$(OUTPRE)locate_kdc.$(OBJEXT)	\
 	$(OUTPRE)lock_file.$(OBJEXT)	\
-	$(OUTPRE)macsock.$(OBJEXT)	\
 	$(OUTPRE)net_read.$(OBJEXT)	\
 	$(OUTPRE)net_write.$(OBJEXT)	\
 	$(OUTPRE)osconfig.$(OBJEXT)	\
@@ -104,7 +100,6 @@ SRCS= \
 	$(srcdir)/an_to_ln.c	\
 	$(srcdir)/c_ustime.c	\
 	$(srcdir)/def_realm.c	\
-	$(srcdir)/DNR.c	\
 	$(srcdir)/ccdefname.c	\
 	$(srcdir)/changepw.c	\
 	$(srcdir)/free_krbhs.c	\
@@ -125,7 +120,6 @@ SRCS= \
 	$(srcdir)/localaddr.c	\
 	$(srcdir)/locate_kdc.c	\
 	$(srcdir)/lock_file.c	\
-	$(srcdir)/macsock.c	\
 	$(srcdir)/net_read.c	\
 	$(srcdir)/net_write.c	\
 	$(srcdir)/osconfig.c	\
