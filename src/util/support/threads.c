@@ -36,12 +36,110 @@
 MAKE_INIT_FUNCTION(krb5int_thread_support_init);
 MAKE_FINI_FUNCTION(krb5int_thread_support_fini);
 
+
 #ifdef ENABLE_THREADS
 
 #ifdef _WIN32
 
-#error "need WIN32 thread support code written"
+static DWORD tls_idx;
+CRITICAL_SECTION key_lock;
+static void (*destructors[K5_KEY_MAX])(void *);
+static unsigned char destructors_set[K5_KEY_MAX];
 
+int krb5int_thread_support_init (void)
+{
+    tls_idx = TlsAlloc();
+    /* XXX This can raise an exception if memory is low!  */
+    InitializeCriticalSection(&key_lock);
+    return 0;
+}
+
+void krb5int_thread_support_fini (void)
+{
+    if (! INITIALIZER_RAN (krb5int_thread_support_init))
+	return;
+    /* ... free stuff ... */
+    TlsFree(tls_idx);
+    DeleteCriticalSection(&key_lock);
+}
+
+int k5_key_register (k5_key_t keynum, void (*destructor)(void *))
+{
+    DWORD wait_result;
+
+    assert(keynum >= 0 && keynum < K5_KEY_MAX);
+    /* XXX: This can raise EXCEPTION_POSSIBLE_DEADLOCK.  */
+    EnterCriticalSection(&key_lock);
+    assert(destructors_set[keynum] == 0);
+    destructors_set[keynum] = 1;
+    destructors[keynum] = destructor;
+    LeaveCriticalSection(&key_lock);
+    return 0;
+}
+
+void *k5_getspecific (k5_key_t keynum)
+{
+    struct tsd_block *t;
+
+    err = CALL_INIT_FUNCTION(krb5int_thread_support_init);
+    if (err)
+	return NULL;
+
+    assert(keynum >= 0 && keynum < K5_KEY_MAX);
+
+    t = TlsGetValue(tls_idx);
+    if (t == NULL)
+	return NULL;
+    return t->values[keynum];
+}
+
+int k5_setspecific (k5_key_t keynum, void *value)
+{
+    struct tsd_block *t;
+
+    err = CALL_INIT_FUNCTION(krb5int_thread_support_init);
+    if (err)
+	return NULL;
+
+    assert(keynum >= 0 && keynum < K5_KEY_MAX);
+
+    t = TlsGetValue(tls_idx);
+    if (t == NULL) {
+	int i;
+	t = malloc(sizeof(*t));
+	if (t == NULL)
+	    return errno;
+	for (i = 0; i < K5_KEY_MAX; i++)
+	    t->values[i] = 0;
+	/* add to global linked list */
+	t->next = 0;
+	err = TlsSetValue(key, t);
+	if (err) {
+	    free(t);
+	    return err;
+	}
+    }
+    t->values[keynum] = value;
+    return 0;
+}
+
+int k5_key_delete (k5_key_t keynum)
+{
+    assert(keynum >= 0 && keynum < K5_KEY_MAX);
+    /* XXX: This can raise EXCEPTION_POSSIBLE_DEADLOCK.  */
+    EnterCriticalSection(&key_lock);
+    abort();
+    LeaveCriticalSection(&key_lock);
+    return 0;
+}
+
+void krb5int_thread_detach_hook (void)
+{
+    /* XXX Memory leak here!
+       Need to destroy all TLS objects we know about for this thread.  */
+}
+
+
 #else
 
 /* POSIX */
@@ -79,6 +177,7 @@ int krb5int_thread_support_init(void)
 
 void krb5int_thread_support_fini(void)
 {
+    /* ... delete stuff ... */
     if (INITIALIZER_RAN(krb5int_thread_support_init))
 	pthread_key_delete(key);
 }
@@ -188,7 +287,9 @@ int k5_key_delete (k5_key_t keynum)
 
 #endif /* Win32 vs POSIX */
 
+
 #else
+/* no thread support */
 
 static void (*destructors[K5_KEY_MAX])(void *);
 static void *tsd_values[K5_KEY_MAX];

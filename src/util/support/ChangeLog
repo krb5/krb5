@@ -1,3 +1,17 @@
+2004-06-17  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (BUILDTOP, LIBNAME, XTRA, OBJFILE): Define for
+	Windows.
+	(LIBOBJS): Define.
+	($(BUILDTOP)/include/krb5/autoconf.h): Disable rule on Windows.
+
+	* threads.c (tls_idx, key_lock, destructors, destructors_set): New
+	variables for Windows.
+	(krb5int_thread_support_init, krb5int_thread_support_fini,
+	k5_key_register, k5_getspecific, k5_setspecific, k5_key_delete,
+	krb5int_thread_detach_hook): New functions for Windows.  Some are
+	just placeholders.
+
 2004-06-14  Ken Raeburn  <raeburn@mit.edu>
 
 	* libkrb5support.exports: Drop krb5int_foreach_localaddr.

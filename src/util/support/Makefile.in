@@ -4,6 +4,11 @@ mydir=util/support
 BUILDTOP=$(REL)..$(S)..
 RELDIR=../util/support
 
+##DOS##BUILDTOP = ..\..
+##DOS##LIBNAME=$(OUTPRE)krb5support_32.lib
+##DOS##XTRA=
+##DOS##OBJFILE=$(OUTPRE)krb5support_32.lst
+
 SED = sed
 
 KRB5_RUN_ENV= @KRB5_RUN_ENV@
@@ -19,6 +24,9 @@ LIBFINIFUNC=krb5int_thread_support_fini
 
 STLIBOBJS= \
 	threads.o
+
+LIBOBJS= \
+	$(OUTPRE)threads.$(OBJEXT)
 
 STOBJLISTS=OBJS.ST
 
@@ -42,9 +50,10 @@ install-unix:: install-libs
 
 clean-unix:: clean-liblinks clean-libs clean-libobjs
 
+##DOS##!if 0
 $(BUILDTOP)/include/krb5/autoconf.h: $(SRCTOP)/include/krb5/autoconf.h.in
 	(cd $(BUILDTOP)/include; $(MAKE) krb5/autoconf.h)
-
+##DOS##!endif
 
 # @lib_frag@
 # @libobj_frag@
