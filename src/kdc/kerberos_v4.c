@@ -636,9 +636,24 @@ kerb_get_principal(name, inst, principal, maxn, more)
 		  (int) name, (int) inst, entries.key.keytype);
 	nprinc = 0;
 	goto cleanup;
-    } else if (! compat_decrypt_key( &entries.key, k)) {
-	bcopy(		k,	&principal->key_low,  LONGLEN);
-	bcopy((long *) 	k + 1,	&principal->key_high, LONGLEN);
+    } else {
+ 	/*
+	 * If the primary key's salt type is not V4, use the alternate
+	 * key instead, if it exists.
+	 */
+ 	if (entries.salt_type != KRB5_KDB_SALTTYPE_V4 &&
+	    entries.alt_key.length) {
+ 	    if (! compat_decrypt_key( &entries.alt_key,k)){
+ 		bcopy(              k,      &principal->key_low,  LONGLEN);
+             	bcopy((long *)      k + 1,  &principal->key_high, LONGLEN);
+	    }
+ 	}
+ 	else {
+ 	    if (! compat_decrypt_key( &entries.key, k)) {
+             	bcopy(              k,      &principal->key_low,  LONGLEN);
+             	bcopy((long *)      k + 1,  &principal->key_high, LONGLEN);
+	    }
+ 	}
     }
     /* convert v5's entries struct to v4's Principal struct:
      * v5's time-unit for lifetimes is 1 sec, while v4 uses 5 minutes.
