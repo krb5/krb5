@@ -18,6 +18,8 @@ static char rcsid_crc_c[] =
 #include <krb5/copyright.h>
 #include <krb5/krb5.h>
 #include <krb5/crc-32.h>
+#include <krb5/ext-proto.h>
+#include <errno.h>
 
 static u_long const crc_table[256] = {
     0x00000000, 0x01080082, 0x02100104, 0x03180186,
@@ -99,6 +101,10 @@ krb5_checksum *outcksum;
     register u_long c = 0;
     register int idx;
     int i;
+
+    outcksum->contents = (krb5_octet *)malloc(4);
+    if (!outcksum->contents)
+	return ENOMEM;
 
     for (i=0; i<in_length;i++) {
 	idx = (data[i] ^ c);
