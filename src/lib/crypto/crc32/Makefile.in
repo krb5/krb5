@@ -1,5 +1,4 @@
 CFLAGS = $(CCOPTS) $(DEFS)
-LDFLAGS = -g
 
 all:: $(OBJS)
 
@@ -11,7 +10,7 @@ SRCS=	$(srcdir)/crc.c $(srcdir)/crctest.c
 
 crctest: crctest.o $(OBJS)
 	$(RM) crctest
-	$(CC) -o $@ crctest.o $(LDFLAGS) $(OBJS)
+	$(CC) -o $@ crctest.o $(CCFLAGS) $(OBJS)
 
 check:: crctest
 	./crctest < $(srcdir)/crc-test
