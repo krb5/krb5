@@ -14,7 +14,7 @@ AC_CHECK_SIZEOF(int)
 AC_CHECK_SIZEOF(long)
 AC_FUNC_VFORK
 AC_HEADER_STDARG
-AC_CHECK_HEADER(termios.h,AC_CHECK_FUNC(cfsetispeed,AC_DEFINE(POSIX_TERMIOS)))
+AC_CHECK_HEADER(termios.h,[AC_CHECK_FUNC(cfsetispeed,AC_DEFINE(POSIX_TERMIOS))])
 AC_CHECK_HEADERS(unistd.h stdlib.h string.h sys/select.h sys/sockio.h paths.h)
 CHECK_UTMP
 DECLARE_SYS_ERRLIST

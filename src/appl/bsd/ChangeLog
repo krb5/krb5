@@ -1,3 +1,8 @@
+2002-12-06  Ezra Peisach  <epeisach@bu.edu>
+
+	* configure.in: Quote the argument to AC_CHECK_HEADER. Autoconf
+	2.57 was having problems.
+
 2002-11-05  Tom Yu  <tlyu@mit.edu>
 
 	* login.c (k5_get_password): Remove trailing colon, as new
