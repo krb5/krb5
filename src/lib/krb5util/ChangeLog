@@ -1,0 +1,7 @@
+Sat May 18 04:41:55 1996  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* configure.in:  Check for functions needed to seteuid.
+
+	* seteuid.c (krb5_seteuid): New function to allow UID to be
+        changed and returned to later.
+

@@ -29,7 +29,7 @@ Makefile.in
 configure
 configure.in
 compat_recv.c
-
+seteuid.c
 Things-to-lose:
 
 Do-last:

@@ -6,9 +6,9 @@ CFLAGS = $(CCOPTS) $(DEFS)
 .c.o:
 	$(CC) $(CFLAGS) -c $(srcdir)/$*.c
 
-OBJS=	compat_recv.$(OBJEXT)	
+OBJS=	compat_recv.$(OBJEXT)	 seteuid.$(OBJEXT)
 
-SRCS=	$(srcdir)/compat_recv	
+SRCS=	$(srcdir)/compat_recv.c $(srcdir)/seteuid.c	
 
 LIB_SUBDIRS= .
 LIBDONE= DONE
