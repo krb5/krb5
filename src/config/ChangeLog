@@ -1,3 +1,8 @@
+2004-08-19  Sam Hartman  <hartmans@mit.edu>
+
+	* shlib.conf: Add support for gnu hurd and for BSD kernels with
+	glibc; use the Linux shared library procedure 
+
 2004-07-11  Ken Raeburn  <raeburn@mit.edu>
 
 	* shlib.conf (alpha*-dec-osf*): Use $(PTHREAD_CFLAGS) in
