@@ -194,5 +194,9 @@ long pty_update_utmp (process_type, pid, username, line, host, flags)
 
 #endif /* HAVE_SETUTENT */
 
-    return ptyint_update_wtmp(&ent, host, userbuf);
+    /* Don't record LOGIN_PROCESS entries. */
+    if (process_type == PTY_LOGIN_PROCESS)
+      return 0;
+    else
+      return ptyint_update_wtmp(&ent, host, userbuf);
 }
