@@ -35,13 +35,6 @@ clean::
 depend::
 
 install::
-	@set -x; for f in $(KRB5_HEADERS) ; \
-	do $(INSTALL_DATA) $(srcdir)$(S)$$f	\
-		$(DESTDIR)$(KRB5_INCDIR)$(S)krb5$(S)$$f ; \
-	done
-	@set -x; for f in osconf.h autoconf.h $(ET_HEADERS); \
-	do $(INSTALL_DATA) $(C)$$f $(DESTDIR)$(KRB5_INCDIR)$(S)krb5$(S)$$f; \
-	done
 
 PROCESS_REPLACE = -e "s+@KRB5RCTMPDIR+$(KRB5RCTMPDIR)+" \
 		  -e "s+@PREFIX+$(INSTALL_PREFIX)+" \

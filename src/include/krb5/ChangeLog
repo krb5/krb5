@@ -1,8 +1,11 @@
-
 Thu Jun 8 14:41:00 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* adm_proto.h - Add prototypes for logging routines.  Also, if
 		kdb.h has not been included, add null structure for entry
 		data structure so that we don't strictly require kdb.h.
+
+Thu Jun  8 11:11:24 1995  Theodore Y. Ts'o  <tytso@lurch.mit.edu>
+
+	* Makefile.in (install): Don't install the install/krb5 header files.
 
 Wed Jun  7 16:23:51 1995    <tytso@rsx-11.mit.edu>
 
