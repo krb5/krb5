@@ -2,7 +2,6 @@ thisconfigdir=.
 BUILDTOP=$(REL)$(U)
 LOCAL_SUBDIRS = resolve asn.1 create hammer verify gssapi dejagnu
 
-CFLAGS = $(CCOPTS)
 RUN_SETUP = @KRB5_RUN_ENV@ KRB5_KDC_PROFILE=kdc.conf KRB5_CONFIG=$(SRCTOP)/config-files/krb5.conf
 KRB5_RUN_ENV= @KRB5_RUN_ENV@
 PROG_LIBPATH=-L$(TOPLIBD)

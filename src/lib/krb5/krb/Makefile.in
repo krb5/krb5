@@ -2,7 +2,6 @@ thisconfigdir=./..
 myfulldir=lib/krb5/krb
 mydir=krb
 BUILDTOP=$(REL)$(U)$(S)$(U)$(S)$(U)
-CFLAGS = $(CCOPTS) $(DEFS)
 RUN_SETUP = @KRB5_RUN_ENV@
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
@@ -34,6 +33,7 @@ STLIBOBJS= \
 	cp_key_cnt.o	\
 	decode_kdc.o	\
 	decrypt_tk.o	\
+	deltat.o	\
         enc_helper.o	\
 	encode_kdc.o	\
 	encrypt_tk.o	\
@@ -117,6 +117,7 @@ OBJS=	$(OUTPRE)addr_comp.$(OBJEXT)	\
 	$(OUTPRE)cp_key_cnt.$(OBJEXT)	\
 	$(OUTPRE)decode_kdc.$(OBJEXT)	\
 	$(OUTPRE)decrypt_tk.$(OBJEXT)	\
+	$(OUTPRE)deltat.$(OBJEXT)	\
         $(OUTPRE)enc_helper.$(OBJEXT)	\
 	$(OUTPRE)encode_kdc.$(OBJEXT)	\
 	$(OUTPRE)encrypt_tk.$(OBJEXT)	\
@@ -201,6 +202,7 @@ SRCS=	$(srcdir)/addr_comp.c	\
 	$(srcdir)/cp_key_cnt.c	\
 	$(srcdir)/decode_kdc.c	\
 	$(srcdir)/decrypt_tk.c	\
+	$(srcdir)/deltat.c	\
 	$(srcdir)/enc_helper.c	\
 	$(srcdir)/encode_kdc.c	\
 	$(srcdir)/encrypt_tk.c	\
@@ -263,6 +265,12 @@ SRCS=	$(srcdir)/addr_comp.c	\
 	$(srcdir)/vic_opt.c	\
 	$(srcdir)/walk_rtree.c
 
+# Someday, when we have a "maintainer mode", do this right:
+BISON=bison
+BISONFLAGS=-v # -v -> .output; -d -> .h
+$(srcdir)/deltat.c : # x-deltat.y
+	$(BISON) $(BISONFLAGS) -o $(srcdir)/deltat.c $(srcdir)/x-deltat.y
+
 ##DOS##LIBOBJS = $(OBJS)
 
 all-unix:: all-libobjs
@@ -278,6 +286,8 @@ T_KERB_OBJS= t_kerb.o conv_princ.o unparse.o set_realm.o str_conv.o
 T_SER_OBJS= t_ser.o ser_actx.o ser_adata.o ser_addr.o ser_auth.o ser_cksum.o \
 	ser_ctx.o ser_eblk.o ser_key.o ser_princ.o serialize.o 
 
+T_DELTAT_OBJS= t_deltat.o deltat.o
+
 t_walk_rtree: $(T_WALK_RTREE_OBJS) $(KDB5_DEPLIBS) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o t_walk_rtree $(T_WALK_RTREE_OBJS) \
 		$(KDB5_LIBS) $(KRB5_BASE_LIBS)
@@ -290,7 +300,10 @@ t_ser: $(T_SER_OBJS) $(KDB5_DEPLIBS) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o t_ser $(T_SER_OBJS) \
 		$(KDB5_LIBS) $(KRB5_BASE_LIBS)
 
-TEST_PROGS= t_walk_rtree t_kerb t_ser
+t_deltat : $(T_DELTAT_OBJS)
+	$(CC_LINK) -o t_deltat $(T_DELTAT_OBJS)
+
+TEST_PROGS= t_walk_rtree t_kerb t_ser t_deltat
 
 check-unix:: $(TEST_PROGS)
 	KRB5_CONFIG=$(srcdir)/t_krb5.conf ; export KRB5_CONFIG ;\
@@ -317,8 +330,10 @@ check-unix:: $(TEST_PROGS)
 	$(RM) test.out
 	KRB5_CONFIG=$(srcdir)/t_krb5.conf ; export KRB5_CONFIG ;\
 		$(RUN_SETUP) ./t_ser
+	./t_deltat
 
 clean::
-	$(RM) $(OUTPRE)t_walk_rtree$(EXEEXT) $(OUTPRE)t_walk_rtree.$(OBJEXT)
-	$(RM) $(OUTPRE)t_kerb$(EXEEXT) $(OUTPRE)t_kerb.$(OBJEXT)
-	$(RM) $(OUTPRE)t_ser$(EXEEXT) $(OUTPRE)t_ser.$(OBJEXT)
+	$(RM) $(OUTPRE)t_walk_rtree$(EXEEXT) $(OUTPRE)t_walk_rtree.$(OBJEXT) \
+		$(OUTPRE)t_kerb$(EXEEXT) $(OUTPRE)t_kerb.$(OBJEXT)	\
+		$(OUTPRE)t_ser$(EXEEXT) $(OUTPRE)t_ser.$(OBJEXT)	\
+		$(OUTPRE)t_deltat$(EXEEXT) $(OUTPRE)t_deltat.$(OBJEXT)

@@ -16,7 +16,10 @@
  * this permission notice appear in supporting documentation, and that
  * the name of M.I.T. not be used in advertising or publicity pertaining
  * to distribution of the software without specific, written prior
- * permission.  M.I.T. makes no representations about the suitability of
+ * permission.  Furthermore if you modify this software you must label
+ * your software as modified software and not distribute it in such a
+ * fashion that it might be confused with the original M.I.T. software.
+ * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
  * 
@@ -81,7 +84,7 @@ static const struct krb_convert sconv_list[] = {
     {"abs",   "abs",          DO_REALM_CONVERSION},
     {"nfs",   "nfs",          DO_REALM_CONVERSION},
     {"tftp",  "tftp",         DO_REALM_CONVERSION},
-    {"zephyr",        "zephyr",       DO_REALM_CONVERSION},
+    {"zephyr",        "zephyr",       0},
     {"http",  "http",         DO_REALM_CONVERSION},
     {"khttp", "khttp",        DO_REALM_CONVERSION},
     {"pgpsigner", "pgpsigner",        DO_REALM_CONVERSION},
@@ -89,18 +92,6 @@ static const struct krb_convert sconv_list[] = {
     {"mandarin-agent",        "mandarin-agent",       DO_REALM_CONVERSION},
     {"write", "write",        DO_REALM_CONVERSION},
     {"palladium", "palladium",        DO_REALM_CONVERSION},
-    {"news",	"news",		DO_REALM_CONVERSION},
-    {"abs",	"abs",		DO_REALM_CONVERSION},
-    {"nfs",	"nfs",		DO_REALM_CONVERSION},
-    {"tftp",	"tftp",		DO_REALM_CONVERSION},
-    {"zephyr",	"zephyr",	DO_REALM_CONVERSION},
-    {"http",	"http",		DO_REALM_CONVERSION},
-    {"khttp",	"khttp",	DO_REALM_CONVERSION},
-    {"pgpsigner", "pgpsigner",	DO_REALM_CONVERSION},
-    {"irc",	"irc",		DO_REALM_CONVERSION},
-    {"mandarin-agent",	"mandarin-agent",	DO_REALM_CONVERSION},
-    {"write",	"write",	DO_REALM_CONVERSION},
-    {"palladium", "palladium",	DO_REALM_CONVERSION},
     {0,		0,		0},
 };
 
@@ -243,7 +234,8 @@ krb5_425_conv_principal(context, name, instance, realm, princ)
 	      if (retval == 0 && full_name && full_name[0]) {
 		  instance = full_name[0];
 	      } else {
-		  strcpy(buf, instance);
+		  strncpy(buf, instance, sizeof(buf));
+		  buf[sizeof(buf) - 1] = '\0';
 		  retval = krb5_get_realm_domain(context, realm, &domain);
 		  if (retval)
 		      return retval;
@@ -251,8 +243,8 @@ krb5_425_conv_principal(context, name, instance, realm, princ)
 		      for (cp = domain; *cp; cp++)
 			  if (isupper(*cp))
 			      *cp = tolower(*cp);
-		      strcat(buf, ".");
-		      strcat(buf, domain);
+		      strncat(buf, ".", sizeof(buf) - 1 - strlen(buf));
+		      strncat(buf, domain, sizeof(buf) - 1 - strlen(buf));
 		      krb5_xfree(domain);
 		  }
 		  instance = buf;

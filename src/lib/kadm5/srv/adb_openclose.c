@@ -232,7 +232,8 @@ osa_adb_ret_t osa_adb_fini_db(osa_adb_db_t db, int magic)
 	   * after trashing it.  This has to be allowed, so don't
 	   * generate an error.
 	   */
-	  (void) fclose(db->lock->lockfile);
+	  if (db->lock->lockmode != OSA_ADB_PERMANENT)
+	       (void) fclose(db->lock->lockfile);
 	  db->lock->lockfile = NULL;
 	  krb5_free_context(db->lock->context);
      }

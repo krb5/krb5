@@ -1,3 +1,115 @@
+2000-04-28  Nalin Dahyabhai  <nalin@redhat.com>
+
+	* conv_princ.c (krb5_425_conv_principal): Don't overflow buffer
+	"buf".
+
+1999-12-02  Ken Raeburn  <raeburn@mit.edu>
+
+	* init_ctx.c (get_profile_etype_list): Report an error if no
+	recognized enctypes are found in the config file.
+
+1999-11-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* init_ctx.c (init_common): Renamed from krb5_init_context, now
+	static.  New argument SECURE provides initialization of
+	profile_secure field.
+	(krb5_init_context): Call it.
+	(krb5_init_secure_context): New function.
+
+	* preauth2.c (krb5_do_preauth): Fix syntax in switch statement.
+
+	* str_conv.c (krb5_deltat_to_string): Always write to a local
+	temporary buffer that's guaranteed to be large enough, then see if
+	the supplied output buffer is big enough.
+	(krb5_string_to_deltat): Deleted.
+	* x-deltat.y, deltat.c: New files.
+	* Makefile.in (deltat.c): Add rule for building from x-deltat.y,
+	but comment out dependencies for easier maintenance.
+	(BISON, BISONFLAGS): New variables.
+
+	* str_conv.c: Removed most static char arrays, substituting the
+	values in place.
+	(krb5_string_to_timestamp): Move atime_format_table inside here.
+	(krb5_timestamp_to_sfstring): Move sftime_format_table inside
+	here.
+
+	* str_conv.c: If strftime or strptime are not available, include
+	the renamed NetBSD versions, and define the function names as
+	macros to map them to the replacement names.
+	(__P, _CurrentTimeLocale, dummy_locale_info, TM_YEAR_BASE,
+	DAYSPERLYEAR, DAYSPERNYEAR, DAYSPERWEEK, isleap, tzname, tzset):
+	Define some dummies for strftime/strptime to use.
+	(strptime): Deleted old stub version.
+	(krb5_timestamp_to_string, krb5_timestamp_to_sfstring): Always
+	assume strftime is available.
+	(krb5_string_to_timestamp): Assume strptime is always available.
+	* strftime.c, strptime.c: New files, based on NetBSD versions.
+	Modified to rename the functions and not export any symbols.
+
+	* Makefile.in (T_DELTAT_OBJS): New variable.
+	(TEST_PROGS): Add t_deltat.
+	(t_deltat): Add rule.
+	(clean): Added t_deltat stuff.  Run rm only once.
+	* t_deltat.c: New file.
+
+1999-11-02  Ken Raeburn  <raeburn@mit.edu>
+
+	* t_ref_kerb.out: Fix expected zephyr/zephyr output.
+
+1999-10-26  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,
+	LOCAL_INCLUDES such that one can override CFLAGS from the command
+	line without losing CPP search patchs and defines. Some associated
+	Makefile cleanup. [from wsanchez@apple.com]
+
+1999-10-14  Tom Yu  <tlyu@mit.edu>
+
+	* preauth2.c (krb5_do_preauth): Add gross workaround for 1.0.x KDC
+	returning a bogus PA-PW-SALT in a KRB-ERROR message when a
+	principal requires preauth: ignore salt hints if an etype_info is
+	present.
+
+1999-10-12  Ken Raeburn  <raeburn@mit.edu>
+
+	* conv_princ.c (sconv_list): Don't do conversion for "zephyr"
+	principal.  (Noticed by Derrick Brashear.)  Delete about a dozen
+	duplicate entries.
+
+1999-08-26  Ken Raeburn  <raeburn@mit.edu>
+
+	* init_ctx.c (get_profile_etype_list): Update name of the des3
+	entry in the default etype list.
+
+1999-08-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* init_ctx.c (get_profile_etype_list): New argument DESONLY; if
+	set, ignore any ktype values other than NULL, DES_CBC_CRC, and
+	DES_CBC_MD5.
+	(krb5_get_default_in_tkt_ktypes, krb5_get_tgs_ktypes): Set it.
+	(krb5_get_permitted_enctypes): Don't set it.
+
+	* fwd_tgt.c (krb5_fwd_tgt_creds): Use KRB5_TC_SUPPORTED_KTYPES
+	when calling krb5_cc_retrieve_cred.
+	* gc_frm_kdc.c (krb5_get_cred_from_kdc_opt): Ditto.
+	* get_creds.c (krb5_get_credentials_core): Set that flag.
+	(krb5_get_credentials): Check for KRB5_CC_NOT_KTYPE error return.
+
+1999-08-17  Ken Raeburn  <raeburn@mit.edu>
+
+	* t_ser.c (main): Disable eblock serialization test, since the
+	code it tests was disabled nearly a year ago.
+
+	* str_conv.c (krb5_timestamp_to_sfstring): Don't pass extra
+	argument to sprintf.
+
+1999-08-10	Alexandra Ellwood	<lxs@mit.edu>
+
+	* chpw.c (krb5_mk_chpw_req):
+		Added call to free cipherpw.data.  cipherpw.data is allocated 
+		by krb5_mk_priv and passed back.  Since cipherpw is never
+		passed back, krb5_mk_chpw_req should free it.
+
 1999-08-05  Danilo Almeida  <dalmeida@mit.edu>
 
 	* init_ctx.c (krb5_init_context): Document why krb5_win_ccdll_load

@@ -1,3 +1,18 @@
+1999-10-26  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,
+	LOCAL_INCLUDES such that one can override CFLAGS from the command
+	line without losing CPP search patchs and defines. Some associated
+	Makefile cleanup. [from wsanchez@apple.com]
+
+1999-08-27  Tom Yu  <tlyu@mit.edu>
+
+	* accept_sec_context.c (krb5_gss_accept_sec_context): Disable
+	krb5-mech2 stuff for now.
+
+	* init_sec_context.c (make_ap_req_v2): Disable krb5-mech2 stuff
+	for now.
+
 Wed May 19 13:21:55 1999  Danilo Almeida  <dalmeida@mit.edu>
 
 	* Makefile.in: Improve rule to create gssapi include dir under

@@ -1,3 +1,15 @@
+1999-10-26  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,
+	LOCAL_INCLUDES such that one can override CFLAGS from the command
+	line without losing CPP search patchs and defines. Some associated
+	Makefile cleanup. [from wsanchez@apple.com]
+
+1999-08-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* fcc_retrv.c (krb5_fcc_retrieve): Replace with a version that
+	calls krb5_cc_retrieve_cred_default.
+
 1999-06-10  Danilo Almeida  <dalmeida@mit.edu>
 
 	* fcc_ops.c (krb5_cache_change): Use PostMessage instead of 

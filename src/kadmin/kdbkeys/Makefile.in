@@ -2,7 +2,6 @@ thisconfigdir=.
 myfulldir=kadmin/kdbkeys
 mydir=.
 BUILDTOP=$(REL)$(U)$(S)$(U)
-CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
 
 PROG = kdbkeys
 OBJS = kdbkeys.o

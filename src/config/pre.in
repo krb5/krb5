@@ -70,11 +70,12 @@ SRCTOP = @srcdir@/$(BUILDTOP)
 VPATH = @srcdir@
 CONFIG_RELTOPDIR = @CONFIG_RELTOPDIR@
 
+ALL_CFLAGS = $(DEFS) $(DEFINES) $(LOCALINCLUDES) $(CPPFLAGS) $(CFLAGS)
+CFLAGS = @CCOPTS@
 CPPFLAGS = @CPPFLAGS@
-DEFS = @DEFS@ $(CPPFLAGS)
+DEFS = @DEFS@
 CC = @CC@
 LD = $(PURE) @LD@
-CCOPTS = @CCOPTS@
 DEPLIBS = @DEPLIBS@
 LDFLAGS = @LDFLAGS@
 LD_UNRESOLVED_PREFIX = @LD_UNRESOLVED_PREFIX@
@@ -283,6 +284,12 @@ COMPILE_ET_C= $(AWK) -f $(SRCTOP)/util/et/et_c.awk outfile=$@
 
 .et.c:
 	$(AWK) -f $(SRCTOP)/util/et/et_c.awk outfile=$*.c $<
+
+# rule to make object files
+#
+.SUFFIXES: .c .o
+.c.o:
+	$(CC) $(ALL_CFLAGS) -c $<
 
 # ss command table rules
 #

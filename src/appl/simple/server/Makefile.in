@@ -3,9 +3,8 @@ myfulldir=appl/simple/server
 mydir=simple/server
 MY_SUBDIRS=.
 BUILDTOP=$(REL)$(U)$(S)$(U)$(S)$(U)
-CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
 
-LOCALINCLUDE= -I.. -I$(srcdir)/..
+LOCALINCLUDES= -I.. -I$(srcdir)/..
 
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)

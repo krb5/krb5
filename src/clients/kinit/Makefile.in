@@ -2,27 +2,19 @@ thisconfigdir=./..
 myfulldir=clients/kinit
 mydir=kinit
 BUILDTOP=$(REL)$(U)$(S)$(U)
-##DOS##BUILDTOP=..\..
 
-CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 
 all-unix:: kinit
-all-windows::
+all-windows:: $(OUTPRE)kinit.exe
 all-mac::
 
 kinit: kinit.o $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o $@ kinit.o $(KRB5_BASE_LIBS)
 
-
-##WIN32##INCLUDES = /I$(BUILDTOP)\include /I$(BUILDTOP)\include\krb5
-##WIN32##CFLAGS	= $(CCOPTS2) $(INCLUDES)
-
-##WIN32##all-windows:: $(OUTPRE)kinit.exe
-##WIN32##$(OUTPRE)kinit.exe: $(OUTPRE)kinit.obj $(BUILDTOP)\util\windows\$(OUTPRE)getopt.obj $(KLIB) $(CLIB)
-##WIN32##	link /nologo /out:$@ $**
-
+$(OUTPRE)kinit.exe: $(OUTPRE)kinit.obj $(BUILDTOP)\util\windows\$(OUTPRE)getopt.obj $(KLIB) $(CLIB)
+	link $(EXE_LINKOPTS) -out:$@ $**
 
 clean-unix::
 	$(RM) kinit.o kinit

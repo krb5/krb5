@@ -54,6 +54,19 @@ krb5-*.*.*)
 	relminor=`echo $release|awk -F. '{print $2}'`
 	relpatch=`echo $release|awk -F. '{print $3}'`
 	;;
+krb5-*.*-current)
+	release=`echo $reldir|sed -e 's/krb5-//'`
+	relhead=`echo $release|sed -e 's/-.*//'`
+	relmajor=`echo $relhead|awk -F. '{print $1}'`
+	relminor=`echo $relhead|awk -F. '{print $2}'`
+	release=${relhead}-$reldate
+	;;
+krb5-*.*-*)
+	release=`echo $reldir|sed -e 's/krb5-//'`
+	relhead=`echo $release|sed -e 's/-.*//'`
+	relmajor=`echo $relhead|awk -F. '{print $1}'`
+	relminor=`echo $relhead|awk -F. '{print $2}'`
+	;;
 krb5-*.*)
 	release=`echo $reldir|sed -e 's/krb5-//'`
 	relmajor=`echo $release|awk -F. '{print $1}'`
@@ -62,8 +75,17 @@ krb5-*.*)
 krb5-current)
 	release=current-$reldate
 	;;
-*);;
+*)
+	release="$reldir"
+	;;
 esac
+
+echo "release=$release"
+echo "major=$relmajor minor=$relminor patch=$relpatch"
+
+# $release is used for send-pr
+# $reltag, $release, $reldate are used for brand.c currently
+# $relmajor, $relminor, $relpatch are used for patchlevel.h currently
 
 if test $checkout = t; then
 	echo "Checking out krb5 with tag $reltag into directory $reldir..."

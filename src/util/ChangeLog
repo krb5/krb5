@@ -1,3 +1,14 @@
+1999-10-26  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,
+	LOCAL_INCLUDES such that one can override CFLAGS from the command
+	line without losing CPP search patchs and defines. Some associated
+	Makefile cleanup. [from wsanchez@apple.com]
+
+1999-08-16  Tom Yu  <tlyu@mit.edu>
+
+	* mkrel (reldate): Fix to deal with release branch snapshots.
+
 Wed May 19 11:43:36 1999  Danilo Almeida  <dalmeida@mit.edu>
 
 	* Makefile.in: Add all and cleanup rules for windows for windows,

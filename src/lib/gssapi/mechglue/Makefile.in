@@ -2,7 +2,7 @@ thisconfigdir=.
 myfulldir=lib/gssapi/mechglue
 mydir=.
 BUILDTOP=$(REL)$(U)$(S)$(U)$(S)$(U)
-CFLAGS = $(CCOPTS) $(DEFS) -I. -I$(srcdir)
+LOCALINCLUDES = -I. -I$(srcdir)
 
 ##DOSBUILDTOP = ..\..\..
 ##DOSLIBNAME=..\$(OUTPRE)gssapi.$(LIBEXT)
@@ -85,8 +85,6 @@ OBJS	= $(OUTPRE)g_acquire_cred.$(OBJEXT) \
 EHDRDIR= $(BUILDTOP)$(S)include$(S)gssapi
 EXPORTED_HEADERS = mechglue.h
 
-.c.o:
-	$(CC) $(CFLAGS) -c $(srcdir)/$*.c
 @SHARED_RULE@
 
 all:: all-$(WHAT) 

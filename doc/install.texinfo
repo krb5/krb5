@@ -16,7 +16,7 @@
 @end iftex
 
 @include definitions.texinfo
-@set EDITION 1.0
+@set EDITION 1.1
 
 @finalout                               @c don't print black warning boxes
 
@@ -1057,10 +1057,10 @@ Each machine running Kerberos must have a @code{/etc/krb5.conf} file.
 (@xref{krb5.conf})
 
 @need 4000
-Also, you must add the appropriate Kerberos services to each client
-machine's @code{/etc/services} file.  If you are using the default
-configuration for @value{PRODUCT}, you should be able to just insert the
-following code:
+Also, for most UNIX systems, you must add the appropriate Kerberos
+services to each client machine's @code{/etc/services} file.  If you are
+using the default configuration for @value{PRODUCT}, you should be able
+to just insert the following code:
 
 @smallexample
 @group
@@ -1094,6 +1094,94 @@ authenticating to any Kerberos V4 KDCs in another realm) you will need
 to switch the port number for @code{kerberos} to 750 and create a
 @code{kerberos-sec} service (tcp and udp) on port 88, so the Kerberos
 V4 KDC(s) will continue to work properly.
+
+@menu
+* Mac OS X Configuration::      
+@end menu
+
+@node Mac OS X Configuration,  , Client Machine Configuration Files, Client Machine Configuration Files
+@subsubsection Mac OS X Configuration
+
+To install Kerberos V5 on Mac OS X and Mac OS X Server, follow the 
+directions for generic Unix-based OS's, except for the 
+@code{/etc/services} updates described above.  
+
+Mac OS X and Mac OS X Server use a database called NetInfo to store
+the contents of files normally found in @code{/etc}.  Instead of
+modifying @code{/etc/services}, you should run the following commands
+to add the Kerberos service entries to NetInfo:
+
+@smallexample
+@group
+$ niutil -create . /services/kerberos
+$ niutil -createprop . /services/kerberos name kerberos kdc
+$ niutil -createprop . /services/kerberos port 750
+$ niutil -createprop . /services/kerberos protocol tcp udp
+$ niutil -create . /services/krbupdate
+$ niutil -createprop . /services/krbupdate name krbupdate kreg
+$ niutil -createprop . /services/krbupdate port 760
+$ niutil -createprop . /services/krbupdate protocol tcp
+$ niutil -create . /services/kpasswd
+$ niutil -createprop . /services/kpasswd name kpasswd kpwd
+$ niutil -createprop . /services/kpasswd port 761
+$ niutil -createprop . /services/kpasswd protocol tcp
+$ niutil -create . /services/klogin
+$ niutil -createprop . /services/klogin port 543
+$ niutil -createprop . /services/klogin protocol tcp
+$ niutil -create . /services/eklogin
+$ niutil -createprop . /services/eklogin port 2105
+$ niutil -createprop . /services/eklogin protocol tcp
+$ niutil -create . /services/kshell
+$ niutil -createprop . /services/kshell name kshell krcmd
+$ niutil -createprop . /services/kshell port 544
+$ niutil -createprop . /services/kshell protocol tcp
+@end group
+@end smallexample
+
+In addition to adding services to NetInfo, you must also modify the
+resolver configuration in NetInfo so that the machine resolves its own
+hostname as a FQDN (fully qualified domain name).  By default, Mac OS X
+and Mac OS X Server machines query NetInfo to resolve hostnames before
+falling back to DNS.  Because NetInfo has an unqualified name for all
+the machines in the NetInfo database, the machine's own hostname will
+resolve to an unqualified name.  Kerberos needs a FQDN to look up keys
+in the machine's keytab file.
+
+Fortunately, you can change the @code{lookupd} caching order to query
+DNS first.  Run the following NetInfo commands and reboot the machine:
+
+@smallexample
+@group
+$ niutil -create . /locations/lookupd/hosts
+$ niutil -createprop . /locations/lookupd/hosts LookupOrder CacheAgent DNSAgent
+ NIAgent NILAgent
+@end group
+@end smallexample
+
+Once you have rebooted, you can verify that the resolver now behaves
+correctly.  Compile the Kerberos 5 distribution and run:
+
+@smallexample
+@group
+$ cd .../src/tests/resolve
+$ ./resolve
+@end group
+@end smallexample
+
+This will tell you whether or not your machine returns FQDNs on name
+lookups.  If the test still fails, you can also try turning off DNS
+caching.  Run the following commands and reboot:
+
+@smallexample
+@group
+$ niutil -create . /locations/lookupd/hosts
+$ niutil -createprop . /locations/lookupd/hosts LookupOrder DNSAgent
+ CacheAgent NIAgent NILAgent
+@end group
+@end smallexample
+
+The remainder of the setup of a Mac OS X client machine or application
+server should be the same as for other UNIX-based systems.
 
 @node UNIX Application Servers,  , Installing and Configuring UNIX Client Machines, Installing Kerberos V5
 @section UNIX Application Servers
@@ -1186,15 +1274,15 @@ telnet  stream  tcp  nowait  root  @value{ROOTDIR}/sbin/telnetd
 @subsection The Keytab File
 
 All Kerberos server machines need a @dfn{keytab} file, called
-@code{/etc/krb5.keytab} (@xref{Upgrading the application servers}), to
-authenticate to the KDC.  The keytab file is an encrypted, local,
-on-disk copy of the host's key.  The keytab file, like the stash file
-(@ref{Create the Database}) is a potential point-of-entry for a
-break-in, and if compromised, would allow unrestricted access to its
-host.  The keytab file should be readable only by root, and should exist
-only on the machine's local disk.  The file should not be part of any
-backup of the machine, unless access to the backup data is secured as
-tightly as access to the machine's root password itself.
+@code{/etc/krb5.keytab}, to authenticate to the KDC.  The keytab file is
+an encrypted, local, on-disk copy of the host's key.  The keytab file,
+like the stash file (@ref{Create the Database}) is a potential
+point-of-entry for a break-in, and if compromised, would allow
+unrestricted access to its host.  The keytab file should be readable
+only by root, and should exist only on the machine's local disk.  The
+file should not be part of any backup of the machine, unless access to
+the backup data is secured as tightly as access to the machine's root
+password itself.
 
 In order to generate a keytab for a host, the host must have a principal
 in the Kerberos database.  The procedure for adding hosts to the
@@ -1267,22 +1355,11 @@ should be readable only by root.
 @node Upgrading Existing Kerberos V5 Installations, Bug Reports for Kerberos V5, Installing Kerberos V5, Top
 @chapter Upgrading Existing @value{PRODUCT} Installations
 
-@menu
-* Upgrading existing Master and Slave KDCs to the current release::  
-* Upgrading the application servers::  
-@end menu
-
-@node Upgrading existing Master and Slave KDCs to the current release, Upgrading the application servers, Upgrading Existing Kerberos V5 Installations, Upgrading Existing Kerberos V5 Installations
-@section Upgrading existing Master and Slave KDCs to the current release
-
 If you already have an existing Kerberos database that you created with
 a prior release of Kerberos 5, you can upgrade it to work with the
-current release with the @code{kdb5_util} command.  As of Kerberos 5
-version 1.0, this upgrade process is only necessary if you are using a
-Kerberos database created with Kerberos 5 beta 6 or earlier; newer
-installations can continue to be used without modification.  The process
-for upgrading a Master KDC involves the following steps (the lines
-beginning with => indicate a continuation of the previous line):
+current release with the @code{kdb5_util} command.  The process for
+upgrading a Master KDC involves the following steps (the lines beginning
+with => indicate a continuation of the previous line):
 
 @enumerate
 
@@ -1290,24 +1367,12 @@ beginning with => indicate a continuation of the previous line):
 server processes, if any.
 
 @item Dumping your existing Kerberos database to an ASCII file with 
-@code{kdb5_edit}'s ``dump'' command:
+@code{kdb5_util}'s ``dump'' command:
 
 @smallexample
 @group
-@b{shell%} kdb5_edit -r @value{PRIMARYREALM} -R 'dump_db' > 
+@b{shell%} kdb5_util -r @value{PRIMARYREALM} dump
 @result{} @value{ROOTDIR}/var/krb5kdc/old-kdb-dump
-@b{shell%}
-@end group
-@end smallexample
-
-@item If you were using OpenV*Secure or AXXiON*Authenticate, dumping your
-policy database to an ASCII file with the @code{ovsec_adm_export}
-command:
-
-@smallexample
-@group
-@b{shell%} ovsec_adm_export -r @value{PRIMARYREALM} > 
-@result{} @value{ROOTDIR}/var/krb5kdc/old-adb-dump
 @b{shell%}
 @end group
 @end smallexample
@@ -1328,50 +1393,11 @@ your current database, you must choose the same master password.
 @end group
 @end smallexample
 
-@item If you were using OpenV*Secure or AXXiON*Authenticate, merging
-your policy database with @code{kdb5_util}'s ``load'' command with the
-``-update'' option:
-
-@smallexample
-@group
-@b{shell%} kdb5_util load -update @value{ROOTDIR}/var/krb5kdc/old-adb-dump
-@b{shell%}
-@end group
-@end smallexample
-
 @end enumerate
 
-The process for upgrading a Slave KDC is simpler.  All you have to do is
-make sure that the stash file on the Slave KDC is correct, stop the old
-server processes on the Slave KDC, install the new server binaries, and
-re-start the server processes.  The Slave KDC database will be upgraded
-automatically when the next propagation is run.  Note that if you
-changed your master key when creating your new Master KDC database, you
-will have to run a Slave KDC propagation before you can restart the
-server processes on the Slave KDC itself; otherwise, the new stash file
-that you create on the slave will not match the old database that exists
-until the propagation occurs, and the server processes will not start.
-
-@node Upgrading the application servers,  , Upgrading existing Master and Slave KDCs to the current release, Upgrading Existing Kerberos V5 Installations
-@section Upgrading the application servers
-
-The default keytab name has changed from @code{/etc/v5srvtab} to
-@code{/etc/krb5.keytab}.  You should rename the old keytab files on all
-of your application servers when you update their server binaries.
-Alternatively, you may add a relation to the library configuration file
-to override the new name, for example:
-
-@smallexample
-@group
-[libdefaults]
-    default_keytab_name = /etc/v5srvtab
-@end group
-@end smallexample
-
-The keytab name defaulted to /etc/v5srvtab in prior releases of Kerberos
-V5.  It was called a @dfn{srvtab} in Kerberos V4.  The @code{v5srvtab}
-file has been renamed to @code{krb5.keytab} to reflect the change in
-terminology.
+To update a Slave KDC, you must stop the old server processes on the
+Slave KDC, install the new server binaries, reload the most recent slave
+dump file, and re-start the server processes.
 
 @node Bug Reports for Kerberos V5, Files, Upgrading Existing Kerberos V5 Installations, Top
 @chapter Bug Reports for @value{PRODUCT}
@@ -1471,10 +1497,12 @@ To add Kerberos V4 support, change the @code{supported_enctypes} line to:
 @node Encryption Types and Salt Types,  , kdc.conf, kdc.conf
 @appendixsubsec Encryption Types and Salt Types
 
-Currently, @value{PRODUCT} supports only DES encryption.  The encoding
-type is @code{des-cbc-crc}.  The @dfn{salt} is additional information
-encoded within the key that tells what kind of key it is.  The only
-salts that you will be likely to encounter are:
+Currently, @value{PRODUCT} supports only DES and triple-DES encryption;
+however, triple-DES is currently supported only for service keys, not
+for user keys or session keys.  The encoding types include
+@code{des-cbc-crc} and @code{des3-cbc-sha1}.  The @dfn{salt} is
+additional information encoded within the key that tells what kind of
+key it is.  The only salts that you will be likely to encounter are:
 
 @itemize @bullet
 @item @dfn{normal}, which @value{COMPANY} recommends using for all of

@@ -16,7 +16,10 @@
  * this permission notice appear in supporting documentation, and that
  * the name of M.I.T. not be used in advertising or publicity pertaining
  * to distribution of the software without specific, written prior
- * permission.  M.I.T. makes no representations about the suitability of
+ * permission.  Furthermore if you modify this software you must label
+ * your software as modified software and not distribute it in such a
+ * fashion that it might be confused with the original M.I.T. software.
+ * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
  *
@@ -313,14 +316,13 @@ os_get_default_config_files(pfiles, secure)
    do not include user paths (from environment variables, etc.)
 */
 static krb5_error_code
-os_init_paths(ctx, secure)
+os_init_paths(ctx)
 	krb5_context ctx;
-	krb5_boolean secure;
 {
     krb5_error_code	retval = 0;
     profile_filespec_t *files = 0;
+    krb5_boolean secure = ctx->profile_secure;
 
-    ctx->profile_secure = secure;
 #ifdef KRB5_DNS_LOOKUP
     ctx->profile_in_memory = 0;
 #endif /* KRB5_DNS_LOOKUP */
@@ -328,7 +330,8 @@ os_init_paths(ctx, secure)
     retval = os_get_default_config_files(&files, secure);
 
     if (!retval) {
-        retval = profile_init(files, &ctx->profile);
+        retval = profile_init((const_profile_filespec_t *) files,
+			      &ctx->profile);
 #ifdef KRB5_DNS_LOOKUP
         /* if none of the filenames can be opened use an empty profile */
         if (retval == ENOENT) {
@@ -383,7 +386,7 @@ krb5_os_init_context(ctx)
 
 	krb5_cc_set_default_name(ctx, NULL);
 
-	retval = os_init_paths(ctx, FALSE);
+	retval = os_init_paths(ctx);
 
 	/*
 	 * If there's an error in the profile, return an error.  Just
@@ -393,7 +396,7 @@ krb5_os_init_context(ctx)
 	return retval;
 }
 
-krb5_error_code
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_get_profile (ctx, profile)
 	krb5_context ctx;
 	profile_t* profile;
@@ -404,7 +407,7 @@ krb5_get_profile (ctx, profile)
     retval = os_get_default_config_files(&files, ctx->profile_secure);
 
     if (!retval)
-        retval = profile_init(files, profile);
+        retval = profile_init((const_profile_filespec_t *) files, profile);
 
     if (files)
         free_filespecs(files);
@@ -465,6 +468,10 @@ krb5_error_code
 krb5_secure_config_files(ctx)
 	krb5_context ctx;
 {
+	/* Obsolete interface; always return an error.
+
+	   This function should be removed next time a major version
+	   number change happens.  */
 	krb5_error_code retval;
 	
 	if (ctx->profile) {
@@ -472,9 +479,12 @@ krb5_secure_config_files(ctx)
 		ctx->profile = 0;
 	}
 
-	retval = os_init_paths(ctx, TRUE);
+	ctx->profile_secure = TRUE;
+	retval = os_init_paths(ctx);
+	if (retval)
+		return retval;
 
-	return retval;
+	return KRB5_OBSOLETE_FN;
 }
 
 void

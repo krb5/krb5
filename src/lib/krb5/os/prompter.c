@@ -121,6 +121,10 @@ cleanup:
 }
 #else /* MSDOS */
 
+#if defined(_WIN32)
+
+#include <io.h>
+
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_prompter_posix(krb5_context context,
 		    void *data,
@@ -129,7 +133,99 @@ krb5_prompter_posix(krb5_context context,
 		    int num_prompts,
 		    krb5_prompt prompts[])
 {
-   return(EINVAL);
+    HANDLE		handle;
+    DWORD		old_mode, new_mode;
+    char		*ptr;
+    int			scratchchar;
+    krb5_error_code	errcode = 0;
+    int			i;
+
+    handle = GetStdHandle(STD_INPUT_HANDLE);
+    if (handle == INVALID_HANDLE_VALUE)
+	return ENOTTY;
+    if (!GetConsoleMode(handle, &old_mode))
+	return ENOTTY;
+
+    new_mode = old_mode;
+    new_mode |=  ( ENABLE_LINE_INPUT | ENABLE_PROCESSED_INPUT );
+    new_mode &= ~( ENABLE_ECHO_INPUT );
+
+    if (!SetConsoleMode(handle, new_mode))
+	return ENOTTY;
+
+    if (!SetConsoleMode(handle, old_mode))
+	return ENOTTY;
+
+    if (name) {
+	fputs(name, stdout);
+	fputs("\n", stdout);
+    }
+
+    if (banner) {
+       fputs(banner, stdout);
+       fputs("\n", stdout);
+    }
+
+    for (i = 0; i < num_prompts; i++) {
+	if (prompts[i].hidden) {
+	    if (!SetConsoleMode(handle, new_mode)) {
+		errcode = ENOTTY;
+		goto cleanup;
+	    }
+	}
+
+	fputs(prompts[i].prompt,stdout);
+	fputs(": ", stdout);
+	fflush(stdout);
+	memset(prompts[i].reply->data, 0, prompts[i].reply->length);
+
+	if (fgets(prompts[i].reply->data, prompts[i].reply->length, stdin)
+	    == NULL) {
+	    if (prompts[i].hidden)
+		putchar('\n');
+	    errcode = KRB5_LIBOS_CANTREADPWD;
+	    goto cleanup;
+	}
+	if (prompts[i].hidden)
+	    putchar('\n');
+	/* fgets always null-terminates the returned string */
+
+	/* replace newline with null */
+	if ((ptr = strchr(prompts[i].reply->data, '\n')))
+	    *ptr = '\0';
+	else /* flush rest of input line */
+	    do {
+		scratchchar = getchar();
+	    } while (scratchchar != EOF && scratchchar != '\n');
+    
+	prompts[i].reply->length = strlen(prompts[i].reply->data);
+
+	if (!SetConsoleMode(handle, old_mode)) {
+	    errcode = ENOTTY;
+	    goto cleanup;
+	}
+    }
+
+ cleanup:
+    if (errcode) {
+	for (i = 0; i < num_prompts; i++) {
+	    memset(prompts[i].reply->data, 0, prompts[i].reply->length);
+	}
+    }
+    return errcode;
 }
-#endif   /* !MSDOS */
-   
+
+#else /* !_WIN32 */
+
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_prompter_posix(krb5_context context,
+		    void *data,
+		    const char *name,
+		    const char *banner,
+		    int num_prompts,
+		    krb5_prompt prompts[])
+{
+    return(EINVAL);
+}
+#endif /* !_WIN32 */
+#endif /* !MSDOS */

@@ -2,7 +2,6 @@ thisconfigdir=.
 myfulldir=util/ss
 mydir=.
 BUILDTOP=$(REL)$(U)$(S)$(U)
-CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
 SED = sed
 
 INSTALLLIB=cp
@@ -26,8 +25,9 @@ install-unix:: install-libs
 
 # hard coded .. is so that ss/ss_err.h works
 # hard coded ../et is so com_err.h works
-# CFLAGS= -I${INCDIR} -I. -I.. -I../et -g
-LOCALINCLUDE= -I. -I$(srcdir)/ -I$(srcdir)/.. -I$(srcdir)/../et -I..
+# CFLAGS= -g
+# CPPFLAGS= -I${INCDIR} -I. -I.. -I../et
+LOCALINCLUDES= -I. -I$(srcdir)/ -I$(srcdir)/.. -I$(srcdir)/../et -I..
 
 # with ss_err.o first, ss_err.h should get rebuilt first too.  should not
 # be relying on this, though.
@@ -137,7 +137,7 @@ ct.tab.c ct.tab.h: ct.y
 # install_library_target(ss,$(OBJS),$(SRCS),)
 
 #mk_cmds: $(MKCMDSOBJS)
-#	$(CC) $(CFLAGS) -o $@ $(MKCMDSOBJS) $(LEXLIB) $(BSDLIB)
+#	$(CC) $(ALL_CFLAGS) -o $@ $(MKCMDSOBJS) $(LEXLIB) $(BSDLIB)
 #
 #mk_cmds.o:	ss_err.h
 #

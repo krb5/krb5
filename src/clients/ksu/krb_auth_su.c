@@ -125,8 +125,9 @@ krb5_boolean zero_password;
 	}	
 
 	if (auth_debug){ dump_principal(context, "local tgt principal name", tgtq.server ); } 	
-	retval = krb5_cc_retrieve_cred(context, cc, KRB5_TC_MATCH_SRV_NAMEONLY,
-					&tgtq, &tgt); 
+	retval = krb5_cc_retrieve_cred(context, cc,
+				       KRB5_TC_MATCH_SRV_NAMEONLY | KRB5_TC_SUPPORTED_KTYPES,
+				       &tgtq, &tgt); 
 
 	if (! retval) retval = krb5_check_exp(context, tgt.times);
 
@@ -260,8 +261,9 @@ krb5_error_code retval;
  		return (FALSE) ; 	
 	}
 
-	if ((retval = krb5_cc_retrieve_cred(context, cc, KRB5_TC_MATCH_SRV_NAMEONLY,
-					  &tgtq, &tgt))){ 
+	if ((retval = krb5_cc_retrieve_cred(context, cc,
+					    KRB5_TC_MATCH_SRV_NAMEONLY | KRB5_TC_SUPPORTED_KTYPES,
+					    &tgtq, &tgt))){ 
 		if (auth_debug)
 		   com_err(prog_name, retval,"While Retrieving credentials"); 
  		return (FALSE) ; 	
@@ -442,8 +444,13 @@ krb5_boolean krb5_get_tkt_via_passwd (context, ccache, client, server,
     } else
 	my_creds.times.renew_till = 0;
 
-
-	 (void) sprintf(prompt,"Kerberos password for %s: ", (char *) client_name);
+	 if (strlen (client_name) + 80 > sizeof (prompt)) {
+	     fprintf (stderr,
+		      "principal name %s too long for internal buffer space\n",
+		      client_name);
+	     return FALSE;
+	 }
+	 (void) sprintf(prompt,"Kerberos password for %s: ", client_name);
 
 	 pwsize = sizeof(password);
 
@@ -483,29 +490,26 @@ void dump_principal (context, str, p)
     krb5_context context;
     char *str;
     krb5_principal p;
-{    
-char * stname;
-krb5_error_code retval; 
+{
+    char * stname;
+    krb5_error_code retval; 
 
-		if ((retval = krb5_unparse_name(context, p, &stname))){
-			fprintf(stderr," %s while unparsing name \n",
-				error_message(retval));    	
-		}
-		fprintf(stderr, " %s: %s\n", str, stname );
+    if ((retval = krb5_unparse_name(context, p, &stname))) {
+	fprintf(stderr, " %s while unparsing name\n", error_message(retval));
+    }
+    fprintf(stderr, " %s: %s\n", str, stname);
 }
 
 void plain_dump_principal (context, p)
     krb5_context context;
     krb5_principal p;
 {    
-char * stname;
-krb5_error_code retval; 
+    char * stname;
+    krb5_error_code retval; 
 
-		if ((retval = krb5_unparse_name(context, p, &stname))){
-			fprintf(stderr," %s while unparsing name \n",
-				error_message(retval));    	
-		}
-		fprintf(stderr, "%s ",  stname );
+    if ((retval = krb5_unparse_name(context, p, &stname)))
+	fprintf(stderr, " %s while unparsing name\n", error_message(retval));
+    fprintf(stderr, "%s ", stname);
 }
 
 #if 0

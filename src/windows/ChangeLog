@@ -1,3 +1,28 @@
+1999-12-03  Danilo Almeida  <dalmeida@mit.edu>
+
+	* version.rc: Bump version up to 1.1.1.
+
+1999-09-15  Danilo Almeida  <dalmeida@mit.edu>
+
+	* README: Add documentation about configuration under windows and
+	krbcc32.dll.
+
+1999-09-09  Danilo Almeida  <dalmeida@mit.edu>
+
+	* README: Explicitly say that we support only Win32 and not Win16.
+
+1999-09-08  Danilo Almeida  <dalmeida@mit.edu>
+
+	* README: Update with install target information and more.
+	* mkbin.bat: Remove mkbin.bat as it is no longer used.
+
+1999-09-01  Danilo Almeida  <dalmeida@mit.edu>
+
+	* readme, README: readme renamed to README.
+
+	* version.rc: Boost version to 1.1.  Include 1998 & 1999 in copyright
+	years.
+
 1999-06-21  Danilo Almeida  <dalmeida@mit.edu>
 
 	* version.rc: Boost version to 1.0.8.
