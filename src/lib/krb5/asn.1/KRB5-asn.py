@@ -283,8 +283,8 @@ KRB-SAFE ::= [APPLICATION 6] SEQUENCE {
 	timestamp[3]			GeneralizedTime,
 	msec[4]				INTEGER,
 	s-address[5]			HostAddress,	-- sender's addr
-	r-address[5]			HostAddress,	-- recip's addr
-	checksum[6]			Checksum			
+	r-address[6]			HostAddress,	-- recip's addr
+	checksum[7]			Checksum			
 }
 
 KRB-PRIV ::= [APPLICATION 7] SEQUENCE {
@@ -298,8 +298,8 @@ EncKrbPrivPart ::= [APPLICATION 15] SEQUENCE {
 	user-data[0]			OCTET STRING,
 	timestamp[1]			GeneralizedTime,
 	msec[2]				INTEGER,
-	s-address[5]			HostAddress,	-- sender's addr
-	r-address[5]			HostAddress	-- recip's addr
+	s-address[3]			HostAddress,	-- sender's addr
+	r-address[4]			HostAddress	-- recip's addr
 }
 
 END
