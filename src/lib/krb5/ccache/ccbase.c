@@ -29,6 +29,8 @@
 
 #include "k5-int.h"
 
+#include "fcc.h"
+
 struct krb5_cc_typelist
  {
   krb5_cc_ops *ops;
@@ -36,9 +38,13 @@ struct krb5_cc_typelist
  };
 extern const krb5_cc_ops krb5_mcc_ops;
 
-static struct krb5_cc_typelist cc_entry = { &krb5_mcc_ops, NULL };
+static struct krb5_cc_typelist cc_mcc_entry = { &krb5_mcc_ops, NULL };
 
-static struct krb5_cc_typelist *cc_typehead = &cc_entry;
+static struct krb5_cc_typelist cc_fcc_entry = { &krb5_cc_file_ops,
+						&cc_mcc_entry };
+
+
+static struct krb5_cc_typelist *cc_typehead = &cc_fcc_entry;
 
 /*
  * Register a new credentials cache type

@@ -83,7 +83,7 @@
 #define KG_TOK_DEL_CTX		0x0102
 
 #define KG_IMPLFLAGS(x) (GSS_C_INTEG_FLAG | GSS_C_CONF_FLAG | \
-			 GSS_C_TRANS_FLAG | GSS_C_PROT_READY_FLAG | \
+			 GSS_C_TRANS_FLAG | \
 			 ((x) & (GSS_C_MUTUAL_FLAG | GSS_C_REPLAY_FLAG | \
 				 GSS_C_SEQUENCE_FLAG | GSS_C_DELEG_FLAG)))
 
@@ -201,8 +201,6 @@ extern void *kg_vdb;
 OM_uint32 kg_get_defcred 
 	(OM_uint32 *minor_status, 
 		   gss_cred_id_t *cred);
-
-OM_uint32 kg_release_defcred (OM_uint32 *minor_status);
 
 krb5_error_code kg_checksum_channel_bindings
          (krb5_context context, gss_channel_bindings_t cb,

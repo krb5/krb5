@@ -1,3 +1,91 @@
+2003-07-19  Ezra Peisach  <epeisach@mit.edu>
+
+	* acquire_cred.c (krb5_gss_register_acceptor_identity): Allocate
+	enough memory to include the null at the end of the keytab char *.
+
+2003-07-17  Tom Yu  <tlyu@mit.edu>
+
+	* gssapiP_krb5.h: Delete kg_release_defcred(); it's no longer
+	used.
+
+	* gssapi_krb5.c: Delete defcred; it's no longer cached.
+	(kg_get_defcred): Don't cache.
+	(kg_release_defcred): Delete; it's no longer used.
+
+	* init_sec_context.c (krb5_gss_init_sec_context): Break into more
+	manageable pieces.  Clean up a few error condition memory leaks
+	previously obscured by the sheer size of this function.
+	(setup_enc): New function; used to be part of
+	krb5_gss_init_sec_context() responsible for setting up enctypes,
+	keyblocks, related nastiness.
+	(get_requested_enctypes): New function; used to be part of
+	krb5_gss_init_sec_context() responsible for pruning the krb5
+	library's default enctype list to the limited set of enctypes
+	usable with GSSAPI.
+	(new_connection): New function; used to be part of
+	krb5_gss_init_sec_context() responsible for initial gss_ctx setup
+	and creating the AP-REQ.
+	(mutual_auth): New function; used to be part of
+	krb5_gss_init_sec_context() responsible for reading the AP-REP if
+	mutual auth was requested.
+
+	* inq_cred.c (krb5_gss_inquire_cred): Rearrange due to removal of
+	kg_release_defcred(), particularly to explicitly release the
+	defcred once it's obtained.
+
+	* rel_cred.c (krb5_gss_release_cred): Remove call to
+	kg_release_defcred(), and always succeed in releasing the null
+	credential.
+
+	* set_ccache.c (gss_krb5_ccache_name): Remove call to
+	kg_release_defcred().
+
+2003-07-14  Tom Yu  <tlyu@mit.edu>
+
+	* accept_sec_context.c (krb5_gss_accept_sec_context): Call
+	TREAD_STR with correct arguments.  Patch from Emily Ratliff.
+
+2003-07-10  Tom Yu  <tlyu@mit.edu>
+
+	* acquire_cred.c (acquire_init_cred): Close the ccache if
+	krb5_cc_set_flags() fails, as krb5int_cc_default succeeds even if
+	the file is not there, but krb5_cc_set_flags will fail in turning
+	off OPENCLOSE mode if the file can't be opened.  Thanks to Kent Wu.
+
+2003-06-13  Tom Yu  <tlyu@mit.edu>
+
+	* init_sec_context.c (make_ap_req_v1): Free checksum_data if
+	needed, to avoid leaking memory.  Found by Kent Wu.
+	(krb5_gss_init_sec_context): Free default_enctypes to avoid
+	leaking returned value from krb5_get_tgs_ktypes.
+
+	* k5unseal.c (kg_unseal_v1): Explicitly set token.value to NULL if
+	token.length == 0, to avoid spurious uninitialized memory
+	references when calling memcpy() with a zero length.
+
+2003-05-13  Tom Yu  <tlyu@mit.edu>
+
+	* gssapi_krb5.h: Remove check for GSS_RFC_COMPLIANT_OIDS.
+
+2003-05-09  Tom Yu  <tlyu@mit.edu>
+
+	* accept_sec_context.c (krb5_gss_accept_sec_context): Rename
+	remote_subkey -> recv_subkey.
+
+	* init_sec_context.c (krb5_gss_init_sec_context): Rename
+	local_subkey -> send_subkey.
+
+2003-03-14  Sam Hartman  <hartmans@mit.edu>
+
+	* accept_sec_context.c (krb5_gss_accept_sec_context): Set
+	prot_ready here
+
+	* init_sec_context.c (krb5_gss_init_sec_context):  Set prot_ready
+	after context established
+
+	* gssapiP_krb5.h (KG_IMPLFLAGS): Don't claim prot_ready until the
+	context is established  because we don't currently support it.  
+
 2003-03-06  Alexandra Ellwood  <lxs@mit.edu>
 
     * disp_status.c, gssapi_krb5.h, gssapiP_krb5.h: 
