@@ -112,8 +112,8 @@ OLDDECLARG(krb5_creds *, cred)
 	return retval;
 #undef cleanup
 #define cleanup() {\
-	bzero((char *)dec_rep->enc_part2->session.contents,\
-	      dec_rep->enc_part2->session.length);\
+	bzero((char *)dec_rep->enc_part2->session->contents,\
+	      dec_rep->enc_part2->session->length);\
 		  krb5_free_kdc_rep(dec_rep); }
 
     /* now it's decrypted and ready for prime time */
@@ -128,8 +128,8 @@ OLDDECLARG(krb5_creds *, cred)
 	cleanup();
 	return retval;
     }
-    bzero((char *)dec_rep->enc_part2->session.contents,
-	  dec_rep->enc_part2->session.length);
+    bzero((char *)dec_rep->enc_part2->session->contents,
+	  dec_rep->enc_part2->session->length);
 
 #undef cleanup
 #define cleanup() {\
