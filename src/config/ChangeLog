@@ -1,3 +1,9 @@
+2002-04-17  Danilo Almeida  <dalmeida@mit.edu>
+
+	* win-pre.in:  the proper #define is KRB5_DNS_LOOKUP_REALM
+	and not KRB5_DNS_LOOKUP_REALMS
+	(pullup from trunk - jaltman@columbia.edu)
+
 2002-04-05  Danilo Almeida  <dalmeida@mit.edu>
 
 	* win-pre.in: Define KRB5_PRIVATE=1.
