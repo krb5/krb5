@@ -513,9 +513,10 @@ the init doesn't succeed.
 %\Reason{Fails on empty-string principal.}
 %}
 
-\numtest{4}{
-\Reason{Fails on invalid principal name.}
-}
+% There is not invalid principal names
+%\numtest{4}{
+%\Reason{Fails on invalid principal name.}
+%}
 
 \numtest{5}{
 \Priority{High}
@@ -525,26 +526,31 @@ the init doesn't succeed.
 \numtest{6}{
 \Priority{High}
 \Reason{Fails when caller connected with CHANGEPW_SERVICE.}
+\Conditions{RPC}
 }
 
 \numtest{7}{
 \Priority{High}
 \Reason{Fails if caller has ``add'' access and not ``delete''.}
+\Conditions{RPC}
 }
 
 \numtest{8}{
 \Priority{High}
 \Reason{Fails if caller has ``modify'' access and not ``delete''.}
+\Conditions{RPC}
 }
 
 \numtest{9}{
 \Priority{High}
 \Reason{Fails if caller has ``get'' access and not ``delete''.}
+\Conditions{RPC}
 }
 
 \numtest{10}{
 \Priority{High}
 \Reason{Fails if caller has no access bits.}
+\Conditions{RPC}
 }
 
 \numtest{11}{
@@ -568,6 +574,7 @@ the init doesn't succeed.
 \numtest{2}{
 \Priority{High}
 \Reason{Fails if user connected with CHANGEPW_SERVICE.}
+\Conditions{RPC}
 }
 
 \numtest{3}{
@@ -607,30 +614,36 @@ the init doesn't succeed.
 \numtest{11}{
 \Priority{High}
 \Reason{Fails for user with no access bits.}
+\Conditions{RPC}
 }
 
 \numtest{12}{
 \Priority{High}
 \Reason{Fails for user with ``get'' access.}
+\Conditions{RPC}
 }
 
 \numtest{13}{
 \Priority{High}
 \Reason{Fails for user with ``add'' access.}
+\Conditions{RPC}
 }
 
 \numtest{14}{
 \Priority{High}
 \Reason{Fails for user with ``delete'' access.}
+\Conditions{RPC}
 }
 
 \numtest{15}{
 \Priority{High}
 \Reason{Succeeds for user with ``modify'' access.}
+\Conditions{RPC}
 }
 
 \numtest{16}{
 \Reason{Succeeds for user with ``modify'' and another access.}
+\Conditions{RPC}
 }
 
 \numtest{17}{
