@@ -8,7 +8,7 @@
 
 @set EDITION pre-BETA 5
 @set VERSION pre-BETA 5
-@set UPDATED March 6, 1995
+@set UPDATED March 8, 1995
 
 @ignore
 @iftex
@@ -281,7 +281,7 @@ Under Kerberos, the @samp{rlogind} daemon allows you to login to a
 remote machine if you can provide @samp{rlogind} a Kerberos ticket
 which proves your identity.  In addition to the ticket, you must also
 have possession of the corresponding ticket session key. The
-combination of a ticket a ticket session key is known as a credential.
+combination of a ticket and the ticket's session key is known as a credential.
 
 Typically, a client program automatically obtains credentials
 identifiying the person using the client program.  The credentials are
@@ -292,7 +292,7 @@ information.
 @node The Kerberos Database, Kerberos Realms, Kerberos Tickets, How Kerberos Works
 @section The Kerberos Database
 
-Kerberos will give you tickets only if you have an entry in the Kerberos
+Kerberos will give you credentials only if you have an entry in the Kerberos
 server's @dfn{Kerberos database}.  Your database entry includes your
 Kerberos @dfn{principal} (which is often just your username), and
 your Kerberos password.  Every Kerberos user must have an entry in this
@@ -372,8 +372,8 @@ keys that are used by services which run as root are often stored in
 the file @file{/etc/v5srvtab}.
 
 @b{WARNING:} This service key is the equivalent of the service's
-password, and must be kept secure, since data which is meant to be
-read only by the service is encrypted using this key.
+password, and must be kept secure.  Data which is meant to be read only
+by the service is encrypted using this key.
 
 @node The User-Kerberos Interaction,  , Network Services and the Master Database, How Kerberos Works
 @section The User--Kerberos Interaction
@@ -650,12 +650,13 @@ That is, you must specify either @samp{--with-ccopts=-O} and
 @samp{--with-ccopts=-g} to configure.  If you don't specify either, the
 compile will never complete.
 
-The optimizer isn't hung; it just takes an exponentially long time.  6
-out of the 48 algorithmic steps takes 3 seconds, 7 steps takes 9
-seconds, 8 steps takes 27 seconds, and so on.  Calculations estimate
-it will finish in approximately 3,469 billion years....
+The optimizer isn't hung; it just takes an exponentially long time.
+Compiling 6 out of the 48 algorithmic steps takes 3 seconds; compiling 7
+steps takes 9 seconds; compiling 8 steps takes 27 seconds, and so on.
+Calculations estimate it will finish in approximately 3,469 billion
+years....
 
-Using GCC version 2.5 instead of the native compiler will also fine,
+Using GCC version 2.5 instead of the native compiler will also work fine,
 both with or without optimization.
 
 @node Alpha OSF/1 V1.3, Alpha OSF/1 V2.0, Ultrix 4.2/3, OS Incompatibilities
