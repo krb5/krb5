@@ -1,3 +1,8 @@
+Fri Jun 23 18:15:07 1995  Tom Yu  (tlyu@dragons-lair)
+
+	* configure.in: fix Sam's typo so libkrb4.a gets symlinked
+		properly
+
 Fri Jun 23 12:29:39 1995  Sam Hartman  <hartmans@tardis.MIT.EDU>
 
 	* configure.in: Handle generation of rules to make static libs.

@@ -55,7 +55,7 @@ AppendRule([install::	libkrb4.[$](SHEXT)
 		[$](DESTDIR)[$](KRB5_SHLIBDIR)[$](S)libkrb4.[$](SHEXT)])
 ])dnl
 if test -n "$krb5_cv_staticlibs_enabled" ; then
-	LinkFileDir(../libkrb4.[$](STEXT), libkrb4.[$](STEXT), ./krb5)
+	LinkFileDir(../libkrb4.[$](STEXT), libkrb4.[$](STEXT), ./krb4)
         AppendRule([install:: 
 	[$](INSTALL_DATA) libkrb4.[$](STEXT) [$](DESTDIR)[$](KRB5_LIBDIR)/libkrb4.[$](STEXT)
 	[$](RANLIB) [$](DESTDIR)[$](KRB5_LIBDIR)/libkrb4.[$](STEXT)]) 
