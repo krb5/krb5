@@ -8,7 +8,7 @@ libgssapi_krb5.a: generic/DONE krb5/DONE
 	$(RANLIB) $@
 
 install:: libgssapi_krb5.a
-	$(INSTALL_DATA) libgssapi_krb5.a $(KRB5_LIBDIR)/libgssapi_krb5.a
+	$(INSTALL_DATA) libgssapi_krb5.a $(DESTDIR)$(KRB5_LIBDIR)/libgssapi_krb5.a
 	$(RANLIB) $(DESTDIR)$(KRB5_LIBDIR)/libgssapi_krb5.a
 
 clean::

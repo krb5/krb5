@@ -1,3 +1,7 @@
+Wed Oct 19 12:16:44 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* Makefile.in: make install obey $(DESTDIR) completely
+
 Mon Oct  3 22:48:54 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* Makefile.in: make install obey $(DESTDIR)
