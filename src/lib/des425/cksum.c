@@ -55,7 +55,7 @@
  * multiple of eight bytes.
  */
 
-void
+void KRB5_CALLCONV
 des_cbc_cksum(in,out,length,key,iv)
     const krb5_octet  *in;		/* >= length bytes of inputtext */
     krb5_octet  *out;			/* >= length bytes of outputtext */

@@ -1,3 +1,8 @@
+2001-04-12  Danilo Almeida  <dalmeida@mit.edu>
+
+	* cksum.c (des_cbc_cksum): Gee, a consistent calling convntion.
+	What a concept!
+
 2001-04-10  Ken Raeburn  <raeburn@mit.edu>
 
 	* cksum.c (des_cbc_cksum): Arguments IN, KEY, and IV now const.
