@@ -69,18 +69,20 @@ OLDDECLARG(krb5_keytab_entry *, entry)
 	    break;
 	}
 	krb5_kt_free_entry(cur_entry);
+	krb5_xfree(cur_entry);
     }
     if (kerror && kerror != KRB5_KT_END) {
 	(void) krb5_ktfileint_close(id);
 	return kerror;
     }
-    if (!(kerror = krb5_ktfileint_close(id))) {
-	if (cur_entry) {
-	    *entry = *cur_entry;
-	    krb5_xfree(cur_entry);
-	} else
-	    kerror = KRB5_KT_NOTFOUND;
-    } else
+    if ((kerror = krb5_ktfileint_close(id)) != 0) {
 	krb5_kt_free_entry(cur_entry);
-    return kerror;
+	krb5_xfree(cur_entry);
+	return kerror;
+    }
+    if (!cur_entry)
+	return KRB5_KT_NOTFOUND;
+    *entry = *cur_entry;
+    krb5_xfree(cur_entry);
+    return 0;
 }
