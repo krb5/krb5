@@ -574,6 +574,9 @@
 #ifndef STDCTopIncludes
 #define STDCTopIncludes /**/  
 #endif
+#ifndef MakeDependFlags
+#define MakeDependFlags /**/  
+#endif
 
             SHELL = BourneShell
 
@@ -660,6 +663,7 @@ STDC_TOP_INCLUDES = STDCTopIncludes
            LDLIBS = $(SYS_LIBRARIES) $(EXTRA_LIBRARIES)
         LDOPTIONS = $(CDEBUGFLAGS) $(CCOPTIONS) $(LDLOCATIONS)
    LDCOMBINEFLAGS = LdCombineFlags
+          MDFLAGS = MakeDependFlags
 
         MACROFILE = MacroFile
            RM_CMD = $(RM) FilesToClean

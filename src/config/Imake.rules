@@ -549,7 +549,7 @@ $(DEPEND):								@@\
 DependDependency()							@@\
 									@@\
 depend::								@@\
-	$(DEPEND) -s "# DO NOT DELETE" -- $(ALLDEFINES) -- $(SRCS)
+	$(DEPEND) -s "# DO NOT DELETE" -- $(ALLDEFINES) $(MDFLAGS) -- $(SRCS)
 #endif /* DependTarget */
 
 
