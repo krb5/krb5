@@ -454,39 +454,3 @@ krb5_gss_acquire_cred(minor_status, desired_name, time_req,
 
    return(GSS_S_COMPLETE);
 }
-
-/* V2 interface */
-OM_uint32
-krb5_gss_add_cred(minor_status, input_cred_handle,
-		  desired_name, desired_mech, cred_usage,
-		  initiator_time_req, acceptor_time_req,
-		  output_cred_handle, actual_mechs, 
-		  initiator_time_rec, acceptor_time_rec)
-    OM_uint32		*minor_status;
-    gss_cred_id_t	input_cred_handle;
-    gss_name_t		desired_name;
-    gss_OID		desired_mech;
-    gss_cred_usage_t	cred_usage;
-    OM_uint32		initiator_time_req;
-    OM_uint32		acceptor_time_req;
-    gss_cred_id_t	*output_cred_handle;
-    gss_OID_set		*actual_mechs;
-    OM_uint32		*initiator_time_rec;
-    OM_uint32		*acceptor_time_rec;
-{
-    /*
-     * This does not apply to our single-mechanism implementation.  Decide
-     * if the correct error is BAD_MECH or DUPLICATE_ELEMENT.
-     */
-
-    /* verify that the requested mechanism is the default, or
-       is krb5 */
-
-    if ((desired_mech != GSS_C_NULL_OID) &&
-	(g_OID_equal(desired_mech, gss_mech_krb5)))
-       return(GSS_S_BAD_MECH);
-
-    *minor_status = 0;
-    return(GSS_S_DUPLICATE_ELEMENT);
-}
-
