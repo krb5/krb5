@@ -85,6 +85,9 @@ krb5_error_code krb5_db_verify_master_key
 krb5_error_code	krb5_db_fetch_mkey
 	PROTOTYPE((krb5_principal, krb5_encrypt_block *, krb5_boolean,
 		   krb5_keyblock * ));
+krb5_error_code krb5_db_store_mkey PROTOTYPE((char *,
+					      krb5_principal,
+					      krb5_keyblock *));
 krb5_error_code krb5_kdb_encrypt_key
 	PROTOTYPE((krb5_encrypt_block *, krb5_keyblock *, krb5_keyblock *));
 krb5_error_code krb5_kdb_decrypt_key
