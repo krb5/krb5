@@ -1,3 +1,5 @@
+include "$(SRCROOT)/../Scripts/Kerberos5BuildSystem.jam" ;
+
 ErrorTableRegexp = "/^\\s*#define\\s+\\w+\(\\s+\\(-?\\d+L\\)\)|\(initialize_\\w+_error_table\\(\\)\)\\s*$/" ;
 ExtractErrorCodes = "perl -e 'while (<STDIN>) { if ($(ErrorTableRegexp)) { print; } }'" ;
 
@@ -9,6 +11,8 @@ IntermediateV4Includes = "$(IntermediateIncludes)/kerberosIV" ;
 IntermediateGSSIncludes = "$(IntermediateIncludes)/gssapi" ;
 IntermediateFrameworkHeaders = "$(Intermediates)/Kerberos" ;
 IntermediateBuild = "$(Intermediates)/build" ;
+
+MakeIncludeStamp = "$(IntermediateBuild)/makeInclude.stamp" ;
 
 AutoconfH = "$(IntermediateV5Includes)/autoconf.h" ;
 OsconfH = "$(IntermediateV5Includes)/osconf.h" ;
@@ -112,8 +116,13 @@ MakeFrameworkHeader "$(IntermediateFrameworkHeaders)/gssapi.h"         : "$(Inte
 MakeFrameworkHeader "$(IntermediateFrameworkHeaders)/gssapi_generic.h" : "$(IntermediateGSSIncludes)/gssapi_generic.h" ;
 MakeFrameworkHeader "$(IntermediateFrameworkHeaders)/gssapi_krb5.h"    : "$(IntermediateGSSIncludes)/gssapi_krb5.h" ;
 
+
+MakeInclude "$(MakeIncludeStamp)" ;
+DEPENDS "$(IntermediateBuild)/include/krb5/autoconf.h" "$(IntermediateBuild)/include/krb5/osconf.h" : "$(MakeIncludeStamp)" ;
+
 CopyHeader "$(AutoconfH)" : "$(IntermediateBuild)/include/krb5/autoconf.h" ;
 CopyHeader "$(OsconfH)"   : "$(IntermediateBuild)/include/krb5/osconf.h" ;
+
 
 DEPENDS all :	"$(IntermediateIncludes)/com_err.h"
                 "$(IntermediateFrameworkHeaders)/com_err.h"
