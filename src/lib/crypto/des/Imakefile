@@ -36,6 +36,8 @@ VERIFYOBJ = verify.o
 
 NormalLibraryTarget(des,$(OBJS))
 
+$(SRCS): fp.c ip.c key_perm.h odd.h p.c p_table.h s_table.h
+
 EXTRA_LIBRARIES = $(TOP)/error_tables/libkrberrs.a
 
 NormalProgramTarget(verify, $(VERIFYOBJ), libdes.a, libdes.a, -lcom_err)
