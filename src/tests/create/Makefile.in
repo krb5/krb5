@@ -5,12 +5,16 @@ ISODELIB=@ISODELIB@
 COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
 DBMLIB=
 KDBLIB=$(TOPLIBD)/libkdb5.a 
+DEPKDBLIB=$(TOPLIBD)/libkdb5.a 
 
 all:: kdb5_mkdums
 
 KLIB = $(KDBLIB) $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(ISODELIB) $(COMERRLIB) $(DBMLIB) 
+DEPKLIB = $(KDBLIB) $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(COMERRLIB) $(DBMLIB) 
 
-kdb5_mkdums: kdb5_mkdums.o
+DEPLIBS = $(DEPKDBLIB) $(DEPKLIB)
+
+kdb5_mkdums: kdb5_mkdums.o $(DEPLIBS)
 	$(CC) $(CFLAGS) -o kdb5_mkdums kdb5_mkdums.o $(KLIB) $(LIBS)
 
 kdb5_mkdums.o:	$(srcdir)/kdb5_mkdums.c

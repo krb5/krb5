@@ -1,3 +1,7 @@
+Thu Sep 29 23:01:58 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* Makefile.in: Relink executabes when libraries change
+
 Wed Sep 28 16:12:08 1994  Mark Eichin  (eichin@cygnus.com)
 
 	* ktest_equal.c: #include stdio.h to get NULL under sunos.

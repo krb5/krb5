@@ -1,16 +1,23 @@
 CC = cc
 CCFLAGS = -g -I../../include
-LIBS = -L../../lib -lkrb5 -lcom_err
+
+COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
+DBMLIB=
+
+KLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(COMERRLIB) $(DBMLIB)
+DEPKLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(COMERRLIB) $(DBMLIB)
 
 all: krb5_encode_test krb5_decode_test
 
 ENCOBJS = krb5_encode_test.o ktest.o ktest_equal.o utility.o asn1buf.o
-krb5_encode_test: $(ENCOBJS)
-	$(CC) $(CCFLAGS) -o krb5_encode_test $(ENCOBJS) $(LIBS)
+
+krb5_encode_test: $(ENCOBJS) $(DEPKLIB)
+	$(CC) $(CCFLAGS) -o krb5_encode_test $(ENCOBJS) $(KLIB)
 
 DECOBJS = krb5_decode_test.o ktest.o ktest_equal.o
-krb5_decode_test: $(DECOBJS)
-	$(CC) $(CCFLAGS) -o krb5_decode_test $(DECOBJS) $(LIBS)
+
+krb5_decode_test: $(DECOBJS) $(DEPKLIB)
+	$(CC) $(CCFLAGS) -o krb5_decode_test $(DECOBJS) $(KLIB)
 
 clean:
 	rm -f *~ *.o krb5_encode_test krb5_decode_test

@@ -1,3 +1,8 @@
+Thu Sep 29 22:59:09 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+ 	* Makefile.in: Relink executable when libraries change
+
+
 Thu Sep 15 17:38:51 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* kdc_hammer.c (get_server_key): index() -> strchr()
