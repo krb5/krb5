@@ -1,3 +1,10 @@
+Tue Jul 23 16:44:50 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* Makefile.in (SRCS): Renamed release_buffer.c to rel_buffer.c,
+		and release_oid_set.c to rel_oid_set.c.  Marc broke the
+		DOS 8.3 renaming which Gilmore had done to conform with
+		DOS's filesystem constraints.
+
 Fri Jun 21 18:02:51 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* gssapi.h: Fix Win-16 build #defines for KRB5_CALLCONV and

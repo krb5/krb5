@@ -43,8 +43,8 @@ SRCS = \
 	$(srcdir)/disp_major_status.c \
 	$(srcdir)/gssapi_generic.c \
 	$(srcdir)/oid_ops.c \
-	$(srcdir)/release_buffer.c \
-	$(srcdir)/release_oid_set.c \
+	$(srcdir)/rel_buffer.c \
+	$(srcdir)/rel_oid_set.c \
 	$(srcdir)/util_buffer.c \
 	$(srcdir)/util_canonhost.c \
 	$(srcdir)/util_dup.c \
@@ -60,8 +60,8 @@ OBJS = \
 	disp_major_status.$(OBJEXT) \
 	gssapi_generic.$(OBJEXT) \
 	oid_ops.$(OBJEXT) \
-	release_buffer.$(OBJEXT) \
-	release_oid_set.$(OBJEXT) \
+	rel_buffer.$(OBJEXT) \
+	rel_oid_set.$(OBJEXT) \
 	util_buffer.$(OBJEXT) \
 	util_canonhost.$(OBJEXT) \
 	util_dup.$(OBJEXT) \
