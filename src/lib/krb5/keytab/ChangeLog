@@ -1,4 +1,8 @@
 
+Wed Dec 13 07:09:30 1995  Chris Provenzano (proven@mit.edu)
+
+        * configure.in : Remove subdirectory db. 
+
 Tue Dec 12 01:26:30 1995  Chris Provenzano (proven@mit.edu)
 
 	* configure.in : Added subdirectory db.
