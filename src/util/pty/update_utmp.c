@@ -275,6 +275,9 @@
  * contains the expected fields.  The files utmp and wtmp seem to
  * exist, but not utmpx or wtmpx.
  *
+ * When writing a logout entry, the presence of a non-empty username
+ * confuses last.
+ *
  * AIX 4.3.x:
  *
  * The ut_exit field seems to exist in utmp, but not utmpx. The files
@@ -300,6 +303,9 @@
  * available, we write the utmpx or utmp structure out to disk
  * ourselves, though sometimes conversion from utmpx to utmp format is
  * needed.
+ *
+ * We assume that at logout the system is ok with with having an empty
+ * username both in utmp and wtmp.
  */
 
 #include <com_err.h>
@@ -606,13 +612,6 @@ pty_update_utmp(int process_type, int pid, const char *username,
 	 * HP-UX.
 	 */
 	strncpy(utx2.ut_line, utxtmp->ut_line, sizeof(utx2.ut_line));
-    }
-
-    if (username[0] == '\0'
-	&& (flags & PTY_UTMP_USERNAME_VALID) && utxtmp != NULL) {
-	/* Use the ut_user from the entry we looked up, if any. */
-	/* XXX Is this really necessary? */
-	strncpy(utx2.ut_user, utxtmp->ut_user, sizeof(utx2.ut_user));
     }
 
     PTY_SETUTXENT();

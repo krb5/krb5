@@ -46,7 +46,7 @@ pty_logwtmp(const char *tty, const char *user, const char *host)
     return 0;
 #else
 
-    loggingin = (user[0] == '\0');
+    loggingin = (user[0] != '\0');
 
     memset(&utx, 0, sizeof(utx));
     strncpy(utx.ut_line, tty, sizeof(utx.ut_line));
@@ -55,6 +55,11 @@ pty_logwtmp(const char *tty, const char *user, const char *host)
 	|| (!defined(HAVE_SETUTXENT) && defined(HAVE_STRUCT_UTMP_UT_HOST))
     strncpy(utx.ut_host, host, sizeof(utx.ut_host));
     utx.ut_host[sizeof(utx.ut_host) - 1] = '\0';
+#endif
+#ifdef HAVE_SETUTXENT
+    gettimeofday(&utx.ut_tv, NULL);
+#else
+    (void)time(&utx.ut_time);
 #endif
     utx.ut_pid = (loggingin ? getpid() : 0);
     utx.ut_type = (loggingin ? USER_PROCESS : DEAD_PROCESS);
@@ -101,44 +106,3 @@ pty_logwtmp(const char *tty, const char *user, const char *host)
 }
 
 #endif /* !(defined(HAVE_SETUTXENT) || defined(HAVE_SETUTENT)) */
-
-#if 0
-long pty_logwtmp (tty, user, host )
-    char *user, *tty, *host;
-{
-#ifdef HAVE_LOGWTMP
-    logwtmp(tty,user,host);
-    return 0;
-#else
-        struct utmp ut;
-    char *tmpx;
-    char utmp_id[5];
-
-    /* Will be empty for logout */
-    int loggingin = user[0];
-
-
-#ifndef NO_UT_HOST
-    strncpy(ut.ut_host, host, sizeof(ut.ut_host));
-#endif
-
-    strncpy(ut.ut_line, tty, sizeof(ut.ut_line));
-    ut.ut_time = time(0);
-    
-#ifndef NO_UT_PID
-    ut.ut_pid = getpid();
-    strncpy(ut.ut_user, user, sizeof(ut.ut_user));
-
-    tmpx = tty + strlen(tty) - 2;
-    sprintf(utmp_id, "kr%s", tmpx);
-    strncpy(ut.ut_id, utmp_id, sizeof(ut.ut_id));
-    ut.ut_pid = (loggingin ? getpid() : 0);
-    ut.ut_type = (loggingin ? USER_PROCESS : DEAD_PROCESS);
-#else
-    strncpy(ut.ut_name, user, sizeof(ut.ut_name));
-#endif
-
-    return ptyint_update_wtmp(&ut, host, user);
-#endif /*HAVE_LOGWTMP*/
-}
-#endif

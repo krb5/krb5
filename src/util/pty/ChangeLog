@@ -1,5 +1,13 @@
 2001-05-08  Tom Yu  <tlyu@mit.edu>
 
+	* logwtmp.c: Delete code under "#if 0".  Fix reversed test for
+	loggingin.  Don't forget to set the ut_tv or ut_time for the
+	entry.
+
+	* update_utmp.c: Update rant about Tru64; remove fetching of
+	ut_user from old entry.  The existence of the old ut_user in the
+	logout entry in wtmp was confusing last.
+
 	* cleanup.c: Call update_utmp() with the correct pid to assist in
 	finding the old utmp entry.
 
