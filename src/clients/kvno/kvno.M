@@ -40,16 +40,27 @@ prints out the key version numbers of each.
 specifies the enctype which will be requested for the session key of
 all the services named on the command line.  This is useful in certain
 backward compatibility situations.
+.TP
+.B \-4
+specifies that Kerberos version 4 tickets should be acquired and
+described.  This option is only available if Kerberos 4 support was
+enabled at compilation time.
 .SH ENVIRONMENT
 .B Kvno
 uses the following environment variable:
 .TP "\w'.SM KRB5CCNAME\ \ 'u"
 .SM KRB5CCNAME
 Location of the credentials (ticket) cache.
+.TP
+.SM KRBTKFILE
+Location of the v4 ticket file.
 .SH FILES
 .TP "\w'/tmp/krb5cc_[uid]\ \ 'u"
 /tmp/krb5cc_[uid]
 default location of the credentials cache ([uid] is the decimal UID of
 the user).
+.TP
+/tmp/tkt[uid]
+default location of the v4 ticket file.
 .SH SEE ALSO
 kinit(1), kdestroy(1), krb5(3)

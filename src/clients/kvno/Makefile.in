@@ -10,8 +10,8 @@ all-unix:: kvno
 all-windows:: $(OUTPRE)kvno.exe
 all-mac::
 
-kvno: kvno.o $(KRB5_BASE_DEPLIBS)
-	$(CC_LINK) -o $@ kvno.o $(KRB5_BASE_LIBS)
+kvno: kvno.o $(KRB4COMPAT_DEPLIBS)
+	$(CC_LINK) -o $@ kvno.o $(KRB4COMPAT_LIBS)
 
 $(OUTPRE)kvno.exe: $(OUTPRE)kvno.obj $(BUILDTOP)\util\windows\$(OUTPRE)getopt.obj $(KLIB) $(CLIB)
 	link $(EXE_LINKOPTS) /out:$@ $**

@@ -1,3 +1,13 @@
+2002-07-26  Ken Raeburn  <raeburn@mit.edu>
+
+	* kvno.c (do_v5_kvno): New function, split out from main.
+	(do_v4_kvno): New function.
+	(prog, quiet): New global variables.
+	(main): Parse new option '-4' and call do_v5_kvno or do_v4_kvno.
+	(usage): List new option.
+	* kvno.M: Document v4 aspects.
+	* Makefile.in (kvno): Use krb4 compat libraries.
+
 2001-06-08  Ezra Peisach  <epeisach@mit.edu>
 
 	* kvno.c: Include unistd.h (if present) for getopt() prototype. 
