@@ -55,7 +55,7 @@ krb5-globals-library-export							= {krb5-globals-root-folder}Krb5Globals.exp
 krb5-globals-data-library-export					= {krb5-globals-root-folder}Krb5GlobalsData.exp
 profile-library-export								= {root-folder}util:profile:profile.exp
 
-gss-library-fragment-name							= "MIT Kerberos¥GSSLib"
+gss-library-fragment-name							= "GSSLibrary"
 krb5-library-fragment-name							= "MIT Kerberos¥Kerberos5Lib"
 krb5-globals-library-fragment-name					= "MIT Kerberos¥Kerberos5GlobalsLib"
 krb5-globals-data-library-fragment-name				= "MIT Kerberos¥Kerberos5GlobalsDataLib"
@@ -83,9 +83,9 @@ gss-library-current-version							= 1
 gss-library-definition-version						= 0
 gss-library-implementation-version					= 1
 
-krb5-library-current-version						= 1
-krb5-library-definition-version						= 0
-krb5-library-implementation-version					= 1
+krb5-library-current-version						= 2
+krb5-library-definition-version						= 2
+krb5-library-implementation-version					= 2
 
 krb5-globals-library-current-version				= 0
 krb5-globals-library-definition-version				= 0
@@ -457,16 +457,20 @@ object-suffix-68k-data					= .68k.o
 
 gss-library-libraries-ppc-debug = ¶
 	{standard-libraries-ppc-debug} ¶
-	{krb5-library-output-folder}{krb5-library-name}{library-platform-ppc}{library-kind-debug}
+	{krb5-library-output-folder}{krb5-library-name}{library-platform-ppc}{library-kind-debug} ¶
+	{profile-library-output-folder}{profile-library-name}{library-platform-ppc}{library-kind-debug}
 gss-library-libraries-68k-debug = ¶
 	{standard-libraries-68k-debug} ¶
-	{krb5-library-output-folder}{krb5-library-name}{library-platform-68k}{library-kind-debug}
+	{krb5-library-output-folder}{krb5-library-name}{library-platform-68k}{library-kind-debug} ¶
+	{profile-library-output-folder}{profile-library-name}{library-platform-68k}{library-kind-debug}
 gss-library-libraries-ppc-final = ¶
 	{standard-libraries-ppc-final} ¶
-	{krb5-library-output-folder}{krb5-library-name}{library-platform-ppc}{library-kind-final}
+	{krb5-library-output-folder}{krb5-library-name}{library-platform-ppc}{library-kind-final} ¶
+	{profile-library-output-folder}{profile-library-name}{library-platform-ppc}{library-kind-final}
 gss-library-libraries-68k-final = ¶
 	{standard-libraries-68k-final} ¶
-	{krb5-library-output-folder}{krb5-library-name}{library-platform-68k}{library-kind-final}
+	{krb5-library-output-folder}{krb5-library-name}{library-platform-68k}{library-kind-final} ¶
+	{profile-library-output-folder}{profile-library-name}{library-platform-68k}{library-kind-final}
 
 krb5-library-libraries-ppc-debug = ¶
 	{standard-libraries-ppc-debug} ¶
