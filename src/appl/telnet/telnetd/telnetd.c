@@ -97,7 +97,7 @@ int	registerd_host_only = 0;
 #ifdef HAVE_SYS_TTY_H
 # include "/usr/include/sys/tty.h"
 #endif
-#ifdef  HAS_PTYVAR
+#ifdef  HAVE_SYS_PTYVAR_H
 # include <sys/ptyvar.h>
 #endif
 
@@ -231,7 +231,7 @@ main(argc, argv)
 	highpty = getnpty();
 #endif /* CRAY */
 
-	while ((ch = getopt(argc, argv, valid_opts)) != EOF) {
+	while ((ch = getopt(argc, argv, valid_opts)) != -1) {
 		switch(ch) {
 
 #ifdef	AUTHENTICATION
@@ -404,7 +404,7 @@ main(argc, argv)
 			break;
 #endif	/* SecurID */
 		case 'S':
-#ifdef	HAS_GETTOS
+#ifdef	HAVE_GETTOSBYNAME
 			if ((tos = parsetos(optarg, "tcp")) < 0)
 				fprintf(stderr, "%s%s%s\n",
 					"telnetd: Bad TOS argument '", optarg,
@@ -585,7 +585,7 @@ main(argc, argv)
 
 #if	defined(IPPROTO_IP) && defined(IP_TOS)
 	{
-# if	defined(HAS_GETTOS)
+# if	defined(HAVE_GETTOSBYNAME)
 		struct tosent *tp;
 		if (tos < 0 && (tp = gettosbyname("telnet", "tcp")))
 			tos = tp->t_tos;
@@ -641,7 +641,7 @@ usage()
 #ifdef	SecurID
 	fprintf(stderr, " [-s]");
 #endif
-#ifdef	HAS_GETTOS
+#ifdef	HAVE_GETTOSBYNAME
 	fprintf(stderr, " [-S tos]");
 #endif
 #ifdef	AUTHENTICATION

@@ -82,7 +82,7 @@ extern struct sysv sysv;
 #endif	/* NEWINIT */
 
 #ifdef	STREAMSPTY
-#ifdef HAS_SAC
+#ifdef HAVE_SAC_H
 #include <sac.h> 
 #endif
 #include <sys/stropts.h>
@@ -91,7 +91,7 @@ extern struct sysv sysv;
 #define SCPYN(a, b)	(void) strncpy(a, b, sizeof(a))
 #define SCMPN(a, b)	strncmp(a, b, sizeof(a))
 
-#ifdef	STREAMS
+#ifdef	HAVE_SYS_STREAM_H
 #include <sys/stream.h>
 #endif
 #ifdef __hpux

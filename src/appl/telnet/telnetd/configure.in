@@ -21,9 +21,8 @@ if test -z "$ac_sysv_termio"; then
 fi
 fi
 AC_HEADER_TIME
-AC_CHECK_HEADERS(string.h arpa/nameser.h)
-AC_CHECK_HEADERS(sys/time.h sys/tty.h)
-AC_HAVE_FUNCS(vhangup)
+AC_CHECK_HEADERS(string.h arpa/nameser.h sys/time.h sys/tty.h sac.h sys/ptyvar.h sys/filio.h sys/stream.h)
+AC_CHECK_FUNCS(gettosbyname)
 dnl Make our operating system-specific security checks and definitions for
 dnl login.
 dnl
@@ -41,19 +40,6 @@ esac
 if test -z "$broken_streams" ; then
     AC_FUNC_CHECK(grantpt,AC_DEFINE(STREAMSPTY))
 fi
-AC_HEADER_CHECK(sac.h,AC_DEFINE(HAS_SAC))
-AC_HEADER_CHECK(sys/ptyvar.h,AC_DEFINE(HAS_PTYVAR))
-AC_FUNC_CHECK(gettosbyname,AC_DEFINE(HAS_GETTOS))
-AC_HEADER_CHECK(sys/filio.h,AC_DEFINE(FILIO_H))
-AC_HEADER_CHECK(sys/stream.h,AC_DEFINE(STREAMS))
-AC_HEADER_CHECK(utmpx.h,
-	AC_DEFINE(UTMPX)
-	AC_DEFINE(HAVE_UTMPX_H)
-	ac_utmp_h=1)
-if test -z "$ac_utmp_h" ; then
-AC_CHECK_HEADERS(utmp.h)
-fi
-AC_FUNC_CHECK(cgetent,AC_DEFINE(HAS_CGETENT))
 AC_MSG_CHECKING([if setpgrp takes two arguments])
 dnl
 AC_CACHE_VAL(krb5_cv_sys_setpgrp_two,

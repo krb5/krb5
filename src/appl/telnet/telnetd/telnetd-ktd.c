@@ -138,7 +138,7 @@ main(argc, argv)
 	highpty = getnpty();
 #endif /* CRAY */
 
-	while ((ch = getopt(argc, argv, "d:a:e:klhnr:u:UI:D:B:sS:a:X:")) != EOF) {
+	while ((ch = getopt(argc, argv, "d:a:e:klhnr:u:UI:D:B:sS:a:X:")) != -1) {
 		switch(ch) {
 
 #ifdef	AUTHENTICATION
@@ -284,7 +284,7 @@ main(argc, argv)
 			break;
 #endif	/* SecurID */
 		case 'S':
-#ifdef	HAS_GETTOS
+#ifdef	HAVE_GETTOSBYNAME
 			if ((tos = parsetos(optarg, "tcp")) < 0)
 				fprintf(stderr, "%s%s%s\n",
 					"telnetd: Bad TOS argument '", optarg,
@@ -433,7 +433,7 @@ main(argc, argv)
 
 #if	defined(IPPROTO_IP) && defined(IP_TOS)
 	{
-# if	defined(HAS_GETTOS)
+# if	defined(HAVE_GETTOSBYNAME)
 		struct tosent *tp;
 		if (tos < 0 && (tp = gettosbyname("telnet", "tcp")))
 			tos = tp->t_tos;
