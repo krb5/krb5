@@ -1,3 +1,7 @@
+1999-06-21  Danilo Almeida  <dalmeida@mit.edu>
+
+	* version.rc: Boost version to 1.0.8.
+
 Wed May 19 13:14:38 1999  Danilo Almeida  <dalmeida@mit.edu>
 
 	* Makefile.in: Remove unncessary LIBCMD definition from recursive
