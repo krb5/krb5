@@ -12,7 +12,7 @@
  */
 
 #if !defined(lint) && !defined(SABER)
-static char rcsid_kdb_edit_c[] =
+static char rcsid_kdb_verify_c[] =
 "$Id$";
 #endif	/* !lint & !SABER */
 
@@ -101,7 +101,6 @@ char *argv[];
 
     krb5_error_code retval;
     char *dbname = 0;
-    char defrealm[BUFSIZ];
     int keytypedone = 0;
     krb5_enctype etype = 0xffff;
     register krb5_cryptosystem_entry *csentry;
@@ -185,11 +184,10 @@ char *argv[];
 	dbname = DEFAULT_DBM_FILE;	/* XXX? */
 
     if (!cur_realm) {
-	if (retval = krb5_get_default_realm(sizeof(defrealm), defrealm)) {
+	if (retval = krb5_get_default_realm(&cur_realm)) {
 	    com_err(progname, retval, "while retrieving default realm name");
 	    exit(1);
 	}	    
-	cur_realm = defrealm;
     }
     if (retval = set_dbname_help(progname, dbname))
 	exit(retval);
