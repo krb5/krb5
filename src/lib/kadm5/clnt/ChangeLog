@@ -1,3 +1,7 @@
+Wed Jul 31 17:01:38 1996  Tom Yu  <tlyu@mit.edu>
+
+	* client_init.c: Revert prior change due to netdb.h shuffling.
+
 Tue Jul 30 19:47:53 1996  Tom Yu  <tlyu@mit.edu>
 
 	* client_init.c: Remove #include <netdb.h> because rpc/types.h

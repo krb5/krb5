@@ -9,6 +9,7 @@ static char *rcsid = "$Header$";
 #endif
 
 #include <stdio.h>
+#include <netdb.h>
 #include <memory.h>
 #include <string.h>
 #include <com_err.h>
