@@ -287,7 +287,10 @@ int stat(const char *path, struct stat *buf);
 
 int fstat(int fildes, struct stat *buf);
 
+#include <errno.h>
+#ifndef EFBIG
 #define EFBIG 1000
+#endif
 
 #define NOFCHMOD 1
 #define NOCHMOD 1
