@@ -1,3 +1,12 @@
+2004-11-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* fake-addrinfo.h: Move most of code content into
+	util/support/fake-addrinfo.c.
+	(krb5int_getaddrinfo, krb5int_freeaddrinfo, krb5int_getnameinfo,
+	krb5int_gai_strerror): Declare.
+	(getaddrinfo, freeaddrinfo, getnameinfo, gai_strerror): Define as
+	macros mapping to the krb5int_ function names.
+
 2004-10-29  Ken Raeburn  <raeburn@mit.edu>
 
 	* fake-addrinfo.h: Include errno.h earlier.

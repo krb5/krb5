@@ -1,3 +1,13 @@
+2004-11-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* fake-addrinfo.c: Import most of the contents of
+	include/fake-addrinfo.h, so we only compile it once.
+	(krb5int_getaddrinfo, krb5int_freeaddrinfo, krb5int_getnameinfo,
+	krb5int_gai_strerror): New functions, always defined and
+	exported.
+	* libkrb5support.exports: Export the new functions, not the old
+	_fac symbols.
+
 2004-10-25  Ken Raeburn  <raeburn@mit.edu>
 
 	* libkrb5support.exports: Export krb5int_fac, _lock_fac,
