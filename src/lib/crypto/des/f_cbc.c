@@ -40,7 +40,7 @@ int
 mit_des_cbc_encrypt(in, out, length, schedule, ivec, encrypt)
 	const mit_des_cblock FAR *in;
 	mit_des_cblock FAR *out;
-	long length;
+	unsigned long length;
 	mit_des_key_schedule schedule;
 	mit_des_cblock ivec;
 	int encrypt;

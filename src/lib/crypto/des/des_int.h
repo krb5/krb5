@@ -147,7 +147,7 @@ extern krb5_error_code mit_afs_string_to_key
 
 /* f_cksum.c */
 extern unsigned long mit_des_cbc_cksum
-    PROTOTYPE((krb5_octet FAR *, krb5_octet FAR *, long , mit_des_key_schedule ,
+    PROTOTYPE((krb5_octet FAR *, krb5_octet FAR *, unsigned long , mit_des_key_schedule ,
 	       krb5_octet FAR *));
 
 /* f_ecb.c */
@@ -156,7 +156,8 @@ extern int mit_des_ecb_encrypt
 
 /* f_cbc.c */
 extern int mit_des_cbc_encrypt
-    PROTOTYPE((const mit_des_cblock FAR *in, mit_des_cblock FAR *out, long length,
+    PROTOTYPE((const mit_des_cblock FAR *in, mit_des_cblock FAR *out, 
+	       unsigned long length,
 	       mit_des_key_schedule schedule, mit_des_cblock ivec,
 	       int encrypt));
     
@@ -241,7 +242,7 @@ extern int mit_des3_ecb_encrypt
 extern int mit_des3_cbc_encrypt
 	PROTOTYPE((const mit_des_cblock FAR *in,
 		   mit_des_cblock FAR *out,
-		   long length,
+		   unsigned long length,
 		   mit_des_key_schedule ks1,
 		   mit_des_key_schedule ks2,
 		   mit_des_key_schedule ks3,

@@ -32,7 +32,7 @@ unsigned long
 mit_des_cbc_cksum(in, out, length, schedule, ivec)
 	krb5_octet FAR *in;
 	krb5_octet FAR *out;
-	long length;
+	unsigned long length;
 	mit_des_key_schedule schedule;
 	krb5_octet FAR *ivec;
 {

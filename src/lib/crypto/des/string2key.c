@@ -75,13 +75,13 @@ krb5_keyblock FAR * keyblock;
 const krb5_data FAR * data;
 const krb5_data FAR * salt;
 {
-    register char *str, *copystr;
+    register krb5_octet *str, *copystr;
     register krb5_octet *key;
 
     register unsigned temp;
     register long i;        
     register int j;
-    register long length;
+    register unsigned long length;
     unsigned char *k_p;
     int forward;
     register char *p_char;
@@ -97,7 +97,7 @@ const krb5_data FAR * salt;
     key = keyblock->contents;
 
     if (salt) {
-      if (salt->length == -1) {
+      if (salt->length == SALT_TYPE_AFS_LENGTH || salt->length == (unsigned) -1) {
 	/* cheat and do AFS string2key instead */
 	return mit_afs_string_to_key (keyblock, data, salt);
       } else 
@@ -178,7 +178,7 @@ const krb5_data FAR * salt;
     memset((char *)key_sked, 0, sizeof(key_sked));
 
     /* clean & free the input string */
-    memset(copystr, 0, (size_t) length);
+    memset(copystr, 0, length);
     krb5_xfree(copystr);
 
     /* now fix up key parity again */

@@ -1,3 +1,22 @@
+2000-10-17  Ezra Peisach  <epeisach@mit.edu>
+
+	* des_int.h: Change prototypes for mit_des_cbc_encrypt(),
+	mit_des_cbc_cksum(), and mit_des3_cbc_encrypt() to take unsigned
+	long lengths.
+
+	* d3_cbc.c (mit_des3_cbc_encrypt): Length argument now takes an
+	unsigned long.
+
+	* f_cbc.c (mit_des_cbc_encrypt): Length argument now takes an
+	unsigned long.
+
+	* f_cksum.c (mit_des_cbc_cksum): Length argument now takes an
+	unsigned long.
+
+	* string2key.c: Unsigned/signed int cleanup. Test for a
+	salt-length of SALT_TYPE_AFS_LENGTH or -1 (for backwards
+	compatibilty) for use of mit_afs_string_to_key().
+
 2000-06-30  Ezra Peisach  <epeisach@mit.edu>
 
 	* afsstring2key.c: Initialization of S[8][64] - each 64 elements 

@@ -31,7 +31,7 @@ int
 mit_des3_cbc_encrypt(in, out, length, ks1, ks2, ks3, ivec, encrypt)
 	const mit_des_cblock FAR *in;
 	mit_des_cblock FAR *out;
-	long length;
+	unsigned long length;
 	mit_des_key_schedule ks1, ks2, ks3;
 	mit_des_cblock ivec;
 	int encrypt;

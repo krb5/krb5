@@ -50,7 +50,7 @@ mit_afs_string_to_key (keyblock, data, salt)
      set up. */
   
     char *realm = salt->data;
-    register int i;
+    register unsigned int i;
     register krb5_octet *key = keyblock->contents;
 
     if (data->length <= 8) {
@@ -76,7 +76,7 @@ mit_afs_string_to_key (keyblock, data, salt)
       mit_des_cblock ikey, tkey;
 
       static mit_des_key_schedule key_sked;
-      int pw_len = strlen(realm)+data->length;
+      unsigned int pw_len = strlen(realm)+data->length;
       char *password = malloc(pw_len+1);
       if (!password) return ENOMEM;
 
