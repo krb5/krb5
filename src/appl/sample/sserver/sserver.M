@@ -25,7 +25,9 @@
 sserver \- sample Kerberos version 5 server
 .SH SYNOPSIS
 .B sserver
-.I serverprincipal
+[
+.I server_port
+]
 .br
 .SH DESCRIPTION
 .I sserver
@@ -34,10 +36,10 @@ listens on the \fBsample\fR TCP port when a connection from a sample
 client is established.  There is a compile-time option to allow it to
 run without intervention of the internet daemon.
 .PP
-.I serverprincipal
-names the principal for which the tickets presented by
-.I sclient
-are expected to be valid; this name is used to fetch the appropriate
-service key from the server key store.
+.I server_port
+is an optional argument; if specified, 
+.I sserver
+will listen on the specified port and wait for a connection.  It is used for
+debugging when it is inconvenient to run the sample server out of inetd.
 .SH SEE ALSO
 sclient(1), services(5), inetd(8)
