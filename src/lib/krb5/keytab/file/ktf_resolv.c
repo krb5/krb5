@@ -33,7 +33,7 @@
 
 krb5_error_code
 krb5_ktfile_resolve(name, id)
-  char *name;
+  const char *name;
   krb5_keytab *id;
 {
     krb5_ktfile_data *data;

@@ -1,3 +1,10 @@
+Tue Oct  4 16:20:48 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+        * ktfile.h
+	* ktf_wreslv.c (krb5_ktfile_wresolve):
+	* ktf_resolv.c (krb5_ktf_resolv): Resolv's first argument is now a
+		const char *.
+
 Fri Sep 30 21:56:02 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* ktf_ops.c (krb5_ktf_ops): 
