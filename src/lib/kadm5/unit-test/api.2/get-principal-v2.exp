@@ -84,8 +84,8 @@ proc test100 {} {
 	fail "$test: key_data $key_data should be {}"
 	set failed 1
     }
-    if {$tl_data != {}} {
-	fail "$test: tl_data $tl_data should be {}"
+    if {$tl_data != "{}"} {
+	fail "$test: tl_data $tl_data should be empty"
 	set failed 1
     }
     if {$failed == 0} {
@@ -172,6 +172,12 @@ test "get-principal 103"
 proc test103 {} {
     global test prompt
 
+    if {! ((  [principal_exists "$test/a"]) ||
+	   [create_principal "$test/a"])} {
+	    error_and_restart "$test: couldn't create principal \"$test/a\""
+	    return
+    }
+
     if {! [cmd {
 	kadm5_init admin admin $KADM5_ADMIN_SERVICE null \
 		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
@@ -180,10 +186,20 @@ proc test103 {} {
 	error "$test: unexpected failure in init"
 	return
     }
-    if {! [cmd {
-	kadm5_get_principal $server_handle testuser p \
+
+    if { ! [cmd [format {
+	kadm5_modify_principal $server_handle \
+		"{%s/a} 0 0 0 0 {%s/a} 0 0 0 0 null 0 0 0 0 0 0 1 {} {{999 6 foobar}}" \
+		{KADM5_TL_DATA}
+    } $test $test]]} {
+	fail "$test: cannot set TL_DATA"
+	return
+    }
+
+    if {! [cmd [format {
+	kadm5_get_principal $server_handle {%s/a} p \
 		{KADM5_PRINCIPAL_NORMAL_MASK KADM5_TL_DATA}
-    }]} {
+    } $test]]} {
 	error "$test: unexpected failure in get_principal"
     }
     send "lindex \$p 17\n"
@@ -214,10 +230,10 @@ proc test103 {} {
     
     if {$num_tl == 0} {
 	fail "$test: num_tl $num_tl should not be 0"
-    } elseif {$tl_data == {}} {
-	fail "$test: tl_data $tl_data should not be {}"
-    } else {
+    } elseif {$tl_data == "{{999 6 foobar}}"} {
 	pass "$test"
+    } else {
+	fail "$test: tl_data $tl_data should be {{999 6 foobar}}"
     }
 
     if { ! [cmd {kadm5_destroy $server_handle}]} {

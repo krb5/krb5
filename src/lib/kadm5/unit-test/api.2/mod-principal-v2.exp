@@ -2,7 +2,7 @@ load_lib lib.t
 api_exit
 api_start
 
-test "modify-principal 100-104"
+test "modify-principal 100-105"
 proc test100_104 {} {
     global test
     global prompt
@@ -49,10 +49,17 @@ proc test100_104 {} {
 		{KADM5_KEY_DATA}
     } "BAD_MASK"
 
+    # test 105
+    one_line_fail_test [format {
+	kadm5_modify_principal $server_handle \
+            "{%s/a} 0 0 0 0 {%s/a} 0 0 0 0 null 0 0 0 0 0 0 1 {} {{1 1 x}}" \
+		{KADM5_TL_DATA}
+    } $test $test] "BAD_TL_TYPE"
+
     # test 100,104
     if { ! [cmd [format {
 	kadm5_modify_principal $server_handle \
-		"{%s/a} 0 0 0 0 {%s/a} 0 0 0 0 null 0 88 0 0 0 0 1 {} {{999 6 foobar}}" \
+		"{%s/a} 0 0 0 0 {%s/a} 0 0 0 0 null 0 88 0 0 0 0 1 {} {{990 6 foobar}}" \
 		{KADM5_MAX_RLIFE KADM5_TL_DATA}
     } $test $test]]} {
 	fail "$test: cannot set MAX_RLIFE or TL_DATA"
@@ -88,10 +95,10 @@ proc test100_104 {} {
 	    return
 	}
     }
-    if {($rlife == 88) && ([string match "*{999 6 foobar}*" $tl])} {
+    if {($rlife == 88) && ($tl == "{{990 6 foobar}}")} {
 	pass "$test"
     } else {
-	fail "$test: $rlife should be 88, $tl should contain {999 6 foobar}"
+	fail "$test: $rlife should be 88, $tl should be {{990 6 foobar}}"
     }
 
     if { ! [cmd {kadm5_destroy $server_handle}]} {

@@ -1,3 +1,8 @@
+Fri Nov  1 13:15:37 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* api.2/get-principal-v2.exp, api.2/mod-principal-v2.exp: update
+ 	for new tl_data semantics [krb5-admin/140]
+
 Thu Oct 31 08:42:18 1996  Ezra Peisach  <epeisach@mit.edu>
 
 	* Makefile.in (check): Only run tests is Perl, tcl, runtest.
