@@ -51,6 +51,7 @@
 #define L_APPL_REQ	 15	/* Application requests (using tgt) */
 #define L_KRB_PWARN      16	/* Protocol warning messages	    */
 
-char   *klog();
+char   *klog(int, char *, char *, char *, char *, char *, char *, char *, 
+	     char *, char *, char *, char *);
 
 #endif /* KLOG_DEFS */
