@@ -62,7 +62,7 @@ krb5_encrypt_block *eblock;
 	(void) (*eblock->crypto_entry->finish_key)(eblock);
 	return retval;
     }
-    if (!bcmp((char *)mkey->contents, (char *)tempkey.contents,
+    if (bcmp((char *)mkey->contents, (char *)tempkey.contents,
 	      mkey->length)) {
 	retval = KRB5_KDB_BADMASTERKEY;
 	(void) (*eblock->crypto_entry->finish_key)(eblock);
