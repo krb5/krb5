@@ -267,22 +267,29 @@ typedef struct _krb5_tl_data {
     krb5_octet          * tl_data_contents;     
 } krb5_tl_data;
 \end{verbatim}
+%
+The KADM5 API only allows elements whose tl_data_type is greater than
+or equal to 256.  Values less than 256 are reserved for internal use
+by the KADM5 or kdb system.  They are filtered out of the list
+returned by kadm5_get_principal, and generate an error if given to
+kadm5_modify_principal.
+
 The libkdb library defines the tagged data types
-KRB5_TL_LAST_PWD_CHANGE, KRB5_TL_MOD_PRINC, and KRB5_TL_KADM_DATA,
-which store the last password modification time, time and modifier of
-last principal modification, and administration system data.  All of
-these entries are expected by the administration system and parsed out
-into fields of the kadm5_principal_ent_rec structure; they are also
-left in the tl_data list.
+KRB5_TL_LAST_PWD_CHANGE, KRB5_TL_MOD_PRINC, and KRB5_TL_KADM_DATA, all
+with values less than 256, which store the last password modification
+time, time and modifier of last principal modification, and
+administration system data.  All of these entries are expected by the
+administration system and parsed out into fields of the
+kadm5_principal_ent_rec structure; as described above, they are not
+included in the tl_data list.
 
-The KADM5 API defines its own tagged data type, KRB5_TL_KADM5_E_DATA,
-which stores the contents of the e_data field of a krb5_db_entry.  The
-tagged data is only present if the database entry has extended data,
-and will only ever exist while KADM5 is implemented on top of the
-DB/DBM database mechansim.
-
-Any additional tagged data fields found in the database will also be
-provided, without interpretation.
+Tagged data elements with types greater than 256 are handled without
+interpretation by KADM5.  Note that an application that calls
+kadm5_modify_principal with the KADM5_TL_DATA mask bit set is
+responsible for providing the {\it complete} tl_data list, which it
+necessarily must obtain from kadm5_get_principal.  It is {\it never}
+possible for an application to construct a complete tl_data list from
+scratch.
 
 \item[key_data] An array of the principal's keys.  The keys contained
 in this array are encrypted in the Kerberos master key.  See section
@@ -754,6 +761,8 @@ remote KADM5 client
 local KADM5 client.
 \item[KADM5_AUTH_LIST] Operation requires ``list'' privilege
 \item[KADM5_AUTH_CHANGEPW] Operation requires ``change-password'' privilege
+\item[KADM5_BAD_TL_TYPE] Programmer error!  Illegal tagged data list
+element type
 \end{description}
 
 \section{Authentication and Authorization}
@@ -1295,6 +1304,8 @@ RETURN CODES:
 operation.
 \item[KADM5_UNK_POLICY] The POLICY bit is set but the new
 policy does not exist.
+\item[KADM5_BAD_TL_TYPE] The KADM5_TL_DATA bit is set in mask, and the
+given tl_data list contains an element whose type is less than 256.
 \end{description}
 
 \subsection{kadm5_rename_principal}
@@ -1623,10 +1634,11 @@ specified in the mask; memory for the structure is not allocated.
 Typically, a caller will specify the mask KADM5_PRINCIPAL_NORMAL_MASK,
 which includes all the fields {\it except} key_data and tl_data to
 improve time and memory efficiency.  A caller that wants key_data and
-tl_data can bitwise-OR those masks onto NORMAL_MASK.
+tl_data can bitwise-OR those masks onto NORMAL_MASK.  Note that even
+if KADM5_TL_DATA is specified, this function will not return internal
+tl_data elements whose type is less than 256.
 
 The caller must free the returned entry with kadm5_free_principal_ent.
-
 
 The function behaves differently for local and remote clients.  For
 remote clients, the KEY_DATA mask is illegal and results in a

@@ -1335,7 +1335,14 @@ no pw_expiration is specified.}
 
 \numtest{104}{
 \Version{KADM5_API_VERSION_2}
-\Reason{Accepts tl_data change.}
+\Reason{Accepts tl_data change when all types are greater than 256.}
+\Status{Implemented}
+}
+
+\numtest{105}{
+\Version{KADM5_API_VERSION_2}
+\Reason{Returns KADM5_BAD_TL_TYPE when given tl_data with a type less
+than 256.} 
 \Status{Implemented}
 }
 
@@ -2025,7 +2032,8 @@ data and the contents are all non-NULL.}
 
 \numtest{103}{
 \Version{KADM5_API_VERSION_2}
-\Reason{If KADM5_TL_DATA is specified, the tl_data fields contain data.}
+\Reason{If KADM5_TL_DATA is specified, the tl_data field contains the
+correct tl_data and no entries whose type is less than 256.}
 \Status{Implemented}
 }
 
