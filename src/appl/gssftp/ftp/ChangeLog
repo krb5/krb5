@@ -1,3 +1,9 @@
+2000-10-23  Tom Yu  <tlyu@mit.edu>
+
+	* secure.h: Change SESSION to refer to &cred.session instead, so
+	as to have the correct pointer type when passed to
+	{mk,rd}_{safe,priv}() functions.
+
 Tue Oct 10 05:01:21 2000  Ezra Peisach  <epeisach@mit.edu>
 
 	* ftp.c (do_auth): Remove debugging printf which I inadvertantly

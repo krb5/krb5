@@ -1,7 +1,7 @@
 #include <stdio.h>
 
 #define CRED_DECL	extern CREDENTIALS cred;
-#define SESSION		cred.session
+#define SESSION		&cred.session
 #define myaddr		data_addr
 #define hisaddr		hisdataaddr
 
