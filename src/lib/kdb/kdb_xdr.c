@@ -616,16 +616,16 @@ krb5_dbe_free_contents(context, entry)
 }
 
 /*
- * Given a particular keytype and optional salttype and kvno, find the
+ * Given a particular enctype and optional salttype and kvno, find the
  * most appropriate krb5_key_data entry of the database entry.
  *
  * If stype or kvno is negative, it is ignored.
  */
 krb5_error_code
-krb5_dbe_find_keytype(kcontext, dbentp, ktype, stype, kvno, kdatap)
+krb5_dbe_find_enctype(kcontext, dbentp, ktype, stype, kvno, kdatap)
     krb5_context	kcontext;
     krb5_db_entry	*dbentp;
-    krb5_keytype	ktype;
+    krb5_enctype	ktype;
     krb5_int32		stype;
     krb5_int32		kvno;
     krb5_key_data	**kdatap;

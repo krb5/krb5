@@ -35,7 +35,7 @@ char *krb5_mkey_pwd_prompt2 = KRB5_KDC_MKEY_2;
 /*
  * Get the KDC database master key from somewhere, filling it into *key.
  *
- * key->keytype should be set to the desired key type.
+ * key->enctype should be set to the desired key type.
  *
  * if fromkeyboard is TRUE, then the master key is read as a password
  * from the user's terminal.  In this case,
@@ -84,7 +84,7 @@ krb5_db_fetch_mkey(context, mname, eblock, fromkeyboard, twice, keyfile, salt, k
 		if (retval)
 			return retval;
 	}
-	retval = krb5_string_to_key(context, eblock, key->keytype, key, &pwd,
+	retval = krb5_string_to_key(context, eblock, key->enctype, key, &pwd,
 				    salt ? salt : &scratch);
 	if (!salt)
 		krb5_xfree(scratch.data);
@@ -93,7 +93,7 @@ krb5_db_fetch_mkey(context, mname, eblock, fromkeyboard, twice, keyfile, salt, k
 
     } else {
 	/* from somewhere else */
-        krb5_ui_2 keytype;
+        krb5_ui_2 enctype;
 	char defkeyfile[MAXPATHLEN+1];
 	krb5_data *realm = krb5_princ_realm(context, mname);
 	FILE *kf;
@@ -112,11 +112,11 @@ krb5_db_fetch_mkey(context, mname, eblock, fromkeyboard, twice, keyfile, salt, k
 	if (!(kf = fopen((keyfile) ? keyfile : defkeyfile, "r")))
 #endif
 	    return KRB5_KDB_CANTREAD_STORED;
-	if (fread((krb5_pointer) &keytype, 2, 1, kf) != 1) {
+	if (fread((krb5_pointer) &enctype, 2, 1, kf) != 1) {
 	    retval = KRB5_KDB_CANTREAD_STORED;
 	    goto errout;
 	}
-	if (keytype != key->keytype) {
+	if (enctype != key->enctype) {
 	    retval = KRB5_KDB_BADSTORED_MKEY;
 	    goto errout;
 	}

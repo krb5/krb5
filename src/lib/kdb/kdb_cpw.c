@@ -124,7 +124,7 @@ add_key_rnd(context, master_eblock, ks_tuple, ks_tuple_count, db_entry, kvno)
 	 */
 	found = 0;
 	for (j = 0; j < i; j++) {
-	    if (ks_tuple[j].ks_keytype == ks_tuple[i].ks_keytype) {
+	    if (ks_tuple[j].ks_enctype == ks_tuple[i].ks_enctype) {
 		found = 1;
 		break;
 	    }
@@ -137,13 +137,13 @@ add_key_rnd(context, master_eblock, ks_tuple, ks_tuple_count, db_entry, kvno)
 	for (j = 0; j < krbtgt_entry.n_key_data; j++) {
 	     if ((krbtgt_entry.key_data[j].key_data_kvno == max_kvno) &&
 		 (krbtgt_entry.key_data[j].key_data_type[0] == 
-		  ks_tuple[i].ks_keytype)) {
+		  ks_tuple[i].ks_enctype)) {
 		break;
 	    }
 	}
 
 	if (j == krbtgt_entry.n_key_data) {
-	    retval = KRB5_KDB_BAD_KEYTYPE;
+	    retval = KRB5_KDB_BAD_ENCTYPE;
 	    goto add_key_rnd_err;
 	}
 
@@ -155,7 +155,7 @@ add_key_rnd(context, master_eblock, ks_tuple, ks_tuple_count, db_entry, kvno)
 	}
 
 	/* Init key */
-	krb5_use_keytype(context, &krbtgt_eblock, ks_tuple[i].ks_keytype);
+	krb5_use_enctype(context, &krbtgt_eblock, ks_tuple[i].ks_enctype);
 	if (retval = krb5_process_key(context,&krbtgt_eblock,&krbtgt_keyblock)){
 	    goto add_key_rnd_err;
 	}
@@ -315,7 +315,7 @@ add_key_pwd(context, master_eblock, ks_tuple, ks_tuple_count, passwd,
 	 */
 	found = 0;
 	for (j = 0; j < i; j++) {
-	    if ((ks_tuple[j].ks_keytype == ks_tuple[i].ks_keytype) &&
+	    if ((ks_tuple[j].ks_enctype == ks_tuple[i].ks_enctype) &&
 		(ks_tuple[j].ks_salttype == ks_tuple[i].ks_salttype)) {
 		found = 1;
 		break;
@@ -323,7 +323,7 @@ add_key_pwd(context, master_eblock, ks_tuple, ks_tuple_count, passwd,
 	}
 	if (found)
 	    continue;
-	krb5_use_keytype(context, &key_eblock, ks_tuple[i].ks_keytype);
+	krb5_use_enctype(context, &key_eblock, ks_tuple[i].ks_enctype);
 	if (retval = krb5_dbe_create_key_data(context, db_entry)) 
 	    return(retval);
 
@@ -360,7 +360,7 @@ add_key_pwd(context, master_eblock, ks_tuple, ks_tuple_count, passwd,
     	pwd.data = passwd;
     	pwd.length = strlen(passwd);
 	if (retval = krb5_string_to_key(context, &key_eblock, 
-					ks_tuple[i].ks_keytype, &key,
+					ks_tuple[i].ks_enctype, &key,
 					&pwd, &key_salt.data))
 	    return(retval);
 

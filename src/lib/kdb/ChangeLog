@@ -1,3 +1,8 @@
+Wed Sep 06 14:20:57 1995   Chris Provenzano (proven@mit.edu)
+
+        * decrypt_key.c, encrypt_key.c, fetch_mkey.c, kdb_compat.c,
+	* kdb_cpw.c, kdb_xdr.c, store_mkey.c, t_kdb.c : 
+		s/keytype/enctype/g, s/KEYTYPE/ENCTYPE/g
 
 Tue Sep 05 22:10:34 1995   Chris Provenzano (proven@mit.edu)
 

@@ -531,13 +531,13 @@ do_testing(db, passes, verbose, timing, rcases, check, save_db, dontclean,
 	goto goodbye;
 
     op = "converting master key";
-    krb5_use_keytype(kcontext, &master_encblock, DEFAULT_KDC_KEYTYPE);
-    master_keyblock.keytype = DEFAULT_KDC_KEYTYPE;
+    krb5_use_enctype(kcontext, &master_encblock, DEFAULT_KDC_ENCTYPE);
+    master_keyblock.enctype = DEFAULT_KDC_ENCTYPE;
     passwd.length = strlen(master_passwd);
     passwd.data = master_passwd;
     if (kret = krb5_string_to_key(kcontext,
 				  &master_encblock,
-				  master_keyblock.keytype,
+				  master_keyblock.enctype,
 				  &master_keyblock,
 				  &passwd,
 				  &salt_data))
@@ -585,7 +585,7 @@ do_testing(db, passes, verbose, timing, rcases, check, save_db, dontclean,
 	goto goodbye;
 
 
-    stat_kb.keytype = DEFAULT_KDC_KEYTYPE;
+    stat_kb.enctype = DEFAULT_KDC_ENCTYPE;
     stat_kb.length = 8;
     stat_kb.contents = (krb5_octet *) "helpmeee";
 

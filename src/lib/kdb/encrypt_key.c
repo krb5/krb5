@@ -58,7 +58,7 @@ krb5_dbekd_encrypt_key_data(context, eblock, keyblock, keysalt, keyver,key_data)
      * The First element of the type/length/contents 
      * fields is the key type/length/contents
      */
-    key_data->key_data_type[0] = keyblock->keytype;
+    key_data->key_data_type[0] = keyblock->enctype;
     key_data->key_data_length[0] = krb5_encrypt_size(keyblock->length, 
 						     eblock->crypto_entry) + 2;
 

@@ -45,7 +45,7 @@ krb5_dbekd_decrypt_key_data(context, eblock, key_data, keyblock, keysalt)
     krb5_octet		* ptr;
 
     keyblock->magic = KV5M_KEYBLOCK;
-    keyblock->keytype = key_data->key_data_type[0];
+    keyblock->enctype = key_data->key_data_type[0];
 
     /* Decrypt key_data_contents */
     if ((keyblock->contents = (krb5_octet *)malloc(krb5_encrypt_size(

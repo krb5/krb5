@@ -26,7 +26,7 @@
 
 
 typedef struct _old_krb5_encrypted_keyblock {
-    krb5_keytype keytype;
+    krb5_enctype enctype;
     int length;
     krb5_octet *contents;
 } old_krb5_encrypted_keyblock;

@@ -53,7 +53,7 @@ krb5_db_store_mkey(context, keyfile, mname, key)
 {
     FILE *kf;
     krb5_error_code retval = 0;
-    krb5_ui_2 keytype;
+    krb5_ui_2 enctype;
     char defkeyfile[MAXPATHLEN+1];
     krb5_data *realm = krb5_princ_realm(context, mname);
 #if HAVE_UMASK
@@ -83,8 +83,8 @@ krb5_db_store_mkey(context, keyfile, mname, key)
 #endif
 	return errno;
     }
-    keytype = key->keytype;
-    if ((fwrite((krb5_pointer) &keytype,
+    enctype = key->enctype;
+    if ((fwrite((krb5_pointer) &enctype,
 		2, 1, kf) != 1) ||
 	(fwrite((krb5_pointer) &key->length,
 		sizeof(key->length), 1, kf) != 1) ||
