@@ -1,5 +1,6 @@
 2002-02-28 Alexandra Ellwood <lxs@mit.edu>
-    * setenv.c: Updated macros to removed warning
+    * setenv.c: Updated macros to removed warning about prototype
+    with no function definition
 
 2000-04-28  Ken Raeburn  <raeburn@mit.edu>
 	    Nalin Dahyabhai  <nalin@redhat.com>
