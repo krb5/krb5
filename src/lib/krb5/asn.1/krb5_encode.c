@@ -822,3 +822,20 @@ krb5_error_code encode_krb5_predicted_sam_response(const krb5_predicted_sam_resp
   sum += length;
   krb5_cleanup();
 }
+
+krb5_error_code encode_krb5_setpw_req(const krb5_principal target,
+				      char *password, krb5_data **code)
+{
+  /* Macros really want us to have a variable called rep which we do not need*/
+  const char *rep = "dummy string";
+
+  krb5_setup();
+
+  krb5_addfield(target,2,asn1_encode_realm);
+  krb5_addfield(target,1,asn1_encode_principal_name);
+  krb5_addlenfield(strlen(password), password,0,asn1_encode_octetstring);
+  krb5_makeseq();
+
+
+  krb5_cleanup();
+}

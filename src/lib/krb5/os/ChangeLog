@@ -1,3 +1,16 @@
+2003-04-24  Sam Hartman  <hartmans@mit.edu>
+
+	* changepw.c (krb5_change_set_password): return error from
+	auth_con_setaddrs not last socket errno if auth_con_setaddrs fails 
+
+2003-04-15  Sam Hartman  <hartmans@mit.edu>
+
+	* changepw.c (krb5_change_set_password): Patches from Paul Nelson
+	to implement Microsoft set password protocol  
+	(krb5_set_password_using_ccache): Use kadmin/changepw in target realm, not local realm and use a two-component principal
+	(krb5_change_set_password): Find the kpasswd server for the realm
+	of the target principal not the client 
+
 2003-04-13  Ken Raeburn  <raeburn@mit.edu>
 
 	* read_pwd.c (krb5_read_password): Always free temporary storage

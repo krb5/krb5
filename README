@@ -538,6 +538,9 @@ providing patches for numerous buffer overruns.
 Thanks to Christopher Thompson and Marcus Watts for discovering the
 ftpd security bug.
 
+Thanks to Paul Nelson of Thursby Software Systems for implementing the
+Microsoft set password protocol.
+
 Thanks to the members of the Kerberos V5 development team at MIT, both
 past and present: Danilo Almeida, Jay Berkenbilt, Richard Basch, Mitch
 Berger, John Carr, Don Davis, Alexandra Ellwood, Nancy Gilman, Matt

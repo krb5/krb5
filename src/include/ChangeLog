@@ -1,3 +1,14 @@
+2003-04-17  Sam Hartman  <hartmans@mit.edu>
+
+	* k5-int.h: Add encode_krb5_setpw_req
+
+2003-04-15  Sam Hartman  <hartmans@mit.edu>
+
+	* krb5.hin: Add krb5_set_password
+	Move krb5*_chpw internals to k5int.h
+
+	* k5-int.h: Add prototypes for set-password helper functions
+
 2003-04-24  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in ($(srcdir)/krb5/autoconf.stmp): Try running
