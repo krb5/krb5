@@ -5,6 +5,10 @@
  * $Source$
  * 
  * $Log$
+ * Revision 1.38  1996/07/30 23:25:37  tlyu
+ * 	* svc_auth_gssapi.c: #include <rpc/rpc.h> before <sys/stat.h> (to
+ * 		get sys/types.h.
+ *
  * Revision 1.37  1996/07/22 20:41:00  marc
  * this commit includes all the changes on the OV_9510_INTEGRATION and
  * OV_MERGE branches.  This includes, but is not limited to, the new openvision
@@ -166,8 +170,8 @@ static char *rcsid = "$Header$";
 
 #include <stdio.h>
 #include <string.h>
-#include <sys/stat.h>
 #include <rpc/rpc.h>
+#include <sys/stat.h>
 
 #include <gssapi/gssapi_generic.h>
 #include <rpc/auth_gssapi.h>
