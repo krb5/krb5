@@ -1,3 +1,10 @@
+Thu Apr 20 20:00:42 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* post.in: The .depend production rule now does even more
+		cannonicalization of the generated dependencies.
+
+	* post.in: cc should be $(CC)
+
 Tue Apr 18 09:36:00 1995  Theodore Y. Ts'o  <tytso@lurch.mit.edu>
 
 	* post.in (.depend, depend): Add production for creating the

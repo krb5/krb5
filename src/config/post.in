@@ -7,8 +7,12 @@ check::
 
 .depend: $(SRCS) $(SRCTOP)/util/depfix.sed
 	if test -n "$(SRCS)" ; then \
-		cc -M $(CFLAGS) $(SRCS) | sed -f $(SRCTOP)/util/depfix.sed | \
-			sed -e 's;$(srcdir)/;$$(srcdir)/;g' > .depend; \
+		$(CC) -M $(CFLAGS) $(SRCS) | \
+			sed -f $(SRCTOP)/util/depfix.sed | \
+			sed -e 's; $(SRCTOP)/; $$(SRCTOP)/;g' | \
+			sed -e 's; $(srcdir)/; $$(srcdir)/;g' | \
+			sed -e 's; $(BUILDTOP)/; $$(BUILDTOP)/;g' | \
+			sed -e 's; \./; ;g' > .depend; \
 	else :; fi
 
 depend:: .depend
