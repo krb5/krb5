@@ -86,7 +86,11 @@ SRCS= \
 	$(SRCDIR)kpwd2pwd.c	\
 	$(SRCDIR)kpwds2pwds.c	\
 	$(SRCDIR)pwd2kpwd.c	\
-	$(SRCDIR)pwds2kpwds.c
+	$(SRCDIR)pwds2kpwds.c	\
+	$(SRCDIR)cred2kcred.c	\
+	$(SRCDIR)crep2kcrep.c	\
+	$(SRCDIR)kcred2cred.c	\
+	$(SRCDIR)kcrep2crep.c
 
 OBJS= \
 	KRB5_tables.o	\
@@ -145,7 +149,11 @@ OBJS= \
 	kpwd2pwd.o	\
 	kpwds2pwds.o	\
 	pwd2kpwd.o	\
-	pwds2kpwds.o
+	pwds2kpwds.o	\
+	cred2kcred.o	\
+	crep2kcrep.o	\
+	kcred2cred.o	\
+	kcrep2crep.o
 
 all:: includes
 
