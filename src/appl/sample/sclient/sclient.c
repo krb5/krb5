@@ -151,18 +151,18 @@ char *argv[];
 
     /* compute checksum, using CRC-32 */
     if (!(send_cksum.contents = (krb5_octet *)
-	  malloc(krb5_cksumarray[CKSUMTYPE_CRC32]->checksum_length))) {
+	  malloc(krb5_checksum_size(CKSUMTYPE_CRC32)))) {
 	com_err(argv[0], ENOMEM, "while allocating checksum");
 	exit(1);
     }
     /* choose some random stuff to compute checksum from */
-    if (retval = (*krb5_cksumarray[CKSUMTYPE_CRC32]->
-		  sum_func)(remote_host,
-			    strlen(remote_host),
-			    0,
-			    0,		/* if length is 0, crc-32 doesn't
-					   use the seed */
-			    &send_cksum)) {
+    if (retval = krb5_calculate_checksum(CKSUMTYPE_CRC32,
+					 remote_host,
+					 strlen(remote_host),
+					 0,
+					 0, /* if length is 0, crc-32 doesn't
+					       use the seed */
+					 &send_cksum)) {
 	com_err(argv[0], retval, "while computing checksum");
 	exit(1);
     }
