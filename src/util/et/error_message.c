@@ -19,6 +19,7 @@
  * provided "as is" without express or implied warranty.
  */
 
+#include "autoconf.h"
 #include <stdio.h>
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
@@ -27,10 +28,6 @@
 #include "com_err.h"
 #include "error_table.h"
 #include "k5-platform.h"
-
-#if defined(_WIN32)
-#define HAVE_STRERROR
-#endif
 
 #if !defined(HAVE_STRERROR) && !defined(SYS_ERRLIST_DECLARED)
 extern char const * const sys_errlist[];
@@ -179,10 +176,10 @@ error_message(long code)
 	 * WinSock errors exist in the 10000 and 11000 ranges
 	 * but might not appear if WinSock is not initialized
 	 */
-	if (code < 12000) {
+	if (code >= WSABASEERR && code < WSABASEERR + 1100) {
 		table_num = 0;
 		offset = code;
-		divisor = 10000;
+		divisor = WSABASEERR;
 	}
 #endif
 #ifdef _WIN32	
@@ -200,7 +197,7 @@ error_message(long code)
 			 * WinSock errors exist in the 10000 and 11000 ranges
 			 * but might not appear if WinSock is not initialized
 			 */
-			if (code < 12000) {
+			if (code >= WSABASEERR && code < WSABASEERR + 1100) {
 			    table_num = 0;
 			    offset = code;
 			    divisor = 10000;
@@ -208,8 +205,22 @@ error_message(long code)
 
 			goto oops;
 		} else {
-			strncpy(buffer, msgbuf, sizeof(buffer));
-			buffer[sizeof(buffer)-1] = '\0';
+			char *buffer;
+			cp = k5_getspecific(K5_KEY_COM_ERR);
+			if (cp == NULL) {
+			    cp = malloc(ET_EBUFSIZ);
+			    if (cp == NULL) {
+			    win32_no_specific:
+				return "Unknown error code";
+			    }
+			    if (k5_setspecific(K5_KEY_COM_ERR, cp) != 0) {
+				free(cp);
+				goto win32_no_specific;
+			    }
+			}
+			buffer = cp;
+			strncpy(buffer, msgbuf, ET_EBUFSIZ);
+			buffer[ET_EBUFSIZ-1] = '\0';
 			cp = buffer + strlen(buffer) - 1;
 			if (*cp == '\n') *cp-- = '\0';
 			if (*cp == '\r') *cp-- = '\0';

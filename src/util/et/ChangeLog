@@ -1,3 +1,19 @@
+2004-06-18  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in ($(OUTPRE)test_et.exe): New target.
+	(check-windows): Build and run test_et.exe.
+
+	* error_message.c: Include autoconf.h.
+	(HAVE_STRERROR) [_WIN32]: Don't define.
+	(error_message) [_WIN32]: Check for range WSABASEERR+[0,1100)
+	instead of all values under 12000.  Use k5_getspecific and
+	k5_setspecific for local buffer.
+
+	* test_et.c (EXPORT_LIST): Define on Windows.
+	(main): Use add/remove_error_table, not the initialize_ routines.
+	(main) [EXPORT_LIST]: Don't test error_table_name, it's not in the
+	export list.
+
 2004-06-04  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (LIBBASE): Renamed from LIB.

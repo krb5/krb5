@@ -136,6 +136,10 @@ test_et: test_et.o test1.o test2.o $(COM_ERR_DEPLIB) $(SUPPORT_DEPLIB)
 t_com_err: t_com_err.o et1.o et2.o $(COM_ERR_DEPLIB) $(SUPPORT_DEPLIB)
 	$(CC_LINK) -o t_com_err t_com_err.o et1.o et2.o -lcom_err $(SUPPORT_LIB)
 
+$(OUTPRE)test_et.exe: $(OUTPRE)test_et.$(OBJEXT) $(OUTPRE)test1.$(OBJEXT) \
+	$(OUTPRE)test2.$(OBJEXT) $(CLIB)
+	link $(EXE_LINKOPTS) -out:$(OUTPRE)test_et$(EXEEXT) $**
+
 all-unix:: compile_et includes
 
 includes:: com_err.h
@@ -156,6 +160,11 @@ RUN_SETUP = @KRB5_RUN_ENV@
 check-unix:: t_com_err test_et
 	$(RUN_SETUP) ./test_et
 	$(RUN_SETUP) ./t_com_err
+
+check-windows:: $(OUTPRE)test_et$(EXEEXT)
+	set path=$(BUILDTOP)\lib\$(OUTPRE);%path%;
+	path
+	$(OUTPRE)test_et$(EXEEXT)
 
 # The real compile_et just isn't portable.  (But then again, anything using 
 # lex and yacc isn't portable by definition.  :-(  )
