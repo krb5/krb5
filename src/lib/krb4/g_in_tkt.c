@@ -496,7 +496,7 @@ krb_get_in_tkt_preauth(user, instance, realm, service, sinstance, life,
 					      arg, preauth_p, preauth_len,
 					      &creds, &laddr);
 	if (retval != KSUCCESS) break;
-	if (in_tkt(user, instance) != KSUCCESS) {
+	if (krb_in_tkt(user, instance, realm) != KSUCCESS) {
 	    retval = INTK_ERR;
 	    break;
 	}

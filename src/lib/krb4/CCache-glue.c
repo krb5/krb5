@@ -107,16 +107,6 @@ krb_in_tkt (
 }
 
 int KRB5_CALLCONV
-in_tkt(
-    char	*name,
-    char	*inst)
-{
-    char	realm[REALM_SZ];
-    krb_get_lrealm(realm, 1);
-    return krb_in_tkt(name, inst, realm);
-}
-
-int KRB5_CALLCONV
 krb_save_credentials(
     char	*service,
     char	*instance,

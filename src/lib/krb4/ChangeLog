@@ -1,5 +1,12 @@
 2003-02-11  Tom Yu  <tlyu@mit.edu>
 
+	* CCache-glue.c: Delete in_tkt().
+
+	* change_password.c: Fix incorrect filename in comment.
+
+	* g_in_tkt.c (krb_get_in_tkt_preauth): Call krb_in_tkt() rather
+	than in_tkt().
+
 	* CCache-glue.c (krb_in_tkt): Rename from in_tkt().
 	(in_tkt): Implement in terms of krb_in_tkt() to match existing
 	Unix and Windows API.  This shouldn't be a problem because it
