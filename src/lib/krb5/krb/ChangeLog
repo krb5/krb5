@@ -1,3 +1,10 @@
+2000-04-28  Nalin Dahyabhai  <nalin@redhat.com>
+
+	* chk_trans.c (krb5_check_transited_list): Don't overflow buffers
+	"prev" and "next".
+	* conv_princ.c (krb5_425_conv_principal): Don't overflow buffer
+	"buf".
+
 2000-04-18  Ken Raeburn  <raeburn@mit.edu>
 
 	* init_ctx.c (krb5_free_ktypes): New routine, to free values

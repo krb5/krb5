@@ -57,8 +57,6 @@ static char *dir;
 
 static void getdir()
 {
- if (!dirlen)
-  {
    if (!(dir = getenv("KRB5RCACHEDIR")))
 #if defined(_MSDOS) || defined(_WIN32)
      if (!(dir = getenv("TEMP")))
@@ -72,8 +70,7 @@ static void getdir()
        dir = "/tmp";
 #endif
 #endif
-   dirlen = strlen(dir) + 1;
-  }
+   dirlen = strlen(dir) + sizeof(PATH_SEPARATOR);
 }
 
 krb5_error_code krb5_rc_io_creat (context, d, fn)

@@ -160,7 +160,7 @@ static krb5_error_code get_from_os(char *name_buf, int name_size)
 	if (get_from_registry_indirect(name_buf, name_size) != 0)
 		return 0;
 
-        strncpy(name_buf, prefix, name_size);       
+        strncpy(name_buf, prefix, name_size - 1);
         name_buf[name_size - 1] = 0;
         size = name_size - strlen(prefix);
         if (size > 0)

@@ -1,3 +1,8 @@
+2000-04-28  Nalin Dahyabhai  <nalin@redhat.com>
+
+	* rc_io.c (getdir): Don't check dirlen again, the call sites
+	always do.  Fix dirlen calculation.
+
 1999-10-26  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,
