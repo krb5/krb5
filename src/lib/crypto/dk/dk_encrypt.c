@@ -313,9 +313,10 @@ krb5int_aes_dk_encrypt(enc, hash, key, usage, ivec, input, output)
     if ((ret = ((*(enc->encrypt))(&ke, ivec, &d1, &d2))))
 	goto cleanup;
 
-    if (ivec != NULL && ivec->length == blocksize)
-	cn = d2.data + d2.length - blocksize;
-    else
+    if (ivec != NULL && ivec->length == blocksize) {
+	int nblocks = (d2.length + blocksize - 1) / blocksize;
+	cn = d2.data + blocksize * (nblocks - 2);
+    } else
 	cn = NULL;
 
     /* hash the plaintext */
@@ -333,8 +334,27 @@ krb5int_aes_dk_encrypt(enc, hash, key, usage, ivec, input, output)
     output->length = enclen;
 
     /* update ivec */
-    if (cn != NULL)
+    if (cn != NULL) {
 	memcpy(ivec->data, cn, blocksize);
+#if 0
+	{
+	    int i;
+	    printf("\n%s: output:", __func__);
+	    for (i = 0; i < output->length; i++) {
+		if (i % 16 == 0)
+		    printf("\n%s: ", __func__);
+		printf(" %02x", i[(unsigned char *)output->data]);
+	    }
+	    printf("\n%s: outputIV:", __func__);
+	    for (i = 0; i < ivec->length; i++) {
+		if (i % 16 == 0)
+		    printf("\n%s: ", __func__);
+		printf(" %02x", i[(unsigned char *)ivec->data]);
+	    }
+	    printf("\n");  fflush(stdout);
+	}
+#endif
+    }
 
     /* ret is set correctly by the prior call */
 

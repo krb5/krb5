@@ -37,7 +37,8 @@ krb5_dk_decrypt_maybe_trunc_hmac(const struct krb5_enc_provider *enc,
 				 const krb5_data *ivec,
 				 const krb5_data *input,
 				 krb5_data *output,
-				 size_t hmacsize);
+				 size_t hmacsize,
+				 int ivec_mode);
 
 krb5_error_code
 krb5_dk_decrypt(enc, hash, key, usage, ivec, input, output)
@@ -50,7 +51,7 @@ krb5_dk_decrypt(enc, hash, key, usage, ivec, input, output)
      krb5_data *output;
 {
     return krb5_dk_decrypt_maybe_trunc_hmac(enc, hash, key, usage,
-					    ivec, input, output, 0);
+					    ivec, input, output, 0, 0);
 }
 
 krb5_error_code
@@ -64,12 +65,12 @@ krb5int_aes_dk_decrypt(enc, hash, key, usage, ivec, input, output)
      krb5_data *output;
 {
     return krb5_dk_decrypt_maybe_trunc_hmac(enc, hash, key, usage,
-					    ivec, input, output, 96 / 8);
+					    ivec, input, output, 96 / 8, 1);
 }
 
 static krb5_error_code
 krb5_dk_decrypt_maybe_trunc_hmac(enc, hash, key, usage, ivec, input, output,
-				 hmacsize)
+				 hmacsize, ivec_mode)
      const struct krb5_enc_provider *enc;
      const struct krb5_hash_provider *hash;
      const krb5_keyblock *key;
@@ -78,6 +79,7 @@ krb5_dk_decrypt_maybe_trunc_hmac(enc, hash, key, usage, ivec, input, output,
      const krb5_data *input;
      krb5_data *output;
      size_t hmacsize;
+     int ivec_mode;
 {
     krb5_error_code ret;
     size_t hashsize, blocksize, keybytes, keylength, enclen, plainlen;
@@ -154,9 +156,15 @@ krb5_dk_decrypt_maybe_trunc_hmac(enc, hash, key, usage, ivec, input, output,
     if ((ret = ((*(enc->decrypt))(&ke, ivec, &d1, &d2))) != 0)
 	goto cleanup;
 
-    if (ivec != NULL && ivec->length == blocksize)
-	cn = (unsigned char *) d1.data + d1.length - blocksize;
-    else
+    if (ivec != NULL && ivec->length == blocksize) {
+	if (ivec_mode == 0)
+	    cn = (unsigned char *) d1.data + d1.length - blocksize;
+	else if (ivec_mode == 1) {
+	    int nblocks = (d1.length + blocksize - 1) / blocksize;
+	    cn = d1.data + blocksize * (nblocks - 2);
+	} else
+	    abort();
+    } else
 	cn = NULL;
 
     /* verify the hash */
