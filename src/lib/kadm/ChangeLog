@@ -1,3 +1,8 @@
+Fri Oct  6 00:30:16 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* logger.c (klog_vsyslog): Make the logs less verbose, by omitting
+		the hostname, pid, etc. information.
+
 Thu Oct  5 19:46:40 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* alt_prof.c (krb5_read_realm_params): Remove the profile

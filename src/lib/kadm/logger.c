@@ -818,7 +818,11 @@ klog_vsyslog(priority, format, arglist)
     /*
      * Format a syslog-esque message of the format:
      *
-     * <date> <hostname> <id>[<pid>](<priority>): <message>
+     * (verbose form)
+     * 		<date> <hostname> <id>[<pid>](<priority>): <message>
+     *
+     * (short form)
+     *		<date> <message>
      */
     cp = outbuf;
     (void) time(&now);
@@ -841,9 +845,13 @@ klog_vsyslog(priority, format, arglist)
     strncpy(outbuf, ctime(&now) + 4, 15);
     cp += 15;
 #endif	/* HAVE_STRFTIME */
+#ifdef VERBOSE_LOGS
     sprintf(cp, " %s %s[%d](%s): ", 
 	    log_control.log_hostname, log_control.log_whoami, getpid(),
 	    severity2string(priority));
+#else
+    sprintf(cp, " ");
+#endif
     syslogp = &outbuf[strlen(outbuf)];
 
     /* Now format the actual message */
