@@ -134,10 +134,32 @@ krb5_sendto_kdc (context, message, realm, reply, use_master)
 		 * protocol exists to support a particular socket type
 		 * within a given protocol family.
 		 */
+#ifdef DEBUG
+		fprintf (stderr, "getting dgram socket in family %d...",
+			 addrs.addrs[host]->sa_family);
+#endif
 		socklist[host] = socket(addrs.addrs[host]->sa_family,
 					SOCK_DGRAM, 0);
-		if (socklist[host] == INVALID_SOCKET)
+		if (socklist[host] == INVALID_SOCKET) {
+#ifdef DEBUG
+		    perror ("socket");
+		    fprintf (stderr, "af was %d\n", addrs.addrs[host]->sa_family);
+#endif
 		    continue;		/* try other hosts */
+		}
+#ifdef DEBUG
+		{
+		    char addrbuf[NI_MAXHOST], portbuf[NI_MAXSERV];
+		    if (0 != getnameinfo (addrs.addrs[host],
+					  socklen (addrs.addrs[host]),
+					  addrbuf, sizeof (addrbuf),
+					  portbuf, sizeof (portbuf),
+					  NI_NUMERICHOST | NI_NUMERICSERV))
+			strcpy (addrbuf, "??"), strcpy (portbuf, "??");
+		    fprintf (stderr, " fd %d; connecting to %s port %s...",
+			     socklist[host], addrbuf, portbuf);
+		}
+#endif
 		/* have a socket to send/recv from */
 		/* On BSD systems, a connected UDP socket will get connection
 		   refused and net unreachable errors while an unconnected
@@ -145,13 +167,27 @@ krb5_sendto_kdc (context, message, realm, reply, use_master)
 		   sendto, recvfrom.  The connect here may return an error if
 		   the destination host is known to be unreachable. */
 		if (connect(socklist[host],
-			    addrs.addrs[host], socklen(addrs.addrs[host])) == SOCKET_ERROR)
-		  continue;
+			    addrs.addrs[host], socklen(addrs.addrs[host])) == SOCKET_ERROR) {
+#ifdef DEBUG
+		    perror ("connect");
+#endif
+		    continue;
+		}
 	    }
+#ifdef DEBUG
+	    fprintf (stderr, "sending...");
+#endif
 	    if (send(socklist[host],
 		       message->data, (int) message->length, 0) 
-		!= message->length)
-	      continue;
+		!= message->length) {
+#ifdef DEBUG
+		perror ("sendto");
+#endif
+		continue;
+	    }
+#ifdef DEBUG
+	    fprintf (stderr, "\n");
+#endif
 	retry:
 	    waitlen.tv_usec = 0;
 	    waitlen.tv_sec = timeout;

@@ -1,3 +1,11 @@
+2001-10-17  Ken Raeburn  <raeburn@mit.edu>
+
+	* locate_kdc.c (add_host_to_list): If sa_len field exists and is
+	zero, try to fill it in.  Another AIX 4.3.3 bug workaround.
+
+	* sendto_kdc.c (krb5_sendto_kdc) [DEBUG]: More fprintf calls for
+	tracing through.
+
 2001-10-10  Ezra Peisach  <epeisach@mit.edu>
 
 	* localaddr.c (krb5_os_localaddr_profile): Cast argument to

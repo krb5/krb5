@@ -279,9 +279,25 @@ add_host_to_list (struct addrlist *lp, const char *hostname,
     if (err)
 	return translate_ai_error (err);
     for (a = addrs; a; a = a->ai_next) {
-	/* AIX 4.3.3 is broken.  */
+	/* AIX 4.3.3 libc is broken.  */
 	if (a->ai_addr->sa_family == 0)
 	    a->ai_addr->sa_family = a->ai_family;
+#ifdef HAVE_SA_LEN
+	if (a->ai_addr->sa_len == 0)
+	    switch (a->ai_addr->sa_family) {
+	    case AF_INET:
+		a->ai_addr->sa_len = sizeof (struct sockaddr_in);
+		break;
+#ifdef KRB5_USE_INET6
+	    case AF_INET6:
+		a->ai_addr->sa_len = sizeof (struct sockaddr_in6);
+		break;
+#endif
+	    default:
+		/* oh well, we lose */
+		break;
+	    }
+#endif
 
 	set_port_num (a->ai_addr, port);
 	err = add_addrinfo_to_list (lp, a);
