@@ -63,7 +63,7 @@ krb5_fcc_initialize(context, id, princ)
 	 MAYBE_CLOSE(context, id, kret);
 	 return kret;
      }
-     krb5_fcc_store_principal(context, id, princ);
+     kret = krb5_fcc_store_principal(context, id, princ);
 
      MAYBE_CLOSE(context, id, kret);
      krb5_change_cache ();

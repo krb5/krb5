@@ -1,3 +1,9 @@
+Sat Jun 10 00:01:23 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* fcc_init.c (krb5_fcc_initialize): Make sure the status return
+	        from krb5_fcc_store_principal is reflected in the return
+		status of krb5_fcc_initialize().
+
 Fri Jun  9 19:30:01 1995    <tytso@rsx-11.mit.edu>
 
 	* configure.in: Remove standardized set of autoconf macros, which
