@@ -120,7 +120,8 @@ asn1_error_code asn1buf_imbed
 	      position starts at the beginning of *subbuf. */
 
 asn1_error_code asn1buf_sync
-	PROTOTYPE((asn1buf *buf, asn1buf *subbuf, asn1_tagnum lasttag));
+	PROTOTYPE((asn1buf *buf, asn1buf *subbuf, const asn1_tagnum lasttag,
+		   const int length));
 /* requires  *subbuf is a sub-buffer of *buf, as created by asn1buf_imbed.
              lasttag is a pointer to the last tagnumber read.
    effects   Synchronizes *buf's current position to match that of *subbuf. */

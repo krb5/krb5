@@ -90,14 +90,15 @@ asn1_error_code asn1buf_imbed(subbuf, buf, length)
   return 0;
 }
 
-asn1_error_code asn1buf_sync(buf, subbuf, lasttag)
+asn1_error_code asn1buf_sync(buf, subbuf, lasttag, length)
      asn1buf * buf;
      asn1buf * subbuf;
-     asn1_tagnum lasttag;
+     const asn1_tagnum lasttag;
+     const int length;
 {
   asn1_error_code retval;
 
-  if (subbuf->bound != buf->bound) {
+  if (length) {
     buf->next = subbuf->bound + 1;
   } else {
     /*

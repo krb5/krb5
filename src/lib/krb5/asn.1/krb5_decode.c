@@ -91,7 +91,7 @@ if(retval) clean_return(retval);\
 next_tag()
 
 #define end_structure()\
-retval = asn1buf_sync(&buf,&subbuf,tagnum);\
+retval = asn1buf_sync(&buf,&subbuf,tagnum,length);\
 if (retval) clean_return(retval)
 
 /* process fields *******************************************/

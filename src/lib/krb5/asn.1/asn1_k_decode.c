@@ -98,7 +98,7 @@ if(retval) return retval;\
 next_tag()
 
 #define end_structure()\
-retval = asn1buf_sync(buf,&subbuf,tagnum);\
+retval = asn1buf_sync(buf,&subbuf,tagnum,length);\
 if(retval) return retval
 
 #define sequence_of(buf)\
@@ -111,7 +111,7 @@ retval = asn1buf_imbed(&seqbuf,buf,length);\
 if(retval) return retval
 
 #define end_sequence_of(buf)\
-retval = asn1buf_sync(buf,&seqbuf,ASN1_TAGNUM_CEILING);\
+retval = asn1buf_sync(buf,&seqbuf,ASN1_TAGNUM_CEILING,length);\
 if(retval) return retval
 
 #define cleanup()\

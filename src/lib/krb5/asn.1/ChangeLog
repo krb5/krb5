@@ -1,5 +1,17 @@
 1999-07-03  Tom Yu  <tlyu@mit.edu>
 
+	* asn1buf.c (asn1buf_sync): Add length parameter to disambiguate
+	constructed-indefinite encoding from constructed-definite encoding
+	which happens to end at the same place as the enclosing buf.
+
+	* asn1buf.h: Update to match definition.
+
+	* krb5_decode.c (end_structure): Update to deal with additional
+	length parameter to asn1buf_sync().
+
+	* asn1_k_decode.c (end_sequence_of, end_structure): Update to deal
+	with additional length parameter to asn1buf_sync().
+
 	* asn1buf.h: New prototpyes for asn1buf_sync() and
 	asn1buf_skiptail().
 
