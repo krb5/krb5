@@ -1,3 +1,11 @@
+2001-04-27  Ken Raeburn  <raeburn@mit.edu>
+
+	* telnetd.c (valid_opts): Note that 'w' takes a parameter.
+	Reported by Nico Williams, <Nicolas.Williams@ubsw.com>.
+	(main): Delete options 'N', 'u', 'i' that were removed from
+	valid_opts in 1999.
+	(usage): Don't show -u option.
+
 2001-01-25  Tom Yu  <tlyu@mit.edu>
 
 	* state.c (envvarok): Disallow LC_* and NLSPATH.

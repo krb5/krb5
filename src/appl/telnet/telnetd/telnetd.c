@@ -153,7 +153,7 @@ extern void usage P((void));
  */
 char valid_opts[] = {
 	'd', ':', 'h', 'k', 'L', ':', 'n', 'S', ':', 'U',
-	'w',
+	'w', ':',
 #ifdef	AUTHENTICATION
 	'a', ':', 'X', ':',
 #endif
@@ -464,16 +464,6 @@ main(argc, argv)
 				}
 			}
 			break;
-		case 'u':
-			maxhostlen = atoi(optarg);
-			break;
-		case 'i':
-			always_ip = 1;
-			break;
-		case 'N':
-			stripdomain = 0;
-			break;
-
 		default:
 			fprintf(stderr, "telnetd: %c: unknown option\n", ch);
 			/* FALLTHROUGH */
@@ -682,7 +672,7 @@ usage()
 #ifdef	AUTHENTICATION
 	fprintf(stderr, " [-X auth-type]");
 #endif
-	fprintf(stderr, " [-u utmp_hostname_length] [-U]\n");
+	fprintf(stderr, " [-U]\n");
 	fprintf(stderr, " [-w [ip|maxhostlen[,[no]striplocal]]]\n");
 	fprintf(stderr, " [port]\n");
 	exit(1);
