@@ -90,9 +90,13 @@ krb5_error_code krb5_db_store_mkey PROTOTYPE((char *,
 					      krb5_principal,
 					      krb5_keyblock *));
 krb5_error_code krb5_kdb_encrypt_key
-	PROTOTYPE((krb5_encrypt_block *, krb5_keyblock *, krb5_keyblock *));
+	PROTOTYPE((krb5_encrypt_block *,
+		   const krb5_keyblock *,
+		   krb5_keyblock *));
 krb5_error_code krb5_kdb_decrypt_key
-	PROTOTYPE((krb5_encrypt_block *, krb5_keyblock *, krb5_keyblock *));
+	PROTOTYPE((krb5_encrypt_block *,
+		   const krb5_keyblock *,
+		   krb5_keyblock *));
 krb5_error_code krb5_db_setup_mkey_name
 	PROTOTYPE((const char *, const char *, char **, krb5_principal *));
 
