@@ -226,6 +226,8 @@ krb5_data **response;			/* filled in with a response packet */
 	enc_tkt_reply.caddrs = request->addresses;
 	reply_encpart.caddrs = request->addresses;
     }	
+    if (isflagset(header_ticket->enc_part2->flags, TKT_FLG_FORWARDED))
+	setflag(enc_tkt_reply.flags, TKT_FLG_FORWARDED);
 
     if (isflagset(request->kdc_options, KDC_OPT_PROXIABLE))
 	setflag(enc_tkt_reply.flags, TKT_FLG_PROXIABLE);
