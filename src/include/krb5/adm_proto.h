@@ -36,7 +36,9 @@ krb5_error_code INTERFACE krb5_adm_connect
 		   char *,
 		   int *,
 		   krb5_auth_context **,
-		   krb5_ccache *));
+		   krb5_ccache *,
+		   char *,
+		   krb5_timestamp));
 void INTERFACE krb5_adm_disconnect
 	PROTOTYPE((krb5_context,
 		   int *,

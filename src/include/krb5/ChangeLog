@@ -1,4 +1,9 @@
 
+Mon Jun 5 13:47:30 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* adm_proto.h - Add new arguments to krb5_adm_connect() for support
+		of specifiable credentials caches and ticket lifetimes.
+
+
 Thu Jun 1 14:28:40 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* adm.h: Change the default admin port to 464.
 
