@@ -75,6 +75,9 @@
 
 #include "osconf.h"
 
+/* Compatibility switch for SAM preauth */
+#define AS_REP_105_SAM_COMPAT
+
 /*
  * Begin "k5-config.h"
  */
@@ -331,9 +334,12 @@ typedef krb5_etype_info_entry ** krb5_etype_info;
 #define PA_SAM_TYPE_SKEY_K0    3   /*  S/key where  KDC has key 0 */
 #define PA_SAM_TYPE_SKEY       4   /*  Traditional S/Key */
 #define PA_SAM_TYPE_SECURID    5   /*  Security Dynamics */
+#define PA_SAM_TYPE_CRYPTOCARD 6   /*  CRYPTOCard */
+#if 1 /* XXX need to figure out who has which numbers assigned */
 #define PA_SAM_TYPE_ACTIVCARD_DEC  6   /*  ActivCard decimal mode */
 #define PA_SAM_TYPE_ACTIVCARD_HEX  7   /*  ActivCard hex mode */
 #define PA_SAM_TYPE_DIGI_PATH_HEX  8   /*  Digital Pathways hex mode */
+#endif
 #define PA_SAM_TYPE_EXP_BASE    128 /* experimental */
 #define PA_SAM_TYPE_GRAIL		(PA_SAM_TYPE_EXP_BASE+0) /* testing */
 #define PA_SAM_TYPE_SECURID_PREDICT	(PA_SAM_TYPE_EXP_BASE+1) /* special */
@@ -940,6 +946,25 @@ KRB5_PROTOTYPE((krb5_context, krb5_kdc_req *,
 		krb5_prompter_fct, void *,
 		krb5_gic_get_as_key_fct, void *));
 
+KRB5_DLLIMP void KRB5_CALLCONV krb5_free_sam_challenge
+	KRB5_PROTOTYPE((krb5_context, krb5_sam_challenge FAR * ));
+KRB5_DLLIMP void KRB5_CALLCONV krb5_free_sam_response
+	KRB5_PROTOTYPE((krb5_context, krb5_sam_response FAR * ));
+KRB5_DLLIMP void KRB5_CALLCONV krb5_free_predicted_sam_response
+	KRB5_PROTOTYPE((krb5_context, krb5_predicted_sam_response FAR * ));
+KRB5_DLLIMP void KRB5_CALLCONV krb5_free_enc_sam_response_enc
+	KRB5_PROTOTYPE((krb5_context, krb5_enc_sam_response_enc FAR * ));
+KRB5_DLLIMP void KRB5_CALLCONV krb5_free_sam_challenge_contents
+	KRB5_PROTOTYPE((krb5_context, krb5_sam_challenge FAR * ));
+KRB5_DLLIMP void KRB5_CALLCONV krb5_free_sam_response_contents
+	KRB5_PROTOTYPE((krb5_context, krb5_sam_response FAR * ));
+KRB5_DLLIMP void KRB5_CALLCONV krb5_free_predicted_sam_response_contents
+	KRB5_PROTOTYPE((krb5_context, krb5_predicted_sam_response FAR * ));
+KRB5_DLLIMP void KRB5_CALLCONV krb5_free_enc_sam_response_enc_contents
+	KRB5_PROTOTYPE((krb5_context, krb5_enc_sam_response_enc FAR * ));
+ 
+KRB5_DLLIMP void KRB5_CALLCONV krb5_free_pa_enc_ts
+	KRB5_PROTOTYPE((krb5_context, krb5_pa_enc_ts FAR *));
 
 /* #include "krb5/wordsize.h" -- comes in through base-defs.h. */
 #include "profile.h"

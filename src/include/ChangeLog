@@ -1,3 +1,15 @@
+1999-04-09  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* k5-int.h: Add new prototypes and #define's provided by Frank
+		Cusack's preauth patch (PR# [krb5-kdc/662])
+
+1999-04-01  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* krb5.hin (krb5_prompter_fct, krb5_prompter_posix): Update
+		function prototypes to reflect new prompter prototype
+		which takes an extra argument for the window titlebar
+		name.  (From Frank Cusack) [krb5-kdc/662]
+
 Mon Mar 15 15:57:41 1999  Tom Yu  <tlyu@mit.edu>
 
 	* k5-int.h: Fix GSS_DLLIMP.
