@@ -9,7 +9,7 @@ server: server.o rpc_test_svc.o $(DEPLIBS)
 	$(LD) $(LDFLAGS) $(LDARGS) -o server server.o rpc_test_svc.o $(LIBS)
 
 client.o: $(srcdir)/client.c
-server.o: $(srcdir)/server.o
+server.o: $(srcdir)/server.c
 
 client.c server.c: rpc_test.h
 

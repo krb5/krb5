@@ -1,3 +1,7 @@
+Thu Nov  7 16:16:38 1996  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (server.o): Fix typo in previous checkin.
+
 Wed Nov  6 16:12:26 1996  Tom Yu <tlyu@mit.edu>
 	* Makefile.in: Add dependencies on $(srcdir)/foo.c so that some
 	makes can deal with VPATH properly (e.g. NetBSD pmake)
