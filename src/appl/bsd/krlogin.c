@@ -1685,12 +1685,38 @@ int des_read(fd, buf, len)
 	nstored = 0;
     }
     
+#if 0
     if ((cc = krb5_net_read(bsd_context, fd, (char *)&len_buf, 4)) != 4) {
 	/* XXX can't read enough, pipe must have closed */
 	return(0);
     }
     rd_len =
 	((len_buf[0]<<24) | (len_buf[1]<<16) | (len_buf[2]<<8) | len_buf[3]);
+#else
+	{
+	    unsigned char c;
+	    int gotzero = 0;
+
+	    /* See the comment in v4_des_read. */
+	    do {
+		cc = krb5_net_read(bsd_context, fd, &c, 1);
+		/* we should check for non-blocking here, but we'd have
+		   to make it save partial reads as well. */
+		if (cc < 0) return 0; /* read error */
+		if (cc == 1) {
+		    if (c == 0) gotzero = 1;
+		}
+	    } while (!gotzero);
+
+	    if ((cc = krb5_net_read(bsd_context, fd, &c, 1)) != 1) return 0;
+	    rd_len = c;
+	    if ((cc = krb5_net_read(bsd_context, fd, &c, 1)) != 1) return 0;
+	    rd_len = (rd_len << 8) | c;
+	    if ((cc = krb5_net_read(bsd_context, fd, &c, 1)) != 1) return 0;
+	    rd_len = (rd_len << 8) | c;
+	}
+
+#endif
     net_len = krb5_encrypt_size(rd_len,eblock.crypto_entry);
     if ((net_len <= 0) || (net_len > sizeof(des_inbuf))) {
 	/* preposterous length; assume out-of-sync; only
@@ -1803,12 +1829,37 @@ int des_read(fd, buf, len)
 	len -= nstored;
 	nstored = 0;
     }
+#if 0
     if ((cc = krb5_net_read(bsd_context, fd, len_buf, 4)) != 4) {
 	/* XXX can't read enough, pipe must have closed */
 	return(0);
     }
     net_len =
 	((len_buf[0]<<24) | (len_buf[1]<<16) | (len_buf[2]<<8) | len_buf[3]);
+#else
+	{
+	    unsigned char c;
+	    int gotzero = 0;
+
+	    /* See the comment in v4_des_read. */
+	    do {
+		cc = krb5_net_read(bsd_context, fd, &c, 1);
+		/* we should check for non-blocking here, but we'd have
+		   to make it save partial reads as well. */
+		if (cc < 0) return 0; /* read error */
+		if (cc == 1) {
+		    if (c == 0) gotzero = 1;
+		}
+	    } while (!gotzero);
+
+	    if ((cc = krb5_net_read(bsd_context, fd, &c, 1)) != 1) return 0;
+	    net_len = c;
+	    if ((cc = krb5_net_read(bsd_context, fd, &c, 1)) != 1) return 0;
+	    net_len = (net_len << 8) | c;
+	    if ((cc = krb5_net_read(bsd_context, fd, &c, 1)) != 1) return 0;
+	    net_len = (net_len << 8) | c;
+	}
+#endif
     if (net_len < 0 || net_len > sizeof(des_inbuf)) {
 	/* XXX preposterous length, probably out of sync.
 	   act as if pipe closed */

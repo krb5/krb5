@@ -1239,6 +1239,7 @@ v5_des_read(fd, buf, len)
 	nstored = 0;
     }
     
+#if 0
     if ((cc = krb5_net_read(bsd_context, fd, (char *)len_buf, 4)) != 4) {
 	if ((cc < 0)  && ((errno == EWOULDBLOCK) || (errno == EAGAIN)))
 	    return(cc);
@@ -1250,6 +1251,30 @@ v5_des_read(fd, buf, len)
 	 ((krb5_ui_4)len_buf[1]<<16) |
 	 ((krb5_ui_4)len_buf[2]<<8) |
 	 (krb5_ui_4)len_buf[3]);
+#else
+	{
+	    unsigned char c;
+	    int gotzero = 0;
+
+	    /* See the comment in v4_des_read. */
+	    do {
+		cc = krb5_net_read(bsd_context, fd, &c, 1);
+		/* we should check for non-blocking here, but we'd have
+		   to make it save partial reads as well. */
+		if (cc < 0) return 0; /* read error */
+		if (cc == 1) {
+		    if (c == 0) gotzero = 1;
+		}
+	    } while (!gotzero);
+
+	    if ((cc = krb5_net_read(bsd_context, fd, &c, 1)) != 1) return 0;
+	    rd_len = c;
+	    if ((cc = krb5_net_read(bsd_context, fd, &c, 1)) != 1) return 0;
+	    rd_len = (rd_len << 8) | c;
+	    if ((cc = krb5_net_read(bsd_context, fd, &c, 1)) != 1) return 0;
+	    rd_len = (rd_len << 8) | c;
+	}
+#endif
     net_len = krb5_encrypt_size(rd_len,eblock.crypto_entry);
     if (net_len < 0 || net_len > sizeof(des_inbuf)) {
 	/* XXX preposterous length, probably out of sync.
@@ -1628,7 +1653,8 @@ int len;
 		len -= nstored;
 		nstored = 0;
 	}
-	
+
+#if 0
 	if ((cc = krb_net_read(fd, (char *)len_buf, 4)) != 4) {
 		/* XXX can't read enough, pipe
 		   must have closed */
@@ -1638,6 +1664,40 @@ int len;
 		   ((krb5_ui_4)len_buf[1]<<16) |
 		   ((krb5_ui_4)len_buf[2]<<8) |
 		   (krb5_ui_4)len_buf[3]);
+#else
+	{
+	    unsigned char c;
+	    int gotzero = 0;
+
+	    /* We're fetching the length which is MSB first, and the MSB
+	       has to be zero unless the client is sending more than 2^24
+	       (16M) bytes in a single write (which is why this code is in
+	       rlogin but not rcp or rsh.) The only reasons we'd get something
+	       other than zero are:
+	           -- corruption of the tcp stream (which will show up when
+		      everything else is out of sync too)
+		   -- un-caught Berkeley-style "pseudo out-of-band data" which
+		      happens any time the user hits ^C twice.
+	       The latter is *very* common, as shown by an 'rlogin -x -d' 
+	       using the CNS V4 rlogin.         Mark EIchin 1/95
+	      */
+	    do {
+		cc = krb_net_read(fd, &c, 1);
+		if (cc < 0) return 0; /* read error */
+		if (cc == 1) {
+		    if (c == 0) gotzero = 1;
+		}
+	    } while (!gotzero);
+
+	    if ((cc = krb_net_read(fd, &c, 1)) != 1) return 0;
+	    net_len = c;
+	    if ((cc = krb_net_read(fd, &c, 1)) != 1) return 0;
+	    net_len = (net_len << 8) | c;
+	    if ((cc = krb_net_read(fd, &c, 1)) != 1) return 0;
+	    net_len = (net_len << 8) | c;
+	}
+
+#endif
 	if (net_len < 0 || net_len > sizeof(des_inbuf)) {
 		/* XXX preposterous length, probably out of sync.
 		   act as if pipe closed */

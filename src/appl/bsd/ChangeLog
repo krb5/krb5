@@ -1,3 +1,10 @@
+Wed Jan 18 14:33:50 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* krlogind.c (v4_des_read, v5_des_read): When reading length,
+	ignore everything before a leading zero (MSB first "reasonable"
+	value) to compensate for rlogin (mis)use of BSD-OOB data.
+	* krlogin.c (des_read): same code (in both versions of des_read.)
+
 Wed Jan 18 01:07:56 1995  Mark Eichin  <eichin@cygnus.com>
 
 	* configure.in: undo streams test. It turns out that we want sunos
