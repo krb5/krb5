@@ -573,7 +573,7 @@ void krb_free_preauth
 KRB5_DLLIMP long KRB5_CALLCONV krb_mk_priv
 	PROTOTYPE((u_char FAR *in, u_char FAR *out,
 		   unsigned KRB4_32 length,
-		   Key_schedule, C_Block,
+		   Key_schedule, C_Block FAR *,
 		   struct sockaddr_in FAR * sender,
 		   struct sockaddr_in FAR * receiver));
 /* mk_req.c */
@@ -584,7 +584,7 @@ KRB5_DLLIMP int KRB5_CALLCONV krb_mk_req
 /* mk_safe.c */
 KRB5_DLLIMP long KRB5_CALLCONV krb_mk_safe
 	PROTOTYPE((u_char FAR *in, u_char FAR *out, unsigned KRB4_32 length,
-		   C_Block,
+		   C_Block FAR *,
 		   struct sockaddr_in FAR *sender,
 		   struct sockaddr_in FAR *receiver));
 /* netread.c */
@@ -608,7 +608,7 @@ KRB5_DLLIMP int KRB5_CALLCONV krb_rd_err
 /* rd_priv.c */
 KRB5_DLLIMP long KRB5_CALLCONV krb_rd_priv
 	PROTOTYPE((u_char FAR *in,unsigned KRB4_32 in_length,
-		   Key_schedule, C_Block,
+		   Key_schedule, C_Block FAR *,
 		   struct sockaddr_in FAR *sender,
 		   struct sockaddr_in FAR *receiver,
 		   MSG_DAT FAR *m_data));
@@ -619,7 +619,8 @@ KRB5_DLLIMP int KRB5_CALLCONV krb_rd_req
 		   char FAR *srvtab));
 /* rd_safe.c */
 KRB5_DLLIMP long KRB5_CALLCONV krb_rd_safe
-	PROTOTYPE((u_char FAR *in, unsigned KRB4_32 in_length, C_Block,
+	PROTOTYPE((u_char FAR *in, unsigned KRB4_32 in_length,
+		   C_Block FAR *,
 		   struct sockaddr_in FAR *sender,
 		   struct sockaddr_in FAR *receiver,
 		   MSG_DAT FAR *m_data));
