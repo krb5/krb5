@@ -1,3 +1,8 @@
+Thu Sep 28 23:35:06 1995  Mark W. Eichin  <eichin@cygnus.com>
+
+	* krb5_encode.c (krb5_cleanup): If asn1buf_destroy fails, don't
+	call it again. (Not that it can ever fail anyhow.)
+
 Tue Sep 26 19:59:56 1995    <tytso@rsts-11.mit.edu>
 
 	* krb5_decode.c: Systematic rework of all the cleanup code to make

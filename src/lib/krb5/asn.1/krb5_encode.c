@@ -136,7 +136,6 @@
     return retval; }\
   retval = asn1buf_destroy(&buf);\
   if(retval){\
-    asn1buf_destroy(&buf);\
     return retval; }\
 \
   return 0
