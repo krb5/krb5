@@ -1012,11 +1012,11 @@ void doit(f, fromp)
 #endif /*CRAY*/
     
     if (chdir(pwd->pw_dir) < 0) {
-	syslog(LOG_ERR ,
-	       "Principal %s  (%s@%s) for local user %s has no home directory.\n",
-	       kremuser, remuser, hostname, locuser);
-	error("No remote directory.\n");
+      if(chdir("/") < 0) {
+      	error("No remote directory.\n");
 	goto signout_please;
+      }
+	   pwd->pw_dir = "/";
     }
 
 #ifdef KERBEROS
