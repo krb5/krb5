@@ -64,6 +64,9 @@ register int *error;
 	    return(0);
 	}
 	retval->usec = val->usec;
+    } else {
+	retval->timestamp = 0;
+	retval->usec = 0;
     }
     retval->s_address = KRB5_HostAddress2krb5_addr(val->s__address, error);
     if (!retval->s_address) {
@@ -77,6 +80,7 @@ register int *error;
     }
     if (val->optionals & opt_KRB5_EncKrbPrivPart_seq__number) {
 	retval->seq_number = val->seq__number;
-    }
+    } else
+	retval->seq_number = 0;
     return(retval);
 }
