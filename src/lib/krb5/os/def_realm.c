@@ -51,24 +51,57 @@ static char rcsid_def_realm_c[] =
 
 extern char *krb5_config_file;		/* extern so can be set at
 					   load/runtime */
+
+/*
+ * In case the program wants to override this.
+ */
+extern char *krb5_override_default_realm;
+
+char *krb5_override_default_realm = 0;
+
 krb5_error_code
 krb5_get_default_realm(lrealm)
 char **lrealm;
 {
     FILE *config_file;
     char realmbuf[BUFSIZ];
+    static char *saved_realm = 0;
+    char *realm;
     char *cp;
 
-    if (!(config_file = fopen(krb5_config_file, "r")))
-	/* can't open */
-	return KRB5_CONFIG_CANTOPEN;
+    if (krb5_override_default_realm)
+	    realm = krb5_override_default_realm;
+    else if (saved_realm)
+	    realm = saved_realm;
+    else {
+	    if (!(config_file = fopen(krb5_config_file, "r")))
+		    /* can't open */
+		    return KRB5_CONFIG_CANTOPEN;
 
-    if (fscanf(config_file, "%s", realmbuf) != 1) {
-	fclose(config_file);
-	return( KRB5_CONFIG_BADFORMAT);
+	    if (fgets(realmbuf, sizeof(realmbuf), config_file) == NULL) {
+		    fclose(config_file);
+		    return(KRB5_CONFIG_BADFORMAT);
+	    }
+	    fclose(config_file);
+	    
+	    realmbuf[BUFSIZ-1] = '0';
+	    cp = strchr(realmbuf, '\n');
+	    if (cp)
+		    *cp = '\0';
+	    cp = strchr(realmbuf, ' ');
+	    if (cp)
+		    *cp = '\0';
+
+	    saved_realm = malloc(strlen (realmbuf) + 1);
+	    if (!saved_realm)
+		    return ENOMEM;
+
+	    strcpy(saved_realm, realmbuf);
+
+	    realm = saved_realm;
     }
-    fclose(config_file);
-    if (!(*lrealm = cp = malloc((unsigned int) strlen(realmbuf) + 1)))
+    
+    if (!(*lrealm = cp = malloc((unsigned int) strlen(realm) + 1)))
 	    return ENOMEM;
     strcpy(cp, realmbuf);
     return(0);
