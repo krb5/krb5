@@ -24,7 +24,7 @@ proc api_exit {} {
 #	puts stdout "Starting api_exit (spawn_id $spawn_id)."
 	catch {close} errMsg
         catch {wait} errMsg
-        puts stdout "Finishing api_exit for $api_pid."
+#       puts stdout "Finishing api_exit for $api_pid."
         set api_pid "0"
 }
 
@@ -126,7 +126,7 @@ proc api_start {} {
 	}
 
 	set api_pid $pid
-	puts stdout "Finishing api_start (spawn_id $spawn_id, pid $api_pid)."
+#	puts stdout "Finishing api_start (spawn_id $spawn_id, pid $api_pid)."
 	return $pid
 }
 api_start
