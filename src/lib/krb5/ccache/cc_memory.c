@@ -97,7 +97,7 @@ typedef struct _krb5_mcc_data {
      krb5_mcc_cursor link;
 } krb5_mcc_data;
 
-static krb5_mcc_data FAR *mcc_head;
+static krb5_mcc_data FAR *mcc_head = 0;
 
 /*
  * Modifies:
@@ -596,5 +596,3 @@ krb5_cc_ops krb5_mcc_ops = {
      NULL, /* XXX krb5_mcc_remove, */
      krb5_mcc_set_flags,
 };
-
-krb5_mcc_data *mcc_head=0L;
