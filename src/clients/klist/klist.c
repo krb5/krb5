@@ -59,6 +59,7 @@ main(argc, argv)
     krb5_flags flags;
     krb5_context kcontext;
 
+    krb5_init_context(&kcontext);
     krb5_init_ets(kcontext);
 
     time(&now);
