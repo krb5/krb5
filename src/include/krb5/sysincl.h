@@ -48,13 +48,6 @@
 #include <sys/file.h>			/* prototypes for file-related
 					   syscalls; flags for open &
 					   friends */
-/* this doesn't work under solaris. Use SEEK_* instead anyway... */
-#ifndef SEEK_SET
-#define SEEK_SET        L_SET	/* absolute offset */
-#define SEEK_CUR	L_INCR	/* relative to current offset */
-#define SEEK_END	L_XTND	/* relative to end of file */
-#endif /* SEEK_SET */
-
 #ifndef FD_SET
 #define FD_SETSIZE          (sizeof (fd_set) * 8)
 
