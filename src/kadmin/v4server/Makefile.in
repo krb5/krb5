@@ -2,7 +2,7 @@ thisconfigdir=./..
 myfulldir=kadmin/v4server
 mydir=v4server
 BUILDTOP=$(REL)$(U)$(S)$(U)
-CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE) $(PW_CHECK) \
+CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE) \
 	-DKADM5 -DNEED_SOCKETS @HESIOD_DEFS@
 PROG_LIBPATH=-L$(TOPLIBD) $(KRB4_LIBPATH)
 PROG_RPATH=$(KRB5_LIBDIR)
