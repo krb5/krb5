@@ -138,12 +138,6 @@ char copyright[] =
 #endif
 #endif
 
-/* how do we tell apart irix 5 and irix 4? */
-#if defined(__sgi) && defined(__mips)
-/* IRIX 5: TIOCGLTC doesn't actually work */
-#undef TIOCGLTC
-#endif
-
 #ifndef TIOCPKT_NOSTOP
 /* These values are over-the-wire protocol, *not* local values */
 #define TIOCPKT_NOSTOP          0x10
@@ -798,6 +792,8 @@ struct tchars {
 };
 #endif
 
+
+#ifndef POSIX_TERMIOS
 #ifdef TIOCGLTC
 /*
  * POSIX 1003.1-1988 does not define a 'suspend' character.
@@ -811,14 +807,8 @@ struct tchars {
 struct	ltchars defltc;
 struct	ltchars noltc =	{ -1, -1, -1, -1, -1, -1 };
 #endif
-
-#ifndef POSIX_TERMIOS
 struct	tchars deftc;
 struct	tchars notc =	{ -1, -1, -1, -1, -1, -1 };
-#ifndef TIOCGLTC
-struct	ltchars defltc;
-struct	ltchars noltc =	{ -1, -1, -1, -1, -1, -1 };
-#endif
 #endif
 
 doit(oldmask)
@@ -835,9 +825,6 @@ doit(oldmask)
 #ifdef VLNEXT
     /* there's a POSIX way of doing this, but do we need it general? */
     deftty.c_cc[VLNEXT] = 0;
-#endif
-#ifdef TIOCGLTC
-    (void) ioctl(0, TIOCGLTC, (char *)&defltc);
 #endif
 #else
 #ifdef USE_TERMIO
@@ -1162,14 +1149,6 @@ writer()
 	      }
 	    }
 
-#ifdef TIOCGLTC
-	if ((c == defltc.t_suspc || c == defltc.t_dsuspc)
-	    && !no_local_escape) {
-	  echo(c);
-	  stop(c);
-	  continue;
-	}
-#else
 #ifdef POSIX_TERMIOS
 	if ( (
 	      (c == deftty.c_cc[VSUSP]) 
@@ -1182,8 +1161,17 @@ writer()
 	  stop(c);
 	  continue;
 	}
+#else /*POSIX_TERMIOS*/
+#ifdef TIOCGLTC
+	if ((c == defltc.t_suspc || c == defltc.t_dsuspc)
+	    && !no_local_escape) {
+	  echo(c);
+	  stop(c);
+	  continue;
+	}
+#endif /*TIOCGLTC*/
 #endif
-#endif
+
       
 	if (c != cmdchar) {
 	  rcmd_stream_write(rem, &cmdchar, 1, 0);
@@ -1257,10 +1245,6 @@ int read_wrapper(fd,buf,size,got_esc)
     bol = (c == deftty.c_cc[VKILL] ||
 	   c == deftty.c_cc[VINTR] ||
 	   c == '\r' || c == '\n');
-#ifdef TIOCGLTC
-    if (!bol)
-      bol = (c == defltc.t_suspc);
-#endif
 	
 #else /* !POSIX_TERMIOS */
     bol = c == defkill || c == deftc.t_eofc ||
@@ -1315,14 +1299,13 @@ stop(cmdc)
     (void) signal(SIGCHLD, SIG_IGN);
 #endif
     
-#ifdef TIOCGLTC
-    (void) kill(cmdc == defltc.t_suspc ? 0 : getpid(), SIGTSTP);
-#else
 #ifdef POSIX_TERMIOS
     (void) kill(cmdc == deftty.c_cc[VSUSP] ? 0 : getpid(), SIGTSTP);
+#else
+#ifdef TIOCGLTC
+    (void) kill(cmdc == defltc.t_suspc ? 0 : getpid(), SIGTSTP);
 #endif
 #endif
-
 #ifdef POSIX_SIGNALS
     sa.sa_handler = catchild;
     (void) sigaction(SIGCHLD, &sa, (struct sigaction *)0);
@@ -1642,11 +1625,6 @@ mode(f)
 
     switch(f) {
     case 0:
-#ifdef TIOCGLTC
-#if !defined(sun)
-	(void) ioctl(0, TIOCSLTC, (char *)&defltc);
-#endif
-#endif
 	(void) tcsetattr(0, TCSADRAIN, &deftty);
 	break;
     case 1:
@@ -1683,14 +1661,6 @@ mode(f)
 	newtty.c_cc[VMIN] = 1;
 	newtty.c_cc[VTIME] = 0;
 	(void) tcsetattr(0, TCSADRAIN, &newtty);
-#ifdef TIOCGLTC
-	/* Do this after the tcsetattr() in case this version
-	 * of termio supports the VSUSP or VDSUSP characters */
-#if !defined(sun)
-	/* this forces ICRNL under Solaris... */
-	(void) ioctl(0, TIOCSLTC, (char *)&noltc);
-#endif
-#endif
 	break;
     default:
 	return;

@@ -1,3 +1,13 @@
+2001-01-12  Sam Hartman  <hartmans@mit.edu>
+
+	* krlogin.c: Previously, we only used TIOCGLTC  on systems with
+	termios.  This is sort of silly since its a BSD 4.[23] IOCTL.  We
+	then go out of our way not to use it on IRIX, Solaris or HPUX.  I
+	think all this comes about because you really want to use BSD
+	IOCTLS on Sunos rather than termios.  I propose to do that and
+	never use BSD IOCTLs on Sunos.
+
+
 2000-12-15  Ken Raeburn  <raeburn@mit.edu>
 
 	* krlogin.c (main): Add new "-4" option, to use krb4
