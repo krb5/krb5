@@ -1,3 +1,16 @@
+Tue Jan 23 03:25:02 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* rel_oid.c (krb5_gss_internal_release_oid): Add the new interface
+		for the mechglue layer.
+
+	* inq_cred.c (krb5_gss_inquire_cred): Call gss_release_oid_set()
+		instead of generic_gss_release_oid_set().
+
+	* gssapiP_krb5.h: Added prototype for krb5_gss_internal_release_oid 
+
+	* Makefile.in (CCSRCS): Removed the file krb5_gss_glue.c and added
+		the file k5mech.c and pname_to_uid.c
+
 Tue Jan  9 22:11:25 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* gssapiP_krb5.h (KRB5_GSS_FOR_CREDS_OPTION): New constant added

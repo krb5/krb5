@@ -475,6 +475,13 @@ PROTOTYPE( (OM_uint32 *,		/* minor_status */
 	    gss_OID *			/* oid */
 	   ));
 
+
+OM_uint32 krb5_gss_internal_release_oid
+PROTOTYPE( (krb5_context,
+	    OM_uint32 *,		/* minor_status */
+	    gss_OID *			/* oid */
+	   ));
+
 OM_uint32 krb5_gss_inquire_names_for_mech
 PROTOTYPE( (void *,
 	    OM_uint32 *,		/* minor_status */

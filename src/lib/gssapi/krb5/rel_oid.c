@@ -41,9 +41,8 @@ krb5_gss_release_oid(minor_status, oid)
      * descriptor.  This allows applications to freely mix their own heap-
      * allocated OID values with OIDs returned by GSS-API.
      */
-    if ((*oid != gss_mech_krb5) &&
-	(*oid != gss_nt_krb5_name) &&
-	(*oid != gss_nt_krb5_principal)) {
+    if (krb5_gss_internal_release_oid(NULL, minor_status,
+				           oid) != GSS_S_COMPLETE) {
 	/* Pawn it off on the generic routine */
 	return(generic_gss_release_oid(minor_status, oid));
     }
@@ -53,3 +52,29 @@ krb5_gss_release_oid(minor_status, oid)
 	return(GSS_S_COMPLETE);
     }
 }
+
+
+OM_uint32
+krb5_gss_internal_release_oid(context, minor_status, oid)
+    krb5_context context;
+    OM_uint32	*minor_status;
+    gss_OID	*oid;
+{
+    /*
+     * This function only knows how to release internal OIDs. It will
+     * return GSS_S_CONTINUE_NEEDED for any OIDs it does not recognize.
+     */
+   
+    if ((*oid != gss_mech_krb5) &&
+	(*oid != gss_nt_krb5_name) &&
+	(*oid != gss_nt_krb5_principal)) {
+	/* We don't know about this OID */
+	return(GSS_S_CONTINUE_NEEDED);
+    }
+    else {
+	*oid = GSS_C_NO_OID;
+	*minor_status = 0;
+	return(GSS_S_COMPLETE);
+    }
+}
+

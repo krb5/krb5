@@ -205,9 +205,16 @@ OM_uint32 krb5_gss_inquire_context
 	    gss_name_t*,      /* acceptor_name */
 	    OM_uint32*,       /* lifetime_rec */
 	    gss_OID*,         /* mech_type */
+	    OM_uint32*,	      /* ctx_flags */
 	    int*,             /* ret_flags */
 	    int*              /* locally_initiated */
 	   );
+
+OM_uint32 krb5_gss_internal_release_oid
+      (void *,                /* context */
+       OM_uint32 *,           /* minor_status */
+       gss_OID *              /* OID */
+      );
 
 OM_uint32 krb5_gss_add_cred
 	   (void *,
@@ -302,6 +309,8 @@ static struct gss_config krb5_mechanism =
 	krb5_gss_import_sec_context,
 	krb5_gss_inquire_cred_by_mech,
 	krb5_gss_inquire_names_for_mech,
+	krb5_gss_inquire_context,
+	krb5_gss_internal_release_oid,	 
 	krb5_pname_to_uid,
 	};
 
