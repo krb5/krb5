@@ -216,9 +216,6 @@ int fstat(int fildes, struct stat *buf);
 
 #define EFBIG 1000
 #define OLD_CONFIG_FILES
-#define PROF_NO_SECTION 1
-#define PROF_NO_RELATION 2
-#define KRB5_REALM_CANT_RESOLVE 1
 
 #define NOFCHMOD 1
 #define NOCHMOD 1

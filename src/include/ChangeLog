@@ -1,3 +1,11 @@
+Tue Sep 12 12:00:00 1995  John Rivlin <jrivlin@fusion.com>
+
+	* k5-int.h: Removed KRB5_REALM_CANT RESOLVE,
+		PROF_NO_SECTION and PROF_NO_RELATION defines
+		as they are also defined in KerberosIV/krb_err.h
+		and util/profile/prof_err.et and create conflicts
+		on the Mac.
+
 Sun Sep 10 12:00:00 1995  James Mattly  <mattly@fusion.com>
 
 	* krb5.hin:  Conditionalized inclusion of <sts/types.h> for _MACINTOSH
