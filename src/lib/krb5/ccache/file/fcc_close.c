@@ -27,7 +27,6 @@
 
 
 #include "fcc.h"
-#include <malloc.h>
 /*
  * Modifies:
  * id
