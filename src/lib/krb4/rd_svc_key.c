@@ -163,7 +163,7 @@ krb54_get_service_keyblock(service,instance,realm,kvno,file,keyblock)
 
     /*
      * Figure out what name to use; if the name is one of the standard
-     * /etc/srbtab, /etc/athena/srvtab, etc., use the default keytab
+     * /etc/srvtab, /etc/athena/srvtab, etc., use the default keytab
      * name.  Otherwise, append .krb5 to the filename and try to use
      * that.
      */
