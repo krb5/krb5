@@ -1,3 +1,7 @@
+1999-09-21  Ken Raeburn  <raeburn@mit.edu>
+
+	* api.2/init-v2.exp (test109): Wait for prompt between commands.
+
 1999-09-01  Ken Raeburn  <raeburn@mit.edu>
 
 	* api.2/init-v2.exp (RESOLVE): New variable.

@@ -197,6 +197,17 @@ proc test109 {} {
 	return;
     }
     send "puts \$p\n"
+    expect {
+	-re "$prompt" { }
+	timeout {
+	    error_and_restart "$test: timeout getting prompt"
+	    return
+	}
+	eof {
+	    error_and_restart "$test: eof getting prompt"
+	    return
+	}
+    }
     send "lindex \$p 4\n"
     expect {
 	-re "(\[0-9\]+)\n$prompt" {set max_life $expect_out(1,string) }
