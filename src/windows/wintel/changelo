@@ -1,3 +1,8 @@
+Tue Sep 26 20:11:18 1995    <tytso@rsts-11.mit.edu>
+
+	* auth.c: Don't include los-proto.h; it's no longer present.
+		Don't include des-int.h; it's no longer needed.
+
 Sat Jun 10 23:09:20 1995  Tom Yu  (tlyu@dragons-lair)
 
 	* auth.c: krb5_auth_context redefinitions
