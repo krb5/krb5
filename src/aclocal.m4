@@ -647,3 +647,45 @@ if test $krb5_cv_has_ansi_volatile = no; then
 ADD_DEF(-Dvolatile=)
 fi
 ])dnl
+dnl
+dnl This rule supports the generation of the shared library object files
+dnl
+define(V5_SHARED_LIB_OBJS,[
+if test ${krb5_cv_shlibs_dir}x != x; then
+SHARED_RULE="	\$(CC) ${krb5_cv_shlibs_cflags} \$(CFLAGS) -o ${krb5_cv_shlibs_dir}/\$""*.o -c \$(srcdir)/\$""*.c"
+SHARED_RULE_LOCAL="	\$(CC) ${krb5_cv_shlibs_cflags} \$(CFLAGS) -o ${krb5_cv_shlibs_dir}/\$""*.o -c \$""*.c"
+else
+SHARED_RULE=
+SHARED_RULE_LOCAL=
+fi
+AC_SUBST(SHARED_RULE)
+AC_SUBST(SHARED_RULE_LOCAL)
+])dnl
+dnl
+dnl This rule adds the additional Makefile fragment necessary to actually 
+dnl create the shared library
+dnl
+define(V5_MAKE_SHARED_LIB,[
+AC_ARG_ENABLE([shared],
+[  --enable-shared         build with shared libraries],[
+HOST_TYPE=$krb5_cv_host
+AC_SUBST(HOST_TYPE)
+SHEXT=$krb5_cv_shlibs_ext
+AC_SUBST(SHEXT)
+DO_MAKE_SHLIB="$1.\$""(SHEXT)"
+AC_DIVERT_PUSH(AC_DIVERSION_MAKEFILE)dnl
+
+all:: $(DO_MAKE_SHLIB)
+
+clean:: 
+	$(RM) $1.[$](SHEXT)
+
+$1.[$](SHEXT): [$](LIBDONE)
+	[$](SRCTOP)/util/makeshlib [$](HOST_TYPE) [$](CC) [$]@ [$](LIB_SUBDIRS)
+
+AC_DIVERT_POP()dnl
+],[
+DO_MAKE_SHLIB=
+])dnl
+AC_SUBST(DO_MAKE_SHLIB)
+])dnl
