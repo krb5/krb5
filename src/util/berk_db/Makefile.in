@@ -18,15 +18,9 @@ all-windows::
 
 libdb.$(STEXT): $(LIBDONE)
 	@if test -f $@ ; then \
-		for i in $(LIB_SUBDIRS) ; \
-		do \
-			(set -x; $(LIBUPDATE) $@ $$i/DONE $$i) \
-		done ; \
+		(set -x; $(LIBUPDATE) $@ DONE $(LIB_SUBDIRS)) \
 	else \
-		for i in $(LIB_SUBDIRS) ; \
-		do \
-			(set -x; $(LIBUPDATE) --force $@ $$i/DONE $$i) \
-		done ; \
+		(set -x; $(LIBUPDATE) --force $@ DONE $(LIB_SUBDIRS)) \
 	fi
 	$(RANLIB) $@
 	touch libdb.stamp
