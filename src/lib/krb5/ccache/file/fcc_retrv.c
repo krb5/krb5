@@ -11,7 +11,7 @@
  */
 
 #if !defined(lint) && !defined(SABER)
-static char fcc_retrieve_c[] = "$Id$";
+static char fcc_retrv_c[] = "$Id$";
 #endif /* !lint && !SABER */
 
 #include <krb5/copyright.h>
@@ -20,7 +20,7 @@ static char fcc_retrieve_c[] = "$Id$";
 
 #define set(bits) (whichfields & bits)
 #define flags_match(a,b) (a & b == a)
-#define times_match_exact(t1,t2) (bcmp(&t1, &t2, sizeof(t1)) == 0)
+#define times_match_exact(t1,t2) (bcmp((char *)&(t1), (char *)&(t2), sizeof(t1)) == 0)
 #define times_match times_match_exact /* XXX WRONG! XXX */
      
 /*
