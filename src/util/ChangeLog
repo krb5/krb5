@@ -1,3 +1,9 @@
+2000-11-01  Ezra Peisach  <epeisach@mit.edu>
+
+	* reconf: Rework syntax to detect version numbers of newer
+	autoconf versions. For autoconf > 2.19, we need to pass an
+	absolute path for the localdir to autoreconf.
+
 2000-10-27  Ezra Peisach  <epeisach@mit.edu>
 
 	* reconf: Pass "-m util/autoconf" to autoreconf only if we are

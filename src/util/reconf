@@ -2,6 +2,7 @@
 
 force=
 autoreconfprog=./util/autoconf/autoreconf
+localdir=.
 autoreconfoptions="-m util/autoconf"
 verbose=false
 
@@ -23,14 +24,30 @@ do
 done
 
 # Currently (2000-10-03) we need 2.12 or later, and 2.13 is current.
-pat="version 2.1[23456789]"
+# Thie pattern also recognizes 2.40 and up.
+patb="2.(1[2-9])|([4-9][0-9])"
+
+# sedcmd1 recognizes the older 2.12 version, and sedcmd2 the newer 2.49
+sedcmd1="s,.*version \(.*\)$,\1,"
+sedcmd2="s,.*) \(.*\)$,\1,;1q"
+
 if test ! -f $autoreconfprog ; then
-	if autoreconf --version | grep "$pat" >/dev/null && \
-	   autoconf --version  | grep "$pat" >/dev/null && \
-	   autoheader --version | grep "$pat" >/dev/null; then
+	if autoreconf --version | sed -e "$sedcmd1" -e "$sedcmd2" | egrep "$patb" >/dev/null && \
+	   autoconf --version  | sed -e "$sedcmd1" -e "$sedcmd2"  | egrep "$patb" >/dev/null && \
+	   autoheader --version | sed -e "$sedcmd1" -e "$sedcmd2" | egrep "$patb" >/dev/null; then
 		autoreconf=autoreconf
 		autoreconfoptions=
-		echo "Using" `autoconf --version` "found in your path..."
+		autoconfversion=`autoconf --version | sed -e "$sedcmd1" -e "$sedcmd2"`
+		echo "Using autoconf version $autoconfversion found in your path..."
+		# Determine if localdir needs to be relative or absolute
+		case "$autoconfversion" in
+		  2.1*)
+		       localdir=.
+		       ;;
+		     *)
+		       localdir=`pwd`
+		       ;;
+		esac
 	else
 		echo "Couldn't find autoconf 2.12 or higher in your path."
 		echo " "
@@ -42,6 +59,6 @@ if test ! -f $autoreconfprog ; then
 fi
 
 if $verbose ; then 
-	echo $autoreconf $autoreconfoptions -l . --verbose $force 
+	echo $autoreconf $autoreconfoptions -l $localdir --verbose $force 
 fi
-$autoreconf $autoreconfoptions  -l . --verbose $force 
+$autoreconf $autoreconfoptions  -l $localdir --verbose $force 
