@@ -26,9 +26,6 @@ krb5kdc \- Kerberos V5 KDC
 .SH SYNOPSIS
 .B krb5kdc
 [
-.B \-r
-.I realm
-] [
 .B \-d
 .I dbname
 ] [
@@ -38,7 +35,13 @@ krb5kdc \- Kerberos V5 KDC
 .B \-M
 .I mkeyname
 ] [
+.B \-p
+.I portnum
+] [
 .B \-m
+] [
+.B \-r
+.I realm
 ]
 .br
 .SH DESCRIPTION
@@ -58,7 +61,7 @@ The
 .B \-d
 .I dbname
 option specifies the name under which the principal database can be found; by
-default the database is in DEFAULT_DBM_FILE (normally /krb5/principal).
+default the database is in DEFAULT_DBM_FILE.
 .PP
 The
 .B \-k
@@ -73,11 +76,45 @@ option specifies the principal name for the master key in the database;
 the default is KRB5_KDB_M_NAME (usually "K/M" in the KDC's realm).
 .PP
 The
+.B \-p
+.I portnum
+option specifies the UDP port number which the KDC should listen on for
+requests.  If none is specified, then the value in /etc/services is used,
+with an ultimate default value of KRB5_DEFAULT_PORT, or 88.
+.PP
+The
 .B \-m
 option specifies that the master database password should be fetched
 from the keyboard rather than from a file on disk.
+.PP
+The KDC may service requests for multiple realms (maximum 32 realms).  The
+realms are listed on the command line.  Per-realm options that can be
+specified on the command line pertain for each realm that follows it and are
+superceded by subsequent definitions of the same option.  For example, 
+.PP
+.B krb5kdc
+.B \-p
+.I 2001
+.B \-r
+.I REALM1
+.B \-p
+.I 2002
+.B \-r
+.I REALM2
+.B \-r
+.I REALM3
+.PP
+specifies that the KDC listen on port 2001 for REALM1 and on port 2002 for
+REALM2 and REALM3.  Additionally, per-realm parameters may be specified in the
+.I kdc.conf
+file.  The location of this file may be specified by the
+.I KRB5_KDC_PROFILE
+environment variable.  Parameters specified in this file take precedence over
+options specified on the command line.  See the
+.I kdc.conf(5)
+description for further details.
 .SH SEE ALSO
-krb5(3), kdb5_create(8), kdb5_stash(8)
+krb5(3), kdb5_create(8), kdb5_stash(8), kdc.conf(5)
 .SH BUGS
 
 It should fork and go into the background when it finishes reading the
