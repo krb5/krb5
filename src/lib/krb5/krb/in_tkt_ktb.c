@@ -64,7 +64,7 @@ keytab_keyproc(context, type, salt, keyseed, key)
 
     kt_id = arg->keytab;
 
-    if (!valid_enctype(type))
+    if (!krb5_c_valid_enctype(type))
 	return KRB5_PROG_ETYPE_NOSUPP;
 
     if (kt_id == NULL)

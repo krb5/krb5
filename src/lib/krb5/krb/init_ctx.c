@@ -273,7 +273,7 @@ krb5_set_default_in_tkt_ktypes(context, ktypes)
 
     if (ktypes) {
 	for (i = 0; ktypes[i]; i++) {
-	    if (!valid_enctype(ktypes[i])) 
+	    if (!krb5_c_valid_enctype(ktypes[i])) 
 		return KRB5_PROG_ETYPE_NOSUPP;
 	}
 
@@ -400,7 +400,7 @@ krb5_set_default_tgs_enctypes (context, ktypes)
 
     if (ktypes) {
 	for (i = 0; ktypes[i]; i++) {
-	    if (!valid_enctype(ktypes[i])) 
+	    if (!krb5_c_valid_enctype(ktypes[i])) 
 		return KRB5_PROG_ETYPE_NOSUPP;
 	}
 

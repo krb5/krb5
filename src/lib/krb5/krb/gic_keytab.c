@@ -28,7 +28,7 @@ krb5_get_as_key_keytab(
 	as_key->length = 0;
     }
 
-    if (!valid_enctype(etype))
+    if (!krb5_c_valid_enctype(etype))
 	return(KRB5_PROG_ETYPE_NOSUPP);
 
     if ((ret = krb5_kt_get_entry(context, keytab, client,

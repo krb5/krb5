@@ -51,10 +51,10 @@ static krb5_error_code prepare_error_as (krb5_kdc_req *, int, krb5_data *,
 /*ARGSUSED*/
 krb5_error_code
 process_as_req(request, from, portnum, response)
-register krb5_kdc_req *request;
-const krb5_fulladdr *from;		/* who sent it ? */
-int	portnum;
-krb5_data **response;			/* filled in with a response packet */
+    krb5_kdc_req *request;
+    const krb5_fulladdr *from;	/* who sent it ? */
+    int	portnum;
+    krb5_data **response;	/* filled in with a response packet */
 {
 
     krb5_db_entry client, server;
@@ -338,7 +338,7 @@ krb5_data **response;			/* filled in with a response packet */
     client_key = (krb5_key_data *) NULL;
     for (i = 0; i < request->nktypes; i++) {
 	useenctype = request->ktype[i];
-	if (!valid_enctype(useenctype))
+	if (!krb5_c_valid_enctype(useenctype))
 	    continue;
 
 	if (!krb5_dbe_find_enctype(kdc_context, &client, useenctype, -1,

@@ -48,7 +48,7 @@ krb5_decrypt_tkt_part(context, srv_key, ticket)
     krb5_data scratch;
     krb5_error_code retval;
 
-    if (!valid_enctype(ticket->enc_part.enctype))
+    if (!krb5_c_valid_enctype(ticket->enc_part.enctype))
 	return KRB5_PROG_ETYPE_NOSUPP;
 
     scratch.length = ticket->enc_part.ciphertext.length;

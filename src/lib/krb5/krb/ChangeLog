@@ -1,3 +1,21 @@
+2002-04-05  Ken Raeburn  <raeburn@mit.edu>
+
+	* decrypt_tk.c (krb5_decrypt_tkt_part): Call krb5_c_valid_enctype
+	instead of valid_enctype.
+	* encode_kdc.c (krb5_encode_kdc_rep): Likewise.
+	* gc_frm_kdc.c (krb5_get_cred_from_kdc_opt): Likewise.
+	* gic_keytab.c (krb5_get_as_key_keytab): Likewise.
+	* in_tkt_ktb.c (keytab_keyproc): Likewise.
+	* in_tkt_sky.c (skey_keyproc): Likewise.
+	* init_ctx.c (krb5_set_default_in_tkt_ktypes,
+	krb5_set_default_tgs_enctypes): Likewise.
+	* send_tgs.c (krb5_send_tgs): Likewise.
+
+	* mk_safe.c (krb5_mk_safe_basic): Call krb5_c_valid_cksumtype,
+	krb5_c_is_coll_proof_cksum, krb5_c_is_keyed_cksum instead of
+	non-prefixed forms.
+	* rd_safe.c (krb5_rd_safe_basic): Likewise.
+
 2002-03-28  Sam Hartman  <hartmans@mit.edu>
 
 	* Makefile.in :  New file init_keyblock.c

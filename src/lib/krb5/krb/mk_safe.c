@@ -64,9 +64,10 @@ krb5_mk_safe_basic(context, userdata, keyblock, replaydata, local_addr,
     krb5_checksum safe_checksum;
     krb5_data *scratch1, *scratch2;
 
-    if (!valid_cksumtype(sumtype))
+    if (!krb5_c_valid_cksumtype(sumtype))
 	return KRB5_PROG_SUMTYPE_NOSUPP;
-    if (!is_coll_proof_cksum(sumtype) || !is_keyed_cksum(sumtype))
+    if (!krb5_c_is_coll_proof_cksum(sumtype)
+	|| !krb5_c_is_keyed_cksum(sumtype))
 	return KRB5KRB_AP_ERR_INAPP_CKSUM;
 
     safemsg.user_data = *userdata;

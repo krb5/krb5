@@ -230,7 +230,7 @@ int main(argc, argv)
 
     master_keyblock.enctype = global_params.enctype;
     if ((master_keyblock.enctype != ENCTYPE_UNKNOWN) &&
-	(!valid_enctype(master_keyblock.enctype))) {
+	(!krb5_c_valid_enctype(master_keyblock.enctype))) {
 	com_err(argv[0], KRB5_PROG_KEYTYPE_NOSUPP,
 		"while setting up enctype %d", master_keyblock.enctype);
     }
@@ -369,7 +369,7 @@ static int open_db_and_mkey()
 	/* If no encryption type is set, use the default */
 	if (master_keyblock.enctype == ENCTYPE_UNKNOWN) {
 	    master_keyblock.enctype = DEFAULT_KDC_ENCTYPE;
-	    if (!valid_enctype(master_keyblock.enctype))
+	    if (!krb5_c_valid_enctype(master_keyblock.enctype))
 		com_err(progname, KRB5_PROG_KEYTYPE_NOSUPP,
 			"while setting up enctype %d",
 			master_keyblock.enctype);

@@ -154,8 +154,8 @@ static krb5_principal_data db_create_princ = {
 
 void
 load_v4db(argc, argv)
-int argc;
-char *argv[];
+    int argc;
+    char *argv[];
 {
     krb5_error_code retval;
     /* The kdb library will default to this, but it is convenient to
@@ -247,7 +247,7 @@ char *argv[];
 	return;
     }
 
-    if (!valid_enctype(master_keyblock.enctype)) {
+    if (!krb5_c_valid_enctype(master_keyblock.enctype)) {
 	com_err(PROGNAME, KRB5_PROG_KEYTYPE_NOSUPP,
 		"while setting up enctype %d", master_keyblock.enctype);
 	krb5_free_context(context);

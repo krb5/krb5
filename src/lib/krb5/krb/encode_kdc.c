@@ -59,7 +59,7 @@ krb5_encode_kdc_rep(context, type, encpart, using_subkey, client_key,
     krb5_enc_kdc_rep_part tmp_encpart;
     krb5_keyusage usage;
 
-    if (!valid_enctype(dec_rep->enc_part.enctype))
+    if (!krb5_c_valid_enctype(dec_rep->enc_part.enctype))
 	return KRB5_PROG_ETYPE_NOSUPP;
 
     switch (type) {

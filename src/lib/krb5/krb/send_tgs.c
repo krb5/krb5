@@ -197,7 +197,7 @@ krb5_send_tgs(context, kdcoptions, timestruct, ktypes, sname, addrs,
     if (ktypes) {
 	/* Check passed ktypes and make sure they're valid. */
    	for (tgsreq.nktypes = 0; ktypes[tgsreq.nktypes]; tgsreq.nktypes++) {
-    	    if (!valid_enctype(ktypes[tgsreq.nktypes]))
+    	    if (!krb5_c_valid_enctype(ktypes[tgsreq.nktypes]))
 		return KRB5_PROG_ETYPE_NOSUPP;
 	}
     	tgsreq.ktype = (krb5_enctype *)ktypes;

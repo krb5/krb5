@@ -1,3 +1,11 @@
+2002-04-05  Ken Raeburn  <raeburn@mit.edu>
+
+	* do_as_req.c (process_as_req): Call krb5_c_valid_enctype instead
+	of valid_enctype.
+	* do_tgs_req.c (process_tgs_req): Likewise.
+	* kdc_util.c (select_session_keytype): Likewise.
+	(comp_cksum): Similarly for valid_cksumtype, is_coll_proof_cksum.
+
 2002-02-20  Ken Raeburn  <raeburn@mit.edu>
 
 	* network.c: Include foreachaddr.c.

@@ -81,8 +81,8 @@ void add_princ (krb5_context, char *);
 
 int
 main(argc, argv)
-int argc;
-char *argv[];
+    int argc;
+    char *argv[];
 {
     extern char *optarg;	
     int optchar, i, n;
@@ -159,7 +159,7 @@ char *argv[];
     if (!enctypedone)
 	master_keyblock.enctype = DEFAULT_KDC_ENCTYPE;
 
-    if (!valid_enctype(master_keyblock.enctype)) {
+    if (!krb5_c_valid_enctype(master_keyblock.enctype)) {
 	com_err(progname, KRB5_PROG_ETYPE_NOSUPP,
 		"while setting up enctype %d", master_keyblock.enctype);
 	exit(1);

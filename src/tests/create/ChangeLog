@@ -1,3 +1,8 @@
+2002-04-05  Ken Raeburn  <raeburn@mit.edu>
+
+	* kdb5_mkdums.c (main): Call krb5_c_valid_enctype instead of
+	valid_enctype.
+
 2001-11-19  Ezra Peisach  <epeisach@mit.edu>
 
 	* kdb5_mkdums.c (main): Invoke krb5_free_context when finished. 

@@ -70,12 +70,12 @@ krb5_rd_safe_basic(context, inbuf, keyblock, recv_addr, sender_addr,
     if ((retval = decode_krb5_safe(inbuf, &message)))
 	return retval;
 
-    if (!valid_cksumtype(message->checksum->checksum_type)) {
+    if (!krb5_c_valid_cksumtype(message->checksum->checksum_type)) {
 	retval = KRB5_PROG_SUMTYPE_NOSUPP;
 	goto cleanup;
     }
-    if (!is_coll_proof_cksum(message->checksum->checksum_type) ||
-	!is_keyed_cksum(message->checksum->checksum_type)) {
+    if (!krb5_c_is_coll_proof_cksum(message->checksum->checksum_type) ||
+	!krb5_c_is_keyed_cksum(message->checksum->checksum_type)) {
 	retval = KRB5KRB_AP_ERR_INAPP_CKSUM;
 	goto cleanup;
     }

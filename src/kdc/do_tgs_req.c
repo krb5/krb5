@@ -238,7 +238,7 @@ tgt_again:
 	}
 	
 	etype = request->second_ticket[st_idx]->enc_part2->session->enctype;
-	if (!valid_enctype(etype)) {
+	if (!krb5_c_valid_enctype(etype)) {
 	    status = "BAD_ETYPE_IN_2ND_TKT";
 	    errcode = KRB5KDC_ERR_ETYPE_NOSUPP;
 	    goto cleanup;

@@ -70,8 +70,8 @@ extern int close_policy_db;
 
 void
 kdb5_stash(argc, argv)
-int argc;
-char *argv[];
+    int argc;
+    char *argv[];
 {
     extern char *optarg;
     extern int optind;
@@ -110,7 +110,7 @@ char *argv[];
 	}
     }
 
-    if (!valid_enctype(master_keyblock.enctype)) {
+    if (!krb5_c_valid_enctype(master_keyblock.enctype)) {
 	char tmp[32];
 	if (krb5_enctype_to_string(master_keyblock.enctype, tmp, sizeof(tmp)))
 	    com_err(argv[0], KRB5_PROG_KEYTYPE_NOSUPP,

@@ -1,3 +1,10 @@
+2002-04-05  Ken Raeburn  <raeburn@mit.edu>
+
+	* kdb5_stash.c (kdb5_stash): Call krb5_c_valid_enctype instead of
+	valid_enctype.
+	* kdb5_util.c (main, open_db_and_mkey): Likewise.
+	* loadv4.c (load_v4db): Likewise.
+
 2002-01-08  Sam Hartman  <hartmans@mit.edu>
 
 	* kdb5_create.c (kdb5_create): Load strong random data
