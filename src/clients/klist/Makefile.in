@@ -13,5 +13,9 @@ clean::
 	$(RM) klist.o klist
 
 install::
-	$(INSTALL_PROGRAM) klist ${DESTDIR}$(CLIENT_BINDIR)/klist
-	$(INSTALL_DATA) $(srcdir)/klist.M ${DESTDIR}$(CLIENT_MANDIR)/klist.1
+	for f in klist; do \
+	  $(INSTALL_PROGRAM) $$f \
+		$(DESTDIR)$(CLIENT_BINDIR)/`echo $$f|sed '$(transform)'`; \
+	  $(INSTALL_DATA) $(srcdir)/$$f.M \
+		${DESTDIR}$(CLIENT_MANDIR)/`echo $$f|sed '$(transform)'`.1; \
+	done

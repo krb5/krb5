@@ -23,5 +23,9 @@ clean::
 	$(RM) ksu
 
 install::
-	$(INSTALL_SETUID) ksu ${DESTDIR}$(CLIENT_BINDIR)/ksu
-	$(INSTALL_DATA) $(srcdir)/ksu.M ${DESTDIR}$(CLIENT_MANDIR)/ksu.1
+	for f in ksu; do \
+	  $(INSTALL_SETUID) $$f \
+		$(DESTDIR)$(CLIENT_BINDIR)/`echo $$f|sed '$(transform)'`; \
+	  $(INSTALL_DATA) $(srcdir)/$$f.M \
+		${DESTDIR}$(CLIENT_MANDIR)/`echo $$f|sed '$(transform)'`.1; \
+	done

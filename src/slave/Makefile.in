@@ -15,16 +15,16 @@ all::	kprop kpropd
 kprop: $(CLIENTOBJS) $(DEPLIBS)
 	$(LD) $(LDFLAGS) $(LDARGS) -o kprop $(CLIENTOBJS) $(LIBS)
 
-install::
-	$(INSTALL_PROGRAM) kprop ${DESTDIR}$(SERVER_BINDIR)/kprop
-	$(INSTALL_DATA) $(srcdir)/kprop.M ${DESTDIR}$(SERVER_MANDIR)/kprop.8
-
 kpropd: $(SERVEROBJS) $(DEPLIBS)
 	$(LD) $(LDFLAGS) $(LDARGS) -o kpropd $(SERVEROBJS) $(LIBS)
 
 install::
-	$(INSTALL_PROGRAM) kpropd ${DESTDIR}$(SERVER_BINDIR)/kpropd
-	$(INSTALL_DATA) $(srcdir)/kpropd.M ${DESTDIR}$(SERVER_MANDIR)/kpropd.8
+	for f in kprop kpropd; do \
+	  $(INSTALL_PROGRAM) $$f \
+		$(DESTDIR)$(SERVER_BINDIR)/`echo $$f|sed '$(transform)'`; \
+	  $(INSTALL_DATA) $(srcdir)/$$f.M \
+		${DESTDIR}$(SERVER_MANDIR)/`echo $$f|sed '$(transform)'`.8; \
+	done
 
 clean::
 	$(RM) $(CLIENTOBJS) $(SERVEROBJS)

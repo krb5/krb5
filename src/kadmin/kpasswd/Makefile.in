@@ -15,8 +15,12 @@ kpasswd: $(OBJS) $(DEPLIBS)
 	$(LD) $(LDFLAGS) $(LDARGS) -o kpasswd $(OBJS) $(LIBS)
 
 install::
-	$(INSTALL_PROGRAM) kpasswd ${DESTDIR}$(CLIENT_BINDIR)/kpasswd
-	$(INSTALL_DATA) $(srcdir)/kpasswd.M ${DESTDIR}$(CLIENT_MANDIR)/kpasswd.1
+	for f in kpasswd; do \
+	  $(INSTALL_PROGRAM) $$f \
+		$(DESTDIR)$(CLIENT_BINDIR)/`echo $$f|sed '$(transform)'`; \
+	  $(INSTALL_DATA) $(srcdir)/$$f.M \
+		${DESTDIR}$(CLIENT_MANDIR)/`echo $$f|sed '$(transform)'`.1; \
+	done
 
 clean::
 	$(RM) kpasswd

@@ -56,8 +56,12 @@ clean::
 	$(RM) telnetd
 
 install::
-	$(INSTALL_PROGRAM) telnetd $(DESTDIR)$(SERVER_BINDIR)/telnetd
-	$(INSTALL_DATA) $(srcdir)/telnetd.8 ${DESTDIR}$(SERVER_MANDIR)/telnetd.8
+	for f in telnetd; do \
+	  $(INSTALL_PROGRAM) $$f \
+		$(DESTDIR)$(SERVER_BINDIR)/`echo $$f|sed '$(transform)'`; \
+	  $(INSTALL_DATA) $(srcdir)/$$f.8 \
+		${DESTDIR}$(SERVER_MANDIR)/`echo $$f|sed '$(transform)'`.8; \
+	done
 
 authenc.o: telnetd.h
 global.o: defs.h ext.h $(ARPA_TELNET)

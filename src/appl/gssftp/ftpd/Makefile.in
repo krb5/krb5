@@ -34,9 +34,12 @@ clean::
 depend::
 
 install::
-	$(INSTALL_PROGRAM) ftpd $(DESTDIR)$(SERVER_BINDIR)/ftpd
-	$(INSTALL_DATA) $(srcdir)/ftpd.M ${DESTDIR}$(SERVER_MANDIR)/ftp.8
-
+	for f in ftpd; do \
+	  $(INSTALL_PROGRAM) $$f \
+		$(DESTDIR)$(SERVER_BINDIR)/`echo $$f|sed '$(transform)'`; \
+	  $(INSTALL_DATA) $(srcdir)/$$f.M \
+		${DESTDIR}$(SERVER_MANDIR)/`echo $$f|sed '$(transform)'`.8; \
+	done
 
 ftpcmd.c: $(srcdir)/ftpcmd.y
 	$(RM) ftpcmd.c y.tab.c

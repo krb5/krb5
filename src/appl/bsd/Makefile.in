@@ -33,41 +33,40 @@ clean::
 rsh: krsh.o kcmd.o forward.o $(SETENVOBJ) $(LIBOBJS) $(DEPLIBS)
 	$(LD) $(LDFLAGS) $(LDARGS) -o rsh krsh.o kcmd.o forward.o $(SETENVOBJ) $(LIBOBJS) $(LIBS)
 
-install::
-	$(INSTALL_PROGRAM) rsh $(DESTDIR)$(CLIENT_BINDIR)/rsh
-	$(INSTALL_DATA) $(srcdir)/rsh.M ${DESTDIR}$(CLIENT_MANDIR)/rsh.1
-
 rcp: krcp.o kcmd.o forward.o $(SETENVOBJ) $(LIBOBJS) $(DEPLIBS)
 	$(LD) $(LDFLAGS) $(LDARGS) -o rcp krcp.o kcmd.o forward.o $(SETENVOBJ) $(LIBOBJS) $(LIBS)
-
-install::
-	$(INSTALL_PROGRAM) rcp $(DESTDIR)$(CLIENT_BINDIR)/rcp
-	$(INSTALL_DATA) $(srcdir)/rcp.M ${DESTDIR}$(CLIENT_MANDIR)/rcp.1
 
 rlogin: krlogin.o kcmd.o forward.o $(SETENVOBJ) $(LIBOBJS) $(DEPLIBS)
 	$(LD) $(LDFLAGS) $(LDARGS) -o rlogin krlogin.o kcmd.o forward.o $(SETENVOBJ) $(LIBOBJS) $(LIBS)
 
 install::
-	$(INSTALL_PROGRAM) rlogin $(DESTDIR)$(CLIENT_BINDIR)/rlogin
-	$(INSTALL_DATA) $(srcdir)/rlogin.M ${DESTDIR}$(CLIENT_MANDIR)/rlogin.1
+	for f in rsh rcp rlogin; do \
+	  $(INSTALL_PROGRAM) $$f \
+		$(DESTDIR)$(CLIENT_BINDIR)/`echo $$f|sed '$(transform)'`; \
+	  $(INSTALL_DATA) $(srcdir)/$$f.M \
+		${DESTDIR}$(CLIENT_MANDIR)/`echo $$f|sed '$(transform)'`.1; \
+	done
 
 kshd: krshd.o kcmd.o  forward.o $(SETENVOBJ) $(LIBOBJS) $(DEPLIBS)
 	$(LD) $(LDFLAGS) $(LDARGS) -o kshd krshd.o kcmd.o  forward.o $(SETENVOBJ) $(LIBOBJS) $(LIBS)
-
-install::
-	$(INSTALL_PROGRAM) kshd $(DESTDIR)$(SERVER_BINDIR)/kshd
-	$(INSTALL_DATA) $(srcdir)/krshd.M ${DESTDIR}$(SERVER_MANDIR)/kshd.8
 
 klogind: krlogind.o  kcmd.o forward.o $(SETENVOBJ) $(LIBOBJS) $(DEPLIBS)
 	$(LD) $(LDFLAGS) $(LDARGS) -o klogind krlogind.o  kcmd.o forward.o $(SETENVOBJ) $(LIBOBJS) $(LIBS)
 
 install::
-	$(INSTALL_PROGRAM) klogind $(DESTDIR)$(SERVER_BINDIR)/klogind
-	$(INSTALL_DATA) $(srcdir)/krlogind.M ${DESTDIR}$(SERVER_MANDIR)/klogind.8
+	for f in kshd klogind; do \
+	  $(INSTALL_PROGRAM) $$f \
+		$(DESTDIR)$(SERVER_BINDIR)/`echo $$f|sed '$(transform)'`; \
+	  $(INSTALL_DATA) $(srcdir)/krshd.M \
+		${DESTDIR}$(SERVER_MANDIR)/`echo $$f|sed '$(transform)'`.8; \
+	done
 
 #
 # We load the libraries twice here since des425 has a dependency on 
 # krb5_read_passwrd in krb5.a.  Sigh, circular references.
+#
+# No program name transformation is done with login.krb5 since it is directly
+# referenced by klogind.
 #
 login.krb5: login.o  $(SETENVOBJ) $(LIBOBJS) $(DEPLIBS)
 	$(LD) $(LDFLAGS) $(LDARGS) -o login.krb5 login.o $(SETENVOBJ) $(LIBOBJS) $(LIBS) $(LOGINLIBS)
