@@ -1,3 +1,15 @@
+2001-07-02  Ezra Peisach  <epeisach@mit.edu>
+
+	* rpc_test_svc.c: Change rpc_test_prog_1 to
+	rpc_test_prog_1_svc.
+
+	* rpc_test.h: Create prototypes for rpc_test_echo_1_svc and
+	rpc_test_prog_1_svc.
+
+	* server.c: Declare usage and handlesig static.  Change
+	rpc_test_echo_1 to rpc_test_echo_1_svc and rpc_test_prog_1 to
+	rpc_test_prog_1_svc.
+
 2001-06-08  Ezra Peisach  <epeisach@mit.edu>
 
 	* client.c: Include unistd.h for getopt() prototype. 

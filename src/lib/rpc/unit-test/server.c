@@ -25,8 +25,6 @@ static char *rcsid = "$Header$";
 #include <sys/param.h>	/* MAXHOSTNAMELEN */
 #include "rpc_test.h"
 
-extern void rpc_test_prog_1();
-
 extern int svc_debug_gssapi, misc_debug_gssapi;
 
 void rpc_test_badauth(OM_uint32 major, OM_uint32 minor,
@@ -43,16 +41,16 @@ static void rpc_test_badverf(gss_name_t client, gss_name_t server,
 #define SERVICE_NAME "server"
 #endif
 
-void usage()
+static void usage()
 {
      fprintf(stderr, "Usage: server {-t|-u} [svc-debug] [misc-debug]\n");
      exit(1);
 }
 
 #ifdef POSIX_SIGNALS
-void handlesig(int dummy)
+static void handlesig(int dummy)
 #else
-void handlesig(void)
+static void handlesig(void)
 #endif
 {
     exit(0);
@@ -117,7 +115,7 @@ main(int argc, char **argv)
 	  exit(1);
      }
      if (!svc_register(transp, RPC_TEST_PROG, RPC_TEST_VERS_1,
-		       rpc_test_prog_1, prot)) { 
+		       rpc_test_prog_1_svc, prot)) { 
 	  fprintf(stderr,
 		  "unable to register (RPC_TEST_PROG, RPC_TEST_VERS_1, %s).",
 		  prot == IPPROTO_TCP ? "tcp" : "udp");
@@ -153,7 +151,7 @@ main(int argc, char **argv)
      /* NOTREACHED */
 }
 
-char **rpc_test_echo_1(char **arg, struct svc_req *h)
+char **rpc_test_echo_1_svc(char **arg, struct svc_req *h)
 {
      static char *res = NULL;
 
