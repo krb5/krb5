@@ -23,6 +23,7 @@ DEFINES= $(RSH) $(RPROGS) \
 all:: rsh rcp rlogin krshd krlogind login.krb5
 
 clean:: 
+	$(RM) rsh rcp rlogin krshd krlogind login.krb5
 
 rsh: krsh.o kcmd.o forward.o $(SETENVOBJ) $(DEPKLIB)
 	$(CC) $(CFLAGS) -o rsh krsh.o kcmd.o forward.o $(SETENVOBJ) $(KLIB) $(LIBS)
