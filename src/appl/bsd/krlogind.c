@@ -947,7 +947,7 @@ protocol(f, p)
 	    if (fcc < 0 && errno == EWOULDBLOCK)
 	      fcc = 0;
 	    else {
-		register char *cp;
+		register unsigned char *cp;
 		int left, n;
 		
 		if (fcc <= 0)

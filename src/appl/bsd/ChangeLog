@@ -1,5 +1,8 @@
 Wed Oct 19 12:36:47 1994  Theodore Y. Ts'o  (tytso@dcl)
 
+	* krlogind.c (protocol): Change yet another variable to be an
+		unsigned char.
+
 	* login.c (main): Add other termios c_cc initializations for the
 		ALPHA. 
 
