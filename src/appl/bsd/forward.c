@@ -35,7 +35,8 @@
 
 /* Decode, decrypt and store the forwarded creds in the local ccache. */
 krb5_error_code
-rd_and_store_for_creds(inbuf, ticket, lusername)
+rd_and_store_for_creds(context, inbuf, ticket, lusername)
+     krb5_context context;
      krb5_data *inbuf;
      krb5_ticket *ticket;
      char *lusername;
@@ -64,16 +65,16 @@ rd_and_store_for_creds(inbuf, ticket, lusername)
     sprintf(ccname, "FILE:/tmp/krb5cc_p%d", getpid());
     setenv("KRB5CCNAME", ccname, 0);
   
-    if (retval = krb5_cc_resolve(ccname, &ccache)) {
+    if (retval = krb5_cc_resolve(context, ccname, &ccache)) {
 	return(retval);
     }
 
-    if (retval = krb5_cc_initialize(ccache,
+    if (retval = krb5_cc_initialize(context, ccache,
 				    ticket->enc_part2->client)) {
 	return(retval);
     }
 
-    if (retval = krb5_cc_store_cred(ccache, &creds)) {
+    if (retval = krb5_cc_store_cred(context, ccache, &creds)) {
 	return(retval);
     }
 

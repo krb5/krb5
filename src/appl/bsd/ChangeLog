@@ -1,3 +1,9 @@
+Fri Jan 13 15:23:47 1995  Chris Provenzano (proven@mit.edu)
+
+    * Added krb5_context to all krb5_routines
+
+	* krsh.c (main): Use htons(debug_port).
+
 Wed Jan 11 01:25:09 1995  Mark Eichin  <eichin@cygnus.com>
 
 	* logutil.c (update_wtmp): declare missing variables if

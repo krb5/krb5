@@ -178,6 +178,7 @@ char des_inbuf[2*BUFSIZ];         /* needs to be > largest read size */
 krb5_encrypt_block eblock;        /* eblock for encrypt/decrypt */
 char des_outbuf[2*BUFSIZ];        /* needs to be > largest write size */
 krb5_data desinbuf,desoutbuf;
+krb5_context bsd_context;
 
 void fatal();
 int v5_des_read();
@@ -552,7 +553,8 @@ doit(f, fromp)
 	exit(1);
     }
 #ifdef KERBEROS
-    krb5_init_ets();
+    krb5_init_context(&bsd_context);
+    krb5_init_ets(bsd_context);
     netf = f;
     desinbuf.data = des_inbuf;
     desoutbuf.data = des_outbuf;
@@ -957,7 +959,7 @@ doit(f, fromp)
 #endif
 	{
 	    /* krb5_kuserok returns 1 if OK */
-	    if (!krb5_kuserok(client, locuser)){
+	    if (!krb5_kuserok(bsd_context, client, locuser)){
 		syslog(LOG_ERR ,
 		       "Principal %s (%s@%s) for local user %s failed krb5_kuserok.\n",
 		       kremuser, remuser, hostname, locuser);
@@ -1469,7 +1471,7 @@ int princ_maps_to_lname(principal, luser)
      char *luser;
 {
     char kuser[10];
-    if (!(krb5_aname_to_localname(principal,
+    if (!(krb5_aname_to_localname(bsd_context, principal,
 				  sizeof(kuser), kuser))
 	&& (strcmp(kuser, luser) == 0)) {
 	return 1;
@@ -1485,14 +1487,15 @@ int default_realm(principal)
     int realm_length;
     int retval;
     
-    realm_length = krb5_princ_realm(principal)->length;
+    realm_length = krb5_princ_realm(bsd_context, principal)->length;
     
-    if (retval = krb5_get_default_realm(&def_realm)) {
+    if (retval = krb5_get_default_realm(bsd_context, &def_realm)) {
 	return 0;
     }
     
     if ((realm_length != strlen(def_realm)) ||
-	(memcmp(def_realm, krb5_princ_realm(principal)->data, realm_length))) {
+	(memcmp(def_realm, krb5_princ_realm(bsd_context, principal)->data, 
+		realm_length))) {
 	free(def_realm);
 	return 0;
     }	
@@ -1536,8 +1539,8 @@ recvauth(netf, peersin, peeraddr)
 #define SIZEOF_INADDR sizeof(struct in_addr)
 #endif
 
-    if (status = krb5_sname_to_principal(NULL, "host", KRB5_NT_SRV_HST,
-					 &server)) {
+    if (status = krb5_sname_to_principal(bsd_context, NULL, "host", 
+					 KRB5_NT_SRV_HST, &server)) {
 	    syslog(LOG_ERR, "parse server name %s: %s", "host",
 		   error_message(status));
 	    exit(1);
@@ -1545,7 +1548,7 @@ recvauth(netf, peersin, peeraddr)
 
     strcpy(v4_instance, "*");
 
-    status = krb5_compat_recvauth(&netf,
+    status = krb5_compat_recvauth(bsd_context, &netf,
 				  "KCMDV0.1",
 				  server, /* Specify daemon principal */
 				  &peeraddr, /* We do want to match */
@@ -1599,7 +1602,7 @@ recvauth(netf, peersin, peeraddr)
 	sprintf(kremuser, "%s/%s@%s", v4_kdata->pname,
 		v4_kdata->pinst, v4_kdata->prealm);
 	
-	if (status = krb5_parse_name(kremuser, &client))
+	if (status = krb5_parse_name(bsd_context, kremuser, &client))
 	  return(status);
 	return 0;
     }
@@ -1608,31 +1611,31 @@ recvauth(netf, peersin, peeraddr)
 	
     getstr(netf, remuser, sizeof(locuser), "remuser");
 
-    if (status = krb5_unparse_name(client, &kremuser))
+    if (status = krb5_unparse_name(bsd_context, client, &kremuser))
 	return status;
     
     /* Setup eblock for encrypted sessions. */
-    krb5_use_keytype(&eblock, ticket->enc_part2->session->keytype);
-    if (status = krb5_process_key(&eblock, ticket->enc_part2->session))
+    krb5_use_keytype(bsd_context, &eblock, ticket->enc_part2->session->keytype);
+    if (status = krb5_process_key(bsd_context, &eblock, ticket->enc_part2->session))
 	fatal(netf, "Permission denied");
 
     /* Null out the "session" because eblock.key references the session
      * key here, and we do not want krb5_free_ticket() to destroy it. */
     ticket->enc_part2->session = 0;
 
-    if (status = krb5_read_message((krb5_pointer)&netf, &inbuf)) {
+    if (status = krb5_read_message(bsd_context, (krb5_pointer)&netf, &inbuf)) {
 	error("Error reading message: %s\n", error_message(status));
 	exit(1);
     }
 
     if (inbuf.length) { /* Forwarding being done, read creds */
-	if (status = rd_and_store_for_creds(&inbuf, ticket, locuser)) {
+	if (status = rd_and_store_for_creds(bsd_context, &inbuf, ticket, locuser)) {
 	    error("Can't get forwarded credentials: %s\n",
 		  error_message(status));
 	    exit(1);
 	}
     }
-    krb5_free_ticket(ticket);
+    krb5_free_ticket(bsd_context, ticket);
     return 0;
 }
 
@@ -1668,7 +1671,7 @@ v5_des_read(fd, buf, len)
 	nstored = 0;
     }
     
-    if ((cc = krb5_net_read(fd, (char *)len_buf, 4)) != 4) {
+    if ((cc = krb5_net_read(bsd_context, fd, (char *)len_buf, 4)) != 4) {
 	if ((cc < 0)  && ((errno == EWOULDBLOCK) || (errno == EAGAIN)))
 	    return(cc);
 	/* XXX can't read enough, pipe must have closed */
@@ -1689,7 +1692,7 @@ v5_des_read(fd, buf, len)
     }
     retry = 0;
   datard:
-    if ((cc = krb5_net_read(fd, desinbuf.data, net_len)) != net_len) {
+    if ((cc = krb5_net_read(bsd_context, fd, desinbuf.data, net_len)) != net_len) {
 	/* XXX can't read enough, pipe must have closed */
 	if ((cc < 0)  && ((errno == EWOULDBLOCK) || (errno == EAGAIN))) {
 	    retry++;
@@ -1707,7 +1710,7 @@ v5_des_read(fd, buf, len)
     }
 
     /* decrypt info */
-    if (krb5_decrypt(desinbuf.data, (krb5_pointer) storage, net_len,
+    if (krb5_decrypt(bsd_context, desinbuf.data, (krb5_pointer) storage, net_len,
 		     &eblock, 0)) {
 	syslog(LOG_ERR,"Read decrypt problem.");
 	return(0);
@@ -1747,7 +1750,7 @@ v5_des_write(fd, buf, len)
 	return(-1);
     }
 
-    if (krb5_encrypt((krb5_pointer)buf, desoutbuf.data, len, &eblock, 0)) {
+    if (krb5_encrypt(bsd_context, (krb5_pointer)buf, desoutbuf.data, len, &eblock, 0)) {
 	syslog(LOG_ERR,"Write encrypt problem.");
 	return(-1);
     }

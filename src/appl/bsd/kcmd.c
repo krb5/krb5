@@ -66,6 +66,7 @@ extern	errno;
 char *default_service = "host";
 
 extern krb5_cksumtype krb5_kdc_req_sumtype;
+extern krb5_context bsd_context;
 
 kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
      cred, seqno, server_seqno, laddr, faddr, authopts)
@@ -139,8 +140,8 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
         fprintf(stderr,"kcmd: no memory\n");
         return(-1);
     }
-    status = krb5_sname_to_principal(host_save,service,KRB5_NT_SRV_HST,
-				     &ret_cred->server);
+    status = krb5_sname_to_principal(bsd_context, host_save,service,
+				     KRB5_NT_SRV_HST, &ret_cred->server);
     if (status) {
 	    fprintf(stderr, "kcmd: krb5_sname_to_principal failed: %s\n",
 		    error_message(status));
@@ -156,7 +157,7 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
        strcpy(rdata.data, realm);
        
        /* XXX we should free the old realm first */
-       krb5_princ_set_realm(ret_cred->server, &rdata);
+       krb5_princ_set_realm(bsd_context, ret_cred->server, &rdata);
    }
 #ifdef POSIX_SIGNALS
     sigemptyset(&urgmask);
@@ -179,7 +180,7 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
 	    sigsetmask(oldmask);
 #endif /* POSIX_SIGNALS */
 	    if (tmpstr) krb5_xfree(tmpstr);
-	    krb5_free_creds(ret_cred);
+	    krb5_free_creds(bsd_context, ret_cred);
 	    return (-1);
     	}
 #ifdef HAVE_SETOWN
@@ -226,7 +227,7 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
     	sigsetmask(oldmask);
 #endif /* POSIX_SIGNALS */
 	if (tmpstr) krb5_xfree(tmpstr);
-	krb5_free_creds(ret_cred);
+	krb5_free_creds(bsd_context, ret_cred);
     	return (-1);
     }
     lport--;
@@ -282,13 +283,13 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
     
     /* compute checksum, using CRC-32 */
     if (!(send_cksum.contents = (krb5_octet *)
-          malloc(krb5_checksum_size(CKSUMTYPE_CRC32)))) {
+          malloc(krb5_checksum_size(bsd_context, CKSUMTYPE_CRC32)))) {
         status = -1;
         goto bad2;
     }
     /* choose some random stuff to compute checksum from */
     sprintf(tmpstr,"%x %x",pid,pid);
-    if (status = krb5_calculate_checksum(CKSUMTYPE_CRC32,
+    if (status = krb5_calculate_checksum(bsd_context, CKSUMTYPE_CRC32,
                                          tmpstr,
                                          strlen(tmpstr),
                                          0,
@@ -297,14 +298,14 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
                                          &send_cksum)) 
       goto bad3;
     
-    status = krb5_cc_default(&cc);
+    status = krb5_cc_default(bsd_context, &cc);
     if (status) goto bad3;
 
-    status = krb5_cc_get_principal(cc, &ret_cred->client);
+    status = krb5_cc_get_principal(bsd_context, cc, &ret_cred->client);
     if (status) goto bad3;
 
     /* Get ticket from credentials cache or kdc */
-    status = krb5_get_credentials(0, cc, ret_cred);
+    status = krb5_get_credentials(bsd_context, 0, cc, ret_cred);
     if (status) goto bad3;
 
     /* Reset internal flags; these should not be sent. */
@@ -314,7 +315,7 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
    /* call Kerberos library routine to obtain an authenticator,
        pass it over the socket to the server, and obtain mutual
        authentication. */
-    status = krb5_sendauth((krb5_pointer) &s,
+    status = krb5_sendauth(bsd_context, (krb5_pointer) &s,
                            "KCMDV0.1", ret_cred->client, ret_cred->server,
 			   authopts,
                            &send_cksum,
@@ -333,14 +334,14 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
 		fprintf(stderr, "Error text sent from server: %s\n",
 			error->text.data);
 	    }
-	    krb5_free_error(error);
+	    krb5_free_error(bsd_context, error);
 	    error = 0;
 	}
     }	
     if (status) goto bad3;
     if (rep_ret && server_seqno) {
 	*server_seqno = rep_ret->seq_number;
-	krb5_free_ap_rep_enc_part(rep_ret);
+	krb5_free_ap_rep_enc_part(bsd_context, rep_ret);
     }
     
     (void) write(s, remuser, strlen(remuser)+1);
@@ -348,7 +349,7 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
     (void) write(s, locuser, strlen(locuser)+1);
     
     if (options & OPTS_FORWARD_CREDS) {   /* Forward credentials */
-	if (status = krb5_get_for_creds(ETYPE_DES_CBC_CRC,
+	if (status = krb5_get_for_creds(bsd_context, ETYPE_DES_CBC_CRC,
 					krb5_kdc_req_sumtype,
 					hp->h_name,
 					ret_cred->client,
@@ -361,12 +362,12 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
 	}
 	
 	/* Send forwarded credentials */
-	if (status = krb5_write_message((krb5_pointer)&s, &outbuf))
+	if (status = krb5_write_message(bsd_context, (krb5_pointer)&s, &outbuf))
 	  goto bad3;
     }
     else { /* Dummy write to signal no forwarding */
 	outbuf.length = 0;
-	if (status = krb5_write_message((krb5_pointer)&s, &outbuf))
+	if (status = krb5_write_message(bsd_context, (krb5_pointer)&s, &outbuf))
 	  goto bad3;
     }
 
@@ -397,8 +398,8 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
     if (tmpstr) krb5_xfree(tmpstr);
     
     /* pass back credentials if wanted */
-    if (cred) krb5_copy_creds(ret_cred,cred);
-    krb5_free_creds(ret_cred);
+    if (cred) krb5_copy_creds(bsd_context, ret_cred,cred);
+    krb5_free_creds(bsd_context, ret_cred);
     
     return (0);
   bad3:
@@ -415,7 +416,7 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
 #endif /* POSIX_SIGNALS */
     if (tmpstr) krb5_xfree(tmpstr);
     if (ret_cred)
-      krb5_free_creds(ret_cred);
+      krb5_free_creds(bsd_context, ret_cred);
     return (status);
 }
 

@@ -89,6 +89,7 @@ char des_inbuf[2*BUFSIZ];       /* needs to be > largest read size */
 char des_outbuf[2*BUFSIZ];      /* needs to be > largest write size */
 krb5_data desinbuf,desoutbuf;
 krb5_encrypt_block eblock;      /* eblock for encrypt/decrypt */
+krb5_context bsd_context;
 krb5_creds *cred;
 
 int	encrypt_flag = 0;
@@ -318,10 +319,11 @@ main(argc, argv0)
     }
 
     if (debug_port)
-      sp->s_port = debug_port;
+      sp->s_port = htons(debug_port);
     
 #ifdef KERBEROS
-    krb5_init_ets();
+    krb5_init_context(&bsd_context);
+    krb5_init_ets(bsd_context);
     authopts = AP_OPTS_MUTUAL_REQUIRED;
 
     /* Piggy-back forwarding flags on top of authopts; */
@@ -352,8 +354,8 @@ main(argc, argv0)
     /* Setup for des_read and write */
     desinbuf.data = des_inbuf;
     desoutbuf.data = des_outbuf;
-    krb5_use_keytype(&eblock,cred->keyblock.keytype);
-    if (status = krb5_process_key(&eblock,&cred->keyblock)) {
+    krb5_use_keytype(bsd_context, &eblock,cred->keyblock.keytype);
+    if (status = krb5_process_key(bsd_context, &eblock,&cred->keyblock)) {
         fprintf(stderr, "%s: Cannot process session key : %s.\n",
                 argv0, error_message(status));
         exit(1);
@@ -581,7 +583,7 @@ int des_read(fd, buf, len)
 	nstored = 0;
     }
     
-    if ((cc = krb5_net_read(fd, len_buf, 4)) != 4) {
+    if ((cc = krb5_net_read(bsd_context, fd, len_buf, 4)) != 4) {
 	/* XXX can't read enough, pipe must have closed */
 	return(0);
     }
@@ -594,14 +596,14 @@ int des_read(fd, buf, len)
 	fprintf(stderr,"Read size problem.\n");
 	return(0);
     }
-    if ((cc = krb5_net_read(fd, desinbuf.data, net_len)) != net_len) {
+    if ((cc = krb5_net_read(bsd_context, fd, desinbuf.data, net_len)) != net_len) {
 	/* pipe must have closed, return 0 */
 	fprintf(stderr, "Read error: length received %d != expected %d.\n",
 		cc, net_len);
 	return(0);
     }
     /* decrypt info */
-    if (cc = krb5_decrypt(desinbuf.data, (krb5_pointer) storage,
+    if (cc = krb5_decrypt(bsd_context, desinbuf.data, (krb5_pointer) storage,
 			  net_len, &eblock, 0)) {
 	fprintf(stderr,"Cannot decrypt data from network\n");
 	return(0);
@@ -634,12 +636,12 @@ int des_write(fd, buf, len)
     if (!encrypt_flag)
       return(write(fd, buf, len));
     
-    desoutbuf.length = krb5_encrypt_size(len,eblock.crypto_entry);
+    desoutbuf.length = krb5_encrypt_size(len, eblock.crypto_entry);
     if (desoutbuf.length > sizeof(des_outbuf)){
 	fprintf(stderr,"Write size problem.\n");
 	return(-1);
     }
-    if (( krb5_encrypt((krb5_pointer)buf,
+    if (( krb5_encrypt(bsd_context, (krb5_pointer)buf,
 		       desoutbuf.data,
 		       len,
 		       &eblock,

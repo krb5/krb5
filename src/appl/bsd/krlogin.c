@@ -149,6 +149,7 @@ int encrypt_flag = 0;
 int fflag = 0, Fflag = 0;
 krb5_creds *cred;
 struct sockaddr_in local, foreign;
+krb5_context bsd_context;
 
 #ifndef UCB_RLOGIN
 #define UCB_RLOGIN      "/usr/ucb/rlogin"
@@ -455,7 +456,8 @@ main(argc, argv)
 	exit(1);
     }
 #ifdef KERBEROS
-    krb5_init_ets();
+    krb5_init_context(&bsd_context);
+    krb5_init_ets(bsd_context);
     desinbuf.data = des_inbuf;
     desoutbuf.data = des_outbuf;	/* Set up des buffers */
     /*
@@ -578,8 +580,8 @@ main(argc, argv)
     rem = sock;
     
     /* setup eblock for des_read and write */
-    krb5_use_keytype(&eblock,cred->keyblock.keytype);
-    if ( status = krb5_process_key(&eblock,&cred->keyblock)) {
+    krb5_use_keytype(bsd_context, &eblock,cred->keyblock.keytype);
+    if ( status = krb5_process_key(bsd_context, &eblock,&cred->keyblock)) {
 	fprintf(stderr,
 		"%s: Cannot process session key : %s.\n",
 		orig_argv[0], error_message(status));
@@ -1681,7 +1683,7 @@ int des_read(fd, buf, len)
 	nstored = 0;
     }
     
-    if ((cc = krb5_net_read(fd, (char *)&len_buf, 4)) != 4) {
+    if ((cc = krb5_net_read(bsd_context, fd, (char *)&len_buf, 4)) != 4) {
 	/* XXX can't read enough, pipe must have closed */
 	return(0);
     }
@@ -1694,7 +1696,7 @@ int des_read(fd, buf, len)
 	fprintf(stderr,"Read size problem.\n");
 	return(0);
     }
-    if ((cc = krb5_net_read(fd, desinbuf.data, net_len)) != net_len) {
+    if ((cc = krb5_net_read(bsd_context, fd, desinbuf.data, net_len)) != net_len) {
 	/* pipe must have closed, return 0 */
 	fprintf(stderr,
 		"Read error: length received %d != expected %d.\n",
@@ -1702,7 +1704,7 @@ int des_read(fd, buf, len)
 	return(0);
     }
     /* decrypt info */
-    if ((krb5_decrypt(desinbuf.data,
+    if ((krb5_decrypt(bsd_context, desinbuf.data,
 		      (krb5_pointer) storage,
 		      net_len,
 		      &eblock, 0))) {
@@ -1742,7 +1744,7 @@ int des_write(fd, buf, len)
 	fprintf(stderr,"Write size problem.\n");
 	return(-1);
     }
-    if (( krb5_encrypt((krb5_pointer)buf,
+    if (( krb5_encrypt(bsd_context, (krb5_pointer)buf,
 		       desoutbuf.data,
 		       len,
 		       &eblock,
@@ -1799,7 +1801,7 @@ int des_read(fd, buf, len)
 	len -= nstored;
 	nstored = 0;
     }
-    if ((cc = krb5_net_read(fd, len_buf, 4)) != 4) {
+    if ((cc = krb5_net_read(bsd_context, fd, len_buf, 4)) != 4) {
 	/* XXX can't read enough, pipe must have closed */
 	return(0);
     }
@@ -1817,7 +1819,7 @@ int des_read(fd, buf, len)
 #else
     rd_len = roundup(net_len, 8);
 #endif
-    if ((cc = krb5_net_read(fd, des_inbuf, rd_len)) != rd_len) {
+    if ((cc = krb5_net_read(bsd_context, fd, des_inbuf, rd_len)) != rd_len) {
 	/* pipe must have closed, return 0 */
 	return(0);
     }
@@ -1866,7 +1868,7 @@ int des_write(fd, buf, len)
 #define min(a,b) ((a < b) ? a : b)
     
     if (len < 8) {
-	krb5_random_confounder(8 - len, &garbage_buf);
+	krb5_random_confounder(bsd_context, 8 - len, &garbage_buf);
 	/* this "right-justifies" the data in the buffer */
 	(void) memcpy(garbage_buf + 8 - len, buf, len);
     }

@@ -85,6 +85,7 @@ char des_outbuf[2*BUFSIZ];         /* needs to be > largest write size */
 krb5_data desinbuf,desoutbuf;
 krb5_encrypt_block eblock;         /* eblock for encrypt/decrypt */
 krb5_keyblock *session_key;	   /* static key for session */
+krb5_context bsd_context;
 
 void	try_normal();
 char	**save_argv();
@@ -149,7 +150,8 @@ main(argc, argv)
     char **orig_argv = save_argv(argc, argv);
     
     sp = getservbyname("kshell", "tcp");
-    krb5_init_ets();
+    krb5_init_context(&bsd_context);
+    krb5_init_ets(bsd_context);
     desinbuf.data = des_inbuf;
     desoutbuf.data = des_outbuf;    /* Set up des buffers */
 #else
@@ -556,7 +558,7 @@ susystem(s)
 #ifdef POSIX_SIGNALS
     struct sigaction sa, isa, qsa;
 #else
-    register krb5_sigtype (*istat)(), (*qstat)();
+    register krb5_sigtype (bsd_context, *istat)(), (*qstat)();
 #endif
     
     if ((pid = vfork()) == 0) {
@@ -1143,19 +1145,17 @@ char **save_argv(argc, argv)
 #endif
 
 #include <krb5/widen.h>    
-krb5_error_code tgt_keyproc(DECLARG(krb5_pointer, keyprocarg),
-			    DECLARG(krb5_principal, principal),
-			    DECLARG(krb5_kvno, vno),
-			    DECLARG(krb5_keyblock **, key))
-     OLDDECLARG(krb5_pointer, keyprocarg)
-     OLDDECLARG(krb5_principal, principal)
-     OLDDECLARG(krb5_kvno, vno)
-     OLDDECLARG(krb5_keyblock **, key)
+krb5_error_code tgt_keyproc(context, keyprocarg, principal, vno, key)
+     krb5_context context;
+     krb5_pointer keyprocarg;
+     krb5_principal principal;
+     krb5_kvno vno;
+     krb5_keyblock ** key;
 #include <krb5/narrow.h>
 {
     krb5_creds *creds = (krb5_creds *)keyprocarg;
     
-    return krb5_copy_keyblock(&creds->keyblock, key);
+    return krb5_copy_keyblock(context, &creds->keyblock, key);
 }
 
 
@@ -1173,7 +1173,7 @@ void send_auth()
     
     
     
-    if (status = krb5_cc_default(&cc)){
+    if (status = krb5_cc_default(bsd_context, &cc)){
 	fprintf(stderr,"rcp: send_auth failed krb5_cc_default : %s\n",
 		error_message(status));
 	exit(1);
@@ -1181,49 +1181,49 @@ void send_auth()
     
     memset ((char*)&creds, 0, sizeof(creds));
     
-    if (status = krb5_cc_get_principal(cc, &creds.client)){
+    if (status = krb5_cc_get_principal(bsd_context, cc, &creds.client)){
 	fprintf(stderr,
 		"rcp: send_auth failed krb5_cc_get_principal : %s\n",
 		error_message(status));
-	krb5_cc_close(cc);
+	krb5_cc_close(bsd_context, cc);
 	exit(1);
     }
     
-    if (status = krb5_unparse_name(creds.client, &princ)){
+    if (status = krb5_unparse_name(bsd_context, creds.client, &princ)){
 	fprintf(stderr,"rcp: send_auth failed krb5_parse_name : %s\n",
 		error_message(status));
-	krb5_cc_close(cc);
+	krb5_cc_close(bsd_context, cc);
 	exit(1);
     }
-    if (status = krb5_build_principal_ext(&creds.server,
-					  krb5_princ_realm(creds.client)->length,
-					  krb5_princ_realm(creds.client)->data,
+    if (status = krb5_build_principal_ext(bsd_context, &creds.server,
+			  krb5_princ_realm(bsd_context, creds.client)->length,
+			  krb5_princ_realm(bsd_context, creds.client)->data,
 					  6, "krbtgt",
-					  krb5_princ_realm(creds.client)->length,
-					  krb5_princ_realm(creds.client)->data,
+			  krb5_princ_realm(bsd_context, creds.client)->length,
+			  krb5_princ_realm(bsd_context, creds.client)->data,
 					  0)){
 	fprintf(stderr,
 		"rcp: send_auth failed krb5_build_principal_ext : %s\n",
 		error_message(status));
-	krb5_cc_close(cc);
+	krb5_cc_close(bsd_context, cc);
 	exit(1);
     }
     
     /* Get TGT from credentials cache */
-    if (status = krb5_get_credentials(KRB5_GC_CACHED, cc, &creds)){
+    if (status = krb5_get_credentials(bsd_context, KRB5_GC_CACHED, cc, &creds)){
 	fprintf(stderr,
                 "rcp: send_auth failed krb5_get_credentials: %s\n",
 		error_message(status));
-	krb5_cc_close(cc);
+	krb5_cc_close(bsd_context, cc);
 	exit(1);
     }
-    krb5_cc_close(cc);
+    krb5_cc_close(bsd_context, cc);
     
     princ_data.data = princ;
     princ_data.length = strlen(princ_data.data) + 1; /* include null 
 							terminator for
 							server's convenience */
-    status = krb5_write_message((krb5_pointer) &rem, &princ_data);
+    status = krb5_write_message(bsd_context, (krb5_pointer) &rem, &princ_data);
     if (status){
 	fprintf(stderr,
                 "rcp: send_auth failed krb5_write_message: %s\n",
@@ -1231,7 +1231,7 @@ void send_auth()
 	exit(1);
     }
     krb5_xfree(princ);
-    status = krb5_write_message((krb5_pointer) &rem, &creds.ticket);
+    status = krb5_write_message(bsd_context, (krb5_pointer)&rem, &creds.ticket);
     if (status){
 	fprintf(stderr,
                 "rcp: send_auth failed krb5_write_message: %s\n",
@@ -1239,7 +1239,7 @@ void send_auth()
 	exit(1);
     }
     
-    status = krb5_read_message((krb5_pointer) &rem, &reply);
+    status = krb5_read_message(bsd_context, (krb5_pointer) &rem, &reply);
     if (status){
 	fprintf(stderr,
                 "rcp: send_auth failed krb5_read_message: %s\n",
@@ -1253,7 +1253,7 @@ void send_auth()
     faddr.contents = (krb5_octet *) &foreign.sin_addr;
     
     /* read the ap_req to get the session key */
-    status = krb5_rd_req(&reply,
+    status = krb5_rd_req(bsd_context, &reply,
 			 0,               /* don't know server's name... */
 			 &faddr,
 			 0,               /* no fetchfrom */
@@ -1269,12 +1269,13 @@ void send_auth()
 	exit(1);
     }
     
-    krb5_copy_keyblock(authdat->ticket->enc_part2->session,&session_key);
-    krb5_free_tkt_authent(authdat);
-    krb5_free_cred_contents(&creds);
+    krb5_copy_keyblock(bsd_context, authdat->ticket->enc_part2->session,
+		       &session_key);
+    krb5_free_tkt_authent(bsd_context, authdat);
+    krb5_free_cred_contents(bsd_context, &creds);
     
-    krb5_use_keytype(&eblock, session_key->keytype);
-    if ( status = krb5_process_key(&eblock, 
+    krb5_use_keytype(bsd_context, &eblock, session_key->keytype);
+    if ( status = krb5_process_key(bsd_context, &eblock, 
 				   session_key)){
 	fprintf(stderr, "rcp: send_auth failed krb5_process_key: %s\n",
 		error_message(status));
@@ -1297,39 +1298,40 @@ void
     
     memset ((char*)&creds, 0, sizeof(creds));
     
-    if (status = krb5_read_message((krb5_pointer) &rem, &pname_data)) {
+    if (status = krb5_read_message(bsd_context, (krb5_pointer)&rem, 
+				   &pname_data)) {
 	exit(1);
     }
     
-    if (status = krb5_read_message((krb5_pointer) &rem,
+    if (status = krb5_read_message(bsd_context, (krb5_pointer) &rem,
 				   &creds.second_ticket)) {
 	exit(1);
     }
     
-    if (status = krb5_cc_default(&cc)){
+    if (status = krb5_cc_default(bsd_context, &cc)){
 	exit(1);
     }
     
-    if (status = krb5_cc_get_principal(cc, &creds.client)){
-	krb5_cc_destroy(cc);
-	krb5_cc_close(cc);
+    if (status = krb5_cc_get_principal(bsd_context, cc, &creds.client)){
+	krb5_cc_destroy(bsd_context, cc);
+	krb5_cc_close(bsd_context, cc);
 	exit(1);
     }
     
-    if (status = krb5_parse_name(pname_data.data, &creds.server)){
-	krb5_cc_destroy(cc);
-	krb5_cc_close(cc);
+    if (status = krb5_parse_name(bsd_context, pname_data.data, &creds.server)){
+	krb5_cc_destroy(bsd_context, cc);
+	krb5_cc_close(bsd_context, cc);
 	exit(1);
     }
     krb5_xfree(pname_data.data);
     
-    if (status = krb5_get_credentials(KRB5_GC_USER_USER, cc, &creds)){
-	krb5_cc_destroy(cc);
-	krb5_cc_close(cc);
+    if (status = krb5_get_credentials(bsd_context, KRB5_GC_USER_USER, cc, &creds)){
+	krb5_cc_destroy(bsd_context, cc);
+	krb5_cc_close(bsd_context, cc);
 	exit(1);
     }
     
-    if (status = krb5_mk_req_extended(AP_OPTS_USE_SESSION_KEY,
+    if (status = krb5_mk_req_extended(bsd_context, AP_OPTS_USE_SESSION_KEY,
 				      0,       /* no application checksum here */
 				      krb5_kdc_default_options,
 				      0,
@@ -1338,27 +1340,27 @@ void
 				      &creds,
 				      0,       /* don't need authenticator copy */
 				      &msg)) {
-	krb5_cc_destroy(cc);
-	krb5_cc_close(cc);
+	krb5_cc_destroy(bsd_context, cc);
+	krb5_cc_close(bsd_context, cc);
 	exit(1);
     }
-    krb5_cc_destroy(cc);
-    krb5_cc_close(cc);
-    status = krb5_write_message((krb5_pointer) &rem, &msg);
+    krb5_cc_destroy(bsd_context, cc);
+    krb5_cc_close(bsd_context, cc);
+    status = krb5_write_message(bsd_context, (krb5_pointer) &rem, &msg);
     krb5_xfree(msg.data);
     if (status){
 	exit(1);
     }
     
     /* setup eblock for des_read and write */
-    krb5_copy_keyblock(&creds.keyblock,&session_key);
+    krb5_copy_keyblock(bsd_context, &creds.keyblock,&session_key);
     
     /* cleanup */
-    krb5_free_cred_contents(&creds);
+    krb5_free_cred_contents(bsd_context, &creds);
     
     /* OK process key */
-    krb5_use_keytype(&eblock, session_key->keytype);
-    if ( status = krb5_process_key(&eblock,session_key)) {
+    krb5_use_keytype(bsd_context, &eblock, session_key->keytype);
+    if ( status = krb5_process_key(bsd_context, &eblock,session_key)) {
 	exit(1);
     }
     
@@ -1398,7 +1400,7 @@ int des_read(fd, buf, len)
 	nstored = 0;
     }
     
-    if ((cc = krb5_net_read(fd, (char *)&len_buf, 4)) != 4) {
+    if ((cc = krb5_net_read(bsd_context, fd, (char *)&len_buf, 4)) != 4) {
 	/* XXX can't read enough, pipe must have closed */
 	return(0);
     }
@@ -1413,14 +1415,14 @@ int des_read(fd, buf, len)
 	errno = E2BIG;
 	return(-1);
     }
-    if ((cc = krb5_net_read(fd, desinbuf.data, net_len)) != net_len) {
+    if ((cc = krb5_net_read(bsd_context, fd, desinbuf.data, net_len)) != net_len) {
 	/* pipe must have closed, return 0 */
 	error( "rcp: Des_read error: length received %d != expected %d.\n",
 	      cc,net_len);
 	return(0);
     }
     /* decrypt info */
-    if ((status = krb5_decrypt(desinbuf.data,
+    if ((status = krb5_decrypt(bsd_context, desinbuf.data,
 			       (krb5_pointer) storage,
 			       net_len,
 			       &eblock, 0))) {
@@ -1460,7 +1462,7 @@ int des_write(fd, buf, len)
     if (desoutbuf.length > sizeof(des_outbuf)){
 	return(-1);
     }
-    if (( krb5_encrypt((krb5_pointer)buf,
+    if (( krb5_encrypt(bsd_context, (krb5_pointer)buf,
 		       desoutbuf.data,
 		       len,
 		       &eblock,
