@@ -59,13 +59,6 @@ To build the Macintosh version of Kerberos 5 and GSS:
 	   has been fixed. If this happens to you, you should restart MPW and start
 	   the build again, and report the problem to macdev@mit.edu.
 
---- Building the Cygnus Network Security Application ---
-
-	10) Open the project file "[krb5 src]:mac:kconfig:kconfig.prj" in the
-	    CodeWarrior Pro 2 IDE.
-
-	11) Select "Make" from the "Project" menu.
-
 --- Binaries ---
 
 	The following assumes that you have followed the steps above to build
@@ -93,21 +86,6 @@ To build the Macintosh version of Kerberos 5 and GSS:
        :K5LibraryPPC
        * CFM Shared Library including Kerberos 5 for PowerPC Macs.
        
-       :libgss.68K
-       * Static CodeWarrior library including GSS for 68k Macs
-       
-       :libgss.PPC
-       * Static CodeWarrior library including GSS for PowerPC Macs
-       
-       :libkrb5.68K
-       * Static CodeWarrior library including Kerberos 5 for 68k Macs
-       
-       :libkrb5.PPC
-       * Static CodeWarrior library including Kerberos 5 for PowerPC Macs
-
-	   :mac:kconfig:CNS Config
-	   * Kerberos 5 Ticket Manager (aka Cygnus Network Security Configuration) application
-	    
 	   :mac:krb5.ini
 	   * Sample krb5.ini file using CYGNUS.COM as the default realm
 	     
@@ -128,9 +106,6 @@ To build the Macintosh version of Kerberos 5 and GSS:
 	      the CFM-68K Runtime Enabler 4.0, available from Apple at:
 	      
 	      <ftp://ftp.info.apple.com/Apple_Support_Area/Apple_Software_Updates/US/Macintosh/System/CFM-68K/>
-	      
-	   4) Put the "CNS Config" application in a handy location.
-
 
 --- Getting Started Programming ---
 
@@ -159,7 +134,7 @@ To build the Macintosh version of Kerberos 5 and GSS:
     
       <http://web.mit.edu/macdev/mit/doc/pdf/krb5api.pdf>
     
-    (This document was created from tex files in the main krb5 source tree.)
+    (That document was created from tex files in the main Kerberos 5 source tree.)
     
     The GSSAPI is described in Internet RFC's 1508 and 1509:
     

@@ -1,3 +1,11 @@
+Fri Aug 28 12:00:00 1998  Miro Jurisic <meeroh@mit.edu>
+
+	* Makefile.tmpl: Removed static library targets, renamed other
+	targets, added debugging targets
+	* ReadMe: removed mentions of static libraries and kconfig
+	* macfile_gen.pl: renamed output variables
+	* version.r: upped to 1.1a3
+
 Fri Aug 21 17:00:00 1998  Miro Jurisic <meeroh@mit.edu>
 
 	* Makefile.tmpl: Added CCache API dependencies
