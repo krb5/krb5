@@ -1,3 +1,6 @@
+Wed Sep 13 10:28:47 1995 Keith Vetter (keithv@fusion.com)
+
+	* crc.c: put function prototype back in.
 
 Fri Jul 7 16:10:52 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* crc.c - Use CRC32_CKSUM_LENGTH where appropriate.  Add checksum
