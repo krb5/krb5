@@ -1,5 +1,7 @@
 Thu Jun  6 00:04:38 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
+	* patchlevel.h (KRB5_MINOR_RELEASE): Update patchlevel for Beta 6 release.
+
 	* Makefile.in (FILES): Include lib/crypto/sha/* in list of files
 		to be built for Windows and the Macintosh.
 		(makefile-windows): Build lib/crypto/sha/makefile for Windows
