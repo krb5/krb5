@@ -66,7 +66,7 @@ krb5_int32 *seqno;
 	return(retval);
 	
     if (retval = krb5_random_key(&eblock, random_state, &subkey)) {
-	(void) krb5_finish_random_key(&eblock, random_state);
+	(void) krb5_finish_random_key(&eblock, &random_state);
 	return retval;
     }	
     /* ignore the error if any, since we've already gotten the key out */

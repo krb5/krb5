@@ -51,12 +51,12 @@ krb5_keyblock **subkey;
 	return(retval);
     *subkey = (krb5_keyblock *)malloc(sizeof(**subkey));
     if (!*subkey) {
-	(void) krb5_finish_random_key(&eblock, random_state);
+	(void) krb5_finish_random_key(&eblock, &random_state);
 	return ENOMEM;
     }
 	
     if (retval = krb5_random_key(&eblock, random_state, subkey)) {
-	(void) krb5_finish_random_key(&eblock, random_state);
+	(void) krb5_finish_random_key(&eblock, &random_state);
 	xfree(*subkey);
 	return retval;
     }	
