@@ -264,6 +264,7 @@
 	_krb5_appdefault_boolean
 #
 	_krb524_convert_creds_kdc
+	_krb5_524_convert_creds
 #
 #
 # DEPRECATED:

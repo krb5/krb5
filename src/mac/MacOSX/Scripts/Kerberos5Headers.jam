@@ -59,8 +59,6 @@ actions MakeFrameworkHeader
            -e 's:<kerberosIV/krb_err.h>:<Kerberos/krb_err.h>:' \
            -e 's:<profile.h>:<Kerberos/profile.h>:' \
            -e 's:<krb5.h>:<Kerberos/krb5.h>:' \
-           -e 's:<krb524.h>:<Kerberos/krb524.h>:' \
-           -e 's:<krb524_err.h>:<Kerberos/krb524_err.h>:' \
            -e 's:<gssapi/gssapi.h>:<Kerberos/gssapi.h>:' \
            -e 's:<gssapi/gssapi_krb5.h>:<Kerberos/gssapi_krb5.h>:' \
            -e 's:<gssapi/gssapi_generic.h>:<Kerberos/gssapi_generic.h>:' \
@@ -100,12 +98,9 @@ CatHeader           "$(IntermediateIncludes)/krb5.h"               : "__KERBEROS
                                                                      "$(IntermediateErrorTables)/asn1_err.h"
                                                                      "$(IntermediateErrorTables)/kdb5_err.h"
                                                                      "$(IntermediateErrorTables)/krb5_err.h"
+                                                                     "$(IntermediateErrorTables)/krb524_err.h"
                                                                      "$(IntermediateErrorTables)/kv5m_err.h" ;
-CopyHeader          "$(IntermediateIncludes)/krb524.h"             : "$(SRCROOT)/../Sources/krb524/krb524.h" ;
-CopyHeader          "$(IntermediateIncludes)/krb524_err.h"         : "$(IntermediateErrorTables)/krb524_err.h" ;
 MakeFrameworkHeader "$(IntermediateFrameworkHeaders)/krb5.h"       : "$(IntermediateIncludes)/krb5.h" ;
-MakeFrameworkHeader "$(IntermediateFrameworkHeaders)/krb524.h"     : "$(IntermediateIncludes)/krb524.h" ;
-MakeFrameworkHeader "$(IntermediateFrameworkHeaders)/krb524_err.h" : "$(IntermediateIncludes)/krb524_err.h" ;
 
 CatHeader           "$(IntermediateGSSIncludes)/gssapi.h"              : "__GSSAPI__"
                                                                          "$(SRCROOT)/../Sources/lib/gssapi/generic/gssapi.hin"
@@ -135,11 +130,7 @@ DEPENDS all :	"$(IntermediateIncludes)/com_err.h"
                 "$(IntermediateFrameworkHeaders)/profile.h"
                 
                 "$(IntermediateIncludes)/krb5.h"
-                "$(IntermediateIncludes)/krb524.h"
-                "$(IntermediateIncludes)/krb524_err.h"
                 "$(IntermediateFrameworkHeaders)/krb5.h"
-                "$(IntermediateFrameworkHeaders)/krb524.h"
-                "$(IntermediateFrameworkHeaders)/krb524_err.h"
                 
                 "$(IntermediateGSSIncludes)/gssapi.h"
                 "$(IntermediateGSSIncludes)/gssapi_generic.h"
