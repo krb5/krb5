@@ -1202,7 +1202,8 @@ void ovsec_kadm_free_principal_ent(ovsec_kadm_principal_ent_t);
 \end{verbatim}
 
 Free the memory that was allocated by a call to
-ovsec_kadm_get_principal. 
+ovsec_kadm_get_principal.  If the argument is NULL, the function
+returns succesfully.
 
 AUTHORIZATION REQUIRED: none (local operation)
 
@@ -1210,7 +1211,8 @@ AUTHORIZATION REQUIRED: none (local operation)
 void ovsec_kadm_free_policy_ent(ovsec_kadm_policy_ent_t);
 \end{verbatim}
 
-Free memory that was allocated by a call to ovsec_kadm_get_policy.
+Free memory that was allocated by a call to ovsec_kadm_get_policy.  If
+the argument is NULL, the function returns succesfully.
 
 AUTHORIZATION REQUIRED: none (local operation)
 
