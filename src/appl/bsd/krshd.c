@@ -318,7 +318,7 @@ extern
 #endif /* CRAY */
 #endif /* KERBEROS */
 
-char	**environ;
+extern char	**environ;
 char ttyn[12];		/* Line string for wtmp entries */
 
 #if defined (alliant) /* Alliant compiler complains of too many 
