@@ -593,7 +593,7 @@ gss-library-objects-68k-final = `catenate {gss-objects-68k-final-list}` {root-fo
 krb5-library-objects-ppc-debug = `catenate {krb5-objects-ppc-debug-list}` {root-folder}mac:K5.CFM{object-suffix-ppc-debug}
 krb5-library-objects-68k-debug = `catenate {krb5-objects-68k-debug-list}` {root-folder}mac:K5.CFM{object-suffix-68k-debug}
 krb5-library-objects-ppc-final = `catenate {krb5-objects-ppc-final-list}` {root-folder}mac:K5.CFM{object-suffix-ppc-final}
-krb5-library-objects-68k-final = `catenate {krb5-objects-68k-final-list}` {root-folder}mac:K5.CFM{object-suffix-68k-debug}
+krb5-library-objects-68k-final = `catenate {krb5-objects-68k-final-list}` {root-folder}mac:K5.CFM{object-suffix-68k-final}
 
 krb5-globals-library-objects-ppc-debug = ¶
 	{krb5-globals-root-folder}Krb5Globals{object-suffix-ppc-debug} ¶
@@ -605,8 +605,8 @@ krb5-globals-library-objects-ppc-final = ¶
 	{krb5-globals-root-folder}Krb5Globals{object-suffix-ppc-final} ¶
 	{krb5-globals-root-folder}Krb5Globals.CFM{object-suffix-ppc-final}
 krb5-globals-library-objects-68k-final = ¶
-	{krb5-globals-root-folder}Krb5Globals{object-suffix-68k-debug} ¶
-	{krb5-globals-root-folder}Krb5Globals.CFM{object-suffix-68k-debug}
+	{krb5-globals-root-folder}Krb5Globals{object-suffix-68k-final} ¶
+	{krb5-globals-root-folder}Krb5Globals.CFM{object-suffix-68k-final}
 
 krb5-globals-data-library-objects-ppc = {krb5-globals-root-folder}Krb5GlobalsData{object-suffix-ppc-data}
 krb5-globals-data-library-objects-68k = {krb5-globals-root-folder}Krb5GlobalsData{object-suffix-68k-data}
