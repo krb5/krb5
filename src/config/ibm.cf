@@ -8,6 +8,9 @@
  */
 
 #define OSName            AOS 4.3
+#define	OS_BSD            1
+/* #define OS_BSD_TAHOE */
+/* #define OS_BSD_RENO */
 #define OSMajorVersion    4
 #define OSMinorVersion    3
 
