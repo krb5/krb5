@@ -78,9 +78,6 @@
 #include <sys/file.h>
 #include <sys/stat.h>
 
-/* for socklen() */
-#include "socket-utils.h"
-
 #if TIME_WITH_SYS_TIME
 # include <sys/time.h>
 # include <time.h>
@@ -101,6 +98,9 @@
 #include <netinet/in.h>
 
 #include <arpa/telnet.h>
+
+/* for socklen() */
+#include "socket-utils.h"
 
 #include <stdio.h>
 #ifdef	__STDC__
