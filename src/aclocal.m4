@@ -1014,7 +1014,12 @@ mips-sgi-irix*)
 	SHLIBSEXT='.so.$(LIBMAJOR)'
 	SHLIBEXT=.so
 	SHOBJEXT=.o
-	LDCOMBINE='ld -shared -ignore_unresolved -update_registry $(BUILDTOP)/so_locations -soname lib$(LIB)$(SHLIBSEXT)'
+	# Kludge follows:
+	if test "$GCC" = yes; then
+		LDCOMBINE='ld -n32 -shared -ignore_unresolved -update_registry $(BUILDTOP)/so_locations -soname lib$(LIB)$(SHLIBSEXT)'
+	else
+		LDCOMBINE='ld -shared -ignore_unresolved -update_registry $(BUILDTOP)/so_locations -soname lib$(LIB)$(SHLIBSEXT)'
+	fi
 	SHLIB_EXPFLAGS='-rpath $(SHLIB_RDIRS) $(SHLIB_DIRS) $(SHLIB_EXPLIBS)'
 	# no gprof for Irix...
 	PROFFLAGS=-p
