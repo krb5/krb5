@@ -265,3 +265,4 @@ EXPORTS
 	krb5_cc_remove_cred
 	krb5_cc_set_flags
 	krb5_cc_get_type
+	krb5_rc_close		; gssapi

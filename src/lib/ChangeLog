@@ -1,3 +1,7 @@
+2001-01-22  Danilo Almeida  <dalmeida@mit.edu>
+
+	* krb5_32.def: Add krb5_rc_close() so gssapi builds.
+
 2000-07-29  Danilo Almeida  <dalmeida@mit.edu>
 
 	* krb5_32.def: Add missing krb5_cc_store_cred().
