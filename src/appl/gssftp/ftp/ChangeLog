@@ -1,3 +1,11 @@
+2001-07-03  Ezra Peisach  <epeisach@mit.edu>
+
+	* secure.c: Instead of hard wiring the FUDGE_FACTOR, new variables
+	to keep track of the total buffer length desired and the actual
+	maximum that can be fitted. Add secure_determine_constants() to
+	determine the mechanism dependent overhead. This has a hard limit
+	for krb4 - for gssapi use gss_wrap_size_limit.
+
 2001-06-15  Ezra Peisach  <epeisach@mit.edu>
 
 	* cmds.c, domacro.c: Cast arguments to isspace() and isdigit()

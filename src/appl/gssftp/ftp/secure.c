@@ -3,7 +3,6 @@
  * secure read(), write(), getc(), and putc().
  * Only one security context, thus only work on one fd at a time!
  */
-
 #ifdef GSSAPI
 #include <gssapi/gssapi.h>
 #include <gssapi/gssapi_generic.h>
@@ -70,23 +69,18 @@ extern unsigned int maxbuf; 	/* maximum output buffer size */
 extern unsigned char *ucbuf;	/* cleartext buffer */
 static unsigned int nout;	/* number of chars in ucbuf,
 				 * pointer into ucbuf */
+static unsigned int smaxbuf;    /* Internal saved value of maxbuf 
+				   in case changes on us */
+static unsigned int smaxqueue;  /* Maximum allowed to queue before 
+				   flush buffer. < smaxbuf by fudgefactor */
 
 #ifdef KRB5_KRB4_COMPAT
-#define FUDGE_FACTOR 32		/* Amount of growth
+#define KRB4_FUDGE_FACTOR 32	/* Amount of growth
 				 * from cleartext to ciphertext.
 				 * krb_mk_priv adds this # bytes.
 				 * Must be defined for each auth type.
 				 */
 #endif /* KRB5_KRB4_COMPAT */
-
-#ifdef GSSAPI
-#undef FUDGE_FACTOR
-#define FUDGE_FACTOR 64 /*It appears to add 52 byts, but I'm not usre it is a constant--hartmans*/
-#endif /*GSSAPI*/
-
-#ifndef FUDGE_FACTOR		/* In case no auth types define it. */
-#define FUDGE_FACTOR 0
-#endif
 
 #ifdef KRB5_KRB4_COMPAT
 /* XXX - The following must be redefined if KERBEROS_V4 is not used
@@ -153,6 +147,45 @@ looping_read(fd, buf, len)
 
 #define ERR	-2
 
+/* 
+ * Given maxbuf as a buffer size, determine how much can we
+ * really transfer given the overhead of different algorithms 
+ *
+ * Sets smaxbuf and smaxqueue
+ */
+
+static int secure_determine_constants()
+{
+    smaxbuf = maxbuf;
+    smaxqueue = maxbuf;
+
+#ifdef KRB5_KRB4_COMPAT
+    /* For KRB4 - we know the fudge factor to be 32 */
+    if (strcmp(auth_type, "KERBEROS_V4") == 0) {
+	smaxqueue = smaxbuf - KRB4_FUDGE_FACTOR;
+    }
+#endif
+#ifdef GSSAPI
+    if (strcmp(auth_type, "GSSAPI") == 0) {
+	OM_uint32 maj_stat, min_stat, mlen;
+	OM_uint32 msize = maxbuf;
+	maj_stat = gss_wrap_size_limit(&min_stat, gcontext, 
+				       (dlevel == PROT_P),
+				       GSS_C_QOP_DEFAULT,
+				       msize, &mlen);
+	if (maj_stat != GSS_S_COMPLETE) {
+			secure_gss_error(maj_stat, min_stat, 
+					 "GSSAPI fudge determination");
+			/* Return error how? */
+			return ERR;
+	}
+	smaxqueue = mlen;
+    }
+#endif
+    
+	return 0;
+}
+
 static int
 secure_putbyte(fd, c)
 int fd;
@@ -160,13 +193,17 @@ unsigned char c;
 {
 	int ret;
 
+	if ((smaxbuf == 0) || (smaxqueue == 0) || (smaxbuf != maxbuf)) {
+	    ret = secure_determine_constants();
+	    if (ret) return ret;
+	}
 	ucbuf[nout++] = c;
-	if (nout == MAX - FUDGE_FACTOR) {
+	if (nout == smaxqueue) {
 	  nout = 0;
-	  ret = secure_putbuf(fd, ucbuf, MAX - FUDGE_FACTOR);
+	  ret = secure_putbuf(fd, ucbuf, smaxqueue);
 	  return(ret?ret:c);
 	}
-return (c);
+	return (c);
 }
 
 /* returns:
@@ -240,14 +277,16 @@ unsigned int nbyte;
 	static unsigned int bufsize;	/* size of outbuf */
 	ftp_int32 length;
 	ftp_uint32 net_len;
+	unsigned int fudge = smaxbuf - smaxqueue; /* Difference in length
+						     buffer lengths required */
 
 	/* Other auth types go here ... */
 #ifdef KRB5_KRB4_COMPAT
-	if (bufsize < nbyte + FUDGE_FACTOR) {
+	if (bufsize < nbyte + fudge) {
 		if (outbuf?
-		    (outbuf = realloc(outbuf, (unsigned) (nbyte + FUDGE_FACTOR))):
-		    (outbuf = malloc((unsigned) (nbyte + FUDGE_FACTOR)))) {
-		  			bufsize =nbyte + FUDGE_FACTOR;
+		    (outbuf = realloc(outbuf, (unsigned) (nbyte + fudge))):
+		    (outbuf = malloc((unsigned) (nbyte + fudge)))) {
+		    bufsize = nbyte + fudge;
 		} else {
 			bufsize = 0;
 			secure_error("%s (in malloc of PROT buffer)",
