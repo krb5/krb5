@@ -50,6 +50,10 @@ static char rcsid_mk_req_ext_c[] =
  The outbuf buffer storage is allocated, and should be freed by the
  caller when finished.
 
+ On an error return, the credentials pointed to by creds might have been
+ augmented with additional fields from the obtained credentials; the entire
+ credentials should be released by calling krb5_free_creds().
+
  returns system errors
 */
 static krb5_error_code generate_authenticator PROTOTYPE((krb5_authenticator *,
@@ -100,7 +104,7 @@ krb5_data *outbuf;
     request.ap_options = ap_req_options;
     /* we need a native ticket */
     if (retval = decode_krb5_ticket(&creds->ticket, &request.ticket))
-	return(retval);			/* XXX who cleans up creds? */
+	return(retval);
 
 #define cleanup_ticket() krb5_free_ticket(request.ticket)
     if (retval = generate_authenticator(&authent, creds, checksum)) {
