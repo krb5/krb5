@@ -138,7 +138,7 @@ static size_t strftime (char *, size_t, const char *, const struct tm *);
 #endif
 
 #ifdef HAVE_STRPTIME
-#ifdef NEED_STRPTIME_PROTOTYPE
+#ifdef NEED_STRPTIME_PROTO
 extern char *strptime (const char *, const char *,
 			    struct tm *);
 #endif

@@ -1,3 +1,8 @@
+2001-06-11  Ezra Peisach  <epeisach@mit.edu>
+
+	* str_conv.c: If strptime() is present on system without a
+	prototype, provide one.
+
 2001-06-07  Ezra Peisach  <epeisach@mit.edu>
 
 	* vfy_increds.c (krb5_verify_init_creds): Get rid of a variable
