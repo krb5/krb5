@@ -344,13 +344,20 @@ kerberos5_is(ap, data, cnt)
 		
 		if (!r) {
 		    krb5_rcache rcache;
+		    krb5_keytab keytabid;
 
 		    r = krb5_get_server_rcache(telnet_context,
 					krb5_princ_component(telnet_context,
 							     server, 0),
 					       &rcache);
-		    r = krb5_rd_req(telnet_context, &auth_context, &auth,
-				    server, telnet_srvtab, NULL, &ticket);
+       
+		    if (!r)
+		      if (telnet_srvtab)
+			r = krb5_kt_resolve(telnet_context, 
+					    telnet_srvtab, &keytabid);
+		    if (!r)
+		      r = krb5_rd_req(telnet_context, &auth_context, &auth,
+				      server, keytabid, NULL, &ticket);
 		    if (rcache)
 		        krb5_rc_close(telnet_context, rcache);
 		    krb5_free_principal(telnet_context, server);

@@ -1,3 +1,8 @@
+Wed Apr 26 19:52:52 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* kerberos5.c (kerberos5_is): use kt_resolve to get keytab, to
+	correspond to current interface to rd_req.
+
 Tue Apr 25 21:23:28 1995  Chris Provenzano  (proven@mit.edu)
 
         * forward.c (rd_and_store_for_creds()) : Rewritten to use
