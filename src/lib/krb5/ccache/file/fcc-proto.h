@@ -48,7 +48,7 @@ krb5_error_code krb5_fcc_read_principal PROTOTYPE((krb5_ccache id , krb5_princip
 krb5_error_code krb5_fcc_read_keyblock PROTOTYPE((krb5_ccache id , krb5_keyblock *keyblock ));
 krb5_error_code krb5_fcc_read_data PROTOTYPE((krb5_ccache id , krb5_data *data ));
 krb5_error_code krb5_fcc_read_int32 PROTOTYPE((krb5_ccache id , krb5_int32 *i ));
-krb5_error_code krb5_fcc_read_int16 PROTOTYPE((krb5_ccache id , krb5_int16 *i ));
+krb5_error_code krb5_fcc_read_ui_2 PROTOTYPE((krb5_ccache id , krb5_ui_2 *i ));
 krb5_error_code krb5_fcc_read_keytype PROTOTYPE((krb5_ccache id , krb5_keytype *k ));
 krb5_error_code krb5_fcc_read_int PROTOTYPE((krb5_ccache id , int *i ));
 krb5_error_code krb5_fcc_read_bool PROTOTYPE((krb5_ccache id , krb5_boolean *b ));

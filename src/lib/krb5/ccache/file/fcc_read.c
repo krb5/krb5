@@ -229,7 +229,7 @@ krb5_fcc_read_addr(id, addr)
 
      addr->contents = 0;
 
-     kret = krb5_fcc_read_int16(id, &addr->addrtype);
+     kret = krb5_fcc_read_ui_2(id, &addr->addrtype);
      CHECK(kret);
 
      kret = krb5_fcc_read_int(id, &addr->length);
@@ -265,11 +265,11 @@ krb5_fcc_read_int32(id, i)
 }
 
 krb5_error_code
-krb5_fcc_read_int16(id, i)
+krb5_fcc_read_ui_2(id, i)
    krb5_ccache id;
-   krb5_int16 *i;
+   krb5_ui_2 *i;
 {
-     return krb5_fcc_read(id, (krb5_pointer) i, sizeof(krb5_int16));
+     return krb5_fcc_read(id, (krb5_pointer) i, sizeof(krb5_ui_2));
 }
 
 krb5_error_code
