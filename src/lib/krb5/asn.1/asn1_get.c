@@ -57,7 +57,6 @@ asn1_get_tag(buf, class, construction, tagnum, retlen)
      asn1_tagnum *tagnum;
      int *retlen;
 {
-  asn1_error_code retval;
   int indef;
 
   return asn1_get_tag_indef(buf, class, construction, tagnum, retlen, &indef);
