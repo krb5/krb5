@@ -1,3 +1,6 @@
+Wed Jul 12 12:37:24 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* error_message.c: Do not include stdlib.h unless it exists
 
 Fri Jul 7 16:42:20 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in - Add DEPLIBS, needed by shared library rule.
