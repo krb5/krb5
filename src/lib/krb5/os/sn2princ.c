@@ -47,11 +47,10 @@ OLDDECLARG(const char *,sname)
 OLDDECLARG(krb5_boolean,canonicalize)
 OLDDECLARG(krb5_principal *,ret_princ)
 {
-    krb5_principal lprinc;
     struct hostent *hp;
     char **hrealms, *remote_host;
     krb5_error_code retval;
-    register char **cpp, *cp;
+    register char *cp;
 
     /* copy the hostname into non-volatile storage */
 
@@ -78,38 +77,12 @@ OLDDECLARG(krb5_principal *,ret_princ)
 	xfree(hrealms);
 	return KRB5_ERR_HOST_REALM_UNKNOWN;
     }
-    if (!(lprinc = (krb5_principal) calloc(4, sizeof(*lprinc)))) {
-	free(remote_host);
-	krb5_free_host_realm(hrealms);
-	return ENOMEM;
-    }	
-    if (!(lprinc[0] = (krb5_data *)malloc(sizeof(*lprinc[0])))) {
-	krb5_free_host_realm(hrealms);
-    nomem:
-	free(remote_host);
-	krb5_free_principal(lprinc);
-	return ENOMEM;
-    }
-    lprinc[0]->data = hrealms[0];
-    lprinc[0]->length = strlen(hrealms[0]);
 
-    /* they're allocated; leave the first one alone, however */
-    for (cpp = &hrealms[1]; *cpp; cpp++)
-	xfree(*cpp);
-    xfree(hrealms);
+    retval = krb5_build_principal(ret_princ, strlen(hrealms[0]), hrealms[0],
+				  sname, remote_host, (char *)0);
 
-    if (!(lprinc[1] = (krb5_data *)malloc(sizeof(*lprinc[1])))) {
-	goto nomem;
-    }
-    lprinc[1]->length = strlen(sname);
-    lprinc[1]->data = strdup(sname);
-    if (!(lprinc[2] = (krb5_data *)malloc(sizeof(*lprinc[2])))) {
-	goto nomem;
-    }
-    lprinc[2]->length = strlen(remote_host);
-    lprinc[2]->data = remote_host;
-
-    *ret_princ = lprinc;
-    return 0;
+    free(remote_host);
+    krb5_free_host_realm(hrealms);
+    return retval;
 }
 
