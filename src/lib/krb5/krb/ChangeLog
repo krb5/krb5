@@ -12,6 +12,11 @@
 	* unparse.c (krb5_unparse_name_ext): Don't move buffer pointer
 	backwards if nothing has been put into the buffer yet.
 
+2003-04-01  Sam Hartman  <hartmans@mit.edu>
+
+	* rd_req.c (krb5_rd_req): If AUTH_CONTEXT_DO_TIME is cleared,
+	don't set up a replay cache. 
+
 2003-03-08  Ezra Peisach  <epeisach@mit.edu>
 
 	* t_kerb.c: Only include krb.h if krb4 support compiled in,
