@@ -466,7 +466,7 @@ krb5_get_in_tkt(context, options, addrs, ktypes, ptypes, key_proc, keyseed,
      * preauth_to_use list.
      */
     if (ptypes) {
-	retval = make_preauth_list(context, ptypes, &preauth_to_use);
+	retval = make_preauth_list(context, ptypes, -1, &preauth_to_use);
 	if (retval)
 	    goto cleanup;
     }
