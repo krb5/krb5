@@ -13,6 +13,7 @@
  */
 
 #include "krb.h"
+#include "krb4int.h"
 
 #ifdef _WIN32
 #include <errno.h>
@@ -457,9 +458,9 @@ krb_get_cred (service, instance, realm, c)
  * Returns KSUCCESS if all goes well, otherwise KFAILURE.
  */
 
-int KRB5_CALLCONV
-krb_save_credentials(sname, sinst, srealm, session, 
-			lifetime, kvno, ticket, issue_date)
+int
+krb4int_save_credentials_addr(sname, sinst, srealm, session, 
+			      lifetime, kvno, ticket, issue_date, laddr)
 
 	char* sname;		/* Service name */
 	char* sinst;		/* Instance */	
@@ -469,6 +470,7 @@ krb_save_credentials(sname, sinst, srealm, session,
 	int kvno;		/* Key version number */
     	KTEXT ticket; 		/* The ticket itself */
 	long issue_date;	/* The issue time */
+	KRB_UINT32 laddr;
 {
 	CREDENTIALS	cr;
 
@@ -487,6 +489,23 @@ krb_save_credentials(sname, sinst, srealm, session,
 	change_cache();
 	return KSUCCESS;
 }
+
+int KRB5_CALLCONV
+krb_save_credentials(
+    char	*name,
+    char	*inst,
+    char	*realm,
+    C_Block	session,
+    int		lifetime,
+    int		kvno,
+    KTEXT	ticket,
+    long	issue_date)
+{
+    return krb4int_save_credentials_addr(name, inst, realm, session,
+					 lifetime, kvno, ticket,
+					 issue_date, 0);
+}
+
 
 int
 krb_delete_cred (sname, sinstance, srealm)

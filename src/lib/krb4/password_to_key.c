@@ -105,12 +105,17 @@ krb5_passwd_to_key(
     char	*passwd,
     C_Block	key)
 {
+    size_t	len, tlen;
+    char	*p;
+
     if (user && instance && realm && passwd) {
-        unsigned int len = MAX_K_NAME_SZ + strlen(passwd) + 1;
-        char *p = malloc (len);
+        len = MAX_K_NAME_SZ + strlen(passwd) + 1;
+	tlen = strlen(passwd) + strlen(realm) + strlen(user) + strlen(instance) + 1;
+	if (tlen > len)
+	    return 0;
+        p = malloc (tlen);
         if (p != NULL) {
-            snprintf (p, len, "%s%s%s%s", passwd, realm, user, instance);
-            p[len - 1] = '\0';
+            sprintf (p, "%s%s%s%s", passwd, realm, user, instance);
             des_string_to_key (p, key);
             free (p);
             return 0;
