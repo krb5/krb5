@@ -127,7 +127,7 @@ char *argv[];
     int optchar;
 
     krb5_error_code retval;
-    char *dbname = 0;
+    char *dbname = DEFAULT_KDB_FILE;
     char *defrealm;
     int keytypedone = 0;
     krb5_enctype etype = DEFAULT_KDC_ETYPE;
@@ -206,9 +206,6 @@ char *argv[];
 	exit(1);
     }
     krb5_use_cstype(&master_encblock, etype);
-
-    if (!dbname)
-	dbname = DEFAULT_DBM_FILE;	/* XXX? */
 
     sci_idx = ss_create_invocation("kdb5_edit", "5.0", (char *) NULL,
 				   &kdb5_edit_cmds, &retval);
