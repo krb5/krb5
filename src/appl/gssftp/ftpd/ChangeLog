@@ -1,3 +1,8 @@
+Mon Oct 14 07:54:17 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* ftpd.c (secure_fprintf): Use STDARG routines if
+		present. [krb5-appl/108]
+
 Tue Sep 10 14:07:36 1996  Tom Yu  <tlyu@mit.edu>
 
 	* ftpd.M: remove ".so man1/header.doc"
