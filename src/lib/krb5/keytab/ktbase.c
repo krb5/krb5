@@ -106,14 +106,23 @@ krb5_kt_resolve (krb5_context context, const char *name, krb5_keytab *ktid)
     }
 #endif
 
-    resid = name + pfxlen + 1;
-	
-    pfx = malloc (pfxlen+1);
-    if (!pfx)
-	return ENOMEM;
+    if ( pfxlen == 1 && isalpha(name[0]) ) {
+        /* We found a drive letter not a prefix - use FILE: */
+        pfx = strdup("FILE:");
+        if (!pfx)
+            return ENOMEM;
 
-    memcpy (pfx, name, pfxlen);
-    pfx[pfxlen] = '\0';
+        resid = name;
+    } else {
+        resid = name + pfxlen + 1;
+	
+        pfx = malloc (pfxlen+1);
+        if (!pfx)
+            return ENOMEM;
+
+        memcpy (pfx, name, pfxlen);
+        pfx[pfxlen] = '\0';
+    }
 
     *ktid = (krb5_keytab) 0;
 

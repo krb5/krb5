@@ -1,3 +1,17 @@
+2004-04-13  Jeffrey Altman <jaltman@mit.edu>
+
+    * ccbase.c:
+      Since we have to reserve all the single letter
+      prefixes make them apply to all platforms
+
+2004-04-13  Jeffrey Altman <jaltman@mit.edu>
+
+    * ccbase.c:
+      On Windows, if there is a ccache name provided without
+      a prefix but which appears to start with a drive letter,
+      treat it as a FILE: ccache instead of failing with a
+      ccache type unknown error.
+     
 2004-04-06  Jeffrey Altman <jaltman@mit.edu>
 
     * cc_mslsa.c:
