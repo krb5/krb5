@@ -1,3 +1,9 @@
+Mon Jun 12 20:01:23 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* kdc_util.c (kdc_process_tgs_req): Set the auth_context rcache to
+		null before freeing auth_context. This keeps the rcache
+		valid. 
+
 Sat Jun 10 23:04:31 1995  Tom Yu  (tlyu@dragons-lair)
 
 	* kdc_util.c: krb5_auth_context redefinitions

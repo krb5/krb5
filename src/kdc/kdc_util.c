@@ -293,6 +293,8 @@ cleanup_authenticator:
     krb5_free_authenticator(kdc_context, authenticator);
 
 cleanup_auth_context:
+    /* We do not want the fre of the auth_context to close the rcache */
+    (void)  krb5_auth_con_setrcache(kdc_context, auth_context, 0);
     krb5_auth_con_free(kdc_context, auth_context);
 
 cleanup:
