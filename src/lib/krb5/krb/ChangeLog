@@ -1,3 +1,11 @@
+2000-06-03  Tom Yu  <tlyu@mit.edu>
+
+	* rd_priv.c (krb5_rd_priv_basic): Delete code that was incorrectly
+	doing explicit ivec chaining; c_decrypt() does it now.
+
+	* mk_priv.c (krb5_mk_priv_basic): Delete code that was incorrectly
+	doing explicit ivec chaining; c_encrypt() does it now.
+
 2000-06-03  Ken Raeburn  <raeburn@mit.edu>
 
 	* get_in_tkt.c (krb5_get_in_tkt): If enctypes are specified, send

@@ -32,8 +32,8 @@ LIBDONE= error_tables/DONE asn.1/DONE ccache/DONE ccache/stdio/DONE \
 STLIBOBJS=krb5_libinit.o
 
 LIB=krb5
-LIBMAJOR=2
-LIBMINOR=2
+LIBMAJOR=3
+LIBMINOR=0
 
 STOBJLISTS= \
 	OBJS.ST \
