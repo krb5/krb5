@@ -2334,7 +2334,7 @@ telnet(user)
 	    }
 	    if (printed_encrypt == 0) {
 		    printed_encrypt = 1;
-		    printf("Waiting for encryption to be negotiated...");
+		    printf("Waiting for encryption to be negotiated...\n");
 		    /*
 		     * Turn on MODE_TRAPSIG and then turn off localchars 
 		     * so that ^C will cause telnet to exit.
