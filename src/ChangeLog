@@ -1,3 +1,7 @@
+Thu Sep 28 16:00:00 1995  John Rivlin  <jrivlin@fusion.com>
+
+	* Makefile.in: Added mac/gss-sample to tar file.
+
 Wed Sep 27 16:00:00 1995  John Rivlin  <jrivlin@fusion.com>
 
 	* Makefile.in: Temporarily move autoconf.h file to include

@@ -179,29 +179,43 @@ krb5_get_cred_via_tkt (context, tkt, kdcoptions, address, in_cred, out_cred)
 	retval = KRB5KRB_AP_ERR_MSG_TYPE;
 	goto error_3;
     }
-    
+   
     /* make sure the response hasn't been tampered with..... */
-    if (!krb5_principal_compare(context, dec_rep->client, tkt->client) ||
-	!krb5_principal_compare(context, dec_rep->enc_part2->server,
-				in_cred->server) ||
-	!krb5_principal_compare(context, dec_rep->ticket->server,
-				in_cred->server) ||
-	(dec_rep->enc_part2->nonce != tgsrep.expected_nonce) ||
-	((in_cred->times.starttime != 0) &&
-	 (in_cred->times.starttime != dec_rep->enc_part2->times.starttime)) ||
-	((in_cred->times.endtime != 0) &&
-	 (dec_rep->enc_part2->times.endtime > in_cred->times.endtime)) ||
-	((kdcoptions & KDC_OPT_RENEWABLE) &&
-	 (in_cred->times.renew_till != 0) &&
-	 (dec_rep->enc_part2->times.renew_till > in_cred->times.renew_till)) ||
-	((kdcoptions & KDC_OPT_RENEWABLE_OK) &&
-	 (dec_rep->enc_part2->flags & KDC_OPT_RENEWABLE) &&
-	 (in_cred->times.endtime != 0) &&
-	 (dec_rep->enc_part2->times.renew_till > in_cred->times.endtime))
-	) {
+    retval = 0;
+
+    if (!krb5_principal_compare(context, dec_rep->client, tkt->client))
 	retval = KRB5_KDCREP_MODIFIED;
-	goto error_3;
-    }
+
+    if (!krb5_principal_compare(context, dec_rep->enc_part2->server, in_cred->server))
+	retval = KRB5_KDCREP_MODIFIED;
+
+    if (!krb5_principal_compare(context, dec_rep->ticket->server, in_cred->server))
+	retval = KRB5_KDCREP_MODIFIED;
+
+    if (dec_rep->enc_part2->nonce != tgsrep.expected_nonce)
+	retval = KRB5_KDCREP_MODIFIED;
+
+    if ((in_cred->times.starttime != 0) &&
+    	(in_cred->times.starttime != dec_rep->enc_part2->times.starttime))
+	retval = KRB5_KDCREP_MODIFIED;
+
+    if ((in_cred->times.endtime != 0) &&
+	(dec_rep->enc_part2->times.endtime > in_cred->times.endtime))
+	retval = KRB5_KDCREP_MODIFIED;
+
+    if ((kdcoptions & KDC_OPT_RENEWABLE) &&
+	(in_cred->times.renew_till != 0) &&
+	(dec_rep->enc_part2->times.renew_till > in_cred->times.renew_till))
+	retval = KRB5_KDCREP_MODIFIED;
+
+    if ((kdcoptions & KDC_OPT_RENEWABLE_OK) &&
+	(dec_rep->enc_part2->flags & KDC_OPT_RENEWABLE) &&
+	(in_cred->times.endtime != 0) &&
+	(dec_rep->enc_part2->times.renew_till > in_cred->times.endtime))
+ 	retval = KRB5_KDCREP_MODIFIED;
+
+    if (retval != 0)
+    	goto error_3;
 
     if (!in_cred->times.starttime &&
 	!in_clock_skew(dec_rep->enc_part2->times.starttime,

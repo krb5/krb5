@@ -1,3 +1,9 @@
+Thu Sep 28 12:00:00 1995  John Rivlin <jrivlin@fusion.com)
+
+	* gc_via_tkt.c: Cleaned up corrupt ticket error testing to 
+		make it more debugable and I think work around a compiler
+		bug.
+
 Mon Sep 25 16:57:59 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in: Removed "foo:: foo-$(WHAT)" lines from the

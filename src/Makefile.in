@@ -199,7 +199,8 @@ FILES= ./* \
 
 WINFILES= windows/* windows/cns/* windows/wintel/* windows/gss/*
 
-MACFILES= mac/* mac/kconfig/* mac/libraries/* mac/telnet-k5-auth/*
+MACFILES= mac/* mac/kconfig/* mac/libraries/* mac/telnet-k5-auth/* \
+	mac/gss-sample/*
 
 WINBINARYFILES=windows/cns/*.ico windows/wintel/*.ico windows/gss/*.ico
 

@@ -23,10 +23,10 @@
 #ifndef _GSSAPI_GENERIC_H_
 #define _GSSAPI_GENERIC_H_
 
-#ifndef _MACINTOSH
-#include <gssapi/gssapi.h>
-#else
+#if defined(__MWERKS__) || defined(applec) || defined(THINK_C)
 #include <gssapi.h>
+#else
+#include <gssapi/gssapi.h>
 #endif
 
 extern const gss_OID_desc FAR * const gss_nt_user_name;
