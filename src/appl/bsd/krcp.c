@@ -66,10 +66,6 @@ char copyright[] =
 #include <varargs.h>
 #endif
 
-#ifndef roundup
-#define roundup(x,y) ((((x)+(y)-1)/(y))*(y))
-#endif
-
 #ifdef KERBEROS
 #include <krb5.h>
 #include <k5-util.h>
@@ -78,23 +74,27 @@ char copyright[] =
 #define RCP_BUFSIZ 4096
      
 int sock;
-struct sockaddr_in foreign;	   /* set up by kcmd used by send_auth */
+struct sockaddr_in local, foreign; /* set up by kcmd used by v4_send_auth */
 char *krb_realm = NULL;
 char *krb_cache = NULL;
 char *krb_config = NULL;
-char des_inbuf[2*RCP_BUFSIZ];          /* needs to be > largest read size */
-char des_outbuf[2*RCP_BUFSIZ];         /* needs to be > largest write size */
-krb5_data desinbuf,desoutbuf;
 krb5_encrypt_block eblock;         /* eblock for encrypt/decrypt */
-krb5_keyblock *session_key;	   /* static key for session */
 krb5_context bsd_context;
 
-void	try_normal();
+#ifdef KRB5_KRB4_COMPAT
+#include <kerberosIV/krb.h>
+Key_schedule v4_schedule;
+CREDENTIALS v4_cred;
+KTEXT_ST v4_ticket;
+MSG_DAT v4_msg_data;
+#endif
+
+void	v4_send_auth(), try_normal();
 char	**save_argv();
 #ifndef HAVE_STRSAVE
 char	*strsave();
 #endif
-int	des_write(), des_read();
+int	rcmd_stream_write(), rcmd_stream_read();
 void 	usage(), sink(), source(), rsource(), verifydir(), answer_auth();
 int	response(), hosteq(), okname(), susystem();
 int	encryptflag = 0;
@@ -103,9 +103,6 @@ int	encryptflag = 0;
 #define	UCB_RCP	"/bin/rcp"
 #endif
 
-#else /* !KERBEROS */
-#define	des_read	read
-#define	des_write	write
 #endif /* KERBEROS */
 
 int	rem;
@@ -134,7 +131,7 @@ void 	error KRB5_STDARG_P((char *fmt, ...));
 void	error KRB5_STDARG_P((char *, va_list));
 #endif
 
-#define	ga()	 	(void) des_write(rem, "", 1)
+#define	ga()	 	(void) rcmd_stream_write(rem, "", 1)
 
 int main(argc, argv)
      int argc;
@@ -162,8 +159,6 @@ int main(argc, argv)
 	    com_err(argv[0], status, "while initializing krb5");
 	    exit(1);
     }
-    desinbuf.data = des_inbuf;
-    desoutbuf.data = des_outbuf;    /* Set up des buffers */
 #endif
 
     pwd = getpwuid(userid = getuid());
@@ -237,6 +232,7 @@ int main(argc, argv)
 	    
 	  case 'f':		/* "from" */
 	    iamremote = 1;
+	    rcmd_stream_init_normal();
 #if defined(KERBEROS)
 	    if (encryptflag)
 	      answer_auth(krb_config, krb_cache);
@@ -248,6 +244,7 @@ int main(argc, argv)
 	    
 	  case 't':		/* "to" */
 	    iamremote = 1;
+	    rcmd_stream_init_normal();
 #if defined(KERBEROS)
 	    if (encryptflag)
 	      answer_auth(krb_config, krb_cache);
@@ -419,29 +416,35 @@ krb5_creds *cred;
 				  &cred,  
 				  0,  /* No seq # */
 				  0,  /* No server seq # */
-				  (struct sockaddr_in *) 0,
+				  &local,
 				  &foreign,
 				  authopts,
-				  0); /* Not any port # */
+				  0, /* Not any port # */
+				  0);
 		    if (status) {
-			if (status != -1) 
-			     fprintf(stderr,
-				     "%s: kcmd to host %s failed - %s\n",
-				     orig_argv[0], host,
-				     error_message(status));
+#ifdef KRB5_KRB4_COMPAT
+			fprintf(stderr, "Trying krb4 rcp...\n");
+			if (strncmp(buf, "-x rcp", 6) == 0)
+			    memcpy(buf, "rcp -x", 6);
+			status = k4cmd(&sock, &host, port,
+				       pwd->pw_name,
+				       tuser ? tuser : pwd->pw_name, buf,
+				       0, &v4_ticket, "rcmd", krb_realm,
+				       NULL, NULL, NULL,
+				       &local, &foreign, 0L, 0);
+			if (status)
+			    try_normal(orig_argv);
+			if (encryptflag)
+			    v4_send_auth(host, krb_realm);
+			rcmd_stream_init_krb4(v4_cred.session, encryptflag, 0,
+					      0);
+#else
 			try_normal(orig_argv);
+#endif
 		    }
-		    else {
-			rem = sock; 
-			session_key = &cred->keyblock;
-				   
-    krb5_use_enctype(bsd_context, &eblock, session_key->enctype);
-    if ((status = krb5_process_key(bsd_context, &eblock, session_key))) {
-	fprintf(stderr, "rcp: send_auth failed krb5_process_key: %s\n",
-		error_message(status));
-	exit(1);
-    }
-		    }
+		    else
+			rcmd_stream_init_krb5(&cred->keyblock, encryptflag, 0);
+		    rem = sock;
 #else
 		    rem = rcmd(&host, port, pwd->pw_name,
 			       tuser ? tuser : pwd->pw_name,
@@ -519,27 +522,31 @@ krb5_creds *cred;
 			      (struct sockaddr_in *) 0,
 			      &foreign,
 			      authopts,
-			      0); /* Not any port # */
+			      0, /* Not any port # */
+			      0);
 		if (status) {
-		    if (status != -1)
-			 fprintf(stderr,
-				 "%s: kcmd to host %s failed - %s\n",
-				 orig_argv[0], host,
-				 error_message(status));
-		    try_normal(orig_argv);
-		    
-		} else {
-		    rem = sock; 
-			session_key = &cred->keyblock;
+#ifdef KRB5_KRB4_COMPAT
+			fprintf(stderr, "Trying krb4 rcp...\n");
+			if (strncmp(buf, "-x rcp", 6) == 0)
+			    memcpy(buf, "rcp -x", 6);
+			status = k4cmd(&sock, &host, port,
+				       pwd->pw_name, suser, buf,
+				       0, &v4_ticket, "rcmd", krb_realm,
+				       NULL, NULL, NULL,
+				       &local, &foreign, 0L, 0);
+			if (status)
+			    try_normal(orig_argv);
+			if (encryptflag)
+			    v4_send_auth(host, krb_realm);
+			rcmd_stream_init_krb4(v4_cred.session, encryptflag, 0,
+					      0);
+#else
+			try_normal(orig_argv);
+#endif
+		} else
+		    rcmd_stream_init_krb5(&cred->keyblock, encryptflag, 0);
+		rem = sock; 
 				   
-    krb5_use_enctype(bsd_context, &eblock, session_key->enctype);
-    if ((status = krb5_process_key(bsd_context, &eblock, session_key))) {
-	fprintf(stderr, "rcp: send_auth failed krb5_process_key: %s\n",
-		error_message(status));
-	exit(1);
-    }
-
-		}
 		euid = geteuid();
 		if (euid == 0) {
 		    (void) setuid(0);
@@ -558,6 +565,7 @@ krb5_creds *cred;
 			   buf, 0);
 		if (rem < 0)
 		  continue;
+		rcmd_stream_init_normal();
 #ifdef HAVE_SETREUID
 		(void) setreuid(0, userid);
 		sink(1, argv+argc-1);
@@ -733,7 +741,7 @@ void source(argc, argv)
 	     */
 	    (void) sprintf(buf, "T%ld 0 %ld 0\n",
 			   stb.st_mtime, stb.st_atime);
-	    (void) des_write(rem, buf, strlen(buf));
+	    (void) rcmd_stream_write(rem, buf, strlen(buf));
 	    if (response() < 0) {
 		(void) close(f);
 		continue;
@@ -741,7 +749,7 @@ void source(argc, argv)
 	}
 	(void) sprintf(buf, "C%04o %ld %s\n",
 		       (int) stb.st_mode&07777, (long ) stb.st_size, last);
-	(void) des_write(rem, buf, strlen(buf));
+	(void) rcmd_stream_write(rem, buf, strlen(buf));
 	if (response() < 0) {
 	    (void) close(f);
 	    continue;
@@ -757,7 +765,7 @@ void source(argc, argv)
 	      amt = stb.st_size - i;
 	    if (readerr == 0 && read(f, bp->buf, amt) != amt)
 	      readerr = errno;
-	    (void) des_write(rem, bp->buf, amt);
+	    (void) rcmd_stream_write(rem, bp->buf, amt);
 	}
 	(void) close(f);
 	if (readerr == 0)
@@ -802,14 +810,14 @@ void rsource(name, statp)
     if (pflag) {
 	(void) sprintf(buf, "T%ld 0 %ld 0\n",
 		       statp->st_mtime, statp->st_atime);
-	(void) des_write(rem, buf, strlen(buf));
+	(void) rcmd_stream_write(rem, buf, strlen(buf));
 	if (response() < 0) {
 	    closedir(d);
 	    return;
 	}
     }
     (void) sprintf(buf, "D%04o %d %s\n", statp->st_mode&07777, 0, last);
-    (void) des_write(rem, buf, strlen(buf));
+    (void) rcmd_stream_write(rem, buf, strlen(buf));
     if (response() < 0) {
 	closedir(d);
 	return;
@@ -828,7 +836,7 @@ void rsource(name, statp)
 	source(1, bufv);
     }
     closedir(d);
-    (void) des_write(rem, "E\n", 2);
+    (void) rcmd_stream_write(rem, "E\n", 2);
     (void) response();
 }
 
@@ -837,7 +845,7 @@ void rsource(name, statp)
 int response()
 {
     char resp, c, rbuf[RCP_BUFSIZ], *cp = rbuf;
-    if (des_read(rem, &resp, 1) != 1)
+    if (rcmd_stream_read(rem, &resp, 1) != 1)
       lostconn();
     switch (resp) {
 	
@@ -850,7 +858,7 @@ int response()
       case 1:				/* error, followed by err msg */
       case 2:				/* fatal error, "" */
 	do {
-	    if (des_read(rem, &c, 1) != 1)
+	    if (rcmd_stream_read(rem, &c, 1) != 1)
 	      lostconn();
 	    *cp++ = c;
 	} while (cp < &rbuf[RCP_BUFSIZ] && c != '\n');
@@ -933,12 +941,12 @@ void sink(argc, argv)
       targisdir = 1;
     for (first = 1; ; first = 0) {
 	cp = cmdbuf;
-	if (des_read(rem, cp, 1) <= 0)
+	if (rcmd_stream_read(rem, cp, 1) <= 0)
 	  return;
 	if (*cp++ == '\n')
 	  SCREWUP("unexpected '\\n'");
 	do {
-	    if (des_read(rem, cp, 1) != 1)
+	    if (rcmd_stream_read(rem, cp, 1) != 1)
 	      SCREWUP("lost connection");
 	} while (*cp++ != '\n');
 	*cp = 0;
@@ -1056,7 +1064,7 @@ void sink(argc, argv)
 	      amt = size - i;
 	    count += amt;
 	    do {
-		j = des_read(rem, cp, amt);
+		j = rcmd_stream_read(rem, cp, amt);
 		if (j <= 0) {
 		    if (j == 0)
 		      error("rcp: dropped connection");
@@ -1111,11 +1119,6 @@ struct buffer *allocbuf(bp, fd, blksize)
 	error("rcp: fstat: %s\n", error_message(errno));
 	return (NULLBUF);
     }
-#ifdef NOROUNDUP
-    size = 0;
-#else
-    size = roundup(stb.st_blksize, blksize);
-#endif
 
     size = blksize;
     if (bp->cnt < size) {
@@ -1133,6 +1136,10 @@ struct buffer *allocbuf(bp, fd, blksize)
 
 
 
+/* This function is mostly vestigial, since under normal operation
+ * the -x flag doesn't get set for the server process for encrypted
+ * rcp.  It only gets called by beta clients attempting user-to-user
+ * authentication. */
 void
 #ifdef HAVE_STDARG_H
 error(char *fmt, ...)
@@ -1157,7 +1164,7 @@ error(fmt, va_alist)
     (void) vsprintf(cp, fmt, ap);
     va_end(ap);
 
-    (void) des_write(rem, buf, strlen(buf));
+    (void) rcmd_stream_write(rem, buf, strlen(buf));
     if (iamremote == 0)
       (void) write(2, buf+1, strlen(buf+1));
 }
@@ -1250,6 +1257,10 @@ char **save_argv(argc, argv)
 
 
 
+/* This function is mostly vestigial, since under normal operation
+ * the -x flag doesn't get set for the server process for encrypted
+ * rcp.  It only gets called by beta clients attempting user-to-user
+ * authentication. */
 void
   answer_auth(config_file, ccache_file)
     char *config_file;
@@ -1311,18 +1322,12 @@ void
 	exit(1);
     }
     
-    /* setup eblock for des_read and write */
-    krb5_copy_keyblock(bsd_context, &new_creds->keyblock,&session_key);
+    rcmd_stream_init_krb5(&new_creds->keyblock, encryptflag, 0);
     
     /* cleanup */
     krb5_free_cred_contents(bsd_context, &creds);
     krb5_free_creds(bsd_context, new_creds);
     krb5_free_data_contents(bsd_context, &msg);
-    
-    /* OK process key */
-    krb5_use_enctype(bsd_context, &eblock, session_key->enctype);
-    if ((status = krb5_process_key(bsd_context, &eblock, session_key)))
-	exit(1);
 
     return;
 }
@@ -1333,127 +1338,34 @@ char storage[2*RCP_BUFSIZ];		/* storage for the decryption */
 int nstored = 0;
 char *store_ptr = storage;
 
-int des_read(fd, buf, len)
-     int fd;
-     register char *buf;
-     int len;
+#ifdef KRB5_KRB4_COMPAT
+void
+v4_send_auth(host,realm)
+char *host;
+char *realm;
 {
-    int nreturned = 0;
-    long net_len,rd_len;
-    int cc;
-    krb5_error_code status;
-    unsigned char len_buf[4];
-    
-    if (!encryptflag)
-      return(read(fd, buf, len));
-    
-    if (nstored >= len) {
-	memcpy(buf, store_ptr, len);
-	store_ptr += len;
-	nstored -= len;
-	return(len);
-    } else if (nstored) {
-	memcpy(buf, store_ptr, nstored);
-	nreturned += nstored;
-	buf += nstored;
-	len -= nstored;
-	nstored = 0;
-    }
-    
-    if ((cc = krb5_net_read(bsd_context, fd, (char *)len_buf, 4)) != 4) {
-	/* XXX can't read enough, pipe must have closed */
-	return(0);
-    }
-    rd_len =
-	((len_buf[0]<<24) | (len_buf[1]<<16) | (len_buf[2]<<8) | len_buf[3]);
-    net_len = krb5_encrypt_size(rd_len,eblock.crypto_entry);
-    if (net_len <= 0 || net_len > sizeof(des_inbuf)) {
-	/* preposterous length; assume out-of-sync; only
-	   recourse is to close connection, so return 0 */
-	error( "rcp: Des_read size problem net_len %d rd_len %d %d.\n",
-	      net_len,rd_len, len);
-	errno = E2BIG;
-	return(-1);
-    }
-    if ((cc = krb5_net_read(bsd_context, fd, desinbuf.data, net_len)) != net_len) {
-	/* pipe must have closed, return 0 */
-	error( "rcp: Des_read error: length received %d != expected %d.\n",
-	      cc,net_len);
-	return(0);
-    }
-    /* decrypt info */
-    if ((status = krb5_decrypt(bsd_context, desinbuf.data,
-			       (krb5_pointer) storage,
-			       net_len,
-			       &eblock, 0))) {
-	error("rcp: Des_read cannot decrypt data from network %s.\n",
-	      error_message(status));
-	return(0);
-    }
-    store_ptr = storage;
-    nstored = rd_len;
-    if (nstored > len) {
-	memcpy(buf, store_ptr, len);
-	nreturned += len;
-	store_ptr += len;
-	nstored -= len;
-    } else {
-	memcpy(buf, store_ptr, nstored);
-	nreturned += nstored;
-	nstored = 0;
-    }
-    
-    return(nreturned);
-}
+	long authopts;
 
-
-int des_write(fd, buf, len)
-     int fd;
-     char *buf;
-     int len;
-{
-    static krb5_data des_write_buf;
-    static int des_write_maxsize;
-    unsigned char len_buf[4];
-
-    /* 
-     * Note that rcp depends on the same file descriptor being both 
-     * input and output to the remote side.  This is bogus, especially 
-     * when rcp is being run by a rsh that pipes. Fix it here because it 
-     * would require significantly more work in other places. --hartmans 1/96
-     */
-    
-    if (fd == 0)
-	fd = 1;
-    if (!encryptflag)
-      return(krb5_net_write(bsd_context, fd, buf, len));
-    
-    des_write_buf.length = krb5_encrypt_size(len,eblock.crypto_entry);
-
-    if (des_write_buf.length > des_write_maxsize) {
-	if (des_write_buf.data) 
-	    free(des_write_buf.data);
-	des_write_maxsize = des_write_buf.length;
-	if ((des_write_buf.data = malloc(des_write_maxsize)) == NULL) {
-	    des_write_maxsize = 0;
-	    return(-1);
+	if ((realm == NULL) || (realm[0] == '\0'))
+	     realm = krb_realmofhost(host);
+	/* this needs to be sent again, because the
+	   rcp process needs the key.  the rshd has
+	   grabbed the first one. */
+	authopts = KOPT_DO_MUTUAL;
+	if ((rem = krb_sendauth(authopts, sock, &v4_ticket,
+				"rcmd", host,
+				realm, (unsigned long) getpid(),
+				&v4_msg_data,
+				&v4_cred, v4_schedule,
+				&local,
+				&foreign,
+				"KCMDV0.1")) != KSUCCESS) {
+		fprintf(stderr,
+			"krb_sendauth mutual fail: %s\n",
+			krb_get_err_text(rem));
+		exit(1);
 	}
-    }
-
-    if ((krb5_encrypt(bsd_context, (krb5_pointer)buf, des_write_buf.data, 
-		      len, &eblock, 0))) {
-	return(-1);
-    }
-    
-    len_buf[0] = (len & 0xff000000) >> 24;
-    len_buf[1] = (len & 0xff0000) >> 16;
-    len_buf[2] = (len & 0xff00) >> 8;
-    len_buf[3] = (len & 0xff);
-    if ((write(fd, len_buf, 4) != 4) || (write(fd, des_write_buf.data, 
-	des_write_buf.length) != des_write_buf.length)) {
-	return(-1);
-    }
-    return(len);
 }
+#endif /* KRB5_KRB4_COMPAT */
 
 #endif /* KERBEROS */

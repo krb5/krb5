@@ -205,7 +205,7 @@ struct winsize {
 
 #ifdef KERBEROS
      
-#include "krb5.h"
+#include <krb5.h>
 #include <kerberosIV/krb.h>
 #include <libpty.h>
 #ifdef HAVE_UTMP_H
@@ -222,28 +222,10 @@ int non_privileged = 0; /* set when connection is seen to be from */
 
 AUTH_DAT	*v4_kdata;
 Key_schedule v4_schedule;
-int v4_des_read(), v4_des_write();
-
-#define RLOGIND_BUFSIZ 5120
-
-int v5_des_read(), v5_des_write();
 
 #include "com_err.h"
      
 #define SECURE_MESSAGE  "This rlogin session is using DES encryption for all data transmissions.\r\n"
-/*
- * Note that the encrypted rlogin packets take the form of a four-byte
- *length followed by encrypted data.  On writing the data out, a significant
- * performance penalty is suffered (at least one RTT per character, two if we
- * are waiting for a shell to echo) by writing the data separately from the 
- * length.  So, unlike the input buffer, which just contains the output
- * data, the output buffer represents the entire packet.
- */
- int (*des_read)(), (*des_write)();
-char des_inbuf[2*RLOGIND_BUFSIZ]; /* needs to be > largest read size */
-char des_outpkt[2*RLOGIND_BUFSIZ+4];/* needs to be > largest write size */
-krb5_data desinbuf,desoutbuf;
-krb5_encrypt_block eblock;        /* eblock for encrypt/decrypt */
 
 krb5_authenticator      *kdata;
 krb5_ticket     *ticket = 0;
@@ -255,8 +237,6 @@ krb5_keytab keytab = NULL;
 #define ARGSTR	"k54ciepPD:S:M:L:f?"
 #else /* !KERBEROS */
 #define ARGSTR	"rpPD:f?"
-#define (*des_read)  read
-#define (*des_write) write
 #endif /* KERBEROS */
 
 #ifndef LOGIN_PROGRAM
@@ -610,13 +590,7 @@ int syncpipe[2];
     if (fromp->sin_family != AF_INET)
       fatal(f, "Permission denied - Malformed from address\n");
     
-#ifdef KERBEROS
-
-	/* setup des buffers */
-    desinbuf.data = des_inbuf;
-    desoutbuf.data = des_outpkt+4;    /* Set up des buffers */
-
-#else /* !KERBEROS */
+#ifndef KERBEROS
     if (fromp->sin_port >= IPPORT_RESERVED ||
 	fromp->sin_port < IPPORT_RESERVED/2)
       fatal(f, "Permission denied - Connection from bad port");
@@ -633,6 +607,7 @@ int syncpipe[2];
     getstr(f, rusername, sizeof(rusername), "remuser");
     getstr(f, lusername, sizeof(lusername), "locuser");
     getstr(f, term, sizeof(term), "Terminal type");
+    rcmd_stream_init_normal();
 #endif
     
     write(f, "", 1);
@@ -808,7 +783,7 @@ int syncpipe[2];
     
 #if defined(KERBEROS) 
     if (do_encrypt) {
-	if (((*des_write)(f, SECURE_MESSAGE, sizeof(SECURE_MESSAGE))) < 0){
+	if (rcmd_stream_write(f, SECURE_MESSAGE, sizeof(SECURE_MESSAGE)) < 0){
 	    sprintf(buferror, "Cannot encrypt-write network.");
 	    fatal(p,buferror);
 	}
@@ -978,7 +953,7 @@ void protocol(f, p)
 	    }
 	}
 	if (FD_ISSET(f, &ibits)) {
-	    fcc = (*des_read)(f, fibuf, sizeof (fibuf));
+	    fcc = rcmd_stream_read(f, fibuf, sizeof (fibuf));
 	    if (fcc < 0 && ((errno == EWOULDBLOCK) || (errno == EAGAIN)))
 	      fcc = 0;
 	    else {
@@ -1036,7 +1011,7 @@ void protocol(f, p)
 #endif
 	}
 	if (FD_ISSET(f, &obits) && pcc > 0) {
-	    cc = (*des_write)(f, pbp, pcc);
+	    cc = rcmd_stream_write(f, pbp, pcc);
 	    if (cc < 0 && ((errno == EWOULDBLOCK) || (errno == EAGAIN))) {
 		/* also shouldn't happen */
 		sleep(5);
@@ -1075,7 +1050,7 @@ void fatal(f, msg)
     buf[0] = '\01';		/* error indicator */
     (void) sprintf(buf + 1, "%s: %s.\r\n",progname, msg);
     if ((f == netf) && (pid > 0))
-      (void) (*des_write)(f, buf, strlen(buf));
+      (void) rcmd_stream_write(f, buf, strlen(buf));
     else
       (void) write(f, buf, strlen(buf));
     syslog(LOG_ERR,"%s\n",msg);
@@ -1198,6 +1173,8 @@ do_krb_login(host)
     /* NOTREACHED */
 }
 
+#endif /* KERBEROS */
+
 
 
 void getstr(fd, buf, cnt, err)
@@ -1222,166 +1199,6 @@ void getstr(fd, buf, cnt, err)
 }
 
 
-
-char storage[2*RLOGIND_BUFSIZ];             /* storage for the decryption */
-int nstored = 0;
-char *store_ptr = storage;
-
-int
-v5_des_read(fd, buf, len)
-     int fd;
-     register char *buf;
-     int len;
-{
-    int nreturned = 0;
-    krb5_ui_4 net_len,rd_len;
-    int cc,retry;
-#if 0
-    unsigned char len_buf[4];
-#endif
-    
-    if (!do_encrypt)
-      return(read(fd, buf, len));
-    
-    if (nstored >= len) {
-	memcpy(buf, store_ptr, len);
-	store_ptr += len;
-	nstored -= len;
-	return(len);
-    } else if (nstored) {
-	memcpy(buf, store_ptr, nstored);
-	nreturned += nstored;
-	buf += nstored;
-	len -= nstored;
-	nstored = 0;
-    }
-    
-#if 0
-    if ((cc = krb5_net_read(bsd_context, fd, (char *)len_buf, 4)) != 4) {
-	if ((cc < 0)  && ((errno == EWOULDBLOCK) || (errno == EAGAIN)))
-	    return(cc);
-	/* XXX can't read enough, pipe must have closed */
-	return(0);
-    }
-    rd_len =
-	(((krb5_ui_4)len_buf[0]<<24) |
-	 ((krb5_ui_4)len_buf[1]<<16) |
-	 ((krb5_ui_4)len_buf[2]<<8) |
-	 (krb5_ui_4)len_buf[3]);
-#else
-	{
-	    unsigned char c;
-	    int gotzero = 0;
-
-	    /* See the comment in v4_des_read. */
-	    do {
-		cc = krb5_net_read(bsd_context, fd, &c, 1);
-		/* we should check for non-blocking here, but we'd have
-		   to make it save partial reads as well. */
-		if (cc <= 0) return 0; /* read error */
-		if (cc == 1) {
-		    if (c == 0) gotzero = 1;
-		}
-	    } while (!gotzero);
-
-	    if ((cc = krb5_net_read(bsd_context, fd, &c, 1)) != 1) return 0;
-	    rd_len = c;
-	    if ((cc = krb5_net_read(bsd_context, fd, &c, 1)) != 1) return 0;
-	    rd_len = (rd_len << 8) | c;
-	    if ((cc = krb5_net_read(bsd_context, fd, &c, 1)) != 1) return 0;
-	    rd_len = (rd_len << 8) | c;
-	}
-#endif
-    net_len = krb5_encrypt_size(rd_len,eblock.crypto_entry);
-    /* note net_len is unsigned */
-    if (net_len > sizeof(des_inbuf)) {
-	/* XXX preposterous length, probably out of sync.
-	   act as if pipe closed */
-	syslog(LOG_ERR,"Read size problem.");
-	return(0);
-    }
-    retry = 0;
-  datard:
-    if ((cc = krb5_net_read(bsd_context,fd,desinbuf.data,net_len)) != net_len) {
-	/* XXX can't read enough, pipe must have closed */
-	if ((cc < 0)  && ((errno == EWOULDBLOCK) || (errno == EAGAIN))) {
-	    retry++;
-	    sleep(1);
-	    if (retry > MAXRETRIES){
-		syslog(LOG_ERR,
-		       "des_read retry count exceeded %d\n",
-		       retry);
-		return(0);
-	    }
-	    goto datard;
-	}
-	syslog(LOG_ERR,
-	       "Read data received %d != expected %d.",
-	       cc, net_len);
-	return(0);
-    }
-    /* decrypt info */
-    if ((krb5_decrypt(bsd_context, desinbuf.data,
-		      (krb5_pointer) storage,
-		      net_len,
-		      &eblock, 0))) {
-	syslog(LOG_ERR,"Read decrypt problem.");
-	return(0);
-    }
-    store_ptr = storage;
-    nstored = rd_len;
-    if (nstored > len) {
-	memcpy(buf, store_ptr, len);
-	nreturned += len;
-	store_ptr += len;
-	nstored -= len;
-    } else {
-	memcpy(buf, store_ptr, nstored);
-	nreturned += nstored;
-	nstored = 0;
-    }
-    return(nreturned);
-}
-    
-
-int
-v5_des_write(fd, buf, len)
-     int fd;
-     char *buf;
-     int len;
-{
-  unsigned char *len_buf = (unsigned char *) des_outpkt;
-    
-    if (!do_encrypt)
-      return(write(fd, buf, len));
-    
-    
-    desoutbuf.length = krb5_encrypt_size(len,eblock.crypto_entry);
-    if (desoutbuf.length > sizeof(des_outpkt)-4){
-	syslog(LOG_ERR,"Write size problem.");
-	return(-1);
-    }
-    if ((krb5_encrypt(bsd_context, (krb5_pointer)buf,
-		      desoutbuf.data,
-		      len,
-		      &eblock,
-		      0))){
-	syslog(LOG_ERR,"Write encrypt problem.");
-	return(-1);
-    }
-
-    len_buf[0] = (len & 0xff000000) >> 24;
-    len_buf[1] = (len & 0xff0000) >> 16;
-    len_buf[2] = (len & 0xff00) >> 8;
-    len_buf[3] = (len & 0xff);
-
-    if (write(fd, des_outpkt,desoutbuf.length+4) != desoutbuf.length+4){
-	syslog(LOG_ERR,"Could not write out all data.");
-	return(-1);
-    }
-    else return(len);
-}
-#endif /* KERBEROS */
 
 void usage()
 {
@@ -1567,8 +1384,7 @@ recvauth(valid_checksum)
 #ifdef KRB5_KRB4_COMPAT
     if (auth_sys == KRB5_RECVAUTH_V4) {
 
-	des_read  = v4_des_read;
-	des_write = v4_des_write;
+	rcmd_stream_init_krb4(v4_kdata->session, do_encrypt, 1, 1);
 
 	/* We do not really know the remote user's login name.
          * Assume it to be the same as the first component of the
@@ -1593,24 +1409,13 @@ recvauth(valid_checksum)
 				      &client)))
 	return status;
 
-    des_read  = v5_des_read;
-    des_write = v5_des_write;
+    rcmd_stream_init_krb5(ticket->enc_part2->session, do_encrypt, 1);
 
     getstr(netf, rusername, sizeof(rusername), "remuser");
 
     if ((status = krb5_unparse_name(bsd_context, client, &krusername)))
 	return status;
     
-    /* Setup up eblock if encrypted login session */
-    /* otherwise zero out session key */
-    if (do_encrypt) {
-	krb5_use_enctype(bsd_context, &eblock,
-			 ticket->enc_part2->session->enctype);
-	if ((status = krb5_process_key(bsd_context, &eblock,
-				       ticket->enc_part2->session)))
-	    fatal(netf, "Permission denied");
-    }      
-
     if ((status = krb5_read_message(bsd_context, (krb5_pointer)&netf, &inbuf)))
 	fatal(netf, "Error reading message");
 
@@ -1622,175 +1427,4 @@ recvauth(valid_checksum)
     return 0;
 }
 
-
-#ifdef KRB5_KRB4_COMPAT
-
-int
-v4_des_read(fd, buf, len)
-int fd;
-register char *buf;
-int len;
-{
-	int nreturned = 0;
-	krb5_ui_4 net_len, rd_len;
-	int cc;
-#if 0
-	unsigned char len_buf[4];
-#endif
-
-	if (!do_encrypt)
-		return(read(fd, buf, len));
-
-	if (nstored >= len) {
-		memcpy(buf, store_ptr, len);
-		store_ptr += len;
-		nstored -= len;
-		return(len);
-	} else if (nstored) {
-		memcpy(buf, store_ptr, nstored);
-		nreturned += nstored;
-		buf += nstored;
-		len -= nstored;
-		nstored = 0;
-	}
-
-#if 0
-	if ((cc = krb_net_read(fd, (char *)len_buf, 4)) != 4) {
-		/* XXX can't read enough, pipe
-		   must have closed */
-		return(0);
-	}
- 	net_len = (((krb5_ui_4)len_buf[0]<<24) |
-		   ((krb5_ui_4)len_buf[1]<<16) |
-		   ((krb5_ui_4)len_buf[2]<<8) |
-		   (krb5_ui_4)len_buf[3]);
-#else
-	{
-	    unsigned char c;
-	    int gotzero = 0;
-
-	    /* We're fetching the length which is MSB first, and the MSB
-	       has to be zero unless the client is sending more than 2^24
-	       (16M) bytes in a single write (which is why this code is in
-	       rlogin but not rcp or rsh.) The only reasons we'd get something
-	       other than zero are:
-	           -- corruption of the tcp stream (which will show up when
-		      everything else is out of sync too)
-		   -- un-caught Berkeley-style "pseudo out-of-band data" which
-		      happens any time the user hits ^C twice.
-	       The latter is *very* common, as shown by an 'rlogin -x -d' 
-	       using the CNS V4 rlogin.         Mark EIchin 1/95
-	      */
-	    do {
-		cc = krb_net_read(fd, &c, 1);
-		if (cc <= 0) return 0; /* read error */
-		if (cc == 1) {
-		    if (c == 0) gotzero = 1;
-		}
-	    } while (!gotzero);
-
-	    if ((cc = krb_net_read(fd, &c, 1)) != 1) return 0;
-	    net_len = c;
-	    if ((cc = krb_net_read(fd, &c, 1)) != 1) return 0;
-	    net_len = (net_len << 8) | c;
-	    if ((cc = krb_net_read(fd, &c, 1)) != 1) return 0;
-	    net_len = (net_len << 8) | c;
-	}
-
-#endif
-	/* Note: net_len is unsigned */
-	if (net_len > sizeof(des_inbuf)) {
-		/* XXX preposterous length, probably out of sync.
-		   act as if pipe closed */
-		return(0);
-	}
-	/* the writer tells us how much real data we are getting, but
-	   we need to read the pad bytes (8-byte boundary) */
-	rd_len = roundup(net_len, 8);
-	if ((cc = krb_net_read(fd, des_inbuf, rd_len)) != rd_len) {
-		/* XXX can't read enough, pipe
-		   must have closed */
-		return(0);
-	}
-	(void) pcbc_encrypt(des_inbuf,
-			    storage,
-			    (net_len < 8) ? 8 : net_len,
-			    v4_schedule,
-			    v4_kdata->session,
-			    DECRYPT);
-	/* 
-	 * when the cleartext block is < 8 bytes, it is "right-justified"
-	 * in the block, so we need to adjust the pointer to the data
-	 */
-	if (net_len < 8)
-		store_ptr = storage + 8 - net_len;
-	else
-		store_ptr = storage;
-	nstored = net_len;
-	if (nstored > len) {
-		memcpy(buf, store_ptr, len);
-		nreturned += len;
-		store_ptr += len;
-		nstored -= len;
-	} else {
-		memcpy(buf, store_ptr, nstored);
-		nreturned += nstored;
-		nstored = 0;
-	}
-	
-	return(nreturned);
-}
-
-int
-v4_des_write(fd, buf, len)
-int fd;
-char *buf;
-int len;
-{
-	static char garbage_buf[8];
-	unsigned char *len_buf = (unsigned char *) des_outpkt;
-
-	if (!do_encrypt)
-		return(write(fd, buf, len));
-
-	/* 
-	 * pcbc_encrypt outputs in 8-byte (64 bit) increments
-	 *
-	 * it zero-fills the cleartext to 8-byte padding,
-	 * so if we have cleartext of < 8 bytes, we want
-	 * to insert random garbage before it so that the ciphertext
-	 * differs for each transmission of the same cleartext.
-	 * if len < 8 - sizeof(long), sizeof(long) bytes of random
-	 * garbage should be sufficient; leave the rest as-is in the buffer.
-	 * if len > 8 - sizeof(long), just garbage fill the rest.
-	 */
-
-#ifdef min
-#undef min
-#endif
-#define min(a,b) ((a < b) ? a : b)
-
-	if (len < 8) {
-		krb5_random_confounder(8 - len, garbage_buf);
-		/* this "right-justifies" the data in the buffer */
-		(void) memcpy(garbage_buf + 8 - len, buf, len);
-	}
-	(void) pcbc_encrypt((len < 8) ? garbage_buf : buf,
-			    des_outpkt+4,
-			    (len < 8) ? 8 : len,
-			    v4_schedule,
-			    v4_kdata->session,
-			    ENCRYPT);
-
-	/* tell the other end the real amount, but send an 8-byte padded
-	   packet */
-	len_buf[0] = (len & 0xff000000) >> 24;
-	len_buf[1] = (len & 0xff0000) >> 16;
-	len_buf[2] = (len & 0xff00) >> 8;
-	len_buf[3] = (len & 0xff);
-	(void) write(fd, des_outpkt, roundup(len,8)+4);
-	return(len);
-}
-
-#endif /* KRB5_KRB4_COMPAT */
 #endif /* KERBEROS */

@@ -129,29 +129,15 @@ char copyright[] =
 #endif
 
 
-#ifndef roundup
-#define roundup(x,y) ((((x)+(y)-1)/(y))*(y))
-#endif
-
 #ifdef KERBEROS
-#include "krb5.h"
-#include "com_err.h"
+#include <krb5.h>
+#include <com_err.h>
 #include "defines.h"
+#ifdef KRB5_KRB4_COMPAT
+#include <kerberosIV/krb.h>
+#endif
      
 #define RLOGIN_BUFSIZ 5120
-     /*
- * Note that the encrypted rlogin packets take the form of a four-byte
- *length followed by encrypted data.  On writing the data out, a significant
- * performance penalty is suffered (at least one RTT per character, two if we
- * are waiting for a shell to echo) by writing the data separately from the 
- * length.  So, unlike the input buffer, which just contains the output
- * data, the output buffer represents the entire packet.
- */
-
-char des_inbuf[2*RLOGIN_BUFSIZ];       /* needs to be > largest read size */
-char des_outpkt[2*RLOGIN_BUFSIZ+4];      /* needs to be > largest write size */
-krb5_data desinbuf,desoutbuf;
-krb5_encrypt_block eblock;      /* eblock for encrypt/decrypt */
 
 void try_normal();
 char *krb_realm = (char *)0;
@@ -161,14 +147,16 @@ krb5_creds *cred;
 struct sockaddr_in local, foreign;
 krb5_context bsd_context;
 
+#ifdef KRB5_KRB4_COMPAT
+Key_schedule v4_schedule;
+CREDENTIALS v4_cred;
+#endif
+
 #ifndef UCB_RLOGIN
 #define UCB_RLOGIN      "/usr/ucb/rlogin"
 #endif
 
 #include "rpaths.h"
-#else /* !KERBEROS */
-#define des_read read
-#define des_write write
 #endif /* KERBEROS */
 
 # ifndef TIOCPKT_WINDOW
@@ -338,6 +326,10 @@ main(argc, argv)
     int sock;
     krb5_flags authopts;
     krb5_error_code status;
+#ifdef KRB5_KRB4_COMPAT
+    KTEXT_ST v4_ticket;
+    MSG_DAT v4_msg_data;
+#endif
 #endif
     int debug_port = 0;
    
@@ -476,8 +468,6 @@ main(argc, argv)
 	    com_err(argv[0], status, "while initializing krb5");
 	    exit(1);
     }
-    desinbuf.data = des_inbuf;
-    desoutbuf.data = des_outpkt+4;	/* Set up des buffers */
 #endif
 
 
@@ -586,25 +576,27 @@ main(argc, argv)
 		  0,		/* No need for server seq # */
 		  &local, &foreign,
 		  authopts,
-		  0);		/* Not any port # */
+		  0,		/* Not any port # */
+		  0);
     if (status) {
-	/* should check for KDC_PR_UNKNOWN, NO_TKT_FILE here -- XXX */
-	 if (status != -1) 
-	      fprintf(stderr,
-		      "%s: kcmd to host %s failed - %s\n",orig_argv[0], host,
-		      error_message(status));
-	 try_normal(orig_argv);
-    }
+#ifdef KRB5_KRB4_COMPAT
+	fprintf(stderr, "Trying krb4 rlogin...\n");
+	status = k4cmd(&sock, &host, debug_port,
+		       null_local_username ? NULL : pwd->pw_name,
+		       name ? name : pwd->pw_name, term,
+		       0, &v4_ticket, "rcmd", krb_realm,
+		       &v4_cred, v4_schedule, &v4_msg_data, &local, &foreign,
+		       (encrypt_flag) ? KOPT_DO_MUTUAL : 0L, 0);
+	if (status)
+	    try_normal(orig_argv);
+	rcmd_stream_init_krb4(v4_cred.session, encrypt_flag, 1, 1);
+#else
+	try_normal(orig_argv);
+#endif
+    } else
+	rcmd_stream_init_krb5(&cred->keyblock, encrypt_flag, 1);
     rem = sock;
     
-    /* setup eblock for des_read and write */
-    krb5_use_enctype(bsd_context, &eblock,cred->keyblock.enctype);
-    if ( status = krb5_process_key(bsd_context, &eblock,&cred->keyblock)) {
-	fprintf(stderr,
-		"%s: Cannot process session key : %s.\n",
-		orig_argv[0], error_message(status));
-	exit(1);
-    }
 #else
     rem = rcmd(&host, debug_port,
 	       null_local_username ? NULL : pwd->pw_name,
@@ -1060,9 +1052,9 @@ writer()
 #endif
 
 	    if (c != cmdchar)
-	      (void) des_write(rem, &cmdchar, 1);
+	      (void) rcmd_stream_write(rem, &cmdchar, 1);
 	}
-	if (des_write(rem, &c, 1) == 0) {
+	if (rcmd_stream_write(rem, &c, 1) == 0) {
 	    prf("line gone");
 	    break;
 	}
@@ -1177,7 +1169,7 @@ sendwindow()
     wp->ws_col = htons(winsize.ws_col);
     wp->ws_xpixel = htons(winsize.ws_xpixel);
     wp->ws_ypixel = htons(winsize.ws_ypixel);
-    (void) des_write(rem, obuf, sizeof(obuf));
+    (void) rcmd_stream_write(rem, obuf, sizeof(obuf));
 }
 
 
@@ -1362,7 +1354,7 @@ fd_set readset, excset, writeset;
 		bufp += n;
 	    }
 	    if (FD_ISSET(rem, &readset)) {
-	  	rcvcnt = des_read(rem, rcvbuf, sizeof (rcvbuf));
+	  	rcvcnt = rcmd_stream_read(rem, rcvbuf, sizeof (rcvbuf));
 		if (rcvcnt == 0)
 		    return (0);
 		if (rcvcnt < 0)
@@ -1597,307 +1589,7 @@ void try_normal(argv)
     perror("exec");
     exit(1);
 }
-
-
-
-char storage[2*RLOGIN_BUFSIZ];		/* storage for the decryption */
-int nstored = 0;
-char *store_ptr = storage;
-
-#ifndef OLD_VERSION
-
-int des_read(fd, buf, len)
-     int fd;
-     register char *buf;
-     int len;
-{
-    int nreturned = 0;
-    long net_len,rd_len;
-    int cc;
-    unsigned char len_buf[4];
-    
-    if (!encrypt_flag)
-      return(read(fd, buf, len));
-    
-    if (nstored >= len) {
-	memcpy(buf, store_ptr, len);
-	store_ptr += len;
-	nstored -= len;
-	return(len);
-    } else if (nstored) {
-	memcpy(buf, store_ptr, nstored);
-	nreturned += nstored;
-	buf += nstored;
-	len -= nstored;
-	nstored = 0;
-    }
-    
-#if 0
-    if ((cc = krb5_net_read(bsd_context, fd, (char *)&len_buf, 4)) != 4) {
-	/* XXX can't read enough, pipe must have closed */
-	return(0);
-    }
-    rd_len =
-	((len_buf[0]<<24) | (len_buf[1]<<16) | (len_buf[2]<<8) | len_buf[3]);
-#else
-	{
-	    unsigned char c;
-	    int gotzero = 0;
-
-	    /* See the comment in v4_des_read. */
-	    do {
-		cc = krb5_net_read(bsd_context, fd, &c, 1);
-		/* we should check for non-blocking here, but we'd have
-		   to make it save partial reads as well. */
-		if (cc <= 0) return cc; /* read error */
-		if (cc == 1) {
-		    if (c == 0) gotzero = 1;
-		}
-	    } while (!gotzero);
-
-	    if ((cc = krb5_net_read(bsd_context, fd, &c, 1)) != 1) return 0;
-	    rd_len = c;
-	    if ((cc = krb5_net_read(bsd_context, fd, &c, 1)) != 1) return 0;
-	    rd_len = (rd_len << 8) | c;
-	    if ((cc = krb5_net_read(bsd_context, fd, &c, 1)) != 1) return 0;
-	    rd_len = (rd_len << 8) | c;
-	}
-
 #endif
-    net_len = krb5_encrypt_size(rd_len,eblock.crypto_entry);
-    if ((net_len <= 0) || (net_len > sizeof(des_inbuf))) {
-	/* preposterous length; assume out-of-sync; only
-	   recourse is to close connection, so return 0 */
-	fprintf(stderr,"Read size problem.\n");
-	return(0);
-    }
-    if ((cc = krb5_net_read(bsd_context, fd, desinbuf.data, net_len)) != net_len) {
-	/* pipe must have closed, return 0 */
-	fprintf(stderr,
-		"Read error: length received %d != expected %d.\n",
-		cc,net_len);
-	return(0);
-    }
-    /* decrypt info */
-    if ((krb5_decrypt(bsd_context, desinbuf.data,
-		      (krb5_pointer) storage,
-		      net_len,
-		      &eblock, 0))) {
-	fprintf(stderr,"Cannot decrypt data from network.\n");
-	return(0);
-    }
-    store_ptr = storage;
-    nstored = rd_len;
-    if (nstored > len) {
-	memcpy(buf, store_ptr, len);
-	nreturned += len;
-	store_ptr += len;
-	nstored -= len;
-    } else {
-	memcpy(buf, store_ptr, nstored);
-	nreturned += nstored;
-	nstored = 0;
-    }
-    
-    return(nreturned);
-}
-
-
-
-int des_write(fd, buf, len)
-     int fd;
-     char *buf;
-     int len;
-{
-  unsigned char *len_buf = (unsigned char *) des_outpkt;
-    
-  if (!encrypt_flag)
-      return(write(fd, buf, len));
-    
-    
-    desoutbuf.length = krb5_encrypt_size(len,eblock.crypto_entry);
-    if (desoutbuf.length > sizeof(des_outpkt)-4){
-      	fprintf(stderr,"Write size problem.\n");
-	return(-1);
-    }
-    if ((krb5_encrypt(bsd_context, (krb5_pointer)buf,
-		      desoutbuf.data,
-		      len,
-		      &eblock,
-		      0))){
-      	fprintf(stderr,"Write encrypt problem.\n");
-	return(-1);
-    }
-
-    len_buf[0] = (len & 0xff000000) >> 24;
-    len_buf[1] = (len & 0xff0000) >> 16;
-    len_buf[2] = (len & 0xff00) >> 8;
-    len_buf[3] = (len & 0xff);
-
-    if (write(fd, des_outpkt,desoutbuf.length+4) != desoutbuf.length+4){
-      fprintf(stderr,"Could not write out all data\n");
-	return(-1);
-    }
-    else return(len);
-}
-
-
-
-#else /* Original version  placed here so that testing could be done
-	 to determine why rlogin with encryption on is slower with
-	 version 5 as compared to version 4. */
-
-#define ENCRYPT 1
-#define DECRYPT 0
-
-
-
-int des_read(fd, buf, len)
-     int fd;
-     register char *buf;
-     int len;
-{
-    int nreturned = 0;
-    long net_len, rd_len;
-    int cc;
-    unsigned char len_buf[4];
-    
-    if (!encrypt_flag)
-      return(read(fd, buf, len));
-    
-    if (nstored >= len) {
-	memcpy(buf, store_ptr, len);
-	store_ptr += len;
-	nstored -= len;
-	return(len);
-    } else if (nstored) {
-	memcpy(buf, store_ptr, nstored);
-	nreturned += nstored;
-	buf += nstored;
-	len -= nstored;
-	nstored = 0;
-    }
-#if 0
-    if ((cc = krb5_net_read(bsd_context, fd, len_buf, 4)) != 4) {
-	/* XXX can't read enough, pipe must have closed */
-	return(0);
-    }
-    net_len =
-	((len_buf[0]<<24) | (len_buf[1]<<16) | (len_buf[2]<<8) | len_buf[3]);
-#else
-	{
-	    unsigned char c;
-	    int gotzero = 0;
-
-	    /* See the comment in v4_des_read. */
-	    do {
-		cc = krb5_net_read(bsd_context, fd, &c, 1);
-		/* we should check for non-blocking here, but we'd have
-		   to make it save partial reads as well. */
-		if (cc < 0) return 0; /* read error */
-		if (cc == 1) {
-		    if (c == 0) gotzero = 1;
-		}
-	    } while (!gotzero);
-
-	    if ((cc = krb5_net_read(bsd_context, fd, &c, 1)) != 1) return 0;
-	    net_len = c;
-	    if ((cc = krb5_net_read(bsd_context, fd, &c, 1)) != 1) return 0;
-	    net_len = (net_len << 8) | c;
-	    if ((cc = krb5_net_read(bsd_context, fd, &c, 1)) != 1) return 0;
-	    net_len = (net_len << 8) | c;
-	}
-#endif
-    if (net_len < 0 || net_len > sizeof(des_inbuf)) {
-	/* XXX preposterous length, probably out of sync.
-	   act as if pipe closed */
-	return(0);
-    }
-    /* the writer tells us how much real data we are getting, but
-       we need to read the pad bytes (8-byte boundary) */
-#ifdef NOROUNDUP
-    rd_len = ((((net_len)+((8)-1))/(8))*(8));
-#else
-    rd_len = roundup(net_len, 8);
-#endif
-    if ((cc = krb5_net_read(bsd_context, fd, des_inbuf, rd_len)) != rd_len) {
-	/* pipe must have closed, return 0 */
-	return(0);
-    }
-    (void) mit_des_cbc_encrypt(
-			       des_inbuf,
-			       storage,
-			       (net_len < 8) ? 8 : net_len,
-			       eblock.priv,
-			       eblock.key->contents,
-			       DECRYPT);
-    /*
-     * when the cleartext block is < 8 bytes, it is "right-justified"
-     * in the block, so we need to adjust the pointer to the data
-     */
-    if (net_len < 8)
-      store_ptr = storage + 8 - net_len;
-    else
-      store_ptr = storage;
-    nstored = net_len;
-    if (nstored > len) {
-	memcpy(buf, store_ptr, len);
-	nreturned += len;
-	store_ptr += len;
-	nstored -= len;
-    } else {
-	memcpy(buf, store_ptr, nstored);
-	nreturned += nstored;
-	nstored = 0;
-    }
-    return(nreturned);
-}
-
-
-
-int des_write(fd, buf, len)
-     int fd;
-     char *buf;
-     int len;
-{
-    static char garbage_buf[8];
-    unsigned char len_buf[4];
-    
-    if (!encrypt_flag)
-      return(write(fd, buf, len));
-    
-#define min(a,b) ((a < b) ? a : b)
-    
-    if (len < 8) {
-	krb5_random_confounder(bsd_context, 8 - len, &garbage_buf);
-	/* this "right-justifies" the data in the buffer */
-	(void) memcpy(garbage_buf + 8 - len, buf, len);
-    }
-    
-    (void) mit_des_cbc_encrypt((len < 8) ? garbage_buf : buf,
-			       des_outbuf,
-			       (len < 8) ? 8 : len,
-			       eblock.priv,
-			       eblock.key->contents,
-			       ENCRYPT);
-    
-    /* tell the other end the real amount, but send an 8-byte padded
-       packet */
-    len_buf[0] = (len & 0xff000000) >> 24;
-    len_buf[1] = (len & 0xff0000) >> 16;
-    len_buf[2] = (len & 0xff00) >> 8;
-    len_buf[3] = (len & 0xff);
-    (void) write(fd, len_buf, 4);
-#ifdef NOROUNDUP
-    (void) write(fd, des_outbuf, ((((len)+((8)-1))/(8))*(8)));
-#else
-    (void) write(fd, des_outbuf, roundup(len,8));
-#endif
-    return(len);
-}
-
-#endif /* OLD_VERSION */
-#endif /* KERBEROS */
 
 
 

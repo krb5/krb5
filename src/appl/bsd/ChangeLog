@@ -1,3 +1,23 @@
+Tue Feb 24 14:52:33 1998  Tom Yu  <tlyu@mit.edu>
+
+	* kcmd.c: Integrate ghudson's changes for client-side krb4
+	compatibility. [krb5-appl/483]
+	
+	* krcp.c: Integrate ghudson's changes for client-side krb4
+	compatibility. [krb5-appl/483]
+
+	* krlogin.c: Integrate ghudson's changes for client-side krb4
+	compatibility. [krb5-appl/483]
+
+	* krlogind.c: Integrate ghudson's changes for client-side krb4
+	compatibility. [krb5-appl/483]
+
+	* krsh.c: Integrate ghudson's changes for client-side krb4
+	compatibility. [krb5-appl/483]
+
+	* krshd.c: Integrate ghudson's changes for client-side krb4
+	compatibility. [krb5-appl/483]
+
 Sun Feb 22 19:16:12 1998  Tom Yu  <tlyu@mit.edu>
 
 	* v4rcp.c: Punt nastiness to redefine setreuid, as we don't use
