@@ -1,3 +1,8 @@
+Mon Jul 21 20:32:14 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* accept_sec_context.c (krb5_gss_accept_sec_context): Initialize
+		ctx before referenced in failure cases.
+
 Tue Jul 15 22:05:21 1997  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* init_sec_context.c (krb5_gss_init_sec_context): Always copy the

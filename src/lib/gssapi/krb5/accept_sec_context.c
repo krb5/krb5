@@ -161,7 +161,7 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
    krb5_principal name = NULL;
    int gss_flags = 0;
    int decode_req_message = 0;
-   krb5_gss_ctx_id_rec *ctx;
+   krb5_gss_ctx_id_rec *ctx = 0;
    krb5_enctype enctype;
    krb5_timestamp now;
    gss_buffer_desc token;
