@@ -8,7 +8,7 @@
 
 	* cc_file.c, cc_stdio.c, cc_memory.c: New files, built from source
 	files of appropriate subdirectories.
-	* fcc.h: New file, copied from file/fcc.h; temporary.
+	* fcc.h, scc.h: New files, copied from subdirectories; temporary.
 	* ccfns.c: New file, implementing what used to be krb5_cc_* macros
 	in krb5.h.
 	* Makefile.in (STLIBOBJS, OBJS, SRCS): Updated.
