@@ -38,6 +38,45 @@
 extern "C" {
 #endif /* __cplusplus */
 
+/* Reserved static storage for GSS_oids.  See rfc 1964 for more details. */
+
+/* 2.1.1. Kerberos Principal Name Form: */
+GSS_DLLIMP extern const gss_OID_desc * const GSS_KRB5_NT_PRINCIPAL_NAME;
+/* This name form shall be represented by the Object Identifier {iso(1)
+ * member-body(2) United States(840) mit(113554) infosys(1) gssapi(2)
+ * krb5(2) krb5_name(1)}.  The recommended symbolic name for this type
+ * is "GSS_KRB5_NT_PRINCIPAL_NAME". */
+
+/* 2.1.2. Host-Based Service Name Form */
+#define GSS_KRB5_NT_HOSTBASED_SERVICE_NAME GSS_C_NT_HOSTBASED_SERVICE
+/* This name form shall be represented by the Object Identifier {iso(1)
+ * member-body(2) United States(840) mit(113554) infosys(1) gssapi(2)
+ * generic(1) service_name(4)}.  The previously recommended symbolic
+ * name for this type is "GSS_KRB5_NT_HOSTBASED_SERVICE_NAME".  The
+ * currently preferred symbolic name for this type is
+ * "GSS_C_NT_HOSTBASED_SERVICE". */
+
+/* 2.2.1. User Name Form */
+#define GSS_KRB5_NT_USER_NAME GSS_C_NT_USER_NAME    
+/* This name form shall be represented by the Object Identifier {iso(1)
+ * member-body(2) United States(840) mit(113554) infosys(1) gssapi(2)
+ * generic(1) user_name(1)}.  The recommended symbolic name for this
+ * type is "GSS_KRB5_NT_USER_NAME". */
+
+/* 2.2.2. Machine UID Form */
+#define GSS_KRB5_NT_MACHINE_UID_NAME GSS_C_NT_MACHINE_UID_NAME
+/* This name form shall be represented by the Object Identifier {iso(1)
+ * member-body(2) United States(840) mit(113554) infosys(1) gssapi(2)
+ * generic(1) machine_uid_name(2)}.  The recommended symbolic name for
+ * this type is "GSS_KRB5_NT_MACHINE_UID_NAME". */
+
+/* 2.2.3. String UID Form */
+#define GSS_KRB5_NT_STRING_UID_NAME GSS_C_NT_STRING_UID_NAME
+/* This name form shall be represented by the Object Identifier {iso(1)
+ * member-body(2) United States(840) mit(113554) infosys(1) gssapi(2)
+ * generic(1) string_uid_name(3)}.  The recommended symbolic name for
+ * this type is "GSS_KRB5_NT_STRING_UID_NAME". */ 
+
 extern const gss_OID_desc * const gss_mech_krb5;
 extern const gss_OID_desc * const gss_mech_krb5_old;
 extern const gss_OID_desc * const gss_mech_krb5_v2;

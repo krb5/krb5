@@ -1,3 +1,8 @@
+2001-04-02	Alexandra Ellwood <lxs@mit.edu>
+
+	* gssapi_krb5.h, gssapi_krb5.c: Added oids from rfc 1964 using the 
+	suggested names.
+
 2001-03-20	Alexandra Ellwood <lxs@mit.edu>
 
 	* gssapi_krb5.h: Added #include of KerberosSupport.h in case this header
