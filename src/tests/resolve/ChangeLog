@@ -1,3 +1,9 @@
+Mon Mar 18 21:49:39 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* configure.in: Add KRB5_RUN_FLAGS
+
+	* Makefile.in: Use runtime flags.
+
 Wed Sep 13 13:57:40 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* resolve.c (main): Fix fencepost error; use argv[1] to test for a

@@ -1,4 +1,6 @@
 CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDES)
+RUN_SETUP = @KRB5_RUN_ENV@
+
 
 OBJS=resolve.o
 SRCS=$(srcdir)/resolve.c
@@ -9,7 +11,7 @@ resolve: $(OBJS) $(DEPLIBS)
 	$(LD) $(LDFLAGS) $(LDARGS) -o resolve $(OBJS) $(LIBS)
 
 check:: resolve
-	LD_LIBRARY_PATH=$(TOPLIBD) ./resolve
+	$(RUN_SETUP) ./resolve
 
 install::
 

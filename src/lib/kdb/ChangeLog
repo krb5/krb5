@@ -1,3 +1,9 @@
+Mon Mar 18 21:46:39 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* configure.in: Add KRB5_RUN_FLAGS
+
+	* Makefile.in: Use the run flags.
+
 Sun Mar 17 20:55:41 1996  Ezra Peisach  <epeisach@dumpster.rose.brandeis.edu>
 
  	* configure.in: Change WITH_KDB_DB to USE_KDB5_LIBRARIES and add

@@ -1,6 +1,12 @@
+Mon Mar 18 21:49:39 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* configure.in: Add KRB5_RUN_FLAGS
+
+	* Makefile.in: Use runtime flags.
+
 Sun Mar 17 20:32:08 1996  Ezra Peisach  <epeisach@dumpster.rose.brandeis.edu>
 
-	* configure.in: Add USE_ANAME, USE_KRB5_LIBRAR, KRB5_LIBRARIES so
+	* configure.in: Add USE_ANAME, USE_KRB5_LIBRARY, KRB5_LIBRARIES so
 		that Makefile does not have to know build tree layout.
 
         * Makefile.in: Rework to be consistant with configure defines so

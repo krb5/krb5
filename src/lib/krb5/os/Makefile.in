@@ -1,4 +1,5 @@
 CFLAGS = $(CCOPTS) $(DEFS)
+KRB5_RUN_ENV = @KRB5_RUN_ENV@
 
 ##DOSBUILDTOP = ..\..\..
 ##DOSLIBNAME=..\krb5.lib
@@ -112,7 +113,7 @@ t_an_to_ln: $(T_AN_TO_LN_OBJS) $(DEPLIBS)
 
 check-unix:: $(TEST_PROGS)
 	KRB5_CONFIG=$(srcdir)/td_krb5.conf ; export KRB5_CONFIG ;\
-	./t_std_conf  -d -s NEW.DEFAULT.REALM -d \
+	$(KRB5_RUN_ENV) ./t_std_conf  -d -s NEW.DEFAULT.REALM -d \
 		-k IGGY.ORG -k DEFAULT_REALM.TST \
 		-D DEFAULT_REALM.TST -r bad.idea -r itar.bad.idea \
 		-r really.BAD.IDEA. -r clipper.bad.idea -r KeYEsCrOW.BaD.IDea \
@@ -129,8 +130,7 @@ check-unix::
 	echo '[realms]' >> ./t_an.conf
 	echo 'r = {' >> ./t_an.conf
 	if test -r ../../../admin/aname/kdb5_anadd ; then \
-		LD_LIBRARY_PATH=$(TOPLIBD) ; export LD_LIBRARY_PATH ; \
-		../../../admin/aname/kdb5_anadd -a -n ./t_an p/i/i/i@r piii; \
+		$(KRB5_RUN_ENV) ../../../admin/aname/kdb5_anadd -a -n ./t_an p/i/i/i@r piii; \
 		../../../admin/aname/kdb5_anadd -a -n ./t_an p/a/b/c@r pabc; \
 		echo 'auth_to_local = DB:./t_an' >> ./t_an.conf; \
 	fi
@@ -140,12 +140,12 @@ check-unix::
 	echo '}' >> ./t_an.conf
 	if test -r ../../../admin/aname/kdb5_anadd ; then \
 		KRB5_CONFIG=./t_an.conf ; export KRB5_CONFIG ; \
-		./t_an_to_ln p/i/i/i@r p/a/b/c@r; \
+		$(KRB5_RUN_ENV) ./t_an_to_ln p/i/i/i@r p/a/b/c@r; \
 	fi
 	KRB5_CONFIG=./t_an.conf ; export KRB5_CONFIG ; \
-	./t_an_to_ln rul/helpme/e@r ru/123/le@r
+	$(KRB5_RUN_ENV) ./t_an_to_ln rul/helpme/e@r ru/123/le@r
 	KRB5_CONFIG=./t_an.conf ; export KRB5_CONFIG ; \
-	./t_an_to_ln fred/r@r barney/r@r
+	$(KRB5_RUN_ENV) ./t_an_to_ln fred/r@r barney/r@r
 	rm ./t_an.*
 
 clean:: 

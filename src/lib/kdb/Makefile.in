@@ -1,4 +1,5 @@
 CFLAGS = $(CCOPTS) $(DEFS)
+KRB5_RUN_ENV = @KRB5_RUN_ENV@
 
 all:: $(OBJS)
 
@@ -42,7 +43,7 @@ t_kdb:	t_kdb.o $(DEPLIBS)
 	$(LD) $(LDFLAGS) $(LDARGS) -o t_kdb t_kdb.o $(LIBS)
 
 check::	t_kdb
-	LD_LIBRARY_PATH=$(TOPLIBD) ; export LD_LIBRARY_PATH ; ./t_kdb
+	$(KRB5_RUN_ENV) ./t_kdb
 
 clean::
 	$(RM) t_kdb t_kdb.o

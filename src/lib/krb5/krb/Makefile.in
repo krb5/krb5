@@ -1,4 +1,5 @@
 CFLAGS = $(CCOPTS) $(DEFS)
+RUN_SETUP = @KRB5_RUN_ENV@
 
 ##DOSBUILDTOP = ..\..\..
 ##DOSLIBNAME=..\krb5.lib
@@ -181,7 +182,7 @@ TEST_PROGS= t_walk_rtree t_kerb t_ser
 
 check-unix:: $(TEST_PROGS)
 	KRB5_CONFIG=$(srcdir)/t_krb5.conf ; export KRB5_CONFIG ;\
-	./t_kerb 425_conv_principal rcmd e40-po ATHENA.MIT.EDU \
+	$(RUN_SETUP) ./t_kerb 425_conv_principal rcmd e40-po ATHENA.MIT.EDU \
 		 425_conv_principal rcmd mit ATHENA.MIT.EDU \
 		 425_conv_principal rcmd lithium ATHENA.MIT.EDU \
 		 425_conv_principal rcmd tweedledumb CYGNUS.COM \
@@ -191,7 +192,7 @@ check-unix:: $(TEST_PROGS)
 		> test.out
 	cmp test.out $(srcdir)/t_ref_kerb.out
 	$(RM) test.out
-	./t_ser
+	$(RUN_SETUP) ./t_ser
 
 check-mac:: $(TEST_PROGS)
 
