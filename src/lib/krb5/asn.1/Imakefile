@@ -140,9 +140,9 @@ OBJS= \
 	tkt2ktkt.o	\
 	u2gen.o
 
-includes:: KRB5-types.h
-
 all:: includes
+
+includes:: KRB5-types.h
 
 OtherdirLibraryTarget($(TOP)/lib,krb5,$(OBJS))
 
