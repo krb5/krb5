@@ -378,7 +378,7 @@ if ![info exists RLOGIN] {
 }
 
 if ![info exists RLOGIN_FLAGS] {
-    set RLOGIN_FLAGS ""
+    set RLOGIN_FLAGS "-x"
 }
 
 # We use a couple of variables to hold shell prompts which may be
@@ -1288,6 +1288,7 @@ proc start_kerberos_daemons { standalone } {
     sleep 2
     set f [open $kdc_lfile a]
     puts $f $markstr
+    flush $f
     close $f
 
     expect {
@@ -1295,6 +1296,8 @@ proc start_kerberos_daemons { standalone } {
 	-ex "$markstr\r\n" { }
 	-re "\[^\r\n\]*\r\n" { exp_continue }
 	timeout {
+	    verbose -log "tail $kdc_lfile output:"
+	    verbose -log [exec tail $kdc_lfile]
 	    if {$standalone} {
 		verbose -log "tail -f timed out ($timeout sec) looking for mark in kdc log"
 		fail "krb5kdc"
@@ -1319,6 +1322,23 @@ proc start_kerberos_daemons { standalone } {
     expect {
 	-i $tailf_spawn_id
 	-re "commencing operation\r\n" { }
+	-re "krb5kdc: \[a-zA-Z\]* - Cannot bind server socket to \[ 0-9a-fA-F:.\]*\r\n" {
+	    verbose -log "warning: $expect_out(0,string)"
+	    exp_continue
+	}
+	"no sockets set up?" {
+	    if {$standalone} {
+		verbose -log "krb5kdc startup failed to bind listening sockets"
+		fail "krb5kdc"
+	    } else {
+		perror "krb5kdc startup failed to bind listening sockets"
+	    }
+	    stop_kerberos_daemons
+	    exec kill $tailf_pid
+	    expect -i $tailf_spawn_id eof
+	    wait -i $tailf_spawn_id
+	    return 0
+	}
 	timeout {
 	    if {$standalone} {
 		verbose -log "krb5kdc startup timed out"
@@ -1406,7 +1426,7 @@ proc start_kerberos_daemons { standalone } {
     expect {
 	-i $tailf_spawn_id
 	"Seeding random number" exp_continue
-	"cannont initialize network" {
+	"cannot initialize network" {
 	    if {$standalone} {
 		verbose -log "kadmind failed network init"
 		fail "kadmind"
@@ -2196,14 +2216,30 @@ proc setup_root_shell { testname } {
     set rlogin_pid [exp_pid]
     set old_timeout $timeout
     set timeout 300
+    set got_refused 0
 
     expect {
 	-re {connect to address [0-9a-fA-F.:]*: Connection refused} {
 	    note $expect_out(buffer)
+	    set got_refused 1
 	    exp_continue
 	}
-	-re "word:|erberos rlogin failed|ection refused|ection reset by peer" {
+	-re "word:|erberos rlogin failed|ection refused|ection reset by peer|not authorized" {
 	    note "$testname test requires ability to rlogin as root"
+	    unsupported "$testname"
+	    set timeout $old_timeout
+	    stop_root_shell
+	    return 0
+	}
+	"Cannot assign requested address" {
+	    note "$testname: rlogin as root 'cannot assign requested address'"
+	    unsupported "$testname"
+	    set timeout $old_timeout
+	    stop_root_shell
+	    return 0
+	}
+	-re "usage: rlogin|illegal option -- x|invalid option -- x" {
+	    note "$testname: rlogin doesn't like command-line flags"
 	    unsupported "$testname"
 	    set timeout $old_timeout
 	    stop_root_shell
@@ -2219,7 +2255,17 @@ proc setup_root_shell { testname } {
 	    return 0
 	}
 	eof {
-	    perror "eof from rlogin $hostname -l root"
+	    if {$got_refused} {
+		# reported some errors, continued, and failed
+		note "$testname test requires ability to log in as root"
+		unsupported $testname
+	    } else {
+		# unknown problem?
+#		perror "eof from rlogin $hostname -l root"
+		note "eof (and unrecognized messages?) from rlogin $hostname -l root"
+		note "$testname test requires ability to log in as root"
+		unsupported $testname
+	    }
 	    stop_root_shell
 	    set timeout $old_timeout
 	    catch "expect_after"
@@ -2463,7 +2509,7 @@ proc krb_exit { } {
 # helpful sometimes for debugging the test suite
 proc spawn_xterm { } {
     global env
-    foreach i {KDB5_UTIL KRB5KDC KADMIND KADMIN KADMIN_LOCAL KINIT KTUTIL KLIST RLOGIN RLOGIND FTP FTPD} {
+    foreach i {KDB5_UTIL KRB5KDC KADMIND KADMIN KADMIN_LOCAL KINIT KTUTIL KLIST RLOGIN RLOGIND FTP FTPD KPASSWD REALMNAME} {
 	global $i
 	if [info exists $i] { set env($i) [set $i] }
     }
