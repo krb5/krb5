@@ -797,11 +797,11 @@ sendrequest(cmd, local, remote, printnames)
 	struct stat st;
 	struct timeval start, stop;
 	register int c, d;
-	FILE *fin, *dout = 0, *popen();
-	int (*closefunc)(), pclose(), fclose();
-	sig_t oldintr, oldintp;
-	long bytes = 0, hashbytes = HASHBYTES;
-	char *lmode, buf[FTP_BUFSIZ], *bufp;
+	FILE *volatile fin, *volatile dout = 0, *popen();
+	int (*volatile closefunc)(), pclose(), fclose();
+	volatile sig_t oldintr, oldintp;
+	volatile long bytes = 0, hashbytes = HASHBYTES;
+	char *volatile lmode, buf[FTP_BUFSIZ], *bufp;
 	sigtype abortsend();
 
 	if (verbose && printnames) {
@@ -1046,17 +1046,17 @@ abortrecv(sig)
 }
 
 recvrequest(cmd, local, remote, lmode, printnames)
-	char *cmd, *local, *remote, *lmode;
+	char *cmd, *volatile local, *remote, *lmode;
 {
-	FILE *fout, *din = 0, *popen();
-	int (*closefunc)(), pclose(), fclose();
-	sig_t oldintr, oldintp;
-	int is_retr, tcrflag, bare_lfs = 0;
+	FILE *volatile fout, *volatile din = 0, *popen();
+	int (*volatile closefunc)(), pclose(), fclose();
+	volatile sig_t oldintr, oldintp;
+	volatile int is_retr, tcrflag, bare_lfs = 0;
 	char *gunique();
 	static int bufsize;
 	static char *buf;
 	int blksize;
-	long bytes = 0, hashbytes = HASHBYTES;
+	volatile long bytes = 0, hashbytes = HASHBYTES;
 	register int c, d;
 	struct timeval start, stop;
 	struct stat st;
@@ -1691,10 +1691,11 @@ abortpt(sig)
 proxtrans(cmd, local, remote)
 	char *cmd, *local, *remote;
 {
-	sig_t oldintr;
-	int secndflag = 0, prox_type, nfnd;
+	volatile sig_t oldintr;
+	volatile int secndflag = 0;
+	int prox_type, nfnd;
 	extern jmp_buf ptabort;
-	char *cmd2;
+	char *volatile cmd2;
 	 fd_set mask;
 	sigtype abortpt();
 

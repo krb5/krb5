@@ -44,7 +44,8 @@ mypopen(cmd,mode)
 	char *mode;
 {
 	int p[2];
-	int myside, hisside, pid;
+	volatile int myside, hisside;
+	int pid;
 
 	if (nfiles <= 0)
 		nfiles = getdtablesize();

@@ -1439,7 +1439,7 @@ mls(argc, argv)
 	extern jmp_buf jabort;
 	sig_t oldintr;
 	int ointer, i;
-	char *cmd, mode[1], *dest;
+	char *volatile cmd, mode[1], *dest;
 	sigtype mabort();
 
 	if (argc < 2 && !another(&argc, &argv, "remote-files"))

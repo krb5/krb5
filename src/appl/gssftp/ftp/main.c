@@ -80,7 +80,8 @@ extern char realm[];
 #endif /* KRB5_KRB4_COMPAT */
 
 main(argc, argv)
-	char *argv[];
+	volatile int argc;
+	char **volatile argv;
 {
 	register char *cp;
 	int top;

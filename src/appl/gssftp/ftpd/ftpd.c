@@ -119,8 +119,16 @@ extern char *mktemp ();
 #include <k5-util.h>
 
 #ifdef STDARG
-extern reply(int, char *, ...);
-extern lreply(int, char *, ...);
+extern reply(int, char *, ...)
+#if __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 7)
+     __attribute__ ((__format__ (__printf__, 2, 3)))
+#endif
+     ;
+extern lreply(int, char *, ...)
+#if __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 7)
+     __attribute__ ((__format__ (__printf__, 2, 3)))
+#endif
+     ;
 #endif
 
 #ifdef KRB5_KRB4_COMPAT
@@ -1446,7 +1454,7 @@ void send_data(instr, outstr, blksize)
 	register int c, cnt;
 	register char *buf;
 	int netfd, filefd;
-	int ret = 0;
+	volatile int ret = 0;
 
 	transflag++;
 	if (sigsetjmp(urgcatch, 1)) {
@@ -1527,7 +1535,7 @@ receive_data(instr, outstr)
 	FILE *instr, *outstr;
 {
 	register int c;
-	int cnt, bare_lfs = 0;
+	volatile int cnt, bare_lfs = 0;
 	char buf[FTP_BUFSIZ];
 	int ret = 0;
 
@@ -2485,13 +2493,13 @@ send_file_list(whichfiles)
 	struct stat st;
 	DIR *dirp = NULL;
 	struct dirent *dir;
-	FILE *dout = NULL;
-	register char **dirlist, *dirname;
-	int simple = 0;
+	FILE *volatile dout = NULL;
+	register char **volatile dirlist, *dirname;
+	volatile int simple = 0;
 #ifndef strpbrk
 	char *strpbrk();
 #endif
-	int ret = 0;
+	volatile int ret = 0;
 
 	if (strpbrk(whichfiles, "~{[*?") != NULL) {
 		extern char **ftpglob(), *globerr;
@@ -2728,8 +2736,6 @@ ftpd_gss_convert_creds(name, creds)
 	char ccname[MAXPATHLEN];
 #ifdef KRB5_KRB4_COMPAT
 	krb5_principal kpcserver;
-	krb5_error_code kpccode;
-	int kpcval;
 	krb5_creds increds, *v5creds;
 	CREDENTIALS v4creds;
 #endif

@@ -66,7 +66,7 @@ ftpd_popen(program, type)
 	char *program, *type;
 {
 	register char *cp;
-	FILE *iop;
+	FILE *volatile iop;
 	int argc, gargc, pdes[2], pid;
 	char **pop, *argv[MAX_ARGV], *gargv[MAX_GARGV], *vv[2];
 	extern char **ftpglob(), **copyblk();
