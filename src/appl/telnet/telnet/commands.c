@@ -145,7 +145,8 @@ extern void herror(const char *);
 typedef struct {
 	char	*name;		/* command name */
 	char	*help;		/* help string (NULL for no help) */
-	int	(*handler)();	/* routine which executes command */
+	int	(*handler)	/* routine which executes command */
+                        (int, char *[]);
 	int	needconnect;	/* Do we need to be connected to execute? */
 } Command;
 
@@ -289,15 +290,16 @@ struct sendlist {
     char	*help;		/* Help information (0 ==> no help) */
     int		needconnect;	/* Need to be connected */
     int		narg;		/* Number of arguments */
-    int		(*handler)();	/* Routine to perform (for special ops) */
+    int		(*handler)	/* Routine to perform (for special ops) */
+			(char *);
     int		nbyte;		/* Number of bytes to send this command */
     int		what;		/* Character to be sent (<0 ==> special) */
 };
 
 
 static int
-	send_esc (void),
-	send_help (void),
+	send_esc (char *),
+	send_help (char *),
 	send_docmd (char *),
 	send_dontcmd (char *),
 	send_willcmd (char *),
@@ -377,7 +379,7 @@ sendcmd(argc, argv)
 	}
 	count += s->nbyte;
 	if (s->handler == send_help) {
-	    send_help();
+	    send_help(NULL);
 	    return 0;
 	}
 
@@ -402,13 +404,12 @@ sendcmd(argc, argv)
     for (i = 1; i < argc; i++) {
 	if ((s = GETSEND(argv[i])) == 0) {
 	    fprintf(stderr, "Telnet 'send' error - argument disappeared!\n");
-	    (void) quit();
+	    (void) quit(0, NULL);
 	    /*NOTREACHED*/
 	}
 	if (s->handler) {
 	    count++;
-	    success += (*s->handler)((s->narg > 0) ? argv[i+1] : 0,
-				  (s->narg > 1) ? argv[i+2] : 0);
+	    success += (*s->handler)(argv[i+1]);
 	    i += s->narg;
 	} else {
 	    NET2ADD(IAC, s->what);
@@ -419,7 +420,8 @@ sendcmd(argc, argv)
 }
 
     static int
-send_esc()
+send_esc(s)
+    char *s;
 {
     NETADD(escape);
     return 1;
@@ -515,7 +517,8 @@ send_tncmd(func, cmd, name)
 }
 
     static int
-send_help()
+send_help(n)
+     char *n;
 {
     struct sendlist *s;	/* pointer to current command */
     for (s = Sendlist; s->name; s++) {
@@ -531,14 +534,16 @@ send_help()
  */
 
     static int
-lclchars()
+lclchars(s)
+     int s;
 {
     donelclchars = 1;
     return 1;
 }
 
     static int
-togdebug()
+togdebug(s)
+     int s;
 {
 #ifndef	NOT43
     if (net > 0 &&
@@ -557,7 +562,8 @@ togdebug()
 
 
     static int
-togcrlf()
+togcrlf(s)
+     int s;
 {
     if (crlf) {
 	printf("Will send carriage returns as telnet <CR><LF>.\r\n");
@@ -663,7 +669,7 @@ togxbinary(val)
 }
 
 
-static int togglehelp (void);
+static int togglehelp (int);
 #if	defined(AUTHENTICATION)
 extern int auth_togdebug (int);
 #endif
@@ -671,7 +677,8 @@ extern int auth_togdebug (int);
 struct togglelist {
     char	*name;		/* name of toggle */
     char	*help;		/* help message */
-    int		(*handler)();	/* routine to do actual setting */
+    int		(*handler)	/* routine to do actual setting */
+			(int);
     int		*variable;
     char	*actionexplanation;
 };
@@ -804,7 +811,8 @@ static struct togglelist Togglelist[] = {
 };
 
     static int
-togglehelp()
+togglehelp(n)
+    int n;
 {
     struct togglelist *c;
 
@@ -1384,7 +1392,9 @@ setescape(argc, argv)
 
     /*VARARGS*/
     static int
-togcrmod()
+togcrmod(argc, argv)
+     int argc;
+     char **argv;
 {
     crmod = !crmod;
     printf("Deprecated usage - please use 'toggle crmod' in the future.\r\n");
@@ -1395,7 +1405,9 @@ togcrmod()
 
     /*VARARGS*/
 static int
-suspend()
+suspend(argc, argv)
+     int argc;
+     char **argv;
 {
 #ifdef	SIGTSTP
     setcommandmode();
@@ -1508,7 +1520,9 @@ bye(argc, argv)
 
 /*VARARGS*/
 int
-quit()
+quit(argc, argv)
+	int argc;
+	char *argv[];
 {
 	(void) call(bye, "bye", "fromquit", 0);
 	Exit(0);
@@ -1518,7 +1532,9 @@ quit()
 
 /*VARARGS*/
 static int
-logout()
+logout(argc, argv)
+     int argc;
+     char **argv;
 {
 	send_do(TELOPT_LOGOUT, 1);
 	(void) netflush();
@@ -1795,7 +1811,7 @@ env_define(var, value)
 		if (ep->next)
 			ep->next->prev = ep;
 	}
-	ep->welldefined = opt_welldefined(var);
+	ep->welldefined = opt_welldefined((char *)var);
 	ep->export = 1;
 	ep->var = (unsigned char *)strdup((char *)var);
 	ep->value = (unsigned char *)strdup((char *)value);
@@ -1925,7 +1941,7 @@ env_varval(what)
 	unsigned char *what;
 {
 	extern int old_env_var, old_env_value, env_auto;
-	int len = strlen((char *)what);
+	unsigned int len = strlen((char *)what);
 
 	if (len == 0)
 		goto unknown;
@@ -2421,7 +2437,8 @@ tn(argc, argv)
     if (argc < 2) {
 	(void) strcpy(line, "open ");
 	printf("(to) ");
-	(void) fgets(&line[strlen(line)], sizeof(line) - strlen(line), stdin);
+	(void) fgets(&line[strlen(line)], (int) (sizeof(line) - strlen(line)),
+		     stdin);
 	makeargv();
 	argc = margc;
 	argv = margv;
@@ -2833,7 +2850,7 @@ command(top, tbuf, cnt)
 		printf("%s> ", prompt);
 	    if (fgets(line, sizeof(line), stdin) == NULL) {
 		if (feof(stdin) || ferror(stdin)) {
-		    (void) quit();
+		    (void) quit(0, NULL);
 		    /*NOTREACHED*/
 		}
 		break;
@@ -2920,8 +2937,8 @@ cmdrc(m1, m2)
     register Command *c;
     FILE *rcfile;
     int gotmachine = 0;
-    int l1 = strlen(m1);
-    int l2 = strlen(m2);
+    unsigned int l1 = strlen(m1);
+    unsigned int l2 = strlen(m2);
     char m1save[64];
 
     if (skiprc)

@@ -304,7 +304,7 @@ printsub(direction, pointer, length)
     int		  length;	/* length of suboption data */
 {
     register int i;
-    char buf[512];
+    unsigned char buf[512];
     extern int want_status_response;
 
     if (showoptions || direction == 0 ||

@@ -693,7 +693,9 @@ mklist(buf, name)
 			 */
 			if (n || (cp - cp2 > 41))
 				;
-			else if (name && (strncasecmp(name, cp2, cp-cp2) == 0))
+			else if (name && (strncasecmp(name, cp2, 
+						      (unsigned) (cp-cp2)) 
+					  == 0))
 				*argv = cp2;
 			else if (is_unique(cp2, argv+1, argvp))
 				*argvp++ = cp2;
@@ -760,7 +762,7 @@ is_unique(name, as, ae)
 	register char *name, **as, **ae;
 {
 	register char **ap;
-	register int n;
+	register unsigned int n;
 
 	n = strlen(name) + 1;
 	for (ap = as; ap < ae; ap++)
@@ -1663,7 +1665,7 @@ env_opt_add(ep)
 	if (opt_replyp + (vp ? strlen((char *)vp) : 0) +
 				strlen((char *)ep) + 6 > opt_replyend)
 	{
-		register int len;
+		register unsigned int len;
 		opt_replyend += OPT_REPLY_SIZE;
 		len = opt_replyend - opt_reply;
 		opt_reply = (unsigned char *)realloc(opt_reply, len);
@@ -2583,7 +2585,8 @@ xmitEC()
 
 
     int
-dosynch()
+dosynch(s)
+     char *s;
 {
     netclear();			/* clear the path to the network */
     NETADD(IAC);
@@ -2596,7 +2599,8 @@ dosynch()
 int want_status_response = 0;
 
     int
-get_status()
+get_status(s)
+    char *s;
 {
     unsigned char tmp[16];
     register unsigned char *cp;
@@ -2631,7 +2635,7 @@ intp()
 	doflush();
     }
     if (autosynch) {
-	dosynch();
+	dosynch(NULL);
     }
 }
 
@@ -2645,7 +2649,7 @@ sendbrk()
 	doflush();
     }
     if (autosynch) {
-	dosynch();
+	dosynch(NULL);
     }
 }
 
@@ -2659,7 +2663,7 @@ sendabort()
 	doflush();
     }
     if (autosynch) {
-	dosynch();
+	dosynch(NULL);
     }
 }
 
@@ -2673,7 +2677,7 @@ sendsusp()
 	doflush();
     }
     if (autosynch) {
-	dosynch();
+	dosynch(NULL);
     }
 }
 

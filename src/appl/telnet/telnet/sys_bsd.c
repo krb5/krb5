@@ -67,6 +67,12 @@
 #define	SIG_FUNC_RET	int
 #endif
 
+#ifdef	SIGTSTP
+static SIG_FUNC_RET susp(int);
+#endif	/* SIGTSTP */
+#ifdef	SIGINFO
+SIG_FUNC_RET ayt(int);
+#endif
 #ifdef	SIGINFO
 extern SIG_FUNC_RET ayt_status();
 #endif
@@ -160,7 +166,7 @@ init_sys()
 
     int
 TerminalWrite(buf, n)
-    char *buf;
+    unsigned char *buf;
     int  n;
 {
     return write(tout, buf, n);
@@ -168,7 +174,7 @@ TerminalWrite(buf, n)
 
     int
 TerminalRead(buf, n)
-    char *buf;
+    unsigned char *buf;
     int  n;
 {
     return read(tin, buf, n);
@@ -249,7 +255,6 @@ TerminalSpecialChars(c)
 /*
  * Flush output to the terminal
  */
- 
     void
 TerminalFlushOutput()
 {
@@ -636,12 +641,6 @@ TerminalNewMode(f)
     }
 
     if (f != -1) {
-#ifdef	SIGTSTP
-	static SIG_FUNC_RET susp();
-#endif	/* SIGTSTP */
-#ifdef	SIGINFO
-	SIG_FUNC_RET ayt();
-#endif
 
 #ifdef	SIGTSTP
 	(void) signal(SIGTSTP, susp);

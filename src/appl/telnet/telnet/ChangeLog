@@ -1,3 +1,15 @@
+2002-11-15  Ezra Peisach  <epeisach@bu.edu>
+
+	* sys_bsd.c: Moved declaration for susp() to type of file and
+	provide prototype.
+
+	* commands.c, externs.h, telnet.c, network.c: Add prototype
+	declaration for command handler table dispatch functions. Make
+	functions called consistant with prototype. Misc unsigned/signed
+	cleanups.
+
+	* authenc.c, main.c, utilities.c: Signed vs. unsigned cleanup.
+
 2002-10-22  Ezra Peisach  <epeisach@bu.edu>
 
 	* configure.in: Autoconf 2.55 will not simply use cpp to test for

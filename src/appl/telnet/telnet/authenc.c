@@ -106,7 +106,7 @@ telnet_gets(tprompt, result, length, echo)
 		printf("%s", tprompt);
 		res = fgets(result, length, stdin);
 	} else if ((res = getpass(tprompt))) {
-		strncpy(result, res, length);
+		strncpy(result, res, (unsigned) length);
 		res = result;
 	}
 	TerminalNewMode(om);

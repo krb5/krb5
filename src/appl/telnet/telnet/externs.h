@@ -318,7 +318,7 @@ extern void
     slc_end_reply (void);
 
 extern int
-    quit (void), 
+    quit (int, char *[]), 
     ttyflush (int),
     rlogin_susp (void),
     tn (int, char **),
@@ -333,8 +333,8 @@ extern int
     stilloob (void), 
     telrcv (void),
     telnet_spin (void),
-    TerminalWrite (char *, int),
-    TerminalRead (char *, int),
+    TerminalWrite (unsigned char *, int),
+    TerminalRead (unsigned char *, int),
     TerminalAutoFlush (void),
     TerminalSpecialChars (int),
     TerminalWindowSize (long *, long *);
@@ -357,8 +357,8 @@ extern int
     env_is_exported (unsigned char *);
 
 extern int
-    get_status (void),
-    dosynch (void);
+    get_status (char *),
+    dosynch (char *);
 
 extern cc_t
     *tcval (int);
