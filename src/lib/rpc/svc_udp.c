@@ -175,6 +175,7 @@ svcudp_recv(xprt, msg)
 	struct rpc_msg *msg;
 {
         struct msghdr dummy;
+	struct iovec dummy_iov[1];
 	register struct svcudp_data *su = su_data(xprt);
 	register XDR *xdrs = &(su->su_xdrs);
 	register int rlen;
@@ -183,6 +184,10 @@ svcudp_recv(xprt, msg)
 
     again:
 	memset((char *) &dummy, 0, sizeof(dummy));
+	dummy_iov[0].iov_base = rpc_buffer(xprt);
+	dummy_iov[0].iov_len = (int) su->su_iosz;
+	dummy.msg_iov = dummy_iov;
+	dummy.msg_iovlen = 1;
 	dummy.msg_namelen = xprt->xp_laddrlen = sizeof(struct sockaddr_in);
 	dummy.msg_name = (char *) &xprt->xp_laddr;
 	rlen = recvmsg(xprt->xp_sock, &dummy, MSG_PEEK);

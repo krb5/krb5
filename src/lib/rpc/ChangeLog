@@ -1,3 +1,9 @@
+Mon Feb 10 00:04:36 1997  Tom Yu  <tlyu@mit.edu>
+
+	* svc_udp.c (svcudp_recv): Avoid coredumps under Solaris (and
+	possibly other systems) by passing in a non-NULL iovec to
+	recvmsg().
+
 Thu Jan 16 19:02:22 1997  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in (all-prerecurse): Update to use double-colon rules.
