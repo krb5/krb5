@@ -1,3 +1,7 @@
+Fri Jan 19 10:45:29 1996  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* krlogin.c (des_read): Return 0 or -1 on close/error respectively.
+
 Wed Jan 17 15:14:33 1996  Sam Hartman  <hartmans@tertius.mit.edu>
 
 	* krlogin.c ((reader): Use select to find out-of-band data, not signals.
