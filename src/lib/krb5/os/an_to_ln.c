@@ -32,16 +32,10 @@
 /*
  * Use compile(3) if no regcomp present.
  */
-#if	!defined(HAVE_REGCOMP) && defined(HAVE_REGEXP_H)
-#define	INIT		char *sp = instring;
-#define	GETC()		(*sp++)
-#define	PEEKC()		(*sp)
-#define	UNGETC(c)	(--sp)
-#define	RETURN(c)	return(c)
-#define	ERROR(c)	
+#if	!defined(HAVE_REGCOMP) && defined(HAVE_REGEXPR_H) && defined(HAVE_COMPILE)
 #define	RE_BUF_SIZE	1024
-#include <regexp.h>
-#endif	/* !HAVE_REGCOMP && HAVE_REGEXP_H */
+#include <regexpr.h>
+#endif	/* !HAVE_REGCOMP && HAVE_REGEXP_H && HAVE_COMPILE */
 
 #define	MAX_FORMAT_BUFFER	1024
 #ifndef	min
@@ -244,11 +238,10 @@ aname_do_match(string, contextp)
 			kret = 0;
 		}
 		regfree(&match_exp);
-#elif	HAVE_REGEXP_H
+#elif	HAVE_REGEXPR_H
 		compile(regexp,
 			regexp_buffer,
-			&regexp_buffer[RE_BUF_SIZE],
-			'\0');
+			&regexp_buffer[RE_BUF_SIZE]);
 		if (step(string, regexp_buffer)) {
 		    if ((loc1 == string) &&
 			(loc2 == &string[strlen(string)]))
@@ -319,7 +312,7 @@ do_replacement(regexp, repl, doall, in, out)
 	} while (doall && matched);
 	regfree(&match_exp);
     }
-#elif	HAVE_REGEXP_H
+#elif	HAVE_REGEXPR_H
     int		matched;
     char	*cp;
     char	*op;
@@ -328,8 +321,7 @@ do_replacement(regexp, repl, doall, in, out)
 
     compile(regexp,
 	    regexp_buffer,
-	    &regexp_buffer[RE_BUF_SIZE],
-	    '\0');
+	    &regexp_buffer[RE_BUF_SIZE]);
     cp = in;
     op = out;
     matched = 0;
