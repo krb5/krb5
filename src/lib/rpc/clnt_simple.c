@@ -70,6 +70,8 @@ gssrpc_callrpc(host, prognum, versnum, procnum, inproc, in, outproc, out)
 	}
 	if (crp->oldhost == NULL) {
 		crp->oldhost = mem_alloc(256);
+		if (crp->oldhost == 0)
+		    return 0;
 		crp->oldhost[0] = 0;
 		crp->socket = RPC_ANYSOCK;
 	}
@@ -98,7 +100,8 @@ gssrpc_callrpc(host, prognum, versnum, procnum, inproc, in, outproc, out)
 		crp->valid = 1;
 		crp->oldprognum = prognum;
 		crp->oldversnum = versnum;
-		(void) strcpy(crp->oldhost, host);
+		(void) strncpy(crp->oldhost, host, 255);
+		crp->oldhost[255] = '\0';
 	}
 	tottimeout.tv_sec = 25;
 	tottimeout.tv_usec = 0;

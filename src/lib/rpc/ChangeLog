@@ -1,3 +1,22 @@
+2000-05-18  Ken Raeburn  <raeburn@mit.edu>
+
+	* auth_gssapi_misc.c (auth_gssapi_display_status_1): Don't pass a
+	gss_buffer_desc to fprintf.
+
+	* clnt_tcp.c (clnttcp_create): Initialize "ct".
+	* clnt_udp.c (clntudp_bufcreate): Initialize "cu".
+
+	* svc_auth_gssapi.c (_svcauth_gssapi, create_client,
+	destroy_client, dump_db, clean_client): Use %p format for
+	displaying pointers.  Remove unused variables.
+
+2000-05-17  Ken Raeburn  <raeburn@mit.edu>
+            Nalin Dahyabhai  <nalin@redhat.com>
+
+	* clnt_perror.c (clnt_sperror): Don't overflow buffer "str" beyond
+	known allocation size.
+	* clnt_simple.c (gssrpc_callrpc): Don't overfill buffer "crp->oldhost".
+
 2000-05-03  Nalin Dahyabhai  <nalin@redhat.com>
 
 	* clnt_perror.c (_buf): Use bigger buffer.

@@ -57,7 +57,6 @@ static char *buf;
 static char *
 _buf()
 {
-
 	if (buf == NULL)
 		buf = (char *)malloc(BUFSIZ);
 	return (buf);
@@ -74,17 +73,20 @@ clnt_sperror(rpch, s)
 	struct rpc_err e;
 	void clnt_perrno();
 	char *err;
-	char *str = _buf();
+	char *bufstart = _buf();
+	char *str = bufstart;
 	char *strstart = str;
 
 	if (str == 0)
 		return (0);
 	CLNT_GETERR(rpch, &e);
 
-	(void) sprintf(str, "%s: ", s);  
+	strncpy (str, s, BUFSIZ - 1);
+	str[BUFSIZ - 1] = 0;
+	strncat (str, ": ", BUFSIZ - 1 - strlen (bufstart));
 	str += strlen(str);
-
-	(void) strcpy(str, clnt_sperrno(e.re_status));  
+	strncat (str, clnt_sperrno(e.re_status), BUFSIZ - 1 - strlen (bufstart));
+	str[BUFSIZ - 1] = '\0';
 	str += strlen(str);
 
 	switch (e.re_status) {
@@ -105,47 +107,64 @@ clnt_sperror(rpch, s)
 
 	case RPC_CANTSEND:
 	case RPC_CANTRECV:
-		(void) sprintf(str, "; errno = %s",
-		    sys_errlist[e.re_errno]); 
+		/* 10 for the string */
+		if(str - bufstart + 10 + strlen(sys_errlist[e.re_errno]) < BUFSIZ)
+		    (void) sprintf(str, "; errno = %s",
+				   sys_errlist[e.re_errno]); 
 		str += strlen(str);
 		break;
 
 	case RPC_VERSMISMATCH:
-		(void) sprintf(str,
-			"; low version = %lu, high version = %lu", 
-			e.re_vers.low, e.re_vers.high);
+		/* 33 for the string, 22 for the numbers */
+		if(str - bufstart + 33 + 22 < BUFSIZ)
+		    (void) sprintf(str,
+				   "; low version = %lu, high version = %lu", 
+				   (unsigned long) e.re_vers.low,
+				   (unsigned long) e.re_vers.high);
 		str += strlen(str);
 		break;
 
 	case RPC_AUTHERROR:
 		err = auth_errmsg(e.re_why);
-		(void) sprintf(str,"; why = ");
+		/* 8 for the string */
+		if(str - bufstart + 8 < BUFSIZ)
+		    (void) sprintf(str,"; why = ");
 		str += strlen(str);
 		if (err != NULL) {
-			(void) sprintf(str, "%s",err);
+			if(str - bufstart + strlen(err) < BUFSIZ)
+			    (void) sprintf(str, "%s",err);
 		} else {
+		    /* 33 for the string, 11 for the number */
+		    if(str - bufstart + 33 + 11 < BUFSIZ)
 			(void) sprintf(str,
-				"(unknown authentication error - %d)",
-				(int) e.re_why);
+				       "(unknown authentication error - %d)",
+				       (int) e.re_why);
 		}
 		str += strlen(str);
 		break;
 
 	case RPC_PROGVERSMISMATCH:
-		(void) sprintf(str, 
-			"; low version = %lu, high version = %lu", 
-			e.re_vers.low, e.re_vers.high);
+		/* 33 for the string, 22 for the numbers */
+		if(str - bufstart + 33 + 22 < BUFSIZ)
+		    (void) sprintf(str,
+				   "; low version = %lu, high version = %lu",
+				   (unsigned long) e.re_vers.low,
+				   (unsigned long) e.re_vers.high);
 		str += strlen(str);
 		break;
 
 	default:	/* unknown */
-		(void) sprintf(str, 
-			"; s1 = %lu, s2 = %lu", 
-			e.re_lb.s1, e.re_lb.s2);
+		/* 14 for the string, 22 for the numbers */
+		if(str - bufstart + 14 + 22 < BUFSIZ)
+		    (void) sprintf(str,
+				   "; s1 = %lu, s2 = %lu",
+				   (unsigned long) e.re_lb.s1,
+				   (unsigned long) e.re_lb.s2);
 		str += strlen(str);
 		break;
 	}
-	(void) sprintf(str, "\n");
+	if(str - bufstart + 1 < BUFSIZ)
+	    (void) sprintf(str, "\n");
 	return(strstart) ;
 }
 
