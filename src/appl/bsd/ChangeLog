@@ -1,3 +1,8 @@
+2000-02-04  Tom Yu  <tlyu@mit.edu>
+
+	* login.c (main): Reorder some control flow to avoid security hole
+	if KRB4_GET_TICKETS is not defined.
+
 2000-01-27  Ken Raeburn  <raeburn@mit.edu>
 
 	* krlogin.c (speeds): Added some comments from net recommending
