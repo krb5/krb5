@@ -1,3 +1,8 @@
+2000-04-08  Tom Yu  <tlyu@mit.edu>
+
+	* vfy_increds.c (krb5_verify_init_creds): appdefault_boolean ->
+	libdefault_boolean; it somehow got missed earlier.
+
 2000-04-07  Jeffrey Altman  <jaltman@columbia.edu>
 
         * gic_pwd.c (krb5_get_init_creds_keytab), gic_pwd.c (krb5_get_init_creds_password)
