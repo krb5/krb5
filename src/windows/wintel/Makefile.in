@@ -24,7 +24,7 @@ XOBJS    =
 !if $(KVERSION) == 5
 BUILDTOP =..\..
 LIBDIR	 = $(BUILDTOP)\lib
-KLIB	 = $(LIBDIR)\krb516.lib
+KLIB	 = $(LIBDIR)\krb5_16.lib
 WLIB	 = $(LIBDIR)\winsock.lib
 INCLUDES = /I$(BUILDTOP)\include /I$(BUILDTOP)\include\krb5 \
 	/I$(BUILDTOP)\lib\crypto\des
