@@ -12,8 +12,6 @@
  * General definitions for Kerberos version 5.
  */
 
-#include <krb5/copyright.h>
-
 #ifndef KRB5_GENERAL__
 #define KRB5_GENERAL__
 
