@@ -175,7 +175,7 @@ proc ftp_test { } {
     }
 
     set testname "ftp connection"
-    expect "Connected to $hostname"
+    expect -nocase "connected to $hostname"
     expect -nocase -re "$localhostname.*ftp server .version \[0-9.\]*. ready."
     expect -re "Using authentication type GSSAPI; ADAT must follow"
     expect "GSSAPI accepted as authentication type"
@@ -183,7 +183,7 @@ proc ftp_test { } {
 	"GSSAPI authentication succeeded" { pass "ftp authentication" }
 	eof	{ fail "ftp authentication" ; catch "expect_after" ; return }
     }
-    expect "Name ($hostname:$env(USER)): "
+    expect -nocase "name ($hostname:$env(USER)): "
     send "$env(USER)\r"
     expect "User $env(USER) logged in."
 #    expect "Remote system type is UNIX."
@@ -200,7 +200,7 @@ proc ftp_test { } {
 
     set testname "status"
     send "status\r"
-    expect "Connected to $hostname."
+    expect -nocase "connected to $hostname."
     expect "Authentication type: GSSAPI"
     expect "ftp> " {
 	pass $testname
