@@ -1,3 +1,8 @@
+2001-10-17  Danilo Almeida  <dalmeida@mit.edu>
+
+	* def-check.pl: Provide a little bit of usage info.  More
+	error-checking.
+
 2001-10-17  Ken Raeburn  <raeburn@mit.edu>
 
 	* def-check.pl: New file.  Not currently used by any automatic
