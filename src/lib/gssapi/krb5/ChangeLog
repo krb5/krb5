@@ -1,3 +1,11 @@
+2004-04-13  Jeffrey Altman <jaltman@mit.edu>
+ 
+    * k5unseal.c: gss_krb5int_unseal_token_v3() takes a pointer to 
+      krb5_context
+    * import_sec_context.c: krb5_gss_ser_init() contains a function
+      pointer table.  this table must use pointers to functions of
+      type KRB5_CALLCONV.
+
 2004-03-20  Ken Raeburn  <raeburn@mit.edu>
 
 	* rel_cred.c (krb5_gss_release_cred): Create and destroy a local

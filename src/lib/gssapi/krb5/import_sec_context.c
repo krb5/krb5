@@ -56,7 +56,7 @@ krb5_error_code
 krb5_gss_ser_init (krb5_context context)
 {
     krb5_error_code code;
-    static krb5_error_code (*const fns[])(krb5_context) = {
+    static krb5_error_code (KRB5_CALLCONV *const fns[])(krb5_context) = {
 	krb5_ser_context_init, krb5_ser_auth_context_init,
 	krb5_ser_ccache_init, krb5_ser_rcache_init, krb5_ser_keytab_init,
     };

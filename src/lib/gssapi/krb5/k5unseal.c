@@ -541,7 +541,7 @@ kg_unseal(minor_status, context_handle, input_token_buffer,
 			    message_buffer, conf_state, qop_state,
 			    toktype);
     else
-	return gss_krb5int_unseal_token_v3(ctx->k5_context, minor_status, ctx,
+	return gss_krb5int_unseal_token_v3(&ctx->k5_context, minor_status, ctx,
 					   ptr, bodysize, message_buffer,
 					   conf_state, qop_state, toktype);
 }
