@@ -1,4 +1,3 @@
-
 Thu Jun 15 17:43:21 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in - Change explicit library names to -l<lib> form, and
 		change target link line to use $(LD) and associated flags.
@@ -8,6 +7,18 @@ Thu Jun 15 17:43:21 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* configure.in - Remove dbm library checks, these are no longer needed
 		with the Berkeley database code.  Also, add shared library
 		usage check.
+
+
+Thu Jun 15 16:18:39 1995  Sam Hartman  <hartmans@tardis.MIT.EDU>
+
+	* sys_term.c (getpty): On AIX, open /dev/ptc for master and use
+        ttyname() to get slave side; much simpler and doesn't get used
+        ptys.
+
+	(cleanopen): Revoke on AIX as well.  This may cause problems on early 3.2 versions, but not revoking causes disconnected sessions to be partially connected to new telnets.  The complete fix will be to make sure telnetd cleans up when it dies.
+
+
+
 
 Fri Jun  9 18:29:56 1995    <tytso@rsx-11.mit.edu>
 

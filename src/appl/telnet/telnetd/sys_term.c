@@ -508,6 +508,14 @@ int *ptynum;
 	}
 
 #else	/* ! STREAMSPTY */
+#ifdef _AIX
+	if((p = open("/dev/ptc", 2)) != -1 ){
+	  strcpy(line, ttyname(p));
+	  chown( line, 0, 0);
+	  chmod (line, 0600 );
+	  return (p);
+	}
+	#else /*_AIX*/
 #ifndef CRAY
 	register char *cp, *p1, *p2;
 	register int i;
@@ -599,6 +607,7 @@ int *ptynum;
 		}
 	}
 #endif	/* CRAY */
+#endif /*_AIX*/
 #endif	/* STREAMSPTY */
 	return(-1);
 }
@@ -1203,7 +1212,7 @@ cleanopen(line)
 	(void) chmod(line, 0600);
 #endif
 
-# if !defined(CRAY) && (BSD > 43)
+# if (!defined(CRAY) && (BSD > 43))||defined(_AIX)
 	(void) revoke(line);
 # endif
 #if	defined(_SC_CRAY_SECURE_SYS)
