@@ -1,3 +1,8 @@
+Tue Jul 23 16:49:56 1996  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
+
+	* Makefile.in: delete extraneous trailing backslash from GENSRCS
+		and GENOBJS
+
 Mon Jul 22 04:17:23 1996  Marc Horowitz  <marc@mit.edu>
 
 	* configure.in (LIBS): add -lgen to LIBS whenever compile is

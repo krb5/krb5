@@ -37,7 +37,7 @@ GENSRCS = kadm_err.c \
 	$(srcdir)/chpass_util.c \
 	$(srcdir)/alt_prof.c \
 	$(srcdir)/str_conv.c \
-	$(srcdir)/logger.c \
+	$(srcdir)/logger.c
 
 SRVSRCS = $(GENSRCS) \
 	$(srcdir)/svr_policy.c \
@@ -71,7 +71,7 @@ GENOBJS = kadm_err.$(OBJEXT) \
 	chpass_util.$(OBJEXT) \
 	alt_prof.$(OBJEXT) \
 	str_conv.$(OBJEXT) \
-	logger.$(OBJEXT) \
+	logger.$(OBJEXT)
 
 SRVOBJS = $(GENOBJS) \
 	svr_policy.$(OBJEXT) \
