@@ -398,7 +398,7 @@ add_key_pwd(context, master_eblock, ks_tuple, ks_tuple_count, passwd,
 	 	return(retval);
 
 	    key_salt.data = *saltdata;
-	    /* key_salt.data.length = -1; *//*length actually used below...*/
+	    key_salt.data.length = -1; /*length actually used below...*/
 	    krb5_xfree(saltdata);
 	}
 		break;
@@ -414,6 +414,10 @@ add_key_pwd(context, master_eblock, ks_tuple, ks_tuple_count, passwd,
 		  free(key_salt.data.data);
 	     return(retval);
 	}
+
+	if (key_salt.data.length == -1)
+	    key_salt.data.length = 
+	      krb5_princ_realm(context, db_entry->princ)->length;
 
 	if (retval = krb5_dbekd_encrypt_key_data(context, master_eblock, &key,
 		     (const krb5_keysalt *)&key_salt,

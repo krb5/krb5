@@ -1,3 +1,9 @@
+Mon Nov 11 20:21:02 1996  Mark Eichin  <eichin@cygnus.com>
+
+	* kdb_cpw.c (add_key_pwd): set length to -1 so krb5_string_to_key
+	handles the AFS3 salttype, but then replace it with the actual
+	length for later processing.
+
 Mon Nov 11 17:03:16 1996  Barry Jaspan  <bjaspan@mit.edu>
 
 	* kdb_cpw.c (cleanup_key_data): fix memory leak [krb5-kdc/163]
