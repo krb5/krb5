@@ -239,9 +239,6 @@ char *argv[];
 
 static void clear_secrets()
 {
-    krb5_finish_key(kadm_context, &server_parm.master_encblock);
-    memset((char *)&server_parm.master_encblock, 0,
-	   sizeof (server_parm.master_encblock));
     memset((char *)server_parm.master_keyblock.contents, 0,
 	   server_parm.master_keyblock.length);
     server_parm.mkvno = 0L;

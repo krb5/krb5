@@ -83,18 +83,7 @@ kadm_ser_init(inter, realm)
     /* setting up the database */
     mkey_name = KRB5_KDB_M_NAME;
 
-#ifdef KADM5
     server_parm.master_keyblock.enctype = params->enctype;
-    krb5_use_enctype(kadm_context, &server_parm.master_encblock, 
-		     server_parm.master_keyblock.enctype);
-#else
-    if (inter == 1) {
-	server_parm.master_keyblock.enctype = ENCTYPE_DES_CBC_MD5;
-	krb5_use_enctype(kadm_context, &server_parm.master_encblock, 
-			 server_parm.master_keyblock.enctype);
-    } else
-	server_parm.master_keyblock.enctype = ENCTYPE_UNKNOWN;
-#endif
     
     retval = krb5_db_setup_mkey_name(kadm_context, mkey_name, realm,
 				     (char **) 0,
@@ -102,24 +91,15 @@ kadm_ser_init(inter, realm)
     if (retval)
 	return KADM_NO_MAST;
     krb5_db_fetch_mkey(kadm_context, server_parm.master_princ,
-		       &server_parm.master_encblock,
+		       &server_parm.master_keyblock.enctype,
 		       (inter == 1), FALSE,
-#ifdef KADM5
 		       params->stash_file,
-#else
-		       (char *) NULL,
-#endif
 		       NULL,
 		       &server_parm.master_keyblock);
     if (retval)
 	return KADM_NO_MAST;
     retval = krb5_db_verify_master_key(kadm_context, server_parm.master_princ,
-				       &server_parm.master_keyblock,
-				       &server_parm.master_encblock);
-    if (retval)
-	return KADM_NO_VERI;
-    retval = krb5_process_key(kadm_context, &server_parm.master_encblock,
-			      &server_parm.master_keyblock);
+				       &server_parm.master_keyblock);
     if (retval)
 	return KADM_NO_VERI;
     retval = krb5_db_get_principal(kadm_context, server_parm.master_princ,
