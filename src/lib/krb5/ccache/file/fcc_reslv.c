@@ -68,6 +68,8 @@ krb5_fcc_resolve (id, residual)
 	  return KRB5_NOMEM;
      }
 
+     ((krb5_fcc_data *) lid->data)->flags = 0;
+     
      /* Set up the filename */
      strcpy(((krb5_fcc_data *) lid->data)->filename, residual);
 

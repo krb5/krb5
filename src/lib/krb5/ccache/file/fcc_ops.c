@@ -33,7 +33,7 @@ krb5_cc_ops krb5_fcc_ops = {
      krb5_fcc_next_cred,
      krb5_fcc_end_seq_get,
      NULL, /* XXX krb5_fcc_remove, */
-     NULL, /* XXX What is the set_flags field? */
+     krb5_fcc_set_flags,
 };
 
 

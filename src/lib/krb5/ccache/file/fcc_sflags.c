@@ -30,12 +30,12 @@ static char fcc_set_flags_c[] = "$Id$";
  * Sets the operational flags of id to flags.
  */
 krb5_error_code
-krb5_fcc_set_flags(id, flags);
+krb5_fcc_set_flags(id, flags)
    krb5_ccache id;
    krb5_flags flags;
 {
      /* XXX This should check for illegal combinations, if any.. */
-     ((krb5_fcc_data *) lid->data)->flags = flags;
+     ((krb5_fcc_data *) id->data)->flags = flags;
      return KRB5_OK;
 }
 

@@ -18,14 +18,15 @@
 #define __KRB5_FILE_CCACHE__
 
 #include <krb5/krb5.h>
+#include <krb5/krb5_err.h>
 #include "fcc-proto.h"
 #include "fcc-os.h"
 
-/* XXX Until I find out the right #define for this.. XXX */
-#define KRB5_OK -1000
-#define KRB5_NOMEM -1001
-#define KRB5_NOTFOUND -1002
-#define KRB5_EOF -1003
+/* XXX  A hack because I don't feel like updating every file. */
+#define KRB5_OK 0
+#define KRB5_NOMEM ENOMEM
+#define KRB5_NOTFOUND KRB5_CC_NOTFOUND
+#define KRB5_EOF KRB5_CC_END
 #define KRB5_FCC_MAXLEN 100
 
 #ifndef TKT_ROOT
