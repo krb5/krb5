@@ -41,7 +41,11 @@ static char rcsid_client_c[] =
 #include <krb5/los-proto.h>
 #include <com_err.h>
 
+#ifdef __STDC__
 extern char *strdup(const char *);
+#else
+extern char *strdup();
+#endif
 
 krb5_error_code
 tgt_keyproc(DECLARG(krb5_pointer, keyprocarg),
@@ -76,19 +80,28 @@ char *argv[];
   krb5_principal sprinc;		/* principal of server */
   krb5_data reply, msg, princ_data;
   krb5_tkt_authent *authdat;
+  unsigned short port;
 
-  if (argc < 2 || argc > 3)
+  if (argc < 2 || argc > 4)
     {
-      fputs ("usage: uu-client <hostname> [message]\n", stderr);
+      fputs ("usage: uu-client <hostname> [message [port]]\n", stderr);
       return 1;
     }
 
   krb5_init_ets();
 
-  if ((serv = getservbyname ("uu-sample", "tcp")) == NULL)
+  if (argc == 4)
+    {
+      port = htons(atoi(argv[3]));
+    }
+  else if ((serv = getservbyname ("uu-sample", "tcp")) == NULL)
     {
       fputs ("uu-client: unknown service \"uu-sample/tcp\"\n", stderr);
       return 2;
+    }
+  else
+    {
+      port = serv->s_port;
     }
 
   if ((host = gethostbyname (argv[1])) == NULL)
@@ -128,7 +141,7 @@ char *argv[];
     }
 
   serv_net_addr.sin_family = AF_INET;
-  serv_net_addr.sin_port = serv->s_port;
+  serv_net_addr.sin_port = port;
 
   i = 0;
   while (1)
@@ -142,7 +155,7 @@ char *argv[];
       if (connect(s, (struct sockaddr *)&serv_net_addr, sizeof (serv_net_addr)) == 0)
 	break;
       com_err ("uu-client", errno, "connecting to \"%s\" (%s).",
-	       hname, inet_ntoa(serv_net_addr.sin_addr.s_addr));
+	       hname, inet_ntoa(serv_net_addr.sin_addr));
     }
 #else
   s = 1;
