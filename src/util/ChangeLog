@@ -1,3 +1,8 @@
+2002-07-05  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (SLIBSH): Use vertical-bar instead of comma for
+	substituting CC in case the CC specified uses commas.
+
 2002-06-15  Ken Raeburn  <raeburn@mit.edu>
 
 	* depfix.sed: Ignore header files under /mit/gnu/.  Replace

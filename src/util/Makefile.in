@@ -9,7 +9,7 @@ MAC_SUBDIRS = profile et
 editsh = sed -e 's,@''ARADD''@,$(ARADD),g' -e 's,@''ARCHIVE''@,$(ARCHIVE),g'
 HOST_TYPE=@HOST_TYPE@
 HAVE_GCC=@HAVE_GCC@
-SLIBSH=sed -e 's,@''CC''@,$(CC),g' -e 's,@''HOST_TYPE''@,$(HOST_TYPE),g' -e 's,@''HAVE_GCC''@,$(HAVE_GCC),g'
+SLIBSH=sed -e 's|@''CC''@|$(CC)|g' -e 's,@''HOST_TYPE''@,$(HOST_TYPE),g' -e 's,@''HAVE_GCC''@,$(HAVE_GCC),g'
 
 all-recurse: libupdate makeshlib
 all-mac::
