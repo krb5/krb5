@@ -305,7 +305,7 @@ kadm5_ret_t    kadm5_create_principal(void *server_handle,
 				      long mask, char *pass);
 kadm5_ret_t    kadm5_create_principal_3(void *server_handle,
 					kadm5_principal_ent_t ent,
-					long mask, krb5_boolean keepold,
+					long mask,
 					int n_ks_tuple,
 					krb5_key_salt_tuple *ks_tuple,
 					char *pass);

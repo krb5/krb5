@@ -1,3 +1,13 @@
+2000-02-26  Tom Yu  <tlyu@mit.edu>
+
+	* kadm_rpc_xdr.c (xdr_cprinc3_arg): Don't XDR the nonexistent
+	keepold flag.
+
+	* kadm_rpc.h: Remove keepold flag from cprinc3_arg.
+
+	* admin.h: Remove keepold flag from create_principal_3, which was
+	kinda ridiculous.
+
 2000-02-22  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (includes): Extract basename of header file to be

@@ -1,3 +1,11 @@
+2000-02-26  Tom Yu  <tlyu@mit.edu>
+
+	* client_principal.c (kadm5_create_principal_3): Remove keepold
+	argument.
+
+	* Makefile.in (LIBMAJOR): Bump major number due to call signature
+	changes.
+
 2000-02-13  Tom Yu  <tlyu@mit.edu>
 
 	* client_rpc.c: Add new client stubs.

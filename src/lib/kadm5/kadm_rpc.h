@@ -16,7 +16,6 @@ struct cprinc3_arg {
 	krb5_ui_4 api_version;
 	kadm5_principal_ent_rec rec;
 	long mask;
-	krb5_boolean keepold;
 	int n_ks_tuple;
 	krb5_key_salt_tuple *ks_tuple;
 	char *passwd;

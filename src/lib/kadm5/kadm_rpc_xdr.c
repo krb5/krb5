@@ -498,9 +498,6 @@ xdr_cprinc3_arg(XDR *xdrs, cprinc3_arg *objp)
 	if (!xdr_long(xdrs, &objp->mask)) {
 		return (FALSE);
 	}
-	if (!xdr_bool(xdrs, &objp->keepold)) {
-		return (FALSE);
-	}
 	if (!xdr_array(xdrs, (caddr_t *)&objp->ks_tuple,
 		       (unsigned int *)&objp->n_ks_tuple, ~0,
 		       sizeof(krb5_key_salt_tuple),

@@ -106,12 +106,11 @@ kadm5_create_principal(void *server_handle,
 {
     return
 	kadm5_create_principal_3(server_handle, entry, mask,
-				 FALSE, 0, NULL, password);
+				 0, NULL, password);
 }
 kadm5_ret_t
 kadm5_create_principal_3(void *server_handle,
 			 kadm5_principal_ent_t entry, long mask,
-			 krb5_boolean keepold,
 			 int n_ks_tuple, krb5_key_salt_tuple *ks_tuple,
 			 char *password)
 {
@@ -250,7 +249,7 @@ kadm5_create_principal_3(void *server_handle,
 			   n_ks_tuple?n_ks_tuple:handle->params.num_keysalts,
 			   password,
 			   (mask & KADM5_KVNO)?entry->kvno:1,
-			   keepold, &kdb)) {
+			   FALSE, &kdb)) {
 	krb5_dbe_free_contents(handle->context, &kdb);
 	if (mask & KADM5_POLICY)
 	     (void) kadm5_free_policy_ent(handle->lhandle, &polent);
