@@ -1,7 +1,7 @@
 /*
  * pty_getpty: open a PTY master.
  *
- * Copyright 1995 by the Massachusetts Institute of Technology.
+ * Copyright 1995, 1996 by the Massachusetts Institute of Technology.
  *
  * 
  * Permission to use, copy, modify, and distribute this software and
@@ -30,7 +30,9 @@ long pty_getpty (fd, slave, slavelength)
     int i,ptynum;
     struct stat stb;
 char slavebuf[1024];
-
+#ifdef HAVE__GETPTY
+char *slaveret; /*Temporary to hold pointer to slave*/
+#endif /*HAVE__GETPTY*/
 
 #ifdef HAVE_OPENPTY
     int slavefd;
@@ -39,9 +41,29 @@ char slavebuf[1024];
          (struct winsize *) 0)) return 1;
 close(slavefd);
     return 0;
-#else
-
-    *fd = open("/dev/ptmx", O_RDWR|O_NDELAY);	/* Solaris, IRIX */
+#else /*HAVE_OPENPTY*/
+#ifdef HAVE__GETPTY
+    /* This code is included for Irix; as of version 5.3, Irix has /dev/ptmx,
+     * but it fails to work properly; even cafter calling unlockpt,
+     * root gets permission denied opening the pty.
+     * The code to support _getpty should be removed if Irix gets working
+     * streams ptys in favor of maintaining the least needed code
+     * paths.
+     */
+    if ((slaveret = _getpty(fd, O_RDWR|O_NDELAY, 0600, 0)) == 0) {
+      *fd = -1;
+      return PTY_GETPTY_NOPTY;
+    }
+    if (strlen(slaveret) > slavelength) {
+      close(*fd);
+      *fd = -1;
+      return PTY_GETPTY_SLAVE_TOOLONG;
+    }
+    else strcpy(slave, slaveret);
+    return 0;
+#else /*HAVE__GETPTY*/
+    
+    *fd = open("/dev/ptmx", O_RDWR|O_NDELAY);	/* Solaris*/
     if (*fd < 0) *fd = open("/dev/ptc", O_RDWR|O_NDELAY); /* AIX */
     if (*fd < 0) *fd = open("/dev/pty", O_RDWR|O_NDELAY); /* sysvimp */
 
@@ -113,6 +135,7 @@ return PTY_GETPTY_SLAVE_TOOLONG;
 	}
 	return PTY_GETPTY_NOPTY;
     }
+#endif /*HAVE__GETPTY*/
 #endif /* HAVE_OPENPTY */
 }
 

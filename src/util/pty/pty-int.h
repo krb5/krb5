@@ -22,7 +22,6 @@
 #include <stdio.h>
 
 #include <sys/stat.h>
-#include <sys/socket.h>
 #include <sys/ioctl.h>
 #include <sys/wait.h>
 #include <sys/file.h>

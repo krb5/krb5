@@ -1,3 +1,15 @@
+Sat Mar 23 15:24:38 1996  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* configure.in : Remove shadow passwords check because nothing in
+ 	libpty cares about the result; remove use of libkrb5, libkrb4,
+ 	libkadm; Check for _getpty
+
+	* getpty.c (pty_getpty): Support _getpty for Irix; Irix has
+ 	/dev/ptmx, but it doesn't work correctly at all.  Also, Irix,
+ 	tends to create device nodes on the fly.
+
+	* pty-int.h: No need to include sys/socket.h
+
 Sat Feb 24 21:34:58 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* vhangup.c (ptyint_vhangup): Don't do call vhangup() if system

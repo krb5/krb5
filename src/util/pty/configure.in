@@ -6,8 +6,8 @@ LinkFileDir([$](TOPLIBD)/libpty.a,libpty.a,../util/pty)
 AC_PROG_INSTALL
 AC_PROG_ARCHIVE
 AC_PROG_RANLIB
-AC_CHECK_FUNCS(fchmod fchown revoke vhangup killpg)
-dnl dbm libs for use of an_to_ln
+AC_CHECK_FUNCS(fchmod fchown revoke vhangup killpg _getpty)
+dnl
 LOGINLIBS=
 dnl
 dnl Make our operating system-specific security checks and definitions for
@@ -125,25 +125,9 @@ AC_DEFINE(SETPGRP_TWOARG)
 fi
 dnl
 dnl
-AC_MSG_CHECKING([shadow password support])
-AC_CACHE_VAL(krb5_cv_shadow_pwd,
-[AC_TRY_LINK(
-[#include <sys/types.h>
-#include <pwd.h>
-#include <shadow.h>],
-[struct spwd *sp = getspnam("root")],
-krb5_cv_shadow_pwd=yes, krb5_cv_shadow_pwd=no)])
-AC_MSG_RESULT($krb5_cv_shadow_pwd)
-if test $krb5_cv_shadow_pwd = yes; then
-AC_DEFINE(HAVE_SHADOW)
-fi
-dnl
 dnl
 ADD_DEF(-DKERBEROS)
 AC_CONST
-USE_KADM_LIBRARY
-USE_KRB4_LIBRARY
-KRB5_LIBRARIES
 V5_USE_SHARED_LIB
 SubdirLibraryRule([$(LIBOBJS)])
 V5_AC_OUTPUT_MAKEFILE
