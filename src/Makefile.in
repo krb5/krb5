@@ -1,0 +1,92 @@
+srcdir = @srcdir@
+VPATH = @srcdir@
+
+DEFS = @DEFS@
+LIBS = @LIBS@
+
+CFLAGS = -g
+LDFLAGS = -g
+
+prefix = /usr/local
+exec_prefix = $(prefix)
+binprefix =
+manprefix =
+
+bindir = $(exec_prefix)/bin
+libdir = $(exec_prefix)/lib
+mandir = $(prefix)/man/man1
+manext = 1
+
+SHELL = /bin/sh
+
+SRCS =  
+
+DISTFILES = $(SRCS) $(HDRS) COPYING COPYING.LIB ChangeLog Makefile.in
+
+
+all::
+
+world::
+	date
+	make ${MFLAGS} mastermakefiles
+	make ${MFLAGS} depend
+	make ${MFLAGS} all
+	date
+
+SUBDIRS = @SUBDIRS@
+
+INSTALLMKDIRS = $(KRB5ROOT) $(KRB5MANROOT) $(KRB5OTHERMKDIRS) \
+		$(ADMIN_BINDIR) $(SERVER_BINDIR) $(CLIENT_BINDIR) \
+		$(ADMIN_MANDIR) $(SERVER_MANDIR) $(CLIENT_MANDIR) \
+		$(FILE_MANDIR) $(KRB5_LIBDIR) $(KRB5_INCDIR) \
+		$(KRB5_INCSUBDIRS)
+
+install:: install-mkdirs
+
+depend:: includes
+
+
+install-mkdirs:
+	-mkdir $(INSTALLMKDIRS)
+
+install::
+	$(MAKE) $(MFLAGS) install.man
+
+# rebuild the Makefiles in the master source tree
+mastermakefiles::
+	-$(MV) Makefile Makefile.bak
+	$(MAKE) -f Makefile.bak Makefile
+	$(MAKE) Makefiles
+
+.c.o:
+	$(CC) -c $(CPPFLAGS) $(DEFS) -I$(srcdir) $(CFLAGS) $<
+
+check:
+	@echo No tests are supplied.
+
+
+TAGS: $(SRCS)
+	etags $(SRCS)
+
+clean::
+	rm -f  *.o core
+
+mostlyclean: clean
+
+distclean: clean
+	rm -f Makefile config.status
+
+realclean: distclean
+	rm -f TAGS
+
+dist: $(DISTFILES)
+	echo cpio-`sed -e '/version_string/!d' \
+	-e 's/[^0-9.]*\([0-9.]*\).*/\1/' -e q version.c` > .fname
+	rm -rf `cat .fname`
+	mkdir `cat .fname`
+	-ln $(DISTFILES) `cat .fname`
+	for file in $(DISTFILES); do \
+	  test -r `cat .fname`/$$file || cp -p $$file `cat .fname`; \
+	done
+	tar chzf `cat .fname`.tar.gz `cat .fname`
+	rm -rf `cat .fname` .fname
