@@ -1,3 +1,16 @@
+Sat Sep 23 23:42:32 2000  Ezra Peisach  <epeisach@mit.edu>
+
+	* t_cc.c: Code cleanup. Test more failure modes of the cache library. 
+
+	* cccopy.c (krb5_cc_copy_creds): Memory leak. Call krb5_cc_end_seq_get.
+
+	* cc_file.c (krb5_fcc_generate_new): Set flags to
+ 	KRB5_TC_OPENCLOSE, otherwise parts of the library assumes that the
+ 	file is open, when it is not.
+
+	* cc_stdio.c (krb5_scc_generate_new): Same as cc_file.c change.
+	
+
 2000-09-22  Ezra Peisach  <epeisach@mit.edu>
 
 	* Makefile.in (check-unix): Build and exectute t_cc.

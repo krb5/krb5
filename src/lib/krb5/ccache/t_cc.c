@@ -30,6 +30,9 @@
 #include "krb5.h"
 #include <stdio.h>
 #include <stdlib.h>
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 #include "com_err.h"
 
 #define KRB5_OK 0
@@ -90,19 +93,31 @@ krb5_context context;
 
 #define CHECK(kret,msg) \
      if (kret != KRB5_OK) {\
+	  com_err(msg, kret, ""); \
+          fflush(stderr);\
+          exit(1);\
+     } else if(debug) printf("%s went ok\n", msg);
+
+#define CHECK_STR(str,msg) \
+     if (str == 0) {\
 	  com_err(msg, kret, "");\
           exit(1);\
      } else if(debug) printf("%s went ok\n", msg);
-						   
+
+#define CHECK_FAIL(experr, kret, msg) \
+     if (experr != kret) { CHECK(kret, msg);}
+
 static void cc_test(context, name, flags)
   krb5_context context;
   const char *name;
   int flags;
 {
-     krb5_ccache id;
+     krb5_ccache id, id2;
      krb5_creds creds;
      krb5_error_code kret;
      krb5_cc_cursor cursor;
+     const char *c_name;
+     char newcache[300];
 
      init_test_cred(context);
 
@@ -110,6 +125,13 @@ static void cc_test(context, name, flags)
      CHECK(kret, "resolve");
      kret = krb5_cc_initialize(context, id, test_creds.client);
      CHECK(kret, "initialize");
+     
+     c_name = krb5_cc_get_name(context, id);
+     CHECK_STR(c_name, "get_name");
+
+     c_name = krb5_cc_get_type(context, id);
+     CHECK_STR(c_name, "get_prefix");
+
      kret = krb5_cc_store_cred(context, id, &test_creds);
      CHECK(kret, "store");
 
@@ -124,8 +146,11 @@ static void cc_test(context, name, flags)
 	  if(kret == KRB5_CC_END) {
 	    if(debug) printf("next_cred: ok at end\n");
 	  }
-	  else
+	  else {
 	    CHECK(kret, "next_cred");
+	    krb5_free_cred_contents(context, &creds);
+	  }
+
      }
      kret = krb5_cc_end_seq_get(context, id, &cursor);
      CHECK(kret, "end_seq_get");
@@ -134,22 +159,87 @@ static void cc_test(context, name, flags)
      CHECK(kret, "close");
 
 
+     /* ------------------------------------------------- */
      kret = krb5_cc_resolve(context, name, &id);
      CHECK(kret, "resolve");
+
+     {
+       /* Copy the cache test*/
+       sprintf(newcache, "%s.new", name);
+       kret = krb5_cc_resolve(context, newcache, &id2);
+       CHECK(kret, "resolve of new cache");
+       
+       /* This should fail as the new creds are not initialized */
+       kret = krb5_cc_copy_creds(context, id, id2);
+       CHECK_FAIL(KRB5_FCC_NOFILE, kret, "copy_creds");
+       
+       kret = krb5_cc_initialize(context, id2, test_creds.client);
+       CHECK(kret, "initialize of id2");
+
+       kret = krb5_cc_copy_creds(context, id, id2);
+       CHECK(kret, "copy_creds");
+
+       kret = krb5_cc_destroy(context, id2);
+       CHECK(kret, "destroy new cache");
+     }
+
+     /* Destroy the first cache */
      kret = krb5_cc_destroy(context, id);
      CHECK(kret, "destroy");
+
+#if 0
+     /* ----------------------------------------------------- */
+     /* Tests the generate new code */
+     kret = krb5_cc_resolve(context, name, &id);
+     CHECK(kret, "resolve");
+     kret = krb5_cc_gen_new(context, &id);
+     CHECK(kret, "gen_new");
+     kret = krb5_cc_destroy(context, id);
+     CHECK(kret, "destroy");
+#endif
 }
 
-static void do_test(context, name)
+static void do_test(context, prefix)
 krb5_context context;
-const char *name;
+const char *prefix;
 {
+  char name[300];
+
+  sprintf(name, "%s/tmp/cctest.%ld", prefix, (long) getpid());
   printf("Starting test on %s\n", name);
   cc_test (context, name, 0);
   cc_test (context, name, !0);
   printf("Test on %s passed\n", name);
 }
 
+static void test_misc(context)
+krb5_context context;
+{
+  /* Tests for certain error returns */
+  krb5_error_code	kret;
+  krb5_ccache id;
+  extern krb5_cc_ops *krb5_cc_dfl_ops;
+  krb5_cc_ops *ops_save;
+
+  fprintf(stderr, "Testing miscellaneous error conditions\n");
+
+  kret = krb5_cc_resolve(context, "unknown_method_ep:/tmp/name", &id);
+  if (kret != KRB5_CC_UNKNOWN_TYPE) {
+    CHECK(kret, "resolve unknown type");
+  }
+
+  /* Test for not specifiying a cache type with no defaults */
+  ops_save = krb5_cc_dfl_ops;
+  krb5_cc_dfl_ops = 0;
+
+  kret = krb5_cc_resolve(context, "/tmp/e", &id);
+  if (kret != KRB5_CC_BADNAME) {
+    CHECK(kret, "resolve no builtin type");
+  }
+
+  krb5_cc_dfl_ops = ops_save;
+
+}
 extern krb5_cc_ops krb5_scc_ops;
 extern krb5_cc_ops krb5_mcc_ops;
 extern krb5_cc_ops krb5_fcc_ops;
@@ -182,10 +272,24 @@ int main ()
       CHECK(kret, "register_mem");
     }
 
+    /* Registering a second time tests for error return */
+    kret = krb5_cc_register(context, &krb5_fcc_ops,0);
+    if(kret != KRB5_CC_TYPE_EXISTS) {
+      CHECK(kret, "register_mem");
+    }
+
+    /* Registering with override should work */
+    kret = krb5_cc_register(context, &krb5_fcc_ops,1);
+    CHECK(kret, "register_mem override");
+
     init_structs();
 
-    do_test(context, "STDIO:/tmp/tkt_test");
-    do_test(context, "MEMORY:/tmp/tkt_test");
-    do_test(context, "FILE:/tmp/tkt_test");
+    test_misc(context);
+    do_test(context, "");
+    do_test(context, "STDIO:");
+    do_test(context, "MEMORY:");
+    do_test(context, "FILE:");
+
+    krb5_free_context(context);
     return 0;
 }

@@ -8,7 +8,7 @@ krb5_cc_copy_creds(context, incc, outcc)
 {
     krb5_error_code code;
     krb5_flags flags;
-    krb5_cc_cursor cur;
+    krb5_cc_cursor cur = 0;
     krb5_creds creds;
 
     flags = 0;				/* turns off OPENCLOSE mode */
@@ -35,10 +35,19 @@ krb5_cc_copy_creds(context, incc, outcc)
     if (code != KRB5_CC_END)
 	goto cleanup;
 
+    code = krb5_cc_end_seq_get(context, incc, &cur);
+    cur = 0;
+    if (code)
+        goto cleanup;
+
     code = 0;
 
 cleanup:
     flags = KRB5_TC_OPENCLOSE;
+
+    /* If set then we are in an error pathway */
+    if (cur) 
+      krb5_cc_end_seq_get(context, incc, &cur);
 
     if (code)
 	krb5_cc_set_flags(context, incc, flags);

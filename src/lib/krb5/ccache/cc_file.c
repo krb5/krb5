@@ -1817,6 +1817,9 @@ krb5_fcc_generate_new (context, id)
 
 	  *id = lid;
 
+	  /* default to open/close on every trn - otherwise destroy 
+	     will get as to state confused */
+	  ((krb5_fcc_data *) lid->data)->flags = KRB5_TC_OPENCLOSE;
       krb5_change_cache ();
 	  return KRB5_OK;
      }

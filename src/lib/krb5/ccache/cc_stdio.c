@@ -1848,7 +1848,10 @@ krb5_scc_generate_new (context, id)
 	  return KRB5_CC_NOMEM;
      }
 
-     ((krb5_scc_data *) lid->data)->flags = 0;
+     /* default to open/close on every trn - otherwise cc_destroy 
+      gets confused as to state
+     */
+     ((krb5_scc_data *) lid->data)->flags = KRB5_TC_OPENCLOSE;
      ((krb5_scc_data *) lid->data)->file = 0;
      
      /* Set up the filename */
