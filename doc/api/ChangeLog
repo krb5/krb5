@@ -1,3 +1,7 @@
+Tue Apr 18 10:42:03 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* intro.tex spell checked
+
 Tue Apr 11 14:21:21 1995  Ezra Peisach  (epeisach@kangaroo.mit.edu)
 
 	* Makefile Cleaned up two pass processing through latex of library

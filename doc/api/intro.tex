@@ -8,7 +8,7 @@ applications being developed.
 description of the functions may be hard to understand for the novice
 Kerberos programmer.
 
-\subsection{Acknoledgments}
+\subsection{Acknowledgments}
 
 
 The Kerberos model is based in part on Needham and Schroeder's trusted
@@ -53,7 +53,7 @@ absence of any active attackers who might be able to ``hijack'' the
 stream connection.
 
 %{\Huge nlg- It would be nice to include more examples here of common
-%mistakes one can make in deisgning kerberized systems -nlg}
+%mistakes one can make in designing kerberized systems -nlg}
 
 The Kerberos protocol code libraries, whose API is described in this
 document, can be used to provide encryption to any application.  In
@@ -62,7 +62,7 @@ application adds one or two calls to the Kerberos library, which
 results in the transmission of the necessary messages to achieve
 authentication.
 
-The two methods for obtaining credentials, the inital ticket exchange
+The two methods for obtaining credentials, the initial ticket exchange
 and the ticket granting ticket exchange, use slightly different
 protocols and require different API routines.  The basic difference an
 API programmer will see is that the initial request does not require a
@@ -75,7 +75,7 @@ the TGT.  For example, once a user's password is used to obtain a TGT,
 it is not required for subsequent TGT exchanges.
 
 The reply consists of a ticket and a session key, encrypted either in
-the user's secret key (i.e., pasword), or the TGT session key.  The
+the user's secret key (i.e., password), or the TGT session key.  The
 combination of a ticket and a session key is known as a set of {\em
 credentials}.\footnote{In Kerberos V4, the ``ticket file'' was a bit of
 a misnomer, since it contained both tickets and their associated session
@@ -90,11 +90,11 @@ In order to verify the authentication, the application server decrypts
 the ticket using its service key, which is only known by the application
 server and the Kerberos server.  Inside the ticket, the Kerberos server
 had placed the name of the client, the name of the server, a DES key
-assocuated with this ticket, and some additional information.  The
+associated with this ticket, and some additional information.  The
 application server then uses the ticket session key to decrypt the
 authenticator, and verifies that the information in the authenticator
 matches the information in the ticket, and that the timestamp in the
-authenticator is recent (to prvent reply attacks).  Since the session
+authenticator is recent (to prevent reply attacks).  Since the session
 key was generated randomly by the Kerberos server, and delivered only
 encrypted in the service key, and in a key known only by the user, the
 application server can be confident that user is really who he or she
@@ -139,14 +139,14 @@ the client was authenticated from another realm.
 
 
 This method can be repeated to authenticate throughout an organization
-accross multiple relms.  To build a valid authentication
+across multiple realms.  To build a valid authentication
 path\footnote{An {\em authentication path} is the sequence of
 intermediate realms that are transited in communicating from one realm
-to another.} to a distant relm, the local realm must share an
+to another.} to a distant realm, the local realm must share an
 inter-realm key with an intermediate realm which
 communicates\footnote{A realm is said to {\em communicate} with
 another realm if the two realms share an inter-realm key} with either
-the distant remote realm or yet another intermediate relm.
+the distant remote realm or yet another intermediate realm.
 
 Realms are typically organized hierarchically.  Each realm shares a
 key with its parent and a different key with each child.  If an
