@@ -7,7 +7,6 @@ Mon Feb 26 03:28:44 1996  Sam Hartman  <hartmans@tertius.mit.edu>
 
 	* configure.in: call USE_ANAME.
 
-
 Sun Feb 25 18:50:45 1996  Sam Hartman  <hartmans@tertius.mit.edu>
 
 	* krlogind.c (v5_des_read): Fix server side of bug in detecing eof
@@ -28,14 +27,13 @@ Fri Feb  9 20:18:48 1996  <hartmans@mit.edu>
 	* krlogind.c (recvauth): Fix v4 incompatability created by
         checksum code; if using v4, don't try to verify a v5 checksum.
 
-||||||| 5.174.2.1
 Fri Feb  2 16:10:56 1996  Sam Hartman  <hartmans@tertius.mit.edu>
 
-	* configure.in (save_path): Look for "ucb" varients in /usr/athena/bin if --enable-athena specified.
+	* configure.in (save_path): Look for "ucb" varients in
+	/usr/athena/bin if --enable-athena specified.
 
-
-	* krsh.c krlogin.c krcp.c (try_normal): If a--enable-athena, don't quit just because we are encrypted.
-
+	* krsh.c krlogin.c krcp.c (try_normal): If --enable-athena, don't
+	quit just because we are encrypted.
 
 Thu Feb  1 00:09:13 1996  Sam Hartman  <hartmans@tertius.mit.edu>
 
@@ -60,7 +58,9 @@ Wed Jan 31 16:24:50 1996  Sam Hartman  <hartmans@tertius.mit.edu>
         processing is enabled *or* encryption is enabled.  Rsh always
         enables stderr, but rcp won't.
 	(SECURE_MESSAGE): Moving to client where it belongs, so the stderr
-	lchannel doesn't get corrupted for rcp.  Besides, the client can determine if it is talking to a tty and only print this message to a tty.
+	channel doesn't get corrupted for rcp.  Besides, the client can
+	determine if it is talking to a tty and only print this message to
+	a tty.
 
 	* krlogind.c (recvauth): Pas ccache to rd_and_store_for_creds
 
@@ -88,10 +88,8 @@ Sat Jan 27 18:40:31 1996  Sam Hartman  <hartmans@tertius.mit.edu>
 
 Fri Jan 26 00:37:23 1996  Sam Hartman  <hartmans@tertius.mit.edu>
 
-	* krlogin.c (endif
-): 
-(reader):  Deal with exceptions even while writing.
-(reader): Fix bogus select bug; actually select on writing
+	* krlogin.c (reader): Deal with exceptions even while writing.
+	(reader): Fix bogus select bug; actually select on writing
 
 Wed Jan 24 00:34:42 1996  Sam Hartman  <hartmans@tertius.mit.edu>
 
@@ -130,7 +128,8 @@ Mon Jan 22 18:14:05 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 Fri Jan 19 10:45:29 1996  Sam Hartman  <hartmans@tertius.mit.edu>
 
-	* krshd.c (recvauth): Verify checksum against command line and remote user.
+	* krshd.c (recvauth): Verify checksum against command line and
+	remote user.
 	(recvauth): Fix accidental memory leak with authenticator and fix
 	include correct username in checksum
 
@@ -255,7 +254,9 @@ Thu Nov  2 16:16:47 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 Mon Oct 16 17:27:43 1995  Sam Hartman  <hartmans@tertius.mit.edu>
 
-	* login.c (main): Don't print warning about no tickets obtained if we didn't ask for a password.  Also, define LOGNAME for so sysvish systems are happy.  Patch from ramus@nersc.gov.
+	* login.c (main): Don't print warning about no tickets obtained if
+	we didn't ask for a password.  Also, define LOGNAME for so sysvish
+	systems are happy.  Patch from ramus@nersc.gov.
 
 Wed Sep 06 14:20:57 1995   Chris Provenzano (proven@mit.edu)
 
@@ -324,7 +325,8 @@ Fri Jul 28 16:49:02 1995  Sam Hartman  <hartmans@tertius.mit.edu>
 	* Makefile.in (LOCAL_LIBRARIES): include -lpty; also included in
         DEPLOCAL_LIBRARIES.
 
-	* krlogind.c (doit): Use pipe for synchronization so pty can be opened in slave.  Use libpty for pty handling.
+	* krlogind.c (doit): Use pipe for synchronization so pty can be
+	opened in slave.  Use libpty for pty handling.
 	(cleanup):  Use pty_cleanup to do most work.
 
 Thu Jul 27 15:02:03 EDT 1995	Paul Park	(pjpark@mit.edu)
