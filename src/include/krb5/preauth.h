@@ -3,7 +3,7 @@
  *
  * (Originally written by Glen Machin at Sandia Labs.)
  *
- * Copyright 1992 by the Massachusetts Institute of Technology.
+ * Copyright 1992, 1995 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -27,6 +27,8 @@
  * any purpose.  It is provided "as is" without express or implied warranty.
  * 
  */
+#ifndef KRB5_PREAUTH__
+#define KRB5_PREAUTH__
 
 #define MAX_PREAUTH_SIZE 20	/* Maximum size of PreAuthenticator.data */
 
@@ -81,3 +83,4 @@ krb5_error_code verify_securid_padata
     PROTOTYPE((krb5_context, krb5_principal client, krb5_address **src_addr,
 	       krb5_data *data));
 
+#endif /* KRB5_PREAUTH__ */

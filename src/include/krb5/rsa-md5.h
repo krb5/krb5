@@ -37,6 +37,9 @@
  ***********************************************************************
  */
 
+#ifndef	KRB5_RSA_MD5__
+#define	KRB5_RSA_MD5__
+
 /* Data structure for MD5 (Message-Digest) computation */
 typedef struct {
   krb5_ui_4 i[2];			/* number of _bits_ handled mod 2^64 */
@@ -62,3 +65,4 @@ extern krb5_checksum_entry
     rsa_md5_cksumtable_entry,
     rsa_md5_des_cksumtable_entry;
 
+#endif /* KRB5_RSA_MD5__ */
