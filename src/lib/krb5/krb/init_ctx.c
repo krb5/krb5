@@ -332,16 +332,14 @@ get_profile_etype_list(context, ktypes, profstr, ctx_count, ctx_list)
 
 	count = 0;
 	sp = retval;
-	while (sp) {
+	while (*sp) {
 	    for (ep = sp; *ep && (*ep != ',') && !isspace((int) (*ep)); ep++)
 		;
 	    if (*ep) {
 		*ep++ = '\0';
 		while (isspace((int) (*ep)) || *ep == ',')
 		    *ep++ = '\0';
-	    } else
-		ep = (char *) NULL;
-
+	    }
 	    count++;
 	    sp = ep;
 	}

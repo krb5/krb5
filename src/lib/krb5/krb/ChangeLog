@@ -1,3 +1,11 @@
+2001-06-29  Tom Yu  <tlyu@mit.edu>
+
+	* init_ctx.c (get_profile_etype_list): Fix etype-counting loop so
+	that trailing separator characters (as in the DEFAULT_ETYPE_LIST)
+	don't cause another iteration, which was causing the following
+	loop to fall off the end of the string due to count being one too
+	great.
+
 2001-06-28  Ezra Peisach  <epeisach@mit.edu>
 
 	* chk_trans.c (foreach_realm): Cleanup loal variable set but never
