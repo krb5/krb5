@@ -30,7 +30,7 @@ static char rcsid_fcc_init_c[] =
 "$Id$";
 #endif /* !lint && !SABER */
 
-
+#include <errno.h>
 #include "fcc.h"
 
 /*
@@ -54,7 +54,11 @@ krb5_fcc_initialize(id, princ)
 
      MAYBE_OPEN(id, FCC_OPEN_AND_ERASE);
 
+#ifdef NOFCHMOD
+     ret = chmod(((krb5_fcc_data *) id->data)->filename, S_IREAD | S_IWRITE);
+#else
      ret = fchmod(((krb5_fcc_data *) id->data)->fd, S_IREAD | S_IWRITE);
+#endif
      if (ret == -1) {
 	 ret = krb5_fcc_interpret(errno);
 	 MAYBE_CLOSE(id, ret);
