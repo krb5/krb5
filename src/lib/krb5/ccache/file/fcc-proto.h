@@ -98,7 +98,7 @@ krb5_error_code krb5_fcc_read_authdatum
 
 /* fcc_reslv.c */
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_fcc_resolve 
-        KRB5_PROTOTYPE((krb5_context, krb5_ccache *id , char *residual ));
+        KRB5_PROTOTYPE((krb5_context, krb5_ccache *id , const char *residual ));
 
 /* fcc_retrv.c */
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_fcc_retrieve 
