@@ -1,20 +1,7 @@
-2004-06-30  Ken Raeburn  <raeburn@mit.edu>
+2004-07-07  Jeffrey Altman <jaltman@mit.edu>
 
-	* cc_file.c (krb5_fcc_data): Added a mutex.
-	(krb5_fcc_read*, krb5_fcc_write, krb5_fcc_store_*,
-	krb5_fcc_open_file, krb5_fcc_skip_header,
-	krb5_fcc_skip_principal): Verify that the mutex is locked.
-	(MAYBE_OPEN): Verify that the mutex is locked; unlock it if
-	returning an error.
-	(krb5_fcc_initialize, krb5_fcc_start_seq_get,
-	krb5_fcc_get_principal, krb5_fcc_store, krb5_fcc_set_flags): Lock
-	and unlock the mutex.
-	(krb5_fcc_close): Likewise.  Destroy the mutex when done.
-	(krb5_fcc_destroy): Merge stdio and non-stdio versions a little
-	more.  Destroy the mutex when done.
-	(krb5_fcc_resolve): Initialize and lock the mutex.
-	(krb5_fcc_next_cred): Lock and unlock the mutex.  Merge the stdio
-	and non-stdio branches a little more.
+    * cc_mslsa.c:  When obtaining a TGT from MSLSA, do not ignore 
+      the cache if the requested enctype is the NULL enctype.
 
 2004-06-29  Jeffrey Altman <jaltman@mit.edu>
 
