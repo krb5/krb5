@@ -1,3 +1,13 @@
+Fri Jul 25 15:18:25 1997  Tom Yu  <tlyu@mit.edu>
+
+	* kdb_kt.h: Move support for "kdb" keytab here.
+
+	* kdb.h: Add support for modified kdb API; remove extra arguments
+	for db_set_mkey and db_get_mkey.  Remove all (hopefully) mentions
+	of any particular backend database implementation.  Add flags
+	argument for db_create, allowing caller to specify whether btree
+	or hash methods are to be used in the backend.
+
 Thu Nov 21 11:55:16 EST 1996    Richard Basch   <basch@lehman.com>
 
         * Makefile.in:

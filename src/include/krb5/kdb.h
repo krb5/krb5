@@ -52,6 +52,10 @@
 #define KRB5_KDB_SUPPORT_DESMD5         0x00004000
 #define	KRB5_KDB_NEW_PRINC		0x00008000
 
+/* Creation flags */
+#define KRB5_KDB_CREATE_BTREE		0x00000001
+#define KRB5_KDB_CREATE_HASH		0x00000002
+
 #if !defined(_MACINTOSH) && !defined(_MSDOS) && !defined(_WIN32)
 
 /*
@@ -172,7 +176,8 @@ krb5_error_code krb5_db_get_age
 		   time_t * ));
 krb5_error_code krb5_db_create
 	KRB5_PROTOTYPE((krb5_context,
-		   char * ));
+		   char *,
+		   krb5_int32 ));
 krb5_error_code krb5_db_rename
 	KRB5_PROTOTYPE((krb5_context,
 		   char *,
@@ -217,6 +222,15 @@ krb5_error_code krb5_db_setup_mkey_name
 		   const char *, 
 		   char **, 
 		   krb5_principal *));
+
+krb5_error_code krb5_db_set_mkey
+        KRB5_PROTOTYPE((krb5_context, krb5_encrypt_block *));
+
+krb5_error_code krb5_db_get_mkey
+        KRB5_PROTOTYPE((krb5_context, krb5_encrypt_block **));
+krb5_error_code krb5_db_destroy 
+	KRB5_PROTOTYPE((krb5_context,
+		   char * ));
 krb5_error_code krb5_db_lock
 	KRB5_PROTOTYPE((krb5_context,
 		   int ));
@@ -238,6 +252,11 @@ krb5_error_code	krb5_db_fetch_mkey
 		   char *,
 		   krb5_data *, 
 		   krb5_keyblock * ));
+
+krb5_error_code krb5_db_open_database
+	KRB5_PROTOTYPE((krb5_context));
+krb5_error_code krb5_db_close_database
+	KRB5_PROTOTYPE((krb5_context));
 
 krb5_error_code krb5_dbekd_encrypt_key_data
 	KRB5_PROTOTYPE((krb5_context,
@@ -281,23 +300,23 @@ krb5_error_code krb5_dbe_lookup_mod_princ_data
 			krb5_db_entry *,
 			krb5_timestamp *,
 			krb5_principal *));
-int krb5_encode_princ_dbmkey
+int krb5_encode_princ_dbkey
 	KRB5_PROTOTYPE((krb5_context,
-    		   datum  *,
+    		   krb5_data  *,
     		   krb5_principal));
-void krb5_free_princ_dbmkey
+void krb5_free_princ_dbkey
 	KRB5_PROTOTYPE((krb5_context,
-		   datum  *));
+		   krb5_data *));
 krb5_error_code krb5_encode_princ_contents
 	KRB5_PROTOTYPE((krb5_context,
-    		   datum  *,
+    		   krb5_data  *,
     		   krb5_db_entry *));
 void krb5_free_princ_contents
 	KRB5_PROTOTYPE((krb5_context,
-		   datum  *));
+		   krb5_data  *));
 krb5_error_code krb5_decode_princ_contents
 	KRB5_PROTOTYPE((krb5_context,
-    		   datum  *,
+    		   krb5_data  *,
     		   krb5_db_entry *));
 void krb5_dbe_free_contents
 	KRB5_PROTOTYPE((krb5_context,
@@ -399,6 +418,8 @@ typedef struct _krb5_db_entry {
 
 #endif	/* OLD_AND_KRUFTY */
 
+/* This is now a structure that is private to the database backend. */
+#ifdef notdef
 #ifdef	KDB5_DISPATCH
 /*
  * Database operation dispatch table.  This table determines the procedures
@@ -426,5 +447,6 @@ krb5_error_code kdb5_db_set_dbops KRB5_PROTOTYPE((krb5_context,
 #else
 typedef	struct _kdb5_dispatch_table kdb5_dispatch_table;
 #endif	/* KDB5_DISPATCH */
+#endif /* notdef */
 #endif /* !defined(_MACINTOSH) && !defined(_MSDOS) &&!defined(_WIN32) */
 #endif /* KRB5_KDB5__ */
