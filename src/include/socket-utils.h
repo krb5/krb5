@@ -71,19 +71,24 @@ struct krb5int_sockaddr_storage {
 #endif
 
 #if defined (__GNUC__)
-/* There's a lot of confusion between pointers to different sockaddr
-   types, and pointers with different degrees of indirection, as in
-   the locate_kdc type functions.  Use these function to ensure we
-   don't do something silly like cast a "sockaddr **" to a
-   "sockaddr_in *".  */
+/*
+ * There's a lot of confusion between pointers to different sockaddr
+ * types, and pointers with different degrees of indirection, as in
+ * the locate_kdc type functions.  Use these function to ensure we
+ * don't do something silly like cast a "sockaddr **" to a
+ * "sockaddr_in *".
+ *
+ * The casts to (void *) are to get GCC to shut up about alignment
+ * increasing.
+ */
 static __inline__ struct sockaddr_in *sa2sin (struct sockaddr *sa)
 {
-    return (struct sockaddr_in *) sa;
+    return (struct sockaddr_in *) (void *) sa;
 }
 #ifdef KRB5_USE_INET6
 static __inline__ struct sockaddr_in6 *sa2sin6 (struct sockaddr *sa)
 {
-    return (struct sockaddr_in6 *) sa;
+    return (struct sockaddr_in6 *) (void *) sa;
 }
 #endif
 static __inline__ struct sockaddr *ss2sa (struct sockaddr_storage *ss)
