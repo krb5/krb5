@@ -21,16 +21,14 @@ struct parse_state {
 	struct profile_node *current_section;
 };
 
-static char *skip_over_blanks(cp)
-	char	*cp;
+static char *skip_over_blanks(char *cp)
 {
 	while (*cp && isspace((int) (*cp)))
 		cp++;
 	return cp;
 }
 
-static void strip_line(line)
-	char	*line;
+static void strip_line(char *line)
 {
 	char *p = line + strlen(line);
 	while (p > line && (p[-1] == '\n' || p[-1] == '\r'))
@@ -67,8 +65,7 @@ static void parse_quoted_string(char *str)
 }
 
 
-static errcode_t parse_init_state(state)
-	struct parse_state *state;
+static errcode_t parse_init_state(struct parse_state *state)
 {
 	state->state = STATE_INIT_COMMENT;
 	state->group_level = 0;
@@ -76,9 +73,7 @@ static errcode_t parse_init_state(state)
 	return profile_create_node("(root)", 0, &state->root_section);
 }
 
-static errcode_t parse_std_line(line, state)
-	char	*line;
-	struct parse_state *state;
+static errcode_t parse_std_line(char *line, struct parse_state *state)
 {
 	char	*cp, ch, *tag, *value;
 	char	*p;
@@ -196,9 +191,7 @@ static errcode_t parse_std_line(line, state)
 	return 0;
 }
 
-static errcode_t parse_line(line, state)
-	char	*line;
-	struct parse_state *state;
+static errcode_t parse_line(char *line, struct parse_state *state)
 {
 	char	*cp;
 	
@@ -218,9 +211,7 @@ static errcode_t parse_line(line, state)
 	return 0;
 }
 
-errcode_t profile_parse_file(f, root)
-	FILE	*f;
-	struct profile_node **root;
+errcode_t profile_parse_file(FILE *f, struct profile_node **root)
 {
 #define BUF_SIZE	2048
 	char *bptr;
@@ -304,8 +295,7 @@ errcode_t profile_parse_file(f, root)
 /*
  * Return TRUE if the string begins or ends with whitespace
  */
-static int need_double_quotes(str)
-	char *str;
+static int need_double_quotes(char *str)
 {
 	if (!str || !*str)
 		return 0;
@@ -320,9 +310,7 @@ static int need_double_quotes(str)
  * Output a string with double quotes, doing appropriate backquoting
  * of characters as necessary.
  */
-static void output_quoted_string(str, f)
-	char	*str;
-	FILE	*f;
+static void output_quoted_string(char *str, FILE *f)
 {
 	char	ch;
 	
@@ -367,10 +355,8 @@ static void output_quoted_string(str, f)
 #define EOL "\n"
 #endif
 
-static void dump_profile_to_file(root, level, dstfile)
-	struct profile_node *root;
-	int level;
-	FILE *dstfile;
+static void dump_profile_to_file(struct profile_node *root, int level,
+				 FILE *dstfile)
 {
 	int i;
 	struct profile_node *p;
@@ -421,9 +407,7 @@ static void dump_profile_to_file(root, level, dstfile)
 	} while (iter != 0);
 }
 
-errcode_t profile_write_tree_file(root, dstfile)
-	struct profile_node *root;
-	FILE		*dstfile;
+errcode_t profile_write_tree_file(struct profile_node *root, FILE *dstfile)
 {
 	dump_profile_to_file(root, 0, dstfile);
 	return 0;

@@ -20,8 +20,7 @@
 #endif
 #include <errno.h>
 
-static errcode_t rw_setup(profile)
-	profile_t	profile;
+static errcode_t rw_setup(profile_t profile)
 {
    	prf_file_t	file;
 	errcode_t	retval = 0;
@@ -84,11 +83,8 @@ static errcode_t rw_setup(profile)
  * ADL - 2/23/99, rewritten TYT 2/25/99
  */
 errcode_t KRB5_CALLCONV
-profile_update_relation(profile, names, old_value, new_value)
-	profile_t	profile;
-	const char	**names;
-	const char	*old_value;
-	const char	*new_value;
+profile_update_relation(profile_t profile, const char **names,
+			const char *old_value, const char *new_value)
 {	
 	errcode_t	retval;
 	struct profile_node *section, *node;
@@ -137,9 +133,7 @@ profile_update_relation(profile, names, old_value, new_value)
  * TYT - 2/25/99
  */
 errcode_t KRB5_CALLCONV
-profile_clear_relation(profile, names)
-	profile_t	profile;
-	const char	**names;
+profile_clear_relation(profile_t profile, const char **names)
 {	
 	errcode_t	retval;
 	struct profile_node *section, *node;
@@ -184,10 +178,8 @@ profile_clear_relation(profile, names)
  * ADL - 2/23/99, rewritten TYT 2/25/99
  */
 errcode_t KRB5_CALLCONV
-profile_rename_section(profile, names, new_name)
-	profile_t	profile;
-	const char	**names;
-	const char	*new_name;
+profile_rename_section(profile_t profile, const char **names,
+		       const char *new_name)
 {	
 	errcode_t	retval;
 	struct profile_node *section, *node;
@@ -237,10 +229,8 @@ profile_rename_section(profile, names, new_name)
  * ADL - 2/23/99, rewritten TYT 2/25/99
  */
 errcode_t KRB5_CALLCONV
-profile_add_relation(profile, names, new_value)
-	profile_t	profile;
-	const char  	**names;
-	const char	*new_value; 
+profile_add_relation(profile_t profile, const char **names,
+		     const char *new_value)
 {
 	errcode_t	retval;
     	struct profile_node *section;

@@ -1,3 +1,8 @@
+2004-02-18  Ken Raeburn  <raeburn@mit.edu>
+
+	* prof_file.c, prof_get.c, prof_init.c, prof_parse.c, prof_set.c,
+	prof_tree.c: Use ANSI style function definitions.
+
 2004-01-30  Alexandra Ellwood  <lxs@mit.edu>
 
     * prof-int.h: prof-int.h should include pthread.h when USE_PTHREADS 

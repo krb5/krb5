@@ -35,8 +35,7 @@ struct global_shared_profile_data krb5int_profile_shared_data = {
 
 static void profile_free_file_data(prf_data_t);
 
-static int rw_access(filespec)
-	profile_filespec_t filespec;
+static int rw_access(profile_filespec_t filespec)
 {
 #ifdef HAVE_ACCESS
 	if (access(filespec, W_OK) == 0)
@@ -61,8 +60,7 @@ static int rw_access(filespec)
 }
 
 #ifdef SHARE_TREE_DATA
-static int r_access(filespec)
-	profile_filespec_t filespec;
+static int r_access(profile_filespec_t filespec)
 {
 #ifdef HAVE_ACCESS
 	if (access(filespec, R_OK) == 0)
@@ -87,9 +85,8 @@ static int r_access(filespec)
 }
 #endif /* SHARE_TREE_DATA */
 
-errcode_t profile_open_file(filespec, ret_prof)
-	const_profile_filespec_t filespec;
-	prf_file_t *ret_prof;
+errcode_t profile_open_file(const_profile_filespec_t filespec,
+			    prf_file_t *ret_prof)
 {
 	prf_file_t	prf;
 	errcode_t	retval;
@@ -244,8 +241,7 @@ make_hard_link(const char *oldpath, const char *newpath)
 #endif
 }
 
-errcode_t profile_flush_file_data(data)
-	prf_data_t data;
+errcode_t profile_flush_file_data(prf_data_t data)
 {
 	FILE		*f;
 	profile_filespec_t new_file;
@@ -344,16 +340,14 @@ void profile_dereference_data(prf_data_t data)
 #endif
 }
 
-void profile_free_file(prf)
-	prf_file_t prf;
+void profile_free_file(prf_file_t prf)
 {
     profile_dereference_data(prf->data);
     free(prf);
 }
 
 /* Call with mutex locked!  */
-static void profile_free_file_data(data)
-	prf_data_t data;
+static void profile_free_file_data(prf_data_t data)
 {
 #ifdef SHARE_TREE_DATA
     if (data->flags & PROFILE_FILE_SHARED) {
@@ -387,8 +381,7 @@ static void profile_free_file_data(data)
 #endif
 }
 
-errcode_t profile_close_file(prf)
-	prf_file_t prf;
+errcode_t profile_close_file(prf_file_t prf)
 {
 	errcode_t	retval;
 	

@@ -24,9 +24,7 @@ error(do not have a 4-byte integer type)
 #endif	/* SIZEOF_LONG == 4 */
 
 errcode_t KRB5_CALLCONV
-profile_init(files, ret_profile)
-	const_profile_filespec_t *files;
-	profile_t *ret_profile;
+profile_init(const_profile_filespec_t *files, profile_t *ret_profile)
 {
 	const_profile_filespec_t *fs;
 	profile_t profile;
@@ -74,9 +72,8 @@ profile_init(files, ret_profile)
 }
 
 errcode_t KRB5_CALLCONV
-profile_init_path(filepath, ret_profile)
-	const_profile_filespec_list_t filepath;
-	profile_t *ret_profile;
+profile_init_path(const_profile_filespec_list_t filepath,
+		  profile_t *ret_profile)
 {
 	int n_entries, i;
 	unsigned int ent_len;
@@ -126,8 +123,7 @@ profile_init_path(filepath, ret_profile)
 }
 
 errcode_t KRB5_CALLCONV
-profile_flush(profile)
-	profile_t	profile;
+profile_flush(profile_t profile)
 {
 	if (!profile || profile->magic != PROF_MAGIC_PROFILE)
 		return PROF_MAGIC_PROFILE;
@@ -139,8 +135,7 @@ profile_flush(profile)
 }
 
 void KRB5_CALLCONV
-profile_abandon(profile)
-	profile_t	profile;
+profile_abandon(profile_t profile)
 {
 	prf_file_t	p, next;
 
@@ -156,8 +151,7 @@ profile_abandon(profile)
 }
 
 void KRB5_CALLCONV
-profile_release(profile)
-	profile_t	profile;
+profile_release(profile_t profile)
 {
 	prf_file_t	p, next;
 
@@ -175,10 +169,8 @@ profile_release(profile)
 /*
  * Here begins the profile serialization functions.
  */
-errcode_t profile_ser_size(unused, profile, sizep)
-    const char *unused;
-    profile_t	profile;
-    size_t	*sizep;
+errcode_t profile_ser_size(const char *unused, profile_t profile,
+			   size_t *sizep)
 {
     size_t	required;
     prf_file_t	pfp;
@@ -193,10 +185,7 @@ errcode_t profile_ser_size(unused, profile, sizep)
     return 0;
 }
 
-static void pack_int32(oval, bufpp, remainp)
-    prof_int32		oval;
-    unsigned char	**bufpp;
-    size_t		*remainp;
+static void pack_int32(prof_int32 oval, unsigned char **bufpp, size_t *remainp)
 {
     (*bufpp)[0] = (unsigned char) ((oval >> 24) & 0xff);
     (*bufpp)[1] = (unsigned char) ((oval >> 16) & 0xff);
@@ -206,11 +195,8 @@ static void pack_int32(oval, bufpp, remainp)
     *remainp -= sizeof(prof_int32);
 }
 
-errcode_t profile_ser_externalize(unused, profile, bufpp, remainp)
-    const char		*unused;
-    profile_t		profile;
-    unsigned char	**bufpp;
-    size_t		*remainp;
+errcode_t profile_ser_externalize(const char *unused, profile_t profile,
+				  unsigned char **bufpp, size_t *remainp)
 {
     errcode_t		retval;
     size_t		required;
@@ -251,10 +237,8 @@ errcode_t profile_ser_externalize(unused, profile, bufpp, remainp)
     return(retval);
 }
 
-static int unpack_int32(intp, bufpp, remainp)
-    prof_int32		*intp;
-    unsigned char	**bufpp;
-    size_t		*remainp;
+static int unpack_int32(prof_int32 *intp, unsigned char **bufpp,
+			size_t *remainp)
 {
     if (*remainp >= sizeof(prof_int32)) {
 	*intp = (((prof_int32) (*bufpp)[0] << 24) |
@@ -269,11 +253,8 @@ static int unpack_int32(intp, bufpp, remainp)
 	return 1;
 }
 
-errcode_t profile_ser_internalize(unused, profilep, bufpp, remainp)
-	const char		*unused;
-	profile_t		*profilep;
-	unsigned char	**bufpp;
-	size_t		*remainp;
+errcode_t profile_ser_internalize(const char *unused, profile_t *profilep,
+				  unsigned char **bufpp, size_t *remainp)
 {
 	errcode_t		retval;
 	unsigned char	*bp;
