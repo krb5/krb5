@@ -1,3 +1,7 @@
+Fri Dec  1 17:27:33 1995    <tytso@rsts-11.mit.edu>
+
+	* configure.in: Add rule for building shared object files.
+
 Fri Dec  1 17:11:43 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* gssapiP_krb5.h (KG_TOK_WRAP_MSG): Changed token ID for
