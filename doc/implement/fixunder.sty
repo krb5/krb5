@@ -3,10 +3,4 @@
 %
 \catcode`\_=\active
 \def\_{_}
-\ifx\undefined\@psfonts
-\def_{\leavevmode \kern.06em \vbox{\hrule width.3em}}
-\else
-%only do this version if we have PostScript fonts already loaded.
-\font\courier = c-med
-\def_{\leavevmode {\courier \char95}}
-\fi
+\def_{\leavevmode {\tt \char95}}
