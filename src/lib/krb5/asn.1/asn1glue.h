@@ -24,8 +24,8 @@
 #define KRB5_APOptions2krb5_apoptions(val, err) KRB5_TicketFlags2krb5_flags((struct type_KRB5_APOptions *) (val), err)
 
 /* to keep lint happy */
-#define xbcopy(src,dst,size) bcopy((char *)(src), (char *)(dst), size)
-#define xbzero(targ, size) bzero((char *)(targ), size)
+#define xbcopy(src,dst,size) memcpy((char *)(dst), (char *)(src), size)
+#define xbzero(targ, size) memset((char *)(targ), 0, size)
 #define xmalloc(n) malloc((unsigned) (n))
 #define xcalloc(n,s) calloc((unsigned)(n), (unsigned)(s))
 
