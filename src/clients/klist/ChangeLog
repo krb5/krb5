@@ -1,3 +1,7 @@
+2000-10-17  Ezra Peisach  <epeisach@mit.edu>
+
+	* klist.c (one_addr): gethostbyaddr takes an int as second argument.
+
 2000-10-09  Tom Yu  <tlyu@mit.edu>
 
 	* klist.c (do_v4_ccache): Call life_to_time().

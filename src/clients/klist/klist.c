@@ -670,7 +670,7 @@ void one_addr(a)
 		freehostent(h);
 	    }
 #else
-	    h = gethostbyaddr(a->contents, a->length, af);
+	    h = gethostbyaddr(a->contents, (int) a->length, af);
 	    if (h) {
 		printf("%s", h->h_name);
 	    }
