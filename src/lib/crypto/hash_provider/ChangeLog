@@ -1,3 +1,9 @@
+2001-03-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* hash_crc32.c, hash_md4.c, hash_md5.c, hash_provider.h,
+	hash_sha1.c: Use krb5int_ prefix for internal "provider"
+	structures.
+
 2001-03-05  Ken Raeburn  <raeburn@mit.edu>
 
 	* hash_crc32.c, hash_md4.c, hash_md5.c, hash_sha1.c: Use const

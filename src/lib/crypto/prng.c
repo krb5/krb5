@@ -37,7 +37,7 @@
    output.  The output is fed back as new seed data, as described
    above.  */
 
-static const struct krb5_enc_provider *const enc = &krb5_enc_des3;
+static const struct krb5_enc_provider *const enc = &krb5int_enc_des3;
 
 /* XXX state.  Should it be in krb5_context? */
 

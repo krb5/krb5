@@ -118,7 +118,7 @@ k5_des_make_key(const krb5_data *randombits, krb5_keyblock *key)
     return(0);
 }
 
-const struct krb5_enc_provider krb5_enc_des = {
+const struct krb5_enc_provider krb5int_enc_des = {
     k5_des_block_size,
     k5_des_keysize,
     k5_des_encrypt,

@@ -71,7 +71,7 @@ k5_descbc_hash(const krb5_keyblock *key, const krb5_data *ivec,
     return(0);
 }
 
-const struct krb5_keyhash_provider krb5_keyhash_descbc = {
+const struct krb5_keyhash_provider krb5int_keyhash_descbc = {
     k5_descbc_hash_size,
     k5_descbc_hash,
     NULL

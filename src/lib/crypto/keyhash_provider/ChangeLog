@@ -1,3 +1,9 @@
+2001-03-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* descbc.c, k5_md4des.c, k5_md5des.c, keyhash_provider.h,
+	t_cksum.c: Use krb5int_ prefix for internal "provider"
+	structures.
+
 2001-03-05  Ken Raeburn  <raeburn@mit.edu>
 
 	* descbc.c, k5_md4des.c, k5_md5des.c: Use const instead of

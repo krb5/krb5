@@ -35,13 +35,13 @@
 #define MD4_K5BETA_COMPAT
 
 #if	MD == 4
-extern struct krb5_keyhash_provider krb5_keyhash_md4des;
-#define khp krb5_keyhash_md4des
+extern struct krb5_keyhash_provider krb5int_keyhash_md4des;
+#define khp krb5int_keyhash_md4des
 #endif
 
 #if	MD == 5
-extern struct krb5_keyhash_provider krb5_keyhash_md5des;
-#define khp krb5_keyhash_md5des
+extern struct krb5_keyhash_provider krb5int_keyhash_md5des;
+#define khp krb5int_keyhash_md5des
 #endif
 
 static void

@@ -1,3 +1,8 @@
+2001-03-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* cksumtypes.c, etypes.c, prng.c: Use krb5int_ prefix for internal
+	"provider" structures.
+
 2001-03-05  Ken Raeburn  <raeburn@mit.edu>
 
 	* prng.c: Clean up some comments.

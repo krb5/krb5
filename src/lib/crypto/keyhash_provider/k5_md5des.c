@@ -189,7 +189,7 @@ k5_md5des_verify(const krb5_keyblock *key, const krb5_data *ivec,
     return(0);
 }
 
-const struct krb5_keyhash_provider krb5_keyhash_md5des = {
+const struct krb5_keyhash_provider krb5int_keyhash_md5des = {
     k5_md5des_hash_size,
     k5_md5des_hash,
     k5_md5des_verify
