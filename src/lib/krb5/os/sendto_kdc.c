@@ -1022,6 +1022,7 @@ krb5int_sendto (krb5_context context, const krb5_data *message,
 
     select_state.max = 0;
     select_state.nfds = 0;
+    select_state.end_time.tv_sec = select_state.end_time.tv_usec = 0;
     FD_ZERO(&select_state.rfds);
     FD_ZERO(&select_state.wfds);
     FD_ZERO(&select_state.xfds);
