@@ -86,17 +86,17 @@ MAKETARGETS="all check"
 . $THISCONF
 
 
-if test ${CC}x != "x"
+if test "x${CC}" != "x"
 then
 	CONFIG_OPTS="$CONFIG_OPTS --with-cc=${CC}"
 fi
 
-if test ${CC_OPTS}x != "x"
+if test "x${CC_OPTS}" != "x"
 then
 	CONFIG_OPTS="$CONFIG_OPTS --with-ccopts=${CC_OPTS}"
 fi
 
-if test ${KRB4}x != "x"
+if test "x${KRB4}" != "x"
 then
 	CONFIG_OPTS="$CONFIG_OPTS --with-krb4=${KRB4}"
 fi
