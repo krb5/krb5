@@ -216,11 +216,11 @@ HINSTANCE get_lib_instance(void);
 
 #endif /* _MSDOS || _WIN32 */
 
-#ifndef KRB5_CALLCONV
+#ifdef _MACINTOSH
+
 #define KRB5_CALLCONV
 #define KRB5_CALLCONV_C
 #define KRB5_DLLIMP
-#endif
 #ifndef FAR
 #define FAR
 #endif
@@ -228,7 +228,6 @@ HINSTANCE get_lib_instance(void);
 #define NEAR
 #endif
 
-#ifdef _MACINTOSH
 #define SIZEOF_INT 4
 #define SIZEOF_SHORT 2
 #define HAVE_SRAND
@@ -294,5 +293,17 @@ int fstat(int fildes, struct stat *buf);
 #else /* _MACINTOSH */
 #define THREEPARAMOPEN(x,y,z) open(x,y,z)
 #endif /* _MACINTOSH */
+
+#ifndef KRB5_CALLCONV
+#define KRB5_CALLCONV
+#define KRB5_CALLCONV_C
+#define KRB5_DLLIMP
+#endif
+#ifndef FAR
+#define FAR
+#endif
+#ifndef NEAR
+#define NEAR
+#endif
 
 #endif /* _KRB5_WIN_MAC_H */
