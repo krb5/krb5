@@ -1,3 +1,8 @@
+Fri Dec 13 14:55:43 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* krb5_err.et: Added the error codes KRB5_APPL_EXPIRED and
+	 	KRB5_LIB_EXPIRED.
+
 Tue Nov 19 17:06:26 1996  Barry Jaspan  <bjaspan@mit.edu>
 
 	* krb5_err.et: add KRB5_KT_KVNONOTFOUND [krb5-libs/198]
