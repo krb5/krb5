@@ -31,6 +31,10 @@ all-unix::
 		ln -s $(srcdir)/db2/include/db-ndbm.h ../include; \
 	fi
 
+clean-unix::
+	$(RM) ../include/db.h ../include/db-config.h ../include/db-ndbm.h \
+		../lib/libdb.a
+
 unixmac: libupdate
 
 libupdate: $(srcdir)/libupdate.sh
