@@ -17,20 +17,20 @@ RUN_SETUP = @KRB5_RUN_ENV@ KRB5_CONFIG=$(SRCTOP)/config-files/krb5.conf
 STLIBOBJS=\
 	aescrypt.o	\
 	aestab.o	\
-	aeskey.o	\
-	aess2k.o
+	aeskey.o
+#	aess2k.o
 
 OBJS=\
 	$(OUTPRE)aescrypt.$(OBJEXT)	\
 	$(OUTPRE)aestab.$(OBJEXT)	\
-	$(OUTPRE)aeskey.$(OBJEXT)	\
-	$(OUTPRE)aess2k.$(OBJEXT)
+	$(OUTPRE)aeskey.$(OBJEXT)
+#	$(OUTPRE)aess2k.$(OBJEXT)
 
 SRCS=\
 	$(srcdir)/aescrypt.c	\
 	$(srcdir)/aestab.c	\
-	$(srcdir)/aeskey.c	\
-	$(srcdir)/aess2k.c
+	$(srcdir)/aeskey.c
+#	$(srcdir)/aess2k.c
 
 ##DOS##LIBOBJS = $(OBJS)
 
