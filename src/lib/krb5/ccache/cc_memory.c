@@ -572,7 +572,7 @@ krb5_mcc_store(krb5_context ctx, krb5_ccache id, krb5_creds *creds)
     krb5_mcc_link *new_node;
     krb5_mcc_data *mptr = (krb5_mcc_data *)id->data;
 
-    new_node = malloc(sizeof(sizeof(krb5_mcc_link)));
+    new_node = malloc(sizeof(krb5_mcc_link));
     if (new_node == NULL)
 	return errno;
     err = krb5_copy_creds(ctx, creds, &new_node->creds);

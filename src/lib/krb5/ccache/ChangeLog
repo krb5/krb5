@@ -1,3 +1,8 @@
+2004-07-18  Ezra Peisach  <epeisach@mit.edu>
+
+	* cc_memory.c (krb5_mcc_store): When allocating krb5_mcc_link
+	memory - allocate sizeof() - not sizeof(sizeof()).
+
 2004-07-16  Ken Raeburn  <raeburn@mit.edu>
 
 	* cc_file.c: Don't check for macsock.h.
