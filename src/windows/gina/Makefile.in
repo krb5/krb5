@@ -1,4 +1,4 @@
-##DOSBUILDTOP=..\..
+BUILDTOP=..\..
 
 OBJS=	$(OUTPRE)ginastub.$(OBJEXT)
 
@@ -9,19 +9,17 @@ INCLUDES = -I$(BUILDTOP)\include
 WINLIBS = advapi32.lib comctl32.lib \
 	libc.lib kernel32.lib wsock32.lib user32.lib shell32.lib oldnames.lib
 
-#comctl32.lib msvcrt.lib advapi32.lib gdi32.lib comdlg32.lib winspool.lib
-
 WINDLLFLAGS = /nodefaultlib /incremental:no /release \
 	/nologo /base:0x1c000000 /dll $(LOPTS)
 
-##WIN32##!ifdef NODEBUG
-##WIN32##CFLAGS = $(CCOPTS2) $(INCLUDES) -DUNICODE -D_UNICODE
-##WIN32##!else
-##WIN32##CFLAGS = $(CCOPTS2) $(INCLUDES) -DUNICODE -D_UNICODE -DDBG
-##WIN32##!endif
+!ifdef NODEBUG
+CFLAGS = $(CCOPTS2) $(INCLUDES) -DUNICODE -D_UNICODE
+!else
+CFLAGS = $(CCOPTS2) $(INCLUDES) -DUNICODE -D_UNICODE -DDBG
+!endif
 
 all-windows::
-##WIN32##all-windows:: $(OUTPRE)kgina.dll
+all-windows:: $(OUTPRE)kgina.dll
 
 clean-windows::
 	$(RM) $(OUTPRE)kgina.dll
