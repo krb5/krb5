@@ -53,11 +53,32 @@ krb5_ktfile_get_entry(context, id, principal, kvno, enctype, entry)
     cur_entry.vno = 0;
     cur_entry.key.contents = 0;
     while (TRUE) {
+	krb5_enctype entry_type;
+	
 	if ((kerror = krb5_ktfileint_read_entry(context, id, &new_entry)))
 	    break;
 
-	if (((enctype  == IGNORE_ENCTYPE)||
-	    (new_entry.key.enctype  == enctype))&&
+	switch (enctype) {
+	case ENCTYPE_DES_CBC_CRC:
+	case ENCTYPE_DES_CBC_MD5:
+	case ENCTYPE_DES_CBC_MD4:
+	case ENCTYPE_DES_CBC_RAW:
+	    enctype = ENCTYPE_DES_CBC_CRC;
+	    break;
+	}
+
+	entry_type = new_entry.key.enctype;
+	switch(entry_type) {
+	case ENCTYPE_DES_CBC_CRC:
+	case ENCTYPE_DES_CBC_MD5:
+	case ENCTYPE_DES_CBC_MD4:
+	case ENCTYPE_DES_CBC_RAW:
+	    entry_type = ENCTYPE_DES_CBC_CRC;
+	    break;
+	}
+
+	if (((enctype == IGNORE_ENCTYPE)||
+	    (entry_type == enctype))&&
 	    krb5_principal_compare(context, principal, new_entry.principal)) {
 		if (kvno == IGNORE_VNO) {
 			if (cur_entry.vno < new_entry.vno) {
