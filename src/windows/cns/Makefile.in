@@ -28,12 +28,12 @@ CFLAGS	= $(CCOPTS2) $(INCLUDES) /D$(KRB)=1
 
 ##### Linker
 LINK 	 = link
-LIBS 	 = $(KLIB) $(WLIB)
+LIBS 	 = $(KLIB) $(CLIB)
 ##WIN16##SYSLIBS  = libw llibcew
 !if defined(DEBUG)
 ##WIN16##LFLAGS	 = /co /nologo /nod /nopackcode /map:full
 ##WIN32##LFLAGS	 = /nologo /nod /debug
-##WIN32##SYSLIBS = libcd.lib kernel32.lib wsock32.lib user32.lib gdi32.lib
+##WIN32##SYSLIBS = libcd.lib kernel32.lib user32.lib gdi32.lib
 !else
 ##WIN16##LFLAGS  = /nologo /nod /nopackcode
 ##WIN32##LFLAGS	 = /nologo /nod

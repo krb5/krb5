@@ -1683,11 +1683,13 @@ quit_application(HINSTANCE hinstance)
 static BOOL
 init_instance(HINSTANCE hinstance, int ncmdshow)
 {
-  WORD versionrequested;
-  WSADATA wsadata;
-  int rc;
   char buf[20];
   int i;
+
+#if 0
+  int rc;
+  WORD versionrequested;
+  WSADATA wsadata;
 
   versionrequested = 0x0101;			/* We need version 1.1 */
   rc = WSAStartup(versionrequested, &wsadata);
@@ -1705,6 +1707,7 @@ init_instance(HINSTANCE hinstance, int ncmdshow)
 
     return FALSE;
   }
+#endif
 
   /*
    * Set up expiration action
@@ -1776,7 +1779,9 @@ quit_instance(HINSTANCE hinstance)
   krb5_cc_close(k5_context, k5_ccache);
 #endif
 
+#if 0
   WSACleanup();
+#endif
 
   /*
    * Unload clock icons
