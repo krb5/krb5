@@ -1,3 +1,7 @@
+Fri Nov 18 16:20:10 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* destest.c (main): Add magic numbers to keyblock structure.
+
 Tue Nov  8 17:57:47 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* des_int.h:
