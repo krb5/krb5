@@ -185,6 +185,10 @@ t_locate_kdc: t_locate_kdc.o
 	$(CC_LINK) $(ALL_CFLAGS) -o t_locate_kdc t_locate_kdc.o \
 		$(KRB5_BASE_LIBS)
 t_locate_kdc.o: t_locate_kdc.c locate_kdc.c
+$(OUTPRE)t_locate_kdc.exe: $(OUTPRE)t_locate_kdc.obj \
+		$(OUTPRE)dnssrv.obj $(OUTPRE)dnsglue.obj \
+		$(KLIB) $(PLIB) $(CLIB) $(SLIB)
+	link $(EXE_LINKOPTS) -out:$@ $** ws2_32.lib $(DNSLIBS)
 
 LCLINT=lclint
 LCLINTOPTS= -warnposix \
