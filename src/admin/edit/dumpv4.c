@@ -89,7 +89,7 @@ v4init(arg, manual)
     return 0;
 }
 
-v4_print_time(file, timeval)
+void v4_print_time(file, timeval)
     FILE   *file;
     unsigned long timeval;
 {
