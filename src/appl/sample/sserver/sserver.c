@@ -34,12 +34,11 @@
  * client (this will be correct if this server is started by inetd).
  */
 
-#include <krb5/krb5.h>
-#include <krb5/ext-proto.h>
-#include <krb5/los-proto.h>
+#include "krb5.h"
+#include "com_err.h"
 
+#include <stdio.h>
 #include <ctype.h>
-#include <com_err.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>

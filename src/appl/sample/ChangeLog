@@ -1,0 +1,4 @@
+Tue Feb 28 01:58:05 1995  John Gilmore  (gnu at toad.com)
+
+	* sample.h:  Avoid <krb5/...> includes.
+

@@ -1,3 +1,7 @@
+Tue Feb 28 01:59:17 1995  John Gilmore  (gnu at toad.com)
+
+	* sserver.c:  Avoid <krb5/...> and <com_err.h> includes.
+
 Mon Oct  3 19:16:14 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* Makefile.in: Use $(srcdir) to find manual page for make install.

@@ -1,3 +1,7 @@
+Tue Feb 28 01:58:39 1995  John Gilmore  (gnu at toad.com)
+
+	* sclient.c:  Avoid <krb5/...> and <com_err.h> includes.
+
 Tue Feb 14 15:30:55 1995 Chris Provenzano  (proven@mit.edu)
 
         * kadmin.c Call krb5_sendauth() with new calling convention.

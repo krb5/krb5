@@ -23,8 +23,6 @@
  * Common definitions for the sample client/server.
  */
 
-#include <krb5/copyright.h>
-
 #ifndef KRB5_SAMPLE__
 #define KRB5_SAMPLE__
 
