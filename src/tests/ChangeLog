@@ -1,3 +1,7 @@
+Wed Apr 26 17:26:19 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* configure.in: Added dejagnu subdirectory for Ian's tests.
+
 Wed Mar  1 16:31:35 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* configure.in: Added resolve subdirectory.

@@ -1,7 +1,7 @@
 AC_INIT(configure.in)
 WITH_CCOPTS
 AC_SET_BUILDTOP
-CONFIG_DIRS(resolve asn.1 create hammer verify)
+CONFIG_DIRS(resolve asn.1 create hammer verify dejagnu)
 MAKE_SUBDIRS("making",all)
 MAKE_SUBDIRS("cleaning",clean)
 MAKE_SUBDIRS("installing",install)
