@@ -1,3 +1,9 @@
+Thu Jan 21 15:23:28 1999  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* krb5.hin: Fix realm iterator prototypes so that they use
+		KRB5_PROTOTYPE, and surround them with extern "C" so
+		things work under C++.
+
 Sun Dec  6 19:45:54 1998  Tom Yu  <tlyu@mit.edu>
 
 	* krb54proto.h: Fix decomp_tkt_krb5 to use KRB4_32, instead of a
