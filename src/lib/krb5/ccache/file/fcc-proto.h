@@ -48,11 +48,14 @@ krb5_error_code krb5_fcc_read_principal PROTOTYPE((krb5_ccache id , krb5_princip
 krb5_error_code krb5_fcc_read_keyblock PROTOTYPE((krb5_ccache id , krb5_keyblock *keyblock ));
 krb5_error_code krb5_fcc_read_data PROTOTYPE((krb5_ccache id , krb5_data *data ));
 krb5_error_code krb5_fcc_read_int32 PROTOTYPE((krb5_ccache id , krb5_int32 *i ));
+krb5_error_code krb5_fcc_read_int16 PROTOTYPE((krb5_ccache id , krb5_int16 *i ));
 krb5_error_code krb5_fcc_read_keytype PROTOTYPE((krb5_ccache id , krb5_keytype *k ));
 krb5_error_code krb5_fcc_read_int PROTOTYPE((krb5_ccache id , int *i ));
 krb5_error_code krb5_fcc_read_bool PROTOTYPE((krb5_ccache id , krb5_boolean *b ));
 krb5_error_code krb5_fcc_read_times PROTOTYPE((krb5_ccache id , krb5_ticket_times *t ));
 krb5_error_code krb5_fcc_read_flags PROTOTYPE((krb5_ccache id , krb5_flags *f ));
+krb5_error_code krb5_fcc_read_addrs PROTOTYPE((krb5_ccache, krb5_address ***));
+krb5_error_code krb5_fcc_read_addr PROTOTYPE((krb5_ccache, krb5_address *));
 
 /* fcc_reslv.c */
 krb5_error_code krb5_fcc_resolve PROTOTYPE((krb5_ccache *id , char *residual ));
@@ -80,11 +83,14 @@ krb5_error_code krb5_fcc_store_principal PROTOTYPE((krb5_ccache id , krb5_princi
 krb5_error_code krb5_fcc_store_keyblock PROTOTYPE((krb5_ccache id , krb5_keyblock *keyblock ));
 krb5_error_code krb5_fcc_store_data PROTOTYPE((krb5_ccache id , krb5_data *data ));
 krb5_error_code krb5_fcc_store_int32 PROTOTYPE((krb5_ccache id , krb5_int32 *i ));
+krb5_error_code krb5_fcc_store_int16 PROTOTYPE((krb5_ccache id , krb5_int16 *i ));
 krb5_error_code krb5_fcc_store_keytype PROTOTYPE((krb5_ccache id , krb5_keytype *k ));
 krb5_error_code krb5_fcc_store_int PROTOTYPE((krb5_ccache id , int *i ));
 krb5_error_code krb5_fcc_store_bool PROTOTYPE((krb5_ccache id , krb5_boolean *b ));
 krb5_error_code krb5_fcc_store_times PROTOTYPE((krb5_ccache id , krb5_ticket_times *t ));
 krb5_error_code krb5_fcc_store_flags PROTOTYPE((krb5_ccache id , krb5_flags *f ));
+krb5_error_code krb5_fcc_store_addrs PROTOTYPE((krb5_ccache id , krb5_addresses ** ));
+krb5_error_code krb5_fcc_store_addr PROTOTYPE((krb5_ccache id , krb5_address * ));
 
 /* fcc_test.c */
 void init_test_cred PROTOTYPE((void ));

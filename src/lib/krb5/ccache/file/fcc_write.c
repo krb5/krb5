@@ -83,6 +83,30 @@ krb5_fcc_store_principal(id, princ)
 }
 
 krb5_error_code
+krb5_fcc_store_addrs(id, addrs)
+   krb5_ccache id;
+   krb5_address ** addrs;
+{
+     krb5_error_code ret;
+     krb5_address **temp;
+     krb5_int32 i, length = 0;
+
+     /* Count the number of components */
+     temp = addrs;
+     while (*temp++)
+	  length += 1;
+
+     ret = krb5_fcc_store_int32(id, &length);
+     CHECK(ret);
+     for (i=0; i < length; i++) {
+	  ret = krb5_fcc_store_addr(id, addrs[i]);
+	  CHECK(ret);
+     }
+
+     return KRB5_OK;
+}
+
+krb5_error_code
 krb5_fcc_store_keyblock(id, keyblock)
    krb5_ccache id;
    krb5_keyblock *keyblock;
@@ -97,7 +121,29 @@ krb5_fcc_store_keyblock(id, keyblock)
 		 (keyblock->length)*sizeof(krb5_octet));
      if (ret < 0)
 	  return errno;
+     if (ret != (keyblock->length)*sizeof(krb5_octet))
+	 return KRB5_EOF;
      
+     return KRB5_OK;
+}
+
+krb5_error_code
+krb5_fcc_store_addr(id, addr)
+   krb5_ccache id;
+   krb5_address *addr;
+{
+     krb5_error_code ret;
+
+     ret = krb5_fcc_store_int16(id, &addr->addrtype);
+     CHECK(ret);
+     ret = krb5_fcc_store_int(id, &addr->length);
+     CHECK(ret);
+     ret = write(((krb5_fcc_data *) id->data)->fd, (char *)addr->contents,
+		 (addr->length)*sizeof(krb5_octet));
+     if (ret < 0)
+	  return errno;
+     if (ret != (addr->length)*sizeof(krb5_octet))
+	 return KRB5_EOF;
      return KRB5_OK;
 }
 
@@ -124,6 +170,14 @@ krb5_fcc_store_int32(id, i)
    krb5_int32 *i;
 {
      return krb5_fcc_write(id, (char *) i, sizeof(krb5_int32));
+}
+
+krb5_error_code
+krb5_fcc_store_int16(id, i)
+   krb5_ccache id;
+   krb5_int16 *i;
+{
+     return krb5_fcc_write(id, (char *) i, sizeof(krb5_int16));
 }
    
 krb5_error_code

@@ -51,6 +51,8 @@ krb5_fcc_next_cred(id, cursor, creds)
      krb5_error_code kret;
      krb5_fcc_cursor *fcursor;
 
+     bzero((char *)creds, sizeof(*creds));
+
      if (OPENCLOSE(id)) {
 	  ret = open(((krb5_fcc_data *) id->data)->filename, O_RDONLY, 0);
 	  if (ret < 0)
@@ -76,6 +78,8 @@ krb5_fcc_next_cred(id, cursor, creds)
      TCHECK(kret);
      kret = krb5_fcc_read_flags(id, &creds->ticket_flags);
      TCHECK(kret);
+     kret = krb5_fcc_read_addrs(id, &creds->addresses);
+     TCHECK(kret);
      kret = krb5_fcc_read_data(id, &creds->ticket);
      TCHECK(kret);
      kret = krb5_fcc_read_data(id, &creds->second_ticket);
@@ -89,6 +93,7 @@ krb5_fcc_next_cred(id, cursor, creds)
 	  ((krb5_fcc_data *) id->data)->fd = -1;
      }
 lose:
-     
+     if (kret != KRB5_OK)
+	 krb5_free_creds(creds);
      return kret;
 }

@@ -64,6 +64,8 @@ krb5_fcc_store(id, creds)
      TCHECK(ret);
      ret = krb5_fcc_store_flags(id, &creds->ticket_flags);
      TCHECK(ret);
+     ret = krb5_fcc_store_addrs(id, creds->addresses);
+     TCHECK(ret);
      ret = krb5_fcc_store_data(id, &creds->ticket);
      TCHECK(ret);
      ret = krb5_fcc_store_data(id, &creds->second_ticket);
