@@ -437,6 +437,9 @@ main(argc, argv)
 	tc.c_cc[VDISCRD] = CFLUSH;
 #endif
 #ifdef VDISCARD
+#ifndef CDISCARD
+#define CDISCARD CFLUSH
+#endif
         tc.c_cc[VDISCARD] = CDISCARD;
 #endif
 #ifdef VWERSE

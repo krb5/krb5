@@ -1,3 +1,12 @@
+Thu Oct 27 14:50:40 1994  Mark Eichin  (eichin@cygnus.com)
+
+	* login.c (main): if CDISCARD is missing, use CFLUSH instead.
+
+Thu Oct 27 14:47:41 1994  Mark Eichin  (eichin@cygnus.com)
+
+	* configure.in: fix typo in "use streams interface" test (ttold.h
+	not ttyold.h)
+
 Thu Oct 27 14:31:17 1994  Mark Eichin  (eichin@cygnus.com)
 
 	* configure.in: check for srand48, srand, and srandom.

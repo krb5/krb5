@@ -40,7 +40,7 @@ AC_DEFINE(POSIX_SIGNALS)))
 AC_HAVE_HEADERS(sys/filio.h sys/sockio.h unistd.h sys/label.h ttyent.h lastlog.h sys/select.h sys/ptyvar.h)
 AC_COMPILE_CHECK([use streams interface],
 [#include <sys/tty.h>
-#include <sys/ttyold.h>
+#include <sys/ttold.h>
 #include <sys/ptyvar.h>],
 [], AC_DEFINE(HAVE_STREAMS))
 AC_REPLACE_FUNCS(getdtablesize)
