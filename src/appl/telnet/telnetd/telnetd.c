@@ -162,6 +162,7 @@ char valid_opts[] = {
 };
 
 main(argc, argv)
+	int argc;
 	char *argv[];
 {
 	struct sockaddr_in from;
@@ -785,7 +786,6 @@ doit(who)
 	struct sockaddr_in *who;
 {
 	char *host, *inet_ntoa();
-	int t;
 	struct hostent *hp;
 	int level;
 	int ptynum;
