@@ -47,7 +47,8 @@ krb5_fcc_close(id)
 {
      register int closeval = KRB5_OK;
 
-     MAYBE_CLOSE(id, closeval);
+     if (((krb5_fcc_data *) id->data)->fd >= 0)
+	     krb5_fcc_close_file(id);
 
      xfree(((krb5_fcc_data *) id->data)->filename);
      xfree(((krb5_fcc_data *) id->data));
