@@ -1,3 +1,8 @@
+2000-02-25  Ken Raeburn  <raeburn@mit.edu>
+
+	* preauth2.c (krb5_do_preauth): Check paorder[h] not h for
+	PA_REAL.  Fix from Matt Crawford.
+
 2000-02-16  Ken Raeburn  <raeburn@mit.edu>
 
 	* preauth2.c (pa_sam): In send-encrypted-sad mode, check for magic

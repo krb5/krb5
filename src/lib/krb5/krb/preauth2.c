@@ -540,7 +540,7 @@ krb5_do_preauth(krb5_context context,
 			
 			out_pa_list[out_pa_list_size++] = out_pa;
 		    }
-		    if (h == PA_REAL)
+		    if (paorder[h] == PA_REAL)
 			realdone = 1;
 		}
 	    }
