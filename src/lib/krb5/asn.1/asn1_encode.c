@@ -185,12 +185,15 @@ asn1_error_code asn1_encode_generaltime(DECLARG(asn1buf *, buf),
      OLDDECLARG(int *, retlen)
 {
   asn1_error_code retval;
-  struct tm *time = gmtime(&val);
+  struct tm *gtime = gmtime(&val);
   char s[16];
   int length, sum=0;
 
   /* Time encoding: YYYYMMDDhhmmssZ */
-  if(!strftime(s,16,"%Y%m%d%H%M%SZ",time)) return ASN1_BAD_TIMEFORMAT;
+  sprintf(s, "%04d%02d%02d%02d%02d%02dZ",
+	  1900+gtime->tm_year, gtime->tm_mon+1, gtime->tm_mday,
+	  gtime->tm_hour, gtime->tm_min, gtime->tm_sec);
+
   retval = asn1buf_insert_charstring(buf,15,s);
   if(retval) return retval;
   sum = 15;

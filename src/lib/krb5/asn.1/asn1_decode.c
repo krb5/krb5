@@ -174,32 +174,9 @@ asn1_error_code asn1_decode_generaltime(DECLARG(asn1buf *, buf),
   ts.tm_min = 10*c2i(s[10]) + c2i(s[11]);
   ts.tm_sec = 10*c2i(s[12]) + c2i(s[13]);
   ts.tm_isdst = -1;
-  t = mktime(&ts);
+  t = gmt_mktime(&ts);
+
   if(t == -1) return ASN1_BAD_TIMEFORMAT;
-
-#define HAVE_GMTOFF
-#ifdef HAVE_GMTOFF
-  t += ts.tm_gmtoff;		/* Convert back to UTC timezone */
-#else
-  {
-    struct tm zg, zl;
-    time_t zero = 24*60*60;	/* miss the year boundary */
-    long delta;
-
-    zl = *localtime(&zero);
-    zg = *gmtime(&zero);
-
-    delta = (zl.tm_sec + 60*(zl.tm_min+60*(zl.tm_hour + 24*zl.tm_yday)))
-      - (zg.tm_sec + 60*(zg.tm_min+60*(zg.tm_hour + 24*zg.tm_yday)));
-
-    if (ts.tm_isdst > 0) {
-      delta += 60*60;
-    }
-
-fprintf(stderr, "ASN1 DECODE: delta = %d\n", delta);
-    t += delta;
-  }
-#endif
 
   *val = t;
   cleanup();

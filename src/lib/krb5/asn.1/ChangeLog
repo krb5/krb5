@@ -1,3 +1,14 @@
+Wed Jul  6 13:21:35 1994  Mark Eichin  (eichin@cygnus.com)
+
+	* asn1_encode.c (asn1_encode_generaltime): don't use strftime on
+	the output of gmtime -- under Solaris, it mutates it! (seems to be
+	doing a timezone offset.) Besides, sprintf is quite sufficient.
+	Also rename local variable time to gtime to avoid name collision.
+	(asn1_decode_generaltime): the fixed-point method below doesn't
+	actually work because it doesn't handle the current timezone
+	offset. Simpler, and more general -- always call gmt_mktime, which
+	is now provided in lib/krb5/os/gmt_mktime.c.
+
 Sun Jul  3 04:43:42 1994  Tom Yu  (tlyu at dragons-lair)
 
 	* asn1_encode_k.h:
