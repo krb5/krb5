@@ -42,7 +42,7 @@ char *who;
 int status;
 {
     fprintf(stderr, "usage: %s [-d dbpathname] [-r realmname] [-k keytype]\n\
-\t[-e etype] [-M mkeyname] [-f keyfile]\n",
+\t[-M mkeyname] [-f keyfile]\n",
 	    who);
     exit(status);
 }
@@ -65,7 +65,6 @@ char *argv[];
     krb5_realm_params *rparams;
 
     int keytypedone = 0;
-    krb5_enctype etype = 0xffff;
 
     if (strrchr(argv[0], '/'))
 	argv[0] = strrchr(argv[0], '/')+1;
@@ -89,11 +88,6 @@ char *argv[];
 	    break;
 	case 'M':			/* master key name in DB */
 	    mkey_name = optarg;
-	    break;
-	case 'e':
-	    if (krb5_string_to_enctype(optarg, &etype))
-		com_err(argv[0], 0, "%s is an invalid encryption type",
-			optarg);
 	    break;
 	case 'f':
 	    keyfile = optarg;
@@ -132,10 +126,6 @@ char *argv[];
 	if (rparams->realm_stash_file && !keyfile)
 	    keyfile = strdup(rparams->realm_stash_file);
 
-	/* Get the value for the encryption type */
-	if (rparams->realm_enctype_valid && (etype == 0xffff))
-	    etype = rparams->realm_enctype;
-
 	krb5_free_realm_params(context, rparams);
     }
 
@@ -155,21 +145,7 @@ char *argv[];
 	exit(1);
     }
 
-    if (etype == 0xffff)
-	etype = DEFAULT_KDC_ETYPE;
-
-    if (!valid_etype(etype)) {
-	char tmp[32];
-
-	if (krb5_enctype_to_string(etype, tmp, sizeof(tmp)))
-	    com_err(argv[0], KRB5_PROG_ETYPE_NOSUPP,
-		    "while setting up etype %d", etype);
-	else
-	    com_err(argv[0], KRB5_PROG_ETYPE_NOSUPP, tmp);
-	exit(1);
-    }
-
-    krb5_use_cstype(context, &master_encblock, etype);
+    krb5_use_keytype(context, &master_encblock, master_keyblock.keytype);
 
     if (retval = krb5_db_set_name(context, dbname)) {
 	com_err(argv[0], retval, "while setting active database to '%s'",
