@@ -154,8 +154,8 @@ define(CONFIG_RULES,[
 AC_WITH([cc],
 echo CC=$withval
 CC=$withval,
-echo CC defaults to cc
-CC=cc)dnl
+if test -z "$CC" ; then CC=cc; fi
+echo CC defaults to $CC)dnl
 AC_SUBST([CC])dnl
 divert(9)dnl
 [
