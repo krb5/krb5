@@ -36,6 +36,9 @@ static char *rcsid = "$Header$";
  *
  *
  * $Log$
+ * Revision 1.4  1994/06/16 06:43:20  eichin
+ * punt USING_BISON
+ *
  * Revision 1.3  1994/06/12 23:49:17  tytso
  * Test for YYLINENO so that pepsy will build cleanly on all platforms.
  *
@@ -75,7 +78,7 @@ static char *rcsid = "$Header$";
 #include "pass2.h"
 #include <krb5/autoconf.h>
 
-#if defined(USING_BISON) || defined(NO_YYLINENO)
+#if defined(NO_YYLINENO)
 int yylineno = 0;		/* Bison doesn't have yylineno, sigh */
 				/* ultrix doesn't either */
 #endif
