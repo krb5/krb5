@@ -93,10 +93,10 @@ DEJAFLAGS	:= $(DEJALFLAGS) $(CLFLAGS) --debug --srcdir $(srcdir) --host \
 		   unknown-$(shell uname -m)-$(shell uname -s)$(shell uname -r)
 RUNTEST		= runtest $(DEJAFLAGS)
 
-START_SERVERS	= $(STESTDIR)/scripts/start_servers $(TEST_SERVER)
+START_SERVERS	= $(STESTDIR)/scripts/start_servers $(TEST_SERVER) $(TEST_PATH)
 START_SERVERS_LOCAL = $(STESTDIR)/scripts/start_servers_local
 
-STOP_SERVERS	= $(STESTDIR)/scripts/stop_servers $(TEST_SERVER)
+STOP_SERVERS	= $(STESTDIR)/scripts/stop_servers $(TEST_SERVER) $(TEST_PATH)
 STOP_SERVERS_LOCAL = $(STESTDIR)/scripts/stop_servers_local
 #
 # End of macros for the KADM5 unit test system.

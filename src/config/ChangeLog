@@ -1,3 +1,7 @@
+Tue Oct 15 16:26:19 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* pre.in: add TEST_PATH argument to START_SERVERS and STOP_SERVERS
+
 Thu Oct  3 13:08:40 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* pre.in: Separate KADM5 unit test files to source dir and build
