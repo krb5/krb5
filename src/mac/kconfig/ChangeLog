@@ -1,3 +1,7 @@
+1999-04-09  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* kconfig.c: Update to use newer (and proper profile calls)
+
 Tue Jul  7 17:00:00 1998  Miro Jurisic <meeroh@mit.edu>
 
 	* Grayed out password changing button and commented out password changing code

@@ -1623,7 +1623,7 @@ void	*state;
 /*also change the profile string to match */
 	state = NULL;
 	code = profile_find_node_subsection(kcontext->profile->first_file->root, "libdefaults", &state, &nam, &node);
-	code = profile_delete_node_relation(node, "default_realm");
+	code = profile_remove_node(node, "default_realm", 0);
 	code = profile_add_node(node, "default_realm", string, &node);
 }			
 #endif
@@ -2486,7 +2486,8 @@ const char	*realm_kdc_names[4];
     realm_kdc_names[0] = "domain_realm";
     realm_kdc_names[1] = 0;
 
-    code = profile_get_first_values(kcontext->profile, realm_kdc_names, &domainlist);
+    code = profile_get_relation_names(kcontext->profile, realm_kdc_names, 
+				      &domainlist);
 
     count = 0;
     while (domainlist && domainlist[count])
@@ -2542,7 +2543,8 @@ const char	*realm_kdc_names[4];
     realm_kdc_names[0] = "realms";
     realm_kdc_names[1] = 0;
 
-    code = profile_get_first_values(kcontext->profile, realm_kdc_names, &realmlist);
+    code = profile_get_subsection_names(kcontext->profile, realm_kdc_names, 
+					&realmlist);
 
     count = 0;
     while (realmlist && realmlist[count])
@@ -2719,7 +2721,7 @@ void	*state;
 
 	state = NULL;
 	code = profile_find_node_subsection(kcontext->profile->first_file->root, "domain_realm", &state, &nam, &node);
-	code = profile_delete_node_relation(node, host);
+	code = profile_remove_node(node, host, 0);
 	code = profile_add_node(node, host, realm, &node);
 
 #endif
@@ -2742,7 +2744,7 @@ void	*state;
 
 	state = NULL;
 	code = profile_find_node_subsection(kcontext->profile->first_file->root, "domain_realm", &state, &nam, &node);
-	code = profile_delete_node_relation(node, host);
+	code = profile_remove_node(node, host, 0);
 #endif
 }
 
@@ -2787,7 +2789,6 @@ void	*state;
 
 	state = NULL;
 	code = profile_find_node_subsection(kcontext->profile->first_file->root, "realms", &state, &nam, &node);
-	code = profile_delete_node_relation(node, realm);	/* possible memory leak here */
 	code = profile_add_node(node, realm, 0, &node);		/* Create the realm node */
 	code = profile_add_node(node, "kdc", host, &node2);		/* Create the realm node */
 	code = profile_add_node(node, "admin_server", host, &node2);		/* Create the realm node */
@@ -2813,7 +2814,7 @@ void	*state;
 
 	state = NULL;
 	code = profile_find_node_subsection(kcontext->profile->first_file->root, "realms", &state, &nam, &node);
-	code = profile_delete_interior_node_relation(node, realm);	/* possible memory leak here */
+	code = profile_remove_node(node, realm, 1);
 #endif
 }
 
