@@ -149,7 +149,7 @@ char copyright[] =
 #include <sys/stropts.h>
 #endif
 
-#ifdef POSIX_TERMIOS
+#if defined(POSIX_TERMIOS) && !defined(ultrix)
 #include <termios.h>
 #else
 #include <sgtty.h>
@@ -619,7 +619,7 @@ void doit(f, fromp)
     if (pid < 0)
       fatalperror(f, "");
     if (pid == 0) {
-#ifdef POSIX_TERMIOS
+#if defined(POSIX_TERMIOS) && !defined(ultrix)
 	struct termios new_termio;
 #else
 	struct sgttyb b;
@@ -663,7 +663,7 @@ void doit(f, fromp)
 	ioctl(0, TIOCSPGRP, &pid);
 #endif
 
-#ifdef POSIX_TERMIOS
+#if defined(POSIX_TERMIOS) && !defined(ultrix)
 	tcsetpgrp(0, pid);
 	tcgetattr(0,&new_termio);
 	new_termio.c_lflag &=  ~(ICANON|ECHO|ISIG);
