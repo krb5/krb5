@@ -1,3 +1,8 @@
+Tue Feb 27 18:47:17 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* gssapi.def: We have implemented gss_inquire_names_for_mech, not
+	        gss_inquire_mechs_for_name.
+	
 Sat Feb 24 18:47:41 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* gssapi.def: Add new GSSAPI V2 calls. (XXX we still need to get
