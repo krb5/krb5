@@ -15,6 +15,7 @@
 
 #include "mit-copyright.h"
 #include <stdio.h>
+#include <MacTypes.h>
 
 #ifndef DES_INT32
 #define DES_INT32 SInt32
@@ -68,6 +69,8 @@ typedef struct des_ks_struct bit_64;
 
 #if !GENERATINGCFM
 #   pragma d0_pointers on
+#else
+#	define DESLibraryIsPresent() ((Ptr) (des_cbc_encrypt) != (Ptr) (kUnresolvedCFragSymbolAddress))
 #endif
 
 int des_cbc_encrypt(des_cblock *in, 

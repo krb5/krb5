@@ -1,0 +1,54 @@
+==============================================================================
+DES Version History
+==============================================================================
+Current version:	1.0.3
+Date:				April 21, 1999
+Author:				lxs@mit.edu
+==============================================================================
+
+DESLib 1.0.3
+April 21, 1999
+
+Renamed all fragments for the new MIT Support Library convention.
+
+New features in this revision: none
+
+Bugs fixed in this revision: none
+	
+========================================================================
+
+
+DESLib 1.0.2
+December 30, 1998
+
+New features in this revision: none
+
+Bugs fixed in this revision:
+ [000001] Added MacTypes.h to des.h
+	
+========================================================================
+
+
+DESLib 1.0.1
+November 4, 1999
+
+New features in this revision: 
+ Added DESLibraryIsPresent ()
+
+Bugs fixed in this revision: none
+	
+========================================================================
+
+
+DESLib 1.0
+October 27, 1999
+
+Initial release
+
+New features in this revision: none
+
+Bugs fixed in this revision: none
+	
+========================================================================
+
+
