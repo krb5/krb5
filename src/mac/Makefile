@@ -1297,8 +1297,6 @@ gss-headers-output = ¶
 
 krb5-headers-output = ¶
 	"{krb5-headers-output-folder}krb5.h" ¶
-	"{krb5-headers-output-folder}com_err.h" ¶
-	"{krb5-headers-output-folder}profile.h" ¶
 	"{krb5-headers-output-folder}win-mac.h"
 
 krb5-globals-headers-output = ¶
