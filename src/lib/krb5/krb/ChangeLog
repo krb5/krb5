@@ -1,3 +1,8 @@
+1998-05-12  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* str_conv.c (krb5_timestamp_to_sfstring): Make sure the date
+		string printed uses 4 digit years.
+
 1998-05-08  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* str_conv.c (krb5_string_to_timestamp, strptime): Fix routines to
