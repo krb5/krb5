@@ -63,11 +63,6 @@ static char sccsid[] = "@(#)rsh.c	5.7 (Berkeley) 9/20/88";
 
 int	error();
      
-/*** XXX -- don't declare this here ever??? ***/
-#ifndef convex
-struct	passwd *getpwuid();
-#endif
-
 int	options;
 int	rfd2;
 int	nflag;

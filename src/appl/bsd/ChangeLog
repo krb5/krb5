@@ -1,3 +1,7 @@
+Thu Aug 11 23:16:31 1994  Mark Eichin  (eichin@perdiem)
+
+	* krsh.c: Don't (mis)declare getpwuid ever.
+
 Sun Aug  7 04:43:24 1994  Mark Eichin  (eichin@cygnus.com)
 
 	* krlogin.c (oob): FWRITE (and out) not needed w/POSIX_TERMIOS
