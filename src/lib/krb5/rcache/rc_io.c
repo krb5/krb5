@@ -33,8 +33,8 @@ extern int errno; /* this should be in errno.h, but isn't on some systems */
 #define FREE(x) ((void) free((char *) (x)))
 #define UNIQUE getpid() /* hopefully unique number */
 
-int dirlen = 0;
-char *dir;
+static int dirlen = 0;
+static char *dir;
 
 /* The do ... while(0) is required to insure that GETDIR looks like a
    single statement in all situations (just {}'s may cause troubles in
