@@ -2379,6 +2379,11 @@ KRB5_PROTOTYPE((krb5_context context,
 		krb5_ccache ccache,
 		char *in_tkt_service));
 
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_decode_ticket
+KRB5_PROTOTYPE((const krb5_data *code, 
+		krb5_ticket **rep));
+
 /*
  * The realm iterator functions
  */
