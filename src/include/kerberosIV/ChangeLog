@@ -1,3 +1,8 @@
+Tue Jun  6 12:30:41 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* krb4-proto.h: Rename save_credentials to krb_save_credentials,
+		to match the Cygnus krb4 library.
+
 Tue May 23 22:08:05 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* krb4-proto.h: klog prototype did not match source.

@@ -198,7 +198,7 @@ int read_service_key P_TYPE_((char *, char *, char *, int , char *, char *));
 int krb_recvauth P_TYPE_((long , int , KTEXT , char *, char *, struct sockaddr_in *, struct sockaddr_in *, AUTH_DAT *, char *, Key_schedule , char *));
 
 /* save_credentials.c */
-int save_credentials P_TYPE_((char *, char *, char *, C_Block , int , int , KTEXT , long ));
+int krb_save_credentials P_TYPE_((char *, char *, char *, C_Block , int , int , KTEXT , long ));
 
 /* send_to_kdc.c */
 int send_to_kdc P_TYPE_((KTEXT , KTEXT , char *));
