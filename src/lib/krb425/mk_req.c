@@ -2,7 +2,8 @@
  * $Source$
  * $Author$
  *
- * Copyright 1990 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991 by the Massachusetts Institute of Technology.
+ * All Rights Reserved.
  *
  * For copying and distribution information, please see the file
  * <krb5/copyright.h>.
@@ -15,7 +16,6 @@ static char rcsid_mk_req_c[] =
 "$Id$";
 #endif	/* !lint & !SABER */
 
-#include <krb5/copyright.h>
 #include "krb425.h"
 
 int
@@ -68,12 +68,12 @@ u_long checksum;
 			EPRINT "Return to long (%d > %d)\n",
 				outbuf.length, MAX_KTXT_LEN);
 #endif
-			free((char *)outbuf.data);
+			xfree(outbuf.data);
 			return(KFAILURE);
 		}
 		authent->length = outbuf.length;
 		memcpy((char *)authent->dat, (char *)outbuf.data, outbuf.length);
-		free((char *)outbuf.data);
+		xfree(outbuf.data);
 	}
 	return(krb425error(r));
 }

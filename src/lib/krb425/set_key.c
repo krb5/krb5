@@ -2,7 +2,8 @@
  * $Source$
  * $Author$
  *
- * Copyright 1990 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991 by the Massachusetts Institute of Technology.
+ * All Rights Reserved.
  *
  * For copying and distribution information, please see the file
  * <krb5/copyright.h>.
@@ -15,7 +16,6 @@ static char rcsid_set_key_c[] =
 "$Id$";
 #endif	/* !lint & !SABER */
 
-#include <krb5/copyright.h>
 #include "krb425.h"
 
 int
@@ -27,7 +27,7 @@ int cvt;
 
 	if (cvt) {
 		if (keyblock.contents)
-			free((char *)keyblock.contents);
+			xfree(keyblock.contents);
 		mit_des_string_to_key(KEYTYPE_DES, &keyblock, 0, 0);
 	} else {
 		if (!keyblock.contents &&

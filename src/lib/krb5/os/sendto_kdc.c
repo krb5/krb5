@@ -2,7 +2,8 @@
  * $Source$
  * $Author$
  *
- * Copyright 1990 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991 by the Massachusetts Institute of Technology.
+ * All Rights Reserved.
  *
  * For copying and distribution information, please see the file
  * <krb5/copyright.h>.
@@ -15,8 +16,6 @@
 static char rcsid_sendto_kdc_c[] =
 "$Id$";
 #endif	/* !lint & !SABER */
-
-#include <krb5/copyright.h>
 
 #include <krb5/krb5.h>
 #include <krb5/ext-proto.h>
@@ -78,7 +77,7 @@ OLDDECLARG(krb5_data *, reply)
 	socklist[i] = -1;
 
     if (!(reply->data = malloc(krb5_max_dgram_size))) {
-	free((char *)addr);
+	xfree(addr);
 	return ENOMEM;
     }
     reply->length = krb5_max_dgram_size;
@@ -170,7 +169,7 @@ OLDDECLARG(krb5_data *, reply)
     for (i = 0; i < AF_MAX; i++)
 	if (socklist[i] != -1)
 	    (void) close(socklist[i]);
-    free((char *)addr);
+    xfree(addr);
     if (retval) {
 	free(reply->data);
 	reply->data = 0;

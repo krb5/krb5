@@ -2,7 +2,8 @@
  * $Source$
  * $Author$
  *
- * Copyright 1990 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991 by the Massachusetts Institute of Technology.
+ * All Rights Reserved.
  *
  * For copying and distribution information, please see the file
  * <krb5/copyright.h>.
@@ -17,7 +18,6 @@ static char rcsid_getaddr_c[] =
 "$Id$";
 #endif	/* !lint & !SABER */
 
-#include <krb5/copyright.h>
 #include <krb5/krb5.h>
 #include <krb5/osconf.h>
 
@@ -138,7 +138,7 @@ krb5_error_code krb5_os_localaddr(addr)
 		    address->length = sizeof(struct in_addr);
 		    address->contents = (unsigned char *)malloc(address->length);
 		    if (!address->contents) {
-			free((char *)address);
+			xfree(address);
 			address = 0;
 			mem_err++;
 		    } else {
@@ -165,7 +165,7 @@ krb5_error_code krb5_os_localaddr(addr)
 		    address->length = sizeof(struct ns_addr);
 		    address->contents = (unsigned char *)malloc(address->length);
 		    if (!address->contents) {
-			free((char *)address);
+			xfree(address);
 			address = 0;
 			mem_err++;
 		    } else {
@@ -196,7 +196,7 @@ krb5_error_code krb5_os_localaddr(addr)
     
     if (mem_err) {
 	for (i=0; i<n_found; i++) {
-	    free((char *)addr_temp[i]);
+	    xfree(addr_temp[i]);
 	    addr_temp[i] = 0;
 	}
 	return ENOMEM;

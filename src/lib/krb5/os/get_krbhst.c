@@ -2,7 +2,8 @@
  * $Source$
  * $Author$
  *
- * Copyright 1990 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991 by the Massachusetts Institute of Technology.
+ * All Rights Reserved.
  *
  * For copying and distribution information, please see the file
  * <krb5/copyright.h>.
@@ -14,8 +15,6 @@
 static char rcsid_get_krbhst_c [] =
 "$Id$";
 #endif	/* !lint & !SABER */
-
-#include <krb5/copyright.h>
 
 #include <krb5/krb5.h>
 #include <krb5/ext-proto.h>
@@ -99,7 +98,7 @@ char ***hostlist;
 	    if (!rethlist[hlindex]) {
 		for (--hlindex; hlindex >= 0; hlindex--)
 		    free(rethlist[hlindex]);
-		free((char *) rethlist);
+		xfree(rethlist);
 		rethlist = 0;
 		retval = ENOMEM;
 		break;
@@ -129,7 +128,7 @@ char ***hostlist;
     (void) fclose(config_file);
 
     if (hlindex == 0) {
-	free((char *)rethlist);
+	xfree(rethlist);
 	rethlist = 0;
 	retval = KRB5_REALM_UNKNOWN;
     }

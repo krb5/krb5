@@ -2,7 +2,8 @@
  * $Source$
  * $Author$
  *
- * Copyright 1990 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991 by the Massachusetts Institute of Technology.
+ * All Rights Reserved.
  *
  * For copying and distribution information, please see the file
  * <krb5/copyright.h>.
@@ -14,8 +15,6 @@
 static char rcsid_read_pwd_c[] =
 "$Id$";
 #endif	/* lint */
-
-#include <krb5/copyright.h>
 
 #include <krb5/krb5.h>
 
@@ -99,7 +98,7 @@ int *size_return;
 	/* interrupted */
 	if (readin_string) {
 	    (void) memset((char *)readin_string, 0, *size_return);
-	    free((char *)readin_string);
+	    xfree(readin_string);
 	}
 	(void) memset(return_pwd, 0, *size_return);
 	cleanup(KRB5_LIBOS_PWDINTR);
@@ -144,7 +143,7 @@ int *size_return;
 	    (void) putchar('\n');
 	    (void) memset((char *)readin_string, 0, *size_return);
 	    (void) memset(return_pwd, 0, *size_return);
-	    free((char *)readin_string);
+	    xfree(readin_string);
 	    cleanup(KRB5_LIBOS_CANTREADPWD);
 	}
 	(void) putchar('\n');
@@ -160,11 +159,11 @@ int *size_return;
 	if (strncmp(return_pwd, (char *)readin_string, *size_return)) {
 	    (void) memset((char *)readin_string, 0, *size_return);
 	    (void) memset(return_pwd, 0, *size_return);
-	    free((char *)readin_string);
+	    xfree(readin_string);
 	    cleanup(KRB5_LIBOS_BADPWDMATCH);
 	}
 	(void) memset((char *)readin_string, 0, *size_return);
-	free((char *)readin_string);
+	xfree(readin_string);
     }
     
     /* reset intrfunc */
