@@ -66,3 +66,16 @@ extern enum auth_stat _authenticate(struct svc_req *rqst, struct rpc_msg *msg,
      ((*((auth)->svc_ah_ops->svc_ah_unwrap))(auth, xdrs, xfunc, xwhere))
 
       
+#define _svcauth_null		_gssrpc_svcauth_null
+#define _svcauth_unix		_gssrpc_svcauth_unix
+#define _svcauth_short		_gssrpc_svcauth_short
+#define _svcauth_gssapi		_gssrpc_svcauth_gssapi
+/* no authentication */
+enum auth_stat _svcauth_null(struct svc_req *, struct rpc_msg *, bool_t *);
+/* unix style (uid, gids) */
+enum auth_stat _svcauth_unix(struct svc_req *, struct rpc_msg *, bool_t *);
+/* short hand unix style */
+enum auth_stat _svcauth_short(struct svc_req *, struct rpc_msg *, bool_t *);
+/* GSS-API style */
+enum auth_stat _svcauth_gssapi(struct svc_req *, struct rpc_msg *, bool_t *);
+

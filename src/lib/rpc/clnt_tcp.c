@@ -91,8 +91,8 @@ struct ct_data {
 	XDR		ct_xdrs;
 };
 
-static int	readtcp(struct ct_data *, caddr_t, int);
-static int	writetcp(struct ct_data *, caddr_t, int);
+static int	readtcp(char *, caddr_t, int);
+static int	writetcp(char *, caddr_t, int);
 
 
 /*
@@ -416,11 +416,12 @@ clnttcp_destroy(h)
  * around for the rpc level.
  */
 static int
-readtcp(ct, buf, len)
-	register struct ct_data *ct;
+readtcp(ctptr, buf, len)
+        char *ctptr;
 	caddr_t buf;
 	register int len;
 {
+  register struct ct_data *ct = (struct ct_data *)ctptr;
 #ifdef FD_SETSIZE
 	fd_set mask;
 	fd_set readfds;
@@ -472,11 +473,12 @@ readtcp(ct, buf, len)
 }
 
 static int
-writetcp(ct, buf, len)
-	struct ct_data *ct;
+writetcp(ctptr, buf, len)
+        char *ctptr;
 	caddr_t buf;
 	int len;
 {
+	struct ct_data *ct = (struct ct_data *)ctptr;
 	register int i, cnt;
 
 	for (cnt = len; cnt > 0; cnt -= i, buf += i) {

@@ -52,19 +52,6 @@ static char sccsid[] = "@(#)svc_auth.c	2.1 88/08/07 4.0 RPCSRC; from 1.19 87/08/
  *
  */
 
-#define _svcauth_null		_gssrpc_svcauth_null
-#define _svcauth_unix		_gssrpc_svcauth_unix
-#define _svcauth_short		_gssrpc_svcauth_short
-
-/* no authentication */
-enum auth_stat _svcauth_null(struct svc_req *, struct rpc_msg *, bool_t *);
-/* unix style (uid, gids) */
-enum auth_stat _svcauth_unix(struct svc_req *, struct rpc_msg *, bool_t *);
-/* short hand unix style */
-enum auth_stat _svcauth_short(struct svc_req *, struct rpc_msg *, bool_t *);
-/* GSS-API style */
-enum auth_stat _svcauth_gssapi(struct svc_req *, struct rpc_msg *, bool_t *);
-
 static struct svcauthsw_type {
      unsigned int flavor;
      enum auth_stat (*authenticator)(struct svc_req *, struct rpc_msg *,

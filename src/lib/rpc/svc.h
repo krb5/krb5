@@ -334,8 +334,10 @@ extern SVCXPRT *svcraw_create(void);
  */
 #define svcudp_create		gssrpc_svcudp_create
 #define svcudp_bufcreate	gssrpc_svcudp_bufcreate
+#define svcudp_enablecache	gssrpc_svcudp_enablecache
 extern SVCXPRT *svcudp_create(int);
 extern SVCXPRT *svcudp_bufcreate(int, unsigned int, unsigned int);
+extern int svcudp_enablecache(SVCXPRT *, rpc_u_int32);
 
 /*
  * Tcp based rpc.

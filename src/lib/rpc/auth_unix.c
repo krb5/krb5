@@ -176,7 +176,8 @@ authunix_create_default()
 	char machname[MAX_MACHINE_NAME + 1];
 	register int uid;
 	register int gid;
-	int gids[NGRPS];
+	GETGROUPS_T gids[NGRPS];
+	int igids[NGRPS], i;
 
 	if (gethostname(machname, MAX_MACHINE_NAME) == -1)
 		abort();
@@ -185,7 +186,10 @@ authunix_create_default()
 	gid = getegid();
 	if ((len = getgroups(NGRPS, gids)) < 0)
 		abort();
-	return (authunix_create(machname, uid, gid, len, gids));
+	for(i = 0; i < NGRPS; i++) {
+	        igids[i] = gids[i];
+	}
+	return (authunix_create(machname, uid, gid, len, igids));
 }
 
 /*

@@ -89,7 +89,7 @@ static struct xp_ops svctcp_rendezvous_op = {
 	svctcp_destroy
 };
 
-static int readtcp(SVCXPRT *, caddr_t, int), writetcp(SVCXPRT *, caddr_t, int);
+static int readtcp(char *, caddr_t, int), writetcp(char *, caddr_t, int);
 static SVCXPRT *makefd_xprt(int, unsigned int, unsigned int);
 
 struct tcp_rendezvous { /* kept in xprt->xp_p1 */
@@ -307,11 +307,12 @@ static struct timeval wait_per_try = { 35, 0 };
  * (And a read of zero bytes is a half closed stream => error.)
  */
 static int
-readtcp(xprt, buf, len)
-	register SVCXPRT *xprt;
+readtcp(xprtptr, buf, len)
+        char *xprtptr;
 	caddr_t buf;
 	register int len;
 {
+	register SVCXPRT *xprt = (SVCXPRT *) xprtptr;
 	register int sock = xprt->xp_sock;
 #ifdef FD_SETSIZE
 	fd_set mask;
@@ -350,11 +351,12 @@ fatal_err:
  * Any error is fatal and the connection is closed.
  */
 static int
-writetcp(xprt, buf, len)
-	register SVCXPRT *xprt;
+writetcp(xprtptr, buf, len)
+        char *xprtptr;
 	caddr_t buf;
 	int len;
 {
+	register SVCXPRT *xprt = (SVCXPRT *) xprtptr;
 	register int i, cnt;
 
 	for (cnt = len; cnt > 0; cnt -= i, buf += i) {

@@ -1,3 +1,31 @@
+2001-07-05  Ezra Peisach  <epeisach@mit.edu>
+
+	* configure.in: Add AC_TYPE_GETGROUPS to determine argument to
+	getgroups.
+
+	* auth_unix.c (authunix_create_default): Use GETGROUPS_T array in
+	call to getgroups. Copy into array of int for call to
+	authunix_create. Note: If auth_unix protection ever used with this
+	code, we will need to cleanup assumptions in int being 32 bits in
+	OTW transfer of gids.
+
+	* clnt_tcp.c, svc_tcp.c: Change writetcp and readtcp to take char
+	* as first argument to be compatible with xdrrec_create.
+
+	* xdr.c (xdr_opaque): Cast argument in call to XDR_GETBYTES.
+
+	* svc.h: Add prototype for gssrpc_svcudp_enablecache.
+
+	* svc_auth_gssapi.c (_gssrpc_svcauth_gssapi): Change
+	_svcauth_gssapi to _gssrpc_svcauth_gssapi for consistancy.
+
+	* svc_auth.c: Move prototypes for _gssrpc_svcauth_{unix, null,
+	short, gssapi} to:
+	* svc_auth.h: here.
+
+	* svc_auth_unix.c: Update _gssrpc_svcauth_short and
+	_gssrpc_svcauth_unix to match prototype.
+
 2001-06-28  Ezra Peisach  <epeisach@mit.edu>
 
 	* auth.h: Provide full prototype for xdr_des_block.

@@ -117,7 +117,7 @@ static client_list *clients = NULL;
 
 extern int errno;
 
-enum auth_stat _svcauth_gssapi(rqst, msg, no_dispatch)
+enum auth_stat _gssrpc_svcauth_gssapi(rqst, msg, no_dispatch)
    register struct svc_req *rqst;
    register struct rpc_msg *msg;
    bool_t *no_dispatch;     
