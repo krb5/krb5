@@ -1040,6 +1040,7 @@ getline(s, n, iop)
 
 	    /* Check to see if we have a protected command. */
 	    if (!((mic = strncmp(s, "ENC", 3)) && strncmp(s, "MIC", 3)
+		&& strncmp(s, "AUTH", 4)
 #ifndef NOCONFIDENTIAL
 	        && strncmp(s, "CONF", 4)
 #endif

@@ -1,3 +1,16 @@
+2003-12-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* ftpcmd.y (getline): Allow "AUTH" as an unprotected command.
+	* ftpd.c (login): Fix checks for accept_sec_context status.  Only
+	send back one message in the CONTINUE_NEEDED case.
+	(with_gss_error_text): New function, split out from
+	reply_gss_error.
+	(reply_gss_error): Call it.
+	(reply_gss_error_1): New function.
+	(log_gss_error, log_gss_error_1): New functions.
+	(login): Call log_gss_error instead of syslog on error from
+	gss_display_name.
+
 2003-06-05  Sam Hartman  <hartmans@mit.edu>
 
 	* popen.c (ftpd_popen): Use fork not vfork
