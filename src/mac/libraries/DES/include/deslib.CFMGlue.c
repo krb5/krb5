@@ -377,6 +377,38 @@ int des_ecb_encrypt (
 }
 
 
+/**** des_3ecb_encrypt ****/
+/* void des_3ecb_encrypt(des_cblock *in, des_cblock *out, des_key_schedule ks1, des_key_schedule ks2, des_key_schedule ks3, int encrypt); */
+
+enum {
+  des_3ecb_encrypt_ProcInfo = kThinkCStackBased
+  | STACK_ROUTINE_PARAMETER(1, SIZE_CODE(sizeof(des_cblock *)))
+  | STACK_ROUTINE_PARAMETER(2, SIZE_CODE(sizeof(des_cblock *)))
+  | STACK_ROUTINE_PARAMETER(3, SIZE_CODE(sizeof(des_key_schedule)))
+  | STACK_ROUTINE_PARAMETER(4, SIZE_CODE(sizeof(des_key_schedule)))
+  | STACK_ROUTINE_PARAMETER(5, SIZE_CODE(sizeof(des_key_schedule)))
+  | STACK_ROUTINE_PARAMETER(6, SIZE_CODE(sizeof(int)))
+};
+
+typedef void (*des_3ecb_encrypt_ProcPtrType)(des_cblock *, des_cblock *, des_key_schedule, des_key_schedule, des_key_schedule, int);
+void des_3ecb_encrypt (
+     des_cblock * in,
+     des_cblock * out,
+     des_key_schedule ks1,
+     des_key_schedule ks2,
+     des_key_schedule ks3,
+     int encrypt)
+{
+  static des_3ecb_encrypt_ProcPtrType des_3ecb_encrypt_ProcPtr = kUnresolvedCFragSymbolAddress;
+
+  // if this symbol has not been setup yet...
+  if((Ptr) des_3ecb_encrypt_ProcPtr == (Ptr) kUnresolvedCFragSymbolAddress)
+    Find_Symbol((Ptr *) &des_3ecb_encrypt_ProcPtr, "\pdes_3ecb_encrypt", des_3ecb_encrypt_ProcInfo);
+  if((Ptr) des_3ecb_encrypt_ProcPtr != (Ptr) kUnresolvedCFragSymbolAddress)
+    des_3ecb_encrypt_ProcPtr(in, out, ks1, ks2, ks3, encrypt);
+}
+
+
 /**** des_key_sched ****/
 /* int des_key_sched(des_cblock k, des_key_schedule schedule); */
 
@@ -404,7 +436,7 @@ int des_key_sched (
 
 /**** des_3pcbc_encrypt ****/
 /* void des_3pcbc_encrypt(des_cblock *input, des_cblock *output, long length, des_key_schedule schedule1, des_cblock ivec1, des_key_schedule schedule2, des_cblock ivec2, des_key_schedule schedule3, des_cblock ivec3, int encrypt); */
-
+/*
 enum {
   des_3pcbc_encrypt_ProcInfo = kThinkCStackBased
   | STACK_ROUTINE_PARAMETER(1, SIZE_CODE(sizeof(des_cblock *)))
@@ -440,7 +472,7 @@ void des_3pcbc_encrypt (
   if((Ptr) des_3pcbc_encrypt_ProcPtr != (Ptr) kUnresolvedCFragSymbolAddress)
     des_3pcbc_encrypt_ProcPtr(input, output, length, schedule1, ivec1, schedule2, ivec2, schedule3, ivec3, encrypt);
 }
-
+*/
 
 /**** make_key_sched ****/
 /* int make_key_sched(des_cblock *key, des_key_schedule schedule); */
@@ -721,33 +753,29 @@ int des_check_key_parity (
 
 
 /**** des_3cbc_encrypt ****/
-/* void des_3cbc_encrypt(des_cblock *input,des_cblock *output, long length, des_key_schedule schedule1, des_cblock ivec1, des_key_schedule schedule2, des_cblock ivec2, des_key_schedule schedule3, des_cblock ivec3, int encrypt); */
+/* void des_3cbc_encrypt(des_cblock *in, des_cblock *out, long length, des_key_schedule ks1, des_key_schedule ks2, des_key_schedule ks3, des_cblock ivec, int encrypt); */
 
 enum {
   des_3cbc_encrypt_ProcInfo = kThinkCStackBased
   | STACK_ROUTINE_PARAMETER(1, SIZE_CODE(sizeof(des_cblock *)))
   | STACK_ROUTINE_PARAMETER(2, SIZE_CODE(sizeof(des_cblock *)))
   | STACK_ROUTINE_PARAMETER(3, SIZE_CODE(sizeof(long)))
-  | STACK_ROUTINE_PARAMETER(4, SIZE_CODE(sizeof(struct des_ks_struct *)))
-  | STACK_ROUTINE_PARAMETER(5, SIZE_CODE(sizeof(unsigned char *)))
-  | STACK_ROUTINE_PARAMETER(6, SIZE_CODE(sizeof(struct des_ks_struct *)))
-  | STACK_ROUTINE_PARAMETER(7, SIZE_CODE(sizeof(unsigned char *)))
-  | STACK_ROUTINE_PARAMETER(8, SIZE_CODE(sizeof(struct des_ks_struct *)))
-  | STACK_ROUTINE_PARAMETER(9, SIZE_CODE(sizeof(unsigned char *)))
-  | STACK_ROUTINE_PARAMETER(10, SIZE_CODE(sizeof(int)))
+  | STACK_ROUTINE_PARAMETER(4, SIZE_CODE(sizeof(des_key_schedule)))
+  | STACK_ROUTINE_PARAMETER(5, SIZE_CODE(sizeof(des_key_schedule)))
+  | STACK_ROUTINE_PARAMETER(6, SIZE_CODE(sizeof(des_key_schedule)))
+  | STACK_ROUTINE_PARAMETER(7, SIZE_CODE(sizeof(des_cblock)))
+  | STACK_ROUTINE_PARAMETER(8, SIZE_CODE(sizeof(int)))
 };
 
-typedef void (*des_3cbc_encrypt_ProcPtrType)(des_cblock *, des_cblock *, long, des_key_schedule, des_cblock, des_key_schedule, des_cblock, des_key_schedule, des_cblock, int);
+typedef void (*des_3cbc_encrypt_ProcPtrType)(des_cblock *, des_cblock *, long, des_key_schedule, des_key_schedule, des_key_schedule, des_cblock, int);
 void des_3cbc_encrypt (
-     des_cblock * input,
-     des_cblock * output,
+     des_cblock * in,
+     des_cblock * out,
      long length,
-     des_key_schedule schedule1,
-     des_cblock ivec1,
-     des_key_schedule schedule2,
-     des_cblock ivec2,
-     des_key_schedule schedule3,
-     des_cblock ivec3,
+     des_key_schedule ks1,
+     des_key_schedule ks2,
+     des_key_schedule ks3,
+     des_cblock ivec,
      int encrypt)
 {
   static des_3cbc_encrypt_ProcPtrType des_3cbc_encrypt_ProcPtr = kUnresolvedCFragSymbolAddress;
@@ -756,7 +784,7 @@ void des_3cbc_encrypt (
   if((Ptr) des_3cbc_encrypt_ProcPtr == (Ptr) kUnresolvedCFragSymbolAddress)
     Find_Symbol((Ptr *) &des_3cbc_encrypt_ProcPtr, "\pdes_3cbc_encrypt", des_3cbc_encrypt_ProcInfo);
   if((Ptr) des_3cbc_encrypt_ProcPtr != (Ptr) kUnresolvedCFragSymbolAddress)
-    des_3cbc_encrypt_ProcPtr(input, output, length, schedule1, ivec1, schedule2, ivec2, schedule3, ivec3, encrypt);
+    des_3cbc_encrypt_ProcPtr(in, out, length, ks1, ks2, ks3, ivec, encrypt);
 }
 
 

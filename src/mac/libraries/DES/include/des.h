@@ -77,15 +77,13 @@ int des_cbc_encrypt(des_cblock *in,
                     des_cblock ivec, 
                     int encrypt);
 
-void des_3cbc_encrypt(des_cblock *input,
-                      des_cblock *output,
+void des_3cbc_encrypt(des_cblock *in,
+                      des_cblock *out,
                       long length,
-                      des_key_schedule schedule1, 
-                      des_cblock ivec1,
-                      des_key_schedule schedule2, 
-                      des_cblock ivec2,
-                      des_key_schedule schedule3, 
-                      des_cblock ivec3, 
+                      des_key_schedule ks1, 
+                      des_key_schedule ks2, 
+                      des_key_schedule ks3, 
+                      des_cblock ivec, 
                       int encrypt);
                     
 unsigned long des_cbc_cksum(des_cblock *in, 
@@ -98,6 +96,13 @@ int des_ecb_encrypt(des_cblock *in,
                     des_cblock *out, 
                     des_key_schedule schedule, 
                     int encrypt);
+
+void des_3ecb_encrypt(des_cblock *in, 
+                      des_cblock *out, 
+                      des_key_schedule ks1, 
+                      des_key_schedule ks2, 
+                      des_key_schedule ks3, 
+                      int encrypt);
                       
 void des_fixup_key_parity(register des_cblock key);
 int des_check_key_parity(register des_cblock key);
@@ -108,17 +113,6 @@ int des_pcbc_encrypt(des_cblock *in,
                      des_key_schedule schedule, 
                      des_cblock ivec, 
                      int encrypt);
-
-void des_3pcbc_encrypt(des_cblock *input,
-                       des_cblock *output,
-                       long length,
-                       des_key_schedule schedule1, 
-                       des_cblock ivec1,
-                       des_key_schedule schedule2, 
-                       des_cblock ivec2,
-                       des_key_schedule schedule3, 
-                       des_cblock ivec3, 
-                       int encrypt);
 
 int make_key_sched(des_cblock *key, des_key_schedule schedule);
 
