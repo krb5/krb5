@@ -1,3 +1,10 @@
+2003-06-06  Tom Yu  <tlyu@mit.edu>
+
+	* g_cnffile.c (krb__get_srvtabname): Make retname be a static
+	array rather than a static pointer, to avoid callers' possible
+	retention of free()d pointers.  Yes, this may cause difficulty
+	with making this function thread-safe.
+
 2003-06-04  Tom Yu  <tlyu@mit.edu>
 
 	* password_to_key.c (mit_passwd_to_key, afs_passwd_to_key): Delete
