@@ -1,3 +1,8 @@
+1999-08-26  Danilo Almeida  <dalmeida@mit.edu>
+
+	* memcache.c (change_cache): Use PostMessage instead of SendMessage
+	so we do not block.
+
 Fri Aug 13 23:23:00 1999  Brad Thompson  <yak@mit.edu>
 
 	* sendauth.c: Initialize __krb_sendauth_hidden_tkt_len so
