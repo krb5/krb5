@@ -1,3 +1,8 @@
+2000-02-28  Ezra Peisach  <epeisach@mit.edu>
+
+	* proto_serv.c (proto_serv): For error return,strdup the returned
+	value from error_message to maintain its const status.
+
 1999-10-26  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,

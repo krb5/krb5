@@ -815,12 +815,13 @@ proto_serv(kcontext, my_id, cl_sock, sv_p, cl_p)
 	if (errbuf.error > 127)
 	    errbuf.error = KRB5KRB_ERR_GENERIC;
 	/* Format the error message in our language */
-	errmsg = error_message(kret);
+	errmsg = strdup(error_message(kret));
 	errbuf.text.length = strlen(errmsg);
 	errbuf.text.data = errmsg;
 	er_kret = krb5_mk_error(kcontext, &errbuf, &errout);
 	if (!er_kret)
 	    krb5_write_message(kcontext, (krb5_pointer) &cl_sock, &errout);
+	if(errmsg) free(errmsg);
 	free(errbuf.text.data);
 	krb5_free_data_contents(kcontext, &errout);
     }
