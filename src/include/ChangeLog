@@ -1,3 +1,7 @@
+1999-09-13  Miro Jurisic <meeroh@mit.edu>
+
+    * win0mac.h:  Add #define HAVE_STRING_H for MacOS builds.
+
 1999-08-31  Jeffrey Altman <jaltman@columbia.edu>
 
     * k5-int.h:  Add #define ANSI_STDIO for Windows builds so that 
