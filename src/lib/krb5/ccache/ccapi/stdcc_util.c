@@ -218,14 +218,14 @@ void dupK5toCC(krb5_context context, krb5_creds *creds, cred_union **cu)
 	 * puts it in appl heap with malloc)
 	 */
 	err = krb5_unparse_name(context, creds->client, &tempname);
-	c->client = malloc(strlen(tempname+1));
+	c->client = malloc(strlen(tempname)+1);
 	if (c->client != NULL)
 		strcpy(c->client,tempname);
 	free(tempname);
 	tempname = NULL;
 		
 	err = krb5_unparse_name(context, creds->server, &tempname);
-	c->server = malloc(strlen(tempname+1));
+	c->server = malloc(strlen(tempname)+1);
 	if (c->server != NULL)
 		strcpy(c->server,tempname);
 	free(tempname);
