@@ -110,7 +110,7 @@ SHLIB_RDIRS=$(KRB5_LIBDIR)
 # These objects implement the time computation routines.
 #
 OSOBJS = unix_time.$(OBJEXT)
-OSSRCS = unix_time.c
+OSSRCS = $(srcdir)/unix_time.c
 
 ##DOS##OSOBJS = win_time.obj
 
