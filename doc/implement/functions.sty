@@ -7,6 +7,7 @@
 \font\argfont = c-bol
 \hyphenchar\argfont = -1
 \fi
+\let\funcfont=\bf
 \newcount\argc@ount
 %
 % funcdecl is used as \begin{funcdecl}{funcname}{return type}{firstline}
@@ -27,7 +28,6 @@
 \newcommand{\funcout}{\docomm@\argc@ount=0{\it /* OUT */}\\}
 \newcommand{\funcarg}[2]{\docomm@#1 {\argfont #2}\advance\argc@ount by1}
 \newcommand{\funcparam}[1]{{\argfont #1}}
-\newcommand{\funcname}[1]{{\bf #1}()}
 \newcommand{\funcfuncarg}[2]{\docomm@#1 {\argfont #2}(\= \+ \argc@ount=0}
 \newcommand{\funcendfuncarg}{), \- \\ \argc@ount=0}
 \newcommand{\libname}[1]{{\argfont #1}}
@@ -35,3 +35,6 @@
 \newcommand{\ptsto}{->\discretionary{}{}{}}
 \newcommand{\datatype}[1]{{\bf #1}}
 \newcommand{\filename}[1]{{\sl #1\/}}
+
+\newcommand{\funcname}[1]{\underrealtrue\index{#1}\underrealfalse{\funcfont #1}()}
+\newcommand{\funcnamenoparens}[1]{\underrealtrue\index{#1}\underrealfalse{\funcfont #1}}
