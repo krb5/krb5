@@ -39,6 +39,7 @@ static char sccsid[] = "@(#)pmap_rmt.c 1.21 87/08/27 Copyr 1984 Sun Micro";
  * Copyright (C) 1984, Sun Microsystems, Inc.
  */
 
+#include <unistd.h>
 #include <gssrpc/rpc.h>
 #include <gssrpc/pmap_prot.h>
 #include <gssrpc/pmap_clnt.h>

@@ -38,6 +38,7 @@ static char sccsid[] = "@(#)clnt_udp.c 1.39 87/08/11 Copyr 1984 Sun Micro";
  */
 
 #include <stdio.h>
+#include <unistd.h>
 #include <gssrpc/rpc.h>
 #include <sys/socket.h>
 #include <sys/ioctl.h>
@@ -436,7 +437,6 @@ clntudp_control(cl, request, info)
 	char *info;
 {
 	register struct cu_data *cu = (struct cu_data *)cl->cl_private;
-	int len;
 	
 	switch (request) {
 	case CLSET_TIMEOUT:

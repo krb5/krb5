@@ -111,6 +111,13 @@ PROTOTYPE((CLIENT *clnt, char *service_name));
 void auth_gssapi_display_status
 PROTOTYPE((char *msg, OM_uint32 major,
 	   OM_uint32 minor)); 
+
+bool_t auth_gssapi_seal_seq
+PROTOTYPE((gss_ctx_id_t context, rpc_u_int32 seq_num, gss_buffer_t out_buf));
+
+bool_t auth_gssapi_unseal_seq
+PROTOTYPE((gss_ctx_id_t context, gss_buffer_t in_buf, rpc_u_int32 *seq_num));
+
 bool_t _svcauth_gssapi_set_names
 PROTOTYPE((auth_gssapi_name *names, int num));
 void _svcauth_gssapi_unset_names

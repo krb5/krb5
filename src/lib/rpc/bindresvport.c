@@ -1,4 +1,6 @@
+#if !defined(lint) && defined(SCCSIDS)
 static  char sccsid[] = "@(#)bindresvport.c	2.2 88/07/29 4.0 RPCSRC 1.8 88/02/08 SMI";
+#endif
 /*
  * Sun RPC is a product of Sun Microsystems, Inc. and is provided for
  * unrestricted use provided that this legend is included on all tape
@@ -33,6 +35,7 @@ static  char sccsid[] = "@(#)bindresvport.c	2.2 88/07/29 4.0 RPCSRC 1.8 88/02/08
  */
 
 #include <string.h>
+#include <unistd.h>
 #include <sys/types.h>
 #include <sys/errno.h>
 #include <sys/socket.h>
@@ -41,6 +44,7 @@ static  char sccsid[] = "@(#)bindresvport.c	2.2 88/07/29 4.0 RPCSRC 1.8 88/02/08
 /*
  * Bind a socket to a privileged IP port
  */
+int
 gssrpc_bindresvport(sd, sin)
 	int sd;
 	struct sockaddr_in *sin;

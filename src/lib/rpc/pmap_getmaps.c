@@ -45,6 +45,7 @@ static char sccsid[] = "@(#)pmap_getmaps.c 1.10 87/08/11 Copyr 1984 Sun Micro";
 #include <sys/socket.h>
 #include <netdb.h>
 #include <stdio.h>
+#include <unistd.h>
 #include <errno.h>
 #ifdef OSF1
 #include <net/route.h>

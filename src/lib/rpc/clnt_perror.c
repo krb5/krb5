@@ -282,6 +282,25 @@ clnt_spcreateerror(s)
 				       rpc_createerr.cf_error.re_errno);
 		}
 		break;
+
+	case RPC_CANTSEND:
+	case RPC_CANTDECODERES:
+	case RPC_CANTENCODEARGS:
+	case RPC_SUCCESS:
+	case RPC_UNKNOWNPROTO:
+	case RPC_PROGNOTREGISTERED:
+	case RPC_FAILED:
+	case RPC_UNKNOWNHOST:
+	case RPC_CANTDECODEARGS:
+	case RPC_PROCUNAVAIL:
+	case RPC_PROGVERSMISMATCH:
+	case RPC_PROGUNAVAIL:
+	case RPC_AUTHERROR:
+	case RPC_VERSMISMATCH:
+	case RPC_TIMEDOUT:
+	case RPC_CANTRECV:
+	default:
+	    break;
 	}
 	(void) strncat(str, "\n", BUFSIZ - 1 - strlen(str));
 	return (str);

@@ -119,6 +119,8 @@ xdr_int(xdrs, ip)
 	} else {
 		return (xdr_short(xdrs, (short *)ip));
 	}
+	/*NOTREACHED*/
+	return(FALSE);
 #endif
 }
 
@@ -383,7 +385,7 @@ xdr_opaque(xdrs, cp, cnt)
 	register unsigned int cnt;
 {
 	register unsigned int rndup;
-	static crud[BYTES_PER_XDR_UNIT];
+	static int crud[BYTES_PER_XDR_UNIT];
 
 	/*
 	 * if no data we are done
@@ -515,6 +517,7 @@ xdr_int32(xdrs, ip)
   }
 }
 
+bool_t
 xdr_u_int32(xdrs, up)
 	XDR *xdrs;
 	rpc_u_int32 *up;
@@ -618,6 +621,8 @@ xdr_string(xdrs, cpp, maxsize)
 		/* fall through... */
 	case XDR_ENCODE:
 		size = strlen(sp);
+		break;
+	case XDR_DECODE:
 		break;
 	}
 	if (! xdr_u_int(xdrs, &size)) {

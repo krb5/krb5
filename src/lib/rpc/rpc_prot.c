@@ -102,6 +102,12 @@ gssrpc_xdr_accepted_reply(xdrs, ar)
 		if (! xdr_u_int32(xdrs, &(ar->ar_vers.low)))
 			return (FALSE);
 		return (xdr_u_int32(xdrs, &(ar->ar_vers.high)));
+
+	case GARBAGE_ARGS:
+	case SYSTEM_ERR:
+	case PROC_UNAVAIL:
+	case PROG_UNAVAIL:
+		break;
 	}
 	return (TRUE);  /* TRUE => open ended set of problems */
 }
@@ -225,7 +231,7 @@ rejected(rjct_stat, error)
 
 	switch (rjct_stat) {
 
-	case RPC_VERSMISMATCH:
+	case RPC_MISMATCH:
 		error->re_status = RPC_VERSMISMATCH;
 		return;
 
@@ -282,6 +288,24 @@ sunrpc_seterr_reply(msg, error)
 	case RPC_PROGVERSMISMATCH:
 		error->re_vers.low = msg->acpted_rply.ar_vers.low;
 		error->re_vers.high = msg->acpted_rply.ar_vers.high;
+		break;
+
+	case RPC_FAILED:
+	case RPC_SUCCESS:
+	case RPC_PROGNOTREGISTERED:
+	case RPC_PMAPFAILURE:
+	case RPC_UNKNOWNPROTO:
+	case RPC_UNKNOWNHOST:
+	case RPC_SYSTEMERROR:
+	case RPC_CANTDECODEARGS:
+	case RPC_PROCUNAVAIL:
+	case RPC_PROGUNAVAIL:
+	case RPC_TIMEDOUT:
+	case RPC_CANTRECV:
+	case RPC_CANTSEND:
+	case RPC_CANTDECODERES:
+	case RPC_CANTENCODEARGS:
+	default:
 		break;
 	}
 }

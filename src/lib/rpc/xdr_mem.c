@@ -47,6 +47,7 @@ static char sccsid[] = "@(#)xdr_mem.c 1.19 87/08/11 Copyr 1984 Sun Micro";
 #include <gssrpc/xdr.h>
 #include <netinet/in.h>
 #include <stdio.h>
+#include <string.h>
 
 static bool_t	xdrmem_getlong();
 static bool_t	xdrmem_putlong();

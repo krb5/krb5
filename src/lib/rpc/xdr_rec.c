@@ -54,6 +54,7 @@ static char sccsid[] = "@(#)xdr_rec.c 1.21 87/08/11 Copyr 1984 Sun Micro";
 #include <netinet/in.h>
 
 #include <unistd.h>
+#include <string.h>
 
 static unsigned int	fix_buf_size();
 static bool_t   flush_out();
@@ -360,6 +361,9 @@ xdrrec_setpos(xdrs, pos)
 				return (TRUE);
 			}
 			break;
+
+		case XDR_FREE:
+			break;
 		}
 	return (FALSE);
 }
@@ -389,6 +393,9 @@ xdrrec_inline(xdrs, len)
 			rstrm->in_finger += len;
 		}
 		break;
+
+	case XDR_FREE:
+	        break;
 	}
 	return (buf);
 }

@@ -298,6 +298,8 @@ extern CLIENT *clnttcp_create();
 extern CLIENT *clntudp_create();
 extern CLIENT *clntudp_bufcreate();
 
+#define _rpc_dtablesize _gssrpc_rpc_dtablesize
+extern int _rpc_dtablesize(void);
 /*
  * Print why creation failed
  */
@@ -338,8 +340,6 @@ extern struct rpc_createerr rpc_createerr;
  */
 #define clnt_sperrno		gssrpc_clnt_sperrno
 char *clnt_sperrno(/* enum clnt_stat num */);	/* string */
-
-
 
 #define UDPMSGSIZE	8800	/* rpc imposed limit on udp msg size */
 #define RPCSMALLMSGSIZE	400	/* a more reasonable packet size */

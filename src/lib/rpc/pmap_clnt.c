@@ -38,6 +38,7 @@ static char sccsid[] = "@(#)pmap_clnt.c 1.37 87/08/11 Copyr 1984 Sun Micro";
  * Copyright (C) 1984, Sun Microsystems, Inc.
  */
 
+#include <unistd.h>
 #include <gssrpc/rpc.h>
 #include <gssrpc/pmap_prot.h>
 #include <gssrpc/pmap_clnt.h>

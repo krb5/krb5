@@ -40,6 +40,7 @@ static char sccsid[] = "@(#)svc_udp.c 1.24 87/08/11 Copyr 1984 Sun Micro";
  */
 
 #include <stdio.h>
+#include <unistd.h>
 #include <gssrpc/rpc.h>
 #include <sys/socket.h>
 #include <errno.h>
@@ -378,6 +379,7 @@ struct udp_cache {
  * Enable use of the cache. 
  * Note: there is no disable.
  */
+int
 gssrpc_svcudp_enablecache(transp, size)
 	SVCXPRT *transp;
 	rpc_u_int32 size;

@@ -65,11 +65,11 @@ static struct svcauthsw_type {
      unsigned int flavor;
      enum auth_stat (*authenticator)();
 } svcauthsw[] = {
-     AUTH_GSSAPI, _svcauth_gssapi,		/* AUTH_GSSAPI */
-     AUTH_NONE, _svcauth_null,			/* AUTH_NULL */
-     AUTH_GSSAPI_COMPAT, _svcauth_gssapi,	/* AUTH_GSSAPI_COMPAT */
-     AUTH_UNIX, _svcauth_unix,			/* AUTH_UNIX */
-     AUTH_SHORT, _svcauth_short,		/* AUTH_SHORT */
+     {AUTH_GSSAPI, _svcauth_gssapi},		/* AUTH_GSSAPI */
+     {AUTH_NONE, _svcauth_null},		/* AUTH_NULL */
+     {AUTH_GSSAPI_COMPAT, _svcauth_gssapi},	/* AUTH_GSSAPI_COMPAT */
+     {AUTH_UNIX, _svcauth_unix},		/* AUTH_UNIX */
+     {AUTH_SHORT, _svcauth_short},		/* AUTH_SHORT */
 };
 static int svcauthnum = sizeof(svcauthsw) / sizeof(struct svcauthsw_type);
 

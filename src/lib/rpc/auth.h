@@ -39,6 +39,8 @@
  */
 
 
+#include <gssrpc/xdr.h>
+
 #define MAX_AUTH_BYTES	400
 #define MAXNETNAMELEN	255	/* maximum length of network user's name */
 
@@ -207,3 +209,10 @@ extern AUTH *authdes_create();
  * need to accept this value until 1.0 is dead.
  */
 #define AUTH_GSSAPI_COMPAT		4
+
+/*
+ * XDR an opaque authentication struct.
+ */
+#define xdr_opaque_auth	   gssrpc_xdr_opaque_auth
+
+extern bool_t xdr_opaque_auth (XDR *, struct opaque_auth *);

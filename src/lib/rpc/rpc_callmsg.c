@@ -39,7 +39,7 @@ static char sccsid[] = "@(#)rpc_callmsg.c 1.4 87/08/11 Copyr 1984 Sun Micro";
  */
 
 #include <sys/param.h>
-
+#include <string.h>
 #include <gssrpc/rpc.h>
 
 /*

@@ -1,3 +1,50 @@
+2001-06-05  Ezra Peisach  <epeisach@mit.edu>
+
+	* clnt_perror.c (clnt_spcreateerror): Enumerate missing cases in
+	switch.
+
+	* getrpcport.c: Include string.h for memmove() prototype and
+	pmap_clnt.h for pmap_getport() prototype.
+
+	* rpc_dtablesize.c (_gssrpc_rpc_dtablesize): Declare as returning int.
+	* get_myaddress.c (gssrpc_get_myaddress): Likewise.
+
+	* rpc_prot.c (gssrpc_xdr_accepted_reply, sunrpc_seterr_reply):
+	Enumerate missing cases for switch.
+	(rejected): Fix typo: RPC_VERMISMATCH -> RPC_MISMATCH for
+	enumerated switch.
+
+  	* svc_auth.c: Add braces to svcauthsw[] initialization.
+
+	* svc_simple.c: Include pmap_clnt.h for pmap_unset prototype.
+
+	* bindresvport.c, clnt_simple.c, clnt_tcp.c, clnt_udp.c, pmap_clnt.c,
+	pmap_getmaps.c, pmap_gtport.c, pmap_rmt.c, svc_tcp.c, svc_udp.c:
+	Include unistd.h for close() prototype.
+
+	* xdr.c (xdr_opaque): Specify internal buffer as ints.
+	(xdr_u_int32): Declare as returning bool_t.
+
+	* clnt_generic.c, rpc_callmsg.c, svc_auth_unix.c, xdr_mem.c:
+	Include string.h for memmove() prototype.
+
+	* xdr_rec.c: Include string.h for memmove() prototype. Add dummy
+	XDR_FREE cases for switches.
+
+	* xdr_reference.c (xdr_reference): Add XDR_ENCODE case. (gcc warning). 
+	* xdr_array.c (xdr_array): Likewise.
+
+	* auth.h: Include gssrpc/xdr.h and provide prototype for
+	gssrpc_xdr_opaque_auth().
+
+	* auth_gssapi.h: Add prototypes for auth_gssapi_seal_seq() and
+	auth_gssapi_unseal_seq().
+
+	* clnt.h: Add prototype for _gssrpc_rpc_dtablesize(). 
+
+	* rpc.h: Add prototypes for gssrpc_get_myaddress() and
+	gssrpc_bindresvport().
+
 2001-03-07  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Check for strerror.

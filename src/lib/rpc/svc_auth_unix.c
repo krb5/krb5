@@ -43,6 +43,7 @@ static char sccsid[] = "@(#)svc_auth_unix.c 1.28 88/02/08 Copyr 1984 Sun Micro";
  */
 
 #include <stdio.h>
+#include <string.h>
 #include <gssrpc/rpc.h>
 
 /*
