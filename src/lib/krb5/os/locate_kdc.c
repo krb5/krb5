@@ -279,6 +279,10 @@ add_host_to_list (struct addrlist *lp, const char *hostname,
     if (err)
 	return translate_ai_error (err);
     for (a = addrs; a; a = a->ai_next) {
+	/* AIX 4.3.3 is broken.  */
+	if (a->ai_addr->sa_family == 0)
+	    a->ai_addr->sa_family = a->ai_family;
+
 	set_port_num (a->ai_addr, port);
 	err = add_addrinfo_to_list (lp, a);
 	if (err)
