@@ -1,3 +1,7 @@
+Fri Oct 21 21:06:48 1994    (tytso@rsx-11)
+
+	* Makefile.in (SED): Don't specify an explicit pathname for sed.
+
 Tue Oct 11 12:43:00 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* Makefile.in: Don't rm the awk and sed scripts during a make clean!

@@ -1,6 +1,6 @@
 CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
 LDFLAGS = -g
-SED = /bin/sed
+SED = sed
 
 INSTALLFILE = cp
 
