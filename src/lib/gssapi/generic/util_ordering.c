@@ -219,6 +219,8 @@ g_queue_size(void *vqueue, size_t *sizep)
 gss_uint32
 g_queue_externalize(void *vqueue, unsigned char **buf, size_t *lenremain)
 {
+    if (*lenremain < sizeof(queue))
+	return ENOMEM;
     memcpy(*buf, vqueue, sizeof(queue));
     *buf += sizeof(queue);
     *lenremain -= sizeof(queue);
@@ -231,6 +233,8 @@ g_queue_internalize(void **vqueue, unsigned char **buf, size_t *lenremain)
 {
     void *q;
 
+    if (*lenremain < sizeof(queue))
+	return EINVAL;
     if ((q = malloc(sizeof(queue))) == 0)
 	return ENOMEM;
     memcpy(q, *buf, sizeof(queue));

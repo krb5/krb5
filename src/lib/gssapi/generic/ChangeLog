@@ -1,3 +1,8 @@
+2004-02-08  Ken Raeburn  <raeburn@mit.edu>
+
+	* util_ordering.c (g_queue_externalize, g_queue_internalize):
+	Check for sufficient buffer space.
+
 2003-12-19  Ken Raeburn  <raeburn@mit.edu>
 
 	* gssapi_generic.c (const_oids): Renamed from oids, and now const.
