@@ -1,3 +1,8 @@
+1999-04-09  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* kdb.h: Add new TL types provided by Frank Cusack's preauth patch
+		(PR# [krb5-kdc/662])
+
 Tue Nov 17 15:39:32 1998  Tom Yu  <tlyu@mit.edu>
 
 	* kdb.h: Update dbe_crk and dbe_cpw to take a boolean to indicate

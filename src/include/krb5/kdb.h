@@ -144,6 +144,10 @@ typedef struct _krb5_db_entry_new {
 #define KRB5_TL_MOD_PRINC		0x0002
 #define KRB5_TL_KADM_DATA		0x0003
 #define KRB5_TL_KADM5_E_DATA		0x0004
+#define KRB5_TL_RB1_CHALLENGE		0x0005
+#ifdef SECURID
+#define KRB5_TL_SECURID_STATE           0x0006
+#endif /* SECURID */
     
 /*
  * Determines the number of failed KDC requests before DISALLOW_ALL_TIX is set
