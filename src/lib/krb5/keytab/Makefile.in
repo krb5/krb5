@@ -17,6 +17,7 @@ STLIBOBJS= \
 	ktdefault.o	\
 	ktfr_entry.o	\
 	ktremove.o	\
+	ktfns.o		\
 	read_servi.o
 
 OBJS=	\
@@ -25,6 +26,7 @@ OBJS=	\
 	$(OUTPRE)ktdefault.$(OBJEXT)	\
 	$(OUTPRE)ktfr_entry.$(OBJEXT)	\
 	$(OUTPRE)ktremove.$(OBJEXT)	\
+	$(OUTPRE)ktfns.$(OBJEXT)	\
 	$(OUTPRE)read_servi.$(OBJEXT)
 
 SRCS=	\
@@ -33,6 +35,7 @@ SRCS=	\
 	$(srcdir)/ktdefault.c	\
 	$(srcdir)/ktfr_entry.c	\
 	$(srcdir)/ktremove.c	\
+	$(srcdir)/ktfns.c	\
 	$(srcdir)/read_servi.c
 
 all-windows:: subdirs $(OBJFILE)

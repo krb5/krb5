@@ -1606,11 +1606,61 @@ struct _krb5_rc_ops {
 
 typedef struct _krb5_rc_ops krb5_rc_ops;
 
-krb5_error_code krb5_rc_register_type 
-	(krb5_context,
-		krb5_rc_ops *);
+krb5_error_code krb5_rc_register_type (krb5_context, krb5_rc_ops *);
 
 extern krb5_rc_ops krb5_rc_dfl_ops;
+
+typedef struct _krb5_kt_ops {
+    krb5_magic magic;
+    char *prefix;
+    /* routines always present */
+    krb5_error_code (KRB5_CALLCONV *resolve) 
+	(krb5_context,
+		 krb5_const char *,
+		 krb5_keytab *);
+    krb5_error_code (KRB5_CALLCONV *get_name) 
+	(krb5_context,
+		 krb5_keytab,
+		 char *,
+		 unsigned int);
+    krb5_error_code (KRB5_CALLCONV *close) 
+	(krb5_context,
+		 krb5_keytab);
+    krb5_error_code (KRB5_CALLCONV *get) 
+	(krb5_context,
+		 krb5_keytab,
+		 krb5_const_principal,
+		 krb5_kvno,
+		 krb5_enctype,
+		 krb5_keytab_entry *);
+    krb5_error_code (KRB5_CALLCONV *start_seq_get) 
+	(krb5_context,
+		 krb5_keytab,
+		 krb5_kt_cursor *);	
+    krb5_error_code (KRB5_CALLCONV *get_next) 
+	(krb5_context,
+		 krb5_keytab,
+		 krb5_keytab_entry *,
+		 krb5_kt_cursor *);
+    krb5_error_code (KRB5_CALLCONV *end_get) 
+	(krb5_context,
+		 krb5_keytab,
+		 krb5_kt_cursor *);
+    /* routines to be included on extended version (write routines) */
+    krb5_error_code (KRB5_CALLCONV *add) 
+	(krb5_context,
+		 krb5_keytab,
+		 krb5_keytab_entry *);
+    krb5_error_code (KRB5_CALLCONV *remove) 
+	(krb5_context,
+		 krb5_keytab,
+		  krb5_keytab_entry *);
+
+    /* Handle for serializer */
+    void * serializer;
+} krb5_kt_ops;
+
+extern krb5_kt_ops krb5_kt_dfl_ops;
 
 extern krb5_error_code krb5int_translate_gai_error (int);
 

@@ -1,3 +1,13 @@
+2001-10-12  Ken Raeburn  <raeburn@mit.edu>
+
+	* k5-int.h (struct _krb5_kt_ops, krb5_kt_ops, krb5_kt_dfl_ops):
+	Definitions and declarations moved here...
+	* krb5.hin: ...from here.
+	(krb5_kt_get_type, krb5_kt_get_name, krb5_kt_close,
+	krb5_kt_get_entry, krb5_kt_start_seq_get, krb5_kt_next_entry,
+	krb5_kt_end_seq_get): Replaced macro definitions with declarations
+	for functions now in lib/krb5/keytab/ktfns.c.
+
 2001-10-09  Ken Raeburn  <raeburn@mit.edu>
 
 	* fake-stdlib.h: Make prototypes unconditional.
