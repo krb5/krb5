@@ -30,6 +30,7 @@
 #include "ktfile.h"
 
 struct _krb5_kt_ops krb5_ktf_ops = {
+    0,
     "FILE", 	/* Prefix -- this string should not appear anywhere else! */
     krb5_ktfile_resolve,
     krb5_ktfile_get_name, 

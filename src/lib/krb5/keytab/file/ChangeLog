@@ -1,3 +1,9 @@
+Fri Sep 30 21:56:02 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* ktf_ops.c (krb5_ktf_ops): 
+	  ktf_wops.c (krb5_ktf_writable_ops):
+	  ktf_defops.c (krb5_kt_dfl_ops): Add placeholder for magic number.
+
 Wed Sep 28 21:14:49 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* ktf_get_en.c (krb5_ktfile_get_entry): Modified to return the

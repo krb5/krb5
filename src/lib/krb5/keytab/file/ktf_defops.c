@@ -30,6 +30,7 @@
 #include "ktfile.h"
 
 krb5_kt_ops krb5_kt_dfl_ops = {
+    0,
     "FILE", 	/* Prefix -- this string should not appear anywhere else! */
     krb5_ktfile_resolve,
     krb5_ktfile_get_name, 

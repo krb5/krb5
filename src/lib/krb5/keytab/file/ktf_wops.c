@@ -30,6 +30,7 @@
 #include "ktfile.h"
 
 struct _krb5_kt_ops krb5_ktf_writable_ops = {
+    0,
     "WRFILE", 	/* Prefix -- this string should not appear anywhere else! */
     krb5_ktfile_wresolve,
     krb5_ktfile_get_name, 
