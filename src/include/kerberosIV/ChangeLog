@@ -1,3 +1,7 @@
+Mon Mar 15 15:58:34 1999  Tom Yu  <tlyu@mit.edu>
+
+	* des.h: Fix GSS_DLLIMP.
+
 1998-12-05  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* krb.h: Add prototypes for krb_set_key() and decomp_ticket().
