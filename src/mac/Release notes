@@ -102,3 +102,11 @@ Changes in 1.1a3:
 2.1d2
  fixed oodles for sockets errno problems
  fixed exports to include krb5_auth_con_* and krb5_rc_*
+
+2.1d3
+ rebuilt against MIT Support Library 1.1d3
+ 
+2.1d4
+ separated profile lib
+ fixed krb5 library CFM version numbers
+ fixed makefile and perl scripts to build form arbitrary root
