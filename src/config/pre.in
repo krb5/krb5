@@ -12,8 +12,8 @@ install:: install-$(WHAT)
 
 check:: check-$(WHAT)
 
-all-unix:: all-prerecurse
-all-unix:: all-recurse
+all-recurse: all-prerecurse
+all-postrecurse:: all-recurse
 all-unix:: all-postrecurse
 
 all-prerecurse::

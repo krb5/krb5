@@ -1,3 +1,15 @@
+2002-08-14  Ken Raeburn  <raeburn@mit.edu>
+
+	* lib.in ($(SUBDIROBJLISTS) and .SH/.PF variants): Depend on
+	recursion.  Use extra dummy target in case the variable is
+	empty.
+	* post.in (ALL_DEP_SRCS): New variable, includes SRCS and
+	EXTRADEPSRCS.
+	(.d): Depend on and use $(ALL_DEP_SRCS).
+	* pre.in (all-unix, all-recurse, all-postrecurse): Make each stage
+	depend on the previous, rather than having all-unix depend on
+	each.
+
 2002-07-17  Ken Raeburn  <raeburn@mit.edu>
 
 	* pre.in (DYN_DEPLIB): Removed.
