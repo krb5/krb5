@@ -1,0 +1,18 @@
+#	$Source$
+#	$Author$
+#	$Id$
+#
+#  Copyright 1990,1991 by the Massachusetts Institute of Technology.
+#  All Rights Reserved.
+# 
+#  For copying and distribution information, please see the file
+#  <krb5/copyright.h>.
+# 
+#TOP=/afs/net/project/krb5/@sys
+TOP=/mit/krb5/build/@sys
+DEPLIBS = $(DEPKDBLIB) $(DEPKLIB)
+LOCAL_LIBRARIES = $(KDBLIB) $(KLIB)
+
+SimpleProgramTarget(kdb5_mkdums)
+
+
