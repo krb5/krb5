@@ -1,4 +1,11 @@
-2002-03-03 Alexandra Ellwood <lxs@mit.edu>
+2002-03-03  Sam Hartman  <hartmans@mit.edu>
+
+        * accept_sec_context.c (rd_and_store_for_creds): Patch from Steven
+	        Michaud <smch@midway.uchicago.edu>  to accept encrypted or
+		        unencrypted credentials.  This is important because Heimdal (and
+			        sometimes Microsoft) send encrypted credentials.
+
+	2002-03-03 Alexandra Ellwood <lxs@mit.edu>
     * accept_sec_context.c, ser_sctx.c, util_crypt.c, wrap_size_limit.c: 
     Removed unused variables.
     * acquire_cred.c: Added include of k5-int.h to get prototypes.
