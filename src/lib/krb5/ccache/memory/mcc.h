@@ -48,7 +48,7 @@ typedef struct _krb5_mcc_data {
      krb5_mcc_cursor link;
 } krb5_mcc_data;
 
-
+#define mcc_head krb5int_mcc_head
 extern krb5_mcc_data FAR *mcc_head;
 #if 0
 extern int krb5_cache_sessions;
