@@ -65,7 +65,9 @@ int utimes(path, times)
 #define   LOCK_NB   4    /* don't block when locking */
 #define   LOCK_UN   8    /* unlock */
 #endif
-#ifdef POSIX
+
+
+#ifdef POSIX_FILE_LOCKS
 #include <fcntl.h>
 
 /*

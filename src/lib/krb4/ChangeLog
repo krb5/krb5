@@ -1,5 +1,8 @@
 Fri Apr 28 13:03:23 1995  Theodore Y. Ts'o  <tytso@dcl>
 
+	* tf_util.c, configure.in: Added check for POSIX_FILE_LOCK to
+		enable POSIX file locking.
+
 	* tf_util.c: Add #include of fcntl.h
 
 	* month_sname.c, one.c: Remove unnecessary include of conf.h
