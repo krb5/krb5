@@ -957,7 +957,7 @@ bad_login:
 				   kdata->pname, kdata->pinst,
 				   kdata->prealm);
 #endif
-			    syslog(LOG_NOTICE, buf);
+			    syslog(LOG_NOTICE, "%s", buf);
 		        } else {
 #endif /* KRB4 */
 #ifdef UT_HOSTSIZE

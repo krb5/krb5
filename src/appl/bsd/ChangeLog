@@ -1,3 +1,10 @@
+Tue Dec  5 20:44:39 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* configure.in: Use krb5util library.
+
+	* login.c (main): Change two-argument call to syslog to three
+		arguments to handle screw cases in hostnames.
+
 Fri Dec  1 17:25:02 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* login.c (main, dofork): Applied patch from Scott Schwartz
