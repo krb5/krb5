@@ -12,12 +12,13 @@
  */
 
 #if !defined(lint) && !defined(SABER)
-static char rcsid_sendauth_c [] =
+static char rcsid_read_msg_c [] =
 "$Id$";
 #endif	/* !lint & !SABER */
 
 #include <krb5/krb5.h>
 #include <krb5/los-proto.h>
+#include <krb5/ext-proto.h>
 #include <com_err.h>
 #include <errno.h>
 
