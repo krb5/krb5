@@ -29,6 +29,8 @@
 
 #include "k5-int.h"
 
+#include "fcc.h"
+
 struct krb5_cc_typelist
  {
   krb5_cc_ops *ops;
@@ -36,9 +38,19 @@ struct krb5_cc_typelist
  };
 extern const krb5_cc_ops krb5_mcc_ops;
 
-static struct krb5_cc_typelist cc_entry = { &krb5_mcc_ops, NULL };
+#ifdef _WIN32
+extern const krb5_cc_ops krb5_lcc_ops;
+static struct krb5_cc_typelist cc_lcc_entry = { &krb5_lcc_ops, NULL };
+static struct krb5_cc_typelist cc_mcc_entry = { &krb5_mcc_ops, &cc_lcc_entry };
+#else
+static struct krb5_cc_typelist cc_mcc_entry = { &krb5_mcc_ops, NULL };
+#endif
 
-static struct krb5_cc_typelist *cc_typehead = &cc_entry;
+static struct krb5_cc_typelist cc_fcc_entry = { &krb5_cc_file_ops,
+						&cc_mcc_entry };
+
+static struct krb5_cc_typelist *cc_typehead = &cc_fcc_entry;
+
 
 /*
  * Register a new credentials cache type
@@ -99,8 +111,22 @@ krb5_cc_resolve (krb5_context context, const char *name, krb5_ccache *cache)
     if (!pfx)
 	return ENOMEM;
 
-    memcpy (pfx, name, pfxlen);
-    pfx[pfxlen] = '\0';
+    if ( pfxlen == 1 && isalpha(name[0]) ) {
+        /* We found a drive letter not a prefix - use FILE: */
+        pfx = strdup("FILE:");
+        if (!pfx)
+            return ENOMEM;
+
+        resid = name;
+    } else {
+        resid = name + pfxlen + 1;
+
+        pfx = malloc (pfxlen+1);
+        if (!pfx)
+            return ENOMEM;
+        memcpy (pfx, name, pfxlen);
+        pfx[pfxlen] = '\0';
+    }
 
     *cache = (krb5_ccache) 0;
 

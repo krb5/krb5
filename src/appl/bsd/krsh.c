@@ -411,8 +411,8 @@ main(argc, argv0)
 	krb5_keyblock *key = &cred->keyblock;
 
 	if (kcmd_proto == KCMD_NEW_PROTOCOL) {
-	    status = krb5_auth_con_getlocalsubkey (bsd_context, auth_context,
-						   &key);
+	    status = krb5_auth_con_getsendsubkey (bsd_context, auth_context,
+						  &key);
 	    if (status) {
 		com_err (argv[0], status, "determining subkey for session");
 		exit (1);

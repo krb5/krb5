@@ -1,3 +1,110 @@
+2004-08-31  Tom Yu  <tlyu@mit.edu>
+
+	* asn1buf.c: Fix denial-of-service bug.
+
+	* asn1buf.c:
+	* krb5_decode.c: Fix double-free vulnerabilities.
+
+2003-10-08  Tom Yu  <tlyu@mit.edu>
+
+	* asn1_k_encode.c (asn1_encode_krb_saved_safe_body): New function;
+	kludge to insert a raw pre-encoded KRB-SAFE-BODY.
+
+	* asn1_k_encode.h (asn1_encode_krb_saved_safe_body): Add
+	prototype.
+
+	* krb5_decode.c (decode_krb5_safe_with_body): New function; saves
+	a copy of the encoding of the KRB-SAFE-BODY to avoid problems
+	caused by re-encoding it during verification.
+
+	* krb5_encode.c (encode_krb5_safe_with_body): New function;
+	re-encode a KRB-SAFE using a saved KRB-SAFE-BODY encoding, to
+	avoid trouble with re-encoding a KRB-SAFE-BODY.
+
+2003-07-22  Sam Hartman  <hartmans@avalanche-breakdown.mit.edu>
+
+	* asn1_k_decode.c (asn1_decode_etype_info2_entry_1_3): Decoder for
+	the broken 1.3 ASN.1 behavior for  etype_info2; see bug 1681.
+
+	* asn1_k_decode.h (asn1_decode_etype_info2): Add v1_3_behavior
+	flag for parsing the broken 1.3 behavior  of using an octetString
+	instead of generalString
+
+	* asn1_k_decode.c (asn1_decode_etype_info2_entry):  Expect etype_info2 as generalstring not octetstring
+
+2003-06-20  Sam Hartman  <hartmans@mit.edu>
+
+	* asn1_k_decode.h (asn1_decode_etype_info2): Prototype.  Also
+	deleted prototype for asn1_decode_etype_info_entry as that is not
+	used outside asn1_k_decode.c
+
+	* krb5_decode.c (decode_krb5_etype_info2): Call etype_info2 decoder
+
+	* asn1_k_decode.c (asn1_decode_etype_info_entry): Split out
+	etype_info2 and etype_info decoder  so we ignore tag 2 in the
+	heimdal encoder
+	(asn1_decode_etype_info2): new function
+
+2003-05-23  Sam Hartman  <hartmans@mit.edu>
+
+	* asn1_k_decode.c (asn1_decode_etype_info_entry): Fix logic error
+	that incorrectly set up s2kparams.data 
+
+2003-05-20  Ezra Peisach  <epeisach@bu.edu>
+
+	* asn1_k_encode.c (asn1_encode_krb_safe_body): Use
+	asn1_encode_unsigned_integer for sequence number.
+
+	* asn1_k_decode.c (asn1_decode_krb_safe_body): Use
+	asn1_decode_seqnum to decode sequence number.
+	
+
+2003-05-18  Tom Yu  <tlyu@mit.edu>
+
+	* asn1_decode.c (asn1_decode_maybe_unsigned): New function; decode
+	negative 32-bit numbers into positive unsigned numbers for the
+	sake of backwards compatibility with old code.
+
+	* asn1_decode.h: Add prototype for asn1_decode_maybe_unsigned.
+
+	* asn1_k_decode.c (asn1_decode_seqnum): New function; wrapper
+	around asn1_decode_maybe_unsigned.
+
+	* asn1_k_decode.h: Add prototype for asn1_decode_seqnum.
+
+	* krb5_decode.c (decode_krb5_authenticator) 
+	(decode_krb5_ap_rep_enc_part, decode_krb5_enc_priv_part): Sequence
+	numbers are now unsigned.  Use asn1_decode_seqnum to handle
+	backwards compat with negative sequence numbers.
+
+	* krb5_encode.c (encode_krb5_authenticator) 
+	(encode_krb5_ap_rep_enc_part, encode_krb5_enc_priv_part): Sequence
+	numbers are now unsigned.
+
+2003-05-06  Sam Hartman  <hartmans@mit.edu>
+
+	* krb5_decode.c (decode_krb5_etype_info2): New function; currently
+	the same code as decode_krb5_etype_info.  This means that we can
+	manage to accept s2kparams in etype_info which is wrong but
+	probably harmless.
+
+	* asn1_k_decode.c (asn1_decode_etype_info_entry): Add etype_info2
+	support 
+
+	* asn1_k_encode.c (asn1_encode_etype_info_entry):  Add support for
+	etype-info2 
+
+	* krb5_encode.c (encode_krb5_etype_info2): New function
+
+2003-04-15  Sam Hartman  <hartmans@mit.edu>
+
+	* krb5_encode.c (encode_krb5_setpw_req): new function
+
+2003-04-13  Ezra Peisach  <epeisach@mit.edu>
+
+	* asn1_k_decode.c (asn1_decode_kdc_req_body): Fix memory leak if
+	optional server field is lacking,
+
 2003-03-11  Ken Raeburn  <raeburn@mit.edu>
 
 	* asn1_get.c (asn1_get_tag): Deleted.

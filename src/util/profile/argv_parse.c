@@ -28,7 +28,11 @@
  * Version 1.1, modified 2/27/1999
  */
 
+#include "prof_int.h"
+
+#ifdef HAVE_STDLIB_H
 #include <stdlib.h>
+#endif
 #include <ctype.h>
 #include <string.h>
 #include "argv_parse.h"

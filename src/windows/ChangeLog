@@ -1,3 +1,133 @@
+2004-12-20  Tom Yu  <tlyu@mit.edu>
+
+	* version.rc: krb5-1.3.6 final.
+
+2004-09-10  Tom Yu  <tlyu@mit.edu>
+
+	* version.rc: krb5-1.3.5 final.
+
+2004-09-03  Tom Yu  <tlyu@mit.edu>
+
+	* version.rc: krb5-1.3.5-beta1.
+
+2004-06-11  Tom Yu  <tlyu@mit.edu>
+
+	* version.rc: krb5-1.3.4 final.
+
+2004-06-03  Tom Yu  <tlyu@mit.edu>
+
+	* version.rc: krb5-1.3.4-beta1.
+
+2004-04-06  Tom Yu  <tlyu@mit.edu>
+
+	* version.rc: krb5-1.3.3 final.
+
+2004-03-31  Tom Yu  <tlyu@mit.edu>
+
+	* version.rc: krb5-1.3.3-beta2.
+
+2004-03-23  Tom Yu  <tlyu@mit.edu>
+
+	* version.rc: krb5-1.3.3-beta1.
+
+2004-02-26  Tom Yu  <tlyu@mit.edu>
+
+	* version.rc: krb5-1.3.2 final.
+
+2004-02-23  Tom Yu  <tlyu@mit.edu>
+
+	* version.rc: Update for krb5-1.3.2-beta5.
+
+2004-02-17  Tom Yu  <tlyu@mit.edu>
+
+	* version.rc: Update for krb5-1.3.2-beta4.
+
+2004-02-11  Tom Yu  <tlyu@mit.edu>
+
+	* version.rc: Update for krb5-1.3.2-beta3.
+
+2004-02-03  Tom Yu  <tlyu@mit.edu>
+
+	* version.rc: Update for krb5-1.3.2-beta2.
+
+2004-02-02  Jeffrey Altman <jaltman@mit.edu>
+
+    * README: Document PreserveInitialTicketIdentity registry key
+
+2004-01-30  Jeffrey Altman <jaltman@mit.edu>
+
+    * README: Update the text to include the details of the new 
+      Windows registry keys necessary to access the TGT session key.
+      Also, provide details on the incompatibility of the gss.exe
+      sample client and the versions distributed by Microsoft.
+
+2004-01-07  Tom Yu  <tlyu@mit.edu>
+
+	* version.rc: Update copyright years.  Update for
+	krb5-1.3.2-beta1.
+
+2003-07-30  Tom Yu  <tlyu@mit.edu>
+
+	* version.rc: krb5-1.3.1 final.
+
+2003-12-22  Jeffrey Altman <jaltman@mit.edu>
+
+    * README: Update to more clearly specify the build environment 
+      requirements.  Supported compilers include MSVC++ 6.0, MSVS.NET,
+      and MSVS.NET 2003.  Clarify requirements for building with DNS
+      support.  Also, add text describing MSLSA: credential cache 
+      and how to configure Windows so it can be used.
+
+2003-07-22  Tom Yu  <tlyu@mit.edu>
+
+	* version.rc: krb5-1.3.1-beta1.
+
+	* README: Revert previous change, as it was in error; socklen_t
+	was introduced in Aug 2001 Platform SDK, and the actual problem
+	reported was very probably a compilation environment
+	misconfiguration.
+
+2003-07-18  Tom Yu  <tlyu@mit.edu>
+
+	* README: Note requirement for Feb 2003 Platform SDK.  Thanks to
+	Doug Engert and Rodney Dyer.
+
+2003-07-08  Tom Yu  <tlyu@mit.edu>
+
+	* version.rc: krb5-1.3 final.
+
+2003-06-27  Tom Yu  <tlyu@mit.edu>
+
+	* version.rc: krb5-1.3-beta5.
+
+2003-06-16  Tom Yu  <tlyu@mit.edu>
+
+	* version.rc: krb5-1.3-beta4.
+
+2003-06-09  Tom Yu  <tlyu@mit.edu>
+
+	* version.rc: krb5-1.3-beta3.
+
+2003-05-27  Tom Yu  <tlyu@mit.edu>
+
+	* version.rc: krb5-1.3-beta2.
+
+2003-05-14  Tom Yu  <tlyu@mit.edu>
+
+	* version.rc: krb5-1.3-beta1.
+
+2003-04-29  Tom Yu  <tlyu@mit.edu>
+
+	* version.rc: krb5-1.3-alpha3.
+
+2003-04-11  Tom Yu  <tlyu@mit.edu>
+
+	* version.rc: krb5-1.3-alpha2.
+
+2003-03-14  Tom Yu  <tlyu@mit.edu>
+
+	* version.rc: krb5-1.3-alpha1.
+
 2002-04-10  Danilo Almeida  <dalmeida@mit.edu>
 
 	* Makefile.in: Build ms2mit.

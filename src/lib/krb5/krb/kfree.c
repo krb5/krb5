@@ -246,6 +246,7 @@ void krb5_free_etype_info(krb5_context context, krb5_etype_info info)
   for(i=0; info[i] != NULL; i++) {
       if (info[i]->salt)
 	  free(info[i]->salt);
+      krb5_free_data_contents( context, &info[i]->s2kparams);
       free(info[i]);
   }
   free(info);
@@ -429,14 +430,20 @@ krb5_free_pwd_data(krb5_context context, krb5_pwd_data *val)
 void KRB5_CALLCONV
 krb5_free_pwd_sequences(krb5_context context, passwd_phrase_element **val)
 {
-    if ((*val)->passwd) {
-	krb5_xfree((*val)->passwd);
-	(*val)->passwd = 0;
+    register passwd_phrase_element **temp;
+
+    for (temp = val; *temp; temp++) {
+	if ((*temp)->passwd) {
+	   krb5_free_data(context, (*temp)->passwd);
+	   (*temp)->passwd = 0;
+	}
+	if ((*temp)->phrase) {
+	   krb5_free_data(context, (*temp)->phrase);
+	   (*temp)->phrase = 0;
+	}
+	krb5_xfree(*temp);
     }
-    if ((*val)->phrase) {
-	krb5_xfree((*val)->phrase);
-	(*val)->phrase = 0;
-    }
+    krb5_xfree(val);
 }
 
 

@@ -1,3 +1,27 @@
+2004-12-20  Tom Yu  <tlyu@mit.edu>
+
+	* svr_principal.c (add_to_history): Fix buffer overflow case where
+	the next pointer points into unallocated space but resizing wasn't
+	done, i.e., when someone decreases the policy history count to the
+	exact "right" number.  Fix some memory leaks.  To avoid losing
+	entries, shift some entries forward after growing the array.
+
+2003-09-02  Alexandra Ellwood  <lxs@mit.edu>
+
+	* svr_principal.c: Added Apple password server support.
+
+2003-06-13  Tom Yu  <tlyu@mit.edu>
+
+	* server_kdb.c (kdb_init_hist): Force history principal's key to
+	be of the same enctype as the master key, as searches for it later
+	on explicitly specify the enctype.
+
+2003-04-01  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in: Remove $(SHLIB_DBLIB_DEPS) and related variables.
+	(SHLIB_EXPDEPS): Remove $(SHLIB_DBLIB_DEPS).
+	(SHLIB_EXPLIBS): Change $(DB_LIB) to $(KDB5_DB_LIB).
+
 2003-01-12  Ezra Peisach  <epeisach@bu.edu>
 
 	* svr_iters.c (kadm5_get_either): For POSIX_REGEXPS

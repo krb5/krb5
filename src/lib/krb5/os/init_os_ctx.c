@@ -31,6 +31,10 @@
 #include "k5-int.h"
 #include "os-proto.h"
 
+#ifdef USE_LOGIN_LIBRARY
+#include "KerberosLoginPrivate.h"
+#endif
+
 #if defined(_WIN32)
 
 static krb5_error_code
@@ -234,8 +238,14 @@ os_get_default_config_files(profile_filespec_t **pfiles, krb5_boolean secure)
     unsigned int ent_len;
     const char *s, *t;
 
+#ifdef USE_LOGIN_LIBRARY
+    /* If __KLAllowHomeDirectoryAccess() == FALSE, we are probably
+        trying to authenticate to a fileserver for the user's homedir. */
+    if (secure || !__KLAllowHomeDirectoryAccess ()) {
+#else
     if (secure) {
-        filepath = DEFAULT_SECURE_PROFILE_PATH;
+#endif
+            filepath = DEFAULT_SECURE_PROFILE_PATH;
     } else { 
         filepath = getenv("KRB5_CONFIG");
         if (!filepath) filepath = DEFAULT_PROFILE_PATH;
@@ -348,7 +358,6 @@ krb5_os_init_context(krb5_context ctx)
 	os_ctx->usec_offset = 0;
 	os_ctx->os_flags = 0;
 	os_ctx->default_ccname = 0;
-	os_ctx->default_ccprincipal = 0;
 
 	krb5_cc_set_default_name(ctx, NULL);
 
@@ -460,11 +469,6 @@ krb5_os_free_context(krb5_context ctx)
 		free(os_ctx->default_ccname);
                 os_ctx->default_ccname = 0;
         }
-
-	if (os_ctx->default_ccprincipal) {
-		krb5_free_principal (ctx, os_ctx->default_ccprincipal);
-		os_ctx->default_ccprincipal = 0;
-	}
 
 	os_ctx->magic = 0;
 	free(os_ctx);
