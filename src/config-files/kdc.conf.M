@@ -72,25 +72,114 @@ that particular realm.
 For each realm, the following tags may be specified in the
 .I [realms]
 subsection:
+
+.IP acl_file
+This
+.B string
+specifies the location of the access control list (acl) file that
+kadmin uses to determine which principals are allowed which permissions
+on the database. The default value is @LOCALSTATEDIR/krb5kdc/kadm5.acl.
+
+.IP admin_keytab
+This
+.B string
+Specifies the location of the keytab file that kadmin uses to
+authenticate to the database.  The default value is
+@LOCALSTATEDIR/krb5kdc/kadm5.keytab.
+
 .IP database_name
 This
 .B string
 specifies the location of the Kerberos database for this realm.
 
-.IP master_key_name
+.IP default_principal_expiration
+This
+.B absolute time string
+specifies the default expiration date of principals created in this realm.
+
+.IP default_principal_flags
+This
+.B flag string
+specifies the default attributes of principals created in this realm.
+The format for the string is a comma-separated list of flags, with '+'
+before each flag to be enabled and '-' before each flag to be
+disabled.  The default is for postdateable, forwardable, tgt-based,
+renewable, proxiable, dup-skey, allow-tickets, and service to be
+enabled, and all others to be disabled.
+
+There are a number of possible flags: 
+.RS
+.TP
+.B postdateable
+Enabling this flag allows the principal to obtain postdateable tickets.
+.TP
+.B forwardable
+Enabling this flag allows the principal to obtain forwardable tickets.
+.TP
+.B tgt-based
+Enabling this flag allows a principal to obtain tickets based on a
+ticket-granting-ticket, rather than repeating the authentication
+process that was used to obtain the TGT.
+.TP
+.B renewable
+Enabling this flag allows the principal to obtain renewable tickets.
+.TP
+.B proxiable
+Enabling this flag allows the principal to obtain proxy tickets.
+.TP
+.B dup-skey
+Enabling this flag allows the principal to obtain a session key for
+another user, permitting user-to-user authentication for this principal.
+.TP
+.B allow-tickets
+Enabling this flag means that the KDC will issue tickets for this
+principal.  Disabling this flag essentially deactivates the principal
+within this realm.
+.TP
+.B preauth
+If this flag is enabled on a client principal, then that principal is
+required to preauthenticate to the KDC before receiving any tickets.
+On a service principal, enabling this flag means that service tickets
+for this principal will only be issued to clients with a TGT that has
+the preauthenticated ticket set.
+.TP
+.B hwauth
+If this flag is enabled, then the principal is required to
+preauthenticate using a hardware device before receiving any tickets.
+.TP
+.B pwchange
+Enabling this flag forces a password change for this principal.
+.TP
+.B service
+Enabling this flag allows the the KDC to issue service tickets for this
+principal.
+.TP
+.B pwservice
+If this flag is enabled, it marks this principal as a password change
+service.  This should only be used in special cases, for example, if a
+user's password has expired, the user has to get tickets for that
+principal to be able to change it without going through the normal
+password authentication.
+.RE
+
+.IP dict_file
 This
 .B string
-specifies the name of the master key.
+location of the dictionary file containing strings that are not allowed
+as passwords.  If this tag is not set or if there is no policy assigned
+to the principal, then no check will be done.
 
-.IP master_key_type
+.IP kadmind_port
 This
-.B key type string
-represents the master key's key type.
+.B port number
+specifies the port on which the kadmind daemon is to listen for this
+realm.
 
-.IP encryption_type
+.IP kpasswd_port
 This
-.B encryption type string
-represents the encryption type used for this realm.
+.B port number
+specifies the port on which the kadmind daemon is to listen for this
+realm.
 
 .IP key_stash_file
 This
@@ -108,6 +197,17 @@ as specified in the
 .I [kdcdefaults] 
 section is used.
 
+.IP master_key_name
+This
+.B string
+specifies the name of the principal associated with the master key.
+The default value is K/M.
+
+.IP master_key_type
+This
+.B key type string
+represents the master key's key type.
+
 .IP max_life
 This
 .B delta time string
@@ -120,23 +220,19 @@ This
 specifies the maximum time period that a ticket may be renewed for in
 this realm. 
 
-.IP default_principal_expiration
-This
-.B absolute time string
-specifies the default expiration date of principals created in this realm.
+.IP supported_enctypes
+list of key:salt strings that specifies the default key/salt
+combinations of principals for this realm
 
-.IP default_principal_flags
-This
-.B flag string
-specifies the default attributes of principals created in this realm.
+.IP kdc_supported_enctypes
+specifies the permitted key-salt combinations of principals for this realm
 
-.IP supported_keytypes
-This list of
-.B key
-:
-.B salt
-strings specifies the default key/salt combinations of principals for this
-realm.
+.IP reject_bad_transit
+this
+.B boolean
+specifies whether or not the list of transited realms for cross-realm
+tickets should be checked against the transit path computed from the
+realm names and the [capaths] section of its krb5.conf file
 
 .SH FILES 
 /usr/local/lib/krb5kdc/kdc.conf

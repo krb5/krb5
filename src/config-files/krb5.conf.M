@@ -70,6 +70,9 @@ Contains various default values used by the Kerberos V5 library.
 Contains default values used by the Kerberos V5 login program,
 .IR login.krb5 (8).
 
+.IP [appdefaults]
+Contains default values that can be used by Kerberos V5 applications.
+
 .IP [realms]
 Contains subsections keyed by Kerberos realm names which describe where
 to find the Kerberos servers for a particular realm, and other
@@ -115,6 +118,10 @@ commas or whitespace.
 This relation identifies the supported list of session key encryption
 types that should be requested by the client, in the same format.
 
+.IP permitted_enctypes
+This relation identifies the permitted list of session key encryption
+types.
+
 .IP clockskew 
 This relation sets the maximum allowable amount of clockskew in seconds
 that the library will tolerate before assuming that a Kerberos message
@@ -156,6 +163,59 @@ received. DCE and Kerberos can share the cache, but some versions of DCE
 do not support the default cache as created by this version of
 Kerberos. Use a value of 1 on DCE 1.0.3a systems, and a value of 2 on
 DCE 1.1 systems.
+
+.IP dns_lookup_kdc
+Indicate whether DNS SRV records shoud be used to locate the KDCs and 
+other servers for a realm, if they are not listed in the information 
+for the realm.  The default is to use these records.
+
+.IP dns_lookup_realm
+Indicate whether DNS TXT records should be used to determine the Kerberos
+realm of a host.  The default is not to use these records.
+
+.IP dns_fallback
+General flag controlling the use of DNS for Kerberos information.  If both
+of the preceding options are specified, this option has no effect.
+
+.IP extra_addresses
+This allows a computer to use multiple local addresses, in order to
+allow Kerberos to work in a network that uses NATs.  The addresses should
+be in a comma-separated list.
+
+.SH APPDEFAULTS SECTION
+
+Each tag in the [appdefaults] section names a Kerberos V5 application
+or an option that is used by some Kerberos V5 application[s].  The
+four ways that you can set values for options are as follows, in
+decreasing order of precedence:
+
+.sp
+.nf
+.in +1i
+#1) 	
+	application = {
+		realm1 = {
+			option = value
+		}
+		realm2 = {
+			option = value
+		}
+	}
+#2) 	
+	application = {
+		option1 = value
+		option2 = value
+	}
+#3)	
+	realm = {
+		option = value
+	}
+#4)	
+	option = value
+.in -1in
+.fi
+.sp
+
 .SH LOGIN SECTION
 The [login] section is used to configure the behavior of the Kerberos V5
 login program,
@@ -218,6 +278,34 @@ a V5 principal name to a V4 principal name. It is used when V4 realm
 name and the V5 realm are not the same, but still share the same 
 principal names and passwords. The tag value is the Kerberos V4 realm 
 name. 
+
+.IP auth_to_local_names
+This subsection allows you to set explicit mappings from principal
+names to local user names.  The tag is the mapping name, and the value
+is the corresponding local user name.
+
+.IP auth_to_local
+This tag allows you to set a general rule for mapping principal names
+to local user names.  It will be used if there is not an explicit
+mapping for the principal name that is being translated.  The possible
+values are:
+
+.in +.5i
+DB:<filename>
+.in +.5i
+The principal will be looked up in the database <filename>.
+Support for this is not currently compiled in by default.
+.in -.5in
+RULE:<exp>
+.in +.5i
+The local name will be formulated from <exp>.
+.in -.5i
+DEFAULT
+.in +.5i
+The principal name will be used as the local name.  If the
+principal has more than one component or is not in the default
+realm, this rule is not applicable and the conversion will fail.
+.in -1i
 
 .SH DOMAIN_REALM SECTION
 
