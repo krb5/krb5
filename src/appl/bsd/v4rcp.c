@@ -208,7 +208,7 @@ int kstream_read(krem, buf, len)
       /* decrypt it */
       des_pcbc_encrypt ((des_cblock *)krem->retbuf, 
 			(des_cblock *)krem->retbuf, 
-			sz, *krem->sched, *krem->ivec, 
+			sz, *krem->sched, krem->ivec, 
 			DECRYPT);
 
       /* now retbuf has sz bytes, return len or x of them to the user */
@@ -265,7 +265,7 @@ int kstream_write(krem, buf, len)
       abort ();
     /* memset(outbuf+4+4, 0x42, BUFSIZ); */
     st = des_pcbc_encrypt ((des_cblock *)buf, (des_cblock *)(krem->outbuf+4+4), outlen,
-			   *krem->sched, *krem->ivec, ENCRYPT);
+			   *krem->sched, krem->ivec, ENCRYPT);
 
     if (st) abort();
     return write(krem->write_fd, krem->outbuf+4, 4+outlen);
@@ -400,6 +400,7 @@ int main(argc, argv)
 			if (argc == 0) 
 			  usage();
 			strncpy(krb_realm,*argv,REALM_SZ);
+			krb_realm[REALM_SZ-1] = 0;
 			sprintf(realmarg, " -k %s", krb_realm);
 			goto next_arg;
 #endif /* KERBEROS */
@@ -782,11 +783,20 @@ void sink(argc, argv)
 			size = size * 10 + (*cp++ - '0');
 		if (*cp++ != ' ')
 			SCREWUP("size not delimited");
-		if (targisdir)
-			(void) sprintf(nambuf, "%s%s%s", targ,
-			    *targ ? "/" : "", cp);
-		else
-			(void) strcpy(nambuf, targ);
+		if (targisdir) {
+			if (strlen(targ) + strlen(cp) + 1 < sizeof(nambuf)) {
+				(void) sprintf(nambuf, "%s%s%s", targ,
+				    *targ ? "/" : "", cp);
+			} else {
+				SCREWUP("target directory name too long");
+			}
+		} else {
+		    if (strlen(targ) + 1 < sizeof(nambuf))
+			(void) strncpy(nambuf, targ, sizeof(nambuf)-1);
+		    else
+			SCREWUP("target pathname too long");
+		}
+		nambuf[sizeof(nambuf)-1] = '\0';
 		exists = stat(nambuf, &stb) == 0;
 		if (cmdbuf[0] == 'D') {
 			if (exists) {
