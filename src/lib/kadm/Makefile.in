@@ -31,3 +31,40 @@ install:: libkadm.a
 
 clean::
 	$(RM) libkadm.a
+
+#
+# t_dbentry
+#
+T_DBENTRY_OBJS =  t_dbentry.$(OBJEXT) \
+		$(TOPLIBD)/libkadm.a $(TOPLIBD)/libkrb5.a	\
+		$(TOPLIBD)/libcrypto.a $(BUILDTOP)/util/et/libcom_err.a
+
+t_dbentry:	$(T_DBENTRY_OBJS)
+	$(LD) -o t_dbentry $(T_DBENTRY_OBJS) $(LIBS)
+
+#
+# t_ktentry
+#
+T_KTENTRY_OBJS =  t_ktentry.$(OBJEXT) \
+		$(TOPLIBD)/libkadm.a $(TOPLIBD)/libkrb5.a	\
+		$(TOPLIBD)/libcrypto.a $(BUILDTOP)/util/et/libcom_err.a
+
+t_ktentry:	$(T_KTENTRY_OBJS)
+	$(LD) -o t_ktentry $(T_KTENTRY_OBJS) $(LIBS)
+
+TEST_PROGS	= t_dbentry t_ktentry
+
+check::	check-$(WHAT)
+
+check-unix::	$(TEST_PROGS)
+	./t_dbentry -r 100
+	./t_ktentry -r 100
+
+check-mac::
+
+check-windows::
+
+clean::
+	$(RM) t_dbentry$(EXEEXT) t_dbentry.$(OBJEXT)
+	$(RM) t_ktentry$(EXEEXT) t_ktentry.$(OBJEXT)
+

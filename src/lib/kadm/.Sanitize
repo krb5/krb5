@@ -34,6 +34,8 @@ adm_kt_enc.c
 adm_rw.c
 configure.in
 configure
+t_dbentry.c
+t_ktentry.c
 
 Things-to-lose:
 
