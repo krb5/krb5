@@ -128,6 +128,13 @@ void svcauth_gssapi_set_log_miscerr_func
 (auth_gssapi_log_miscerr_func func,
 	   caddr_t data);
 
+void svcauth_gss_set_log_badauth_func(auth_gssapi_log_badauth_func,
+				      caddr_t);
+void svcauth_gss_set_log_badverf_func(auth_gssapi_log_badverf_func,
+				      caddr_t);
+void svcauth_gss_set_log_miscerr_func(auth_gssapi_log_miscerr_func,
+				      caddr_t data);
+
 #define GSS_COPY_BUFFER(dest, src) { \
      (dest).length = (src).length; \
      (dest).value = (src).value; }

@@ -451,9 +451,6 @@ svc_getreqset(readfds)
 				r.rq_proc = msg.rm_call.cb_proc;
 				r.rq_cred = msg.rm_call.cb_cred;
 
-				/* in case _authenticate has been replaced
-				   with an old-style version */
-				r.rq_xprt->xp_auth = &svc_auth_none;
 				no_dispatch = FALSE;
 
 				/* first authenticate the message */

@@ -1,3 +1,56 @@
+2004-06-15  Tom Yu  <tlyu@mit.edu>
+
+	* auth_gss.c (print_rpc_gss_sec): Use gss_oid_to_str().
+	(rpc_gss_data): Add field "established" to indicate whether
+	context establishment is in progress; this prevents recursive
+	failures when auth_refresh() calls clnt_call().  If clnt_call()
+	called from auth_refresh() gets an error condition, the
+	clnt_call() logic will attempt a refresh, which can cause the
+	cl_auth to get destroyed multiple times, corrupting memory.
+	(authgss_validate, authgss_refresh): Use gd->established.
+	(authgss_refresh): Release gd->gc_wire_verf.
+	(authgss_destroy_context): Log clnt_call() failures.
+
+	* auth_gssapi.h: Add prototypes for svcauth_gss_set_log_*_func.
+
+	* authgss_prot.c (log_status): Correctly reset msg_ctx between
+	different types of calls to gss_display_status().
+
+	* svc.c: Don't reset xp_auth prior to authenticating message.
+
+	* svc.h (svc_req): Remove rq_svcname; application can get it from
+	rq_svccred anyway.
+
+	* svc_auth_gss.c: Include auth_gssapi.h to get typedefs for
+	logging callback functions.  Enable logging callbacks.  Replace
+	SVCAUTH_PRIVATE_LVALUE() kludge.  Fix up namespace somewhat to not
+	use reserved names.
+	(svcauth_gss_accept_sec_context): Free rpc_gss_init_args to avoid
+	leak.  Release gr->gr_token on error conditions.
+	(svcauth_gss_nextverf, svcauth_gss_accept_sec_context):
+	(gssrpc__svcauth_gss): Use gd->checksum.
+	(gssrpc__svcauth_gss): Use macro ret_freegc() to ensure freeing of
+	gc.  On destroy, set *no_dispatch=TRUE and explicitly send reply
+	to avoid application sending a NULLPROC reply with an invalid
+	verifier.
+
+	* svc_auth_gssapi.c (gssrpc__svcauth_gssapi): Set xp_auth to NULL
+	upon destroy.
+	(svc_auth_gssapi_destroy): New function so SVCAUTH_DESTROY() will
+	work.
+
+	* svc_tcp.c (svctcp_create, makefd_xprt): Initialize xp_auth to
+	NULL.
+	(svctcp_destroy): Call SVCAUTH_DESTROY() if appropriate.
+
+	* svc_udp.c (svcudp_bufcreate, svcudp_destroy): Initialize xp_auth
+	to NULL.
+	(svcudp_destroy): Only close xp_sock if it's not -1.  Call
+	SVCAUTH_DESTROY() if appropriate.
+
+	* xdr_rec.c (xdrrec_getpos): Add CITI's fix to return position for
+	non-flushed buffers.
+
 2004-05-27  Tom Yu  <tlyu@mit.edu>
 
 	* auth_any.c, svc_auth_any.c: Removed.

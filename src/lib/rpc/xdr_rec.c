@@ -303,30 +303,22 @@ xdrrec_getpos(xdrs)
 	register RECSTREAM *rstrm = (RECSTREAM *)xdrs->x_private;
 	register int pos;
 
-/* 11/5/95 JRG HELP! lseek() can't take a pointer as the first arg
- * This code must have always failed, and the failure let the arithmetic
- * calculations proceed
- */
-#ifdef __osf__
-	pos = -1;
-#else
-	pos = lseek((int)rstrm->tcp_handle, (off_t) 0, 1);
-#endif
-	if (pos != -1)
-		switch (xdrs->x_op) {
+	switch (xdrs->x_op) {
 
-		case XDR_ENCODE:
-			pos += rstrm->out_finger - rstrm->out_base;
-			break;
+	case XDR_ENCODE:
+		pos = rstrm->out_finger - rstrm->out_base
+			- BYTES_PER_XDR_UNIT;
+		break;
 
-		case XDR_DECODE:
-			pos -= rstrm->in_boundry - rstrm->in_finger;
-			break;
+	case XDR_DECODE:
+		pos = rstrm->in_boundry - rstrm->in_finger
+			- BYTES_PER_XDR_UNIT;
+		break;
 
-		default:
-			pos = (u_int) -1;
-			break;
-		}
+	default:
+		pos = -1;
+		break;
+	}
 	return ((u_int) pos);
 }
 

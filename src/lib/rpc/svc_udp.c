@@ -149,6 +149,7 @@ svcudp_bufcreate(sock, sendsz, recvsz)
 	    &(su->su_xdrs), rpc_buffer(xprt), su->su_iosz, XDR_DECODE);
 	su->su_cache = NULL;
 	xprt->xp_p2 = (caddr_t)su;
+	xprt->xp_auth = NULL;
 	xprt->xp_verf.oa_base = su->su_verfbody;
 	xprt->xp_ops = &svcudp_op;
 	xprt->xp_port = ntohs(addr.sin_port);
@@ -300,7 +301,13 @@ svcudp_destroy(xprt)
 	register struct svcudp_data *su = su_data(xprt);
 
 	xprt_unregister(xprt);
-	(void)close(xprt->xp_sock);
+	if (xprt->xp_sock != -1)
+		(void)close(xprt->xp_sock);
+	xprt->xp_sock = -1;
+	if (xprt->xp_auth != NULL) {
+		SVCAUTH_DESTROY(xprt->xp_auth);
+		xprt->xp_auth = NULL;
+	}
 	XDR_DESTROY(&(su->su_xdrs));
 	mem_free(rpc_buffer(xprt), su->su_iosz);
 	mem_free((caddr_t)su, sizeof(struct svcudp_data));

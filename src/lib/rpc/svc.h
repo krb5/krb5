@@ -164,9 +164,8 @@ struct svc_req {
 	rpcproc_t		rq_proc;	/* the desired procedure */
 	struct opaque_auth rq_cred;	/* raw creds from the wire */
 	void *		rq_clntcred;	/* read only cooked client cred */
-	void *		rq_svccred;	/* read only cooked svc cred */
+	void *		rq_svccred;	/* read only svc cred/context */
 	void *		rq_clntname;	/* read only client name */
-	void *		rq_svcname;	/* read only cooked service cred */
 	SVCXPRT		*rq_xprt;	/* associated transport */
 	/* The request's auth flavor *should* be here, but the svc_req 	*/
 	/* isn't passed around everywhere it is necessary.  The 	*/

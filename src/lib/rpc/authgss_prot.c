@@ -39,10 +39,6 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
-#include <gssrpc/types.h>
-#include <gssrpc/xdr.h>
-#include <gssrpc/auth.h>
-#include <gssrpc/auth_gss.h>
 #include <gssrpc/rpc.h>
 #ifdef HAVE_HEIMDAL
 #include <gssapi.h>
@@ -289,21 +285,22 @@ log_debug(const char *fmt, ...)
 void
 log_status(char *m, OM_uint32 maj_stat, OM_uint32 min_stat)
 {
-	OM_uint32 min;
-	gss_buffer_desc msg;
-	int msg_ctx = 0;
+	OM_uint32 min, msg_ctx;
+	gss_buffer_desc msgg, msgm;
 
-	fprintf(stderr, "rpcsec_gss: %s: ", m);
-	
+	msg_ctx = 0;
 	gss_display_status(&min, maj_stat, GSS_C_GSS_CODE, GSS_C_NULL_OID,
-			   &msg_ctx, &msg);
-	fprintf(stderr, "%s - ", (char *)msg.value);
-	gss_release_buffer(&min, &msg);
-
+			   &msg_ctx, &msgg);
+	msg_ctx = 0;
 	gss_display_status(&min, min_stat, GSS_C_MECH_CODE, GSS_C_NULL_OID,
-			   &msg_ctx, &msg);
-	fprintf(stderr, "%s\n", (char *)msg.value);
-	gss_release_buffer(&min, &msg);
+			   &msg_ctx, &msgm);
+
+	log_debug("%s: %.*s - %.*s\n", m,
+		  msgg.length, (char *)msgg.value,
+		  msgm.length, (char *)msgm.value);
+
+	gss_release_buffer(&min, &msgg);
+	gss_release_buffer(&min, &msgm);
 }
 
 void

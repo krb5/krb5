@@ -96,8 +96,9 @@ static struct auth_ops authgss_ops = {
 void
 print_rpc_gss_sec(struct rpc_gss_sec *ptr)
 {
-int i;
-char *p;
+#if HAVE_HEIMDAL
+	int i;
+	char *p;
 
 	log_debug("rpc_gss_sec:\n");
 	if(ptr->mech == NULL)
@@ -113,6 +114,23 @@ char *p;
 	}
 	log_debug("     qop: %d\n",ptr->qop);
 	log_debug("     service: %d\n",ptr->svc);
+#else
+	OM_uint32 min_stat;
+	gss_buffer_desc msg;
+
+	if (ptr->mech == NULL)
+		log_debug("rpc_gss_sec: mech NULL, qop %d, svc %d",
+			  ptr->qop, ptr->svc);
+	else {
+		gss_oid_to_str(&min_stat, ptr->mech, &msg);
+
+		log_debug("rpc_gss_sec: mech %.*s, qop %d, svc %d",
+			  msg.length, (char *)msg.value,
+			  ptr->qop, ptr->svc);
+
+		gss_release_buffer(&min_stat, &msg);
+	}
+#endif
 }
 #endif /*DEBUG*/
 
@@ -140,6 +158,7 @@ static gss_OID_desc spkm3oid =
 
 struct rpc_gss_data {
 	bool_t			 established;	/* context established */
+	bool_t			 inprogress;
   gss_buffer_desc      gc_wire_verf; /* save GSS_S_COMPLETE NULL RPC verfier 
                                    * to process at end of context negotiation*/
 	CLIENT			*clnt;		/* client handle */
@@ -364,7 +383,7 @@ authgss_refresh(AUTH *auth, struct rpc_msg *msg)
 	
 	gd = AUTH_PRIVATE(auth);
 	
-	if (gd->established)
+	if (gd->established || gd->inprogress)
 		return (TRUE);
 	
 	/* GSS context establishment loop. */
@@ -384,6 +403,7 @@ authgss_refresh(AUTH *auth, struct rpc_msg *msg)
 #endif /*SPKM*/
    
 	for (;;) {
+		gd->inprogress = TRUE;
 		maj_stat = gss_init_sec_context(&min_stat,
 						GSS_C_NO_CREDENTIAL,
 						&gd->ctx,
@@ -418,7 +438,9 @@ authgss_refresh(AUTH *auth, struct rpc_msg *msg)
 					      (caddr_t)&gr, AUTH_TIMEOUT);
 			
 			gss_release_buffer(&min_stat, &send_token);
-			
+
+			log_debug("authgss_refresh: call_stat=%d", call_stat);
+			log_debug("%s", clnt_sperror(gd->clnt, "authgss_refresh"));
 			if (call_stat != RPC_SUCCESS ||
 			    (gr.gr_major != GSS_S_COMPLETE &&
 			     gr.gr_major != GSS_S_CONTINUE_NEEDED))
@@ -458,13 +480,16 @@ authgss_refresh(AUTH *auth, struct rpc_msg *msg)
 
 			if (maj_stat != GSS_S_COMPLETE || qop_state != gd->sec.qop) {
 				log_status("gss_verify_mic", maj_stat, min_stat);
+				gss_release_buffer(&min_stat, &gd->gc_wire_verf);
 				if (maj_stat == GSS_S_CONTEXT_EXPIRED) {
 					gd->established = FALSE;
 					authgss_destroy_context(auth);
 				}
 				return (FALSE);
 			}
+			gss_release_buffer(&min_stat, &gd->gc_wire_verf);
 			gd->established = TRUE;
+			gd->inprogress = FALSE;
 			gd->gc.gc_proc = RPCSEC_GSS_DATA;
 			gd->gc.gc_seq = 0;
 			gd->win = gr.gr_win;
@@ -510,6 +535,7 @@ authgss_destroy_context(AUTH *auth)
 {
 	struct rpc_gss_data	*gd;
 	OM_uint32		 min_stat;
+	enum clnt_stat		 callstat;
 
 	log_debug("in authgss_destroy_context()");
 	
@@ -518,8 +544,13 @@ authgss_destroy_context(AUTH *auth)
 	if (gd->gc.gc_ctx.length != 0) {
 		if (gd->established) {
 			gd->gc.gc_proc = RPCSEC_GSS_DESTROY;
-			clnt_call(gd->clnt, NULLPROC, xdr_void, NULL,
-				  xdr_void, NULL, AUTH_TIMEOUT);
+			callstat = clnt_call(gd->clnt, NULLPROC,
+					     xdr_void, NULL,
+					     xdr_void, NULL,
+					     AUTH_TIMEOUT);
+			log_debug("%s",
+				  clnt_sperror(gd->clnt,
+					       "authgss_destroy_context"));
 		}
 		gss_release_buffer(&min_stat, &gd->gc.gc_ctx);
 		/* XXX ANDROS check size of context  - should be 8 */
@@ -530,6 +561,8 @@ authgss_destroy_context(AUTH *auth)
 		gd->ctx = GSS_C_NO_CONTEXT;
 	}
 	gd->established = FALSE;
+
+	log_debug("finished authgss_destroy_context()");
 }
 
 static void

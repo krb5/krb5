@@ -176,6 +176,7 @@ svctcp_create(sock, sendsize, recvsize)
 	}
 	xprt->xp_p2 = NULL;
 	xprt->xp_p1 = (caddr_t)r;
+	xprt->xp_auth = NULL;
 	xprt->xp_verf = gssrpc__null_auth;
 	xprt->xp_ops = &svctcp_rendezvous_op;
 	xprt->xp_port = ntohs(addr.sin_port);
@@ -225,6 +226,7 @@ makefd_xprt(fd, sendsize, recvsize)
 	    (caddr_t)xprt, readtcp, writetcp);
 	xprt->xp_p2 = NULL;
 	xprt->xp_p1 = (caddr_t)cd;
+	xprt->xp_auth = NULL;
 	xprt->xp_verf.oa_base = cd->verf_body;
 	xprt->xp_addrlen = 0;
 	xprt->xp_laddrlen = 0;
@@ -291,6 +293,10 @@ svctcp_destroy(xprt)
 	} else {
 		/* an actual connection socket */
 		XDR_DESTROY(&(cd->xdrs));
+	}
+	if (xprt->xp_auth != NULL) {
+		SVCAUTH_DESTROY(xprt->xp_auth);
+		xprt->xp_auth = NULL;
 	}
 	mem_free((caddr_t)cd, sizeof(struct tcp_conn));
 	mem_free((caddr_t)xprt, sizeof(SVCXPRT));

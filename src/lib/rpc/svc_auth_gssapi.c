@@ -76,6 +76,8 @@ typedef struct _svc_auth_gssapi_data {
 
 static bool_t	svc_auth_gssapi_wrap(SVCAUTH *, XDR *, xdrproc_t, caddr_t);
 static bool_t	svc_auth_gssapi_unwrap(SVCAUTH *, XDR *, xdrproc_t, caddr_t);
+static bool_t	svc_auth_gssapi_destroy(SVCAUTH *);
+
 static svc_auth_gssapi_data *create_client(void);
 static svc_auth_gssapi_data *get_client
        (gss_buffer_t client_handle);
@@ -89,6 +91,7 @@ static void dump_db (char *msg);
 struct svc_auth_ops svc_auth_gssapi_ops = {
      svc_auth_gssapi_wrap,
      svc_auth_gssapi_unwrap,
+     svc_auth_gssapi_destroy
 };
 
 /*
@@ -581,6 +584,7 @@ enum auth_stat gssrpc__svcauth_gssapi(rqst, msg, no_dispatch)
 		    *no_dispatch = TRUE;
 
 		    destroy_client(client_data);
+		    rqst->rq_xprt->xp_auth = NULL;
 		    break;
 
 	       default:
@@ -924,7 +928,9 @@ bool_t svcauth_gssapi_set_names(names, num)
      for (i = 0; i < num; i++) {
 	  in_buf.value = names[i].name;
 	  in_buf.length = strlen(in_buf.value) + 1;
-     
+
+	  PRINTF(("svcauth_gssapi_set_names: importing %s\n", in_buf.value));
+
 	  gssstat = gss_import_name(&minor_stat, &in_buf, names[i].type,
 				    &server_name_list[i]); 
      
@@ -1083,4 +1089,13 @@ static bool_t svc_auth_gssapi_unwrap(auth, in_xdrs, xdr_func, xdr_ptr)
 	  return FALSE;
      } else
 	  return TRUE;
+}
+
+static bool_t svc_auth_gssapi_destroy(auth)
+    SVCAUTH *auth;
+{
+     svc_auth_gssapi_data *client_data = SVCAUTH_PRIVATE(auth);
+
+     destroy_client(client_data);
+     return TRUE;
 }
