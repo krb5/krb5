@@ -6,6 +6,13 @@
 	configure output.  Use AC_HELP_STRING.  Shorten up some messages,
 	drop some options that are defaults and obvious counterparts to
 	other documented options.
+	(KRB5_LIB_AUX): Use default_shared and default_static from
+	shlib.conf to decide whether to build shared and static libraries
+	by default.  Update messages to indicate shared libraries are the
+	default for most platforms now.  Use AC_MSG_NOTICE and
+	AC_MSG_WARN instead of AC_MSG_RESULT when there's no "checking"
+	message.
+
 	* configure.in: Likewise.
 
 2004-03-17  Ken Raeburn  <raeburn@mit.edu>
