@@ -1,3 +1,8 @@
+2001-08-01  Ken Raeburn  <raeburn@mit.edu>
+
+	* hostaddr.c (krb5_os_hostaddr): Only retry non-numeric lookup
+	after numeric lookup if AI_NUMERICHOST is nonzero.
+
 2001-07-31  Ezra Peisach  <epeisach@mit.edu>
 
 	* genaddrs.c: Use GETPEERNAME_ARG2_TYPE, GETPEERNAME_ARG3_TYPE

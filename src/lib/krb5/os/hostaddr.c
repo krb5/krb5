@@ -56,7 +56,7 @@ krb5_os_hostaddr(context, name, ret_addrs)
     hints.ai_socktype = SOCK_DGRAM;
 
     r = getaddrinfo (name, 0, &hints, &ai);
-    if (r) {
+    if (r && AI_NUMERICHOST != 0) {
 	hints.ai_flags &= ~AI_NUMERICHOST;
 	r = getaddrinfo (name, 0, &hints, &ai);
     }
