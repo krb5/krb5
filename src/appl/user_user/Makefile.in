@@ -29,7 +29,7 @@ all:: uuserver
 
 install::
 	$(INSTALL_PROGRAM) uuclient $(DESTDIR)$(CLIENT_BINDIR)/uuclient
-	$(INSTALL_PROGRAM) uuserver $(DESTDIR)$(SERVER_BINDIR)/uusrever
+	$(INSTALL_PROGRAM) uuserver $(DESTDIR)$(SERVER_BINDIR)/uuserver
 
 clean::
 	$(RM) server.o uuserver
