@@ -44,6 +44,11 @@ struct test_case test_cases[] = {
 		}
 	},
 	{
+		/* This one intentionally supplies a length shorter
+		   than the string.  The point of this is to ensure
+		   that s[len] is not zero, so that anything actually
+		   relying on that value (i.e., reading out of bounds)
+		   should generate incorrect results.  */
 		"NaCl2", 4,
 		{
 			{ 0x61, 0xef, 0xe6, 0x83, 0xe5, 0x8a, 0x6b, 0x98 },
@@ -83,6 +88,7 @@ do_it (struct test_case *tcase)
 	krb5_keyblock key;
 	krb5_error_code err;
 	int i;
+	unsigned char longpass[2048];
 
 	key.contents = keydata;
 	key.length = sizeof (keydata);
@@ -99,6 +105,21 @@ do_it (struct test_case *tcase)
 	 * interesting stuff depending on the length.
 	 */
 	passwd.data = "My Password";
+	for (i = 0; i < 12; i++) {
+		passwd.length = i;
+		err = mit_afs_string_to_key (&key, &passwd, &salt);
+		if (err != 0) {
+			com_err (me, err, "");
+			exit (1);
+		}
+		if (memcmp (tcase->keys[i], keydata, 8) != 0)
+			abort ();
+	}
+
+	memset (longpass, '!', sizeof (longpass));
+	longpass[sizeof (longpass)-1] = '\0';
+	memcpy (longpass, "My Password", strlen ("My Password"));
+	passwd.data = longpass;
 	for (i = 0; i < 12; i++) {
 		passwd.length = i;
 		err = mit_afs_string_to_key (&key, &passwd, &salt);

@@ -96,7 +96,9 @@ mit_afs_string_to_key (keyblock, data, salt)
 	if (password[i] == '\0')
 	  password[i] = 'X';
       password[8] = '\0';
-      strncpy(key, (char *) afs_crypt(password, "#~", afs_crypt_buf) + 2, 8);
+      strncpy(key,
+	      (char *) afs_crypt(password, "#~"/*"p1"*/, afs_crypt_buf) + 2,
+	      8);
       for (i=0; i<8; i++)
 	key[i] <<= 1;
       /* now fix up key parity again */
@@ -112,7 +114,7 @@ mit_afs_string_to_key (keyblock, data, salt)
 
       /* some bound checks from the original code are elided here as
 	 the malloc above makes sure we have enough storage. */
-      strcpy (password, data->data);
+      memcpy (password, data->data, data->length);
       for (i=data->length, j = 0; j < salt->length; i++, j++) {
 	password[i] = realm[j];
 	if (isupper(password[i]))
