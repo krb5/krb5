@@ -71,9 +71,9 @@
 
 krb5_error_code
 mit_des_string_to_key_int (keyblock, data, salt)
-krb5_keyblock FAR * keyblock;
-const krb5_data FAR * data;
-const krb5_data FAR * salt;
+    krb5_keyblock FAR * keyblock;
+    const krb5_data FAR * data;
+    const krb5_data FAR * salt;
 {
     register krb5_octet *str, *copystr;
     register krb5_octet *key;
@@ -97,13 +97,15 @@ const krb5_data FAR * salt;
     key = keyblock->contents;
 
     if (salt) {
-      if (salt->length == SALT_TYPE_AFS_LENGTH || salt->length == (unsigned) -1) {
-	/* cheat and do AFS string2key instead */
-	return mit_afs_string_to_key (keyblock, data, salt);
-      } else 
-	length = data->length + salt->length;
-      }
-    else
+	if (salt->length == SALT_TYPE_AFS_LENGTH || salt->length == (unsigned) -1) {
+	    krb5_data salt2;
+	    salt2.data = salt->data;
+	    salt2.length = strlen (salt2.data);
+	    /* cheat and do AFS string2key instead */
+	    return mit_afs_string_to_key (keyblock, data, &salt2);
+	} else 
+	    length = data->length + salt->length;
+    } else
 	length = data->length;
 
     copystr = malloc((size_t) length);
