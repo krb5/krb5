@@ -1,5 +1,7 @@
 Wed Nov 13 02:53:31 1996  Tom Yu  <tlyu@mit.edu>
 
+	* osconfig.c: Add warning re: global variables.
+
 	* ktdefname.c, osconfig.c: Revert previous kt_default_name
 	changes.
 

@@ -22,6 +22,11 @@
  * 
  *
  * Definition of default configuration parameters.
+ *
+ * ***** WARNING *****
+ * These globals are internal library interfaces and are not
+ * supported.  Do not use them in any production code, as they will be
+ * removed from the library in the future.
  */
 
 #include "k5-int.h"
