@@ -809,7 +809,8 @@ krb5_seteuid(0); /*So we have some chance of sweeping up*/
 	 */
  	if (setluid((uid_t) pwd->pw_uid) < 0) {
 		perror("setuid");
-		sleepexit(1);
+		sweep_up(ksu_context, use_source_cache, cc_target);
+		exit(1);
 	}
 #endif	/* HAVE_SETLUID */
 
