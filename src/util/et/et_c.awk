@@ -113,7 +113,9 @@ c2n["_"]=63
 	print "# include \"win-mac.h\"" > outfile
 	print "#endif" > outfile
 	print "" > outfile
+	print "#if !defined(_WIN32) && !defined(macintosh) && !(defined(__MACH__) && defined(__APPLE__))" > outfile
 	print "extern void initialize_" table_name "_error_table (void);" > outfile
+	print "#endif" > outfile
 	print "" > outfile
 	print "/* Lclint doesn't handle null annotations on arrays" > outfile
 	print "   properly, so we need this typedef in each" > outfile
@@ -185,7 +187,9 @@ END {
 	print "    0" > outfile
 	print "};" > outfile
 	print "" > outfile
+	print "#if !defined(_WIN32) && !defined(macintosh) && !(defined(__MACH__) && defined(__APPLE__))" > outfile
 	print "#include <com_err.h>" > outfile
+	print "#endif" > outfile
 	print "" > outfile
 	if (tab_base_high == 0) {
 	    print "const struct error_table et_" table_name "_error_table = { text, " \
@@ -197,7 +201,7 @@ END {
 		tab_base_low, table_item_count) > outfile
 	}
 	print "" > outfile
-	print "#if !defined(_WIN32) && !defined(macintosh)" > outfile
+	print "#if !defined(_WIN32) && !defined(macintosh) && !(defined(__MACH__) && defined(__APPLE__))" > outfile
 	print "void initialize_" table_name "_error_table (void)" > outfile
 	print "    /*@modifies internalState@*/" > outfile
 	print "{" > outfile

@@ -1,3 +1,39 @@
+2002-07-03  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in: Fix rebuild rules et_?.perl -> et_?.pl.  Also,
+	strip the "#!" line.
+
+	* error_table.h: Fix mac conditional, due to _et_list declaration
+	moving from et_c.awk
+
+	* et_c.perl, et_h.perl: Remove.
+
+	* et_c.pl, et_h.pl: Generate.
+
+2002-07-03  Danilo Almeida  <dalmeida@mit.edu>
+
+	* com_err.h: Windows should include <win-mac.h> as opposed
+	to <Kerberos5/win-mac.h>
+	[pullup from 1-2-2-branch]
+
+2002-07-03  Miro Jurisic  <meeroh@mit.edu>
+
+	* et_c.perl, et_h.perl: 
+        Renamed to et_c.pl and et_h.pl because the extension is used
+        as a newline separator heuristic in MacPerl parser
+
+	* et_c.perl, et_h.perl: 
+        Removed #! from the first line to avoid confusing MacPerl
+
+	[pullups from 1-2-2-branch]
+
+2002-07-03  Alexandra Ellwood  <lxs@mit.edu>
+
+	* com_err.h, error_message.c, et.pbexp, et_c.awk, et_h.awk: 
+        conditionalized com_err so it doesn't need to export et_list 
+        on Mac OS X 
+	[pullup from 1-2-2-branch]
+
 2001-10-05  Ken Raeburn  <raeburn@mit.edu>
 
 	* com_err.h (KRB5_EXPORTVAR): Don't define.

@@ -1,4 +1,3 @@
-#!/usr/athena/bin/perl
 eval 'exec /usr/athena/bin/perl -S $0 ${1+"$@"}'
     if $running_under_some_shell;
 			# this emulates #! processing on NIH machines.
@@ -138,7 +137,17 @@ line: while (<>) {
 	&Pick('>', $outfile) &&
 	    (print $fh '');
 	&Pick('>', $outfile) &&
+	    (print $fh
+
+	      '#if defined(macintosh) || (defined(__MACH__) && defined(__APPLE__))');
+	&Pick('>', $outfile) &&
+	    (print $fh '#include <KerberosComErr/KerberosComErr.h>');
+	&Pick('>', $outfile) &&
+	    (print $fh '#else');
+	&Pick('>', $outfile) &&
 	    (print $fh '#include <com_err.h>');
+	&Pick('>', $outfile) &&
+	    (print $fh '#endif');
 	&Pick('>', $outfile) &&
 	    (print $fh '');
     }
@@ -194,7 +203,7 @@ else {
 &Pick('>', $outfile) &&
     (print $fh
 
-      '#if !defined(_WIN32) && !defined(macintosh)');
+      '#if !defined(_WIN32) && !defined(macintosh) && !(defined(__MACH__) && defined(__APPLE__))');
 &Pick('>', $outfile) &&
     (print $fh '/* for compatibility with older versions... */');
 &Pick('>', $outfile) &&

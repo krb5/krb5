@@ -27,8 +27,9 @@
 #include "com_err.h"
 #include "error_table.h"
 
-#ifdef macintosh
-#include <ErrorLib.h>
+#if defined(macintosh) || (defined(__MACH__) && defined(__APPLE__))
+    #include <KerberosSupport/KerberosSupport.h>
+    #include <KerberosSupport/ErrorLib.h>
 #endif
 
 #if defined(_WIN32)
@@ -48,7 +49,7 @@ extern const int sys_nerr;
 
 static char buffer[ET_EBUFSIZ];
 
-#if (defined(_WIN32) || defined(macintosh))
+#if (defined(_WIN32) || defined(macintosh)  || (defined(__MACH__) && defined(__APPLE__)))
 /*@null@*/ static struct et_list * _et_list = (struct et_list *) NULL;
 #else
 /* Old interface compatibility */
@@ -199,12 +200,19 @@ error_message(long code)
 
 oops:
 
-#if defined(macintosh)
+#if TARGET_OS_MAC
 	{
 		/* This may be a Mac OS Toolbox error or an MIT Support Library Error.  Ask ErrorLib */
 		if (GetErrorLongString(code, buffer, ET_EBUFSIZ - 1) == noErr) {
 			return buffer;
 		}
+
+#if TARGET_API_MAC_OSX
+		/* ComErr and ErrorLib don't know about this error, ask the system */
+		/* Of course there's no way to tell if it knew what error it got */
+		return (strerror (code));
+#endif
+
 	}
 #endif
 	

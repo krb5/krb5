@@ -19,7 +19,7 @@ struct et_list {
     /*@dependent@*//*@null@*/ struct et_list *next;
     /*@dependent@*//*@null@*/ const struct error_table *table;
 };
-#if !defined(_WIN32) && !defined(macintosh)
+#if !defined(_WIN32) && !defined(macintosh) && !(defined(__MACH__) && defined(__APPLE__))
 /*@null@*//*@dependent@*/ extern struct et_list * _et_list;
 #endif
 
