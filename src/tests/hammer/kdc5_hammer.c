@@ -81,7 +81,7 @@ int status;
     fprintf(stderr,
 	    "usage: %s -p prefix -n num_to_check [-c cachename] [-r realmname]\n",
 	    who);
-    fprintf(stderr, "\t [-D depth] [-k enctype]\n");
+    fprintf(stderr, "\t [-D depth]\n");
     fprintf(stderr, "\t [-P preauth type] [-R repeat_count] [-t] [-b] [-v] \n");
 
     exit(status);
@@ -122,7 +122,6 @@ main(argc, argv)
     char ctmp[4096], ctmp2[BUFSIZ], stmp[4096], stmp2[BUFSIZ];
     krb5_principal client_princ;
     krb5_error_code retval;
-    krb5_enctype enctype = DEFAULT_KDC_ENCTYPE;
 
     krb5_init_context(&test_context);
 
@@ -138,7 +137,7 @@ main(argc, argv)
     n_tried = 0;
     errors = 0;
 
-    while ((option = getopt(argc, argv, "D:p:n:c:R:k:P:e:bvr:t")) != -1) {
+    while ((option = getopt(argc, argv, "D:p:n:c:R:P:e:bvr:t")) != -1) {
 	switch (option) {
 	case 't':
 	    do_timer = 1;
@@ -164,9 +163,6 @@ main(argc, argv)
 	    break;
        case 'n':                        /* how many to check */
 	    num_to_check = atoi(optarg);
-	    break;
-	case 'k':
-	    enctype = atoi(optarg);
 	    break;
 	case 'P':
 	    patypedata[0] = atoi(optarg);
@@ -200,12 +196,6 @@ main(argc, argv)
 	    com_err(prog, retval, "while retrieving default realm name");
 	    exit(1);
 	}	    
-    }
-
-    if (!valid_enctype(enctype)) {
-      com_err(prog, KRB5_PROG_ETYPE_NOSUPP,
-	      "while setting up enctype %d", enctype);
-      exit(1);
     }
 
     if (ccache == NULL) {

@@ -1,3 +1,9 @@
+2002-04-05  Ken Raeburn  <raeburn@mit.edu>
+
+	* kdc5_hammer.c (main): Delete '-k' option which didn't do
+	anything.
+	(usage): Don't display '-k' option.
+
 2001-10-09  Ken Raeburn  <raeburn@mit.edu>
 
 	* kdb5_hammer.c: Make prototypes unconditional.
