@@ -1,6 +1,5 @@
 #include <stdio.h>
-#include "krb5.h"
-#include "asn1.h"
+#include "k5-int.h"
 #include "com_err.h"
 #include "utility.h"
 

@@ -1,10 +1,9 @@
-#include "krb5.h"
+#include "k5-int.h"
 #include "ktest.h"
 #include "com_err.h"
 #include "utility.h"
 #include "ktest_equal.h"
 
-#include "asn1.h"
 #include "debug.h"
 #include <string.h>
 

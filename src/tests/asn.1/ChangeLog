@@ -1,4 +1,8 @@
 
+Thu Jul 27 15:29:10 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* krb5_{en,de}code_test.c - Use k5-int instead of krb5 and asn1.h.
+
+
 Wed Jul 12 12:30:45 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in - Add LD_LIBRARY_PATH in case we used shared objects
 		by default.
