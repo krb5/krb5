@@ -10,7 +10,7 @@ EHDRDIR=$(BUILDTOP)/include/krb5
 
 HDRS=$(ASN1_SRCS) kdb5_err.h krb5_err.h kv5m_err.h adm_err.h
 OBJS=$(ASN1_OBJS) kdb5_err.o krb5_err.o kv5m_err.o adm_err.o init_ets.o
-ETSRCS=$(ASN1_SRCS) kdb5_err.c krb5_err.c kv5m_err.o adm_err.c
+ETSRCS=$(ASN1_SRCS) kdb5_err.c krb5_err.c kv5m_err.c adm_err.c
 SRCS=$(ETSRCS) $(srcdir)/init_ets.c
 
 all:: ${HDRS} includes ${OBJS}
@@ -23,6 +23,7 @@ isode_err.o: isode_err.c
 kdb5_err.o: kdb5_err.c
 krb5_err.o: krb5_err.c
 adm_err.o: adm_err.c
+kv5m_err.o: kv5m_err.c
 
 $(BOGUS)::
 	echo '/* not using isode */' > $@
