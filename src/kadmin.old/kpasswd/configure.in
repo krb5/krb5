@@ -1,7 +1,7 @@
 AC_INIT(kpasswd.c)
 CONFIG_RULES
 AC_PROG_INSTALL
-AC_HAVE_HEADERS(unistd.h stdlib.h)
+AC_HAVE_HEADERS(unistd.h string.h stdlib.h)
 CHECK_UTMP
 AC_FUNC_CHECK(getutent,AC_DEFINE(HAVE_GETUTENT))
 ET_RULES
