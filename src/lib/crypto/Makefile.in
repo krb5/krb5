@@ -29,6 +29,7 @@ STLIBOBJS=\
 	etypes.o		\
 	hmac.o			\
 	keyed_cksum.o		\
+	keyed_checksum_types.o	\
 	make_checksum.o		\
 	make_random_key.o	\
 	nfold.o			\
@@ -55,6 +56,7 @@ OBJS=\
 	etypes.$(OBJEXT)		\
 	hmac.$(OBJEXT)			\
 	keyed_cksum.$(OBJEXT)		\
+	keyed_checksum_types.$(OBJEXT)	\
 	make_checksum.$(OBJEXT)		\
 	make_random_key.$(OBJEXT)	\
 	nfold.$(OBJEXT)			\
@@ -81,6 +83,7 @@ SRCS=\
 	$(subdir)/etypes.c		\
 	$(subdir)/hmac.c		\
 	$(subdir)/keyed_cksum.c		\
+	$(subdir)/keyed_checksum_types.c\
 	$(subdir)/make_checksum.c	\
 	$(subdir)/make_random_key.c	\
 	$(subdir)/nfold.c		\
