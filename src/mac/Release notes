@@ -82,3 +82,9 @@ Changes in 1.1a3:
  added 68K des library
  removed all traces of CW builds
  forced 68K version of krb globals to build
+ 
+2.0 GM
+ updated to DESLib 1.0.4
+ added custom icon, vend, CCIª and hfdr resources
+ renamed glue files
+ updated readme
