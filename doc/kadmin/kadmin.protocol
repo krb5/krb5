@@ -13,7 +13,8 @@ commands are encoded in the "command request" PDU described in the
 password changing protocol, and the server's responses to these
 commands are encoded in the "command reply" PDU.
 
-These commands are (optional commands are marked with an asterisk):
+These commands are (optional commands are marked with an asterisk, new
+or changed commands are marked with a plus sign):
 	ADD-PRINCIPAL
 	DELETE-PRINCIPAL
 	RENAME-PRINCIPAL
@@ -21,7 +22,9 @@ These commands are (optional commands are marked with an asterisk):
 	OTHER-CHANGEPW
 	OTHER-RANDOM-CHANGEPW
 	INQUIRE-PRINCIPAL
-	EXTRACT-KEY		(*)
+	EXTRACT-KEY		(*+)
+	ADD-KEY			(+)
+	DELETE-KEY		(+)
 
 In order to support these additional commands, the following additional
 status codes are also defined:
@@ -38,6 +41,8 @@ Number	Symbolic Name		Meaning
 68	VALUE_REQUIRED		The specified option requires a value.
 69	SYSTEM_ERROR		A system error occurred while processing a
 				request.
+70(+)	KEY_ALREADY_EXISTS	The specified key already exists.
+71(+)	KEY_DOES_NOT_EXIST	The specified key does not exist.
 
 The add principal operation
 ---------------------------
@@ -230,6 +235,66 @@ o Description
 o Access Required
 	Client principal must have EXTRACT permission.
 
+The add key operation
+---------------------
+o Command String		"ADD-KEY"
+o Arguments
+	<principal-string>	- name of the principal
+	<password>		- current password value
+	<keyname>		- name of the key in the form
+				  <keytype>:<salttype>.
+	.
+	.
+	.
+o Returns
+	SUCCESS			- operation successful
+	SYSTEM_ERROR		- system error
+	NOT_AUTHORIZED		- not authorized to perform this
+	KEY_ALREADY_EXISTS	- one or more of the specified
+				  keytypes already exist.
+	BAD_OPTION		- bad keytype:saltyupe specified
+o Supplemental Returns
+	NONE			- if successful
+	error message text	- if failure
+o Description
+	If the specified principal exists, the keyname(s) parse
+	correctly the specified password is successfully verified
+	against the existing key(s), and the specified keyname(s) do
+	not exist, then these keytype(s) are added to the principal.
+o Access Required
+	Client principal must have MODIFY_PRINCIPAL permission.
+
+The delete key operation
+------------------------
+o Command String		"DELETE-KEY"
+o Arguments
+	<principal-string>	- name of the principal
+	<password>		- current password value
+	<keyname>		- name of the key in the form
+				  <keytype>:<salttype>, or name of the
+				  key in the form <keytype>:<salttype>:
+				  <key-version>
+	.
+	.
+	.
+o Returns
+	SUCCESS			- operation successful
+	SYSTEM_ERROR		- system error
+	NOT_AUTHORIZED		- not authorized to perform this
+	KEY_DOES_NOT_EXIST	- one or more of the specified
+				  keytypes do not exist.
+	BAD_OPTION		- bad keytype:saltyupe specified
+o Supplemental Returns
+	NONE			- if successful
+	error message text	- if failure
+o Description
+	If the specified principal exists, the keyname(s) parse
+	correctly the specified password is successfully verified
+	against the existing key(s), and the specified keyname(s) 
+	exist, then they are deleted from the principal.
+o Access Required
+	Client principal must have MODIFY_PRINCIPAL permission.
+
 Keywords
 --------
 The following list of keywords are used for the ADD-PRINCIPAL and
@@ -239,7 +304,6 @@ INQUIRE-PRINCIPAL command.
 Valid	Keyword		Value Type	Value
 -------	---------------	---------------	--------------------------------------
   (S)	PASSWORD	<string> 	New password.
-  (SR)	KVNO		<integer>	Key version number.
   (SR)	MAXLIFE		<integer>	The maximum lifetime of tickets for
 					this principal in seconds.
   (SR)	MAXRENEWLIFE	<integer>	The maximum renewable lifetime of
@@ -252,25 +316,50 @@ Valid	Keyword		Value Type	Value
   (SR)	FLAGS		<integer>	Specifies flag value for this
 					principal's attributes field in the
 					database.
-  (SR)	SALTTYPE	<string>	Comma-separated list of salt types
-					supported for this principal.  See
-					note below.
-  (R)	MKVNO		<integer>	Master key version number.
-  (R)	LASTPWCHANGE	<general-time>	Last time of password change.
   (R)	LASTSUCCESS	<general-time>	Last successful password entry.
   (R)	LASTFAILED	<general-time>	Last failed password attempt.
   (R)	FAILCOUNT	<integer>	Number of failed password attempts.
-  (R)	MODNAME		<string>	Principal name who performed last
-					modification.
-  (R)	MODDATE		<general-time>	Last modification date.
+  (SR)	AUXDATA		<tagged-value>	Tagged auxiliary value (see below)
+  (R)	KEYDATA		<key-value>	Key value (see below)
+  (SR)	EXTRADATA	<unspecified>	Extra data (see below)
 
 The valid field indicates whether an attribute is Settable (e.g. appropriate
 for use with ADD-PRINCIPAL, et. al.; Returnable (e.g. returned by
 INQUIRE-PRINCIPAL); or both Settable and Returnable.
 
-Note: The value for SALTTYPE is a comma-separated list of strings.  The
-individual values for these may be either "KRB5" or "KRB4" or a site-specific
-value.
+o <tagged-value>
+The <tagged-value> type denotes data which is stored in the database as a
+tagged value.  The protocol representation consists of a 4-byte network order
+integer to denote the tag with the remaining data providing the value.  If
+encoded data is to be encapsulated, it must be in network order.  In summary:
+	AUXDATA=<tag><value>
+For example, to encode the value for tag 1 with a 4-byte value of 32 71 1e 30
+in network order, the encoding would be:
+	AUXDATA=00 00 00 01 32 71 1e 30
+
+o <key-value>
+The <key-value> type denotes data which is stored in the database on a per-key
+basis.  The protocol representation is consists of a 4-byte network order
+integer to denote a particular key.  This integer is implementation dependent
+and is only used to correlate different <key-value> entries.  This integer
+is followed by a 4-byte network order integer which denotes the attribute type.
+Currently, only three are supported: -1 denotes the key version; 1 denotes the
+key type and 2 denotes the salt type.  This attribute type integer is followed
+by the attribute value and an optional per-attribute value.  In summary:
+	KEYDATA=<key-tag><attribute><attribute-value>[<per-attribute-value>]
+For example, to encode the value of a key with keytype 3, salttype 5, with key
+version number 32, key data of 12 34 56 78 90 ab cd ef and salt data of f0 e1
+d2 c3 b4 a5 96 87, the encoding would be (using key-tag de ad be ef):
+	(key version number 32)
+	KEYDATA=de ad be ef ff ff ff ff 00 00 00 20
+	(key keytype 3, value 1234567890abcdef)
+	KEYDATA=de ad be ef 00 00 00 01 00 00 00 03 12 34 56 78 90 ab cd ef
+	(key salttype 5, value f0e1d2c3b4a59687)
+	KEYDATA=de ad be ef 00 00 00 02 00 00 00 05 f0 e1 d2 c3 b4 a5 96 87
+
+o <unspecified>
+The <unspecified> type is exactly that.  Unspecified.  Any data may be encoded
+here without restriction.
 
 Keytab Entry
 ------------
