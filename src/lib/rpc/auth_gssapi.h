@@ -123,13 +123,13 @@ PROTOTYPE((auth_gssapi_name *names, int num));
 void _svcauth_gssapi_unset_names
 PROTOTYPE(());
 
-void _svcauth_set_log_badauth_func
+void _svcauth_gssapi_set_log_badauth_func
 PROTOTYPE((auth_gssapi_log_badauth_func func,
 	   caddr_t data));
-void _svcauth_set_log_badverf_func
+void _svcauth_gssapi_set_log_badverf_func
 PROTOTYPE((auth_gssapi_log_badverf_func func,
 	   caddr_t data));
-void _svcauth_set_log_miscerr_func
+void _svcauth_gssapi_set_log_miscerr_func
 PROTOTYPE((auth_gssapi_log_miscerr_func func,
 	   caddr_t data));
 
