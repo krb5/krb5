@@ -3,6 +3,9 @@ Building the Macintosh version of Kerberos 5 and GSS
 
 (Last updated $Date$)
 
+If you have questions or comments about the Macintosh build process,
+send e-mail to <macdev@mit.edu> .
+
 
 To build the Macintosh version of Kerberos 5 and GSS:
 
@@ -114,15 +117,18 @@ To build the Macintosh version of Kerberos 5 and GSS:
 
 	 To install the Kerberos 5 system on your Mac:
 
-	   1) Drop the :mac:krb5.ini file (configured for your site) into
+	   1) Copy the :mac:krb5.ini file (configured for your site) into
 	      the "Preferences" folder in the "System Folder".
 	   
 	   2) Install the shared libraries by copying the  "GSSLib" file
 	      to the "Extensions" folder in the "System Folder".
 	   
-	   3) Put the "CNS Config" application in a handy location.
-	   
-	   4) Put the krb5.ini file in your preferences folder.
+	   3) If you are using System 7.6 or earlier on a 68K Mac, install
+	      the CFM-68K Runtime Enabler 4.0, available from Apple at:
+	      
+	      <ftp://ftp.info.apple.com/Apple_Support_Area/Apple_Software_Updates/US/Macintosh/System/CFM-68K/>
+	      
+	   4) Put the "CNS Config" application in a handy location.
 
 
 --- Getting Started Programming ---
@@ -156,3 +162,14 @@ To build the Macintosh version of Kerberos 5 and GSS:
             libkrb5.PPC
             
 	   3) Set the project options to 4 byte integers and enums treated as ints.
+
+    A PDF document describing the Kerberos 5 API is located at:
+    
+      <http://web.mit.edu/macdev/mit/doc/pdf/krb5api.pdf>
+    
+    (This document was created from tex files in the main krb5 source tree.)
+    
+    The GSSAPI is described in Internet RFC's 1508 and 1509:
+    
+      <http://info.internet.isi.edu/in-notes/rfc/files/rfc1508.txt>
+      <http://info.internet.isi.edu/in-notes/rfc/files/rfc1509.txt>
