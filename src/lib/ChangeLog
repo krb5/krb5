@@ -1,3 +1,9 @@
+2004-03-31  Jeffrey Altman <jaltman@mit.edu>
+
+    * Makefile.in: Delay Load the ADVAPI32.DLL and SECUR32.DLL libraries
+      to enable the KRB5_32.DLL to load on Windows 9x systems which do
+      not support the LSA Kerberos functionality.
+
 2004-03-08  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (LOCAL_SUBDIRS): Renamed from MY_SUBDIRS.
