@@ -27,7 +27,7 @@
 #include "mcc.h"
 
 #define set(bits) (whichfields & bits)
-#define flags_match(a,b) (a & b == a)
+#define flags_match(a,b) (((a) & (b)) == (a))
 #define times_match_exact(t1,t2) (memcmp((char *)(t1), (char *)(t2), sizeof(*(t1))) == 0)
 
 static krb5_boolean times_match PROTOTYPE((const krb5_ticket_times *,

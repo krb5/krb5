@@ -1,3 +1,8 @@
+Thu Aug 15 16:48:22 1996  Tom Yu  <tlyu@mit.edu>
+
+	* mcc_retrv.c: Add parens to def'n of flags_match because == has
+		higher precedence than &. (noticed by -Wall)
+
 Tue Jun 11 20:15:01 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* mcc_close.c (krb5_mcc_close): Remove inclusion of malloc.h
