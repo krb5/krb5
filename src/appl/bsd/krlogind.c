@@ -107,9 +107,6 @@ static char sccsid[] = "@(#)rlogind.c	5.17 (Berkeley) 8/31/88";
  */
 #define LOG_REMOTE_REALM
 #define CRYPT
-#ifdef KRB5_KRB4_COMPAT
-#define SERVE_V4
-#endif
 
 #include <stdio.h>
 #include <sys/types.h>
@@ -178,6 +175,8 @@ struct winsize {
 #ifdef BUFSIZ
 #undef BUFSIZ
 #endif
+
+#undef KRB5_KRB4_COMPAT
 
 int auth_sys = 0;	/* Which version of Kerberos used to authenticate */
 
@@ -1040,6 +1039,7 @@ do_krb_login(host)
     krb5_error_code status;
     struct passwd *pwd;
     int	passed_krb, passed_rhosts;
+    char *msg_fail;
 
     passed_krb = passed_rhosts = 0;
 
@@ -1063,14 +1063,14 @@ do_krb_login(host)
     /* OK we have authenticated this user - now check authorization. */
     /* The Kerberos authenticated programs must use krb5_kuserok or kuserok*/
     
-#ifdef SERVE_V4
+#ifndef KRB5_KRB4_COMPAT
     if (auth_sys == KRB5_RECVAUTH_V4) {
 	  fatal(netf, "This server does not support Kerberos V4");
   }
 #endif
     
     if (must_pass_k5 || must_pass_one) {
-#if (defined(ALWAYS_V5_KUSEROK) || !defined(SERVE_V4))
+#if (defined(ALWAYS_V5_KUSEROK) || !defined(KRB5_KRB4_COMPAT))
 	/* krb5_kuserok returns 1 if OK */
 	if (client && krb5_kuserok(client, lusername))
 	    passed_krb++;
@@ -1105,11 +1105,18 @@ do_krb_login(host)
     if ((must_pass_k5 && passed_krb) ||
 	(must_pass_rhosts && passed_rhosts) ||
 	(must_pass_one && (passed_krb || passed_rhosts)))
-	return;
+	    return;
     
     if (ticket)
 	krb5_free_ticket(ticket);
-    fatal(netf, "User is not authorized to login to specified account");
+
+    msg_fail =  (char *) malloc( strlen(krusername) + strlen(lusername) + 80 );
+    if (!msg_fail)
+	fatal(netf, "User is not authorized to login to specified account");
+    sprintf(msg_fail, "User %s is not authorized to login to account %s",
+	    krusername, lusername);
+    fatal(netf, msg_fail);
+    /* NOTREACHED */
 }
 
 
@@ -1466,7 +1473,7 @@ recvauth()
     getstr(netf, lusername, sizeof (lusername), "locuser");
     getstr(netf, term, sizeof(term), "Terminal type");
 
-#ifdef SERVE_V4
+#ifdef KRB5_KRB4_COMPAT
     if (auth_sys == KRB5_RECVAUTH_V4) {
 
 	des_read  = v4_des_read;
@@ -1520,7 +1527,7 @@ recvauth()
 }
 
 
-#ifdef SERVE_V4
+#ifdef KRB5_KRB4_COMPAT
 
 int
 v4_des_read(fd, buf, len)
@@ -1654,5 +1661,5 @@ int len;
 	return(len);
 }
 
-#endif /* SERVE_V4 */
+#endif /* KRB5_KRB4_COMPAT */
 #endif /* KERBEROS */
