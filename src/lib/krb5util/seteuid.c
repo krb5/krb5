@@ -21,7 +21,7 @@
 #include <sys/types.h>
 #endif
 
-#include <k5-int.h>
+#include <k5-util.h>
 
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
@@ -33,15 +33,15 @@
 
 #include <errno.h>
 
-int krb5_seteuid( euid_in)
+int krb5_seteuid(euid_in)
     int euid_in;
 {
     uid_t euid = (uid_t) euid_in;
 #if defined(HAVE_SETEUID)
-    return  (seteuid(euid)) ;
+    return (seteuid(euid));
 #else
 #if defined(HAVE_SETRESUID)
-    return (setresuid(getuid(), euid, geteuid())) ;
+    return (setresuid(getuid(), euid, geteuid()));
 #else
 #if defined(HAVE_SETREUID)
     return setreuid(geteuid(), euid); 
@@ -49,8 +49,29 @@ int krb5_seteuid( euid_in)
     /* You need to add a case to deal with this operating system.*/
     errno = EPERM;
     return -1;
-  
 #endif /* HAVE_SETREUID */
 #endif /* HAVE_SETRESUID */
 #endif /* HAVE_SETEUID */
+}
+
+int krb5_setegid(egid_in)
+    int egid_in;
+{
+    gid_t egid = (gid_t) egid_in;
+
+#ifdef HAVE_SETEGID
+    return (seteuid(egid));
+#else
+#ifdef HAVE_SETRESGID
+    return (setresgid(getgid(), egid, getegid()));
+#else
+#ifdef HAVE_SETREGID
+    return (setregid(getegid(), egid));
+#else /* HAVE_SETREGID */
+    /* You need to add a case to deal with this operating system.*/
+    errno = EPERM;
+    return -1;
+#endif /* HAVE_SETREGID */
+#endif /* HAVE_SETRESGID */
+#endif /* HAVE_SETEGID */
 }

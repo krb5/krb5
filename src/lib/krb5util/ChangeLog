@@ -1,3 +1,10 @@
+Sun Feb 22 19:22:18 1998  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in: Add checks for set{re,e,res}gid().
+
+	* seteuid.c: Include k5-util.h rather than k5-int.h.  Add
+	krb5_setegid().
+
 Wed Feb 18 16:26:00 1998  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Remove trailing slash from thisconfigdir.  Fix up
