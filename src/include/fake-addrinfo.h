@@ -109,6 +109,8 @@
 #  define inline __inline__ /* this form silences -pedantic warnings */
 # elif defined(__mips) && defined(__sgi)
 #  define inline __inline /* IRIX used at MIT does inline but not c99 yet */
+# elif defined(__sun) && __SUNPRO_C >= 0x540
+/* The Forte Developer 7 C compiler supports "inline".  */
 # else
 #  define inline /* nothing, just static */
 # endif

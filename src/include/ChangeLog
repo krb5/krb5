@@ -1,5 +1,8 @@
 2003-08-26  Ken Raeburn  <raeburn@mit.edu>
 
+	* fake-addrinfo.h (inline): Supported by Sun Forte Developer 7
+	compiler.
+
 	* foreachaddr.c (foreach_localaddr) [HAVE_IFADDRS_H]: Skip over
 	any returned data structure with a NULL ifa_addr field.
 
