@@ -1,3 +1,8 @@
+2003-07-15  Ken Raeburn  <raeburn@mit.edu>
+
+	* aclocal.m4 (extra_gcc_warn_opts): Don't turn on -pedantic on
+	Darwin.
+
 2003-05-27  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (KRBHDEP): Add krb524_err header.

@@ -456,13 +456,18 @@ AC_SUBST(HAVE_GCC)
 # maybe add -Waggregate-return, or can we assume that actually works by now?
 # -Wno-comment is for SunOS system header <sys/stream.h>
 extra_gcc_warn_opts="-Wall -Wmissing-prototypes -Wcast-qual \
- -Wcast-align -Wconversion -Wshadow -Wno-comment -pedantic"
+ -Wcast-align -Wconversion -Wshadow -Wno-comment"
 if test "$GCC" = yes ; then
   if test "x$krb5_ac_cflags_set" = xset ; then
     AC_MSG_NOTICE(not adding extra gcc warning flags because CFLAGS was set)
   else
     AC_MSG_NOTICE(adding extra warning flags for gcc)
     CFLAGS="$CFLAGS $extra_gcc_warn_opts"
+    if test "`uname -s`" = Darwin ; then
+      AC_MSG_NOTICE(skipping pedantic warnings on Darwin)
+    else
+      CFLAGS="$CFLAGS -pedantic"
+    fi
   fi
 fi
 ])dnl
