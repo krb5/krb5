@@ -1,4 +1,6 @@
 thisconfigdir=.
+myfulldir=lib/rpc
+mydir=.
 BUILDTOP=$(REL)$(U)$(S)$(U)
 CFLAGS = $(CCOPTS) $(DEFS) -DGSSAPI_KRB5 -DDEBUG_GSSAPI=0
 
