@@ -1,3 +1,11 @@
+Tue Jul 23 11:09:08 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* Makefile.in: libkdb5.so needs to be built with
+		libcrypto and libkrb5.
+
+	* configure.in: Pass version numbers of teh crypto and krb5 shared
+		libraries. 
+
 Fri Jul 12 15:32:26 1996  Marc Horowitz  <marc@mit.edu>
 
 	* kdb_cpw.c (add_key_pwd): initialize retval = 0, in case the
