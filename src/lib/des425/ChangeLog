@@ -1,3 +1,10 @@
+Thu Nov 12 17:20:25 1998  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (STLIBOBJS, OBJS, SRCS): Restore des.c
+
+	* des.c: Restore des_ecb_encrypt and make it use the cbc
+	interface.
+
 1998-10-27  Marc Horowitz  <marc@mit.edu>
 
 	* random_key.c, new_rnd_key.c: make the v4 compat random key code
