@@ -1,3 +1,7 @@
+2004-02-06  Sam Hartman  <hartmans@avalanche-breakdown.mit.edu>
+
+	* kdc_util.c:  Ignore unknown TGS options
+
 2004-01-05  Sam Hartman  <hartmans@mit.edu>
 
 	* kerberos_v4.c (kerberos_v4): Only backdate the rquest in the

@@ -1113,13 +1113,10 @@ validate_tgs_request(register krb5_kdc_req *request, krb5_db_entry server,
     int		st_idx = 0;
 
     /*
-     * If an illegal option is set, complain.
+     * If an illegal option is set, ignore it.
      */
-    if (request->kdc_options & ~(TGS_OPTIONS_HANDLED)) {
-	*status = "INVALID TGS OPTIONS";
-	return KDC_ERR_BADOPTION;
-    }
-    
+    request->kdc_options &= ~(TGS_OPTIONS_HANDLED);
+
     /* Check to see if server has expired */
     if (server.expiration && server.expiration < kdc_time) {
 	*status = "SERVICE EXPIRED";
