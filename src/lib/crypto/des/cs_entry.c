@@ -19,6 +19,7 @@ static char rcsid_des_cs_ent_c[] =
 
 #include <krb5/krb5.h>
 #include <krb5/mit-des.h>
+#include <krb5/crc-32.h>
 
 extern krb5_error_code mit_des_encrypt_func PROTOTYPE((const krb5_pointer,
 						       krb5_pointer,
@@ -54,7 +55,7 @@ krb5_cryptosystem_entry mit_des_cryptosystem_entry = {
     mit_des_finish_random_key,
     mit_des_random_key,
     sizeof(mit_des_cblock),
-    0,
+    CRC32_CKSUM_LENGTH,
     sizeof(mit_des_cblock),
     ETYPE_DES_CBC_CRC,
     KEYTYPE_DES
