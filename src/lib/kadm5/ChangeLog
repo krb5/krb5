@@ -1,3 +1,11 @@
+Fri Aug  2 13:19:29 1996  Barry Jaspan  <bjaspan@DUN-DUN-NOODLES>
+
+	* alt_prof.c (kadm5_get_config_params): alloc enough bytes for
+        adbname
+
+	* kadm_rpc_xdr.c (xdr_krb5_kvno): assign tmp before xdr'ing it to
+        avoid a spurious purify error
+
 Thu Jul 25 12:04:32 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* admin_internal.h (_KADM5_CHECK_HANDLE): Add parenthesis around

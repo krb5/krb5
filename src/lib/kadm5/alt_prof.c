@@ -369,7 +369,7 @@ krb5_error_code kadm5_get_config_params(context, kdcprofile, kdcenv,
 	 params.mask |= KADM5_CONFIG_ADBNAME;
 	 params.admin_dbname = strdup(params_in->admin_dbname);
     } else if (params_in->mask & KADM5_CONFIG_DBNAME) {
-	 params.admin_dbname = (char *) malloc(strlen(params.dbname) + 6);
+	 params.admin_dbname = (char *) malloc(strlen(params.dbname) + 7);
 	 if (params.admin_dbname) {
 	      sprintf(params.admin_dbname, "%s.kadm5", params.dbname);
 	      params.mask |= KADM5_CONFIG_ADBNAME;
@@ -378,7 +378,7 @@ krb5_error_code kadm5_get_config_params(context, kdcprofile, kdcenv,
 	 params.admin_dbname = svalue;
 	 params.mask |= KADM5_CONFIG_ADBNAME;
     } else if (params.mask & KADM5_CONFIG_DBNAME) {
-	 params.admin_dbname = (char *) malloc(strlen(params.dbname) + 6);
+	 params.admin_dbname = (char *) malloc(strlen(params.dbname) + 7);
 	 if (params.admin_dbname) {
 	      sprintf(params.admin_dbname, "%s.kadm5", params.dbname);
 	      params.mask |= KADM5_CONFIG_ADBNAME;
