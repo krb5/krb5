@@ -175,7 +175,8 @@ krb5_data **response;			/* filled in with a response packet */
 #undef cleanup
 #define cleanup() { krb5_free_ticket(header_ticket); \
 		   krb5_db_free_principal(&server, 1); \
-		   bzero((char *)session_key->contents, session_key->length); \
+		   memset((char *)session_key->contents, 0, \
+			  session_key->length); \
 		   free((char *)session_key->contents); \
 		   session_key->contents = 0; }
 
@@ -372,7 +373,8 @@ krb5_data **response;			/* filled in with a response packet */
 #undef cleanup
 #define cleanup() { krb5_free_ticket(header_ticket); \
 		   krb5_db_free_principal(&server, 1); \
-		   bzero((char *)session_key->contents, session_key->length); \
+		   memset((char *)session_key->contents, 0, \
+			  session_key->length); \
 		   free((char *)session_key->contents); \
 		   session_key->contents = 0; \
 		   if (newtransited) free(enc_tkt_reply.transited.data);}
@@ -404,7 +406,7 @@ krb5_data **response;			/* filled in with a response packet */
 
 	retval = krb5_encrypt_tkt_part(&encrypting_key, &ticket_reply);
 
-	bzero((char *)encrypting_key.contents, encrypting_key.length);
+	memset((char *)encrypting_key.contents, 0, encrypting_key.length);
 	free((char *)encrypting_key.contents);
 
 	if (retval) {
@@ -443,7 +445,7 @@ krb5_data **response;			/* filled in with a response packet */
     retval = krb5_encode_kdc_rep(KRB5_TGS_REP, &reply_encpart,
 				 header_ticket->enc_part2->session,
 				 &reply, response);
-    bzero((char *)session_key->contents, session_key->length);
+    memset((char *)session_key->contents, 0, session_key->length);
     free((char *)session_key->contents);
     session_key->contents = 0;
     return retval;

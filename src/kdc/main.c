@@ -271,7 +271,7 @@ closedown_db()
     /* clean up master key stuff */
     retval = krb5_finish_key(&master_encblock);
 
-    bzero((char *)&master_encblock, sizeof(master_encblock));
+    memset((char *)&master_encblock, 0, sizeof(master_encblock));
 
     /* close database */
     if (retval) {

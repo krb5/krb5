@@ -57,7 +57,7 @@ const char *prog;
 	com_err(prog, 0, "Cannot create server socket");
 	return retval;
     }
-    bzero((char *)&sin, sizeof(sin));
+    memset((char *)&sin, 0, sizeof(sin));
     sin.sin_port = sp->s_port;
     if (bind(udp_port_fd, (struct sockaddr *)&sin, sizeof(sin)) == -1) {
 	retval = errno;

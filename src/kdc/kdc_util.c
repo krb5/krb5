@@ -199,7 +199,7 @@ krb5_ticket **ticket;
 				 0,	/* no replay cache */
 				 &authdat);
     krb5_db_free_principal(&server, nprincs);
-    bzero((char *)encrypting_key.contents, encrypting_key.length);
+    memset((char *)encrypting_key.contents, 0, encrypting_key.length);
     free((char *)encrypting_key.contents);
     if (retval) {
 	cleanup_apreq();
