@@ -34,7 +34,7 @@ static char rcsid_do_tgs_req_c[] =
 #include "extern.h"
 
 
-static krb5_error_code prepare_error_tgs PROTOTYPE((krb5_tgs_req *,
+static krb5_error_code prepare_error_tgs PROTOTYPE((krb5_real_tgs_req *,
 						int,
 						krb5_data **));
 static krb5_error_code decrypt_second_ticket PROTOTYPE((krb5_ticket *));
@@ -42,7 +42,7 @@ static krb5_error_code decrypt_second_ticket PROTOTYPE((krb5_ticket *));
 /*ARGSUSED*/
 krb5_error_code
 process_tgs_req(request, from, response)
-register krb5_tgs_req *request;
+krb5_tgs_req *request;
 krb5_fulladdr *from;			/* who sent it ? */
 krb5_data **response;			/* filled in with a response packet */
 {
@@ -60,10 +60,13 @@ krb5_data **response;			/* filled in with a response packet */
     int newtransited = 0;
     krb5_timestamp until, rtime;
     krb5_keyblock encrypting_key;
-
+    register krb5_real_tgs_req *realreq;
 	
+    /* get ptr to real stuff */
+    realreq = request->tgs_request2;
+
     /* assume that we've already dealt with the AP_REQ header, so
-       we can use request->header freely.
+       we can use request->header2 freely.
        Also assume the encrypted part (if any) has been decrypted
        with the session key.
        
@@ -75,16 +78,16 @@ krb5_data **response;			/* filled in with a response packet */
        header? */
 
     nprincs = 1;
-    if (retval = krb5_db_get_principal(request->server, &server, &nprincs,
+    if (retval = krb5_db_get_principal(realreq->server, &server, &nprincs,
 				       &more))
 	return(retval);
     if (more) {
 	krb5_db_free_principal(&server, nprincs);
-	return(prepare_error_tgs(request, KDC_ERR_PRINCIPAL_NOT_UNIQUE,
+	return(prepare_error_tgs(realreq, KDC_ERR_PRINCIPAL_NOT_UNIQUE,
 				 response));
     } else if (nprincs != 1) {
 	krb5_db_free_principal(&server, nprincs);
-	return(prepare_error_tgs(request, KDC_ERR_S_PRINCIPAL_UNKNOWN,
+	return(prepare_error_tgs(realreq, KDC_ERR_S_PRINCIPAL_UNKNOWN,
 				 response));
     }
 
@@ -95,30 +98,30 @@ krb5_data **response;			/* filled in with a response packet */
 	return(retval);
     }
     
-    if (!valid_etype(request->etype)) {
+    if (!valid_etype(realreq->etype)) {
 	/* unsupported etype */
 
 	cleanup();
-	return(prepare_error_tgs(request, KDC_ERR_ETYPE_NOSUPP, response));
+	return(prepare_error_tgs(realreq, KDC_ERR_ETYPE_NOSUPP, response));
     }
 
-    if (isset(request->kdc_options, KDC_OPT_REUSE_SKEY)) {
+    if (isflagset(realreq->kdc_options, KDC_OPT_REUSE_SKEY)) {
 	/* decrypt second ticket, and examine */
-	second_ticket = request->enc_part2->second_ticket;
+	second_ticket = realreq->enc_part2->second_ticket;
 	if (retval = decrypt_second_ticket(second_ticket)) {
 	    cleanup();
 	    return(retval);
 	}
-	if (!isset(second_ticket->enc_part2->flags,
+	if (!isflagset(second_ticket->enc_part2->flags,
 		   TKT_FLG_DUPLICATE_SKEY)) {
 	    krb5_free_enc_tkt_part(second_ticket->enc_part2);
 	    second_ticket->enc_part2 = 0;
 	    cleanup();
-	    return(prepare_error_tgs(request, KDC_ERR_BADOPTION, response));
+	    return(prepare_error_tgs(realreq, KDC_ERR_BADOPTION, response));
 	}
 	session_key = second_ticket->enc_part2->session;
     } else {
-	if (retval = (*(krb5_csarray[request->etype]->system->random_key))(krb5_csarray[request->etype]->random_sequence, &session_key)) {
+	if (retval = (*(krb5_csarray[realreq->etype]->system->random_key))(krb5_csarray[realreq->etype]->random_sequence, &session_key)) {
 	    /* random key failed */
 	    cleanup();
 	    return(retval);
@@ -128,8 +131,8 @@ krb5_data **response;			/* filled in with a response packet */
 #undef cleanup
 #define cleanup() {krb5_db_free_principal(&server, 1); bzero((char *)session_key->contents, session_key->length); free((char *)session_key->contents); session_key->contents = 0; if (second_ticket) {krb5_free_enc_tkt_part(second_ticket->enc_part2); second_ticket->enc_part2 = 0;}}
 
-    ticket_reply.server = request->server; /* XXX careful for realm... */
-    ticket_reply.etype = request->etype;
+    ticket_reply.server = realreq->server; /* XXX careful for realm... */
+    ticket_reply.etype = realreq->etype;
     ticket_reply.skvno = server.kvno;
 
     enc_tkt_reply.flags = 0;
@@ -137,7 +140,7 @@ krb5_data **response;			/* filled in with a response packet */
 
 
     /* short-hand name to avoid lots of dereferencing */
-    header_ticket = request->header->ticket;
+    header_ticket = request->header2->ticket;
 
     /* don't use new addresses unless forwarded, see below */
 
@@ -153,59 +156,59 @@ krb5_data **response;			/* filled in with a response packet */
 
     if (against_flag_policy_tgs(request)) {
 	cleanup();
-	return(prepare_error_tgs(request, KDC_ERR_BADOPTION, response));
+	return(prepare_error_tgs(realreq, KDC_ERR_BADOPTION, response));
     }
 
-    if (isset(request->kdc_options, KDC_OPT_FORWARDABLE))
-	set(enc_tkt_reply.flags, TKT_FLG_FORWARDABLE);
+    if (isflagset(realreq->kdc_options, KDC_OPT_FORWARDABLE))
+	setflag(enc_tkt_reply.flags, TKT_FLG_FORWARDABLE);
 
-    if (isset(request->kdc_options, KDC_OPT_FORWARDED)) {
-	set(enc_tkt_reply.flags, TKT_FLG_FORWARDED);
+    if (isflagset(realreq->kdc_options, KDC_OPT_FORWARDED)) {
+	setflag(enc_tkt_reply.flags, TKT_FLG_FORWARDED);
 
 	/* include new addresses in ticket & reply */
 
-	enc_tkt_reply.caddrs = request->addresses;
-	reply_encpart.caddrs = request->addresses;
+	enc_tkt_reply.caddrs = realreq->addresses;
+	reply_encpart.caddrs = realreq->addresses;
     }	
 
-    if (isset(request->kdc_options, KDC_OPT_PROXIABLE))
-	set(enc_tkt_reply.flags, TKT_FLG_PROXIABLE);
+    if (isflagset(realreq->kdc_options, KDC_OPT_PROXIABLE))
+	setflag(enc_tkt_reply.flags, TKT_FLG_PROXIABLE);
 
-    if (isset(request->kdc_options, KDC_OPT_PROXY)) {
-	set(enc_tkt_reply.flags, TKT_FLG_PROXY);
+    if (isflagset(realreq->kdc_options, KDC_OPT_PROXY)) {
+	setflag(enc_tkt_reply.flags, TKT_FLG_PROXY);
 
 	/* include new addresses in ticket & reply */
 
-	enc_tkt_reply.caddrs = request->addresses;
-	reply_encpart.caddrs = request->addresses;
+	enc_tkt_reply.caddrs = realreq->addresses;
+	reply_encpart.caddrs = realreq->addresses;
     }
 
-    if (isset(request->kdc_options, KDC_OPT_ALLOW_POSTDATE))
-	set(enc_tkt_reply.flags, TKT_FLG_MAY_POSTDATE);
+    if (isflagset(realreq->kdc_options, KDC_OPT_ALLOW_POSTDATE))
+	setflag(enc_tkt_reply.flags, TKT_FLG_MAY_POSTDATE);
 
-    if (isset(request->kdc_options, KDC_OPT_POSTDATED)) {
-	set(enc_tkt_reply.flags, TKT_FLG_POSTDATED);
-	set(enc_tkt_reply.flags, TKT_FLG_INVALID);
-	if (against_postdate_policy(request->from)) {
+    if (isflagset(realreq->kdc_options, KDC_OPT_POSTDATED)) {
+	setflag(enc_tkt_reply.flags, TKT_FLG_POSTDATED);
+	setflag(enc_tkt_reply.flags, TKT_FLG_INVALID);
+	if (against_postdate_policy(realreq->from)) {
 	    cleanup();
-	    return(prepare_error_tgs(request, KDC_ERR_BADOPTION, response));
+	    return(prepare_error_tgs(realreq, KDC_ERR_BADOPTION, response));
 	}	    
-	enc_tkt_reply.times.starttime = request->from;
+	enc_tkt_reply.times.starttime = realreq->from;
     } else
 	enc_tkt_reply.times.starttime = kdc_time;
 
-    if (isset(request->kdc_options, KDC_OPT_DUPLICATE_SKEY) ||
-	isset(request->kdc_options, KDC_OPT_REUSE_SKEY))
-	set(enc_tkt_reply.flags, TKT_FLG_DUPLICATE_SKEY);
-    if (isset(request->kdc_options, KDC_OPT_VALIDATE)) {
+    if (isflagset(realreq->kdc_options, KDC_OPT_DUPLICATE_SKEY) ||
+	isflagset(realreq->kdc_options, KDC_OPT_REUSE_SKEY))
+	setflag(enc_tkt_reply.flags, TKT_FLG_DUPLICATE_SKEY);
+    if (isflagset(realreq->kdc_options, KDC_OPT_VALIDATE)) {
 	if (header_ticket->enc_part2->times.starttime > kdc_time) {
 	    cleanup();
-	    return(prepare_error_tgs(request, KRB_AP_ERR_TKT_NYV, response));
+	    return(prepare_error_tgs(realreq, KRB_AP_ERR_TKT_NYV, response));
 	}
 	/* XXX move this check out elsewhere? */
 	if (check_hot_list(header_ticket)) {
 	    cleanup();
-	    return(prepare_error_tgs(request, KRB_AP_ERR_REPEAT, response));
+	    return(prepare_error_tgs(realreq, KRB_AP_ERR_REPEAT, response));
 	}
 	/* BEWARE of allocation hanging off of ticket & enc_part2, it belongs
 	   to the caller */
@@ -221,7 +224,7 @@ krb5_data **response;			/* filled in with a response packet */
 	*/
 
     enc_tkt_reply.times.authtime = header_ticket->enc_part2->times.authtime;
-    if (isset(request->kdc_options, KDC_OPT_RENEW)) {
+    if (isflagset(realreq->kdc_options, KDC_OPT_RENEW)) {
 	krb5_deltat old_life;
 
           /* Note that if the endtime has already passed, the ticket would  */
@@ -231,7 +234,7 @@ krb5_data **response;			/* filled in with a response packet */
 	/* has it completely run out? */
 	if (header_ticket->enc_part2->times.renew_till < kdc_time) {
 	    cleanup();
-	    return(prepare_error_tgs(request, KRB_AP_ERR_TKT_EXPIRED, response));
+	    return(prepare_error_tgs(realreq, KRB_AP_ERR_TKT_EXPIRED, response));
 	}    
 
 	/* BEWARE of allocation hanging off of ticket & enc_part2, it belongs
@@ -248,27 +251,27 @@ krb5_data **response;			/* filled in with a response packet */
     } else {
 	/* not a renew request */
 	enc_tkt_reply.times.starttime = kdc_time;
-	until = (request->till == 0) ? infinity : request->till;
+	until = (realreq->till == 0) ? infinity : realreq->till;
 	enc_tkt_reply.times.endtime =
 	    min(until, min(enc_tkt_reply.times.starttime + server.max_life,
 			   min(enc_tkt_reply.times.starttime + max_life_for_realm,
 			       header_ticket->enc_part2->times.endtime)));
-	if (isset(request->kdc_options, KDC_OPT_RENEWABLE_OK) &&
-	    (enc_tkt_reply.times.endtime < request->till) &&
-	    isset(header_ticket->enc_part2->flags,
+	if (isflagset(realreq->kdc_options, KDC_OPT_RENEWABLE_OK) &&
+	    (enc_tkt_reply.times.endtime < realreq->till) &&
+	    isflagset(header_ticket->enc_part2->flags,
 		  TKT_FLG_RENEWABLE)) {
-	    set(request->kdc_options, KDC_OPT_RENEWABLE);
-	    request->rtime =
-		min(request->till,
+	    setflag(realreq->kdc_options, KDC_OPT_RENEWABLE);
+	    realreq->rtime =
+		min(realreq->till,
 		    header_ticket->enc_part2->times.renew_till);
 	}
     }
-    rtime = (request->rtime == 0) ? infinity : request->rtime;
+    rtime = (realreq->rtime == 0) ? infinity : realreq->rtime;
 
-    if (isset(request->kdc_options, KDC_OPT_RENEWABLE)) {
+    if (isflagset(realreq->kdc_options, KDC_OPT_RENEWABLE)) {
 	/* already checked above in policy check to reject request for a
 	   renewable ticket using a non-renewable ticket */
-	set(enc_tkt_reply.flags, TKT_FLG_RENEWABLE);
+	setflag(enc_tkt_reply.flags, TKT_FLG_RENEWABLE);
 	enc_tkt_reply.times.renew_till =
 	    min(rtime,
 		min(enc_tkt_reply.times.starttime + server.max_renewable_life,
@@ -279,9 +282,9 @@ krb5_data **response;			/* filled in with a response packet */
     }
 
     /* assemble any authorization data */
-    if (request->enc_part2->authorization_data) {
+    if (realreq->enc_part2->authorization_data) {
 	if (retval =
-	    concat_authorization_data(request->enc_part2->authorization_data,
+	    concat_authorization_data(realreq->enc_part2->authorization_data,
 				      header_ticket->enc_part2->authorization_data, 
 				      &enc_tkt_reply.authorization_data)) {
 	    cleanup();
@@ -312,13 +315,13 @@ krb5_data **response;			/* filled in with a response packet */
 #define cleanup() {krb5_db_free_principal(&server, 1); bzero((char *)session_key->contents, session_key->length);free((char *)session_key->contents); session_key->contents = 0; if (second_ticket) {krb5_free_enc_tkt_part(second_ticket->enc_part2); second_ticket->enc_part2 = 0;} if (newtransited) free(enc_tkt_reply.transited.data);}
 
     ticket_reply.enc_part2 = &enc_tkt_reply;
-    if (isset(request->kdc_options, KDC_OPT_ENC_TKT_IN_SKEY)) {
+    if (isflagset(realreq->kdc_options, KDC_OPT_ENC_TKT_IN_SKEY)) {
 	if (!second_ticket) {
-	    if 	(retval = decrypt_second_ticket(request->enc_part2->second_ticket)) {
+	    if 	(retval = decrypt_second_ticket(realreq->enc_part2->second_ticket)) {
 		cleanup();
 		return(retval);
 	    }
-	    second_ticket = request->enc_part2->second_ticket;
+	    second_ticket = realreq->enc_part2->second_ticket;
 	}
 	if (retval = krb5_encrypt_tkt_part(second_ticket->enc_part2->session,
 					   &ticket_reply)) {
@@ -357,13 +360,13 @@ krb5_data **response;			/* filled in with a response packet */
 
     /* Start assembling the response */
     reply.client = header_ticket->enc_part2->client;
-    reply.etype = request->etype;
+    reply.etype = realreq->etype;
     reply.ckvno = 0;			/* We are using the session key */
     reply.ticket = &ticket_reply;
 
     reply_encpart.session = session_key;
     reply_encpart.last_req = 0;		/* XXX */
-    reply_encpart.ctime = request->ctime;
+    reply_encpart.ctime = realreq->ctime;
 
     /* copy the time fields EXCEPT for authtime; it's location
        is used for ktime */
@@ -386,7 +389,7 @@ krb5_data **response;			/* filled in with a response packet */
 
 static krb5_error_code
 prepare_error_tgs (request, error, response)
-register krb5_tgs_req *request;
+register krb5_real_tgs_req *request;
 int error;
 krb5_data **response;
 {
