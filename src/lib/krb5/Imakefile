@@ -37,6 +37,8 @@ SRCS =	\
 	perror.c \
 	$(VSSRCS) $(VPSRCS)
 
+all::;	(cd asn.1; make Makefile)
+
 MakeSubdirs($(SUBDIRS))
 
 AdditiveLibraryTarget(krb5,$(OBJS))
