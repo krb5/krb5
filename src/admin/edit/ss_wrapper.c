@@ -52,6 +52,7 @@ int main(argc, argv)
 	    if (code != 0) {
 		    ss_perror(sci_idx, code, request);
 		    exit_status++;
+	    }
     } else
 	    ss_listen(sci_idx, &retval);
     return quit() ? 1 : exit_status;
