@@ -63,7 +63,7 @@ krb5_cs_table_entry *krb5_csarray[] = {
     LUCIFER_CRC_CSENTRY,
 };
 
-int krb5_max_cryptosystem = sizeof(krb5_csarray)/sizeof(krb5_csarray[0]);
+int krb5_max_cryptosystem = sizeof(krb5_csarray)/sizeof(krb5_csarray[0]) - 1;
 
 krb5_cs_table_entry *krb5_keytype_array[] = {
     0,
@@ -71,7 +71,7 @@ krb5_cs_table_entry *krb5_keytype_array[] = {
     LUCIFER_CRC_CSENTRY,
 };
 
-int krb5_max_keytype = sizeof(krb5_keytype_array)/sizeof(krb5_keytype_array[0]);
+int krb5_max_keytype = sizeof(krb5_keytype_array)/sizeof(krb5_keytype_array[0]) - 1;
 
 krb5_checksum_entry *krb5_cksumarray[] = {
     0,
