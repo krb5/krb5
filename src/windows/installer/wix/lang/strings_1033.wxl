@@ -39,6 +39,9 @@
     <String Id="KerberosClientTitle">Client</String>
     <String Id="KerberosClientDesc">Kerberos client utilities, libraries and documentation</String>
     
+    <String Id="StrKerberosClientDebugTitle">Debug symbols</String>
+    <String Id="StrKerberosClientDebugDesc">Debugging symbols for Kerberos for Windows components.</String>
+
     <String Id="KerberosSDKTitle">SDK</String>
     <String Id="KerberosSDKDesc">Libraries and header files for developing software with Kerberos</String>
     
@@ -51,5 +54,5 @@
     <String Id="IE501Required">Kerberos for Windows requires Microsoft Internet Explorer version 5.01 or higher.  Please resolve this and run the installer again.</String>
 
     <String Id="ARPComments">Build of</String>
-    
+
 </WixLocalization>
