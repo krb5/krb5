@@ -1,3 +1,8 @@
+2001-07024  Jeffrey Altman <jaltman@columbia.edu>
+
+        * win-pre.in:  the proper #define is KRB5_DNS_LOOKUP_REALM
+          and not KRB5_DNS_LOOKUP_REALMS
+
 2001-07-23  Danilo Almeida  <dalmeida@mit.edu>
 
 	* win-pre.in, win-post.in: Move rule-printing code to win-post.in
