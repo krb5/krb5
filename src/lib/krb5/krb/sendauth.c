@@ -218,7 +218,7 @@ krb5_sendauth(context, auth_context,
 
 error_return:
     krb5_free_cred_contents(context, &creds);
-    if (credspout)
+    if (!out_creds && credspout)
 	krb5_free_creds(context, credspout); 
     if (!ccache && use_ccache)
 	krb5_cc_close(context, use_ccache);

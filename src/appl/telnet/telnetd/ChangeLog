@@ -1,3 +1,8 @@
+Wed Apr  9 23:46:40 1997  Tom Yu  <tlyu@mit.edu>
+
+	* sys_term.c (start_login): Bounds check the constructed "speed"
+	passed in to login.
+
 Thu Nov  7 15:32:06 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* telnetd.c (main): Check the error return from

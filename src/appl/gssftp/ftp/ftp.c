@@ -155,7 +155,7 @@ hookup(host, port)
 		}
 		hisctladdr.sin_family = hp->h_addrtype;
 		memcpy((caddr_t)&hisctladdr.sin_addr, hp->h_addr_list[0],
-		    hp->h_length);
+		       sizeof(hisctladdr.sin_addr));
 		(void) strncpy(hostnamebuf, hp->h_name, sizeof(hostnamebuf));
 	}
 	hostname = hostnamebuf;
@@ -177,7 +177,8 @@ hookup(host, port)
 			perror((char *) 0);
 			hp->h_addr_list++;
 			memcpy((caddr_t)&hisctladdr.sin_addr,
-			     hp->h_addr_list[0], hp->h_length);
+			       hp->h_addr_list[0], 
+			       sizeof(hisctladdr.sin_addr));
 			fprintf(stdout, "Trying %s...\n",
 				inet_ntoa(hisctladdr.sin_addr));
 			(void) close(s);
