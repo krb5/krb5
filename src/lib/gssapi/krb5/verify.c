@@ -28,7 +28,7 @@
 
 OM_uint32
 krb5_gss_verify(minor_status, context_handle,
-		token_buffer, message_buffer,
+		message_buffer, token_buffer,
 		qop_state)
      OM_uint32 *minor_status;
      gss_ctx_id_t context_handle;
