@@ -330,17 +330,6 @@ krb5_get_host_realm(context, host, realmsp)
                 if (cp) 
                     cp++;
             } while (retval && cp && cp[0]);
-            if (retval)
-                retval = krb5_try_realm_txt_rr("_kerberos", "", &realm);
-            if (retval && default_realm) {
-                cp = default_realm;
-                do {
-                    retval = krb5_try_realm_txt_rr("_kerberos", cp, &realm);
-                    cp = strchr(cp,'.');
-                    if (cp) 
-                        cp++;
-                } while (retval && cp && cp[0]);
-            }
         }
     }
 #endif /* KRB5_DNS_LOOKUP */

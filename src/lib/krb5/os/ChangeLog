@@ -1,3 +1,8 @@
+2000-05-15  Jeffrey Altman <jaltman@columbia.edu>
+
+        * hst_realm.c (krb5_get_host_realm)
+          remove the searchlist and defaultrealm _kerberos queries
+
 2000-05-09	Alexandra Ellwood <lxs@mit.edu>
 
 	*localaddr.c: Fixed the local_addr_fallback_kludge so that it actually does something.
