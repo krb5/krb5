@@ -22,6 +22,7 @@
 
 #include <krb5.h>
 #include <kadm5/admin.h>
+#include <krb5/adm_proto.h>
 #include <com_err.h>
 #include <stdarg.h>
 
