@@ -310,13 +310,115 @@ void dupK5toCC(krb5_context context, krb5_creds *creds, cred_union **cu)
 }
 
 /*
- *  bitTst
- *  - utility function for below function
+ * Utility functions...
  */
-int bitTst(int var, int mask) {
+static krb5_boolean
+times_match(t1, t2)
+register const krb5_ticket_times *t1;
+register const krb5_ticket_times *t2;
+{
+    if (t1->renew_till) {
+	if (t1->renew_till > t2->renew_till)
+	    return FALSE;		/* this one expires too late */
+    }
+    if (t1->endtime) {
+	if (t1->endtime > t2->endtime)
+	    return FALSE;		/* this one expires too late */
+    }
+    /* only care about expiration on a times_match */
+    return TRUE;
+}
 
-	return var & mask;
-} 
+static krb5_boolean
+times_match_exact (t1, t2)
+    register const krb5_ticket_times *t1, *t2;
+{
+    return (t1->authtime == t2->authtime
+	    && t1->starttime == t2->starttime
+	    && t1->endtime == t2->endtime
+	    && t1->renew_till == t2->renew_till);
+}
+
+static krb5_boolean
+standard_fields_match(context, mcreds, creds)
+   krb5_context context;
+register const krb5_creds *mcreds, *creds;
+{
+    return (krb5_principal_compare(context, mcreds->client,creds->client) &&
+	    krb5_principal_compare(context, mcreds->server,creds->server));
+}
+
+/* only match the server name portion, not the server realm portion */
+
+static krb5_boolean
+srvname_match(context, mcreds, creds)
+   krb5_context context;
+register const krb5_creds *mcreds, *creds;
+{
+    krb5_boolean retval;
+    krb5_principal_data p1, p2;
+    
+    retval = krb5_principal_compare(context, mcreds->client,creds->client);
+    if (retval != TRUE)
+	return retval;
+    /*
+     * Hack to ignore the server realm for the purposes of the compare.
+     */
+    p1 = *mcreds->server;
+    p2 = *creds->server;
+    p1.realm = p2.realm;
+    return krb5_principal_compare(context, &p1, &p2);
+}
+
+
+static krb5_boolean
+authdata_match(mdata, data)
+    krb5_authdata *const *mdata, *const *data;
+{
+    const krb5_authdata *mdatap, *datap;
+
+    if (mdata == data)
+	return TRUE;
+
+    if (mdata == NULL)
+	return *data == NULL;
+
+    if (data == NULL)
+	return *mdata == NULL;
+
+    while ((mdatap = *mdata)
+	   && (datap = *data)
+	   && mdatap->ad_type == datap->ad_type
+	   && mdatap->length == datap->length
+	   && !memcmp ((char *) mdatap->contents, (char *) datap->contents,
+		       datap->length)) {
+	mdata++;
+	data++;
+    }
+
+    return !*mdata && !*data;
+}
+
+static krb5_boolean
+data_match(data1, data2)
+register const krb5_data *data1, *data2;
+{
+    if (!data1) {
+	if (!data2)
+	    return TRUE;
+	else
+	    return FALSE;
+    }
+    if (!data2) return FALSE;
+
+    if (data1->length != data2->length)
+	return FALSE;
+    else
+	return memcmp(data1->data, data2->data, data1->length) ? FALSE : TRUE;
+}
+
+#define MATCH_SET(bits) (whichfields & bits)
+#define flags_match(a,b) (((a) & (b)) == (a))
 
 /*  stdccCredsMatch
  *  - check to see if the creds match based on the whichFields variable
@@ -330,70 +432,36 @@ int stdccCredsMatch(krb5_context context, krb5_creds *base,
 	krb5_ticket_times b, m;
 	krb5_authdata **bp, **mp;
 	krb5_boolean retval;
-	
 
-	/* always check the standard fields */
-	if ((krb5_principal_compare(context, base->client, match->client) &&
-	    krb5_principal_compare(context, base->server, match->server)) == FALSE)
-	    return FALSE;
-
-	if (bitTst(whichfields, KRB5_TC_MATCH_TIMES)) {
-		/*
-		 * test for matching times
-		 * according to the file cache implementation we do:
-		 */
-		if (match->times.renew_till) {
-			if (match->times.renew_till > base->times.renew_till)
-				return FALSE;		/* this one expires too late */
-		}
-		if (match->times.endtime) {
-			if (match->times.endtime > base->times.endtime)
-				return FALSE;		/* this one expires too late */
-		}
-	} 
+	if (((MATCH_SET(KRB5_TC_MATCH_SRV_NAMEONLY) &&
+	      srvname_match(context, match, base)) ||
+	     standard_fields_match(context, match, base))
+	    &&
+	    (! MATCH_SET(KRB5_TC_MATCH_IS_SKEY) ||
+	     match->is_skey == base->is_skey)
+	    &&
+	    (! MATCH_SET(KRB5_TC_MATCH_FLAGS_EXACT) ||
+	     match->ticket_flags == base->ticket_flags)
+	    &&
+	    (! MATCH_SET(KRB5_TC_MATCH_FLAGS) ||
+	     flags_match(match->ticket_flags, base->ticket_flags))
+	    &&
+	    (! MATCH_SET(KRB5_TC_MATCH_TIMES_EXACT) ||
+	     times_match_exact(&match->times, &base->times))
+	    &&
+	    (! MATCH_SET(KRB5_TC_MATCH_TIMES) ||
+	     times_match(&match->times, &base->times))
+	    &&
+	    (! MATCH_SET(KRB5_TC_MATCH_AUTHDATA) ||
+	     authdata_match (match->authdata, base->authdata))
+	    &&
+	    (! MATCH_SET(KRB5_TC_MATCH_2ND_TKT) ||
+	     data_match (&match->second_ticket, &base->second_ticket))
+	    &&
+	    ((! MATCH_SET(KRB5_TC_MATCH_KTYPE))||
+	     (match->keyblock.enctype == base->keyblock.enctype))
+	    )
+		return TRUE;
+	return FALSE;
 	
-	if (bitTst(whichfields, KRB5_TC_MATCH_IS_SKEY)) 
-		if (base->is_skey != match->is_skey) return FALSE;
-	
-	if (bitTst(whichfields, KRB5_TC_MATCH_FLAGS)) 
-		if (base->ticket_flags != match->ticket_flags) return FALSE;
-		
-	if (bitTst(whichfields, KRB5_TC_MATCH_TIMES_EXACT)) {
-		b = base->times; m = match->times;
-		if ((b.authtime != m.authtime) ||
-			(b.starttime != m.starttime) ||
-			(b.endtime != m.endtime) ||
-			(b.renew_till != m.renew_till)) return FALSE;
-		}
-		
-	if (bitTst(whichfields, KRB5_TC_MATCH_AUTHDATA)) {
-		bp = base->authdata;
-		mp = match->authdata;
-		if ((bp != NULL) && (mp != NULL)) {
-		while ( (bp) && (*bp != NULL) ){
-			if (( (*bp)->ad_type != (*mp)->ad_type) ||
-				( (*bp)->length != (*mp)->length) ||
-				( memcmp( (*bp)->contents, (*mp)->contents, (*bp)->length) != 0)) return FALSE;
-			mp++; bp++;
-		}
-	  }
-	}
-	
-	if (bitTst(whichfields, KRB5_TC_MATCH_SRV_NAMEONLY)) {
-		//taken from cc_retrv.c
-		retval = krb5_principal_compare(context, base->client,match->client);
-		if (!retval) return FALSE;
-	  
-	  }
-	 
-	if (bitTst(whichfields, KRB5_TC_MATCH_2ND_TKT)) 
-		if ( (base->second_ticket.length != match->second_ticket.length) ||
-			(memcmp(base->second_ticket.data, match->second_ticket.data, base->second_ticket.length) != 0))
-			return FALSE;
-			
-	if (bitTst(whichfields,	KRB5_TC_MATCH_KTYPE))
-		if (base->keyblock.enctype != match->keyblock.enctype) return FALSE;
-			
-	//if we fall through to here, they must match
-	return TRUE;
 }

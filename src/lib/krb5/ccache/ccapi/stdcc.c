@@ -25,6 +25,7 @@
  * 
  */
 
+#define NEED_WINDOWS
 #include "stdcc.h"
 #include "stdcc_util.h"
 #include "string.h"
@@ -32,6 +33,19 @@
 
 #if defined(_MSDOS) || defined(_WIN32)
 apiCB *gCntrlBlock = NULL;
+#else
+#define CC_API_VER2
+#endif
+
+#ifdef DEBUG
+#if defined(_MSDOS) || defined(_WIN32)
+#include <io.h>
+#define SHOW_DEBUG(buf)   MessageBox((HWND)NULL, (buf), "ccapi debug", MB_OK)
+#endif
+	/* XXX need macintosh debugging statement if we want to debug */
+	/* on the mac */
+#else
+#define SHOW_DEBUG(buf)
 #endif
 
 /*
@@ -57,6 +71,31 @@ krb5_cc_ops krb5_cc_stdcc_ops = {
       krb5_stdcc_remove, 
       krb5_stdcc_set_flags,
 };
+
+#if defined(_MSDOS) || defined(_WIN32)
+/*
+ * cache_changed be called after the cache changes.
+ * A notification message is is posted out to all top level
+ * windows so that they may recheck the cache based on the
+ * changes made.  We register a unique message type with which
+ * we'll communicate to all other processes. 
+ */
+void cache_changed()
+{
+	static unsigned int message = 0;
+	
+	if (message == 0)
+		message = RegisterWindowMessage(WM_KERBEROS5_CHANGED);
+
+	SendMessage(HWND_BROADCAST, message, 0, 0);
+}
+#else /* _MSDOS || _WIN32 */
+
+void cache_changed()
+{
+	return;
+}
+#endif /* _MSDOS || _WIN32 */
 
 struct err_xlate
 {
@@ -90,6 +129,9 @@ static krb5_error_code cc_err_xlate(int err)
 {
 	const struct err_xlate *p;
 
+	if (err == CC_NOERROR)
+		return 0;
+
 	for (p = err_xlate_table; p->cc_err; p++) {
 		if (err == p->cc_err)
 			return p->krb5_err;
@@ -104,7 +146,11 @@ static krb5_error_code stdcc_setup(krb5_context context,
 
   	/* make sure the API has been intialized */
   	if (gCntrlBlock == NULL) {
+#ifdef CC_API_VER2
+		err = cc_initialize(&gCntrlBlock, CC_API_VER_2, NULL, NULL);
+#else
 		err = cc_initialize(&gCntrlBlock, CC_API_VER_1, NULL, NULL);
+#endif
 		if (err != CC_NOERROR)
 			return cc_err_xlate(err);
 	}
@@ -286,11 +332,9 @@ krb5_error_code KRB5_CALLCONV  krb5_stdcc_initialize
 	err = cc_create(gCntrlBlock, ccapi_data->cache_name, cName,
 			CC_CRED_V5, 0L, &ccapi_data->NamedCache);
 	krb5_free_unparsed_name(context, cName);
+	cache_changed();
 	
-	if (err)
-		return cc_err_xlate(err);
-	
-	return 0;
+	return cc_err_xlate(err);
 }
 
 /*
@@ -299,7 +343,7 @@ krb5_error_code KRB5_CALLCONV  krb5_stdcc_initialize
  * store some credentials in our cache
  */
 krb5_error_code KRB5_CALLCONV krb5_stdcc_store 
-        (krb5_context context, krb5_ccache id , krb5_creds *creds )
+        (krb5_context context, krb5_ccache id, krb5_creds *creds )
 {
 	krb5_error_code	retval;
 	stdccCacheDataPtr	ccapi_data = id->data;
@@ -324,6 +368,7 @@ krb5_error_code KRB5_CALLCONV krb5_stdcc_store
 	/* free the cred union */
 	err = cc_free_creds(gCntrlBlock, &cu);
 		 
+	cache_changed();
 	return err;
 }
 
@@ -337,12 +382,22 @@ krb5_error_code KRB5_CALLCONV krb5_stdcc_start_seq_get
 {
 	stdccCacheDataPtr	ccapi_data = id->data;
 	krb5_error_code	retval;
+	int	err;
+	ccache_cit	*iterator;
 
 	if ((retval = stdcc_setup(context, ccapi_data)))
 		return retval;
-	
+
+#ifdef CC_API_VER2
+	err = cc_seq_fetch_creds_begin(gCntrlBlock, ccapi_data->NamedCache,
+				       &iterator);
+	if (err != CC_NOERROR)
+		return cc_err_xlate(err);
+	*cursor = iterator;
+#else
 	/* all we have to do is initialize the cursor */
 	*cursor = NULL;
+#endif
 	return 0;
 }
 
@@ -360,15 +415,29 @@ krb5_error_code KRB5_CALLCONV krb5_stdcc_next_cred
 	stdccCacheDataPtr	ccapi_data = id->data;
 	int err;
 	cred_union *credU = NULL;
+	ccache_cit	*iterator;
 	
 	if ((retval = stdcc_setup(context, ccapi_data)))
 		return retval;
 	
+#ifdef CC_API_VER2
+	iterator = *cursor;
+	if (iterator == 0)
+		return KRB5_CC_END;
+	err = cc_seq_fetch_creds_next(gCntrlBlock, &credU, iterator);
+
+	if (err = CC_END) {
+		cc_seq_fetch_creds_end(gCntrlBlock, &iterator);
+		*cursor = 0;
+	}
+#else
 	err = cc_seq_fetch_creds(gCntrlBlock, ccapi_data->NamedCache,
-				 &credU, (ccache_cit **)cursor);
+				 &credU, (ccache_cit **)cursor); 
+#endif
+
 	if (err != CC_NOERROR)
 		return cc_err_xlate(err);
-
+	
 	/* copy data	(with translation) */
 	dupCCtoK5(context, credU->cred.pV5Cred, creds);
 	
@@ -451,6 +520,11 @@ krb5_error_code KRB5_CALLCONV krb5_stdcc_end_seq_get
 	if (*cursor == NULL)
 		return 0;
 
+#ifdef CC_API_VER2
+	err = cc_seq_fetch_creds_end(gCntrlBlock, (ccache_cit **)cursor);
+	if (err != CC_NOERROR)
+		return cc_err_xlate(err);
+#else	
 	/*
 	 * Finish calling cc_seq_fetch_creds to clear out the cursor
 	 */
@@ -462,6 +536,7 @@ krb5_error_code KRB5_CALLCONV krb5_stdcc_end_seq_get
 		
 		cc_free_creds(gCntrlBlock, &credU);
 	}
+#endif
 	
 	return(0);
 }
@@ -515,6 +590,7 @@ krb5_stdcc_destroy (krb5_context context, krb5_ccache id)
 	
 	/* destroy the named cache */
 	err = cc_destroy(gCntrlBlock, &ccapi_data->NamedCache);
+	cache_changed();
 	
 	return cc_err_xlate(err);
 }
@@ -614,6 +690,7 @@ krb5_error_code KRB5_CALLCONV krb5_stdcc_remove
     	
     	/* free the temp cred union */
     	err = cc_free_creds(gCntrlBlock, &cu);
+	cache_changed();
     	if (err != CC_NOERROR)
 		return cc_err_xlate(err);
 
