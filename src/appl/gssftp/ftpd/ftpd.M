@@ -39,12 +39,11 @@
 Internet File Transfer Protocol server
 .SH SYNOPSIS
 .B ftpd
-[\fB\-a \fP|\fB -A\fP] [\fB\-c\fP] [\fB\-C\fP] [\fB\-d\fP] [\fB\-l\fP]
-[\fB\-t\fP \fItimeout\fP] [\fB\-T\fP \fImaxtimeout\fP]
-[\fB\-p\fP \fIport\fP] [\fB\-u\fP \fIumask\fP]
-[\fB\-U\fP \fIftpusers-file\fP]
+[\fB\-A \fP|\fB -a\fP] [\fB\-C\fP] [\fB\-c\fP] [\fB\-d\fP] [\fB\-l\fP]
+[\fB\-v\fP] [\fB\-T\fP \fImaxtimeout\fP] [\fB\-t\fP \fItimeout\fP]
+[\fB\-p\fP \fIport\fP] [\fB\-U\fP \fIftpusers-file\fP] [\fB\-u\fP \fIumask\fP]
 [\fB\-r\fP \fIrealm-file\fP] [\fB\-s\fP \fIsrvtab\fP]
-[\fB\-w\fP[\fBip\fP|\fImaxhostlen\fP[\fB,\fP[\fBno\fP]\fBstriplocal\fP]]]
+[\fB\-w\fP{\fBip\fP|\fImaxhostlen\fP[\fB,\fP{\fBstriplocal\fP|\fBnostriplocal\fP}]}]
 .SH DESCRIPTION
 .B Ftpd
 is the
@@ -79,25 +78,34 @@ Allow the CCC (Clear Command Channel) command to be used. This allows
 less secure connections, and should probably only be used when debugging.
 .TP
 .B \-d
-Debugging information is written to the syslog.
+Debugging information is written to the syslog.  (Identical to -v)
 .TP
 .B \-l
 Each
 .IR ftp (1)
-session is logged in the syslog.
+session is logged in the syslog.  If this flag appears twice, additional
+information about operations performed (such as files retrieved, directories
+created, etc.) will be logged via syslog.  If it appears three times, some
+other statistics such as the number of bytes transferred will be logged via
+syslog as well.
 .TP
-.B \-t
-The inactivity timeout period is set to
-.I timeout
-seconds (the default is 15 minutes).
+.B \-v
+Debugging information is written to the syslog.  (Identical to -d)
 .TP
-.B \-T
-A client may also request a different timeout period; the maximum period
-allowed may be set to
+\fB\-T\fP \fImaxtimeout\fP
+A client may request a maximum timeout period allowed set to
 .I timeout
 seconds with the
 .B \-T
-option.  The default limit is 2 hours.
+option.  The default limit is 2 hours.  This is different from the normal
+inactivity timeout specified by the
+.B \-t
+option (see below).
+.TP
+\fB\-t\fP \fItimeout\fP
+The inactivity timeout period is set to
+.I timeout
+seconds (the default is 15 minutes).
 .TP
 \fB\-p\fP \fIport\fP
 Run as a server and accept a connection on
@@ -105,14 +113,14 @@ Run as a server and accept a connection on
 Normally the ftp server is invoked by
 .IR inetd (8).
 .TP
-\fB\-u\fP \fIumask\fP
-Sets the umask for the ftpd process.  The default value is normally 027.
-.TP
 \fB\-U\fP \fIftpusers-file\fP
 Sets the full path and name of the
 .I ftpusers
 file to use.  The default value is normally
 .IR /etc/ftpusers .
+.TP
+\fB\-u\fP \fIumask\fP
+Sets the umask for the ftpd process.  The default value is normally 027.
 .TP
 \fB\-r\fP \fIrealm-file\fP
 Sets the name of the
@@ -126,7 +134,7 @@ Sets the name of the
 file to use for Kerberos V4 authentication.  The default value is normally
 .IR /etc/srvtab .
 .TP
-\fB\-w \fP[\fBip\fP|\fImaxhostlen\fP[\fB,\fP[\fBno\fP]\fBstriplocal\fP]]
+\fB\-w \fP{\fBip\fP|\fImaxhostlen\fP[\fB,\fP{\fBstriplocal\fP|\fBnostriplocal\fP}]}
 Controls the form of the remote hostname passed to login(1).
 Specifying \fBip\fP results in the numeric IP address always being
 passed to login(1).  Specifying a number, \fImaxhostlen\fP, sets the
