@@ -9,10 +9,10 @@ AC_CHECK_HEADERS(unistd.h stdlib.h sys/param.h sys/socket.h)
 AC_C_CONST
 AC_PROG_INSTALL
 AC_CHECK_PROG(RUNTEST,runtest,runtest)
-if test "$RUNTEST" != ""; then
-	HAVE_RUNTEST=no
-else
+if test x"$RUNTEST" != x; then
 	HAVE_RUNTEST=yes
+else
+	HAVE_RUNTEST=no
 fi
 AC_SUBST(HAVE_RUNTEST)
 AC_TYPE_SIGNAL
