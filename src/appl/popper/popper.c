@@ -31,7 +31,17 @@ char    **  argv;
 
     /*  Tell the user that we are listenting */
     pop_msg(&p,POP_SUCCESS,
+#ifdef KERBEROS
+#ifdef KRB4
         "UCB Pop server (version %s) with Kerberos (TM) at %s starting.",
+#else
+#ifdef KRB5
+        "UCB Pop server (version %s) with Kerberos (TM) V5 at %s starting.",
+#endif /* KRB5 */
+#endif /* KRB4 */
+#else /* !KERBEROS */
+        "UCB Pop server (version %s) at %s starting.",
+#endif /* KERBEROS */
 	    VERSION,p.myhost);
 
     /*  State loop.  The POP server is always in a particular state in 
