@@ -3,6 +3,7 @@
  * $Author$
  *
  * Copyright 1987, 1988, 1990 by the Massachusetts Institute of Technology.
+ * All Rights Reserved.
  *
  * For copying and distribution information, please see the file
  * <krb5/copyright.h>.
@@ -10,10 +11,9 @@
 
 #if !defined(lint) && !defined(SABER)
 static char rcsid_net_read_c[] =
-"$Header$";
+"$Id$";
 #endif	/* !lint & !SABER */
 
-#include <krb5/copyright.h>
 #include <krb5/config.h>		/* for stdlib.h config option */
 #include <krb5/ext-proto.h>
 

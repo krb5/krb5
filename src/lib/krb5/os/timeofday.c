@@ -3,6 +3,7 @@
  * $Author$
  *
  * Copyright 1990 by the Massachusetts Institute of Technology.
+ * All Rights Reserved.
  *
  * For copying and distribution information, please see the file
  * <krb5/copyright.h>.
@@ -14,8 +15,6 @@
 static char rcsid_timeofday_c[] =
 "$Id$";
 #endif	/* lint || saber */
-
-#include <krb5/copyright.h>
 
 #include <time.h>
 #include <stdio.h>			/* needed for libos-proto.h */
