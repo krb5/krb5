@@ -12,13 +12,23 @@
 
 #ifdef UseComErrInstalled
 COMERRDIR=
+all::
+	$(RM) include/com_err.h
 #else
 COMERRDIR=comerr
+all::
+	$(RM) include/com_err.h
+	$(LN) ../comerr/com_err.h include/com_err.h
 #endif
 #ifdef UseSSInstalled
 SSDIR=
+all::
+	$(RM) include/ss
 #else
 SSDIR=ss
+all::
+	$(RM) include/ss
+	$(LN) ../ss include/ss
 #endif
         SUBDIRS = $(COMERRDIR) $(SSDIR) \
 			error_tables asn.1 lib kdc admin clients appl
