@@ -55,7 +55,7 @@ main(argc, argv)
      v5creds.client = client;
      v5creds.server = server;
      v5creds.times.endtime = 0;
-     v5creds.keyblock.keytype = KEYTYPE_DES;
+     v5creds.keyblock.keytype = KEYTYPE_DES_CBC_MD5;
      if (ret = krb5_get_credentials(context, 0, cc, &v5creds)) {
 	  com_err("getcred", ret, "getting V5 credentials");
 	  exit(1);

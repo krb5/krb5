@@ -105,7 +105,6 @@ void krb5_print_ticket(context, ticket_data, key)
      krb5_unparse_name(context, tkt->server, &p);
      printf("Ticket: Server: %s\n", p);
      free(p);
-     printf("Ticket: EType: %d\n", tkt->enc_part.etype);
      printf("Ticket: kvno: %d\n", tkt->enc_part.kvno);
      printf("Ticket: Flags: 0x%08x\n", tkt->enc_part2->flags);
      krb5_print_keyblock("Ticket: Session Keyblock",
@@ -254,7 +253,7 @@ int main(argc, argv)
      increds.client = client;
      increds.server = server;
      increds.times.endtime = 0;
-     increds.keyblock.keytype = KEYTYPE_DES;
+     increds.keyblock.keytype = KEYTYPE_DES_CBC_MD5;
      if ((ret = krb5_get_credentials(context, 0, cc, &increds, &v5creds))) {
 	  com_err("test", ret, "getting V5 credentials");
 	  exit(1);
@@ -281,7 +280,7 @@ int main(argc, argv)
 	  keybuf[i] += c;
      }
      
-     key.keytype = KEYTYPE_DES;
+     key.keytype = KEYTYPE_DES_CBC_MD5;
      key.length = KEYSIZE; /* presumably */
      key.contents = (krb5_octet *) keybuf;
 

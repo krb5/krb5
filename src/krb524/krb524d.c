@@ -217,10 +217,8 @@ void init_master(context)
 	  cleanup_and_exit(1, context);
      }
 
-     master_keyblock.keytype = KEYTYPE_DES;
-     krb5_use_cstype(context, &master_encblock,
-		     krb5_keytype_array[master_keyblock.keytype]->
-		     	system->proto_enctype);
+     master_keyblock.keytype = KEYTYPE_DES_CBC_MD5;
+     krb5_use_keytype(context, &master_encblock, master_keyblock.keytype);
      if ((ret = krb5_db_fetch_mkey(context, master_princ, &master_encblock,
 				  FALSE, /* non-manual type-in */
 				  FALSE, /* irrelevant, given prev. arg */
@@ -271,9 +269,9 @@ krb5_error_code do_connection(s, context)
      if (debug)
 	  printf("V5 ticket decoded\n");
      
-     /* XXX KEYTYPE_DES shouldn't be hardcoded here.  Should be
+     /* XXX KEYTYPE_DES_CBC_MD5 shouldn't be hardcoded here.  Should be
         derived from the ticket. */
-     if ((ret = lookup_service_key(context, v5tkt->server, KEYTYPE_DES, 
+     if ((ret = lookup_service_key(context, v5tkt->server, KEYTYPE_DES_CBC_MD5, 
 				  &service_key)))
 	  goto error;
      if (debug)

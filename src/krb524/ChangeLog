@@ -1,3 +1,10 @@
+
+Tue Sep 05 22:10:34 1995   Chris Provenzano (proven@mit.edu)
+
+        * cnv_tkt_skey.c, getcred.c, k524init.c, krb524d.c, test.c : 
+		Remove krb5_enctype references, and replace with
+                krb5_keytype where appropriate.
+
 Thu Aug 24 18:40:22 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* .Sanitize: Update file list
