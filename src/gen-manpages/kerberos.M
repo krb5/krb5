@@ -23,11 +23,10 @@ the remote machines you deal with support the Kerberos system.
 If you enter your username and
 .I kinit
 responds with this message:
-.nf
-
-Principal unknown (kerberos)
-
-.fi
+.PP
+kinit(v5): Client not found in Kerberos database while getting initial
+credentials
+.PP
 you haven't been registered as a Kerberos user.  See your system
 administrator.
 .PP
@@ -141,4 +140,4 @@ Kerberos was developed at MIT.  OpenVision rewrote and donated the
 administration server, which is used in the current version of Kerberos
 5.
 .SH RESTRICTIONS
-Copyright 1985,1986,1989-1996 Massachusetts Institute of Technology
+Copyright 1985,1986,1989-1996,2002 Massachusetts Institute of Technology
