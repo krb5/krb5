@@ -208,7 +208,7 @@ krb5_error_code krb5_kt_get_name
 	PROTOTYPE((krb5_keytab,
 		   char *,
 		   int ));
-krb5_error_code krb5_tk_default_name
+krb5_error_code krb5_kt_default_name
 	PROTOTYPE((char *,
 		   int ));
 krb5_error_code krb5_kt_default
