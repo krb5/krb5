@@ -248,9 +248,9 @@ HINSTANCE get_lib_instance(void);
 #include <unix.h>
 #include <ctype.h>
 
-#ifdef NEED_LOWLEVEL_IO
+/*#ifdef NEED_LOWLEVEL_IO*/
 #include <fcntl.h>
-#endif
+/*#endif*/
 
 /*
  * Which encryption routines libcrypto will provide is controlled by
