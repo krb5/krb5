@@ -1967,7 +1967,7 @@ char *data;
 		if (maj_stat != GSS_S_COMPLETE)
 		  continue;
 		found++;
-	}
+		/*	}*/
 
 		if (!found && (maj_stat != GSS_S_COMPLETE))
 		{
@@ -2064,6 +2064,7 @@ char *data;
 		(void) gss_release_cred(&min_stat, &server_creds);
 		return(0);
 	}
+      }
     }
 #endif /* GSSAPI */
 	/* Other auth types go here ... */

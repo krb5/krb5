@@ -1,3 +1,9 @@
+Thu Jun 13 18:35:19 1996  Kevin L Mitchell  <klmitch@mit.edu>
+
+	* ftpd.c (authdata): misplaced braces caused server to not be able to
+		use ftp principle if it was present.  Client looks for ftp
+		first, then tries host; ftpd was looking only for host.
+
 Mon Jun  3 16:12:59 1996  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in, configure.in: back out previous changes and use
