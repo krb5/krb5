@@ -78,6 +78,7 @@ krb5_sendauth(/* IN */
 	krb5_authenticator	authent;
 	krb5_data		inbuf, outbuf;
 	int			len;
+	krb5_ccache		use_ccache = 0;
 
 	/*
 	 * First, send over the length of the sendauth version string;
@@ -116,15 +117,27 @@ krb5_sendauth(/* IN */
 	 */
 	memset((char *)&creds, 0, sizeof(creds));
 	memset((char *)&authent, 0, sizeof(authent));
-	
+
+	/*
+	 * See if we need to access the credentials cache
+	 */
+	if (!credsp || !credsp->ticket.length) {
+		if (ccache)
+			use_ccache = ccache;
+		else if (retval = krb5_cc_default(&use_ccache))
+			goto error_return;
+	}
 	if (!credsp) {
-		if (!ccache)
-			return(KRB5_NOCREDS_SUPPLIED);
 		if (retval = krb5_copy_principal(server, &creds.server))
-			return(retval);
-		if (retval = krb5_copy_principal(client, &creds.client)) {
+			goto error_return;
+		if (client)
+			retval = krb5_copy_principal(client, &creds.client);
+		else
+			retval = krb5_cc_get_principal(use_ccache,
+						       &creds.client);
+		if (retval) {
 			krb5_free_principal(creds.server);
-			return(retval);
+			goto error_return;
 		}
 		/* creds.times.endtime = 0; -- memset 0 takes care of this
 					zero means "as long as possible" */
@@ -134,10 +147,8 @@ krb5_sendauth(/* IN */
 		credsp = &creds;
 	}
 	if (!credsp->ticket.length) {
-		if (!ccache)
-			return(KRB5_NOCREDS_SUPPLIED);
 		if (retval = krb5_get_credentials(kdc_options,
-						  ccache,
+						  use_ccache,
 						  credsp))
 		    goto error_return;
 	}
@@ -155,7 +166,8 @@ krb5_sendauth(/* IN */
 	if (retval = krb5_mk_req_extended(ap_req_options, checksump,
 					  kdc_options,
 					  sequence ? *sequence : 0, newkey,
-					  ccache, credsp, &authent, &outbuf))
+					  use_ccache, credsp, &authent,
+					  &outbuf))
 	    goto error_return;
 
 	/*
@@ -219,6 +231,8 @@ krb5_sendauth(/* IN */
 	}
 	retval = 0;		/* Normal return */
 error_return:
+	if (!ccache && use_ccache)
+		krb5_cc_close(use_ccache);
 	krb5_free_cred_contents(&creds);
 	krb5_free_authenticator_contents(&authent);
 	return(retval);
