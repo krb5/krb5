@@ -348,30 +348,6 @@ Minor changes listed by ticket ID
 * [1439] krb5_free_pwd_sequences() now correctly frees the entire
   sequence of elements.
 
---[ DELETE BEFORE RELEASE ---changes to unreleased code, etc.--- ]--
-
-* [1054] KRB-CRED messages for RC4 are encrypted now.
-
-* [1177] krb5-1-2-2-branch merged onto trunk.
-
-* [1193] Punted comment about reworking key storage architecture.
-
-* [1208] install-headers target implemented.
-
-* [1223] asn1_decode_oid, asn1_encode_oid implemented
-
-* [1276] Generated dependencies handle --without-krb4 properly now.
-
-* [1384, 1413] Use of autoconf-2.52 in util/reconf will now cause a
-  warning.
-
-* [1388] DNS support is turned on in KfM.
-
-* [1391] Fix kadmind startup failure with krb4 vuln patch.
-
-* [1409] get_ad_tkt() now prompts for password if there are no tickets
-  (in KfM).
-
 Copyright Notice and Legal Administrivia
 ----------------------------------------
 
