@@ -80,12 +80,12 @@ krb5-globals-data-library-term						= __terminate
 profile-library-term								= TerminateProfileLib
 
 gss-library-current-version							= 1
-gss-library-definition-version						= 1
-gss-library-implementation-version					= 0
+gss-library-definition-version						= 0
+gss-library-implementation-version					= 1
 
 krb5-library-current-version						= 1
-krb5-library-definition-version						= 1
-krb5-library-implementation-version					= 0
+krb5-library-definition-version						= 0
+krb5-library-implementation-version					= 1
 
 krb5-globals-library-current-version				= 0
 krb5-globals-library-definition-version				= 0
