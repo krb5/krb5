@@ -1,3 +1,8 @@
+Mon Feb  8 21:56:45 1999  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* rd_req.c (krb_rd_req): Add appropriate #ifdef so that this code
+		compiles cleanly when KRB4_USE_KEYTAB is not defined.
+
 1998-12-05  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* rd_svc_key.c (krb54_get_service_keyblock): New function which
