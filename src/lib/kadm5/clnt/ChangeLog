@@ -1,3 +1,8 @@
+2000-06-30  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (SHLIB_EXPDEPS): Add libdb.
+	(SHLIB_EXPLIBS): Add -ldb.
+
 2000-06-28  Ezra Peisach  <epeisach@mit.edu>
 
 	* client_init.c (_kadm5_init_any): gss_krb5_ccache_name returns
