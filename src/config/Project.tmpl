@@ -266,22 +266,25 @@ P_PROTOS=-UUseNarrowPrototypes
        UNIFDEFSRC = $(TOP)/util/unifdef
           TOPLIBD = $(TOP)/lib
             OSLIB = os
+         OSDEPLIB = $(TOPLIBD)/libos.a
            DESLIB = des5
+        DESDEPLIB = $(TOPLIBD)/libdes5.a
         RSAMD4LIB = md4
+     RSAMD4DEPLIB = $(TOPLIBD)/libmd4.a
           KRB5LIB = krb5
+       KRB5DEPLIB = $(TOPLIBD)/libkrb5.a
            CRCLIB = crc32
-           MD4LIB = md4
+        CRCDEPLIB = $(TOPLIBD)/libcrc32.a
          ISODELIB = IsodeLib
 
            DBMLIB = DbmLib
-          DEPKLIB = $(TOPLIBD)/lib$(KRB5LIB).a $(TOPLIBD)/lib$(RSAMD4LIB).a $(TOPLIBD)/lib$(DESLIB).a $(TOPLIBD)/lib$(OSLIB).a $(TOPLIBD)/lib$(CRCLIB).a
-             KLIB = -L$(TOPLIBD) -l$(KRB5LIB) -l$(RSAMD4LIB) -l$(DESLIB) -l$(OSLIB) -l$(CRCLIB) $(ISODELIB) $(COMERRLIB) $(DBMLIB)
-        DEPKDBLIB = $(TOPLIBD)/libkdb.a
-/* ideally, this would be just "kdb", but since it needs to load before
-   the other libs, it misses th e -L$(TOPLIBD) */
-           KDBLIB = $(DEPKDBLIB)
-     DEPKRB425LIB = $(TOPLIBD)/libkrb425.a
-        KRB425LIB = $(DEPKDBLIB)
+          DEPKLIB = $(KRB5DEPLIB) $(RSAMD4DEPLIB) $(DESDEPLIB) $(OSDEPLIB) $(CRCDEPLIB)
+          KLIBLOC = -L$(TOPLIBD)
+             KLIB = $(KLIBLOC) -l$(KRB5LIB) -l$(RSAMD4LIB) -l$(DESLIB) -l$(OSLIB) -l$(CRCLIB) $(ISODELIB) $(COMERRLIB) $(DBMLIB)
+        KDBDEPLIB = $(TOPLIBD)/libkdb.a
+           KDBLIB = $(KLIBLOC) -lkdb
+     KRB425DEPLIB = $(TOPLIBD)/libkrb425.a
+        KRB425LIB = $(KRB425DEPLIB)
           KRB4LIB = Krb4LibList
      KRB4INCLUDES = Krb4Includes
 
