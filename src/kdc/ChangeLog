@@ -1,3 +1,10 @@
+Sat Jan 27 00:53:41 1996  Mark Eichin  <eichin@cygnus.com>
+
+	* network.c (setup_network): strtol is good enough for port
+	number, and sunos doesn't have strtoul (and nothing else in the
+	tree uses it.)
+	(add_port): use proper old-style definition.
+	
 Wed Dec 13 03:51:53 1995  Chris Provenzano (proven@mit.edu)
 
         * kerberos_v4.c : Remove mkvno for krb5_db_entry

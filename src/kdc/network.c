@@ -49,7 +49,8 @@ static int max_udp_ports = 0;
 static fd_set select_fds;
 static int select_nfds;
 
-static krb5_error_code add_port(u_short port)
+static krb5_error_code add_port(port)
+     u_short port;
 {
     int	i;
     int *new_fds;
@@ -103,7 +104,7 @@ const char *prog;
 		cp++;
 		continue;
 	    }
-	    port = strtoul(cp, &cp, 10);
+	    port = strtol(cp, &cp, 10);
 	    if (cp == 0)
 		break;
 	    retval = add_port(port);
