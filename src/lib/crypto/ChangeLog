@@ -1,3 +1,9 @@
+Fri Jan 21 22:47:00 2000  Miro Jurisic  <meeroh@mit.edu>
+
+	* Makefile.in: added crypto_libinit.[co]
+	* crypto_libinit.[ch]: new files, contain library initialization
+		and cleanup code
+
 2000-01-21  Ken Raeburn  <raeburn@mit.edu>
 
 	* cksumtypes.c (krb5_cksumtypes_list, krb5_cksumtypes_length): Now

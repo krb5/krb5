@@ -45,6 +45,12 @@ STOBJLISTS= \
 	posix/OBJS.ST \
 	$(BUILDTOP)/util/profile/OBJS.ST
 
+OBJS=\
+	$(OUTPRE)krb5_libinit.$(OBJEXT)
+
+SRCS=\
+	$(subdir)/krb5_libinit.c
+
 RELDIR=krb5
 SHLIB_EXPDEPS = \
 	$(TOPLIBD)/libk5crypto$(SHLIBEXT) \

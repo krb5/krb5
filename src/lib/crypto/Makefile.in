@@ -26,6 +26,7 @@ STLIBOBJS=\
 	cksumtype_to_string.o	\
 	cksumtypes.o		\
 	coll_proof_cksum.o	\
+	crypto_libinit.o	\
 	decrypt.o		\
 	encrypt.o		\
 	encrypt_length.o	\
@@ -53,6 +54,7 @@ OBJS=\
 	$(OUTPRE)cksumtype_to_string.$(OBJEXT)	\
 	$(OUTPRE)cksumtypes.$(OBJEXT)		\
 	$(OUTPRE)coll_proof_cksum.$(OBJEXT)	\
+	$(OUTPRE)crypto_libinit.$(OBJEXT)	\
 	$(OUTPRE)decrypt.$(OBJEXT)		\
 	$(OUTPRE)encrypt.$(OBJEXT)		\
 	$(OUTPRE)encrypt_length.$(OBJEXT)	\
@@ -80,6 +82,7 @@ SRCS=\
 	$(subdir)/cksumtype_to_string.c	\
 	$(subdir)/cksumtypes.c		\
 	$(subdir)/coll_proof_cksum.c	\
+	$(subdir)/crypto_libinit.c	\
 	$(subdir)/decrypt.c		\
 	$(subdir)/encrypt.c		\
 	$(subdir)/encrypt_length.c	\

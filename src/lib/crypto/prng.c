@@ -153,3 +153,9 @@ krb5_c_random_make_octets(krb5_context context, krb5_data *data)
 
     return(0);
 }
+
+void prng_cleanup (void)
+{
+	free (random_state);
+	inited = 0;
+}
