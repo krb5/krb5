@@ -17,7 +17,7 @@ LIBMAJOR=3
 LIBMINOR=0
 
 all-unix:: all-liblinks
-clean-unix:: clean-liblinks clean-libs clean-libobjs
+clean-unix:: clean-liblinks clean-libs clean-libobjs clean-lclint
 install-unix:: install-libs
 
 LINTFLAGS=-uhvb 
@@ -82,9 +82,11 @@ test2.o: test2.c
 test_et.o: test1.h test2.h
 et1.o: et1.c
 et2.o: et2.c
+test1.c test2.c et1.c et2.c: et_c.awk
+test1.h test2.h et1.h et2.h: et_h.awk
 t_com_err.o: et1.h et2.h t_com_err.c
 
-# /u1/kr/lclint-2.5m/bin/lclint -warnposix -D__sparc
+# /u1/kr/lclint-2.5q/bin/lclint -warnposix -D__sparc
 LCLINT=lclint
 # +posixlib	gets more complete errno list than ansilib
 # -usedef	turns off bogus warnings from poor dataflow analysis (should be
@@ -96,12 +98,19 @@ LCLINT=lclint
 # -exportlocal
 # -retvalint	allow ignoring of int return values (e.g., fputs)
 LCLINTOPTS=+posixlib \
-	-usedef -warnposix +charintliteral +ignoresigns -predboolint \
+	-usedef -warnposix +charintliteral +ignoresigns -predboolint +boolint \
 	-exportlocal -retvalint \
-	+mod-uncon +modinternalstrict +modfilesys \
-	-expect 1
-do-lclint: error_table.y et_lex.lex.c
-	$(LCLINT) $(LCLINTOPTS) $(LOCALINCLUDES) $(DEFS) $(SRCS)
+	+mod-uncon +modinternalstrict +modfilesys
+com_err.lcd: error_table.c error_table.h et_lex.lex.c com_err.h
+	$(LCLINT) $(LCLINTOPTS) $(LOCALINCLUDES) $(DEFS) $(SRCS) \
+		-dump com_err.new -expect 1
+	mv -f com_err.new com_err.lcd
+do-lclint: com_err.lcd t_com_err.c et1.c et2.c et1.h et2.h
+	$(LCLINT) $(LCLINTOPTS) $(LOCALINCLUDES) \
+		$(srcdir)/t_com_err.c et1.c et2.c
+# "-load com_err.lcd" -> lclint brokenness
+clean-lclint:
+	$(RM) com_err.new com_err.lcd
 ITS4=its4
 ITS4OPTS=
 do-its4: error_table.y et_lex.lex.c
@@ -151,6 +160,14 @@ et_c.awk: $(srcdir)/et_c.awk
 et_h.awk: $(srcdir)/et_h.awk
 	$(CP) $(srcdir)/et_h.awk et_h.awk
 
+rebuild: rebuild-c rebuild-h
+rebuild-c:
+	a2p < $(srcdir)/et_c.awk > $(srcdir)/et_c.tmp
+	mv -f $(srcdir)/et_c.tmp $(srcdir)/et_c.perl
+rebuild-h:
+	a2p < $(srcdir)/et_h.awk > $(srcdir)/et_h.tmp
+	mv -f $(srcdir)/et_h.tmp $(srcdir)/et_h.perl
+
 clean-unix::
 	$(RM) compile_et
 
@@ -180,6 +197,7 @@ clean-files::
 		et.ar TAGS y.tab.c lex.yy.c error_table.c \
 		et_lex.lex.c \
 		test1.h test1.c test2.h test2.c test_et \
+		et1.c et1.h et2.c et2.h t_com_err \
 		eddep makedep *.ln
 
 clean-windows::

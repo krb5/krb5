@@ -1,3 +1,19 @@
+2000-12-05  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (clean-unix): Clean up lclint files too.
+	(cleant-lclint): New target.
+	(et1.c, et2.c, et1.h, et2.h, test1.c, test1.h, test2.h, test2.c):
+	Show dependencies on awk scripts.
+	(LCLINTOPTS): Remove +boolint, add +mod-uncon, +modinternalstrict,
+	+mod-filesys, remove expected error.
+	(com_err.lcd): New target; processes library through lclint and
+	generates a dump file.
+	(do-lclint): Now runs lclint on one of the test programs, and
+	depends on (but doesn't currently use) com_err.lcd.
+	(rebuild, rebuild-c, rebuild-h): New targets: Rebuild perl
+	versions of awk scripts.
+	(clean-files): Get more generated files from test cases.
+
 2000-11-14  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (check-unix): Depend on, and run, t_com_err and
