@@ -43,8 +43,7 @@ char *fn;
 	krb5_address peer;
 	krb5_tkt_authent *authdat;
 	char addr[4];
-	krb5_data *server[4];
-	krb5_data srvdata[3];
+	krb5_principal server;
 	krb5_error_code r;
 	krb5_data authe;
 	extern int gethostname();
@@ -81,15 +80,14 @@ char *fn;
 		}
 		instance = hostname;
 	}
-	set_data5(srvdata[0], _krb425_local_realm);
-	set_data5(srvdata[1], service);
-	set_data5(srvdata[2], instance);
-
-	server[0] = &srvdata[0];
-	server[1] = &srvdata[1];
-	server[2] = &srvdata[2];
-	server[3] = 0;
-
+	if (r = krb5_build_principal(&server,
+				     strlen(_krb425_local_realm),
+				     _krb425_local_realm,
+				     service,
+				     instance,
+				     0)) {
+	    return(krb425error(r));
+	}
 	
 	authe.length = authent->length;
 	authe.data = (char *)authent->dat;
@@ -129,16 +127,17 @@ char *fn;
 /* ? : will break some compilers when dealing with function pointers */
 	if (use_set_key)
 		r = krb5_rd_req(&authe,
-				(krb5_principal)server,
+				server,
 				from_addr ? &peer : 0,
 				fn, setkey_key_proc,
 				0, 0, &authdat);
 	else
 		r = krb5_rd_req(&authe,
-				(krb5_principal)server,
+				server,
 				from_addr ? &peer : 0,
 				fn, 0,
 				0, 0, &authdat);
+	krb5_free_principal(server);
 	if (r) {
 #ifdef	EBUG
 		ERROR(r)

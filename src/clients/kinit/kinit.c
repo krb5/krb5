@@ -60,7 +60,7 @@ main(argc, argv)
     krb5_address **my_addresses;
     krb5_error_code code;
     krb5_principal me;
-    krb5_data *server[4];
+    krb5_principal server;
     krb5_creds my_creds;
     krb5_timestamp now;
 
@@ -140,12 +140,17 @@ main(argc, argv)
     memset((char *)&my_creds, 0, sizeof(my_creds));
     
     my_creds.client = me;
-    my_creds.server = server;
 
-    server[0] = me[0];		/* realm name */
-    server[1] = &tgtname;
-    server[2] = me[0];
-    server[3] = 0;
+    if (code = krb5_build_principal_ext(&server,
+					me[0]->length, me[0]->data,
+					tgtname.length, tgtname.data,
+					me[0]->length, me[0]->data,
+					0)) {
+	com_err(argv[0], code, "while building server name");
+	exit(1);
+    }
+
+    my_creds.server = server;
 
     code = krb5_os_localaddr(&my_addresses);
     if (code != 0) {
@@ -170,6 +175,7 @@ main(argc, argv)
 					 0, /* let lib read pwd from kbd */
 					 ccache,
 					 &my_creds);
+    krb5_free_principal(server);
     if (code != 0) {
 	com_err (argv[0], code, "while getting initial credentials");
 	exit(1);

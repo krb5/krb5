@@ -28,19 +28,18 @@ CREDENTIALS *c;
 	static krb5_principal client_principal = { 0 };
 
 	krb5_creds creds;
-	krb5_data *server[4];
+	krb5_principal server;
 	krb5_data srvdata[3];
 	krb5_error_code r;
 	krb5_ticket *ticket;
 
-	set_data5(srvdata[0], realm);
-	set_data5(srvdata[1], service);
-	set_data5(srvdata[2], instance);
-
-	server[0] = &srvdata[0];
-	server[1] = &srvdata[1];
-	server[2] = &srvdata[2];
-	server[3] = 0;
+	if (r = krb5_build_principal(&server,
+				     strlen(realm), realm,
+				     service,
+				     instance,
+				     0)) {
+	    return(krb425error(r));
+	}
 
 	if (!_krb425_ccache)
 		krb5_cc_default(&_krb425_ccache);
@@ -53,8 +52,10 @@ CREDENTIALS *c;
 	creds.times.endtime = 0;
 	creds.keyblock.keytype = KEYTYPE_DES;
 
-	if (r = krb5_get_credentials(0, _krb425_ccache, &creds))
-		return(krb425error(r));
+	r = krb5_get_credentials(0, _krb425_ccache, &creds);
+	krb5_free_principal(server);
+	if (r)
+	    return(krb425error(r));
 	
 #ifdef	EBUG
 	{

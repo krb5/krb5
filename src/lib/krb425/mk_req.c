@@ -26,20 +26,18 @@ char *instance;
 char *realm;
 u_long checksum;
 {
-	krb5_data *server[4];
-	krb5_data srvdata[3];
+	krb5_principal server;
 	krb5_error_code r;
 	krb5_data outbuf;
 	krb5_checksum ck;
 
-	set_data5(srvdata[0], realm);
-	set_data5(srvdata[1], service);
-	set_data5(srvdata[2], instance);
-
-	server[0] = &srvdata[0];
-	server[1] = &srvdata[1];
-	server[2] = &srvdata[2];
-	server[3] = 0;
+	if (r = krb5_build_principal(&server,
+				     strlen(realm), realm,
+				     service,
+				     instance,
+				     0)) {
+	    return(krb425error(r));
+	}
 
 	if (!_krb425_ccache)
 		krb5_cc_default(&_krb425_ccache);
@@ -62,6 +60,7 @@ u_long checksum;
 	if (r)
 		ERROR(r)
 #endif
+	krb5_free_principal(server);
 	if (!r) {
 		if (outbuf.length > MAX_KTXT_LEN) {
 #ifdef	EBUG
