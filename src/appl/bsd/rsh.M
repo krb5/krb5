@@ -19,8 +19,7 @@
 .\"
 .\"	@(#)rsh.1	6.2 (Berkeley) 9/20/88
 .\"
-.TH RSH 1 "Kerberos Version 4.0" "MIT Project Athena"
-.UC 5
+.TH RSH 1 "Kerberos Version 5.0" "MIT Project Athena"
 .SH NAME
 rsh \- remote shell
 .SH SYNOPSIS
@@ -64,8 +63,18 @@ The remote username used is the same as your local username,
 unless you specify a different remote name with the
 .B \-l
 option.
-Kerberos authentication is used, and authorization is determined as in
-rlogin(1).
+.PP
+Each user may have a private authorization list in a file \&.k5login
+in his login directory.  Each line in this file should contain a
+Kerberos principal name of the form 
+.IR principal/instance@realm .
+If there is a ~/.k5login file, then access is granted to the account if
+and only if the originater user is authenticated to one of the
+princiapls named in the ~/.k5login file.  Otherwise, the originating
+user will be granted access to the account if and only if the
+authenticated principal name of the user can be mapped to the local
+account name using the aname -> lname mapping rules (see \fIkrb5_anadd(8)\fP
+for more details).
 .PP
 The
 .B \-k
@@ -123,6 +132,8 @@ on the command line can be omitted.
 /etc/hosts
 .br
 /usr/hosts/*
+.br
+\&.k5login		in the user's home directory
 .DT
 .SH SEE ALSO
 rlogin(1), kerberos(3), krb_sendauth(3), krb_realmofhost(3)

@@ -4,14 +4,13 @@
 .\"
 .\"	@(#)rshd.8c	6.3 (Berkeley) 5/24/86
 .\"
-.TH RSHD 8C "May 24, 1986"
-.UC 5
+.TH KRSHD 8C "Kerberos Version 5.0" "MIT Project Athena"
 .SH NAME
-rshd \- remote shell server
+krshd \- kerberized remote shell server
 .SH SYNOPSIS
-.B /usr/etc/rshd
+.B /usr/etc/krshd -kKrR
 .SH DESCRIPTION
-.I Rshd
+.I Krshd
 is the server for the 
 .IR rcmd (3X)
 routine and, consequently, for the
@@ -19,88 +18,62 @@ routine and, consequently, for the
 program.  The server provides remote execution facilities
 with authentication based on privileged port numbers from trusted hosts.
 .PP
-.I Rshd
-listens for service requests at the port indicated in
-the ``cmd'' service specification; see
-.IR services (5).
-When a service request is received the following protocol
-is initiated:
-.IP 1)
-The server checks the client's source port.
-If the port is not in the range 0-1023, the server
-aborts the connection.
+The
+.I krshd
+server is invoked by \fIinetd(8c)\fP when it receives a connection
+on the port indicated in /etc/inetd.conf.  A typical /etc/inetd.conf
+configuration line for \fIkrshd\fP might be:
+
+kshell	stream	tcp	nowait	root	/krb5/sbin/krshd	krshd -K
+
+When a service request is received, the follow protocol is initiated:
+
+.IP 1) 
+Authentication is checked
 .IP 2)
-The server reads characters from the socket up
-to a null (`\e0') byte.  The resultant string is
-interpreted as an ASCII number, base 10.
+Authorization is checked via the access-control files \fI.k5login\fP 
+and \fI.rhosts\fP in the user's home directory.
 .IP 3)
-If the number received in step 1 is non-zero,
-it is interpreted as the port number of a secondary
-stream to be used for the 
-.BR stderr .
-A second connection is then created to the specified
-port on the client's machine.  The source port of this
-second connection is also in the range 0-1023.
-.IP 4)
-The server checks the client's source address
-and requests the corresponding host name (see
-.IR gethostbyaddr (3N),
-.IR hosts (5)
-and
-.IR named (8)).
-If the hostname cannot be determined,
-the dot-notation representation of the host address is used.
-.IP 5)
-A null terminated user name of at most 16 characters
-is retrieved on the initial socket.  This user name
-is interpreted as the user identity on the
-.BR client 's
-machine.
-.IP 6)
-A null terminated user name of at most 16 characters
-is retrieved on the initial socket.  This user name
-is interpreted as a user identity to use on the
-.BR server 's
-machine.
-.IP 7)
-A null terminated command to be passed to a
-shell is retrieved on the initial socket.  The length of
-the command is limited by the upper bound on the size of
-the system's argument list.  
-.IP 8)
-.I Rshd
-then validates the user according to the following steps.
-The local (server-end) user name is looked up in the password file
-and a
-.I chdir
-is performed to the user's home directory.  If either
-the lookup or 
-.I chdir
-fail, the connection is terminated.
-If the user is not the super-user, (user id 0), the file 
-.I /etc/hosts.equiv
-is consulted for a list of hosts considered ``equivalent''.
-If the client's host name is present in this file, the
-authentication is considered successful.  If the lookup
-fails, or the user is the super-user, then the file
-.I .rhosts
-in the home directory of the remote user is checked for
-the machine name and identity of the user on the client's
-machine.  If this lookup fails, the connection is terminated.
-.IP 9)
 A null byte is returned on the initial socket
 and the command line is passed to the normal login
 shell of the user.  The
 shell inherits the network connections established
 by
-.IR rshd .
+.IR krshd .
+
+\fIKrshd\fP can be configured either by command-line arguments passed
+by \fIinetd(8)\fP,  
+or by the name of the daemon. If command-line arguments are present, they 
+take priority.  The options are:
+
+.IP \fB\-k\fP 10
+Check authorization in ~/.k5login.
+
+.IP \fB\-K\fP
+Similar to \fb\-k\fP except that the authorization check must succeed
+inorder for the login to succeed.
+
+.IP \fB\-r\fP 
+Check authorization in ~/.rhosts.
+
+.IP \fB\-K\fP
+Similar to \fb\-r\fP except that the authorization check must succeed
+inorder for the login to succeed.
+
+.PP
+If no command-line arguments are present, then the presence of the 
+letters kKrR in the program-name before "shd" determine the 
+behaviour of the program exactly as with the command-line arguments.
+.PP
+If the \fB\-r\fP or \fB\-R\fP options are used, the client must
+connect from a privileged port.
 .SH DIAGNOSTICS
 Except for the last one listed below,
 all diagnostic messages
 are returned on the initial socket,
 after which any network connections are closed.
 An error is indicated by a leading byte with a value of
-1 (0 is returned in step 9 above upon successful completion
+1 (0 is returned in step 3 above upon successful completion
 of all the steps prior to the execution of the login shell).
 .PP
 .B ``locuser too long''
@@ -151,13 +124,9 @@ on the connection associated with the
 .BR stderr ,
 and is not preceded by a flag byte.
 .SH SEE ALSO
-rsh(1C),
+rshd(8C), rsh(1C),
 rcmd(3X)
 .SH BUGS
-The authentication procedure used here assumes the integrity
-of each client machine and the connecting medium.  This is
-insecure, but is useful in an ``open'' environment.
-.PP
 A facility to allow all data exchanges to be encrypted should be
 present.
 .PP

@@ -79,9 +79,6 @@ from the keyboard rather than from a file on disk.
 .SH SEE ALSO
 krb5(3), kdb5_create(8), kdb5_stash(8)
 .SH BUGS
-Doesn't yet do v4 compatibility.
-
-Doesn't yet do inter-realm stuff properly.
 
 It should fork and go into the background when it finishes reading the
 master password from the terminal.

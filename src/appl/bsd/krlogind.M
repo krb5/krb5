@@ -4,67 +4,86 @@
 .\"
 .\"	@(#)rlogind.8c	6.3 (Berkeley) 5/24/86
 .\"
-.TH RLOGIND 8C "May 24, 1986"
-.UC 5
+.TH KRLOGIND 8C "Kerberos Version 5.0" "MIT Project Athena"
 .SH NAME
-rlogind \- remote login server
+krlogind \- remote login server
 .SH SYNOPSIS
 .B /etc/rlogind
 [
-.B \-d
+.B \-kKrRpPex
 ]
 .SH DESCRIPTION
-.I Rlogind
+.I Krlogind
 is the server for the 
 .IR rlogin (1C)
-program.  The server provides a remote login facility
-with authentication based on privileged port numbers from trusted hosts.
+program.  The server is 
+based on rlogind(8C) but uses kerberos authentication.
 .PP
-.I Rlogind
-listens for service requests at the port indicated in
-the ``login'' service specification; see
-.IR services (5).
-When a service request is received the following protocol
-is initiated:
+The 
+.I krlogind
+server is invoked by \fIinetd(8c)\fP when it receives a
+connection on the port indicated in /etc/inetd.conf.  A typical
+/etc/inetd.conf configuration line for \fIkrlogind\fP might be:
+
+klogin	stream	tcp	nowait	root	/krb5/sbin/krlogind krlogind -K
+
+When a service request is received, the follow protocol is initiated:
+
 .IP 1)
-The server checks the client's source port.
-If the port is not in the range 0-1023, the server
-aborts the connection.
+Check authentication.
 .IP 2)
-The server checks the client's source address
-and requests the corresponding host name (see
-.IR gethostbyaddr (3N),
-.IR hosts (5)
-and
-.IR named (8)).
-If the hostname cannot be determined,
-the dot-notation representation of the host address is used.
+Check authorization via the access-control files \fI.k5login\fP 
+and \fI.rhosts\fP in the user's home directory.
+.IP 3)
+Prompt for password if any checks fail.
 .PP
-Once the source port and address have been checked, 
-.I rlogind
-allocates a pseudo terminal (see 
-.IR pty (4)),
-and manipulates file descriptors so that the slave
-half of the pseudo terminal becomes the 
-.B stdin ,
-.B stdout ,
-and
-.B stderr 
-for a login process.
-The login process is an instance of the
-.IR login (1)
-program, invoked with the
-.B \-r
-option.  The login process then proceeds with the authentication
-process as described in
-.IR rshd (8C),
-but if automatic authentication fails, it reprompts the user
-to login as one finds on a standard terminal line.
+If the authentication succeeds, login the user by calling the accompanying 
+login.krb5 or /bin/login, according to the definition of 
+DO_NOT_USE_K_LOGIN.  
+.PP 
+The configuration of \fIkrlogind\fP is done
+either by command-line arguments passed by
+inetd, or by the name of the daemon. If command-line arguments are
+present, they  take priority. The options are:
+.IP \fB\-k\fP 10
+Check authorization in ~/.k5login.
+
+.IP \fB\-K\fP
+Similar to \fb\-k\fP except that the authorization check must succeed
+inorder for the login to succeed.
+
+.IP \fB\-r\fP 
+Check authorization in ~/.rhosts.
+
+.IP \fB\-K\fP
+Similar to \fb\-r\fP except that the authorization check must succeed
+inorder for the login to succeed.
+
+.IP \fB\-p\fP 
+Prompt the user for a password.  If \fB-r\fP or \fB-k\fP
+is passed \fB-p\fP is necessary to allow password authentication.
+Otherwise, if all previous checks fail, login permission is denied
+
+.IP \fB\-P\fP
+Prompt the user for a password.  If the -P option is passed, then the
+password is verified in addition to all other checks.
+.IP \fB\-e\fP
+Create an encrypted session.
+.IP \fB\-x\fP
+Create an encrypted session.
+.PP
+If no command-line arguments are present, then the presence of the 
+letters kKrRpPex in the program-name before "logind" determine the 
+behaviour of the program exactly as with the command-line arguments.
+.PP
+If the ~/.rhosts check is to be used, then the program verifies that
+the client is connecting
+from a privileged port, before allowing login.
 .PP
 The parent of the login process manipulates the master side of
 the pseduo terminal, operating as an intermediary
 between the login process and the client instance of the
-.I rlogin
+.I rlogin(1C)
 program.  In normal operation, the packet protocol described
 in
 .IR pty (4)
@@ -91,12 +110,7 @@ by the server failed.
 .B ``/bin/sh: ...''
 .br
 The user's login shell could not be started.
+.SH SEE ALSO
+rlogind(8C), rlogin(1C)
 .SH BUGS
-The authentication procedure used here assumes the integrity
-of each client machine and the connecting medium.  This is
-insecure, but is useful in an ``open'' environment.
-.PP
-A facility to allow all data exchanges to be encrypted should be
-present.
-.PP
 A more extensible protocol should be used.

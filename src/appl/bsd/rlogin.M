@@ -19,8 +19,7 @@
 .\"
 .\"	@(#)rlogin.1	6.9 (Berkeley) 9/19/88
 .\"
-.TH RLOGIN 1 "Kerberos Version 4.0" "MIT Project Athena"
-.UC 5
+.TH RLOGIN 1 "Kerberos Version 5.0" "MIT Project Athena"
 .SH NAME
 rlogin \- remote login
 .SH SYNOPSIS
@@ -92,18 +91,20 @@ standard Berkeley rlogin(1), except that instead of the \fIrhosts\fP
 mechanism, it uses Kerberos authentication to determine the
 authorization to use a remote account.
 .PP
-Each user may have a private authorization list in a file \&.klogin
+Each user may have a private authorization list in a file \&.k5login
 in his login directory.  Each line in this file should contain a
 Kerberos principal name of the form 
-.IR principal.instance@realm .
+.IR principal/instance@realm .
 If the originating user is authenticated to one of the principals named
-in \&.klogin, access is granted to the account.  The principal
-\fIaccountname\fP.@\fIlocalrealm\fP is granted access if there is no
-\&.klogin file. 
+in \&.k5login, access is granted to the account.  If there is no
+/.k5login file, the principal will be granted access 
+to the account according to the aname\->lname mapping rules (see
+.IR krb5_anadd(8) 
+for more details) 
 Otherwise
 a login and password will be prompted for on the remote machine as in
 .IR login (1).
-To avoid some security problems, the \&.klogin file must be owned by
+To avoid some security problems, the \&.k5login file must be owned by
 the remote user.
 .PP
 If there is some problem in marshaling the Kerberos authentication
@@ -196,5 +197,7 @@ rsh(1), kerberos(3), krb_sendauth(3), krb_realmofhost(3),
 rlogin(1) [UCB version]
 .SH FILES
 /usr/hosts/*		for \fIrhost\fP version of the command
+.br
+\&.k5login		in the user's home directory
 .SH BUGS
 More of the environment should be propagated.

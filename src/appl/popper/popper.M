@@ -10,11 +10,9 @@
 .\"
 .\" @(#)popper.8    1.3    (CCS)   9/15/90     Copyright (c) 1990 Regents of the University of California.\nAll rights reserved.\n
 .\"
-.TH popper 8 "August 1990"
-.UC 6
-.ad
+.TH popper 8 "Kerberos Version 5.0" "MIT Project Athena"
 .SH NAME
-popper \- pop 3 server
+popper \- Kerberized Berkeley pop 3 server
 .SH SYNOPSIS
 .B /usr/etc/popper
 [ -d ]
@@ -26,7 +24,29 @@ variety of Unix computers to manage electronic mail for Macintosh
 and MS-DOS computers.  The server was developed at the University of
 California at Berkeley and conforms fully to the specifications in RFC
 1081 and RFC 1082.  The Berkeley server also has extensions to
-send electronic mail on behalf of a client.
+send electronic mail on behalf of a client.  
+
+This  Kerberized version of popper works like just like the Berkeley
+POP server, except
+that it expects the client to do a Kerberos authentication at the very
+beginning (using krb5_sendauth).  After the successful Kerberos
+exchange, the protocol reverts back to standard POP protocol, except
+that the username must match the Kerberos principal used in the initial
+authentication, and the password command is ignored, since the user has
+already authenticated using Kerberos. 
+.PP
+The kerberized version of popper is invoked out of 
+.IR inetd(8),
+using a
+line in /etc/inetd.conf like this:
+.PP
+kpop    stream  tcp     nowait  root    /usr/etc/popper popper
+.PP
+Since a Kerberos authentication is required at the beginning, the port
+used by the Kerberized POP protocol is different from the standard
+Berkeley POP
+protocol.  This port is kpop, and it is traditionally 1109 (where the
+official Berkely port is 110 for version 3 and 109 for version 2).
 .PP
 The 
 .B \-d
@@ -36,30 +56,26 @@ information is saved using syslog(8).  The
 flag turns on debugging and saves the trace information in
 .I trace\-file
 using fprintf(s).
-.SH HOW TO OBTAIN THE SERVER
-.PP
-The POP server is available via anonymous ftp from lilac.Berkeley.EDU
-(128.32.136.12).  It is in two files in the pub directory: a compressed
-tar file popper.tar.Z and a Macintosh StuffIt archive in BinHex format
-called MacPOP.sit.hqx.
+.\" .SH HOW TO OBTAIN THE SERVER
+.\" .PP
+.\" The POP server is available via anonymous ftp from lilac.Berkeley.EDU
+.\" (128.32.136.12).  It is in two files in the pub directory: a compressed
+.\" tar file popper.tar.Z and a Macintosh StuffIt archive in BinHex format
+.\" called MacPOP.sit.hqx.
+.\" 
 .SH THE POP TRANSACTION CYCLE
 .PP
-The Berkeley POP server is a single program (called popper) that is
-launched by inetd when it gets a service request on the POP TCP port.
-(The official port number specified in RFC 1081 for POP version 3 is
-port 110.  However, some POP3 clients attempt to contact the server at
-port 109, the POP version 2 port.  Unless you are running both POP2 and
-POP3 servers, you can simply define both ports for use by the POP3
-server.  This is explained in the installation instructions later on.)
+The Kerberized Berkeley POP server is a single program (called popper) that is
+launched by inetd when it gets a service request on the KPOP TCP port.
 The popper program initializes and verifies that the peer IP address is
 registered in the local domain, logging a warning message when a
 connection is made to a client whose IP address does not have a
 canonical name.  For systems using BSD 4.3 bind, it also checks to see
 if a cannonical name lookup for the client returns the same peer IP
 address, logging a warning message if it does not.  The the server
-enters the authorization state, during which the client must correctly
-identify itself by providing a valid Unix userid and password on the
-server's host machine.  No other exchanges are allowed during this
+enters the authorization state, during which the client sends the
+password command with a dummy password, since authentication is done
+with Kerberos credentials.  No other exchanges are allowed during this
 state (other than a request to quit.)  If authentication fails, a
 warning message is logged and the session ends.  Once the user is
 identified, popper changes its user and group ids to match that of the
@@ -90,18 +106,18 @@ be exercised in using this option since it generates considerable
 output in the syslog file.  Alternatively, the "-t <file-name>" option
 will place debugging information into file "<file-name>" using fprintf
 instead of syslog.
-.PP
-For SunOS version 3.5, the popper program is launched by inetd from
-/etc/servers.  This file does not allow you to specify command line
-arguments.  Therefore, if you want to enable debugging, you can specify
-a shell script in /etc/servers to be launched instead of popper and in
-this script call popper with the desired arguments.
+.\" .PP
+.\" For SunOS version 3.5, the popper program is launched by inetd from
+.\" /etc/servers.  This file does not allow you to specify command line
+.\" arguments.  Therefore, if you want to enable debugging, you can specify
+.\" a shell script in /etc/servers to be launched instead of popper and in
+.\" this script call popper with the desired arguments.
 .PP
 You can confirm that the POP server is running on Unix by telneting to
-port 110 (or 109 if you set it up that way).  For example:
+port 1109.  For example:
 .PP
 .nf
-%telnet myhost 110
+%telnet myhost 1109
 Trying...
 Connected to myhost.berkeley.edu.
 Escape character is '^]'.
