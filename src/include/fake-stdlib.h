@@ -61,112 +61,115 @@
    stat(2)
    utimes(2)
    asctime(2)
+   monitor(3)
+   monstartup(3)
  */
 
 /* /usr/lib/lint/llib-lc */
-int access P((char *p , int m ));
-int acct P((char *f ));
-char *brk P((char *a ));
-int chdir P((char *s ));
-int chmod P((char *s , int m ));
-int chown P((char *s , int u , int g ));
-int chroot P((char *d ));
-int close P((int f ));
-int dup P((int f ));
-int dup2 P((int o , int n ));
-int execve P((char *s , char *v [], char *e []));
-int _exit P((int s ));
-int fchmod P((int f , int m ));
-int fchown P((int f , int u , int g ));
-int fcntl P((int f , int c , int a ));
-int flock P((int f , int o ));
+/* /usr/lib/lint/llib-lc */
+int access P((char *, int ));
+int acct P((char *));
+char *brk P((char *));
+int chdir P((char *));
+int chmod P((char *, int ));
+int chown P((char *, int , int ));
+int chroot P((char *));
+int close P((int ));
+int dup P((int ));
+int dup2 P((int , int ));
+int execve P((char *, char * [], char * []));
+int _exit P((int ));
+int fchmod P((int , int ));
+int fchown P((int , int , int ));
+int fcntl P((int , int , int ));
+int flock P((int , int ));
 int fork P((void ));
-int fsync P((int f ));
-int ftruncate P((int d , off_t l ));
+int fsync P((int ));
+int ftruncate P((int , off_t ));
 int getdtablesize P((void ));
 gid_t getegid P((void ));
 uid_t geteuid P((void ));
 gid_t getgid P((void ));
-int getgroups P((int n , int *g ));
+int getgroups P((int , int *));
 long gethostid P((void ));
-int gethostname P((char *n , int l ));
+int gethostname P((char *, int ));
 int getpagesize P((void ));
-int getpgrp P((int p ));
+int getpgrp P((int ));
 int getpid P((void ));
 int getppid P((void ));
-int getsockname P((int s , char *name , int *namelen ));
-int getsockopt P((int s , int level , int opt , char *buf , int *len ));
+int getsockname P((int , char *, int *));
+int getsockopt P((int , int , int , char *, int *));
 uid_t getuid P((void ));
-int ioctl P((int d , u_long r , char *p ));
-int kill P((int p , int s ));
-int killpg P((int pg , int s ));
-int link P((char *a , char *b ));
-int listen P((int s , int b ));
-off_t lseek P((int f , off_t o , int d ));
-int madvise P((char *a , int l , int b ));
-int mmap P((char *a , int l , int p , int s , int f , off_t o ));
-int mincore P((char *a , int l , char *v ));
-int mkdir P((char *p , int m ));
-int mknod P((char *n , int m , int a ));
-int mount P((int t , char *d , int f , caddr_t *dt ));
-int mprotect P((char *a , int l , int p ));
-int mremap P((char *a , int l , int p , int s , int f ));
-int munmap P((char *a , int l ));
-int open P((char *f , int m , int stuff ));
-int pipe P((int f [2 ]));
-int profil P((char *b , int s , int o , int i ));
-int ptrace P((int r , int p , int *a , int d ));
-int quota P((int c , int u , int a , char *ad ));
-int read P((int f , char *b , int l ));
-int readlink P((char *p , char *b , int s ));
-int reboot P((int h ));
-int recv P((int s , char *b , int l , int f ));
-int rename P((char *f , char *t ));
-int rmdir P((char *p ));
-char *sbrk P((int i ));
-int send P((int s , char *m , int l , int f ));
-int setgroups P((int n , int *g ));
-int sethostid P((long h ));
-int sethostname P((char *n , int l ));
-int setpgrp P((int g , int pg ));
-int setpriority P((int w , int who , int pri ));
-int setquota P((char *s , char *f ));
-int setregid P((int r , int e ));
-int setreuid P((int r , int e ));
-int setsockopt P((int s , int level , int opt , char *buf , int len ));
-int shutdown P((int s , int h ));
-int sigblock P((int m ));
-int sigsetmask P((int m ));
-int sigpause P((int m ));
-int socket P((int a , int t , int p ));
-int socketpair P((int d , int t , int p , int s [2 ]));
-char *stk P((char *a ));
-char *sstk P((int a ));
-int swapon P((char *s ));
-int symlink P((char *t , char *f ));
+int ioctl P((int , u_long , char *));
+int kill P((int , int ));
+int killpg P((int , int ));
+int link P((char *, char *));
+int listen P((int , int ));
+off_t lseek P((int , off_t , int ));
+int madvise P((char *, int , int ));
+int mmap P((char *, int , int , int , int , off_t ));
+int mincore P((char *, int , char *));
+int mkdir P((char *, int ));
+int mknod P((char *, int , int ));
+int mount P((int , char *, int , caddr_t *));
+int mprotect P((char *, int , int ));
+int mremap P((char *, int , int , int , int ));
+int munmap P((char *, int ));
+int open P((char *, int , int ));
+int pipe P((int  [2 ]));
+int profil P((char *, int , int , int ));
+int ptrace P((int , int , int *, int ));
+int quota P((int , int , int , char *));
+int read P((int , char *, int ));
+int readlink P((char *, char *, int ));
+int reboot P((int ));
+int recv P((int , char *, int , int ));
+int rename P((char *, char *));
+int rmdir P((char *));
+char *sbrk P((int ));
+int send P((int , char *, int , int ));
+int setgroups P((int , int *));
+int sethostid P((long ));
+int sethostname P((char *, int ));
+int setpgrp P((int , int ));
+int setpriority P((int , int , int ));
+int setquota P((char *, char *));
+int setregid P((int , int ));
+int setreuid P((int , int ));
+int setsockopt P((int , int , int , char *, int ));
+int shutdown P((int , int ));
+int sigblock P((int ));
+int sigsetmask P((int ));
+int sigpause P((int ));
+int socket P((int , int , int ));
+int socketpair P((int , int , int , int [2 ]));
+char *stk P((char *));
+char *sstk P((int ));
+int swapon P((char *));
+int symlink P((char *, char *));
 int sync P((void ));
-int truncate P((char *p , off_t l ));
-int umask P((int n ));
-int umount P((char *s ));
-int unlink P((char *s ));
+int truncate P((char *, off_t ));
+int umask P((int ));
+int umount P((char *));
+int unlink P((char *));
 int vfork P((void ));
 int vhangup P((void ));
-int write P((int f , char *b , int l ));
-int abs P((int i ));
-int alarm P((unsigned s ));
-double atof P((char *s ));
-int atoi P((char *s ));
-long atol P((char *s ));
-int bcmp P((char *b1 , char *b2 , int length ));
-int bcopy P((char *src , char *dst , int length ));
-int bzero P((char *b , int length ));
-char *calloc P((unsigned n , unsigned s ));
+int write P((int , char *, int ));
+int abs P((int ));
+int alarm P((unsigned ));
+double atof P((char *));
+int atoi P((char *));
+long atol P((char *));
+int bcmp P((char *, char *, int ));
+int bcopy P((char *, char *, int ));
+int bzero P((char *, int ));
+char *calloc P((unsigned , unsigned ));
 int closelog P((void ));
-int creat P((char *s , int m ));
-char *crypt P((char *k , char *s ));
-char *ctime P((long *c ));
-char *ecvt P((double v , int n , int *d , int *s ));
-int encrypt P((char *s , int i ));
+int creat P((char *, int ));
+char *crypt P((char *, char *));
+char *ctime P((long *));
+char *ecvt P((double , int , int *, int *));
+int encrypt P((char *, int ));
 int endfsent P((void ));
 int endgrent P((void ));
 int endhostent P((void ));
@@ -176,150 +179,551 @@ int endpwent P((void ));
 int endservent P((void ));
 int endttyent P((void ));
 int endusershell P((void ));
-int execl P((char *f , char *a ));
-int execle P((char *f , char *a ));
-int execlp P((char *f , char *a ));
-int execv P((char *s , char *v []));
-int execvp P((char *s , char *v []));
-int exect P((char *s , char *v [], char *e []));
-int exit P((int s ));
-char *fcvt P((double v , int n , int *d , int *s ));
-int ffs P((int i ));
-int free P((char *p ));
-double frexp P((double v , int *e ));
-char *gcvt P((double v , int n , char *b ));
-struct disktab *getdiskbyname P((char *name ));
-char *getenv P((char *n ));
+int execl P((char *, char *));
+int execle P((char *, char *));
+int execlp P((char *, char *));
+int execv P((char *, char * []));
+int execvp P((char *, char * []));
+int exect P((char *, char * [], char * []));
+int exit P((int ));
+char *fcvt P((double , int , int *, int *));
+int ffs P((int ));
+int free P((char *));
+double frexp P((double , int *));
+char *gcvt P((double , int , char *));
+struct disktab *getdiskbyname P((char *));
+char *getenv P((char *));
 struct fstab *getfsent P((void ));
-struct fstab *getfsspec P((char *n ));
-struct fstab *getfsfile P((char *n ));
-struct fstab *getfstype P((char *t ));
+struct fstab *getfsspec P((char *));
+struct fstab *getfsfile P((char *));
+struct fstab *getfstype P((char *));
 struct group *getgrent P((void ));
-struct group *getgrgid P((int n ));
-struct group *getgrnam P((char *n ));
-struct hostent *gethostbyaddr P((char *addr , int len , int type ));
-struct hostent *gethostbyname P((char *name ));
+struct group *getgrgid P((int ));
+struct group *getgrnam P((char *));
+struct hostent *gethostbyaddr P((char *, int , int ));
+struct hostent *gethostbyname P((char *));
 struct hostent *gethostent P((void ));
 char *getlogin P((void ));
-struct netent *getnetbyaddr P((int net , int type ));
-struct netent *getnetbyname P((char *name ));
+struct netent *getnetbyaddr P((int , int ));
+struct netent *getnetbyname P((char *));
 struct netent *getnetent P((void ));
-int getopt P((int argc , char **argv , char *optstr ));
-char *getpass P((char *n ));
-struct protoent *getprotobyname P((char *name ));
-struct protoent *getprotobynumber P((int proto ));
+int getopt P((int , char **, char *));
+char *getpass P((char *));
+struct protoent *getprotobyname P((char *));
+struct protoent *getprotobynumber P((int ));
 struct protoent *getprotoent P((void ));
-int getpw P((int u , char *b ));
+int getpw P((int , char *));
 struct passwd *getpwent P((void ));
-struct passwd *getpwuid P((int n ));
-struct passwd *getpwnam P((char *n ));
-struct servent *getservbyname P((char *name , char *proto ));
-struct servent *getservbyport P((int port , char *proto ));
+struct passwd *getpwuid P((int ));
+struct passwd *getpwnam P((char *));
+struct servent *getservbyname P((char *, char *));
+struct servent *getservbyport P((int , char *));
 struct servent *getservent P((void ));
-struct ttyent *getttynam P((char *name ));
+struct ttyent *getttynam P((char *));
 char *getusershell P((void ));
-char *getwd P((char *pathname ));
-struct tm *gmtime P((long *c ));
-u_long htonl P((u_long hostlong ));
-u_short htons P((int hostshort ));
-char *index P((char *s , int c ));
-u_long inet_addr P((char *cp ));
-u_long inet_network P((char *cp ));
-int initgroups P((char *uname , int agroup ));
-char *initstate P((unsigned s , char *st , int n ));
-int isatty P((int f ));
-double ldexp P((double v , int e ));
+char *getwd P((char *));
+struct tm *gmtime P((long *));
+u_long htonl P((u_long ));
+u_short htons P((unsigned int ));
+char *index P((char *, int ));
+u_long inet_addr P((char *));
+u_long inet_network P((char *));
+int initgroups P((char *, int ));
+char *initstate P((unsigned , char *, int ));
+int isatty P((int ));
+double ldexp P((double , int ));
 int longjmperror P((void ));
-struct tm *localtime P((long *c ));
-char *malloc P((unsigned n ));
-char *memccpy P((char *t , char *f , int c , int n ));
-char *memchr P((char *s , int c , int n ));
-int memcmp P((char *s1 , char *s2 , int n ));
-char *memcpy P((char *t , char *f , int n ));
-char *memset P((char *s , int c , int n ));
-char *mktemp P((char *p ));
-int mkstemp P((char *p ));
-double modf P((double v , double *p ));
-int moncontrol P((int mode ));
-int monitor P((int (*l )(), int (*h )(), short *b , int s , int n ));
-int monstartup P((int (*l )(), int (*h )()));
-int nice P((int incr ));
-struct ns_addr ns_addr P((char *name ));
-u_long ntohl P((u_long netlong ));
-u_short ntohs P((int netshort ));
-int openlog P((char *s , int f , int l ));
+struct tm *localtime P((long *));
+char *malloc P((unsigned ));
+char *memccpy P((char *, char *, int , int ));
+char *memchr P((char *, int , int ));
+int memcmp P((char *, char *, int ));
+char *memcpy P((char *, char *, int ));
+char *memset P((char *, int , int ));
+char *mktemp P((char *));
+int mkstemp P((char *));
+double modf P((double , double *));
+int moncontrol P((int ));
+int nice P((int ));
+struct ns_addr ns_addr P((char *));
+u_long ntohl P((u_long ));
+u_short ntohs P((unsigned int ));
+int openlog P((char *, int , int ));
 int pause P((void ));
-int perror P((char *s ));
-int psignal P((unsigned sig , char *s ));
-int qsort P((char *b , int n , int w , int (*c )()));
+int perror P((char *));
+int psignal P((unsigned , char *));
+int qsort P((char *, int , int , int (* )()));
 int rand P((void ));
 long random P((void ));
-int rcmd P((char **a , u_short rp , char *lu , char *ru , char *c , int *f ));
-char *re_comp P((char *s ));
-int re_exec P((char *s ));
-char *realloc P((char *p , unsigned n ));
-int rexec P((char **a , u_short rp , char *n , char *p , char *c , int *f ));
-char *rindex P((char *s , int c ));
-int rresvport P((int *p ));
-int ruserok P((char *rh , int su , char *ru , char *lu ));
-int setegid P((gid_t egid ));
-int seteuid P((uid_t euid ));
+int rcmd P((char **, u_short , char *, char *, char *, int *));
+char *re_comp P((char *));
+int re_exec P((char *));
+char *realloc P((char *, unsigned ));
+int rexec P((char **, u_short , char *, char *, char *, int *));
+char *rindex P((char *, int ));
+int rresvport P((int *));
+int ruserok P((char *, int , char *, char *));
+int setegid P((gid_t ));
+int seteuid P((uid_t ));
 int setfsent P((void ));
 int setgrent P((void ));
-int setgid P((gid_t g ));
-int sethostent P((int stayopen ));
-int sethostfile P((char *name ));
-int setkey P((char *k ));
-int setlogmask P((int m ));
-int setnetent P((int stayopen ));
-int setprotoent P((int stayopen ));
+int setgid P((gid_t ));
+int sethostent P((int ));
+int sethostfile P((char *));
+int setkey P((char *));
+int setlogmask P((int ));
+int setnetent P((int ));
+int setprotoent P((int ));
 int setpwent P((void ));
-int setpwfile P((char *file ));
-int setrgid P((gid_t rgid ));
-int setruid P((uid_t ruid ));
-int setservent P((int stayopen ));
-char *setstate P((char *st ));
+int setpwfile P((char *));
+int setrgid P((gid_t ));
+int setruid P((uid_t ));
+int setservent P((int ));
+char *setstate P((char *));
 int setttyent P((void ));
-int setuid P((uid_t u ));
+int setuid P((uid_t ));
 int setusershell P((void ));
-int siginterrupt P((int sig , int flag ));
-int sleep P((unsigned i ));
-int srand P((int s ));
-char *strcat P((char *a , char *b ));
-char *strcatn P((char *a , char *b , int n ));
-char *strchr P((char *s , int c ));
-int strcmp P((const char *a , const char *b ));
-int strcmpn P((char *a , char *b , int n ));
-char *strcpy P((char *a , const char *b ));
-char *strcpyn P((char *a , char *b , int n ));
-int strcspn P((char *s , char *set ));
-int strlen P((const char *s ));
-char *strncat P((char *a , const char *b , int n ));
-int strncmp P((char *a , const char *b , int n ));
-char *strncpy P((char *a , const char *b , int n ));
-char *strpbrk P((char *s , char *brk ));
-char *strrchr P(( char *s , int c ));
-int strspn P((char *s , char *set ));
-char *strtok P((char *s , char *sep ));
-int swab P((char *f , char *t , int n ));
-int syslog P((int l , char *f ));
-int system P((char *s ));
-long tell P((int f ));
-long time P((long *t ));
-char *timezone P((int z , int d ));
-char *tmpnam P((char *s ));
-char *ttyname P((int f ));
+int siginterrupt P((int , int ));
+int sleep P((unsigned ));
+int srand P((int ));
+char *strcat P((char *, char *));
+char *strcatn P((char *, char *, int ));
+char *strchr P((char *, int ));
+int strcmp P((const char *, const char *));
+int strcmpn P((char *, char *, int ));
+char *strcpy P((char *, const char *));
+char *strcpyn P((char *, char *, int ));
+int strcspn P((char *, char *));
+int strlen P((const char *));
+char *strncat P((char *, const char *, int ));
+int strncmp P((const char *, const char *, int ));
+char *strncpy P((char *, const char *, int ));
+char *strpbrk P((char *, char *));
+char *strrchr P((char *, int ));
+int strspn P((char *, char *));
+char *strtok P((char *, char *));
+int swab P((char *, char *, int ));
+int syslog P((int , char *));
+int system P((char *));
+long tell P((int ));
+long time P((long *));
+char *timezone P((int , int ));
+char *tmpnam P((char *));
+char *ttyname P((int ));
 int ttyslot P((void ));
-unsigned ualarm P((unsigned value , unsigned interval ));
-int usleep P((unsigned useconds ));
-int utime P((char *name , time_t *timep ));
-char *valloc P((unsigned s ));
-int vlimit P((int limit , int value ));
-int printf P((char *s, ... ));
-int puts P((char *s ));
-
-#undef jmp_buf
-#undef DBM
+unsigned ualarm P((unsigned , unsigned ));
+int usleep P((unsigned ));
+int utime P((char *, time_t *));
+char *valloc P((unsigned ));
+int vlimit P((int , int ));
+int printf P((char *, ...));
+int puts P((char *));
 
 #endif /* VAX */
+
+#if (defined(mips) && defined(ultrix)) || (defined(__mips__) && defined(__ultrix__))
+
+/* massaged from /usr/lib/lint/llib-lc, via watchbin/mkproto */
+/* above functions removed, plus:
+   old DBM
+   sigset stuff
+   semctl
+   semget
+   semop
+   shmctl
+   shmget
+   uname
+   ustat
+   msg*
+   to*
+   is*
+   hsearch
+   ftok
+ */
+
+/* /usr/lib/lint/llib-lc */
+int access P((char * , int ));
+int acct P((char * ));
+#ifndef SYSTEM_FIVE
+caddr_t brk P((caddr_t ));
+#endif
+caddr_t sbrk P((int  ));
+#ifdef mips
+int cachectl P((char * , int , int ));
+int cacheflush P((char *, int , int ));
+#endif
+int chdir P((char * ));
+int chmod P((char * , int  ));
+int fchmod P((int  , int  ));
+int chown P((char * , int  , int  ));
+int fchown P((int  , int  , int ));
+int chroot P((char * ));
+int close P((int  ));
+int creat P((char * , int  ));
+int dup P((int  ));
+int dup2 P((int , int  ));
+int execve P((char * , char * [], char * []));
+#ifndef SYSTEM_FIVE
+int _exit P((int  ));
+#endif
+int exportfs P((char * , int  , int  ));
+int fcntl P((int  , int  , int ));
+int fork P((void ));
+int getdirentries P((int  , char * , int  , long * ));
+int getdomainname P((char * , int  ));
+int setdomainname P((char * , int ));
+#ifndef SYSTEM_FIVE
+int getgid P((void ));
+int getegid P((void ));
+#endif
+int getmnt P((int * , struct fs_data * , int  , int , char * ));
+#ifndef SYSTEM_FIVE
+int getpgrp P((int ));
+#endif
+int getpid P((void ));
+int getppid P((void ));
+#ifndef SYSTEM_FIVE
+int getuid P((void ));
+int geteuid P((void ));
+#endif
+#ifndef SYSTEM_FIVE
+int ioctl P((int  , int  , char * ));
+#endif
+int kill P((int  , int  ));
+int link P((char * , char * ));
+long lseek P((int  , long  , int ));
+#ifdef SYSTEM_FIVE
+int madvise P((char * , int , int ));
+int mmap P((char * , int  , int , int , int , off_t ));
+int mincore P((char * , int  , char * ));
+#endif
+int mkdir P((char *, int  ));
+int mknod P((char * , int , int ));
+int mount P((char * , char * , int ));
+int umount P((char * ));
+#ifdef SYSTEM_FIVE
+int mprotect P((char * , int , int ));
+int mremap P((char * , int , int , int , int ));
+int munmap P((char * , int ));
+#endif
+int nfs_svc P((int ));
+void nfs_biod P((void ));
+int open P((char * , int  , int  ));
+int pipe P((int [2]));
+#ifndef SYSTEM_FIVE
+int profil P((char * , int , int , int ));
+#endif
+int ptrace P((int , int , int * , int  ));
+#ifndef SYSTEM_FIVE
+int read P((int , char * , int  ));
+#endif
+#ifndef SYSTEM_FIVE
+int setpgrp P((int , int ));
+#endif
+#ifdef SYSTEM_FIVE
+char *stk P((char * ));
+char *sstk P((int  ));
+#endif
+void sync P((void ));
+int umask P((int ));
+int unlink P((char * ));
+pid_t waitpid P((pid_t , int * , int ));
+#ifndef SYSTEM_FIVE
+int write P((int , char * , int  ));
+#endif
+
+void abort P((void ));
+int abs P((int ));
+#ifndef SYSTEM_FIVE
+int alarm P((unsigned ));
+#endif
+char *crypt P((char * , char * ));
+#ifndef SYSTEM_FIVE
+void encrypt P((char * ));
+#endif
+char *ctime P((long * ));
+struct tm *localtime P((long * ));
+struct tm *gmtime P((long * ));
+#ifndef SYSTEM_FIVE
+char *timezone P((int  , int  ));
+#endif
+char *ecvt P((double , int , int * , int * ));
+char *fcvt P((double , int  , int * , int * ));
+char *gcvt P((double , int , char * ));
+int execl P((char * , char * ));
+int execle P((char * , char * ));
+int execv P((char * , char **));
+int exect P((char *, char **, char ** ));
+void exit P((int ));
+double frexp P((double , int * ));
+double ldexp P((double , int  ));
+double modf P((double , double * ));
+struct disktab *getdiskbyname P((char * ));
+char *getenv P((char * ));
+struct fstab *getfsent P((void ));
+struct fstab *getfsspec P((char * ));
+struct fstab *getfsfile P((char * ));
+struct fstab *getfstype P((char * ));
+int endfsent P((void ));
+int setfsent P((void ));
+#ifndef SYSTEM_FIVE
+struct group *getgrent P((void ));
+struct group *getgrgid P((int ));
+struct group *getgrnam P((char * ));
+int endgrent P((void ));
+int setgrent P((void ));
+#endif
+char *getlogin P((void ));
+struct hostent *gethostent P((void ));
+struct hostent *gethostbyname P((char * ));
+struct hostent *gethostbyaddr P((char * , int  , int  ));
+void sethostent P((int ));
+void endhostent P((void ));
+struct netent *getnetent P((void ));
+struct netent *getnetbyname P((char * ));
+struct netent *getnetbyaddr P((int  , int ));
+void setnetent P((int ));
+void endnetent P((void ));
+char *getpass P((char * ));
+struct protoent *getprotoent P((void ));
+struct protoent *getprotobyname P((char * ));
+struct protoent *getprotobynumber P((int  ));
+void setprotoent P((int ));
+void endprotoent P((void ));
+int getpw P((int , char * ));
+#ifndef SYSTEM_FIVE
+struct passwd *getpwent P((void ));
+struct passwd *getpwuid P((int ));
+struct passwd *getpwnam P((char * ));
+int endpwent P((void ));
+int setpwent P((void ));
+#endif
+char *gets P((char * ));
+struct servent *getservent P((void ));
+struct servent *getservbyname P((char * , char * ));
+struct servent *getservbyport P((int , char * ));
+void setservent P((int ));
+void endservent P((void ));
+struct ttyent *getttyent P((void ));
+struct ttyent *getttynam P((char * ));
+void setttyent P((void ));
+void endttyent P((void ));
+unsigned long inet_network P((char * ));
+int initgroups P((char * , int  ));
+char *malloc P((unsigned ));
+char *calloc P((unsigned , unsigned  ));
+char *realloc P((char * , unsigned  ));
+void free P((char * ));
+char *alloca P((int  ));
+int mkfifo P((char * , mode_t  ));
+char *mktemp P((char * ));
+#ifndef SYSTEM_FIVE
+void monitor P((int (* )(), int (* )(), short * , int , int  ));
+#endif
+void monstartup P((int (* )(), int (* )()));
+void moncontrol P((int ));
+#ifndef SYSTEM_FIVE
+void nice P((int ));
+#endif
+long pathconf P((char * , int  ));
+long fpathconf P((int , int ));
+int pause P((void ));
+void perror P((char * ));
+int printf P((char *, ...));
+#ifndef SYSTEM_FIVE
+char *sprintf P((char * , const char *, ... ));
+#endif
+int puts P((char * ));
+#ifndef SYSTEM_FIVE
+int qsort P((char * , int  , int , int (* )()));
+#endif
+int rand P((void ));
+void srand P((int ));
+int rcmd P((char ** , u_short , char * , char * , char * , int * ));
+int rresvport P((int * ));
+int ruserok P((char * , int  , char * , char * ));
+int rexec P((char ** , u_short  , char * , char * , char * , int * ));
+int scanf P((char * ));
+int sscanf P((char * , char * ));
+int setpgid P((pid_t  , pid_t  ));
+int setuid P((int  ));
+int seteuid P((int  ));
+int setruid P((int  ));
+int setgid P((int  ));
+int setegid P((int  ));
+int setrgid P((int  ));
+
+int siginterrupt P((int  , int  ));
+unsigned sleep P((unsigned  ));
+char *strcat P((char * , char * ));
+int strcmp P((const char * , const char * ));
+char *strcpy P((char * , const char * ));
+int strlen P((const char * ));
+char *strncat P((char * , const char * , int  ));
+int strncmp P((const char * , const char * , int  ));
+char *strncpy P((char * , const char * , int  ));
+char *strchr P((char * , int  ));
+char *strrchr P((char * , int  ));
+char *strpbrk P((char * , char * ));
+int strspn P((char * , char * ));
+int strcspn P((char * , char * ));
+char *strtok P((char * , char * ));
+char *index P((char * , int  ));
+char *rindex P((char * , int  ));
+void swab P((char * , char * , int  ));
+long sysconf P((int  ));
+int system P((char * ));
+char *ttyname P((int  ));
+int isatty P((int  ));
+int ttyslot P((void ));
+int utime P((char * , time_t  []));
+
+#ifndef SYSTEM_FIVE
+int flock P((int  , int  ));
+int fsync P((int  ));
+int getdtablesize P((void ));
+int getgroups P((int  , int * ));
+int gethostid P((void ));
+int sethostid P((int  ));
+int gethostname P((char * , int  ));
+int sethostname P((char * , int  ));
+int getpagesize P((void ));
+int getpriority P((int  , int  ));
+int setpriority P((int  , int  , int  ));
+int getsockname P((int  , char * , int * ));
+int getsockopt P((int  , int  , int  , char * , int * ));
+int setsockopt P((int  , int  , int  , char * , int  ));
+int killpg P((int  , int  ));
+int listen P((int  , int  ));
+int quota P((int  , int  , int  , caddr_t ));
+int readlink P((char * , char * , int  ));
+int reboot P((int  ));
+int recv P((int  , char * , int  , int  ));
+int rename P((char * , char * ));
+int rmdir P((char * ));
+int send P((int  , char * , int , int  ));
+int setgroups P((int  , int * ));
+int setregid P((int  , int  ));
+int setquota P((char * , char * ));
+int setreuid P((int  , int  ));
+pid_t setsid P((void ));
+int shutdown P((int  , int  ));
+int sigblock P((int  ));
+int sigpause P((int  ));
+int sigsetmask P((int  ));
+int socket P((int , int  , int  ));
+int socketpair P((int , int  , int  , int  [2 ]));
+int swapon P((char * ));
+int symlink P((char * , char * ));
+int truncate P((char * , int  ));
+int ftruncate P((int  , int  ));
+int vfork P((void ));
+void vhangup P((void ));
+double atof P((char * ));
+int atoi P((char * ));
+long atol P((char * ));
+void bcopy P((char * , char * , int  ));
+int bcmp P((char * , char * , int  ));
+void bzero P((char * , int  ));
+int ffs P((int  ));
+char *getwd P((char * ));
+void psignal P((unsigned  , char * ));
+void srandom P((int  ));
+long random P((void ));
+char *initstate P((unsigned  , char * , int  ));
+char *setstate P((char * ));
+char *re_comp P((char * ));
+int re_exec P((char * ));
+int openlog P((char * , int  ));
+void syslog P((int  , char * ));
+void closelog P((void ));
+long time P((long * ));
+char *valloc P((unsigned  ));
+int vlimit P((int  , int  ));
+#endif
+int execlp P((char * , char * ));
+int execvp P((char * , char * []));
+int plock P((int ));
+char *shmat P((int  , char * , int  ));
+int shmdt P((char * ));
+int stime P((long * ));
+void sys3b P((int  , int  , int  ));
+long ulimit P((int  , long  ));
+long a64l P((char * ));
+char *l64a P((long  ));
+void _assert P((char * , char * , int  ));
+char *bsearch P((char * , char * , unsigned  , unsigned  , int (* )(char *, char *)));
+long clock P((void ));
+char *ctermid P((char * ));
+char *cuserid P((char * ));
+double drand48 P((void ));
+double erand48 P((unsigned short  [3 ]));
+long lrand48 P((void ));
+long nrand48 P((unsigned short  [3 ]));
+long mrand48 P((void ));
+long jrand48 P((unsigned short  [3 ]));
+void srand48 P((long s ));
+unsigned short *seed48 P((unsigned short  [3 ]));
+void lcong48 P((unsigned short  [7 ]));
+char *getcwd P((char * , int  ));
+int getopt P((int  , char ** , char * ));
+int hcreate P((unsigned  ));
+void hdestroy P((void ));
+void l3tol P((long * , char * , int  ));
+void ltol3 P((char * , long * , int  ));
+char *lsearch P((char * , char * , unsigned * , unsigned  , int (* )(char *, char *)));
+char *lfind P((char * , char * , unsigned * , unsigned  , int (* )(char *, char *)));
+char *memccpy P((char * , char * , int  , int  ));
+char *memchr P((char * , int  , int  ));
+int memcmp P((char * , char * , int  ));
+char *memcpy P((char * , char * , int  ));
+char *memset P((char * , int  , int  ));
+int gsignal P((int  ));
+double strtod P((char * , char ** ));
+long strtol P((char * , char ** , int  ));
+char *tmpnam P((char * ));
+char *tempnam P((char * , char * ));
+char *tsearch P((char * , char ** , int (* )(char *, char *)));
+char *tfind P((char * , char ** , int (* )(char *, char *)));
+char *tdelete P((char * , char ** , int (* )(char *, char *)));
+void twalk P((char * , void (* )(char *, int, int)));
+int vprintf P((char * , ...  ));
+int vsprintf P((char * , const char * , ...  ));
+int syscall P((int  , int  , int  , int  ));
+long tell P((int  ));
+
+#ifdef SYSTEM_FIVE
+
+unsigned alarm P((unsigned ));
+int brk P((char * ));
+void _exit P((int  ));
+int getpgrp P((void ));
+unsigned short getuid P((void ));
+unsigned short geteuid P((void ));
+unsigned short getgid P((void ));
+unsigned short getegid P((void ));
+int ioctl P((int  , int  , int  ));
+int nice P((int  ));
+void profil P((char * , int  , int  , int  ));
+int read P((int  , char * , unsigned  ));
+int setpgrp P((void ));
+int write P((int  , char * , unsigned  ));
+void setkey P((char * ));
+void encrypt P((char * , int  ));
+void tzset P((void ));
+struct group *getgrent P((void ));
+struct group *getgrgid P((int  ));
+struct group *getgrnam P((char * ));
+void setgrent P((void ));
+void endgrent P((void ));
+struct passwd *getpwent P((void ));
+struct passwd *getpwuid P((int  ));
+struct passwd *getpwnam P((char * ));
+void setpwent P((void ));
+void endpwent P((void ));
+int sprintf P((char * , char *, ... ));
+void qsort P((char * , unsigned  , unsigned  , int (* )()));
+#endif
+
+#endif /* MIPS/Ultrix */
 #undef P
