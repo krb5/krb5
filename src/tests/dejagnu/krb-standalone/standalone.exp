@@ -30,6 +30,7 @@ proc doit { } {
     global tmppwd
     global spawn_id
     global supported_enctypes
+    global KRBIV
 
     # Start up the kerberos and kadmind daemons.
     if ![start_kerberos_daemons 1] {
@@ -81,7 +82,8 @@ proc doit { } {
 	do_klist "foo/bar" "krbtgt/$REALMNAME@$REALMNAME" "klist kt foo/bar vno $vno"
 	do_kdestroy "kdestroy foo/bar vno $vno"
 	
-	if [regexp {des-cbc-[a-z0-9-]*:v4} [lindex $supported_enctypes 0]] {
+	if {[info exists KRBIV] && $KRBIV &&
+	    [regexp {des-cbc-[a-z0-9-]*:v4} [lindex $supported_enctypes 0]]} {
 	    catch "exec rm -f $tmppwd/foosrvtab"
 	    spawn $KTUTIL
 	    expect_after {

@@ -1,3 +1,8 @@
+2003-01-01  Ezra Peisach  <epeisach@bu.edu>
+
+	* standalone.exp: Only run the keytab to srvtab tests if kerberos 4
+	support is compiled into the source tree.
+
 2002-09-30  Tom Yu  <tlyu@mit.edu>
 
 	* rsh.exp (rsh_test): Explicitly call stop_rsh_daemon upon pass
