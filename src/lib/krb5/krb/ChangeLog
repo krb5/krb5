@@ -1,3 +1,8 @@
+Fri Feb 13 15:27:35 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in: Added new file kfree.c, which contained all of the
+		functions previously in the lib/krb5/free directory.
+
 Mon Feb  2 17:02:29 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* Makefile.in: Define BUILDTOP and thisconfigdir in the Makefile
