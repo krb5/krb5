@@ -19,6 +19,8 @@ static char rcsid_parse_c [] =
 
 #include <krb5/krb5.h>
 #include <krb5/ext-proto.h>
+#include <stdio.h>
+#include <krb5/libos-proto.h>
 
 #include <errno.h>
 
