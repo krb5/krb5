@@ -1,3 +1,7 @@
+2001-06-22  Ezra Peisach  <epeisach@mit.edu>
+
+	* krb.h: Don't use "options" and "user" as argument names.
+
 2001-06-20  Ezra Peisach  <epeisach@mit.edu>
 
 	* krb.h: Add prototype for krb__get_srvtabname() which is invoked
