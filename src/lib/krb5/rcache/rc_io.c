@@ -105,7 +105,9 @@ char **fn;
     {
      case EBADF: FREE(d->fn); return KRB5_RC_IO_UNKNOWN; break;
      case EFBIG: FREE(d->fn); return KRB5_RC_IO_SPACE; break;
+#ifdef EDQUOT
      case EDQUOT: FREE(d->fn); return KRB5_RC_IO_SPACE; break;
+#endif
      case ENOSPC: FREE(d->fn); return KRB5_RC_IO_SPACE; break;
      case EIO: FREE(d->fn); return KRB5_RC_IO_IO; break;
      case EPERM: FREE(d->fn); return KRB5_RC_IO_PERM; break;
@@ -132,7 +134,9 @@ char *fn;
     {
      case EBADF: FREE(d->fn); return KRB5_RC_IO_UNKNOWN; break;
      case EFBIG: FREE(d->fn); return KRB5_RC_IO_SPACE; break;
+#ifdef EDQUOT
      case EDQUOT: FREE(d->fn); return KRB5_RC_IO_SPACE; break;
+#endif
      case ENOSPC: FREE(d->fn); return KRB5_RC_IO_SPACE; break;
      case EIO: FREE(d->fn); return KRB5_RC_IO_IO; break;
      case EPERM: FREE(d->fn); return KRB5_RC_IO_PERM; break;
@@ -165,7 +169,9 @@ int num;
     {
      case EBADF: return KRB5_RC_IO_UNKNOWN; break;
      case EFBIG: return KRB5_RC_IO_SPACE; break;
+#ifdef EDQUOT
      case EDQUOT: return KRB5_RC_IO_SPACE; break;
+#endif
      case ENOSPC: return KRB5_RC_IO_SPACE; break;
      case EIO: return KRB5_RC_IO_IO; break;
      default: return KRB5_RC_IO_UNKNOWN; break;
