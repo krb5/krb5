@@ -1841,9 +1841,9 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				EXPORTED_SYMBOLS_FILE = "$(SRCROOT)/Kerberos5Lib.pbexp";
-				FRAMEWORK_SEARCH_PATHS = "";
+				FRAMEWORK_SEARCH_PATHS = "\"$(SYMROOT)/StubFrameworks\"";
 				FRAMEWORK_VERSION = A;
-				HEADER_SEARCH_PATHS = "\"$(SYMROOT)/GSSKerberos5.intermediates\"";
+				HEADER_SEARCH_PATHS = "\"$(SYMROOT)/GSSKerberos5.intermediates\" \"$(SYMROOT)/StubFrameworks\"";
 				INSTALL_PATH = /System/Library/Frameworks/Kerberos.framework/Frameworks;
 				LIBRARY_SEARCH_PATHS = "";
 				OPTIMIZATION_CFLAGS = "";
@@ -6387,12 +6387,14 @@
 		};
 		41D6B5480029FA1112120111 = {
 			isa = PBXFrameworkReference;
-			path = KerberosLogin.framework;
+			name = KerberosLogin.framework;
+			path = StubFrameworks/KerberosLogin.framework;
 			refType = 3;
 		};
 		41D6B5490029FA1112120111 = {
 			isa = PBXFrameworkReference;
-			path = KerberosLogin.framework;
+			name = KerberosLogin.framework;
+			path = StubFrameworks/KerberosLogin.framework;
 			refType = 3;
 		};
 		41D6B54A0029FA1112120111 = {
@@ -6492,9 +6494,9 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				EXPORTED_SYMBOLS_FILE = "$(SRCROOT)/GSSLibrary.pbexp";
-				FRAMEWORK_SEARCH_PATHS = "";
+				FRAMEWORK_SEARCH_PATHS = "\"$(SYMROOT)/StubFrameworks\"";
 				FRAMEWORK_VERSION = A;
-				HEADER_SEARCH_PATHS = "\"$(SYMROOT)/GSSKerberos5.intermediates\"";
+				HEADER_SEARCH_PATHS = "\"$(SYMROOT)/GSSKerberos5.intermediates\" \"$(SYMROOT)/StubFrameworks\"";
 				INSTALL_PATH = /System/Library/Frameworks/Kerberos.framework/Frameworks;
 				LIBRARY_SEARCH_PATHS = "";
 				OPTIMIZATION_CFLAGS = "";
