@@ -32,6 +32,7 @@
 #include "stdcc.h"
 #include "stdcc_util.h"
 #include "string.h"
+#include "k5-int.h"
 #include <stdio.h>
 
 apiCB *gCntrlBlock = NULL;

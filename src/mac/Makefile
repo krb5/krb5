@@ -109,7 +109,7 @@ privatekrb5-library-current-version					= 5
 privatekrb5-library-definition-version				= 5
 privatekrb5-library-implementation-version			= 5
 
-krb5-library-current-version						= 5
+krb5-library-current-version						= 6
 krb5-library-definition-version						= 5
 krb5-library-implementation-version					= 5
 

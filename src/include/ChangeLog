@@ -1,3 +1,7 @@
+2001-06-13  Miro Jurisic <meeroh@mit.edu>
+
+	* krb5.hin, k5-int.h: Replaced cc_* macros with functions
+
 2001-03-20  Alexandra Ellwood <lxs@mit.edu>
 
 	* krb5.hin: Changed KerberosConditionalMacros.h to

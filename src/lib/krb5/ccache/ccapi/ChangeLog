@@ -1,3 +1,7 @@
+2001-06-13  Miro Jurisic <meeroh@mit.edu>
+
+	* stdcc.c: Replaced cc_* macros with functions
+
 2001-02-27	Alexandra Ellwood <lxs@mit.edu>
 
 	* stdcc.h, stdcc_util.h: Updated Mac OS #defines and #includes for new 
