@@ -30,6 +30,38 @@ if ![setup_kerberos_db 0] {
     return
 }
 
+proc start_sserver_daemon { inetd } {
+    global spawn_id
+    global sserver_pid
+    global sserver_spawn_id
+    global SSERVER
+    global T_INETD
+    global tmppwd
+
+    # if inetd = 0, then we are running stand-alone
+    if !{$inetd} {
+	    # Start the sserver
+	    spawn $SSERVER -p 3964 -S $tmppwd/srvtab
+	    set sserver_pid [exp_pid]
+	    set sserver_spawn_id $spawn_id
+
+	    verbose "sserver_spawn is $sserver_spawn_id" 1
+    } else {
+	    # Start the sserver
+	    spawn $T_INETD 3964 $SSERVER sserver -S $tmppwd/srvtab
+	    set sserver_pid [exp_pid]
+	    set sserver_spawn_id $spawn_id
+
+	    verbose "sserver_spawn (t_inetd) is $sserver_spawn_id" 1
+    }
+
+    # Give sserver some time to start
+    catch "exec sleep 2"
+
+    return 1
+}
+
+
 proc stop_sserver_daemon { } {
     global sserver_pid
     global sserver_spawn_id
@@ -44,19 +76,71 @@ proc stop_sserver_daemon { } {
     return 1
 }
 
+proc stop_check_sserver_daemon { } {
+    global sserver_spawn_id
+    global sserver_pid
+
+    # Check the exit status of sserver - should exit here
+    set status_list [wait -i $sserver_spawn_id]
+    verbose "wait -i $sserver_spawn_id returned $status_list (sserver)"
+    catch "close -i $sserver_spawn_id"
+    if { [lindex $status_list 2] != 0 || [lindex $status_list 3] != 0 } {
+	send_log "exit status: $status_list\n"
+	verbose "exit status: $status_list"
+	fail "sserver"
+    } else {
+	pass "sserver"
+    }
+    # In either case the server shutdown
+    unset sserver_pid
+}
+
+proc test_sclient { msg } {
+    global SCLIENT
+    global hostname
+    global spawn_id
+
+
+    # Test the client
+    spawn $SCLIENT $hostname 3964
+    verbose "sclient_spawn is  $spawn_id" 1
+
+    expect {
+	"sendauth succeeded, reply is:" {
+		verbose "Start proper message"
+	}
+	timeout {
+		fail $msg 
+		return 0
+	}
+	eof {
+		fail $msg 
+		return 0
+	}	
+     }
+
+    expect {
+	"You are krbtest/admin@KRBTEST.COM" {
+		verbose "received valid sample message"}
+	eof {
+		fail $msg 
+		return 0
+	    }
+    }
+
+    if ![check_exit_status "ssample"] {
+	return 0
+    }
+
+    return 1
+}
 # We are about to start up a couple of daemon processes.  We do all
 # the rest of the tests inside a proc, so that we can easily kill the
 # processes when the procedure ends.
 
 proc doit { } {
-    global KLIST
-    global KDESTROY
-    global KEY
-    global SSERVER
-    global SCLIENT
     global hostname
-    global tmppwd
-    global spawn_id
+    global KEY
     global sserver_pid
     global sserver_spawn_id
 
@@ -80,60 +164,29 @@ proc doit { } {
 	return
     }
 
-    # Start the sserver
-    spawn $SSERVER -p 3964 -S $tmppwd/srvtab
-    set sserver_pid [exp_pid]
-    set sserver_spawn_id $spawn_id
-
-    verbose "sserver_spawn is" $sserver_spawn_id
-
-    # Give sserver some time to start
-    catch "exec sleep 2"
-
-    # Test the client
-    spawn $SCLIENT $hostname 3964
-    expect {
-	"sendauth succeeded, reply is:" {
-		verbose "Start proper message"
-	}
-	timeout {
-		fail "sclient"
-		return
-	}
-	eof {
-		fail "sclient"
-		return
-	}	
+    if ![start_sserver_daemon 0 ] {
+	return 
     }
 
-    expect {
-	"You are krbtest/admin@KRBTEST.COM" {
-		verbose "received valid sample message"}
-	eof {
-		fail "sclient"
-		return 
-	    }
-    }
-
-    if ![check_exit_status "ssample"] {
+    if ![test_sclient sclient] {
 	return
     }
-    pass "ssample"
-
-    # Check the exit status of sserver - should exit here
-    set status_list [wait -i $sserver_spawn_id]
-    verbose "wait -i $sserver_spawn_id returned $status_list (sserver)"
-    catch "close -i $sserver_spawn_id"
-    if { [lindex $status_list 2] != 0 || [lindex $status_list 3] != 0 } {
-	send_log "exit status: $status_list\n"
-	verbose "exit status: $status_list"
-	fail "sserver"
-    } else {
-	pass "sserver"
-    }
-    # In either case the server shutdown
-    unset sserver_pid
     
+    pass "sample - standalone"
+
+    stop_check_sserver_daemon
+    
+    if ![start_sserver_daemon 1 ] {
+	return 
+    }
+
+    if ![test_sclient sclient-inetd] {
+	return
+    }
+    
+    pass "sample - inetd"
+
+    stop_check_sserver_daemon
     return
 }
 

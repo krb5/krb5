@@ -1,3 +1,7 @@
+Sat Aug 26 17:56:50 1995  Ezra Peisach  (epeisach@kangaroo.mit.edu)
+
+	* sample.exp: Add inetd test
+
 Thu Aug 24 18:48:01 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* .Sanitize: Update file list
