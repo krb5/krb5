@@ -130,6 +130,10 @@ static    int
 send_tncmd P((void (*func)(), char *, char *));
 static int help(int, char **);
 
+#ifdef NEED_HERROR_PROTO
+extern void herror(const char *);
+#endif
+
 typedef struct {
 	char	*name;		/* command name */
 	char	*help;		/* help string (NULL for no help) */
@@ -2372,10 +2376,20 @@ status(argc, argv)
 /*
  * Function that gets called when SIGINFO is received.
  */
+#if	defined(CRAY) || (defined(USE_TERMIO) && !defined(SYSV_TERMIO))
+void 
 ayt_status()
 {
     (void) call(status, "status", "notmuch", 0);
 }
+#else
+int
+ayt_status()
+{
+    (void) call(status, "status", "notmuch", 0);
+    return 0;
+}
+#endif
 #endif
 
     int
@@ -2624,7 +2638,7 @@ tn(argc, argv)
     return 0;
 }
 
-#define HELPINDENT (sizeof ("connect"))
+#define HELPINDENT ((int) sizeof ("connect"))
 
 static char
 	openhelp[] =	"connect to a site",

@@ -25,6 +25,12 @@ fi
 fi
 KRB5_NEED_PROTO([#include <unistd.h>
 #include <stdlib.h>],parsetos,1)
+dnl
+KRB5_NEED_PROTO([#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <netdb.h>],herror,1)
+dnl
 CHECK_SIGNALS
 if test "$KRB4_LIB" = ''; then
 	AC_MSG_RESULT(No Kerberos 4 authentication)

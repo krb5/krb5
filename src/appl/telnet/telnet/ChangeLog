@@ -1,3 +1,11 @@
+2001-07-06  Ezra Peisach  <epeisach@mit.edu>
+
+	* configure.in: Check if prototype needed for herror().
+
+	* commands.c (ayt_status): Add explict return type (void or int)
+	depending on signal handler definition. Add prototype for herror
+	if system does not provide one.
+
 2001-07-02  Ezra Peisach  <epeisach@mit.edu>
 
 	* commands.c: Remove prototypes for EncryptAutoEnc(),
