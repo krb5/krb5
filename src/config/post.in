@@ -15,21 +15,20 @@ check-windows::
 		touch .d ; \
 	fi
 
-.depend: .d $(SRCTOP)/util/depfix.sed
-	r=`echo "$(SRCTOP)" | sed \
-				-e ':loop' \
-				-e '\;/[a-z][a-z0-9_\-]*/\.\./;{' \
-				-e 's;/[a-z][a-z0-9_\-]*/\.\./;/;g' \
-				-e 'bloop' \
-				-e '}' \
-				-e 's;/[a-z][a-z0-9_\-]*/\.\.$$;;g'` ; \
-	sed < .d  \
-			-e 's; \./; ;g' \
-			-e 's; $(SRCTOP)/; $$(SRCTOP)/;g' \
-			-e 's; $(srcdir)/; $$(srcdir)/;g' \
-			-e "s; $$r/"'; $$(SRCTOP)/;g' \
-			-e 's; $(BUILDTOP)/; $$(BUILDTOP)/;g' | \
-	sed -f $(SRCTOP)/util/depfix.sed > .depend
+# Generate a script for dropping in the appropriate make variables, using
+# directory-specific parameters.  General substitutions independent of local
+# make variables happen in depfix.sed.
+depfix2.sed: Makefile $(SRCTOP)/util/depgen.sed
+	echo 's; \./; ;g'				>> depfix2.tmp
+	echo 's; $(SRCTOP)/; $$(SRCTOP)/;g'		>> depfix2.tmp
+	echo 's; $(srcdir)/; $$(srcdir)/;g'		>> depfix2.tmp
+	echo 's; $$(srcdir)/\.\./; $(srcdir)/../;g'	>> depfix2.tmp
+	echo '$(SRCTOP)' | sed -f $(SRCTOP)/util/depgen.sed >> depfix2.tmp
+	echo 's; $(BUILDTOP)/; $$(BUILDTOP)/;g'		>> depfix2.tmp
+	mv -f depfix2.tmp depfix2.sed
+
+.depend: .d depfix2.sed $(SRCTOP)/util/depfix.sed
+	sed -f depfix2.sed < .d | sed -f $(SRCTOP)/util/depfix.sed > .depend
 
 depend-postrecurse:: .depend
 	if test -n "$(SRCS)" ; then \
