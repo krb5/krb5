@@ -8,9 +8,15 @@ all:: all-$(WHAT)
 
 all-unix::
 
+all-mac::
+
 clean:: clean-$(WHAT)
 
 clean-unix::
+	$(RM) libkrb5.a libkdb5.a libcrypto.a 
+	$(RM) libgssapi_krb5.a libdes425.a libkrb425.a
+
+clean-mac::
 	$(RM) libkrb5.a libkdb5.a libcrypto.a 
 	$(RM) libgssapi_krb5.a libdes425.a libkrb425.a
 
@@ -20,11 +26,12 @@ clean-windows::
 # Windows stuff to make libkrb5.dll and libkrb5.lib. Currently it
 # combines crypto, krb5 and the util/et directories.
 #
-CLIB = crypto\crypto.lib
-KLIB = krb5\krb5.lib
+CLIB  = crypto\crypto.lib
+KLIB  = krb5\krb5.lib
+GLIB  = gssapi\gssapi.lib
 ETLIB = $(BUILDTOP)\util\et\comerr.lib
-WLIB = .\winsock.lib
-LIBS = $(CLIB) $(KLIB) $(ETLIB) $(WLIB)
+WLIB  = .\winsock.lib
+LIBS  = $(CLIB) $(KLIB) $(GLIB) $(ETLIB) $(WLIB)
 
 #
 # Fast: is a faster way to make things on the PC. Unfortunately it requires
@@ -41,7 +48,9 @@ fast: win_glue.obj winsock.lib
 	cd ..
 	cd $(BUILDTOP)\util\et
 	$(MAKE) -$(MFLAGS)
-	cd ..\..\lib
+	cd ..\..\lib\gssapi
+	$(MAKE) -$(MFLAGS)
+	cd ..
 	link /co /seg:400 /noe /nologo win_glue, libkrb5.dll,nul, \
 	   $(LIBS) ldllcew libw,libkrb5.def
 	rc /nologo /p /k libkrb5.dll
