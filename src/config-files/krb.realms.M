@@ -69,5 +69,11 @@ ensure that anchored domain names are properly matched.]
 ucbvax.berkeley.edu would be mapped by the default rules to the
 BERKELEY.EDU realm, while sage.lcs.mit.edu would be mapped to the
 LCS.MIT.EDU realm.
+.br
+.SH FILES
+.IP KRB5ROOT/krb.realms 23
+The location of krb.realms is defined at compile time by KRB5ROOT, this
+is /krb5 by default.
+.br
 .SH SEE ALSO
 krb.conf(5)

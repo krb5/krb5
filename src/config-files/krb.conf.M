@@ -56,5 +56,11 @@ realm, and kerberos.lcs.mit.edu as a KDC for the LCS.MIT.EDU.
 In addition, kerberos.lcs.mit.edu provides an administrative server for
 the LCS realm, and kerberos-1.mit.edu provides such a server for the
 Athena realm.
+.br
+.SH FILES
+.IP KRB5ROOT/krb.conf 23
+The location of krb.conf is defined at compile time by KRB5ROOT, this
+is /krb5 by default.
+.br
 .SH SEE ALSO
 krb.realms(5)
