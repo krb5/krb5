@@ -13,6 +13,8 @@
 /\.a$/d
 /\.zip$/d
 /\.tar$/d
+/\.lib$/d
+/\.dll$/d
 /~$/d
 /winfile.list$/d
 /macfile.list$/d

@@ -1,3 +1,12 @@
+Mon Feb  8 22:13:23 1999  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* winexclude.sed: Add .dll and .lib files to the list of functions
+ 		which shouldn't get included in the non-binary list of
+ 		files to be added to kerbsrc.zip for the Windows build.
+		(If .dll or .lib files need to be included in the zip
+ 		file, they must be added to the WINBINARYFILES macro in
+ 		the top-level Makefile.in)
+
 1998-11-13  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* post.in (*-recurse): If $(MY_SUBDIRS) is non-NULL use it instead
