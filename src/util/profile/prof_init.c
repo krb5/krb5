@@ -41,7 +41,9 @@ profile_init(files, ret_profile)
 	memset(profile, 0, sizeof(struct _profile_t));
 	profile->magic = PROF_MAGIC_PROFILE;
 
-	for (fs = files; !PROFILE_LAST_FILESPEC(*fs); fs++) {
+        /* if the filenames list is not specified return an empty profile */
+        if ( files ) {
+	    for (fs = files; !PROFILE_LAST_FILESPEC(*fs); fs++) {
 		retval = profile_open_file(*fs, &new_file);
 		/* if this file is missing, skip to the next */
 		if (retval == ENOENT) {
@@ -56,17 +58,19 @@ profile_init(files, ret_profile)
 		else
 			profile->first_file = new_file;
 		last = new_file;
-	}
-	/*
-	 * If last is still null after the loop, then all the files were
-	 * missing, so return the appropriate error.
-	 */
-	if (!last) {
+	    }
+	    /*
+	     * If last is still null after the loop, then all the files were
+	     * missing, so return the appropriate error.
+	     */
+	    if (!last) {
 		profile_release(profile);
 		return ENOENT;
+	    }
 	}
-	*ret_profile = profile;
-	return 0;
+
+        *ret_profile = profile;
+        return 0;
 }
 
 #ifndef macintosh
