@@ -235,12 +235,13 @@ init_adb_err_tbl() to initialize the database table.
 
 \begin{description}
 \item[OSA_ADB_OK] Operation successful.
+\item[OSA_ADB_FAILURE] General failure.
 \item[OSA_ADB_DUP] Operation would create a duplicate database entry.
 \item[OSA_ADB_NOENT] Named entry not in database.
-\item[OSA_ADB_MEM] Out of memory performing operation.
-\item[OSA_ADB_FAILURE] General failure.
 \item[OSA_ADB_BAD_PRINC] The krb5_principal structure is invalid.
 \item[OSA_ADB_BAD_POLICY] The specified policy name is invalid.
+\item[OSA_ADB_XDR_FAILURE] The principal or policy structure cannot be
+encoded for storage.
 \end{description}
 
 Database functions can also return system errors.  Unless otherwise
