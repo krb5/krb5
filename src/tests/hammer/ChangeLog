@@ -1,3 +1,9 @@
+
+Mon Mar 27 07:56:26 1995 Chris Provenzano (proven@mit.edu)
+
+        * kdc5_hammer.c (verify_cs_pair()): Use new calling conventions 
+		for krb5_rd_req() and krb5_mk_req_extended(),
+
 Fri Mar 24 14:52:03 1995    <tytso@rsx-11.mit.edu>
 
 	* kdc5_hammer.c (get_tgt): Remove the call to krb5_os_localaddr()

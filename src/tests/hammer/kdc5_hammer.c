@@ -60,6 +60,7 @@ int verify_cs_pair
 		   char *,
 		   krb5_principal,
 		   char *,
+		   char *,
 		   int, int, int,
 		   krb5_ccache));
 
@@ -244,7 +245,7 @@ main(argc, argv)
 	    strcat(stmp, stmp2);
 	    sprintf(server, "%s@%s", stmp, cur_realm);
 	    if (verify_cs_pair(test_context, client, client_princ, 
-			       server, n, i, j, ccache))
+			       stmp, cur_realm, n, i, j, ccache))
 	      errors++;
 	    n_tried++;
 	  }
@@ -256,120 +257,155 @@ main(argc, argv)
   }
 
 
-krb5_error_code get_server_key(context, keyprocarg, princ, vno, keytype, key)
+static krb5_error_code 
+get_server_key(context, server, keytype, key)
     krb5_context context;
-    krb5_pointer keyprocarg;
-    krb5_principal princ;
-    krb5_kvno vno;
+    krb5_principal server;
     krb5_keytype keytype;
     krb5_keyblock ** key;
 {
-  krb5_encrypt_block eblock;
-  krb5_data pwd, salt;
-  char *princ_str, *at;
-  krb5_error_code code;
-  /* Jon Rochlis asks: Does this belong here or in libos or something? */
-  /* John Kohl replies: not really; it's not a generally useful function */
+    krb5_error_code retval;
+    krb5_encrypt_block eblock;
+    char * string;
+    krb5_data salt;
+    krb5_data pwd;
 
-  code = krb5_unparse_name(context, princ, &princ_str);
-  if (code) {
-    com_err (prog, code, "while unparsing server name");
-    return(code);
-  }
+    if (retval = krb5_principal2salt(context, server, &salt))
+	return retval;
 
-  /* The kdb5_create does not include realm names in the password ... 
-     this is ugly */
-  at = strchr(princ_str, '@');
-  if (at) *at = '\0';
+    if (retval = krb5_unparse_name(context, server, &string))
+	goto cleanup_salt;
 
-  pwd.data = princ_str;
-  pwd.length = strlen(princ_str);
-  
-  if (code = krb5_principal2salt(context, princ, &salt)) {
-    com_err(prog, code, "while converting principal to salt for '%s'", princ_str);
-    goto errout;
-  }
+    pwd.data = string;
+    pwd.length = strlen(string);
 
-  *key = (krb5_keyblock *)malloc(sizeof(**key));
-  if (!*key) {
-    code = ENOMEM;
-    com_err(prog, code, "while allocating key for server %s", princ_str);
-    goto errout;
-  }    
-  krb5_use_keytype(context, &eblock, keytype);
-  code = krb5_string_to_key(context, &eblock, keytype, *key, &pwd, &salt);
-  if (code)
-    goto errout;
+    if (*key = (krb5_keyblock *)malloc(sizeof(krb5_keyblock))) {
+    	krb5_use_keytype(context, &eblock, keytype);
+    	if (retval = krb5_string_to_key(context, &eblock, keytype, 
+				        *key, &pwd, &salt))
+	    free(*key);
+    } else 
+        retval = ENOMEM;
 
-out:
-  if (princ_str) free(princ_str);
-  if (salt.data) free(salt.data);
-  return(code);
+    free(string);
 
-  errout:
-  if (*key) krb5_xfree(*key);
-  goto out;
-
+cleanup_salt:
+    free(salt.data);
+    return retval;
 }
 
-int verify_cs_pair(context, p_client_str, p_client, p_server_str, p_num, 
-		   c_depth, s_depth, ccache)
+extern krb5_flags krb5_kdc_default_options;
+
+int verify_cs_pair(context, p_client_str, p_client, service, hostname, 
+		   p_num, c_depth, s_depth, ccache)
     krb5_context context;
     char *p_client_str;
     krb5_principal p_client;
-    char *p_server_str;
+    char * service;
+    char * hostname;
     int p_num, c_depth, s_depth;
     krb5_ccache ccache;
 {
-    krb5_error_code code;
-    krb5_principal server;
-    krb5_data request_data;
-    char *returned_client;
-    krb5_tkt_authent *authdat;
+    krb5_error_code 	  retval;
+    krb5_creds 	 	  creds;
+    krb5_creds 		* credsp;
+    krb5_ticket 	* ticket = NULL;
+    krb5_keyblock 	* keyblock = NULL;
+    krb5_auth_context 	* auth_context = NULL;
+    krb5_data		  request_data;
 
     if (brief)
       fprintf(stderr, "\tprinc (%d) client (%d) for server (%d)\n", 
 	      p_num, c_depth, s_depth);
     else
       fprintf(stderr, "\tclient %s for server %s\n", p_client_str, 
-	      p_server_str);
+	      hostname);
 
-    if (code = krb5_parse_name (context, p_server_str, &server)) {
-      com_err (prog, code, "when parsing name %s", p_server_str);
-      return(-1);
+    /* Initialize variables */
+    memset((char *)&creds, 0, sizeof(creds));
+
+    /* Do client side */
+    if (retval = krb5_build_principal(context, &creds.server, strlen(hostname), 
+				      hostname, service, NULL, NULL)) {
+	com_err(prog, retval, "while building principal for %s", hostname);
+	return retval;
     }
 
-    /* test the checksum stuff? */
-    if (code = krb5_mk_req(context, server, 0, 0, ccache, &request_data)) {
-	com_err(prog, code, "while preparing AP_REQ for %s", p_server_str);
-	return(-1);
+    /* obtain ticket & session key */
+    if (retval = krb5_cc_get_principal(context, ccache, &creds.client)) {
+	com_err(prog, retval, "while getting client princ for %s", hostname);
+    	krb5_free_cred_contents(context, &creds);
+	return retval;
     }
 
-    if (code = krb5_rd_req(context, &request_data, server, 0, 0, 
-			   get_server_key, 0, 0, &authdat)) {
-	com_err(prog, code, "while decoding AP_REQ for %s", p_server_str);
-	return(-1);
+    if (retval = krb5_get_credentials(context, krb5_kdc_default_options,
+                                      ccache, &creds, &credsp)) {
+	com_err(prog, retval, "while getting creds for %s", hostname);
+    	krb5_free_cred_contents(context, &creds);
+	return retval;
     }
 
-    if (!krb5_principal_compare(context, authdat->authenticator->client, 
-				p_client)) {
-      code = krb5_unparse_name(context, authdat->authenticator->client, 
-			       &returned_client);
-      if (code)
-	com_err (prog, code, 
-		 "Client not as expected, but cannot unparse client name");
-      else
-	com_err (prog, 0, "Client not as expected (%s).", returned_client);
-      krb5_free_tkt_authent(context, authdat);
-      free(returned_client);
-      return(-1);
+    krb5_free_cred_contents(context, &creds);
+
+    if (retval = krb5_mk_req_extended(context, &auth_context, 0, NULL,
+			            credsp, &request_data)) {
+	com_err(prog, retval, "while preparing AP_REQ for %s", hostname);
+        krb5_auth_con_free(context, auth_context);
+	return retval;
     }
 
-    krb5_free_tkt_authent(context, authdat);
-    krb5_free_principal(context, server);
-    if (request_data.data) krb5_xfree(request_data.data);
+    krb5_auth_con_free(context, auth_context);
+    auth_context = NULL;
 
-    return(0);
+    /* Do server side now */
+    if (retval = get_server_key(context, credsp->server,
+				credsp->keyblock.keytype, &keyblock)) {
+	com_err(prog, retval, "while getting server key for %s", hostname);
+	goto cleanup_rdata;
+    }
+
+    if (krb5_auth_con_init(context, &auth_context)) {
+	com_err(prog, retval, "while creating auth_context for %s", hostname);
+	goto cleanup_keyblock;
+    }
+
+    if (krb5_auth_con_setuseruserkey(context, auth_context, keyblock)) {
+	com_err(prog, retval, "while setting auth_context key %s", hostname);
+	goto cleanup_keyblock;
+    }
+
+    if (retval = krb5_rd_req(context, &auth_context, &request_data, 
+			     NULL /* server */, 0, NULL, &ticket)) { 
+	com_err(prog, retval, "while decoding AP_REQ for %s", hostname); 
+        krb5_auth_con_free(context, auth_context);
+	goto cleanup_keyblock;
+    }
+
+    krb5_auth_con_free(context, auth_context);
+
+    if (!(krb5_principal_compare(context,ticket->enc_part2->client,p_client))){
+    	char *returned_client;
+        if (retval = krb5_unparse_name(context, ticket->enc_part2->client, 
+			       	       &returned_client)) 
+	    com_err (prog, retval, 
+		     "Client not as expected, but cannot unparse client name");
+      	else
+	    com_err (prog, 0, "Client not as expected (%s).", returned_client);
+	retval = KRB5_PRINC_NOMATCH;
+      	free(returned_client);
+    } else {
+	retval = 0;
+    }
+
+    krb5_free_ticket(context, ticket);
+
+cleanup_keyblock:
+    krb5_free_keyblock(context, keyblock);
+
+cleanup_rdata:
+    krb5_xfree(request_data.data);
+
+    return retval;
 }
 
 int get_tgt (context, p_client_str, p_client, ccache)
@@ -417,9 +453,6 @@ int get_tgt (context, p_client_str, p_client, ccache)
     my_creds.client = *p_client;
     my_creds.server = tgt_server;
 
-    /* ugh, I'd much rather just delete the credential */
-    krb5_cc_destroy(context, ccache);  
-
     code = krb5_cc_initialize (context, ccache, *p_client);
     if (code != 0) {
 	com_err (prog, code, "when initializing cache %s",
@@ -437,7 +470,6 @@ int get_tgt (context, p_client_str, p_client, ccache)
 					 &my_creds, 0);
     my_creds.server = my_creds.client = 0;
     krb5_free_principal(context, tgt_server);
-    krb5_free_addresses(context, my_addresses);
     krb5_free_cred_contents(context, &my_creds);
     if (code != 0) {
 	com_err (prog, code, "while getting initial credentials");
