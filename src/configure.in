@@ -7,7 +7,7 @@ WITH_KRB4
 WITH_NETLIB
 AC_ARG_ENABLE([athena],
 [  --enable-athena         build with MIT Project Athena configuration],,)
-if test -z "$KRB4"; then
+if test -z "$KRB4_LIB"; then
 kadminv4=""
 else
 kadminv4=kadmin.v4

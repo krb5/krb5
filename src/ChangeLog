@@ -1,3 +1,8 @@
+Thu Apr 27 17:54:05 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* configure.in: check KRB4_LIB to know if we're building with krb4
+	support enabled and thus want kadmin.v4.
+
 Thu Apr 27 14:00:00 1995  Keith Vetter (keithv@fusion.com)
 
 	* Makefile.in: bug fix in makeing makefile on the PC.
