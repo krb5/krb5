@@ -35,24 +35,39 @@ krb5_keyblock *out;
        along with the encrypted key */
 
     krb5_error_code retval;
+    krb5_keyblock tmpin;
 
     out->keytype = in->keytype;
     out->length = krb5_encrypt_size(in->length, eblock->crypto_entry);
-    
+
+    /* because of checksum space requirements imposed by the encryption
+       interface, we need to copy the input key into a larger area. */
+    tmpin.length = in->length;
+    tmpin.contents = (krb5_octet *)malloc(out->length);
+    if (!tmpin.contents) {
+	out->length = 0;
+	return ENOMEM;
+    }
+    memcpy((char *)tmpin.contents, (const char *)in->contents, tmpin.length);
+
     out->length += sizeof(out->length);
     out->contents = (krb5_octet *)malloc(out->length);
     if (!out->contents) {
+	free((char *)tmpin.contents);
 	out->contents = 0;
 	out->length = 0;
 	return ENOMEM;
     }
     /* copy in real length */
-    memcpy((char *)out->contents, (char *)&in->length, sizeof(out->length));
+    memcpy((char *)out->contents, (const char *)&tmpin.length,
+	   sizeof(out->length));
     /* and arrange for encrypted key */
-    if (retval = krb5_encrypt((krb5_pointer) in->contents,
-			      (krb5_pointer) (((char *) out->contents) +
-					      sizeof(out->length)),
-			      in->length, eblock, 0)) {
+    retval = krb5_encrypt((krb5_pointer) tmpin.contents,
+			  (krb5_pointer) (((char *) out->contents) +
+					  sizeof(out->length)),
+			  tmpin.length, eblock, 0);
+    free((char *)tmpin.contents);
+    if (retval) {
 	free((char *)out->contents);
 	out->contents = 0;
 	out->length = 0;
