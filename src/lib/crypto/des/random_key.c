@@ -45,7 +45,7 @@ mit_des_random_key (eblock, seed, keyblock)
     }
     randkey->magic = KV5M_KEYBLOCK;
     randkey->length = sizeof(mit_des_cblock);
-    randkey->keytype = eblock->crypto_entry->proto_keytype;
+    randkey->enctype = eblock->crypto_entry->proto_enctype;
     mit_des_new_random_key(randkey->contents, (mit_des_random_key_seed *) seed);
     *keyblock = randkey;
     return 0;
