@@ -1,6 +1,11 @@
+=======
 Sat Feb 10 18:38:43 1996  Tom Yu  <tlyu@dragons-lair.MIT.EDU>
 
 	* g_glue.c: grab stdlib.h to get NULL
+
+Fri Feb  9 09:04:50 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* g_inquire_context.c: Include stdlib.h if present
 
 Wed Feb  7 14:16:01 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 

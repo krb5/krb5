@@ -28,6 +28,9 @@
  */
 
 #include "mglueP.h"
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
 
 static OM_uint32
 convert_name_to_union_name(
