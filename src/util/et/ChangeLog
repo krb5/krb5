@@ -1,3 +1,7 @@
+2004-04-29  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (LIBINITFUNC, LIBFINIFUNC): New variables.
+
 2004-04-24  Ken Raeburn  <raeburn@mit.edu>
 
 	Delete support for old globally-visible linked list, necessary
