@@ -1,3 +1,11 @@
+Mon Sep 18 08:35:47 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* Makefile.in (check): Only build libdb.a when making the self
+		checks. Do not install the library.
+
+	* configure.in: Do not build a shared library - the contents are
+		already merged into libkrb5.
+
 Thu Aug 24 18:40:48 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* .Sanitize: Update file list

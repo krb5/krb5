@@ -7,19 +7,4 @@ AC_PROG_RANLIB
 AC_PROG_INSTALL
 DO_SUBDIRS
 V5_SHARED_LIB_OBJS
-V5_MAKE_SHARED_LIB(libdb)
-AC_ARG_ENABLE([shared],
-[  --enable-shared         build shared libraries],[
-LinkFileDir([$](TOPLIBD)/libdb.[$](SHEXT), libdb.[$](SHEXT), ../util/berk_db)
-AppendRule([all -unix:: [$](TOPLIBD)/libdb.$(SHEXT)])
-AppendRule([install::	libdb.[$](SHEXT)
-	[$](INSTALL_DATA) libdb.[$](SHEXT)	\
-		[$](DESTDIR)[$](KRB5_SHLIBDIR)[$](S)libdb.[$](SHEXT)])
-])dnl
-if test -n "$krb5_cv_staticlibs_enabled" ; then
-        AppendRule([install:: libdb.[$](STEXT)
-	[$](INSTALL_DATA) libdb.[$](STEXT) [$](DESTDIR)[$](KRB5_LIBDIR)[$](S)libdb.[$](STEXT)])
-        LinkFileDir([$](TOPLIBD)/libdb.[$](STEXT),libdb.[$](STEXT),../util/berk_db)
-        AppendRule([all:: [$](TOPLIBD)/libdb.[$](STEXT)])
-fi
 V5_AC_OUTPUT_MAKEFILE

@@ -10,7 +10,7 @@ DEPLIBS=
 SHLIB_LIBS=
 SHLIB_LDFLAGS= $(LDFLAGS) @SHLIB_RPATH_DIRS@	
 SHLIB_LIBDIRS= @SHLIB_LIBDIRS@
-STEXT=@STEXT@
+STEXT=a
 
 all:: all-$(WHAT)
 
@@ -34,10 +34,6 @@ libdb.$(STEXT): hash/DONE
 	$(RANLIB) $@
 	touch libdb.stamp
 
-install:: libdb.$(STEXT)
-	$(INSTALL_DATA) libdb.a $(DESTDIR)$(KRB5_LIBDIR)/libdb.a
-	$(RANLIB) $(DESTDIR)$(KRB5_LIBDIR)/libdb.a
-
 clean:: clean-$(WHAT)
 
 clean-unix::
@@ -60,3 +56,4 @@ clean-windows::
 	@echo Making clean locally
 
 
+check:: libdb.$(STEXT)
