@@ -28,8 +28,10 @@ krb5/autoconf.h: $(srcdir)/krb5/autoconf.h.in
 	(cd krb5; $(MAKE) autoconf.h)
 $(srcdir)/krb5/autoconf.h.in: @MAINT@ $(srcdir)/krb5/autoconf.stmp
 $(srcdir)/krb5/autoconf.stmp: $(srcdir)/configure.in $(SRCTOP)/aclocal.m4
+	$(RM) -r $(srcdir)/autom4te.cache
 	cd $(srcdir) && $(AUTOHEADER) --include=$(CONFIG_RELTOPDIR) $(AUTOHEADERFLAGS)
 	touch $(srcdir)/krb5/autoconf.stmp
+	$(RM) -r $(srcdir)/autom4te.cache
 
 krb5.h: krb5/autoconf.h $(srcdir)/krb5.hin krb5_err.h kdb5_err.h kv5m_err.h krb524_err.h \
 		asn1_err.h

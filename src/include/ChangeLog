@@ -1,5 +1,8 @@
 2005-03-25  Ken Raeburn  <raeburn@mit.edu>
 
+	* Makefile.in ($(srcdir)/krb5/autoconf.stmp): Nuke autom4te.cache
+	directory.
+
 	* k5-platform.h: Expand on init/fini comments some more.
 	(MAKE_FINI_FUNCTION): Add an HP-UX specific variant that defines
 	an auxiliary function fitting the signature of HP-UX 10 library
