@@ -73,6 +73,8 @@ CVTRES = cvtres
 ##WIN32##KLIB=$(BUILDTOP)\lib\krb5_32.lib
 ##WIN16##GLIB=$(BUILDTOP)\lib\gssapi.lib
 ##WIN32##GLIB=$(BUILDTOP)\lib\gssapi32.lib
+##WIN16##WLIB=$(BUILDTOP)\lib\winsock.lib
+##WIN32##WLIB=
 
 ARADD=rem
 RANLIB=rem

@@ -11,6 +11,10 @@ Sun Feb  9 13:43:42 1997  Tom Yu  <tlyu@mit.edu>
 	timestamps of OBJS.* would not get checked after STAMP.* get
 	updated, even though OBJS.* get updated as a side effect.
 
+Sat Feb  8 12:17:17 1997  Richard Basch  <basch@lehman.com>
+
+	* windows.in: Define WLIB (winsock library) for Win16.
+
 Fri Feb  7 08:44:32 1997  Richard Basch  <basch@lehman.com>
 
 	* windows.in: Compile win16 non-DLL objects with /GA to add the
