@@ -1,3 +1,8 @@
+Thu Jul  6 17:30:49 1995  Tom Yu  <tlyu@lothlorien.MIT.EDU>
+
+	* krb_auth_su.c (krb5_get_tkt_via_passwd): Pass context to
+		os_localaddr.
+
 Tue Jun 20 14:32:46 1995  Tom Yu  (tlyu@dragons-lair)
 
 	* main.c: HAS_GETUSERSHELL -> HAVE_GETUSERSHELL

@@ -407,7 +407,7 @@ krb5_boolean krb5_get_tkt_via_passwd (context, ccache, client, server,
 	return (FALSE);	
     }	
 
-    code = krb5_os_localaddr(&my_addresses);
+    code = krb5_os_localaddr(context, &my_addresses);
 
     if (code != 0) {
 	com_err (prog_name, code, "when getting my address");
