@@ -1,3 +1,8 @@
+Wed Nov 19 11:04:27 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* Makefile.in (clean-unix): krb_err.h resides in the kerberosIV
+	 	subdir for make clean.
+
 Wed Nov 19 00:01:07 1997  Tom Yu  <tlyu@mit.edu>
 
 	* rd_safe.c (krb_rd_safe): Fix up call to quad_cksum.

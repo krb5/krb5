@@ -209,7 +209,7 @@ clean-:: clean-unix
 clean-unix::
 	-$(RM) krb_err.c
 	-$(RM) krb_err.h
-	-$(RM) ../../include/krb_err.h
+	-$(RM) ../../include/kerberosIV/krb_err.h
 
 clean-unix:: clean-liblinks clean-libs clean-libobjs
 
