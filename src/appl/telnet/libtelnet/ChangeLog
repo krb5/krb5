@@ -1,3 +1,6 @@
+Thu Apr 27 17:08:16 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* configure.in: use AC_CONST since we need it for v4.
 
 Thu Apr 27 15:52:19 1995  Chris Provenzano  (proven@mit.edu)
 
