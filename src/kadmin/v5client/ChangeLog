@@ -1,4 +1,11 @@
 
+Fri May 12 16:04:01 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* configure.in	- Check for regex.h.
+	* kadmin5.c	- Use regex.h only if present.  Correctly calculate
+			  length of argument string to build when command is
+			  on command line.
+
+
 Thu May 11 12:18:27 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* kadmin5.c	- Change "programname" to be the last component of
 			  argv[0].  Also correctly terminate generated

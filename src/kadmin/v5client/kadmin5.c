@@ -33,9 +33,9 @@
 #if	HAVE_PWD_H
 #include <pwd.h>
 #endif	/* HAVE_PWD_H */
-#if	HAVE_RE_COMP || HAVE_REGCOMP
+#if	HAVE_REGEX_H
 #include <regex.h>
-#endif	/* HAVE_RE_COMP || HAVE_REGCOMP */
+#endif	/* HAVE_REGEX_H */
 
 /*
  * Global storage.
@@ -1413,6 +1413,7 @@ kadmin_startup(argc, argv)
 	for (i=optind; i<argc; i++)
 	    n2alloc += strlen(argv[i]) + 1;
 
+	n2alloc++;
 	if (action = (char *) malloc(n2alloc)) {
 	    for (i=optind; i<argc; i++) {
 		strcat(action, argv[i]);
