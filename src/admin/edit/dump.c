@@ -244,10 +244,18 @@ void load_db(argc, argv)
 		goto error_out;
 	}
 	for (;;) {
+		int nitems;
+
 		lineno++;
 		memset((char *)&entry, 0, sizeof(entry));
-		if (fscanf(f,"%d\t%d\t", &name_len, &mod_name_len) == EOF)
+		nitems = fscanf(f,"%d\t%d\t", &name_len, &mod_name_len);
+		if (nitems == EOF)
 			break;
+		if (nitems != 2) {
+			fprintf(stderr, "Couldn't parse line #%d\n", lineno);
+			load_error++;
+			break;
+		}
 		if (!(name = malloc(name_len+1))) {
 			com_err(argv[0], errno,
 				"While allocating space for name");
