@@ -1,4 +1,17 @@
-/* placebo */
-all:	
-	@echo Placebo for lib/rcache
+NormalLibraryObjectRule()
 
+INCLUDES=-I.
+
+OBJS=	\
+	rc_base.o	\
+	rc_dfl.o 	\
+	rc_io.o		\
+	rcache.o
+
+SRCS=	\
+	rc_base.c	\
+	rc_dfl.c 	\
+	rc_io.c		\
+	rcache.c
+
+NormalLibraryTarget(rc,$(OBJS))
