@@ -86,13 +86,20 @@ dnl directory?
 dnl
 define(CONFIG_DIRS,[AC_CONFIG_SUBDIRS($1)])dnl
 dnl
+dnl AC_PUSH_MAKEFILE():
+dnl allow stuff to get tacked on to the end of the makefile
+dnl
+define(AC_PUSH_MAKEFILE,[dnl
+cat>>append.out<<'PUSHEOF'
+])dnl
+define(AC_POP_MAKEFILE,[dnl
+PUSHEOF
+])dnl
 dnl
 dnl append subdir rule -- MAKE_SUBDIRS("making",all)
 dnl
-define(AC_DIVERSION_MAKEFILE,9)dnl   things that get pushed on the makefile
-dnl
 define(_MAKE_SUBDIRS,[
-AC_DIVERT_PUSH(AC_DIVERSION_MAKEFILE)dnl
+AC_PUSH_MAKEFILE()dnl
 changequote(<<<,>>>)dnl
 
 $2::<<<
@@ -104,7 +111,7 @@ $2::<<<
 			CURRENT_DIR=$(CURRENT_DIR)$$i/ >>>$3<<<) \
 	done>>>
 changequote([,])dnl
-AC_DIVERT_POP()dnl
+AC_POP_MAKEFILE()dnl
 ])dnl
 define(MAKE_SUBDIRS,[
 _MAKE_SUBDIRS($1, $2, $2)])dnl
@@ -112,27 +119,27 @@ dnl
 dnl take saved makefile stuff and put it in the Makefile
 dnl
 define(EXTRA_RULES,[
-cat >> Makefile <<"SUBDIREOF"
-# [DIVERSION_MAKEFILE] contents
-undivert(AC_DIVERSION_MAKEFILE)
+>>append.out
+cat - append.out>> Makefile <<"SUBDIREOF"
+# append.out contents
 SUBDIREOF
 ])dnl
 dnl
 dnl take saved makefile stuff and put it in the argument
 dnl
 define(EXTRA_RULES_IN,[
-cat >> $1 <<"SUBDIREOF"
-# [DIVERSION_MAKEFILE] contents
-undivert(AC_DIVERSION_MAKEFILE)
+>>append.out
+cat - append.out >> $1 <<"SUBDIREOF"
+# append.out contents
 SUBDIREOF
 ])dnl
 dnl
 dnl take saved makefile stuff and put it in the argument
 dnl
 define(EXTRA_RULES_OUT,[
-cat > $1 <<"SUBDIREOF"
-# [DIVERSION_MAKEFILE] contents
-undivert(AC_DIVERSION_MAKEFILE)
+>>append.out
+cat - append.out> $1 <<"SUBDIREOF"
+# append.out contents
 SUBDIREOF
 ])dnl
 dnl
@@ -156,7 +163,7 @@ WITH_CPPOPTS dnl
 WITH_KRB4 dnl
 WITH_NETLIB dnl
 KRB_INCLUDE dnl
-AC_DIVERT_PUSH(AC_DIVERSION_MAKEFILE)dnl
+AC_PUSH_MAKEFILE()dnl
 [
 SHELL=/bin/sh
 
@@ -167,7 +174,7 @@ config.status: $(srcdir)/configure
 $(srcdir)/configure: $(srcdir)/configure.in $(SRCTOP)/aclocal.m4
 	cd $(srcdir); $(SRCTOP)/util/autoconf/autoconf --localdir=$(BUILDTOP) --macrodir=$(BUILDTOP)/util/autoconf
 ]
-AC_DIVERT_POP()dnl
+AC_POP_MAKEFILE()dnl
 ])dnl
 dnl
 dnl check for sys_errlist -- DECLARE_SYS_ERRLIST
@@ -208,7 +215,7 @@ dnl drop in rules for building error tables -- ET_RULES
 dnl
 define(ET_RULES,[
 AC_PROG_AWK dnl
-AC_DIVERT_PUSH(AC_DIVERSION_MAKEFILE)dnl
+AC_PUSH_MAKEFILE()dnl
 [
 
 ### /* these are invoked as $(...) foo.et, which works, but could be better */
@@ -223,13 +230,13 @@ COMPILE_ET_C= $(AWK) -f $(SRCTOP)/util/et/et_c.awk outfile=$@
 	$(AWK) -f $(SRCTOP)/util/et/et_c.awk outfile=$][*.c $<
 
 ]
-AC_DIVERT_POP()dnl
+AC_POP_MAKEFILE()dnl
 ])dnl
 dnl
 dnl drop in rules for building command tables -- SS_RULES
 dnl
 define(SS_RULES,[
-AC_DIVERT_PUSH(AC_DIVERSION_MAKEFILE)dnl
+AC_PUSH_MAKEFILE()dnl
 changequote({,})dnl
 {
 
@@ -245,7 +252,7 @@ MAKE_COMMANDS= $(BUILDTOP)/util/ss/mk_cmds
 
 }
 changequote([,])dnl
-AC_DIVERT_POP()dnl
+AC_POP_MAKEFILE()dnl
 ])dnl
 dnl
 dnl check for <dirent.h> -- CHECK_DIRENT
@@ -424,7 +431,7 @@ dnl Imake LinkFile rule, so they occur in the right place -- LinkFile(dst,src)
 dnl
 define(LinkFile,[
 AC_LN_S
-AC_DIVERT_PUSH(AC_DIVERSION_MAKEFILE)dnl
+AC_PUSH_MAKEFILE()dnl
 changequote({,})dnl
 
 $1:: $2{
@@ -433,7 +440,7 @@ $1:: $2{
 
 }
 changequote([,])dnl
-AC_DIVERT_POP()dnl
+AC_POP_MAKEFILE()dnl
 ])dnl
 dnl
 dnl Like above, but specifies how to get from link target to source, e.g.
@@ -442,7 +449,7 @@ dnl	ln -s ../foo ./bar/blotz
 dnl
 define(LinkFileDir,[
 AC_LN_S
-AC_DIVERT_PUSH(AC_DIVERSION_MAKEFILE)dnl
+AC_PUSH_MAKEFILE()dnl
 changequote({,})dnl
 
 $1:: $2{
@@ -451,22 +458,22 @@ $1:: $2{
 
 }
 changequote([,])dnl
-AC_DIVERT_POP()dnl
+AC_POP_MAKEFILE()dnl
 ])dnl
 dnl
 dnl explicit append text (for non-general things) -- AppendRule(txt)
 dnl
 define(AppendRule,[
-AC_DIVERT_PUSH(AC_DIVERSION_MAKEFILE)dnl
+AC_PUSH_MAKEFILE()dnl
 
 $1
 
-AC_DIVERT_POP()dnl
+AC_POP_MAKEFILE()dnl
 ])dnl
 dnl
 dnl create DONE file for lib/krb5 -- SubdirLibraryRule(list)
 define(SubdirLibraryRule,[
-AC_DIVERT_PUSH(AC_DIVERSION_MAKEFILE)dnl
+AC_PUSH_MAKEFILE()dnl
 
 all:: DONE
 
@@ -475,13 +482,13 @@ DONE:: $1
 
 clean::
 	$(RM) DONE
-AC_DIVERT_POP()dnl
+AC_POP_MAKEFILE()dnl
 ])dnl
 dnl
 dnl copy header file into include dir -- CopyHeader(hfile,hdir)
 dnl
 define(CopyHeader,[
-AC_DIVERT_PUSH(AC_DIVERSION_MAKEFILE)dnl
+AC_PUSH_MAKEFILE()dnl
 
 includes:: $1
 	@if test -d $2; then :; else (set -x; mkdir $2) fi
@@ -493,13 +500,13 @@ includes:: $1
 clean::
 	$(RM) $2/$1
 
-AC_DIVERT_POP()dnl
+AC_POP_MAKEFILE()dnl
 ])dnl
 dnl
 dnl copy source header file into include dir -- CopySrcHeader(hfile,hdir)
 dnl
 define(CopySrcHeader,[
-AC_DIVERT_PUSH(AC_DIVERSION_MAKEFILE)dnl
+AC_PUSH_MAKEFILE()dnl
 
 includes:: $1
 	@if test -d $2; then :; else (set -x; mkdir $2) fi
@@ -511,17 +518,17 @@ includes:: $1
 clean::
 	$(RM) $2/$1
 
-AC_DIVERT_POP()dnl
+AC_POP_MAKEFILE()dnl
 ])dnl
 dnl
 dnl Krb5InstallHeaders(headers,destdir)
 define(Krb5InstallHeaders,[
-AC_DIVERT_PUSH(AC_DIVERSION_MAKEFILE)dnl
+AC_PUSH_MAKEFILE()dnl
 install:: $1
 	@set -x; for f in $1 ; \
 	do [$](INSTALL_DATA) [$$]f $2/[$$]f ; \
 	done
-AC_DIVERT_POP()dnl
+AC_POP_MAKEFILE()dnl
 ])dnl
 dnl
 dnl arbitrary DEFS -- ADD_DEF(value)
@@ -587,7 +594,7 @@ define(V5_AC_OUTPUT_MAKEFILE,
 cat pre.out Makefile.out post.out > Makefile
 [EXTRA_RULES]
 # sed -f $CONF_FRAGDIR/mac-mf.sed < Makefile > MakeFile
-rm pre.out Makefile.out post.out,
+rm pre.out Makefile.out post.out append.out,
 CONF_FRAGDIR=$srcdir/${ac_config_fragdir} )])dnl
 dnl
 dnl CHECK_UTMP: check utmp structure and functions
@@ -733,7 +740,7 @@ AC_SUBST(HOST_TYPE)
 SHEXT=$krb5_cv_shlibs_ext
 AC_SUBST(SHEXT)
 DO_MAKE_SHLIB="$1.\$""(SHEXT)"
-AC_DIVERT_PUSH(AC_DIVERSION_MAKEFILE)dnl
+AC_PUSH_MAKEFILE()dnl
 
 all:: $(DO_MAKE_SHLIB)
 
@@ -745,7 +752,7 @@ $1.[$](SHEXT): [$](LIBDONE) [$](DEPLIBS)
 		"[$](SHLIB_LIBDIRS)" \
 		"[$](SHLIB_LIBS)" "[$](SHLIB_LDFLAGS)" [$](LIB_SUBDIRS)
 
-AC_DIVERT_POP()dnl
+AC_POP_MAKEFILE()dnl
 ],[
 DO_MAKE_SHLIB=
 ])dnl

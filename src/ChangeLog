@@ -1,3 +1,11 @@
+Fri Jun 16 00:45:03 1995  Tom Yu  (tlyu@dragons-lair)
+
+	* aclocal.m4: people were using AC_DIVERSION_MAKEFILE inside
+		conditionals, not realizing that it would not end up
+		conditionalized.  Define a new macro AC_PUSH_MAKEFILE,
+		along with AC_POP_MAKEFILE, to stuff things into a tmp
+		file (append.out) to unconfuse things.
+
 Thu Jun 15 21:59:22 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* aclocal.m4 (V5_USE_SHARED_LIB): Quote arguments to test in
