@@ -221,7 +221,6 @@ InitInstance(HANDLE hInstance, int nCmdShow)
 
 #ifdef KRB5
   krb5_init_context(&k5_context);
-  krb5_init_ets(k5_context);
 #endif
 
   return (TRUE);

@@ -1738,10 +1738,8 @@ init_instance(HINSTANCE hinstance, int ncmdshow)
     krb5_error_code code;
 
     code = krb5_init_context(&k5_context);
-    if (!code) {
-      krb5_init_ets(k5_context);
+    if (!code)
       code = k5_init_ccache(&k5_ccache);
-    }
     if (code) {
       com_err(NULL, code, "while initializing program");
       return FALSE;
