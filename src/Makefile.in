@@ -316,9 +316,9 @@ FILES= ./* \
 	lib/krb5/ccache/* lib/krb5/ccache/file/* lib/krb5/ccache/memory/* \
 	lib/krb5/ccache/stdio/* lib/krb5/ccache/ccapi/* \
 	lib/krb5/error_tables/* \
-	lib/krb5/keytab/* lib/krb5/keytab/file/* \
+	lib/krb5/keytab/* lib/krb5/keytab/file/* lib/krb5/keytab/srvtab/* \
 	lib/krb5/os/* lib/krb5/posix/* lib/krb5/rcache/* \
-	util/et/* util/profile/*
+	util/* util/et/* util/profile/*
 
 WINFILES= util/windows/* windows/* windows/lib/* windows/cns/* \
 	windows/wintel/* windows/gss/* windows/gina/*
@@ -385,15 +385,14 @@ dos-Makefile:
 
 prep-windows: dos-Makefile awk-windows-mac
 
-# Not supported....
-krbsrc83.zip: dos-Makefile awk-windows-mac winfile.list
-	rm -f krbsrc83.zip
-	$(ZIP) -@Dlk krbsrc83.zip < winfile.list
-	$(ZIP) -Dk krbsrc83.zip $(WINBINARYFILES)
-	if test -d mit ; then \
-		$(ZIP) -rDk krbsrc83.zip $(MITWINBINARYFILES) ; \
-	fi
-	rm -f $(CLEANUP)
+krbsrc83.zip: krbsrc83-is-obsolete
+
+krbsrc83-is-obsolete:
+	@echo "Win16 and krbsrc83.zip are no longer supported."
+	@echo "We don't support building under 8.3 restricted filesystems"
+	@echo "anymore.  You can still build for Win32 on filesystems"
+	@echo "without 8.3 restrictions using kerbsrc.zip"
+	@echo " "
 
 kerbsrc.zip: dos-Makefile awk-windows-mac winfile.list
 	rm -f kerbsrc.zip
@@ -407,7 +406,7 @@ kerbsrc.zip: dos-Makefile awk-windows-mac winfile.list
 kerbsrc-nt.zip: kerbsrc-nt-is-obsolete
 
 kerbsrc-nt-is-obsolete:
-	@echo "Kerbsrc-nt.zip is now obsolete.  Just use and build kerbsrc.zip"
+	@echo "kerbsrc-nt.zip is now obsolete.  Just use and build kerbsrc.zip"
 	@echo "We don't support building under 8.3 restricted filesystems"
 	@echo "anymore, so what was kerbsrc-nt.zip is now kerbsrc.zip."
 	@echo " "
