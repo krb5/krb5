@@ -20,8 +20,6 @@
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
  * 
- *
- * Wrapper for the V4 libdes for use with kerberos V5.
  */
 
 
@@ -29,11 +27,6 @@
 #include <krb5/ext-proto.h>
 
 #include "des_int.h"
-
-#ifdef DEBUG
-#include <stdio.h>
-extern int des_debug;
-#endif
 
 /*
 	converts the string pointed to by "data" into an encryption key
@@ -107,7 +100,7 @@ OLDDECLARG(const krb5_data *, salt)
     /* init key array for bits */
     memset(k_char,0,sizeof(k_char));
 
-#ifdef DEBUG
+#if 0
     if (mit_des_debug)
 	fprintf(stdout,
 		"\n\ninput str length = %d  string = %*s\nstring = 0x ",
@@ -120,7 +113,7 @@ OLDDECLARG(const krb5_data *, salt)
     for (i = 1; i <= length; i++) {
 	/* get next input key byte */
 	temp = (unsigned int) *str++;
-#ifdef DEBUG
+#if 0
 	if (mit_des_debug)
 	    fprintf(stdout,"%02x ",temp & 0xff);
 #endif
@@ -165,7 +158,7 @@ OLDDECLARG(const krb5_data *, salt)
     /* now fix up key parity again */
     mit_des_fixup_key_parity(key);
 
-#ifdef DEBUG
+#if 0
     if (mit_des_debug)
 	fprintf(stdout,
 		"\nResulting string_to_key = 0x%x 0x%x\n",

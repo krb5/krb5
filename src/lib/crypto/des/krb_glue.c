@@ -50,12 +50,6 @@
 
 #include "des_int.h"
 
-#ifdef DEBUG
-#include <stdio.h>
-
-extern int mit_des_debug;
-#endif
-
 /*
 	encrypts "size" bytes at "in", storing result in "out".
 	"eblock" points to an encrypt block which has been initialized
