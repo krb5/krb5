@@ -1,3 +1,8 @@
+1999-06-11  Miro Jurisic  <meeroh@mit.edu>
+
+	* init_os_ctx.c (os_init_paths): added NRL config file name correctly
+		(thanks dalmeida)
+
 1999-06-09  Miro Jurisic  <meeroh@mit.edu>
 
 	* c_ustime.c (krb5_crypto_us_timeofday): fixed Mac PPC #ifdef

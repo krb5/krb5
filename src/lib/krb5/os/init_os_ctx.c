@@ -135,8 +135,8 @@ os_init_paths(ctx, secure)
 #else /* _MSDOS || _WIN32 */
 #ifdef macintosh
 	filenames[0] = GetMacProfilePathName("\pkrb Configuration");
-	filenames[0] = GetMacProfilePathName("\pkrb5.ini");
-	filenames[1] = 0;
+	filenames[1] = GetMacProfilePathName("\pkrb5.ini");
+	filenames[2] = 0;
 	retval = profile_init(filenames, &ctx->profile);
 #else
 	/*
