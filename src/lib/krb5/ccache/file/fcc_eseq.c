@@ -2,7 +2,7 @@
  * $Source$
  * $Author$
  *
- * Copyright 1990 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991 by the Massachusetts Institute of Technology.
  *
  * For copying and distribution information, please see the file
  * <krb5/copyright.h>.
@@ -35,14 +35,15 @@ krb5_fcc_end_seq_get(id, cursor)
    krb5_ccache id;
    krb5_cc_cursor *cursor;
 {
-     if (OPENCLOSE(id)) {
-	  close(((krb5_fcc_data *) id->data)->fd);
-	  ((krb5_fcc_data *) id->data)->fd = -1;
-     }
-
+     int kret = KRB5_OK;
+     
+     /* don't close; it may be left open by the caller,
+	and if not, fcc_start_seq_get and/or fcc_next_cred will do the
+	MAYBE_CLOSE.
+     MAYBE_CLOSE(id, kret); */
      xfree((krb5_fcc_cursor *) *cursor);
 
-     return KRB5_OK;
+     return kret;
 }
 
 

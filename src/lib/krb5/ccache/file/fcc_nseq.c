@@ -2,7 +2,7 @@
  * $Source$
  * $Author$
  *
- * Copyright 1990 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991 by the Massachusetts Institute of Technology.
  *
  * For copying and distribution information, please see the file
  * <krb5/copyright.h>.
@@ -53,22 +53,14 @@ krb5_fcc_next_cred(id, cursor, creds)
 
      memset((char *)creds, 0, sizeof(*creds));
 
-     if (OPENCLOSE(id)) {
-	  ret = open(((krb5_fcc_data *) id->data)->filename, O_RDONLY, 0);
-	  if (ret < 0)
-	       return krb5_fcc_interpret(errno);
-	  ((krb5_fcc_data *) id->data)->fd = ret;
-     }
+     MAYBE_OPEN(id, FCC_OPEN_RDONLY);
 
      fcursor = (krb5_fcc_cursor *) *cursor;
 
      ret = lseek(((krb5_fcc_data *) id->data)->fd, fcursor->pos, L_SET);
      if (ret < 0) {
 	 ret = krb5_fcc_interpret(errno);
-	 if (OPENCLOSE(id)) {
-	     (void) close(((krb5_fcc_data *)id->data)->fd);
-	     ((krb5_fcc_data *)id->data)->fd = -1;
-	 }
+	 MAYBE_CLOSE(id, ret);
 	 return ret;
      }
 
@@ -97,10 +89,8 @@ krb5_fcc_next_cred(id, cursor, creds)
      cursor = (krb5_cc_cursor *) fcursor;
 
 lose:
-     if (OPENCLOSE(id)) {
-	  close(((krb5_fcc_data *) id->data)->fd);
-	  ((krb5_fcc_data *) id->data)->fd = -1;
-     }
+     MAYBE_CLOSE(id, kret);		/* won't overwrite kret
+					   if already set */
      if (kret != KRB5_OK) {
 	 if (creds->client)
 	     krb5_free_principal(creds->client);

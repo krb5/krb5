@@ -2,7 +2,7 @@
  * $Source$
  * $Author$
  *
- * Copyright 1990 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991 by the Massachusetts Institute of Technology.
  *
  * For copying and distribution information, please see the file
  * <krb5/copyright.h>.
@@ -39,18 +39,14 @@ krb5_fcc_store(id, creds)
 #define TCHECK(ret) if (ret != KRB5_OK) goto lose;
      krb5_error_code ret;
 
-     /* Make sure we are writing to the end of the file */
-     if (OPENCLOSE(id)) {
-	  ret = open(((krb5_fcc_data *) id->data)->filename,
-		     O_RDWR | O_APPEND, 0);
-	  if (ret < 0)
-	       return krb5_fcc_interpret(errno);
-	  ((krb5_fcc_data *) id->data)->fd = ret;
-     }
+     MAYBE_OPEN(id, FCC_OPEN_RDWR);
 
+     /* Make sure we are writing to the end of the file */
      ret = lseek(((krb5_fcc_data *) id->data)->fd, 0, L_XTND);
-     if (ret < 0)
+     if (ret < 0) {
+	  MAYBE_CLOSE_IGNORE(id);
 	  return krb5_fcc_interpret(errno);
+     }
 
      ret = krb5_fcc_store_principal(id, creds->client);
      TCHECK(ret);
@@ -74,11 +70,7 @@ krb5_fcc_store(id, creds)
      TCHECK(ret);
 
 lose:
-          
-     if (OPENCLOSE(id)) {
-	  close(((krb5_fcc_data *) id->data)->fd);
-	  ((krb5_fcc_data *) id->data)->fd = -1;
-     }
+     MAYBE_CLOSE(id, ret);
      return ret;
 #undef TCHECK
 }

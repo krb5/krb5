@@ -2,7 +2,7 @@
  * $Source$
  * $Author$
  *
- * Copyright 1990 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991 by the Massachusetts Institute of Technology.
  *
  * For copying and distribution information, please see the file
  * <krb5/copyright.h>.
@@ -32,15 +32,8 @@ krb5_fcc_close(id)
 {
      register int closeval = KRB5_OK;
 
-     if (OPENCLOSE(id)) {
-	 closeval = close(((krb5_fcc_data *) id->data)->fd);
-	 ((krb5_fcc_data *) id->data)->fd = -1;
-	 if (closeval == -1) {
-	     closeval = krb5_fcc_interpret(errno);
-	 } else
-	     closeval = KRB5_OK;
-		 
-     }
+     MAYBE_CLOSE(id, closeval);
+
      xfree(((krb5_fcc_data *) id->data)->filename);
      xfree(((krb5_fcc_data *) id->data));
      xfree(id);

@@ -2,7 +2,7 @@
  * $Source$
  * $Author$
  *
- * Copyright 1990 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991 by the Massachusetts Institute of Technology.
  *
  * For copying and distribution information, please see the file
  * <krb5/copyright.h>.
@@ -35,23 +35,15 @@ krb5_fcc_get_principal(id, princ)
    krb5_ccache id;
    krb5_principal *princ;
 {
-     krb5_error_code kret;
+     krb5_error_code kret = KRB5_OK;
 
-     if (OPENCLOSE(id)) {
-	  kret = open(((krb5_fcc_data *) id->data)->filename, O_RDONLY, 0);
-	  if (kret < 0)
-	       return krb5_fcc_interpret(errno);
-	  ((krb5_fcc_data *) id->data)->fd = kret;
-     }
-     else
-	  lseek(((krb5_fcc_data *) id->data)->fd, 0, L_SET);
+     MAYBE_OPEN(id, FCC_OPEN_RDONLY);
+     /* make sure we're beyond the vno */
+     lseek(((krb5_fcc_data *) id->data)->fd, sizeof(krb5_int16), L_SET);
 
      kret = krb5_fcc_read_principal(id, princ);
 
-     if (OPENCLOSE(id)) {
-	  close(((krb5_fcc_data *) id->data)->fd);
-	  ((krb5_fcc_data *) id->data)->fd = -1;
-     }
+     MAYBE_CLOSE(id, kret);
      return kret;
 }
 

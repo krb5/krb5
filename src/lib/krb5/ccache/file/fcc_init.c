@@ -2,7 +2,7 @@
  * $Source$
  * $Author$
  *
- * Copyright 1990 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991 by the Massachusetts Institute of Technology.
  *
  * For copying and distribution information, please see the file
  * <krb5/copyright.h>.
@@ -35,30 +35,20 @@ krb5_fcc_initialize(id, princ)
    krb5_ccache id;
    krb5_principal princ;
 {
-     int ret;
+     int ret = KRB5_OK;
 
-     ret = open(((krb5_fcc_data *) id->data)->filename, O_CREAT | O_TRUNC |
-		O_RDWR, 0);
-     if (ret < 0)
-	  return krb5_fcc_interpret(errno);
-     ((krb5_fcc_data *) id->data)->fd = ret;
+     MAYBE_OPEN(id, FCC_OPEN_AND_ERASE);
 
      ret = fchmod(((krb5_fcc_data *) id->data)->fd, S_IREAD | S_IWRITE);
      if (ret == -1) {
 	 ret = krb5_fcc_interpret(errno);
-	 if (OPENCLOSE(id)) {
-	     close(((krb5_fcc_data *)id->data)->fd);
-	     ((krb5_fcc_data *) id->data)->fd = -1;
-	 }
+	 MAYBE_CLOSE(id, ret);
 	 return ret;
      }
      krb5_fcc_store_principal(id, princ);
 
-     if (OPENCLOSE(id)) {
-	  close(((krb5_fcc_data *) id->data)->fd);
-	  ((krb5_fcc_data *) id->data)->fd = -1;
-     }
-     return KRB5_OK;
+     MAYBE_CLOSE(id, ret);
+     return ret;
 }
 
 
