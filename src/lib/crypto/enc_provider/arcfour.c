@@ -10,7 +10,11 @@
 #include "arcfour-int.h"
 #include "enc_provider.h"
 /* gets the next byte from the PRNG */
-static inline unsigned int k5_arcfour_byte(ArcfourContext *);
+#if ((__GNUC__ >= 2) )
+static __inline__ unsigned int k5_arcfour_byte(ArcfourContext *);
+#else
+static unsigned int k5_arcfour_byte(ArcfourContext *);
+#endif /* gcc inlines*/
 
 /* Initializes the context and sets the key. */
 static krb5_error_code k5_arcfour_init(ArcfourContext *ctx, const unsigned char *key, 
@@ -36,16 +40,22 @@ static void k5_arcfour_keysize(size_t *, size_t *);
 static krb5_error_code
 k5_arcfour_make_key(krb5_const krb5_data *, krb5_keyblock *);
 
-static char arcfour_weakkey1[] = {0x00, 0x00, 0xfd};
-static char arcfour_weakkey2[] = {0x03, 0xfd, 0xfc};
+static unsigned char arcfour_weakkey1[] = {0x00, 0x00, 0xfd};
+static unsigned char arcfour_weakkey2[] = {0x03, 0xfd, 0xfc};
 static krb5_data arcfour_weakkeys[] = { {KV5M_DATA, sizeof (arcfour_weakkey1),
-					 arcfour_weakkey1},
+					 (char * ) arcfour_weakkey1},
 					{KV5M_DATA, sizeof (arcfour_weakkey2),
-					 arcfour_weakkey2},
+					 (char * ) arcfour_weakkey2},
 					{KV5M_DATA, 0, 0}
 };
 
-static inline unsigned int k5_arcfour_byte(ArcfourContext *ctx)
+/*xxx we really should check for c9x here and use inline on 
+ * more than just gcc. */
+#if ((__GNUC__ >= 2) )
+static __inline__ unsigned int k5_arcfour_byte(ArcfourContext * ctx)
+#else
+static unsigned int k5_arcfour_byte(ArcfourContext * ctx)
+#endif /* gcc inlines*/
 {
   unsigned int x;
   unsigned int y;
@@ -147,7 +157,7 @@ k5_arcfour_docrypt(krb5_const krb5_keyblock *key, krb5_const krb5_data *state,
 
   if (state) {
     arcfour_ctx=(ArcfourContext *)state->data;
-    k5_arcfour_crypt(arcfour_ctx, output->data, input->data, input->length);
+    k5_arcfour_crypt(arcfour_ctx, (unsigned char *) output->data, (const unsigned char *) input->data, input->length);
   }
   else {
     arcfour_ctx=malloc(sizeof (ArcfourContext));
@@ -157,7 +167,8 @@ k5_arcfour_docrypt(krb5_const krb5_keyblock *key, krb5_const krb5_data *state,
       free(arcfour_ctx);
       return (ret);
     }
-    k5_arcfour_crypt(arcfour_ctx, output->data, input->data, input->length);
+    k5_arcfour_crypt(arcfour_ctx, (unsigned char * ) output->data,
+		     (const unsigned char * ) input->data, input->length);
     memset(arcfour_ctx, 0, sizeof (ArcfourContext));
     free(arcfour_ctx);
   }
