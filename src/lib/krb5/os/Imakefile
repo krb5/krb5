@@ -1,11 +1,12 @@
 NormalLibraryObjectRule()
 
 OBJS= \
-	config_fn.o	\
+	config.o	\
+	def_realm.o	\
 	defname.o	\
 	free_krbhs.o	\
 	get_krbhst.o	\
-	getaddr.o	\
+	localaddr.o	\
 	locate_kdc.o	\
 	lock_file.o	\
 	mstime.o	\
@@ -15,11 +16,12 @@ OBJS= \
 	unlck_file.o
 
 SRCS= \
-	config_fn.c	\ 
+	config.c	\ 
+	def_realm.c	\
 	defname.c	\
 	free_krbhs.c	\
 	get_krbhst.c	\
-	getaddr.c	\
+	localaddr.c	\
 	locate_kdc.c	\
 	lock_file.c	\
 	mstime.c	\
