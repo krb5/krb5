@@ -332,6 +332,7 @@ authenticate(p, addr)
 		p->client, error_message(retval));
 	exit(-1);
     }
+    krb5_free_principal(server);
     if (retval = krb5_unparse_name(ext_client, &client_name)) {
 	pop_msg(p, POP_FAILURE, "name not parsable--%s",
 		error_message(retval));

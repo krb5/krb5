@@ -604,6 +604,7 @@ char *host;
 			   0,		/* don't need a subsession key */
 			   &err_ret,
 			   0);		/* don't need reply */
+    krb5_free_principal(server);
     if (retval) {
 	if (err_ret && err_ret->text.length) {
 	    sprintf(Errmsg, "krb5 error: %s [server says '%*s'] ",
