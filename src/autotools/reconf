@@ -1,8 +1,0 @@
-#!/bin/sh
-for i in `find . -name configure.in -print`; do
-     j=`echo $i | sed s/configure.in//`
-     echo $j
-     (cd $j; autoconf)
-done
-echo include/krb5
-(cd include/krb5; autoheader)
