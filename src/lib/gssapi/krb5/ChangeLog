@@ -1,3 +1,11 @@
+2002-02-19  Danilo Almeida  <dalmeida@mit.edu>
+
+	* init_sec_context.c (krb5_gss_init_sec_context): Remove unsused
+	variables.  Fix fencepost error in loop that prevents duplicates
+	while trying to figure out the desired enctype.  Make the loop
+	structure in a little more readable.
+	(get_credentials): Remove unused variable.
+
 2001-12-07  Ken Raeburn  <raeburn@mit.edu>
 
 	* init_sec_context.c (krb5_gss_init_sec_context): When supplying a

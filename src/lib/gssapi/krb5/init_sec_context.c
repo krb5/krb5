@@ -99,7 +99,6 @@ static krb5_error_code get_credentials(context, cred, server, now,
 {
     krb5_error_code	code;
     krb5_creds 		in_creds;
-    int i;
     
     memset((char *) &in_creds, 0, sizeof(krb5_creds));
 
@@ -340,7 +339,6 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
    gss_buffer_desc token;
    int i, j, k, err;
    int default_mech = 0;
-   krb5_ui_4 resp_flags;
    OM_uint32 major_status;
 
    if (GSS_ERROR(kg_get_context(minor_status, &context)))
@@ -477,25 +475,35 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
 	    && i < N_WANTED_ENCTYPES);
 	   j++) {
 
+	  int is_duplicate_enctype;
+	  int is_wanted_enctype;
+
 	  krb5_enctype e = default_enctypes[j];
 
 	  /* Is this enctype one of the ones we want for GSSAPI?  */
-	  for (k = 0; k < N_WANTED_ENCTYPES; k++)
-	      if (wanted_enctypes[k] == e)
+	  is_wanted_enctype = 0;
+	  for (k = 0; k < N_WANTED_ENCTYPES; k++) {
+	      if (wanted_enctypes[k] == e) {
+		  is_wanted_enctype = 1;
 		  break;
-	  if (k == N_WANTED_ENCTYPES)
+	      }
+	  }
+	  /* If unwanted, go to the next one. */
+	  if (!is_wanted_enctype)
 	      continue;
 
 	  /* Is this enctype already in the list of enctypes to
-	     request?  */
-	  for (k = 0; k <= i; k++)
-	      if (requested_enctypes[k] == e)
+	     request?  (Is it a duplicate?)  */
+	  is_duplicate_enctype = 0;
+	  for (k = 0; k < i; k++) {
+	      if (requested_enctypes[k] == e) {
+		  is_duplicate_enctype = 1;
 		  break;
-	  if (k <= i)
-	      continue;
-
-	  /* Add it.  */
-	  requested_enctypes[i++] = e;
+	      }
+	  }
+	  /* If it is not a duplicate, add it. */
+	  if (!is_duplicate_enctype)
+	      requested_enctypes[i++] = e;
       }
       requested_enctypes[i++] = 0;
 
@@ -640,7 +648,7 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
    } else {
       unsigned char *ptr;
       char *sptr;
-      krb5_data ap_rep, mic;
+      krb5_data ap_rep;
       krb5_ap_rep_enc_part *ap_rep_data;
       krb5_error *krb_error;
 
