@@ -90,11 +90,13 @@ krb524_sendto_kdc (context, message, realm, reply, addr, addrlen)
 
     retval = internals.krb5_locate_server(context, realm, &al, 0,
 					  "krb524_server", "_krb524",
-					  SOCK_DGRAM, port, 0);
+					  SOCK_DGRAM, port,
+					  0, PF_INET);
     if (retval == KRB5_REALM_CANT_RESOLVE || retval == KRB5_REALM_UNKNOWN) {
 	/* Fallback heuristic: Assume krb524 port on every KDC might
 	   work.  */
-	retval = internals.krb5_locate_kdc(context, realm, &al, 0, SOCK_DGRAM);
+	retval = internals.krb5_locate_kdc(context, realm, &al, 0,
+					   SOCK_DGRAM, PF_INET);
 	/*
 	 * Bash the ports numbers.
 	 */

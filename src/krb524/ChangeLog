@@ -1,3 +1,8 @@
+2002-12-06  Tom Yu  <tlyu@mit.edu>
+
+	* sendmsg.c (krb524_sendto_kdc): Update calls to locate_server()
+	and locate_kdc() to restrict protocol family to IPv4.
+
 2002-09-24  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (EXTRADEPSRCS): New variable.
