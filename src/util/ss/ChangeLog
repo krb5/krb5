@@ -1,3 +1,11 @@
+2000-05-01  Nalin Dahyabhai  <nalin@redhat.com>
+
+	* help.c (ss_help): Don't overflow buffers "buffer" or "buf".
+	* list_rqs.c (ss_list_requests): Don't overflow buffer "buffer".
+	* mk_cmds.c (main): Don't overflow buffer "c_file".
+	* utils.c (generate_rqte): Update lengths of constant strings in
+	computing buffer size.
+
 2000-02-01  Ken Raeburn  <raeburn@mit.edu>
 
 	* listen.c (ss_listen): Local var END should be volatile.
