@@ -19,7 +19,8 @@
 .\" or implied warranty.
 .\" 
 .\"
-.TH KPROPD 8 "Kerberos Version 5.0" "MIT Project Athena"
+.so man1/header.doc
+.TH KPROPD 8 \*h
 .SH NAME
 kpropd \- Kerberos V5 slave KDC update server
 .SH SYNOPSIS
@@ -63,67 +64,65 @@ up-to-date KDC database.
 .PP
 Normally, kpropd is invoked out of 
 .I inetd(8).  
-This is done by adding a
-line to the inetd.conf file which looks like this:
+This is done by adding a line to the inetd.conf file which looks like
+this:
 
 kprop	stream	tcp	nowait	root	/krb5/bin/kpropd	kpropd
 
-However, kpropd can also run as a standalone deamon, if the 
-.B \-S 
-option is
-turned on.  This is done for debugging purposes, or if for some reason
-the system administrator just doesn't want to run it out of 
-.I inetd(8).  
-.PP
-The
-.B \-r
-.I realm
-option specifies the realm of the master server; by default the realm
-returned by 
+However, kpropd can also run as a standalone deamon, if the
+.B \-S
+option is turned on.  This is done for debugging purposes, or if for
+some reason the system administrator just doesn't want to run it out of
+.IR inetd (8).
+.SH OPTIONS
+.TP
+\fB\-r\fP \fIrealm\fP
+specifies the realm of the master server; by default the realm returned
+by
 .IR krb5_default_local_realm (3)
 is used.
-.PP
-The
-.B \-f
-.I file
-option specifies the filename where the dumped principal database file
-is to be stored; by default the dumped database file is KPROPD_DEFAULT_FILE
+.TP
+\fB\-f\fP \fIfile\fP
+specifies the filename where the dumped principal database file is to be
+stored; by default the dumped database file is KPROPD_DEFAULT_FILE
 (normally /krb5/from_master).
-.PP
-The 
+.TP
 .B \-p
-option allows the user to specify the pathname to the 
+allows the user to specify the pathname to the
 .IR kdb5_edit (8)
 program; by default the pathname used is KPROPD_DEFAULT_KDB5_EDIT
 (normally /krb5/bin/kdb5_edit).
-.PP
-The
+.TP
 .B \-S
-option turns on standalone mode.  Normally, kpropd is invoked out of
+turn on standalone mode.  Normally, kpropd is invoked out of
 .IR inetd (8)
-and so it expects a network connection to be passed to it from
+so it expects a network connection to be passed to it from
 .I inetd (8).
 If the 
 .B \-S 
 option is specified, kpropd will put itself into the background, and
 wait for connections to the KPROP_SERVICE port (normally krb5_prop).
-.PP
-The
+.TP
 .B \-d
-option turns on debug mode.  In this mode, if the 
+turn on debug mode.  In this mode, if the
 .B \-S 
 option is selected, 
 .I kpropd
 will not detach itself from the current job and run in the background.
-Instead, it will run in the foreground and print out debugging
-messages during the database propagation.
-.PP
-The 
+Instead, it will run in the foreground and print out debugging messages
+during the database propagation.
+.TP
 .B \-P
-option allows for an alternate port number for 
+allow for an alternate port number for
 .I kpropd
 to listen on. This is only useful if the program is run in standalone
-mode. 
+mode.
+.SH FILES
+.TP "\w'kpropd.acl\ \ 'u"
+kpropd.acl
+Access file for
+.BR kpropd .
+Each entry is a line containing the principal of a host from which the
+local machine will allow Kerberos database propagation via kprop.
 .SH SEE ALSO
 kprop(8), kdb5_edit(8), krb5kdc(8), inetd(8)
-
