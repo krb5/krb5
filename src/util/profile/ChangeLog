@@ -1,3 +1,7 @@
+Fri Jul 12 20:28:49 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* Makefile.in (CFLAGS): On Windows builds, add -DHAVE_STDLIB_H
+
 Mon Jun 24 09:37:26 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* prof_file.c, prof_init.c, prof_parse.c, prof_section.c,
