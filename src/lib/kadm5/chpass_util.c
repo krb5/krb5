@@ -61,7 +61,8 @@ kadm5_ret_t _kadm5_chpass_principal_util(void *server_handle,
 					 krb5_principal princ,
 					 char *new_pw, 
 					 char **ret_pw,
-					 char *msg_ret)
+					 char *msg_ret,
+					 int msg_len)
 {
   int code, code2, pwsize;
   static char buffer[255];
@@ -94,12 +95,18 @@ kadm5_ret_t _kadm5_chpass_principal_util(void *server_handle,
       memset(buffer, 0, sizeof(buffer));
 #endif      
       if (code == KRB5_LIBOS_BADPWDMATCH) {
-	strcpy(msg_ret, string_text(CHPASS_UTIL_NEW_PASSWORD_MISMATCH));
+	strncpy(msg_ret, string_text(CHPASS_UTIL_NEW_PASSWORD_MISMATCH),
+		msg_len - 1);
+	msg_ret[msg_len - 1] = '\0';
 	return(code);
       } else {
-	sprintf(msg_ret, "%s %s\n%s\n", error_message(code), 
-		string_text(CHPASS_UTIL_WHILE_READING_PASSWORD),
-		string_text(CHPASS_UTIL_PASSWORD_NOT_CHANGED));
+        strncpy(msg_ret, error_message(code), msg_len - 1);
+        strncat(msg_ret, " ", msg_len - 1);
+        strncat(msg_ret, string_text(CHPASS_UTIL_WHILE_READING_PASSWORD),
+		msg_len - 1);
+        strncat(msg_ret, string_text(CHPASS_UTIL_PASSWORD_NOT_CHANGED),
+		msg_len - 1);
+	msg_ret[msg_len - 1] = '\0';
 	return(code);
       }
     }
@@ -107,7 +114,8 @@ kadm5_ret_t _kadm5_chpass_principal_util(void *server_handle,
 #ifdef ZEROPASSWD    
       memset(buffer, 0, sizeof(buffer));
 #endif      
-      strcpy(msg_ret, string_text(CHPASS_UTIL_NO_PASSWORD_READ));
+      strncpy(msg_ret, string_text(CHPASS_UTIL_NO_PASSWORD_READ), msg_len - 1);
+      msg_ret[msg_len - 1] = '\0';
       return(KRB5_LIBOS_CANTREADPWD); /* could do better */
     }
   }
@@ -123,7 +131,8 @@ kadm5_ret_t _kadm5_chpass_principal_util(void *server_handle,
 #endif    
 
   if (code == KADM5_OK) {
-    strcpy(msg_ret, string_text(CHPASS_UTIL_PASSWORD_CHANGED));
+    strncpy(msg_ret, string_text(CHPASS_UTIL_PASSWORD_CHANGED), msg_len - 1);
+    msg_ret[msg_len - 1] = '\0';
     return(0);
   }
 
@@ -141,12 +150,15 @@ kadm5_ret_t _kadm5_chpass_principal_util(void *server_handle,
   /* Ok, we have a password quality error. Return a good message */
 
   if (code == KADM5_PASS_REUSE) {
-    strcpy(msg_ret, string_text(CHPASS_UTIL_PASSWORD_REUSE));
+    strncpy(msg_ret, string_text(CHPASS_UTIL_PASSWORD_REUSE), msg_len - 1);
+    msg_ret[msg_len - 1] = '\0';
     return(code);
   }
 
   if (code == KADM5_PASS_Q_DICT) {
-    strcpy(msg_ret, string_text(CHPASS_UTIL_PASSWORD_IN_DICTIONARY));
+    strncpy(msg_ret, string_text(CHPASS_UTIL_PASSWORD_IN_DICTIONARY),
+	    msg_len - 1);
+    msg_ret[msg_len - 1] = '\0';
     return(code);
   }
   
@@ -155,18 +167,32 @@ kadm5_ret_t _kadm5_chpass_principal_util(void *server_handle,
   code2 = kadm5_get_principal (lhandle, princ, &princ_ent,
 			       KADM5_PRINCIPAL_NORMAL_MASK);
   if (code2 != 0) {
-    sprintf(msg_ret, "%s %s\n%s %s\n\n%s\n ", error_message(code2), 
-	    string_text(CHPASS_UTIL_GET_PRINC_INFO),
-	    error_message(code),
-	    string_text(CHPASS_UTIL_WHILE_TRYING_TO_CHANGE),
-	    string_text(CHPASS_UTIL_PASSWORD_NOT_CHANGED));
+    strncpy(msg_ret, error_message(code2), msg_len - 1);
+    strncat(msg_ret, " ", msg_len - 1 - strlen(msg_ret));
+    strncat(msg_ret, string_text(CHPASS_UTIL_GET_PRINC_INFO), msg_len - 1 - strlen(msg_ret));
+    strncat(msg_ret, "\n", msg_len - 1 - strlen(msg_ret));
+    strncat(msg_ret, error_message(code), msg_len - 1 - strlen(msg_ret));
+    strncat(msg_ret, " ", msg_len - 1 - strlen(msg_ret));
+    strncat(msg_ret, string_text(CHPASS_UTIL_WHILE_TRYING_TO_CHANGE),
+	    msg_len - 1 - strlen(msg_ret));
+    strncat(msg_ret, "\n\n", msg_len - 1 - strlen(msg_ret));
+    strncat(msg_ret, string_text(CHPASS_UTIL_PASSWORD_NOT_CHANGED),
+	    msg_len - 1 - strlen(msg_ret));
+    strncat(msg_ret, "\n", msg_len - 1 - strlen(msg_ret));
+    msg_ret[msg_len - 1] = '\0';
     return(code);
   }
   
   if ((princ_ent.aux_attributes & KADM5_POLICY) == 0) {
-    sprintf(msg_ret, "%s %s\n\n%s", error_message(code), 
-	    string_text(CHPASS_UTIL_NO_POLICY_YET_Q_ERROR),
-	    string_text(CHPASS_UTIL_PASSWORD_NOT_CHANGED));
+    strncpy(msg_ret, error_message(code), msg_len - 1 - strlen(msg_ret));
+    strncat(msg_ret, " ", msg_len - 1 - strlen(msg_ret));
+    strncpy(msg_ret, string_text(CHPASS_UTIL_NO_POLICY_YET_Q_ERROR),
+	    msg_len - 1 - strlen(msg_ret));
+    strncat(msg_ret, "\n\n", msg_len - 1 - strlen(msg_ret));
+    strncpy(msg_ret, string_text(CHPASS_UTIL_PASSWORD_NOT_CHANGED),
+	    msg_len - 1 - strlen(msg_ret));
+    msg_ret[msg_len - 1] = '\0';
+
     (void) kadm5_free_principal_ent(lhandle, &princ_ent);
     return(code);
   }

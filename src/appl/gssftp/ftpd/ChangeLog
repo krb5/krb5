@@ -1,3 +1,50 @@
+2001-11-02  Tom Yu  <tlyu@mit.edu>
+
+	* ftpcmd.y: Kludge to #define unix on BSD for now.
+
+2001-10-29  Ken Raeburn  <raeburn@mit.edu>
+
+	* ftpd.c (login): New argument LOGINCODE, optional result code to
+	override local use of success code 230 when homedir is not
+	accessible but root directory is.
+	(user): Pass result code 232 to login.
+	(pass): Pass result code 0 to login.
+
+2001-08-28  Ezra Peisach  <epeisach@mit.edu>
+
+	* ftpd.c (auth_data): Iterate over all krb4 services instead of
+ 	trying to examine the srvtab file for a particular key (which
+ 	failes when falling back on the v5 keytab for des3 services).
+	[pullup from trunk]
+
+2001-04-25  Tom Yu  <tlyu@mit.edu>
+
+	* ftpcmd.y: Don't dereference a NULL pointer returned from
+	ftpglob().
+
+	* ftpd.c: Be more paranoid about return values from ftpglob().
+	Police uses of sprintf().  Account for expansion in
+	radix_encode().
+
+2000-08-25  Tom Yu  <tlyu@mit.edu>
+
+	* ftpcmd.y: Fix up grammar so that single character token names
+	are no longer used; this was breaking the build using bison on
+	HP/UX because some system headers declare structures with members
+	having all-uppercase field names and bison puts the token name
+	#define statements in front of the C declarations section in the
+	output, causing them to be in force while those headers get
+	#included.  There doesn't seem to be much purpose in not just
+	using character constants, anyway.
+
+2000-06-14  Tom Yu  <tlyu@mit.edu>
+
+	* ftpcmd.y (nonguest): Return $1, not 1, if (!guest).
+
+2000-05-11  Nalin Dahyabhai  <nalin@redhat.com>
+
+	* ftpd.c (gunique): Make sure that path stored in "new" isn't too long.
+
 2000-02-18  Ken Raeburn  <raeburn@mit.edu>
 
 	* ftpd.c (reply, lreply): Declare with format attribute under

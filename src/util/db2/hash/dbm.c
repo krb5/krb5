@@ -168,8 +168,9 @@ kdb2_dbm_open(file, flags, mode)
 	info.cachesize = 0;
 	info.hash = NULL;
 	info.lorder = 0;
-	(void)strcpy(path, file);
-	(void)strcat(path, DBM_SUFFIX);
+	(void)strncpy(path, file, sizeof(path) - 1);
+	path[sizeof(path) - 1] = '\0';
+	(void)strncat(path, DBM_SUFFIX, sizeof(path) - 1 - strlen(path));
 	return ((DBM *)__hash_open(path, flags, mode, &info, 0));
 }
 

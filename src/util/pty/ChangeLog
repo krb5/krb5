@@ -1,3 +1,164 @@
+2001-11-19  Tom Yu  <tlyu@mit.edu>
+
+	* update_utmp.c (pty_update_utmp): Patch from Garry Zacheiss to
+	kludge around cases where we need to use more than 2 characters of
+	LINE in order to avoid conflicts in UT_ID.
+
+2001-11-05  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (LIBMINOR): Bump due to changes to internals.
+
+2001-09-25  Tom Yu  <tlyu@mit.edu>
+
+	* pty-int.h: Fix up botched merge: cause prototypes for
+	ptyint_update_wtmp{,x} to be correct.
+
+2001-09-07  Tom Yu  <tlyu@mit.edu>
+
+	* update_utmp.c (pty_update_utmp): Remember to chop off leading
+	"/dev/" for the non-sysV case.  Handle lseek() returning non-zero
+	yet non-negative values (it usually does... :-), so that we can
+	actually write somewhere not at the beginning of the utmp file if
+	necessary.
+
+	* update_utmp.c (pty_update_utmp): Don't copy host if it's a null
+	pointer.
+
+	* dump-utmp.c (print_ut): Use size of ut_name field, not ut_user,
+	which may not exist, for width when printing ut_name field value.
+	Specify width when printing hostname, it may be unterminated.
+	(main): Move utp and utxp declarations closer to their usages, and
+	make both conditionalized so they're not declared if they're not
+	used.
+
+	* getpty.c: Make pty_getpty() into ptyint_getpty_ext(), which has
+	an extra argument that determines whether to call grantpt() and
+	unlockpt() on systems that support it.  The new pty_getpty() will
+	simply call the extended version.  This is to support some
+	wackiness needed by pty_paranoia.c tests.
+
+	* pty-int.h: Add prototype for ptyint_getpty_ext().
+
+	* pty_paranoia.c: Add rant about ptys and quirks therein.  Needs
+	to be updated somewhat.  Add some more paranoia for the case where
+	we actually succeed in opening the slave of a closed master and
+	then succeed in opening the same master.  This program will get
+	rewritten at some point to actually see what things result in EOFs
+	and under what conditions data will actually get passed between
+	master and slave.
+
+	* pty_paranoia.c: New file; do many paranoid checks about ctty
+	handling by the pty drivers.
+
+	* Makefile.in: Add rules for pty_paranoia and check-paranoia,
+	which runs pty_paranoia.
+
+	* configure.in: Define REVOKE_NEEDS_OPEN for Tru64.  Add support
+	for program building and run flags for the sake of pty_paranoia.
+
+	* open_slave.c: Fix somewhat; AIX doesn't like opening the ctty
+	twice, so only do initial open if we special-case it in
+	configure.in, e.g. for Tru64.
+
+	* logwtmp.c: Delete code under "#if 0".  Fix reversed test for
+	loggingin.  Don't forget to set the ut_tv or ut_time for the
+	entry.
+
+	* update_utmp.c: Update rant about Tru64; remove fetching of
+	ut_user from old entry.  The existence of the old ut_user in the
+	logout entry in wtmp was confusing last.
+
+	* cleanup.c: Call update_utmp() with the correct pid to assist in
+	finding the old utmp entry.
+
+	* open_ctty.c: Reformat somewhat and revise comment.
+
+	* open_slave.c: Rework significantly.  Primarily, keep a fd open
+	to the slave if we need to reopen the slave device following
+	vhangup() or revoke(), to accommodate various OS quirks.
+
+	* update_utmp.c: Revise history section somewhat to document more
+	HP-UX brokenness.  Search via ut_pid before searching via
+	ut_line.  Copy stuff around because entuxent() will clobber some
+	things.
+
+	* void_assoc.c: Revise comment and reformat somewhat.
+
+	* open_slave.c (pty_open_slave): If revoke() present on system but
+	VHANG_FIRST is not defined, declare local variable.
+
+	* dump-utmp.c: Fix some off-by-one errors.  Handle cases where we
+	have utmpname() but not utmpname().
+
+	* pty-int.h: Fix typo; VHANG_first -> VHANG_FIRST.
+
+	* open_slave.c (pty_open_slave): Add workaround for Tru64 v5.0,
+	since its revoke() will fail if the slave isn't open already.
+
+	* cleanup.c (pty_cleanup): Delcare local variable only if
+	VHANG_LAST defined.
+
+	* logwtmp.c (pty_logwtmp): Only declare local variables if
+	logwtmp() not available on system.
+
+	* update_utmp.c (pty_update_utmp): Fix typo (OWRONLY ->
+	O_WRONLY).
+
+	* update_wtmp.c (ptyint_update_wtmpx): Add missing semi-colon in
+ 	code path if PTY_UTMP_E_EXIT and PTY_UTMPX_E_EXIT exist.
+
+	* configure.in: Fix some quoting of shell variables when passing
+	to "test".  Reorder some logic in consistency checks to validate
+	cache variables against "yes" to account for possible empty or
+	nonexistent values.
+
+	* pty-int.h: Fix conditional prototype of update_wtmp().
+
+	* update_wtmp.c: Fix conditional compilation of update_wtmp() to
+	cover the case where we have setutxent() but don't have updwtmpx()
+	and WTMPX_FILE, as is the case on some Linux installations.
+
+	* configure.in(K5_CHECK_UT_MEMBER): Fix typo in previous; make
+	sure to include the correct header when checking structure
+	members.
+
+	* configure.in: Many changes to support the rewriting of the utmp
+	pieces of libpty.  Do a large amount of checking for consistency
+	of various utmp and utmpx APIs as currently understood.  See rant
+	in update_utmp.c.
+
+	* dump-utmp.c: Rewrite; now has capability to use utmp{,x}name()
+	to extract entries from utmp and utmpx files.  Adjusts field
+	widths when printing as appropriate.
+
+	* libpty.h: Update call signature for update_utmp() and logwtmp();
+	make prototypes unconditional.
+
+	* logwtmp.c: Rewrite.  Use pututline() or pututxline() API
+	whenever possible.
+
+	* pty-int.h: Update call signatures for update_wtmp{,x}(); make
+	prototypes unconditional.
+
+	* sane_hostname.c: Use the autoconf-correct macro names.
+
+	* update_utmp.c: Rewrite.  Basically, use functions from the
+	pututline() or pututxline() API whenever possible, to avoid
+	lossage.  Inserted large rant about the conjectured history of BSD
+	utmp, sysV utmp, and utmpx, as well as documentation about some
+	known quirks.
+
+	* update_wtmp.c: Rewrite.  Add new function ptyint_logwtmpx() that
+	takes a utmpx rather than a utmp, so it can fail to lose data
+	converting to and from utmp.
+
+	[many pullups from trunk]
+
+2000-03-24  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Check for alpha*-dec-osf* instead of
+	alpha-dec-osf*.
+
 1999-10-26  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,

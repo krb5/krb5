@@ -1,3 +1,8 @@
+2001-02-05  Tom Yu  <tlyu@mit.edu>
+
+	* cnv_tkt_skey.c (krb524_convert_tkt_skey): Avoid double-free;
+	caller should free v5tkt. [pullup from trunk]
+
 1999-10-26  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,

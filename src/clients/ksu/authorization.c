@@ -40,12 +40,10 @@ krb5_boolean fowner(fp, uid)
      * the user himself, or by root.  Otherwise, don't grant access.
      */
     if (fstat(fileno(fp), &sbuf)) {
-	fclose(fp);
 	return(FALSE);
     }
 
     if ((sbuf.st_uid != uid) && sbuf.st_uid) {
-	fclose(fp);
 	return(FALSE);
     }
 
@@ -102,8 +100,10 @@ krb5_error_code krb5_authorization(context, principal, luser,
     if (!k5login_flag){
     	if ((login_fp = fopen(k5login_path, "r")) == NULL)
 	    return 0;
-	if ( fowner(login_fp, pwd->pw_uid) == FALSE)
+	if ( fowner(login_fp, pwd->pw_uid) == FALSE) {
+	    fclose(login_fp);
 	    return 0;
+	}
     }
 
     if (!k5users_flag){
@@ -111,6 +111,7 @@ krb5_error_code krb5_authorization(context, principal, luser,
 	    return 0;
     	}
 	if ( fowner(users_fp, pwd->pw_uid) == FALSE){
+	    fclose(users_fp);
 	    return 0;
     	}
     }

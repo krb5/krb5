@@ -199,8 +199,9 @@ klog_com_err_proc(whoami, code, format, ap)
 
     /* If reporting an error message, separate it. */
     if (code) {
-	strcat(outbuf, error_message(code));
-	strcat(outbuf, " - ");
+        outbuf[sizeof(outbuf) - 1] = '\0';
+	strncat(outbuf, error_message(code), sizeof(outbuf) - 1 - strlen(outbuf));
+	strncat(outbuf, " - ", sizeof(outbuf) - 1 - strlen(outbuf));
     }
     cp = &outbuf[strlen(outbuf)];
     

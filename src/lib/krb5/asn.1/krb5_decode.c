@@ -77,23 +77,29 @@ if(tagnum != (tagexpect)) clean_return(KRB5_BADMSGTYPE)
 
 /* decode an explicit tag and place the number in tagnum */
 #define next_tag()\
-retval = asn1_get_tag(&subbuf,&class,&construction,&tagnum,NULL);\
-if(retval) clean_return(retval);\
-if(class != CONTEXT_SPECIFIC || construction != CONSTRUCTED)\
-  clean_return(ASN1_BAD_ID)
+retval = asn1_get_tag_indef(&subbuf,&class,&construction,&tagnum,NULL,&indef);\
+if(retval) clean_return(retval)
+
+#define get_eoc()						\
+retval = asn1_get_tag_indef(&subbuf,&class,&construction,	\
+			    &tagnum,NULL,&indef);		\
+if(retval) return retval;					\
+if(class != UNIVERSAL || tagnum || indef)			\
+  return ASN1_MISSING_EOC
 
 /* decode sequence header and initialize tagnum with the first field */
 #define begin_structure()\
 asn1buf subbuf;\
+int seqindef;\
 int indef;\
-retval = asn1_get_sequence(&buf,&length,&indef);\
+retval = asn1_get_sequence(&buf,&length,&seqindef);\
 if(retval) clean_return(retval);\
-retval = asn1buf_imbed(&subbuf,&buf,length,indef);\
+retval = asn1buf_imbed(&subbuf,&buf,length,seqindef);\
 if(retval) clean_return(retval);\
 next_tag()
 
 #define end_structure()\
-retval = asn1buf_sync(&buf,&subbuf,tagnum,length);\
+retval = asn1buf_sync(&buf,&subbuf,class,tagnum,length,indef,seqindef);\
 if (retval) clean_return(retval)
 
 /* process fields *******************************************/
@@ -101,6 +107,7 @@ if (retval) clean_return(retval)
 #define get_field_body(var,decoder)\
 retval = decoder(&subbuf,&(var));\
 if(retval) clean_return(retval);\
+if (indef) { get_eoc(); }\
 next_tag()
 
 /* decode a field (<[UNIVERSAL id]> <length> <contents>)
@@ -110,26 +117,35 @@ next_tag()
 #define get_field(var,tagexpect,decoder)\
 if(tagnum > (tagexpect)) clean_return(ASN1_MISSING_FIELD);\
 if(tagnum < (tagexpect)) clean_return(ASN1_MISPLACED_FIELD);\
+if(class != CONTEXT_SPECIFIC || construction != CONSTRUCTED)\
+  clean_return(ASN1_BAD_ID);\
 get_field_body(var,decoder)
 
 /* decode (or skip, if not present) an optional field */
 #define opt_field(var,tagexpect,decoder)\
+if(class != CONTEXT_SPECIFIC || construction != CONSTRUCTED)\
+  clean_return(ASN1_BAD_ID);\
 if(tagnum == (tagexpect)){ get_field_body(var,decoder); }
 
 /* field w/ accompanying length *********/
 #define get_lenfield_body(len,var,decoder)\
 retval = decoder(&subbuf,&(len),&(var));\
 if(retval) clean_return(retval);\
+if (indef) { get_eoc(); }\
 next_tag()
 
 /* decode a field w/ its length (for string types) */
 #define get_lenfield(len,var,tagexpect,decoder)\
 if(tagnum > (tagexpect)) clean_return(ASN1_MISSING_FIELD);\
 if(tagnum < (tagexpect)) clean_return(ASN1_MISPLACED_FIELD);\
+if(class != CONTEXT_SPECIFIC || construction != CONSTRUCTED)\
+  clean_return(ASN1_BAD_ID);\
 get_lenfield_body(len,var,decoder)
 
 /* decode an optional field w/ length */
 #define opt_lenfield(len,var,tagexpect,decoder)\
+if(class != CONTEXT_SPECIFIC || construction != CONSTRUCTED)\
+  clean_return(ASN1_BAD_ID);\
 if(tagnum == (tagexpect)){\
   get_lenfield_body(len,var,decoder);\
 }

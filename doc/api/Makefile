@@ -28,7 +28,7 @@ library.dvi:  lib1.stamp $(LIBTEX) $(STYLES)
 lib1.stamp: $(LIBTEX) $(STYLES)
 	touch library.ind
 	latex library
-	index library.idx
+	texindex library.idx
 	date > lib1.stamp
 
 .tex.dvi:
