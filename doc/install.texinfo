@@ -1050,7 +1050,7 @@ counterparts
 @c @code{from}
 @code{su}, @code{passwd}, and @code{rdist}.
 
-@node Client Machine Configuration Files, MacOS X Configuration, Client Programs, Installing and Configuring UNIX Client Machines
+@node Client Machine Configuration Files, Mac OS X Configuration, Client Programs, Installing and Configuring UNIX Client Machines
 @subsection Client Machine Configuration Files
 
 Each machine running Kerberos must have a @code{/etc/krb5.conf} file.
@@ -1096,43 +1096,20 @@ to switch the port number for @code{kerberos} to 750 and create a
 V4 KDC(s) will continue to work properly.
 
 @menu
-* MacOS X Configuration::
+* Mac OS X Configuration::
 @end menu
 
-@node MacOS X Configuration,  , Client Machine Configuration Files, Client Machine Configuration Files
-@subsubsection MacOS X Configuration
+@node Mac OS X Configuration,  , Client Machine Configuration Files, Client Machine Configuration Files
+@subsubsection Mac OS X Configuration
 
-To install Kerberos V on MacOS X, follow the directions for generic
-Unix-based OS's, except for the @code{/etc/services} updates described
-above.  Then, you must reconfigure your name resolver to return fully
-qualified domain names (FQDNs).  To see if your system is already
-correctly configured, compile the Kerberos code, and run:
+To install Kerberos V5 on Mac OS X and Mac OS X Server, follow the 
+directions for generic Unix-based OS's, except for the 
+@code{/etc/services} updates described above.  
 
-@smallexample
-@group
-$ cd .../src/tests/resolve
-$ ./resolve
-@end group
-@end smallexample
-
-This will tell you whether or not your machine returns FQDNs on name
-lookups.  If the test fails, run the following commands to fix things:
-
-@smallexample
-@group
-$ niutil -create . /locations/lookupd/hosts
-$ niutil -createprop . /locations/lookupd/hosts LookupOrder CacheAgent DNSAgent
- NIAgent NILAgent
-@end group
-@end smallexample
-
-Unfortunately, as of release time, the machine must be rebooted for the
-changes to take effect.  When the machine comes back up, run the test
-again to make sure things are fixed.
-
-Now, service entries must be created for the Kerberos-based servers.
-@code{/etc/services} is meaningless on MacOS X, so the following
-commands must be run instead:
+Mac OS X and Mac OS X Server use a database called NetInfo to store
+the contents of files normally found in @code{/etc}.  Instead of
+modifying @code{/etc/services}, you should run the following commands
+to add the Kerberos service entries to NetInfo:
 
 @smallexample
 @group
@@ -1161,9 +1138,50 @@ $ niutil -createprop . /services/kshell protocol tcp
 @end group
 @end smallexample
 
-The remainder of the setup of a MacOS X client machine or application
-server should be the same as for other UNIX-based systems.
+In addition to adding services to NetInfo, you must also modify the
+resolver configuration in NetInfo so that the machine resolves its own
+hostname as a FQDN (fully qualified domain name).  By default, Mac OS X
+and Mac OS X Server machines query NetInfo to resolve hostnames before
+falling back to DNS.  Because NetInfo has an unqualified name for all
+the machines in the NetInfo database, the machine's own hostname will
+resolve to an unqualified name.  Kerberos needs a FQDN to look up keys
+in the machine's keytab file.
 
+Fortunately, you can change the @code{lookupd} caching order to query
+DNS first.  Run the following NetInfo commands and reboot the machine:
+
+@smallexample
+@group
+$ niutil -create . /locations/lookupd/hosts
+$ niutil -createprop . /locations/lookupd/hosts LookupOrder CacheAgent DNSAgent
+ NIAgent NILAgent
+@end group
+@end smallexample
+
+Once you have rebooted, you can verify that the resolver now behaves
+correctly.  Compile the Kerberos 5 distribution and run:
+
+@smallexample
+@group
+$ cd .../src/tests/resolve
+$ ./resolve
+@end group
+@end smallexample
+
+This will tell you whether or not your machine returns FQDNs on name
+lookups.  If the test still fails, you can also try turning off DNS
+caching.  Run the following commands and reboot:
+
+@smallexample
+@group
+$ niutil -create . /locations/lookupd/hosts
+$ niutil -createprop . /locations/lookupd/hosts LookupOrder DNSAgent
+ CacheAgent NIAgent NILAgent
+@end group
+@end smallexample
+
+The remainder of the setup of a Mac OS X client machine or application
+server should be the same as for other UNIX-based systems.
 
 @node UNIX Application Servers,  , Installing and Configuring UNIX Client Machines, Installing Kerberos V5
 @section UNIX Application Servers

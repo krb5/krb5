@@ -1,3 +1,8 @@
+1999-09-08  Ken Raeburn  <raeburn@mit.edu>
+
+	* install.texinfo (Mac OS X Configuration): Revised text from
+	Alexis, with more explanations of what's going on.
+
 1999-09-07  Ken Raeburn  <raeburn@mit.edu>
 
 	* definitions.texinfo: Update for 1.1 release.
