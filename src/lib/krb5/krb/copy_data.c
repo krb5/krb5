@@ -51,7 +51,7 @@ krb5_data **outdata;
     if (!(tempdata = (krb5_data *)malloc(sizeof(*tempdata))))
 	return ENOMEM;
 
-    tmpdata->length = indata->length;
+    tempdata->length = indata->length;
     if (tempdata->length) {
 	if (!(tempdata->data = malloc(tempdata->length))) {
 	    xfree(tempdata);
