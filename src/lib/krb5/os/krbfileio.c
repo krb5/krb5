@@ -43,6 +43,9 @@ static char *VersionID = "@(#)krbfileio.c	2 - 08/22/91";
 
 #include <sys/types.h>
 #include <krb5/ext-proto.h>
+#ifdef NEED_SYS_FCNTL_H
+#include <sys/fcntl.h>
+#endif
 
 #ifdef apollo
 #   define OPEN_MODE_NOT_TRUSTWORTHY
