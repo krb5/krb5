@@ -113,7 +113,7 @@ proc start_telnet_daemon { args } {
     }
 
     # Give the telnet daemon a few seconds to get set up.
-    catch "exec sleep 2"
+    sleep 2
 }
 
 # A procedure to stop the telnet daemon.

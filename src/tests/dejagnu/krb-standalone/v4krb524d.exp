@@ -49,7 +49,7 @@ proc start_k524_daemon { } {
     set k524d_pid [exp_pid]
 
     # Give the krb524d daemon a few seconds to get set up.
-    catch "exec sleep 2"
+    sleep 2
 }
 
 # A procedure to stop the krb524 daemon.

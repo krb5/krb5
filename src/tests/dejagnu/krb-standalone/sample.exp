@@ -57,7 +57,7 @@ proc start_sserver_daemon { inetd } {
     }
 
     # Give sserver some time to start
-    catch "exec sleep 2"
+    sleep 2
 
     return 1
 }

@@ -48,7 +48,7 @@ proc start_rsh_daemon { option } {
     set krshd_pid [exp_pid]
 
     # Give the rsh daemon a few seconds to get set up.
-    catch "exec sleep 2"
+    sleep 2
 }
 
 # A procedure to stop the rsh daemon.

@@ -1,3 +1,8 @@
+2005-01-11  Ken Raeburn  <raeburn@mit.edu>
+
+	* rlogin.exp (start_rlogin_daemon): Use built-in sleep command.
+	* telnet.exp (start_telnet_daemon): Likewise.
+
 2004-11-15  Tom Yu  <tlyu@mit.edu>
 
 	* telnet.exp (telnet_test): Work around possible race condition

@@ -101,7 +101,7 @@ proc start_rlogin_daemon { option } {
     }
 
     # Give the rlogin daemon a few seconds to get set up.
-    catch "exec sleep 2"
+    sleep 2
 }
 
 # A procedure to stop the rlogin daemon.

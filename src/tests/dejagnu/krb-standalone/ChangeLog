@@ -1,3 +1,12 @@
+2005-01-11  Ken Raeburn  <raeburn@mit.edu>
+
+	* gssftp.exp (start_ftp_daemon): Use built-in sleep command.
+	* rcp.exp (start_rsh_daemon): Likewise.
+	* rsh.exp (start_rsh_daemon): Likewise.
+	* sample.exp (start_sserver_daemon): Likewise.
+	* v4gssftp.exp (start_ftp_daemon): Likewise.
+	* v4krb524d.exp (start_k524_daemon): Likewise.
+
 2004-12-20  Tom Yu  <tlyu@mit.edu>
 
 	* pwhist.exp: New file.  Perform some sanity checking on password

@@ -51,7 +51,7 @@ proc start_ftp_daemon { } {
     set ftpd_pid [exp_pid]
 
     # Give the ftp daemon a few seconds to get set up.
-    catch "exec sleep 2"
+    sleep 2
 }
 
 # A procedure to stop the ftp daemon.
