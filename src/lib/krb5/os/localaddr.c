@@ -499,12 +499,14 @@ static int print_addr (/*@unused@*/ void *dataptr, struct sockaddr *sa)
 	printf ("addr %s\n",
 		inet_ntoa (((struct sockaddr_in *)sa)->sin_addr));
 	break;
+#ifdef AF_INET6
     case AF_INET6:
 	printf ("addr %s\n",
 		inet_ntop (sa->sa_family,
 			   &((struct sockaddr_in6 *)sa)->sin6_addr,
 			   buf, sizeof (buf)));
 	break;
+#endif
 #ifdef AF_LINK
     case AF_LINK:
 	printf ("linkaddr\n");
@@ -679,7 +681,7 @@ krb5_os_localaddr(context, addr)
 		krb5_xfree (data.addr_temp[i]);
 	    free (data.addr_temp);
 	}
-	if (r == -1 && data.mem_err)
+	if (data.mem_err)
 	    return ENOMEM;
 	else
 	    return r;

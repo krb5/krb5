@@ -1,5 +1,10 @@
 2001-03-05  Ken Raeburn  <raeburn@mit.edu>
 
+	* localaddr.c (krb5_os_localaddr): Don't look for -1 return value
+	from foreach_localaddr.
+	(print_addr): Only process AF_INET6 addresses if AF_INET6 is
+	defined.
+
 	* gmt_mktime.c (gmt_mktime): Handle years earlier than 1970.
 	(main) [TEST_LEAP]: New routine, driver for testing.
 	* Makefile.in (t_mktime): New target.
