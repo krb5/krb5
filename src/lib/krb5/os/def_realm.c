@@ -27,6 +27,17 @@
 #include "k5-int.h"
 #include <stdio.h>
 
+#ifdef KRB5_DNS_LOOKUP	     
+/* for old Unixes and friends ... */
+#ifndef MAXHOSTNAMELEN
+#define MAXHOSTNAMELEN 64
+#endif
+
+#define MAX_DNS_NAMELEN (15*(MAXHOSTNAMELEN + 1)+1)
+
+extern int krb5_try_realm_txt_rr(char *,char *, char **);
+#endif /* KRB5_DNS_LOOKUP */
+
 /*
  * Retrieves the default realm to be used if no user-specified realm is
  *  available.  [e.g. to interpret a user-typed principal name with the
@@ -64,12 +75,56 @@ krb5_get_default_realm(context, lrealm)
 	    retval = profile_get_string(context->profile, "libdefaults",
 					"default_realm", 0, 0,
 					&context->default_realm);
-	    if (context->default_realm == 0)
-		return(KRB5_CONFIG_NODEFREALM);
+#ifdef KRB5_DNS_LOOKUP
+	    if (context->default_realm == 0) {
+		/*
+		 * Since this didn't appear in our config file, try looking
+		 * it up via DNS.  Look for a TXT records of the form:
+		 *
+		 * _kerberos.<localhost>
+		 * _kerberos.<domainname>
+		 * _kerberos.<searchlist>
+		 *
+		 */
+		char localhost[MAX_DNS_NAMELEN+1];
+		char * p;
+		localhost[0] = localhost[sizeof(localhost)-1] = 0;
+		gethostname(localhost,MAX_DNS_NAMELEN);
+		
+		if ( localhost[0] ) {
+		    p = localhost;
+		    do {
+			retval = krb5_try_realm_txt_rr("_kerberos", p, 
+						       &context->default_realm);
+			p = strchr(p,'.');
+			if (p)
+			    p++;
+		    } while (retval && p && p[0]);
+		    
+		    if (retval)
+			retval = krb5_try_realm_txt_rr("_kerberos", "", 
+						       &context->default_realm);
+		} else {
+		    retval = krb5_try_realm_txt_rr("_kerberos", "", 
+						   &context->default_realm);
+		}
+		if (retval) {
+		    return(KRB5_CONFIG_NODEFREALM);
+		}
+	    }
+#endif /* KRB5_DNS_LOOKUP */
     }
-    
-    realm = context->default_realm;
 
+    if (context->default_realm == 0)
+	return(KRB5_CONFIG_NODEFREALM);
+    if (context->default_realm[0] == 0) {
+	    free (context->default_realm);
+	    context->default_realm = 0;
+	    return KRB5_CONFIG_NODEFREALM;
+    }
+
+    realm = context->default_realm;
+    
     if (!(*lrealm = cp = malloc((unsigned int) strlen(realm) + 1)))
 	    return ENOMEM;
     strcpy(cp, realm);

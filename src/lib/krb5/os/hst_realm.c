@@ -72,10 +72,150 @@
 #include <strings.h>
 #endif
 
+#ifdef KRB5_DNS_LOOKUP       
+#ifdef WSHELPER
+#include <wshelper.h>
+#else /* WSHELPER */
+#include <arpa/inet.h>       
+#include <arpa/nameser.h>    
+#include <resolv.h>          
+#include <netdb.h>
+#endif /* WSHELPER */
+#endif /* KRB5_DNS_LOOKUP */ 
+
 /* for old Unixes and friends ... */
 #ifndef MAXHOSTNAMELEN
 #define MAXHOSTNAMELEN 64
 #endif
+
+#define MAX_DNS_NAMELEN (15*(MAXHOSTNAMELEN + 1)+1)
+
+#ifdef KRB5_DNS_LOOKUP
+/*
+ * Try to look up a TXT record pointing to a Kerberos realm
+ */
+
+krb5_error_code
+krb5_try_realm_txt_rr(prefix, name, realm)
+    const char *prefix, *name;
+    char **realm;
+{
+    union {
+        unsigned char bytes[2048];
+        HEADER hdr;
+    } answer;
+    unsigned char *p;
+    char host[MAX_DNS_NAMELEN], *h;
+    int size;
+    int type, class, numanswers, numqueries, rdlen, len;
+
+    /*
+     * Form our query, and send it via DNS
+     */
+
+    if (name == NULL || name[0] == '\0') {
+        strcpy(host,prefix);
+    } else {
+        if ( strlen(prefix) + strlen(name) + 3 > MAX_DNS_NAMELEN )
+            return KRB5_ERR_HOST_REALM_UNKNOWN;
+        sprintf(host,"%s.%s", prefix, name);
+    }
+    /* Realm names don't (normally) end with ".", but if the query
+       doesn't end with "." and doesn't get an answer as is, the
+       resolv code will try appending the local domain.  Since the
+       realm names are absolutes, let's stop that.  */
+    h = host + strlen (host);
+    if (h > host && h[-1] != '.')
+	strcpy (h, ".");
+
+    size = res_search(host, C_IN, T_TXT, answer.bytes, sizeof(answer.bytes));
+
+    if (size < 0)
+	return KRB5_ERR_HOST_REALM_UNKNOWN;
+
+    p = answer.bytes;
+
+    numqueries = ntohs(answer.hdr.qdcount);
+    numanswers = ntohs(answer.hdr.ancount);
+
+    p += sizeof(HEADER);
+
+    /*
+     * We need to skip over the questions before we can get to the answers,
+     * which means we have to iterate over every query record.  We use
+     * dn_expand to tell us how long each compressed name is.
+     */
+
+#define INCR_CHECK(x, y) x += y; if (x > size + answer.bytes) \
+                         return KRB5_ERR_HOST_REALM_UNKNOWN
+#define CHECK(x, y) if (x + y > size + answer.bytes) \
+                         return KRB5_ERR_HOST_REALM_UNKNOWN
+#define NTOHSP(x, y) x[0] << 8 | x[1]; x += y
+
+    while (numqueries--) {
+	len = dn_expand(answer.bytes, answer.bytes + size, p, host, 
+                         sizeof(host));
+	if (len < 0)
+	    return KRB5_ERR_HOST_REALM_UNKNOWN;
+	INCR_CHECK(p, len + 4);		/* Name plus type plus class */
+    }
+
+    /*
+     * We're now pointing at the answer records.  Process the first
+     * TXT record we find.
+     */
+
+    while (numanswers--) {
+	
+	/* First the name; use dn_expand to get the compressed size */
+	len = dn_expand(answer.bytes, answer.bytes + size, p,
+			host, sizeof(host));
+	if (len < 0)
+	    return KRB5_ERR_HOST_REALM_UNKNOWN;
+	INCR_CHECK(p, len);
+
+	/* Next is the query type */
+        CHECK(p, 2);
+	type = NTOHSP(p,2);
+
+	/* Next is the query class; also skip over 4 byte TTL */
+        CHECK(p,6);
+	class = NTOHSP(p,6);
+
+	/* Record data length - make sure we aren't truncated */
+
+        CHECK(p,2);
+	rdlen = NTOHSP(p,2);
+
+	if (p + rdlen > answer.bytes + size)
+	    return KRB5_ERR_HOST_REALM_UNKNOWN;
+
+	/*
+	 * If this is a TXT record, return the string.  Note that the
+	 * string has a 1-byte length in the front
+	 */
+	/* XXX What about flagging multiple TXT records as an error?  */
+
+	if (class == C_IN && type == T_TXT) {
+	    len = *p++;
+	    if (p + len > answer.bytes + size)
+		return KRB5_ERR_HOST_REALM_UNKNOWN;
+	    *realm = malloc(len + 1);
+	    if (*realm == NULL)
+		return ENOMEM;
+	    strncpy(*realm, (char *) p, len);
+	    (*realm)[len] = '\0';
+            /* Avoid a common error. */
+            if ( (*realm)[len-1] == '.' )
+                (*realm)[len-1] = '\0';
+	    return 0;
+	}
+    }
+
+    return KRB5_ERR_HOST_REALM_UNKNOWN;
+}
+#endif /* KRB5_DNS_LOOKUP */
+
 
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_get_host_realm(context, host, realmsp)
@@ -87,15 +227,15 @@ krb5_get_host_realm(context, host, realmsp)
     char *default_realm, *realm, *cp;
     krb5_error_code retval;
     int l;
-    char local_host[MAXHOSTNAMELEN+1];
+    char local_host[MAX_DNS_NAMELEN+1];
 
     if (host)
-	strncpy(local_host, host, MAXHOSTNAMELEN);
+	strncpy(local_host, host, MAX_DNS_NAMELEN);
     else {
 	if (gethostname(local_host, sizeof(local_host)-1) == -1)
 	    return SOCKET_ERRNO;
     }
-    local_host[sizeof(local_host)-1] = '\0';
+    local_host[MAX_DNS_NAMELEN] = '\0';
     for (cp = local_host; *cp; cp++) {
 	if (isupper(*cp))
 	    *cp = tolower(*cp);
@@ -139,25 +279,56 @@ krb5_get_host_realm(context, host, realmsp)
 	}
     }
 
+#ifdef KRB5_DNS_LOOKUP
     if (realm == (char *)NULL) {
-	    if (default_realm != (char *)NULL) {
-		    /* We are defaulting to the realm of the host */
-		    if (!(cp = (char *)malloc(strlen(default_realm)+1)))
-			    return ENOMEM;
-		    strcpy(cp, default_realm);
-		    realm = cp;
+        /*
+        * Since this didn't appear in our config file, try looking
+        * it up via DNS.  Look for a TXT records of the form:
+        *
+        * _kerberos.<hostname>
+        * _kerberos.<searchlist>
+        * _kerberos.<defaultrealm>
+        *
+        */
+        cp = local_host;
+        do {
+            retval = krb5_try_realm_txt_rr("_kerberos", cp, &realm);
+            cp = strchr(cp,'.');
+            if (cp) 
+                cp++;
+        } while (retval && cp && cp[0]);
+        if (retval)
+            retval = krb5_try_realm_txt_rr("_kerberos", "", &realm);
+        if (retval && default_realm) {
+            cp = default_realm;
+            do {
+                retval = krb5_try_realm_txt_rr("_kerberos", cp, &realm);
+                cp = strchr(cp,'.');
+                if (cp) 
+                    cp++;
+            } while (retval && cp && cp[0]);
+        }
+    }
+#endif /* KRB5_DNS_LOOKUP */
+    if (realm == (char *)NULL) {
+        if (default_realm != (char *)NULL) {
+            /* We are defaulting to the realm of the host */
+            if (!(cp = (char *)malloc(strlen(default_realm)+1)))
+                return ENOMEM;
+            strcpy(cp, default_realm);
+            realm = cp;
 
-		    /* Assume the realm name is upper case */
-		    for (cp = realm; *cp; cp++)
-			    if (islower(*cp))
-				    *cp = toupper(*cp);
-	    } else {
-		    /* We are defaulting to the local realm */
-		    retval = krb5_get_default_realm(context, &realm);
-		    if (retval) {
-			    return retval;
-		    }
-	    }
+            /* Assume the realm name is upper case */
+            for (cp = realm; *cp; cp++)
+                if (islower(*cp))
+                    *cp = toupper(*cp);
+        } else {    
+            /* We are defaulting to the local realm */
+            retval = krb5_get_default_realm(context, &realm);
+            if (retval) {
+                return retval;
+            }
+        }
     }
     if (!(retrealms = (char **)calloc(2, sizeof(*retrealms)))) {
 	if (realm != (char *)NULL)

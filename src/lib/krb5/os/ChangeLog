@@ -1,3 +1,36 @@
+1999-06-21  Ken Raeburn  <raeburn@mit.edu>
+	and Jeffrey Altman and Ken Hornstein
+
+	* def_realm.c (MAXHOSTNAMELEN) [KRB5_DNS_LOOKUP]: Define if not
+	already defined.
+	(MAX_DNS_NAMELEN) [KRB5_DNS_LOOKUP]: New macro.
+	(krb5_get_default_realm): Return an error if an empty realm name
+	is found.
+	(krb5_get_default_realm) [KRB5_DNS_LOOKUP]: Use
+	krb5_try_realm_txt_rr to determine the realm of the local host or
+	domain.
+
+	* hst_realm.c [KRB5_DNS_LOOKUP]: Pull in some extra header files
+	for resolver functionality.
+	(MAX_DNS_NAMELEN): New macro.
+	(krb5_try_realm_txt_rr) [KRB5_DNS_LOOKUP]: New function; looks up
+	a TXT record.
+	(krb5_get_host_realm): Use MAX_DNS_NAMELEN for buffer size.
+	(krb5_get_host_realm) [KRB5_DNS_LOOKUP]: Use DNS lookup if config
+	file doesn't contain a match.
+
+	* locate_kdc.c [KRB5_DNS_LOOKUP]: Pull in some extra header files
+	for resolver functionality.
+	(MAXHOSTNAMELEN) [KRB5_DNS_LOOKUP]: Define if not already
+	defined.
+	(MAX_DNS_NAMELEN) [KRB5_DNS_LOOKUP]: New macro.
+	(krb5_locate_srv_conf): Renamed from krb5_locate_kdc; now static;
+	extra char* argument replaces fixed "kdc" in array of names to
+	look up in profile.
+	(krb5_locate_srv_dns) [KRB5_DNS_LOOKUP]: New function; looks up
+	SRV records, and returns addresses sorted by priority.
+	(krb5_locate_kdc): New function, calls above routines.
+
 1999-06-16  Danilo Almeida  <dalmeida@mit.edu>
 
 	* ccdefname.c (get_from_registry_indirect, try_dir, get_from_os): 
