@@ -1,5 +1,8 @@
 2004-05-05  Ken Raeburn  <raeburn@mit.edu>
 
+	* threads.c (krb5int_thread_support_fini) [!ENABLE_THREADS]:
+	Provide a dummy function for now.
+
 	* foreachaddr.c: Deleted.  Code moved to lib/krb5/os/localaddr.c.
 	* fake-addrinfo.c: Deleted.
 	* Makefile.in (SRCS, STLIBOBJS): Updated.

@@ -199,6 +199,11 @@ int krb5int_thread_support_init(void)
     return 0;
 }
 
+void krb5int_thread_support_fini(void)
+{
+    /* ... */
+}
+
 int k5_key_register (k5_key_t keynum, void (*d)(void *))
 {
     assert(keynum >= 0 && keynum < K5_KEY_MAX);
