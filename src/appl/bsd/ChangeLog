@@ -1,5 +1,8 @@
 Fri Dec 30 18:35:50 1994  Richard Basch  (probe@tardis)
 
+	* Makefile.in
+	  	Fixed man page installation when build tree != source tree
+
 	* configure.in
 	  	No need to do the fcntl check
 		Changed GETPGRP_ONEARG detection (and assign it when it
