@@ -98,7 +98,7 @@ static int		key_num_ktents = 0;
 static krb5_key_salt_tuple *key_ktents = (krb5_key_salt_tuple *) NULL;
 static int		key_ktents_inited = 0;
 static krb5_key_salt_tuple default_ktent = {
-    ENCTYPE_DES_CBC_MD5, KRB5_KDB_SALTTYPE_NORMAL
+    DEFAULT_KDC_ENCTYPE, KRB5_KDB_SALTTYPE_NORMAL
 };
 
 static char		*key_db_name = (char *) NULL;
@@ -132,10 +132,10 @@ key_get_admin_entry(kcontext)
      */
     admin_princ_name = (char *) malloc((size_t)
 				       ((2*strlen(realm_name)) + 3 +
-					strlen(KRB5_ADM_SERVICE_NAME)));
+					strlen(KRB5_ADM_SERVICE_INSTANCE)));
     if (admin_princ_name) {
 	/* Format the admin name */
-	sprintf(admin_princ_name, "%s/%s@%s", KRB5_ADM_SERVICE_NAME,
+	sprintf(admin_princ_name, "%s/%s@%s", KRB5_ADM_SERVICE_INSTANCE,
 		realm_name, realm_name);
 	DPRINT(DEBUG_REALM, key_debug_level,
 	       ("- setting up admin principal %s\n", admin_princ_name));
@@ -318,14 +318,14 @@ key_get_admin_entry(kcontext)
 	xxx.key_data = madmin_keys;
 	if (krb5_dbe_find_enctype(kcontext,
 				  &xxx,
-				  ENCTYPE_DES_CBC_MD5,
+				  DEFAULT_KDC_ENCTYPE,
 				  -1,
 				  -1,
 				  &kdata))
 	    kdata = &madmin_keys[0];
 
 	memset(&madmin_key, 0, sizeof(krb5_keyblock));
-	madmin_key.enctype = ENCTYPE_DES_CBC_MD5;
+	madmin_key.enctype = DEFAULT_KDC_ENCTYPE;
 	madmin_key.length = kdata->key_data_length[0];
 	madmin_key.contents = kdata->key_data_contents[0];
     }
@@ -372,7 +372,7 @@ key_init(kcontext, debug_level, key_type, master_key_name, manual,
     /*
      * Figure out arguments.
      */
-    master_keyblock.enctype=((key_type == -1) ? ENCTYPE_DES_CBC_MD5 : key_type);
+    master_keyblock.enctype=((key_type == -1) ? DEFAULT_KDC_ENCTYPE : key_type);
     mkey_name = ((!master_key_name) ? KRB5_KDB_M_NAME : master_key_name);
 
     /*
@@ -1110,7 +1110,9 @@ key_pwd_is_weak(kcontext, dbentp, string)
 			      &key_list);
     if (!kret) {
 	for (i=0; i<num_keys; i++) {
-	    if ((key_list[i].key_data_type[0] == ENCTYPE_DES_CBC_MD5) &&
+	    if (((key_list[i].key_data_type[0] == ENCTYPE_DES_CBC_MD5) ||
+		 (key_list[i].key_data_type[0] == ENCTYPE_DES_CBC_MD4) ||
+		 (key_list[i].key_data_type[0] == ENCTYPE_DES_CBC_CRC)) &&
 		(key_list[i].key_data_length[0] == KRB5_MIT_DES_KEYSIZE) &&
 		mit_des_is_weak_key(key_list[i].key_data_contents[0])) {
 		weakness = 1;
