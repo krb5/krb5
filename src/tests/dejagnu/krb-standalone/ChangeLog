@@ -1,3 +1,7 @@
+Fri Jan 30 23:49:54 1998  Tom Yu  <tlyu@mit.edu>
+
+	* kadmin.exp: Fix to deal with new kpasswd program.
+
 Sun Nov  9 10:07:07 1997  Ezra Peisach  <epeisach@mit.edu>
 
 	* gssftp.exp: Replace "else if" with "elseif" as expect 5.25

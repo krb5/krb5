@@ -12,7 +12,7 @@ if {![get_hostname] \
 
 # find kpasswd
 if ![info exists KPASSWD] {
-    set KPASSWD [findfile $objdir/../../kadmin/passwd/kpasswd]
+    set KPASSWD [findfile $objdir/../../clients/kpasswd/kpasswd]
 }
 
 # find kdestroy
@@ -607,27 +607,31 @@ proc kadmin_delete { pname } {
 #--
 proc kpasswd_cpw { princ opw npw } {
     global KPASSWD
+    global REALMNAME
 
     spawn $KPASSWD $princ
     expect_after {
 	timeout {
 	    fail "kpasswd $princ $npw"
-	    catch "expect_after"
+#	    catch "expect_after"
 	    return 0
 	}
 	eof {
 	    fail "kpasswd $princ $npw"
-	    catch "expect_after"
+#	    catch "expect_after"
 	    return 0
 	}
     }
 
-    expect "Changing password for $princ."
-    expect "Old password:" { send "$opw\r" }
-    expect "New password:" { send "$npw\r" }
-    expect "New password (again):" { send "$npw\r" }
-    expect "\r"
-    expect "Kerberos password changed."
+#    expect "Changing password for $princ."
+#    expect "Old password:" { send "$opw\r" }
+#    expect "New password:" { send "$npw\r" }
+#    expect "New password (again):" { send "$npw\r" }
+    expect "Password for $princ@$REALMNAME:" { send "$opw\r" }
+    expect "Enter new password:"  { send "$npw\r" }
+    expect "Enter it again:"      { send "$npw\r" }
+#    expect "Kerberos password changed."
+    expect "Password changed."
     expect_after
     expect eof
 
