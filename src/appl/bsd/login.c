@@ -973,6 +973,7 @@ afs_cleanup ()
     exit(1); \
 }
 
+#if defined(HAVE_ETC_ENVIRONMENT) || defined(HAVE_ETC_TIMEZONE)
 static void
 read_env_vars_from_file (filename)
     char *filename;
@@ -998,6 +999,7 @@ read_env_vars_from_file (filename)
 	fclose(fp);
     }
 }
+#endif
 
 static void
 log_repeated_failures (tty, hostname)

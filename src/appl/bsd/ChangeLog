@@ -1,5 +1,10 @@
 2001-06-20  Ezra Peisach  <epeisach@mit.edu>
 
+	* login.c (read_env_vars_from_file: Only define if
+	/etc/environment or /etc/timezone exists on machine.
+
+2001-06-20  Ezra Peisach  <epeisach@mit.edu>
+
 	* kcmd.c: Get rid of prototypes for krb5_write_message(),
 	krb5_net_write(), and krb5_net_read(). They are in krb5.h now.
 
