@@ -621,7 +621,7 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
 
        /* construct the checksum buffer */
 
-       cblen = sizeof(krb5_ui_2)*5;
+       cblen = 4*5;
        if (input_chan_bindings)
 	   cblen += (input_chan_bindings->initiator_address.length+
 		     input_chan_bindings->acceptor_address.length+

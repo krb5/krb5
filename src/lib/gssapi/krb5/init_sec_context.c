@@ -141,7 +141,7 @@ make_ap_req_v2(context, auth_context, cred, server, now, endtime,
 
     /* construct the checksum fields */
 
-    cblen = sizeof(krb5_ui_2)*5;
+    cblen = 4*5;
     if (chan_bindings)
 	cblen += (chan_bindings->initiator_address.length+
 		  chan_bindings->acceptor_address.length+
