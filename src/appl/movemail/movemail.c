@@ -51,6 +51,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
  */
 
 #include <stdio.h>
+#include <time.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/file.h>
@@ -97,12 +98,17 @@ extern char *getenv();
 #endif
 
 char *concat ();
+void fatal(), error(), pfatal_with_name();
+void mbx_write(), mbx_delimit_begin(), mbx_delimit_end();
+int pop_init(), popmail(), pop_command(), pop_stat(), pop_retr();
+int getline(), multiline(), putline();
+
 extern int errno;
 
 /* Nonzero means this is name of a lock file to delete on fatal error.  */
 char *delete_lockname;
 
-main (argc, argv)
+int main (argc, argv)
      int argc;
      char **argv;
 {
@@ -279,7 +285,7 @@ main (argc, argv)
 
 /* Print error message and exit.  */
 
-fatal (s1, s2)
+void fatal (s1, s2)
      char *s1, *s2;
 {
   if (delete_lockname)
@@ -290,7 +296,7 @@ fatal (s1, s2)
 
 /* Print error message.  `s1' is printf control string, `s2' is arg for it. */
 
-error (s1, s2, s3)
+void error (s1, s2, s3)
      char *s1, *s2, *s3;
 {
   printf ("movemail: ");
@@ -298,7 +304,7 @@ error (s1, s2, s3)
   printf ("\n");
 }
 
-pfatal_with_name (name)
+void pfatal_with_name (name)
      char *name;
 {
   char *s;
@@ -379,7 +385,7 @@ char Errmsg[80];
 
 static int debug = 0;
 
-popmail(user, outfile)
+int popmail(user, outfile)
 char *user;
 char *outfile;
 {
@@ -390,7 +396,6 @@ char *outfile;
     int mbfi;
     FILE *mbf;
     char *getenv();
-    int mbx_write();
     char *get_errmsg();
 #ifdef HESIOD
     struct hes_postoffice *p;
@@ -512,12 +517,14 @@ char *outfile;
     return(0);
 }
 
-pop_init(host)
+int pop_init(host)
 char *host;
 {
     register struct hostent *hp;
     register struct servent *sp;
+#ifndef KERBEROS
     int lport = IPPORT_RESERVED - 1;
+#endif
     struct sockaddr_in sin;
     int s;
     char *get_errmsg();
@@ -601,21 +608,24 @@ char *host;
     }
 #endif /* KRB4 */
 #ifdef KRB5
-    krb5_init_context(&context);
-    krb5_init_ets(context);
+    retval = krb5_init_context(&context);
+    if (retval) {
+	    com_err("movemail", retval, "while initializing krb5");
+	    exit(1);
+    }
 
-    if (retval = krb5_cc_default(context, &ccdef)) {
+    if ((retval = krb5_cc_default(context, &ccdef))) {
     krb5error:
 	sprintf(Errmsg, "krb5 error: %s", error_message(retval));
 	close(s);
 	return(NOTOK);
     }
-    if (retval = krb5_cc_get_principal(context, ccdef, &client)) {
+    if ((retval = krb5_cc_get_principal(context, ccdef, &client))) {
 	goto krb5error;
     }
 
-    if (retval = krb5_sname_to_principal(context, hostname, POP_SNAME,
-					 KRB5_NT_SRV_HST, &server)) {
+    if ((retval = krb5_sname_to_principal(context, hostname, POP_SNAME,
+					  KRB5_NT_SRV_HST, &server))) {
 	goto krb5error;
     }
 
@@ -656,7 +666,7 @@ char *host;
     return(OK);
 }
 
-pop_command(fmt, a, b, c, d)
+int pop_command(fmt, a, b, c, d)
 char *fmt;
 char *a, *b, *c, *d;
 {
@@ -682,7 +692,7 @@ char *a, *b, *c, *d;
 }
 
     
-pop_stat(nmsgs, nbytes)
+int pop_stat(nmsgs, nbytes)
 int *nmsgs, *nbytes;
 {
     char buf[128];
@@ -705,9 +715,9 @@ int *nmsgs, *nbytes;
     }
 }
 
-pop_retr(msgno, action, arg)
+int pop_retr(msgno, action, arg)
 int msgno;
-int (*action)();
+void (*action)();
 void* arg;			/* may always be FILE* -- eichin -- XXX */
 {
     char buf[1024];
@@ -735,7 +745,7 @@ void* arg;			/* may always be FILE* -- eichin -- XXX */
     }
 }
 
-getline(buf, n, f)
+int getline(buf, n, f)
 char *buf;
 register int n;
 FILE *f;
@@ -763,7 +773,7 @@ FILE *f;
     return(OK);
 }
 
-multiline(buf, n, f)
+int multiline(buf, n, f)
 char *buf;
 register int n;
 FILE *f;
@@ -788,7 +798,7 @@ get_errmsg()
     return(s);
 }
 
-putline(buf, err, f)
+int putline(buf, err, f)
 char *buf;
 char *err;
 FILE *f;
@@ -802,7 +812,7 @@ FILE *f;
     return(OK);
 }
 
-mbx_write(line, mbf)
+void mbx_write(line, mbf)
 char *line;
 FILE *mbf;
 {
@@ -810,7 +820,7 @@ FILE *mbf;
     fputc(0x0a, mbf);
 }
 
-mbx_delimit_begin(mbf)
+void mbx_delimit_begin(mbf)
 FILE *mbf;
 {
 #ifdef OUTPUT_MMDF_FORMAT
@@ -820,7 +830,7 @@ FILE *mbf;
 #endif
 }
 
-mbx_delimit_end(mbf)
+void mbx_delimit_end(mbf)
 FILE *mbf;
 {
 #ifdef OUTPUT_MMDF_FORMAT
