@@ -30,7 +30,7 @@
 
 char prog[32];
 char *progname = prog;
-char *acl_file_name = DEFAULT_ACL_NAME;
+char *acl_file_name = DEFAULT_ADMIN_ACL;
 char *adm5_ver_str = ADM5_VERSTR;
 int  adm5_ver_len;
 
