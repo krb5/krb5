@@ -1,3 +1,8 @@
+
+	* dbtest.c: Test for __STDC__ defined, not nonzero, to decide
+	whether to use stdarg.h or varargs.h.
+	(err): Similarly for function signature.
+
 2002-02-19  Ken Raeburn  <raeburn@mit.edu>
 
 	* run.test: Use "/bin/." instead of "/bin" in find commands in
