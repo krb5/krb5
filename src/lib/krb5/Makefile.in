@@ -24,6 +24,7 @@ libkrb5.a: error_tables/DONE asn.1/DONE ccache/DONE ccache/stdio/DONE \
 			$(LIBUPDATE) --force $@ $$i/DONE $$i ; \
 		done \
 	fi
+	touch libkrb5.stamp
 		
 
 install:: libkrb5_ranlib
@@ -31,4 +32,4 @@ install:: libkrb5_ranlib
 	$(RANLIB) $(DESTDIR)$(KRB5_LIBDIR)/libkrb5.a
 
 clean::
-	$(RM) libkrb5.a libkrb5_ranlib
+	$(RM) libkrb5.a libkrb5_ranlib libkrb5.stamp

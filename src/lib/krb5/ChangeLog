@@ -1,5 +1,9 @@
 Tue Nov  1 14:56:47 1994    (tytso@rsx-11)
 
+	* Makefile.in: Change the way libupdate works so that we use
+		libkrb5.stamp to determine whether or not $arcmd needs to
+		be rerun. 
+
 	* Makefile.in:
 	* configure.in: Change the way the library is built to use the
 		libupdate script.
