@@ -1,0 +1,15 @@
+#!/bin/csh -f
+foreach i (`find . -type d -print`)
+   set j=`echo $i | sed -e "s/^\.\///"`
+   if ($j:t == CVS) then
+#	echo skipping CVS
+   else if ($j:t == .) then
+#	echo skipping .
+   else
+	set k=`echo $j | sed -e 's/[^/]//g' | sed -e 's/\//..\//g'`
+	echo match: $j $k
+	echo 'sinclude(['$k'../aclocal.m4])' > $j/aclocal.m4
+#	echo 'sinclude(['$k'../aclocal.m4])' 
+   endif
+end
+
