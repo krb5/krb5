@@ -9,6 +9,7 @@ OBJS=	addr_comp.o	\
 	encode_kdc.o	\
 	encode_tkt.o	\
 	encrypt_tk.o	\
+	faddr_ordr.o	\
 	free_krbhs.o	\
 	get_in_tkt.o	\
 	get_krbhst.o	\
@@ -18,6 +19,7 @@ OBJS=	addr_comp.o	\
 	mk_error.o	\
 	mk_req.o	\
 	mk_req_ext.o	\
+	mk_safe.o	\
 	parse.o		\
 	princ_comp.o	\
 	rd_error.o	\
@@ -34,6 +36,7 @@ SRCS=	addr_comp.c	\
 	encode_kdc.c	\
 	encode_tkt.c	\
 	encrypt_tk.c	\
+	faddr_ordr.c	\
 	free_krbhs.c	\
 	get_in_tkt.c	\
 	get_krbhst.c	\
@@ -43,6 +46,7 @@ SRCS=	addr_comp.c	\
 	mk_error.c	\
 	mk_req.c	\
 	mk_req_ext.c	\
+	mk_safe.c	\
 	parse.c		\
 	princ_comp.c	\
 	rd_error.c	\
