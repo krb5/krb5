@@ -149,7 +149,7 @@ add_key_rnd(context, master_key, ks_tuple, ks_tuple_count, db_entry, kvno)
 					     &key, NULL, kvno, 
 					     &db_entry->key_data[db_entry->n_key_data-1]);
 
-	krb5_free_keyblock(context, &key);
+	krb5_free_keyblock_contents(context, &key);
 
 	if (retval)
 	    goto add_key_rnd_err;
