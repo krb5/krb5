@@ -1,3 +1,11 @@
+2005-01-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* cc_file.c (struct _krb5_fcc_data): Fields disk_file_lock,
+	file_is_locked deleted.
+	(krb5_fcc_open_file, krb5_fcc_close_file, dereference,
+	krb5_fcc_resolve, krb5_fcc_generate_new, krb5_fcc_set_flags):
+	Don't set or check them.
+
 2005-01-11  Jeffrey Altman <jaltman@mit.edu>
 
         * cc_mslsa.c: 
