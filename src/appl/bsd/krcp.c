@@ -74,7 +74,9 @@ char copyright[] =
      
 int sock;
 struct sockaddr_in foreign;	   /* set up by kcmd used by send_auth */
-char *krb_realm = (char *)0;
+char *krb_realm = NULL;
+char *krb_cache = NULL;
+char *krb_config = NULL;
 char des_inbuf[2*BUFSIZ];          /* needs to be > largest read size */
 char des_outbuf[2*BUFSIZ];         /* needs to be > largest write size */
 krb5_data desinbuf,desoutbuf;
@@ -134,7 +136,8 @@ main(argc, argv)
     char *targ, *host, *src;
     char *suser, *tuser, *thost;
     int i;
-    char buf[BUFSIZ], cmdbuf[16];
+    int cmdsiz = 30;
+    char buf[BUFSIZ], cmdbuf[30];
     char *cmd = cmdbuf;
     struct servent *sp;
     static char curhost[256];
@@ -209,6 +212,26 @@ main(argc, argv)
 	    }
 	    strcpy(krb_realm, *argv);	
 	    goto next_arg;
+	  case 'c':		/* Change default ccache file */
+	    argc--, argv++;
+	    if (argc == 0) 
+	      usage();
+	    if(!(krb_cache = (char *)malloc(strlen(*argv) + 1))){
+		fprintf(stderr, "rcp: Cannot malloc.\n");
+		exit(1);
+	    }
+	    strcpy(krb_cache, *argv);	
+	    goto next_arg;
+	  case 'C':		/* Change default config file */
+	    argc--, argv++;
+	    if (argc == 0) 
+	      usage();
+	    if(!(krb_config = (char *)malloc(strlen(*argv) + 1))){
+		fprintf(stderr, "rcp: Cannot malloc.\n");
+		exit(1);
+	    }
+	    strcpy(krb_config, *argv);	
+	    goto next_arg;
 #endif /* KERBEROS */
 	    /* The rest of these are not for users. */
 	  case 'd':
@@ -219,7 +242,7 @@ main(argc, argv)
 	    iamremote = 1;
 #if defined(KERBEROS)
 	    if (encryptflag)
-	      answer_auth();
+	      answer_auth(krb_config, krb_cache);
 #endif /* KERBEROS */
 	    (void) response();
 	    source(--argc, ++argv);
@@ -229,7 +252,7 @@ main(argc, argv)
 	    iamremote = 1;
 #if defined(KERBEROS) 
 	    if (encryptflag)
-	      answer_auth();
+	      answer_auth(krb_config, krb_cache);
 #endif /* KERBEROS */
 	    sink(--argc, ++argv);
 	    exit(errs);
@@ -246,19 +269,28 @@ main(argc, argv)
       targetshouldbedirectory = 1;
     rem = -1;
 #ifdef KERBEROS
-    if (krb_realm != NULL) {
-        cmd = (char *) malloc(strlen(krb_realm) + 20);
-	if (cmd == NULL) {
-	    fprintf(stderr, "rcp: Cannot malloc.\n");
-	    exit(1);
-	}
+    if (krb_realm != NULL)
+	cmdsiz += strlen(krb_realm);
+    if (krb_cache != NULL)
+	cmdsiz += strlen(krb_cache);
+    if (krb_config != NULL)
+	cmdsiz += strlen(krb_config);
+
+    if ((cmd = (char *)malloc(cmdsiz)) == NULL) {
+	fprintf(stderr, "rcp: Cannot malloc.\n");
+	exit(1);
     }
-    (void) sprintf(cmd, "rcp%s%s%s%s%s%s",
+    (void) sprintf(cmd, "rcp%s%s%s%s%s%s%s%s%s%s",
 		   iamrecursive ? " -r" : "", pflag ? " -p" : "", 
 		   encryptflag ? " -x" : "",
 		   targetshouldbedirectory ? " -d" : "",
 		   krb_realm != NULL ? " -k " : "",
-		   krb_realm != NULL ? krb_realm : "");
+		   krb_realm != NULL ? krb_realm : "",
+		   krb_cache != NULL ? " -c " : "",
+		   krb_cache != NULL ? krb_cache : "",
+		   krb_config != NULL ? " -C " : "",
+		   krb_config != NULL ? krb_config : "");
+
 #else /* !KERBEROS */
     (void) sprintf(cmd, "rcp%s%s%s",
 		   iamrecursive ? " -r" : "", pflag ? " -p" : "", 
@@ -1253,10 +1285,8 @@ void send_auth()
 	exit(1);
     }
     
-    status = krb5_read_message(bsd_context, (krb5_pointer) &rem, &reply);
-    if (status){
-	fprintf(stderr,
-                "rcp: send_auth failed krb5_read_message: %s\n",
+    if (status = krb5_read_message(bsd_context, (krb5_pointer) &rem, &reply)) {
+	fprintf(stderr, "rcp: send_auth failed krb5_read_message: %s\n",
 		error_message(status));
 	exit(1);
     }
@@ -1301,39 +1331,47 @@ void send_auth()
     
 }
 
-
-
 void
-  answer_auth()
+  answer_auth(config_file, ccache_file)
+    char *config_file;
+    char *ccache_file;
 {
     krb5_data pname_data, msg;
     krb5_creds creds, *new_creds;
     krb5_ccache cc;
     krb5_error_code status;
     krb5_auth_context *auth_context = NULL;
-    extern krb5_flags krb5_kdc_default_options;
     
+    if (config_file) {
+    	char * filenames[2];
+    	filenames[1] = NULL;
+    	filenames[0] = config_file;
+    	if (status = krb5_set_config_files(bsd_context, filenames))
+	    exit(1);
+    }
     
     memset ((char*)&creds, 0, sizeof(creds));
-    
-    if (status = krb5_read_message(bsd_context, (krb5_pointer)&rem, 
-				   &pname_data)) {
+
+    if (status = krb5_read_message(bsd_context, (krb5_pointer)&rem,
+				   &pname_data)) 
 	exit(1);
-    }
     
     if (status = krb5_read_message(bsd_context, (krb5_pointer) &rem,
-				   &creds.second_ticket)) {
+				   &creds.second_ticket)) 
 	exit(1);
+    
+    if (ccache_file == NULL) {
+    	if (status = krb5_cc_default(bsd_context, &cc))
+	    exit(1);
+    } else {
+	if (status = krb5_cc_resolve(bsd_context, ccache_file, &cc))
+	    exit(1);
     }
-    
-    if (status = krb5_cc_default(bsd_context, &cc)){
+
+    if (status = krb5_cc_get_principal(bsd_context, cc, &creds.client)) 
 	exit(1);
-    }
-    
-    if (status = krb5_cc_get_principal(bsd_context, cc, &creds.client))
-	exit(1);
-    
-    if (status = krb5_parse_name(bsd_context, pname_data.data, &creds.server))
+
+    if (status = krb5_parse_name(bsd_context, pname_data.data, &creds.server)) 
 	exit(1);
 
     krb5_xfree(pname_data.data);
@@ -1345,27 +1383,25 @@ void
 			  	      AP_OPTS_USE_SESSION_KEY,
 				      NULL, new_creds, &msg))
 	exit(1);
-
+    
     if (status = krb5_write_message(bsd_context, (krb5_pointer) &rem, &msg)) {
     	krb5_xfree(msg.data);
 	exit(1);
     }
     
-    krb5_xfree(msg.data);
-
     /* setup eblock for des_read and write */
     krb5_copy_keyblock(bsd_context, &new_creds->keyblock,&session_key);
     
     /* cleanup */
     krb5_free_cred_contents(bsd_context, &creds);
     krb5_free_creds(bsd_context, new_creds);
+    krb5_xfree(msg.data);
     
     /* OK process key */
     krb5_use_keytype(bsd_context, &eblock, session_key->keytype);
-    if ( status = krb5_process_key(bsd_context, &eblock,session_key)) {
+    if (status = krb5_process_key(bsd_context, &eblock, session_key)) 
 	exit(1);
-    }
-    
+
     return;
 }
 

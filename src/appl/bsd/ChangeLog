@@ -1,4 +1,11 @@
 
+Fri May 05 09:16:16 1995  Chris Provenzano (proven@mit.edu)
+
+	* krcp.c (answer_auth()): Requires two new args that are passed
+		from the command line. The first -c is to pass the filename
+		of the remote credential cache. The second -C is to pass
+		the filename of the remote krb5.conf file.
+
 Thu May 04 23:53:23 1995  Chris Provenzano (proven@mit.edu)
 
 	* krcp.c (answer_auth()): Don't destroy the credential cache.
