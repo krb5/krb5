@@ -1,0 +1,36 @@
+/*
+ * SET VERSION NUMBERS BEFORE MAKING MAKEFILES
+ */
+
+#define OSName            Ultrix-32 3.1
+#define OSMajorVersion    3
+#define OSMinorVersion    1
+#define SystemV NO
+#define HasVoidSignalReturn YES
+#define HasPutenv YES
+#define HasBsearch YES
+
+#undef ExtensionDefines
+#define ExtensionDefines -DSHAPE -DMITSHM -DMULTIBUFFER -DMITMISC
+
+#ifdef VaxArchitecture
+#define XqvssServer Xqvss
+#define XqdssServer Xqdss
+#define UnalignedReferencesAllowed YES	       /* if arbitrary deref is okay */
+#define HasSaberC YES
+#define ServerDefines StandardDefines ExtensionDefines -DXDMCP -DNOSTDHDRS -DX11R4
+/* gcc is *VERY USEFUL*, especially for the server; GET it */
+/* #define HasGcc YES */
+#endif
+
+#ifdef MipsArchitecture
+#define XmfbpmaxServer Xmfbpmax
+#define XcfbpmaxServer Xcfbpmax
+#define StandardDefines
+#define DefaultCCOptions -Wf,-XNh2000 -Olimit 2000
+#define ServerDefines StandardDefines ExtensionDefines -DXDMCP
+
+#endif
+
+/**/# platform:  $XConsortium: ultrix.cf,v 1.20 89/12/22 15:56:14 rws Exp $
+/**/# operating system:  OSName
