@@ -45,5 +45,4 @@
 
 /* other external variables */
 extern	char **environ;
-extern	int errno;
 

@@ -27,23 +27,15 @@ Things-to-keep:
 ChangeLog
 Makefile.in
 README
-RELEASE_NOTES
 configure
 configure.in
 cnv_tkt_skey.c
-conv_creds.c
 conv_princ.c
 conv_tkt.c
-encode.c
-getcred.c
-globals.c
 k524init.c
-krb524.h
-krb524_err.et
+krb524d.h
 krb524_prot
 krb524d.c
-misc.c
-sendmsg.c
 test.c
 
 Things-to-lose:

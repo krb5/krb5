@@ -1,11 +1,15 @@
+/*
+** set password functions added by Paul W. Nelson, Thursby Software Systems, Inc.
+*/
 #include <string.h>
 
 #include "k5-int.h"
 #include "krb5_err.h"
 #include "auth_con.h"
 
-krb5_error_code KRB5_CALLCONV
-krb5_mk_chpw_req(krb5_context context, krb5_auth_context auth_context, krb5_data *ap_req, char *passwd, krb5_data *packet)
+
+krb5_error_code 
+krb5int_mk_chpw_req(krb5_context context, krb5_auth_context auth_context, krb5_data *ap_req, char *passwd, krb5_data *packet)
 {
     krb5_error_code ret = 0;
     krb5_data clearpw;
@@ -66,8 +70,8 @@ cleanup:
     return(ret);
 }
 
-krb5_error_code KRB5_CALLCONV
-krb5_rd_chpw_rep(krb5_context context, krb5_auth_context auth_context, krb5_data *packet, int *result_code, krb5_data *result_data)
+krb5_error_code 
+krb5int_rd_chpw_rep(krb5_context context, krb5_auth_context auth_context, krb5_data *packet, int *result_code, krb5_data *result_data)
 {
     char *ptr;
     int plen, vno;
@@ -116,8 +120,18 @@ krb5_rd_chpw_rep(krb5_context context, krb5_auth_context auth_context, krb5_data
 	ap_rep.data = ptr;
 	ptr += ap_rep.length;
 
-	if ((ret = krb5_rd_rep(context, auth_context, &ap_rep, &ap_rep_enc)))
+	/*
+	 * Save send_subkey to later smash recv_subkey.
+	 */
+	ret = krb5_auth_con_getsendsubkey(context, auth_context, &tmp);
+	if (ret)
+	    return ret;
+
+	ret = krb5_rd_rep(context, auth_context, &ap_rep, &ap_rep_enc);
+	if (ret) {
+	    krb5_free_keyblock(context, tmp);
 	    return(ret);
+	}
 
 	krb5_free_ap_rep_enc_part(context, ap_rep_enc);
 
@@ -126,17 +140,16 @@ krb5_rd_chpw_rep(krb5_context context, krb5_auth_context auth_context, krb5_data
 	cipherresult.data = ptr;
 	cipherresult.length = (packet->data + packet->length) - ptr;
 
-	/* XXX there's no api to do this right. The problem is that
-	   if there's a remote subkey, it will be used.  This is
-	   not what the spec requires */
-
-	tmp = auth_context->remote_subkey;
-	auth_context->remote_subkey = NULL;
+	/*
+	 * Smash recv_subkey to be send_subkey, per spec.
+	 */
+	ret = krb5_auth_con_setrecvsubkey(context, auth_context, tmp);
+	krb5_free_keyblock(context, tmp);
+	if (ret)
+	    return ret;
 
 	ret = krb5_rd_priv(context, auth_context, &cipherresult, &clearresult,
 			   &replay);
-
-	auth_context->remote_subkey = tmp;
 
 	if (ret)
 	    return(ret);
@@ -161,7 +174,7 @@ krb5_rd_chpw_rep(krb5_context context, krb5_auth_context auth_context, krb5_data
     *result_code = (*result_code<<8) | (*ptr++ & 0xff);
 
     if ((*result_code < KRB5_KPASSWD_SUCCESS) ||
-	(*result_code > KRB5_KPASSWD_SOFTERROR)) {
+	(*result_code > KRB5_KPASSWD_INITIAL_FLAG_NEEDED)) {
 	ret = KRB5KRB_AP_ERR_MODIFIED;
 	goto cleanup;
     }
@@ -221,3 +234,284 @@ krb5_chpw_result_code_string(krb5_context context, int result_code, char **code_
 
    return(0);
 }
+
+krb5_error_code 
+krb5int_mk_setpw_req(
+     krb5_context context,
+     krb5_auth_context auth_context,
+     krb5_data *ap_req,
+     krb5_principal targprinc,
+     char *passwd,
+     krb5_data *packet )
+{
+    krb5_error_code ret;
+    krb5_data	cipherpw;
+    krb5_data	*encoded_setpw;
+
+    char *ptr;
+     int count = 2;
+
+     cipherpw.data = NULL;
+     cipherpw.length = 0;
+     
+    if (ret = krb5_auth_con_setflags(context, auth_context,
+				     KRB5_AUTH_CONTEXT_DO_SEQUENCE))
+		return(ret);
+
+    ret = encode_krb5_setpw_req(targprinc, passwd, &encoded_setpw);
+    if (ret) {
+	return ret;
+    }
+
+    if ( (ret = krb5_mk_priv(context, auth_context, encoded_setpw, &cipherpw, NULL)) != 0) {
+	krb5_free_data( context, encoded_setpw);
+	return(ret);
+    }
+    krb5_free_data( context, encoded_setpw);
+    
+
+    packet->length = 6 + ap_req->length + cipherpw.length;
+    packet->data = (char *) malloc(packet->length);
+    if (packet->data  == NULL) {
+	ret = ENOMEM;
+	goto cleanup;
+    }
+    ptr = packet->data;
+/*
+** build the packet -
+*/
+/* put in the length */
+    *ptr++ = (packet->length>>8) & 0xff;
+    *ptr++ = packet->length & 0xff;
+/* put in the version */
+    *ptr++ = (char)0xff;
+    *ptr++ = (char)0x80;
+/* the ap_req length is big endian */
+    *ptr++ = (ap_req->length>>8) & 0xff;
+    *ptr++ = ap_req->length & 0xff;
+/* put in the request data */
+    memcpy(ptr, ap_req->data, ap_req->length);
+    ptr += ap_req->length;
+/*
+** put in the "private" password data -
+*/
+    memcpy(ptr, cipherpw.data, cipherpw.length);
+    ret = 0;
+ cleanup:
+    if (cipherpw.data)
+	krb5_free_data_contents(context, &cipherpw);
+    if ((ret != 0) && packet->data) {
+	free( packet->data);
+	packet->data = NULL;
+    }
+    return ret;
+}
+
+krb5_error_code 
+krb5int_rd_setpw_rep( krb5_context context, krb5_auth_context auth_context, krb5_data *packet,
+     int *result_code, krb5_data *result_data )
+{
+    char *ptr;
+    unsigned int message_length, version_number;
+    krb5_data ap_rep;
+    krb5_ap_rep_enc_part *ap_rep_enc;
+    krb5_error_code ret;
+    krb5_data cipherresult;
+    krb5_data clearresult;
+    krb5_replay_data replay;
+    krb5_keyblock *tmpkey;
+/*
+** validate the packet length -
+*/
+    if (packet->length < 4)
+	return(KRB5KRB_AP_ERR_MODIFIED);
+
+    ptr = packet->data;
+
+/*
+** see if it is an error
+*/
+    if (krb5_is_krb_error(packet)) {
+	krb5_error *krberror;
+	if (ret = krb5_rd_error(context, packet, &krberror))
+	    return(ret);
+	if (krberror->e_data.data  == NULL) {
+	    ret = ERROR_TABLE_BASE_krb5 + krberror->error;
+	    krb5_free_error(context, krberror);
+	    return (ret);
+	}
+	clearresult = krberror->e_data;
+	krberror->e_data.data  = NULL; /*So we can free it later*/
+	krberror->e_data.length = 0;
+	krb5_free_error(context, krberror);
+		
+    } else { /* Not an error*/
+
+/*
+** validate the message length -
+** length is big endian 
+*/
+	message_length = (((ptr[0] << 8)&0xff) | (ptr[1]&0xff));
+	ptr += 2;
+/*
+** make sure the message length and packet length agree -
+*/
+	if (message_length != packet->length)
+	    return(KRB5KRB_AP_ERR_MODIFIED);
+/*
+** get the version number -
+*/
+	version_number = (((ptr[0] << 8)&0xff) | (ptr[1]&0xff));
+	ptr += 2;
+/*
+** make sure we support the version returned -
+*/
+/*
+** set password version is 0xff80, change password version is 1
+*/
+	if (version_number != 0xff80 && version_number != 1)
+	    return(KRB5KDC_ERR_BAD_PVNO);
+/*
+** now fill in ap_rep with the reply -
+*/
+/*
+** get the reply length -
+*/
+	ap_rep.length = (((ptr[0] << 8)&0xff) | (ptr[1]&0xff));
+	ptr += 2;
+/*
+** validate ap_rep length agrees with the packet length -
+*/
+	if (ptr + ap_rep.length >= packet->data + packet->length)
+	    return(KRB5KRB_AP_ERR_MODIFIED);
+/*
+** if data was returned, set the ap_rep ptr -
+*/
+	if( ap_rep.length ) {
+	    ap_rep.data = ptr;
+	    ptr += ap_rep.length;
+
+	    /*
+	     * Save send_subkey to later smash recv_subkey.
+	     */
+	    ret = krb5_auth_con_getsendsubkey(context, auth_context, &tmpkey);
+	    if (ret)
+		return ret;
+
+	    ret = krb5_rd_rep(context, auth_context, &ap_rep, &ap_rep_enc);
+	    if (ret) {
+		krb5_free_keyblock(context, tmpkey);
+		return(ret);
+	    }
+
+	    krb5_free_ap_rep_enc_part(context, ap_rep_enc);
+/*
+** now decrypt the result -
+*/
+	    cipherresult.data = ptr;
+	    cipherresult.length = (packet->data + packet->length) - ptr;
+
+	    /*
+	     * Smash recv_subkey to be send_subkey, per spec.
+	     */
+	    ret = krb5_auth_con_setrecvsubkey(context, auth_context, tmpkey);
+	    krb5_free_keyblock(context, tmpkey);
+	    if (ret)
+		return ret;
+
+	    ret = krb5_rd_priv(context, auth_context, &cipherresult, &clearresult,
+			       NULL);
+	    if (ret)
+		return(ret);
+	} /*We got an ap_rep*/
+	else
+	    return (KRB5KRB_AP_ERR_MODIFIED);
+    } /*Response instead of error*/
+
+/*
+** validate the cleartext length 
+*/
+    if (clearresult.length < 2) {
+	ret = KRB5KRB_AP_ERR_MODIFIED;
+	goto cleanup;
+    }
+/*
+** now decode the result -
+*/
+    ptr = clearresult.data;
+
+    *result_code = (((ptr[0] << 8)&0xff) | (ptr[1]&0xff));
+    ptr += 2;
+
+/*
+** result code 5 is access denied
+*/
+    if ((*result_code < KRB5_KPASSWD_SUCCESS) || (*result_code > 5))
+    {
+	ret = KRB5KRB_AP_ERR_MODIFIED;
+	goto cleanup;
+    }
+/*
+** all success replies should be authenticated/encrypted
+*/
+    if( (ap_rep.length == 0) && (*result_code == KRB5_KPASSWD_SUCCESS) )
+    {
+	ret = KRB5KRB_AP_ERR_MODIFIED;
+	goto cleanup;
+    }
+
+    if (result_data) {
+	result_data->length = (clearresult.data + clearresult.length) - ptr;
+
+	if (result_data->length)
+	{
+	    result_data->data = (char *) malloc(result_data->length);
+	    if (result_data->data)
+		memcpy(result_data->data, ptr, result_data->length);
+	}
+	else
+	    result_data->data = NULL;
+    }
+    ret = 0;
+
+ cleanup:
+    krb5_free_data_contents(context, &clearresult);
+    return(ret);
+}
+
+krb5_error_code 
+krb5int_setpw_result_code_string( krb5_context context, int result_code, const char **code_string )
+{
+   switch (result_code)
+   {
+   case KRB5_KPASSWD_MALFORMED:
+      *code_string = "Malformed request error";
+      break;
+   case KRB5_KPASSWD_HARDERROR:
+      *code_string = "Server error";
+      break;
+   case KRB5_KPASSWD_AUTHERROR:
+      *code_string = "Authentication error";
+      break;
+   case KRB5_KPASSWD_SOFTERROR:
+      *code_string = "Password change rejected";
+      break;
+   case 5: /* access denied */
+      *code_string = "Access denied";
+      break;
+   case 6:	/* bad version */
+      *code_string = "Wrong protocol version";
+      break;
+   case 7: /* initial flag is needed */
+      *code_string = "Initial password required";
+      break;
+   case 0:
+	  *code_string = "Success";
+   default:
+      *code_string = "Password change failed";
+      break;
+   }
+
+   return(0);
+}
+

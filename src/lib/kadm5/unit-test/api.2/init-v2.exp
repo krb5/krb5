@@ -532,10 +532,10 @@ proc test117 {} {
 	}
     }
     
-    if {$max_life == 36000} {
+    if {$max_life == 86400} {
 	pass "$test"
     } else {
-	fail "$test: max_life $max_life should be 36000"
+	fail "$test: max_life $max_life should be 86400"
     }
 
     if {! [cmd {kadm5_destroy $server_handle}]} {

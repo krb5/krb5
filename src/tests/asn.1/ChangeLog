@@ -1,3 +1,34 @@
+2003-05-18  Tom Yu  <tlyu@mit.edu>
+
+	* krb5_decode_test.c (main): Add new test cases for sequence
+	number compatibility.
+
+	* utility.c (krb5_data_hex_parse): Rewrite to be more lenient
+	about whitespace.
+
+2003-05-12  Ezra Peisach  <epeisach@mit.edu>
+
+	* krb5_decode_test.c: Modify decode_run macro to take a cleanup
+	handler to free allocated memory. Add static handlers to free
+	krb5_alt_method, passwd_phrase_element and krb5_enc_data as the
+	krb5 library does not handle at this time.
+
+	* krb5_encode_test.c: Free krb5_context at end. Utilize the many
+	ktest_empty and detroy functions to cleanup memory.
+
+	* ktest.h, ktest.c: Add many ktest free and empty functions to
+	cleanup allocated structures in tests.
+
+	* utility.c (krb5_data_hex_parse): Free temporary data.
+	
+
+2003-05-06  Sam Hartman  <hartmans@mit.edu>
+
+	* krb5_encode_test.c (main): Add etype_info2 support
+
+	* ktest.c (ktest_make_sample_etype_info): Initialize s2kparams to be null.
+	(ktest_make_sample_etype_info2): New function
+
 2002-11-07  Ezra Peisach  <epeisach@bu.edu>
 
 	* krb5_decode_test.c: Test for sam_challenege without empty
