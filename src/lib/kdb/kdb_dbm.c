@@ -808,7 +808,7 @@ krb5_dbm_db_rename(context, from, to)
 	db_ctx = (krb5_db_context *) context->db_context;
 
 	/*
-	 * Create the database, failing if it already exists; the
+	 * Create the database if it does not already exists; the
 	 * files must exist because krb5_dbm_db_lock, called below,
 	 * will fail otherwise.
 	 */
