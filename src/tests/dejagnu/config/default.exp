@@ -1304,6 +1304,7 @@ proc start_kerberos_daemons { standalone } {
     global kadmind_spawn_id
     global tmppwd
     global env
+    global timeout
 
     if ![setup_kerberos_db 0] {
 	return 0
@@ -1342,12 +1343,13 @@ proc start_kerberos_daemons { standalone } {
     expect {
 	-i $tailf_spawn_id
 	-ex "$markstr\r\n" { }
+	-re "\[^\r\n\]*\r\n" { exp_continue }
 	timeout {
 	    if {$standalone} {
-		verbose -log "tail -f timed out looking for mark"
+		verbose -log "tail -f timed out ($timeout sec) looking for mark in kdc log"
 		fail "krb5kdc"
 	    } else {
-		perror "krbkdc tail -f timed out looking for mark"
+		perror "krbkdc tail -f timed out ($timeout sec) looking for mark in kdc log"
 	    }
 	    stop_kerberos_daemons
 	    exec kill $tailf_pid
@@ -1418,12 +1420,13 @@ proc start_kerberos_daemons { standalone } {
     expect {
 	-i $tailf_spawn_id
 	-ex "$markstr\r\n" { }
+	-re "\[^\r\n\]*\r\n" { exp_continue }
 	timeout {
 	    if {$standalone} {
-		verbose -log "tail -f timed out looking for mark"
+		verbose -log "tail -f timed out ($timeout sec) looking for mark in kadmind log"
 		fail "kadmind"
 	    } else {
-		perror "kadmind tail -f timed out looking for mark"
+		perror "kadmind tail -f timed out ($timeout sec) looking for mark in kadmind log"
 	    }
 	    stop_kerberos_daemons
 	    exec kill $tailf_pid
@@ -2233,6 +2236,10 @@ proc setup_root_shell { testname } {
     set timeout 300
 
     expect {
+	-re {connect to address [0-9a-fA-F.:]*: Connection refused} {
+	    note $expect_out(buffer)
+	    exp_continue
+	}
 	-re "word:|erberos rlogin failed|ection refused|ection reset by peer" {
 	    note "$testname test requires ability to rlogin as root"
 	    unsupported "$testname"

@@ -1,3 +1,12 @@
+2003-01-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* default.exp (start_kerberos_daemons): Record more information
+	when "tail -f" doesn't show the mark written to the log file.
+	Look for and discard non-matching lines.
+	(setup_root_shell): Ignore the message displayed by rlogin when
+	a connection is refused to one address but other addresses are
+	available.
+
 2002-11-08  Tom Yu  <tlyu@mit.edu>
 
 	* default.exp: Add (disabled) debugging code for catching leaking
