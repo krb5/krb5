@@ -1,3 +1,7 @@
+2000-10-16  Ezra Peisach  <epeisach@mit.edu>
+
+	* sim_server.c: Cast to int strings width arguments in printf.
+
 Tue Sep 26 18:16:33 2000  Ezra Peisach  <epeisach@mit.edu>
 
 	* sim_server.c: Warnigs cleanup of signed vs. unsigned arguments

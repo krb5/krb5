@@ -246,7 +246,7 @@ char *argv[];
 	com_err(PROGNAME, retval, "while verifying SAFE message");
 	exit(1);
     }
-    printf("Safe message is: '%.*s'\n", message.length, message.data);
+    printf("Safe message is: '%.*s'\n", (int) message.length, message.data);
 
     krb5_free_data_contents(context, &message);
 
@@ -269,7 +269,8 @@ char *argv[];
 	com_err(PROGNAME, retval, "while verifying PRIV message");
 	exit(1);
     }
-    printf("Decrypted message is: '%.*s'\n", message.length, message.data);
+    printf("Decrypted message is: '%.*s'\n", (int) message.length, 
+	   message.data);
 
     krb5_auth_con_free(context, auth_context);
     krb5_free_context(context);
