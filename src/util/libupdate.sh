@@ -30,9 +30,9 @@ fi
 
 echo "Updating library $library from $oblist"
 
+touch $library
 $arcmd $library `cat $oblist | \
 		sed -e "s;^\([^ ]*\);$dir/\1;g" -e "s; \([^ ]*\); $dir/\1;g"`
-touch $library
 
 
 

@@ -1,5 +1,9 @@
 Tue Nov  1 14:49:00 1994    (tytso@rsx-11)
 
+	* libupdate.sh: touch the library first, before running $aradd, in
+		case changing the mod time of the library after running
+		$aradd causes problems on some systems.
+
 	* libupdate.sh: Change use of "head -1" to "sed 1q"
 
 	* configure.in: 
