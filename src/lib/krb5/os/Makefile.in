@@ -129,19 +129,19 @@ check-unix::
 	echo '	default_realm = r' >> ./t_an.conf
 	echo '[realms]' >> ./t_an.conf
 	echo 'r = {' >> ./t_an.conf
-	if test -r ../../../admin/aname/kdb5_anadd ; then \
-		$(KRB5_RUN_ENV) ../../../admin/aname/kdb5_anadd -a -n ./t_an p/i/i/i@r piii; \
-		../../../admin/aname/kdb5_anadd -a -n ./t_an p/a/b/c@r pabc; \
-		echo 'auth_to_local = DB:./t_an' >> ./t_an.conf; \
-	fi
+#	if test -r ../../../admin/aname/kdb5_anadd ; then \
+#		$(KRB5_RUN_ENV) ../../../admin/aname/kdb5_anadd -a -n ./t_an p/i/i/i@r piii; \
+#		../../../admin/aname/kdb5_anadd -a -n ./t_an p/a/b/c@r pabc; \
+#		echo 'auth_to_local = DB:./t_an' >> ./t_an.conf; \
+#	fi
 	echo 'auth_to_local = RULE:[3:$$1$$3$$2](rule.*)s/rule//g' \
 		>> ./t_an.conf
 	echo 'auth_to_local = DEFAULT' >> ./t_an.conf
 	echo '}' >> ./t_an.conf
-	if test -r ../../../admin/aname/kdb5_anadd ; then \
-		KRB5_CONFIG=./t_an.conf ; export KRB5_CONFIG ; \
-		$(KRB5_RUN_ENV) ./t_an_to_ln p/i/i/i@r p/a/b/c@r; \
-	fi
+#	if test -r ../../../admin/aname/kdb5_anadd ; then \
+#		KRB5_CONFIG=./t_an.conf ; export KRB5_CONFIG ; \
+#		$(KRB5_RUN_ENV) ./t_an_to_ln p/i/i/i@r p/a/b/c@r; \
+#	fi
 	KRB5_CONFIG=./t_an.conf ; export KRB5_CONFIG ; \
 	$(KRB5_RUN_ENV) ./t_an_to_ln rul/helpme/e@r ru/123/le@r
 	KRB5_CONFIG=./t_an.conf ; export KRB5_CONFIG ; \

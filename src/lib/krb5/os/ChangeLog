@@ -1,3 +1,11 @@
+Tue Jul 30 19:15:55 1996  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* Makefile.in (check-unix): Comment out an_2_ln tests that use
+        database.
+
+	* an_to_ln.c (krb5_aname_to_localname): Make the db lookup verison
+        of aname_2_localname optional.
+
 Sun Jul 28 22:39:12 1996  Tom Yu  <tlyu@mit.edu>
 
 	* an_to_ln.c (aname_do_match): #elif HAVE_REGEXP_H should have

@@ -41,7 +41,7 @@
 #ifndef	min
 #define	min(a,b)	((a>b) ? b : a)
 #endif	/* min */
-
+#ifdef ANAME_DB
 #ifdef	BERK_DB_DBM
 /*
  * Use Berkeley Hashed Database code.
@@ -60,6 +60,7 @@ extern datum	db_dbm_fetch KRB5_PROTOTYPE((DBM *, datum));
 #define	KDBM_CLOSE(db)		dbm_close(db)
 #define	KDBM_FETCH(db, key)	dbm_fetch(db, key)
 #endif	/* BERK_DB_DBM */
+#endif /*ANAME_DB*/
 
 /*
  * Find the portion of the flattened principal name that we use for mapping.
@@ -87,6 +88,7 @@ aname_full_to_mapping_name(fprincname)
     return(mname);
 }
 
+#ifdef ANAME_DB
 /*
  * Implementation:  This version uses a DBM database, indexed by aname,
  * to generate a lname.
@@ -146,6 +148,7 @@ db_an_to_ln(context, dbname, aname, lnsize, lname)
     return KRB5_LNAME_NOTRANS;
 #endif	/* BERK_DB_DBM && !_MSDOS && !_WIN32 && !MACINTOSH */
 }
+#endif /*ANAME_DB*/
 
 #ifdef	AN_TO_LN_RULES
 /*
@@ -743,6 +746,7 @@ krb5_aname_to_localname(context, aname, lnsize, lname)
 				*argp = '\0';
 				argp++;
 			    }
+#ifdef ANAME_DB
 			    if (!strcmp(typep, "DB") && argp) {
 				kret = db_an_to_ln(context,
 						   argp,
@@ -753,6 +757,7 @@ krb5_aname_to_localname(context, aname, lnsize, lname)
 				    break;
 			    }
 			    else
+#endif
 #ifdef	AN_TO_LN_RULES
 			    if (!strcmp(typep, "RULE") && argp) {
 				kret = rule_an_to_ln(context,
