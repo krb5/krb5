@@ -82,6 +82,12 @@ mit_afs_string_to_key (keyblock, data, salt)
     krb5_octet *key = keyblock->contents;
 
     if (data->length <= 8) {
+      /* One block only.  Run afs_crypt and use the first eight
+	 returned bytes after the copy of the (fixed) salt.
+
+	 Since the returned bytes are alphanumeric, the output is
+	 limited to 2**48 possibilities; for each byte, only 64
+	 possible values can be used.  */
       unsigned char password[9]; /* trailing nul for crypt() */
       char afs_crypt_buf[16];
 
@@ -96,8 +102,10 @@ mit_afs_string_to_key (keyblock, data, salt)
 	if (password[i] == '\0')
 	  password[i] = 'X';
       password[8] = '\0';
-      strncpy(key,
-	      (char *) afs_crypt(password, "#~"/*"p1"*/, afs_crypt_buf) + 2,
+      /* Out-of-bounds salt characters are equivalent to a salt string
+	 of "p1".  */
+      strncpy((char *) key,
+	      (char *) afs_crypt((char *) password, "#~", afs_crypt_buf) + 2,
 	      8);
       for (i=0; i<8; i++)
 	key[i] <<= 1;
@@ -106,13 +114,15 @@ mit_afs_string_to_key (keyblock, data, salt)
       /* clean & free the input string */
       memset(password, 0, (size_t) sizeof(password));
     } else {
+      /* Multiple blocks.  Do a CBC checksum, twice, and use the
+	 result as the new key.  */
       mit_des_cblock ikey, tkey;
       mit_des_key_schedule key_sked;
       unsigned int pw_len = salt->length+data->length;
       unsigned char *password = malloc(pw_len+1);
       if (!password) return ENOMEM;
 
-      /* some bound checks from the original code are elided here as
+      /* Some bound checks from the original code are elided here as
 	 the malloc above makes sure we have enough storage. */
       memcpy (password, data->data, data->length);
       for (i=data->length, j = 0; j < salt->length; i++, j++) {
