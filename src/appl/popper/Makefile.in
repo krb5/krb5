@@ -5,8 +5,7 @@
 # -DPOP_PVT_PASSWD : use a private passwd file for users of the POP mail service
 # -DMAILDIR : Set to site specific other than default.
 #
-CFLAGS = -g -DMAILDIR=\"/usr/spool/pop\" -DKERBEROS -DKRB5 -DDEBUG $(DEFS) $(LOCALINCLUDE)
-LDFLAGS = -g
+CFLAGS = $(CCOPTS) -DMAILDIR=\"/usr/spool/pop\" -DKERBEROS -DKRB5 -DDEBUG $(DEFS) $(LOCALINCLUDE)
 
 KRB5MANROOT = $(KRB5ROOT)/man
 ADMIN_BINDIR = $(KRB5ROOT)/admin

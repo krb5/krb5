@@ -1,3 +1,7 @@
+Wed Oct 26 15:00:13 1994    (tytso@rsx-11)
+
+	* Makefile.in (CFLAGS): Control -g/-O via $(CCOPTS)
+
 Mon Oct  3 19:17:15 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* Makefile.in: Use $(srcdir) to find manual page for make install.
