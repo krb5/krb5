@@ -2395,7 +2395,6 @@ krb5_error_code KRB5_CALLCONV krb5_aname_to_localname
 		krb5_const_principal,
 		const int,
 		char * ));
-#if KRB5_PRIVATE
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_get_host_realm
 	KRB5_PROTOTYPE((krb5_context,
 		const char FAR *,
@@ -2403,6 +2402,7 @@ KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_get_host_realm
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_free_host_realm
 	KRB5_PROTOTYPE((krb5_context,
 		char FAR * const FAR * ));
+#if KRB5_PRIVATE
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_get_realm_domain
 	KRB5_PROTOTYPE((krb5_context,
 		const char *,
