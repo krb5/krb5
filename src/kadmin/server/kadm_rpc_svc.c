@@ -5,6 +5,9 @@
  * $Source$
  * 
  * $Log$
+ * Revision 1.14  1997/07/01 06:37:28  tlyu
+ * 	* kadm_rpc_svc.c, server_stubs.c: Add support for setv4key.
+ *
  * Revision 1.13  1997/04/23 19:53:11  bjaspan
  * add kadm5_setkey_principal
  *
@@ -175,6 +178,12 @@ void kadm_1(rqstp, transp)
 	  xdr_argument = xdr_chpass_arg;
 	  xdr_result = xdr_generic_ret;
 	  local = (char *(*)()) chpass_principal_1;
+	  break;
+
+     case SETV4KEY_PRINCIPAL:
+	  xdr_argument = xdr_setv4key_arg;
+	  xdr_result = xdr_generic_ret;
+	  local = (char *(*)()) setv4key_principal_1;
 	  break;
 
      case SETKEY_PRINCIPAL:

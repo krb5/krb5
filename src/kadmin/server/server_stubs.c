@@ -612,6 +612,61 @@ chpass_principal_1(chpass_arg *arg, struct svc_req *rqstp)
 }
 
 generic_ret *
+setv4key_principal_1(setv4key_arg *arg, struct svc_req *rqstp)
+{
+    static generic_ret		    ret;
+    char			    *prime_arg;
+    gss_buffer_desc		    client_name,
+				    service_name;
+    OM_uint32			    minor_stat;
+    kadm5_server_handle_t	    handle;
+
+    xdr_free(xdr_generic_ret, &ret);
+
+    if (ret.code = new_server_handle(arg->api_version, rqstp, &handle))
+	 return &ret;
+
+    if (ret.code = check_handle((void *)handle)) {
+	 free_server_handle(handle);
+	 return &ret;
+    }
+
+    ret.api_version = handle->api_version;
+
+    if (setup_gss_names(rqstp, &client_name, &service_name) < 0) {
+	 ret.code = KADM5_FAILURE;
+	 return &ret;
+    }
+    krb5_unparse_name(handle->context, arg->princ, &prime_arg);
+
+    if (!(CHANGEPW_SERVICE(rqstp)) &&
+	       acl_check(handle->context, rqstp->rq_clntcred,
+			 ACL_SETKEY, arg->princ)) {
+	 ret.code = kadm5_setv4key_principal((void *)handle, arg->princ,
+					     arg->keyblock);
+    } else {
+	 krb5_klog_syslog(LOG_NOTICE, LOG_UNAUTH, "kadm5_setv4key_principal",
+		prime_arg, client_name.value, service_name.value,
+		inet_ntoa(rqstp->rq_xprt->xp_raddr.sin_addr));
+	 ret.code = KADM5_AUTH_SETKEY;
+    }
+
+    if(ret.code != KADM5_AUTH_SETKEY) {
+	krb5_klog_syslog(LOG_NOTICE, LOG_DONE, "kadm5_setv4key_principal", 
+	       prime_arg, ((ret.code == 0) ? "success" :
+			   error_message(ret.code)), 
+	       client_name.value, service_name.value,
+	       inet_ntoa(rqstp->rq_xprt->xp_raddr.sin_addr));
+    }
+
+    free_server_handle(handle);
+    free(prime_arg);
+    gss_release_buffer(&minor_stat, &client_name);
+    gss_release_buffer(&minor_stat, &service_name);
+    return &ret;
+}
+
+generic_ret *
 setkey_principal_1(setkey_arg *arg, struct svc_req *rqstp)
 {
     static generic_ret		    ret;
