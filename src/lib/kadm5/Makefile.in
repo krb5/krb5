@@ -68,6 +68,8 @@ BUILD_HDRS = adb_err.h chpass_util_strings.h kadm_err.h
 SRC_HDRS = adb.h admin.h admin_internal.h admin_xdr.h kadm_rpc.h \
 		server_internal.h 
 
+$(HDRS): includes
+
 includes:: $(SRC_HDRS) $(BUILD_HDRS)
 	if [ -d $(HDRDIR) ]; then :; else mkdir -p $(HDRDIR); fi
 	for i in $(SRC_HDRS) ; do \

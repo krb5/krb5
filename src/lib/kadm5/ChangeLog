@@ -1,3 +1,7 @@
+2002-08-22  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in ($(HDRS)): Depend on "includes".
+
 2002-07-31  Tom Yu  <tlyu@mit.edu>
 
 	* kadm_err.et: Add KADM5_MISSING_KRB5_CONF_PARAMS, indicating a
