@@ -46,3 +46,5 @@ NormalProgramTarget(krb5kdc,$(OBJS),$(DEPKDBLIB) $(DEPKLIB), \
 
 clean::
 	$(RM) kdc5_err.h kdc5_err.c
+
+DependTarget()
