@@ -21,7 +21,7 @@
 #include "Kerberos524Init.h"
 #include "krb524_err.h"
 
-void Kerberos5Init (CFStringRef inBundleID)
+void Kerberos524Init (CFStringRef inBundleID)
 {
     add_error_table (&et_k524_error_table);
 }

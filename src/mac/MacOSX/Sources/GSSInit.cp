@@ -17,11 +17,11 @@
  */
  
 #include "GSSInit.h"
+extern "C" {
 #include "gss_libinit.h"
+};
 
-extern "C" void GSSInit (CFStringRef inBundleID);
-
-void GSSInit (void)
+void GSSInit (CFStringRef inBundleID)
 {
 	gssint_initialize_library ();
 }

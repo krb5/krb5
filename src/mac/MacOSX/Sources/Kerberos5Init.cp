@@ -19,8 +19,10 @@
 #include <Kerberos/com_err.h>
 
 #include "Kerberos5Init.h"
+extern "C" {
 #include "krb5_libinit.h"
 #include "crypto_libinit.h"
+};
 
 void Kerberos5Init (CFStringRef inBundleID)
 {
