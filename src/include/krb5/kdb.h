@@ -90,7 +90,7 @@ krb5_error_code krb5_kdb_encrypt_key
 krb5_error_code krb5_kdb_decrypt_key
 	PROTOTYPE((krb5_encrypt_block *, krb5_keyblock *, krb5_keyblock *));
 krb5_error_code krb5_db_setup_mkey_name
-	PROTOTYPE((const char *, const char *, krb5_principal *));
+	PROTOTYPE((const char *, const char *, char **, krb5_principal *));
 
 /* XXX these belong in some config file */
 #define	KRB5_KDB_MAX_LIFE	(60*60*24) /* one day */
