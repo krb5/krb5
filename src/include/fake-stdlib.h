@@ -118,7 +118,7 @@ int setgroups P((int , int *));
 int sethostid P((long ));
 int sethostname P((char *, int ));
 int setpgrp P((int , int ));
-int setquota P((char *, char *));
+int setquota P((const char *, const char *));
 int setregid P((int , int ));
 int setreuid P((int , int ));
 int shutdown P((int , int ));
