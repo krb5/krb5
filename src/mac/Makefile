@@ -543,6 +543,11 @@ utilitieslib-macos9-final				= {mitsupportlib-root-folder}UtilitiesLib:Binaries:
 utilitieslib-carbon-debug				= {mitsupportlib-root-folder}UtilitiesLib:Binaries:UtilitiesLib.CBd
 utilitieslib-carbon-final				= {mitsupportlib-root-folder}UtilitiesLib:Binaries:UtilitiesLib.CB
 
+morefileslib-macos9-debug				= {mitsupportlib-root-folder}MoreFilesLib:Binaries:MoreFilesLib.9d
+morefileslib-macos9-final				= {mitsupportlib-root-folder}MoreFilesLib:Binaries:MoreFilesLib.9
+morefileslib-carbon-debug				= {mitsupportlib-root-folder}MoreFilesLib:Binaries:MoreFilesLib.CBd
+morefileslib-carbon-final				= {mitsupportlib-root-folder}MoreFilesLib:Binaries:MoreFilesLib.CB
+
 object-suffix-macos9-debug				= .9d.o
 object-suffix-macos9-final				= .9.o
 object-suffix-macos9-data				= .9.o
@@ -627,18 +632,22 @@ privatekrb5-library-libraries-carbon-final = ¶
 
 profile-library-libraries-macos9-debug = ¶
 	{standard-libraries-macos9-debug} ¶
+	{morefileslib-macos9-debug} ¶
 	{utilitieslib-macos9-debug} ¶
 	{comerr-library-output-folder}{comerr-library-name}{library-target-macos9}{library-kind-debug}
 profile-library-libraries-macos9-final = ¶
 	{standard-libraries-macos9-final} ¶
+	{morefileslib-macos9-final} ¶
 	{utilitieslib-macos9-final} ¶
 	{comerr-library-output-folder}{comerr-library-name}{library-target-macos9}{library-kind-final}
 profile-library-libraries-carbon-debug = ¶
 	{standard-libraries-carbon-debug} ¶
+	{morefileslib-carbon-debug} ¶
 	{utilitieslib-carbon-debug} ¶
 	{comerr-library-output-folder}{comerr-library-name}{library-target-carbon}{library-kind-debug}
 profile-library-libraries-carbon-final = ¶
 	{standard-libraries-carbon-final} ¶
+	{morefileslib-carbon-final} ¶
 	{utilitieslib-carbon-final} ¶
 	{comerr-library-output-folder}{comerr-library-name}{library-target-carbon}{library-kind-final}
 
