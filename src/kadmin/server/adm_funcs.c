@@ -60,20 +60,6 @@ struct saltblock {
 extern krb5_encrypt_block master_encblock;
 extern krb5_keyblock master_keyblock;
 
-struct mblock {
-    krb5_deltat max_life;
-    krb5_deltat max_rlife;
-    krb5_timestamp expiration;
-    krb5_flags flags;
-    krb5_kvno mkvno;
-} mblock = {				/* XXX */
-    KRB5_KDB_MAX_LIFE,
-    KRB5_KDB_MAX_RLIFE,
-    KRB5_KDB_EXPIRATION,
-    KRB5_KDB_DEF_FLAGS,
-    0
-};
-
 typedef unsigned char des_cblock[8];
 
 		/* krb5_kvno may be narrow */
@@ -158,26 +144,32 @@ OLDDECLARG(krb5_db_entry *, entry)
     int one = 1;
 
     krb5_kvno KDB5_VERSION_NUM = 1;
-    krb5_deltat KDB5_MAX_TKT_LIFE = KRB5_KDB_MAX_LIFE;
-    krb5_deltat KDB5_MAX_REN_LIFE = KRB5_KDB_MAX_RLIFE;
-    krb5_timestamp KDB5_EXP_DATE  = KRB5_KDB_EXPIRATION;
     extern krb5_flags NEW_ATTRIBUTES;
 
     if (!req_type) { /* New entry - initialize */
 	memset((char *) entry, 0, sizeof(krb5_db_entry));
-        entry->principal = (krb5_principal) principal;
+	retval = krb5_copy_principal(principal, &entry->principal);
+	if (retval)
+		return retval;
         entry->kvno = KDB5_VERSION_NUM;
-        entry->max_life = KDB5_MAX_TKT_LIFE;
-        entry->max_renewable_life = KDB5_MAX_REN_LIFE;
-        entry->mkvno = mblock.mkvno;
-        entry->expiration = KDB5_EXP_DATE;
-        entry->mod_name = master_princ;
+        entry->max_life = master_entry.max_life;
+        entry->max_renewable_life = master_entry.max_renewable_life;
+        entry->mkvno = master_entry.mkvno;
+        entry->expiration = master_entry.expiration;
+	retval = krb5_copy_principal(master_princ, &entry->mod_name);
+	if (retval) {
+	    krb5_free_principal(entry->principal);
+	    entry->principal = 0;
+	    return retval;
+	}
     } else { /* Modify existing entry */
 	entry->kvno++;
 #ifdef SANDIA
 	entry->attributes &= ~KRB5_KDB_REQUIRES_PWCHANGE;
 #endif
-	entry->mod_name = (krb5_principal) principal;
+	retval = krb5_copy_principal(principal, &entry->mod_name);
+	if (retval)
+		return retval;
     }
 
     if (key && key->length) {

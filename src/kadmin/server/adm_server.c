@@ -73,6 +73,8 @@ global_client_server_info client_server_info;
 int classification;             /* default = Unclassified */
 #endif
 
+krb5_db_entry master_entry;
+
 krb5_flags NEW_ATTRIBUTES;
 
 cleanexit(val)
@@ -287,7 +289,24 @@ krb5_keyblock *masterkeyblock;
         (void) krb5_db_fini();
         return(retval);
     }
- 
+
+/*
+ * fetch the master database entry, and hold on to it.
+ */
+    number_of_entries = 1;
+    if (retval = krb5_db_get_principal(masterkeyname, &master_entry, 
+				       &number_of_entries, &more)) {
+	return(retval);
+    }
+    if (number_of_entries != 1) {
+	if (number_of_entries)
+	    krb5_db_free_principal(&master_entry, number_of_entries);
+	return(KRB5_KDB_NOMASTERKEY);
+    } else if (more) {
+	krb5_db_free_principal(&master_entry, number_of_entries);
+	return(KRB5KDC_ERR_PRINCIPAL_NOT_UNIQUE);
+    }	
+
 /*
 	fetch the TGS key, and hold onto it; this is an efficiency hack 
 	the master key name here is from the master_princ global,

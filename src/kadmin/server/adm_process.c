@@ -69,7 +69,9 @@ OLDDECLARG(krb5_keyblock **, key)
     arg = ( struct cpw_keyproc_arg *) keyprocarg;
 
     if (arg->key) {
-	*key = arg->key;
+	retval = krb5_copy_keyblock(arg->key, key);
+	if (retval)
+	    return retval;
     } else {
 	if (retval = krb5_parse_name(client_server_info.name_of_service, 
 				     &cpw_krb)) {
@@ -417,10 +419,8 @@ char *prog;
                         0,
                         &msg_data)) {
 	syslog(LOG_ERR, "kadmind error Error Performing Final mk_priv");
-	free(final_msg.data);
 	goto finish;
     }
-    free(final_msg.data);
     
         /* Send Final Reply to Client */
     if (retval = krb5_write_message(&client_server_info.client_socket,

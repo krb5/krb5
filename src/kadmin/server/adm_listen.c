@@ -29,6 +29,7 @@
 #include <krb5/los-proto.h>
 #include <krb5/adm_defs.h>
 #include <krb5/sysincl.h>
+#include <krb5/kdb.h>
 
 #include <syslog.h>
 #include <signal.h>

@@ -51,6 +51,7 @@ typedef struct {
 extern krb5_encrypt_block master_encblock;
 extern krb5_keyblock master_keyblock;
 extern krb5_principal master_princ;
+extern krb5_db_entry master_entry;
 
 extern volatile int signal_requests_exit;
 extern char *dbm_db_name;

@@ -1,3 +1,21 @@
+Wed Sep 14 22:33:23 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* adm_server (init_db): Save a copy of the master key database
+		entry in the master_entry global variable.
+
+	* adm_process.c (process_client): Removed calls to
+		free(final_msg.data), where final_msg.data was pointing to
+		an automatic variable.
+
+	* adm_process.c (cpw_keyproc): In the case where the
+		keyprocarg->key is set, copy the keyblock instead of
+		passing a pointer down --- more pointer aliasing problems!
+
+	* adm_funcs.c (adm_modify_kdb): Added calls to krb5_copy_principal
+		instead of merely assigning pointers to one another and
+		causing pointer aliasing problems.  Make sure the master
+		key version number is propagated correctly.
+
 Thu Aug  4 03:38:58 1994  Tom Yu  (tlyu@dragons-lair)
 
 	* Makefile.in: whoops install manpage as kadmin.8, not kadmin.1

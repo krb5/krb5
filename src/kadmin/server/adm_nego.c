@@ -45,6 +45,7 @@
 #include <krb5/asn1.h>
 
 #include <krb5/adm_defs.h>
+#include <krb5/kdb.h>
 #include "adm_extern.h"
 
 krb5_error_code

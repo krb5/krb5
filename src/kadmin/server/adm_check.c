@@ -44,6 +44,7 @@
 #include <krb5/los-proto.h>
 #include <krb5/adm_defs.h>
 #include <krb5/adm_err.h>
+#include <krb5/kdb.h>
 #include "adm_extern.h"
 
 krb5_error_code
