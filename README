@@ -62,11 +62,11 @@ and logging in as "guest" with password "guest".
 Notes, Major Changes, and Known Bugs for 1.3.1
 ----------------------------------------------
 
-* [1681] The incorrect encoding of ETYPE-INFO2 preauthentication hint
-  is no longer emitted, and the both the incorrect and the correct
-  encodings of ETYPE-INFO2 are now accepted.  We STRONGLY encourage
-  deploying krb5-1.3.1 in preference to 1.3, especially on client
-  installations, as the 1.3 release did not conform to the
+* [1681] The incorrect encoding of the ETYPE-INFO2 preauthentication
+  hint is no longer emitted, and the both the incorrect and the
+  correct encodings of ETYPE-INFO2 are now accepted.  We STRONGLY
+  encourage deploying krb5-1.3.1 in preference to 1.3, especially on
+  client installations, as the 1.3 release did not conform to the
   internet-draft for the revised Kerberos protocol in its encoding of
   ETYPE-INFO2.
 
@@ -114,6 +114,9 @@ Minor changes in 1.3.1
 
 * [1684] The file credentials cache is now supported if USE_CCAPI is
   defined, i.e., for KfM and KfW.
+
+* [1691] Documentation for the obsolete kdc_supported_enctypes config
+  variable has been removed.
 
 Notes, Major Changes, and Known Bugs for 1.3
 --------------------------------------------
