@@ -245,7 +245,7 @@ MAKE_COMMANDS= $(BUILDTOP)/util/ss/mk_cmds
 
 .ct.c:
 	@if [ $< != $}{*.ct ]; then \
-		(set -x; cp $< $}{*.ct && $(MAKE_COMMANDS) $}{*.#t && $(RM) $}{*.ct) || exit 1; \
+		(set -x; cp $< $}{*.ct && $(MAKE_COMMANDS) $}{*.ct && $(RM) $}{*.ct) || exit 1; \
 	else \
 		(set -x; $(MAKE_COMMANDS) $}{*.ct) || exit 1; \
 	fi
@@ -609,6 +609,7 @@ dnl make this one deeper...
 dnl
 dnl The default is `$srcdir' or `$srcdir/..' or `$srcdir/../..'.
 dnl There's no need to call this macro explicitly; just AC_REQUIRE it.
+undefine([AC_CONFIG_AUX_DIR_DEFAULT])
 AC_DEFUN(AC_CONFIG_AUX_DIR_DEFAULT,
 [AC_CONFIG_AUX_DIRS($srcdir $srcdir/.. $srcdir/../.. $srcdir/../../.. $srcdir/../../../.. $srcdir/../../../../..)])dnl
 dnl
