@@ -1,3 +1,8 @@
+Mon Oct 21 17:20:32 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* admin_server.c: use params.admin_keytab instead of a hard-coded
+ 	value [krb5-admin/30]
+
 Thu Sep 26 17:54:33 1996  Barry Jaspan  <bjaspan@mit.edu>
 
 	* admin_server.c (process_client): allow keytab to be specified on

@@ -66,11 +66,6 @@ admin_params prm;		/* The command line parameters struct */
 char prog[32];			/* WHY IS THIS NEEDED??????? */
 char *progname = prog;
 char *acldir = DEFAULT_ACL_DIR;
-#ifdef OVSEC_KADM
-char *keytab = "FILE:/krb5/ovsec_adm.srvtab";
-#else
-char *keytab = NULL;
-#endif
 char krbrlm[REALM_SZ];
 extern Kadm_Server server_parm;
 krb5_context kadm_context;
@@ -153,7 +148,10 @@ char *argv[];
 	    (void) strncpy(krbrlm, optarg, sizeof(krbrlm) - 1);
 	    break;
         case 'k':
-	    keytab = optarg;
+#ifdef OVSEC_KADM
+	    params.admin_keytab = optarg;
+	    params.mask |= KADM5_CONFIG_ADMIN_KEYTAB;
+#endif
 	    break;
         case 'h':			/* get help on using admin_server */
 	default:
@@ -406,7 +404,7 @@ void process_client(fd, who)
 	    server_parm.sinst, server_parm.krbrlm);
 
     retval = ovsec_kadm_init_with_skey(service_name,
-				       keytab,
+				       params.admin_keytab,
 				       OVSEC_KADM_ADMIN_SERVICE, krbrlm,
 				       OVSEC_KADM_STRUCT_VERSION,
 				       OVSEC_KADM_API_VERSION_1,
