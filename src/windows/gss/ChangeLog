@@ -1,3 +1,7 @@
+2004-02-12  Jeffrey Altman <jaltman@mit.edu>
+
+    * Fix libpath for krbcc32.lib (only affects KRB5_KFW_COMPILE builds)
+
 2004-02-11  Jeffrey Altman <jaltman@mit.edu>
 
     * gss-misc.h: Add file.  Copy from src/appl/gss-sample/
