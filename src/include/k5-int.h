@@ -66,10 +66,13 @@
 #define SIZEOF_SHORT    2
 #define SIZEOF_LONG     4
 
-#ifndef INTERFACE
-#define INTERFACE   __far __export __pascal
-#define INTERFACE_C __far __export __cdecl
-#endif
+#ifndef KRB5_CALLCONV
+#define KRB5_CALLCONV __far __export __pascal
+#define KRB5_CALLCONV_C __far __export __cdecl
+#define KRB5_DLLIMP
+#define INTERFACE   KRB5_CALLCONV
+#define INTERFACE_C KRB5_CALLCONV_C
+#endif /* !KRB5_CALLCONV */
 
 /*
  * The following defines are needed to make <windows.h> work
@@ -93,14 +96,20 @@
 #define SIZEOF_SHORT    2
 #define SIZEOF_LONG     4
 
-#ifndef INTERFACE
-#define INTERFACE   __declspec(__dllexport) __stdcall
-#define INTERFACE_C __declspec(__dllexport) __cdecl
+#ifndef KRB5_CALLCONV
+#ifdef KRB5_DLL_FILE
+#define KRB5_DECLSPEC dllexport
+#else
+#define KRB5_DECLSPEC dllimport
 #endif
+#define KRB5_DLLIMP __declspec(KRB5_DECLSPEC)
+#define KRB5_CALLCONV __stdcall
+#define KRB5_CALLCONV_C __cdecl
+#define INTERFACE   KRB5_DLLIMP KRB5_CALLCONV
+#define INTERFACE_C KRB5_DLLIMP KRB5_CALLCONV_C
+#endif /* !KRB5_CALLCONV */
 
-#define FAR
-#define NEAR
-
+#include <windows.h>
 #endif
 	
 /* Kerberos Windows initialization file */
@@ -129,6 +138,7 @@
 #define	KRB5_PROVIDE_PROTOTYPES
 #define HAVE_STDARG_H
 #define HAVE_SYS_TYPES_H
+#define HAS_STDLIB_H
 
 /* This controls which encryption routines libcrypto will provide */
 #define PROVIDE_DES_CBC_MD5
@@ -325,10 +335,15 @@ typedef unsigned char	u_char;
  * Windows requires a different api interface to each function. Here
  * just define it as NULL.
  */
+#ifndef KRB5_CALLCONV
+#define KRB5_CALLCONV
+#define KRB5_CALLCONV_C
+#define KRB5_DLLIMP
 #define INTERFACE
 #define INTERFACE_C
 #define FAR
 #define NEAR
+#endif
 #ifndef O_BINARY
 #define O_BINARY 0
 #endif
@@ -353,7 +368,7 @@ typedef unsigned char	u_char;
 /*
  * Begin "k5-sockets.h"
  */
-#ifdef _MSDOS
+#if defined (_MSDOS) || defined(_WIN32)
 
 #include <winsock.h>
 
@@ -614,7 +629,7 @@ typedef struct _krb5_sam_response {
 /*
  * Begin "dbm.h"
  */
-#if !defined(_MACINTOSH) && !defined(_MSDOS)
+#if !defined(_MACINTOSH) && !defined(_MSDOS) && !defined(_WIN32)
 
 #ifndef ODBM
 #include <ndbm.h>
@@ -661,7 +676,7 @@ typedef char DBM;
 #ifdef HAS_STDLIB_H
 #include <stdlib.h>
 #else
-#if defined(__STDC__) || defined(_WINDOWS)
+#if defined(__STDC__) || defined(_MSDOS)
 #ifdef NO_STDLIB_H
 #include <fake-stdlib.h>
 #else
