@@ -1,3 +1,7 @@
+2000-04-28  Tom Yu  <tlyu@mit.edu>
+
+	* rd_req.c (krb_rd_req): Fix some uses of strcpy().
+
 2000-03-12  Ezra Peisach  <epeisach@mit.edu>
 
 	* cr_tkt.c (krb_cr_tkt_int): Add static prototype.
