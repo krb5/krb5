@@ -1,0 +1,12 @@
+thisconfigdir=./..
+myfulldir=util/db2/recno
+mydir=recno
+BUILDTOP=$(REL)$(U)$(S)$(U)$(S)$(U)
+STLIBOBJS=	rec_close.o rec_delete.o rec_get.o rec_open.o rec_put.o \
+		rec_search.o rec_seq.o rec_utils.o
+
+LOCALINCLUDES=	-I. -I$(srcdir)/../include -I../include -I$(srcdir)/../mpool \
+		-I$(srcdir)/../db
+
+all-unix:: all-libobjs
+clean-unix:: clean-libobjs

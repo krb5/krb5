@@ -1,0 +1,23 @@
+thisconfigdir=./..
+myfulldir=util/db2/test
+mydir=test
+BUILDTOP=$(REL)$(U)$(S)$(U)$(S)$(U)
+
+FCTSH = @FCTSH@
+TMPDIR=.
+
+LOCALINCLUDES=	-I. -I$(srcdir)/../include -I../include -I$(srcdir)/../mpool \
+		-I$(srcdir)/../db
+
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
+
+KRB5_RUN_ENV= @KRB5_RUN_ENV@
+
+all::
+
+dbtest: dbtest.o $(DB_DEPLIB)
+	$(CC_LINK) -o $@ dbtest.o $(STRERROR_OBJ) $(DB_LIB)
+
+check:: dbtest
+	$(KRB5_RUN_ENV) srcdir=$(srcdir) TMPDIR=$(TMPDIR) $(FCTSH) $(srcdir)/run.test

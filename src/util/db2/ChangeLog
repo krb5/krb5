@@ -1,3 +1,21 @@
+2000-06-30  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in: Rework to use krb5 build system.
+
+	* Makefile.in: Rework to use krb5 build system.
+
+	* btree/Makefile.in: New file.
+
+	* clib/Makefile.in: New file.
+
+	* db/Makefile.in: New file.
+
+	* mpool/Makefile.in: New file.
+
+	* recno/Makefile.in: New file.
+
+	* test/Makefile.in: New file.
+
 2000-06-26  Ken Raeburn  <raeburn@mit.edu>
 
 	* btree/bt_put.c (__bt_put): Initialize "e".

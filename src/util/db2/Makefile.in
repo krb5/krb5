@@ -1,16 +1,16 @@
-SHELL = /bin/sh
+thisconfigdir=.
+myfulldir=util/db2
+mydir=.
+BUILDTOP=$(REL)$(U)$(S)$(U)
+LOCAL_SUBDIRS=hash btree db mpool recno clib test
 
-SUBDIRS = obj
+LIB=db
+LIBMAJOR=1
+LIBMINOR=0
+STOBJLISTS=hash/OBJS.ST btree/OBJS.ST db/OBJS.ST mpool/OBJS.ST \
+	recno/OBJS.ST
+RELDIR=../util/db2
 
-all clean distclean realclean check::
-	for i in ${SUBDIRS}; do (cd $$i; ${MAKE} $@) || exit 1; done
-
-distclean::
-	rm -rf config.status config.log config.cache db-config.h
-
-install::
-
-Makefiles::
-
-realclean::
-	rm -rf configure db-config.h.in
+all-unix:: all-liblinks
+clean-unix:: clean-liblinks clean-libs
+install-unix:: install-libs

@@ -1,0 +1,12 @@
+thisconfigdir=./..
+myfulldir=util/db2/hash
+mydir=hash
+BUILDTOP=$(REL)$(U)$(S)$(U)$(S)$(U)
+STLIBOBJS=	hash.o hash_bigkey.o hash_debug.o hash_func.o hash_log2.o \
+		hash_page.o hsearch.o dbm.o
+
+LOCALINCLUDES=	-I. -I$(srcdir)/../include -I../include -I$(srcdir)/../mpool \
+		-I$(srcdir)/../db
+
+all-unix:: all-libobjs
+clean-unix:: clean-libobjs

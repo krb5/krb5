@@ -1,0 +1,10 @@
+thisconfigdir=./..
+myfulldir=util/db2/mpool
+mydir=mpool
+BUILDTOP=$(REL)$(U)$(S)$(U)$(S)$(U)
+STLIBOBJS=mpool.o
+
+LOCALINCLUDES=	-I. -I$(srcdir)/../include -I../include -I$(srcdir)/../db
+
+all-unix:: all-libobjs
+clean-unix:: clean-libobjs
