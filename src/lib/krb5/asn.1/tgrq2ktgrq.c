@@ -78,10 +78,13 @@ register int *error;
     if (!retval->server) {
 	goto errout;
     }
-    retval->from = gentime2unix(val->from, error);
-    if (*error) {
-	goto errout;
+    if (val->from) {
+	retval->from = gentime2unix(val->from, error);
+	if (*error) {
+	    goto errout;
+	}
     }
+
     retval->till = gentime2unix(val->till, error);
     if (*error) {
 	goto errout;
