@@ -1,3 +1,8 @@
+Tue Oct 28 10:18:10 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* kdb_cpw.c (add_key_pwd): For KRB5_KDB_SALTTYPE_AFS3, the salt
+	 	key for afs_mit_string_to_key mut be null terminated. 
+
 Mon Oct 13 10:18:19 1997  Ezra Peisach  <epeisach@mit.edu>
 
 	* t_kdb.c (do_testing): Add krb5_free_context.

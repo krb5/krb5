@@ -392,6 +392,7 @@ add_key_pwd(context, master_eblock, ks_tuple, ks_tuple_count, passwd,
             key_salt.data.data = 0;
             break;
     	case KRB5_KDB_SALTTYPE_AFS3: {
+#if 0
             krb5_data * saltdata;
             if (retval = krb5_copy_data(context, krb5_princ_realm(context,
 					db_entry->princ), &saltdata))
@@ -400,6 +401,19 @@ add_key_pwd(context, master_eblock, ks_tuple, ks_tuple_count, passwd,
 	    key_salt.data = *saltdata;
 	    key_salt.data.length = -1; /*length actually used below...*/
 	    krb5_xfree(saltdata);
+#else
+	    /* Why do we do this? Well, the afs_mit_string_to_key needs to
+	       use strlen, and the realm is not NULL terminated.... */
+	    int slen = (*krb5_princ_realm(context,db_entry->princ)).length;
+	    if(!(key_salt.data.data = (char *) malloc(slen+1)))
+	        return ENOMEM;
+	    key_salt.data.data[slen] = 0;
+	    memcpy((char *)key_salt.data.data,
+		   (char *)(*krb5_princ_realm(context,db_entry->princ)).data,
+		   slen);
+	    key_salt.data.length = -1; /*length actually used below...*/
+#endif
+
 	}
 		break;
 	default:
