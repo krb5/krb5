@@ -16,7 +16,11 @@
 #ifndef KRB5_SYSINCL__
 #define KRB5_SYSINCL__
 
+#ifndef KRB5_SYSTYPES__
+#define KRB5_SYSTYPES__
 #include <sys/types.h>			/* needed for much of the reset */
+#endif /* KRB5_SYSTYPES__ */
+
 #include <sys/time.h>			/* struct timeval, utimes() */
 #include <sys/stat.h>			/* struct stat, stat() */
 #include <sys/param.h>			/* MAXPATHLEN */

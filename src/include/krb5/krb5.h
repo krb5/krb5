@@ -16,7 +16,10 @@
 #ifndef KRB5_GENERAL__
 #define KRB5_GENERAL__
 
+#ifndef KRB5_SYSTYPES__
+#define KRB5_SYSTYPES__
 #include <sys/types.h>
+#endif /* KRB5_SYSTYPES__ */
 
 #include <krb5/config.h>
 
