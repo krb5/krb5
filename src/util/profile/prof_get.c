@@ -346,7 +346,7 @@ profile_get_boolean(profile, name, subname, subsubname,
 	} else if (retval)
 		return retval;
    
-	return prof_parse_boolean (value, ret_boolean);
+	return profile_parse_boolean (value, ret_boolean);
 }
 
 /*

@@ -1,6 +1,12 @@
 2000-04-03  Jeffrey Altman <jaltman@columbia.edu>
 
         * prof_get.c: 
+            profile_get_boolean() was calling prof_parse_boolean()
+            instead of profile_get_boolean()
+
+2000-04-03  Jeffrey Altman <jaltman@columbia.edu>
+
+        * prof_get.c: 
           . Added #include <limits.h> for definitions of INT_MAX, etc.
           . Changed 'ret_int' to 'ret_boolean' in prof_get_boolean
 
