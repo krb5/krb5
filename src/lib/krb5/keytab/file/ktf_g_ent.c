@@ -81,6 +81,14 @@ krb5_ktfile_get_entry(context, id, principal, kvno, enctype, entry)
 		krb5_kt_free_entry(context, &new_entry);
 		continue;
 	    }
+	    /*
+	     * Coerce the enctype of the output keyblock in case we
+	     * got an inexact match on the enctype; this behavior will
+	     * go away when the key storage architecture gets
+	     * redesigned for 1.3.
+	     */
+	    new_entry.key.enctype = enctype;
+
 	}
 
 	/* if the principal isn't the one requested, free new_entry
