@@ -10,7 +10,7 @@ asn1_error_code asn1_krb5_data_unparse(DECLARG(const krb5_data *, code),
      OLDDECLARG(const krb5_data *, code)
      OLDDECLARG(char **, s)
 {
-  if(*s != NULL) free(s);
+  if(*s != NULL) free(*s);
   
   if(code==NULL){
     *s = (char*)calloc(strlen("<NULL>")+1, sizeof(char));
