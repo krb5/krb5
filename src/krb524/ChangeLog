@@ -1,3 +1,9 @@
+2001-06-21  Ezra Peisach  <epeisach@mit.edu>
+
+	* configure.in: Test need for daemon prototype.
+
+	* krb524d.c: Provide daemon prototype if needed.
+
 2001-06-20  Ezra Peisach  <epeisach@mit.edu>
 
 	* krb524d.c: Include <krb5/adm_proto.h> for krb5_log_init()

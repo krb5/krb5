@@ -5,6 +5,9 @@ KRB5_BUILD_LIBRARY_STATIC
 KRB5_BUILD_LIBOBJS
 AC_PROG_AWK
 AC_CHECK_HEADERS(sys/select.h unistd.h) dnl
+KRB5_NEED_PROTO([#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif],daemon,1)
 AC_TYPE_SIGNAL
 
 KRB5_BUILD_PROGRAM

@@ -40,6 +40,10 @@
 #include <krb.h>
 #include "krb524.h"
 
+#if defined(NEED_DAEMON_PROTO)
+extern int daemon(int, int);
+#endif
+
 #define TIMEOUT 60
 #define TKT_BUFSIZ 2048
 #define MSGSIZE 8192
