@@ -27,7 +27,7 @@
 #include "k5-int.h"
 #include "ktsrvtab.h"
 
-krb5_error_code
+krb5_error_code KRB5_CALLCONV
 krb5_ktsrvtab_start_seq_get(context, id, cursorp)
     krb5_context context;
     krb5_keytab id;

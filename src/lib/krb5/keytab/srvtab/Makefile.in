@@ -7,7 +7,7 @@ CFLAGS = $(CCOPTS) $(DEFS)
 
 ##DOS##BUILDTOP = ..\..\..\..
 ##DOS##PREFIXDIR=keytab\srvtab
-##DOS##OBJFILE=$(OUTPRE)file.lst
+##DOS##OBJFILE=$(OUTPRE)srvtab.lst
 ##WIN16##LIBNAME=..\..\krb5.lib
 
 STLIBOBJS= \
@@ -43,8 +43,6 @@ SRCS=	\
 	$(srcdir)/kts_resolv.c	\
 	$(srcdir)/kts_ssget.c	\
 	$(srcdir)/kts_util.c
-
-all-windows:: subdirs $(OBJFILE)
 
 ##DOS##LIBOBJS = $(OBJS)
 

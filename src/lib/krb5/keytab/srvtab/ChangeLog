@@ -1,3 +1,16 @@
+1999-06-15  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in: Fix windows build.
+
+	* ktsrvtab.h, kts_resolv.c (krb5_ktsrvtab_resolve), 
+	kts_g_name.c (krb5_ktsrvtab_get_name), 
+	kts_close.c (krb5_ktsrvtab_close),
+	kts_g_ent.c (krb5_ktsrvtab_get_entry), 
+	kts_ssget.c (krb5_ktsrvtab_start_seq_get), 
+	kts_next.c (krb5_ktsrvtab_get_next), 
+	kts_endget.c (krb5_ktsrvtab_end_get): Fix calling convention.
+
+
 1999-06-13  Geoffrey King  <gjking@mit.edu>
 
 	* Initial checkin of ghudson's code to implement the SRVTAB keytab

@@ -59,22 +59,22 @@ typedef struct _krb5_ktsrvtab_data {
 
 extern struct _krb5_kt_ops krb5_kts_ops;
 
-krb5_error_code krb5_ktsrvtab_resolve
+krb5_error_code KRB5_CALLCONV krb5_ktsrvtab_resolve
 	PROTOTYPE((krb5_context,
 		   const char *,
 		   krb5_keytab *));
 
-krb5_error_code krb5_ktsrvtab_get_name
+krb5_error_code KRB5_CALLCONV krb5_ktsrvtab_get_name
 	PROTOTYPE((krb5_context,
 		   krb5_keytab,
 		   char *,
 		   int));
 
-krb5_error_code krb5_ktsrvtab_close
+krb5_error_code KRB5_CALLCONV krb5_ktsrvtab_close
 	PROTOTYPE((krb5_context,
 		   krb5_keytab));
 
-krb5_error_code krb5_ktsrvtab_get_entry
+krb5_error_code KRB5_CALLCONV krb5_ktsrvtab_get_entry
 	PROTOTYPE((krb5_context,
 		   krb5_keytab,
 		   krb5_principal,
@@ -82,18 +82,18 @@ krb5_error_code krb5_ktsrvtab_get_entry
 		   krb5_enctype,
 		   krb5_keytab_entry *));
 
-krb5_error_code krb5_ktsrvtab_start_seq_get
+krb5_error_code KRB5_CALLCONV krb5_ktsrvtab_start_seq_get
 	PROTOTYPE((krb5_context,
 		   krb5_keytab,
 		   krb5_kt_cursor *));
 
-krb5_error_code krb5_ktsrvtab_get_next
+krb5_error_code KRB5_CALLCONV krb5_ktsrvtab_get_next
 	PROTOTYPE((krb5_context,
 		   krb5_keytab,
 		   krb5_keytab_entry *,
 		   krb5_kt_cursor *));
 
-krb5_error_code krb5_ktsrvtab_end_get
+krb5_error_code KRB5_CALLCONV krb5_ktsrvtab_end_get
 	PROTOTYPE((krb5_context,
 		   krb5_keytab,
 		   krb5_kt_cursor *));
