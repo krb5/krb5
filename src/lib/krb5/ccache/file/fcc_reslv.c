@@ -45,7 +45,6 @@ krb5_fcc_resolve (id, residual)
    char *residual;
 {
      krb5_ccache lid;
-     int ret;
      
      lid = (krb5_ccache) malloc(sizeof(struct _krb5_ccache));
      if (lid == NULL)
@@ -75,13 +74,8 @@ krb5_fcc_resolve (id, residual)
      /* Set up the filename */
      strcpy(((krb5_fcc_data *) lid->data)->filename, residual);
 
-     /* Make sure we can open the file name */
-     ret = open(((krb5_fcc_data *) lid->data)->filename, O_CREAT|O_RDWR,0600);
-     if (ret == -1)
-	  return errno;
-     else {
-	  close(ret);
-	  *id = lid;
-	  return KRB5_OK;
-     }
+     /* other routines will get errors on open, and callers must expect them,
+	if cache is non-existent/unusable */
+     *id = lid;
+     return KRB5_OK;
 }
