@@ -1,3 +1,9 @@
+1998-04-21  Ken Raeburn  <raeburn@cygnus.com>
+
+	* glob.c (ftpglob): Always allocate new storage, even if no magic
+	glob characters were found, because the caller will always free
+	the storage.
+
 Tue Apr  7 16:53:58 1998  Dan Winship  <danw@mit.edu>
 
 	* secure.c (secure_putbyte): Set nout = 0 *before* calling
