@@ -111,12 +111,55 @@ char	pathbuf[255];
         {
             char defname[160];                  /* Default value */
 
-            GetWindowsDirectory (defname, sizeof(defname)-7);
-            strcat (defname, "\\krb5cc");
-            strcpy (name_buf, "FILE:");
-            GetPrivateProfileString(INI_FILES, INI_KRB_CCACHE, defname,
-                name_buf+5, sizeof(name_buf)-5, KERBEROS_INI);
-        }
+#if defined(_WIN32)
+	    /* If the RegKRB5CCNAME variable is set, it will point to
+	     * the registry key that has the name of the cache to use.
+	     * The Gradient PC-DCE sets the registry key
+	     * [HKEY_CURRENT_USER\Software\Gradient\DCE\Default\KRB5CCNAME]
+	     * to point at the cache file name (including the FILE: prefix).
+	     * By indirecting with the RegKRB5CCNAME entry in kerberos.ini,
+	     * we can accomodate other versions that might set a registry
+	     * variable.
+	     */
+	    char newkey[256];
+	    
+	    LONG name_buf_size;
+	    HKEY hkey;
+	    DWORD ipType;
+	    int found = 0;
+	    char *cp;
+    
+
+	    GetPrivateProfileString(INI_FILES, "RegKRB5CCNAME", "", 
+				    newkey, sizeof(newkey), KERBEROS_INI); 
+	    if (strlen(newkey)) {
+		cp = strrchr(newkey,'\\');
+		if (cp) {
+		    *cp = '\0'; /* split the string */
+		    cp++;
+		} else
+		    cp = "";
+		if (RegOpenKeyEx(HKEY_CURRENT_USER, newkey, 0,
+				 KEY_QUERY_VALUE, &hkey) == ERROR_SUCCESS) {
+		    name_buf_size = sizeof(name_buf);
+		    if (RegQueryValueEx(hkey, cp, 0, &ipType, 
+					name_buf, &name_buf_size)
+			== ERROR_SUCCESS) 
+			found = 1;
+		}
+	    }
+	    if(!(found)) {
+#endif
+		
+		GetWindowsDirectory (defname, sizeof(defname)-7);
+		strcat (defname, "\\krb5cc");
+		strcpy (name_buf, "FILE:");
+		GetPrivateProfileString(INI_FILES, INI_KRB_CCACHE, defname,
+					name_buf+5, sizeof(name_buf)-5, KERBEROS_INI);
+#if defined(_WIN32)
+	    }
+#endif
+	}
 #else
 	sprintf(name_buf, "FILE:/tmp/krb5cc_%d", getuid());
 #endif
