@@ -37,6 +37,7 @@ krb5_init_ets PROTOTYPE((void))
     
     initialized++;
     initialize_krb5_error_table();
+    initialize_kv5m_error_table();
     initialize_kdb5_error_table();
 #ifdef KRB5_USE_ISODE
     initialize_isod_error_table();

@@ -1,3 +1,9 @@
+Thu Nov  3 16:39:49 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* configure.in:
+	* Makefile.in:
+	* kv5m_err.et: Add the kv5m error table.
+
 Fri Oct 14 23:07:48 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* init_ets.c (krb5_init_ets): Fix typo in spelling of KRB5_USE_ISODE.
