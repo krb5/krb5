@@ -33,6 +33,7 @@ OBJS= \
 	rnd_confoun.o	\
 	read_pwd.o	\
 	sendto_kdc.o	\
+	sn2princ.o	\
 	timeofday.o	\
 	unlck_file.o	\
 	ustime.o
@@ -60,6 +61,7 @@ SRCS= \
 	port2ip.c	\
 	rnd_confoun.c	\
 	sendto_kdc.c	\
+	sn2princ.c	\
 	timeofday.c	\
 	unlck_file.c	\
 	ustime.c
