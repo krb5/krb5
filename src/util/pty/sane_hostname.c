@@ -20,7 +20,7 @@
  * express or implied warranty.
  * 
  */
-#include <com_err.h>
+#include "com_err.h"
 #include "pty-int.h"
 #include <sys/socket.h>
 #include "libpty.h"

@@ -1,5 +1,10 @@
 2002-06-12  Ken Raeburn  <raeburn@mit.edu>
 
+	* cleanup.c, getpty.c, init.c, init_slave.c, logwtmp.c,
+	open_ctty.c, open_slave.c, pty_paranoia.c, sane_hostname.c,
+	update_utmp.c, update_wtmp.c, vhangup.c, void_assoc.c: Include
+	"com_err.h" instead of <com_err.h>.
+
 	* pty-int.h: Don't include syslog.h.
 
 2002-05-24  Ken Raeburn  <raeburn@mit.edu>

@@ -308,7 +308,7 @@
  * username both in utmp and wtmp.
  */
 
-#include <com_err.h>
+#include "com_err.h"
 #include "libpty.h"
 #include "pty-int.h"
 
