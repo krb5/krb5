@@ -1,3 +1,7 @@
+Wed Sep 25 16:20:29 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* kdc.conf.proto: remove admin_dbname and admin_lockfile
+
 Fri Sep 20 16:54:44 1996  Barry Jaspan  <bjaspan@mit.edu>
 
 	* krb5.conf.proto: change logging to /krb5/syslog

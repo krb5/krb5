@@ -5,8 +5,6 @@
 	__REALM__ = {
 		profile = /krb5/krb5.conf
 		database_name = /krb5/kdb5
-		admin_database_name = /krb5/kadb5
-		admin_database_lockfile = /krb5/ovsec_adm.lock
 		admin_keytab = /krb5/ovsec_adm.srvtab
 		key_stash_file = /krb5/.k5.__REALM__
 		acl_file = /krb5/ovsec_adm.acl
