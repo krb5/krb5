@@ -16,7 +16,7 @@
 
 @include definitions.texinfo
 @set EDITION 1.0
-@set UPDATED November 27, 1996
+@set UPDATED June 16, 2000
 
 @finalout                               @c don't print black warning boxes
 
