@@ -45,8 +45,10 @@ krb5_error_code krb5_fcc_destroy(id)
      
      if (OPENCLOSE(id)) {
 	  ret = open(((krb5_fcc_data *) id->data)->filename, O_RDWR, 0);
-	  if (ret < 0)
-	       return krb5_fcc_interpret(errno);
+	  if (ret < 0) {
+	      ret = krb5_fcc_interpret(errno);
+	      goto cleanup;
+	  }
 	  ((krb5_fcc_data *) id->data)->fd = ret;
      }
      else
@@ -59,7 +61,7 @@ krb5_error_code krb5_fcc_destroy(id)
 	     (void) close(((krb5_fcc_data *)id->data)->fd);
 	     ((krb5_fcc_data *) id->data)->fd = -1;
 	 }
-	 return ret;
+	 goto cleanup;
      }
      
      ret = fstat(((krb5_fcc_data *) id->data)->fd, &buf);
@@ -69,7 +71,7 @@ krb5_error_code krb5_fcc_destroy(id)
 	     (void) close(((krb5_fcc_data *)id->data)->fd);
 	     ((krb5_fcc_data *) id->data)->fd = -1;
 	 }
-	 return ret;
+	 goto cleanup;
      }
 
      /* XXX This may not be legal XXX */
@@ -83,7 +85,7 @@ krb5_error_code krb5_fcc_destroy(id)
 		  (void) close(((krb5_fcc_data *)id->data)->fd);
 		  ((krb5_fcc_data *) id->data)->fd = -1;
 	      }
-	      return ret;
+	      goto cleanup;
 	  }
 
      if (write(((krb5_fcc_data *) id->data)->fd, zeros, size % BUFSIZ) < 0) {
@@ -92,7 +94,7 @@ krb5_error_code krb5_fcc_destroy(id)
 	     (void) close(((krb5_fcc_data *)id->data)->fd);
 	     ((krb5_fcc_data *) id->data)->fd = -1;
 	 }
-	 return ret;
+	 goto cleanup;
      }
 
      ret = close(((krb5_fcc_data *) id->data)->fd);
@@ -100,6 +102,11 @@ krb5_error_code krb5_fcc_destroy(id)
 
      if (ret)
 	 ret = krb5_fcc_interpret(errno);
+
+  cleanup:
+     xfree(((krb5_fcc_data *) id->data)->filename);
+     xfree(id->data);
+     xfree(id);
 
      return ret;
 }

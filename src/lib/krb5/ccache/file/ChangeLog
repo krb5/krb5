@@ -1,3 +1,8 @@
+Thu Sep 22 21:37:15 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* fcc_destry.c (krb5_fcc_destroy): Make sure memory associated
+		with the credentials cache is freed after it is destroyed.
+
 Thu Aug 18 16:33:33 1994  Theodore Y. Ts'o  (tytso at tsx-11)
 
 	* fcc_retrv.c (srvname_match): Fix bug in srvname_match where so

@@ -61,7 +61,7 @@ krb5_error_code krb5_scc_destroy(id)
 	     (void) fclose(data->file);
 	     data->file = 0;
 	 }
-	 return ret;
+	 goto cleanup;
      }
 
 #if 0
@@ -77,7 +77,7 @@ krb5_error_code krb5_scc_destroy(id)
 	     (void) fclose(data->file);
 	     data->file = 0;
 	 }
-	 return ret;
+	 goto cleanup;
      }
 
      /* XXX This may not be legal XXX */
@@ -91,7 +91,7 @@ krb5_error_code krb5_scc_destroy(id)
 		  (void) fclose(data->file);
 		  data->file = 0;
 	      }
-	      return ret;
+	      goto cleanup;
 	  }
 
      if (fwrite(data->file, zeros, size % BUFSIZ) < 0) {
@@ -100,7 +100,7 @@ krb5_error_code krb5_scc_destroy(id)
 	     (void) fclose(data->file);
 	     data->file = 0;
 	 }
-	 return ret;
+	 goto cleanup;
      }
      
      ret = fclose(data->file);
@@ -109,6 +109,11 @@ krb5_error_code krb5_scc_destroy(id)
 
      if (ret)
 	 ret = krb5_scc_interpret(errno);
+
+  cleanup:
+     xfree(data->filename);
+     xfree(data);
+     xfree(id);
 
      return ret;
 }

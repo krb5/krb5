@@ -1,3 +1,8 @@
+Thu Sep 22 21:38:09 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* scc_destry.c (krb5_scc_destroy): Make sure memory associated
+		with the credentials cache is freed after it is destroyed.
+
 Thu Aug 18 16:34:51 1994  Theodore Y. Ts'o  (tytso at tsx-11)
 
 	* scc_retrv.c (srvname_match): Fix bug in srvname_match where so
