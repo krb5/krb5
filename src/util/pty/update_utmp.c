@@ -83,9 +83,13 @@ long pty_update_utmp (process_type, pid, username, line, host, flags)
 #endif
 
 #ifndef NO_UT_PID
-    if (!strcmp (line, "/dev/console"))
+    if (!strcmp (line, "/dev/console")) {
+#if (defined(sun) && defined(__SVR4))
+      strncpy (ent.ut_id, "co", 4);
+#else
       strncpy (ent.ut_id, "cons", 4);
-    else {
+#endif
+    } else {
       tmpx = line + strlen(line)-1;
       if (*(tmpx-1) != '/') tmpx--; /* last two characters, unless it's a / */
 #ifdef __hpux

@@ -1,3 +1,31 @@
+1999-08-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* update_utmp.c (pty_update_utmp): Use "co" instead of "cons" for
+	console line on Solaris.  Patch from Larry Schwimmer
+	(schwim@whatmore.Stanford.EDU).
+
+	* Makefile.in (dump-utmp): Add a rule for building, never
+	automatically done.
+	(dump-utmp.o): Depends on dump-utmp.c.
+
+	Updates from Cygnus KerbNet:
+
+	* dump-utmp.c (ut_typename): Only define if
+	HAVE_STRUCT_UTMP_UT_TYPE is defined.
+	(main): Dump more info, and conditionalize it better.
+
+	* dump-utmp.c (ctime): Declare, to prevent crashes on Alpha.
+
+	* dump-utmp.c (UTMPX): Define if not defined but HAVE_UTMPX_H is
+	defined.
+	(ut_typename): Return shorter forms for some symbols.
+	(main): Require `-x' flag for [uw]tmpx file instead of guessing
+	from the name.  Reject unknown `-' arguments.  Print a message if
+	an error occurs while reading from utmpx file.  Break up output
+	statements into smaller pieces.  Conditionalize output of some
+	utmp fields on whether those fields are present.  Print out exit
+	status fields and timestamp.
+
 Fri Apr 23 23:13:57 1999  Tom Yu  <tlyu@mit.edu>
 
 	* update_utmp.c (pty_update_utmp): utx.ut_pid is a pid_t, and

@@ -46,6 +46,10 @@ all-unix:: includes pty_err.h
 
 all-unix:: all-liblinks
 
+dump-utmp: dump-utmp.o
+	$(CC) $(LDFLAGS) -o dump-utmp dump-utmp.o
+dump-utmp.o: dump-utmp.c
+
 install-unix:: install-libs
 
 clean-unix::
