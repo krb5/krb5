@@ -145,21 +145,29 @@
 	krb5_timestamp_to_sfstring
 	krb5_timestamp_to_string
 #
+	krb5_auth_con_init
 	krb5_auth_con_free
-	krb5_auth_con_genaddrs
+	krb5_auth_con_setflags
 	krb5_auth_con_getflags
+	krb5_auth_con_setaddrs
+	krb5_auth_con_getaddrs
+	krb5_auth_con_setports
+	krb5_auth_con_setuseruserkey
 	krb5_auth_con_getkey
 	krb5_auth_con_getlocalsubkey
-	krb5_auth_con_getremotesubkey
-	krb5_auth_con_init
-	krb5_auth_con_setaddrs
-	krb5_auth_con_setflags
+	krb5_auth_con_set_req_cksumtype
+	krb5_auth_con_set_safe_cksumtype
+#	krb5_auth_con_getcksumtype				Why is this missing from sources?
 	krb5_auth_con_getlocalseqnumber
 	krb5_auth_con_getremoteseqnumber
-	krb5_auth_con_setuseruserkey
-	krb5_auth_con_getauthenticator
-	krb5_auth_con_set_req_cksumtype
+	krb5_auth_con_initivector
+	krb5_auth_con_getivector
+	krb5_auth_con_setivector
 	krb5_auth_con_setrcache
+	krb5_auth_con_getrcache
+	krb5_auth_con_getremotesubkey
+	krb5_auth_con_getauthenticator
+	krb5_auth_con_genaddrs
 #
 	krb5_cc_default
 	krb5_cc_default_name
