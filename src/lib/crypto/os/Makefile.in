@@ -10,7 +10,7 @@ STLIBOBJS = rnd_confoun.o c_localaddr.o c_ustime.o @LIBOBJS@
 COBJS=	rnd_confoun.$(OBJEXT) c_localaddr.$(OBJEXT) c_ustime.$(OBJEXT) 
 OBJS= $(COBJS) $(LIBOBJS)
 
-SRCS=	rnd_confoun.c c_localaddr.c c_ustime.c
+SRCS=	$(srcdir)/rnd_confoun.c $(srcdir)/c_localaddr.c $(srcdir)/c_ustime.c
 
 ##DOS##LIBOBJS = $(COBJS)
 

@@ -1,3 +1,7 @@
+Tue Aug 12 09:09:14 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* Makefile.in (SRCS): Add $(srcdir) as needed.
+
 Fri Jul  4 00:13:02 1997  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* c_localaddr.c (local_addr_fallback_kludge): Added Winsock
