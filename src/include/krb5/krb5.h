@@ -60,8 +60,13 @@ typedef struct _krb5_authenticator {
     krb5_principal client;		/* client name/realm */
     krb5_checksum *checksum;		/* checksum, includes type */
     krb5_ui_2 cmsec;			/* client msec portion */
-    krb5_timestamp cmsec;		/* client sec portion */
+    krb5_timestamp ctime;		/* client sec portion */
 } krb5_authenticator;
+
+typedef struct _krb5_tkt_authent {
+    krb5_ticket ticket;
+    krb5_authenticator authenticator;
+} krb5_tkt_authent;
 
 /* credentials:  Ticket, session key, etc. */
 typedef struct _krb5_credentials {
@@ -95,4 +100,18 @@ typedef struct _krb5_kdc_rep {
     krb5_principal server;		/* server's principal identifier */
     krb5_address **caddrs;		/* array of ptrs to addresses */
 } krb5_kdc_rep;
+
+/* error message structure */
+typedef struct _krb5_error {
+    /* some of these may be meaningless in certain contexts */
+    krb5_timestamp ctime;		/* client sec portion */
+    krb5_ui_2 cmsec;			/* client msec portion */
+    krb5_ui_2 smsec;			/* server msec portion */
+    krb5_timestamp stime;		/* server sec portion */
+    krb5_ui_4 error;			/* error code (protocol error #'s) */
+    krb5_principal client;		/* client's principal identifier */
+    krb5_principal server;		/* client's principal identifier */
+    krb5_string text;			/* descriptive text */
+} krb5_error;
+
 #endif /* __KRB5_GENERAL__ */
