@@ -48,29 +48,27 @@ krb5_sname_to_principal(context, hostname, sname, type, ret_princ)
     /* We cast this instead of declaring as const char* due to some compilers 
      * which apparently get upset at reassigning the variable
      */
-    char *host = (char *) hostname;
-    char *service = (char *) sname;
 
     if ((type == KRB5_NT_UNKNOWN) ||
 	(type == KRB5_NT_SRV_HST)) {
 
 	/* if hostname is NULL, use local hostname */
-	if (! host) {
+	if (! hostname) {
 	    if (gethostname(localname, MAXHOSTNAMELEN))
 		return errno;
-	    host = localname;
+	    hostname = localname;
 	}
 
 	/* if sname is NULL, use "host" */
-	if (! service)
-	    service = "host";
+	if (! sname)
+	    sname = "host";
 
 	/* copy the hostname into non-volatile storage */
 
 	if (type == KRB5_NT_SRV_HST) {
 	    char *addr;
 	    
-	    if (!(hp = gethostbyname(host)))
+	    if (!(hp = gethostbyname(hostname)))
 		return KRB5_ERR_BAD_HOSTNAME;
 	    remote_host = strdup(hp->h_name);
 	    if (!remote_host)
@@ -93,7 +91,7 @@ krb5_sname_to_principal(context, hostname, sname, type, ret_princ)
 		    return ENOMEM;
 	    }
 	} else /* type == KRB5_NT_UNKNOWN */ {
-	    remote_host = strdup((char *) host);
+	    remote_host = strdup((char *) hostname);
 	}
 	if (!remote_host)
 	    return ENOMEM;
@@ -116,7 +114,7 @@ krb5_sname_to_principal(context, hostname, sname, type, ret_princ)
 
 
 	retval = krb5_build_principal(context, ret_princ, strlen(realm),
-				      realm, service, remote_host,
+				      realm, sname, remote_host,
 				      (char *)0);
 
 	krb5_princ_type(context, *ret_princ) = type;
