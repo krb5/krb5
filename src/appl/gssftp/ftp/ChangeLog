@@ -1,3 +1,8 @@
+Fri Sep 27 16:05:09 1996  Tom Yu  <tlyu@mit.edu>
+
+	* cmds.c (setpeer): Apply jik's fix so "-n" actually works as
+	intended.
+
 Tue Sep 10 14:07:15 1996  Tom Yu  <tlyu@mit.edu>
 
 	* ftp.M: remove ".so man1/header.doc"

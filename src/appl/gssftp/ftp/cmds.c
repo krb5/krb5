@@ -167,9 +167,10 @@ setpeer(argc, argv)
 		mode = MODE_S;
 		stru = STRU_F;
 		(void) strcpy(bytename, "8"), bytesize = 8;
-		do_auth();
-		if (autologin)
+		if (autologin) {
+			do_auth();
 			(void) login(argv[1]);
+		}
 
 		if (0) {
 		  setpbsz(1<<20);
