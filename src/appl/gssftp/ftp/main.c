@@ -86,6 +86,7 @@ main(argc, argv)
 	int top;
 	struct passwd *pw = NULL;
 	char homedir[MAXPATHLEN];
+	char *progname = argv[0];
 
 	sp = getservbyname("ftp", "tcp");
 	if (sp == 0) {
@@ -147,10 +148,9 @@ main(argc, argv)
 				doglob = 0;
 				break;
 
-
 			case 'u':
-			  autoauth = 0;
-			  break;
+				autoauth = 0;
+				break;
 
 			case 'f':
 				forward = 1;
@@ -160,11 +160,13 @@ main(argc, argv)
 				autoencrypt = 1;
 				break;
 
-
 			default:
-				fprintf(stdout,
+			  fprintf(stderr,
 				  "ftp: %c: unknown option\n", *cp);
-				exit(1);
+			  fprintf(stderr, "Usage: %s [-v] [-d] [-i] [-n] [-g] "
+				  "[-k realm] [-f] [-x] [-u] [-t] [host]\n",
+				  progname);
+			  exit(1);
 			}
 	nextopt:
 		argc--, argv++;

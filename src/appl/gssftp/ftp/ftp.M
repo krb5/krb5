@@ -37,7 +37,7 @@ ftp \- ARPANET file transfer program
 .SH SYNOPSIS
 .B ftp
 [\fB\-v\fP] [\fB\-d\fP] [\fB\-i\fP] [\fB\-n\fP] [\fB\-g\fP] [\fB\-k\fP
-\fIrealm\fP] [\fB\-f\fP] [\fB\-x\fP] [\fIhost\fP]
+\fIrealm\fP] [\fB\-f\fP] [\fB\-x\fP] [\fB\-u\fP] [\fB\-t\fP] [\fIhost\fP]
 .SH DESCRIPTION
 .B FTP
 is the user interface to the
@@ -57,8 +57,23 @@ transfer statistics.
 .B \-n
 Restrains
 .B ftp
-from attempting ``auto-login'' upon initial connection.  If
-auto-login is enabled,
+from attempting ``auto-login'' upon initial connection.  If auto-login
+is enabled,
+.B ftp
+will check the
+.I .netrc
+(see below) file in the user's home directory for an entry describing an
+account on the remote machine.  If no entry exists,
+.B ftp
+will prompt for the remote machine login name (default is the user
+identity on the local machine), and, if necessary, prompt for a password
+and an account with which to login.
+.TP
+.B \-u
+Restrains
+.B ftp
+from attempting ``auto-authentication'' upon initial connection.  If
+auto-authentication is enabled,
 .B ftp
 attempts to authenticate to the
 .SM FTP
@@ -68,16 +83,7 @@ command, using whichever authentication types are locally supported.
 Once an authentication type is accepted, an authentication protocol
 will proceed by issuing
 .SM ADAT
-commands.
-.B ftp
-then will check the
-.I .netrc
-(see below) file in the user's home directory for an entry describing an
-account on the remote machine.  If no entry exists,
-.B ftp
-will prompt for the remote machine login name (default is the user
-identity on the local machine), and, if necessary, prompt for a password
-and an account with which to login.
+commands.  This option also disables auto-login.
 .TP
 .B \-i
 Turns off interactive prompting during multiple file transfers.
@@ -96,8 +102,12 @@ When using Kerberos v4 authentication, gets tickets in
 Causes credentials to be forwarded to the remote host.
 .TP
 .B \-x
-Causes the client to attempt to negotiate encryption (protection level
-`private') immediately after successfully authenticating.
+Causes the client to attempt to negotiate encryption (data and command
+protection levels ``private'') immediately after successfully
+authenticating.
+.TP
+.B \-t
+Enables packet tracing.
 .SH COMMANDS
 The client host with which
 .B ftp
@@ -181,6 +191,15 @@ is on (default is off), remote computer file names with all letters in
 upper case are written in the local directory with the letters mapped to
 lower case.
 .TP
+.B ccc
+Turn off integrity protection on the command channel.  This command
+must be sent integrity protected, and must be proceeded by a successful
+.SM ADAT
+command.  Since turning off integrity protection potentially
+allows an attacker to insert commands onto the command channel, some
+.SM FTP
+servers may refuse to honor this command.
+.TP
 \fBcd\fP \fIremote-directory\fP
 Change the working directory on the remote machine to
 .IR remote-directory .
@@ -205,6 +224,22 @@ Terminate the
 .SM FTP
 session with the remote server, and return to the command interpreter.
 Any defined macros are erased.
+.TP
+\fBcprotect\fP [\fIprotection-level\fP]
+Set the protection level on commands to
+.IR protection-level .
+The valid protection levels are ``clear'' for unprotected commands,
+``safe'' for commands integrity protected by
+cryptographic checksum, and ``private'' for commands
+confidentiality and integrity protected by encryption.  If an
+.SM ADAT
+command succeeded, then the default command protection level is
+``safe'', otherwise the only possible level is ``clear''.  If no
+level is specified, the current level is printed.
+.B cprotect clear
+is equivalent to the
+.B ccc
+command.
 .TP
 .B cr
 Toggle carriage return stripping during ascii type file retrieval.
@@ -560,7 +595,7 @@ server.  An optional port number may be supplied, in which case,
 will attempt to contact an
 .SM FTP
 server at that port.  If the
-.B auto-login
+.B auto-authenticate
 option is on (default),
 .B ftp
 will attempt to authenticate to the
@@ -571,7 +606,9 @@ command, using whichever authentication types which are locally
 supported.  Once an authentication type is accepted, an authentication
 protocol will proceed by issuing
 .SM ADAT
-commands.
+commands.  If the
+.B auto-login
+option is on (default),
 .B ftp
 will also attempt to automatically log the user in to the
 .SM FTP
@@ -580,6 +617,12 @@ server (see below).  If the
 option is specified,
 .B ftp
 will forward a copy of the user's Kerberos tickets to the remote host.
+.TP
+.B passive
+Toggle passive data transfer mode.  In passive mode, the client initiates
+the data connection by listening on the data port.  Passive mode may
+be necessary for operation from behind firewalls which do not permit
+incoming connections.
 .TP
 .B private
 Set the protection level on data transfers to ``private''.  Data

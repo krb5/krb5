@@ -1,3 +1,41 @@
+Mon Oct 26 13:46:47 1998  Dan Winship  <danw@mit.edu>
+
+	* ftpd.c (main): Add -A (require authentication, but not
+	necessarily authorization) and -C (user wants local credentials).
+
+	(user): Implement -A. Reorganize code a bit. If want_creds (-C) is
+	set, require a password even if authorization succeeds.
+
+	(kpass): Add krb5 ticket-getting code too. If want_creds is set,
+ 	don't destroy the tickets after verifying the Kerberos password.
+
+	(pass): Check krb password before local password, so we can
+	get credentials if we need them. Ignore local password if
+	want_creds is set. In case of "too many failed login attempts",
+	exit via dologout() instead of exit() so on-disk credentials are
+	destroyed.
+
+	(auth_data): If user forwards GSSAPI creds and want_creds is set,
+	write them out to a krb5 ccache. If doing krb4 compat, convert
+	them to krb4 tickets as well. (If want_creds is not set, smile and
+	nod at the user and then destroy the creds.)
+
+	(end_login): If the user has creds on disk, destroy them.
+	(dologout): If the user has creds on disk, destroy them.
+
+	* ftpd.M: Add -A and -C.
+	
+Fri Oct 23 18:18:52 1998  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* ftpd.c (pass): Wait 5 seconds before returning "password
+		incorrect", and only allow three bad passwords.  Then
+		return an 421 reply code before closing the connection and
+		going away.
+
+	* ftpcmd.y (cmd): Don't allow the PORT command to accept a port
+		number lower than 1024; this prevents some nasty ftp
+		"bounce attacks" to SMTP ports, etc.
+
 Tue Oct 20 16:29:46 1998  Dan Winship  <danw@mit.edu>
 
 	* ftpd.M: Reality check. Add -a to synopsis, document -c and -u

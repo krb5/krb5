@@ -52,6 +52,20 @@ AC_MSG_RESULT($krb5_cv_shadow_pwd)
 if test $krb5_cv_shadow_pwd = yes; then
 AC_DEFINE(HAVE_SHADOW)
 fi
+AC_ARG_WITH([krb4],
+[  --without-krb4          don't include Kerberos V4 backwards compatibility
+  --with-krb4             use V4 libraries included with V5 (default)
+  --with-krb4=KRB4DIR     use preinstalled V4 libraries],
+,
+withval=yes
+)dnl
+if test $withval = no; then
+	AC_MSG_RESULT(no krb4 support)
+else 
+	AC_MSG_RESULT(Adding in krb4 support)
+	FTPD_LIBS="../../../krb524/libkrb524.a"
+fi
+AC_SUBST(FTPD_LIBS)
 dnl
 dnl
 dnl
