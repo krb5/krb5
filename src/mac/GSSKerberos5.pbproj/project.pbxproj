@@ -694,7 +694,6 @@
 				00F24295FFB75B2612120156,
 				00F24296FFB75B2612120156,
 				00F24297FFB75B2612120156,
-				00F242BAFFB76A1512120156,
 			);
 			buildSettings = {
 				DYLIB_COMPATIBILITY_VERSION = 4;
@@ -868,7 +867,6 @@
 				00F242A7FFB75FA712120156,
 				00F242A9FFB75FA712120156,
 				00F242ABFFB75FA712120156,
-				00F242B7FFB7698D12120156,
 			);
 			buildSettings = {
 				DYLIB_COMPATIBILITY_VERSION = 4;
@@ -947,7 +945,6 @@
 				00F242AFFFB760BC12120156,
 				00F242B1FFB760BC12120156,
 				00F242B3FFB760BC12120156,
-				00F242C0FFB7705612120156,
 			);
 			buildSettings = {
 				DYLIB_COMPATIBILITY_VERSION = 4;
@@ -1028,48 +1025,7 @@
 			isa = PBXTargetDependency;
 			target = 5C1372EBFF6546C412120111;
 		};
-		00F242B7FFB7698D12120156 = {
-			buildActionMask = 8;
-			dstPath = /usr/include;
-			dstSubfolderSpec = 0;
-			files = (
-				00F242B9FFB769B812120156,
-			);
-			isa = PBXCopyFilesBuildPhase;
-			name = "Copy Files";
-		};
-		00F242B9FFB769B812120156 = {
-			fileRef = 174475DDFF5EF35112120111;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		00F242BAFFB76A1512120156 = {
-			buildActionMask = 8;
-			dstPath = /usr/include;
-			dstSubfolderSpec = 0;
-			files = (
-			);
-			isa = PBXCopyFilesBuildPhase;
-			name = "Copy Files";
-		};
-		00F242C0FFB7705612120156 = {
-			buildActionMask = 8;
-			dstPath = /usr/include;
-			dstSubfolderSpec = 0;
-			files = (
-				00F242C3FFB7707D12120156,
-			);
-			isa = PBXCopyFilesBuildPhase;
-			name = "Copy Files";
-		};
 		00F242C2FFB7706712120156 = {
-			fileRef = 5C13731AFF654A8C12120111;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		00F242C3FFB7707D12120156 = {
 			fileRef = 5C13731AFF654A8C12120111;
 			isa = PBXBuildFile;
 			settings = {
