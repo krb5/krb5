@@ -1,3 +1,8 @@
+Thu Oct  3 13:08:40 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* pre.in: Separate KADM5 unit test files to source dir and build
+		dir based on how generated.
+
 Mon Sep 23 15:40:04 1996  Barry Jaspan  <bjaspan@mit.edu>
 
 	* pre.in (DEJAFLAGS): set --srcdir $(srcdir) so unit test files

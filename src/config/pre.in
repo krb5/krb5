@@ -74,14 +74,15 @@ KRB5_INCSUBDIRS = \
 # XXX check which of these are actually used!
 #
 TESTDIR		= $(BUILDTOP)/kadmin/testing
+STESTDIR	= $(SRCTOP)/kadmin/testing
 COMPARE_DUMP	= $(TESTDIR)/scripts/compare_dump.pl
 FIX_CONF_FILES	= $(TESTDIR)/scripts/fixup-conf-files.pl
-INITDB		= $(TESTDIR)/scripts/init_db
+INITDB		= $(STESTDIR)/scripts/init_db
 MAKE_KEYTAB	= $(TESTDIR)/scripts/make-host-keytab.pl
 LOCAL_MAKE_KEYTAB= $(TESTDIR)/scripts/make-host-keytab.pl
-RESTORE_FILES	= $(TESTDIR)/scripts/restore_files.sh
-SAVE_FILES	= $(TESTDIR)/scripts/save_files.sh
-ENV_SETUP	= TOP=$(BUILDTOP)/kadmin $(TESTDIR)/scripts/env-setup.sh
+RESTORE_FILES	= $(STESTDIR)/scripts/restore_files.sh
+SAVE_FILES	= $(STESTDIR)/scripts/save_files.sh
+ENV_SETUP	= $(TESTDIR)/scripts/env-setup.sh
 CLNTTCL		= $(TESTDIR)/util/ovsec_kadm_clnt_tcl
 SRVTCL		= $(TESTDIR)/util/ovsec_kadm_srv_tcl
 # Dejagnu variables.
@@ -92,11 +93,11 @@ DEJAFLAGS	:= $(DEJALFLAGS) $(CLFLAGS) --debug --srcdir $(srcdir) --host \
 		   unknown-$(shell uname -m)-$(shell uname -s)$(shell uname -r)
 RUNTEST		= runtest $(DEJAFLAGS)
 
-START_SERVERS	= $(TESTDIR)/scripts/start_servers $(TEST_SERVER)
-START_SERVERS_LOCAL = $(TESTDIR)/scripts/start_servers_local
+START_SERVERS	= $(STESTDIR)/scripts/start_servers $(TEST_SERVER)
+START_SERVERS_LOCAL = $(STESTDIR)/scripts/start_servers_local
 
-STOP_SERVERS	= $(TESTDIR)/scripts/stop_servers $(TEST_SERVER)
-STOP_SERVERS_LOCAL = $(TESTDIR)/scripts/stop_servers_local
+STOP_SERVERS	= $(STESTDIR)/scripts/stop_servers $(TEST_SERVER)
+STOP_SERVERS_LOCAL = $(STESTDIR)/scripts/stop_servers_local
 #
 # End of macros for the KADM5 unit test system.
 #
