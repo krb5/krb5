@@ -327,7 +327,7 @@ krb5_tkt_authent **ret_authdat;
      * 	 
      * We try checksumming the req-body two different ways: first we
      * try reaching into the raw asn.1 stream (if available), and
-     * checksum that directly; if that failes, then we try encoding
+     * checksum that directly; if that fails, then we try encoding
      * using our local asn.1 library.
      */
     retval = KRB5KRB_AP_ERR_BAD_INTEGRITY;
