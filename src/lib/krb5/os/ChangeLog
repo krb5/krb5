@@ -4,6 +4,36 @@
 	now external.
 	(grow_list): New macro.
 
+	* sendto_kdc.c (MAX_PASS, dprint): New macros.
+	(krb5int_debug_fprint, merge_addrlists): New function.
+	(krb5int_debug_sendto_kdc): New variable.
+	(krb5_sendto_kdc): Use dprint.  Call krb5int_locate_kdc in two
+	places, with socket type selection done separately.
+	(debug_log_connect): Function deleted; use dprint instead.
+	(dperror): Use dprint.
+	(print_fdsets): Function deleted; use dprint instead.
+	(struct conn_state): Use struct instead of union so incoming and
+	outgoing buffer pointers can co-exist.  Add INITIALIZING state.
+	(state_strings): Add INITIALIZING.
+	(krb5int_sendto_udp, krb5int_sendto_tcp): Functions integrated
+	into krb5int_sendto.
+	(call_select): Use dprint.
+	(setup_connection): New function, handles data structure
+	initialization.
+	(start_connection): Renamed from start_tcp_connection.  Don't do
+	data structure initialization, just start connection, and transmit
+	UDP datagrams.  Use dprint.
+	(maybe_send): Create socket for "INITIALIZING" connections;
+	transmit datagrams.
+	(kill_conn): New function split out from service_tcp_fd.
+	(SSF_READ, SSF_WRITE, SSF_EXCEPTION): New macros.
+	(service_tcp_fd): Accept a flag word rather than separate int
+	arguments for read, write, exception.  Use dprint.
+	(service_udp_fd): New function.
+	(service_fd): New function, calls one of the above two.
+	(service_fds): Call it.  Use a flag word instead of separate r/w/x
+	values.
+
 2002-08-15  Ken Raeburn  <raeburn@mit.edu>
 
 	* sendto_kdc.c (DEFAULT_UDP_PREF_LIMIT, HARD_UDP_LIMIT): New
