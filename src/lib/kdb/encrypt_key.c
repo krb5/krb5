@@ -37,21 +37,27 @@ krb5_keyblock *out;
        along with the encrypted key */
 
     krb5_error_code retval;
+    krb5_octet *tmpcontents;
 
     out->keytype = in->keytype;
     out->length = krb5_encrypt_size(in->length, eblock->crypto_entry);
+    if (!(tmpcontents = (krb5_octet *)calloc(1, out->length)))
+	return ENOMEM;
+    
+    bcopy((char *) in->contents, (char *)tmpcontents, in->length);
     out->length += sizeof(out->length);
     out->contents = (krb5_octet *)malloc(out->length);
     if (!out->contents) {
 	out->contents = 0;
 	out->length = 0;
+	xfree(tmpcontents);
 	return ENOMEM;
     }
     /* copy in real length */
     bcopy((char *)&in->length, (char *)out->contents, sizeof(out->length));
     /* and arrange for encrypted key */
     if (retval = (*eblock->crypto_entry->
-		  encrypt_func)((krb5_pointer) in->contents,
+		  encrypt_func)((krb5_pointer) tmpcontents,
 				(krb5_pointer) (((char *) out->contents) +
 						sizeof(out->length)),
 				in->length, eblock, 0)) {
@@ -59,5 +65,6 @@ krb5_keyblock *out;
 	out->contents = 0;
 	out->length = 0;
     }
+    xfree(tmpcontents);
     return retval;
 }
