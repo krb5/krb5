@@ -10,15 +10,19 @@ server: server.o rpc_test_svc.o $(DEPLIBS)
 
 client.c server.c: rpc_test.h
 
-rpc_test.h rpc_test_clnt.c rpc_test_svc.c: rpc_test.x
-	-rm -f rpc_test_clnt.c rpc_test_svc.c rpc_test.h
-	-ln -s $(srcdir)/rpc_test.x .
-	rpcgen -l rpc_test.x -o rpc_test_clnt.c
-	rpcgen -m rpc_test.x -o rpc_test_svc.c
-	rpcgen -h rpc_test.x -o rpc_test.h
-
-clean::
-	rm -f rpc_test.h rpc_test_clnt.c rpc_test_svc.c
+# If rpc_test.h and rpc_test_*.c do not work on your system, you can
+# try using rpcgen by uncommenting these lines (be sure to uncomment
+# then in the generated not Makefile.in).
+# rpc_test.h rpc_test_clnt.c rpc_test_svc.c: rpc_test.x
+# 	-rm -f rpc_test_clnt.c rpc_test_svc.c rpc_test.h
+# 	-ln -s $(srcdir)/rpc_test.x .
+# 	rpcgen -l rpc_test.x -o rpc_test_clnt.c
+# 	rpcgen -m rpc_test.x -o rpc_test_svc.c
+# 	rpcgen -h rpc_test.x -o rpc_test.h
+# 
+# clean::
+# 	rm -f rpc_test.h rpc_test_clnt.c rpc_test_svc.c
+# 
 
 check unit-test:: unit-test-setup unit-test-body unit-test-cleanup
 

@@ -1,3 +1,9 @@
+Thu Oct 24 17:20:11 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* Makefile.in, rpc_test_clnt.c, rpc_test_svc.c, rpc_test.h:
+ 	distribute generated rpc_test_* files instead of running rpcgen on
+ 	rpc_text.x [krb5-admin/133]
+
 Wed Oct 16 16:13:13 1996  Barry Jaspan  <bjaspan@mit.edu>
 
 	* rpc_test.0/expire.exp: add test for expired credentials
