@@ -27,7 +27,6 @@
 
 
 #include "mcc.h"
-#include <malloc.h>
 /*
  * Modifies:
  * id

@@ -1,3 +1,7 @@
+Tue Jun 11 20:15:01 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* mcc_close.c (krb5_mcc_close): Remove inclusion of malloc.h
+
 Thu Feb  1 15:47:25 1996  Sam Hartman  <hartmans@tertius.mit.edu>
 
 	* mcc_retrv.c (ktype_reasonable): removed.
