@@ -2,8 +2,6 @@
 #   GSSAPI.EXP - GSSAPI.DLL module definition file
 #----------------------------------------------------
 
-        ___initializeGSS
-
 	_gss_acquire_cred
 	_gss_release_cred
 	_gss_init_sec_context
