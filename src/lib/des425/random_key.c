@@ -23,39 +23,22 @@
  *
  */
 
-
 #include "des.h"
-
-extern krb5_pointer des425_random_state;
 
 /* random_key */
 int
 des_random_key(key)
     mit_des_cblock *key;
 {
-    krb5_encrypt_block	eblock;
     krb5_keyblock	keyblock;
-    krb5_keyblock	*new_key;
     krb5_error_code	kret;
-    mit_des_cblock	nullkey;
 
-    krb5_use_enctype(NULL, &eblock, ENCTYPE_DES_CBC_CRC);
+    if (kret = krb5_c_make_random_key(/* XXX */ 0, ENCTYPE_DES_CBC_CRC,
+				      &keyblock))
+	return(kret);
 
-    memset(nullkey, 0, sizeof(mit_des_cblock));
-    mit_des_fixup_key_parity(*key);
+    memcpy(key, keyblock.contents, sizeof(mit_des_cblock));
 
-    keyblock.enctype = ENCTYPE_DES_CBC_CRC;
-    keyblock.length = sizeof(mit_des_cblock);
-    keyblock.contents = (krb5_octet *)nullkey;
-
-    if (! des425_random_state)
-	mit_des_init_random_key(&eblock, &keyblock, &des425_random_state);
-
-    kret = mit_des_random_key(NULL, des425_random_state, &new_key);
-    if (kret) return kret;
-
-    memcpy(key, new_key->contents, sizeof(mit_des_cblock));
-    krb5_free_keyblock(NULL, new_key);
     return(0);
 }
 
