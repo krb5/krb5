@@ -87,6 +87,7 @@ main(argc, argv)
 	    exit(1);
 	printf("OK, deleting database '%s'...\n", dbname);
     }
+#ifndef	BERK_DB_DBM
     (void) strcpy(dbfilename, dbname);
     (void) strcat(dbfilename, ".dir");
     if (unlink(dbfilename) == -1) {
@@ -109,6 +110,17 @@ main(argc, argv)
 		"Database may be partially deleted--inspect files manually!\n");
 	exit(1);
     }
+#else	/* BERK_DB_DBM */
+    (void) strcpy(dbfilename, dbname);
+    (void) strcat(dbfilename, ".db");
+    if (unlink(dbfilename) == -1) {
+	retval = errno;
+	com_err(argv[0], retval, "deleting database file '%s'",dbfilename);
+	fprintf(stderr,
+		"Database may be partially deleted--inspect files manually!\n");
+	exit(1);
+    }
+#endif	/* BERK_DB_DBM */
     (void) strcpy(dbfilename, dbname);
     (void) strcat(dbfilename, ".ok");
     if (unlink(dbfilename) == -1) {

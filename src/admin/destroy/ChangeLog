@@ -1,3 +1,10 @@
+
+Fri May 26 17:48:41 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* kdb5_destroy.c - Conditionalize implicit knowledge of filename
+		suffix under BERK_DB_DBM.  If this is set, then use ".db"
+		otherwise, use ".dir" and ".pag".
+	* Makefile.in - Set BERK_DB_DBM when compiling.
+
 Thu Mar  2 12:18:36 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in (ISODELIB): Remove reference to $(ISODELIB).
