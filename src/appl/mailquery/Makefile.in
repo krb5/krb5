@@ -1,4 +1,5 @@
 CFLAGS = $(CCOPTS) -DKPOP -DKRB5 $(DEFS) $(LOCALINCLUDE)
+COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
 
 all::
 
