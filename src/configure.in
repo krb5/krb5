@@ -13,7 +13,7 @@ yes;
 ])dnl
 AC_MSG_RESULT($krb5_cv_prog_gcc)
 dnl
-AC_MSG_CHECKING([for build host])
+ifelse([AC_MSG_CHECKING([for build host])
 AC_CACHE_VAL(krb5_cv_host, [export CC
 AC_CANONICAL_HOST
 krb5_cv_host=$host])
@@ -240,7 +240,7 @@ krb5_cv_shlibs_dirhead=
 krb5_cv_shlibs_tail_comp=
 krb5_cv_staticlibs_enabled=yes
 krb5_cv_shlibs_enabled=])
-
+])
 AC_KRB5_TCL
 AC_ARG_ENABLE([athena],
 [  --enable-athena         build with MIT Project Athena configuration],,)
