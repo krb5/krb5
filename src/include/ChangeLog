@@ -1,3 +1,8 @@
+2001-03-20  Alexandra Ellwood <lxs@mit.edu>
+
+	* krb5.hin: Changed KerberosConditionalMacros.h to
+	KerberosSupport.h
+
 2001-02-28  Miro Jurisic <meeroh@mit.edu>
 
 	* k5-int.h: Rearranged the #ifdef macintosh section to

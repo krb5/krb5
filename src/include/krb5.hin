@@ -57,7 +57,7 @@
 #define KRB5_GENERAL__
 
 #if defined(macintosh) || (defined(__MACH__) && defined(__APPLE__))
-	#include <KerberosSupport/KerberosConditionalMacros.h>
+	#include <KerberosSupport/KerberosSupport.h>
 	
 	#if TARGET_API_MAC_OS8 || (TARGET_API_MAC_CARBON && !TARGET_API_MAC_OSX)
 		#include <Kerberos5/win-mac.h>
@@ -96,9 +96,9 @@
  */
 
 #if TARGET_OS_MAC
-#include <KerberosProfile/KerberosProfile.h>
+    #include <KerberosProfile/KerberosProfile.h>
 #else
-#include <profile.h>
+    #include <profile.h>
 #endif
 
 #include <errno.h>
