@@ -1,3 +1,15 @@
+2003-06-03  Tom Yu  <tlyu@mit.edu>
+
+	* extern.h (master_princ): Remove realm_mkvno, realm_tgskey,
+	realm_tgskvno, realm_kstypes, realm_nkstypes.  They're not needed
+	anymore.
+
+	* main.c (finish_realm): Remove references to realm_kstypes,
+	realm_tgskey.
+	(init_realm): Don't bother with realm_kstypes.  Don't bother
+	looking up the master kvno.  Don't bother caching the TGS key.
+	None of these were being used.
+
 2003-05-30  Ken Raeburn  <raeburn@mit.edu>
 
 	* main.c (init_realm): Use KRB5_KDB_MAX_RLIFE, not
