@@ -1,9 +1,14 @@
+Tue Aug  8 20:47:01 1995  Tom Yu  <tlyu@dragons-lair.MIT.EDU>
+
+	* update_utmp.c (pty_update_utmp): change #ifdef NO_UT_PID to
+		#ifndef
+
 Tue Aug  8 09:13:50 1995  Sam Hartman  <hartmans@pao.mit.edu>
 
 	* open_slave.c (pty_open_slave): Dissociate from controlling
         terminal before calling revoke.
 	(pty_open_slave): Don't ask for a controlling terminal unless we need it.
-=======
+
 Tue Aug  8 20:32:08 1995  Tom Yu  <tlyu@dragons-lair.MIT.EDU>
 
 	* update_utmp.c: flush preprocessor directive to left margin.

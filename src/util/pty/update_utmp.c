@@ -48,7 +48,7 @@ long pty_update_utmp (process_type, pid, username, line, host)
 
     strncpy(ent.ut_line, line+sizeof("/dev/")-1, sizeof(ent.ut_line));
     ent.ut_time = time(0);
-#ifdef NO_UT_PID
+#ifndef NO_UT_PID
     ent.ut_pid = pid;
     switch ( process_type ) {
     case PTY_LOGIN_PROCESS:
