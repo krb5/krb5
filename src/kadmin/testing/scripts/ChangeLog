@@ -1,3 +1,7 @@
+2002-12-18  Ken Raeburn  <raeburn@mit.edu>
+
+	* env-setup.shin: Set KRB5CCNAME to something under $K5ROOT.
+
 2002-10-30  Ken Raeburn  <raeburn@mit.edu>
 
 	* start_servers_local: If $USER isn't set, use $LOGNAME.  If
