@@ -1,3 +1,11 @@
+2004-06-15  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (SHLIB_DIRS, SHLIB_EXPLIBS, SHLIB_EXPDEPLIBS): Set
+	to depend on the new support library.
+	(SHLIB_LIBS): Don't define.
+	* configure.in: Use BUILD_LIBRARY_WITH_DEPS instead of the no-deps
+	version.
+
 2004-06-04  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (LIBBASE): Renamed from LIB.
