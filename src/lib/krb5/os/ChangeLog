@@ -1,3 +1,9 @@
+Fri May  7 14:39:08 1999  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* locate_kdc.c (krb5_locate_kdc): Return KRB5_REALM_UNKNOWN if
+ 		profile_get_values returns PROF_NO_RELATION or
+ 		PROF_NO_SECTION.
+
 1999-04-01  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* prompter.c (krb5_prompter_posix): Update to use new prompter
