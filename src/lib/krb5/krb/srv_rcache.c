@@ -35,21 +35,21 @@ static char rcsid_srv_rcache_c[] =
 
 krb5_error_code
 krb5_get_server_rcache(piece, rcptr)
-const char *piece;
+const krb5_data *piece;
 krb5_rcache *rcptr;
 {
     krb5_rcache rcache;
     char *cachename;
     extern krb5_deltat krb5_clockskew;
     krb5_error_code retval;
-    int len = strlen(piece);
+    int len = piece->length;
 
     if (rcache = (krb5_rcache) malloc(sizeof(*rcache))) {
 	if (!(retval = krb5_rc_resolve_type(&rcache, "dfl"))) {
 
 	    if (cachename = malloc(len+1+3)) {
 		strcpy(cachename, "rc_");
-		strcat(cachename, piece);
+		strncat(cachename, piece->data, len);
 		cachename[len+3] = '\0';
 
 		if (!(retval = krb5_rc_resolve(rcache, cachename))) {
