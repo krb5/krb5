@@ -321,5 +321,6 @@ error_code KRB5_KT_FORMAT,		"Bad format in keytab"
 
 error_code KRB5_NOPERM_ETYPE,	"Encryption type not permitted"
 error_code KRB5_CONFIG_ETYPE_NOSUPP,	"No supported encryption types (config file error?)"
+error_code KRB5_OBSOLETE_FN,	"Program called an obsolete, deleted function"
 
 end
