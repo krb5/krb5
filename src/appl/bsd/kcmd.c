@@ -143,6 +143,7 @@ extern krb5_error_code krb5_write_message (krb5_context, krb5_pointer,
 extern int krb5_net_read (krb5_context, int , char *, int);
 extern int krb5_net_write (krb5_context, int , const char *, int);
 /* XXX: And these should be declared in krb.h, or private.  */
+#ifdef KRB5_KRB4_COMPAT
 extern int
 krb_sendauth(long options, int fd, KTEXT ticket,
 	     char *service, char *inst, char *realm,
@@ -153,7 +154,7 @@ krb_sendauth(long options, int fd, KTEXT ticket,
 	     struct sockaddr_in *laddr,
 	     struct sockaddr_in *faddr,
 	     char *version);
-
+#endif
 
 int
 kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,

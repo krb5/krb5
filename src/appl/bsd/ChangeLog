@@ -1,3 +1,8 @@
+2000-06-19  Tom Yu  <tlyu@mit.edu>
+
+	* kcmd.c: Conditionalize krb_sendauth prototype based on sense of
+	KRB5_KRB4_COMPAT.
+
 2000-06-15  Tom Yu  <tlyu@mit.edu>
 
 	* login.c (try_convert524): Add use_ccache argument.  Handle case
