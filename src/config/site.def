@@ -93,7 +93,7 @@
 #ifdef UseInstalled		/* if outside the tree */
 #define CcCmd gcc -fstrength-reduce -fpcc-struct-return -fwritable-strings -traditional
 #else				/* server won't compile with -traditional */
-#define CcCmd gcc -fstrength-reduce -fpcc-struct-return 
+#define CcCmd gcc -fstrength-reduce -fpcc-struct-return -pedantic -ansi -Wall
 #endif
 #endif
 #endif
@@ -197,7 +197,7 @@
 #ifdef UseInstalled		/* if outside the tree */
 #define CcCmd gcc -DNOSTDHDRS -fstrength-reduce -fpcc-struct-return -fwritable-strings -traditional
 #else				/* server won't compile with -traditional */
-#define CcCmd gcc -DNOSTDHDRS -fstrength-reduce -fpcc-struct-return 
+#define CcCmd gcc -DNOSTDHDRS -fstrength-reduce -fpcc-struct-return -pedantic -ansi -Wall
 #endif
 #endif
 #endif
