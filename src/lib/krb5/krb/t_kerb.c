@@ -16,15 +16,22 @@
 
 #include "com_err.h"
 
-void test_string_to_timestamp(ctx, time)
+void test_string_to_timestamp KRB5_PROTOTYPE((krb5_context, char *));
+void test_425_conv_principal KRB5_PROTOTYPE((krb5_context, char *, char*, char *));
+void test_524_conv_principal KRB5_PROTOTYPE((krb5_context, char *));
+void test_parse_name KRB5_PROTOTYPE((krb5_context, const char *));
+void test_set_realm KRB5_PROTOTYPE((krb5_context, const char *, const char *));
+void usage KRB5_PROTOTYPE((char *));
+
+void test_string_to_timestamp(ctx, ktime)
 	krb5_context ctx;
-	char *time;
+	char *ktime;
 {
     krb5_timestamp	timestamp;
     time_t		t;
     krb5_error_code	retval;
 
-    retval = krb5_string_to_timestamp(time, &timestamp);
+    retval = krb5_string_to_timestamp(ktime, &timestamp);
     if (retval) {
 	com_err("krb5_string_to_timestamp", retval, 0);
 	return;
