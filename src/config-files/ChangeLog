@@ -1,3 +1,8 @@
+Fri Sep  1 23:26:46 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* krb5.conf.M: Add documentation for the clockskew and
+		kdc_timesync relations in the libdefaults section.
+
 Thu Aug 24 19:24:26 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* .Sanitize: Update file list

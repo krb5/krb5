@@ -90,6 +90,18 @@ The following relations are defined in the [libdefaults] section:
 This relation identifies the default realm to be used in a client
 host's Kerberos activity.
 
+.IP clockskew 
+This relation sets the maximum allowable amount of clockskew in
+seconds that the library will tolerate before assuming that a Kerberos
+message is invalid.  The default value is 300 seconds, or five
+minutes.
+
+.IP kdc_timesync 
+If the value of this relation is non-zero, the library will compute
+the difference between the system clock and the time returned by the
+KDC and in order to correct for an inaccurate system clock.  This
+corrective factor is only used by the Kerberos library.
+
 .SH REALMS SECTION
 
 Each tag in the [realms] section of the file names a Kerberos realm.
