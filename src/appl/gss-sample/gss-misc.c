@@ -122,6 +122,7 @@ int send_token(s, flags, tok)
 {
      int len, ret;
      unsigned char char_flags = (unsigned char) flags;
+     unsigned char lenbuf[4];
 
      ret = write_all(s, (char *)&char_flags, 1);
      if (ret != 1) {
@@ -129,9 +130,14 @@ int send_token(s, flags, tok)
        return -1;
      }
 
-     len = htonl(tok->length);
+     if (tok->length > 0xffffffffUL)
+	 abort();
+     lenbuf[0] = (tok->length >> 24) & 0xff;
+     lenbuf[1] = (tok->length >> 16) & 0xff;
+     lenbuf[2] = (tok->length >> 8) & 0xff;
+     lenbuf[3] = tok->length & 0xff;
 
-     ret = write_all(s, (char *) &len, 4);
+     ret = write_all(s, lenbuf, 4);
      if (ret < 0) {
 	  perror("sending token length");
 	  return -1;
@@ -188,6 +194,7 @@ int recv_token(s, flags, tok)
 {
      int ret;
      unsigned char char_flags;
+     unsigned char lenbuf[4];
 
      ret = read_all(s, (char *) &char_flags, 1);
      if (ret < 0) {
@@ -201,7 +208,7 @@ int recv_token(s, flags, tok)
        *flags = (int) char_flags;
      }
 
-     ret = read_all(s, (char *) &tok->length, 4);
+     ret = read_all(s, lenbuf, 4);
      if (ret < 0) {
 	  perror("reading token length");
 	  return -1;
@@ -212,8 +219,11 @@ int recv_token(s, flags, tok)
 		     ret, 4);
 	 return -1;
      }
-	  
-     tok->length = ntohl(tok->length);
+
+     tok->length = ((lenbuf[0] << 24)
+		    | (lenbuf[1] << 16)
+		    | (lenbuf[2] << 8)
+		    | lenbuf[3]);
      tok->value = (char *) malloc(tok->length ? tok->length : 1);
      if (tok->length && tok->value == NULL) {
 	 if (display_file)

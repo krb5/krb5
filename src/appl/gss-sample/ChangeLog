@@ -1,3 +1,9 @@
+2002-12-30  Ken Raeburn  <raeburn@mit.edu>
+
+	* gss-misc.c (send_token, recv_token): Open-code the math to send
+	and receive the length as four bytes in network order, rather than
+	using the first four bytes of a size_t.
+
 2002-08-29  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in: Revert $(S)=>/ change, for Windows support.
