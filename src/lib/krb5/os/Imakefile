@@ -5,11 +5,15 @@ OBJS= \
 	def_realm.o	\
 	defname.o	\
 	free_krbhs.o	\
+	free_hstrl.o	\
 	get_krbhst.o	\
+	hst_realm.o	\
 	localaddr.o	\
 	locate_kdc.o	\
 	lock_file.o	\
 	mstime.o	\
+	net_read.o	\
+	net_write.o	\
 	read_pwd.o	\
 	sendto_kdc.o	\
 	timeofday.o	\
@@ -20,11 +24,15 @@ SRCS= \
 	def_realm.c	\
 	defname.c	\
 	free_krbhs.c	\
+	free_hstrl.c	\
 	get_krbhst.c	\
+	hst_realm.c	\
 	localaddr.c	\
 	locate_kdc.c	\
 	lock_file.c	\
 	mstime.c	\
+	net_read.c	\
+	net_write.c	\
 	read_pwd.c	\
 	sendto_kdc.c	\
 	timeofday.c	\
