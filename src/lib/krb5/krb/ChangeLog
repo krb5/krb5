@@ -1,3 +1,8 @@
+2000-04-28  Nalin Dahyabhai  <nalin@redhat.com>
+
+	* conv_princ.c (krb5_425_conv_principal): Don't overflow buffer
+	"buf".
+
 1999-12-02  Ken Raeburn  <raeburn@mit.edu>
 
 	* init_ctx.c (get_profile_etype_list): Report an error if no

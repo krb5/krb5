@@ -1,3 +1,12 @@
+2000-04-28  Ken Raeburn  <raeburn@mit.edu>
+	    Nalin Dahyabhai  <nalin@redhat.com>
+
+	* kuserok.c (kuserok): Don't overflow buffer "pbuf".
+
+2000-04-28  Tom Yu  <tlyu@mit.edu>
+
+	* rd_req.c (krb_rd_req): Fix some uses of strcpy().
+
 1999-10-26  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,
