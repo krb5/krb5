@@ -2,7 +2,7 @@
 # Works for both k4 and k5 releases.
 #
 NAME 	 = krb5
-OBJS 	 = $(NAME).obj tktlist.obj
+OBJS 	 = cns.obj tktlist.obj
 
 ##### Options
 DEBUG 	 = 1
@@ -56,10 +56,10 @@ LFLAGS 	 = /nologo /nod /nopackcode
 
 all:: makefile $(NAME).exe
 
-$(NAME).exe: $*.def $*.res $(OBJS) $(XOBJS) $(LIBS)
+$(NAME).exe: $*.def cns.res $(OBJS) $(XOBJS) $(LIBS)
 	$(LINK) $(LFLAGS) $(OBJS) $(XOBJS), $@, $*.map, \
 	  $(LIBS) $(SYSLIBS), $*.def
-	$(RC) $(RFLAGS) /k $*.res $@
+	$(RC) $(RFLAGS) /k cns.res $@
 
 install:
 	copy $(NAME).exe ..\floppy
@@ -73,9 +73,9 @@ clean::
 	if exist *.err del *.err
 	if exist ..\floppy\$(NAME).exe del ..\floppy\$(NAME).exe
 
-$(OBJS) $(NAME).res: $(NAME).h tktlist.h
+$(OBJS) cns.res: cns.h tktlist.h
 
-$(NAME).res: clock00.ico clock05.ico clock10.ico clock15.ico clock20.ico \
+cns.res: clock00.ico clock05.ico clock10.ico clock15.ico clock20.ico \
 	     clock25.ico clock30.ico clock35.ico clock40.ico clock45.ico \
 	     clock50.ico clock55.ico clock60.ico clockexp.ico clocktkt.ico \
 	     cns.ico
