@@ -1,3 +1,9 @@
+2001-06-12  Ezra Peisach  <epeisach@mit.edu>
+
+	* asn1_k_decode.c (asn1_decode_predicted_sam_response): Use
+	asn1_decode_charstring() instead of asn1_decode_octetstring() to
+	decode krb5_data.
+
 2000-10-26  Tom Yu  <tlyu@mit.edu>
 
 	* asn1buf.c (asn1buf_sync): Add new arguments to include the full

@@ -36,7 +36,7 @@ asn1_construction construction;\
 asn1_tagnum tagnum;\
 unsigned int length,taglen
 
-#define unused_var(x) if(0) x=0
+#define unused_var(x) if(0) {x=0; x=x-x;}
 
 #define next_tag()\
 retval = asn1_get_tag_indef(&subbuf,&class,&construction,\
@@ -887,7 +887,7 @@ asn1_error_code asn1_decode_predicted_sam_response(buf, val)
     alloc_field(val->client,krb5_principal_data);
     get_field(val->client,4,asn1_decode_realm);
     get_field(val->client,5,asn1_decode_principal_name);
-    opt_string(val->msd,6,asn1_decode_octetstring);
+    opt_string(val->msd,6,asn1_decode_charstring); /* should be octet */
     end_structure();
     val->magic = KV5M_PREDICTED_SAM_RESPONSE;
   }
