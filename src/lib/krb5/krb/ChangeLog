@@ -1,3 +1,8 @@
+1999-08-17  Ken Raeburn  <raeburn@mit.edu>
+
+	* str_conv.c (krb5_timestamp_to_sfstring): Don't pass extra
+	argument to sprintf.
+
 1999-08-10	Alexandra Ellwood	<lxs@mit.edu>
 
 	* chpw.c (krb5_mk_chpw_req):
