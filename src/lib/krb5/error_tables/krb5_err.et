@@ -163,4 +163,8 @@ error_code KRB5_CONFIG_BADFORMAT,	"Improper format of configuration file"
 error_code KRB5_CONFIG_NOTENUFSPACE,	"Insufficient space to return complete information"
 
 error_code KRB5_BADMSGTYPE,		"Invalid message type specified for encoding"
+
+error_code KRB5_CC_BADNAME,		"Credential cache name malformed"
+error_code KRB5_CC_UNKNOWN_TYPE,	"Unknown credential cache type"
+
 end
