@@ -18,6 +18,8 @@ static char krb5_ktfile_resolve_c[] =
 
 #include <krb5/copyright.h>
 #include <krb5/krb5.h>
+#include <krb5/ext-proto.h>
+#include <errno.h>
 
 #include "ktfile.h"
 
@@ -28,19 +30,25 @@ krb5_ktfile_resolve(name, id)
 {
     krb5_ktfile_data *data;
 
-    if ((*id = malloc(sizeof(struct _krb5_kt))) == NULL)
-	return(KRB5_NO_MEMORY); /* XXX */
+    if ((*id = (krb5_keytab) malloc(sizeof(**id))) == NULL)
+	return(ENOMEM);
     
     (*id)->ops = &krb5_ktf_ops;
-    if ((data = (krb5_ktfile_data *)malloc(sizeof(krb5_ktfile_data))) == NULL)
-	return(KRB5_NO_MEMORY); /* XXX */
+    if ((data = (krb5_ktfile_data *)malloc(sizeof(krb5_ktfile_data))) == NULL) {
+	xfree(*id);
+	return(ENOMEM);
+    }
 
-    if ((data->name = (char *)calloc(strlen(name) + 1, sizeof(char))) == NULL)
-	return(KRB5_NO_MEMORY); /* XXX */
+    if ((data->name = (char *)calloc(strlen(name) + 1, sizeof(char))) == NULL) {
+	xfree(data);
+	xfree(*id);
+	return(ENOMEM);
+    }
 
     (void) strcpy(data->name, name);
+    data->openf = 0;
 
-    id->data = (krb5_pointer)data;
+    (*id)->data = (krb5_pointer)data;
 
     return(0); /* XXX */
 }
