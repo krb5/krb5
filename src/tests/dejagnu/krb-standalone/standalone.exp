@@ -1,4 +1,4 @@
- # Standalone Kerberos test.
+# Standalone Kerberos test.
 # This is a DejaGnu test script.
 # This script tests that the Kerberos tools can talk to each other.
 

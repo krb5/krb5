@@ -1,3 +1,39 @@
+Fri May  3 21:44:24 1996  Ken Raeburn  <raeburn@cygnus.com>
+
+	Fri Mar 29 15:05:30 1996  Chris Provenzano  <proven@cygnus.com>
+
+	* rsh.exp: Add tests for ticket forwarding.
+
+	Thu Mar 28 19:30:53 1996  Marc Horowitz  <marc@mit.edu>
+
+	* kadmin.exp and gssapi.exp: Fix syntax of expect_after blocks.
+  	The -i $foo must be inside the {, and the { must be by itself at
+ 	the end of the line.
+	* gssftp.exp (start_ftp_daemon): use krb5.conf, not krb.conf
+
+	Thu Mar 28 17:32:47 1996  Ken Raeburn  <raeburn@cygnus.com>
+
+	* gssftp.exp (ftp_test): Explicitly select binary mode.
+
+	Wed Mar 27 22:45:53 1996  Ken Raeburn  <raeburn@cygnus.com>
+
+	* kadmin.exp: Don't look at output from kadmind to drain it; that
+	problem is handled elsewhere now.
+
+	Thu Mar 14 14:57:19 1996  Mark Eichin  <eichin@cygnus.com>
+
+	* kadmin.exp (kadmin_delete, kamind_add, kadmin_add_rnd,
+	kadmin_examine, kadmin_cpw, kadmin_cpw_rnd, kadmin_modify,
+	kadmin_rename, kadmin_list, kadmin_extract, kadmin_extractv4):
+	check for "lost KDC" as well.
+
+	Sun Feb 18 00:56:52 1996  Mark W. Eichin  <eichin@cygnus.com>
+
+	* kadmin.exp (kadmin_show): extend regexp to match current kadmin
+	interface.
+	(kadmin_add): match more of extended output (tentative change,
+	should be expanded later to actually check the values.)
+
 Wed Apr 17 17:53:51 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* gssftp.exp: Fix the expect string so that it doesn't assume that

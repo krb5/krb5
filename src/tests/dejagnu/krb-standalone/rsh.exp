@@ -15,6 +15,10 @@ if ![info exists KRSHD] {
     set KRSHD [findfile $objdir/../../appl/bsd/kshd]
 }
 
+if ![info exists KLIST] {
+    set KLIST [findfile $objdir/../../clients/klist/klist]
+}
+
 # Make sure .k5login is reasonable.
 if ![check_k5login rsh] {
     return
@@ -66,6 +70,7 @@ proc stop_rsh_daemon { } {
 
 proc rsh_test { } {
     global REALMNAME
+    global KLIST
     global RSH
     global KEY
     global BINSH
@@ -144,6 +149,65 @@ proc rsh_test { } {
 	catch "close -i $spawn_id"
 	stop_rsh_daemon
     }
+
+    # Check ticket forwarding
+    set failed no
+    start_rsh_daemon -k
+    set testname "rsh forwarding tickets"
+    spawn $RSH $hostname -f -k $REALMNAME -D 3544 -A $BINSH -c $KLIST
+    expect {
+	"Ticket cache:" { }
+ 	"klist: No credentials cache file found" {
+	    fail "$testname (not forwarded)"
+	    return
+	}
+	timeout {
+	    fail "$testname (timeout)"
+	    return
+	}
+	eof {
+	    fail "$testname (eof)"
+	    return
+	}
+    }
+
+    if ![check_exit_status $testname] {
+	return
+    }
+
+    pass $testname
+
+    stop_rsh_daemon
+
+    # Check encrypted ticket forwarding
+    set failed no
+    start_rsh_daemon -e
+    set testname "encrypted rsh forwarding tickets"
+    spawn $RSH $hostname -x -f -k $REALMNAME -D 3544 -A $BINSH -c $KLIST
+    expect {
+	"Ticket cache:" { }
+ 	"klist: No credentials cache file found" {
+	    fail "$testname (not forwarded)"
+	    return
+	}
+	timeout {
+	    fail "$testname (timeout)"
+	    return
+	}
+	eof {
+	    fail "$testname (eof)"
+	    return
+	}
+    }
+
+    if ![check_exit_status $testname] {
+	return
+    }
+
+    pass $testname
+
+    stop_rsh_daemon
+
 
     # Check stderr
     start_rsh_daemon -k

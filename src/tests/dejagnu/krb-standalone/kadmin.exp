@@ -32,7 +32,6 @@ proc kadmin_add { pname password } {
     global KEY
     global spawn_id
     global tmppwd
-    global kadmind_spawn_id
 
     set good 0
     spawn $KADMIN -m -p krbtest/admin@$REALMNAME ank $pname
@@ -64,19 +63,14 @@ proc kadmin_add { pname password } {
     set k_stat [wait -i $spawn_id]
     verbose "wait -i $spawn_id returned $k_stat (kadmin add)"
     catch "close -i $spawn_id"
-    #
-    # Read the kadmind message too.  It checks the operation of kadmind,
-    # and also, on some systems the write to standard error will block if
-    # too many messages back up.
-    #
-    expect -i $kadmind_spawn_id "Add Principal operation for $pname successfully issued by krbtest/admin@$REALMNAME"
     if { $good == 1 } {
 	#
 	# use kdb5_edit to verify that a principal was created and that its
 	# salt types are 0 (normal).
 	#
 	spawn $KDB5_EDIT -r $REALMNAME
-	expect_after { -i $spawn_id
+	expect_after {
+	    -i $spawn_id
 	    timeout {
 		fail "kadmin add $pname"
 		catch "expect_after"
@@ -91,6 +85,16 @@ proc kadmin_add { pname password } {
 	set good 0
 	expect "kdb5_edit:" { send "show $pname\r" }
 	expect "Name: $pname@$REALMNAME" { set good 1 }
+
+	expect "Maximum life:" { verbose "got max life" }
+	expect "Maximum renewable life:" { verbose "got max rlife" }
+	expect "Expiration:" { verbose "got expiration" }
+	expect "Password expiration:" { verbose "got pw expiration" }
+	expect "Last successful password:" { verbose "last succ pw" }
+	expect "Last failed password attempt:" { verbose "last pw attempt" }
+	expect "Failed password attempts:" { verbose "num failed attempts" }
+	expect "Attributes:" { verbose "attributes" }
+	expect "Number of keys:" { verbose "num keys"} 
 	expect "kdb5_edit:" { send "q\r" }
 	expect_after
 	expect eof
@@ -124,7 +128,6 @@ proc kadmin_add_rnd { pname } {
     global KEY
     global spawn_id
     global tmppwd
-    global kadmind_spawn_id
 
     set good 0
     spawn $KADMIN -m -p krbtest/admin@$REALMNAME ark $pname
@@ -154,14 +157,14 @@ proc kadmin_add_rnd { pname } {
     set k_stat [wait -i $spawn_id]
     verbose "wait -i $spawn_id returned $k_stat (kadmin add_rnt)"
     catch "close -i $spawn_id"
-    expect -i $kadmind_spawn_id "Add Principal operation for $pname successfully issued by krbtest/admin@$REALMNAME"
     if { $good == 1 } {
 	#
 	# use kdb5_edit to verify that a principal was created and that its
 	# salt types are 0 (normal).
 	#
 	spawn $KDB5_EDIT -r $REALMNAME
-	expect_after { -i $spawn_id
+	expect_after {
+	     -i $spawn_id
 	    timeout {
 		fail "kadmin add_rnd $pname"
 		catch "expect_after"
@@ -248,7 +251,6 @@ proc kadmin_cpw { pname password } {
     global KADMIN
     global KEY
     global spawn_id
-    global kadmind_spawn_id
 
     spawn $KADMIN -m -p krbtest/admin@$REALMNAME cpw $pname
     expect_after {
@@ -281,7 +283,6 @@ proc kadmin_cpw { pname password } {
     set k_stat [wait -i $spawn_id]
     verbose "wait -i $spawn_id returned $k_stat (kadmin cpw)"
     catch "close -i $spawn_id"
-    expect -i $kadmind_spawn_id "Change Password operation for $pname successfully issued by krbtest/admin@$REALMNAME"
     pass "kadmin cpw $pname"
     return 1
 }
@@ -296,7 +297,6 @@ proc kadmin_cpw_rnd { pname } {
     global KADMIN
     global KEY
     global spawn_id
-    global kadmind_spawn_id
 
     spawn $KADMIN -m -p krbtest/admin@$REALMNAME crk $pname
     expect_after {
@@ -327,7 +327,6 @@ proc kadmin_cpw_rnd { pname } {
     set k_stat [wait -i $spawn_id]
     verbose "wait -i $spawn_id returned $k_stat (kadmin cpw_rnd)"
     catch "close -i $spawn_id"
-    expect -i $kadmind_spawn_id "Change Random Password operation for $pname successfully issued by krbtest/admin@$REALMNAME"
     pass "kadmin cpw_rnd $pname"
     return 1
 }
@@ -342,7 +341,6 @@ proc kadmin_modify { pname flags } {
     global KADMIN
     global KEY
     global spawn_id
-    global kadmind_spawn_id
 
     spawn $KADMIN -m -p krbtest/admin@$REALMNAME -- modent $pname $flags
     expect_after {
@@ -370,7 +368,6 @@ proc kadmin_modify { pname flags } {
     set k_stat [wait -i $spawn_id]
     verbose "wait -i $spawn_id returned $k_stat (kadmin modify)"
     catch "close -i $spawn_id"
-    expect -i $kadmind_spawn_id "Modify Principal operation for $pname successfully issued by krbtest/admin@$REALMNAME"
     pass "kadmin modify $pname"
     return 1
 }
@@ -387,7 +384,6 @@ proc kadmin_rename { pname npname } {
     global KEY
     global spawn_id
     global tmppwd
-    global kadmind_spawn_id
 
     set good 0
     spawn $KADMIN -m -p krbtest/admin@$REALMNAME -- renent -force $pname $npname
@@ -417,14 +413,14 @@ proc kadmin_rename { pname npname } {
     set k_stat [wait -i $spawn_id]
     verbose "wait -i $spawn_id returned $k_stat (kadmin rename)"
     catch "close -i $spawn_id"
-    expect -i $kadmind_spawn_id "Rename Principal operation from $pname to $npname successfully issued by krbtest/admin@$REALMNAME"
     if { $good == 1 } {
 	#
 	# use kdb5_edit to verify that the new principal was created and that its
 	# salt types are 0 (normal).
 	#
 	spawn $KDB5_EDIT -r $REALMNAME
-	expect_after { -i $spawn_id
+	expect_after {
+	    -i $spawn_id
 	    timeout {
 		fail "kadmin renent $pname $npname"
 		catch "expect_after"
@@ -636,7 +632,6 @@ proc kadmin_delete { pname } {
     global KEY
     global spawn_id
     global tmppwd
-    global kadmind_spawn_id
 
     set good 0
     spawn $KADMIN -m -p krbtest/admin@$REALMNAME -- delent -force $pname
@@ -666,13 +661,13 @@ proc kadmin_delete { pname } {
     set k_stat [wait -i $spawn_id]
     verbose "wait -i $spawn_id returned $k_stat (kadmin delent)"
     catch "close -i $spawn_id"
-    expect -i $kadmind_spawn_id "Delete Principal operation for $pname successfully issued by krbtest/admin@$REALMNAME"
     if { $good == 1 } {
 	#
 	# use kdb5_edit to verify that the old principal is not present.
 	#
 	spawn $KDB5_EDIT -r $REALMNAME
-	expect_after { -i $spawn_id
+	expect_after {
+	    -i $spawn_id
 	    timeout {
 		fail "kadmin delent $pname"
 		catch "expect_after"
@@ -715,7 +710,6 @@ proc kadmin_delete { pname } {
 #--
 proc kpasswd_cpw { princ opw npw } {
     global KPASSWD
-    global kadmind_spawn_id
 
     spawn $KPASSWD -u $princ
     expect_after {
@@ -733,7 +727,6 @@ proc kpasswd_cpw { princ opw npw } {
     expect "Enter old password for $princ:" { send "$opw\r" }
     expect "Enter new password:" { send "$npw\r" }
     expect "Re-enter new password:" { send "$npw\r" }
-    expect -i $kadmind_spawn_id "changed password for $princ"
     if ![check_exit_status "kpasswd"] {
 	fail "kpasswd $princ $npw"
 	return 0

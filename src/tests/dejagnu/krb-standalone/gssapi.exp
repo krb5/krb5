@@ -224,7 +224,8 @@ proc doit { } {
     set env(KRB5CCNAME) $tmppwd/gss_tk_0
     verbose "KRB5CCNAME=$env(KRB5CCNAME)"
     spawn $GSSCLIENT -port 5556 $hostname gssservice@$hostname "message from gsstest0"
-    expect_after -i $spawn_id {
+    expect_after {
+	-i $spawn_id
 	timeout {
 	    fail gssclient0
 	    catch "expect_after"
@@ -238,7 +239,8 @@ proc doit { } {
     }
     expect -i $spawn_id "Signature verified"
     catch "expect_after"
-    expect_after -i $gss_server_spawn_id {
+    expect_after {
+	-i $gss_server_spawn_id
 	timeout {
 	    fail gssclient0
 	    catch "expect_after"
@@ -263,7 +265,8 @@ proc doit { } {
     set env(KRB5CCNAME) $tmppwd/gss_tk_1
     verbose "KRB5CCNAME=$env(KRB5CCNAME)"
     spawn $GSSCLIENT -port 5556 $hostname gssservice@$hostname "message from gsstest1"
-    expect_after -i $spawn_id {
+    expect_after {
+	-i $spawn_id
 	timeout {
 	    fail gssclient1
 	    catch "expect_after"
@@ -277,7 +280,8 @@ proc doit { } {
     }
     expect -i $spawn_id "Signature verified"
     catch "expect_after"
-    expect_after -i $gss_server_spawn_id {
+    expect_after {
+	-i $gss_server_spawn_id
 	timeout {
 	    fail gssclient1
 	    catch "expect_after"
@@ -302,7 +306,8 @@ proc doit { } {
     set env(KRB5CCNAME) $tmppwd/gss_tk_2
     verbose "KRB5CCNAME=$env(KRB5CCNAME)"
     spawn $GSSCLIENT -port 5556 $hostname gssservice@$hostname "message from gsstest2"
-    expect_after -i $spawn_id {
+    expect_after {
+	-i $spawn_id
 	timeout {
 	    fail gssclient2
 	    catch "expect_after"
@@ -316,7 +321,8 @@ proc doit { } {
     }
     expect -i $spawn_id "Signature verified"
     catch "expect_after"
-    expect_after -i $gss_server_spawn_id {
+    expect_after {
+	-i $gss_server_spawn_id
 	timeout {
 	    fail gssclient2
 	    catch "expect_after"
@@ -341,7 +347,8 @@ proc doit { } {
     set env(KRB5CCNAME) $tmppwd/gss_tk_3
     verbose "KRB5CCNAME=$env(KRB5CCNAME)"
     spawn $GSSCLIENT -port 5556 $hostname gssservice@$hostname "message from gsstest3"
-    expect_after -i $gss_server_spawn_id {
+    expect_after {
+	-i $gss_server_spawn_id
 	timeout {
 	    fail gssclient3
 	    catch "expect_after"
@@ -356,7 +363,8 @@ proc doit { } {
     expect -i $gss_server_spawn_id "Accepted connection: \"gsstest3@$REALMNAME\" at"
     expect -i $gss_server_spawn_id "Received message: \"message from gsstest3\""
     catch "expect_after"
-    expect_after -i $spawn_id {
+    expect_after {
+	-i $spawn_id
 	timeout {
 	    fail gssclient3
 	    catch "expect_after"
@@ -389,7 +397,8 @@ proc doit { } {
     set env(KRB5CCNAME) $tmppwd/gss_tk_0
     verbose "KRB5CCNAME=$env(KRB5CCNAME)"
     spawn $GSSCLIENT -port 5557 -v2 $hostname gssservice@$hostname "message from gsstest0"
-    expect_after -i $spawn_id {
+    expect_after {
+	-i $spawn_id
 	timeout {
 	    fail gssclient0
 	    catch "expect_after"
@@ -403,7 +412,8 @@ proc doit { } {
     }
     expect -i $spawn_id "Signature verified"
     catch "expect_after"
-    expect_after -i $gss_server_spawn_id {
+    expect_after {
+	-i $gss_server_spawn_id
 	timeout {
 	    fail gssclient0
 	    catch "expect_after"
@@ -428,7 +438,8 @@ proc doit { } {
     set env(KRB5CCNAME) $tmppwd/gss_tk_1
     verbose "KRB5CCNAME=$env(KRB5CCNAME)"
     spawn $GSSCLIENT -port 5557 -v2 $hostname gssservice@$hostname "message from gsstest1"
-    expect_after -i $spawn_id {
+    expect_after {
+	-i $spawn_id
 	timeout {
 	    fail gssclient1
 	    catch "expect_after"
@@ -442,7 +453,8 @@ proc doit { } {
     }
     expect -i $spawn_id "Signature verified"
     catch "expect_after"
-    expect_after -i $gss_server_spawn_id {
+    expect_after {
+	-i $gss_server_spawn_id
 	timeout {
 	    fail gssclient1
 	    catch "expect_after"
@@ -467,7 +479,8 @@ proc doit { } {
     set env(KRB5CCNAME) $tmppwd/gss_tk_2
     verbose "KRB5CCNAME=$env(KRB5CCNAME)"
     spawn $GSSCLIENT -port 5557 -v2 $hostname gssservice@$hostname "message from gsstest2"
-    expect_after -i $spawn_id {
+    expect_after {
+	-i $spawn_id
 	timeout {
 	    fail gssclient2
 	    catch "expect_after"
@@ -481,7 +494,8 @@ proc doit { } {
     }
     expect -i $spawn_id "Signature verified"
     catch "expect_after"
-    expect_after -i $gss_server_spawn_id {
+    expect_after {
+	-i $gss_server_spawn_id
 	timeout {
 	    fail gssclient2
 	    catch "expect_after"
@@ -506,7 +520,8 @@ proc doit { } {
     set env(KRB5CCNAME) $tmppwd/gss_tk_3
     verbose "KRB5CCNAME=$env(KRB5CCNAME)"
     spawn $GSSCLIENT -port 5557 -v2 $hostname gssservice@$hostname "message from gsstest3"
-    expect_after -i $gss_server_spawn_id {
+    expect_after {
+	-i $gss_server_spawn_id
 	timeout {
 	    fail gssclient3
 	    catch "expect_after"
@@ -521,7 +536,8 @@ proc doit { } {
     expect -i $gss_server_spawn_id "Accepted connection: \"gsstest3@$REALMNAME\" at"
     expect -i $gss_server_spawn_id "Received message: \"message from gsstest3\""
     catch "expect_after"
-    expect_after -i $spawn_id {
+    expect_after {
+	-i $spawn_id
 	timeout {
 	    fail gssclient3
 	    catch "expect_after"
