@@ -273,7 +273,7 @@ else {
 &Pick('>', $outfile) &&
     (print $fh '');
 &Pick('>', $outfile) &&
-    (print $fh '#if (defined(unix) || defined(_AIX)) && !(defined(__MACH__) && defined(__APPLE__))');
+    (print $fh '#if !defined(_MSDOS) && !defined(_WIN32) && !defined(macintosh) && !(defined(__MACH__) && defined(__APPLE__))');
 &Pick('>', $outfile) &&
     (print $fh 'struct et_list {');
 &Pick('>', $outfile) &&
