@@ -293,8 +293,7 @@ FILES= ./* \
 WINFILES= util/windows/* windows/* windows/lib/* windows/cns/* \
 	windows/wintel/* windows/gss/* windows/gina/*
 
-MACFILES= mac/* mac/kconfig/* mac/libraries/* mac/telnet-k5-auth/* \
-	mac/gss-sample/* mac/SAP/* config/* include/* \
+MACFILES= mac/* mac/kconfig/* mac/libraries/* config/* include/* \
 	include/krb5/* include/krb5/stock/* include/sys/* \
 	./patchlevel.h
 
