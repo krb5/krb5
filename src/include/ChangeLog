@@ -1,3 +1,13 @@
+1998-11-13  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in: Set the myfulldir and mydir variables (which are
+		relative to buildtop and thisconfigdir, respectively.)
+		Add a MY_SUBDIRS definition to control the directories
+		which are recursively descended by the Makefile.
+
+	* configure.in: Folded tests from krb5 and kerberosIV directories
+		into this configure.in file.
+
 1998-10-26  Marc Horowitz  <marc@mit.edu>
 
 	* krb5.hin: add new interfaces for new crypto API and key
