@@ -147,10 +147,10 @@ krb5_fcc_store_keyblock(context, id, keyblock)
      krb5_fcc_data *data = (krb5_fcc_data *)id->data;
      krb5_error_code ret;
 
-     ret = krb5_fcc_store_ui_2(context, id, keyblock->keytype);
+     ret = krb5_fcc_store_ui_2(context, id, keyblock->enctype);
      CHECK(ret);
      if (data->version == KRB5_FCC_FVNO_3) {
-	 ret = krb5_fcc_store_ui_2(context, id, keyblock->keytype);
+	 ret = krb5_fcc_store_ui_2(context, id, keyblock->enctype);
 	 CHECK(ret);
      }
      ret = krb5_fcc_store_int32(context, id, keyblock->length);

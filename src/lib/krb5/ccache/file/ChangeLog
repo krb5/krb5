@@ -1,3 +1,6 @@
+Wed Sep 06 14:20:57 1995   Chris Provenzano (proven@mit.edu)
+
+        * file_read.c, file_write.c : s/keytype/enctype/g, s/KEYTYPE/ENCTYPE/g
 
 Tue Sep 05 22:58:52 1995
 
