@@ -238,7 +238,7 @@ tgt_again:
 	goto cleanup;
     }
     useetype = request->etype[i];
-    krb5_use_keytype(kdc_context, &eblock, useetype);
+    krb5_use_cstype(kdc_context, &eblock, useetype);
 
     retval = krb5_random_key(kdc_context, &eblock, krb5_csarray[useetype]->random_sequence,
 			     &session_key);

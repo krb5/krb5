@@ -1,3 +1,10 @@
+Fri Feb 10 14:35:42 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* do_tgs_req.c (process_tgs_req): krb5_use_keytype() was being
+		called when the argument was a encryption type.   Change
+		use to krb5_use_cstype().  Actually, any use of
+		krb5_use_keytype() is a bug by definition.
+
 Wed Feb 01 21:07:03 1995  Chris Provenzano (proven@mit.edu)
 
 	* kdc_util.c (kdc_rdreq_keyproc()) Add krb5_keytype() arg.
