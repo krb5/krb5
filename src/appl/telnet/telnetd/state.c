@@ -89,7 +89,7 @@ static void sb_auth_complete()
   if (!auth_negotiated) {
     static char *error =
       "An environment option was sent before authentication negotiation completed.\r\nThis may create a security hazard. Connection dropped.\r\n";
-    writenet(error, strlen(error));
+    netputs(error);
     netflush();
     exit(1);
   }
@@ -212,9 +212,7 @@ gotiac:			switch (c) {
 				}
 
 				netclear();	/* clear buffer back */
-				*nfrontp++ = IAC;
-				*nfrontp++ = DM;
-				neturg = nfrontp-1; /* off by one XXX */
+				netprintf_urg("%c%c", IAC, DM);
 				DIAG(TD_OPTIONS,
 					printoption("td: send IAC", DM));
 				break;
@@ -384,9 +382,12 @@ gotiac:			switch (c) {
 		pfrontp = opfrontp;
 		pfrontp += term_input(xptyobuf, pfrontp, n, BUFSIZ+NETSLOP,
 					xbuf2, &oc, BUFSIZ);
-		for (cp = xbuf2; oc > 0; --oc)
-			if ((*nfrontp++ = *cp++) == IAC)
-				*nfrontp++ = IAC;
+		for (cp = xbuf2; oc > 0; --oc) {
+			if (*cp == IAC)
+				netprintf("%c%c", *cp++, IAC);
+			else
+				netprintf("%c", *cp++);
+		}
 	}
 #endif	/* defined(CRAY2) && defined(UNICOS5) */
 }  /* end of telrcv */
@@ -466,8 +467,7 @@ send_do(option, init)
 			set_his_want_state_will(option);
 		do_dont_resp[option]++;
 	}
-	(void) sprintf(nfrontp, (char *)doopt, option);
-	nfrontp += sizeof (dont) - 2;
+	netprintf((char *)doopt, option);
 
 	DIAG(TD_OPTIONS, printoption("td: send do", option));
 }
@@ -686,8 +686,7 @@ send_dont(option, init)
 		set_his_want_state_wont(option);
 		do_dont_resp[option]++;
 	}
-	(void) sprintf(nfrontp, (char *)dont, option);
-	nfrontp += sizeof (doopt) - 2;
+	netprintf((char *)dont, option);
 
 	DIAG(TD_OPTIONS, printoption("td: send dont", option));
 }
@@ -836,8 +835,7 @@ send_will(option, init)
 		set_my_want_state_will(option);
 		will_wont_resp[option]++;
 	}
-	(void) sprintf(nfrontp, (char *)will, option);
-	nfrontp += sizeof (doopt) - 2;
+	netprintf((char *)will, option);
 
 	DIAG(TD_OPTIONS, printoption("td: send will", option));
 }
@@ -996,8 +994,7 @@ send_wont(option, init)
 		set_my_want_state_wont(option);
 		will_wont_resp[option]++;
 	}
-	(void) sprintf(nfrontp, (char *)wont, option);
-	nfrontp += sizeof (wont) - 2;
+	netprintf((char *)wont, option);
 
 	DIAG(TD_OPTIONS, printoption("td: send wont", option));
 }
@@ -1396,10 +1393,8 @@ suboption()
 	    env_ovar_wrong:
 			env_ovar = OLD_ENV_VALUE;
 			env_ovalue = OLD_ENV_VAR;
-			DIAG(TD_OPTIONS, {sprintf(nfrontp,
-				"ENVIRON VALUE and VAR are reversed!\r\n");
-				nfrontp += strlen(nfrontp);});
-
+			DIAG(TD_OPTIONS,
+			     netputs("ENVIRON VALUE and VAR are reversed!\r\n"));
 		}
 	    }
 	    SB_RESTORE();
@@ -1638,7 +1633,7 @@ send_status()
 	ADD(IAC);
 	ADD(SE);
 
-	writenet(statusbuf, ncp - statusbuf);
+	netwrite(statusbuf, ncp - statusbuf);
 	netflush();	/* Send it on its way */
 
 	DIAG(TD_OPTIONS,

@@ -1,3 +1,38 @@
+2001-08-02  Tom Yu  <tlyu@mit.edu>
+
+	* authenc.c (net_write): Rewrite in terms of netwrite().
+
+	* configure.in: Check for vsnprintf().
+
+	* ext.h: New prototypes for netprintf, netprintf_urg,
+	netprintf_noflush, netwrite, netputs.
+
+	* slc.c: Fix to use new NETOBUF-handling functions.
+
+	* state.c: Fix to use new NETOBUF-handling functions.
+
+	* telnetd.c: Fix to use new NETOBUF-handling functions.
+
+	* termstat.c: Fix to use new NETOBUF-handling functions.
+
+	* utility.c: General rework to be more paranoid about
+	bounds-checking of NETOBUF and NFRONTP.  Abstract away
+	interactions with NETOBUF to eliminate explicit references to
+	NFRONTP in many places.
+	(netwrite): New function; copies a buffer to the
+	NETOBUF "ring buffer", checking bounds and calling netflush() if
+	needed.
+	(netputs): New function; calls netwrite() with a nul-terminated
+	string.
+	(netprintf, netprintf_ext): New function; wrap sprintf() with
+	bounds checking for use with NETOBUF.
+	(netprintf_urg): New function; like netprintf() except sets neturg
+	to point at last char written.
+	(netprintf_noflush): New function; like netprintf() except
+	silently fails if NETOBUF is full.
+	(ttloop, printoption, printsub, printdata): Fix to use new
+	NETOBUF-handling functions.
+
 2001-07-23  Ezra Peisach  <epeisach@mit.edu>
 
 	* sys_term.c (startslave): Get rid of extra argument in call to

@@ -693,7 +693,7 @@ static void encrypt_failure()
     char *lerror_message =
 	"Encryption was not successfully negotiated.  Goodbye.\r\n\r\n";
 
-    writenet(lerror_message, strlen(lerror_message));
+    netputs(lerror_message);
     netflush();
     exit(1);
 }
@@ -779,51 +779,26 @@ getterminaltype(name)
     if (his_state_is_will(TELOPT_TSPEED)) {
 	static unsigned char sb[] =
 			{ IAC, SB, TELOPT_TSPEED, TELQUAL_SEND, IAC, SE };
-
-	if(nfrontp - netobuf + sizeof(sb) < sizeof(netobuf)) {
-	    memcpy(nfrontp, sb, sizeof(sb));
-	    nfrontp += sizeof(sb);
-	    *nfrontp = '\0';
-	}
+	netwrite(sb, sizeof(sb));
     }
     if (his_state_is_will(TELOPT_XDISPLOC)) {
 	static unsigned char sb[] =
 			{ IAC, SB, TELOPT_XDISPLOC, TELQUAL_SEND, IAC, SE };
-
-	if(nfrontp - netobuf + sizeof(sb) < sizeof(netobuf)) {
-	    memcpy(nfrontp, sb, sizeof(sb));
-	    nfrontp += sizeof(sb);
-	    *nfrontp = '\0';
-	}
+	netwrite(sb, sizeof(sb));
     }
     if (his_state_is_will(TELOPT_NEW_ENVIRON)) {
 	static unsigned char sb[] =
 			{ IAC, SB, TELOPT_NEW_ENVIRON, TELQUAL_SEND, IAC, SE };
-
-	if(nfrontp - netobuf + sizeof(sb) < sizeof(netobuf)) {
-	    memcpy(nfrontp, sb, sizeof(sb));
-	    nfrontp += sizeof(sb);
-	    *nfrontp = '\0';
-	}
+	netwrite(sb, sizeof(sb));
     }
     else if (his_state_is_will(TELOPT_OLD_ENVIRON)) {
 	static unsigned char sb[] =
 			{ IAC, SB, TELOPT_OLD_ENVIRON, TELQUAL_SEND, IAC, SE };
-
-	if(nfrontp - netobuf + sizeof(sb) < sizeof(netobuf)) {
-	    memcpy(nfrontp, sb, sizeof(sb));
-	    nfrontp += sizeof(sb);
-	    *nfrontp = '\0';
-	}
+	netwrite(sb, sizeof(sb));
     }
-    if (his_state_is_will(TELOPT_TTYPE)) {
+    if (his_state_is_will(TELOPT_TTYPE))
+	netwrite(ttytype_sbbuf, sizeof(ttytype_sbbuf));
 
-	if(nfrontp - netobuf + sizeof(ttytype_sbbuf) < sizeof(netobuf)) {
-	    memcpy(nfrontp, ttytype_sbbuf, sizeof(ttytype_sbbuf));
-	    nfrontp += sizeof(ttytype_sbbuf);
-	    *nfrontp = '\0';
-	}
-    }
     if (his_state_is_will(TELOPT_TSPEED)) {
 	while (sequenceIs(tspeedsubopt, baseline))
 	    ttloop();
@@ -900,11 +875,7 @@ _gettermname()
     if (his_state_is_wont(TELOPT_TTYPE))
 	return;
     settimer(baseline);
-    if(nfrontp - netobuf + sizeof(ttytype_sbbuf)) {
-    	memcpy(nfrontp, ttytype_sbbuf, sizeof(ttytype_sbbuf));
-    	nfrontp += sizeof(ttytype_sbbuf);
-	*nfrontp = '\0';
-    }
+    netwrite(ttytype_sbbuf, sizeof(ttytype_sbbuf));
     while (sequenceIs(ttypesubopt, baseline))
 	ttloop();
 }
@@ -1178,9 +1149,7 @@ telnet(f, p, host)
 	 * mode, which we do not want.
 	 */
 	if (his_want_state_is_will(TELOPT_ECHO)) {
-		DIAG(TD_OPTIONS,
-			{sprintf(nfrontp, "td: simulating recv\r\n");
-			 nfrontp += strlen(nfrontp);});
+		DIAG(TD_OPTIONS, netputs("td: simulating recv\r\n"));
 		willoption(TELOPT_ECHO);
 	}
 
@@ -1309,9 +1278,7 @@ telnet(f, p, host)
 	localstat();
 #endif	/* LINEMODE */
 
-	DIAG(TD_REPORT,
-		{sprintf(nfrontp, "td: Entering processing loop\r\n");
-		 nfrontp += strlen(nfrontp);});
+	DIAG(TD_REPORT, netputs("td: Entering processing loop\r\n"));
 
 #ifdef	convex
 	startslave(host);
@@ -1436,8 +1403,7 @@ telnet(f, p, host)
 			netip = netibuf;
 		    }
 		    DIAG((TD_REPORT | TD_NETDATA),
-			    {sprintf(nfrontp, "td: netread %d chars\r\n", ncc);
-			     nfrontp += strlen(nfrontp);});
+			 netprintf("td: netread %d chars\r\n", ncc));
 		    DIAG(TD_NETDATA, printdata("nd", netip, ncc));
 		}
 
@@ -1484,9 +1450,7 @@ telnet(f, p, host)
 					 * royally if we send them urgent
 					 * mode data.
 					 */
-					*nfrontp++ = IAC;
-					*nfrontp++ = DM;
-					neturg = nfrontp-1; /* off by one XXX */
+					netprintf_urg("%c%c", IAC, DM);
 #endif
 				}
 				if (his_state_is_will(TELOPT_LFLOW) &&
@@ -1496,13 +1460,11 @@ telnet(f, p, host)
 					    ptyibuf[0] & TIOCPKT_DOSTOP ? 1 : 0;
 					if (newflow != flowmode) {
 						flowmode = newflow;
-						(void) sprintf(nfrontp,
-							"%c%c%c%c%c%c",
+						netprintf("%c%c%c%c%c%c",
 							IAC, SB, TELOPT_LFLOW,
 							flowmode ? LFLOW_ON
 								 : LFLOW_OFF,
 							IAC, SE);
-						nfrontp += 6;
 					}
 				}
 				pcc--;
@@ -1525,19 +1487,19 @@ telnet(f, p, host)
 				break;
 			c = *ptyip++ & 0377, pcc--;
 			if (c == IAC)
-				*nfrontp++ = c;
+				netprintf("%c", c);
 #if	defined(CRAY2) && defined(UNICOS5)
 			else if (c == '\n' &&
 				     my_state_is_wont(TELOPT_BINARY) && newmap)
-				*nfrontp++ = '\r';
+				netputs("\r");
 #endif	/* defined(CRAY2) && defined(UNICOS5) */
-			*nfrontp++ = c;
+			netprintf("%c", c);
 			if ((c == '\r') && (my_state_is_wont(TELOPT_BINARY))) {
 				if (pcc > 0 && ((*ptyip & 0377) == '\n')) {
-					*nfrontp++ = *ptyip++ & 0377;
+					netprintf("%c", *ptyip++ & 0377);
 					pcc--;
 				} else
-					*nfrontp++ = '\0';
+					netprintf("%c", '\0');
 			}
 		}
 #if	defined(CRAY2) && defined(UNICOS5)
@@ -1699,7 +1661,7 @@ sendsusp()
  * When we get an AYT, if ^T is enabled, use that.  Otherwise,
  * just send back "[Yes]".
  */
-	void
+void
 recv_ayt()
 {
 #if	defined(SIGINFO) && defined(TCSIG)
@@ -1708,10 +1670,7 @@ recv_ayt()
 		return;
 	}
 #endif
-	(void) strncpy(nfrontp, "\r\n[Yes]\r\n",
-		       sizeof(netobuf) - 1 - (nfrontp - netobuf));
-	nfrontp += 9;
-	*nfrontp = '\0';
+	netputs("\r\n[Yes]\r\n");
 }
 
 	void
