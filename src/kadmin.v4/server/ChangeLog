@@ -1,4 +1,8 @@
 
+Mon Jul 17 15:12:30 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* kadm_ser_wrap.c - Add NULL stash file argument to krb5_db_fetch_mkey.
+
+
 Fri Jul 7 16:05:11 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in - Remove all explicit library handling and LDFLAGS.
 	* configure.in - Add USE_<mumble> and KRB5_LIBRARIES.

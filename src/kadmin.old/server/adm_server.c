@@ -239,6 +239,7 @@ process_args(context, argc, argv)
 		&master_encblock, 
 		manual,
 		FALSE,			/* only read it once, if at all */
+		(char *) NULL,		/* No stash file */
 		0,			/* No salt supplied */
 		&master_keyblock)) {
 	com_err(argv[0], retval, "while fetching master key");

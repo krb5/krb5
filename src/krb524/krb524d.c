@@ -227,6 +227,7 @@ void init_master(context)
      if ((ret = krb5_db_fetch_mkey(context, master_princ, &master_encblock,
 				  FALSE, /* non-manual type-in */
 				  FALSE, /* irrelevant, given prev. arg */
+				  (char *) NULL,
 				  0, &master_keyblock))) {
 	  com_err(whoami, ret, "while fetching master key");
 	  cleanup_and_exit(1, context);

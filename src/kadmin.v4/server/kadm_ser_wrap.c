@@ -89,7 +89,7 @@ kadm_ser_init(inter, realm)
 	return KADM_NO_MAST;
     krb5_db_fetch_mkey(kadm_context, server_parm.master_princ,
 		       &server_parm.master_encblock,
-		       (inter == 1), FALSE, NULL,
+		       (inter == 1), FALSE, (char *) NULL, NULL,
 		       &server_parm.master_keyblock);
     if (retval)
 	return KADM_NO_MAST;
