@@ -6,7 +6,7 @@
  * Copyright 1989,1990 by the Massachusetts Institute of Technology.
  *
  * For copying and distribution information, please see the file
- * <krb5/mit-copyright.h>.
+ * <krb5/copyright.h>.
  *
  * Encryption interface-related declarations
  */
@@ -40,11 +40,13 @@ typedef struct _krb5_cryptosystem_entry {
     krb5_error_code (*encrypt_func) PROTOTYPE((const krb5_pointer /* in */,
 					       krb5_pointer /* out */,
 					       const size_t,
-					       krb5_encrypt_block *));
+					       krb5_encrypt_block *,
+					       krb5_pointer));
     krb5_error_code (*decrypt_func) PROTOTYPE((const krb5_pointer /* in */,
 					       krb5_pointer /* out */,
 					       const size_t,
-					       krb5_encrypt_block *));
+					       krb5_encrypt_block *,
+					       krb5_pointer));
     krb5_error_code (*process_key) PROTOTYPE((krb5_encrypt_block *,
 					      const krb5_keyblock *));
     krb5_error_code (*finish_key) PROTOTYPE((krb5_encrypt_block *));
@@ -76,10 +78,9 @@ typedef struct _krb5_cs_table_entry {
 /* could be used in a table to find a sumtype */
 typedef struct _krb5_checksum_entry {
     krb5_error_code  (*sum_func) PROTOTYPE ((krb5_pointer /* in */,
-					     krb5_pointer /* out */,
-					     krb5_pointer /* seed */,
 					     size_t /* in_length */,
-					     size_t /* seed_length */,
+					     krb5_pointer /* key/seed */,
+					     size_t /* key/seed size */,
 					     krb5_checksum * /* out_cksum */));
     int checksum_length;		/* length of stuff returned by
 					   sum_func */
