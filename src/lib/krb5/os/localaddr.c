@@ -30,7 +30,7 @@
 #define NEED_SOCKETS
 #include "k5-int.h"
 
-#ifndef _MSDOS
+#if !defined(HAVE_MACSOCK_H) && !defined(_MSDOS)
 
 /* needed for solaris, harmless elsewhere... */
 #define BSD_COMP
@@ -109,7 +109,7 @@ krb5_os_localaddr(addr)
     code = ioctl (s, SIOCGIFCONF, (char *)&ifc);
     if (code < 0) {
 	int retval = errno;
-	close(s);
+	closesocket (s);
 	return retval;
     }
     n = ifc.ifc_len / sizeof (struct ifreq);
@@ -220,7 +220,7 @@ krb5_os_localaddr(addr)
     return 0;
 }
 
-#else /* DOS version */
+#else /* Windows/Mac version */
 
 /* No ioctls in winsock so we just assume there is only one networking 
  * card per machine, so gethostent is good enough. 
@@ -236,25 +236,28 @@ krb5_os_localaddr (krb5_address ***addr) {
     if (*addr == NULL)
         return ENOMEM;
 
+#ifdef HAVE_MACSOCK_H
+    hostrec = getmyipaddr();
+#else /* HAVE_MACSOCK_H */
     if (gethostname (host, sizeof(host))) {
         err = WSAGetLastError();
         return err;
     }
-        
 
     hostrec = gethostbyname (host);
     if (hostrec == NULL) {
         err = WSAGetLastError();
         return err;
     }
+#endif /* HAVE_MACSOCK_H */
 
     (*addr)[0] = calloc (1, sizeof(krb5_address));
     if ((*addr)[0] == NULL) {
         free (*addr);
         return ENOMEM;
     }
-    (*addr)[0]->addrtype = ADDRTYPE_INET;
-    (*addr)[0]->length = sizeof(struct in_addr);
+    (*addr)[0]->addrtype = hostrec->h_addrtype;
+    (*addr)[0]->length = hostrec->h_length;
     (*addr)[0]->contents = (unsigned char *)malloc((*addr)[0]->length);
     if (!(*addr)[0]->contents) {
         free((*addr)[0]);
@@ -262,9 +265,10 @@ krb5_os_localaddr (krb5_address ***addr) {
         return ENOMEM;
     } else {
         memcpy ((char *)(*addr)[0]->contents,
-                (char *)hostrec->h_addr,
+                (char *)&hostrec->h_addr,
                 (*addr)[0]->length);
     }
+	/* FIXME, deal with the case where gethostent returns multiple addrs */
 
     return(0);
 }

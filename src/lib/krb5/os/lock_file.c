@@ -24,12 +24,16 @@
  * libos: krb5_lock_file routine
  */
 
-#ifndef _MSDOS
+#include "k5-int.h"
+#include <stdio.h>
+
+#if !defined(_MSDOS) && !defined(HAVE_MACSOCK_H)
+
+/* Unix version...  */
+
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#include "k5-int.h"
-#include <stdio.h>
 
 #ifdef POSIX_FILE_LOCKS
 #include <errno.h>
@@ -43,8 +47,6 @@
 #define EXCLUSIVE_LOCK	LOCK_EX
 #define UNLOCK_LOCK	LOCK_UN
 #endif
-
-#include <sys/types.h>
 
 extern int errno;
 
@@ -104,9 +106,7 @@ krb5_lock_file(context, filep, pathname, mode)
 #endif
     return 0;
 }
-#else   /* MSDOS */
-
-#include "k5-int.h"
+#else   /* MSDOS or Macintosh */
 
 krb5_error_code INTERFACE
 krb5_lock_file(context, filep, pathname, mode)

@@ -1,3 +1,25 @@
+Tue Mar 28 18:35:20 1995  John Gilmore  (gnu at toad.com)
+
+	* DNR.c:  Add Apple MacTCP source file for domain name resolution.
+	* macsock.c:  Add fake socket support routines for MacTCP.
+	* Makefile.in (OBJS, SRCS):  Add DNR and macsock.
+	* ccdefname.c:  On Mac, default cred cache is "STDIO:krb5cc" for now.
+	FIXME, this needs to find the Preferences folder and use that.
+	FIXME, shouldn't be conditioned on HAVE_MACSOCK_H.
+	* gmt_mktime.c:  Use HAVE_SYS_TYPES_H.
+	* krbfileio.c:  Remove <sys/types.h>.
+	* localaddr.c, sendto_kdc.c:  Convert to more generic socket
+	support.  Use closesocket instead of close, SOCKET_ERRNO rather
+	than errno, SOCKET rather than int, etc.
+	* localaddr.c:  Use getmyipaddr() from macsock.c, if on Mac.
+	Add FIXME for multiple local addresses.
+	* lock_file.c:  Provide a dummy version for MacOS.
+	* read_pwd.c (ECHO_PASSWORD):  Add #ifdef's to avoid all the ioctls
+	and other stuff that turn off echoing.  This is useful for debugging
+	on MacOS.  FIXME:  ECHO_PASSWORD needs to be added to configure.in.
+	* ustime.c:  Bring in Mac-specific time-and-timezone code.  It
+	probably isn't hooked up correctly, yet.
+
 Mon Mar 27 14:16:39 1995  John Gilmore  (gnu at toad.com)
 
 	* full_ipadr.c, gen_rname.c, port2ip.c, read_msg.c, write_msg.c:

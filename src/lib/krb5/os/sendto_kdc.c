@@ -29,7 +29,6 @@
 #define NEED_LOWLEVEL_IO
 #include "k5-int.h"
 
-#include <sys/types.h>
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
 #else
@@ -69,7 +68,7 @@ krb5_sendto_kdc (context, message, realm, reply)
     int naddr;
     int sent, nready;
     krb5_error_code retval;
-    int *socklist;
+    SOCKET *socklist;
     fd_set readable;
     struct timeval waitlen;
     int cc;
@@ -83,14 +82,14 @@ krb5_sendto_kdc (context, message, realm, reply)
     if (naddr == 0)
 	return KRB5_REALM_UNKNOWN;
 
-    socklist = (int *)malloc(naddr * sizeof(int));
+    socklist = (SOCKET *)malloc(naddr * sizeof(SOCKET));
     if (socklist == NULL) {
 	krb5_xfree(addr);
 	krb5_xfree(socklist);
 	return ENOMEM;
     }
     for (i = 0; i < naddr; i++)
-	socklist[i] = -1;
+	socklist[i] = INVALID_SOCKET;
 
     if (!(reply->data = malloc(krb5_max_dgram_size))) {
 	krb5_xfree(addr);
@@ -110,7 +109,7 @@ krb5_sendto_kdc (context, message, realm, reply)
 	    /* send to the host, wait timeout seconds for a response,
 	       then move on. */
 	    /* cache some sockets for each host */
-	    if (socklist[host] == -1) {
+	    if (socklist[host] == INVALID_SOCKET) {
 		/* XXX 4.2/4.3BSD has PF_xxx = AF_xxx, so the socket
 		   creation here will work properly... */
 		/*
@@ -122,7 +121,7 @@ krb5_sendto_kdc (context, message, realm, reply)
 		 * within a given protocol family.
 		 */
 		socklist[host] = socket(addr[host].sa_family, SOCK_DGRAM, 0);
-		if (socklist[host] == -1)
+		if (socklist[host] == INVALID_SOCKET)
 		    continue;		/* try other hosts */
 		/* have a socket to send/recv from */
 		/* On BSD systems, a connected UDP socket will get connection
@@ -131,7 +130,7 @@ krb5_sendto_kdc (context, message, realm, reply)
 		   sendto, recvfrom.  The connect here may return an error if
 		   the destination host is known to be unreachable. */
 		if (connect(socklist[host],
-			    &addr[host], sizeof(addr[host])) == -1)
+			    &addr[host], sizeof(addr[host])) == SOCKET_ERROR)
 		  continue;
 	    }
 	    if (send(socklist[host],
@@ -142,19 +141,19 @@ krb5_sendto_kdc (context, message, realm, reply)
 	    waitlen.tv_sec = timeout;
 	    FD_ZERO(&readable);
 	    FD_SET(socklist[host], &readable);
-	    if (nready = select(1 + socklist[host],
+	    if (nready = select(SOCKET_NFDS(socklist[host]),
 				&readable,
 				0,
 				0,
 				&waitlen)) {
-		if (nready == -1) {
-		    if (errno == EINTR)
+		if (nready == SOCKET_ERROR) {
+		    if (SOCKET_ERRNO == SOCKET_EINTR)
 			goto retry;
-		    retval = errno;
+		    retval = SOCKET_ERRNO;
 		    goto out;
 		}
 		if ((cc = recv(socklist[host],
-			       reply->data, reply->length, 0)) == -1)
+			       reply->data, reply->length, 0)) == SOCKET_ERROR)
 		  {
 		    /* man page says error could be:
 		       EBADF: won't happen
@@ -169,7 +168,7 @@ krb5_sendto_kdc (context, message, realm, reply)
 		       server (i.e. don't set sent = 1).
 		       */
 
-		    if (errno == EINTR)
+		    if (SOCKET_ERRNO == SOCKET_EINTR)
 		      sent = 1;
 		    continue;
 		  }
@@ -199,8 +198,8 @@ krb5_sendto_kdc (context, message, realm, reply)
     retval = KRB5_KDC_UNREACH;
  out:
     for (i = 0; i < naddr; i++)
-	if (socklist[i] != -1)
-	    (void) close(socklist[i]);
+	if (socklist[i] != INVALID_SOCKET)
+	    (void) closesocket (socklist[i]);
     krb5_xfree(addr);
     krb5_xfree(socklist);
     if (retval) {

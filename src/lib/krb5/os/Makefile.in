@@ -7,6 +7,7 @@ CFLAGS = $(CCOPTS) $(DEFS)
 OBJS= \
 	an_to_ln.$(OBJEXT)	\
 	def_realm.$(OBJEXT)	\
+	DNR.$(OBJEXT)	\
 	ccdefname.$(OBJEXT)	\
 	free_krbhs.$(OBJEXT)	\
 	free_hstrl.$(OBJEXT)	\
@@ -23,6 +24,7 @@ OBJS= \
 	localaddr.$(OBJEXT)	\
 	locate_kdc.$(OBJEXT)	\
 	lock_file.$(OBJEXT)	\
+	macsock.$(OBJEXT)	\
 	net_read.$(OBJEXT)	\
 	net_write.$(OBJEXT)	\
 	osconfig.$(OBJEXT)	\
@@ -40,6 +42,7 @@ OBJS= \
 SRCS= \
 	$(srcdir)/an_to_ln.c	\
 	$(srcdir)/def_realm.c	\
+	$(srcdir)/DNR.c	\
 	$(srcdir)/ccdefname.c	\
 	$(srcdir)/free_krbhs.c	\
 	$(srcdir)/free_hstrl.c	\
@@ -56,6 +59,7 @@ SRCS= \
 	$(srcdir)/localaddr.c	\
 	$(srcdir)/locate_kdc.c	\
 	$(srcdir)/lock_file.c	\
+	$(srcdir)/macsock.c	\
 	$(srcdir)/net_read.c	\
 	$(srcdir)/net_write.c	\
 	$(srcdir)/osconfig.c	\

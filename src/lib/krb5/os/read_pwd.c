@@ -35,6 +35,12 @@
 #include <sgtty.h>
 #endif
 
+extern int errno;
+
+#ifdef ECHO_PASSWORD
+#define cleanup(errcode) (void) signal(SIGINT, ointrfunc); return errcode;
+#else
+
 /* POSIX_* are auto-magically defined in <krb5/config.h> at source
    configuration time. */
 
@@ -43,8 +49,6 @@
 #else
 #include <sys/ioctl.h>
 #endif /* POSIX_TERMIOS */
-
-extern int errno;
 
 #ifdef POSIX_TERMIOS
 #define cleanup(errcode) (void) signal(SIGINT, ointrfunc); tcsetattr(fd, TCSANOW, &save_control); return errcode;
@@ -55,6 +59,8 @@ extern int errno;
 #define cleanup(errcode) (void) signal(SIGINT, ointrfunc); ioctl(fd, TIOCSETP, (char *)&tty_savestate); return errcode;
 #endif /* sun */
 #endif /* POSIX_TERMIOS */
+
+#endif /* ECHO_PASSWORD */
 
 static jmp_buf pwd_jump;
 
@@ -83,6 +89,7 @@ krb5_read_password(context, prompt, prompt2, return_pwd, size_return)
     register char *ptr;
     int scratchchar;
     krb5_sigtype (*ointrfunc)();
+#ifndef ECHO_PASSWORD
 #ifdef POSIX_TERMIOS
     struct termios echo_control, save_control;
     int fd;
@@ -97,7 +104,7 @@ krb5_read_password(context, prompt, prompt2, return_pwd, size_return)
         errno=ENOTTY; /* say innapropriate ioctl for device */
 	return errno;
     }
-#endif /* sun */
+#endif /* notdef */
 
     if (tcgetattr(fd, &echo_control) == -1)
 	return errno;
@@ -122,7 +129,7 @@ krb5_read_password(context, prompt, prompt2, return_pwd, size_return)
         errno=ENOTTY; /* say innapropriate ioctl for device */
 	return errno;
     }
-#endif /* sun */
+#endif /* notdef */
 
     /* save terminal state */
     if (
@@ -146,6 +153,8 @@ krb5_read_password(context, prompt, prompt2, return_pwd, size_return)
 	== -1)
 	return errno;
 #endif
+
+#endif /* ECHO_PASSWORD */
 
     if (setjmp(pwd_jump)) {
 	/* interrupted */
@@ -222,6 +231,7 @@ krb5_read_password(context, prompt, prompt2, return_pwd, size_return)
     /* reset intrfunc */
     (void) signal(SIGINT, ointrfunc);
 
+#ifndef ECHO_PASSWORD
 #ifdef POSIX_TERMIOS
     if (tcsetattr(fd, TCSANOW, &save_control) == -1)
 	return errno;
@@ -235,6 +245,7 @@ krb5_read_password(context, prompt, prompt2, return_pwd, size_return)
 	== -1)
 	return errno;
 #endif
+#endif /* ECHO_PASSWORD */
     *size_return = strlen(return_pwd);
 
     return 0;

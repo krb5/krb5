@@ -39,7 +39,6 @@ static char *VersionID = "@(#)krbfileio.c	2 - 08/22/91";
 #ifdef HAVE_SYS_FILE_H
 #include <sys/file.h>
 #endif
-#include <sys/types.h>
 #ifdef NEED_SYS_FCNTL_H
 #include <sys/fcntl.h>
 #endif
