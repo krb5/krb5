@@ -1,3 +1,5 @@
+datadir=@datadir@
+
 thisconfigdir=.
 myfulldir=.
 mydir=.
@@ -45,7 +47,7 @@ INSTALLMKDIRS = $(KRB5ROOT) $(KRB5MANROOT) $(KRB5OTHERMKDIRS) \
 		$(ADMIN_BINDIR) $(SERVER_BINDIR) $(CLIENT_BINDIR) \
 		$(ADMIN_MANDIR) $(SERVER_MANDIR) $(CLIENT_MANDIR) \
 		$(FILE_MANDIR) $(KRB5_LIBDIR) $(KRB5_INCDIR) \
-		$(KRB5_INCSUBDIRS)
+		$(KRB5_INCSUBDIRS) $(datadir)
 
 install-recurse: install-mkdirs
 

@@ -1,3 +1,7 @@
+Fri Feb 16 16:23:25 2001  Ezra Peisach  <epeisach@mit.edu>
+
+	* Makefile.in: Add $(datadir) to INSTALLMKDIRS for util/et.
+
 2001-01-28  Tom Yu  <tlyu@mit.edu>
 
 	* aclocal.m4 (KRB5_LIB_AUX): Smash some shared lib file extensions
