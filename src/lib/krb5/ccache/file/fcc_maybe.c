@@ -229,7 +229,8 @@ krb5_fcc_open_file (context, id, mode)
      data->mode = mode;
      switch(mode) {
      case FCC_OPEN_AND_ERASE:
-	 open_flag = O_CREAT|O_TRUNC|O_RDWR;
+	 unlink(data->filename);
+	 open_flag = O_CREAT|O_EXCL|O_TRUNC|O_RDWR;
 	 break;
      case FCC_OPEN_RDWR:
 	 open_flag = O_RDWR;
