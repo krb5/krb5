@@ -1,5 +1,8 @@
 Wed Jul 24 18:48:43 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
+	* util_token.c (g_verify_token_header): Changed return code to be
+		an unsigned int 32, since we return a com_err error code.
+
 	* rel_buffer.c (generic_gss_release_buffer): 
 	* rel_oid_set.c (generic_gss_release_oid_set): Remove INTERFACE
  		keyworded; not needed (and causes problems) since we're

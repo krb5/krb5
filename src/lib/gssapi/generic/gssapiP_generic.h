@@ -121,7 +121,7 @@ int g_token_size PROTOTYPE((gss_OID mech, unsigned int body_size));
 void g_make_token_header PROTOTYPE((gss_OID mech, int body_size,
 			  unsigned char **buf, int tok_type));
 
-int g_verify_token_header PROTOTYPE((gss_OID mech, int *body_size,
+gss_uint32 g_verify_token_header PROTOTYPE((gss_OID mech, int *body_size,
 			  unsigned char **buf, int tok_type, int toksize));
 
 OM_uint32 g_display_major_status PROTOTYPE((OM_uint32 *minor_status,
