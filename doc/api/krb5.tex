@@ -10,7 +10,7 @@ encryption type, default configuration files and the like. Functions
 exist to provide full access to the data structures stored in the
 context and should not be accessed directly by developers.
 
-\begin{funcdecl}{krb5_init_context}{krb5_error_code}{\funcinout}
+\begin{funcdecl}{krb5_init_context}{krb5_error_code}{\funcout}
 \funcarg{krb5_context *}{context}
 \end{funcdecl}
 
@@ -104,8 +104,8 @@ flags are:
 \multicolumn{1}{c}{Symbol} & Meaning \\
 KRB5_AUTH_CONTEXT_DO_TIME & Use timestamps \\
 KRB5_AUTH_CONTEXT_RET_TIME & Save timestamps\\ &\  to output structure\\
-KRB5_AUTH_CONTEXT_DO_SEQUENCE	& Use sequence numbers \\
-KRB5_AUTH_CONTEXT_RET_SEQUENCE	& Copy sequence numbers \\ &\ to output structure\\
+KRB5_AUTH_CONTEXT_DO_SEQUENCE   & Use sequence numbers \\
+KRB5_AUTH_CONTEXT_RET_SEQUENCE  & Copy sequence numbers \\ &\ to output structure\\
 \end{tabular}
 
 
@@ -706,7 +706,7 @@ Returns system errors.
 \funcin
 \funcarg{krb5_ccache}{ccache}
 \funcarg{krb5_creds *}{in_cred}
-\funcout			
+\funcout                        
 \funcarg{krb5_cred **}{out_cred}
 \funcarg{krb5_creds ***}{tgts}
 \end{funcdecl}
@@ -831,18 +831,18 @@ Returns errors from encryption routines, system errors.
 \funcarg{const krb5_enctype *}{etypes}
 \funcarg{const krb5_preauthtype *}{ptypes}
 \funcfuncarg{krb5_error_code}{(*key_proc)}
-	\funcarg{krb5_context}{context}
-	\funcarg{const krb5_keytype}{type}
-	\funcarg{krb5_data *}{salt}
-	\funcarg{krb5_const_pointer}{keyseed}
-	\funcarg{krb5_keyblock **}{key}
+        \funcarg{krb5_context}{context}
+        \funcarg{const krb5_keytype}{type}
+        \funcarg{krb5_data *}{salt}
+        \funcarg{krb5_const_pointer}{keyseed}
+        \funcarg{krb5_keyblock **}{key}
 \funcendfuncarg
 \funcarg{krb5_const_pointer}{keyseed}
 \funcfuncarg{krb5_error_code}{(*decrypt_proc)}
-	\funcarg{krb5_context}{context}
-	\funcarg{const krb5_keyblock *}{key}
-	\funcarg{krb5_const_pointer}{decryptarg}
-	\funcarg{krb5_kdc_rep *}{dec_rep}
+        \funcarg{krb5_context}{context}
+        \funcarg{const krb5_keyblock *}{key}
+        \funcarg{krb5_const_pointer}{decryptarg}
+        \funcarg{krb5_kdc_rep *}{dec_rep}
 \funcendfuncarg
 \funcarg{krb5_const_pointer}{decryptarg}
 \funcinout
@@ -1467,13 +1467,13 @@ listed below.
 
 \begin{tabular}{ll}
 \multicolumn{1}{c}{Symbol} & Meaning \\
-KRB5_AUTH_CONTEXT_DO_TIME		& Use timestamps\\
-	&\  and replay cache\\
-KRB5_AUTH_CONTEXT_RET_TIME	& Copy timestamp \\
-	&\ to \funcparam{*outdata} \\
-KRB5_AUTH_CONTEXT_DO_SEQUENCE	& Use sequence numbers \\
-KRB5_AUTH_CONTEXT_RET_SEQUENCE	& Copy sequence numbers\\
-	&\ to \funcparam{*outdata} \\
+KRB5_AUTH_CONTEXT_DO_TIME               & Use timestamps\\
+        &\  and replay cache\\
+KRB5_AUTH_CONTEXT_RET_TIME      & Copy timestamp \\
+        &\ to \funcparam{*outdata} \\
+KRB5_AUTH_CONTEXT_DO_SEQUENCE   & Use sequence numbers \\
+KRB5_AUTH_CONTEXT_RET_SEQUENCE  & Copy sequence numbers\\
+        &\ to \funcparam{*outdata} \\
 \end{tabular}
 
 If timestamps are to be used (i.e., if KRB5_AUTH_CONTEXT_DO_TIME is
@@ -1544,10 +1544,10 @@ If timestamps are to be used (i.e., if KRB5_AUTH_CONTEXT_DO_TIME is set
 in the \funcparam{auth_context}), then two additional checks are performed:
 \begin{itemize}
 \item The timestamp in the message must be within the permitted clock
-	skew (which is usually five minutes), or KRB5KRB_AP_ERR_SKEW
-	is returned.
+        skew (which is usually five minutes), or KRB5KRB_AP_ERR_SKEW
+        is returned.
 \item The message must not be a replayed message, according to
-	\funcparam{rcache}.
+        \funcparam{rcache}.
 \end{itemize}
 
 Returns system errors, integrity errors.
@@ -1590,9 +1590,9 @@ should be used to identify the message.  Valid flags are listed below.
 KRB5_AUTH_CONTEXT_DO_TIME& Use timestamps in replay cache\\
 KRB5_AUTH_CONTEXT_RET_TIME& Use timestamps in output data\\
 KRB5_AUTH_CONTEXT_DO_SEQUENCE& Use sequence numbers\\
-	&\ in replay cache\\
+        &\ in replay cache\\
 KRB5_AUTH_CONTEXT_RET_SEQUENCE& Use sequence numbers\\
-	&\ in replay cache and output data \\
+        &\ in replay cache and output data \\
 \end{tabular}
 
 Returns system errors, encryption errors.
