@@ -1,3 +1,11 @@
+2003-03-04  Ken Raeburn  <raeburn@mit.edu>
+
+	* aes_s2k.c, aes_s2k.h: New files.
+	* Makefile.in (STLIBOBJS, OBJS, SRCS): Build aes_s2k.
+	(LOCALINCLUDES): Add dk directory.
+	(GEN_OBJS): New variable.
+	(aes-gen): Use GEN_OBJS.
+
 2003-02-28  Ezra Peisach  <epeisach@bu.edu>
 
 	* Makefile.in (clean): Cleanup testing objects and outputs
