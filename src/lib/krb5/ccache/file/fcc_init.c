@@ -47,7 +47,7 @@ krb5_fcc_initialize(context, id, princ)
    krb5_principal princ;
 {
      krb5_error_code kret = 0;
-     int reti;
+     int reti = 0;
 
      MAYBE_OPEN(context, id, FCC_OPEN_AND_ERASE);
 
@@ -66,6 +66,7 @@ krb5_fcc_initialize(context, id, princ)
      krb5_fcc_store_principal(context, id, princ);
 
      MAYBE_CLOSE(context, id, kret);
+     krb5_change_cache ();
      return kret;
 }
 

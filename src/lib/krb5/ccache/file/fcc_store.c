@@ -82,6 +82,7 @@ krb5_fcc_store(context, id, creds)
 
 lose:
      MAYBE_CLOSE(context, id, ret);
+     krb5_change_cache ();
      return ret;
 #undef TCHECK
 }

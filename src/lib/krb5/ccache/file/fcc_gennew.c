@@ -101,7 +101,7 @@ krb5_fcc_generate_new (context, id)
 
      /* Make sure the file name is reserved */
      ret = open(((krb5_fcc_data *) lid->data)->filename,
-		O_CREAT | O_EXCL | O_WRONLY, 0);
+		O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0);
      if (ret == -1) {
 	  retcode = krb5_fcc_interpret(context, errno);
           goto err_out;
@@ -133,6 +133,8 @@ krb5_fcc_generate_new (context, id)
 	  }
 
 	  *id = lid;
+
+      krb5_change_cache ();
 	  return KRB5_OK;
      }
 

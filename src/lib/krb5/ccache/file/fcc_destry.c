@@ -48,7 +48,7 @@ krb5_fcc_destroy(context, id)
       
      
      if (OPENCLOSE(id)) {
-	  ret = open(((krb5_fcc_data *) id->data)->filename, O_RDWR, 0);
+	  ret = open(((krb5_fcc_data *) id->data)->filename, O_RDWR | O_BINARY, 0);
 	  if (ret < 0) {
 	      kret = krb5_fcc_interpret(context, errno);
 	      goto cleanup;
@@ -57,6 +57,45 @@ krb5_fcc_destroy(context, id)
      }
      else
 	  lseek(((krb5_fcc_data *) id->data)->fd, 0, SEEK_SET);
+
+#ifdef MSDOS_FILESYSTEM
+/* "disgusting bit of UNIX trivia" - that's how the writers of NFS describe
+** the ability of UNIX to still write to a file which has been unlinked.
+** Naturally, the PC can't do this. As a result, we have to delete the file
+** after we wipe it clean but that throws off all the error handling code.
+** So we have do the work ourselves.
+*/
+    ret = fstat(((krb5_fcc_data *) id->data)->fd, &buf);
+    if (ret == -1) {
+        kret = krb5_fcc_interpret(context, errno);
+        size = 0;                               /* Nothing to wipe clean */
+    } else
+        size = (unsigned long) buf.st_size;
+
+    memset(zeros, 0, BUFSIZ);
+    while (size > 0) {
+        wlen = (int) ((size > BUFSIZ) ? BUFSIZ : size); /* How much to write */
+        i = write(((krb5_fcc_data *) id->data)->fd, zeros, wlen);
+        if (i < 0) {
+            kret = krb5_fcc_interpret(context, errno);
+            /* Don't jump to cleanup--we still want to delete the file. */
+            break;
+        }
+        size -= i;                              /* We've read this much */
+    }
+
+    ret = unlink(((krb5_fcc_data *) id->data)->filename);
+    if (ret < 0) {
+        kret = krb5_fcc_interpret(context, errno);
+        if (OPENCLOSE(id)) {
+            (void) close(((krb5_fcc_data *)id->data)->fd);
+            ((krb5_fcc_data *) id->data)->fd = -1;
+            kret = ret;
+        }
+        goto cleanup;
+    }
+
+#else /* MSDOS_FILESYSTEM */
 
      ret = unlink(((krb5_fcc_data *) id->data)->filename);
      if (ret < 0) {
@@ -81,7 +120,6 @@ krb5_fcc_destroy(context, id)
 
      /* XXX This may not be legal XXX */
      size = (unsigned long) buf.st_size;
-
      memset(zeros, 0, BUFSIZ);
      for (i=0; i < size / BUFSIZ; i++)
 	  if (write(((krb5_fcc_data *) id->data)->fd, zeros, BUFSIZ) < 0) {
@@ -109,10 +147,13 @@ krb5_fcc_destroy(context, id)
      if (ret)
 	 kret = krb5_fcc_interpret(context, errno);
 
+#endif /* MSDOS_FILESYSTEM */
+
   cleanup:
      krb5_xfree(((krb5_fcc_data *) id->data)->filename);
      krb5_xfree(id->data);
      krb5_xfree(id);
 
+     krb5_change_cache ();
      return kret;
 }

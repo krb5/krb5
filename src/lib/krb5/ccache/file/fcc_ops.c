@@ -24,8 +24,7 @@
  * This file contains the structure krb5_fcc_ops.
  */
 
-
-
+#define NEED_WINDOWS
 #include "fcc.h"
 
 krb5_cc_ops krb5_fcc_ops = {
@@ -47,10 +46,42 @@ krb5_cc_ops krb5_fcc_ops = {
      krb5_fcc_set_flags,
 };
 
+#ifdef _WINDOWS
 
+/*
+ * krb5_change_cache should be called after the cache changes.
+ * A notification message is is posted out to all top level
+ * windows so that they may recheck the cache based on the
+ * changes made.  We register a unique message type with which
+ * we'll communicate to all other processes. 
+ */
 
+void 
+krb5_change_cache (int send) {
 
-     
+    SendMessage(HWND_BROADCAST, krb5_get_notification_message(), 0, 0);
 
+}
 
+unsigned int INTERFACE
+krb5_get_notification_message (void) {
+    static unsigned int message = 0;
 
+    if (message == 0)
+        message = RegisterWindowMessage(WM_KERBEROS5_CHANGED);
+
+    return message;
+}
+#else /* _WINDOWS */
+
+void INTERFACE
+krb5_change_cache () 
+{
+    return;
+}
+unsigned int INTERFACE
+krb5_get_notification_message () {
+    return 0;
+}
+
+#endif /* _WINDOWS */

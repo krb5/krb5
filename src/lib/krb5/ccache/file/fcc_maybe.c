@@ -236,7 +236,7 @@ krb5_fcc_open_file (context, id, mode)
 	 break;
      }
 
-     fd = open (data->filename, open_flag, 0600);
+     fd = open (data->filename, open_flag | O_BINARY, 0600);
      if (fd == -1)
 	  return krb5_fcc_interpret (context, errno);
 

@@ -325,6 +325,7 @@ krb5_fcc_read_int32(context, id, i)
     krb5_fcc_data *data = (krb5_fcc_data *)id->data;
     krb5_error_code retval;
     unsigned char buf[4];
+    krb5_int32 val;
 
     if ((data->version == KRB5_FCC_FVNO_1) ||
 	(data->version == KRB5_FCC_FVNO_2)) 
@@ -333,7 +334,11 @@ krb5_fcc_read_int32(context, id, i)
 	retval = krb5_fcc_read(context, id, buf, 4);
 	if (retval)
 	    return retval;
-	*i = (((((buf[0] << 8) + buf[1]) << 8 ) + buf[2]) << 8) + buf[3];
+        val = buf[0];
+        val = (val << 8) | buf[1];
+        val = (val << 8) | buf[2];
+        val = (val << 8) | buf[3];
+        *i = val;
 	return 0;
     }
 }

@@ -1,3 +1,18 @@
+Tue Mar 21 19:14:49 1995 Keith Vetter (keithv@fusion.com)
+
+	* fcc_destroy.c: open file on the PC in binary mode, worked around
+           the unixism of working with deleted files.
+        * fcc_genn.c: open file on the PC in binary mode.
+        * fcc_init.c: uninitialized variable on the PC.
+        * fcc_maybe.c: open file on the PC in binary mode.
+        * fcc_read.c: a real clever one-line piece of code to turn 4 bytes 
+           into a 32 bit integer fails miserbly on 16 bit machines. Fixed.
+        * fcc_ops.c: added hooks to notify programs when the ccache changes.
+           For windows, the code is taken from the K4 release, for other
+           platforms it does nothing.
+        * fcc_destroy.c, fcc_genn.c, fcc_init.c, fcc_store.c: added calls to
+           the hook described for fcc_ops.c.
+
 Fri Mar 17 19:23:09 1995  John Gilmore  (gnu at toad.com)
 
 	* Makefile.in (LDFLAGS):  Eliminate, duplicates config/pre.in.
