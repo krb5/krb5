@@ -26,18 +26,16 @@
 
 #include "des.h"
 
-extern void mit_des_fixup_key_parity();
-extern int mit_des_is_weak_key();
-extern int mit_des_init_random_number_generator();
-extern void mit_des_set_random_generator_seed();
-extern void mit_des_set_sequence_number();
-extern void mit_des_generate_random_block();
-extern int mit_des_new_random_key();
-extern void mit_des_generate_random_block();
+extern int INTERFACE mit_des_init_random_number_generator();
+extern void INTERFACE mit_des_set_random_generator_seed();
+extern void INTERFACE mit_des_set_sequence_number();
+extern void INTERFACE mit_des_generate_random_block();
+extern int INTERFACE mit_des_new_random_key();
 
 
-void des_set_random_generator_seed(), des_set_sequence_number();
-void des_generate_random_block();
+void INTERFACE des_set_random_generator_seed();
+void INTERFACE des_set_sequence_number();
+void INTERFACE des_generate_random_block();
 
 /*
  * The secret des key schedule and sequence number for the current
@@ -55,7 +53,7 @@ static mit_des_random_key_seed random_sequence_state;
  *        to be a weak des key.  Des_generate_random_block is used to
  *        provide the random bits.
  */
-int
+int INTERFACE
 des_new_random_key(key)
     mit_des_cblock key;
 {
@@ -76,7 +74,8 @@ des_new_random_key(key)
  *
  * Note: this routine calls des_set_random_generator_seed.
  */
-void des_init_random_number_generator(key)
+void INTERFACE
+des_init_random_number_generator(key)
      mit_des_cblock key;
 {
      mit_des_init_random_number_generator(key, &random_sequence_state);
@@ -99,7 +98,7 @@ void des_init_random_number_generator(key)
  * Requires: key is a valid des key.  I.e., has correct parity and is not a
  *           weak des key.
  */
-void
+void INTERFACE
 des_set_random_generator_seed(key)
      mit_des_cblock key;
 {
@@ -115,7 +114,7 @@ des_set_random_generator_seed(key)
  *
  * Note that des_set_random_generator_seed resets the sequence number to 0.
  */
-void
+void INTERFACE
 des_set_sequence_number(new_sequence_number)
      mit_des_cblock new_sequence_number;
 {
@@ -130,7 +129,8 @@ des_set_sequence_number(new_sequence_number)
  * Requires: des_set_random_generator_seed must have been called at least once
  *           before this routine is called.
  */
-void des_generate_random_block(block)
+void INTERFACE
+des_generate_random_block(block)
      mit_des_cblock block;
 {
     mit_des_generate_random_block(block, &random_sequence_state);

@@ -23,7 +23,7 @@
 
 #include "asn1_get.h"
 
-asn1_error_code asn1_get_tag(buf, class, construction, tagnum, retlen)
+asn1_error_code INTERFACE asn1_get_tag(buf, class, construction, tagnum, retlen)
      asn1buf * buf;
      asn1_class * class;
      asn1_construction * construction;
@@ -43,7 +43,7 @@ asn1_error_code asn1_get_tag(buf, class, construction, tagnum, retlen)
   return 0;
 }
 
-asn1_error_code asn1_get_sequence(buf, retlen)
+asn1_error_code INTERFACE asn1_get_sequence(buf, retlen)
      asn1buf * buf;
      int * retlen;
 {
@@ -63,7 +63,7 @@ asn1_error_code asn1_get_sequence(buf, retlen)
 /****************************************************************/
 /* Private Procedures */
 
-asn1_error_code asn1_get_id(buf, class, construction, tagnum)
+asn1_error_code INTERFACE asn1_get_id(buf, class, construction, tagnum)
      asn1buf * buf;
      asn1_class * class;
      asn1_construction * construction;
@@ -99,7 +99,7 @@ asn1_error_code asn1_get_id(buf, class, construction, tagnum)
   return 0;
 }
 
-asn1_error_code asn1_get_length(buf, retlen)
+asn1_error_code INTERFACE asn1_get_length(buf, retlen)
      asn1buf * buf;
      int * retlen;
 {

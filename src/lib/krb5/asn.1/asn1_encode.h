@@ -46,7 +46,7 @@
      asn1_encode_generalstring
 */
 
-asn1_error_code asn1_encode_integer
+asn1_error_code INTERFACE asn1_encode_integer
 	PROTOTYPE((asn1buf *buf, const long val, int *retlen));
 /* requires  *buf is allocated
    modifies  *buf, *retlen
@@ -55,7 +55,7 @@ asn1_error_code asn1_encode_integer
              Returns ENOMEM to signal an unsuccesful attempt
               to expand the buffer. */
 
-asn1_error_code asn1_encode_unsigned_integer
+asn1_error_code INTERFACE asn1_encode_unsigned_integer
 	PROTOTYPE((asn1buf *buf, const unsigned long val, int *retlen));
 /* requires  *buf is allocated
    modifies  *buf, *retlen
@@ -64,7 +64,7 @@ asn1_error_code asn1_encode_unsigned_integer
              Returns ENOMEM to signal an unsuccesful attempt
               to expand the buffer. */
 
-asn1_error_code asn1_encode_octetstring
+asn1_error_code INTERFACE asn1_encode_octetstring
 	PROTOTYPE((asn1buf *buf,
 		   const int len, const asn1_octet *val,
 		   int *retlen));
@@ -75,7 +75,7 @@ asn1_error_code asn1_encode_octetstring
              Returns ENOMEM to signal an unsuccesful attempt
               to expand the buffer. */
 
-asn1_error_code asn1_encode_charstring
+asn1_error_code INTERFACE asn1_encode_charstring
 	PROTOTYPE((asn1buf *buf,
 		   const int len, const char *val,
 		   int *retlen));
@@ -86,7 +86,7 @@ asn1_error_code asn1_encode_charstring
              Returns ENOMEM to signal an unsuccesful attempt
               to expand the buffer. */
 
-asn1_error_code asn1_encode_null
+asn1_error_code INTERFACE asn1_encode_null
 	PROTOTYPE((asn1buf *buf, int *retlen));
 /* requires  *buf is allocated
    modifies  *buf, *retlen
@@ -95,7 +95,7 @@ asn1_error_code asn1_encode_null
              Returns ENOMEM to signal an unsuccesful attempt
               to expand the buffer. */
 
-asn1_error_code asn1_encode_printablestring
+asn1_error_code INTERFACE asn1_encode_printablestring
 	PROTOTYPE((asn1buf *buf,
 		   const int len, const char *val,
 		   int *retlen));
@@ -106,7 +106,7 @@ asn1_error_code asn1_encode_printablestring
              Returns ENOMEM to signal an unsuccesful attempt
               to expand the buffer. */
 
-asn1_error_code asn1_encode_ia5string
+asn1_error_code INTERFACE asn1_encode_ia5string
 	PROTOTYPE((asn1buf *buf,
 		   const int len, const char *val,
 		   int *retlen));
@@ -117,7 +117,7 @@ asn1_error_code asn1_encode_ia5string
              Returns ENOMEM to signal an unsuccesful attempt
               to expand the buffer. */
 
-asn1_error_code asn1_encode_generaltime
+asn1_error_code INTERFACE asn1_encode_generaltime
 	PROTOTYPE((asn1buf *buf, const time_t val, int *retlen));
 /* requires  *buf is allocated
    modifies  *buf, *retlen
@@ -127,7 +127,7 @@ asn1_error_code asn1_encode_generaltime
               to expand the buffer.
    Note: The encoding of GeneralizedTime is YYYYMMDDhhmmZ */
 
-asn1_error_code asn1_encode_generalstring
+asn1_error_code INTERFACE asn1_encode_generalstring
 	PROTOTYPE((asn1buf *buf,
 		   const int len, const char *val,
 		   int *retlen));

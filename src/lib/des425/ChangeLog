@@ -1,3 +1,10 @@
+Tue Feb 21 17:42:44 1995 Keith Vetter (keithv@fusion.com)
+
+        * Makefile.in: made to work on the PC
+	* *.c, des.h: added windows INTERFACE keyword
+        * read_passwd.c: renamed a static variable to avoid compiler error
+        * quad_cksum.c: errno extern declaration removed on the PC
+
 Fri Feb  3 17:23:45 1995  Theodore Y. Ts'o  (tytso@dcl)
 
 	* pcbc_encrypt.c: Add SIZEOF_FOO checks to properly define

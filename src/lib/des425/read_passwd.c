@@ -33,10 +33,10 @@
 
 #include "des.h"
 
-static krb5_context global_context = 0;
+static krb5_context krb4_global_context = 0;
 
 /*** Routines ****************************************************** */
-int
+int INTERFACE
 des_read_password/*_v4_compat_crock*/(k,prompt,verify)
     mit_des_cblock *k;
     char *prompt;
@@ -48,8 +48,8 @@ des_read_password/*_v4_compat_crock*/(k,prompt,verify)
     char prompt2[BUFSIZ];
     int string_size = sizeof(key_string);
 
-    if (!global_context) {
-	    retval = krb5_init_context(&global_context);
+    if (!krb4_global_context) {
+	    retval = krb5_init_context(&krb4_global_context);
 	    if (retval)
 		    return retval;
     }
@@ -58,7 +58,7 @@ des_read_password/*_v4_compat_crock*/(k,prompt,verify)
 	strcpy(prompt2, "Verifying, please re-enter ");
 	strncat(prompt2, prompt, sizeof(prompt2)-(strlen(prompt2)+1));
     }
-    ok = krb5_read_password(global_context, prompt, verify ? prompt2 : 0,
+    ok = krb5_read_password(krb4_global_context, prompt, verify ? prompt2 : 0,
 			    key_string, &string_size);
     
     if (ok == 0)

@@ -38,7 +38,7 @@
  *
  * Requires: key has correct odd parity.
  */
-int
+int INTERFACE
 des_is_weak_key(key)
      mit_des_cblock key;
 {

@@ -18,7 +18,8 @@
 /* 
  * copy of include/des.h to avoid collision with local one
  */
-#include <kerberosIV/mit-copyright.h>
+#include <krb5/copyright.h>
+#include <krb5/config.h>
 #include <krb5/osconf.h>
 
 #ifndef KRB_INT32
@@ -71,7 +72,7 @@ typedef struct des_ks_struct bit_64;
 /*
  * des_pcbc_encrypt - {en,de}crypt a stream in PCBC mode
  */
-int
+int INTERFACE
 des_pcbc_encrypt(in, out, length, schedule, ivec, encrypt)
 	des_cblock *in;
 	des_cblock *out;

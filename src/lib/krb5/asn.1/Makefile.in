@@ -8,6 +8,9 @@ LDFLAGS = -g
 RM = rm -f
 CP = cp
 
+##DOSBUILDTOP = ..\..\..
+##DOSLIBNAME=..\libkrb5.lib
+##DOS!include $(BUILDTOP)\config\windows.in
 
 PEPSY = @PEPSY@
 PSYFLAGS = @PSYFLAGS@
@@ -15,8 +18,6 @@ PSYFLAGS = @PSYFLAGS@
 KRB5ROOT = @KRB5ROOT@
 
 KRB5_INCDIR = $(KRB5ROOT)/include
-
-all:: $(OBJS)
 
 SRCTOP=$(srcdir)/$(BUILDTOP)
 
@@ -35,17 +36,23 @@ SRCS= \
 	$(srcdir)asn1_misc.c
 
 OBJS= \
-	asn1_decode.o\
-	asn1_k_decode.o\
-	asn1_encode.o\
-	asn1_get.o\
-	asn1_make.o\
-	asn1buf.o\
-	krb5_decode.o\
-	krb5_encode.o\
-	asn1_k_encode.o\
-	asn1_misc.o
+	asn1_decode.$(OBJEXT)\
+	asn1_k_decode.$(OBJEXT)\
+	asn1_encode.$(OBJEXT)\
+	asn1_get.$(OBJEXT)\
+	asn1_make.$(OBJEXT)\
+	asn1buf.$(OBJEXT)\
+	krb5_decode.$(OBJEXT)\
+	krb5_encode.$(OBJEXT)\
+	asn1_k_encode.$(OBJEXT)\
+	asn1_misc.$(OBJEXT)
 
-clean::
+all:: $(OBJS)
+
+clean:: clean-$(WHAT)
+
+clean-unix::
 	$(RM) $(OBJS)
 
+clean-windows::
+	$(RM) *.obj

@@ -50,7 +50,7 @@ if(class != UNIVERSAL || construction != PRIMITIVE || tagnum != type)\
 #define cleanup()\
 return 0
 
-asn1_error_code asn1_decode_integer(buf, val)
+asn1_error_code INTERFACE asn1_decode_integer(buf, val)
      asn1buf * buf;
      long * val;
 {
@@ -69,7 +69,7 @@ asn1_error_code asn1_decode_integer(buf, val)
   cleanup();
 }
 
-asn1_error_code asn1_decode_unsigned_integer(buf, val)
+asn1_error_code INTERFACE asn1_decode_unsigned_integer(buf, val)
      asn1buf * buf;
      unsigned long * val;
 {
@@ -88,7 +88,7 @@ asn1_error_code asn1_decode_unsigned_integer(buf, val)
   cleanup();
 }
 
-asn1_error_code asn1_decode_octetstring(buf, retlen, val)
+asn1_error_code INTERFACE asn1_decode_octetstring(buf, retlen, val)
      asn1buf * buf;
      int * retlen;
      asn1_octet ** val;
@@ -101,7 +101,7 @@ asn1_error_code asn1_decode_octetstring(buf, retlen, val)
   cleanup();
 }
 
-asn1_error_code asn1_decode_charstring(buf, retlen, val)
+asn1_error_code INTERFACE asn1_decode_charstring(buf, retlen, val)
      asn1buf * buf;
      int * retlen;
      char ** val;
@@ -115,7 +115,7 @@ asn1_error_code asn1_decode_charstring(buf, retlen, val)
 }
 
 
-asn1_error_code asn1_decode_generalstring(buf, retlen, val)
+asn1_error_code INTERFACE asn1_decode_generalstring(buf, retlen, val)
      asn1buf * buf;
      int * retlen;
      char ** val;
@@ -129,7 +129,7 @@ asn1_error_code asn1_decode_generalstring(buf, retlen, val)
 }
 
 
-asn1_error_code asn1_decode_null(buf)
+asn1_error_code INTERFACE asn1_decode_null(buf)
      asn1buf * buf;
 {
   setup();
@@ -138,7 +138,7 @@ asn1_error_code asn1_decode_null(buf)
   cleanup();
 }
 
-asn1_error_code asn1_decode_printablestring(buf, retlen, val)
+asn1_error_code INTERFACE asn1_decode_printablestring(buf, retlen, val)
      asn1buf * buf;
      int * retlen;
      char ** val;
@@ -151,7 +151,7 @@ asn1_error_code asn1_decode_printablestring(buf, retlen, val)
   cleanup();
 }
 
-asn1_error_code asn1_decode_ia5string(buf, retlen, val)
+asn1_error_code INTERFACE asn1_decode_ia5string(buf, retlen, val)
      asn1buf * buf;
      int * retlen;
      char ** val;
@@ -164,7 +164,7 @@ asn1_error_code asn1_decode_ia5string(buf, retlen, val)
   cleanup();
 }
 
-asn1_error_code asn1_decode_generaltime(buf, val)
+asn1_error_code INTERFACE asn1_decode_generaltime(buf, val)
      asn1buf * buf;
      time_t * val;
 {

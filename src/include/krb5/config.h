@@ -25,7 +25,7 @@
 #ifndef KRB5_CONFIG__
 #define KRB5_CONFIG__
 
-#ifdef __windows__
+#ifdef _MSDOS
 /* 
  * Machine-type definitions: PC Clone 386 running Microloss Windows
  */
@@ -41,6 +41,7 @@
 
 #define USE_STRING_H 
 #define HAVE_SRAND
+#define HAVE_ERRNO
 
 #ifndef _SIZE_T_DEFINED
 typedef unsigned int size_t;

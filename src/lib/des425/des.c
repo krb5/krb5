@@ -52,7 +52,7 @@
 #include "des.h"
 #include <krb5/ext-proto.h>
 
-int
+int INTERFACE
 des_ecb_encrypt(clear, cipher, schedule, encrypt)
     unsigned long *clear;
     unsigned long *cipher;

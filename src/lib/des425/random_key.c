@@ -27,7 +27,7 @@
 #include "des.h"
 
 /* random_key */
-int
+int INTERFACE
 des_random_key(key)
     mit_des_cblock *key;
 {

@@ -58,7 +58,7 @@
  * cleartext.
  */
 
-int
+int INTERFACE
 des_cbc_encrypt(in,out,length,key,iv,encrypt)
     krb5_octet   *in;		/* >= length bytes of input text */
     krb5_octet  *out;		/* >= length bytes of output text */

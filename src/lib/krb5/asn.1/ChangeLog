@@ -1,3 +1,8 @@
+Tue Feb 21 12:00:00 1995  Keith Vetter (keithv@fusion.com)
+
+	* Makefile.in: made to work for the PC
+	* *.c, *.h: added windows INTERFACE keyword to all functions
+
 Tue Feb 21 20:11:30 1995  Theodore Y. Ts'o  (tytso@dcl)
 
 	* asn1_k_decode.h(asn1_decode_kvno, asn1_decode_krb_safe_body):

@@ -63,4 +63,25 @@ typedef struct des_ks_struct bit_64;
 
 #define des_cblock_print(x) des_cblock_print_file(x, stdout)
 
+/*
+ * Windows needs everything prototyped because we're exporting all the fuctions.
+ */
+void INTERFACE des_cbc_cksum();
+int INTERFACE des_ecb_encrypt();
+int INTERFACE des_cbc_encrypt();
+void INTERFACE des_fixup_key_parity();
+int INTERFACE des_check_key_parity();
+int INTERFACE des_key_sched();
+int INTERFACE des_new_random_key();
+void INTERFACE des_init_random_number_generator();
+void INTERFACE des_set_random_generator_seed();
+void INTERFACE des_set_sequence_number();
+void INTERFACE des_generate_random_block();
+int INTERFACE des_pcbc_encrypt();
+unsigned long INTERFACE des_quad_cksum();
+int INTERFACE des_random_key();
+int INTERFACE des_read_password();
+int INTERFACE des_string_to_key();
+int INTERFACE des_is_weak_key();
+
 #endif	/* DES_DEFS */

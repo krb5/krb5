@@ -100,12 +100,14 @@
 
 /* Externals */
 extern char *errmsg();
+#ifndef HAVE_ERRNO
 extern int errno;
+#endif
 extern int des_debug;
 
 /*** Routines ***************************************************** */
 
-unsigned long
+unsigned long INTERFACE
 des_quad_cksum(in,out,length,out_count,c_seed)
     mit_des_cblock *c_seed;		/* secret seed, 8 bytes */
     unsigned char *in;		/* input block */

@@ -44,13 +44,11 @@
 /*   #include "des_internal.h" */
 
 extern int mit_des_debug;
-extern int mit_des_debug_print();
-extern void mit_des_fixup_key_parity();
 
 /*
  * convert an arbitrary length string to a DES key
  */
-int
+int INTERFACE
 des_string_to_key(str,key)
     char *str;
     register mit_des_cblock *key;
@@ -64,7 +62,7 @@ des_string_to_key(str,key)
     register char *p_char;
     static char k_char[64];
     static mit_des_key_schedule key_sked;
-    extern unsigned long des_cbc_cksum();
+    extern void INTERFACE des_cbc_cksum();
 
     in_str = str;
     forward = 1;

@@ -30,7 +30,7 @@
 #include "krbasn1.h"
 #include "asn1buf.h"
 
-asn1_error_code asn1_get_tag
+asn1_error_code INTERFACE asn1_get_tag
 	PROTOTYPE((asn1buf *buf,
 		   asn1_class *class,
 		   asn1_construction *construction,
@@ -45,7 +45,7 @@ asn1_error_code asn1_get_tag
 	      *tagnum is set to ASN1_TAGNUM_CEILING.
 	     Returns ASN1_OVERRUN if *buf is exhausted during the parse. */
 
-asn1_error_code asn1_get_sequence
+asn1_error_code INTERFACE asn1_get_sequence
 	PROTOTYPE((asn1buf *buf, int *retlen));
 /* requires  *buf is allocated
    effects   Decodes a tag from *buf and returns ASN1_BAD_ID if it
@@ -55,7 +55,7 @@ asn1_error_code asn1_get_sequence
 /****************************************************************/
 /* Private Procedures */
 
-asn1_error_code asn1_get_id
+asn1_error_code INTERFACE asn1_get_id
 	PROTOTYPE((asn1buf *buf,
 		   asn1_class *class,
 		   asn1_construction *construction,
@@ -67,7 +67,7 @@ asn1_error_code asn1_get_id
               are returned in *construction and *tagnum, respectively.
 	     Returns ASN1_OVERRUN if *buf is exhausted. */
 
-asn1_error_code asn1_get_length
+asn1_error_code INTERFACE asn1_get_length
 	PROTOTYPE((asn1buf *buf, int *retlen));
 /* requires  *buf is allocated
    effects   Decodes the group of length octets at *buf's

@@ -53,7 +53,7 @@ typedef char key[64];
 /* the following are really void but cc86 doesnt allow it */
 static void make_key_sched PROTOTYPE((key, mit_des_key_schedule));
 
-int
+int INTERFACE
 des_key_sched(k,schedule)
     register mit_des_cblock k;	/* r11 */
     mit_des_key_schedule schedule;

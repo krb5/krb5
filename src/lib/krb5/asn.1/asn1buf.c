@@ -51,7 +51,7 @@
 #include "asn1buf.h"
 #include <stdio.h>
 
-asn1_error_code asn1buf_create(buf)
+asn1_error_code INTERFACE asn1buf_create(buf)
      asn1buf ** buf;
 {
   *buf = (asn1buf*)calloc(1,sizeof(asn1buf));
@@ -62,7 +62,7 @@ asn1_error_code asn1buf_create(buf)
   return 0;
 }
 
-asn1_error_code asn1buf_wrap_data(buf, code)
+asn1_error_code INTERFACE asn1buf_wrap_data(buf, code)
      asn1buf * buf;
      const krb5_data * code;
 {
@@ -72,7 +72,7 @@ asn1_error_code asn1buf_wrap_data(buf, code)
   return 0;
 }
 
-asn1_error_code asn1buf_imbed(subbuf, buf, length)
+asn1_error_code INTERFACE asn1buf_imbed(subbuf, buf, length)
      asn1buf * subbuf;
      const asn1buf * buf;
      const int length;
@@ -83,14 +83,14 @@ asn1_error_code asn1buf_imbed(subbuf, buf, length)
   return 0;
 }
 
-void asn1buf_sync(buf, subbuf)
+void INTERFACE asn1buf_sync(buf, subbuf)
      asn1buf * buf;
      asn1buf * subbuf;
 {
   buf->next = subbuf->next;
 }
 
-asn1_error_code asn1buf_destroy(buf)
+asn1_error_code INTERFACE asn1buf_destroy(buf)
      asn1buf ** buf;
 {
   if (*buf != NULL) {
@@ -101,7 +101,7 @@ asn1_error_code asn1buf_destroy(buf)
   return 0;
 }
 
-asn1_error_code asn1buf_insert_octet(buf, o)
+asn1_error_code INTERFACE asn1buf_insert_octet(buf, o)
      asn1buf * buf;
      const asn1_octet o;
 {
@@ -114,7 +114,7 @@ asn1_error_code asn1buf_insert_octet(buf, o)
   return 0;
 }
 
-asn1_error_code asn1buf_insert_octetstring(buf, len, s)
+asn1_error_code INTERFACE asn1buf_insert_octetstring(buf, len, s)
      asn1buf * buf;
      const int len;
      const krb5_octet * s;
@@ -129,7 +129,7 @@ asn1_error_code asn1buf_insert_octetstring(buf, len, s)
   return 0;
 }
 
-asn1_error_code asn1buf_insert_charstring(buf, len, s)
+asn1_error_code INTERFACE asn1buf_insert_charstring(buf, len, s)
      asn1buf * buf;
      const int len;
      const char * s;
@@ -144,7 +144,7 @@ asn1_error_code asn1buf_insert_charstring(buf, len, s)
   return 0;
 }
 
-asn1_error_code asn1buf_remove_octet(buf, o)
+asn1_error_code INTERFACE asn1buf_remove_octet(buf, o)
      asn1buf * buf;
      asn1_octet * o;
 {
@@ -153,7 +153,7 @@ asn1_error_code asn1buf_remove_octet(buf, o)
   return 0;
 }
 
-asn1_error_code asn1buf_remove_octetstring(buf, len, s)
+asn1_error_code INTERFACE asn1buf_remove_octetstring(buf, len, s)
      asn1buf * buf;
      const int len;
      asn1_octet ** s;
@@ -174,7 +174,7 @@ asn1_error_code asn1buf_remove_octetstring(buf, len, s)
   return 0;
 }
 
-asn1_error_code asn1buf_remove_charstring(buf, len, s)
+asn1_error_code INTERFACE asn1buf_remove_charstring(buf, len, s)
      asn1buf * buf;
      const int len;
      char ** s;
@@ -194,14 +194,14 @@ asn1_error_code asn1buf_remove_charstring(buf, len, s)
   return 0;
 }
 
-int asn1buf_remains(buf)
+int INTERFACE asn1buf_remains(buf)
      const asn1buf * buf;
 {
   if(buf == NULL || buf->base == NULL) return 0;
   else return buf->bound - buf->next + 1;
 }
 
-asn1_error_code asn12krb5_buf(buf, code)
+asn1_error_code INTERFACE asn12krb5_buf(buf, code)
      const asn1buf * buf;
      krb5_data ** code;
 {
@@ -223,7 +223,7 @@ asn1_error_code asn12krb5_buf(buf, code)
 /* These parse and unparse procedures should be moved out. They're
    useful only for debugging and superfluous in the production version. */
 
-asn1_error_code asn1buf_unparse(buf, s)
+asn1_error_code INTERFACE asn1buf_unparse(buf, s)
      const asn1buf * buf;
      char ** s;
 {
@@ -249,7 +249,7 @@ asn1_error_code asn1buf_unparse(buf, s)
   return 0;
 }
 
-asn1_error_code asn1buf_hex_unparse(buf, s)
+asn1_error_code INTERFACE asn1buf_hex_unparse(buf, s)
      const asn1buf * buf;
      char ** s;
 {
@@ -286,21 +286,21 @@ asn1_error_code asn1buf_hex_unparse(buf, s)
 /****************************************************************/
 /* Private Procedures */
 
-int asn1buf_size(buf)
+int INTERFACE asn1buf_size(buf)
      const asn1buf * buf;
 {
   if(buf == NULL || buf->base == NULL) return 0;
   return buf->bound - buf->base + 1;
 }
 
-int asn1buf_free(buf)
+int INTERFACE asn1buf_free(buf)
      const asn1buf * buf;
 {
   if(buf == NULL || buf->base == NULL) return 0;
   else return buf->bound - buf->next + 1;
 }
 
-asn1_error_code asn1buf_ensure_space(buf, amount)
+asn1_error_code INTERFACE asn1buf_ensure_space(buf, amount)
      asn1buf * buf;
      const int amount;
 {
@@ -312,7 +312,7 @@ asn1_error_code asn1buf_ensure_space(buf, amount)
   return 0;
 }
 
-asn1_error_code asn1buf_expand(buf, inc)
+asn1_error_code INTERFACE asn1buf_expand(buf, inc)
      asn1buf * buf;
      const int inc;
 {
@@ -337,7 +337,7 @@ asn1_error_code asn1buf_expand(buf, inc)
   return 0;
 }
 
-int asn1buf_len(buf)
+int INTERFACE asn1buf_len(buf)
      const asn1buf * buf;
 {
   return buf->next - buf->base;

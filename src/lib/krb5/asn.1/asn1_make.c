@@ -23,7 +23,7 @@
 
 #include "asn1_make.h"
 
-asn1_error_code asn1_make_etag(buf, class, tagnum, in_len, retlen)
+asn1_error_code INTERFACE asn1_make_etag(buf, class, tagnum, in_len, retlen)
      asn1buf * buf;
      const asn1_class class;
      const asn1_tagnum tagnum;
@@ -33,7 +33,7 @@ asn1_error_code asn1_make_etag(buf, class, tagnum, in_len, retlen)
   return asn1_make_tag(buf,class,CONSTRUCTED,tagnum,in_len,retlen);
 }
 
-asn1_error_code asn1_make_tag(buf, class, construction, tagnum, in_len, retlen)
+asn1_error_code INTERFACE asn1_make_tag(buf, class, construction, tagnum, in_len, retlen)
      asn1buf * buf;
      const asn1_class class;
      const asn1_construction construction;
@@ -57,7 +57,7 @@ asn1_error_code asn1_make_tag(buf, class, construction, tagnum, in_len, retlen)
   return 0;
 }
 
-asn1_error_code asn1_make_length(buf, in_len, retlen)
+asn1_error_code INTERFACE asn1_make_length(buf, in_len, retlen)
      asn1buf * buf;
      const int in_len;
      int * retlen;
@@ -77,7 +77,7 @@ asn1_error_code asn1_make_length(buf, in_len, retlen)
       in_copy = in_copy >> 8;
       length++;
     }
-    retval = asn1buf_insert_octet(buf, 0x80 | (asn1_octet)(length&0x7F));
+    retval = asn1buf_insert_octet(buf, (asn1_octet) (0x80 | (asn1_octet)(length&0x7F)));
     if(retval) return retval;
     length++;
     *retlen = length;
@@ -86,7 +86,7 @@ asn1_error_code asn1_make_length(buf, in_len, retlen)
   return 0;
 }
 
-asn1_error_code asn1_make_id(buf, class, construction, tagnum, retlen)
+asn1_error_code INTERFACE asn1_make_id(buf, class, construction, tagnum, retlen)
      asn1buf * buf;
      const asn1_class class;
      const asn1_construction construction;
@@ -96,8 +96,8 @@ asn1_error_code asn1_make_id(buf, class, construction, tagnum, retlen)
   asn1_error_code retval;
 
   if(tagnum < 31) {
-    retval = asn1buf_insert_octet(buf, class | construction |
-				       (asn1_octet)tagnum);
+    retval = asn1buf_insert_octet(buf, (asn1_octet) (class | construction |
+				       (asn1_octet)tagnum));
     if(retval) return retval;
     *retlen = 1;
   }else{
@@ -110,12 +110,12 @@ asn1_error_code asn1_make_id(buf, class, construction, tagnum, retlen)
     length++;
 
     for(; tagcopy != 0; tagcopy >>= 7){
-      retval = asn1buf_insert_octet(buf, 0x80 | (asn1_octet)(tagcopy&0x7F));
+      retval = asn1buf_insert_octet(buf, (asn1_octet) (0x80 | (asn1_octet)(tagcopy&0x7F)));
       if(retval) return retval;
       length++;
     }
 
-    retval = asn1buf_insert_octet(buf, class | construction | 0x1F);
+    retval = asn1buf_insert_octet(buf, (asn1_octet) (class | construction | 0x1F));
     if(retval) return retval;
     length++;
     *retlen = length;
@@ -124,7 +124,7 @@ asn1_error_code asn1_make_id(buf, class, construction, tagnum, retlen)
   return 0;
 }
 
-asn1_error_code asn1_make_sequence(buf, seq_len, retlen)
+asn1_error_code INTERFACE asn1_make_sequence(buf, seq_len, retlen)
      asn1buf * buf;
      const int seq_len;
      int * retlen;
@@ -143,7 +143,7 @@ asn1_error_code asn1_make_sequence(buf, seq_len, retlen)
   return 0;
 }
 
-asn1_error_code asn1_make_set(buf, set_len, retlen)
+asn1_error_code INTERFACE asn1_make_set(buf, set_len, retlen)
      asn1buf * buf;
      const int set_len;
      int * retlen;
@@ -162,7 +162,7 @@ asn1_error_code asn1_make_set(buf, set_len, retlen)
   return 0;
 }
 
-asn1_error_code asn1_make_string(buf, length, string, retlen)
+asn1_error_code INTERFACE asn1_make_string(buf, length, string, retlen)
      asn1buf * buf;
      const int length;
      const char * string;

@@ -1,20 +1,22 @@
 CFLAGS = $(CCOPTS) $(DEFS) -I$(srcdir)/../crypto/des
 LDFLAGS = -g
 
-all:: $(OBJS)
+##DOSBUILDTOP = ..\..
+##DOSLIBNAME=libdes425.lib
+##DOS!include $(BUILDTOP)\config\windows.in
 
-OBJS=	cksum.o		\
-	des.o		\
-	enc_dec.o	\
-	key_parity.o	\
-	key_sched.o	\
-	new_rnd_key.o	\
-	pcbc_encrypt.o	\
-	quad_cksum.o	\
-	random_key.o	\
-	read_passwd.o \
-	str_to_key.o	\
-	weak_key.o	
+OBJS=	cksum.$(OBJEXT)		\
+	des.$(OBJEXT)		\
+	enc_dec.$(OBJEXT)	\
+	key_parity.$(OBJEXT)	\
+	key_sched.$(OBJEXT)	\
+	new_rnd_key.$(OBJEXT)	\
+	pcbc_encrypt.$(OBJEXT)	\
+	quad_cksum.$(OBJEXT)	\
+	random_key.$(OBJEXT)	\
+	read_passwd.$(OBJEXT) \
+	str_to_key.$(OBJEXT)	\
+	weak_key.$(OBJEXT)	
 
 SRCS=	$(srcdir)/cksum.c	\
 	$(srcdir)/des.c		\
@@ -33,16 +35,22 @@ SRCS=	$(srcdir)/cksum.c	\
 EXT_LIB= libdes425.a $(TOPLIBD)/libcrypto.a
 DEPKLIB= $(TOPLIBD)/libcrypto.a
 
+all:: $(OBJS)
+
 verify: verify.o libdes425.a $(DEPKLIB)
 	$(CC) -o $@ verify.o $(LDFLAGS) $(EXT_LIB)
 
-check:: verify
+check:: check-$(WHAT)
+
+check-unix:: verify
 	./verify -z
 	./verify -m
 	./verify
 
+check-windows::
+
 clean::
-	$(RM) verify
+	$(RM) verify$(EXEEXT)
 
 libdes425.a: $(OBJS)
 	$(RM) $@
@@ -57,5 +65,5 @@ install:: libdes425.a
 	$(RANLIB) $(DESTDIR)$(KRB5_LIBDIR)/libdes425.a
 
 clean::
-	$(RM) libdes425.a
+	$(RM) libdes425.$(LIBEXT) libdes425.bak
 

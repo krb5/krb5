@@ -23,7 +23,7 @@
 
 #include "asn1_misc.h"
 
-asn1_error_code asn1_krb5_realm_copy(target, source)
+asn1_error_code INTERFACE asn1_krb5_realm_copy(target, source)
      krb5_principal target;
      krb5_principal source;
 {

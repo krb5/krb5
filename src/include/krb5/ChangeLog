@@ -1,10 +1,19 @@
+Tue Feb 21 17:31:06 1995 Keith Vetter (keithv@fusion.com)
+
+	* config.h: added HAVE_ERRNO for the windows section
+           changed windows manifest constant from __windows__ 
+           to _MSDOS so that DOS test programs will compile.
+
+Tue Feb 21 12:00:32 1995 Keith Vetter (keithv@fusion.com)
+
+	* asn1.h: added windows INTERFACE keyword to all functions.
+
 Tue Feb 21 17:49:41 1995  Mark Eichin  (eichin@cygnus.com)
 
 	* config.h: get krb5/autoconf.h.
 	* Makefile.in (KRB5_HEADERS): add config.h, remove rsa-md4.h and
 	crc-32.h which aren't here anymore.
 
-=======
 Tue Feb 21 0:0:32 1995 Keith Vetter (keithv@fusion.com)
 
 	* func-proto.h: added windows INTERFACE keyword to all functions.
