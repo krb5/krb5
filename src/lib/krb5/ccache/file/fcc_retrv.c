@@ -20,7 +20,7 @@ static char rcsid_fcc_retrv_c[] = "$Id$";
 
 #define set(bits) (whichfields & bits)
 #define flags_match(a,b) (a & b == a)
-#define times_match_exact(t1,t2) (bcmp((char *)(t1), (char *)(t2), sizeof(*(t1))) == 0)
+#define times_match_exact(t1,t2) (memcmp((char *)(t1), (char *)(t2), sizeof(*(t1))) == 0)
 
 static krb5_boolean times_match PROTOTYPE((const krb5_ticket_times *,
 					   const krb5_ticket_times *));
@@ -147,7 +147,7 @@ authdata_match(mdata, data)
     while ((mdatap = *mdata) && (datap = *data)) {
       if ((mdatap->ad_type != datap->ad_type) ||
           (mdatap->length != datap->length) ||
-          (bcmp ((char *)mdatap->contents,
+          (memcmp ((char *)mdatap->contents,
 		 (char *)datap->contents, mdatap->length) != 0))
           return FALSE;
       mdata++;
