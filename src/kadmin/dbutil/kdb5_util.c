@@ -1,8 +1,8 @@
 /*
- * admin/edit/kdb5_edit.c
+ * kadmin/dbutil/kdb5_util.c
  *
- * (C) Copyright 1990,1991, 1996 by the Massachusetts Institute of Technology.
- * All Rights Reserved.
+ * (C) Copyright 1990,1991,1996,2001 by the Massachusetts Institute of
+ * Technology.  All Rights Reserved.
  *
  * Export of this software from the United States of America may
  *   require a specific license from the United States Government.
@@ -57,7 +57,7 @@
 #include <k5-int.h>
 #include <kadm5/admin.h>
 #include <krb5/adm_proto.h>
-#include <kadm5/adb.h>
+#include <kadm5/server_internal.h>
 #include <time.h>
 #include "kdb5_util.h"
 
@@ -301,6 +301,7 @@ static int open_db_and_mkey()
     int nentries;
     krb5_boolean more;
     krb5_data scratch, pwd, seed;
+    kadm5_server_handle_rec kadm5_handle;
 
     dbactive = FALSE;
     valid_master_key = 0;
@@ -316,7 +317,15 @@ static int open_db_and_mkey()
 	exit_status++;
 	return(1);
     }
-    if ((retval = osa_adb_open_policy(&policy_db, &global_params))) {
+    /* XXX Horrible kludge.  To get the generation number to increase from
+     * policy updates, the handle to the policy db needs a handle to the
+     * principal db so it can do a kdb_get_entry on the master principal.
+     * The only things it looks at are the context and params.
+     */
+    kadm5_handle.context = util_context;
+    kadm5_handle.params = global_params;
+    if ((retval = osa_adb_open_policy(&policy_db, &global_params,
+    				      &kadm5_handle))) {
 	com_err(progname, retval, "opening policy database");
 	exit_status++;
 	return (1);

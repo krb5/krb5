@@ -75,7 +75,7 @@ static char *v4_mkeyfile = "/.k";
 /* Define to make certain blocks private */
 #define V4_DECLARES_STATIC
 #include "kdb5_util.h"
-#include "kadm5/adb.h"                  /* osa_adb_create_policy_db */
+#include "kadm5/adb.h"			/* osa_adb_create_policy_db */
 #include <netinet/in.h>			/* ntohl */
 
 #define PROGNAME argv[0]

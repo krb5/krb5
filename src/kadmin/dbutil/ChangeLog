@@ -1,5 +1,22 @@
 2001-06-20  Mitchell Berger  <mitchb@mit.edu>
 
+	* dump.c: Changed to include server_internal.h instead of adb.h.
+	(load_db): kadm5_server_handle_rec added for the new
+	osa_adb_open_policy calling sequence.
+
+	* kdb5_create.c: Comment about steps in creating a database updated to
+	include a step where the generation number is initialized.  Call to
+	initialize the generation number upon creation of the master principal
+	added.
+
+	* kdb5_util.c: Changed to include server_internal.h instead of adb.h.
+	(open_db_and_mkey): kadm5_server_handle_rec added for the new
+	osa_adb_open_policy calling sequence.
+
+	* loadv4.c: Unimportant whitespace change in a comment.
+
+2001-06-20  Mitchell Berger  <mitchb@mit.edu>
+
 	* kdb5_create.c (kdb5_create): Fixed typo in com_err message.
 
 2001-06-18  Ezra Peisach  <epeisach@mit.edu>

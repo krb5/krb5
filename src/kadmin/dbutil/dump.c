@@ -30,7 +30,7 @@
 #include <stdio.h>
 #include <k5-int.h>
 #include <kadm5/admin.h>
-#include <kadm5/adb.h>
+#include <kadm5/server_internal.h>
 #include <com_err.h>
 #include "kdb5_util.h"
 #if defined(HAVE_REGEX_H) && defined(HAVE_REGCOMP)
@@ -2079,6 +2079,7 @@ load_db(argc, argv)
     int			update, verbose;
     krb5_int32		crflags;
     int			aindex;
+    kadm5_server_handle_rec kadm5_handle;
 
     /*
      * Parse the arguments.
@@ -2250,7 +2251,15 @@ load_db(argc, argv)
 	 exit_status++;
 	 goto error;
     }
-    if ((kret = osa_adb_open_policy(&tmppol_db, &newparams))) {
+
+    /* XXX Horrible kludge - to get generation number increases from policy
+     * from policy updates, the policy db handle needs a handle to the
+     * principal db so it can do a kdb_get_entry on the master principal.
+     * The context and params are the only things looked at.
+     */
+    kadm5_handle.context = kcontext;
+    kadm5_handle.params = global_params;
+    if ((kret = osa_adb_open_policy(&tmppol_db, &newparams, &kadm5_handle))) {
 	 fprintf(stderr, "%s: %s while opening policy database\n",
 		 programname, error_message(kret));
 	 exit_status++;
