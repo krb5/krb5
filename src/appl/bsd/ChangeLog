@@ -1,3 +1,12 @@
+Thu Jun 22 14:36:46 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* configure.in: Change AC_HAVE_HEADERS with AC_CHECK_HEADERS, and
+		check for string.h as well.
+
+	* krsh.c: Don't include ext-proto.h; move the #include of the
+		header files which we actually needed into krsh.c, using
+		the autoconf standard define's.
+
 Wed Jun 21 17:29:27 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* login.c: Change RETSIGTYPE to krb5_sigtype to be consistant.

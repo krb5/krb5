@@ -35,11 +35,18 @@ char copyright[] =
 
 #include <netinet/in.h>
 
-#include <stdio.h>
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+#ifdef HAVE_STRING_H
 #include <string.h>
+#else
+#include <strings.h>
+#endif
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#include <stdio.h>
 #include <errno.h>
 #include <signal.h>
 #include <pwd.h>
@@ -58,7 +65,6 @@ char copyright[] =
 #include "krb5.h"
 #include "com_err.h"
 #include "defines.h"
-#include "ext-proto.h"
 #endif /* KERBEROS */
      
 /*
