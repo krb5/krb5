@@ -365,7 +365,7 @@ krb5_error_code krb5_cc_register
 	PROTOTYPE((krb5_cc_ops *,
 		   krb5_boolean ));
 
-krb5_error_code krb5_sendauth PROTOTYPE((void *,
+krb5_error_code krb5_sendauth PROTOTYPE((krb5_pointer,
 					 char *,
 					 krb5_principal,
 					 krb5_principal,
@@ -378,7 +378,7 @@ krb5_error_code krb5_sendauth PROTOTYPE((void *,
 					 krb5_error **,
 					 krb5_ap_rep_enc_part **));
 	
-krb5_error_code krb5_recvauth PROTOTYPE((void *,
+krb5_error_code krb5_recvauth PROTOTYPE((krb5_pointer,
 					 char *,
 					 krb5_principal,
 					 krb5_address *,
