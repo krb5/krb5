@@ -49,7 +49,7 @@ OLDDECLARG(krb5_boolean,override)
 	    return KRB5_CC_TYPE_EXISTS;
     }
     if (!(t = (struct krb5_cc_typelist *) malloc(sizeof(*t))))
-	return ENOMEM;			/* XXX */
+	return ENOMEM;
     t->next = cc_typehead;
     t->ops = ops;
     cc_typehead = t;
