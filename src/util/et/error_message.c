@@ -39,9 +39,12 @@ long code;
     char *cp;
 
 #ifdef _WINDOWS
+#define HAS_STRERROR 1
 /*
 ** Winsock defines errors in the range 10000-10100. These are equivalent
 ** to 10000 plus the Berkeley error numbers.
+*
+* (Does windows strerror() work right here?)
 */
     if (code >= 10000 && code <= 10100)		/* Is it Winsock error? */
 	code -= 10000;				/* Turn into Berkeley errno */

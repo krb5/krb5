@@ -1,3 +1,7 @@
+Sat Feb 24 18:50:03 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* error_message.c (HAS_STRERROR): Windows has strerror()
+
 Wed Feb  7 00:19:17 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in (CCFILES): Checked in danw's changes to support
