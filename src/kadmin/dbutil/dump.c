@@ -970,7 +970,7 @@ dump_db(argc, argv)
 		     error_message(kret));
 	     exit_status++;
 	}
-	if (ofile && ofile != stdout && !exit_status) {
+	if (ofile && f != stdout && !exit_status) {
 	     fclose(f);
 	     update_ok_file(ofile);
 	}

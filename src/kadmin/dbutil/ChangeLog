@@ -1,3 +1,7 @@
+Thu Aug 29 11:57:09 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* dump.c (dump_db): don't compare apples and iguanas
+
 Sat Aug 24 21:14:45 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* loadv4.c, kdb5_stash.c: Removed unused variable rparams.
