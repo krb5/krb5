@@ -42,6 +42,10 @@ typedef int krb5_sigtype;
 #define USE_STRING_H
 #endif
 
+#ifndef HasStdlibHTrue
+#define NO_STDLIB_H
+#endif
+
 #ifdef Bitsize32
 #ifdef Bitsize64
  error: only one of BitsizeNN, please.
