@@ -111,12 +111,12 @@ krb5_data **response;			/* filled in with a response packet */
     krb5_timestamp kdc_time, authtime;
     krb5_keyblock *session_key = 0;
     krb5_keyblock encrypting_key;
-    krb5_enctype useetype;
     krb5_pa_data *padat_tmp[2], padat_local;
     krb5_data salt_data;
     const char *status;
     krb5_encrypt_block eblock;
     krb5_key_data  *server_key, *client_key;
+    krb5_keytype usekeytype;
 #ifdef	KRBCONF_KDC_MODIFIES_KDB
     krb5_boolean update_client = 0;
 #endif	/* KRBCONF_KDC_MODIFIES_KDB */
@@ -203,12 +203,11 @@ krb5_data **response;			/* filled in with a response packet */
 	goto errout;
     }
       
-    /* This will change when the etype == keytype */
-    for (i = 0; i < request->netypes; i++) {
-	if (!valid_etype(request->etype[i]))
+    for (i = 0; i < request->nktypes; i++) {
+	if (!valid_keytype(request->ktype[i]))
 	    continue;
 
-	if (request->etype[i] == ETYPE_DES_CBC_MD5 &&
+	if (request->ktype[i] == KEYTYPE_DES_CBC_MD5 &&
 	    !isflagset(server.attributes, KRB5_KDB_SUPPORT_DESMD5))
 	    continue;
 
@@ -216,28 +215,25 @@ krb5_data **response;			/* filled in with a response packet */
 	 * Find the server key of the appropriate type.  If we could specify
 	 * a kvno, it would be supplied here.
 	 */
-	if (!krb5_dbe_find_keytype(kdc_context,
-				   &server,
-				   krb5_csarray[request->etype[i]]->
-				   	system->proto_keytype,
+	if (!krb5_dbe_find_keytype(kdc_context, &server, request->ktype[i],
 				   -1,		/* Ignore salttype */
 				   -1,		/* Get highest kvno */
 				   &server_key))
 	    goto got_a_key;
     }
     
-    /* unsupported etype */
+    /* unsupported ktype */
     krb5_klog_syslog(LOG_INFO,"AS_REQ: BAD ENCRYPTION TYPE: host %s, %s for %s",
                      fromstring, cname, sname);
-    retval = prepare_error_as(request, KDC_ERR_ETYPE_NOSUPP, 0, response);
+    retval = prepare_error_as(request, KDC_ERR_KEYTYPE_NOSUPP, 0, response);
     goto errout;
 
 got_a_key:;
-    useetype = request->etype[i];
-    krb5_use_cstype(kdc_context, &eblock, useetype);
+    usekeytype = request->ktype[i];
+    krb5_use_keytype(kdc_context, &eblock, request->ktype[i]);
     
     if ((retval = krb5_random_key(kdc_context, &eblock,
-				  krb5_csarray[useetype]->random_sequence,
+				  krb5_keytype_array[usekeytype]->random_sequence,
 				  &session_key))) {
 	/* random key failed */
       krb5_klog_syslog(LOG_INFO,"AS_REQ: RANDOM KEY FAILED: host %s, %s for %s",
@@ -419,7 +415,7 @@ got_a_key:;
 	krb5_klog_syslog(LOG_INFO,
 			 "AS_REQ: CANNOT FIND CLIENT KEY: host %s, %s for %s",
 			 fromstring, cname, sname);
-	retval = prepare_error_as(request, KDC_ERR_ETYPE_NOSUPP, 0, response);
+	retval = prepare_error_as(request, KDC_ERR_KEYTYPE_NOSUPP, 0, response);
 	goto errout;
     }
 
@@ -493,7 +489,7 @@ got_a_key:;
 
     /* now encode/encrypt the response */
 
-    reply.enc_part.etype = useetype;
+    reply.enc_part.keytype = usekeytype;
     reply.enc_part.kvno = client_key->key_data_kvno;
 
     /* convert client.key_data into a real key */

@@ -389,7 +389,7 @@ kerb_get_principal(name, inst, principal, maxn, more)
 
     if (krb5_dbe_find_keytype(kdc_context,
 			       &entries,
-			       KEYTYPE_DES,
+			       KEYTYPE_DES_CBC_CRC,
 			       KRB5_KDB_SALTTYPE_V4,
 			       -1,
 			       &pkey)) {

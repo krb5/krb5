@@ -1,3 +1,9 @@
+
+Tue Sep 05 22:10:34 1995   Chris Provenzano (proven@mit.edu)
+
+        * do_as_req.c, do_tgs_req.c, kerberos_v4.c, main.c: Remove krb5_enctype
+		references, and replace with krb5_keytype where appropriate.
+
 Mon Sep  4 14:10:26 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* do_as_req.c, do_tgs_req.c, kdc_util.c, kdc_util.h, policy.c: Add
