@@ -1,3 +1,7 @@
+Wed Mar  1 17:59:19 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* kadm.h: Remove declaration of malloc() and realloc().
+
 Fri Feb  3 06:50:46 1995  Theodore Y. Ts'o  (tytso@dcl)
 
 	* krb.h: Add changes to make this work on Alpha's.  (From Ezra).

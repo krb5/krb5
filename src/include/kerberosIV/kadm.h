@@ -148,8 +148,6 @@ extern void krb_set_tkt_string();	/* XXX ditto */
 
 extern unsigned long quad_cksum();	/* XXX should be in des.h */
 
-/* XXX This doesn't belong here!!! */
-char *malloc(), *realloc();
 #ifdef POSIX
 typedef void sigtype;
 #else
