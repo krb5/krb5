@@ -352,26 +352,15 @@ char *
 etype_string(enctype)
     krb5_enctype enctype;
 {
-    static char buf[12];
+    static char buf[100];
+    krb5_error_code retval;
     
-    switch (enctype) {
-    case ENCTYPE_DES_CBC_CRC:
-	return "DES-CBC-CRC";
-	break;
-    case ENCTYPE_DES_CBC_MD4:
-	return "DES-CBC-MD4";
-	break;
-    case ENCTYPE_DES_CBC_MD5:
-	return "DES-CBC-MD5";
-	break;
-    case ENCTYPE_DES3_CBC_SHA:
-	return "DES3-CBC-SHA";
-	break;
-    default:
+    if ((retval = krb5_enctype_to_string(enctype, buf, sizeof(buf)))) {
+	/* XXX if there's an error != EINVAL, I should probably report it */
 	sprintf(buf, "etype %d", enctype);
-	return buf;
-	break;
     }
+
+    return buf;
 }
 
 char *

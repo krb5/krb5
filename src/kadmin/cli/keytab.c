@@ -399,26 +399,11 @@ int remove_principal(char *keytab_str, krb5_keytab keytab, char
 static char *etype_string(enctype)
     krb5_enctype enctype;
 {
-    static char buf[12];
-    
-    switch (enctype) {
-    case ENCTYPE_DES_CBC_CRC:
-	return "DES-CBC-CRC";
-	break;
-    case ENCTYPE_DES_CBC_MD4:
-	return "DES-CBC-MD4";
-	break;
-    case ENCTYPE_DES_CBC_MD5:
-	return "DES-CBC-MD5";
-	break;
-#if 0
-    case ENCTYPE_DES3_CBC_MD5:
-	return "DES3-CBC-MD5";
-	break;
-#endif
-    default:
+    static char buf[100];
+    krb5_error_code ret;
+
+    if (ret = krb5_enctype_to_string(enctype, buf, sizeof(buf)))
 	sprintf(buf, "etype %d", enctype);
-	return buf;
-	break;
-    }
+
+    return buf;
 }
