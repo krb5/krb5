@@ -1,3 +1,8 @@
+Fri Aug 11 15:49:30 1995  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* Makefile.in (CFILES): Rename initialize_slave.c to init_slave.c
+        so it isn't truncated in libpty.a.
+
 Fri Aug 11 01:12:03 1995  Sam Hartman  <hartmans@infocalypse>
 
 	* initialize_slave.c (pty_initialize_slave): You really do need to

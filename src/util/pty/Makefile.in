@@ -6,7 +6,7 @@ SED = sed
 	$(CC) $(CFLAGS) -c $(srcdir)/$*.c
 
 
-LIBOBJS= cleanup.o getpty.o initialize_slave.o open_ctty.o open_slave.o \
+LIBOBJS= cleanup.o getpty.o init_slave.o open_ctty.o open_slave.o \
    update_utmp.o update_wtmp.o vhangup.o void_assoc.o pty_err.o logwtmp.o init.o
 LIBUPDATE= $(BUILDTOP)/util/libupdate
 LIBDONE=DONE
@@ -16,10 +16,10 @@ INSTALLFILE = cp
 # for pty-int.h
 LOCALINCLUDE=-I. -I$(srcdir)
 
-FILES= Makefile cleanup.c getpty.c initialize_slave.c open_ctty.c open_slave.c update_utmp.c update_wtmp.c vhangup.c void_assoc.c pty_err.h pty_err.c\
+FILES= Makefile cleanup.c getpty.c init_slave.c open_ctty.c open_slave.c update_utmp.c update_wtmp.c vhangup.c void_assoc.c pty_err.h pty_err.c\
 logwtmp.c init.c
 
-CFILES=cleanup.c getpty.c initialize_slave.c open_ctty.c open_slave.c\
+CFILES=cleanup.c getpty.c init_slave.c open_ctty.c open_slave.c\
 update_utmp.c update_wtmp.c vhangup.c void_assoc.c pty_err.c logwtmp.c init.c
 
 
