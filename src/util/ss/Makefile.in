@@ -1,5 +1,4 @@
 CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
-LDFLAGS = -g
 SED = sed
 
 INSTALLLIB=cp
@@ -63,7 +62,13 @@ FILES=	$(SRCS) $(MKCMDSFILES) $(HFILES) \
 # stuff to build
 #
 
-all::	mk_cmds libss.a includes # libss_p.a lint
+all:: all-$(WHAT)
+
+all-unix::	mk_cmds libss.a includes # libss_p.a lint
+all-mac::
+all-windows::  all-unix
+
+unixmac:: includes
 
 dist:	archives
 
