@@ -1,3 +1,9 @@
+Mon Oct 21 21:19:53 1996  Tom Yu  <tlyu@mit.edu>
+
+	* aclocal.m4: Fix CopySrcHeader and CopyHeader so they actually
+	generate dependencies for the files they're copying to.  Also, fix
+	up DO_SUBDIRS to work with new recursion methods.
+
 Mon Oct  7 15:07:38 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* configure.in: Add AC_KRB5_TCL so configure --help is useful.

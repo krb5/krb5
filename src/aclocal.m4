@@ -64,8 +64,11 @@ dnl DO_SUBDIRS
 dnl recurse into subdirs by specifying the recursion targets
 dnl the rules are in post.in but the target needs substitution
 AC_DEFUN([DO_SUBDIRS],
-[RECURSE_TARGETS="all-unix clean-unix install-unix check-unix Makefiles"
-AC_SUBST(RECURSE_TARGETS)])
+[ALL_RECURSE="all-recurse"
+CLEAN_RECURSE="clean-recurse"
+INSTALL_RECURSE="install-recurse"
+CHECK_RECURSE="check-recurse"
+MAKEFILES_RECURSE="Makefiles-recurse"])
 dnl
 dnl drop in standard rules for all configure files -- CONFIG_RULES
 dnl
@@ -82,6 +85,11 @@ AC_CONST dnl
 WITH_NETLIB dnl
 KRB_INCLUDE dnl
 AC_ARG_PROGRAM dnl
+AC_SUBST(ALL_RECURSE)
+AC_SUBST(CLEAN_RECURSE)
+AC_SUBST(INSTALL_RECURSE)
+AC_SUBST(CHECK_RECURSE)
+AC_SUBST(MAKEFILES_RECURSE)
 ])dnl
 
 dnl This is somewhat gross and should go away when the build system
@@ -399,7 +407,8 @@ dnl
 define(CopyHeader,[
 AC_PUSH_MAKEFILE()dnl
 
-includes:: $1
+includes:: $2/$1
+$2/$1: $1
 	@if test -d $2; then :; else (set -x; mkdir $2) fi
 	@if cmp $1 $2/$1 >/dev/null 2>&1; then :; \
 	else \
@@ -417,7 +426,8 @@ dnl
 define(CopySrcHeader,[
 AC_PUSH_MAKEFILE()dnl
 
-includes:: $1
+includes:: $2/$1
+$2/$1: $(srcdir)/$1
 	@if test -d $2; then :; else (set -x; mkdir $2) fi
 	@if cmp $(srcdir)/$1 $2/$1 >/dev/null 2>&1; then :; \
 	else \
