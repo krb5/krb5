@@ -203,8 +203,15 @@ void get_preauth_hint_list(request, client, server, e_data)
 	memset(*pa, 0, sizeof(krb5_pa_data));
 	(*pa)->magic = KV5M_PA_DATA;
 	(*pa)->pa_type = ap->type;
-	if (ap->get_edata)
-	    (ap->get_edata)(kdc_context, request, client, server, *pa);
+	if (ap->get_edata) {
+	  retval = (ap->get_edata)(kdc_context, request, client, server, *pa);
+	  if (retval) {
+	    /* just failed on this type, continue */
+	    free(*pa);
+	    *pa = 0;
+	    continue;
+	  }
+	}
 	pa++;
     }
     retval = encode_krb5_padata_sequence((const krb5_pa_data **) pa_data,
@@ -433,7 +440,7 @@ get_etype_info(context, request, client, server, pa_data)
 
     salt.data = 0;
 
-    entry = malloc((client->n_key_data * 2) * sizeof(krb5_etype_info_entry *));
+    entry = malloc((client->n_key_data * 2 + 1) * sizeof(krb5_etype_info_entry *));
     if (entry == NULL)
 	return ENOMEM;
     entry[0] = NULL;
@@ -630,7 +637,8 @@ get_sam_edata(context, request, client, server, pa_data)
 
     {
       char *uname;
-      int npr = 1, more;
+      int npr = 1;
+      krb5_boolean more;
       krb5_db_entry assoc;
       krb5_key_data  *assoc_key;
       krb5_principal newp;
@@ -656,7 +664,7 @@ get_sam_edata(context, request, client, server, pa_data)
 	  strlen(sam_ptr->name);
 	npr = 1;
 	retval = krb5_db_get_principal(kdc_context, newp, &assoc, &npr, &more);
-	if(!retval) {
+	if(!retval && npr) {
 	  sc.sam_type = sam_ptr->sam_type;
 	  break;
 	}
@@ -690,7 +698,9 @@ get_sam_edata(context, request, client, server, pa_data)
 	  }
 	  /* now we can use encrypting_key... */
 	}
-      }
+      } else
+	/* SAM is not an option - so don't return as hint */
+	return KRB5_PREAUTH_BAD_TYPE;
 
       krb5_princ_component(kdc_context,newp,probeslot)->data = 0;
       krb5_princ_component(kdc_context,newp,probeslot)->length = 0;

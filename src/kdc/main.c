@@ -721,7 +721,9 @@ initialize_realms(kcontext, argc, argv)
 	hierarchy[2] = (char *) NULL;
 	if (krb5_aprof_get_string(aprof, hierarchy, TRUE, &default_ports))
 	    default_ports = 0;
-	krb5_aprof_finish(aprof);
+	/* aprof_init can return 0 with aprof == NULL */
+	if (aprof)
+	     krb5_aprof_finish(aprof);
     }
     if (default_ports == 0)
 	default_ports = strdup(DEFAULT_KDC_PORTLIST);
@@ -803,6 +805,7 @@ initialize_realms(kcontext, argc, argv)
 	}
     }
 
+#ifdef USE_RCACHE
     /*
      * Now handle the replay cache.
      */
@@ -810,6 +813,7 @@ initialize_realms(kcontext, argc, argv)
 	com_err(argv[0], retval, "while initializing KDC replay cache");
 	exit(1);
     }
+#endif
 
     /* Ensure that this is set for our first request. */
     kdc_active_realm = kdc_realmlist[0];

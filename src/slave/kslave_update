@@ -1,16 +1,16 @@
 #!/bin/sh
 #
-# Propagate if database (principal.pag) has been modified since last dump
+# Propagate if database (principal.db) has been modified since last dump
 # (dumpfile.dump_ok) or if database has been dumped since last successful
 # propagation (dumpfile.<slave machine>.last_prop)
 
-KDB_DIR=/krb5
+KDB_DIR=/usr/local/var/krb5kdc
 
-KDB_FILE=$KDB_DIR/principal.page
+KDB_FILE=$KDB_DIR/principal.db
 DUMPFILE=$KDB_DIR/slave_datatrans
-KDB5_EDIT=/krb5/sbin/kdb5_edit
-KPROP=/krb5/sbin/kprop
- 
+KDB5_UTIL=/usr/local/sbin/kdb5_util
+KPROP=/usr/local/sbin/kprop
+
 SLAVE=$1
 if [ -z "${SLAVE}" ]
 then 
@@ -23,7 +23,7 @@ if [ "`ls -t $DUMPFILE.dump_ok $KDB_FILE | sed -n 1p`"  = "$KDB_FILE" -o \
 then
 
 	date
-	$KDB5_EDIT -R "ddb $DUMPFILE" >/dev/null
+	$KDB5_EDIT dump $DUMPFILE > /dev/null
 
 	$KPROP -d -f $DUMPFILE ${SLAVE}
 	rm $DUMPFILE

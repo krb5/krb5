@@ -183,7 +183,7 @@ int main(int argc, char *argv[])
      
      if (ret = kadm5_get_config_params(context, NULL, NULL, &params,
 				       &params)) {
-	  krb5_klog_syslog(LOG_ERR, "%s: %s while initializing, aborting\n",
+	  krb5_klog_syslog(LOG_ERR, "%s: %s while initializing, aborting",
 			   whoami, error_message(ret));
 	  fprintf(stderr, "%s: %s while initializing, aborting\n",
 		  whoami, error_message(ret));
@@ -197,7 +197,7 @@ int main(int argc, char *argv[])
 
      if ((params.mask & REQUIRED_PARAMS) != REQUIRED_PARAMS) {
 	  krb5_klog_syslog(LOG_ERR, "%s: Missing required configuration values "
-			   "while initializing, aborting\n", whoami,
+			   "while initializing, aborting", whoami,
 			   (params.mask & REQUIRED_PARAMS) ^ REQUIRED_PARAMS);
 	  fprintf(stderr, "%s: Missing required configuration values "
 		  "(%x) while initializing, aborting\n", whoami,
@@ -635,33 +635,58 @@ void log_badverf(gss_name_t client_name, gss_name_t server_name,
 		 struct svc_req *rqst, struct rpc_msg *msg, char
 		 *data)
 {
-     static const char *const proc_names[] = {
-	  "kadm5_create_principal",
-	  "kadm5_delete_principal",
-	  "kadm5_modify_principal",
-	  "kadm5_rename_principal",
-	  "kadm5_get_principal",
-	  "kadm5_chpass_principal",
-	  "kadm5_randkey_principal",
-	  "kadm5_create_policy",
-	  "kadm5_delete_policy",
-	  "kadm5_modify_policy",
-	  "kadm5_get_policy",
-	  "kadm5_get_privs",
+     struct procnames {
+	  rpc_u_int32 proc;
+	  const char *proc_name;
      };
+     static const struct procnames proc_names[] = {
+	  {1, "CREATE_PRINCIPAL"},
+	  {2, "DELETE_PRINCIPAL"},
+	  {3, "MODIFY_PRINCIPAL"},
+	  {4, "RENAME_PRINCIPAL"},
+	  {5, "GET_PRINCIPAL"},
+	  {6, "CHPASS_PRINCIPAL"},
+	  {7, "CHRAND_PRINCIPAL"},
+	  {8, "CREATE_POLICY"},
+	  {9, "DELETE_POLICY"},
+	  {10, "MODIFY_POLICY"},
+	  {11, "GET_POLICY"},
+	  {12, "GET_PRIVS"},
+	  {13, "INIT"},
+	  {14, "GET_PRINCS"},
+	  {15, "GET_POLS"},
+     };
+#define NPROCNAMES (sizeof (proc_names) / sizeof (struct procnames))
      OM_uint32 minor;
      gss_buffer_desc client, server;
      gss_OID gss_type;
      char *a;
+     rpc_u_int32 proc;
+     int i;
+     const char *procname;
 
      (void) gss_display_name(&minor, client_name, &client, &gss_type);
      (void) gss_display_name(&minor, server_name, &server, &gss_type);
      a = inet_ntoa(rqst->rq_xprt->xp_raddr.sin_addr);
 
-     krb5_klog_syslog(LOG_NOTICE, "WARNING! Forged/garbled request: %s, "
-	    "claimed client = %s, server = %s, addr = %s",
-	    proc_names[msg->rm_call.cb_proc], client.value,
-	    server.value, a);
+     proc = msg->rm_call.cb_proc;
+     procname = NULL;
+     for (i = 0; i < NPROCNAMES; i++) {
+	  if (proc_names[i].proc == proc) {
+	       procname = proc_names[i].proc_name;
+	       break;
+	  }
+     }
+     if (procname != NULL)
+	  krb5_klog_syslog(LOG_NOTICE, "WARNING! Forged/garbled request: %s, "
+			   "claimed client = %s, server = %s, addr = %s",
+			   procname, client.value,
+			   server.value, a);
+     else
+	  krb5_klog_syslog(LOG_NOTICE, "WARNING! Forged/garbled request: %d, "
+			   "claimed client = %s, server = %s, addr = %s",
+			   proc, client.value,
+			   server.value, a);
 
      (void) gss_release_buffer(&minor, &client);
      (void) gss_release_buffer(&minor, &server);
@@ -724,7 +749,7 @@ void log_badauth(OM_uint32 major, OM_uint32 minor,
      krb5_klog_syslog(LOG_NOTICE, "Authentication attempt failed: %s, GSS-API "
 	    "error strings are:", a);
      log_badauth_display_status("   ", major, minor);
-     krb5_klog_syslog(LOG_NOTICE, "   GSS-API error strings complete.\n");
+     krb5_klog_syslog(LOG_NOTICE, "   GSS-API error strings complete.");
 }
 
 void log_badauth_display_status(char *msg, OM_uint32 major, OM_uint32 minor)
@@ -752,11 +777,11 @@ void log_badauth_display_status_1(char *m, OM_uint32 code, int type,
 						 GSS_C_MECH_CODE, 1);
 	       } else
 		    krb5_klog_syslog(LOG_ERR, "GSS-API authentication error %s: "
-			   "recursive failure!\n", msg);
+			   "recursive failure!", msg);
 	       return;
 	  }
 
-	  krb5_klog_syslog(LOG_NOTICE, "%s %s\n", m, (char *)msg.value); 
+	  krb5_klog_syslog(LOG_NOTICE, "%s %s", m, (char *)msg.value); 
 	  (void) gss_release_buffer(&minor_stat, &msg);
 	  
 	  if (!msg_ctx)

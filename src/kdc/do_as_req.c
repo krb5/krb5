@@ -99,6 +99,7 @@ krb5_data **response;			/* filled in with a response packet */
 	status = "UNPARSING_CLIENT";
 	goto errout;
     }
+    limit_string(cname);
     if (!request->server) {
 	status = "NULL_SERVER";
 	errcode = KRB5KDC_ERR_S_PRINCIPAL_UNKNOWN;
@@ -108,6 +109,7 @@ krb5_data **response;			/* filled in with a response packet */
 	status = "UNPARSING_SERVER";
 	goto errout;
     }
+    limit_string(sname);
     
     c_nprincs = 1;
     if ((errcode = krb5_db_get_principal(kdc_context, request->client,

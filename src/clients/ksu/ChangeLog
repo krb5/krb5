@@ -1,3 +1,31 @@
+Fri Mar 12 18:52:18 1999  Tom Yu  <tlyu@mit.edu>
+
+	* main.c (main): Fix cleanup code for setluid() failure.
+
+Thu Mar  4 18:46:55 1999  Tom Yu  <tlyu@mit.edu>
+
+	* heuristic.c (get_authorized_princ_names): Fix to not call
+	list_union() if cmd is NULL, otherwise freed memory gets
+	referenced. [krb5-clients/698]
+
+Mon Feb 22 19:17:15 1999  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in: Actually AC_SUBST(KSU_LIBS).
+
+Thu Feb 18 22:33:58 1999  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (ksu): Add $(KSU_LIBS).
+
+	* configure.in: Add check for setluid().
+
+	* main.c (main): Add call to setluid() on systems that have it.
+
+Wed Feb  4 20:46:49 1998  Tom Yu  <tlyu@mit.edu>
+
+	* krb_auth_su.c (krb5_verify_tkt_def): If using a pre-existing
+	credential cache, ensure that the host ticket has not yet
+	expired.  Patch from vwelch@ncsa.uiuc.edu [krb5-clients/545].
+
 Sun Nov 10 20:10:53 1996  Sam Hartman  <hartmans@mit.edu>
 
 	* krb_auth_su.c (path_passwd;): If you don't have a srvtab, always

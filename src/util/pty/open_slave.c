@@ -55,6 +55,8 @@ long pty_open_slave ( slave, fd)
 #endif
     
 
+	if (slave == NULL || *slave == '\0')
+	    return PTY_OPEN_SLAVE_TOOSHORT;
         if (chmod(slave, 0))
 	    return PTY_OPEN_SLAVE_CHMODFAIL;
 	if ( chown(slave, 0, 0 ) == -1 ) 

@@ -1,3 +1,37 @@
+Fri Apr 23 20:05:38 1999  Tom Yu  <tlyu@mit.edu>
+
+	* svc.c: Fix to reference the correct xprt because we're no longer
+	calling ffs(); also remove some unused variables.
+
+Wed Apr 21 16:22:32 1999  Tom Yu  <tlyu@mit.edu>
+
+	* svc.c (xprt_unregister): Fix typo.
+
+1999-04-14    <tytso@rsts-11.mit.edu>
+
+	* svc.c (svc_getreq, svc_getreqset): Avoid using internal, private
+		fd_set structure elements (Needed for Linux/glibc 2.1)
+
+Tue Oct 21 14:31:33 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* svc_auth_gssapi.c (destroy_client): Fix to not lose entries in
+        the chain linked list.
+
+Fri Nov 22 15:50:42 1996  unknown  <bjaspan@mit.edu>
+
+	* get_myaddress.c (get_myaddress): use krb5_os_localaddr instead
+ 	of ioctl() to get local IP addresses [krb5-libs/227]
+
+	* clnt_generic.c, clnt_simple.c, getrpcport.c: use sizeof instead
+ 	of h_length to determine number of bytes of addr to copy from DNS
+ 	response [krb5-misc/211]
+
+Fri Nov 22 11:49:43 1996  Sam Hartman  <hartmans@mit.edu>
+
+	* types.hin: Include stdlib.h if found at config time [203]
+
+	* configure.in: Substitute STDLIB_INCLUDE into types.h. [203]
+
 Tue Nov 12 16:27:27 1996  Barry Jaspan  <bjaspan@mit.edu>
 
 	* auth_gssapi.c (auth_gssapi_create): handle channel bindings

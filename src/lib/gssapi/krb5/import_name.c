@@ -54,7 +54,8 @@ krb5_gss_import_name(minor_status, input_name_buffer,
    krb5_context context;
    krb5_principal princ;
    krb5_error_code code;
-   char *stringrep, *tmp;
+   char *stringrep, *tmp, *tmp2, *cp;
+   OM_uint32	length;
 #ifndef NO_PASSWORD
    struct passwd *pw;
 #endif
@@ -70,7 +71,8 @@ krb5_gss_import_name(minor_status, input_name_buffer,
    /* Go find the appropriate string rep to pass into parse_name */
 
    if ((input_name_type != GSS_C_NULL_OID) &&
-       g_OID_equal(input_name_type, gss_nt_service_name)) {
+       (g_OID_equal(input_name_type, gss_nt_service_name) ||
+	g_OID_equal(input_name_type, gss_nt_service_name_v2))) {
       char *service, *host;
 
       if ((tmp =
@@ -83,7 +85,7 @@ krb5_gss_import_name(minor_status, input_name_buffer,
       tmp[input_name_buffer->length] = 0;
 
       service = tmp;
-      if (host = strchr(tmp, '@')) {
+      if ((host = strchr(tmp, '@'))) {
 	 *host = '\0';
 	 host++;
       }
@@ -115,6 +117,7 @@ krb5_gss_import_name(minor_status, input_name_buffer,
 	 *minor_status = ENOMEM;
 	 return(GSS_S_FAILURE);
       }
+      tmp2 = 0;
 
       memcpy(tmp, input_name_buffer->value, input_name_buffer->length);
       tmp[input_name_buffer->length] = 0;
@@ -135,7 +138,40 @@ krb5_gss_import_name(minor_status, input_name_buffer,
 	 else
 	    *minor_status = (OM_uint32) G_NOUSER;
 #endif
-      } else {
+      } else if (g_OID_equal(input_name_type, gss_nt_exported_name)) {
+	 cp = tmp;
+	 if (*cp++ != 0x04)
+		 goto fail_name;
+	 if (*cp++ != 0x01)
+		 goto fail_name;
+	 if (*cp++ != 0x00)
+		 goto fail_name;
+	 length = *cp++;
+	 if (length != gss_mech_krb5->length+2)
+		 goto fail_name;
+	 if (*cp++ != 0x06)
+		 goto fail_name;
+	 length = *cp++;
+	 if (length != gss_mech_krb5->length)
+		 goto fail_name;
+	 if (memcmp(cp, gss_mech_krb5->elements, length) != 0)
+		 goto fail_name;
+	 cp += length;
+	 length = *cp++;
+	 length = (length << 8) | *cp++;
+	 length = (length << 8) | *cp++;
+	 length = (length << 8) | *cp++;
+	 tmp2 = malloc(length+1);
+	 if (tmp2 == NULL) {
+		 xfree(tmp);
+		 *minor_status = ENOMEM;
+		 return GSS_S_FAILURE;
+	 }
+	 strncpy(tmp2, cp, length);
+	 tmp2[length] = 0;
+	 
+	 stringrep = tmp2;
+     } else {
 	 return(GSS_S_BAD_NAMETYPE);
       }
 
@@ -143,9 +179,16 @@ krb5_gss_import_name(minor_status, input_name_buffer,
 
       if (stringrep)
 	 code = krb5_parse_name(context, (char *) stringrep, &princ);
-      else
+      else {
+      fail_name:
+	 xfree(tmp);
+	 if (tmp2)
+		 xfree(tmp2);
 	 return(GSS_S_BAD_NAME);
+      }
       
+      if (tmp2)
+	      xfree(tmp2);
       xfree(tmp);
    }
 

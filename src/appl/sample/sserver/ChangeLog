@@ -1,3 +1,10 @@
+Thu Dec  5 19:44:05 1996  Tom Yu  <tlyu@mit.edu>
+
+	* sserver.M: remove ref's to "/krb5" [PR 279]
+
+	* sserver.M: v5srvtab -> krb5.keytab; also kdb5_edit -> kadmin [PR
+	279]
+
 Thu Nov  7 15:24:43 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* sserver.c (main): Check the error return from

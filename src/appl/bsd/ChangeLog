@@ -1,3 +1,174 @@
+Fri Mar 12 19:01:35 1999  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (kshd): Add $(LOGINLIBS).
+
+Mon Mar  8 19:21:23 1999  Tom Yu  <tlyu@mit.edu>
+
+	* kshd.M: Resync manpage.
+
+	* krshd.c: Rework hostname logging.
+
+Wed Feb 24 20:05:40 1999  Tom Yu  <tlyu@mit.edu>
+
+	* klogind.M: Resync manpage.
+
+	* krlogind.c: Rework flags for hostname logging.
+
+Mon Feb 22 22:26:32 1999  Tom Yu  <tlyu@mit.edu>
+
+	* kcmd.c (kcmd): Fix up to not call sname_to_principal until after
+	all the addresses in hp have been iterated through to avoid
+	smashing. [krb5-appl/516]
+
+Wed Feb 17 17:24:11 1999  Tom Yu  <tlyu@mit.edu>
+
+	* klogind.M: Document things a little better, including new
+	options controlling hostname manipulation.
+
+	* krlogind.c: Make use of pty_make_sane_hostname() for purposes of
+	manipulating hostname to pass to login.  Also unconditionally
+	syslog IP address and full hostname of remote host.  Add command
+	line options to control such behavior.
+
+	* configure.in: Add arpa/nameser.h to CHECK_HEADERS.
+
+Fri Feb 12 10:20:20 1999  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* login.c (read_env_vars_from_file): Fix so that it uses
+		passed-in filename instead of the hard-coded to
+		/etc/environment.  [krb5-appl/691]
+
+Wed Jan 20 21:42:41 1999  Tom Yu  <tlyu@mit.edu>
+
+	* login.c (main): Call setluid().
+
+	* krshd.c (doit): Call setluid().
+
+	* configure.in: Check for setluid() rather than main() in
+	libsecurity.
+
+1998-10-06  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* krshd.c (doit): Apply ghudson's patch so that rshd passes the
+		port numbers for the local and foreign addresses so that
+		the V4 encrypted RCP will work correctly.  [krb5-appl/638]
+	* v4rcp.c (answer_auth): Apply ghudson's patch so that if
+		KRB5LOCALPORT and KRB5REMOTEPORT are set, use them to set
+		the foreign and local ports so that encrypted rcp for the
+		same machine.  [krb5-appl/638]
+
+Sat Aug 15 00:01:15 1998  Geoffrey King  <gjking@mit.edu>
+
+	* krcp.c (error): Don't call rcmd_stream_write if iamremote is not
+ 	set, because it expects a valid file descriptor [krb5-appl/359].
+  	Also, remove mistakenly duplicated comment above the function.
+
+Mon Jul 27 00:06:20 1998  Geoffrey King  <gjking@mit.edu>
+
+	* krlogin.c (main): Apply ghudson's patch so that rlogin -a
+	no longer dumps core. [krb5-appl/612]
+
+1998-05-26  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* login.c (dolastlog): BSD 4.4 systems don't have lastlog.h, but
+		still define struct lastlog somewhere.  Included from Dima
+		Ruban's FreeBSD patches.
+
+	* krlogin.c: Include sys/ioctl_compat.h if it is present (instead
+		of just for 386BSD).  
+
+	* loginpaths.h (LPATH): If the OS provides _PATH_DEFPATH, use it
+		to define LPATH and RPATH.
+
+	* login.c: #include paths.h if present, and use it to set the
+		pathnames for certain common files.
+
+	* configure.in (withval): Check for <sys/ioctl_compat.h> and
+	   <paths.h>
+
+Sat May 16 16:07:42 1998  Tom Yu  <tlyu@mit.edu>
+
+	* login.c: Replace strcpy with strncpy in places.  Add nul
+	termination to some existing invocations of strncpy.
+
+Tue Jan 20 21:42:06 1998  Tom Yu  <tlyu@mit.edu>
+
+	* krlogind.c (protocol): Declare pibuf and fibuf as being BUFSIZ
+	bytes long, rather than 1024.  Fixes an Irix bug. [krb5-appl/527]
+
+Thu Nov 20 16:42:54 1997  Tom Yu  <tlyu@mit.edu>
+
+	* krlogind.c (recvauth): Fix args in call to
+ 	rd_and_store_for_creds. [krb5-appl/502]
+
+Mon Nov 17 20:55:31 1997  Tom Yu  <tlyu@mit.edu>
+
+	* krshd.c: Don't set checksum_ignored to 1 if checksum_required is
+	0; also, if a krb5 client passes in a checksum, check it
+	regardless of whether checksum_required is true. [krb5-appl/500]
+
+Wed Nov 12 19:03:02 1997  Tom Yu  <tlyu@mit.edu>
+
+	* forward.c (rd_and_store_for_creds): Don't do the chown.  Avoids
+	a security hole. [krb5-appl/494]
+
+	* krshd.c (recvauth): chown the ccache explicitly, as
+	rd_and_store_for_creds no longer does so. [krb5-appl/494]
+
+Thu Nov  6 22:04:26 1997  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* v4rcp.c: Use error_message(errno) instead of using
+ 		sys_errlist[errno].  This avoids the hair of deciding
+ 		whether or not we need to declare sys_errlist or use
+ 		strerror(), etc., since com_err has all of that complexity
+ 		anyway.  Also fixed lots of -Wall nits.
+
+Mon Nov  3 15:25:48 1997  Tom Yu  <tlyu@mit.edu>
+
+	* krlogind.c (doit): Fix up potential buffer overrun.
+	[krb5-appl/488]
+
+Tue Mar 18 12:34:03 1997  Sam Hartman  <hartmans@luminous.MIT.EDU>
+
+ [326]	* login.c(doit):  Preserve terminal even without -p.
+
+Sat Dec 28 21:06:43 1996  Sam Hartman  <hartmans@luminous.MIT.EDU>
+
+	* login.c: Force environment variables like HOME to be set even if
+ 	-p given.
+
+Thu Feb 27 10:58:07 1997  Sam Hartman  <hartmans@luminous.MIT.EDU>
+
+	* krshd.c: Allow user to login with / as home directory if homedir
+ 	not found. [167]
+
+Fri Dec  6 00:53:08 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* v4rcp.c: Extend the platform-specific braindamage so that
+ 		FreeBSD works.  This whole file is eventually going to
+ 		need serious rototilling to make it even vaguely correct.
+		[PR #284]
+
+Fri Dec  6 00:02:25 1996  Tom Yu  <tlyu@mit.edu>
+
+	* loginpaths.h: Add catch-all entries for LPATH and RPATH in case
+	we run across something that we haven't hardcoded paths for
+	yet. [267]
+
+Thu Dec  5 21:58:28 1996  Tom Yu  <tlyu@mit.edu>
+
+	* login.M: v5srvtab -> krb5.keytab [279]
+
+Sun Nov 24 23:35:22 1996  Ezra Peisach  <epeisach@mit.edu>
+
+	* login.c (try_afscall): Change to take pointer to function
+		instead of only calling setpag(). [krb5-appl/190]
+
+Fri Nov 22 15:46:46 1996  unknown  <bjaspan@mit.edu>
+
+	* kcmd.c (kcmd): use sizeof instead of h_length to determine
+ 	number of bytes of addr to copy from DNS response [krb5-misc/211]
+
 Thu Nov 14 14:30:28 1996  Barry Jaspan  <bjaspan@mit.edu>
 
 	* krcp.c: don't print our own error message if kcmd returns -1 (it

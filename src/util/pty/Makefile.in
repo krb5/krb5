@@ -7,7 +7,8 @@ SED = sed
 
 
 LIBOBJS= cleanup.o getpty.o init_slave.o open_ctty.o open_slave.o \
-   update_utmp.o update_wtmp.o vhangup.o void_assoc.o pty_err.o logwtmp.o init.o
+   update_utmp.o update_wtmp.o vhangup.o void_assoc.o pty_err.o logwtmp.o \
+   init.o sane_hostname.o
 LIBUPDATE= $(BUILDTOP)/util/libupdate
 LIBDONE=DONE
 LIB_SUBDIRS=.
@@ -17,10 +18,10 @@ INSTALLFILE = cp
 LOCALINCLUDE=-I. -I$(srcdir)
 
 FILES= Makefile cleanup.c getpty.c init_slave.c open_ctty.c open_slave.c update_utmp.c update_wtmp.c vhangup.c void_assoc.c pty_err.h pty_err.c\
-logwtmp.c init.c
+logwtmp.c init.c sane_hostname.c
 
 CFILES=cleanup.c getpty.c init_slave.c open_ctty.c open_slave.c\
-update_utmp.c update_wtmp.c vhangup.c void_assoc.c pty_err.c logwtmp.c init.c
+update_utmp.c update_wtmp.c vhangup.c void_assoc.c pty_err.c logwtmp.c init.c sane_hostname.c
 
 
 SRCS=pty_err.h $(CFILES)
