@@ -87,6 +87,8 @@ xdr_callmsg(xdrs, cmsg)
 				buf += RNDUP(oa->oa_length) / sizeof (rpc_int32);
 			}
 			oa = &cmsg->rm_call.cb_verf;
+			_log("%s:%d: packing: oa->oa_flavor=%d oa_length=%d\n",
+			     __FILE__, __LINE__, oa->oa_flavor, oa->oa_length);
 			IXDR_PUT_ENUM(buf, oa->oa_flavor);
 			IXDR_PUT_LONG(buf, oa->oa_length);
 			if (oa->oa_length) {
@@ -153,6 +155,8 @@ xdr_callmsg(xdrs, cmsg)
 				oa->oa_flavor = IXDR_GET_ENUM(buf, enum_t);
 				oa->oa_length = IXDR_GET_LONG(buf);
 			}
+			_log("%s:%d: unpacked: oa->oa_flavor=%d oa_length=%d\n",
+			     __FILE__, __LINE__, oa->oa_flavor, oa->oa_length);
 			if (oa->oa_length) {
 				if (oa->oa_length > MAX_AUTH_BYTES) {
 					return (FALSE);

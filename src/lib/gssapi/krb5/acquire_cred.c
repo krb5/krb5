@@ -136,9 +136,24 @@ acquire_accept_cred(context, minor_status, desired_name, output_princ, cred)
       return(GSS_S_CRED_UNAVAIL);
    }
 
+   _log("%s:%d: krb5_gss_keytab=%s ops=%p\n", SFILE, __LINE__,
+	krb5_gss_keytab ? krb5_gss_keytab : "(null)", kt->ops);
+
    if (desired_name != GSS_C_NO_NAME) {
       princ = (krb5_principal) desired_name;
       if ((code = krb5_kt_get_entry(context, kt, princ, 0, 0, &entry))) {
+	 {
+	     char *p, ktname[BUFSIZ];
+	     krb5_error_code err;
+	     if (krb5_unparse_name(context, princ, &p))
+		 p = NULL;
+	     if (err = krb5_kt_get_name(context, kt, ktname, sizeof(ktname)))
+		 sprintf(ktname, "(error %d/%s)", err, error_message(err));
+	     _log("%s:%d: error %d/%s; desired_name=%s\n", SFILE, __LINE__,
+		  code, error_message(code),
+		  p ? p : "(error)");
+	     free(p);
+	 }
 	 (void) krb5_kt_close(context, kt);
 	 if (code == KRB5_KT_NOTFOUND)
 	    *minor_status = KG_KEYTAB_NOMATCH;

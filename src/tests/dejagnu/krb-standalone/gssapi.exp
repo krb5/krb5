@@ -285,6 +285,11 @@ proc doit { } {
     set gss_server_spawn_id $spawn_id
     sleep 2
 
+    if 0 {
+	send_user "about to run run_client gssclient0 $tmppwd/gss_tk_0 gssclient0\n"
+	set env(CMD) "env KRB5CCNAME=$tmppwd/gss_tk_0 $GSSCLIENT -port 5556 $hostname gssservice@$hostname message-from-gssclient0"
+	spawn_xterm
+    }
     run_client gssclient0 $tmppwd/gss_tk_0 gssclient0
     run_client gssclient1 $tmppwd/gss_tk_1 gssclient1
     run_client gssclient2 $tmppwd/gss_tk_2 gssclient2

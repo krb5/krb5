@@ -129,13 +129,7 @@ static int preauth_search_list[] = {
      -1
 };
 
-static krb5_enctype enctypes[] = {
-    ENCTYPE_DES3_CBC_SHA1,
-    ENCTYPE_ARCFOUR_HMAC,
-    ENCTYPE_DES_CBC_MD5,
-    ENCTYPE_DES_CBC_CRC,
-    0,
-};
+static const krb5_enctype *enctypes = 0;
 
 static kadm5_ret_t _kadm5_init_any(char *client_name,
 				   enum init_type init_type,

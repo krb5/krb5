@@ -309,16 +309,17 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
 
    ptr = (unsigned char *) input_token->value;
 
+   _log("%s:%d: here\n", SFILE, __LINE__);
    if (!(code = g_verify_token_header((gss_OID) gss_mech_krb5,
 				      &(ap_req.length),
 				      &ptr, KG_TOK_CTX_AP_REQ,
-				      input_token->length))) {
+				      input_token->length, 1))) {
        mech_used = gss_mech_krb5;
    } else if ((code == G_WRONG_MECH) &&
 	      !(code = g_verify_token_header((gss_OID) gss_mech_krb5_old,
 					     &(ap_req.length), 
 					     &ptr, KG_TOK_CTX_AP_REQ,
-					     input_token->length))) {
+					     input_token->length, 1))) {
        /*
 	* Previous versions of this library used the old mech_id
 	* and some broken behavior (wrong IV on checksum
@@ -331,6 +332,7 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
        major_status = GSS_S_DEFECTIVE_TOKEN;
        goto fail;
    }
+   _log("%s:%d: here\n", SFILE, __LINE__);
 
    sptr = (char *) ptr;
    TREAD_STR(sptr, ap_req.data, ap_req.length);
@@ -616,6 +618,7 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
        goto fail;
    }
 
+   ctx->proto = 0;
    switch(ctx->subkey->enctype) {
    case ENCTYPE_DES_CBC_MD5:
    case ENCTYPE_DES_CBC_CRC:
@@ -635,12 +638,7 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
 	   /*SUPPRESS 113*/
 	   ctx->enc->contents[i] ^= 0xf0;
 
-       if ((code = krb5_copy_keyblock(context, ctx->subkey, &ctx->seq))) {
-	   major_status = GSS_S_FAILURE;
-	   goto fail;
-       }
-
-       break;
+       goto copy_subkey_to_seq;
 
    case ENCTYPE_DES3_CBC_SHA1:
        ctx->subkey->enctype = ENCTYPE_DES3_CBC_RAW;
@@ -649,36 +647,38 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
        ctx->sealalg = SEAL_ALG_DES3KD;
 
        /* fill in the encryption descriptors */
-
+   copy_subkey:
        if ((code = krb5_copy_keyblock(context, ctx->subkey, &ctx->enc))) {
 	   major_status = GSS_S_FAILURE;
 	   goto fail;
        }
-
+   copy_subkey_to_seq:
        if ((code = krb5_copy_keyblock(context, ctx->subkey, &ctx->seq))) {
 	   major_status = GSS_S_FAILURE;
 	   goto fail;
        }
-
        break;
-	  case ENCTYPE_ARCFOUR_HMAC:
-	    ctx->signalg = SGN_ALG_HMAC_MD5 ;
-	    ctx->cksum_size = 8;
-	    ctx->sealalg = SEAL_ALG_MICROSOFT_RC4 ;
 
-	      code = krb5_copy_keyblock (context, ctx->subkey, &ctx->enc);
-	      if (code)
-		  goto fail;
-	      code = krb5_copy_keyblock (context, ctx->subkey, &ctx->seq);
-	      if (code) {
-		  krb5_free_keyblock (context, ctx->enc);
-		  goto fail;
-	      }
-	      break;	    
+   case ENCTYPE_ARCFOUR_HMAC:
+       ctx->signalg = SGN_ALG_HMAC_MD5 ;
+       ctx->cksum_size = 8;
+       ctx->sealalg = SEAL_ALG_MICROSOFT_RC4 ;
+       goto copy_subkey;
 
    default:
-       code = KRB5_BAD_ENCTYPE;
-       goto fail;
+       ctx->signalg = -1;
+       ctx->sealalg = -1;
+       ctx->proto = 1;
+       code = krb5int_c_mandatory_cksumtype(context, ctx->subkey->enctype,
+					    &ctx->cksumtype);
+       if (code)
+	   goto fail;
+       code = krb5_c_checksum_length(context, ctx->cksumtype,
+				     &ctx->cksum_size);
+       if (code)
+	   goto fail;
+       ctx->have_acceptor_subkey = 0;
+       goto copy_subkey;
    }
 
    ctx->endtime = ticket->enc_part2->times.endtime;
@@ -686,7 +686,11 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
 
    krb5_free_ticket(context, ticket); /* Done with ticket */
 
-   krb5_auth_con_getremoteseqnumber(context, auth_context, &ctx->seq_recv);
+   {
+       krb5_ui_4 seq_temp;
+       krb5_auth_con_getremoteseqnumber(context, auth_context, &seq_temp);
+       ctx->seq_recv = seq_temp;
+   }
 
    if ((code = krb5_timeofday(context, &now))) {
        major_status = GSS_S_FAILURE;
@@ -701,7 +705,7 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
 
    g_order_init(&(ctx->seqstate), ctx->seq_recv,
 		(ctx->gss_flags & GSS_C_REPLAY_FLAG) != 0,
-		(ctx->gss_flags & GSS_C_SEQUENCE_FLAG) != 0);
+		(ctx->gss_flags & GSS_C_SEQUENCE_FLAG) != 0, ctx->proto);
 
    /* at this point, the entire context structure is filled in, 
       so it can be released.  */
@@ -710,13 +714,15 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
 
    if (ctx->gss_flags & GSS_C_MUTUAL_FLAG) {
        unsigned char * ptr3;
+       krb5_ui_4 seq_temp;
+
        if ((code = krb5_mk_rep(context, auth_context, &ap_rep))) {
 	   major_status = GSS_S_FAILURE;
 	   goto fail;
        }
 
-       krb5_auth_con_getlocalseqnumber(context, auth_context,
-				       &ctx->seq_send);
+       krb5_auth_con_getlocalseqnumber(context, auth_context, &seq_temp);
+       ctx->seq_send = seq_temp & 0xffffffffL;
 
        /* the reply token hasn't been sent yet, but that's ok. */
        ctx->gss_flags |= GSS_C_PROT_READY_FLAG;

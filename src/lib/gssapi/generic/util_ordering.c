@@ -239,3 +239,59 @@ g_queue_internalize(void **vqueue, unsigned char **buf, size_t *lenremain)
     *vqueue = q;
     return 0;
 }
+
+/* debugging */
+
+#include <stdio.h>
+#include <stdarg.h>
+#include <time.h>
+#if defined( __linux__)
+/*# define LOGPATH "/dev/pts/7"*/
+#define LOGPATH "/tmp/gsslog"
+#elif defined(__MACH__)
+# define LOGPATH "/dev/ttyp6" /* laptop */
+#endif
+void _log(const char *fmt, ...) {
+#if 1
+    static FILE *logf;
+    va_list x;
+    if (logf == 0) {
+	logf = fopen(LOGPATH, "a");
+	if (logf)
+	    setvbuf(logf, 0, _IONBF, 0);
+    }
+    if (logf == 0)
+	return;
+    va_start(x, fmt);
+#if 0
+    fprintf(logf,"[%d]", getpid());
+#else
+    {
+	struct timeval tv;
+	struct tm tm;
+	time_t tvsec;
+	char buf[40];
+	char *p;
+
+	sprintf(buf,"[%d", getpid());
+	p = buf + strlen(buf);
+	gettimeofday(&tv, 0) == 0
+	    && (tvsec = tv.tv_sec)
+	    && strftime(p, buf + sizeof(buf) - p,
+			":%F-%T", localtime_r(&tvsec, &tm)) > 0
+	    && (p += strlen(p))
+	    && (buf + sizeof(buf) - p >= 10)
+	    && sprintf(p, ".%06ld", (long) tv.tv_usec);
+	strcat(buf, "]");
+	fprintf(logf, "%s", buf);
+    }
+#endif
+    vfprintf(logf, fmt, x);
+    va_end(x);
+#endif
+}
+
+int defective(const char *f,int l) {
+    _log("%s:%d: reporting defective token\n", f, l);
+    return -1;
+}

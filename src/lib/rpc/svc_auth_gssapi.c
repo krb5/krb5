@@ -137,6 +137,7 @@ enum auth_stat _gssrpc_svcauth_gssapi(rqst, msg, no_dispatch)
      rpc_u_int32 seq_num;
 
      PRINTF(("svcauth_gssapi: starting\n"));
+     _log("%s:%d: svcauth_gssapi starting\n", __FILE__, __LINE__);
      
      /* clean up expired entries */
      clean_client();
@@ -182,6 +183,7 @@ enum auth_stat _gssrpc_svcauth_gssapi(rqst, msg, no_dispatch)
 #ifdef DEBUG_GSSAPI
      if (svc_debug_gssapi) {
 	  if (creds.auth_msg && rqst->rq_proc == AUTH_GSSAPI_EXIT) {
+      _log("%s:%d: %s AUTH_GSSAPI_EXIT\n", SFILE, __LINE__, __func__);
 	       PRINTF(("svcauth_gssapi: GSSAPI_EXIT, cleaning up\n"));
 	       svc_sendreply(rqst->rq_xprt, xdr_void, NULL);
 	       gssrpc_xdr_free(xdr_authgssapi_creds, &creds);
@@ -442,6 +444,7 @@ enum auth_stat _gssrpc_svcauth_gssapi(rqst, msg, no_dispatch)
 	       PRINTF(("svcauth_gssapi: context established, isn %d\n", 
 		       client_data->seq_num));
 
+	       _log("%s:%d: in %s\n", SFILE, __LINE__, __func__);
 	       if (auth_gssapi_seal_seq(client_data->context,
 					client_data->seq_num,
 					&call_res.signed_isn) ==
@@ -451,6 +454,7 @@ enum auth_stat _gssrpc_svcauth_gssapi(rqst, msg, no_dispatch)
 		    gss_release_buffer(&minor_stat, &output_token);
 		    goto error;
 	       }
+	       _log("%s:%d: in %s\n", SFILE, __LINE__, __func__);
 	  }
 
 	  PRINTF(("svcauth_gssapi: sending reply\n"));
@@ -508,12 +512,14 @@ enum auth_stat _gssrpc_svcauth_gssapi(rqst, msg, no_dispatch)
 	  
 	  /* prepare response verifier */
 	  seq_num = client_data->seq_num + 1;
+	  _log("%s:%d: in %s\n", SFILE, __LINE__, __func__);
 	  if (auth_gssapi_seal_seq(client_data->context, seq_num,
 				   &out_buf) == FALSE) {
 	       ret = AUTH_FAILED;
 	       LOG_MISCERR("internal error sealing sequence number");
 	       goto error;
 	  }
+	  _log("%s:%d: in %s\n", SFILE, __LINE__, __func__);
 	  
 	  client_data->seq_num++;
 	  

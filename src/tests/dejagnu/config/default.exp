@@ -97,6 +97,17 @@ set passes {
 	{dummy=[verbose -log "AES + DES enctypes"]}
     }
     {
+	aesonly
+	des3_krbtgt=0
+	{supported_enctypes=aes256-cts-hmac-sha1-96:normal}
+	{kdc_supported_enctypes=aes256-cts-hmac-sha1-96:normal}
+	{permitted_enctypes(kdc)=aes256-cts-hmac-sha1-96}
+	{permitted_enctypes(client)=aes256-cts-hmac-sha1-96}
+	{permitted_enctypes(server)=aes256-cts-hmac-sha1-96}
+	{master_key_type=aes256-cts-hmac-sha1-96}
+	{dummy=[verbose -log "AES enctypes"]}
+    }
+    {
 	aes-des3
 	des3_krbtgt=0
 	{supported_enctypes=aes256-cts-hmac-sha1-96:normal des3-cbc-sha1:normal des-cbc-crc:normal}
@@ -1451,6 +1462,10 @@ proc start_kerberos_daemons { standalone } {
 	    wait -i $tailf_spawn_id
 	    return 0
 	}
+	"No principal in keytab matches desired name" {
+	    dump_db
+	    exp_continue
+	}
 	"starting" { }
 	timeout {
 	    if {$standalone} {
@@ -1589,6 +1604,28 @@ proc add_kerberos_key { kkey standalone } {
 	}
 	return 1
     }
+}
+
+# dump_db
+proc dump_db { } {
+    global KADMIN_LOCAL
+    global REALMNAME
+
+    spawn $KADMIN_LOCAL -r $REALMNAME
+    expect_after {
+	eof {
+	    perror "failed to get debugging dump of database (eof)"
+	}
+	timeout {
+	    perror "failed to get debugging dump of database (timeout)"
+	}
+    }
+    expect "kadmin.local: "
+    send "getprincs\r"
+    expect "kadmin.local: "
+    send "quit\r"
+    expect eof
+    catch expect_after
 }
 
 # add_random_key
@@ -2508,7 +2545,7 @@ proc krb_exit { } {
 # helpful sometimes for debugging the test suite
 proc spawn_xterm { } {
     global env
-    foreach i {KDB5_UTIL KRB5KDC KADMIND KADMIN KADMIN_LOCAL KINIT KTUTIL KLIST RLOGIN RLOGIND FTP FTPD KPASSWD REALMNAME} {
+    foreach i {KDB5_UTIL KRB5KDC KADMIND KADMIN KADMIN_LOCAL KINIT KTUTIL KLIST RLOGIN RLOGIND FTP FTPD KPASSWD REALMNAME GSSCLIENT REALMNAME} {
 	global $i
 	if [info exists $i] { set env($i) [set $i] }
     }

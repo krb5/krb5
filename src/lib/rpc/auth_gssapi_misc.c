@@ -97,8 +97,12 @@ bool_t auth_gssapi_seal_seq(context, seq_num, out_buf)
      
      in_buf.length = sizeof(rpc_u_int32);
      in_buf.value = (char *) &nl_seq_num;
+     _log("%s:%d: %s about to call gss_seal\n", SFILE, __LINE__,
+	  __func__);
      gssstat = gss_seal(&minor_stat, context, 0, GSS_C_QOP_DEFAULT,
 			&in_buf, NULL, out_buf);
+     _log("%s:%d: %s result %d/%d in_buf %d out_buf %d\n", __FILE__, __LINE__,
+	  __func__, gssstat, minor_stat, in_buf.length, out_buf->length);
      if (gssstat != GSS_S_COMPLETE) {
 	  PRINTF(("gssapi_seal_seq: failed\n"));
 	  AUTH_GSSAPI_DISPLAY_STATUS(("sealing sequence number",
@@ -119,6 +123,9 @@ bool_t auth_gssapi_unseal_seq(context, in_buf, seq_num)
      
      gssstat = gss_unseal(&minor_stat, context, in_buf, &out_buf,
 			  NULL, NULL);
+     _log("%s:%d: %s input len %d result %d/%d len %d\n",
+	  __FILE__, __LINE__, __func__, in_buf->length,
+	  gssstat, minor_stat, out_buf.length);
      if (gssstat != GSS_S_COMPLETE) {
 	  PRINTF(("gssapi_unseal_seq: failed\n"));
 	  AUTH_GSSAPI_DISPLAY_STATUS(("unsealing sequence number",

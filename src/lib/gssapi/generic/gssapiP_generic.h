@@ -162,8 +162,9 @@ void g_make_token_header (gss_OID mech, unsigned int body_size,
 			  unsigned char **buf, int tok_type);
 
 gss_int32 g_verify_token_header (gss_OID mech, unsigned int *body_size,
-			  unsigned char **buf, int tok_type, 
-				 unsigned int toksize_in);
+				 unsigned char **buf, int tok_type, 
+				 unsigned int toksize_in,
+				 int wrapper_required);
 
 OM_uint32 g_display_major_status (OM_uint32 *minor_status,
 				 OM_uint32 status_value,

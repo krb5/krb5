@@ -340,9 +340,8 @@ get_requested_enctypes(
    int is_duplicate_enctype;
    int is_wanted_enctype;
    static const krb5_enctype wanted_enctypes[] = {
-#if 1
+     ENCTYPE_AES256_CTS_HMAC_SHA1_96, ENCTYPE_AES128_CTS_HMAC_SHA1_96,
      ENCTYPE_DES3_CBC_SHA1,
-#endif
      ENCTYPE_ARCFOUR_HMAC,
      ENCTYPE_DES_CBC_CRC,
      ENCTYPE_DES_CBC_MD5, ENCTYPE_DES_CBC_MD4,
@@ -418,6 +417,9 @@ setup_enc(
    krb5_error_code code;
    int i;
 
+   ctx->have_acceptor_subkey = 0;
+   ctx->proto = 0;
+   ctx->cksumtype = 0;
    switch(ctx->subkey->enctype) {
    case ENCTYPE_DES_CBC_MD5:
    case ENCTYPE_DES_CBC_MD4:
@@ -433,54 +435,53 @@ setup_enc(
 	 goto fail;
 
       for (i=0; i<ctx->enc->length; i++)
-	 /*SUPPRESS 113*/
 	 ctx->enc->contents[i] ^= 0xf0;
 
-      if ((code = krb5_copy_keyblock(context, ctx->subkey, &ctx->seq)))
-	 goto fail;
-
-      break;
+      goto copy_subkey_to_seq;
 
    case ENCTYPE_DES3_CBC_SHA1:
+       /* MIT extension */
       ctx->subkey->enctype = ENCTYPE_DES3_CBC_RAW;
       ctx->signalg = SGN_ALG_HMAC_SHA1_DES3_KD;
       ctx->cksum_size = 20;
       ctx->sealalg = SEAL_ALG_DES3KD;
 
+   copy_subkey:
       code = krb5_copy_keyblock (context, ctx->subkey, &ctx->enc);
       if (code)
 	 goto fail;
+   copy_subkey_to_seq:
       code = krb5_copy_keyblock (context, ctx->subkey, &ctx->seq);
       if (code) {
 	 krb5_free_keyblock (context, ctx->enc);
 	 goto fail;
       }
       break;
+
    case ENCTYPE_ARCFOUR_HMAC:
+       /* Microsoft extension */
       ctx->signalg = SGN_ALG_HMAC_MD5 ;
       ctx->cksum_size = 8;
       ctx->sealalg = SEAL_ALG_MICROSOFT_RC4 ;
 
-      code = krb5_copy_keyblock (context, ctx->subkey, &ctx->enc);
-      if (code)
-	 goto fail;
-      code = krb5_copy_keyblock (context, ctx->subkey, &ctx->seq);
-      if (code) {
-	 krb5_free_keyblock (context, ctx->enc);
-	 goto fail;
-      }
-      break;	    
-#if 0
-   case ENCTYPE_DES3_CBC_MD5:
-      enctype = ENCTYPE_DES3_CBC_RAW;
-      ctx->signalg = 3;
-      ctx->cksum_size = 16;
-      ctx->sealalg = 1;
-      break;
-#endif
+      goto copy_subkey;
+
    default:
-      *minor_status = KRB5_BAD_ENCTYPE;
-      return GSS_S_FAILURE;
+       /* Fill some fields we shouldn't be using on this path
+	  with garbage.  */
+       ctx->signalg = -10;
+       ctx->sealalg = -10;
+
+       ctx->proto = 1;
+       code = krb5int_c_mandatory_cksumtype(context, ctx->subkey->enctype,
+					    &ctx->cksumtype);
+       if (code)
+	   goto fail;
+       code = krb5_c_checksum_length(context, ctx->cksumtype,
+				     &ctx->cksum_size);
+       if (code)
+	   goto fail;
+       goto copy_subkey;
    }
 fail:
    *minor_status = code;
@@ -557,8 +558,6 @@ new_connection(
    ctx->seed_init = 0;
    ctx->big_endian = 0;  /* all initiators do little-endian, as per spec */
    ctx->seqstate = 0;
-   ctx->nctypes = 0;
-   ctx->ctypes = 0;
 
    if ((code = krb5_timeofday(context, &now)))
       goto fail;
@@ -602,6 +601,7 @@ new_connection(
 
    {
       /* gsskrb5 v1 */
+      krb5_ui_4 seq_temp;
       if ((code = make_ap_req_v1(context, ctx,
 				 cred, k_cred, input_chan_bindings, 
 				 mech_type, &token))) {
@@ -613,8 +613,8 @@ new_connection(
 	 goto fail;
       }
 
-      krb5_auth_con_getlocalseqnumber(context, ctx->auth_context,
-				      &ctx->seq_send);
+      krb5_auth_con_getlocalseqnumber(context, ctx->auth_context, &seq_temp);
+      ctx->seq_send = seq_temp;
       krb5_auth_con_getsendsubkey(context, ctx->auth_context,
 				  &ctx->subkey);
    }
@@ -664,7 +664,7 @@ new_connection(
       ctx->seq_recv = ctx->seq_send;
       g_order_init(&(ctx->seqstate), ctx->seq_recv,
 		   (ctx->gss_flags & GSS_C_REPLAY_FLAG) != 0, 
-		   (ctx->gss_flags & GSS_C_SEQUENCE_FLAG) != 0);
+		   (ctx->gss_flags & GSS_C_SEQUENCE_FLAG) != 0, ctx->proto);
       ctx->gss_flags |= GSS_C_PROT_READY_FLAG;
       ctx->established = 1;
       return(GSS_S_COMPLETE);
@@ -680,8 +680,6 @@ fail:
 	   krb5_free_principal(context, ctx_free->there);
        if (ctx_free->subkey)
 	   krb5_free_keyblock(context, ctx_free->subkey);
-       if (ctx_free->ctypes)
-	   krb5_free_cksumtypes(context, ctx_free->ctypes);
        xfree(ctx_free);
    } else
 	(void)krb5_gss_delete_sec_context(minor_status, context_handle, NULL);
@@ -763,14 +761,15 @@ mutual_auth(
 
    ptr = (unsigned char *) input_token->value;
 
+   _log("%s:%d: here\n", SFILE, __LINE__);
    if (g_verify_token_header((gss_OID) ctx->mech_used,
 			     &(ap_rep.length),
 			     &ptr, KG_TOK_CTX_AP_REP,
-			     input_token->length)) {
+			     input_token->length, 1)) {
       if (g_verify_token_header((gss_OID) ctx->mech_used,
 				&(ap_rep.length),
 				&ptr, KG_TOK_CTX_ERROR,
-				input_token->length) == 0) {
+				input_token->length, 1) == 0) {
 
 	 /* Handle a KRB_ERROR message from the server */
 
@@ -791,6 +790,7 @@ mutual_auth(
 	 return(GSS_S_DEFECTIVE_TOKEN);
       }
    }
+   _log("%s:%d: here\n", SFILE, __LINE__);
 
    sptr = (char *) ptr;                      /* PC compiler bug */
    TREAD_STR(sptr, ap_rep.data, ap_rep.length);
@@ -813,7 +813,16 @@ mutual_auth(
    ctx->seq_recv = ap_rep_data->seq_number;
    g_order_init(&(ctx->seqstate), ctx->seq_recv,
 		(ctx->gss_flags & GSS_C_REPLAY_FLAG) != 0,
-		(ctx->gss_flags & GSS_C_SEQUENCE_FLAG) !=0);
+		(ctx->gss_flags & GSS_C_SEQUENCE_FLAG) !=0, ctx->proto);
+
+   if (ctx->proto == 1 && ap_rep_data->subkey) {
+       /* Keep acceptor's subkey.  */
+       ctx->have_acceptor_subkey = 1;
+       code = krb5_copy_keyblock(context, ap_rep_data->subkey,
+				 &ctx->subkey);
+       if (code)
+	   goto fail;
+   }
 
    /* free the ap_rep_data */
    krb5_free_ap_rep_enc_part(context, ap_rep_data);

@@ -297,10 +297,13 @@ init_1(argp, clnt)
    CLIENT *clnt;
 {
      static generic_ret res;
+     int x;
 
      memset((char *)&res, 0, sizeof(res));
-     if (clnt_call(clnt, INIT, xdr_u_int32, argp,
-		   xdr_generic_ret, &res, TIMEOUT) != RPC_SUCCESS) {
+     x = clnt_call(clnt, INIT, xdr_u_int32, argp,
+		   xdr_generic_ret, &res, TIMEOUT);
+     if (x != RPC_SUCCESS) {
+	 _log("%s:%d: init_1: clnt_call returned %d\n", SFILE, __LINE__, x);
 	  return (NULL);
      }
      return (&res);

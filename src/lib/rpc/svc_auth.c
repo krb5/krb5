@@ -93,6 +93,8 @@ _authenticate(rqst, msg, no_dispatch)
 	rqst->rq_xprt->xp_verf.oa_length = 0;
 	cred_flavor = rqst->rq_cred.oa_flavor;
 	*no_dispatch = FALSE;
+	_log("%s:%d: dispatching authentication flavor %d\n",
+	     __FILE__, __LINE__, cred_flavor);
 	for (i = 0; i < svcauthnum; i++) {
 	     if (cred_flavor == svcauthsw[i].flavor &&
 		 svcauthsw[i].authenticator != NULL) {

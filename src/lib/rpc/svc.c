@@ -457,6 +457,9 @@ svc_getreqset(readfds)
 				no_dispatch = FALSE;
 
 				/* first authenticate the message */
+				_log("%s:%d: msg.cb_verf.oa_length=%d, oa_flavor=%d\n",
+				     __FILE__, __LINE__, msg.rm_call.cb_verf.oa_length,
+				     msg.rm_call.cb_verf.oa_flavor);
 				why=_authenticate(&r, &msg, &no_dispatch);
 				if (why != AUTH_OK) {
 				     svcerr_auth(xprt, why);
