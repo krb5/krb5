@@ -1,3 +1,8 @@
+2001-09-24  Mitchell Berger  <mitchb@mit.edu>
+
+	* krb5kdc.M: Document the -n option.  Thanks to Dennis Davis
+	<D.H.Davis@bath.ac.uk>
+
 2001-07-31  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Include stdlib.h in test for swab declaration.

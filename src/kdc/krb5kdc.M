@@ -46,6 +46,8 @@ krb5kdc \- Kerberos V5 KDC
 ] [
 .B \-4
 .I v4mode
+] [
+.B \-n
 ]
 .br
 .SH DESCRIPTION
@@ -110,6 +112,13 @@ entries, and to issue tickets for all but preauthentication required
 database entries respectively. The default behaviour is as if 
 .I nopreauth
 was specified.
+.PP
+The
+.B \-n
+option specifies that the KDC does not put itself in the background
+and does not disassociate itself from the terminal.  In normal
+operation, you should always allow the KDC to place itself in
+the background.
 .PP
 The KDC may service requests for multiple realms (maximum 32 realms).  The
 realms are listed on the command line.  Per-realm options that can be
