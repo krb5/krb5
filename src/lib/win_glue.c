@@ -25,25 +25,20 @@
  * server for the Kerberos DLL.
  */
 #ifdef SAP_TIMEBOMB
-#if 1
-#define TIMEBOMB 852094800	/* 1-Jan-97 */
-#else
-#define TIMEBOMB 820472400	/* 1-Jan-96 */
-#endif
+#define TIMEBOMB 853304400      /* 15-Jan-97 */
 #define TIMEBOMB_PRODUCT "SAPGUI"
-#define TIMEBOMB_WARN  31
+#define TIMEBOMB_WARN  15
 #endif
 
 #ifdef KRB_TIMEBOMB
-#if 1
-#define TIMEBOMB 852094800	/* 1-Jan-97 */
-#else
-#define TIMEBOMB 820472400	/* 1-Jan-96 */
-#endif
+#define TIMEBOMB 853304400      /* 15-Jan-97 */
 #define TIMEBOMB_PRODUCT "Kerberos V5"
-#define TIMEBOMB_WARN 31
+#define TIMEBOMB_WARN 15
 #endif
 
+/*
+ * #defines for using MIT's version server DLL
+ */
 #ifdef SAP_VERSERV
 #define VERSERV
 #define APP_TITLE "KRB5-SAP"
@@ -91,7 +86,7 @@ static int CallVersionServer(app_title, app_version, app_ini, code_cover)
 	if (v_complain(vstatus, app_ini)) {
 		WinVSReportRequest(vrequest, NULL, 
 				   "Version Server Status Report");
-	}                 					  
+	}                                                         
 	if (vstatus == V_REQUIRED) {
 		SetCursor(LoadCursor(NULL, IDC_WAIT));
 		VSDestroyRequest(vrequest);
@@ -102,6 +97,65 @@ static int CallVersionServer(app_title, app_version, app_ini, code_cover)
 }   
 
 #endif
+
+#ifdef TIMEBOMB
+static void do_timebomb()
+{
+	char buf[1024];
+	long timeleft;
+
+	timeleft = TIMEBOMB - time(0);
+	if (timeleft <= 0) {
+		sprintf(buf, "Your version of %s has expired.\n",
+			TIMEBOMB_PRODUCT);
+		strcat(buf, "Please upgrade it.");
+#ifdef TIMEBOMB_INFO
+		strcat(buf, TIMEBOMB_INFO);
+#endif
+		MessageBox(NULL, buf, "", MB_OK);
+#ifdef SAP_TIMEBOMB
+		/* 
+		 * The SAP R/3 application doesn't listen to a polite
+		 * request to quit, so we hit it over the head with a
+		 * hammer.  Unfortunately, this leaves dangling system
+		 * resources that don't get freed, so the user will
+		 * have to reboot (or at least restart windows).
+		 */
+		FatalAppExit(0, "Note: you should reboot now.");
+		return;
+#else
+		PostQuitMessage(0);
+#endif
+	}
+	timeleft = timeleft / ((long) 60*60*24);
+	if (timeleft < TIMEBOMB_WARN) {
+		sprintf(buf, "Your version of %s will expire in %ld days.\n",
+			TIMEBOMB_PRODUCT, timeleft);
+		strcat(buf, "Please upgrade it soon.");
+#ifdef TIMEBOMB_INFO
+		strcat(buf, TIMEBOMB_INFO);
+#endif
+		MessageBox(NULL, buf, "", MB_OK);
+	}
+}
+#endif
+
+/*
+ * This was originally called from LibMain; unfortunately, Windows 3.1
+ * doesn't allow you to make messaging calls from LibMain.  So, we now
+ * do the timebomb/version server stuff from krb5_init_context().
+ */
+void krb5_win_do_init()
+{
+#ifdef TIMEBOMB
+	do_timebomb();
+#endif
+#ifdef VERSERV
+   if (CallVersionServer(APP_TITLE, APP_VER, APP_INI, NULL))
+	   PostQuitMessage(0);
+#endif
+
+}
 
 int
 win_socket_initialize()
@@ -114,12 +168,12 @@ win_socket_initialize()
 
     err = WSAStartup (wVersionRequested, &wsaData);
     if (err != 0)
-        return err;                             /* Library can't initialize */
+	return err;                             /* Library can't initialize */
 
     if (wVersionRequested != wsaData.wVersion) {
 	/* DLL couldn't support our version of the spec */
-        WSACleanup ();
-        return -104;                            /* FIXME -- better error? */
+	WSACleanup ();
+	return -104;                            /* FIXME -- better error? */
     }
 
     return 0;
@@ -132,29 +186,6 @@ WORD wDataSeg;
 WORD cbHeap;
 LPSTR CmdLine;
 {
-#ifdef TIMEBOMB
-   char buf[256];
-   long timeleft;
-
-   timeleft = TIMEBOMB - time(0);
-   if (timeleft <= 0) {
-           sprintf(buf, "Your version of %s has expired.\n", TIMEBOMB_PRODUCT);
-           strcat(buf, "Please upgrade it.");
-           MessageBox(NULL, buf, "", MB_OK);
-	   PostQuitMessage(0);
-   }
-   timeleft = timeleft / ((long) 60*60*24);
-   if (timeleft < TIMEBOMB_WARN) {
-        sprintf(buf, "Your version of %s will expire in %ld days.\n",
-                TIMEBOMB_PRODUCT, timeleft);
-        strcat(buf, "Please upgrade it soon.");
-        MessageBox(NULL, buf, "", MB_OK);
-   }
-#endif
-#ifdef SAP_VERSERV
-   if (CallVersionServer(APP_TITLE, APP_VER, APP_INI, NULL))
-	   PostQuitMessage(0);
-#endif
     win_socket_initialize ();
     return 1;
 }
