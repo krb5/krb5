@@ -1,3 +1,9 @@
+2000-05-04  Wilfredo Sanchez <tritan@mit.edu>
+	* Makefile.in: kadmin server binaries install into SERVER_BINDIR
+	instead of ADMIN_BINDIR. (The default is the same for both, though
+	in BSD layouts SERVER_BINDIR should be /usr/libexec, not
+	/usr/sbin.)
+
 2000-05-02  Wilfredo Sanchez <tritan@mit.edu>
 
 	* config.guess, config.sub: Clean up Rhapsody and Mac OS X guesses.
