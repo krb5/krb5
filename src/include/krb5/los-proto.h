@@ -80,8 +80,8 @@ krb5_error_code krb5_gen_portaddr
 	       krb5_const_pointer,
 	       krb5_address **));
 
-krb5_error_code krb5_read_message PROTOTYPE((void *, krb5_data *));
-krb5_error_code krb5_write_message PROTOTYPE((void *, krb5_data *));
+krb5_error_code krb5_read_message PROTOTYPE((krb5_pointer, krb5_data *));
+krb5_error_code krb5_write_message PROTOTYPE((krb5_pointer, krb5_data *));
 
 #include <krb5/widen.h>
 krb5_error_code krb5_sname_to_principal
