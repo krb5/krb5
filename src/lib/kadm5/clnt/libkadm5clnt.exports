@@ -37,6 +37,7 @@ kadm5_free_key_data
 kadm5_free_name_list
 kadm5_free_policy_ent
 kadm5_free_principal_ent
+kadm5_get_admin_service_name
 kadm5_get_config_params
 kadm5_get_policies
 kadm5_get_policy
