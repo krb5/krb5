@@ -157,4 +157,8 @@ error_code KRB5_LIBOS_PWDINTR,		"Password read interrupted"
 
 error_code KRB5_PARSE_ILLCHAR,		"Illegal character in component name"
 error_code KRB5_PARSE_MALFORMED,	"Malformed representation of principal"
+
+error_code KRB5_CONFIG_CANTOPEN,	"Can't find configuration file"
+error_code KRB5_CONFIG_BADFORMAT,	"Improper format of configuration file"
+error_code KRB5_CONFIG_NOTENUFSPACE,	"Insufficient space to return complete information"
 end
