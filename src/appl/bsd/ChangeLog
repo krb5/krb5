@@ -1,6 +1,9 @@
 Tue May  2 22:12:39 1995  Theodore Y. Ts'o  (tytso@dcl)
 
-	* kcmd.c (kcmd()): Bug fix to jik's bug fix.  (Caused by our code
+	* krcp.c (main): Don't try to play uid swapping games if the
+		effective uid is not zero.
+
+	* kcmd.c (kcmd): Bug fix to jik's bug fix.  (Caused by our code
 		drift since jik's changes went in, and not sufficiently
 		careful checking of jik's patches before applying it.)
 

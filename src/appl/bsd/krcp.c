@@ -144,6 +144,7 @@ main(argc, argv)
 #ifdef KERBEROS
     krb5_flags authopts;
     krb5_error_code status;	
+    int euid;
     char **orig_argv = save_argv(argc, argv);
     
     sp = getservbyname("kshell", "tcp");
@@ -469,18 +470,25 @@ main(argc, argv)
 		    if (encryptflag)
 		      send_auth();
 		}
+		euid = geteuid();
 #ifdef HAVE_SETREUID
-		(void) setreuid(0, userid);
+		if (euid == 0)
+		    (void) setreuid(0, userid);
 		sink(1, argv+argc-1);
-		(void) setreuid(userid, 0);
+		if (euid == 0)
+		    (void) setreuid(userid, 0);
 #else
-		(void) setuid(0);
-		if(seteuid(userid)) {
-		  perror("rcp seteuid user"); errs++; exit(errs);
+		if (euid == 0) {
+		    (void) setuid(0);
+		    if(seteuid(userid)) {
+			perror("rcp seteuid user"); errs++; exit(errs);
+		    }
 		}
 		sink(1, argv+argc-1);
-		if(seteuid(0)) {
-		  perror("rcp seteuid 0"); errs++; exit(errs);
+		if (euid == 0) {
+		    if(seteuid(0)) {
+			perror("rcp seteuid 0"); errs++; exit(errs);
+		    }
 		}
 #endif
 #else
