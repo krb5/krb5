@@ -156,7 +156,7 @@ shared:
 TEST_PROGS= t_std_conf t_an_to_ln
 
 T_STD_CONF_OBJS= t_std_conf.o def_realm.o get_krbhst.o realm_dom.o \
-		hst_realm.o init_os_ctx.o locate_kdc.o 
+		hst_realm.o init_os_ctx.o locate_kdc.o dnsglue.o 
 
 T_AN_TO_LN_OBJS = t_an_to_ln.o an_to_ln.o 
 

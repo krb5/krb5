@@ -1,3 +1,7 @@
+2004-09-22  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (T_STD_CONF_OBJS): Include dnsglue.o.
+
 2004-09-21  Tom Yu  <tlyu@mit.edu>
 
 	* dnsglue.c: Conditionalize some stuff on ns_initparse() instead
