@@ -187,12 +187,10 @@ foreach_localaddr (data, pass1fn, betweenfn, pass2fn)
 
 	    continue;
 	}
-#if 0 /* Access from same host doesn't work if loopback is omitted?  */
 #ifdef IFF_LOOPBACK
 	    /* None of the current callers want loopback addresses.  */
 	if (ifreq.ifr_flags & IFF_LOOPBACK)
 	    goto skip;
-#endif
 #endif
 	/* Ignore interfaces that are down.  */
 	if (!(ifreq.ifr_flags & IFF_UP))
@@ -391,7 +389,7 @@ const char *prog;
 	    signal_requests_hup = 0;
 	}
 	readfds = select_fds;
-	nfound = select(select_nfds, &readfds, 0, 0, 0);
+	nfound = select(select_nfds + 1, &readfds, 0, 0, 0);
 	if (nfound == -1) {
 	    if (errno == EINTR)
 		continue;
