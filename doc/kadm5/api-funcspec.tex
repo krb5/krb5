@@ -187,105 +187,27 @@ the attributes field.
 \item[max_life] The maximum lifetime of any Kerberos ticket issued to
 this principal.
 
-\item[attributes] A bitfield of attributes for use by the KDC.  
-Note that only some are explicitly supported by the admin system.
+\item[attributes] A bitfield of attributes for use by the KDC.  The
+symbols and constant values are defined below; their interpretation
+appears in the libkdb functional specification.
 
 \begin{tabular}{clr}
-{\bf Supported} & {\bf Name} & {\bf Value} \\
-  & KRB5_KDB_DISALLOW_POSTDATED     & 0x00000001 \\
-  & KRB5_KDB_DISALLOW_FORWARDABLE   & 0x00000002 \\
-X & KRB5_KDB_DISALLOW_TGT_BASED     & 0x00000004 \\
-  & KRB5_KDB_DISALLOW_RENEWABLE     & 0x00000008 \\
-  & KRB5_KDB_DISALLOW_PROXIABLE     & 0x00000010 \\
-  & KRB5_KDB_DISALLOW_DUP_SKEY      & 0x00000020 \\
-X & KRB5_KDB_DISALLOW_ALL_TIX       & 0x00000040 \\
-  & KRB5_KDB_REQUIRES_PRE_AUTH      & 0x00000080 \\
-  & KRB5_KDB_REQUIRES_HW_AUTH       & 0x00000100 \\
-X & KRB5_KDB_REQUIRES_PWCHANGE      & 0x00000200 \\
-  & KRB5_KDB_DISALLOW_SVR           & 0x00001000 \\
-X & KRB5_KDB_PWCHANGE_SERVICE       & 0x00002000 \\
-  & KRB5_KDB_SUPPORT_DESMD5         & 0x00004000 \\
-  & KRB5_KDB_NEW_PRINC              & 0x00008000
+{\bf Name} & {\bf Value} \\
+KRB5_KDB_DISALLOW_POSTDATED     & 0x00000001 \\
+KRB5_KDB_DISALLOW_FORWARDABLE   & 0x00000002 \\
+KRB5_KDB_DISALLOW_TGT_BASED     & 0x00000004 \\
+KRB5_KDB_DISALLOW_RENEWABLE     & 0x00000008 \\
+KRB5_KDB_DISALLOW_PROXIABLE     & 0x00000010 \\
+KRB5_KDB_DISALLOW_DUP_SKEY      & 0x00000020 \\
+KRB5_KDB_DISALLOW_ALL_TIX       & 0x00000040 \\
+KRB5_KDB_REQUIRES_PRE_AUTH      & 0x00000080 \\
+KRB5_KDB_REQUIRES_HW_AUTH       & 0x00000100 \\
+KRB5_KDB_REQUIRES_PWCHANGE      & 0x00000200 \\
+KRB5_KDB_DISALLOW_SVR           & 0x00001000 \\
+KRB5_KDB_PWCHANGE_SERVICE       & 0x00002000 \\
+KRB5_KDB_SUPPORT_DESMD5         & 0x00004000 \\
+KRB5_KDB_NEW_PRINC              & 0x00008000
 \end{tabular}
-
-The interpretation of each bit is as follows.  For each of the bits
-that disables a corresponding KDC_OPT option, the option is disabled
-on an AS_REQ if the bit is set on either the client or the server, and
-the option is disabled on TGS_REQ if the bit is set on the server (the
-setting of the bit on the client is irrelevant for a TGS_REQ).
-
-\begin{description}
-\item[KRB5_KDB_DISALLOW_POSTDATED]  Disables the ALLOW_POSTDATED
-and POSTDATED KDC options on AS_REQ and TGS_REQ.
-
-\item[KRB5_KDB_DISALLOW_FORWARDABLE] Disables the FORWARDABLE KDC
-option for AS_REQ and TGS_REQ.
-
-\item[KRB5_KDB_DISALLOW_TGT_BASED] All TGS_REQ requests will fail for
-a principal with this bit set.
-
-\item[KRB5_KDB_DISALLOW_RENEWABLE] Disables the RENEWABLE KDC option for
-AS_REQ and TGS_REQ.
-
-\item[KRB5_KDB_DISALLOW_PROXIABLE] Disables the PROXIABLE KDC option on
-AS_REQ and TGS_REQ.
-
-\item[KRB5_KDB_DISALLOW_DUP_SKEY] Disables the ENC_TKT_IN_SKEY option on
-TGS_REQ.
-
-\item[KRB5_KDB_DISALLOW_ALL_TIX] All AS_REQ requests fail if this bit
-is set for the client or the server, and all TGS_REQ requests fail if
-this bit is set for the server.  Note that this bit can be set
-automatically if the symbol KRBCONF_KDC_MODIFIES_KDC is defined and a
-specified number of pre-authentication attempts fail.
-
-\item[KRB5_KDB_REQUIRES_PRE_AUTH] Any AS_REQ will fail if this bit is
-set and the padata field of the request is empty.  Any TGS_REQ will
-fail if this bit is set and the TKT_FLAG_PRE_AUTH bit is not set in
-the tgt.  Thus, it is possible to have the bit not set on the TGT but
-to have a specific service require pre-authentication.
-
-\item[KRB5_KDB_REQUIRES_HW_AUTH] Unclear.
-
-\item[KRB5_KDB_REQUIRES_PWCHANGE] An AS_REQ will fail if this bit is
-set on the client and the KRB5_KDC_PWCHANGE_SERVICE bit is not set on
-the server.
-
-\item[KRB5_KDB_DISALLOW_SVR] All AS_REQ and TGS_REQ request will fail
-if the server has this bit set.
-
-\item[KRB5_KDB_PWCHANGE_SERVICE] An request from a client whose
-password has expired will succeed if this bit is set on the server.
-Also see KRB5_KDC_REQUIRES_PWCHANGE.
-
-\item[KRB5_KDB_SUPPORT_DESMD5] This bit indicates that the principal
-understands ENCTYPE_DES_MD5 and therefore that that encryption type
-should be used whenever a DES encryption type is request (implicitly
-assuming that it is the best DES-based encryption type available,
-which may not be the case if we implement ENCTYPE_DES_SHA for
-example).  The bit is employed during an AS_REQ and a TGS_REQ whenever
-the a key to be used is ENCTYPE_DES_CRC; if this bit is set (and if
-the client listed MD5 in its request, in the case of a session key),
-ENCTYPE_DES_MD5 is used instead.
-
-This bit is basically a kludge to save space in the KDC database.
-Without it, a service that supported DES with CRC and MD5 would have
-to have two separate key_data entries in the database, differing only
-in encryption type.  This bit allows a principal to have only a single
-key, using CRC, because it tells the KDC that the same key can be used
-with MD5.
-
-This solution will not scale well to handle the inevitable future
-situation of multiple salt types with DES3 or other encryption
-systems.  A better solution is needed; perhaps the redundant key data
-should just be stored in the database.
-
-\item[KRB5_KDB_NEW_PRINC] If this bit is set, the principal is still
-being ``created'' and the administration system should allow
-administrators with ``add'' priviledge to modify it.  This bit was
-created for use by a different Kerberos administration system that was
-never completed, and is not presently used.
-\end{description}
 
 \item[mod_name] The name of the Kerberos principal that most recently
 modified this principal.
@@ -737,9 +659,9 @@ controlled by configuration parameters.
 
 Client applications will link against libkadm5clnt.a and server
 programs against libkadm5srv.a.  Client applications must also link
-against: libgssapi_krb5.a, libkrb5.a, libcrypto.a, librpclib.a,
+against: libgssapi_krb5.a, libkrb5.a, libcrypto.a, libgssrpc.a,
 libcom_err.a, and libdyn.a.  Server applications must also link
-against: libkdb5.a, libkrb5.a, libcrypto.a, librpclib.a, libcom_err.a,
+against: libkdb5.a, libkrb5.a, libcrypto.a, libgssrpc.a, libcom_err.a,
 and libdyn.a.
 
 \section{Error Codes}
