@@ -33,6 +33,11 @@
 #else
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#ifdef sun
+/* SunOS4 unistd didn't declare these; okay to make unconditional?  */
+extern int optind;
+extern char *optarg;
+#endif /* sun */
 #else
 extern int optind;
 extern char *optarg;
