@@ -1,3 +1,0 @@
-all::
-install::
-	@echo "nothing to install in isode (thankfully!)"
