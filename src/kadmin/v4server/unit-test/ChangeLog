@@ -1,3 +1,8 @@
+Tue Mar  3 10:30:11 1998  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* Makefile.in (check): Use the variable DO_V4_TEST to distinguish
+        from the other kadmin testing.
+
 Fri Feb 27 23:32:38 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* Makefile.in: Changed thisconfigdir to point at the kadmin

@@ -4,7 +4,7 @@ BUILDTOP=$(REL)$(U)$(S)$(U)$(S)$(U)
 # $Id$
 #
 
-check:: check-@DO_TEST@
+check:: check-@DO_V4_TEST@
 
 check-::
 	@echo "+++"
