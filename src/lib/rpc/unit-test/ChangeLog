@@ -1,3 +1,7 @@
+Wed Nov  6 16:12:26 1996  Tom Yu <tlyu@mit.edu>
+	* Makefile.in: Add dependencies on $(srcdir)/foo.c so that some
+	makes can deal with VPATH properly (e.g. NetBSD pmake)
+
 Mon Nov  4 23:12:06 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* server.c: We don't need the special case for linux anymore,
