@@ -1,3 +1,9 @@
+Tue Jul 11 19:26:47 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* fcc-proto.h: Add prototype for krb5_fcc_read. Indicate that
+		krb5_change_cache takes no arguments. 
+	
+
 Wed July  5 15:52:31 1995  James Mattly  <mattly@fusion.com>
 	* fcc_destroy.c changed open to THREEPARAMOPEN for macintosh
 	opens

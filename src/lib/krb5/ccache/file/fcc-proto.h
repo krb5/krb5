@@ -68,6 +68,11 @@ krb5_error_code INTERFACE krb5_fcc_next_cred
 		   krb5_creds *creds ));
 
 /* fcc_read.c */
+krb5_error_code krb5_fcc_read
+	PROTOTYPE((krb5_context, 
+		   krb5_ccache id , 
+		   krb5_pointer buf,
+		   int len));
 krb5_error_code krb5_fcc_read_principal 
 	PROTOTYPE((krb5_context, krb5_ccache id , krb5_principal *princ ));
 krb5_error_code krb5_fcc_read_keyblock 
@@ -122,7 +127,7 @@ krb5_error_code INTERFACE krb5_fcc_set_flags
 /* fcc_ops.c */
 extern krb5_cc_ops krb5_cc_file_ops;
 krb5_error_code krb5_change_cache
-   PROTOTYPE(());
+   PROTOTYPE((void));
 
 
 /* fcc_write.c */
