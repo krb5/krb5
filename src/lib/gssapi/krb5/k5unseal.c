@@ -328,6 +328,7 @@ kg2_unwrap_priv(context, minor_status, ctx, ptr, bodysize, output, qop_state)
     if (code = krb5_c_decrypt(context, ctx->subkey,
 			      KRB5_KEYUSAGE_GSS_TOK_WRAP_PRIV,
 			      0, &cipher, &plain)) {
+	free(plain.data);
 	*minor_status = code;
 	return(GSS_S_FAILURE);
     }
@@ -338,6 +339,7 @@ kg2_unwrap_priv(context, minor_status, ctx, ptr, bodysize, output, qop_state)
     bodysize = plain.length;
 
     if (bodysize < 7) {
+	free(plain.data);
 	*minor_status = G_TOK_TRUNC;
 	return(GSS_S_DEFECTIVE_TOKEN);
     }
@@ -351,51 +353,62 @@ kg2_unwrap_priv(context, minor_status, ctx, ptr, bodysize, output, qop_state)
     ptr += 2;
     bodysize -= 7;
 
-    if (bodysize != tmsglen) {
+    /* check context expiry */
+
+    if ((code = krb5_timeofday(context, &now))) {
+	free(plain.data);
+	*minor_status = code;
+	return(GSS_S_FAILURE);
+    }
+
+    if (now > ctx->endtime) {
+	free(plain.data);
+	*minor_status = 0;
+	return(GSS_S_CONTEXT_EXPIRED);
+    }
+
+    /* do sequencing checks */
+
+    if ((ctx->initiate && tdirection != 0xff) ||
+	(!ctx->initiate && tdirection != 0)) {
+	free(plain.data);
+	*minor_status = G_BAD_DIRECTION;
+	return(GSS_S_BAD_SIG);
+    }
+
+    if (retval = g_order_check(&(ctx->seqstate), tseqnum)) {
+	free(plain.data);
+	*minor_status = 0;
+	return(retval);
+    }
+
+    /* now copy out the data.  can't do a strict equality check here,
+       since the output could be padded.  */
+
+    if (bodysize < tmsglen) {
+	free(plain.data);
 	*minor_status = G_TOK_TRUNC;
 	return(GSS_S_DEFECTIVE_TOKEN);
     }
 
     tmsg = ptr;
 
-    /* check context expiry */
+    if ((output->value = (void *) malloc(tmsglen)) == NULL) {
+	free(plain.data);
+	*minor_status = ENOMEM;
+	return(GSS_S_FAILURE);
+    }
 
-   if ((code = krb5_timeofday(context, &now))) {
-       *minor_status = code;
-       return(GSS_S_FAILURE);
-   }
+    memcpy(output->value, tmsg, tmsglen);
+    output->length = tmsglen;
 
-   if (now > ctx->endtime) {
-       *minor_status = 0;
-       return(GSS_S_CONTEXT_EXPIRED);
-   }
+    if (qop_state)
+	*qop_state = GSS_C_QOP_DEFAULT;
 
-   /* do sequencing checks */
+    free(plain.data);
 
-   if ((ctx->initiate && tdirection != 0xff) ||
-       (!ctx->initiate && tdirection != 0)) {
-       *minor_status = G_BAD_DIRECTION;
-       return(GSS_S_BAD_SIG);
-   }
-
-   if (retval = g_order_check(&(ctx->seqstate), tseqnum)) {
-       *minor_status = 0;
-       return(retval);
-   }
-
-   if ((output->value = (void *) malloc(tmsglen)) == NULL) {
-       *minor_status = ENOMEM;
-       return(GSS_S_FAILURE);
-   }
-
-   memcpy(output->value, tmsg, tmsglen);
-   output->length = tmsglen;
-
-   if (qop_state)
-       *qop_state = GSS_C_QOP_DEFAULT;
-
-   *minor_status = 0;
-   return(GSS_S_COMPLETE);
+    *minor_status = 0;
+    return(GSS_S_COMPLETE);
 }
 
 /* message_buffer is an input if SIGN, output if SEAL, and ignored if DEL_CTX
