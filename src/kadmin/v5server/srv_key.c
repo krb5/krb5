@@ -31,6 +31,13 @@
 #include "kadm5_defs.h"
 #include "mit-des.h"
 
+/*
+ * These control the maximum [renewable] life of the changepw principal, if
+ * it is created by us.
+ */
+#define	KEY_DEF_MAX_LIFE	(2*60*60)
+#define	KEY_DEF_MAX_RLIFE	(2*60*60)
+
 static const char *key_cpw_ufokey_fmt = "%s: no keys in database entry for %s.\n";
 static const char *key_cpw_decerr_fmt = "%s: cannot decode keys for %s.\n";
 static const char *key_add_cpw_err_fmt = "%s: cannot add entry for %s (%s).\n";
@@ -202,6 +209,8 @@ key_get_admin_entry(kcontext)
 		    krb5_timeofday(kcontext, &madmin_entry.mod_date);
 		    madmin_entry.last_pwd_change = madmin_entry.mod_date;
 		    madmin_entry.mkvno = key_master_entry()->kvno;
+		    madmin_entry.max_life = KEY_DEF_MAX_LIFE;
+		    madmin_entry.max_renewable_life = KEY_DEF_MAX_RLIFE;
 		    number_of_entries = 1;
 
 		    /*

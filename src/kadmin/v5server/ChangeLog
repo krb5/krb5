@@ -1,4 +1,10 @@
 
+Mon Jun 5 14:14:10 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* srv_key.c(key_get_admin_entry) - When adding database entry for
+		changepw principal, supply a maximum life and maximum renewable
+		lifetime so that it doesn't end up being zero.
+
+
 Thu Jun 1 14:34:41 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* srv_acl.c: Change default acl file name to be a #define.  If it
 		is not defined, then default to /krb5/krb5_adm.acl.
