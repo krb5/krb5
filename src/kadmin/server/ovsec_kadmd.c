@@ -1085,10 +1085,10 @@ void do_schpw(int s1, kadm5_config_params *params)
         goto cleanup;
     }
 
-    len = sendto(s1, repdata.data, repdata.length, 0,
+    len = sendto(s1, repdata.data, (int) repdata.length, 0,
 		 (struct sockaddr *) &from, sizeof(from));
 
-    if (len < repdata.length) {
+    if (len < (int) repdata.length) {
 	krb5_xfree(repdata.data);
 
 	krb5_klog_syslog(LOG_ERR, "chpw: Error sending reply: %s", 

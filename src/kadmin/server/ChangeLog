@@ -1,3 +1,7 @@
+2000-10-17  Ezra Peisach  <epeisach@mit.edu>
+
+	* ovsec_kadmd.c (do_schpw): Cast arguments to sendto() which take int.
+
 2000-06-30  Tom Yu  <tlyu@mit.edu>
 
 	* server_stubs.c: Kludge to rename xdr_free() properly.
