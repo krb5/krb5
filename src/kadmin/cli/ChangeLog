@@ -1,3 +1,7 @@
+Fri Aug 23 14:16:18 1996  Sam Hartman  <hartmans@mit.edu>
+
+	* configure.in: Use shared libaries if present.
+
 Fri Aug 23 14:47:55 1996  Barry Jaspan  <bjaspan@mit.edu>
 
 	* kadmin.c: add newlines to "invalid date spec" msg
