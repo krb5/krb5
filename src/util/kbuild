@@ -78,6 +78,7 @@ do
   esac
 done
 
+CONFIG_OPTS="-v"
 # echo ==== THISCONF: =====
 # cat $THISCONF
 # echo --------------------
