@@ -1,3 +1,19 @@
+Tue Mar 14 16:08:08 1995    <tytso@rsx-11.mit.edu>
+
+	* Makefile.in, configure.in: Use the libdes425 library so that the
+		DES code doesn't get dragged in twice.
+
+	* krlogind.c: Include <sys/time.h> so that Linux can get the
+		FD_SET macros.
+
+	* kcmd.c (kcmd): Close the credentials cache when you're done with
+	        it.
+
+	* krlogind.c (doit): Always initialize the Krb5 error table.
+
+	* krlogind.c (main, doit): Minor type fixes to gethostbyname(),
+		accept().
+
 Fri Mar 10 18:32:22 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* kcmd.c (kcmd): Initialize ret_cred to zero so that in case of an

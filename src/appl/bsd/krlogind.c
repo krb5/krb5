@@ -118,6 +118,7 @@ char copyright[] =
 #include <sys/ioctl.h>
 #include <sys/wait.h>
 #include <sys/file.h>
+#include <sys/time.h>
 #include <ctype.h>
 #include <fcntl.h>
 #include <netinet/in.h>
@@ -427,7 +428,7 @@ main(argc, argv)
 	     exit(2);
 	 }
 	 
-	 if ((fd = accept(s, &from, &fromlen)) < 0) {
+	 if ((fd = accept(s, (struct sockaddr *) &from, &fromlen)) < 0) {
 	     fprintf(stderr, "Error in accept: %s\n", strerror(errno));
 	     exit(2);
 	 }
@@ -499,7 +500,7 @@ void doit(f, fromp)
 #endif
 
     fromp->sin_port = ntohs((u_short)fromp->sin_port);
-    hp = gethostbyaddr(&fromp->sin_addr, sizeof (struct in_addr),
+    hp = gethostbyaddr((char *) &fromp->sin_addr, sizeof (struct in_addr),
 		       fromp->sin_family);
     if (hp == 0) {
 	/*
@@ -515,10 +516,10 @@ void doit(f, fromp)
       fatal(f, "Permission denied - Malformed from address\n");
     
 #ifdef KERBEROS
+    krb5_init_context(&bsd_context);
+    krb5_init_ets(bsd_context);
     if (must_pass_k5 || must_pass_one) {
-	/* Init error messages and setup des buffers */
-	krb5_init_context(&bsd_context);
-	krb5_init_ets(bsd_context);
+	/* setup des buffers */
 	desinbuf.data = des_inbuf;
 	desoutbuf.data = des_outbuf;    /* Set up des buffers */
     }

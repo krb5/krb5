@@ -291,6 +291,7 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
 
     /* Get ticket from credentials cache or kdc */
     status = krb5_get_credentials(bsd_context, 0, cc, get_cred, &ret_cred);
+    (void) krb5_cc_close(bsd_context, cc);
     krb5_free_creds(bsd_context, get_cred);
     if (status) goto bad2;
 
