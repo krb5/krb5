@@ -15,8 +15,15 @@
 #define INI_ALERT       "Alert"
 #define INI_BEEP        "Beep"
 #define INI_FILES       "Files"
-#define INI_KRB_CONF    "krb.conf"        /* Location of krb.conf file */
-#define DEF_KRB_CONF    "krb.con"         /* Default name for krb.conf file */
+#ifdef KRB4
+	#define INI_KRB_CONF    "krb.conf"     /* Location of krb.conf file */
+	#define DEF_KRB_CONF    "krb.con"      /* Default name for krb.conf file */
+#endif /* KRB4 */
+#ifdef KRB5
+	#define INI_KRB5_CONF   "krb5.ini"		/* From k5-config.h */
+	#define INI_KRB_CONF    INI_KRB5_CONF	/* Location of krb.conf file */
+	#define DEF_KRB_CONF    INI_KRB5_CONF	/* Default name for krb.conf file */
+#endif /* KRB5 */
 #define INI_KRB_REALMS  "krb.realms"      /* Location of krb.realms file */
 #define DEF_KRB_REALMS  "krb.rea"         /* Default name for krb.realms file */
 #define INI_RECENT_LOGINS "Recent Logins"    

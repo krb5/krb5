@@ -1,3 +1,9 @@
+Thu Apr 27 11:46:42 1995 Keith Vetter (keithv@fusion.com)
+
+	* cns.c, cns.rc, krbini.h: K5 no longer has conf and realms files
+	   but one generic config file. Changed options menu to so we can
+	   specify where it lives.
+
 Thu Apr 20 12:17:34 1995 Keith Vetter (keithv@fusion.com)
 
 	* cns.c, tktlist.c, krbini.h: Fixed up #include so it

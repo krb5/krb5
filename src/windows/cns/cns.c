@@ -801,6 +801,7 @@ opts_initdialog (
 	WPARAM wparam,
 	LPARAM lparam)
 {
+	char wdir[FILENAME_MAX];
 	char defname[FILENAME_MAX];
     char newname[FILENAME_MAX];
 	UINT rc;
@@ -808,36 +809,32 @@ opts_initdialog (
 
 	center_dialog(hwnd);
 	set_dialog_font(hwnd, hfontdialog);
-
-/* krb.conf file */
-	rc = GetWindowsDirectory(defname, sizeof(defname));
+	rc = GetWindowsDirectory(wdir, sizeof(wdir));
 	assert(rc > 0);
+	strcat (wdir, "\\");
 
-	strcat(defname, "\\");
+	/* krb.conf file */
+	strcpy(defname, wdir);
 	strcat(defname, DEF_KRB_CONF);
 	GetPrivateProfileString(INI_FILES, INI_KRB_CONF, defname,
 		newname, sizeof(newname), KERBEROS_INI);
 	_strupr(newname);
 	SetDlgItemText(hwnd, IDD_CONF, newname);
+	
+	#ifdef KRB4
+	/* krb.realms file */
+		strcpy(defname, wdir);
+		strcat(defname, DEF_KRB_REALMS);
+		GetPrivateProfileString(INI_FILES, INI_KRB_REALMS, defname,
+			newname, sizeof(newname), KERBEROS_INI);
+		_strupr(newname);
+		SetDlgItemText(hwnd, IDD_REALMS, newname);
+	#endif /* KRB4 */
 
-/* krb.realms file */
-	rc = GetWindowsDirectory(defname, sizeof(defname));
-	assert(rc > 0);
-
-	strcat(defname, "\\");
-	strcat(defname, DEF_KRB_REALMS);
-	GetPrivateProfileString(INI_FILES, INI_KRB_REALMS, defname,
-		newname, sizeof(newname), KERBEROS_INI);
-	_strupr(newname);
-	SetDlgItemText(hwnd, IDD_REALMS, newname);
-
-/* Credential cache file */
+	/* Credential cache file */
     #ifdef KRB5
-    	rc = GetWindowsDirectory(defname, sizeof(defname));
-    	assert(rc > 0);
-
-    	strcat(defname, "\\");
-    	strcat(defname, "krb5cc");
+		strcpy(defname, wdir);
+    	strcat(defname, INI_KRB_CCACHE);
     	GetPrivateProfileString(INI_FILES, INI_KRB_CCACHE, defname,
     		ccname, sizeof(ccname), KERBEROS_INI);
     	_strupr(ccname);
@@ -882,6 +879,7 @@ opts_command (
 	WPARAM wparam,
 	LPARAM lparam)
 {
+	char wdir[FILENAME_MAX];
 	char defname[FILENAME_MAX];
 	char newname[FILENAME_MAX];
 	char *p;
@@ -891,6 +889,10 @@ opts_command (
 
 	switch (wparam) {
 	case IDOK:
+		rc = GetWindowsDirectory(wdir, sizeof(wdir));
+		assert(rc > 0);
+		strcat(wdir, "\\");
+
 /* Ticket duration */
 		lifetime = GetDlgItemInt(hwnd, IDD_LIFETIME, &b, FALSE);
 
@@ -906,48 +908,32 @@ opts_command (
 /* krb.conf file */
 		GetDlgItemText(hwnd, IDD_CONF, newname, sizeof(newname));
 		trim(newname);
-		rc = GetWindowsDirectory(defname, sizeof(defname));
-		assert(rc > 0);
-
-		strcat(defname, "\\");
+		strcpy(defname, wdir);
 		strcat(defname, DEF_KRB_CONF);
-		if (_stricmp(newname, defname) == 0 || !newname[0])
-			p = NULL;
-		else
-			p = newname;
+		p = (*newname && _stricmp(newname, defname)) ? newname : NULL;
 		b = WritePrivateProfileString(INI_FILES, INI_KRB_CONF, p, KERBEROS_INI);
 		assert(b);
 
 /* krb.realms file */
-		GetDlgItemText(hwnd, IDD_REALMS, newname, sizeof(newname));
-		trim(newname);
-		rc = GetWindowsDirectory(defname, sizeof(defname));
-		assert(rc > 0);
-
-		strcat(defname, "\\");
-		strcat(defname, DEF_KRB_REALMS);
-		if (_stricmp(newname, defname) == 0 || !newname[0])
-			p = NULL;
-		else
-			p = newname;
-		b = WritePrivateProfileString(INI_FILES, INI_KRB_REALMS, p, KERBEROS_INI);
-		assert(b);
+		#ifdef KRB4
+			GetDlgItemText(hwnd, IDD_REALMS, newname, sizeof(newname));
+			trim(newname);
+			strcpy(defname, wdir);
+			strcat(defname, DEF_KRB_REALMS);
+			p = (*newname && _stricmp(newname, defname)) ? newname : NULL;
+			b = WritePrivateProfileString(INI_FILES, INI_KRB_REALMS, p, KERBEROS_INI);
+			assert(b);
+		#endif /* KRB4 */
 
 /* Credential cache file */
         #ifdef KRB5
     		GetDlgItemText(hwnd, IDD_CCACHE, newname, sizeof(newname));
     		trim(newname);
-    		rc = GetWindowsDirectory(defname, sizeof(defname));
-    		assert(rc > 0);
-
-    		strcat(defname, "\\");
+			strcpy(defname, wdir);
     		strcat(defname, "krb5cc");
-            if (*newname == '\0')
+            if (*newname == '\0')				// For detecting name change
                 strcpy (newname, defname);
-    		if (_stricmp(newname, defname) == 0 || *newname == '\0')
-    			p = NULL;
-    		else
-    			p = newname;
+			p = (*newname && _stricmp(newname, defname)) ? newname : NULL;
     		b = WritePrivateProfileString(INI_FILES, INI_KRB_CCACHE, p, KERBEROS_INI);
     		assert(b);
 
