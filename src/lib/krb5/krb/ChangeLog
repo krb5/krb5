@@ -1,3 +1,10 @@
+1999-08-10	Alexandra Ellwood	<lxs@mit.edu>
+
+	* chpw.c (krb5_mk_chpw_req):
+		Added call to free cipherpw.data.  cipherpw.data is allocated 
+		by krb5_mk_priv and passed back.  Since cipherpw is never
+		passed back, krb5_mk_chpw_req should free it.
+
 1999-08-05  Danilo Almeida  <dalmeida@mit.edu>
 
 	* init_ctx.c (krb5_init_context): Document why krb5_win_ccdll_load
