@@ -252,7 +252,8 @@ o Returns
 	NOT_AUTHORIZED		- not authorized to perform this
 	KEY_ALREADY_EXISTS	- one or more of the specified
 				  keytypes already exist.
-	BAD_OPTION		- bad keytype:saltyupe specified
+	BAD_OPTION		- bad keytype:saltype specified
+	BAD_PW			- supplied password is incorrect
 o Supplemental Returns
 	NONE			- if successful
 	error message text	- if failure
@@ -283,7 +284,8 @@ o Returns
 	NOT_AUTHORIZED		- not authorized to perform this
 	KEY_DOES_NOT_EXIST	- one or more of the specified
 				  keytypes do not exist.
-	BAD_OPTION		- bad keytype:saltyupe specified
+	BAD_OPTION		- bad keytype:saltype specified
+	BAD_PW			- supplied password is incorrect
 o Supplemental Returns
 	NONE			- if successful
 	error message text	- if failure
