@@ -762,6 +762,7 @@ include-paths = `catenate {include-folders-list} | StreamEdit -d -set prefix="{r
 	-i {mitkerberoslib-root-folder}CCacheLib:Headers: ¶
 	-i {mitkerberoslib-root-folder}LoginLib:Headers: ¶
 	-i {mitkerberoslib-root-folder}PreferencesLib:Headers: ¶
+	-i {mitkerberoslib-root-folder}Support:Headers: ¶
 	{mitsupportlib-include-paths}
 		
 compiler-options-macos9-debug = {include-paths} {common-compiler-options} {macos9-compiler-options} ¶
