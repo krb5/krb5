@@ -80,8 +80,11 @@ main(argc, argv)
     int pwsize;
     char password[255], *client_name, prompt[255];
 
-    krb5_init_context(&kcontext);
-    krb5_init_ets(kcontext);
+    code = krb5_init_context(&kcontext);
+    if (code) {
+	    com_err(argv[0], code, "while initializing krb5");
+	    exit(1);
+    }
 
     if ((code = krb5_timeofday(kcontext, &now))) {
 	com_err(argv[0], code, "while getting time of day");

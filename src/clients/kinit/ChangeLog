@@ -1,3 +1,9 @@
+Wed Nov  6 09:31:35 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* kinit.c (main): Check the return code from krb5_init_context,
+		and print an error message if appropriate.  No longer call
+		krb5_init_ets(), as it's no longer necessary.
+
 Tue Sep 10 14:13:52 1996  Tom Yu  <tlyu@mit.edu>
 
 	* kinit.M: remove ".so man1/header.doc"
