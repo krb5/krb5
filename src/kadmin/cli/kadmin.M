@@ -397,42 +397,6 @@ KADM5_BAD_MASK (shouldn't happen)
 .RE
 .fi
 .TP
-\fBrename_principal\fP [\fB-force\fP] \fIold new\fP
-rename the principal
-.I old
-to
-.IR new .
-Prompts for confirmation, unless the
-.B \-force
-option is given.  Requires both the
-.I add
-and
-.I delete
-privileges.  Aliased to
-.BR renprinc .
-.sp
-.nf
-.RS
-.TP
-EXAMPLE:
-kadmin: renprinc tlyutest test0
-Are you sure you want to rename the principal
-"tlyutest@BLEEP.COM" to
-"test0@BLEEP.COM"? (yes/no): yes
-Principal "tlyutest@BLEEP.COM" renamed to
-"test0@BLEEP.COM".
-Make sure that you have removed "tlyutest@BLEEP.COM" from
-all ACLs before reusing.
-kadmin:
-.TP
-ERRORS:
-KADM5_AUTH_ADD (requires "add" privilege)
-KADM5_AUTH_DELETE (requires "delete" privilege)
-KADM5_UNK_PRINC (source principal does not exist)
-KADM5_DUP (target principal already exists)
-.RE
-.fi
-.TP
 \fBchange_password\fP [\fIoptions\fP] \fIprincipal\fP
 changes the password of
 .IR principal .

@@ -1,3 +1,8 @@
+2002-06-06  Tom Yu  <tlyu@mit.edu>
+
+	* kadmin.M: Remove references to "rename_principal".
+	[pullup from 1-2-2-branch]
+
 2001-10-10  Ken Raeburn  <raeburn@mit.edu>
 
 	* kadmin.c (kadmin_parse_name): Properly advance pointer in
