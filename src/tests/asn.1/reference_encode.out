@@ -44,3 +44,6 @@ encode_krb5_alt_method (no data): 30 05 A0 03 02 01 2A
 encode_krb5_etype_info: 30 33 30 14 A0 03 02 01 00 A1 0D 04 0B 4D 6F 72 74 6F 6E 27 73 20 23 30 30 05 A0 03 02 01 01 30 14 A0 03 02 01 02 A1 0D 04 0B 4D 6F 72 74 6F 6E 27 73 20 23 32
 encode_krb5_etype_info (only 1): 30 16 30 14 A0 03 02 01 00 A1 0D 04 0B 4D 6F 72 74 6F 6E 27 73 20 23 30
 encode_krb5_etype_info (no info): 30 00
+encode_krb5_pa_enc_ts: 30 1A A0 11 18 0F 31 39 39 34 30 36 31 30 30 36 30 33 31 37 5A A1 05 02 03 01 E2 40
+encode_krb5_pa_enc_ts (no usec): 30 13 A0 11 18 0F 31 39 39 34 30 36 31 30 30 36 30 33 31 37 5A
+encode_krb5_enc_data: 30 23 A0 03 02 01 00 A1 03 02 01 05 A2 17 04 15 6B 72 62 41 53 4E 2E 31 20 74 65 73 74 20 6D 65 73 73 61 67 65

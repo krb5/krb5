@@ -1884,3 +1884,31 @@ encode_krb5_etype_info (no info):
 
 [Sequence/Sequence Of] 
 
+encode_krb5_pa_enc_ts:
+
+[Sequence/Sequence Of] 
+.  [0] [Generalized Time] <15>
+      31 39 39 34 30 36 31 30     19940610
+      30 36 30 33 31 37 5a        060317Z
+.  [1] [Integer] <3>
+      01 e2 40                    ..@
+
+encode_krb5_pa_enc_ts (no usec):
+
+[Sequence/Sequence Of] 
+.  [0] [Generalized Time] <15>
+      31 39 39 34 30 36 31 30     19940610
+      30 36 30 33 31 37 5a        060317Z
+
+encode_krb5_enc_data:
+
+[Sequence/Sequence Of] 
+.  [0] [Integer] <1>
+      00                          .
+.  [1] [Integer] <1>
+      05                          .
+.  [2] [Octet String] <21>
+      6b 72 62 41 53 4e 2e 31     krbASN.1
+      20 74 65 73 74 20 6d 65      test me
+      73 73 61 67 65              ssage
+
