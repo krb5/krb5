@@ -59,7 +59,7 @@ krb5_keyblock *out;
 		  decrypt_func)((krb5_pointer) (((char *) in->contents) +
 						sizeof(in->length)),
 				(krb5_pointer) out->contents,
-				in->length-sizeof(in->length), eblock)) {
+				in->length-sizeof(in->length), eblock, 0)) {
 	free((char *)out->contents);
 	out->contents = 0;
 	out->length = 0;

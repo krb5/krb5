@@ -80,7 +80,7 @@ register krb5_ticket *dec_ticket;
     if (retval =
 	(*eblock.crypto_entry->encrypt_func)((krb5_pointer) scratch->data,
 					     (krb5_pointer) dec_ticket->enc_part.data,
-					     scratch->length, &eblock)) {
+					     scratch->length, &eblock, 0)) {
 	goto clean_prockey;
     }
 

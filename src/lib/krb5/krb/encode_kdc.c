@@ -91,7 +91,7 @@ OLDDECLARG(krb5_data **, enc_rep)
     if (retval =
 	(*eblock.crypto_entry->encrypt_func)((krb5_pointer) scratch->data,
 					     (krb5_pointer) dec_rep->enc_part.data,
-					     scratch->length, &eblock)) {
+					     scratch->length, &eblock, 0)) {
 	goto clean_prockey;
     }
 
