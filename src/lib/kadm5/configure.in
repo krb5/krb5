@@ -1,6 +1,5 @@
 AC_INIT(configure.in)
 CONFIG_RULES
-AC_CONFIG_SUBDIRS(clnt srv unit-test)
 AC_PROG_ARCHIVE
 AC_PROG_ARCHIVE_ADD
 AC_PROG_RANLIB
@@ -9,5 +8,37 @@ AC_PROG_LEX
 AC_PROG_AWK
 AC_CHECK_HEADERS(syslog.h)
 AC_CHECK_FUNCS(openlog syslog closelog strftime vsprintf)
+KRB5_AC_REGEX_FUNCS
+dnl
+dnl AIX is unusual in that it wants all symbols resolved at link time
+dnl  Fortunately, it will allow us to link the kdb library now, even if
+dnl it is linked again later.
+AIX_DB_LIB=''
+case $krb5_cv_host in
+*-*-aix*)
+	AIX_DB_LIB="-ldb"
+	;;
+esac
+AC_SUBST(AIX_DB_LIB)
+dnl
+AC_CANONICAL_HOST
+dnl The following are tests for the presence of programs required for testing 
+AC_CHECK_PROG(RUNTEST,runtest,runtest)
+AC_CHECK_PROG(PERL,perl,perl)
+AC_CHECK_FUNCS(srand48 srand srandom)
+AC_KRB5_TCL	
+if test "$PERL" = perl -a "$RUNTEST" = runtest -a "$TCL_LIBS" != ""; then
+ 	DO_TEST=ok
+fi
+AC_SUBST(DO_TEST) 
+dnl
 KRB5_BUILD_LIBOBJS
-V5_AC_OUTPUT_MAKEFILE
+KRB5_BUILD_LIBRARY_WITH_DEPS
+KRB5_BUILD_PROGRAM
+dnl
+K5_GEN_MAKEFILE(., libobj)
+K5_GEN_MAKEFILE(clnt, lib libobj)
+K5_GEN_MAKEFILE(srv, lib libobj)
+K5_GEN_MAKEFILE(unit-test)
+K5_AC_OUTPUT
+

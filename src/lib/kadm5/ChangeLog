@@ -1,3 +1,12 @@
+Fri Feb 27 22:30:41 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* configure.in: Move tests from all of kadm5's subdirectories into
+		this configure.in, and make it generate makefiles for all
+		of the subdirectories.
+
+	* Makefile.in: Add a LOCAL_SUBDIRS macro for all subdirectories in
+		the kadm5 library.
+
 Wed Feb 18 16:13:56 1998  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Remove trailing slash from thisconfigdir.  Fix up

@@ -1,3 +1,13 @@
+Fri Feb 27 22:33:05 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in: Changed thisconfigdir to point at the lib/kadm5
+ 		directory, since we've moved all of the configure.in
+		tests to the toplevel lib/kadm5 configure.in.
+		Instead of adding @LIBS@ to the list of libraries which
+		should be linked as shared library dependencies, add
+		@GEN_LIB@ and @AIX_DB_LIB@ which will get expanded if
+		necessary. 
+
 Wed Feb 18 16:15:22 1998  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Remove trailing slash from thisconfigdir.  Fix up
