@@ -1,3 +1,9 @@
+2002-11-12  Tom Yu  <tlyu@mit.edu>
+
+	* shlib.conf: Fix AIX to explicitly include system libraries in
+	"-blibpath:" by adding a variable RPATH_TAIL.  Fix typo in non-gcc
+	case.
+
 2002-11-08  Ken Raeburn  <raeburn@mit.edu>
 
 	* pre.in (.et.h, .et.c): Drop "set -x".

@@ -829,7 +829,7 @@ if test -n "$tcl_ok_conf" ; then
   TCL_LIBPATH="-L$TCL_EXEC_PREFIX/lib"
   TCL_RPATH=":$TCL_EXEC_PREFIX/lib"
   if test "$DEPLIBEXT" != "$SHLIBEXT" && test -n "$RPATH_FLAG"; then
-    TCL_MAYBE_RPATH='$(RPATH_FLAG)'"$TCL_EXEC_PREFIX/lib"
+    TCL_MAYBE_RPATH='$(RPATH_FLAG)'"$TCL_EXEC_PREFIX/lib$RPATH_TAIL"
   else
     TCL_MAYBE_RPATH=
   fi
