@@ -1,3 +1,9 @@
+2002-03-06  Ken Raeburn  <raeburn@mit.edu>
+
+	* krb5_err.et: Change several "credentials cache file" messages to
+	just say "credentials cache", so as to be applicable in the ccapi
+	case too.  (Miro's change from 1.2.x branch.)
+
 2002-01-08  Ken Raeburn  <raeburn@mit.edu>
 
 	* krb5_err.et (KRB5_EAI_FAIL, KRB5_EAI_NODATA, KRB5_EAI_NONAME,
