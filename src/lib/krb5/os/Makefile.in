@@ -12,6 +12,7 @@ PROG_RPATH=$(KRB5_LIBDIR)
 ##WIN16##LIBNAME=..\krb5.lib
 
 STLIBOBJS= \
+	accessor.o	\
 	an_to_ln.o	\
 	c_ustime.o	\
 	def_realm.o	\
@@ -54,6 +55,7 @@ STLIBOBJS= \
 	write_msg.o
 
 OBJS= \
+	$(OUTPRE)accessor.$(OBJEXT)	\
 	$(OUTPRE)an_to_ln.$(OBJEXT)	\
 	$(OUTPRE)c_ustime.$(OBJEXT)	\
 	$(OUTPRE)def_realm.$(OBJEXT)	\
@@ -96,6 +98,7 @@ OBJS= \
 	$(OUTPRE)write_msg.$(OBJEXT)
 
 SRCS= \
+	$(srcdir)/accessor.c    \
 	$(srcdir)/an_to_ln.c	\
 	$(srcdir)/c_ustime.c	\
 	$(srcdir)/def_realm.c	\

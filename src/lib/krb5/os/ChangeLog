@@ -1,3 +1,12 @@
+2000-07-19  Danilo Almeida  <dalmeida@mit.edu>
+
+	* accessor.c (krb5int_accessor): Add krb5int_accessor() to access
+	internal krb5 functions from outside the library (so that we don't
+	have to export them for the krb525 and gssapi libraries).  The
+	goal is to make this function eventually do nothing.
+
+	* Makefile.in: Compile accessor.c.
+
 2000-07-18  Ezra Peisach  <epeisach@mit.edu>
 
 	* locate_kdc.c, hst_realm.c, def_realm.c, changepw.c: Include
