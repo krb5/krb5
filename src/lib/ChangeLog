@@ -1,3 +1,7 @@
+Tue May 30 10:21:21 1995 Keith Vetter (keithv@fusion.com)
+
+	* libkrb5.def: added kadm exported routines.
+
 Fri May 26 10:18:04 1995 Keith Vetter (keithv@fusion.com)
 
 	* Makefile.in: add kadm directory for the PC.
