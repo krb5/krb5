@@ -243,4 +243,13 @@ OM_uint32 generic_gss_str_to_oid
 	    gss_OID *		/* oid */
 	   );
 
+#define _log		gssint_log
+#define _log_block	gssint_log_block
+extern void _log(const char *, ...);
+extern void _log_block(const char *, int, const char *, void *, size_t);
+#define _log_block2(LABEL,PTR,SIZE) _log_block(__FILE__,__LINE__,LABEL,PTR,SIZE)
+#define SFILE (strrchr(__FILE__,'/') ? 1+strrchr(__FILE__,'/') : __FILE__)
+#undef GSS_S_DEFECTIVE_TOKEN
+#define GSS_S_DEFECTIVE_TOKEN (defective(SFILE,__LINE__),(((OM_uint32) 9ul) << GSS_C_ROUTINE_ERROR_OFFSET))
+
 #endif /* _GSSAPIP_GENERIC_H_ */
