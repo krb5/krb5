@@ -145,6 +145,7 @@ void krb5int_prng_cleanup (void)
 {
     if (inited)
 	krb5int_yarrow_final (&y_ctx);
+    k5_mutex_destroy(&yarrow_lock);
     inited = 0;
 }
 
