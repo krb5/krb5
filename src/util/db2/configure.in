@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT(db/db.c)
-AC_CONFIG_HEADER(include/db-config.h)
+AC_CONFIG_HEADER(include/config.h include/db-config.h)
 CONFIG_RULES
 
 AC_PATH_PROG(FALSE,false,:)
@@ -68,22 +68,21 @@ AC_C_CONST
 AC_CHECK_SIZEOF(int)
 
 dnl checks for library functions
-AC_CHECK_FUNC(memmove,,
+AC_CHECK_FUNC(memmove, ,
 [MEMMOVE_OBJ=memmove.o
-ADD_DEF(-Dmemmove=kdb2__memmove)
-ADD_DEF(-DMEMMOVE)])
-
-AC_CHECK_FUNC(mkstemp,,
-[MKSTEMP_OBJ=mkstemp.o
-ADD_DEF(-Dmkstemp=kdb2__mkstemp)])
-AC_CHECK_FUNC(strerror,,
-[STRERROR_OBJ=strerror.o
-ADD_DEF(-Dstrerror=kdb2__strerror)])
-
+AC_DEFINE(memmove, kdb2__memmove)
+AC_DEFINE(MEMMOVE)])
 AC_SUBST(MEMMOVE_OBJ)
+
+AC_CHECK_FUNCS(mkstemp, ,
+[MKSTEMP_OBJ=mkstemp.o
+AC_DEFINE(mkstemp, kdb2__mkstemp)])
 AC_SUBST(MKSTEMP_OBJ)
+
+AC_CHECK_FUNCS(strerror, ,
+[STRERROR_OBJ=strerror.o
+AC_DEFINE(strerror, kdb2__strerror)])
 AC_SUBST(STRERROR_OBJ)
-AC_CHECK_FUNCS(memmove mkstemp strerror)
 
 KRB5_BUILD_LIBRARY
 KRB5_BUILD_LIBOBJS

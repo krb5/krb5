@@ -1,3 +1,20 @@
+2000-07-01  Tom Yu  <tlyu@mit.edu>
+
+	* clib/strerror.c: #include config.h.
+
+	* clib/mkstemp.c: #include config.h.
+
+	* clib/memmove.c: #include config.h.
+
+	* clib/Makefile.in (LOCALINCLUDES): Add -I../include to get
+	config.h.
+
+	* configure.in: Generate two config headers, one for internal use
+	and one for external use.  Rework clib replacement code to use
+	AC_DEFINE rather than ADD_DEF.
+
+	* Makefile.in (STOBJLISTS): Add clib.
+
 2000-06-30  Tom Yu  <tlyu@mit.edu>
 
 	* configure.in: Rework to use krb5 build system.

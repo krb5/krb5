@@ -8,7 +8,7 @@ LIB=db
 LIBMAJOR=1
 LIBMINOR=0
 STOBJLISTS=hash/OBJS.ST btree/OBJS.ST db/OBJS.ST mpool/OBJS.ST \
-	recno/OBJS.ST
+	recno/OBJS.ST clib/OBJS.ST
 RELDIR=../util/db2
 
 HDRDIR=$(BUILDTOP)/include
