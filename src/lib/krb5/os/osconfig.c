@@ -29,8 +29,10 @@
 #endif
 #include "k5-int.h"
 
+#ifdef OLD_CONFIG_FILES
 char *krb5_config_file = DEFAULT_CONFIG_FILENAME;
 char *krb5_trans_file = DEFAULT_TRANS_FILENAME;
+#endif
 char *krb5_defkeyname  = DEFAULT_KEYTAB_NAME;
 #ifdef USE_DBM_LNAME
 char *krb5_lname_file = DEFAULT_LNAME_FILENAME;

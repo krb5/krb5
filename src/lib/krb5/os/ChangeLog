@@ -1,3 +1,8 @@
+Sun Apr 30 16:03:59 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* osconfig.c: Global variables krb5_config_file and
+		krb5_trans_file conditionalized on OLD_CONFIG_FILES.
+
 Fri Apr 28 09:58:31 EDT 1995	Paul Park	(pjpark@mit.edu)
 
 	Move adm_conn.c from libkrb5 to libkadm.
