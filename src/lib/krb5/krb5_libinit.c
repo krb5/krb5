@@ -23,7 +23,7 @@ krb5_error_code krb5int_initialize_library (void)
 {
 	
 	if (!initialized) {
-#if !TARGET_OS_MAC || USE_HARDCODED_FALLBACK_ERROR_TABLES
+#if !USE_BUNDLE_ERROR_STRINGS
 	    add_error_table(&et_krb5_error_table);
 	    add_error_table(&et_kv5m_error_table);
 	    add_error_table(&et_kdb5_error_table);
@@ -48,7 +48,7 @@ void krb5int_cleanup_library (void)
 	krb5_stdcc_shutdown();
 #endif
 	
-#if !TARGET_OS_MAC || USE_HARDCODED_FALLBACK_ERROR_TABLES
+#if !USE_BUNDLE_ERROR_STRINGS
 	remove_error_table(&et_krb5_error_table);
 	remove_error_table(&et_kv5m_error_table);
 	remove_error_table(&et_kdb5_error_table);
