@@ -1,3 +1,9 @@
+Wed Nov  6 10:45:12 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* server_init.c (kadm5_init): Use a more fined grained error
+ 		code, KADM5_MISSING_CONF_PARAMS instead of
+ 		KRB5_CONFIG_BADFORMAT
+
 Wed Nov  6 16:22:05 1996  Barry Jaspan  <bjaspan@mit.edu>
 
 	* svr_principal.c (kadm5_modify_principal): don't free the

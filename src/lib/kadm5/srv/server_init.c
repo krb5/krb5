@@ -178,7 +178,7 @@ kadm5_ret_t kadm5_init(char *client_name, char *pass,
      if ((handle->params.mask & REQUIRED_PARAMS) != REQUIRED_PARAMS) {
 	  krb5_free_context(handle->context);
 	  free(handle);
-	  return KRB5_CONFIG_BADFORMAT;
+	  return KADM5_MISSING_CONF_PARAMS;
      }
 
     /*
