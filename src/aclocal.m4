@@ -96,8 +96,8 @@ AC_DIVERT_PUSH(AC_DIVERSION_MAKEFILE)dnl
 changequote(<<<,>>>)dnl
 
 $2::<<<
-	@case "`echo '$(MAKEFLAGS)'|sed -e 's/ --.*$$//'`" in \
-		*[ik]*) set +e ;; *) set -e ;; esac; \
+	-@case "`echo '$(MAKEFLAGS)'|sed -e 's/ --.*$$//'`" in \
+		*[ik]*) ;; *) set -e ;; esac; \
 	for i in $(SUBDIRS) ; do \
 		(cd $$i ; echo>>> $1 <<<"in $(CURRENT_DIR)$$i..."; \
 			$(MAKE) CC="$(CC)" CCOPTS="$(CCOPTS)" \
@@ -459,7 +459,7 @@ define(CopySrcHeader,[
 AC_DIVERT_PUSH(AC_DIVERSION_MAKEFILE)dnl
 
 includes:: $1
-	@if test -d $2; then :; else mkdir $2; fi
+	@if test -d $2; then :; else (set -x; mkdir $2) fi
 	@if cmp $(srcdir)/$1 $2/$1 >/dev/null 2>&1; then :; \
 	else \
 		(set -x; [$](RM) $2/$1;	[$](CP) $(srcdir)/$1 $2/$1) \

@@ -1,3 +1,10 @@
+Tue Jun 13 01:44:12 1995  Tom Yu  (tlyu@dragons-lair)
+
+	* aclocal.m4 (CopySrcHeader): do a set -x before mkdir
+		_MAKE_SUBDIRS: inserted a "-@" rather than a "@" at the
+		beginning of the rule; Ultrix make does /bin/sh -e
+		ruleline if it's not there, and set +e doesn't work.
+
 Sat Jun 10 08:14:22 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* acconfig.h: Removed HAS_ANSI_CONST, HAS_ANSI_VOLATILE,
