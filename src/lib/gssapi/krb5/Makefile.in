@@ -33,7 +33,7 @@ gssapi_err_krb5.h: gssapi_err_krb5.et
 
 gssapi_err_krb5.c: gssapi_err_krb5.et
 
-CCSRCS = \
+SRCS = \
 	$(srcdir)/accept_sec_context.c \
 	$(srcdir)/acquire_cred.c \
 	$(srcdir)/compare_name.c \
@@ -67,9 +67,10 @@ CCSRCS = \
 	$(srcdir)/util_crypt.c \
 	$(srcdir)/util_seed.c \
 	$(srcdir)/util_seqnum.c \
-	$(srcdir)/verify.c
+	$(srcdir)/verify.c \
+	gssapi_err_krb5.c
 
-CCOBJS = \
+OBJS = \
 	accept_sec_context.$(OBJEXT) \
 	acquire_cred.$(OBJEXT) \
 	compare_name.$(OBJEXT) \
@@ -103,10 +104,9 @@ CCOBJS = \
 	util_crypt.$(OBJEXT) \
 	util_seed.$(OBJEXT) \
 	util_seqnum.$(OBJEXT) \
-	verify.$(OBJEXT)
+	verify.$(OBJEXT) \
+	gssapi_err_krb5.$(OBJEXT)
 
-SRCS= $(ETSRCS) $(CCSRCS)
-OBJS= $(ETOBJS) $(CCOBJS)
 HDRS= $(ETHDRS)
 
 EHDRDIR=$(TOP)/include/gssapi

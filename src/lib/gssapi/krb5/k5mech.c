@@ -8,7 +8,11 @@
  * structure, so I hide it in a non-published header.  Thats ok,
  * we know where to find it.
  */
+#if defined(__MWERKS__) || defined(applec) || defined(THINK_C)
+#include "mglueP.h"
+#else
 #include "../mechglue/mglueP.h"
+#endif
 
 #include "gssapiP_krb5.h"
 /*

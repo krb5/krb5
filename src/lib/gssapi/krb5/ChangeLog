@@ -1,3 +1,11 @@
+Tue Apr  2 15:20:24 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in (SRCS): Inlined list of source files for SRCS and
+		OBJS (for Macintosh build).
+
+	* k5mech.c: Added Macintosh #ifdef so that the #include path is
+		right for the Macintosh.
+
 Wed Mar 20 20:25:53 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* rel_oid.c (krb5_gss_release_oid): Don't compile this procedure,
