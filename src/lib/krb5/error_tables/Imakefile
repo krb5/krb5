@@ -28,7 +28,7 @@ ETOBJS=isode_err.o kdb5_err.o krb5_err.o
 
 ETHDRS=isode_err.h kdb5_err.h krb5_err.h
 
-SRCS= $(ETSRCS) init_ets.c
+SRCS= $(ETSRCS) $(SRCDIR)init_ets.c
 OBJS= $(ETOBJS) init_ets.o
 HDRS= $(ETHDRS)
 
@@ -48,6 +48,8 @@ CopyHeader(kdb5_err.h,$(EHDRDIR))
 
 
 OtherdirLibraryTarget($(TOP)/lib,krb5,$(OBJS))
+
+depend:: $(ETSRCS)
 
 DependTarget()
 
