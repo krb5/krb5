@@ -18,7 +18,7 @@
  
 #include "gss_libinit.h"
 
-#if TARGET_API_MAC_OS8
+#if TARGET_RT_MAC_CFM
 #include <CodeFragments.h>
 
 OSErr __initializeGSS(CFragInitBlockPtr ibp);
@@ -43,12 +43,12 @@ void __initializeGSS(void)
 		err = gssint_initialize_library ();
 	}
 
-#if TARGET_API_MAC_OS8
+#if TARGET_RT_MAC_CFM
 	return err;
 #endif
 }
 
-#if TARGET_API_MAC_OS8
+#if TARGET_RT_MAC_CFM
 void __terminateGSS(void)
 {
 	gssint_cleanup_library ();
