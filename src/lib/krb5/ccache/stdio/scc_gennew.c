@@ -95,9 +95,10 @@ krb5_scc_generate_new (context, id)
 	     retcode = krb5_scc_interpret (context, errno);
 	     goto err_out;
      } else {
-	 unsigned char scc_fvno[2] = {
-	    (unsigned char) (KRB5_SCC_DEFAULT_FVNO >> 8),
-	    (unsigned char) (KRB5_SCC_DEFAULT_FVNO & 0xFF)};
+	 unsigned char scc_fvno[2];
+
+	 scc_fvno[0] = (unsigned char) (KRB5_SCC_DEFAULT_FVNO >> 8);
+	 scc_fvno[1] = (unsigned char) (KRB5_SCC_DEFAULT_FVNO & 0xFF);
 
 	 if (!fwrite((char *)scc_fvno, sizeof(scc_fvno), 1, f)) {
 	     retcode = krb5_scc_interpret(context, errno);
