@@ -29,6 +29,7 @@ long pty_cleanup (slave, pid, update_utmp)
     int update_utmp;
 {
     struct utmp ut;
+    int retval, fd;
     
 #ifndef NO_UT_PID
     ut.ut_pid = 0;
@@ -55,17 +56,18 @@ long pty_cleanup (slave, pid, update_utmp)
      * along SIGHUP, all processes may not die.
      */
     if ( pid > 0 ) {
-    #ifdef HAVE_KILLPG
+#ifdef HAVE_KILLPG
 	killpg(pid, SIGHUP);
-	#else
+#else
 	kill( -(pid), SIGHUP );
 #endif /*HAVE_KILLPG*/
     }
 #else /* HAVE_REVOKE*/
-    #ifdef VHANG_LAST
+#ifdef VHANG_LAST
     if ( retval = ( pty_open_ctty( slave, &fd ))) 
 	return retval;
     ptyint_vhangup();
+    return 0;
 #endif
     #endif
 }
