@@ -1,5 +1,7 @@
 2000-02-16  Danilo Almeida  <dalmeida@mit.edu>
 
+	* kinit.M: Document that -s is not applicable to Kerberos 4.
+
 	* kinit.c: Nicer usage message.  Better checking for illegal
 	options.  Do not output error when doing Kerberos 4 if we will be
 	trying 524 afterwards.  Add hooks for future support for

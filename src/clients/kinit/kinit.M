@@ -93,6 +93,7 @@ requests a postdated ticket, valid starting at
 Postdated tickets are issued with the
 .I invalid
 flag set, and need to be fed back to the kdc before use.
+(Not applicaple to Kerberos 4.)
 .TP
 \fB\-r\fP \fIrenewable_life\fP
 requests renewable tickets, with a total lifetime of
