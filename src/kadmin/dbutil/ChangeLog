@@ -1,3 +1,7 @@
+Tue Dec  3 16:04:24 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* kdb5_util.c: fix multiply defined globals [krb5-admin/260]
+
 Wed Nov 13 00:06:40 1996  Mark Eichin  <eichin@cygnus.com>
 
 	* dump.c (load_db): lock the database directly (having fixed the

@@ -64,10 +64,10 @@ usage()
      exit(1);
 }
 
-krb5_keyblock master_keyblock;
-krb5_principal master_princ;
+extern krb5_keyblock master_keyblock;
+extern krb5_principal master_princ;
+extern krb5_encrypt_block master_encblock;
 krb5_db_entry master_entry;
-krb5_encrypt_block master_encblock;
 krb5_pointer master_random;
 int	valid_master_key = 0;
 
