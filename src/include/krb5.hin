@@ -984,7 +984,7 @@ typedef struct _krb5_cc_ops {
     char FAR *prefix;
     char FAR * (KRB5_CALLCONV *get_name) KRB5_NPROTOTYPE((krb5_context, krb5_ccache));
     krb5_error_code (KRB5_CALLCONV *resolve) KRB5_NPROTOTYPE((krb5_context, krb5_ccache FAR *,
-					    char FAR *));
+					    const char FAR *));
     krb5_error_code (KRB5_CALLCONV *gen_new) KRB5_NPROTOTYPE((krb5_context, krb5_ccache FAR *));
     krb5_error_code (KRB5_CALLCONV *init) KRB5_NPROTOTYPE((krb5_context, krb5_ccache,
 					    krb5_principal));
@@ -1179,7 +1179,7 @@ typedef struct _krb5_kt_ops {
     krb5_error_code (KRB5_CALLCONV *get) 
 	KRB5_NPROTOTYPE((krb5_context,
 		 krb5_keytab,
-		 krb5_principal,
+		 krb5_const_principal,
 		 krb5_kvno,
 		 krb5_enctype,
 		 krb5_keytab_entry FAR *));
@@ -1518,9 +1518,9 @@ krb5_error_code krb5_principal2salt_norealm
 /* libcc.spec */
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_cc_resolve
 	KRB5_PROTOTYPE((krb5_context,
-		char FAR *,
+		const char FAR *,
 		krb5_ccache FAR * ));
-KRB5_DLLIMP char FAR * KRB5_CALLCONV krb5_cc_default_name
+KRB5_DLLIMP const char FAR * KRB5_CALLCONV krb5_cc_default_name
 	KRB5_PROTOTYPE((krb5_context));
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_cc_default
 	KRB5_PROTOTYPE((krb5_context,
