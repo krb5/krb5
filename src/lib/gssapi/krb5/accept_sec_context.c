@@ -86,9 +86,9 @@ rd_and_store_for_creds(context, inbuf, out_cred)
     krb5_data *inbuf;
     krb5_gss_cred_id_t *out_cred;
 {
-    krb5_creds ** creds;
+    krb5_creds ** creds = NULL;
     krb5_error_code retval;
-    krb5_ccache ccache;
+    krb5_ccache ccache = NULL;
     krb5_gss_cred_id_t cred = NULL;
     extern krb5_cc_ops krb5_mcc_ops;
     krb5_auth_context auth_context = NULL;
@@ -153,7 +153,8 @@ rd_and_store_for_creds(context, inbuf, out_cred)
        goto cleanup;
     */
 cleanup:
-    krb5_free_tgt_creds(context, creds);
+    if (creds)
+	krb5_free_tgt_creds(context, creds);
 
     if (!cred && ccache)
 	(void)krb5_cc_close(context, ccache);
