@@ -56,6 +56,8 @@ static char rcsid_sserver_c [] =
 
 extern krb5_deltat krb5_clockskew;
 
+#define DEBUG
+
 void
 main(argc, argv)
 int argc;
@@ -77,18 +79,18 @@ char *argv[];
 
     openlog("sserver", 0, LOG_DAEMON);
 
-    if (argc < 2) {
-	syslog(LOG_ERR, "needs server argument");
-	exit(1);
-    }
-    if (retval = krb5_parse_name(argv[1], &server)) {
-	syslog(LOG_ERR, "parse server name %s: %s", argv[1],
-	       error_message(retval));
+    if (retval = krb5_sname_to_principal(NULL, SAMPLE_SERVICE, KRB5_NT_SRV_HST,
+					 &server)) {
+	syslog(LOG_ERR, "while generating service name (%s): %s",
+	       SAMPLE_SERVICE, error_message(retval));
 	exit(1);
     }
     
-#ifdef DEBUG
-    {
+    /*
+     * If user specified a port, then listen on that port; otherwise,
+     * assume we've been started out of inetd.
+     */
+    if (argc > 2) {
 	int acc;
 	struct sockaddr_in sin;
 
@@ -99,7 +101,7 @@ char *argv[];
 
 	sin.sin_family = AF_INET;
 	sin.sin_addr.s_addr = 0;
-	sin.sin_port = htons(5555);
+	sin.sin_port = htons(atoi(argv[1]));
 	if (bind(sock, &sin, sizeof(sin))) {
 	    syslog(LOG_ERR, "bind: %m");
 	    exit(3);
@@ -115,17 +117,17 @@ char *argv[];
 	dup2(acc, 0);
 	close(sock);
 	sock = 0;
+    } else {
+	/*
+	 * To verify authenticity, we need to know the address of the
+	 * client.
+	 */
+	if (getpeername(0, (struct sockaddr *)&peername, &namelen) < 0) {
+	    syslog(LOG_ERR, "getpeername: %m");
+	    exit(1);
+	}
     }
-#else
-    /*
-     * To verify authenticity, we need to know the address of the
-     * client.
-     */
-    if (getpeername(0, (struct sockaddr *)&peername, &namelen) < 0) {
-	syslog(LOG_ERR, "getpeername: %m");
-	exit(1);
-    }
-#endif
+
     peeraddr.addrtype = peername.sin_family;
     peeraddr.length = sizeof(peername.sin_addr);
     peeraddr.contents = (krb5_octet *)&peername.sin_addr;
@@ -134,6 +136,7 @@ char *argv[];
 			       SAMPLE_VERSION, server, &peeraddr,
 			       0, 0, 0,	/* no fetchfrom, keyproc or arg */
 			       0,	/* default rc type */
+			       0,	/* no flags */
 			       0,	/* don't need seq number */
 			       &client,
 			       0, 0	/* don't care about ticket or
