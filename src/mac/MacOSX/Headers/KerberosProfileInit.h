@@ -19,3 +19,4 @@
 #include <CoreFoundation/CoreFoundation.h>
 
 extern "C" void KerberosProfileInit (CFStringRef inBundleID);
+extern "C" void KerberosProfileTerminate (void);

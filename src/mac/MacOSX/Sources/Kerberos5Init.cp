@@ -34,3 +34,12 @@ void Kerberos5Init (CFStringRef inBundleID)
 #endif
 }
 
+void Kerberos5Terminate (void)
+{
+ 	krb5int_cleanup_library ();
+    cryptoint_cleanup_library ();   
+
+#if USE_HARDCODED_FALLBACK_ERROR_TABLES
+    remove_error_table (&et_k524_error_table);
+#endif
+}

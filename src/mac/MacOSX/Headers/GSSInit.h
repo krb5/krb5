@@ -19,3 +19,4 @@
 #include <CoreFoundation/CoreFoundation.h>
 
 extern "C" void GSSInit (CFStringRef inBundleID);
+extern "C" void GSSTerminate (void);

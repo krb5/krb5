@@ -25,3 +25,8 @@ void GSSInit (CFStringRef inBundleID)
 {
 	gssint_initialize_library ();
 }
+
+void GSSTerminate (void)
+{
+    gssint_cleanup_library ();
+}

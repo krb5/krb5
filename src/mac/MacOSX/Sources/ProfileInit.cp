@@ -37,3 +37,14 @@ void KerberosProfileInit (CFStringRef inBundleID)
         dprintf ("prof_mutex_init returned %ld\n", err);
     }
 }
+
+void KerberosProfileTerminate (void)
+{
+#if USE_HARDCODED_FALLBACK_ERROR_TABLES
+	/* Initialize the error tables */
+	remove_error_table(&et_prof_error_table);
+#endif
+   
+    prof_mutex_destroy (&g_shared_trees_mutex);
+}
+
