@@ -1,3 +1,9 @@
+Wed Sep 13 17:32:36 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* c_localaddr.c (krb5_crypto_os_localaddr): Clear the buffer
+		before calling the SIOCGIFCONF ioctl.  This makes purify
+		happy.
+
 Thu Sep  7 12:00:00 1995  James Mattly <mattly@fusion.com>
 	
 	* Renamed ustime.c to c_ustime.c

@@ -117,9 +117,10 @@ krb5_crypto_os_localaddr(addr)
     int n_found;
     int mem_err = 0;
     
+    memset(buf, 0, sizeof(buf));
     ifc.ifc_len = sizeof(buf);
     ifc.ifc_buf = buf;
-
+    
     s = socket (USE_AF, USE_TYPE, USE_PROTO);
     if (s < 0)
 	return errno;
