@@ -69,7 +69,7 @@ DESTESTOBJ = destest.o
 all::
 depend:: des.c $(SRCS)
 
-OtherdirLibraryTarget(..,des5,$(OBJS))
+OtherdirLibraryTarget(..,$(DESLIB),$(OBJS))
 
 DependTarget()
 
