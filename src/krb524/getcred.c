@@ -50,7 +50,7 @@ main(argc, argv)
 	  com_err("getcred", ret, "parsing server name");
 	  exit(1);
      }
-     if (ret = krb5_cc_default(&cc)) {
+     if (ret = krb5_cc_default(context, &cc)) {
 	  com_err("getcred", ret, "opening default credentials cache");
 	  exit(1);
      }

@@ -1,3 +1,8 @@
+2000-07-19  Danilo Almeida  <dalmeida@mit.edu>
+
+	* getcred.c (main): Use correct parameters for krb5_cc_default()
+	in case someone actually wants to build this file.
+	
 1999-10-26  Wilfredo Sanchez  <tritan@mit.edu>
 
 	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,
