@@ -1,3 +1,7 @@
+2002-06-12  Ken Raeburn  <raeburn@mit.edu>
+
+	* pty-int.h: Don't include syslog.h.
+
 2002-05-24  Ken Raeburn  <raeburn@mit.edu>
 
 	* sane_hostname.c (pty_make_sane_hostname): Always initialize

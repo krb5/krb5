@@ -66,7 +66,6 @@
 #endif
      
 #include <netdb.h>
-#include <syslog.h>
 #include <string.h>
 #include <sys/param.h>
 
