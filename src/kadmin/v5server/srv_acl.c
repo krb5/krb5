@@ -194,13 +194,15 @@ static void
 acl_free_entries()
 {
     aent_t	*ap;
+    aent_t	*np;
 
     DPRINT(DEBUG_CALLS, acl_debug_level, ("* acl_free_entries()\n"));
-    for (ap=acl_list_head; ap; ap = ap->ae_next) {
+    for (ap=acl_list_head; ap; ap = np) {
 	if (ap->ae_name)
 	    free(ap->ae_name);
 	if (ap->ae_principal)
 	    krb5_free_principal((krb5_context) NULL, ap->ae_principal);
+	np = ap->ae_next;
 	free(ap);
     }
     acl_list_head = acl_list_tail = (aent_t *) NULL;
