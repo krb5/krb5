@@ -104,6 +104,7 @@ if { $PRIOCNTL_HACK } {
 set passes {
     {
 	des
+	mode=udp
 	des3_krbtgt=0
 	{supported_enctypes=des-cbc-crc:normal}
 	{kdc_supported_enctypes=des-cbc-crc:normal}
@@ -111,6 +112,7 @@ set passes {
     }
     {
 	des.des3tgt
+	mode=udp
 	des3_krbtgt=1
 	{supported_enctypes=des-cbc-crc:normal}
 	{kdc_supported_enctypes=des3-cbc-sha1:normal des-cbc-crc:normal}
@@ -118,6 +120,7 @@ set passes {
     }
     {
 	des3
+	mode=udp
 	des3_krbtgt=1
 	{supported_enctypes=des3-cbc-sha1:normal des-cbc-crc:normal}
 	{kdc_supported_enctypes=des3-cbc-sha1:normal des-cbc-crc:normal}
@@ -125,6 +128,7 @@ set passes {
     }
     {
 	aes
+	mode=udp
 	des3_krbtgt=0
 	{supported_enctypes=aes256-cts-hmac-sha1-96:normal des-cbc-crc:normal}
 	{kdc_supported_enctypes=aes256-cts-hmac-sha1-96:normal des-cbc-crc:normal}
@@ -136,6 +140,7 @@ set passes {
     }
     {
 	aesonly
+	mode=udp
 	des3_krbtgt=0
 	{supported_enctypes=aes256-cts-hmac-sha1-96:normal}
 	{kdc_supported_enctypes=aes256-cts-hmac-sha1-96:normal}
@@ -146,7 +151,20 @@ set passes {
 	{dummy=[verbose -log "AES enctypes"]}
     }
     {
+	aes-tcp
+	mode=tcp
+	des3_krbtgt=0
+	{supported_enctypes=aes256-cts-hmac-sha1-96:normal}
+	{kdc_supported_enctypes=aes256-cts-hmac-sha1-96:normal}
+	{permitted_enctypes(kdc)=aes256-cts-hmac-sha1-96}
+	{permitted_enctypes(client)=aes256-cts-hmac-sha1-96}
+	{permitted_enctypes(server)=aes256-cts-hmac-sha1-96}
+	{master_key_type=aes256-cts-hmac-sha1-96}
+	{dummy=[verbose -log "AES via TCP"]}
+    }
+    {
 	aes-des3
+	mode=udp
 	des3_krbtgt=0
 	{supported_enctypes=aes256-cts-hmac-sha1-96:normal des3-cbc-sha1:normal des-cbc-crc:normal}
 	{kdc_supported_enctypes=aes256-cts-hmac-sha1-96:normal des3-cbc-sha1:normal des-cbc-crc:normal}
@@ -158,6 +176,7 @@ set passes {
     }
     {
 	des3-aes
+	mode=udp
 	des3_krbtgt=1
 	{supported_enctypes=aes256-cts-hmac-sha1-96:normal des3-cbc-sha1:normal des-cbc-crc:normal}
 	{kdc_supported_enctypes=aes256-cts-hmac-sha1-96:normal des3-cbc-sha1:normal des-cbc-crc:normal}
@@ -169,6 +188,7 @@ set passes {
     }
     {
 	des-v4
+	mode=udp
 	des3_krbtgt=0
 	{supported_enctypes=des-cbc-crc:v4}
 	{kdc_supported_enctypes=des-cbc-crc:v4}
@@ -177,6 +197,7 @@ set passes {
     }
     {
 	des-md5-v4
+	mode=udp
 	des3_krbtgt=0
 	{supported_enctypes=des-cbc-md5:v4 des-cbc-crc:v4}
 	{kdc_supported_enctypes=des-cbc-md5:v4 des-cbc-crc:v4}
@@ -185,6 +206,7 @@ set passes {
     }
     {
 	all-des-des3-enctypes
+	mode=udp
 	des3_krbtgt=1
 	{supported_enctypes=des3-cbc-sha1:normal des-cbc-crc:normal \
 		des-cbc-md5:normal des-cbc-crc:v4 des-cbc-md5:norealm \
@@ -196,6 +218,7 @@ set passes {
     }
     {
 	des.no-kdc-md5
+	mode=udp
 	des3_krbtgt=0
 	tgt_support_desmd5=0
 	{permitted_enctypes(kdc)=des-cbc-crc}
@@ -209,6 +232,7 @@ set passes {
     }
     {
 	des.des3-tgt.no-kdc-des3
+	mode=udp
 	tgt_support_desmd5=0
 	{permitted_enctypes(kdc)=des-cbc-crc}
 	{default_tgs_enctypes(client)=des-cbc-crc}
@@ -749,6 +773,7 @@ proc setup_kerberos_files { } {
     global last_passname_conf
     global multipass_name
     global master_key_type
+    global mode
 
     if ![get_hostname] { 
 	return 0
@@ -767,6 +792,7 @@ proc setup_kerberos_files { } {
 	set conffile [open $tmppwd/kdc.conf w]
 	puts $conffile "\[kdcdefaults\]"
 	puts $conffile "	kdc_ports = 3085,3086,3087,3088,3089"
+	puts $conffile "	kdc_tcp_ports = 3085,3086,3087,3088,3089"
 	puts $conffile ""
 	puts $conffile "\[realms\]"
 	puts $conffile "	$REALMNAME = \{"
@@ -783,7 +809,13 @@ proc setup_kerberos_files { } {
 	puts $conffile "		master_key_name = master/key"
 	puts $conffile "		supported_enctypes = $supported_enctypes"
 	puts $conffile "		kdc_supported_enctypes = $kdc_supported_enctypes"
-	puts $conffile "		kdc_ports = 3088"
+	if { $mode == "tcp" } {
+	    puts $conffile "		kdc_ports = 3081"
+	    puts $conffile "		kdc_tcp_ports = 3088,3091"
+	} else {
+	    puts $conffile "		kdc_ports = 3088"
+	    puts $conffile "		kdc_tcp_ports = 3081"
+	}
 	puts $conffile "		default_principal_expiration = 2037.12.31.23.59.59"
 	puts $conffile "		default_principal_flags = -postdateable forwardable"
 	puts $conffile "		dict_file = $tmppwd/dictfile"
@@ -836,6 +868,7 @@ proc setup_krb5_conf { {type client} } {
     global default_tgs_enctypes
     global default_tkt_enctypes
     global permitted_enctypes
+    global mode
 
     # Create a krb5.conf file.
     if { ![file exists $tmppwd/krb5.$type.conf] \
@@ -858,9 +891,14 @@ proc setup_krb5_conf { {type client} } {
 	puts $conffile "	krb4_config = $tmppwd/krb.conf"
 	puts $conffile "	krb4_realms = $tmppwd/krb.realms"
 	puts $conffile "	krb4_srvtab = $tmppwd/v4srvtab"
+	if { $mode == "tcp" } {
+	    puts $conffile "	udp_preference_limit = 1"
+	}
 	puts $conffile ""
 	puts $conffile "\[realms\]"
 	puts $conffile "	$REALMNAME = \{"
+	# I hope nothing's listening on 15294...
+	puts $conffile "		kdc = $hostname:15294"
 	puts $conffile "		kdc = $hostname:3088"
 	puts $conffile "		admin_server = $hostname:3750"
 	puts $conffile "		kpasswd_server = $hostname:3751"

@@ -1,3 +1,12 @@
+2004-02-25  Ken Raeburn  <raeburn@mit.edu>
+
+	* default.exp (passes): Add "mode=udp" to existing pass
+	specifications.  Add a new pass which does AES and "mode=tcp".
+	(setup_kerberos_files, setup_krb5_conf): Check global var "mode"
+	and use it to force UDP or TCP communication between client and
+	KDC.  Also, have clients try another random port where we don't
+	expect anything to be listening.
+
 2004-02-13  Tom Yu  <tlyu@mit.edu>
 
 	* default.exp (PRIOCNTL_HACK): Use "==" instead of "eq", which is
