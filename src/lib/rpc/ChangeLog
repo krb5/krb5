@@ -1,3 +1,7 @@
+Tue Oct 15 17:04:09 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* configure.in: add DO_SUBDIRS so make will descend into unit-test
+
 Wed Oct  9 14:15:34 1996  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in (all-unix): Force $(OBJS) to depend on includes,

@@ -5,6 +5,9 @@
  * $Source$
  * 
  * $Log$
+ * Revision 1.40  1996/10/15 21:05:10  bjaspan
+ * 	* configure.in: add DO_SUBDIRS so make will descend into unit-test
+ *
  * Revision 1.39  1996/08/14 00:01:48  tlyu
  * 	* getrpcent.c: Add PROTOTYPE and conditionalize function
  * 		prototypes.
@@ -198,9 +201,11 @@ static char *rcsid = "$Header$";
 #include <gssapi/gssapi_krb5.h>
 #endif
 
+#ifdef GSSAPI_KRB5
 /* This is here for the krb5_error_code typedef and the
    KRB5KRB_AP_WRONG_PRINC #define.*/
 #include <krb5.h>
+#endif
 
 #include <sys/file.h>
 #include <fcntl.h>
@@ -556,17 +561,20 @@ enum auth_stat _svcauth_gssapi(rqst, msg, no_dispatch)
 		    client_data->server_creds = server_creds;
 		    client_data->server_name = server_name_list[i];
 		    break;
-	       } else if (call_res.gss_major != GSS_S_FAILURE ||
+	       } else if (call_res.gss_major != GSS_S_FAILURE
+#ifdef GSSAPI_KRB5
 			  /*
-			   * XXX hard-coded because there is no other
-			   * way to prevent all GSS_S_FAILURES from
+			   * hard-coded because there is no other way
+			   * to prevent all GSS_S_FAILURES from
 			   * returning a "wrong principal in request"
 			   * error
 			   */
-			  ((krb5_error_code) call_res.gss_minor !=
-			   (krb5_error_code) KRB5KRB_AP_WRONG_PRINC)) {
-		   break;
-		 }
+			  || ((krb5_error_code) call_res.gss_minor !=
+			      (krb5_error_code) KRB5KRB_AP_WRONG_PRINC)
+#endif
+			  ) {
+		    break;
+	       }
 	  }
 	  
 	  gssstat = call_res.gss_major;

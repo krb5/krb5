@@ -15,6 +15,9 @@ static char *rcsid = "$Header$";
 
 #include <gssapi/gssapi.h>
 #include <gssapi/gssapi_generic.h>
+#ifdef GSSAPI_KRB5
+#include <gssapi/gssapi_krb5.h>
+#endif
 
 #include <rpc/rpc.h>
 #include <rpc/auth_gssapi.h>
@@ -203,7 +206,7 @@ AUTH *auth_gssapi_create(clnt, gssstat, minor_stat,
      clnt->cl_auth = auth;
 
      /* start by trying latest version */
-     call_arg.version = 3;
+     call_arg.version = 4;
 
 try_new_version:
      /* set state for initial call to init_sec_context */
@@ -211,7 +214,21 @@ try_new_version:
      AUTH_PRIVATE(auth)->context = GSS_C_NO_CONTEXT;
      init_func = AUTH_GSSAPI_INIT;
 
-     if (call_arg.version == 3) {
+#ifdef GSSAPI_KRB5
+     /*
+      * OV servers up to version 3 used the old mech id.  Beta 7
+      * servers used version 3 with the new mech id; however, the beta
+      * 7 gss-api accept_sec_context accepts either mech id.  Thus, if
+      * any server rejects version 4, we fall back to version 3 with
+      * the old mech id; for the OV server it will be right, and for
+      * the beta 7 server it will be accepted.  Not ideal, but it
+      * works.
+      */
+     if (call_arg.version < 4 && mech_type == gss_mech_krb5)
+	  mech_type = gss_mech_krb5_old;
+#endif
+
+     if (call_arg.version >= 3) {
 	  if (clnt_control(clnt, CLGET_LOCAL_ADDR, &laddr) == FALSE) {
 	       PRINTF(("gssapi_create: CLGET_LOCAL_ADDR failed"));
 	       goto cleanup;
