@@ -98,6 +98,7 @@ InstallProgram "$(DSTROOT)/usr/sbin/kprop"           : "$(IntermediateBuild)/sla
 InstallProgram "$(DSTROOT)/usr/sbin/kpropd"          : "$(IntermediateBuild)/slave/kpropd" ;
 InstallProgram "$(DSTROOT)/usr/sbin/krb524d"         : "$(IntermediateBuild)/krb524/krb524d" ;
 InstallProgram "$(DSTROOT)/usr/sbin/krb5kdc"         : "$(IntermediateBuild)/kdc/krb5kdc" ;
+InstallProgram "$(DSTROOT)/usr/bin/krb5-config"      : "$(IntermediateBuild)/krb5-config" ;
                   
 InstallFile "$(DSTROOT)/usr/share/man/man1/kerberos.1"     : "$(SRCROOT)/../../Kerberos5/Sources/gen-manpages/kerberos.M" ;
 InstallFile "$(DSTROOT)/usr/share/man/man5/kdc.conf.5"     : "$(SRCROOT)/../../Kerberos5/Sources/config-files/kdc.conf.M" ;
@@ -124,6 +125,7 @@ DEPENDS install : all
                   "$(DSTROOT)/usr/sbin/krb524d"
                   "$(DSTROOT)/usr/sbin/krb5kdc"
                   "$(DSTROOT)/usr/sbin/ktutil"
+                  "$(DSTROOT)/usr/bin/krb5-config"
                   
                   "$(DSTROOT)/usr/share/man/man1/kerberos.1"
                   "$(DSTROOT)/usr/share/man/man5/kdc.conf.5"
