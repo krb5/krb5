@@ -168,10 +168,10 @@ static void rpc_test_badverf(gss_name_t client, gss_name_t server,
      (void) gss_display_name(&minor_stat, server, &server_name, &type);
 
      printf("rpc_test server: bad verifier from %s at %s:%d for %s\n",
-	    client_name.value,
+	    (char *) client_name.value,
 	    inet_ntoa(rqst->rq_xprt->xp_raddr.sin_addr), 
 	    ntohs(rqst->rq_xprt->xp_raddr.sin_port),
-	    server_name.value);
+	    (char *) server_name.value);
 
      (void) gss_release_buffer(&minor_stat, &client_name);
      (void) gss_release_buffer(&minor_stat, &server_name);
@@ -241,7 +241,7 @@ void log_badauth_display_status_1(OM_uint32 code, int type, int rec)
 						 GSS_C_MECH_CODE, 1);
 	       } else
 		    printf("GSS-API authentication error %s: "
-			   "recursive failure!\n", msg);
+			   "recursive failure!\n", (char *)msg.value);
 	       return;
 	  }
 	  

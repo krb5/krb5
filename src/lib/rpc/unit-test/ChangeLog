@@ -1,5 +1,8 @@
 2001-06-05  Ezra Peisach  <epeisach@mit.edu>
 
+	* server.c (log_badauth_display_status_1): Need value element of
+	gss_buffer_desc for printf.
+
 	* client.c (main): Missing arguments to printf fixed.
 
 2001-04-24  Ezra Peisach  <epeisach@mit.edu>
