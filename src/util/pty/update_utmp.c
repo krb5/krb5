@@ -120,6 +120,9 @@ long pty_update_utmp (process_type, pid, username, line, host)
 #ifdef HAVE_SETUTXENT
     setutxent();
     getutmpx(&ent, &utx);
+if (host)
+    strncpy(utx.ut_host, host, sizeof(utx.ut_host));
+    else utx.ut_host[0] = 0;
     pututxline(&utx);
     endutxent();
 #endif /* HAVE_SETUTXENT */
@@ -135,5 +138,5 @@ long pty_update_utmp (process_type, pid, username, line, host)
 
 #endif /* HAVE_SETUTENT */
 
-    return ptyint_update_wtmp(&ent);
+    return ptyint_update_wtmp(&ent, host);
 }

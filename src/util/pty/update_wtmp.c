@@ -29,8 +29,9 @@
 #define PATH_WTMP "/usr/adm/wtmp"
 #endif
 
-long ptyint_update_wtmp (ent)
+long ptyint_update_wtmp (ent , host)
     struct utmp *ent;
+     char *host;
     {
     struct utmp ut;
     struct stat statb;
@@ -39,11 +40,16 @@ long ptyint_update_wtmp (ent)
     struct utmpx utx;
 
     getutmpx(ent, &utx);
+if (host)
+    strncpy(utx.ut_host, host, sizeof(utx.ut_host) );
+    else uts.ut_host[0] = 0;
     updwtmpx(WTMPX_FILE, &utx);
 #endif
 
 #ifdef HAVE_UPDWTMP
+#ifndef HAVE_SETUTXENT
     updwtmp(WTMP_FILE, ent);
+#endif /* HAVE_SETUTXENT*/
 #else /* HAVE_UPDWTMP */
 
     if ((fd = open(WTMP_FILE, O_WRONLY|O_APPEND, 0)) >= 0) {
@@ -79,3 +85,4 @@ long ptyint_update_wtmp (ent)
     return 0; /* no current failure cases; file not found is not failure!*/
     
 }
+

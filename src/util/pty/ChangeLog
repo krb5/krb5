@@ -1,13 +1,57 @@
-Sat Oct 14 20:49:40 1995  Sam Hartman  <hartmans@tertius.mit.edu>
+Mon Oct 16 17:41:45 1995  Sam Hartman  <hartmans@tertius.mit.edu>
 
+
+
+	* update_wtmp.c (ptyint_update_wtmp): Update to take host name, so
+        we can get the full host name if it is chopped in utmp.
 	* update_wtmp.c (ptyint_update_wtmp):  Insert fallback path for Sunos and others, return defined value.
 
 
-Fri Aug 11 17:49:36 1995  Samuel D Hartman  (hartmans@vorlon)
 
+
+	* update_utmp.c (pty_update_utmp): Incorperate utmpx handling patch from ramus@nersc.gov to deal with support for longer hostanmes in utmpx.
+
+
+*update_utmp.c: Add return statement and fallback path for Sunos.
+
+Sat Oct 14 20:49:40 1995  Sam Hartman  <hartmans@tertius.mit.edu>
+Fri Aug 11 17:49:36 1995  Samuel D Hartman  (hartmans@vorlon)
+>>>>>>> 1.24
+
+<<<<<<< ChangeLog
+Fri Sep 29 14:18:03 1995  Theodore Y. Ts'o  <tytso@dcl>
+=======
 	* update_wtmp.c (ptyint_update_wtmp): If EMPTY not defined as a
         utmp type, use DEAD_PROCESS.
+>>>>>>> 1.24
 
+<<<<<<< ChangeLog
+	* configure.in:
+	* Makefile.in: Use the SubdirLibraryRule defined in aclocal.m4 to
+		create the DONE file (and to properly clean it up).
+
+Mon Sep 25 16:42:36 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in: Removed "foo:: foo-$(WHAT)" lines from the
+		Makefile. 
+
+Thu Sep  7 19:13:05 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* update_utmp.c: ultimately fall back to /etc/utmp for UTMP_FILE,
+	if it is still missing after all previous efforts.
+	* update_wtmp.c: /usr/adm/wtmp for WTMP_FILE likewise.
+
+Thu Aug 24 18:40:48 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* .Sanitize: Update file list
+
+Tue Aug 15 21:42:16 1995    <tytso@rsts-11.mit.edu>
+
+	* update_wtmp.c (ptyint_update_wtmp): If EMPTY is not defined,
+		then set ut.ut_type to 0 instead.
+
+=======
+>>>>>>> 1.24
 Fri Aug 11 15:49:30 1995  Sam Hartman  <hartmans@tertius.mit.edu>
 
 	* Makefile.in (CFILES): Rename initialize_slave.c to init_slave.c
