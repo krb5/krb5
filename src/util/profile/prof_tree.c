@@ -109,7 +109,8 @@ errcode_t profile_verify_node(node)
 	struct profile_node *node;
 {
 	struct profile_node *p, *last;
-	
+	errcode_t	retval;
+
 	CHECK_MAGIC(node);
 
 	if (node->value && node->first_child)
@@ -121,11 +122,13 @@ errcode_t profile_verify_node(node)
 			return PROF_BAD_LINK_LIST;
 		if (last && (last->next != p))
 			return PROF_BAD_LINK_LIST;
-		if (node->group_level != p->group_level+1)
+		if (node->group_level+1 != p->group_level)
 			return PROF_BAD_GROUP_LVL;
 		if (p->parent != node)
 			return PROF_BAD_PARENT_PTR;
-		profile_verify_node(p);
+		retval = profile_verify_node(p);
+		if (retval)
+			return retval;
 	}
 	return 0;
 }

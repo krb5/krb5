@@ -1,3 +1,13 @@
+Fri Feb 19 00:49:10 1999  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* test_parse.c (main): Add a call to profile_verify_node so we can
+		test the internal rep invariants.
+
+	* prof_tree.c (profile_verify_node): Fix bug in
+		profile_verify_node in the group_level test.  Also make
+		profile_verify_node check the return code when it is
+		recursively testing the child nodes.
+
 Mon Jan 25 18:44:26 1999  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* prof_tree.c (profile_node_iterator): Added comments indicating
