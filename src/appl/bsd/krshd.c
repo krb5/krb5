@@ -1728,15 +1728,15 @@ krb5_authenticator *authenticator;
 	 * principal's name. 
          */
 	strcpy(remuser, v4_kdata->pname);
-	kremuser = (char *) malloc(strlen(v4_kdata->pname) + 1 +
-				   strlen(v4_kdata->pinst) + 1 +
-				   strlen(v4_kdata->prealm) + 1);
-	sprintf(kremuser, "%s/%s@%s", v4_kdata->pname,
-		v4_kdata->pinst, v4_kdata->prealm);
+
+	status = krb5_425_conv_principal(bsd_context, v4_kdata->pname,
+					 v4_kdata->pinst, v4_kdata->prealm,
+					 &client);
+	if (status) return status;
+
+	status = krb5_unparse_name(bsd_context, client, &kremuser);
 	
-	if (status = krb5_parse_name(bsd_context, kremuser, &client))
-	  return(status);
-	return 0;
+	return status;
     }
 
     /* Must be V5  */
