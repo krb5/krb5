@@ -128,6 +128,18 @@ typedef int krb5_sigtype;
 #define BITS64
 #endif
 
+#ifdef SYSV
+/* Change srandom and random to use rand and srand */
+/* Taken from the Sandia changes.  XXX  We should really just include */
+/* srandom and random into Kerberos release, since rand() is a really */
+/* bad random number generator.... [tytso:19920616.2231EDT] */
+#define random() rand()
+#define srandom(a) srand(a)
+#ifndef unicos61
+#define utimes(a,b) utime(a,b)
+#endif  /* unicos61 */
+#endif /* SYSV */
+
 /* XXX these should be parameterized soon... */
 #define PROVIDE_DES_CBC_CRC
 #define PROVIDE_CRC32
