@@ -1,3 +1,8 @@
+2004-07-28  Ken Raeburn  <raeburn@mit.edu>
+
+	* gssapi_krb5.c (kg_get_ccache_name): Make a copy of the default
+	ccache name, because calling krb5_free_context will destroy it.
+
 2004-07-14  Ken Raeburn  <raeburn@mit.edu>
 
 	* gssapi_krb5.c (kg_sync_ccache_name): Add context argument

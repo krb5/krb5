@@ -189,8 +189,10 @@ kg_get_ccache_name (OM_uint32 *minor_status, const char **out_name)
 	    err = krb5_init_context(&context);
 	    if (!err)
 		err = krb5_cc_set_default_name (context, NULL);
-            if (!err)
+            if (!err) {
                 name = krb5_cc_default_name(context);
+		name = strdup(name);
+	    }
 	    if (context)
 		krb5_free_context(context);
         }
