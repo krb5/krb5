@@ -1,4 +1,9 @@
+Mon Oct 14 01:55:41 1996  Sam Hartman  <hartmans@mit.edu>
+
+	* utility.c (printsub): Patch from jhawk@bbnplannet.com to deal
+ 	with bug printing out authentication name. [71]
 Sat Sep 21 03:38:31 1996  Sam Hartman  <hartmans@mit.edu>
+(printsub): Fix encrypt promise bit option parsing [74]
 
 	* utility.c (ttloop): Continue on eintr.
 
