@@ -61,11 +61,31 @@ typedef unsigned int size_t;
 #define _SIZE_T_DEFINED
 #endif 
 
+/* FIXME, Keith!  I'm not sure how it ever worked.
+   Typedeffing u_long and u_char twice will break.  Please eliminate either
+   the DOS-only _U_TYPES_DEFINED stuff, or the HAVE_SYS_TYPES_H stuff in
+   the DOS section of this file.  The KRB5_SYSTYPES section below was
+   previously in ../krb5.h, but I moved it into k5-config.h because
+   there was an interaction on Unix needing <sys/types.h> before
+   defining the networking include files in k5-config.h.  */
 #ifndef _U_TYPES_DEFINED
 typedef unsigned long u_long;
 typedef unsigned char u_char;
 #define _U_LONG_DEFINED
 #endif 
+
+#ifndef KRB5_SYSTYPES__
+#define KRB5_SYSTYPES__
+
+#ifdef HAVE_SYS_TYPES_H		/* From autoconf.h */
+#include <sys/types.h>
+#else /* HAVE_SYS_TYPES_H */
+typedef unsigned long 	u_long;
+typedef unsigned int	u_int;
+typedef unsigned short	u_short;
+typedef unsigned char	u_char;
+#endif /* HAVE_SYS_TYPES_H */
+#endif /* KRB5_SYSTYPES__ */
 
 #ifndef INTERFACE
 #define INTERFACE   __far __export __pascal
@@ -155,6 +175,19 @@ typedef unsigned char u_char;
 #include "autoconf.h"
 #endif
 
+#ifndef KRB5_SYSTYPES__
+#define KRB5_SYSTYPES__
+
+#ifdef HAVE_SYS_TYPES_H		/* From autoconf.h */
+#include <sys/types.h>
+#else /* HAVE_SYS_TYPES_H */
+typedef unsigned long 	u_long;
+typedef unsigned int	u_int;
+typedef unsigned short	u_short;
+typedef unsigned char	u_char;
+#endif /* HAVE_SYS_TYPES_H */
+#endif /* KRB5_SYSTYPES__ */
+
 #ifdef SYSV
 /* Change srandom and random to use rand and srand */
 /* Taken from the Sandia changes.  XXX  We should really just include */
@@ -229,6 +262,7 @@ typedef unsigned char u_char;
 #include <sys/param.h>		/* For MAXHOSTNAMELEN */
 #include <sys/socket.h>		/* For SOCK_*, AF_*, etc */
 #include <sys/time.h>		/* For struct timeval */
+#include <net/if.h>		/* For struct ifconf, for localaddr.c */
 
 #endif /* HAVE_MACSOCK_H */
 #endif /* NEED_SOCKETS */

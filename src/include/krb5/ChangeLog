@@ -1,3 +1,13 @@
+Fri Mar 17 19:12:13 1995  John Gilmore  (gnu at toad.com)
+
+	* k5-config.h:  Move <sys/types.h> handling from ../krb5.h to
+	here, because we need <sys/types.h> or the u_* types to be defined
+	before we include the Unix socket include files a little later in
+	k5-config.h.  We actually add this code twice, once in the MSDOS
+	section and once in the Unix/Mac section.
+	(NEED_SOCKETS):  Also include <net/if.h>, for localaddr.c.
+	* Makefile.in (clean-mac):  Add.
+
 Tue Mar 14 16:50:54 1995    <tytso@rsx-11.mit.edu>
 
 	* Makefile.in: Delete definition for KRB5ROOT and KRB5_INCDIR,

@@ -60,5 +60,5 @@ clean:: clean-$(WHAT)
 
 clean-unix::
 	$(RM) $(ET_HEADERS)
-
+clean-mac::
 clean-windows::
