@@ -1,3 +1,9 @@
+2003-05-22  Sam Hartman  <hartmans@mit.edu>
+
+	* admin.texinfo (appdefaults): Describe afs_krb5
+
+	* krb425.texinfo (AFS and the Appdefaults Section): Note about AFS and 2b tokens
+
 2003-05-13  Ken Raeburn  <raeburn@mit.edu>
 
 	* definitions.texinfo: Updated DefaultSupportedEnctypes.
