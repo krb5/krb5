@@ -97,7 +97,7 @@ register int *error;
 	    goto errout;
 	}
     }
-    retval->srealm = krb5_data2qbuf(val->server[0]);
+    retval->srealm = krb5_data2qbuf(krb5_princ_realm(val->server));
     if (!retval->srealm) {
 	*error = ENOMEM;
 	goto errout;

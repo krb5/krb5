@@ -62,7 +62,7 @@ register int *error;
 	free_KRB5_EncTicketPart(retval);
 	return(0);
     }
-    retval->crealm = krb5_data2qbuf(val->client[0]);
+    retval->crealm = krb5_data2qbuf(krb5_princ_realm(val->client));
     if (!retval->crealm) {
 	*error = ENOMEM;
 	goto errout;

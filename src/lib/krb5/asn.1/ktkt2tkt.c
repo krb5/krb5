@@ -56,7 +56,7 @@ register int *error;
     xbzero(retval, sizeof(*retval));
 
     retval->tkt__vno = KRB5_PVNO;
-    retval->realm = krb5_data2qbuf(val->server[0]);
+    retval->realm = krb5_data2qbuf(krb5_princ_realm(val->server));
     if (!retval->realm) {
 	*error = ENOMEM;
     errout:

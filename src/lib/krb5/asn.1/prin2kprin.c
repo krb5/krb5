@@ -39,7 +39,23 @@ static char rcsid_prin2kprin_c[] =
 
 #include <krb5/ext-proto.h>
 
-/* ISODE defines max(a,b) */
+static int qbuf_to_data(val, data)
+register const struct qbuf *val;
+krb5_data *data;
+{
+    int length;
+    if (qb_pullup(val) != OK)
+	return 1;
+    if ((length = val->qb_forw->qb_len) > 0) {
+	data->data = malloc(length);
+	memcpy(data->data, val->qb_forw->qb_data, length);
+    } else {
+	data->data = 0;
+    }
+    data->length = length;
+    return 0;
+}
+
 
 krb5_principal
 KRB5_PrincipalName2krb5_principal(val, realm, error)
@@ -85,26 +101,34 @@ register int *error;
     for (i = 1, rv = val; rv->next; i++, rv = rv->next)
 	;
 
-    /* plus one for the realm, plus one for null term */
-    retval = (krb5_principal) xcalloc(i + 2, sizeof(krb5_data *));
-					     
+    retval = (krb5_principal) malloc(sizeof(krb5_principal_data));
+
     if (!retval) {
 	*error = ENOMEM;
 	return(0);
     }
-
-    retval[0] = qbuf2krb5_data(realm, error);
-    if (!retval[0]) {
+    /* plus one for the realm */
+    retval->length = i;
+    retval->data = (krb5_data *)malloc(i * sizeof(krb5_data));
+    if (retval->data == 0) {
 	xfree(retval);
-	return(0);
+	*error = ENOMEM;
+	return 0;
     }
-    for (i = 1, rv = val; rv; rv = rv->next, i++) {
-	retval[i] = qbuf2krb5_data(rv->GeneralString, error);
-	if (!retval[i]) {
-	    krb5_free_principal(retval);
+
+    if (qbuf_to_data(realm, krb5_princ_realm(retval))) {
+	xfree(retval->data);
+	xfree(retval);
+	*error = ENOMEM;
+	return 0;
+    }
+
+    for (i = 0, rv = val; rv; rv = rv->next, i++) 
+	if (qbuf_to_data(rv->GeneralString, krb5_princ_component(retval, i))) {
+	    while (--i >= 0)
+		free(krb5_princ_component(retval, i)->data);
+	    *error = ENOMEM;
 	    return(0);
 	}
-    }
-    retval[i] = 0;
     return(retval);
 }

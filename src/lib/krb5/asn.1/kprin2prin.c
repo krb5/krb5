@@ -80,9 +80,11 @@ register int *error;
 #endif
     register struct type_KRB5_PrincipalName *retval = 0, *rv1 = 0, *rv2;
     register int i;
+    int nelem = krb5_princ_size(val);
+
 
     /* still skipping realm */
-    for (i = 1; val[i]; i++, rv1 = rv2) { 
+    for (i = 0; i < nelem; i++, rv1 = rv2) { 
 	rv2 = (struct type_KRB5_PrincipalName *) xmalloc(sizeof(*rv2));
 	if (!rv2) {
 	    if (retval)
@@ -96,7 +98,7 @@ register int *error;
 	if (!retval)
 	    retval = rv2;
 
-	rv2->GeneralString = krb5_data2qbuf(val[i]);
+	rv2->GeneralString = krb5_data2qbuf(krb5_princ_component(val, i));
 	if (!rv2->GeneralString) {
 	    /* clean up */
 	    if (retval)

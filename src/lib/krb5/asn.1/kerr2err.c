@@ -80,7 +80,7 @@ register int *error;
     retval->error__code = val->error;
 
     if (val->client) {
-	retval->crealm = krb5_data2qbuf(val->client[0]);
+	retval->crealm = krb5_data2qbuf(krb5_princ_realm(val->client));
 	if (!retval->crealm) {
 	    *error = ENOMEM;
 	    goto errout;
@@ -93,7 +93,7 @@ register int *error;
 
     /* server is technically not optional, but... */
     if (val->server) {
-	retval->realm = krb5_data2qbuf(val->server[0]);
+	retval->realm = krb5_data2qbuf(krb5_princ_realm(val->server));
 	if (!retval->realm) {
 	    *error = ENOMEM;
 	    goto errout;

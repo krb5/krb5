@@ -38,8 +38,6 @@ static char rcsid_kkdcr2kdcr_c[] =
 
 #include <krb5/ext-proto.h>
 
-/* ISODE defines max(a,b) */
-
 struct type_KRB5_TGS__REP *
 krb5_kdc_rep2KRB5_KDC__REP(DECLARG(const register krb5_kdc_rep *,val),
 			   DECLARG(register int *,error))
@@ -65,7 +63,7 @@ OLDDECLARG(register int *,error)
 	}
     }
 
-    retval->crealm = krb5_data2qbuf(val->client[0]);
+    retval->crealm = krb5_data2qbuf(krb5_princ_realm(val->client));
     if (!retval->crealm) {
 	*error = ENOMEM;
     errout:
