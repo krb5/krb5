@@ -178,7 +178,7 @@ static kdb5_dispatch_table dbm_dispatch = {
 /*
  * Free all principals and names in the recorded names list.
  */
-void
+static void
 free_principals(kcontext, nentries)
     krb5_context	kcontext;
     int 		nentries;
@@ -206,7 +206,7 @@ free_principals(kcontext, nentries)
 /*
  * Initialize the recorded names list.
  */
-void
+static void
 init_princ_recording(kcontext, nentries)
     krb5_context	kcontext;
     int 		nentries;
@@ -222,7 +222,7 @@ init_princ_recording(kcontext, nentries)
 /*
  * Record a principal and name.
  */
-void
+static void
 record_principal(slotno, princ, pname)
     int			slotno;
     krb5_principal	princ;
@@ -240,7 +240,7 @@ record_principal(slotno, princ, pname)
 /*
  * See if a principal already exists.
  */
-krb5_boolean
+static krb5_boolean
 principal_found(nvalid, pname)
     int		nvalid;
     char	*pname;
@@ -261,7 +261,7 @@ principal_found(nvalid, pname)
 /*
  * Add a principal to the database.
  */
-krb5_error_code
+static krb5_error_code
 add_principal(kcontext, principal, eblock, key, rseed)
     krb5_context	  kcontext;
     krb5_principal	  principal;
@@ -278,7 +278,6 @@ add_principal(kcontext, principal, eblock, key, rseed)
     memset((char *) &dbent, 0, sizeof(dbent));
     dbent.len			= KRB5_KDB_V1_BASE_LENGTH;
 
-    dbent.mkvno 		= 1;
     dbent.attributes 		= KRB5_KDB_DEF_FLAGS;
     dbent.max_life 		= KRB5_KDB_MAX_LIFE;
     dbent.expiration 		= KRB5_KDB_EXPIRATION;
@@ -319,7 +318,7 @@ add_principal(kcontext, principal, eblock, key, rseed)
 /*
  * Generate a principal name.
  */
-krb5_error_code
+static krb5_error_code
 gen_principal(kcontext, realm, do_rand, n, princp, namep)
     krb5_context	kcontext;
     char		*realm;
@@ -371,7 +370,7 @@ gen_principal(kcontext, realm, do_rand, n, princp, namep)
 /*
  * Find a principal in the database.
  */
-krb5_error_code
+static krb5_error_code
 find_principal(kcontext, principal, docompare)
     krb5_context	kcontext;
     krb5_principal	principal;
@@ -397,8 +396,7 @@ find_principal(kcontext, principal, docompare)
     }
 
     if (docompare) {
-	if ((dbent.mkvno != 1) ||
-	    (dbent.max_life != KRB5_KDB_MAX_LIFE) ||
+	if ((dbent.max_life != KRB5_KDB_MAX_LIFE) ||
 	    (dbent.max_renewable_life != KRB5_KDB_MAX_RLIFE) ||
 	    (dbent.expiration != KRB5_KDB_EXPIRATION) ||
 	    (dbent.attributes != KRB5_KDB_DEF_FLAGS) ||
@@ -420,7 +418,7 @@ find_principal(kcontext, principal, docompare)
 /*
  * Delete a principal.
  */
-krb5_error_code
+static krb5_error_code
 delete_principal(kcontext, principal)
     krb5_context	kcontext;
     krb5_principal	principal;
@@ -436,7 +434,7 @@ delete_principal(kcontext, principal)
     return((num2delete == 1) ? 0 : KRB5KRB_ERR_GENERIC);
 }
 
-int
+static int
 do_testing(db, passes, verbose, timing, rcases, check, save_db, dontclean,
 	   db_type, ptest)
     char	*db;

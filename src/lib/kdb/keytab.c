@@ -58,7 +58,7 @@ krb5_ktkdb_resolve(context, kdb, id)
     if ((*id = (krb5_keytab) malloc(sizeof(**id))) == NULL)
         return(ENOMEM);
 
-    if ((data = (krb5_ktkdb_data *)malloc(sizeof(krb5_db_context))) == NULL) {
+    if ((data = (krb5_db_context *)malloc(sizeof(krb5_db_context))) == NULL) {
         krb5_xfree(*id);
         return(ENOMEM);
     }
