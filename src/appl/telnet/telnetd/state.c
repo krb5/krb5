@@ -1629,7 +1629,7 @@ char *varp;
     if (!strncmp(varp, "LD_", 3) || !strncmp(varp, "_RLD_", 5) ||
 	!strncmp(varp, "ELF_LD_", 7) ||
         !strcmp(varp, "LIBPATH") || !strcmp(varp, "IFS") ||
-	!strchr(varp, '='))
+	strchr(varp, '='))
     {
 	syslog(LOG_INFO, "Rejected the attempt to modify the environment variable \"%s\"", varp);
 	return 0;
