@@ -71,11 +71,11 @@ Must have a Kerberos version 5 server running to use ksu.
 .I ksu
 is a Kerberized version of the su program that has two missions:
 one is to securely change the real and effective user ID to that
-of the target user, the other is to create a new security context.
-For the sake of clarity all references to, and attributes of
+of the target user, and the other is to create a new security context.
+For the sake of clarity, all references to and attributes of
 the user invoking the program will start with 'source' (e.g.
-source user, source cache, etc.).  Likewise all references
-to and attributes of the target account, will start with 'target'.
+source user, source cache, etc.).  Likewise, all references
+to and attributes of the target account will start with 'target'.
 .br
 .SH AUTHENTICATION
 To fulfill the first mission, ksu operates in two phases: authentication
@@ -90,7 +90,7 @@ jqpublic@USC.EDU) or a default principal name will be assigned
 using a heuristic described in the OPTIONS section (see
 .B \-n
 option).
-The target user name must be the first argument to ksu, if not specified
+The target user name must be the first argument to ksu; if not specified
 root is the default.  If '.' is specified then the target user will be
 the source user (e.g. ksu .). 
 If the source user is root or the target user is the source user, no 
@@ -100,8 +100,8 @@ for an appropriate Kerberos ticket in the source cache.
 The ticket can either be for
 the end-server
 or a ticket granting ticket (TGT) for the target principal's realm.  If the
-ticket for the end server is already in the cache, it's, decrypted and
-verified.  If it's not in the cache but the TGT is, TGT is used to
+ticket for the end-server is already in the cache, it's decrypted and
+verified.  If it's not in the cache but the TGT is, the TGT is used to
 obtain the ticket for the end-server.   The end-server ticket is then
 verified.  If neither ticket is in the cache, but ksu is compiled
 with the GET_TGT_VIA_PASSWD define, the user will be prompted
@@ -134,7 +134,7 @@ jqpublic/secure@USC.EDU
 .br
 jqpublic/admin@USC.EDU
 .PP
-The format of .k5users is the same, accept the
+The format of .k5users is the same, except the
 principal name may be followed by a list of commands that
 the principal is authorized to execute. (see the
 .B \-e
@@ -227,8 +227,8 @@ is set to the default principal of the source cache. If the
 cache does not exist then the default principal name is set to
 target_user@local_realm.
 If the source and target users are different and
-neither ~/target_user/.k5users
-nor ~/target_user/.k5login exist then
+neither ~target_user/.k5users
+nor ~target_user/.k5login exist then
 the default principal name is
 target_user_login_name@local_realm. Otherwise,
 starting with the first principal listed below,
@@ -369,9 +369,9 @@ ls
 
 If the source user is root or source user == target user,
 no authorization takes place and             
-the command is executed.  If source user id != 0, and .k5users
+the command is executed.  If source user id != 0, and ~target_user/.k5users
 file does not exist, authorization fails.
-Otherwise, .k5users file must have an
+Otherwise, ~target_user/.k5users file must have an
 appropriate entry for target principal
 to get authorized.
 
@@ -422,6 +422,7 @@ Note: that all flags and parameters following -a
 will be passed to the shell, thus all options
 intended for ksu must precede
 .B \-a.
+The
 .B \-a
 option can be used to simulate the
 .B \-e
@@ -433,7 +434,7 @@ option if used as follows:
 is interpreted by the c-shell to execute the command.
 .PP
 .SH INSTALLATION INSTRUCTIONS
-ksu can be compiled with the following 5 flags (see the Imakefile):
+ksu can be compiled with the following 4 flags (see the Imakefile):
 .TP 10
 \fIGET_TGT_VIA_PASSWD\fP 
 in case no appropriate tickets are found in the source
