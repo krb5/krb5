@@ -1,3 +1,14 @@
+Sat Nov 23 17:26:22 1996  Mark Eichin  <eichin@kitten.gen.ma.us>
+
+	* [krb5-libs/149] only generate requests that you can actually
+	handle.
+	
+	Tue Sep  3 22:53:56 1996  Mark Eichin  <eichin@cygnus.com>
+
+	* kdc_preauth.c (get_preauth_hint_list): detect ap->get_edata
+	return status and don't pass back hint if it failed.
+	(get_etype_info): malloc one more word in entry for end marker.
+
 Thu Nov  7 12:27:21 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* kdc_preauth.c (check_padata): Fixed error handling; in order for
