@@ -1,3 +1,26 @@
+2002-06-20  Danilo Almeida  <dalmeida@mit.edu>
+
+	* winccld.c: Include k5-int.h to get hidden ops struct.
+	[pullup from 1-2-2-branch]
+
+2002-06-20  Alexandra Ellwood <lxs@mit.edu>
+
+	* stdcc.h: Added prototype for krb5_stdcc_shutdown.
+
+	* stdcc.h, stdcc_util.h, stdcc_util.c: Updated Mac OS X headers to new 
+	framework layout
+
+	* stdcc.c: Removed unused variables and fixed macros to reduce warnings
+
+	[pullups from 1-2-2-branch]
+
+2002-06-20  Miro Jurisic  <meeroh@mit.edu>
+
+	* stdcc.c: Replaced cc_* macros with functions
+	* stdcc.h, stdcc_util.h: Updated Mac OS #defines and #includes for new 
+	header layout and Mac OS X frameworks
+	[pullup from 1-2-2-branch]
+
 2002-04-01  Danilo Almeida  <dalmeida@mit.edu>
 
 	* stdcc_util.c: Include errno.h.
