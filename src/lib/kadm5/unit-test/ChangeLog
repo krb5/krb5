@@ -1,3 +1,10 @@
+2005-02-10  Tom Yu  <tlyu@mit.edu>
+
+	* api.2/init-v2.exp: Handle improved error codes from
+	client_init.c.
+	(test152): Expect KRB5_FCC_NOFILE.
+	(test153): Expect KRB5_CC_NOTFOUND.
+
 2004-08-20  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in (init-test): Don't use local copy of client_init.o

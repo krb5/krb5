@@ -1,3 +1,8 @@
+2005-02-11  Tom Yu  <tlyu@mit.edu>
+
+	* kadm5/api-unit-test.tex (ovsec_kadm_init): Update to reflect
+	changed expected error codes for init 152, 153 tests.
+
 2005-01-03  Ken Raeburn  <raeburn@mit.edu>
 
 	* build.texinfo (The util Directory): Add the new support
