@@ -1,3 +1,8 @@
+Wed Jun 28 03:06:32 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* configure.in: int*_t and pgno_t declarations from
+	hash/configure.in.
+
 Wed Jun 28 00:19:52 1995  Mark Eichin  <eichin@cygnus.com>
 
 	* dbtest.c (xmalloc): use memcpy, memmove isn't needed.
