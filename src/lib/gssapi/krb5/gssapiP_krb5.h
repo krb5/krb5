@@ -47,11 +47,8 @@
 #ifndef _GSSAPIP_KRB5_H_
 #define _GSSAPIP_KRB5_H_
 
-#if TARGET_OS_MAC
-#include <Kerberos/krb5.h>
-#else
 #include <krb5.h>
-#endif
+
 #ifdef HAVE_MEMORY_H
 #include <memory.h>
 #endif

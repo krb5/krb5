@@ -1,3 +1,8 @@
+2003-03-06  Alexandra Ellwood  <lxs@mit.edu>
+
+    * disp_status.c, gssapi_krb5.h, gssapiP_krb5.h: 
+    Removed Mac header goober.
+
 2003-03-05  Tom Yu  <tlyu@mit.edu>
 
 	* acquire_cred.c (krb5_gss_register_acceptor_identity): New
