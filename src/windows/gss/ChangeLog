@@ -1,3 +1,7 @@
+Mon Feb 10 23:18:46 1997  Richard Basch  <basch@lehman.com>
+
+	* Makefile.in: Use WLIB definition in config/windows.in
+
 Tue Feb  4 16:18:25 1997  Richard Basch  <basch@lehman.com>
 
 	* Makefile.in: win16 - fixed the winsock.lib path reference
