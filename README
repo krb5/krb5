@@ -1,34 +1,135 @@
-Kerberos 5 Release 1.0 README file
+		   Kerberos Version 5, Release 1.0
+
+			    Release Notes
+
+			The MIT Kerberos Team
+
+Unpacking the Source Distribution
+---------------------------------
+
+The source distribution of Kerberos 5 comes in three gzipped tarfiles,
+krb5-1.0.src.tar.gz, krb5-1.0.doc.tar.gz, and krb5-1.0.crypto.tar.gz.
+The krb5-1.0.doc.tar.gz contains the doc/ directory and this README
+file.  The krb5-1.0.src.tar.gz contains all of doc/ and src/, except
+for the crypto library sources, which are in krb5-1.0.crypto.tar.gz.
+
+Instruction on how to extract the entire distribution follow.  These
+directions assume that you want to extract into a directory called
+DIST.
+
+If you have the GNU tar program and gzip installed, you can simply do:
+
+	mkdir DIST
+	cd DIST
+	gtar zxpf krb5-1.0.src.tar.gz
+	gtar zxpf krb5-1.0.crypto.tar.gz
+
+If you don't have GNU tar, you will need to get the FSF gzip
+distribution and use gzcat:
+
+	mkdir DIST
+	cd DIST
+	gzcat krb5-1.0.src.tar.gz | tar xpf -
+	gzcat krb5-1.0.crypto.tar.gz | tar xpf -
+
+Both of these methods will extract the sources into DIST/krb5-1.0/src
+and the documentation into DIST/krb5-1.0/doc.
+
+Unpacking the Binary Distribution
+---------------------------------
+
+XXX add real directions here
+
+Building and Installing Kerberos 5
 ----------------------------------
 
-Contents:
----------
+The first file you should look at is doc/install.ps; it contains the
+notes for building and installing Kerberos 5.  The info file
+krb5-install.info has the same information in info file format.  You
+can view this using the GNU emacs info-mode, or by using the
+standalone info file viewer from the Free Software Foundation.
 
-Legal Administrivia
-Building and Installing Kerberos 5
+Other good files to look at are admin-guide.ps and user-guide.ps,
+which contain the system administrator's guide, and the user's guide,
+respectively.  They are also available as info files
+kerberos-admin.info and krb5-user.info, respectively.
+
+>>									     <<
+>> Please report any problems/bugs/comments by using krb5-send-pr            <<
+>>									     <<
+
 Notes and Major Changes
-Acknowledgements
+-----------------------
 
-Legal Administrivia
--------------------
+* The default keytab name has changed from /etc/v5srvtab to
+/etc/krb5.keytab.
+
+* login.krb5 no longer defaults to getting krb4 tickets.
+
+* Windows DLL names have changed. XXX need more info here
+
+* The directory structure used for installations has changed.  In
+particular, files previously located in $prefix/lib/krb5kdc are now
+normally located in $sysconfdir/krb5kdc.  With the normal configure
+options, this means the KDC database goes in /usr/local/var/krb5kdc by
+default.  If you wish to have the old behavior, then you would use a
+configure line like the following:
+
+	configure --prefix=/usr/local --sysconfdir=/usr/local/lib
+
+* kshd has been modified to accept krb4 encrypted rcp connections; for
+this to work, the v4rcp program must be in the sbin directory.
+
+* The gssrpc library has symbol collisions with the rpc library in
+some of the libcs in certain operating systems without shared
+libraries, notably some ports of NetBSD and MkLinux.  For those
+platforms which have rpc in libc and also contain NIS in libc,
+compiling with static libraries will not work because of this
+conflict.  NetBSD users can either upgrade to the current tree, which
+includes shared libraries for more ports, choose not to build kadmind
+or kadmin, or recompile NetBSD without NIS support.  MkLinux users
+must either recompile without NIS or not build the administration
+system.
+
+Copyright Notice and Legal Administrivia
+----------------------------------------
+
+Copyright (C) 1996 by the Massachusetts Institute of Technology.
+
+All rights reserved.
+
+Export of this software from the United States of America may require
+a specific license from the United States Government.  It is the
+responsibility of any person or organization contemplating export to
+obtain such a license before exporting.
+
+WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
+distribute this software and its documentation for any purpose and
+without fee is hereby granted, provided that the above copyright
+notice appear in all copies and that both that copyright notice and
+this permission notice appear in supporting documentation, and that
+the name of M.I.T. not be used in advertising or publicity pertaining
+to distribution of the software without specific, written prior
+permission.  M.I.T. makes no representations about the suitability of
+this software for any purpose.  It is provided "as is" without express
+or implied warranty.
 
 THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
 IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 
-Files are copyright MIT, Cygnus Support, OpenVision, Oracle, Sun Soft,
-and others.  
+Individual source code files are copyright MIT, Cygnus Support,
+OpenVision, Oracle, Sun Soft, and others.
 
 Project Athena, Athena, Athena MUSE, Discuss, Hesiod, Kerberos, Moira,
 and Zephyr are trademarks of the Massachusetts Institute of Technology
 (MIT).  No commercial use of these trademarks may be made without
 prior written permission of MIT.
 
-FYI, "commercial use" means use of a name in a product or other
-for-profit manner.  It does NOT prevent a commercial firm from
-referring to the MIT trademarks in order to convey information
-(although in doing so, recognition of their trademark status should be
-given).
+"Commercial use" means use of a name in a product or other for-profit
+manner.  It does NOT prevent a commercial firm from referring to the
+MIT trademarks in order to convey information (although in doing so,
+recognition of their trademark status should be given).
 
 The following copyright and permission notice applies to the
 OpenVision Kerberos Administration system located in kadmin/create,
@@ -64,61 +165,6 @@ kadmin/dbutil, kadmin/server, lib/kadm, and portions of lib/rpc:
    commitment to continuing Kerberos technology development 
    and our gratitude for the valuable work which has been 
    performed by MIT and the Kerberos community.
-
-Building and Installing Kerberos 5
-----------------------------------
-The first file you should look at is doc/install.ps; it contains the
-notes for building and installing Kerberos 5.  The info file
-install.info has the same information in info file format.  You
-can view this using the GNU emacs info-mode, or by using the
-standalone info file viewer from the Free Software Foundation.
-
-Other good files to look at are admin-guide.ps and user-guide.ps,
-which contain the system administrator's guide, and the user's guide,
-respectively.  They are also available as info files
-kerberos-admin.info and krb5-user.info, respectively.
-
->>									     <<
->> Please report any problems/bugs/comments to 'krb5-bugs@mit.edu'           <<
->>									     <<
-
-Notes and Major Changes
------------------------
-
-* The default keytab name has changed from /etc/v5srvtab to
-/etc/krb5.keytab.
-
-* login.krb5 no longer defaults to getting krb4 tickets.
-
-* Windows DLL names have changed. XXX need more info here
-
-* The directory structure used for installations has changed.  In
- particular, files previously located in $prefix/lib/krb5kdc are now
- normally located in $sysconfdir/krb5kdc.  With the normal configure
- options, this means the KDC database goes in /usr/local/var/krb5kdc
-by default.  If you wish to have the old behavior, then you would use
-a configure line like the following:
-
-
-      Configure --prefix=/usr/local --sysconfdir=/usr/local/lib
-
-
-* kshd has been modified to accept krb4 encrypted rcp connections; for
- this to work, the v4rcp program must be in the sbin directory..
-
-
-* The gssrpc library has symbol collisions with the rpc library in
-some of the libcs in certain operating systems without shared
-libraries, notably some ports of NetBSD and MkLinux.  For those
-platforms which have rpc in libc and also contain NIS in libc,
-compiling with static libraries will not work because of this
-conflict.  NetBSD users can either upgrade to the current tree, which
-includes shared libraries for more ports, choose not to build kadmind
-or kadmin, or recompile NetBSD without NIS support.  MkLinux users
-must either recompile without NIS or not build the administration
-system.
-
-
 
 Acknowledgements
 ----------------
