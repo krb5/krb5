@@ -262,6 +262,7 @@ verify_as_reply(krb5_context 		context,
 	    (request->rtime != 0) &&
 	    (as_reply->enc_part2->times.renew_till > request->rtime))
 	|| ((request->kdc_options & KDC_OPT_RENEWABLE_OK) &&
+	    !(request->kdc_options & KDC_OPT_RENEWABLE) &&
 	    (as_reply->enc_part2->flags & KDC_OPT_RENEWABLE) &&
 	    (request->till != 0) &&
 	    (as_reply->enc_part2->times.renew_till > request->till))

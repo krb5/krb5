@@ -1,3 +1,10 @@
+2003-05-30  Alexandra Ellwood <lxs@mit.edu>
+
+	* get_in_tkt.c: (verify_as_reply) Only check the renewable lifetime
+	of tickets whose request options included KDC_OPT_RENEWABLE_OK
+	if those options did not also include KDC_OPT_RENEWABLE.   Otherwise 
+	verify_as_reply() will fail for all renewable tickets.
+
 2003-05-27  Ken Raeburn  <raeburn@mit.edu>
 
 	* conv_creds.c: Enable support on Windows always.
