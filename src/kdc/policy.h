@@ -1,7 +1,5 @@
 /*
- * $Source$
- * $Author$
- * $Id$
+ * kdc/policy.h
  *
  * Copyright 1990 by the Massachusetts Institute of Technology.
  *

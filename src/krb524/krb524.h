@@ -21,10 +21,6 @@
 #ifndef __KRB524_H__
 #define __KRB524_H__
 
-/*
- * $Id$
- */
-
 #define KRB524_SERVICE "krb524"
 #define KRB524_PORT 4444
 

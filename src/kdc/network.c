@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * kdc/network.c
  *
  * Copyright 1990 by the Massachusetts Institute of Technology.
  *
@@ -24,10 +23,6 @@
  * Network code for Kerberos v5 KDC.
  */
 
-#if !defined(lint) && !defined(SABER)
-static char rcsid_network_c[] =
-"$Id$";
-#endif	/* !lint & !SABER */
 
 #include <krb5/copyright.h>
 #include <krb5/osconf.h>

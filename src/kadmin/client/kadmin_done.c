@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * kadmin/client/kadmin_done.c
  *
  * Copyright 1988 by the Massachusetts Institute of Technology.
  *
@@ -15,10 +14,6 @@
  * any purpose.  It is provided "as is" without express or implied warranty.
  */
 
-#if !defined(lint) && !defined(SABER)
-static char rcsid_kadmin_done[] =
-    "$Header$";
-#endif	/* lint */
 
 /*
  * kadmin_done

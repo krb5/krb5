@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * kadmin/server/adm_server.c
  *
  * Copyright 1988 by the Massachusetts Institute of Technology.
  *
@@ -16,10 +15,6 @@
  * any purpose.  It is provided "as is" without express or implied warranty.
  */
 
-#if !defined(lint) && !defined(SABER)
-static char rcsid_adm_server_c[] =
-"$Header$";
-#endif	/* lint */
 
 /*
   adm_server.c

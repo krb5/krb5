@@ -1,7 +1,5 @@
 /*
- * $Source$
- * $Author$
- * $Id$
+ * kdc/extern.h
  *
  * Copyright 1990 by the Massachusetts Institute of Technology.
  *

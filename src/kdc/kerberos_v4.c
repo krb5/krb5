@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * kdc/kerberos_v4.c
  *
  * Copyright 1985, 1986, 1987, 1988,1991 by the Massachusetts Institute
  * of Technology.
@@ -25,10 +24,6 @@
  */
 
 #ifdef KRB4
-#if !defined(lint) && !defined(SABER)
-static char rcsid_kerberos_v4_c[] =
-"$Id$";
-#endif	/* !lint & !SABER */
 
 #include <krb5/config.h>
 #include <krb5/sysincl.h>

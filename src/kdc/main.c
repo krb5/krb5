@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * kdc/main.c
  *
  * Copyright 1990 by the Massachusetts Institute of Technology.
  *
@@ -24,10 +23,6 @@
  * Main procedure body for the KDC server process.
  */
 
-#if !defined(lint) && !defined(SABER)
-static char rcsid_main_c[] =
-"$Id$";
-#endif	/* !lint & !SABER */
 
 #include <stdio.h>
 #include <syslog.h>

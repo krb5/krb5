@@ -1,7 +1,6 @@
 #ifdef SANDIA
 /*
- * $Source$
- * $Author$
+ * kadmin/server/adm_parse.c
  *
  * Copyright 1990,1991 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -29,10 +28,6 @@
  * Edit a KDC database.
  */
 
-#if !defined(lint) && !defined(SABER)
-static char rcsid_adm_parse[] =
-"$Id$";
-#endif  /* !lint & !SABER */
  
 #include <syslog.h>
 #include <stdio.h>

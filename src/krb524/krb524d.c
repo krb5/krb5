@@ -18,10 +18,6 @@
  * purpose.  It is provided "as is" without express or implied warranty.
  */
 
-#if !defined(lint) && !defined(SABER)
-static char rcs_id[] = "$Id$";
-#endif
-
 #include <stdio.h>
 #include <string.h>
 #include <sys/types.h>

@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * kadmin/server/adm_extern.c
  *
  * Copyright 1990 by the Massachusetts Institute of Technology.
  *
@@ -28,10 +27,6 @@
  * allocations of adm_extern stuff
  */
 
-#if !defined(lint) && !defined(SABER)
-static char rcsid_adm_extern_c[] =
-"$Id$";
-#endif	/* !lint & !SABER */
 
 #include <krb5/copyright.h>
 

@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * kdc/kdc_util.c
  *
  * Copyright 1990,1991 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -25,10 +24,6 @@
  * Utility functions for the KDC implementation.
  */
 
-#if !defined(lint) && !defined(SABER)
-static char rcsid_kdc_util_c[] =
-"$Id$";
-#endif	/* !lint & !SABER */
 
 #include <krb5/krb5.h>
 #include <krb5/kdb.h>

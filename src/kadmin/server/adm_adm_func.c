@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * kadmin/server/adm_adm_func.c
  *
  * Copyright 1990,1991 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -28,10 +27,6 @@
  * Modify the Kerberos Database
  */
 
-#if !defined(lint) && !defined(SABER)
-static char rcsid_adm_adm_func[] =
-  "$Id$";
-#endif	/* !lint & !SABER */
 
 #include <sys/types.h>
 #include <syslog.h>

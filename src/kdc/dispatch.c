@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * kdc/dispatch.c
  *
  * Copyright 1990 by the Massachusetts Institute of Technology.
  *
@@ -24,10 +23,6 @@
  * Dispatch an incoming packet.
  */
 
-#if !defined(lint) && !defined(SABER)
-static char rcsid_dispatch_c[] =
-"$Id$";
-#endif	/* !lint & !SABER */
 
 #include <krb5/copyright.h>
 #include <krb5/krb5.h>

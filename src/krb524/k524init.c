@@ -18,20 +18,12 @@
  * purpose.  It is provided "as is" without express or implied warranty.
  */
 
-#if !defined(lint) && !defined(SABER)
-static char rcs_id[] = "$Id$";
-#endif
-
 #include <stdio.h>
 #include <krb5/krb5.h>
 #include <krb.h>
 
 extern int optind;
 extern char *optarg;
-
-#if !defined(lint) && !defined(SABER)
-const char rcsid[] = "$Id$";
-#endif
 
 main(int argc, char **argv)
 {

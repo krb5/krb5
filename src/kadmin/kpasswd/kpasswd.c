@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * kadmin/kpasswd/kpasswd.c
  *
  * Copyright 1988 by the Massachusetts Institute of Technology.
  *
@@ -16,10 +15,6 @@
  * any purpose.  It is provided "as is" without express or implied warranty.
  */
 
-#ifndef	lint
-static char rcsid_kpasswd_c[] =
-    "$Header$";
-#endif	/* lint */
 
 /*
  * kpasswd

@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * kdc/policy.c
  *
  * Copyright 1990 by the Massachusetts Institute of Technology.
  *
@@ -24,10 +23,6 @@
  * Policy decision routines for KDC.
  */
 
-#if !defined(lint) && !defined(SABER)
-static char rcsid_policy_c[] =
-"$Id$";
-#endif	/* !lint & !SABER */
 
 #include <krb5/copyright.h>
 

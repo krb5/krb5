@@ -5,7 +5,6 @@ suppress 34 on v4_klog
 suppress 36 on sendto
 suppress 35
 suppress 287 on usage
-suppress 287 on rcsid_kerberos_c
 suppress 287 on sin
 suppress 349 on krb_err_txt
 suppress 349 on krbONE

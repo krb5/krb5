@@ -22,10 +22,6 @@
  * backoff retry algorithm.  This is based on krb5_sendto_kdc.
  */
 
-#if !defined(lint) && !defined(SABER)
-static char rcs_id[] = "$Id$";
-#endif	/* !lint & !SABER */
-
 #include <krb5/krb5.h>
 #include <krb5/ext-proto.h>
 
