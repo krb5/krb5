@@ -58,7 +58,7 @@ k5_hmac_md5_hash (const krb5_keyblock *key, krb5_keyusage usage,
   ds.length = key->length;
   ks.length = key->length;
   ds.data = malloc(ds.length);
-  if (ds.length == NULL)
+  if (ds.data == NULL)
     return ENOMEM;
   ks.contents = (void *) ds.data;
 

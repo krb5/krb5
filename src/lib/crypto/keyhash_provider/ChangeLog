@@ -1,3 +1,8 @@
+2001-12-14  Ezra Peisach  <epeisach@mit.edu>
+
+	* hmac_md5.c (k5_hmac_md5_hash): Test if malloc returns NULL and
+	not the argument to malloc.
+
 2001-12-05  Ezra Peisach  <epeisach@mit.edu>
 
 	* t_cksum.c (main): Free memory leak in tests.
