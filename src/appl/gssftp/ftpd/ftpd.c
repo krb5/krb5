@@ -92,7 +92,9 @@ static char sccsid[] = "@(#)ftpd.c	5.40 (Berkeley) 7/2/91";
 #endif
 
 #define strerror(error)	(sys_errlist[error])
+#ifdef NEED_SYS_ERRLIST
 extern char *sys_errlist[];
+#endif
 
 extern char *mktemp ();
 

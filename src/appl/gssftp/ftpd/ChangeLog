@@ -1,3 +1,11 @@
+Thu Jan 18 18:39:06 1996  Sam Hartman  <hartmans@zygorthian-space-raiders.MIT.EDU>
+
+	* configure.in: Check for crypt in -lcrypt
+
+	* ftpd.c: Conditionalize sys_errlist
+
+	* configure.in: Check to declare sys_errlist.
+
 Thu Jan 18 14:55:42 1996  Sam Hartman  <hartmans@tertius.mit.edu>
 
 	* ftpd.c : Only return an unable to acquire credentials error if all possible services fail.

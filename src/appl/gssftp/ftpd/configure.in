@@ -7,10 +7,12 @@ KRB5_SIGTYPE
 CHECK_UTMP
 CHECK_SIGPROCMASK
 CHECK_WAIT_TYPE
+DECLARE_SYS_ERRLIST
 AC_FUNC_VFORK
 AC_CHECK_HEADERS(unistd.h stdlib.h string.h)
 AC_REPLACE_FUNCS(getdtablesize)
 AC_HAVE_FUNCS(getcwd getusershell seteuid setreuid setresuid)
+AC_CHECK_LIB(crypt,crypt) dnl 
 dnl 
 dnl copied from appl/bsd/configure.in
 AC_MSG_CHECKING([setenv])
