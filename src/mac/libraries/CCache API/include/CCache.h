@@ -15,11 +15,36 @@
 #ifndef _CCache_h_
 #define _CCache_h_
 
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
 #if defined(__CFM68K__) && !defined(__USING_STATIC_LIBS__)
 #	pragma import on
 #endif
 
-#include "Processes.h"
+/* This stuff is to make sure that we always use the same compiler options for
+   this header file. Otherwise we get really exciting failure modes -- meeroh */
+#include <ConditionalMacros.h>
+
+#if PRAGMA_STRUCT_ALIGN
+	#pragma options align=mac68k
+#elif PRAGMA_STRUCT_PACKPUSH
+	#pragma pack(push, 2)
+#elif PRAGMA_STRUCT_PACK
+	#pragma pack(2)
+#endif
+
+#if PRAGMA_ENUM_ALWAYSINT
+	#pragma enumsalwaysint on
+#endif
+
+#if TARGET_CPU_68K
+	#pragma fourbyteints on
+#endif 
+
+#include <Processes.h>
+
 /*
 ** The Official Error Codes
 */
@@ -51,10 +76,10 @@ typedef cc_int32 cc_nc_flags;
 enum StringToKey_Type { STK_AFS = 0, STK_DES = 1};
 
 enum {  MAX_V4_CRED_LEN = 1250, 
-		KRB_PRINCIPAL_SZ = 1250, 
-		KRB_INSTANCE_SZ = 1250,
-		KRB_REALM_SZ = 1250,
-		KRB_SERVICE_SZ = 1250,
+		KRB_PRINCIPAL_SZ = 40, 
+		KRB_INSTANCE_SZ = 40,
+		KRB_REALM_SZ = 40,
+		KRB_SERVICE_SZ = 40,
 		ADDR_SZ = 16  };
 
 // V4 Credentials
@@ -155,7 +180,7 @@ typedef struct _ccache_p {
 typedef struct _ccache_it {
 	ccache_p *prevNC;
 	int		  lastCredOffset;
-} ccache_it;
+} ccache_cit;
 
 typedef struct _apiCB {
 	ccache_p* listHead;
@@ -212,8 +237,8 @@ return a pointer to the control structure for the cache via handle */
 int
 cc_create(apiCB* cc_ctx,			// > DLL's primary control structure
 		  char* name,				// > name of cache to be [destroyed if exists, then] created
-		  const enum cc_cred_vers vers,	// > version of credentials to be held in cache
 		  char* principal,			// > name of principal associated with named cache
+		  const enum cc_cred_vers vers,	// > version of credentials to be held in cache
 		  int cc_flags,				// > options
 		  ccache_p** handle);		// < named cache control structure 
 
@@ -283,8 +308,7 @@ repeated calls will return all currently held NC's
 int
 cc_seq_fetch_NCs(apiCB* cc_ctx,			// > DLL's primary control structure
 				   ccache_p** ccache_pointer,	// <> named cache control structure (close, then open next)
-			       ccache_it** itCache);// <> iterator used by DLL, set to NULL before first call
-										//    Also NULL for final call if loop ends before CC_END
+			       ccache_cit** itCache);// <> iterator used by DLL, set to NULL before first call
 
 /* Sequentially fetch every set of credentials in the Named Cache handle
 use similiarly to cc_seq_fetch_NCs */
@@ -292,8 +316,7 @@ int
 cc_seq_fetch_creds(apiCB* cc_ctx,			// > DLL's primary control structure
 				   ccache_p* ccache_pointer,		// > named cache control structure
 			       cred_union** creds,			// < filled in by DLL, free via cc_free_creds()
-			       ccache_it** itCreds);	// <> iterator used by DLL, set to NULL before first call
-											//    Also NULL for final call if loop ends before CC_END
+			       ccache_cit** itCreds);	// <> iterator used by DLL, set to NULL before first call
 
 /* a wrapper for cc_seq_fetch_NCs.
 	Returns: a null terminated list (array) of pointers to infoNC structs
@@ -309,12 +332,12 @@ cc_get_NC_info(apiCB *cc_ctx,		// > control structure
 /* just a wrapper for free() ??? */
 int
 cc_free_principal(apiCB* cc_ctx,		// > DLL's primary control structure
-				  char* principal);// <> principal to be freed, returned as NULL
+				  char** principal);// <> principal to be freed, returned as NULL
 									//   (from cc_get_principal())
 /* another wrapper? */
 int
 cc_free_name(apiCB* cc_ctx,			// > DLL's primary control structure
-			 char* name);			// <> name to be freed, returned as NULL
+			 char** name);			// <> name to be freed, returned as NULL
 									//   (from cc_seq_fetch_cache())
 
 /* free storage associated with cred_union** */
@@ -343,8 +366,28 @@ cc_lock_request(apiCB* cc_ctx,		// > DLL's primary control structure
 				ccache_p* ccache_pointer,		// > named cache control structure
 				int lock_type);		// > one (or combination) of above defined lock types
 			   
+#if PRAGMA_STRUCT_ALIGN
+	#pragma options align=reset
+#elif PRAGMA_STRUCT_PACKPUSH
+	#pragma pack(pop)
+#elif PRAGMA_STRUCT_PACK
+	#pragma pack()
+#endif
+
+#if PRAGMA_ENUM_ALWAYSINT
+	#pragma enumsalwaysint reset
+#endif
+
+#if TARGET_CPU_68K
+	#pragma fourbyteints reset
+#endif 
+
 #if defined(__CFM68K__) && !defined(__USING_STATIC_LIBS__)
 #	pragma import reset
 #endif
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
 #endif /* Krb_CCacheAPI_h_ */
