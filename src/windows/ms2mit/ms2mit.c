@@ -86,6 +86,13 @@ main(
         exit(1);
     }
 
+    if (code = krb5_cc_set_flags(kcontext, mslsa_ccache, KRB5_TC_NOTICKET)) {
+        com_err(argv[0], code, "while setting KRB5_TC_NOTICKET flag");
+        krb5_cc_close(kcontext, mslsa_ccache);
+        krb5_free_context(kcontext);
+        exit(1);
+    }
+
     /* Enumerate tickets from cache looking for an initial ticket */
     if ((code = krb5_cc_start_seq_get(kcontext, mslsa_ccache, &cursor))) {
         com_err(argv[0], code, "while initiating the cred sequence of MS LSA ccache");
@@ -104,6 +111,13 @@ main(
         krb5_free_cred_contents(kcontext, &creds);
     }
     krb5_cc_end_seq_get(kcontext, mslsa_ccache, &cursor);
+
+    if (code = krb5_cc_set_flags(kcontext, mslsa_ccache, 0)) {
+        com_err(argv[0], code, "while clearing flags");
+        krb5_cc_close(kcontext, mslsa_ccache);
+        krb5_free_context(kcontext);
+        exit(1);
+    }
 
     if ( !initial_ticket ) {
         fprintf(stderr, "%s: Initial Ticket Getting Tickets are not available from the MS LSA\n",

@@ -1,3 +1,8 @@
+2004-09-09  Jeffrey Altman <jaltman@mit.edu>
+
+   * ms2mit.c: apply KRB5_TC_NOTICKET to MSLSA: ccache while
+               searching for an initial ticket
+
 2004-08-20  Jeffrey Altman <jaltman@mit.edu>
  
     * ms2mit.c: add -c ccache command line option
