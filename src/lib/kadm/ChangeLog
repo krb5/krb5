@@ -1,3 +1,7 @@
+Wed Sep 06 14:20:57 1995   Chris Provenzano (proven@mit.edu)
+
+        * adm_kt_dec.c, adm_kt_enc.c, alt_prof.c, keysalt.c, str_conv.c : 
+		s/keytype/enctype/g, s/KEYTYPE/ENCTYPE/g
 
 Tue Sep 05 22:10:34 1995   Chris Provenzano (proven@mit.edu)
 
