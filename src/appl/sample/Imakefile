@@ -2,7 +2,7 @@
 #	$Author$
 #	$Id$
 #
-#  Copyright 1990 by the Massachusetts Institute of Technology.
+#  Copyright 1990,1991 by the Massachusetts Institute of Technology.
 #  All Rights Reserved.
 # 
 # Export of this software from the United States of America is assumed
@@ -22,13 +22,8 @@
 # or implied warranty.
 # 
 # 
+#define IHaveSubdirs
+#define PassCDebugFlags
 
-        DEPLIBS = $(DEPKLIB)
-LOCAL_LIBRARIES = $(KLIB)
-           SRCS = sclient.c sserver.c
-
-SimpleTestProgramTarget(sclient)
-SimpleTestProgramTarget(sserver)
-
-DependTarget()
-LintTarget()
+SUBDIRS=sclient sserver
+MakeSubdirs($(SUBDIRS))

@@ -52,7 +52,7 @@ static char rcsid_sserver_c [] =
 #include <netdb.h>
 #include <syslog.h>
 
-#include "sample.h"
+#include "../sample.h"
 
 extern krb5_deltat krb5_clockskew;
 
