@@ -1,3 +1,15 @@
+Tue Aug 22 09:56:14 2000  Ezra Peisach  <epeisach@mit.edu>
+
+	* rd_svc_key.c (krb54_get_service_keyblock): If the keytab
+ 	encryption type is a non-raw des3 key, bash its enctype. This
+ 	matches kdc/kerberos_v4.c.
+
+Mon Aug 14 12:13:20 2000  Ezra Peisach  <epeisach@mit.edu>
+
+	* cr_tkt.c (krb_cr_tkt_int): When prototypes were changed to not
+ 	include a narrow prototype, the flags were being sent OTW as four
+ 	bytes instead of one.
+
 2000-08-02  Ezra Peisach  <epeisach@mit.edu>
 
 	* tf_util.c (tf_init): Add KRB5_DLLIMP/KRB5_CALLCONV definitions
