@@ -54,9 +54,9 @@ des_string_to_key(str,key)
     register mit_des_cblock *key;
 {
     register char *in_str;
-    register unsigned temp,i;
+    register unsigned temp;
     register int j;
-    register long length;
+    register long i, length;
     static unsigned char *k_p;
     static int forward;
     register char *p_char;

@@ -38,7 +38,7 @@ des_read_password/*_v4_compat_crock*/(k,prompt,verify)
     char *prompt;
     int	verify;
 {
-    int ok;
+    krb5_error_code ok;
     krb5_error_code retval;
     char key_string[BUFSIZ];
     char prompt2[BUFSIZ];

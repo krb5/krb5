@@ -1,3 +1,9 @@
+Tue Mar 7 19:57:28 1995 Keith Vetter (keithv@fusion.com)
+
+	* pcbc_enc.c: added casts on the long->char assignments.
+        * str_to_key.c: converted int->long to match types.
+	* read_passwd.c: converted int->long.
+
 Wed Mar  8 17:13:44 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in (clean): Dete verify.o on a "make clean".

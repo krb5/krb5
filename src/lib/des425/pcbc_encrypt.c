@@ -233,21 +233,21 @@ des_pcbc_encrypt(in, out, length, schedule, ivec, encrypt)
 				op += (int) length;
 				switch(length) {
 				case 8:
-					*(--op) = right & 0xff;
+					*(--op) = (unsigned char) (right & 0xff);
 				case 7:
-					*(--op) = (right >> 8) & 0xff;
+					*(--op) = (unsigned char) ((right >> 8) & 0xff);
 				case 6:
-					*(--op) = (right >> 16) & 0xff;
+					*(--op) = (unsigned char) ((right >> 16) & 0xff);
 				case 5:
-					*(--op) = (right >> 24) & 0xff;
+					*(--op) = (unsigned char) ((right >> 24) & 0xff);
 				case 4:
-					*(--op) = left & 0xff;
+					*(--op) = (unsigned char) (left & 0xff);
 				case 3:
-					*(--op) = (left >> 8) & 0xff;
+					*(--op) = (unsigned char) ((left >> 8) & 0xff);
 				case 2:
-					*(--op) = (left >> 16) & 0xff;
+					*(--op) = (unsigned char) ((left >> 16) & 0xff);
 				case 1:
-					*(--op) = (left >> 24) & 0xff;
+					*(--op) = (unsigned char) ((left >> 24) & 0xff);
 					break;
 				}
 				break;		/* we're done */
