@@ -1,3 +1,14 @@
+2004-02-26  Jeffrey Altman <jaltman@mit.edu>
+
+    * sendto_kdc.c, send524.c:
+      The use_master parameter of sendto_kdc is now an in/out 
+      parameter used to report to the caller whether or not
+      the responding KDC was in fact the master.  This is 
+      necessary to allow callers to prevent making an unnecessary
+      additional call to query the master if the original 
+      query did not explicitly state that the master should be 
+      queried.
+
 2004-02-25  Ken Raeburn  <raeburn@mit.edu>
 
 	* sendto_kdc.c (start_connection): Close socket if connect() call

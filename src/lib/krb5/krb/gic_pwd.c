@@ -124,7 +124,7 @@ krb5_get_init_creds_password(krb5_context context, krb5_creds *creds, krb5_princ
    ret = krb5_get_init_creds(context, creds, client, prompter, data,
 			     start_time, in_tkt_service, options,
 			     krb5_get_as_key_password, (void *) &pw0,
-			     use_master, &as_reply);
+			     &use_master, &as_reply);
 
    /* check for success */
 
@@ -149,7 +149,7 @@ krb5_get_init_creds_password(krb5_context context, krb5_creds *creds, krb5_princ
       ret2 = krb5_get_init_creds(context, creds, client, prompter, data,
 				 start_time, in_tkt_service, options,
 				 krb5_get_as_key_password, (void *) &pw0,
-				 use_master, &as_reply);
+				 &use_master, &as_reply);
       
       if (ret2 == 0) {
 	 ret = 0;
@@ -195,7 +195,7 @@ krb5_get_init_creds_password(krb5_context context, krb5_creds *creds, krb5_princ
 				  prompter, data,
 				  start_time, "kadmin/changepw", &chpw_opts,
 				  krb5_get_as_key_password, (void *) &pw0,
-				  use_master, NULL)))
+				  &use_master, NULL)))
       goto cleanup;
 
    prompt[0].prompt = "Enter new password";
@@ -283,7 +283,7 @@ krb5_get_init_creds_password(krb5_context context, krb5_creds *creds, krb5_princ
    ret = krb5_get_init_creds(context, creds, client, prompter, data,
 			     start_time, in_tkt_service, options,
 			     krb5_get_as_key_password, (void *) &pw0,
-			     use_master, &as_reply);
+			     &use_master, &as_reply);
 
 cleanup:
    krb5int_set_prompt_types(context, 0);

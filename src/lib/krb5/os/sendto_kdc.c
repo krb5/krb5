@@ -262,11 +262,11 @@ merge_addrlists (struct addrlist *dest, struct addrlist *src)
 krb5_error_code
 krb5_sendto_kdc (krb5_context context, const krb5_data *message,
 		 const krb5_data *realm, krb5_data *reply,
-		 int use_master, int tcp_only)
+		 int *use_master, int tcp_only)
 {
     krb5_error_code retval;
     struct addrlist addrs;
-    int socktype1 = 0, socktype2 = 0;
+    int socktype1 = 0, socktype2 = 0, addr_used;
 
     /*
      * find KDC location(s) for realm
@@ -282,7 +282,7 @@ krb5_sendto_kdc (krb5_context context, const krb5_data *message,
      */
 
     dprint("krb5_sendto_kdc(%d@%p, \"%D\", use_master=%d, tcp_only=%d)\n",
-	   message->length, message->data, realm, use_master, tcp_only);
+	   message->length, message->data, realm, *use_master, tcp_only);
 
     if (!tcp_only && context->udp_pref_limit < 0) {
 	int tmp;
@@ -301,7 +301,7 @@ krb5_sendto_kdc (krb5_context context, const krb5_data *message,
 	context->udp_pref_limit = tmp;
     }
 
-    retval = (use_master ? KRB5_KDC_UNREACH : KRB5_REALM_UNKNOWN);
+    retval = (*use_master ? KRB5_KDC_UNREACH : KRB5_REALM_UNKNOWN);
 
     if (tcp_only)
 	socktype1 = SOCK_STREAM, socktype2 = 0;
@@ -310,7 +310,7 @@ krb5_sendto_kdc (krb5_context context, const krb5_data *message,
     else
 	socktype1 = SOCK_STREAM, socktype2 = SOCK_DGRAM;
 
-    retval = krb5_locate_kdc(context, realm, &addrs, use_master, socktype1, 0);
+    retval = krb5_locate_kdc(context, realm, &addrs, *use_master, socktype1, 0);
     if (socktype2) {
 	struct addrlist addrs2;
 
@@ -323,10 +323,37 @@ krb5_sendto_kdc (krb5_context context, const krb5_data *message,
     }
 
     if (addrs.naddrs > 0) {
-	retval = krb5int_sendto (context, message, &addrs, reply, 0, 0);
-	krb5int_free_addrlist (&addrs);
-	if (retval == 0)
-	    return 0;
+        retval = krb5int_sendto (context, message, &addrs, reply, 0, 0,
+                                 &addr_used);
+        if (retval == 0) {
+            /*
+             * Set use_master to 1 if we ended up talking to a master when
+             * we didn't explicitly request to
+             */
+            if (*use_master == 0) {
+                struct addrlist addrs3;
+                retval = krb5_locate_kdc(context, realm, &addrs3, 1, 
+                                         addrs.addrs[addr_used]->ai_socktype,
+                                         addrs.addrs[addr_used]->ai_family);
+                if (retval == 0) {
+                    int i;
+                    for (i = 0; i < addrs3.naddrs; i++) {
+                        if (addrs.addrs[addr_used]->ai_addrlen ==
+                            addrs3.addrs[i]->ai_addrlen &&
+                            memcmp(addrs.addrs[addr_used]->ai_addr,
+                                   addrs3.addrs[i]->ai_addr,
+                                   addrs.addrs[addr_used]->ai_addrlen) == 0) {
+                            *use_master = 1;
+                            break;
+                        }
+                    }
+                    krb5int_free_addrlist (&addrs3);
+                }
+            }
+            krb5int_free_addrlist (&addrs);
+            return 0;
+        }
+        krb5int_free_addrlist (&addrs);
     }
     return retval;
 }
@@ -963,8 +990,9 @@ service_fds (struct select_state *selstate,
 
 krb5_error_code
 krb5int_sendto (krb5_context context, const krb5_data *message,
-		const struct addrlist *addrs, krb5_data *reply,
-		struct sockaddr *localaddr, socklen_t *localaddrlen)
+                const struct addrlist *addrs, krb5_data *reply,
+                struct sockaddr *localaddr, socklen_t *localaddrlen,
+                int *addr_used)
 {
     int i, pass;
     int delay_this_pass = 2;
@@ -1071,6 +1099,8 @@ krb5int_sendto (krb5_context context, const krb5_data *message,
 	   (int) reply->length, reply->data);
     retval = 0;
     conns[winning_conn].x.in.buf = 0;
+    if (addr_used)
+        *addr_used = winning_conn;
     if (localaddr != 0 && localaddrlen != 0 && *localaddrlen > 0)
 	(void) getsockname(conns[winning_conn].fd, localaddr, localaddrlen);
 egress:

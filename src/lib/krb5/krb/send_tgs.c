@@ -138,7 +138,7 @@ krb5_send_tgs(krb5_context context, krb5_flags kdcoptions,
     krb5_timestamp time_now;
     krb5_pa_data **combined_padata;
     krb5_pa_data ap_req_padata;
-    int tcp_only = 0;
+    int tcp_only = 0, use_master;
 
     /* 
      * in_creds MUST be a valid credential NOT just a partially filled in
@@ -261,9 +261,10 @@ krb5_send_tgs(krb5_context context, krb5_flags kdcoptions,
 
     /* now send request & get response from KDC */
 send_again:
+    use_master = 0;
     retval = krb5_sendto_kdc(context, scratch, 
 			     krb5_princ_realm(context, sname),
-			     &rep->response, 0, tcp_only);
+			     &rep->response, &use_master, tcp_only);
     if (retval == 0) {
 	if (krb5_is_krb_error(&rep->response)) {
 	    if (!tcp_only) {

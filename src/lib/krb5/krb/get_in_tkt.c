@@ -90,7 +90,7 @@ send_as_request(krb5_context 		context,
 		krb5_timestamp 		*time_now,
 		krb5_error ** 		ret_err_reply,
 		krb5_kdc_rep ** 	ret_as_reply,
-		int 			use_master)
+		int 			    *use_master)
 {
     krb5_kdc_rep *as_reply = 0;
     krb5_error_code retval;
@@ -444,6 +444,7 @@ krb5_get_in_tkt(krb5_context context,
     krb5_pa_data  **	preauth_to_use = 0;
     int			loopcount = 0;
     krb5_int32		do_more = 0;
+    int             use_master = 0;
 
     if (! krb5_realm_compare(context, creds->client, creds->server))
 	return KRB5_IN_TKT_REALM_MISMATCH;
@@ -535,7 +536,7 @@ krb5_get_in_tkt(krb5_context context,
 	err_reply = 0;
 	as_reply = 0;
 	if ((retval = send_as_request(context, &request, &time_now, &err_reply,
-				      &as_reply, 0)))
+				      &as_reply, &use_master)))
 	    goto cleanup;
 
 	if (err_reply) {
@@ -738,7 +739,7 @@ krb5_get_init_creds(krb5_context context,
 		    krb5_get_init_creds_opt *options,
 		    krb5_gic_get_as_key_fct gak_fct,
 		    void *gak_data,
-		    int  use_master,
+		    int  *use_master,
 		    krb5_kdc_rep **as_reply)
 {
     krb5_error_code ret;

@@ -96,7 +96,7 @@ krb5_get_init_creds_keytab(krb5_context context, krb5_creds *creds, krb5_princip
    ret = krb5_get_init_creds(context, creds, client, NULL, NULL,
 			     start_time, in_tkt_service, options,
 			     krb5_get_as_key_keytab, (void *) keytab,
-			     use_master,NULL);
+			     &use_master,NULL);
 
    /* check for success */
 
@@ -117,7 +117,7 @@ krb5_get_init_creds_keytab(krb5_context context, krb5_creds *creds, krb5_princip
       ret2 = krb5_get_init_creds(context, creds, client, NULL, NULL,
 				 start_time, in_tkt_service, options,
 				 krb5_get_as_key_keytab, (void *) keytab,
-				 use_master, NULL);
+				 &use_master, NULL);
       
       if (ret2 == 0) {
 	 ret = 0;

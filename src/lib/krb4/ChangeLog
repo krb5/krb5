@@ -1,3 +1,9 @@
+2004-02-26  Jeffrey Altman <jaltman@mit.edu>
+
+    * send_to_kdc.c: modify call to internals.sendto_udp to support
+      the new declaration which contains an additional output parameter
+      which will not be used.
+
 2004-02-24  Sam Hartman  <hartmans@avalanche-breakdown.mit.edu>
 
 	* rd_svc_key.c (krb54_get_service_keyblock): Remove ENCTYPE_LOCAL_DES3_HMAC_SHA1

@@ -504,10 +504,10 @@ struct addrlist;
 krb5_error_code krb5_lock_file (krb5_context, int, int);
 krb5_error_code krb5_unlock_file (krb5_context, int);
 krb5_error_code krb5_sendto_kdc (krb5_context, const krb5_data *,
-				 const krb5_data *, krb5_data *, int, int);
+				 const krb5_data *, krb5_data *, int *, int);
 krb5_error_code krb5int_sendto (krb5_context, const krb5_data *,
 				const struct addrlist *, krb5_data *,
-				struct sockaddr *, socklen_t *);
+				struct sockaddr *, socklen_t *, int *);
 krb5_error_code krb5_get_krbhst (krb5_context, const krb5_data *, char *** );
 krb5_error_code krb5_free_krbhst (krb5_context, char * const * );
 krb5_error_code krb5_create_secure_file (krb5_context, const char * pathname);
@@ -946,7 +946,7 @@ krb5_get_init_creds
 		krb5_get_init_creds_opt *gic_options,
 		krb5_gic_get_as_key_fct gak,
 		void *gak_data,
-		int master,
+		int *master,
 		krb5_kdc_rep **as_reply);
 
 void krb5int_populate_gic_opt (
@@ -1703,7 +1703,7 @@ typedef struct _krb5int_access {
 				      int, int, int, int);
     krb5_error_code (*sendto_udp) (krb5_context, const krb5_data *msg,
 				   const struct addrlist *, krb5_data *reply,
-				   struct sockaddr *, socklen_t *);
+				   struct sockaddr *, socklen_t *, int *);
     krb5_error_code (*add_host_to_list)(struct addrlist *lp,
 					const char *hostname,
 					int port, int secport,

@@ -1,3 +1,9 @@
+2004-02-26  Jeffrey Altman <jaltman@mit.edu>
+
+    * k5-int.h: change prototype declarations necessary to support
+      the use of krb5_get_init_creds_password's use_master as an
+      in/out parameter
+
 2004-02-26  Ken Raeburn  <raeburn@mit.edu>
 
 	* win-mac.h (GETSOCKNAME_ARG2_TYPE, GETSOCKNAME_ARG3_TYPE): Set

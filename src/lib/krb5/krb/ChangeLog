@@ -1,3 +1,13 @@
+2004-02-26  Jeffrey Altman <jaltman@mit.edu>
+  
+    * get_in_tkt.c, gic_keytab.c, gic_pwd.c, send_tgs.c: 
+      Implement changes to support the use of 
+      krb5_get_init_creds_password's use_master as an in/out
+      parameter.  This allows us to prevent a duplicate request
+      being sent to the KDC in the situation that the password
+      used is incorrect.  This behavior results a negative user
+      experience and had to be corrected.
+
 2004-02-13  Ken Raeburn  <raeburn@mit.edu>
 
 	* sendauth.c: Don't specify defaults for
