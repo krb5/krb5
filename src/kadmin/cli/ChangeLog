@@ -1,3 +1,8 @@
+2000-06-06  Ken Raeburn  <raeburn@mit.edu>
+
+	* kadmin.c (kadmin_startup): Don't pass keytab_name to printf if
+	it's NULL.
+
 2000-05-31  Ken Raeburn  <raeburn@mit.edu>
 
 	* strftime.c: Replace with a copy of the one from libkrb5, which
