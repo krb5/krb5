@@ -112,7 +112,7 @@ void mit_des_init_random_number_generator(key,p_seed)
 	krb5_xfree(addrs);
     }
     /*
-     * Generate a tempory value that depends on the key and host_id
+     * Generate a temporary value that depends on the key and host_id
      * such that it gives no useful information about the key:
      */
     mit_des_set_random_generator_seed(key, p_seed);
