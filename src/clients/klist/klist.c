@@ -220,8 +220,8 @@ void do_keytab(name)
 	       printf(" ");
 	  }
 	  printf("%s", pname);
-if (show_etype)
-    printf(" (%s) " , etype_string(entry.key.enctype));
+	  if (show_etype)
+	      printf(" (%s) " , etype_string(entry.key.enctype));
 	  if (show_keys) {
 	       printf(" (0x");
 	       {
@@ -487,9 +487,9 @@ show_credential(progname, kcontext, cred)
 	    fputs("\t",stdout);
 	else
 	    fputs(", ",stdout);
-	printf("Etype (skey, tkt): %s, %s ",
-	       etype_string(cred->keyblock.enctype), 
-	       etype_string(tkt->enc_part.enctype));
+	printf("Etype (skey, tkt): %s, "
+	       etype_string(cred->keyblock.enctype));
+	printf("%s ", etype_string(tkt->enc_part.enctype));
 	krb5_free_ticket(kcontext, tkt);
 	extra_field++;
     }
