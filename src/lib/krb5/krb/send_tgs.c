@@ -152,11 +152,11 @@ OLDDECLARG(krb5_response *,rep)
        KRB_ERROR is application 2 */
     /* allow either constructed or primitive encoding, so check for bit 6
        set or reset */
-    if (rep->response.data[0] == 0x61 ||
-	rep->response.data[0] == 0x21) {
+
+    if (krb5_is_kdc_rep(&rep->response))
 	/* it's a KDC_REP--assume TGS_REP */
 	rep->message_type = KRB5_TGS_REP;
-    } else /* assume it's an error */
+    else /* assume it's an error */
 	rep->message_type = KRB5_ERROR;
     return 0;
 }
