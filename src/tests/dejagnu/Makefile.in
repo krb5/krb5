@@ -7,6 +7,7 @@ RUNTESTFLAGS =
 KRB5_RUN_ENV= @KRB5_RUN_ENV@
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
+KRB4_RUNTESTFLAGS=@KRB4_DEJAGNU_TEST@
 
 SRCS=$(srcdir)/t_inetd.c
 
@@ -21,7 +22,7 @@ check-::
 	@echo "+++"
 
 check-runtest:: t_inetd site.exp
-	$(HAVE_RUNTEST) --tool krb --srcdir $(srcdir) $(RUNTESTFLAGS)
+	$(HAVE_RUNTEST) --tool krb --srcdir $(srcdir) $(KRB4_RUNTESTFLAGS) $(RUNTESTFLAGS)
 
 t_inetd:: t_inetd.o $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o t_inetd t_inetd.o $(KRB5_BASE_LIBS)

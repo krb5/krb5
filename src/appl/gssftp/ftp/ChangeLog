@@ -1,3 +1,38 @@
+2001-11-02  Tom Yu  <tlyu@mit.edu>
+
+	* cmds.c (setpeer): Kludge to #define unix on BSD for now.
+
+2001-10-29  Ezra Peisach  <epeisach@mit.edu>
+
+	* secure.c: Instead of hard wiring the FUDGE_FACTOR, new variables
+	to keep track of the total buffer length desired and the actual
+	maximum that can be fitted. Add secure_determine_constants() to
+	determine the mechanism dependent overhead. This has a hard limit
+	for krb4 - for gssapi use gss_wrap_size_limit.
+	[pullup from trunk]
+
+2001-10-26  Ken Raeburn  <raeburn@mit.edu>
+
+	* cmds.c (setpeer): Use unsigned short for port number.  Patch
+	from Garry Zacheiss.
+
+2000-05-11  Nalin Dahyabhai  <nalin@redhat.com>
+
+	* domacro.c (domacro): Don't overflow "line2"
+	* ftp.c (getreply, krb4 compat): Bail if message data too big for buffer
+	(getreply, gssapi): Ditto.
+	(pswitch): Don't overflow "ntin", "ntout", "mapin", "mapout".
+	(do_auth, krb4 compat): Don't overflow "realm".
+
+2000-04-27  Nalin Dahyabhai  <nalin@redhat.com>
+
+	* cmds.c (remglob): Don't overflow buffer "temp".
+	(shell): Don't overflow buffer "shellnam".
+	(quote1): "buf"
+	* glob.c (ftpglob): Fix boundary in buffer "agpath".
+	(expand): Don't overflow buffer pointed to by "gpath".
+	(execbrc): Don't overflow buffer "restbuf".
+
 2000-02-18  Ken Raeburn  <raeburn@mit.edu>
 
 	* cmds.c (mls): Declare some variables volatile to protect against

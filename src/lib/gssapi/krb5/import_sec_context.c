@@ -44,7 +44,7 @@ gss_OID krb5_gss_convert_static_mech_oid(oid)
 		if ((oid->length == p->length) &&
 		    (memcmp(oid->elements, p->elements, p->length) == 0)) {
 			gss_release_oid(&minor_status, &oid);
-			return p;
+			return (gss_OID) p;
 		}
 	}
 	return oid;

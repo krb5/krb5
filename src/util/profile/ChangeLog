@@ -1,3 +1,32 @@
+2001-11-05  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (LIBMINOR): Bump due to error table changes.
+
+2001-09-25  Ken Raeburn  <raeburn@mit.edu>
+
+	* prof_err.et (PROF_BAD_BOOLEAN, PROF_BAD_INTEGER): New error
+	codes.
+
+2001-02-02  Tom Yu  <tlyu@mit.edu>
+
+	* krb5.conf: Test with trailing whitespace on "default_realm"
+	line. [pullup from trunk]
+
+	* krb5.conf: Test with a space after ']' and '{' [pullup from trunk]
+
+	* prof_parse.c (parse_std_line): Spaces after '{' or ']' should
+	not be a fatal error. This is a common lossage in krb5.conf files.
+	[pullup from trunk]
+
+2000-10-7  Miro Jurisic  <meeroh@mit.edu>
+
+	* et.pbexp: Added the Mach-O initializer function
+
+2000-10-7  Miro Jurisic  <meeroh@mit.edu>
+
+	* et.pbexp: Added the Mac OS X export file (hopefully temporary,
+	until Apple fixes their tools to use the same format as Mac OS 9)
+
 1999-10-26  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,

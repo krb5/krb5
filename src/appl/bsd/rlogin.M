@@ -25,6 +25,7 @@ rlogin \- remote login
 .I rhost
 [\fB\-e\fP\fI\|c\fP] [\fB\-8\fP] [\fB\-c\fP] [ \fB\-a\fP] [\fB\-f\fP]
 [\fB\-F\fP] [\fB\-t\fP \fItermtype\fP] [\fB\-n\fP] [\fB\-7\fP]
+[\fB\-PN | \-PO\fP]
 [\fB\-d\fP] [\fB\-k\fP \fIrealm\fP] [\fB\-x\fP] [\fB\-L\fP] [\fB\-l\fP
 \fIusername\fP]
 .PP
@@ -133,6 +134,16 @@ instead of the remote host's realm as determined by
 turn on DES encryption for all data passed via the rlogin session.  This
 significantly reduces response time and significantly increases CPU
 utilization.
+.TP
+\fB-PN\fP
+.TP
+\fB-PO\fP
+Explicitly request new or old version of the Kerberos ``rcmd''
+protocol.  The new protocol avoids many security problems found in the
+old one, but is not interoperable with older servers.  (An
+"input/output error" and a closed connection is the most likely result
+of attempting this combination.)  If neither option is specified, some
+simple heuristics are used to guess which to try.
 .SH SEE ALSO
 rsh(1), kerberos(3), krb_sendauth(3), krb_realmofhost(3), rlogin(1) [UCB
 version]

@@ -1,3 +1,14 @@
+2000-06-21  Tom Yu  <tlyu@mit.edu>
+
+	* server.c: Include gssrpc/pmap_clnt.h in order to get renaming of
+	pmap_unset().  From Nathan Neulinger.
+
+2000-06-08  Tom Yu  <tlyu@mit.edu>
+
+	* lib/helpers.exp (kinit): Move "expect eof" into the commands
+	that send the prompt.  Don't "expect eof" outside of the main
+	expect, as the main expect may have already read eof.
+
 2000-02-15  Tom Yu  <tlyu@mit.edu>
 
 	* server.c: Add code to set a signal handler for SIGHUP and a few

@@ -1,3 +1,29 @@
+2001-10-29  Miro Jurisic  <meeroh@mit.edu>
+	* pullup from krb5-1-2 branch after krb5-1-2-2-bp
+	* gssapi.hin, gssapi_generic.h, gssapi_generic.c: 
+	added oids from rfc 2744.  Kept old oids for compatibility.
+	* gssapi.hin: Changed KerberosConditionalMacros.h to
+	KerberosSupport.h.
+	* gssapi.hin: Fixed Mac OS preprocessor test
+	* gssapi_generic.h: corrected Mac OS include to <GSS/gssapi.h>
+	* gssapiP_generic.h: use "" include for krb5.h
+	* disp_com_err_status.c, gssapi.hin: Updated Mac OS #defines
+	and #includes for new header layout and Mac OS X frameworks
+	* gssapi_generic.h: Added check for Mac OS X includes.  This will
+	not break autoconf-style builds because they do not include
+	ConditionalMacros.h.
+        
+2001-10-20  Ken Raeburn  <raeburn@mit.edu>
+
+	* gssapiP_generic.h (g_*): For every g_ function declared here,
+	first define the name as a macro using a gssint_ prefix to avoid
+	conflicting with glib function names.
+
+2000-09-11  Alexandra Ellwood <lxs@mit.edu>
+        * gssapi_generic.h: Added check for Mac OS X includes.  This will
+        not break autoconf-style builds because they do not include
+        ConditionalMacros.h.
+        
 1999-10-26  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,

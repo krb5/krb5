@@ -4,8 +4,8 @@ kdb5_util \- Kerberos database maintainance utility
 .SH SYNOPSIS
 .B kdb5_util
 .I command
-[\fB\-r\fP \fIrealm\fP] [\fB\-d\fP \fIdbname\fP]
-[\fB\-k\fP \fImkeytype\fP] [\fB\-M\fP \fImkeyname\fP]
+[\fB\-r\fP\ \fIrealm\fP] [\fB\-d\fP\ \fIdbname\fP]
+[\fB\-k\fP\ \fImkeytype\fP] [\fB\-M\fP\ \fImkeyname\fP]
 [\fB\-m\fP]
 .I command_options
 .SH DESCRIPTION
@@ -35,25 +35,25 @@ successfully opens the database, because the database may not exist yet
 or the stash file may be corrupt.
 .SH COMMAND-LINE OPTIONS
 .TP
-\fB\-r\fP \fIrealm\fP
+\fB\-r\fP\ \fIrealm\fP
 specifies the Kerberos realm of the database; by default the realm
 returned by
 .IR krb5_default_local_realm (3)
 is used.
 .TP
-\fB-d\fP \fIdbname\fP
+\fB\-d\fP\ \fIdbname\fP
 specifies the name under which the principal database is stored; by
 default the database is that listed in
 .IR kdc.conf (5).
 The KADM5 policy database and lock file are also derived from this
 value.
 .TP
-\fB\-k\fP \fImkeytype\fP
+\fB\-k\fP\ \fImkeytype\fP
 specifies the key type of the master key in the database; the default is
 that given in
 .IR kdc.conf .
 .TP
-\fB\-M\fP \fImkeyname\fP
+\fB\-M\fP\ \fImkeyname\fP
 principal name for the master key in the database; the default is
 that given in
 .IR kdc.conf .
@@ -63,7 +63,7 @@ specifies that the master database password should be read from the TTY
 rather than fetched from a file on disk.
 .SH COMMANDS
 .TP
-\fBcreate\fP [\fB-s\fP]
+\fBcreate\fP [\fB\-s\fP]
 Creates a new database.  If the
 .B \-s
 option is specified, the stash file is also created.  This command fails
@@ -78,15 +78,17 @@ the
 .B \-f
 argument, does not prompt the user.
 .TP
-\fBstash\fP [\fB\-f\fP \fIkeyfile\fP]
+\fBstash\fP [\fB\-f\fP\ \fIkeyfile\fP]
 Stores the master principal's keys in a stash file.  The
 .B \-f
 argument can be used to override the keyfile specified at startup.
 .TP
-\fBdump\fP [\fB\-old\fP] [\fB\-b6\fP] [\fB\-ov\fP] [\fB-verbose\fP] [\fIfilename\fP [\fIprincipals...\fP]]
+\fBdump\fP [\fB\-old\fP] [\fB\-b6\fP] [\fB\-b7\fP] [\fB\-ov\fP]
+[\fB\-verbose\fP] [\fIfilename\fP [\fIprincipals...\fP]]
+.br
 Dumps the current Kerberos and KADM5 database into an ASCII file.  By
 default, the database is dumped in current format, "kdb5_util
-load_dumpversion 4".  Options:
+load_dumpversion 5".  Options:
 .RS
 .TP
 .B \-old
@@ -96,6 +98,9 @@ causes the dump to be in the Kerberos 5 Beta 5 and earlier dump format
 .B \-b6
 causes the dump to be in the Kerberos 5 Beta 6 format ("kdb5_edit
 load_dump version 3.0").
+.TP
+.B \-b7
+causes the dump to be in the Kerberos 5 Beta 7 format ("kdb5_util load_dump version 4").  This was the dump format produced on releases prior to 1.2.2.
 .TP
 .B \-ov
 causes the dump to be in
@@ -107,7 +112,9 @@ causes the name of each principal and policy to be printed as it is
 dumped.
 .RE
 .TP
-\fBload\fP [\fB\-old\fP] [\fB\-b6\fP] [\fB\-ov\fP] [\fB-verbose\fP] [\fB-update\fP] \fIfilename dbname\fP [\fIadmin_dbname\fP]
+\fBload\fP [\fB\-old\fP] [\fB\-b6\fP] [\fB\-ov\fP]
+[\fB\-verbose\fP] [\fB\-update\fP] \fIfilename dbname\fP [\fIadmin_dbname\fP]
+.br
 Loads a database dump from the named file into the named database.
 Unless the 
 .B \-old
@@ -129,6 +136,10 @@ requires the database to be in the Kerberos 5 Beta 5 and earlier format
 .B \-b6
 requires the database to be in the Kerberos 5 Beta 6 format ("kdb5_edit
 load_dump version 3.0").
+.TP
+.B \-b7
+requires the database to be in the Kerberos 5 Beta 7 format ("kdb5_util
+load_dump version 4").
 .TP
 .B \-ov
 requires the database to be in
@@ -159,7 +170,7 @@ if not specified.
 \fBdump_v4\fP [\fIfilename\fP]
 Dumps the current database into the Kerberos 4 database dump format.
 .TP
-\fBload_v4\fP [\fB\-t\fP] [\fB-n\fP] [\fB\-K\fP] [\fB-s \fIstashfile\fP] \fIinputfile\fP
+\fBload_v4\fP [\fB\-t\fP] [\fB-n\fP] [\fB\-K\fP] [\fB\-s\ \fIstashfile\fP] \fIinputfile\fP
 Loads a Kerberos 4 database dump file.  Options:
 .RS
 .TP

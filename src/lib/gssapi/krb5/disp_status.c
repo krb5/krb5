@@ -21,7 +21,12 @@
  */
 
 #include "gssapiP_krb5.h"
+
+#if TARGET_OS_MAC
+#include <KerberosComErr/KerberosComErr.h>
+#else
 #include "com_err.h"
+#endif
 
 /* XXXX internationalization!! */
 

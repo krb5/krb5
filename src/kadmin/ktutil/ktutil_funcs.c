@@ -317,7 +317,9 @@ krb5_error_code ktutil_write_keytab(context, list, name)
     krb5_error_code retval = 0;
 
     strcpy(ktname, "WRFILE:");
-    strncat(ktname, name, MAXPATHLEN);
+    if (strlen (name) >= MAXPATHLEN)
+	return ENAMETOOLONG;
+    strncat (ktname, name, MAXPATHLEN);
     retval = krb5_kt_resolve(context, ktname, &kt);
     if (retval)
 	return retval;

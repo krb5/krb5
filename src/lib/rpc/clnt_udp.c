@@ -117,7 +117,7 @@ clntudp_bufcreate(raddr, program, version, wait, sockp, sendsz, recvsz)
 	unsigned int recvsz;
 {
 	CLIENT *cl;
-	register struct cu_data *cu;
+	register struct cu_data *cu = 0;
 	struct timeval now;
 	struct rpc_msg call_msg;
 

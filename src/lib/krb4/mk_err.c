@@ -41,6 +41,14 @@ krb_mk_err(p,e,e_string)
 {
     u_char      *start;
 
+    /* Just return the buffer length if p is NULL, because writing to the
+     * buffer would be a bad idea.  Note that this feature is a change from
+     * previous versions, and can therefore only be used safely in this
+     * source tree, where we know this function supports it. */
+    if(p == NULL) {
+        return 2 + sizeof(e) + strlen(e_string);
+    }
+
     start = p;
 
     /* Create fixed part of packet */
