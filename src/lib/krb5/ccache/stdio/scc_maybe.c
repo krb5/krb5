@@ -98,7 +98,7 @@ krb5_scc_open_file (id, mode)
 	  (void) fclose (data->file);
 	  data->file = 0;
      }
-#if defined(__STDC__)
+#ifdef ANSI_STDIO
      switch(mode) {
      case SCC_OPEN_AND_ERASE:
 	 open_flag = "wb+";
@@ -129,9 +129,10 @@ krb5_scc_open_file (id, mode)
      f = fopen (data->filename, open_flag);
      if (!f)
 	  return krb5_scc_interpret (errno);
-     setbuf (f, data->stdio_buffer);
-#if 0 /* alternative, not requiring sizeof stdio_buffer == BUFSIZ */
+#ifdef ANSI_STDIO
      setvbuf(f, data->stdio_buffer, _IOFBF, sizeof (data->stdio_buffer));
+#else
+     setbuf (f, data->stdio_buffer);
 #endif
      switch (mode) {
      case SCC_OPEN_RDONLY:
@@ -166,7 +167,7 @@ krb5_scc_open_file (id, mode)
 	     (void) fclose(f);
 	     return KRB5_CCACHE_BADVNO;
 	 }
-	 if (scc_fvno != htons(KRB5_SCC_FVNO)) {
+	 if (scc_fvno != (krb5_int16)htons(KRB5_SCC_FVNO)) {
 	     (void) krb5_unlock_file(f, data->filename);
 	     (void) fclose(f);
 	     return KRB5_CCACHE_BADVNO;
