@@ -125,7 +125,7 @@ bloop2
 x
 s/^[^ ]* [^ ]* [^ ]* //
 s/\./\\./g
-s|\(^.*$\)|\
+s|^\(.*\)$|\
 # Now substitute for BUILDTOP:\
 s; \1/; $(BUILDTOP)/;g|
 p
