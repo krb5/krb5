@@ -1,3 +1,8 @@
+2004-08-31  Tom Yu  <tlyu@mit.edu>
+
+	* rd_rep.c:
+	* send_tgs.c: Fix double-free vulnerabilities.
+
 2004-08-27  Ken Raeburn  <raeburn@mit.edu>
 
 	* conv_princ.c (krb5_425_conv_principal): Terminate argument list
