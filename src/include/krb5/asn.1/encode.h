@@ -16,6 +16,21 @@
 #ifndef __KRB5_ENCODE_DEFS__
 #define __KRB5_ENCODE_DEFS__
 
+
+/* encode.c */
+krb5_error_code encode_generic
+    PROTOTYPE((krb5_pointer,
+	       krb5_data **,
+	       int (* )PROTOTYPE ((PE,int,int,char *,krb5_pointer )),
+	       krb5_pointer (* )PROTOTYPE ((krb5_pointer,int *)),
+	       void (* )PROTOTYPE ((krb5_pointer ))));
+krb5_error_code decode_generic
+	PROTOTYPE((krb5_data *,
+		   krb5_pointer *,
+		   int (* )PROTOTYPE ((PE,int,int,char *,krb5_pointer )),
+		   krb5_pointer (* )PROTOTYPE ((krb5_pointer,int *)),
+		   void (* )PROTOTYPE ((krb5_pointer ))));
+
 #define encode_krb5_authenticator(pauth, output) \
     encode_generic(pauth,  output, \
 		   encode_KRB5_Authenticator, \
@@ -37,6 +52,17 @@
 		   decode_KRB5_Ticket, \
 		   KRB5_Ticket2krb5_ticket, \
 		   free_KRB5_Ticket)
+
+#define encode_krb5_enc_tkt_part(ptick, output) \
+    encode_generic(ptick,  output, \
+		   encode_KRB5_EncTicketPart, \
+		   krb5_enc_tkt_part2KRB5_EncTicketPart, \
+		   free_KRB5_EncTicketPart)
+#define decode_krb5_enc_tkt_part(ptick, output) \
+    decode_generic(ptick, (krb5_pointer *) output, \
+		   decode_KRB5_EncTicketPart, \
+		   KRB5_EncTicketPart2krb5_enc_tkt_part, \
+		   free_KRB5_EncTicketPart)
 
 #define encode_krb5_as_req(req, output) \
     encode_generic(req, output, \
