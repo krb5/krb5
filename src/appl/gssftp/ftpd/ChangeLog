@@ -1,3 +1,9 @@
+Thu Mar 25 23:13:56 1999  Tom Yu  <tlyu@mit.edu>
+
+	* ftpd.c (login): Check that the luid is not the uid we want to
+	change to prior to calling setluid() so that we can run as
+	non-root.
+
 Wed Mar 24 17:11:32 1999  Tom Yu  <tlyu@mit.edu>
 
 	* configure.in: Check for sys/sockio.h.

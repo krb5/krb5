@@ -899,7 +899,8 @@ pass(passwd)
  	 * set the login uid. If this fails this opens up a problem on DEC OSF
  	 * with C2 enabled.
 	 */
-	if (setluid((uid_t)pw->pw_uid) < 0) {
+	if (((uid_t)getluid() != pw->pw_uid)
+	    && setluid((uid_t)pw->pw_uid) < 0) {
 	        reply(550, "Can't set luid.");
 		goto bad;
 	}
