@@ -72,10 +72,6 @@ static char sccsid[] = "@(#)ftp.c	5.38 (Berkeley) 4/22/91";
 #include <varargs.h>
 #endif
 
-#ifdef POSIX
-#include <stdlib.h>
-#endif
-
 #ifndef L_SET
 #define L_SET 0
 #endif
@@ -128,7 +124,7 @@ off_t	restart_point = 0;
 extern char *sys_errlist[];
 #endif
 
-extern int connected, errno;
+extern int errno;
 
 #define herror()	printf("unknown host\n")
 
@@ -2028,7 +2024,6 @@ do_auth()
     outer_loop:
 	    if (maj_stat == GSS_S_COMPLETE)
 	        break;
-	    ;
 	  }
 	  verbose = oldverbose;
 	  if (maj_stat == GSS_S_COMPLETE) {
