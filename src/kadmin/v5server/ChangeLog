@@ -1,4 +1,23 @@
 
+Wed Aug 9 17:09:35 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* admin.c - Add code to use kdb5's change-password interfaces under
+		USE_KDB5_CPW for now until it's fully shaken out.
+		- Fix a memory leak in admin_add_modify.
+		- Handle null return from krb5_dbe_decode_mod_princ_data().
+	* passwd.c - Add code to use kdb5's change-password interfaces under
+		USE_KDB5_CPW for now until it's fully shaken out.
+		- Fix a memory leak in passwd_check_opass_ok()
+	* proto_serv.c - Use krb5_auth_context_free() to free the auth_context
+		instead of krb5_xfree().
+	* srv_acl.c - Fix Purify complaint about reading freed data.
+	* srv_key.c - Add krb5_use_keytype() for each keytype.  Add key_master_
+		encblock() for usage by kdb5's change-password interfaces.
+	* srv_net.c - Change sense of test to mark slave entry freed.  This
+		allows us to work for a while while debugging and slave creation
+		disable.
+	* kadm5_defs.h - Add prototype for key_master_encblock().
+
+
 Tue Aug 8 17:30:36 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* admin.c - Allow multiple key/salt strings to be parsed.  Fix key
 		merging logic.  Fix some Purify complaints.
