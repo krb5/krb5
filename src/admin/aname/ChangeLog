@@ -1,4 +1,12 @@
 
+Fri Jun 30 14:28:20 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* kdb5_anadd.c - Add ability to select between Berkeley and DBM format
+		at compile time.
+	* configure.in - Add --with-dbm and --with-aname-dbm and check/set
+		appropriate definitions and libraries.
+	* Makefile.in - Use DBFLAGS set by configure.in.
+
+
 Thu Jun 15 15:22:33 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in - Change explicit library names to -l<lib> form, and
 		change target link line to use $(LD) and associated flags.

@@ -30,6 +30,29 @@
 #include <stdio.h>
 #include <errno.h>
 
+#ifdef	BERK_DB_DBM
+/*
+ * Use Berkeley database code.
+ */
+extern DBM	*db_dbm_open PROTOTYPE((char *, int, int));
+extern void     db_dbm_close PROTOTYPE((DBM *));
+extern int      db_dbm_delete PROTOTYPE((DBM *, datum));
+extern int      db_dbm_store PROTOTYPE((DBM *, datum, datum, int));
+
+#define	KDBM_OPEN(db, fl, mo)	db_dbm_open(db, fl, mo)
+#define	KDBM_CLOSE(db)		db_dbm_close(db)
+#define	KDBM_DELETE(db, key)	db_dbm_delete(db, key)
+#define	KDBM_STORE(db,key,c,f)	db_dbm_store(db, key, c, f)
+#else	/* BERK_DB_DBM */
+/*
+ * Use stock DBM code.
+ */
+#define	KDBM_OPEN(db, fl, mo)	dbm_open(db, fl, mo)
+#define	KDBM_CLOSE(db)		dbm_close(db)
+#define	KDBM_DELETE(db, key)	dbm_delete(db, key)
+#define	KDBM_STORE(db,key,c,f)	dbm_store(db, key, c, f)
+#endif	/* BERK_DB_DBM */
+
 extern int errno;
 
 void
@@ -97,7 +120,7 @@ char *argv[];
     pname = argv[optind];
     lname = argv[optind+1];
 
-    if (!(db = dbm_open(andbname, O_RDWR|O_CREAT, 0644))) {
+    if (!(db = KDBM_OPEN(andbname, O_RDWR|O_CREAT, 0644))) {
 	com_err(argv[0], errno, "while opening/creating %s",
 		andbname);
 	exit(1);
@@ -106,22 +129,22 @@ char *argv[];
     key.dsize = strlen(pname)+1;	/* include the null */
 
     if (del) {
-	if (dbm_delete(db, key)) {
+	if (KDBM_DELETE(db, key)) {
 	    com_err(argv[0], 0, "No such entry while deleting %s from %s",
 		    pname, andbname);
-	    dbm_close(db);
+	    KDBM_CLOSE(db);
 	    exit(1);
 	}
     } else if (add) {
 	contents.dptr = lname;
 	contents.dsize = strlen(lname)+1;
-	if (dbm_store(db, key, contents, DBM_REPLACE)) {
+	if (KDBM_STORE(db, key, contents, DBM_REPLACE)) {
 	    com_err(argv[0], errno, "while inserting/replacing %s in %s",
 		    pname, andbname);
-	    dbm_close(db);
+	    KDBM_CLOSE(db);
 	    exit(1);
 	}
     }
-    dbm_close(db);
+    KDBM_CLOSE(db);
     exit(0);
 }
