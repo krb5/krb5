@@ -17,6 +17,6 @@ case $HOST_TYPE in
 esac
 SHLIB_TAIL_COMP=$krb5_cv_shlibs_tail_comp
 AC_SUBST(SHLIB_TAIL_COMP)
-CONFIG_DIRS(et ss profile berk_db)
+CONFIG_DIRS(et ss profile berk_db pty)
 DO_SUBDIRS
 V5_AC_OUTPUT_MAKEFILE

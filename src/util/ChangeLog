@@ -1,3 +1,12 @@
+Wed Jul 26 15:39:53 1995  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* configure.in (SHLIB_TAIL_COMP): Add pty to CONFIG_DIRS
+
+Thu Jul 13 16:09:10 1995  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* makeshlib.sh (ldflags): Protect test for HAVE_GCC so it works if not using gcc.
+
+
 Thu Jul  6 09:52:08 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* Makefile.in (clean): Remove makeshlib
