@@ -114,21 +114,26 @@ typedef struct _krb5_as_req {
     krb5_principal server;		/* includes realm (but not used) */
 } krb5_as_req;
 
+typedef struct _krb5_enc_kdc_rep_part {
+    /* encrypted part: */
+    krb5_confounder confounder;		/* confounder */
+    krb5_keyblock *session;		/* session key */
+    krb5_last_req_entry **last_req;	/* array of ptrs to entries */
+    krb5_timestamp ctime;		/* client timestamp */
+    krb5_timestamp key_exp;		/* expiration date */
+    krb5_flags flags;			/* ticket flags */
+    krb5_ticket_times times;		/* lifetime info */
+    krb5_principal server;		/* server's principal identifier */
+    krb5_address **caddrs;		/* array of ptrs to addresses */
+} krb5_enc_kdc_rep_part;
+
 typedef struct _krb5_kdc_rep {
     /* cleartext part: */
     krb5_principal client;		/* client's principal identifier */
     krb5_enctype etype;			/* encryption type */
     krb5_kvno ckvno;			/* client key version */
-    krb5_string ticket;			/* ticket (already encrypted) */
-    /* encrypted part: */
-    krb5_confounder confounder;		/* confounder */
-    krb5_keyblock *session;		/* session key */
-    krb5_last_req_entry *last_req;	/* array of ptrs to entries */
-    krb5_ticket_times times;		/* lifetime info */
-    krb5_timestamp key_exp;		/* expiration date */
-    krb5_flags flags;			/* ticket flags */
-    krb5_principal server;		/* server's principal identifier */
-    krb5_address **caddrs;		/* array of ptrs to addresses */
+    krb5_ticket *ticket;		/* ticket */
+    krb5_string enc_part;		/* encrypted part */
 } krb5_kdc_rep;
 
 /* error message structure */
@@ -140,18 +145,65 @@ typedef struct _krb5_error {
     krb5_timestamp stime;		/* server sec portion */
     krb5_ui_4 error;			/* error code (protocol error #'s) */
     krb5_principal client;		/* client's principal identifier */
-    krb5_principal server;		/* client's principal identifier */
+    krb5_principal server;		/* server's principal identifier */
     krb5_string text;			/* descriptive text */
 } krb5_error;
 
+typedef struct _krb5_ap_req {
+    krb5_flags ap_options;		/* requested options */
+    krb5_ticket *ticket;		/* ticket */
+    krb5_string authenticator;		/* authenticator (already encrypted) */
+} krb5_ap_req;
+
 typedef struct _krb5_ap_rep {
+    krb5_string enc_part;
+} krb5_ap_rep;
+
+typedef struct _krb5_ap_rep_enc_part {
     krb5_timestamp ctime;		/* client time, seconds portion */
     krb5_ui_2 cmsec;			/* client time, milliseconds portion */
-} krb5_ap_rep;
+} krb5_ap_rep_enc_part;
 
 typedef struct _krb5_response {
     octet message_type;
     krb5_string *response;
 } krb5_response;
 
+typedef struct _krb5_tgs_req {
+    krb5_ap_req *header;		/* AP-REQ */
+    krb5_flags kdc_options;		/* requested options */
+    krb5_timestamp from;		/* requested starttime */
+    krb5_timestamp till;		/* requested endtime */
+    krb5_timestamp rtime;		/* (optional) requested renew_till */
+    krb5_timestamp ctime;		/* client's time */
+    krb5_enctype etype;			/* encryption type */
+    krb5_principal server;		/* server's principal identifier */
+    krb5_address **addresses;		/* array of ptrs to addresses */
+    krb5_string enc_part;		/* (optional) encrypted part */
+} krb5_tgs_req;
+
+typedef struct _krb5_tgs_req_enc_part {
+    krb5_authdata **authorization_data;	/* auth data */
+    krb5_ticket *second_ticket;		/* second ticket */
+} krb5_tgs_req_enc_part;
+
+typedef struct _krb5_safe {
+    krb5_string user_data;		/* user data */
+    krb5_timestamp timestamp;		/* client time */
+    krb5_ui_2 msec;			/* millisecond portion of time */
+    krb5_address **addresses;		/* array of ptrs to addresses */
+    krb5_checksum *checksum;		/* data integrity checksum */
+} krb5_safe;
+
+typedef struct _krb5_priv {
+    krb5_enctype etype;			/* encryption type */
+    krb5_string enc_part;		/* encrypted part */
+} krb5_priv;
+
+typedef struct _krb5_priv_enc_part {
+    krb5_string user_data;		/* user data */
+    krb5_timestamp timestamp;		/* client time */
+    krb5_ui_2 msec;			/* millisecond portion of time */
+    krb5_address **addresses;		/* array of ptrs to addresses */
+} krb5_priv_enc_part;
 #endif /* __KRB5_GENERAL__ */
