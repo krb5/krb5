@@ -211,18 +211,18 @@ The translation will be null terminated in all non-error returns.
 
 Returns system errors.
 
-\begin{funcdecl}{krb5_get_default_realm}{krb5_error_code}{\funcin}
-\funcarg{int}{lnsize}
+\begin{funcdecl}{krb5_get_default_realm}{krb5_error_code}
 \funcout
-\funcarg{char *}{lrealm}
+\funcarg{char **}{lrealm}
 \end{funcdecl}
 
 Retrieves the default realm to be used if no user-specified realm is
 available (e.g. to interpret a user-typed principal name with the
-realm omitted for convenience).
+realm omitted for convenience), filling in \funcparam{lrealm} with a
+pointer to the default realm in allocated storage.
 
-\funcparam{lnsize} specifies the maximum length name that is to be filled into
-\funcparam{lrealm}.
+It is the caller's responsibility for freeing the allocated storage
+pointed to be \funcparam{lream} when it is finished with it.
 
 Returns system errors.
 
@@ -272,3 +272,54 @@ Returns TRUE if authorized, FALSE if not authorized.
 Given a length and a pointer, fills in the area pointed to by
 \funcparam{fillin} with \funcparam{size} random octets suitable for use
 in a confounder.
+
+\begin{funcdecl}{krb5_gen_portaddr}{krb5_error_code}{\funcin}
+\funcarg{const krb5_address *}{adr}
+\funcarg{krb5_const_pointer}{ptr}
+\funcout
+\funcarg{krb5_address **}{outaddr}
+\end{funcdecl}
+
+Given an address \funcparam{adr} and an additional address-type specific
+portion pointed to by
+\funcparam{port} this routine
+combines them into a freshly-allocated
+\datatype{krb5_address} with type \datatype{ADDRTYPE_ADDRPORT} and fills in
+\funcparam{*outaddr} to point to this address.  For IP addresses,
+\funcparam{ptr} should point to a network-byte-order TCP or UDP port
+number.  Upon success, \funcparam{*outaddr} will point to an allocated
+address which should be freed with \funcname{krb5_free_address}.
+
+\begin{funcdecl}{krb5_gen_replay_name}{krb5_error_code}{\funcin}
+\funcarg{const krb5_address *}{inaddr}
+\funcarg{const char *}{uniq}
+\funcout
+\funcarg{char **}{string}
+\end{funcdecl}
+
+Given a \datatype{krb5_address} with type \datatype{ADDRTYPE_ADDRPORT}
+in \funcparam{inaddr}, this function unpacks its component address and
+additional type, and uses them along with \funcparam{uniq} to allocate a
+fresh string to represent the address and additional information.  The
+string is suitable for use as a replay cache tag.  This string is
+allocated and should be freed with \funcname{free} when the caller has
+finished using it.  When using IP addresses, the components in
+\funcparam{inaddr\ptsto contents} must be of type
+\datatype{ADDRTYPE_INET} and \datatype{ADDRTYPE_PORT}.
+
+\begin{funcdecl}{krb5_sname_to_principal}{krb5_error_code}{\funcin}
+\funcarg{const char *}{hostname}
+\funcarg{const char *}{sname}
+\funcout
+\funcarg{krb5_principal *}{ret_princ}
+\end{funcdecl}
+
+Given a hostname \funcparam{hostname} and a generic service name
+\funcparam{sname}, this function generates a full principal name to be
+used when authenticating with the named service on the host.
+\funcparam{hostname} is placed into canonical form before being composed
+into the returned principal \funcparam{ret_princ}.  The realm of the
+principal is determined internally by calling \funcname{krb5_get_host_realm}.
+
+The caller should release \funcparam{ret_princ}'s storage by calling
+\funcname{krb5_free_principal} when it is finished with the principal.
