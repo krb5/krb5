@@ -1,4 +1,3 @@
-//#include "k5-int.h"
 #include "krb5.h"
 	
 #if defined(macintosh)
@@ -11,17 +10,19 @@
 
 #define kStringLiteralLen 255
 
-//globals to be exported
+/* globals to be exported */
 extern krb5_cc_ops krb5_cc_stdcc_ops;
 
-//structure to stash in the cache's data field
-//only holds another pointer to the actual cache right now
+/*
+ * structure to stash in the cache's data field
+ */
 typedef struct _stdccCacheData {
+     	char *cache_name;
 	ccache_p *NamedCache;
 } stdccCacheData, *stdccCacheDataPtr;
 
 
-//function protoypes complete with bogus windowsesque macros.. 
+/* function protoypes  */
 
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_stdcc_close
         KRB5_PROTOTYPE((krb5_context, krb5_ccache id ));
