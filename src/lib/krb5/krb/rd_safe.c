@@ -148,7 +148,7 @@ krb5_data *outbuf;
     message->checksum = his_cksum;
 			 
     if (!(our_cksum.contents = (krb5_octet *)
-	  malloc(krb5_cksumarray[his_cksum->checksum_type]->checksum_length))) {
+	  malloc(krb5_checksum_size(his_cksum->checksum_type)))) {
 	cleanup();
 	return ENOMEM;
     }
@@ -156,12 +156,10 @@ krb5_data *outbuf;
 #undef cleanup
 #define cleanup() {krb5_free_safe(message); xfree(our_cksum.contents);}
 
-    retval = (*(krb5_cksumarray[his_cksum->checksum_type]->
-		sum_func))(scratch->data,
-			   scratch->length,
-			   (krb5_pointer) key->contents,
-			   key->length,
-			   &our_cksum);
+    retval = krb5_calculate_checksum(his_cksum->checksum_type,
+				     scratch->data, scratch->length,
+				     (krb5_pointer) key->contents,
+				     key->length, &our_cksum);
     (void) memset((char *)scratch->data, 0, scratch->length);
     krb5_free_data(scratch);
     
@@ -169,7 +167,6 @@ krb5_data *outbuf;
 	cleanup();
 	return retval;
     }
-
 
     if (our_cksum.length != his_cksum->length ||
 	memcmp((char *)our_cksum.contents, (char *)his_cksum->contents,
