@@ -30,6 +30,11 @@
 #endif
 #include <krb5.h>
 
+/* C++ friendlyness */
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
 extern const gss_OID_desc * const gss_mech_krb5;
 extern const gss_OID_desc * const gss_mech_krb5_old;
 extern const gss_OID_desc * const gss_mech_krb5_v2;
@@ -71,5 +76,9 @@ OM_uint32 gss_krb5_ccache_name
 OM_uint32 krb5_gss_set_backward_mode
         PROTOTYPE((OM_uint32 *minor_status,
                    int mode));
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
 #endif /* _GSSAPI_KRB5_H_ */

@@ -1,5 +1,9 @@
 1999-03-14  Miro Jurisic  <meeroh@mit.edu>
 
+	* gssapi_krb5.h: added extern "C" for C++ friendliness
+
+1999-03-14  Miro Jurisic  <meeroh@mit.edu>
+
 	* set_ccache.c (gss_krb5_ccache_name): Now compiles
 
 1999-03-11  Theodore Ts'o  <tytso@rsts-11.mit.edu>
