@@ -1,4 +1,8 @@
 
+Tue May 9 15:27:36 EDT 1995	Paul Park	(pjpark@mit.edu)
+	Fix compiler warnings.
+
+
 Fri May 5 11:07:52 EDT 1995	Paul Park	(pjpark@mit.edu)
 	#ifdef out language and support.  Remove description from manpage.
 

@@ -411,8 +411,8 @@ main(argc, argv)
 
 	npass_len = KRB5_ADM_MAX_PASSWORD_LEN;
 	if (!(kret = krb5_read_password(kcontext,
-					kpwd_change_prompt_1,
-					kpwd_change_prompt_2,
+					(char *) kpwd_change_prompt_1,
+					(char *) kpwd_change_prompt_2,
 					npassword,
 					&npass_len))) {
 	    krb5_data		check_data[2];
