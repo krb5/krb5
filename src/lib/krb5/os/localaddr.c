@@ -799,8 +799,9 @@ add_addr (void *P_data, struct sockaddr *a)
 #endif
 
 #ifdef AF_LINK
-	/* Some BSD-based systems (e.g. NetBSD 1.5) will include the
-	   ethernet address, but we don't want that, at least for now.  */
+	/* Some BSD-based systems (e.g. NetBSD 1.5) and AIX will
+	   include the ethernet address, but we don't want that, at
+	   least for now.  */
     case AF_LINK:
 	break;
 #endif
