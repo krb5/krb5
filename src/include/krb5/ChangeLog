@@ -1,4 +1,8 @@
 
+Thu Jul 27 02:59:05 1995   Chris Provenzano (proven@mit.edu)
+
+        * kdb.h - Define new kdb format.
+
 Mon Jul 17 15:03:43 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* adm.h - Add per-realm parameter block data structure
 		(krb5_realm_params).

@@ -28,62 +28,85 @@
 #ifndef KRB5_KDB5__
 #define KRB5_KDB5__
 
-/* this is the same structure as krb5_keyblock, but with a different name to
-   enable compile-time catching of programmer confusion between encrypted &
-   decrypted keys in the database */
-
-typedef struct _krb5_encrypted_keyblock {
-    krb5_magic magic;
-    short keytype;				/* XXX this is SO ugly --- proven */
-    int length;
-    krb5_octet *contents;
-} krb5_encrypted_keyblock;
-
 /*
- * Note --- this structure cannot be modified without changing the
- * database version number in libkdb.a
+ * Note --- these structures cannot be modified without changing the
+ * database version number in libkdb.a, but should be expandable by
+ * adding new tl_data types.
  */
-typedef struct _krb5_db_entry {
-    krb5_magic magic;
-    krb5_principal principal;
-    krb5_encrypted_keyblock key;
-    krb5_kvno kvno;
-    krb5_deltat	max_life;
-    krb5_deltat	max_renewable_life;
-    krb5_kvno mkvno;			/* master encryption key vno */
-    
-    krb5_timestamp expiration;		/* This is when the client expires */
-    krb5_timestamp pw_expiration; 	/* This is when its password does */
-    krb5_timestamp last_pwd_change; 	/* Last time of password change  */
-    krb5_timestamp last_success;	/* Last successful password */
-    
-    krb5_timestamp last_failed;		/* Last failed password attempt */
-    krb5_kvno fail_auth_count; 		/* # of failed password attempts */
-    
-    krb5_principal mod_name;
-    krb5_timestamp mod_date;
-    krb5_flags attributes;
-    krb5_int32 salt_type:8,
- 	       salt_length:24;
-    krb5_octet *salt;
-    krb5_encrypted_keyblock alt_key;
-    krb5_int32 alt_salt_type:8,
- 	       alt_salt_length:24;
-    krb5_octet *alt_salt;
-    
-    krb5_int32 expansion[8];
-} krb5_db_entry;
-  
-#ifdef SANDIA	/* SANDIA Enhancement (Pre-Auth/Blacklist) */
-#define KRB5_MAX_FAIL_COUNT		5
-#endif
+typedef struct _krb5_tl_data {
+    struct _krb5_tl_data* tl_data_next;		/* NOT saved */
+    krb5_int16 		  tl_data_type;		
+    krb5_int16		  tl_data_length;	
+    krb5_octet 	        * tl_data_contents;	
+} krb5_tl_data;
 
+/* 
+ * If this ever changes up the version number and make the arrays be as
+ * big as necessary.
+ *
+ * Currently the first type is the keytype and the second is the salt type.
+ */
+typedef struct _krb5_key_data {
+    krb5_int16 		  key_data_ver;		/* Version */
+    krb5_int16		  key_data_kvno;	/* Key Version */
+    krb5_int16		  key_data_type[2];	/* Array of types */
+    krb5_int16		  key_data_length[2];	/* Array of lengths */
+    krb5_octet 	        * key_data_contents[2];	/* Array of pointers */
+} krb5_key_data;
+
+#define KRB5_KDB_V1_KEY_DATA_ARRAY	2	/* # of array elements */
+
+typedef struct _krb5_keysalt {
+    krb5_int16		  type;	
+    krb5_data		  data;			/* Length, data */
+} krb5_keysalt;
+
+/* Salt types */
 #define KRB5_KDB_SALTTYPE_NORMAL	0
 #define KRB5_KDB_SALTTYPE_V4		1
 #define KRB5_KDB_SALTTYPE_NOREALM	2
 #define KRB5_KDB_SALTTYPE_ONLYREALM	3
 #define KRB5_KDB_SALTTYPE_SPECIAL	4
 
+typedef struct _krb5_db_entry_new {
+    krb5_magic 		  magic;		/* NOT saved */
+    krb5_int16		  len;			
+    krb5_kvno 		  mkvno;
+    krb5_flags 		  attributes;
+    krb5_deltat		  max_life;
+    krb5_deltat		  max_renewable_life;
+    krb5_timestamp 	  expiration;	  	/* When the client expires */
+    krb5_timestamp 	  pw_expiration;  	/* When its passwd expires */
+    krb5_timestamp 	  last_success;		/* Last successful passwd */
+    krb5_timestamp 	  last_failed;		/* Last failed passwd attempt */
+    krb5_kvno 	 	  fail_auth_count; 	/* # of failed passwd attempt */
+    krb5_int16 		  n_tl_data;
+    krb5_int16 		  n_key_data;
+    krb5_int16		  e_length;		/* Length of extra data */
+    krb5_octet		* e_data;		/* Extra data to be saved */
+
+    krb5_principal 	  princ;		/* Length, data */	
+    krb5_tl_data	* tl_data;		/* Linked list */
+    krb5_key_data       * key_data;		/* Array */
+} krb5_db_entry;
+
+#define	KRB5_KDB_MAGIC_NUMBER		0xdbdbdbdb
+#define KRB5_KDB_V1_BASE_LENGTH		42
+  
+struct tl_data_1 {
+    krb5_timestamp 	  last_pwd_change; 	/* Last time passwd changed */
+};
+
+#define KRB5_TL_LAST_PWD_CHANGE		0x0001
+
+typedef struct tl_data_2 {
+    krb5_timestamp 	  mod_date;
+    krb5_principal 	  mod_princ;
+} krb5_tl_mod_princ;
+
+#define KRB5_TL_MOD_PRINC		0x0002
+    
+/* Attributes */
 #define	KRB5_KDB_DISALLOW_POSTDATED	0x00000001
 #define	KRB5_KDB_DISALLOW_FORWARDABLE	0x00000002
 #define	KRB5_KDB_DISALLOW_TGT_BASED	0x00000004
@@ -97,6 +120,10 @@ typedef struct _krb5_db_entry {
 #define KRB5_KDB_DISALLOW_SVR		0x00001000
 #define KRB5_KDB_PWCHANGE_SERVICE	0x00002000
 #define KRB5_KDB_SUPPORT_DESMD5         0x00004000
+
+#ifdef SANDIA	/* SANDIA Enhancement (Pre-Auth/Blacklist) */
+#define KRB5_MAX_FAIL_COUNT		5
+#endif
 
 /* XXX depends on knowledge of krb5_parse_name() formats */
 #define KRB5_KDB_M_NAME		"K/M"	/* Kerberos/Master */
@@ -161,16 +188,7 @@ krb5_error_code krb5_db_store_mkey
 		   char *,
 		   krb5_principal,
 		   krb5_keyblock *));
-krb5_error_code krb5_kdb_encrypt_key
-	KRB5_PROTOTYPE((krb5_context,
-		   krb5_encrypt_block *,
-		   const krb5_keyblock *,
-		   krb5_encrypted_keyblock *));
-krb5_error_code krb5_kdb_decrypt_key
-	KRB5_PROTOTYPE((krb5_context,
-		   krb5_encrypt_block *,
-		   const krb5_encrypted_keyblock *,
-		   krb5_keyblock *));
+
 krb5_error_code krb5_db_setup_mkey_name
 	KRB5_PROTOTYPE((krb5_context,
 		   const char *, 
@@ -199,7 +217,98 @@ krb5_error_code	krb5_db_fetch_mkey
 		   krb5_data *, 
 		   krb5_keyblock * ));
 
+krb5_error_code krb5_dbekd_encrypt_key_data
+	KRB5_PROTOTYPE((krb5_context,
+		   krb5_encrypt_block *,
+		   const krb5_keyblock *,
+		   const krb5_keysalt *,
+		   int,
+		   krb5_key_data *));
+krb5_error_code krb5_dbekd_decrypt_key_data
+	KRB5_PROTOTYPE((krb5_context,
+		   krb5_encrypt_block *,
+		   const krb5_key_data *,
+		   krb5_keyblock *,
+		   krb5_keysalt *));
+krb5_error_code krb5_dbe_create_key_data
+	KRB5_PROTOTYPE((krb5_context,
+			krb5_db_entry *));
+krb5_error_code krb5_dbe_encode_mod_princ_data
+	KRB5_PROTOTYPE((krb5_context,
+    		   krb5_tl_mod_princ *,
+    		   krb5_db_entry *));
+krb5_error_code krb5_dbe_decode_mod_princ_data
+	KRB5_PROTOTYPE((krb5_context,
+    		   krb5_db_entry *,
+    		   krb5_tl_mod_princ  **));
+int krb5_encode_princ_dbmkey
+	KRB5_PROTOTYPE((krb5_context,
+    		   datum  *,
+    		   krb5_principal));
+void krb5_free_princ_dbmkey
+	KRB5_PROTOTYPE((krb5_context,
+		   datum  *));
+krb5_error_code krb5_encode_princ_contents
+	KRB5_PROTOTYPE((krb5_context,
+    		   datum  *,
+    		   krb5_db_entry *));
+void krb5_free_princ_contents
+	KRB5_PROTOTYPE((krb5_context,
+		   datum  *));
+krb5_error_code krb5_decode_princ_contents
+	KRB5_PROTOTYPE((krb5_context,
+    		   datum  *,
+    		   krb5_db_entry *));
+void krb5_dbe_free_contents
+	KRB5_PROTOTYPE((krb5_context,
+    		   krb5_db_entry *));
+ 
 #define KRB5_KDB_DEF_FLAGS	0
+
+#ifdef KRB5_OLD_AND_KRUFTY
+/* this is the same structure as krb5_keyblock, but with a different name to
+   enable compile-time catching of programmer confusion between encrypted &
+   decrypted keys in the database */
+
+typedef struct _krb5_encrypted_keyblock {
+    krb5_magic magic;
+    short keytype;			/* XXX this is SO ugly --- proven */
+    int length;
+    krb5_octet *contents;
+} krb5_encrypted_keyblock;
+
+typedef struct _krb5_db_entry {
+    krb5_magic magic;
+    krb5_principal principal;
+    krb5_encrypted_keyblock key;
+    krb5_kvno kvno;
+    krb5_deltat	max_life;
+    krb5_deltat	max_renewable_life;
+    krb5_kvno mkvno;			/* master encryption key vno */
+    
+    krb5_timestamp expiration;		/* This is when the client expires */
+    krb5_timestamp pw_expiration; 	/* This is when its password does */
+    krb5_timestamp last_pwd_change; 	/* Last time of password change  */
+    krb5_timestamp last_success;	/* Last successful password */
+    
+    krb5_timestamp last_failed;		/* Last failed password attempt */
+    krb5_kvno fail_auth_count; 		/* # of failed password attempts */
+    
+    krb5_principal mod_name;
+    krb5_timestamp mod_date;
+    krb5_flags attributes;
+    krb5_int32 salt_type:8,
+ 	       salt_length:24;
+    krb5_octet *salt;
+    krb5_encrypted_keyblock alt_key;
+    krb5_int32 alt_salt_type:8,
+ 	       alt_salt_length:24;
+    krb5_octet *alt_salt;
+    
+    krb5_int32 expansion[8];
+} krb5_db_entry_OLD;
+
+#endif	/* OLD_AND_KRUFTY */
 
 #ifdef	KDB5_DISPATCH
 /*
@@ -229,4 +338,3 @@ krb5_error_code kdb5_db_set_dbops KRB5_PROTOTYPE((krb5_context,
 						  kdb5_dispatch_table *));
 #endif	/* KDB5_DISPATCH */
 #endif /* KRB5_KDB5__ */
-
