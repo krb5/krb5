@@ -448,7 +448,7 @@ sub read_file
 {
 	die("Bad call to read_file") unless defined $_[0];
 	local($FN) = (&chew_on_filename($_[0]));
-	local (@LINES, @CRFREE_LINES, @NLFREE_LINES);
+	local ($CONTENTS, @NLFREE_LINES);
 
 	if (!open(FILE, $FN))
 	{
@@ -456,17 +456,23 @@ sub read_file
 		exit(1);
 	}
 
-	@LINES=<FILE>;
-	@CRFREE_LINES=grep(s/\012$//, @LINES);
-	@NLFREE_LINES=grep(s/\n$//, @CRFREELINES);
-	
-	if (!close(FILE))
 	{
-		print(STDERR "Can't close $FN.\n");
-		exit(1);
-	}
+		local ($/);
+		undef $/;
+		$CONTENTS = <FILE>;
+		
+		$CONTENTS =~ s/\012/\015/g;
+		
+		@NLFREE_LINES = split ('\015', $CONTENTS);
+		
+		if (!close(FILE))
+		{
+			print(STDERR "Can't close $FN.\n");
+			exit(1);
+		}
 
-	@NLFREE_LINES;
+		return @NLFREE_LINES;
+	}
 }
 
 # lists files that match $PATTERN in $DIR.
