@@ -42,6 +42,7 @@ int timestamp_width;
 
 krb5_context kcontext;
 
+char * etype_string KRB5_PROTOTYPE((krb5_enctype ));
 void show_credential KRB5_PROTOTYPE((char *,
 				krb5_context,
 				krb5_creds *));
@@ -213,6 +214,8 @@ void do_keytab(name)
 	       printf(" ");
 	  }
 	  printf("%s", pname);
+if (show_etype)
+    printf(" (%s) " , etype_string(entry.key.enctype));
 	  if (show_keys) {
 	       printf(" (0x");
 	       {
