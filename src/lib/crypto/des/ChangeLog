@@ -1,3 +1,8 @@
+Thu Sep 28 16:00:00 1995  John Rivlin  <jrivlin@fusion.com>
+
+	* Makefile.in: Renamed verify.c to t_verify.c to avoid conflict with 
+		lib/gssapi/krb5/verify.c on the Mac.
+
 Mon Sep 25 16:48:36 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in: Removed "foo:: foo-$(WHAT)" lines from the
