@@ -122,10 +122,14 @@ if(asn1class != CONTEXT_SPECIFIC || construction != CONSTRUCTED)\
 get_field_body(var,decoder)
 
 /* decode (or skip, if not present) an optional field */
-#define opt_field(var,tagexpect,decoder)\
-if(asn1class != CONTEXT_SPECIFIC || construction != CONSTRUCTED)\
-  clean_return(ASN1_BAD_ID);\
-if(tagnum == (tagexpect)){ get_field_body(var,decoder); }
+#define opt_field(var,tagexpect,decoder)				\
+  if (asn1buf_remains(&subbuf, seqindef)) {				\
+    if (asn1class != CONTEXT_SPECIFIC || construction != CONSTRUCTED)	\
+      clean_return(ASN1_BAD_ID);					\
+    if (tagnum == (tagexpect)) {					\
+      get_field_body(var,decoder);					\
+    }									\
+  }
 
 /* field w/ accompanying length *********/
 #define get_lenfield_body(len,var,decoder)\
@@ -143,13 +147,15 @@ if(asn1class != CONTEXT_SPECIFIC || construction != CONSTRUCTED)\
 get_lenfield_body(len,var,decoder)
 
 /* decode an optional field w/ length */
-#define opt_lenfield(len,var,tagexpect,decoder)\
-if(asn1class != CONTEXT_SPECIFIC || construction != CONSTRUCTED)\
-  clean_return(ASN1_BAD_ID);\
-if(tagnum == (tagexpect)){\
-  get_lenfield_body(len,var,decoder);\
-}
-
+#define opt_lenfield(len,var,tagexpect,decoder)				\
+  if (asn1buf_remains(&subbuf, seqindef)) {				\
+    if (asn1class != CONTEXT_SPECIFIC || construction != CONSTRUCTED)	\
+      clean_return(ASN1_BAD_ID);					\
+    if (tagnum == (tagexpect)) {					\
+      get_lenfield_body(len,var,decoder);				\
+    }									\
+  }
+  
 
 /* clean up ******************************************************/
 /* finish up */

@@ -1,3 +1,20 @@
+2002-10-07  Tom Yu  <tlyu@mit.edu>
+
+	* asn1_get.c (asn1_get_tag_indef): Stomp on asn1class,
+	construction, retlen, and indef, even if we've hit the end of the
+	buffer, to avoid passing uninitialized values around.
+
+	* asn1_k_decode.c: Reformat somewhat and add comments to demystify
+	things a little.
+	(opt_field): Fix to explicitly check for end of subbuf before
+	verifying the pre-fetched tag, which may have been stomped on by
+	asn1_get_tag_indef() encountering end-of-buffer.
+
+	* krb5_decode.c (opt_field, opt_lenfield): Fix to explicitly check
+	for end of subbuf before verifying the pre-fetched tag, which may
+	have been stomped on by asn1_get_tag_indef() encountering
+	end-of-buffer.
+
 2002-09-02  Ken Raeburn  <raeburn@mit.edu>
 
 	* asn1_decode.c, asn1_encode.c, asn1_get.c, asn1_get.h,

@@ -29,141 +29,212 @@
 #include "asn1_get.h"
 #include "asn1_misc.h"
 
-#define setup()\
-asn1_error_code retval;\
-asn1_class asn1class;\
-asn1_construction construction;\
-asn1_tagnum tagnum;\
-unsigned int length,taglen
+/* Declare useful decoder variables. */
+#define setup()					\
+  asn1_error_code retval;			\
+  asn1_class asn1class;				\
+  asn1_construction construction;		\
+  asn1_tagnum tagnum;				\
+  unsigned int length, taglen
 
-#define unused_var(x) if(0) {x=0; x=x-x;}
+#define unused_var(x) if (0) { x = 0; x = x - x; }
 
-#define next_tag()\
-retval = asn1_get_tag_indef(&subbuf,&asn1class,&construction,\
-			    &tagnum,&taglen,&indef);\
-if(retval) return retval;
+/* This is used for prefetch of next tag in sequence. */
+#define next_tag()							\
+  retval = asn1_get_tag_indef(&subbuf, &asn1class, &construction,	\
+			      &tagnum, &taglen, &indef);		\
+  if (retval) return retval;
 
-#define get_eoc()						\
-retval = asn1_get_tag_indef(&subbuf,&asn1class,&construction,	\
-			    &tagnum,&taglen,&indef);		\
-if(retval) return retval;					\
-if(asn1class != UNIVERSAL || tagnum || indef)			\
-  return ASN1_MISSING_EOC
+/* Force check for EOC tag. */
+#define get_eoc()							\
+  retval = asn1_get_tag_indef(&subbuf, &asn1class, &construction,	\
+			      &tagnum, &taglen, &indef);		\
+  if (retval) return retval;						\
+  if (asn1class != UNIVERSAL || tagnum || indef)			\
+    return ASN1_MISSING_EOC
 
-#define alloc_field(var,type)\
-var = (type*)calloc(1,sizeof(type));\
-if((var) == NULL) return ENOMEM
+#define alloc_field(var, type)			\
+  var = (type*)calloc(1, sizeof(type));		\
+  if ((var) == NULL) return ENOMEM
 
-
-#define apptag(tagexpect)\
-retval = asn1_get_tag(buf,&asn1class,&construction,&tagnum,&applen);\
-if(retval) return retval;\
-if(asn1class != APPLICATION || construction != CONSTRUCTED ||\
-   tagnum != (tagexpect)) return ASN1_BAD_ID
+/* Fetch an expected APPLICATION class tag and verify. */
+#define apptag(tagexpect)						   \
+  retval = asn1_get_tag(buf, &asn1class, &construction, &tagnum, &applen); \
+  if (retval) return retval;						   \
+  if (asn1class != APPLICATION || construction != CONSTRUCTED ||	   \
+      tagnum != (tagexpect)) return ASN1_BAD_ID
 
 /**** normal fields ****/
-#define get_field_body(var,decoder)\
-retval = decoder(&subbuf,&(var));\
-if(retval) return retval;\
-if(!taglen && indef) { get_eoc(); }\
-next_tag()
 
-#define get_field(var,tagexpect,decoder)\
-if(tagnum > (tagexpect)) return ASN1_MISSING_FIELD;\
-if(tagnum < (tagexpect)) return ASN1_MISPLACED_FIELD;\
-if((asn1class != CONTEXT_SPECIFIC || construction != CONSTRUCTED) \
-   && (tagnum || taglen || asn1class != UNIVERSAL)) \
-  return ASN1_BAD_ID;\
-get_field_body(var,decoder)
+/*
+ * get_field_body
+ *
+ * Get bare field.  This also prefetches the next tag.  The call to
+ * get_eoc() assumes that any values fetched by this macro are
+ * enclosed in a context-specific tag.
+ */
+#define get_field_body(var, decoder)		\
+  retval = decoder(&subbuf, &(var));		\
+  if (retval) return retval;			\
+  if (!taglen && indef) { get_eoc(); }		\
+  next_tag()
 
-#define opt_field(var,tagexpect,decoder,optvalue)\
-if((asn1class != CONTEXT_SPECIFIC || construction != CONSTRUCTED) \
-   && (tagnum || taglen || asn1class != UNIVERSAL)) \
-  return ASN1_BAD_ID;\
-if(tagnum == (tagexpect)){\
-  get_field_body(var,decoder); }\
-else var = optvalue
+/*
+ * get_field
+ *
+ * Get field having an expected context specific tag.  This assumes
+ * that context-specific tags are monotonically increasing in its
+ * verification of tag numbers.
+ */
+#define get_field(var, tagexpect, decoder)				\
+  if (tagnum > (tagexpect)) return ASN1_MISSING_FIELD;			\
+  if (tagnum < (tagexpect)) return ASN1_MISPLACED_FIELD;		\
+  if ((asn1class != CONTEXT_SPECIFIC || construction != CONSTRUCTED)	\
+      && (tagnum || taglen || asn1class != UNIVERSAL))			\
+    return ASN1_BAD_ID;							\
+  get_field_body(var,decoder)
 
+/*
+ * opt_field
+ *
+ * Get an optional field with an expected context specific tag.
+ * Assumes that OPTVAL will have the default value, thus failing to
+ * distinguish between absent optional values and present optional
+ * values that happen to have the value of OPTVAL.
+ */
+#define opt_field(var, tagexpect, decoder, optvalue)			\
+  if (asn1buf_remains(&subbuf, seqindef)) {				\
+    if ((asn1class != CONTEXT_SPECIFIC || construction != CONSTRUCTED)	\
+	&& (tagnum || taglen || asn1class != UNIVERSAL))		\
+      return ASN1_BAD_ID;						\
+    if (tagnum == (tagexpect)) {					\
+      get_field_body(var, decoder);					\
+    } else var = optvalue;						\
+  }
+  
 /**** fields w/ length ****/
-#define get_lenfield_body(len,var,decoder)\
-retval = decoder(&subbuf,&(len),&(var));\
-if(retval) return retval;\
-if(!taglen && indef) { get_eoc(); }\
-next_tag()
 
-#define get_lenfield(len,var,tagexpect,decoder)\
-if(tagnum > (tagexpect)) return ASN1_MISSING_FIELD;\
-if(tagnum < (tagexpect)) return ASN1_MISPLACED_FIELD;\
-if((asn1class != CONTEXT_SPECIFIC || construction != CONSTRUCTED) \
-   && (tagnum || taglen || asn1class != UNIVERSAL)) \
-  return ASN1_BAD_ID;\
-get_lenfield_body(len,var,decoder)
+/* similar to get_field_body */
+#define get_lenfield_body(len, var, decoder)	\
+  retval = decoder(&subbuf, &(len), &(var));	\
+  if (retval) return retval;			\
+  if (!taglen && indef) { get_eoc(); }		\
+  next_tag()
 
-#define opt_lenfield(len,var,tagexpect,decoder)\
-if(tagnum == (tagexpect)){\
-  get_lenfield_body(len,var,decoder); }\
-else { len = 0; var = 0; }
+/* similar to get_field_body */
+#define get_lenfield(len, var, tagexpect, decoder)			\
+  if (tagnum > (tagexpect)) return ASN1_MISSING_FIELD;			\
+  if (tagnum < (tagexpect)) return ASN1_MISPLACED_FIELD;		\
+  if ((asn1class != CONTEXT_SPECIFIC || construction != CONSTRUCTED)	\
+      && (tagnum || taglen || asn1class != UNIVERSAL))			\
+    return ASN1_BAD_ID;							\
+  get_lenfield_body(len, var, decoder)
 
+/* similar to opt_field */
+#define opt_lenfield(len, var, tagexpect, decoder)	\
+  if (tagnum == (tagexpect)) {				\
+    get_lenfield_body(len, var, decoder);		\
+  } else { len = 0; var = 0; }
 
-#define begin_structure()\
-asn1buf subbuf;\
-int seqindef;\
-int indef;\
-retval = asn1_get_sequence(buf,&length,&seqindef);\
-if(retval) return retval;\
-retval = asn1buf_imbed(&subbuf,buf,length,seqindef);\
-if(retval) return retval;\
-next_tag()
+/*
+ * begin_structure
+ *
+ * Declares some variables for decoding SEQUENCE types.  This is meant
+ * to be called in an inner block that ends with a call to
+ * end_structure().
+ */
+#define begin_structure()					\
+  asn1buf subbuf;						\
+  int seqindef;							\
+  int indef;							\
+  retval = asn1_get_sequence(buf, &length, &seqindef);		\
+  if (retval) return retval;					\
+  retval = asn1buf_imbed(&subbuf, buf, length, seqindef);	\
+  if (retval) return retval;					\
+  next_tag()
 
-#define end_structure()\
-retval = asn1buf_sync(buf,&subbuf,asn1class,tagnum,length,indef,seqindef);\
-if(retval) return retval
+/* skip trailing garbage */
+#define end_structure()						\
+  retval = asn1buf_sync(buf, &subbuf, asn1class, tagnum,	\
+			length, indef, seqindef);		\
+  if (retval) return retval
 
+/*
+ * sequence_of
+ *
+ * Declares some variables for decoding SEQUENCE OF types.  This is
+ * meant to be called in an inner block that ends with a call to
+ * end_sequence_of().
+ */
 #define sequence_of(buf)			\
-unsigned int length, taglen;			\
-asn1_class asn1class;				\
-asn1_construction construction;			\
-asn1_tagnum tagnum;				\
-int indef;					\
-sequence_of_common(buf)
+  unsigned int length, taglen;			\
+  asn1_class asn1class;				\
+  asn1_construction construction;		\
+  asn1_tagnum tagnum;				\
+  int indef;					\
+  sequence_of_common(buf)
 
-#define sequence_of_common(buf)				\
-int size=0;						\
-asn1buf seqbuf;						\
-int seqofindef;						\
-retval = asn1_get_sequence(buf,&length,&seqofindef);	\
-if(retval) return retval;				\
-retval = asn1buf_imbed(&seqbuf,buf,length,seqofindef);	\
-if(retval) return retval
-
+/*
+ * sequence_of_no_tagvars
+ *
+ * This is meant for use inside decoder functions that have an outer
+ * sequence structure and thus declares variables of different names
+ * than does sequence_of() to avoid shadowing.
+ */
 #define sequence_of_no_tagvars(buf)		\
-asn1_class eseqclass;				\
-asn1_construction eseqconstr;			\
-asn1_tagnum eseqnum;				\
-unsigned int eseqlen;				\
-int eseqindef;					\
-sequence_of_common(buf)
+  asn1_class eseqclass;				\
+  asn1_construction eseqconstr;			\
+  asn1_tagnum eseqnum;				\
+  unsigned int eseqlen;				\
+  int eseqindef;				\
+  sequence_of_common(buf)
 
+/*
+ * sequence_of_common
+ *
+ * Fetches the outer SEQUENCE OF length info into {length,seqofindef}
+ * and imbeds an inner buffer seqbuf.  Unlike begin_structure(), it
+ * does not prefetch the next tag.
+ */
+#define sequence_of_common(buf)					\
+  int size = 0;							\
+  asn1buf seqbuf;						\
+  int seqofindef;						\
+  retval = asn1_get_sequence(buf, &length, &seqofindef);	\
+  if (retval) return retval;					\
+  retval = asn1buf_imbed(&seqbuf, buf, length, seqofindef);	\
+  if (retval) return retval
+
+/*
+ * end_sequence_of
+ *
+ * Attempts to fetch an EOC tag, if any, and to sync over trailing
+ * garbage, if any.
+ */
+#define end_sequence_of(buf)						\
+  retval = asn1_get_tag_indef(&seqbuf, &asn1class, &construction,	\
+			      &tagnum, &taglen, &indef);		\
+  if (retval) return retval;						\
+  retval = asn1buf_sync(buf, &seqbuf, asn1class, tagnum,		\
+			length, indef, seqofindef);			\
+  if (retval) return retval;
+
+/*
+ * end_sequence_of_no_tagvars
+ *
+ * Like end_sequence_of(), but uses the different (non-shadowing)
+ * variable names.
+ */
 #define end_sequence_of_no_tagvars(buf)				\
-retval = asn1_get_tag_indef(&seqbuf,&eseqclass,&eseqconstr,	\
-			    &eseqnum,&eseqlen,&eseqindef);	\
-if(retval) return retval;					\
-retval = asn1buf_sync(buf,&seqbuf,eseqclass,eseqnum,		\
-		      eseqlen,eseqindef,seqofindef);		\
-if(retval) return retval;
+  retval = asn1_get_tag_indef(&seqbuf, &eseqclass, &eseqconstr,	\
+			      &eseqnum, &eseqlen, &eseqindef);	\
+  if (retval) return retval;					\
+  retval = asn1buf_sync(buf, &seqbuf, eseqclass, eseqnum,	\
+			eseqlen, eseqindef, seqofindef);	\
+  if (retval) return retval;
 
-#define end_sequence_of(buf)					\
-retval = asn1_get_tag_indef(&seqbuf,&asn1class,&construction,	\
-			    &tagnum,&taglen,&indef);		\
-if(retval) return retval;					\
-retval = asn1buf_sync(buf,&seqbuf,asn1class,tagnum,			\
-		      length,indef,seqofindef);			\
-if(retval) return retval;
-
-#define cleanup()\
-return 0
-
-
+#define cleanup()				\
+  return 0
 
 /* scalars */
 asn1_error_code asn1_decode_kerberos_time(asn1buf *buf, krb5_timestamp *val)

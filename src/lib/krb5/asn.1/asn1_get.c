@@ -35,8 +35,16 @@ asn1_get_tag_indef(asn1buf *buf, asn1_class *asn1class,
   
   if (buf == NULL || buf->base == NULL ||
       buf->bound - buf->next + 1 <= 0) {
-      *tagnum = ASN1_TAGNUM_CEILING;
-      return 0;
+    *tagnum = ASN1_TAGNUM_CEILING; /* emphatically not an EOC tag */
+    if (asn1class != NULL)
+      *asn1class = UNIVERSAL;
+    if (construction != NULL)
+      *construction = PRIMITIVE;
+    if (retlen != NULL)
+      *retlen = 0;
+    if (indef != NULL)
+      *indef = 0;
+    return 0;
   }
   retval = asn1_get_id(buf,asn1class,construction,tagnum);
   if(retval) return retval;
