@@ -1,3 +1,7 @@
+Wed Feb 12 15:22:53 1997  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
+
+	* configure.in: Fix DES425_DEPLIB
+
 Wed Feb  5 22:08:58 1997  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in:

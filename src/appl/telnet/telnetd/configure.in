@@ -72,7 +72,7 @@ withval=no
 AC_ARG_WITH([krb4],[],,withval=yes)
 if test $withval = no; then
 	DES425_LIB=-ldes425
-	DES425_DEPLIB='$(TOPLIBD)/libdes425.a'
+	DES425_DEPLIB='$(TOPLIBD)/libdes425$(DEPLIBEXT)'
 fi
 dnl
 KRB5_BUILD_PROGRAM
