@@ -239,6 +239,7 @@ kerberos5_send(ap)
 		return(0);
 	}
 
+	creds.keyblock.enctype=ENCTYPE_DES_CBC_CRC;
 	if ((r = krb5_get_credentials(telnet_context, 0,
 				      ccache, &creds, &new_creds))) {
 		if (auth_debug_mode) {

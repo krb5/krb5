@@ -1,3 +1,7 @@
+Fri Jan 26 01:05:46 1996  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* kerberos5.c (kerberos5_send): Get DES_CBC-CRC credentials.
+
 Tue Jan  9 22:53:58 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* forward.c (get_for_creds): Removed no longer used function.
