@@ -208,3 +208,8 @@ Changes in 1.1a3:
 3.1d1
  from tag Mac_GSSKerberos5_3_1d1
  Carbon and CWP 6 builds
+ 
+3.1d2
+ from tag Mac_GSSKerberos5_3_1d2
+ Fixed epoch conversion throughout
+ Rebuilt with fixed CWP 6 fcntl.h
