@@ -1,3 +1,8 @@
+Thu Jun 22 16:15:10 1995  Tom Yu  (tlyu@dragons-lair)
+
+	* acconfig.h: NO_NESTED_PROTOTYPES -> KRB5_NO_NESTED_PROTOTYPES;
+		KRB5_PROVIDE_PROTOTYPES -> KRB5_NO_PROTOTYPES
+
 Fri Jun 23 12:13:22 1995  Sam Hartman  <hartmans@tardis.MIT.EDU>
 
 	* configure.in: Enable static library generation for Linux.
