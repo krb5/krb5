@@ -255,17 +255,17 @@ char *kdb5_edit_Init(argc, argv)
     }
 
     if (master_keyblock.enctype != ENCTYPE_UNKNOWN) {
-	if (!valid_enctype(master_keyblock.enctype)) {
-	    char tmp[32];
-	    if (krb5_enctype_to_string(master_keyblock.enctype,
-				       tmp, sizeof(tmp)))
-		com_err(argv[0], KRB5_PROG_KEYTYPE_NOSUPP,
-			"while setting up enctype %d", master_keyblock.enctype);
-	    else
-		com_err(argv[0], KRB5_PROG_KEYTYPE_NOSUPP, tmp);
-	    exit(1);
-	}
-	krb5_use_enctype(edit_context, &master_encblock,
+	    if (!valid_enctype(master_keyblock.enctype)) {
+		    char tmp[32];
+		    if (krb5_enctype_to_string(master_keyblock.enctype,
+					       tmp, sizeof(tmp)))
+			    com_err(argv[0], KRB5_PROG_KEYTYPE_NOSUPP,
+				    "while setting up enctype %d", master_keyblock.enctype);
+		    else
+			    com_err(argv[0], KRB5_PROG_KEYTYPE_NOSUPP, tmp);
+		    exit(1);
+	    }
+	    krb5_use_enctype(edit_context, &master_encblock,
 			 master_keyblock.enctype);
     }
 
@@ -479,6 +479,24 @@ set_dbname_help(pname, dbname)
 	    com_err(pname, retval, "while calculated master key salt");
 	    return(1);
 	}
+
+	/* If no encryption type is set, use the default */
+	if (master_keyblock.enctype == ENCTYPE_UNKNOWN) {
+		master_keyblock.enctype = DEFAULT_KDC_ENCTYPE;
+		if (!valid_enctype(master_keyblock.enctype)) {
+			char tmp[32];
+			if (krb5_enctype_to_string(master_keyblock.enctype,
+						   tmp, sizeof(tmp)))
+				com_err(pname, KRB5_PROG_KEYTYPE_NOSUPP,
+					"while setting up enctype %d", master_keyblock.enctype);
+			else
+				com_err(pname, KRB5_PROG_KEYTYPE_NOSUPP, tmp);
+			exit(1);
+		}
+		krb5_use_enctype(edit_context, &master_encblock,
+				 master_keyblock.enctype);
+	}
+
 	retval = krb5_string_to_key(edit_context, &master_encblock, 
 				    &master_keyblock, &pwd, &scratch);
 	if (retval) {
@@ -557,7 +575,25 @@ void enter_master_key(argc, argv)
 		       master_keyblock.length);
 		krb5_xfree(master_keyblock.contents);
 		master_keyblock.contents = NULL;
+		valid_master_key = 0;
 	}
+
+	if (master_keyblock.enctype == ENCTYPE_UNKNOWN) {
+		master_keyblock.enctype = DEFAULT_KDC_ENCTYPE;
+		if (!valid_enctype(master_keyblock.enctype)) {
+			char tmp[32];
+			if (krb5_enctype_to_string(master_keyblock.enctype,
+						   tmp, sizeof(tmp)))
+				com_err(argv[0], KRB5_PROG_KEYTYPE_NOSUPP,
+					"while setting up enctype %d", master_keyblock.enctype);
+			else
+				com_err(argv[0], KRB5_PROG_KEYTYPE_NOSUPP, tmp);
+			exit(1);
+		}
+		krb5_use_enctype(edit_context, &master_encblock,
+				 master_keyblock.enctype);
+	}
+
 	if ((retval = krb5_db_fetch_mkey(edit_context, master_princ,
 					 &master_encblock,
 					TRUE, FALSE, (char *) NULL,
