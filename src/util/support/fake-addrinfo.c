@@ -131,9 +131,7 @@ extern /*@dependent@*/ char *gai_strerror (int code) /*@*/;
 #endif
 
 
-#if defined (__APPLE__) && defined (__MACH__)
-#define FAI_CACHE
-#endif
+#include "cache-addrinfo.h"
 
 #if (defined (__linux__) && defined(HAVE_GETADDRINFO)) || defined (_AIX)
 /* See comments below.  */
@@ -343,80 +341,6 @@ system_getnameinfo (const struct sockaddr *sa, socklen_t salen,
 
 #undef  gai_strerror
 #define gai_strerror	my_fake_gai_strerror
-#undef  addrinfo
-#define addrinfo	my_fake_addrinfo
-
-struct addrinfo {
-    int ai_family;		/* PF_foo */
-    int ai_socktype;		/* SOCK_foo */
-    int ai_protocol;		/* 0, IPPROTO_foo */
-    int ai_flags;		/* AI_PASSIVE etc */
-    size_t ai_addrlen;		/* real length of socket address */
-    char *ai_canonname;		/* canonical name of host */
-    struct sockaddr *ai_addr;	/* pointer to variable-size address */
-    struct addrinfo *ai_next;	/* next in linked list */
-};
-
-#undef	AI_PASSIVE
-#define	AI_PASSIVE	0x01
-#undef	AI_CANONNAME
-#define	AI_CANONNAME	0x02
-#undef	AI_NUMERICHOST
-#define	AI_NUMERICHOST	0x04
-/* RFC 2553 says these are part of the interface for getipnodebyname,
-   not for getaddrinfo.  RFC 3493 says they're part of the interface
-   for getaddrinfo, and getipnodeby* are deprecated.  Our fake
-   getaddrinfo implementation here does IPv4 only anyways.  */
-#undef	AI_V4MAPPED
-#define	AI_V4MAPPED	0
-#undef	AI_ADDRCONFIG
-#define	AI_ADDRCONFIG	0
-#undef	AI_ALL
-#define	AI_ALL		0
-#undef	AI_DEFAULT
-#define	AI_DEFAULT	(AI_V4MAPPED|AI_ADDRCONFIG)
-
-#ifndef NI_MAXHOST
-#define NI_MAXHOST 1025
-#endif
-#ifndef NI_MAXSERV
-#define NI_MAXSERV 32
-#endif
-
-#undef	NI_NUMERICHOST
-#define NI_NUMERICHOST	0x01
-#undef	NI_NUMERICSERV
-#define NI_NUMERICSERV	0x02
-#undef	NI_NAMEREQD
-#define NI_NAMEREQD	0x04
-#undef	NI_DGRAM
-#define NI_DGRAM	0x08
-#undef	NI_NOFQDN
-#define NI_NOFQDN	0x10
-
-
-#undef  EAI_ADDRFAMILY
-#define EAI_ADDRFAMILY	1
-#undef  EAI_AGAIN
-#define EAI_AGAIN	2
-#undef  EAI_BADFLAGS
-#define EAI_BADFLAGS	3
-#undef  EAI_FAIL
-#define EAI_FAIL	4
-#undef  EAI_FAMILY
-#define EAI_FAMILY	5
-#undef  EAI_MEMORY
-#define EAI_MEMORY	6
-#undef  EAI_NODATA
-#define EAI_NODATA	7
-#undef  EAI_NONAME
-#define EAI_NONAME	8
-#undef  EAI_SERVICE
-#define EAI_SERVICE	9
-#undef  EAI_SOCKTYPE
-#define EAI_SOCKTYPE	10
-#undef  EAI_SYSTEM
-#define EAI_SYSTEM	11
 
 #endif /* ! HAVE_GETADDRINFO */
 
@@ -586,23 +510,6 @@ int getnameinfo (const struct sockaddr *addr, socklen_t len,
 #if defined(NEED_FAKE_GETADDRINFO) || defined(WRAP_GETADDRINFO)
 #include <stdlib.h>
 #endif
-
-struct face {
-    struct in_addr *addrs4;
-    struct in6_addr *addrs6;
-    unsigned int naddrs4, naddrs6;
-    time_t expiration;
-    char *canonname, *name;
-    struct face *next;
-};
-
-/* fake addrinfo cache */
-struct fac {
-    k5_mutex_t lock;
-    struct face *data;
-};
-
-static struct fac krb5int_fac = { K5_MUTEX_PARTIAL_INITIALIZER, 0 };
 
 #ifdef NEED_FAKE_GETADDRINFO
 #include <string.h> /* for strspn */
@@ -1353,16 +1260,6 @@ void freeaddrinfo (struct addrinfo *ai)
 #endif
 }
 #endif /* WRAP_GETADDRINFO */
-
-int krb5int_init_fac (void)
-{
-    return k5_mutex_finish_init(&krb5int_fac.lock);
-}
-
-void krb5int_fini_fac (void)
-{
-    k5_mutex_destroy(&krb5int_fac.lock);
-}
 
 extern int krb5int_call_thread_support_init(void);
 static int krb5int_lock_fac (void)

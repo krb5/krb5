@@ -1,3 +1,17 @@
+2004-11-15  Ken Raeburn  <raeburn@mit.edu>
+
+	* cache-addrinfo.h, init-addrinfo.c: New files, split out from
+	fake-addrinfo.c.
+	* fake-addrinfo.c: Include cache-addrinfo.h.
+	(FAI_CACHE, struct face, struct fac): Moved to cache-addrinfo.h.
+	(krb5int_fac, krb5int_init_fac, krb5int_fini_fac): Moved to
+	init-addrinfo.c.
+	(addrinfo, struct addrinfo): Don't define.
+	(AI_* and NI_* and EAI_* macros): Don't define.
+	* threads.c: Include cache-addrinfo.h.
+	(krb5int_init_fac, krb5int_fini_fac): Don't declare.
+	* Makefile.in (SRCS, STLIBOBJS, LIBOBJS): Updated.
+
 2004-11-03  Ken Raeburn  <raeburn@mit.edu>
 
 	* fake-addrinfo.c: Import most of the contents of

@@ -322,8 +322,7 @@ int krb5int_call_thread_support_init (void)
     return CALL_INIT_FUNCTION(krb5int_thread_support_init);
 }
 
-extern int krb5int_init_fac(void);
-extern void krb5int_fini_fac(void);
+#include "cache-addrinfo.h"
 
 int krb5int_thread_support_init (void)
 {
