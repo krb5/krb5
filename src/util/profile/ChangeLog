@@ -1,3 +1,8 @@
+2000-10-7  Miro Jurisic  <meeroh@mit.edu>
+
+	* et.pbexp: Added the Mac OS X export file (hopefully temporary,
+	until Apple fixes their tools to use the same format as Mac OS 9)
+
 1999-10-26  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,
