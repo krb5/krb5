@@ -1,3 +1,11 @@
+2000-04-22  Ken Raeburn  <raeburn@mit.edu>
+
+	* localaddr.c: Include stddef.h.
+	(foreach_localaddr): Check each address against previously used
+	addresses, and skip duplicates, in case multiple interfaces have
+	the same address.  If called functions fail, drop out of loop and
+	return nonzero.
+
 2000-04-18  Danilo Almeida  <dalmeida@mit.edu>
 
 	* prompter.c (krb5int_set_prompt_types): Set to actual value
