@@ -36,7 +36,13 @@
 #endif
 
 /* add more for the various recent BSD variants */
-#if defined(__bsdi__) || defined(__NetBSD__)
+#if defined(__bsdi__) || defined(__NetBSD__) || defined(__FreeBSD__)
 #define BSD44
 #define BSD42
+#endif
+
+#ifdef vax
+#ifdef unix
+#define BSD42
+#endif
 #endif
