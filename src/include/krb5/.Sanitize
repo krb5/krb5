@@ -32,7 +32,9 @@ MacTCPCommonTypes.h
 Makefile.in
 TCPPB.h
 UDPPB.h
+adm.h
 adm_defs.h
+adm_proto.h
 asn.1
 asn1.h
 autoconf.h.in
