@@ -44,16 +44,7 @@ static char rcsid_kdb_edit_c[] =
 #include <ss/ss.h>
 #include <stdio.h>
 
-extern char *progname;
-extern char *Err_no_database;
-
-struct mblock {
-    krb5_deltat max_life;
-    krb5_deltat max_rlife;
-    krb5_timestamp expiration;
-    krb5_flags flags;
-    krb5_kvno mkvno;
-};
+#include "./kdb5_edit.h"
 
 struct dump_record {
 	char	*comerr_name;
