@@ -101,6 +101,7 @@
  *      FontTarget                               (basename)
  *      CompressedFontTarget                     (basename)
  *      AllTarget                                (depends)
+ *	DoRanlib				 (flags,files)
  * 
  * 
  * The general linking for building programs is:
@@ -286,26 +287,6 @@ SaberProgramTarget(program,$(SRCS3),$(OBJS3),locallib,syslib)		@@\
 InstallProgram(program,$(BINDIR))					@@\
 InstallManPage(program,$(MANDIR))
 #endif /* ComplexProgramTarget_3 */
-
-
-
-/*
- * ServerTarget - generate rules to compile, link, and relink an X server.
- */
-#ifndef ServerTarget
-#define	ServerTarget(server,subdirs,objects,libs,syslibs)		@@\
-server: subdirs objects libs						@@\
-	-@if [ -f server ]; then echo "	$(MV) server server.bak"; \	@@\
-		$(MV) server server.bak; else exit 0; fi		@@\
-	$(CC) $(CDEBUGFLAGS) $(CCOPTIONS) -o server objects libs $(EXTRA_LIBRARIES) syslibs $(EXTRA_LOAD_FLAGS) @@\
-									@@\
-load/**/server:								@@\
-	-@if [ -f server ]; then echo "	$(MV) server server.bak"; \	@@\
-		$(MV) server server.bak; else exit 0; fi		@@\
-	$(CC) $(CDEBUGFLAGS) $(CCOPTIONS) -o server objects libs $(EXTRA_LIBRARIES) syslibs $(EXTRA_LOAD_FLAGS)
-#endif /* ServerTarget */
-
-
 
 
 /*
@@ -501,23 +482,6 @@ InstallMultipleDestFlags(install,list,dest,flags)
 #define InstallMultipleMan(list,dest)					@@\
 InstallMultipleDest(install.man,list,dest)
 #endif /* InstallMultipleMan */
-
-
-/*
- * InstallAppDefaults - generate rules to install appliation default files 
- * if the InstallAppDefFiles configuration parameter is set.
- */
-#ifndef InstallAppDefaults
-#if InstallAppDefFiles
-#define	InstallAppDefaults(class)					@@\
-install:: class.ad							@@\
-	$(INSTALL) -c $(INSTAPPFLAGS) class.ad $(XAPPLOADDIR)/class
-#else
-#define	InstallAppDefaults(class)
-#endif /* InstallAppDefFiles */
-#endif /* InstallAppDefaults */
-
-
 
 
 /*
@@ -1359,67 +1323,6 @@ CppScriptTarget(name,name.cpp,defs, /**/)
 step::									@@\
 	$(MKDIRHIER) dirs
 #endif /* MakeDirectories */
-
-
-/*
- * MakeFonts - generate rules to build font databases.
- */
-#ifndef MakeFonts
-#define MakeFonts()							@@\
-all::  $(OBJS) fonts.dir						@@\
-									@@\
-fonts.dir:  $(OBJS)							@@\
-	$(MKFONTDIR) .							@@\
-									@@\
-clean::									@@\
-	$(RM) *.snf fonts.dir
-#endif /* MakeFonts */
-
-
-/*
- * InstallFonts - generate rules to install font files
- */
-#ifndef InstallFonts
-#define InstallFonts(dest)						@@\
-InstallMultipleFlags($(OBJS),dest,$(INSTDATFLAGS))			@@\
-									@@\
-install::  fonts.dir							@@\
-	$(INSTALL) -c $(INSTDATFLAGS) fonts.dir dest
-#endif /* InstallFonts */
-
-
-/*
- * InstallFontAliases - generate rules to install font aliases databases. 
- */
-#ifndef InstallFontAliases
-#define InstallFontAliases(dest)					@@\
-install::  fonts.alias							@@\
-	$(INSTALL) -c $(INSTDATFLAGS) fonts.alias dest
-#endif /* InstallFontAliases */
-
-
-/*
- * FontTarget - generate rules to convert a .bdf file into a .snf file.
- */
-#ifndef FontTarget
-#define FontTarget(basename)						@@\
-basename.snf:  basename.bdf						@@\
-	$(FONTC) $(FONTCFLAGS) $? >$@
-#endif /* FontTarget */
-
-
-/*
- * CompressedFontTarget - generate rules to convert a .bdf file into a 
- * compressed .snf file.
- */
-#ifndef CompressedFontTarget
-#define CompressedFontTarget(basename)					@@\
-basename.snf.Z:  basename.bdf						@@\
-	$(FONTC) $(FONTCFLAGS) $? >basename.snf				@@\
-	$(COMPRESS) basename.snf					@@\
-	rm -f basename.snf
-#endif /* CompressedFontTarget */
-
 
 /*
  * AllTarget - generate rules to build necessary things during make all.
