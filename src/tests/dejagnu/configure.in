@@ -1,0 +1,11 @@
+AC_INIT(Makefile.in)
+WITH_CCOPTS
+CONFIG_RULES
+AC_CONFIG_FRAGMENTS(.. ../.. ../../.. ../../../.. ../../../../.. ../../../../../..)
+AC_SUBST(BUILDTOP)
+BUILDTOP=[$]ac_reltopdir
+AC_PROG_INSTALL
+WITH_NETLIB
+KRB_INCLUDE
+WITH_KRB5ROOT
+V5_AC_OUTPUT_MAKEFILE

@@ -1,0 +1,5 @@
+RUNTEST = runtest
+RUNTESTFLAGS =
+
+check::
+	$(RUNTEST) --tool krb --srcdir $(srcdir) $(RUNTESTFLAGS)
