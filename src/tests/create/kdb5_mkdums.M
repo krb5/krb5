@@ -19,7 +19,8 @@
 .\" or implied warranty.
 .\" 
 .\"
-.TH KDB5_MKDUMS 8 "Kerberos Version 5.0" "MIT Project Athena"
+.so man1/header.doc
+.TH KDB5_MKDUMS 8 \*h
 .SH NAME
 kdb5_mkdums \- create a new Kerberos V5 principal database
 .SH SYNOPSIS

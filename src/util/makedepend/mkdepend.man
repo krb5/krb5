@@ -23,7 +23,9 @@
 .\" be used in advertising or otherwise to promote the sale, use or other 
 .\" dealing in this Software without prior written authorization from the 
 .\" X Consortium.
-.TH MAKEDEPEND 1 "Release 6" "X Version 11"
+.\" "
+.so man1/header.doc
+.TH MAKEDEPEND 1 \*h
 .UC 4
 .SH NAME
 makedepend \- create dependencies in makefiles
