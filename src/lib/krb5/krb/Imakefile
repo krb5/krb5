@@ -29,6 +29,7 @@ OBJS=	addr_comp.o	\
 	addr_srch.o	\
 	bld_pr_ext.o	\
 	bld_princ.o	\
+	compat_recv.o	\
 	conv_princ.o	\
 	copy_addrs.o	\
 	copy_auth.o	\
@@ -87,6 +88,7 @@ SRCS=	$(SRCDIR)addr_comp.c	\
 	$(SRCDIR)addr_srch.c	\
 	$(SRCDIR)bld_pr_ext.c	\
 	$(SRCDIR)bld_princ.c	\
+	$(SRCDIR)compat_recv.c	\
 	$(SRCDIR)conv_princ.c	\
 	$(SRCDIR)copy_addrs.c	\
 	$(SRCDIR)copy_auth.c	\
