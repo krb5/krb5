@@ -26,13 +26,12 @@ NormalLibraryObjectRule()
 
 OBJS=	crc.o
 
-SRCS=	crc.c crctest.c
+SRCS=	$(SRCDIR)crc.c $(SRCDIR)crctest.c
 
 CRCTESTOBJ = crctest.o
 
-Krb5LibraryTarget(crc32,$(OBJS))
+OtherdirLibraryTarget(..,$(DESLIB),$(OBJS))
 
-OtherdirLibraryTarget(..,des5,$(OBJS))
+NormalProgramTarget(crctest,$(CRCTESTOBJ),$(OBJS),$(OBJS),)
 
-NormalProgramTarget(crctest,$(CRCTESTOBJ),libcrc32.a,libcrc32.a,)
-
+DependTarget()
