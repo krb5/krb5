@@ -38,6 +38,7 @@ static char rcsid_adm_extern_c[] =
 #include <krb5/krb5.h>
 #include <krb5/kdb.h>
 #include <krb5/kdb_dbm.h>
+#include <krb5/osconf.h>
 
 /* real declarations of KDC's externs */
 krb5_encrypt_block master_encblock;
@@ -46,7 +47,7 @@ krb5_principal master_princ;
 
 volatile int signal_requests_exit = 0;	/* gets set when signal hits */
 
-char *dbm_db_name = DEFAULT_DBM_FILE;
+char *dbm_db_name = DEFAULT_KDB_FILE;
 
 krb5_keyblock tgs_key;
 krb5_kvno tgs_kvno;
