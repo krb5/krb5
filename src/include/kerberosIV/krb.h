@@ -340,7 +340,7 @@ typedef struct msg_dat MSG_DAT;
 /*
  * New byte swapping routines, much cleaner
  */
-#define krb4_swab16(val)	(((val) >> 8) | ((val) << 8))
+#define krb4_swab16(val)	((((val) >> 8)&0xFF) | ((val) << 8))
 #define krb4_swab32(val)	((((val)>>24)&0xFF) | (((val)>>8)&0xFF00) | \
 				  (((val)<<8)&0xFF0000) | ((val)<<24))
 

@@ -1,3 +1,8 @@
+2000-06-02  Ken Raeburn  <raeburn@mit.edu>
+
+	* krb.h (krb4_swab16): Mask upper byte of input after shifting, in
+	case the input value is a signed short.
+
 2000-05-18  Ken Raeburn  <raeburn@mit.edu>
 
 	* krb.h (krb4_swab32): Mask high byte of input value after
