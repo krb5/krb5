@@ -1,6 +1,7 @@
 NormalLibraryObjectRule()
 
 OBJS= \
+	an_to_ln.o	\
 	config.o	\
 	def_realm.o	\
 	defname.o	\
@@ -20,7 +21,8 @@ OBJS= \
 	unlck_file.o
 
 SRCS= \
-	config.c	\ 
+	an_to_ln.c	\
+	config.c	\
 	def_realm.c	\
 	defname.c	\
 	free_krbhs.c	\
