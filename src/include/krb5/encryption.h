@@ -103,13 +103,15 @@ typedef struct _krb5_cs_table_entry {
 } krb5_cs_table_entry;
 
 /* could be used in a table to find a sumtype */
+typedef krb5_error_code  (API *SUM_FUNC) NPROTOTYPE ((krb5_pointer /* in */,
+		   size_t /* in_length */,
+			krb5_pointer /* key/seed */,
+			size_t /* key/seed size */,
+			krb5_checksum FAR * /* out_cksum */));
+
 typedef struct _krb5_checksum_entry {
     krb5_magic magic;
-    krb5_error_code  (*sum_func) NPROTOTYPE (( krb5_pointer /* in */,
-					     size_t /* in_length */,
-					     krb5_pointer /* key/seed */,
-					     size_t /* key/seed size */,
-					     krb5_checksum * /* out_cksum */));
+    SUM_FUNC sum_func;
     int checksum_length;		/* length of stuff returned by
 					   sum_func */
     unsigned int is_collision_proof:1;

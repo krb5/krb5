@@ -1,6 +1,9 @@
 KDB5DIR = $(KRB5ROOT)
 KRB5SRVTABDIR = /etc
 
+##DOSBUILDTOP = ..\..
+##DOS!include $(BUILDTOP)\config\windows.in
+
 KRB5_HEADERS = asn1.h base-defs.h ccache.h crc-32.h encryption.h \
 		error_def.h errors.h ext-proto.h fieldbits.h \
 		free.h func-proto.h hostaddr.h kdb.h kdb_dbm.h \
@@ -11,8 +14,17 @@ KRB5_HEADERS = asn1.h base-defs.h ccache.h crc-32.h encryption.h \
 ET_HEADERS = adm_err.h asn1_err.h kdb5_err.h krb5_err.h
 BUILT_HEADERS = autoconf.h config.h osconf.h
 
-all:: $(BUILT_HEADERS)
+all:: all-$(WHAT)
 
+all-unix:: $(BUILT_HEADERS)
+
+all-windows:
+	copy stock\config.win config.h
+	echo /* not used in windows */ > osconf.h
+	echo /* not used in windows */ > autoconf.h
+	copy $(BUILDTOP)\lib\krb5\asn.1\krb5_decode.h .\asn.1\krb5_decode.h
+	copy $(BUILDTOP)\lib\krb5\asn.1\krb5_encode.h .\asn.1\krb5_encode.h
+ 
 includes:: autoconf.h
 
 # Run a header through a preprocessor to generate an architecture/environment
@@ -41,7 +53,7 @@ install::
 
 PROCESS_REPLACE = -e "s+@KRB5ROOT+$(KRB5ROOT)+" \
 		  -e "s+@KDB5DIR+$(KDB5DIR)+" \
-		  -e "s+@KRB5SRVTABDIR+${KRB5SRVTABDIR}+" 
+		  -e "s+@KRB5SRVTABDIR+$(KRB5SRVTABDIR)+" 
 
 OSCONFSRC = $(srcdir)/stock/osconf.h
 
@@ -59,5 +71,10 @@ config.h: $(CONFSRC)
 	@if cmp -s config.new config.h ; then :; \
 	else (set -x; $(RM) config.h ; $(CP) config.new config.h) fi
 
-clean::
-	$(RM) config.new osconf.new $(ET_HEADERS) $(BUILT_HEADERS)
+clean:: clean-$(WHAT)
+	$(RM) config.new osconf.new $(BUILT_HEADERS)
+
+clean-unix::
+	$(RM) $(ET_HEADERS)
+
+clean-windows::

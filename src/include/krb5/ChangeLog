@@ -1,3 +1,15 @@
+Mon Feb 6 19:42:7 1995 Keith Vetter (keithv@fusion.com)
+
+        * configure.in: added header checks for sys/param.h and sys/file.h.
+        * encryption.h: added typedef prototype for sum_func function 
+            with the windows api to make microsoft compiler happy.
+        * sysincl.h: conditionally include sys/file.h and sys/param.h since
+            windows doesn't have them.
+        * Makefile.in: 
+           - changed macros with ${...} to $(...) since nmake barfs on {}.
+           - added windows only make preamble 
+           - split the all target into unix and windows branches
+
 Fri Feb 10 14:54:26 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* asn1.h: Removed ISODE cruft -- moved included .h files into

@@ -43,11 +43,16 @@
 #include <time.h>
 #endif
 #include <sys/stat.h>			/* struct stat, stat() */
+#ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>			/* MAXPATHLEN */
+#endif
 
+#ifdef HAVE_SYS_FILE_H
 #include <sys/file.h>			/* prototypes for file-related
 					   syscalls; flags for open &
 					   friends */
+#endif
+
 #ifndef FD_SET
 #define FD_SETSIZE          (sizeof (fd_set) * 8)
 
