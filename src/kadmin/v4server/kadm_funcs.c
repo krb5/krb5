@@ -665,8 +665,8 @@ int lower(str)
 	int	effect=0;
 
 	for (cp = str; *cp; cp++) {
-		if (isupper(*cp)) {
-			*cp = tolower(*cp);
+		if (isupper((int) *cp)) {
+			*cp = tolower((int) *cp);
 			effect++;
 		}
 	}
@@ -683,11 +683,11 @@ des_check_gecos(gecos, newpw)
 	for (cp = gecos; *cp; ) {
 		/* Skip past punctuation */
 		for (; *cp; cp++)
-			if (isalnum(*cp))
+			if (isalnum((int) *cp))
 				break;
 		/* Skip to the end of the word */
 		for (ncp = cp; *ncp; ncp++)
-			if (!isalnum(*ncp) && *ncp != '\'')
+			if (!isalnum((int) *ncp) && *ncp != '\'')
 				break;
 		/* Delimit end of word */
 		if (*ncp)
@@ -723,11 +723,11 @@ str_check_gecos(gecos, pwstr)
 	for (cp = gecos; *cp; ) {
 		/* Skip past punctuation */
 		for (; *cp; cp++)
-			if (isalnum(*cp))
+			if (isalnum((int) *cp))
 				break;
 		/* Skip to the end of the word */
 		for (ncp = cp; *ncp; ncp++)
-			if (!isalnum(*ncp) && *ncp != '\'')
+			if (!isalnum((int) *ncp) && *ncp != '\'')
 				break;
 		/* Delimit end of word */
 		if (*ncp)

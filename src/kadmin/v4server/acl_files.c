@@ -280,7 +280,7 @@ char *buf;
     register char *pin, *pout;
 
     for(pin = pout = buf; *pin != '\0'; pin++)
-	if(!isspace(*pin)) *pout++ = *pin;
+	if(!isspace((int) *pin)) *pout++ = *pin;
     *pout = '\0';		/* Terminate the string */
 }
 

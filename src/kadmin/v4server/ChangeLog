@@ -1,3 +1,9 @@
+2001-06-18  Ezra Peisach  <epeisach@mit.edu>
+
+	* kadm_funcs.c: Cast argument to isalnum()/isdigit() to int.
+
+	* acl_files.c (nuke_whitespace): Cast argument to isspace() to int. 
+
 2001-06-11  Ezra Peisach  <epeisach@rna.mit.edu>
 
 	* kadm_supp.c: Include string.h for strncpy() prototype.
