@@ -37,7 +37,7 @@ struct krb5int_dns_state {
     void *ansp;
     int anslen;
     int ansmax;
-#if HAVE_RES_NSEARCH
+#if HAVE_NS_INITPARSE
     int cur_ans;
     ns_msg msg;
 #else
@@ -46,7 +46,7 @@ struct krb5int_dns_state {
 #endif
 };
 
-#if !HAVE_RES_NSEARCH
+#if !HAVE_NS_INITPARSE
 static int initparse(struct krb5int_dns_state *);
 #endif
 
@@ -81,8 +81,11 @@ krb5int_dns_init(struct krb5int_dns_state **dsp,
     nextincr = 2048;
     maxincr = INT_MAX;
 
-#if HAVE_RES_NSEARCH
+#if HAVE_NS_INITPARSE
     ds->cur_ans = 0;
+#endif
+
+#if HAVE_RES_NSEARCH
     len = res_ninit(&statbuf);
     if (len < 0)
 	return -1;
@@ -117,7 +120,7 @@ krb5int_dns_init(struct krb5int_dns_state **dsp,
     } while (len > ds->ansmax);
 
     ds->anslen = len;
-#if HAVE_RES_NSEARCH
+#if HAVE_NS_INITPARSE
     len = ns_initparse(ds->ansp, ds->anslen, &ds->msg);
 #else
     len = initparse(ds);
@@ -130,7 +133,7 @@ krb5int_dns_init(struct krb5int_dns_state **dsp,
     return 0;
 }
 
-#if HAVE_RES_NSEARCH
+#if HAVE_NS_INITPARSE
 /*
  * krb5int_dns_nextans - get next matching answer record
  *
@@ -196,7 +199,7 @@ krb5int_dns_fini(struct krb5int_dns_state *ds)
 /*
  * Compat routines for BIND 4
  */
-#if !HAVE_RES_NSEARCH
+#if !HAVE_NS_INITPARSE
 
 /*
  * initparse

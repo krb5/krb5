@@ -1,3 +1,9 @@
+2004-09-21  Tom Yu  <tlyu@mit.edu>
+
+	* dnsglue.c: Conditionalize some stuff on ns_initparse() instead
+	of assuming that the presence of res_nsearch() means
+	ns_initparse() is available.
+
 2004-09-20  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in (STLIBOBJS, OBJS, SRCS): Add dnsglue.c.
