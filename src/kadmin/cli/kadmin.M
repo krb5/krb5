@@ -722,9 +722,9 @@ option is specified, less verbose status information is displayed.
 .RS
 .TP
 EXAMPLE:
-kadmin: ktremove -k /krb5/kadmind.keytab kadmin/admin
+kadmin: ktremove -k /usr/local/var/krb5kdc/kadmind.keytab kadmin/admin
 Entry for principal kadmin/admin with kvno 3 removed
-	from keytab WRFILE:/krb5/kadmind.keytab.
+	from keytab WRFILE:/usr/local/var/krb5kdc/kadmind.keytab.
 kadmin:
 .RE
 .fi
