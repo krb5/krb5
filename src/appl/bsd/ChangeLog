@@ -1,3 +1,8 @@
+Tue Dec 24 16:08:41 1996  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in: Fix up "test $ac_cv_c_cross" to deal with
+	autoconf-2.12, since that variable can be set to a null string.
+
 Fri Dec  6 00:53:08 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* v4rcp.c: Extend the platform-specific braindamage so that

@@ -177,7 +177,7 @@ dnl
 AC_MSG_CHECKING([/etc/environment])
 AC_CACHE_VAL(krb5_cv_etc_environment,
 [AC_C_CROSS
-if test $ac_cv_c_cross = yes; then
+if test "$ac_cv_c_cross" = yes; then
 errprint(__file__:__line__: warning: Cannot check for file existence when cross compiling
 )dnl
 AC_MSG_ERROR(Cannot check for file existence when cross compiling)
@@ -197,7 +197,7 @@ dnl
 AC_MSG_CHECKING([/etc/TIMEZONE])
 AC_CACHE_VAL(krb5_cv_etc_timezone,
 [AC_C_CROSS
-if test $ac_cv_c_cross = yes; then
+if test "$ac_cv_c_cross" = yes; then
 errprint(__file__:__line__: warning: Cannot check for file existence when cross compiling
 )dnl
 AC_MSG_ERROR(Cannot check for file existence when cross compiling)
