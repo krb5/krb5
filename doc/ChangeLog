@@ -1,5 +1,12 @@
 2002-06-18  Ken Raeburn  <raeburn@mit.edu>
 
+	* implementor.texinfo (IPv6 Support): New chapter.
+	(Socket API): New placeholder chapter.
+	(Local Addresses): Specify more precisely the IRIX version we use
+	at MIT.
+	(Thread Safety): Delete quoted email, since we don't actually have
+	this API yet.  Refer people to the mailing list archives.
+
 	* copyright.texinfo: Update copyright year.
 
 2002-05-30  Jen Selby  <jenselby@mit.edu>

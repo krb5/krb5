@@ -65,13 +65,15 @@ This file contains internal implementor's information for the
 
 @menu
 * Introduction::                
-* Local Addresses::
-* Host Address Lookup::
-* Thread Safety::
+* Socket API::                  
+* IPv6 Support::                
+* Local Addresses::             
+* Host Address Lookup::         
+* Thread Safety::               
 * Shared Libraries::            
 @end menu
 
-@node Introduction, Local Addresses, Top, Top
+@node Introduction, Socket API, Top, Top
 @chapter Introduction
 
 This file contains internal implementor's information for
@@ -79,7 +81,96 @@ This file contains internal implementor's information for
 from install.texi; eventually it will have more detailed information on
 the internals of the @value{PRODUCT}.
 
-@node Local Addresses, Host Address Lookup, Introduction, Top
+@node Socket API, IPv6 Support, Introduction, Top
+@chapter Socket API
+
+Someone should describe the API subset we're allowed to use with
+sockets, how and when to use @code{SOCKET_ERRNO}, @i{etc}.
+
+@node IPv6 Support, Local Addresses, Socket API, Top
+@chapter IPv6 Support
+
+Most of the IPv6 support is keyed on the macro @code{KRB5_USE_INET6}.
+If this macro is not defined, there should be no references to
+@code{AF_INET6}, @code{struct sockaddr_in6}, @i{etc}.
+
+The @code{configure} scripts will check for the existence of various
+functions, macros and structure types to decide whether to enable the
+IPv6 support.  You can also use the @samp{--enable-ipv6} or
+@samp{--disable-ipv6} options to override this decision.
+
+Regardless of the setting of @code{KRB5_USE_INET6}, some aspects of
+the new APIs devised for IPv6 are used throughout the code, because it
+would be too difficult maintain code for the IPv6 APIs and for the old
+APIs at the same time.  But for backwards compatibility, we try to
+fake them if the system libraries don't provide them, at least for
+now.  This means we sometimes use slightly modified versions of the
+APIs, but we try to keep the modifications as non-intrusive as
+possible.  Macros are used to rename struct tags and function names,
+so don't @code{#undef} any of these names.
+
+@table @code
+
+@item getaddrinfo
+@itemx getnameinfo
+@itemx freeaddrinfo
+@itemx gai_strerror
+@itemx struct addrinfo
+Always include the header file @code{fake-addrinfo.h} before using
+these.  If the native system doesn't provide them, the header file
+will, using static functions that will call @code{gethostbyname} and
+the like in the native libraries.  (This also happens to be the way
+the Winsock 2 headers work, depending on some of the predefined macros
+indicating the target OS version.)
+
+We also provide ``wrapper'' versions on some systems where a native
+implementation exists but the data it returns is broken in some way.
+
+So these may not always be thread-safe, and they may not always
+provide IPv6 support, but the API will be consistent.
+
+@item struct sockaddr_storage
+@itemx socklen_t
+These are provided by @code{socket-utils.h}, if the native headers
+don't provide them.  @code{sockaddr_storage} contains a
+@code{sockaddr_in}, so by definition it's big enough to hold one; it
+also has some extra padding which will probably make it big enough to
+hold a @code{sockaddr_in6} if the resulting binary should get run on a
+kernel with IPv6 support.
+
+Question: Should these simply be moved into @code{port-sockets.h}?
+
+@end table
+
+IRIX 6.5.7 has no IPv6 support.  Of the systems most actively in the
+MIT's Athena environment (used by MIT's Kerberos UNIX developers),
+this is the only one without built-in IPv6 support.  In another year
+or so we probably won't be using those systems any more, and we may
+consider dropping support for systems without IPv6 support.
+
+Some utility functions or macros are also provided to give a
+convenient shorthand for some operations, and to retain compile-time
+type checking when possible (generally using inline functions but only
+when compiling with GCC).
+
+@table @code
+
+@item socklen(struct sockaddr *)
+Returns the length of the @code{sockaddr} structure, by looking at the
+@code{sa_len} field if it exists, or by returning the known sizes of
+@code{AF_INET} and @code{AF_INET6} address structures.
+
+@item sa2sin(struct sockaddr *)
+@itemx sa2sin6(struct sockaddr *)
+@itemx ss2sa(struct sockaddr_storage *)
+@itemx ss2sin(struct sockaddr_storage *)
+@itemx ss2sin6(struct sockaddr_storage *)
+Pointer type conversions.  Use these instead of plain casts, to get
+type checking under GCC.
+
+@end table
+
+@node Local Addresses, Host Address Lookup, IPv6 Support, Top
 @chapter Local Addresses
 
 (Last update: 2002-03-13.)
@@ -147,11 +238,12 @@ does not return any IPv6 addresses.  They must be read from a file
 under @code{/proc}.  (This appears to be what the @samp{ifconfig}
 program does.)
 
-IRIX 6.5: The buffer is filled in with as many entries as will fit in
-N-1 bytes, and the size used is returned in @code{ifc_len}.  Providing
-exactly the desired number of bytes is inadequate; the buffer must be
-@emph{bigger} than needed.  (E.g., 32->0, 33->32.)  The returned
-@code{ifc_len} is always less than the supplied one.  Largest gap: 32.
+IRIX 6.5.7: The buffer is filled in with as many entries as will fit
+in N-1 bytes, and the size used is returned in @code{ifc_len}.
+Providing exactly the desired number of bytes is inadequate; the
+buffer must be @emph{bigger} than needed.  (E.g., 32->0, 33->32.)  The
+returned @code{ifc_len} is always less than the supplied one.  Largest
+gap: 32.
 
 AIX 4.3.3: Sometimes the returned @code{ifc_len} is bigger than the
 supplied one, but it may not be big enough for @emph{all} the
@@ -317,336 +409,9 @@ from the library.
 
 A rough proposal for hooks for implementing locking was put forth, and
 an IBM Linux group is experimenting with a trial implementation of it,
-with a few changes.
-
-@quotation
-
-Okay, here's a proposal based on looking at OpenSSL's "threads.pod"
-(but not enough of the details of the implementation, yet) and talking
-with Danilo and Miro and Tom.  This is just a starting point for
-discussion....
-
-In terms of the work you've already shown us in patches, Emily, I have
-some specific comments I'll address in another message, but as far as
-the API issue goes, most everything you've done I think will map
-pretty directly to calls described here, and a first cut could be done
-with a dumb shim layer that doesn't support all the callback stuff
-described below.
-
-
-We use a shim layer to direct the calls to the native thread
-interface, whatever it may be; this avoids requiring that
-Kerberos-using applications all use (for example) pthreads packages
-not provided by the OS vendor.  When reasonable, we use that system
-thread package by default.  If there isn't a single system API, or
-it's inconvenient to make applications use it, then by default we
-don't make the library thread-safe, though we still favor thread-safe
-support routines like gethostbyname_r.
-
-We allow applications to register callback functions to implement the
-thread support, and invoke these functions through a shim layer.  This
-way we avoid being tied to a specific thread package.  This callback
-support looks pretty important for systems like MacOS, which can
-support multiple thread packages that may not play nicely together;
-the application can indicate which interface should be used.
-
-The locking functions need only handle a limited number of locks; this
-number must be queried at run time, but will be fixed for the life of
-the process.  Locks within each library have assigned numbers, and
-protect global data only, not objects that can be allocated in huge
-numbers.
-
-Thread-specific data (which is probably needed for error_message in
-the com_err library, unless we rip out that interface, which would
-break a few applications) is handled similarly.  Callback functions
-can be registered, and only a fixed small number of enumerated cases
-need to be supported in each library.  We could handle most of this
-internally with mutexes and such, except that we probably want data
-cleaned up on thread exit.
-
-The callback functions provided by the application would be:
-@example
-	get-thread-id
-	get/release-lock
-	set-specific-data
-	get-specific-data
-	destroy-specific-data (on thread exit)
-@end example
-
-The callback functions may only be registered while no locks are held
-(which presumably means before any threads are created and while in
-the main application).  Locks are not held across library calls; they
-are always released.
-
-(Question: Should the callback functions be registered through
-separate functions, or one call with extra arguments or a structure
-pointer?)
-
-Each library (each that has data needing protecting, that is) provides
-a set of functions for manipulating these callbacks, based in part on
-the OpenSSL API.  We also provide a thread-info function which gives
-the application some info about the thread safety of the library in
-question.  Since shared libraries can be updated independently of
-applications, this should be a run-time check; configure-type checks
-for the currently-installed library should be easy to perform, but
-should only be used in conjunction with, not in place of, the run-time
-check.
-
-(Question: Should we consider gssapi thread-safe if it uses locks
-around krb5 calls that can call DNS or C library routines that are not
-known to be thread-safe, or worse, are known not to be thread-safe?)
-
-Should locks be ref-counted?  Should we impose that requirement on the
-supplied callback functions, or implement it in this middle layer?
-According to
-@samp{http://www.unix-systems.org/single_unix_specification_v2/xsh/pthread_mutex_lock.html}
-the "normal" pthread mutex does not permit multiple acquisition
-attempts on the same lock, but "recursive" type mutexes have reference
-counts.  (What's OpenSSL do?)
-
-For each library's prefix "foo" (to be determined for libraries like
-com_err without consistent prefixes), we'd have the following
-functions and macros, with names adjusted accordingly:
-
-----------------
-
-public:
-
-@smallexample
-/* Set the new locking callback function.
-   Argument to the function are locking mode, lock number,
-   and source file/line for debugging.
-
-   This callback function is called via the internal locking function
-   below.
-
-   If a library uses functions in a second library, this function
-   should also call the _set_locking_callback function for the second
-   library, in case the application is not written to be aware of the
-   second library.  However, the lock numbers need to be adjusted so
-   that the two sets of lock numbers don't overlap.
-
-   Q: If this function *is* called while locks are held, what should
-   it do?  Abort?  Return without doing anything?  Change the
-   callbacks anyways and let the program break?  Should there be an
-   error code return?  (This function shouldn't depend on com_err.)
-
-   Q: Must this function handle reference counts on locks, or should
-   we assert that it will only be called on locks not held by the
-   current thread?  */
-void foo_set_locking_callback (void (*lockfn)(int mode, int locknum,
-                                              const char *file,
-                                              int line));
-
-/* Number of locks needed by this library for global data.
-
-   If this library uses functions in a second library, this function
-   should include the locks needed by the second library in the
-   returned count.  Lock numbers go from 0 to num_locks-1.  It is not
-   required that all of the numbers actually be used, but there
-   shouldn't be any large gaps in the numbering sequence.
-
-   For simple libraries without dependencies, this should be a fixed
-   value.  For libraries with dependencies on other libraries, it
-   should still be fixed, but dependent on the num_locks values for
-   those libraries (or hardcoded knowledge about the number of locks
-   they need, if you don't want to keep it clean).  */
-int foo_num_locks (void);
-
-/* Set the "what's my thread id?" function.
-   Might not be needed, depending how we handle the rest of the API.
-   If needed, check process-id too, so the returned id is just for
-   threads within a process.
-
-   Q: What if a multithreaded process forks?  */
-void foo_set_id_callback (unsigned long (*idfn)(void));
-
-/* Register functions for manipulating thread-specific data.
-   POSIX has fairly directly corresponding functions.
-   On Windows the functions are similar, but the destruction callback
-   is via an invocation of DllMain at thread exit time, not per-object
-   callbacks; a mutex-protected list of keys with destructors will
-   allow mapping one to the other.
-
-   We will probably want this for com_err's static buffer for
-   unknown-error messages.  I doubt any other library will need it,
-   but we'll see...
-
-   This would also be a (presumably small) numbered list of data, with
-   a maximum index determined at run time, handled akin to the locks
-   above.  */
-int foo_num_specificdata (void);
-void foo_set_specificdata_callback
-         (void (*setdestructorfn)(int sdnum, void (*fn)(void*)),
-          void (*setfn)(int sdnum, void *data, const char *file, int line),
-          void *(*getfn)(int sdnum));
-
-/* Default lock handling in the library.
-
-   With this call, an application not providing its own callbacks can
-   still verify that the library is built to use the same threading
-   system as its default.
-
-   If FOO_THREADS_NONE is returned, it means the hooks are present,
-   but no locking routines will actually be called by default.  If the
-   application wants to use multiple threads, it needs to register
-   callbacks.
-
-   If FOO_THREADS_UNSAFE is returned, it means that not only are no
-   default callbacks compiled in, but the code calls routines in other
-   libraries that are not known to be thread-safe.  (For example,
-   getpwuid or gethostbyname.)  Callback functions may be registered
-   by the application, if it wants to take its chances.  (We might use
-   locks internally to prevent krb5 code from using such routines in
-   multiple threads before the returned values are copied out to
-   non-static storage.  But IMHO we shouldn't export that locking
-   capability as part of the API.)
-
-   Q: What about systems that might have multiple thread packages that
-   *are* known to play nicely together?  If some FooThreads package is
-   provided by the kernel and the pthreads implementation uses
-   FooThreads primitives in a compatible way, the application should
-   be okay even if it doesn't use the same interface as the gss/krb5
-   libraries.  Should that knowledge be in the library or the
-   application?  Should we not bother?  */
-int foo_get_lock_info (void);
-/* Should these be macros or enumerators?  */
-#define FOO_THREADS_PTHREAD   1
-#define FOO_THREADS_WIN32     2
-#define FOO_THREADS_MACOS9    3
-#define FOO_THREADS_MACH      4
-...
-#define FOO_THREADS_NONE      0 /* app must set callbacks */
-#define FOO_THREADS_UNSAFE   -1 /* lib uses unsafe libc calls */
-
-for internal use within the library only:
-
-#define LOCKMODE_LOCK   1
-#define LOCKMODE_UNLOCK 2
-/* Acquire the lock.
-
-   Q: Support ref-counted locks at this layer?  */
-void fooint_lock (int mode, int locknum, const char *file, int line);
-#define LOCK(N)    fooint_lock(LOCKMODE_LOCK,(N),__FILE__,__LINE__)
-#define UNLOCK(N)  fooint_lock(LOCKMODE_UNLOCK,(N),__FILE__,__LINE__)
-
-/* Functions implementing thread-specific data, using the callbacks
-   registered above.  */
-void fooint_setspecificdestructor (int sdnum, void (*dfn)(void *data));
-void fooint_setspecific_1 (int sdnum, void *data, const char *file, int line);
-#define fooint_setspecific(SDNUM,DATA) \
-		fooint_setspecific_1((SDNUM),(DATA),__FILE__,__LINE__)
-void *fooint_getspecific (int sdnum);
-
-----------------
-@end smallexample
-
-The functionality maps pretty closely to a subset of POSIX thread
-functionality, aside from using integers instead of
-implementation-specific types.  It's a little further from the Windows
-thread API, but mostly (AFAIK) in that the thread-specific-data
-destructors would need to be recorded in a per-library list and
-invoked out of DllMain when it gets a thread-exit notification.
-
-So instead of
-
-@example
-	pthread_mutex_lock(&foo_mutex);
-@end example
-
-we'd use
-
-@example
-	#define FOO_MUTEX    2
-	LOCK(FOO_MUTEX);
-@end example
-
-The use of a maximum number of locks means the locks can be allocated
-at initialization or callback-registration time, when the locking
-functions will not be called.  Since the locking functions and the
-meanings of the lock numbers are buried within each library, the
-application cannot use these locks portably in any meaningful way.
-But this also means we can change the set of locks required between
-versions without breaking any applications, and we don't have to add
-code in multiple places to use pthread_once equivalents to create a
-bunch of locks, or static initialization when we don't know the
-application's lock type, instead it can be localized to the shim
-layer.
-
-The use of a maximum number of thread-specific data objects means a
-fixed list of destructor functions can be used, perhaps even
-hard-coded in each library's DllMain, and we don't need to worry about
-creating keys, protecting the variables holding the keys, etc.
-
-The functionality of pthread_once can be achieved by allocating one of
-the lock numbers to protect the flag associated with the
-initialization routine that is to be called.  For example, instead of
-
-@example
-	pthread_once(&foo_once, foo_init);
-@end example
-
-we can use
-
-@example
-	#define FOO_INIT_LOCKNUM    3
-        static int foo_init_called;
-
-	LOCK_WRITE(FOO_INIT_LOCKNUM);
-	if (!foo_init_called) @{
-		foo_init();
-		foo_init_called++;
-	@}
-	UNLOCK_WRITE(FOO_INIT_LOCKNUM);
-@end example
-
-It's a bit more clunky; perhaps a wrapper function would still be
-desirable, but we don't necessarily need to require this functionality
-from the callback functions supplied by the application.  (We could
-also make it optional, and fake it when no callback is supplied.)
-
-If we want to require that a thread be able to grab a lock multiple
-times with a reference count, we have to decide whether to impose that
-requirement on the lock callback function, which keeps the shim layer
-thin, or implement it in the shim layer.  (I should look more closely
-at what OpenSSL is doing in this department.  It would be nice if the
-same lock callback functions can be used for both packages, but we
-aren't distinguishing between read and write locks.)  I guess I'd lean
-towards not permitting multiple locks.
-
-There's no support here for pthread_trylock equivalents; all attempts
-will block if the lock is held by another thread.  Since some library
-routines block waiting on responses from the net, it's possible some
-locks may be held for quite a while.  We can work to avoid such cases
-as much as possible.
-
-There's no support for cleanup functions to be called in case of
-thread cancellation (e.g., pthread_cleanup_push).  We might be able to
-implement this with thread-specific data with a destructor, though.
-Do we care?  I doubt it.
-
-----------------
-
-Anyways, that's the basic idea as Miro, Danilo, Tom and I hashed it
-out this evening.  But, at least in my case, there isn't a lot of
-actual experience to back this up, so please let us know what you
-think.  Is the application interface too clunky?  Not flexible enough?
-
-Ken
-
-P.S.  Another question: Which is more important, thread safety or IPv6
-support?  I think at least one of the OSes I was working with had
-gethostbyname_r, which is thread-safe but IPv4-only, and
-non-thread-safe versions of interfaces supporting IPv6 name lookups.
-I'd favor IPv6, at the moment, but I could certainly see people
-wanting it the other way; it could be configure-time selectable or
-something....
-
-@end quotation
-
-A few issues with this proposal have been discussed on the
-@samp{krbdev} mailing list, but you can see generally where we're
-probably headed.
+with a few changes.  A few issues with the proposal have been
+discussed on the @samp{krbdev} mailing list, and you can find the
+discussion in the list archives.
 
 @node Shared Libraries,  , Thread Safety, Top
 @chapter Shared Libraries
