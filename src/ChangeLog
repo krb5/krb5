@@ -1,3 +1,8 @@
+2002-04-02  Tom Yu  <tlyu@mit.edu>
+
+	* aclocal.m4 (CONFIG_RULES): Fix to not define KRB5_DEPRECATED; we
+	set it to 1 in krb5.hin now.
+
 2002-04-01  Tom Yu  <tlyu@mit.edu>
 
 	* aclocal.m4 (CONFIG_RULES): Add -DKRB5_PRIVATE=1 and
