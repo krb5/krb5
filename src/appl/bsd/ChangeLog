@@ -1,3 +1,9 @@
+Sat Apr 29 01:26:06 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in (login.krb5): Link the libraries twice due to
+		circular dependency in the libraries.  (read_password in
+		libdes425.a depends on krb5_read_password in libkrb5.a)
+
 Fri Apr 28 20:33:06 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* login.c (main): Don't use setreuid() to play games with the real
