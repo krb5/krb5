@@ -85,7 +85,7 @@ krb5_tkt_authent *tktauthent;
 
 
     if ((server != NULL) &&
-	(!krb5_principal_compare(server, req->ticket->server))
+	(!krb5_principal_compare(server, req->ticket->server)))
 	return KRB5KRB_AP_WRONG_PRINC;
 
     /* if (req->ap_options & AP_OPTS_USE_SESSION_KEY)
