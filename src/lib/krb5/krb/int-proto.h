@@ -12,7 +12,6 @@
  * Function prototypes for Kerberos V5 library internal functions.
  */
 
-#include <krb5/copyright.h>
 
 #ifndef KRB5_INT_FUNC_PROTO__
 #define KRB5_INT_FUNC_PROTO__

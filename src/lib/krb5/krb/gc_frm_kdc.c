@@ -17,7 +17,6 @@ static char rcsid_gcfkdc_c[] =
 "$Id$";
 #endif	/* !lint & !SABER */
 
-#include <krb5/copyright.h>
 
 #include <krb5/krb5.h>
 #include <krb5/ext-proto.h>
