@@ -1,3 +1,7 @@
+
+Tue Aug 8 17:24:27 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* update_utmp.c - getutmpx() requires address of utmpx structure.
+
 Mon Aug  7 17:41:39 1995  Sam Hartman  <hartmans@tertius.mit.edu>
 
 	* cleanup.c (pty_cleanup): Call pty_update_utmp using new interface.

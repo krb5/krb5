@@ -114,7 +114,7 @@ long pty_update_utmp (process_type, pid, username, line, host)
     
 #ifdef HAVE_SETUTXENT
     setutxent();
-    getutmpx(ent, &utx);
+    getutmpx(&ent, &utx);
     pututxline(&utx);
     endutxent();
 #endif /* HAVE_SETUTXENT */
