@@ -1,7 +1,7 @@
 /*
  * admin/edit/kdb5_edit.c
  *
- * Copyright 1990,1991 by the Massachusetts Institute of Technology.
+ * (C) Copyright 1990,1991, 1996 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -291,6 +291,7 @@ char *kdb5_edit_Init(argc, argv)
     exit_status = 0;	/* It's OK if we get errors in set_dbname_help */
     return request;
 }
+
 
 #define	NO_PRINC ((krb5_kvno)-1)
 
@@ -652,6 +653,7 @@ void extract_srvtab(argc, argv)
 
     for (i = 2; i < argc; i++) {
 	/* iterate over the names */
+int keynum;
 	pname = malloc(strlen(argv[1])+strlen(argv[i])+strlen(cur_realm)+3);
 	if (!pname) {
 	    com_err(argv[0], ENOMEM,
@@ -692,16 +694,18 @@ void extract_srvtab(argc, argv)
 	    exit_status++;
 	    goto cleanmost;
 	}
+for (keynum = 0; keynum < dbentry.n_key_data; keynum++) {
+    
 	if ((retval = krb5_dbekd_decrypt_key_data(edit_context,
 						  &master_encblock,
-						  &dbentry.key_data[0],
+						  &dbentry.key_data[keynum],
 						  &newentry.key, NULL))) {
 	    com_err(argv[0], retval, "while decrypting key for '%s'", pname);
 	    exit_status++;
 	    goto cleanall;
 	}
 	newentry.principal = princ;
-	newentry.vno = dbentry.key_data[0].key_data_kvno;
+	newentry.vno = dbentry.key_data[keynum].key_data_kvno;
 	if ((retval = krb5_kt_add_entry(edit_context, ktid, &newentry))) {
 	    com_err(argv[0], retval, "while adding key to keytab '%s'",
 		    ktname);
@@ -711,7 +715,8 @@ void extract_srvtab(argc, argv)
 		   pname, ktname);
 	memset((char *)newentry.key.contents, 0, newentry.key.length);
 	krb5_xfree(newentry.key.contents);
-    cleanall:
+  }
+      cleanall:
 	    krb5_db_free_principal(edit_context, &dbentry, nentries);
     cleanmost:
 	    free(pname);
@@ -773,6 +778,7 @@ void extract_v4_srvtab(argc, argv)
     }
     for (i = 2; i < argc; i++) {
 	unsigned char kvno;
+	krb5_key_data *pkey;
 
 	/* iterate over the names */
 	pname = malloc(strlen(argv[1])+strlen(argv[i])+strlen(cur_realm)+3);
@@ -815,9 +821,27 @@ void extract_v4_srvtab(argc, argv)
 	    exit_status++;
 	    goto cleanmost;
 	}
-	if ((retval = krb5_dbekd_decrypt_key_data(edit_context,
+    if (krb5_dbe_find_enctype(edit_context,
+			      &dbentry,
+			       ENCTYPE_DES_CBC_CRC,
+			       KRB5_KDB_SALTTYPE_V4,
+			       -1,
+			       &pkey) &&
+	(retval = krb5_dbe_find_enctype(edit_context,
+			      &dbentry,
+			       ENCTYPE_DES_CBC_CRC,
+			       -1,
+			       -1,
+			      &pkey))) {
+	com_err(argv[0], retval, "while retrieving %s", pname);
+	    exit_status++;
+	    goto cleanmost;
+	}
+
+	
+if ((retval = krb5_dbekd_decrypt_key_data(edit_context,
 						  &master_encblock,
-						  &dbentry.key_data[0],
+					  &pkey,
 						  &key, NULL))) {
 	    com_err(argv[0], retval, "while decrypting key for '%s'", pname);
 	    exit_status++;
@@ -830,6 +854,7 @@ void extract_v4_srvtab(argc, argv)
 		krb5_xfree(key.contents);
 		continue;
 	}
+/*XXX handle host*/
 	fwrite(argv[i], strlen(argv[i]) + 1, 1, fout); /* p.name */
 	fwrite(argv[1], strlen(argv[1]) + 1, 1, fout); /* p.instance */
 	fwrite(cur_realm, strlen(cur_realm) + 1, 1, fout); /* p.realm */

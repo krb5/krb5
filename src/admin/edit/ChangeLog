@@ -1,6 +1,13 @@
+Thu Jan 25 16:07:42 1996  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* kdb5_edit.c (extract_srvtab): Extract *all* the keys in a
+        dbentry, not the first one.
+	(extract_v4_srvtab): Attempt to find the right v4 keys.
+
 Wed Jan 24 18:48:38 1996  Tom Yu  <tlyu@dragons-lair.MIT.EDU>
 
 	* Makefile.in: Remove spurious @DEFS@
+
 
 Wed Dec 13 03:44:58 1995  Chris Provenzano (proven@mit.edu)
 
