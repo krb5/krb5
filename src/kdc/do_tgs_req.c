@@ -168,22 +168,21 @@ tgt_again:
 	errcode = KRB5KDC_ERR_PRINCIPAL_NOT_UNIQUE;
 	goto cleanup;
     } else if (nprincs != 1) {
-	/* XXX Is it possible for a principal to have length 1 so that
-	   the following statement is undefined?  Only length 3 is valid
-	   here, but can a length 1 ticket pass through all prior tests?  */
+	/*
+	 * might be a request for a TGT for some other realm; we
+	 * should do our best to find such a TGS in this db
+	 */
+	if (firstpass && krb5_princ_size(request->server) == 2) {
+	    krb5_data *server_1 = krb5_princ_component(request->server, 1);
+	    krb5_data *tgs_1 = krb5_princ_component(tgs_server, 1);
 
-	krb5_data *server_1 = krb5_princ_component(request->server, 1);
-	krb5_data *tgs_1 = krb5_princ_component(tgs_server, 1);
-
-	/* might be a request for a TGT for some other realm; we should
-	   do our best to find such a TGS in this db */
-	if (firstpass && krb5_princ_size(request->server) == 3 &&
-	    server_1->length == tgs_1->length &&
-	    !memcmp(server_1->data, tgs_1->data, tgs_1->length)) {
-	    krb5_db_free_principal(&server, nprincs);
-	    find_alternate_tgs(request, &server, &more, &nprincs);
-	    firstpass = 0;
-	    goto tgt_again;
+	    if (server_1->length != tgs_1->length ||
+		memcmp(server_1->data, tgs_1->data, tgs_1->length)) {
+		krb5_db_free_principal(&server, nprincs);
+		find_alternate_tgs(request, &server, &more, &nprincs);
+		firstpass = 0;
+		goto tgt_again;
+	    }
 	}
 	krb5_db_free_principal(&server, nprincs);
 	status = "UNKNOWN_SERVER";
@@ -672,8 +671,8 @@ int *nprincs;
     *nprincs = 0;
     *more = FALSE;
 
-    if (retval = krb5_walk_realm_tree(krb5_princ_component(request->server, 0),
-				      krb5_princ_component(request->server, 2),
+    if (retval = krb5_walk_realm_tree(krb5_princ_realm(request->server),
+				      krb5_princ_component(request->server, 1),
 				      &plist, KRB5_REALM_BRANCH_CHAR))
 	return;
 
