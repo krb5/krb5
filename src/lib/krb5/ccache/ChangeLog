@@ -1,3 +1,8 @@
+2001-10-10  Ezra Peisach  <epeisach@mit.edu>
+
+	* cc_file.c (krb5_fcc_read): Remove const from fourth argument to
+	function to match prototype earlier in file.
+
 2001-10-09  Ken Raeburn  <raeburn@mit.edu>
 
 	* cc_file.c, cc_memory.c, cc_stdio.c, ser_cc.c: Make prototypes

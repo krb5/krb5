@@ -305,7 +305,7 @@ krb5_fcc_read(context, id, buf, len)
    krb5_context context;
    krb5_ccache id;
    krb5_pointer buf;
-   const unsigned int len;
+   unsigned int len;
 {
      int ret;
 
