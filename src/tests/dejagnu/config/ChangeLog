@@ -1,3 +1,9 @@
+2005-03-14  Ken Raeburn  <raeburn@mit.edu>
+
+	* default.exp (start_tail): Make 'standalone' an additional
+	argument.
+	(start_kerberos_daemons): Pass it.
+
 2005-01-12  Ken Raeburn  <raeburn@mit.edu>
 
 	* default.exp (start_tail): New proc.  Handles GNU tail race

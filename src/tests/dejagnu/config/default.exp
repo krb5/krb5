@@ -1336,7 +1336,7 @@ proc setup_kerberos_db { standalone } {
     return 1
 }
 
-proc start_tail { fname spawnid_var pid_var which } {
+proc start_tail { fname spawnid_var pid_var which standalone } {
     upvar $spawnid_var spawnid
     upvar $pid_var pid
     global timeout
@@ -1442,7 +1442,7 @@ proc start_kerberos_daemons { standalone } {
     set kdc_lfile $tmppwd/kdc.log
     set kadmind_lfile $tmppwd/kadmind5.log
 
-    if ![start_tail $kdc_lfile tailf_spawn_id tailf_pid krb5kdc] {
+    if ![start_tail $kdc_lfile tailf_spawn_id tailf_pid krb5kdc $standalone] {
 	return 0
     }
 
@@ -1508,7 +1508,7 @@ proc start_kerberos_daemons { standalone } {
     }
     catch "unset env(KRB5_KTNAME)"
 
-    if ![start_tail $kadmind_lfile tailf_spawn_id tailf_pid kadmind] {
+    if ![start_tail $kadmind_lfile tailf_spawn_id tailf_pid kadmind $standalone] {
 	return 0
     }
 
