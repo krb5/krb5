@@ -262,7 +262,7 @@ int server_message KRB5_PROTOTYPE((int));
 void oob KRB5_PROTOTYPE((void));
 krb5_sigtype	lostpeer KRB5_PROTOTYPE((int));
 #if __STDC__
-int setsignal(int sig, krb5_sigtype (*act)());
+void setsignal(int sig, krb5_sigtype (*act)());
 #endif
 static int read_wrapper(int fd, char *buf, int size, int *got_esc);
 void try_normal(char **);
@@ -935,6 +935,7 @@ static void doit(oldmask)
 /*
  * Trap a signal, unless it is being ignored.
  */
+void
 setsignal(sig, act)
      int sig;
      krb5_sigtype (*act)();
@@ -1393,8 +1394,6 @@ int server_message(mark)
 #ifndef POSIX_TERMIOS
     int out = FWRITE;
 #endif
-    int n;
-    int rcvd = 0;
 #ifdef POSIX_TERMIOS
     struct termios tty;
 #else
@@ -1527,12 +1526,7 @@ reader(oldmask)
      int oldmask;
 #endif
 {
-#if (defined(BSD) && BSD+0 >= 43) || defined(ultrix)
-    int pid = getpid();
-#else
-    int pid = -getpid();
-#endif
-fd_set readset, excset, writeset;
+    fd_set readset, excset, writeset;
     int n, remaining, left;
     char *bufp = rcvbuf;
     char *cp;
@@ -1807,7 +1801,6 @@ void try_normal(argv)
 {
     register char *nhost;
 #ifdef POSIX_SIGNALS
-    struct sigaction sa;
     sigset_t mask;
 #endif
     

@@ -1,3 +1,27 @@
+2001-06-01  Ezra Peisach  <epeisach@mit.edu>
+
+	* login.c: Add braces around initializers. Cleanup assignments in
+	conditionals.  Include krb524.h if KRB4_CONVERT defined.
+
+	* krlogind.c (main): Cleanup unused variables.
+	(protocol): Cleanup ambiguous if-if-else warning.
+
+	* krshd.c (main): Cleanup unused variables.
+
+	* krlogin.c (setsignal): Declare as void.
+	(server_message): Cleanup unused variables.
+
+	* setenv.c (setenv): Declare as returning int and clean up
+	assignments in conditionals.
+
+	* kcmd.c (kcmd, rcmd_stream_init_krb5, v5_des_read): Clean up
+	unused variables and assignments in conditionals.
+	* forward.c (rd_and_store_for_creds): Likewise.
+	* krcp.c (rsource): Likewise.
+	* v4rcp.c (answer_auth): Likewise.
+
+	* krsh.c (main): Declare as retuning int.
+
 2001-05-25  Tom Yu  <tlyu@mit.edu>
 
 	* krlogind.c (protocol): Don't do TIOCPKT on systems with STREAMS

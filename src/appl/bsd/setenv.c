@@ -25,6 +25,7 @@
  *	Set the value of the environmental variable "name" to be
  *	"value".  If rewrite is set, replace any current value.
  */
+int
 setenv(name, value, rewrite)
 	register char *name, *value;
 	int rewrite;
@@ -42,7 +43,7 @@ setenv(name, value, rewrite)
 		if (!rewrite)
 			return(0);
 		if (strlen(C) >= l_value) {	/* old larger; copy over */
-			while (*C++ = *value++);
+			while ((*C++ = *value++));
 			return(0);
 		}
 	}
@@ -74,7 +75,7 @@ setenv(name, value, rewrite)
 	    malloc((u_int)((int)(C - name) + l_value + 2))))
 		return(-1);
 	for (C = environ[offset]; (*C = *name++) &&( *C != '='); ++C);
-	for (*C++ = '='; *C++ = *value++;);
+	for (*C++ = '='; (*C++ = *value++););
 	return(0);
 }
 

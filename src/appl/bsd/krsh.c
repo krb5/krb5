@@ -122,6 +122,7 @@ void	try_normal(char **);
 #define	mask(s)	(1 << ((s) - 1))
 #endif /* POSIX_SIGNALS */
      
+int
 main(argc, argv0)
      int argc;
      char **argv0;

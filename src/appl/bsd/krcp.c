@@ -471,10 +471,11 @@ int main(argc, argv)
 			krb5_boolean similar;
 			krb5_keyblock *key = &cred->keyblock;
 
-			if (status = krb5_c_enctype_compare(bsd_context,
-							    ENCTYPE_DES_CBC_CRC,
-							    cred->keyblock.enctype,
-							    &similar))
+			status = krb5_c_enctype_compare(bsd_context,
+							ENCTYPE_DES_CBC_CRC,
+							cred->keyblock.enctype,
+							&similar);
+			if (status)
 			    try_normal(orig_argv); /* doesn't return */
 
 			if (!similar) {
@@ -891,7 +892,7 @@ void rsource(name, statp)
 	closedir(d);
 	return;
     }
-    while (dp = readdir(d)) {
+    while ((dp = readdir(d)) != NULL) {
 	if (dp->d_ino == 0)
 	  continue;
 	if (!strcmp(dp->d_name, ".") || !strcmp(dp->d_name, ".."))

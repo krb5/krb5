@@ -1013,7 +1013,8 @@ answer_auth()
 	  local.sin_addr.s_addr = inet_addr(envaddr);
 #endif
 	  local.sin_family = AF_INET;
-	  if (envaddr = getenv("KRB5LOCALPORT"))
+	  envaddr = getenv("KRB5LOCALPORT");
+	  if (envaddr)
 	    local.sin_port = htons(atoi(envaddr));
 	  else
 	    local.sin_port = 0;
@@ -1028,7 +1029,8 @@ answer_auth()
 	  foreign.sin_addr.s_addr = inet_addr(envaddr);
 #endif
 	  foreign.sin_family = AF_INET;
-	  if (envaddr = getenv("KRB5REMOTEPORT"))
+	  envaddr = getenv("KRB5REMOTEPORT");
+	  if (envaddr)
 	    foreign.sin_port = htons(atoi(envaddr));
 	  else
 	    foreign.sin_port = 0;

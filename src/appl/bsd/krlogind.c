@@ -347,9 +347,8 @@ int main(argc, argv)
 {
     extern int opterr, optind;
     extern char * optarg;
-    int on = 1, fromlen, ch, i;
+    int on = 1, fromlen, ch;
     struct sockaddr_in from;
-    char *options;
     int debug_port = 0;
     int fd;
     int do_fork = 0;
@@ -976,14 +975,13 @@ void protocol(f, p)
      int f, p;
 {
     unsigned char pibuf[BUFSIZ], qpibuf[BUFSIZ*2], fibuf[BUFSIZ], *pbp, *fbp;
-    register pcc = 0, fcc = 0;
+    register int pcc = 0, fcc = 0;
     int cc;
-    char cntl;
 #ifdef POSIX_SIGNALS
     struct sigaction sa;
 #endif
 #ifdef TIOCPKT
-    register tiocpkt_on = 0;
+    register int tiocpkt_on = 0;
     int on = 1;
 #endif
     
@@ -1024,12 +1022,14 @@ void protocol(f, p)
 	    FD_SET(p, &obits);
 	else
 	    FD_SET(f, &ibits);
-	if (pcc >= 0)
-	    if (pcc)
+	if (pcc >= 0) {
+	    if (pcc) {
 		FD_SET(f, &obits);
-	    else
+	    } else {
 		FD_SET(p, &ibits);
-	
+	    }
+	}
+
 	if (select(8*sizeof(ibits), &ibits, &obits, &ebits, 0) < 0) {
 	    if (errno == EINTR)
 	      continue;
@@ -1207,7 +1207,6 @@ do_krb_login(host_addr, hostname)
      char *host_addr, *hostname;
 {
     krb5_error_code status;
-    struct passwd *pwd;
     char *msg_fail = NULL;
     int valid_checksum;
 

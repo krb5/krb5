@@ -359,10 +359,12 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
         goto bad2;
     }
 
-    if (status = krb5_cc_default(bsd_context, &cc))
+    status = krb5_cc_default(bsd_context, &cc);
+    if (status)
     	goto bad2;
 
-    if (status = krb5_cc_get_principal(bsd_context, cc, &get_cred->client)) {
+    status = krb5_cc_get_principal(bsd_context, cc, &get_cred->client);
+    if (status) {
     	(void) krb5_cc_close(bsd_context, cc);
     	goto bad2;
     }
@@ -389,8 +391,9 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
 	goto bad2;
 
     /* Only need local address for mk_cred() to send to krlogind */
-    if (status = krb5_auth_con_genaddrs(bsd_context, auth_context, s,
-			KRB5_AUTH_CONTEXT_GENERATE_LOCAL_FULL_ADDR))
+    status = krb5_auth_con_genaddrs(bsd_context, auth_context, s,
+				   KRB5_AUTH_CONTEXT_GENERATE_LOCAL_FULL_ADDR);
+    if (status)
 	goto bad2;
 
     if (protonum == KCMD_PROTOCOL_COMPAT_HACK) {
@@ -452,22 +455,25 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
     (void) write(s, locuser, strlen(locuser)+1);
     
     if (options & OPTS_FORWARD_CREDS) {   /* Forward credentials */
-	if (status = krb5_fwd_tgt_creds(bsd_context, auth_context,
-					host_save,
-					ret_cred->client, ret_cred->server,
-					0, options & OPTS_FORWARDABLE_CREDS,
-					&outbuf)) {
+	status = krb5_fwd_tgt_creds(bsd_context, auth_context,
+				    host_save,
+				    ret_cred->client, ret_cred->server,
+				    0, options & OPTS_FORWARDABLE_CREDS,
+				    &outbuf);
+	if (status) {
 	    fprintf(stderr, "kcmd: Error getting forwarded creds\n");
 	    goto bad2;
 	}
 
 	/* Send forwarded credentials */
-	if (status = krb5_write_message(bsd_context, (krb5_pointer)&s, &outbuf))
+	status = krb5_write_message(bsd_context, (krb5_pointer)&s, &outbuf);
+	if (status)
 	  goto bad2;
     }
     else { /* Dummy write to signal no forwarding */
 	outbuf.length = 0;
-	if (status = krb5_write_message(bsd_context, (krb5_pointer)&s, &outbuf))
+	status = krb5_write_message(bsd_context, (krb5_pointer)&s, &outbuf);
+	if (status)
 	  goto bad2;
     }
 
@@ -814,7 +820,6 @@ void rcmd_stream_init_krb5(in_keyblock, encrypt_flag, lencheck, am_client,
 {
     krb5_error_code status;
     size_t blocksize;
-    krb5_boolean similar;
 
     if (!encrypt_flag) {
 	rcmd_stream_init_normal();
@@ -835,8 +840,9 @@ void rcmd_stream_init_krb5(in_keyblock, encrypt_flag, lencheck, am_client,
 
     use_ivecs = 1;
 
-    if (status = krb5_c_block_size(bsd_context, keyblock->enctype,
-				   &blocksize)) {
+    status = krb5_c_block_size(bsd_context, keyblock->enctype,
+			       &blocksize);
+    if (status) {
 	/* XXX what do I do? */
 	abort();
     }
@@ -952,9 +958,10 @@ static int v5_des_read(fd, buf, len, secondary)
     if ((cc = krb5_net_read(bsd_context, fd, &c, 1)) != 1) return 0;
     rd_len = (rd_len << 8) | c;
 
-    if (ret = krb5_c_encrypt_length(bsd_context, keyblock->enctype,
-				    use_ivecs ? rd_len + 4 : rd_len,
-				    &net_len)) {
+    ret = krb5_c_encrypt_length(bsd_context, keyblock->enctype,
+				use_ivecs ? rd_len + 4 : rd_len,
+				&net_len);
+    if (ret) {
 	errno = ret;
 	return(-1);
     }
@@ -977,9 +984,10 @@ static int v5_des_read(fd, buf, len, secondary)
     plain.data = storage;
 
     /* decrypt info */
-    if (ret = krb5_c_decrypt(bsd_context, keyblock, KCMD_KEYUSAGE,
-		       use_ivecs ? encivec_i + secondary : 0,
-		       &cipher, &plain)) {
+    ret = krb5_c_decrypt(bsd_context, keyblock, KCMD_KEYUSAGE,
+			 use_ivecs ? encivec_i + secondary : 0,
+			 &cipher, &plain);
+    if (ret) {
 	/* probably out of sync */
 	errno = EIO;
 	return(-1);

@@ -184,6 +184,10 @@ typedef sigtype (*handler)();
 #include <arpa/resolv.h>
 #endif /* BIND_HACK */
 
+#ifdef KRB4_CONVERT
+#include <krb524.h>
+#endif
+
 /* Hacks to maintain compatability with Athena libkrb*/
 #ifndef HAVE_KRB_SAVE_CREDENTIALS
 #define krb_save_credentials save_credentials
@@ -315,6 +319,10 @@ extern int errno;
 char *getenv();
 void dofork();
 
+
+
+
+void term_init();
 int doremotelogin(), do_krb_login(), rootterm();
 void lgetstr(), getloginname(), checknologin(), sleepexit();
 void dolastlog(), motd(), check_mail();
@@ -342,12 +350,12 @@ static struct login_confs {
     int *flag;
 } login_conf_set[] = {
 #ifdef KRB5_GET_TICKETS
-    "krb5_get_tickets", &login_krb5_get_tickets,
+    {"krb5_get_tickets", &login_krb5_get_tickets},
 #endif
 #ifdef KRB5_KRB4_COMPAT
-    "krb4_get_tickets", &login_krb4_get_tickets,
-    "krb4_convert", &login_krb4_convert,
-    "krb4_run_aklog", &login_krb_run_aklog,
+    {"krb4_get_tickets", &login_krb4_get_tickets},
+    {"krb4_convert", &login_krb4_convert},
+    {"krb4_run_aklog", &login_krb_run_aklog},
 #endif /* KRB5_KRB4_COMPAT */
 };
 
@@ -581,16 +589,18 @@ int try_krb5 (me_p, pass)
     krb5_error_code code;
     krb5_principal me;
 
-    if (code = krb5_parse_name(kcontext, username, &me)) {
+    code = krb5_parse_name(kcontext, username, &me);
+    if (code) {
 	com_err ("login", code, "when parsing name %s",username);
 	return 0;
     }
 
     *me_p = me;
 
-    if (code = krb5_get_init_creds_password(kcontext, &my_creds, me, pass,
-					    krb5_prompter_posix, NULL,
-					    0, NULL, NULL)) {
+    code = krb5_get_init_creds_password(kcontext, &my_creds, me, pass,
+					krb5_prompter_posix, NULL,
+					0, NULL, NULL);
+    if (code) {
 	if (code == KRB5KRB_AP_ERR_BAD_INTEGRITY)
 	    fprintf (stderr,
 		     "%s: Kerberos password incorrect\n", 
@@ -621,6 +631,7 @@ int have_v5_tickets (me)
 #endif /* KRB5_GET_TICKETS */
 
 #ifdef KRB4_CONVERT
+int
 try_convert524(kcontext, me, use_ccache)
     krb5_context kcontext;
     krb5_principal me;
@@ -705,6 +716,7 @@ try_convert524(kcontext, me, use_ccache)
 #endif
 
 #ifdef KRB4_GET_TICKETS
+int
 try_krb4 (me, user_pwstring)
     krb5_principal me;
     char *user_pwstring;
@@ -773,7 +785,9 @@ int verify_krb_v4_tgt (realm)
     AUTH_DAT authdata;
     unsigned long addr;
     static /*const*/ char rcmd[] = "rcmd";
+#if 0
     char key[8];
+#endif
     int krbval, retval, have_keys;
 
     if (gethostname(hostname, sizeof(hostname)) == -1) {
@@ -852,7 +866,6 @@ void destroy_tickets()
 {
 #ifdef KRB5_GET_TICKETS
     krb5_ccache cache;
-    krb5_error_code retval;
 
     if (login_krb5_get_tickets) {
 	if(!krb5_cc_default(kcontext, &cache))
@@ -1327,9 +1340,10 @@ int main(argc, argv)
 		break;
 
 	    if (got_v5_tickets) {
-		if (retval = krb5_verify_init_creds(kcontext, &my_creds, NULL,
-						    NULL, &xtra_creds,
-						    NULL)) {
+		retval = krb5_verify_init_creds(kcontext, &my_creds, NULL,
+						NULL, &xtra_creds,
+						NULL);
+		if (retval) {
 		    com_err("login", retval, "while verifying initial ticket");
 #ifndef SYSLOG42
 		    syslog(LOG_NOTICE|LOG_AUTH,
@@ -1567,8 +1581,9 @@ int main(argc, argv)
 	} else {
 	    mcreds.ticket_flags = 0;
 
-	    if (retval = krb5_cc_retrieve_cred(kcontext, ccache, 0,
-					       &mcreds, &save_v5creds)) {
+	    retval = krb5_cc_retrieve_cred(kcontext, ccache, 0,
+					   &mcreds, &save_v5creds);
+	    if (retval) {
 		syslog(LOG_ERR,
 		       "%s while retrieiving V5 initial ticket for copy",
 		       error_message(retval));
@@ -1642,11 +1657,12 @@ int main(argc, argv)
 	/* set up credential cache -- obeying KRB5_ENV_CCNAME 
 	   set earlier */
 	/* (KRB5_ENV_CCNAME == "KRB5CCNAME" via osconf.h) */
-	if (retval = krb5_cc_default(kcontext, &ccache)) {
+	if ((retval = krb5_cc_default(kcontext, &ccache))) {
 	    com_err(argv[0], retval, "while getting default ccache");
-	} else if (retval = krb5_cc_initialize(kcontext, ccache, me)) {
+	} else if ((retval = krb5_cc_initialize(kcontext, ccache, me))) {
 	    com_err(argv[0], retval, "when initializing cache");
-	} else if (retval = krb5_cc_store_cred(kcontext, ccache, &my_creds)) {
+	} else if ((retval = krb5_cc_store_cred(kcontext, ccache, 
+						&my_creds))) {
 	    com_err(argv[0], retval, "while storing credentials");
 	} else if (xtra_creds &&
 		   (retval = krb5_cc_copy_creds(kcontext, xtra_creds,
@@ -1661,8 +1677,8 @@ int main(argc, argv)
 	    syslog(LOG_ERR,
 		   "%s while re-initializing V5 ccache as user",
 		   error_message(retval));
-	} else if (retval = krb5_cc_store_cred(kcontext, ccache,
-					       &save_v5creds)) {
+	} else if ((retval = krb5_cc_store_cred(kcontext, ccache,
+						&save_v5creds))) {
 	    syslog(LOG_ERR,
 		   "%s while re-storing V5 credentials as user",
 		   error_message(retval));
@@ -1855,6 +1871,7 @@ speed_t b_speeds[] = {
 };
 #endif
 
+void
 term_init (do_rlogin)
 {
     int line_speed = -1;
@@ -1999,7 +2016,7 @@ void getloginname()
 	    if (p < nbuf + UT_NAMESIZE)
 		*p++ = ch;
 	}
-	if (p > nbuf)
+	if (p > nbuf) {
 	    if (nbuf[0] == '-')
 		fprintf(stderr,
 			"login names may not start with '-'.\n");
@@ -2008,6 +2025,7 @@ void getloginname()
 		username = nbuf;
 		break;
 	    }
+	}
     }
 }
 

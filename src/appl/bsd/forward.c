@@ -45,7 +45,8 @@ rd_and_store_for_creds(context, auth_context, inbuf, ticket, ccache)
 
     *ccache  = NULL;
 
-    if (retval = krb5_rd_cred(context, auth_context, inbuf, &creds, NULL)) 
+    retval = krb5_rd_cred(context, auth_context, inbuf, &creds, NULL);
+    if (retval) 
 	return(retval);
 
     /* Set the KRB5CCNAME ENV variable to keep sessions 
@@ -56,13 +57,16 @@ rd_and_store_for_creds(context, auth_context, inbuf, ticket, ccache)
     sprintf(ccname, "FILE:/tmp/krb5cc_p%d", getpid());
     setenv("KRB5CCNAME", ccname, 1);
   
-    if (retval = krb5_cc_resolve(context, ccname, ccache)) 
+    retval = krb5_cc_resolve(context, ccname, ccache);
+    if (retval) 
 	goto cleanup;
 
-    if (retval = krb5_cc_initialize(context, *ccache, ticket->enc_part2->client))
+    retval = krb5_cc_initialize(context, *ccache, ticket->enc_part2->client);
+    if (retval)
 	goto cleanup;
 
-    if (retval = krb5_cc_store_cred(context, *ccache, *creds)) 
+    retval = krb5_cc_store_cred(context, *ccache, *creds);
+    if (retval) 
 	goto cleanup;
 
 cleanup:

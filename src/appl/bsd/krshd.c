@@ -192,7 +192,9 @@ char *srvtab = NULL;
 krb5_keytab keytab = NULL;
 krb5_ccache ccache = NULL;
 int default_realm(krb5_principal principal);
+#if defined(KERBEROS) && defined(LOG_OTHER_USERS) && !defined(LOG_ALL_LOGINS) 
 static int princ_maps_to_lname(krb5_principal principal, char *luser);
+#endif
 
 void fatal(int, const char *);
 
@@ -276,9 +278,10 @@ int main(argc, argv)
     struct sockaddr_in from;
     extern int opterr, optind;
     extern char *optarg;
-    char *options;
     int ch;
+#if 0
     int i;
+#endif
     int fd;
     int debug_port = 0;
 #ifdef KERBEROS
@@ -1734,6 +1737,7 @@ void usage()
 
 
 
+#if defined(KERBEROS) && defined(LOG_OTHER_USERS) && !defined(LOG_ALL_LOGINS) 
 static int princ_maps_to_lname(principal, luser)	
      krb5_principal principal;
      char *luser;
@@ -1746,6 +1750,7 @@ static int princ_maps_to_lname(principal, luser)
     }
     return 0;
 }
+#endif
 
 
 int default_realm(principal)
@@ -1789,7 +1794,6 @@ recvauth(netfd, peersin, valid_checksum)
     krb5_auth_context auth_context = NULL;
     krb5_error_code status;
     struct sockaddr_in laddr;
-    char krb_vers[KRB_SENDAUTH_VLEN + 1];
     int len;
     krb5_data inbuf;
 #ifdef KRB5_KRB4_COMPAT
@@ -1820,11 +1824,13 @@ recvauth(netfd, peersin, valid_checksum)
     strcpy(v4_instance, "*");
 #endif
 
-    if (status = krb5_auth_con_init(bsd_context, &auth_context))
+    status = krb5_auth_con_init(bsd_context, &auth_context);
+    if (status)
 	return status;
 
-    if (status = krb5_auth_con_genaddrs(bsd_context, auth_context, netfd,
-			KRB5_AUTH_CONTEXT_GENERATE_REMOTE_FULL_ADDR))
+    status = krb5_auth_con_genaddrs(bsd_context, auth_context, netfd,
+			        KRB5_AUTH_CONTEXT_GENERATE_REMOTE_FULL_ADDR);
+    if (status)
 	return status;
 
     status = krb5_auth_con_getrcache(bsd_context, auth_context, &rcache);
