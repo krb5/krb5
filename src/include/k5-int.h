@@ -1432,4 +1432,6 @@ krb5_error_code krb5_ser_unpack_bytes KRB5_PROTOTYPE((krb5_octet *,
 #define KRB5_VERIFY_MAGIC(structure,magic_number) \
     if ((structure)->magic != (magic_number)) return (magic_number);
     
+int krb5_seteuid  KRB5_PROTOTYPE((uid_t));
+
 #endif /* _KRB5_INT_H */
