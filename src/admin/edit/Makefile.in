@@ -10,6 +10,7 @@ OBJS= kdb5_edit.o \
 	util.o \
 	dump.o \
 	dumpv4.o \
+	loadv4.o \
 	ss_wrapper.o \
 	$(LIBOBJS)
 
@@ -19,7 +20,8 @@ SRCS= $(srcdir)/kdb5_edit.c \
 	$(srcdir)/util.c \
 	$(srcdir)/dump.c \
 	$(srcdir)/ss_wrapper.c \
-	$(srcdir)/dumpv4.c
+	$(srcdir)/dumpv4.c \
+	$(srcdir)/loadv4.c
 
 all:: kdb5_edit
 

@@ -66,6 +66,9 @@ request dump_v4db, "Dump database entries to a V4 slave dump file",
 request load_db, "Load database entries from a file",
 	load_db, lddb;
 
+request load_v4db, "Load database entries from a V4 slave dump file",
+	load_v4db, lddb4;
+
 request set_dbname, "Change database name",
 	set_dbname, sdbn;
 

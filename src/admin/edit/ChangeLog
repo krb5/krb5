@@ -1,3 +1,11 @@
+
+Fri Aug 25 17:37:33 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* dumpv4.c - Fix handle_keys().  It was trying to recreate work that
+		has already been done.
+	* Makefile.in, .Sanitize, loadv4.c, kdb5_ed_ct.ct - Add lddb4, the
+		command to load a v4 dump file.  This is basically, kdb5_
+		convert reconstituted to fit within the framework of kdb5_edit.
+
 Thu Aug 24 19:28:39 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* .Sanitize: Update file list

@@ -35,6 +35,7 @@ kdb5_ed_ct.ct
 kdb5_edit.M
 kdb5_edit.c
 kdb5_edit.h
+loadv4.c
 ss_wrapper.c
 tcl_wrapper.c
 util.c
