@@ -23,15 +23,6 @@
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
  * 
- *
- * These routines check and fix parity of encryption keys for the DES
- * algorithm.
- *
- * Under U.S. law, this software may not be exported outside the US
- * without license from the U.S. Commerce department.
- *
- * These routines form the library interface to the DES facilities.
- *
  */
 
 #include "des_int.h"
@@ -51,8 +42,6 @@ des_fixup_key_parity(key)
 
 /*
  * des_check_key_parity: returns true iff key has the correct des parity.
- *                       See des_fix_key_parity for the definition of
- *                       correct des parity.
  */
 int
 des_check_key_parity(key)

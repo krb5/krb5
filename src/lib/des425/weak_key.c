@@ -23,13 +23,6 @@
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
  * 
- *
- * Under U.S. law, this software may not be exported outside the US
- * without license from the U.S. Commerce department.
- *
- * These routines form the library interface to the DES facilities.
- *
- * Originally written 8/85 by Steve Miller, MIT Project Athena.
  */
 
 #include "des_int.h"

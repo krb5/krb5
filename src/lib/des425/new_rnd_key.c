@@ -55,20 +55,6 @@
 #include "des_int.h"
 #include "des.h"
 
-/*
- * des_init_random_number_generator:
- *
- *    This routine takes a secret key possibly shared by a number
- * of servers and uses it to generate a random number stream that is
- * not shared by any of the other servers.  It does this by using the current
- * process id, host id, and the current time to the nearest second.  The
- * resulting stream seed is not useful information for cracking the secret
- * key.   Moreover, this routine keeps no copy of the secret key.
- * This routine is used for example, by the kerberos server(s) with the
- * key in question being the kerberos master key.
- *
- * Note: this routine calls des_set_random_generator_seed.
- */
 void
 des_init_random_number_generator(key)
     mit_des_cblock key;
@@ -107,4 +93,3 @@ des_new_random_key(key)
 
     return 0;
 }
-
