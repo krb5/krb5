@@ -1,3 +1,7 @@
+2004-02-16  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in: Invoke KRB5_AC_PRIOCNTL_HACK.
+
 2003-12-27  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (LOCAL_SUBDIRS): Fix typo in last (undocumented)
