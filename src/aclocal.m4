@@ -655,15 +655,15 @@ fi dnl stdarg test failure
 ])dnl
 
 dnl
-dnl KRB5_AC_REGEX_FUNCS --- check for different regular expression 
-dnl				support functions
+dnl KRB5_AC_NEED_LIBGEN --- check if libgen needs to be linked in for
+dnl 				compile/step	
 dnl
-AC_DEFUN(KRB5_AC_REGEX_FUNCS,[
-AC_CHECK_FUNCS(re_comp re_exec regexec)
+dnl
+AC_DEFUN(KRB5_AC_NEED_LIBGEN,[
+AC_REQUIRE([AC_PROG_CC])
 dnl
 dnl regcomp is present but non-functional on Solaris 2.4
 dnl
-AC_REQUIRE([AC_PROG_CC])
 AC_MSG_CHECKING(for working regcomp)
 AC_CACHE_VAL(ac_cv_func_regcomp,[
 AC_TRY_RUN([
@@ -671,23 +671,33 @@ AC_TRY_RUN([
 #include <regex.h>
 regex_t x; regmatch_t m;
 int main() { return regcomp(&x,"pat.*",0) || regexec(&x,"pattern",1,&m,0); }
-], ac_cv_func_regcomp=yes, ac_cv_func_regcomp=no)])
+], ac_cv_func_regcomp=yes, ac_cv_func_regcomp=no, AC_ERROR([Cannot test regcomp when cross compiling]))])
 AC_MSG_RESULT($ac_cv_func_regcomp)
 test $ac_cv_func_regcomp = yes && AC_DEFINE(HAVE_REGCOMP)
 dnl
-dnl Check for the compile and step functions
+dnl Check for the compile and step functions - only if regcomp is not available
 dnl
-save_LIBS="$LIBS"
-LIBS=-lgen
+if test $ac_cv_func_regcomp = no; then
+ save_LIBS="$LIBS"
+ LIBS=-lgen
 dnl this will fail if there's no compile/step in -lgen, or if there's
 dnl no -lgen.  This is fine.
-AC_CHECK_FUNCS(compile step)
-LIBS="$save_LIBS"
+ AC_CHECK_FUNCS(compile step)
+ LIBS="$save_LIBS"
 dnl
 dnl Set GEN_LIB if necessary 
 dnl
-AC_CHECK_LIB(gen, compile, GEN_LIB=-lgen, GEN_LIB=)
-AC_SUBST(GEN_LIB)
+ AC_CHECK_LIB(gen, compile, GEN_LIB=-lgen, GEN_LIB=)
+ AC_SUBST(GEN_LIB)
+fi
+])
+dnl
+dnl KRB5_AC_REGEX_FUNCS --- check for different regular expression 
+dnl				support functions
+dnl
+AC_DEFUN(KRB5_AC_REGEX_FUNCS,[
+AC_CHECK_FUNCS(re_comp re_exec regexec)
+AC_REQUIRE([KRB5_AC_NEED_LIBGEN])
 ])dnl
 dnl
 dnl AC_KRB5_TCL_FIND_CONFIG (uses tcl_dir)
@@ -986,8 +996,7 @@ dnl Set variables to build a program.
 
 AC_DEFUN(KRB5_BUILD_PROGRAM,
 [AC_REQUIRE([KRB5_LIB_AUX])
-AC_CHECK_LIB(gen, compile, GEN_LIB=-lgen, GEN_LIB=)
-AC_SUBST(GEN_LIB)
+AC_REQUIRE([KRB5_AC_NEED_LIBGEN])
 AC_SUBST(CC_LINK)
 AC_SUBST(DEPLIBEXT)])
 

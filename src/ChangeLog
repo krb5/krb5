@@ -1,3 +1,14 @@
+2001-06-18  Ezra Peisach  <epeisach@mit.edu>
+
+	* acconfig.h: Add HAVE_REGCOMP.
+
+	* aclocal.m4 (KRB5_AC_NEED_LIBGEN): Determins if libgen is really
+	needed to be linked with executables by determining if regcomp()
+	is missing or non-functionl and then if compile/step will be used.
+	(KRB5_AC_REGEX_FUNCS): Rewritten to require KRB5_AC_NEED_LIBGEN.
+	(KRB5_BUILD_PROGRAM): Use KRB5_AC_NEED_LIBGEN instead of testing
+	for compile in libgen.
+	
 2001-06-11  Ezra Peisach  <epeisach@mit.edu>
 
 	* aclocal.m4 (KRB5_NEED_PROTO): Determines if the OS provides a

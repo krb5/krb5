@@ -18,6 +18,7 @@
 
 #undef HAVE_STDARG_H
 #undef HAVE_VARARGS_H
+#undef HAVE_REGCOMP
 
 /* Define if struct sockaddr and friends (sockaddr_in etc) have the
    sa_len field.  */
