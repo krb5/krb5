@@ -1,3 +1,7 @@
+Mon Jan 15 17:35:25 1996  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* sys_term.c: Call pty_update_utmp with PTY_TTYSLOT_USABLE flag.
+
 Mon Nov 27 15:55:50 1995  Tom Yu  <tlyu@dragons-lair.MIT.EDU>
 
 	* state.c: use P properly so it won't break non-ansi compilers.

@@ -38,9 +38,6 @@ pty_open_ctty (slave, fd)
     int *fd;
 {
     int testfd, retval;
-#ifdef HAVE_SETSID
-    (void) setsid();
-#endif
 
 /* First, dissociate from previous terminal */
     if ( (retval = ptyint_void_association()) != 0 )

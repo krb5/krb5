@@ -703,7 +703,8 @@ int syncpipe[2];
 #ifndef NO_UT_PID
 	{
 
-	    pty_update_utmp(PTY_LOGIN_PROCESS, getpid(), "rlogin", line, ""/*host*/);
+	    pty_update_utmp(PTY_LOGIN_PROCESS, getpid(), "rlogin", line,
+			    ""/*host*/, PTY_TTYSLOT_USABLE);
 	}
 #endif
 

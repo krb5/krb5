@@ -24,6 +24,9 @@
 #define PTY_USER_PROCESS 1
 #define PTY_DEAD_PROCESS 2
 
+/* flags to update_utmp*/
+#define PTY_TTYSLOT_USABLE (0x1)
+#define PTY_UTMP_USERNAME_VALID (0x2)
 #ifdef __STDC__ /* use prototypes */
 
 long pty_init(void);
@@ -33,7 +36,7 @@ long pty_open_slave (const char *slave, int *fd);
 long pty_open_ctty (const char *slave, int *fd);
 
 long pty_initialize_slave ( int fd);
-long pty_update_utmp (int process_type,int pid,  char *user, char *line, char *host);
+long pty_update_utmp (int process_type,int pid,  char *user, char *line, char *host, int flags);
 
 long pty_logwtmp (char *tty, char * user, char *host);
 

@@ -1,3 +1,17 @@
+Wed Jan 17 15:14:33 1996  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* krlogin.c ((reader): Use select to find out-of-band data, not signals.
+	(oob): No longer a signal handler; just a function.
+	(writer): get rid of copytochild setup as sigurg no longer needed
+	(main): Don't block SIGURG
+	* configure.in :  Include sys/time.h check
+
+Mon Jan 15 16:16:07 1996  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* login.c (main): ttyslot usable here as well
+
+	* krlogind.c (doit): update_utmp can use ttyslot.
+
 Thu Jan 11 12:40:08 1996  Ezra Peisach  (epeisach@paris)
 
 	* krsh.c, krlogin.c: (main): Ultrix cc does not support automatic

@@ -1,3 +1,22 @@
+Tue Jan 16 13:52:22 1996  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* void_assoc.c (ptyint_void_association): Move setsid call from open_ctty to void_association.
+
+	* logwtmp.c (pty_logwtmp): Pass user argument to update_wtmp.
+
+	* update_utmp.c (update_utmp): Implement PTY_UTMP_USERNAME_VALID flag
+
+Mon Jan 15 15:48:37 1996  Sam Hartman  (hartmans@justforfun)
+
+	* cleanup.c: Change to indiciate utmp user name is valid.
+
+	* 
+
+Mon Jan 15 15:21:16 1996  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* update_utmp.c (pty_update_utmp): Add flags field; use ttyslot
+        only if reasonable.
+
 Fri Jan 12 16:33:37 1996  Sam Hartman  <hartmans@infocalypse>
 
 	* open_slave.c (pty_open_slave): Don't use fchmod or fchown; they

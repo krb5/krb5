@@ -784,7 +784,7 @@ bad_login:
 		struct utmp utmp;
 
 		login_time = time(&utmp.ut_time);
-		if ( (retval = pty_update_utmp(PTY_USER_PROCESS, getpid(),  username, ttyn, hostname)) < 0 )
+		if ( (retval = pty_update_utmp(PTY_USER_PROCESS, getpid(),  username, ttyn, hostname, PTY_TTYSLOT_USABLE)) < 0 )
 		    com_err (argv[0], retval, "while updating utmp");
 	}
 

@@ -1137,7 +1137,8 @@ if ( read(syncpipe[0], &c, 1) == 0 ) {
 		
 			} else {
 		
-		pty_update_utmp (PTY_LOGIN_PROCESS, getpid(), "LOGIN", line, host);
+		pty_update_utmp (PTY_LOGIN_PROCESS, getpid(), "LOGIN", line,
+				 host, PTY_TTYSLOT_USABLE);
 		getptyslave(autologin);
 
 /* Notify our parent we're ready to continue.*/

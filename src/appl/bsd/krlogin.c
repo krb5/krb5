@@ -64,6 +64,12 @@ char copyright[] =
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
+#ifdef HAVE_SYS_SELECT_H
+#include <sys/select.h>
+#endif
+#if HAVE_SYS_TIME_H
+#include <sys/time.h>
+#endif
 
 #ifdef POSIX_TERMIOS
 #include <termios.h>
@@ -216,7 +222,8 @@ struct	winsize winsize;
 char	*host=0;			/* external, so it can be
 					   reached from confirm_death() */
 
-krb5_sigtype	sigwinch KRB5_PROTOTYPE((int)), oob KRB5_PROTOTYPE((int));
+krb5_sigtype	sigwinch KRB5_PROTOTYPE((int));
+void oob KRB5_PROTOTYPE((void));
 krb5_sigtype	lostpeer KRB5_PROTOTYPE((int));
 #if __STDC__
 int setsignal(int sig, krb5_sigtype (*act)());
@@ -544,16 +551,15 @@ main(argc, argv)
     (void) sigaction(SIGPIPE, &sa, (struct sigaction *)0);
     
     (void) sigemptyset(&urgmask);
-    (void) sigaddset(&urgmask, SIGURG);
     (void) sigaddset(&urgmask, SIGUSR1);
     oldmask = &omask;
     (void) sigprocmask(SIG_BLOCK, &urgmask, oldmask);
 #else
     (void) signal(SIGPIPE, lostpeer);
 #ifdef sgi
-    oldmask = sigignore(sigmask(SIGURG) | sigmask(SIGUSR1));
+    oldmask = sigignore( sigmask(SIGUSR1));
 #else
-    oldmask = sigblock(sigmask(SIGURG) | sigmask(SIGUSR1));
+    oldmask = sigblock( sigmask(SIGUSR1));
 #endif
 #endif /* POSIX_SIGNALS */
 
@@ -603,28 +609,6 @@ main(argc, argv)
     if (rem < 0)
       exit(1);
     
-    /* we need to do the SETOWN here so that we get the SIGURG
-       registered if the URG data come in early, before the reader() gets
-       to do this for real (otherwise, the signal is never generated
-       by the kernel).  We block it above, so when it gets unblocked
-       it will get processed by the reader().
-       There is a possibility that the signal will get delivered to both
-       writer and reader, but that is harmless, since the writer reflects
-       it to the reader, and the oob() processing code in the reader will
-       work properly even if it is called when no oob() data is present.
-       */
-#ifdef hpux
-	/* hpux invention */
-	{
-	  int pid = getpid();
-	  ioctl(rem, FIOSSAIOSTAT, &pid); /* trick: pid is non-zero */
-	  ioctl(rem, FIOSSAIOOWN, &pid);
-	}
-#else
-#ifdef HAVE_SETOWN
-    (void) fcntl(rem, F_SETOWN, getpid());
-#endif
-#endif
     if (options & SO_DEBUG &&
 	setsockopt(rem, SOL_SOCKET, SO_DEBUG, (char*)&on, sizeof (on)) < 0)
       perror("rlogin: setsockopt (SO_DEBUG)");
@@ -682,8 +666,7 @@ int confirm_death ()
 
 int	child;
 krb5_sigtype	catchild KRB5_PROTOTYPE((int));
-krb5_sigtype	copytochild KRB5_PROTOTYPE((int)),
-		writeroob KRB5_PROTOTYPE((int));
+krb5_sigtype	writeroob KRB5_PROTOTYPE((int));
 
 int	defflags, tabflag;
 int	deflflags;
@@ -810,16 +793,8 @@ doit(oldmask)
 	exit(3);
     }
     
-    /*
-     * We may still own the socket, and may have a pending SIGURG
-     * (or might receive one soon) that we really want to send to
-     * the reader.  Set a trap that simply copies such signals to
-     * the child.
-     */
 #ifdef POSIX_SIGNALS
     /* "sa" has already been initialized above. */
-    sa.sa_handler = copytochild;
-    (void) sigaction(SIGURG, &sa, (struct sigaction *)0);
 
     sa.sa_handler = writeroob;
     (void) sigaction(SIGUSR1, &sa, (struct sigaction *)0);
@@ -829,7 +804,6 @@ doit(oldmask)
     sa.sa_handler = catchild;
     (void) sigaction(SIGCHLD, &sa, (struct sigaction *)0);
 #else
-    (void) signal(SIGURG, copytochild);
     (void) signal(SIGUSR1, writeroob);
 #ifndef sgi
     (void) sigsetmask(oldmask);
@@ -921,15 +895,6 @@ done(status)
 
 
 
-/*
- * Copy SIGURGs to the child process.
- */
-krb5_sigtype
-  copytochild(signo)
-int signo;
-{
-    (void) kill(child, SIGURG);
-}
 
 
 
@@ -1228,15 +1193,8 @@ int	rcvcnt;
 int	rcvstate;
 int	ppid;
 
-#ifdef POSIX_SETJMP
-sigjmp_buf rcvtop;
-#else
-jmp_buf rcvtop;
-#endif
 
-krb5_sigtype
-  oob(signo)
-int signo;
+void oob()
 {
 #ifndef POSIX_TERMIOS
     int out = FWRITE;
@@ -1253,33 +1211,9 @@ int signo;
     struct sgttyb sb;
 #endif
 #endif
+    mark = 0;
     
-    while (recv(rem, &mark, 1, MSG_OOB) < 0)
-      switch (errno) {
-	  
-	case EWOULDBLOCK:
-	  /*
-	   * Urgent data not here yet.
-	   * It may not be possible to send it yet
-	   * if we are blocked for output
-	   * and our input buffer is full.
-	   */
-	  if (rcvcnt < sizeof(rcvbuf)) {
-	      n = read(rem, rcvbuf + rcvcnt,
-		       sizeof(rcvbuf) - rcvcnt);
-	      if (n <= 0)
-		return;
-	      rcvd += n;
-	  } else {
-	      n = read(rem, waste, sizeof(waste));
-	      if (n <= 0)
-		return;
-	  }
-	  continue;
-	  
-	default:
-	  return;
-      }
+     recv(rem, &mark, 1, MSG_OOB);
     if (mark & TIOCPKT_WINDOW) {
 	/*
 	 * Let server know about window size changes
@@ -1347,38 +1281,11 @@ int signo;
 	    n = read(rem, waste, sizeof (waste));
 	    if (n <= 0)
 	      break;
+return;
 	}
-	/*
-	 * Don't want any pending data to be output,
-	 * so clear the recv buffer.
-	 * If we were hanging on a write when interrupted,
-	 * don't want it to restart.  If we were reading,
-	 * restart anyway.
-	 */
-	rcvcnt = 0;
-#ifdef POSIX_SETJMP
-	siglongjmp(rcvtop, 1);
-#else
-	longjmp(rcvtop, 1);
-#endif
     }
     
-    /*
-     * oob does not do FLUSHREAD (alas!)
-     */
     
-    /*
-     * If we filled the receive buffer while a read was pending,
-     * longjmp to the top to restart appropriately.  Don't abort
-     * a pending write, however, or we won't know how much was written.
-     */
-#ifdef POSIX_SETJMP
-    if (rcvd && rcvstate == READING)
-	siglongjmp(rcvtop, 1);
-#else
-    if (rcvd && rcvstate == READING)
-	longjmp(rcvtop, 1);
-#endif
 }
 
 
@@ -1398,6 +1305,7 @@ reader(oldmask)
 #else
     int pid = -getpid();
 #endif
+fd_set readset, excset;
     int n, remaining;
     char *bufp = rcvbuf;
 
@@ -1409,27 +1317,13 @@ reader(oldmask)
     sa.sa_handler = SIG_IGN;
     (void) sigaction(SIGTTOU, &sa, (struct sigaction *)0);
 
-#ifdef SA_RESTART
-    /* Because SIGURG will be coming in during a read,
-     * we want to restart the syscall afterwards. */
-    sa.sa_flags |= SA_RESTART;
-#endif
-    sa.sa_handler = oob;
-    (void) sigaction(SIGURG, &sa, (struct sigaction *)0);
 #else    
     (void) signal(SIGTTOU, SIG_IGN);
-    (void) signal(SIGURG, oob);
 #endif
     
     ppid = getppid();
-#ifdef HAVE_SETOWN
-    (void) fcntl(rem, F_SETOWN, pid);
-#endif
-#ifdef POSIX_SETJMP
-    (void) sigsetjmp(rcvtop, 1);
-#else
-    (void) setjmp(rcvtop);
-#endif
+FD_ZERO(&readset);
+    FD_ZERO(&excset);
 #ifdef POSIX_SIGNALS
     sigprocmask(SIG_SETMASK, oldmask, (sigset_t*)0);
 #else
@@ -1437,6 +1331,7 @@ reader(oldmask)
     (void) sigsetmask(oldmask);
 #endif
 #endif /* POSIX_SIGNALS */
+
     for (;;) {
 	while ((remaining = rcvcnt - (bufp - rcvbuf)) > 0) {
 	    rcvstate = WRITING;
@@ -1450,11 +1345,21 @@ reader(oldmask)
 	}
 	bufp = rcvbuf;
 	rcvcnt = 0;
-	rcvstate = READING;
-	rcvcnt = des_read(rem, rcvbuf, sizeof (rcvbuf));
+	 rcvstate = READING;
+FD_SET(rem,&readset);
+	FD_SET(rem,&excset);
+	if (select(rem+1, &readset, 0, &excset, 0) > 0 ) {
+if (FD_ISSET(rem, &excset))
+  oob();
+if (FD_ISSET(rem, &readset)) {
+	  	rcvcnt = des_read(rem, rcvbuf, sizeof (rcvbuf));
 	if (rcvcnt == 0)
 	  return (0);
-	if (rcvcnt < 0) {
+	if (rcvcnt < 0)
+	  goto error;
+}
+	} else
+		  error: {
 	    if (errno == EINTR)
 	      continue;
 	    perror("read");

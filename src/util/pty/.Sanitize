@@ -25,6 +25,7 @@ Things-to-keep:
 
 .cvsignore
 ChangeLog
+README
 Makefile.in
 configure.in
 cleanup.c

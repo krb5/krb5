@@ -4,6 +4,9 @@
 kadm_deplib=''
 kadm_lib=''
 
+kutil_deplib=''
+kutil_lib=''
+
 kdb5_deplib=''
 kdb5_lib=''
 

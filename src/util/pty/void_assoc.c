@@ -24,6 +24,10 @@
 long ptyint_void_association()
 {
             int con_fd;
+#ifdef HAVE_SETSID
+    (void) setsid();
+#endif
+
         /* Void tty association first */
         if ((con_fd = open("/dev/tty", O_RDWR)) >= 0) {
           ioctl(con_fd, TIOCNOTTY, 0);
