@@ -19,6 +19,7 @@ static char rcsid_rd_error_c[] =
 
 #include <krb5/krb5.h>
 #include <krb5/asn1.h>
+#include <krb5/krb5_err.h>
 
 #include <krb5/ext-proto.h>
 
@@ -39,6 +40,8 @@ krb5_error *dec_error;
     krb5_error_code retval;
     krb5_error *new_dec_error;
 
+    if (!krb5_is_krb_error(enc_errbuf))
+	return KRB5KRB_AP_ERR_MSG_TYPE;
     if (retval = decode_krb5_error(enc_errbuf, &new_dec_error))
 	return(retval);
     *dec_error = *new_dec_error;

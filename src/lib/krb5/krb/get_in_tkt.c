@@ -114,6 +114,8 @@ OLDDECLARG(krb5_ccache, ccache)
 
     /* now decode the reply...could be error or as_rep */
 
+    if (!krb5_is_kdc_rep(&reply))
+	return KRB5KRB_AP_ERR_MSG_TYPE;
     if (retval = decode_krb5_as_rep(&reply, &as_reply)) {
 	if (decode_krb5_error(&reply, &err_reply))
 	    return retval;		/* some other reply--??? */
