@@ -270,6 +270,11 @@ void get_preauth_hint_list(request, client, server, e_data)
 	}
 	pa++;
     }
+    if (pa_data[0] == 0) {
+	krb5_klog_syslog (LOG_INFO,
+			  "%spreauth required but hint list is empty",
+			  hw_only ? "hw" : "");
+    }
     retval = encode_krb5_padata_sequence((const krb5_pa_data **) pa_data,
 					 &edat);
     if (retval)
@@ -759,8 +764,11 @@ return_sam_data(context, in_padata, client, request, reply, client_key,
     {
 	krb5_octet *p = encrypting_key->contents;
 	krb5_octet *q = psr->sam_key.contents;
+	int length = ((encrypting_key->length < psr->sam_key.length)
+		      ? encrypting_key->length
+		      : psr->sam_key.length);
 
-	for (i = 0; i < encrypting_key->length, i < psr->sam_key.length; i++)
+	for (i = 0; i < length; i++)
 	    p[i] ^= q[i];
     }
 
@@ -938,6 +946,10 @@ get_sam_edata(context, request, client, server, pa_data)
       sc.sam_challenge_label.length = strlen(sc.sam_challenge_label.data);
       sc.sam_challenge.data = "12345";
       sc.sam_challenge.length = strlen(sc.sam_challenge.data);
+
+#if 0 /* Enable this to test "normal" (no flags set) mode.  */
+      psr.sam_flags = sc.sam_flags = 0;
+#endif
 
       psr.magic = KV5M_PREDICTED_SAM_RESPONSE;
       /* string2key on sc.sam_challenge goes in here */
