@@ -381,7 +381,6 @@ int get_tgt (context, p_client_str, p_client, ccache)
     char *cache_name = NULL;		/* -f option */
     long lifetime = KRB5_DEFAULT_LIFE;	/* -l option */
     int options = KRB5_DEFAULT_OPTIONS;
-    krb5_address **my_addresses;
     krb5_error_code code;
     krb5_creds my_creds;
     krb5_timestamp start;
@@ -415,12 +414,6 @@ int get_tgt (context, p_client_str, p_client, ccache)
 	return(-1);
     }
 
-    code = krb5_os_localaddr(&my_addresses);
-    if (code != 0) {
-	com_err (prog, code, "when getting my address");
-	exit(1);
-    }
-
     my_creds.client = *p_client;
     my_creds.server = tgt_server;
 
@@ -439,7 +432,7 @@ int get_tgt (context, p_client_str, p_client, ccache)
     my_creds.times.endtime = start + lifetime;
     my_creds.times.renew_till = 0;
 
-    code = krb5_get_in_tkt_with_password(context, options, my_addresses,
+    code = krb5_get_in_tkt_with_password(context, options, 0,
 					 NULL, patype, p_client_str, ccache,
 					 &my_creds, 0);
     my_creds.server = my_creds.client = 0;
