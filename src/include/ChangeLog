@@ -1,3 +1,8 @@
+2003-05-02  Ken Raeburn  <raeburn@mit.edu>
+
+	* port-sockets.h (inet_ntop) [!_WIN32 && !HAVE_MACSOCK_H]: Define
+	as a macro if not provided by the OS.
+
 2003-04-17  Sam Hartman  <hartmans@mit.edu>
 
 	* k5-int.h: Add encode_krb5_setpw_req
