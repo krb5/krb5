@@ -1,3 +1,7 @@
+Tue Sep 10 00:48:38 1996  Mark Eichin  <eichin@cygnus.com>
+
+	* kadmin.c (kadmin_startup): -m doesn't take an argument.
+
 Tue Sep 10 14:15:28 1996  Tom Yu  <tlyu@mit.edu>
 
 	* kadmin.M: remove ".so man1/header.doc"
