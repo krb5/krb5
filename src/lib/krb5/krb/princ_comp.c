@@ -30,6 +30,19 @@
 #include <krb5/ext-proto.h>
 
 krb5_boolean
+krb5_realm_compare(princ1, princ2)
+krb5_const_principal princ1;
+krb5_const_principal princ2;
+{
+    if (krb5_princ_realm(princ1)->length != krb5_princ_realm(princ2)->length ||
+	memcmp (krb5_princ_realm(princ1)->data, krb5_princ_realm(princ2)->data,
+		krb5_princ_realm(princ2)->length))
+	return FALSE;
+
+    return TRUE;
+}
+
+krb5_boolean
 krb5_principal_compare(princ1, princ2)
 krb5_const_principal princ1;
 krb5_const_principal princ2;
@@ -40,9 +53,7 @@ krb5_const_principal princ2;
     if (nelem != krb5_princ_size(princ2))
 	return FALSE;
 
-    if (krb5_princ_realm(princ1)->length != krb5_princ_realm(princ2)->length ||
-	memcmp (krb5_princ_realm(princ1)->data, krb5_princ_realm(princ2)->data,
-		krb5_princ_realm(princ2)->length))
+    if (! krb5_realm_compare(princ1, princ2))
 	return FALSE;
 
     for (i = 0; i < nelem; i++) {

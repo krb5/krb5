@@ -1,3 +1,8 @@
+Thu Sep 29 15:10:42 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* princ_comp.c (krb5_realm_compare): Added new function from
+		OpenVision.
+
 Wed Sep 21 17:57:35 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* rd_req_dec.c (krb5_rd_req_decoded): Added Changes from Cybersafe

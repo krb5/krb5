@@ -128,6 +128,9 @@ krb5_boolean krb5_address_compare
 int krb5_address_order
 	PROTOTYPE((const krb5_address *,
 		   const krb5_address *));
+krb5_boolean krb5_realm_compare
+	PROTOTYPE((krb5_const_principal,
+		   krb5_const_principal));
 krb5_boolean krb5_principal_compare
 	PROTOTYPE((krb5_const_principal,
 		   krb5_const_principal));
