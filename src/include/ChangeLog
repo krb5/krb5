@@ -1,3 +1,8 @@
+2000-08-07  Ezra Peisach  <epeisach@mit.edu>
+
+	* krb5.hin: lr_type element of krb5_last_req_entry needs to be a
+	signed int instead of an unsigned char.
+
 2000-07-20  Danilo Almeida  <dalmeida@mit.edu>
 
 	* krb5.hin: Fix calling convention for krb5_cc_get_type.

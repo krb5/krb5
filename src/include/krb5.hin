@@ -917,7 +917,7 @@ typedef struct _krb5_creds {
 /* Last request fields */
 typedef struct _krb5_last_req_entry {
     krb5_magic magic;
-    krb5_octet lr_type;
+    krb5_int32 lr_type;
     krb5_timestamp value;
 } krb5_last_req_entry;
 
