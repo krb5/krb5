@@ -37,7 +37,4 @@ install::
 	$(INSTALLPROG) kdb5_stash.M ${DESTDIR}$(ADMIN_MANDIR)/kdb5_stash.$(ADMIN_MANSUFFIX)
 
 clean::
-	$(RM) $(OBJS)
-
-clean::
-	$(RM) kdb5_stash
+	$(RM) kdb5_stash kdb5_stash.o

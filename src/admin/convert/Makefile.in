@@ -41,8 +41,5 @@ install::
 	$(INSTALLPROG) kdb5_convert.M ${DESTDIR}$(ADMIN_MANDIR)/kdb5_convert.$(ADMIN_MANSUFFIX)
 
 clean::
-	$(RM) $(OBJS)
-
-clean::
-	$(RM) kdb5_convert
+	$(RM) kdb5_convert kdb5_convert.o
 

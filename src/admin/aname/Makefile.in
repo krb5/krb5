@@ -37,8 +37,5 @@ install::
 	$(INSTALLPROG) kdb5_anadd.M ${DESTDIR}$(ADMIN_MANDIR)/kdb5_anadd.$(ADMIN_MANSUFFIX)
 
 clean::
-	$(RM) $(OBJS)
-
-clean::
-	$(RM) kdb5_anadd
+	$(RM) kdb5_anadd kdb5_anadd.o
 

@@ -53,7 +53,7 @@ install::
 	$(INSTALLPROG) kpropd.M ${DESTDIR}$(SERVER_MANDIR)/kpropd.$(SERVER_MANSUFFIX)
 
 clean::
-	$(RM) $(OBJS)
+	$(RM) $(CLIENTOBJS) $(SERVEROBJS)
 
 clean::
 	$(RM) kprop kpropd

@@ -37,8 +37,6 @@ install::
 	$(INSTALLPROG) kdb5_create.M ${DESTDIR}$(ADMIN_MANDIR)/kdb5_create.$(ADMIN_MANSUFFIX)
 
 clean::
-	$(RM) kdb5_create
+	$(RM) kdb5_create kdb5_create.o
 
-clean::
-	$(RM) $(OBJS)
 

@@ -37,7 +37,4 @@ install::
 	$(INSTALLPROG) kdb5_destroy.M ${DESTDIR}$(ADMIN_MANDIR)/kdb5_destroy.$(ADMIN_MANSUFFIX)
 
 clean::
-	$(RM) $(OBJS)
-
-clean::
-	$(RM) kdb5_destroy
+	$(RM) kdb5_destroy kdb5_destroy.o
