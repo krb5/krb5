@@ -1,3 +1,9 @@
+2001-07-24  Ezra Peisach  <epeisach@mit.edu>
+
+	* asn1_k_encode.c: (asn1_encode_predicted_sam_response): Use
+	asn1_encode_charstring() instead of asn1_decode_octetstring() for
+	krb5_data. (signed vs. unsigned)
+
 2001-06-12  Ezra Peisach  <epeisach@mit.edu>
 
 	* asn1_k_decode.c (asn1_decode_predicted_sam_response): Use

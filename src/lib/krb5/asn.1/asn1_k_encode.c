@@ -954,7 +954,7 @@ asn1_error_code asn1_encode_predicted_sam_response(buf, val, retlen)
 {
   asn1_setup();
 
-  add_optstring(val->msd,6,asn1_encode_octetstring);
+  add_optstring(val->msd,6,asn1_encode_charstring);
   asn1_addfield(val->client,5,asn1_encode_principal_name);
   asn1_addfield(val->client,4,asn1_encode_realm);
   asn1_addfield(val->susec,3,asn1_encode_integer);
