@@ -1,3 +1,8 @@
+Sun Nov 10 20:10:53 1996  Sam Hartman  <hartmans@mit.edu>
+
+	* krb_auth_su.c (path_passwd;): If you don't have a srvtab, always
+ 	fail.
+
 Thu Nov  7 15:41:19 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* main.c (main): Check the error return from

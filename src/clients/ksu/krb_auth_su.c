@@ -220,7 +220,7 @@ krb5_seteuid(0);
 				     &target_tkt);
 	if (retval) {
 	    com_err(prog_name, retval, "while verifying ticket for server");
-	    if (retval != ENOENT) return (FALSE);
+	    return (FALSE);
 	}
 
 	if ((retval = krb5_cc_store_cred(context,  cc, out_creds))){
