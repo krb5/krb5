@@ -34,6 +34,26 @@ set kdc_supported_enctypes "des-cbc-crc:normal"
 # request a des-cbc-md4 session key.  Since only des-cbc-crc is in the
 # KDC's permitted_enctypes list, the TGT will be unusable.
 
+# KLUDGE for tracking down leaking ptys
+if 0 {
+    rename spawn oldspawn
+    rename wait oldwait
+    proc spawn { args } {
+	upvar 1 spawn_id spawn_id
+	verbose "spawn: args=$args"
+	set pid [eval oldspawn $args]
+	verbose "spawn: pid=$pid spawn_id=$spawn_id"
+	return $pid
+    }
+    proc wait { args } {
+	upvar 1 spawn_id spawn_id
+	verbose "wait: args=$args"
+	set ret [eval oldwait $args]
+	verbose "wait: $ret"
+	return $ret
+    }
+}
+
 # The des.des3-tgt.no-kdc-des3 pass will fail if the KDC doesn't
 # constrain ticket key enctypes to those in permitted_enctypes.  It
 # does this by not putting des3 in the permitted_enctypes, while
@@ -1502,8 +1522,12 @@ proc stop_kerberos_daemons { } {
     verbose "entered stop_kerberos_daemons"
 
     if [info exists kdc_pid] {
-	catch "exec kill $kdc_pid"
-	catch "expect eof"
+	if [catch "exec kill $kdc_pid" msg] {
+	    verbose "kill kdc: $msg"
+	}
+	if [catch "expect -i $kdc_spawn_id eof" msg] {
+	    verbose "expect kdc eof: $msg"
+	}
 	set kdc_list [wait -i $kdc_spawn_id]
 	verbose "wait -i $kdc_spawn_id returned $kdc_list (kdc)"
 	unset kdc_pid
@@ -1511,8 +1535,12 @@ proc stop_kerberos_daemons { } {
     }
 
     if [info exists kadmind_pid] {
-	catch "exec kill $kadmind_pid"
-	catch "expect eof"
+	if [catch "exec kill $kadmind_pid" msg] {
+	    verbose "kill kadmind: $msg"
+	}
+	if [catch "expect -i $kadmind_spawn_id eof" msg] {
+	    verbose "expect kadmind eof: $msg"
+	}
 	set kadmind_list [wait -i $kadmind_spawn_id]
 	verbose "wait -i $kadmind_spawn_id returned $kadmind_list (kadmind5)"
 	unset kadmind_pid

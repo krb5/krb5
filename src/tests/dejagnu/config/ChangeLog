@@ -1,3 +1,10 @@
+2002-11-08  Tom Yu  <tlyu@mit.edu>
+
+	* default.exp: Add (disabled) debugging code for catching leaking
+	ptys.  expect eof from the correct spawn_ids when killing kdc and
+	kadmind to avoid leaking ptys.
+	[pullup from trunk]
+
 2002-11-03  Tom Yu  <tlyu@mit.edu>
 
 	* default.exp (stop_kerberos_daemons): Kill, expect eof, wait, in
