@@ -1,3 +1,11 @@
+
+Tue Jun 6 17:25:20 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* Makefile.in : Change $(ARCHIVE) to $(ARADD) so that updates to the
+		library replace modules instead of appending them.
+	* cnv_tkt_skey.c, conv_creds.c : Concatenate the two strings which
+		comprise the print format.  Some compilers cannot deal with
+		<string><string> (e.g. Ultrix).
+
 Mon Jun  5 22:25:33 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in, cnv_tkt_skey.c, conv_creds.c, conv_princ.c,

@@ -52,7 +52,7 @@ GENS	= krb524_err.c krb524_err.h
 all:: $(GENS) libkrb524.a krb524d test k524init
 
 libkrb524.a: $(OBJS)
-	$(ARCHIVE) $@ $(OBJS)
+	$(ARADD) $@ $(OBJS)
 	$(RANLIB) $@
 
 test: libkrb524.a test.o $(DEPKDBLIB) $(DEPKLIB)
