@@ -777,6 +777,18 @@ dnl
 dnl This rule generates library lists for programs.
 dnl
 define(KRB5_LIBRARIES,[
+dnl
+dnl under solaris, if we use compile() and step(), we need -lgen
+save_LIBS="$LIBS"
+LIBS=-lgen
+dnl this will fail if there's no compile/step in -lgen, or if there's
+dnl no -lgen.  This is fine.
+AC_CHECK_FUNCS(compile step)
+[if test "$ac_cv_func_compile" = yes ; then
+	LIBS="$save_LIBS -lgen"
+else
+	LIBS="$save_LIBS"
+fi]
 dnl this is ugly, but it wouldn't be necessary if krb5 didn't abuse
 dnl configure so badly
 SRVDEPLIBS="\[$](DEPLOCAL_LIBRARIES) $kadmsrv_deplib $gssrpc_deplib $gssapi_deplib $kdb5_deplib $kutil_deplib \[$](TOPLIBD)/libkrb5.a $kdb4_deplib $krb4_deplib \[$](TOPLIBD)/libcrypto.a $ss_deplib $dyn_deplib $db_deplib \[$](TOPLIBD)/libcom_err.a"
