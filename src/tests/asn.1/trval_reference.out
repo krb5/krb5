@@ -143,10 +143,10 @@ encode_krb5_enc_kdc_rep_part:
 .  .  .  [keyvalue] [Octet String] "12345678"
 .  .  [last-req] [Sequence/Sequence Of] 
 .  .  .  [Sequence/Sequence Of] 
-.  .  .  .  [lr-type] [Integer] 251
+.  .  .  .  [lr-type] [Integer] -5
 .  .  .  .  [lr-value] [Generalized Time] "19940610060317Z"
 .  .  .  [Sequence/Sequence Of] 
-.  .  .  .  [lr-type] [Integer] 251
+.  .  .  .  [lr-type] [Integer] -5
 .  .  .  .  [lr-value] [Generalized Time] "19940610060317Z"
 .  .  [nonce] [Integer] 42
 .  .  [key-expiration] [Generalized Time] "19940610060317Z"
@@ -180,10 +180,10 @@ encode_krb5_enc_kdc_rep_part(optionals NULL):
 .  .  .  [keyvalue] [Octet String] "12345678"
 .  .  [last-req] [Sequence/Sequence Of] 
 .  .  .  [Sequence/Sequence Of] 
-.  .  .  .  [lr-type] [Integer] 251
+.  .  .  .  [lr-type] [Integer] -5
 .  .  .  .  [lr-value] [Generalized Time] "19940610060317Z"
 .  .  .  [Sequence/Sequence Of] 
-.  .  .  .  [lr-type] [Integer] 251
+.  .  .  .  [lr-type] [Integer] -5
 .  .  .  .  [lr-value] [Generalized Time] "19940610060317Z"
 .  .  [nonce] [Integer] 42
 .  .  [flags] [Bit String] 0xfe5cba98

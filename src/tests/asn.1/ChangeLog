@@ -1,3 +1,13 @@
+2000-08-07  Ezra Peisach  <epeisach@mit.edu>
+
+	* reference_encode.out, trval_reference.out: Test encoding of
+	negative lr_type field.
+
+	* krb5_decode_test.c: Fix enc_kdc_rep_part tests to trully handle
+	a negative lr_type in a krb5_last_req_entry structure. If
+	KRB5_GENEROUS_LR_TYPE is defined, do a backwards compatibility
+	test as well.
+
 2000-07-28  Ezra Peisach  <epeisach@mit.edu>
 
 	* utility.c: Add casts on types being sent to internal functions.
