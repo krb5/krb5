@@ -11,7 +11,6 @@
 #define _GSS_MECHGLUEP_H
 
 #include "mechglue.h"
-#include <sys/types.h>
 
 #ifdef _MSDOS
 #include <malloc.h>
