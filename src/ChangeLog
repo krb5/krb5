@@ -1,3 +1,8 @@
+2002-06-10  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (WINMAKEFILES): Remove keytab subdir makefiles, and
+	their build rules.
+
 2002-04-25  Ezra Peisach  <epeisach@bu.edu>
 
 	* configure.in (AC_CONFIG_SUBDIRS): Always run configure in
