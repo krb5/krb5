@@ -162,6 +162,7 @@ n_found = 0;
 		address = (krb5_address *)
 		    malloc (sizeof(krb5_address));
 		if (address) {
+		    address->magic = KV5M_ADDRESS;
 		    address->addrtype = ADDRTYPE_INET;
 		    address->length = sizeof(struct in_addr);
 		    address->contents = (unsigned char *)malloc(address->length);
@@ -186,6 +187,7 @@ n_found = 0;
 		address = (krb5_address *)
 		    malloc (sizeof (krb5_address) + sizeof (struct ns_addr));
 		if (address) {
+		    address->magic = KV5M_ADDRESS;
 		    address->addrtype = ADDRTYPE_XNS; 
 
 		    /* XXX should we perhaps use ns_host instead? */
@@ -273,6 +275,7 @@ krb5_crypto_os_localaddr (krb5_address ***addr) {
         free (*addr);
         return ENOMEM;
     }
+    (*addr)[0]->magic = KV5M_ADDRESS;
     (*addr)[0]->addrtype = hostrec->h_addrtype;
     (*addr)[0]->length = hostrec->h_length;
     (*addr)[0]->contents = (unsigned char *)malloc((*addr)[0]->length);
