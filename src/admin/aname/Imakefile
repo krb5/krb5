@@ -1,4 +1,4 @@
 DEPLIBS = $(OSLIB)
-LOCAL_LIBRARIES = $(OSLIB) -lcom_err DbmLib
+LOCAL_LIBRARIES = $(OSLIB) $(COMERRLIB) $(DBMLIB)
 
 SimpleProgramTarget(kdb5_anadd)
