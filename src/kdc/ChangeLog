@@ -1,3 +1,8 @@
+Tue Jul 15 01:55:56 1997  Tom Yu  <tlyu@mit.edu>
+
+	* kdc_preauth.c (get_sam_edata): Don't goto cleanup if SAM is not
+	used; this prevents freeing an unallocated keyblock.
+
 Thu May 29 21:08:24 1997  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* do_as_req.c (process_as_req), do_tgs_req (process_tgs_req): Use
