@@ -1812,6 +1812,16 @@ krb5_error_code krb5_rd_cred
                    krb5_creds ***,
                    krb5_replay_data *));
 
+krb5_error_code krb5_fwd_tgt_creds
+	KRB5_PROTOTYPE((krb5_context, 
+			krb5_auth_context,
+			char *,
+			krb5_principal, 
+			krb5_principal, 
+			krb5_ccache,
+			int forwardable,
+			krb5_data *));	
+
 krb5_error_code krb5_auth_con_init
 	KRB5_PROTOTYPE((krb5_context,
 		   krb5_auth_context *));
@@ -1966,6 +1976,9 @@ krb5_error_code krb5_make_fulladdr
 	       krb5_address *,
 	       krb5_address *,
 	       krb5_address *));
+
+krb5_error_code krb5_os_hostaddr
+    KRB5_PROTOTYPE((krb5_context, const char *, krb5_address ***));
 
 krb5_error_code krb5_set_real_time
     KRB5_PROTOTYPE((krb5_context, krb5_int32, krb5_int32));
