@@ -1,3 +1,13 @@
+2000-08-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* listen.c (ss_quit): Now returns void.  Fix type of argument ARGV
+	to fit prototype.
+
+	* ss.h (ss_execute_line) [__STDC__]: Make prototype
+	unconditional.
+	(ss_quit): Use __SS_PROTO and return void, as with other
+	command functions.
+
 2000-08-02  Ezra Peisach  <epeisach@mit.edu>
 
 	* requests.c (DECLARE): Fix prototype for dispatch functions to

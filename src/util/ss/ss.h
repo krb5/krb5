@@ -47,6 +47,7 @@ typedef struct _ss_rp_options {	/* DEFAULT VALUES */
 
 void ss_help __SS_PROTO;
 void ss_list_requests __SS_PROTO;
+void ss_quit __SS_PROTO;
 char *ss_current_request();
 #ifdef __STDC__
 char *ss_name(int);
@@ -63,8 +64,7 @@ void ss_set_prompt(int, char *);
 char *ss_get_prompt(int);
 void ss_add_request_table(int, ss_request_table *, int, int *);
 void ss_delete_request_table(int, ss_request_table *, int *);
-int ss_execute_line PROTOTYPE((int, char*));
-int ss_quit PROTOTYPE((int, char**, int, pointer));
+int ss_execute_line (int, char*);
 #else
 char *ss_name();
 void ss_error ();
@@ -81,7 +81,6 @@ char *ss_get_prompt();
 void ss_add_request_table();
 void ss_delete_request_table();
 int ss_execute_line();
-int ss_quit();
 #endif
 extern ss_request_table ss_std_requests;
 #endif /* _ss_h */
