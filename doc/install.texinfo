@@ -417,6 +417,19 @@ Modify the configuration files, @code{/etc/krb5.conf}
 hostnames and realm name) for your realm.  @value{COMPANY} recommends
 that you keep @code{krb5.conf} in @code{/etc}.
 
+Among the settings in your @code{/etc/krb5.conf} file, be sure to create
+a @code{[logging]} stanza so that the KDC and kadmind will generate
+logging output.  For example:
+
+@smallexample
+@group
+[logging]
+    kdc = FILE:/var/log/krb5kdc.log
+    admin_server = FILE:/var/log/kadmin.log
+    default = FILE:/var/log/krb5lib.log
+@end group
+@end smallexample
+
 @node Create the Database, Add Administrators to the Acl File, Edit the Configuration Files, Install the Master KDC
 @subsubsection Create the Database
 
@@ -643,6 +656,21 @@ Each daemon will fork and run in the background.  Assuming you want
 these daemons to start up automatically at boot time, you can add them
 to the KDC's @code{/etc/rc} or @code{/etc/inittab} file.  You need to
 have a stash file in order to do this.
+
+You can verify that they started properly by checking for their startup
+messages in the logging locations you defined in @code{/etc/krb5.conf}
+(see @xref{Edit the Configuration Files}).  For example:
+
+@smallexample
+@b{shell%} tail /var/log/krb5kdc.log
+Dec 02 12:35:47 beeblebrox krb5kdc[3187](info): commencing operation
+@b{shell%} tail /var/log/kadmin.log
+Dec 02 12:35:52 beeblebrox kadmind[3189](info): starting
+@end smallexample
+
+Any errors the daemons encounter while starting will also be listed in
+the logging output.
+
 
 @node Install the Slave KDCs, Back on the Master KDC, Install the Master KDC, Installing KDCs
 @subsection Install the Slave KDCs

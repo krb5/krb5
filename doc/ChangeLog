@@ -3,6 +3,9 @@ Mon Dec  2 13:00:26 1996  Barry Jaspan  <bjaspan@mit.edu>
 	* install.texinfo (Add Administrators to the Kerberos Database):
  	note relationship between acl file and admin principals
  	[krb5-doc/251]
+	(Edit the Configuration Files): mention the logging stanza here,
+ 	too, and tell people to check it when they start the daemons
+ 	[krb5-doc/253]
 
 	* build.texinfo (The KADM5 Tests): add section for the kadm5 tests
  	[krb5-doc/247]
