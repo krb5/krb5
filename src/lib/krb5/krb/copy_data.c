@@ -37,7 +37,7 @@ krb5_data **outdata;
 	free((char *)tempdata);
 	return ENOMEM;
     }
-    bcopy((char *)indata->data, (char *)tempdata->data, tempdata->length);
+    memcpy((char *)tempdata->data, (char *)indata->data, tempdata->length);
     *outdata = tempdata;
     return 0;
 }

@@ -85,7 +85,7 @@ OLDDECLARG(krb5_data *, outbuf)
     if (retval = encode_krb5_enc_priv_part(&privmsg_enc_part, &scratch))
 	return retval;
 
-#define cleanup_scratch() { (void) bzero(scratch->data, scratch->length); krb5_free_data(scratch); }
+#define cleanup_scratch() { (void) memset(scratch->data, 0, scratch->length); krb5_free_data(scratch); }
 
     /* put together an eblock for this encryption */
 
@@ -99,7 +99,7 @@ OLDDECLARG(krb5_data *, outbuf)
 	xfree(scratch);
 	return ENOMEM;
     }
-    bzero(scratch->data + scratch->length,
+    memset(scratch->data + scratch->length, 0,
 	  privmsg.enc_part.ciphertext.length - scratch->length);
     if (!(privmsg.enc_part.ciphertext.data =
 	  malloc(privmsg.enc_part.ciphertext.length))) {
@@ -108,7 +108,7 @@ OLDDECLARG(krb5_data *, outbuf)
     }
 
 #define cleanup_encpart() {\
-(void) bzero(privmsg.enc_part.ciphertext.data, \
+(void) memset(privmsg.enc_part.ciphertext.data, 0, \
 	     privmsg.enc_part.ciphertext.length); \
 free(privmsg.enc_part.ciphertext.data); \
 privmsg.enc_part.ciphertext.length = 0; privmsg.enc_part.ciphertext.data = 0;}
@@ -128,13 +128,14 @@ privmsg.enc_part.ciphertext.length = 0; privmsg.enc_part.ciphertext.data = 0;}
         goto clean_prockey;
     }
 
+
     /* put last block into the i_vector */
     if (i_vector)
-	bcopy(privmsg.enc_part.ciphertext.data +
-	      (privmsg.enc_part.ciphertext.length -
-	       eblock.crypto_entry->block_length),
-	      i_vector,
-	      eblock.crypto_entry->block_length);
+	memcpy(i_vector,
+	       privmsg.enc_part.ciphertext.data +
+	       (privmsg.enc_part.ciphertext.length -
+	        eblock.crypto_entry->block_length),
+	       eblock.crypto_entry->block_length);
 	   
     /* private message is now assembled-- do some cleanup */
     cleanup_scratch();

@@ -31,6 +31,6 @@ krb5_keyblock *to;
     to->contents = (krb5_octet *)malloc(to->length);
     if (!to->contents)
 	return ENOMEM;
-    bcopy((char *)from->contents, (char *)to->contents, to->length);
+    memcpy((char *)to->contents, (char *)from->contents, to->length);
     return 0;
 }

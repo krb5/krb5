@@ -91,7 +91,7 @@ OLDDECLARG(krb5_data *, outbuf)
         return ENOMEM;
     }
 
-#define cleanup_scratch() {(void)bzero(scratch.data, scratch.length); (void)xfree(scratch.data);}
+#define cleanup_scratch() {(void)memset(scratch.data, 0, scratch.length); (void)xfree(scratch.data);}
 
     /* do any necessary key pre-processing */
     if (retval = krb5_process_key(&eblock, key)) {
@@ -117,11 +117,11 @@ OLDDECLARG(krb5_data *, outbuf)
        input */
     /* put last block into the i_vector */
     if (i_vector)
-	bcopy(privmsg->enc_part.ciphertext.data +
-	      (privmsg->enc_part.ciphertext.length -
-	       eblock.crypto_entry->block_length),
-	      i_vector,
-	      eblock.crypto_entry->block_length);
+	memcpy(i_vector,
+	       privmsg->enc_part.ciphertext.data +
+	       (privmsg->enc_part.ciphertext.length -
+	        eblock.crypto_entry->block_length),
+	       eblock.crypto_entry->block_length);
 
     /* private message is now decrypted -- do some cleanup */
 
@@ -139,7 +139,7 @@ OLDDECLARG(krb5_data *, outbuf)
     }
     cleanup_scratch();
 
-#define cleanup_data() {(void)bzero(privmsg_enc_part->user_data.data,privmsg_enc_part->user_data.length); (void)xfree(privmsg_enc_part->user_data.data);}
+#define cleanup_data() {(void)memset(privmsg_enc_part->user_data.data,0,privmsg_enc_part->user_data.length); (void)xfree(privmsg_enc_part->user_data.data);}
 #define cleanup_mesg() {(void)xfree(privmsg_enc_part);}
 
     if (retval = krb5_timeofday(&currenttime)) {

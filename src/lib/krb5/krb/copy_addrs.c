@@ -34,7 +34,7 @@ krb5_address **outad;
 	xfree(tmpad);
 	return ENOMEM;
     }
-    bcopy((char *)inad->contents, (char *)tmpad->contents, inad->length);
+    memcpy((char *)tmpad->contents, (char *)inad->contents, inad->length);
     *outad = tmpad;
     return 0;
 }
