@@ -151,21 +151,21 @@ krb5_auth_context_size(krb5_context kcontext, krb5_pointer arg, size_t *sizep)
 		required += sizeof(krb5_int32);
 	}
 
-	/* Calculate size required by local_subkey, if appropriate */
-	if (!kret && auth_context->local_subkey) {
+	/* Calculate size required by send_subkey, if appropriate */
+	if (!kret && auth_context->send_subkey) {
 	    kret = krb5_size_opaque(kcontext,
 				    KV5M_KEYBLOCK,
-				    (krb5_pointer) auth_context->local_subkey,
+				    (krb5_pointer) auth_context->send_subkey,
 				    &required);
 	    if (!kret)
 		required += sizeof(krb5_int32);
 	}
 
-	/* Calculate size required by remote_subkey, if appropriate */
-	if (!kret && auth_context->remote_subkey) {
+	/* Calculate size required by recv_subkey, if appropriate */
+	if (!kret && auth_context->recv_subkey) {
 	    kret = krb5_size_opaque(kcontext,
 				    KV5M_KEYBLOCK,
-				    (krb5_pointer) auth_context->remote_subkey,
+				    (krb5_pointer) auth_context->recv_subkey,
 				    &required);
 	    if (!kret)
 		required += sizeof(krb5_int32);
@@ -300,23 +300,23 @@ krb5_auth_context_externalize(krb5_context kcontext, krb5_pointer arg, krb5_octe
 	    }
 
 	    /* Now handle subkey, if appropriate */
-	    if (!kret && auth_context->local_subkey) {
+	    if (!kret && auth_context->send_subkey) {
 		(void) krb5_ser_pack_int32(TOKEN_LSKBLOCK, &bp, &remain);
 		kret = krb5_externalize_opaque(kcontext,
 					       KV5M_KEYBLOCK,
 					       (krb5_pointer)
-					       auth_context->local_subkey,
+					       auth_context->send_subkey,
 					       &bp,
 					       &remain);
 	    }
 
 	    /* Now handle subkey, if appropriate */
-	    if (!kret && auth_context->remote_subkey) {
+	    if (!kret && auth_context->recv_subkey) {
 		(void) krb5_ser_pack_int32(TOKEN_RSKBLOCK, &bp, &remain);
 		kret = krb5_externalize_opaque(kcontext,
 					       KV5M_KEYBLOCK,
 					       (krb5_pointer)
-					       auth_context->remote_subkey,
+					       auth_context->recv_subkey,
 					       &bp,
 					       &remain);
 	    }
@@ -474,26 +474,26 @@ krb5_auth_context_internalize(krb5_context kcontext, krb5_pointer *argp, krb5_oc
 		    kret = krb5_ser_unpack_int32(&tag, &bp, &remain);
 	    }
 
-	    /* This is the local_subkey */
+	    /* This is the send_subkey */
 	    if (!kret && (tag == TOKEN_LSKBLOCK)) {
 		if (!(kret = krb5_internalize_opaque(kcontext,
 						     KV5M_KEYBLOCK,
 						     (krb5_pointer *)
 						     &auth_context->
-						     local_subkey,
+						     send_subkey,
 						     &bp,
 						     &remain)))
 		    kret = krb5_ser_unpack_int32(&tag, &bp, &remain);
 	    }
 
-	    /* This is the remote_subkey */
+	    /* This is the recv_subkey */
 	    if (!kret) {
 		if (tag == TOKEN_RSKBLOCK) {
 		    kret = krb5_internalize_opaque(kcontext,
 						   KV5M_KEYBLOCK,
 						   (krb5_pointer *)
 						   &auth_context->
-						   remote_subkey,
+						   recv_subkey,
 						   &bp,
 						   &remain);
 		}

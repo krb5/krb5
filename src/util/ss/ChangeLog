@@ -1,3 +1,7 @@
+2003-04-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* ss.h: Don't declare errno.  Include errno.h.
+
 2003-02-05  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (std_rqs.c): Depend on ct_c.sed and ct_c.awk.
