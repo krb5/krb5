@@ -1,3 +1,8 @@
+2003-02-05  Ezra Peisach  <epeisach@.bu.edu>
+
+	* Makefile.in (run-aes-test): Add $(RUN_SETUP) so that if
+	compiling only shared libraries, LD_LIBRARY_PATH is set for test.
+
 2003-02-03  Ken Raeburn  <raeburn@mit.edu>
 
 	* New directory, with Briad Gladstone's implementation of AES,
