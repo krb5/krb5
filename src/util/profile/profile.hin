@@ -4,10 +4,12 @@
 
 typedef struct _profile_t *profile_t;
 
+#if !defined(PROTOTYPE)
 #if defined(__STDC__) || defined(_WINDOWS)
 #define PROTOTYPE(x) x
 #else
 #define PROTOTYPE(x) ()
+#endif
 #endif
 
 extern long profile_init
