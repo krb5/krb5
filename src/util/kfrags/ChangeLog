@@ -1,3 +1,9 @@
+Tue Oct 11 19:10:13 1994  Mark Eichin  (eichin@cygnus.com)
+
+	* ucb.conf: add "ranlib" for ucb, it's a common element.
+	* sunpro.conf: New file. Points to Sun (not MIT) installation path
+	for their unbundled compiler ("SUNWspro").
+
 Thu Sep 29 19:55:43 1994  Mark Eichin  (eichin@cygnus.com)
 
 	* base.conf: simplest path, lists all executables.
