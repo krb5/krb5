@@ -126,7 +126,7 @@ int main(int argc, char *argv[])
 
      names[0].name = names[1].name = names[2].name = names[3].name = NULL;
      names[0].type = names[1].type = names[2].type = names[3].type =
-	  gss_nt_krb5_name;
+	  (gss_OID) gss_nt_krb5_name;
 
 #ifdef PURIFY
      purify_start_batch();
@@ -410,12 +410,12 @@ int main(int argc, char *argv[])
      /* if set_names succeeded, this will too */
      in_buf.value = names[1].name;
      in_buf.length = strlen(names[1].name) + 1;
-     (void) gss_import_name(&OMret, &in_buf, gss_nt_krb5_name,
+     (void) gss_import_name(&OMret, &in_buf, (gss_OID) gss_nt_krb5_name,
 			    &gss_changepw_name);
      if (oldnames) {
 	  in_buf.value = names[3].name;
 	  in_buf.length = strlen(names[3].name) + 1;
-	  (void) gss_import_name(&OMret, &in_buf, gss_nt_krb5_name,
+	  (void) gss_import_name(&OMret, &in_buf, (gss_OID) gss_nt_krb5_name,
 				 &gss_oldchangepw_name);
      }
 
