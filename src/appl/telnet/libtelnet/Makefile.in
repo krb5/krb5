@@ -29,6 +29,9 @@ LOCALINCLUDES=-I.. -I$(srcdir)/.. @KRB4_INCLUDES@
 DEFINES = $(AUTH_DEF)
 LIBOBJS=@LIBOBJS@
 
+SETENVSRC=@SETENVSRC@
+SETENVOBJ=@SETENVOBJ@
+
 LIB=    libtelnet.a
 SRCS=   $(srcdir)/auth.c \
 	$(srcdir)/encrypt.c \
@@ -51,7 +54,7 @@ SRCS=   $(srcdir)/auth.c \
 
 OBJS=   auth.o encrypt.o genget.o \
 	misc.o kerberos.o kerberos5.o forward.o spx.o enc_des.o \
-	$(LIBOBJS)
+	$(LIBOBJS) getent.o $(SETENVOBJ)
 
 TELNET_H= $(srcdir)/../arpa/telnet.h
 

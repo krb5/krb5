@@ -1,3 +1,11 @@
+2002-03-13  Ezra Peisach  <epeisach@mit.edu>
+
+	* configure.in: Do not explicitly add getent.o and setenv.o to
+	LIBOBJS. Autoconf 2.53 labels this as an error. Move to
+	Makefile.in.
+
+	* Makefile.in (OBJS): Add getent.o and setenv.o explicity. 
+
 2001-10-09  Ken Raeburn  <raeburn@mit.edu>
 
 	* auth-proto.h, auth.h, enc-proto.h, enc_des.c, encrypt.c,
