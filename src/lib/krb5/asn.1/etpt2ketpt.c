@@ -103,7 +103,7 @@ register int *error;
     if (*error) {
 	goto errout;
     }	
-    if (retval->flags & TKT_FLG_RENEWABLE) {
+    if (val->renew__till) {
 	retval->times.renew_till = gentime2unix(val->renew__till, error);
 	if (*error) {
 	    goto errout;
