@@ -97,6 +97,57 @@ OBJS = auth_none.$(OBJEXT) \
 	xdr_stdio.$(OBJEXT) \
 	xdr_alloc.$(OBJEXT)
 
+HDRDIR=$(BUILDTOP)/include/rpc
+
+HDRS=	$(HDRDIR)/auth.h \
+	$(HDRDIR)/auth_gssapi.h \
+	$(HDRDIR)/auth_unix.h \
+	$(HDRDIR)/clnt.h \
+	$(HDRDIR)/netdb.h \
+	$(HDRDIR)/pmap_clnt.h \
+	$(HDRDIR)/pmap_prot.h \
+	$(HDRDIR)/pmap_rmt.h \
+	$(HDRDIR)/rpc.h \
+	$(HDRDIR)/rpc_msg.h \
+	$(HDRDIR)/svc.h \
+	$(HDRDIR)/svc_auth.h \
+	$(HDRDIR)/types.h \
+	$(HDRDIR)/xdr.h
+
+$(OBJS): $(HDRS) shared
+
+$(HDRDIR):
+	mkdir $@
+
+$(HDRDIR)/auth.h: $(HDRDIR) $(srcdir)/auth.h
+	$(CP) $(srcdir)/auth.h $@
+$(HDRDIR)/auth_gssapi.h: $(HDRDIR) $(srcdir)/auth_gssapi.h
+	$(CP) $(srcdir)/auth_gssapi.h $@
+$(HDRDIR)/auth_unix.h: $(HDRDIR) $(srcdir)/auth_unix.h
+	$(CP) $(srcdir)/auth_unix.h $@
+$(HDRDIR)/clnt.h: $(HDRDIR) $(srcdir)/clnt.h
+	$(CP) $(srcdir)/clnt.h $@
+$(HDRDIR)/netdb.h: $(HDRDIR) $(srcdir)/netdb.h
+	$(CP) $(srcdir)/netdb.h $@
+$(HDRDIR)/pmap_clnt.h: $(HDRDIR) $(srcdir)/pmap_clnt.h
+	$(CP) $(srcdir)/pmap_clnt.h $@
+$(HDRDIR)/pmap_prot.h: $(HDRDIR) $(srcdir)/pmap_prot.h
+	$(CP) $(srcdir)/pmap_prot.h $@
+$(HDRDIR)/pmap_rmt.h: $(HDRDIR) $(srcdir)/pmap_rmt.h
+	$(CP) $(srcdir)/pmap_rmt.h $@
+$(HDRDIR)/rpc.h: $(HDRDIR) $(srcdir)/rpc.h
+	$(CP) $(srcdir)/rpc.h $@
+$(HDRDIR)/rpc_msg.h: $(HDRDIR) $(srcdir)/rpc_msg.h
+	$(CP) $(srcdir)/rpc_msg.h $@
+$(HDRDIR)/svc.h: $(HDRDIR) $(srcdir)/svc.h
+	$(CP) $(srcdir)/svc.h $@
+$(HDRDIR)/svc_auth.h: $(HDRDIR) $(srcdir)/svc_auth.h
+	$(CP) $(srcdir)/svc_auth.h $@
+$(HDRDIR)/xdr.h: $(HDRDIR) $(srcdir)/xdr.h
+	$(CP) $(srcdir)/xdr.h $@
+$(HDRDIR)/types.h: $(HDRDIR) types.h
+	$(CP) types.h $@
+
 LIB_SUBDIRS= .
 LIBDONE= DONE
 #
@@ -115,7 +166,6 @@ SHLIB_LIBS=-lgssapi_krb5 -lkrb5 -lcrypto -lcom_err -ldyn
 SHLIB_LDFLAGS= $(LDFLAGS) @SHLIB_RPATH_DIRS@
 SHLIB_LIBDIRS= @SHLIB_LIBDIRS@
 
-all-unix:: shared includes
 all-unix:: $(OBJS)
 all-mac:: $(OBJS)
 all-windows:: $(OBJS)
@@ -126,7 +176,7 @@ shared:
 check-windows::
 
 clean-unix::
-	$(RM) shared/*
+	$(RM) shared/* $(HDRS)
 
 clean-mac::
 clean-windows::
@@ -147,3 +197,5 @@ install:: libgssrpc.a
 clean::
 	$(RM) libgssrpc.$(LIBEXT) libgssrpc.bak DONE
 
+# hack to force libs to get built before recursing into subdirs
+all-recurse: libgssrpc.$(STEXT)

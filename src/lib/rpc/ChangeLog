@@ -1,3 +1,8 @@
+Mon Oct 21 21:22:42 1996  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in, configure.in: Fixes to work with new directory
+ 	recursion method.
+
 Wed Oct 16 16:12:07 1996  Barry Jaspan  <bjaspan@mit.edu>
 
 	* svc_auth_gssapi.c (_svcauth_gssapi): accept add call_arg version
