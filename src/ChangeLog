@@ -1,3 +1,19 @@
+Mon Sep 25 16:32:57 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in: Removed "foo:: foo-$(WHAT)" lines from the
+		Makefile. 
+
+	* aclocal.m4 (MAKE_SUBDIRS, DO_SUBDIRS): MAKE_SUBDIRS now takes
+		three arguments; DO_SUBDIRS now generates target rules of
+		the form: "foo-unix: <for each subdirectory> make foo".
+		All of the macros which generated targets "all",
+		"install", "clean", etc. now generate targets "all-unix",
+		"install-unix", "clean-unix".  
+
+		This scheme allows us to do multiple-platform builds,
+		while preserving ordering constraints that we need in
+		order to build library subdirectories correctly.
+
 Sun Sep 24 12:00:00 1995  John Rivlin <jrivlin@fusion.com>
 
 	* Makefile.in: Update CLEANUP list to clean up files created

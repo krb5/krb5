@@ -80,7 +80,7 @@ esac
 dnl
 dnl append subdir rule -- MAKE_SUBDIRS("making",all)
 dnl
-define(_MAKE_SUBDIRS,[dnl
+define(MAKE_SUBDIRS,[dnl
 AC_PUSH_MAKEFILE()dnl
 changequote(<<<,>>>)dnl
 
@@ -100,8 +100,6 @@ $2::<<<
 changequote([,])dnl
 AC_POP_MAKEFILE()dnl
 ])dnl
-define(MAKE_SUBDIRS,[dnl
-_MAKE_SUBDIRS($1, $2, $2)])dnl
 dnl
 dnl take saved makefile stuff and put it in the Makefile
 dnl
@@ -133,10 +131,10 @@ dnl
 dnl drop in standard subdirectory rules
 dnl
 define(DO_SUBDIRS,[dnl
-MAKE_SUBDIRS("making",all)
-MAKE_SUBDIRS("cleaning",clean)
-MAKE_SUBDIRS("installing",install)
-MAKE_SUBDIRS("checking",check)
+MAKE_SUBDIRS("making",all-unix, all)
+MAKE_SUBDIRS("cleaning",clean-unix, clean)
+MAKE_SUBDIRS("installing",install-unix, install)
+MAKE_SUBDIRS("checking",check-unix, check)
 ])dnl
 dnl
 dnl drop in standard rules for all configure files -- CONFIG_RULES
@@ -499,7 +497,7 @@ dnl create DONE file for lib/krb5 -- SubdirLibraryRule(list)
 define(SubdirLibraryRule,[
 AC_PUSH_MAKEFILE()dnl
 
-all:: DONE
+all-unix:: DONE
 
 DONE:: $1
 	@if test x'$1' = x && test -r [$]@; then :;\
@@ -507,7 +505,7 @@ DONE:: $1
 		(set -x; echo $1 > [$]@) \
 	fi
 
-clean::
+clean-unix::
 	$(RM) DONE
 AC_POP_MAKEFILE()dnl
 ])dnl
@@ -524,7 +522,7 @@ includes:: $1
 		(set -x; [$](RM) $2/$1;	[$](CP) $1 $2/$1) \
 	fi
 
-clean::
+clean-unix::
 	$(RM) $2/$1
 
 AC_POP_MAKEFILE()dnl
@@ -542,7 +540,7 @@ includes:: $1
 		(set -x; [$](RM) $2/$1;	[$](CP) $(srcdir)/$1 $2/$1) \
 	fi
 
-clean::
+clean-unix::
 	$(RM) $2/$1
 
 AC_POP_MAKEFILE()dnl
@@ -551,7 +549,7 @@ dnl
 dnl Krb5InstallHeaders(headers,destdir)
 define(Krb5InstallHeaders,[
 AC_PUSH_MAKEFILE()dnl
-install:: $1
+install-unix:: $1
 	@set -x; for f in $1 ; \
 	do [$](INSTALL_DATA) [$$]f $2/[$$]f ; \
 	done
@@ -859,9 +857,9 @@ AC_SUBST(STEXT)
 DO_MAKE_SHLIB="$1.\$""(SHEXT)"
 AC_PUSH_MAKEFILE()dnl
 
-all:: [$](DO_MAKE_SHLIB) [$](SHLIB_STATIC_TARGET)
+all-unix:: [$](DO_MAKE_SHLIB) [$](SHLIB_STATIC_TARGET)
 
-clean:: 
+clean-unix:: 
 	$(RM) $1.[$](SHEXT) [$](SHLIB_STATIC_TARGET)
 
 $1.[$](SHEXT): [$](LIBDONE) [$](DEPLIBS)
@@ -875,9 +873,9 @@ STEXT=$krb5_cv_noshlibs_ext
 AC_SUBST(STEXT)
 DO_MAKE_SHLIB=
 AC_PUSH_MAKEFILE()
-all:: [$](DO_MAKE_SHLIB) [$](SHLIB_STATIC_TARGET)
+all-unix:: [$](DO_MAKE_SHLIB) [$](SHLIB_STATIC_TARGET)
 
-clean:: 
+clean-unix:: 
 	$(RM) $1.[$](STEXT)
 AC_POP_MAKEFILE()
 ])dnl

@@ -5,8 +5,6 @@ HDRS =
 
 DISTFILES = $(SRCS) $(HDRS) COPYING COPYING.LIB ChangeLog Makefile.in
 
-all:: all-$(WHAT)
-
 all-unix::
 
 all-mac::
@@ -58,8 +56,6 @@ install-mkdirs:
 
 TAGS: $(SRCS)
 	etags $(SRCS)
-
-clean:: clean-$(WHAT)
 
 clean-:: clean-windows
 clean-mac:: clean-unix
