@@ -309,9 +309,9 @@ krb5_keyblock *masterkeyblock;
     /* the master key name here is from the master_princ global,
        so we can safely share its substructure */
 
-    tgs_server[0] = krb5_princ_realm(masterkeyname);
+    krb5_princ_set_realm(tgs_server, krb5_princ_realm(masterkeyname));
     /* tgs_server[1] is init data */
-    tgs_server[2] = krb5_princ_realm(masterkeyname);
+    *krb5_princ_component(tgs_server, 2) = *krb5_princ_realm(masterkeyname);
     /* tgs_server[3] is init data (0) */
 
     nprincs = 1;
