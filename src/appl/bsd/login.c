@@ -124,6 +124,10 @@ char copyright[] =
 #define PRIO_OFFSET 0
 #endif
 
+#if !defined(TAB3)
+#define TAB3 0
+#endif
+
 #define	TTYGRPNAME	"tty"		/* name of group to own ttys */
 
 #define	MOTDFILE	"/etc/motd"

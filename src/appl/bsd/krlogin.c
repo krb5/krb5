@@ -163,6 +163,10 @@ krb5_context bsd_context;
 # define TIOCPKT_WINDOW 0x80
 # endif /* TIOCPKT_WINDOW */
 
+#ifndef ONOCR
+#define ONOCR 0
+#endif
+
 #ifdef POSIX_TERMIOS
 struct termios deftty;
 #endif
@@ -1488,9 +1492,11 @@ mode(f)
 			newtty.c_oflag &= ~(ONLCR|ONOCR);
 			newtty.c_oflag |=  (OPOST);
 		}
+#ifdef TABDLY
 		/* preserve tab delays, but turn off XTABS */
 		if ((newtty.c_oflag & TABDLY) == TAB3)
 			newtty.c_oflag &= ~TABDLY;
+#endif
 
 		if (litout)
 			newtty.c_oflag &= ~OPOST;
@@ -1565,9 +1571,11 @@ mode(f)
 	sb.c_cc[VMIN] = 1;
 	if (eight)
 	  sb.c_iflag &= ~(ISTRIP);
+#ifdef TABDLY
 	/* preserve tab delays, but turn off tab-to-space expansion */
 	if ((sb.c_oflag & TABDLY) == TAB3)
 	  sb.c_oflag &= ~TAB3;
+#endif
 	/*
 	 **  restore current flow control state
 	 */

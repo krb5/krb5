@@ -8,6 +8,7 @@ dnl dbm libs for use of an_to_ln
 AC_CHECK_LIB(ndbm,main)
 AC_CHECK_LIB(dbm,main)
 AC_CHECK_LIB(util,main)
+AC_CHECK_LIB(crypt,crypt)
 dnl
 dnl AIX has them all; SCO might too
 LOGINLIBS=
@@ -41,6 +42,7 @@ AC_FUNC_CHECK(setlogin,AC_DEFINE(HAVE_SETLOGIN))
 AC_FUNC_CHECK(logwtmp,AC_DEFINE(HAVE_LOGWTMP))
 AC_HAVE_HEADERS(sys/filio.h sys/sockio.h unistd.h stdlib.h sys/label.h sys/tty.h ttyent.h lastlog.h sys/select.h sys/ptyvar.h)
 AC_REPLACE_FUNCS(getdtablesize)
+DECLARE_SYS_ERRLIST
 CHECK_SIGNALS
 CHECK_SETJMP
 CHECK_DIRENT

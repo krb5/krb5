@@ -112,7 +112,9 @@ char	*colon();
 int	errs;
 krb5_sigtype	lostconn();
 int	errno;
+#ifdef NEED_SYS_ERRLIST
 extern char	*sys_errlist[];
+#endif
 int	iamremote, targetshouldbedirectory;
 int	iamrecursive;
 int	pflag;

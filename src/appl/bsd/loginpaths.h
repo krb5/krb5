@@ -81,3 +81,10 @@
 #define LPATH "/usr/bin:/usr/dbin:/usr/dbin"
 #endif
 #endif
+
+#ifndef LPATH
+#ifdef __NetBSD__
+#define LPATH "/usr/bin:/bin"
+#define RPATH "/usr/bin:/bin"
+#endif
+#endif
