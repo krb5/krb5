@@ -1,3 +1,7 @@
+2002-08-14  Ken Raeburn  <raeburn@mit.edu>
+
+	* dump.c: Unused file deleted.
+
 2002-07-29  Jen Selby <jenselby@mit.edu>
 
 	* kadmin.M: corrected documenation of "-k/-t" options.
