@@ -1,3 +1,8 @@
+2000-06-02  Danilo Almeida  <dalmeida@mit.edu>
+
+	* k5-int.h (krb5int_cc_default): Fix linkage to be consistent with
+	code.  (Note: We should dump KRB5_DLLIMP.)
+
 2000-05-31  Ken Raeburn  <raeburn@mit.edu>
 
 	* krb5.hin (krb5_recvauth_version): Declare.
