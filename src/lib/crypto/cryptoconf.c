@@ -30,8 +30,10 @@ static char rcsid_cryptoconf_c[] =
 #ifdef PROVIDE_RSA_MD4
 #include <krb5/rsa-md4.h>
 #define MD4_CKENTRY &rsa_md4_cksumtable_entry
+#define MD4_DES_CKENTRY &rsa_md4_des_cksumtable_entry
 #else
 #define MD4_CKENTRY 0
+#define MD4_DES_CKENTRY 0
 #endif
 
 #ifdef PROVIDE_SNEFRU
@@ -93,7 +95,7 @@ krb5_checksum_entry *krb5_cksumarray[] = {
     0,
     CRC32_CKENTRY,
     MD4_CKENTRY,
-    XEROX_CKENTRY,
+    MD4_DES_CKENTRY,
     DES_CBC_CKENTRY,
 };
 
