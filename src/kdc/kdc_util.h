@@ -33,7 +33,7 @@ krb5_error_code kdc_convert_key PROTOTYPE((krb5_keyblock *,
 krb5_error_code decrypt_tgs_req PROTOTYPE((krb5_tgs_req *,
 					   const krb5_fulladdr *));
 krb5_error_code kdc_process_tgs_req PROTOTYPE((krb5_tgs_req *,
-					       krb5_fulladdr *));
+					       const krb5_fulladdr *));
 
 /* do_as_req.c */
 krb5_error_code process_as_req PROTOTYPE((krb5_as_req *,
