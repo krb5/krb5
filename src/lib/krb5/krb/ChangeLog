@@ -1,3 +1,10 @@
+2002-04-05  Danilo Almeida  <dalmeida@mit.edu>
+
+	* princ_comp.c (krb5_realm_compare), auth_con.c
+	(krb5_auth_con_setports, krb5_auth_con_getaddrs,
+	krb5_auth_con_initivector), addr_order.c (krb5_address_order),
+	addr_comp.c (krb5_address_compare): Make KRB5_CALLCONV.
+
 2002-04-03  Danilo Almeida  <dalmeida@mit.edu>
 
 	* bld_princ.c (krb5_build_principal_va): Make

@@ -1,3 +1,8 @@
+2002-04-05  Danilo Almeida  <dalmeida@mit.edu>
+
+	* toffset.c (krb5_get_time_offsets), an_to_ln.c
+	(krb5_aname_to_localname): Make KRB5_CALLCONV.
+
 2002-02-28 Alexandra Ellwood <lxs@mit.edu>
     * init_os_ctx.c: Add CoreServices.h before k5-int.h so we don't get 
     multiple definitions for FSSpec.  Also removed an unused variable in
