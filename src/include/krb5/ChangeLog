@@ -1,3 +1,9 @@
+Fri Mar 10 14:23:12 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* sysincl.h: Removed definition of FD_SETSIZE, FD_SET, FD_CLR,
+		FD_ISSET, and FD_ZERO.  Defining them in favor of using
+		the system include files is almost always wrong.
+
 Fri Mar 10 10:04:41 1995 Chris Provenzano (proven@mit.edu)
 
 	* func-proto.h (krb5_mk_req(), krb5_mk_req_extended(), krb5_rd_rep(),
