@@ -1,3 +1,7 @@
+2001-07-03  Ezra Peisach  <epeisach@mit.edu>
+
+	* ftpd.c (sgetpwnam): Remove local declaration of sgetsave.
+
 2001-07-02  Ezra Peisach  <epeisach@mit.edu>
 
 	* popen.c: Include ftpd_var.h.

@@ -623,8 +623,6 @@ sgetpwnam(name)
 #ifdef HAVE_SHADOW
 	register struct spwd *sp;
 #endif
-	char *sgetsave();
-
 	if ((p = getpwnam(name)) == NULL)
 		return (p);
 	if (save.pw_name) {
