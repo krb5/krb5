@@ -1,3 +1,8 @@
+2000-05-30  Wilfredo Sanchez  <tritan@mit.edu>
+
+	* Makefile.in, osconf.h: Use bindir and sbindir from configure
+	rather than building them up from EXEC_PREFIX.
+
 2000-5-18	Alexandra Ellwood <lxs@mit.edu>
 
 	* macsock.h: local_addr_fallback_kludge defined to 0 again... fixed gethostname
