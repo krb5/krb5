@@ -6,6 +6,28 @@
 #ifndef CompileEtCmd
 #define CompileEtCmd $(ETSRC)/compile_et
 #endif
+#ifndef MkCmdsCmd
+#define MkCmdsCmd $(SSMKSRC)/mk_cmds
+#endif
+#ifndef PosyFlags
+#define PosyFlags -f -h2 -a -s
+#endif
+#ifndef PepyFlags
+#define PepyFlags -a PY_advise -s -r
+#endif
+#ifndef PepyCmd
+#define PepyCmd $(ISODE)/@sys/bin/pepy
+#endif
+#ifndef PosyCmd
+#define PosyCmd $(ISODE)/@sys/bin/posy
+#endif
+
+#ifndef PepyPosyRules
+#define	PepyPosyRules()							@@\
+.SUFFIXES:	.py							@@\
+.py.c:									@@\
+	$(PEPY) $(PYFLAGS) $<
+#endif /* PepyPosyRules */
 
 /*
  * Default Definitions.
@@ -15,7 +37,12 @@
         CONFIGSRC = $(TOP)/config
          IMAKESRC = $(CONFIGSRC)
             ISODE = /mit/isode/isode-6.0
+          POFLAGS = PosyFlags
+          PYFLAGS = PepyFlags
+             PEPY = PepyCmd
+             POSY = PosyCmd
             ETSRC = $(TOP)/lib/comerr/compile_et
+         SSCMDSRC = $(TOP)/lib/ss/mk_cmds
           DEPKLIB = $(TOP)/lib/krb/libkrb.a \
                     $(TOP)/lib/ccache/libcred.a \
                     $(TOP)/lib/ccache/file/libfcc.a \
@@ -30,7 +57,7 @@
                     $(TOP)/asn.1/libasn1.a \
                     $(TOP)/lib/free/libkfree.a
 
-             KLIB = $(DEPKLIB) $(ISODE)/libisode.a -ldes -lcom_err
+             KLIB = $(DEPKLIB) $(ISODE)/@sys/lib/libisode.a -ldes -lcom_err
            KDBLIB = $(TOP)/lib/kdb/libkdb.a
 
 #ifdef UseInstalled
@@ -38,11 +65,13 @@
            DEPEND = makedepend		/* assume BINDIR in path */
         MKDIRHIER = BourneShell $(BINDIR)/mkdirhier.sh
        COMPILE_ET = compile_et
+          MK_CMDS = mk_cmds
 #else
             IMAKE = $(IMAKESRC)/imake
            DEPEND = DependCmd
         MKDIRHIER = BourneShell $(SCRIPTSRC)/mkdirhier.sh
        COMPILE_ET = CompileEtCmd
+          MK_CMDS = MkCmdsCmd
 #endif
 
 #ifndef ErrorTableObjectRule
@@ -57,3 +86,14 @@
 	$(COMPILE_ET) $*.et
 
 #endif
+
+#ifndef CmdTableObjectRule
+
+#define CmdTableObjectRule()						@@\
+.SUFFIXES: .ct								@@\
+									@@\
+.ct.c: 									@@\
+	$(MK_CMDS) $*.ct
+
+#endif
+
