@@ -76,10 +76,13 @@ kadm_ser_init(inter, realm)
     server_parm.admin_addr.sin_port = sep->s_port;
     /* setting up the database */
     mkey_name = KRB5_KDB_M_NAME;
-    server_parm.master_keyblock.enctype = ENCTYPE_DES_CBC_MD5;
-    
-    krb5_use_enctype(kadm_context, &server_parm.master_encblock, 
-		    server_parm.master_keyblock.enctype);
+
+    if (inter == 1) {
+	server_parm.master_keyblock.enctype = ENCTYPE_DES_CBC_MD5;
+	krb5_use_enctype(kadm_context, &server_parm.master_encblock, 
+			 server_parm.master_keyblock.enctype);
+    } else
+	server_parm.master_keyblock.enctype = ENCTYPE_UNKNOWN;
     
     retval = krb5_db_setup_mkey_name(kadm_context, mkey_name, realm,
 				     (char **) 0,
@@ -108,9 +111,7 @@ kadm_ser_init(inter, realm)
 
     retval = krb5_dbe_find_enctype(kadm_context,
 				   &master_entry,
-				   ENCTYPE_DES_CBC_MD5,
-				   -1,
-				   -1,
+				   -1, -1, -1,
 				   &kdatap);
     if (retval)
         return KRB5_PROG_KEYTYPE_NOSUPP;
