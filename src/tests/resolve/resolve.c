@@ -68,10 +68,21 @@ main(argc, argv)
 	char *ptr;
 	char addrcopy[4];
 	struct hostent *host;
+	int quiet = 0;
 	int err;
 
-	if(argc > 1) {
-		strncpy(myname, argv[1], MAXHOSTNAMELEN);
+	argc--; argv++;
+	while (argc) {
+	    if ((strcmp(*argv, "--quiet") == 0) ||
+		(strcmp(*argv, "-q") == 0)) {
+		quiet++;
+	    } else 
+		break;
+	    argc--; argv++;
+	}
+
+	if (argc > 1) {
+		strncpy(myname, *argv, MAXHOSTNAMELEN);
 	} else {
 		if(gethostname(myname, MAXHOSTNAMELEN)) {
 			perror("gethostname failure");
@@ -82,7 +93,8 @@ main(argc, argv)
 	myname[MAXHOSTNAMELEN] = '\0';	/* for safety */
 	
 	/* Look up the address... */
-	printf("Hostname:  %s\n", myname);
+	if (!quiet)
+	    printf("Hostname:  %s\n", myname);
 	
 
 	/* Set the hosts db to close each time - effectively rewinding file */
@@ -95,8 +107,9 @@ main(argc, argv)
 	
 	ptr = host->h_addr_list[0];
 #define UC(a) (((int)a)&0xff)
-	printf("Host address: %d.%d.%d.%d\n", 
-	       UC(ptr[0]), UC(ptr[1]), UC(ptr[2]), UC(ptr[3]));
+	if (!quiet)
+	    printf("Host address: %d.%d.%d.%d\n", 
+		   UC(ptr[0]), UC(ptr[1]), UC(ptr[2]), UC(ptr[3]));
 
 	memcpy(addrcopy, ptr, 4);
 
@@ -106,14 +119,19 @@ main(argc, argv)
 		exit(2);
 	}
 	
-	printf("FQDN: %s\n", host->h_name);
+	if (quiet)
+	    printf("%s\n", host->h_name);
+	else
+	    printf("FQDN: %s\n", host->h_name);
 	
 	if(strchr(host->h_name, '.') == NULL) {
 		fprintf(stderr, "\nResolve library did not return a fully qualified domain name\n");
 		fprintf(stderr, "You may have to reconfigure the kerberos distribution to select a\ndifferent set of libraries using --with-netlib[=libs]\n");
 		exit(3);
 	}
-	printf("Resolve library appears to have passed the test\n");
+
+	if (!quiet)
+	    printf("Resolve library appears to have passed the test\n");
 
 	/* All ok */
 	exit(0);

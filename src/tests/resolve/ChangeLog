@@ -1,3 +1,10 @@
+Mon May  1 20:00:18 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* resolve.c (main): Add --quiet option which only prints the fully
+		qualified domain name.  This will allow this routine to be
+		used in the deja gnu tests to determine the FQDN of the
+		local host.
+
 Tue Apr 25 22:16:38 1995  Mark Eichin  <eichin@cygnus.com>
 
 	* resolve.c (main): copy the address sent back by gethostbyname
