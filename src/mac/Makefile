@@ -374,16 +374,19 @@ clib-ppc-final						= {mitsupportlib-root-folder}CLib:Binaries:CLib.PPC
 runtimelib-ppc-debug				= {mitsupportlib-root-folder}RuntimeLib:Binaries:RuntimeLib.PPC.debug
 runtimelib-ppc-final				= {mitsupportlib-root-folder}RuntimeLib:Binaries:RuntimeLib.PPC
 
+runtimelib-static-ppc-debug			= {mitsupportlib-root-folder}"RuntimeLib:Binaries:ShlibRuntime.Lib.PPC.debug"
+runtimelib-static-ppc-final			= {mitsupportlib-root-folder}"RuntimeLib:Binaries:ShlibRuntime.Lib.PPC"
+
 standard-libraries-ppc-debug			= ¶
 	"{clib-ppc-debug}" ¶
 	"{runtimelib-ppc-debug}" ¶
-	¶"{MWPPCLibraries}MSL ShLibRuntime.Lib¶" ¶
+	"{runtimelib-static-ppc-debug}" ¶
 	¶"{SharedLibraries}InterfaceLib¶" ¶
 	¶"{SharedLibraries}MathLib¶"
 standard-libraries-ppc-final			= ¶
 	"{clib-ppc-final}" ¶
 	"{runtimelib-ppc-final}" ¶
-	¶"{MWPPCLibraries}MSL ShLibRuntime.Lib¶" ¶
+	"{runtimelib-static-ppc-final}" ¶
 	¶"{SharedLibraries}InterfaceLib¶" ¶
 	¶"{SharedLibraries}MathLib¶"
 
