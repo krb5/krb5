@@ -630,7 +630,7 @@ HINSTANCE get_lib_instance(void);
 unsigned int krb_get_notification_message(void);
 KRB5_DLLIMP char FAR * KRB5_CALLCONV krb_get_default_user(void);
 KRB5_DLLIMP int KRB5_CALLCONV krb_set_default_user(char *);
-KRB4_32 win_time_gmt_unixsec(unsigned KRB4_32 *);
+unsigned KRB4_32 win_time_gmt_unixsec(unsigned KRB4_32 *);
 long win_time_get_epoch(void);
 #endif
 
