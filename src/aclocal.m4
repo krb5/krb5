@@ -1096,7 +1096,7 @@ AC_ARG_WITH(tcl,
 		TCL_INC=-I$withval/include
 		TCL_LIB=-L$withval/lib
 	fi)
-
+AC_CHECK_LIB(dl, dlopen, DL_LIB=-ldl)
 if test "$TCL_WITH" != no ; then
 	hold_cflags=$CPPFLAGS
 	hold_ldflags=$LDFLAGS
@@ -1104,12 +1104,12 @@ if test "$TCL_WITH" != no ; then
 	LDFLAGS="$CPPFLAGS $TCL_LIB"
 	AC_CHECK_HEADER(tcl.h,dnl
 		AC_CHECK_LIB(tcl7.5, Tcl_CreateCommand, 
-			TCL_LIB="$TCL_LIB -ltcl7.5",
+			TCL_LIB="$TCL_LIB -ltcl7.5 $DL_LIB",
 			AC_CHECK_LIB(tcl, Tcl_CreateCommand, 
-				TCL_LIB="$TCL_LIB -ltcl",
+				TCL_LIB="$TCL_LIB -ltcl $DL_LIB",
 				AC_MSG_WARN("tcl.h found but not library"),
-				-lm),
-			-lm)
+				-lm $DL_LIB),
+			-lm $DL_LIB)
 	,dnl If tcl.h not found
 	AC_MSG_WARN(Could not find Tcl which is needed for the kadm5 tests)
 	TCL_LIB=

@@ -1,3 +1,8 @@
+Fri Nov  1 20:41:07 1996  Tom Yu  <tlyu@mit.edu>
+
+	* aclocal.m4 (AC_KRB5_TCL): Check for -ldl when checking for -ltcl
+	or -ltcl7.5 in case the TCL library needs it. [krb5-admin/141]
+
 Thu Oct 31 10:57:29 1996  Ezra Peisach  <epeisach@trane.rose.brandeis.edu>
 
 	* aclocal.m4 (db_lib): Use relative path to libdb.a file.
