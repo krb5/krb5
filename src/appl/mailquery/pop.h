@@ -28,6 +28,8 @@ char *get_errmsg();
 int pop_command();
 int pop_stat();
 int pop_retr();
+int pop_query();
 char *concat();
+void fatal(), error(), pfatal_with_name();
 
 extern char Errmsg[];

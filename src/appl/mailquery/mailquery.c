@@ -23,30 +23,34 @@
  *      -v - print result
  *      -e - exec this command if there is mail.
  */
-#include <pwd.h>
-#include <fcntl.h>
-#include <sys/file.h>  
 #include <stdio.h>
-#include <string.h>
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+#include <string.h>
+#include <pwd.h>
+#include <fcntl.h>
+#include <sys/file.h>  
 #ifdef HESIOD
 #include <hesiod.h>
 #endif
 #include "pop.h"
 
-
 extern int pop_debug;
 int verbose = 0;
 char *exec_cmd;
+
+int mailquery();
 
 void usage()
 {
     fprintf(stderr, "usage: mailquery [-d] [-v] [-e cmd] [user[@host]]\n");
 } 
 
-main(argc, argv)
+int main(argc, argv)
      int argc;
      char *argv[];
 {
@@ -55,7 +59,6 @@ main(argc, argv)
     char *mhost = NULL, *mhp;
     char *user = 0;
     struct passwd * pwd;
-    char response[128];
     char c;
     extern int optind;
     extern char *optarg;
@@ -139,7 +142,7 @@ main(argc, argv)
 
 }
 
-mailquery(mhost, user)
+int mailquery(mhost, user)
      char *mhost;
      char *user;
 {

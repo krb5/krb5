@@ -17,6 +17,9 @@
 /*
  * Poplib - library routines for speaking POP
  */
+#include <stdio.h>
+#include <unistd.h>
+#include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/file.h>
@@ -25,8 +28,6 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
-#include <stdio.h>
-#include <string.h>
 #if defined(KRB4) && defined(KRB5)
 error You cannot define both KRB4 and KRB5
 #endif
@@ -53,6 +54,7 @@ extern char *malloc();
 #include "pop.h"
 
 void *xmalloc();
+int getline(), multiline(), putline();
 
 char Errmsg[80];		/* to return error messages */
 int pop_debug;
@@ -60,13 +62,15 @@ int pop_debug;
 static FILE *sfi = 0;
 static FILE *sfo = 0;
 
-pop_init(host, reserved)
+int pop_init(host, reserved)
 char *host;
 int reserved;
 {
     register struct hostent *hp;
     register struct servent *sp;
+#ifndef KPOP
     int lport = IPPORT_RESERVED - 1;
+#endif
     struct sockaddr_in sin;
     int s;
     char *get_errmsg();
@@ -84,7 +88,6 @@ int reserved;
     krb5_ccache ccdef;
     krb5_principal client = NULL, server = NULL;
     krb5_error *err_ret = NULL;
-    register char *cp;
     krb5_auth_context auth_context;
 #endif
 #endif
@@ -164,32 +167,27 @@ int reserved;
     }
 #endif /* KRB4 */
 #ifdef KRB5
-    krb5_init_context(&context);
-    krb5_init_ets(context);
-
+    retval = krb5_init_context(&context);
+    if (retval) {
+	    com_err("pop_init", retval, "while initializing krb5");
+	    close(s);
+	    return(NOTOK);
+    }
     routine = "krb5_cc_default";
-    if (retval = krb5_cc_default(context, &ccdef)) {
+    if ((retval = krb5_cc_default(context, &ccdef))) {
     krb5error:
 	sprintf(Errmsg, "%s: krb5 error: %s", routine, error_message(retval));
 	close(s);
 	return(NOTOK);
     }
     routine = "krb5_cc_get_principal";
-    if (retval = krb5_cc_get_principal(context, ccdef, &client)) {
+    if ((retval = krb5_cc_get_principal(context, ccdef, &client))) {
 	goto krb5error;
     }
 
-#if 0
-    /* lower-case to get name for "instance" part of service name */
-    for (cp = hp->h_name; *cp; cp++)
-	if (isupper(*cp))
-	    *cp = tolower(*cp);
-#endif
-
     routine = "krb5_sname_to_principal";
-    if (retval = krb5_sname_to_principal(context, hp->h_name, "pop",
-					 KRB5_NT_UNKNOWN,
-					 &server)) {
+    if ((retval = krb5_sname_to_principal(context, hp->h_name, "pop",
+					  KRB5_NT_UNKNOWN, &server))) {
 	goto krb5error;
     }
 
@@ -235,7 +233,7 @@ int reserved;
     return(OK);
 }
 
-pop_command(fmt, a, b, c, d)
+int pop_command(fmt, a, b, c, d)
 char *fmt;
 char *a, *b, *c, *d;
 {
@@ -260,7 +258,7 @@ char *a, *b, *c, *d;
     }
 }
 
-pop_query(nbytes, user)
+int pop_query(nbytes, user)
      int *nbytes;
      char *user;
 {
@@ -290,7 +288,7 @@ pop_query(nbytes, user)
     }
 }
     
-pop_stat(nmsgs, nbytes)
+int pop_stat(nmsgs, nbytes)
 int *nmsgs, *nbytes;
 {
     char buf[1024];
@@ -313,7 +311,7 @@ int *nmsgs, *nbytes;
     }
 }
 
-pop_retr(msgno, action, arg)
+int pop_retr(msgno, action, arg)
 int msgno;
 int (*action)();
 char *arg;			/* is this always FILE*??? -- XXX */
@@ -354,14 +352,14 @@ char *arg;			/* is this always FILE*??? -- XXX */
     }
 }
 
-pop_getline(buf, n)
+int pop_getline(buf, n)
      char *buf;
      int n;
 {
     return getline(buf, n, sfi);
 }
 
-getline(buf, n, f)
+int getline(buf, n, f)
 char *buf;
 register int n;
 FILE *f;
@@ -389,7 +387,7 @@ FILE *f;
     return(OK);
 }
 
-multiline(buf, n, f)
+int multiline(buf, n, f)
 char *buf;
 register int n;
 FILE *f;
@@ -428,7 +426,7 @@ get_errmsg()
     return(s);
 }
 
-putline(buf, err, f)
+int putline(buf, err, f)
 char *buf;
 char *err;
 FILE *f;
@@ -445,7 +443,7 @@ FILE *f;
 
 /* Print error message and exit.  */
 
-fatal (s1, s2)
+void fatal (s1, s2)
      char *s1, *s2;
 {
   error (s1, s2);
@@ -454,7 +452,7 @@ fatal (s1, s2)
 
 /* Print error message.  `s1' is printf control string, `s2' is arg for it. */
 
-error (s1, s2, s3)
+void error (s1, s2, s3)
      char *s1, *s2, *s3;
 {
   printf ("poplib: ");
@@ -462,7 +460,7 @@ error (s1, s2, s3)
   printf ("\n");
 }
 
-pfatal_with_name (name)
+void pfatal_with_name (name)
      char *name;
 {
   char *s = concat ("", strerror(errno), " for %s");
