@@ -1,4 +1,4 @@
-		  Kerberos Version 5, Release 1.3.1
+		  Kerberos Version 5, Release 1.3.2
 
 			    Release Notes
 			The MIT Kerberos Team
@@ -7,20 +7,20 @@ Unpacking the Source Distribution
 ---------------------------------
 
 The source distribution of Kerberos 5 comes in a gzipped tarfile,
-krb5-1.3.1.tar.gz.  Instructions on how to extract the entire
+krb5-1.3.2.tar.gz.  Instructions on how to extract the entire
 distribution follow.
 
 If you have the GNU tar program and gzip installed, you can simply do:
 
-	gtar zxpf krb5-1.3.1.tar.gz
+	gtar zxpf krb5-1.3.2.tar.gz
 
 If you don't have GNU tar, you will need to get the FSF gzip
 distribution and use gzcat:
 
-	gzcat krb5-1.3.1.tar.gz | tar xpf -
+	gzcat krb5-1.3.2.tar.gz | tar xpf -
 
-Both of these methods will extract the sources into krb5-1.3.1/src and
-the documentation into krb5-1.3.1/doc.
+Both of these methods will extract the sources into krb5-1.3.2/src and
+the documentation into krb5-1.3.2/doc.
 
 Building and Installing Kerberos 5
 ----------------------------------
@@ -58,6 +58,97 @@ You may view bug reports by visiting
 http://krbdev.mit.edu/rt/
 
 and logging in as "guest" with password "guest".
+
+Notes, Major Changes, and Known Bugs for 1.3.2
+----------------------------------------------
+
+* [2040, 1471, 2067] Support for AES in GSSAPI has been implemented.
+  This corresponds to the in-progress work in the IETF (CFX).
+
+Minor changes in 1.3.2
+----------------------
+
+* [1437] Applied patch from Stephen Grau so kinit returns non-zero
+  status under certain failure conditions where it had previously
+  returned zero.
+
+* [1586] On Windows, the krb4 CREDENTIALS structure has been changed
+  to align with KfW's version of the structure.
+
+* [1613] Applied patch from Dave Shrimpton to avoid truncation of
+  dates output from the kadmin CLI when long time zone names are
+  used.
+
+* [1622] krshd no longer calls syslog from inside a signal handler, in
+  an effort to avoid deadlocks on exit.
+
+* [1649] A com_err test program compiles properly on Darwin now.
+
+* [1692] A new configuration file tag "master_kdc" has been added to
+  allow master KDCs to be designated separately from admin servers.
+
+* [1702] krb5_get_host_realm() and krb5_free_host_realm() are no
+  longer marked as KRB5_PRIVATE.
+
+* [1711] Applied patch from Harry McGavran Jr to allow fake-addrinfo.h
+  to compile on libc5 Linux platforms.
+
+* [1712] Applied patch from Cesar Garcia to fix lifetime computation
+  in krb524 ticket conversion.
+
+* [1713] Fixed an endianness bug in krb524d, found by Cesar Garcia.
+
+* [1715] kadmind4 and v5passwdd are no longer installed on Mac OS X.
+
+* [1718] The krb4 library configure script now recognizes
+  OpenDarwin/x86.  Bug found by Rob Braun.
+
+* [1721] krb5_get_init_creds_password() no longer returns a spurious
+  KRB5_REALM_UNKNOWN if DNS SRV record support is turned off.
+
+* [1730] krb_mk_auth() no longer overzealously clears the key
+  schedule.
+
+* [1731] A double-free related to reading forwarded credentials has
+  been fixed.  Found by Joseph Galbraith.
+
+* [1770] Applied patch from Maurice Massar to fix a foreachaddr()
+  problem that was causing the KDC to segfault on startup.
+
+* [1790] The Linux build uses $(CC) to create shared libraries,
+  avoiding a libgcc problem when building libdb.
+
+* [1792] The lib/kadm5 unit tests now work around a Solaris 9
+  pty-close bug.
+
+* [1799] kadmind supports callouts to the Apple password server.
+
+* [1893] KRB-SAFE messages from older releases can now be read
+  successfully.  Prior 1.3.x releases did not save the encoded
+  KRB-SAFE message, and experienced problems when re-encoding.  Found
+  by Scooter Morris.
+
+* [1962] MS LSA tickets with short remaining lifetimes will be
+  rejected in favor of retrieving tickets bypassing the LSA cache.
+
+* [1973] sendto_kdc.c now closes sockets with closesocket() instead of
+  close(), avoiding a descriptor leak on Windows.
+
+* [1979] An erroneously short initial sequence number mask has been
+  fixed.
+
+* [2028] KfW now displays a kinit dialog when GSS fails to find
+  tickets.
+
+* [2049] Added a new ccache type "MSLSA:" for read-only access to the
+  MS Windows LSA cache.
+
+* [2051] Missing exports have been added to krb4_32.def on Windows.
+
+* [2060] GSSAPI's idea of the default ccache is less sticky now.
+
+* [2068] The profile library includes prof-int.h before conditionals
+  that rely on it.
 
 Notes, Major Changes, and Known Bugs for 1.3.1
 ----------------------------------------------
