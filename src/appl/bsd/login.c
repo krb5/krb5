@@ -391,12 +391,13 @@ main(argc, argv)
 #if !defined(_AIX)
 	ioctlval = 0;
 #ifdef TIOCLSET
-/* linux, sco don't have this line discipline interface */
+	/* linux, sco don't have this line discipline interface */
 	(void)ioctl(0, TIOCLSET, (char *)&ioctlval);
 #endif
 	(void)ioctl(0, TIOCNXCL, (char *)0);
 	(void)fcntl(0, F_SETFL, ioctlval);
 #endif
+
 #ifdef POSIX_TERMIOS
 	(void)tcgetattr(0, &tc);
 #else
@@ -431,10 +432,8 @@ main(argc, argv)
 	tc.c_cc[VEOL2] = CNUL;
 #endif
 #ifdef VSUSP
-#ifdef hpux
-#ifndef CSUSP
+#if !defined(CSUSP) && defined(CSWTCH)
 #define CSUSP CSWTCH
-#endif
 #endif
 	tc.c_cc[VSUSP] = CSUSP;
 #endif
@@ -465,8 +464,8 @@ main(argc, argv)
 #ifdef VSTATUS
 #ifdef CSTATUS
         tc.c_cc[VSTATUS] = CSTATUS;
-#endif
-#endif
+#endif /* CSTATUS */
+#endif /* VSTATUS */
 #endif /* NO_INIT_CC */
 	tcsetattr(0, TCSANOW, &tc);
 #else
@@ -773,14 +772,11 @@ bad_login:
 	{
 		struct utmp utmp;
 
-		memset((char *)&utmp, 0, sizeof(utmp));
-		login_time = time(&utmp.ut_time);
-#ifdef USER_PROCESS
-		utmp.ut_type = USER_PROCESS;
-#endif
 #ifndef NO_UT_PID
+		utmp.ut_type = USER_PROCESS;
 		utmp.ut_pid = getppid();
 #endif
+		login_time = time(&utmp.ut_time);
 		update_utmp(&utmp, username, ttyn, hostname);
 	}
 
@@ -833,16 +829,13 @@ bad_login:
 
 	if (*pwd->pw_shell == '\0')
 		pwd->pw_shell = BSHELL;
+#if defined(NTTYDISC) && !defined(_IBMR2)
 	/* turn on new line discipline for the csh */
 	else if (!strcmp(pwd->pw_shell, "/bin/csh")) {
-#ifdef NTTYDISC
-/* sco, svr4 don't have it */
-#if !defined(_IBMR2)
 		ioctlval = NTTYDISC;
 		(void)ioctl(0, TIOCSETD, (char *)&ioctlval);
-#endif
-#endif
 	}
+#endif
 
 	/* destroy environment unless user has requested preservation */
 	envinit = (char **)malloc(MAXENVIRON * sizeof(char *));
@@ -855,7 +848,7 @@ bad_login:
 
 	i = 0;
 
-#if defined(_AIX) && defined(_IBMR2)
+#ifdef _IBMR2
 	{
 	    FILE *fp;
 	    if ((fp = fopen("/etc/environment", "r")) != NULL) {

@@ -28,6 +28,7 @@
 #include <sys/time.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <syslog.h>
 #include <utmp.h>
 #ifdef HAVE_SETUTXENT
 #include <utmpx.h>
@@ -40,30 +41,30 @@
 #define	WTMP_FILE	"/usr/adm/wtmp"
 #endif
      
-#ifndef EMPTY
-/* linux has UT_UNKNOWN but not EMPTY */
-#define EMPTY UT_UNKNOWN
-#endif
 
 void update_utmp();
 void update_wtmp();
 void logwtmp();
 
+
 void update_utmp(ent, username, line, host)
     struct utmp *ent;
     char *username, *line, *host;
 {
-    char *tmpx;
 #ifdef HAVE_SETUTENT
     struct utmp ut;
-    char utmp_id[5];
 #else
     struct stat statb;
 #endif
 #ifdef HAVE_SETUTXENT
     struct utmpx utx;
 #endif
-    
+#ifndef NO_UT_PID
+    char *tmpx;
+    char utmp_id[5];
+#endif
+    int fd;
+
     strncpy(ent->ut_line, line+sizeof("/dev/")-1, sizeof(ent->ut_line));
     ent->ut_time = time(0);
 
@@ -84,26 +85,52 @@ void update_utmp(ent, username, line, host)
     strncpy(ent->ut_name, username, sizeof(ent->ut_name));
 #endif
     
-#ifdef HAVE_SETUTXENT
-    getutmpx(ent, &utx);
-    getutxid(&utx);
-    setutxent();
-    pututxline(&utx);
-    endutxent();
-#endif
 #ifdef HAVE_SETUTENT
+
     utmpname(UTMP_FILE);
     setutent();
-    getutid(ent);
     pututline(ent);
     endutent();
+
+#if 0
+    /* XXX -- NOT NEEDED ANYMORE */
+
+    if (ent->ut_type == DEAD_PROCESS) {
+	if ((fd = open(UTMP_FILE, O_RDWR)) >= 0) {
+	    int cnt = 0;
+	    while(read(fd, (char *)&ut, sizeof(ut)) == sizeof(ut)) {
+		if (!strncmp(ut.ut_id, ent->ut_id, sizeof(ut.ut_id))) {
+		    (void) memset(ut.ut_host, 0, sizeof(ut.ut_host));
+		    (void) memset(ut.ut_user, 0, sizeof(ut.ut_user));
+		    (void) time(&ut.ut_time);
+		    ut.ut_exit.e_exit = ut.ut_pid = 0;
+		    ut.ut_type = EMPTY;
+		    (void) lseek(fd, -sizeof(ut), SEEK_CUR);
+		    (void) write(fd, &ut, sizeof(ut));
+		}
+		cnt++;
+	    }
+	    close(fd);
+	}
+    }
+#endif
+    
+#ifdef HAVE_SETUTXENT
+    setutxent();
+    getutmpx(ent, &utx);
+    pututxline(&utx);
+    endutxent();
+#endif /* HAVE_SETUTXENT */
+
 #else /* HAVE_SETUTENT */
-    tty = ttyslot();
+	
+    int tty = ttyslot();
     if (tty > 0 && (fd = open(UTMP_FILE, O_WRONLY, 0)) >= 0) {
 	(void)lseek(fd, (off_t)(tty * sizeof(struct utmp)), SEEK_SET);
 	(void)write(fd, (char *)ent, sizeof(struct utmp));
 	(void)close(fd);
     }
+
 #endif /* HAVE_SETUTENT */
 
     update_wtmp(ent);
@@ -165,15 +192,10 @@ void logwtmp(tty, locuser, host, loggingin)
     tmpx = tty + strlen(tty) - 2;
     sprintf(utmp_id, "kr%s", tmpx);
     strncpy(ut.ut_id, utmp_id, sizeof(ut.ut_id));
+    ut.ut_pid = (loggingin ? getpid() : 0);
+    ut.ut_type = (loggingin ? USER_PROCESS : DEAD_PROCESS);
 #else
     strncpy(ut.ut_name, locuser, sizeof(ut.ut_name));
-#endif
-
-#ifndef NO_UT_TYPE
-    ut.ut_type = (loggingin ? USER_PROCESS : DEAD_PROCESS);
-#endif
-#ifndef NO_UT_PID
-    ut.ut_pid = (loggingin ? getpid() : 0);
 #endif
 
     update_wtmp(&ut);

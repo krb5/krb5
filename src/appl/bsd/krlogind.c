@@ -100,6 +100,7 @@ char copyright[] =
 #define LOG_REMOTE_REALM
 #define CRYPT
 
+
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -312,28 +313,15 @@ main(argc, argv)
     
     progname = *argv;
     
-#ifdef KERBEROS
-    
 #ifndef LOG_NDELAY
 #define LOG_NDELAY 0
 #endif
     
-    
 #ifndef LOG_AUTH /* 4.2 syslog */
-    openlog(progname, LOG_PID|LOG_NDELAY);
+    openlog(progname, LOG_PID | LOG_NDELAY);
 #else
     openlog(progname, LOG_PID | LOG_AUTH | LOG_NDELAY, LOG_AUTH);
 #endif /* 4.2 syslog */
-    
-#else /* ! KERBEROS */
-    
-#ifndef LOG_AUTH /* 4.2 syslog */
-    openlog("rlogind", LOG_PID| LOG_NDELAY);
-#else
-    openlog("rlogind", LOG_PID | LOG_AUTH | LOG_NDELAY, LOG_AUTH);
-#endif /* 4.2 syslog */
-    
-#endif /* KERBEROS */
     
     if (argc == 1) { /* Get parameters from program name. */
 	if (strlen(progname) > MAX_PROG_NAME) {
@@ -566,11 +554,6 @@ void doit(f, fromp)
     (void) ioctl(p, TIOCSWINSZ, &win);
 #endif
     
-#ifndef sysvimp  /* IMP has a problem with opening and closing
-		    it's stream pty by the parent process */
-    
-    /* Make sure we can open slave pty, then close it for system 5 so that 
-       the process group is set correctly..... */
 #ifdef VHANG_FIRST
     vfd = open(line, O_RDWR);
     if (vfd < 0)
@@ -601,22 +584,29 @@ void doit(f, fromp)
     (void) setsid();
 #endif
 
-    t = open(line, O_RDWR);
-#ifdef VHANG_FIRST
-#ifndef VHANG_NO_CLOSE
-	(void) close(vfd);
+#ifdef ultrix
+    /* The Ultrix (and other BSD tty drivers) require the process group
+     * to be zero, in order to acquire the new tty as a controlling tty. */
+    (void) setpgrp(0, 0);
 #endif
-#endif /* VHANG_FIRST */
+
+    t = open(line, O_RDWR);
     if (t < 0)
       fatalperror(f, line);
+
+#ifdef ultrix
+    setpgrp(0, getpid());
+#endif
+	
+#if defined(VHANG_FIRST) && !defined(VHANG_NO_CLOSE)
+    (void) close(vfd);
+#endif
+
 #ifdef TIOCSCTTY
     if(ioctl(t, TIOCSCTTY, 0) < 0) /* set controlling tty */
       fatalperror(f, "setting controlling tty");
 #endif
-#if 0 /*def SYSV*/
-    close(t);
-#endif
-#endif  /* sysvimp */
+
 #ifdef POSIX_SIGNALS
     sa.sa_handler = cleanup;
     (void) sigaction(SIGCHLD, &sa, (struct sigaction *)0);
@@ -627,80 +617,71 @@ void doit(f, fromp)
 #endif
     pid = fork();
     if (pid < 0)
-      fatalperror(f, "", errno);
+      fatalperror(f, "");
     if (pid == 0) {
 #ifdef POSIX_TERMIOS
 	struct termios new_termio;
 #else
 	struct sgttyb b;
 #endif /* POSIX_TERMIOS */
-#if 0 /*def SYSV*/
-	(void) setpgrp(0,0);
-	/* SYSV open slave. (We closed it so pgrp would be set correctly) */
-	t = open(line, O_RDWR);
-	if (t < 0)
-	  fatalperror(f, line);
-#endif
-	
+
 #ifdef HAVE_STREAMS
 #ifdef HAVE_LINE_PUSH
 	while (ioctl (t, I_POP, 0) == 0); /*Clear out any old lined's*/
 	if (line_push(t) < 0)
-	  fatalperror(f, "IPUSH",errno);
+	  fatalperror(f, "IPUSH");
 #else
 #ifdef sun
 	while (ioctl (t, I_POP, 0) == 0); /*Clear out any old lined's*/
 	if (ioctl(t, I_PUSH, "ptem") < 0)
-	  fatalperror(f, "IPUSH-ptem",errno);
+	  fatalperror(f, "IPUSH-ptem");
 	if (ioctl(t, I_PUSH, "ldterm") < 0)
-	  fatalperror(f, "IPUSH-ldterm",errno);
+	  fatalperror(f, "IPUSH-ldterm");
 	if (ioctl(t, I_PUSH, "ttcompat") < 0)
-	  fatalperror(f, "IPUSH-ttcompat",errno);
+	  fatalperror(f, "IPUSH-ttcompat");
 #endif /* sun */
 #endif /* HAVE_LINE_PUSH */
 #endif /* HAVE_STREAMS */
 	
-	/* Under Ultrix 3.0, the pgrp of the slave pty terminal
-	   needs to be set explicitly.  Why rlogind works at all
-	   without this on 4.3BSD is a mystery.
-	   It seems to work fine on 4.3BSD with this code enabled.
-	   IMP's need both ioctl and setpgrp..
-	   */
-#ifdef sysvimp
-	pid = 0;
-#else
-#ifdef GETGRP_ONEARG
-	pid = getpgrp();
-#else
+	/*
+	 * Under Ultrix 3.0, the pgrp of the slave pty terminal
+	 * needs to be set explicitly.  Why rlogind works at all
+	 * without this on 4.3BSD is a mystery.
+	 */
+	close(f), close(p);
+	dup2(t, 0), dup2(t, 1), dup2(t, 2);
+	if (t > 2)
+	  close(t);
+
+#ifdef GETPGRP_ONEARG
 	pid = getpgrp(getpid());
+#else
+	pid = getpgrp();
 #endif
-#endif /* sysvimp */
-	
-#ifdef POSIX_TERMIOS
-	tcsetpgrp(0, pid);
-#else /* POSIX_TERMIOS */
+
 #ifdef TIOCSPGRP
 	ioctl(0, TIOCSPGRP, &pid);
-#endif /* TIOCSPGRP */
-#endif /* POSIX_TERMIOS */
-	
-	pid = 0;			/*reset pid incase exec fails*/
-	    
+#endif
+
 #ifdef POSIX_TERMIOS
-	tcgetattr(t,&new_termio);
-	new_termio.c_lflag &=  ~(ICANON|ECHO|ISIG|IEXTEN);
+	tcsetpgrp(0, pid);
+	tcgetattr(0,&new_termio);
+	new_termio.c_lflag &=  ~(ICANON|ECHO|ISIG);
 	/* so that login can read the authenticator */
 	new_termio.c_iflag &= ~(IXON|IXANY|BRKINT|INLCR|ICRNL|ISTRIP);
 	/* new_termio.c_iflag = 0; */
 	/* new_termio.c_oflag = 0; */
 	new_termio.c_cc[VMIN] = 1;
 	new_termio.c_cc[VTIME] = 0;
-	tcsetattr(t,TCSANOW,&new_termio);
+	tcsetattr(0,TCSANOW,&new_termio);
 #else
-	(void)ioctl(t, TIOCGETP, &b);
+	(void)ioctl(0, TIOCGETP, &b);
 	b.sg_flags = RAW|ANYP;
-	(void)ioctl(t, TIOCSETP, &b);
+	(void)ioctl(0, TIOCSETP, &b);
 #endif /* POSIX_TERMIOS */
+
+	pid = 0;			/*reset pid incase exec fails*/
+	    
 	/*
 	 **      signal the parent that we have turned off echo
 	 **      on the slave side of the pty ... he's waiting
@@ -709,12 +690,8 @@ void doit(f, fromp)
 	 **      and we don't get the right tty affiliation, and
 	 **      other kinds of hell breaks loose ...
 	 */
-	(void) write(t, &c, 1);
+	(void) write(1, &c, 1);
 	
-	close(f), close(p);
-	dup2(t, 0), dup2(t, 1), dup2(t, 2);
-	if (t > 2)
-	  close(t);
 #if defined(sysvimp)
 	setcompat (COMPAT_CLRPGROUP | (getcompat() & ~COMPAT_BSDTTY));
 #endif
@@ -760,22 +737,16 @@ void doit(f, fromp)
 #endif /* LOG_REMOTE_REALM || LOG_OTHER_USERS || LOG_ALL_LOGINS */
 #endif /* KERBEROS */
 
-#ifdef LOGIN_PROCESS
+#ifndef NO_UT_PID
 	{
-	    int tmpx;
-	    char utmp_id[5];
 	    struct utmp ent;
 
-#ifndef NO_UT_PID
 	    ent.ut_pid = getpid();
-#endif
-#ifndef NO_UT_TYPE
 	    ent.ut_type = LOGIN_PROCESS;
-#endif
 	    update_utmp(&ent, "rlogin", line, ""/*host*/);
 	}
 #endif
-	
+
 #ifdef DO_NOT_USE_K_LOGIN
 	execl(LOGIN_PROGRAM, "login", "-r", rhost_name, 0);
 #else
@@ -785,21 +756,23 @@ void doit(f, fromp)
 	  execl(LOGIN_PROGRAM, "login", "-h", rhost_name, "-e", lusername, 0);
 #endif
 	
-	fatalperror(2, LOGIN_PROGRAM, errno);
+	fatalperror(2, LOGIN_PROGRAM);
 	/*NOTREACHED*/
-    }
+    } /* if (pid == 0) */
+
     /*
      **      wait for child to start ... read one byte
      **      -- see the child, who writes one byte after
      **      turning off echo on the slave side ...
      **      The master blocks here until it reads a byte.
      */
+    close(t);
     if (read(p, &c, 1) != 1) {
 	/*
 	 * Problems read failed ...
 	 */
 	sprintf(buferror, "Cannot read slave pty %s ",line);
-	fatalperror(p,buferror,errno);
+	fatalperror(p,buferror);
     }
     
 #if defined(KERBEROS) 
@@ -817,22 +790,22 @@ void doit(f, fromp)
 #endif /* KERBEROS */
       ioctl(f, FIONBIO, &on);
     ioctl(p, FIONBIO, &on);
-#ifdef hpux
-    /******** FIONBIO doesn't currently work on ptys, should be O_NDELAY? **/
-    /*** get flags and add O_NDELAY **/
+
+    /* FIONBIO doesn't always work on ptys, use fcntl to set O_NDELAY? */
     (void) fcntl(p,F_SETFL,fcntl(p,F_GETFL,0) | O_NDELAY);
-#endif
-    
+
 /*** XXX -- make this portable ***/
 #if defined(TIOCPKT) && !defined(__svr4__) || defined(solaris20)
     ioctl(p, TIOCPKT, &on);
 #endif
+
 #ifdef POSIX_SIGNALS
     sa.sa_handler = SIG_IGN;
     (void) sigaction(SIGTSTP, &sa, (struct sigaction *)0);
 #else
     signal(SIGTSTP, SIG_IGN);
 #endif
+
 #ifdef hpux
     setpgrp2(0, 0);
 #else
@@ -845,13 +818,13 @@ void doit(f, fromp)
     (void) write(p, lusername, strlen(lusername) +1);
 #endif
     /* stuff term info down to login */
-    if( write(p, term, strlen(term)+1) <= 0 ){
+    if( write(p, term, strlen(term)+1) != strlen(term)+1 ){
 	/*
 	 * Problems write failed ...
 	 */
 	sprintf(buferror,"Cannot write slave pty %s ",line);
-	fatalperror(f,buferror,errno);
-    } 
+	fatalperror(f,buferror);
+    }
     protocol(f, p);
     signal(SIGCHLD, SIG_IGN);
     cleanup();
@@ -984,9 +957,7 @@ protocol(f, p)
 		      if (n) {
 			  left -= n;
 			  if (left > 0)
-			    memcpy(cp,
-				   cp+n,
-				   left);
+			    memmove(cp, cp+n, left);
 			  fcc -= n;
 			  goto top; /* n^2 */
 		      }
@@ -1011,7 +982,7 @@ protocol(f, p)
 	      break;
 	    else if (pibuf[0] == 0)
 	      pbp++, pcc--;
-#if 0
+#ifndef sun
 	    else {
 		if (pkcontrol(pibuf[0])) {
 		    pibuf[0] |= oobdata[0];
@@ -1044,8 +1015,6 @@ krb5_sigtype cleanup()
     
 #ifndef NO_UT_PID
     ut.ut_pid = 0;
-#endif
-#ifndef NO_UT_TYPE
     ut.ut_type = DEAD_PROCESS;
 #endif
     update_utmp(&ut, "", line, (char *)0);
@@ -1265,14 +1234,17 @@ v5_des_read(fd, buf, len)
 	nstored = 0;
     }
     
-    if ((cc = krb5_net_read(fd, (char *)&len_buf, 4)) != 4) {
+    if ((cc = krb5_net_read(fd, (char *)len_buf, 4)) != 4) {
 	if ((cc < 0)  && ((errno == EWOULDBLOCK) || (errno == EAGAIN)))
 	    return(cc);
 	/* XXX can't read enough, pipe must have closed */
 	return(0);
     }
     rd_len =
-	((len_buf[0]<<24) | (len_buf[1]<<16) | (len_buf[2]<<8) | len_buf[3]);
+	(((krb5_ui_4)len_buf[0]<<24) |
+	 ((krb5_ui_4)len_buf[1]<<16) |
+	 ((krb5_ui_4)len_buf[2]<<8) |
+	 (krb5_ui_4)len_buf[3]);
     net_len = krb5_encrypt_size(rd_len,eblock.crypto_entry);
     if (net_len < 0 || net_len > sizeof(des_inbuf)) {
 	/* XXX preposterous length, probably out of sync.
@@ -1651,13 +1623,15 @@ int len;
 		nstored = 0;
 	}
 	
-	if ((cc = krb_net_read(fd, (char *)&len_buf, 4)) != 4) {
+	if ((cc = krb_net_read(fd, (char *)len_buf, 4)) != 4) {
 		/* XXX can't read enough, pipe
 		   must have closed */
 		return(0);
 	}
- 	net_len = ((len_buf[0]<<24) | (len_buf[1]<<16) |
-		   (len_buf[2]<<8) | len_buf[3]);
+ 	net_len = (((krb5_ui_4)len_buf[0]<<24) |
+		   ((krb5_ui_4)len_buf[1]<<16) |
+		   ((krb5_ui_4)len_buf[2]<<8) |
+		   (krb5_ui_4)len_buf[3]);
 	if (net_len < 0 || net_len > sizeof(des_inbuf)) {
 		/* XXX preposterous length, probably out of sync.
 		   act as if pipe closed */
@@ -1730,7 +1704,7 @@ int len;
 #define min(a,b) ((a < b) ? a : b)
 
 	if (len < 8) {
-		krb5_random_confounder(8 - len, &garbage_buf);
+		krb5_random_confounder(8 - len, garbage_buf);
 		/* this "right-justifies" the data in the buffer */
 		(void) memcpy(garbage_buf + 8 - len, buf, len);
 	}
