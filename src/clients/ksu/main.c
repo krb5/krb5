@@ -41,7 +41,11 @@ int set_env_var();
 void sweep_up();
 char * ontty();
 void init_auth_names();
+#ifdef STDARG_PROTOTYPES
 void print_status( const char *fmt, ...);
+#else
+void print_status();
+#endif
 char * get_dir_of_file();     
 
 /* Note -e and -a options are mutually exclusive */
