@@ -35,33 +35,18 @@
 #define	USE_DBM_LNAME		/* Use a DBM database for the aname/lname
 				   conversion */
 
-#ifdef KRB5_ATHENA_COMPAT
-/*
- * Let's store krb5.conf is the same place whether or not we're
- * compiling under with Project Athena options turned on.  Things are
- * much more sane that way!!!!  --- Ted
- */
-#define DEFAULT_PROFILE_FILENAME "/etc/krb5.conf"
-#define	DEFAULT_CONFIG_FILENAME	"/etc/athena/krb.conf.v5"
-#define	DEFAULT_TRANS_FILENAME	"/etc/athena/krb.realms"
-#define	DEFAULT_LNAME_FILENAME	"/etc/athena/aname"
-#define	DEFAULT_KEYTAB_NAME	"FILE:/etc/athena/v5srvtab"
-#elif defined(_WINDOWS)
+#ifdef _WINDOWS
 #define DEFAULT_PROFILE_FILENAME "krb5.ini"
-#define	DEFAULT_CONFIG_FILENAME	"krb.conf"
-#define	DEFAULT_TRANS_FILENAME	"krb.realms"
 #define	DEFAULT_LNAME_FILENAME	"/aname"
 #define	DEFAULT_KEYTAB_NAME	"FILE:/v5srvtab"
-#else
+#else /* !_WINDOWS */
 #define DEFAULT_PROFILE_FILENAME "/etc/krb5.conf"
-#define	DEFAULT_CONFIG_FILENAME	"@KRB5ROOT/krb.conf"
-#define	DEFAULT_TRANS_FILENAME	"@KRB5ROOT/krb.realms"
-#define	DEFAULT_LNAME_FILENAME	"@KRB5ROOT/aname"
-#define	DEFAULT_KEYTAB_NAME	"FILE:@KRB5SRVTABDIR/v5srvtab"
-#endif
+#define	DEFAULT_KEYTAB_NAME	"FILE:/etc/v5srvtab"
+#define	DEFAULT_LNAME_FILENAME	"@PREFIX/lib/krb5.aname"
+#endif /* _WINDOWS  */
 
-#define DEFAULT_KDB_FILE        "@KDB5DIR/principal"
-#define DEFAULT_ADMIN_ACL	"@KDB5DIR/admin_acl_file"
+#define DEFAULT_KDB_FILE        "@PREFIX/lib/krb5kdc/principal"
+#define KRB5_DEFAULT_ADMIN_ACL	"@PREFIX/lib/krb5kdc/krb5_adm.acl"
 
 #define	DEFAULT_KDC_ETYPE	ETYPE_DES_CBC_CRC
 #define	DEFAULT_KDC_KEYTYPE	KEYTYPE_DES
@@ -83,8 +68,8 @@
 #define RCTMPDIR	"@KRB5RCTMPDIR"	/* directory to store replay caches */
 
 #define KRB5_PATH_TTY	"/dev/tty"
-#define KRB5_PATH_LOGIN	"@KRB5ROOT/sbin/login.krb5"
-#define KRB5_PATH_RLOGIN "@KRB5ROOT/bin/rlogin"
+#define KRB5_PATH_LOGIN	"@EXEC_PREFIX/sbin/login.krb5"
+#define KRB5_PATH_RLOGIN "@EXEC_PREFIX/bin/rlogin"
 
 #define KRB5_ENV_CCNAME	"KRB5CCNAME"
 
@@ -93,10 +78,10 @@
  */
 
 /* the default syslog file */
-#define KADM_SYSLOG  "@KDB5DIR/admin_server.syslog"
+#define KADM_SYSLOG  "@PREFIX/lib/krb5kdc/admin_server.syslog"
 
 /* where to find the bad password table */
-#define PW_CHECK_FILE "@KDB5DIR/bad_passwd"
+#define PW_CHECK_FILE "@PREFIX/lib/krb5kdc/bad_passwd"
 
-#define DEFAULT_ACL_DIR	"@KDB5DIR"
+#define DEFAULT_ACL_DIR	"@PREFIX/lib/krb5kdc"
 #endif /* KRB5_OSCONF__ */
