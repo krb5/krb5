@@ -267,7 +267,6 @@ get_authorized_princ_names( const char *luser, char *cmd, char *** princ_list)
     return 0;
 }
 
-
 void close_time(int k5users_flag, FILE * users_fp,
                   int k5login_flag, FILE * login_fp){
 
@@ -390,10 +389,11 @@ krb5_error_code retval;
 char * client_name; 
 krb5_boolean temp_found = FALSE;   
 char * cc_source_name;
+struct stat st_temp;
 
 cc_source_name = krb5_cc_get_name(cc);
 
-if ( ! access(cc_source_name, F_OK)){
+if ( ! stat(cc_source_name, &st_temp)){
 
 	if (retval = find_ticket (cc, client, end_server, &temp_found)) {
 		return retval;
@@ -527,6 +527,7 @@ krb5_boolean found = FALSE;
 struct stat tb;
 int count =0; 
 int i;
+struct stat st_temp;
 
 *path_out = 0;
 
@@ -537,7 +538,7 @@ if (options->princ){
 
 cc_source_name = krb5_cc_get_name(cc_source);
 
-if ( ! access(cc_source_name, F_OK)){
+if ( ! stat(cc_source_name, &st_temp)){
 	 if (retval = krb5_cc_get_principal(cc_source, &cc_def_princ)){
                 return retval;
         }
@@ -573,6 +574,19 @@ if (source_uid == 0){
 }
 
 /* from here on, the code is for source_uid !=  0 */           
+
+if (source_uid && (source_uid == target_uid)){
+	if(cc_def_princ){
+		*client = cc_def_princ;
+	}else{ 
+		*client = target_client; 
+	}
+	if (auth_debug){
+	    printf("GET_best_princ_for_target: via source_uid == target_uid\n");
+	}
+
+	return 0;
+}
 
    /* if .k5users and .k5login do not exist */  	
 if ( stat(k5login_path, &tb) && stat(k5users_path, &tb) ){
@@ -682,45 +696,10 @@ while (aplist[i]){
    for password promting */                 
 
 
-if (princ_trials[0].found == TRUE){ 
-	*client = princ_trials[0].p;
-
-	if (auth_debug){
-		printf(
-	            "GET_best_princ_for_target: via prompt passwd list choice: default cache principal\n");
-	}
-	return  0;	
-}
-
-
-#ifdef PRINC_LOOK_AHEAD
-
-if (princ_trials[0].p){
-	if (retval= krb5_copy_principal(princ_trials[0].p, &temp_client)){
-		return retval; 	
-	}
-
-	/* get the client name that is the closest
-	 to default principal of source cache */
-
-	if (retval = get_closest_principal(aplist, &temp_client, & found)){
-		return retval; 	
-	}
-
-	if (found == TRUE){  
-		*client = temp_client; 	
-		if (auth_debug){
-			printf(
-		            "GET_best_princ_for_target: via prompt passwd list choice: approximation of default cache principal\n");
-		}
-		return 0;
-	}
-}
-#endif /* PRINC_LOOK_AHEAD */ 
-
-for (i=1; i < count; i ++){ 
+for (i=0; i < count; i ++){ 
 	if (princ_trials[i].found == TRUE){ 
 		*client = princ_trials[i].p;
+
 		if (auth_debug){
 			printf(
 		            "GET_best_princ_for_target: via prompt passwd list choice #%d \n",i);
@@ -729,18 +708,44 @@ for (i=1; i < count; i ++){
 	}
 }
 
-/* ok looks like we are out of luck, so just take the firs name
-   in the list and return */                                  
+#ifdef PRINC_LOOK_AHEAD
 
-if (retval = krb5_parse_name(aplist[0], &temp_client)){
-	return retval;
+
+for (i=0; i < count; i ++){ 
+	if (princ_trials[i].p){
+		if(retval=krb5_copy_principal(princ_trials[i].p, &temp_client)){
+			return retval; 	
+		}
+
+		/* get the client name that is the closest
+		  to the three princ in trials */
+
+		if(retval=get_closest_principal(aplist, &temp_client, & found)){
+			return retval; 	
+		}
+
+		if (found == TRUE){  
+			*client = temp_client; 	
+			if (auth_debug){
+				printf(
+			            "GET_best_princ_for_target: via prompt passwd list choice: approximation of princ in trials # %d \n",i);
+			}
+			return 0;
+		}
+		krb5_free_principal(temp_client);
+	}
 }
+
+
+#endif /* PRINC_LOOK_AHEAD */ 
+
+
 
 if(auth_debug){
-	printf( "GET_best_princ_for_target: out of luck choice\n");
+	printf( "GET_best_princ_for_target: out of luck, can't get appropriate default principal\n");
 }
 
-*client = temp_client; 
+*path_out = NOT_AUTHORIZED;
 return 0;
 
 }

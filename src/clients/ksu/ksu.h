@@ -41,11 +41,13 @@
 #include <unistd.h>
 #include <string.h>
 #include <syslog.h>
+#include <stdarg.h>
 
 #define NO_TARGET_FILE '.'
+#define SOURCE_USER_LOGIN "."
 
 #define KRB5_DEFAULT_OPTIONS 0
-#define KRB5_DEFAULT_TKT_LIFE 60*60*8 /* 8 hours */
+#define KRB5_DEFAULT_TKT_LIFE 60*60*12 /* 12 hours */
 
 #define KRB5_SECONDARY_CACHE "FILE:/tmp/krb5cc_"
 
@@ -68,6 +70,7 @@ extern char * optarg;
 /* globals */
 extern char * prog_name;
 extern int auth_debug;
+extern int quiet;
 extern char k5login_path[MAXPATHLEN];
 extern char k5users_path[MAXPATHLEN];
 extern char * gb_err;
@@ -86,7 +89,7 @@ extern void dump_principal ();
 extern krb5_error_code krb5_verify_tkt_def();
 extern krb5_boolean krb5_fast_auth();
 extern krb5_boolean krb5_get_tkt_via_passwd ();
-extern int gen_sim();  
+extern int gen_sym();  
 extern krb5_error_code krb5_authorization();     
 extern krb5_error_code k5login_lookup ();
 extern krb5_error_code k5users_lookup ();
@@ -94,6 +97,8 @@ extern krb5_error_code get_line ();
 extern char *  get_first_token ();
 extern char *  get_next_token ();
 extern krb5_boolean fowner();
+extern krb5_boolean  krb5_find_princ_in_cred_list(); 
+extern krb5_error_code  krb5_find_princ_in_cache();
 
 #ifndef min
 #define min(a,b) ((a) > (b) ? (b) : (a))

@@ -61,7 +61,7 @@ krb5_error_code retval =0;
 char ** k5login_plist = NULL;
 int got_it = 0; 
 char * client_name;		
-
+krb5_boolean zero_password;
 
 	*path_passwd = 0;
 	memset((char *) &tgtq, 0, sizeof(tgtq)); 
@@ -136,12 +136,12 @@ char * client_name;
 
 #ifdef GET_TGT_VIA_PASSWD
 
-		fprintf(stderr,"WARNING: Your password may get exposed if you are logged in remotely \n");
-		fprintf(stderr,"         and don't have a secure channel. \n");
+		fprintf(stderr,"WARNING: Your password may be exposed if you enter it here and are logged \n");
+		fprintf(stderr,"         in remotely using an unsecure (non-encrypted) channel. \n");
 	
 		/*get the ticket granting ticket, via passwd(promt for passwd)*/
 	 	if (krb5_get_tkt_via_passwd (&cc, client, tgtq.server,
-				       options) == FALSE){ 
+				       options, & zero_password) == FALSE){ 
 				return FALSE;
 		}
 		*path_passwd = 1;
@@ -193,7 +193,7 @@ char * client_name;
 		krb5_free_tgt_creds(tgts);
 	}
 
-	if (retval = krb5_verify_tkt_def(client, server, 
+	if (retval = krb5_verify_tkt_def(client, server, &cred.keyblock, 
 					&cred.ticket, &target_tkt)){
 		com_err(prog_name, retval, "while verifing ticket for server"); 
 		return (FALSE);
@@ -240,7 +240,7 @@ char * client_name;
 
 	}
 
-	if (retval = krb5_verify_tkt_def(client, server, 
+	if (retval = krb5_verify_tkt_def(client, server, &tgt.keyblock, 
 					&tgt.ticket, &target_tkt)){
 		com_err(prog_name, retval, "while verifing ticket for server"); 
 		return (FALSE);
@@ -253,7 +253,9 @@ char * client_name;
 
 krb5_error_code krb5_verify_tkt_def( /* IN */ 
 				   krb5_principal client,
-				   krb5_principal server, krb5_data * scr_ticket,
+				   krb5_principal server,
+				   krb5_keyblock * cred_ses_key,	
+				   krb5_data * scr_ticket,
 				   /* OUT */	 
 				   krb5_ticket ** clear_ticket)
 {
@@ -262,6 +264,7 @@ krb5_keytab_entry ktentry;
 krb5_keyblock *tkt_key = NULL;
 krb5_ticket * tkt = NULL;
 krb5_error_code retval =0;
+krb5_keyblock *	tkt_ses_key;
 
 	if (retval = decode_krb5_ticket(scr_ticket, &tkt)){
 		return retval;
@@ -305,8 +308,13 @@ krb5_error_code retval =0;
 		return(retval);
 	}
 
+
+
 	if (!krb5_principal_compare(client, tkt->enc_part2->client)) {
-			retval = KRB5KRB_AP_ERR_BADMATCH;
+			krb5_free_ticket(tkt);	
+			krb5_kt_free_entry(&ktentry);
+			krb5_free_keyblock(tkt_key);
+			return KRB5KRB_AP_ERR_BADMATCH;
 	}
 
 	if (auth_debug){ 
@@ -316,16 +324,35 @@ krb5_error_code retval =0;
 	    	dump_principal("tkt->enc_part2->client",tkt->enc_part2->client);
 	} 	
 
+	tkt_ses_key = tkt->enc_part2->session;	
+
+	if (cred_ses_key->keytype != tkt_ses_key->keytype ||
+	    cred_ses_key->length != tkt_ses_key->length ||
+       	    memcmp((char *)cred_ses_key->contents,
+		   (char *)tkt_ses_key->contents, cred_ses_key->length)) {
+
+		krb5_free_ticket(tkt);	
+		krb5_kt_free_entry(&ktentry);
+		krb5_free_keyblock(tkt_key);
+        	return KRB5KRB_AP_ERR_BAD_INTEGRITY;
+    	}
+
+	if (auth_debug){ 
+	 	fprintf(stderr,
+		       "krb5_verify_tkt_def: session keys match \n");
+	} 	
+
 	*clear_ticket = tkt; 
 	krb5_kt_free_entry(&ktentry);
 	krb5_free_keyblock(tkt_key);
-    return retval; 	
+    	return 0; 	
 
 }
 
 
 krb5_boolean krb5_get_tkt_via_passwd (krb5_ccache * ccache, krb5_principal client,
-				    krb5_principal server, opt_info * options) { 
+				    krb5_principal server, opt_info * options,
+				    krb5_boolean * zero_password) { 
     krb5_address **my_addresses;
     krb5_error_code code;
     krb5_creds my_creds;
@@ -334,6 +361,9 @@ krb5_boolean krb5_get_tkt_via_passwd (krb5_ccache * ccache, krb5_principal clien
     int pwsize;
     int	i;
     char password[255], *client_name, prompt[255];
+
+
+    *zero_password = FALSE;	
 
     if (code = krb5_unparse_name(client, &client_name)) {
         com_err (prog_name, code, "when unparsing name");
@@ -379,9 +409,17 @@ krb5_boolean krb5_get_tkt_via_passwd (krb5_ccache * ccache, krb5_principal clien
 	 pwsize = sizeof(password);
 
 	 code = krb5_read_password(prompt, 0, password, &pwsize);
-	 if (code || pwsize == 0) {
-	      fprintf(stderr, "Error while reading password for '%s'\n",
+	 if (code ) {
+	      com_err(prog_name, code, "while reading password for '%s'\n",
 		      client_name);
+	      memset(password, 0, sizeof(password));
+	      krb5_free_addresses(my_addresses);
+	      return (FALSE); 
+	 }
+
+	 if ( pwsize == 0) {
+	      fprintf(stderr, "No password given\n");
+    	      *zero_password = TRUE;
 	      memset(password, 0, sizeof(password));
 	      krb5_free_addresses(my_addresses);
 	      return (FALSE); 

@@ -22,15 +22,20 @@
 # or implied warranty.
 # 
 # 
-        DEPLIBS = $(DEPKLIB)
+
+DEPLIBS = $(DEPKLIB)
 LOCAL_LIBRARIES = $(KLIB)
+
+DEFINES = -DLOCAL_REALM='"."' -DGET_TGT_VIA_PASSWD -DPRINC_LOOK_AHEAD -DCMD_PATH='"/bin /local/bin"'
 
 OBJS = krb_auth_su.o ccache.o authorization.o main.o heuristic.o
 SRCS = krb_auth_su.c ccache.c authorization.c main.c heuristic.c
 
-all:: ksu
+all::	ksu
 
 NormalProgramTarget(ksu,$(OBJS),$(DEPLIBS),$(LOCAL_LIBRARIES),)
-Krb5InstallClientProgram(ksu)
-DependTarget()
 
+InstallProgramWithFlags(ksu,$(CLIENT_BINDIR),$(INSTUIDFLAGS))
+Krb5InstallManPage(ksu,$(CLIENT_MANDIR),$(CLIENT_MANSUFFIX))
+
+DependTarget()
