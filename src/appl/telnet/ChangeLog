@@ -1,3 +1,8 @@
+2005-01-13  Ezra Peisach  <epeisach@mit.edu>
+
+	* configure.in: When looking for setupterm() - look in
+	libcurses/libncurses even if termcap library found.
+
 2004-09-22  Tom Yu  <tlyu@mit.edu>
 
 	* configure.in: Use KRB5_AC_LIBUTIL.

@@ -51,10 +51,10 @@ AC_CHECK_HEADERS(term.h,,,dnl
 ])
 dnl
 AC_CHECK_LIB(termcap,main,AC_DEFINE(TERMCAP)
-LIBS="$LIBS -ltermcap",
-  AC_CHECK_LIB(curses,setupterm,LIBS="$LIBS -lcurses",
+LIBS="$LIBS -ltermcap")
+AC_CHECK_LIB(curses,setupterm,LIBS="$LIBS -lcurses",
   AC_CHECK_LIB(ncurses,setupterm,LIBS="$LIBS -lncurses")
-))
+)
 KRB5_AC_INET6
 AC_CHECK_FUNCS(setupterm)
 AC_CHECK_HEADER(termios.h,AC_DEFINE(USE_TERMIO) ac_termio=1)
