@@ -1,3 +1,7 @@
+Tue Jul 11 07:35:12 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* kerberos_v4.c: Add prototype for set_tgtkey
+
 Mon Jul 10 17:01:15 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* kerberos_v4.c: Add prototypes for compat_decrypt_key,

@@ -153,6 +153,7 @@ static krb5_data *response;
 
 void kerberos_v4 PROTOTYPE((struct sockaddr_in *, KTEXT));
 void kerb_err_reply PROTOTYPE((struct sockaddr_in *, KTEXT, long, char *));
+int set_tgtkey PROTOTYPE((char *));
  
 krb5_error_code
 process_v4( pkt, client_fulladdr, is_secondary, resp)
