@@ -44,10 +44,6 @@ UTIL_VALIDATE_OBJ= utl_nohash_validate.$(OBJEXT)
 CCSRCS = \
 	$(srcdir)/disp_major_status.c \
 	$(srcdir)/disp_com_err_status.c \
-	$(srcdir)/gssapi_generic.c \
-	$(srcdir)/oid_ops.c \
-	$(srcdir)/rel_buffer.c \
-	$(srcdir)/rel_oid_set.c \
 	$(srcdir)/util_buffer.c \
 	$(srcdir)/util_canonhost.c \
 	$(srcdir)/util_dup.c \
@@ -58,10 +54,6 @@ CCSRCS = \
 CCOBJS = \
 	disp_major_status.$(OBJEXT) \
 	disp_com_err_status.$(OBJEXT) \
-	gssapi_generic.$(OBJEXT) \
-	oid_ops.$(OBJEXT) \
-	rel_buffer.$(OBJEXT) \
-	rel_oid_set.$(OBJEXT) \
 	util_buffer.$(OBJEXT) \
 	util_canonhost.$(OBJEXT) \
 	util_dup.$(OBJEXT) \

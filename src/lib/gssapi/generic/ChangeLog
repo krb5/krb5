@@ -1,3 +1,12 @@
+Tue Jan 23 03:28:41 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* gssapiP_generic.h: Removed prototypes of functions that have
+		been moved to the mechglue layer.
+
+	* Makefile.in: Removed gssapi_generic.c, oid_ops.c, rel_buffer.c,
+		and rel_oid_set.c --- these functions are now done in the
+		mechglue layer.  
+
 Wed Jan 10 21:31:42 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in (gssapi_err_generic.$(OBJEXT)): Added ##DOS
