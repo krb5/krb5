@@ -123,7 +123,7 @@ static kstream kstream_create_rcp_from_fd(read_fd, write_fd, sched, ivec)
      des_key_schedule *sched;
      des_cblock *ivec;
 {
-  kstream tmp = (kstream)malloc(sizeof(kstream*));
+  kstream tmp = (kstream)malloc(sizeof(*tmp));
   tmp->encrypting = 1;
   tmp->read_fd = read_fd;
   tmp->write_fd = write_fd;
@@ -146,7 +146,7 @@ static kstream kstream_create_from_fd(read_fd, write_fd, sched, session)
      des_cblock *session;
 {
   /* just set it up... */
-  kstream tmp = (kstream)malloc(sizeof(kstream*));
+  kstream tmp = (kstream)malloc(sizeof(*tmp));
   tmp->encrypting = 0;
   tmp->read_fd = read_fd;
   tmp->write_fd = write_fd;

@@ -1,3 +1,9 @@
+2001-07-14  Ken Raeburn  <raeburn@mit.edu>
+
+	* v4rcp.c (kstream_create_rcp_from_fd, kstream_create_from_fd):
+	Allocate correct amount of space for kstream data.  (Patch from
+	Cygnus KerbNet code, 1997.)
+
 2001-07-08  Ezra Peisach  <epeisach@mit.edu>
 
 	* login.c (sigint): Declare static.
