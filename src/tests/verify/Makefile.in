@@ -1,0 +1,24 @@
+CFLAGS = $(CCOPTS) $(DEFS) 
+LDFLAGS = -g
+
+ISODELIB=@ISODELIB@
+COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
+DBMLIB=
+KDBLIB=$(TOPLIBD)/libkdb5.a 
+
+all:: kdb5_verify
+
+KLIB = $(KDBLIB) $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(ISODELIB) $(COMERRLIB) $(DBMLIB) 
+
+kdb5_verify: kdb5_verify.o
+	$(CC) $(CFLAGS) -o kdb5_verify kdb5_verify.o $(KLIB) $(LIBS)
+
+kdb5_verify.o:	$(srcdir)/kdb5_verify.c
+
+all:: kdb5_verify
+
+install::
+
+clean::
+	$(RM) kdb5_verify.o kdb5_verify
+

@@ -1,0 +1,23 @@
+CFLAGS = $(CCOPTS) $(DEFS) 
+LDFLAGS = -g
+
+ISODELIB=@ISODELIB@
+COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
+DBMLIB=
+
+all:: kdc5_hammer
+
+KLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(ISODELIB) $(COMERRLIB) $(DBMLIB)
+
+kdc5_hammer: kdc5_hammer.o
+	$(CC) $(CFLAGS) -o kdc5_hammer kdc5_hammer.o $(KLIB) $(LIBS)
+
+kdc5_hammer.o:	$(srcdir)/kdc5_hammer.c
+
+all:: kdc5_hammer
+
+install::
+
+clean::
+	$(RM) kdc5_hammer.o kdc5_hammer
+
