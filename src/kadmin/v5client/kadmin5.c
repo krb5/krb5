@@ -38,6 +38,20 @@
 #endif	/* HAVE_REGEX_H */
 
 /*
+ * Use compile(3) if no regcomp present.
+ */
+#if	!defined(HAVE_REGCOMP) && defined(HAVE_REGEXP_H)
+#define	INIT		char *sp = instring;
+#define	GETC()		(*sp++)
+#define	PEEKC()		(*sp)
+#define	UNGETC(c)	(--sp)
+#define	RETURN(c)	return(c)
+#define	ERROR(c)	
+#define	RE_BUF_SIZE	1024
+#include <regexp.h>
+#endif	/* !HAVE_REGCOMP && HAVE_REGEXP_H */
+
+/*
  * Global storage.
  */
 int		exit_status = 0;
@@ -57,9 +71,9 @@ extern krb5_kt_ops krb5_ktf_writable_ops;
  * Own storage
  */
 static char 		*realm_name = (char *) NULL;
-#if	!HAVE_RE_COMP && !HAVE_REGCOMP
+#if	!HAVE_RE_COMP && !HAVE_REGCOMP && !HAVE_REGEXP_H
 static char		*re_string = (char *) NULL;
-#endif	/* !HAVE_RE_COMP && !HAVE_REGCOMP */
+#endif	/* !HAVE_RE_COMP && !HAVE_REGCOMP && !HAVE_REGEXP_H */
 
 /*
  * Static strings.
@@ -132,11 +146,11 @@ static const char *ren_conf_fmt		= "Enter '%c' to rename principal %s to %s: ";
 static const char ren_conf_char		= 'y';
 static const char *ren_princ_fmt	= "principal %s renamed to %s.";
 static const char *ren_noconf_fmt	= "not confirmed - principal %s not renamed to %s.";
-#if	HAVE_RE_COMP || HAVE_REGCOMP
+#if	HAVE_RE_COMP || HAVE_REGCOMP || HAVE_REGEXP_H
 static const char *lprinc_usage_fmt	= "usage is %s [%s] <regexp>";
-#else	/* HAVE_RE_COMP || HAVE_REGCOMP */
+#else	/* HAVE_RE_COMP || HAVE_REGCOMP || HAVE_REGEXP_H */
 static const char *lprinc_usage_fmt	= "usage is %s [%s] princpal";
-#endif	/* HAVE_RE_COMP || HAVE_REGCOMP */
+#endif	/* HAVE_RE_COMP || HAVE_REGCOMP || HAVE_REGEXP_H */
 static const char *lprinc_all_regexp	= ".*";
 static const char *lprinc_regexp_fmt	= "%s - regular expression error: %s";
 static const char *lprinc_regsrch_fmt	= "%s on %s - RE search error: %s";
@@ -162,7 +176,7 @@ static const char *kadmin_noprompt_msg	= ": cannot make password prompt";
 
 static const char *kadmin_pprompt_fmt	= "Enter password for %s: ";
 
-#if	!HAVE_RE_COMP && !HAVE_REGCOMP
+#if	!HAVE_RE_COMP && !HAVE_REGCOMP && !HAVE_REGEXP_H
 /*
  * re_comp()	- Compile a regular expression for subsequent usage by re_exec
  *
@@ -198,7 +212,7 @@ re_exec(sstring)
     else
 	return(1);
 }
-#endif	/* !HAVE_RE_COMP && !HAVE_REGCOMP */
+#endif	/* !HAVE_RE_COMP && !HAVE_REGCOMP && !HAVE_REGEXP_H */
 
 /*
  * kadmin_get_entry()	- Get a principal entry.
@@ -1073,10 +1087,11 @@ kadmin_list(argc, argv)
     int			match_error;
     char		match_errmsg[BUFSIZ];
     size_t		errmsg_size;
-#endif	/* HAVE_REGCOMP */
-#if	HAVE_RE_COMP && !HAVE_REGCOMP
+#elif	HAVE_REGEXP_H
+    char		regexp_buffer[RE_BUF_SIZE];
+#elif	HAVE_RE_COMP
     extern char		*re_comp();
-#endif	/* HAVE_RE_COMP && !HAVE_REGCOMP */
+#endif	/* HAVE_REGEXP_H */
 
     requestname = argv[0];
     error = 0;
@@ -1167,7 +1182,18 @@ kadmin_list(argc, argv)
 				match = 1;
 			    }
 			}
-#else	/* HAVE_REGCOMP */
+			regfree(&match_exp);
+#elif	HAVE_REGEXP_H
+			compile(argv[i],
+				regexp_buffer,
+				&regexp_buffer[RE_BUF_SIZE],
+				'\0');
+			if (step(next, regexp_buffer)) {
+			    if ((loc1 == next) &&
+				(loc2 == &next[strlen(next)]))
+				match = 1;
+			}
+#else	/* HAVE_REGEXP_H */
 			if (!(re_result = re_comp(argv[i]))) {
 			    com_err(argv[0], 0, lprinc_regexp_fmt, re_result);
 			    error = 1;
@@ -1175,7 +1201,7 @@ kadmin_list(argc, argv)
 			}
 			if (re_exec(next))
 			    match = 1;
-#endif	/* HAVE_REGCOMP */
+#endif	/* HAVE_REGEXP_H */
 		    }
 		    if (error)
 			break;
