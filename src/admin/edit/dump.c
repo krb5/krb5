@@ -315,7 +315,7 @@ void load_db(argc, argv)
 		    }
 		}
 		entry.alt_salt_length = alt_salt_len;
-		if (salt_len) {
+		if (alt_salt_len) {
 		    if (!(entry.alt_salt = (krb5_octet *)
 			  malloc(alt_salt_len+1))) {
 			com_err(argv[0], errno,
