@@ -10,10 +10,6 @@
 #endif
 #include <errno.h>
 
-#if TARGET_OS_MAC
-#include <Kerberos/FullPOSIXPath.h>
-#endif
-
 #include "prof_int.h"
 
 /* Find a 4-byte integer type */
@@ -128,72 +124,6 @@ profile_init_path(filepath, ret_profile)
 
 	return retval;
 }
-
-#if TARGET_OS_MAC
-KRB5_DLLIMP errcode_t KRB5_CALLCONV
-FSp_profile_init(files, ret_profile)
-	const FSSpec* files;
-	profile_t *ret_profile;
-{
-    UInt32		fileCount = 0;
-    const FSSpec*	nextSpec;
-    char**		pathArray = NULL;
-    UInt32		i;
-    errcode_t		retval = 0;
-
-    for (nextSpec = files; ; nextSpec++) {
-        if ((nextSpec -> vRefNum == 0) &&
-            (nextSpec -> parID == 0) &&
-            (StrLength (nextSpec -> name) == 0))
-            break;
-        fileCount++;
-    }
-    
-    pathArray = malloc ((fileCount + 1) * sizeof (char*));
-    if (pathArray == NULL) {
-        retval = ENOMEM;
-    }
-    
-    if (retval == 0) {
-        for (i = 0; i < fileCount + 1; i++) {
-            pathArray [i] = NULL;
-        }
-        
-        for (i = 0; i < fileCount; i++) {
-            OSErr err = FSpGetFullPOSIXPath (&files [i], &pathArray [i]);
-            if (err == memFullErr) {
-                retval = ENOMEM;
-                break;
-            } else if (err != noErr) {
-                retval = ENOENT;
-                break;
-            }
-        }
-    }
-    
-    if (retval == 0) {
-        retval = profile_init (pathArray, ret_profile);
-    }
-    
-    if (pathArray != NULL) {
-        for (i = 0; i < fileCount; i++) {
-            if (pathArray [i] != 0)
-                free (pathArray [i]);
-        }
-        free (pathArray);
-    }
-    
-    return retval;
-}
-
-KRB5_DLLIMP errcode_t KRB5_CALLCONV
-FSp_profile_init_path(files, ret_profile)
-	const FSSpec* files;
-	profile_t *ret_profile;
-{
-    return FSp_profile_init (files, ret_profile);
-}
-#endif /* TARGET_OS_MAC */
 
 errcode_t KRB5_CALLCONV
 profile_flush(profile)

@@ -21,8 +21,6 @@
         #pragma enumsalwaysint on
     #endif
     #pragma options align=mac68k
-    /* We use file paths as unique file identifiers */
-    #define COPY_RESOURCE_FORK 1
 #endif
 
 #ifndef KRB5_CALLCONV
@@ -53,15 +51,6 @@ long KRB5_CALLCONV profile_init
 
 long KRB5_CALLCONV profile_init_path
 	(const_profile_filespec_list_t filelist, profile_t *ret_profile);
-
-/* On Mac Carbon, also provide FSSpec variants */
-#if TARGET_OS_MAC && defined(__FILES__)
-long KRB5_CALLCONV FSp_profile_init
-	(const FSSpec* files, profile_t *ret_profile);
-
-long KRB5_CALLCONV FSp_profile_init_path
-	(const FSSpec* files, profile_t *ret_profile);
-#endif
 
 long KRB5_CALLCONV profile_flush
 	(profile_t profile);

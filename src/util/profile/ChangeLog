@@ -1,3 +1,17 @@
+2003-03-06 Alexandra Ellwood <lxs@mit.edu>
+    * profile.hin, prof_file.c (profile_flush_file_data): Stop copying
+    the resource fork.  We stopped writing resources to the krb5
+    configuration in KfM 4.5.x.  In KfM 5.0 will no longer read
+    preferences from the resource fork so we can destroy it on copy.
+    
+    * prof-int.h: No longer include MoreFiles.  Removed framework style
+    includes for Kerberos headers.
+    
+    * prof_FSp_glue.c, prof_init.c, profile.hin: Moved Mac FSSpec-based 
+      functions into a separate file so they will only be built with KfM.
+      These functions will be exported but not in the headers because
+      they are deprecated.
+
 2003-01-17  Ken Raeburn  <raeburn@mit.edu>
 
 	* prof_file.c (profile_flush_file_data) [_WIN32]: Don't call

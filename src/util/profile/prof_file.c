@@ -285,24 +285,6 @@ errcode_t profile_flush_file_data(data)
 		goto errout;
 	}
 
-#ifdef COPY_RESOURCE_FORK
-	{
-		FSSpec from;
-		FSSpec to;
-		OSErr err = FSpLocationFromFullPOSIXPath (data -> filespec, &from);
-		if (err == noErr) {
-			err = FSpLocationFromFullPOSIXPath (new_file, &to);
-		}
-		if (err == noErr) {
-			err = FSpResourceForkCopy (&from, &to);
-		}
-		if (err != noErr) {
-			retval = ENOENT;
-			goto end;
-		}
-	}
-#endif
-
 	unlink(old_file);
 	if (make_hard_link(data->filespec, old_file) == 0) {
 	    /* Okay, got the hard link.  Yay.  Now we've got our

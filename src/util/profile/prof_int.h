@@ -3,18 +3,15 @@
  */
 
 #include <time.h>
+#include <stdio.h>
 #if defined(macintosh) || (defined(__MACH__) && defined(__APPLE__))
 #include <TargetConditionals.h>
-#include <Kerberos/com_err.h>
-#include <Kerberos/FullPOSIXPath.h>
-#include <CoreServices/CoreServices.h>
 #define USE_PTHREADS
 #define PROFILE_SUPPORTS_FOREIGN_NEWLINES
 #define SHARE_TREE_DATA
-#else
-#include "com_err.h"
 #endif
 
+#include "com_err.h"
 #include "profile.h"
 
 #if defined(_WIN32)
