@@ -56,8 +56,21 @@ static char rcsid_adm_server_c[] =
 #include <krb5/kdb_dbm.h>
 
 #include <krb5/adm_defs.h>
-#include "adm_server.h"
 #include "adm_extern.h"
+
+char prog[32];
+char *progname = prog;
+char *acl_file_name = DEFAULT_ADMIN_ACL;
+char *adm5_ver_str = ADM5_VERSTR;
+int  adm5_ver_len;
+
+char *adm5_tcp_portname = ADM5_PORTNAME;
+int adm5_tcp_port_fd = -1;
+ 
+unsigned pidarraysize = 0;
+int *pidarray = (int *) 0;
+
+int exit_now = 0;
 
 global_client_server_info client_server_info;
 
@@ -142,7 +155,7 @@ char **argv;
         fclose(startup_file);
     }
 #endif
-    while ((c = getopt(argc, argv, "hmMa:d:k:r:")) != EOF) {
+    while ((c = getopt(argc, argv, "hmMa:d:k:r:D")) != EOF) {
 	switch(c) {
 	    case 'a':			/* new acl directory */
 		acl_file_name = optarg;
@@ -173,6 +186,10 @@ char **argv;
 
 	    case 'r':
 		db_realm = optarg;
+		break;
+
+	    case 'D':
+		adm_debug_flag = 1;
 		break;
 
 	    case 'h':			/* get help on using adm_server */

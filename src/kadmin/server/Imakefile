@@ -9,12 +9,6 @@
 #
 # Imakefile for Kerberos admin server library.
 
-#ifdef Krb4KDCCompat
-K4LIB=-l$(KRB425LIB) -l$(DES425LIB)
-#else
-K4LIB=
-#endif
-
 SRCS = \
 	adm_server.c \
 	adm_parse.c \
@@ -28,7 +22,8 @@ SRCS = \
 	adm_adm_func.c \
 	adm_funcs.c \
 	adm_check.c \
-	adm_extern.c 
+	adm_extern.c \
+	adm_msgs.c
 
 OBJS = \
 	adm_server.o \
@@ -43,7 +38,8 @@ OBJS = \
 	adm_adm_func.o \
 	adm_funcs.o \
 	adm_check.o \
-	adm_extern.o
+	adm_extern.o \
+	adm_msgs.o
 
 ErrorTableObjectRule()
 

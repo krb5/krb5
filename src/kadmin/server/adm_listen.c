@@ -47,6 +47,8 @@ static char rcsid_adm_listen[] =
 
 #include "adm_extern.h"
 
+int adm_debug_flag = 0;
+
 void
 kill_children()
 {
@@ -118,7 +120,12 @@ const char *prog;
 				error_message(errno));
 		    continue;
 		}
-#ifndef DEBUG
+		
+		if (adm_debug_flag) {
+			retval = process_client("adm5_listen_and_process");
+			exit(retval);
+		}
+			
 		/* if you want a sep daemon for each server */
 		if (!(pid = fork())) {
 			/* child */
@@ -150,12 +157,6 @@ const char *prog;
 				pidarray[0] = pid;
 			}
 		}
-#else
-		/* do stuff */
-
-		retval = process_client("adm5_listen_and_process");
-		exit(retval);
-#endif /* DEBUG */
 	} else {
 		syslog(LOG_AUTH | LOG_INFO, "%s: something else woke me up!",
 			"adm5_listen_and_process");

@@ -71,6 +71,8 @@ extern int *pidarray;
 extern char *adm5_ver_str;
 extern int adm5_ver_len;
 
+extern int adm_debug_flag;
+
 extern int send_seqno;
 extern int recv_seqno;
 
@@ -78,5 +80,13 @@ extern int exit_now;
 
 extern krb5_data inbuf;
 extern krb5_data msg_data;
+
+extern char *oper_type[];
+extern char *ksrvutil_message[];
+extern char *kadmind_general_response[];
+extern char *kadmind_kpasswd_response[];
+extern char *kadmind_ksrvutil_response[];
+extern char *kadmind_kadmin_response[];
+
 
 #endif /* __ADM_EXTERN__ */

@@ -193,7 +193,7 @@ OLDDECLARG(krb5_db_entry *, entry)
     }
 
     if (!req_type) { /* New entry - initialize */
-	memset((char *) &entry, 0, sizeof(entry));
+	memset((char *) entry, 0, sizeof(*entry));
         entry->principal = (krb5_principal) principal;
         entry->kvno = KDB5_VERSION_NUM;
         entry->max_life = KDB5_MAX_TKT_LIFE;

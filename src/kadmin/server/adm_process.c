@@ -277,57 +277,56 @@ char *prog;
 			error_message(retval));
 	(void) sprintf(retbuf, "kadmind error during recvauth: %s\n", 
 			error_message(retval));
-    } else {
-	/* Check if ticket was issued using password (and not tgt)
-	   within the last 5 minutes */
-	
-	if (!(client_creds->enc_part2->flags & TKT_FLG_INITIAL)) {
-	    syslog(LOG_ERR,
-		 "Client ticket not initial");
-	    close(client_server_info.client_socket);
-	    exit(0);
-	}
-
-	if (retval = krb5_timeofday(&adm_time)) {
-	    syslog(LOG_ERR,
-		 "Can't get time of day");
-	    close(client_server_info.client_socket);
-	    exit(0);
-	}
-	
-	if ((client_creds->enc_part2->times.authtime - adm_time) > 60*5) {
-	    syslog(LOG_ERR,
-		 "Client ticket not recent");
-	    close(client_server_info.client_socket);
-	    exit(0);
-	}
-
-	recv_seqno = client_auth_data->seq_number;
-
-	if ((client_server_info.name_of_client =
-			(char *) calloc (1, 3 * 255)) == (char *) 0) {
-	    syslog(LOG_ERR, "kadmind error: No Memory for name_of_client");
-	    close(client_server_info.client_socket);
-	    exit(0);
-	}
-
-	if ((retval = krb5_unparse_name(client_server_info.client, 
-			&client_server_info.name_of_client))) {
-	     syslog(LOG_ERR, "kadmind error: unparse failed.", 
-				error_message(retval));
-	    goto finish;
-	}
-
-	syslog(LOG_AUTH | LOG_INFO,
-		"Request for Administrative Service Received from %s at %s.",
-		client_server_info.name_of_client,
-		inet_ntoa( client_server_info.client_name.sin_addr ));
-	
-			/* compose the reply */
-	outbuf.data[0] = KADMIND;
-        outbuf.data[1] = KADMSAG;
-        outbuf.length = 2;
+	exit(1);
     }
+
+    /* Check if ticket was issued using password (and not tgt)
+     * within the last 5 minutes
+     */
+	
+    if (!(client_creds->enc_part2->flags & TKT_FLG_INITIAL)) {
+	syslog(LOG_ERR, "Client ticket not initial");
+	close(client_server_info.client_socket);
+	exit(0);
+    }
+
+    if (retval = krb5_timeofday(&adm_time)) {
+	syslog(LOG_ERR, "Can't get time of day");
+	close(client_server_info.client_socket);
+	exit(0);
+    }
+	
+    if ((adm_time - client_creds->enc_part2->times.authtime) > 60*5) {
+	syslog(LOG_ERR, "Client ticket not recent");
+	close(client_server_info.client_socket);
+	exit(0);
+    }
+
+    recv_seqno = client_auth_data->seq_number;
+
+    if ((client_server_info.name_of_client =
+	 (char *) calloc (1, 3 * 255)) == (char *) 0) {
+	syslog(LOG_ERR, "kadmind error: No Memory for name_of_client");
+	close(client_server_info.client_socket);
+	exit(0);
+    }
+
+    if ((retval = krb5_unparse_name(client_server_info.client, 
+				    &client_server_info.name_of_client))) {
+	syslog(LOG_ERR, "kadmind error: unparse failed.", 
+	       error_message(retval));
+	goto finish;
+    }
+
+    syslog(LOG_AUTH | LOG_INFO,
+	   "Request for Administrative Service Received from %s at %s.",
+	   client_server_info.name_of_client,
+	   inet_ntoa( client_server_info.client_name.sin_addr ));
+	
+    /* compose the reply */
+    outbuf.data[0] = KADMIND;
+    outbuf.data[1] = KADMSAG;
+    outbuf.length = 2;
 
 		/* write back the response */
     if ((retval = krb5_write_message(&client_server_info.client_socket,
@@ -387,6 +386,7 @@ char *prog;
 	    otype = 0;
 	    break;
 
+	    
 	default:
 	    retbuf[0] = KUNKNOWNAPPL;
 	    retbuf[1] = '\0';
