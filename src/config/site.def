@@ -57,10 +57,13 @@
 #ifndef UltrixArchitecture
 #define ExtraLoadFlags -Z
 #endif
+
+#ifndef DefaultCDebugFlags
 #if HasGcc
 #define DefaultCDebugFlags OptimizedCDebugFlags DebuggableCDebugFlags
 #else
 #define DefaultCDebugFlags DebuggableCDebugFlags
+#endif
 #endif
 
 #if HasNdbm
