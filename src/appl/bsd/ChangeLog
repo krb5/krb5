@@ -1,3 +1,8 @@
+Mon Nov  7 21:22:00 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* getdtablesize.c:  Use POSIX method of obtaining fd table size,
+		if available. 
+
 Thu Oct 27 20:07:03 1994  Mark Eichin  (eichin@cygnus.com)
 
 	* login.c (main): if CSTATUS is missing, don't set c_cc[VSTATUS]
