@@ -3,15 +3,14 @@
  * $Author$
  * $Id$
  *
- * Copyright 1990 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991 by the Massachusetts Institute of Technology.
+ * All Rights Reserved.
  *
  * For copying and distribution information, please see the file
  * <krb5/copyright.h>.
  *
  * Function prototypes for Kerberos V5 library (libos)
  */
-
-#include <krb5/copyright.h>
 
 #ifndef KRB5_LIBOS_PROTO__
 #define KRB5_LIBOS_PROTO__
@@ -72,5 +71,23 @@ krb5_boolean krb5_kuserok
 krb5_error_code krb5_random_confounder
 	PROTOTYPE((int,
 		   krb5_pointer ));
+krb5_error_code krb5_unpack_full_ipaddr
+    PROTOTYPE((krb5_address *,
+	       krb5_int32 *,
+	       krb5_int16 *));
+
+
+#ifdef NARROW_PROTOTYPES
+krb5_error_code krb5_make_full_ipaddr
+    PROTOTYPE((krb5_int32,
+	       krb5_int16,
+	       krb5_address **));
+#else
+krb5_error_code krb5_make_full_ipaddr
+    PROTOTYPE((krb5_int32,
+	       int,			/* unsigned short promotes to signed
+					   int */
+	       krb5_address **));
+#endif /* not NARROW_PROTOTYPES */
 
 #endif /* KRB5_LIBOS_PROTO__ */
