@@ -52,4 +52,4 @@ clean-windows::
 	@echo Making clean locally
 
 
-check:: libdb.$(STEXT)
+check-unix:: libdb.$(STEXT)
