@@ -43,6 +43,7 @@ extern char *optarg;
 char *prog;
 
 static int brief;
+static char *cur_realm = 0;
 
 krb5_error_code
 krb5_parse_lifetime (time, len)
@@ -77,7 +78,7 @@ int status;
 	    "usage: %s -p prefix -n num_to_check [-d dbpathname] [-r realmname]\n",
 	    who);
     fprintf(stderr, "\t [-D depth] [-k keytype] [-e etype] [-M mkeyname]\n");
-    fprintf(stderr, "\t [-P preauth type] [-r repeat_count]\n");
+    fprintf(stderr, "\t [-P preauth type] [-R repeat_count]\n");
 
     exit(status);
 }
@@ -98,7 +99,7 @@ main(argc, argv)
     krb5_error_code code;
     int num_to_check, n, i, j, repeat_count, counter;
     int n_tried, errors, keytypedone;
-    char prefix[BUFSIZ], *client, *server;
+    char prefix[BUFSIZ], client[4096], server[4096];
     int depth;
     char ctmp[4096], ctmp2[BUFSIZ], stmp[4096], stmp2[BUFSIZ];
     krb5_principal client_princ;
@@ -118,7 +119,7 @@ main(argc, argv)
     errors = 0;
     keytypedone = 0;
 
-    while ((option = getopt(argc, argv, "D:p:n:c:r:k:P:e:bv")) != EOF) {
+    while ((option = getopt(argc, argv, "D:p:n:c:R:k:P:e:bv")) != EOF) {
 	switch (option) {
 	case 'b':
 	    brief = 1;
@@ -126,8 +127,11 @@ main(argc, argv)
 	case 'v':
 	    brief = 0;
 	    break;
-	case 'r':
+	case 'R':
 	    repeat_count = atoi(optarg); /* how many times? */
+	    break;
+	case 'r':
+	    cur_realm = optarg;
 	    break;
 	case 'D':
 	    depth = atoi(optarg);       /* how deep to go */
@@ -174,6 +178,13 @@ main(argc, argv)
     if (!keytypedone)
 	keytype = DEFAULT_KDC_KEYTYPE;
 
+    if (!cur_realm) {
+	if (retval = krb5_get_default_realm(&cur_realm)) {
+	    com_err(prog, retval, "while retrieving default realm name");
+	    exit(1);
+	}	    
+    }
+
     if (!valid_keytype(keytype)) {
       com_err(prog, KRB5_PROG_KEYTYPE_NOSUPP,
 	      "while setting up keytype %d", keytype);
@@ -212,7 +223,7 @@ main(argc, argv)
 	  (void) sprintf(ctmp2, "%s%s%d-DEPTH-%d", (i != 1) ? "/" : "",
 			 prefix, n, i);
 	  strcat(ctmp, ctmp2);
-	  client = ctmp;
+	  sprintf(client, "%s@%s", ctmp, cur_realm);
 
 	  if (get_tgt (client, &client_princ, ccache)) {
 	    errors++;
@@ -227,7 +238,7 @@ main(argc, argv)
 	    (void) sprintf(stmp2, "%s%s%d-DEPTH-%d", (j != 1) ? "/" : "",
 			   prefix, n, j);
 	    strcat(stmp, stmp2);
-	    server = stmp;
+	    sprintf(server, "%s@%s", stmp, cur_realm);
 	    if (verify_cs_pair(client, client_princ, server, n, i, j, ccache))
 	      errors++;
 	    n_tried++;

@@ -1,3 +1,8 @@
+Sun Oct 23 01:44:37 1994    (tytso@rsx-11)
+
+	* kdc5_hammer.c (main): Allow kdc_hammer to be called on an
+		arbitrary realm.
+
 Tue Oct  4 17:24:36 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* kdc_hammer.c (get_server_key): Add widen.h and narrow.h around
