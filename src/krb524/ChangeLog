@@ -1,3 +1,8 @@
+2003-03-12  Ken Raeburn  <raeburn@mit.edu>
+
+	* cnv_tkt_skey.c (krb524_convert_tkt_skey): Extract source IP
+	address in its proper size, not as 'long'.
+
 2003-03-06  Alexandra Ellwood  <lxs@mit.edu>
     * cnv_tkt_skey.c, conv_creds.c, conv_princ.c, encode.c, sendmsg.c: 
       Removed Mac-specific includes.
