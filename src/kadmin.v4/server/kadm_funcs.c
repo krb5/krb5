@@ -61,7 +61,14 @@ kadm_entry2princ(entry, princ)
   strncpy(princ->exp_date_txt, ctime((const time_t *) &entry.expiration),
 	  DATE_SZ);
   princ->attributes = entry.attributes;
-  princ->max_life = entry.max_life / (60 * 5);
+
+  if ((entry.max_life / (60 * 5)) > 255)
+      princ->max_life = 255;
+  else {
+      princ->max_life = entry.max_life / (60 * 5);
+      if (princ->max_life == 0) princ->max_life++;
+  }
+  
   princ->kdc_key_ver = 1; /* entry.mkvno; */
   princ->key_version = entry.key_data[0].key_data_kvno;
 
@@ -107,9 +114,11 @@ kadm_princ2entry(princ, entry)
     return retval;
 
   entry->len = KRB5_KDB_V1_BASE_LENGTH;
-  entry->max_life = princ.max_life * (60 * 5);
-  entry->max_renewable_life = server_parm.max_rlife; /* XXX yeah well */
-  entry->expiration = princ.exp_date;
+  entry->max_life =
+      princ.max_life ? princ.max_life * 60 * 5 : server_parm.max_life;
+  entry->max_renewable_life = server_parm.max_rlife;
+  entry->expiration =
+      princ.exp_date ? princ.exp_date : server_parm.expiration;
   entry->attributes = princ.attributes;
 
   retval = krb5_425_conv_principal(kadm_context, princ.mod_name,
@@ -230,7 +239,7 @@ Kadm_vals *valsout;
   if (!IS_FIELD(KADM_ATTR,valsin->fields))
     data_i.attributes = server_parm.flags;
   if (!IS_FIELD(KADM_MAXLIFE,valsin->fields))
-    data_i.max_life = server_parm.max_life;
+    data_i.max_life = 0;
 
   retval = kadm_princ2entry(data_i, &newentry);
   if (retval) {
@@ -533,7 +542,7 @@ Kadm_vals *valsout;		/* the actual record which is returned */
     if (IS_FIELD(KADM_ATTR,valsin2->fields))
       newentry.attributes = temp_key.attributes;
     if (IS_FIELD(KADM_MAXLIFE,valsin2->fields))
-      newentry.max_life = temp_key.max_life; 
+      newentry.max_life = temp_key.max_life * 60 * 5;
     if (IS_FIELD(KADM_DESKEY,valsin2->fields)) {
       if ((newpw.contents = (krb5_octet *)malloc(8)) == NULL) {
 	krb5_db_free_principal(kadm_context, &newentry, 1);
@@ -1019,7 +1028,14 @@ kadm_chg_srvtab(rname, rinstance, rrealm, values)
   memcpy((char *)&values->key_high, newpw.contents + 4, 4);
   values->key_low = htonl(values->key_low);
   values->key_high = htonl(values->key_high);
-  values->max_life = odata.max_life / (60 * 5);
+
+  if ((odata.max_life / (60 * 5)) > 255)
+      values->max_life = 255;
+  else {
+      values->max_life = odata.max_life / (60 * 5);
+      if (values->max_life == 0) values->max_life++;
+  }
+
   values->exp_date = odata.expiration;
   values->attributes = odata.attributes;
   memset(values->fields, 0, sizeof(values->fields));

@@ -1,7 +1,11 @@
+Thu May  9 02:03:33 1996  Richard Basch  <basch@lehman.com>
+
+	* kadm_funcs.c: Better handling of the principal lifetimes.
+
 Thu Mar 21 20:33:43 1996  Richard Basch  <basch@lehman.com>
 
 	* kadm_funcs.c: new principals were being created with two keys,
-	one of which the key_data_ver=0 and had no valid data.
+		one of which the key_data_ver=0 and had no valid data.
 
 Tue Mar 19 19:42:37 1996  Richard Basch  <basch@lehman.com>
 
