@@ -1,3 +1,7 @@
+Sat Feb 22 01:37:03 1997  Sam Hartman  <hartmans@luminous.MIT.EDU>
+
+	* Makefile.in (LIBMINOR): Bump minor version
+
 Thu Nov 21 11:55:16 EST 1996    Richard Basch   <basch@lehman.com>
 
         * Makefile.in: win32 build

@@ -1,3 +1,7 @@
+Sat Feb 22 01:37:23 1997  Sam Hartman  <hartmans@luminous.MIT.EDU>
+
+	* Makefile.in (LIBMINOR): Bump minor version
+
 Sun Dec 29 21:52:44 1996  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in:
