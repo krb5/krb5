@@ -79,6 +79,9 @@ Notes, Major Changes, and Known Bugs
   ** Do not use triple-DES in your config files except as described in
   ** the documentation.
 
+* The principal database now uses the btree backend of Berkeley DB.
+  This should result in improved KDC performance.
+
 * The lib/rpc tests do not appear to work under NetBSD-1.4, for
   reasons that are not completely clear at the moment, but probably
   have something to do with portmapper interfacing.  This should not
@@ -96,6 +99,9 @@ Notes, Major Changes, and Known Bugs
 
 * Hardware preauthentication is known to be broken; this will be fixed
   in an upcoming release.
+
+* krb524d now defaults to forking into the background; use
+  "krb524d -nofork" to avoid forking.
 
 * Not all reported bugs have been fixed in this release, due to time
   constraints.  We are planning to make another release in the near
@@ -118,7 +124,11 @@ a specific license from the United States Government.  It is the
 responsibility of any person or organization contemplating export to
 obtain such a license before exporting.
 
-WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
+If you make modifications to this software and distribute the modified
+software you MUST LABEL IT AS BEING A MODIFIED VERSION AND NOT
+ORIGINAL MIT KERBEROS CODE.
+
+WITHIN THESE CONSTRAINTS, permission to use, copy, modify, and
 distribute this software and its documentation for any purpose and
 without fee is hereby granted, provided that the above copyright
 notice appear in all copies and that both that copyright notice and
