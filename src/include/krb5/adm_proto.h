@@ -43,7 +43,39 @@ void krb5_adm_disconnect
 		   krb5_auth_context *,
 		   krb5_ccache));
 
-/* adm_proto.c */
+/* adm_kw_dec.c */
+krb5_error_code krb5_adm_proto_to_dbent
+	PROTOTYPE((krb5_context,
+		   krb5_int32,
+		   krb5_data *,
+		   krb5_ui_4 *,
+		   krb5_db_entry *,
+		   char **));
+
+/* adm_kw_enc.c */
+krb5_error_code krb5_adm_dbent_to_proto
+	PROTOTYPE((krb5_context,
+		   krb5_ui_4,
+		   krb5_db_entry *,
+		   char *,
+		   krb5_int32 *,
+		   krb5_data **));
+
+/* adm_kt_dec.c */
+krb5_error_code krb5_adm_proto_to_ktent
+	PROTOTYPE((krb5_context,
+		   krb5_int32,
+		   krb5_data *,
+		   krb5_keytab_entry *));
+
+/* adm_kt_enc.c */
+krb5_error_code krb5_adm_ktent_to_proto
+	PROTOTYPE((krb5_context,
+		   krb5_keytab_entry *,
+		   krb5_int32 *,
+		   krb5_data **));
+
+/* adm_rw.c */
 void krb5_free_adm_data
 	PROTOTYPE((krb5_context,
 		   krb5_int32,
@@ -53,14 +85,14 @@ krb5_error_code krb5_send_adm_cmd
 	PROTOTYPE((krb5_context,
 		   krb5_pointer,
 		   krb5_auth_context *,
-		   int,
+		   krb5_int32,
 		   krb5_data *));
 krb5_error_code krb5_send_adm_reply
 	PROTOTYPE((krb5_context,
 		   krb5_pointer,
 		   krb5_auth_context *,
 		   krb5_int32,
-		   int,
+		   krb5_int32,
 		   krb5_data *));
 krb5_error_code krb5_read_adm_cmd
 	PROTOTYPE((krb5_context,

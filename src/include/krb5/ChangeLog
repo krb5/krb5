@@ -1,3 +1,7 @@
+
+Tue May 9 15:17:00 EDT 1995	Paul Park	(pjpark@mit.edu)
+	Add definitions and prototypes for new administrative protocol.
+
 Mon May  8 22:13:15 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* los-proto.h: krb5_read_password - prompt strings should be const
