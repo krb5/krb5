@@ -1,3 +1,13 @@
+Thu Mar  2 23:24:00 1995  John Gilmore  (gnu at toad.com)
+
+	Make include files begin to work on the Macintosh.
+
+	* k5-int.h:  Remove krb5/ from #includes.  Rearrange #includes
+	so that time_t is defined before kdb.h is included.
+	* krb5.h:  Include k5-config.h first, so its #define's can
+	control the rest of the file.  If <sys/types.h> is not present,
+	define u_long, etc, manually.
+
 Wed Feb 22 18:31:12 1995  John Gilmore  (gnu at toad.com)
 
 	* k5-int.h:  Remove commented-out <widen.h> and <narrow.h>.
