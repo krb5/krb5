@@ -1,7 +1,7 @@
 /*
  * kadmin/ktutil/ktutil_funcs.c
  *
- * Copyright 1995 by the Massachusetts Institute of Technology.
+ *(C) Copyright 1995, 1996 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -356,6 +356,8 @@ krb5_error_code ktutil_write_srvtab(context, list, name)
 	goto free_pruned;
     }
     for (lp = pruned; lp; lp = lp->next) {
+	unsigned char  kvno;
+	kvno = (unsigned char) lp->entry->vno;
 	retval = krb5_524_conv_principal(context,
 					 lp->entry->principal,
 					 sname, sinst, srealm);
@@ -364,7 +366,7 @@ krb5_error_code ktutil_write_srvtab(context, list, name)
 	fwrite(sname, strlen(sname) + 1, 1, fp);
 	fwrite(sinst, strlen(sinst) + 1, 1, fp);
 	fwrite(srealm, strlen(srealm) + 1, 1, fp);
-	fwrite((char *)&lp->entry->vno, 1, 1, fp);
+	fwrite((char *)&kvno, 1, 1, fp);
 	fwrite((char *)lp->entry->key.contents,
 	       sizeof (des_cblock), 1, fp);
     }

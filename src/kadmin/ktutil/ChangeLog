@@ -1,3 +1,8 @@
+Fri Jan 26 00:06:50 1996  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* ktutil_funcs.c (ktutil_write_srvtab): Write v4 version
+        properly. Previous code was endien dependent.
+
 Mon Dec 25 10:03:15 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* ktutil.c (ktutil_write_v4): Call ktutil_write_srvtab not
