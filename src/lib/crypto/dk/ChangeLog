@@ -1,3 +1,8 @@
+2001-01-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* stringtokey.c (kerberos): Now const.
+	(krb5_dk_string_to_key): Cast it to non-const.
+
 2000-06-03  Tom Yu  <tlyu@mit.edu>
 
 	* dk_encrypt.c (krb5_dk_encrypt, krb5_marc_dk_encrypt): Chain

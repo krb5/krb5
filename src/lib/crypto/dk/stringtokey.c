@@ -26,7 +26,7 @@
 
 #include "dk.h"
 
-static unsigned char kerberos[] = "kerberos";
+static const unsigned char kerberos[] = "kerberos";
 #define kerberos_len (sizeof(kerberos)-1)
 
 krb5_error_code
@@ -78,7 +78,7 @@ krb5_dk_string_to_key(enc, string, salt, key)
     /* now derive the key from this one */
 
     indata.length = kerberos_len;
-    indata.data = kerberos;
+    indata.data = (unsigned char *) kerberos;
 
     if ((ret = krb5_derive_key(enc, &foldkey, key, &indata)))
 	memset(key->contents, 0, key->length);
