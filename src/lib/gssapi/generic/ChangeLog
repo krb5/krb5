@@ -1,3 +1,7 @@
+2002-03-07 Alexandra Ellwood <lxs@mit.edu>
+    * gssapi.hin: Added check for CFM compiles.  Removed dependency on 
+    PRAGMA_* macros.  Moved check struct alignment check before struct declarations.
+
 2002-03-03 Alexandra Ellwood <lxs@mit.edu>
     * disp_com_err_status.c: Updated Mac OS X headers to new 
     framework layout... this time for real.

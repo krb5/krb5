@@ -29,12 +29,25 @@
 
 #if defined(macintosh) || (defined(__MACH__) && defined(__APPLE__))
 	#include <TargetConditionals.h>
+    #if TARGET_RT_MAC_CFM
+        #error "Use KfM 4.0 SDK headers for CFM compilation."
+    #endif
 	
 	/* This is an API divergence in 1.2.3. This will be reconciled in 1.3, when
 	all platforms will have RFC-compliant OID declarations. */
 	#define GSS_RFC_COMPLIANT_OIDS 1
 #else
 	#define GSS_RFC_COMPLIANT_OIDS 0
+#endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
+#if TARGET_OS_MAC
+    #pragma import on
+    #pragma options align=mac68k
+    #pragma enumsalwaysint on
 #endif
 
 #if defined(_MSDOS) || defined(_WIN32)
@@ -331,23 +344,6 @@ typedef	int		gss_cred_usage_t;
 /*
  * Finally, function prototypes for the GSSAPI routines.
  */
-
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
-
-/* Macintoh CFM-68K magic incantation */
-#if PRAGMA_IMPORT
-#pragma import on
-#endif
-
-#if PRAGMA_STRUCT_ALIGN
-	#pragma options align=mac68k
-#elif PRAGMA_STRUCT_PACKPUSH
-	#pragma pack(push, 2)
-#elif PRAGMA_STRUCT_PACK
-	#pragma pack(2)
-#endif
 
 /* RFC-compliant GSS_oids will be present on all platforms in 1.3 */
 #if GSS_RFC_COMPLIANT_OIDS
@@ -803,19 +799,10 @@ PROTOTYPE(	(OM_uint32  *,		/* minor_status */
 		 gss_name_t *		/* output_name */
 	));
 
-/* Macintosh CFM-68K magic incantation */
-#if PRAGMA_STRUCT_ALIGN
+#if TARGET_OS_MAC
+    #pragma enumsalwaysint reset
 	#pragma options align=reset
-#elif PRAGMA_STRUCT_PACKPUSH
-	#pragma pack(pop)
-#elif PRAGMA_STRUCT_PACK
-	#pragma pack()
-#endif
-
-#ifdef PRAGMA_IMPORT_OFF
-#pragma import off
-#elif PRAGMA_IMPORT
-#pragma import reset
+    #pragma import reset
 #endif
 
 #ifdef __cplusplus
