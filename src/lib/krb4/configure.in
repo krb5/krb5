@@ -9,6 +9,15 @@ AC_CHECK_HEADERS(stdlib.h)
 AC_TYPE_MODE_T
 AC_TYPE_UID_T
 AC_DEFINE(KRB4_USE_KEYTAB)
+case $krb5_cv_host in
+     powerpc-apple-darwin*)
+     KRB_ERR_TXT=
+     ;;
+     *)
+     KRB_ERR_TXT=krb_err_txt.c
+     ;;
+esac
+AC_SUBST([KRB_ERR_TXT])
 AC_CHECK_FUNCS(strdup seteuid setreuid setresuid)
 AC_PROG_AWK
 KRB5_BUILD_LIBOBJS
