@@ -1,3 +1,8 @@
+1999-09-21  Ken Raeburn  <raeburn@mit.edu>
+
+	* rc_dfl.c (krb5_rc_io_fetch): Set client and server fields to
+	NULL after freeing them in the error case.
+
 Mon May 10 15:26:53 1999  Danilo Almeida  <dalmeida@mit.edu>
 
 	* Makefile.in: Do win32 build in subdir.
