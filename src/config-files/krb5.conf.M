@@ -78,6 +78,13 @@ should be in, given its fully qualified domain name.
 Contains relations which determine how Kerberos entities are to
 perform their logging.
 
+.IP [capaths]
+Contains the authentication paths used with non-hierarchical
+cross-realm. Entries in the section are used by the client to 
+determine the intermediate realms which may be used in cross-realm
+authentication. It is also used by the end-service when checking 
+the transited field for trusted intermediate realms.
+
 .PP 
 
 Each of these sections will be covered in more details in the
@@ -106,6 +113,20 @@ If the value of this relation is non-zero, the library will compute
 the difference between the system clock and the time returned by the
 KDC and in order to correct for an inaccurate system clock.  This
 corrective factor is only used by the Kerberos library.
+
+.IP checksum_type
+For compatability with DCE security servers which do not support 
+the default CKSUMTYPE_RSA_MD5 used by this version of Kerberos. Use 
+a value of 2 to use the CKSUMTYPE_RSA_MD4 instead. This applies to 
+DCE 1.1 and earlier. 
+
+.IP ccache_type
+User this parameter on systems which are DCE clients, to specify the
+type of cache to be created by kinit, or when forwarded tickets are 
+received. DCE and Kerberos can share the cache, but some versions
+of DCE do not support the default cache as created by this version of 
+Kerberos. Use a value of 1 on DCE 1.0.3a systems, and a value of 2 
+on DCE 1.1 systems. 
 
 .SH REALMS SECTION
 
@@ -262,6 +283,112 @@ will be appended to the file /var/adm/kadmin.log and sent to the device
 .in -1i
 .fi
 .sp
+
+.SH CAPATHS SECTION
+
+Cross-realm authentication is typically organized hierarchically. 
+This hierarchy is based on the name of the realm, which thus imposes
+restrictions on the choice of realm names, and on who may participate
+in a cross-realm authentication. A non hierarchical orgization may 
+be used, but requires a database to construct the authentication
+paths between the realms. This section defines that database.
+
+A client will use this section to find the authentication path between
+its realm and the realm of the server. The server will use this section
+to verify the authentication path used be the client, by checking
+the transited field of the received ticket.
+
+There is a tag name for each participating realm, and each tag
+has subtags for each of the realms. The value of the subtags is
+an intermediate realm which may participate in the cross-realm 
+authentication. The subtags may be repeated if there is more then 
+one intermediate realm. A value of "." means that the two realms 
+share keys directly, and no intermediate realms should 
+be allowd to participate.
+
+There are n**2 possible entries in this table, but only those 
+entries which will be needed on the client or the server need to be
+present. The client needs a tag for its local realm, with subtags
+for all the realms of servers it will need to authenticate with.
+A server needs a tag for each realm of the clients it will serve.
+
+For example, ANL.GOV, PNL.GOV, and NERSC.GOV all wish to use the ES.NET 
+realm as an intermediate realm. ANL has a sub realm of TEST.ANL.GOV
+which will authenticate with NERSC.GOV but not PNL.GOV. 
+The [capath] section for ANL.GOV systems would look like this:
+
+.sp
+.nf
+.in +1i
+[capaths]
+	ANL.GOV = {
+		TEST.ANL.GOV = .
+		PNL.GOV = ES.NET
+		NERSC.GOV = ES.NET
+		ES.NET = .
+	}
+	TEST.ANL.GOV = {
+		ANL.GOV = .
+	}
+	PNL.GOV = {
+		ANL.GOV = ES.NET
+	}
+	NERSC.GOV = {
+		ANL.GOV = ES.NET
+	}
+	ES.NET = {
+		ANL.GOV = .
+	}
+.in -1i
+.fi
+.sp
+
+The [capath] section of the configuration file used on NERSC.GOV 
+systems would look like this:
+
+.sp
+.nf
+.in +1i
+[capaths]
+	NERSC.GOV = {
+		ANL.GOV = ES.NET
+		TEST.ANL.GOV = ES.NET
+		TEST.ANL.GOV = ANL.GOV
+		PNL.GOV = ES.NET
+		ES.NET = .
+	}
+	ANL.GOV = {
+		NERSC.GOV = ES.NET
+	}
+	PNL.GOV = {
+		NERSC.GOV = ES.NET
+	}
+	ES.NET = {
+		NERSC.GOV = .
+	}
+	TEST.ANL.GOV = {
+		NERSC.GOV = ANL.GOV
+		NERSC.GOV = ES.NET
+	}
+	
+	}
+.in -1i
+.fi
+.sp
+
+In the above examples, the ordering is not important, except 
+when the same subtag name is used more then once. The client 
+will use this to determing the path. (It is not important to the 
+server, since the transited field is not sorted.) 
+
+If this section is not present, or if the client or server cannot
+find a client/server path, then normal hierarchical orginization 
+is assumed. 
+
+This feature is not currently supported by DCE. DCE security servers
+can be used with Kerberized clients and servers, but versions prior
+to DCE 1.1 did not fill in the transited field, and should be used
+with caution. 
 
 .SH FILES 
 /etc/krb5.conf
