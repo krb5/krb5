@@ -116,6 +116,8 @@ static	krb5_ticket * ticket = NULL;
 #define Voidptr krb5_pointer
 
 krb5_keyblock	session_key;
+char *		telnet_srvtab = NULL;
+char *		telnet_krb5_realm = NULL;
 
 	static int
 Data(ap, type, d, c)
@@ -207,6 +209,19 @@ kerberos5_send(ap)
 	    return(0);
 	}
 
+	if (telnet_krb5_realm != NULL) {
+	    krb5_data rdata;
+
+	    rdata.length = strlen(telnet_krb5_realm);
+	    rdata.data = (char *) malloc(rdata.length + 1);
+	    if (rdata.data == NULL) {
+	        fprintf(stderr, "malloc failed\n");
+		return(0);
+	    }
+	    strcpy(rdata.data, telnet_krb5_realm);
+	    krb5_princ_set_realm(telnet_context, creds.server, &rdata);
+	}
+
 	if (r = krb5_cc_get_principal(telnet_context, ccache, &creds.client)) {
 		if (auth_debug_mode) {
 			printf("Kerberos V5: failure on principal (%s)\r\n",
@@ -250,7 +265,8 @@ kerberos5_send(ap)
 	if (newkey && (newkey->keytype != KEYTYPE_DES)) {
 	    if (new_creds->keyblock.keytype == KEYTYPE_DES)
 		/* use the session key in credentials instead */
-		krb5_copy_keyblock_contents(telnet_context, new_creds, 
+		krb5_copy_keyblock_contents(telnet_context, 
+					    &new_creds->keyblock,
 					    &session_key);
 	    else
 	        /* XXX ? */;
@@ -315,8 +331,16 @@ kerberos5_is(ap, data, cnt)
 					    &server);
 		
 		if (!r) {
+		    krb5_rcache rcache;
+
+		    r = krb5_get_server_rcache(telnet_context,
+					krb5_princ_component(telnet_context,
+							     server, 0),
+					       &rcache);
 		    r = krb5_rd_req(telnet_context, &auth_context, &auth,
-				    server, NULL, NULL, &ticket);
+				    server, telnet_srvtab, NULL, &ticket);
+		    if (rcache)
+		        krb5_rc_close(telnet_context, rcache);
 		    krb5_free_principal(telnet_context, server);
 		}
 		if (r) {
@@ -604,6 +628,19 @@ kerberos5_forward(ap)
 		 error_message(r));
 	krb5_free_creds(telnet_context, local_creds);
 	return;
+    }
+
+    if (telnet_krb5_realm != NULL) {
+        krb5_data rdata;
+
+	rdata.length = strlen(telnet_krb5_realm);
+	rdata.data = (char *) malloc(rdata.length + 1);
+	if (rdata.data == NULL) {
+	    fprintf(stderr, "malloc failed\n");
+	    return;
+	}
+	strcpy(rdata.data, telnet_krb5_realm);
+	krb5_princ_set_realm(telnet_context, local_creds->server, &rdata);
     }
 
     if (r = krb5_cc_default(telnet_context, &ccache)) {

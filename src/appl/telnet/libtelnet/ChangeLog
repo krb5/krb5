@@ -1,3 +1,16 @@
+Thu Apr 20 20:12:32 1995  Mark Eichin  <eichin@cygnus.com>
+
+	Changes for testsuite from Ian Taylor <ian@cygnus.com>
+	* kerberos5.c (telnet_srvtab): New global variable.
+	(telnet_krb5_realm): New global variable.
+	(kerberos5_send): If telnet_krb5_realm is set, copy it into
+	creds.server.  Pass new_creds to krb5_mk_req_extended, not &creds.
+	Pass &new_creds->keyblock to krb5_copy_keyblock_contents, not
+	new_creds.
+	(kerberos5_is): pass telnet_srvtab in to krb_rd_req.
+	(kerberos5_forward): If telnet_krb5_realm is set, copy it into
+	local_creds->server.
+
 Wed Mar 29 15:08:43 1995  Theodore Y. Ts'o  (tytso@dcl)
 
 	* kerberos5.c: No need to have the session_key established for
