@@ -273,11 +273,12 @@ kg_ctx_size(kcontext, arg, sizep)
      *	krb5_int32	for cksumtype
      *	...		for acceptor_subkey
      *	krb5_int32	for acceptor_key_cksumtype
+     *	krb5_int32	for cred_rcache
      *	krb5_int32	for trailer.
      */
     kret = EINVAL;
     if ((ctx = (krb5_gss_ctx_id_rec *) arg)) {
-	required = 16*sizeof(krb5_int32);
+	required = 17*sizeof(krb5_int32);
 	required += 2*sizeof(krb5_int64);
 	required += sizeof(ctx->seed);
 
@@ -472,6 +473,9 @@ kg_ctx_externalize(kcontext, arg, buffer, lenremain)
 		kret = krb5_ser_pack_int32((krb5_int32) ctx->acceptor_subkey_cksumtype,
 					   &bp, &remain);
 
+	    if (!kret)
+		kret = krb5_ser_pack_int32((krb5_int32) ctx->cred_rcache,
+					   &bp, &remain);
 	    /* trailer */
 	    if (!kret)
 		kret = krb5_ser_pack_int32(KG_CONTEXT, &bp, &remain);
