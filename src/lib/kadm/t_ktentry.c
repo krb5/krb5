@@ -194,11 +194,10 @@ print_ktent(kcontext, ientp)
  *	using krb5_adm_proto_to_ktent.  Then verify the match.
  */
 static krb5_int32
-do_test(pname, verbose, isrand, isset, title, passno)
+do_test(pname, verbose, isrand, title, passno)
     char		*pname;
     krb5_boolean	verbose;
     krb5_boolean	isrand;
-    krb5_boolean	isset;
     char		*title;
     krb5_int32		passno;
 {
@@ -362,8 +361,7 @@ main(argc, argv)
     if (error)
 	return(error);
 
-    error += do_test(programname, verbose, 0, 1, "Standard set test", 0);
-    error += do_test(programname, verbose, 0, 0, "Standard get test", 0);
+    error += do_test(programname, verbose, 0, "Standard test", 0);
     for (i=0; i<randompasses; i++)
 	error += do_test(programname, verbose, 1, 0, "Random test", i+1);
     if (verbose) {

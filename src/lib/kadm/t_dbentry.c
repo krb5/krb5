@@ -106,7 +106,7 @@ gen_dbent(kcontext, dbentp, isrand, validp, pwdp, expectp)
     }
     else {
 	if (is_set) {
-	    *pwdp = (char *) malloc(strlen(defpass));
+	    *pwdp = (char *) malloc(strlen(defpass)+1);
 	    strcpy(*pwdp, defpass);
 	    *validp |= KRB5_ADM_M_PASSWORD;
 	}
@@ -533,11 +533,11 @@ print_dbent(kcontext, ivalid, ientp, ipwd)
  *	using krb5_adm_proto_to_dbent.  Then verify the match.
  */
 static krb5_int32
-do_test(pname, verbose, isrand, isset, title, passno)
+do_test(pname, verbose, isrand, is_a_set, title, passno)
     char		*pname;
     krb5_boolean	verbose;
     krb5_boolean	isrand;
-    krb5_boolean	isset;
+    krb5_boolean	is_a_set;
     char		*title;
     krb5_int32		passno;
 {
@@ -575,7 +575,7 @@ do_test(pname, verbose, isrand, isset, title, passno)
 	complist = (krb5_data *) NULL;
 	should_fail = 0;
 	if (!isrand) {
-	    if (isset)
+	    if (is_a_set)
 		in_validmask = KRB5_ADM_M_SET;
 	    else
 		in_validmask = KRB5_ADM_M_GET;

@@ -1,4 +1,12 @@
 
+Tue May 16 13:19:04 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* t_dbentry.c	- Change isset to is_a_set to keep Ultrix happy.  Also
+			  correctly calculate the length of the standard pwd.
+			  so that we don't overwrite the end of the malloc()ed
+			  string.
+	* t_ktentry.c	- Remove isset logic, no differentiation for keytabs.
+
+
 Tue May 16 10:35:54 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* t_dbentry.c, t_ktentry.c - new test modules for encode/decode
 		functions.  These convert to and from krb5_db_entry and
