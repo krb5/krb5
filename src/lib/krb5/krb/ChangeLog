@@ -1,3 +1,7 @@
+2002-08-15  Tom Yu  <tlyu@mit.edu>
+
+	* t_ser.c (ser_ccache_test): Remove references to STDIO ccaches.
+
 2002-08-01  Tom Yu  <tlyu@mit.edu>
 
 	* unparse.c (krb5_unparse_name_ext): Error out if passed a NULL

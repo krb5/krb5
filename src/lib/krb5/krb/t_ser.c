@@ -392,7 +392,6 @@ ser_ccache_test(kcontext, verbose)
     char		princname[256];
     krb5_ccache		ccache;
     krb5_principal	principal;
-    extern krb5_cc_ops	krb5_scc_ops;
 
     sprintf(ccname, "temp_cc_%d", (int) getpid());
     sprintf(princname, "zowie%d/instance%d@this.is.a.test",
@@ -418,24 +417,9 @@ ser_ccache_test(kcontext, verbose)
 			      (krb5_pointer) ccache, KV5M_CCACHE)) &&
 	    !(kret = krb5_cc_destroy(kcontext, ccache))) {
 	    krb5_free_principal(kcontext, principal);
-	    sprintf(ccname, "STDIO:temp_cc_%d", (int) getpid());
-	    sprintf(princname, "xxx%d/i%d@this.is.a.test",
-		    (int) getpid(), (int) getpid());
-	    if ((kret = krb5_cc_resolve(kcontext, ccname, &ccache)))
-		kret = krb5_cc_register(kcontext, &krb5_scc_ops, 1);
-	    if (!kret &&
-		!(kret = krb5_cc_resolve(kcontext, ccname, &ccache)) &&
-		!(kret = ser_data(verbose, "> Resolved STDIO ccache",
-				  (krb5_pointer) ccache, KV5M_CCACHE)) &&
-		!(kret = krb5_parse_name(kcontext, princname, &principal)) &&
-		!(kret = krb5_cc_initialize(kcontext, ccache, principal)) &&
-		!(kret = ser_data(verbose, "> Initialized STDIO ccache",
-				  (krb5_pointer) ccache, KV5M_CCACHE)) &&
-		!(kret = krb5_cc_destroy(kcontext, ccache))) {
-		krb5_free_principal(kcontext, principal);
-		if (verbose)
-		    printf("* ccache test succeeded\n");
-	    }
+
+	    if (verbose)
+		printf("* ccache test succeeded\n");
 	}
     }
     if (kret)
