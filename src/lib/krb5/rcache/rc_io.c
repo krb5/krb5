@@ -81,7 +81,8 @@ krb5_rc_io_creat(krb5_context context, krb5_rc_iostuff *d, char **fn)
 {
     char *c;
     krb5_int16 rc_vno = htons(KRB5_RC_VNO);
-    krb5_error_code retval;
+    krb5_error_code retval = 0;
+    int do_not_unlink = 0;
 
     GETDIR;
     if (fn && *fn)
@@ -136,54 +137,68 @@ krb5_rc_io_creat(krb5_context context, krb5_rc_iostuff *d, char **fn)
 #endif
 	case ENOSPC:
 	    retval = KRB5_RC_IO_SPACE;
-	    goto fail;
+	    goto cleanup;
 
 	case EIO:
 	    retval = KRB5_RC_IO_IO;
-	    goto fail;
+	    goto cleanup;
 
 	case EPERM:
 	case EACCES:
 	case EROFS:
 	case EEXIST:
 	    retval = KRB5_RC_IO_PERM;
-	    goto no_unlink;
+	    do_not_unlink = 1;
+	    goto cleanup;
 
 	default:
 	    retval = KRB5_RC_IO_UNKNOWN;
-	    goto fail;
+	    goto cleanup;
 	}
     }
-    if ((retval = krb5_rc_io_write(context, d, (krb5_pointer)&rc_vno,
-				   sizeof(rc_vno))) ||
-	(retval = krb5_rc_io_sync(context, d)))
-    {
-    fail:
-	(void) unlink(d->fn);
-    no_unlink:
-	FREE(d->fn);
-	d->fn = NULL;
+    retval = krb5_rc_io_write(context, d, (krb5_pointer)&rc_vno,
+			      sizeof(rc_vno));
+    if (retval)
+	goto cleanup;
+
+    retval = krb5_rc_io_sync(context, d);
+
+ cleanup:
+    if (retval) {
+	if (d->fn) {
+	    if (!do_not_unlink)
+		(void) unlink(d->fn);
+	    FREE(d->fn);
+	    d->fn = NULL;
+	}
 	(void) close(d->fd);
-	return retval;
     }
-    return 0;
+    return retval;
 }
 
 krb5_error_code
-krb5_rc_io_open(krb5_context context, krb5_rc_iostuff *d, char *fn)
+krb5_rc_io_open_internal(krb5_context context, krb5_rc_iostuff *d, char *fn,
+			 char* full_pathname)
 {
     krb5_int16 rc_vno;
-    krb5_error_code retval;
+    krb5_error_code retval = 0;
+    int do_not_unlink = 1;
 #ifndef NO_USERID
     struct stat statb;
 #endif
 
     GETDIR;
-    if (!(d->fn = malloc(strlen(fn) + dirlen + 1)))
-	return KRB5_RC_IO_MALLOC;
-    (void) strcpy(d->fn, dir);
-    (void) strcat(d->fn, PATH_SEPARATOR);
-    (void) strcat(d->fn, fn);
+    if (full_pathname) {
+	if (!(d->fn = malloc(strlen(full_pathname) + 1)))
+	    return KRB5_RC_IO_MALLOC;
+	(void) strcpy(d->fn, full_pathname);
+    } else {
+	if (!(d->fn = malloc(strlen(fn) + dirlen + 1)))
+	    return KRB5_RC_IO_MALLOC;
+	(void) strcpy(d->fn, dir);
+	(void) strcat(d->fn, PATH_SEPARATOR);
+	(void) strcat(d->fn, fn);
+    }
 
 #ifdef NO_USERID
     d->fd = THREEPARAMOPEN(d->fn, O_RDWR | O_BINARY, 0600);
@@ -210,65 +225,117 @@ krb5_rc_io_open(krb5_context context, krb5_rc_iostuff *d, char *fn)
 #endif
 	case ENOSPC:
 	    retval = KRB5_RC_IO_SPACE;
-	    goto fail;
+	    goto cleanup;
 
 	case EIO:
 	    retval = KRB5_RC_IO_IO;
-	    goto fail;
+	    goto cleanup;
 
 	case EPERM:
 	case EACCES:
 	case EROFS:
 	    retval = KRB5_RC_IO_PERM;
-	    goto fail;
+	    goto cleanup;
 
 	default:
 	    retval = KRB5_RC_IO_UNKNOWN;
-	    goto fail;
+	    goto cleanup;
 	}
     }
-    if ((retval = krb5_rc_io_read(context, d, (krb5_pointer) &rc_vno,
-				  sizeof(rc_vno))))
-	goto unlk;
 
+    do_not_unlink = 0;
+    retval = krb5_rc_io_read(context, d, (krb5_pointer) &rc_vno,
+			     sizeof(rc_vno));
+    if (retval)
+	goto cleanup;
 
     if (ntohs(rc_vno) != KRB5_RC_VNO)
-    {
 	retval = KRB5_RCACHE_BADVNO;
-    unlk:
-	unlink(d->fn);
-    fail:
+
+ cleanup:
+    if (retval) {
+	if (d->fn) {
+	    if (!do_not_unlink)
+		(void) unlink(d->fn);
+	    FREE(d->fn);
+	    d->fn = NULL;
+	}
 	(void) close(d->fd);
-	FREE(d->fn);
-	d->fn = NULL;
-	return retval;
     }
-    return 0;
+    return retval;
+}
+
+krb5_error_code
+krb5_rc_io_open(krb5_context context, krb5_rc_iostuff *d, char *fn)
+{
+    return krb5_rc_io_open_internal(context, d, fn, NULL);
 }
 
 krb5_error_code
 krb5_rc_io_move(krb5_context context, krb5_rc_iostuff *new,
 		krb5_rc_iostuff *old)
 {
-    char *fn = NULL;
 #if defined(_MSDOS) || defined(_WIN32)
+    char *new_fn = NULL;
+    char *old_fn = NULL;
+    off_t offset = 0;
+    krb5_error_code retval = 0;
     /*
-     * Work around provided by Tom Sanfilippo to work around poor
-     * Windows emulation of POSIX functions.  Rename and dup has
+     * Initial work around provided by Tom Sanfilippo to work around
+     * poor Windows emulation of POSIX functions.  Rename and dup has
      * different semantics!
+     *
+     * Additional fixes and explanation provided by dalmeida@mit.edu:
+     *
+     * First, we save the offset of "old".  Then, we close and remove
+     * the "new" file so we can do the rename.  We also close "old" to
+     * make sure the rename succeeds (though that might not be
+     * necessary on some systems).
+     *
+     * Next, we do the rename.  If all goes well, we seek the "new"
+     * file to the position "old" was at.
+     *
+     * --- WARNING!!! ---
+     *
+     * Since "old" is now gone, we mourn its disappearance, but we
+     * cannot emulate that Unix behavior...  THIS BEHAVIOR IS
+     * DIFFERENT FROM UNIX.  However, it is ok because this function
+     * gets called such that "old" gets closed right afterwards.
      */
-    GETDIR;
+    offset = lseek(old->fd, 0, SEEK_CUR);
+
+    new_fn = new->fn;
+    new->fn = NULL;
     close(new->fd);
-    unlink(new->fn);
+    new->fd = -1;
+
+    unlink(new_fn);
+
+    old_fn = old->fn;
+    old->fn = NULL;
     close(old->fd);
-    if (rename(old->fn, new->fn) == -1) /* MUST be atomic! */
-	return KRB5_RC_IO_UNKNOWN;
-    fn = new->fn;
-    new->fn = NULL;		/* avoid clobbering */
-    krb5_rc_io_close(context, new);
-    krb5_rc_io_open(context, new, fn);
-    free(fn);
+    old->fd = -1;
+
+    if (rename(old_fn, new_fn) == -1) { /* MUST be atomic! */
+	retval = KRB5_RC_IO_UNKNOWN;
+	goto cleanup;
+    }
+
+    retval = krb5_rc_io_open_internal(context, new, 0, new_fn);
+    if (retval)
+	goto cleanup;
+
+    if (lseek(new->fd, offset, SEEK_SET) == -1) {
+	retval = KRB5_RC_IO_UNKNOWN;
+	goto cleanup;
+    }
+
+ cleanup:
+    free(new_fn);
+    free(old_fn);
+    return retval;
 #else
+    char *fn = NULL;
     if (rename(old->fn, new->fn) == -1) /* MUST be atomic! */
 	return KRB5_RC_IO_UNKNOWN;
     fn = new->fn;
@@ -280,8 +347,8 @@ krb5_rc_io_move(krb5_context context, krb5_rc_iostuff *new,
 #else
     new->fd = dup(old->fd);
 #endif
-#endif
     return 0;
+#endif
 }
 
 krb5_error_code
@@ -304,12 +371,14 @@ krb5_rc_io_write(krb5_context context, krb5_rc_iostuff *d, krb5_pointer buf,
 }
 
 krb5_error_code
-krb5_rc_io_sync(
-    krb5_context context,
-    krb5_rc_iostuff *d
-    )
+krb5_rc_io_sync(krb5_context context, krb5_rc_iostuff *d)
 {
-#if !defined(MSDOS_FILESYSTEM) && !defined(macintosh)
+#if defined(_MSDOS) || defined(_WIN32)
+#ifndef fsync
+#define fsync _commit
+#endif
+#endif
+#ifndef macintosh
     if (fsync(d->fd) == -1) {
 	switch(errno)
 	{
@@ -342,11 +411,15 @@ krb5_rc_io_read(krb5_context context, krb5_rc_iostuff *d, krb5_pointer buf,
 krb5_error_code
 krb5_rc_io_close(krb5_context context, krb5_rc_iostuff *d)
 {
-    if (d->fn != NULL)
+    if (d->fn != NULL) {
 	FREE(d->fn);
-    d->fn = NULL;
-    if (close(d->fd) == -1) /* can't happen */
-	return KRB5_RC_IO_UNKNOWN;
+	d->fn = NULL;
+    }
+    if (d->fd != -1) {
+	if (close(d->fd) == -1) /* can't happen */
+	    return KRB5_RC_IO_UNKNOWN;
+	d->fd = -1;
+    }
     return 0;
 }
 

@@ -219,8 +219,7 @@ krb5_rc_dfl_close_no_free(krb5_context context, krb5_rcache id)
 	FREE(q);
     }
 #ifndef NOIOSTUFF
-    if (t->d.fd >= 0)
-	(void) krb5_rc_io_close(context, &t->d);
+    (void) krb5_rc_io_close(context, &t->d);
 #endif
     FREE(t);
     return 0;
@@ -547,11 +546,11 @@ krb5_rc_dfl_expunge(krb5_context context, krb5_rcache id)
 	t->h[i] = r;
 	r->nh = rt;
     }
-
+    return 0;
 #else
     struct authlist *q;
     char *name;
-    krb5_error_code retval;
+    krb5_error_code retval = 0;
     krb5_rcache tmp;
     krb5_deltat lifespan = t->lifespan;  /* save original lifespan */
 
@@ -573,23 +572,33 @@ krb5_rc_dfl_expunge(krb5_context context, krb5_rcache id)
     if (!tmp)
 	return ENOMEM;
     retval = krb5_rc_resolve_type(context, &tmp, "dfl");
-    if (retval)
-	return retval;
+    if (retval) {
+        free(tmp);
+        return retval;
+    }
     retval = krb5_rc_resolve(context, tmp, 0);
     if (retval)
-	return retval;
+        goto cleanup;
     retval = krb5_rc_initialize(context, tmp, lifespan);
     if (retval)
-	return retval;
+        goto cleanup;
     for (q = t->a; q; q = q->na) {
-	if (krb5_rc_io_store(context, (struct dfl_data *)tmp->data, &q->rep))
-	    return KRB5_RC_IO;
+	if (krb5_rc_io_store(context, (struct dfl_data *)tmp->data, &q->rep)) {
+            retval = KRB5_RC_IO;
+            goto cleanup;
+        }
     }
+    /* NOTE: We set retval in case we have an error */
+    retval = KRB5_RC_IO;
+    if (krb5_rc_io_sync(context, &((struct dfl_data *)tmp->data)->d))
+        goto cleanup;
     if (krb5_rc_io_sync(context, &t->d))
-	return KRB5_RC_IO;
+        goto cleanup;
     if (krb5_rc_io_move(context, &t->d, &((struct dfl_data *)tmp->data)->d))
-	return KRB5_RC_IO;
+        goto cleanup;
+    retval = 0;
+ cleanup:
     (void) krb5_rc_dfl_close(context, tmp);
+    return retval;
 #endif
-    return 0;
 }
