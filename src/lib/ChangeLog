@@ -1,3 +1,7 @@
+Tue Feb 25 01:03:41 1997  Richard Basch  <basch@lehman.com>
+
+	* Makefile.in: krb5_32.lib now also depends on gdi32.lib
+
 Thu Feb 20 23:30:32 1997  Richard Basch  <basch@lehman.com>
 
 	* Makefile.in: Build krb4 dll; it built all the objs (win16/32)
