@@ -1,3 +1,12 @@
+2003-06-06  Ken Raeburn  <raeburn@mit.edu>
+
+	* RealmsConfig-glue.c: Include k5-int.h.
+	(dnscache): New variable.
+	(DNS_CACHE_TIMEOUT): New macro.
+	(krb_get_krbhst) [KRB5_DNS_LOOKUP]: If no krb.conf info is found,
+	try DNS SRV records for "kerberos-iv".  Cache results in case
+	they're immediately requested again.
+
 2003-06-06  Tom Yu  <tlyu@mit.edu>
 
 	* g_cnffile.c (krb__get_srvtabname): Make retname be a static
