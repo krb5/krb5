@@ -211,14 +211,14 @@ krb5_error_code KRB5_CALLCONV  krb5_stdcc_generate_new
   	cc_get_change_time(gCntrlBlock, &time);
   	sprintf(name, "gen_new_cache%d", time);
   	
-  	//create the new cache
+  	/* create the new cache */
   	err = cc_create(gCntrlBlock, name, name, CC_CRED_V5, 0L,
 			&ccapi_data->NamedCache);
 	if (err != CC_NOERROR) {
 		retval = cc_err_xlate(err);
 		goto errout;
 	}
-	
+
   	/* setup some fields */
   	newCache->ops = &krb5_cc_stdcc_ops;
   	newCache->data = ccapi_data;
@@ -331,6 +331,19 @@ krb5_error_code KRB5_CALLCONV  krb5_stdcc_initialize
 
 	err = cc_create(gCntrlBlock, ccapi_data->cache_name, cName,
 			CC_CRED_V5, 0L, &ccapi_data->NamedCache);
+	if (err != CC_NOERROR) {
+		krb5_free_unparsed_name(context, cName);
+		return cc_err_xlate(err);
+	}
+
+#if 0
+	/*
+	 * Some implementations don't set the principal name
+	 * correctly, so we force set it to the correct value.
+	 */
+	err = cc_set_principal(gCntrlBlock, ccapi_data->NamedCache,
+			       CC_CRED_V5, cName);
+#endif
 	krb5_free_unparsed_name(context, cName);
 	cache_changed();
 	
@@ -427,7 +440,7 @@ krb5_error_code KRB5_CALLCONV krb5_stdcc_next_cred
 		return KRB5_CC_END;
 	err = cc_seq_fetch_creds_next(gCntrlBlock, &credU, iterator);
 
-	if (err = CC_END) {
+	if (err == CC_END) {
 		cc_seq_fetch_creds_end(gCntrlBlock, &iterator);
 		*cursor = 0;
 	}
