@@ -1,14 +1,29 @@
-/* 
- * cr_tkt.c
+/*
+ * lib/krb4/cr_tkt.c
  *
- * Copyright 1985, 1986, 1987, 1988 by the Massachusetts Institute
- * of Technology.
+ * Copyright 1985, 1986, 1987, 1988, 2000 by the Massachusetts
+ * Institute of Technology.  All Rights Reserved.
  *
- * For copying and distribution information, please see the file
- * <mit-copyright.h>.
+ * Export of this software from the United States of America may
+ *   require a specific license from the United States Government.
+ *   It is the responsibility of any person or organization contemplating
+ *   export to obtain such a license before exporting.
+ * 
+ * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
+ * distribute this software and its documentation for any purpose and
+ * without fee is hereby granted, provided that the above copyright
+ * notice appear in all copies and that both that copyright notice and
+ * this permission notice appear in supporting documentation, and that
+ * the name of M.I.T. not be used in advertising or publicity pertaining
+ * to distribution of the software without specific, written prior
+ * permission.  Furthermore if you modify this software you must label
+ * your software as modified software and not distribute it in such a
+ * fashion that it might be confused with the original M.I.T. software.
+ * M.I.T. makes no representations about the suitability of
+ * this software for any purpose.  It is provided "as is" without express
+ * or implied warranty.
  */
 
-#include "mit-copyright.h"
 #include "des.h"
 #include "krb.h"
 #include "prot.h"
@@ -21,7 +36,6 @@ krb_cr_tkt_int PROTOTYPE((KTEXT tkt, unsigned int flags_in, char *pname,
 			  char *session, int life, long time_sec, 
 			  char *sname, char *sinstance, C_Block key, 
 			  krb5_keyblock *k5key));
-
 
 /*
  * Create ticket takes as arguments information that should be in a
@@ -140,60 +154,61 @@ krb_cr_tkt_int(tkt, flags_in, pname, pinstance, prealm, paddress,
     krb5_keyblock *k5key;	/* NULL if not present */
 {
     Key_schedule key_s;
-    register char *data;        /* running index into ticket */
-    unsigned char flags = flags_in & 0xFF; /* Must be 1 byte */
+    register unsigned char *data; /* running index into ticket */
+    size_t pnamelen, pinstlen, prealmlen, snamelen, sinstlen;
+    struct in_addr paddr;
+
+    /* Be really paranoid. */
+    if (sizeof(paddr.s_addr) != 4)
+	return KFAILURE;
 
     tkt->length = 0;            /* Clear previous data  */
 
     /* Check length of ticket */
-    if (sizeof(tkt->dat) < (sizeof(flags) +
-                            1 + strlen(pname) +
-                            1 + strlen(pinstance) +
-                            1 + strlen(prealm) +
-                            4 +                         /* address */
-			    8 +                         /* session */
-			    1 +                         /* life */
-			    4 +                         /* issue time */
-                            1 + strlen(sname) +
-                            1 + strlen(sinstance) +
-			    7) / 8) {                   /* roundoff */
+    pnamelen = strlen(pname) + 1;
+    pinstlen = strlen(pinstance) + 1;
+    prealmlen = strlen(prealm) + 1;
+    snamelen = strlen(sname) + 1;
+    sinstlen = strlen(sinstance) + 1;
+    if (sizeof(tkt->dat) / 8 < ((1 + pnamelen + pinstlen + prealmlen
+				 + 4 /* address */
+				 + 8 /* session */
+				 + 1 /* life */
+				 + 4 /* issue time */
+				 + snamelen + sinstlen
+				 + 7) / 8) /* roundoff */
+	|| life > 255 || life < 0) {
         memset(tkt->dat, 0, sizeof(tkt->dat));
         return KFAILURE /* XXX */;
     }
 
-    flags |= HOST_BYTE_ORDER;   /* ticket byte order   */
-    memcpy((char *) (tkt->dat), (char *) &flags, sizeof(flags));
-    data = ((char *)tkt->dat) + sizeof(flags);
-    (void) strcpy(data, pname);
-    data += 1 + strlen(pname);
-    (void) strcpy(data, pinstance);
-    data += 1 + strlen(pinstance);
-    (void) strcpy(data, prealm);
-    data += 1 + strlen(prealm);
-    memcpy(data, (char *) &paddress, 4);
-    data += 4;
+    data = tkt->dat;
+    *data++ = flags_in;
+    memcpy(data, pname, pnamelen);
+    data += pnamelen;
+    memcpy(data, pinstance, pinstlen);
+    data += pinstlen;
+    memcpy(data, prealm, prealmlen);
+    data += prealmlen;
 
-    memcpy(data, (char *) session, 8);
+    paddr.s_addr = paddress;
+    memcpy(data, &paddr.s_addr, sizeof(paddr.s_addr));
+    data += sizeof(paddr.s_addr);
+
+    memcpy(data, session, 8);
     data += 8;
-    *(data++) = (char) life;
+    *data++ = life;
     /* issue time */
-    memcpy(data, (char *) &time_sec, 4);
-    data += 4;
-    (void) strcpy(data, sname);
-    data += 1 + strlen(sname);
-    (void) strcpy(data, sinstance);
-    data += 1 + strlen(sinstance);
+    KRB4_PUT32(data, time_sec);
+
+    memcpy(data, sname, snamelen);
+    data += snamelen;
+    memcpy(data, sinstance, sinstlen);
+    data += sinstlen;
 
     /* guarantee null padded ticket to multiple of 8 bytes */
     memset(data, 0, 7);
-    tkt->length = ((data - ((char *)tkt->dat) + 7)/8)*8;
-
-    /* Check length of ticket */
-    if (tkt->length > (sizeof(KTEXT_ST) - 7)) {
-        memset(tkt->dat, 0, tkt->length);
-        tkt->length = 0;
-        return KFAILURE /* XXX */;
-    }
+    tkt->length = ((data - tkt->dat + 7) / 8) * 8;
 
 #ifndef NOENCRYPTION
     /* Encrypt the ticket in the services key */
@@ -205,7 +220,7 @@ krb_cr_tkt_int(tkt, flags_in, pname, pinstance, prealm, paddress,
 	size_t enclen;
 
 	in.length = tkt->length;
-	in.data = tkt->dat;
+	in.data = (char *)tkt->dat;
 	/* XXX assumes context arg is ignored */
 	ret = krb5_c_encrypt_length(NULL, k5key->enctype,
 				    (size_t)in.length, &enclen);
@@ -229,9 +244,10 @@ krb_cr_tkt_int(tkt, flags_in, pname, pinstance, prealm, paddress,
 	    free(out.ciphertext.data);
 	}
     } else {
-	key_sched(key,key_s);
-	pcbc_encrypt((C_Block *)tkt->dat,(C_Block *)tkt->dat,
-		     (long) tkt->length,key_s,(C_Block *)key,1);
+	key_sched(key, key_s);
+	pcbc_encrypt((C_Block *)tkt->dat, (C_Block *)tkt->dat,
+		     (long)tkt->length, key_s, (C_Block *)key, 1);
+	memset(key_s, 0, sizeof(key_s));
     }
 #endif /* !NOENCRYPTION */
     return 0;

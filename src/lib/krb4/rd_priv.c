@@ -1,11 +1,27 @@
 /*
- * rd_priv.c
+ * lib/krb4/rd_priv.c
  *
- * CopKRB4_32right 1986, 1987, 1988 by the Massachusetts Institute
- * of Technology.
+ * Copyright 1986, 1987, 1988, 2000 by the Massachusetts Institute of
+ * Technology.  All Rights Reserved.
  *
- * For copying and distribution information, please see the file
- * <mit-copyright.h>.
+ * Export of this software from the United States of America may
+ *   require a specific license from the United States Government.
+ *   It is the responsibility of any person or organization contemplating
+ *   export to obtain such a license before exporting.
+ * 
+ * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
+ * distribute this software and its documentation for any purpose and
+ * without fee is hereby granted, provided that the above copyright
+ * notice appear in all copies and that both that copyright notice and
+ * this permission notice appear in supporting documentation, and that
+ * the name of M.I.T. not be used in advertising or publicity pertaining
+ * to distribution of the software without specific, written prior
+ * permission.  Furthermore if you modify this software you must label
+ * your software as modified software and not distribute it in such a
+ * fashion that it might be confused with the original M.I.T. software.
+ * M.I.T. makes no representations about the suitability of
+ * this software for any purpose.  It is provided "as is" without express
+ * or implied warranty.
  *
  * This routine dissects a a Kerberos 'private msg', decrypting it,
  * checking its integrity, and returning a pointer to the application
@@ -17,8 +33,6 @@
  *
  * Steve Miller    Project Athena  MIT/DEC
  */
-
-#include "mit-copyright.h"
 
 /* system include files */
 #include <stdio.h>
@@ -66,7 +80,7 @@ int private_msg_ver = KRB_PROT_VERSION;
  */
 
 KRB5_DLLIMP long KRB5_CALLCONV
-krb_rd_priv(in,in_length,schedule,key,sender,receiver,m_data)
+krb_rd_priv(in, in_length, schedule, key, sender, receiver, m_data)
     u_char *in;			/* pointer to the msg received */
     unsigned KRB4_32 in_length; /* length of "in" msg */
     Key_schedule schedule;	/* precomputed key schedule */
@@ -76,30 +90,32 @@ krb_rd_priv(in,in_length,schedule,key,sender,receiver,m_data)
     MSG_DAT *m_data;		/*various input/output data from msg */
 {
     register u_char *p,*q;
-    unsigned KRB4_32 src_addr;
+    int v, t, le;
+    struct in_addr src_addr;
     unsigned KRB4_32 c_length;
     int swap_bytes;
     unsigned KRB4_32 t_local;
     KRB4_32 delta_t;		/* Difference between timestamps */
 
     p = in;			/* beginning of message */
+#define IN_REMAIN (in_length - (p - in))
     swap_bytes = 0;
 
-    if (*p++ != KRB_PROT_VERSION && *(p-1) != 3)
+    if (IN_REMAIN < 1 + 1 + 4)
+	return RD_AP_MODIFIED;
+    v = *p++;
+    if (v != KRB_PROT_VERSION && v != 3)
         return RD_AP_VERSION;
-    private_msg_ver = *(p-1);
-    if (((*p) & ~1) != AUTH_MSG_PRIVATE)
+    private_msg_ver = v;
+    t = *p++;
+    if ((t & ~1) != AUTH_MSG_PRIVATE)
         return RD_AP_MSG_TYPE;
-    if ((*p++ & 1) != HOST_BYTE_ORDER)
-        swap_bytes++;
+    le = t & 1;
 
     /* get cipher length */
-    memcpy((char *)&c_length, (char *)p, sizeof(c_length));
-    if (swap_bytes)
-	    c_length = krb4_swab32(c_length);
-    p += sizeof(c_length);
+    KRB4_GET32(c_length, p, le);
     /* check for rational length so we don't go comatose */
-    if (VERSION_SZ + MSG_TYPE_SZ + c_length > in_length)
+    if (IN_REMAIN < c_length)
         return RD_AP_MODIFIED;
 
 #ifndef NOENCRYPTION
@@ -118,17 +134,10 @@ krb_rd_priv(in,in_length,schedule,key,sender,receiver,m_data)
 #endif
 
     /* safely get application data length */
-    memcpy((char *)&(m_data->app_length), (char *) p, 
-	   sizeof(m_data->app_length));
-    if (swap_bytes)
-        m_data->app_length = krb4_swab32(m_data->app_length);
-    p += sizeof(m_data->app_length);    /* skip over */
+    KRB4_GET32(m_data->app_length, p, le);
 
-    if (m_data->app_length + sizeof(c_length) + sizeof(in_length) +
-        sizeof(m_data->time_sec) + sizeof(m_data->time_5ms) +
-        sizeof(src_addr) + VERSION_SZ + MSG_TYPE_SZ
-        > in_length)
-        return RD_AP_MODIFIED;
+    if (IN_REMAIN < m_data->app_length + 4 + 1 + 4)
+	return RD_AP_MODIFIED;
 
 #ifndef NOENCRYPTION
     /* we're now at the decrypted application data */
@@ -138,25 +147,19 @@ krb_rd_priv(in,in_length,schedule,key,sender,receiver,m_data)
     p += m_data->app_length;
 
     /* safely get time_5ms */
-    memcpy((char *)&(m_data->time_5ms), (char *) p, 
-	   sizeof(m_data->time_5ms));
-    /*  don't need to swap-- one byte for now */
-    p += sizeof(m_data->time_5ms);
+    m_data->time_5ms = *p++;
 
     /* safely get src address */
-    memcpy((char *)&src_addr, (char *) p, sizeof(src_addr));
+    memcpy(&src_addr.s_addr, p, sizeof(src_addr.s_addr));
     /* don't swap, net order always */
-    p += sizeof(src_addr);
+    p += sizeof(src_addr.s_addr);
 
-    if (!krb_ignore_ip_address && src_addr != (u_long) sender->sin_addr.s_addr)
+    if (!krb_ignore_ip_address
+	&& src_addr.s_addr != sender->sin_addr.s_addr)
 	return RD_AP_MODIFIED;
 
     /* safely get time_sec */
-    memcpy((char *)&(m_data->time_sec), (char *) p, 
-	  sizeof(m_data->time_sec));
-    if (swap_bytes) m_data->time_sec = krb4_swab32(m_data->time_sec);
-
-    p += sizeof(m_data->time_sec);
+    KRB4_GET32(m_data->time_sec, p, le);
 
     /* check direction bit is the sign bit */
     /* For compatibility with broken old code, compares are done in VAX 
@@ -166,17 +169,18 @@ krb_rd_priv(in,in_length,schedule,key,sender,receiver,m_data)
        back to the receiver, but most higher level protocols can deal
        with that more directly. */
     if (krb_ignore_ip_address) {
-        if (m_data->time_sec <0)
+        if (m_data->time_sec < 0)
             m_data->time_sec = -m_data->time_sec;
     } else if (lsb_net_ulong_less(sender->sin_addr.s_addr,
-			   receiver->sin_addr.s_addr)==-1) 
+				  receiver->sin_addr.s_addr) == -1)
 	/* src < recv */ 
-	m_data->time_sec =  - m_data->time_sec; 
-    else if (lsb_net_ulong_less(sender->sin_addr.s_addr, 
-				receiver->sin_addr.s_addr)==0) 
-	if (lsb_net_ushort_less(sender->sin_port,receiver->sin_port)==-1)
+	m_data->time_sec = -m_data->time_sec;
+    else if (lsb_net_ulong_less(sender->sin_addr.s_addr,
+				receiver->sin_addr.s_addr) == 0)
+	if (lsb_net_ushort_less(sender->sin_port,
+				receiver->sin_port) == -1)
 	    /* src < recv */
-	    m_data->time_sec =  - m_data->time_sec; 
+	    m_data->time_sec = -m_data->time_sec;
     /*
      * all that for one tiny bit!
      * Heaven help those that talk to themselves.
@@ -185,12 +189,12 @@ krb_rd_priv(in,in_length,schedule,key,sender,receiver,m_data)
     /* check the time integrity of the msg */
     t_local = TIME_GMT_UNIXSEC;
     delta_t = t_local - m_data->time_sec;
-    if (delta_t < 0) delta_t = -delta_t;  /* Absolute value of difference */
+    if (delta_t < 0)
+	delta_t = -delta_t;	/* Absolute value of difference */
     if (delta_t > CLOCK_SKEW) {
-        return(RD_AP_TIME);		/* XXX should probably be better
-					   code */
+        return RD_AP_TIME;	/* XXX should probably be better code */
     }
-    DEB (("\ndelta_t = %d",delta_t));
+    DEB(("\ndelta_t = %d", delta_t));
 
     /*
      * caller must check timestamps for proper order and

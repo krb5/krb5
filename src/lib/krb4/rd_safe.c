@@ -1,12 +1,28 @@
 /*
- * rd_safe.c
+ * lib/krb4/rd_safe.c
  *
- * CopKRB4_32right 1986, 1987, 1988 by the Massachusetts Institute
- * of Technology.
+ * Copyright 1986, 1987, 1988, 2000 by the Massachusetts Institute of
+ * Technology.  All Rights Reserved.
  *
- * For copying and distribution information, please see the file
- * <mit-copyright.h>.
- *
+ * Export of this software from the United States of America may
+ *   require a specific license from the United States Government.
+ *   It is the responsibility of any person or organization contemplating
+ *   export to obtain such a license before exporting.
+ * 
+ * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
+ * distribute this software and its documentation for any purpose and
+ * without fee is hereby granted, provided that the above copyright
+ * notice appear in all copies and that both that copyright notice and
+ * this permission notice appear in supporting documentation, and that
+ * the name of M.I.T. not be used in advertising or publicity pertaining
+ * to distribution of the software without specific, written prior
+ * permission.  Furthermore if you modify this software you must label
+ * your software as modified software and not distribute it in such a
+ * fashion that it might be confused with the original M.I.T. software.
+ * M.I.T. makes no representations about the suitability of
+ * this software for any purpose.  It is provided "as is" without express
+ * or implied warranty.
+ * 
  * This routine dissects a a Kerberos 'safe msg', checking its
  * integrity, and returning a pointer to the application data
  * contained and its length.
@@ -15,8 +31,6 @@
  *
  * Steve Miller    Project Athena  MIT/DEC
  */
-
-#include "mit-copyright.h"
 
 /* system include files */
 #include <stdio.h>
@@ -57,45 +71,45 @@ krb_rd_safe(in,in_length,key,sender,receiver,m_data)
     struct sockaddr_in FAR *receiver;	/* receiver's address -- me */
     MSG_DAT FAR *m_data;		/* where to put message information */
 {
+    int i;
     unsigned KRB4_32 calc_cksum[4];
     unsigned KRB4_32 big_cksum[4];
-    int swap_bytes;
+    int le;
 
     u_char     *p,*q;
-    unsigned KRB4_32  src_addr; /* Can't send structs since no
-				   * guarantees on size */
+    int t;
+    struct in_addr src_addr;
     unsigned KRB4_32 t_local;	/* Local time in our machine */
     KRB4_32 delta_t;		/* Difference between timestamps */
 
     /* Be very conservative */
-    if (sizeof(src_addr) != sizeof(struct in_addr)) {
+    if (sizeof(src_addr.s_addr) != 4) {
 #ifdef DEBUG
-        fprintf(stderr,"\n\
-krb_rd_safe protocol err sizeof(u_long) != sizeof(struct in_addr)");
+	fprintf(stderr, "\nkrb_rd_safe protocol err "
+		"sizeof(src_addr.s_addr) != 4\n");
 #endif
-        return RD_AP_VERSION;
+	return RD_AP_VERSION;
     }
 
     p = in;                     /* beginning of message */
-    swap_bytes = 0;
+#define IN_REMAIN (in_length - (p - in))
+    if (IN_REMAIN < 1 + 1 + 4)
+	return RD_AP_MODIFIED;
 
-    if (*p++ != KRB_PROT_VERSION)       return RD_AP_VERSION;
-    if (((*p) & ~1) != AUTH_MSG_SAFE) return RD_AP_MSG_TYPE;
-    if ((*p++ & 1) != HOST_BYTE_ORDER) swap_bytes++;
+    if (*p++ != KRB_PROT_VERSION)
+	return RD_AP_VERSION;
+    t = *p++;
+    if ((t & ~1) != AUTH_MSG_SAFE)
+	return RD_AP_MSG_TYPE;
+    le = t & 1;
 
     q = p;                      /* mark start of cksum stuff */
 
     /* safely get length */
-    memcpy((char *)&(m_data->app_length), (char *)p, 
-	   sizeof(m_data->app_length));
-    if (swap_bytes) m_data->app_length = krb4_swab32(m_data->app_length);
-    p += sizeof(m_data->app_length); /* skip over */
+    KRB4_GET32(m_data->app_length, p, le);
 
-    if (m_data->app_length + sizeof(in_length)
-        + sizeof(m_data->time_sec) + sizeof(m_data->time_5ms)
-        + sizeof(big_cksum) + sizeof(src_addr)
-        + VERSION_SZ + MSG_TYPE_SZ > in_length)
-        return(RD_AP_MODIFIED);
+    if (IN_REMAIN < m_data->app_length + 1 + 4 + 4 + 4 * 4)
+	return RD_AP_MODIFIED;
 
     m_data->app_data = p;       /* we're now at the application data */
 
@@ -103,28 +117,19 @@ krb_rd_safe protocol err sizeof(u_long) != sizeof(struct in_addr)");
     p += m_data->app_length;
 
     /* safely get time_5ms */
-    memcpy((char *)&(m_data->time_5ms), (char *)p, 
-	   sizeof(m_data->time_5ms));
-
-    /* don't need to swap-- one byte for now */
-    p += sizeof(m_data->time_5ms);
+    m_data->time_5ms = *p++;
 
     /* safely get src address */
-    memcpy((char *)&src_addr, (char *)p, sizeof(src_addr));
-
+    (void)memcpy(&src_addr.s_addr, p, sizeof(src_addr.s_addr));
     /* don't swap, net order always */
-    p += sizeof(src_addr);
+    p += sizeof(src_addr.s_addr);
 
-    if (!krb_ignore_ip_address &&
-	src_addr != (unsigned KRB4_32) sender->sin_addr.s_addr)
+    if (!krb_ignore_ip_address
+	&& src_addr.s_addr != sender->sin_addr.s_addr)
         return RD_AP_MODIFIED;
 
     /* safely get time_sec */
-    memcpy((char *)&(m_data->time_sec), (char *)p, 
-          sizeof(m_data->time_sec));
-    if (swap_bytes)
-        m_data->time_sec = krb4_swab32(m_data->time_sec);
-    p += sizeof(m_data->time_sec);
+    KRB4_GET32(m_data->time_sec, p, le);
 
     /* check direction bit is the sign bit */
     /* For compatibility with broken old code, compares are done in VAX 
@@ -166,15 +171,6 @@ krb_rd_safe protocol err sizeof(u_long) != sizeof(struct in_addr)");
      * and we don't assume tightly synchronized clocks.
      */
 
-    memcpy((char *)big_cksum, (char *)p, sizeof(big_cksum));
-    if (swap_bytes) {
-      /* swap_u_16(big_cksum); */
-      unsigned KRB4_32 *bb;
-      bb = (unsigned KRB4_32*)big_cksum;
-      bb[0] = krb4_swab32(bb[0]);  bb[1] = krb4_swab32(bb[1]);
-      bb[2] = krb4_swab32(bb[2]);  bb[3] = krb4_swab32(bb[3]);
-    }
-
 #ifdef NOENCRYPTION
     memset(calc_cksum, 0, sizeof(calc_cksum));
 #else /* Do encryption */
@@ -183,13 +179,17 @@ krb_rd_safe protocol err sizeof(u_long) != sizeof(struct in_addr)");
     quad_cksum(q,calc_cksum,p-q,2,key);
 #endif /* NOENCRYPTION */
 
+    for (i = 0; i < 4; i++)
+	KRB4_GET32(big_cksum[i], p, le);
+
     DEB (("\n0: calc %l big %lx\n1: calc %lx big %lx\n2: calc %lx big %lx\n3: calc %lx big %lx\n",
                calc_cksum[0], big_cksum[0],
                calc_cksum[1], big_cksum[1],
                calc_cksum[2], big_cksum[2],
                calc_cksum[3], big_cksum[3]));
-    if (memcmp((char *)big_cksum,(char *)calc_cksum,sizeof(big_cksum)))
-        return(RD_AP_MODIFIED);
+    for (i = 0; i < 4; i++)
+	if (big_cksum[i] != calc_cksum[i])
+	    return RD_AP_MODIFIED;
 
-    return(RD_AP_OK);           /* OK == 0 */
+    return RD_AP_OK;		/* OK == 0 */
 }

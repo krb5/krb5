@@ -1,14 +1,29 @@
 /*
- * cr_ciph.c
+ * lib/krb4/cr_ciph.c
  *
- * Copyright 1986, 1987, 1988 by the Massachusetts Institute
- * of Technology.
+ * Copyright 1986, 1987, 1988, 2000 by the Massachusetts Institute of
+ * Technology.  All Rights Reserved.
  *
- * For copying and distribution information, please see the file
- * <mit-copyright.h>.
+ * Export of this software from the United States of America may
+ *   require a specific license from the United States Government.
+ *   It is the responsibility of any person or organization contemplating
+ *   export to obtain such a license before exporting.
+ * 
+ * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
+ * distribute this software and its documentation for any purpose and
+ * without fee is hereby granted, provided that the above copyright
+ * notice appear in all copies and that both that copyright notice and
+ * this permission notice appear in supporting documentation, and that
+ * the name of M.I.T. not be used in advertising or publicity pertaining
+ * to distribution of the software without specific, written prior
+ * permission.  Furthermore if you modify this software you must label
+ * your software as modified software and not distribute it in such a
+ * fashion that it might be confused with the original M.I.T. software.
+ * M.I.T. makes no representations about the suitability of
+ * this software for any purpose.  It is provided "as is" without express
+ * or implied warranty.
  */
 
-#include "mit-copyright.h"
 #include "krb.h"
 #include "des.h"
 #include <string.h>
@@ -53,6 +68,7 @@
  *
  */
 
+int
 create_ciph(c, session, service, instance, realm, life, kvno, tkt,
 	    kdc_time, key)
     KTEXT           c;		/* Text block to hold ciphertext */
@@ -66,54 +82,54 @@ create_ciph(c, session, service, instance, realm, life, kvno, tkt,
     unsigned long   kdc_time;	/* KDC time */
     C_Block         key;	/* Key to encrypt ciphertext with */
 {
-    char            *ptr;
+    unsigned char   *ptr;
+    size_t          servicelen, instancelen, realmlen;
     Key_schedule    key_s;
 
-    ptr = (char *) c->dat;
+    ptr = c->dat;
 
-    if(sizeof(c->dat) / 8 < (8 +
-		             strlen(service) + 1 +
-		             strlen(instance) + 1 +
-		             strlen(realm) + 1 +
-			     1 + 1 + 1 +
-			     tkt->length + 4 +
-			     7) / 8) {
+    /* Validate lengths. */
+    servicelen = strlen(service) + 1;
+    instancelen = strlen(instance) + 1;
+    realmlen = strlen(realm) + 1;
+    if (sizeof(c->dat) / 8 < ((8 + servicelen + instancelen + realmlen
+			       + 1 + 1 + 1 + tkt->length
+			       + 4 + 7) / 8)
+	|| tkt->length > 255 || tkt->length < 0) {
         c->length = 0;
-        return(KFAILURE);
+        return KFAILURE;
     }
 
-    memcpy(ptr, (char *) session, 8);
+    memcpy(ptr, session, 8);
     ptr += 8;
 
-    (void) strcpy(ptr,service);
-    ptr += strlen(service) + 1;
+    memcpy(ptr, service, servicelen);
+    ptr += servicelen;
+    memcpy(ptr, instance, instancelen);
+    ptr += instancelen;
+    memcpy(ptr, realm, realmlen);
+    ptr += realmlen;
 
-    (void) strcpy(ptr,instance);
-    ptr += strlen(instance) + 1;
+    *ptr++ = life;
+    *ptr++ = kvno;
+    *ptr++ = tkt->length;
 
-    (void) strcpy(ptr,realm);
-    ptr += strlen(realm) + 1;
-
-    *(ptr++) = (unsigned char) life;
-    *(ptr++) = (unsigned char) kvno;
-    *(ptr++) = (unsigned char) tkt->length;
-
-    memcpy(ptr, (char *)(tkt->dat), tkt->length);
+    memcpy(ptr, tkt->dat, (size_t)tkt->length);
     ptr += tkt->length;
 
-    memcpy(ptr, (char *) &kdc_time, 4);
-    ptr += 4;
+    KRB4_PUT32(ptr, kdc_time);
 
     /* guarantee null padded encrypted data to multiple of 8 bytes */
     memset(ptr, 0, 7);
 
-    c->length = (((ptr - (char *) c->dat) + 7) / 8) * 8;
+    c->length = (((ptr - c->dat) + 7) / 8) * 8;
 
 #ifndef NOENCRYPTION
-    key_sched(key,key_s);
-    pcbc_encrypt((C_Block *)c->dat,(C_Block *)c->dat,
-		 (long) c->length,key_s,(C_Block*) key,ENCRYPT);
+    key_sched(key, key_s);
+    pcbc_encrypt((C_Block *)c->dat, (C_Block *)c->dat,
+		 (long)c->length, key_s, (C_Block*)key, ENCRYPT);
+    memset(key_s, 0, sizeof(key_s));
 #endif /* NOENCRYPTION */
 
-    return(KSUCCESS);
+    return KSUCCESS;
 }

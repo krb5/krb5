@@ -370,6 +370,7 @@ send_recv(pkt,rpkt,f,_to,addrs)
 	DEB (("Recvfrom error %d\n", SOCKET_ERRNO));
         return 0;
     }
+    rpkt->length = recvresult;
 #ifdef DEBUG
     if (krb_debug) {
         printf("received packet from ");

@@ -1,11 +1,27 @@
 /*
- * mk_safe.c
+ * lib/krb4/mk_req.c
  *
- * Copyright 1986, 1987, 1988 by the Massachusetts Institute
- * of Technology.
+ * Copyright 1986, 1987, 1988, 2000 by the Massachusetts Institute of
+ * Technology.  All Rights Reserved.
  *
- * For copying and distribution information, please see the file
- * <mit-copyright.h>.
+ * Export of this software from the United States of America may
+ *   require a specific license from the United States Government.
+ *   It is the responsibility of any person or organization contemplating
+ *   export to obtain such a license before exporting.
+ * 
+ * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
+ * distribute this software and its documentation for any purpose and
+ * without fee is hereby granted, provided that the above copyright
+ * notice appear in all copies and that both that copyright notice and
+ * this permission notice appear in supporting documentation, and that
+ * the name of M.I.T. not be used in advertising or publicity pertaining
+ * to distribution of the software without specific, written prior
+ * permission.  Furthermore if you modify this software you must label
+ * your software as modified software and not distribute it in such a
+ * fashion that it might be confused with the original M.I.T. software.
+ * M.I.T. makes no representations about the suitability of
+ * this software for any purpose.  It is provided "as is" without express
+ * or implied warranty.
  *
  * This routine constructs a Kerberos 'safe msg', i.e. authenticated
  * using a private session key to seed a checksum. Msg is NOT
@@ -16,7 +32,6 @@
  * Steve Miller    Project Athena  MIT/DEC
  */
 
-#include "mit-copyright.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -61,7 +76,7 @@ extern int krb_debug;
  */
 
 KRB5_DLLIMP long KRB5_CALLCONV
-krb_mk_safe(in,out,length,key,sender,receiver)
+krb_mk_safe(in, out, length, key, sender, receiver)
     u_char *in;			/* application data */
     u_char *out;		/*
 				 * put msg here, leave room for header!
@@ -81,37 +96,38 @@ krb_mk_safe(in,out,length,key,sender,receiver)
     unsigned KRB4_32 msg_usecs;
     u_char msg_time_5ms;
     KRB4_32 msg_time_sec;
+    int i;
 
+    /* Be really paranoid. */
+    if (sizeof(sender->sin_addr.s_addr) != 4)
+	return -1;
     /*
      * get the current time to use instead of a sequence #, since
      * process lifetime may be shorter than the lifetime of a session
      * key.
      */
-	 
     msg_secs = TIME_GMT_UNIXSEC_US(&msg_usecs);
     msg_time_sec = msg_secs;
-    msg_time_5ms = msg_usecs/5000; /* 5ms quanta */
+    msg_time_5ms = msg_usecs / 5000; /* 5ms quanta */
 
     p = out;
 
     *p++ = KRB_PROT_VERSION;
-    *p++ = AUTH_MSG_SAFE | HOST_BYTE_ORDER;
+    *p++ = AUTH_MSG_SAFE;
 
     q = p;			/* start for checksum stuff */
     /* stuff input length */
-    memcpy((char *)p, (char *)&length, sizeof(length));
-    p += sizeof(length);
+    KRB4_PUT32(p, length);
 
     /* make all the stuff contiguous for checksum */
-    memcpy((char *)p, (char *)in, (int) length);
+    memcpy(p, in, length);
     p += length;
 
     /* stuff time 5ms */
-    memcpy((char *)p, (char *)&msg_time_5ms, sizeof(msg_time_5ms));
-    p += sizeof(msg_time_5ms);
+    *p++ = msg_time_5ms;
 
     /* stuff source address */
-    memcpy((char *)p, (char *) &sender->sin_addr.s_addr, 
+    memcpy(p, &sender->sin_addr.s_addr,
 	   sizeof(sender->sin_addr.s_addr));
     p += sizeof(sender->sin_addr.s_addr);
 
@@ -122,34 +138,34 @@ krb_mk_safe(in,out,length,key,sender,receiver)
     /* For compatibility with broken old code, compares are done in VAX 
        byte order (LSBFIRST) */ 
     if (lsb_net_ulong_less(sender->sin_addr.s_addr, /* src < recv */ 
-			  receiver->sin_addr.s_addr)==-1) 
-        msg_time_sec =  -msg_time_sec; 
-    else if (lsb_net_ulong_less(sender->sin_addr.s_addr, 
-				receiver->sin_addr.s_addr)==0) 
-        if (lsb_net_ushort_less(sender->sin_port,receiver->sin_port) == -1) 
-            msg_time_sec = -msg_time_sec; 
+			   receiver->sin_addr.s_addr) == -1)
+        msg_time_sec = -msg_time_sec;
+    else if (lsb_net_ulong_less(sender->sin_addr.s_addr,
+				receiver->sin_addr.s_addr) == 0)
+        if (lsb_net_ushort_less(sender->sin_port,
+				receiver->sin_port) == -1)
+            msg_time_sec = -msg_time_sec;
     /*
      * all that for one tiny bit!  Heaven help those that talk to
      * themselves.
      */
 
     /* stuff time sec */
-    memcpy((char *)p, (char *)&msg_time_sec, sizeof(msg_time_sec));
-    p += sizeof(msg_time_sec);
+    KRB4_PUT32(p, msg_time_sec);
 
 #ifdef NOENCRYPTION
     cksum = 0;
-    memset((char*) big_cksum, 0, sizeof(big_cksum));
+    memset(big_cksum, 0, sizeof(big_cksum));
 #else /* Do encryption */
     /* calculate the checksum of length, timestamps, and input data */
     cksum = quad_cksum(q, (unsigned KRB4_32 *)big_cksum,
-		       p-q, 2, key);
+		       p - q, 2, key);
 #endif /* NOENCRYPTION */
-    DEB (("\ncksum = %u",cksum));
+    DEB(("\ncksum = %u",cksum));
 
     /* stuff checksum */
-    memcpy((char *)p, (char *)big_cksum, sizeof(big_cksum));
-    p += sizeof(big_cksum);
+    for (i = 0; i < 4; i++)
+	KRB4_PUT32(p, big_cksum[i]);
 
-    return ((long)(p - out));	/* resulting size */
+    return p - out;		/* resulting size */
 }

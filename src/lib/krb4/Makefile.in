@@ -60,6 +60,7 @@ OBJS	= \
 	$(OUTPRE)rd_safe.$(OBJEXT) \
 	$(OUTPRE)send_to_kdc.$(OBJEXT) \
 	$(OUTPRE)stime.$(OBJEXT) \
+	$(OUTPRE)strnlen.$(OBJEXT) \
 	$(OUTPRE)rd_preauth.$(OBJEXT) \
 	$(OUTPRE)mk_preauth.$(OBJEXT) \
 	$(OSOBJS) $(CACHEOBJS) $(SETENVOBJS) $(STRCASEOBJS) $(SHMOBJS) \
@@ -96,6 +97,7 @@ SRCS = \
 	$(srcdir)/rd_safe.c \
 	$(srcdir)/send_to_kdc.c \
 	$(srcdir)/stime.c \
+	$(srcdir)/strnlen.c \
 	$(srcdir)/rd_preauth.c \
 	$(srcdir)/mk_preauth.c \
 	$(srcdir)/unix_time.c \

@@ -1,3 +1,87 @@
+2000-11-08  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (OBJS, SRCS): Add strnlen.o, strnlen.c.
+
+	* cr_auth_repl.c: Audit.  Fix up copyright.  Use new KRB4_PUT*
+	macros for encoding so output is always big-endian.  Precompute
+	string lengths for better length-checking.
+
+	* cr_ciph.c: Audit.  Fix up copyright.  Use new KRB4_PUT* macros
+	for encoding so that output is always big-endian.  Precompute
+	string lengths for better length-checking.  Zero out the key
+	schedule after encrypting.
+
+	* cr_death_pkt.c: Audit.  Fix up copyright.  Precompute string
+	lengths for better length-checking.
+
+	* cr_err_repl.c: Audit.  Fix up copyright.  Use moving pointer to
+	do encoding.  Precompute string lengths for better
+	length-checking.  Use KRB4_PUT* macros so that output is always
+	big-endian.
+
+	* cr_tkt.c: Audit.  Fix up copyright.  Use KRB4_PUT* macros for
+	encoding so that output is always big-endian.  Zero out the key
+	schedule after encrypting.
+
+	* decomp_tkt.c: Audit.  Fix up copyright.  Use krb_strnlen() for
+	actually detecting string length errors.  Use a struct in_addr to
+	retrieve the IP address and assign it to paddress for return.  Use
+	KRB4_GET* macros for decoding to avoid byteswapping problems.
+	Zero out session key and decrypted ticket on error.
+
+	* g_ad_tkt.c: Audit.  Fix up copyright.  Break out parsing of
+	decrypted KDC reply packet into a separate function to simplify
+	error handling somewhat.  Precompute string lengths for better
+	length-checking.  Use KRB4_PUT* macros for encoding so that output
+	is always big-endian.  Use KRB4_GET* macros for decoding to avoid
+	byteswapping problems.  Stomp on session key on error conditions.
+
+	* g_in_tkt.c: Audit.  Fix up copyright.  Precompute string lengths
+	for better length-checking.  Use KRB4_PUT* macros for encoding so
+	output is always big-endian.  Use KRB4_GET* macros for decoding to
+	avoid byteswapping problems.  Use krb_strnlen() to actually detect
+	string length errors.  Zero out session key and decrypted KDC
+	reply once they're no longer useful.
+
+	* mk_auth.c: Audit.  Fix up copyright.  Use moving pointer for
+	encoding.  Use KRB4_PUT* macros for encoding to avoid alignment
+	issues with using memcpy().  Use KRB4_GET* macros for decoding to
+	avoid alignment issues with using memcpy().
+
+	* mk_err.c: Audit.  Fix up copyright.  Precompute string length.
+	Use KRB4_PUT* macros to always encode as big-endian.
+
+	* mk_preauth.c: Audit.  Zero out key schedule after encryption.
+
+	* mk_priv.c: Audit.  Fix up copyright.  Use KRB4_PUT* macros for
+	encoding so output is always big-endian.
+
+	* mk_req.c: Audit.  Fix up copyright.  Use moving pointer for
+	encoding.  Precompute string lengths for better length-checking.
+	Use KRB4_PUT* macros for encoding so output is always big-endian.
+	Zero out session key after encryption.
+
+	* mk_safe.c: Audit.  Fix up copyright.  Use KRB4_PUT* macros for
+	encoding so output is always big-endian.
+
+	* rd_err.c: Audit.  Fix up copyright.  Use KRB4_GET* macros to
+	avoid alignment issues.
+
+	* rd_preauth.c: Audit.  Zero key schedule after decrypting.
+
+	* rd_priv.c: Audit.  Fix up copyright.  Use KRB4_GET* macros to
+	avoid alignment issues.
+
+	* rd_req.c: Audit.  Fix up copyright.
+
+	* send_to_kdc.c (send_recv): Actually set rpkt->length, since some
+	callers actually use it now to do length-checking.
+
+	* strnlen.c: New file; compute string length, bounded by a
+	maximum.  If the maximum number of characters has been read
+	without encountering a NUL character, return -1.  This makes
+	overflow checking of strings in buffers much easier.
+
 2000-11-01  Ezra Peisach  <epeisach@mit.edu>
 
 	* configure.in: Use AC_C_CONST and AC_CHECK_FUNCS instead of

@@ -1,15 +1,30 @@
 /*
- * mk_auth.c
+ * lib/krb4/mk_auth.c
  *
- * CopKRB4_32right 1987, 1988 by the Massachusetts Institute of Technology.
+ * Copyright 1987, 1988, 2000 by the Massachusetts Institute of
+ * Technology.  All Rights Reserved.
  *
- * For copying and distribution information, please see the file
- * <mit-copyright.h>.
+ * Export of this software from the United States of America may
+ *   require a specific license from the United States Government.
+ *   It is the responsibility of any person or organization contemplating
+ *   export to obtain such a license before exporting.
+ * 
+ * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
+ * distribute this software and its documentation for any purpose and
+ * without fee is hereby granted, provided that the above copyright
+ * notice appear in all copies and that both that copyright notice and
+ * this permission notice appear in supporting documentation, and that
+ * the name of M.I.T. not be used in advertising or publicity pertaining
+ * to distribution of the software without specific, written prior
+ * permission.  Furthermore if you modify this software you must label
+ * your software as modified software and not distribute it in such a
+ * fashion that it might be confused with the original M.I.T. software.
+ * M.I.T. makes no representations about the suitability of
+ * this software for any purpose.  It is provided "as is" without express
+ * or implied warranty.
  *
  * Derived from sendauth.c by John Gilmore, 10 October 1994.
  */
-
-#include "mit-copyright.h"
 
 #define	DEFINE_SOCKADDR		/* Ask for sockets declarations from krb.h. */
 #include <stdio.h>
@@ -110,30 +125,35 @@ krb_mk_auth(options, ticket, service, inst, realm, checksum, version, buf)
      char FAR *version;		/* version string */
      KTEXT buf;			/* Output buffer to fill  */
 {
-    int rem, i;
+    int rem;
     char krb_realm[REALM_SZ];
-    KRB4_32 tkt_len;
+    char *phost;
+    int phostlen;
+    unsigned char *p;
 
-    rem=KSUCCESS;
+    rem = KSUCCESS;
 
     /* get current realm if not passed in */
     if (!realm) {
 	rem = krb_get_lrealm(krb_realm,1);
 	if (rem != KSUCCESS)
-	    return(rem);
+	    return rem;
 	realm = krb_realm;
     }
 
     if (!(options & KOPT_DONT_CANON)) {
-	(void) strncpy(inst, krb_get_phost(inst), INST_SZ - 1);
-	inst[INST_SZ-1] = 0;
+	phost = krb_get_phost(inst);
+	phostlen = krb_strnlen(phost, INST_SZ) + 1;
+	if (phostlen <= 0 || phostlen > INST_SZ)
+	    return KFAILURE;
+	memcpy(inst, phost, (size_t)phostlen);
     }
 
     /* get the ticket if desired */
     if (!(options & KOPT_DONT_MK_REQ)) {
-	rem = krb_mk_req(ticket, service, inst, realm, checksum);
+	rem = krb_mk_req(ticket, service, inst, realm, (KRB4_32)checksum);
 	if (rem != KSUCCESS)
-	    return(rem);
+	    return rem;
     }
 
 #ifdef ATHENA_COMPAT
@@ -146,31 +166,32 @@ krb_mk_auth(options, ticket, service, inst, realm, checksum, version, buf)
     }
 #endif /* ATHENA_COMPAT */
 
+    /* Check buffer size */
+    if (sizeof(buf->dat) < (KRB_SENDAUTH_VLEN + KRB_SENDAUTH_VLEN
+			    + 4 + ticket->length)
+	|| ticket->length < 0)
+	return KFAILURE;
+
     /* zero the buffer */
-    (void) memset(buf->dat, 0, MAX_KTXT_LEN);
+    memset(buf->dat, 0, sizeof(buf->dat));
+    p = buf->dat;
 
     /* insert version strings */
-    (void) strncpy((char *)buf->dat, KRB_SENDAUTH_VERS, KRB_SENDAUTH_VLEN);
-    (void) strncpy((char *)buf->dat+KRB_SENDAUTH_VLEN, version,
-		KRB_SENDAUTH_VLEN);
-
-    /* increment past vers strings */
-    i = 2*KRB_SENDAUTH_VLEN;
+    strncpy((char *)p, KRB_SENDAUTH_VERS, KRB_SENDAUTH_VLEN);
+    p += KRB_SENDAUTH_VLEN;
+    strncpy((char *)p, version, KRB_SENDAUTH_VLEN);
+    p += KRB_SENDAUTH_VLEN;
 
     /* put ticket length into buffer */
-    tkt_len = htonl((unsigned KRB4_32) ticket->length);
-    (void) memcpy(buf->dat+i, (char *) &tkt_len, sizeof(tkt_len));
-    i += sizeof(tkt_len);
+    KRB4_PUT32(p, ticket->length);
 
     /* put ticket into buffer */
-    (void) memcpy(buf->dat+i, (char *) ticket->dat, ticket->length);
-    i += ticket->length;
+    memcpy(p, ticket->dat, (size_t)ticket->length);
+    p += ticket->length;
 
-    buf->length = i;
+    buf->length = p - buf->dat;
     return KSUCCESS;
 }
-
-
 
 /*
  * For mutual authentication using mk_auth, check the server's response
@@ -199,22 +220,31 @@ krb_check_auth (buf, checksum, msg_data, session, schedule, laddr, faddr)
 {
     int cc;
     unsigned KRB4_32 cksum;
+    unsigned char *p;
 
     /* decrypt it */
 #ifndef NOENCRYPTION
     key_sched(session, schedule);
 #endif /* !NOENCRYPTION */
-    if (cc = krb_rd_priv(buf->dat, buf->length, schedule,
-			 (C_Block *)session, faddr, laddr, msg_data))
-	return(cc);
+    if (buf->length < 0)
+	return KFAILURE;
+    cc = krb_rd_priv(buf->dat, (unsigned KRB4_32)buf->length, schedule,
+		     (C_Block *)session, faddr, laddr, msg_data);
+    memset(schedule, 0, sizeof(schedule));
+    if (cc)
+	return cc;
 
-    /* fetch the (incremented) checksum that we supplied in the request */
-    (void) memcpy((char *)&cksum, (char *)msg_data->app_data, 
-		  sizeof(cksum));
-    cksum = ntohl(cksum);
+    /*
+     * Fetch the (incremented) checksum that we supplied in the
+     * request.
+     */
+    if (msg_data->app_length < 4)
+	return KFAILURE;
+    p = msg_data->app_data;
+    KRB4_GET32BE(cksum, p);
 
     /* if it doesn't match, fail -- reply wasn't from our real server.  */
     if (cksum != checksum + 1)
-	return(KFAILURE);	 /* XXX */
-    return(KSUCCESS);
+	return KFAILURE;	/* XXX */
+    return KSUCCESS;
 }

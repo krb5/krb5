@@ -1,11 +1,27 @@
 /*
- * mk_priv.c
+ * lib/krb4/mk_priv.c
  *
- * CopKRB4_32right 1986, 1987, 1988 by the Massachusetts Institute
- * of Technology.
+ * Copyright 1986, 1987, 1988, 2000 by the Massachusetts Institute of
+ * Technology.  All Rights Reserved.
  *
- * For copying and distribution information, please see the file
- * <mit-copyright.h>.
+ * Export of this software from the United States of America may
+ *   require a specific license from the United States Government.
+ *   It is the responsibility of any person or organization contemplating
+ *   export to obtain such a license before exporting.
+ * 
+ * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
+ * distribute this software and its documentation for any purpose and
+ * without fee is hereby granted, provided that the above copyright
+ * notice appear in all copies and that both that copyright notice and
+ * this permission notice appear in supporting documentation, and that
+ * the name of M.I.T. not be used in advertising or publicity pertaining
+ * to distribution of the software without specific, written prior
+ * permission.  Furthermore if you modify this software you must label
+ * your software as modified software and not distribute it in such a
+ * fashion that it might be confused with the original M.I.T. software.
+ * M.I.T. makes no representations about the suitability of
+ * this software for any purpose.  It is provided "as is" without express
+ * or implied warranty.
  *
  * This routine constructs a Kerberos 'private msg', i.e.
  * cryptographically sealed with a private session key.
@@ -14,8 +30,6 @@
  *
  * Steve Miller    Project Athena  MIT/DEC
  */
-
-#include "mit-copyright.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -80,7 +94,7 @@ extern int krb_debug;
  */
 
 KRB5_DLLIMP long KRB5_CALLCONV
-krb_mk_priv(in,out,length,schedule,key,sender,receiver)
+krb_mk_priv(in, out, length, schedule, key, sender, receiver)
     u_char FAR *in;		/* application data */
     u_char FAR *out;		/* put msg here, leave room for
 				 * header! breaks if in and out
@@ -95,27 +109,31 @@ krb_mk_priv(in,out,length,schedule,key,sender,receiver)
     u_char *c_length_ptr;
     extern int private_msg_ver; /* in krb_rd_priv.c */
 
-    unsigned KRB4_32 c_length;
+    unsigned KRB4_32 c_length, c_length_raw;
     u_char msg_time_5ms;
     unsigned KRB4_32 msg_time_sec;
     unsigned KRB4_32 msg_time_usec;
 
+    /* Be really paranoid. */
+    if (sizeof(sender->sin_addr.s_addr) != 4)
+	return -1;
     /*
      * get the current time to use instead of a sequence #, since
      * process lifetime may be shorter than the lifetime of a session
      * key.
      */
-    msg_time_sec = TIME_GMT_UNIXSEC_US (&msg_time_usec);
-    msg_time_5ms = msg_time_usec/5000; /* 5ms quanta */
+    msg_time_sec = TIME_GMT_UNIXSEC_US(&msg_time_usec);
+    msg_time_5ms = msg_time_usec / 5000; /* 5ms quanta */
 
     p = out;
 
-    *p++ = private_msg_ver?private_msg_ver:KRB_PROT_VERSION;
-    *p++ = AUTH_MSG_PRIVATE | HOST_BYTE_ORDER;
+    /* Cruftiness below! */
+    *p++ = private_msg_ver ? private_msg_ver : KRB_PROT_VERSION;
+    *p++ = AUTH_MSG_PRIVATE;
 
-    /* calculate cipher length */
+    /* save ptr to cipher length */
     c_length_ptr = p;
-    p += sizeof(c_length);
+    p += 4;
 
 #ifndef NOENCRYPTION
     /* start for encrypted stuff */
@@ -123,23 +141,21 @@ krb_mk_priv(in,out,length,schedule,key,sender,receiver)
     q = p;
 
     /* stuff input length */
-    memcpy((char *)p, (char *)&length, sizeof(length));
-    p += sizeof(length);
+    KRB4_PUT32(p, length);
 
 #ifdef NOENCRYPTION
     /* make all the stuff contiguous for checksum */
 #else
     /* make all the stuff contiguous for checksum and encryption */
 #endif
-    memcpy((char *)p, (char *)in, (int) length);
+    memcpy(p, in, (size_t)length);
     p += length;
 
     /* stuff time 5ms */
-    memcpy((char *)p, (char *)&msg_time_5ms, sizeof(msg_time_5ms));
-    p += sizeof(msg_time_5ms);
+    *p++ = msg_time_5ms;
 
     /* stuff source address */
-    memcpy((char *)p, (char *)&sender->sin_addr.s_addr, 
+    memcpy(p, &sender->sin_addr.s_addr,
 	   sizeof(sender->sin_addr.s_addr));
     p += sizeof(sender->sin_addr.s_addr);
 
@@ -150,15 +166,15 @@ krb_mk_priv(in,out,length,schedule,key,sender,receiver)
     /* For compatibility with broken old code, compares are done in VAX 
        byte order (LSBFIRST) */ 
     if (lsb_net_ulong_less(sender->sin_addr.s_addr, /* src < recv */ 
-			  receiver->sin_addr.s_addr)==-1) 
-        msg_time_sec =  -msg_time_sec; 
-    else if (lsb_net_ulong_less(sender->sin_addr.s_addr, 
-				receiver->sin_addr.s_addr)==0) 
-        if (lsb_net_ushort_less(sender->sin_port,receiver->sin_port) == -1) 
-            msg_time_sec = -msg_time_sec; 
+			  receiver->sin_addr.s_addr) == -1)
+        msg_time_sec = -msg_time_sec;
+    else if (lsb_net_ulong_less(sender->sin_addr.s_addr,
+				receiver->sin_addr.s_addr) == 0)
+        if (lsb_net_ushort_less(sender->sin_port,
+				receiver->sin_port) == -1)
+            msg_time_sec = -msg_time_sec;
     /* stuff time sec */
-    memcpy((char *)p, (char *)&msg_time_sec, sizeof(msg_time_sec));
-    p += sizeof(msg_time_sec);
+    KRB4_PUT32(p, msg_time_sec);
 
     /*
      * All that for one tiny bit!  Heaven help those that talk to
@@ -170,10 +186,10 @@ krb_mk_priv(in,out,length,schedule,key,sender,receiver)
      * calculate the checksum of the length, address, sequence, and
      * inp data
      */
-    cksum =  quad_cksum(q,NULL,p-q,0,key);
+    cksum = quad_cksum(q,NULL,p-q,0,key);
     DEB (("\ncksum = %u",cksum));
     /* stuff checksum */
-    memcpy((char *) p, (char *) &cksum, sizeof(cksum));
+    memcpy(p, &cksum, sizeof(cksum));
     p += sizeof(cksum);
 #endif
 
@@ -189,17 +205,18 @@ krb_mk_priv(in,out,length,schedule,key,sender,receiver)
      */
 #endif
 
-    c_length = p - q;
-    c_length = ((c_length + sizeof(C_Block) -1)/sizeof(C_Block)) *
-        sizeof(C_Block);
+    c_length_raw = p - q;
+    c_length = ((c_length_raw + sizeof(C_Block) -1)
+		/ sizeof(C_Block)) * sizeof(C_Block);
     /* stuff the length */
-    memcpy((char *)c_length_ptr, (char *) &c_length, sizeof(c_length));
+    p = c_length_ptr;
+    KRB4_PUT32(p, c_length);
 
 #ifndef NOENCRYPTION
     /* pcbc encrypt, pad as needed, use key as ivec */
-    pcbc_encrypt((C_Block *) q,(C_Block *) q, (long) (p-q), schedule,
-                 key, ENCRYPT);
+    pcbc_encrypt((C_Block *)q,(C_Block *)q, (long)c_length_raw,
+		 schedule, key, ENCRYPT);
 #endif /* NOENCRYPTION */
 
-    return (q - out + c_length);        /* resulting size */
+    return q - out + c_length;	/* resulting size */
 }

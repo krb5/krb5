@@ -1,14 +1,29 @@
 /*
- * cr_err_repl.c
+ * lib/krb4/cr_err_repl.c
  *
- * Copyright 1985, 1986, 1987, 1988 by the Massachusetts Institute
- * of Technology.
+ * Copyright 1985, 1986, 1987, 1988, 2000 by the Massachusetts
+ * Institute of Technology.  All Rights Reserved.
  *
- * For copying and distribution information, please see the file
- * <mit-copyright.h>.
+ * Export of this software from the United States of America may
+ *   require a specific license from the United States Government.
+ *   It is the responsibility of any person or organization contemplating
+ *   export to obtain such a license before exporting.
+ * 
+ * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
+ * distribute this software and its documentation for any purpose and
+ * without fee is hereby granted, provided that the above copyright
+ * notice appear in all copies and that both that copyright notice and
+ * this permission notice appear in supporting documentation, and that
+ * the name of M.I.T. not be used in advertising or publicity pertaining
+ * to distribution of the software without specific, written prior
+ * permission.  Furthermore if you modify this software you must label
+ * your software as modified software and not distribute it in such a
+ * fashion that it might be confused with the original M.I.T. software.
+ * M.I.T. makes no representations about the suitability of
+ * this software for any purpose.  It is provided "as is" without express
+ * or implied warranty.
  */
 
-#include "mit-copyright.h"
 #include "krb.h"
 #include "prot.h"
 #include <string.h>
@@ -66,44 +81,39 @@ cr_err_reply(pkt,pname,pinst,prealm,time_ws,e,e_string)
     u_long e;			/* Error code */
     char *e_string;		/* Text of error */
 {
-    u_char *v = (u_char *) pkt->dat; /* Prot vers number */
-    u_char *t = (u_char *)(pkt->dat+1); /* Prot message type */
+    unsigned char *p;
+    size_t pnamelen, pinstlen, prealmlen, e_stringlen;
 
-    /* Create fixed part of packet */
-#if 0
-    *v = (unsigned char) req_act_vno; /* KRB_PROT_VERSION; */
-#else
-    *v = (unsigned char) KRB_PROT_VERSION;
-#endif
-    *t = (unsigned char) AUTH_MSG_ERR_REPLY;
-    *t |= HOST_BYTE_ORDER;
+    p = pkt->dat;
+    *p++ = KRB_PROT_VERSION;
+    *p++ = AUTH_MSG_ERR_REPLY;
 
     /* Make sure the reply will fit into the buffer. */
-    if(sizeof(pkt->dat) < 3 + strlen(pname) +
-		    	  1 + strlen(pinst) +
-			  1 + strlen(prealm) +
-			  4 + 4 +
-			  1 + strlen(e_string)) {
+    pnamelen = strlen(pname) + 1;
+    pinstlen = strlen(pinst) + 1;
+    prealmlen = strlen(prealm) + 1;
+    e_stringlen = strlen(e_string) + 1;
+    if(sizeof(pkt->dat) < (1 + 1 + pnamelen + pinstlen + prealmlen
+			   + 4 + 4 + e_stringlen)) {
         pkt->length = 0;
 	return;
     }
     /* Add the basic info */
-    (void) strcpy((char *) (pkt->dat+2),pname);
-    pkt->length = 3 + strlen(pname);
-    (void) strcpy((char *)(pkt->dat+pkt->length),pinst);
-    pkt->length += 1 + strlen(pinst);
-    (void) strcpy((char *)(pkt->dat+pkt->length),prealm);
-    pkt->length += 1 + strlen(prealm);
+    memcpy(p, pname, pnamelen);
+    p += pnamelen;
+    memcpy(p, pinst, pinstlen);
+    p += pinstlen;
+    memcpy(p, prealm, prealmlen);
+    p += prealmlen;
     /* ws timestamp */
-    memcpy((char *)(pkt->dat+pkt->length), (char *) &time_ws, 4);
-    pkt->length += 4;
+    KRB4_PUT32(p, time_ws);
     /* err code */
-    memcpy((char *)(pkt->dat+pkt->length), (char *) &e, 4);
-    pkt->length += 4;
+    KRB4_PUT32(p, e);
     /* err text */
-    (void) strcpy((char *)(pkt->dat+pkt->length),e_string);
-    pkt->length += 1 + strlen(e_string);
+    memcpy(p, e_string, e_stringlen);
+    p += e_stringlen;
 
     /* And return */
+    pkt->length = p - pkt->dat;
     return;
 }

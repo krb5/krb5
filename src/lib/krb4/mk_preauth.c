@@ -21,10 +21,9 @@
 extern char *malloc(), *calloc(), *realloc();
 #endif
 
-
 int
 krb_mk_preauth(preauth_p, preauth_len,
-	       key_proc,aname,inst,realm,password,key)
+	       key_proc, aname, inst, realm, password, key)
     char **preauth_p;
     int  *preauth_len;
     key_proc_type key_proc;
@@ -35,15 +34,15 @@ krb_mk_preauth(preauth_p, preauth_len,
     C_Block key;
 {
 #ifdef NOENCRYPTION
-    *preauth_len = strlen(aname)+1;	/* include the trailing 0 */
+    *preauth_len = strlen(aname) + 1; /* include the trailing 0 */
     *preauth_p = malloc(*preauth_len);
-    strcpy(*preauth_p, aname);		/* this will copy the trailing 0 */
+    strcpy(*preauth_p, aname);	/* this will copy the trailing 0 */
 #else
     des_key_schedule key_s;
     int sl = strlen(aname);
 #endif
 
-    (*key_proc)(aname,inst,realm,password,key);
+    (*key_proc)(aname, inst, realm, password, key);
 
 #ifndef NOENCRYPTION
     /* 
@@ -52,17 +51,18 @@ krb_mk_preauth(preauth_p, preauth_len,
      */
     *preauth_len = (((sl + 1) / 8) + 1) * 8;
     /* allocate memory for preauth_p and fill it with 0 */
-    *preauth_p = (char*) malloc(*preauth_len);
+    *preauth_p = malloc((size_t)*preauth_len);
     /* create the key schedule */
     if (des_key_sched(key, key_s)) {
-      return 1;
+	return 1;
     }
     /* 
      * encrypt aname using key_s as the key schedule and key as the
      * initialization vector.
      */
-    des_pcbc_encrypt((des_cblock *) aname, (des_cblock *) *preauth_p,
-		     (long) (sl + 1), key_s, (des_cblock *) key, DES_ENCRYPT);
+    des_pcbc_encrypt((des_cblock *)aname, (des_cblock *)*preauth_p,
+		     (long)(sl + 1), key_s, (des_cblock *)key, DES_ENCRYPT);
+    memset(key_s, 0, sizeof(key_s));
 #endif
     return 0;
 }
@@ -72,6 +72,6 @@ krb_free_preauth(preauth_p, preauth_len)
      char *preauth_p;
      int preauth_len;
 {
-  free(preauth_p);
-  return;
+    free(preauth_p);
+    return;
 }

@@ -23,38 +23,39 @@
 
 
 int
-krb_rd_preauth(pkt,preauth_p,preauth_len,auth_pr,key)
+krb_rd_preauth(pkt, preauth_p, preauth_len, auth_pr, key)
     KTEXT pkt;
     char *preauth_p;
     int preauth_len;
     Principal *auth_pr;
     des_cblock key;
 {
-   int st;
-   char *name_p;
+    int st;
+    char *name_p;
 
-   name_p = auth_pr->name;
+    name_p = auth_pr->name;
    
 #ifndef NOENCRYPTION
-   /* Decrypt preauth_p using key as the key and initialization vector. */
-   /* check preauth_len */
-   if ((((strlen(name_p) + 1) / 8) + 1) *8 != preauth_len)
-     return KERB_ERR_PREAUTH_SHORT;
-   else {
-     des_key_schedule key_s;
+    /* Decrypt preauth_p using key as the key and initialization vector. */
+    /* check preauth_len */
+    if ((((strlen(name_p) + 1) / 8) + 1) * 8 != preauth_len)
+	return KERB_ERR_PREAUTH_SHORT;
+    else {
+	des_key_schedule key_s;
 
-     if (des_key_sched(key, key_s)) {
-       return 1;
-     }
-     des_pcbc_encrypt((des_cblock *) preauth_p, (des_cblock *) preauth_p,
-		      (long) preauth_len, key_s, (des_cblock *) key, 
-		      DES_DECRYPT);
-   }
+	if (des_key_sched(key, key_s)) {
+	    return 1;
+	}
+	des_pcbc_encrypt((des_cblock *)preauth_p, (des_cblock *)preauth_p,
+			 (long)preauth_len, key_s, (des_cblock *)key, 
+			 DES_DECRYPT);
+	memset(key_s, 0, sizeof(key_s));
+    }
 #endif /* R3_NO_MODIFICATIONS */
 
-   /* since the preauth data has the trailing 0, this just works */
-   st = strcmp(preauth_p, name_p);
-   if (st)
+    /* since the preauth data has the trailing 0, this just works */
+    st = strcmp(preauth_p, name_p);
+    if (st)
 	return KERB_ERR_PREAUTH_MISMATCH;
-   return 0;
+    return 0;
 }
