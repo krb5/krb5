@@ -1,4 +1,7 @@
 /* just stuff needed by kerberos 5 */
+/* This is in the top level so that it is in the same "local" directory
+   as aclocal.m4, so autoreconf causes autoheader to find it. Nothing actually
+   includes this file, it is always processed into something else. */
 
 #undef ANSI_STDIO
 #undef HAS_SETVBUF
