@@ -205,7 +205,13 @@ char *kdb5_edit_Init(argc, argv)
 	exit(1);
     }
     krb5_use_cstype(edit_context, &master_encblock, etype);
-    if (!cur_realm) {
+
+    if (cur_realm) {
+	if (retval = krb5_set_default_realm(edit_context, cur_realm)) {
+	    com_err(progname, retval, "while setting default realm name");
+	    exit(1);
+        }
+    } else {
 	if (retval = krb5_get_default_realm(edit_context, &defrealm)) {
 	    com_err(progname, retval, "while retrieving default realm name");
 	    exit(1);
@@ -217,6 +223,7 @@ char *kdb5_edit_Init(argc, argv)
 	}
 	(void) strcpy(cur_realm, defrealm);
     }
+
     (void) set_dbname_help(progname, dbname);
     exit_status = 0;	/* It's OK if we get errors in set_dbname_help */
     return request;

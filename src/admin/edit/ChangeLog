@@ -1,3 +1,9 @@
+Wed Apr 19 13:59:47 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* kdb5_edit.c (kdb5_edit_Init): If a default realm is specified
+		(with -r), use krb5_set_default_realm so that created keys
+		will have the correct realm.
+
 Thu Mar 23 23:28:26 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* kdb5_edit.c (show_principal, parse_princ_args): Add
