@@ -23,6 +23,7 @@
 #include <sys/time.h>
 #endif
 #include <stdio.h>
+#include <stdarg.h>
 
 #include "krb4int.h"
 #include <klog.h>
@@ -53,27 +54,27 @@ static is_open;
  * The return value is undefined.
  */
 
-/*VARARGS1 */
-void krb_log(format,a1,a2,a3,a4,a5,a6,a7,a8,a9,a0)
-    char *format;
-    char *a1,*a2,*a3,*a4,*a5,*a6,*a7,*a8,*a9,*a0;
+void krb_log(const char *format,...)
 {
     FILE *logfile;
     time_t now;
     struct tm *tm;
+    va_list args;
 
-    if ((logfile = fopen(log_name,"a")) == NULL)
-        return;
+    va_start(args, format);
 
-    (void) time(&now);
-    tm = localtime(&now);
+    if ((logfile = fopen(log_name,"a")) != NULL) {
+	(void) time(&now);
+	tm = localtime(&now);
 
-    fprintf(logfile,"%2d-%s-%d %02d:%02d:%02d ",tm->tm_mday,
-            month_sname(tm->tm_mon + 1),1900+tm->tm_year,
-            tm->tm_hour, tm->tm_min, tm->tm_sec);
-    fprintf(logfile,format,a1,a2,a3,a4,a5,a6,a7,a8,a9,a0);
-    fprintf(logfile,"\n");
-    (void) fclose(logfile);
+	fprintf(logfile,"%2d-%s-%d %02d:%02d:%02d ",tm->tm_mday,
+		month_sname(tm->tm_mon + 1),1900+tm->tm_year,
+		tm->tm_hour, tm->tm_min, tm->tm_sec);
+	vfprintf(logfile,format,args);
+	fprintf(logfile,"\n");
+	(void) fclose(logfile);
+    }
+    va_end(args);
     return;
 }
 

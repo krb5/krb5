@@ -29,8 +29,7 @@ int k_gethostname(char *, int);
 void kset_logfile(char *);
 
 /* log.c */
-void krb_log(char *, char *, char *, char *, char *, char *, char *, 
-	     char *, char *, char *, char *);
+void krb_log(const char *, ...);
 
 void krb_set_logfile(char *);
 

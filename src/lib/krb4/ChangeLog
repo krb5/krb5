@@ -1,3 +1,10 @@
+2002-07-30  Ken Raeburn  <raeburn@mit.edu>
+
+	* log.c: Include stdarg.h.
+	(krb_log): Use va_ macros and vfprintf instead of a bunch of
+	pointer arguments.
+	* krb4int.h (krb_log): Declaration updated.
+
 2002-07-12  Ken Raeburn  <raeburn@mit.edu>
 
 	* ad_print.c, g_phost.c, g_tkt_svc.c, gethostname.c, mac_glue.c,
