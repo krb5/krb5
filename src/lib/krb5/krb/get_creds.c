@@ -55,12 +55,20 @@ krb5_creds *creds;
     fields = KRB5_TC_MATCH_TIMES /*XXX |KRB5_TC_MATCH_SKEY_TYPE */
 	| KRB5_TC_MATCH_AUTHDATA;
 
-    switch(retval = krb5_cc_retrieve_cred(ccache, fields, &mcreds, creds)) {
-    case KRB5_CC_NOTFOUND:
-	break;
-    default:
-	return retval;
+    if (options & KRB5_GC_USER_USER) {
+	/* also match on identical 2nd tkt and tkt encrypted in a
+	   session key */
+	fields |= KRB5_TC_MATCH_2ND_TKT|KRB5_TC_MATCH_IS_SKEY;
+	mcreds.is_skey = TRUE;
     }
+
+    retval = krb5_cc_retrieve_cred(ccache, fields, &mcreds, creds);
+    if (retval != KRB5_CC_NOTFOUND || options & KRB5_GC_CACHED)
+	return retval;
+
+    if (options & KRB5_GC_USER_USER && !creds->second_ticket.length)
+	return KRB5_NO_2ND_TKT;
+
     retval = krb5_get_cred_from_kdc(ccache, creds, &tgts);
     if (tgts) {
 	register int i = 0;
@@ -76,5 +84,4 @@ krb5_creds *creds;
     if (!retval)
 	retval = krb5_cc_store_cred(ccache, creds);
     return retval;
-
 }
