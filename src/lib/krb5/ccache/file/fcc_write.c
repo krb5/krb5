@@ -149,9 +149,8 @@ krb5_fcc_store_keyblock(context, id, keyblock)
 
      ret = krb5_fcc_store_ui_2(context, id, keyblock->keytype);
      CHECK(ret);
-     if ((data->version != KRB5_FCC_FVNO_1) &&
-	 (data->version != KRB5_FCC_FVNO_2)) {
-	 ret = krb5_fcc_store_ui_2(context, id, keyblock->etype);
+     if (data->version == KRB5_FCC_FVNO_3) {
+	 ret = krb5_fcc_store_ui_2(context, id, keyblock->keytype);
 	 CHECK(ret);
      }
      ret = krb5_fcc_store_int32(context, id, keyblock->length);
