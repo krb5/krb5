@@ -1,3 +1,7 @@
+Tue Jun 20 12:23:20 1995  Tom Yu  (tlyu@dragons-lair)
+
+	* BADSYMS: Updated after finding bugs in getsyms
+
 Mon Jun 19 11:23:47 1995  Tom Yu  (tlyu@dragons-lair)
 
 	* BADSYMS: list of bad symbols found in various source files;

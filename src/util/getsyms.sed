@@ -2,29 +2,39 @@
 y/	/ /
 s/  */ /g
 /\/\*/{
-:COMMENT
-N
-y/	/ /
-s/  */ /g
-/\*\//!bCOMMENT
+	:COMMENT
+	y/	/ /
+	s/  */ /g
+	/\*\//!{
+		N
+		bCOMMENT
+	}
 }
 s/\/\*.*\*\///
 /^ *#ifdef/{
-s/^ *#ifdef //
-b
+	s/^ *#ifdef //
+	b
 }
 /^ *#ifndef/{
-s/^ *#ifndef //
-b
+	s/^ *#ifndef //
+	b
 }
-/^ *#if/{
-s/^ *#if//
-s/ *defined *( *\([A-Za-z0-9_]*\) *) */\1 /g
-s/||//g
-s/&&//g
-s/!//g
-s/(//g
-s/)//g
-b
+/^ *#if.*defined/{
+	s/^ *#if //
+	:IF
+	/^defined/!{
+		:NUKE
+		s/^.//
+		/^defined/!bNUKE
+	}
+	h
+	/^defined/s/^defined *( *\([A-Za-z0-9_]*\) *).*/\1/p
+	g
+	/^defined/s/^defined *( *\([[A-Za-z0-9_]*\) *)//
+	/defined/!{
+		d
+		b
+	}
+	bIF
 }
 d

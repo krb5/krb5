@@ -1,5 +1,7 @@
 Mon Jun 19 00:58:33 1995  Tom Yu  (tlyu@dragons-lair)
 
+	* getsyms, getsyms.sed: fix a few random bugs
+
 	* getsyms, getsyms.sed: simple scripts to find #ifdef's that
 		aren't declared with configure.in
 
