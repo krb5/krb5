@@ -99,6 +99,7 @@
 #include	<stdio.h>
 #include	<ctype.h>
 #include	<sys/types.h>
+#include	<sys/param.h>
 #ifdef SYSV
 #ifndef macII			/* mac will get the stuff out of file.h */
 #include	<fcntl.h>
