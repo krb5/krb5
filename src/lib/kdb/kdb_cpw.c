@@ -382,6 +382,17 @@ add_key_pwd(context, master_eblock, ks_tuple, ks_tuple_count, passwd,
             key_salt.data.length = 0;
             key_salt.data.data = 0;
             break;
+    	case KRB5_KDB_SALTTYPE_AFS3: {
+            krb5_data * saltdata;
+            if (retval = krb5_copy_data(context, krb5_princ_realm(context,
+					db_entry->princ), &saltdata))
+	 	return(retval);
+
+	    key_salt.data = *saltdata;
+	    /* key_salt.data.length = -1; *//*length actually used below...*/
+	    krb5_xfree(saltdata);
+	}
+		break;
 	default:
 	    return(KRB5_KDB_BAD_SALTTYPE);
 	}
