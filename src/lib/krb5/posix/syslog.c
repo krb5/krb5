@@ -65,7 +65,7 @@ void
 #ifdef __STDC__
 syslog(int pri, const char *fmt, ...)
 #else
-syslog(pri, fmt, args)
+syslog(pri, fmt, va_alist)
 	int pri;
 	char *fmt;
 	va_dcl
