@@ -96,11 +96,9 @@ typedef struct _krb5_checksum_entry {
 #define	KEYTYPE_NULL		0x0000
 #define KEYTYPE_DES		0x0001	/* Data Encryption Standard,
 					   FIPS 46,81 */
-#define KEYTYPE_LUCIFER		0x0002	/* Lucifer */
 
 #define	ETYPE_NULL		0x0000
 #define	ETYPE_DES_CBC_CRC	0x0001	/* DES cbc mode with CRC-32 */
-#define	ETYPE_LUCIFER_CRC	0x0002
 
 #define	CKSUMTYPE_CRC32		0x0001
 #define	CKSUMTYPE_RSA_MD4	0x0002
