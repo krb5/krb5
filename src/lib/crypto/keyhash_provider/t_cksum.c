@@ -75,7 +75,7 @@ main(argc, argv)
   krb5_boolean		valid;
   size_t		length;
   krb5_keyblock		keyblock;
-  krb5_error_code	kret;
+  krb5_error_code	kret=0;
   krb5_data		plaintext, newstyle_checksum;
 
   /* this is a terrible seed, but that's ok for the test. */

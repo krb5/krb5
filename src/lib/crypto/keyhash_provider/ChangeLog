@@ -1,3 +1,7 @@
+2002-12-23  Ezra Peisach  <epeisach@bu.edu>
+
+	* t_cksum.c: Cleanup (potential) variable used before set warning.
+
 2002-10-09  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (t_cksum4, t_cksum5): Include com_err library when
