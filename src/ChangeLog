@@ -1,6 +1,7 @@
 2004-05-04  Ken Raeburn  <raeburn@mit.edu>
 
-	* configure.in: Generate a makefile in util/support.
+	* configure.in: Generate a makefile in util/support.  Include
+	dependency support for shared library build.
 
 2004-04-29  Ken Raeburn  <raeburn@mit.edu>
 
