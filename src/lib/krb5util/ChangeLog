@@ -1,3 +1,8 @@
+2001-06-11  Ezra Peisach  <epeisach@mit.edu>
+
+	* compat_recv.c: Include k5-util.h to ensure new prototypes agree
+	with definitions.
+
 2000-10-23  Tom Yu  <tlyu@mit.edu>
 
 	* compat_recv.c (krb_v4_recvauth): Update call to mk_priv().

@@ -45,6 +45,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include "k5-util.h"
 
 static int krb_v4_recvauth();
 
