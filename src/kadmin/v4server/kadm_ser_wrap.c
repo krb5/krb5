@@ -22,8 +22,6 @@ unwraps wrapped packets and calls the appropriate server subroutine
 #include <unistd.h>
 #endif
 #include <sys/types.h>
-#include <netdb.h>
-#include <sys/socket.h>
 #include "kadm_server.h"
 #include <kadm.h>
 #include <kadm_err.h>

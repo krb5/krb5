@@ -1,5 +1,9 @@
 Wed Jul 31 17:53:45 1996  Tom Yu  <tlyu@mit.edu>
 
+	* kadm_ser_wrap.c: Remove #include <sys/socket.h>, <netdb.h>
+ 		because k5-int.h already grabs it if NEED_SOCKETS is
+ 		defined.
+
 	* admin_server.c: Remove #include <sys/socket.h> because k5-int.h
 		already grabs it if NEED_SOCKETS is defined.
 
