@@ -49,12 +49,9 @@ static char sccsid[] = "@(#)clnt_perror.c 1.15 87/10/07 Copyr 1984 Sun Micro";
 #ifdef NEED_SYS_ERRLIST
 extern char *sys_errlist[];
 #endif
-#undef sys_nerr
-#define sys_nerr 99999 /* XXX */
-#undef strerror
-#define strerror(N) sys_errlist[N]
-#else
 extern int sys_nerr;
+#undef strerror
+#define strerror(N) (((N) > 0 && (N) < sys_nerr) ? sys_errlist[N] : (char *)0)
 #endif /* HAVE_STRERROR */
 static char *auth_errmsg();
 
@@ -276,14 +273,14 @@ clnt_spcreateerror(s)
 
 	case RPC_SYSTEMERROR:
 		(void) strncat(str, " - ", BUFSIZ - 1 - strlen(str));
-		if (rpc_createerr.cf_error.re_errno > 0
-		    && rpc_createerr.cf_error.re_errno < sys_nerr)
-			(void) strncat(str,
-				       strerror(rpc_createerr.cf_error.re_errno),
-			    BUFSIZ - 1 - strlen(str));
-		else
+		{
+		    const char *m = strerror(rpc_createerr.cf_error.re_errno);
+		    if (m)
+			(void) strncat(str, m, BUFSIZ - 1 - strlen(str));
+		    else
 			(void) sprintf(&str[strlen(str)], "Error %d",
-			    rpc_createerr.cf_error.re_errno);
+				       rpc_createerr.cf_error.re_errno);
+		}
 		break;
 	}
 	(void) strncat(str, "\n", BUFSIZ - 1 - strlen(str));

@@ -1,10 +1,12 @@
 2001-03-07  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Check for strerror.
-	* clnt_perror.c (strerror, sys_nerr) [!HAVE_STRERROR]: Define.
-	(sys_nerr) [HAVE_STRERROR]: Declare at top level instead of in
+	* clnt_perror.c (strerror) [!HAVE_STRERROR]: Define, with
+	out-of-range check using sys_nerr.
+	(sys_nerr) [!HAVE_STRERROR]: Declare at top level instead of in
 	clnt_spcreateerror.
-	(clnt_sperror, clnt_spcreateerror): Use strerror always.
+	(clnt_sperror, clnt_spcreateerror): Use strerror always.  Skip
+	range check.
 
 Sun Feb 18 17:48:35 2001  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
