@@ -13,6 +13,7 @@ OBJS=	addr_comp.o	\
 	encode_kdc.o	\
 	encode_tkt.o	\
 	encrypt_tk.o	\
+	f_tgt_cred.o	\
 	faddr_ordr.o	\
 	gc_via_tgt.o	\
 	get_in_tkt.o	\
@@ -47,6 +48,7 @@ SRCS=	addr_comp.c	\
 	encode_kdc.c	\
 	encode_tkt.c	\
 	encrypt_tk.c	\
+	f_tgt_cred.c	\
 	faddr_ordr.c	\
 	gc_via_tgt.c	\
 	get_in_tkt.c	\
