@@ -3,7 +3,6 @@
 ##############################################################################################################
 
 root-folder											= ::
-mitsupportlib-root-folder							= {root-folder}:::MITSupportLib:
 makefile-name										= {root-folder}mac:Makefile
 
 library-output-folder								= {root-folder}bin:
@@ -24,7 +23,7 @@ library-kind-final						=
 ##############################################################################################################
 
 #	Everything
-all Ä glue gss-krb5-library-debug gss-krb5-library-final
+all Ä glue gss-krb5-library-debug gss-krb5-library-final headers
 
 #	Debugging versions
 all-debug Ä ppc-debug 68k-debug
@@ -375,16 +374,6 @@ ccache-68k-debug						= {root-folder}¶"mac:libraries:CCache API:bin:CCacheLib.68
 ccache-ppc-final						= {root-folder}¶"mac:libraries:CCache API:bin:CCacheLib.PPC¶"
 ccache-68k-final						= {root-folder}¶"mac:libraries:CCache API:bin:CCacheLib.68K¶"
 
-sockets-ppc-debug						= {mitsupportlib-root-folder}SocketsLib:Binaries:SocketsLib.PPC.debug
-sockets-68k-debug						= {mitsupportlib-root-folder}SocketsLib:Binaries:SocketsLib.68K.debug
-sockets-ppc-final						= {mitsupportlib-root-folder}SocketsLib:Binaries:SocketsLib.PPC
-sockets-68k-final						= {mitsupportlib-root-folder}SocketsLib:Binaries:SocketsLib.68K
-
-errorlib-ppc-debug						= {mitsupportlib-root-folder}ErrorLib:Binaries:ErrorLib.PPC.debug
-errorlib-68k-debug						= {mitsupportlib-root-folder}ErrorLib:Binaries:ErrorLib.68K.debug
-errorlib-ppc-final						= {mitsupportlib-root-folder}ErrorLib:Binaries:ErrorLib.PPC
-errorlib-68k-final						= {mitsupportlib-root-folder}ErrorLib:Binaries:ErrorLib.68K
-
 object-suffix-ppc-debug					= .ppcd.o
 object-suffix-68k-debug					= .68kd.o
 object-suffix-ppc-final					= .ppcf.o
@@ -408,26 +397,18 @@ gss-library-libraries-68k-final = ¶
 krb5-library-libraries-ppc-debug = ¶
 	{standard-libraries-ppc-debug} ¶
 	{ccache-ppc-debug} ¶
-	{sockets-ppc-debug} ¶
-	{errorlib-ppc-debug} ¶
 	{krb5-globals-library-output-folder}{krb5-globals-library-name}{library-platform-ppc}{library-kind-debug}
 krb5-library-libraries-68k-debug = ¶
 	{standard-libraries-68k-debug} ¶
 	{ccache-68k-debug} ¶
-	{sockets-68k-debug} ¶
-	{errorlib-68k-debug} ¶
 	{krb5-globals-library-output-folder}{krb5-globals-library-name}{library-platform-68k}{library-kind-debug}
 krb5-library-libraries-ppc-final = ¶
 	{standard-libraries-ppc-final} ¶
 	{ccache-ppc-final} ¶
-	{sockets-ppc-final} ¶
-	{errorlib-ppc-final} ¶
 	{krb5-globals-library-output-folder}{krb5-globals-library-name}{library-platform-ppc}{library-kind-final}
 krb5-library-libraries-68k-final = ¶
 	{standard-libraries-68k-final} ¶
 	{ccache-68k-final} ¶
-	{sockets-68k-final} ¶
-	{errorlib-68k-final} ¶
 	{krb5-globals-library-output-folder}{krb5-globals-library-name}{library-platform-68k}{library-kind-final}
 
 krb5-globals-library-libraries-ppc-debug = ¶
@@ -538,15 +519,9 @@ ppc-compiler-options =
 debug-compiler-options = -sym on
 final-compiler-options = -sym off
 
-mitsupportlib-include-paths = ¶
-	-i {mitsupportlib-root-folder}SocketsLib:Headers: ¶
-	-i {mitsupportlib-root-folder}ErrorLib:Headers: ¶
-	-i {mitsupportlib-root-folder}UtilitiesLib:Headers:
-
 include-paths = `catenate {include-folders-list}` ¶
-	-i {root-folder}mac:libraries:¶"CCache API¶":include: ¶
-	-i {krb5-globals-root-folder} ¶
-	{mitsupportlib-include-paths}
+	-i {root-folder}mac:libraries:¶"CCache API¶":include ¶
+	-i {krb5-globals-root-folder}
 		
 compiler-options-ppc-debug = {include-paths} {common-compiler-options} {ppc-compiler-options} ¶
 	{debug-compiler-options} -prefix {precompiled-headers-ppc}
@@ -571,11 +546,11 @@ precompiled-headers-source = {precompiled-headers-folder}KerberosHeaders.pch
 
 {precompiled-headers-ppc} Ä {precompiled-headers-source} {precompiled-headers-folder}KerberosHeaders.h
 	{compiler-ppc} {precompiled-headers-source} {common-compiler-options} {ppc-compiler-options} ¶
-		-precompile {Targ} -i {precompiled-headers-folder} {mitsupportlib-include-paths}
+		-precompile {Targ} -i {precompiled-headers-folder}
 
 {precompiled-headers-68k} Ä {precompiled-headers-source} {precompiled-headers-folder}KerberosHeaders.h
 	{compiler-68k} {precompiled-headers-source} {common-compiler-options} {68k-compiler-options} ¶
-		-precompile {Targ} -i {precompiled-headers-folder} {mitsupportlib-include-paths}
+		-precompile {Targ} -i {precompiled-headers-folder}
 
 make-options-common = ¶
 	-f {makefile-name} ¶
@@ -967,7 +942,7 @@ gss-krb5-library-debug Ä all-debug
 
 gss-krb5-library Ä
 	Delete -i {target}
-	Rez "{root-folder}mac:version.r" -a -o {target}
+	Rez {root-folder}"version.r" -a -o {target}
 	MergeFragment -x -z {fragments} {target}
 	SetFile {target} -c gss-krb5-library-creator -t 'shlb'
 	DeRez -only "'cfrg'(0)" {target} "{RIncludes}"CodeFragments.r | StreamEdit -s {root-folder}FragmentAlias.mpw | Rez -a -o {target} -i "{RIncludes}"
@@ -985,3 +960,77 @@ clean Ä
 	Delete -i `files -r -s -o -f "{root-folder}" | StreamEdit  -d -e "/Å{object-suffix-ppc-data}/ Print"` supercalifragilisticexpialidoucious
 	Delete -i `files -r -s -o -f "{root-folder}" | StreamEdit  -d -e "/Å{object-suffix-68k-data}/ Print"` supercalifragilisticexpialidoucious
 	Delete -i {all-lists}
+	
+##############################################################################################################
+###			Copying headers around
+##############################################################################################################
+
+gss-headers-output-folder							= {root-folder}:GSSLib:Headers:
+krb5-headers-output-folder							= {root-folder}:Kerberos5Lib:Headers:
+krb5-globals-headers-output-folder					= {root-folder}:Kerberos5GlobalsLib:Headers:
+
+gss-headers-output = ¶
+	"{gss-headers-output-folder}gssapi.h" ¶
+	"{gss-headers-output-folder}gssapi_krb5.h"
+
+krb5-headers-output = ¶
+	"{krb5-headers-output-folder}krb5.h" ¶
+	"{krb5-headers-output-folder}com_err.h" ¶
+	"{krb5-headers-output-folder}profile.h" ¶
+	"{krb5-headers-output-folder}win-mac.h"
+
+krb5-globals-headers-output = ¶
+	"{krb5-globals-headers-output-folder}Kerberos5Globals.h"
+	
+headers-output = {gss-headers-output} {krb5-headers-output} {krb5-globals-headers-output}
+
+headers Ä {headers-output}
+
+"{gss-headers-output-folder}gssapi.h" Ä "{root-folder}lib:gssapi:generic:gssapi.h" {makefile-name}
+	"{create-folder}" "{TargDir}"
+	If (`Exists "{Targ}" | Count -l`)
+		SetFile -a l "{Targ}"
+	End
+	Duplicate -y "{root-folder}lib:gssapi:generic:gssapi.h" "{Targ}"
+
+"{gss-headers-output-folder}gssapi_krb5.h" Ä "{root-folder}lib:gssapi:krb5:gssapi_krb5.h" {makefile-name}
+	"{create-folder}" "{TargDir}"
+	If (`Exists "{Targ}" | Count -l`)
+		SetFile -a l "{Targ}"
+	End
+	Duplicate -y "{root-folder}lib:gssapi:krb5:gssapi_krb5.h" "{Targ}"
+
+"{krb5-headers-output-folder}krb5.h" Ä "{root-folder}include:krb5.h" {makefile-name}
+	"{create-folder}" "{TargDir}"
+	If (`Exists "{Targ}" | Count -l`)
+		SetFile -a l "{Targ}"
+	End
+	Duplicate -y "{root-folder}include:krb5.h" "{Targ}"
+
+"{krb5-headers-output-folder}com_err.h" Ä "{root-folder}util:et:com_err.h" {makefile-name}
+	"{create-folder}" "{TargDir}"
+	If (`Exists "{Targ}" | Count -l`)
+		SetFile -a l "{Targ}"
+	End
+	Duplicate -y "{root-folder}util:et:com_err.h" "{Targ}"
+
+"{krb5-headers-output-folder}profile.h" Ä "{root-folder}util:profile:profile.h" {makefile-name}
+	"{create-folder}" "{TargDir}"
+	If (`Exists "{Targ}" | Count -l`)
+		SetFile -a l "{Targ}"
+	End
+	Duplicate -y "{root-folder}util:profile:profile.h" "{Targ}"
+
+"{krb5-headers-output-folder}win-mac.h" Ä "{root-folder}include:win-mac.h" {makefile-name}
+	"{create-folder}" "{TargDir}"
+	If (`Exists "{Targ}" | Count -l`)
+		SetFile -a l "{Targ}"
+	End
+	Duplicate -y "{root-folder}include:win-mac.h" "{Targ}"
+
+"{krb5-globals-headers-output-folder}Kerberos5Globals.h" Ä "{root-folder}mac:libraries:Kerberos v5 Globals:Krb5Globals.h" {makefile-name}
+	"{create-folder}" "{TargDir}"
+	If (`Exists "{Targ}" | Count -l`)
+		SetFile -a l "{Targ}"
+	End
+	Duplicate -y "{root-folder}mac:libraries:Kerberos v5 Globals:Krb5Globals.h" "{Targ}"
