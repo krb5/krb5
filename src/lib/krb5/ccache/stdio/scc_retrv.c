@@ -81,7 +81,7 @@ register const krb5_creds *mcreds, *creds;
     retval = krb5_principal_compare(mcreds->client,creds->client);
     if (retval != TRUE)
 	return retval;
-    return krb5_principal_compare(&(mcreds->server[1]),&(creds->server[1]));
+    return krb5_principal_compare(mcreds->server, creds->server);
 }
 
 
