@@ -697,7 +697,13 @@ krb5_error_code krb5_decrypt_data
 #define KRB5_CYBERSAFE_SECUREID		9  /* Cybersafe */
 #define	KRB5_PADATA_AFS3_SALT		10 /* Cygnus */
 #define KRB5_PADATA_ETYPE_INFO		11 /* Etype info for preauth */
+#define KRB5_PADATA_SAM_CHALLENGE	12 /* draft challenge system */
+#define KRB5_PADATA_SAM_RESPONSE	13 /* draft challenge system response */
     
+#define	KRB5_SAM_USE_SAD_AS_KEY		0x80000000
+#define	KRB5_SAM_SEND_ENCRYPTED_SAD	0x40000000
+#define	KRB5_SAM_MUST_PK_ENCRYPT_SAD	0x20000000 /* currently must be zero */
+
 /* Reserved for SPX pre-authentication. */
 #define KRB5_PADATA_DASS		16
 
