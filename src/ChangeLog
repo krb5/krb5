@@ -1,3 +1,7 @@
+2004-04-24  Ken Raeburn  <raeburn@mit.edu>
+
+	* aclocal.m4 (KRB5_BUILD_LIBRARY_WITH_DEPS): Look for perl.
+
 2004-04-22  Ken Raeburn  <raeburn@mit.edu>
 
 	* aclocal.m4 (KRB5_BUILD_LIBRARY_WITH_DEPS): Substitute

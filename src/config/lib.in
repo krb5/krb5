@@ -42,12 +42,9 @@ lib$(LIB)$(STLIBEXT): $(STOBJLISTS)
 lib$(LIB)$(SHLIBVEXT): $(SHOBJLISTS) $(SHLIB_EXPDEPS) $(SHLIB_EXPORT_FILE_DEP)
 	$(RM) $@
 	@echo "building shared $(LIB) library ($(LIBMAJOR).$(LIBMINOR))"
-	@dirs=`echo $(SHOBJLISTS) | \
-		sed -e 's%/OBJS.SH%%g' -e 's%OBJS.SH%.%'`; \
-		objlist=`for d in $$dirs; do \
-			sed -e '/^$$/d' -e "s%^%$$d/%" -e "s% % $$d/%g" \
-				$$d/OBJS.SH; done` ; \
-		set -x ; $(MAKE_SHLIB_COMMAND)
+	@objlist=`set -x && $(PERL) -p -e '$$e=$$ARGV; $$e =~ s/OBJS.SH$$//; s/^/ /; s/ $$//; s/ / $$e/g;' $(SHOBJLISTS)` && \
+		set -x && \
+		$(MAKE_SHLIB_COMMAND)
 
 lib$(LIB)$(SHLIBSEXT): lib$(LIB)$(SHLIBVEXT)
 	$(RM) $@
