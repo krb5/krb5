@@ -21,7 +21,7 @@ char	*proto;
 	register char	*c;
 	int		tos;
 
-#ifdef HAS_GETTOS
+#ifdef HAVE_GETTOSBYNAME
 	struct tosent	*tosp;
 
 	tosp = gettosbyname(name, proto);
