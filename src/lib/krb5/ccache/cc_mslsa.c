@@ -1147,6 +1147,11 @@ krb5_lcc_resolve (krb5_context context, krb5_ccache *id, const char *residual)
         krb5_free_cred_contents(context,&creds);
     } else {
         data->princ = 0;
+        krb5_xfree(data->cc_name);
+        krb5_xfree(lid->data);
+        krb5_xfree(lid);
+        CloseHandle(LogonHandle);
+        return KRB5_FCC_NOFILE;
     }
 
     /*

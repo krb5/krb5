@@ -3,6 +3,9 @@
    * cc_mslsa.c:
      Add missing return statements in krb5_lcc_start_seq_get()
 
+     Return error if principal name cannot be determined during
+     krb5_lcc_resolve()
+
    * cc-int.h:
      New file - Add prototypes for cc internal functions
 
