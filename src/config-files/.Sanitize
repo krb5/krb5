@@ -24,10 +24,9 @@ Do-first:
 Things-to-keep:
 
 ChangeLog
-krb.conf
-krb.conf.M
-krb.realms
-krb.realms.M
+convert-config-files
+krb5.conf
+krb5.conf.M
 services.append
 krb5.conf
 

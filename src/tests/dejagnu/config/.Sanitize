@@ -23,50 +23,8 @@ Do-first:
 
 Things-to-keep:
 
-.cvsignore
 ChangeLog
-DNR.c
-Makefile.in
-an_to_ln.c
-ccdefname.c
-configure
-configure.in
-def_realm.c
-free_hstrl.c
-free_krbhs.c
-full_ipadr.c
-genaddrs.c
-gen_port.c
-gen_rname.c
-get_krbhst.c
-gmt_mktime.c
-hst_realm.c
-init_os_ctx.c
-krbfileio.c
-ktdefname.c
-kuserok.c
-localaddr.c
-locate_kdc.c
-lock_file.c
-macsock.c
-mk_faddr.c
-net_read.c
-net_write.c
-os-proto.h
-osconfig.c
-port2ip.c
-read_msg.c
-read_pwd.c
-realm_dom.c
-ref_std_conf.out
-sendto_kdc.c
-sn2princ.c
-timeofday.c
-t_std_conf.c
-td_krb5.conf
-unlck_file.c
-ustime.c
-write_msg.c
+default.exp
 
 Things-to-lose:
 

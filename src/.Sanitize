@@ -43,7 +43,8 @@ configure.in
 include
 isode
 kadmin
-kadmin.new
+kadmin.v4
+kadmin.old
 kdc
 krb524
 lib
@@ -57,6 +58,10 @@ wconfig.c
 windows
 
 Things-to-lose:
+
+kadmin.new
+autotools
+isode
 
 Do-last:
 

@@ -54,13 +54,11 @@ encode_kdc.c
 encrypt_tk.c
 faddr_ordr.c
 free_rtree.c
-gc_2tgt.c
 gc_frm_kdc.c
-gc_via_tgt.c
+gc_via_tkt.c
 gen_seqnum.c
 gen_subkey.c
 get_creds.c
-get_fcreds.c
 get_in_tkt.c
 in_tkt_ktb.c
 in_tkt_pwd.c

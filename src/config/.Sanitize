@@ -33,6 +33,8 @@ mac-post.in
 mac-pre.in
 post.in
 pre.in
+ren2long
+ren2long.awk
 rm.bat
 windows.in
 

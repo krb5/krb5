@@ -31,6 +31,7 @@ asn.1
 configure
 configure.in
 create
+dejagnu
 dump.c
 hammer
 resolve
