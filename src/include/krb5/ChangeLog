@@ -1,3 +1,7 @@
+2003-03-05  Sam Hartman  <hartmans@mit.edu>
+
+	* Remove kdb_dbm.h
+
 2002-11-05  Tom Yu  <tlyu@mit.edu>
 
 	* kdb.h (KRB5_KDC_MKEY_1, KRB5_KDC_MKEY_2): Remove trailing colon,
