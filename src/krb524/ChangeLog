@@ -1,3 +1,8 @@
+2003-01-31  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (clean-windows): Remove $(GENS).
+	(krb524_err.c): Depend on krb524_err.et.
+
 2003-01-10  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Don't explicitly invoke AC_PROG_INSTALL.
