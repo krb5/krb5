@@ -29,10 +29,14 @@ fragment-name-final						=
 all Ä unset-echo all-debug all-final
 
 #	Debugging versions
-all-debug Ä unset-echo macos9-debug carbon-debug
+all-debug Ä unset-echo macos9-debug-build carbon-debug-build
+carbon-debug Ä unset-echo carbon-debug-build
+macos9-debug Ä unset-echo macos9-debug-build
 
 #	Final versions
-all-final Ä unset-echo macos9-final carbon-final
+all-final Ä unset-echo macos9-final-build carbon-final-build
+carbon-final Ä unset-echo carbon-final-build
+macos9-final Ä unset-echo macos9-final-build
 
 #	Clasic 69K glue
 glue Ä unset-echo glue-gss glue-krb5
@@ -899,28 +903,28 @@ make-output = "{TempFolder}GSS/Kerberos Makefile script"
 submakefile-gss-target = gss-library
 submakefile-krb5-target = krb5-library
 
-macos9-debug Ä glue headers documentation {makefile-dependency} {gss-objects-macos9-debug-list} {krb5-objects-macos9-debug-list} ¶
+macos9-debug-build Ä glue headers documentation {makefile-dependency} {gss-objects-macos9-debug-list} {krb5-objects-macos9-debug-list} ¶
 	{profile-objects-macos9-debug-list} {comerr-objects-macos9-debug-list} {include-folders-list}
 	Make {make-options-common} {make-options-macos9-debug} {submakefile-gss-target} > {make-output}
 	{make-output}
 	Make {make-options-common} {make-options-macos9-debug} {submakefile-krb5-target} > {make-output}
 	{make-output}
 	
-macos9-final Ä glue headers documentation  {makefile-dependency} {gss-objects-macos9-final-list} {krb5-objects-macos9-final-list} ¶
+macos9-final-build Ä glue headers documentation  {makefile-dependency} {gss-objects-macos9-final-list} {krb5-objects-macos9-final-list} ¶
 	{profile-objects-macos9-final-list} {comerr-objects-macos9-final-list} {include-folders-list}
 	Make {make-options-common} {make-options-macos9-final} {submakefile-gss-target} > {make-output}
 	{make-output}
 	Make {make-options-common} {make-options-macos9-final} {submakefile-krb5-target} > {make-output}
 	{make-output}
 	
-carbon-debug Ä glue headers documentation {makefile-dependency} {gss-objects-carbon-debug-list} {krb5-objects-carbon-debug-list} ¶
+carbon-debug-build Ä glue headers documentation {makefile-dependency} {gss-objects-carbon-debug-list} {krb5-objects-carbon-debug-list} ¶
 	{profile-objects-carbon-debug-list} {comerr-objects-carbon-debug-list} {include-folders-list}
 	Make {make-options-common} {make-options-carbon-debug} {submakefile-gss-target} > {make-output}
 	{make-output}
 	Make {make-options-common} {make-options-carbon-debug} {submakefile-krb5-target} > {make-output}
 	{make-output}
 	
-carbon-final Ä glue headers documentation  {makefile-dependency} {gss-objects-carbon-final-list} {krb5-objects-carbon-final-list} ¶
+carbon-final-build Ä glue headers documentation  {makefile-dependency} {gss-objects-carbon-final-list} {krb5-objects-carbon-final-list} ¶
 	{profile-objects-carbon-final-list} {comerr-objects-carbon-final-list} {include-folders-list}
 	Make {make-options-common} {make-options-carbon-final} {submakefile-gss-target} > {make-output}
 	{make-output}
