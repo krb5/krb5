@@ -76,8 +76,8 @@ krb5_encrypt_block *eblock;
 	krb5_db_free_principal(&master_entry, nprinc);
 	return retval;
     }
-    if (memcmp((char *)mkey->contents, (char *)tempkey.contents,
-	       mkey->length)) {
+    if (mkey->length != tempkey.length ||
+	memcmp((char *)mkey->contents, (char *)tempkey.contents,mkey->length)) {
 	retval = KRB5_KDB_BADMASTERKEY;
 	(void) krb5_finish_key(eblock);
     } else
