@@ -1,3 +1,7 @@
+Fri May 10 01:19:18 1996  Richard Basch  <basch@lehman.com>
+
+	* md5crypto.c: des3-md5 is being replaced with des3-sha
+
 Fri Apr 12 21:27:35 1996  Richard Basch  <basch@lehman.com>
 
 	* rsa-md5.h md5crypto.c md5glue.c md5.c t_cksum.c t_mddriver.c:

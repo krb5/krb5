@@ -283,6 +283,7 @@ size_t seed_length;
 	else 
 	    retval = KRB5KRB_AP_ERR_BAD_INTEGRITY;
     }
+#if CKSUMTYPE_RSA_MD5_DES3
     else if (cksum->checksum_type == CKSUMTYPE_RSA_MD5_DES3) {
 	if (cksum->length == (RSA_MD5_DES_CKSUM_LENGTH +
 			      RSA_MD5_DES_CONFOUND_LENGTH)) {
@@ -340,6 +341,7 @@ size_t seed_length;
 	else 
 	    retval = KRB5KRB_AP_ERR_BAD_INTEGRITY;
     }
+#endif /* CKSUMTYPE_RSA_MD5_DES3 */
     else
 	retval = KRB5KRB_AP_ERR_INAPP_CKSUM;
 
