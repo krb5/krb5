@@ -1,3 +1,8 @@
+Sun Dec  7 07:24:23 1997  Ezra Peisach  <epeisach@dumpster.rose.brandeis.edu>
+
+	* gic_pwd.c (krb5_get_init_creds_password): Change fourth argument
+ 	in call to prompter (which is an int) from NULL to 0.
+
 Sat Dec  6 02:28:17 1997  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Add files chpw.c, gic_*, preauth2.c, vfy_increds.c,

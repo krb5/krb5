@@ -303,7 +303,7 @@ cleanup:
 		    hours/24);
 
 	 /* ignore an error here */
-	 (*prompter)(context, data, banner, NULL, 0);
+	 (*prompter)(context, data, banner, 0, 0);
       }
    }
 
