@@ -110,7 +110,6 @@ krb5_gss_wrap_size_limit(minor_status, context_handle, conf_req_flag,
 	return(GSS_S_NO_CONTEXT);
     }
 
-#if 1
     if (ctx->proto == 1) {
 	/* No pseudo-ASN.1 wrapper overhead, so no sequence length and
 	   OID.  */
@@ -125,11 +124,17 @@ krb5_gss_wrap_size_limit(minor_status, context_handle, conf_req_flag,
 	    else
 		sz -= (16 + ctx->cksum_size);
 	}
+
+	/* While testing only!  */
+	if (sz < 65536)
+	    sz = 0;
+	else
+	    sz -= 65535;
+
 	*max_input_size = sz;
 	*minor_status = 0;
 	return GSS_S_COMPLETE;
     }
-#endif
 
     /* Calculate the token size and subtract that from the output size */
     overhead = 7 + ctx->mech_used->length;
