@@ -5,6 +5,7 @@ Major projects:
 DONE	* convert syslog -> log (to real file)
 	* save versus deletion of rcache file (HIGH PRIORITY)
 	* Use dbm as the default database. (HIGH PRIORITY)
+	* Solaris: KDC does not notice new databases.
 
 2.  API changes
 DONE	* context changes (mostly done)
@@ -38,7 +39,7 @@ DONE	* write configuration file library
 DONE	* fold in krb4 library
 DONE	* kdc support automatic fallback (done)
 	* DES glue code rewrite
-	* don't need NEED_SYS_FCNTL.H; just always include <fnctl.h>
+DONE	* don't need NEED_SYS_FCNTL.H; just always include <fnctl.h>
 	* utmp configure cleanup
 	* telnet portability
 DONE	* CONFIG_RULES should include more standard rules (WITH_KRB4, etc.)
