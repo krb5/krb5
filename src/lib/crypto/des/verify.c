@@ -23,15 +23,12 @@ static char rcsid_verify_c[] =
 #include <krb5/krb5.h>
 #include <krb5/ext-proto.h>
 #include <krb5/mit-des.h>
+#include "des_int.h"
 #include <stdio.h>
 #include <com_err.h>
 
 extern int errno;
 extern krb5_cryptosystem_entry mit_des_cryptosystem_entry;
-extern mit_des_encrypt_f();
-extern mit_des_decrypt_f();
-extern mit_des_ecb_encrypt();
-extern mit_des_cbc_cksum();
 
 char *progname;
 int nflag = 2;
@@ -261,10 +258,12 @@ main(argc,argv)
 
     printf("ACTUAL CBC\n\tclear \"%s\"\n",input);
     in_length =  strlen((char *)input);
-    if (retval = mit_des_encrypt_f((krb5_pointer) input,
-				   (krb5_pointer) cipher_text,
-				   (size_t) in_length, 
-				   &eblock, (krb5_pointer) ivec)) {
+    if (retval = mit_des_cbc_encrypt((krb5_octet *) input,
+				     (krb5_octet *) cipher_text,
+				     (size_t) in_length, 
+				     (struct mit_des_ks_struct *)eblock.priv,
+				     (krb5_octet *) ivec,
+				     MIT_DES_ENCRYPT)) {
 	com_err("des verify", retval, "can't encrypt");
 	exit(-1);
     }
@@ -276,10 +275,12 @@ main(argc,argv)
 	}
 	printf("\n");
     }
-    if (retval = mit_des_decrypt_f((krb5_pointer) cipher_text,
-				   (krb5_pointer) clear_text,
-				   (size_t) in_length, 
-				   &eblock, (krb5_pointer) ivec)) {
+    if (retval = mit_des_cbc_encrypt((krb5_octet *) cipher_text,
+				     (krb5_octet *) clear_text,
+				     (size_t) in_length, 
+				     eblock.priv,
+				     (krb5_octet *) ivec,
+				     MIT_DES_DECRYPT)) {
 	com_err("des verify", retval, "can't decrypt");
 	exit(-1);
     }
@@ -299,7 +300,7 @@ main(argc,argv)
     printf("or some part thereof\n");
     input = clear_text2;
     mit_des_cbc_cksum(input,cipher_text,(long) strlen((char *)input),
-		      eblock.priv,ivec,1);
+		      eblock.priv,ivec);
     printf("ACTUAL CBC checksum\n");
     printf("\t\tencrypted cksum = (low to high bytes)\n\t\t");
     for (j = 0; j<=7; j++)
@@ -346,7 +347,10 @@ do_encrypt(in,out)
     char *out;
 {
     for (i =1; i<=nflag; i++) {
-	mit_des_ecb_encrypt(in,out,(struct mit_des_ks_struct *)eblock.priv,1);
+	mit_des_ecb_encrypt((u_long *)in,
+			    (u_long *)out,
+			    (struct mit_des_ks_struct *)eblock.priv,
+			    MIT_DES_ENCRYPT);
 	if (mit_des_debug) {
 	    printf("\nclear %s\n",in);
 	    for (j = 0; j<=7; j++)
@@ -365,7 +369,10 @@ do_decrypt(in,out)
     /* try to invert it */
 {
     for (i =1; i<=nflag; i++) {
-	mit_des_ecb_encrypt(out,in,(struct mit_des_ks_struct *)eblock.priv,0);
+	mit_des_ecb_encrypt((u_long *)out,
+			    (u_long *)in,
+			    (struct mit_des_ks_struct *)eblock.priv,
+			    MIT_DES_DECRYPT);
 	if (mit_des_debug) {
 	    printf("clear %s\n",in);
 	    for (j = 0; j<=7; j++)
