@@ -133,7 +133,7 @@ krb5_db_fetch_mkey(context, mname, etype, fromkeyboard, twice, keyfile,
 	(void) strncat(defkeyfile, realm->data,
 		       min(sizeof(defkeyfile)-sizeof(DEFAULT_KEYFILE_STUB)-1,
 			   realm->length));
-	(void) strcat(defkeyfile, "");
+	defkeyfile[sizeof(defkeyfile) - 1] = '\0';
 	
 #ifdef ANSI_STDIO
 	if (!(kf = fopen((keyfile) ? keyfile : defkeyfile, "rb")))

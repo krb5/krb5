@@ -58,8 +58,8 @@ static char *
 _buf()
 {
 
-	if (buf == 0)
-		buf = (char *)malloc(256);
+	if (buf == NULL)
+		buf = (char *)malloc(BUFSIZ);
 	return (buf);
 }
 
@@ -238,26 +238,29 @@ clnt_spcreateerror(s)
 	if (str == 0)
 		return(0);
 	(void) sprintf(str, "%s: ", s);
-	(void) strcat(str, clnt_sperrno(rpc_createerr.cf_stat));
+	str[BUFSIZ - 1] = '\0';
+	(void) strncat(str, clnt_sperrno(rpc_createerr.cf_stat), BUFSIZ - 1);
 	switch (rpc_createerr.cf_stat) {
 	case RPC_PMAPFAILURE:
-		(void) strcat(str, " - ");
-		(void) strcat(str,
-		    clnt_sperrno(rpc_createerr.cf_error.re_status));
+		(void) strncat(str, " - ", BUFSIZ - 1 - strlen(str));
+		(void) strncat(str,
+		    clnt_sperrno(rpc_createerr.cf_error.re_status),
+		    BUFSIZ - 1 - strlen(str));
 		break;
 
 	case RPC_SYSTEMERROR:
-		(void) strcat(str, " - ");
+		(void) strncat(str, " - ", BUFSIZ - 1 - strlen(str));
 		if (rpc_createerr.cf_error.re_errno > 0
 		    && rpc_createerr.cf_error.re_errno < sys_nerr)
-			(void) strcat(str,
-			    sys_errlist[rpc_createerr.cf_error.re_errno]);
+			(void) strncat(str,
+			    sys_errlist[rpc_createerr.cf_error.re_errno],
+			    BUFSIZ - 1 - strlen(str));
 		else
 			(void) sprintf(&str[strlen(str)], "Error %d",
 			    rpc_createerr.cf_error.re_errno);
 		break;
 	}
-	(void) strcat(str, "\n");
+	(void) strncat(str, "\n", BUFSIZ - 1 - strlen(str));
 	return (str);
 }
 

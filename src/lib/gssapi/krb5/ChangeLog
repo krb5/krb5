@@ -1,3 +1,8 @@
+2000-05-03  Nalin Dahyabhai  <nalin@redhat.com>
+
+	* add_cred.c (krb5_gss_add_cred): Don't overflow buffers "ktboth"
+	or "ccboth".
+
 2000-04-21  Ken Raeburn  <raeburn@mit.edu>
 
 	* gssapiP_krb5.h (struct _krb5_gss_ctx_id_rec): Delete field

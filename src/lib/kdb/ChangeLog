@@ -1,3 +1,12 @@
+2000-05-03  Nalin Dahyabhai  <nalin@redhat.com>
+
+	* setup_mkey.c (krb5_db_setup_mkey_name): Use REALM_SEP_STRING
+	when computing size of buffer that is to include it.
+
+	* fetch_mkey.c (krb5_db_fetch_mkey): Make sure "defkeyfile" is
+	null terminated after construction.
+	* store_mkey.c (krb5_db_store_mkey): Likewise.
+
 2000-04-27  Ken Raeburn  <raeburn@mit.edu>
 	    Ezra Peisach  <epeisach@mit.edu>
 

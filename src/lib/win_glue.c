@@ -271,9 +271,10 @@ static krb5_error_code do_timebomb()
 		if (first_time) {
 			sprintf(buf, "Your version of %s has expired.\n",
 				TIMEBOMB_PRODUCT);
-			strcat(buf, "Please upgrade it.");
+			buf[sizeof(buf) - 1] = '\0';
+			strncat(buf, "Please upgrade it.", sizeof(buf) - 1 - strlen(buf));
 #ifdef TIMEBOMB_INFO
-			strcat(buf, TIMEBOMB_INFO);
+			strncat(buf, TIMEBOMB_INFO, sizeof(buf) - 1 - strlen(buf));
 #endif
 			MessageBox(NULL, buf, "", MB_OK);
 			first_time = 0;
@@ -285,9 +286,9 @@ static krb5_error_code do_timebomb()
 		if (first_time) {
 			sprintf(buf, "Your version of %s will expire in %ld days.\n",
 				TIMEBOMB_PRODUCT, timeleft);
-			strcat(buf, "Please upgrade it soon.");
+			strncat(buf, "Please upgrade it soon.", sizeof(buf) - 1 - strlen(buf));
 #ifdef TIMEBOMB_INFO
-			strcat(buf, TIMEBOMB_INFO);
+			strncat(buf, TIMEBOMB_INFO, sizeof(buf) - 1 - strlen(buf));
 #endif
 			MessageBox(NULL, buf, "", MB_OK);
 			first_time = 0;

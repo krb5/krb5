@@ -1,3 +1,9 @@
+2000-05-03  Nalin Dahyabhai  <nalin@redhat.com>
+
+	* clnt_perror.c (_buf): Use bigger buffer.
+	(clnt_spcreateerror): Don't overflow buffer "buf" beyond known
+	allocation size.
+
 2000-02-22  Donn Cave  <donn@u.washington.edu>
 
 	* Makefile.in (includes): Extract basename of header file to be

@@ -199,8 +199,9 @@ krb5_gss_add_cred(minor_status, input_cred_handle,
 		return(GSS_S_FAILURE);
 	    }
 
-	    strcpy(ktboth, kttype);
-	    strcat(ktboth, ":");
+	    strncpy(ktboth, kttype, sizeof(ktboth) - 1);
+	    ktboth[sizeof(ktboth) - 1] = '\0';
+	    strncat(ktboth, ":", sizeof(ktboth) - 1 - strlen(ktboth));
 
 	    if (code = krb5_kt_get_name(context, cred->keytab,
 					ktboth+strlen(ktboth),
@@ -256,9 +257,10 @@ krb5_gss_add_cred(minor_status, input_cred_handle,
 		return(GSS_S_FAILURE);
 	    }
 
-	    strcpy(ccboth, cctype);
-	    strcat(ccboth, ":");
-	    strcat(ccboth, ccname);
+	    strncpy(ccboth, cctype, sizeof(ccboth) - 1);
+	    ccboth[sizeof(ccboth) - 1] = '\0';
+	    strncat(ccboth, ":", sizeof(ccboth) - 1 - strlen(ccboth));
+	    strncat(ccboth, ccname, sizeof(ccboth) - 1 - strlen(ccboth));
 
 	    if (code = krb5_cc_resolve(context, ccboth, &new_cred->ccache)) {
 		if (new_cred->rcache)
