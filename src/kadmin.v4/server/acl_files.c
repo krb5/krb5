@@ -21,9 +21,7 @@
 #include <sys/stat.h>
 #include <sys/errno.h>
 #include <ctype.h>
-#ifdef NEED_SYS_FCNTL_H
-#include <sys/fcntl.h>
-#endif
+#include <fcntl.h>
 #include "krb.h"
 
 #ifndef KRB_REALM

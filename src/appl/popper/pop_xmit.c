@@ -13,9 +13,7 @@ static char copyright[] = "Copyright (c) 1990 Regents of the University of Calif
 #include <sys/types.h>
 #include <sys/file.h>
 #include <sys/wait.h>
-#ifdef NEED_SYS_FCNTL_H
-#include <sys/fcntl.h>
-#endif
+#include <fcntl.h>
 #ifdef HAS_PATHS_H
 #include <paths.h>
 #endif

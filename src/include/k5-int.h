@@ -209,7 +209,6 @@ typedef unsigned int size_t;
 
 #if defined(_MACINTOSH)
 
-
 #ifdef NEED_LOWLEVEL_IO
 #include <fcntl.h>
 #endif
@@ -633,12 +632,7 @@ extern char *strdup KRB5_PROTOTYPE((const char *));
 					   friends */
 #endif
 
-#if defined(SYSV) || defined(_AIX)
 #include <fcntl.h>
-#endif
-#ifdef NEED_SYS_FCNTL_H
-#include <sys/fcntl.h>
-#endif
 
 #endif /* KRB5_SYSINCL__ */
 /*

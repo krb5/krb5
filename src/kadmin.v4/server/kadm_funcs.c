@@ -27,9 +27,7 @@ the actual database manipulation code
 #include <kadm_err.h>
 #include <krb_db.h>
 #include <syslog.h>
-#ifdef NEED_SYS_FCNTL_H
-#include <sys/fcntl.h>
-#endif
+#include <fcntl.h>
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
 #ifdef TIME_WITH_SYS_TIME
