@@ -23,6 +23,7 @@ static char rcsid_kdb_create_c[] =
 #include <krb5/kdb5_err.h>
 #include <krb5/isode_err.h>
 #include <stdio.h>
+#include <krb5/libos-proto.h>
 #include <krb5/asn1.h>
 
 #include <com_err.h>
@@ -73,7 +74,7 @@ usage(who, status)
 char *who;
 int status;
 {
-    fprintf(stderr, "usage: %s [-n dbname] [-r realmname] [-k keytype]\n\
+    fprintf(stderr, "usage: %s [-d dbpathname] [-r realmname] [-k keytype]\n\
 \t[-e etype] [-M mkeyname]\n",
 	    who);
     exit(status);
@@ -117,17 +118,20 @@ char *argv[];
     char *mkey_name = 0;
     char *mkey_fullname;
     char defrealm[BUFSIZ];
-    int keytypedone = 0, etypedone = 0;
-    krb5_enctype etype;
+    int keytypedone = 0;
+    krb5_enctype etype = -1;
     register krb5_cryptosystem_entry *csentry;
 
     initialize_krb5_error_table();
     initialize_kdb5_error_table();
     initialize_isod_error_table();
 
-    while ((optchar = getopt(argc, argv, "n:r:k:M:e:")) != EOF) {
+    if (rindex(argv[0], '/'))
+	argv[0] = rindex(argv[0], '/')+1;
+
+    while ((optchar = getopt(argc, argv, "d:r:k:M:e:")) != EOF) {
 	switch(optchar) {
-	case 'n':			/* set db name */
+	case 'd':			/* set db name */
 	    dbname = optarg;
 	    break;
 	case 'r':
@@ -142,7 +146,6 @@ char *argv[];
 	    break;
 	case 'e':
 	    etype = atoi(optarg);
-	    etypedone++;
 	    break;
 	case '?':
 	default:
@@ -150,23 +153,21 @@ char *argv[];
 	    /*NOTREACHED*/
 	}
     }
-    if (!mkey_name)
-	mkey_name = KRB5_KDB_M_NAME;
 
     if (!keytypedone)
 	master_keyblock.keytype = KEYTYPE_DES;
 
     if (!valid_keytype(master_keyblock.keytype)) {
-	com_err(argv[0], KRB5KDC_ERR_ETYPE_NOSUPP,
+	com_err(argv[0], KRB5_PROG_KEYTYPE_NOSUPP,
 		"while setting up keytype %d", master_keyblock.keytype);
 	exit(1);
     }
 
-    if (!etypedone)
-	etype = keytype_to_etype(master_keyblock.keytype);
+    if (etype == -1)
+	etype = krb5_keytype_array[master_keyblock.keytype]->system->proto_enctype;
 
     if (!valid_etype(etype)) {
-	com_err(argv[0], KRB5KDC_ERR_ETYPE_NOSUPP,
+	com_err(argv[0], KRB5_PROG_ETYPE_NOSUPP,
 		"while setting up etype %d", etype);
 	exit(1);
     }
@@ -196,7 +197,7 @@ char *argv[];
 
     /* assemble & parse the master key name */
 
-    if (retval = setup_mkey_name(mkey_name, realm, &mkey_fullname,
+    if (retval = krb5_db_setup_mkey_name(mkey_name, realm, &mkey_fullname,
 				 &master_princ)) {
 	com_err(argv[0], retval, "while setting up master key name");
 	exit(1);
