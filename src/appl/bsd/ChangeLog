@@ -1,3 +1,7 @@
+Tue Dec 19 17:11:37 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* kcmd.c: Also include unistd.h, if it's available.
+
 Tue Dec  5 20:44:39 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* configure.in: Use krb5util library.
