@@ -29,10 +29,10 @@ PICFLAGS=@PICFLAGS@
 PROFFLAGS=@PROFFLAGS@
 .SUFFIXES: .c .so .po
 .c.so:
-	$(CC) $(DEFS) $(DEFINES) $(LOCALINCLUDES) $(PICFLAGS) $(CPPFLAGS) $(CFLAGS) -c $< -o $*.so.o && \
+	$(CC) $(DEFS) $(DEFINES) $(PICFLAGS) $(CPPFLAGS) $(LOCALINCLUDES) $(CFLAGS) -c $< -o $*.so.o && \
 		$(MV) $*.so.o $*.so
 .c.po:
-	$(CC) $(DEFS) $(DEFINES) $(LOCALINCLUDES) $(PROFFLAGS) $(CPPFLAGS) $(CFLAGS) -c $< -o $*.po.o && \
+	$(CC) $(DEFS) $(DEFINES) $(PROFFLAGS) $(CPPFLAGS) $(LOCALINCLUDES) $(CFLAGS) -c $< -o $*.po.o && \
 		$(MV) $*.po.o $*.po
 
 # rules to generate object file lists

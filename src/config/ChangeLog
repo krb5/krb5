@@ -1,3 +1,8 @@
+2000-05-03  Tom Yu  <tlyu@mit.edu>
+
+	* libobj.in, pre.in: Put $(LOCALINCLUDES) after $(CPPFLAGS) since
+	$(CPPFLAGS) should have its includes show up first.
+
 2000-03-01  Tom Yu  <tlyu@mit.edu>
 
 	* pre.in (INSTALL_SHLIB): New variable.
