@@ -21,21 +21,19 @@
 static char sccsid[] = "@(#)strdup.c	5.3 (Berkeley) 6/1/90";
 #endif /* LIBC_SCCS and not lint */
 
-#include <sys/types.h>
-#include <stddef.h>
-#include <string.h>
-
+#include <krb5/krb5.h>
+#include <krb5/ext-proto.h>
 
 char *
 strdup(str)
-	char *str;
+	const char *str;
 {
 	int len;
 	char *copy, *malloc();
 
 	len = strlen(str) + 1;
 	if (!(copy = malloc((u_int)len)))
-		return((char *)NULL);
+		return((char *)0);
 	bcopy(str, copy, len);
 	return(copy);
 }
