@@ -1,3 +1,8 @@
+2002-07-24  Ezra Peisach  <epeisach@bu.edu>
+
+	* krb524.h: Need to include port-sockets.h before socket-utils.h
+	for windows for struct sockaddr_in.
+
 2002-07-23  Ezra Peisach  <epeisach@bu.edu>
 
 	* krb524.h: Include socket-utils.h instead of port-sockets.h for
