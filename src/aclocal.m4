@@ -7,13 +7,13 @@ define(AC_STUFF_FILE_PRE,
 [AC_DIVERT_PUSH(AC_DIVERSION_SED)dnl
 1r $1
 AC_DIVERT_POP()dnl
-])
+])dnl
 dnl AC_STUFF_FILE_POST()
 define(AC_STUFF_FILE_POST,
 [AC_DIVERT_PUSH(AC_DIVERSION_SED)dnl
 [$]r $1
 AC_DIVERT_POP()dnl
-])
+])dnl
 dnl
 dnl look for the top of the tree
 dnl
@@ -50,7 +50,7 @@ fi
   else
      ac_postpend=
   fi
-])
+])dnl
 dnl
 dnl
 dnl set up buildtop stuff
@@ -190,7 +190,7 @@ AC_MSG_RESULT($krb5_cv_decl_errlist)
 if test $krb5_cv_decl_errlist = no; then
 	AC_DEFINE(NEED_SYS_ERRLIST)
 fi
-])
+])dnl
 dnl
 dnl check for sigmask/sigprocmask -- CHECK_SIGPROCMASK
 dnl
@@ -245,7 +245,7 @@ MAKE_COMMANDS= $(BUILDTOP)/util/ss/mk_cmds
 
 .ct.c:
 	@if [ $< != $}{*.ct ]; then \
-		(set -x; cp $< $}{*.ct && $(MAKE_COMMANDS) $}{*.ct && $(RM) $}{*.ct) || exit 1; \
+		(set -x; cp $< $}{*.ct && $(MAKE_COMMANDS) $}{*.#t && $(RM) $}{*.ct) || exit 1; \
 	else \
 		(set -x; $(MAKE_COMMANDS) $}{*.ct) || exit 1; \
 	fi
@@ -294,7 +294,7 @@ AC_MSG_RESULT($krb5_cv_struct_wait)
 if test $krb5_cv_struct_wait = no; then
 	AC_DEFINE(WAIT_USES_INT)
 fi
-])
+])dnl
 dnl
 dnl check for POSIX signal handling -- CHECK_SIGNALS
 dnl
@@ -585,7 +585,7 @@ dnl
 dnl The default is `$srcdir' or `$srcdir/..' or `$srcdir/../..'.
 dnl There's no need to call this macro explicitly; just AC_REQUIRE it.
 AC_DEFUN(AC_CONFIG_AUX_DIR_DEFAULT,
-[AC_CONFIG_AUX_DIRS($srcdir $srcdir/.. $srcdir/../.. $srcdir/../../.. $srcdir/../../../.. $srcdir/../../../../..)])
+[AC_CONFIG_AUX_DIRS($srcdir $srcdir/.. $srcdir/../.. $srcdir/../../.. $srcdir/../../../.. $srcdir/../../../../..)])dnl
 dnl
 dnl V5_OUTPUT_MAKEFILE
 dnl
@@ -773,7 +773,6 @@ DO_MAKE_SHLIB=
 ])dnl
 AC_SUBST(DO_MAKE_SHLIB)
 ])dnl
-
 dnl
 dnl Defines LDARGS correctly so that we actually link with the shared library
 dnl
@@ -802,8 +801,3 @@ else
 fi
 AC_SUBST(LDARGS)
 ])dnl
-
-
-
-
-

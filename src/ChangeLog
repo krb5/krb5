@@ -1,3 +1,9 @@
+Wed Jun 21 14:57:55 1995    <tytso@rsx-11.mit.edu>
+
+	* aclocal.m4: Removed extra blank lines and added "dnl" to the end
+		of some macro definitions to get rid of extra newlines
+		added at the beginning of configure scripts.
+
 Tue Jun 20 12:23:20 1995  Tom Yu  (tlyu@dragons-lair)
 
 	* BADSYMS: Updated after finding bugs in getsyms
