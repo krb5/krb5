@@ -175,7 +175,6 @@ kerberos5_init(ap, server)
 		str_data[3] = TELQUAL_IS;
 	memset(&session_key, 0, sizeof(session_key));
 	session_key.magic = KV5M_KEYBLOCK;
-	session_key.etype = ETYPE_UNKNOWN;
 	if (telnet_context == 0)
 	    krb5_init_context(&telnet_context);
         krb5_init_ets(telnet_context);
@@ -282,7 +281,7 @@ kerberos5_send(ap)
 	 * keep the key in our private storage, but don't use it yet
 	 * ---see kerberos5_reply() below 
 	 */
-	if (newkey && (newkey->keytype != KEYTYPE_DES)) {
+	if (newkey) {
 	    if (new_creds->keyblock.keytype == KEYTYPE_DES)
 		/* use the session key in credentials instead */
 		krb5_copy_keyblock_contents(telnet_context, 
@@ -403,23 +402,18 @@ kerberos5_is(ap, data, cnt)
 		    free(name);
 		krb5_auth_con_getremotesubkey(telnet_context, auth_context,
 					      &newkey);
-	    	if (newkey && newkey->keytype == KEYTYPE_DES) {
+	    	if (newkey) {
 		    if (session_key.contents)
 			free(session_key.contents);
 		    krb5_copy_keyblock_contents(telnet_context, newkey,
 					    	&session_key);
 		    krb5_free_keyblock(telnet_context, newkey);
 		} else {
-		    if (newkey)
-		    	krb5_free_keyblock(telnet_context, newkey);
-		    if (ticket->enc_part2->session->keytype == KEYTYPE_DES) {
-		        if (session_key.contents)
-			    free(session_key.contents);
-		        krb5_copy_keyblock_contents(telnet_context, 
+		    if (session_key.contents)
+		        free(session_key.contents);
+		    krb5_copy_keyblock_contents(telnet_context, 
 					   ticket->enc_part2->session,
 					   &session_key);
-		    } else
-		        break;
 		}
 		
 #ifdef ENCRYPTION

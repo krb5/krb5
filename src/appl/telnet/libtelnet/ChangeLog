@@ -1,4 +1,9 @@
 
+Tue Sep 05 22:10:34 1995   Chris Provenzano (proven@mit.edu)
+
+        * kerberos5.c : Remove krb5_enctype references, and replace with
+                krb5_keytype where appropriate.
+
 Thu Aug 3 11:36:15 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* kerberos.c - Give the compiler something to compile when K4 disabled.
 
