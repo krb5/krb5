@@ -1,3 +1,8 @@
+Fri Feb 13 13:23:18 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* accept_sec_context.c (krb5_gss_accept_sec_context): Always allow
+		use of the pre RFC mechanism when accepting contexts.
+
 Thu Feb 12 16:38:14 1998  Tom Yu  <tlyu@mit.edu>
 
 	* accept_sec_context.c (krb5_gss_accept_sec_context): Add lots of
