@@ -907,7 +907,7 @@ void do_schpw(int s1, kadm5_config_params *params)
     if (connect(s2, (struct sockaddr *) &from, sizeof(from)) < 0) {
 	krb5_klog_syslog(LOG_ERR, "chpw: Couldn't connect to client: %s",
 			 error_message(errno));
-	return;
+	goto cleanup;
     }
 
     if (ret = process_chpw_request(context, global_server_handle,
@@ -919,9 +919,10 @@ void do_schpw(int s1, kadm5_config_params *params)
 
     close(s2);
 
-    if (repdata.length == 0)
+    if (repdata.length == 0) {
 	/* just qreturn.  This means something really bad happened */
-	return;
+        goto cleanup;
+    }
 
     len = sendto(s1, repdata.data, repdata.length, 0,
 		 (struct sockaddr *) &from, sizeof(from));
@@ -931,10 +932,13 @@ void do_schpw(int s1, kadm5_config_params *params)
 
 	krb5_klog_syslog(LOG_ERR, "chpw: Error sending reply: %s", 
 			 error_message(errno));
-	return;
+	goto cleanup;
     }
 
     krb5_xfree(repdata.data);
+
+cleanup:
+    krb5_kt_close(context, kt);
 
     return;
 }

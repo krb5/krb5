@@ -20,6 +20,7 @@ process_chpw_request(context, server_handle, realm, s, keytab, sin, req, rep)
     char *ptr;
     int plen, vno;
     krb5_address local_kaddr, remote_kaddr;
+    int allocated_mem = 0;  
     krb5_data ap_req, ap_rep;
     krb5_auth_context auth_context;
     krb5_principal changepw;
@@ -149,6 +150,7 @@ process_chpw_request(context, server_handle, realm, s, keytab, sin, req, rep)
 	local_kaddr.length = addrs[0]->length;
 	local_kaddr.contents = malloc(addrs[0]->length);
 	memcpy(local_kaddr.contents, addrs[0]->contents, addrs[0]->length);
+	allocated_mem++;
 
 	krb5_free_addresses(context, addrs);
     }
@@ -367,6 +369,8 @@ bailout:
 	krb5_xfree(clear.data);
     if (cipher.length)
 	krb5_xfree(cipher.data);
+    if (allocated_mem) 
+        krb5_xfree(local_kaddr.contents);
 
     return(ret);
 }
