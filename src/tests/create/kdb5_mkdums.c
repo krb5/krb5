@@ -182,7 +182,8 @@ char *argv[];
     }
 
     if (etype == 0xffff)
-	etype = DEFAULT_KDC_ETYPE;
+	etype = krb5_keytype_array[master_keyblock.keytype]->
+	    system->proto_enctype;
 
     if (!valid_etype(etype)) {
 	com_err(progname, KRB5_PROG_ETYPE_NOSUPP,
