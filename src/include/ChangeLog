@@ -7,6 +7,8 @@
 	(krb5_seteuid, krb5_setegid): Replace function declarations with
 	macro definitions.
 	(krb5_setedid): Delete declaration of non-existent function.
+	(krb5_compat_recvauth, krb5_compat_recvauth_version): Declarations
+	deleted.
 
 2002-06-24  Ken Raeburn  <raeburn@mit.edu>
 
