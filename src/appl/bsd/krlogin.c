@@ -261,9 +261,7 @@ krb5_sigtype	sigwinch KRB5_PROTOTYPE((int));
 int server_message KRB5_PROTOTYPE((int));
 void oob KRB5_PROTOTYPE((void));
 krb5_sigtype	lostpeer KRB5_PROTOTYPE((int));
-#if __STDC__
-void setsignal(int sig, krb5_sigtype (*act)());
-#endif
+void setsignal KRB5_PROTOTYPE((int sig, krb5_sigtype (*act)()));
 static int read_wrapper(int fd, char *buf, int size, int *got_esc);
 void try_normal(char **);
 static void mode(int);
@@ -274,7 +272,7 @@ static void doit(sigset_t *);
 static int reader(int);
 static void doit(int);
 #endif
-static int control(unsigned char *, int);
+static int control(char *, int);
 static void sendwindow(void);
 static void stop(int), echo(int);
 static void writer(void), done(int);
@@ -1498,7 +1496,7 @@ void oob()
    client.  */
 
 static int control(cp, n)
-     unsigned char *cp;
+     char *cp;
      int n;
 {
     if ((n >= 5) && (cp[2] == 'o') && (cp[3] == 'o')) {
