@@ -18,6 +18,6 @@
 
 #define CRC32_CKSUMTYPE	1
 
-#define CRC32_CKSUM_LENGTH	(4*sizeof(octet))
+#define CRC32_CKSUM_LENGTH	(4*sizeof(krb5_octet))
 
 #endif /* __KRB5_CRC32__ */

@@ -25,14 +25,14 @@
 typedef struct _krb5_keyblock {
     krb5_keytype keytype;
     int length;
-    octet contents[1];			/* actually can be more, depending
+    krb5_octet contents[1];		/* actually can be more, depending
 					   on length */
 } krb5_keyblock;
 
 typedef struct _krb5_checksum {
     krb5_cksumtype checksum_type;	/* checksum type */
     int length;
-    octet contents[1];			/* actually can be more, depending
+    krb5_octet contents[1];		/* actually can be more, depending
 					   on length */
 } krb5_checksum;
 
