@@ -19,11 +19,11 @@ build : {KH68K} {KHPPC}
 .c.PPC.o : .c
 	MWCPPC {DepDir}{Default}.c {OPTIONS} -prefix {KHPPC}
 
-{KH}68K : {KH}.pch
+{KH68K} : {KH}KerberosHeaders.pch
 	MWC68K {KH}KerberosHeaders.pch -precompile {KH68K} {OPTIONS} -i {KH}
 
-{KH}PPC : {KH}.pch
-	MWCPPC {KH}KerberosHeaders.pch -precompile {KH}PPC {OPTIONS} -i {KH}
+{KHPPC} : {KH}KerberosHeaders.pch
+	MWCPPC {KH}KerberosHeaders.pch -precompile {KHPPC} {OPTIONS} -i {KH}
 
 link :
 	MWLink68K -library -model far -o libkrb5.68K {K5OBJS68K}

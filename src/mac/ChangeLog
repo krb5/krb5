@@ -1,3 +1,11 @@
+Wed Mar 20 00:16:45 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* macfiles.sh: Improved matching of the SRCS declaration.  It must
+		not be commented out; it must start on the first column of
+		the line.
+
+	* Makefile.tmpl (KH): Fix typos in Dan's original template.
+
 Wed Feb  7 00:26:08 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.tmpl, macfiles.sh: New files, for danw's changes to
