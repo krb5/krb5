@@ -1,3 +1,11 @@
+Wed Nov  6 17:48:49 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* lib/lib.t: global $test everywhere it is used
+
+	* api.2/mod-principal-v2.exp: init to kadmin/admin, not
+ 	kadmin/changepw; specify real principal, not null (obviously I
+ 	never ran these tests via the client library before)
+
 Fri Nov  1 13:15:37 1996  Barry Jaspan  <bjaspan@mit.edu>
 
 	* api.2/get-principal-v2.exp, api.2/mod-principal-v2.exp: update

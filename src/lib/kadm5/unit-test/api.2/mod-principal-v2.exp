@@ -14,7 +14,7 @@ proc test100_104 {} {
     }
 
     if {! [cmd {
-	kadm5_init admin admin $KADM5_CHANGEPW_SERVICE null \
+	kadm5_init admin admin $KADM5_ADMIN_SERVICE null \
 		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
 		server_handle
     }]} {
@@ -29,25 +29,25 @@ proc test100_104 {} {
     } $test]
 
     # test 101
-    one_line_fail_test {
-	kadm5_modify_principal $server_handle null \
+    one_line_fail_test [format {
+	kadm5_modify_principal $server_handle [simple_principal "%s/a"] \
 		{KADM5_LAST_SUCCESS}
-    } "BAD_MASK"
+    } $test] "BAD_MASK"
     # test 102
-    one_line_fail_test {
-	kadm5_modify_principal $server_handle null \
+    one_line_fail_test [format {
+	kadm5_modify_principal $server_handle [simple_principal "%s/a"] \
 		{KADM5_LAST_FAILED}
-    } "BAD_MASK"
+    } $test] "BAD_MASK"
     # test 103
-    one_line_fail_test {
-	kadm5_modify_principal $server_handle null \
+    one_line_fail_test [format {
+	kadm5_modify_principal $server_handle [simple_principal "%s/a"] \
 		{KADM5_FAIL_AUTH_COUNT}
-    } "BAD_MASK"
+    } $test] "BAD_MASK"
     # test 103.5
-    one_line_fail_test {
-	kadm5_modify_principal $server_handle null \
+    one_line_fail_test [format {
+	kadm5_modify_principal $server_handle [simple_principal "%s/a"] \
 		{KADM5_KEY_DATA}
-    } "BAD_MASK"
+    } $test] "BAD_MASK"
 
     # test 105
     one_line_fail_test [format {

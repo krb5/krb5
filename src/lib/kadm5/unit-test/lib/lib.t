@@ -12,7 +12,7 @@ set lib_pid 0
 # case.
 #
 proc lib_start_api {} {
-    global spawn_id lib_pid
+    global spawn_id lib_pid test
 
     if {! [api_isrunning $lib_pid]} {
 	api_exit
@@ -47,8 +47,7 @@ proc cmd {command} {
 }
 
 proc tcl_cmd {command} {
-    global prompt
-    global spawn_id
+    global prompt spawn_id test
 
     send "[string trim $command]\n"
     expect {
@@ -108,8 +107,7 @@ proc one_line_fail_test_nochk {command} {
 }
 
 proc resync {} {
-    global prompt
-    global spawn_id
+    global prompt spawn_id test
 
     expect {
 	-re "$prompt$"	{}
