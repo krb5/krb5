@@ -12,7 +12,16 @@ LinkFile(libcrypto.a, ./crypto/libcrypto.a)
 LinkFile(libgssapi_krb5.a, ./gssapi/libgssapi_krb5.a)
 LinkFile(libkrb4.a, ./krb4/libkrb4.a)
 LinkFile(libkdb4.a, ./kdb4/libkdb4.a)
+LinkFile(libdes425.a, ./des425/libdes425.a)
 AppendRule([all-unix:: all-unix-subdirs libkrb5.a libcrypto.a])
 AppendRule([all-unix:: libgssapi_krb5.a])
-AppendRule([all-unix:: libkrb4.a libkdb4.a])
+AppendRule([all-unix:: libkrb4.a libkdb4.a libdes425.a])
+AC_ARG_ENABLE([shared],
+[  --enable-shared         build with shared libraries],[
+LinkFile(libcrypto.so, ./crypto/libcrypto.so)
+LinkFile(libkrb5.so, ./krb5/libkrb5.so)
+LinkFile(libkrb4.so, ./krb4/libkrb4.so)
+LinkFile(libdes425.so, ./des425/libdes425.so)
+AppendRule([all-unix:: libkrb5.so libcrypto.so libkrb4.so libdes425.so])
+])dnl
 V5_AC_OUTPUT_MAKEFILE
