@@ -1,3 +1,23 @@
+2000-05-17  Tom Yu  <tlyu@mit.edu>
+
+	* kerberos_v4.c (process_v4): Zero out v4_pkt.mbz.
+	(kerberos_v4): Fix handling of APPL_REQUEST messages to deal with
+	ridiculously long realms, etc.  Fix up some calls to
+	kerb_err_reply() to be more useful.  Set req_*_ptr before any
+	possible calls to kerb_err_reply().
+
+2000-05-11  Nalin Dahyabhai  <nalin@redhat.com>
+
+	* kerberos_v4.c (process_v4): Don't assume that the realm is null-
+	terminated.
+	(set_tgtkey): Truncate realm name if it's too long.
+
+2000-04-28  Ken Raeburn  <raeburn@mit.edu>
+	    Nalin Dahyabhai  <nalin@redhat.com>
+
+	* kerberos_v4.c (kerb_err_reply): Use strncat so as not to overrun
+	error buffer.
+
 1999-10-26  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,

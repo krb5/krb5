@@ -233,11 +233,11 @@ krb5_data **resp;
         return(retval);
 
     if (!*local_realm) {		/* local-realm name already set up */
-	/* XXX assumes realm is null-terminated! */
 	lrealm = master_princ->realm.data;
-	if (strlen(lrealm) < sizeof(local_realm))
-	    strcpy(local_realm, lrealm);
-	else
+	if (master_princ->realm.length < sizeof(local_realm)) {
+	    memcpy(local_realm, lrealm, master_princ->realm.length);
+	    local_realm[master_princ->realm.length] = '\0';
+	} else
 	    retval = KRB5_CONFIG_NOTENUFSPACE;
     }
     /* convert client_fulladdr to client_sockaddr:
@@ -256,6 +256,7 @@ krb5_data **resp;
 	    return KRB5KRB_ERR_FIELD_TOOLONG;
     }
     v4_pkt.length = pkt->length;
+    v4_pkt.mbz = 0;
     memcpy( v4_pkt.dat, pkt->data, pkt->length);
 
     kerberos_v4( &client_sockaddr, &v4_pkt);
@@ -293,7 +294,7 @@ char * v4_klog( type, format, va_alist)
     case L_APPL_REQ:
 	strcpy(log_text, "PROCESS_V4:");
 	vsprintf(log_text+strlen(log_text), format, pvar);
-	krb5_klog_syslog(logpri, log_text);
+	krb5_klog_syslog(logpri, "%s", log_text);
     /* ignore the other types... */
     }
     va_end(pvar);
@@ -622,6 +623,9 @@ kerberos_v4(client, pkt)
 
     req_act_vno = req_version;
 
+    /* set these to point to something safe */
+    req_name_ptr = req_inst_ptr = req_realm_ptr = "";
+
     /* check if disabled, but we tell client */
     if (kdc_v4 == KDC_V4_DISABLE) {
 	lt = klog(L_KRB_PERR,
@@ -700,7 +704,7 @@ kerberos_v4(client, pkt)
 
 	    if ((i = check_princ(req_name_ptr, req_inst_ptr, 0,
 				 &a_name_data, &k5key, 0))) {
-		kerb_err_reply(client, pkt, i, lt);
+		kerb_err_reply(client, pkt, i, "check_princ failed");
 		a_name_data.key_low = a_name_data.key_high = 0;
 		krb5_free_keyblock_contents(kdc_context, &k5key);
 		return;
@@ -715,7 +719,7 @@ kerberos_v4(client, pkt)
 	    /* this does all the checking */
 	    if ((i = check_princ(service, instance, lifetime,
 				 &s_name_data, &k5key, 1))) {
-		kerb_err_reply(client, pkt, i, lt);
+		kerb_err_reply(client, pkt, i, "check_princ failed");
 		a_name_data.key_high = a_name_data.key_low = 0;
 		s_name_data.key_high = s_name_data.key_low = 0;
 		krb5_free_keyblock_contents(kdc_context, &k5key);
@@ -806,19 +810,40 @@ kerberos_v4(client, pkt)
 	    tk->length = 0;
 	    k_flags = 0;	/* various kerberos flags */
 
+	    auth->mbz = 0;	/* pkt->mbz already zeroed */
 	    auth->length = 4 + strlen((char *)pkt->dat + 3);
+	    if (auth->length + 1 > MAX_KTXT_LEN) {
+		lt = klog(L_KRB_PERR,
+			  "APPL request with realm length too long from %s",
+			  inet_ntoa(client_host));
+		kerb_err_reply(client, pkt, RD_AP_INCON,
+			       "realm length too long");
+		return;
+	    }
+
 	    auth->length += (int) *(pkt->dat + auth->length) +
 		(int) *(pkt->dat + auth->length + 1) + 2;
+	    if (auth->length > MAX_KTXT_LEN) {
+		lt = klog(L_KRB_PERR,
+			  "APPL request with funky tkt or req_id length from %s",
+			  inet_ntoa(client_host));
+		kerb_err_reply(client, pkt, RD_AP_INCON,
+			       "funky tkt or req_id length");
+		return;
+	    }
 
 	    memcpy(auth->dat, pkt->dat, auth->length);
 
 	    strncpy(tktrlm, (char *)auth->dat + 3, REALM_SZ);
+	    tktrlm[REALM_SZ-1] = '\0';
 	    kvno = (krb5_kvno)auth->dat[2];
 	    if (set_tgtkey(tktrlm, kvno)) {
 		lt = klog(L_ERR_UNK,
 			  "FAILED set_tgtkey realm %s, kvno %d. Host: %s ",
 			  tktrlm, kvno, inet_ntoa(client_host));
-		kerb_err_reply(client, pkt, kerno, lt);
+		/* no better error code */
+		kerb_err_reply(client, pkt,
+			       KERB_ERR_PRINCIPAL_UNKNOWN, lt);
 		return;
 	    }
 	    kerno = krb_rd_req(auth, "krbtgt", tktrlm, client_host.s_addr,
@@ -863,7 +888,7 @@ kerberos_v4(client, pkt)
 	    kerno = check_princ(service, instance, req_life,
 				&s_name_data, &k5key, 1);
 	    if (kerno) {
-		kerb_err_reply(client, pkt, kerno, lt);
+		kerb_err_reply(client, pkt, kerno, "check_princ failed");
 		s_name_data.key_high = s_name_data.key_low = 0;
 		krb5_free_keyblock_contents(kdc_context, &k5key);
 		return;
@@ -968,7 +993,7 @@ kerb_err_reply(client, pkt, err, string)
     static char e_msg[128];
 
     strcpy(e_msg, "\nKerberos error -- ");
-    strcat(e_msg, string);
+    strncat(e_msg, string, sizeof(e_msg) - 1 - 19);
     cr_err_reply(e_pkt, req_name_ptr, req_inst_ptr, req_realm_ptr,
 		 req_time_ws, err, e_msg);
     krb4_sendto(f, (char *) e_pkt->dat, e_pkt->length, 0,
@@ -1127,7 +1152,8 @@ set_tgtkey(r, kvno)
 
     if (!K4KDC_ENCTYPE_OK(k5key.enctype)) {
 	krb_set_key_krb5(kdc_context, &k5key);
-	strcpy(lastrealm, r);
+	strncpy(lastrealm, r, sizeof(lastrealm) - 1);
+	lastrealm[sizeof(lastrealm) - 1] = '\0';
 	last_kvno = kvno;
     } else {
 	/* unseal tgt key from master key */
@@ -1136,7 +1162,8 @@ set_tgtkey(r, kvno)
 	kdb_encrypt_key(key, key, master_key,
 			master_key_schedule, DECRYPT);
 	krb_set_key((char *) key, 0);
-	strcpy(lastrealm, r);
+	strncpy(lastrealm, r, sizeof(lastrealm) - 1);
+	lastrealm[sizeof(lastrealm) - 1] = '\0';
 	last_kvno = kvno;
     }
     krb5_free_keyblock_contents(kdc_context, &k5key);
