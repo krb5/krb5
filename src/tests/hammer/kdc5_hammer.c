@@ -83,12 +83,13 @@ int status;
 	    "usage: %s -p prefix -n num_to_check [-d dbpathname] [-r realmname]\n",
 	    who);
     fprintf(stderr, "\t [-D depth] [-k keytype] [-e etype] [-M mkeyname]\n");
-    fprintf(stderr, "\t [-r repeat_count]\n");
+    fprintf(stderr, "\t [-P preauth type] [-r repeat_count]\n");
 
     exit(status);
 }
 
 static krb5_enctype etype = 0xffff;
+static krb5_preauthtype patype = KRB5_PADATA_NONE;
 static krb5_keytype keytype;
 
 void
@@ -123,7 +124,7 @@ main(argc, argv)
     errors = 0;
     keytypedone = 0;
 
-    while ((option = getopt(argc, argv, "D:p:n:c:r:k:e:bv")) != EOF) {
+    while ((option = getopt(argc, argv, "D:p:n:c:r:k:P:e:bv")) != EOF) {
 	switch (option) {
 	case 'b':
 	    brief = 1;
@@ -149,6 +150,9 @@ main(argc, argv)
 	    break;
 	case 'e':
 	    etype = atoi(optarg);
+	    break;
+	case 'P':
+	    patype = atoi(optarg);
 	    break;
 	case 'c':
 	    if (ccache == NULL) {
@@ -423,11 +427,12 @@ int get_tgt (p_client_str, p_client, ccache)
     my_creds.times.renew_till = 0;
 
     code = krb5_get_in_tkt_with_password(options, my_addresses,
+					 patype,
 					 etype,
 					 keytype,
 					 p_client_str,
 					 ccache,
-					 &my_creds);
+					 &my_creds, 0);
     my_creds.server = my_creds.client = 0;
     krb5_free_principal(tgt_server);
     krb5_free_addresses(my_addresses);
