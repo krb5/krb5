@@ -1,3 +1,7 @@
+2004-02-03  Tom Yu  <tlyu@mit.edu>
+
+	* version.rc: Update for krb5-1.3.2-beta2.
+
 2004-02-02  Jeffrey Altman <jaltman@mit.edu>
 
     * README: Document PreserveInitialTicketIdentity registry key
