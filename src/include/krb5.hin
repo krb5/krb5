@@ -56,8 +56,13 @@
 #ifndef KRB5_GENERAL__
 #define KRB5_GENERAL__
 
+/* By default, do not expose deprecated interfaces. */
 #ifndef KRB5_DEPRECATED
-#define KRB5_DEPRECATED 1 /* Expose deprecated things for now. */
+#define KRB5_DEPRECATED 0
+#endif
+/* Do not expose private interfaces.  Build system will override. */
+#ifndef KRB5_PRIVATE
+#define KRB5_PRIVATE 0
 #endif
 
 #if defined(macintosh) || (defined(__MACH__) && defined(__APPLE__))
@@ -65,20 +70,6 @@
 #    if TARGET_RT_MAC_CFM
 #	error "Use KfM 4.0 SDK headers for CFM compilation."
 #    endif
-
-#	ifndef KRB5_PRIVATE /* Allow e.g. build system to override */
-#		define KRB5_PRIVATE 0
-#	endif
-#else
-#if defined(_WIN32)
-#	ifndef KRB5_PRIVATE
-#		define KRB5_PRIVATE 0
-#	endif
-#else
-#	ifndef KRB5_PRIVATE
-#		define KRB5_PRIVATE 1
-#	endif
-#endif
 #endif
 
 #if defined(_MSDOS) || defined(_WIN32)
