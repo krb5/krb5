@@ -248,6 +248,8 @@ add_princ(context, str_newprinc)
 
     sprintf(princ_name, "%s@%s", str_newprinc, cur_realm);
     
+    memset((char *)&newentry, 0, sizeof(newentry));
+
     if (retval = krb5_parse_name(context, princ_name, &newprinc)) {
       com_err(progname, retval, "while parsing '%s'", princ_name);
       return;
