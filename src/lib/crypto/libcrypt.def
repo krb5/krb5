@@ -1,8 +1,8 @@
 ;-----------------------------
-;   CRYPTO.DEF - module definition file
+;   LIBCRYPTO.DEF - module definition file
 ;-----------------------------
 
-LIBRARY   CRYPTO
+LIBRARY   LIBCRYPT
 DESCRIPTION 'DLL for Kerberos cryptography support'
 EXETYPE   WINDOWS
 CODE      PRELOAD MOVEABLE DISCARDABLE
@@ -10,7 +10,7 @@ DATA      PRELOAD MOVEABLE SINGLE
 HEAPSIZE  8192
 
 EXPORTS
-	WEP @1 RESIDENTNAME
+	WEP                                     @1 RESIDENTNAME
 	LIBMAIN                         	@2
 	CRC32_SUM_FUNC				@3 
 	KRB5_RANDOM_CONFOUNDER			@4 
@@ -50,3 +50,6 @@ EXPORTS
 	MIT_DES_STRING_TO_KEY			@38 
 	MIT_RAW_DES_DECRYPT_FUNC		@39 
 	MIT_RAW_DES_ENCRYPT_FUNC		@40 
+	LOAD_CRC32_CKSUMTABLE_ENTRY             @41 
+	LOAD_RSA_MD4_DES_CKSUMTABLE_ENTRY       @42
+	LOAD_RSA_MD5_DES_CKSUMTABLE_ENTRY       @43

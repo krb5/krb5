@@ -30,7 +30,7 @@ win_glue.obj:: win_glue.c
 libcrypto.lib:: libcrypto.dll
 	implib /nologo $@ $(@R).dll
 	
-libcrypto.dll:: $(LIBNAME)
+libcrypto.dll:: $(LIBNAME) libcrypto.def
 	link /co /noe /nologo win_glue,libcrypto.dll,nul,\
 		crypto.lib winsock ldllcew libw,libcrypto.def
 	rc /p /k $@
@@ -63,19 +63,19 @@ check-unix::
 all-windows::
 	cd crc32
 	@echo Making in ..\crc32
-	-$(MAKE) -$(MFLAGS)
+	-$(MAKE) -$(MFLAGS) LIBCMD=$(LIBCMD)
 	cd ..\des
 	@echo Making in des
-	-$(MAKE) -$(MFLAGS)
+	-$(MAKE) -$(MFLAGS) LIBCMD=$(LIBCMD)
 	cd ..\md4
 	@echo Making in ..\md4
-	-$(MAKE) -$(MFLAGS)
+	-$(MAKE) -$(MFLAGS) LIBCMD=$(LIBCMD)
 	cd ..\md5
 	@echo Making in ..\md5
-	-$(MAKE) -$(MFLAGS)
+	-$(MAKE) -$(MFLAGS) LIBCMD=$(LIBCMD)
 	cd ..\os
 	@echo Making in ..\os
-	-$(MAKE) -$(MFLAGS)
+	-$(MAKE) -$(MFLAGS) LIBCMD=$(LIBCMD)
 	cd ..
 
 clean-windows::

@@ -1,3 +1,8 @@
+Fri Mar 3 19:01:59 1995 Keith Vetter (keithv@fusion.com)
+
+	* md5crypto.c: added a method to pull in a data structure 
+           from outside a dll.
+
 Thu Mar 2 17:54:26 1995 Keith Vetter (keithv@fusion.com)
 
 	* Makefile.in: changed LIBNAME for the PC

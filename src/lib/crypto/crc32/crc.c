@@ -185,3 +185,15 @@ krb5_checksum_entry crc32_cksumtable_entry = {
     0,					/* not collision proof */
     0,					/* doesn't use key */
 };
+
+#if defined(_WINDOWS)
+/*
+** Windows can't pull in data from a DLL library. So we must provide a
+** method to do so. If the crypto library is merged in with the other
+** libraries, and this never gets called by an end-user, then we
+** can get rid of this.
+*/
+krb5_checksum_entry * INTERFACE load_crc32_cksumtable_entry (void) {
+    return &crc32_cksumtable_entry;
+}
+#endif
