@@ -221,5 +221,9 @@ Changes in 1.1a3:
  
 3.1d4
  from tag Mac_GSSKerberos5_3_1d4
- First Mac OS X release
- Fixed SDK script to copy glue.h files
+ first Mac OS X release
+
+3.1d5
+ from tag Mac_GSSKerberos5_3_1d5
+ fixed Carbon fragment names
+ 
