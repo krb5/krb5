@@ -3,6 +3,7 @@
 	* Makefile.in (includes): Delete gssapi_krb5.h rule.
 	($(GSSAPI_KRB5_HDR)): Add command to create header directory if
 	needed.
+	(all-unix): Add $(GSSAPI_KRB_HDR).
 
 2003-02-09  Ezra Peisach  <epeisach@bu.edu>
 
