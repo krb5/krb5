@@ -17,7 +17,7 @@ CFLAGS 	 = $(CCOPTS2) $(INCLUDES)
 !endif
 
 ##### RC Compiler
-##WIN16##RFLAGS 	 = /nologo /D$(KRB)=1 $(INCLUDES)
+##WIN16##RFLAGS 	 = /nologo $(INCLUDES)
 ##WIN32##RFLAGS 	 = $(INCLUDES)
 
 
