@@ -725,6 +725,37 @@ krb5_error_code encode_krb5_etype_info( rep, code)
   krb5_cleanup();
 }
 
+krb5_error_code encode_krb5_enc_data(rep, code)
+     const krb5_enc_data * rep;
+     krb5_data ** code;
+{
+  krb5_setup();
+
+  retval = asn1_encode_encrypted_data(buf,rep,&length);
+  if(retval) return retval;
+  sum += length;
+
+  krb5_cleanup();
+}
+
+krb5_error_code encode_krb5_pa_enc_ts(rep, code)
+     const krb5_pa_enc_ts * rep;
+     krb5_data ** code;
+{
+  krb5_setup();
+
+  /* pausec[1]                    INTEGER OPTIONAL */
+  if (rep->pausec)
+	  krb5_addfield(rep->pausec,1,asn1_encode_integer);
+
+  /* patimestamp[0]               KerberosTime, -- client's time */
+  krb5_addfield(rep->patimestamp,0,asn1_encode_kerberos_time);
+
+  krb5_makeseq();
+
+  krb5_cleanup();
+}
+
 /* Sandia Additions */
 krb5_error_code encode_krb5_pwd_sequence( rep, code)
      const passwd_phrase_element * rep;

@@ -727,6 +727,32 @@ krb5_error_code decode_krb5_etype_info(code, rep)
   cleanup_none();		/* we're not allocating anything here */
 }
 
-  
-    
-	
+krb5_error_code decode_krb5_enc_data(code, rep)
+     const krb5_data * code;
+     krb5_enc_data ** rep;
+{
+  setup_buf_only();
+  alloc_field(*rep,krb5_enc_data);
+
+  retval = asn1_decode_encrypted_data(&buf,*rep);
+  if(retval) clean_return(retval);
+
+  cleanup(free);
+}
+
+krb5_error_code decode_krb5_pa_enc_ts(code, rep)
+     const krb5_data * code;
+     krb5_pa_enc_ts ** rep;
+{
+  setup();
+  alloc_field(*rep,krb5_pa_enc_ts);
+  { begin_structure();
+    get_field((*rep)->patimestamp,0,asn1_decode_kerberos_time);
+    if (tagnum == 1) {
+	get_field((*rep)->pausec,1,asn1_decode_int);
+    } else
+	(*rep)->pausec = 0;
+    end_structure (); }
+  cleanup(free);
+}
+

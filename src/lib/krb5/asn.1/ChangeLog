@@ -1,3 +1,14 @@
+Tue Oct 31 20:06:49 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* krb5_decode.c (decode_krb5_pa_enc_ts, decode_krb5_enc_data):
+	        Added new functions.
+
+	* krb5_encode.c (encode_krb5_pa_enc_ts, encode_krb5_enc_data):
+	        Added new functions.
+
+	* KRB5-asn.py (PA-ENC-TS-ENC): Added new definition for the
+		krb5_pa_enc_ts structure.
+
 Fri Oct  6 22:03:01 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in: Remove ##DOS!include of config/windows.in.

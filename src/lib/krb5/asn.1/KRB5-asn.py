@@ -329,6 +329,11 @@ ETYPE-INFO-ENTRY ::= SEQUENCE {
 
 ETYPE-INFO ::= SEQUENCE OF ETYPE-INFO-ENTRY
 
+PA-ENC-TS-ENC   ::= SEQUENCE {
+       patimestamp[0]               KerberosTime, -- client's time
+       pausec[1]                    INTEGER OPTIONAL
+}
+
 -- These ASN.1 definitions are NOT part of the official Kerberos protocol... 
 
 -- New ASN.1 definitions for the kadmin protocol.
