@@ -1,3 +1,8 @@
+2001-11-06  Tom Yu  <tlyu@mit.edu>
+
+	* rsh.exp: Fix date-grabbing regexp to deal with older versions of
+	expect/tcl that have limited regexp capabilities.
+
 2001-11-02  Tom Yu  <tlyu@mit.edu>
 
 	* rsh.exp: Fix date grabbing code so we don't try to parse the
