@@ -13,7 +13,6 @@ static char rcsid[] = "$Id$";
 
 #include "kpasswd_strings.h"
 #define string_text error_message
-#define initialize_kpasswd_strings initialize_kpws_error_table
 
 #include <stdio.h>
 #include <pwd.h>
@@ -95,8 +94,6 @@ kpasswd(context, argc, argv)
       return(7);
       /*NOTREACHED*/
     }
-
-  krb5_init_ets(context);
 
   /************************************
    *  Get principal name to change    * 

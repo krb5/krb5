@@ -13,7 +13,6 @@ static char rcsid[] = "$Id$";
 
 #include "kpasswd_strings.h"
 #define string_text error_message
-#define initialize_kpasswd_strings initialize_kpws_error_table
 
 #include <stdio.h>
 #include <pwd.h>
@@ -63,14 +62,14 @@ main(argc, argv)
   krb5_context context;
   int retval;
 
-  initialize_kpasswd_strings();
-
   whoami = (whoami = strrchr(argv[0], '/')) ? whoami + 1 : argv[0];
 
   if (retval = krb5_init_context(&context)) {
        com_err(whoami, retval, "initializing krb5 context");
        exit(retval);
   }
+  initialize_kpws_error_table();
+
   retval = kpasswd(context, argc, argv);
 
   if (!retval)
