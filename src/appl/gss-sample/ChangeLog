@@ -1,3 +1,9 @@
+
+Mon May 22 15:41:33 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* gss-server.c	: (server_establish_context) Don't call gss_release_
+			  buffer right after gss_accept_sec_context because
+			  in the event that we choke, we lose the minor status
+
 Fri Apr 28 15:30:00 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in (gss-client): Use $(LD) instead of $(CC) so that we can

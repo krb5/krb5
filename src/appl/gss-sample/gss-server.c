@@ -361,12 +361,13 @@ int server_establish_context(s, server_creds, context, client_name)
 				      NULL, 	/* ignore time_rec */
 				      NULL); 	/* ignore del_cred_handle */
 
-	  (void) gss_release_buffer(&min_stat, &recv_tok);
-	  
 	  if (maj_stat!=GSS_S_COMPLETE && maj_stat!=GSS_S_CONTINUE_NEEDED) {
 	       display_status("accepting context", maj_stat, min_stat);
+	       (void) gss_release_buffer(&min_stat, &recv_tok);
 	       return -1;
 	  }
+	  (void) gss_release_buffer(&min_stat, &recv_tok);
+	  
 
 	  if (send_tok.length != 0) {
 	       if (send_token(s, &send_tok) < 0) {
