@@ -142,6 +142,10 @@ LOPTS=-nologo -incremental:no
 # CCOPTS2 was for non-DLL compiles (EXEs, for example)
 #
 !ifdef NODEBUG
+!ifdef DEBUG_SYMBOL
+CCOPTS=/ZI $(CCOPTS)
+LOPTS=$(LOPTS) -debug
+!endif
 CCOPTS=/Os /MD $(CCOPTS)
 LOPTS=$(LOPTS)
 !else
@@ -170,7 +174,7 @@ CLIB=$(BUILDTOP)\lib\$(OUTPRE)comerr32.lib
 PLIB=$(BUILDTOP)\lib\$(OUTPRE)xpprof32.lib
 KLIB=$(BUILDTOP)\lib\$(OUTPRE)krb5_32.lib
 K4LIB=$(BUILDTOP)\lib\$(OUTPRE)krb4_32.lib
-SLIB=$(BUILDTOP)\lib\$(OUTPRE)krb5support_32.lib
+SLIB=$(BUILDTOP)\lib\$(OUTPRE)k5sprt32.lib
 GLIB=$(BUILDTOP)\lib\$(OUTPRE)gssapi32.lib
 WLIB=
 

@@ -88,6 +88,10 @@ extern char *unptyip;  /* pointer to remaining characters in buffer */
 extern int	pty, net;
 extern int	SYNCHing;		/* we are in TELNET SYNCH mode */
 
+#ifdef ENCRYPTION
+extern int	must_encrypt;
+#endif
+
 extern void
 	_termstat (void),
 	add_slc (int, int, int),

@@ -54,6 +54,11 @@ long KRB5_CALLCONV profile_flush_to_buffer
 void KRB5_CALLCONV profile_free_buffer
 	(profile_t profile, char *buf);
 
+long KRB5_CALLCONV profile_is_writable
+	(profile_t profile, int *writable);
+long KRB5_CALLCONV profile_is_modified
+	(profile_t profile, int *modified);
+
 void KRB5_CALLCONV profile_abandon
 	(profile_t profile);
 

@@ -1,3 +1,7 @@
+2004-12-15  Jeffrey Altman <jaltman@mit.edu>
+   
+         * version.rc: rename krb5support.dll to k5sprt32.dll
+
 2004-09-30  Jeffrey Altman <jaltman@mit.edu>
 
         * version.rc: Add pismere condition resource strings

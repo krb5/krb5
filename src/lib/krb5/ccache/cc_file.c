@@ -264,10 +264,6 @@ typedef struct _krb5_fcc_data {
        that can be changed.  (Filename is fixed after
        initialization.)  */
     k5_mutex_t lock;
-    /* Grab this one before trying to get an advisory lock on the disk
-       file, since the facility is per-process, not per-thread.  */
-    k5_mutex_t disk_file_lock;
-    int file_is_locked;
     int file;
     krb5_flags flags;
     int mode;				/* needed for locking code */
@@ -1172,9 +1168,7 @@ krb5_fcc_close_file (krb5_context context, krb5_fcc_data *data)
 	 return KRB5_FCC_INTERNAL;
 
      retval = krb5_unlock_file(context, data->file);
-     k5_mutex_unlock(&data->disk_file_lock);
      ret = close (data->file);
-     data->file_is_locked = 0;
      data->file = NO_FILE;
      if (retval)
 	 return retval;
@@ -1212,11 +1206,7 @@ krb5_fcc_open_file (krb5_context context, krb5_ccache id, int mode)
 
     if (data->file != NO_FILE) {
 	/* Don't know what state it's in; shut down and start anew.  */
-	if (data->file_is_locked) {
-	    (void) krb5_unlock_file(context, data->file);
-	    k5_mutex_unlock(&data->disk_file_lock);
-	    data->file_is_locked = 0;
-	}
+	(void) krb5_unlock_file(context, data->file);
 	(void) close (data->file);
 	data->file = NO_FILE;
     }
@@ -1245,17 +1235,10 @@ krb5_fcc_open_file (krb5_context context, krb5_ccache id, int mode)
 	lock_flag = KRB5_LOCKMODE_SHARED;
     else 
 	lock_flag = KRB5_LOCKMODE_EXCLUSIVE;
-    retval = k5_mutex_lock(&data->disk_file_lock);
-    if (retval) {
-	close(f);
-	return retval;
-    }
     if ((retval = krb5_lock_file(context, f, lock_flag))) {
-	k5_mutex_unlock(&data->disk_file_lock);
 	(void) close(f);
 	return retval;
     }
-    data->file_is_locked = 1;
 
     if (mode == FCC_OPEN_AND_ERASE) {
 	 /* write the version number */
@@ -1378,8 +1361,6 @@ done:
      if (retval) {
          data->file = -1;
          (void) krb5_unlock_file(context, f);
-	 (void) k5_mutex_unlock(&data->disk_file_lock);
-	 data->file_is_locked = 0;
          (void) close(f);
      }
      return retval;
@@ -1486,9 +1467,13 @@ static krb5_error_code dereference(krb5_context context, krb5_fcc_data *data)
     assert(*fccsp != NULL);
     (*fccsp)->refcount--;
     if ((*fccsp)->refcount == 0) {
+        struct fcc_set *temp;
 	data = (*fccsp)->data;
+	temp = *fccsp;
 	*fccsp = (*fccsp)->next;
+	free(temp);
 	k5_mutex_unlock(&krb5int_cc_file_mutex);
+	k5_mutex_assert_unlocked(&data->lock);
 	free(data->filename);
 	zap(data->buf, sizeof(data->buf));
 	if (data->file >= 0) {
@@ -1496,9 +1481,7 @@ static krb5_error_code dereference(krb5_context context, krb5_fcc_data *data)
 	    krb5_fcc_close_file(context, data);
 	    k5_mutex_unlock(&data->lock);
 	}
-	k5_mutex_assert_unlocked(&data->lock);
 	k5_mutex_destroy(&data->lock);
-	k5_mutex_destroy(&data->disk_file_lock);
 	free(data);
     } else
 	k5_mutex_unlock(&krb5int_cc_file_mutex);
@@ -1517,6 +1500,7 @@ static krb5_error_code KRB5_CALLCONV
 krb5_fcc_close(krb5_context context, krb5_ccache id)
 {
      dereference(context, (krb5_fcc_data *) id->data);
+     krb5_xfree(id);
      return KRB5_OK;
 }
 
@@ -1730,25 +1714,14 @@ krb5_fcc_resolve (krb5_context context, krb5_ccache *id, const char *residual)
 	     free(data);
 	     return kret;
 	 }
-	 kret = k5_mutex_init(&data->disk_file_lock);
-	 if (kret) {
-	     k5_mutex_unlock(&krb5int_cc_file_mutex);
-	     k5_mutex_unlock(&data->lock);
-	     k5_mutex_destroy(&data->lock);
-	     free(data->filename);
-	     free(data);
-	     return kret;
-	 }
 	 /* data->version,mode filled in for real later */
 	 data->version = data->mode = 0;
-	 data->file_is_locked = 0;
 	 data->flags = KRB5_TC_OPENCLOSE;
 	 data->file = -1;
 	 data->valid_bytes = 0;
 	 setptr = malloc(sizeof(struct fcc_set));
 	 if (setptr == NULL) {
 	     k5_mutex_unlock(&krb5int_cc_file_mutex);
-	     k5_mutex_destroy(&data->disk_file_lock);
 	     k5_mutex_destroy(&data->lock);
 	     free(data->filename);
 	     free(data);
@@ -2010,12 +1983,6 @@ krb5_fcc_generate_new (krb5_context context, krb5_ccache *id)
      retcode = k5_mutex_init(&data->lock);
      if (retcode)
 	 goto err_out;
-     retcode = k5_mutex_init(&data->disk_file_lock);
-     if (retcode) {
-	 k5_mutex_destroy(&data->lock);
-	 goto err_out;
-     }
-     data->file_is_locked = 0;
 
      /* Set up the filename */
      strcpy(((krb5_fcc_data *) lid->data)->filename, scratch);
@@ -2233,7 +2200,9 @@ krb5_fcc_set_flags(krb5_context context, krb5_ccache id, krb5_flags flags)
     /* XXX This should check for illegal combinations, if any.. */
     if (flags & KRB5_TC_OPENCLOSE) {
 	/* asking to turn on OPENCLOSE mode */
-	if (!OPENCLOSE(id))
+	if (!OPENCLOSE(id)
+	    /* XXX Is this test necessary? */
+	    && ((krb5_fcc_data *) id->data)->file != NO_FILE)
             (void) krb5_fcc_close_file (context, ((krb5_fcc_data *) id->data));
     } else {
 	/* asking to turn off OPENCLOSE mode, meaning it must be

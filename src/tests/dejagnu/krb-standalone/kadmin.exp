@@ -402,6 +402,11 @@ proc kadmin_list {  } {
 	    catch "expect_after"
 	    return 0
 	}
+	"Communication failure" {
+	    fail "kadmin ldb got RPC error"
+	    catch "expect_after"
+	    return 0
+	}
 	timeout {
 	    fail "kadmin ldb"
 	    catch "expect_after"
@@ -416,7 +421,7 @@ proc kadmin_list {  } {
     expect -re "assword\[^\r\n\]*: *" {
 	send "adminpass$KEY\r"
     }
-    expect -re "\(.*@$REALMNAME\r\n\)*"
+    expect -re "\(.*@$REALMNAME\r\n\)+"
     expect_after
     expect eof
     set k_stat [wait -i $spawn_id]
@@ -1033,6 +1038,17 @@ proc kadmin_test { } {
 	return
     }
 
+    # test retrieval of large number of principals
+    # bug [2877]
+    for { set i 0 } { $i < 200 } { incr i } {
+	if { ![kadmin_add "foo$i" foopass] } {
+	    return
+	}
+    }
+
+    if { ![kadmin_list] } {
+	return
+    }
     verbose "kadmin_test succeeded"
 }
 

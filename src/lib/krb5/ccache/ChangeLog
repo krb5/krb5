@@ -1,3 +1,42 @@
+2005-01-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* cc_file.c (struct _krb5_fcc_data): Fields disk_file_lock,
+	file_is_locked deleted.
+	(krb5_fcc_open_file, krb5_fcc_close_file, dereference,
+	krb5_fcc_resolve, krb5_fcc_generate_new, krb5_fcc_set_flags):
+	Don't set or check them.
+
+2005-01-11  Jeffrey Altman <jaltman@mit.edu>
+
+        * cc_mslsa.c: 
+          - do not free krb5_creds if krb5_copy_creds fails
+          - cause MSTicketToMITTicket to return failure if
+            krb5_copy_data fails
+
+2004-12-25  Ezra Peisach  <epeisach@mit.edu>
+
+	* cc_file.c (krb5_fcc_close): Free the cache id.
+	(dereference): When removing fcc_set entry from list, free the
+	pointer as well.
+
+2004-12-16  Jeffrey Altman <jaltman@mit.edu>
+        * cc_mslsa.c:
+          Temporarily deactivate support for KerbSubmitTicketMessage   
+          and KerbQueryTicketCacheEx2Message until the new Platform SDK
+          becomes publicly available.
+
+2004-12-15  Jeffrey Altman <jaltman@mit.edu>
+
+        * cc_mslsa.c: 
+          - Activate support for KerbSubmitTicketMessage
+          - Activate support for KerbQueryTicketCacheEx2Message
+          - Add locale support for regions which use MultiByte characters
+
+2004-11-19  Ken Raeburn  <raeburn@mit.edu>
+
+	* cc_mslsa.c (MSCredToMITCred): Don't create an empty array for
+	addresses, just use a null pointer now.
+
 2004-10-07  Jeffrey Altman <jaltman@mit.edu>
         * cc_mslsa.c: Fix the forced setting of the Initial Ticket Flag
                 on Win2000 and add it to XP and 2003 SP1

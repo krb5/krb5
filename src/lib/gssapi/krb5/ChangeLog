@@ -1,3 +1,9 @@
+2005-01-13 Jeffrey Altman <jaltman@mit.edu>
+
+        * init_sec_context.c, acquire_cred.c: fix calls to 
+          krb5_gss_release_cred() to pass in the correct type.
+          This fixes a mutex leak.
+
 2004-08-27  Tom Yu  <tlyu@mit.edu>
 
 	* init_sec_context.c (make_ap_req_v1): Free checksum data

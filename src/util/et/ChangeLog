@@ -1,3 +1,14 @@
+2005-01-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* error_message.c (com_err_terminate): Lock the list mutex before
+	walking through it; unlock and destroy it afterwards.
+
+2004-11-05  Ken Raeburn  <raeburn@mit.edu>
+
+	* et_h.awk: Declare initialize_*_error_table as taking no
+	arguments.
+	* et_h.pl: Regenerated.
+
 2004-10-07  Tom Yu  <tlyu@mit.edu>
 
 	* et_c.awk, et_h.awk: Fix off-by-one error.
