@@ -1,3 +1,9 @@
+Mon Nov 27 14:52:23 1995  Tom Yu  <tlyu@dragons-lair.MIT.EDU>
+
+	* rc_dfl.c (krb5_rc_dfl_init): default lifespan to
+		context->clockskew in case some app can't get at the
+		internals of the context struct.
+
 Fri Oct  6 22:05:31 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in: Remove ##DOS!include of config/windows.in.

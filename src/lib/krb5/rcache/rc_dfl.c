@@ -189,7 +189,8 @@ krb5_deltat lifespan;
     struct dfl_data *t = (struct dfl_data *)id->data;
     krb5_error_code retval;
 
-    t->lifespan = lifespan;
+    t->lifespan = lifespan ? lifespan : context->clockskew;
+    /* default to clockskew from the context */
 #ifndef NOIOSTUFF
     if ((retval = krb5_rc_io_creat(context, &t->d,&t->name)))
 	return retval;
