@@ -1,3 +1,8 @@
+2001-10-11  Tom Yu  <tlyu@mit.edu>
+
+	* post.in: Minor tidying.  Make the target of the mondo recursion
+	rule commands be the variable $(RECURSE_TARGETS).
+
 2001-09-06  Ken Raeburn  <raeburn@mit.edu>
 
 	* post.in (depfix2.sed): New target, generates a sed script

@@ -74,7 +74,10 @@ $(srcdir)/$(thisconfigdir)/configure: $(srcdir)/$(thisconfigdir)/configure.in \
 	cd $(srcdir)/$(thisconfigdir) && \
 		$(AUTOCONF) --localdir=$(CONFIG_RELTOPDIR) $(AUTOCONFFLAGS)
 
-all-recurse clean-recurse distclean-recurse install-recurse check-recurse depend-recurse Makefiles-recurse:
+RECURSE_TARGETS=all-recurse clean-recurse distclean-recurse install-recurse \
+	check-recurse depend-recurse Makefiles-recurse
+
+$(RECURSE_TARGETS):
 	@case "`echo 'x$(MFLAGS)'|sed -e 's/^x//' -e 's/ --.*$$//'`" \
 		in *[ik]*) e="status=1" ;; *) e="exit 1";; esac; \
 	if test -z "$(MY_SUBDIRS)" ; then \
