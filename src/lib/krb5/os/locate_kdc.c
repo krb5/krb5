@@ -71,7 +71,6 @@ krb5_locate_kdc(context, realm, addr_pp, naddrs, master_index, nmasters)
     realm_kdc_names[3] = 0;
 
     code = profile_get_values(context->profile, realm_kdc_names, &hostlist);
-    krb5_xfree(host);
 
      if (code == PROF_NO_SECTION) {
  	krb5_xfree(host);
