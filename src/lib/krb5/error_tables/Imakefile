@@ -1,13 +1,17 @@
-SRCS=isode_err.c kdb5_err.c krb5_err.c
+ETSRCS=isode_err.c kdb5_err.c krb5_err.c
 
-OBJS=isode_err.o kdb5_err.o krb5_err.o
+ETOBJS=isode_err.o kdb5_err.o krb5_err.o
 
-HDRS=isode_err.h kdb5_err.h krb5_err.h
+ETHDRS=isode_err.h kdb5_err.h krb5_err.h
+
+SRCS= $(ETSRCS) init_ets.c
+OBJS= $(ETOBJS) init_ets.o
+HDRS= $(ETHDRS)
 
 all:: ${SRCS} ${HDRS} ${OBJS}
 
 clean::
-	$(RM) $(HDRS) $(SRCS)
+	$(RM) $(ETHDRS) $(ETSRCS)
 
 NormalLibraryObjectRule()
 ErrorTableObjectRule()
