@@ -887,13 +887,6 @@ void extract_v4_srvtab(argc, argv)
 	    exit_status++;
 	    goto cleanall;
 	}
-	if (key.enctype != 1) {
-		com_err(argv[0], 0, "%s does not have a DES key!", pname);
-		exit_status++;
-		memset((char *)key.contents, 0, key.length);
-		krb5_xfree(key.contents);
-		continue;
-	}
 	fwrite(argv[i], strlen(argv[i]) + 1, 1, fout); /* p.name */
 	fwrite(argv[1], strlen(argv[1]) + 1, 1, fout); /* p.instance */
 	fwrite(cur_realm, strlen(cur_realm) + 1, 1, fout); /* p.realm */

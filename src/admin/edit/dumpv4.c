@@ -114,77 +114,42 @@ dump_v4_iterator(ptr, entry)
     struct dump_record *arg = (struct dump_record *) ptr;
     krb5_tl_mod_princ *mod_princ = NULL;
     krb5_error_code retval;
-    char *mod_name=NULL;
-    char *name=NULL;
     int	i, max_kvno, ok_key;
 
     struct v4princ {
-      char name[ANAME_SZ+1];
-      char instance[INST_SZ+1];
-      int max_life;
-      int kdc_key_ver, key_version, attributes;
-      char mod_name[ANAME_SZ+1];
-      char mod_instance[INST_SZ+1];
+	char name[ANAME_SZ+1];
+	char instance[INST_SZ+1];
+	char realm[REALM_SZ+1];
+	int max_life;
+	int kdc_key_ver, key_version, attributes;
+	char mod_name[ANAME_SZ+1];
+	char mod_instance[INST_SZ+1];
+	char mod_realm[REALM_SZ+1];
     } v4princ, *principal;
     des_cblock v4key;
-
-    v4princ.name[ANAME_SZ] = 0;
-    v4princ.mod_name[ANAME_SZ] = 0;
-    v4princ.instance[INST_SZ] = 0;
-    v4princ.mod_instance[INST_SZ] = 0;
-
+    
     principal = &v4princ;
 
-    if (retval = krb5_unparse_name(edit_context, entry->princ, &name)) {
-	com_err(arg->comerr_name, retval, "while unparsing principal");
-	exit_status++;
-	return retval;
-    }
-
-    if (strcmp(krb5_princ_realm(edit_context, entry->princ)->data, arg->realm)){
-	/* 
-	 * skip this because it's a key for a different realm, probably
-	 * a paired krbtgt key 
-	 */
-        free(name);
+    if (strcmp(krb5_princ_realm(edit_context, entry->princ)->data, arg->realm))
+	/* skip this because it's a key for a different realm, probably
+	 * a paired krbtgt key */
 	return 0;
-    }
 
-    strncpy(principal->name,
-	    krb5_princ_component(edit_context, entry->princ, 0)->data,ANAME_SZ);
-    if (!strcmp(principal->name, "host")) {
-        strcpy(principal->name, "rcmd");
-    }
-    if (!principal->name[0]) {
-        strcpy(principal->name, "*");
-    }
-
-    if (entry->princ->length > 2) {
-	free(name);
+    retval = krb5_524_conv_principal(edit_context, entry->princ,
+				     principal->name, principal->instance,
+				     principal->realm);
+    if (retval)
+	/* Skip invalid V4 principals */
 	return 0;
-    } else if (entry->princ->length > 1) {
-        char *inst;
-        strncpy(principal->instance,
-	        krb5_princ_component(edit_context, entry->princ, 1)->data, 
-	        INST_SZ);
-        if ((inst = strchr(principal->instance, '.')) &&
-	    strcmp(principal->name, "krbtgt") &&
-	    strcmp(principal->name, "afs"))
-	{
-	    /* nuke domain off the end of anything that isn't a tgt */
-	    *inst = '\0';
-        }
-	if (!strcmp(principal->name, "K") && !strcmp(principal->instance, "M"))
-	{
-	    /* The V4 master key is handled specially */
-	    free(name);
-	    return 0;
-	}
-    } else {
-        principal->instance[0] = '*';
-        principal->instance[1] = '\0';
-    }
-    free(name);
+
+    if (!strcmp(principal->name, "K") && !strcmp(principal->instance, "M"))
+	/* The V4 master key is handled specially */
+	return 0;
+
+    if (! principal->name[0])
+	return 0;
+    if (! principal->instance[0])
+	strcpy(principal->instance, "*");
 
     /* Now move to mod princ */
     if (retval = krb5_dbe_decode_mod_princ_data(edit_context,entry,&mod_princ)){
@@ -192,28 +157,20 @@ dump_v4_iterator(ptr, entry)
 	exit_status++;
 	return retval;
     }
-    if (retval=krb5_unparse_name(edit_context,mod_princ->mod_princ,&mod_name)) {
-	com_err(arg->comerr_name, retval, "while unparsing principal");
-	exit_status++;
-	return retval;
-    }
-    strncpy(principal->mod_name,
-	    krb5_princ_component(edit_context, mod_princ->mod_princ, 0)->data, 
-	    ANAME_SZ);
-    if (!principal->mod_name[0]) {
-      strcpy(principal->mod_name, "*");
+    retval = krb5_524_conv_principal(edit_context, mod_princ->mod_princ,
+				     principal->mod_name, principal->mod_instance,
+				     principal->mod_realm);
+    if (retval) {
+	/* Invalid V4 mod principal */
+	principal->mod_name[0] = '\0';
+	principal->mod_instance[0] = '\0';
     }
 
-    if (mod_princ->mod_princ->length > 1) {
-        strncpy(principal->mod_instance, 
-	        krb5_princ_component(edit_context,mod_princ->mod_princ,1)->data,
-	        INST_SZ);
-    } else {
-        principal->mod_instance[0] = '*';
-        principal->mod_instance[1] = '\0';
-    }
-    free(mod_name);
-
+    if (! principal->mod_name[0])
+	strcpy(principal->mod_name, "*");
+    if (! principal->mod_instance[0])
+	strcpy(principal->mod_instance, "*");
+    
     /* OK deal with the key now. */
     for (max_kvno = i = 0; i < entry->n_key_data; i++) {
 	if (max_kvno < entry->key_data[i].key_data_kvno) {

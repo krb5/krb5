@@ -1,3 +1,14 @@
+Tue Mar 19 18:00:58 1996  Richard Basch  <basch@lehman.com>
+
+	* kdb5_edit.c (extract_v4_srvtab): do not test to make sure we
+	fetched a key of enctype 1 (des-cbc-crc), since we may have gotten
+	another des key from the database, which is just as useful in a
+	v4 srvtab
+
+	* dumpv4.c (dump_v4_iterator): use krb5_524_conv_principal to do the
+	v5 to v4 principal translation, instead of having yet another
+	hard-coded table.
+
 Wed Mar  6 16:17:20 1996  Richard Basch  <basch@lehman.com>
 
 	* dumpv4.c: The V4 master key & schedule was never initialized,
