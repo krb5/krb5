@@ -252,7 +252,6 @@ process_client(context, prog)
 		(krb5_pointer) &client_server_info.client_socket,
 		ADM5_CPW_VERSION,
 		client_server_info.server,
-		NULL,
 		0,
 		NULL,
 		&client_ticket

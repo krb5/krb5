@@ -1,3 +1,7 @@
+Wed May 03 03:30:51 1995  Chris Provenzano (proven@mit.edu)
+
+        * adm_process.c: (krb5_recvauth()): No longer needs the rc_type arg.
+
 Sat Apr 29 00:24:48 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* adm_network.c (setup_network): Use sigaction() instead of
