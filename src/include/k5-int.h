@@ -844,7 +844,6 @@ typedef struct _krb5_preauth_ops {
 krb5_error_code krb5_obtain_padata
     	KRB5_PROTOTYPE((krb5_context,
 		krb5_pa_data **,
-		krb5_etype_info,
 		krb5_error_code ( * )(krb5_context,
 	   			      krb5_const krb5_enctype,
                                       krb5_data *,

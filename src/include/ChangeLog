@@ -1,3 +1,8 @@
+Thu Nov  9 00:04:52 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* k5-int.h: Remove etype_info from the argument list of
+	        krb5_obtain_padata.
+
 Wed Nov  8 02:53:48 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* krb5.hin: Add preauthentication type KRB5_PADATA_ETYPE_INFO.
