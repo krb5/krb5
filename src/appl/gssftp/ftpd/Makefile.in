@@ -29,8 +29,8 @@ LOCALINCLUDES = -I$(srcdir)/.. -I$(srcdir) @KRB4_INCLUDES@
 
 all::	ftpd
 
-ftpd:	$(OBJS) $(PTY_DEPLIB) $(GSS_DEPLIBS) $(UTIL_DEPLIB) $(KRB4COMPAT_DEPLIBS)
-	$(CC_LINK) -o $@ $(OBJS) $(FTPD_LIBS) $(PTY_LIB) $(GSS_LIBS) $(UTIL_LIB) $(KRB4COMPAT_LIBS)
+ftpd:	$(OBJS) $(PTY_DEPLIB) $(GSS_DEPLIBS) $(KRB4COMPAT_DEPLIBS)
+	$(CC_LINK) -o $@ $(OBJS) $(FTPD_LIBS) $(PTY_LIB) $(GSS_LIBS) $(KRB4COMPAT_LIBS)
 
 clean::
 	$(RM) ftpd ftpcmd.c

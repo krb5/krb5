@@ -1,3 +1,7 @@
+2002-06-25  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (ftpd): Don't use krb5util library.
+
 2002-04-11  Sam Hartman  <hartmans@mit.edu>
 
 	* ftpd.c (adata;): Don't use channel bindings in call to gss_accept
