@@ -33,9 +33,6 @@ void krb_log(const char *, ...);
 
 void krb_set_logfile(char *);
 
-/* mk_req.c */
-int krb_set_lifetime(int);
-
 /* month_sname.c */
 const char * month_sname(int);
 
