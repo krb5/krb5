@@ -1,3 +1,8 @@
+Mon Aug  5 16:46:48 1996  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
+
+	* Makefile.in (CFLAGS): Change DEBUG_GSSAPI to 0 to avoid printing
+		excess stuff to stderr.
+
 Wed Jul 31 20:36:34 1996  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
 
 	* getrpcent.c: Shuffle inclusion order somewhat.
