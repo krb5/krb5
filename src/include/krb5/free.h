@@ -45,5 +45,6 @@ void krb5_free_tgs_req_enc_part PROTOTYPE((krb5_tgs_req_enc_part *));
 void krb5_free_safe PROTOTYPE((krb5_safe *));
 void krb5_free_priv PROTOTYPE((krb5_priv *));
 void krb5_free_priv_enc_part PROTOTYPE((krb5_priv_enc_part *));
+void krb5_free_creds PROTOTYPE((krb5_creds *));
 
 #endif /* KRB5_FREE__ */
