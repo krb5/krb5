@@ -53,7 +53,7 @@ dbtest: dbtest.o $(STRERROR_OBJ) $(LIBDB)
 	$(CC) -o $@ dbtest.o $(STRERROR_OBJ) $(LIBDB)
 
 check:: dbtest
-	TMPDIR=$(TMPDIR) $(FCTSH) $(top_srcdir)/test/run.test
+	srcdir=$(srcdir) TMPDIR=$(TMPDIR) $(FCTSH) $(top_srcdir)/test/run.test
 
 install::
 

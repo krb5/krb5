@@ -386,7 +386,7 @@ collect_key(hashp, pagep, len, last_page)
 		totlen = len + BIGKEYLEN(pagep);
 		if (hashp->bigkey_buf)
 			free(hashp->bigkey_buf);
-		hashp->bigkey_buf = (char *)malloc(totlen);
+		hashp->bigkey_buf = (u_int8_t *)malloc(totlen);
 		if (!hashp->bigkey_buf)
 			return (-1);
 		memcpy(hashp->bigkey_buf + len,
@@ -400,7 +400,7 @@ collect_key(hashp, pagep, len, last_page)
 	if (BIGKEYLEN(pagep) == 0) {
 		if (hashp->bigkey_buf)
 			free(hashp->bigkey_buf);
-		hashp->bigkey_buf = (char *)malloc(len);
+		hashp->bigkey_buf = (u_int8_t *)malloc(len);
 		return (hashp->bigkey_buf ? len : -1);
 	}
 	totlen = len + BIGKEYLEN(pagep);
@@ -453,7 +453,7 @@ collect_data(hashp, pagep, len)
 		if (hashp->bigdata_buf)
 			free(hashp->bigdata_buf);
 		totlen = len + BIGDATALEN(pagep);
-		hashp->bigdata_buf = (char *)malloc(totlen);
+		hashp->bigdata_buf = (u_int8_t *)malloc(totlen);
 		if (!hashp->bigdata_buf)
 			return (-1);
 		memcpy(hashp->bigdata_buf + totlen - BIGDATALEN(pagep),

@@ -1,3 +1,18 @@
+Thu Jan 15 11:34:13 1998  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* hash/hash_bigkey.c (collect_key, collect_data): Cast malloc
+	return value to correct types. (raeburn@cygnus.com)
+
+	* obj/Makefile.in (check): Set srcdir in environment.
+	(raeburn@cygnus.com)
+
+	* configure.in (AC_COMPILE_TYPE): replacment for AC_CHECK_TYPE
+	that uses AC_TRY_COMPILE instead of AC_EGREP_CPP.  For now, only
+	use it for the int32 types (where AC_CHECK_TYPE gets the wrong
+	result on __CYGWIN32__) and plan that AC_CHECK_TYPE itself gets
+	repaired. (Fix by eichin@cygnus.com)
+
+
 Sun Dec 21 18:33:14 1997  Tom Yu  <tlyu@mit.edu>
 
 	* hash/dbm.c: Rename the errno member of HTAB.
