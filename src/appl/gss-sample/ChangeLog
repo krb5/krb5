@@ -1,0 +1,5 @@
+Tue Jul 19 20:28:46 1994  Tom Yu  (tlyu at dragons-lair)
+
+	* Makefile.in:
+	* configre.in: changes to make autoconf work
+

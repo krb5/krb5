@@ -1,7 +1,7 @@
 CFLAGS = -g $(DEFS) $(LOCALINCLUDE)
 LDFLAGS = -g
 
-ISODELIB=$(TOPLIBD)/libisode.a
+ISODELIB=@ISODELIB@
 COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
 DBMLIB=
 
@@ -22,13 +22,11 @@ gss-misc.o:	$(srcdir)/gss-misc.o
 
 gss-server.o:	$(srcdir)/gss-server.o
 
-
 all:: gss-server gss-client
 
-
 clean::
-	$(RM) kinit.o kinit
+	$(RM) gss-server gss-client
 
 install::
-	$(INSTALLPROG) kinit ${DESTDIR}$(CLIENT_BINDIR)/kinit
-	$(INSTALLPROG) kinit.M ${DESTDIR}$(CLIENT_MANDIR)/kinit.$(CLIENT_MANSUFFIX)
+	$(INSTALL_PROGRAM) gss-client ${DESTDIR}$(CLIENT_BINDIR)/gss-client
+	$(INSTALL_PROGRAM) gss-server ${DESTDIR}$(SERVER_BINDIR)/gss-server
