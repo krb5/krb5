@@ -1854,6 +1854,7 @@ static int globulize(cpp)
 	char **cpp;
 {
 	char **globbed;
+	char **globbed1;
 
 	if (!doglob)
 		return (1);
@@ -1867,10 +1868,11 @@ static int globulize(cpp)
 		return (0);
 	}
 	if (globbed) {
-		*cpp = *globbed++;
+		globbed1 = globbed;
+		*cpp = *globbed1++;
 		/* don't waste too much memory */
 		if (*globbed) {
-			blkfree(globbed);
+			blkfree(globbed1);
 			free((char *)globbed);
 		}
 	}

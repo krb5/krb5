@@ -1,3 +1,8 @@
+2000-11-21  Ken Raeburn  <raeburn@mit.edu>
+
+	* cmds.c (globulize): Use correct address of globbed results when
+	freeing storage.  Patch from Nalin Dahyabhai <nalin@redhat.com>.
+
 2000-10-23  Tom Yu  <tlyu@mit.edu>
 
 	* secure.h: Change SESSION to refer to &cred.session instead, so
