@@ -1,3 +1,7 @@
+2004-08-08  Ken Raeburn  <raeburn@mit.edu>
+
+	* libkrb5.exports: Remove memory ccache symbols except ops table.
+
 2004-06-18  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (OBJFILEDEP, OBJFILELIST) [DOS]: Include locally
