@@ -22,6 +22,11 @@
 #endif
 
 #define HasVoidSignalReturn NO
+#define HasPosixTermios NO
+#define HasPosixFileLocks NO
+#define HasStringH YES
+#define Bitsize32
+
 #define HasSaberC YES
 
 #ifdef VaxArchitecture
