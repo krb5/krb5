@@ -3,14 +3,14 @@
  *
  */
 
-kadm5_ret_t chpass_principal_wrapper(void *server_handle,
-				     krb5_principal principal,
-				     char *password);
+kadm5_ret_t chpass_principal_wrapper_3(void *server_handle,
+				       krb5_principal principal,
+				       char *password);
 
-kadm5_ret_t randkey_principal_wrapper(void *server_handle,
-				      krb5_principal principal,
-				      krb5_keyblock **key,
-				      int *n_keys);
+kadm5_ret_t randkey_principal_wrapper_3(void *server_handle,
+				        krb5_principal principal,
+				        krb5_keyblock **key,
+				        int *n_keys);
 
 kadm5_ret_t kadm5_get_principal_v1(void *server_handle,
 				   krb5_principal principal, 

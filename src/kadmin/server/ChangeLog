@@ -1,3 +1,9 @@
+2002-12-09  Ezra Peisach  <epeisach@bu.edu>
+
+	* misc.h: Rename prototypes from chpass_principal_wrapper and
+	randkey_principal_wrapper to chpass_principal_wrapper_3 and
+	randkey_principal_wrapper_3
+
 2002-10-08  Tom Yu  <tlyu@mit.edu>
 
 	* misc.c (chpass_principal_wrapper_3): Renamed from
