@@ -9,9 +9,9 @@
 # 
 NormalLibraryObjectRule()
 
-OBJS=	md4.o md4glue.o
+OBJS=	md4.o md4glue.o md4crypto.o
 
-SRCS=	md4.c md4glue.c
+SRCS=	md4.c md4glue.c md4crypto.c
 
 DEFINES= $(DESDEFINES)
 
