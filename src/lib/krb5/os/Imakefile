@@ -1,9 +1,31 @@
 NormalLibraryObjectRule()
 
-OBJS=defname.o getaddr.o lock_file.o mstime.o \
-	read_pwd.o timeofday.o unlck_file.o config_fn.o
+OBJS= \
+	config_fn.o	\
+	defname.o	\
+	free_krbhs.o	\
+	get_krbhst.o	\
+	getaddr.o	\
+	locate_kdc.o	\
+	lock_file.o	\
+	mstime.o	\
+	read_pwd.o	\
+	sendto_kdc.o	\
+	timeofday.o	\
+	unlck_file.o
 
-SRCS=defname.c getaddr.c lock_file.c mstime.c \
-	read_pwd.c timeofday.c unlck_file.c config_fn.c
+SRCS= \
+	config_fn.c	\ 
+	defname.c	\
+	free_krbhs.c	\
+	get_krbhst.c	\
+	getaddr.c	\
+	locate_kdc.c	\
+	lock_file.c	\
+	mstime.c	\
+	read_pwd.c	\
+	sendto_kdc.c	\
+	timeofday.c	\
+	unlck_file.c
 
 NormalLibraryTarget(os,${OBJS})
