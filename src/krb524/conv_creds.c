@@ -127,7 +127,7 @@ krb524_convert_creds_plain(context, v5creds, v4creds)
      krb5_ui_4 addr;
 #endif
      int ret;
-     krb5_timestamp lifetime;
+     krb5_timestamp endtime;
      
      memset((char *) v4creds, 0, sizeof(CREDENTIALS));
 
@@ -150,12 +150,17 @@ krb524_convert_creds_plain(context, v5creds, v4creds)
 		 sizeof(C_Block));
 
      /* V4 has no concept of authtime or renew_till, so ignore them */
-     /* V4 lifetime is 1 byte, in 5 minute increments */
-     lifetime = 
-	  ((v5creds->times.endtime - v5creds->times.starttime) / 300);
-     v4creds->lifetime =
-	  ((lifetime > 0xff) ? 0xff : lifetime);
      v4creds->issue_date = v5creds->times.starttime;
+     v4creds->lifetime = krb_time_to_life(v5creds->times.starttime,
+					  v5creds->times.endtime);
+     endtime = krb_life_to_time(v5creds->times.starttime,
+				v4creds->lifetime);
+     /*
+      * Adjust start time backwards to deal with rounding up in
+      * krb_time_to_life(), to match code on server side.
+      */
+     if (endtime > v5creds->times.endtime)
+	 v4creds->issue_date -= endtime - v5creds->times.endtime;
 
 #if 0
      /* XXX perhaps we should use the addr of the client host if */

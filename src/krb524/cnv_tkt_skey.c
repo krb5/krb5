@@ -46,28 +46,6 @@ krb524int_krb_cr_tkt_int(KTEXT, unsigned int, char *, char *, char *, long,
 			 char *, int, long, char *, char *, C_Block,
 			 krb5_keyblock *);
 
-/* rather than copying the cmu code, these values are derived from
-   a calculation based on the table and comments found there.
-   the expression (in elisp) is:
-   (defun cmu-to-secs2 (j)
-      (if (< j 128) (* j 5 60)
-         (round (* 38400 (expt 1.06914489 (- j 128))))))
-   and is low by one for 16 values but is exact for the others.
- */
-
-static long cmu_seconds[] = 
-{
-  38400,  41055,  43894,  46929,  50174,  53643,  57352,  61318,
-  65558,  70091,  74937,  80119,  85658,  91581,  97914,  104684,
-  111922,  119661,  127935,  136781,  146239,  156350,  167161,  178720,
-  191077,  204289,  218415,  233517,  249663,  266926,  285383,  305116,
-  326213,  348769,  372885,  398668,  426233,  455705,  487215,  520903,
-  556921,  595430,  636600,  680618,  727679,  777995,  831789,  889303,
-  950794,  1016536,  1086825,  1161973,  1242317,  1328217,  1420057,  1518246,
-  1623225,  1735463,  1855462,  1983757,  2120924,  2267575,  2424366, 2591999,
-  0
-};
-
 /*
  * Convert a v5 ticket for server to a v4 ticket, using service key
  * skey for both.
@@ -83,7 +61,7 @@ int krb524_convert_tkt_skey(context, v5tkt, v4tkt, v5_skey, v4_skey,
      char pname[ANAME_SZ], pinst[INST_SZ], prealm[REALM_SZ];
      char sname[ANAME_SZ], sinst[INST_SZ];
      krb5_enc_tkt_part *v5etkt;
-     int ret, lifetime, deltatime;
+     int ret, lifetime, v4endtime;
      krb5_timestamp server_time;
      struct sockaddr_in *sinp = (struct sockaddr_in *)saddr;
      krb5_address kaddr;
@@ -116,7 +94,6 @@ int krb524_convert_tkt_skey(context, v5tkt, v4tkt, v5_skey, v4_skey,
      }
      
      /* V4 has no concept of authtime or renew_till, so ignore them */
-     /* V4 lifetime is 1 byte, in 5 minute increments */
      if (v5etkt->times.starttime == 0)
 	  v5etkt->times.starttime = v5etkt->times.authtime;
      /* rather than apply fit an extended v5 lifetime into a v4 range,
@@ -129,17 +106,17 @@ int krb524_convert_tkt_skey(context, v5tkt, v4tkt, v5_skey, v4_skey,
 	 v5tkt->enc_part2 = NULL;
 	 return ret;       
      }
-     if (   (server_time+context->clockskew >= v5etkt->times.starttime)
-	 && (server_time-context->clockskew <= v5etkt->times.endtime)) {
-          deltatime = v5etkt->times.endtime - (server_time-context->clockskew);
-	  lifetime = deltatime / 300;
-	  /* if (lifetime > 255) lifetime = 255; */
-	  if (lifetime > 127) {
-	      /* use the CMU algorithm instead: */
-	      long *clist = cmu_seconds;
-	      while(*clist && *clist < deltatime) clist++;
-	      lifetime = 128 + (clist - cmu_seconds);
-	  }
+     if ((server_time + context->clockskew >= v5etkt->times.starttime)
+	 && (server_time - context->clockskew <= v5etkt->times.endtime)) {
+	  lifetime = krb_time_to_life(server_time, v5etkt->times.endtime);
+	  v4endtime = krb_life_to_time(v5etkt->times.starttime, lifetime);
+	  /*
+	   * Adjust start time backwards if the lifetime value
+	   * returned by krb_time_to_life() maps to a longer lifetime
+	   * than that of the original krb5 ticket.
+	   */
+	  if (v4endtime > v5etkt->times.endtime)
+	      server_time -= v4endtime - v5etkt->times.endtime;
      } else {
           if (krb524_debug)
 	       fprintf(stderr, "v5 ticket time out of bounds\n");

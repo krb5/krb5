@@ -1,3 +1,13 @@
+2000-10-06  Tom Yu  <tlyu@mit.edu>
+
+	* conv_creds.c (krb524_convert_creds_plain): Use time_to_life()
+	and life_to_time() to do lifetime calculations, including the
+	adjustment of start time, to match server-side calculations.
+
+	* cnv_tkt_skey.c (krb524_convert_tkt_skey): Use time_to_life() and
+	life_to_time() to do lifetime calculations.  Adjust start time
+	backwards to deal with roundup so ticket expires at correct time.
+
 2000-10-06  Ezra Peisach  <epeisach@mit.edu>
 
 	* krb524d.c (do_connection): Do not assume that sizeof(int) == 4. 
