@@ -1,4 +1,10 @@
 @echo off
+:loop
+if exist %1 del %1
+shift
+if not %1.==. goto loop
+exit
+
 Rem
 Rem rm.bat
 Rem
@@ -24,7 +30,3 @@ Rem
 Rem
 Rem Batch file to mimic the functionality of the Unix rm command
 Rem
-:loop
-if exist %1 del %1
-shift
-if not %1.==. goto loop

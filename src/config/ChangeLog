@@ -1,7 +1,29 @@
+Tue Feb  4 15:56:41 1997  Richard Basch  <basch@lehman.com>
+
+	* windows.in: Do not bother to define INTERFACE or INTERFACE_C
+
+Sun Feb  2 23:30:17 1997  Richard Basch  <basch@lehman.com>
+
+	* windows.in:
+		Compile with /Ld to link dynamic libraries (win16)
+		Compile DLL objects with /DKRB5_DLL_FILE (win16)
+
+Thu Jan 30 22:08:42 1997  Richard Basch  <basch@lehman.com>
+
+	* windows.in:
+		Compile with /MD to link against the runtime library (win32)
+
 Tue Dec 24 16:43:45 1996  Tom Yu  <tlyu@mit.edu>
 
 	* config.guess:
 	* config.sub: Update from autoconf-2.12.
+
+Thu Nov 21 11:55:16 EST 1996    Richard Basch   <basch@lehman.com>
+
+	* rm.bat: Do the work first; the comments are at the end so as
+		to improve the speed of the script significantly (20%)
+	* windows.in: corrected typo (all-windows) and added win32 support
+	* win-post.in: win16/win32 support
 
 Mon Nov 11 20:53:01 1996  Tom Yu  <tlyu@mit.edu>
 

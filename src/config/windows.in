@@ -1,5 +1,3 @@
-# Microsoft Windows configuration file for Cygnus Kerberos
-# ***copy from K4***
 
 WHAT=windows
 
@@ -11,7 +9,7 @@ install:: install-$(WHAT)
 
 check:: check-$(WHAT)
 
-all-windiws::
+all-windows::
 clean-windows::
 install-windows::
 check-windows::
@@ -24,7 +22,7 @@ S=\		# seperator
 U=..\		# up one level
 
 srcdir = .
-SRCTOP = $(srcdir)/$(BUILDTOP)
+SRCTOP = $(srcdir)\$(BUILDTOP)
 
 # /* The name of the C compiler for the target */
 CC=cl /nologo
@@ -32,14 +30,14 @@ CL=
 #
 # CCOPTS for DLL functions
 #
-##WIN16##CCOPTS=/ALw /Zp /GD2s /Os /Zi /Od /W3 $(XTRA)
-##WIN32##CCOPTS=/Os /Zi /Od /W3 $(XTRA) -DKRB5_DLL_FILE
+##WIN16##CCOPTS=/ALw /Zp /GD2s /Os /Zi /Od /W3 /Ld $(XTRA) /DKRB5_DLL_FILE
+##WIN32##CCOPTS=/Os /Zi /Od /W3 /MD $(XTRA) -DKRB5_DLL_FILE
 #
 # CCOPTS for non-DLL compiles
 #
-##WIN16##CCOPTS2=/AL /Zp /G2s  /Os /Zi /Od /W3 -DINTERFACE= -DINTERFACE_C= $(XTRA)
-##WIN32##CCOPTS2=/Os /Zi /Od /W3 -DINTERFACE= -DINTERFACE_C= $(XTRA)
-CPPFLAGS =  -I$(SRCTOP)/include -I$(SRCTOP)/include/krb5
+##WIN16##CCOPTS2=/AL /Zp /G2s  /Os /Zi /Od /W3 $(XTRA)
+##WIN32##CCOPTS2=/Os /Zi /Od /W3 $(XTRA)
+CPPFLAGS =  -I$(SRCTOP)\include -I$(SRCTOP)\include\krb5 -DLEHMAN
 DEFS = $(CPPFLAGS)
 CFLAGS2 = $(CCOPTS2) $(DEFS)
 
@@ -61,12 +59,20 @@ DBG_LIB=/nologo /Zp /ALw /GD /Gs /Os /G2 /Zi /Od
 DBG=/nologo /Zp /AL /Os /Mq /Zi /Od
 
 RM=$(BUILDTOP)\config\rm.bat
+LIBECHO=$(BUILDTOP)\util\windows\libecho
 CP=copy
 MV=ren
 LN=copy
 LIBCMD=lib
 PAGESIZE=/pagesize:128
 AWK=rem
+RC = rc
+CVTRES = cvtres
+
+##WIN16##KLIB=$(BUILDTOP)\lib\krb5_16.lib
+##WIN32##KLIB=$(BUILDTOP)\lib\krb5_32.lib
+##WIN16##GLIB=$(BUILDTOP)\lib\gssapi.lib
+##WIN32##GLIB=$(BUILDTOP)\lib\gssapi32.lib
 
 ARADD=rem
 RANLIB=rem
