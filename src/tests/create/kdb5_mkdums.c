@@ -77,18 +77,6 @@ static char *mkey_name = 0;
 static char *mkey_password = 0;
 static krb5_boolean manual_mkey = FALSE;
 
-void
-quit()
-{
-    krb5_error_code retval = krb5_db_fini(test_context);
-    memset((char *)master_keyblock.contents, 0, master_keyblock.length);
-    if (retval) {
-	com_err(progname, retval, "while closing database");
-	exit(1);
-    }
-    exit(0);
-}
-
 void add_princ PROTOTYPE((krb5_context, char *));
 
 int
@@ -209,7 +197,8 @@ char *argv[];
     }
 
     retval = krb5_db_fini(test_context);
-    memset((char *)master_keyblock.contents, 0, master_keyblock.length);
+    memset((char *)master_keyblock.contents, 0, 
+	   (size_t) master_keyblock.length);
     if (retval && retval != KRB5_KDB_DBNOTINITED) {
 	com_err(progname, retval, "while closing database");
 	exit(1);
