@@ -1,6 +1,7 @@
 CFLAGS = $(CCOPTS) $(DEFS) 
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
+SRCS=$(srcdir)/kdb5_mkdums.c
 
 all:: kdb5_mkdums
 

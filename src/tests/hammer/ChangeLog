@@ -1,3 +1,7 @@
+Sun Aug 17 14:26:57 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* Makefile.in (SRCS): Add $(SRCS) line.
+
 Tue Feb 18 18:21:16 1997  Richard Basch  <basch@lehman.com>
 
 	* kdc5_hammer.c (verify_cs_pair):

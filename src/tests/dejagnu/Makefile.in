@@ -4,6 +4,8 @@ KRB5_RUN_ENV= @KRB5_RUN_ENV@
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 
+SRCS=$(srcdir)/t_inetd.c
+
 all install::
 
 check:: check-$(HAVE_RUNTEST)

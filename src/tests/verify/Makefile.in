@@ -2,6 +2,8 @@ CFLAGS = $(CCOPTS) $(DEFS)
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 
+SRCS=$(srcdir)/kdb5_verify.c
+
 all:: kdb5_verify
 
 kdb5_verify: kdb5_verify.o $(KDB5_DEPLIBS) $(KRB5_BASE_DEPLIBS)

@@ -2,6 +2,8 @@ CFLAGS = $(CCOPTS) $(DEFS)
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 
+SRCS=$(srcdir)/kdc5_hammer.c
+
 all:: kdc5_hammer
 
 kdc5_hammer: kdc5_hammer.o $(KRB5_BASE_DEPLIBS)
