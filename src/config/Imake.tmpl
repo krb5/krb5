@@ -511,6 +511,9 @@
 #define StandardDefines /**/
 #endif
 #endif
+#ifndef SaberDefines
+#define SaberDefines /**/
+#endif
 #ifndef NdbmDefines
 #if HasNdbm
 #define NdbmDefines -DNDBM
@@ -580,6 +583,7 @@
      STD_INCLUDES = StandardIncludes
   STD_CPP_DEFINES = StandardCppDefines
       STD_DEFINES = StandardDefines
+    SABER_DEFINES = SaberDefines
  EXTRA_LOAD_FLAGS = ExtraLoadFlags
   EXTRA_LIBRARIES = ExtraLibraries
              TAGS = TagsCmd
@@ -699,7 +703,7 @@ MakefileAdditions()
 
 #if HasSaberC
 saber:
-	/**/#load $(ALLDEFINES) $(SRCS)
+	/**/#load $(ALLDEFINES) $(SABER_DEFINES) $(SRCS)
 
 osaber:
 	/**/#load $(ALLDEFINES) $(OBJS)
