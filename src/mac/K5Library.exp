@@ -183,6 +183,15 @@
 	krb5_free_realm_string
 #
 	krb5_cc_set_default_name
+#
+	krb5_rc_default 
+	krb5_rc_register_type 
+	krb5_rc_resolve_type 
+	krb5_rc_resolve_full 
+	krb5_rc_get_type 
+	krb5_rc_default_type 
+	krb5_rc_default_name 
+	krb5_auth_to_rep 
 
 #Temporary exports (DO NOT USE)
 	decode_krb5_ticket
