@@ -124,7 +124,7 @@ OM_uint32 gss_accept_sec_context(minor_status, context_handle,
 		 */
 		if (*minor_status = krb5_rd_req(&inbuf, server, &sender_addr,
 						0, gss_krb5_keyproc,
-						&verifier_cred_handle,
+						(krb5_pointer)&verifier_cred_handle,
 						rcache, &authdat))
 			return(GSS_S_FAILURE);
 		if (*minor_status = krb5_rc_close(rcache))
