@@ -1,3 +1,11 @@
+Thu Jun 29 06:50:08 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* kerberos_v4.c (check_princ): delete master_key_version check,
+	since we never actually set it.
+	(main): elide original V4 server code to avoid confusion when
+	looking for variable references.
+	(type_2_v5err): reformat for 79 columns instead of 80 and
+	conditionalize out since it is unused (though still informative.)
 
 Tue Jun 27 15:59:48 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* main.c - Change profile name hierarchy storage to const char *.  Add

@@ -92,26 +92,10 @@ static struct timeval kerb_time;
 static Principal a_name_data;	/* for requesting user */
 static Principal s_name_data;	/* for services requested */
 static C_Block session_key;
-/*
-static C_Block user_key;
-static C_Block service_key;
-*/
-extern u_char master_key_version;
-u_char master_key_version;
-/*
-static char k_instance[INST_SZ];
-*/
+
 static char log_text[128];
 static char *lt;
 static int more;
-
-#ifdef notdef
-static int mflag;		/* Are we invoked manually? */
-static int lflag;		/* Have we set an alterate log file? */
-static char *log_file;	/* name of alt. log file */
-static int nflag;		/* don't check max age */
-static int rflag;		/* alternate realm specified */
-#endif
 
 /* fields within the received request packet */
 static u_char req_msg_type;
@@ -119,258 +103,20 @@ static u_char req_version;
 static char *req_name_ptr;
 static char *req_inst_ptr;
 static char *req_realm_ptr;
-/*
-static u_char req_no_req;
-*/
+
 static krb5_ui_4 req_time_ws;
 
 int req_act_vno = KRB_PROT_VERSION; /* Temporary for version skew */
 
 static char local_realm[REALM_SZ];
 
-/* statistics */
-#ifdef notdef
-static long q_bytes;		/* current bytes remaining in queue */
-static long q_n;		/* how many consecutive non-zero
-				 * q_bytes   */
-#endif
-/*
-static long max_q_bytes;
-static long max_q_n; */
 static long n_auth_req;
 static long n_appl_req;
-/* static long n_packets;
-static long n_user;
-static long n_server; */
 
-/* static long max_age = -1; */
 static long pause_int = -1;
 
-/* static void check_db_age(); */
 static void hang();
 
-#ifndef BACKWARD_COMPAT
-/*
- * Print usage message and exit.
- */
-static void usage()
-{
-    fprintf(stderr, "Usage: %s [-s] [-m] [-n] [-p pause_seconds]%s%s\n", progname, 
-	    " [-a max_age] [-l log_file] [-r realm]"
-	    ," [database_pathname]"
-	    );
-    exit(1);
-}
-
-main(argc, argv)
-    int     argc;
-    char  **argv;
-{
-    struct sockaddr_in from;
-    register int n;
-    int     on = 1;
-    int     child;
-    struct servent *sp;
-    int     fromlen;
-    static KTEXT_ST pkt_st;
-    KTEXT   pkt = &pkt_st;
-    Principal *p;
-    int     more, kerror;
-    C_Block key;
-    int c;
-    extern char *optarg;
-    extern int optind;
-
-    progname = argv[0];
-
-    while ((c = getopt(argc, argv, "snmp:a:l:r:")) != EOF) {
-	switch(c) {
-	case 's':
-	    /*
-	     * Set parameters to slave server defaults.
-	     */
-	    if (max_age == -1 && !nflag)
-		max_age = ONE_DAY;	/* 24 hours */
-	    if (pause_int == -1)
-		pause_int = FIVE_MINUTES; /* 5 minutes */
-	    if (lflag == 0) {
-		log_file = KRBSLAVELOG;
-		lflag++;
-	    }
-	    break;
-	case 'n':
-	    max_age = -1;	/* don't check max age. */
-	    nflag++;
-	    break;
-	case 'm':
-	    mflag++;		/* running manually; prompt for master key */
-	    break;
-	case 'p':
-	    /* Set pause interval. */
-	    if (!isdigit(optarg[0]))
-		usage();
-	    pause_int = atoi(optarg);
-	    if ((pause_int < 5) ||  (pause_int > ONE_HOUR)) {
-		fprintf(stderr, "pause_int must be between 5 and 3600 seconds.\n");
-		usage();
-	    }
-	    break;
-	case 'a':
-	    /* Set max age. */
-	    if (!isdigit(optarg[0])) 
-		usage();
-	    max_age = atoi(optarg);
-	    if ((max_age < ONE_HOUR) || (max_age > THREE_DAYS)) {
-		fprintf(stderr, "max_age must be between one hour and three days, in seconds\n");
-		usage();
-	    }
-	    break;
-	case 'l':
-	    /* Set alternate log file */
-	    lflag++;
-	    log_file = optarg;
-	    break;
-	case 'r':
-	    /* Set realm name */
-	    rflag++;
-	    strcpy(local_realm, optarg);
-	    break;
-	default:
-	    usage();
-	    break;
-	}
-    }
-
-    if (optind == (argc-1)) {
-	if (kerb_db_set_name(argv[optind]) != 0) {
-	    fprintf(stderr, "Could not set alternate database name\n");
-	    exit(1);
-	}
-	optind++;
-    }
-
-    if (optind != argc)
-	usage();
-	
-    printf("Kerberos server starting\n");
-    
-    if ((!nflag) && (max_age != -1))
-	printf("\tMaximum database age: %d seconds\n", max_age);
-    if (pause_int != -1)
-	printf("\tSleep for %d seconds on error\n", pause_int);
-    else
-	printf("\tSleep forever on error\n");
-    if (mflag)
-	printf("\tMaster key will be entered manually\n");
-    
-    printf("\tLog file is %s\n", lflag ? log_file : KRBLOG);
-
-    if (lflag)
-	kset_logfile(log_file);
-    
-    /* find our hostname, and use it as the instance */
-    if (gethostname(k_instance, INST_SZ)) {
-	fprintf(stderr, "%s: gethostname error\n", progname);
-	exit(1);
-    }
-
-    if ((sp = getservbyname("kerberos", "udp")) == 0) {
-	fprintf(stderr, "%s: udp/kerberos unknown service\n", progname);
-	exit(1);
-    }
-    sin.sin_port = sp->s_port;
-
-    if ((f = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
-	fprintf(stderr, "%s: Can't open socket\n", progname);
-	exit(1);
-    }
-    if (setsockopt(f, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)) < 0)
-	fprintf(stderr, "%s: setsockopt (SO_REUSEADDR)\n", progname);
-
-    if (bind(f, &sin, S_AD_SZ, 0) < 0) {
-	fprintf(stderr, "%s: Can't bind socket\n", progname);
-	exit(1);
-    }
-    /* do all the database and cache inits */
-    if (n = kerb_init()) {
-	if (mflag) {
-	    printf("Kerberos db and cache init ");
-	    printf("failed = %d ...exiting\n", n);
-	    exit(-1);
-	} else {
-	    klog(L_KRB_PERR,
-	    "Kerberos db and cache init failed = %d ...exiting", n);
-	    hang();
-	}
-    }
-
-    /* Make sure database isn't stale */
-    check_db_age();
-    
-    /* setup master key */
-    if (kdb_get_master_key (mflag, master_key, master_key_schedule) != 0) {
-      klog (L_KRB_PERR, "kerberos: couldn't get master key.\n");
-      exit (-1);
-    }
-    kerror = kdb_verify_master_key (master_key, master_key_schedule, stdout);
-    if (kerror < 0) {
-      klog (L_KRB_PERR, "Can't verify master key.");
-      memset (master_key, 0, sizeof (master_key));
-      memset (master_key_schedule, 0, sizeof (master_key_schedule));
-      exit (-1);
-    }
-
-    master_key_version = (u_char) kerror;
-
-    fprintf(stdout, "\nCurrent Kerberos master key version is %d\n",
-	    master_key_version);
-
-    if (!rflag) {
-	/* Look up our local realm */
-	krb_get_lrealm(local_realm, 1);
-    }
-    fprintf(stdout, "Local realm: %s\n", local_realm);
-    fflush(stdout);
-
-    if (set_tgtkey(local_realm)) {
-	/* Ticket granting service unknown */
-	klog(L_KRB_PERR, "Ticket granting ticket service unknown");
-	fprintf(stderr, "Ticket granting ticket service unknown\n");
-	exit(1);
-    }
-    if (mflag) {
-	if ((child = fork()) != 0) {
-	    printf("Kerberos started, PID=%d\n", child);
-	    exit(0);
-	}
-	setup_disc();
-    }
-    /* receive loop */
-    for (;;) {
-	fromlen = S_AD_SZ;
-	n = recvfrom(f, pkt->dat, MAX_PKT_LEN, 0, &from, &fromlen);
-	if (n > 0) {
-	    pkt->length = n;
-	    pkt->mbz = 0; /* force zeros to catch runaway strings */
-	    /* see what is left in the input queue */
-	    ioctl(f, FIONREAD, &q_bytes);
-	    gettimeofday(&kerb_time, NULL);
-	    q_n++;
-	    max_q_n = max(max_q_n, q_n);
-	    n_packets++;
-	    klog(L_NET_INFO,
-	 "q_byt %d, q_n %d, rd_byt %d, mx_q_b %d, mx_q_n %d, n_pkt %d",
-		 q_bytes, q_n, n, max_q_bytes, max_q_n, n_packets, 0);
-	    max_q_bytes = max(max_q_bytes, q_bytes);
-	    if (!q_bytes)
-		q_n = 0;	/* reset consecutive packets */
-	    kerberos(&from, pkt);
-	} else
-	    klog(L_NET_ERR,
-	    "%s: bad recvfrom n = %d errno = %d", progname, n, errno, 0);
-    }
-}
-#else /* BACKWARD_COMPAT */
 
 /* v4/v5 backwards-compatibility stub routines,
  * which allow the v5 server to handle v4 packets
@@ -438,25 +184,27 @@ krb5_data **resp;
     *resp = response;
     return(retval);
 }
+#if 0
 /* convert k4's klog() levels into corresponding errors for v5: */
-int type_2_v5err[] = { 0,	/* 		0  No error		      */
-    KDC_ERR_NONE,		/* L_NET_ERR	1  Error in network code      */
-    KDC_ERR_NONE,		/* L_NET_INFO	2  Info on network activity   */
-    KRB_AP_ERR_BADVERSION,	/* L_KRB_PERR	3  Kerberos protocol errors   */
-    KDC_ERR_NONE,		/* L_KRB_PINFO	4  Kerberos protocol info     */
-    KDC_ERR_NONE,		/* L_INI_REQ	5  Request for initial ticket */
-    KRB_AP_ERR_BADVERSION,	/* L_NTGT_INTK	6  Initial request not for TGT*/
-    KDC_ERR_NONE,		/* L_DEATH_REQ	7  Request for server death   */
-    KDC_ERR_NONE,		/* L_TKT_REQ	8  All ticket requests w/ tgt */
-    KDC_ERR_SERVICE_EXP,	/* L_ERR_SEXP	9  Service expired	      */
-    KDC_ERR_C_OLD_MAST_KVNO,	/* L_ERR_MKV	10 Master key version old     */
-    KDC_ERR_NULL_KEY,		/* L_ERR_NKY    11 User's key is null         */
-    KDC_ERR_PRINCIPAL_NOT_UNIQUE, /* L_ERR_NUN	12 Principal not unique       */
-    KDC_ERR_C_PRINCIPAL_UNKNOWN,  /* L_ERR_UNK	13 Principal Unknown          */
-    KDC_ERR_NONE,		/* L_ALL_REQ    14 All requests	     	      */
-    KDC_ERR_NONE,		/* L_APPL_REQ   15 Application requests w/ tgt*/
-    KRB_AP_ERR_BADVERSION	/* L_KRB_PWARN  16 Protocol warning messages  */
+int type_2_v5err[] = { 0,	/* 		0 No error		     */
+    KDC_ERR_NONE,		/* L_NET_ERR	1 Error in network code      */
+    KDC_ERR_NONE,		/* L_NET_INFO	2 Info on network activity   */
+    KRB_AP_ERR_BADVERSION,	/* L_KRB_PERR	3 Kerberos protocol errors   */
+    KDC_ERR_NONE,		/* L_KRB_PINFO	4 Kerberos protocol info     */
+    KDC_ERR_NONE,		/* L_INI_REQ	5 Request for initial ticket */
+    KRB_AP_ERR_BADVERSION,	/* L_NTGT_INTK	6 Initial request not for TGT*/
+    KDC_ERR_NONE,		/* L_DEATH_REQ	7 Request for server death   */
+    KDC_ERR_NONE,		/* L_TKT_REQ	8 All ticket requests w/ tgt */
+    KDC_ERR_SERVICE_EXP,	/* L_ERR_SEXP	9 Service expired	     */
+    KDC_ERR_C_OLD_MAST_KVNO,	/* L_ERR_MKV	10 Master key version old    */
+    KDC_ERR_NULL_KEY,		/* L_ERR_NKY    11 User's key is null        */
+    KDC_ERR_PRINCIPAL_NOT_UNIQUE, /* L_ERR_NUN	12 Principal not unique      */
+    KDC_ERR_C_PRINCIPAL_UNKNOWN,  /* L_ERR_UNK	13 Principal Unknown         */
+    KDC_ERR_NONE,		/* L_ALL_REQ    14 All requests	     	     */
+    KDC_ERR_NONE,		/* L_APPL_REQ   15 Application requests w/tgt*/
+    KRB_AP_ERR_BADVERSION	/* L_KRB_PWARN  16 Protocol warning messages */
 };
+#endif
 #define klog v4_klog
 #ifdef HAVE_STDARG_H
 char * v4_klog( int type, const char *format, ...)
@@ -680,8 +428,6 @@ cleanup:
     return( nprinc);
 }
 void
-#endif /* BACKWARD_COMPAT */
-
 kerberos_v4(client, pkt)
     struct sockaddr_in *client;
     KTEXT   pkt;
@@ -1156,14 +902,6 @@ int check_princ(p_name, instance, lifetime, p)
 	lt = klog(L_ERR_NKY, "Null key \"%s\" \"%s\"", p_name,
 	    instance, 0);
 	return KERB_ERR_NULL_KEY;
-    }
-    if (master_key_version != p->kdc_key_ver) {
-	/* log error reply */
-	lt = klog(L_ERR_MKV,
-	    "Key vers incorrect, KRB = %d, \"%s\" \"%s\" = %d",
-	    master_key_version, p->name, p->instance, p->kdc_key_ver,
-	    0);
-	return KERB_ERR_NAME_MAST_KEY_VER;
     }
     /* make sure the service hasn't expired */
     if ((u_long) p->exp_date < (u_long) kerb_time.tv_sec) {
