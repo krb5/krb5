@@ -1,5 +1,7 @@
 Fri Nov  1 19:05:15 1996  Tom Yu  <tlyu@mit.edu>
 
+	* .cvsignore: Ignore the .html files.
+
 	* copyright.texinfo: Add call to "@pagealignmacro" to force a
 	blank page after copyright spewage. [krb5-doc/54]
 

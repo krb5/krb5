@@ -1,3 +1,6 @@
+admin_toc.html
+admin.html
+admin_foot.html
 admin.log
 admin.dvi
 admin.aux
@@ -12,6 +15,9 @@ admin-guide.ps
 kerberos-admin.info
 kerberos-admin.info-1
 kerberos-admin.info-2
+install_toc.html
+install.html
+install_foot.html
 install.log
 install.dvi
 install.aux
@@ -26,6 +32,9 @@ install-guide.ps
 krb5-install.info
 krb5-install.info-1
 krb5-install.info-2
+user-guide_toc.html
+user-guide.html
+user-guide_foot.html
 user-guide.log
 user-guide.dvi
 user-guide.aux
