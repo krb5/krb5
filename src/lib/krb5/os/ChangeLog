@@ -1,3 +1,7 @@
+Wed Mar 13 13:11:49 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* t_std_conf.c: Include string.h
+
 Thu Feb 29 16:14:46 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* sendto_kdc.c (krb5_sendto_kdc): Take out calls to
