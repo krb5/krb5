@@ -1,3 +1,9 @@
+2003-08-26  Ken Raeburn  <raeburn@mit.edu>
+
+	* cc_file.c (krb5_fcc_store_int32, krb5_fcc_store_ui_4) 
+	(krb5_fcc_store_ui_2, krb5_fcc_store_octet): Remove gratuitous
+	conditionalizing of casts on USE_STDIO, left over from merge.
+
 2003-07-22  Sam Hartman  <hartmans@mit.edu>
 
 	* ccbase.c: Always register the file credentials cache type.  If

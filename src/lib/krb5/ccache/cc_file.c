@@ -971,30 +971,13 @@ krb5_fcc_store_int32(krb5_context context, krb5_ccache id, krb5_int32 i)
 	(data->version == KRB5_FCC_FVNO_2)) 
 	return krb5_fcc_write(context, id, (char *) &i, sizeof(krb5_int32));
     else {
-#ifndef USE_STDIO
         buf[3] = (unsigned char) (i & 0xFF);
-#else
-        buf[3] = i & 0xFF;
-#endif
 	i >>= 8;
-#ifndef USE_STDIO
         buf[2] = (unsigned char) (i & 0xFF);
-#else
-        buf[2] = i & 0xFF;
-#endif
 	i >>= 8;
-#ifndef USE_STDIO
         buf[1] = (unsigned char) (i & 0xFF);
-#else
-        buf[1] = i & 0xFF;
-#endif
 	i >>= 8;
-#ifndef USE_STDIO
         buf[0] = (unsigned char) (i & 0xFF);
-#else
-        buf[0] = i & 0xFF;
-#endif
-	
 	return krb5_fcc_write(context, id, buf, 4);
     }
 }
@@ -1009,30 +992,13 @@ krb5_fcc_store_ui_4(krb5_context context, krb5_ccache id, krb5_ui_4 i)
 	(data->version == KRB5_FCC_FVNO_2)) 
 	return krb5_fcc_write(context, id, (char *) &i, sizeof(krb5_int32));
     else {
-#ifndef USE_STDIO
         buf[3] = (unsigned char) (i & 0xFF);
-#else
-        buf[3] = i & 0xFF;
-#endif
 	i >>= 8;
-#ifndef USE_STDIO
         buf[2] = (unsigned char) (i & 0xFF);
-#else
-        buf[2] = i & 0xFF;
-#endif
 	i >>= 8;
-#ifndef USE_STDIO
         buf[1] = (unsigned char) (i & 0xFF);
-#else
-        buf[1] = i & 0xFF;
-#endif
 	i >>= 8;
-#ifndef USE_STDIO
         buf[0] = (unsigned char) (i & 0xFF);
-#else
-        buf[0] = i & 0xFF;
-#endif
-	
 	return krb5_fcc_write(context, id, buf, 4);
     }
 }
@@ -1046,25 +1012,12 @@ krb5_fcc_store_ui_2(krb5_context context, krb5_ccache id, krb5_int32 i)
     
     if ((data->version == KRB5_FCC_FVNO_1) ||
 	(data->version == KRB5_FCC_FVNO_2)) {
-#ifndef USE_STDIO
         ibuf = (krb5_ui_2) i;
-#else
-        ibuf = i;
-#endif
 	return krb5_fcc_write(context, id, (char *) &ibuf, sizeof(krb5_ui_2));
     } else {
-#ifndef USE_STDIO
         buf[1] = (unsigned char) (i & 0xFF);
-#else
-        buf[1] = i & 0xFF;
-#endif
 	i >>= 8;
-#ifndef USE_STDIO
         buf[0] = (unsigned char) (i & 0xFF);
-#else
-        buf[0] = i & 0xFF;
-#endif
-	
 	return krb5_fcc_write(context, id, buf, 2);
     }
 }
@@ -1074,11 +1027,7 @@ krb5_fcc_store_octet(krb5_context context, krb5_ccache id, krb5_int32 i)
 {
     krb5_octet ibuf;
 
-#ifndef USE_STDIO
     ibuf = (krb5_octet) i;
-#else
-    ibuf = i;
-#endif
     return krb5_fcc_write(context, id, (char *) &ibuf, 1);
 }
    
