@@ -144,9 +144,7 @@ line: while (<>) {
 	&Pick('>', $outfile) &&
 	    (print $fh '');
 	&Pick('>', $outfile) &&
-	    (print $fh
-
-	      '#if !defined(_WIN32)');
+	    (print $fh '#if !defined(_WIN32)');
 	&Pick('>', $outfile) &&
 	    (print $fh 'extern void initialize_' . $table_name .
 
@@ -232,6 +230,11 @@ line: while (<>) {
     $skipone = 0;
 }
 
+if ($table_item_count > 255) {
+    &Pick('|', 'cat 1>&2') &&
+	(print $fh 'Error table too large!');
+    exit 1;
+}
 &Pick('>', $outfile) &&
     (print $fh '    0');
 &Pick('>', $outfile) &&
@@ -261,9 +264,7 @@ else {
 &Pick('>', $outfile) &&
     (print $fh '');
 &Pick('>', $outfile) &&
-    (print $fh
-
-      '#if !defined(_WIN32)');
+    (print $fh '#if !defined(_WIN32)');
 &Pick('>', $outfile) &&
     (print $fh 'void initialize_' . $table_name . '_error_table (void)');
 &Pick('>', $outfile) &&
@@ -278,6 +279,8 @@ else {
     (print $fh '}');
 &Pick('>', $outfile) &&
     (print $fh '#endif');
+
+exit $ExitValue;
 
 sub Pick {
     local($mode,$name,$pipe) = @_;

@@ -1,3 +1,8 @@
+2004-10-06  Ken Raeburn  <raeburn@mit.edu>
+
+	* et_c.awk, et_h.awk: Complain if the error table is too large.
+	* et_c.pl, et_h.pl: Regenerated.
+
 2004-07-03  Ken Raeburn  <raeburn@mit.edu>
 
 	* error_message.c (remove_error_table) [!ENABLE_THREADS &&

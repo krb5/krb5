@@ -136,6 +136,10 @@ c2n["_"]=63
 }
 
 END {
+	if (table_item_count > 255) {
+	    print "Error table too large!" | "cat 1>&2"
+	    exit 1
+	}
 	if (tab_base_high == 0) {
 		print "#define ERROR_TABLE_BASE_" table_name " (" \
 			sprintf("%d", tab_base_sign*tab_base_low) \
