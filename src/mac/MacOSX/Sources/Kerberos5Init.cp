@@ -16,13 +16,11 @@
  * without express or implied warranty.
  */
 
-#include <CoreFoundation/CoreFoundation.h>
 #include <Kerberos/com_err.h>
 
+#include "Kerberos5Init.h"
 #include "krb5_libinit.h"
 #include "crypto_libinit.h"
-
-extern "C" void Kerberos5Init (CFStringRef inBundleID);
 
 void Kerberos5Init (CFStringRef inBundleID)
 {

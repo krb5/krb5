@@ -1,4 +1,4 @@
-/* Copyright 1998 by the Massachusetts Institute of Technology.
+/* Copyright 2002 by the Massachusetts Institute of Technology.
  *
  * Permission to use, copy, modify, and distribute this
  * software and its documentation for any purpose and without
@@ -15,15 +15,7 @@
  * this software for any purpose.  It is provided "as is"
  * without express or implied warranty.
  */
- 
-#include <Kerberos/com_err.h>
 
-#include "KerberosProfileInit.h"
-#include "profile.h"
-#include "prof_err.h"
+#include <CoreFoundation/CoreFoundation.h>
 
-void KerberosProfileInit (CFStringRef inBundleID)
-{
-	/* Initialize the error tables */
-	add_error_table(&et_prof_error_table);
-}
+extern "C" void Kerberos5Init (CFStringRef inBundleID);

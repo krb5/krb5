@@ -1,9 +1,15 @@
 #ifndef __ASSEMBLER__
 #include <TargetConditionals.h>
 
+/* Macros for crypto types so they don't conflict with KerberosDES */
+#define make_key_sched mit_make_key_sched
+#define _des_FP_table  _mit_des_FP_table
+#define _des_IP_table  _mit_des_IP_table
+#define _des_SP_table  _mit_des_SP_table
+
 #define SIZEOF_LONG		4
 #define SIZEOF_INT		4
-#define SIZEOF_SHORT		2
+#define SIZEOF_SHORT	2
 
 #define	KRB5_DLLIMP		
 #define	GSS_DLLIMP		

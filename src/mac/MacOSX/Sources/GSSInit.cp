@@ -16,7 +16,7 @@
  * without express or implied warranty.
  */
  
-#include <CoreFoundation/CoreFoundation.h>
+#include "GSSInit.h"
 #include "gss_libinit.h"
 
 extern "C" void GSSInit (CFStringRef inBundleID);
