@@ -21,10 +21,16 @@ the "krb5" style that is included here.
 
 Labels, including case labels, are outdented by four columns.
 Continuations of statements are indented by an additional four
-columns.  Continuations of argument lists or parenthesized expressions
-should line up with the column after the opening parenthesis.  Note
-that this may create width problems if you call a fuction deep in a
-bunch of nested control flow statements.
+columns.  When continuing expressions this way, split the expression
+so that the newline goes before a binary operator rather than after
+it.
+
+Continuations of argument lists or parenthesized expressions should
+line up with the column after the opening parenthesis.  Note that this
+may create width problems if you call a fuction deep in a bunch of
+nested control flow statements.  Regardless, any expression split
+between lines should stil be split so that the newline goes before a
+binary operator rather than after it.
 
 The maximum width should be 79 columns.  If you need more than this,
 consider rewriting the code so that it fits in 79 columns, since
@@ -96,15 +102,13 @@ variables to nil.  This will be done by the tentative "krb5" style for
 the emacs cc-mode.
 
 Spaces go after keywords, but not after function names.  Do not,
-however, put a space after sizeof if its argument is
-parenthesized. [XXX from BSD KNF but do we want to do this?]  Don't
-put a space after a cast operator, either.  Spaces also do not go
-before parentheses that are argument lists for function calls if there
-is a function pointer being dereferenced somewhere.  Spaces go after
-commas in argument lists, as well as commas that are comma operators.
-Spaces also go between parts in a for loop, except for "forever" type
-loops.  Use for statements rather than while statements to create
-forever loops.
+however, put a space after sizeof.  Don't put a space after a cast
+operator, either.  Spaces also do not go before parentheses that are
+argument lists for function calls even if the function call is through
+a pointer.  Spaces go after commas in argument lists, as well as
+commas that are comma operators.  Spaces also go between parts in a
+for loop, except for "forever" type loops.  Use for statements rather
+than while statements to create forever loops.
 
 	if (x) {
 	    p = calloc(1024, sizeof(int));
@@ -122,6 +126,10 @@ operators.
 
 	x = --a + b / c - d++;
 	y = p->z.v[x];
+
+Put spaces around the "?" and ":" in a conditional expression.
+
+	x = y ? f() : g();
 
 In general, do not parenthesize the argument of "return".
 
@@ -187,7 +195,7 @@ In any case, reading the section in the C FAQ on null pointers is
 highly recommended to remove confusion regarding null pointers in C,
 since this is a subject of much confusion to even experienced
 programmers.  In particular, if you do not understand why using
-calloc() to allocate a struct that contains pointer fields or why
+calloc() to allocate a struct that contains pointer members or why
 calling memset() to initialize such a struct to all-bytes-zero is
 wrong, reread that section again.  (Note that there are *lots* of
 examples of code in the krb5 source tree that erroneously calls
@@ -195,9 +203,9 @@ memset() to zero a struct, and we should fix these somehow
 eventually.)
 
 Control flow statements that have a single statement as their body
-should nevertheless have braces around ther bodies if the body is more
-than one line long, especially in the case of stacked multiple if-else
-clauses; use:
+should nevertheless have braces around their bodies if the body is
+more than one line long, especially in the case of stacked multiple
+if-else clauses; use:
 
 	if (x) {
 	    if (y)
@@ -244,6 +252,25 @@ and maintain.  Therefore, avoid code like this:
 	#endif
 		g();
 	    }
+
+Put comments after conditional compilation directives such as "#else"
+and "#endif".  Make them correspond to the sense of the value that
+controls the compilation of the section they are closing, i.e.
+
+	#ifdef FOO
+	/* ... */
+	#else /* !FOO */
+	/* ... */
+	#endif /* !FOO */
+
+Also, in the case of more complex conditional compilation directives,
+write the comments like this:
+
+	#if defined(FOO) || defined(BAR)
+	/* ... */
+	#else /* !(defined(FOO) || defined(BAR)) */
+	/* ... */
+	#endif /* !(defined(FOO) || defined(BAR)) */
 
 If you are writing a do-while loop that has only one statement in its
 body, put braces around it anyway, since the while clause may be
@@ -321,17 +348,42 @@ and relational operators.
 
 The sizeof operator takes either a unary expression or a parenthesized
 type name.  It is not necessary to parenthesize the operand of sizeof
-if it is applied to a unary expression.  [XXX do we want to force
-parenthesization of expressions used as operands to sizeof?]  The
-sizeof operator does not evaluate its operand if it is a unary
-expression, so usages such as
+if it is applied to a unary expression, but still, always parenthesize
+the operand of the sizeof operator.  The sizeof operator does not
+evaluate its operand if it is a unary expression, so usages such as
 
-	s = sizeof ++foo;
+	s = sizeof(++foo);
 
 should be avoided for the sake of sanity and readability.
 
 Don't pass around structures except by address.  We may relax this
 restriction for non-API function, though.
+
+For new functions, input parameters should go before output parameters
+in the call signature.  There are exceptions, such as a context-like
+parameter.
+
+Every function should have block comment preceding it describing
+briefly in complete sentences what it does, what inputs and outputs it
+has, and what error codes it can return.  It should also describe any
+unsual aspects of the function.  At some point we will want to put
+some of this information into a machine-parsable form.
+
+Macros should have all-uppercase names.  If it is necessary to use
+multiple statements, use braces, and wrap the whole thing in a
+do-while(0) construct, such as
+
+	#define FOOMACRO(x, y) do {			\
+	    foo = (x) + (y);				\
+	    f(y);					\
+	} while (0)
+
+Leave off the semicolon at the end of a function-like macro, so that
+it can be mostly used like a call to a function without a return
+value.  Line up the backslashes to make it more readable.  Use M-x
+c-backslash-region in emacs to do neat lined-up backslashes.
+Parenthesize uses of arguments in the replacement text of a macro in
+order to prevent weird interactions.
 
 Strive to make your code capable of compiling using "gcc -Wall
 -Wmissing-prototypes -Wtraditional -Wcast-qual -Wcast-align
@@ -353,7 +405,8 @@ than file scope, but it's better to be paranoid in this case.)
 POSIX reserves typedef names ending with _t as well.
 
 Recall that errno is a reserved identifier, and is permitted to be a
-macro.  Therefore, do not use errno as the name of a field.
+macro.  Therefore, do not use errno as the name of a structure member,
+etc.
 
 Reserved namespaces are somewhat more restricted than this; read the
 appropriate section of the C standard if you have questions.
@@ -379,10 +432,65 @@ namespace collisions.
 
 The C standard only guarantees six case-insensitive characters to be
 significant in external identifiers; this is largely regarded as
-obsolescent and we will ignore it.  It does, however, only guarantee
-31 case-sensitive characters to be signficant in internal identifiers,
-so do not use identifiers that differ beyond the 31st character.  This
-is unlikely to be a problem, though.
+obsolescent even in 1989 and we will ignore it.  It does, however,
+only guarantee 31 case-sensitive characters to be signficant in
+internal identifiers, so do not use identifiers that differ beyond the
+31st character.  This is unlikely to be a problem, though.
+
+Aspects of C style in GNU coding std but not here
+-------------------------------------------------
+
+* redundant parens to force extra indent of operators of different
+  precedences
+
+* redundant parens to force general extra indent of expressions that
+  are broken between lines
+
+* use of ^L characters to break up source files into pages
+
+* nitpicking about capitalization in comments of variable names when
+  their values are meant
+
+* commenting usages of static variables
+
+* casts to void
+
+* separation of word in names with underscores vs case change
+
+* enum vs #define'd integer constants 
+
+* 14 char filename limits, MS-DOS filename limits
+
+* portability
+
+* system library function quirks
+
+* internationalization
+
+* mmap()
+
+Aspects of C style in BSD KNF but not here
+------------------------------------------
+
+* sorting of header files
+
+* sorting of struct members
+
+* separating struct tag decl and struct typedef
+
+* sorting of var decl
+
+* lining up var names in decls
+
+* newline after decls
+
+* usage of __P
+
+* usage of getopt
+
+* not initializing vars in decls
+
+* stdarg/varargs handling
 
 Emacs cc-mode style
 -------------------

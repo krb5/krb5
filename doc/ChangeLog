@@ -1,3 +1,8 @@
+2000-07-12  Tom Yu  <tlyu@mit.edu>
+
+	* coding-style: Update after some discussion.  Add sections
+	comparing to BSD KNF and GNU coding standards.
+
 2000-07-11  Tom Yu  <tlyu@mit.edu>
 
 	* coding-style: Some minor tweaks.  Require do-while to always be
