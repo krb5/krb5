@@ -1,5 +1,9 @@
 Thu Oct 13 17:50:19 1994  Theodore Y. Ts'o  (tytso@dcl)
 
+	* Makefile.in: Add support for the MDx test driver t_mddriver.
+		Run t_mddriver on a "make check", to make sure we have a
+		valid MD5 implementation.
+
 	* md5.c (UL): Add the UL macro to control how unsigned long
 		constants are compiled.  If we have an ANSI C environment,
 		use the UL suffix to keep the compiler from warning about
