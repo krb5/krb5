@@ -1,3 +1,11 @@
+Fri Dec  1 17:11:43 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* krb5_gss_glue.c (gss_inquire_names_for_mech): Added new context
+		argument to the call of krb5_gss_inquire_names_for_mech().
+
+	* inq_names.c (krb5_gss_inquire_names_for_mech): Added new context
+		argument to the arg list.
+
 Thu Nov 16 17:04:00 1995    <tytso@rsts-11.mit.edu>
 
 	* gssapiP_krb5.h (KG_TOK_MIC_MSG, KG_TOK_WRAP_MSG, KG_DEL_CTX):

@@ -405,7 +405,8 @@ gss_inquire_names_for_mech(minor_status, mechanism, name_types)
     gss_OID	mechanism;
     gss_OID_set	*name_types;
 {
-    return(krb5_gss_inquire_names_for_mech(minor_status,
+    return(krb5_gss_inquire_names_for_mech(kg_context,
+					   minor_status,
 					   mechanism,
 					   name_types));
 }
