@@ -14,7 +14,7 @@ SRCS =	$(srcdir)/clnt_policy.c \
 	$(srcdir)/clnt_privs.c \
 	$(srcdir)/clnt_chpass_util.c
 
-OBJS =	@LIBOBJS@ \
+OBJS =	\
 	clnt_policy.$(OBJEXT) \
 	client_rpc.$(OBJEXT) \
 	client_principal.$(OBJEXT) \

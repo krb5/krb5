@@ -33,10 +33,6 @@ static char *rcsid = "$Header$";
 
 #define	ADM_CCACHE  "/tmp/ovsec_adm.XXXXXX"
 
-#ifndef _POSIX_SOURCE /* Perhaps this should actually say __STDC__ */
-int	setenv(const char *var, const char *val, int flag);
-void	unsetenv(const char *var);
-#endif
 
 enum init_type { INIT_PASS, INIT_SKEY, INIT_CREDS };
 
@@ -412,7 +408,7 @@ static kadm5_ret_t _kadm5_init_any(char *client_name,
      if (ccname_orig)
 	  ccname_orig = strdup(ccname_orig);
      
-     (void) setenv("KRB5CCNAME", handle->cache_name, 1);
+     (void) krb5_setenv("KRB5CCNAME", handle->cache_name, 1);
 
 #ifndef INIT_TEST
      input_name.value = full_service_name;
@@ -459,10 +455,10 @@ static kadm5_ret_t _kadm5_init_any(char *client_name,
 #endif /* ! INIT_TEST */
 
      if (ccname_orig) {
-	  (void) setenv("KRB5CCNAME", ccname_orig, 1);
+	  (void) krb5_setenv("KRB5CCNAME", ccname_orig, 1);
 	  free(ccname_orig);
      } else
-	  (void) unsetenv("KRB5CCNAME");
+	  (void) krb5_unsetenv("KRB5CCNAME");
 
      
      if (handle->clnt->cl_auth == NULL) {

@@ -1,3 +1,9 @@
+Wed Jul 24 20:59:35 1996  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* configure.in: Don't replace setenv
+
+	* client_init.c (_kadm5_init_any): Use krb5_setenv and krb5_unsetenv
+
 Wed Jul 24 18:20:47 1996  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
 
 	* Makefile.in, configure.in: break out client lib into a
