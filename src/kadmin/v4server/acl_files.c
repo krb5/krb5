@@ -49,7 +49,10 @@
 
 extern int errno;
 
+#ifndef HAVE_STDLIB_H
 extern char *malloc(), *calloc();
+#endif
+
 extern time_t time();
 
 static int acl_abort();

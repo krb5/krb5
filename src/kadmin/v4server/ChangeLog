@@ -1,3 +1,7 @@
+Tue Feb 18 09:59:59 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* acl_files.c: Do not declare malloc() or calloc() if stdlib.h exists.
+
 Thu Feb  6 14:49:45 1997  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
 
 	* Makefile.in (LOCALINCLUDE): Repair lack of -I. and -I$(srcdir)
