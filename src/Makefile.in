@@ -17,7 +17,7 @@ all-unix::
 
 all-mac::
 
-all-windows:: makefile-windows
+all-windows:: Makefile-windows
 	@echo Making in util\windows
 	cd util\windows
 	-$(MAKE) -$(MAKEFLAGS)
@@ -119,7 +119,7 @@ unixmac:
 # Microsoft Windows build process...
 #
 
-config-windows:: makefile-windows
+config-windows:: Makefile-windows
 	@echo Making in include
 	cd include
 	-$(MAKE) -$(MAKEFLAGS)
@@ -129,124 +129,124 @@ config-windows:: makefile-windows
 ##DOS##	config\windows.in config\win-post.in
 ##DOS##WCONFIG= .\wconfig $(WCONFIG_FLAGS)
 
-##DOS##makefile-windows:: $(MKFDEP) makefile \
-##DOS##		clients\makefile clients\kdestroy\makefile \
-##DOS##		clients\kinit\makefile clients\klist\makefile \
-##DOS##		include\makefile include\krb5\makefile \
-##DOS##		lib\makefile lib\crypto\makefile \
-##DOS##		lib\crypto\crc32\makefile lib\crypto\des\makefile \
-##DOS##		lib\crypto\dk\makefile lib\crypto\enc_provider\makefile \
-##DOS##		lib\crypto\hash_provider\makefile \
-##DOS##		lib\crypto\keyhash_provider\makefile \
-##DOS##		lib\crypto\raw\makefile lib\crypto\old\makefile \
-##DOS##		lib\crypto\sha1\makefile \
-##DOS##		lib\crypto\md4\makefile lib\crypto\md5\makefile \
-##DOS##		lib\des425\makefile \
-##DOS##		lib\gssapi\makefile lib\gssapi\generic\makefile \
-##DOS##		lib\gssapi\krb5\makefile lib\gssapi\mechglue\makefile \
-##DOS##		lib\krb4\makefile lib\krb5\makefile \
-##DOS##		lib\krb5\asn.1\makefile lib\krb5\ccache\makefile \
-##DOS##		lib\krb5\ccache\file\makefile \
-##DOS##		lib\krb5\ccache\stdio\makefile \
-##DOS##		lib\krb5\ccache\memory\makefile \
-##DOS##		lib\krb5\ccache\ccapi\makefile \
-##DOS##		lib\krb5\error_tables\makefile \
-##DOS##		lib\krb5\keytab\makefile \
-##DOS##		lib\krb5\keytab\file\makefile lib\krb5\krb\makefile \
-##DOS##		lib\krb5\os\makefile lib\krb5\posix\makefile \
-##DOS##		lib\krb5\rcache\makefile \
-##DOS##		util\et\makefile util\profile\makefile \
-##DOS##		util\windows\makefile \
+##DOS##Makefile-windows:: $(MKFDEP) Makefile \
+##DOS##		clients\Makefile clients\kdestroy\Makefile \
+##DOS##		clients\kinit\Makefile clients\klist\Makefile \
+##DOS##		include\Makefile include\krb5\Makefile \
+##DOS##		lib\Makefile lib\crypto\Makefile \
+##DOS##		lib\crypto\crc32\Makefile lib\crypto\des\Makefile \
+##DOS##		lib\crypto\dk\Makefile lib\crypto\enc_provider\Makefile \
+##DOS##		lib\crypto\hash_provider\Makefile \
+##DOS##		lib\crypto\keyhash_provider\Makefile \
+##DOS##		lib\crypto\raw\Makefile lib\crypto\old\Makefile \
+##DOS##		lib\crypto\sha1\Makefile \
+##DOS##		lib\crypto\md4\Makefile lib\crypto\md5\Makefile \
+##DOS##		lib\des425\Makefile \
+##DOS##		lib\gssapi\Makefile lib\gssapi\generic\Makefile \
+##DOS##		lib\gssapi\krb5\Makefile lib\gssapi\mechglue\Makefile \
+##DOS##		lib\krb4\Makefile lib\krb5\Makefile \
+##DOS##		lib\krb5\asn.1\Makefile lib\krb5\ccache\Makefile \
+##DOS##		lib\krb5\ccache\file\Makefile \
+##DOS##		lib\krb5\ccache\stdio\Makefile \
+##DOS##		lib\krb5\ccache\memory\Makefile \
+##DOS##		lib\krb5\ccache\ccapi\Makefile \
+##DOS##		lib\krb5\error_tables\Makefile \
+##DOS##		lib\krb5\keytab\Makefile \
+##DOS##		lib\krb5\keytab\file\Makefile lib\krb5\krb\Makefile \
+##DOS##		lib\krb5\os\Makefile lib\krb5\posix\Makefile \
+##DOS##		lib\krb5\rcache\Makefile \
+##DOS##		util\et\Makefile util\profile\Makefile \
+##DOS##		util\windows\Makefile \
 ##DOS##		windows\Makefile windows\lib\Makefile \
 ##DOS##		windows\cns\Makefile windows\gina\Makefile \
 ##DOS##		windows\gss\Makefile windows\wintel\Makefile
 ##DOS##	config\rm.bat wconfig.obj msvc.pdb
 
-##DOS##makefile: makefile.in $(MKFDEP)
+##DOS##Makefile: Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##clients\makefile: clients\makefile.in $(MKFDEP)
+##DOS##clients\Makefile: clients\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##clients\kdestroy\makefile: clients\kdestroy\makefile.in $(MKFDEP)
+##DOS##clients\kdestroy\Makefile: clients\kdestroy\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##clients\kinit\makefile: clients\kinit\makefile.in $(MKFDEP)
+##DOS##clients\kinit\Makefile: clients\kinit\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##clients\klist\makefile: clients\klist\makefile.in $(MKFDEP)
+##DOS##clients\klist\Makefile: clients\klist\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##include\makefile: include\makefile.in $(MKFDEP)
+##DOS##include\Makefile: include\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##include\krb5\makefile: include\krb5\makefile.in $(MKFDEP)
+##DOS##include\krb5\Makefile: include\krb5\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##lib\makefile: lib\makefile.in $(MKFDEP)
+##DOS##lib\Makefile: lib\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##lib\crypto\makefile: lib\crypto\makefile.in $(MKFDEP)
+##DOS##lib\crypto\Makefile: lib\crypto\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##lib\crypto\crc32\makefile: lib\crypto\crc32\makefile.in $(MKFDEP)
+##DOS##lib\crypto\crc32\Makefile: lib\crypto\crc32\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##lib\crypto\des\makefile: lib\crypto\des\makefile.in $(MKFDEP)
+##DOS##lib\crypto\des\Makefile: lib\crypto\des\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##lib\crypto\dk\makefile: lib\crypto\dk\makefile.in $(MKFDEP)
+##DOS##lib\crypto\dk\Makefile: lib\crypto\dk\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##lib\crypto\enc_provider\makefile: lib\crypto\enc_provider\makefile.in $(MKFDEP)
+##DOS##lib\crypto\enc_provider\Makefile: lib\crypto\enc_provider\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##lib\crypto\hash_provider\makefile: lib\crypto\hash_provider\makefile.in $(MKFDEP)
+##DOS##lib\crypto\hash_provider\Makefile: lib\crypto\hash_provider\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##lib\crypto\keyhash_provider\makefile: lib\crypto\keyhash_provider\makefile.in $(MKFDEP)
+##DOS##lib\crypto\keyhash_provider\Makefile: lib\crypto\keyhash_provider\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##lib\crypto\sha1\makefile: lib\crypto\sha1\makefile.in $(MKFDEP)
+##DOS##lib\crypto\sha1\Makefile: lib\crypto\sha1\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##lib\crypto\md4\makefile: lib\crypto\md4\makefile.in $(MKFDEP)
+##DOS##lib\crypto\md4\Makefile: lib\crypto\md4\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##lib\crypto\md5\makefile: lib\crypto\md5\makefile.in $(MKFDEP)
+##DOS##lib\crypto\md5\Makefile: lib\crypto\md5\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##lib\crypto\old\makefile: lib\crypto\old\makefile.in $(MKFDEP)
+##DOS##lib\crypto\old\Makefile: lib\crypto\old\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##lib\crypto\raw\makefile: lib\crypto\raw\makefile.in $(MKFDEP)
+##DOS##lib\crypto\raw\Makefile: lib\crypto\raw\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##lib\des425\makefile: lib\des425\makefile.in $(MKFDEP)
+##DOS##lib\des425\Makefile: lib\des425\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##lib\gssapi\makefile: lib\gssapi\makefile.in $(MKFDEP)
+##DOS##lib\gssapi\Makefile: lib\gssapi\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##lib\gssapi\generic\makefile: lib\gssapi\generic\makefile.in $(MKFDEP)
+##DOS##lib\gssapi\generic\Makefile: lib\gssapi\generic\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##lib\gssapi\mechglue\makefile: lib\gssapi\mechglue\makefile.in $(MKFDEP)
+##DOS##lib\gssapi\mechglue\Makefile: lib\gssapi\mechglue\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##lib\gssapi\krb5\makefile: lib\gssapi\krb5\makefile.in $(MKFDEP)
+##DOS##lib\gssapi\krb5\Makefile: lib\gssapi\krb5\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##lib\krb4\makefile: lib\krb4\makefile.in $(MKFDEP)
+##DOS##lib\krb4\Makefile: lib\krb4\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##lib\krb5\makefile: lib\krb5\makefile.in $(MKFDEP)
+##DOS##lib\krb5\Makefile: lib\krb5\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##lib\krb5\asn.1\makefile: lib\krb5\asn.1\makefile.in $(MKFDEP)
+##DOS##lib\krb5\asn.1\Makefile: lib\krb5\asn.1\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##lib\krb5\ccache\makefile: lib\krb5\ccache\makefile.in $(MKFDEP)
+##DOS##lib\krb5\ccache\Makefile: lib\krb5\ccache\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##lib\krb5\ccache\file\makefile: lib\krb5\ccache\file\makefile.in $(MKFDEP)
+##DOS##lib\krb5\ccache\file\Makefile: lib\krb5\ccache\file\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##lib\krb5\ccache\stdio\makefile: lib\krb5\ccache\stdio\makefile.in $(MKFDEP)
+##DOS##lib\krb5\ccache\stdio\Makefile: lib\krb5\ccache\stdio\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##lib\krb5\ccache\memory\makefile: lib\krb5\ccache\memory\makefile.in $(MKFDEP)
+##DOS##lib\krb5\ccache\memory\Makefile: lib\krb5\ccache\memory\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##lib\krb5\ccache\ccapi\makefile: lib\krb5\ccache\ccapi\makefile.in $(MKFDEP)
+##DOS##lib\krb5\ccache\ccapi\Makefile: lib\krb5\ccache\ccapi\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##lib\krb5\error_tables\makefile: lib\krb5\error_tables\makefile.in $(MKFDEP)
+##DOS##lib\krb5\error_tables\Makefile: lib\krb5\error_tables\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##lib\krb5\keytab\makefile: lib\krb5\keytab\makefile.in $(MKFDEP)
+##DOS##lib\krb5\keytab\Makefile: lib\krb5\keytab\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##lib\krb5\keytab\file\makefile: lib\krb5\keytab\file\makefile.in $(MKFDEP)
+##DOS##lib\krb5\keytab\file\Makefile: lib\krb5\keytab\file\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##lib\krb5\krb\makefile: lib\krb5\krb\makefile.in $(MKFDEP)
+##DOS##lib\krb5\krb\Makefile: lib\krb5\krb\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##lib\krb5\os\makefile: lib\krb5\os\makefile.in $(MKFDEP)
+##DOS##lib\krb5\os\Makefile: lib\krb5\os\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##lib\krb5\posix\makefile: lib\krb5\posix\makefile.in $(MKFDEP)
+##DOS##lib\krb5\posix\Makefile: lib\krb5\posix\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##lib\krb5\rcache\makefile: lib\krb5\rcache\makefile.in $(MKFDEP)
+##DOS##lib\krb5\rcache\Makefile: lib\krb5\rcache\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##util\et\makefile: util\et\makefile.in $(MKFDEP)
+##DOS##util\et\Makefile: util\et\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##util\profile\makefile: util\profile\makefile.in $(MKFDEP)
+##DOS##util\profile\Makefile: util\profile\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##util\windows\makefile: util\windows\makefile.in $(MKFDEP)
+##DOS##util\windows\Makefile: util\windows\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##windows\Makefile:  windows\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
@@ -375,13 +375,15 @@ macfile.list:
 
 dos-Makefile:
 	cat config/windows.in Makefile.in config/win-post.in | \
-		sed -e 's/^##DOS##//' -e 's/^##DOS//' > Makefile
+		sed -e "s/^##DOS##//" -e "s/^##DOS//" > Makefile
 	cp windows/mkbin.bat .
+
+prep-windows: dos-Makefile awk-windows-mac
 
 # Not supported....
 krbsrc83.zip: dos-Makefile awk-windows-mac winfile.list
 	rm -f krbsrc83.zip
-	$(ZIP) -Dlk krbsrc83.zip `cat winfile.list`
+	$(ZIP) -@Dlk krbsrc83.zip < winfile.list
 	$(ZIP) -Dk krbsrc83.zip $(WINBINARYFILES)
 	if test -d mit ; then \
 		$(ZIP) -Dk krbsrc83.zip $(MITWINBINARYFILES) ; \
@@ -390,7 +392,7 @@ krbsrc83.zip: dos-Makefile awk-windows-mac winfile.list
 
 kerbsrc.zip: dos-Makefile awk-windows-mac winfile.list
 	rm -f kerbsrc.zip
-	$(ZIP) -Dl kerbsrc.zip `cat winfile.list`
+	$(ZIP) -@Dl kerbsrc.zip < winfile.list
 	$(ZIP) -D kerbsrc.zip $(WINBINARYFILES)
 	if test -d mit ; then \
 		$(ZIP) -D kerbsrc.zip $(MITWINBINARYFILES) ; \
