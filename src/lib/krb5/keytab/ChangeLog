@@ -1,3 +1,16 @@
+2002-06-18  Danilo Almeida  <dalmeida@mit.edu>
+
+	* ktfr_entry.c: Rename krb5_kt_free_entry_contents as
+	krb5_free_keytab_entry_contents to make it consistent with rest of
+	API.
+	[pullup from 1-2-2-branch]
+
+2002-06-18  Ken Raeburn  <raeburn@mit.edu>
+
+	* ktfr_entry.c (krb5_kt_free_entry_contents): Rename from
+	krb5_kt_free_entry, keep old name as wrapper.
+	[pullup from 1-2-2-branch]
+
 2002-06-11  Ken Raeburn  <raeburn@mit.edu>
 
 	* kt_file.c: Undo non-logged part of last change that added
