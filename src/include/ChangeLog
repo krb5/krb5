@@ -1,3 +1,8 @@
+2001-07-31  Ken Raeburn  <raeburn@mit.edu>
+
+	* krb5.hin (krb5_check_transited_list): Pointer args now point to
+	const.
+
 2001-07-20  Ken Raeburn  <raeburn@mit.edu>
 
 	* fake-addrinfo.h: Include port-sockets.h instead of system header

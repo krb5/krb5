@@ -1,3 +1,8 @@
+2001-07-31  Ken Raeburn  <raeburn@mit.edu>
+
+	* chk_trans.c (krb5_check_transited_list): Pointer args now point
+	to const.
+
 2001-07-31  Ezra Peisach  <epeisach@mit.edu>
 
 	* get_in_tkt.c: Cast to unsigned krb5_error error value to 
