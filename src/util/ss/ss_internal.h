@@ -119,9 +119,12 @@ extern pointer realloc PROTOTYPE((pointer, unsigned));
 extern pointer calloc PROTOTYPE((unsigned, unsigned));
 #endif
 
-#ifdef USE_SIGPROCMASK
+#if defined(USE_SIGPROCMASK) && !defined(POSIX_SIGNALS)
 /* fake sigmask, sigblock, sigsetmask */
 #include <signal.h>
+#ifdef sigmask
+#undef sigmask
+#endif
 #define sigmask(x) (1L<<(x)-1)
 #define sigsetmask(x) sigprocmask(SIG_SETMASK,&x,NULL)
 static int _fake_sigstore;
