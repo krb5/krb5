@@ -1,3 +1,7 @@
+Wed Nov 20 13:59:58 1996  Ezra Peisach  <epeisach@mit.edu>
+
+	* Makefile.in (install): Install gssapi.h from the build tree.
+
 Tue Nov 19 16:43:16 1996  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in (gssapi.h): grep USE_.*_H out from autoconf.h as
