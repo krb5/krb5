@@ -1,3 +1,8 @@
+Mon Nov 18 20:57:08 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* configure.in: Remove the popper, mailquery, and movemail
+	 	directories.
+
 Mon Jan 15 02:39:05 1996  Mark Eichin  <eichin@cygnus.com>
 
 	* configure.in: add gssftp to CONFIG_DIRS so that the GSSAPI
