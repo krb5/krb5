@@ -1,4 +1,12 @@
 
+Mon Jun 19 13:34:23 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* login.c - Change setluid call to check for luid and then set it if
+		it fails, also make this logic conditional under HAVE_SETLUID.
+	* configure.in - For OSF/1 systems where libsecurity is present, set
+		HAVE_SETLUID.  We'll need to determine similar tests for other
+		extended security systems that we are to support in the future.
+
+
 Thu Jun 15 17:32:20 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in - Change explicit library names to -l<lib> form, and
 		change target link line to use $(LD) and associated flags.

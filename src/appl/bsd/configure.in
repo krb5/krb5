@@ -12,6 +12,19 @@ AC_CHECK_LIB(odm,main,
     AC_CHECK_LIB(cfg,main, 
       LOGINLIBS="-lodm -ls -lcfg" 
       )))
+dnl
+dnl Make our operating system-specific security checks and definitions for
+dnl login.
+dnl
+case $krb5_cv_host in
+alpha-dec-osf*)
+	AC_CHECK_LIB(security,main,
+		AC_DEFINE(HAVE_SETLUID)
+		LOGINLIBS="$LOGINLIBS -lsecurity"
+	)
+	;;
+esac
+dnl
 AC_SUBST(LOGINLIBS)
 dnl
 AC_VFORK

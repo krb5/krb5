@@ -818,10 +818,16 @@ bad_login:
       	    syslog(LOG_ERR, "setlogin() failure %d",errno);
 #endif
 
-#ifdef __SCO__
-	/* this is necessary when C2 mode is enabled, but not otherwise */
-	setluid((uid_t) pwd->pw_uid);
-#endif
+#ifdef	HAVE_SETLUID
+	/*
+	 * If we're on a system which keeps track of login uids, then
+	 * attempt to set the login uid, but don't get too unhappy when/if
+	 * it doesn't succeed.
+	 */
+	if ((uid_t) getluid() < (uid_t) 0) {
+	    setluid((uid_t) pwd->pw_uid);
+	}
+#endif	/* HAVE_SETLUID */
 	/* This call MUST succeed */
 #ifdef _IBMR2
 	setuidx(ID_LOGIN, pwd->pw_uid);
