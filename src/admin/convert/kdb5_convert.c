@@ -80,6 +80,7 @@ void v4fini PROTOTYPE((void));
 int v4init PROTOTYPE((char *, char *, int, char *));
 krb5_error_code enter_in_v5_db PROTOTYPE((krb5_context, char *, Principal *));
 krb5_error_code process_v4_dump PROTOTYPE((krb5_context, char *, char *));
+krb5_error_code fixup_database PROTOTYPE((krb5_context, char *));
 	
 int create_local_tgt = 0;
 
@@ -388,7 +389,10 @@ master key name '%s'\n",
     putchar('\n');
     if (retval)
 	com_err(PROGNAME, retval, "while translating entries to the database");
-
+    else {
+	retval = fixup_database(context, realm);
+    }
+    
     /* clean up; rename temporary database if there were no errors */
     if (retval == 0) {
 	if (retval = krb5_db_fini (context))
@@ -804,3 +808,31 @@ char *realm;
     return retval;
 }
 
+krb5_error_code fixup_database(context, realm)
+    krb5_context context;
+    char * realm;
+{
+    krb5_db_entry entry;
+    krb5_error_code retval;
+    int nprincs;
+    krb5_boolean more;
+
+    nprincs = 1;
+    if (retval = krb5_db_get_principal(context, &tgt_princ, &entry, 
+				       &nprincs, &more))
+	return retval;
+    
+    if (nprincs == 0)
+	return 0;
+    
+    entry.attributes |= KRB5_KDB_SUPPORT_DESMD5;
+    
+    retval = krb5_db_put_principal(context, &entry, &nprincs);
+    
+    if (nprincs)
+	krb5_db_free_principal(context, &entry, nprincs);
+    
+    return retval;
+}
+
+    

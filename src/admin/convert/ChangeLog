@@ -1,3 +1,8 @@
+Tue Mar 28 16:41:52 1995    <tytso@rsx-11.mit.edu>
+
+	* kdb5_convert.c (fixup_database, main): Set SUPPORT_DESMD5
+		attribute for the krbtgt entry.
+
 Thu Mar  2 12:23:51 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in (ISODELIB): Remove reference to $(ISODELIB).
