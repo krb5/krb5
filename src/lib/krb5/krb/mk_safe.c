@@ -129,6 +129,9 @@ krb5_mk_safe(context, auth_context, userdata, outbuf, outdata)
     krb5_keyblock       * keyblock;
     krb5_replay_data      replaydata;
 
+    /* Clear replaydata block */
+    memset((char *) &replaydata, 0, sizeof(krb5_replay_data));
+
     /* Get keyblock */
     if ((keyblock = auth_context->local_subkey) == NULL)
         if ((keyblock = auth_context->remote_subkey) == NULL)
