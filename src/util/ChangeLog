@@ -1,3 +1,7 @@
+Sat Feb 24 19:03:53 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* makeshlib.sh: Add support for HPUX and Sinix (sys5r4 on mips).
+
 Wed Feb  7 00:26:47 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in: Folded in danw's changes to allow

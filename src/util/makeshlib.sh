@@ -29,6 +29,16 @@ case $host  in
 	ld -Bshareable $ldflags -o $library $FILES $libdirfl $liblist
 	stat=$?
 	;;
+*-*-hpux*)
+	FILES=`for i
+	do
+		sed -e "s;^;$i/shared/;" -e "s; ; $i/shared/;g" $i/DONE
+	done`
+	ldflags="`echo $ldflags | sed 's/-Wl,+b,/+b /g'`"
+	echo ld -b $ldflags -o $library $FILES $libdirfl $liblist
+	ld -b $ldflags -o $library $FILES $libdirfl $liblist
+	stat=$?
+	;;
 *-*-linux*)
 	FILES=`for i 
 	do
@@ -37,6 +47,22 @@ case $host  in
  
 	echo $CC -G $ldflags -o $library $optflags $FILES $libdirfl $liblist 
 	$CC --shared $ldflags -o $library $FILES $libdirfl $liblist
+	stat=$?
+	;;
+mips-sni-sysv4)
+	FILES=`for i 
+	do
+		sed -e "s;^;$i/shared/;" -e "s; ; $i/shared/;g" $i/DONE
+	done`
+ 
+	optflags=""
+	if test "$HAVE_GCC"x = "x" ; then
+		optflags="-h $library"
+	fi
+	ldflags="`echo $ldflags | sed -e 's/-R /-R/g'`"
+
+	echo $CC -G $ldflags -o $library $optflags $FILES $libdirfl $liblist 
+	$CC -G $ldflags -o $library $optflags $FILES $libdirfl $liblist
 	stat=$?
 	;;
 *-*-solaris*)
