@@ -57,7 +57,7 @@
 #ifndef DES_INTERNAL_DEFS
 #define DES_INTERNAL_DEFS
 
-#include <k5-int.h>
+#include "k5-int.h"
 /*
  * Begin "mit-des.h"
  */

@@ -1,3 +1,8 @@
+2002-06-07  Miro Jurisic  <meeroh@mit.edu>
+
+	* des_int.h: use "" includes for k5-int.h
+	[pullup from 1-2-2-branch]
+
 2001-10-03  Ken Raeburn  <raeburn@mit.edu>
 
 	* afsstring2key.c, d3_cbc.c, des_int.h, f_cbc.c, f_cksum.c,
