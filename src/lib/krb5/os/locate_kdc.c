@@ -25,18 +25,20 @@ static char rcsid_locate_kdc_c[] =
 #include <sys/socket.h>
 #ifdef KRB5_USE_INET
 #include <netinet/in.h>
+#define KRB5_UDP_PORT	htons(8973)	/* XXX */
 #endif
 #include <netdb.h>
 
-#define KRB5_UDP_PORT	8973	/* XXX */
 
 /*
  * returns count of number of addresses found
  */
 
-int krb5_locate_kdc(realm, addr_pp)
+krb5_error_code
+krb5_locate_kdc(realm, addr_pp, naddrs)
     krb5_data *realm;
     struct sockaddr **addr_pp;
+    int *naddrs;
 {
     char **hostlist;
     int code;
@@ -54,8 +56,10 @@ int krb5_locate_kdc(realm, addr_pp)
 	;
     count = i;
     
-    if (count == 0)
+    if (count == 0) {
+	*naddrs = 0;
 	return 0;
+    }
 
     addr_p = (struct sockaddr *)malloc (sizeof (struct sockaddr) * count);
 
@@ -96,5 +100,6 @@ int krb5_locate_kdc(realm, addr_pp)
 				 * "can't find any KDC names"
 				 */
     *addr_pp = addr_p;
-    return out;
+    *naddrs = out;
+    return 0;
 }
