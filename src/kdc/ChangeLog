@@ -1,3 +1,11 @@
+Wed Feb 21 23:28:33 1996  Richard Basch  <basch@lehman.com>
+
+	* kerberos_v4.c: Improve checking of DES keys
+
+	* main.c: Do not assume the master key is DES; instead initialize
+		the V4 random key generator from a random key after the
+		DES_CBC_CRC generator has been initialized.
+
 Tue Feb 20 16:50:59 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* kerberos_v4.c (kerberos_v4): Use strong random number generator
