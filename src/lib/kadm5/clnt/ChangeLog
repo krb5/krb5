@@ -1,3 +1,8 @@
+Tue Jul 30 19:47:53 1996  Tom Yu  <tlyu@mit.edu>
+
+	* client_init.c: Remove #include <netdb.h> because rpc/types.h
+		(included from kadm5/admin.h) gets it.
+
 Wed Jul 24 20:59:35 1996  Sam Hartman  <hartmans@tertius.mit.edu>
 
 	* configure.in: Don't replace setenv
