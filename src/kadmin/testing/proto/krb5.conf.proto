@@ -1,6 +1,7 @@
 [libdefaults]
 	default_realm = __REALM__
 	default_keytab_name = FILE:__K5ROOT__/v5srvtab
+	dns_fallback = no
 
 [realms]
 	__REALM__ = {

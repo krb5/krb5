@@ -12,6 +12,6 @@
 		kadmind_port = 1751
 		kpasswd_port = 1752
 		master_key_type = des-cbc-crc
-		supported_enctypes = des-cbc-crc:normal des-cbc-crc:v4 des-cbc-md5:normal des-cbc-raw:normal
+		supported_enctypes = des3-hmac-sha1:normal des-cbc-crc:normal des-cbc-crc:v4 des-cbc-md5:normal des-cbc-raw:normal
 	}
 

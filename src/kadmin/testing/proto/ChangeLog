@@ -1,3 +1,9 @@
+2000-05-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* krb5.conf.proto: Set dns_fallback=no.
+
+	* kdc.conf.proto: Add des3 to supported_enctypes.
+
 Wed Jan 21 12:44:25 1998  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* kdc.conf.proto: Add kpasswd_port line so kadmind can start as
