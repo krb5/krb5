@@ -13,6 +13,7 @@
 #include <stdio.h>
 #include <setjmp.h>
 #include <signal.h>
+#include <termios.h>
 #include <sys/param.h>
 
 static ss_data *current_info;
