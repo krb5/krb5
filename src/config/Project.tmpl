@@ -12,6 +12,9 @@
 #ifndef MkCmdsCmd
 #define MkCmdsCmd $(SSMKSRC)/mk_cmds
 #endif
+#ifndef SSLib
+#define SSLib -lss /* $(TOP)/lib/ss/libss.a */
+#endif
 #ifndef PosyFlags
 #define PosyFlags -f -h2 -a -s
 #endif
@@ -124,11 +127,13 @@ libdir/lib/**/libname.a:						@@\
         MKDIRHIER = BourneShell $(BINDIR)/mkdirhier.sh
        COMPILE_ET = compile_et
           MK_CMDS = mk_cmds
+            SSLIB = -lss
 #else
             IMAKE = $(IMAKESRC)/imake
            DEPEND = DependCmd
         MKDIRHIER = BourneShell $(SCRIPTSRC)/mkdirhier.sh
        COMPILE_ET = CompileEtCmd
           MK_CMDS = MkCmdsCmd
+            SSLIB = SSLib
 #endif
 
