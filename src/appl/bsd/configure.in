@@ -216,4 +216,15 @@ USE_KRB4_LIBRARY
 USE_KRB5UTIL_LIBRARY
 KRB5_LIBRARIES
 V5_USE_SHARED_LIB
+if test "$krb5_cv_build_krb4_libs" = yes; then
+	AC_DEFINE(HAVE_KRB_GET_ERR_TEXT)
+	AC_DEFINE(HAVE_KRB_SAVE_CREDENTIALS)
+else
+	oldlibs=$LIBS
+	LIBS=" $KRB4_LIB -lkrb5 -lcrypto -lcom_err"
+	AC_CHECK_FUNCS(krb_get_err_text krb_save_credentials)
+	LIBS=$oldlibs
+fi
+
+AC_CHECK_HEADERS(krb4-proto.h)
 V5_AC_OUTPUT_MAKEFILE

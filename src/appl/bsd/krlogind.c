@@ -620,6 +620,7 @@ int syncpipe[2];
 	new_termio.c_iflag &= ~(IXON|IXANY|BRKINT|INLCR|ICRNL);
 #else
 	new_termio.c_lflag |= (ICANON|ECHO|ISIG|IEXTEN);
+	new_termio.c_oflag |= (ONLCR|OPOST|TAB3);
 	new_termio.c_iflag|= (IXON|IXANY|BRKINT|INLCR|ICRNL);
 #endif /*Do we need binary stream?*/
 	new_termio.c_iflag &= ~(ISTRIP);

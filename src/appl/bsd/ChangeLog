@@ -1,3 +1,21 @@
+Fri Jun 21 21:12:52 1996  Sam Hartman  <hartmans@mit.edu>
+
+	* configure.in : Make sure it works with the built-in libkrb4.a again.
+
+Fri Jun 14 13:19:30 1996  Sam Hartman  <hartmans@mit.edu>
+
+	* login.c: Add define to deal with krb_save_credentials possibly
+ 	being called save_credentials, and to define krb_get_err_text if
+ 	it is not defined by the krb4 library.
+
+	* configure.in :  check for krb_save_credentials and krb_get_err_text
+
+Thu Jun 13 14:24:50 1996  Sam Hartman  <hartmans@mit.edu>
+
+	* krlogind.c (doit): If using vendor login, make sure output flags
+ 	are reasonable.
+
+
 Sat Jun 15 04:03:32 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* configure.in: Cleanup of tests whose results are not longer used

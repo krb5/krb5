@@ -173,12 +173,29 @@ typedef sigtype (*handler)();
 #include <krb.h>
 #include <netdb.h>
 #include <netinet/in.h>
+#ifdef HAVE_KRB4_PROTO_H
 #include <krb4-proto.h>
+#endif
 #include <arpa/inet.h>
 #ifdef BIND_HACK
 #include <arpa/nameser.h>
 #include <arpa/resolv.h>
 #endif /* BIND_HACK */
+
+/* Hacks to maintain compatability with Athena libkrb*/
+#ifndef HAVE_KRB_SAVE_CREDENTIALS
+#define krb_save_credentials save_credentials
+#endif /*HAVE_KRB_SAVE_CREDENTIALS*/
+
+#ifndef HAVE_KRB_GET_ERR_TEXT
+
+static const char * krb_get_err_text(kerror)
+  int kerror;
+{
+  return krb_err_txt[kerror];
+}
+
+#endif /*HAVE_KRB_GET_ERR_TEXT*/
 #endif /* KRB4 */
 
 #ifndef __STDC__
