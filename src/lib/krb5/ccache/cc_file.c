@@ -1,6 +1,32 @@
-/* cc_file.c - file ccache implementation
- * Copyright 2000 MIT blah blah...
+/*
+ * lib/krb5/ccache/cc_file.c
+ *
+ * Copyright 1990,1991,1992,1993,1994,2000 by the Massachusetts Institute of Technology.
+ * All Rights Reserved.
+ *
+ * Export of this software from the United States of America may
+ *   require a specific license from the United States Government.
+ *   It is the responsibility of any person or organization contemplating
+ *   export to obtain such a license before exporting.
+ * 
+ * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
+ * distribute this software and its documentation for any purpose and
+ * without fee is hereby granted, provided that the above copyright
+ * notice appear in all copies and that both that copyright notice and
+ * this permission notice appear in supporting documentation, and that
+ * the name of M.I.T. not be used in advertising or publicity pertaining
+ * to distribution of the software without specific, written prior
+ * permission.  Furthermore if you modify this software you must label
+ * your software as modified software and not distribute it in such a
+ * fashion that it might be confused with the original M.I.T. software.
+ * M.I.T. makes no representations about the suitability of
+ * this software for any purpose.  It is provided "as is" without express
+ * or implied warranty.
+ * 
+ *
+ * implementation of file-based credentials cache
  */
+
 /*
 If OPENCLOSE is defined, ecah of the functions opens and closes the
 file whenever it needs to access it.  Otherwise, the file is opened
@@ -66,80 +92,36 @@ fcc_nseq.c and fcc_read don't check return values a lot.
  #error find some way to use net-byte-order file version numbers.
 #endif
 
-/* start of former file/fcc-proto.h */
-/*
- * lib/krb5/ccache/file/fcc-proto.h
- *
- * Copyright 1990,1991 by the Massachusetts Institute of Technology.
- * All Rights Reserved.
- *
- * Export of this software from the United States of America may
- *   require a specific license from the United States Government.
- *   It is the responsibility of any person or organization contemplating
- *   export to obtain such a license before exporting.
- * 
- * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
- * distribute this software and its documentation for any purpose and
- * without fee is hereby granted, provided that the above copyright
- * notice appear in all copies and that both that copyright notice and
- * this permission notice appear in supporting documentation, and that
- * the name of M.I.T. not be used in advertising or publicity pertaining
- * to distribution of the software without specific, written prior
- * permission.  Furthermore if you modify this software you must label
- * your software as modified software and not distribute it in such a
- * fashion that it might be confused with the original M.I.T. software.
- * M.I.T. makes no representations about the suitability of
- * this software for any purpose.  It is provided "as is" without express
- * or implied warranty.
- * 
- *
- * Prototypes for File-based credentials cache
- */
-
-
-#ifndef KRB5_FCC_PROTO__
-#define KRB5_FCC_PROTO__
-
-/* fcc_close.c */
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_fcc_close
         KRB5_PROTOTYPE((krb5_context, krb5_ccache id ));
 
-/* fcc_defnam.c */
 char * krb5_fcc_default_name 
         KRB5_PROTOTYPE((krb5_context));
 
-/* fcc_destry.c */
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_fcc_destroy 
         KRB5_PROTOTYPE((krb5_context, krb5_ccache id ));
 
-/* fcc_eseq.c */
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_fcc_end_seq_get 
         KRB5_PROTOTYPE((krb5_context, krb5_ccache id , krb5_cc_cursor *cursor ));
 
-/* fcc_gennew.c */
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_fcc_generate_new 
         KRB5_PROTOTYPE((krb5_context, krb5_ccache *id ));
 
-/* fcc_getnam.c */
 KRB5_DLLIMP char * KRB5_CALLCONV krb5_fcc_get_name 
         KRB5_PROTOTYPE((krb5_context, krb5_ccache id ));
 
-/* fcc_gprin.c */
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_fcc_get_principal 
         KRB5_PROTOTYPE((krb5_context, krb5_ccache id , krb5_principal *princ ));
 
-/* fcc_init.c */
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_fcc_initialize 
         KRB5_PROTOTYPE((krb5_context, krb5_ccache id , krb5_principal princ ));
 
-/* fcc_nseq.c */
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_fcc_next_cred 
         KRB5_PROTOTYPE((krb5_context, 
 		   krb5_ccache id , 
 		   krb5_cc_cursor *cursor , 
 		   krb5_creds *creds ));
 
-/* fcc_read.c */
 krb5_error_code krb5_fcc_read
         KRB5_PROTOTYPE((krb5_context, 
 		   krb5_ccache id , 
@@ -168,11 +150,9 @@ krb5_error_code krb5_fcc_read_authdata
 krb5_error_code krb5_fcc_read_authdatum 
         KRB5_PROTOTYPE((krb5_context, krb5_ccache , krb5_authdata *));
 
-/* fcc_reslv.c */
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_fcc_resolve 
         KRB5_PROTOTYPE((krb5_context, krb5_ccache *id , const char *residual ));
 
-/* fcc_retrv.c */
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_fcc_retrieve 
         KRB5_PROTOTYPE((krb5_context, 
 		   krb5_ccache id , 
@@ -180,31 +160,24 @@ KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_fcc_retrieve
 		   krb5_creds *mcreds , 
 		   krb5_creds *creds ));
 
-/* fcc_sseq.c */
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_fcc_start_seq_get 
         KRB5_PROTOTYPE((krb5_context, krb5_ccache id , krb5_cc_cursor *cursor ));
 
-/* fcc_store.c */
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_fcc_store 
         KRB5_PROTOTYPE((krb5_context, krb5_ccache id , krb5_creds *creds ));
 
-/* fcc_skip.c */
 krb5_error_code krb5_fcc_skip_header
         KRB5_PROTOTYPE((krb5_context, krb5_ccache));
 krb5_error_code krb5_fcc_skip_principal 
         KRB5_PROTOTYPE((krb5_context, krb5_ccache id ));
 
-/* fcc_sflags.c */
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_fcc_set_flags 
         KRB5_PROTOTYPE((krb5_context, krb5_ccache id , krb5_flags flags ));
 
-/* fcc_ops.c */
 KRB5_DLLIMP extern krb5_cc_ops krb5_cc_file_ops;
 krb5_error_code krb5_change_cache
    KRB5_PROTOTYPE((void));
 
-
-/* fcc_write.c */
 krb5_error_code krb5_fcc_write 
         KRB5_PROTOTYPE((krb5_context, krb5_ccache id , krb5_pointer buf , int len ));
 krb5_error_code krb5_fcc_store_principal 
@@ -230,51 +203,14 @@ krb5_error_code krb5_fcc_store_authdata
 krb5_error_code krb5_fcc_store_authdatum 
         KRB5_PROTOTYPE((krb5_context, krb5_ccache , krb5_authdata *));
 
-/* fcc_errs.c */
 krb5_error_code krb5_fcc_interpret 
         KRB5_PROTOTYPE((krb5_context, int ));
 
-/* fcc_maybe.c */
 krb5_error_code krb5_fcc_close_file 
         KRB5_PROTOTYPE((krb5_context, krb5_ccache));
 krb5_error_code krb5_fcc_open_file 
         KRB5_PROTOTYPE((krb5_context, krb5_ccache, int));
 
-#endif /* KRB5_FCC_PROTO__ */
-/* end of former file/fcc-proto.h */
-/* start of former file/fcc.h */
-/*
- * lib/krb5/ccache/file/fcc.h
- *
- * Copyright 1990,1991 by the Massachusetts Institute of Technology.
- * All Rights Reserved.
- *
- * Export of this software from the United States of America may
- *   require a specific license from the United States Government.
- *   It is the responsibility of any person or organization contemplating
- *   export to obtain such a license before exporting.
- * 
- * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
- * distribute this software and its documentation for any purpose and
- * without fee is hereby granted, provided that the above copyright
- * notice appear in all copies and that both that copyright notice and
- * this permission notice appear in supporting documentation, and that
- * the name of M.I.T. not be used in advertising or publicity pertaining
- * to distribution of the software without specific, written prior
- * permission.  Furthermore if you modify this software you must label
- * your software as modified software and not distribute it in such a
- * fashion that it might be confused with the original M.I.T. software.
- * M.I.T. makes no representations about the suitability of
- * this software for any purpose.  It is provided "as is" without express
- * or implied warranty.
- * 
- *
- * This file contains constant and function declarations used in the
- * file-based credential cache routines.
- */
-
-#ifndef __KRB5_FILE_CCACHE__
-#define __KRB5_FILE_CCACHE__
 
 #define KRB5_OK 0
 
@@ -354,42 +290,6 @@ typedef struct _krb5_fcc_cursor {
 {									\
     if (OPENCLOSE (ID)) {						\
 	(void) krb5_fcc_close_file (CONTEXT,ID); } }
-
-/* DO NOT ADD ANYTHING AFTER THIS #endif */
-#endif /* __KRB5_FILE_CCACHE__ */
-/* end of former file/fcc.h */
-/* start of former file/fcc_read.c */
-/*
- * lib/krb5/ccache/file/fcc_read.c
- *
- * Copyright 1990,1991,1992,1993,1994 by the Massachusetts Institute
- * of Technology. 
- * All Rights Reserved.
- *
- * Export of this software from the United States of America may
- *   require a specific license from the United States Government.
- *   It is the responsibility of any person or organization contemplating
- *   export to obtain such a license before exporting.
- * 
- * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
- * distribute this software and its documentation for any purpose and
- * without fee is hereby granted, provided that the above copyright
- * notice appear in all copies and that both that copyright notice and
- * this permission notice appear in supporting documentation, and that
- * the name of M.I.T. not be used in advertising or publicity pertaining
- * to distribution of the software without specific, written prior
- * permission.  Furthermore if you modify this software you must label
- * your software as modified software and not distribute it in such a
- * fashion that it might be confused with the original M.I.T. software.
- * M.I.T. makes no representations about the suitability of
- * this software for any purpose.  It is provided "as is" without express
- * or implied warranty.
- * 
- *
- * This file contains the source code for reading variables from a
- * credentials cache.  These are not library-exported functions.
- */
-
 
 #define CHECK(ret) if (ret != KRB5_OK) goto errout;
      
@@ -871,37 +771,6 @@ krb5_fcc_read_authdatum(context, id, a)
 }
 /* end of former file/fcc_read.c */
 #undef CHECK
-/* start of former file/fcc_write.c */
-/*
- * lib/krb5/ccache/file/fcc_write.c
- *
- * Copyright 1990,1991,1992,1993,1994 by the Massachusetts Institute
- * of Technology. 
- * All Rights Reserved.
- *
- * Export of this software from the United States of America may
- *   require a specific license from the United States Government.
- *   It is the responsibility of any person or organization contemplating
- *   export to obtain such a license before exporting.
- * 
- * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
- * distribute this software and its documentation for any purpose and
- * without fee is hereby granted, provided that the above copyright
- * notice appear in all copies and that both that copyright notice and
- * this permission notice appear in supporting documentation, and that
- * the name of M.I.T. not be used in advertising or publicity pertaining
- * to distribution of the software without specific, written prior
- * permission.  Furthermore if you modify this software you must label
- * your software as modified software and not distribute it in such a
- * fashion that it might be confused with the original M.I.T. software.
- * M.I.T. makes no representations about the suitability of
- * this software for any purpose.  It is provided "as is" without express
- * or implied warranty.
- * 
- *
- * This file contains the source code for krb5_fcc_write_<type>.
- */
-
 
 #define CHECK(ret) if (ret != KRB5_OK) return ret;
 
@@ -1185,35 +1054,6 @@ krb5_fcc_store_authdatum (context, id, a)
 }
 /* end of former file/fcc_write.c */
 #undef CHECK
-/* start of former file/fcc_maybe.c */
-/*
- * lib/krb5/ccache/file/fcc_maybe.c
- *
- * Copyright 1990, 1991 by the Massachusetts Institute of Technology.
- * All Rights Reserved.
- *
- * Export of this software from the United States of America may
- *   require a specific license from the United States Government.
- *   It is the responsibility of any person or organization contemplating
- *   export to obtain such a license before exporting.
- * 
- * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
- * distribute this software and its documentation for any purpose and
- * without fee is hereby granted, provided that the above copyright
- * notice appear in all copies and that both that copyright notice and
- * this permission notice appear in supporting documentation, and that
- * the name of M.I.T. not be used in advertising or publicity pertaining
- * to distribution of the software without specific, written prior
- * permission.  Furthermore if you modify this software you must label
- * your software as modified software and not distribute it in such a
- * fashion that it might be confused with the original M.I.T. software.
- * M.I.T. makes no representations about the suitability of
- * this software for any purpose.  It is provided "as is" without express
- * or implied warranty.
- * 
- *
- * This file contains the source code for conditional open/close calls.
- */
 
 krb5_error_code
 krb5_fcc_close_file (context, id)
@@ -1414,39 +1254,6 @@ done:
      }
      return retval;
 }
-/* end of former file/fcc_maybe.c */
-/* start of former file/fcc_skip.c */
-/*
- * lib/krb5/ccache/file/fcc_skip.c
- *
- * Copyright 1990,1991 by the Massachusetts Institute of Technology.
- * All Rights Reserved.
- *
- * Export of this software from the United States of America may
- *   require a specific license from the United States Government.
- *   It is the responsibility of any person or organization contemplating
- *   export to obtain such a license before exporting.
- * 
- * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
- * distribute this software and its documentation for any purpose and
- * without fee is hereby granted, provided that the above copyright
- * notice appear in all copies and that both that copyright notice and
- * this permission notice appear in supporting documentation, and that
- * the name of M.I.T. not be used in advertising or publicity pertaining
- * to distribution of the software without specific, written prior
- * permission.  Furthermore if you modify this software you must label
- * your software as modified software and not distribute it in such a
- * fashion that it might be confused with the original M.I.T. software.
- * M.I.T. makes no representations about the suitability of
- * this software for any purpose.  It is provided "as is" without express
- * or implied warranty.
- * 
- *
- * This file contains the source code for reading variables from a
- * credentials cache.  These are not library-exported functions.
- */
-
-
 
 krb5_error_code
 krb5_fcc_skip_header(context, id)
@@ -1482,36 +1289,6 @@ krb5_fcc_skip_principal(context, id)
      krb5_free_principal(context, princ);
      return KRB5_OK;
 }
-/* end of former file/fcc_skip.c */
-/* start of former file/fcc_init.c */
-/*
- * lib/krb5/ccache/file/fcc_init.c
- *
- * Copyright 1990,1991 by the Massachusetts Institute of Technology.
- * All Rights Reserved.
- *
- * Export of this software from the United States of America may
- *   require a specific license from the United States Government.
- *   It is the responsibility of any person or organization contemplating
- *   export to obtain such a license before exporting.
- * 
- * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
- * distribute this software and its documentation for any purpose and
- * without fee is hereby granted, provided that the above copyright
- * notice appear in all copies and that both that copyright notice and
- * this permission notice appear in supporting documentation, and that
- * the name of M.I.T. not be used in advertising or publicity pertaining
- * to distribution of the software without specific, written prior
- * permission.  Furthermore if you modify this software you must label
- * your software as modified software and not distribute it in such a
- * fashion that it might be confused with the original M.I.T. software.
- * M.I.T. makes no representations about the suitability of
- * this software for any purpose.  It is provided "as is" without express
- * or implied warranty.
- * 
- *
- * This file contains the source code for krb5_fcc_initialize.
- */
 
 
 /*
@@ -1557,39 +1334,6 @@ krb5_fcc_initialize(context, id, princ)
 }
 
 
-/* end of former file/fcc_init.c */
-/* start of former file/fcc_close.c */
-/*
- * lib/krb5/ccache/file/fcc_close.c
- *
- * Copyright 1990,1991 by the Massachusetts Institute of Technology.
- * All Rights Reserved.
- *
- * Export of this software from the United States of America may
- *   require a specific license from the United States Government.
- *   It is the responsibility of any person or organization contemplating
- *   export to obtain such a license before exporting.
- * 
- * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
- * distribute this software and its documentation for any purpose and
- * without fee is hereby granted, provided that the above copyright
- * notice appear in all copies and that both that copyright notice and
- * this permission notice appear in supporting documentation, and that
- * the name of M.I.T. not be used in advertising or publicity pertaining
- * to distribution of the software without specific, written prior
- * permission.  Furthermore if you modify this software you must label
- * your software as modified software and not distribute it in such a
- * fashion that it might be confused with the original M.I.T. software.
- * M.I.T. makes no representations about the suitability of
- * this software for any purpose.  It is provided "as is" without express
- * or implied warranty.
- * 
- *
- * This file contains the source code for krb5_fcc_close.
- */
-
-
-
 /*
  * Modifies:
  * id
@@ -1614,36 +1358,6 @@ krb5_fcc_close(context, id)
 
      return closeval;
 }
-/* end of former file/fcc_close.c */
-/* start of former file/fcc_destry.c */
-/*
- * lib/krb5/ccache/file/fcc_destry.c
- *
- * Copyright 1990 by the Massachusetts Institute of Technology.
- * All Rights Reserved.
- *
- * Export of this software from the United States of America may
- *   require a specific license from the United States Government.
- *   It is the responsibility of any person or organization contemplating
- *   export to obtain such a license before exporting.
- * 
- * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
- * distribute this software and its documentation for any purpose and
- * without fee is hereby granted, provided that the above copyright
- * notice appear in all copies and that both that copyright notice and
- * this permission notice appear in supporting documentation, and that
- * the name of M.I.T. not be used in advertising or publicity pertaining
- * to distribution of the software without specific, written prior
- * permission.  Furthermore if you modify this software you must label
- * your software as modified software and not distribute it in such a
- * fashion that it might be confused with the original M.I.T. software.
- * M.I.T. makes no representations about the suitability of
- * this software for any purpose.  It is provided "as is" without express
- * or implied warranty.
- * 
- *
- * This file contains the source code for krb5_fcc_destroy.
- */
 
 /*
  * Effects:
@@ -1775,39 +1489,6 @@ krb5_fcc_destroy(context, id)
      krb5_change_cache ();
      return kret;
 }
-/* end of former file/fcc_destry.c */
-/* start of former file/fcc_reslv.c */
-/*
- * lib/krb5/ccache/file/fcc_reslv.c
- *
- * Copyright 1990 by the Massachusetts Institute of Technology.
- * All Rights Reserved.
- *
- * Export of this software from the United States of America may
- *   require a specific license from the United States Government.
- *   It is the responsibility of any person or organization contemplating
- *   export to obtain such a license before exporting.
- * 
- * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
- * distribute this software and its documentation for any purpose and
- * without fee is hereby granted, provided that the above copyright
- * notice appear in all copies and that both that copyright notice and
- * this permission notice appear in supporting documentation, and that
- * the name of M.I.T. not be used in advertising or publicity pertaining
- * to distribution of the software without specific, written prior
- * permission.  Furthermore if you modify this software you must label
- * your software as modified software and not distribute it in such a
- * fashion that it might be confused with the original M.I.T. software.
- * M.I.T. makes no representations about the suitability of
- * this software for any purpose.  It is provided "as is" without express
- * or implied warranty.
- * 
- *
- * This file contains the source code for krb5_fcc_resolve.
- */
-
-
-
 
 extern krb5_cc_ops krb5_fcc_ops;
 
@@ -1873,38 +1554,6 @@ krb5_fcc_resolve (context, id, residual)
      *id = lid;
      return KRB5_OK;
 }
-/* end of former file/fcc_reslv.c */
-/* start of former file/fcc_sseq.c */
-/*
- * lib/krb5/ccache/file/fcc_sseq.c
- *
- * Copyright 1990,1991 by the Massachusetts Institute of Technology.
- * All Rights Reserved.
- *
- * Export of this software from the United States of America may
- *   require a specific license from the United States Government.
- *   It is the responsibility of any person or organization contemplating
- *   export to obtain such a license before exporting.
- * 
- * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
- * distribute this software and its documentation for any purpose and
- * without fee is hereby granted, provided that the above copyright
- * notice appear in all copies and that both that copyright notice and
- * this permission notice appear in supporting documentation, and that
- * the name of M.I.T. not be used in advertising or publicity pertaining
- * to distribution of the software without specific, written prior
- * permission.  Furthermore if you modify this software you must label
- * your software as modified software and not distribute it in such a
- * fashion that it might be confused with the original M.I.T. software.
- * M.I.T. makes no representations about the suitability of
- * this software for any purpose.  It is provided "as is" without express
- * or implied warranty.
- * 
- *
- * This file contains the source code for krb5_fcc_start_seq_get.
- */
-
-
 
 /*
  * Effects:
@@ -1953,37 +1602,6 @@ done:
      MAYBE_CLOSE(context, id, kret);
      return kret;
 }
-/* end of former file/fcc_sseq.c */
-/* start of former file/fcc_nseq.c */
-/*
- * lib/krb5/ccache/file/fcc_nseq.c
- *
- * Copyright 1990,1991 by the Massachusetts Institute of Technology.
- * All Rights Reserved.
- *
- * Export of this software from the United States of America may
- *   require a specific license from the United States Government.
- *   It is the responsibility of any person or organization contemplating
- *   export to obtain such a license before exporting.
- * 
- * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
- * distribute this software and its documentation for any purpose and
- * without fee is hereby granted, provided that the above copyright
- * notice appear in all copies and that both that copyright notice and
- * this permission notice appear in supporting documentation, and that
- * the name of M.I.T. not be used in advertising or publicity pertaining
- * to distribution of the software without specific, written prior
- * permission.  Furthermore if you modify this software you must label
- * your software as modified software and not distribute it in such a
- * fashion that it might be confused with the original M.I.T. software.
- * M.I.T. makes no representations about the suitability of
- * this software for any purpose.  It is provided "as is" without express
- * or implied warranty.
- * 
- *
- * This file contains the source code for krb5_fcc_next_cred.
- */
-
 
 /*
  * Requires:
@@ -2064,38 +1682,6 @@ lose:
 	 krb5_free_cred_contents(context, creds);
      return kret;
 }
-/* end of former file/fcc_nseq.c */
-/* start of former file/fcc_eseq.c */
-/*
- * lib/krb5/ccache/file/fcc_eseq.c
- *
- * Copyright 1990,1991 by the Massachusetts Institute of Technology.
- * All Rights Reserved.
- *
- * Export of this software from the United States of America may
- *   require a specific license from the United States Government.
- *   It is the responsibility of any person or organization contemplating
- *   export to obtain such a license before exporting.
- * 
- * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
- * distribute this software and its documentation for any purpose and
- * without fee is hereby granted, provided that the above copyright
- * notice appear in all copies and that both that copyright notice and
- * this permission notice appear in supporting documentation, and that
- * the name of M.I.T. not be used in advertising or publicity pertaining
- * to distribution of the software without specific, written prior
- * permission.  Furthermore if you modify this software you must label
- * your software as modified software and not distribute it in such a
- * fashion that it might be confused with the original M.I.T. software.
- * M.I.T. makes no representations about the suitability of
- * this software for any purpose.  It is provided "as is" without express
- * or implied warranty.
- * 
- *
- * This file contains the source code for krb5_fcc_end_seq_get.
- */
-
-
 
 /*
  * Requires:
@@ -2126,40 +1712,6 @@ krb5_fcc_end_seq_get(context, id, cursor)
 
      return kret;
 }
-
-
-/* end of former file/fcc_eseq.c */
-/* start of former file/fcc_gennew.c */
-/*
- * lib/krb5/ccache/file/fcc_gennew.c
- *
- * Copyright 1990,1991 by the Massachusetts Institute of Technology.
- * All Rights Reserved.
- *
- * Export of this software from the United States of America may
- *   require a specific license from the United States Government.
- *   It is the responsibility of any person or organization contemplating
- *   export to obtain such a license before exporting.
- * 
- * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
- * distribute this software and its documentation for any purpose and
- * without fee is hereby granted, provided that the above copyright
- * notice appear in all copies and that both that copyright notice and
- * this permission notice appear in supporting documentation, and that
- * the name of M.I.T. not be used in advertising or publicity pertaining
- * to distribution of the software without specific, written prior
- * permission.  Furthermore if you modify this software you must label
- * your software as modified software and not distribute it in such a
- * fashion that it might be confused with the original M.I.T. software.
- * M.I.T. makes no representations about the suitability of
- * this software for any purpose.  It is provided "as is" without express
- * or implied warranty.
- * 
- *
- * This file contains the source code for krb5_fcc_generate_new.
- */
-
-extern krb5_cc_ops krb5_fcc_ops;
 
 /*
  * Effects:
@@ -2278,39 +1830,6 @@ err_out:
      krb5_xfree(lid);
      return retcode;
 }
-/* end of former file/fcc_gennew.c */
-/* start of former file/fcc_getnam.c */
-/*
- * lib/krb5/ccache/file/fcc_getnam.c
- *
- * Copyright 1990 by the Massachusetts Institute of Technology.
- * All Rights Reserved.
- *
- * Export of this software from the United States of America may
- *   require a specific license from the United States Government.
- *   It is the responsibility of any person or organization contemplating
- *   export to obtain such a license before exporting.
- * 
- * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
- * distribute this software and its documentation for any purpose and
- * without fee is hereby granted, provided that the above copyright
- * notice appear in all copies and that both that copyright notice and
- * this permission notice appear in supporting documentation, and that
- * the name of M.I.T. not be used in advertising or publicity pertaining
- * to distribution of the software without specific, written prior
- * permission.  Furthermore if you modify this software you must label
- * your software as modified software and not distribute it in such a
- * fashion that it might be confused with the original M.I.T. software.
- * M.I.T. makes no representations about the suitability of
- * this software for any purpose.  It is provided "as is" without express
- * or implied warranty.
- * 
- *
- * This file contains the source code for krb5_fcc_get_name.
- */
-
-
-
 
 /*
  * Requires:
@@ -2326,38 +1845,6 @@ krb5_fcc_get_name (context, id)
 {
      return (char *) ((krb5_fcc_data *) id->data)->filename;
 }
-/* end of former file/fcc_getnam.c */
-/* start of former file/fcc_gprin.c */
-/*
- * lib/krb5/ccache/file/fcc_gprin.c
- *
- * Copyright 1990,1991 by the Massachusetts Institute of Technology.
- * All Rights Reserved.
- *
- * Export of this software from the United States of America may
- *   require a specific license from the United States Government.
- *   It is the responsibility of any person or organization contemplating
- *   export to obtain such a license before exporting.
- * 
- * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
- * distribute this software and its documentation for any purpose and
- * without fee is hereby granted, provided that the above copyright
- * notice appear in all copies and that both that copyright notice and
- * this permission notice appear in supporting documentation, and that
- * the name of M.I.T. not be used in advertising or publicity pertaining
- * to distribution of the software without specific, written prior
- * permission.  Furthermore if you modify this software you must label
- * your software as modified software and not distribute it in such a
- * fashion that it might be confused with the original M.I.T. software.
- * M.I.T. makes no representations about the suitability of
- * this software for any purpose.  It is provided "as is" without express
- * or implied warranty.
- * 
- *
- * This file contains the source code for krb5_fcc_get_principal.
- */
-
-
 
 /*
  * Modifies:
@@ -2393,248 +1880,6 @@ done:
 }
 
      
-/* end of former file/fcc_gprin.c */
-/* start of former file/fcc_retrv.c */
-/*
- * lib/krb5/ccache/file/fcc_retrv.c
- *
- * Copyright 1990,1991 by the Massachusetts Institute of Technology.
- * All Rights Reserved.
- *
- * Export of this software from the United States of America may
- *   require a specific license from the United States Government.
- *   It is the responsibility of any person or organization contemplating
- *   export to obtain such a license before exporting.
- * 
- * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
- * distribute this software and its documentation for any purpose and
- * without fee is hereby granted, provided that the above copyright
- * notice appear in all copies and that both that copyright notice and
- * this permission notice appear in supporting documentation, and that
- * the name of M.I.T. not be used in advertising or publicity pertaining
- * to distribution of the software without specific, written prior
- * permission.  Furthermore if you modify this software you must label
- * your software as modified software and not distribute it in such a
- * fashion that it might be confused with the original M.I.T. software.
- * M.I.T. makes no representations about the suitability of
- * this software for any purpose.  It is provided "as is" without express
- * or implied warranty.
- * 
- *
- * This file contains the source code for krb5_fcc_retrieve.
- */
-
-#if 0
-
-
-#ifdef macintosh
-#define register
-#endif
-
-#define set(bits) (whichfields & bits)
-#define flags_match(a,b) (((a) & (b)) == (a))
-#define times_match_exact(t1,t2) (memcmp((char *)(t1), (char *)(t2), sizeof(*(t1))) == 0)
-
-static krb5_boolean times_match PROTOTYPE((const krb5_ticket_times *,
-					   const krb5_ticket_times *));
-static krb5_boolean standard_fields_match
-    PROTOTYPE((krb5_context,
-		   const krb5_creds *,
-	       const krb5_creds *));
-
-static krb5_boolean srvname_match
-    PROTOTYPE((krb5_context,
-		   const krb5_creds *,
-	       const krb5_creds *));
-
-static krb5_boolean authdata_match
-    PROTOTYPE ((krb5_authdata * const *, krb5_authdata * const *));
-
-
-static krb5_boolean
-data_match(data1, data2)
-register const krb5_data *data1, *data2;
-{
-    if (!data1) {
-	if (!data2)
-	    return TRUE;
-	else
-	    return FALSE;
-    }
-    if (!data2) return FALSE;
-
-    if (data1->length != data2->length)
-	return FALSE;
-    else
-	return memcmp(data1->data, data2->data, data1->length) ? FALSE : TRUE;
-}
-
-
-
-/*
- * Effects:
- * Searches the file cred cache is for a credential matching mcreds,
- * with the fields specified by whichfields.  If one if found, it is
- * returned in creds, which should be freed by the caller with
- * krb5_free_credentials().
- * 
- * The fields are interpreted in the following way (all constants are
- * preceded by KRB5_TC_).  MATCH_IS_SKEY requires the is_skey field to
- * match exactly.  MATCH_TIMES requires the requested lifetime to be
- * at least as great as that specified; MATCH_TIMES_EXACT requires the
- * requested lifetime to be exactly that specified.  MATCH_FLAGS
- * requires only the set bits in mcreds be set in creds;
- * MATCH_FLAGS_EXACT requires all bits to match.
- *
- * Errors:
- * system errors
- * permission errors
- * KRB5_CC_NOMEM
- */
-krb5_error_code KRB5_CALLCONV
-krb5_fcc_retrieve(context, id, whichfields, mcreds, creds)
-   krb5_context context;
-   krb5_ccache id;
-   krb5_flags whichfields;
-   krb5_creds *mcreds;
-   krb5_creds *creds;
-{
-     /* This function could be considerably faster if it kept indexing */
-     /* information.. sounds like a "next version" idea to me. :-) */
-
-     krb5_cc_cursor cursor;
-     krb5_error_code kret;
-     krb5_creds fetchcreds;
-
-     kret = krb5_fcc_start_seq_get(context, id, &cursor);
-     if (kret != KRB5_OK)
-	  return kret;
-
-     while ((kret = krb5_fcc_next_cred(context, id, &cursor, &fetchcreds)) == KRB5_OK) {
-	 if (((set(KRB5_TC_MATCH_SRV_NAMEONLY) &&
-		   srvname_match(context, mcreds, &fetchcreds)) ||
-	       standard_fields_match(context, mcreds, &fetchcreds))
-	      &&
-	      (! set(KRB5_TC_MATCH_IS_SKEY) ||
-	       mcreds->is_skey == fetchcreds.is_skey)
-	      &&
-	      (! set(KRB5_TC_MATCH_FLAGS_EXACT) ||
-	       mcreds->ticket_flags == fetchcreds.ticket_flags)
-	      &&
-	      (! set(KRB5_TC_MATCH_FLAGS) ||
-	       flags_match(mcreds->ticket_flags, fetchcreds.ticket_flags))
-	      &&
-	      (! set(KRB5_TC_MATCH_TIMES_EXACT) ||
-	       times_match_exact(&mcreds->times, &fetchcreds.times))
-	      &&
-	      (! set(KRB5_TC_MATCH_TIMES) ||
-	       times_match(&mcreds->times, &fetchcreds.times))
-	      &&
-	      ( ! set(KRB5_TC_MATCH_AUTHDATA) ||
-	       authdata_match(mcreds->authdata, fetchcreds.authdata))
-	      &&
-	      (! set(KRB5_TC_MATCH_2ND_TKT) ||
-	       data_match (&mcreds->second_ticket, &fetchcreds.second_ticket))
-	      &&
-	     ((! set(KRB5_TC_MATCH_KTYPE))||
-		(mcreds->keyblock.enctype == fetchcreds.keyblock.enctype)))
-	  {
-	       krb5_fcc_end_seq_get(context, id, &cursor);
-	       *creds = fetchcreds;
-	       return KRB5_OK;
-	  }
-
-	  /* This one doesn't match */
-	  krb5_free_cred_contents(context, &fetchcreds);
-     }
-
-     /* If we get here, a match wasn't found */
-     krb5_fcc_end_seq_get(context, id, &cursor);
-     return KRB5_CC_NOTFOUND;
-}
-
-static krb5_boolean
-times_match(t1, t2)
-register const krb5_ticket_times *t1;
-register const krb5_ticket_times *t2;
-{
-    if (t1->renew_till) {
-	if (t1->renew_till > t2->renew_till)
-	    return FALSE;		/* this one expires too late */
-    }
-    if (t1->endtime) {
-	if (t1->endtime > t2->endtime)
-	    return FALSE;		/* this one expires too late */
-    }
-    /* only care about expiration on a times_match */
-    return TRUE;
-}
-
-static krb5_boolean
-standard_fields_match(context, mcreds, creds)
-krb5_context		context;
-const krb5_creds	*mcreds;
-const krb5_creds	*creds;
-{
-krb5_boolean clientcmp;
-krb5_boolean servercmp;
-	clientcmp = krb5_principal_compare(context, mcreds->client,creds->client);
-	servercmp = krb5_principal_compare(context, mcreds->server,creds->server);
-    return (clientcmp && servercmp);
-}
-
-/* only match the server name portion, not the server realm portion */
-
-static krb5_boolean
-srvname_match(context, mcreds, creds)
-   krb5_context context;
-register const krb5_creds *mcreds, *creds;
-{
-    krb5_boolean retval;
-    krb5_principal_data p1, p2;
-    
-    retval = krb5_principal_compare(context, mcreds->client,creds->client);
-    if (retval != TRUE)
-	return retval;
-    /*
-     * Hack to ignore the server realm for the purposes of the compare.
-     */
-    p1 = *mcreds->server;
-    p2 = *creds->server;
-    p1.realm = p2.realm;
-    return krb5_principal_compare(context, &p1, &p2);
-}
-
-static krb5_boolean
-authdata_match(mdata, data)
-    register krb5_authdata * const *mdata, * const *data;
-{
-    register const krb5_authdata *mdatap, *datap;
-
-    if (mdata == data)
-      return TRUE;
-
-    if (mdata == NULL)
-	return *data == NULL;
-	
-    if (data == NULL)
-	return *mdata == NULL;
-    
-    while ((mdatap = *mdata) && (datap = *data)) {
-      if ((mdatap->ad_type != datap->ad_type) ||
-          (mdatap->length != datap->length) ||
-          (memcmp ((char *)mdatap->contents,
-		 (char *)datap->contents, mdatap->length) != 0))
-          return FALSE;
-      mdata++;
-      data++;
-    }
-    return (*mdata == NULL) && (*data == NULL);
-}
-
-#else
-
-
 krb5_error_code KRB5_CALLCONV
 krb5_fcc_retrieve(context, id, whichfields, mcreds, creds)
    krb5_context context;
@@ -2646,38 +1891,6 @@ krb5_fcc_retrieve(context, id, whichfields, mcreds, creds)
     return krb5_cc_retrieve_cred_default (context, id, whichfields,
 					  mcreds, creds);
 }
-
-#endif
-/* end of former file/fcc_retrv.c */
-/* start of former file/fcc_store.c */
-/*
- * lib/krb5/ccache/file/fcc_store.c
- *
- * Copyright 1990,1991 by the Massachusetts Institute of Technology.
- * All Rights Reserved.
- *
- * Export of this software from the United States of America may
- *   require a specific license from the United States Government.
- *   It is the responsibility of any person or organization contemplating
- *   export to obtain such a license before exporting.
- * 
- * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
- * distribute this software and its documentation for any purpose and
- * without fee is hereby granted, provided that the above copyright
- * notice appear in all copies and that both that copyright notice and
- * this permission notice appear in supporting documentation, and that
- * the name of M.I.T. not be used in advertising or publicity pertaining
- * to distribution of the software without specific, written prior
- * permission.  Furthermore if you modify this software you must label
- * your software as modified software and not distribute it in such a
- * fashion that it might be confused with the original M.I.T. software.
- * M.I.T. makes no representations about the suitability of
- * this software for any purpose.  It is provided "as is" without express
- * or implied warranty.
- * 
- *
- * This file contains the source code for krb5_fcc_store.
- */
 
 
 #define CHECK(ret) if (ret != KRB5_OK) return ret;
@@ -2738,39 +1951,7 @@ lose:
      return ret;
 #undef TCHECK
 }
-/* end of former file/fcc_store.c */
 #undef CHECK
-/* start of former file/fcc_sflags.c */
-/*
- * lib/krb5/ccache/file/fcc_sflags.c
- *
- * Copyright 1990,1991 by the Massachusetts Institute of Technology.
- * All Rights Reserved.
- *
- * Export of this software from the United States of America may
- *   require a specific license from the United States Government.
- *   It is the responsibility of any person or organization contemplating
- *   export to obtain such a license before exporting.
- * 
- * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
- * distribute this software and its documentation for any purpose and
- * without fee is hereby granted, provided that the above copyright
- * notice appear in all copies and that both that copyright notice and
- * this permission notice appear in supporting documentation, and that
- * the name of M.I.T. not be used in advertising or publicity pertaining
- * to distribution of the software without specific, written prior
- * permission.  Furthermore if you modify this software you must label
- * your software as modified software and not distribute it in such a
- * fashion that it might be confused with the original M.I.T. software.
- * M.I.T. makes no representations about the suitability of
- * this software for any purpose.  It is provided "as is" without express
- * or implied warranty.
- * 
- *
- * This file contains the source code for krb5_fcc_set_flags.
- */
-
-
 
 
 /*
@@ -2806,44 +1987,11 @@ krb5_fcc_set_flags(context, id, flags)
     return KRB5_OK;
 }
 
-/* end of former file/fcc_sflags.c */
-/* start of former file/fcc_errs.c */
-/*
- * lib/krb5/ccache/file/fcc_errs.c
- *
- * Copyright 1990 by the Massachusetts Institute of Technology.
- * All Rights Reserved.
- *
- * Export of this software from the United States of America may
- *   require a specific license from the United States Government.
- *   It is the responsibility of any person or organization contemplating
- *   export to obtain such a license before exporting.
- * 
- * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
- * distribute this software and its documentation for any purpose and
- * without fee is hereby granted, provided that the above copyright
- * notice appear in all copies and that both that copyright notice and
- * this permission notice appear in supporting documentation, and that
- * the name of M.I.T. not be used in advertising or publicity pertaining
- * to distribution of the software without specific, written prior
- * permission.  Furthermore if you modify this software you must label
- * your software as modified software and not distribute it in such a
- * fashion that it might be confused with the original M.I.T. software.
- * M.I.T. makes no representations about the suitability of
- * this software for any purpose.  It is provided "as is" without express
- * or implied warranty.
- * 
- *
- * error code interpretation routine
- */
-
-
-
 
 krb5_error_code
 krb5_fcc_interpret(context, errnum)
-   krb5_context context;
-int errnum;
+     krb5_context context;
+     int errnum;
 {
     register krb5_error_code retval;
     switch (errnum) {
@@ -2889,37 +2037,6 @@ int errnum;
     }
     return retval;
 }
-/* end of former file/fcc_errs.c */
-/* start of former file/fcc_ops.c */
-/*
- * lib/krb5/ccache/file/fcc_ops.c
- *
- * Copyright 1990 by the Massachusetts Institute of Technology.
- * All Rights Reserved.
- *
- * Export of this software from the United States of America may
- *   require a specific license from the United States Government.
- *   It is the responsibility of any person or organization contemplating
- *   export to obtain such a license before exporting.
- * 
- * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
- * distribute this software and its documentation for any purpose and
- * without fee is hereby granted, provided that the above copyright
- * notice appear in all copies and that both that copyright notice and
- * this permission notice appear in supporting documentation, and that
- * the name of M.I.T. not be used in advertising or publicity pertaining
- * to distribution of the software without specific, written prior
- * permission.  Furthermore if you modify this software you must label
- * your software as modified software and not distribute it in such a
- * fashion that it might be confused with the original M.I.T. software.
- * M.I.T. makes no representations about the suitability of
- * this software for any purpose.  It is provided "as is" without express
- * or implied warranty.
- * 
- *
- * This file contains the structure krb5_fcc_ops.
- */
-
 #define NEED_WINDOWS
 
 krb5_cc_ops krb5_fcc_ops = {
@@ -2983,40 +2100,6 @@ krb5_get_notification_message ()
 
 #endif /* _MSDOS || _WIN32 */
 
-/* end of former file/fcc_ops.c */
-/* start of former file/fcc_defops.c */
-/*
- * lib/krb5/ccache/file/fcc_defops.c
- *
- * Copyright 1990 by the Massachusetts Institute of Technology.
- * All Rights Reserved.
- *
- * Export of this software from the United States of America may
- *   require a specific license from the United States Government.
- *   It is the responsibility of any person or organization contemplating
- *   export to obtain such a license before exporting.
- * 
- * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
- * distribute this software and its documentation for any purpose and
- * without fee is hereby granted, provided that the above copyright
- * notice appear in all copies and that both that copyright notice and
- * this permission notice appear in supporting documentation, and that
- * the name of M.I.T. not be used in advertising or publicity pertaining
- * to distribution of the software without specific, written prior
- * permission.  Furthermore if you modify this software you must label
- * your software as modified software and not distribute it in such a
- * fashion that it might be confused with the original M.I.T. software.
- * M.I.T. makes no representations about the suitability of
- * this software for any purpose.  It is provided "as is" without express
- * or implied warranty.
- * 
- *
- * This file contains the structure krb5_cc_dfl_ops.
- */
-
-
-
-
 krb5_cc_ops krb5_cc_file_ops = {
      0,
      "FILE",
@@ -3035,4 +2118,3 @@ krb5_cc_ops krb5_cc_file_ops = {
      NULL, /* XXX krb5_fcc_remove, */
      krb5_fcc_set_flags,
 };
-/* end of former file/fcc_defops.c */
