@@ -810,17 +810,6 @@ const char	**status;
 	return(KDC_ERR_S_PRINCIPAL_UNKNOWN);
     }
 
-    /* Check to see if preauthentication is required */
-    if (isflagset(client.attributes, KRB5_KDB_REQUIRES_PRE_AUTH) &&
-        !request->padata) {
-	*status = "MISSING PRE_AUTH";
-#ifdef KRBCONF_VAGUE_ERRORS
-	return KRB_ERR_GENERIC;
-#else
-	return KDC_ERR_PREAUTH_REQUIRED;
-#endif
-    }
-
     /*
      * Check against local policy
      */

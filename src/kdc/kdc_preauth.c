@@ -123,7 +123,7 @@ void get_preauth_hint_list(client, server, e_data)
 	*pa = malloc(sizeof(krb5_pa_data));
 	if (*pa == 0)
 	    goto errout;
-	memset(pa, 0, sizeof(krb5_pa_data));
+	memset(*pa, 0, sizeof(krb5_pa_data));
 	(*pa)->magic = KV5M_PA_DATA;
 	(*pa)->pa_type = ap->type;
 	if (ap->get_edata)

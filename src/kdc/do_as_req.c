@@ -532,7 +532,7 @@ errout:
 	if (errcode < 0 || errcode > 128)
 	    errcode = KRB_ERR_GENERIC;
 	    
-	errcode = prepare_error_as(request, errcode, 0, response);
+	errcode = prepare_error_as(request, errcode, &e_data, response);
     }
     if (cname)
 	    free(cname);
