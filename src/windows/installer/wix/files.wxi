@@ -137,8 +137,7 @@
 	                    <Environment Id="env_kclient_path" Action="set" Name="PATH" Part="last" System="yes" Value="[KERBEROSDIR]bin" />
                     </Component>
                     <Component Id="cmf_k5sprt32_dll" Guid="F2381331-9201-4c02-866F-2038676771D4" DiskId="1">
-	                    <File Id="fil_k5sprt32_dll" LongName="k5sprt32.dll" Name="k5sprt32.dll" KeyPath="yes" />
-	                    <Environment Id="env_kclient_path" Action="set" Name="PATH" Part="last" System="yes" Value="[KERBEROSDIR]bin" />
+	                    <File Id="fil_k5sprt32_dll" LongName="k5sprt32.dll" Name="k5sprt32.dll" />
                     </Component>
                     <Component Id="cmf_krb524_dll" Guid="98685874-A9AA-4BC5-9830-271D9CF52C17" DiskId="1">
 	                    <File Id="fil_krb524_dll" LongName="krb524.dll" Name="krb524.dll" KeyPath="yes" />
@@ -313,7 +312,7 @@
 	                    <File Id="fil_kpasswd_pdb" LongName="kpasswd.pdb" Name="kpasswd.pdb" />
 	                    <File Id="fil_kvno_pdb" LongName="kvno.pdb" Name="kvno.pdb" />
 	                    <File Id="fil_krb5_32_pdb" LongName="krb5_32.pdb" Name="krb5_32.pdb" KeyPath="yes" />
-	                    <File Id="fil_k5sprt32_pdb" LongName="k5sprt32.pdb" Name="k5sprt32.pdb" KeyPath="yes" />
+	                    <File Id="fil_k5sprt32_pdb" LongName="k5sprt32.pdb" Name="k5sprt32.pdb" />
 	                    <File Id="fil_krb524_pdb" LongName="krb524.pdb" Name="krb524.pdb" />
 	                    <File Id="fil_krbcc32_pdb" LongName="krbcc32.pdb" Name="krbcc32.pdb" />
 	                    <File Id="fil_krbcc32s_pdb" LongName="krbcc32s.pdb" Name="krbcc32s.pdb" />
@@ -624,7 +623,6 @@
                             <File Id="fil_kclnt32_lib" LongName="kclnt32.lib" Name="kclnt32.lib" />
                             <File Id="fil_krb524_lib" LongName="krb524.lib" Name="krb524.lib" />
                             <File Id="fil_krb5_32_lib" LongName="krb5_32.lib" Name="krb5_32.lib" KeyPath="yes" />
-                            <File Id="fil_k5sprt32_lib" LongName="k5sprt32.lib" Name="k5sprt32.lib" KeyPath="yes" />
                             <File Id="fil_krbcc32_lib" LongName="krbcc32.lib" Name="krbcc32.lib" />
                             <File Id="fil_krbv4w32_lib" LongName="krbv4w32.lib" Name="krbv4w32.lib" />
                             <File Id="fil_leashw32_lib" LongName="leashw32.lib" Name="leashw32.lib" />
@@ -720,7 +718,7 @@
     </Directory>
     
     <Directory Id="ProgramMenuFolder">
-        <Directory Id="dirShortcut" LongName="$(loc.ProductName)" Name="$(loc.ProductNameShort)">
+        <Directory Id="dirShortcut" LongName="$(loc.ProductName)" Name="KFW">
         </Directory>
     </Directory>
     <Directory Id="StartupFolder">

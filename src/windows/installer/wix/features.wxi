@@ -39,7 +39,6 @@
             Description="$(loc.KerberosClientDesc)"
             InstallDefault="local"
             Title="$(loc.KerberosClientTitle)"
-            FollowParent="yes"
             Level="30">
             
             <ComponentRef Id="cmf_aklog_exe" />

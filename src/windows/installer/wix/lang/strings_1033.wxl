@@ -26,7 +26,7 @@
   
   -->
     <String Id="ProductName">Kerberos for Windows</String>
-    <String Id="ProductNameShort">Kerberos</String>
+    <String Id="ProductNameShort">KFW</String>
     <String Id="ProductMIT">MIT</String>
     <String Id="ProductDebug">Debug/Checked</String>
     <String Id="ProductBeta">Beta</String>
