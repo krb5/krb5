@@ -1,5 +1,8 @@
 2001-07-06  Ezra Peisach  <epeisach@mit.edu>
 
+	* conv_princ.c (krb5_425_conv_principal): Cast argument to tolower
+	to int.
+
 	* get_in_tkt.c: Include os-proto.h for _krb5_conf_boolean prototype.
 
 	* Makefile.in (LOCALINCLUDES): Add -I$(srcdir)/../os so os-proto.h

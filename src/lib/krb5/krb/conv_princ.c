@@ -319,7 +319,7 @@ krb5_425_conv_principal(context, name, instance, realm, princ)
 		  if (domain) {
 		      for (cp = domain; *cp; cp++)
 			  if (isupper((int) (*cp)))
-			      *cp = tolower(*cp);
+			      *cp = tolower((int) *cp);
 		      strncat(buf, ".", sizeof(buf) - 1 - strlen(buf));
 		      strncat(buf, domain, sizeof(buf) - 1 - strlen(buf));
 		      krb5_xfree(domain);
