@@ -55,7 +55,7 @@ error_code KRB5KDC_ERR_SERVICE_NOTYET,	"Server not yet valid - try again later"
 error_code KRB5KDC_ERR_KEY_EXP,  	"Password has expired"
 error_code KRB5KDC_ERR_PREAUTH_FAILED,  "Preauthentication failed"
 # ^^ 24
-error_code KRB5KDC_ERR_PREAUTH_REQUIRED,"Additional pre-authentication required"
+error_code KRB5KDC_ERR_PREAUTH_REQUIRED, "Additional pre-authentication required"
 error_code KRB5KDC_ERR_SERVER_NOMATCH,	"Requested server and ticket don't match"
 error_code KRB5PLACEHOLD_27,		"KRB5 error code 27"
 error_code KRB5PLACEHOLD_28,		"KRB5 error code 28"
