@@ -206,10 +206,11 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
    krb5_ui_4 gss_flags = 0;
    int decode_req_message = 0;
    krb5_gss_ctx_id_rec *ctx = 0;
+#if 0
    krb5_enctype enctype;
+#endif
    krb5_timestamp now;
    gss_buffer_desc token;
-   int err;
    krb5_auth_context auth_context = NULL;
    krb5_ticket * ticket = NULL;
    int option_id;
