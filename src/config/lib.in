@@ -50,6 +50,15 @@ lib$(LIBBASE)$(SHLIBEXT): lib$(LIBBASE)$(SHLIBVEXT)
 	$(RM) $@
 	$(LN_S) lib$(LIBBASE)$(SHLIBVEXT) $@
 
+binutils.versions: $(SHLIB_EXPORT_FILE) Makefile
+	echo >  binutils.versions "HIDDEN { local: __*; _rest*; _save*; *; };"
+	echo >> binutils.versions "$(LIBBASE)_$(LIBMAJOR)_MIT {"
+	sed  >> binutils.versions < $(SHLIB_EXPORT_FILE) "s/$$/;/"
+	echo >> binutils.versions "};"
+
+osf1.exports: $(SHLIB_EXPORT_FILE) Makefile
+	sed "s/^/-exported_symbol /" < $(SHLIB_EXPORT_FILE) > osf1.exports
+
 lib$(LIBBASE)$(PFLIBEXT): $(PFOBJLISTS)
 	$(RM) $@
 	@echo "building profiled $(LIBBASE) library"
@@ -81,6 +90,7 @@ clean-libs:
 	$(RM) lib$(LIBBASE)$(SHLIBSEXT)
 	$(RM) lib$(LIBBASE)$(SHLIBEXT)
 	$(RM) lib$(LIBBASE)$(PFLIBEXT)
+	$(RM) binutils.versions osf1.exports
 
 clean-liblinks:
 	$(RM) $(TOPLIBD)/lib$(LIBBASE)$(STLIBEXT)

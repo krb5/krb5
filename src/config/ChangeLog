@@ -1,3 +1,13 @@
+2004-09-22  Ken Raeburn  <raeburn@mit.edu>
+
+	* lib.in (binutils.versions, osf1.exports): New file targets.
+	(clean-libs): Delete them.
+	* pre.in (SHLIB_EXPORT_FILE_DEP): Use @SHLIB_EXPORT_FILE_DEP@.
+	* shlib.conf: Set it to $(SHLIB_EXPORT_FILE) by default.
+	(alpha*-dec-osf*): Use osf1.exports instead of adding commands to
+	generate a temporary file.
+	(*-*-linux*, *-*-gnu*, *-*-k*bsd*-gnu): Use binutils.versions.
+
 2004-09-22  Tom Yu  <tlyu@mit.edu>
 
 	* pre.in (UTIL_LIB): Set if we need libutil.

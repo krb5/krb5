@@ -497,7 +497,7 @@ SHLIB_EXPORT_FILE=$(srcdir)/lib$(LIBBASE).exports
 # File that needs to be current for building the shared library,
 # usually SHLIB_EXPORT_FILE, but not always, if we have to convert
 # it to another, intermediate form for the linker.
-SHLIB_EXPORT_FILE_DEP=$(SHLIB_EXPORT_FILE)
+SHLIB_EXPORT_FILE_DEP=@SHLIB_EXPORT_FILE_DEP@
 
 # Command to run to build a shared library.
 # In systems that require multiple commands, like AIX, it may need
