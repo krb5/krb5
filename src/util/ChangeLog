@@ -1,3 +1,7 @@
+Thu Jul  6 09:52:08 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* Makefile.in (clean): Remove makeshlib
+
 Tue Jul  4 02:11:56 1995  Tom Yu  <tlyu@lothlorien.MIT.EDU>
 
 	* makeshlib.sh: Add support for NetBSD shared libraries.
