@@ -1,4 +1,8 @@
 
+Mon May 15 10:57:17 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* kadmin5.M	- Change default principal name for kadmin5.
+
+
 Fri May 12 16:04:01 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* configure.in	- Check for regex.h.
 	* kadmin5.c	- Use regex.h only if present.  Correctly calculate

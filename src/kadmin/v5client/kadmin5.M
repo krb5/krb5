@@ -45,14 +45,16 @@ specifies the default realm.
 .B principal
 specifies a principal name to use instead of the default 
 .I user
-.B /kadmind5@realm.
+.B /kadmin5@realm.
 .IP \-m
 specifies that multiple operations will be permitted for only one entry of the
 administrative principal's password.
 
 .SH DESCRIPTION
 This utility provides a network administration interface to the Kerberos
-master database.  Kerberos administrators use kadmin5 to register new
+master database.  Kerberos administrators use
+.I kadmin5
+to register new
 users and services with the master database; to remove old users and services
 from the master database; to modify information about existing database
 entries; and to create service key tables from entries in the database.
@@ -71,7 +73,7 @@ Principals who may perform administrative operations are controlled by the
 .I kadmind5
 access control list.  The default administrative principal is
 .I user
-.B /kadmind5@realm.
+.B /kadmin5@realm.
 .PP
 One command may be specified on the command line, or if no command is provided,
 an interactive command loop is entered for the administrator to enter commands.
