@@ -28,6 +28,9 @@ static char *rcsid = "$Header$";
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 
 #include <gssapi/gssapi.h>
 #include <gssapi/gssapi_generic.h>
@@ -48,7 +51,6 @@ main(argc, argv)
      int argc;
      char **argv;
 {
-     struct sockaddr_in saddr;
      char *service_name;
      u_short port = 4444;
      int s;
