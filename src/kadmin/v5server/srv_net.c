@@ -28,7 +28,7 @@
 #include <errno.h>
 #include <setjmp.h>
 #include <sys/wait.h>
-#include <sys/signal.h>
+#include <signal.h>
 #ifdef	USE_PTHREADS
 #include <pthread.h>
 #endif	/* USE_PTHREADS */

@@ -27,7 +27,7 @@
  * 	protocol as implemented in lib/krb5/os/adm_conn.c.  Any changes
  *	in one module must be reflected in the other.
  */
-#include <sys/signal.h>
+#include <signal.h>
 #define	NEED_SOCKETS
 #include "k5-int.h"
 #include "com_err.h"
