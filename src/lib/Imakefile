@@ -29,10 +29,11 @@ SUBDIRS = krb5 kdb des425 krb425 crypto gssapi
 
 MakeSubdirs($(SUBDIRS))
 
-all:: libkrb5.a libcrypto.a
+all:: libkrb5.a libcrypto.a libgssapi_krb5.a
 
 LinkFile(libkrb5.a, krb5/libkrb5.a)
 LinkFile(libcrypto.a, crypto/libcrypto.a)
+LinkFile(libgssapi_krb5.a, gssapi/libgssapi_krb5.a)
 
 Krb5InstallLibrary(krb425,$(KRB5_LIBDIR))
 Krb5InstallLibrary(des425,$(KRB5_LIBDIR))
