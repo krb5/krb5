@@ -1,3 +1,8 @@
+2004-06-04  Ken Raeburn  <raeburn@mit.edu>
+
+	* kuserok.c (krb5_kuserok): Handle draft POSIX versions of
+	getpwnam_r.
+
 2004-06-02  Tom Yu  <tlyu@mit.edu>
 
 	* an_to_ln.c (do_replacement): Patch from Bill Dodd to fix missing
