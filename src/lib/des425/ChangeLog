@@ -1,3 +1,7 @@
+Wed Jun 28 17:09:34 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* read_passwd.c, configure.in: use HAS_ANSI_VOLATILE instead.
+
 Tue Jun 27 23:17:11 1995  Mark Eichin  <eichin@cygnus.com>
 
 	* read_passwd.c: only use volatile if __STDC__ is 1.

@@ -47,11 +47,6 @@ intr_routine(signo)
 }
 
 
-/* native sunos cc lacks volatile */
-#if !defined(__STDC__) || __STDC__ != 1
-#define volatile
-#endif
-
 /*** Routines ****************************************************** */
 krb5_error_code
 des_read_pw_string/*_v4_compat_crock*/(return_pwd, bufsize, prompt, prompt2)
