@@ -70,6 +70,6 @@ typedef struct _krb5_cc_ops {
 #define krb5_cc_set_flags(cache, flags) (*(cache)->ops->set_flags)(cache, flags)
 #define krb5_cc_get_name(cache) (*(cache)->ops->get_name)(cache)
 
-extern krb5_cc_ops krb5_cc_dfl_ops;
+extern krb5_cc_ops *krb5_cc_dfl_ops;
 
 #endif /* KRB5_CCACHE__ */
