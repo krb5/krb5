@@ -1,3 +1,7 @@
+Wed Jul 24 16:03:52 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* krb5_err.et: Added new error code KRB5_KT_NAME_TOOLONG
+
 Thu Jun 13 21:43:23 1996  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
 
 	* configure.in: remove ref to SS_RULES, ET_RULES
