@@ -73,11 +73,14 @@ principal.  See section \ref{sec:keys} for details.
 retrieved {\it by local clients only}.  This is necessary in order for
 the kadm5 API to provide the primary Kerberos database interface.
 
-\item The KADM5 authorization system has been completely changed.  XXX
-Function semantics still refer only to the old method.
+\item The KADM5 authorization system has been completely changed.
 
 \item The functions kadm5_flush, kadm5_get_principals, and
 kadm5_get_policies have been added.
+
+\item The KADM5 API now obeys a caller-allocates rather than
+callee-allocates system.  kadm5_get_principal and kadm5_get_policy
+(XXX not yet!) are affected.
 \end{enumerate}
 \end{description}
 
@@ -255,10 +258,27 @@ if the server has this bit set.
 password has expired will succeed if this bit is set on the server.
 Also see KRB5_KDC_REQUIRES_PWCHANGE.
 
-\item[KRB5_KDB_SUPPORT_DESMD5] An AS_REQ for a principal with this bit
-set and an encrytion type of ENCTYPE_DES_CBC_CRC causes the encryption
-type ENCTYPE_DES_CBC_MD5 to be used instead.  XXX Why set this bit
-instead of just changing the service principal's enctype?
+\item[KRB5_KDB_SUPPORT_DESMD5] This bit indicates that the principal
+understands ENCTYPE_DES_MD5 and therefore that that encryption type
+should be used whenever a DES encryption type is request (implicitly
+assuming that it is the best DES-based encryption type available,
+which may not be the case if we implement ENCTYPE_DES_SHA for
+example).  The bit is employed during an AS_REQ and a TGS_REQ whenever
+the a key to be used is ENCTYPE_DES_CRC; if this bit is set (and if
+the client listed MD5 in its request, in the case of a session key),
+ENCTYPE_DES_MD5 is used instead.
+
+This bit is basically a kludge to save space in the KDC database.
+Without it, a service that supported DES with CRC and MD5 would have
+to have two separate key_data entries in the database, differing only
+in encryption type.  This bit allows a principal to have only a single
+key, using CRC, because it tells the KDC that the same key can be used
+with MD5.
+
+This solution will not scale well to handle the inevitable future
+situation of multiple salt types with DES3 or other encryption
+systems.  A better solution is needed; perhaps the redundant key data
+should just be stored in the database.
 
 \item[KRB5_KDB_NEW_PRINC] If this bit is set, the principal is still
 being ``created'' and the administration system should allow
