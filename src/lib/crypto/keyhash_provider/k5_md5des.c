@@ -114,7 +114,6 @@ k5_md5des_verify(const krb5_keyblock *key, const krb5_data *ivec,
 		 const krb5_data *input, const krb5_data *hash,
 		 krb5_boolean *valid)
 {
-    krb5_error_code ret;
     krb5_MD5_CTX ctx;
     unsigned char plaintext[CONFLENGTH+RSA_MD5_CKSUM_LENGTH];
     unsigned char xorkey[8];
@@ -145,7 +144,7 @@ k5_md5des_verify(const krb5_keyblock *key, const krb5_data *ivec,
 	    xorkey[i] ^= 0xf0;
     }
     
-    switch (ret = mit_des_key_sched(xorkey, schedule)) {
+    switch (mit_des_key_sched(xorkey, schedule)) {
     case -1:
 	return(KRB5DES_BAD_KEYPAR);
     case -2:

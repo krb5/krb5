@@ -1,3 +1,9 @@
+2001-05-31  Ezra Peisach  <epeisach@mit.edu>
+
+	* k5_md4des.c (k5_md4des_verify): Get rid of local variable that
+	is assigned to, without side effects, but never used.
+	* k5_md5des.c (k5_md5des_verify): Likewise.
+
 2001-03-09  Ken Raeburn  <raeburn@mit.edu>
 
 	* descbc.c, k5_md4des.c, k5_md5des.c, keyhash_provider.h,
