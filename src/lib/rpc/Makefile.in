@@ -189,6 +189,14 @@ all-windows:: $(OBJS)
 
 install-unix:: install-libs
 
+install-unix::
+	for i in $(SRC_HDRS); do \
+		(set -x; $(INSTALL_DATA) $(srcdir)/$$i $(DESTDIR)$(KRB5_INCDIR)$(S)$$i) ; \
+	done
+	for i in $(BUILD_HDRS); do \
+		(set -x; $(INSTALL_DATA) $$i $(DESTDIR)$(KRB5_INCDIR)$(S)$$i) ; \
+	done
+
 BUILD_HDRS = types.h
 SRC_HDRS = auth.h auth_gss.h auth_gssapi.h auth_unix.h clnt.h \
 	netdb.h pmap_clnt.h pmap_prot.h pmap_rmt.h rename.h \

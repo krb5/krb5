@@ -1,3 +1,7 @@
+2004-10-18  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (install-unix): Install headers.
+
 2004-09-23  Ken Raeburn  <raeburn@mit.edu>
 
 	* xdr_rec.c (LAST_FRAG): Use 1L in case int is small.
