@@ -48,6 +48,53 @@
 
 #include "fake-addrinfo.h"
 
+void fixup_addrinfo (struct addrinfo *ai)
+{
+    struct addrinfo *ai2;
+
+    if (ai == 0)
+	return;
+
+    /* Linux libc version 6 (libc-2.2.4.so on Debian) is broken.
+
+       RFC 2553 says that when AI_CANONNAME is set, the ai_canonname
+       flag of the first returned structure has the canonical name of
+       the host.  Instead, GNU libc sets ai_canonname in all the
+       returned structures, sometimes it's the canonical name and
+       sometimes it's the numeric form of an address.  So if we
+       actually want the canonical name, we may have to look through
+       the list and discard numeric addresses.
+
+       Since it's dependent on the target hostname, it's hard to check
+       for at configure time.  */
+    if (ai->ai_canonname && strchr(ai->ai_canonname, ':')) {
+	for (ai2 = ai->ai_next; ai2; ai2 = ai2->ai_next) {
+	    if (ai2->ai_canonname == 0)
+		continue;
+	    if (!strchr(ai2->ai_canonname, ':')) {
+		char *p = ai->ai_canonname;
+		ai->ai_canonname = ai2->ai_canonname;
+		ai2->ai_canonname = p;
+		break;
+	    }
+	}
+	if (ai2 == 0)
+	    /* Ran off end, with no non-numeric name.  What to do?  */
+	    ;
+    }
+
+    for (; ai; ai = ai->ai_next) {
+	/* AIX 4.3.3 libc is broken.  It doesn't set the family or len
+	   fields of the sockaddr structures.  */
+	if (ai->ai_addr->sa_family == 0)
+	    ai->ai_addr->sa_family = ai->ai_family;
+#ifdef HAVE_SA_LEN
+	if (ai->ai_addr->sa_len == 0)
+	    ai->ai_addr->sa_len = ai->ai_addrlen;
+#endif
+    }
+}
+
 #ifdef HAVE_FAKE_GETADDRINFO
 
 static int translate_h_errno (int h);

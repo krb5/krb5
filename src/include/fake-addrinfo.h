@@ -44,14 +44,20 @@
 #include "port-sockets.h"
 #include "socket-utils.h"
 
-#if !defined (HAVE_GETADDRINFO) || defined (BROKEN_GETADDRINFO)
-
 #ifndef FAI_PREFIX
 # error "FAI_PREFIX must be defined when fake-addrinfo.h is included"
 #endif
 
 #define FAI_CONCAT(A,B) FAI_CONCAT2(A,B)
 #define FAI_CONCAT2(A,B) A ## B
+
+/* Various C libraries have broken implementations of getaddrinfo.  */
+#undef fixup_addrinfo
+#define fixup_addrinfo FAI_CONCAT(FAI_PREFIX, _fixup_addrinfo)
+
+extern void fixup_addrinfo (struct addrinfo *ai);
+
+#if !defined (HAVE_GETADDRINFO) || defined (BROKEN_GETADDRINFO)
 
 #undef  getaddrinfo
 #define getaddrinfo	FAI_CONCAT(FAI_PREFIX, _fake_getaddrinfo)

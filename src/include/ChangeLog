@@ -1,3 +1,11 @@
+2002-02-10  Ken Raeburn  <raeburn@mit.edu>
+
+	* fake-addrinfo.h: Always check for FAI_PREFIX, not just when fake
+	getaddrinfo support is needed.
+	(fixup_addrinfo): Declare.
+	* fake-addrinfo.c (fixup_addrinfo): New function, fixes up
+	breakage in AIX and GNU implementations (so far) of getaddrinfo.
+
 2002-01-08  Ken Raeburn  <raeburn@mit.edu>
 
 	* socket-utils.h (ss2sin6) [__GNUC__]: Define inline function only
