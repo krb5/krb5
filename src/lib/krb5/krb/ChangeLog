@@ -1,3 +1,8 @@
+2000-10-04  Ezra Peisach  <epeisach@mit.edu>
+
+	* rd_req_dec.c (krb5_rd_req_decrypt_tkt_part): Fix memory leak if
+	krb5_decrypt_tkt_part() fails. (krb5-libs/855)
+
 2000-10-03  Ezra Peisach  <epeisach@mit.edu>
 
 	* copy_addrs.c (krb5_copy_addresses): Cleanup unsigned vs signed
