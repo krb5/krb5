@@ -38,4 +38,5 @@
 /* add more for the various recent BSD variants */
 #if defined(__bsdi__) || defined(__NetBSD__)
 #define BSD44
+#define BSD42
 #endif
