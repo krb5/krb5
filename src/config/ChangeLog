@@ -1,3 +1,8 @@
+2004-02-18  Tom Yu  <tlyu@mit.edu>
+
+	* shlib.conf (alpha-*-dec-osf*, mips-sgi-irix*): Use $(CC) instead
+	of ld for building shared libraries.
+
 2004-02-12  Tom Yu  <tlyu@mit.edu>
 
 	* shlib.conf (*-*-solaris-*): Remove exitsleep.
