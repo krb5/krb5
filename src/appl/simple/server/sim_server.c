@@ -66,7 +66,7 @@ char *argv[];
     unsigned char pktbuf[BUFSIZ];
     krb5_principal sprinc;
     krb5_context context;
-    krb5_auth_context *auth_context = NULL;
+    krb5_auth_context auth_context = NULL;
     krb5_address addr;
     krb5_ticket *ticket = NULL;
 

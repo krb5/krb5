@@ -112,7 +112,7 @@ static unsigned char str_data[1024] = { IAC, SB, TELOPT_AUTHENTICATION, 0,
 #define KRB_FORWARD_REJECT     	6       /* Forwarded credentials rejected */
 #endif	/* FORWARD */
 
-krb5_auth_context * auth_context;
+krb5_auth_context auth_context;
 
 static	krb5_data auth;
 	/* telnetd gets session key from here */

@@ -93,14 +93,14 @@ extern char *kadmind_kadmin_response[];
 
 krb5_error_code adm_build_key
 	PROTOTYPE((krb5_context,
-		   krb5_auth_context *,
+		   krb5_auth_context,
 		   char *,
 		   int,
 		   krb5_db_entry));
 
 krb5_error_code adm_change_pwd
 	PROTOTYPE((krb5_context,
-		   krb5_auth_context *,
+		   krb5_auth_context,
 		   char *,
 		   char *,
 		   int));
@@ -112,7 +112,7 @@ krb5_error_code adm_change_pwd_rnd
 
 krb5_error_code adm_add_new_key
 	PROTOTYPE((krb5_context,
-		   krb5_auth_context *,
+		   krb5_auth_context,
 		   char *,
 		   char *,
 		   int));
@@ -129,13 +129,13 @@ krb5_error_code adm_del_old_key
 
 krb5_error_code adm_mod_old_key
 	PROTOTYPE((krb5_context,
-		   krb5_auth_context *,
+		   krb5_auth_context,
 		   char *,
 		   char *));
 
 krb5_error_code adm_inq_old_key
 	PROTOTYPE((krb5_context, 
-		   krb5_auth_context *,
+		   krb5_auth_context,
 		   char *,
 		   char *));
 
@@ -160,14 +160,14 @@ krb5_error_code adm_enter_rnd_pwd_key
 
 krb5_error_code adm5_kadmin
 	PROTOTYPE((krb5_context,
-		   krb5_auth_context *,
+		   krb5_auth_context,
     		   char *,  
     		   char *,
     		   int *));
 
 krb5_error_code adm_negotiate_key
 	PROTOTYPE((krb5_context,
-		   krb5_auth_context *,
+		   krb5_auth_context,
 		   char const *,
 		   char *));
 
@@ -218,7 +218,7 @@ krb5_error_code adm_enter_pwd_key
 
 krb5_error_code adm5_change
 	PROTOTYPE((krb5_context,
-		   krb5_auth_context *,
+		   krb5_auth_context,
 	    	   char *,
     		   krb5_principal));
 
@@ -228,7 +228,7 @@ int adm5_listen_and_process
 
 krb5_error_code adm5_kpasswd
 	PROTOTYPE((krb5_context,
-		   krb5_auth_context *,
+		   krb5_auth_context,
     		   char *,
     		   kadmin_requests *,
     		   char *,

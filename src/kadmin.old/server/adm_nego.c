@@ -45,7 +45,7 @@
 krb5_error_code
 adm_negotiate_key(context, auth_context, prog, new_passwd)
     krb5_context context;
-    krb5_auth_context *auth_context;
+    krb5_auth_context auth_context;
     char const * prog;
     char * new_passwd;
 {

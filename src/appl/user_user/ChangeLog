@@ -1,3 +1,7 @@
+Sat Jun 10 23:00:05 1995  Tom Yu  (tlyu@dragons-lair)
+
+	* client.c, server.c: krb5_auth_context redefinitions
+
 Fri Jun  9 18:30:36 1995    <tytso@rsx-11.mit.edu>
 
 	* configure.in: Remove standardized set of autoconf macros, which

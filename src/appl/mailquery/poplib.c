@@ -85,7 +85,7 @@ int reserved;
     krb5_principal client = NULL, server = NULL;
     krb5_error *err_ret = NULL;
     register char *cp;
-    krb5_auth_context * auth_context;
+    krb5_auth_context auth_context;
 #endif
 #endif
 

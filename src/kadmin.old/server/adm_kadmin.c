@@ -35,7 +35,7 @@
 krb5_error_code
 adm5_kadmin(context, auth_context, prog, retbuf, otype)
     krb5_context context;
-    krb5_auth_context * auth_context;
+    krb5_auth_context auth_context;
     char *prog;
     char *retbuf;		/* Allocated in Calling Routine */
     int *otype;

@@ -75,7 +75,7 @@
     #ifdef KRB5
         static krb5_data auth;
     	static int auth_how;
-        static krb5_auth_context *auth_context;
+        static krb5_auth_context auth_context;
 
         #define KRB_SERVICE_NAME    "host"
         #define KERBEROS_VERSION    KERBEROS_V5

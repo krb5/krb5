@@ -51,7 +51,7 @@ char *argv[];
   krb5_ccache cc;
   krb5_data msgtext, msg;
   krb5_context context;
-    krb5_auth_context * auth_context = NULL;
+    krb5_auth_context auth_context = NULL;
 
 #ifndef DEBUG
   freopen("/tmp/uu-server.log", "w", stderr);

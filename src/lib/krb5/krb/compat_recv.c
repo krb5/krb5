@@ -62,7 +62,7 @@ krb5_compat_recvauth(context, auth_context,
 		     ticket,
 		     auth_sys, v4_kdata, v4_schedule, v4_version)
     krb5_context context;
-    krb5_auth_context **auth_context;
+    krb5_auth_context  *auth_context;
 	krb5_pointer	fdp;
 	char	*appl_version;
 	krb5_principal	server;

@@ -317,7 +317,7 @@ int verify_cs_pair(context, p_client_str, p_client, service, hostname,
     krb5_creds 		* credsp;
     krb5_ticket 	* ticket = NULL;
     krb5_keyblock 	* keyblock = NULL;
-    krb5_auth_context 	* auth_context = NULL;
+    krb5_auth_context 	  auth_context = NULL;
     krb5_data		  request_data;
 
     if (brief)

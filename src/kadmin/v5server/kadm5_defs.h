@@ -205,14 +205,14 @@ krb5_error_code proto_serv
 krb5_int32 passwd_check
 	PROTOTYPE((krb5_context,
 		   int,
-		   krb5_auth_context *,
+		   krb5_auth_context,
 		   krb5_ticket *,
 		   krb5_data *,
 		   krb5_int32 *));
 krb5_int32 passwd_change
 	PROTOTYPE((krb5_context,
 		   int,
-		   krb5_auth_context *,
+		   krb5_auth_context,
 		   krb5_ticket *,
 		   krb5_data *,
 		   krb5_data *,

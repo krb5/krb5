@@ -75,14 +75,14 @@ static void usage
 krb5_error_code open_connection 
 	PROTOTYPE((char *, int *, char *));
 void	kerberos_authenticate 
-	PROTOTYPE((krb5_context, krb5_auth_context **, 
+	PROTOTYPE((krb5_context, krb5_auth_context *, 
 		   int, krb5_principal, krb5_creds **));
 int	open_database 
 	PROTOTYPE((krb5_context, char *, int *));
 void	close_database 
 	PROTOTYPE((krb5_context, int));
 void	xmit_database 
-	PROTOTYPE((krb5_context, krb5_auth_context *, krb5_creds *, 
+	PROTOTYPE((krb5_context, krb5_auth_context, krb5_creds *, 
 		   int, int, int));
 void	send_error 
 	PROTOTYPE((krb5_context, krb5_creds *, int, char *, krb5_error_code));
@@ -105,7 +105,7 @@ main(argc, argv)
 	krb5_error_code	retval;
 	krb5_context context;
 	krb5_creds *my_creds;
-	krb5_auth_context * auth_context;
+	krb5_auth_context auth_context;
 	char	Errmsg[256];
 	
 	PRS(context, argv);
@@ -389,7 +389,7 @@ open_connection(host, fd, Errmsg)
 
 void kerberos_authenticate(context, auth_context, fd, me, new_creds)
     krb5_context context;
-    krb5_auth_context **auth_context;
+    krb5_auth_context *auth_context;
     int	fd;
     krb5_principal me;
     krb5_creds ** new_creds;
@@ -538,7 +538,7 @@ close_database(context, fd)
 void
 xmit_database(context, auth_context, my_creds, fd, database_fd, database_size)
     krb5_context context;
-    krb5_auth_context * auth_context;
+    krb5_auth_context auth_context;
     krb5_creds *my_creds;
     int	fd;
     int	database_fd;

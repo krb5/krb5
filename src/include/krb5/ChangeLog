@@ -1,3 +1,7 @@
+Sat Jun 10 22:11:45 1995  Tom Yu  (tlyu@dragons-lair)
+
+	* adm_proto.h: update krb5_auth_context stuff
+
 Fri Jun  9 18:42:30 1995    <tytso@rsx-11.mit.edu>
 
 	* configure.in: Remove standardized set of autoconf macros, which

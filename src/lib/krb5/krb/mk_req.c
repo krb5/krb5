@@ -52,7 +52,7 @@ krb5_error_code
 krb5_mk_req(context, auth_context, ap_req_options, service, hostname, in_data,
 	      ccache, outbuf)
     krb5_context          context;
-    krb5_auth_context  ** auth_context;
+    krb5_auth_context   * auth_context;
     const krb5_flags      ap_req_options;
     char		* service;
     char		* hostname;

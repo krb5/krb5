@@ -544,7 +544,7 @@ char *host;
     krb5_context context;
     krb5_principal client, server;
     krb5_error *err_ret = NULL;
-    krb5_auth_context * auth_context;
+    krb5_auth_context auth_context;
     char *hostname;
 #endif /* KRB5 */
 #endif /* KERBEROS */

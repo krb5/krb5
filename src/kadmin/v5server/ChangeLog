@@ -1,3 +1,8 @@
+Sat Jun 10 23:04:00 1995  Tom Yu  (tlyu@dragons-lair)
+
+	* kadm5_defs.h, passwd.c, proto_serv.c: krb5_auth_context
+		redefinitions
+
 Fri Jun  9 19:06:04 1995    <tytso@rsx-11.mit.edu>
 
 	* configure.in: Remove standardized set of autoconf macros, which

@@ -43,7 +43,7 @@ int print_status_message();
 krb5_error_code
 kadm_del_user(context, auth_context, my_creds, local_socket, principal)
     krb5_context context;
-    krb5_auth_context *auth_context;
+    krb5_auth_context auth_context;
     int *local_socket;
     char *principal;
 {

@@ -43,14 +43,14 @@ krb5_error_code INTERFACE krb5_adm_connect
 		   char *,
 		   char *,
 		   int *,
-		   krb5_auth_context **,
+		   krb5_auth_context *,
 		   krb5_ccache *,
 		   char *,
 		   krb5_timestamp));
 void INTERFACE krb5_adm_disconnect
 	PROTOTYPE((krb5_context,
 		   int *,
-		   krb5_auth_context *,
+		   krb5_auth_context,
 		   krb5_ccache));
 
 #if ! defined(_WINDOWS)
@@ -96,26 +96,26 @@ void INTERFACE krb5_free_adm_data
 krb5_error_code INTERFACE krb5_send_adm_cmd
 	PROTOTYPE((krb5_context,
 		   krb5_pointer,
-		   krb5_auth_context *,
+		   krb5_auth_context,
 		   krb5_int32,
 		   krb5_data *));
 krb5_error_code krb5_send_adm_reply
 	PROTOTYPE((krb5_context,
 		   krb5_pointer,
-		   krb5_auth_context *,
+		   krb5_auth_context,
 		   krb5_int32,
 		   krb5_int32,
 		   krb5_data *));
 krb5_error_code krb5_read_adm_cmd
 	PROTOTYPE((krb5_context,
 		   krb5_pointer,
-		   krb5_auth_context *,
+		   krb5_auth_context,
 		   krb5_int32 *,
 		   krb5_data **));
 krb5_error_code INTERFACE krb5_read_adm_reply
 	PROTOTYPE((krb5_context,
 		   krb5_pointer,
-		   krb5_auth_context *,
+		   krb5_auth_context,
 		   krb5_int32 *,
 		   krb5_int32 *,
 		   krb5_data **));

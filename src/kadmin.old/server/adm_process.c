@@ -112,7 +112,7 @@ process_client(context, prog)
     krb5_data final_msg;
     char completion_msg[520];
     kadmin_requests request_type;
-    krb5_auth_context *auth_context = NULL;
+    krb5_auth_context auth_context = NULL;
     krb5_ticket * client_ticket = NULL;
     krb5_replay_data replaydata;
 

@@ -46,7 +46,7 @@ krb5_error_code
 krb5_rd_req(context, auth_context, inbuf, server, keytab, 
 	    ap_req_options, ticket)
     krb5_context 	  context;
-    krb5_auth_context  ** auth_context;
+    krb5_auth_context   * auth_context;
     const krb5_data 	* inbuf;
     krb5_const_principal  server;	/* XXX do we really need this */
     krb5_keytab		  keytab;
@@ -55,7 +55,7 @@ krb5_rd_req(context, auth_context, inbuf, server, keytab,
 {
     krb5_error_code 	  retval;
     krb5_ap_req 	* request;
-    krb5_auth_context	* new_auth_context;
+    krb5_auth_context	  new_auth_context;
     krb5_keytab           new_keytab = NULL;
 
     if (!krb5_is_ap_req(inbuf))

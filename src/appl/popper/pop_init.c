@@ -287,7 +287,7 @@ authenticate(p, addr)
 #endif
 
 #ifdef KRB5
-    krb5_auth_context * auth_context = NULL;
+    krb5_auth_context auth_context = NULL;
     krb5_error_code retval;
     krb5_principal server;
     int sock = 0;

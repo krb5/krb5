@@ -1,3 +1,7 @@
+Sat Jun 10 23:08:57 1995  Tom Yu  (tlyu@dragons-lair)
+
+	* kpasswd.c: krb5_auth_context redefinitions
+
 
 Mon Jun 5 14:19:51 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* kpasswd.c : Use new krb5_adm_connect() calling sequence.

@@ -49,7 +49,7 @@ krb5_sendauth(context, auth_context,
 	      /* OUT */
 	      error, rep_result, out_creds)
     	krb5_context 		  context;
-    	krb5_auth_context      ** auth_context;
+    	krb5_auth_context       * auth_context;
 	krb5_pointer		  fd;
 	char			* appl_version;
 	krb5_principal		  client;

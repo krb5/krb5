@@ -35,7 +35,7 @@
  * Own storage.
  */
 static int		server_socket = -1;
-static krb5_auth_context *server_auth_context = (krb5_auth_context *) NULL;
+static krb5_auth_context server_auth_context = (krb5_auth_context) NULL;
 static krb5_ccache	server_ccache = (krb5_ccache) NULL;
 static krb5_boolean	server_active = 0;
 static krb5_error_code	server_stat = 0;
@@ -243,7 +243,7 @@ net_disconnect(force)
 
 	    /* Clean up our state. */
 	    server_socket = -1;
-	    server_auth_context = (krb5_auth_context *) NULL;
+	    server_auth_context = (krb5_auth_context) NULL;
 	    server_ccache = (krb5_ccache) NULL;
 	    server_active = 0;
 	    server_op_in_prog = 0;

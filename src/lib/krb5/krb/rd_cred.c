@@ -211,7 +211,7 @@ extern krb5_deltat krb5_clockskew;
 krb5_error_code INTERFACE
 krb5_rd_cred(context, auth_context, pcreddata, pppcreds, outdata)
     krb5_context          context;
-    krb5_auth_context   * auth_context;
+    krb5_auth_context     auth_context;
     krb5_data 		* pcreddata;       
     krb5_creds        *** pppcreds;
     krb5_replay_data  	* outdata;

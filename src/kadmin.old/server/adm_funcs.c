@@ -405,7 +405,7 @@ cleanup:
 krb5_error_code
 adm5_change(context, auth_context, prog, newprinc)
     krb5_context context;
-    krb5_auth_context * auth_context;
+    krb5_auth_context auth_context;
     char *prog;
     krb5_principal newprinc;
 {

@@ -1590,7 +1590,7 @@ recvauth(netf, peersin)
      int netf;
      struct sockaddr_in peersin;
 {
-    krb5_auth_context *auth_context = NULL;
+    krb5_auth_context auth_context = NULL;
     krb5_error_code status;
     struct sockaddr_in laddr;
     char krb_vers[KRB_SENDAUTH_VLEN + 1];

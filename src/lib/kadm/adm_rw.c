@@ -100,7 +100,7 @@ krb5_error_code INTERFACE
 krb5_send_adm_cmd(kcontext, sock, ctx, nargs, arglist)
     krb5_context	kcontext;	/* Context handle	(In ) */
     krb5_pointer	sock;		/* Socket to write to	(In ) */
-    krb5_auth_context	*ctx;		/* Auth context		(In ) */
+    krb5_auth_context	ctx;		/* Auth context		(In ) */
     krb5_int32			nargs;		/* Number of arguments	(In ) */
     krb5_data		*arglist;	/* Components to write	(In ) */
 {
@@ -193,7 +193,7 @@ krb5_error_code
 krb5_send_adm_reply(kcontext, sock, ctx, cmd_stat, ncomps, complist)
     krb5_context	kcontext;	/* Context handle	(In ) */
     krb5_pointer	sock;		/* Socket to write to	(In ) */
-    krb5_auth_context	*ctx;		/* Auth context		(In ) */
+    krb5_auth_context	ctx;		/* Auth context		(In ) */
     krb5_int32		cmd_stat;	/* Command status	(In ) */
     krb5_int32			ncomps;		/* Number of arguments	(In ) */
     krb5_data		*complist;	/* Components to write	(In ) */
@@ -288,7 +288,7 @@ krb5_error_code
 krb5_read_adm_cmd(kcontext, sock, ctx, nargs, arglist)
     krb5_context	kcontext;	/* Context handle	(In ) */
     krb5_pointer	sock;		/* Socket to read from	(In ) */
-    krb5_auth_context	*ctx;		/* Auth context		(In ) */
+    krb5_auth_context	ctx;		/* Auth context		(In ) */
     krb5_int32		*nargs;		/* Number of arguments	(Out) */
     krb5_data		**arglist;	/* List of arguments	(Out) */
 {
@@ -416,7 +416,7 @@ krb5_error_code INTERFACE
 krb5_read_adm_reply(kcontext, sock, ctx, cmd_stat, ncomps, complist)
     krb5_context	kcontext;	/* Context handle	(In ) */
     krb5_pointer	sock;		/* Socket to read from	(In ) */
-    krb5_auth_context	*ctx;		/* Auth context		(In ) */
+    krb5_auth_context	ctx;		/* Auth context		(In ) */
     krb5_int32		*cmd_stat;	/* Command status	(Out) */
     krb5_int32		*ncomps;	/* # of reply components(Out) */
     krb5_data		**complist;	/* List of components	(Out) */

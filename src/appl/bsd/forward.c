@@ -33,7 +33,7 @@
 krb5_error_code
 rd_and_store_for_creds(context, auth_context, inbuf, ticket, lusername)
     krb5_context context;
-    krb5_auth_context * auth_context;
+    krb5_auth_context auth_context;
     krb5_data *inbuf;
     krb5_ticket *ticket;
     char *lusername;
@@ -86,7 +86,7 @@ cleanup:
 krb5_error_code 
 get_for_creds(context, auth_context, rhost, client, forwardable, out_buf)
     krb5_context context;
-    krb5_auth_context * auth_context;
+    krb5_auth_context auth_context;
     char *rhost;
     krb5_principal client;
     int forwardable;      /* Should forwarded TGT also be forwardable? */

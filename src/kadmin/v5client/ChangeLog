@@ -1,3 +1,7 @@
+Sat Jun 10 23:03:41 1995  Tom Yu  (tlyu@dragons-lair)
+
+	* network.c: krb5_auth_context redefinitions
+
 Fri Jun  9 23:04:56 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* kadmin5.c: Change the default kadmin instance to be "admin"

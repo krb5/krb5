@@ -59,7 +59,7 @@ krb5_gss_accept_sec_context(context, minor_status, context_handle,
    krb5_gss_ctx_id_rec *ctx;
    krb5_timestamp now;
    gss_buffer_desc token;
-   krb5_auth_context * auth_context = NULL;
+   krb5_auth_context auth_context = NULL;
    krb5_ticket * ticket = NULL;
 
    /* set up returns to be freeable */

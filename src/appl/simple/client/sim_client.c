@@ -69,7 +69,7 @@ main(argc, argv)
     extern krb5_deltat krb5_clockskew;
 
     krb5_context 	  context;
-    krb5_auth_context 	* auth_context = NULL;
+    krb5_auth_context 	  auth_context = NULL;
     krb5_replay_data 	  replaydata;
 
     if (argc != 2 && argc != 3) {

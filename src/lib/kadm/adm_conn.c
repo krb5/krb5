@@ -67,7 +67,7 @@ static krb5_error_code kadm_contact_server
 		krb5_address **));
 static krb5_error_code kadm_get_auth
 	PROTOTYPE((krb5_context,
-		krb5_auth_context * *,
+		krb5_auth_context *,
 		krb5_address *,
 		krb5_address *));
 
@@ -574,7 +574,7 @@ kadm_contact_server(kcontext, realmp, sockp, local, remote)
 static krb5_error_code
 kadm_get_auth(kcontext, ctxp, local, remote)
     krb5_context	kcontext;
-    krb5_auth_context	**ctxp;
+    krb5_auth_context	*ctxp;
     krb5_address	*local;
     krb5_address	*remote;
 {
@@ -606,7 +606,7 @@ krb5_adm_connect(kcontext, user, prompt, opassword, sockp, ctxp,
     char		*prompt;	/* Old password prompt	(In ) */
     char		*opassword;	/* Old Password		(I/O) */
     int			*sockp;		/* Socket for conn.	(Out) */
-    krb5_auth_context	**ctxp;		/* Auth context		(Out) */
+    krb5_auth_context	*ctxp;		/* Auth context		(Out) */
     krb5_ccache		*ccachep;	/* Credentials cache	(I/O) */
     char		*ccname;	/* Cred cache name	(In ) */
     krb5_timestamp	tlife;		/* Ticket lifetime	(In ) */
@@ -629,7 +629,7 @@ krb5_adm_connect(kcontext, user, prompt, opassword, sockp, ctxp,
     *sockp = -1;
     local_addr = remote_addr = (krb5_address *) NULL;
     client = (krb5_principal) NULL;
-    *ctxp = (krb5_auth_context *) NULL;
+    *ctxp = (krb5_auth_context) NULL;
     ccache_supplied = (*ccachep != (krb5_ccache) NULL);
 
     /*
@@ -708,7 +708,7 @@ krb5_adm_connect(kcontext, user, prompt, opassword, sockp, ctxp,
     if (kret) {
 	if (*ctxp) {
 	    krb5_xfree(*ctxp);
-	    *ctxp = (krb5_auth_context *) NULL;
+	    *ctxp = (krb5_auth_context) NULL;
 	}
 	if (*sockp >= 0) {
 	    close(*sockp);
@@ -745,7 +745,7 @@ void INTERFACE
 krb5_adm_disconnect(kcontext, socketp, auth_context, ccache)
     krb5_context	kcontext;
     int			*socketp;
-    krb5_auth_context	*auth_context;
+    krb5_auth_context	auth_context;
     krb5_ccache		ccache;
 {
     if (ccache)

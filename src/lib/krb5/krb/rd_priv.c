@@ -174,7 +174,7 @@ cleanup_privmsg:;
 krb5_error_code
 krb5_rd_priv(context, auth_context, inbuf, outbuf, outdata)
     krb5_context 	  context;
-    krb5_auth_context 	* auth_context;
+    krb5_auth_context 	  auth_context;
     const krb5_data   	* inbuf;
     krb5_data 	      	* outbuf;
     krb5_replay_data  	* outdata;

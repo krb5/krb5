@@ -1,3 +1,10 @@
+Sat Jun 10 23:05:51 1995  Tom Yu  (tlyu@dragons-lair)
+
+	* auth_con.c, compat_recv.c, mk_cred.c, mk_priv.c, mk_rep.c,
+	  mk_req.c, mk_req_ext.c, mk_safe.c, rd_cred.c, rd_priv.c,
+	  rd_rep.c, rd_req.c rd_req_dec.c, rd_safe.c, recvauth.c,
+	  sendauth.c: krb5_auth_context redefinitions
+
 Fri Jun  9 18:48:43 1995    <tytso@rsx-11.mit.edu>
 
 	* rd_req_dec.c (krb5_rd_req_decoded): Fix -Wall nits

@@ -1,3 +1,7 @@
+Sat Jun 10 23:07:27 1995  Tom Yu  (tlyu@dragons-lair)
+
+	* genaddrs.c: krb5_auth_context redefinitions
+
 Fri Jun  9 22:08:33 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* gmt_mktime.c (gmt_mktime): Change assertion to check to make

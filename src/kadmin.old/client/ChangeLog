@@ -1,3 +1,9 @@
+Sat Jun 10 23:00:53 1995  Tom Yu  (tlyu@dragons-lair)
+
+	* kadmin.c, kadmin_add.c, kadmin_apr.c, kadmin_cpr.c,
+	  kadmin_cpw.c, kadmin_del.c, kadmin_done.c, kadmin_inq.c,
+	  kadmin_mod.c, kadmin_msnd.c: krb5_auth_context redefinitions
+
 Fri Jun  9 19:06:41 1995    <tytso@rsx-11.mit.edu>
 
 	* configure.in: Remove standardized set of autoconf macros, which

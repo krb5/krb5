@@ -189,7 +189,7 @@ krb5_error_code INTERFACE
 krb5_mk_ncred(context, auth_context, ppcreds, ppdata, outdata)
 
     krb5_context 	  context;
-    krb5_auth_context	* auth_context;
+    krb5_auth_context	  auth_context;
     krb5_creds 	       ** ppcreds;
     krb5_data 	       ** ppdata;
     krb5_replay_data  	* outdata;
@@ -347,7 +347,7 @@ error:
 krb5_error_code INTERFACE
 krb5_mk_1cred(context, auth_context, pcreds, ppdata, outdata)
     krb5_context 	  context;
-    krb5_auth_context	* auth_context;
+    krb5_auth_context	  auth_context;
     krb5_creds 		* pcreds;
     krb5_data 	       ** ppdata;
     krb5_replay_data  	* outdata;

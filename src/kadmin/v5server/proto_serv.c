@@ -106,7 +106,7 @@ proto_serv(kcontext, my_id, cl_sock, sv_p, cl_p)
     krb5_data		in_data;
     krb5_data		out_data;
     krb5_rcache		rcache;
-    krb5_auth_context	*auth_context;
+    krb5_auth_context	auth_context;
     krb5_flags		ap_options;
     krb5_ticket		*ticket;
     krb5_address	*local;

@@ -109,7 +109,7 @@ main(argc,argv)
     char *new_password;
     int new_pwsize;
 
-    krb5_auth_context * new_auth_context;
+    krb5_auth_context new_auth_context;
     krb5_replay_data replaydata;
 
 #ifdef SANDIA

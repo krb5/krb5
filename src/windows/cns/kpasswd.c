@@ -81,7 +81,7 @@ static krb5_error_code
 keyadmin_send_receive (
 	krb5_context 		k5context,
 	int *				conn_socket,
-	krb5_auth_context *	auth_context,
+	krb5_auth_context 	auth_context,
 	krb5_int32 			nargs,
 	krb5_data *			arglist,
 	krb5_int32 *		cmd_stat,
@@ -116,7 +116,7 @@ k5_change_password (
     char **text)
 {
 	krb5_error_code		kret, kret2;
-	krb5_auth_context * auth_context;
+	krb5_auth_context  auth_context;
 	krb5_ccache			ccache;
 	int					conn_socket;			/* Socket for talking over */
 	krb5_int32			nreplies;

@@ -43,7 +43,7 @@ krb5_recvauth(context, auth_context,
 	      /* OUT */
 	      ticket)
     krb5_context 	  context;
-    krb5_auth_context  ** auth_context;
+    krb5_auth_context   * auth_context;
     krb5_pointer	  fd;
     char		* appl_version;
     krb5_principal	  server;
@@ -51,7 +51,7 @@ krb5_recvauth(context, auth_context,
     krb5_keytab		  keytab;
     krb5_ticket	       ** ticket;
 {
-    krb5_auth_context	* new_auth_context;
+    krb5_auth_context	  new_auth_context;
     krb5_flags		  ap_option;
     krb5_error_code	  retval, problem;
     krb5_data		  inbuf;

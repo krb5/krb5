@@ -177,7 +177,7 @@ main(argc, argv)
 
     krb5_error_code	kret;
     krb5_context	kcontext;
-    krb5_auth_context	*auth_context;
+    krb5_auth_context	auth_context;
     krb5_ccache		ccache;
     char		*opassword;
     char		*npassword;

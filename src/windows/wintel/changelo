@@ -1,3 +1,7 @@
+Sat Jun 10 23:09:20 1995  Tom Yu  (tlyu@dragons-lair)
+
+	* auth.c: krb5_auth_context redefinitions
+
 Fri Jun 2 10:51:31 1995 Keith Vetter (keithv@fusion.com)
 	
 	Added cursor keys (in two modes) and ctrl-space: the arrow 

@@ -1221,7 +1221,7 @@ void send_auth()
     krb5_error_code status;
     krb5_address faddr;
     krb5_ticket * ticket = NULL;
-    krb5_auth_context * auth_context = NULL;
+    krb5_auth_context auth_context = NULL;
     
     
     if (status = krb5_cc_default(bsd_context, &cc)){
@@ -1347,7 +1347,7 @@ void
     krb5_creds creds, *new_creds;
     krb5_ccache cc;
     krb5_error_code status;
-    krb5_auth_context *auth_context = NULL;
+    krb5_auth_context auth_context = NULL;
     
     if (config_file) {
     	const char * filenames[2];

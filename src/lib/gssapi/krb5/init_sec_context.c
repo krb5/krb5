@@ -27,7 +27,7 @@ static krb5_error_code
 make_ap_req(context, auth_context, cred, server, endtime, chan_bindings, 
 	    do_mutual, flags, token)
     krb5_context context;
-    krb5_auth_context ** auth_context;
+    krb5_auth_context * auth_context;
     krb5_gss_cred_id_t cred;
     krb5_principal server;
     krb5_timestamp *endtime;

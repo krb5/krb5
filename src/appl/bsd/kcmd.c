@@ -103,7 +103,7 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
     krb5_ccache cc;
     krb5_data outbuf;
     krb5_flags options = authopts;
-    krb5_auth_context * auth_context = NULL;
+    krb5_auth_context auth_context = NULL;
 
     pid = getpid();
     hp = gethostbyname(*ahost);

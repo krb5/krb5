@@ -39,7 +39,7 @@
 krb5_error_code
 krb5_mk_rep(context, auth_context, outbuf)
     krb5_context 	  context;
-    krb5_auth_context	* auth_context;
+    krb5_auth_context	  auth_context;
     krb5_data 		* outbuf;
 {
     krb5_error_code 	  retval;

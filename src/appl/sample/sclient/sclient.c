@@ -64,7 +64,7 @@ char *argv[];
     krb5_principal client, server;
     krb5_error *err_ret;
     krb5_ap_rep_enc_part *rep_ret;
-    krb5_auth_context * auth_context = 0;
+    krb5_auth_context auth_context = 0;
     short xmitlen;
 
     if (argc != 2 && argc != 3) {

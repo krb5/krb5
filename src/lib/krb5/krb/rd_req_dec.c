@@ -95,7 +95,7 @@ krb5_error_code
 krb5_rd_req_decoded(context, auth_context, req, server, keytab, 
 		    ap_req_options, ticket)
     krb5_context 	  context;
-    krb5_auth_context  ** auth_context;
+    krb5_auth_context   * auth_context;
     const krb5_ap_req 	* req;
     krb5_const_principal  server;
     krb5_keytab           keytab;

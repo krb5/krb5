@@ -51,7 +51,7 @@ extern char *malloc(), *calloc(), *realloc();
 krb5_error_code
 kadm_snd_mod(context, auth_context, my_creds, local_socket)
     krb5_context context;
-    krb5_auth_context *auth_context;
+    krb5_auth_context auth_context;
     krb5_creds *my_creds;
     int *local_socket;
 {

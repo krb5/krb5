@@ -266,7 +266,7 @@ struct _krb5_context;
 typedef struct _krb5_context FAR * krb5_context;
 
 struct _krb5_auth_context;
-typedef struct _krb5_auth_context krb5_auth_context;
+typedef struct _krb5_auth_context FAR * krb5_auth_context;
 
 /*
  * begin "encryption.h"
@@ -1256,7 +1256,7 @@ krb5_error_code INTERFACE krb5_get_cred_via_tkt
                    krb5_creds **));
 krb5_error_code krb5_mk_req
 	PROTOTYPE((krb5_context,
-		   krb5_auth_context **,
+		   krb5_auth_context *,
 		   const krb5_flags,
 		   char *,
 		   char *,
@@ -1265,18 +1265,18 @@ krb5_error_code krb5_mk_req
 		   krb5_data * ));
 krb5_error_code INTERFACE krb5_mk_req_extended
 	PROTOTYPE((krb5_context,
-		   krb5_auth_context FAR * FAR *,
+		   krb5_auth_context FAR *,
 		   const krb5_flags,
 		   krb5_data FAR *,
 		   krb5_creds FAR *,
 		   krb5_data FAR * ));
 krb5_error_code krb5_mk_rep
 	PROTOTYPE((krb5_context,
-		   krb5_auth_context *,
+		   krb5_auth_context,
 		   krb5_data *));
 krb5_error_code INTERFACE krb5_rd_rep
 	PROTOTYPE((krb5_context,
-		   krb5_auth_context FAR *,
+		   krb5_auth_context,
 		   const krb5_data FAR *,
 		   krb5_ap_rep_enc_part FAR * FAR *));
 krb5_error_code krb5_mk_error
@@ -1289,13 +1289,13 @@ krb5_error_code krb5_rd_error
 		   krb5_error ** ));
 krb5_error_code krb5_rd_safe
 	PROTOTYPE((krb5_context,
-		   krb5_auth_context *,
+		   krb5_auth_context,
 		   const krb5_data *,
 		   krb5_data *,
 		   krb5_replay_data *));
 krb5_error_code krb5_rd_priv
 	PROTOTYPE((krb5_context,
-		   krb5_auth_context *,
+		   krb5_auth_context,
 		   const krb5_data *,
 		   krb5_data *,
 		   krb5_replay_data *));
@@ -1682,7 +1682,7 @@ krb5_error_code krb5_decode_kdc_rep
 
 krb5_error_code krb5_rd_req
 	PROTOTYPE((krb5_context,
-		   krb5_auth_context **,
+		   krb5_auth_context *,
 		   const krb5_data *,
 		   krb5_const_principal,
 		   krb5_keytab,
@@ -1691,7 +1691,7 @@ krb5_error_code krb5_rd_req
 
 krb5_error_code krb5_rd_req_decoded
 	PROTOTYPE((krb5_context,
-		   krb5_auth_context **,
+		   krb5_auth_context *,
 		   const krb5_ap_req *,
 		   krb5_const_principal,
 		   krb5_keytab,
@@ -1707,13 +1707,13 @@ krb5_error_code krb5_kt_read_service_key
 		   krb5_keyblock **));
 krb5_error_code krb5_mk_safe
 	PROTOTYPE((krb5_context,
-		   krb5_auth_context *,
+		   krb5_auth_context,
 		   const krb5_data *,
 		   krb5_data *,
 		   krb5_replay_data *));
 krb5_error_code krb5_mk_priv
 	PROTOTYPE((krb5_context,
-		   krb5_auth_context *,
+		   krb5_auth_context,
 		   const krb5_data *,
 		   krb5_data *,
 		   krb5_replay_data *));
@@ -1724,7 +1724,7 @@ krb5_error_code krb5_cc_register
 
 krb5_error_code krb5_sendauth 
 	PROTOTYPE((krb5_context,
-		   krb5_auth_context **,
+		   krb5_auth_context *,
 		   krb5_pointer,
 		   char *,
 		   krb5_principal,
@@ -1738,7 +1738,7 @@ krb5_error_code krb5_sendauth
 		   krb5_creds **));
 	
 krb5_error_code krb5_recvauth PROTOTYPE((krb5_context,
-		   krb5_auth_context **,
+		   krb5_auth_context *,
 		   krb5_pointer,
 		   char *,
 		   krb5_principal,
@@ -1755,117 +1755,117 @@ krb5_error_code krb5_walk_realm_tree
 
 krb5_error_code INTERFACE krb5_mk_ncred
     	PROTOTYPE((krb5_context,
-                   krb5_auth_context *,
+                   krb5_auth_context,
                    krb5_creds **,
                    krb5_data **,
                    krb5_replay_data *));
 
 krb5_error_code INTERFACE krb5_mk_1cred
         PROTOTYPE((krb5_context,
-                   krb5_auth_context *,
+                   krb5_auth_context,
                    krb5_creds *,
                    krb5_data **,
                    krb5_replay_data *));
 
 krb5_error_code krb5_auth_con_init
 	PROTOTYPE((krb5_context,
-		   krb5_auth_context **));
+		   krb5_auth_context *));
 
 krb5_error_code krb5_auth_con_free
 	PROTOTYPE((krb5_context,
-		   krb5_auth_context *));
+		   krb5_auth_context));
 
 krb5_error_code krb5_auth_con_setflags
 	PROTOTYPE((krb5_context,
-		   krb5_auth_context *,
+		   krb5_auth_context,
 		   krb5_int32));
 
 krb5_error_code krb5_auth_con_getflags
 	PROTOTYPE((krb5_context,
-		   krb5_auth_context *,
+		   krb5_auth_context,
 		   krb5_int32 *));
 
 krb5_error_code krb5_auth_con_setaddrs
 	PROTOTYPE((krb5_context,
-		   krb5_auth_context *,
+		   krb5_auth_context,
 		   krb5_address *,
 		   krb5_address *));
 
 krb5_error_code krb5_auth_con_getaddrs
 	PROTOTYPE((krb5_context,
-		   krb5_auth_context *,
+		   krb5_auth_context,
 		   krb5_address **,
 		   krb5_address **));
 
 krb5_error_code krb5_auth_con_setports
 	PROTOTYPE((krb5_context,
-		   krb5_auth_context *,
+		   krb5_auth_context,
 		   krb5_address *,
 		   krb5_address *));
 
 krb5_error_code krb5_auth_con_setuseruserkey
 	PROTOTYPE((krb5_context,
-		   krb5_auth_context *,
+		   krb5_auth_context,
 		   krb5_keyblock *));
 
 krb5_error_code krb5_auth_con_getkey
 	PROTOTYPE((krb5_context,
-		   krb5_auth_context *,
+		   krb5_auth_context,
 		   krb5_keyblock **));
 
 krb5_error_code krb5_auth_con_getlocalsubkey
 	PROTOTYPE((krb5_context,
-		   krb5_auth_context *,
+		   krb5_auth_context,
 		   krb5_keyblock **));
 
 krb5_error_code krb5_auth_con_setcksumtype
 	PROTOTYPE((krb5_context,
-		   krb5_auth_context *,
+		   krb5_auth_context,
 		   krb5_cksumtype));
 
 krb5_error_code krb5_auth_con_getcksumtype
 	PROTOTYPE((krb5_context,
-		   krb5_auth_context *,
+		   krb5_auth_context,
 		   krb5_cksumtype *));
 
 krb5_error_code krb5_auth_con_getlocalseqnumber
 	PROTOTYPE((krb5_context,
-		   krb5_auth_context *,
+		   krb5_auth_context,
 		   krb5_int32 *));
 
 krb5_error_code krb5_auth_con_getremoteseqnumber
 	PROTOTYPE((krb5_context,
-		   krb5_auth_context *,
+		   krb5_auth_context,
 		   krb5_int32 *));
 
 krb5_error_code krb5_auth_con_setivector
 	PROTOTYPE((krb5_context,
-		   krb5_auth_context *,
+		   krb5_auth_context,
 		   krb5_pointer));
 
 krb5_error_code krb5_auth_con_getivector
 	PROTOTYPE((krb5_context,
-		   krb5_auth_context *,
+		   krb5_auth_context,
 		   krb5_pointer *));
 
 krb5_error_code krb5_auth_con_setrcache
 	PROTOTYPE((krb5_context,
-		   krb5_auth_context *,
+		   krb5_auth_context,
 		   krb5_rcache));
 
 krb5_error_code krb5_auth_con_getrcache
 	PROTOTYPE((krb5_context,
-		   krb5_auth_context *,
+		   krb5_auth_context,
 		   krb5_rcache *));
 
 krb5_error_code krb5_auth_con_getauthenticator
    PROTOTYPE((krb5_context,
-         krb5_auth_context *,
+         krb5_auth_context,
          krb5_authenticator **));
 
 krb5_error_code krb5_auth_con_getremotesubkey
    PROTOTYPE((krb5_context,
-         krb5_auth_context *,
+         krb5_auth_context,
          krb5_keyblock **));
 
 #define KRB5_REALM_BRANCH_CHAR '.'

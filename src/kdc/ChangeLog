@@ -1,3 +1,7 @@
+Sat Jun 10 23:04:31 1995  Tom Yu  (tlyu@dragons-lair)
+
+	* kdc_util.c: krb5_auth_context redefinitions
+
 Fri Jun  9 19:13:08 1995    <tytso@rsx-11.mit.edu>
 
 	* dispatch.c, kdc_util.h, kerberos_v4.c: Use KRB5_KRB4_COMPAT

@@ -68,7 +68,7 @@ int	standalone = 0;
 krb5_principal	server;		/* This is our server principal name */
 krb5_principal	client;		/* This is who we're talking to */
 krb5_context kpropd_context;
-krb5_auth_context * auth_context;
+krb5_auth_context auth_context;
 char	*realm = NULL;		/* Our realm */
 char	*file = KPROPD_DEFAULT_FILE;
 char	*temp_file_name;

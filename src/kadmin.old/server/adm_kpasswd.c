@@ -44,7 +44,7 @@ struct cpw_keyproc_arg {
 krb5_error_code
 adm5_kpasswd(context, auth_context, prog, request_type, retbuf, otype)
     krb5_context context;
-    krb5_auth_context *auth_context;
+    krb5_auth_context auth_context;
     char *prog;
     kadmin_requests *request_type;
     char *retbuf;

@@ -309,7 +309,7 @@ krb5_int32
 passwd_check(kcontext, debug_level, auth_context, ticket, pwdata, supp)
     krb5_context	kcontext;
     int			debug_level;
-    krb5_auth_context	*auth_context;
+    krb5_auth_context	auth_context;
     krb5_ticket		*ticket;
     krb5_data		*pwdata;
     krb5_int32		*supp;
@@ -381,7 +381,7 @@ passwd_change(kcontext, debug_level, auth_context, ticket,
 	      olddata, newdata, supp)
     krb5_context	kcontext;
     int			debug_level;
-    krb5_auth_context	*auth_context;
+    krb5_auth_context	auth_context;
     krb5_ticket		*ticket;
     krb5_data		*olddata;
     krb5_data		*newdata;

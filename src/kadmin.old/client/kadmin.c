@@ -101,7 +101,7 @@ main(argc,argv)
     int nflag = 0;
     int port = 0;
 
-    krb5_auth_context * new_auth_context;
+    krb5_auth_context new_auth_context;
     krb5_replay_data replaydata;
 
     krb5_init_context(&context);

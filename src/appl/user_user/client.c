@@ -50,7 +50,7 @@ char *argv[];
   krb5_ccache cc;
   krb5_creds creds, *new_creds;
   krb5_data reply, msg, princ_data;
-    krb5_auth_context * auth_context = NULL;
+    krb5_auth_context auth_context = NULL;
     krb5_ticket * ticket = NULL;
     krb5_context context;
   unsigned short port;

@@ -1,3 +1,8 @@
+Sat Jun 10 22:10:46 1995  Tom Yu  (tlyu@dragons-lair)
+
+	* krb5.hin: declare krb5_auth_context as
+		struct _krb5_auth_context FAR *
+
 Fri Jun  9 18:43:20 1995    <tytso@rsx-11.mit.edu>
 
 	* krb5.hin: Remove definition of the krb5_fulladdr structure, and

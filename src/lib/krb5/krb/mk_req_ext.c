@@ -71,7 +71,7 @@ krb5_error_code INTERFACE
 krb5_mk_req_extended(context, auth_context, ap_req_options, in_data, in_creds,
 		     outbuf)
     krb5_context 	  context;
-    krb5_auth_context	**auth_context;
+    krb5_auth_context	* auth_context;
     const krb5_flags 	  ap_req_options;
     krb5_data		* in_data;
     krb5_creds 		* in_creds;
@@ -80,7 +80,7 @@ krb5_mk_req_extended(context, auth_context, ap_req_options, in_data, in_creds,
     krb5_error_code 	  retval;
     krb5_checksum	  checksum;
     krb5_checksum	  *checksump = 0;
-    krb5_auth_context	* new_auth_context;
+    krb5_auth_context	  new_auth_context;
 
     krb5_ap_req request;
     krb5_data *scratch = 0;

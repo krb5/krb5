@@ -48,7 +48,7 @@ extern int classification;
 krb5_error_code
 adm_build_key (context, auth_context, new_passwd, oper_type, entry)
     krb5_context context;
-    krb5_auth_context * auth_context;
+    krb5_auth_context auth_context;
     char *new_passwd;
     int oper_type;
     krb5_db_entry entry;
@@ -171,7 +171,7 @@ adm_build_key (context, auth_context, new_passwd, oper_type, entry)
 krb5_error_code
 adm_change_pwd(context, auth_context, prog, customer_name, salttype)
     krb5_context context;
-    krb5_auth_context * auth_context;
+    krb5_auth_context auth_context;
     char *prog;
     char *customer_name;
     int salttype;
@@ -295,7 +295,7 @@ adm_change_pwd_rnd(context, cmdname, customer_name)
 krb5_error_code
 adm_add_new_key(context, auth_context, cmdname, customer_name, salttype)
     krb5_context context;
-    krb5_auth_context *auth_context;
+    krb5_auth_context auth_context;
     char *cmdname;
     char *customer_name;
     int salttype;
@@ -470,7 +470,7 @@ adm_del_old_key(context, cmdname, customer_name)
 krb5_error_code
 adm_mod_old_key(context, auth_context, cmdname, customer_name)
     krb5_context context;
-    krb5_auth_context * auth_context;
+    krb5_auth_context auth_context;
     char *cmdname;
     char *customer_name;
 {
@@ -682,7 +682,7 @@ adm_mod_old_key(context, auth_context, cmdname, customer_name)
 krb5_error_code
 adm_inq_old_key(context, auth_context, cmdname, customer_name)
     krb5_context context;
-    krb5_auth_context * auth_context;
+    krb5_auth_context auth_context;
     char *cmdname;
     char *customer_name;
 {

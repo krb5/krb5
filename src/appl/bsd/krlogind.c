@@ -1536,7 +1536,7 @@ int default_realm(principal)
 krb5_error_code
 recvauth()
 {
-    krb5_auth_context * auth_context = NULL;
+    krb5_auth_context auth_context = NULL;
     krb5_error_code status;
     struct sockaddr_in peersin, laddr;
     char krb_vers[KRB_SENDAUTH_VLEN + 1];

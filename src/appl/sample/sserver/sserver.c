@@ -65,7 +65,7 @@ main(argc, argv)
     char *argv[];
 {
     krb5_context context;
-    krb5_auth_context * auth_context = NULL;
+    krb5_auth_context auth_context = NULL;
     krb5_ticket * ticket;
     krb5_address peeraddr;
     struct sockaddr_in peername;

@@ -40,7 +40,7 @@ krb5_error_code
 kadm_add_user(context, auth_context, my_creds, local_socket, 
 	      oper_type, principal)
     krb5_context 	  context;
-    krb5_auth_context	* auth_context;
+    krb5_auth_context	  auth_context;
     krb5_creds 		* my_creds;
     int 		* local_socket;
     int 		  oper_type;

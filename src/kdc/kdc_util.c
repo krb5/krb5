@@ -173,7 +173,7 @@ kdc_process_tgs_req(request, from, pkt, ticket, subkey)
     krb5_data		  scratch1;
     krb5_data 		* scratch = NULL;
     krb5_boolean 	  foreign_server = FALSE;
-    krb5_auth_context 	* auth_context = NULL;
+    krb5_auth_context 	  auth_context = NULL;
     krb5_authenticator	* authenticator = NULL;
     krb5_checksum 	* his_cksum = NULL;
     krb5_keyblock 	* key = NULL;

@@ -1,3 +1,7 @@
+Sat Jun 10 22:59:20 1995  Tom Yu  (tlyu@dragons-lair)
+
+	* sim_server.c: krb5_auth_context redefinitions
+
 Fri Jun  9 18:23:58 1995    <tytso@rsx-11.mit.edu>
 
 	* sim_server.c: #include krb5.h first, to reduce size of debugging
