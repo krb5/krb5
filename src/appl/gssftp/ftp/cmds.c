@@ -70,9 +70,11 @@ extern	char **ftpglob();
 extern	char *home;
 extern	char *remglob();
 extern	char *getenv();
+#ifndef HAVE_STRERROR
 #define strerror(error) (sys_errlist[error])
 #ifdef NEED_SYS_ERRLIST
 extern char *sys_errlist[];
+#endif
 #endif
 
 extern off_t restart_point;

@@ -1,3 +1,9 @@
+2001-12-18  Ken Raeburn  <raeburn@mit.edu>
+
+	* cmds.c (strerror): Only define if not HAVE_STRERROR.
+	* ftp.c (strerror): Likewise.
+	* secure.c (secure_putbuf, secure_getbyte): Use strerror.
+
 2001-11-30  Tom Yu  <tlyu@mit.edu>
 
 	* glob.c (execbrc): Fix some fencepost errors.  Don't copy

@@ -1,3 +1,13 @@
+2001-12-18  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Check for strerror.
+	* clnt_perror.c (strerror) [!HAVE_STRERROR]: Define, with
+	out-of-range check using sys_nerr.
+	(sys_nerr) [!HAVE_STRERROR]: Declare at top level instead of in
+	clnt_spcreateerror.
+	(clnt_sperror, clnt_spcreateerror): Use strerror always.  Skip
+	range check.
+
 2000-06-21  Tom Yu  <tlyu@mit.edu>
 
 	* svc_auth_gssapi.c (_svcauth_gssapi): Missed a rename.  From

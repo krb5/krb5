@@ -36,8 +36,11 @@ extern gss_ctx_id_t gcontext;
 #include <netinet/in.h>
 #include <errno.h>
 
+#ifndef HAVE_STRERROR
+#define strerror(error) (sys_errlist[error])
 #ifdef NEED_SYS_ERRLIST
 extern char *sys_errlist[];
+#endif
 #endif
 
 #if (SIZEOF_SHORT == 4)
@@ -289,7 +292,7 @@ unsigned int nbyte;
 		} else {
 			bufsize = 0;
 			secure_error("%s (in malloc of PROT buffer)",
-				     sys_errlist[errno]);
+				     strerror(errno));
 			return(ERR);
 		}
 	}
@@ -336,7 +339,7 @@ unsigned int nbyte;
 			} else {
 				bufsize = 0;
 				secure_error("%s (in malloc of PROT buffer)",
-					     sys_errlist[errno]);
+					     strerror(errno));
 				return(ERR);
 			}
 		}
@@ -365,7 +368,7 @@ int fd;
 				!= sizeof(length)) {
 			secure_error("Couldn't read PROT buffer length: %d/%s",
 				     kerror,
-				     kerror == -1 ? sys_errlist[errno]
+				     kerror == -1 ? strerror(errno)
 				     : "premature EOF");
 			return(ERR);
 		}
@@ -377,7 +380,7 @@ int fd;
 		if ((kerror = looping_read(fd, ucbuf, length)) != length) {
 			secure_error("Couldn't read %u byte PROT buffer: %s",
 					length, kerror == -1 ?
-					sys_errlist[errno] : "premature EOF");
+					strerror(errno) : "premature EOF");
 			return(ERR);
 		}
 		/* Other auth types go here ... */

@@ -45,9 +45,14 @@ static char sccsid[] = "@(#)clnt_perror.c 1.15 87/10/07 Copyr 1984 Sun Micro";
 #include <gssrpc/auth.h>
 #include <gssrpc/clnt.h>
 
+#ifndef HAVE_STRERROR
 #ifdef NEED_SYS_ERRLIST
 extern char *sys_errlist[];
 #endif
+extern int sys_nerr;
+#undef strerror
+#define strerror(N) (((N) > 0 && (N) < sys_nerr) ? sys_errlist[N] : (char *)0)
+#endif /* HAVE_STRERROR */
 static char *auth_errmsg();
 
 
@@ -108,9 +113,9 @@ clnt_sperror(rpch, s)
 	case RPC_CANTSEND:
 	case RPC_CANTRECV:
 		/* 10 for the string */
-		if(str - bufstart + 10 + strlen(sys_errlist[e.re_errno]) < BUFSIZ)
+		if(str - bufstart + 10 + strlen(strerror(e.re_errno)) < BUFSIZ)
 		    (void) sprintf(str, "; errno = %s",
-				   sys_errlist[e.re_errno]); 
+				   strerror(e.re_errno)); 
 		str += strlen(str);
 		break;
 
@@ -251,7 +256,6 @@ char *
 clnt_spcreateerror(s)
 	char *s;
 {
-	extern int sys_nerr;
 	char *str = _buf();
 
 	if (str == 0)
@@ -269,14 +273,14 @@ clnt_spcreateerror(s)
 
 	case RPC_SYSTEMERROR:
 		(void) strncat(str, " - ", BUFSIZ - 1 - strlen(str));
-		if (rpc_createerr.cf_error.re_errno > 0
-		    && rpc_createerr.cf_error.re_errno < sys_nerr)
-			(void) strncat(str,
-			    sys_errlist[rpc_createerr.cf_error.re_errno],
-			    BUFSIZ - 1 - strlen(str));
-		else
+		{
+		    const char *m = strerror(rpc_createerr.cf_error.re_errno);
+		    if (m)
+			(void) strncat(str, m, BUFSIZ - 1 - strlen(str));
+		    else
 			(void) sprintf(&str[strlen(str)], "Error %d",
-			    rpc_createerr.cf_error.re_errno);
+				       rpc_createerr.cf_error.re_errno);
+		}
 		break;
 	}
 	(void) strncat(str, "\n", BUFSIZ - 1 - strlen(str));

@@ -1,3 +1,7 @@
+2001-12-18  Ken Raeburn  <raeburn@mit.edu>
+
+	* ftpd.c (strerror): Only define if not HAVE_STRERROR.
+
 2001-11-30  Tom Yu  <tlyu@mit.edu>
 
 	* ftpcmd.y (pathname): Handle returns from ftpglob() better so
