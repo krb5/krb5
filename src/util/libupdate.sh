@@ -9,11 +9,13 @@ ARADD="@ARADD@"
 ARCHIVE="@ARCHIVE@"
 
 force=
+rmcmd=
 arcmd="$ARADD"
 if test "$1" = "--force" 
 then
 	force=yes
 	arcmd="$ARCHIVE"
+	rmcmd="rm -f $library"
 	shift
 fi
 
@@ -32,6 +34,7 @@ fi
 
 echo "Updating library $library from $oblist"
 
+$rmcmd
 $arcmd $library `cat $oblist | \
 		sed -e "s;^\([^ ]*\);$dir/\1;g" -e "s; \([^ ]*\); $dir/\1;g"`
 

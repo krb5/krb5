@@ -1,3 +1,10 @@
+Tue Apr 16 22:26:36 1996  Ken Raeburn  <raeburn@cygnus.com>
+
+	Wed Mar  6 05:02:36 1996  Mark Eichin  <eichin@cygnus.com>
+
+	* libupdate.sh: $ARCHIVE does not delete when creating. Explicitly
+	remove $library when using --force.
+
 Fri Mar 29 16:42:24 1996  Richard Basch  <basch@lehman.com>
 
 	* makeshlib.sh: Added support for SunOS shared libraries.
