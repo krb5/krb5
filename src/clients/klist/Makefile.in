@@ -1,20 +1,33 @@
-CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
+##DOS##BUILDTOP=..\..
 
+CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 
-all:: klist
+all-unix:: klist
+all-windows::
+all-mac::
+
 
 klist: klist.o $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o $@ klist.o $(KRB5_BASE_LIBS)
 
-clean::
+
+##WIN32##INCLUDES = /I$(BUILDTOP)\include /I$(BUILDTOP)\include\krb5
+##WIN32##CFLAGS	= $(CCOPTS2) $(INCLUDES)
+  
+##WIN32##all-windows:: klist.exe
+##WIN32##klist.exe: klist.obj
+##WIN32##	link /nologo /out:$@ $*.obj $(KLIB)
+
+
+clean-unix::
 	$(RM) klist.o klist
 
-install::
+install-unix::
 	for f in klist; do \
 	  $(INSTALL_PROGRAM) $$f \
 		$(DESTDIR)$(CLIENT_BINDIR)/`echo $$f|sed '$(transform)'`; \
 	  $(INSTALL_DATA) $(srcdir)/$$f.M \
-		${DESTDIR}$(CLIENT_MANDIR)/`echo $$f|sed '$(transform)'`.1; \
+		$(DESTDIR)$(CLIENT_MANDIR)/`echo $$f|sed '$(transform)'`.1; \
 	done

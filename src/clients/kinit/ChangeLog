@@ -1,3 +1,12 @@
+Sat Feb  8 15:37:39 1997  Richard Basch  <basch@lehman.com>
+
+	* Makefile.in:
+		Build kinit.exe (win32 console app)
+
+	* kinit.c:
+		Removed unused local variables
+		Created prototypes for internal functions (win32)
+
 Mon Jan 27 16:44:20 1997  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in:

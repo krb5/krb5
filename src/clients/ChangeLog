@@ -1,3 +1,6 @@
+Sat Feb  8 15:27:31 1997  Richard Basch  <basch@lehman.com>
+
+	* Makefile.in: Added win32 rules (kinit,kdestroy,klist console apps)
 
 Fri Jul 7 15:52:28 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in - Remove LDFLAGS

@@ -1,20 +1,34 @@
-CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
+##DOS##BUILDTOP=..\..
 
+CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 
-all:: kdestroy
+all-unix:: kdestroy
+all-windows::
+all-mac::
 
 kdestroy: kdestroy.o $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o $@ kdestroy.o $(KRB5_BASE_LIBS)
 
-clean::
+
+
+##WIN32##INCLUDES = /I$(BUILDTOP)\include /I$(BUILDTOP)\include\krb5
+##WIN32##CFLAGS	= $(CCOPTS2) $(INCLUDES)
+  
+##WIN32##all-windows:: kdestroy.exe
+##WIN32##kdestroy.exe: kdestroy.obj
+##WIN32##	link /nologo /out:$@ $*.obj \
+##WIN32##	  $(BUILDTOP)\util\windows\getopt.obj $(KLIB)
+
+
+clean-unix::
 	$(RM) kdestroy.o kdestroy
 
-install::
+install-unix::
 	for f in kdestroy; do \
 	  $(INSTALL_PROGRAM) $$f \
 		$(DESTDIR)$(CLIENT_BINDIR)/`echo $$f|sed '$(transform)'`; \
 	  $(INSTALL_DATA) $(srcdir)/$$f.M \
-		${DESTDIR}$(CLIENT_MANDIR)/`echo $$f|sed '$(transform)'`.1; \
+		$(DESTDIR)$(CLIENT_MANDIR)/`echo $$f|sed '$(transform)'`.1; \
 	done

@@ -1,3 +1,8 @@
+Mon Feb 10 14:59:54 1997  Richard Basch  <basch@lehman.com>
+
+	* Makefile.in:
+		Build kdestroy.exe (win32 console app)
+
 Mon Jan 27 16:38:44 1997  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in:
