@@ -39,6 +39,9 @@ char copyright[] =
 
 /* based on @(#)main.c	5.5 (Berkeley) 12/18/92 */
 
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 #include <sys/types.h>
 #include <libtelnet/auth.h>
 #ifdef ENCRYPTION
@@ -50,6 +53,7 @@ char copyright[] =
 #include "ring.h"
 #include "externs.h"
 #include "defines.h"
+
 
 
 #if 0
