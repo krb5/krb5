@@ -102,11 +102,13 @@ static const char enctype_null_in[]		= "null";
 static const char enctype_descbccrc_in[]	= "des-cbc-crc";
 static const char enctype_descbcmd4_in[]	= "des-cbc-md4";
 static const char enctype_descbcmd5_in[]	= "des-cbc-md5";
+static const char enctype_des3cbcmd5_in[]	= "des3-cbc-md5";
 static const char enctype_descbcraw_in[]	= "des-cbc-raw";
 static const char enctype_null_out[]		= "Null";
 static const char enctype_descbccrc_out[]	= "DES cbc mode with CRC-32";
 static const char enctype_descbcmd4_out[]	= "DES cbc mode with RSA-MD4";
 static const char enctype_descbcmd5_out[]	= "DES cbc mode with RSA-MD5";
+static const char enctype_des3cbcmd5_out[]	= "Triple DES cbc mode with RSA-MD5";
 static const char enctype_descbcraw_out[]	= "DES cbc mode raw";
 
 /* Salttype strings */
@@ -223,6 +225,7 @@ static const struct enctype_lookup_entry enctype_table[] = {
 { ENCTYPE_DES_CBC_CRC,	enctype_descbccrc_in,	enctype_descbccrc_out	},
 { ENCTYPE_DES_CBC_MD4,	enctype_descbcmd4_in,	enctype_descbcmd4_out	},
 { ENCTYPE_DES_CBC_MD5,	enctype_descbcmd5_in,	enctype_descbcmd5_out	},
+{ ENCTYPE_DES3_CBC_MD5,	enctype_des3cbcmd5_in,	enctype_des3cbcmd5_out	},
 { ENCTYPE_DES_CBC_RAW,	enctype_descbcraw_in,	enctype_descbcraw_out	}
 };
 static const int enctype_table_nents = sizeof(enctype_table)/
