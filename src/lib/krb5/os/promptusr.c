@@ -3,10 +3,13 @@
  */
 
 #include "k5-int.h"
+#if !defined(_MSDOS) && !defined(_MACINTOSH)
 
 #include <stdio.h>
 #include <stdlib.h>
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 #include <termios.h>
 #include <signal.h>
 #include <setjmp.h>
@@ -159,6 +162,4 @@ main(int argc, char **argv)
 
 #endif
 	
-	
-    
-	
+#endif /* !_MSODS || _!MACINTOSH */
