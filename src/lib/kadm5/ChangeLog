@@ -1,3 +1,10 @@
+1999-09-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* logger.c (DEVICE_PRINT, klog_com_err_proc, klog_vsyslog): Use
+	proper format strings to fprintf, instead of net-supplied data.
+	Fold in writes of following end-of-line sequences when
+	appropriate.
+
 1998-11-13  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* Makefile.in: Set the myfulldir and mydir variables (which are
