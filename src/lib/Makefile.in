@@ -78,15 +78,16 @@ $(CLIB): $(CLIBS) $(WLIB) $(CDEF) no_glue.obj
 ##WIN32##	link $(WINDLLFLAGS) /def:$(CDEF) /out:$*.dll \
 ##WIN32##	   no_glue.obj version.res $(CLIBS) $(WINLIBS)
 
-$(PLIB): $(PLIBS) $(WLIB) $(PDEF) no_glue.obj
+$(PLIB): $(PLIBS) $(WLIB) $(CLIB) $(PDEF) no_glue.obj
 ##WIN16##	link /co /seg:400 /noe /nod /nol \
-##WIN16##	   no_glue, $*.dll, $*.map, $(PLIBS) $(WINLIBS), $(PDEF)
+##WIN16##	   no_glue, $*.dll, $*.map, $(PLIBS) $(CLIB) $(WINLIBS), \
+##WIN16##	   $(PDEF)
 ##WIN16##	copy $(VERSIONRC) version.rc
 ##WIN16##	rc /nologo /p /k $(CPPFLAGS) -DPROF_LIB -D_MSDOS_ -DRES_ONLY version.rc $*.dll
 ##WIN16##	implib /nologo $@ $*.dll
 ##WIN32##	rc  $(CPPFLAGS) -DPROF_LIB -D_WIN32 -D_MSDOS_ -DRES_ONLY -fo version.res $(VERSIONRC)
 ##WIN32##	link $(WINDLLFLAGS) /def:$(PDEF) /out:$*.dll \
-##WIN32##	   no_glue.obj version.res $(PLIBS) $(WINLIBS)
+##WIN32##	   no_glue.obj version.res $(PLIBS) $(CLIB) $(WINLIBS)
 
 $(KLIB): $(KLIBS) $(CLIB) $(PLIB) $(WLIB) $(KDEF) k5_glue.obj $(KRB5RC) $(CCACHE_LIB)
 ##WIN16##	link /co /seg:400 /noe /nod /nol \
@@ -113,16 +114,18 @@ $(GLIB): $(GLIBS) $(KLIB) $(CLIB) $(GDEF) gss_glue.obj
 ##WIN32##	link $(WINDLLFLAGS) /def:$(GDEF) /out:$*.dll \
 ##WIN32##	   gss_glue.obj version.res $(GLIBS) $(KLIB) $(CLIB) $(WINLIBS)
 
-$(K4LIB): $(K4LIBS) $(KLIB) $(CLIB) $(K4DEF) k4_glue.obj
+$(K4LIB): $(K4LIBS) $(KLIB) $(CLIB) $(PLIB) $(K4DEF) k4_glue.obj
 ##WIN16##	link /co /seg:400 /noe /nod /nol \
 ##WIN16##	   k4_glue, $*.dll, $*.map, \
-##WIN16##	   $(K4LIBS) $(KLIB) $(CLIB) $(WINLIBS) llibcew, $(K4DEF)
+##WIN16##	   $(K4LIBS) $(KLIB) $(CLIB) $(PLIB) $(WINLIBS) llibcew, \
+##WIN16##	   $(K4DEF)
 ##WIN16##	copy $(VERSIONRC) version.rc
 ##WIN16##	rc /nologo /p /k -DKRB4_LIB version.rc $*.dll
 ##WIN16##	implib /nologo $@ $*.dll
 ##WIN32##	rc   -D_WIN32 -DKRB4_LIB -fo version.res $(VERSIONRC)
 ##WIN32##	link $(WINDLLFLAGS) /def:$(K4DEF) /out:$*.dll \
-##WIN32##	   k4_glue.obj version.res $(K4LIBS) $(KLIB) $(CLIB) $(WINLIBS)
+##WIN32##	   k4_glue.obj version.res $(K4LIBS) $(KLIB) $(CLIB) $(PLIB) \
+##WIN32##	   $(WINLIBS)
 
 #
 # The following kludge is for MIT's SAP/Version server hack
