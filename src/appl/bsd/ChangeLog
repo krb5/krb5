@@ -1,5 +1,7 @@
 Mon Nov  7 21:22:00 1994  Theodore Y. Ts'o  (tytso@dcl)
 
+	* configure.in: Add check for stdlib.h
+
 	* configure.in: Remove unused check for HAVE_GETDTABLESIZE
 		(especially since we replace it with AC_REPLACE_FUNCS
 		later!)

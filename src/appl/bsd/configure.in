@@ -34,7 +34,7 @@ AC_FUNC_CHECK(setreuid,AC_DEFINE(HAVE_SETREUID))
 AC_FUNC_CHECK(setresuid,AC_DEFINE(HAVE_SETRESUID))
 AC_FUNC_CHECK(waitpid,AC_DEFINE(HAVE_WAITPID))
 AC_FUNC_CHECK(setsid,AC_DEFINE(HAVE_SETSID))
-AC_HAVE_HEADERS(sys/filio.h sys/sockio.h unistd.h sys/label.h ttyent.h lastlog.h sys/select.h sys/ptyvar.h)
+AC_HAVE_HEADERS(sys/filio.h sys/sockio.h unistd.h stdlib.h sys/label.h ttyent.h lastlog.h sys/select.h sys/ptyvar.h)
 AC_COMPILE_CHECK([use streams interface],
 [#include <sys/tty.h>
 #include <sys/ttold.h>
