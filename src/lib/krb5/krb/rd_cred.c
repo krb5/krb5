@@ -93,7 +93,7 @@ krb5_rd_cred_basic(context, pcreddata, pkeyblock, local_addr, remote_addr,
 	goto cleanup_cred;
 
     if (!krb5_address_compare(context, remote_addr, encpart.s_address)) {
-        KRB5KRB_AP_ERR_BADADDR;
+        retval = KRB5KRB_AP_ERR_BADADDR;
         goto cleanup_cred;
     }
 

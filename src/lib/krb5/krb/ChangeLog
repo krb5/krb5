@@ -1,3 +1,7 @@
+Thu May 11 22:42:30 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* rd_cred.c (krb5_rd_cred_basic): If address don't match, return
+		KRB5KRB_AP_ERR_BADADDR (add missing retval).
 
 Thu May 11 18:30:21 1995  Chris Provenzano (proven@mit.edu)
 
