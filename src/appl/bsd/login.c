@@ -1801,11 +1801,9 @@ int rewrite_ccache = 1; /*try to write out ccache*/
 	if (*pwd->pw_shell == '\0')
 		pwd->pw_shell = BSHELL;
 #if defined(NTTYDISC) && defined(TIOCSETD)
-	/* turn on new line discipline for the csh */
-	if (!strcmp(pwd->pw_shell, "/bin/csh")) {
-		ioctlval = NTTYDISC;
-		(void)ioctl(0, TIOCSETD, (char *)&ioctlval);
-	}
+	/* turn on new line discipline for all shells */
+	ioctlval = NTTYDISC;
+	(void)ioctl(0, TIOCSETD, (char *)&ioctlval);
 #endif
 
 	ccname = getenv("KRB5CCNAME");  /* save cache */
@@ -2386,6 +2384,13 @@ void sleepexit(eval)
 }
 
 #if defined(KRB4_GET_TICKETS) || defined(KRB5_GET_TICKETS)
+
+static int hungup = 0;
+static sigtype
+sighup() {
+    hungup = 1;
+}
+
 /* call already conditionalized on login_krb4_get_tickets */
 /*
  * This routine handles cleanup stuff, and the like.
@@ -2395,8 +2400,9 @@ void sleepexit(eval)
 void
 dofork()
 {
-    int child;
-
+    int child,pid;
+    handler sa;
+    
 #ifdef _IBMR2
     update_ref_count(1);
 #endif
@@ -2433,15 +2439,26 @@ dofork()
     (void) chdir("/");	/* Let's not keep the fs busy... */
     
     /* If we're the parent, watch the child until it dies */
+
+    /* On receipt of SIGHUP, pass that along to child's process group. */
+    handler_init (sa, sighup);
+    handler_set (SIGHUP, sa);
+
+    while (1) {
 #ifdef HAVE_WAITPID
-    (void)waitpid(child, 0, 0);
+        pid = waitpid(child, 0, 0);
 #else
 #ifdef WAIT_USES_INT
-    while(wait((int *)0) != child) /*void*/ ;
+        pid = wait((int *)0);
 #else
-    while(wait((union wait *)0) != child) /*void*/ ;
+        pid = wait((union wait *)0);
 #endif
 #endif
+	if (hungup)
+	    killpg(child, SIGHUP);
+	if (pid == child)
+		break;
+    }
     
     /* Cleanup stuff */
     /* Run destroy_tickets to destroy tickets */
