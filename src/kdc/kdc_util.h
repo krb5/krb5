@@ -35,18 +35,17 @@ krb5_error_code fetch_last_req_info PROTOTYPE((krb5_db_entry *,
 krb5_error_code kdc_convert_key PROTOTYPE((krb5_keyblock *,
 					   krb5_keyblock *,
 					   int));
-krb5_error_code decrypt_tgs_req PROTOTYPE((krb5_tgs_req *,
-					   const krb5_fulladdr *));
-krb5_error_code kdc_process_tgs_req PROTOTYPE((krb5_tgs_req *,
-					       const krb5_fulladdr *));
+krb5_error_code kdc_process_tgs_req PROTOTYPE((krb5_kdc_req *,
+					       const krb5_fulladdr *,
+					       krb5_ticket **));
 
 /* do_as_req.c */
-krb5_error_code process_as_req PROTOTYPE((krb5_as_req *,
+krb5_error_code process_as_req PROTOTYPE((krb5_kdc_req *,
 					  const krb5_fulladdr *,
 					  krb5_data ** ));
 
 /* do_tgs_req.c */
-krb5_error_code process_tgs_req PROTOTYPE((krb5_tgs_req *,
+krb5_error_code process_tgs_req PROTOTYPE((krb5_kdc_req *,
 					   const krb5_fulladdr *,
 					   krb5_data ** ));
 /* dispatch.c */
