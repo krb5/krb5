@@ -14,7 +14,7 @@ KRB5ROOT = @KRB5ROOT@
 
 KRB5_INCDIR = $(KRB5ROOT)/include
 
-install:: $(KRB4_HEADERS)
+install::
 	@set -x; for f in $(KRB4_HEADERS) ; \
-	do cp $(srcdir)/$$f $(DESTDIR)$(KRB5_INCDIR)/kerberosIV/$$f ; \
+	do $(INSTALL_DATA) $(srcdir)/$$f $(DESTDIR)$(KRB5_INCDIR)/kerberosIV/$$f ; \
 	done

@@ -1,3 +1,13 @@
+Fri Nov 18 01:24:58 1994  Mark Eichin  <eichin@cygnus.com>
+
+	* Makefile.in (install): use $(INSTALL_DATA) instead of cp. Elide
+	dependency in install rule so $(srcdir) works.
+	* configure.in: use AC_PROG_INSTALL.
+
+Fri Nov 18 00:17:03 1994  Mark Eichin  <eichin@cygnus.com>
+
+	* configure.in: add WITH_CCOPTS.
+
 Mon Oct  3 18:50:25 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* Makefile.in: make install obey $(DESTDIR)
