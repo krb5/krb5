@@ -120,14 +120,6 @@ libss.a: $(OBJS)
 clean::
 	$(RM) libss.a
 
-install::
-	$(INSTALLLIB) libss.a $(DESTDIR)$(LIBDIR)/libss.a
-	$(CHMOD) 644 $(DESTDIR)$(LIBDIR)/libss.a
-	$(RANLIB)    $(DESTDIR)$(LIBDIR)/libss.a
-	$(CHMOD) 444 $(DESTDIR)$(LIBDIR)/libss.a
-## 
-
-
 libss.o:	$(OBJS)
 	$(LD) -r -s -o $@ $(OBJS)
 	$(CHMOD) -x $@
