@@ -52,6 +52,8 @@ register char **name;
     register int i;
     int totalsize = 0;
 
+    if (!principal[0] || !principal[1])
+	return KRB5_PARSE_MALFORMED;
     /* check for invalid elements of components; don't need to check
        realm, which is first component */
     for (i = 1; principal[i]; i++) {
