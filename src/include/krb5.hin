@@ -429,7 +429,7 @@ KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
     krb5_c_keyed_checksum_types
     KRB5_PROTOTYPE((krb5_context context, krb5_enctype enctype, 
-		    unsigned int count, krb5_cksumtypes *cksumtypes));
+		    unsigned int count, krb5_cksumtype *cksumtypes));
 
 
 #define KRB5_KEYUSAGE_AS_REQ_PA_ENC_TS		1

@@ -1,3 +1,7 @@
+Sun Jul 26 18:13:39 1998  Sam Hartman  <hartmans@utwig.mesas.com>
+
+	* Makefile.in (LIBMAJOR): bump libmajor
+
 Wed Apr 15 18:07:38 1998  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in (SHLIB_EXPDEPS): 

@@ -1,3 +1,11 @@
+Thu Jul 30 13:12:57 1998  Sam Hartman  <hartmans@utwig.mesas.com>
+
+	* configure.in: Test for sa_len so localaddr works on NetBSD.
+
+Sun Jul 26 17:46:47 1998  Sam Hartman  <hartmans@utwig.mesas.com>
+
+	* Makefile.in (LIBMAJOR): bump to 2
+
 Wed Apr 15 18:07:20 1998  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in (SHLIB_EXPDEPS): 

@@ -8,7 +8,7 @@ DEFINES=-I$(srcdir)/../../include/kerberosIV
 ##DOS##OBJFILE=krb4.lst
 
 LIB=krb4
-LIBMAJOR=1
+LIBMAJOR=2
 LIBMINOR=0
 RELDIR=krb4
 

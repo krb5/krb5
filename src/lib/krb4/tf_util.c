@@ -182,7 +182,7 @@ int tf_init(tf_name, rw)
     int rw;
 {
     int     wflag;
-    uid_t   me, getuid();
+    uid_t   me= getuid();
     struct stat stat_buf, stat_buffd;
 #ifdef TKT_SHMEM
     char shmidname[MAXPATHLEN]; 

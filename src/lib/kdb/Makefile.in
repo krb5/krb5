@@ -7,7 +7,7 @@ PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 
 LIB=kdb5
-LIBMAJOR=2
+LIBMAJOR=3
 LIBMINOR=0
 RELDIR=kdb
 # Depends on libk5crypto and libkrb5

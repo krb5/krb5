@@ -1,3 +1,11 @@
+Thu Jul 30 13:13:30 1998  Sam Hartman  <hartmans@utwig.mesas.com>
+
+	* tf_util.c (tf_init): s/,/= so getuid() actually gets called
+
+Sun Jul 26 17:51:24 1998  Sam Hartman  <hartmans@utwig.mesas.com>
+
+	* Makefile.in (LIBMAJOR): Bump libmajor
+
 Thu Jul  9 19:35:01 1998  Matthew D Hancher  <mdh@mit.edu>
 
 	* tf_util.c (tf_init): Fixed a potential race condition in the opening 
