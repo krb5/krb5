@@ -132,6 +132,7 @@ krb5_ticket **ticket;
     krb5_data *scratch, scratch2;
     krb5_pa_data **tmppa;
     krb5_boolean freeprinc = FALSE;
+    krb5_boolean local_client = TRUE;
 
     if (!request->padata)
 	return KRB5KDC_ERR_PADATA_TYPE_NOSUPP;
@@ -180,6 +181,21 @@ krb5_ticket **ticket;
 	server.principal = tgs_server;
     } else {
 	nprincs = 1;
+	/* If the "server" principal in the ticket is not something
+	   in the local realm, then we must refuse to service the request
+	   if the client claims to be from the local realm.
+	   
+	   If we don't do this, then some other realm's nasty KDC can
+	   claim to be authenticating a client from our realm, and we'll
+	   give out tickets concurring with it!
+	   
+	   we set a flag here for checking below.
+	   */
+	if ((apreq->ticket->server[0]->length != tgs_server[0]->length) ||
+	    memcmp(apreq->ticket->server[0]->data, tgs_server[0]->data,
+		   tgs_server[0]->length))
+	    local_client = FALSE;
+
 	if (retval = krb5_db_get_principal(apreq->ticket->server,
 					   &server, &nprincs,
 					   &more)) {
@@ -232,6 +248,18 @@ krb5_ticket **ticket;
 
     /* now rearrange output from rd_req_decoded */
 
+    /* make sure the client is of proper lineage (see above) */
+    if (!local_client &&
+	(authdat->ticket->enc_part2->client[0]->length ==
+	 tgs_server[0]->length) &&
+	!memcmp(authdat->ticket->enc_part2->client[0]->data,
+		tgs_server[0]->data,
+		tgs_server[0]->length)) {
+	/* someone in a foreign realm claiming to be local */
+	krb5_free_tkt_authent(authdat);
+	cleanup_apreq();
+	return KRB5KDC_ERR_POLICY;
+    }
     our_cksum.checksum_type = authdat->authenticator->checksum->checksum_type;
     if (!valid_cksumtype(our_cksum.checksum_type)) {
 	krb5_free_tkt_authent(authdat);
