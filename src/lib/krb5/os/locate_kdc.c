@@ -47,6 +47,7 @@ static char rcsid_locate_kdc_c[] =
 
 #ifdef KRB5_USE_INET
 extern char *krb5_kdc_udp_portname;
+extern char *krb5_kdc_sec_udp_portname;
 #endif
 
 /*
@@ -68,6 +69,7 @@ krb5_locate_kdc(realm, addr_pp, naddrs)
     struct servent *sp;
 #ifdef KRB5_USE_INET
     u_short udpport = 0;		/* 0 is an invalid UDP port #. */
+    u_short sec_udpport = 0;		/* 0 is an invalid UDP port #. */
 #endif
 
     hostlist = 0;
@@ -78,16 +80,30 @@ krb5_locate_kdc(realm, addr_pp, naddrs)
 #ifdef KRB5_USE_INET
     if (sp = getservbyname(krb5_kdc_udp_portname, "udp"))
 	udpport = sp->s_port;
+    if (krb5_kdc_sec_udp_portname)
+    	if (sp = getservbyname(krb5_kdc_sec_udp_portname, "udp")) {
+#ifdef KRB5_TRY_SECONDARY_PORT_FIRST
+	    sec_udpport = udpport;
+	    udpport = sp->s_port;
+#else
+	    sec_udpport = sp->s_port;
+#endif
+	}
 #endif
 
-    for (i=0; hostlist[i]; i++)
-	;
-    count = i;
+    count = 0;
+    while (hostlist[count])
+	    count++;
     
     if (count == 0) {
 	*naddrs = 0;
 	return 0;
     }
+    
+#ifdef KRB5_USE_INET
+    if (sec_udpport)
+	    count = count * 2;
+#endif
 
     addr_p = (struct sockaddr *)malloc (sizeof (struct sockaddr) * count);
 
@@ -111,6 +127,17 @@ krb5_locate_kdc(realm, addr_pp, naddrs)
 			addr_p = (struct sockaddr *)
 			    realloc ((char *)addr_p,
 				     sizeof(struct sockaddr) * count);
+		    }
+		    if (sec_udpport) {
+			addr_p[out] = addr_p[out-1];
+			sin_p = (struct sockaddr_in *) &addr_p[out++];
+			sin_p->sin_port = sec_udpport;
+			if (out >= count) {
+			    count *= 2;
+			    addr_p = (struct sockaddr *)
+				    realloc ((char *)addr_p,
+					     sizeof(struct sockaddr) * count);
+			}
 		    }
 		}
 		break;
