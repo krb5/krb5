@@ -85,7 +85,6 @@ kg_checksum_channel_bindings(context, cb, cksum, bigend)
 
    if (code = krb5_c_make_checksum(context, CKSUMTYPE_RSA_MD5, 0, 0,
 				   &plaind, cksum)) {
-      xfree(cksum->contents);
       xfree(buf);
       return(code);
    }
