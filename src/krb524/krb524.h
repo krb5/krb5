@@ -26,7 +26,11 @@
 #define KRB524_SERVICE "krb524"
 #define KRB524_PORT 4444
 
-#include "krb524_err.h"
+#if defined(macintosh) || (defined(__MACH__) && defined(__APPLE__))
+	#include <TargetConditionals.h>
+#else
+	#include "krb524_err.h"
+#endif
 
 extern int krb524_debug;
 

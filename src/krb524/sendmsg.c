@@ -44,7 +44,7 @@
 #include "krb524.h"
 
 /* For krb5_locate_kdc() */
-#include <k5-int.h>
+#include "k5-int.h"
 
 /*
  * krb524_sendto_kdc:

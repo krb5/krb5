@@ -1,3 +1,7 @@
+2002-02-28 Alexandra Ellwood <lxs@mit.edu>
+    * krb524.h: Updated to new Mac OS header layout.
+    * sendmsg.c: k5-int.h should be included as a local header
+
 2001-12-07  Ken Raeburn  <raeburn@mit.edu>
 
 	* krb524d.c (cleanup_and_exit): Don't close keytab if it hasn't
