@@ -894,7 +894,6 @@ bad_login:
 	setenv("PATH", LPATH, 0);
 	setenv("USER", pwd->pw_name, 0);
 	setenv("SHELL", pwd->pw_shell, 0);
-	setenv("LOGNAME", pwd->pw_name, 0);
 
 	if (term[0] == '\0')
 		(void) strncpy(term, stypeof(tty), sizeof(term));

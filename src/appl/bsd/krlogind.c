@@ -621,7 +621,7 @@ int syncpipe[2];
 
 #if defined(POSIX_TERMIOS) && !defined(ultrix)
 	tcgetattr(t,&new_termio);
-	new_termio.c_lflag &=  ~(ICANON|ECHO|ISIG);
+	new_termio.c_lflag &=  ~(ICANON|ECHO|ISIG|IEXTEN);
 	/* so that login can read the authenticator */
 	new_termio.c_iflag &= ~(IXON|IXANY|BRKINT|INLCR|ICRNL|ISTRIP);
 	/* new_termio.c_iflag = 0; */

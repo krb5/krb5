@@ -1,3 +1,12 @@
+Sun Nov 12 12:39:23 1995  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* krlogind.c (doit): Clear iextn for NetBSD and other 4.4-based
+        systems so that ctrl-o isn't special.
+
+Sat Oct 21 17:33:37 1995  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* login.c (main): Don't set LOGNAME twice.
+
 Sun Nov 12 04:44:50 1995  Mark W. Eichin  <eichin@cygnus.com>
 
 	* krshd.c (doit): drag TZ= from parent environment into envinit to
