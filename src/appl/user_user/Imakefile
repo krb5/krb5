@@ -12,7 +12,6 @@
         DEPLIBS = $(DEPKLIB)
 LOCAL_LIBRARIES = $(KLIB)
         DEFINES = -DDEBUG
-CDEBUGFLAGS = -g
 
 SERVERSRCS = server.c
 SERVEROBJS = server.o
@@ -21,6 +20,7 @@ CLIENTSRCS = client.c
 CLIENTOBJS = client.o
 
 all:: uuclient uuserver
+
 
 NormalProgramTarget(uuclient,$(CLIENTOBJS),$(DEPLIBS),$(LOCAL_LIBRARIES),)
 
@@ -31,3 +31,9 @@ SaberProgramTarget(uuclient, $(CLIENTSRCS), $(CLIENTOBJS),
 SaberProgramTarget(uuserver, $(SERVERSRCS), $(SERVEROBJS), 
 	$(DEPLIBS) $(LOCAL_LIBRARIES),)
 
+SRCS=$(SERVERSRCS) $(CLIENTSRCS)
+
+DependTarget()
+
+clean::
+	$(RM) $(SERVEROBJS) $(CLIENTOBJS) uuclient uuserver
