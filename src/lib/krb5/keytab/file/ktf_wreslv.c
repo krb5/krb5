@@ -49,6 +49,6 @@ krb5_ktfile_wresolve(name, id)
 
     (*id)->data = (krb5_pointer)data;
 
-    return(0); /* XXX */
+    return(0);
 }
 

@@ -37,5 +37,5 @@ krb5_ktfile_close(id)
     xfree(id->data);
     id->ops = 0;
     xfree(id);
-    return (0); /* XXX */
+    return (0);
 }

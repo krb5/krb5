@@ -34,5 +34,5 @@ krb5_ktfile_get_name(id, name, len)
 {
     memset(name, 0, len);
     strncpy(name, KTFILENAME(id), len);
-    return(0); /* XXX */
+    return(0);
 }

@@ -34,11 +34,11 @@ OLDDECLARG(krb5_kvno, kvno)
 OLDDECLARG(krb5_keytab_entry *, entry)
 {
     krb5_keytab_entry *cur_entry;
-    krb5_error_code kerror = 0; /* XXX */
+    krb5_error_code kerror = 0;
 
     /* Open the keyfile for reading */
     if (kerror = krb5_ktfileint_openr(id))
-	return(kerror); /* XXX */
+	return(kerror);
     
     /* 
      * For efficiency and simplicity, we'll use a while true that 
