@@ -1,5 +1,7 @@
 2002-12-18  Ken Raeburn  <raeburn@mit.edu>
 
+	* init_db (qualname): If "kdb5_util create" fails, exit.
+
 	* env-setup.shin: Set KRB5CCNAME to something under $K5ROOT.
 
 2002-10-30  Ken Raeburn  <raeburn@mit.edu>
