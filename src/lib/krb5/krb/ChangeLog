@@ -1,3 +1,9 @@
+Thu Feb  9 17:43:04 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* gc_via_tgt.c (krb5_get_cred_via_tgt): Set up the keyblock's
+		etype field correctly (after copying the keyblock, so it
+		doesn't get overwritten!)
+
 Mon Feb 06 17:19:04 1995 Chris Provenzano  (proven@mit.edu)
 
 	* get_in_tkt.c (krb5_get_in_tkt())

@@ -146,13 +146,12 @@ krb5_get_cred_via_tgt (context, tgt, kdcoptions, sumtype, cred)
 	memset(&cred->keyblock.contents, 0, cred->keyblock.length);
 	krb5_xfree(cred->keyblock.contents);
     }
-    cred->keyblock.magic = KV5M_KEYBLOCK;
-    cred->keyblock.etype = dec_rep->ticket->enc_part.etype;
     if (retval = krb5_copy_keyblock_contents(context, dec_rep->enc_part2->session,
 					     &cred->keyblock)) {
 	cleanup();
 	return retval;
     }
+    cred->keyblock.etype = dec_rep->ticket->enc_part.etype;
     memset((char *)dec_rep->enc_part2->session->contents, 0,
 	  dec_rep->enc_part2->session->length);
 
