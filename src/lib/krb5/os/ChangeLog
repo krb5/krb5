@@ -1,3 +1,7 @@
+2000-10-28	Miro Jurisic <meeroh@mit.edu>
+
+	* c_ustime.c: Fixed epoch calculation under Mac OS 9 Carbon and Mac OS X
+
 2000-10-16	Miro Jurisic <meeroh@mit.edu>
 
 	* init_os_ctx.c: Use PreferencesLib to discover config files on Mac OS X

@@ -136,10 +136,10 @@ krb5_crypto_us_timeofday(seconds, microseconds)
     	
     	usec = nanoseconds / 1000;
     #else
-    	UnsignedWide			microseconds;
-		Microseconds (&microseconds);
+    	UnsignedWide	currentMicroseconds;
+		Microseconds (&currentMicroseconds);
     	
-    	MicrosecondsToSecsMicrosecs (microseconds, &sec, &usec);
+    	MicrosecondsToSecsMicrosecs (currentMicroseconds, &sec, &usec);
     #endif
     } else
 #endif /* TARGET_CPU_PPC */
@@ -278,24 +278,25 @@ void MicrosecondsToSecsMicrosecs (
    )
 {
    UInt64					eventMicroseconds;
-   static UInt32			gMicrosecondsAtStart = 0;
+   static const UInt64		kTenE6 = U64SetU (1000000);
+   static UInt64			gMicrosecondsAtStart = U64SetU (0);
 
    /*
     * If this is the first call, compute the offset between
-    * GetDateTime and UpTime.
+    * GetDateTime and Microseconds.
     */
-   if (gMicrosecondsAtStart == 0) {
+   if (U64Compare (gMicrosecondsAtStart, U64SetU (0)) == 0) {
       UInt32				secondsAtStart;
-      UInt32				microsecondsAtStart;
+      UnsignedWide			microsecondsAtStart;
 
       GetDateTime (&secondsAtStart);
       Microseconds (&microsecondsAtStart);
-	  gMicrosecondsAtStart = 1000000 * secondsAtStart - microsecondsAtStart;
+	  gMicrosecondsAtStart = U64Subtract (U64Multiply (U64SetU (1000000), U64SetU (secondsAtStart)), UnsignedWideToUInt64 (microsecondsAtStart));
    }
    /*
     * Add the local time epoch to the event time
     */
-   eventMicroseconds = UnsignedWideToUInt64 (gMicrosecondsAtStart) + UnsignedWideToUInt64 (eventTime);
+   eventMicroseconds = gMicrosecondsAtStart + UnsignedWideToUInt64 (eventTime);
 
    /*
     * eventSeconds = eventMicroseconds / 10e6;
@@ -303,7 +304,7 @@ void MicrosecondsToSecsMicrosecs (
     * Finally, compute the local time (seconds) and fraction.
     */
    *eventSeconds = eventMicroseconds / 1000000;
-   *residualMicroseconds = eventMicroseconds - *eventSeconds * 100000;
+   *residualMicroseconds = eventMicroseconds - *eventSeconds * 1000000;
 }
 #elif defined(_WIN32)
 
