@@ -46,11 +46,11 @@ static char rcsid_sendto_kdc_c[] =
  *
  */
 krb5_error_code
-krb5_sendto_kdc (DECLARG(krb5_data *, message),
-		 DECLARG(krb5_data *, realm),
+krb5_sendto_kdc (DECLARG(const krb5_data *, message),
+		 DECLARG(const krb5_data *, realm),
 		 DECLARG(krb5_data *, reply))
-OLDDECLARG(krb5_data *, message)
-OLDDECLARG(krb5_data *, realm)
+OLDDECLARG(const krb5_data *, message)
+OLDDECLARG(const krb5_data *, realm)
 OLDDECLARG(krb5_data *, reply)
 {
     register int timeout, host, i;
