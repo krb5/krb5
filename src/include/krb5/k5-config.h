@@ -33,9 +33,12 @@
 /* Kerberos Windows initialization file */
 #define KERBEROS_INI    "kerberos.ini"
 #define INI_FILES       "Files"
+#ifdef OLD_CONFIG_FILES
 #define INI_KRB_CONF    "krb.conf"		/* Location of krb.conf file */
 #define INI_KRB_REALMS  "krb.realms"	/* Location of krb.realms file */
+#endif
 #define INI_KRB_CCACHE  "krb5cc"       /* Location of the ccache */
+#define INI_KRB5_CONF   "krb5.ini"		/* Location of krb5.conf file */
 
 #define KRB5_DBM_COMPAT__                       /* Don't load dbm.h */
 #define KRB5_KDB5__                             /* Don't load kdb.h */
@@ -106,14 +109,14 @@ typedef unsigned char	u_char;
 /* Some of our own infrastructure where the WinSock stuff was too hairy
    to dump into a clean Unix program...  */
 
-#define	SOCKET_INITIALIZE()	win_socket_initialize()
-#define	SOCKET_CLEANUP()	WSACleanup()
-#define	SOCKET_ERRNO		(WSAGetLastError())
-#define	SOCKET_SET_ERRNO(x)	(WSASetLastError (x))
-#define	SOCKET_NFDS(f)		(0)	/* select()'s first arg is ignored */
-#define SOCKET_READ(fd, b, l)	(recv(fd, b, l, 0))
-#define SOCKET_WRITE(fd, b, l)	(send(fd, b, l, 0))
-#define SOCKET_EINTR		WSAEINTR
+#define SOCKET_INITIALIZE()     win_socket_initialize()
+#define SOCKET_CLEANUP()        WSACleanup()
+#define SOCKET_ERRNO            (WSAGetLastError())
+#define SOCKET_SET_ERRNO(x)     (WSASetLastError (x))
+#define SOCKET_NFDS(f)          (0)     /* select()'s first arg is ignored */
+#define SOCKET_READ(fd, b, l)   (recv(fd, b, l, 0))
+#define SOCKET_WRITE(fd, b, l)  (send(fd, b, l, 0))
+#define SOCKET_EINTR            WSAEINTR
 
 int win_socket_initialize();
 #endif
