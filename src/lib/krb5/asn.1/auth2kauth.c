@@ -62,6 +62,13 @@ register int *error;
 	krb5_free_authenticator(retval);
 	return(0);
     }
+    if (val->subkey) {
+	retval->subkey = KRB5_EncryptionKey2krb5_keyblock(val->subkey, error);
+	if (!retval->subkey) {
+	    krb5_free_authenticator(retval);
+	    return(0);
+	}
+    }
     if (val->optionals & opt_KRB5_Authenticator_seq__number) {
 	retval->seq_number = val->seq__number;
     }

@@ -64,6 +64,11 @@ register int *error;
     if (!retval->ctime) {
 	goto errout;
     }
+    if (val->subkey) {
+	retval->subkey = krb5_keyblock2KRB5_EncryptionKey(val->subkey, error);
+	if (!retval->subkey)
+	    goto errout;
+    }
     if (val->seq_number) {
 	retval->seq__number = val->seq_number;
 	retval->optionals |= opt_KRB5_Authenticator_seq__number;
