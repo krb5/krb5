@@ -68,10 +68,6 @@ OLDDECLARG(krb5_principal, princ)
 
 #define min(A, B) ((A) < (B) ? (A): (B))
 
-#if defined(lint) || defined(SABER)
-    princ = princ;
-#endif
-
     if ( keytype != KEYTYPE_DES )
 	return (KRB5_PROG_KEYTYPE_NOSUPP);
 
@@ -84,8 +80,16 @@ OLDDECLARG(krb5_principal, princ)
     keyblock->keytype = KEYTYPE_DES;
     keyblock->length = sizeof(mit_des_cblock);
     key = keyblock->contents;
+
     bzero(copystr, sizeof(copystr));
-    (void) strncpy(copystr, data->data, min(data->length,511));
+    j = min(data->length, 511);
+    (void) strncpy(copystr, data->data, j);
+    if ( princ != 0 )
+	for (i=0; princ[i] != 0 && j < 511; i++) {
+	    (void) strncpy(copystr+j, princ[i]->data, 
+			   min(princ[i]->length, 511-j));
+	    j += min(princ[i]->length, 511-j);
+	}
 
     /* convert copystr to des key */
     forward = 1;
@@ -117,7 +121,7 @@ OLDDECLARG(krb5_principal, princ)
 	    else
 		*--p_char ^= (int) temp & 01;
 	    temp = temp >> 1;
-	} while (--j > 0);
+	}
 
 	/* check and flip direction */
 	if ((i%8) == 0)
