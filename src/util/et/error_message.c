@@ -45,6 +45,9 @@ MAKE_FINI_FUNCTION(com_err_terminate);
 int com_err_initialize(void)
 {
     int err;
+#ifdef SHOW_INITFINI_FUNCS
+    printf("com_err_initialize\n");
+#endif
     terminated = 0;
     err = k5_mutex_finish_init(&et_list_lock);
     if (err)
@@ -61,8 +64,15 @@ int com_err_initialize(void)
 void com_err_terminate(void)
 {
     struct dynamic_et_list *e, *enext;
-    if (! INITIALIZER_RAN(com_err_initialize) || PROGRAM_EXITING())
+    if (! INITIALIZER_RAN(com_err_initialize) || PROGRAM_EXITING()) {
+#ifdef SHOW_INITFINI_FUNCS
+	printf("com_err_terminate: skipping\n");
+#endif
 	return;
+    }
+#ifdef SHOW_INITFINI_FUNCS
+    printf("com_err_terminate\n");
+#endif
     k5_key_delete(K5_KEY_COM_ERR);
     k5_mutex_destroy(&com_err_hook_lock);
     k5_mutex_lock(&et_list_lock);

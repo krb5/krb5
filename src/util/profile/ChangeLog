@@ -1,3 +1,9 @@
+2005-02-08  Ken Raeburn  <raeburn@mit.edu>
+
+	* prof_file.c (profile_library_initializer,
+	profile_library_finalizer): If SHOW_INITFINI_FUNCS is defined,
+	print tracing messages.
+
 2005-01-13  Ken Raeburn  <raeburn@mit.edu>
 
 	* prof_file.c (profile_free_file_data): Destroy mutex before
