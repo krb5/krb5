@@ -1,3 +1,10 @@
+1999-07-21  Ken Raeburn  <raeburn@mit.edu>
+
+	* init_os_ctx.c (os_get_default_config_files): Fix some typos and
+	missed name changes in the patch Miro just checked in but forgot
+	to mention here, in which Mac filespecs are used instead of
+	filenames.
+
 1999-06-30  Ken Raeburn  <raeburn@mit.edu>
 
 	* locate_kdc.c (krb5_locate_kdc): Kerberos admin service name is

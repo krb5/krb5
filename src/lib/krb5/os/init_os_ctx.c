@@ -195,7 +195,7 @@ free_filespecs(files)
 
 static krb5_error_code
 os_get_default_config_files(pfiles, secure)
-	profile_filespect** pfiles;
+	profile_filespec_t ** pfiles;
 	krb5_boolean secure;
 {
     profile_filespec_t* files;
@@ -279,33 +279,33 @@ os_get_default_config_files(pfiles, secure)
     }
 
     /* the array is NULL terminated */
-    filenames = (char**) malloc((n_entries+1) * sizeof(char*));
-    if (filenames == 0)
+    files = (char**) malloc((n_entries+1) * sizeof(char*));
+    if (files == 0)
         return ENOMEM;
 
     /* measure, copy, and skip each one */
     for(s = filepath, i=0; (t = strchr(s, ':')) || (t=s+strlen(s)); s=t+1, i++)
     {
         ent_len = t-s;
-        filenames[i] = (char*) malloc(ent_len + 1);
-        if (filenames[i] == 0) {
+        files[i] = (char*) malloc(ent_len + 1);
+        if (files[i] == 0) {
             /* if malloc fails, free the ones that worked */
-            while(--i >= 0) free(filenames[i]);
-            free(filenames);
+            while(--i >= 0) free(files[i]);
+            free(files);
             return ENOMEM;
         }
-        strncpy(filenames[i], s, ent_len);
-        filenames[i][ent_len] = 0;
+        strncpy(files[i], s, ent_len);
+        files[i][ent_len] = 0;
         if (*t == 0) {
             i++;
             break;
         }
     }
     /* cap the array */
-    filenames[i] = 0;
+    files[i] = 0;
 #endif /* !_MSDOS && !_WIN32 */
 #endif /* !macintosh */
-    *pfilenames = filenames;
+    *pfiles = files;
     return 0;
 }
 
