@@ -3,7 +3,8 @@ WITH_CCOPTS
 CONFIG_RULES
 AC_SET_BUILDTOP
 AC_MSG_CHECKING([for build host])
-AC_CACHE_VAL(krb5_cv_host, [AC_CANONICAL_HOST
+AC_CACHE_VAL(krb5_cv_host, [export CC
+AC_CANONICAL_HOST
 krb5_cv_host=$host])
 AC_MSG_RESULT($krb5_cv_host)
 WITH_KRB5ROOT

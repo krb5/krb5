@@ -1,5 +1,7 @@
 Fri May 26 21:45:50 1995  Theodore Y. Ts'o  (tytso@dcl)
 
+	* configure.in: Export $(CC) for the benefit of config.guess
+
 	* Makefile.in: Create kerbsrc-nt.zip with the right filename, and
 		clean up include/krb5.h after making the Windows .zip files.
 
