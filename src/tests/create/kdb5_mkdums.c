@@ -121,7 +121,7 @@ char *argv[];
     num_to_create = 0;
     depth = 1;
 
-    while ((optchar = getopt(argc, argv, "D:p:n:d:r:R:k:M:e:m")) != EOF) {
+    while ((optchar = getopt(argc, argv, "D:p:n:d:r:k:M:e:m")) != EOF) {
 	switch(optchar) {
 	case 'D':
 	    depth = atoi(optarg);       /* how deep to go */
