@@ -22,40 +22,4 @@ extern int	krbONE;
 #define		MSB_FIRST		0	/*  68000, IBM RT/PC */
 #define		LSB_FIRST		1	/*  Vax, PC8086 */
 
-#ifdef PC8086
-#define IBMPC
-#define BITS16
-/*#define BIG*/
-#define CROSSMSDOS
-#define LSBFIRST
-
-#else
-
-#ifdef vax
-#define VAX
-#define VAXASM
-#define BITS32
-#define BIG
-#define BSDUNIX
-#define LSBFIRST
-
-#else
-
-#ifdef ibm032
-#define IBMWS
-#define IBMWSASM
-#define BITS32
-#define BIG
-#define BSDUNIX
-#define MSBFIRST
-#define MUSTALIGN
-
-#else
-
-Please put a description of your machine here.
-
-#endif ibm032
-#endif vax
-#endif pc8086
-
 #endif KRB_CONF_DEFS
