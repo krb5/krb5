@@ -36,4 +36,7 @@ ec KRB5_KDB_DBINITED,		"Database has already been initialized"
 ec KRB5_KDB_ILLDIRECTION,	"Bad direction for converting keys"
 
 ec KRB5_KDB_NOMASTERKEY,	"Cannot find master key record in database"
+ec KRB5_KDB_BADMASTERKEY,	"Master key does not match database"
+ec KRB5_KDB_INVALIDKEYSIZE,	"Key size in database is invalid"
+
 end
