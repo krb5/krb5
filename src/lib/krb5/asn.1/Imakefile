@@ -12,15 +12,116 @@ NormalLibraryObjectRule()
 
 SRCS= \
 	KRB5-asn.py	\
-	asn1glue.c	\
 	encode.c 	\
-	decode.c
+	decode.c	\
+	adat2kadat.c	\
+	addr2kaddr.c	\
+	aprp2kaprp.c	\
+	aprq2kaprq.c	\
+	arep2karep.c	\
+	asrq2kasrq.c	\
+	auth2kauth.c	\
+	ck2kck.c	\
+	ekrp2kekrp.c	\
+	enck2kkey.c	\
+	err2kerr.c	\
+	etpt2ketpt.c	\
+	g2unix.c	\
+	kadat2adat.c	\
+	kaddr2addr.c	\
+	kaprp2aprp.c	\
+	kaprq2aprq.c	\
+	karep2arep.c	\
+	kasrp2kdcr.c	\
+	kasrq2asrq.c	\
+	kauth2auth.c	\
+	kck2ck.c	\
+	kdcr2kasrp.c	\
+	kdcr2kkdcr.c	\
+	kdcr2ktgsr.c	\
+	kekrp2ekrp.c	\
+	kerr2err.c	\
+	ketpt2etpt.c	\
+	kkdcr2kdcr.c	\
+	kkey2enck.c	\
+	klsrq2lsrq.c	\
+	kprep2prep.c	\
+	kprin2prin.c	\
+	kpriv2priv.c	\
+	krtrq2rtrq.c	\
+	ksafe2safe.c	\
+	ktgrq2tgrq.c	\
+	ktgsr2kdcr.c	\
+	ktkt2tkt.c	\
+	ktrep2trep.c	\
+	lsrq2klsrq.c	\
+	prep2kprep.c	\
+	prin2kprin.c	\
+	priv2kpriv.c	\
+	qbuf2data.c	\
+	rtrq2krtrq.c	\
+	safe2ksafe.c	\
+	tgrq2ktgrq.c	\
+	tkt2ktkt.c	\
+	trep2ktrep.c	\
+	u2gen.c
 
 OBJS= \
 	KRB5-types.o	\
-	asn1glue.o	\
 	encode.o	\
-	decode.o
+	decode.o	\
+	adat2kadat.o	\
+	addr2kaddr.o	\
+	aprp2kaprp.o	\
+	aprq2kaprq.o	\
+	arep2karep.o	\
+	asrq2kasrq.o	\
+	auth2kauth.o	\
+	ck2kck.o	\
+	ekrp2kekrp.o	\
+	enck2kkey.o	\
+	err2kerr.o	\
+	etpt2ketpt.o	\
+	g2unix.o	\
+	kadat2adat.o	\
+	kaddr2addr.o	\
+	kaprp2aprp.o	\
+	kaprq2aprq.o	\
+	karep2arep.o	\
+	kasrp2kdcr.o	\
+	kasrq2asrq.o	\
+	kauth2auth.o	\
+	kck2ck.o	\
+	kdcr2kasrp.o	\
+	kdcr2kkdcr.o	\
+	kdcr2ktgsr.o	\
+	kekrp2ekrp.o	\
+	kerr2err.o	\
+	ketpt2etpt.o	\
+	kkdcr2kdcr.o	\
+	kkey2enck.o	\
+	klsrq2lsrq.o	\
+	kprep2prep.o	\
+	kprin2prin.o	\
+	kpriv2priv.o	\
+	krtrq2rtrq.o	\
+	ksafe2safe.o	\
+	ktgrq2tgrq.o	\
+	ktgsr2kdcr.o	\
+	ktkt2tkt.o	\
+	ktrep2trep.o	\
+	lsrq2klsrq.o	\
+	prep2kprep.o	\
+	prin2kprin.o	\
+	priv2kpriv.o	\
+	qbuf2data.o	\
+	rtrq2krtrq.o	\
+	safe2ksafe.o	\
+	tgrq2ktgrq.o	\
+	tkt2ktkt.o	\
+	trep2ktrep.o	\
+	u2gen.o
+
 
 OtherdirLibraryTarget($(TOP)/lib,krb5,$(OBJS))
 
