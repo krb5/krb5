@@ -28,7 +28,7 @@ NormalLibraryObjectRule()
 
 SUBDIRS1 = error_tables
 SUBDIRS2 = ccache keytab krb rcache free os kdb des \
-	des425 crc-32 krb425 rsa-md4 gssapi
+	des425 crc32 krb425 md4 md5 gssapi
 SUBDIRS = $(SUBDIRS1) asn.1 $(SUBDIRS2)
 
 #ifdef HasVfprintf
@@ -67,27 +67,51 @@ SRCS =	\
 
 MakeSubdirs($(SUBDIRS))
 
+#ifdef UseSedHack
+
+/* Imake using System V derived cpp generates a bad Makefile.  */
+
 /* This target will make all Makefiles except asn.1/Makefile. */
 #undef MakefileSubdirs
 #define MakefileSubdirs(dirs)						@@\
-MakeMakeSubdirs($(SUBDIRS1) $(SUBDIRS2), Makefiles)			@@\
-MakeNsubdirMakefiles()
+MakeMakeSubdirs($(SUBDIRS1) $(SUBDIRS2), Makefiles)
 
-Makefiles::
-	$(MAKE) asn.1/Makefile TOP=../$(TOP) CURRENT_DIR=$(CURRENT_DIR)/asn.1
+#ifdef SourceTop
+     IMAKEARG = -f/**/SourceTop/CURDIR/asn.1/Imakefile
+#endif
+
+Makefiles:: asn.1/Makefile
 
 asn.1/Makefile::
-	cd asn.1; set -e; \
-	$(IMAKE_CMD) -DTOPDIR=$(TOP) -DCURDIR=$(CURRENT_DIR) -s Makefile.new; \
-	sed 's/^@/	@/' Makefile.new > Makefile.newer && $(MV) Makefile.newer Makefile.new ;\
-	$(MAKE) -f Makefile.new noop; \
+	@case '${MFLAGS}' in *[ik]*) set +e;; esac; \
+	case '${MFLAGS}' in *n*) executeit="no";; esac; \
+	case $(TOP) in \
+	/?*) imaketop=$(TOP) ; top=$(TOP) ;; \
+	*) imaketop=../ ; top=../$(TOP) ;; \
+	esac; \
+	echo "making asn.1/Makefile..."; \
+	i=asn.1 ; \
+	cd $$i; \
+	$(RM) Makefile.bak; \
 	if [ -f Makefile ]; then \
-		echo "$(RM) Makefile.bak; $(MV) Makefile Makefile.bak"; \
-		$(RM) Makefile.bak; $(MV) Makefile Makefile.bak; \
-	fi ; \
-	$(MV) Makefile.new Makefile; \
-	$(RM) Makefile.new Makefile.newer
+		echo "	$(MV) Makefile Makefile.bak"; \
+		if [ "$$executeit" != "no" ]; then \
+			$(MV) Makefile Makefile.bak; \
+		fi; \
+	fi; \
+	if [ "$$executeit" != "no" ]; then \
+		curdir=$(CURRENT_DIR)/; \
+		ImakeSubCmdHelper -DTOPDIR=$$top -DCURDIR=CURDIR/$$i -f$(SRCSUBDIR)Imakefile -s Makefile.new; \
+		sed 's/^@/	@/' Makefile.new > Makefile.newer && $(MV) Makefile.newer Makefile.new ; \
+		$(MAKE) -f Makefile.new noop; \
+		if [ -f Makefile ]; then \
+			$(RM) Makefile.bak; $(MV) Makefile Makefile.bak; \
+		fi ; \
+		$(MV) Makefile.new Makefile; \
+		$(RM) Makefile.new Makefile.newer; \
+	fi
 
+#endif	/* UseSedHack */
 
 AdditiveLibraryTarget(krb5,$(OBJS))
 
