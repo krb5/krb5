@@ -1,3 +1,11 @@
+2002-04-05  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in: Build kt accessor functions on Windows.
+
+	* ktfr_entry.c: Rename krb5_kt_free_entry_contents as
+	krb5_free_keytab_entry_contents to make it consistent with rest of
+	API.
+
 2002-04-02  Ken Raeburn  <raeburn@mit.edu>
 
 	* ktfr_entry.c (krb5_kt_free_entry_contents): Rename from
