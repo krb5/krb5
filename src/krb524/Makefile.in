@@ -77,15 +77,15 @@ STLIBOBJS = \
 	$(OUTPRE)libinit.$(OBJEXT)
 
 ##WIN32##!ifdef KRB524_STATIC_HACK
-LPREFIX=..\lib
-K5_GLUE=$(LPREFIX)\$(OUTPRE)k5_glue.obj
-KLIBS = $(LPREFIX)\krb5\$(OUTPRE)krb5.lib \
-	$(LPREFIX)\crypto\$(OUTPRE)crypto.lib \
-	$(BUILDTOP)\util\profile\$(OUTPRE)profile.lib \
-	$(LPREFIX)\des425\$(OUTPRE)des425.lib
-KLIB=$(KLIBS) $(DNSLIBS) $(K5_GLUE) $(CLIB)
-STLIBOBJS=$(STLIBOBJS:libinit=globals)
-K524DEP=$(STLIBOBJS)
+##WIN32##LPREFIX=..\lib
+##WIN32##K5_GLUE=$(LPREFIX)\$(OUTPRE)k5_glue.obj
+##WIN32##KLIBS = $(LPREFIX)\krb5\$(OUTPRE)krb5.lib \
+##WIN32##	$(LPREFIX)\crypto\$(OUTPRE)crypto.lib \
+##WIN32##	$(BUILDTOP)\util\profile\$(OUTPRE)profile.lib \
+##WIN32##	$(LPREFIX)\des425\$(OUTPRE)des425.lib
+##WIN32##KLIB=$(KLIBS) $(DNSLIBS) $(K5_GLUE) $(CLIB)
+##WIN32##STLIBOBJS=$(STLIBOBJS:libinit=globals)
+##WIN32##K524DEP=$(STLIBOBJS)
 ##WIN32##!endif
 
 GENS	= krb524_err.c krb524_err.h

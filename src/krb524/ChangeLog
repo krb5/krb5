@@ -1,3 +1,9 @@
+2001-09-28  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in: Put "##WIN32##" prefix on lines added in last
+	change, otherwise UNIX Make complains about STLIBOBJS referencing
+	itself.
+
 2001-09-28  Danilo Almeida  <dalmeida@mit.edu>
 
 	* Makefile.in: Add KRB524_STATIC_HACK for Windows build so that we
