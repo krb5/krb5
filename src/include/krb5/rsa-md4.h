@@ -29,6 +29,10 @@
 #ifndef __KRB5_RSA_MD4_H__
 #define __KRB5_RSA_MD4_H__
 
+#ifdef unicos61
+#include <sys/types.h>
+#endif /* unicos61 */
+
 /* 16 u_char's in the digest */
 #define RSA_MD4_CKSUM_LENGTH	16
 /* des blocksize is 8, so this works nicely... */
@@ -71,19 +75,15 @@ extern krb5_checksum_entry
  **********************************************************************
  */
 
-#ifdef BITS32
-/* typedef a 32 bit type */
-typedef unsigned long int UINT4;
-#else
- error: you gotta fix this implementation to deal with non-32 bit words;
-#endif
+#include <krb5/config.h>
+#include <krb5/wordsize.h>
 
 /* Data structure for MD4 (Message Digest) computation */
 typedef struct {
-  UINT4 i[2];                   /* number of _bits_ handled mod 2^64 */
-  UINT4 buf[4];                                    /* scratch buffer */
-  unsigned char in[64];                              /* input buffer */
-  unsigned char digest[16];     /* actual digest after MD4Final call */
+  krb5_ui_4 i[2];			/* number of _bits_ handled mod 2^64 */
+  krb5_ui_4 buf[4];			/* scratch buffer */
+  unsigned char in[64];			/* input buffer */
+  unsigned char digest[16];		/* actual digest after MD4Final call */
 } MD4_CTX;
 
 #ifdef __STDC__
