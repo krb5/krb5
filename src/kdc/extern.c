@@ -34,6 +34,7 @@ static char rcsid_extern_c[] =
 #include <krb5/krb5.h>
 #include <krb5/kdb.h>
 #include <krb5/kdb_dbm.h>
+#include <krb5/osconf.h>
 
 #include "extern.h"
 
