@@ -397,7 +397,7 @@
 		00F189690074D4357F000001 = {
 			buildActionMask = 2147483647;
 			files = (
-				00F1896F0074D52F7F000001,
+				F529691701E9E5C20123322A,
 			);
 			isa = PBXFrameworksBuildPhase;
 			name = "Frameworks & Libraries";
@@ -424,12 +424,6 @@
 			isa = PBXFrameworkReference;
 			path = Kerberos.framework;
 			refType = 3;
-		};
-		00F1896F0074D52F7F000001 = {
-			fileRef = 00F1896E0074D52F7F000001;
-			isa = PBXBuildFile;
-			settings = {
-			};
 		};
 		00F189700074D6497F000001 = {
 			isa = PBXExecutableFileReference;
@@ -688,13 +682,12 @@
 			buildSettings = {
 				DYLIB_COMPATIBILITY_VERSION = 4;
 				DYLIB_CURRENT_VERSION = 4;
-				EXPORTED_SYMBOLS_FILE = "$(SYMROOT)/GSSKerberos5.intermediates/libkrb5.pbexp";
 				FRAMEWORK_SEARCH_PATHS = "";
 				INSTALL_PATH = /usr/lib;
 				LIBRARY_STYLE = DYNAMIC;
 				OPTIMIZATION_CFLAGS = "-O0";
 				OTHER_CFLAGS = "-DTHIS_PREVENTS_BUILD_FAILURE";
-				OTHER_LDFLAGS = "-init ___libkrb5_LoadKerberosFramework -seg_addr_table $(SRCROOT)/../../Common/Sources/KerberosSegAddrs";
+				OTHER_LDFLAGS = "-sub_umbrella Kerberos5 -sub_umbrella KerberosProfile -seg_addr_table $(SRCROOT)/../../Common/Sources/KerberosSegAddrs";
 				OTHER_LIBTOOL_FLAGS = "";
 				OTHER_REZFLAGS = "";
 				PRODUCT_NAME = libkrb5.dylib;
@@ -703,7 +696,6 @@
 				WARNING_CFLAGS = "-Wmost -Wno-four-char-constants -Wno-unknown-pragmas";
 			};
 			dependencies = (
-				F5438CB2017E462801D06BDA,
 			);
 			isa = PBXLibraryTarget;
 			name = libkrb5;
@@ -722,8 +714,7 @@
 		00F24295FFB75B2612120156 = {
 			buildActionMask = 2147483647;
 			files = (
-				F5438CC1017E478201D06BDA,
-				F5438CC2017E478201D06BDA,
+				F529691001E9E46A0123322A,
 			);
 			isa = PBXSourcesBuildPhase;
 			name = Sources;
@@ -731,7 +722,8 @@
 		00F24296FFB75B2612120156 = {
 			buildActionMask = 2147483647;
 			files = (
-				F5438CCB017E47A601D06BDA,
+				F529691301E9E53B0123322A,
+				F529691401E9E53B0123322A,
 			);
 			isa = PBXFrameworksBuildPhase;
 			name = "Frameworks & Libraries";
@@ -758,6 +750,7 @@
 				F5438CBC017E478201D06BDA,
 				00F242ACFFB760BC12120156,
 				F5438CC8017E47A601D06BDA,
+				F529690D01E9E46A0123322A,
 			);
 			isa = PBXGroup;
 			name = Dylibs;
@@ -778,13 +771,12 @@
 			buildSettings = {
 				DYLIB_COMPATIBILITY_VERSION = 4;
 				DYLIB_CURRENT_VERSION = 4;
-				EXPORTED_SYMBOLS_FILE = "$(SYMROOT)/GSSKerberos5.intermediates/libk5crypto.pbexp";
 				FRAMEWORK_SEARCH_PATHS = "";
 				INSTALL_PATH = /usr/lib;
 				LIBRARY_STYLE = DYNAMIC;
 				OPTIMIZATION_CFLAGS = "-O0";
 				OTHER_CFLAGS = "-DTHIS_PREVENTS_DOUBLE_QUOTES_OF_DOOM";
-				OTHER_LDFLAGS = "-init ___libk5crypto_LoadKerberosFramework -seg_addr_table $(SRCROOT)/../../Common/Sources/KerberosSegAddrs";
+				OTHER_LDFLAGS = "-seg_addr_table $(SRCROOT)/../../Common/Sources/KerberosSegAddrs";
 				OTHER_LIBTOOL_FLAGS = "";
 				OTHER_REZFLAGS = "";
 				PRODUCT_NAME = libk5crypto.dylib;
@@ -793,7 +785,6 @@
 				WARNING_CFLAGS = "-Wmost -Wno-four-char-constants -Wno-unknown-pragmas";
 			};
 			dependencies = (
-				F5438CAE017E462801D06BDA,
 			);
 			isa = PBXLibraryTarget;
 			name = libk5crypto;
@@ -812,8 +803,7 @@
 		00F242A0FFB75F1512120156 = {
 			buildActionMask = 2147483647;
 			files = (
-				F5438CBD017E478201D06BDA,
-				F5438CBE017E478201D06BDA,
+				F529690E01E9E46A0123322A,
 			);
 			isa = PBXSourcesBuildPhase;
 			name = Sources;
@@ -821,7 +811,6 @@
 		00F242A2FFB75F1512120156 = {
 			buildActionMask = 2147483647;
 			files = (
-				F5438CC9017E47A601D06BDA,
 			);
 			isa = PBXFrameworksBuildPhase;
 			name = "Frameworks & Libraries";
@@ -848,13 +837,12 @@
 			buildSettings = {
 				DYLIB_COMPATIBILITY_VERSION = 4;
 				DYLIB_CURRENT_VERSION = 4;
-				EXPORTED_SYMBOLS_FILE = "$(SYMROOT)/GSSKerberos5.intermediates/libcom_err.pbexp";
 				FRAMEWORK_SEARCH_PATHS = "";
 				INSTALL_PATH = /usr/lib;
 				LIBRARY_STYLE = DYNAMIC;
 				OPTIMIZATION_CFLAGS = "-O0";
 				OTHER_CFLAGS = "-DTHIS_PREVENTS_BUILD_FAILURE";
-				OTHER_LDFLAGS = "-init ___libcom_err_LoadKerberosFramework -seg_addr_table $(SRCROOT)/../../Common/Sources/KerberosSegAddrs";
+				OTHER_LDFLAGS = "-sub_umbrella KerberosComErr -seg_addr_table $(SRCROOT)/../../Common/Sources/KerberosSegAddrs";
 				OTHER_LIBTOOL_FLAGS = "";
 				OTHER_REZFLAGS = "";
 				PRODUCT_NAME = libcom_err.dylib;
@@ -863,7 +851,6 @@
 				WARNING_CFLAGS = "-Wmost -Wno-four-char-constants -Wno-unknown-pragmas";
 			};
 			dependencies = (
-				F5438CB0017E462801D06BDA,
 			);
 			isa = PBXLibraryTarget;
 			name = libcom_err;
@@ -882,8 +869,7 @@
 		00F242A7FFB75FA712120156 = {
 			buildActionMask = 2147483647;
 			files = (
-				F5438CBF017E478201D06BDA,
-				F5438CC0017E478201D06BDA,
+				F529690F01E9E46A0123322A,
 			);
 			isa = PBXSourcesBuildPhase;
 			name = Sources;
@@ -891,7 +877,7 @@
 		00F242A9FFB75FA712120156 = {
 			buildActionMask = 2147483647;
 			files = (
-				F5438CCA017E47A601D06BDA,
+				F529691201E9E5130123322A,
 			);
 			isa = PBXFrameworksBuildPhase;
 			name = "Frameworks & Libraries";
@@ -918,13 +904,12 @@
 			buildSettings = {
 				DYLIB_COMPATIBILITY_VERSION = 4;
 				DYLIB_CURRENT_VERSION = 4;
-				EXPORTED_SYMBOLS_FILE = "$(SYMROOT)/GSSKerberos5.intermediates/libgssapi_krb5.pbexp";
 				FRAMEWORK_SEARCH_PATHS = "";
 				INSTALL_PATH = /usr/lib;
 				LIBRARY_STYLE = DYNAMIC;
 				OPTIMIZATION_CFLAGS = "-O0";
 				OTHER_CFLAGS = "-DTHIS_PREVENTS_BUILD_FAILURE";
-				OTHER_LDFLAGS = "-init ___libgssapi_krb5_LoadKerberosFramework -seg_addr_table $(SRCROOT)/../../Common/Sources/KerberosSegAddrs";
+				OTHER_LDFLAGS = "-sub_umbrella GSS -seg_addr_table $(SRCROOT)/../../Common/Sources/KerberosSegAddrs";
 				OTHER_LIBTOOL_FLAGS = "";
 				OTHER_REZFLAGS = "";
 				PRODUCT_NAME = libgssapi_krb5.dylib;
@@ -933,7 +918,6 @@
 				WARNING_CFLAGS = "-Wmost -Wno-four-char-constants -Wno-unknown-pragmas";
 			};
 			dependencies = (
-				F5438CB4017E468B01D06BDA,
 			);
 			isa = PBXLibraryTarget;
 			name = libgssapi_krb5;
@@ -952,8 +936,7 @@
 		00F242AFFFB760BC12120156 = {
 			buildActionMask = 2147483647;
 			files = (
-				F5438CC3017E478201D06BDA,
-				F5438CC4017E478201D06BDA,
+				F529691101E9E46A0123322A,
 			);
 			isa = PBXSourcesBuildPhase;
 			name = Sources;
@@ -961,7 +944,7 @@
 		00F242B1FFB760BC12120156 = {
 			buildActionMask = 2147483647;
 			files = (
-				F5438CCC017E47A601D06BDA,
+				F529691501E9E5530123322A,
 			);
 			isa = PBXFrameworksBuildPhase;
 			name = "Frameworks & Libraries";
@@ -1338,7 +1321,7 @@
 				LIBRARY_SEARCH_PATHS = "";
 				OPTIMIZATION_CFLAGS = "-O0";
 				OTHER_CFLAGS = "";
-				OTHER_LDFLAGS = "-umbrella Kerberos -seg_addr_table $(SRCROOT)/../../Common/Sources/KerberosSegAddrs";
+				OTHER_LDFLAGS = "-seg_addr_table $(SRCROOT)/../../Common/Sources/KerberosSegAddrs";
 				OTHER_LIBTOOL_FLAGS = "";
 				OTHER_REZFLAGS = "";
 				PRINCIPAL_CLASS = "";
@@ -1498,7 +1481,7 @@
 				LIBRARY_SEARCH_PATHS = "";
 				OPTIMIZATION_CFLAGS = "-O0";
 				OTHER_CFLAGS = "";
-				OTHER_LDFLAGS = "-init ___InitializeProfileLib -umbrella Kerberos -seg_addr_table $(SRCROOT)/../../Common/Sources/KerberosSegAddrs";
+				OTHER_LDFLAGS = "-init ___InitializeProfileLib -seg_addr_table $(SRCROOT)/../../Common/Sources/KerberosSegAddrs";
 				OTHER_LIBTOOL_FLAGS = "";
 				OTHER_REZFLAGS = "";
 				PRINCIPAL_CLASS = "";
@@ -1813,7 +1796,7 @@
 				LIBRARY_SEARCH_PATHS = "";
 				OPTIMIZATION_CFLAGS = "-O0";
 				OTHER_CFLAGS = "";
-				OTHER_LDFLAGS = "-init ___initializeK5 -umbrella Kerberos -seg_addr_table $(SRCROOT)/../../Common/Sources/KerberosSegAddrs";
+				OTHER_LDFLAGS = "-init ___initializeK5 -seg_addr_table $(SRCROOT)/../../Common/Sources/KerberosSegAddrs";
 				OTHER_LIBTOOL_FLAGS = "";
 				OTHER_REZFLAGS = "";
 				PRINCIPAL_CLASS = "";
@@ -6449,7 +6432,7 @@
 				LIBRARY_SEARCH_PATHS = "";
 				OPTIMIZATION_CFLAGS = "-O0";
 				OTHER_CFLAGS = "";
-				OTHER_LDFLAGS = "-init ___initializeGSS -umbrella Kerberos -seg_addr_table $(SRCROOT)/../../Common/Sources/KerberosSegAddrs";
+				OTHER_LDFLAGS = "-init ___initializeGSS -seg_addr_table $(SRCROOT)/../../Common/Sources/KerberosSegAddrs";
 				OTHER_LIBTOOL_FLAGS = "";
 				OTHER_REZFLAGS = "";
 				PRINCIPAL_CLASS = "";
@@ -8477,6 +8460,65 @@
 			settings = {
 			};
 		};
+		F529690D01E9E46A0123322A = {
+			isa = PBXFileReference;
+			path = DylibStub.c;
+			refType = 4;
+		};
+		F529690E01E9E46A0123322A = {
+			fileRef = F529690D01E9E46A0123322A;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F529690F01E9E46A0123322A = {
+			fileRef = F529690D01E9E46A0123322A;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F529691001E9E46A0123322A = {
+			fileRef = F529690D01E9E46A0123322A;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F529691101E9E46A0123322A = {
+			fileRef = F529690D01E9E46A0123322A;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F529691201E9E5130123322A = {
+			fileRef = 012574A5FF7A9C8212120111;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F529691301E9E53B0123322A = {
+			fileRef = 012574A6FF7A9C8212120111;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F529691401E9E53B0123322A = {
+			fileRef = F529E9330199D56601120112;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F529691501E9E5530123322A = {
+			fileRef = 012574A8FF7A9C8212120111;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F529691701E9E5C20123322A = {
+			fileRef = 00F1896E0074D52F7F000001;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
 		F529E9320199D42601120112 = {
 			isa = PBXFileReference;
 			path = Kerberos5PrivateLib.pbexp;
@@ -8529,7 +8571,7 @@
 				INSTALL_PATH = /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks;
 				OPTIMIZATION_CFLAGS = "-O0";
 				OTHER_CFLAGS = "-DTHIS_PREVENTS_DOUBLE_QUOTES_OF_DOOM";
-				OTHER_LDFLAGS = "-init ___Kerberos5_LoadKerberosFramework -umbrella Kerberos -seg_addr_table $(SRCROOT)/../../Common/Sources/KerberosSegAddrs";
+				OTHER_LDFLAGS = "-init ___Kerberos5_LoadKerberosFramework -seg_addr_table $(SRCROOT)/../../Common/Sources/KerberosSegAddrs";
 				OTHER_LIBTOOL_FLAGS = "";
 				OTHER_REZFLAGS = "";
 				PRINCIPAL_CLASS = "";
@@ -8897,7 +8939,7 @@
 				INSTALL_PATH = /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks;
 				OPTIMIZATION_CFLAGS = "-O0";
 				OTHER_CFLAGS = "-DTHIS_PREVENTS_DOUBLE_QUOTES_OF_DOOM";
-				OTHER_LDFLAGS = "-init ___Kerberos5Private_LoadKerberosFramework -umbrella Kerberos -seg_addr_table $(SRCROOT)/../../Common/Sources/KerberosSegAddrs";
+				OTHER_LDFLAGS = "-init ___Kerberos5Private_LoadKerberosFramework -seg_addr_table $(SRCROOT)/../../Common/Sources/KerberosSegAddrs";
 				OTHER_LIBTOOL_FLAGS = "";
 				OTHER_REZFLAGS = "";
 				PRINCIPAL_CLASS = "";
@@ -9117,10 +9159,6 @@
 			settingsToPassOnCommandLine = 280;
 			shouldUseHeadermap = 0;
 		};
-		F5438CAE017E462801D06BDA = {
-			isa = PBXTargetDependency;
-			target = F5438CAD017E457701D06BDA;
-		};
 		F5438CAF017E462801D06BDA = {
 			buildArgumentsString = "-d3 \"JAMFILE=$(SRCROOT)/../../Common/Scripts/Shared/DylibShims.jam\" \"-sSRCROOT=$(SRCROOT)\" \"-sOBJROOT=$(OBJROOT)\" \"-sDSTROOT=$(DSTROOT)\" \"-sSYMROOT=$(SYMROOT)\" \"-sLIB=libcom_err\" \"-sPROJECT=GSSKerberos5\" \"-sSYMFILE1=$(SRCROOT)/../util/et/et.pbexp\" $(ACTION)";
 			buildPhases = (
@@ -9143,10 +9181,6 @@
 			settingsToPassInEnvironment = 287;
 			settingsToPassOnCommandLine = 280;
 			shouldUseHeadermap = 0;
-		};
-		F5438CB0017E462801D06BDA = {
-			isa = PBXTargetDependency;
-			target = F5438CAF017E462801D06BDA;
 		};
 		F5438CB1017E462801D06BDA = {
 			buildArgumentsString = "-d3 \"JAMFILE=$(SRCROOT)/../../Common/Scripts/Shared/DylibShims.jam\" \"-sLIB=libkrb5\" \"-sPROJECT=GSSKerberos5\" \"-sSYMFILE1=$(SRCROOT)/Kerberos5Lib.pbexp\" \"-sSYMFILE2=$(SRCROOT)/../util/profile/profile.pbexp\" \"-sSRCROOT=$(SRCROOT)\" \"-sOBJROOT=$(OBJROOT)\" \"-sDSTROOT=$(DSTROOT)\" \"-sSYMROOT=$(SYMROOT)\" $(ACTION)";
@@ -9171,10 +9205,6 @@
 			settingsToPassOnCommandLine = 280;
 			shouldUseHeadermap = 0;
 		};
-		F5438CB2017E462801D06BDA = {
-			isa = PBXTargetDependency;
-			target = F5438CB1017E462801D06BDA;
-		};
 		F5438CB3017E468B01D06BDA = {
 			buildArgumentsString = "-d3 \"JAMFILE=$(SRCROOT)/../../Common/Scripts/Shared/DylibShims.jam\" \"-sSRCROOT=$(SRCROOT)\" \"-sOBJROOT=$(OBJROOT)\" \"-sDSTROOT=$(DSTROOT)\" \"-sSYMROOT=$(SYMROOT)\" \"-sLIB=libgssapi_krb5\" \"-sPROJECT=GSSKerberos5\" \"-sSYMFILE1=$(SRCROOT)/GSSLibrary.pbexp\" $(ACTION)";
 			buildPhases = (
@@ -9197,10 +9227,6 @@
 			settingsToPassInEnvironment = 287;
 			settingsToPassOnCommandLine = 280;
 			shouldUseHeadermap = 0;
-		};
-		F5438CB4017E468B01D06BDA = {
-			isa = PBXTargetDependency;
-			target = F5438CB3017E468B01D06BDA;
 		};
 		F5438CB5017E478201D06BDA = {
 			isa = PBXFileReference;
@@ -9250,83 +9276,11 @@
 			path = GSSKerberos5.intermediates/libgssapi_krb5Shims.s;
 			refType = 3;
 		};
-		F5438CBD017E478201D06BDA = {
-			fileRef = F5438CB7017E478201D06BDA;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		F5438CBE017E478201D06BDA = {
-			fileRef = F5438CB8017E478201D06BDA;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		F5438CBF017E478201D06BDA = {
-			fileRef = F5438CB9017E478201D06BDA;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		F5438CC0017E478201D06BDA = {
-			fileRef = F5438CBA017E478201D06BDA;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		F5438CC1017E478201D06BDA = {
-			fileRef = F5438CB5017E478201D06BDA;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		F5438CC2017E478201D06BDA = {
-			fileRef = F5438CB6017E478201D06BDA;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		F5438CC3017E478201D06BDA = {
-			fileRef = F5438CBB017E478201D06BDA;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		F5438CC4017E478201D06BDA = {
-			fileRef = F5438CBC017E478201D06BDA;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
 		F5438CC8017E47A601D06BDA = {
 			isa = PBXFrameworkReference;
 			name = CoreFoundation.framework;
 			path = /System/Library/Frameworks/CoreFoundation.framework;
 			refType = 0;
-		};
-		F5438CC9017E47A601D06BDA = {
-			fileRef = F5438CC8017E47A601D06BDA;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		F5438CCA017E47A601D06BDA = {
-			fileRef = F5438CC8017E47A601D06BDA;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		F5438CCB017E47A601D06BDA = {
-			fileRef = F5438CC8017E47A601D06BDA;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		F5438CCC017E47A601D06BDA = {
-			fileRef = F5438CC8017E47A601D06BDA;
-			isa = PBXBuildFile;
-			settings = {
-			};
 		};
 		F579576501C027FC01120112 = {
 			buildActionMask = 2147483647;
