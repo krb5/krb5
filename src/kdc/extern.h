@@ -31,7 +31,12 @@ typedef struct __kdc_realm_data {
      * General Kerberos per-realm data.
      */
     char *		realm_name;	/* Realm name			    */
+/* XXX the real context should go away once the db_context is done. 
+ * The db_context is then associated with the realm keytab using 
+ * krb5_ktkdb_resolv(). There should be nothing in the context which 
+ * cannot span multiple realms -- proven */
     krb5_context	realm_context;	/* Context to be used for realm	    */
+    krb5_keytab		realm_keytab; 	/* keytab to be used for this realm */
     char *		realm_profile;	/* Profile file for this realm	    */
     /*
      * Database per-realm data.

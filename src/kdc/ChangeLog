@@ -1,3 +1,13 @@
+
+Tue Dec 12 01:10:34 1995  Chris Provenzano (proven@mit.edu)
+
+	* extern.h: Added a krb5_keytab to the realm context. The keytab
+		should be associated with a krb5_db_context which will
+		make having a krb5_context unnecessary in the realm context.
+	* kdc_util.c kdc_process_tgs_req(): Use the realm keytab instead
+		of faking up a user-to-user key to pass to krb5_rd_req_decode().
+	* main.c: Added code to use the new database keytab routines.
+
 Mon Dec 11 16:58:31 1995  Chris Provenzano (proven@mit.edu)
 
 	* kdc_preauth.c return_padata(): Initialize local variable "size" 

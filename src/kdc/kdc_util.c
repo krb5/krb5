@@ -212,20 +212,25 @@ kdc_process_tgs_req(request, from, pkt, ticket, subkey)
 					  kdc_rcache)))
 	goto cleanup_auth_context;
 
+/*
     if ((retval = kdc_get_server_key(apreq->ticket, &key, &kvno)))
 	goto cleanup_auth_context;
+*/
 
     /*
      * XXX This is currently wrong but to fix it will require making a 
      * new keytab for groveling over the kdb.
      */
+/*
     retval = krb5_auth_con_setuseruserkey(kdc_context, auth_context, key);
     krb5_free_keyblock(kdc_context, key);
     if (retval) 
 	goto cleanup_auth_context;
+*/
 
     if ((retval = krb5_rd_req_decoded(kdc_context, &auth_context, apreq, 
-				      apreq->ticket->server, NULL,
+				      apreq->ticket->server, 
+				      kdc_active_realm->realm_keytab,
 				      NULL, ticket))) {
 	/*
 	 * I'm not so sure that this is right, but it's better than nothing
@@ -239,23 +244,17 @@ kdc_process_tgs_req(request, from, pkt, ticket, subkey)
 	    (retval == KRB5_RC_IO_UNKNOWN)) {
 	    (void) krb5_rc_close(kdc_context, kdc_rcache);
 	    kdc_rcache = (krb5_rcache) NULL;
-	    if (!(retval = kdc_initialize_rcache(kdc_context,
-						 (char *) NULL))) {
-		if ((retval = krb5_auth_con_setrcache(kdc_context,
-						      auth_context,
+	    if (!(retval = kdc_initialize_rcache(kdc_context, (char *) NULL))) {
+		if ((retval = krb5_auth_con_setrcache(kdc_context, auth_context,
 						      kdc_rcache)) ||
-		    (retval = krb5_rd_req_decoded(kdc_context,
-						  &auth_context,
-						  apreq, 
-						  apreq->ticket->server,
-						  NULL,
-						  NULL,
-						  ticket))
+		    (retval = krb5_rd_req_decoded(kdc_context, &auth_context,
+						  apreq, apreq->ticket->server,
+				      		 kdc_active_realm->realm_keytab,
+						  NULL, ticket))
 		    )
 		    goto cleanup_auth_context;
 	    }
-	}
-	else
+	} else
 	    goto cleanup_auth_context;
     }
 
@@ -317,6 +316,10 @@ cleanup:
     return retval;
 }
 
+/* XXX This function should no longer be necessary. 
+ * The KDC should take the keytab associated with the realm and pass that to 
+ * the krb5_rd_req_decode(). --proven
+ */
 krb5_error_code
 kdc_get_server_key(ticket, key, kvno)
     krb5_ticket 	* ticket;
