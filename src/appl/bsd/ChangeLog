@@ -1,3 +1,10 @@
+2000-03-15  Ken Raeburn  <raeburn@mit.edu>
+	    Mark D. Roth  <roth@uiuc.edu>
+
+	* login.c (update_ref_count): Copy passwd info before calling
+	getuserattr, to keep data from getting clobbered.  Patch from Mark
+	Roth.
+
 2000-02-28  Ken Raeburn  <raeburn@mit.edu>
 
 	* krlogin.c (main): Don't output debugging messages if debugging

@@ -2411,9 +2411,21 @@ char *strsave(sp)
 #ifdef _IBMR2
 update_ref_count(int adj)
 {
+    struct passwd *save_pwd;
     static char *empty = "\0";
     char *grp;
     int i;
+
+    /* save pwd before calling getuserattr() */
+    save_pwd = (struct passwd *)malloc(sizeof(struct passwd));
+    save_pwd->pw_name = strdup(pwd->pw_name);
+    save_pwd->pw_passwd = strdup(pwd->pw_passwd);
+    save_pwd->pw_uid = pwd->pw_uid;
+    save_pwd->pw_gid = pwd->pw_gid;
+    save_pwd->pw_gecos = strdup(pwd->pw_gecos);
+    save_pwd->pw_dir = strdup(pwd->pw_dir);
+    save_pwd->pw_shell = strdup(pwd->pw_shell);
+    pwd = save_pwd;
 
     /* Update reference count on all user's temporary groups */
     setuserdb(S_READ|S_WRITE);
