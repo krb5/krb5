@@ -1,3 +1,21 @@
+1999-04-09  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* kfree.c (krb5_free_sam_challenge, krb5_free_sam_challenge_contents,
+		krb5_free_sam_response, krb5_free_sam_response_contents,
+		krb5_free_predicted_sam_response, 
+		krb5_free_predicted_sam_response_contents,
+		krb5_free_enc_sam_response_enc, 
+		krb5_free_enc_sam_response_enc_contents,
+		krb5_free_pa_enc_ts): Added new functions.  Part of
+		patches from [krb5-kdc/662]
+
+	* gic_pwd.c (krb5_get_init_creds_password): Add new argument to
+		calls to the prompter function.  Part of patches from
+		[krb5-kdc/662].
+
+	* preauth2.c (pa_enc_timestamp, pa_sam): Update calls to new
+		prompter function.   [krb5-kdc/662].
+
 1999-03-31  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* init_ctx.c (krb5_init_context): Call krb5_win_ccdll_load() to

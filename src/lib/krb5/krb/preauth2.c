@@ -102,12 +102,17 @@ krb5_error_code pa_enc_timestamp(krb5_context context,
     krb5_enc_data enc_data;
     krb5_pa_data *pa;
    
-    /* if we haven't yet gotten a key, get it now.  */
-
-    if (ret = ((*gak_fct)(context, request->client,
-			  request->ktype[0], prompter, prompter_data,
-			  salt, as_key, gak_data)))
-	return(ret);
+    /*
+     * We need to use the password as part or all of the key.
+     * If as_key contains info, it should be the users pass phrase.
+     * If not, get the password before issuing the challenge.
+     */
+    if (as_key->length == 0) {
+       if (ret = ((*gak_fct)(context, request->client,
+			     request->ktype[0], prompter, prompter_data,
+			     salt, as_key, gak_data)))
+           return(ret);
+    }
 
     /* now get the time of day, and encrypt it accordingly */
 
@@ -194,9 +199,10 @@ char *sam_challenge_banner(sam_type)
 
 #define SAMDATA(kdata, str, maxsize) \
 	(kdata.length)? \
-	((((kdata.length)<=(maxsize))?(kdata.length):(maxsize))): \
+	((((kdata.length)<=(maxsize))?(kdata.length):(strlen(str)))): \
 	strlen(str), \
-	(kdata.length)?(kdata.data):(str)
+	(kdata.length)? \
+	((((kdata.length)<=(maxsize))?(kdata.data):(str))):(str)
 
 /* XXX Danger! This code is not in sync with the kerberos-password-02
    draft.  This draft cannot be implemented as written.  This code is
@@ -216,7 +222,8 @@ krb5_error_code pa_sam(krb5_context context,
 {
     krb5_error_code		ret;
     krb5_data			tmpsam;
-    char			banner[100], prompt[100], response[100];
+    char			name[100], banner[100];
+    char			prompt[100], response[100];
     krb5_data			response_data;
     krb5_prompt			kprompt;
     krb5_data			defsalt;
@@ -238,6 +245,10 @@ krb5_error_code pa_sam(krb5_context context,
 	return(KRB5_SAM_UNSUPPORTED);
     }
 
+    sprintf(name, "%.*s",
+	    SAMDATA(sam_challenge->sam_type_name, "SAM Authentication",
+		    sizeof(name) - 1));
+
     sprintf(banner, "%.*s",
 	    SAMDATA(sam_challenge->sam_challenge_label,
 		    sam_challenge_banner(sam_challenge->sam_type),
@@ -257,7 +268,8 @@ krb5_error_code pa_sam(krb5_context context,
     kprompt.hidden = sam_challenge->sam_challenge.length?0:1;
     kprompt.reply = &response_data;
 
-    if (ret = ((*prompter)(context, prompter_data, banner, 1, &kprompt))) {
+    if (ret = ((*prompter)(context, prompter_data, name,
+			   banner, 1, &kprompt))) {
 	krb5_xfree(sam_challenge);
 	return(ret);
     }

@@ -583,3 +583,103 @@ krb5_free_unparsed_name(context, val)
     return;
 }
 
+KRB5_DLLIMP void KRB5_CALLCONV
+krb5_free_sam_challenge(krb5_context ctx, krb5_sam_challenge FAR *sc)
+{
+    if (!sc)
+	return;
+    krb5_free_sam_challenge_contents(ctx, sc);
+    krb5_xfree(sc);
+}
+
+KRB5_DLLIMP void KRB5_CALLCONV
+krb5_free_sam_challenge_contents(krb5_context ctx, krb5_sam_challenge FAR *sc)
+{
+    if (!sc)
+	return;
+    if (sc->sam_type_name.data)
+	krb5_free_data_contents(ctx, &sc->sam_type_name);
+    if (sc->sam_track_id.data)
+	krb5_free_data_contents(ctx, &sc->sam_track_id);
+    if (sc->sam_challenge_label.data)
+	krb5_free_data_contents(ctx, &sc->sam_challenge_label);
+    if (sc->sam_challenge.data)
+	krb5_free_data_contents(ctx, &sc->sam_challenge);
+    if (sc->sam_response_prompt.data)
+	krb5_free_data_contents(ctx, &sc->sam_response_prompt);
+    if (sc->sam_pk_for_sad.data)
+	krb5_free_data_contents(ctx, &sc->sam_pk_for_sad);
+    if (sc->sam_cksum.contents)
+	krb5_xfree(sc->sam_cksum.contents);
+}
+
+KRB5_DLLIMP void KRB5_CALLCONV
+krb5_free_sam_response(krb5_context ctx, krb5_sam_response FAR *sr)
+{
+    if (!sr)
+	return;
+    krb5_free_sam_response_contents(ctx, sr);
+    krb5_xfree(sr);
+}
+
+KRB5_DLLIMP void KRB5_CALLCONV
+krb5_free_sam_response_contents(krb5_context ctx, krb5_sam_response FAR *sr)
+{
+    if (!sr)
+	return;
+    if (sr->sam_track_id.data)
+	krb5_free_data_contents(ctx, &sr->sam_track_id);
+    if (sr->sam_enc_key.ciphertext.data)
+	krb5_free_data_contents(ctx, &sr->sam_enc_key.ciphertext);
+    if (sr->sam_enc_nonce_or_ts.ciphertext.data)
+	krb5_free_data_contents(ctx, &sr->sam_enc_nonce_or_ts.ciphertext);
+}
+
+KRB5_DLLIMP void KRB5_CALLCONV
+krb5_free_predicted_sam_response(krb5_context ctx,
+				 krb5_predicted_sam_response FAR *psr)
+{
+    if (!psr)
+	return;
+    krb5_free_predicted_sam_response_contents(ctx, psr);
+    krb5_xfree(psr);
+}
+
+KRB5_DLLIMP void KRB5_CALLCONV
+krb5_free_predicted_sam_response_contents(krb5_context ctx,
+				 krb5_predicted_sam_response FAR *psr)
+{
+    if (!psr)
+	return;
+    if (psr->sam_key.contents);
+	krb5_free_keyblock_contents(ctx, &psr->sam_key);
+}
+
+KRB5_DLLIMP void KRB5_CALLCONV
+krb5_free_enc_sam_response_enc(krb5_context ctx,
+			       krb5_enc_sam_response_enc FAR *esre)
+{
+    if (!esre)
+	return;
+    krb5_free_enc_sam_response_enc_contents(ctx, esre);
+    krb5_xfree(esre);
+}
+
+KRB5_DLLIMP void KRB5_CALLCONV
+krb5_free_enc_sam_response_enc_contents(krb5_context ctx,
+			       krb5_enc_sam_response_enc FAR *esre)
+{
+    if (!esre)
+	return;
+    if (esre->sam_passcode.data)
+	krb5_free_data_contents(ctx, &esre->sam_passcode);
+}
+
+KRB5_DLLIMP void KRB5_CALLCONV
+krb5_free_pa_enc_ts(krb5_context ctx, krb5_pa_enc_ts FAR *pa_enc_ts)
+{
+    if (!pa_enc_ts)
+	return;
+    krb5_xfree(pa_enc_ts);
+}
+

@@ -38,7 +38,7 @@ krb5_get_as_key_password(context, client, etype, prompter, prompter_data,
 	if (prompter == NULL)
 	    return(EIO);
 
-	if (ret = krb5_unparse_name(context, client, &clientstr))
+	if ((ret = krb5_unparse_name(context, client, &clientstr)))
 	    return(ret);
 
 	strcpy(promptstr, "Password for ");
@@ -51,12 +51,13 @@ krb5_get_as_key_password(context, client, etype, prompter, prompter_data,
 	prompt.hidden = 1;
 	prompt.reply = password;
 
-	if (ret = ((*prompter)(context, prompter_data, NULL, 1, &prompt)))
+	if (ret = (((*prompter)(context, prompter_data, NULL, NULL,
+				1, &prompt))))
 	    return(ret);
     }
 
     if ((salt->length == -1) && (salt->data == NULL)) {
-	if (ret = krb5_principal2salt(context, client, &defsalt))
+	if ((ret = krb5_principal2salt(context, client, &defsalt)))
 	    return(ret);
 
 	salt = &defsalt;
@@ -179,11 +180,11 @@ krb5_get_init_creds_password(context, creds, client, password, prompter, data,
    krb5_get_init_creds_opt_set_forwardable(&chpw_opts, 0);
    krb5_get_init_creds_opt_set_proxiable(&chpw_opts, 0);
 
-   if (ret = krb5_get_init_creds(context, &chpw_creds, client,
-				 prompter, data,
-				 start_time, "kadmin/changepw", &chpw_opts,
-				 krb5_get_as_key_password, (void *) &pw0,
-				 &master, NULL))
+   if ((ret = krb5_get_init_creds(context, &chpw_creds, client,
+				  prompter, data,
+				  start_time, "kadmin/changepw", &chpw_opts,
+				  krb5_get_as_key_password, (void *) &pw0,
+				  &master, NULL)))
       goto cleanup;
 
    prompt[0].prompt = "Enter new password";
@@ -200,7 +201,7 @@ krb5_get_init_creds_password(context, creds, client, password, prompter, data,
       pw0.length = sizeof(pw0array);
       pw1.length = sizeof(pw1array);
 
-      if (ret = ((*prompter)(context, data, banner,
+      if (ret = ((*prompter)(context, data, 0, banner,
 			     sizeof(prompt)/sizeof(prompt[0]), prompt)))
 	 goto cleanup;
 
@@ -215,9 +216,9 @@ krb5_get_init_creds_password(context, creds, client, password, prompter, data,
 	 krb5_data code_string;
 	 krb5_data result_string;
 
-	 if (ret = krb5_change_password(context, &chpw_creds, pw0array,
-					&result_code, &code_string,
-					&result_string))
+	 if ((ret = krb5_change_password(context, &chpw_creds, pw0array,
+					 &result_code, &code_string,
+					 &result_string)))
 	    goto cleanup;
 
 	 /* the change succeeded.  go on */
@@ -296,7 +297,7 @@ cleanup:
 		    hours/24);
 
 	 /* ignore an error here */
-	 (*prompter)(context, data, banner, 0, 0);
+	 (*prompter)(context, data, 0, banner, 0, 0);
       }
    }
 
