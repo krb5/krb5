@@ -230,7 +230,6 @@ krb_check_auth (buf, checksum, msg_data, session, schedule, laddr, faddr)
 	return KFAILURE;
     cc = krb_rd_priv(buf->dat, (unsigned KRB4_32)buf->length, schedule,
 		     (C_Block *)session, faddr, laddr, msg_data);
-    memset(schedule, 0, sizeof(schedule));
     if (cc)
 	return cc;
 

@@ -27,6 +27,7 @@
 #include "asn1_k_encode.h"
 #include "asn1_make.h"
 #include "asn1_encode.h"
+#include <assert.h>
 
 /**** asn1 macros ****/
 #if 0
@@ -643,7 +644,7 @@ asn1_error_code asn1_encode_krb_safe_body(asn1buf *buf, const krb5_safe *val, un
     asn1_addfield(val->r_address,5,asn1_encode_host_address);
   asn1_addfield(val->s_address,4,asn1_encode_host_address);
   if(val->seq_number)
-    asn1_addfield(val->seq_number,3,asn1_encode_integer);
+    asn1_addfield(val->seq_number,3,asn1_encode_unsigned_integer);
   if(val->timestamp){
     asn1_addfield(val->usec,2,asn1_encode_integer);
     asn1_addfield(val->timestamp,1,asn1_encode_kerberos_time);
@@ -708,24 +709,33 @@ asn1_error_code asn1_encode_krb_cred_info(asn1buf *buf, const krb5_cred_info *va
   asn1_cleanup();
 }
 
-asn1_error_code asn1_encode_etype_info_entry(asn1buf *buf, const krb5_etype_info_entry *val, unsigned int *retlen)
+asn1_error_code asn1_encode_etype_info_entry(asn1buf *buf, const krb5_etype_info_entry *val,
+					     unsigned int *retlen, int etype_info2)
 {
   asn1_setup();
 
+  assert(val->s2kparams.data == NULL || etype_info2);
   if(val == NULL || (val->length > 0 && val->length != KRB5_ETYPE_NO_SALT &&
 		     val->salt == NULL))
      return ASN1_MISSING_FIELD;
-
-  if (val->length >= 0 && val->length != KRB5_ETYPE_NO_SALT)
+  if(val->s2kparams.data != NULL)
+      asn1_addlenfield(val->s2kparams.length, val->s2kparams.data, 2,
+		       asn1_encode_octetstring);
+  if (val->length >= 0 && val->length != KRB5_ETYPE_NO_SALT){
+      if (etype_info2)
 	  asn1_addlenfield(val->length,val->salt,1,
-			   asn1_encode_octetstring);
-  asn1_addfield(val->etype,0,asn1_encode_integer);
+			   asn1_encode_generalstring)
+      else 	  asn1_addlenfield(val->length,val->salt,1,
+				   asn1_encode_octetstring);
+  }
+asn1_addfield(val->etype,0,asn1_encode_integer);
   asn1_makeseq();
 
   asn1_cleanup();
 }
 
-asn1_error_code asn1_encode_etype_info(asn1buf *buf, const krb5_etype_info_entry **val, unsigned int *retlen)
+asn1_error_code asn1_encode_etype_info(asn1buf *buf, const krb5_etype_info_entry **val,
+				       unsigned int *retlen, int etype_info2)
 {
     asn1_setup();
     int i;
@@ -734,7 +744,7 @@ asn1_error_code asn1_encode_etype_info(asn1buf *buf, const krb5_etype_info_entry
   
     for(i=0; val[i] != NULL; i++); /* get to the end of the array */
     for(i--; i>=0; i--){
-	retval = asn1_encode_etype_info_entry(buf,val[i],&length);
+	retval = asn1_encode_etype_info_entry(buf,val[i],&length, etype_info2);
 	if(retval) return retval;
 	sum += length;
     }
@@ -931,4 +941,21 @@ asn1_error_code asn1_encode_predicted_sam_response(asn1buf *buf, const krb5_pred
   asn1_makeseq();
 
   asn1_cleanup();
+}
+
+/*
+ * Do some ugliness to insert a raw pre-encoded KRB-SAFE-BODY.
+ */
+asn1_error_code asn1_encode_krb_saved_safe_body(asn1buf *buf, const krb5_data *body, unsigned int *retlen)
+{
+  asn1_error_code retval;
+
+  retval = asn1buf_insert_octetstring(buf, body->length,
+				      (krb5_octet *)body->data);
+  if (retval){
+    asn1buf_destroy(&buf);
+    return retval; 
+  }
+  *retlen = body->length;
+  return 0;
 }

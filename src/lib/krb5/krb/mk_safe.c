@@ -120,9 +120,8 @@ krb5_mk_safe(krb5_context context, krb5_auth_context auth_context, const krb5_da
     memset((char *) &replaydata, 0, sizeof(krb5_replay_data));
 
     /* Get keyblock */
-    if ((keyblock = auth_context->local_subkey) == NULL)
-        if ((keyblock = auth_context->remote_subkey) == NULL)
-            keyblock = auth_context->keyblock;
+    if ((keyblock = auth_context->send_subkey) == NULL)
+	keyblock = auth_context->keyblock;
 
     /* Get replay info */
     if ((auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_DO_TIME) &&

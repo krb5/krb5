@@ -17,6 +17,7 @@ typedef struct cns_reg {
   DWORD         forwardable;                     /* get forwardable tickets? */
   DWORD         conf_override;                   /* allow changing of confname */
   DWORD         cc_override;                     /* allow changing of ccname */
+  DWORD         noaddresses;                     /* Don't require address in tickets */
   char          name[MAX_K_NAME_SZ];             /* last user used */
   char          realm[MAX_K_NAME_SZ];            /* last realm used */
   char          confname[FILENAME_MAX];

@@ -43,7 +43,7 @@ default was set.
 the following should be consistent with the variables set in
 krb5/src/lib/krb5/krb/init_ctx.c
 @end ignore
-@set DefaultETypeList des3-cbc-sha1 arcfour-hmac-md5 des-cbc-crc des-cbc-md5 des-cbc-md4 
+@set DefaultETypeList aes256-cts-hmac-sha1-96 des3-cbc-sha1 arcfour-hmac-md5 des-cbc-crc des-cbc-md5 des-cbc-md4 
 @comment DEFAULT_ETYPE_LIST
 @set DefaultDefaultTgsEnctypes @value{DefaultETypeList}
 @set DefaultDefaultTktEnctypes @value{DefaultETypeList}
@@ -52,14 +52,14 @@ krb5/src/lib/krb5/krb/init_ctx.c
 @comment libdefaults, clockskew
 @set DefaultChecksumType RSA MD5 
 @comment libdefaults, kdc_req_checksum_type, ap_req_checksum_type, safe_checksum_type
-@set DefaultCcacheType 3 
+@set DefaultCcacheType 4
 @comment DEFAULT_CCACHE_TYPE 
-@set DefaultCcacheTypeMac 4 
-@comment DEFAULT_CCACHE_TYPE
-@set DefaultTktLifetime 10 hours
+@set DefaultTktLifetime 1 day
 @comment libdefaults, tkt_lifetime
-@set DefaultKDCTimesyncMac 1
-@set DefaultKDCTimesync 0
+@comment -- actually, that's not implemented; see
+@comment lib/krb5/krb/get_in_tkt.c, and clients/kinit/kinit.c for krb4
+@comment fallback
+@set DefaultKDCTimesync 1
 @comment DEFAULT_KDC_TIMESYNC
 @set DefaultKDCDefaultOptions KDC_OPT_RENEWABLE_OK
 @comment line 194
@@ -68,7 +68,7 @@ krb5/src/lib/krb5/krb/init_ctx.c
 the following defaults should be consistent with default variables set
 in krb5/src/include/krb5/stock/osconf.h
 @end ignore
-@set DefaultMasterKeyType des-cbc-crc 
+@set DefaultMasterKeyType des3-cbc-sha1
 @comment DEFAULT_KDC_ENCTYPE
 @set DefaultKadmindPort 749 
 @comment DEFAULT_KADM5_PORT
@@ -146,7 +146,7 @@ krb5/src/appl/bsd/login.c
 the following defaults should be consistent with the values set in
 krb5/src/kdc/kerberos_v4
 @end ignore
-@set DefaultV4Mode nopreauth
+@set DefaultV4Mode  none
 @comment KDC_V4_DEFAULT_MODE
 
 @ignore

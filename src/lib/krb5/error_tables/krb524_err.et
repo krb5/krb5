@@ -29,5 +29,6 @@ error_code KRB524_V4ERR, "Kerberos V4 error"
 error_code KRB524_ENCFULL, "Encoding too large"
 error_code KRB524_DECEMPTY, "Decoding out of data"
 error_code KRB524_NOTRESP, "Service not responding"
+error_code KRB524_KRB4_DISABLED,	"Kerberos version 4 support is disabled"
 
 end

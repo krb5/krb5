@@ -26,7 +26,14 @@ HAVE_GCC=@HAVE_GCC@
 SLIBSH=sed -e 's|@''CC''@|$(CC)|g' -e 's,@''HOST_TYPE''@,$(HOST_TYPE),g' -e 's,@''HAVE_GCC''@,$(HAVE_GCC),g'
 
 all-recurse: libupdate makeshlib
+all-unix:: $(FAKEPREFIX)/lib
 all-mac::
+
+$(FAKEPREFIX)/lib:
+	$(SRCTOP)/config/mkinstalldirs $(FAKEPREFIX) && ln -s `pwd`/../lib $(FAKEPREFIX)
+
+clean-unix::
+	$(RM) -r $(FAKEPREFIX)
 
 NO_OUTDIR=1
 all-windows::

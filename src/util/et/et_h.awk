@@ -148,7 +148,7 @@ END {
 	print "" > outfile
 	print "extern const struct error_table et_" table_name "_error_table;" > outfile
 	print "" > outfile
-	print "#if !defined(_WIN32) && !defined(macintosh) && !(defined(__MACH__) && defined(__APPLE__))" > outfile
+	print "#if !defined(_WIN32)" > outfile
 	print "/* for compatibility with older versions... */" > outfile
 	print "extern void initialize_" table_name "_error_table () /*@modifies internalState@*/;" > outfile
 	print "#else" > outfile

@@ -44,7 +44,7 @@
 #endif
 #endif
 
-#if defined HAS_INTTYPES_H
+#if defined HAS_INTTYPES_H || defined HAVE_INTTYPES_H
 #include <inttypes.h>
 #define s_u32     u
 #define s_u64   ull
