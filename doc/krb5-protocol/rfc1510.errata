@@ -1,4 +1,4 @@
----rfc1510.eratta---as of June 14, 1994---
+---rfc1510.eratta---as of Auguest 10, 1994---
 
 1. [19940312] The following lines describes corrections to pseudocode
    in rfc1510 as of March 12, 1994.
@@ -61,4 +61,45 @@ the appropriate type using the list of methods provided together with
 information from the Kerberos database indicating acceptable
 encryption methods for the application server.  The KDC will not issue
 tickets with a weak session key encryption type.
+
+---
+3. [19940707] Case of realm names for DNS based realm names, 
+
+   The following should appear in section 7.1 before the description
+   of the four classed of realm names (before "There are presently...")
+
+     Kerberos realm names are case sensitive.  Realm names that differ
+     only in the case of the characters are not equivalent.
+
+   The domain example should be changes from:
+        domain:   host.subdomain.domain (example)
+
+   To:
+
+        domain:   ATHENA.MIT.EDU (example)
+
+   The following should be append to the domain name paragraph of
+   section 7.1 (following "nor slashes (/).")
+
+     Domain names must be converted to upper case when used as realm names.
+
+---
+4. [19940707] Official name of host is instance for NT-SRV-HST
+
+   Append to paragraph 7.2.1:
+
+   When a host has an official name and one or more aliases, the
+   official name of the host must be used when constructing the name
+   of the server principal.
+
+---
+
+5. [19940722] The protocol is standards track
+
+   In the 3rd paragraph of the overview delete:
+
+     ", and are not being submitted for consideration as
+     an Internet standard at this time"
+
+   as it contradicts the first sentence of the RFC. 
 

@@ -1,4 +1,4 @@
-8.3.  Protocol constants and associated values as of December 19, 1993
+8.3.  Protocol constants and associated values
 
    The following tables list constants used in the protocol and defines
    their meanings.
@@ -11,6 +11,7 @@ NULL                0            1              0              0
 des-cbc-crc         1            8              4              8
 des-cbc-md4         2            8              0              8
 des-cbc-md5         3            8              0              8
+<reserved>          4
 
 -------------------------------+-------------------+-------------
 Checksum type                  |sumtype value      |checksum size
@@ -30,14 +31,19 @@ padata type                    |padata-type value
 PA-TGS-REQ                      1
 PA-ENC-TIMESTAMP                2
 PA-PW-SALT                      3
-PA-DATA-SESAME			4
+<reserved>                      4
+PA-ENC-UNIX-TIME                5
+PA-SANDIA-SECUREID              6
+PA-SESAME                       7
+PA-OSF-DCE                      8
+PA-CYBERSAFE-SECUREID           9
 
 -------------------------------+-------------
 authorization data type        |ad-type value
 -------------------------------+-------------
 reserved values                 0-63
-OSF-DCE                         64
-SESAME                          65
+AD-OSF-DCE                      64
+AD-SESAME                       65
 
 -------------------------------+-----------------
 alternate authentication type  |method-type value
@@ -68,66 +74,48 @@ KRB_AP_REQ      14     application request to server
 KRB_AP_REP      15     Response to KRB_AP_REQ_MUTUAL
 KRB_SAFE        20     Safe (checksummed) application message
 KRB_PRIV        21     Private (encrypted) application message
-KRB_CRED        22     Private (encrypted) message to forward
-                       credentials
+KRB_CRED        22     Private (encrypted) message to forward credentials
 KRB_ERROR       30     Error response
 
 name types
 
 KRB_NT_UNKNOWN   0   Name type not known
-KRB_NT_PRINCIPAL 1   Just the name of the principal as in DCE, or
-                     for users
+KRB_NT_PRINCIPAL 1   Just the name of the principal as in DCE, or for users
 KRB_NT_SRV_INST  2   Service and other unique instance (krbtgt)
-KRB_NT_SRV_HST   3   Service with host name as instance (telnet,
-                     rcommands)
+KRB_NT_SRV_HST   3   Service with host name as instance (telnet, rcommands)
 KRB_NT_SRV_XHST  4   Service with host as remaining components
 KRB_NT_UID       5   Unique ID
 
 error codes
 
 KDC_ERR_NONE                   0   No error
-KDC_ERR_NAME_EXP               1   Client's entry in database has
-                                   expired
-KDC_ERR_SERVICE_EXP            2   Server's entry in database has
-                                   expired
-KDC_ERR_BAD_PVNO               3   Requested protocol version number
-                                   not supported
-KDC_ERR_C_OLD_MAST_KVNO        4   Client's key encrypted in old
-                                   master key
-KDC_ERR_S_OLD_MAST_KVNO        5   Server's key encrypted in old
-                                   master key
+KDC_ERR_NAME_EXP               1   Client's entry in database has expired
+KDC_ERR_SERVICE_EXP            2   Server's entry in database has expired
+KDC_ERR_BAD_PVNO               3   Requested protocol version # not supported
+KDC_ERR_C_OLD_MAST_KVNO        4   Client's key encrypted in old master key
+KDC_ERR_S_OLD_MAST_KVNO        5   Server's key encrypted in old master key
 KDC_ERR_C_PRINCIPAL_UNKNOWN    6   Client not found in Kerberos database
 KDC_ERR_S_PRINCIPAL_UNKNOWN    7   Server not found in Kerberos database
-KDC_ERR_PRINCIPAL_NOT_UNIQUE   8   Multiple principal entries in
-                                   database
+KDC_ERR_PRINCIPAL_NOT_UNIQUE   8   Multiple principal entries in database
 KDC_ERR_NULL_KEY               9   The client or server has a null key
 KDC_ERR_CANNOT_POSTDATE       10   Ticket not eligible for postdating
-KDC_ERR_NEVER_VALID           11   Requested start time is later than
-                                   end time
+KDC_ERR_NEVER_VALID           11   Requested start time is later than end time
 KDC_ERR_POLICY                12   KDC policy rejects request
-KDC_ERR_BADOPTION             13   KDC cannot accommodate requested
-                                   option
-KDC_ERR_ETYPE_NOSUPP          14   KDC has no support for encryption
-                                   type
+KDC_ERR_BADOPTION             13   KDC cannot accommodate requested option
+KDC_ERR_ETYPE_NOSUPP          14   KDC has no support for encryption type
 KDC_ERR_SUMTYPE_NOSUPP        15   KDC has no support for checksum type
 KDC_ERR_PADATA_TYPE_NOSUPP    16   KDC has no support for padata type
 KDC_ERR_TRTYPE_NOSUPP         17   KDC has no support for transited type
 KDC_ERR_CLIENT_REVOKED        18   Clients credentials have been revoked
-KDC_ERR_SERVICE_REVOKED       19   Credentials for server have been
-                                   revoked
+KDC_ERR_SERVICE_REVOKED       19   Credentials for server have been revoked
 KDC_ERR_TGT_REVOKED           20   TGT has been revoked
-KDC_ERR_CLIENT_NOTYET         21   Client not yet valid - try again
-                                   later
-KDC_ERR_SERVICE_NOTYET        22   Server not yet valid - try again
-                                   later
-KDC_ERR_KEY_EXPIRED           23   Password has expired - change
-                                   password to reset
-KDC_ERR_PREAUTH_FAILED        24   Pre-authentication information
-                                   was invalid
-KDC_ERR_PREAUTH_REQUIRED      25   Additional pre-authentication
-                                   required*
-KRB_AP_ERR_BAD_INTEGRITY      31   Integrity check on decrypted field
-                                   failed
+KDC_ERR_CLIENT_NOTYET         21   Client not yet valid - try again later
+KDC_ERR_SERVICE_NOTYET        22   Server not yet valid - try again later
+KDC_ERR_KEY_EXPIRED           23   Password has expired - change to reset
+KDC_ERR_PREAUTH_FAILED        24   Pre-authentication information was invalid
+KDC_ERR_PREAUTH_REQUIRED      25   Additional pre-authentication required*
+KDC_ERR_SERVER_NOMATCH        26   Requested server and ticket don't match
+KRB_AP_ERR_BAD_INTEGRITY      31   Integrity check on decrypted field failed
 KRB_AP_ERR_TKT_EXPIRED        32   Ticket expired
 KRB_AP_ERR_TKT_NYV            33   Ticket not yet valid
 KRB_AP_ERR_REPEAT             34   Request is a replay
@@ -139,19 +127,15 @@ KRB_AP_ERR_BADVERSION         39   Protocol version mismatch
 KRB_AP_ERR_MSG_TYPE           40   Invalid msg type
 KRB_AP_ERR_MODIFIED           41   Message stream modified
 KRB_AP_ERR_BADORDER           42   Message out of order
-KRB_AP_ERR_BADKEYVER          44   Specified version of key is not
-                                   available
+KRB_AP_ERR_BADKEYVER          44   Specified version of key is not available
 KRB_AP_ERR_NOKEY              45   Service key not available
 KRB_AP_ERR_MUT_FAIL           46   Mutual authentication failed
 KRB_AP_ERR_BADDIRECTION       47   Incorrect message direction
-KRB_AP_ERR_METHOD             48   Alternative authentication method
-                                   required*
+KRB_AP_ERR_METHOD             48   Alternative authentication method required*
 KRB_AP_ERR_BADSEQ             49   Incorrect sequence number in message
-KRB_AP_ERR_INAPP_CKSUM        50   Inappropriate type of checksum in
-                                   message
+KRB_AP_ERR_INAPP_CKSUM        50   Inappropriate type of checksum in message
 KRB_ERR_GENERIC               60   Generic error (description in e-text)
-KRB_ERR_FIELD_TOOLONG         61   Field is too long for this
-                                   implementation
+KRB_ERR_FIELD_TOOLONG         61   Field is too long for this implementation
 
    *This error carries additional information in the e-data field.  The
    contents of the e-data field for this message is described in section
