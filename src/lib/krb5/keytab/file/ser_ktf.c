@@ -124,7 +124,7 @@ krb5_ktf_keytab_externalize(kcontext, arg, buffer, lenremain)
     krb5_int32		file_pos[2];
     char		*ktname;
     size_t		namelen;
-    char		*fnamep;
+    const char		*fnamep;
 
     required = 0;
     bp = *buffer;
@@ -148,7 +148,7 @@ krb5_ktf_keytab_externalize(kcontext, arg, buffer, lenremain)
 	    if (ktdata && ktdata->name)
 		fnamep = ktdata->name;
 	    else
-		fnamep = (char *) ktfile_def_name;
+		fnamep = ktfile_def_name;
 	    namelen += (strlen(fnamep)+1);
 
 	    if ((ktname = (char *) malloc(namelen))) {

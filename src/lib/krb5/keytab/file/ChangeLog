@@ -1,3 +1,10 @@
+2000-09-25  Ezra Peisach  <epeisach@mit.edu>
+
+	* ser_ktf.c (krb5_ktf_keytab_externalize): Do not violate const char * 
+	declaration of ktfile_def_name.
+
+	* ktf_util.c (xfwrite): Cast length field to fwrite/fread as unsigned. 
+
 1999-10-26  Wilfredo Sanchez  <tritan@mit.edu>
 
 	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,

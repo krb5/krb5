@@ -86,8 +86,8 @@ typedef krb5_int16  krb5_kt_vno;
 
 krb5_kt_vno krb5_kt_default_vno = KRB5_KT_DEFAULT_VNO;
 
-#define xfwrite(a, b, c, d) fwrite((char *)a, b, c, d)
-#define xfread(a, b, c, d) fread((char *)a, b, c, d)
+#define xfwrite(a, b, c, d) fwrite((char *)a, b, (unsigned) c, d)
+#define xfread(a, b, c, d) fread((char *)a, b, (unsigned) c, d)
 
 #ifdef ANSI_STDIO
 static char *fopen_mode_rbplus= "rb+";
