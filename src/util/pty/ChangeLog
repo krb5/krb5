@@ -1,3 +1,10 @@
+Fri Nov  8 17:45:42 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* update_utmp.c (pty_update_utmp): Add code which attempts to
+		compensate for systems that don't have getutmpx()
+
+	* configure.in: Check for getutmpx().  Replace calls to
+		AC_FUNC_CHECK with AC_HAVE_FUNCS().
 
 Thu Jun 13 22:14:24 1996  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
 
