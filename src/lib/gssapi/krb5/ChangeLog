@@ -1,3 +1,12 @@
+Thu Mar 16 19:54:33 1995 Keith Vetter (keithv@fusion.com)
+
+	* init_sec_context.c: fixed signed/unsigned mismatch and
+           added a prototype which will later be removed.
+        * import_name.c: fixed for the PC--made conditional the
+           code dependent upon passwords.
+	* Makefile.in: changed the name of the library the PC
+	   builds, and added xxx-mac targets to mimic xxx-unix.
+
 Fri Mar 10 09:44:29 1995 Chris Provenzano (proven@mit.edu)
 
 	* init_sec_context.c (krb5_gss_init_sec_context())

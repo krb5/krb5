@@ -21,8 +21,10 @@
  */
 
 #include "gssapiP_krb5.h"
-#ifndef _MSDOS
+#ifndef NO_PASSWORD
 #include <pwd.h>
+#endif
+
 #ifdef USE_STRING_H
 #include <string.h>
 #else
@@ -48,8 +50,9 @@ krb5_gss_import_name(context, minor_status, input_name_buffer,
    krb5_principal princ;
    krb5_error_code code;
    char *stringrep;
+#ifndef NO_PASSWORD
    struct passwd *pw;
-
+#endif
    /* set up default returns */
 
    *output_name = NULL;
@@ -72,7 +75,7 @@ krb5_gss_import_name(context, minor_status, input_name_buffer,
       service = tmp;
       if ((host = strchr(tmp, '@')) == NULL) {
 	 xfree(tmp);
-	 *minor_status = G_BAD_SERVICE_NAME;
+	 *minor_status = (OM_uint32) G_BAD_SERVICE_NAME;
 	 return(GSS_S_BAD_NAME);
       }
       *host = '\0';
@@ -87,7 +90,7 @@ krb5_gss_import_name(context, minor_status, input_name_buffer,
       krb5_principal input;
 
       if (input_name_buffer->length != sizeof(krb5_principal)) {
-	 *minor_status = G_WRONG_SIZE;
+	 *minor_status = (OM_uint32) G_WRONG_SIZE;
 	 return(GSS_S_BAD_NAME);
       }
 
@@ -104,16 +107,18 @@ krb5_gss_import_name(context, minor_status, input_name_buffer,
 	  g_OID_equal(input_name_type, gss_nt_krb5_name) ||
 	  g_OID_equal(input_name_type, gss_nt_user_name)) {
 	 stringrep = (char *) input_name_buffer->value;
+#ifndef NO_PASSWORD
       } else if (g_OID_equal(input_name_type, gss_nt_machine_uid_name)) {
 	 if (pw = getpwuid(*((uid_t *) input_name_buffer->value)))
 	    stringrep = pw->pw_name;
 	 else
-	    *minor_status = G_NOUSER;
+	    *minor_status = (OM_uint32) G_NOUSER;
       } else if (g_OID_equal(input_name_type, gss_nt_string_uid_name)) {
 	 if (pw = getpwuid((uid_t) atoi(input_name_buffer->value)))
 	    stringrep = pw->pw_name;
 	 else
-	    *minor_status = G_NOUSER;
+	    *minor_status = (OM_uint32) G_NOUSER;
+#endif
       } else {
 	 return(GSS_S_BAD_NAMETYPE);
       }
@@ -138,7 +143,7 @@ krb5_gss_import_name(context, minor_status, input_name_buffer,
 
    if (! kg_save_name((gss_name_t) princ)) {
       krb5_free_principal(context, princ);
-      *minor_status = G_VALIDATE_FAILED;
+      *minor_status = (OM_uint32) G_VALIDATE_FAILED;
       return(GSS_S_FAILURE);
    }
 
@@ -147,4 +152,3 @@ krb5_gss_import_name(context, minor_status, input_name_buffer,
    *output_name = (gss_name_t) princ;
    return(GSS_S_COMPLETE);
 }
-#endif

@@ -63,7 +63,7 @@ make_ap_req(context, auth_context, cred, server, endtime, chan_bindings,
     /* done with this, free it */
     xfree(md5.contents);
 
-    checksum_data.data = ckbuf;
+    checksum_data.data = (char *) ckbuf;
     checksum_data.length = sizeof(ckbuf);
 
     /* fill in the necessary fields in creds */
@@ -174,6 +174,8 @@ krb5_gss_init_sec_context(context, minor_status, claimant_cred_handle,
     krb5_timestamp now;
     gss_buffer_desc token;
     int i;
+/* Remove this when server is fixed and this function goes away */
+krb5_error_code INTERFACE krb5_auth_con_setkey (); 
 
    /* set up return values so they can be "freed" successfully */
 
@@ -412,6 +414,7 @@ krb5_gss_init_sec_context(context, minor_status, claimant_cred_handle,
       sptr = (char *) ptr;                      /* PC compiler bug */
       TREAD_STR(sptr, ap_rep.data, ap_rep.length);
 
+/* A hack. Don't forget to remove the prototype for it above */
 krb5_auth_con_setkey(context, ctx->auth_context, ctx->subkey);
       /* decode the ap_rep */
       if (code = krb5_rd_rep(context,ctx->auth_context,&ap_rep,&ap_rep_data)) {

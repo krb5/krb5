@@ -2,7 +2,7 @@ CFLAGS = $(CCOPTS) $(DEFS) -I. -I$(srcdir)
 LDFLAGS = -g
 
 ##DOSBUILDTOP = ..\..\..
-##DOSLIBNAME=..\libgssapi_krb5.$(LIBEXT)
+##DOSLIBNAME=..\gssapi.$(LIBEXT)
 ##DOSsrcdir = .
 ##DOS!include $(BUILDTOP)\config\windows.in
 
@@ -64,6 +64,8 @@ all:: all-$(WHAT) $(SRCS) $(HDRS) includes $(OBJS)
 
 all-unix::
 
+all-mac::
+
 all-windows::
 	if not exist $(EHDRDIR)\nul mkdir $(EHDRDIR)
 	copy gssapi.h $(EHDRDIR)
@@ -72,6 +74,9 @@ all-windows::
 clean:: clean-$(WHAT)
 
 clean-unix::
+	$(RM) $(ETHDRS) $(ETSRCS)
+
+clean-mac::
 	$(RM) $(ETHDRS) $(ETSRCS)
 
 clean-windows::

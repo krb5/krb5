@@ -1,3 +1,8 @@
+Tue Mar 21 19:08:51 1995 Keith Vetter (keithv@fusion.com)
+
+	* Makefile.in: changed the name of the library the PC
+           builds, and added xxx-mac targets to mimic xxx-unix.
+
 Wed Mar 15 20:23:17 1995 Keith Vetter (keithv@fusion.com)
 
 	* Makefile.in: cleaned up for the PC
