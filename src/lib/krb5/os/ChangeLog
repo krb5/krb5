@@ -1,0 +1,6 @@
+Wed Jun 22 15:49:30 1994  Theodore Y. Ts'o  (tytso at tsx-11)
+
+	* locate_kdc.c (krb5_locate_kdc): Fixed default port numbers so
+	they are loaded in network byte order instead of host byte order.
+
+
