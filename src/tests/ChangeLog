@@ -1,3 +1,10 @@
+2005-02-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* gss-threads: New subdirectory.
+	* Makefile.in (LOCAL_SUBDIRS): Add it.
+	* configure.in: Configure it.  Check for semaphore.h, sem_init,
+	sem_trywait.
+
 2005-02-02  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Look for dlfcn.h.  Configure new shlib
