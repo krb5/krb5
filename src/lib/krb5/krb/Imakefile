@@ -7,7 +7,9 @@ OBJS=	decode_kdc.o	\
 	encode_kdc.o	\
 	encode_tkt.o	\
 	encrypt_tk.o	\
+	free_krbhs.o	\
 	get_in_tkt.o	\
+	get_krbhst.o	\
 	in_tkt_pwd.o	\
 	in_tkt_sky.o	\
 	kdc_rep_dc.o	\
@@ -24,7 +26,9 @@ SRCS=	decode_kdc.c	\
 	encode_kdc.c	\
 	encode_tkt.c	\
 	encrypt_tk.c	\
+	free_krbhs.c	\
 	get_in_tkt.c	\
+	get_krbhst.c	\
 	in_tkt_pwd.c	\
 	in_tkt_sky.c	\
 	kdc_rep_dc.c	\
