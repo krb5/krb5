@@ -1,3 +1,11 @@
+Mon Jun 30 13:21:34 1997  Kevin L Mitchell  <klmitch@mit.edu>
+
+	* login.c (dofork): Solaris 2.4 puts killpg in the bsd compatibility
+		libraries.  Autoconf correctly determined that it wasn't
+		available, but it wasn't conditionalized out.  Added the
+		conditional, using kill(-child, SIGHUP) as a replacement,
+		as suggested by tlyu
+
 Thu Jun  5 15:56:54 1997  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* login.c: Always use the new tty line discpline.  [krb5-appl/428]

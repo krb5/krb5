@@ -2455,7 +2455,11 @@ dofork()
 #endif
 #endif
 	if (hungup)
+#ifdef HAVE_KILLPG
 	    killpg(child, SIGHUP);
+#else
+	    kill(-child, SIGHUP);
+#endif
 	if (pid == child)
 		break;
     }
