@@ -528,8 +528,6 @@ extern char *strdup (const char *);
 /* libos.spec */
 krb5_error_code krb5_lock_file (krb5_context, int, int);
 krb5_error_code krb5_unlock_file (krb5_context, int);
-int krb5_net_read (krb5_context, int , char *, int);
-int krb5_net_write (krb5_context, int , const char *, int);
 krb5_error_code krb5_sendto_kdc (krb5_context, const krb5_data *,
 				 const krb5_data *, krb5_data *, int);
 krb5_error_code krb5_get_krbhst (krb5_context, const krb5_data *, char *** );
