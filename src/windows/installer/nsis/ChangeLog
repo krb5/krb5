@@ -1,3 +1,12 @@
+2004-05-17  Jeffrey Altman <jaltman@mit.edu>
+
+* kfw.nsi, kfw-fixed.nsi, utils.nsi:
+  - replace the UpdateDLL macro with the ReplaceDLL macro
+  - use ReplaceDLL to install all .exe and .dll files
+  this will allow the installer to work even when some files
+  are loaded by modules which cannot be terminated such as 
+  Network Providers (afslogon.dll for example)
+
 2004-04-14  Jeffrey Altman <jaltman@mit.edu>
 
 * nsi-includes.nsi:  update version to 2.6.1
