@@ -478,7 +478,6 @@ char **argv;
     free(client_server_info.name_of_service);
     krb5_free_principal(client_server_info.server);
 
-shutdown:
     if (errout = closedown_network(argv[0])) {
 	com_err(argv[0], retval, "while shutting down network");
 	retval = retval + errout;

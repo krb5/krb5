@@ -331,7 +331,6 @@ OLDDECLARG(krb5_db_entry *, entry)
     struct saltblock salt;
     struct saltblock altsalt;
     krb5_keyblock alttempkey;
-    krb5_octet v4_keyptr[8];
 
     pwd.data = new_password;
     pwd.length = strlen((char *) new_password);
