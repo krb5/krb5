@@ -123,12 +123,12 @@ OLDDECLARG(krb5_data *, reply)
 				&waitlen)) {
 		if (nready == -1)
 		    continue;		/* XXX */
-		if (cc = recvfrom(socklist[addr[host].sa_family],
-				  reply->data,
-				  reply->length,
-				  0,
-				  &fromaddr,
-				  &fromlen) == -1)
+		if ((cc = recvfrom(socklist[addr[host].sa_family],
+				   reply->data,
+				   reply->length,
+				   0,
+				   &fromaddr,
+				   &fromlen)) == -1)
 		    continue;		/* XXX */
 		if (bcmp((char *)&fromaddr, (char *)&addr[host],
 			 fromlen)) {
@@ -159,7 +159,8 @@ OLDDECLARG(krb5_data *, reply)
     retval = KRB5_KDC_UNREACH;
  out:
     for (i = 0; i < AF_MAX; i++)
-	(void) close(i);
+	if (socklist[i] != -1)
+	    (void) close(socklist[i]);
     free((char *)addr);
     if (retval) {
 	free(reply->data);
