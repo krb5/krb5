@@ -254,8 +254,6 @@ foo(krb5_keyblock *pass, krb5_data *salt, krb5_data *out)
 
     memset(out->data, 0, out->length);
     err = hmac1 (&krb5int_hash_sha1, pass, salt, out);
-    if (err)
-	com_err("foo", err, "computing hmac");
     return err;
 }
 
