@@ -1,3 +1,9 @@
+
+Tue Jun 27 16:28:23 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* acconfig.h - Reinstate KRB5_PROVIDE_PROTOTYPES.  This is needed for
+		compilers which recognize prototypes but don't set __STDC__
+		or _WINDOWS.
+
 Fri Jun 23 20:14:45 1995  Sam Hartman  <hartmans@tardis.MIT.EDU>
 
 	* aclocal.m4 (SHARED_RULE_LOCAL): Use makeshlib out of

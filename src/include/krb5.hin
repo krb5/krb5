@@ -167,7 +167,7 @@ typedef char FAR * krb5_pointer;
 typedef char krb5_const FAR * krb5_const_pointer;
 #endif
 
-#if (defined(__STDC__) || defined(_WINDOWS)) && !defined(KRB5_NO_PROTOTYPES)
+#if (defined(__STDC__) || defined(_WINDOWS) || defined(KRB5_PROVIDE_PROTOTYPES)) && !defined(KRB5_NO_PROTOTYPES)
 #define KRB5_PROTOTYPE(x) x
 #if defined(__STDC__) || defined(HAVE_STDARG_H) || defined(_WINDOWS)
 #define	KRB5_STDARG_P(x) x

@@ -1,3 +1,9 @@
+
+Tue Jun 27 16:14:38 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* krb5.hin - Reinstate KRB5_PROVIDE_PROTOTYPES.  This is needed for
+		compilers which recognize prototypes but don't set __STDC__
+		or _WINDOWS.
+
 Thu Jun 22 16:03:07 1995  Tom Yu  (tlyu@dragons-lair)
 
 	* syslog.h: reverse sense of KRB5_PROVIDE_PROTOTYPES

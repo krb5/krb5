@@ -61,6 +61,7 @@
 
 #define HAS_ANSI_VOLATILE
 #define HAS_VOID_TYPE
+#define	KRB5_PROVIDE_PROTOTYPES
 #define HAVE_STDARG_H
 #define HAVE_SYS_TYPES_H
 
