@@ -170,7 +170,11 @@ void g_make_token_header(mech, body_size, buf, tok_type)
  */
 static gss_int32 g_bad_tok_header = G_BAD_TOK_HEADER;
 #undef G_BAD_TOK_HEADER
-#define G_BAD_TOK_HEADER (_log("%s:%d: returning G_BAD_TOK_HEADER", SFILE, __LINE__), g_bad_tok_header)
+#define G_BAD_TOK_HEADER (_log("%s:%d: returning G_BAD_TOK_HEADER\n", SFILE, __LINE__), g_bad_tok_header)
+static gss_int32 g_wrong_mech = G_WRONG_MECH;
+#undef G_WRONG_MECH
+#define G_WRONG_MECH (_log("%s:%d: returning G_WRONG_MECH\n", SFILE, __LINE__), g_wrong_mech)
+
 gss_int32 g_verify_token_header(mech, body_size, buf_in, tok_type, toksize_in,
 				wrapper_required)
      gss_OID mech;
@@ -204,8 +208,11 @@ gss_int32 g_verify_token_header(mech, body_size, buf_in, tok_type, toksize_in,
    if ((seqsize = der_read_length(&buf, &toksize)) < 0)
       return(G_BAD_TOK_HEADER);
 
-   if (seqsize != toksize)
+   if (seqsize != toksize) {
+       _log("%s:%d: bad token header: seqsize=%d toksize=%d\n",
+	    SFILE, __LINE__, seqsize, toksize);
       return(G_BAD_TOK_HEADER);
+   }
 
    if ((toksize-=1) < 0)
       return(G_BAD_TOK_HEADER);
@@ -233,12 +240,14 @@ skip_wrapper:
 	    buf, buf[0], buf[1]);
        if ((*buf++ != ((tok_type>>8)&0xff)) ||
 	   (*buf++ != (tok_type&0xff))) {
-	   _log("%s:%d: G_WRONG_TOKID\n", SFILE, __LINE__);
+	   _log("%s:%d: G_WRONG_TOKID: wanted 0x%x got 0x%x\n",
+		SFILE, __LINE__, tok_type, buf[-2], buf[-1]);
 	   return(G_WRONG_TOKID);
        }
    }
    *buf_in = buf;
    *body_size = toksize;
 
+   _log("%s:%d: success\n", SFILE, __LINE__);
    return 0;
 }
