@@ -11,7 +11,7 @@
  * Encryption interface-related declarations
  */
 
-#include <krb5/mit-copyright.h>
+#include <krb5/copyright.h>
 
 #ifndef __KRB5_ENCRYPTION__
 #define __KRB5_ENCRYPTION__
@@ -25,10 +25,10 @@ typedef struct _krb5_keyblock {
 
 /* could be used in a table to find an etype and initialize a block */
 typedef struct _krb5_cryptosystem_entry {
-    int (*encrypt_func)(/* void *in, void *out, krb5_keyblock *key,
-			   void *private */);
-    int (*decrypt_func)(/* void *in, void *out, krb5_keyblock *key,
-			   void *private */);
+    int (*encrypt_func)(/* void *in, void *out, size_t length,
+			   krb5_encrypt_block *block */);
+    int (*decrypt_func)(/* void *in, void *out, size_t length,
+			   krb5_encrypt_block *block */);
     int (*process_key)(/* krb5_encrypt_block *block, krb5_keyblock *key */);
     int block_length;
     int pad_minimum;			/* needed for cksum size computation */
@@ -37,8 +37,8 @@ typedef struct _krb5_cryptosystem_entry {
 
 typedef struct _krb5_encrypt_block {
     krb5_cryptosystem_entry crypto_entry;
-    krb5_keyblock key;
-    void *private;			/* for private use, e.g. DES
+    krb5_keyblock *key;
+    void *priv;				/* for private use, e.g. DES
 					   key schedules */
 } krb5_encrypt_block;
 
