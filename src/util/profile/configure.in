@@ -4,7 +4,7 @@ AC_C_CONST
 AC_CHECK_SIZEOF(short)
 AC_CHECK_SIZEOF(int)
 AC_CHECK_SIZEOF(long)
-AC_CHECK_HEADERS(unistd.h stdlib.h)
+AC_CHECK_HEADERS(unistd.h stdlib.h pwd.h)
 AC_CHECK_FUNCS(stat access strdup)
 AC_PROG_AWK
 KRB5_BUILD_LIBOBJS

@@ -1,5 +1,13 @@
 2003-01-10  Ken Raeburn  <raeburn@mit.edu>
 
+	* configure.in: Check for pwd.h.
+	* prof_file.c: Include pwd.h if available.
+	(profile_open_file) [HAVE_PWD_H]: If $HOME isn't set, look up the
+	home directory in the passwd file.  Expand the filename before
+	checking against the cache.
+	(profile_open_file) [SHARE_TREE_DATA]: Fix the sense of the test
+	for read access.
+
 	* configure.in: Use V5_AC_OUTPUT_MAKEFILE instead of
 	K5_GEN_MAKEFILE and K5_AC_OUTPUT.
 

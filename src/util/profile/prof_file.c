@@ -17,6 +17,9 @@
 #include <sys/stat.h>
 #include <errno.h>
 
+#ifdef HAVE_PWD_H
+#include <pwd.h>
+#endif
 
 #if defined(_WIN32)
 #include <io.h>
@@ -91,6 +94,7 @@ errcode_t profile_open_file(filespec, ret_prof)
 	char		*home_env = 0;
 	unsigned int	len;
 	prf_data_t	data;
+	char		*expanded_filename;
 
 	prf = malloc(sizeof(struct _prf_file_t));
 	if (!prf)
@@ -98,18 +102,45 @@ errcode_t profile_open_file(filespec, ret_prof)
 	memset(prf, 0, sizeof(struct _prf_file_t));
 	prf->magic = PROF_MAGIC_FILE;
 
+	len = strlen(filespec)+1;
+	if (filespec[0] == '~' && filespec[1] == '/') {
+		home_env = getenv("HOME");
+#ifdef HAVE_PWD_H
+		if (home_env == NULL) {
+		    uid_t uid;
+		    struct passwd *pw;
+
+		    uid = getuid();
+		    pw = getpwuid(uid);
+		    if (pw != NULL && pw->pw_dir[0] != 0)
+			home_env = pw->pw_dir;
+		}
+#endif
+		if (home_env)
+			len += strlen(home_env);
+	}
+	expanded_filename = malloc(len);
+	if (expanded_filename == 0)
+	    return errno;
+	if (home_env) {
+	    strcpy(expanded_filename, home_env);
+	    strcat(expanded_filename, filespec+1);
+	} else
+	    memcpy(expanded_filename, filespec, len);
+
 #ifdef SHARE_TREE_DATA
 	(void) prof_mutex_lock(&g_shared_trees_mutex);
 	for (data = g_shared_trees; data; data = data->next) {
-	    if (!strcmp(data->filespec, filespec)
+	    if (!strcmp(data->filespec, expanded_filename)
 		/* Check that current uid has read access.  */
-		&& r_access(data->filespec) == 0)
+		&& r_access(data->filespec))
 		break;
 	}
 	if (data) {
 	    retval = profile_update_file_data(data);
 	    data->refcount++;
 	    (void) prof_mutex_unlock(&g_shared_trees_mutex);
+	    free(expanded_filename);
 	    prf->data = data;
 	    *ret_prof = prf;
 	    return retval;
@@ -129,23 +160,7 @@ errcode_t profile_open_file(filespec, ret_prof)
 	data->magic = PROF_MAGIC_FILE_DATA;
 	data->refcount = 1;
 	data->comment = 0;
-
-	len = strlen(filespec)+1;
-	if (filespec[0] == '~' && filespec[1] == '/') {
-		home_env = getenv("HOME");
-		if (home_env)
-			len += strlen(home_env);
-	}
-	data->filespec = malloc(len);
-	if (!data->filespec) {
-		free(prf);
-		return ENOMEM;
-	}
-	if (home_env) {
-		strcpy(data->filespec, home_env);
-		strcat(data->filespec, filespec+1);
-	} else
-		strcpy(data->filespec, filespec);
+	data->filespec = expanded_filename;
 
 	retval = profile_update_file(prf);
 	if (retval) {
