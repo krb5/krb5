@@ -1,3 +1,9 @@
+Fri Mar 31 16:30:03 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* realm_dom.c (krb5_get_realm_domain): Don't indent #ifdef's!
+
+	* hst_realm.c (krb5_get_host_realm): Don't indent #ifdef's!
+
 Thu Mar 30 15:54:54 1995 Keith Vetter (keithv@fusion.com)
 
 	* localaddr.c: in Windows/Mac code, fixed bug due to wrong level
