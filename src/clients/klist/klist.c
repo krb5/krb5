@@ -60,20 +60,18 @@ int show_etype = 0, show_addresses = 0, no_resolve = 0;
 char *defname;
 char *progname;
 krb5_int32 now;
-int timestamp_width;
+unsigned int timestamp_width;
 
 krb5_context kcontext;
 
 char * etype_string KRB5_PROTOTYPE((krb5_enctype ));
-void show_credential KRB5_PROTOTYPE((char *,
-				krb5_context,
-				krb5_creds *));
+void show_credential KRB5_PROTOTYPE((krb5_creds *));
 	
 void do_ccache KRB5_PROTOTYPE((char *));
 void do_keytab KRB5_PROTOTYPE((char *));
 void printtime KRB5_PROTOTYPE((time_t));
 void one_addr KRB5_PROTOTYPE((krb5_address *));
-void fillit KRB5_PROTOTYPE((FILE *, int, int));
+void fillit KRB5_PROTOTYPE((FILE *, unsigned int, int));
 
 #ifdef KRB5_KRB4_COMPAT
 void do_v4_ccache KRB5_PROTOTYPE((char *));
@@ -99,12 +97,12 @@ static int default_k4 = 1;
 static int default_k4 = 0;
 #endif
 
-void usage()
+static void usage()
 {
 #define KRB_AVAIL_STRING(x) ((x)?"available":"not available")
 
-    fprintf(stderr, "Usage: %s [-5] [-4] [-e] [[-c] [-f] [-s] [-a [-n]]] "
-	     "[-k [-t] [-K]] [name]\n", progname); 
+    fprintf(stderr, "Usage: %s [-5] [-4] [-e] [[-c] [-f] [-s] [-a [-n]]] %s",
+	     progname, "[-k [-t] [-K]] [name]\n"); 
     fprintf(stderr, "\t-5 Kerberos 5 (%s)\n", KRB_AVAIL_STRING(got_k5));
     fprintf(stderr, "\t-4 Kerberos 4 (%s)\n", KRB_AVAIL_STRING(got_k4));
     fprintf(stderr, "\t   (Default is %s%s%s%s)\n",
@@ -448,7 +446,7 @@ void do_ccache(name)
 		creds.times.endtime > now)
 		exit_status = 0;
 	} else {
-	    show_credential(progname, kcontext, &creds);
+	    show_credential(&creds);
 	}
 	krb5_free_cred_contents(kcontext, &creds);
     }
@@ -491,7 +489,7 @@ etype_string(enctype)
     return buf;
 }
 
-char *
+static char *
 flags_string(cred)
     register krb5_creds *cred;
 {
@@ -541,9 +539,7 @@ printtime(tv)
 }
 
 void
-show_credential(progname, kcontext, cred)
-    char 		* progname;
-    krb5_context  	  kcontext;
+show_credential(cred)
     register krb5_creds * cred;
 {
     krb5_error_code retval;
@@ -704,9 +700,9 @@ void one_addr(a)
 
 void
 fillit(f, num, c)
-    FILE	*f;
-    int		num;
-    int		c;
+    FILE		*f;
+    unsigned int	num;
+    int			c;
 {
     int i;
 
@@ -755,7 +751,8 @@ do_v4_ccache(name)
      */
 
     /* Open ticket file */
-    if (k_errno = tf_init(file, R_TKT_FIL)) {
+    k_errno = tf_init(file, R_TKT_FIL);
+    if (k_errno) {
 	fprintf(stderr, "%s: %s\n", progname, krb_get_err_text (k_errno));
 	exit(1);
     }
@@ -775,7 +772,7 @@ do_v4_ccache(name)
     }
 
     /* Open ticket file */
-    if (k_errno = tf_init(file, R_TKT_FIL)) {
+    if ((k_errno = tf_init(file, R_TKT_FIL))) {
 	fprintf(stderr, "%s: %s\n", progname, krb_get_err_text (k_errno));
 	exit(1);
     }

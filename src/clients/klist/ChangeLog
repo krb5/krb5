@@ -1,3 +1,9 @@
+2000-08-02  Ezra Peisach  <epeisach@mit.edu>
+
+	* klist.c: Compiler warning cleanups by declaring functions as
+	static, using existing global variables instead of trying to
+	shadow them, and removing assignments from conditionals.
+
 2000-04-19  Danilo Almeida  <dalmeida@mit.edu>
 
 	* Makefile.in: Link in getopt library on Windows.
