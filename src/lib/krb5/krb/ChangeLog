@@ -1,5 +1,7 @@
 Wed May 24 18:19:17 1995  Theodore Y. Ts'o  (tytso@dcl)
 
+	* Makefile.in, configure.in: Add rules for building shared library.
+
 	* gc_via_tkt.c (krb5_kdcrep2creds): On an error, free the keyblock.
 
 Tue May 23 16:28:42 1995  Theodore Y. Ts'o  (tytso@dcl)
