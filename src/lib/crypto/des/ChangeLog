@@ -1,3 +1,7 @@
+Tue Oct 21 13:22:23 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* Makefile.in (RUN_SETUP): Set KRB5_CONFIG.
+
 Tue Oct 14 15:35:53 1997  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
 
 	* des_int.h: Use better logic to find an appropriate type for
