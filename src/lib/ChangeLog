@@ -1,3 +1,8 @@
+Tue May 23 22:25:03 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* Makefile.in (clean-unix): Remove symlinks to libkrb4.a and
+		libkdb4.a. 
+
 Tue May  2 21:39:26 1995  Tom Yu  (tlyu@dragons-lair)
 
 	* Makefile.in: nuke spurious whitespace from blank line
