@@ -77,11 +77,11 @@ void des_init_random_number_generator();
 KRB5_DLLIMP void KRB5_CALLCONV des_set_random_generator_seed();
 void des_set_sequence_number();
 void des_generate_random_block();
-int des_pcbc_encrypt();
-unsigned long des_quad_cksum();
+KRB5_DLLIMP int KRB5_CALLCONV des_pcbc_encrypt();
+KRB5_DLLIMP unsigned long KRB5_CALLCONV des_quad_cksum();
 int des_random_key();
 krb5_error_code des_read_password();
-int des_string_to_key();
+KRB5_DLLIMP int KRB5_CALLCONV des_string_to_key();
 int des_is_weak_key();
 
 #endif	/* DES_DEFS */

@@ -120,13 +120,13 @@ extern int des_debug;
 
 /*** Routines ***************************************************** */
 
-unsigned long
+KRB5_DLLIMP unsigned long KRB5_CALLCONV
 des_quad_cksum(in,out,length,out_count,c_seed)
-    mit_des_cblock *c_seed;		/* secret seed, 8 bytes */
-    unsigned char *in;		/* input block */
-    unsigned KRB_INT32 *out;		/* optional longer output */
-    int out_count;		/* number of iterations */
-    long length;		/* original length in bytes */
+    mit_des_cblock FAR *c_seed;		/* secret seed, 8 bytes */
+    unsigned char FAR *in;		/* input block */
+    unsigned KRB_INT32 FAR *out;	/* optional longer output */
+    int out_count;			/* number of iterations */
+    long length;			/* original length in bytes */
 {
 
     /*

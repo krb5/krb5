@@ -48,10 +48,10 @@ extern int mit_des_debug;
 /*
  * convert an arbitrary length string to a DES key
  */
-int
+KRB5_DLLIMP int KRB5_CALLCONV
 des_string_to_key(str,key)
     char *str;
-    register mit_des_cblock *key;
+    register mit_des_cblock key;
 {
     register char *in_str;
     register unsigned temp;
