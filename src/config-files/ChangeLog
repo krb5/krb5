@@ -1,3 +1,13 @@
+Sat Oct 21 09:07:59 1995  Ezra Peisach  (epeisach@kangaroo.mit.edu)
+    
+	* kdc.conf.M: Fixed typo
+
+	* configure.in, Makefile.in: Install manual pages.
+
+	* .Sanitize: Update file list
+
+	* .cvsignore: Ignore configure
+
 Thu Oct  5 22:38:24 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* kdc.conf.M: Documented kdc_ports, and removed references to

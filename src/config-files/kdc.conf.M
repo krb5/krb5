@@ -53,7 +53,7 @@ port 88 and port 750.
 .SH REALMS SECTION
 Each tag in the
 .I [realms]
-section of the file names a Kerbveros realm.  The value of the tag is a
+section of the file names a Kerberos realm.  The value of the tag is a
 subsection where the relations in that subsection define KDC parameters for
 that particular realm.
 .PP

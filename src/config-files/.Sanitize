@@ -23,7 +23,11 @@ Do-first:
 
 Things-to-keep:
 
+.cvsignore
 ChangeLog
+Makefile.in
+configure
+configure.in
 convert-config-files
 kdc.conf
 kdc.conf.M
