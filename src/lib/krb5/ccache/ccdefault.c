@@ -93,7 +93,7 @@ krb5_cc_default(context, ccache)
     	/* We got a ccache... remember what principal is associated with it */
     	err = krb5_cc_get_principal (context, *ccache, &os_ctx->default_ccprincipal);
     	if (err)
-    		os_ctx->default_ccprincipal == 0;
+    		os_ctx->default_ccprincipal = 0;
     }
     return retval;
 }
