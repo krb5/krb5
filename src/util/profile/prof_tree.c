@@ -441,7 +441,7 @@ errcode_t profile_node_iterator(iter_p, ret_node, ret_name, ret_value)
 	errcode_t			retval;
 	int				skip_num = 0;
 
-	if (iter->magic != PROF_MAGIC_ITERATOR)
+	if (!iter || iter->magic != PROF_MAGIC_ITERATOR)
 		return PROF_MAGIC_ITERATOR;
 	/*
 	 * If the file has changed, then the node pointer is invalid,

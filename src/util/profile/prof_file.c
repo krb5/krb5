@@ -29,17 +29,29 @@ errcode_t profile_open_file(filename, ret_prof)
 {
 	prf_file_t	prf;
 	errcode_t	retval;
+	char		*home_env = 0;
+	int		len;
 
 	prf = malloc(sizeof(struct _prf_file_t));
 	if (!prf)
 		return ENOMEM;
 	memset(prf, 0, sizeof(struct _prf_file_t));
-	prf->filename = malloc(strlen(filename)+1);
+	len = strlen(filename)+1;
+	if (filename[0] == '~' && filename[1] == '/') {
+		home_env = getenv("HOME");
+		if (home_env)
+			len += strlen(home_env);
+	}
+	prf->filename = malloc(len);
 	if (!prf->filename) {
 		free(prf);
 		return ENOMEM;
 	}
-	strcpy(prf->filename, filename);
+	if (home_env) {
+		strcpy(prf->filename, home_env);
+		strcat(prf->filename, filename+1);
+	} else
+		strcpy(prf->filename, filename);
 	prf->magic = PROF_MAGIC_FILE;
 
 	retval = profile_update_file(prf);

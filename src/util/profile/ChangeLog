@@ -1,3 +1,14 @@
+1998-12-31  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* prof_tree.c (profile_node_iterator): Make sure the pointer to
+		the iterator function is non-NULL before checking the
+		magic value.
+
+1998-12-15  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* prof_file.c (profile_open_file): Add ability to parse filenames
+		that begin with "~/" and substitute it with "$HOME/".
+
 1998-12-04  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* prof_get.c: Add new public profile_iterator functions for
