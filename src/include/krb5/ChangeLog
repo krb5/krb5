@@ -1,3 +1,8 @@
+Thu Jan 12 01:55:54 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* Makefile.in (install): constructed headers come from the build
+	tree, not the source tree.
+
 Fri Dec 23 22:29:43 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* krb5.h (krb5_cred): Add enc_part2 member which may point to the
