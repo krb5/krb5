@@ -62,7 +62,7 @@ main(argc, argv)
     krb5_address **my_addresses;
     krb5_error_code code;
     krb5_principal me;
-    krb5_data *server[3];
+    krb5_data *server[4];
     krb5_creds my_creds;
     
     /*
@@ -137,7 +137,8 @@ main(argc, argv)
 
     server[0] = me[0];		/* realm name */
     server[1] = &tgtname;
-    server[2] = 0;
+    server[2] = me[0];
+    server[3] = 0;
 
     code = krb5_os_localaddr(&my_addresses);
     if (code != 0) {
