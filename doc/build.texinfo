@@ -769,11 +769,12 @@ NetBSD and FreeBSD.)
 @node HPUX, Solaris versions 2.0 through 2.3, BSDI, OS Incompatibilities
 @subsection HPUX
 
-The native (bundled) compiler for HPUX currently will not work, because
-it is not a full ANSI C compiler.  The optional compiler (c89) should
-work as long as you give it the @samp{-D_HPUX_SOURCE} flag
-(i.e. @samp{./configure CC='c89 -D_HPUX_SOURCE'}).  This has only
-been tested recently for HPUX 10.20.
+The native (bundled) compiler for HPUX currently will not work,
+because it is not a full ANSI C compiler.  The optional ANSI C
+compiler should work as long as you give it the @samp{-Ae} flag
+(i.e. @samp{./configure CC='cc -Ae}).  This is equivalent to
+@samp{./configure CC='c89 -D_HPUX_SOURCE'}, which was the previous
+recommendation.  This has only been tested recently for HPUX 10.20.
 
 @node Solaris versions 2.0 through 2.3, Solaris 2.X, HPUX, OS Incompatibilities
 @subsection Solaris versions 2.0 through 2.3
