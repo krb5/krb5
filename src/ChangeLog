@@ -1,3 +1,8 @@
+2002-07-17  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Don't make a Makefile in util/dyn.
+	* krb5-config.in: Don't include "-ldyn".
+
 2002-07-12  Ken Raeburn  <raeburn@mit.edu>
 
 	* aclocal.m4 (KRB5_BUILD_LIBRARY_STATIC): Disable installation of

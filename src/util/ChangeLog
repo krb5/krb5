@@ -1,5 +1,8 @@
 2002-07-17  Ken Raeburn  <raeburn@mit.edu>
 
+	* Makefile.in (MY_SUBDIRS): Delete dyn.
+	* dyn: Directory and contents deleted.
+
 	* reconf: Create include/krb5/autoconf.stmp on success if it
 	didn't already exist.
 

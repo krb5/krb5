@@ -189,7 +189,7 @@ if test -n "$do_libs"; then
     fi
 
     if test $library = 'kadm_common'; then
-	lib_flags="$lib_flags -lgssrpc -ldyn"
+	lib_flags="$lib_flags -lgssrpc"
 	library=gssapi
     fi
 

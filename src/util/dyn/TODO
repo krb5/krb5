@@ -1,3 +1,0 @@
-o be able to get obj->size
-o be able to get array without DynAdd (so you can just use DynPut)
-o be able to specify bzero on realloc

@@ -1,7 +1,7 @@
 thisconfigdir=./..
 myfulldir=util
 mydir=util
-MY_SUBDIRS=et ss profile pty dyn db2 send-pr
+MY_SUBDIRS=et ss profile pty db2 send-pr
 BUILDTOP=$(REL)$(U)
 
 MAC_SUBDIRS = profile et

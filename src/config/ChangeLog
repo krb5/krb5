@@ -1,3 +1,8 @@
+2002-07-17  Ken Raeburn  <raeburn@mit.edu>
+
+	* pre.in (DYN_DEPLIB): Removed.
+	(GSSRPC_DEPLIBS, GSSRPC_LIBS): Drop libdyn references.
+
 2002-07-13  Tom Yu  <tlyu@mit.edu>
 
 	* pre.in (PTY_DEPLIB): Fix to reflect always being built static.
