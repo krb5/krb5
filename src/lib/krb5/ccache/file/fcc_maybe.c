@@ -267,15 +267,35 @@ krb5_fcc_open_file (context, id, mode)
 	     (void) close(fd);
 	     return KRB5_CCACHE_BADVNO;
 	 }
-	 if ((fcc_fvno != htons(KRB5_FCC_FVNO_3)) &&
+	 if ((fcc_fvno != htons(KRB5_FCC_FVNO_4)) &&
+	     (fcc_fvno != htons(KRB5_FCC_FVNO_3)) &&
 	     (fcc_fvno != htons(KRB5_FCC_FVNO_2)) &&
 	     (fcc_fvno != htons(KRB5_FCC_FVNO_1))) {
 	     (void) fcc_lock_file(data, fd, UNLOCK_IT);
 	     (void) close(fd);
 	     return KRB5_CCACHE_BADVNO;
 	 }
-	 data->version = ntohs(fcc_fvno);
-     }
-     data->fd = fd;
-     return 0;
+	if (fcc_fvno == htons(KRB5_FCC_FVNO_4)) {
+     	    krb5_ui_2 fcc_flen;
+	    char buf[1024];
+	    
+	    if (read(fd, (char *)&fcc_flen, sizeof(fcc_flen)) 
+		!= sizeof(fcc_flen)) {
+		     (void) fcc_lock_file(data, fd, UNLOCK_IT);
+		     (void) close(fd);
+		     return KRB5_CCACHE_BADVNO;
+	    }
+	    /* Skip past the header info for now */
+	    if (fcc_flen = htons(fcc_flen)) {
+	        if (read(fd, buf, fcc_flen) != fcc_flen) {
+		     (void) fcc_lock_file(data, fd, UNLOCK_IT);
+		     (void) close(fd);
+		     return KRB5_CCACHE_BADVNO;
+		}
+	    }
+	}
+	data->version = ntohs(fcc_fvno);
+    }
+    data->fd = fd;
+    return 0;
 }
