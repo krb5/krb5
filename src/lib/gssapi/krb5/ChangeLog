@@ -1,3 +1,8 @@
+2001-02-27	Alexandra Ellwood <lxs@mit.edu>
+
+	* disp-status.c, gssapiP_krb5.h, gssapi_krb5.h: Updated Mac OS #defines
+	and #includes for new header layout and Mac OS X frameworks
+	
 2001-01-30  Ezra Peisach  <epeisach@mit.edu>
 
 	* accept_sec_context.c (krb5_gss_accept_sec_context): If an error

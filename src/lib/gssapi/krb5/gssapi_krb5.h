@@ -23,7 +23,11 @@
 #ifndef _GSSAPI_KRB5_H_
 #define _GSSAPI_KRB5_H_
 
+#if TARGET_OS_MAC
+#include <Kerberos5/Kerberos5.h>
+#else
 #include <krb5.h>
+#endif
 
 /* C++ friendlyness */
 #ifdef __cplusplus

@@ -51,7 +51,12 @@
  * $Id$
  */
 
+#if TARGET_OS_MAC
+#include <Kerberos5/Kerberos5.h>
+#else
 #include <krb5.h>
+#endif
+
 #include <memory.h>
 
 /* work around sunos braindamage */
