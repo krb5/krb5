@@ -72,8 +72,13 @@ Notes, Major Changes, and Known Bugs for 1.3
   that will probably frustrate any attempts to run this code under SunOS
   4 or other pre-C89 systems.
 
-* Some new code, bug fixes, and cleanup for IPv6 support.  [[TODO:
-  Insert list of (non-)supporting programs and libraries here.]]
+* Some new code, bug fixes, and cleanup for IPv6 support.  Most of the
+  code should support IPv6 transparently now.  The RPC code (and
+  therefore the admin system, which is based on it) does not yet
+  support IPv6.  The support for Kerberos 4 may work with IPv6 in very
+  limited ways, if the address checking is turned off.  The FTP client
+  and server do not have support for the new protocol messages needed
+  for IPv6 support (RFC 2429).
 
 * We have upgraded to autoconf 2.52 (or later), and the syntax for
   specifying certain configuration options have changed.  For example,
@@ -94,6 +99,9 @@ Notes, Major Changes, and Known Bugs for 1.3
   may not work with the krb5 sources.  Many configure-time variables
   can be used to help the compiler and linker find the installed
   packages; see the build documentation for details.
+
+  We have not tested this change with version 4 of the Berkeley DB
+  library.
 
 * The AES cryptosystem has been implemented.  However, support in the
   Kerberos GSSAPI mechanism has not been written (or even fully
