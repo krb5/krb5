@@ -1,5 +1,7 @@
 2001-07-19  Ezra Peisach  <epeisach@mit.edu>
 
+	* xdr_mem.c: Do not assume that XDR x_private field is char *.
+
 	* auth.h: AUTH ah_private structure element changed to void *. 
 
 	* clnt.h: CLIENT cl_private structure element changed to type void *. 

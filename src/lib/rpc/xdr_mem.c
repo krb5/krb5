@@ -102,7 +102,7 @@ xdrmem_getlong(xdrs, lp)
 	if ((xdrs->x_handy -= sizeof(rpc_int32)) < 0)
 		return (FALSE);
 	*lp = (long)ntohl(*((rpc_u_int32 *)(xdrs->x_private)));
-	xdrs->x_private += sizeof(rpc_int32);
+	xdrs->x_private = (char *)xdrs->x_private + sizeof(rpc_int32);
 	return (TRUE);
 }
 
@@ -115,7 +115,7 @@ xdrmem_putlong(xdrs, lp)
 	if ((xdrs->x_handy -= sizeof(rpc_int32)) < 0)
 		return (FALSE);
 	*(rpc_int32 *)xdrs->x_private = (rpc_int32)htonl((rpc_u_int32)(*lp));
-	xdrs->x_private += sizeof(rpc_int32);
+	xdrs->x_private = (char *)xdrs->x_private + sizeof(rpc_int32);
 	return (TRUE);
 }
 
@@ -129,7 +129,7 @@ xdrmem_getbytes(xdrs, addr, len)
 	if ((xdrs->x_handy -= len) < 0)
 		return (FALSE);
 	memmove(addr, xdrs->x_private, len);
-	xdrs->x_private += len;
+	xdrs->x_private = (char *)xdrs->x_private + len;
 	return (TRUE);
 }
 
@@ -143,7 +143,7 @@ xdrmem_putbytes(xdrs, addr, len)
 	if ((xdrs->x_handy -= len) < 0)
 		return (FALSE);
 	memmove(xdrs->x_private, addr, len);
-	xdrs->x_private += len;
+	xdrs->x_private = (char *)xdrs->x_private + len;
 	return (TRUE);
 }
 
@@ -164,7 +164,7 @@ xdrmem_setpos(xdrs, pos)
 	unsigned int pos;
 {
 	register caddr_t newaddr = xdrs->x_base + pos;
-	register caddr_t lastaddr = xdrs->x_private + xdrs->x_handy;
+	register caddr_t lastaddr = (char *) xdrs->x_private + xdrs->x_handy;
 
 	if ((long)newaddr > (long)lastaddr)
 		return (FALSE);
@@ -183,7 +183,7 @@ xdrmem_inline(xdrs, len)
 	if (xdrs->x_handy >= len) {
 		xdrs->x_handy -= len;
 		buf = (rpc_int32 *) xdrs->x_private;
-		xdrs->x_private += len;
+		xdrs->x_private = (char *)xdrs->x_private + len;
 	}
 	return (buf);
 }
