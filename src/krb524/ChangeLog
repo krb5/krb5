@@ -1,3 +1,8 @@
+2001-02-05  Tom Yu  <tlyu@mit.edu>
+
+	* cnv_tkt_skey.c (krb524_convert_tkt_skey): Avoid double-free;
+	caller should free v5tkt.
+
 2000-10-17  Ezra Peisach  <epeisach@mit.edu>
 
 	* encode.c, krb524.h: encode_v4tkt() and decode_v4tkt() now take

@@ -68,7 +68,6 @@ int krb524_convert_tkt_skey(context, v5tkt, v4tkt, v5_skey, v4_skey,
 
      v5tkt->enc_part2 = NULL;
      if ((ret = krb5_decrypt_tkt_part(context, v5_skey, v5tkt))) {
-	  krb5_free_ticket(context, v5tkt);
 	  return ret;
      }
      v5etkt = v5tkt->enc_part2;
