@@ -37,14 +37,18 @@ link tree for your build tree.
 
 The first step in each of these build procedures is to unpack the source
 distribution.  The Kerberos V5 distribution comes in two compressed tar
-files.  The first file, which is generally named @file{krb5.src.tar.gz},
-contains the sources for all of Kerberos except for the crypto library,
-which is found in the file @file{krb5.crypto.tar.gz}.
+files.  The first file, which is generally named
+@file{krb5-1.0.src.tar.gz}, contains the sources for all of Kerberos
+except for the crypto library, which is found in the file
+@file{krb5-1.0.crypto.tar.gz}.
 
 Both files should be unpacked in the same directory, such as
-@file{/u1/krb5}.  (In the rest of this document, we will assume that you
-have chosen to unpack the Kerberos V5 source distribution in this
-directory.)
+@file{/u1/krb5-1.0}.  (In the rest of this document, we will assume that
+you have chosen to unpack the Kerberos V5 source distribution in this
+directory.  Note that the tarfiles will by default all unpack into the
+@file{./krb5-1.0} directory, so that if your current directory is
+@file{/u1} when you unpack the tarfiles, you will get
+@file{/u1/krb5-1.0/src}, etc.)
 
 
 @node Doing the Build, Testing the Build, Unpacking the Sources, Building Kerberos V5
@@ -73,7 +77,7 @@ use the following abbreviated procedure.
 
 @enumerate
 @item
- @code{cd /u1/krb5/src}
+ @code{cd /u1/krb5-1.0/src}
 @item
  @code{./configure}
 @item
@@ -96,9 +100,9 @@ you might use the following procedure:
 
 @enumerate
 @item 
-@code{mkdir /u1/krb5/pmax}
+@code{mkdir /u1/krb5-1.0/pmax}
 @item
- @code{cd /u1/krb5/pmax}
+ @code{cd /u1/krb5-1.0/pmax}
 @item
  @code{../src/configure}
 @item
@@ -118,11 +122,11 @@ you might use the following procedure:
 
 @enumerate
 @item
- @code{mkdir /u1/krb5/solaris}
+ @code{mkdir /u1/krb5-1.0/solaris}
 @item
- @code{cd /u1/krb5/solaris}
+ @code{cd /u1/krb5-1.0/solaris}
 @item
- @code{/u1/krb5/src/util/lndir `pwd`/../src}
+ @code{/u1/krb5-1.0/src/util/lndir `pwd`/../src}
 @item
  @code{./configure}
 @item
@@ -148,9 +152,10 @@ building Kerberos; see @ref{Doing the Build}.):
 
 @menu
 * The DejaGnu Tests::           
+* The KADM5 Tests::     
 @end menu
 
-@node The DejaGnu Tests,  , Testing the Build, Testing the Build
+@node The DejaGnu Tests,  The KADM5 Tests, Testing the Build, Testing the Build
 @subsection The DejaGnu Tests 
 
 Some of the built-in regression tests are setup to use the DejaGnu
@@ -158,24 +163,52 @@ framework for running tests. These tests tend to be more comprehensive
 than the normal built-in tests as they setup test servers and test
 client/server activities. 
 
-DejaGnu may be found wherever GNU software is archived. 
+DejaGnu may be found wherever GNU software is archived.  
 
-Most of the tests are setup to run as a non-privledged user. There are
-two series of tests (@samp{rlogind} and @samp{telnetd}) which require
-the ability to @samp{rlogin} as root to the local machine. Admittedly,
-this does require the use of a @file{.rhosts} file or some other
-authenticated means. @footnote{If you are fortunate enough to have a
-previous version of Kerberos V5 or V4 installed, and the Kerberos rlogin
-is first in your path, you can setup @file{.k5login} or @file{.klogin}
-respectively to allow you access.}
+Most of the tests are setup to run as a non-privledged user.  For some
+of the krb-root tests to work properly, either (a) the user running the
+tests must not have a .k5login file in the home directory or (b) the
+.k5login file must contain an entry for @code{<username>@@KRBTEST.COM}.
+There are two series of tests (@samp{rlogind} and @samp{telnetd}) which
+require the ability to @samp{rlogin} as root to the local
+machine. Admittedly, this does require the use of a @file{.rhosts} file
+or some authenticated means. @footnote{If you are fortunate enough to
+have a previous version of Kerberos V5 or V4 installed, and the Kerberos
+rlogin is first in your path, you can setup @file{.k5login} or
+@file{.klogin} respectively to allow you access.}
 
 If you cannot obtain root access to your machine, all the other tests
 will still run. Note however, with DejaGnu 1.2, the "untested testcases"
 will cause the testsuite to exit with a non-zero exit status which
 @samp{make} will consider a failure of the testing process. Do not worry
 about this, as these tests are the last run when @samp{make check} is
-executed from the top level of the build tree.
+executed from the top level of the build tree.  This problem does not
+exist with DejaGnu 1.3.
 
+@node The KADM5 Tests,  , The DejaGnu Tests, Testing the Build
+@subsection The KADM5 Tests
+
+Regression tests for the KADM5 system, including the GSS-RPC, KADM5
+client and server libraries, and kpasswd, are also included in this
+release.  Each set of KADM5 tests is contained in a sub-directory called
+@code{unit-test} directly below the system being tested.  For example,
+lib/rpc/unit-test contains the tests for GSS-RPC.  The tests are all
+based on DejaGnu (but they are not actually called part of "The DejaGnu
+tests," whose naming predates the inclusion of the KADM5 system).  In
+addition, they require the Tool Command Language (TCL) header files and
+libraries to be available during compilation and some of the tests also
+require Perl in order to operate.  If all of these resources are not
+available during configuration, the KADM5 tests will not run.  The TCL
+installation directory can be specified with the @code{--with-tcl}
+configure option (see @xref{Options to Configure}).  The runtest and
+perl programs must be in the current execution path.
+
+If you install DejaGnu, TCL, or Perl after configuring and building
+Kerberos and then want to run the KADM5 tests, you will need to
+re-configure the tree and run @code{make} at the top level again to make
+sure all the proper programs are built.  To save time, you actually only
+need to reconfigure and build in the directories src/kadmin/testing,
+src/lib/rpc, src/lib/kadm5, and src/kpasswd.
 
 @node Options to Configure, osconf.h, Testing the Build, Building Kerberos V5
 @section Options to Configure 
@@ -202,6 +235,13 @@ desire a different location use this option.
 
 This option allows one to separate the architecture independent programs
 from the configuration files and manual pages. 
+
+@item --localstatedir=DIR
+
+This option sets the directory for locally modifiable single-machine
+data.  In Kerberos, this mostly is useful for setting a location for the
+KDC data files, as they will be installed in LOCALSTATEDIR/krb5kdc,
+which is by default PREFIX/var/krb5kdc.
 
 @item --with-cc=COMPILER
 
@@ -239,10 +279,11 @@ builtin Kerberos V4 library.
 
 @item  --with-krb4=KRB4DIR 
 
-This option enables Kerberos V4 backwards compatibility.  The directory
-specified by @code{KRB4DIR} specifies where the V4 header files should
-be found (@file{/KRB4DIR/include}) as well as where the V4 Kerberos
-library should be found (@file{/KRB4DIR/lib}).
+This option enables Kerberos V4 backwards compatibility using a
+pre-existing Kerberos V4 installation.  The directory specified by
+@code{KRB4DIR} specifies where the V4 header files should be found
+(@file{/KRB4DIR/include}) as well as where the V4 Kerberos library
+should be found (@file{/KRB4DIR/lib}).
 
 @item  --without-krb4
 
@@ -280,22 +321,12 @@ you're using slave servers!!!  It also causes the database to be
 modified (and thus needing to be locked) frequently. Please note that
 the implementors do not regularly test this feature.
 
-@item --with-kdb-db=database 
+@item --with-tcl=TCLPATH
 
-The configuration process will try to determine a working set of
-libraries required to implement the Kerberos database. Configure will
-look for interfaces that use or emulate a @samp{ndbm} or @samp{dbm}
-library. Failing that, a build in copy of the Berkeley DB code will be
-used. You may decide to compile a different interface than the default
-by specifying one of "ndbm", "dbm", or "db". 
-
-An important note on platforms where the @samp{ndbm} implementation is
-based on @sc{GDBM} (such as the Linux Slackware distribution). @sc{GDBM}
-has its own built in file locking which prevents simultaneous access to
-the database from two separate processes in which one wants to modify
-the database while the otherone only wants to read. (i.e. the KDC and
-administrative servers). In this case, you will need to specify the use
-of the Berkeley DB.
+Some of the unit-tests in the build tree rely upon using a program in
+Tcl. The directory specified by @code{TCLPATH} specifies where the Tcl
+header file (@file{/TCLPATH/include/tcl.h} as well as where the Tcl
+library should be found (@file{/TCLPATH/lib}).
 
 @end table
 
@@ -329,11 +360,6 @@ realms, their KDCs, etc.
 
 The profile file format is no longer the same format as Kerberos V4's
 @file{krb.conf} file. 
-
-@item DEFAULT_LNAME_FILENAME
-
-The pathname to the database that maps authentication names to local
-account names.  See kdb5_anadd(8).
 
 @item DEFAULT_KEYTAB_NAME
 
@@ -371,7 +397,7 @@ of the libraries may be installed on the same system and continue to
 work.
 
 Currently the supported platforms are: NetBSD 1.0A, AIX 3.2.5, AIX 4.1,
-Solaris 5.3, Alpha OSF/1 >= 2.1, HP-UX >= 9.X.
+Solaris 2.4 (aka SunOS 5.4), Alpha OSF/1 >= 2.1, HP-UX >= 9.X.
 
 To enable shared libraries on the above platforms, run the configure
 script with the option @samp{--enable-shared}.
@@ -503,10 +529,6 @@ LD_LIBRARY_PATH environment variable when you compile it.  Alternatively
 you can use the @code{-i} option to @samp{cc}, by using the specifying
 @code{--with-ccopts=-i} option to @samp{configure}.
 
-Shared library support only works when using the Sunsoft C compiler. We
-are currently using version 3.0.1.   (The latest GCC may work; this
-needs to be tested.)
-
 @node SGI Irix 5.X, Ultrix 4.2/3, Solaris 2.X, OS Incompatibilities
 @subsection SGI Irix 5.X
 
@@ -581,7 +603,7 @@ that you have made a change that will require that all the
 @code{--force} option:
 
 @example
-% cd /u1/krb5/src
+% cd /u1/krb5-1.0/src
 % ./util/reconf --force
 @end example
 
@@ -601,7 +623,7 @@ Then follow the instructions for building packaged source trees (above).
 To install the binaries into a binary tree, do:
 
 @example
-% cd /u1/krb5/src
+% cd /u1/krb5-1.0/src
 % make all
 % make install DESTDIR=somewhere-else
 @end example

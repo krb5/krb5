@@ -23,8 +23,8 @@
 @set PREVRELEASE beta 7
 @set INSTALLDIR /usr/@value{LCPRODUCT}
 @set PREVINSTALLDIR @value{INSTALLDIR}
-@set ROOTDIR /usr/@value{LCPRODUCT}
-@set BINDIR /usr/@value{LCPRODUCT}/bin
+@set ROOTDIR /usr/local
+@set BINDIR /usr/local/bin
 @set SECONDDOMAIN fubar.org
 @set SECONDREALM FUBAR.ORG
 @set UPDATED @today

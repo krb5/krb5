@@ -3,7 +3,7 @@
 \input texinfo @c -*-texinfo-*-
 @c %**start of header
 @c guide
-@setfilename kerberos-admin.info
+@setfilename krb5-admin.info
 @settitle Kerberos V5 System Administrator's Guide
 @setchapternewpage odd                  @c chapter begins on next odd page
 @c @setchapternewpage on                   @c chapter begins on next page
@@ -15,7 +15,8 @@
 @end iftex
 
 @include definitions.texinfo
-@set EDITION b7-1
+@set EDITION 1.0
+@set UPDATED November 27, 1996
 
 @finalout                               @c don't print black warning boxes
 
@@ -58,6 +59,7 @@ installation.
 * Copyright::                   
 * Introduction::                
 * How Kerberos Works::          
+* Configuration Files::         
 * Administrating Kerberos Database Entries::  
 * Application Servers::         
 * Backups of Secure Hosts::     
@@ -116,7 +118,7 @@ The appendices include sample configuration files, the list of Kerberos
 error messages, and a complete list of the time zones understood by
 @code{kadmin}.
 
-@node How Kerberos Works, Administrating Kerberos Database Entries, Introduction, Top
+@node How Kerberos Works, Configuration Files, Introduction, Top
 @chapter How Kerberos Works
 
 This section provides a simplified description of a general user's
@@ -329,7 +331,593 @@ Following are definitions of some of the Kerberos terminology.
 
 @include glossary.texinfo
 
-@node Administrating Kerberos Database Entries, Application Servers, How Kerberos Works, Top
+@node Configuration Files, Administrating Kerberos Database Entries, How Kerberos Works, Top
+@chapter Configuration Files
+
+@menu
+* krb5.conf::                   
+* kdc.conf::                    
+@end menu
+
+@node krb5.conf, kdc.conf, Configuration Files, Configuration Files
+@section krb5.conf
+
+The @code{krb5.conf} file contains Kerberos configuration information,
+including the locations of KDCs and admin servers for the Kerberos
+realms of interest, defaults for the current realm and for Kerberos
+applications, and mappings of hostnames onto Kerberos realms.  Normally,
+you should install your @code{krb5.conf} file in the directory
+@code{/etc}.  You can override the default location by setting the
+environment variable @samp{KRB5_CONFIG}.
+
+The @code{krb5.conf} file is set up in the style of a Windows INI file.
+Sections are headed by the section name, in square brackets.  Each
+section may contain zero or more relations, of the form:
+
+@smallexample
+foo = bar
+@end smallexample
+
+@noindent
+or
+
+@smallexample
+@group
+fubar = @{
+        foo = bar
+        baz = quux
+@}
+@end group
+@end smallexample
+
+The @code{krb5.conf} file may contain any or all of the following seven
+sections:
+
+@table @b
+@itemx libdefaults
+Contains default values used by the Kerberos V5 library.
+
+@itemx appdefaults
+Contains default values used by Kerberos V5 applications.
+
+@itemx realms
+Contains subsections keyed by Kerberos realm names.  Each subsection
+describes realm-specific information, including where to find the
+Kerberos servers for that realm.
+
+@itemx domain_realm
+Contains relations which map domain names and subdomains onto Kerberos
+realm names.  This is used by programs to determine what realm a host
+should be in, given its fully qualified domain name.
+
+@itemx logging
+Contains relations which determine how Kerberos programs are to perform
+logging.
+
+@itemx capaths
+Contains the authentication paths used with direct (nonhierarchical)
+cross-realm authentication.  Entries in this section are used by the
+client to determine the intermediate realms which may be used in
+cross-realm authentication.  It is also used by the end-service when
+checking the transited field for trusted intermediate realms.
+
+@itemx kdc
+For a KDC, may contain the location of the kdc.conf file.
+@end table
+
+@menu
+* libdefaults::                 
+* appdefaults::                 
+* realms (krb5.conf)::          
+* domain_realm::                
+* logging::                     
+* capaths::                     
+* kdc::                         
+* Sample krb5.conf File::       
+@end menu
+
+@node libdefaults, appdefaults, krb5.conf, krb5.conf
+@subsection [libdefaults]
+
+The @code{libdefaults} section may contain any of the following
+relations:
+
+@table @b
+@itemx default_realm
+Identifies the default Kerberos realm for the client.  Set its value to
+your Kerberos realm.
+
+@itemx default_tgs_enctypes
+Identifies the supported list of session key encryption types that
+should be returned by the KDC.  The list may be delimited with commas or
+whitespace.  Currently, the only supported encryption type is
+"des-cbc-crc".  Support for other encryption types is planned in the
+future.
+
+@itemx default_tkt_enctypes
+Identifies the supported list of session key encryption
+types that should be requested by the client.  The format is the same as
+for @emph{default_tkt_enctypes}.  Again, the only supported encryption
+type is "des-cbc-crc".
+
+@itemx clockskew
+Sets the maximum allowable amount of clockskew in seconds that the
+library  will tolerate before assuming that a Kerberos message is
+invalid.  The default value is 300 seconds, or five minutes.
+
+@itemx checksum_type
+Used for compatability with DCE security servers which do not support
+the default CKSUMTYPE_RSA_MD5 used by this version of Kerberos.  A value
+of 1 indicates the default checksum type.  Use a value of 2 to use the
+CKSUMTYPE_RSA_MD4 instead.  This applies to DCE 1.1 and earlier.
+
+@itemx ccache_type
+Use this parameter on systems which are DCE clients, to specify the type
+of cache to be created by kinit, or when forwarded tickets are received.
+DCE and Kerberos can share the cache, but some versions of DCE do not
+support the default cache as created by this version of Kerberos.  Use a
+value of 1 on DCE 1.0.3a systems, and a value of 2 on DCE 1.1 systems.
+@end table
+
+@node appdefaults, realms (krb5.conf), libdefaults, krb5.conf
+@subsection [appdefaults]
+
+Each tag in the [appdefaults] section names a Kerberos V5 application.
+The value of the tag is a subsection with relations that define the
+default behaviors for that application.  
+
+For example:
+
+@smallexample
+@group
+[appdefaults]
+    kinit = @{
+        forwardable = true
+    @}
+    telnet = @{
+        forward = true
+        encrypt = true
+        autologin = true
+    @}
+@end group
+@end smallexample
+
+The list of specifiable options for each application may be found in
+that application's man pages.  The application defaults specified here
+are overridden by those specified in the [realms] section.
+
+@node realms (krb5.conf), domain_realm, appdefaults, krb5.conf
+@subsection [realms]
+
+Each tag in the [realms] section of the file is the name of a Kerberos
+realm.  The value of the tag is a subsection with relations that define
+the properties of that particular realm.  For each realm, the following
+tags may be specified in the realm's subsection:
+
+@table @b
+@itemx kdc
+The name of a host running a KDC for that realm.  An optional port
+number (separated from the hostname by a colon) may be included.
+
+@itemx admin_server
+Identifies the host where the administration server is running.
+Typically this is the master Kerberos server.
+
+@itemx application defaults
+Application defaults that are specific to a particular realm may be
+specified within that realm's tag.  Realm-specific application defaults
+override the global defaults specified in the [appdefaults] section.
+@end table
+
+@node domain_realm, logging, realms (krb5.conf), krb5.conf
+@subsection [domain_realm]
+
+The [domain_realm] section provides a translation from a domain name or
+hostname to a Kerberos realm name.  The tag name can be a host name, or
+a domain name, where domain names are indicated by a prefix of a period
+(@samp{.}).  The value of the relation is the Kerberos realm name for
+that particular host or domain.  Host names and domain names should be
+in lower case.
+
+If no translation entry applies, the host's realm is considered to be
+the hostname's domain portion converted to upper case.  For example, the
+following [domain_realm] section:
+
+@smallexample
+@group
+[domain_realm]
+    @value{PRIMARYDOMAIN} = @value{PRIMARYREALM}
+    crash.@value{PRIMARYDOMAIN} = TEST.@value{PRIMARYREALM}
+    @value{SECONDDOMAIN} = @value{SECONDREALM}
+@end group
+@end smallexample
+
+@noindent
+maps crash.@value{PRIMARYDOMAIN} into the TEST.@value{PRIMARYREALM}
+realm.  All other hosts in the @value{PRIMARYDOMAIN} domain will map by
+default to the @value{PRIMARYREALM} realm, and all hosts in the
+@value{SECONDDOMAIN} domain will map by default into the
+@value{SECONDREALM} realm.  Note the entries for the hosts
+@value{PRIMARYDOMAIN} and @value{SECONDDOMAIN}.  Without these entries,
+@ifset CYGNUS
+these hosts would be mapped into the Kerberos realms @samp{COM} and
+@end ifset
+@ifclear CYGNUS
+these hosts would be mapped into the Kerberos realms @samp{EDU} and
+@end ifclear
+@samp{ORG}, respectively.
+
+@node logging, capaths, domain_realm, krb5.conf
+@subsection [logging]
+The [logging] section indicates how a particular entity is to perform
+its logging.  The relations in this section assign one or more values to
+the entity name.  Currently, the following entities are used:
+
+@table @b
+@itemx kdc
+These entries specify how the KDC is to perform its logging.
+
+@itemx admin_server
+These entries specify how the administrative server
+is to perform its logging.
+
+@itemx default
+These entries specify how to perform logging in the
+absence of explicit specifications otherwise.
+@end table
+
+Values are of the following forms:
+
+@table @b
+@itemx FILE=<filename>
+
+@itemx FILE:<filename> 
+This value causes the entity's logging messages to go to the specified
+file.  If the @samp{=} form is used, the file is overwritten.  If the
+@samp{:} form is used, the file is appended to.
+
+@itemx STDERR
+This value causes the entity's logging messages to go to its standard
+error stream.
+
+@itemx CONSOLE
+This value causes the entity's logging messages to go to the console, if
+the system supports it.
+
+@itemx DEVICE=<devicename>
+This causes the entity's logging messages to go to the specified device.
+
+@itemx SYSLOG[:<severity>[:<facility>]]
+This causes the entity's logging messages to go to the system log.
+
+The @dfn{severity} argument specifies the default severity of system log
+messages.  This may be any of the following severities supported by the
+@code{syslog(3)} call, minus the LOG_ prefix:  LOG_EMERG, LOG_ALERT,
+LOG_CRIT, LOG_ERR, LOG_WARNING, LOG_NOTICE, LOG_INFO, and LOG_DEBUG.
+For example, a value of @samp{CRIT} would specify LOG_CRIT severity.
+
+The facility argument specifies the facility under which the messages
+are logged.  This may be any of the following facilities supported by
+the syslog(3) call minus the LOG_ prefix:  LOG_KERN, LOG_USER, LOG_MAIL,
+LOG_DAEMON, LOG_AUTH, LOG_LPR, LOG_NEWS, LOG_UUCP, LOG_CRON, and
+LOG_LOCAL0 through LOG_LOCAL7.
+
+If no severity is specified, the default is ERR.  If no facility is
+specified, the default is AUTH.
+@end table
+
+In the following example, the logging messages from the KDC will go to
+the console and to the system log under the facility LOG_DAEMON with
+default severity of LOG_INFO; and the logging messages from the
+administrative server will be appended to the file /var/adm/kadmin.log
+and sent to the device /dev/tty04.
+
+@smallexample
+@group
+[logging]
+    kdc = CONSOLE
+    kdc = SYSLOG:INFO:DAEMON
+    admin_server = FILE:/var/adm/kadmin.log
+    admin_server = DEVICE=/dev/tty04
+@end group
+@end smallexample
+
+@node capaths, kdc, logging, krb5.conf
+@subsection [capaths]
+
+In order to perform direct (non-hierarchical) cross-realm
+authentication, a database is needed to construct the authentication
+paths between the realms.  This section defines that database.
+
+A client will use this section to find the authentication path between
+its realm and the realm of the server.  The server will use this section
+to verify the authentication path used be the client, by checking the
+transited field of the received ticket.
+
+There is a tag for each participating realm, and each tag has subtags
+for each of the realms.  The value of the subtags is an intermediate
+realm which may participate in the cross-realm authentication.  The
+subtags may be repeated if there is more then one intermediate realm.  A
+value of "."  means that the two realms share keys directly, and no
+intermediate realms should be allowd to participate.
+
+There are n**2 possible entries in this table, but only those entries
+which will be needed on the client or the server need to be present.
+The client needs a tag for its local realm, with subtags for all the
+realms of servers it will need to authenticate with.  A server needs a
+tag for each realm of the clients it will serve.
+
+For example, ANL.GOV, PNL.GOV, and NERSC.GOV all wish to use the ES.NET
+realm as an intermediate realm.  ANL has a sub realm of TEST.ANL.GOV
+which will authenticate with NERSC.GOV but not PNL.GOV.  The [capath]
+section for ANL.GOV systems would look like this:
+
+@smallexample
+@group
+[capaths]
+    ANL.GOV = @{
+        TEST.ANL.GOV = .
+        PNL.GOV = ES.NET
+        NERSC.GOV = ES.NET
+        ES.NET = .
+    @}
+    TEST.ANL.GOV = @{
+        ANL.GOV = .
+    @}
+    PNL.GOV = @{
+        ANL.GOV = ES.NET
+    @}
+    NERSC.GOV = @{
+        ANL.GOV = ES.NET
+    @}
+    ES.NET = @{
+        ANL.GOV = .
+    @}
+@end group
+@end smallexample
+
+The [capath] section of the configuration file used on NERSC.GOV systems
+would look like this:
+
+@smallexample
+@group
+[capaths]
+    NERSC.GOV = @{
+        ANL.GOV = ES.NET
+        TEST.ANL.GOV = ES.NET
+        TEST.ANL.GOV = ANL.GOV
+        PNL.GOV = ES.NET
+        ES.NET = .
+    @}
+    ANL.GOV = @{
+        NERSC.GOV = ES.NET
+    @}
+    PNL.GOV = @{
+        NERSC.GOV = ES.NET
+    @}
+    ES.NET = @{
+        NERSC.GOV = .
+    @}
+    TEST.ANL.GOV = @{
+        NERSC.GOV = ANL.GOV
+        NERSC.GOV = ES.NET
+    @}
+@end group
+@end smallexample
+
+In the above examples, the ordering is not important, except when the
+same subtag name is used more then once.  The client will use this to
+determing the path.  (It is not important to the server, since the
+transited field is not sorted.)
+
+This feature is not currently supported by DCE.  DCE security servers
+can be used with Kerberized clients and servers, but versions prior to
+DCE 1.1 did not fill in the transited field, and should be used with
+caution.
+
+@node kdc, Sample krb5.conf File, capaths, krb5.conf
+@subsection [kdc]
+
+The [kdc] section is used to define configuration information necessary
+for a KDC to find the KDC configuration file (@code{kdc.conf}) if it is
+not in the default location.  The only tag used in this section would be
+@samp{profile}, which would be set to the location of the KDC
+configuration file.
+
+@node Sample krb5.conf File,  , kdc, krb5.conf
+@subsection Sample krb5.conf File
+
+Here is an example of a generic @code{krb5.conf} file:
+
+@smallexample
+@group
+[libdefaults]
+    ticket_lifetime = 600
+    default_realm = @value{PRIMARYREALM}
+    default_tkt_enctypes = des-cbc-crc
+    default_tgs_enctypes = des-cbc-crc
+
+[realms]
+    @value{PRIMARYREALM} = @{
+        kdc = @value{KDCSERVER}.@value{PRIMARYDOMAIN}
+        kdc = @value{KDCSLAVE1}.@value{PRIMARYDOMAIN}
+        kdc = @value{KDCSLAVE2}.@value{PRIMARYDOMAIN}
+        admin_server = @value{KDCSERVER}.@value{PRIMARYDOMAIN}
+        default_domain = @value{PRIMARYDOMAIN}
+    @}
+    @value{SECONDREALM} = @{
+        kdc = @value{KDCSERVER}.@value{SECONDDOMAIN}
+        kdc = @value{KDCSLAVE1}.@value{SECONDDOMAIN}
+        admin_server = @value{KDCSERVER}.@value{SECONDDOMAIN}
+    @}
+
+[domain_realm]
+    @value{PRIMARYDOMAIN} = @value{PRIMARYREALM}
+
+@end group
+@end smallexample
+
+@iftex
+@vfill
+@end iftex
+
+@node kdc.conf,  , krb5.conf, Configuration Files
+@section kdc.conf
+
+The @code{kdc.conf} file contains KDC configuration information,
+including defaults used when issuing Kerberos tickets.  Normally, you
+should install your @code{kdc.conf} file in the directory
+@code{@value{ROOTDIR}/var/krb5kdc}.  You can override the default
+location by setting the environment variable @samp{KRB5_KDC_PROFILE}.
+
+The @code{kdc.conf} file is set up in the same format as the
+@code{krb5.conf} file.  (@xref{krb5.conf}.)  The @code{kdc.conf} file
+may contain any or all of the following three sections:
+
+@table @b
+@itemx kdcdefaults
+Contains default values for overall behavior of the KDC.
+
+@itemx realms
+Contains subsections keyed by Kerberos realm names.  Each subsection
+describes realm-specific information, including where to find the
+Kerberos servers for that realm.
+
+@itemx logging
+Contains relations which determine how Kerberos programs are to perform
+logging.
+@end table
+
+@menu
+* kdcdefaults::                 
+* realms (kdc.conf)::           
+* Sample kdc.conf File::        
+@end menu
+
+@node kdcdefaults, realms (kdc.conf), kdc.conf, kdc.conf
+@subsection [kdcdefaults]
+
+The following relation is defined in the [kdcdefaults] section:
+
+@table @b
+@itemx kdc_ports
+This relation lists the ports on which the Kerberos server should listen
+by default.  This list is a comma separated list of integers.  If this
+relation is not specified, the compiled-in default is usually port 88
+(the assigned Kerberos port) and port 750 (the port used by Kerberos
+V4).
+@end table
+
+@node realms (kdc.conf), Sample kdc.conf File, kdcdefaults, kdc.conf
+@subsection [realms]
+
+Each tag in the [realms] section of the file names a Kerberos realm.
+The value of the tag is a subsection where the relations in that
+subsection define KDC parameters for that particular realm.
+
+For each realm, the following tags may be specified in the [realms]
+subsection:
+
+@table @b
+@itemx acl_file
+(String.)  Location of the access control list (acl) file that kadmin
+uses to determine which principals are allowed which permissions on the
+database.  The default is @code{@value{ROOTDIR}/var/krb5kdc/kadm5.acl}.
+
+@itemx admin_keytab
+(String.)  Location of the keytab file that kadmin uses to authenticate
+to the database.  The default is
+@code{@value{ROOTDIR}/var/krb5kdc/kadm5.keytab}.
+
+@itemx database_name
+(String.)  Location of the Kerberos database for this realm.  The
+default is @* @code{@value{ROOTDIR}/var/krb5kdc/principal}.
+
+@itemx default_principal_expiration
+(Absolute time string.)  Specifies the default expiration date of
+principals created in this realm.
+
+@itemx default_principal_flags
+(Flag string.)  Specifies the default attributes of principals created
+in this realm.
+
+@itemx dict_file
+(String.)  Location of the dictionary file containing strings that are
+not allowed as passwords.  The default is
+@code{@value{ROOTDIR}/var/krb5kdc/kadm5.dict}.
+
+@itemx encryption_type
+(Encryption type string.)  Specifies the encryption type used for this
+realm.  Only "des-cbc-crc" is supported at this time.
+
+@itemx kadmind_port
+(Port number.)  Specifies the port that the kadmind daemon is to listen
+for this realm.  The assigned port for kadmind is 749.
+
+@itemx key_stash_file
+(String.)  Specifies the location where the master key has been stored
+(via @code{kdb5_util stash}).  The default is
+@code{@value{ROOTDIR}/var/krb5kdc/.k5.@i{REALM}}, where @i{REALM} is the
+Kerberos realm.
+
+@itemx kdc_ports
+(String.)  Specifies the list of ports that the KDC is to listen to for
+this realm.  By default, the value of kdc_ports as specified in the
+[kdcdefaults] section is used.
+
+@itemx master_key_name
+(String.)  Specifies the name of the master key.
+
+@itemx master_key_type
+(Key type string.)  Specifies the master key's key type.  Only
+"des-cbc-crc" is supported at this time.
+
+@itemx max_life
+(Delta time string.)  Specifes the maximum time period for which a
+ticket may be valid in this realm.
+
+@itemx max_renewable_life
+(Delta time string.)  Specifies the maximum time period during which a
+valid ticket may be renewed in this realm.
+
+@itemx profile
+(String.)  Location of the Kerberos V5 configuration file, if different
+from the default (@code{/etc/krb5.conf}).
+
+@itemx supported_enctypes
+List of key:salt strings.  Specifies the default key/salt combinations
+of principals for this realm.  Since only the encryption type
+"des-cbc-crc" is supported, you should set this tag to
+@samp{des-cbc-crc:normal}.
+@end table
+
+@node Sample kdc.conf File,  , realms (kdc.conf), kdc.conf
+@subsection Sample kdc.conf File
+
+Here's an example of a @code{kdc.conf} file:
+
+@smallexample
+@group
+[kdcdefaults]
+    kdc_ports = 88
+
+[realms]
+    @value{PRIMARYREALM} = @{
+        kadmind_port = 749
+        max_life = 10h 0m 0s
+        max_renewable_life = 7d 0h 0m 0s
+        master_key_type = des-cbc-crc
+        supported_enctypes = des-cbc-crc:normal
+    @}
+
+[logging]
+    kdc = FILE:@value{ROOTDIR}/var/krb5kdc/kdc.log
+    admin_server = FILE:@value{ROOTDIR}/var/krb5kdc/kadmin.log
+
+@end group
+@end smallexample
+
+@node Administrating Kerberos Database Entries, Application Servers, Configuration Files, Top
 @chapter Administrating the Kerberos Database
 
 Your Kerberos database contains all of your realm's Kerberos principals,
@@ -361,13 +949,13 @@ database dump and load, which are provided by @code{kdb5_util}).
 
 The remote version authenticates to the KADM5 server using the service
 principal @code{kadmin/admin}.  If the credentials cache contains a
-ticket for the @code{kadmin/admin} principal, and the @samp{-c
-credentials_cache} option is specified, that ticket is used to
-authenticate to KADM5.  Otherwise, the @samp{-p} and @samp{-k} options
-are used to specify the client Kerberos principal name used to
-authenticate.  Once kadmin has determined the principal name, it
-requests a @code{kadmin/admin} Kerberos service ticket from the KDC, and
-uses that service ticket to authenticate to KADM5.
+ticket for the @code{kadmin/admin} principal, and the @samp{-c ccache}
+option is specified, that ticket is used to authenticate to KADM5.
+Otherwise, the @samp{-p} and @samp{-k} options are used to specify the
+client Kerberos principal name used to authenticate.  Once kadmin has
+determined the principal name, it requests a @code{kadmin/admin}
+Kerberos service ticket from the KDC, and uses that service ticket to
+authenticate to KADM5.
 
 @menu
 * Kadmin Options::              
@@ -514,7 +1102,7 @@ requires the ``inquire'' administrative privilege.  The syntax is:
 @noindent The @code{get_principal} command has the alias @code{getprinc}.
 
 For example, suppose you wanted to view the attributes of the principals
-@code{@value{RANDOMUSER1}/root@@@value{PRIMARYREALM}} and
+@* @code{@value{RANDOMUSER1}/root@@@value{PRIMARYREALM}} and
 @code{systest@@@value{PRIMARYREALM}}.  You would type:
 
 @smallexample
@@ -629,7 +1217,7 @@ permissions are determined by the first matching entry.
 @smallexample
 @group
 */admin@@@value{PRIMARYREALM}  *
-@value{ADMINUSER}/null@@@value{PRIMARYREALM}  ADMCIL
+@value{ADMINUSER}@@@value{PRIMARYREALM}  ADMCIL
 @value{ADMINUSER}/*@@@value{PRIMARYREALM}  il
 @value{RANDOMUSER1}/root@@@value{PRIMARYREALM}  cil  */root@@@value{PRIMARYREALM}
 */*@@@value{PRIMARYREALM}  i
@@ -641,7 +1229,7 @@ has all administrative privileges.  The user @code{@value{ADMINUSER}}
 has all permissions with his @code{admin} instance,
 @code{@value{ADMINUSER}/admin@@@value{PRIMARYREALM}} (matches the first
 line).  He has no permissions at all with his @code{null} instance,
-@code{@value{ADMINUSER}/null@@@value{PRIMARYREALM}} (matches the second
+@code{@value{ADMINUSER}@@@value{PRIMARYREALM}} (matches the second
 line).  He has @i{inquire} and @i{list} permissions with any other
 instance (matches the third line).  When @code{@value{RANDOMUSER1}} is
 using her @code{root}
@@ -649,7 +1237,7 @@ instance, @code{@value{RANDOMUSER1}/root@@@value{PRIMARYREALM}}, she has
 @i{change password}, @i{inquire}, and @i{list} privileges for any other
 principal that has the instance @code{root}.  Finally, any principal in
 the realm @code{@value{PRIMARYREALM}} (except for
-@code{@value{ADMINUSER}/null@@@value{PRIMARYREALM}}, as mentioned above)
+@code{@value{ADMINUSER}@@@value{PRIMARYREALM}}, as mentioned above)
 has @i{inquire} privileges.
 
 @node Adding or Modifying Principals, Deleting Principals, Privileges, Principals
@@ -741,14 +1329,14 @@ principal in the database.
 @item @{-|+@}allow_proxiable
 The ``-allow_proxiable'' option prohibits this principal from obtaining
 proxiable tickets.  ``+allow_proxiable'' clears this flag.  In effect,
-``-allow_proxiable'' sets the KRB5_KDB_DISALLOW_PROXIABLE flag. on the
+``-allow_proxiable'' sets the @* KRB5_KDB_DISALLOW_PROXIABLE flag. on the
 principal in the database.
 
 @item @{-|+@}allow_dup_skey
 The ``-allow_dup_skey'' option disables user-to-user authentication for
 this principal by prohibiting this principal from obtaining a session
 key for another user.  ``+allow_dup_skey'' clears this flag.  In effect,
-``-allow_dup_skey'' sets the KRB5_KDB_DISALLOW_DUP_SKEY flag on the
+``-allow_dup_skey'' sets the @* KRB5_KDB_DISALLOW_DUP_SKEY flag on the
 principal in the database.
 
 @item @{-|+@}requires_preauth
@@ -767,7 +1355,7 @@ database.
 @item @{-|+@}allow_svr
 The ``-allow_svr'' flag prohibits the issuance of service tickets for
 this principal.  ``+allow_svr'' clears this flag.  In effect,
-``-allow_svr'' sets the KRB5_KDB_DISALLOW_SVR flag on the principal in
+``-allow_svr'' sets the @* KRB5_KDB_DISALLOW_SVR flag on the principal in
 the database.
 
 @item @{-|+@}allow_tgs_req
@@ -781,7 +1369,7 @@ principal in the database.
 @item @{-|+@}allow_tix
 The ``-allow_tix'' option forbids the issuance of any tickets for this
 principal.  ``+allow_tix'' clears this flag.  The default is
-``+allow_tix''.  In effect, ``-allow_tix'' sets the
+``+allow_tix''.  In effect, ``-allow_tix'' sets the @*
 KRB5_KDB_DISALLOW_ALL_TIX flag on the principal in the database.
 
 @item @{-|+@}needchange
@@ -863,7 +1451,7 @@ kadmin:}
 If you will need cross-realm authentication, you need to add principals
 for the other realm's TGT to each realm.  For example, if you need to do
 cross-realm authentication between the realms @value{PRIMARYREALM} and
-@value{SECONDREALM}, you would need to add the principals
+@value{SECONDREALM}, you would need to add the principals @*
 @samp{krbtgt/@value{SECONDREALM}@@@value{PRIMARYREALM}} and
 @samp{krbtgt/@value{PRIMARYREALM}@@@value{SECONDREALM}} to both
 databases.  You need to be sure the passwords and the key version
@@ -1312,8 +1900,8 @@ example:
 @smallexample
 @group
 @b{shell%} @value{ROOTDIR}/sbin/kdb5_util -r @value{PRIMARYREALM} create -s
-@b{kdb5_util: No such file or directory while setting active database to '/krb5/principal'
-Initializing database '@value{ROOTDIR}/lib/krb5kdc/principal' for
+@b{kdb5_util: No such file or directory while setting active database to '@value{ROOTDIR}/var/krb5kdc/principal'
+Initializing database '@value{ROOTDIR}/var/krb5kdc/principal' for
 @result{} realm '@value{PRIMARYREALM}',
 master key name 'K/M@@@value{PRIMARYREALM}'
 You will be prompted for the database Master Password.
@@ -1418,10 +2006,10 @@ kadmin:}
 
 @smallexample
 @group
-@b{kadmin:} ktadd -k /krb5/kadmind.keytab kadmin/admin kadmin/changepw
+@b{kadmin:} ktadd -k @value{ROOTDIR}/var/krb5kdc/kadmind.keytab kadmin/admin kadmin/changepw
 @b{kadmin: Entry for principal kadmin/admin@@@value{PRIMARYREALM} with
      kvno 3, encryption type DES-CBC-CRC added to keytab
-     WRFILE:/krb5/kadmind.keytab.
+     WRFILE:@value{ROOTDIR}/var/krb5kdc/kadmind.keytab.
 kadmin:}
 @end group
 @end smallexample
@@ -1466,9 +2054,9 @@ For example:
 
 @smallexample
 @group
-@b{kadmin:} ktremove -k /krb5/kadmind.keytab kadmin/admin
+@b{kadmin:} ktremove -k @value{ROOTDIR}/var/krb5kdc/kadmind.keytab kadmin/admin
 @b{kadmin: Entry for principal kadmin/admin with kvno 3 removed
-     from keytab WRFILE:/krb5/kadmind.keytab.
+     from keytab WRFILE:@value{ROOTDIR}/var/krb5kdc/kadmind.keytab.
 kadmin:}
 @end group
 @end smallexample
@@ -1677,174 +2265,17 @@ Database from a Dump File}.)
 @node Bug Reporting, Appendix, Backups of Secure Hosts, Top
 @chapter Bug Reporting
 
-In any complex software, there will be bugs. Please send bug reports or
-other problems you may uncover to the e-mail address
-@b{krb5-bugs@@mit.edu}.  Please mention which version of the Kerberos V5
-distribution you are using, and whether you have made any private
-changes.  Bug reports that include proposed fixes are especially
-welcome.  If you do include fixes, please send them using either context
-diffs or unified diffs (using @samp{diff -c} or @samp{diff -u},
-respectively).
+@include send-pr.texinfo
 
 @node Appendix,  , Bug Reporting, Top
 @appendix Appendix
 
 @menu
-* Files::                       
-* krb5.conf::                   
-* kdc.conf::                    
 * Errors::                      
 * kadmin Time Zones::           
 @end menu
 
-@node Files, krb5.conf, Appendix, Appendix
-@appendixsec Files
-
-@node krb5.conf, kdc.conf, Files, Appendix
-@appendixsec krb5.conf
-
-Normally, you should install your @code{krb5.conf} file in the directory
-@code{/etc}.  However, note that you can override this default through
-the environment variable @samp{KRB5_CONFIG}.
-
-Here is an example of a generic @code{krb5.conf} file:
-
-@smallexample
-@group
-[libdefaults]
-    ticket_lifetime = 600
-    default_realm = @value{PRIMARYREALM}
-    default_tkt_enctypes = des-cbc-crc
-    default_tgs_enctypes = des-cbc-crc
-
-[realms]
-    @value{PRIMARYREALM} = @{
-        kdc = @value{KDCSERVER}.@value{PRIMARYDOMAIN}:88
-        kdc = @value{KDCSLAVE1}.@value{PRIMARYDOMAIN}:88
-        kdc = @value{KDCSLAVE2}.@value{PRIMARYDOMAIN}:88
-        admin_server = @value{KDCSERVER}.@value{PRIMARYDOMAIN}:749
-        default_domain = @value{PRIMARYDOMAIN}
-        @}
-    @}
-
-[domain_realm]
-    .@value{PRIMARYDOMAIN} = @value{PRIMARYREALM}
-    @value{PRIMARYDOMAIN} = @value{PRIMARYREALM}
-
-[logging]
-    kdc = FILE:/dev/ttyp9
-    admin_server = FILE:/dev/ttyp9
-    default = FILE:/dev/ttyp9
-@end group
-@end smallexample
-
-@iftex
-@vfill
-@end iftex
-@page
-
-Here is an example of a more extensive @code{krb5.conf} file, which
-includes a second Kerberos realm and authentication to Kerberos V4 as
-well as V5 KDCs in the realm @code{@value{PRIMARYREALM}}:
-
-@smallexample
-@group
-[libdefaults]
-    ticket_lifetime = 600
-    default_realm = @value{PRIMARYREALM}
-    default_tkt_enctypes = des-cbc-crc
-    default_tgs_enctypes = des-cbc-crc
-    krb4_srvtab = /etc/srvtab
-    krb4_config = /usr/krb4/lib/krb.conf
-    krb4_realms = /usr/krb4/lib/krb.realms
-
-[realms]
-    @value{PRIMARYREALM} = @{
-        kdc = @value{KDCSERVER}.@value{PRIMARYDOMAIN}:88
-        kdc = @value{KDCSLAVE1}.@value{PRIMARYDOMAIN}:88
-        kdc = @value{KDCSLAVE2}.@value{PRIMARYDOMAIN}:88
-        admin_server = @value{KDCSERVER}.@value{PRIMARYDOMAIN}:749
-        default_domain = @value{PRIMARYDOMAIN}
-        v4_instance_convert = @{
-            bleep = @value{PRIMARYDOMAIN}
-        @}
-    @}
-    @value{SECONDREALM} = @{
-        kdc = @value{KDCSERVER}.@value{SECONDDOMAIN}
-        kdc = @value{KDCSLAVE1}.@value{SECONDDOMAIN}
-        admin_server = @value{KDCSERVER}.@value{SECONDDOMAIN}
-    @}
-
-[domain_realm]
-    .@value{PRIMARYDOMAIN} = @value{PRIMARYREALM}
-    @value{PRIMARYDOMAIN} = @value{PRIMARYREALM}
-    .@value{SECONDDOMAIN} = @value{SECONDREALM}
-    @value{SECONDDOMAIN} = @value{SECONDREALM}
-@end group
-@end smallexample
-
-For the KDCs, add a section onto the end of the @code{krb5.conf} file
-telling where the @code{kdc.conf} file is located, as in the following
-example:
-
-@smallexample
-@group
-[kdc]
-    profile = @value{ROOTDIR}/lib/krb5kdc/kdc.conf
-
-[logging]
-    admin_server = FILE:@value{ROOTDIR}/lib/krb5kdc/kadmind.log
-    kdc = FILE:@value{ROOTDIR}/lib/krb5kdc/kdc.log
-    default = CONSOLE
-@end group
-@end smallexample
-
-@iftex
-@vfill
-@end iftex
-@page
-
-@node kdc.conf, Errors, krb5.conf, Appendix
-@appendixsec kdc.conf
-
-Normally, you should install your @code{kdc.conf} file in the directory
-@code{@value{ROOTDIR}/lib/krb5kdc}.  However, note that you can override
-this default by a pointer in the KDC's @code{krb5.conf} file, or through
-the environment variable @samp{KRB5_KDC_PROFILE}.
-
-Here's an example of a @code{kdc.conf} file:
-
-@smallexample
-@group
-[kdcdefaults]
-    kdc_ports = 88,750
-
-[realms]
-    @value{PRIMARYREALM} = @{
-        profile = /etc/krb5.conf
-        database_name = @value{ROOTDIR}/lib/krb5kdc/principal
-        admin_database_name = @value{ROOTDIR}/lib/krb5kdc/principal.kadm5
-        admin_database_lockfile = @value{ROOTDIR}/lib/krb5kdc/principal.kadm5.lock
-        admin_keytab = @value{ROOTDIR}/lib/krb5kdc/kadm5.keytab
-        acl_file = @value{ROOTDIR}/lib/krb5kdc/kadm5.acl
-        dict_file = @value{ROOTDIR}/lib/krb5kdc/kadm5.dict
-        key_stash_file = @value{ROOTDIR}/lib/krb5kdc/.k5.@value{PRIMARYREALM}
-        kadmind_port = 749
-        max_life = 10h 0m 0s
-        max_renewable_life = 7d 0h 0m 0s
-        master_key_type = des-cbc-crc
-        supported_enctypes = des-cbc-crc:normal
-    @}
-@end group
-@end smallexample
-
-To add Kerberos V4 support, change the @code{supported_enctypes} line to:
-
-@smallexample
-        supported_enctypes = des-cbc-crc:normal des-cbc-crc:v4
-@end smallexample
-
-@node Errors, kadmin Time Zones, kdc.conf, Appendix
+@node Errors, kadmin Time Zones, Appendix, Appendix
 @appendixsec Kerberos Error Messages
 
 @menu

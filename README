@@ -1,51 +1,80 @@
-Beta test distribution READ-ME file.
------------------------------------
+		   Kerberos Version 5, Release 1.0
 
-THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
-IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
-WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+			    Release Notes
 
-Files are copyright MIT, Cygnus Support, OpenVision, Oracle, Sun Soft,
-and others.  
+			The MIT Kerberos Team
 
-The following copyright and permission notice applies to the
-OpenVision Kerberos Administration system located in kadmin/create,
-kadmin/dbutil, kadmin/server, lib/kadm, and portions of lib/rpc:
+Unpacking the Source Distribution
+---------------------------------
 
-   Copyright, OpenVision Technologies, Inc., 1996, All Rights Reserved
-     
-   WARNING: Retrieving the OpenVision Kerberos Administration system 
-   source code, as described below, indicates your acceptance of the 
-   following terms.  If you do not agree to the following terms, do not 
-   retrieve the OpenVision Kerberos administration system.
-     
-   You may freely use and distribute the Source Code and Object Code 
-   compiled from it, but this Source Code is provided to you "AS IS" 
-   EXCLUSIVE OF ANY WARRANTY, INCLUDING, WITHOUT LIMITATION, ANY 
-   WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, OR 
-   ANY OTHER WARRANTY, WHETHER EXPRESS OR IMPLIED.  IN NO EVENT WILL 
-   OPENVISION HAVE ANY LIABILITY FOR ANY LOST PROFITS, LOSS OF DATA OR 
-   COSTS OF PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES, OR FOR ANY 
-   SPECIAL, INDIRECT, OR CONSEQUENTIAL DAMAGES ARISING OUT OF THIS 
-   AGREEMENT, INCLUDING, WITHOUT LIMITATION, THOSE RESULTING FROM THE USE 
-   OF THE SOURCE CODE, OR THE FAILURE OF THE SOURCE CODE TO PERFORM, OR 
-   FOR ANY OTHER REASON.
+The source distribution of Kerberos 5 comes in three gzipped tarfiles,
+krb5-1.0.src.tar.gz, krb5-1.0.doc.tar.gz, and krb5-1.0.crypto.tar.gz.
+The krb5-1.0.doc.tar.gz contains the doc/ directory and this README
+file.  The krb5-1.0.src.tar.gz contains the src/ directory and this
+README file, except for the crypto library sources, which are in
+krb5-1.0.crypto.tar.gz.
 
-   OpenVision retains all rights, title, and interest in the donated
-   Source Code.  With respect to OpenVision's copyrights in the donated
-   Source Code, OpenVision also retains rights to derivative works
-   of the Source Code whether created by OpenVision or a third party.
-     
-   OpenVision Technologies, Inc. has donated this Kerberos 
-   Administration system to MIT for inclusion in the standard 
-   Kerberos 5 distribution.  This donation underscores our 
-   commitment to continuing Kerberos technology development 
-   and our gratitude for the valuable work which has been 
-   performed by MIT and the Kerberos community. 
+Instruction on how to extract the entire distribution follow.  These
+directions assume that you want to extract into a directory called
+DIST.
+
+If you have the GNU tar program and gzip installed, you can simply do:
+
+	mkdir DIST
+	cd DIST
+	gtar zxpf krb5-1.0.src.tar.gz
+	gtar zxpf krb5-1.0.crypto.tar.gz
+	gtar zxpf krb5-1.0.doc.tar.gz
+
+If you don't have GNU tar, you will need to get the FSF gzip
+distribution and use gzcat:
+
+	mkdir DIST
+	cd DIST
+	gzcat krb5-1.0.src.tar.gz | tar xpf -
+	gzcat krb5-1.0.crypto.tar.gz | tar xpf -
+	gzcat krb5-1.0.doc.tar.gz | tar xpf -
+
+Both of these methods will extract the sources into DIST/krb5-1.0/src
+and the documentation into DIST/krb5-1.0/doc.
+
+Unpacking the Binary Distribution
+---------------------------------
+
+Binary distributions of Kerberos V5 are provided merely as convenience
+to those people who wish to try out Kerberos V5 without needing to do
+a full compile of Kerberos.
+
+MIT and the MIT Kerberos V5 development team make no guarantees that
+we will continue to supply binary distributions for future releases of
+Kerberos V5, or for any operating system/platform in particular.
+These binary distributions have been prepared by members of the MIT
+Kerberos V5 development team, or by volunteers who have graciously
+agreed to test the pre-release snapshot.  Each binary build is PGP
+signed by the person who prepared the binary distribution for that
+particular platform.  
+
+While the binary distribution is *supposed* to correspond exactly to
+the 1.0 Kerberos V5 source release, you have no way of knowing whether
+the person who prepared the binary release might have inserted a
+trojan horse, or a trapdoor.  For all you know, the binary
+distribution might be mailing all of your Kerberos keys to
+kremvax!boris.  (The same is true for the source distribution, but at
+least you can audit the code yourself!)
+
+For this reason, if you are planning on using Kerberos V5 in
+production, we strongly suggest that you obtain the source
+distribution and compile it from source yourself.
+
+The binary distributions have been compiled so that they will install
+in /usr/local.  To install, su to root and and type the command:
+
+	cd /usr/local
+	gunzip < /tmp/krb5-1.0.<platform>.tar.gz | tar xvf -
 
 
-
-Now, with that out of the way, let me point you to a few things:
+Building and Installing Kerberos 5
+----------------------------------
 
 The first file you should look at is doc/install.ps; it contains the
 notes for building and installing Kerberos 5.  The info file
@@ -58,31 +87,167 @@ which contain the system administrator's guide, and the user's guide,
 respectively.  They are also available as info files
 kerberos-admin.info and krb5-user.info, respectively.
 
->>									     <<
->> Please report any problems/bugs/comments to 'krb5-bugs@mit.edu'           <<
->>									     <<
+Reporting Bugs
+--------------
 
+Please report any problems/bugs/comments using the krb5-send-pr
+program.  The krb5-send-pr program will be installed in the sbin
+directory once you have successfully compiled and installed Kerberos
+V5 (or if you have installed one of our binary distributions).
 
+If you are not able to use krb5-send-pr because you haven't been able
+compile and install Kerberos V5 on any platform, you may send mail to
+krb5-bugs@mit.edu.
+
+Notes and Major Changes
+-----------------------
+
+* We are now using the GNATS system to track bug reports for Kerberos
+V5.  It is therefore helpful for people to use the krb5-send-pr
+program when reporting bugs.  The old interface of sending mail to
+krb5-bugs@mit.edu will still work; however, bug reports sent in this
+fashion may experience a delay in being processed.
+
+* The default keytab name has changed from /etc/v5srvtab to
+/etc/krb5.keytab.
+
+* login.krb5 no longer defaults to getting krb4 tickets.
+
+* The Windows (win16) DLL, LIBKRB5.DLL, has been renamed to
+KRB5_16.DLL.  This change was necessary to distinguish it from the
+win32 version, which will be named KRB5_32.DLL.  Note that the
+GSSAPI.DLL file has not been renamed, because this name was specified
+in a draft standard for the Windows 16 GSSAPI bindings.  (The 32-bit
+version of the GSSAPI DLL will be named GSSAPI32.DLL.)
+
+* The directory structure used for installations has changed.  In
+particular, files previously located in $prefix/lib/krb5kdc are now
+normally located in $sysconfdir/krb5kdc.  With the normal configure
+options, this means the KDC database goes in /usr/local/var/krb5kdc by
+default.  If you wish to have the old behavior, then you would use a
+configure line like the following:
+
+	configure --prefix=/usr/local --sysconfdir=/usr/local/lib
+
+* kshd has been modified to accept krb4 encrypted rcp connections; for
+this to work, the v4rcp program must be in the bin directory.
+
+* The gssrpc library has symbol collisions with the rpc library in
+some of the libcs in certain operating systems without shared
+libraries, notably some ports of NetBSD and MkLinux.  For those
+platforms which have rpc in libc and also contain NIS in libc,
+compiling with static libraries will not work because of this
+conflict.  NetBSD users can either upgrade to the current tree, which
+includes shared libraries for more ports, choose not to build kadmind
+or kadmin, or recompile NetBSD without NIS support.  MkLinux users
+must either recompile without NIS or not build the administration
+system.
+
+Copyright Notice and Legal Administrivia
+----------------------------------------
+
+Copyright (C) 1996 by the Massachusetts Institute of Technology.
+
+All rights reserved.
+
+Export of this software from the United States of America may require
+a specific license from the United States Government.  It is the
+responsibility of any person or organization contemplating export to
+obtain such a license before exporting.
+
+WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
+distribute this software and its documentation for any purpose and
+without fee is hereby granted, provided that the above copyright
+notice appear in all copies and that both that copyright notice and
+this permission notice appear in supporting documentation, and that
+the name of M.I.T. not be used in advertising or publicity pertaining
+to distribution of the software without specific, written prior
+permission.  M.I.T. makes no representations about the suitability of
+this software for any purpose.  It is provided "as is" without express
+or implied warranty.
+
+THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
+IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
+WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+
+Individual source code files are copyright MIT, Cygnus Support,
+OpenVision, Oracle, Sun Soft, and others.
+
+Project Athena, Athena, Athena MUSE, Discuss, Hesiod, Kerberos, Moira,
+and Zephyr are trademarks of the Massachusetts Institute of Technology
+(MIT).  No commercial use of these trademarks may be made without
+prior written permission of MIT.
+
+"Commercial use" means use of a name in a product or other for-profit
+manner.  It does NOT prevent a commercial firm from referring to the
+MIT trademarks in order to convey information (although in doing so,
+recognition of their trademark status should be given).
+
+The following copyright and permission notice applies to the
+OpenVision Kerberos Administration system located in kadmin/create,
+kadmin/dbutil, kadmin/passwd, kadmin/server, lib/kadm5, and portions
+of lib/rpc:
+
+   Copyright, OpenVision Technologies, Inc., 1996, All Rights Reserved
+
+   WARNING: Retrieving the OpenVision Kerberos Administration system 
+   source code, as described below, indicates your acceptance of the 
+   following terms.  If you do not agree to the following terms, do not 
+   retrieve the OpenVision Kerberos administration system.
+
+   You may freely use and distribute the Source Code and Object Code
+   compiled from it, with or without modification, but this Source
+   Code is provided to you "AS IS" EXCLUSIVE OF ANY WARRANTY,
+   INCLUDING, WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY OR
+   FITNESS FOR A PARTICULAR PURPOSE, OR ANY OTHER WARRANTY, WHETHER
+   EXPRESS OR IMPLIED.  IN NO EVENT WILL OPENVISION HAVE ANY LIABILITY
+   FOR ANY LOST PROFITS, LOSS OF DATA OR COSTS OF PROCUREMENT OF 
+   SUBSTITUTE GOODS OR SERVICES, OR FOR ANY SPECIAL, INDIRECT, OR
+   CONSEQUENTIAL DAMAGES ARISING OUT OF THIS AGREEMENT, INCLUDING, 
+   WITHOUT LIMITATION, THOSE RESULTING FROM THE USE OF THE SOURCE 
+   CODE, OR THE FAILURE OF THE SOURCE CODE TO PERFORM, OR FOR ANY 
+   OTHER REASON.
+
+   OpenVision retains all copyrights in the donated Source Code. OpenVision
+   also retains copyright to derivative works of the Source Code, whether
+   created by OpenVision or by a third party. The OpenVision copyright 
+   notice must be preserved if derivative works are made based on the 
+   donated Source Code.
+
+   OpenVision Technologies, Inc. has donated this Kerberos 
+   Administration system to MIT for inclusion in the standard 
+   Kerberos 5 distribution.  This donation underscores our 
+   commitment to continuing Kerberos technology development 
+   and our gratitude for the valuable work which has been 
+   performed by MIT and the Kerberos community.
+
+Acknowledgements
+----------------
 
 Appreciation Time!!!!  There are far too many people to try to thank
 them all; many people have contributed to the development of Kerberos
-V5.  This is only a partial listing....  
+V5.  This is only a partial listing....
+
+Thanks to Paul Vixie and the Internet Software Consortium for funding
+the work of Barry Jaspan.  This funding was invaluable for the OV
+administration server integration, as well as the 1.0 release
+preparation process.
 
 Thanks to John Linn, Scott Foote, and all of the folks at OpenVision
 Technologies, Inc., who donated their administration server for use in
 the MIT release of Kerberos.
 
-Thanks to Paul Vixie and the Internet Software Consortium for
-supporting the OV administration server integration work.
-
-Thanks to Jeff Bigler, Mark Eichin, Mark Horowitz, Nancy Gilman, Ken
+Thanks to Jeff Bigler, Mark Eichin, Marc Horowitz, Nancy Gilman, Ken
 Raeburn, and all of the folks at Cygnus Support, who provided
 innumerable bug fixes and portability enhancements to the Kerberos V5
-tree.  Thanks especially ot Jeff Bigler, for the new user and system
+tree.  Thanks especially to Jeff Bigler, for the new user and system
 administrator's documentation.
 
 Thanks to Doug Engert from ANL for providing many bug fixes, as well
 as testing to ensure DCE interoperability.
+
+Thanks to Ken Hornstein at NRL for providing many bug fixes and
+suggestions.
 
 Thanks to Sean Mullan and Bill Sommerfeld from Hewlett Packard for
 their many suggestions and bug fixes.
@@ -92,15 +257,3 @@ past and present: Jay Berkenbilt, Richard Basch, John Carr, Don
 Davis, Nancy Gilman, Sam Hartman, Marc Horowitz, Barry Jaspan, John
 Kohl, Cliff Neuman, Kevin Mitchell, Paul Park, Ezra Peisach, Chris
 Provenzano, Jon Rochlis, Jeff Schiller, Harry Tsai, Ted Ts'o, Tom Yu.
-
-Note:
-
-Project Athena, Athena, Athena MUSE, Discuss, Hesiod, Kerberos, Moira, and 
-Zephyr are trademarks of the Massachusetts Institute of Technology (MIT).  No 
-commercial use of these trademarks may be made without prior written 
-permission of MIT.
-	
-FYI, "commercial use" means use of a name in a product or other for-profit 
-manner.  It does NOT prevent a commercial firm from referring to the MIT
-trademarks in order to convey information (although in doing so, recognition
-of their trademark status should be given).

@@ -1,3 +1,17 @@
+Sat Nov 23 00:22:20 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* cryptoconf.c: Also zero out the entries in cryptoconf, to make
+		sure no one tries to use triple DES and SHA.
+
+Fri Nov 22 20:49:13 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* configure.in (enableval): Disable triple DES and SHA, since
+		what's there isn't the final triple DES.  [PR#231]
+
+Mon Nov 18 20:38:24 1996  Ezra Peisach  <epeisach@mit.edu>
+ [krb5-libs/201]
+	* configure.in: Set shared library version to 1.0.
+
 Thu Jun  6 00:04:38 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* Makefile.in (all-windows): Don't pass $(LIBCMD) on the command

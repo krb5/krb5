@@ -67,9 +67,15 @@ This file describes how to use the @value{PRODUCT} client programs.
 @node Introduction, Kerberos V5 Tutorial, Copyright, Top
 @chapter Introduction
 
+@ifset CYGNUS
 @value{PRODUCT} is based on the Kerberos V5 authentication system
-developed at MIT.  Kerberos is named for the three-headed watchdog from
-Greek mythology, who guarded the entrance to the underworld.
+developed at MIT.
+@end ifset
+@ifset MIT
+Kerberos V5 is an authentication system developed at MIT.
+@end ifset
+Kerberos is named for the three-headed watchdog from Greek mythology,
+who guarded the entrance to the underworld.
 
 Under Kerberos, a client (generally either a user or a service) sends a
 request for a ticket to the @i{Key Distribution Center} (KDC).  The KDC
@@ -215,7 +221,7 @@ versions, when you type their command names.
 
 On many systems, Kerberos is built into the login program, and you get
 tickets automatically when you log in.  Other programs, such as
-/@code{rsh}, @code{rcp}, @code{telnet}, and @code{rlogin}, can forward
+@code{rsh}, @code{rcp}, @code{telnet}, and @code{rlogin}, can forward
 copies of your tickets to the remote host.  Most of these programs also
 automatically destroy your tickets when they exit.  However,
 @value{COMPANY} recommends that you explicitly destroy your Kerberos
@@ -1118,7 +1124,7 @@ turns off encryption.
 
 @need 1800
 For example, if your Kerberos tickets allowed you to run programs on the
-host @code{@value{RANDOMHOST2}@@@value{SECONDDOMAIN}} as root, you could
+host @* @code{@value{RANDOMHOST2}@@@value{SECONDDOMAIN}} as root, you could
 run the @samp{date} program as follows:
 
 @smallexample

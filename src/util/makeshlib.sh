@@ -96,15 +96,16 @@ mips-sni-sysv4)
  
 	optflags=""
 	if test "$HAVE_GCC"x = "x" ; then
-		optflags="-h $library"
+		optflags=""
+     CC=ld
 	else
 		# XXX assumes that we're either using
 		# recent gld (binutils 2.7?) or else using native ld
-		optflags="-Wl,-h -Wl,$library"
+		optflags=""
 	fi
 
 	echo ld -dp -assert pure-text $ldflags -o $library $optflags $FILES $libdirfl
-	ld -dp -assert pure-text $ldflags -o $library $optflags $FILES $libdirfl
+ld	 -dp -assert pure-text $ldflags -o $library $optflags $FILES $libdirfl
 	stat=$?
 	;;
 *-*-aix*)

@@ -35,9 +35,9 @@ typedef unsigned int size_t;
 #define PROVIDE_DES_CBC_CRC
 #define PROVIDE_DES_CBC_MD5
 #define PROVIDE_DES_CBC_RAW
-#define PROVIDE_DES3_CBC_MD5
-#define PROVIDE_DES3_CBC_RAW
-
+/* #define PROVIDE_DES3_CBC_MD5 */
+/* #define PROVIDE_DES3_CBC_RAW */
+/* #define PROVIDE_NIST_SHA */
 
 #define NO_SYS_TYPES_H
 #define NO_SYS_STAT_H
