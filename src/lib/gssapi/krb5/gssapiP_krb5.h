@@ -162,6 +162,9 @@ OM_uint32 kg_unseal PROTOTYPE((OM_uint32 *minor_status,
 		    int *qop_state,
 		    int toktype));
 
+krb5_error_code
+kg_ser_context_init PROTOTYPE((krb5_context));
+
 /** declarations of internal name mechanism functions **/
 
 OM_uint32 krb5_gss_acquire_cred
@@ -343,6 +346,20 @@ PROTOTYPE( (krb5_context,
 	    int*,             /* ret_flags */
 	    int*              /* locally_initiated */
 	   ));
+
+OM_uint32 krb5_gss_export_sec_context
+PROTOTYPE( (krb5_context,
+	    OM_uint32 *,	/* minor_status */
+	    gss_ctx_id_t *,	/* context_handle */
+	    gss_buffer_t	/* interprocess_token */
+	    ));
+
+OM_uint32 krb5_gss_import_sec_context
+PROTOTYPE( (krb5_context,
+	    OM_uint32 *,	/* minor_status */
+	    gss_buffer_t,	/* interprocess_token */
+	    gss_ctx_id_t *	/* context_handle */
+	    ));
 
 OM_uint32 kg_get_context();
 	
