@@ -112,13 +112,18 @@ krb5.lib:   $(KLIB)
 gssapi.lib: $(GLIB)
 
 sap_glue.obj: win_glue.c
-	$(CC) $(CFLAGS) -DSAP_TIMEBOMB -I$(VERS_DIR) /c /Fo$@ win_glue.c
+	$(CC) $(CFLAGS) -DSAP_TIMEBOMB -DGSSAPI=1 /c /Fo$@ win_glue.c
 
-##WIN16##sapkrb5.dll: $(GLIBS) $(KLIB) sapkrb5.def sap_glue.obj
+##WIN16##krbsap16.dll: $(GLIBS) $(KLIB) $(CLIB) $(GDEF) $(GDEF) sap_glue.obj
 ##WIN16##	link /co /seg:400 /noe /nod /nol \
 ##WIN16##	   sap_glue, $*.dll, $*.map, \
-##WIN16##	   $(GLIBS) $(KLIB) $(VERS_DIR)\vswin.lib $(WINLIBS), $(GDEF)
+##WIN16##	   $(GLIBS) $(KLIB) $(CLIB) $(WINLIBS), $(GDEF)
 ##WIN16##	rc /nologo /p /k $*.dll
+##WIN16##	implib /nologo $*.lib $*.dll
+
+##WIN32##krbsap32.dll: $(GLIBS) $(KLIB) $(CLIB) $(GDEF) $(GDEF) sap_glue.obj
+##WIN32##	link $(WINDLLFLAGS) /def:$(GDEF) /out:$*.dll \
+##WIN32##	   sap_glue.obj $(GLIBS) $(KLIB) $(CLIB) $(WINLIBS)
 
 
 all-windows:: 

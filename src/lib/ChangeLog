@@ -1,3 +1,9 @@
+Wed Mar 19 14:15:42 1997  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* Makefile.in: Fix up name of the SAP Kerberos glue library to be
+		platform dependent (sapkrb16.dll, sapkrb32.dll).  Fix
+		makefile rules to work correctly after NT port.
+
 Mon Mar  3 14:52:58 1997  Ezra Peisach  <epeisach@mit.edu>
 
 	* Makefile.in (MAC_SUBDIRS): Change KRB5 to krb5 for Mac subdirs.
