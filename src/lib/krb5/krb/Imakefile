@@ -1,0 +1,27 @@
+NormalLibraryObjectRule()
+
+OBJS=	decode_kdc.o	\
+	decode_tkt.o	\
+	decrypt_tk.o	\
+	def_realm.o	\
+	encode_kdc.o	\
+	encode_tkt.o	\
+	encrypt_tk.o	\
+	mk_error.o	\
+	parse.o		\
+	rd_error.o	\
+	unparse.o
+
+SRCS=	decode_kdc.c	\
+	decode_tkt.c	\
+	decrypt_tk.c	\
+	def_realm.c	\
+	encode_kdc.c	\
+	encode_tkt.c	\
+	encrypt_tk.c	\
+	mk_error.c	\
+	parse.c		\
+	rd_error.c	\
+	unparse.c
+
+NormalLibraryTarget(krb,$(OBJS))
