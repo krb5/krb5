@@ -21,7 +21,6 @@ OBJS=	\
 	ktdefault.o	\
 	ktfr_entry.o	\
 	ktremove.o	\
-	ktresolve.o	\
 	read_servi.o
 
 SRCS=	\
@@ -30,7 +29,6 @@ SRCS=	\
 	ktdefault.c	\
 	ktfr_entry.c	\
 	ktremove.c	\
-	ktresolve.c	\
 	read_servi.c
 
 OtherdirLibraryTarget($(TOP)/lib,krb5,$(OBJS))
