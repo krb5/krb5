@@ -287,6 +287,7 @@ authenticate(p, addr)
 #endif
 
 #ifdef KRB5
+    krb5_auth_context * auth_context = NULL;
     krb5_error_code retval;
     krb5_principal server;
     int sock = 0;
@@ -304,17 +305,12 @@ authenticate(p, addr)
 	exit(-1);
     }
 
-    if (retval = krb5_recvauth(pop_context, (krb5_pointer)&sock,
-			       "KPOPV1.0",
-			       server,
-			       0,	/* ignore peer address */
-			       0, 0, 0,	/* no fetchfrom, keyproc or arg */
-			       0,	/* default rc type */
+    if (retval = krb5_recvauth(pop_context, &auth_context, (krb5_pointer)&sock,
+			       "KPOPV1.0", server,
+			       NULL,	/* default rc type */
 			       0, 	/* no flags */
-			       0,	/* don't need seq number */
-			       &ext_client,
-			       0, 0	/* don't care about ticket or
-					   authenticator */
+			       NULL,	/* default keytab */
+			       NULL	/* don't care about ticket */
 			       )) {
 	pop_msg(p, POP_FAILURE, "recvauth failed--%s", error_message(retval));
 	pop_log(p, POP_WARNING, "%s: recvauth failed--%s",
@@ -322,6 +318,7 @@ authenticate(p, addr)
 	exit(-1);
     }
     krb5_free_principal(pop_context, server);
+    krb5_auth_con_free(pop_context, auth_context);
     if (retval = krb5_unparse_name(pop_context, ext_client, &client_name)) {
 	pop_msg(p, POP_FAILURE, "name not parsable--%s",
 		error_message(retval));

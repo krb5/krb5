@@ -1,3 +1,8 @@
+
+Mon Mar 27 07:56:26 1995 Chris Provenzano (proven@mit.edu)
+
+        * pop_init.c Use new calling conventions for krb5_recvauth().
+
 Tue Mar 14 16:54:41 1995    <tytso@rsx-11.mit.edu>
 
 	* Makefile.in: Delete definitions defined in pre/config.in.
