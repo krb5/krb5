@@ -1,3 +1,9 @@
+Wed Mar 29 08:56:47 1995  John Gilmore  (gnu at toad.com)
+
+	* Makefile.in:  Fix up Mac makefile.
+	* error_message.c:  For errno, use strerror if HAS_STRERROR.
+	* configure.in:  Define HAS_STRERROR.
+
 Thu Mar 23 19:00:03 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* com_err.c (default_com_err_proc): Fixed breakage introduced by

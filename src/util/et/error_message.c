@@ -35,10 +35,14 @@ long code;
     offset = (int) l_offset;
     table_num = code - l_offset;
     if (!table_num) {
+#ifdef HAS_STRERROR
+	return strerror (offset);
+#else
         if (offset < sys_nerr)
 	    return(sys_errlist[offset]);
 	else
 	    goto oops;
+#endif
     }
     for (et = _et_list; et; et = et->next) {
 	if (et->table->base == table_num) {
