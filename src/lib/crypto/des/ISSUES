@@ -1,5 +1,13 @@
--*- text -*-
+Issues to be addressed for src/lib/crypto/des: -*- text -*-
 
-* "const" could be used in more places
+
+"const" could be used in more places
 
-* array types used too much
+
+Array types are used in calling interfaces.  Under ANSI C, a value of
+type "arraytype *" cannot be assigned to a variable of type "const
+arraytype *", so we get compilation warnings.
+
+Possible fix: Rewrite internal interfaces to not use arrays this way.
+Provide external routines compatible with old API, but not using
+const?
