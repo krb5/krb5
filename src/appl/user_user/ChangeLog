@@ -1,3 +1,10 @@
+Thu Nov  7 15:36:15 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* client.c (argv): 
+	* server.c (argv): Check the error return from
+ 		krb5_init_context(), and print an error message if
+ 		necessary.
+
 Fri Mar 15 21:39:25 1996  Ezra Peisach  (epeisach@kangaroo.mit.edu)
 
 	* server.c: Remove declaration of krb5_kdc_default_options.

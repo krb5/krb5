@@ -95,8 +95,11 @@ main(argc, argv)
     krb5_auth_context 	  auth_context = NULL;
     krb5_replay_data 	  replaydata;
 
-    krb5_init_context(&context);
-    krb5_init_ets(context);
+    retval = krb5_init_context(&context);
+    if (retval) {
+	    com_err(argv[0], retval, "while initializing krb5");
+	    exit(1);
+    }
 
     progname = argv[0];
 

@@ -45,8 +45,11 @@ int main(argc, argv)
     extern krb5_kt_ops krb5_ktf_writable_ops;
     int sci_idx;
 
-    krb5_init_context(&kcontext);
-    krb5_init_ets(kcontext);
+    retval = krb5_init_context(&kcontext);
+    if (retval) {
+        com_err(argv[0], retval, "while initializing krb5");
+	exit(1);
+    }
     retval = krb5_kt_register(kcontext, &krb5_ktf_writable_ops);
     if (retval) {
 	com_err(argv[0], retval,

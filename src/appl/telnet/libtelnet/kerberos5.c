@@ -165,13 +165,17 @@ kerberos5_init(ap, server)
 	Authenticator *ap;
 	int server;
 {
+	krb5_error_code retval;
+	
 	if (server)
 		str_data[3] = TELQUAL_REPLY;
 	else
 		str_data[3] = TELQUAL_IS;
-	if (telnet_context == 0)
-	    krb5_init_context(&telnet_context);
-        krb5_init_ets(telnet_context);
+	if (telnet_context == 0) {
+		retval = krb5_init_context(&telnet_context);
+		if (retval)
+			return 0;
+	}
 	return(1);
 }
 

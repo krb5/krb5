@@ -95,13 +95,17 @@ char *argv[];
     char *lrealm;
     extern char *optarg;
     extern int fascist_cpw;
-
+    krb5_error_code retval;
+    
 #ifdef OVSEC_KADM
     memset(&params, 0, sizeof(params));
 #endif
 
-    krb5_init_context(&kadm_context);
-    krb5_init_ets(kadm_context);
+    retval = krb5_init_context(&kadm_context);
+    if (retval) {
+        com_err(argv[0], retval, "while initializing krb5");
+	exit(1);
+    }
     initialize_kadm_error_table();
     prog[sizeof(prog)-1]='\0';		/* Terminate... */
     (void) strncpy(prog, argv[0], sizeof(prog)-1);

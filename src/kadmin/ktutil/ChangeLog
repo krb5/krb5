@@ -1,3 +1,9 @@
+Thu Nov  7 15:42:17 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* ktutil.c (main): Check the error return from
+ 		krb5_init_context(), and print an error message if
+ 		necessary.
+
 Tue Sep 10 14:17:17 1996  Tom Yu  <tlyu@mit.edu>
 
 	* ktutil.M: remove ".so man1/header.doc"

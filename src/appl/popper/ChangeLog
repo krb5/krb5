@@ -1,3 +1,9 @@
+Fri Nov  8 17:21:17 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* pop_init.c (pop_init): Check the error return from
+ 		krb5_init_context(), and print an error message if
+ 		necessary.
+
 Tue Sep 10 14:08:36 1996  Tom Yu  <tlyu@mit.edu>
 
 	* popper.M: remove ".so man1/header.doc"

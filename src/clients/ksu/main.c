@@ -127,7 +127,12 @@ char * dir_of_cc_source;
     params[1] = NULL;
 
 
-    krb5_init_context(&ksu_context); 
+    retval = krb5_init_context(&ksu_context);
+    if (retval) {
+        com_err(argv[0], retval, "while initializing krb5");
+	exit(1);
+    }
+
     krb5_init_ets(ksu_context); 	/* initialize kerberos error tables */
     krb5_secure_config_files(ksu_context);
 

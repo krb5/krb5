@@ -360,9 +360,16 @@ main(argc, argv)
 		case 'R':
 		    {
 			extern krb5_context telnet_context;
+			krb5_error_code retval;
 			
-			if (telnet_context == 0)
-			    krb5_init_context(&telnet_context);
+			if (telnet_context == 0) {
+				retval = krb5_init_context(&telnet_context);
+				if (retval) {
+					com_err("telnetd", retval,
+						"while initializing krb5");
+					exit(1);
+				}
+			}
 			krb5_set_default_realm(telnet_context, optarg);
 			break;
 		    }

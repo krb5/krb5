@@ -365,8 +365,11 @@ void PRS(argv)
 	krb5_error_code	retval;
 	static const char	tmp[] = ".temp";
 	
-	krb5_init_context(&kpropd_context);
-	krb5_init_ets(kpropd_context);
+	retval = krb5_init_context(&kpropd_context);
+	if (retval) {
+		com_err(argv[0], retval, "while initializing krb5");
+		exit(1);
+	}
 
 	progname = *argv++;
 	while (word = *argv++) {

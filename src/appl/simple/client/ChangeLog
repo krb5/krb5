@@ -1,3 +1,9 @@
+Thu Nov  7 15:26:10 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* sim_client.c (main): Check the error return from
+ 		krb5_init_context(), and print an error message if
+ 		necessary.
+
 Thu Nov  9 09:33:38 1995  Ezra Peisach  (epeisach@kangaroo.mit.edu)
 
 	* sim_client.c (main): Use krb5_get_server_rcache instead of

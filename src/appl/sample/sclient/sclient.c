@@ -73,8 +73,11 @@ char *argv[];
 	exit(1);
     }
 
-    krb5_init_context(& context);
-    krb5_init_ets(context);
+    retval = krb5_init_context(&context);
+    if (retval) {
+	    com_err(argv[0], retval, "while initializing krb5");
+	    exit(1);
+    }
 
     (void) signal(SIGPIPE, SIG_IGN);
     if (!valid_cksumtype(CKSUMTYPE_CRC32)) {

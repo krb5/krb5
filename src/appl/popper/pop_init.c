@@ -293,8 +293,11 @@ authenticate(p, addr)
     krb5_ticket *ticket;
     int sock = 0;
 
-    krb5_init_context(&pop_context);
-    krb5_init_ets(pop_context);
+    retval = krb5_init_context(&pop_context);
+    if (retval) {
+	    com_err("pop_authenticate", retval, "while initializing krb5");
+	    exit(1);
+    }
 
     if (retval = krb5_sname_to_principal(pop_context, p->myhost, "pop", 
 					 KRB5_NT_SRV_HST, &server)) {

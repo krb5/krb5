@@ -1,3 +1,9 @@
+Thu Nov  7 15:18:01 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* kprop.c (main): 
+	* kpropd.c (PRS): Check the error return from krb5_init_context(),
+ 		and print an error message if necessary.
+
 Tue Oct 22 16:42:37 1996  Barry Jaspan  <bjaspan@mit.edu>
 
 	* kpropd.c (PRS): munge realm of sname_to_princ when -r is

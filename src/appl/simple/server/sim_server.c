@@ -87,8 +87,11 @@ char *argv[];
     krb5_address addr;
     krb5_ticket *ticket = NULL;
 
-    krb5_init_context(&context);
-    krb5_init_ets(context);
+    retval = krb5_init_context(&context);
+    if (retval) {
+	    com_err(argv[0], retval, "while initializing krb5");
+	    exit(1);
+    }
 
     /*
      * Parse command line arguments

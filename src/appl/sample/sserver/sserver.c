@@ -89,8 +89,11 @@ main(argc, argv)
 
     progname = *argv;
 
-    krb5_init_context(&context);
-    krb5_init_ets(context);
+    retval = krb5_init_context(&context);
+    if (retval) {
+	    com_err(argv[0], retval, "while initializing krb5");
+	    exit(1);
+    }
 
     /* open a log connection */
     openlog("sserver", 0, LOG_DAEMON);
