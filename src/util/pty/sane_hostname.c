@@ -52,6 +52,11 @@ pty_make_sane_hostname(const struct sockaddr *addr, int maxlen,
     char lhost[MAXHOSTNAMELEN];
     size_t ut_host_len;
 
+    /* Note that on some systems (e.g., AIX 4.3.3), we may get an IPv6
+       address such as ::FFFF:18.18.1.71 when an IPv4 connection comes
+       in.  That's okay; at least on AIX, getnameinfo will deal with
+       that properly.  */
+
     *out = NULL;
     if (maxlen && maxlen < 16)
 	/* assume they meant 16, otherwise IPv4 addr won't fit */
