@@ -1,3 +1,9 @@
+2001-02-21  Tom Yu  <tlyu@mit.edu>
+
+	* setenv.c: Add conditionals for compilation of setenv, unsetenv,
+	and getenv such that they only get compiled if they don't already
+	exist.
+
 2000-05-22  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in (OBJS): Put @SETENVOBJ@ on same line as xmalloc.o to
