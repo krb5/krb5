@@ -13,7 +13,6 @@
 	#include <time.h>
 	#include <string.h>
     #include "krb5.h"
-    #include "des_int.h"
     #include "com_err.h"
 #endif
 
