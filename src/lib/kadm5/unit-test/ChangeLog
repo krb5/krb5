@@ -1,3 +1,8 @@
+Fri Oct 25 16:43:52 1996  Ezra Peisach  <epeisach@trane.rose.brandeis.edu>
+
+	* Makefile.in (init-test): Add -UUSE_KADM5_API_VERSION before the
+		-D of same.  
+
 Wed Oct 23 13:32:40 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* api.2/get-principal-v2.exp: Fix for test 100 where {} is not

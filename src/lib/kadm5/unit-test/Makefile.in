@@ -12,7 +12,7 @@ init-test: init-test.o client_init.o $(CLNTDEPLIPS)
 		$(CLNTLIBS)
 
 client_init.o: $(SRCTOP)/lib/kadm5/clnt/client_init.c
-	$(CC) $(CFLAGS) -DUSE_KADM5_API_VERSION=2 -DINIT_TEST -c -I$(SRCTOP)/lib/kadm5 $(SRCTOP)/lib/kadm5/clnt/client_init.c
+	$(CC) $(CFLAGS) -UUSE_KADM5_API_VERSION -DUSE_KADM5_API_VERSION=2 -DINIT_TEST -c -I$(SRCTOP)/lib/kadm5 $(SRCTOP)/lib/kadm5/clnt/client_init.c
 
 destroy-test: destroy-test.o $(CLNTDEPLIBS)
 	$(LD) $(LDFLAGS) $(LDARGS) -o destroy-test destroy-test.o $(CLNTLIBS)
