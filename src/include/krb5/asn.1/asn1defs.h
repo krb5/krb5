@@ -182,5 +182,8 @@ krb5_priv_enc_part *KRB5_EncKrbPrivPart2krb5_priv_enc_part
 
 struct type_UNIV_GeneralizedTime *unix2gentime
 	PROTOTYPE((const int, register int *));
+long gentime2unix
+	PROTOTYPE((const struct type_UNIV_GeneralizedTime *,
+		   int *));
 
 #endif /* KRB5_ASN1DEFS__ */
