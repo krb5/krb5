@@ -1829,16 +1829,16 @@ int rewrite_ccache = 1; /*try to write out ccache*/
 	read_env_vars_from_file ("/etc/TIMEZONE");
 #else
 	if (tz)
-	    setenv ("TZ", tz, 0);
+	    setenv ("TZ", tz, 1);
 #endif
 
 	if (ccname)
-		setenv("KRB5CCNAME", ccname, 0);
+		setenv("KRB5CCNAME", ccname, 1);
 
-	setenv("HOME", pwd->pw_dir, 0);
-	setenv("PATH", LPATH, 0);
-	setenv("USER", pwd->pw_name, 0);
-	setenv("SHELL", pwd->pw_shell, 0);
+	setenv("HOME", pwd->pw_dir, 1);
+	setenv("PATH", LPATH, 1);
+	setenv("USER", pwd->pw_name, 1);
+	setenv("SHELL", pwd->pw_shell, 1);
 
 	if (term[0] == '\0')
 		(void) strncpy(term, stypeof(tty), sizeof(term));
