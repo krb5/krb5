@@ -21,12 +21,16 @@
  */
 
 /* This file could be OS specific */
+#define NEED_SOCKETS
 #include "gssapiP_generic.h"
-#ifndef _MSDOS
+
 #include <sys/types.h>
+#ifndef _WINSOCKAPI_
 #include <sys/socket.h>
 #include <netdb.h>
+#endif
 #include <ctype.h>
+#include <string.h>
 
 char * INTERFACE
 g_canonicalize_host(hostname)
@@ -61,4 +65,3 @@ g_canonicalize_host(hostname)
 
    return(canon);
 }
-#endif

@@ -1,3 +1,11 @@
+Tue Mar 7 20:14:53 1995 Keith Vetter (keithv@fusion.com)
+
+	* disp_maj.c: added casts on int->long assignments.
+        * util_can.c: made to work with PC winsockets.
+        * util_dup.c: added system include for prototype info.
+        * util_tok.c: int/long problems.
+        * gssapip_.h: added casts on int->char assignments.
+
 Tue Feb 28 00:25:58 1995  John Gilmore  (gnu at toad.com)
 
 	* gssapi.h:  Avoid <krb5/...> includes.

@@ -21,6 +21,7 @@
  */
 
 #include "gssapiP_generic.h"
+#include <string.h>
 
 char * INTERFACE g_strdup(str)
      char *str;

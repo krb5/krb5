@@ -40,10 +40,10 @@
    things */
 
 #define TWRITE_INT(ptr, num, bigend) \
-   (ptr)[0] = (bigend)?((num)>>24):((num)&0xff); \
-   (ptr)[1] = (bigend)?(((num)>>16)&0xff):(((num)>>8)&0xff); \
-   (ptr)[2] = (bigend)?(((num)>>8)&0xff):(((num)>>16)&0xff); \
-   (ptr)[3] = (bigend)?((num)&0xff):((num)>>24); \
+   (ptr)[0] = (char) ((bigend)?((num)>>24):((num)&0xff)); \
+   (ptr)[1] = (char) ((bigend)?(((num)>>16)&0xff):(((num)>>8)&0xff)); \
+   (ptr)[2] = (char) ((bigend)?(((num)>>8)&0xff):(((num)>>16)&0xff)); \
+   (ptr)[3] = (char) ((bigend)?((num)&0xff):((num)>>24)); \
    (ptr) += 4;
 
 #define TREAD_INT(ptr, num, bigend) \

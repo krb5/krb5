@@ -21,6 +21,7 @@
  */
 
 #include "gssapiP_generic.h"
+#include <string.h>
 
 /* This code has knowledge of the min and max errors of each type
    within the gssapi major status */
@@ -278,20 +279,20 @@ OM_uint32 INTERFACE g_display_major_status(minor_status, status_value,
 
    if (!tmp) {
       /* bogon input - there should be something left */
-      *minor_status = G_BAD_MSG_CTX;
+      *minor_status = (OM_uint32) G_BAD_MSG_CTX;
       return(GSS_S_FAILURE);
    }
 
    /* compute the bit offset */
    /*SUPPRESS 570*/
-   for (bit=0; (1<<bit) != LSBGET(tmp); bit++) ;
+   for (bit=0; (((OM_uint32) 1)<<bit) != LSBGET(tmp); bit++) ;
 
    /* print it */
    if (ret = display_bit(minor_status, bit, status_string))
       return(ret);
 
    /* compute the new status_value/message_context */
-   status_value -= 1<<bit;
+   status_value -= ((OM_uint32) 1)<<bit;
 
    if (status_value) {
       *message_context = bit+3;

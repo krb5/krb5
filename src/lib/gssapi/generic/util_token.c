@@ -116,7 +116,7 @@ int INTERFACE g_token_size(mech, body_size)
      unsigned int body_size;
 {
    /* set body_size to sequence contents size */
-   body_size += 4 + mech->length;
+   body_size += 4 + (int) mech->length;         /* NEED overflow check */
    return(1 + der_length_size(body_size) + body_size);
 }
 
@@ -172,7 +172,9 @@ int INTERFACE g_verify_token_header(mech, body_size, buf, tok_type, toksize)
       return(0);
    toid.length = *(*buf)++;
 
-   if ((toksize-=toid.length) < 0)
+   if ((toid.length & VALID_INT_BITS) != toid.length) /* Overflow??? */
+      return(0);
+   if ((toksize-= (int) toid.length) < 0)
       return(0);
    toid.elements = *buf;
    (*buf)+=toid.length;
