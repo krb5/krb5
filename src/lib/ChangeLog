@@ -1,3 +1,8 @@
+Wed Oct 25 14:56:26 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in (lib-windows): For the windows, add the oldnames
+		library to the link lines for gssapi.dll and libkrb5.dll
+
 Tue Oct 10 21:45:51 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in: Added the "/nod" option to the gssapi.dll and
