@@ -1,3 +1,11 @@
+1999-08-18  Tom Yu  <tlyu@mit.edu>
+
+	* etypes.c: Update des3-cbc-sha1 to alignt with new number
+	assignments.
+
+	* cksumtypes.c: Update hmac-sha1-des3 to align with new number
+	assignments.
+
 Tue May 18 19:52:56 1999  Danilo Almeida  <dalmeida@mit.edu>
 
 	* Makefile.in: Remove - from recursive Win32 make invocation.
