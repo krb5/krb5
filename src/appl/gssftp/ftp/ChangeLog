@@ -1,3 +1,10 @@
+Thu Dec 11 23:26:58 1997  Tom Yu  <tlyu@mit.edu>
+
+	* ftp.c:
+	* main.c: Don't include netdb.h or sys/socket.h if krb.h is
+	included; this works around an Ultrix bug where those headers
+	aren't protected against multiple inclusion.
+
 Thu Oct 16 01:20:30 1997  Tom Yu  <tlyu@mit.edu>
 
 	* main.c: Change KERBEROS to KRB5_KRB4_COMPAT where appropriate.

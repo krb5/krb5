@@ -41,7 +41,10 @@ static char sccsid[] = "@(#)ftp.c	5.38 (Berkeley) 4/22/91";
 #include <sys/param.h>
 #include <sys/stat.h>
 #include <sys/ioctl.h>
+#ifndef KRB5_KRB4_COMPAT
+/* krb.h gets this, and Ultrix doesn't protect vs multiple inclusion */
 #include <sys/socket.h>
+#endif
 #include <sys/time.h>
 #include <sys/file.h>
 #ifdef HAVE_SYS_SELECT_H
@@ -58,7 +61,10 @@ static char sccsid[] = "@(#)ftp.c	5.38 (Berkeley) 4/22/91";
 #include <signal.h>
 #include <string.h>
 #include <errno.h>
+#ifndef KRB5_KRB4_COMPAT
+/* krb.h gets this, and Ultrix doesn't protect vs multiple inclusion */
 #include <netdb.h>
+#endif
 #include <fcntl.h>
 #include <pwd.h>
 #ifndef STDARG
