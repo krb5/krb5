@@ -78,7 +78,7 @@ OLDDECLARG(krb5_data *, outbuf)
 #define cleanup_privmsg() {(void)xfree(privmsg->enc_part.ciphertext.data); (void)xfree(privmsg);}
     if (!valid_etype(privmsg->enc_part.etype)) {
 	cleanup_privmsg();
-	return KRB5_PROG_ETYPE_NOSUPP; /* XXX */
+	return KRB5_PROG_ETYPE_NOSUPP;
     }
 			   
     /* put together an eblock for this decryption */
