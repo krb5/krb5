@@ -54,13 +54,13 @@ dnl
 dnl Check for where the BSD rlogin, rcp, and rsh programs live.
 dnl
 save_path=$PATH
-AC_CHECK_ECHO_N
+AC_PROG_ECHO_N
 PATH=/bin:/usr/bin:/usr/bsd:/usr/ucb
 AC_PATH_PROG(UCB_RLOGIN,rlogin,/usr/ucb/rlogin)
 AC_PATH_PROG(UCB_RSH,rsh,/usr/ucb/rsh)
 AC_PATH_PROG(UCB_RCP,rcp,/usr/ucb/rcp)
 PATH=$save_path
-AC_CHECK_ECHO_N
+AC_PROG_ECHO_N
 dnl
 dnl
 AC_MSG_CHECKING([streams interface])
