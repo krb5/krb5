@@ -28,8 +28,6 @@
 
 #include "k5-int.h"
 
-extern char *krb5_defkeyname;
-
 krb5_error_code
 krb5_kt_default_name(context, name, namesize)
     krb5_context context;
@@ -40,37 +38,57 @@ krb5_kt_default_name(context, name, namesize)
     krb5_error_code code;
     char *retval;
 
-    if ((context->profile_secure == FALSE) &&
-	(cp = getenv("KRB5_KTNAME"))) {
-	strncpy(name, cp, namesize);
-	if (strlen(cp) >= (size_t) namesize)
-	    return KRB5_CONFIG_NOTENUFSPACE;
-    } else if (((code = profile_get_string(context->profile,
-					   "libdefaults",
-					   "default_keytab_name", NULL, 
-					   NULL, &retval)) == 0) &&
-	       retval) {
-	strncpy(name, retval, namesize);
-	if ((size_t) namesize < strlen(retval))
-	    return KRB5_CONFIG_NOTENUFSPACE;
-    } else {
+    if (context->kt_default_name == NULL) {
+	if ((context->profile_secure == FALSE) &&
+	    (cp = getenv("KRB5_KTNAME"))) {
+	} else if (((code = profile_get_string(context->profile,
+					       "libdefaults",
+					       "default_keytab_name", NULL, 
+					       NULL, &cp)) == 0) && cp){
+	    ;
+	} else {
 #if defined (_MSDOS) || defined(_WIN32)
-	{
-	    char    defname[160];
-	    int     len;
-
-	    len= GetWindowsDirectory( defname, sizeof(defname)-2 );
-	    defname[len]= '\0';
-	    if ( (len + strlen(krb5_defkeyname) + 1) > namesize )
-		return KRB5_CONFIG_NOTENUFSPACE;
-	    sprintf(name, krb5_defkeyname, defname);
-	}
+	    {
+		char    defname[160];
+		int     len;
+		
+		len= GetWindowsDirectory( defname, sizeof(defname)-2 );
+		defname[len]= '\0';
+		if ((cp = malloc(strlen(DEFAULT_KEYTAB_NAME) + 1 + len))
+		    == NULL)
+		    return ENOMEM;
+		sprintf(cp, DEFAULT_KEYTAB_NAME, defname);
+	    }
 #else
-	strncpy(name, krb5_defkeyname, namesize);
-	if ((size_t) namesize < strlen(krb5_defkeyname))
-	    return KRB5_CONFIG_NOTENUFSPACE;
+	    if ((cp = malloc(strlen(DEFAULT_KEYTAB_NAME) + 1)) == NULL)
+		return ENOMEM;
+	    strcpy(cp, DEFAULT_KEYTAB_NAME);
 #endif
+	}
+	/* cache the result... */
+	if ((context->kt_default_name = malloc(strlen(cp) + 1)) == NULL)
+	    return ENOMEM;
+	strcpy(context->kt_default_name, cp);
     }
+    strncpy(name, context->kt_default_name, namesize);
+    if ((size_t) namesize < strlen(context->kt_default_name))
+	return KRB5_CONFIG_NOTENUFSPACE;
     return 0;
 }
-    
+
+krb5_error_code
+krb5_kt_set_default_name(context, name)
+     krb5_context context;
+     char *name;
+{
+    char *cp;
+    if ((cp = malloc(strlen(name) + 1)) == NULL)
+	return ENOMEM;
+    else {
+	strcpy(cp, name);
+	if (context->kt_default_name)
+	    free(context->kt_default_name);
+	context->kt_default_name = cp;
+	return 0;
+    }
+}
