@@ -740,20 +740,6 @@ int getnameinfo (const struct sockaddr *sa, socklen_t len,
 #endif /* NEED_FAKE_GETADDRINFO */
 
 
-#if defined (WRAP_GETADDRINFO) || defined (WRAP_GETNAMEINFO)
-/* These variables will contain pointers to the system versions.  They
-   have to be initialized at the end, because the way we initialize
-   them (for UNIX) is #undef and a reference to the C library symbol
-   name.  */
-static int (*const gaiptr) (const char *, const char *,
-			    const struct addrinfo *,
-			    struct addrinfo **);
-static void (*const faiptr) (struct addrinfo *);
-#ifdef WRAP_GETNAMEINFO
-static int (*const gniptr) (const struct sockaddr *, socklen_t,
-			    char *, socklen_t, char *, socklen_t, int);
-#endif
-
 #ifdef WRAP_GETADDRINFO
 
 static inline
@@ -909,8 +895,6 @@ int getnameinfo (const struct sockaddr *sa, socklen_t len,
     return (*gniptr)(sa, len, host, hostlen, service, servicelen, flags);
 }
 #endif /* WRAP_GETNAMEINFO */
-
-#endif /* WRAP_GETADDRINFO || WRAP_GETNAMEINFO */
 
 #if defined(KRB5_USE_INET6) && defined(NEED_INSIXADDR_ANY) 
 /* If compiling with IPv6 support and C library does not define in6addr_any */
