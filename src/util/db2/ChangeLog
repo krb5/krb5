@@ -1,3 +1,9 @@
+Wed Jul 31 03:35:47 1996  Tom Yu  <tlyu@mit.edu>
+
+	* obj/Makefile.in: Add -Dfoo=my_foo when compiling replacement
+		functions (so that the redefinitions in db-int.h take
+		effect).
+
 Mon Jul 29 23:24:22 1996  Tom Yu  <tlyu@mit.edu>
 
 	* hash/hash.c, hash/hash_func.c, hash/hash_page.c: Add "static" to
