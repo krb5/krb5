@@ -95,7 +95,8 @@ install-unix::
 
 clean-unix::
 	$(RM) $(OBJS) core *~ *.bak #*
-	$(RM) krb524test krb524d k524init test.o krb524d.o k524init.o
+	$(RM) krb524test krb524d k524init test.o $(CLIENT_OBJS) $(SERVER_OBJS)
+
 
 # +++ Dependency line eater +++
 # 

@@ -1,3 +1,8 @@
+2003-12-15  Ezra Peisach  <epeisach@mit.edu>
+
+	* Makefile.in (clean-unix): Clean up more files now that STLIBOBS
+	is not used (introduced in 1491). Some files were missed.
+
 2003-09-02  Tom Yu  <tlyu@mit.edu>
 
 	* cnv_tkt_skey.c (krb524_convert_tkt_skey): Apply patch from Cesar
