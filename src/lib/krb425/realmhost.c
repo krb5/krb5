@@ -40,8 +40,14 @@ char *host;
                         if (islower(*cp))
                                 *cp = toupper(*cp);
         } else {
-		if (krb5_get_default_realm(REALM_SZ, ret_realm))
-			ret_realm[0] = 0;
+		if (!_krb425_local_realm &&
+		    krb5_get_default_realm(&_krb425_local_realm))
+			_krb425_local_realm = NULL;
+
+		if (_krb425_local_realm) {
+			strncpy(ret_realm, _krb425_local_realm, REALM_SZ);
+			ret_realm[REALM_SZ-1] = 0;
+		}
 	}
 
 	if (krb5_get_host_realm(host, &realms)) {

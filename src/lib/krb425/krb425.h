@@ -46,7 +46,7 @@
 		str[0] = 0; \
 }
 
-extern char 		_krb425_local_realm[REALM_SZ+1];
+extern char 		*_krb425_local_realm;
 extern krb5_ccache 	_krb425_ccache;
 extern int		_krb425_error_init;
 

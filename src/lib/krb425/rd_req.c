@@ -28,7 +28,7 @@ AUTH_DAT *ad;
 char *fn;
 {
 	krb5_address peer;
-	krb5_tkt_authent authd;
+	krb5_tkt_authent *authdat;
 	char addr[4];
 	krb5_data *server[4];
 	krb5_data srvdata[3];
@@ -44,8 +44,9 @@ char *fn;
 		memcpy(addr, (char *)&from_addr + (sizeof(from_addr) - 4), 4);
 	}
 
-	if (!_krb425_local_realm[0])
-		krb5_get_default_realm(REALM_SZ, _krb425_local_realm);
+	if (!_krb425_local_realm)
+		if (r = krb5_get_default_realm(&_krb425_local_realm))
+			return(krb425error(r));
 
 	if (!strcmp(instance, "*")) {
 		static char hostname[64] = { 0 };
@@ -111,7 +112,7 @@ char *fn;
 	if (r = krb5_rd_req(&authe,
 			    (krb5_principal)server,
 			    from_addr ? &peer : 0,
-			    fn, 0, 0, 0, &authd)) {
+			    fn, 0, 0, 0, &authdat)) {
 #ifdef	EBUG
 		ERROR(r)
 #endif
@@ -122,52 +123,51 @@ char *fn;
 
 #ifdef	EBUG
 	r = 0;
-	while (authd.authenticator->client[r]) {
-		EPRINT "Client[%d]: ", r); show5((*authd.authenticator->client[r])); ENEWLINE
+	while (authdat->authenticator->client[r]) {
+		EPRINT "Client[%d]: ", r); show5((*authdat->authenticator->client[r])); ENEWLINE
 		++r;
 	}
 	r = 0;
-	while (authd.ticket->server[r]) {
-		EPRINT "Server[%d]: ", r); show5((*authd.ticket->server[r])); ENEWLINE
+	while (authdat->ticket->server[r]) {
+		EPRINT "Server[%d]: ", r); show5((*authdat->ticket->server[r])); ENEWLINE
 		++r;
 	}
 	r = 0;
 #endif
-	set_string(ad->pname, ANAME_SZ, authd.authenticator->client[1]);
-	set_string(ad->pinst, INST_SZ, authd.authenticator->client[2]);
-	set_string(ad->prealm, REALM_SZ, authd.authenticator->client[0]);
+	set_string(ad->pname, ANAME_SZ, authdat->authenticator->client[1]);
+	set_string(ad->pinst, INST_SZ, authdat->authenticator->client[2]);
+	set_string(ad->prealm, REALM_SZ, authdat->authenticator->client[0]);
 
-	ad->checksum = *(long *)authd.authenticator->checksum->contents;
+	ad->checksum = *(long *)authdat->authenticator->checksum->contents;
 
-	if (authd.ticket->enc_part2->session->keytype != KEYTYPE_DES) {
+	if (authdat->ticket->enc_part2->session->keytype != KEYTYPE_DES) {
 		r = KFAILURE;
 		goto out;
 	} else
 		memcpy((char*)ad->session,
-		       (char*)authd.ticket->enc_part2->session->contents,
+		       (char*)authdat->ticket->enc_part2->session->contents,
 		       sizeof(C_Block));
 
-	ad->life = authd.ticket->enc_part2->times.endtime;
-	ad->time_sec = authd.authenticator->ctime;
+	ad->life = authdat->ticket->enc_part2->times.endtime;
+	ad->time_sec = authdat->authenticator->ctime;
 	ad->address = 0;
 
-	if (authd.ticket->enc_part2->caddrs[0]->addrtype != ADDRTYPE_INET) {
+	if (authdat->ticket->enc_part2->caddrs[0]->addrtype != ADDRTYPE_INET) {
 		r = KFAILURE;
 		goto out;
 	} else
 		memcpy((char*)&ad->address + sizeof(ad->address) - 4,
-		       (char*)authd.ticket->enc_part2->caddrs[0]->contents, 4);
+		       (char*)authdat->ticket->enc_part2->caddrs[0]->contents, 4);
 
-	if (authd.ticket->enc_part2->authorization_data &&
-	    authd.ticket->enc_part2->authorization_data[0]) {
-		ad->reply.length = authd.ticket->enc_part2->authorization_data[0]->length;
+	if (authdat->ticket->enc_part2->authorization_data &&
+	    authdat->ticket->enc_part2->authorization_data[0]) {
+		ad->reply.length = authdat->ticket->enc_part2->authorization_data[0]->length;
 		memcpy((char*)ad->reply.dat,
-		       (char*)authd.ticket->enc_part2->authorization_data[0]->contents,
+		       (char*)authdat->ticket->enc_part2->authorization_data[0]->contents,
 		       min(ad->reply.length, MAX_KTXT_LEN));
 		ad->reply.mbz = 0;
 	}
 out:
-	krb5_free_ticket(authd.ticket);
-	krb5_free_authenticator(authd.authenticator);
+	krb5_free_tkt_authent(authdat);
 	return(r);
 }

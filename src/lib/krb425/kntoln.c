@@ -23,8 +23,11 @@ krb_kntoln(ad,lname)
 AUTH_DAT *ad;
 char *lname;
 {
-	if (!_krb425_local_realm[0])
-		krb5_get_default_realm(REALM_SZ, _krb425_local_realm);
+	krb5_error_code	retval;
+	
+	if (!_krb425_local_realm)
+		if (retval = krb5_get_default_realm(&_krb425_local_realm))
+			return(krb425error(retval));
 
 	if (strcmp(ad->pinst,""))
 		return(KFAILURE);
