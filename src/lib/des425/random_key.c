@@ -1,6 +1,13 @@
 /*
  * $Source$
  * $Author$
+ *
+ * Copyright 1990,1991 by the Massachusetts Institute of Technology.
+ * All Rights Reserved.
+ *
+ * For copying and distribution information, please see the file
+ * <krb5/copyright.h>.
+ *
  */
 
 #ifndef	lint
