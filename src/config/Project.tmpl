@@ -10,10 +10,10 @@
 #define TouchCmd touch
 #endif
 #ifndef UnifdefCmd
-#define UnifdefCmd unifdef
+#define UnifdefCmd $(TOP)/util/unifdef/unifdef
 #endif
 #ifndef CompileEtCmd
-#define CompileEtCmd compile_et
+#define CompileEtCmd $(TOP)/util/et/compile_et
 #endif
 #ifndef MkCmdsCmd
 #define MkCmdsCmd mk_cmds
@@ -25,10 +25,10 @@
 #define ImakeCmd imake			/* assume BINDIR in path */
 #endif
 #ifndef SSLib
-#define SSLib -lss
+#define SSLib -L$(TOPLIBD) -lss
 #endif
 #ifndef ComErrLib
-#define ComErrLib -lcom_err
+#define ComErrLib -L$(TOPLIBD) -lcom_err
 #endif
 #ifndef PepsyFlags
 #define PepsyFlags -f -h0 -a -s -C
@@ -45,6 +45,9 @@
 #endif
 #ifndef Krb4LibList
 #define Krb4LibList -lkrb $(KLIBLOC) -l$(DES425LIB)
+#endif
+#ifndef Krb4KdbList
+#define Krb4KdbList -lkdb
 #endif
 #ifndef Krb4DepList
 #define Krb4DepList $(DES425DEPLIB)
@@ -78,13 +81,74 @@
 #ifndef Kdb5Dir
 #define Kdb5Dir		/krb5
 #endif
+#ifndef Krb5Manroot
+#define Krb5Manroot	$(KRB5ROOT)/man
+#endif
+#ifndef AdminManSuffix
+#define AdminManSuffix 8
+#endif
+#ifndef AdminMandir
+#define AdminMandir $(KRB5MANROOT)/man$(ADMIN_MANSUFFIX)
+#endif
+#ifndef ServerManSuffix
+#define ServerManSuffix 8
+#endif
+#ifndef ServerMandir
+#define ServerMandir $(KRB5MANROOT)/man$(SERVER_MANSUFFIX)
+#endif
+#ifndef ClientManSuffix
+#define ClientManSuffix 1
+#endif
+#ifndef ClientMandir
+#define ClientMandir $(KRB5MANROOT)/man$(CLIENT_MANSUFFIX)
+#endif
+#ifndef FileManSuffix
+#define FileManSuffix 5
+#endif
+#ifndef FileMandir
+#define FileMandir $(KRB5MANROOT)/man$(FILE_MANSUFFIX)
+#endif
+#ifndef AdminBindir
+#define AdminBindir $(KRB5ROOT)/admin
+#endif
+#ifndef ServerBindir
+#define ServerBindir $(KRB5ROOT)/sbin
+#endif
+#ifndef ClientBindir
+#define ClientBindir $(KRB5ROOT)/bin
+#endif
+#ifndef Krb5Libdir
+#define	Krb5Libdir $(KRB5ROOT)/lib
+#endif
+#ifndef Krb5Incdir
+#define	Krb5Incdir $(KRB5ROOT)/include
+#endif
+#ifndef Krb5Othermkdirs
+#define Krb5Othermkdirs
+#endif
+#ifndef Krb5Srvtabdir
+#define Krb5Srvtabdir /etc
+#endif
+
+#ifndef DbmLib
+#if HasNdbm
+#define DbmLib
+#else
+#define DbmLib -ldbm
+#endif
+#endif
+
+/* Hack around sun cpp bug */
+  
+PEPSY_WARNING_STRING = \
+	@echo '***Ignore the warning message "Warning: Can'"'"'t find UNIV.ph failed"'
 
 #ifndef PepsyTarget
 #define	PepsyTarget(basename)						@@\
 .SUFFIXES:	.py							@@\
-basename/**/_defs.h basename/**/_pre_defs.h basename-types.h basename/**/_tables.c: basename-asn.py					@@\
-	@echo '***Ignore the warning message "Warning: Can'\''t find UNIV.ph failed"' @@\
-	$(PEPSY) $(PSYFLAGS) $(SRCDIR)basename-asn.py
+Concat(basename,_defs.h) Concat(basename,_pre_defs.h) Concat(basename,-types.h) Concat(basename,_tables.c): Concat(basename,-asn.py)			@@\
+	$(PEPSY_WARNING_STRING)						@@\
+	$(PEPSY) $(PSYFLAGS) Concat3($(SRCDIR),basename,-asn.py)
 #endif /* PepsyTarget */
 
 #ifndef ErrorTableObjectRule
@@ -117,7 +181,7 @@ basename/**/_defs.h basename/**/_pre_defs.h basename-types.h basename/**/_tables
 
 #ifndef SharedLibraryTarget
 #define SharedLibraryTarget(libname,deps)				@@\
-lib/**/libname.a::
+Concat3(lib,libname,.a)::
 #endif
 
 /*
@@ -126,28 +190,28 @@ lib/**/libname.a::
  */
 #ifndef AdditiveLibraryTarget
 #define	AdditiveLibraryTarget(libname,objlist,deps)			@@\
-AllTarget(lib/**/libname.a)						@@\
-AllTarget(foo/**/libname)						@@\
+AllTarget(Concat3(lib,libname,.a))					@@\
+AllTarget(Concat(foo,libname))						@@\
 DependTarget()								@@\
 									@@\
-foo/**/libname: objlist							@@\
-	$(ARADD) lib/**/libname.a objlist				@@\
-	$(TOUCH) foo/**/libname						@@\
-lib/**/libname.a: foo/**/libname					@@\
+Concat(foo,libname): objlist						@@\
+	$(ARADD) Concat3(lib,libname,.a) objlist			@@\
+	$(TOUCH) Concat(foo,libname)					@@\
+Concat3(lib,libname,.a): Concat(foo,libname)				@@\
 	$(RANLIB) $@							@@\
 clean::									@@\
-	$(RM) foo/**/libname lib/**/libname.a
+	$(RM) Concat(foo,libname) Concat3(lib,libname,.a)
 #endif /* AdditiveLibraryTarget */
 
 #ifndef RanlibLibraryTarget
 #define	RanlibLibraryTarget(libname,deps)				@@\
-AllTarget(lib/**/libname.a)						@@\
-foo2/**/libname: foo/**/libname						@@\
+AllTarget(Concat3(lib,libname,.a))					@@\
+Concat(foo2,libname): Concat(foo,libname)				@@\
 	$(TOUCH) $@							@@\
-lib/**/libname.a: foo2/**/libname					@@\
+Concat3(lib,libname,.a): Concat(foo2,libname)				@@\
 	$(RANLIB) $@							@@\
 clean::									@@\
-	$(RM) foo/**/libname foo2/**/libname lib/**/libname.a
+	$(RM) Concat(foo,libname) Concat(foo2,libname) Concat3(lib,libname,.a)
 #endif
 
 /*
@@ -157,17 +221,17 @@ clean::									@@\
 #ifndef OtherdirLibraryTarget
 #define	OtherdirLibraryTarget(libdir,libname,objlist)			@@\
 AllTarget(objlist)							@@\
-AllTarget(libdir/lib/**/libname.a)					@@\
-AllTarget(foo/**/libname)						@@\
+AllTarget(Concat4(libdir,/lib,libname,.a))				@@\
+AllTarget(Concat(foo,libname))						@@\
 									@@\
-libdir/lib/**/libname.a foo/**/libname:	objlist				@@\
-	$(ARADD) libdir/lib/**/libname.a objlist			@@\
-	$(TOUCH) foo/**/libname						@@\
-	$(TOUCH) libdir/foo/**/libname					@@\
+Concat4(libdir,/lib,libname,.a) Concat(foo,libname):	objlist		@@\
+	$(ARADD) Concat4(libdir,/lib,libname,.a) objlist		@@\
+	$(TOUCH) Concat(foo,libname)					@@\
+	$(TOUCH) Concat3(libdir,/foo,libname)				@@\
 /* The $(RANLIB) is done at the end by the directory itself */		@@\
 									@@\
 clean::									@@\
-	$(RM) foo/**/libname
+	$(RM) Concat(foo,libname)
 #endif /* OtherdirLibraryTarget */
 
 /*
@@ -194,7 +258,7 @@ includes:: hfile							@@\
    indicating some adjustment of the file took place. */
 #ifndef ProcessStockHeader
 #define ProcessStockHeader(stockname,newname)				@@\
-newname: stockname Makefile						@@\
+newname: stockname							@@\
 	-$(RM) newname.new						@@\
 	-$(UNIFDEF) $(PROCESS_DEFINES) stockname | sed $(PROCESS_REPLACE) >newname.new		@@\
 	if cmp -s newname.new newname ; then true; \			@@\
@@ -207,22 +271,23 @@ newname: stockname Makefile						@@\
  */
 #ifndef Krb5LibraryTarget
 #define	Krb5LibraryTarget(libname,objlist)				@@\
-AllTarget(lib/**/libname.a)						@@\
+AllTarget(Concat3(lib,libname,.a))					@@\
 DependTarget()								@@\
 									@@\
-lib/**/libname.a: objlist						@@\
+Concat3(lib,libname,.a): objlist					@@\
 	$(RM) $@							@@\
 	$(AR) $@ objlist						@@\
 	$(RANLIB) $@							@@\
-	$(RM) $(TOPLIBD)/lib/**/libname.a				@@\
-	$(LN) ../$(CURRENT_DIR)/lib/**/libname.a $(TOP)/lib/lib/**/libname.a
+	$(RM) Concat3($(TOPLIBD)/lib,libname,.a)			@@\
+	$(LN) Concat3(../$(CURRENT_DIR)/lib,libname,.a) Concat3($(TOP)/lib/lib,libname,.a)
 #endif /* Krb5LibraryTarget */
 
 #ifndef Krb5InstallLibrary
 #define	Krb5InstallLibrary(libname,destdir)				@@\
-install:: lib/**/libname.a						@@\
-	$(RM) destdir/lib/**/libname.a					@@\
-	$(CP) lib/**/libname.a destdir/lib/**/libname.a
+install:: Concat3(lib,libname,.a)					@@\
+	$(RM) Concat4(destdir,/lib,libname,.a)				@@\
+	$(CP) Concat3(lib,libname,.a) Concat4(destdir,/lib,libname,.a)	@@\
+	$(RANLIB) Concat4(destdir,/lib,libname,.a)
 #endif
 
 #ifndef Krb5InstallHeaders
@@ -262,6 +327,11 @@ Krb5ComplexProgramTarget(program,bindir,mandir,mansuffix)
 #define Krb5AdminProgramTarget(program)					@@\
 Krb5SimpleProgramTarget(program,$(ADMIN_BINDIR),$(ADMIN_MANDIR),$(ADMIN_MANSUFFIX))
 #endif /* Krb5AdminProgramTarget */
+
+#ifndef Krb5ServerProgramTarget
+#define Krb5ServerProgramTarget(program)				@@\
+Krb5SimpleProgramTarget(program,$(SERVER_BINDIR),$(SERVER_MANDIR),$(SERVER_MANSUFFIX))
+#endif /* Krb5ServerProgramTarget */
 
 #ifndef Krb5ClientProgramTarget
 #define Krb5ClientProgramTarget(program)				@@\
@@ -323,6 +393,8 @@ clean::									@@\
  */
 #ifndef SimpleTestProgramTarget
 #define	SimpleTestProgramTarget(program)				@@\
+        PROGRAM = program						@@\
+									@@\
 AllTarget(program)							@@\
 									@@\
 program: program.o $(DEPLIBS)						@@\
@@ -333,7 +405,7 @@ SaberProgramTarget(program,program.c,program.o,$(LOCAL_LIBRARIES), /**/)@@\
 									@@\
 clean::									@@\
 	$(RM) $(PROGRAM)
-#endif /* ComplexProgramTarget */
+#endif /* SimpleTestProgramTarget */
 
 #if HasPosixTermios
 P_TERMIOS=-DHasPosixTermiosTrue
@@ -457,13 +529,9 @@ P_NESTPROTO=-UNoNestedPrototypes
  */
 
             ARADD = ArAddCmd
-#ifdef SourceTop
-     TOP_INCLUDES = -I$(TOP)/include -I/**/SourceTop/include $(STDC_TOP_INCLUDES)
-#else
      TOP_INCLUDES = -I$(TOP)/include $(STDC_TOP_INCLUDES)
-#endif
+   EXTRA_INCLUDES = ExtraIncludes
         CONFIGSRC = $(TOP)/config
-            ISODE = IsodeDir
          PSYFLAGS = PepsyFlags
             PEPSY = PepsyCmd
             TOUCH = TouchCmd
@@ -476,11 +544,16 @@ P_NESTPROTO=-UNoNestedPrototypes
          ZEPHDEFS = ZephyrDefines
          ZEPHLIBS = ZephyrLibs
 #endif
+#ifdef OS_TelnetName
+     TELNET_OPSYS = OS_TelnetName
+#endif
          KRB5ROOT = Krb5Root
           KDB5DIR = Kdb5Dir
 
   PROCESS_DEFINES = $(P_TERMIOS) $(P_FLOCKS) $(P_TYPES) $(P_SIGTYPE) $(P_STRINGH) $(P_BITSIZE) $(P_DBM) $(P_INET) $(P_STDLIBH) $(P_TIME_DEFS) $(P_PROTOS) $(P_NPROTO) $(P_STDARG) $(P_ANSI_STDIO) $(P_VOID) $(P_CONST) $(P_VOLATILE) $(P_UNISTD) $(P_NESTPROTO) -DUnifdefRan
-  PROCESS_REPLACE = -e "s+@KRB5ROOT+$(KRB5ROOT)+" -e "s+@KDB5DIR+$(KDB5DIR)+"
+  PROCESS_REPLACE = -e "s+@KRB5ROOT+$(KRB5ROOT)+" \
+		    -e "s+@KDB5DIR+$(KDB5DIR)+" \
+		    -e "s+@KRB5SRVTABDIR+${KRB5SRVTABDIR}+"
        DESDEFINES = DesDefines
 #if HasSharedLibraries
           TOPLIBD = $(TOP)/lib/shared
@@ -508,6 +581,7 @@ P_NESTPROTO=-UNoNestedPrototypes
      DES425DEPLIB = $(TOPLIBD)/libdes425.a
         DES425LIB = des425
           KRB4LIB = Krb4LibList
+          KDB4LIB = Krb4KdbList
      KRB4INCLUDES = Krb4Includes
        KRB4DEPLIB = Krb4DepList
 
@@ -516,6 +590,7 @@ P_NESTPROTO=-UNoNestedPrototypes
         COMERRLIB = ComErrLib
        COMPILE_ET = CompileEtCmd
 
+      KRB5MANROOT = Krb5Manroot
      ADMIN_BINDIR = AdminBindir
   ADMIN_MANSUFFIX = AdminManSuffix
      ADMIN_MANDIR = AdminMandir
@@ -525,5 +600,11 @@ P_NESTPROTO=-UNoNestedPrototypes
     CLIENT_BINDIR = ClientBindir
  CLIENT_MANSUFFIX = ClientManSuffix
     CLIENT_MANDIR = ClientMandir
+   FILE_MANSUFFIX = FileManSuffix
+      FILE_MANDIR = FileMandir
       KRB5_LIBDIR = Krb5Libdir
       KRB5_INCDIR = Krb5Incdir
+  KRB5_INCSUBDIRS = concat(Krb5Incdir,/krb5) \
+                    concat(Krb5Incdir,/krb5/asn.1) \
+                    concat(Krb5Incdir,/kerberosIV)
+ KRB5_OTHERMKDIRS = Krb5Othermkdirs
