@@ -1,3 +1,13 @@
+Wed Jan 24 20:49:13 1996  Tom Yu  <tlyu@dragons-lair.MIT.EDU>
+
+	* g_compare_name.c, g_delete_sec_context.c, g_dsp_status.c,
+	g_exp_sec_context.c, g_imp_sec_context.c, g_rel_buffer.c,
+	g_rel_cred.c, g_rel_name.c, g_rel_oid_set.c, get_mechanism.c,
+	get_mtype.c: Include stdlib.h and string.h as needed
+
+	* mglueP.h: Add many invocations of NPROTOTYPE and PROTOTYPE to
+		prevent breakage.
+
 Tue Jan 23 11:52:24 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* add_mechanism.c, g_inquire_cred.c, g_imp_name.c,

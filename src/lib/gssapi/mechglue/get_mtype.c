@@ -7,6 +7,9 @@
  */
 
 #include "mglueP.h"
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
 
 OM_uint32 get_mech_type(OID, token)
 

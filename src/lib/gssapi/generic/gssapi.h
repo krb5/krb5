@@ -78,10 +78,18 @@
  * Make sure we have a definition for PROTOTYPE.
  */
 #if !defined(PROTOTYPE)
-#if defined(__STDC__) || defined(_WINDOWS)
+#if defined(__STDC__) || defined(_WINDOWS) || defined(__ultrix)
 #define PROTOTYPE(x) x
 #else
 #define PROTOTYPE(x) ()
+#endif
+#endif
+
+#ifndef NPROTOTYPE
+#if defined(__ultrix) && !defined (__GNUC__)
+#define NPROTOTYPE(x) ()
+#else
+#define NPROTOTYPE(x) PROTOTYPE(x)
 #endif
 #endif
 

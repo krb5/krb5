@@ -7,6 +7,10 @@
  */
 
 #include "mglueP.h"
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+#include <string.h>
 
 OM_uint32
 gss_compare_name (minor_status,
