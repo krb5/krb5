@@ -3,24 +3,6 @@
 /* 
  * $Header$
  *
- *
- * $Log$
- * Revision 1.1  1994/06/10 03:29:17  eichin
- * autoconfed isode for kerberos work
- *
- * Revision 1.1  94/06/10  03:17:42  eichin
- * autoconfed isode for kerberos work
- * 
- * Revision 1.3  1994/06/07 23:08:23  eichin
- * hide calloc/malloc/realloc from ultrix too
- *
- * Revision 1.1  1994/05/31 20:37:55  eichin
- * reduced-isode release from /mit/isode/isode-subset/src
- *
- * Revision 8.0  91/07/17  12:33:44  isode
- * Release 7.0
- * 
- * 
  */
 
 /*
@@ -161,14 +143,17 @@ char   *mktemp ();
 #endif /* SVR4 */
 
 #ifdef __STDC__
-#include <malloc.h>
+#include <stdlib.h>
+#else
+/* ultrix cc isn't STD but has stdlib.h, with malloc...  */
+#ifdef mips
+#include <stdlib.h>
 #else
 #ifndef _AIX
-#ifndef mips
 char   *calloc (), *malloc (), *realloc ();
-#endif
-#endif
-#endif
+#endif /* _AIX */
+#endif /* mips */
+#endif /* __STDC__ */
 
 
 #ifndef	BSDSTRS
