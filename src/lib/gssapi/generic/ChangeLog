@@ -1,3 +1,23 @@
+2001-10-05  Ken Raeburn  <raeburn@mit.edu>
+
+	Windows still requires DLL specs for variables.
+	* gssapi.hin (GSS_DLLIMP): Define, as before (from win-mac.h) for
+	Windows, empty otherwise.
+	(GSS_C_NT_USER_NAME, GSS_C_NT_MACHINE_UID_NAME,
+	GSS_C_NT_STRING_UID_NAME, GSS_C_NT_HOSTBASED_SERVICE_X,
+	GSS_C_NT_HOSTBASED_SERVICE, GSS_C_NT_ANONYMOUS,
+	GSS_C_NT_EXPORT_NAME): Use GSS_DLLIMP.
+	* gssapi_generic.h (gss_nt_user_name, gss_nt_machine_uid_name,
+	gss_nt_string_uid_name, gss_nt_service_name): Use GSS_DLLIMP.
+	* gssapi_generic.c (gss_nt_user_name, gss_nt_machine_uid_name,
+	gss_nt_string_uid_name, gss_nt_service_name, GSS_C_NT_USER_NAME,
+	GSS_C_NT_MACHINE_UID_NAME, GSS_C_NT_STRING_UID_NAME,
+	GSS_C_NT_HOSTBASED_SERVICE_X, GSS_C_NT_HOSTBASED_SERVICE,
+	GSS_C_NT_ANONYMOUS, GSS_C_NT_EXPORT_NAME): Use GSS_DLLIMP.
+
+	* gssapi.hin: Drop FAR, NEAR, _MSDOS support.
+	* gssapiP_generic.h: Drop _MSDOS support.
+
 2001-10-03  Ken Raeburn  <raeburn@mit.edu>
 
 	* gssapi.hin, gssapi_generic.c, gssapi_generic.h: Don't use

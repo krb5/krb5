@@ -27,7 +27,7 @@
  * $Id$
  */
 
-#if (defined(_MSDOS) || defined(_WIN32) || defined(macintosh))
+#if (defined(_WIN32) || defined(macintosh))
 #include <k5-int.h>
 #else
 #ifdef HAVE_STDLIB_H

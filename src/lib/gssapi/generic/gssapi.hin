@@ -27,7 +27,7 @@
  * Determine platform-dependent configuration.
  */
 
-#if defined(_MSDOS) || defined(_WIN32) || defined(macintosh)
+#if defined(_WIN32) || defined(macintosh)
 #include <win-mac.h>
 
 /* Macintoh CFM-68K magic incantation */
@@ -41,10 +41,6 @@
 #define KRB5_CALLCONV_C
 #define KRB5_EXPORTVAR
 #endif
-#ifndef FAR
-#define FAR
-#define NEAR
-#endif
 
 #define	GSS_SIZEOF_INT		SIZEOF_INT
 #define	GSS_SIZEOF_LONG		SIZEOF_LONG
@@ -54,7 +50,7 @@
  * Make sure we have a definition for PROTOTYPE.
  */
 #if !defined(PROTOTYPE)
-#if defined(__STDC__) || defined(__cplusplus) || defined(_MSDOS) || defined(_WIN32) || defined(__ultrix)
+#if defined(__STDC__) || defined(__cplusplus) || defined(_WIN32) || defined(__ultrix)
 #define PROTOTYPE(x) x
 #else
 #define PROTOTYPE(x) ()
@@ -90,9 +86,9 @@
  * First, define the three platform-dependent pointer types.
  */
 
-typedef void FAR * gss_name_t;
-typedef void FAR * gss_cred_id_t;
-typedef void FAR * gss_ctx_id_t;
+typedef void * gss_name_t;
+typedef void * gss_cred_id_t;
+typedef void * gss_ctx_id_t;
 
 /*
  * The following type must be defined as the smallest natural unsigned integer
@@ -123,19 +119,19 @@ typedef gss_uint32	OM_uint32;
 
 typedef struct gss_OID_desc_struct {
       OM_uint32 length;
-      void      FAR *elements;
-} gss_OID_desc, FAR *gss_OID;
+      void *elements;
+} gss_OID_desc, *gss_OID;
 #endif	/* OM_STRING */
 
 typedef struct gss_OID_set_desc_struct  {
       size_t  count;
       gss_OID elements;
-} gss_OID_set_desc, FAR *gss_OID_set;
+} gss_OID_set_desc, *gss_OID_set;
 
 typedef struct gss_buffer_desc_struct {
       size_t length;
-      void FAR *value;
-} gss_buffer_desc, FAR *gss_buffer_t;
+      void *value;
+} gss_buffer_desc, *gss_buffer_t;
 
 typedef struct gss_channel_bindings_struct {
       OM_uint32 initiator_addrtype;
@@ -143,7 +139,7 @@ typedef struct gss_channel_bindings_struct {
       OM_uint32 acceptor_addrtype;
       gss_buffer_desc acceptor_address;
       gss_buffer_desc application_data;
-} FAR *gss_channel_bindings_t;
+} *gss_channel_bindings_t;
 
 /*
  * For now, define a QOP-type as an OM_uint32 (pending resolution of ongoing
@@ -325,6 +321,16 @@ typedef	int		gss_cred_usage_t;
  * Finally, function prototypes for the GSSAPI routines.
  */
 
+#if defined (_WIN32) && defined (_MSC_VER)
+# ifdef GSS_DLL_FILE
+#  define GSS_DLLIMP __declspec(dllexport)
+# else
+#  define GSS_DLLIMP __declspec(dllimport)
+# endif
+#else
+# define GSS_DLLIMP
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -340,7 +346,7 @@ extern "C" {
  * GSS_C_NT_USER_NAME should be initialized to point
  * to that gss_OID_desc.
  */
-extern gss_OID GSS_C_NT_USER_NAME;
+GSS_DLLIMP extern gss_OID GSS_C_NT_USER_NAME;
 
 /*
  * The implementation must reserve static storage for a
@@ -352,7 +358,7 @@ extern gss_OID GSS_C_NT_USER_NAME;
  * The constant GSS_C_NT_MACHINE_UID_NAME should be
  * initialized to point to that gss_OID_desc.
  */
-extern gss_OID GSS_C_NT_MACHINE_UID_NAME;
+GSS_DLLIMP extern gss_OID GSS_C_NT_MACHINE_UID_NAME;
 
 /*
  * The implementation must reserve static storage for a
@@ -364,7 +370,7 @@ extern gss_OID GSS_C_NT_MACHINE_UID_NAME;
  * The constant GSS_C_NT_STRING_UID_NAME should be
  * initialized to point to that gss_OID_desc.
  */
-extern gss_OID GSS_C_NT_STRING_UID_NAME;
+GSS_DLLIMP extern gss_OID GSS_C_NT_STRING_UID_NAME;
 
 /*
  * The implementation must reserve static storage for a
@@ -383,7 +389,7 @@ extern gss_OID GSS_C_NT_STRING_UID_NAME;
  * parameter, but should not be emitted by GSS-API
  * implementations
  */
-extern gss_OID GSS_C_NT_HOSTBASED_SERVICE_X;
+GSS_DLLIMP extern gss_OID GSS_C_NT_HOSTBASED_SERVICE_X;
 
 /*
  * The implementation must reserve static storage for a
@@ -396,7 +402,7 @@ extern gss_OID GSS_C_NT_HOSTBASED_SERVICE_X;
  * GSS_C_NT_HOSTBASED_SERVICE should be initialized
  * to point to that gss_OID_desc.
  */
-extern gss_OID GSS_C_NT_HOSTBASED_SERVICE;
+GSS_DLLIMP extern gss_OID GSS_C_NT_HOSTBASED_SERVICE;
 
 /*
  * The implementation must reserve static storage for a
@@ -408,7 +414,7 @@ extern gss_OID GSS_C_NT_HOSTBASED_SERVICE;
  * and GSS_C_NT_ANONYMOUS should be initialized to point
  * to that gss_OID_desc.
  */
-extern gss_OID GSS_C_NT_ANONYMOUS;
+GSS_DLLIMP extern gss_OID GSS_C_NT_ANONYMOUS;
 
 
 /*
@@ -421,77 +427,77 @@ extern gss_OID GSS_C_NT_ANONYMOUS;
  * GSS_C_NT_EXPORT_NAME should be initialized to point
  * to that gss_OID_desc.
  */
-extern gss_OID GSS_C_NT_EXPORT_NAME;
+GSS_DLLIMP extern gss_OID GSS_C_NT_EXPORT_NAME;
 
 /* Function Prototypes */
 
 OM_uint32 KRB5_CALLCONV gss_acquire_cred
-PROTOTYPE( (OM_uint32 FAR *,		/* minor_status */
+PROTOTYPE( (OM_uint32 *,		/* minor_status */
             gss_name_t,			/* desired_name */
             OM_uint32,			/* time_req */
             gss_OID_set,		/* desired_mechs */
             gss_cred_usage_t,		/* cred_usage */
-            gss_cred_id_t FAR *,	/* output_cred_handle */
-            gss_OID_set FAR *,		/* actual_mechs */
-            OM_uint32 FAR *		/* time_rec */
+            gss_cred_id_t *,	/* output_cred_handle */
+            gss_OID_set *,		/* actual_mechs */
+            OM_uint32 *		/* time_rec */
            ));
 
 OM_uint32 KRB5_CALLCONV gss_release_cred
-PROTOTYPE( (OM_uint32 FAR *,		/* minor_status */
-            gss_cred_id_t FAR *		/* cred_handle */
+PROTOTYPE( (OM_uint32 *,		/* minor_status */
+            gss_cred_id_t *		/* cred_handle */
            ));
 
 OM_uint32 KRB5_CALLCONV gss_init_sec_context
-PROTOTYPE( (OM_uint32 FAR *,		/* minor_status */
+PROTOTYPE( (OM_uint32 *,		/* minor_status */
             gss_cred_id_t,		/* claimant_cred_handle */
-            gss_ctx_id_t FAR *,		/* context_handle */
+            gss_ctx_id_t *,		/* context_handle */
             gss_name_t,			/* target_name */
             gss_OID,			/* mech_type (used to be const) */
             OM_uint32,			/* req_flags */
             OM_uint32,			/* time_req */
             gss_channel_bindings_t,	/* input_chan_bindings */
             gss_buffer_t,		/* input_token */
-            gss_OID FAR *,		/* actual_mech_type */
+            gss_OID *,		/* actual_mech_type */
             gss_buffer_t,		/* output_token */
-            OM_uint32 FAR *,		/* ret_flags */
-            OM_uint32 FAR *		/* time_rec */
+            OM_uint32 *,		/* ret_flags */
+            OM_uint32 *		/* time_rec */
            ));
 
 OM_uint32 KRB5_CALLCONV gss_accept_sec_context
-PROTOTYPE( (OM_uint32 FAR *,		/* minor_status */
-            gss_ctx_id_t FAR *,		/* context_handle */
+PROTOTYPE( (OM_uint32 *,		/* minor_status */
+            gss_ctx_id_t *,		/* context_handle */
             gss_cred_id_t,		/* acceptor_cred_handle */
             gss_buffer_t,		/* input_token_buffer */
             gss_channel_bindings_t,	/* input_chan_bindings */
-            gss_name_t FAR *,		/* src_name */
-            gss_OID FAR *,		/* mech_type */
+            gss_name_t *,		/* src_name */
+            gss_OID *,		/* mech_type */
             gss_buffer_t,		/* output_token */
-            OM_uint32 FAR *,		/* ret_flags */
-            OM_uint32 FAR *,		/* time_rec */
-            gss_cred_id_t FAR *		/* delegated_cred_handle */
+            OM_uint32 *,		/* ret_flags */
+            OM_uint32 *,		/* time_rec */
+            gss_cred_id_t *		/* delegated_cred_handle */
            ));
 
 OM_uint32 KRB5_CALLCONV gss_process_context_token
-PROTOTYPE( (OM_uint32 FAR *,		/* minor_status */
+PROTOTYPE( (OM_uint32 *,		/* minor_status */
             gss_ctx_id_t,		/* context_handle */
             gss_buffer_t		/* token_buffer */
            ));
 
 OM_uint32 KRB5_CALLCONV gss_delete_sec_context
-PROTOTYPE( (OM_uint32 FAR *,		/* minor_status */
-            gss_ctx_id_t FAR *,		/* context_handle */
+PROTOTYPE( (OM_uint32 *,		/* minor_status */
+            gss_ctx_id_t *,		/* context_handle */
             gss_buffer_t		/* output_token */
            ));
 
 OM_uint32 KRB5_CALLCONV gss_context_time
-PROTOTYPE( (OM_uint32 FAR *,		/* minor_status */
+PROTOTYPE( (OM_uint32 *,		/* minor_status */
             gss_ctx_id_t,		/* context_handle */
-            OM_uint32 FAR *		/* time_rec */
+            OM_uint32 *		/* time_rec */
            ));
 
 /* New for V2 */
 OM_uint32 KRB5_CALLCONV gss_get_mic
-PROTOTYPE( (OM_uint32 FAR *,		/* minor_status */
+PROTOTYPE( (OM_uint32 *,		/* minor_status */
 	    gss_ctx_id_t,		/* context_handle */
 	    gss_qop_t,			/* qop_req */
 	    gss_buffer_t,		/* message_buffer */
@@ -500,7 +506,7 @@ PROTOTYPE( (OM_uint32 FAR *,		/* minor_status */
 
 /* New for V2 */
 OM_uint32 KRB5_CALLCONV gss_verify_mic
-PROTOTYPE( (OM_uint32 FAR *,		/* minor_status */
+PROTOTYPE( (OM_uint32 *,		/* minor_status */
 	    gss_ctx_id_t,		/* context_handle */
 	    gss_buffer_t,		/* message_buffer */
 	    gss_buffer_t,		/* message_token */
@@ -509,100 +515,100 @@ PROTOTYPE( (OM_uint32 FAR *,		/* minor_status */
 
 /* New for V2 */
 OM_uint32 KRB5_CALLCONV gss_wrap
-PROTOTYPE( (OM_uint32 FAR *,		/* minor_status */
+PROTOTYPE( (OM_uint32 *,		/* minor_status */
 	    gss_ctx_id_t,		/* context_handle */
 	    int,			/* conf_req_flag */
 	    gss_qop_t,			/* qop_req */
 	    gss_buffer_t,		/* input_message_buffer */
-	    int FAR *,			/* conf_state */
+	    int *,			/* conf_state */
 	    gss_buffer_t		/* output_message_buffer */
 	   ));
 
 /* New for V2 */
 OM_uint32 KRB5_CALLCONV gss_unwrap
-PROTOTYPE( (OM_uint32 FAR *,		/* minor_status */
+PROTOTYPE( (OM_uint32 *,		/* minor_status */
 	    gss_ctx_id_t,		/* context_handle */
 	    gss_buffer_t,		/* input_message_buffer */
 	    gss_buffer_t,		/* output_message_buffer */
-	    int FAR *,			/* conf_state */
-	    gss_qop_t FAR *		/* qop_state */
+	    int *,			/* conf_state */
+	    gss_qop_t *		/* qop_state */
 	   ));
 
 OM_uint32 KRB5_CALLCONV gss_display_status
-PROTOTYPE( (OM_uint32 FAR *,		/* minor_status */
+PROTOTYPE( (OM_uint32 *,		/* minor_status */
             OM_uint32,			/* status_value */
             int,			/* status_type */
             gss_OID,			/* mech_type (used to be const) */
-            OM_uint32 FAR *,		/* message_context */
+            OM_uint32 *,		/* message_context */
             gss_buffer_t		/* status_string */
            ));
 
 OM_uint32 KRB5_CALLCONV gss_indicate_mechs
-PROTOTYPE( (OM_uint32 FAR *,		/* minor_status */
-            gss_OID_set FAR *		/* mech_set */
+PROTOTYPE( (OM_uint32 *,		/* minor_status */
+            gss_OID_set *		/* mech_set */
            ));
 
 OM_uint32 KRB5_CALLCONV gss_compare_name
-PROTOTYPE( (OM_uint32 FAR *,		/* minor_status */
+PROTOTYPE( (OM_uint32 *,		/* minor_status */
             gss_name_t,			/* name1 */
             gss_name_t,			/* name2 */
-            int FAR *			/* name_equal */
+            int *			/* name_equal */
            ));
 
 OM_uint32 KRB5_CALLCONV gss_display_name
-PROTOTYPE( (OM_uint32 FAR *,		/* minor_status */
+PROTOTYPE( (OM_uint32 *,		/* minor_status */
             gss_name_t,			/* input_name */
             gss_buffer_t,		/* output_name_buffer */
-            gss_OID FAR *		/* output_name_type */
+            gss_OID *		/* output_name_type */
            ));
 
 OM_uint32 KRB5_CALLCONV gss_import_name
-PROTOTYPE( (OM_uint32 FAR *,		/* minor_status */
+PROTOTYPE( (OM_uint32 *,		/* minor_status */
             gss_buffer_t,		/* input_name_buffer */
             gss_OID,			/* input_name_type(used to be const) */
-            gss_name_t FAR *		/* output_name */
+            gss_name_t *		/* output_name */
            ));
 
 OM_uint32 KRB5_CALLCONV gss_release_name
-PROTOTYPE( (OM_uint32 FAR *,		/* minor_status */
-            gss_name_t FAR *		/* input_name */
+PROTOTYPE( (OM_uint32 *,		/* minor_status */
+            gss_name_t *		/* input_name */
            ));
 
 OM_uint32 KRB5_CALLCONV gss_release_buffer
-PROTOTYPE( (OM_uint32 FAR *,		/* minor_status */
+PROTOTYPE( (OM_uint32 *,		/* minor_status */
             gss_buffer_t		/* buffer */
            ));
 
 OM_uint32 KRB5_CALLCONV gss_release_oid_set
-PROTOTYPE( (OM_uint32 FAR *,		/* minor_status */
-            gss_OID_set FAR * 		/* set */
+PROTOTYPE( (OM_uint32 *,		/* minor_status */
+            gss_OID_set * 		/* set */
            ));
 
 OM_uint32 KRB5_CALLCONV gss_inquire_cred
-PROTOTYPE( (OM_uint32 FAR *,		/* minor_status */
+PROTOTYPE( (OM_uint32 *,		/* minor_status */
             gss_cred_id_t,		/* cred_handle */
-            gss_name_t FAR *,		/* name */
-            OM_uint32 FAR *,		/* lifetime */
-            gss_cred_usage_t FAR *,	/* cred_usage */
-            gss_OID_set FAR *		/* mechanisms */
+            gss_name_t *,		/* name */
+            OM_uint32 *,		/* lifetime */
+            gss_cred_usage_t *,	/* cred_usage */
+            gss_OID_set *		/* mechanisms */
            ));
 
 /* Last argument new for V2 */
 OM_uint32 KRB5_CALLCONV gss_inquire_context
-PROTOTYPE( (OM_uint32 FAR *,		/* minor_status */
+PROTOTYPE( (OM_uint32 *,		/* minor_status */
 	    gss_ctx_id_t,		/* context_handle */
-	    gss_name_t FAR *,		/* src_name */
-	    gss_name_t FAR *,		/* targ_name */
-	    OM_uint32 FAR *,		/* lifetime_rec */
-	    gss_OID FAR *,		/* mech_type */
-	    OM_uint32 FAR *,		/* ctx_flags */
-	    int FAR *,           	/* locally_initiated */
-	    int FAR *			/* open */
+	    gss_name_t *,		/* src_name */
+	    gss_name_t *,		/* targ_name */
+	    OM_uint32 *,		/* lifetime_rec */
+	    gss_OID *,		/* mech_type */
+	    OM_uint32 *,		/* ctx_flags */
+	    int *,           	/* locally_initiated */
+	    int *			/* open */
 	   ));
 
 /* New for V2 */
 OM_uint32 KRB5_CALLCONV gss_wrap_size_limit
-PROTOTYPE( (OM_uint32 FAR *,		/* minor_status */
+PROTOTYPE( (OM_uint32 *,		/* minor_status */
 	    gss_ctx_id_t,		/* context_handle */
 	    int,			/* conf_req_flag */
 	    gss_qop_t,			/* qop_req */
@@ -612,106 +618,106 @@ PROTOTYPE( (OM_uint32 FAR *,		/* minor_status */
 
 /* New for V2 */
 OM_uint32 KRB5_CALLCONV gss_import_name_object
-PROTOTYPE( (OM_uint32 FAR *,		/* minor_status */
-	    void FAR *,			/* input_name */
+PROTOTYPE( (OM_uint32 *,		/* minor_status */
+	    void *,			/* input_name */
 	    gss_OID,			/* input_name_type */
-	    gss_name_t FAR *		/* output_name */
+	    gss_name_t *		/* output_name */
 	   ));
 
 /* New for V2 */
 OM_uint32 KRB5_CALLCONV gss_export_name_object
-PROTOTYPE( (OM_uint32 FAR *,		/* minor_status */
+PROTOTYPE( (OM_uint32 *,		/* minor_status */
 	    gss_name_t,			/* input_name */
 	    gss_OID,			/* desired_name_type */
-	    void FAR * FAR *		/* output_name */
+	    void **		/* output_name */
 	   ));
 
 /* New for V2 */
 OM_uint32 KRB5_CALLCONV gss_add_cred
-PROTOTYPE( (OM_uint32 FAR *,		/* minor_status */
+PROTOTYPE( (OM_uint32 *,		/* minor_status */
 	    gss_cred_id_t,		/* input_cred_handle */
 	    gss_name_t,			/* desired_name */
 	    gss_OID,			/* desired_mech */
 	    gss_cred_usage_t,		/* cred_usage */
 	    OM_uint32,			/* initiator_time_req */
 	    OM_uint32,			/* acceptor_time_req */
-	    gss_cred_id_t FAR *,	/* output_cred_handle */
-	    gss_OID_set FAR *,		/* actual_mechs */
-	    OM_uint32 FAR *,		/* initiator_time_rec */
-	    OM_uint32 FAR *		/* acceptor_time_rec */
+	    gss_cred_id_t *,	/* output_cred_handle */
+	    gss_OID_set *,		/* actual_mechs */
+	    OM_uint32 *,		/* initiator_time_rec */
+	    OM_uint32 *		/* acceptor_time_rec */
 	   ));
 
 /* New for V2 */
 OM_uint32 KRB5_CALLCONV gss_inquire_cred_by_mech
-PROTOTYPE( (OM_uint32  FAR *,		/* minor_status */
+PROTOTYPE( (OM_uint32 *,		/* minor_status */
 	    gss_cred_id_t,		/* cred_handle */
 	    gss_OID,			/* mech_type */
-	    gss_name_t FAR *,		/* name */
-	    OM_uint32 FAR *,		/* initiator_lifetime */
-	    OM_uint32 FAR *,		/* acceptor_lifetime */
-	    gss_cred_usage_t FAR * 	/* cred_usage */
+	    gss_name_t *,		/* name */
+	    OM_uint32 *,		/* initiator_lifetime */
+	    OM_uint32 *,		/* acceptor_lifetime */
+	    gss_cred_usage_t * 	/* cred_usage */
 	   ));
 
 /* New for V2 */
 OM_uint32 KRB5_CALLCONV gss_export_sec_context
-PROTOTYPE( (OM_uint32 FAR *,		/* minor_status */
-	    gss_ctx_id_t FAR *,		/* context_handle */
+PROTOTYPE( (OM_uint32 *,		/* minor_status */
+	    gss_ctx_id_t *,		/* context_handle */
 	    gss_buffer_t		/* interprocess_token */
 	    ));
 
 /* New for V2 */
 OM_uint32 KRB5_CALLCONV gss_import_sec_context
-PROTOTYPE( (OM_uint32 FAR *,		/* minor_status */
+PROTOTYPE( (OM_uint32 *,		/* minor_status */
 	    gss_buffer_t,		/* interprocess_token */
-	    gss_ctx_id_t FAR *		/* context_handle */
+	    gss_ctx_id_t *		/* context_handle */
 	    ));
 
 /* New for V2 */
 OM_uint32 KRB5_CALLCONV gss_release_oid
-PROTOTYPE( (OM_uint32 FAR *,		/* minor_status */
-	    gss_OID FAR *		/* oid */
+PROTOTYPE( (OM_uint32 *,		/* minor_status */
+	    gss_OID *		/* oid */
 	   ));
 
 /* New for V2 */
 OM_uint32 KRB5_CALLCONV gss_create_empty_oid_set
-PROTOTYPE( (OM_uint32 FAR *,		/* minor_status */
-	    gss_OID_set FAR *		/* oid_set */
+PROTOTYPE( (OM_uint32 *,		/* minor_status */
+	    gss_OID_set *		/* oid_set */
 	   ));
 
 /* New for V2 */
 OM_uint32 KRB5_CALLCONV gss_add_oid_set_member
-PROTOTYPE( (OM_uint32 FAR *,		/* minor_status */
+PROTOTYPE( (OM_uint32 *,		/* minor_status */
 	    gss_OID,			/* member_oid */
-	    gss_OID_set FAR *		/* oid_set */
+	    gss_OID_set *		/* oid_set */
 	   ));
 
 /* New for V2 */
 OM_uint32 KRB5_CALLCONV gss_test_oid_set_member
-PROTOTYPE( (OM_uint32 FAR *,		/* minor_status */
+PROTOTYPE( (OM_uint32 *,		/* minor_status */
 	    gss_OID,			/* member */
 	    gss_OID_set,		/* set */
-	    int FAR *			/* present */
+	    int *			/* present */
 	   ));
 
 /* New for V2 */
 OM_uint32 KRB5_CALLCONV gss_str_to_oid
-PROTOTYPE( (OM_uint32 FAR *,		/* minor_status */
+PROTOTYPE( (OM_uint32 *,		/* minor_status */
 	    gss_buffer_t,		/* oid_str */
-	    gss_OID FAR *		/* oid */
+	    gss_OID *		/* oid */
 	   ));
 
 /* New for V2 */
 OM_uint32 KRB5_CALLCONV gss_oid_to_str
-PROTOTYPE( (OM_uint32 FAR *,		/* minor_status */
+PROTOTYPE( (OM_uint32 *,		/* minor_status */
 	    gss_OID,			/* oid */
 	    gss_buffer_t		/* oid_str */
 	   ));
 
 /* New for V2 */
 OM_uint32 KRB5_CALLCONV gss_inquire_names_for_mech
-PROTOTYPE( (OM_uint32 FAR *,		/* minor_status */
+PROTOTYPE( (OM_uint32 *,		/* minor_status */
 	    gss_OID,			/* mechanism */
-	    gss_OID_set FAR *		/* name_types */
+	    gss_OID_set *		/* name_types */
 	   ));
 
 /*
@@ -722,7 +728,7 @@ PROTOTYPE( (OM_uint32 FAR *,		/* minor_status */
  * V1 applications to link against GSSAPI V2 implementations.
  */
 OM_uint32 KRB5_CALLCONV gss_sign
-PROTOTYPE( (OM_uint32 FAR *,    /* minor_status */
+PROTOTYPE( (OM_uint32 *,    /* minor_status */
             gss_ctx_id_t,     	/* context_handle */
             int,              	/* qop_req */
             gss_buffer_t,     	/* message_buffer */
@@ -730,30 +736,30 @@ PROTOTYPE( (OM_uint32 FAR *,    /* minor_status */
            ));
 
 OM_uint32 KRB5_CALLCONV gss_verify
-PROTOTYPE( (OM_uint32 FAR *,    /* minor_status */
+PROTOTYPE( (OM_uint32 *,    /* minor_status */
             gss_ctx_id_t,     	/* context_handle */
             gss_buffer_t,     	/* message_buffer */
             gss_buffer_t,     	/* token_buffer */
-            int FAR *           /* qop_state */
+            int *           /* qop_state */
            ));
 
 OM_uint32 KRB5_CALLCONV gss_seal
-PROTOTYPE( (OM_uint32 FAR *,    /* minor_status */
+PROTOTYPE( (OM_uint32 *,    /* minor_status */
             gss_ctx_id_t,     	/* context_handle */
             int,              	/* conf_req_flag */
             int,              	/* qop_req */
             gss_buffer_t,     	/* input_message_buffer */
-            int FAR *,          /* conf_state */
+            int *,          /* conf_state */
             gss_buffer_t      	/* output_message_buffer */
            ));
 
 OM_uint32 KRB5_CALLCONV gss_unseal
-PROTOTYPE( (OM_uint32 FAR *,    /* minor_status */
+PROTOTYPE( (OM_uint32 *,    /* minor_status */
             gss_ctx_id_t,     	/* context_handle */
             gss_buffer_t,     	/* input_message_buffer */
             gss_buffer_t,     	/* output_message_buffer */
-            int FAR *,          /* conf_state */
-            int FAR *           /* qop_state */
+            int *,          /* conf_state */
+            int *           /* qop_state */
            ));
 
 /* New for V2 */

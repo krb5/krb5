@@ -126,22 +126,22 @@ static gss_OID_desc oids[] = {
  * Constants of the form gss_nt_* are the original MIT krb5 names 
  * found in gssapi_generic.h.  They are provided for compatibility. */ 
 
-gss_OID GSS_C_NT_USER_NAME           = oids+0;
-gss_OID gss_nt_user_name             = oids+0;
+GSS_DLLIMP gss_OID GSS_C_NT_USER_NAME           = oids+0;
+GSS_DLLIMP gss_OID gss_nt_user_name             = oids+0;
 
-gss_OID GSS_C_NT_MACHINE_UID_NAME    = oids+1;
-gss_OID gss_nt_machine_uid_name      = oids+1;
+GSS_DLLIMP gss_OID GSS_C_NT_MACHINE_UID_NAME    = oids+1;
+GSS_DLLIMP gss_OID gss_nt_machine_uid_name      = oids+1;
 
-gss_OID GSS_C_NT_STRING_UID_NAME     = oids+2;
-gss_OID gss_nt_string_uid_name       = oids+2;
+GSS_DLLIMP gss_OID GSS_C_NT_STRING_UID_NAME     = oids+2;
+GSS_DLLIMP gss_OID gss_nt_string_uid_name       = oids+2;
 
-gss_OID GSS_C_NT_HOSTBASED_SERVICE_X = oids+3;
+GSS_DLLIMP gss_OID GSS_C_NT_HOSTBASED_SERVICE_X = oids+3;
 gss_OID gss_nt_service_name_v2       = oids+3;
 
-gss_OID GSS_C_NT_HOSTBASED_SERVICE   = oids+4;
-gss_OID gss_nt_service_name          = oids+4;
+GSS_DLLIMP gss_OID GSS_C_NT_HOSTBASED_SERVICE   = oids+4;
+GSS_DLLIMP gss_OID gss_nt_service_name          = oids+4;
 
-gss_OID GSS_C_NT_ANONYMOUS           = oids+5;
+GSS_DLLIMP gss_OID GSS_C_NT_ANONYMOUS           = oids+5;
 
-gss_OID GSS_C_NT_EXPORT_NAME         = oids+6;
+GSS_DLLIMP gss_OID GSS_C_NT_EXPORT_NAME         = oids+6;
 gss_OID gss_nt_exported_name         = oids+6;
