@@ -6,7 +6,8 @@ SRCS= \
 	main.c \
 	network.c \
 	policy.c \
-	extern.c
+	extern.c \
+	kdc5_err.c
 
 OBJS= \
  	dispatch.o \
@@ -16,8 +17,11 @@ OBJS= \
 	main.o \
 	network.o \
 	policy.o \
-	extern.o
+	extern.o \
+	kdc5_err.o
 
-all::	krb5kdc
+ErrorTableObjectRule()
+
+all::	krb5kdc $(SRCS)
 
 NormalProgramTarget(krb5kdc,$(OBJS),$(KDBLIB) $(DEPKLIB),$(KDBLIB) $(KLIB),)
