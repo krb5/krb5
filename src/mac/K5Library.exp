@@ -33,6 +33,7 @@
 	krb5_free_creds
 	krb5_free_data
 	krb5_free_data_contents
+	krb5_free_default_realm
 	krb5_free_enc_kdc_rep_part
 	krb5_free_enc_tkt_part
 	krb5_free_error
@@ -77,7 +78,10 @@
 	krb5_get_init_creds_password
 	krb5_get_init_creds_keytab
 	krb5_get_init_creds_opt_init
+	krb5_get_validated_creds
+	krb5_get_renewed_creds
 	krb5_get_notification_message
+	krb5_get_time_offsets
 	krb5_init_context
 	krb5_mk_error
 	krb5_mk_priv
@@ -88,6 +92,7 @@
 	krb5_os_localaddr
 	krb5_parse_name
 	krb5_principal_compare
+	krb5_get_prompt_types
 	krb5_rd_cred
 	krb5_rd_error
 	krb5_rd_priv
@@ -120,16 +125,6 @@
 	krb5_init_random_key
 	krb5_finish_random_key
 	krb5_random_key
-#
-	krb5_c_decrypt
-	krb5_c_encrypt
-	krb5_c_encrypt_length
-	krb5_c_checksum_length
-	krb5_c_block_size
-	krb5_c_make_checksum
-	krb5_c_verify_checksum
-	krb5_c_random_make_octets
-	krb5_c_keyed_checksum_types
 #
 	krb5_425_conv_principal
 	krb5_524_conv_principal
@@ -193,31 +188,32 @@
 #
 	krb5_cc_set_default_name
 #
-	krb5_rc_default 
-	krb5_rc_register_type 
-	krb5_rc_resolve_type 
-	krb5_rc_resolve_full 
-	krb5_rc_get_type 
-	krb5_rc_default_type 
-	krb5_rc_default_name 
-	krb5_auth_to_rep 
-#
 	krb5_get_profile
+#
+# Added for 1.2:
+	krb5_decode_ticket
 
 #Temporary exports (DO NOT USE)
-	decode_krb5_ticket					# remove in next version
-	krb5_random_confounder
-	krb5_size_opaque
-	krb5_internalize_opaque
-	krb5_externalize_opaque
-	krb5_ser_pack_int32
-	krb5_ser_unpack_int32
-	krb5_ser_pack_bytes
-	krb5_ser_unpack_bytes
-	krb5_ser_auth_context_init
-	krb5_ser_context_init
-	krb5_ser_ccache_init
-	krb5_ser_keytab_init
-	krb5_ser_rcache_init
-	decode_krb5_ap_req					# remove in next version
-	krb5_mcc_ops
+	krb5_size_opaque					# GSSAPI
+	krb5_internalize_opaque				# GSSAPI
+	krb5_externalize_opaque				# GSSAPI
+	krb5_ser_pack_int32					# GSSAPI
+	krb5_ser_unpack_int32				# GSSAPI
+	krb5_ser_pack_bytes					# GSSAPI
+	krb5_ser_unpack_bytes				# GSSAPI
+	krb5_ser_auth_context_init			# GSSAPI
+	krb5_ser_context_init				# GSSAPI
+	krb5_ser_ccache_init				# GSSAPI
+	krb5_ser_keytab_init				# GSSAPI
+	krb5_ser_rcache_init				# GSSAPI
+	decode_krb5_ap_req					# GSSAPI
+	krb5_mcc_ops						# GSSAPI
+	krb5_c_keyed_checksum_types 		# GSSAPI
+	krb5_c_random_make_octets			# GSSAPI
+	krb5_c_encrypt						# GSSAPI
+	krb5_c_make_checksum				# GSSAPI
+	krb5_c_decrypt						# GSSAPI
+	krb5_c_verify_checksum				# GSSAPI
+	krb5_c_block_size					# GSSAPI
+	krb5_c_checksum_length				# GSSAPI
+	krb5_c_encrypt_length				# GSSAPI
