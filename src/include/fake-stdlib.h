@@ -677,12 +677,16 @@ extern char *memcpy P((char *, const char *, int));
 #ifndef memset
 extern char *memset P((char *, int, int));
 #endif
-extern char *calloc P((unsigned int, unsigned int));
-extern char *malloc P((unsigned int));
-extern char *realloc P((char *, unsigned int));
-extern void free P((char *));
+extern void *calloc P((unsigned int, unsigned int));
+extern void *malloc P((unsigned int));
+extern void *realloc P((void *, unsigned int));
+extern void free P((void *));
 extern void abort P((void));
 extern char *getenv P((const char *));
+
+extern double atof P((const char *));
+extern int    atoi P((const char *));
+
 #endif /* ibm032 */
 
 #undef P
