@@ -913,7 +913,10 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
 
    /*SUPPRESS 29*/
    if (*context_handle == GSS_C_NO_CONTEXT
-       || ((krb5_gss_ctx_id_t)*context_handle)->testing_unknown_tokid) {
+#ifdef CFX_EXERCISE
+       || ((krb5_gss_ctx_id_t)*context_handle)->testing_unknown_tokid
+#endif
+       ) {
       major_status = new_connection(minor_status, cred, context_handle,
 				    target_name, mech_type, req_flags,
 				    time_req, input_chan_bindings,
