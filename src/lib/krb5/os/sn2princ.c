@@ -81,7 +81,7 @@ OLDDECLARG(krb5_principal *,ret_princ)
     retval = krb5_build_principal(ret_princ, strlen(hrealms[0]), hrealms[0],
 				  sname, remote_host, (char *)0);
 
-    krb5_princ_type(principal) = KRB5_NT_SRV_HST;
+    krb5_princ_type(*ret_princ) = KRB5_NT_SRV_HST;
 
     free(remote_host);
     krb5_free_host_realm(hrealms);
