@@ -7,6 +7,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
 
 #if defined(_WIN32)
 #include <malloc.h>
