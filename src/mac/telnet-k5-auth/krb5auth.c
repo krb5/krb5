@@ -56,7 +56,6 @@ long					oldA4;
 
 			/* initialize krb5 */
 		    krb5_init_context(&k5_context);
-		    krb5_init_ets(k5_context);
 			break;
 	
 		case TNFUNC_INIT_SESSION_AUTH:

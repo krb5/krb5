@@ -172,7 +172,6 @@ main(argc, argv)
 			retval);
 		exit(1);
 	}
-	krb5_init_ets(ctx);
 
 	while ((c = getopt(argc, argv, "dk:r:D:l:s:")) != EOF) {
 	    switch (c) {

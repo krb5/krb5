@@ -131,7 +131,6 @@ main(argc, argv)
     krb5_error_code retval;
 
     krb5_init_context(&test_context);
-    krb5_init_ets(test_context);
 
     if (strrchr(argv[0], '/'))
 	prog = strrchr(argv[0], '/')+1;

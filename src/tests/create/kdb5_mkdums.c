@@ -109,7 +109,6 @@ char *argv[];
     int depth;
 
     krb5_init_context(&test_context);
-    krb5_init_ets(test_context);
 
     if (strrchr(argv[0], '/'))
 	argv[0] = strrchr(argv[0], '/')+1;

@@ -309,7 +309,6 @@ int main (void)
     	doalert("Kerberos configuration file not present");
     	getout(0);
     }
-    krb5_init_ets(kcontext);
 #endif
 
 	/*

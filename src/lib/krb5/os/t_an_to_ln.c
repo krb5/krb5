@@ -14,7 +14,6 @@ main(argc, argv)
 
     programname = argv[0];
     krb5_init_context(&kcontext);
-    krb5_init_ets(kcontext);
     for (i=1; i < argc; i++) {
 	if (!(kret = krb5_parse_name(kcontext, argv[i], &principal))) {
 	    if (!(kret = krb5_aname_to_localname(kcontext,
