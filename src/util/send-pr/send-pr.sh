@@ -31,7 +31,7 @@ SUBMITTER=@SUBMITTER@
 GNATS_ROOT=
 
 # The default mail address for PR submissions. 
-GNATS_ADDR=bugs
+GNATS_ADDR=krb5-bugs@mit.edu
 
 # Where the gnats category tree lives.
 DATADIR=@DATADIR@
