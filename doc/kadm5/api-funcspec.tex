@@ -435,23 +435,23 @@ kadm5_config_params structure to kadm5_init:
 typedef struct _kadm5_config_params {
         u_int32 mask;
 
-	/* Client and server fields */
+        /* Client and server fields */
         char *realm;
-	char *profile;
-	int kadmind_port;
+        char *profile;
+        int kadmind_port;
 
-	/* client fields */
-	char *admin_server;
+        /* client fields */
+        char *admin_server;
 
-	/* server fields */
+        /* server fields */
         char *dbname;
-	char *admin_dbname;
-	char *admin_lockfile;
-	char *acl_file;
-	char *dict_file;
-	char *admin_keytab;
+        char *admin_dbname;
+        char *admin_lockfile;
+        char *acl_file;
+        char *dict_file;
+        char *admin_keytab;
 
-	/* server library (database) fields */
+        /* server library (database) fields */
         char *stash_file;
         char *mkey_name;
         krb5_enctype enctype;
