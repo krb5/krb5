@@ -1,3 +1,16 @@
+Thu Apr 11 23:50:24 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* krb5.hin (krb5_x, krb5_xc): Fix wrapper macros so they don't
+		try to dereference a function pointer as a data value.
+		This doesn't work if you're using hpux cc, since functions
+		are aligned on 2-byte boundaries, but data has to be
+		accessed on 4-byte boundaries.  Accessing a function as a
+		data value isn't ANSI C portable anyway.  :-)  Wrapper
+		macros now take a function pointer, and check to see if
+		the function pointer is non-NULL, instead of taking a
+		(*funptr), and seeing if the function when treated as data
+		object is non-NULL. 
+
 Wed Apr 10 10:37:21 1996  Theodore Y. Ts'o  (tytso@dcl)
 
 	* krb5.hin (krb5_validate_times): Add prototype of new function.

@@ -457,20 +457,20 @@ extern krb5_cksumtype krb5_max_cksum;		/* max entry in array */
 #define krb5_use_enctype(context, eblockp, enctype) (eblockp)->crypto_entry = krb5_enctype_array[(enctype)]->system
 
 #if 1
-#define krb5_x(ptr,args) ((ptr)?(ptr args):(abort(),1))
-#define krb5_xc(ptr,args) ((ptr)?(ptr args):(abort(),(char*)0))
+#define krb5_x(ptr,args) ((ptr)?((*(ptr)) args):(abort(),1))
+#define krb5_xc(ptr,args) ((ptr)?((*(ptr)) args):(abort(),(char*)0))
 #else
-#define krb5_x(ptr,args) (ptr args)
-#define krb5_xc(ptr,args) (ptr args)
+#define krb5_x(ptr,args) ((*(ptr)) args)
+#define krb5_xc(ptr,args) ((*(ptr)) args)
 #endif
-#define krb5_encrypt(context, inptr, outptr, size, eblock, ivec) krb5_x((*(eblock)->crypto_entry->encrypt_func),(inptr, outptr, size, eblock, ivec))
-#define krb5_decrypt(context, inptr, outptr, size, eblock, ivec) krb5_x((*(eblock)->crypto_entry->decrypt_func),(inptr, outptr, size, eblock, ivec))
-#define krb5_process_key(context, eblock, key) krb5_x((*(eblock)->crypto_entry->process_key),(eblock, key))
-#define krb5_finish_key(context, eblock) krb5_x((*(eblock)->crypto_entry->finish_key),(eblock))
-#define krb5_string_to_key(context, eblock, keyblock, data, princ) krb5_x((*(eblock)->crypto_entry->string_to_key),(eblock, keyblock, data, princ))
-#define krb5_init_random_key(context, eblock, keyblock, ptr) krb5_x((*(eblock)->crypto_entry->init_random_key),(keyblock, ptr))
-#define krb5_finish_random_key(context, eblock, ptr) krb5_x((*(eblock)->crypto_entry->finish_random_key),(ptr))
-#define krb5_random_key(context, eblock, ptr, keyblock) krb5_x((*(eblock)->crypto_entry->random_key),(eblock, ptr, keyblock))
+#define krb5_encrypt(context, inptr, outptr, size, eblock, ivec) krb5_x((eblock)->crypto_entry->encrypt_func,(inptr, outptr, size, eblock, ivec))
+#define krb5_decrypt(context, inptr, outptr, size, eblock, ivec) krb5_x((eblock)->crypto_entry->decrypt_func,(inptr, outptr, size, eblock, ivec))
+#define krb5_process_key(context, eblock, key) krb5_x((eblock)->crypto_entry->process_key,(eblock, key))
+#define krb5_finish_key(context, eblock) krb5_x((eblock)->crypto_entry->finish_key,(eblock))
+#define krb5_string_to_key(context, eblock, keyblock, data, princ) krb5_x((eblock)->crypto_entry->string_to_key,(eblock, keyblock, data, princ))
+#define krb5_init_random_key(context, eblock, keyblock, ptr) krb5_x((eblock)->crypto_entry->init_random_key,(keyblock, ptr))
+#define krb5_finish_random_key(context, eblock, ptr) krb5_x((eblock)->crypto_entry->finish_random_key,(ptr))
+#define krb5_random_key(context, eblock, ptr, keyblock) krb5_x((eblock)->crypto_entry->random_key,(eblock, ptr, keyblock))
 
 #define krb5_eblock_enctype(context, eblockp) ((eblockp)->crypto_entry->proto_enctype)
 
@@ -1076,19 +1076,19 @@ typedef struct _krb5_cc_ops {
 /* for set_flags and other functions */
 #define KRB5_TC_OPENCLOSE		0x00000001
 
-#define krb5_cc_initialize(context, cache, principal) krb5_x((*(cache)->ops->init),(context, cache, principal))
-#define krb5_cc_gen_new(context, cache) krb5_x((*(cache)->ops->gen_new),(context, cache))
-#define krb5_cc_destroy(context, cache) krb5_x((*(cache)->ops->destroy),(context, cache))
-#define krb5_cc_close(context, cache) krb5_x((*(cache)->ops->close),(context, cache))
-#define krb5_cc_store_cred(context, cache, creds) krb5_x((*(cache)->ops->store),(context, cache, creds))
-#define krb5_cc_retrieve_cred(context, cache, flags, mcreds, creds) krb5_x((*(cache)->ops->retrieve),(context, cache, flags, mcreds, creds))
-#define krb5_cc_get_principal(context, cache, principal) krb5_x((*(cache)->ops->get_princ),(context, cache, principal))
-#define krb5_cc_start_seq_get(context, cache, cursor) krb5_x((*(cache)->ops->get_first),(context, cache, cursor))
-#define krb5_cc_next_cred(context, cache, cursor, creds) krb5_x((*(cache)->ops->get_next),(context, cache, cursor, creds))
-#define krb5_cc_end_seq_get(context, cache, cursor) krb5_x((*(cache)->ops->end_get),(context, cache, cursor))
-#define krb5_cc_remove_cred(context, cache, flags, creds) krb5_x((*(cache)->ops->remove_cred),(context, cache,flags, creds))
-#define krb5_cc_set_flags(context, cache, flags) krb5_x((*(cache)->ops->set_flags),(context, cache, flags))
-#define krb5_cc_get_name(context, cache) krb5_xc((*(cache)->ops->get_name),(context, cache))
+#define krb5_cc_initialize(context, cache, principal) krb5_x((cache)->ops->init,(context, cache, principal))
+#define krb5_cc_gen_new(context, cache) krb5_x((cache)->ops->gen_new,(context, cache))
+#define krb5_cc_destroy(context, cache) krb5_x((cache)->ops->destroy,(context, cache))
+#define krb5_cc_close(context, cache) krb5_x((cache)->ops->close,(context, cache))
+#define krb5_cc_store_cred(context, cache, creds) krb5_x((cache)->ops->store,(context, cache, creds))
+#define krb5_cc_retrieve_cred(context, cache, flags, mcreds, creds) krb5_x((cache)->ops->retrieve,(context, cache, flags, mcreds, creds))
+#define krb5_cc_get_principal(context, cache, principal) krb5_x((cache)->ops->get_princ,(context, cache, principal))
+#define krb5_cc_start_seq_get(context, cache, cursor) krb5_x((cache)->ops->get_first,(context, cache, cursor))
+#define krb5_cc_next_cred(context, cache, cursor, creds) krb5_x((cache)->ops->get_next,(context, cache, cursor, creds))
+#define krb5_cc_end_seq_get(context, cache, cursor) krb5_x((cache)->ops->end_get,(context, cache, cursor))
+#define krb5_cc_remove_cred(context, cache, flags, creds) krb5_x((cache)->ops->remove_cred,(context, cache,flags, creds))
+#define krb5_cc_set_flags(context, cache, flags) krb5_x((cache)->ops->set_flags,(context, cache, flags))
+#define krb5_cc_get_name(context, cache) krb5_xc((cache)->ops->get_name,(context, cache))
 #define krb5_cc_get_type(context, cache) (*(cache)->ops->prefix)
 
 extern krb5_cc_ops FAR *krb5_cc_dfl_ops;
@@ -1153,15 +1153,15 @@ krb5_error_code krb5_auth_to_rep
 		   krb5_tkt_authent FAR *,
 		   krb5_donot_replay FAR *));
 
-#define krb5_rc_initialize(context, id, span) krb5_x((*(id)->ops->init),(context, id, span))
-#define krb5_rc_recover(context, id) krb5_x((*(id)->ops->recover),(context, id))
-#define krb5_rc_destroy(context, id) krb5_x((*(id)->ops->destroy),(context, id))
-#define krb5_rc_close(context, id) krb5_x((*(id)->ops->close),(context, id))
-#define krb5_rc_store(context, id, dontreplay) krb5_x((*(id)->ops->store),(context, id, dontreplay))
-#define krb5_rc_expunge(context, id) krb5_x((*(id)->ops->expunge),(context, id))
-#define krb5_rc_get_lifespan(context, id, spanp) krb5_x((*(id)->ops->get_span),(context, id, spanp))
-#define krb5_rc_get_name(context, id) krb5_xc((*(id)->ops->get_name),(context, id))
-#define krb5_rc_resolve(context, id, name) krb5_x((*(id)->ops->resolve),(context, id, name))
+#define krb5_rc_initialize(context, id, span) krb5_x((id)->ops->init,(context, id, span))
+#define krb5_rc_recover(context, id) krb5_x((id)->ops->recover,(context, id))
+#define krb5_rc_destroy(context, id) krb5_x((id)->ops->destroy,(context, id))
+#define krb5_rc_close(context, id) krb5_x((id)->ops->close,(context, id))
+#define krb5_rc_store(context, id, dontreplay) krb5_x((id)->ops->store,(context, id, dontreplay))
+#define krb5_rc_expunge(context, id) krb5_x((id)->ops->expunge,(context, id))
+#define krb5_rc_get_lifespan(context, id, spanp) krb5_x((id)->ops->get_span,(context, id, spanp))
+#define krb5_rc_get_name(context, id) krb5_xc((id)->ops->get_name,(context, id))
+#define krb5_rc_resolve(context, id, name) krb5_x((id)->ops->resolve,(context, id, name))
 
 extern krb5_rc_ops krb5_rc_dfl_ops;
 
@@ -1246,12 +1246,12 @@ typedef struct _krb5_kt_ops {
 } krb5_kt_ops;
 
 #define krb5_kt_get_type(context, keytab) (*(keytab)->ops->prefix)
-#define krb5_kt_get_name(context, keytab, name, namelen) krb5_x((*(keytab)->ops->get_name),(context, keytab,name,namelen))
-#define krb5_kt_close(context, keytab) krb5_x((*(keytab)->ops->close),(context, keytab))
-#define krb5_kt_get_entry(context, keytab, principal, vno, enctype, entry) krb5_x((*(keytab)->ops->get),(context, keytab, principal, vno, enctype, entry))
-#define krb5_kt_start_seq_get(context, keytab, cursor) krb5_x((*(keytab)->ops->start_seq_get),(context, keytab, cursor))
-#define krb5_kt_next_entry(context, keytab, entry, cursor) krb5_x((*(keytab)->ops->get_next),(context, keytab, entry, cursor))
-#define krb5_kt_end_seq_get(context, keytab, cursor) krb5_x((*(keytab)->ops->end_get),(context, keytab, cursor))
+#define krb5_kt_get_name(context, keytab, name, namelen) krb5_x((keytab)->ops->get_name,(context, keytab,name,namelen))
+#define krb5_kt_close(context, keytab) krb5_x((keytab)->ops->close,(context, keytab))
+#define krb5_kt_get_entry(context, keytab, principal, vno, enctype, entry) krb5_x((keytab)->ops->get,(context, keytab, principal, vno, enctype, entry))
+#define krb5_kt_start_seq_get(context, keytab, cursor) krb5_x((keytab)->ops->start_seq_get,(context, keytab, cursor))
+#define krb5_kt_next_entry(context, keytab, entry, cursor) krb5_x((keytab)->ops->get_next,(context, keytab, entry, cursor))
+#define krb5_kt_end_seq_get(context, keytab, cursor) krb5_x((keytab)->ops->end_get,(context, keytab, cursor))
 /* remove and add are functions, so that they can return NOWRITE
    if not a writable keytab */
 
