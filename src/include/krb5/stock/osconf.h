@@ -23,6 +23,13 @@
 #define ODBM
 #endif
 
+#ifdef UseSysTimeH
+#define	USE_SYS_TIME_H	/* Needs <sys/time.h> for time includes. */		
+#endif
+#ifdef UseTimeH
+#define	USE_TIME_H	/* Needs <time.h> for time includes. */
+#endif
+
 #ifdef HasInetTrue
 #define KRB5_USE_INET		/* Support IP address family */
 #endif
