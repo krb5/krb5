@@ -7,6 +7,8 @@
 	(PROG_LIBPATH, PROG_RPATH, LOCALINCLUDES): Add Tcl options.
 	(DEFINES): Define.
 	(clean-unix): Delete profile_tcl.
+	* profile_tcl.c: New file, generated from profile.swg, but checked
+	in to avoid requiring swig in order to generate the test program.
 
 	* prof_int.h (struct _prf_data_t): Add a mutex.
 	* prof_file.c (profile_open_file): Initialize data mutex.
