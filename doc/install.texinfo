@@ -668,15 +668,15 @@ named @value{KDCSLAVE1}.@value{PRIMARYDOMAIN} and
 @smallexample
 @group
 @b{shell%} @value{ROOTDIR}/sbin/kadmin
-@b{kadmin:} addprinc -randpass host/@value{KDCSERVER}.@value{PRIMARYDOMAIN}
+@b{kadmin:} addprinc -randkey host/@value{KDCSERVER}.@value{PRIMARYDOMAIN}
 @b{WARNING: no policy specified for "host/@value{KDCSERVER}.@value{PRIMARYDOMAIN}@@@value{PRIMARYREALM}";
 defaulting to no policy.
 Principal "host/@value{KDCSERVER}.@value{PRIMARYDOMAIN}@@@value{PRIMARYREALM}" created.
-kadmin:} addprinc -randpass host/@value{KDCSLAVE1}.@value{PRIMARYDOMAIN}
+kadmin:} addprinc -randkey host/@value{KDCSLAVE1}.@value{PRIMARYDOMAIN}
 @b{WARNING: no policy specified for "host/@value{KDCSLAVE1}.@value{PRIMARYDOMAIN}@@@value{PRIMARYREALM}";
 defaulting to no policy.
 Principal "host/@value{KDCSLAVE1}.@value{PRIMARYDOMAIN}@@@value{PRIMARYREALM}" created.}
-@b{kadmin:} addprinc -randpass host/@value{KDCSLAVE2}.@value{PRIMARYDOMAIN}
+@b{kadmin:} addprinc -randkey host/@value{KDCSLAVE2}.@value{PRIMARYDOMAIN}
 @b{WARNING: no policy specified for "host/@value{KDCSLAVE2}.@value{PRIMARYDOMAIN}@@@value{PRIMARYREALM}";
 defaulting to no policy.
 Principal "host/@value{KDCSLAVE2}.@value{PRIMARYDOMAIN}@@@value{PRIMARYREALM}" created.

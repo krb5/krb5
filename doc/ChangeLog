@@ -1,3 +1,8 @@
+Fri Nov 29 19:47:38 1996  Tom Yu  <tlyu@mit.edu>
+
+	* install.texinfo (Create Host Keys for the Slave KDCs): Change
+	-randpass to -randkey. [244]
+
 Thu Nov 28 18:54:02 1996  Tom Yu  <tlyu@mit.edu>
 
 	* krb425.texinfo: Change to use "@chapternewpage odd", also frob
