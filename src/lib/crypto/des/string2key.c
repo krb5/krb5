@@ -20,21 +20,16 @@ static char des_st2_key_c[] =
 #include <sys/errno.h>
 
 #include <krb5/krb5.h>
-#include <krb5/des.h>
 #include <krb5/krb5_err.h>
 #include <krb5/ext-proto.h>
 
-#include "des_internal.h"
+#include "des_int.h"
 
 #ifdef DEBUG
 #include <stdio.h>
 extern int des_debug;
-extern int des_debug_print();
 #endif
 
-extern void des_fixup_key_parity();
-extern int des_key_sched();
-extern void des_cbc_cksum();
 /*
 	converts the string pointed to by "data" into an encryption key
 	of type "keytype".  *keyblock is filled in with the key info;
@@ -72,7 +67,7 @@ OLDDECLARG(krb5_principal, princ)
     static int forward;
     register char *p_char;
     static char k_char[64];
-    static des_key_schedule key_sked;
+    static mit_des_key_schedule key_sked;
 
 #define min(A, B) ((A) < (B) ? (A): (B))
 
@@ -83,14 +78,14 @@ OLDDECLARG(krb5_principal, princ)
     if ( keytype != KEYTYPE_DES )
 	return (KRB5_PROG_KEYTYPE_NOSUPP);
 
-    if ( !(keyblock->contents = (krb5_octet *)malloc(sizeof(des_cblock))) )
+    if ( !(keyblock->contents = (krb5_octet *)malloc(sizeof(mit_des_cblock))) )
 	return(ENOMEM);
 
-#define cleanup() {bzero(keyblock->contents, sizeof(des_cblock));\
+#define cleanup() {bzero(keyblock->contents, sizeof(mit_des_cblock));\
 		       (void) free((char *) keyblock->contents);}
 
     keyblock->keytype = KEYTYPE_DES;
-    keyblock->length = sizeof(des_cblock);
+    keyblock->length = sizeof(mit_des_cblock);
     key = keyblock->contents;
     bzero(copystr, sizeof(copystr));
     (void) strncpy(copystr, data->data, min(data->length,511));
@@ -104,7 +99,7 @@ OLDDECLARG(krb5_principal, princ)
     bzero(k_char,sizeof(k_char));
 
 #ifdef DEBUG
-    if (des_debug)
+    if (mit_des_debug)
 	fprintf(stdout,
 		"\n\ninput str length = %d  string = %s\nstring = 0x ",
 		length,str);
@@ -115,7 +110,7 @@ OLDDECLARG(krb5_principal, princ)
 	/* get next input key byte */
 	temp = (unsigned int) *str++;
 #ifdef DEBUG
-	if (des_debug)
+	if (mit_des_debug)
 	    fprintf(stdout,"%02x ",temp & 0xff);
 #endif
 	/* loop through bits within byte, ignore parity */
@@ -132,7 +127,7 @@ OLDDECLARG(krb5_principal, princ)
 	    forward = !forward;
     }
 
-    /* now stuff into the key des_cblock, and force odd parity */
+    /* now stuff into the key mit_des_cblock, and force odd parity */
     p_char = k_char;
     k_p = (unsigned char *) key;
 
@@ -144,19 +139,19 @@ OLDDECLARG(krb5_principal, princ)
     }
 
     /* fix key parity */
-    des_fixup_key_parity(key);
+    mit_des_fixup_key_parity(key);
 
     /* Now one-way encrypt it with the folded key */
-    (void) des_key_sched(key, key_sked);
-    (void) des_cbc_cksum((krb5_octet *)copystr, key, length, key_sked, key);
+    (void) mit_des_key_sched(key, key_sked);
+    (void) mit_des_cbc_cksum((krb5_octet *)copystr, key, length, key_sked, key);
     /* erase key_sked */
     bzero((char *)key_sked, sizeof(key_sked));
 
     /* now fix up key parity again */
-    des_fixup_key_parity(key);
+    mit_des_fixup_key_parity(key);
 
 #ifdef DEBUG
-    if (des_debug)
+    if (mit_des_debug)
 	fprintf(stdout,
 		"\nResulting string_to_key = 0x%x 0x%x\n",
 		*((unsigned long *) key),

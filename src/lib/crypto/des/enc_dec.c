@@ -35,13 +35,12 @@ static char des_enc_dec_c[] =
 #include <krb5/krb5.h>
 #include <krb5/ext-proto.h>
 
-#include <krb5/des.h>
+#include "des_int.h"
 
 #ifdef DEBUG
 #include <stdio.h>
 
-extern int des_debug;
-extern int des_debug_print();
+extern int mit_des_debug;
 #endif
 
 
@@ -67,7 +66,6 @@ OLDDECLARG(size_t, size)
 OLDDECLARG(krb5_encrypt_block *, key)
 OLDDECLARG(krb5_pointer, ivec)
 {
-    krb5_error_code des_cbc_encrypt();
     krb5_octet	*iv;
     
     if ( ivec == 0 )
@@ -76,12 +74,12 @@ OLDDECLARG(krb5_pointer, ivec)
 	iv = (krb5_octet *)ivec;
 
     /* XXX should check that key sched is valid here? */
-    return (des_cbc_encrypt((krb5_octet *)in, 
+    return (mit_des_cbc_encrypt((krb5_octet *)in, 
 			    (krb5_octet *)out,
 			    size, 
-			    (struct des_ks_struct *)key->priv, 
+			    (struct mit_des_ks_struct *)key->priv, 
 			    iv,
-			    DES_ENCRYPT));
+			    MIT_DES_ENCRYPT));
 }    
 
 /*
@@ -108,7 +106,6 @@ OLDDECLARG(size_t, size)
 OLDDECLARG(krb5_encrypt_block *, key)
 OLDDECLARG(krb5_pointer, ivec)
 {
-    krb5_error_code des_cbc_encrypt();
     krb5_octet	*iv;
 
     if ( ivec == 0 )
@@ -117,12 +114,12 @@ OLDDECLARG(krb5_pointer, ivec)
 	iv = (krb5_octet *)ivec;
 
     /* XXX should check that key sched is valid here? */
-    return (des_cbc_encrypt ((krb5_octet *)in, 
+    return (mit_des_cbc_encrypt ((krb5_octet *)in, 
 			     (krb5_octet *)out, 
 			     size, 
-			     (struct des_ks_struct *)key->priv, 
+			     (struct mit_des_ks_struct *)key->priv, 
 			     iv,
-			     DES_DECRYPT));
+			     MIT_DES_DECRYPT));
 }    
 /*
  * This routine performs DES cipher-block-chaining operation, either
@@ -144,15 +141,15 @@ OLDDECLARG(krb5_pointer, ivec)
  */
 
 krb5_error_code
-des_cbc_encrypt(in,out,length,key,iv,encrypt)
+mit_des_cbc_encrypt(in,out,length,key,iv,encrypt)
     krb5_octet   *in;		/* >= length bytes of input text */
     krb5_octet  *out;		/* >= length bytes of output text */
     register long length;	/* in bytes */
-    int encrypt;		/* 0 ==> decrypt, else encrypt */
-    des_key_schedule key;		/* precomputed key schedule */
+    mit_des_key_schedule key;		/* precomputed key schedule */
     krb5_octet *iv;		/* 8 bytes of ivec */
+    int encrypt;		/* 0 ==> decrypt, else encrypt */
 {
-    int des_ecb_encrypt();
+    int mit_des_ecb_encrypt();
 
     register unsigned long *input = (unsigned long *) in;
     register unsigned long *output = (unsigned long *) out;
@@ -198,14 +195,14 @@ des_cbc_encrypt(in,out,length,key,iv,encrypt)
 		    *(t_in_p+j)= 0;
 
 #ifdef DEBUG
-	    if (des_debug)
-		des_debug_print("clear",length,t_input[0],t_input[1]);
+	    if (mit_des_debug)
+		mit_des_debug_print("clear",length,t_input[0],t_input[1]);
 #endif
 	    /* do the xor for cbc into the temp */
 	    t_input[0] ^= t_output[0];
 	    t_input[1] ^= t_output[1];
 	    /* encrypt */
-	    (void) des_ecb_encrypt(t_input,t_output,key,encrypt);
+	    (void) mit_des_ecb_encrypt(t_input,t_output,key,encrypt);
 	    /* copy temp output and save it for cbc */
 #ifdef MUSTALIGN
 	    if ((long) output & 3) {
@@ -222,9 +219,9 @@ des_cbc_encrypt(in,out,length,key,iv,encrypt)
 	    }
 
 #ifdef DEBUG
-	    if (des_debug) {
-		des_debug_print("xor'ed",i,t_input[0],t_input[1]);
-		des_debug_print("cipher",i,t_output[0],t_output[1]);
+	    if (mit_des_debug) {
+		mit_des_debug_print("xor'ed",i,t_input[0],t_input[1]);
+		mit_des_debug_print("cipher",i,t_output[0],t_output[1]);
 	    }
 #endif
 	}
@@ -261,18 +258,18 @@ des_cbc_encrypt(in,out,length,key,iv,encrypt)
 
 	    /* no padding for decrypt */
 #ifdef DEBUG
-	    if (des_debug)
-		des_debug_print("cipher",i,t_input[0],t_input[1]);
+	    if (mit_des_debug)
+		mit_des_debug_print("cipher",i,t_input[0],t_input[1]);
 #else
 #ifdef lint
 	    i = i;
 #endif
 #endif
 	    /* encrypt */
-	    (void) des_ecb_encrypt(t_input,t_output,key,encrypt);
+	    (void) mit_des_ecb_encrypt(t_input,t_output,key,encrypt);
 #ifdef DEBUG
-	    if (des_debug)
-		des_debug_print("out pre xor",i,t_output[0],t_output[1]);
+	    if (mit_des_debug)
+		mit_des_debug_print("out pre xor",i,t_output[0],t_output[1]);
 #endif
 	    /* do the xor for cbc into the output */
 	    t_output[0] ^= xor_0;
@@ -296,8 +293,8 @@ des_cbc_encrypt(in,out,length,key,iv,encrypt)
 	    xor_0 = t_input[0];
 	    xor_1 = t_input[1];
 #ifdef DEBUG
-	    if (des_debug)
-		des_debug_print("clear",i,t_output[0],t_output[1]);
+	    if (mit_des_debug)
+		mit_des_debug_print("clear",i,t_output[0],t_output[1]);
 #endif
 	}
 	return 0;

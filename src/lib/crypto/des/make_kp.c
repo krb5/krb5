@@ -19,7 +19,8 @@
 #include <mit-copyright.h>
 #include <stdio.h>
 #include <errno.h>
-#include "des_internal.h"
+#include <krb5/krb5.h>
+#include "des_int.h"
 
 #ifndef lint
 static char rcsid[]=
@@ -27,10 +28,7 @@ static char rcsid[]=
 #endif /* lint */
 
 char *progname;
-extern char *errmsg();
 extern int errno;
-extern long swap_bit_pos_1();
-extern long swap_bit_pos_0();
 int sflag;
 int vflag;
 int dflag;
@@ -91,7 +89,7 @@ int  pc_2[48+1] = { 0,
 
 int ks_perm[16+1][48+1];
 
-int des_debug;
+int mit_des_debug;
 
 void gen(stream)
     FILE *stream;
@@ -125,7 +123,7 @@ void gen(stream)
      * start at iter = 1, not zero.
      */
     for (iter = 1; iter <= 16; iter++) {
-        if (des_debug) {
+        if (mit_des_debug) {
             /*  for debugging */
             printf(
                     "/* DEBUG-- start iteration = %d  shifts = %d",
@@ -159,7 +157,7 @@ void gen(stream)
         }
 
 
-        if (des_debug) {
+        if (mit_des_debug) {
             /* for debugging */
             printf("/* DEBUG:\n");
             printf(" * after shifts, iteration = %d  shifts = %d",

@@ -43,29 +43,26 @@ static char rcsid_des_c[] =
 
 #include <stdio.h>
 #include <krb5/krb5.h>
-#include <krb5/des.h>
-#include "des_internal.h"
+#include "des_int.h"
 #include "s_table.h"
 #include "p_table.h"
 
 #ifdef DEBUG
-#define DBG_PRINT(s) if (des_debug & 2) \
-    des_debug_print(s,i,L1&0xffff,(L1>>16)&0xffff, \
+#define DBG_PRINT(s) if (mit_des_debug & 2) \
+    mit_des_debug_print(s,i,L1&0xffff,(L1>>16)&0xffff, \
 		R1&0xffff,(R1>>16)&0xffff)
 #else
 #define DBG_PRINT(s)
 #endif
 
-extern int des_debug;
-extern des_cblock_print_file ();
-extern des_debug_print ();
+extern int mit_des_debug;
 
 int
-des_ecb_encrypt(clear, cipher, schedule, encrypt)
+mit_des_ecb_encrypt(clear, cipher, schedule, encrypt)
     unsigned long *clear;
     unsigned long *cipher;
     int encrypt;		/* 0 ==> decrypt, else encrypt */
-    register des_key_schedule schedule; /* r11 */
+    register mit_des_key_schedule schedule; /* r11 */
 {
 
     /* better pass 8 bytes, length not checked here */
@@ -132,14 +129,14 @@ des_ecb_encrypt(clear, cipher, schedule, encrypt)
     }
 
 #ifdef DEBUG
-    if (des_debug & 2) {
+    if (mit_des_debug & 2) {
 	printf("All values printed from low byte (bit 0)");
 	printf(" --> high byte (bit 63)\n");
 	i = 0;
 	dbg_tmp[0] = L1;
 	dbg_tmp[1] = R1;
 	printf("iter = %2d  before IP\n\t\tL1 R1 = ",i);
-	des_cblock_print_file (dbg_tmp, stdout);
+	mit_des_cblock_print_file (dbg_tmp, stdout);
     }
 
     DBG_PRINT("before IP");
@@ -157,11 +154,11 @@ des_ecb_encrypt(clear, cipher, schedule, encrypt)
     for (i = 0; i <= (AUTH_DES_ITER-1); i++) {
 
 #ifdef DEBUG
-	if (des_debug & 2) {
+	if (mit_des_debug & 2) {
 	    dbg_tmp[0] = L1;
 	    dbg_tmp[1] = R1;
 	    printf("iter = %2d	start loop\n\t\tL1 R1 = ",i);
-	    des_cblock_print_file (dbg_tmp, stdout);
+	    mit_des_cblock_print_file (dbg_tmp, stdout);
 	    DBG_PRINT("start loop");
 	}
 
@@ -221,12 +218,12 @@ des_ecb_encrypt(clear, cipher, schedule, encrypt)
 	R1 = R2;
 
 #ifdef DEBUG
-	if (des_debug & 2) {
+	if (mit_des_debug & 2) {
 	    dbg_tmp[0] = L1;
 	    dbg_tmp[1] = R1;
 	    DBG_PRINT("after e");
 	    printf("iter = %2d	after e\n\t\tL1 R1 = ",i);
-	    des_cblock_print_file (dbg_tmp, stdout);
+	    mit_des_cblock_print_file (dbg_tmp, stdout);
 	}
 #endif
 
@@ -253,12 +250,12 @@ des_ecb_encrypt(clear, cipher, schedule, encrypt)
 	/* dont have to reset input to L1, R1 */
 
 #ifdef DEBUG
-	if (des_debug & 2) {
+	if (mit_des_debug & 2) {
 	    dbg_tmp[0] = L1;
 	    dbg_tmp[1] = R1;
 	    DBG_PRINT("after xor");
 	    printf("iter = %2d	after xor\n\t\tL1 R1 =",i);
-	    des_cblock_print_file (dbg_tmp, stdout);
+	    mit_des_cblock_print_file (dbg_tmp, stdout);
 	}
 #endif
 
@@ -364,12 +361,12 @@ des_ecb_encrypt(clear, cipher, schedule, encrypt)
 #endif
 
 #ifdef DEBUG
-	if (des_debug & 2) {
+	if (mit_des_debug & 2) {
 	    dbg_tmp[0] = L1;
 	    dbg_tmp[1] = R1;
 	    DBG_PRINT("after s");
 	    printf("iter = %2d	after s\n\t\tL1 R1 = ",i);
-	    des_cblock_print_file (dbg_tmp, stdout);
+	    mit_des_cblock_print_file (dbg_tmp, stdout);
 	}
 #endif
 
@@ -380,12 +377,12 @@ des_ecb_encrypt(clear, cipher, schedule, encrypt)
 	R1 = R2;
 
 #ifdef DEBUG
-	if (des_debug & 2) {
+	if (mit_des_debug & 2) {
 	    dbg_tmp[0] = L1;
 	    dbg_tmp[1] = R1;
 	    DBG_PRINT("after p");
 	    printf("iter = %2d	after p\n\t\tL1 R1 = ",i);
-	    des_cblock_print_file (dbg_tmp, stdout);
+	    mit_des_cblock_print_file (dbg_tmp, stdout);
 	}
 #endif
 
@@ -406,12 +403,12 @@ des_ecb_encrypt(clear, cipher, schedule, encrypt)
     R1 = R2;
 
 #ifdef DEBUG
-    if (des_debug & 2) {
+    if (mit_des_debug & 2) {
 	dbg_tmp[0] = L1;
 	dbg_tmp[1] = R1;
 	DBG_PRINT("before FP");
 	printf("iter = %2d  before FP\n\t\tL1 R1 = ",i);
-	des_cblock_print_file (dbg_tmp, stdout);
+	mit_des_cblock_print_file (dbg_tmp, stdout);
     }
 
 #endif
@@ -440,14 +437,14 @@ des_ecb_encrypt(clear, cipher, schedule, encrypt)
     }
 
 #ifdef DEBUG
-    if (des_debug & 2) {
+    if (mit_des_debug & 2) {
 	L1 = L2;
 	R1 = R2;
 	dbg_tmp[0] = L1;
 	dbg_tmp[1] = R1;
 	DBG_PRINT("done");
 	printf("iter = %2d  done\n\t\tL1 R1 = ",i);
-	des_cblock_print_file (dbg_tmp, stdout);
+	mit_des_cblock_print_file (dbg_tmp, stdout);
     }
 #endif
 

@@ -19,7 +19,7 @@ static char des_fnr_key_c[] =
 #include <sys/errno.h>
 
 #include <krb5/krb5.h>
-#include <krb5/des.h>
+#include <krb5/mit-des.h>
 #include <krb5/ext-proto.h>
 
 /*
@@ -29,7 +29,7 @@ static char des_fnr_key_c[] =
 krb5_error_code mit_des_finish_random_key (DECLARG(krb5_pointer *, seed))
 OLDDECLARG(krb5_pointer *, seed)
 {
-    bzero( (char *)*seed, sizeof(des_random_key_seed) );
+    bzero( (char *)*seed, sizeof(mit_des_random_key_seed) );
     free((char *)*seed);
     *seed = 0;
     return 0;		/* XXX init_random_key */

@@ -24,8 +24,7 @@ static char key_parity_c[] =
 
 #include <mit-copyright.h>
 #include <krb5/krb5.h>
-#include <krb5/des.h>
-#include "des_internal.h"
+#include "des_int.h"
 
 #include "odd.h"          /* Load compile-time generated odd_parity table */
 
@@ -35,12 +34,12 @@ static char key_parity_c[] =
  *                       vax order.
  */
 void
-des_fixup_key_parity(key)
-     register des_cblock key;
+mit_des_fixup_key_parity(key)
+     register mit_des_cblock key;
 {
     int i;
 
-    for (i=0; i<sizeof(des_cblock); i++)
+    for (i=0; i<sizeof(mit_des_cblock); i++)
       key[i] = odd_parity[key[i]];
 
     return;
@@ -52,12 +51,12 @@ des_fixup_key_parity(key)
  *                       correct des parity.
  */
 int
-des_check_key_parity(key)
-     register des_cblock key;
+mit_des_check_key_parity(key)
+     register mit_des_cblock key;
 {
     int i;
 
-    for (i=0; i<sizeof(des_cblock); i++)
+    for (i=0; i<sizeof(mit_des_cblock); i++)
       if (key[i] != odd_parity[key[i]])
 	return(0);
 

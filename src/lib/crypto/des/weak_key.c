@@ -21,14 +21,13 @@ static char weak_key_c[] =
 #endif	/* !lint & !SABER */
 
 #include <krb5/krb5.h>
-#include <krb5/des.h>
 #include <krb5/ext-proto.h>
-#include "des_internal.h"
+#include "des_int.h"
 
 /*
  * The following are the weak DES keys:
  */
-static des_cblock weak[16] = {
+static mit_des_cblock weak[16] = {
     /* weak keys */
     {0x01,0x01,0x01,0x01,0x01,0x01,0x01,0x01},
     {0xfe,0xfe,0xfe,0xfe,0xfe,0xfe,0xfe,0xfe},
@@ -56,19 +55,19 @@ static des_cblock weak[16] = {
 };
 
 /*
- * des_is_weak_key: returns true iff key is a [semi-]weak des key.
+ * mit_des_is_weak_key: returns true iff key is a [semi-]weak des key.
  *
  * Requires: key has correct odd parity.
  */
 int
-des_is_weak_key(key)
-     des_cblock key;
+mit_des_is_weak_key(key)
+     mit_des_cblock key;
 {
     int i;
-    des_cblock *weak_p = weak;
+    mit_des_cblock *weak_p = weak;
 
-    for (i = 0; i < (sizeof(weak)/sizeof(des_cblock)); i++) {
-	if (!bcmp((char *)weak_p++,(char *)key,sizeof(des_cblock)))
+    for (i = 0; i < (sizeof(weak)/sizeof(mit_des_cblock)); i++) {
+	if (!bcmp((char *)weak_p++,(char *)key,sizeof(mit_des_cblock)))
 	    return 1;
     }
 

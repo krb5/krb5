@@ -15,14 +15,8 @@
 #include <stdio.h>
 #include <krb5/krb5.h>
 #include <krb5/ext-proto.h>
-#include "des_internal.h"
+#include "des_int.h"
 #include "tables.h"
-
-extern unsigned int swap_bit_pos_0_to_ansi PROTOTYPE((unsigned int));
-extern long swap_long_bytes();
-extern unsigned long swap_long_bytes_bit_number();
-extern void test_set PROTOTYPE((FILE *, char const *, int,
-				char const *, int));
 
 void gen (stream)
     FILE * stream;

@@ -24,41 +24,33 @@ static char new_rnd_key_c[] =
 #include <mit-copyright.h>
 
 #include <krb5/krb5.h>
-#include <krb5/des.h>
-#include "des_internal.h"
-
-extern void des_fixup_key_parity();
-extern int des_is_weak_key();
-extern int des_ecb_encrypt();
-extern int des_key_sched();
-void des_set_random_generator_seed(), des_set_sequence_number();
-void des_generate_random_block();
+#include "des_int.h"
 
 /*
- * des_new_random_key: create a random des key
+ * mit_des_new_random_key: create a random des key
  *
- * Requires: des_set_random_number_generater_seed must be at called least
+ * Requires: mit_des_set_random_number_generater_seed must be at called least
  *           once before this routine is called.
  *
  * Notes: the returned key has correct parity and is guarenteed not
- *        to be a weak des key.  Des_generate_random_block is used to
+ *        to be a weak des key.  Mit_Des_generate_random_block is used to
  *        provide the random bits.
  */
 int
-des_new_random_key(key, p_seed)
-    des_cblock key;
-    des_random_key_seed	*p_seed;
+mit_des_new_random_key(key, p_seed)
+    mit_des_cblock key;
+    mit_des_random_key_seed	*p_seed;
 {
     do {
-	des_generate_random_block(key, p_seed);
-	des_fixup_key_parity(key);
-    } while (des_is_weak_key(key));
+	mit_des_generate_random_block(key, p_seed);
+	mit_des_fixup_key_parity(key);
+    } while (mit_des_is_weak_key(key));
 
     return(0);
 }
 
 /*
- * des_init_random_number_generator:
+ * mit_des_init_random_number_generator:
  *
  *    This routine takes a secret key possibly shared by a number
  * of servers and uses it to generate a random number stream that is
@@ -69,7 +61,7 @@ des_new_random_key(key, p_seed)
  * This routine is used for example, by the kerberos server(s) with the
  * key in question being the kerberos master key.
  *
- * Note: this routine calls des_set_random_generator_seed.
+ * Note: this routine calls mit_des_set_random_generator_seed.
  */
 #ifndef BSDUNIX
   you lose...   (aka, you get to implement an analog of this for your
@@ -78,18 +70,18 @@ des_new_random_key(key, p_seed)
 
 #include <sys/time.h>
 #include <krb5/ext-proto.h>
-extern long gethostid();
+extern long gethostid(); /* XXX */
 
-void des_init_random_number_generator(key,p_seed)
-    des_cblock key;
-    des_random_key_seed	*p_seed;
+void mit_des_init_random_number_generator(key,p_seed)
+    mit_des_cblock key;
+    mit_des_random_key_seed	*p_seed;
 {
     struct { /* This must be 64 bits exactly */
 	long process_id;
 	long host_id;
     } seed;
     struct timeval time; /* this must also be 64 bits exactly */
-    des_cblock new_key;
+    mit_des_cblock new_key;
 
     /*
      * use a host id and process id in generating the seed to ensure
@@ -102,28 +94,28 @@ void des_init_random_number_generator(key,p_seed)
      * Generate a tempory value that depends on the key, host_id, and
      * process_id such that it gives no useful information about the key:
      */
-    des_set_random_generator_seed(key, p_seed);
-    des_set_sequence_number((unsigned char *)&seed, p_seed);
-    des_new_random_key(new_key, p_seed);
+    mit_des_set_random_generator_seed(key, p_seed);
+    mit_des_set_sequence_number((unsigned char *)&seed, p_seed);
+    mit_des_new_random_key(new_key, p_seed);
 
     /*
      * use it to select a random stream:
      */      
-    des_set_random_generator_seed(new_key, p_seed);
+    mit_des_set_random_generator_seed(new_key, p_seed);
 
     /*
      * use a time stamp to ensure that a server started later does not reuse
      * an old stream:
      */
     gettimeofday(&time, (struct timezone *)0);
-    des_set_sequence_number((unsigned char *)&time, p_seed);
+    mit_des_set_sequence_number((unsigned char *)&time, p_seed);
 
     /*
      * use the time stamp finally to select the final seed using the
      * current random number stream:
      */
-    des_new_random_key(new_key, p_seed);
-    des_set_random_generator_seed(new_key, p_seed);
+    mit_des_new_random_key(new_key, p_seed);
+    mit_des_set_random_generator_seed(new_key, p_seed);
 }
 
 #endif /* ifdef BSDUNIX */
@@ -135,7 +127,7 @@ void des_init_random_number_generator(key,p_seed)
  */
 
 /*
- * des_set_random_generator_seed: this routine is used to select a random
+ * mit_des_set_random_generator_seed: this routine is used to select a random
  *                                number stream.  The stream that results is
  *                                totally determined by the passed in key.
  *                                (I.e., calling this routine again with the
@@ -146,14 +138,14 @@ void des_init_random_number_generator(key,p_seed)
  *           weak des key.
  */
 void
-des_set_random_generator_seed(key, p_seed)
-    des_cblock key;
-    des_random_key_seed	*p_seed;
+mit_des_set_random_generator_seed(key, p_seed)
+    mit_des_cblock key;
+    mit_des_random_key_seed	*p_seed;
 {
     register int i;
 
     /* select the new stream: (note errors are not possible here...) */
-    des_key_sched(key, p_seed->random_sequence_key);
+    mit_des_key_sched(key, p_seed->random_sequence_key);
 
     /* "seek" to the start of the stream: */
     for (i=0; i<8; i++)
@@ -161,40 +153,40 @@ des_set_random_generator_seed(key, p_seed)
 }
 
 /*
- * des_set_sequence_number: this routine is used to set the sequence number
+ * mit_des_set_sequence_number: this routine is used to set the sequence number
  *                          of the current random number stream.  This routine
  *                          may be used to "seek" within the current random
  *                          number stream.
  *
- * Note that des_set_random_generator_seed resets the sequence number to 0.
+ * Note that mit_des_set_random_generator_seed resets the sequence number to 0.
  */
 void
-des_set_sequence_number(new_sequence_number, p_seed)
-    des_cblock new_sequence_number;
-    des_random_key_seed	*p_seed;
+mit_des_set_sequence_number(new_sequence_number, p_seed)
+    mit_des_cblock new_sequence_number;
+    mit_des_random_key_seed	*p_seed;
 {
     bcopy((char *)new_sequence_number, (char *)p_seed->sequence_number,
 	  sizeof(p_seed->sequence_number));
 }
 
 /*
- * des_generate_random_block: routine to return the next random number
+ * mit_des_generate_random_block: routine to return the next random number
  *                            from the current random number stream.
  *                            The returned number is 64 bits long.
  *
- * Requires: des_set_random_generator_seed must have been called at least once
+ * Requires: mit_des_set_random_generator_seed must have been called at least once
  *           before this routine is called.
  */
-void des_generate_random_block(block, p_seed)
-    des_cblock block;
-    des_random_key_seed	*p_seed;
+void mit_des_generate_random_block(block, p_seed)
+    mit_des_cblock block;
+    mit_des_random_key_seed	*p_seed;
 {
     int i;
 
     /*
      * Encrypt the sequence number to get the new random block:
      */
-    des_ecb_encrypt((unsigned long *)p_seed->sequence_number, 
+    mit_des_ecb_encrypt((unsigned long *)p_seed->sequence_number, 
 		    (unsigned long *)block, 
 		    p_seed->random_sequence_key, 1);
 

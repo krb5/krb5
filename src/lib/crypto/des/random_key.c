@@ -19,11 +19,9 @@ static char des_ran_key_c[] =
 #include <sys/errno.h>
 
 #include <krb5/krb5.h>
-#include <krb5/des.h>
 #include <krb5/ext-proto.h>
 
-extern int des_new_random_key();
-
+#include "des_int.h"
 /*
         generate a random encryption key, allocating storage for it and
         filling in the keyblock address in *keyblock
@@ -38,13 +36,13 @@ OLDDECLARG(krb5_keyblock **, keyblock)
 
     if (!(randkey = (krb5_keyblock *)malloc(sizeof(*randkey))))
 	return ENOMEM;
-    if (!(randkey->contents = (krb5_octet *)malloc(sizeof(des_cblock)))) {
+    if (!(randkey->contents = (krb5_octet *)malloc(sizeof(mit_des_cblock)))) {
 	free((char *)randkey);
 	return ENOMEM;
     }
-    randkey->length = sizeof(des_cblock);
+    randkey->length = sizeof(mit_des_cblock);
     randkey->keytype = KEYTYPE_DES;
-    des_new_random_key(randkey->contents, (des_random_key_seed *) seed);
+    mit_des_new_random_key(randkey->contents, (mit_des_random_key_seed *) seed);
     *keyblock = randkey;
     return 0;
 }

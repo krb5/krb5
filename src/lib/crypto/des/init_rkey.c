@@ -19,11 +19,10 @@ static char des_inr_key_c[] =
 #include <sys/errno.h>
 
 #include <krb5/krb5.h>
-#include <krb5/des.h>
 #include <krb5/ext-proto.h>
 #include <krb5/krb5_err.h>
 
-extern void des_init_random_number_generator();
+#include "des_int.h"
 
 /*
         initialize the random key generator using the encryption key,
@@ -38,14 +37,14 @@ krb5_error_code mit_des_init_random_key (DECLARG(krb5_keyblock *,seedblock),
 OLDDECLARG(krb5_keyblock *,seedblock)
 OLDDECLARG(krb5_pointer *,seed)
 {
-    des_random_key_seed * p_seed;
+    mit_des_random_key_seed * p_seed;
     if (seedblock->keytype != KEYTYPE_DES)
 	return KRB5_BAD_KEYTYPE;	  /* XXX error code bad keytype */
-    if ( !(p_seed = (des_random_key_seed *) 
-	   malloc(sizeof(des_random_key_seed))) ) 
+    if ( !(p_seed = (mit_des_random_key_seed *) 
+	   malloc(sizeof(mit_des_random_key_seed))) ) 
 	return ENOMEM;
-    bzero( (char *)p_seed, sizeof(des_random_key_seed) );
-    des_init_random_number_generator(seedblock->contents, p_seed);
+    bzero( (char *)p_seed, sizeof(mit_des_random_key_seed) );
+    mit_des_init_random_number_generator(seedblock->contents, p_seed);
     *seed = (krb5_pointer) p_seed;
     return 0;
 }

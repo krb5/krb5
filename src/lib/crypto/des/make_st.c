@@ -10,14 +10,12 @@
 
 #include <mit-copyright.h>
 #include <stdio.h>
-#include "des_internal.h"
+#include <krb5/krb5.h>
+#include "des_int.h"
 #include "tables.h"
 
-extern unsigned long swap_bit_pos_0();
-extern unsigned long swap_six_bits_to_ansi();
-extern unsigned long swap_four_bits_to_ansi();
 char temp[8][64];
-int des_debug;
+int mit_des_debug;
 
 void gen(stream)
     FILE *stream;
@@ -45,7 +43,7 @@ void gen(stream)
             m = S[i][l];
             /* restore in host order */
             n = swap_four_bits_to_ansi(m);
-            if (des_debug)
+            if (mit_des_debug)
                 fprintf(stderr,
                 "i = %d, j = %d, k = %d, l = %d, m = %d, n = %d\n",
                         i,j,k,l,m,n);

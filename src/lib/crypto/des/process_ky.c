@@ -19,11 +19,11 @@ static char des_prc_key_c[] =
 #include <sys/errno.h>
 
 #include <krb5/krb5.h>
-#include <krb5/des.h>
 #include <krb5/ext-proto.h>
 #include <krb5/krb5_err.h>
 
-extern int des_key_sched();
+#include "des_int.h"
+
 /*
         does any necessary key preprocessing (such as computing key
                 schedules for DES).
@@ -43,16 +43,16 @@ krb5_error_code mit_des_process_key (DECLARG(krb5_encrypt_block *, eblock),
 OLDDECLARG(krb5_encrypt_block *, eblock)
 OLDDECLARG(krb5_keyblock *,keyblock)
 {
-    struct des_ks_struct       *schedule;      /* pointer to key schedules */
+    struct mit_des_ks_struct       *schedule;      /* pointer to key schedules */
     
-    if (keyblock->length != sizeof (des_cblock))
+    if (keyblock->length != sizeof (mit_des_cblock))
 	return KRB5_BAD_KEYSIZE;	/* XXX error code-bad key size */
 
-    if ( !(schedule = (struct des_ks_struct *) malloc(sizeof(des_key_schedule))) )
+    if ( !(schedule = (struct mit_des_ks_struct *) malloc(sizeof(mit_des_key_schedule))) )
         return ENOMEM;
 #define cleanup() { free( (char *) schedule); }
 
-    switch (des_key_sched (keyblock->contents, schedule)) {
+    switch (mit_des_key_sched (keyblock->contents, schedule)) {
     case -1:
 	cleanup();
 	return KRB5DES_BAD_KEYPAR;	/* XXX error code-bad key parity */

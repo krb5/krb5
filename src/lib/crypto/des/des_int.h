@@ -17,6 +17,7 @@
 
 #include <krb5/config.h>
 #include <krb5/osconf.h>
+#include <krb5/mit-des.h>
 
 /*
  * number of iterations of the inner
@@ -93,72 +94,90 @@ typedef struct {
 
 
 /* cbc_cksum.c */
-krb5_error_code mit_des_cbc_checksum
+extern krb5_error_code mit_des_cbc_checksum
     PROTOTYPE((krb5_pointer, size_t,krb5_pointer,size_t, krb5_checksum * ));
 
 /* cksum.c */
-void mit_des_cbc_cksum
+extern void mit_des_cbc_cksum
     PROTOTYPE((krb5_octet *, krb5_octet *, long , mit_des_key_schedule ,
 	       krb5_octet *));
 /* des.c */
-int des_ecb_encrypt
-    PROTOTYPE((unsigned long *, unsigned long *, des_key_schedule , int ));
+extern int mit_des_ecb_encrypt
+    PROTOTYPE((unsigned long *, unsigned long *, mit_des_key_schedule , int ));
 
 /* enc_dec.c */
-krb5_error_code mit_des_encrypt_func
+extern krb5_error_code mit_des_encrypt_func
     PROTOTYPE(( krb5_pointer, krb5_pointer, size_t, krb5_encrypt_block *,
 	       krb5_pointer ));
-krb5_error_code mit_des_decrypt_func
+extern krb5_error_code mit_des_decrypt_func
     PROTOTYPE(( krb5_pointer, krb5_pointer, size_t, krb5_encrypt_block *,
 	       krb5_pointer ));
-krb5_error_code mit_des_cbc_encrypt
+extern krb5_error_code mit_des_cbc_encrypt
     PROTOTYPE((krb5_octet *, krb5_octet *, long, mit_des_key_schedule,
 	       krb5_octet *, int));
 
 /* fin_rndkey.c */
-krb5_error_code mit_des_finish_random_key
+extern krb5_error_code mit_des_finish_random_key
     PROTOTYPE(( krb5_pointer *));
 
 /* finish_key.c */
-krb5_error_code mit_des_finish_key
+extern krb5_error_code mit_des_finish_key
     PROTOTYPE(( krb5_encrypt_block *));
 
 /* init_rkey.c */
-krb5_error_code mit_des_init_random_key
+extern krb5_error_code mit_des_init_random_key
     PROTOTYPE(( krb5_keyblock *,  krb5_pointer *));
 
 /* key_parity.c */
-void mit_des_fixup_key_parity PROTOTYPE((mit_des_cblock ));
-int mit_des_check_key_parity PROTOTYPE((mit_des_cblock ));
+extern void mit_des_fixup_key_parity PROTOTYPE((mit_des_cblock ));
+extern int mit_des_check_key_parity PROTOTYPE((mit_des_cblock ));
 
 /* key_sched.c */
-int mit_des_key_sched PROTOTYPE((mit_des_cblock , mit_des_key_schedule ));
+extern int mit_des_key_sched
+    PROTOTYPE((mit_des_cblock , mit_des_key_schedule ));
 
 /* new_rnd_key.c */
-int mit_des_new_random_key PROTOTYPE((mit_des_cblock , mit_des_random_key_seed *));
-void mit_des_init_random_number_generator
-    PROTOTYPE((mit_des_cblock, mit_des_random_key_seed));
-void mit_des_set_random_generator_seed
+extern int mit_des_new_random_key
     PROTOTYPE((mit_des_cblock , mit_des_random_key_seed *));
-void mit_des_set_sequence_number
+extern void mit_des_init_random_number_generator
+    PROTOTYPE((mit_des_cblock, mit_des_random_key_seed *));
+extern void mit_des_set_random_generator_seed
     PROTOTYPE((mit_des_cblock , mit_des_random_key_seed *));
-void mit_des_generate_random_block
+extern void mit_des_set_sequence_number
+    PROTOTYPE((mit_des_cblock , mit_des_random_key_seed *));
+extern void mit_des_generate_random_block
     PROTOTYPE((mit_des_cblock , mit_des_random_key_seed *));
 
 /* process_ky.c */
-krb5_error_code mit_des_process_key
+extern krb5_error_code mit_des_process_key
     PROTOTYPE(( krb5_encrypt_block *,  krb5_keyblock *));
 
 /* random_key.c */
-krb5_error_code mit_des_random_key
+extern krb5_error_code mit_des_random_key
     PROTOTYPE(( krb5_pointer ,  krb5_keyblock **));
 
 /* string2key.c */
-krb5_error_code mit_des_string_to_key
+extern krb5_error_code mit_des_string_to_key
     PROTOTYPE((krb5_keytype, krb5_keyblock *, krb5_data *, krb5_principal ));
 
 /* weak_key.c */
-int mit_des_is_weak_key PROTOTYPE((mit_des_cblock ));
+extern int mit_des_is_weak_key PROTOTYPE((mit_des_cblock ));
+
+/* misc.c */
+extern void swap_bits PROTOTYPE((char *));
+extern unsigned long long_swap_bits PROTOTYPE((unsigned long ));
+extern unsigned long swap_six_bits_to_ansi PROTOTYPE((unsigned long ));
+extern unsigned long swap_four_bits_to_ansi PROTOTYPE((unsigned long ));
+extern unsigned long swap_bit_pos_1 PROTOTYPE((unsigned long ));
+extern unsigned long swap_bit_pos_0 PROTOTYPE((unsigned long ));
+extern unsigned long swap_bit_pos_0_to_ansi PROTOTYPE((unsigned long ));
+extern unsigned long rev_swap_bit_pos_0 PROTOTYPE((unsigned long ));
+extern unsigned long swap_byte_bits PROTOTYPE((unsigned long ));
+extern unsigned long swap_long_bytes_bit_number PROTOTYPE((unsigned long ));
+#ifdef FILE
+/* XXX */
+extern void test_set PROTOTYPE((FILE *, const char *, int, const char *, int));
+#endif
 
 #undef P
 #endif	/*DES_INTERNAL_DEFS*/

@@ -12,7 +12,8 @@
  */
 
 #include <stdio.h>
-#include "des_internal.h"
+#include <krb5/krb5.h>
+#include "des_int.h"
 #include "tables.h"
 
 void gen(stream)

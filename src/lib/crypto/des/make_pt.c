@@ -11,11 +11,10 @@
 
 #include <mit-copyright.h>
 #include <stdio.h>
-#include "des_internal.h"
+#include <krb5/krb5.h>
+#include "des_int.h"
 #include "tables.h"
 
-extern unsigned long swap_byte_bits();
-extern unsigned long rev_swap_bit_pos_0();
 static unsigned char P_temp[32];
 static unsigned long P_prime[4][256];
 

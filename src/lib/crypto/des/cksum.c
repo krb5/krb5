@@ -30,12 +30,9 @@ static char rcsid_cksum_c[] =
 #include <strings.h>
 
 #include <krb5/krb5.h>
-#include <krb5/des.h>
-#include "des_internal.h"
+#include "des_int.h"
 
-extern int des_debug;
-extern int des_debug_print();
-extern int des_ecb_encrypt();
+extern int mit_des_debug;
 
 /*
  * This routine performs DES cipher-block-chaining checksum operation,
@@ -53,11 +50,11 @@ extern int des_ecb_encrypt();
  */
 
 void
-des_cbc_cksum(in,out,length,key,iv)
+mit_des_cbc_cksum(in,out,length,key,iv)
     krb5_octet  *in;		/* >= length bytes of inputtext */
     krb5_octet  *out;		/* >= length bytes of outputtext */
     register long length;	/* in bytes */
-    des_key_schedule key;		/* precomputed key schedule */
+    mit_des_key_schedule key;		/* precomputed key schedule */
     krb5_octet  *iv;		/* 8 bytes of ivec */
 {
     register unsigned long *input = (unsigned long *) in;
@@ -102,18 +99,18 @@ des_cbc_cksum(in,out,length,key,iv)
 		*(t_in_p+j)= 0;
 
 #ifdef DEBUG
-	if (des_debug)
-	    des_debug_print("clear",length,t_input[0],t_input[1]);
+	if (mit_des_debug)
+	    mit_des_debug_print("clear",length,t_input[0],t_input[1]);
 #endif
 	/* do the xor for cbc into the temp */
 	t_input[0] ^= t_output[0] ;
 	t_input[1] ^= t_output[1] ;
 	/* encrypt */
-	(void) des_ecb_encrypt(t_input,t_output,key,1);
+	(void) mit_des_ecb_encrypt(t_input,t_output,key,1);
 #ifdef DEBUG
-	if (des_debug) {
-	    des_debug_print("xor'ed",i,t_input[0],t_input[1]);
-	    des_debug_print("cipher",i,t_output[0],t_output[1]);
+	if (mit_des_debug) {
+	    mit_des_debug_print("xor'ed",i,t_input[0],t_input[1]);
+	    mit_des_debug_print("cipher",i,t_output[0],t_output[1]);
 	}
 #else
 #ifdef lint

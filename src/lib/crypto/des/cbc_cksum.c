@@ -30,10 +30,7 @@ static char des_cbc_checksum_c[] =
 #include <krb5/ext-proto.h>
 #include <krb5/krb5_err.h>
 
-#include <krb5/des.h>
-
-extern void des_cbc_cksum();
-extern int des_key_sched();
+#include "des_int.h"
 
 /*
 	produces cbc cheksum of sequence "in" of the length "in_length" 
@@ -56,19 +53,19 @@ OLDDECLARG(krb5_pointer, key)
 OLDDECLARG(size_t, key_size)
 OLDDECLARG(krb5_checksum *, cksum)
 {
-    struct des_ks_struct       *schedule;      /* pointer to key schedules */
+    struct mit_des_ks_struct       *schedule;      /* pointer to key schedules */
     krb5_octet 	*contents;
 
-    if (key_size != sizeof(des_cblock))
+    if (key_size != sizeof(mit_des_cblock))
 	return KRB5_BAD_KEYSIZE;
 
-    if (!(schedule = (struct des_ks_struct *) malloc(sizeof(des_key_schedule))))
+    if (!(schedule = (struct mit_des_ks_struct *) malloc(sizeof(mit_des_key_schedule))))
         return ENOMEM;
 
-#define cleanup() { bzero((char *)schedule, sizeof(des_key_schedule));\
+#define cleanup() { bzero((char *)schedule, sizeof(mit_des_key_schedule));\
 		    free( (char *) schedule); }
 
-    switch (des_key_sched ((krb5_octet *)key, schedule)) {
+    switch (mit_des_key_sched ((krb5_octet *)key, schedule)) {
     case -1:
         cleanup();
         return KRB5DES_BAD_KEYPAR;       /* XXX error code-bad key parity */
@@ -81,16 +78,16 @@ OLDDECLARG(krb5_checksum *, cksum)
         ;
     }
 
-    if (!(contents = (krb5_octet *) malloc(sizeof(des_cblock)))) {
+    if (!(contents = (krb5_octet *) malloc(sizeof(mit_des_cblock)))) {
 	cleanup();
         return ENOMEM;
     }
 
-    des_cbc_cksum((krb5_octet *)in, contents, in_length,
+    mit_des_cbc_cksum((krb5_octet *)in, contents, in_length,
 		  schedule, (krb5_octet *)key);
 
     cksum->checksum_type = CKSUMTYPE_DESCBC;
-    cksum->length = sizeof(des_cblock);
+    cksum->length = sizeof(mit_des_cblock);
     cksum->contents = contents;
     cleanup();
 

@@ -36,27 +36,22 @@ static char key_sched_c[] =
 #endif	/* !lint & !SABER */
 
 #include <mit-copyright.h>
-#include "des_internal.h"
 #include <stdio.h>
 
 #include <krb5/krb5.h>
-#include <krb5/des.h>
+#include "des_int.h"
 #include "key_perm.h"
 
-extern int des_debug;
-extern rev_swap_bit_pos_0();
-extern int des_check_key_parity();
-extern int des_is_weak_key();
+extern int mit_des_debug;
 
 typedef char key[64];
 /* the following are really void but cc86 doesnt allow it */
-void make_key_sched();
-
+static void make_key_sched PROTOTYPE((key, mit_des_key_schedule));
 
 int
-des_key_sched(k,schedule)
-    register des_cblock k;	/* r11 */
-    des_key_schedule schedule;
+mit_des_key_sched(k,schedule)
+    register mit_des_cblock k;	/* r11 */
+    mit_des_key_schedule schedule;
 {
     /* better pass 8 bytes, length not checked here */
 
@@ -72,17 +67,17 @@ des_key_sched(k,schedule)
     n = n;				/* fool it in case of VAXASM */
 #endif
 #ifdef DEBUG
-    if (des_debug)
+    if (mit_des_debug)
 	fprintf(stderr,"\n\ninput key, left to right = ");
 #endif
 
-    if (!des_check_key_parity(k))	/* bad parity --> return -1 */
+    if (!mit_des_check_key_parity(k))	/* bad parity --> return -1 */
 	return(-1);
 
     do {
 	/* get next input key byte */
 #ifdef DEBUG
-	if (des_debug)
+	if (mit_des_debug)
 	    fprintf(stderr,"%02x ",*k & 0xff);
 #endif
 	temp = (unsigned int) ((unsigned char) *k++);
@@ -100,7 +95,7 @@ des_key_sched(k,schedule)
     } while (--i > 0);
 
 #ifdef DEBUG
-    if (des_debug) {
+    if (mit_des_debug) {
 	p_char = k_char;
 	fprintf(stderr,"\nKey bits, from zero to 63");
 	for (i = 0; i <= 7; i++) {
@@ -116,9 +111,9 @@ des_key_sched(k,schedule)
 #endif
 
     /* check against weak keys */
-    k -= sizeof(des_cblock);
+    k -= sizeof(mit_des_cblock);
 
-    if (des_is_weak_key(k))
+    if (mit_des_is_weak_key(k))
 	return(-2);
 
     make_key_sched(k_char,schedule);
@@ -130,7 +125,7 @@ des_key_sched(k,schedule)
 static void
 make_key_sched(Key,Schedule)
     register key Key;		/* r11 */
-    des_key_schedule Schedule;
+    mit_des_key_schedule Schedule;
 {
     /*
      * The key has been converted to an array to make this run faster;
@@ -235,7 +230,7 @@ make_key_sched(Key,Schedule)
     } while (--iter > 0);
 
 #ifdef DEBUG
-    if (des_debug) {
+    if (mit_des_debug) {
 	char *n;
 	int q;
 	fprintf(stderr,"\nKey Schedule, left to right");

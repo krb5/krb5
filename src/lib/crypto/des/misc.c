@@ -19,8 +19,7 @@
 #include <krb5/krb5.h>
 #include <krb5/ext-proto.h>
 
-#include <krb5/des.h>
-#include "des_internal.h"
+#include "des_int.h"
 
 /*
  * The DES algorithm is defined in terms of MSBFIRST, so sometimes,
@@ -131,7 +130,7 @@ unsigned long swap_bit_pos_1(x)
      */
     register y,z;
 
-    /* always do it, only used by des_make_key_perm.c so far */
+    /* always do it, only used by mit_des_make_key_perm.c so far */
     y = (x-1)/8;
     z = (x-1)%8;
 
@@ -291,7 +290,7 @@ void test_set(stream, src, testbit, dest, setbit)
 }
 
 extern void gen PROTOTYPE((FILE *));
-int des_debug;
+int mit_des_debug;
 char const *whoami;
 
 void
@@ -310,7 +309,7 @@ main(argc, argv)
         arg = *argv;
         if (*arg == '-') {
             if (!strcmp(arg, "-d") && !strcmp(arg, "-debug"))
-                des_debug++;
+                mit_des_debug++;
             else {
                 fprintf(stderr, "%s: unknown control argument %s\n",
                         whoami, arg);

@@ -13,14 +13,10 @@
 
 #include <mit-copyright.h>
 #include <stdio.h>
-#include "des_internal.h"
+#include <krb5/krb5.h>
+#include "des_int.h"
 #include "tables.h"
 
-extern long swap_bit_pos_0();
-extern long rev_swap_bit_pos_0();
-extern void test_set();
-extern unsigned long swap_long_bytes_bit_number();
-unsigned long swap_bit_pos_0_to_ansi();
 
 #define SWAP(x) swap_long_bytes_bit_number(swap_bit_pos_0_to_ansi(x))
 
