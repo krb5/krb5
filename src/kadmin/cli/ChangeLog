@@ -1,3 +1,9 @@
+Mon Sep  9 11:14:23 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* kadmin.c: Fix the usage messages to state -randkey, not
+ 		-randpass, to conform with what the code (and man pages)
+ 		use.
+
 Thu Sep  5 20:15:12 1996  Ezra Peisach  (epeisach@mit.edu)
  
   	* getdate.y: Declare a private copy of struct timeb (no-one uses

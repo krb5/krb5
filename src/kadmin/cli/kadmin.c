@@ -650,7 +650,7 @@ void kadmin_cpw(argc, argv)
 	krb5_free_principal(context, princ);
    usage:
 	fprintf(stderr,
-		"usage: change_password [-randpass] [-pw passowrd] "
+		"usage: change_password [-randkey] [-pw passowrd] "
 		"principal\n");
 	return;
    }
@@ -820,7 +820,7 @@ void kadmin_addprinc_usage(func)
 {
      fprintf(stderr, "usage: %s [options] principal\n", func);
      fprintf(stderr, "\toptions are:\n");
-     fprintf(stderr, "\t\t[-expire expdate] [-pwexpire pwexpdate] [-maxlife maxtixlife]\n\t\t[-kvno kvno] [-policy policy] [-randpass] [-pw password]\n\t\t[-maxrenewlife maxrenewlife] [{+|-}attribute]\n");
+     fprintf(stderr, "\t\t[-expire expdate] [-pwexpire pwexpdate] [-maxlife maxtixlife]\n\t\t[-kvno kvno] [-policy policy] [-randkey] [-pw password]\n\t\t[-maxrenewlife maxrenewlife] [{+|-}attribute]\n");
      fprintf(stderr, "\tattributes are:\n");
      fprintf(stderr, "%s%s%s",
 	     "\t\tallow_postdated allow_forwardable allow_tgs_req allow_renewable\n",
