@@ -1,0 +1,3 @@
+./util/autoconf/autoconf --recur --macrodir=util/autoconf
+cd include/krb5
+../../util/autoconf/autoheader --macrodir=../../util/autoconf
