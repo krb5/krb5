@@ -161,12 +161,18 @@ OLDDECLARG(krb5_ccache, ccache)
     creds->is_skey = FALSE;		/* this is an AS_REQ, so cannot
 					   be encrypted in skey */
     creds->ticket_flags = as_reply->enc_part2->flags;
+    if (retval = krb5_copy_addresses(dec_rep->enc_part2->caddrs,
+				     &cred->addresses)) {
+	cleanup_key();
+	return retval;
+    }
     creds->second_ticket.length = 0;
     creds->second_ticket.data = 0;
 
     retval = encode_krb5_ticket(as_reply->ticket, &packet);
     krb5_free_kdc_rep(as_reply);
     if (retval) {
+	krb5_free_address(creds->addresses);
 	cleanup_key();
 	return retval;
     }	
@@ -177,6 +183,7 @@ OLDDECLARG(krb5_ccache, ccache)
     if (retval = krb5_cc_store_cred(ccache, creds)) {
 	/* clean up the pieces */
 	free((char *)creds->ticket.data);
+	krb5_free_address(creds->addresses);
 	cleanup_key();
 	return retval;
     }
