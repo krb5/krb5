@@ -427,7 +427,7 @@ InstallProgramWithFlags(program,dest, /**/)
 #ifndef InstallScript
 #define	InstallScript(program,dest)					@@\
 install:: program.script						@@\
-	$(INSTALL) -c $(INSTPGMFLAGS) program.script dest/program
+	$(INSTALL) -c $(INSTSCRFLAGS) program.script dest/program
 #endif /* InstallScript */
 
 
