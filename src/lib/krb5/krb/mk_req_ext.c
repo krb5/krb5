@@ -175,6 +175,6 @@ const krb5_creds *creds;
 const krb5_checksum *cksum;
 {
     authent->client = creds->client;
-    authent->checksum = cksum;
+    authent->checksum = (krb5_checksum *)cksum;
     return(krb5_ms_timeofday(&authent->ctime, &authent->cmsec));
 }
