@@ -1655,9 +1655,8 @@ To add Kerberos V4 support, add @code{des-cbc-crc:v4} to the
 @node Encryption Types and Salt Types,  , kdc.conf, kdc.conf
 @appendixsubsec Encryption Types and Salt Types
 
-Currently, @value{PRODUCT} supports only DES and triple-DES encryption;
-however, triple-DES is currently supported only for service keys, not
-for user keys or session keys.  The encoding types include
+Currently, @value{PRODUCT} supports only DES and triple-DES encryption.
+The encoding types include
 @code{des-cbc-crc} and @code{des3-cbc-sha1}.  The @dfn{salt} is
 additional information encoded within the key that tells what kind of
 key it is.  The only salts that you will be likely to encounter are:
@@ -1667,15 +1666,12 @@ key it is.  The only salts that you will be likely to encounter are:
 your @value{PRODUCT} keys
 
 @item @dfn{v4}, which is necessary only for compatibility with a v4 KDC
+or a v4 version of @code{kinit}, and then only with @code{des-cbc-crc}
+encryption
 
 @item @dfn{afs}, which you will never need to generate, and which you will
 encounter only if you dump an AFS database into a Kerberos database
 @end itemize
-
-For best compatibility with Microsoft Kerberos clients, the
-@code{normal} salt type should be listed ahead of other salt types for
-the same encryption type in the KDC config file and (when specified) on
-the @code{kadmin} command line.
 
 Support for additional encryption types is planned in the future.
 

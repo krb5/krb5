@@ -330,8 +330,8 @@ in the Kerberos build. This option is only supported on certain
 platforms. 
 
 @item --enable-dns
-@itemx --enable-dns-for-kdc
-@itemx --enable-dns-for-realm
+@item --enable-dns-for-kdc
+@item --enable-dns-for-realm
 
 Enable the use of DNS to look up a host's Kerberos realm, or a realm's
 KDCs, if the information is not provided in krb5.conf.  See

@@ -1,3 +1,14 @@
+2000-06-16  Ken Raeburn  <raeburn@mit.edu>
+
+	* admin.texinfo: Update descriptions to indicate full support for
+	des3.  Describe new DNS-related libdefaults tags for krb5.conf.
+
+	* build.texinfo (Options to Configure): Fix @item labels.
+
+	* install.texinfo: Update descriptions to indicate full support
+	for des3, and describe "v4" salt as being useful only with
+	des-cbc-crc.
+
 2000-06-15  Tom Yu  <tlyu@mit.edu>
 
 	* admin.texinfo: Note in multiple places that the current default
