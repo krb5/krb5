@@ -129,8 +129,6 @@ static int preauth_search_list[] = {
      -1
 };
 
-static const krb5_enctype *enctypes = 0;
-
 static kadm5_ret_t _kadm5_init_any(char *client_name,
 				   enum init_type init_type,
 				   char *pass,
@@ -361,7 +359,7 @@ static kadm5_ret_t _kadm5_init_any(char *client_name,
 	       code = krb5_get_in_tkt_with_password(handle->context,
 						    0, /* no options */
 						    0, /* default addresses */
-						    enctypes,
+						    0,	  /* enctypes */
 						    NULL, /* XXX preauth */
 						    pass,
 						    ccache,
@@ -382,7 +380,7 @@ static kadm5_ret_t _kadm5_init_any(char *client_name,
 		    code = krb5_get_in_tkt_with_keytab(handle->context,
 						       0, /* no options */
 						       0, /* default addrs */
-						       enctypes,
+						       0,    /* enctypes */
 						       NULL, /* XXX preauth */
 						       kt,
 						       ccache,
