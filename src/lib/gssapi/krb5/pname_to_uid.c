@@ -28,8 +28,8 @@ uid_t * uid;
 	struct passwd	*pw;
 	char		*pname_copy, *prefix, *suffix, *default_realm = NULL,
 			*temp;
-	unsigned char	krb5principalname[] =
-			  {"\052\206\110\206\367\022\001\002\002\001"};
+	static unsigned char	krb5principalname[] =
+	{"\052\206\110\206\367\022\001\002\002\001"};
 
 /*
  * check that the name_type is the Kerberos Principal Name form

@@ -1,3 +1,9 @@
+Wed Jan 24 20:46:37 1996  Tom Yu  <tlyu@dragons-lair.MIT.EDU>
+
+	* pname_to_uid.c (krb5_pname_to_uid): Changed def'n of
+		krb5principalname to static so K&R compilers won't lose on
+		automatic aggregate initialization.
+
 Wed Jan 24 13:21:37 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* import_name.c (krb5_gss_import_name): Don't assume that the
