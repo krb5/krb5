@@ -46,26 +46,18 @@ static errcode_t rw_setup(profile_t profile)
 	    return 0;
 	}
 
-#ifdef SHARE_TREE_DATA
 	if ((file->data->flags & PROFILE_FILE_SHARED) != 0) {
 	    prf_data_t new_data;
-	    new_data = malloc(sizeof(struct _prf_data_t));
+	    new_data = profile_make_prf_data(file->data->filespec);
 	    if (new_data == NULL) {
 		retval = ENOMEM;
 	    } else {
-		*new_data = *file->data;
-		/* We can blow away the information because update
-		   will be called further down */
-		new_data->comment = NULL;
-		new_data->root = NULL;
-		new_data->flags &= ~PROFILE_FILE_SHARED;
-		new_data->timestamp = 0;
-		/* copy the file spec */
-		new_data->filespec = malloc(strlen(file->data->filespec) + 1);
-		if (new_data->filespec == NULL) {
-		    retval = ENOMEM;
-		} else {
-		    strcpy (new_data->filespec, file->data->filespec);
+		retval = k5_mutex_init(&new_data->lock);
+		if (retval == 0) {
+		    new_data->root = NULL;
+		    new_data->flags = file->data->flags & ~PROFILE_FILE_SHARED;
+		    new_data->timestamp = 0;
+		    new_data->upd_serial = file->data->upd_serial;
 		}
 	    }
 
@@ -77,7 +69,6 @@ static errcode_t rw_setup(profile_t profile)
 	    profile_dereference_data_locked(file->data);
 	    file->data = new_data;
 	}
-#endif /* SHARE_TREE_DATA */
 
 	profile_unlock_global();
 	retval = profile_update_file(file);

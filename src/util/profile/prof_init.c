@@ -176,8 +176,7 @@ errcode_t profile_ser_size(const char *unused, profile_t profile,
     required = 3*sizeof(prof_int32);
     for (pfp = profile->first_file; pfp; pfp = pfp->next) {
 	required += sizeof(prof_int32);
-	if (pfp->data->filespec)
-	    required += strlen(pfp->data->filespec);
+	required += strlen(pfp->data->filespec);
     }
     *sizep += required;
     return 0;
@@ -217,8 +216,7 @@ errcode_t profile_ser_externalize(const char *unused, profile_t profile,
 	    pack_int32(PROF_MAGIC_PROFILE, &bp, &remain);
 	    pack_int32(fcount, &bp, &remain);
 	    for (pfp = profile->first_file; pfp; pfp = pfp->next) {
-		slen = (pfp->data->filespec) ?
-		    (prof_int32) strlen(pfp->data->filespec) : 0;
+		slen = (prof_int32) strlen(pfp->data->filespec);
 		pack_int32(slen, &bp, &remain);
 		if (slen) {
 		    memcpy(bp, pfp->data->filespec, (size_t) slen);

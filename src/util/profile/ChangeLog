@@ -1,3 +1,25 @@
+2004-10-15  Ken Raeburn  <raeburn@mit.edu>
+
+	* prof_file.c, prof_int.h, prof_set.c: Remove support for
+	non-SHARE_TREE_DATA case.
+	* prof_int.h (struct _prf_data_t): Change filespec to a trailing
+	char array.  Add a length field for the filespec.
+	(profile_make_prf_data): Declare.
+	(profile_lock_global, profile_unlock_global): Prototypes need
+	argument lists.
+	* prof_file.c: Include stddef.h.
+	(scan_shared_trees_locked, scan_shared_trees_unlocked): New
+	functions.
+	(r_access, rw_access): Now take const_profile_filespec_t arg.
+	(profile_make_prf_data): New function.
+	(profile_open_file): Scan trees at beginning and end.  Use
+	profile_make_prf_data to allocate and initialize storage.
+	(profile_dereference_data, profile_free_file_data): Scan trees.
+	(profile_ser_size, profile_ser_externalize): Filespec is never
+	null.
+	* prof_set.c (rw_setup): Use profile_make_prf_data to allocate
+	and initialize storage.
+
 2004-10-13  Alexandra Ellwood  <lxs@mit.edu>
 
         * prof_file.c (profile_library_initializer, 

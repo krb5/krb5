@@ -10,10 +10,6 @@
 #define PROFILE_SUPPORTS_FOREIGN_NEWLINES
 #endif
 
-/* N.B.: The locking code for the non-sharing case is not complete.
-   Be sure to fix it if you turn off this flag.  */
-#define SHARE_TREE_DATA
-
 #include "k5-thread.h"
 #include "com_err.h"
 #include "profile.h"
@@ -39,24 +35,25 @@ struct _prf_data_t {
 	prf_magic_t	magic;
 	k5_mutex_t	lock;
 	char		*comment;
-	profile_filespec_t filespec;
 	struct profile_node *root;
 	time_t		timestamp; /* time tree was last updated from file */
 	int		flags;	/* r/w, dirty */
 	int		upd_serial; /* incremented when data changes */
 	int		refcount; /* prf_file_t references */
 	struct _prf_data_t *next;
+	/* Was: "profile_filespec_t filespec".  Now: flexible char
+	   array ... except, we need to work in C89, so an array
+	   length must be specified.  */
+	size_t		fslen;
+	const char	filespec[sizeof("/etc/krb5.conf")];
 };
 
 typedef struct _prf_data_t *prf_data_t;
+prf_data_t profile_make_prf_data(const char *);
 
 struct _prf_file_t {
 	prf_magic_t	magic;
-#ifdef SHARE_TREE_DATA
 	struct _prf_data_t	*data;
-#else
-	struct _prf_data_t	data[1];
-#endif
 	struct _prf_file_t *next;
 };
 
@@ -201,8 +198,8 @@ errcode_t profile_close_file
 void profile_dereference_data (prf_data_t);
 void profile_dereference_data_locked (prf_data_t);
 
-int profile_lock_global();
-int profile_unlock_global();
+int profile_lock_global (void);
+int profile_unlock_global (void);
 
 /* prof_init.c -- included from profile.h */
 errcode_t profile_ser_size
