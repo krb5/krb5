@@ -12,6 +12,18 @@ struct cprinc_arg {
 typedef struct cprinc_arg cprinc_arg;
 bool_t xdr_cprinc_arg();
 
+struct cprinc3_arg {
+	krb5_ui_4 api_version;
+	kadm5_principal_ent_rec rec;
+	long mask;
+	krb5_boolean keepold;
+	int n_ks_tuple;
+	krb5_key_salt_tuple *ks_tuple;
+	char *passwd;
+};
+typedef struct cprinc3_arg cprinc3_arg;
+bool_t xdr_cprinc3_arg();
+
 struct generic_ret {
 	krb5_ui_4 api_version;
 	kadm5_ret_t code;
@@ -66,6 +78,17 @@ struct chpass_arg {
 typedef struct chpass_arg chpass_arg;
 bool_t xdr_chpass_arg();
 
+struct chpass3_arg {
+	krb5_ui_4 api_version;
+	krb5_principal princ;
+	krb5_boolean keepold;
+	int n_ks_tuple;
+	krb5_key_salt_tuple *ks_tuple;
+	char *pass;
+};
+typedef struct chpass3_arg chpass3_arg;
+bool_t xdr_chpass3_arg();
+
 struct setv4key_arg {
 	krb5_ui_4 api_version;
 	krb5_principal princ;
@@ -83,12 +106,34 @@ struct setkey_arg {
 typedef struct setkey_arg setkey_arg;
 bool_t xdr_setkey_arg();
 
+struct setkey3_arg {
+	krb5_ui_4 api_version;
+	krb5_principal princ;
+	krb5_boolean keepold;
+	int n_ks_tuple;
+	krb5_key_salt_tuple *ks_tuple;
+        krb5_keyblock *keyblocks;
+        int n_keys;
+};
+typedef struct setkey3_arg setkey3_arg;
+bool_t xdr_setkey3_arg();
+
 struct chrand_arg {
 	krb5_ui_4 api_version;
 	krb5_principal princ;
 };
 typedef struct chrand_arg chrand_arg;
 bool_t xdr_chrand_arg();
+
+struct chrand3_arg {
+	krb5_ui_4 api_version;
+	krb5_principal princ;
+	krb5_boolean keepold;
+	int n_ks_tuple;
+	krb5_key_salt_tuple *ks_tuple;
+};
+typedef struct chrand3_arg chrand3_arg;
+bool_t xdr_chrand3_arg();
 
 struct chrand_ret {
 	krb5_ui_4 api_version;
@@ -223,3 +268,11 @@ extern gpols_ret *get_pols_1();
 extern generic_ret *setkey_principal_1();
 #define SETV4KEY_PRINCIPAL ((krb5_ui_4) 17)
 extern generic_ret *setv4key_principal_1();
+#define CREATE_PRINCIPAL3 ((krb5_ui_4) 18)
+extern generic_ret *create_principal3_1();
+#define CHPASS_PRINCIPAL3 ((krb5_ui_4) 19)
+extern generic_ret *chpass_principal3_1();
+#define CHRAND_PRINCIPAL3 ((krb5_ui_4) 20)
+extern chrand_ret *chrand_principal3_1();
+#define SETKEY_PRINCIPAL3 ((krb5_ui_4) 21)
+extern generic_ret *setkey_principal3_1();

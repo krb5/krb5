@@ -22,6 +22,20 @@ create_principal_1(argp, clnt)
 }
 
 generic_ret *
+create_principal3_1(argp, clnt)
+	cprinc_arg *argp;
+	CLIENT *clnt;
+{
+	static generic_ret res;
+
+	memset((char *)&res, 0, sizeof(res));
+	if (clnt_call(clnt, CREATE_PRINCIPAL3, xdr_cprinc3_arg, argp, xdr_generic_ret, &res, TIMEOUT) != RPC_SUCCESS) {
+		return (NULL);
+	}
+	return (&res);
+}
+
+generic_ret *
 delete_principal_1(argp, clnt)
 	dprinc_arg *argp;
 	CLIENT *clnt;
@@ -107,6 +121,20 @@ chpass_principal_1(argp, clnt)
 }
 
 generic_ret *
+chpass_principal3_1(argp, clnt)
+	chpass_arg *argp;
+	CLIENT *clnt;
+{
+	static generic_ret res;
+
+	memset((char *)&res, 0, sizeof(res));
+	if (clnt_call(clnt, CHPASS_PRINCIPAL3, xdr_chpass3_arg, argp, xdr_generic_ret, &res, TIMEOUT) != RPC_SUCCESS) {
+		return (NULL);
+	}
+	return (&res);
+}
+
+generic_ret *
 setv4key_principal_1(argp, clnt)
 	setv4key_arg *argp;
 	CLIENT *clnt;
@@ -134,6 +162,20 @@ setkey_principal_1(argp, clnt)
 	return (&res);
 }
 
+generic_ret *
+setkey_principal3_1(argp, clnt)
+	setkey_arg *argp;
+	CLIENT *clnt;
+{
+	static generic_ret res;
+
+	memset((char *)&res, 0, sizeof(res));
+	if (clnt_call(clnt, SETKEY_PRINCIPAL3, xdr_setkey3_arg, argp, xdr_generic_ret, &res, TIMEOUT) != RPC_SUCCESS) {
+		return (NULL);
+	}
+	return (&res);
+}
+
 chrand_ret *
 chrand_principal_1(argp, clnt)
 	chrand_arg *argp;
@@ -143,6 +185,20 @@ chrand_principal_1(argp, clnt)
 
 	memset((char *)&res, 0, sizeof(res));
 	if (clnt_call(clnt, CHRAND_PRINCIPAL, xdr_chrand_arg, argp, xdr_chrand_ret, &res, TIMEOUT) != RPC_SUCCESS) {
+		return (NULL);
+	}
+	return (&res);
+}
+
+chrand_ret *
+chrand_principal3_1(argp, clnt)
+	chrand_arg *argp;
+	CLIENT *clnt;
+{
+	static chrand_ret res;
+
+	memset((char *)&res, 0, sizeof(res));
+	if (clnt_call(clnt, CHRAND_PRINCIPAL3, xdr_chrand3_arg, argp, xdr_chrand_ret, &res, TIMEOUT) != RPC_SUCCESS) {
 		return (NULL);
 	}
 	return (&res);

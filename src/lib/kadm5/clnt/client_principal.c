@@ -72,6 +72,68 @@ kadm5_create_principal(void *server_handle,
 }
 
 kadm5_ret_t
+kadm5_create_principal_3(void *server_handle,
+			 kadm5_principal_ent_t princ, long mask,
+			 krb5_boolean keepold, int n_ks_tuple,
+			 krb5_key_salt_tuple *ks_tuple,
+			 char *pw)
+{
+    generic_ret		*r;
+    cprinc3_arg		arg;
+    kadm5_server_handle_t handle = server_handle;
+
+    CHECK_HANDLE(server_handle);
+
+    memset(&arg, 0, sizeof(arg));
+    arg.mask = mask;
+    arg.passwd = pw;
+    arg.api_version = handle->api_version;
+    arg.keepold = keepold;
+    arg.n_ks_tuple = n_ks_tuple;
+    arg.ks_tuple = ks_tuple;
+
+    if(princ == NULL)
+	return EINVAL;
+
+    if (handle->api_version == KADM5_API_VERSION_1) {
+       memcpy(&arg.rec, princ, sizeof(kadm5_principal_ent_rec_v1));
+    } else {
+       memcpy(&arg.rec, princ, sizeof(kadm5_principal_ent_rec));
+    }
+    if (handle->api_version == KADM5_API_VERSION_1) {
+	 /*
+	  * hack hack cough cough.
+	  * krb5_unparse name dumps core if we pass it in garbage
+	  * or null. So, since the client is not allowed to set mod_name
+	  * anyway, we just fill it in with a dummy principal. The server of
+	  * course ignores this.
+	  */
+	 krb5_parse_name(handle->context, "bogus/bogus", &arg.rec.mod_name);
+    } else
+	 arg.rec.mod_name = NULL;
+    
+    if(!(mask & KADM5_POLICY))
+	arg.rec.policy = NULL;
+    if (! (mask & KADM5_KEY_DATA)) {
+	 arg.rec.n_key_data = 0;
+	 arg.rec.key_data = NULL;
+    }
+    if (! (mask & KADM5_TL_DATA)) {
+	 arg.rec.n_tl_data = 0;
+	 arg.rec.tl_data = NULL;
+    }
+	 
+    r = create_principal3_1(&arg, handle->clnt);
+
+    if (handle->api_version == KADM5_API_VERSION_1)
+	 krb5_free_principal(handle->context, arg.rec.mod_name);
+
+    if(r == NULL)
+	return KADM5_RPC_ERROR;
+    return r->code;
+}
+
+kadm5_ret_t
 kadm5_delete_principal(void *server_handle, krb5_principal principal)
 {
     dprinc_arg		arg;
@@ -262,6 +324,33 @@ kadm5_chpass_principal(void *server_handle,
 }
 
 kadm5_ret_t
+kadm5_chpass_principal_3(void *server_handle,
+			 krb5_principal princ, krb5_boolean keepold,
+			 int n_ks_tuple, krb5_key_salt_tuple *ks_tuple,
+			 char *password)
+{
+    chpass3_arg		arg;
+    generic_ret		*r;
+    kadm5_server_handle_t handle = server_handle;
+
+    CHECK_HANDLE(server_handle);
+
+    arg.princ = princ;
+    arg.pass = password;
+    arg.api_version = handle->api_version;
+    arg.keepold = keepold;
+    arg.n_ks_tuple = n_ks_tuple;
+    arg.ks_tuple = ks_tuple;
+
+    if(princ == NULL)
+	return EINVAL;
+    r = chpass_principal3_1(&arg, handle->clnt);
+    if(r == NULL)
+	return KADM5_RPC_ERROR;        
+    return r->code;
+}
+
+kadm5_ret_t
 kadm5_setv4key_principal(void *server_handle,
 			 krb5_principal princ,
 			 krb5_keyblock *keyblock)
@@ -306,6 +395,90 @@ kadm5_setkey_principal(void *server_handle,
     r = setkey_principal_1(&arg, handle->clnt);
     if(r == NULL)
 	return KADM5_RPC_ERROR;        
+    return r->code;
+}
+
+kadm5_ret_t
+kadm5_setkey_principal_3(void *server_handle,
+			 krb5_principal princ,
+			 krb5_boolean keepold, int n_ks_tuple,
+			 krb5_key_salt_tuple *ks_tuple,
+			 krb5_keyblock *keyblocks,
+			 int n_keys)
+{
+    setkey3_arg		arg;
+    generic_ret		*r;
+    kadm5_server_handle_t handle = server_handle;
+
+    CHECK_HANDLE(server_handle);
+
+    arg.princ = princ;
+    arg.keyblocks = keyblocks;
+    arg.n_keys = n_keys;
+    arg.api_version = handle->api_version;
+    arg.keepold = keepold;
+    arg.n_ks_tuple = n_ks_tuple;
+    arg.ks_tuple = ks_tuple;
+
+    if(princ == NULL || keyblocks == NULL)
+	return EINVAL;
+    r = setkey_principal3_1(&arg, handle->clnt);
+    if(r == NULL)
+	return KADM5_RPC_ERROR;        
+    return r->code;
+}
+
+kadm5_ret_t
+kadm5_randkey_principal_3(void *server_handle,
+			  krb5_principal princ,
+			  krb5_boolean keepold, int n_ks_tuple,
+			  krb5_key_salt_tuple *ks_tuple,
+			  krb5_keyblock **key, int *n_keys)
+{
+    chrand3_arg		arg;
+    chrand_ret		*r;
+    krb5_keyblock	new;
+    kadm5_server_handle_t handle = server_handle;
+    int			i, ret;
+
+    CHECK_HANDLE(server_handle);
+
+    arg.princ = princ;
+    arg.api_version = handle->api_version;
+    arg.keepold = keepold;
+    arg.n_ks_tuple = n_ks_tuple;
+    arg.ks_tuple = ks_tuple;
+
+    if(princ == NULL)
+	return EINVAL;
+    r = chrand_principal3_1(&arg, handle->clnt);
+    if(r == NULL)
+	return KADM5_RPC_ERROR;
+    if (handle->api_version == KADM5_API_VERSION_1) {
+	 if (key)
+	      krb5_copy_keyblock(handle->context, &r->key, key);
+    } else {
+	 if (n_keys)
+	      *n_keys = r->n_keys;
+	 if (key) {
+	      if(r->n_keys) {
+		      *key = (krb5_keyblock *) 
+			      malloc(r->n_keys*sizeof(krb5_keyblock));
+		      if (*key == NULL)
+			      return ENOMEM;
+		      for (i = 0; i < r->n_keys; i++) {
+			      ret = krb5_copy_keyblock_contents(handle->context,
+								&r->keys[i],
+								&(*key)[i]);
+			      if (ret) {
+				      free(*key);
+				      return ENOMEM;
+			      }
+		      }
+	      } else *key = NULL;
+         }
+    }
+
     return r->code;
 }
 

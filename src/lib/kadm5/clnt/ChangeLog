@@ -1,3 +1,10 @@
+2000-02-13  Tom Yu  <tlyu@mit.edu>
+
+	* client_rpc.c: Add new client stubs.
+
+	* client_principal.c: Add new functions for client-side kadm rpc
+	calls.
+
 2000-01-27  Ken Raeburn  <raeburn@raeburn.org>
 
 	* client_init.c (enctypes): New array, listing only

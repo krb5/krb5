@@ -58,3 +58,4 @@ error_code KADM5_AUTH_SETKEY, "Operation requires ``set-key'' privilege"
 error_code KADM5_SETKEY_DUP_ENCTYPES, "Multiple values for single or folded enctype"
 error_code KADM5_SETV4KEY_INVAL_ENCTYPE, "Invalid enctype for setv4key"
 end
+error_code KADM5_SETKEY3_ETYPE_MISMATCH, "Mismatched enctypes for setkey3"
