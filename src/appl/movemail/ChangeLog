@@ -1,3 +1,8 @@
+Tue Jun 20 13:09:51 1995  Tom Yu  (tlyu@dragons-lair)
+
+	* movemail.c: USE_STRING_H -> HAVE_STRING_H; fix HAVE_STLIB_H to
+	dtrt.
+	* configure.in: added missing tests for string.h and stdlib.h
 
 Thu Jun 15 17:37:08 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in - Change explicit library names to -l<lib> form, and

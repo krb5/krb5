@@ -84,22 +84,15 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <sys/locking.h>
 #endif
 
-#ifdef HAS_STDLIB_H
+#ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #else
-#ifdef __STDC__
-#ifdef NO_STDLIB_H
-#include <fake-stdlib.h>
-#else
-#include <stdlib.h>
-#endif /* NO_STDLIB_H */
 #else
 extern char *malloc(), *realloc(), *calloc();
 extern char *getenv();
-#endif /* ! __STDC__ */
-#endif /* HAS_STDLIB_H */
+#endif /* HAVE_STDLIB_H */
 
-#ifdef USE_STRING_H
+#ifdef HAVE_STRING_H
 #include <string.h>
 #else
 #include <strings.h>
