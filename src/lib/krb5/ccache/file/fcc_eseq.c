@@ -1,0 +1,45 @@
+/*
+ * $Source$
+ * $Author$
+ *
+ * Copyright 1990 by the Massachusetts Institute of Technology.
+ *
+ * For copying and distribution information, please see the file
+ * <krb5/mit-copyright.h>.
+ *
+ * This file contains the source code for krb5_fcc_end_seq_get.
+ */
+
+#ifndef	lint
+static char fcc_eseq_c[] = "$Id$";
+#endif	lint
+
+#include <krb5/copyright.h>
+#include "fcc.h"
+
+/*
+ * Requires:
+ * cursor is a krb5_cc_cursor originally obtained from
+ * krb5_fcc_start_seq_get.
+ *
+ * Modifies:
+ * id, cursor
+ *
+ * Effects:
+ * Finishes sequential processing of the file credentials ccache id,
+ * and invalidates the cursor (it must never be used after this call).
+ */
+krb5_error
+krb5_fcc_end_seq_get(krb5_ccache id, krb5_cc_cursor *cursor)
+{
+#ifdef OPENCLOSE
+#else
+     close(id->data->fd);
+#endif
+
+     free((krb5_fcc_cursor) cursor);
+
+     return KRB5_OK;
+}
+
+
