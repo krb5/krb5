@@ -1,3 +1,7 @@
+Thu Apr 20 12:16:50 1995 Keith Vetter (keithv@fusion.com)
+
+	* win_glue.c: include k5-int.h instead of krb5.h.
+
 Mon Apr 17 17:47:07 1995 Keith Vetter (keithv@fusion.com)
 
 	* Makefile.in: forgot about the rule to make gssapi.lib on the PC.

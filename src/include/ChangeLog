@@ -1,3 +1,7 @@
+Thu Apr 20 12:15:54 1995 Keith Vetter (keithv@fusion.com)
+
+	* krb5.h: Needs SIZEOF_INT, SIZEOF_LONG defined for the PC.
+
 Wed Apr 29 10:00:00 1995 Keith Vetter (keithv@fusion.com)
 
 	* Makefile.in: duplicated the file copying stuff from 

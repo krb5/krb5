@@ -11,7 +11,7 @@
 
 /* We can't include winsock.h directly because of /Za (stdc) options */
 #define NEED_SOCKETS
-#include "krb5.h"
+#include "k5-int.h"
 
 int
 win_socket_initialize()

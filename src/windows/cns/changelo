@@ -1,3 +1,10 @@
+Thu Apr 20 12:17:34 1995 Keith Vetter (keithv@fusion.com)
+
+	* cns.c, tktlist.c, krbini.h: Fixed up #include so it
+	   it only relies on krb5.h. We now include winsock 
+	   ourselves and we needed to pull one constant out of
+	   k5-config.h (INI_KRB_CCACHE).
+
 Tue Apr 18 16:19:07 1995 Keith Vetter (keithv@fusion.com)
 
 	* makefile: better compile flags.

@@ -1,3 +1,7 @@
+Thu Apr 20 12:45:07 1995 Keith Vetter (keithv@fusion.com)
+
+	* Makefile.in: bug that makefiles were always being reconfigured.
+
 Wed Apr 19 18:32:04 1995 Keith Vetter (keithv@fusion.com)
 
 	* Makefile.in: 

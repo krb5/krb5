@@ -34,7 +34,7 @@
 #endif
 
 #ifdef KRB5
-	#define	NEED_SOCKETS
+	#include "winsock.h"
 	#include "krb5.h"
 	#include "krbini.h"
 	#include "com_err.h"

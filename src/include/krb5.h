@@ -33,6 +33,10 @@
 #endif
 
 #ifdef _MSDOS
+
+#define SIZEOF_INT      2
+#define SIZEOF_LONG     4
+
 #ifndef KRB5_CONFIG__
 #define KRB5_PROVIDE_PROTOTYPES
 #define HAS_VOID_TYPE

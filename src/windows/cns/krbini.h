@@ -21,3 +21,4 @@
 #define DEF_KRB_REALMS  "krb.rea"         /* Default name for krb.realms file */
 #define INI_RECENT_LOGINS "Recent Logins"    
 #define INI_LOGIN       "Login"
+#define INI_KRB_CCACHE  "krb5cc"       	/* From k5-config.h */
