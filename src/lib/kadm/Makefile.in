@@ -4,9 +4,17 @@ LDFLAGS = -g
 all:: $(OBJS)
 
 OBJS=	adm_conn.o	\
+	adm_kw_dec.o	\
+	adm_kw_enc.o	\
+	adm_kt_dec.o	\
+	adm_kt_enc.o	\
 	adm_rw.o
 
 SRCS=	$(srcdir)/adm_conn.c	\
+	$(srcdir)/adm_kw_dec.c	\
+	$(srcdir)/adm_kw_enc.c	\
+	$(srcdir)/adm_kt_dec.c	\
+	$(srcdir)/adm_kt_enc.c	\
 	$(srcdir)/adm_rw.c
 
 libkadm.a: ${OBJS}

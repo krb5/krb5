@@ -1,4 +1,12 @@
 
+Tue May 9 15:21:49 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* adm_conn.c	- use profile information to locate the admin_server.
+			  Also, return the correct value from krb5_adm_connect
+			  instead of always returning zero.
+	* adm_{kw,kt}_{enc,dec}.c - New modules to [en/de]code administrative
+			  protocol keyword=value pairs and keytab entries.
+
+
 Fri Apr 28 09:47:29 EDT 1995	Paul Park	(pjpark@mit.edu)
 
 	Create a new library consisting of functions which communicate with
