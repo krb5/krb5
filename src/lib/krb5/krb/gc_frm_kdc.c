@@ -151,7 +151,7 @@ krb5_get_cred_from_kdc (ccache, cred, tgts)
 					       &tgtq))
 		goto out;
 	    /* save tgt in return array */
-	    if (retval = krb5_copy_cred(&tgtq, &ret_tgts[nservers]))
+	    if (retval = krb5_copy_creds(&tgtq, &ret_tgts[nservers]))
 		goto out;
 	    /* XXX need to clean up stuff pointed to by tgtq? */
 	    tgt = tgtq;
