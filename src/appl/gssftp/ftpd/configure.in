@@ -1,0 +1,31 @@
+AC_INIT(ftpcmd.y)
+CONFIG_RULES
+AC_CONST
+AC_PROG_INSTALL
+AC_PROG_YACC
+KRB5_SIGTYPE
+CHECK_UTMP
+CHECK_SIGPROCMASK
+CHECK_WAIT_TYPE
+AC_FUNC_VFORK
+AC_CHECK_HEADERS(unistd.h stdlib.h string.h)
+AC_REPLACE_FUNCS(getdtablesize)
+AC_HAVE_FUNCS(getcwd getusershell seteuid setreuid setresuid)
+dnl 
+dnl copied from appl/bsd/configure.in
+AC_MSG_CHECKING([setenv])
+AC_CACHE_VAL(krb5_cv_setenv,
+[AC_TRY_LINK(
+[],[setenv("PATH","/bin",0);],
+krb5_cv_setenv=yes,krb5_cv_setenv=no)])
+AC_MSG_RESULT($krb5_cv_setenv)
+if test $krb5_cv_setenv = no; then
+SETENVSRC='$(srcdir)/../bsd/setenv.c'
+SETENVOBJ=setenv.o
+AC_SUBST([SETENVSRC])
+AC_SUBST([SETENVOBJ])
+fi
+dnl
+WITH_DBM_LNAME
+V5_USE_SHARED_LIB
+V5_AC_OUTPUT_MAKEFILE

@@ -1,0 +1,219 @@
+Sun Jan 14 01:54:35 1996  Bill Schoofs <wjs@cray.com>
+
+	* Makefile.in (DEFINES): define NOCONFIDENTIAL for future use.
+	* ftp.c (command): recognize 533, not 402, for 'server unwilling
+	to accept' 
+	(getreply): recognize 633 for confidential reply, and then don't
+	support it.
+	
+Tue Jan  2 19:17:47 1996  Mark Eichin  <eichin@cygnus.com>
+
+	* pclose.c: test HAVE_GETDTABLESIZE instead of hpux.
+	* configure.in: set HAVE_GETDTABLESIZE.
+
+Fri Oct 20 11:59:32 1995  Mark W. Eichin  <eichin@cygnus.com>
+
+	* ftp.c (do_auth): synthesize channel bindings from myctladdr and
+	hisctladdr, based on changes pending for draft 9.
+
+Thu Oct 19 04:47:36 1995  Mark W. Eichin  <eichin@cygnus.com>
+
+	* configure.in: check for POSIX_TERMIOS just like appl/bsd does.
+
+Wed Oct  4 19:24:39 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* ftp, pclose, ruserpass.c, secure.c: don't ever declare malloc.
+
+Sun Oct  1 03:30:30 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* ftp.c (do_auth): accept ADAT 3yz response. Clean up loops, add
+	lots of debugging messages.
+
+Sun Oct  1 00:56:55 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* Makefile.in: use FTP_BUFSIZ everywhere and make it large for
+	now.
+	* ftp.c: only look at "host" for now. Report error parsing
+	name. Handle gssapi error reporting better.
+	
+
+Sat Sep 30 22:26:37 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* ftp.c, secure.c: correct gssapi includes. Fix some typos and
+	missing declarations.
+
+Sat Sep 30 21:31:09 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* Makefile.in (depend, install): change to double colon rules.
+	* cmds.c: no conf.h, check HAVE_GETCWD, use krb5_sigtype.
+	* configure.in: check KRB5_SIGTYPE, CHECK_SIGPROCMASK,
+	CHECK_WAIT_TYPE, and getcwd.
+	* ftp.c: no conf.h, use krb5_sigtype.
+	(secure_command): use user_gss_error.
+	(do_auth): cycle through gss_services.
+	(user_gss_error): new function, decomposes GSSAPI errors and sends
+	them to standard error.
+	(secure_gss_error): hook for secure.c common functions to get the
+	correct error routine.
+	* getpass.c, main.c: no conf.h, use krb5_sigtype.
+	* pclose.c: no conf.h, use krb5_sigtype.
+	(mypclose): obey USE_SIGPROCMASK.
+	* secure.c (secure_getbyte): use generic secure_gss_error.
+	
+Sat Sep 30 16:43:28 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* configure.in, Makefile.in: new files for port to GSSAPI and
+	build within the Kerberos V5 build tree.
+	* ftp.c, secure.c: GSSAPI authentication changes based on the IETF
+	CAT working group ***DRAFT*** FTP Security specification, draft
+	number 8, appendix I.
+
+
+**** previous change logs from CNS V4 modifications of Steve Lunt's
+     draft-3 ftp client, which this is based on. ****
+	
+Wed Jul 26 21:01:42 1995  Ken Raeburn  <raeburn@cygnus.com>
+
+	* domacro.c: Include string.h.
+	* secure.c: Ditto.
+
+Mon Jul 10 14:54:41 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* glob.c (matchdir): #if 0 code that uses a private member of the
+	DIR structure to check whether a filename passed to opendir is a
+	directory or not.
+
+Fri May 26 19:36:12 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* glob.c (matchdir): open "." explicitly if gpath is null.
+
+Fri May 19 16:11:07 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* ftp.c (ptransfer): be sure that printf(%g) gets a float, not an
+	implicit double, by doing the whole calculation in the variable.
+
+Thu Feb  2 13:40:04 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ftp.c: Don't try to use IP_TOS if the IP_TOS argument
+	(IPTOS_LOWDELAY, etc.) is not defined.
+
+Wed Jan 18 14:07:33 1995  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* ftp.1: Include man1/tmac.doc.
+
+	* ftp.c (initconn): If the PASV command is rejected, turn off
+	passive mode and try again.
+
+Wed Jan  4 11:21:34 1995  Ian Lance Taylor  <ian@tweedledumb.cygnus.com>
+
+	* cmds.c, ftp.c: Use mygetpass instead of getpass.
+
+	* ruserpass.c: Don't include <utmp.h>.  Don't declare getlogin,
+	getpass, or getuttmp.
+
+Thu Dec 29 15:19:44 1994  Mark Eichin  <eichin@cygnus.com>
+
+	* cmds.c (setpeer): add || defined(linux) to the NBBY == 8 check,
+	since this code is appropriate under linux.
+
+Thu Dec 29 14:11:37 1994  Mark Eichin  <eichin@cygnus.com>
+
+	* cmds.c (siteidle): renamed idle() to avoid conflict with linux
+	idle(void).
+	* cmdtab.c: rename declaration and cmdtab entry.
+
+Tue Dec 27 13:29:08 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* ftp.c: If STDARG is defined, or if __STDC__ is defined and
+	VARARGS is not defined, include <stdarg.h>, instead of
+	<varargs.h>.
+	(command): Use <stdarg.h> routines if STDARG || (__STDC__ && !
+	VARARGS).
+	(secure_error): Likewise.
+	* ftp_var.h (command): Declare if STDARG || (__STDC__ && !
+	VARARGS).
+	* secure.c (secure_error): Likewise.
+
+	* secure.h (hisaddr): Define as hisdataaddr.
+	* ftp.c (hisdataaddr): New global variable.
+	(initconn): Set hisdataaddr to data_addr.
+	(dataconn): Use hisdataaddr instead of local variable from.
+
+Fri Dec 23 15:18:12 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* cmds.c (unix): Define if _AIX is defined (AIX compiler does not
+	predefine unix).
+
+	* ftp.c (login): When choosing the default login name, use the
+	values of the environment variables LOGNAME and then USER in
+	preference to calling getlogin.
+
+Thu Dec 22 14:59:34 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* cmds.c (gettype): Sometimes type will be zero, which requires
+	special handling.
+
+	* main.c: Include <krb.h>.
+	(main): Support new option: -k.
+	* ftp.c (realm): New global variable.
+	(do_auth): Remove local variable realm; use new global instead.
+	Don't call krb_realmofhost if realm is set.
+	* ftp.1: Document -k.
+
+Fri Dec 16 10:53:08 1994  Ian Lance Taylor  <ian@cygnus.com>
+
+	Fixes for Alpha OSF/1:
+	* cmds.c: Redefine sig_t to my_sig_t to avoid header file
+	conflict.
+	* ftp.c: Likewise.
+
+	Fixes for SCO:
+	* cmdtab.c: Include <stdio.h> before ftp_var.h.
+	* domacro.c: Move include of <stdio.h> before include of
+	ftp_var.h.  Don't include <sys/ttychars.h>.
+	* main.c: Move include of <stdio.h> before include of ftp_var.h.
+
+	Fixes for AIX:
+	* cmds.c (mput): Use 0 instead of NULL when an integer is
+	expected.
+	(getit, mget): Likewise.
+	* ftp_var.h (strncpy, strncat, strcat, strcpy): Don't declare.
+	* ruserpass.c (strcpy): Don't declare.
+	* secure.c: Include <netinet/in.h>.
+
+	Fixes for Irix 4:
+	* ftp_var.h: Unless DEFINITIONS is defined, declare variables
+	rather than defining them.
+	* ftp.c: Define DEFINITIONS before including ftp_var.h.
+	(recvrequest): If NOSTBLKSIZE is defined, use BUFSIZ instead of
+	st_blksize.
+	* getpass.c: Put note after #endif in /* */
+	* pclose.c: Likewise.
+	* ruserpass.c (token): Move before ruserpass.
+	(ruserpass): Don't declare token.
+
+	General fixes to make it compile on Solaris: Use sigtype for
+	signal handler return values, including conf.h where needed.  Add
+	a dummy argument to signal handler functions. Replace index,
+	rindex, bzero and bcopy with ANSI C functions.  Cast Kerberos
+	routine arguments to avoid warnings.  Also:
+	* cmds.c: Include <string.h>.  If POSIX is defined, include
+	unistd.h, otherwise define getcwd to call getwd.
+	(lcd): Call getcwd instead of getwd.
+	(shell): If WAIT_USES_INT, use int instead of union wait.
+	* ftp.c: Include <string.h>.
+	(L_SET, L_INCR): Define if not defined.
+
+	* ftp_var.h (index, rindex): Don't declare.
+	* main.c: Inclue <string.h>.
+	* pclose.c (getdtablesize): New function on hpux or __svr4__.
+	* radix.c (radix_encode): Cast strcmp arguments to avoid warnings.
+	* ruserpass.c: Include <string.h>.  If POSIX, include <stdlib.h>
+	and don't declare malloc.
+	(MAXHOSTNAMELEN): Define if not defined.
+	(index): Don't declare.
+
+Thu Dec 15 16:13:44 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* Initial checkin.  Based on Steve Lunt's ftp program, which was
+        based on BSD code.

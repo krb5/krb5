@@ -1,0 +1,69 @@
+#
+# appl/gssftp/ftpd/Makefile.in
+#
+CFLAGS = -DGSSAPI -DFTP_BUFSIZ=10240 $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
+
+SETENVSRC=@SETENVSRC@
+SETENVOBJ=@SETENVOBJ@
+COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
+
+SRCS	= ftpd.c ftpcmd.y logwtmp.c popen.c vers.c \
+	  $(srcdir)../ftp/glob.c \
+	  $(srcdir)../ftp/radix.c \
+	  $(srcdir)../ftp/secure.c \
+	  $(srcdir)../../bsd/getdtablesize.c $(SETENVSRC)
+
+OBJS	= ftpd.o ftpcmd.o glob.o popen.o logwtmp.o vers.o radix.o \
+	  secure.o getdtablesize.o $(SETENVOBJ)
+
+KLIB = -lgssapi_krb5 -lkrb5 -lcrypto $(COMERRLIB)
+DEPKLIB = $(TOPLIBD)/gssapi/libgssapi_krb5.a $(TOPLIBD)/libkrb5.a \
+		$(TOPLIBD)/libcrypto.a $(COMERRLIB)
+
+LOCALINCLUDE = -I$(srcdir)/..
+DEFINES = -DGSSAPI -DNOCONFIDENTIAL
+
+all::	ftpd
+
+ftpd:	$(OBJS) $(DEPKLIB)
+	$(LD) $(LDFLAGS) $(LDARGS) -o $@ $(OBJS) $(KLIB) $(LIBS)
+
+clean::
+	$(RM) ftp ftpcmd.c
+
+depend::
+
+install::
+	$(INSTALL_PROGRAM) ftpd $(DESTDIR)$(SERVER_BINDIR)/ftpd
+	$(INSTALL_DATA) $(srcdir)/ftpd.M ${DESTDIR}$(SERVER_MANDIR)/ftp.8
+
+
+ftpcmd.c: $(srcdir)/ftpcmd.y
+	$(RM) ftpcmd.c y.tab.c
+	$(YACC) $(srcdir)/ftpcmd.y
+	$(MV) y.tab.c ftpcmd.c
+
+glob.o: $(srcdir)/../ftp/glob.c
+	$(CC) -c $(CFLAGS) $(srcdir)/../ftp/glob.c
+radix.o: $(srcdir)/../ftp/radix.c
+	$(CC) -c $(CFLAGS) $(srcdir)/../ftp/radix.c
+secure.o: $(srcdir)/../ftp/secure.c
+	$(CC) -c $(CFLAGS) $(srcdir)/../ftp/secure.c
+
+getdtablesize.o: $(srcdir)/../../bsd/getdtablesize.c
+	$(CC) -c $(CFLAGS) $(srcdir)/../../bsd/getdtablesize.c
+
+setenv.o: $(srcdir)/../../bsd/setenv.c
+	$(CC) -c $(CFLAGS) $(srcdir)/../../bsd/setenv.c
+
+
+ftpd.o: $(srcdir)/pathnames.h
+secure.o: $(srcdir)/secure.h
+
+ftpd.o: $(srcdir)/ftpd.c
+ftpcmd.o: ftpcmd.c
+popen.o: $(srcdir)/popen.c
+logwtmp.o: $(srcdir)/logwtmp.c
+vers.o: $(srcdir)/vers.c
+
+# NOPOSTFIX

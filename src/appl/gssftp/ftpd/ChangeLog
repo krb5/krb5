@@ -1,0 +1,232 @@
+Sun Jan 14 02:58:42 1996  Mark Eichin  <eichin@cygnus.com>
+
+	* ftpd.c (auth_data): call gss_release_cred on the server_creds we
+	acquired, before they leave scope.
+
+Sun Jan 14 02:47:19 1996  Karri Balk - Contractor <kbalk@cup.hp.com>
+
+	* ftpd.c (gss_services): list of gssapi service names to try.
+	(auth_data): loop over gss_services.
+
+Sun Jan 14 01:54:35 1996  Bill Schoofs <wjs@cray.com>
+
+	* Makefile.in (DEFINES): define NOCONFIDENTIAL for future use.
+	* ftpcmd.y (CCC): ditch broken CCC code, return proper 534 code.
+	(PBSZ): return proper code 501 for bad PBSZ argument
+	(PROT): recognize PROT E.
+	(cmdtab): add CCC so as to cleanly reject it.
+	(getline): reject CONF as unsupported (but put in code to
+	potentially recognize it in the future.) Reject protected commands
+	of auth_type isn't yet set.
+	* ftpd.c (setlevel): use 536, not 504, for invalid level, and
+	use levelnames to find the proper name.
+	(user): if kuserok succeeds, respond 232, not 231; if it fails,
+	respond 336 (though 331 might be more appropriate.)
+	(auth): fix spelling error.
+	
+Tue Jan  2 19:19:16 1996  Mark Eichin  <eichin@cygnus.com>
+
+	* ftpd.c: use HAVE_SETEUID and HAVE_SETRESUID to figure out how
+	to emulate seteuid instead of assuming hpux.
+	* configure.in: test for seteuid, setreuid and setresuid.
+
+Fri Oct 20 17:17:19 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* ftpd.c (auth_data): supply correct channel bindings to accept,
+	matching the client changes.
+
+Thu Oct 19 12:22:28 1995  Mark W. Eichin  <eichin@cygnus.com>
+
+	* configure.in: check WITH_DBM_LNAME since we use an_to_ln.
+
+Wed Oct  4 19:26:50 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* ftpd.c (user): use HAVE_GETUSERSHELL.
+	* configure.in: check for getusershell.
+
+Mon Oct  2 16:43:54 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* popen.c (ftpd_popen): malloc all strings, not just globbed ones.
+
+Sun Oct  1 03:31:24 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* ftpd.c (auth_data): acquire credentials (currently fixed for
+	service "host".) Fix loop reply logic. Add debugging syslogs. Set
+	auth_type *after* 235 success reply, so it doesn't get encrypted.
+
+Sun Oct  1 00:58:39 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* Makefile.in: use FTP_BUFSIZ everywhere and make it large for
+	now.
+	* configure.in: check for headers need to build getdtablesize.
+	* ftpd.c (secure_reply): add GSSAPI hooks.
+	(reply_gss_error): better gssapi error reporting.
+	
+
+Sat Sep 30 22:26:25 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* ftpd.c: correct gssapi includes. Fix type of client_name. Use
+	gss_ok instead of kerb_ok for GSSAPI case (to simplify future
+	combined code.) Fix some declarations. Fix arguments to
+	gss_accept_sec_context for type.
+	* ftpcmd.y: correct gssapi includes.
+	
+Sat Sep 30 21:40:30 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* Makefile.in: hook setenv.c and getdtablesize.c from appl/bsd.
+	Use double-colon rules for clean, depend, install.
+	configure.in: check for yacc, SIGTYPE, UTMP, SIGPROCMASK,
+	WAIT_TYPE, getdtablesize, getcwd, setenv (using the test from
+	appl/bsd.)
+	* ftpcmd.y: no conf.h. declare level. Use krb5_sigtype directly.
+	* ftpd.c: use getcwd directly, make -s srvtab KERBEROS specific.
+	(user): return 331 as per draft-8, but suggest 53z.
+	(auth_data): return 535 and 335 and quote draft-8 as to why.
+	(secure_gss_error): generic interface for secure.c functions to
+	call reply_gss_error instead.
+	* logwtmp.c: no conf.h, check NO_UT_HOST.
+	* popen.c: no conf.h, no getdtablesize.
+	(ftpd_pclose): Obey USE_SIGPROCMASK.
+
+Sat Sep 30 16:43:28 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* configure.in, Makefile.in: new files for port to GSSAPI and
+	build within the Kerberos V5 build tree.
+	* ftpcmd.y, ftpd.c, secure.c: GSSAPI authentication changes based
+	on the IETF CAT working group ***DRAFT*** FTP Security
+	specification, draft number 8, appendix I.
+
+
+**** previous change logs from CNS V4 modifications of Steve Lunt's
+     draft-3 ftp daemon, which this is based on. ****
+
+Wed Jul 26 21:03:13 1995  Ken Raeburn  <raeburn@cygnus.com>
+
+	* secure.c: Include string.h.
+
+	* ftpd.c (main): Cast signal() return value to long instead of
+	int; it's more likely to fit.
+
+Thu Feb  2 13:41:24 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ftpcmd.y (NBBY): Explicitly define if __pyrsoft and MIPSEB.
+	(cmd_list): In handling of SYST, undefine BSD if __svr4__ is
+	defined.
+
+	* ftpd.c: Don't try to use IP_TOS if the IP_TOS argument
+	(IPTOS_LOWDELAY, etc.) is not defined.
+
+Wed Jan 18 17:12:22 1995  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* ftpd.8: Include man1/tmac.doc.
+
+Wed Jan 11 15:29:10 1995  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* ftpd.c (authenticate): New variable.
+	(main): Handle -a (require authentication) option.
+	(user): If authenticate is set, reply with an error if kuserok
+	fails or if no Kerberos authentication was used.
+	* ftpcmd.y: Use check_login when parsing the PASV command.
+	* ftpd.8: Document new -a option.
+
+Tue Jan  3 01:25:57 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* Makefile.in (clean): explicitly delete ftpcmd.c on clean.
+
+Thu Dec 29 15:17:12 1994  Mark Eichin  <eichin@cygnus.com>
+
+	* ftpcmd.y (rcmd): don't declare atol, since it isn't used here
+	anyhow, and it's a macro under linux.
+	(top level): #define NBBY 8 for linux.
+
+Thu Dec 29 14:51:41 1994  Mark Eichin  <eichin@cygnus.com>
+
+	* ftpd.c (statcmd): don't use NBBY check -- linux doesn't have it,
+	it is in no spec, and if it isn't 8, it won't work anyway. (Use
+	strcat instead of sprintf, while we're at it...)
+
+Tue Dec 27 16:29:24 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* ftpcmd.y (reply, lreply): Declare if STDARG || (__STDC__ && !
+	VARARGS).
+	* ftpd.c:  If STDARG is defined, or if __STDC__ is defined and
+	VARARGS is not defined, include <stdarg.h>.
+	(secure_error): Use <stdarg.h> routines if STDARG || (__STDC__ &&
+	! VARARGS).
+	(reply, lreply): Likewise.
+	(setproctitle): Just use one argument.
+	* secure.c (secure_error): Declare if STDARG || (__STDC__ && !
+	VARARGS).
+
+Fri Dec 23 16:25:44 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* ftpcmd.y (unix): Define if _AIX is defined (AIX compiler does
+	not predefine unix).
+
+Thu Dec 22 15:05:14 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* ftpd.c (keyfile): New global variable.
+	(main): Move option processing before check of remote socket.  Add
+	new options -p, -r, and -s.  Handle -p by accepting a remote
+	connection.
+	(kpass): Use keyfile variable rather than KEYFILE.  Pass keyfile
+	explicitly to krb_rd_req.
+	(auth_data): Likewise.
+	* ftpd.8: Document new -p, -r, and -s options.
+
+Fri Dec 16 11:06:16 1994  Ian Lance Taylor  <ian@cygnus.com>
+
+	Fixes for HP/UX:
+	* ftpd.c: On HP/UX, define seteuid and setegid as macros which
+	call setresuid and setresgid.
+
+	Fixes for UnixWare:
+	* ftpd.c (main): Use a temporary variable rather than calling
+	htons(ntohs(X)).
+	* ftpcmd.y: Include conf.h.
+	(getline): Cast arguments to Kerberos routines to avoid warnings.
+	(toolong): Declare as type sigtype, and add dummy argument.
+
+	Fixes for SCO:
+	* cmdtab.y: Include <sys/types.h>.
+	* ftpd.c (initgroups): Define on SCO.
+	(main): Don't handle SIGURG if it is not defined.
+	(pass): Don't try to use crypt on SCO; instead, require Kerberos
+	password or anonymous login.
+
+	Fixes for AIX:
+	* ftpcmd.y (index): Don't define.
+	(strpbrk, strcpy): Don't declare.
+	* ftpd.c (index, rindex): Don't define.
+	* logwtmp.c (strncpy): Don't declare.
+	* secure.c: Include <netinet/in.h>.
+
+	Fixes for Ultrix:
+	* ftpd.c (main): Define LOG_NDELAY and LOG_DAEMON as zero if they
+	are not already defined by <syslog.h>.
+
+	Fixes for Irix 4:
+	* ftpd.c (retrieve): Don't refer to st_blksize if NOSTBLKSIZE is
+	defined.
+
+	* ftpcmd.y: Fix yacc code to use %union and %type.
+	(yylex): Assign to fields of yylval, rather than to yylval
+	directly.
+
+	General fixes to make it compile on Solaris: Use sigtype for
+	signal handler return values, including conf.h where needed.  Add
+	a dummy argument to signal handler functions. Replace index,
+	rindex, bzero and bcopy with ANSI C functions.  Cast Kerberos
+	routine arguments to avoid warnings.  Also:
+	* ftpd.c: Don't include <varargs.h>.  If POSIX is defined, include
+	unistd.h, otherwise define getcwd to call getwd.
+	(L_SET, L_INCR): Define if not defined.
+	(pwd): Use getcwd instead of getwd.  If POSIX, change the error
+	handling accordingly.
+	* popen.c (getdtablesize): New function on hpux or __svr4__.
+	(ftpd_pclose): If WAIT_USES_INT, use int instead of union wait.
+
+Thu Dec 15 16:13:44 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* Initial checkin.  Based on Steve Lunt's ftp program, which was
+        based on BSD code.

@@ -1,0 +1,9 @@
+Sun Jan 14 03:19:55 1996  Mark Eichin  <eichin@cygnus.com>
+
+	* README.gssftp: new file, documents history of this implementation.
+
+Sat Sep 30 16:28:34 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* configure.in, Makefile.in: New files controlling the
+	construction of the GSSAPI implementation of ftp.
+
