@@ -1,3 +1,15 @@
+
+Fri Jul 7 16:20:07 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* Makefile.in - Add t_cksum under unix only.
+	* configure.in - Define MD5_K5BETA_COMPAT to select compatability for
+		md5crypto.c.
+	* md5crypto.c - Correct implementation of RSA-MD5-DES checksums.  Add
+		ability to understand previous implementation and ability to
+		generate these checksums when forced to.
+		- Also add verification procedure for these checksums.
+	* md5glue.c - Add verifier procedure.
+	* t_cksum.c - New checksum verifier test.
+
 Wed Jun 21 10:52:20 1995    <tytso@rsx-11.mit.edu>
 
 	* md5crypto.c, md5glue.c: Change PROTOTYPE -> KRB5_PROTOTYPE

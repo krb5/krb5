@@ -1,4 +1,17 @@
 
+Fri Jul 7 16:13:28 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* Makefile.in - Add t_cksum under unix only.
+	* configure.in - Define MD4_K5BETA_COMPAT to select compatability for
+		md4crypto.c.
+	* md4crypto.c - Correct implementation of RSA-MD4-DES checksums.  Add
+		ability to understand previous implementation and ability to
+		generate these checksums when forced to.
+		- Also add verification procedure for these checksums.
+	* md4glue.c - Add verifier procedure.
+	* rsa-md4.h - Add RSA_MD4_DES_CONFOUND_LENGTH, the length of the
+		RSA-MD4-DES confounder per RFC1510.
+
+
 Tue Jun 27 15:53:02 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* md4.c(Transform) - Add 'register' to scratch variable names.  Helps
 		out compiler so that DEC native compilers can now optimize

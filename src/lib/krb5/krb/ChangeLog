@@ -1,3 +1,8 @@
+
+Fri Jul 7 16:31:06 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* Makefile.in - Find com_err in TOPLIBD.
+	* rd_safe.c - Use checksum verifier instead of doing it manually.
+
 Thu Jul  6 17:31:40 1995  Tom Yu  <tlyu@lothlorien.MIT.EDU>
 
 	* rd_safe.c (krb5_rd_safe_basic): Pass context to os_localaddr.
