@@ -1,3 +1,7 @@
+2003-05-12  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in: Add setting of KRB_ERR on Windows.
+
 2003-05-11  Sam Hartman  <hartmans@mit.edu>
 
 	* Makefile.in: Build krb_err.c when appropriate.

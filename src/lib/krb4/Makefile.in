@@ -30,6 +30,7 @@ SHLIB_RDIRS=$(KRB5_LIBDIR)
 
 EHDRDIR=$(BUILDTOP)$(S)include$(S)kerberosIV
 KRB_ERR=@KRB_ERR@
+##DOS##KRB_ERR=$(OUTPRE)krb_err.$(OBJEXT)
 
 OBJS	= \
 	$(OUTPRE)change_password.$(OBJEXT) \
