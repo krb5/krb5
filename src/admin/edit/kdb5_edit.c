@@ -47,10 +47,11 @@ struct mblock {
     0
 };
 
-void add_key PROTOTYPE((char * const *, const krb5_principal,
+void add_key PROTOTYPE((char * const *, krb5_const_principal,
 			const krb5_keyblock *, krb5_kvno));
 void enter_rnd_key PROTOTYPE((char **, const krb5_principal, krb5_kvno));
-void enter_pwd_key PROTOTYPE((char **, const krb5_principal, const krb5_principal, krb5_kvno));
+void enter_pwd_key PROTOTYPE((char **, krb5_const_principal,
+			      krb5_const_principal, krb5_kvno));
 
 int set_dbname_help PROTOTYPE((char *, char *));
 
@@ -59,9 +60,10 @@ usage(who, status)
 char *who;
 int status;
 {
-    fprintf(stderr, "usage: %s [-d dbpathname] [-r realmname] [-k keytype]\n\
-\t[-e etype] [-M mkeyname]\n",
+    fprintf(stderr,
+	    "usage: %s [-d dbpathname] [-r realmname] [-R request ]\n",
 	    who);
+    fprintf(stderr, "\t [-k keytype] [-e etype] [-M mkeyname]\n");
     exit(status);
 }
 
@@ -108,23 +110,27 @@ char *argv[];
     int keytypedone = 0;
     krb5_enctype etype = -1;
     register krb5_cryptosystem_entry *csentry;
-    int sci_idx;
+    int sci_idx, code;
     extern krb5_kt_ops krb5_ktf_writable_ops;
+    char	*request = NULL;
 
     krb5_init_ets();
 
-    if (rindex(argv[0], '/'))
-	argv[0] = rindex(argv[0], '/')+1;
+    if (strrchr(argv[0], '/'))
+	argv[0] = strrchr(argv[0], '/')+1;
 
     progname = argv[0];
 
-    while ((optchar = getopt(argc, argv, "d:r:k:M:e:m")) != EOF) {
+    while ((optchar = getopt(argc, argv, "d:r:R:k:M:e:m")) != EOF) {
 	switch(optchar) {
 	case 'd':			/* set db name */
 	    dbname = optarg;
 	    break;
 	case 'r':
 	    cur_realm = optarg;
+	    break;
+        case 'R':
+	    request = optarg;
 	    break;
 	case 'k':
 	    master_keyblock.keytype = atoi(optarg);
@@ -193,7 +199,12 @@ char *argv[];
     if (retval = set_dbname_help(progname, dbname))
 	exit(retval);
 
-    ss_listen(sci_idx, &retval);
+    if (request) {
+	    (void) ss_execute_line(sci_idx, request, &code);
+	    if (code != 0)
+		    ss_perror(sci_idx, code, request);
+    } else
+	    ss_listen(sci_idx, &retval);
     (void) (*csentry->finish_key)(&master_encblock);
     (void) (*csentry->finish_random_key)(&master_random);
     retval = krb5_db_fini();
@@ -310,11 +321,11 @@ char *argv[];
 
 void
 add_key(DECLARG(char * const *, argv),
-	DECLARG(const krb5_principal, principal),
+	DECLARG(krb5_const_principal, principal),
 	DECLARG(const krb5_keyblock *, key),
 	DECLARG(krb5_kvno, vno))
 OLDDECLARG(char * const *, argv)
-OLDDECLARG(const krb5_principal, principal)
+OLDDECLARG(krb5_const_principal, principal)
 OLDDECLARG(const krb5_keyblock *, key)
 OLDDECLARG(krb5_kvno, vno)
 {
@@ -771,12 +782,12 @@ char *argv[];
 
 void
 enter_pwd_key(DECLARG(char **, argv),
-	      DECLARG(const krb5_principal, princ),
-	      DECLARG(const krb5_principal, string_princ),
+	      DECLARG(krb5_const_principal, princ),
+	      DECLARG(krb5_const_principal, string_princ),
 	      DECLARG(krb5_kvno, vno))
 OLDDECLARG(char **, argv)
-OLDDECLARG(const krb5_principal, princ)
-OLDDECLARG(const krb5_principal, string_princ)
+OLDDECLARG(krb5_const_principal, princ)
+OLDDECLARG(krb5_const_principal, string_princ)
 OLDDECLARG(krb5_kvno, vno)
 {
     krb5_error_code retval;
@@ -808,4 +819,33 @@ OLDDECLARG(krb5_kvno, vno)
     free((char *)tempkey.contents);
     return;
 }
+
+void change_working_dir(argc, argv)
+	int	argc;
+	char	**argv;
+{
+	if (argc != 2) {
+		com_err(argv[0], 0, "Usage: %s directory", argv[0]);
+		return;
+	}
+	if (chdir(argv[1])) {
+		com_err(argv[0], errno,
+			"Couldn't change directory to %s", argv[1]);
+	}
+}
+
+void print_working_dir(argc, argv)
+	int	argc;
+	char	**argv;
+{
+	char	buf[MAXPATHLEN];
+
+	if (!getwd(buf)) {
+		com_err(argv[0], 0, "Couldn't get working directory: %s",
+			buf);
+		return;
+	}
+	puts(buf);
+}
+
 
