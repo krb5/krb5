@@ -21,8 +21,10 @@ OM_uint32 gssint_initialize_library (void)
 {
 	
 	if (!initialized) {
+#if !TARGET_OS_MAC || USE_HARDCODED_FALLBACK_ERROR_TABLES
 	    add_error_table(&et_k5g_error_table);
 	    add_error_table(&et_ggss_error_table);
+#endif
 
 		initialized = 1;
 	}
