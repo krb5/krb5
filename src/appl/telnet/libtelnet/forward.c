@@ -27,7 +27,9 @@
 #include <stdio.h>
 #include <netdb.h>
  
-#include "k5-int.h"
+#include "krb5.h"
+#include <errno.h>
+
 #include "krb5forw.h"
  
 #if defined(NEED_SETENV) || defined(NEED_SETENV_PROTO)
@@ -53,7 +55,7 @@ rd_and_store_for_creds(context, auth_context, inbuf, ticket)
 	return(retval);
 
     sprintf(ccname, "FILE:/tmp/krb5cc_p%ld", (long) getpid());
-    setenv(KRB5_ENV_CCNAME, ccname, 1);
+    setenv("KRB5CCNAME", ccname, 1);
 
     if ((retval = krb5_cc_resolve(context, ccname, &ccache)))
 	goto cleanup;

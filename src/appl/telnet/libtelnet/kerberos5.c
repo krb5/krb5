@@ -63,8 +63,10 @@
 
 #ifdef	KRB5
 #include <arpa/telnet.h>
+#include <errno.h>
 #include <stdio.h>
-#include "k5-int.h"
+#include "krb5.h"
+
 #include "com_err.h"
 #include <netdb.h>
 #include <ctype.h>
@@ -202,7 +204,7 @@ kerberos5_cleanup()
     if (telnet_context == 0)
 	return;
 
-    ccname = getenv(KRB5_ENV_CCNAME);
+    ccname = getenv("KRB5CCNAME");
     if (ccname) {
 	retval = krb5_cc_resolve(telnet_context, ccname, &ccache);
 	if (!retval)

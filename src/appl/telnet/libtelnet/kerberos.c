@@ -716,7 +716,9 @@ kerberos4_cksum(d, n)
 	return(ck);
 }
 #else
-#include "k5-int.h"
+#include <krb5.h>
+#include <errno.h>
+
 #endif
 
 #ifdef notdef
