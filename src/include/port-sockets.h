@@ -75,15 +75,7 @@ typedef WSABUF sg_buf;
 #include <sys/types.h>
 #include <netinet/in.h>		/* For struct sockaddr_in and in_addr */
 #include <arpa/inet.h>		/* For inet_ntoa */
-
-#if !defined(_XOPEN_SOURCE_EXTENDED) && !defined(_WIN32)
-/* Hack for HPUX, to get h_errno.  */
-# define _XOPEN_SOURCE_EXTENDED 1
-# include <netdb.h>
-# undef _XOPEN_SOURCE_EXTENDED
-#else
-# include <netdb.h>
-#endif
+#include <netdb.h>
 
 #include <sys/param.h>		/* For MAXHOSTNAMELEN */
 #include <sys/socket.h>		/* For SOCK_*, AF_*, etc */

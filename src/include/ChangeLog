@@ -1,3 +1,9 @@
+2004-09-10  Tom Yu  <tlyu@mit.edu>
+
+	* port-sockets.h: Remove _XOPEN_SOURCE_EXTENDED hack for netdb.h,
+	as it can cause inconsistencies between headers.  It significantly
+	broke HP-UX 10.20 anyway.
+
 2004-09-01  Jeffrey Altman <jaltman@mit.edu>
 
         * krb5.hin: define KRB5_TC_NOTICKET for use with krb5_cc_set_flags
