@@ -117,3 +117,27 @@ krb5_gc_via_2tgt
 --------------------------------------------------------------
 
 Bad comment message in KRB5-aux.h (KRB5-types.c should be KRB5_tables.c)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+needed before beta4-patch2:
+
+940802		stdargs/varargs breakage of ksu under SunOS
+940802		ultrix appl/bsd stuff breaks (Mark?)
+940802		double-check make install
+
+not-quite-critical bug fixes:
+
+940802		linux port problems, e.g. broken linux headers, sgtty.h, etc.
+940802		double-check telnet problems, e.g. solaris pty grabbing
+940802		rethink using compile check for fopen() binary mode
+
+cleanup for later:
+
+940802		realloc lossage made more reasonable;  requires a compile
+		and run type of check, then use REALLOC everywhere, #defined
+		to check if argument is NULL first, if realloc(NULL) returns
+		NULL.  This is to guard against lossage like SunOS.
+940802		yank isode from tree, insert tcl subset
+940802		sanity check API doc
+940802		deja gnu, testing framework
