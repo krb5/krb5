@@ -1,5 +1,18 @@
 2004-02-02  Jeffrey Altman <jaltman@mit.edu>
 
+   * cc_msla.c: 
+     GetMSCacheTicketFromCacheInfo() uses the tktinfo->TicketFlags as the
+     value to assign to TicketRequest->TicketFlags.  This field is blindly
+     inserted into the kdc-options[0] field of the TGS_REQ.  If there are
+     bits such as TRANSIT_POLICY_CHECKED in the TicketFlags, this will result
+     in an unknown TGS_OPTION being processed by the KDC.
+
+     This has been fixed by mapping the Ticket Flags to KDC options.
+     We only map Forwardable, Forwarded, Proxiable, and Renewable.  The others
+     should not be used.
+
+2004-02-02  Jeffrey Altman <jaltman@mit.edu>
+
    * cc_mslsa.c: the MSLSA code was crashing on Pismere machines when 
      logging on with cross realm credentials.  On these machines there are
      8 tickets within the LSA cache from two different realms.  One of the
