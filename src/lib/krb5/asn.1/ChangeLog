@@ -1,3 +1,8 @@
+2005-03-04  Ken Raeburn  <raeburn@mit.edu>
+
+	* asn1_encode.c (asn1_encode_generaltime): If gmtime_r returns int
+	instead of pointer, do the appropriate error checking.
+
 2004-12-28  Ezra Peisach  <epeisach@mit.edu>
 
 	* asn1_decode.c (asn1_decode_generaltime): Fix memory leak when
