@@ -23,11 +23,13 @@ Do-first:
 
 Things-to-keep:
 
+ChangeLog
 krb.conf
 krb.conf.M
 krb.realms
 krb.realms.M
 services.append
+krb5.conf
 
 Things-to-lose:
 

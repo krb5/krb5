@@ -56,9 +56,12 @@ port2ip.c
 read_msg.c
 read_pwd.c
 realm_dom.c
+ref_std_conf.out
 sendto_kdc.c
 sn2princ.c
 timeofday.c
+t_std_conf.c
+td_krb5.conf
 unlck_file.c
 ustime.c
 write_msg.c
