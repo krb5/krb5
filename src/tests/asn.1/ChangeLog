@@ -1,3 +1,7 @@
+2002-08-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in: Change $(S)=>/ and $(U)=>.. globally.
+
 2001-10-09  Ken Raeburn  <raeburn@mit.edu>
 
 	* ktest.h, ktest_equal.h, utility.c, utility.h: Make prototypes

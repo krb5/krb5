@@ -2,7 +2,7 @@ thisconfigdir=.
 myfulldir=include
 mydir=.
 MY_SUBDIRS=krb5 kerberosIV
-BUILDTOP=$(REL)$(U)
+BUILDTOP=$(REL)..
 ##DOSBUILDTOP = ..
 NO_OUTPRE=1
 
@@ -64,5 +64,5 @@ clean-windows::
 	@echo Making clean in include
 
 install:: krb5.h profile.h
-	$(INSTALL_DATA) krb5.h $(DESTDIR)$(KRB5_INCDIR)$(S)krb5.h
-	$(INSTALL_DATA) profile.h $(DESTDIR)$(KRB5_INCDIR)$(S)profile.h
+	$(INSTALL_DATA) krb5.h $(DESTDIR)$(KRB5_INCDIR)/krb5.h
+	$(INSTALL_DATA) profile.h $(DESTDIR)$(KRB5_INCDIR)/profile.h

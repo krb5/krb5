@@ -1,7 +1,7 @@
 thisconfigdir=.
 myfulldir=appl/telnet/telnetd
 mydir=.
-BUILDTOP=$(REL)$(U)$(S)$(U)$(S)$(U)
+BUILDTOP=$(REL)../../..
 # derived from the original Makefile.generic
 #
 # Copyright (c) 1991 The Regents of the University of California.

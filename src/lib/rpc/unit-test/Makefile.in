@@ -1,7 +1,7 @@
 thisconfigdir=.
 myfulldir=lib/rpc/unit-test
 mydir=.
-BUILDTOP=$(REL)$(U)$(S)$(U)$(S)$(U)
+BUILDTOP=$(REL)../../..
 LOCALINCLUDES = -I.
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)

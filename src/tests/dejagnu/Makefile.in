@@ -1,7 +1,7 @@
 thisconfigdir=./..
 myfulldir=tests/dejagnu
 mydir=dejagnu
-BUILDTOP=$(REL)$(U)$(S)$(U)
+BUILDTOP=$(REL)../..
 RUNTEST = @RUNTEST@ $(DEJAFLAGS)
 RUNTESTFLAGS =
 KRB5_RUN_ENV= @KRB5_RUN_ENV@

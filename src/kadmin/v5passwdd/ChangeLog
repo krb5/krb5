@@ -1,3 +1,7 @@
+2002-08-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in: Change $(S)=>/ and $(U)=>.. globally.
+
 2002-06-19  Ezra Peisach  <epeisach@bu.edu>
 
 	* srv_net.c: Conditionalize debugging variables inside DEBUG

@@ -6,7 +6,7 @@ thisconfigdir=./..
 myfulldir=windows/ms2mit
 mydir=.
 MY_SUBDIRS=.
-BUILDTOP=$(REL)$(U)$(S)$(U)
+BUILDTOP=$(REL)../..
 DEFINES = 
 PROG_LIBPATH=-L$(TOPLIBD) -L$(KRB5_LIBDIR)
 

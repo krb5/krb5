@@ -1,3 +1,7 @@
+2002-08-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in: Change $(S)=>/ and $(U)=>.. globally.
+
 2002-06-14  Miro Jurisic  <meeroh@mit.edu>
 
 	* rc_io.c, rc_dfl.c: use "" includes for krb5.h and k5-int.h

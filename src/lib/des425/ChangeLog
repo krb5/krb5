@@ -1,3 +1,7 @@
+2002-08-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in: Change $(S)=>/ and $(U)=>.. globally.
+
 2001-10-05  Ken Raeburn  <raeburn@mit.edu>
 
 	* read_passwd.c, unix_time.c: Drop _MSDOS support.

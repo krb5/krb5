@@ -1,3 +1,7 @@
+2002-08-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in: Change $(S)=>/ and $(U)=>.. globally.
+
 2002-04-05  Ken Raeburn  <raeburn@mit.edu>
 
 	* kdc5_hammer.c (main): Delete '-k' option which didn't do

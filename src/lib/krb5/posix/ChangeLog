@@ -1,3 +1,7 @@
+2002-08-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in: Change $(S)=>/ and $(U)=>.. globally.
+
 2002-06-12  Ken Raeburn  <raeburn@mit.edu>
 
 	* syslog.c: Include syslog.h instead of sys/syslog.h.

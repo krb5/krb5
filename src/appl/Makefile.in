@@ -1,7 +1,7 @@
 thisconfigdir=.
 myfulldir=appl
 mydir=.
-BUILDTOP=$(REL)$(U)
+BUILDTOP=$(REL)..
 
 MY_SUBDIRS= sample simple user_user bsd gss-sample gssftp telnet
 

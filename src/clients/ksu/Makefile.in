@@ -1,7 +1,7 @@
 thisconfigdir=./..
 myfulldir=clients/ksu
 mydir=ksu
-BUILDTOP=$(REL)$(U)$(S)$(U)
+BUILDTOP=$(REL)../..
 DEFINES = -DGET_TGT_VIA_PASSWD -DPRINC_LOOK_AHEAD -DCMD_PATH='"/bin /local/bin"'
 
 PROG_LIBPATH=-L$(TOPLIBD)

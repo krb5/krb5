@@ -1,3 +1,7 @@
+2002-08-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in: Change $(S)=>/ and $(U)=>.. globally.
+
 2002-05-13  Sam Hartman  <hartmans@mit.edu>
 
 	* arcfour.c: Microsoft indicates that they have changed some key

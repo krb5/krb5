@@ -1,3 +1,7 @@
+2002-08-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in: Change $(S)=>/ and $(U)=>.. globally.
+
 1999-08-31  Ken Raeburn  <raeburn@mit.edu>
 
 	* lib/helpers.exp (unexpire): Move expiration date ahead a few

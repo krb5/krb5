@@ -1,7 +1,7 @@
 thisconfigdir=.
 myfulldir=krb524
 mydir=.
-BUILDTOP=$(REL)$(U)
+BUILDTOP=$(REL)..
 # Copyright 1994 by OpenVision Technologies, Inc.
 # 
 # Permission to use, copy, modify, distribute, and sell this software
@@ -90,8 +90,8 @@ STLIBOBJS = \
 
 GENS	= krb524_err.c krb524_err.h
 
-KRB524_HDR=$(BUILDTOP)$(S)include$(S)krb524.h
-KRB524_ERR_HDR=$(BUILDTOP)$(S)include$(S)krb524_err.h
+KRB524_HDR=$(BUILDTOP)/include/krb524.h
+KRB524_ERR_HDR=$(BUILDTOP)/include/krb524_err.h
 
 all-unix:: $(GENS) 
 all-unix:: all-libs

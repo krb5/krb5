@@ -1,7 +1,7 @@
 thisconfigdir=./..
 myfulldir=tests/gssapi
 mydir=gssapi
-BUILDTOP=$(REL)$(U)$(S)$(U)
+BUILDTOP=$(REL)../..
 DEFINES = -DUSE_AUTOCONF_H
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)

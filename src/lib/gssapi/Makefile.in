@@ -1,7 +1,7 @@
 thisconfigdir=.
 myfulldir=lib/gssapi
 mydir=.
-BUILDTOP=$(REL)$(U)$(S)$(U)
+BUILDTOP=$(REL)../..
 LOCAL_SUBDIRS= generic krb5
 
 ##DOSLIBNAME=$(OUTPRE)gssapi.lib

@@ -57,10 +57,6 @@ Makefiles-postrecurse::
 ABS=/
 # begin relative path
 REL=
-# up-directory
-U=..
-# path separator
-S=/
 # this is magic... should only be used for preceding a program invocation
 C=./
 

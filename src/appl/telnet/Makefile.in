@@ -1,4 +1,4 @@
 thisconfigdir=.
 myfulldir=appl/telnet
 mydir=.
-BUILDTOP=$(REL)$(U)$(S)$(U)
+BUILDTOP=$(REL)../..

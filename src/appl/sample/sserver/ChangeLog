@@ -1,3 +1,7 @@
+2002-08-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in: Change $(S)=>/ and $(U)=>.. globally.
+
 2001-11-05  Ezra Peisach  <epeisach@mit.edu>
 
 	* sserver.c (main): Use GETPEERNAME_ARG3_TYPE instead of int.

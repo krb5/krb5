@@ -1,3 +1,7 @@
+2002-08-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in: Change $(S)=>/ and $(U)=>.. globally.
+
 2001-11-28  Danilo Almeida  <dalmeida@mit.edu>
 
 	* ms2mit.c: Make sure we get a des-cbc-crc session key instead of

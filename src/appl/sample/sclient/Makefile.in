@@ -3,7 +3,7 @@ myfulldir=appl/sample/sclient
 mydir=sample/sclient
 MY_SUBDIRS=.
 
-BUILDTOP=$(REL)$(U)$(S)$(U)$(S)$(U)
+BUILDTOP=$(REL)../../..
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 

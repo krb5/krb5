@@ -2,7 +2,7 @@ thisconfigdir=./..
 myfulldir=lib
 mydir=lib
 MY_SUBDIRS=crypto krb5 des425 @KRB4@ kdb gssapi rpc kadm5
-BUILDTOP=$(REL)$(U)
+BUILDTOP=$(REL)..
 
 MAC_SUBDIRS = crypto krb5 gssapi
 

@@ -1,3 +1,7 @@
+2002-08-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in: Change $(S)=>/ and $(U)=>.. globally.
+
 2002-06-25  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (MY_SUBDIRS): Don't list krb5util.

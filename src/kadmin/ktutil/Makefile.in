@@ -1,7 +1,7 @@
 thisconfigdir=./..
 myfulldir=kadmin/ktutil
 mydir=ktutil
-BUILDTOP=$(REL)$(U)$(S)$(U)
+BUILDTOP=$(REL)../..
 LOCALINCLUDES = $(KRB4_INCLUDES)
 PROG_LIBPATH=-L$(TOPLIBD) $(KRB4_LIBPATH)
 PROG_RPATH=$(KRB5_LIBDIR)

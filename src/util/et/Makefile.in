@@ -5,7 +5,7 @@ mydatadir=$(datadir)/et
 thisconfigdir=.
 myfulldir=util/et
 mydir=.
-BUILDTOP=$(REL)$(U)$(S)$(U)
+BUILDTOP=$(REL)../..
 RELDIR=../util/et
 SED = sed
 
@@ -65,7 +65,7 @@ SHLIB_LIBS=
 SHLIB_LDFLAGS= $(LDFLAGS) @SHLIB_RPATH_DIRS@	
 SHLIB_LIBDIRS= @SHLIB_LIBDIRS@
 
-COM_ERR_HDR=$(BUILDTOP)$(S)include$(S)com_err.h
+COM_ERR_HDR=$(BUILDTOP)/include/com_err.h
 
 all-windows:: $(COM_ERR_HDR)
 

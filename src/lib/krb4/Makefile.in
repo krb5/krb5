@@ -1,7 +1,7 @@
 thisconfigdir=.
 myfulldir=lib/krb4
 mydir=.
-BUILDTOP=$(REL)$(U)$(S)$(U)
+BUILDTOP=$(REL)../..
 LOCALINCLUDES = -I$(BUILDTOP)/include/kerberosIV -I$(srcdir)/../../include/kerberosIV
 
 ##DOS##BUILDTOP = ..\..
@@ -27,7 +27,7 @@ SHLIB_EXPLIBS=-lkrb5 -lcom_err -ldes425 -lk5crypto
 SHLIB_DIRS=-L$(TOPLIBD)
 SHLIB_RDIRS=$(KRB5_LIBDIR)
 
-EHDRDIR=$(BUILDTOP)$(S)include$(S)kerberosIV
+EHDRDIR=$(BUILDTOP)/include/kerberosIV
 
 OBJS	= \
 	$(OUTPRE)cr_auth_repl.$(OBJEXT) \

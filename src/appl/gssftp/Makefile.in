@@ -1,6 +1,6 @@
 thisconfigdir=.
 myfulldir=appl/gssftp
 mydir=.
-BUILDTOP=$(REL)$(U)$(S)$(U)
+BUILDTOP=$(REL)../..
 LOCAL_SUBDIRS=ftp ftpd
 LDFLAGS = -g

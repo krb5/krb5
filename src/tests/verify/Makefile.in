@@ -1,7 +1,7 @@
 thisconfigdir=./..
 myfulldir=tests/verify
 mydir=verify
-BUILDTOP=$(REL)$(U)$(S)$(U)
+BUILDTOP=$(REL)../..
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 
