@@ -214,7 +214,9 @@ static int translate_ai_error (int err)
     switch (err) {
     case 0:
 	return 0;
+#ifdef EAI_ADDRFAMILY
     case EAI_ADDRFAMILY:
+#endif
     case EAI_BADFLAGS:
     case EAI_FAMILY:
     case EAI_SOCKTYPE:
@@ -227,14 +229,18 @@ static int translate_ai_error (int err)
     case EAI_MEMORY:
 	/* Translate to standard errno code.  */
 	return ENOMEM;
+#if EAI_NODATA != EAI_NONAME
     case EAI_NODATA:
+#endif
     case EAI_NONAME:
 	/* Name not known or no address data, but no error.  Do
 	   nothing more.  */
 	return 0;
+#ifdef EAI_SYSTEM
     case EAI_SYSTEM:
 	/* System error, obviously.  */
 	return errno;
+#endif
     default:
 	/* An error code we haven't handled?  */
 	return EINVAL;

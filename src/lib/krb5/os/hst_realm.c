@@ -407,8 +407,10 @@ krb5_error_code
 krb5int_translate_gai_error (int num)
 {
     switch (num) {
+#ifdef EAI_ADDRFAMILY
     case EAI_ADDRFAMILY:
 	return EAFNOSUPPORT;
+#endif
     case EAI_AGAIN:
 	return EAGAIN;
     case EAI_BADFLAGS:
@@ -419,16 +421,20 @@ krb5int_translate_gai_error (int num)
 	return EAFNOSUPPORT;
     case EAI_MEMORY:
 	return ENOMEM;
+#if EAI_NODATA != EAI_NONAME
     case EAI_NODATA:
 	return KRB5_EAI_NODATA;
+#endif
     case EAI_NONAME:
 	return KRB5_EAI_NONAME;
     case EAI_SERVICE:
 	return KRB5_EAI_SERVICE;
     case EAI_SOCKTYPE:
 	return EINVAL;
+#ifdef EAI_SYSTEM
     case EAI_SYSTEM:
 	return errno;
+#endif
     }
     abort ();
     return -1;

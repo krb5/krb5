@@ -1,3 +1,9 @@
+2002-04-10  Danilo Almeida  <dalmeida@mit.edu>
+
+	* locate_kdc.c (translate_ai_error), hst_realm.c
+	(krb5int_translate_gai_error): Test some EAI_ error definitions
+	so that we will also build correctly on Win32 (Winsock 2).
+
 2002-03-26  Ken Raeburn  <raeburn@mit.edu>
 
 	* hostaddr.c (FAI_PREFIX): Delete.
