@@ -14,6 +14,7 @@ static char rcsid_net_read_c[] =
 #endif	/* !lint & !SABER */
 
 #include <krb5/copyright.h>
+#include <krb5/config.h>		/* for stdlib.h config option */
 #include <krb5/ext-proto.h>
 
 /*
