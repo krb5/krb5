@@ -64,8 +64,8 @@ SRCS=	$(srcdir)/afsstring2key.c \
 	$(srcdir)/u_rn_key.c
 
 
-all-unix:: $(OBJS) shared
-all-mac:: $(OBJS) shared
+all-unix:: shared $(OBJS)
+all-mac:: shared $(OBJS)
 all-windows:: $(OBJFILE)
 
 ##DOS$(OBJFILE): $(OBJS)

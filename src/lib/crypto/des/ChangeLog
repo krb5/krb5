@@ -1,3 +1,8 @@
+Fri Feb  7 07:12:52 1997  Richard Basch  <basch@lehman.com>
+
+	* Makefile.in (all-unix, all-mac): Create shared directory
+		before trying to build the object files
+
 Thu Jan 30 21:43:19 1997  Richard Basch  <basch@lehman.com>
 
 	* cbc_cksum.c
