@@ -1,3 +1,7 @@
+2001-06-11  Ezra Peisach  <epeisach@mit.edu>
+
+	* kinit.c (k4_begin): Cleanup assignment in conditional warning.
+
 2001-04-05  Danilo Almeida  <dalmeida@mit.edu>
 
 	* kinit.c (k4_kinit): Use ANSI C-style string continuation.

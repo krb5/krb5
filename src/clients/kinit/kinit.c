@@ -645,8 +645,9 @@ k4_begin(opts, k4)
 		    fprintf(stderr, "Unable to identify user\n");
 		    return 0;
 		}
-		if (k_errno = kname_parse(k4->aname, k4->inst, k4->realm,
-					  name))
+		k_errno = kname_parse(k4->aname, k4->inst, k4->realm,
+				      name);
+		if (k_errno)
 		{
 		    fprintf(stderr, "%s: %s\n", progname, 
 			    krb_get_err_text(k_errno));
