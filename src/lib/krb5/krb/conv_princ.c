@@ -147,7 +147,8 @@ krb5_524_conv_principal(context, princ, name, inst, realm)
 	  compo = krb5_princ_component(context, princ, 0);
 	  p = sconv_list;
 	  while (p->v4_str) {
-	       if (strncmp(p->v5_str, compo->data, compo->length) == 0) {
+	       if (strncmp(p->v5_str, compo->data, compo->length) == 0 && 
+	           strlen(p->v5_str) == compo->length) {
 		   /*
 		    * It is, so set the new name now, and chop off
 		    * instance's domain name if requested.
