@@ -242,6 +242,19 @@ if test $krb5_cv_has_struct_lifconf = yes; then
 fi
 dnl
 dnl
+AC_MSG_CHECKING([for h_errno in netdb.h])
+AC_CACHE_VAL(krb5_cv_header_netdb_h_h_errno,
+[AC_TRY_COMPILE(
+	[#include <netdb.h>],
+	[int x = h_errno;], krb5_cv_header_netdb_h_h_errno=yes,
+	krb5_cv_header_netdb_h_h_errno=no)])
+AC_MSG_RESULT($krb5_cv_header_netdb_h_h_errno)
+if test $krb5_cv_header_netdb_h_h_errno = yes; then
+    AC_DEFINE([HAVE_NETDB_H_H_ERRNO], 1,
+	[Define if netdb.h declares h_errno])
+fi
+dnl
+dnl
 KRB5_AC_NEED_BIND_8_COMPAT
 dnl
 dnl

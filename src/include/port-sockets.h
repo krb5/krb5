@@ -77,6 +77,10 @@ typedef WSABUF sg_buf;
 #include <arpa/inet.h>		/* For inet_ntoa */
 #include <netdb.h>
 
+#ifndef HAVE_NETDB_H_H_ERRNO
+extern int h_errno;		/* In case it's missing, e.g., HP-UX 10.20. */
+#endif
+
 #include <sys/param.h>		/* For MAXHOSTNAMELEN */
 #include <sys/socket.h>		/* For SOCK_*, AF_*, etc */
 #include <sys/time.h>		/* For struct timeval */

@@ -1,3 +1,9 @@
+2004-09-15  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in: Check for h_errno declaration in netdb.h.
+
+	* port-sockets.h: Explicitly declare h_errno if it's missing.
+
 2004-09-10  Tom Yu  <tlyu@mit.edu>
 
 	* port-sockets.h: Remove _XOPEN_SOURCE_EXTENDED hack for netdb.h,
