@@ -1,3 +1,8 @@
+2001-06-20  Ezra Peisach  <epeisach@mit.edu>
+
+	* acquire_cred.c (acquire_init_cred): Include "k5-int.h" for
+	krb5int-cc_default() prototype.
+
 2001-06-18  Ezra Peisach  <epeisach@mit.edu>
 
 	* accept_sec_context.c acquire_cred.c import_sec_context.c
