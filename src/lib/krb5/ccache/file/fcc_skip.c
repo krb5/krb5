@@ -12,7 +12,7 @@
  */
 
 #if !defined(lint) && !defined(SABER)
-static char fcc_read_c[] = "$Id$";
+static char rcsid_fcc_read_c[] = "$Id$";
 #endif /* !lint && !SABER */
 
 #include <krb5/copyright.h>

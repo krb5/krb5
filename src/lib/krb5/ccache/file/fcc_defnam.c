@@ -17,7 +17,7 @@
  */
 
 #if !defined(lint) && !defined(SABER)
-static char fcc_defnam_c[] = "$Id$";
+static char rcsid_fcc_defnam_c[] = "$Id$";
 #endif /* !lint && !SABER */
 
 #include "fcc.h"
