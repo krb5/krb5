@@ -1,3 +1,7 @@
+2003-07-22  Alexandra Ellwood  <lxs@mit.edu>
+
+        * fake-addrinfo.h: Don't use broken getaddrinfo on Mac OS X
+
 2003-07-21  Alexandra Ellwood  <lxs@mit.edu>
 
         * krb5_32.def: Export krb5_principal2salt.
