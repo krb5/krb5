@@ -487,9 +487,10 @@ show_credential(progname, kcontext, cred)
 	    fputs("\t",stdout);
 	else
 	    fputs(", ",stdout);
-	printf("Etype (skey, tkt): %s, "
+	printf("Etype (skey, tkt): %s, ",
 	       etype_string(cred->keyblock.enctype));
-	printf("%s ", etype_string(tkt->enc_part.enctype));
+	printf("%s ",
+	       etype_string(tkt->enc_part.enctype));
 	krb5_free_ticket(kcontext, tkt);
 	extra_field++;
     }
