@@ -1,3 +1,7 @@
+Sat Jul 24 08:50:39 1999  Ezra Peisach  <epeisach@mit.edu>
+
+	* Makefile.in (kshd): Add $(LOGINLIBS).
+
 1999-07-09  Ken Raeburn  <raeburn@mit.edu>
 
 	AIX 4.3.2 changes based on bug report from Joshua Lackey,
