@@ -594,6 +594,8 @@ punt:
 
 #else /* not defined (SIOCGLIFNUM) */
 
+#define SLOP (sizeof (struct ifreq) + 128)
+
 static int
 foreach_localaddr (/*@null@*/ void *data,
 		   int (*pass1fn) (/*@null@*/ void *, struct sockaddr *) /*@*/,
@@ -642,7 +644,7 @@ foreach_localaddr (/*@null@*/ void *data,
 	est_if_count = numifs;
 #endif
     if (current_buf_size == 0)
-	current_buf_size = est_ifreq_size * est_if_count;
+	current_buf_size = est_ifreq_size * est_if_count + SLOP;
     buf = malloc (current_buf_size);
     if (buf == NULL)
 	return errno;
@@ -663,17 +665,21 @@ foreach_localaddr (/*@null@*/ void *data,
        the only indication we get, complicated by the fact that the
        associated address may make the required storage a little
        bigger than the size of an ifreq.  */
-    if (current_buf_size - size < sizeof (struct ifreq) + 40
+    if (current_buf_size - size < SLOP
 #ifdef SIOCGSIZIFCONF
+	/* Unless we hear SIOCGSIZIFCONF is broken somewhere, let's
+	   trust the value it returns.  */
 	&& ifconfsize <= 0
 #elif defined (SIOCGIFNUM)
 	&& numifs <= 0
 #endif
+	/* And we need *some* sort of bounds.  */
+	&& current_buf_size <= 100000
 	) {
 	size_t new_size;
 
 	est_if_count *= 2;
-	new_size = est_ifreq_size * est_if_count;
+	new_size = est_ifreq_size * est_if_count + SLOP;
 	buf = grow_or_free (buf, new_size);
 	if (buf == 0)
 	    return errno;
@@ -682,7 +688,15 @@ foreach_localaddr (/*@null@*/ void *data,
     }
 
     n = size;
+    if (n > current_buf_size)
+	n = current_buf_size;
 
+    /* Note: Apparently some systems put the size (used or wanted?)
+       into the start of the buffer, just none that I'm actually
+       using.  Fix this when there's such a test system available.
+       The Samba mailing list archives mention that NTP looks for the
+       size on these systems: *-fujitsu-uxp* *-ncr-sysv4*
+       *-univel-sysv*.  */
     for (i = 0; i < n; i+= ifreq_size(*ifr) ) {
 	ifr = (struct ifreq *)((caddr_t) buf+i);
 

@@ -1,3 +1,12 @@
+2002-03-05  Ken Raeburn  <raeburn@mit.edu>
+
+	* foreachaddr.c (SLOP): New macro.
+	(foreach_localaddr): Use it as the amount of extra space we look
+	for past the ifreq structures actually filled in.  Add SLOP to the
+	size of the buffer allocated to hold the ifreq structures.  Place
+	an upper bound on the buffer size.  Don't crash if the returned
+	ifc_len is larger than the supplied buffer size.
+
 2002-02-22  Ken Raeburn  <raeburn@mit.edu>
 
 	* krb5.hin, k5-int.h: Use const instead of krb5_const.
