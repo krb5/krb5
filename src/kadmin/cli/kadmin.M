@@ -667,9 +667,11 @@ kadmin:
 \fBktadd\fP [\fB\-k\fP \fIkeytab\fP] [\fB\-q\fP] [\fIprincipal\fP | \fB\-glob\fP \fIprinc-exp\fP] [\fI...\fP]
 Adds a principal or all principals matching
 .I princ-exp
-to a keytab.  Requires the
+to a keytab, randomizing each principal's key in the process.  Requires the
 .I inquire
-privilege.  An entry for each of the principal's unique encryption types
+and 
+.I changepw
+privileges.  An entry for each of the principal's unique encryption types
 is added, ignoring multiple keys with the same encryption type but
 different salt types.  If the
 .B \-k
