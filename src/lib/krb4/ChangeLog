@@ -1,3 +1,8 @@
+2003-06-03  Sam Hartman  <hartmans@mit.edu>
+
+	* g_in_tkt.c (krb_get_in_tkt_preauth_creds): Keep copy of
+	ciphertext while trying different keyprocs 
+
 2003-06-02  Tom Yu  <tlyu@mit.edu>
 
 	* change_password.c (krb_change_password): Explicitly zero the
