@@ -37,7 +37,6 @@
 #include "asn1_err.h"
 #include "kdb5_err.h"
 #include "profile.h"
-#include "adm_err.h"
 extern void krb5_stdcc_shutdown();
 #endif
 #ifdef GSSAPI
@@ -412,7 +411,6 @@ control(int mode)
     (*et_func)(&et_kdb5_error_table);
     (*et_func)(&et_asn1_error_table);
     (*et_func)(&et_prof_error_table);
-    (*et_func)(&et_kadm_error_table);
 #endif
 #ifdef GSSAPI
     (*et_func)(&et_k5g_error_table);

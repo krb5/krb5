@@ -1,3 +1,8 @@
+2002-11-18  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in: Remove references to kadm_err.et for now; changes
+	to move kadm_err.et to lib/krb4 haven't been commmitted yet.
+
 2002-11-15  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Remove some missed references to adm_err.et.
