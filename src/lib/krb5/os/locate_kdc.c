@@ -46,7 +46,7 @@ krb5_locate_kdc(context, realm, addr_pp, naddrs, master_index, nmasters)
     const char	*realm_kdc_names[4];
     char **masterlist, **hostlist, *host, *port, *cp;
     krb5_error_code code;
-    int i, j, out, count;
+    int i, j, out, count, ismaster;
     struct sockaddr *addr_p;
     struct sockaddr_in *sin_p;
     struct hostent *hp;
@@ -103,6 +103,9 @@ krb5_locate_kdc(context, realm, addr_pp, naddrs, master_index, nmasters)
     }
     
     if (master_index) {
+        *master_index = 0;
+	*nmasters = 0;
+
 	realm_kdc_names[0] = "realms";
 	realm_kdc_names[1] = host;
 	realm_kdc_names[2] = "admin_server";
@@ -113,10 +116,7 @@ krb5_locate_kdc(context, realm, addr_pp, naddrs, master_index, nmasters)
 
 	krb5_xfree(host);
 
-	if (code) {
-	    *master_index = 0;
-	    *nmasters = 0;
-	} else {
+	if (code == 0) {
 	    for (i=0; masterlist[i]; i++) {
 		host = masterlist[i];
 
@@ -138,10 +138,9 @@ krb5_locate_kdc(context, realm, addr_pp, naddrs, master_index, nmasters)
 	krb5_xfree(host);
     }
 
-    /* at this point, is master is non-NULL, then either the master kdc
+    /* at this point, if master is non-NULL, then either the master kdc
        is required, and there is one, or the master kdc is not required,
        and there may or may not be one. */
-
 
 #ifdef HAVE_NETINET_IN_H
     if (sec_udpport)
@@ -175,10 +174,15 @@ krb5_locate_kdc(context, realm, addr_pp, naddrs, master_index, nmasters)
 	    continue;
 	}
 
-	if (masterlist)
-	    for (j=0; masterlist[j]; j++)
-		if (strcasecmp(hostlist[i], masterlist[j]) == 0)
+	ismaster = 0;
+	if (masterlist) {
+	    for (j=0; masterlist[j]; j++) {
+		if (strcasecmp(hostlist[i], masterlist[j]) == 0) {
 		    *master_index = out;
+		    ismaster = 1;
+		}
+	    }
+	}
 
 	switch (hp->h_addrtype) {
 
@@ -211,7 +215,7 @@ krb5_locate_kdc(context, realm, addr_pp, naddrs, master_index, nmasters)
 	default:
 	    break;
 	}
-	if (masterlist)
+	if (ismaster)
 	    *nmasters = out - *master_index;
 
 	/* Free the hostlist entry we are looping over. */
