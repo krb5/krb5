@@ -1,3 +1,10 @@
+Fri Apr 7 15:32:04 1995 Keith Vetter (keithv@fusion.com)
+
+	* ccdefname.c: 
+           changed windows stored filename syntax--dropped the 'FILE:' part.
+           changed buffer from malloc to static since we don't want it 
+            ever to fail, and nobody checks it for errors.
+
 Wed Apr 5 16:32:07 1995 Keith Vetter (keithv@fusion.com)
 
 	* get_krbh.c: better error handling--old return values were 

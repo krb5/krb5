@@ -33,12 +33,10 @@ krb5_cc_default_name(context)
     krb5_context context;
 {
     char *name = getenv(KRB5_ENV_CCNAME);
-    static char *name_buf;
+    static char name_buf[160];
     
     if (name == 0) {
-	if (name_buf == 0)
-	    name_buf = malloc (160);
-	
+
 #ifdef HAVE_MACSOCK_H
 	strcpy (name_buf, "STDIO:krb5cc");
 #else
@@ -46,11 +44,11 @@ krb5_cc_default_name(context)
         {
             char defname[160];                  /* Default value */
 
-            strcpy (defname, "FILE:");
-            GetWindowsDirectory (defname+5, 160-5-7);
+            GetWindowsDirectory (defname, sizeof(defname)-7);
             strcat (defname, "\\krb5cc");
+            strcpy (name_buf, "FILE:");
             GetPrivateProfileString(INI_FILES, INI_KRB_CCACHE, defname,
-                name_buf, 160, KERBEROS_INI);
+                name_buf+5, sizeof(name_buf)-5, KERBEROS_INI);
         }
 #else
 	sprintf(name_buf, "FILE:/tmp/krb5cc_%d", getuid());
