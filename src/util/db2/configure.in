@@ -63,7 +63,8 @@ AC_COMPILE_TYPE(u_int32_t, unsigned int)
 
 dnl checks for structures
 dnl checks for compiler characteristics
-AC_C_BIGENDIAN
+dnl AC_C_BIGENDIAN
+AC_CHECK_HEADERS(endian.h)
 AC_C_CONST
 AC_CHECK_SIZEOF(int)
 
