@@ -241,7 +241,35 @@ case "$enableval" in
   *)	AC_MSG_ERROR(bad value "$enableval" for enable-ipv6 option) ;;
 esac
 ])dnl
+dnl
+AC_DEFUN(KRB5_AC_CHECK_TYPE_WITH_HEADERS,[
+AC_MSG_CHECKING(for type $1)
+changequote(<<,>>)dnl
+varname=`echo $1 | sed 's,[ -],_,g'`
+changequote([,])dnl
+AC_CACHE_VAL(krb5_cv_$varname,[
+AC_TRY_COMPILE([$2],[ $1 foo; ], eval krb5_cv_$varname=yes, eval krb5_cv_$varname=no)])
+eval x="\$krb5_cv_$varname"
+AC_MSG_RESULT($x)
+if eval test "$x" = yes ; then
+  AC_DEFINE_UNQUOTED(HAVE_`echo $varname | tr a-z A-Z`)
+fi])
+dnl
+dnl
+AC_DEFUN(KRB5_AC_CHECK_SOCKADDR_STORAGE,[
+KRB5_AC_CHECK_TYPE_WITH_HEADERS(struct sockaddr_storage, [
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_MACSOCK_H
+#include <macsock.h>
+#else
+#include <sys/socket.h>
+#endif
+#include <netinet/in.h>
+])])dnl
 AC_DEFUN(KRB5_AC_CHECK_INET6,[
+AC_REQUIRE([KRB5_AC_CHECK_SOCKADDR_STORAGE])
 AC_MSG_CHECKING(for IPv6 compile-time support)
 AC_CACHE_VAL(krb5_cv_inet6,[
 dnl NetBSD and Linux both seem to have gotten get*info but not getipnodeby*
@@ -262,7 +290,6 @@ AC_TRY_COMPILE([
 #include <netdb.h>
 ],[
   struct sockaddr_in6 in;
-  struct sockaddr_storage x;
   AF_INET6;
   IN6_IS_ADDR_LINKLOCAL (&in.sin6_addr);
 ],krb5_cv_inet6=yes,krb5_cv_inet6=no)])
@@ -528,7 +555,7 @@ dnl KRB5_SOCKADDR_SA_LEN: define HAVE_SA_LEN if sockaddr contains the sa_len
 dnl component
 dnl
 AC_DEFUN([KRB5_SOCKADDR_SA_LEN],[ dnl
-AC_MSG_CHECKING(Whether struct sockaddr contains sa_len)
+AC_MSG_CHECKING(whether struct sockaddr contains sa_len)
 AC_CACHE_VAL(krb5_cv_sockaddr_sa_len,
 [AC_TRY_COMPILE([#include <sys/types.h>
 #include <sys/socket.h>

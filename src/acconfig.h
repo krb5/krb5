@@ -26,6 +26,8 @@
 /* Define if there is a socklen_t type; if not, size_t is probably
    what we should use.  */
 #undef HAVE_SOCKLEN_T
+/* Define if "struct sockaddr_storage" is available.  */
+#undef HAVE_STRUCT_SOCKADDR_STORAGE
 
 /* Define if MIT Project Athena default configuration should be used */
 #undef KRB5_ATHENA_COMPAT

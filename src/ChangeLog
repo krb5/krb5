@@ -1,3 +1,13 @@
+2001-08-31  Ken Raeburn  <raeburn@mit.edu>
+
+	* aclocal.m4 (KRB5_AC_CHECK_TYPE_WITH_HEADERS,
+	KRB5_AC_CHECK_SOCKADDR_STORAGE): New macros.
+	(KRB5_AC_CHECK_INET6): Call KRB5_AC_CHECK_SOCKADDR_STORAGE, but
+	don't require success for IPv6 support.
+	(KRB5_SOCKADDR_SA_LEN): Change first letter of checking message to
+	lowercase.
+	* acconfig.h (HAVE_STRUCT_SOCKADDR_STORAGE): Undef.
+
 2001-08-30  Ken Raeburn  <raeburn@mit.edu>
 
 	* aclocal.m4 (AC_KRB5_TCL_FIND_CONFIG): Do put /usr/include/tcl$v
