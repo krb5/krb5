@@ -99,8 +99,6 @@ typedef unsigned short gid_t;
 #define DEFAULT_TKT_LIFE	255	/* default lifetime for krb_mk_req */
 #endif
 
-#define KRB_NEVERDATE ((KRB4_32)-1)
-
 /* Definition of text structure used to pass text around */
 #define		MAX_KTXT_LEN	1250
 
