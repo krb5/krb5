@@ -129,7 +129,8 @@ krb5_gss_inquire_cred(minor_status, cred_handle, name, lifetime_ret,
        lifetime = GSS_C_INDEFINITE;
 
    if (name) {
-      if ((code = krb5_copy_principal(context, cred->princ, &ret_name))) {
+      if (cred->princ &&
+	  (code = krb5_copy_principal(context, cred->princ, &ret_name))) {
 	 *minor_status = code;
 	 return(GSS_S_FAILURE);
       }

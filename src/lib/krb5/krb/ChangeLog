@@ -1,3 +1,9 @@
+2003-03-02  Sam Hartman  <hartmans@mit.edu>
+
+	* srv_rcache.c (krb5_get_server_rcache): If punctuation or graphic characters in replay ccache name then use  escaping
+
+	* rd_req.c (krb5_rd_req): Allow initializing the replay cache from  the ticket
+
 2003-02-25  Tom Yu  <tlyu@mit.edu>
 
 	* gic_pwd.c (krb5_get_init_creds_password): Don't pass a NULL

@@ -108,42 +108,31 @@ acquire_accept_cred(context, minor_status, desired_name, output_princ, cred)
       return(GSS_S_CRED_UNAVAIL);
    }
 
-   /* figure out what principal to use.  If the default name is
-      requested, use the default sn2princ output */
-
-   if (desired_name == (gss_name_t) NULL) {
-      if ((code = krb5_sname_to_principal(context, NULL, NULL, KRB5_NT_SRV_HST,
-					  &princ))) {
-	 (void) krb5_kt_close(context, kt);
-	 *minor_status = code;
-	 return(GSS_S_FAILURE);
-      }
-      *output_princ = princ;
-   } else {
-      princ = (krb5_principal) desired_name;
-   }
-
-   if ((code = krb5_kt_get_entry(context, kt, princ, 0, 0, &entry))) {
+if (desired_name != GSS_C_NO_NAME) {
+    princ = (krb5_principal) desired_name;
+    if ((code = krb5_kt_get_entry(context, kt, princ, 0, 0, &entry))) {
 	(void) krb5_kt_close(context, kt);
 	if (code == KRB5_KT_NOTFOUND)
-	     *minor_status = KG_KEYTAB_NOMATCH;
+	    *minor_status = KG_KEYTAB_NOMATCH;
 	else
-	     *minor_status = code;
+	    *minor_status = code;
 	return(GSS_S_CRED_UNAVAIL);
-   }
-   krb5_kt_free_entry(context, &entry);
+    }
+    krb5_kt_free_entry(context, &entry);
 
-   /* hooray.  we made it */
+    /* Open the replay cache for this principal. */
+    if ((code = krb5_get_server_rcache(context,
+				       krb5_princ_component(context, princ, 0),
+				       &cred->rcache))) {
+	*minor_status = code;
+	return(GSS_S_FAILURE);
+    }
+
+}
+
+/* hooray.  we made it */
 
    cred->keytab = kt;
-
-   /* Open the replay cache for this principal. */
-   if ((code = krb5_get_server_rcache(context,
-				      krb5_princ_component(context, princ, 0),
-				      &cred->rcache))) {
-       *minor_status = code;
-       return(GSS_S_FAILURE);
-   }
 
    return(GSS_S_COMPLETE);
 }
@@ -413,7 +402,7 @@ krb5_gss_acquire_cred(minor_status, desired_name, time_req,
 
    /* if the princ wasn't filled in already, fill it in now */
 
-   if (!cred->princ)
+   if (!cred->princ && (desired_name != GSS_C_NO_CREDENTIAL))
       if ((code = krb5_copy_principal(context, (krb5_principal) desired_name,
 				      &(cred->princ)))) {
 	 if (cred->ccache)

@@ -31,6 +31,8 @@
 #include <ctype.h>
 #include <stdio.h>
 
+/* Macro for valid RC name characters*/
+#define isinvalidrcname(x) (isgraph(x)||ispunct(x))
 krb5_error_code KRB5_CALLCONV
 krb5_get_server_rcache(krb5_context context, const krb5_data *piece, krb5_rcache *rcptr)
 {
@@ -58,7 +60,7 @@ krb5_get_server_rcache(krb5_context context, const krb5_data *piece, krb5_rcache
     for (i = 0; i < piece->length; i++) {
 	if (piece->data[i] == '\\')
 	    len++;
-	else if (!isgraph((int) piece->data[i]))
+	else if (!isinvalidrcname((int) piece->data[i]))
 	    len += 3;
     }
 
@@ -81,7 +83,7 @@ krb5_get_server_rcache(krb5_context context, const krb5_data *piece, krb5_rcache
 	    cachename[p++] = '\\';
 	    continue;
 	}
-	if (!isgraph((int) piece->data[i])) {
+	if (!isinvalidrcname((int) piece->data[i])) {
 	    sprintf(tmp, "%03o", piece->data[i]);
 	    cachename[p++] = '\\';
 	    cachename[p++] = tmp[0];

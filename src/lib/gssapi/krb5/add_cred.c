@@ -181,7 +181,8 @@ krb5_gss_add_cred(minor_status, input_cred_handle,
 	new_cred->rfc_mech = cred->rfc_mech;
 	new_cred->tgt_expire = cred->tgt_expire;
 
-	code = krb5_copy_principal(context, cred->princ, &new_cred->princ);
+	if (cred->princ)
+	    code = krb5_copy_principal(context, cred->princ, &new_cred->princ);
 	if (code) {
 	    xfree(new_cred);
 
@@ -192,7 +193,8 @@ krb5_gss_add_cred(minor_status, input_cred_handle,
 	if (cred->keytab) {
 	    kttype = krb5_kt_get_type(context, cred->keytab);
 	    if ((strlen(kttype)+2) > sizeof(ktboth)) {
-		krb5_free_principal(context, new_cred->princ);
+		if (new_cred->princ)
+		    krb5_free_principal(context, new_cred->princ);
 		xfree(new_cred);
 
 		*minor_status = ENOMEM;
@@ -207,7 +209,8 @@ krb5_gss_add_cred(minor_status, input_cred_handle,
 				    ktboth+strlen(ktboth),
 				    sizeof(ktboth)-strlen(ktboth));
 	    if (code) {
-		krb5_free_principal(context, new_cred->princ);
+		if(new_cred->princ)
+		    krb5_free_principal(context, new_cred->princ);
 		xfree(new_cred);
 
 		*minor_status = code;
@@ -216,6 +219,7 @@ krb5_gss_add_cred(minor_status, input_cred_handle,
 
 	    code = krb5_kt_resolve(context, ktboth, &new_cred->keytab);
 	    if (code) {
+		if (new_cred->princ)
 		krb5_free_principal(context, new_cred->princ);
 		xfree(new_cred);
 
@@ -233,7 +237,8 @@ krb5_gss_add_cred(minor_status, input_cred_handle,
 					       &new_cred->rcache))) {
 		if (new_cred->keytab)
 		    krb5_kt_close(context, new_cred->keytab);
-		krb5_free_principal(context, new_cred->princ);
+		if (new_cred->princ)
+		    krb5_free_principal(context, new_cred->princ);
 		xfree(new_cred);
 
 		*minor_status = code;
@@ -252,6 +257,7 @@ krb5_gss_add_cred(minor_status, input_cred_handle,
 		    krb5_rc_close(context, new_cred->rcache);
 		if (new_cred->keytab)
 		    krb5_kt_close(context, new_cred->keytab);
+		if (new_cred->princ)
 		krb5_free_principal(context, new_cred->princ);
 		xfree(new_cred);
 
@@ -270,7 +276,8 @@ krb5_gss_add_cred(minor_status, input_cred_handle,
 		    krb5_rc_close(context, new_cred->rcache);
 		if (new_cred->keytab)
 		    krb5_kt_close(context, new_cred->keytab);
-		krb5_free_principal(context, new_cred->princ);
+		if (new_cred->princ)
+		    krb5_free_principal(context, new_cred->princ);
 		xfree(new_cred);
 
 		*minor_status = code;
@@ -289,6 +296,7 @@ krb5_gss_add_cred(minor_status, input_cred_handle,
 		krb5_rc_close(context, new_cred->rcache);
 	    if (new_cred->keytab)
 		krb5_kt_close(context, new_cred->keytab);
+	    if (new_cred->princ)
 	    krb5_free_principal(context, new_cred->princ);
 	    xfree(new_cred);
 

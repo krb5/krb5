@@ -1,3 +1,25 @@
+2003-03-02  Sam Hartman  <hartmans@mit.edu>
+
+	* accept_sec_context.c (krb5_gss_accept_sec_context): Deal with
+	creds without rcache available.  They will be slower.
+
+	* add_cred.c (krb5_gss_add_cred): Deal with princ being null
+
+	* accept_sec_context.c (krb5_gss_accept_sec_context): Populate
+	ctx->here from ticket->server instead of cred->princ.  If
+	cred->princ exists it will be the same, but the previous change
+	may make it null
+
+	* inq_cred.c (krb5_gss_inquire_cred): Allow for null princ
+	component of credentials
+
+	* acquire_cred.c: When acquiring acceptor credentials, allow
+	GSS_C_NO_NAME to mean that we accept any credential.  In this case
+	we do not look to see if the principal is found in the keytab and
+	we leave princ null in the context.  This means you get
+	GSS_C_NO_NAME out from inquire_cred.   If cred->princ is null
+	don't set up a rcache
+
 2003-03-01  Tom Yu  <tlyu@mit.edu>
 
 	* accept_sec_context.c (krb5_gss_accept_sec_context): Don't

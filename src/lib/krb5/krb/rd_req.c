@@ -79,6 +79,9 @@ krb5_rd_req(krb5_context context, krb5_auth_context *auth_context, const krb5_da
         *auth_context = new_auth_context;
     }
 
+    if (!server) {
+	server = request->ticket->server;
+    }
     /* Get an rcache if necessary. */
     if (((*auth_context)->rcache == NULL) && server) {
 	if ((retval = krb5_get_server_rcache(context,

@@ -360,9 +360,11 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
    }
    krb5_auth_con_setflags(context, auth_context,
 			  KRB5_AUTH_CONTEXT_DO_SEQUENCE);
-   if ((code = krb5_auth_con_setrcache(context, auth_context, cred->rcache))) {
-       major_status = GSS_S_FAILURE;
-       goto fail;
+   if (cred->rcache) {
+       if ((code = krb5_auth_con_setrcache(context, auth_context, cred->rcache))) {
+	   major_status = GSS_S_FAILURE;
+	   goto fail;
+       }
    }
    if ((code = krb5_auth_con_setaddrs(context, auth_context, NULL, paddr))) {
        major_status = GSS_S_FAILURE;
@@ -580,7 +582,7 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
        goto fail;
    }
 
-   if ((code = krb5_copy_principal(context, cred->princ, &ctx->here))) {
+   if ((code = krb5_copy_principal(context, ticket->server, &ctx->here))) {
        major_status = GSS_S_FAILURE;
        goto fail;
    }
