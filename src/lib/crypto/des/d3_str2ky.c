@@ -28,7 +28,7 @@
  *
  * 168-fold the input string (appended with any salt), and treat the resulting
  * 168 bits as three DES keys sans parity.  Process each set of 56 bits into
- * a usable DES key with odd parity, and then encrypt the set of three usable
+ * a usable DES key with odd parity, and twice encrypt the set of three usable
  * DES keys using Triple-DES CBC mode.  The result is then treated as three
  * DES keys, and should be corrected for parity.  Any DES key that is weak or
  * semi-weak is to be corrected by eXclusive-ORing with 00000000000000F0.
@@ -107,6 +107,13 @@ const krb5_data FAR * salt;
 
     /* Now, CBC encrypt with itself */
     (void) mit_des3_key_sched(*((mit_des3_cblock *)key), ks);
+    (void) mit_des3_cbc_encrypt((mit_des_cblock *)key,
+				(mit_des_cblock *)key,
+				keyblock->length,
+				((mit_des_key_schedule *)ks)[0],
+				((mit_des_key_schedule *)ks)[1],
+				((mit_des_key_schedule *)ks)[2],
+				zero_ivec, TRUE);
     (void) mit_des3_cbc_encrypt((mit_des_cblock *)key,
 				(mit_des_cblock *)key,
 				keyblock->length,
