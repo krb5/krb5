@@ -90,8 +90,13 @@ extern void krb5_stdcc_shutdown();
  * arbitrary third party applications.  If there is an error, or we
  * decide that we should not version check the calling application
  * then VSflag will be FALSE when the function returns.
+ *
+ * The buffers passed into this function must be at least
+ * APPVERINFO_SIZE bytes long.
  */
-	
+
+#define APPVERINFO_SIZE 256
+
 void GetCallingAppVerInfo( char *AppTitle, char *AppVer, char *AppIni,
 			  BOOL *VSflag)
 {
@@ -190,17 +195,12 @@ void GetCallingAppVerInfo( char *AppTitle, char *AppVer, char *AppIni,
 	strncpy( locAppIni, KERBEROS_INI, sizeof(locAppIni) - 1 );
 	locAppIni[ sizeof(locAppIni) - 1 ] = '\0';
 
-	/*
-	 * We're not supposed to know how long these buffers are, but the
-	 * only place this function gets called from is this file, with them
-	 * being 256 chars long.
-	 */
-	strncpy( AppTitle, locAppTitle, 255);
-	AppTitle[ 255 ] = '\0';
-	strncpy( AppVer, locAppVer, 255);
-	AppVer[ 255 ] = '\0';
-	strncpy( AppIni, locAppIni, 255);
-	AppIni[ 255 ] = '\0';
+	strncpy( AppTitle, locAppTitle, APPVERINFO_SIZE);
+	AppTitle[APPVERINFO_SIZE - 1] = '\0';
+	strncpy( AppVer, locAppVer, APPVERINFO_SIZE);
+	AppVer[APPVERINFO_SIZE - 1] = '\0';
+	strncpy( AppIni, locAppIni, APPVERINFO_SIZE);
+	AppIni[APPVERINFO_SIZE - 1] = '\0';
 
 	/*
 	 * We also need to determine if we want to suppress version
@@ -333,9 +333,9 @@ krb5_error_code krb5_vercheck()
 		if (CallVersionServer(APP_TITLE, APP_VER, APP_INI, NULL))
 			return VERSERV_ERROR;
 #else
-		char AppTitle[256];
-		char AppVer[256];
-		char AppIni[256];
+		char AppTitle[APPVERINFO_SIZE];
+		char AppVer[APPVERINFO_SIZE];
+		char AppIni[APPVERINFO_SIZE];
 		BOOL VSflag=TRUE;
 
 		GetCallingAppVerInfo( AppTitle, AppVer, AppIni, &VSflag);

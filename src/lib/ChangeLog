@@ -1,5 +1,9 @@
 2000-06-02  Danilo Almeida  <dalmeida@mit.edu>
 
+	* win_glue.c (GetCallingAppVerInfo, krb5_vercheck): Use
+	APPVERINFO_SIZE-sized buffers instead of hard-coding a number
+	everywhere.  Document the buffer size in funciton documentation.
+
 	* krb5_32.def: Add krb5int_cc_default for the benefit of GSS API DLL.
 
 2000-05-23  Nalin Dahyabhai  <nalin@redhat.com>
