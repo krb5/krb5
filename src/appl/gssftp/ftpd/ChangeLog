@@ -1,3 +1,8 @@
+2000-10-16  Ezra Peisach  <epeisach@mit.edu>
+
+	* ftpd.c (reply): For gssapi connection, do not include NULL in
+	sealed reply string.
+
 2000-10-03  Ezra Peisach  <epeisach@mit.edu>
 
 	* ftpd.c (login): Return of krb5_cc_get_name is now const char *.

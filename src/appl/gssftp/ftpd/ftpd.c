@@ -1775,7 +1775,7 @@ reply(n, fmt, p0, p1, p2, p3, p4, p5)
 			int conf_state;
 		
 			in_buf.value = in;
-			in_buf.length = strlen(in) + 1;
+			in_buf.length = strlen(in);
 			maj_stat = gss_seal(&min_stat, gcontext,
 					    clevel == PROT_P, /* private */
 					    GSS_C_QOP_DEFAULT,
