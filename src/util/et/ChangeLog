@@ -1,3 +1,8 @@
+Thu Sep  8 22:33:07 1994  Theodore Y. Ts'o  (tytso@pinata)
+
+	* com_err.c (default_com_err_proc): Reversed order of \n\r to make
+		jik happy.
+
 Wed Jul 13 23:19:34 1994  Tom Yu  (tlyu at dragons-lair)
 
 	* Makefile.in: nuke the libcom_err.a.bak stuff
