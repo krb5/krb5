@@ -129,9 +129,11 @@ static char storage[2*RCMD_BUFSIZ];	 /* storage for the decryption */
 static int nstored = 0;
 static char *store_ptr = storage;
 static int twrite(int, char *, int, int);
-static int v5_des_read(), v5_des_write();
+static int v5_des_read(int, char *, int, int), 
+    v5_des_write(int, char *, int, int);
 #ifdef KRB5_KRB4_COMPAT
-static int v4_des_read(), v4_des_write();
+static int v4_des_read(int, char *, int, int), 
+    v4_des_write(int, char *, int, int);
 static C_Block v4_session;
 static int right_justify;
 #endif
@@ -183,7 +185,7 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
 #else
     long oldmask;
 #endif
-    struct sockaddr_in sin, from, local_laddr;
+    struct sockaddr_in sockin, from, local_laddr;
     krb5_creds *get_cred, *ret_cred = 0;
     char c;
     int lport;
@@ -242,10 +244,10 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
 #endif /* POSIX_SIGNALS */
 	    return (-1);
     	}
-    	sin.sin_family = hp->h_addrtype;
-    	memcpy((caddr_t)&sin.sin_addr,hp->h_addr, sizeof(sin.sin_addr));
-    	sin.sin_port = rport;
-    	if (connect(s, (struct sockaddr *)&sin, sizeof (sin)) >= 0)
+    	sockin.sin_family = hp->h_addrtype;
+    	memcpy((caddr_t)&sockin.sin_addr,hp->h_addr, sizeof(sockin.sin_addr));
+    	sockin.sin_port = rport;
+    	if (connect(s, (struct sockaddr *)&sockin, sizeof (sockin)) >= 0)
 	    break;
     	(void) close(s);
     	if (errno == EADDRINUSE)
@@ -256,14 +258,14 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
 	    int oerrno = errno;
 	    
 	    fprintf(stderr,
-    		    "connect to address %s: ", inet_ntoa(sin.sin_addr));
+    		    "connect to address %s: ", inet_ntoa(sockin.sin_addr));
 	    errno = oerrno;
 	    perror(0);
 	    hp->h_addr_list++;
-	    memcpy((caddr_t)&sin.sin_addr,hp->h_addr_list[0],
-		   sizeof(sin.sin_addr));
+	    memcpy((caddr_t)&sockin.sin_addr,hp->h_addr_list[0],
+		   sizeof(sockin.sin_addr));
 	    fprintf(stderr, "Trying %s...\n",
-		    inet_ntoa(sin.sin_addr));
+		    inet_ntoa(sockin.sin_addr));
 	    continue;
     	}
 #endif /* !(defined(ultrix) || defined(sun)) */
@@ -346,9 +348,9 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
     }
     
     if (!laddr) laddr = &local_laddr;
-    if (!faddr) faddr = &sin;
+    if (!faddr) faddr = &sockin;
     else 
-      memcpy(faddr,&sin,sizeof(sin));
+      memcpy(faddr,&sockin,sizeof(sockin));
     
     sin_len = sizeof (struct sockaddr_in);
     if (getsockname(s, (struct sockaddr *)laddr, &sin_len) < 0) {
@@ -544,7 +546,7 @@ k4cmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, ticket, service, realm,
 #else
     sigmasktype oldmask;
 #endif
-    struct sockaddr_in sin, from;
+    struct sockaddr_in sockin, from;
     char c;
     int lport = START_PORT;
     struct hostent *hp;
@@ -583,10 +585,10 @@ k4cmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, ticket, service, realm,
 #endif /* POSIX_SIGNALS */
 	    return (-1);
 	}
-	sin.sin_family = hp->h_addrtype;
-	memcpy((caddr_t)&sin.sin_addr, hp->h_addr, sizeof(sin.sin_addr));
-	sin.sin_port = rport;
-	if (connect(s, (struct sockaddr *)&sin, sizeof (sin)) >= 0)
+	sockin.sin_family = hp->h_addrtype;
+	memcpy((caddr_t)&sockin.sin_addr, hp->h_addr, sizeof(sockin.sin_addr));
+	sockin.sin_port = rport;
+	if (connect(s, (struct sockaddr *)&sockin, sizeof (sockin)) >= 0)
 	    break;
 	(void) close(s);
 	if (errno == EADDRINUSE) {
@@ -598,13 +600,13 @@ k4cmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, ticket, service, realm,
 	    int oerrno = errno;
 
 	    fprintf(stderr,
-		    "connect to address %s: ", inet_ntoa(sin.sin_addr));
+		    "connect to address %s: ", inet_ntoa(sockin.sin_addr));
 	    errno = oerrno;
 	    perror(0);
 	    hp->h_addr_list++;
-	    memcpy((caddr_t)&sin.sin_addr, hp->h_addr_list[0],
-		   sizeof(sin.sin_addr));
-	    fprintf(stderr, "Trying %s...\n", inet_ntoa(sin.sin_addr));
+	    memcpy((caddr_t)&sockin.sin_addr, hp->h_addr_list[0],
+		   sizeof(sockin.sin_addr));
+	    fprintf(stderr, "Trying %s...\n", inet_ntoa(sockin.sin_addr));
 	    continue;
 	}
 #endif						/* !(defined(ultrix) || defined(sun)) */
@@ -662,7 +664,7 @@ k4cmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, ticket, service, realm,
     }
 
     /* set up the needed stuff for mutual auth */
-    *faddr = sin;
+    *faddr = sockin;
     sin_len = sizeof (struct sockaddr_in);
     if (getsockname(s, (struct sockaddr *)laddr, &sin_len) < 0) {
 	perror("getsockname");
@@ -762,25 +764,25 @@ int
 getport(alport)
      int *alport;
 {
-    struct sockaddr_in sin;
+    struct sockaddr_in sockin;
     int s;
-    int len = sizeof(sin);
+    int len = sizeof(sockin);
     
     s = socket(AF_INET, SOCK_STREAM, 0);
     if (s < 0)
 	return (-1);
 
-    memset((char *) &sin, 0,sizeof(sin));
-    sin.sin_family = AF_INET;
-    sin.sin_addr.s_addr = INADDR_ANY;
+    memset((char *) &sockin, 0,sizeof(sockin));
+    sockin.sin_family = AF_INET;
+    sockin.sin_addr.s_addr = INADDR_ANY;
 
-    if (bind(s, (struct sockaddr *)&sin, sizeof (sin)) >= 0) {
+    if (bind(s, (struct sockaddr *)&sockin, sizeof (sockin)) >= 0) {
 	if (alport) {
-	    if (getsockname(s, (struct sockaddr *)&sin, &len) < 0) {
+	    if (getsockname(s, (struct sockaddr *)&sockin, &len) < 0) {
 		(void) close(s);
 		return -1;
 	    } else {
-		*alport = ntohs(sin.sin_port);
+		*alport = ntohs(sockin.sin_port);
 	    }
 	}
 	return s;
@@ -1072,10 +1074,11 @@ static int v5_des_write(fd, buf, len, secondary)
 #ifdef KRB5_KRB4_COMPAT
 
 static int
-v4_des_read(fd, buf, len)
+v4_des_read(fd, buf, len, secondary)
 int fd;
 char *buf;
 int len;
+int secondary;
 {
 	int nreturned = 0;
 	krb5_ui_4 net_len, rd_len;
@@ -1165,10 +1168,11 @@ int len;
 }
 
 static int
-v4_des_write(fd, buf, len)
+v4_des_write(fd, buf, len, secondary)
 int fd;
 char *buf;
 int len;
+int secondary;
 {
 	static char garbage_buf[8];
 	unsigned char *len_buf = (unsigned char *) des_outpkt;
@@ -1224,7 +1228,7 @@ int len;
 
 char *
   strsave(sp)
-char *sp;
+const char *sp;
 {
     register char *ret;
     

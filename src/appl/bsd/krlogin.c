@@ -157,10 +157,10 @@ char copyright[] =
 #ifdef KERBEROS
 #include <krb5.h>
 #include <com_err.h>
-#include "defines.h"
 #ifdef KRB5_KRB4_COMPAT
 #include <kerberosIV/krb.h>
 #endif
+#include "defines.h"
      
 #define RLOGIN_BUFSIZ 5120
 
@@ -264,6 +264,22 @@ krb5_sigtype	lostpeer KRB5_PROTOTYPE((int));
 #if __STDC__
 int setsignal(int sig, krb5_sigtype (*act)());
 #endif
+static int read_wrapper(int fd, char *buf, int size, int *got_esc);
+void try_normal(char **);
+static void mode(int);
+#ifdef POSIX_SIGNALS
+static int reader(sigset_t *);
+static void doit(sigset_t *);
+#else
+static int reader(int);
+static void doit(int);
+#endif
+static int control(unsigned char *, int);
+static void sendwindow(void);
+static void stop(char), echo(char);
+static void writer(void), done(int);
+static int confirm_death (void);
+
 
 /* to allow exits from signal handlers, without conflicting declarations */
 static krb5_sigtype exit_handler() {
@@ -739,7 +755,7 @@ main(argc, argv)
 
 
 
-int confirm_death ()
+static int confirm_death ()
 {
     char hostname[33];
     char input;
@@ -811,9 +827,11 @@ struct	tchars deftc;
 struct	tchars notc =	{ -1, -1, -1, -1, -1, -1 };
 #endif
 
-doit(oldmask)
+static void doit(oldmask)
 #ifdef POSIX_SIGNALS
     sigset_t *oldmask;
+#else
+    int oldmask;
 #endif
 {
 #ifdef POSIX_SIGNALS
@@ -956,7 +974,7 @@ setsignal(sig, act)
 
 
 
-done(status)
+void done(status)
      int status;
 {
 #ifdef POSIX_SIGNALS
@@ -1063,7 +1081,7 @@ int signo;
  * ~^Z	suspend rlogin process.
  * ~^Y  suspend rlogin process, but leave reader alone.
  */
-writer()
+static void writer()
 {
     int n_read;
     char buf[1024];
@@ -1198,7 +1216,7 @@ writer()
    was a read error (other than EINTR) and errno is set appropriately. 
 */
 
-int read_wrapper(fd,buf,size,got_esc) 
+static int read_wrapper(fd,buf,size,got_esc) 
      int fd;
      char *buf;
      int size;
@@ -1258,7 +1276,7 @@ int read_wrapper(fd,buf,size,got_esc)
   return return_length;
 }
 
-echo(c)
+static void echo(c)
      register char c;
 {
     char buf[8];
@@ -1281,7 +1299,7 @@ echo(c)
 
 
 
-stop(cmdc)
+static void stop(cmdc)
      char cmdc;
 {
 #ifdef POSIX_SIGNALS
@@ -1337,7 +1355,7 @@ int signo;
 /*
  * Send the window size to the server via the magic escape
  */
-sendwindow()
+static void sendwindow()
 {
     char obuf[4 + sizeof (struct winsize)];
     struct winsize *wp = (struct winsize *)(obuf+4);
@@ -1479,7 +1497,7 @@ void oob()
    quote rule so that binary data from the server does not confuse the
    client.  */
 
-int control(cp, n)
+static int control(cp, n)
      unsigned char *cp;
      int n;
 {
@@ -1500,6 +1518,7 @@ int control(cp, n)
 /*
  * reader: read from remote: line -> 1 
  */
+static int 
 reader(oldmask)
 #ifdef POSIX_SIGNALS
     sigset_t *oldmask;
@@ -1612,7 +1631,8 @@ error:
 
 
 
-mode(f)
+static void mode(f)
+int f;
 {
 #ifdef POSIX_TERMIOS
     struct termios newtty;
@@ -1784,7 +1804,7 @@ prf(f, a1, a2, a3, a4, a5)
 void try_normal(argv)
      char **argv;
 {
-    register char *host;
+    register char *nhost;
 #ifdef POSIX_SIGNALS
     struct sigaction sa;
     sigset_t mask;
@@ -1798,12 +1818,12 @@ void try_normal(argv)
 	    UCB_RLOGIN);
     fflush(stderr);
     
-    host = strrchr(argv[0], '/');
-    if (host)
-      host++;
+    nhost = strrchr(argv[0], '/');
+    if (nhost)
+      nhost++;
     else
-      host = argv[0];
-    if (!strcmp(host, "rlogin"))
+      nhost = argv[0];
+    if (!strcmp(nhost, "rlogin"))
       argv++;
     
 #ifdef POSIX_SIGNALS

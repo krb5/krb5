@@ -27,6 +27,9 @@
 
 #include "k5-int.h"
 
+#define SKIP_V4_PROTO /* To skip the krb4 prototypes */
+#include "defines.h"
+
 /* Decode, decrypt and store the forwarded creds in the local ccache. */
 krb5_error_code
 rd_and_store_for_creds(context, auth_context, inbuf, ticket, ccache)

@@ -41,3 +41,26 @@ extern int getport (int *);
 extern void rcmd_stream_init_krb5 (krb5_keyblock *in_keyblock,
 				   int encrypt_flag, int lencheck,
 				   int am_client, enum kcmd_proto protonum);
+
+extern void rcmd_stream_init_normal(void);
+
+#if defined(KRB5_KRB4_COMPAT) && !defined(SKIP_V4_PROTO)
+extern void rcmd_stream_init_krb4(C_Block, int, int, int);
+
+extern int k4cmd(int *sock, char **ahost, u_short rport, char *locuser, 
+		 char *remuser, char *cmd, int *fd2p, KTEXT ticket,
+		 char *service, char *realm, CREDENTIALS *cred, 
+		 Key_schedule schedule, MSG_DAT *msg_data, 
+		 struct sockaddr_in *laddr, struct sockaddr_in *faddr, 
+		 long authopts, int anyport);
+#endif
+
+#ifndef HAVE_STRSAVE
+extern char *strsave(const char *sp);
+#endif
+
+krb5_error_code rd_and_store_for_creds(krb5_context context, 
+				       krb5_auth_context auth_context,
+				       krb5_data *inbuf, krb5_ticket *ticket,
+				       krb5_ccache *ccache);
+

@@ -71,6 +71,10 @@ char copyright[] =
 #include <k5-util.h>
 #include <com_err.h>
 
+#ifdef KRB5_KRB4_COMPAT
+#include <kerberosIV/krb.h>
+#endif
+
 #include "defines.h"
 
 #define RCP_BUFSIZ 4096
@@ -84,21 +88,23 @@ krb5_encrypt_block eblock;         /* eblock for encrypt/decrypt */
 krb5_context bsd_context;
 
 #ifdef KRB5_KRB4_COMPAT
-#include <kerberosIV/krb.h>
 Key_schedule v4_schedule;
 CREDENTIALS v4_cred;
 KTEXT_ST v4_ticket;
 MSG_DAT v4_msg_data;
 #endif
 
-void	v4_send_auth(), try_normal();
-char	**save_argv();
+void	v4_send_auth(char *, char *), try_normal(char **);
+char	**save_argv(int, char **);
 #ifndef HAVE_STRSAVE
 char	*strsave();
 #endif
 int	rcmd_stream_write(), rcmd_stream_read();
-void 	usage(), sink(), source(), rsource(), verifydir(), answer_auth();
-int	response(), hosteq(), okname(), susystem();
+void 	usage(void), sink(int, char **),
+    source(int, char **), rsource(char *, struct stat *), verifydir(char *), 
+    answer_auth(char *, char *);
+int	response(void), hosteq(char *, char *), okname(char *), 
+    susystem(char *);
 int	encryptflag = 0;
 
 #ifndef UCB_RCP
@@ -108,7 +114,7 @@ int	encryptflag = 0;
 #endif /* KERBEROS */
 
 int	rem;
-char	*colon();
+char	*colon(char *);
 int	errs;
 krb5_sigtype	lostconn();
 int	iamremote, targetshouldbedirectory;
@@ -122,7 +128,9 @@ int	port = 0;
 struct buffer {
     int	cnt;
     char	*buf;
-} *allocbuf();
+};
+
+struct buffer *allocbuf(struct buffer *, int, int);
 
 #define	NULLBUF	(struct buffer *) 0
   

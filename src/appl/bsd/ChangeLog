@@ -1,3 +1,16 @@
+2001-03-12  Ezra Peisach  <epeisach@mit.edu>
+
+	* defines.h: Add prototypes for rcmd_stream_init_normal(),
+	rcmd_stream_init_krb4(), strsave() and rd_and_store_for_creds()
+
+	* Makefile.in: Add dependency of forward.o on defines.h
+
+	* forward.c: Include defines.h for prototypes.
+
+	* kcmd.c, krcp.c, krlogin.c, krlogind.c, krsh.c: Provide full prototype
+	for local functions and move include of kerberosIV/krb.h before
+	defines.h.
+
 2001-01-26  Tom Yu  <tlyu@mit.edu>
 
 	* krshd.c: Get path for NOLOGIN file from paths.h if present,

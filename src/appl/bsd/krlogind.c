@@ -317,11 +317,11 @@ static	int Pfd;
 #define VHANG_LAST		/* vhangup must occur on close, not open */
 #endif
 
-void	fatal(), fatalperror(), doit(), usage(), do_krb_login(), getstr();
-void	protocol();
-int	princ_maps_to_lname(), default_realm();
+void	fatal(int, const char *), fatalperror(int, const char *), doit(int, struct sockaddr_in *), usage(void), do_krb_login(char *, char *), getstr(int, char *, int, char *);
+void	protocol(int, int);
+int	princ_maps_to_lname(krb5_principal, char *), default_realm(krb5_principal);
 krb5_sigtype	cleanup();
-krb5_error_code recvauth();
+krb5_error_code recvauth(int *);
 
 /* There are two authentication related masks:
    * auth_ok and auth_sent.
@@ -558,9 +558,9 @@ int main(argc, argv)
 	if (getpeername(0, (struct sockaddr *)&from, &fromlen) < 0) {
 	    syslog(LOG_ERR,"Can't get peer name of remote host: %m");
 #ifdef STDERR_FILENO
-	    fatal(STDERR_FILENO, "Can't get peer name of remote host", 1);
+	    fatal(STDERR_FILENO, "Can't get peer name of remote host");
 #else
-	    fatal(2, "Can't get peer name of remote host", 1);
+	    fatal(2, "Can't get peer name of remote host");
 #endif
 	}
 	fd = 0;
@@ -906,6 +906,7 @@ unsigned char	oobdata[] = {TIOCPKT_WINDOW};
 char    oobdata[] = {0};
 #endif
 
+static 
 int sendoob(fd, byte)
      int fd;
      char *byte;
@@ -936,7 +937,7 @@ int sendoob(fd, byte)
  * in the data stream.  For now, we are only willing to handle
  * window size changes.
  */
-int control(pty, cp, n)
+static int control(pty, cp, n)
      int pty;
      unsigned char *cp;
      int n;
@@ -1151,7 +1152,7 @@ krb5_sigtype cleanup()
 
 void fatal(f, msg)
      int f;
-     char *msg;
+     const char *msg;
 {
     char buf[512];
     int out = 1 ;          /* Output queue of f */
@@ -1190,7 +1191,7 @@ void fatal(f, msg)
 
 void fatalperror(f, msg)
      int f;
-     char *msg;
+     const char *msg;
 {
     char buf[512];
     

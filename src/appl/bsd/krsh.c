@@ -64,10 +64,10 @@ char copyright[] =
 #ifdef KERBEROS
 #include <krb5.h>
 #include <com_err.h>
-#include "defines.h"
 #ifdef KRB5_KRB4_COMPAT
 #include <kerberosIV/krb.h>
 #endif
+#include "defines.h"
 #endif /* KERBEROS */
 
 #ifdef KRB5_KRB4_COMPAT
@@ -103,7 +103,7 @@ CREDENTIALS v4_cred;
 
 int	encrypt_flag = 0;
 char	*krb_realm = (char *)0;
-void	try_normal();
+void	try_normal(char **);
 
 #endif /* KERBEROS */
 

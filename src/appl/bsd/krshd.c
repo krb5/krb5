@@ -191,7 +191,10 @@ krb5_context bsd_context;
 char *srvtab = NULL;
 krb5_keytab keytab = NULL;
 krb5_ccache ccache = NULL;
-void fatal();
+int default_realm(krb5_principal principal);
+static int princ_maps_to_lname(krb5_principal principal, char *luser);
+
+void fatal(int, const char *);
 
 int require_encrypt = 0;
 int do_encrypt = 0;
@@ -202,11 +205,15 @@ int maxhostlen = 0;
 int stripdomain = 1;
 int always_ip = 0;
 
+static krb5_error_code recvauth(int netfd, struct sockaddr_in peersin,
+				int *valid_checksum);
+
 #else /* !KERBEROS */
 
 #define ARGSTR	"RD:?"
      
 #endif /* KERBEROS */
+
      
 #ifndef HAVE_KILLPG
 #define killpg(pid, sig) kill(-(pid), (sig))
@@ -242,7 +249,8 @@ extern
 /*VARARGS1*/
 void	error();
 
-void usage(), getstr(), doit();
+void usage(void), getstr(int, char *, int, char *), 
+    doit(int, struct sockaddr_in *);
 
 #ifdef __SCO__
 /* sco has getgroups and setgroups but no initgroups */
@@ -1726,7 +1734,7 @@ void usage()
 
 
 
-int princ_maps_to_lname(principal, luser)	
+static int princ_maps_to_lname(principal, luser)	
      krb5_principal principal;
      char *luser;
 {
@@ -1772,9 +1780,9 @@ int default_realm(principal)
 #define	KRB_SENDAUTH_VERS	"AUTHV0.1" /* MUST be KRB_SENDAUTH_VLEN
 					      chars */
 
-krb5_error_code
-recvauth(netf, peersin, valid_checksum)
-     int netf;
+static krb5_error_code
+recvauth(netfd, peersin, valid_checksum)
+     int netfd;
      struct sockaddr_in peersin;
      int *valid_checksum;
 {
@@ -1798,7 +1806,7 @@ recvauth(netf, peersin, valid_checksum)
 
     *valid_checksum = 0;
     len = sizeof(laddr);
-    if (getsockname(netf, (struct sockaddr *)&laddr, &len)) {
+    if (getsockname(netfd, (struct sockaddr *)&laddr, &len)) {
 	    exit(1);
     }
 	
@@ -1815,7 +1823,7 @@ recvauth(netf, peersin, valid_checksum)
     if (status = krb5_auth_con_init(bsd_context, &auth_context))
 	return status;
 
-    if (status = krb5_auth_con_genaddrs(bsd_context, auth_context, netf,
+    if (status = krb5_auth_con_genaddrs(bsd_context, auth_context, netfd,
 			KRB5_AUTH_CONTEXT_GENERATE_REMOTE_FULL_ADDR))
 	return status;
 
@@ -1840,7 +1848,7 @@ recvauth(netf, peersin, valid_checksum)
     }
 
 #ifdef KRB5_KRB4_COMPAT
-    status = krb5_compat_recvauth_version(bsd_context, &auth_context, &netf,
+    status = krb5_compat_recvauth_version(bsd_context, &auth_context, &netfd,
 				  NULL,		/* Specify daemon principal */
 				  0, 		/* no flags */
 				  keytab, /* normally NULL to use v5srvtab */
@@ -1855,7 +1863,7 @@ recvauth(netf, peersin, valid_checksum)
 				  &auth_sys, 	/* which authentication system*/
 				  &v4_kdata, 0, &version);
 #else
-    status = krb5_recvauth_version(bsd_context, &auth_context, &netf,
+    status = krb5_recvauth_version(bsd_context, &auth_context, &netfd,
 				   NULL,        /* daemon principal */
 				   0,           /* no flags */
 				   keytab,      /* normally NULL to use v5srvtab */
@@ -1869,15 +1877,15 @@ recvauth(netf, peersin, valid_checksum)
 	    /*
 	     * clean up before exiting
 	     */
-	    getstr(netf, locuser, sizeof(locuser), "locuser");
-	    getstr(netf, cmdbuf, sizeof(cmdbuf), "command");
-	    getstr(netf, remuser, sizeof(locuser), "remuser");
+	    getstr(netfd, locuser, sizeof(locuser), "locuser");
+	    getstr(netfd, cmdbuf, sizeof(cmdbuf), "command");
+	    getstr(netfd, remuser, sizeof(locuser), "remuser");
 	}
 	return status;
     }
 
-    getstr(netf, locuser, sizeof(locuser), "locuser");
-    getstr(netf, cmdbuf, sizeof(cmdbuf), "command");
+    getstr(netfd, locuser, sizeof(locuser), "locuser");
+    getstr(netfd, cmdbuf, sizeof(cmdbuf), "command");
 
 #ifdef KRB5_KRB4_COMPAT
     if (auth_sys == KRB5_RECVAUTH_V4) {
@@ -1904,13 +1912,13 @@ recvauth(netf, peersin, valid_checksum)
 	
     kcmd_proto = KCMD_UNKNOWN_PROTOCOL;
     if (version.length != 9)
-	fatal (netf, "bad application version length");
+	fatal (netfd, "bad application version length");
     if (!memcmp (version.data, "KCMDV0.1", 9))
 	kcmd_proto = KCMD_OLD_PROTOCOL;
     if (!memcmp (version.data, "KCMDV0.2", 9))
 	kcmd_proto = KCMD_NEW_PROTOCOL;
 
-    getstr(netf, remuser, sizeof(locuser), "remuser");
+    getstr(netfd, remuser, sizeof(locuser), "remuser");
 
     if ((status = krb5_unparse_name(bsd_context, ticket->enc_part2->client, 
 				    &kremuser)))
@@ -1930,7 +1938,7 @@ recvauth(netf, peersin, valid_checksum)
 
 	if (chksumbuf == 0)
 	    goto error_cleanup;
-	if (getsockname(netf, (struct sockaddr *) &adr, &adr_length) != 0)
+	if (getsockname(netfd, (struct sockaddr *) &adr, &adr_length) != 0)
 	    goto error_cleanup;
 
 	sprintf(chksumbuf,"%u:", ntohs(adr.sin_port));
@@ -1964,14 +1972,14 @@ recvauth(netf, peersin, valid_checksum)
 	status = krb5_auth_con_getremotesubkey (bsd_context, auth_context,
 						&key);
 	if (status)
-	    fatal (netf, "Server can't get session subkey");
+	    fatal (netfd, "Server can't get session subkey");
 	if (!key && do_encrypt && kcmd_proto == KCMD_NEW_PROTOCOL)
-	    fatal (netf, "No session subkey sent");
+	    fatal (netfd, "No session subkey sent");
 	if (key && kcmd_proto == KCMD_OLD_PROTOCOL) {
 #ifdef HEIMDAL_FRIENDLY
 	    key = 0;
 #else
-	    fatal (netf, "Session subkey not allowed in old kcmd protocol");
+	    fatal (netfd, "Session subkey not allowed in old kcmd protocol");
 #endif
 	}
 	if (key == 0)
@@ -1983,7 +1991,7 @@ recvauth(netf, peersin, valid_checksum)
      * key here, and we do not want krb5_free_ticket() to destroy it. */
     ticket->enc_part2->session = 0;
 
-    if ((status = krb5_read_message(bsd_context, (krb5_pointer)&netf,
+    if ((status = krb5_read_message(bsd_context, (krb5_pointer)&netfd,
 				    &inbuf))) {
 	error("Error reading message: %s\n", error_message(status));
 	exit(1);
@@ -2018,7 +2026,7 @@ recvauth(netf, peersin, valid_checksum)
 
 void fatal(f, msg)
      int f;
-     char *msg;
+     const char *msg;
 {
     char buf[512];
 #ifndef POSIX_TERMIOS
