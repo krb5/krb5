@@ -42,6 +42,10 @@
 #include <stddef.h>
 #include <ctype.h>
 
+#if defined(__linux__) && defined(KRB5_USE_INET6)
+#define LINUX_IPV6_HACK
+#endif
+
 #if defined(TEST) || defined(DEBUG)
 # define FAI_PREFIX krb5int
 # include "fake-addrinfo.c"
@@ -265,6 +269,68 @@ get_lifconf (int af, int s, size_t *lenp, /*@out@*/ char *buf)
     *lenp = lifc.lifc_len;
     /*@=matchanyintegral@*/
     return ret;
+}
+#endif
+
+#ifdef LINUX_IPV6_HACK
+/* Hack workaround until they get a real interface for this.  */
+struct linux_ipv6_addr_list {
+    struct sockaddr_in6 addr;
+    struct linux_ipv6_addr_list *next;
+};
+static struct linux_ipv6_addr_list *
+get_linux_ipv6_addrs ()
+{
+    struct linux_ipv6_addr_list *lst = 0;
+    FILE *f;
+
+    /* _PATH_PROCNET_IFINET6 */
+    f = fopen("/proc/net/if_inet6", "r");
+    if (f) {
+	char ifname[21];
+	int idx, pfxlen, scope, dadstat;
+	struct in6_addr a6;
+	struct linux_ipv6_addr_list *nw;
+	int i, addrbyte[16];
+
+	while (fscanf(f,
+		      "%2x%2x%2x%2x%2x%2x%2x%2x%2x%2x%2x%2x%2x%2x%2x%2x"
+		      " %2x %2x %2x %2x %20s\n",
+		      &addrbyte[0], &addrbyte[1], &addrbyte[2], &addrbyte[3],
+		      &addrbyte[4], &addrbyte[5], &addrbyte[6], &addrbyte[7],
+		      &addrbyte[8], &addrbyte[9], &addrbyte[10], &addrbyte[11],
+		      &addrbyte[12], &addrbyte[13], &addrbyte[14],
+		      &addrbyte[15],
+		      &idx, &pfxlen, &scope, &dadstat, ifname) != EOF) {
+	    for (i = 0; i < 16; i++)
+		a6.s6_addr[i] = addrbyte[i];
+	    if (scope != 0)
+		continue;
+#if 0
+	    switch (scope) {
+	    case 0:
+	    default:
+		break;
+	    case IPV6_ADDR_LINKLOCAL:
+	    case IPV6_ADDR_SITELOCAL:
+	    case IPV6_ADDR_COMPATv4:
+	    case IPV6_ADDR_LOOPBACK:
+		continue;
+	    }
+#endif
+	    nw = malloc (sizeof (struct linux_ipv6_addr_list));
+	    if (nw == 0)
+		continue;
+	    memset (nw, 0, sizeof (*nw));
+	    nw->addr.sin6_addr = a6;
+	    nw->addr.sin6_family = AF_INET6;
+	    /* Ignore other fields, we don't actually use them here.  */
+	    nw->next = lst;
+	    lst = nw;
+	}
+	fclose (f);
+    }
+    return lst;
 }
 #endif
 
@@ -508,6 +574,10 @@ punt:
 #ifdef SIOCGIFNUM
     int numifs = -1;
 #endif
+#ifdef LINUX_IPV6_HACK
+    struct linux_ipv6_addr_list *linux_ipv6_addrs = get_linux_ipv6_addrs ();
+    struct linux_ipv6_addr_list *lx_v6;
+#endif
 
     s = socket (USE_AF, USE_TYPE, USE_PROTO);
     if (s < 0)
@@ -622,12 +692,18 @@ punt:
 	/*@=moduncon@*/
     }
 
+#ifdef LINUX_IPV6_HACK
+    for (lx_v6 = linux_ipv6_addrs; lx_v6; lx_v6 = lx_v6->next)
+	if ((*pass1fn) (data, (struct sockaddr *) &lx_v6->addr))
+	    goto punt;
+#endif
+
     /*@-moduncon@*/
     if (betweenfn != NULL && (*betweenfn)(data))
 	goto punt;
     /*@=moduncon@*/
 
-    if (pass2fn)
+    if (pass2fn) {
 	for (i = 0; i < n; i+= ifreq_size(*ifr) ) {
 	    ifr = (struct ifreq *)((caddr_t) buf+i);
 
@@ -640,11 +716,24 @@ punt:
 		goto punt;
 	    /*@=moduncon@*/
 	}
+#ifdef LINUX_IPV6_HACK
+	for (lx_v6 = linux_ipv6_addrs; lx_v6; lx_v6 = lx_v6->next)
+	    if ((*pass2fn) (data, (struct sockaddr *) &lx_v6->addr))
+		goto punt;
+#endif
+    }
  punt:
     /*@-moduncon@*/
     closesocket(s);
     /*@=moduncon@*/
     free (buf);
+#ifdef LINUX_IPV6_HACK
+    while (linux_ipv6_addrs) {
+	lx_v6 = linux_ipv6_addrs->next;
+	free (linux_ipv6_addrs);
+	linux_ipv6_addrs = lx_v6;
+    }
+#endif
 
     return retval;
 #endif /* not HAVE_IFADDRS_H */

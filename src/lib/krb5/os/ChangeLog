@@ -1,3 +1,12 @@
+2002-02-10  Ken Raeburn  <raeburn@mit.edu>
+
+	* localaddr.c (LINUX_IPV6_HACK) [__linux__&& KRB5_USE_INET6]:
+	Define macro.
+	(get_linux_ipv6_addrs) [LINUX_IPV6_HACK]: New function, reads
+	addresses from /proc/net/if_inet6.
+	(foreach_localaddr) [!HAVE_IFADDRS_H && !SIOCGLIFNUM &&
+	LINUX_IPV6_HACK]: Include ipv6 addresses.
+
 2002-01-09  Ken Raeburn  <raeburn@mit.edu>
 
 	* hst_realm.c (EAFNOSUPPORT): On Windows, translate to
