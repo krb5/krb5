@@ -24,9 +24,17 @@
 # 
 NormalLibraryObjectRule()
 
-OBJS=	rnd_confoun.o localaddr.o ustime.o
+#if HasMemmove
+MMOBJS=
+MMSRCS=
+#else
+MMOBJS= memmove.o
+MMSRCS= memmove.c
+#endif
 
-SRCS=	rnd_confoun.c localaddr.c ustime.c
+OBJS=	rnd_confoun.o localaddr.o ustime.o $(MMOBJS)
+
+SRCS=	rnd_confoun.c localaddr.c ustime.c $(MMSRCS)
 
 SubdirLibraryRule($(OBJS))
 
@@ -40,3 +48,5 @@ localaddr.c: ../../krb5/os/localaddr.c
 ustime.c: ../../krb5/os/ustime.c
 	$(LN) ../../krb5/os/ustime.c $@
 
+memmove.c: ../../krb5/posix/memmove.c
+	$(LN) ../../krb5/posix/memmove.c $@
