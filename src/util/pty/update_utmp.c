@@ -532,7 +532,7 @@ pty_update_utmp(int process_type, int pid, const char *username,
 #ifdef __hpux
     strcpy(utmp_id, cp);
 #else
-    if (len >= 2 && *(cp - 1) != '/')
+    if (len > 2 && *(cp - 1) != '/')
       sprintf(utmp_id, "k%s", cp - 1);
     else
       sprintf(utmp_id, "k0%s", cp);
