@@ -34,10 +34,11 @@ static char rcsid_defname_c[] =
 
 #include <stdio.h>
 #include <krb5/ext-proto.h>
+#include <krb5/osconf.h>
 
 char *krb5_cc_default_name()
 {
-    char *name = getenv ("KRB5CCNAME");
+    char *name = getenv(KRB5_ENV_CCNAME);
     static char *name_buf;
     
     if (name == 0) {
