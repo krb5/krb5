@@ -1,3 +1,7 @@
+2002-12-18  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (check): Remove test_db before running tests.
+
 2002-12-16  Ezra Peisach  <epeisach@bu.edu>
 
 	* Makefile.in: Change to allow compilation with-system-db and
