@@ -56,11 +56,13 @@ extern int errno;
 
 #ifdef POSIX_TERMIOS
 #define cleanup(errcode) (void) signal(SIGINT, ointrfunc); tcsetattr(fd, TCSANOW, &save_control); return errcode;
-#elif defined(sun)
-#define cleanup(errcode) (void) signal(SIGINT, ointrfunc); stty(fd, (char *)&tty_savestate); return errcode;
 #else
+#ifdef sun
+#define cleanup(errcode) (void) signal(SIGINT, ointrfunc); stty(fd, (char *)&tty_savestate); return errcode;
+#else /* !sun */
 #define cleanup(errcode) (void) signal(SIGINT, ointrfunc); ioctl(fd, TIOCSETP, (char *)&tty_savestate); return errcode;
-#endif
+#endif /* sun */
+#endif /* POSIX_TERMIOS */
 
 static jmp_buf pwd_jump;
 
