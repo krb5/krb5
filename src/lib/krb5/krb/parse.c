@@ -114,7 +114,7 @@ krb5_principal *principal;
     for (ncomponents = 1, cp = name,
 	 endcomponent = index(name, COMPONENT_SEP);
 	 cp && cp <= realmptr; 
-	 ncomponents++, endcomponent = index(cp, COMPONENT_SEP)) {
+	 ncomponents++) {
 
 	if (endcomponent && endcomponent < realmptr) {
 	    retprinc[ncomponents]->length = endcomponent - cp;
@@ -135,9 +135,10 @@ krb5_principal *principal;
 	strncpy(retprinc[ncomponents]->data, cp,
 		retprinc[ncomponents]->length);
 	retprinc[ncomponents]->data[retprinc[ncomponents]->length] = '\0';
-	if (endcomponent)
+	if (endcomponent) {
 	    cp = endcomponent + 1;	/* move past divider */
-	else
+	    endcomponent = index(cp, COMPONENT_SEP);
+	} else
 	    cp = 0;
     }
     *principal = retprinc;
