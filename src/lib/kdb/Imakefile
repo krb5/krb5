@@ -1,5 +1,7 @@
+SRCS=encrypt_key.c kdb_dbm.c verify_mky.c
+
 NormalLibraryObjectRule()
 
-OBJS=kdb_dbm.o
+OBJS= encrypt_key.o kdb_dbm.o verify_mky.o
 
 NormalLibraryTarget(kdb,$(OBJS))
