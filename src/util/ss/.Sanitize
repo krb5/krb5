@@ -32,8 +32,8 @@ configure
 configure.in
 copyright.h
 ct.y
-ct_c.awk
-ct_c.sed
+ct_c.awk.in
+ct_c.sed.in
 data.c
 error.c
 execute_cmd.c

@@ -1,3 +1,7 @@
+Thu Aug 24 18:19:54 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* .Sanitize: Updated to reflect ct_c.* to ct_c.*.in filename changes.
+
 Mon Aug  7 19:14:28 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in (mk_cmds): Add $(SHELL) to invocation of
