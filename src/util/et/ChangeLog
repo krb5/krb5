@@ -1,3 +1,8 @@
+2002-09-02  Ken Raeburn  <raeburn@mit.edu>
+
+	* com_err.c (default_com_err_proc, com_err_va, set_com_err_hook):
+	Define with prototype syntax.
+
 2002-08-29  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in: Revert $(S)=>/ change, for Windows support.

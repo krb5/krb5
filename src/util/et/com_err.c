@@ -36,13 +36,7 @@ static void MacMessageBox(char *errbuf);
 static /*@null@*/ et_old_error_hook_func com_err_hook = 0;
 
 static void default_com_err_proc (const char *whoami, errcode_t code,
-				  const char *fmt, va_list ap);
-
-static void default_com_err_proc(whoami, code, fmt, ap)
-	const char *whoami;
-	errcode_t code;
-	const char *fmt;
-	va_list ap;
+				  const char *fmt, va_list ap)
 {
 #if defined(_WIN32) || defined(macintosh)
 
@@ -98,11 +92,10 @@ static void default_com_err_proc(whoami, code, fmt, ap)
 #endif
 }
 
-void KRB5_CALLCONV com_err_va(whoami, code, fmt, ap)
-	const char *whoami;
-	errcode_t code;
-	const char *fmt;
-	va_list ap;
+void KRB5_CALLCONV com_err_va(const char *whoami,
+			      errcode_t code,
+			      const char *fmt,
+			      va_list ap)
 {
 	if (!com_err_hook)
 		default_com_err_proc(whoami, code, fmt, ap);
@@ -112,8 +105,8 @@ void KRB5_CALLCONV com_err_va(whoami, code, fmt, ap)
 
 
 void KRB5_CALLCONV_C com_err(const char *whoami,
-					 errcode_t code,
-					 const char *fmt, ...)
+			     errcode_t code,
+			     const char *fmt, ...)
 {
 	va_list ap;
 
@@ -123,8 +116,7 @@ void KRB5_CALLCONV_C com_err(const char *whoami,
 }
 
 #if !(defined(_WIN32))
-et_old_error_hook_func set_com_err_hook (new_proc)
-	et_old_error_hook_func new_proc;
+et_old_error_hook_func set_com_err_hook (et_old_error_hook_func new_proc)
 {
 	et_old_error_hook_func x = com_err_hook;
 
