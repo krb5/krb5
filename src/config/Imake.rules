@@ -581,7 +581,7 @@ tags::									@@\
  * within the source tree.
  */
 #ifndef ImakeDependency
-#ifdef UseInstalled
+#ifdef UseImakeInstalled
 #define ImakeDependency(target) /**/
 #else
 #define ImakeDependency(target)						@@\
