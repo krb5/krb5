@@ -43,6 +43,7 @@ typedef struct _krb5_fcc_data {
      char *filename;
      int fd;
      krb5_flags flags;
+     int mode;				/* needed for locking code */
 } krb5_fcc_data;
 
 /* An off_t can be arbitrarily complex */
