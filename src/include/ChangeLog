@@ -1,3 +1,9 @@
+2004-10-28  Ken Raeburn  <raeburn@mit.edu>
+
+	* k5-thread.h (return_after_yield, k5_mutex_lock) [__GNUC__]: Add
+	macro versions so debugging line numbers will be useful.
+	(DEBUG_THREADS_SLOW): Don't define.
+
 2004-10-05  Ken Raeburn  <raeburn@mit.edu>
 
 	* fake-addrinfo.h (AI_ADDRCONFIG, AI_V4MAPPED, AI_ALL): If not

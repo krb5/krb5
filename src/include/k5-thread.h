@@ -139,7 +139,7 @@
 
 #define DEBUG_THREADS
 #define DEBUG_THREADS_LOC
-#define DEBUG_THREADS_SLOW /* permit debugging stuff that'll slow things down */
+#undef DEBUG_THREADS_SLOW /* debugging stuff that'll slow things down? */
 #undef DEBUG_THREADS_STATS
 
 #include <assert.h>
@@ -464,11 +464,20 @@ static inline void k5_pthread_assert_locked(pthread_mutex_t *m) { }
    the invoking site via a macro; once it returns, the inline function
    is called (with messed-up line-number info for gdb hopefully
    localized to just that call).  */
+#ifdef __GNUC__
+#define return_after_yield(R)			\
+	__extension__ ({			\
+	    int _r = (R);			\
+	    MAYBE_SCHED_YIELD();		\
+	    _r;					\
+	})
+#else
 static inline int return_after_yield(int r)
 {
     MAYBE_SCHED_YIELD();
     return r;
 }
+#endif
 
 #ifdef USE_PTHREAD_LOCK_ONLY_IF_LOADED
 
@@ -607,6 +616,16 @@ static inline int k5_mutex_finish_init_1(k5_mutex_t *m, k5_debug_loc l)
 	(k5_os_mutex_assert_unlocked(&(M)->os),	\
 	 (M)->loc_last = K5_DEBUG_LOC,		\
 	 k5_os_mutex_destroy(&(M)->os))
+#ifdef __GNUC__
+#define k5_mutex_lock(M)				\
+	__extension__ ({				\
+	    int _err = 0;				\
+	    k5_mutex_t *_m = (M);			\
+	    _err = k5_os_mutex_lock(&_m->os);		\
+	    if (_err == 0) _m->loc_last = K5_DEBUG_LOC;	\
+	    _err;					\
+	})
+#else
 static inline int k5_mutex_lock_1(k5_mutex_t *m, k5_debug_loc l)
 {
     int err = 0;
@@ -617,6 +636,7 @@ static inline int k5_mutex_lock_1(k5_mutex_t *m, k5_debug_loc l)
     return err;
 }
 #define k5_mutex_lock(M)	k5_mutex_lock_1(M, K5_DEBUG_LOC)
+#endif
 static inline int k5_mutex_unlock_1(k5_mutex_t *m, k5_debug_loc l)
 {
     int err = 0;
