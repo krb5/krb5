@@ -9,8 +9,8 @@ struct _krb5_auth_context {
     krb5_address      *	local_addr;
     krb5_address      *	local_port;
     krb5_keyblock     * keyblock;
-    krb5_keyblock     * local_subkey;
-    krb5_keyblock     * remote_subkey;
+    krb5_keyblock     * send_subkey;
+    krb5_keyblock     * recv_subkey;
 
     krb5_int32		auth_context_flags;
     krb5_int32		remote_seq_number;

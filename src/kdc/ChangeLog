@@ -1,3 +1,8 @@
+2003-05-09  Tom Yu  <tlyu@mit.edu>
+
+	* kdc_util.c (kdc_process_tgs_req): Rename getremotesubkey ->
+	getrecvsubkey.
+
 2003-04-02  Sam Hartman  <hartmans@mit.edu>
 
 	* kdc_preauth.c (get_etype_info): Avoid infinite loop if request

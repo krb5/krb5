@@ -327,7 +327,7 @@ kerberos5_send(ap)
 				 &check_data, new_creds, &auth);
 
 #ifdef	ENCRYPTION
-	krb5_auth_con_getlocalsubkey(telnet_context, auth_context, &newkey);
+	krb5_auth_con_getsendsubkey(telnet_context, auth_context, &newkey);
 	if (session_key) {
 		krb5_free_keyblock(telnet_context, session_key);
 		session_key = 0;
@@ -552,7 +552,7 @@ kerberos5_is(ap, data, cnt)
 		
 		if (name)
 		    free(name);
-		krb5_auth_con_getremotesubkey(telnet_context, auth_context,
+		krb5_auth_con_getrecvsubkey(telnet_context, auth_context,
 					      &newkey);
 		if (session_key) {
 		    krb5_free_keyblock(telnet_context, session_key);

@@ -1,3 +1,15 @@
+2003-05-09  Tom Yu  <tlyu@mit.edu>
+
+	* krcp.c (main): Rename getlocalsubkey -> getsendsubkey.
+
+	* krlogin.c (main): Rename getlocalsubkey -> getsendsubkey.
+
+	* krlogind.c (recvauth): Rename getremotesubkey -> getrecvsubkey.
+
+	* krsh.c (main): Rename getlocalsubkey -> getsendsubkey.
+
+	* krshd.c (recvauth): Rename getremotesubkey -> getrecvsubkey.
+
 2003-04-08  Ken Raeburn  <raeburn@mit.edu>
 
 	* krshd.c (main): Use LOG_AUTH syslog facility, not LOG_DAEMON,

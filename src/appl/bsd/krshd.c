@@ -1962,8 +1962,8 @@ recvauth(netfd, peersin, valid_checksum)
 
     {
 	krb5_keyblock *key;
-	status = krb5_auth_con_getremotesubkey (bsd_context, auth_context,
-						&key);
+	status = krb5_auth_con_getrecvsubkey (bsd_context, auth_context,
+					      &key);
 	if (status)
 	    fatal (netfd, "Server can't get session subkey");
 	if (!key && do_encrypt && kcmd_proto == KCMD_NEW_PROTOCOL)
