@@ -76,12 +76,8 @@ verbose "Test realm is $REALMNAME"
 # if they exist.  If they do not, then they must be in PATH.  We
 # expect $objdir to be ...tests/dejagnu.
 
-if ![info exists KDB5_CREATE] {
-    set KDB5_CREATE [findfile $objdir/../../admin/create/kdb5_create]
-}
-
-if ![info exists KDB5_STASH] {
-    set KDB5_STASH [findfile $objdir/../../admin/stash/kdb5_stash]
+if ![info exists KDB5_UTIL] {
+    set KDB5_UTIL [findfile $objdir/../../kadmin/dbutil/kdb5_util]
 }
 
 if ![info exists KDB5_EDIT] {
@@ -568,8 +564,7 @@ proc setup_kadmind_srvtab {  } {
 
 proc setup_kerberos_db { standalone } {
     global REALMNAME
-    global KDB5_CREATE
-    global KDB5_STASH
+    global KDB5_UTIL
     global KDB5_EDIT
     global KEY
     global tmppwd
@@ -579,7 +574,7 @@ proc setup_kerberos_db { standalone } {
 	return 1
     }
 
-    catch "exec rm -f [glob -nocomplain tmpdir/db*]"
+    catch "exec rm -f [glob -nocomplain tmpdir/db* tmpdir/adb*]"
 
     # Creating a new database means we need a new srvtab.
     catch "exec rm -f tmpdir/srvtab"
@@ -588,17 +583,18 @@ proc setup_kerberos_db { standalone } {
 	return 0
     }
 
-    spawn $KDB5_CREATE -r $REALMNAME
+    spawn $KDB5_UTIL -r $REALMNAME -R create
+
     expect {
 	"Enter KDC database master key:" {
-	    verbose "kdb5_create started"
+	    verbose "kdb5_util started"
 	}
 	timeout {
-	    fail "kdb5_create"
+	    fail "kdb5_util - create"
 	    return 0
 	}
 	eof {
-	    fail "kdb5_create"
+	    fail "kdb5_util - create"
 	    return 0
 	}
     }
@@ -607,51 +603,57 @@ proc setup_kerberos_db { standalone } {
     expect {
 	"Re-enter KDC database master key to verify:" { }
 	timeout {
-	    fail "kdb5_create"
+	    fail "kdb5_util create - verify"
 	    return 0
 	}
 	eof {
-	    fail "kdb5_create"
+	    fail "kdb5_util create - verify"
 	    return 0
 	}
     }
     send "masterkey$KEY\r"
     expect {
 	-re "\[Cc\]ouldn't" {
-	    fail "kdb5_create"
+	    fail "kdb5_util - create"
 	    return 0
 	}
+	"Cannot find/read stored" {
+	    exp_continue
+	}
+	"Warning: proceeding without master key" {
+	    exp_continue
+	}
 	timeout {
-	    fail "kdb5_create"
+	    fail "kdb5_util - create"
 	    return 0
 	}
 	eof { }
     }
-    if ![check_exit_status kdb5_create] {
+    if ![check_exit_status kdb5_util] {
 	return 0
     }
 
     if {$standalone} {
-	pass "kdb5_create"
+	pass "kdb5_util - create"
     }
 
     # Stash the master key in a file.
-    spawn $KDB5_STASH -r $REALMNAME
+    spawn $KDB5_UTIL  -r $REALMNAME -R stash
     expect {
 	"Enter KDC database master key:" {
-	    verbose "kdb5_stash started"
+	    verbose "kdb5_util stash started"
 	}
 	timeout {
-	    fail "kdb5_stash"
+	    fail "kdb5_util stash"
 	    if {!$standalone} {
-		catch "exec rm -f tmpdir/db.ok"
+		catch "exec rm -f tmpdir/db.ok tmpdir/adb.db"
 	    }
 	    return 0
 	}
 	eof {
-	    fail "kdb5_stash"
+	    fail "kdb5_util stash"
 	    if {!$standalone} {
-		catch "exec rm -f tmpdir/db.ok"
+		catch "exec rm -f tmpdir/db.ok tmpdir/adb.db"
 	    }
 	    return 0
 	}
@@ -660,19 +662,19 @@ proc setup_kerberos_db { standalone } {
     expect {
 	eof { }
 	timeout {
-	    fail "kdb5_stash"
+	    fail "kdb5_util stash"
 	    if {!$standalone} {
-		catch "exec rm -f tmpdir/db.ok"
+		catch "exec rm -f tmpdir/db.ok tmpdir/adb.db"
 	    }
 	    return 0
 	}
     }
-    if ![check_exit_status kdb5_stash] {
+    if ![check_exit_status kdb5_util] {
 	return 0
     }
 
     if {$standalone} {
-	pass "kdb5_stash"
+	pass "kdb5_util stash"
     }
 
     # Add an admin user.
@@ -682,7 +684,7 @@ proc setup_kerberos_db { standalone } {
 	    catch "expect_after"
 	    fail "kdb5_edit (timeout)"
 	    if {!$standalone} {
-		catch "exec rm -f tmpdir/db.ok"
+		catch "exec rm -f tmpdir/db.ok tmpdir/adb.db"
 	    }
 	    return 0
 	}
@@ -690,7 +692,7 @@ proc setup_kerberos_db { standalone } {
 	    catch "expect_after"
 	    fail "kdb5_edit (eof)"
 	    if {!$standalone} {
-		catch "exec rm -f tmpdir/db.ok"
+		catch "exec rm -f tmpdir/db.ok tmpdir/adb.db"
 	    }
 	    return 0
 	}
@@ -702,16 +704,12 @@ proc setup_kerberos_db { standalone } {
     expect "Re-enter password for verification:"
     send "adminpass$KEY\r"
     expect "kdb5_edit:"
-    send "ark kadmin/admin@$REALMNAME\r"
-    expect "kdb5_edit:"
-    send "ark kadmin/changepw@$REALMNAME\r"
-    expect "kdb5_edit:"
     send "quit\r"
     expect "\r"
     expect_after
     if ![check_exit_status kdb5_edit] {
 	if {!$standalone} {
-	    catch "exec rm -f tmpdir/db.ok"
+	    catch "exec rm -f tmpdir/db.ok tmpdir/adb.db"
 	}
 	return 0
     }

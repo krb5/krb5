@@ -1,3 +1,9 @@
+Sat Jul 27 02:20:54 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* default.exp: Rewrite to use kdb5_util instead of kdb5_create and
+		kdb5_stash. No longer add the kadmin/admin and changepw
+		keys to the database as this is handled automatically.
+
 Fri Jul 19 19:50:23 1996  Marc Horowitz  <marc@mit.edu>
 
 	* default.exp: changes to work with the new admin system.  This is
