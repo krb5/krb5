@@ -744,8 +744,7 @@ kerberos_v4(struct sockaddr_in *client, KTEXT pkt)
 	    v4endtime = krb_life_to_time(kerb_time.tv_sec, lifetime);
 	    /*
 	     * Adjust issue time backwards if necessary, due to
-	     * roundup in krb_time_to_life().  XXX This frobs
-	     * kerb_time, which is potentially problematic.
+	     * roundup in krb_time_to_life().
 	     */
 	    if (v4endtime > v4req_end)
 		request_backdate = v4endtime - v4req_end;
@@ -819,6 +818,8 @@ kerberos_v4(struct sockaddr_in *client, KTEXT pkt)
 	    char   *service;	/* Service name */
 	    char   *instance;	/* Service instance */
 	    int     kerno = 0;	/* Kerberos error number */
+	    unsigned int request_backdate =  0; /*How far to backdate
+						  in seconds.*/
 	    char    tktrlm[REALM_SZ];
 
 	    n_appl_req++;
@@ -938,11 +939,10 @@ kerberos_v4(struct sockaddr_in *client, KTEXT pkt)
 	    v4endtime = krb_life_to_time(kerb_time.tv_sec, lifetime);
 	    /*
 	     * Adjust issue time backwards if necessary, due to
-	     * roundup in krb_time_to_life().  XXX This frobs
-	     * kerb_time, which is potentially problematic.
+	     * roundup in krb_time_to_life().
 	     */
 	    if (v4endtime > v4req_end)
-		kerb_time.tv_sec -= v4endtime - v4req_end;
+		request_backdate = v4endtime - v4req_end;
 
 	    /* unseal server's key from master key */
 	    memcpy(key,                &s_name_data.key_low,  4);
@@ -963,7 +963,7 @@ kerberos_v4(struct sockaddr_in *client, KTEXT pkt)
 	    krb_create_ticket(tk, k_flags, ad->pname, ad->pinst,
 			      ad->prealm, client_host.s_addr,
 			      (char *) session_key, lifetime,
-			      kerb_time.tv_sec,
+			      kerb_time.tv_sec - request_backdate,
 			      s_name_data.name, s_name_data.instance,
 			      key);
 	    krb5_free_keyblock_contents(kdc_context, &k5key);

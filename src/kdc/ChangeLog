@@ -1,3 +1,8 @@
+2004-07-23  Tom Yu  <tlyu@mit.edu>
+
+	* kerberos_v4.c (kerberos_v4): Duplicate backdating fix for
+	APPL_REQUEST as well.  Fix comments.
+
 2004-03-22  Ken Raeburn  <raeburn@mit.edu>
 
 	* network.c (delete_fd): Free pointed-to data after removing it
