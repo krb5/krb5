@@ -49,6 +49,15 @@ typedef struct _krb5_data {
 #ifdef __STDC__
 typedef	void * krb5_pointer;
 typedef void const * krb5_const_pointer;
+#else
+/* make const & volatile available without effect */
+#define const
+#define volatile
+typedef char * krb5_pointer;
+typedef char * krb5_const_pointer;
+#endif /* __STDC__ */
+
+#if defined(__STDC__) || defined(KRB5_PROVIDE_PROTOTYPES)
 #define PROTOTYPE(x) x
 #ifdef NARROW_PROTOTYPES
 #define DECLARG(type, val) type val
@@ -58,15 +67,10 @@ typedef void const * krb5_const_pointer;
 #define OLDDECLARG(type, val) type val;
 #endif /* Narrow prototypes */
 #else
-/* make const & volatile available without effect */
-#define const
-#define volatile
-typedef char * krb5_pointer;
-typedef char * krb5_const_pointer;
 #define PROTOTYPE(x) ()
 #define DECLARG(type, val) val
 #define OLDDECLARG(type, val) type val;
-#endif /* __STDC__ */
+#endif /* STDC or PROTOTYPES */
 
 typedef	krb5_data **	krb5_principal;	/* array of strings */
 					/* CONVENTION: realm is first elem. */

@@ -11,10 +11,10 @@
  *
  */
 
-#ifdef __STDC__
-# define	P(s) s
+#if defined(__STDC__) || defined(KRB5_PROVIDE_PROTOTYPES)
+# define	P_TYPE_(s) s
 #else
-# define P(s) ()
+# define P_TYPE_(s) ()
 #endif
 
 /* in pepsy output, these are macros.  However, we need to pass them around
@@ -120,103 +120,103 @@
 #undef free_KRB5_METHOD__DATA
 
 /* KRB5-types.c */
-int encode_KRB5_Realm P((PE *, int , integer , char *, struct type_KRB5_Realm *));
-int encode_KRB5_PrincipalName P((PE *, int , integer , char *, struct type_KRB5_PrincipalName *));
-int encode_KRB5_HostAddress P((PE *, int , integer , char *, struct type_KRB5_HostAddress *));
-int encode_KRB5_HostAddresses P((PE *, int , integer , char *, struct type_KRB5_HostAddresses *));
-int encode_KRB5_AuthorizationData P((PE *, int , integer , char *, struct type_KRB5_AuthorizationData *));
-int encode_KRB5_KDCOptions P((PE *, int , integer , char *, struct type_KRB5_KDCOptions *));
-int encode_KRB5_LastReq P((PE *, int , integer , char *, struct type_KRB5_LastReq *));
-int encode_KRB5_KerberosTime P((PE *, int , integer , char *, struct type_KRB5_KerberosTime *));
-int encode_KRB5_Ticket P((PE *, int , integer , char *, struct type_KRB5_Ticket *));
-int encode_KRB5_TransitedEncoding P((PE *, int , integer , char *, struct type_KRB5_TransitedEncoding *));
-int encode_KRB5_EncTicketPart P((PE *, int , integer , char *, struct type_KRB5_EncTicketPart *));
-int encode_KRB5_Authenticator P((PE *, int , integer , char *, struct type_KRB5_Authenticator *));
-int encode_KRB5_TicketFlags P((PE *, int , integer , char *, struct type_KRB5_TicketFlags *));
-int encode_KRB5_AS__REQ P((PE *, int , integer , char *, struct type_KRB5_AS__REQ *));
-int encode_KRB5_TGS__REQ P((PE *, int , integer , char *, struct type_KRB5_TGS__REQ *));
-int encode_KRB5_PA__DATA P((PE *, int , integer , char *, struct type_KRB5_PA__DATA *));
-int encode_KRB5_KDC__REQ__BODY P((PE *, int , integer , char *, struct type_KRB5_KDC__REQ__BODY *));
-int encode_KRB5_AS__REP P((PE *, int , integer , char *, struct type_KRB5_AS__REP *));
-int encode_KRB5_TGS__REP P((PE *, int , integer , char *, struct type_KRB5_TGS__REP *));
-int encode_KRB5_EncASRepPart P((PE *, int , integer , char *, struct type_KRB5_EncASRepPart *));
-int encode_KRB5_EncTGSRepPart P((PE *, int , integer , char *, struct type_KRB5_EncTGSRepPart *));
-int encode_KRB5_AP__REQ P((PE *, int , integer , char *, struct type_KRB5_AP__REQ *));
-int encode_KRB5_APOptions P((PE *, int , integer , char *, struct type_KRB5_APOptions *));
-int encode_KRB5_AP__REP P((PE *, int , integer , char *, struct type_KRB5_AP__REP *));
-int encode_KRB5_EncAPRepPart P((PE *, int , integer , char *, struct type_KRB5_EncAPRepPart *));
-int encode_KRB5_KRB__SAFE P((PE *, int , integer , char *, struct type_KRB5_KRB__SAFE *));
-int encode_KRB5_KRB__SAFE__BODY P((PE *, int , integer , char *, struct type_KRB5_KRB__SAFE__BODY *));
-int encode_KRB5_KRB__PRIV P((PE *, int , integer , char *, struct type_KRB5_KRB__PRIV *));
-int encode_KRB5_EncKrbPrivPart P((PE *, int , integer , char *, struct type_KRB5_EncKrbPrivPart *));
-int encode_KRB5_KRB__ERROR P((PE *, int , integer , char *, struct type_KRB5_KRB__ERROR *));
-int encode_KRB5_EncryptedData P((PE *, int , integer , char *, struct type_KRB5_EncryptedData *));
-int encode_KRB5_EncryptionKey P((PE *, int , integer , char *, struct type_KRB5_EncryptionKey *));
-int encode_KRB5_Checksum P((PE *, int , integer , char *, struct type_KRB5_Checksum *));
-int encode_KRB5_METHOD__DATA P((PE *, int , integer , char *, struct type_KRB5_METHOD__DATA *));
-int decode_KRB5_Realm P((PE , int , integer *, char **, struct type_KRB5_Realm **));
-int decode_KRB5_PrincipalName P((PE , int , integer *, char **, struct type_KRB5_PrincipalName **));
-int decode_KRB5_HostAddress P((PE , int , integer *, char **, struct type_KRB5_HostAddress **));
-int decode_KRB5_HostAddresses P((PE , int , integer *, char **, struct type_KRB5_HostAddresses **));
-int decode_KRB5_AuthorizationData P((PE , int , integer *, char **, struct type_KRB5_AuthorizationData **));
-int decode_KRB5_KDCOptions P((PE , int , integer *, char **, struct type_KRB5_KDCOptions **));
-int decode_KRB5_LastReq P((PE , int , integer *, char **, struct type_KRB5_LastReq **));
-int decode_KRB5_KerberosTime P((PE , int , integer *, char **, struct type_KRB5_KerberosTime **));
-int decode_KRB5_Ticket P((PE , int , integer *, char **, struct type_KRB5_Ticket **));
-int decode_KRB5_TransitedEncoding P((PE , int , integer *, char **, struct type_KRB5_TransitedEncoding **));
-int decode_KRB5_EncTicketPart P((PE , int , integer *, char **, struct type_KRB5_EncTicketPart **));
-int decode_KRB5_Authenticator P((PE , int , integer *, char **, struct type_KRB5_Authenticator **));
-int decode_KRB5_TicketFlags P((PE , int , integer *, char **, struct type_KRB5_TicketFlags **));
-int decode_KRB5_AS__REQ P((PE , int , integer *, char **, struct type_KRB5_AS__REQ **));
-int decode_KRB5_TGS__REQ P((PE , int , integer *, char **, struct type_KRB5_TGS__REQ **));
-int decode_KRB5_PA__DATA P((PE , int , integer *, char **, struct type_KRB5_PA__DATA **));
-int decode_KRB5_KDC__REQ__BODY P((PE , int , integer *, char **, struct type_KRB5_KDC__REQ__BODY **));
-int decode_KRB5_AS__REP P((PE , int , integer *, char **, struct type_KRB5_AS__REP **));
-int decode_KRB5_TGS__REP P((PE , int , integer *, char **, struct type_KRB5_TGS__REP **));
-int decode_KRB5_EncASRepPart P((PE , int , integer *, char **, struct type_KRB5_EncASRepPart **));
-int decode_KRB5_EncTGSRepPart P((PE , int , integer *, char **, struct type_KRB5_EncTGSRepPart **));
-int decode_KRB5_AP__REQ P((PE , int , integer *, char **, struct type_KRB5_AP__REQ **));
-int decode_KRB5_APOptions P((PE , int , integer *, char **, struct type_KRB5_APOptions **));
-int decode_KRB5_AP__REP P((PE , int , integer *, char **, struct type_KRB5_AP__REP **));
-int decode_KRB5_EncAPRepPart P((PE , int , integer *, char **, struct type_KRB5_EncAPRepPart **));
-int decode_KRB5_KRB__SAFE P((PE , int , integer *, char **, struct type_KRB5_KRB__SAFE **));
-int decode_KRB5_KRB__SAFE__BODY P((PE , int , integer *, char **, struct type_KRB5_KRB__SAFE__BODY **));
-int decode_KRB5_KRB__PRIV P((PE , int , integer *, char **, struct type_KRB5_KRB__PRIV **));
-int decode_KRB5_EncKrbPrivPart P((PE , int , integer *, char **, struct type_KRB5_EncKrbPrivPart **));
-int decode_KRB5_KRB__ERROR P((PE , int , integer *, char **, struct type_KRB5_KRB__ERROR **));
-int decode_KRB5_EncryptedData P((PE , int , integer *, char **, struct type_KRB5_EncryptedData **));
-int decode_KRB5_EncryptionKey P((PE , int , integer *, char **, struct type_KRB5_EncryptionKey **));
-int decode_KRB5_Checksum P((PE , int , integer *, char **, struct type_KRB5_Checksum **));
-int decode_KRB5_METHOD__DATA P((PE , int , integer *, char **, struct type_KRB5_METHOD__DATA **));
+int encode_KRB5_Realm P_TYPE_((PE *, int , integer , char *, struct type_KRB5_Realm *));
+int encode_KRB5_PrincipalName P_TYPE_((PE *, int , integer , char *, struct type_KRB5_PrincipalName *));
+int encode_KRB5_HostAddress P_TYPE_((PE *, int , integer , char *, struct type_KRB5_HostAddress *));
+int encode_KRB5_HostAddresses P_TYPE_((PE *, int , integer , char *, struct type_KRB5_HostAddresses *));
+int encode_KRB5_AuthorizationData P_TYPE_((PE *, int , integer , char *, struct type_KRB5_AuthorizationData *));
+int encode_KRB5_KDCOptions P_TYPE_((PE *, int , integer , char *, struct type_KRB5_KDCOptions *));
+int encode_KRB5_LastReq P_TYPE_((PE *, int , integer , char *, struct type_KRB5_LastReq *));
+int encode_KRB5_KerberosTime P_TYPE_((PE *, int , integer , char *, struct type_KRB5_KerberosTime *));
+int encode_KRB5_Ticket P_TYPE_((PE *, int , integer , char *, struct type_KRB5_Ticket *));
+int encode_KRB5_TransitedEncoding P_TYPE_((PE *, int , integer , char *, struct type_KRB5_TransitedEncoding *));
+int encode_KRB5_EncTicketPart P_TYPE_((PE *, int , integer , char *, struct type_KRB5_EncTicketPart *));
+int encode_KRB5_Authenticator P_TYPE_((PE *, int , integer , char *, struct type_KRB5_Authenticator *));
+int encode_KRB5_TicketFlags P_TYPE_((PE *, int , integer , char *, struct type_KRB5_TicketFlags *));
+int encode_KRB5_AS__REQ P_TYPE_((PE *, int , integer , char *, struct type_KRB5_AS__REQ *));
+int encode_KRB5_TGS__REQ P_TYPE_((PE *, int , integer , char *, struct type_KRB5_TGS__REQ *));
+int encode_KRB5_PA__DATA P_TYPE_((PE *, int , integer , char *, struct type_KRB5_PA__DATA *));
+int encode_KRB5_KDC__REQ__BODY P_TYPE_((PE *, int , integer , char *, struct type_KRB5_KDC__REQ__BODY *));
+int encode_KRB5_AS__REP P_TYPE_((PE *, int , integer , char *, struct type_KRB5_AS__REP *));
+int encode_KRB5_TGS__REP P_TYPE_((PE *, int , integer , char *, struct type_KRB5_TGS__REP *));
+int encode_KRB5_EncASRepPart P_TYPE_((PE *, int , integer , char *, struct type_KRB5_EncASRepPart *));
+int encode_KRB5_EncTGSRepPart P_TYPE_((PE *, int , integer , char *, struct type_KRB5_EncTGSRepPart *));
+int encode_KRB5_AP__REQ P_TYPE_((PE *, int , integer , char *, struct type_KRB5_AP__REQ *));
+int encode_KRB5_APOptions P_TYPE_((PE *, int , integer , char *, struct type_KRB5_APOptions *));
+int encode_KRB5_AP__REP P_TYPE_((PE *, int , integer , char *, struct type_KRB5_AP__REP *));
+int encode_KRB5_EncAPRepPart P_TYPE_((PE *, int , integer , char *, struct type_KRB5_EncAPRepPart *));
+int encode_KRB5_KRB__SAFE P_TYPE_((PE *, int , integer , char *, struct type_KRB5_KRB__SAFE *));
+int encode_KRB5_KRB__SAFE__BODY P_TYPE_((PE *, int , integer , char *, struct type_KRB5_KRB__SAFE__BODY *));
+int encode_KRB5_KRB__PRIV P_TYPE_((PE *, int , integer , char *, struct type_KRB5_KRB__PRIV *));
+int encode_KRB5_EncKrbPrivPart P_TYPE_((PE *, int , integer , char *, struct type_KRB5_EncKrbPrivPart *));
+int encode_KRB5_KRB__ERROR P_TYPE_((PE *, int , integer , char *, struct type_KRB5_KRB__ERROR *));
+int encode_KRB5_EncryptedData P_TYPE_((PE *, int , integer , char *, struct type_KRB5_EncryptedData *));
+int encode_KRB5_EncryptionKey P_TYPE_((PE *, int , integer , char *, struct type_KRB5_EncryptionKey *));
+int encode_KRB5_Checksum P_TYPE_((PE *, int , integer , char *, struct type_KRB5_Checksum *));
+int encode_KRB5_METHOD__DATA P_TYPE_((PE *, int , integer , char *, struct type_KRB5_METHOD__DATA *));
+int decode_KRB5_Realm P_TYPE_((PE , int , integer *, char **, struct type_KRB5_Realm **));
+int decode_KRB5_PrincipalName P_TYPE_((PE , int , integer *, char **, struct type_KRB5_PrincipalName **));
+int decode_KRB5_HostAddress P_TYPE_((PE , int , integer *, char **, struct type_KRB5_HostAddress **));
+int decode_KRB5_HostAddresses P_TYPE_((PE , int , integer *, char **, struct type_KRB5_HostAddresses **));
+int decode_KRB5_AuthorizationData P_TYPE_((PE , int , integer *, char **, struct type_KRB5_AuthorizationData **));
+int decode_KRB5_KDCOptions P_TYPE_((PE , int , integer *, char **, struct type_KRB5_KDCOptions **));
+int decode_KRB5_LastReq P_TYPE_((PE , int , integer *, char **, struct type_KRB5_LastReq **));
+int decode_KRB5_KerberosTime P_TYPE_((PE , int , integer *, char **, struct type_KRB5_KerberosTime **));
+int decode_KRB5_Ticket P_TYPE_((PE , int , integer *, char **, struct type_KRB5_Ticket **));
+int decode_KRB5_TransitedEncoding P_TYPE_((PE , int , integer *, char **, struct type_KRB5_TransitedEncoding **));
+int decode_KRB5_EncTicketPart P_TYPE_((PE , int , integer *, char **, struct type_KRB5_EncTicketPart **));
+int decode_KRB5_Authenticator P_TYPE_((PE , int , integer *, char **, struct type_KRB5_Authenticator **));
+int decode_KRB5_TicketFlags P_TYPE_((PE , int , integer *, char **, struct type_KRB5_TicketFlags **));
+int decode_KRB5_AS__REQ P_TYPE_((PE , int , integer *, char **, struct type_KRB5_AS__REQ **));
+int decode_KRB5_TGS__REQ P_TYPE_((PE , int , integer *, char **, struct type_KRB5_TGS__REQ **));
+int decode_KRB5_PA__DATA P_TYPE_((PE , int , integer *, char **, struct type_KRB5_PA__DATA **));
+int decode_KRB5_KDC__REQ__BODY P_TYPE_((PE , int , integer *, char **, struct type_KRB5_KDC__REQ__BODY **));
+int decode_KRB5_AS__REP P_TYPE_((PE , int , integer *, char **, struct type_KRB5_AS__REP **));
+int decode_KRB5_TGS__REP P_TYPE_((PE , int , integer *, char **, struct type_KRB5_TGS__REP **));
+int decode_KRB5_EncASRepPart P_TYPE_((PE , int , integer *, char **, struct type_KRB5_EncASRepPart **));
+int decode_KRB5_EncTGSRepPart P_TYPE_((PE , int , integer *, char **, struct type_KRB5_EncTGSRepPart **));
+int decode_KRB5_AP__REQ P_TYPE_((PE , int , integer *, char **, struct type_KRB5_AP__REQ **));
+int decode_KRB5_APOptions P_TYPE_((PE , int , integer *, char **, struct type_KRB5_APOptions **));
+int decode_KRB5_AP__REP P_TYPE_((PE , int , integer *, char **, struct type_KRB5_AP__REP **));
+int decode_KRB5_EncAPRepPart P_TYPE_((PE , int , integer *, char **, struct type_KRB5_EncAPRepPart **));
+int decode_KRB5_KRB__SAFE P_TYPE_((PE , int , integer *, char **, struct type_KRB5_KRB__SAFE **));
+int decode_KRB5_KRB__SAFE__BODY P_TYPE_((PE , int , integer *, char **, struct type_KRB5_KRB__SAFE__BODY **));
+int decode_KRB5_KRB__PRIV P_TYPE_((PE , int , integer *, char **, struct type_KRB5_KRB__PRIV **));
+int decode_KRB5_EncKrbPrivPart P_TYPE_((PE , int , integer *, char **, struct type_KRB5_EncKrbPrivPart **));
+int decode_KRB5_KRB__ERROR P_TYPE_((PE , int , integer *, char **, struct type_KRB5_KRB__ERROR **));
+int decode_KRB5_EncryptedData P_TYPE_((PE , int , integer *, char **, struct type_KRB5_EncryptedData **));
+int decode_KRB5_EncryptionKey P_TYPE_((PE , int , integer *, char **, struct type_KRB5_EncryptionKey **));
+int decode_KRB5_Checksum P_TYPE_((PE , int , integer *, char **, struct type_KRB5_Checksum **));
+int decode_KRB5_METHOD__DATA P_TYPE_((PE , int , integer *, char **, struct type_KRB5_METHOD__DATA **));
 
-void free_KRB5_PrincipalName P((struct type_KRB5_PrincipalName *));
-void free_KRB5_HostAddress P((struct type_KRB5_HostAddress *));
-void free_KRB5_HostAddresses P((struct type_KRB5_HostAddresses *));
-void free_KRB5_AuthorizationData P((struct type_KRB5_AuthorizationData *));
-void free_KRB5_LastReq P((struct type_KRB5_LastReq *));
-void free_KRB5_Ticket P((struct type_KRB5_Ticket *));
-void free_KRB5_TransitedEncoding P((struct type_KRB5_TransitedEncoding *));
-void free_KRB5_EncTicketPart P((struct type_KRB5_EncTicketPart *));
-void free_KRB5_Authenticator P((struct type_KRB5_Authenticator *));
-void free_KRB5_AS__REQ P((struct type_KRB5_AS__REQ *));
-void free_KRB5_TGS__REQ P((struct type_KRB5_TGS__REQ *));
-void free_KRB5_PA__DATA P((struct type_KRB5_PA__DATA *));
-void free_KRB5_KDC__REQ__BODY P((struct type_KRB5_KDC__REQ__BODY *));
-void free_KRB5_AS__REP P((struct type_KRB5_AS__REP *));
-void free_KRB5_TGS__REP P((struct type_KRB5_TGS__REP *));
-void free_KRB5_EncASRepPart P((struct type_KRB5_EncASRepPart *));
-void free_KRB5_EncTGSRepPart P((struct type_KRB5_EncTGSRepPart *));
-void free_KRB5_AP__REQ P((struct type_KRB5_AP__REQ *));
-void free_KRB5_AP__REP P((struct type_KRB5_AP__REP *));
-void free_KRB5_EncAPRepPart P((struct type_KRB5_EncAPRepPart *));
-void free_KRB5_KRB__SAFE P((struct type_KRB5_KRB__SAFE *));
-void free_KRB5_KRB__SAFE__BODY P((struct type_KRB5_KRB__SAFE__BODY *));
-void free_KRB5_KRB__PRIV P((struct type_KRB5_KRB__PRIV *));
-void free_KRB5_EncKrbPrivPart P((struct type_KRB5_EncKrbPrivPart *));
-void free_KRB5_KRB__ERROR P((struct type_KRB5_KRB__ERROR *));
-void free_KRB5_EncryptedData P((struct type_KRB5_EncryptedData *));
-void free_KRB5_EncryptionKey P((struct type_KRB5_EncryptionKey *));
-void free_KRB5_Checksum P((struct type_KRB5_Checksum *));
-void free_KRB5_METHOD__DATA P((struct type_KRB5_METHOD__DATA *));
+void free_KRB5_PrincipalName P_TYPE_((struct type_KRB5_PrincipalName *));
+void free_KRB5_HostAddress P_TYPE_((struct type_KRB5_HostAddress *));
+void free_KRB5_HostAddresses P_TYPE_((struct type_KRB5_HostAddresses *));
+void free_KRB5_AuthorizationData P_TYPE_((struct type_KRB5_AuthorizationData *));
+void free_KRB5_LastReq P_TYPE_((struct type_KRB5_LastReq *));
+void free_KRB5_Ticket P_TYPE_((struct type_KRB5_Ticket *));
+void free_KRB5_TransitedEncoding P_TYPE_((struct type_KRB5_TransitedEncoding *));
+void free_KRB5_EncTicketPart P_TYPE_((struct type_KRB5_EncTicketPart *));
+void free_KRB5_Authenticator P_TYPE_((struct type_KRB5_Authenticator *));
+void free_KRB5_AS__REQ P_TYPE_((struct type_KRB5_AS__REQ *));
+void free_KRB5_TGS__REQ P_TYPE_((struct type_KRB5_TGS__REQ *));
+void free_KRB5_PA__DATA P_TYPE_((struct type_KRB5_PA__DATA *));
+void free_KRB5_KDC__REQ__BODY P_TYPE_((struct type_KRB5_KDC__REQ__BODY *));
+void free_KRB5_AS__REP P_TYPE_((struct type_KRB5_AS__REP *));
+void free_KRB5_TGS__REP P_TYPE_((struct type_KRB5_TGS__REP *));
+void free_KRB5_EncASRepPart P_TYPE_((struct type_KRB5_EncASRepPart *));
+void free_KRB5_EncTGSRepPart P_TYPE_((struct type_KRB5_EncTGSRepPart *));
+void free_KRB5_AP__REQ P_TYPE_((struct type_KRB5_AP__REQ *));
+void free_KRB5_AP__REP P_TYPE_((struct type_KRB5_AP__REP *));
+void free_KRB5_EncAPRepPart P_TYPE_((struct type_KRB5_EncAPRepPart *));
+void free_KRB5_KRB__SAFE P_TYPE_((struct type_KRB5_KRB__SAFE *));
+void free_KRB5_KRB__SAFE__BODY P_TYPE_((struct type_KRB5_KRB__SAFE__BODY *));
+void free_KRB5_KRB__PRIV P_TYPE_((struct type_KRB5_KRB__PRIV *));
+void free_KRB5_EncKrbPrivPart P_TYPE_((struct type_KRB5_EncKrbPrivPart *));
+void free_KRB5_KRB__ERROR P_TYPE_((struct type_KRB5_KRB__ERROR *));
+void free_KRB5_EncryptedData P_TYPE_((struct type_KRB5_EncryptedData *));
+void free_KRB5_EncryptionKey P_TYPE_((struct type_KRB5_EncryptionKey *));
+void free_KRB5_Checksum P_TYPE_((struct type_KRB5_Checksum *));
+void free_KRB5_METHOD__DATA P_TYPE_((struct type_KRB5_METHOD__DATA *));
 
-#undef P
+#undef P_TYPE_

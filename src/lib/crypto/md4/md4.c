@@ -45,7 +45,7 @@ static char rcsid_md4_c[] = "$Id$";
 #include <krb5/rsa-md4.h>
 
 /* forward declaration */
-#ifdef __STDC__
+#if defined(__STDC__) || defined(KRB5_PROVIDE_PROTOTYPES)
 static void Transform (UINT4 *, UINT4 *);
 #else
 static void Transform ();
