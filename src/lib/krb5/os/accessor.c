@@ -42,6 +42,13 @@ krb5int_accessor(krb5int_access *internals, krb5_int32 version)
     internals_temp.locate_server = &krb5int_locate_server;
     internals_temp.sendto_udp = &krb5int_sendto;
     internals_temp.add_host_to_list = krb5int_add_host_to_list;
+#ifdef KRB5_DNS_LOOKUP
+    internals_temp.make_srv_query_realm = krb5int_make_srv_query_realm;
+    internals_temp.free_srv_dns_data = krb5int_free_srv_dns_data;
+#else
+    internals_temp.make_srv_query_realm = 0;
+    internals_temp.free_srv_dns_data = 0;
+#endif
 #ifdef KRB5_KRB4_COMPAT
     internals_temp.krb_life_to_time = krb5int_krb_life_to_time;
     internals_temp.krb_time_to_life = krb5int_krb_time_to_life;

@@ -1,3 +1,13 @@
+2003-06-06  Ken Raeburn  <raeburn@mit.edu>
+
+	* locate_kdc.c (struct srv_dns_entry): Moved to k5-int.h.
+	(krb5int_make_srv_query_realm): Renamed from make_srv_query_realm.
+	(krb5int_free_srv_dns_data): New function.
+	(krb5_locate_srv_dns_1): Use it.
+
+	* accessor.c (krb5int_accessor): Fill in make_srv_query_realm and
+	free_srv_dns_data fields.
+
 2003-06-05  Ken Raeburn  <raeburn@mit.edu>
 
 	* locate_kdc.c (make_srv_query_realm): Punt if strdup fails.

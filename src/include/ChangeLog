@@ -1,3 +1,11 @@
+2003-06-06  Ken Raeburn  <raeburn@mit.edu>
+
+	* k5-int.h (struct srv_dns_entry): Declare.
+	(krb5int_make_srv_query_realm, krb5int_free_srv_dns_data):
+	Declare.
+	(struct _krb5int_access): Add make_srv_query_realm and
+	free_srv_dns_data fields.
+
 2003-06-03  Ken Raeburn  <raeburn@mit.edu>
 
 	* k5-int.h (struct _krb5int_access): Add locate_server back in.

@@ -1615,7 +1615,19 @@ krb5_error_code krb5int_setpw_result_code_string
 	(krb5_context context, int result_code,
 			const char **result_codestr);
 
-
+struct srv_dns_entry {
+    struct srv_dns_entry *next;
+    int priority;
+    int weight;
+    unsigned short port;
+    char *host;
+};
+krb5_error_code
+krb5int_make_srv_query_realm(const krb5_data *realm,
+			     const char *service,
+			     const char *protocol,
+			     struct srv_dns_entry **answers);
+void krb5int_free_srv_dns_data(struct srv_dns_entry *);
 
 #if defined(macintosh) && defined(__CFM68K__) && !defined(__USING_STATIC_LIBS__)
 #pragma import reset
@@ -1659,6 +1671,13 @@ typedef struct _krb5int_access {
 					int port, int secport,
 					int socktype, int family);
     void (*free_addrlist) (struct addrlist *);
+
+    krb5_error_code (*make_srv_query_realm)(const krb5_data *realm,
+					    const char *service,
+					    const char *protocol,
+					    struct srv_dns_entry **answers);
+    void (*free_srv_dns_data)(struct srv_dns_entry *);
+
     /* krb4 compatibility stuff -- may be null if not enabled */
     krb5_int32 (*krb_life_to_time)(krb5_int32, int);
     int (*krb_time_to_life)(krb5_int32, krb5_int32);

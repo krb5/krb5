@@ -508,24 +508,29 @@ krb5_locate_srv_conf(krb5_context context, const krb5_data *realm,
  * Lookup a KDC via DNS SRV records
  */
 
-struct srv_dns_entry {
+void krb5int_free_srv_dns_data (struct srv_dns_entry *p)
+{
     struct srv_dns_entry *next;
-    int priority;
-    int weight;
-    unsigned short port;
-    char *host;
-};
+    while (p) {
+	next = p->next;
+	free(p->host);
+	free(p);
+	p = next;
+    }
+}
 
 /* Do DNS SRV query, return results in *answers.
 
    Make best effort to return all the data we can.  On memory or
    decoding errors, just return what we've got.  Always return 0,
    currently.  */
-static krb5_error_code
-make_srv_query_realm(const krb5_data *realm,
-		     const char *service,
-		     const char *protocol,
-		     struct srv_dns_entry **answers)
+#define make_srv_query_realm krb5int_make_srv_query_realm
+
+krb5_error_code
+krb5int_make_srv_query_realm(const krb5_data *realm,
+			     const char *service,
+			     const char *protocol,
+			     struct srv_dns_entry **answers)
 {
     union {
         unsigned char bytes[2048];
@@ -776,15 +781,7 @@ krb5_locate_srv_dns_1 (const krb5_data *realm,
     fprintf (stderr, "[end]\n");
 #endif
 
-    for (entry = head; entry != NULL; ) {
-	struct srv_dns_entry *srv;
-	free(entry->host);
-        entry->host = NULL;
-	srv = entry;
-	entry = entry->next;
-	free(srv);
-    }
-
+    krb5int_free_srv_dns_data(head);
     return code;
 }
 #endif /* KRB5_DNS_LOOKUP */
