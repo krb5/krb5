@@ -14,7 +14,7 @@ all:: all-$(WHAT)
 
 all-unix:: shared $(OBJS)
 all-mac: $(OBJS)
-all-windows:: syslog.obj
+all-windows:: syslog.obj sscanf.obj
 
 shared:
 	mkdir shared

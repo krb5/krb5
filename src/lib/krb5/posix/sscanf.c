@@ -47,6 +47,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <stdarg.h>
+#include <string.h>
 
 #if 0
 #if __STDC__
@@ -98,11 +99,12 @@
 #define u_char unsigned char
 #define u_long unsigned long
 
-static u_char *__sccl();
+static u_char *__sccl(char *tab, u_char *fmt);
 
 /*
  * sscanf
  */
+int
 sscanf(char *str, char const *fmt0, ...)
 {
 	va_list ap;
@@ -334,7 +336,7 @@ literal:
 			if (flags & SUPPRESS) {
 				size_t sum = 0;
 				for (;;) {
-					if ((n = chars_left) < width) {
+					if ((size_t) (n = chars_left) < width) {
 						sum += n;
 						width -= n;
 						char_ptr += n;
@@ -354,7 +356,7 @@ literal:
 
 				dest = (char *)va_arg(ap, char *);
 				r = width;
-				if (r > chars_left)
+				if (r > (size_t) chars_left)
 					r = chars_left;
 				strncpy(dest, char_ptr, width);
 				
@@ -368,7 +370,7 @@ literal:
 		case CT_CCL:
 			/* scan a (nonempty) character class (sets NOSKIP) */
 			if (width == 0)
-				width = ~0;	/* `infinity' */
+				width = (size_t) ~0;	/* `infinity' */
 			/* take only those things in the class */
 			if (flags & SUPPRESS) {
 				n = 0;
@@ -409,7 +411,7 @@ literal:
 		case CT_STRING:
 			/* like CCL, but zero-length string OK, & no NOSKIP */
 			if (width == 0)
-				width = ~0;
+				width = (size_t) ~0;
 			if (flags & SUPPRESS) {
 				n = 0;
 				while (!isspace(*char_ptr)) {
@@ -567,11 +569,11 @@ literal:
 				if (flags & POINTER)
 					*va_arg(ap, void **) = (void *)res;
 				else if (flags & SHORT)
-					*va_arg(ap, short *) = res;
+					*va_arg(ap, short *) = (short) res;
 				else if (flags & LONG)
 					*va_arg(ap, long *) = res;
 				else
-					*va_arg(ap, int *) = res;
+					*va_arg(ap, int *) = (int) res;
 				nassigned++;
 			}
 			nread += p - buf;
