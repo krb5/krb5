@@ -1,3 +1,12 @@
+
+Thu Apr 27 16:33:17 EDT 1995	Paul Park	(pjpark@mit.edu)
+
+	* mk_priv.c	- Back out previous change which always put in
+			  timestamp, regardless of DO_TIME setting and
+			  instead, clear out the replaydata before calling
+			  mk_priv_basic from mk_priv.
+	* mk_safe.c	- Same replaydata fix.
+
 Wed Apr 27 11:30:00 1995 Keith Vetter (keithv@fusion.com)
 
 	* init_ctx.c: krb5_init_context wasn't checking return values.
