@@ -785,7 +785,8 @@ AC_ARG_WITH([shared],
 ,
 withval=yes
 )dnl
-if test "$withval" = yes; then
+if test "$krb5_cv_shlibs_enabled" = yes ; then
+  if test "$withval" = yes; then
 	AC_MSG_RESULT(Using shared libraries)
 	LDARGS="$krb5_cv_shlibs_ldflag -L[$](TOPLIBD) $LDARGS"
 	if test "$krb5_cv_exe_need_dirs" = yes; then
@@ -793,9 +794,12 @@ if test "$withval" = yes; then
 	fi
 	SHLIB_TAIL_COMP=$krb5_cv_shlibs_tail_comp
 	AC_SUBST(SHLIB_TAIL_COMP)
-else
+  else
 	AC_MSG_RESULT(Using archive libraries)
 	LDARGS="$krb5_cv_noshlibs_ldflag -L[$](TOPLIBD) $LDARGS"
+  fi
+else
+  LDARGS="-L[$](TOPLIBD) $LDARGS"
 fi
 AC_SUBST(LDARGS)
 ])dnl
