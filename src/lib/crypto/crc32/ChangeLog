@@ -1,3 +1,7 @@
+2001-03-14  Ken Raeburn  <raeburn@mit.edu>
+
+	* crc-32.h: Stop using PROTOTYPE macro.
+
 2001-03-05  Ken Raeburn  <raeburn@mit.edu>
 
 	* crc-32.h, crc.c, crc32.c: Use const instead of krb5_const.
