@@ -129,7 +129,7 @@ OLDDECLARG(krb5_creds *, cred)
     }
 
     if (retval = krb5_encode_ticket(dec_rep->ticket, &scratch))
-	krb5_free_address(creds->addresses);
+	krb5_free_address(cred->addresses);
     else {
 	cred->ticket = *scratch;
 	free((char *)scratch);
