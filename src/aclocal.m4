@@ -1090,10 +1090,10 @@ int $2();],
     eval krb5_cv_missing_$2_prototype=no)))
  if eval "test \"`echo '$krb5_cv_missing_'$1_prototype`\" = yes"; then
   AC_MSG_RESULT(yes)
-  $3
+  $4
  else
   AC_MSG_RESULT(no)
-  $4
+  $3
  fi
 ])dnl
 dnl

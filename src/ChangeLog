@@ -1,3 +1,8 @@
+Wed May 29 18:39:21 1996  Tom Yu  <tlyu@mit.edu>
+
+	* aclocal.m4 (AC_CHECK_DBM_PROTO): sense of arguments to be
+		evaluated was reversed
+
 Mon May 20 17:56:15 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* aclocal.m4 (CHECK_DB): Remove vestigal support for ODBM.  
