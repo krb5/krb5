@@ -32,15 +32,12 @@
 #include <krb5/kdb_dbm.h>
 #include <krb5/ext-proto.h>
 #include <krb5/sysincl.h>
+#include <krb5/libos.h>
 #include <stdio.h>
 #include <errno.h>
 #include <sys/types.h>
 #include <utime.h>
 #include <krb5/config.h>
-
-#ifdef POSIX_FILE_LOCKS
-#include <fcntl.h>
-#endif
 
 #define OLD_COMPAT_VERSION_1
 
@@ -60,7 +57,8 @@ extern long krb5_dbm_db_debug;
 extern char *progname;
 #endif
 
-static int dblfd = -1;
+static FILE *dblfp = 0;
+static char *dblfname = 0;
 static int mylock = 0;
 static int lockmode = 0;
 static int inited = 0;
@@ -190,24 +188,22 @@ krb5_dbm_db_init()
     filename = gen_dbsuffix (current_db_name, ".ok");
     if (!filename)
 	return ENOMEM;
-#ifdef POSIX_FILE_LOCKS
     /*
-     * needs be open read/write so that write locking can work with
+     * should be open read/write so that write locking can work with
      * POSIX systems
      */
-    if ((dblfd = open(filename, O_RDWR, 0)) == -1) {
+    dblfp = fopen(filename, "r+");
+    if ((dblfp = fopen(filename, "r+")) == 0) {
 	if (errno == EACCES) {
-	    if ((dblfd = open(filename, O_RDONLY, 0)) == -1)
+	    if ((dblfp = fopen(filename, "r")) == 0)
 		goto err_out;
 	} else
 	    goto err_out;
     }
-#else
-    if ((dblfd = open(filename, 0, 0)) == -1)
-	goto err_out;
-#endif
     inited++;
+    dblfname = filename;
     errno = 0;
+    return 0;
     
 err_out:
     free(filename);
@@ -235,11 +231,13 @@ krb5_dbm_db_fini()
 	current_db_ptr = 0;
     }
 
-    if (close(dblfd) == -1)
+    if (fclose(dblfp) == EOF)
 	retval = errno;
     else
 	retval = 0;
-    dblfd = -1;
+    dblfp = 0;
+    free(dblfname);
+    dblfname = 0;
     inited = 0;
     mylock = 0;
     return retval;
@@ -831,52 +829,32 @@ krb5_error_code
 krb5_dbm_db_lock(mode)
 int mode;
 {
-#ifdef POSIX_FILE_LOCKS
-    struct flock fl;
-#else
-    int flock_mode;
-#endif
+    int krb5_lock_mode;
+    int error;
     if (mylock && (lockmode >= mode)) {
 	    mylock++;		/* No need to upgrade lock, just return */
 	    return(0);
     }
 
-#ifdef POSIX_FILE_LOCKS
-    if (mode == KRB5_DBM_EXCLUSIVE)
-	fl.l_type = F_WRLCK;
-    else if (mode == KRB5_DBM_SHARED)
-	fl.l_type = F_RDLCK;
-    else
-	return KRB5_KDB_BADLOCKMODE;
-    fl.l_whence = 0;
-    fl.l_start = 0;
-    fl.l_len = 0;
-    if (fcntl(dblfd, non_blocking ? F_SETLK : F_SETLKW, &fl) == -1) {
-	if (errno == EBADF && mode == KRB5_DBM_EXCLUSIVE) {
-	    /* tried to exclusive-lock something we don't have write access
-	       to. */
-	    return KRB5_KDB_CANTLOCK_DB;
-	}
-	return errno;
-    }
-#else
     switch (mode) {
     case KRB5_DBM_EXCLUSIVE:
-	flock_mode = LOCK_EX;
+	krb5_lock_mode = KRB5_LOCKMODE_EXCLUSIVE;
 	break;
     case KRB5_DBM_SHARED:
-	flock_mode = LOCK_SH;
+	krb5_lock_mode = KRB5_LOCKMODE_SHARED;
 	break;
     default:
 	return KRB5_KDB_BADLOCKMODE;
     }
-    lockmode = mode;
     if (non_blocking)
-	flock_mode |= LOCK_NB;
+	flock_mode |= KRB5_LOCKMODE_DONTBLOCK;
 
-    if (flock(dblfd, flock_mode) < 0) 
-	return errno;
-#endif
+    error = krb5_lock_file(dblfp, dblfname, krb5_lock_mode);
+
+    if (error == EBADF && mode == KRB5_DBM_EXCLUSIVE)
+	return KRB5_KDB_CANTLOCK_DB;
+    if (error)
+	return error;
     mylock++;
     return 0;
 }
@@ -888,18 +866,7 @@ krb5_dbm_db_unlock()
 	return KRB5_KDB_NOTLOCKED;
 
     if (--mylock == 0) {
-#ifdef POSIX_FILE_LOCKS
-	    struct flock fl;
-	    fl.l_type = F_UNLCK;
-	    fl.l_whence = 0;
-	    fl.l_start = 0;
-	    fl.l_len = 0;
-	    if (fcntl(dblfd, F_SETLK, &fl) == -1)
-		    return errno;
-#else
-	    if (flock(dblfd, LOCK_UN) < 0)
-		    return errno;
-#endif
+      return krb5_lock_file(dblfp, dblfname, KRB5_LOCKMODE_UNLOCK);
     }
     return 0;
 }

@@ -1,3 +1,8 @@
+Thu Nov 17 19:22:16 1994  Mark Eichin  (eichin@cygnus.com)
+
+	* kdb_dbm.c (krb5_dbm_db_unlock): Use krb5_lock_file.
+	(krb5_dbm_db_lock): Same. (Changes from jtkohl@mit.edu.)
+
 Thu Nov 10 17:20:42 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* decrypt_key.c (krb5_kdb_decrypt_key): Set the keyblock's magic
