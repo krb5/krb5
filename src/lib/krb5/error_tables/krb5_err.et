@@ -2,7 +2,7 @@
 # $Source$
 # $Author$
 #
-# Copyright 1989 by the Massachusetts Institute of Technology.
+# Copyright 1989,1990 by the Massachusetts Institute of Technology.
 #
 # For copying and distribution information, please see the file
 # <krb5/mit-copyright.h>.
@@ -149,4 +149,12 @@ error_code KRB5PLACEHOLD_126,	"KRB5 error code 126"
 error_code KRB5PLACEHOLD_127,	"KRB5 error code 127"
 
 error_code KRB5_ERR_RCSID,	"$Id$"
+
+error_code KRB5_LIBOS_BADLOCKFLAG,	"Invalid flag for file lock mode"
+error_code KRB5_LIBOS_CANTREADPWD,	"Cannot read password"
+error_code KRB5_LIBOS_BADPWDMATCH,	"Password mismatch"
+error_code KRB5_LIBOS_PWDINTR,		"Password read interrupted"
+
+error_code KRB5_PARSE_ILLCHAR,		"Illegal character in component name"
+error_code KRB5_PARSE_MALFORMED,	"Malformed representation of principal"
 end
