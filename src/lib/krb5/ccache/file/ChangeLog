@@ -1,3 +1,10 @@
+Tue Feb 21 16:14:25 1995  Mark Eichin  (eichin@cygnus.com)
+
+	* configure.in: check for HAVE_FLOCK, since we may need to use
+	both flock and fcntl.
+	* fcc_maybe.c: try fcntl lock, if we get EINVAL specifically, fall
+	back to flock (if we have it.)
+
 Fri Jan 27 00:49:36 1995  Chris Provenzano (proven@mit.edu)
 
         * Fix fcc_read.c (krb5_fcc_read_authdatum()) krb5_authdatatype

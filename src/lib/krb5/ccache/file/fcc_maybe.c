@@ -44,30 +44,26 @@ int krb5_fcc_default_format = KRB5_FCC_DEFAULT_FVNO;
 #include <krb5/los-proto.h>
 #include <stdio.h>
 
-#ifdef POSIX_FILE_LOCKS
-#ifndef unicos61
-#include <fcntl.h>
-#endif /* unicos61 */
-#define SHARED_LOCK	F_RDLCK
-#define EXCLUSIVE_LOCK	F_WRLCK
-#define UNLOCK_LOCK	F_UNLCK
-#else /* !POSIX_FILE_LOCKS */
-#ifndef sysvimp
-#include <sys/file.h>
-#endif /* sysvimp */
-#define SHARED_LOCK	LOCK_SH
-#define EXCLUSIVE_LOCK	LOCK_EX
-#define UNLOCK_LOCK	LOCK_UN
-#endif /* POSIX_FILE_LOCKS */
-
 #define LOCK_IT 0
 #define UNLOCK_IT 1
 
-static krb5_error_code fcc_lock_file PROTOTYPE((krb5_fcc_data *,
-						int, int));
+/* Under SunOS 4 and SunOS 5 and possibly other operating systems, having
+   POSIX fcntl locks doesn't mean that they work on every filesystem. If we
+   get EINVAL, try flock (if we have it) since that might work... */
+
+#ifdef POSIX_FILE_LOCKS
+static krb5_error_code fcc_lock_file_posix PROTOTYPE((krb5_fcc_data *, int, int));
+
+#ifndef unicos61
+#include <fcntl.h>
+#endif /* unicos61 */
+
+#define SHARED_LOCK	F_RDLCK
+#define EXCLUSIVE_LOCK	F_WRLCK
+#define UNLOCK_LOCK	F_UNLCK
 
 static krb5_error_code
-fcc_lock_file(data, fd, lockunlock)
+fcc_lock_file_posix(data, fd, lockunlock)
 krb5_fcc_data *data;
 int fd;
 int lockunlock;
@@ -75,14 +71,10 @@ int lockunlock;
     /* XXX need to in-line lock_file.c here, but it's sort-of OK since
        we're already unix-dependent for file descriptors */
 
-#ifdef POSIX_FILE_LOCKS
     int lock_cmd = F_SETLKW;
     struct flock lock_arg;
 #define lock_flag lock_arg.l_type
     lock_flag = -1;
-#else
-    int lock_flag = -1;
-#endif
 
     if (lockunlock == LOCK_IT)
 	switch (data->mode) {
@@ -100,7 +92,6 @@ int lockunlock;
     if (lock_flag == -1)
 	return(KRB5_LIBOS_BADLOCKFLAG);
 
-#ifdef POSIX_FILE_LOCKS
     lock_arg.l_whence = 0;
     lock_arg.l_start = 0;
     lock_arg.l_len = 0;
@@ -110,11 +101,85 @@ int lockunlock;
 	    return(EAGAIN);
 	return(errno);
     }
-#else
+    return 0;
+}
+#undef lock_flag
+
+#undef SHARED_LOCK
+#undef EXCLUSIVE_LOCK
+#undef UNLOCK_LOCK
+
+#endif /* POSIX_FILE_LOCKS */
+
+#ifdef HAVE_FLOCK
+
+#ifndef sysvimp
+#include <sys/file.h>
+#endif /* sysvimp */
+
+#define SHARED_LOCK	LOCK_SH
+#define EXCLUSIVE_LOCK	LOCK_EX
+#define UNLOCK_LOCK	LOCK_UN
+
+static krb5_error_code fcc_lock_file_flock PROTOTYPE((krb5_fcc_data *, int, int));
+static krb5_error_code
+fcc_lock_file_flock(data, fd, lockunlock)
+krb5_fcc_data *data;
+int fd;
+int lockunlock;
+{
+    /* XXX need to in-line lock_file.c here, but it's sort-of OK since
+       we're already unix-dependent for file descriptors */
+
+    int lock_flag = -1;
+
+    if (lockunlock == LOCK_IT)
+	switch (data->mode) {
+	case FCC_OPEN_RDONLY:
+	    lock_flag = SHARED_LOCK;
+	    break;
+	case FCC_OPEN_RDWR:
+	case FCC_OPEN_AND_ERASE:
+	    lock_flag = EXCLUSIVE_LOCK;
+	    break;
+	}
+    else
+	lock_flag = UNLOCK_LOCK;
+
+    if (lock_flag == -1)
+	return(KRB5_LIBOS_BADLOCKFLAG);
+
     if (flock(fd, lock_flag) == -1)
 	return(errno);
-#endif
     return 0;
+}
+
+#undef SHARED_LOCK
+#undef EXCLUSIVE_LOCK
+#undef UNLOCK_LOCK
+
+#endif HAVE_FLOCK
+
+static krb5_error_code fcc_lock_file PROTOTYPE((krb5_fcc_data *, int, int));
+static krb5_error_code
+fcc_lock_file(data, fd, lockunlock)
+krb5_fcc_data *data;
+int fd;
+int lockunlock;
+{
+  krb5_error_code st;
+#ifdef POSIX_FILE_LOCKS
+  st = fcc_lock_file_posix(data, fd, lockunlock);
+  if (st != EINVAL) {
+    return st;
+  }
+#endif /* POSIX_FILE_LOCKS */
+
+#ifdef HAVE_FLOCK
+  return fcc_lock_file_flock(data, fd, lockunlock);
+#else
+  return st;
+#endif
 }
 
 krb5_error_code
