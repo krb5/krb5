@@ -653,7 +653,7 @@ krb5_stdcc_destroy (krb5_context context, krb5_ccache id)
  *
  * - return the name of the named cache
  */
-char * KRB5_CALLCONV krb5_stdcc_get_name 
+const char * KRB5_CALLCONV krb5_stdcc_get_name 
         (krb5_context context, krb5_ccache id )
 {
 	char *name = NULL;

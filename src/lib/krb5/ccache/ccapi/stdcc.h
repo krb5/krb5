@@ -37,7 +37,7 @@ KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_stdcc_end_seq_get
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_stdcc_generate_new 
         KRB5_PROTOTYPE((krb5_context, krb5_ccache *id ));
 
-KRB5_DLLIMP char * KRB5_CALLCONV krb5_stdcc_get_name 
+KRB5_DLLIMP const char * KRB5_CALLCONV krb5_stdcc_get_name 
         KRB5_PROTOTYPE((krb5_context, krb5_ccache id ));
 
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_stdcc_get_principal 

@@ -1,3 +1,8 @@
+2000-10-03  Ezra Peisach  <epeisach@mit.edu>
+
+	* stdcc.c, stdcc.h (krb5_stdcc_get_name): Declare as returning
+	const char *.
+
 2000-07-20  Danilo Almeida  <dalmeida@mit.edu>
 
 	* stdcc.h: Include k5-int.h to get krb5_ccache definition.
