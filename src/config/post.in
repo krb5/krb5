@@ -5,11 +5,27 @@ all::
 
 check::
 
+.depend: $(SRCS) $(SRCTOP)/util/depfix.sed
+	if test -n "$(SRCS)" ; then \
+		cc -M $(CFLAGS) $(SRCS) | sed -f $(SRCTOP)/util/depfix.sed | \
+			sed -e 's;$(srcdir)/;$$(srcdir)/;g' > .depend; \
+	else :; fi
+
+depend: .depend
+	if test -n "$(SRCS)" ; then \
+		sed -e '/^# +++ Dependency line eater +++/,$$d' \
+			< $(srcdir)/Makefile.in | cat - .depend \
+			> $(srcdir)/Makefile.in.new; \
+	$(MV) $(srcdir)/Makefile.in $(srcdir)/Makefile.in.old; \
+	$(MV) $(srcdir)/Makefile.in.new $(srcdir)/Makefile.in; \
+	else :; fi
+
 clean:: clean-$(WHAT)
 	$(RM) config.log pre.out post.out Makefile.out
 
 clean-unix::
 	if test -n "$(OBJS)" ; then $(RM) $(OBJS); else :; fi
+	$(RM) .depend
 
 clean-windows::
 	$(RM) *.$(OBJEXT)
