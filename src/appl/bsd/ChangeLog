@@ -1,3 +1,8 @@
+Wed Sep 28 20:57:24 1994  Mark Eichin  (eichin@tweedledumber.cygnus.com)
+
+	* configure.in (srand48): check for srand48, and if it exists,
+	substitute it for srandom (and lrand48 for random.)
+
 Wed Sep 28 14:36:29 1994  Mark Eichin  (eichin@rtl.cygnus.com)
 
 	* Makefile.in: always put $(K4LIB) before $(KLIB) so that
