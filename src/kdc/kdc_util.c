@@ -302,3 +302,14 @@ krb5_ticket *ticket;
 {
     return 0;
 }
+
+/* XXX!  This is a temporary place-holder */
+
+krb5_error_code
+compress_transited(in_tran, princ, out_tran)
+krb5_data *in_tran;
+krb5_principal princ;
+krb5_data *out_tran;
+{
+    return EOPNOTSUPP;
+}
