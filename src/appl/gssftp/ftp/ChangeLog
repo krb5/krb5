@@ -1,3 +1,9 @@
+Thu Jan 18 11:55:50 1996  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* configure.in: Check for sys/select.h
+
+	* ftp.c: Include sys/select.h if present.
+
 Sun Jan 14 01:54:35 1996  Bill Schoofs <wjs@cray.com>
 
 	* Makefile.in (DEFINES): define NOCONFIDENTIAL for future use.

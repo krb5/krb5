@@ -41,6 +41,9 @@ static char sccsid[] = "@(#)ftp.c	5.38 (Berkeley) 4/22/91";
 #include <sys/socket.h>
 #include <sys/time.h>
 #include <sys/file.h>
+#ifdef HAVE_SYS_SELECT_H
+#include <sys/select.h>
+#endif
 
 #include <netinet/in.h>
 #include <netinet/in_systm.h>
