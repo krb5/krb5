@@ -1546,7 +1546,7 @@ kadm5_setkey_principal_3(void *server_handle,
 	}
     }
 
-    if (n_ks_tuple != n_keys)
+    if (n_ks_tuple && n_ks_tuple != n_keys)
 	return KADM5_SETKEY3_ETYPE_MISMATCH;
 
     if ((ret = kdb_get_entry(handle, principal, &kdb, &adb)))

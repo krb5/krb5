@@ -1,3 +1,10 @@
+2002-11-07  Tom Yu  <tlyu@mit.edu>
+
+	* svr_principal.c (kadm5_setkey_principal_3): Apply patch from
+	Emily Ratliff to allow n_ks_tuple to be zero, which is the case if
+	being called from kadmind answering a client's setkey_principal
+	request.
+
 2002-10-15  Ezra Peisach  <epeisach@bu.edu>
 
 	* server_init.c (kadm5_lock, kadm5_unlock): Return KADM5_OK
