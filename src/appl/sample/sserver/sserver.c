@@ -36,7 +36,7 @@ static char rcsid_sserver_c [] =
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
-#include <syslog.h>
+#include <sys/syslog.h>
 
 #include "sample.h"
 
@@ -61,11 +61,7 @@ char *argv[];
     krb5_init_ets();
     /* open a log connection */
 
-#ifdef ultrix
-    openlog("sserver", 0);
-#else
     openlog("sserver", 0, LOG_DAEMON);
-#endif
 
     if (argc < 2) {
 	syslog(LOG_ERR, "needs server argument");
