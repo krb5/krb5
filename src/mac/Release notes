@@ -273,3 +273,7 @@ Changes in 1.1a3:
 3.1
 from tag Mac_GSSKerberos5_3_1
 final for KL 4.0/KfM 3.5/KfM 4.0a16
+
+3.2a1
+from tag Mac_GSSKerberos5_3_2a1
+more build fixes for Mac OS X
