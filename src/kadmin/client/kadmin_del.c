@@ -43,6 +43,9 @@ static char rcsid_kadmin_del[] =
 #include <krb5/kdb.h>
 #include <krb5/kdb_dbm.h>
 
+void decode_kadmind_reply();
+int print_status_message();
+
 krb5_error_code
 kadm_del_user(my_creds, rep_ret, local_addr, foreign_addr, 
 	      local_socket, seqno, principal)
@@ -137,17 +140,13 @@ char *principal;
         return(1);
     }
 
-    memcpy(&rd_priv_resp.appl_code, msg_data.data, 1);
-    memcpy(&rd_priv_resp.oper_code, msg_data.data + 1, 1);
-    memcpy(&rd_priv_resp.retn_code, msg_data.data + 2, 1);
+    decode_kadmind_reply(msg_data, &rd_priv_resp);
 
     free(inbuf.data);
     free(msg_data.data);
-    if (!((rd_priv_resp.appl_code == KADMIN) &&
-		(rd_priv_resp.retn_code == KADMGOOD)))
-      fprintf(stderr, "Principal Does NOT Exist!\n");
-    else
-      fprintf(stderr, "\nDatabase Deletion Successful.\n");
 
+    print_status_message(&rd_priv_resp,
+			 "Database Deletion Successful.");
+    
     return(0);
 }

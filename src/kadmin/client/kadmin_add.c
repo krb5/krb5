@@ -45,6 +45,9 @@ static char rcsid_kadmin_add[] =
 #include <krb5/kdb.h>
 #include <krb5/kdb_dbm.h>
 
+void decode_kadmind_reply();
+int print_status_message();
+
 krb5_error_code
   kadm_add_user(my_creds, rep_ret, local_addr, foreign_addr, 
 		local_socket, seqno, oper_type, principal)
@@ -144,8 +147,14 @@ char *principal;
     free(inbuf.data);
     
     if (msg_data.data[2] == KADMBAD) {
-	fprintf(stderr, "Principal Already Exists!\n\n");
-	return(0);
+	decode_kadmind_reply(msg_data, &rd_priv_resp);
+
+	if (rd_priv_resp.message) {
+	    fprintf(stderr, "%s\n\n", rd_priv_resp.message);
+	    free(rd_priv_resp.message);
+	} else
+	    fprintf(stderr, "Generic error from server.\n\n");
+        return(0);
     }
     
 #ifdef MACH_PASS
@@ -258,18 +267,13 @@ char *principal;
     }
     free(inbuf.data);
     
-    memcpy(&rd_priv_resp.appl_code, msg_data.data, 1);
-    memcpy(&rd_priv_resp.oper_code, msg_data.data + 1, 1);
-    memcpy(&rd_priv_resp.retn_code, msg_data.data + 2, 1);
+    decode_kadmind_reply(msg_data, &rd_priv_resp);
+
+    free(inbuf.data);
+    free(msg_data.data);
+
+    retval = print_status_message(&rd_priv_resp,
+				  "Database Addition Successful.");
     
-    free(msg_data.data);                                   
-    
-    if (!((rd_priv_resp.appl_code == KADMIN) &&
-	  (rd_priv_resp.retn_code == KADMGOOD))) {
-        fprintf(stderr, "Generic Error During kadmin Addition!\n");
-        retval = 1;
-    } else {
-        fprintf(stderr, "\nDatabase Addition Successful.\n");
-    }
     return(retval);
 }

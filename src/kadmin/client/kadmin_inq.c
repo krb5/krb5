@@ -44,6 +44,9 @@ static char rcsid_kadmin_inq[] =
 #include <krb5/kdb.h>
 #include <krb5/kdb_dbm.h>
 
+void decode_kadmind_reply();
+int print_status_message();
+
 krb5_error_code
 kadm_inq_user(my_creds, rep_ret, local_addr, foreign_addr, 
 	      local_socket, seqno, principal)
@@ -59,7 +62,6 @@ char *principal;
     char username[755];
     int count;
     krb5_error_code retval;     /* return code */
-
     char *my_data;
 
     if ((inbuf.data = (char *) calloc(1, 3 + sizeof(username))) == (char *) 0) {
@@ -148,16 +150,23 @@ char *principal;
     }
 	
     if (msg_data.data[2] == KADMBAD) {
-        fprintf(stderr, "Principal Does Not Exist!\n\n");
+	decode_kadmind_reply(msg_data, &rd_priv_resp);
+
+	if (rd_priv_resp.message) {
+	    fprintf(stderr, "%s\n\n", rd_priv_resp.message);
+	    free(rd_priv_resp.message);
+	} else
+	    fprintf(stderr, "Generic error from server.\n\n");
         return(0);
     }
 
-    if ((my_data = (char *) calloc(1, msg_data.length + 1)) == (char *) 0) {
-	fprintf(stderr, "No Memory Allocating Inquiry Buffer!\n");
-	return(1);
+    my_data = malloc(msg_data.length + 1);
+    if (!my_data) {
+	fprintf(stderr, "kadmin_inq: Couldn't allocate space for my_data!\n");
+	exit(1);
     }
-
-    (void) memcpy(my_data, msg_data.data, msg_data.length);
+    memcpy(my_data, msg_data.data, msg_data.length);
+    my_data[msg_data.length] = 0;
 
 		/* Print Inquiry Information */
     fprintf(stdout, "%s\n", my_data);
@@ -221,18 +230,13 @@ char *principal;
     }
     free(inbuf.data);
      
-    memcpy(&rd_priv_resp.appl_code, msg_data.data, 1);
-    memcpy(&rd_priv_resp.oper_code, msg_data.data + 1, 1);
-    memcpy(&rd_priv_resp.retn_code, msg_data.data + 2, 1);
- 
+    decode_kadmind_reply(msg_data, &rd_priv_resp);
+
+    free(inbuf.data);
     free(msg_data.data);
- 
-    if (!((rd_priv_resp.appl_code == KADMIN) &&
-                (rd_priv_resp.retn_code == KADMGOOD))) {
-        fprintf(stderr, "Generic Error During kadmin Inquiry!\n");
-        retval = 1;
-    } else {
-        fprintf(stderr, "\nDatabase Inquiry Successful.\n");
-    }
+
+    print_status_message(&rd_priv_resp,
+			 "Password Inquiry Successful.");
+    
     return(0);
 }

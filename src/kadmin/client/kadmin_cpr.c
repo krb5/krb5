@@ -46,6 +46,9 @@ static char rcsid_kadmin_cpr[] =
 #include <krb5/kdb.h>
 #include <krb5/kdb_dbm.h>
 
+void decode_kadmind_reply();
+int print_status_message();
+
 krb5_error_code
 kadm_cpw_user_rnd(my_creds, rep_ret, local_addr, foreign_addr, 
 		  local_socket, seqno, principal)
@@ -142,18 +145,14 @@ char *principal;
     }
     free(inbuf.data);
 
-    memcpy(&rd_priv_resp.appl_code, msg_data.data, 1);
-    memcpy(&rd_priv_resp.oper_code, msg_data.data + 1, 1);
-    memcpy(&rd_priv_resp.retn_code, msg_data.data + 2, 1);
- 
-    free(msg_data.data);
- 
-    if (!((rd_priv_resp.appl_code == KADMIN) &&
-		(rd_priv_resp.retn_code == KADMGOOD)))
-      fprintf(stderr, "Principal does NOT exist!\n");
-    else
-      fprintf(stderr, "\nPassword Modification Successful.\n");
+    decode_kadmind_reply(msg_data, &rd_priv_resp);
 
+    free(inbuf.data);
+    free(msg_data.data);
+
+    print_status_message(&rd_priv_resp,
+			 "Password Modification Successful.");
+    
     return(0);
 }
 

@@ -45,6 +45,9 @@ static char rcsid_kadmin_adr[] =
 #include <krb5/kdb.h>
 #include <krb5/kdb_dbm.h>
 
+void decode_kadmind_reply();
+int print_status_message();
+
 krb5_error_code
   kadm_add_user_rnd(my_creds, rep_ret, local_addr, foreign_addr, 
 		    local_socket, seqno, principal)
@@ -140,19 +143,14 @@ char *principal;
 	free(inbuf.data);
         return(1);
     }
-    free(inbuf.data);
-    
-    memcpy(&rd_priv_resp.appl_code, msg_data.data, 1);
-    memcpy(&rd_priv_resp.oper_code, msg_data.data + 1, 1);
-    memcpy(&rd_priv_resp.retn_code, msg_data.data + 2, 1);
-    
-    free(msg_data.data);                                   
-    
-    if (!((rd_priv_resp.appl_code == KADMIN) &&
-	  (rd_priv_resp.retn_code == KADMGOOD)))
-      fprintf(stderr, "Principal already exists!\n");
-    else
-      fprintf(stderr, "\nDatabase Addition Successful.\n");
 
+    decode_kadmind_reply(msg_data, &rd_priv_resp);
+
+    free(inbuf.data);
+    free(msg_data.data);
+
+    retval = print_status_message(&rd_priv_resp,
+				  "Database Addition Successful.");
+    
     return(retval);
 }

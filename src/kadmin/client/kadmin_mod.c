@@ -44,6 +44,9 @@ static char rcsid_kadmin_mod[] =
 #include <krb5/kdb.h>
 #include <krb5/kdb_dbm.h>
 
+void decode_kadmind_reply();
+int print_status_message();
+
 krb5_error_code
 kadm_mod_user(my_creds, rep_ret, local_addr, foreign_addr, 
 	      local_socket, seqno, principal)
@@ -141,7 +144,13 @@ char *principal;
     free(msg_data.data);
 
     if (msg_data.data[2] == KADMBAD) {
-        fprintf(stderr, "Principal Does NOT Exist!\n\n");
+	decode_kadmind_reply(msg_data, &rd_priv_resp);
+
+	if (rd_priv_resp.message) {
+	    fprintf(stderr, "%s\n\n", rd_priv_resp.message);
+	    free(rd_priv_resp.message);
+	} else
+	    fprintf(stderr, "Generic error from server.\n\n");
         return(0);
     }
 
@@ -204,20 +213,15 @@ char *principal;
 	free(inbuf.data);
         return(1);
     }
+
+
+    decode_kadmind_reply(msg_data, &rd_priv_resp);
+
     free(inbuf.data);
-
-    memcpy(&rd_priv_resp.appl_code, msg_data.data, 1);
-    memcpy(&rd_priv_resp.oper_code, msg_data.data + 1, 1);
-    memcpy(&rd_priv_resp.retn_code, msg_data.data + 2, 1);
-
     free(msg_data.data);
 
-    if (!((rd_priv_resp.appl_code == KADMIN) &&
-		(rd_priv_resp.retn_code == KADMGOOD))) {
-	fprintf(stderr, "Error Performing kadmin service!\n");
-	retval = 1;
-    } else {
-        fprintf(stderr, "\nDatabase Modification Successful.\n");
-    }
+    print_status_message(&rd_priv_resp,
+			 "Database Modification Successful.");
+    
     return(0);
 }

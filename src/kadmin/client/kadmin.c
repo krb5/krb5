@@ -50,6 +50,15 @@ static char rcsid_kadmin[] =
 #include <krb5/kdb.h>
 #include <krb5/kdb_dbm.h>
 
+/*
+ * Try no preauthentication first; then try the encrypted timestamp
+ */
+int preauth_search_list[] = {
+	0,			
+	KRB5_PADATA_ENC_TIMESTAMP,
+	-1
+	};
+
 krb5_error_code get_first_ticket 
 	PROTOTYPE((krb5_ccache, 
 		krb5_principal));
@@ -59,6 +68,8 @@ struct sockaddr_in local_sin, remote_sin;
 krb5_creds my_creds;
 
 void get_def_princ();
+void decode_kadmind_reply();
+int print_status_message();
 
 main(argc,argv)
   int argc;
@@ -494,29 +505,27 @@ repeat:
 	exit(1);
     }
     free(inbuf.data);
- 
-    memcpy(&rd_priv_resp.appl_code, msg_data.data, 1);
-    memcpy(&rd_priv_resp.oper_code, msg_data.data + 1, 1);
-    memcpy(&rd_priv_resp.retn_code, msg_data.data + 2, 1);
- 
+
+    decode_kadmind_reply(msg_data, &rd_priv_resp);
     free(msg_data.data);
+    
     if (!((rd_priv_resp.appl_code == KADMIN) &&
-                (rd_priv_resp.retn_code == KADMGOOD))) {
-	fprintf(stderr, "Generic Error During kadmin Termination!\n");
+	  (rd_priv_resp.retn_code == KADMGOOD))) {
+	if (rd_priv_resp.message)
+	    fprintf(stderr, "%s\n", rd_priv_resp.message);
+	else
+	    fprintf(stderr, "Generic Error During kadmin Termination!\n");
 	retval = 1;
     } else {
 	fprintf(stderr, "\nHave a Good Day.\n\n");
     }
 
+    if (rd_priv_resp.message)
+	free(rd_priv_resp.message);
+
     free(send_cksum.contents);
-
-
-    if (retval) {
-	fprintf(stderr, "\n\nkadmin terminating - %s.\n\n", 
-		kadmind_kadmin_response[rd_priv_resp.retn_code]);
-	exit(1);
-    }
-    exit(0);
+    
+    exit(retval);
 }
 
 krb5_error_code
@@ -533,6 +542,7 @@ OLDDECLARG(krb5_principal, client)
     krb5_error_code retval;
     char *password;
     int  pwsize;
+    int	 i;
     
     if ((retval = krb5_unparse_name(client, &client_name))) {
 	fprintf(stderr, "Unable to Unparse Client Name!\n");
@@ -583,28 +593,34 @@ OLDDECLARG(krb5_principal, client)
     }
 
 	/*	Build Request for Initial Credentials */
-    if ((retval = krb5_get_in_tkt_with_password(
-			0,			/* options */
-			my_addresses,
-			KRB5_PADATA_ENC_TIMESTAMP, /* do preauth */
-			ETYPE_DES_CBC_CRC,  	/* etype */
-			KEYTYPE_DES,
-			password,
-			cache,
-			&my_creds,
-			0  ))) {
-            fprintf(stderr, "\nUnable to Get Initial Credentials : %s!\n",
-                        error_message(retval));
-	    (void) memset(password, 0, pwsize);
-	    free(password);
-	    krb5_free_addresses(my_addresses);
-            return(1);
+    for (i=0; preauth_search_list[i] >= 0; i++) {
+	retval = krb5_get_in_tkt_with_password(
+					0,	/* options */
+					my_addresses,
+					/* do random preauth */
+                                        preauth_search_list[i],
+					ETYPE_DES_CBC_CRC,   /* etype */
+					KEYTYPE_DES,
+					password,
+					cache,
+					&my_creds,
+				        0);
+	if (retval != KRB5KDC_PREAUTH_FAILED &&
+	    retval != KRB5KRB_ERR_GENERIC)
+	    break;
     }
- 
+    
         /* Do NOT Forget to zap password  */
     memset((char *) password, 0, pwsize);
     free(password);
     krb5_free_addresses(my_addresses);
+    
+    if (retval) {
+            fprintf(stderr, "\nUnable to Get Initial Credentials : %s!\n",
+                        error_message(retval));
+            return(1);
+    }
+ 
     return(0);
 }
 
@@ -771,3 +787,45 @@ usage()
     fprintf(stderr, "	the -n option is used.\n\n");
     exit(0);
 }
+
+void decode_kadmind_reply(data, response)
+    krb5_data	data;
+    kadmin_requests	*response;
+{
+    response->appl_code = data.data[0];
+    response->oper_code = data.data[1];
+    response->retn_code = data.data[2];
+    if (data.length > 3 && data.data[3]) {
+	response->message = malloc(data.length - 2);
+	if (response->message) {
+	    memcpy(response->message, data.data + 3, data.length - 3);
+	    response->message[data.length - 3] = 0;
+	}
+    } else
+	response->message = NULL;
+
+    return;
+}
+
+int print_status_message(response, success_msg)
+    kadmin_requests	*response;
+    char		*success_msg;
+{
+    int	retval = 1;
+    
+    if (response->appl_code == KADMIN) {
+	if (response->retn_code == KADMGOOD) {
+	    fprintf(stderr, "%s\n", success_msg);
+	    retval = 0;
+	} else if (response->retn_code == KADMBAD) 
+	    fprintf(stderr, "%s\n", response->message);
+	else
+	    fprintf(stderr, "ERROR: unknown return code from server.\n");
+    } else
+	fprintf(stderr, "ERROR: unknown application code from server.\n");
+
+    if (response->message)
+	free(response->message);
+    
+    return retval;
+}    
