@@ -54,6 +54,31 @@ static char rcsid_key_sched_c[] =
 
 #include <krb5/krb5.h>
 #include "des_int.h"
+#if !defined(LSBFIRST) && !defined(MSBFIRST)
+/* autoconf and Ferguson DES code */
+
+void make_key_sched PROTOTYPE((mit_des_cblock, mit_des_key_schedule));
+
+int
+mit_des_key_sched(k,schedule)
+    mit_des_cblock k;
+    mit_des_key_schedule schedule;
+{
+    if (!mit_des_check_key_parity(k))	/* bad parity --> return -1 */
+	return(-1);
+
+    if (mit_des_is_weak_key(k))
+	return(-2);
+
+    make_key_sched(k,schedule);
+
+    /* if key was good, return 0 */
+    return 0;
+}
+
+#else
+/* Imake and MIT DES code */
+
 #include "key_perm.h"
 
 extern int mit_des_debug;
@@ -258,3 +283,4 @@ make_key_sched(Key,Schedule)
     }
 #endif
 }
+#endif
