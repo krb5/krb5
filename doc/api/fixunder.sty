@@ -1,20 +1,15 @@
 %
 % re-define _ to be normal, and to provide a reasonable underscore.
 %
-\catcode`\_=12
+\def\makeunderactive{\catcode`\_=\active\relax}
+\def\makeunderother{\catcode`\_=12\relax}
+\def\makeunderletter{\catcode`\_=11\relax}
+\def\makeundernormal{\catcode`\_=8\relax}
+\makeunderother
 \def\cctwlunder{_}
 
-\catcode`\_=\active
-\def\_{_}
-\def_{\leavevmode {\tt \char95}}
-%
-% fix up index commands to deal with active _
-% from LATEX.TEX:
-% LATEX VERSION 2.09 <4 Aug 1988>, Copyright (C) 1988 by Leslie Lamport
-
-\def\makeindex{\if@filesw \newwrite\@indexfile
-  \immediate\openout\@indexfile=\jobname.idx
-  \def\index{\let_=\cctwlunder\@bsphack\begingroup
-             \def\protect####1{\string####1\space}\@sanitize
-             \@wrindex\@indexfile}\typeout
-  {Writing index file \jobname.idx }\fi}
+\newif\ifunderreal
+\underrealfalse
+\makeunderactive
+\def_{\ifunderreal\cctwlunder\else\leavevmode {\tt \cctwlunder}\discretionary{}{}{}\fi}
+\let\_=_
