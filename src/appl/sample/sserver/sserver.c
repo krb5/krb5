@@ -36,7 +36,7 @@ static char rcsid_sserver_c [] =
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
-#include <sys/syslog.h>
+#include <syslog.h>
 
 #include "sample.h"
 

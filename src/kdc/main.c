@@ -23,7 +23,7 @@ static char rcsid_main_c[] =
 #else
 #include <varargs.h>
 #endif
-#include <sys/syslog.h>
+#include <syslog.h>
 #include <signal.h>
 #include <errno.h>
 
