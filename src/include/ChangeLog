@@ -1,3 +1,11 @@
+2001-06-07  Ezra Peisach  <epeisach@mit.edu>
+
+	* k5-int.h: Remove AS_REP_105_SAM_COMPAT definition. Not used in
+	tree.  Remove SYSV redefinition of random() to rand() and
+	srandom() to srand(). Two locations in tree that might matter
+	already handled in configure. Unicos redefinition of utimes() to
+	utime() removed - appl/bsd has its own implementation.
+
 2001-06-06  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in ($(srcdir)/krb5/autoconf.h.in): New target; rebuild

@@ -79,9 +79,6 @@
 
 #include "osconf.h"
 
-/* Compatibility switch for SAM preauth */
-#define AS_REP_105_SAM_COMPAT
-
 /*
  * Begin "k5-config.h"
  */
@@ -147,18 +144,6 @@ typedef unsigned short	u_short;
 typedef unsigned char	u_char;
 #endif /* HAVE_SYS_TYPES_H */
 #endif /* KRB5_SYSTYPES__ */
-
-#ifdef SYSV
-/* Change srandom and random to use rand and srand */
-/* Taken from the Sandia changes.  XXX  We should really just include */
-/* srandom and random into Kerberos release, since rand() is a really */
-/* bad random number generator.... [tytso:19920616.2231EDT] */
-#define random() rand()
-#define srandom(a) srand(a)
-#ifndef unicos61
-#define utimes(a,b) utime(a,b)
-#endif  /* unicos61 */
-#endif /* SYSV */
 
 #define DEFAULT_PWD_STRING1 "Enter password:"
 #define DEFAULT_PWD_STRING2 "Re-enter password for verification:"
@@ -1577,8 +1562,6 @@ void krb5int_set_prompt_types
  */
 #define KRB5_VERIFY_MAGIC(structure,magic_number) \
     if ((structure)->magic != (magic_number)) return (magic_number);
-
-int krb5_seteuid  (int);
 
 /* to keep lint happy */
 #define krb5_xfree(val) free((char FAR *)(val))
