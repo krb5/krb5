@@ -453,7 +453,7 @@ kerberos5_is(ap, data, cnt)
 			(void) strcat(errbuf, error_message(r));
 			goto errout;
 		    }
-		    r = krb5_verify_checksum(telnet_checksum,
+		    r = krb5_verify_checksum(telnet_context,
 					     cksum->checksum_type, cksum,
 					     &type_check, 2, key->contents,
 					     key->length);

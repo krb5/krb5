@@ -1,3 +1,8 @@
+Thu Feb  6 00:14:50 1997  Richard Basch  <basch@lehman.com>
+
+	* kerberos5.c (kerberos5_is): First argument to
+		krb5_verify_checksum is a krb5_context!!!
+
 Thu Nov  7 15:29:09 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* kerberos5.c (kerberos5_init): Check the error return from
