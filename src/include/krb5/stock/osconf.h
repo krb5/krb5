@@ -27,13 +27,13 @@
 #ifndef KRB5_OSCONF__
 #define KRB5_OSCONF__
 
+#if !defined(_MSDOS)
+    /* Don't try to pull in autoconf.h for Windows, since it's not used */
 #ifndef KRB5_AUTOCONF__
 #define KRB5_AUTOCONF__
 #include "autoconf.h"
 #endif
-
-#define	USE_DBM_LNAME		/* Use a DBM database for the aname/lname
-				   conversion */
+#endif
 
 #ifdef _WINDOWS
 #define DEFAULT_PROFILE_FILENAME "krb5.ini"
