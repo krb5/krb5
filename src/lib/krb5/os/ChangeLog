@@ -1,5 +1,8 @@
 1999-11-23  Ken Raeburn  <raeburn@mit.edu>
 
+	* an_to_ln.c (default_an_to_ln): Avoid stomping byte after
+	supplied buffer.  Thanks to Matt Crawford.
+
 	* init_os_ctx.c (os_init_paths): Delete SECURE argument; read the
 	value from the profile structure instead.
 	(krb5_os_init_context, krb5_get_profile): Don't pass SECURE

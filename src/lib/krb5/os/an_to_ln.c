@@ -630,7 +630,7 @@ default_an_to_ln(context, aname, lnsize, lname)
     free(def_realm);
     strncpy(lname, krb5_princ_component(context, aname,0)->data, 
 	    min(krb5_princ_component(context, aname,0)->length,lnsize));
-    if (lnsize < krb5_princ_component(context, aname,0)->length ) {
+    if (lnsize <= krb5_princ_component(context, aname,0)->length ) {
 	retval = KRB5_CONFIG_NOTENUFSPACE;
     } else {
 	lname[krb5_princ_component(context, aname,0)->length] = '\0';
