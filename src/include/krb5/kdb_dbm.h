@@ -30,6 +30,7 @@
 #define krb5_dbm_db_get_principal krb5_db_get_principal
 #define krb5_dbm_db_free_principal krb5_db_free_principal
 #define krb5_dbm_db_put_principal krb5_db_put_principal
+#define krb5_dbm_db_delete_principal krb5_db_delete_principal
 #define krb5_dbm_db_iterate krb5_db_iterate
 
 /* libkdb.spec */

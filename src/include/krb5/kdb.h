@@ -77,6 +77,9 @@ void krb5_db_free_principal
 krb5_error_code krb5_db_put_principal
 	PROTOTYPE((krb5_db_entry *,
 		   int * ));
+krb5_error_code krb5_db_delete_principal
+	PROTOTYPE((krb5_principal,
+		   int * ));
 krb5_error_code krb5_db_iterate
 	PROTOTYPE((krb5_error_code (* ) PROTOTYPE((krb5_pointer,
 						   krb5_db_entry *)),
