@@ -1,5 +1,4 @@
-KRB4 = @KRB4@
-K4LIB = @K4LIB@
+KRB4_LIB = @KRB4_LIB@
 
 CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
 LDFLAGS = -g
@@ -55,7 +54,7 @@ kdc5_err.h: kdc5_err.et
 kdc5_err.o: kdc5_err.h
 
 krb5kdc: $(OBJS) $(KDBDEPLIB) $(DEPKLIB)
-	$(CC) $(CFLAGS) -o krb5kdc $(OBJS) $(KDBLIB) $(K4LIB) $(KLIB) $(LIBS)
+	$(CC) $(CFLAGS) -o krb5kdc $(OBJS) $(KDBLIB) $(KRB4_LIB) $(KLIB) $(LIBS)
 
 install::
 	$(INSTALL_PROGRAM) krb5kdc ${DESTDIR}$(SERVER_BINDIR)/krb5kdc

@@ -1,3 +1,8 @@
+Thu Apr 27 13:52:22 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* Makefile.in (krb5kdc): use KRB4_LIB directly.
+	* configure.in: use WITH_KRB4 as-is.
+
 Wed Apr 26 11:23:11 1995  Mark Eichin  <eichin@cygnus.com>
 
 	* configure.in: need HAS_ANSI_VOLATILE for signal_requests_exit.

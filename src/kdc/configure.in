@@ -12,12 +12,4 @@ HAS_ANSI_VOLATILE
 KRB_INCLUDE
 WITH_KRB4
 WITH_KRB5ROOT
-AC_ARG_WITH([krb4],
-[  --with-krb4=KRB4DIR     build with Kerberos V4 backwards compatibility],
-ADD_DEF(-DKRB4)
-ADD_DEF(-DBACKWARD_COMPAT)
-K4LIB='$(KRB4)/lib/libkrb.a $(TOPLIBD)/libdes425.a',
-echo "warning: no krb4 support will be built in kdc"
-K4LIB=)
-AC_SUBST(K4LIB)
 V5_AC_OUTPUT_MAKEFILE
