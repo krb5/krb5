@@ -1,5 +1,5 @@
 #!/bin/sh
-repository=/afs/athena.mit.edu/astaff/project/krbdev/.cvsroot
+repository=:kserver:cvs.mit.edu:/cvs/krbdev
 dodoc=t
 dosrc=t
 checkout=t
@@ -32,13 +32,9 @@ case reldir in
 *);;
 esac
 
-if test ! -d $reldir; then
-	mkdir $reldir
-fi
-
 echo "Checking out krb5 with tag $reltag into directory $reldir..."
 if test $checkout = t; then
-	(cd $reldir; cvs -q -d $repository export -r$reltag krb5)
+	cvs -q -d $repository export -r$reltag -d $reldir krb5
 fi
 
 if test $dosrc = t; then
