@@ -37,7 +37,7 @@ k5_descbc_hash_size(size_t *output)
 }
 
 static krb5_error_code
-k5_descbc_hash(const krb5_keyblock *key, const krb5_data *ivec,
+k5_descbc_hash(const krb5_keyblock *key, krb5_keyusage usage, const krb5_data *ivec,
 	       const krb5_data *input, krb5_data *output)
 {
     mit_des_key_schedule schedule;

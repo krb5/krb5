@@ -1,3 +1,13 @@
+2001-10-22  Sam Hartman  <hartmans@mit.edu>
+
+	* t_cksum.c (main):  Include key usage in hash call.
+
+	* k5_md5des.c (k5_md5des_hash): add usage
+
+	* k5_md4des.c (k5_md4des_hash):  add key usage
+
+	* descbc.c (k5_descbc_hash):  Add key usage
+
 2001-05-31  Ezra Peisach  <epeisach@mit.edu>
 
 	* k5_md4des.c (k5_md4des_verify): Get rid of local variable that

@@ -48,7 +48,7 @@ k5_md4des_hash_size(size_t *output)
    that's less efficient, and there's no need for this to be generic */
 
 static krb5_error_code
-k5_md4des_hash(const krb5_keyblock *key, const krb5_data *ivec,
+k5_md4des_hash(const krb5_keyblock *key, krb5_keyusage usage, const krb5_data *ivec,
 	       const krb5_data *input, krb5_data *output)
 {
     krb5_error_code ret;

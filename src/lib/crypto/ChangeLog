@@ -1,3 +1,14 @@
+2001-10-22  Sam Hartman  <hartmans@mit.edu>
+
+	* make_checksum.c (krb5_c_make_checksum):  Include key usage
+
+2001-10-19  Sam Hartman  <hartmans@mit.edu>
+
+	* Makefile.in (check-unix):  Run t_encrypt
+
+	* t_encrypt.c:  New file to contain generic encryption system
+	black-box tests ; currently primitive,  but useful for rc4 work
+
 2001-10-03  Ken Raeburn  <raeburn@mit.edu>
 
 	* block_size.c, checksum_length.c, cksumtype_to_string.c,

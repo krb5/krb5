@@ -85,7 +85,7 @@ krb5_c_make_checksum(context, cksumtype, key, usage, input, cksum)
 	    }
 	}
 
-	ret = (*(krb5_cksumtypes_list[i].keyhash->hash))(key, 0, input, &data);
+	ret = (*(krb5_cksumtypes_list[i].keyhash->hash))(key, usage, 0, input, &data);
     } else if (krb5_cksumtypes_list[i].flags & KRB5_CKSUMFLAG_DERIVE) {
 	/* any key is ok */
 #ifdef ATHENA_DES3_KLUDGE

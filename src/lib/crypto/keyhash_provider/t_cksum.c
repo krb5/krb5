@@ -102,7 +102,7 @@ main(argc, argv)
     plaintext.length = strlen(argv[msgindex]);
     plaintext.data = argv[msgindex];
 
-    if ((kret = (*(khp.hash))(&keyblock, 0, &plaintext, &newstyle_checksum))) {
+    if ((kret = (*(khp.hash))(&keyblock, 0, 0, &plaintext, &newstyle_checksum))) {
       printf("krb5_calculate_checksum choked with %d\n", kret);
       break;
     }
