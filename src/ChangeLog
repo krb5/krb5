@@ -1,3 +1,8 @@
+Fri Jul 26 15:07:51 1996  Marc Horowitz  <marc@mit.edu>
+
+	* aclocal.m4 (LIBS): include -lgen if compile() is present and
+ 	-lkrb5 is used.
+
 Tue Jul 23 00:36:46 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* acconfig.h: Add contents of util/db2/acconfig.h so that
