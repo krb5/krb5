@@ -24,6 +24,8 @@
  * This file contains the source code for krb5_fcc_retrieve.
  */
 
+#if 0
+
 #include "fcc.h"
 
 #ifdef macintosh
@@ -230,3 +232,21 @@ authdata_match(mdata, data)
     }
     return (*mdata == NULL) && (*data == NULL);
 }
+
+#else
+
+#include "k5-int.h"
+
+krb5_error_code KRB5_CALLCONV
+krb5_fcc_retrieve(context, id, whichfields, mcreds, creds)
+   krb5_context context;
+   krb5_ccache id;
+   krb5_flags whichfields;
+   krb5_creds *mcreds;
+   krb5_creds *creds;
+{
+    return krb5_cc_retrieve_cred_default (context, id, whichfields,
+					  mcreds, creds);
+}
+
+#endif
