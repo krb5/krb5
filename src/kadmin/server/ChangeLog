@@ -1,3 +1,10 @@
+Mon Mar  1 21:24:49 1999  Tom Yu  <tlyu@mit.edu>
+
+	* ovsec_kadmd.c (log_badverf): Actually make a real lookup table
+	for procedure numbers.  Also, if we don't find the procedure
+	number, just log the number rather than falling off the end of an
+	array.
+
 1998-11-13  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* Makefile.in: Set the myfulldir and mydir variables (which are

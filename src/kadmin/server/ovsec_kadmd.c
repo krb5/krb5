@@ -786,33 +786,60 @@ void log_badverf(gss_name_t client_name, gss_name_t server_name,
 		 struct svc_req *rqst, struct rpc_msg *msg, char
 		 *data)
 {
-     static const char *const proc_names[] = {
-	  "kadm5_create_principal",
-	  "kadm5_delete_principal",
-	  "kadm5_modify_principal",
-	  "kadm5_rename_principal",
-	  "kadm5_get_principal",
-	  "kadm5_chpass_principal",
-	  "kadm5_randkey_principal",
-	  "kadm5_create_policy",
-	  "kadm5_delete_policy",
-	  "kadm5_modify_policy",
-	  "kadm5_get_policy",
-	  "kadm5_get_privs",
+     struct procnames {
+	  rpc_u_int32 proc;
+	  const char *proc_name;
      };
+     static const struct procnames proc_names[] = {
+	  {1, "CREATE_PRINCIPAL"},
+	  {2, "DELETE_PRINCIPAL"},
+	  {3, "MODIFY_PRINCIPAL"},
+	  {4, "RENAME_PRINCIPAL"},
+	  {5, "GET_PRINCIPAL"},
+	  {6, "CHPASS_PRINCIPAL"},
+	  {7, "CHRAND_PRINCIPAL"},
+	  {8, "CREATE_POLICY"},
+	  {9, "DELETE_POLICY"},
+	  {10, "MODIFY_POLICY"},
+	  {11, "GET_POLICY"},
+	  {12, "GET_PRIVS"},
+	  {13, "INIT"},
+	  {14, "GET_PRINCS"},
+	  {15, "GET_POLS"},
+	  {16, "SETKEY_PRINCIPAL"},
+	  {17, "SETV4KEY_PRINCIPAL"},
+     };
+#define NPROCNAMES (sizeof (proc_names) / sizeof (struct procnames))
      OM_uint32 minor;
      gss_buffer_desc client, server;
      gss_OID gss_type;
      char *a;
+     rpc_u_int32 proc;
+     int i;
+     const char *procname;
 
      (void) gss_display_name(&minor, client_name, &client, &gss_type);
      (void) gss_display_name(&minor, server_name, &server, &gss_type);
      a = inet_ntoa(rqst->rq_xprt->xp_raddr.sin_addr);
 
-     krb5_klog_syslog(LOG_NOTICE, "WARNING! Forged/garbled request: %s, "
-	    "claimed client = %s, server = %s, addr = %s",
-	    proc_names[msg->rm_call.cb_proc], client.value,
-	    server.value, a);
+     proc = msg->rm_call.cb_proc;
+     procname = NULL;
+     for (i = 0; i < NPROCNAMES; i++) {
+	  if (proc_names[i].proc == proc) {
+	       procname = proc_names[i].proc_name;
+	       break;
+	  }
+     }
+     if (procname != NULL)
+	  krb5_klog_syslog(LOG_NOTICE, "WARNING! Forged/garbled request: %s, "
+			   "claimed client = %s, server = %s, addr = %s",
+			   procname, client.value,
+			   server.value, a);
+     else
+	  krb5_klog_syslog(LOG_NOTICE, "WARNING! Forged/garbled request: %d, "
+			   "claimed client = %s, server = %s, addr = %s",
+			   proc, client.value,
+			   server.value, a);
 
      (void) gss_release_buffer(&minor, &client);
      (void) gss_release_buffer(&minor, &server);
