@@ -1106,7 +1106,9 @@ dump_db(argc, argv)
 		    printf("Please enter new master key....\n");
 	    if ((retval = krb5_db_fetch_mkey(util_context, master_princ, 
 					     new_master_keyblock.enctype,
-					     !new_mkey_file, TRUE, 
+					     (new_mkey_file == 0) ? 
+					        (krb5_boolean) 1 : 0, 
+					     TRUE, 
 					     new_mkey_file, 0,
 					     &new_master_keyblock))) { 
 		    com_err(argv[0], retval, "while reading new master key");

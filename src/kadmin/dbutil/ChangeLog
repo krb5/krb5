@@ -1,3 +1,8 @@
+2001-10-26  Ezra Peisach  <epeisach@mit.edu>
+
+	* dump.c (dump_db): Pass krb5_boolean instead of char * as
+	argument to kb5_db_fetch_mkey().
+
 2001-10-23  Tom Yu  <tlyu@mit.edu>
 
 	* loadv4.c (fixup_database): Don't set SUPPORT_DESMD5 anymore.
