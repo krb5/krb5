@@ -26,13 +26,15 @@ static char rcsid_encode_c[] =
 #include "encode.h"
 #include "asn1defs.h"
 
+#include <krb5/ext-proto.h>
+
 #include <stdio.h>
 
 krb5_error_code
 encode_generic(input, data_out, encoder, translator, free_translation)
 krb5_pointer input;
 register krb5_data **data_out;
-int (*encoder) PROTOTYPE((PE, int, int, char *, krb5_pointer));
+int (*encoder) PROTOTYPE((PE *, int, int, char *, krb5_pointer));
 krb5_pointer (*translator) PROTOTYPE((krb5_pointer, int * ));
 void (*free_translation) PROTOTYPE((krb5_pointer ));
 {
@@ -70,14 +72,14 @@ void (*free_translation) PROTOTYPE((krb5_pointer ));
     (*data_out)->data = malloc(ps_get_abs(pe));
     if (!(*data_out)->data) {
 	error = ENOMEM;
-	free(*data_out);
+	free((char *)*data_out);
 	*data_out = 0;
 	goto errout;
     }
     if (pe2ps(ps, pe) != OK || ps_flush(ps) != OK) {
 	error = ps->ps_errno + ISODE_50_PS_ERR_NONE;
 	free((*data_out)->data);
-	free(*data_out);
+	free((char *)*data_out);
 	*data_out = 0;
 	goto errout;
     }
