@@ -135,12 +135,11 @@ fi
 dnl Hack for now.
 AC_DEFUN([KRB5_AC_ENABLE_THREADS],[
 AC_ARG_ENABLE([thread-support],
-AC_HELP_STRING([--enable-thread-support],use PRELIMINARY EXPERIMENTAL UNFINISHED POSIX-only thread support @<:@disabled@:>@),
-[  if test "$enableval" = yes ; then
-    AC_MSG_NOTICE(enabling PRELIMINARY EXPERIMENTAL UNFINISHED POSIX-only thread support)
-    AC_DEFINE(ENABLE_THREADS,1,[Define if thread support enabled])
-  fi
-])
+AC_HELP_STRING([--disable-thread-support],don't enable thread support @<:@enabled@:>@), , enable_thread_support=yes)
+if test "$enable_thread_support" = yes ; then
+  AC_MSG_NOTICE(enabling thread support)
+  AC_DEFINE(ENABLE_THREADS,1,[Define if thread support enabled])
+fi
 dnl Maybe this should be inside the conditional above?  Doesn't cache....
 if test "$enable_thread_support" = yes; then
 ACX_PTHREAD(,[AC_MSG_ERROR([cannot determine options for enabling thread support])])
