@@ -87,9 +87,9 @@ utility.o: telnetd.h defs.h ext.h $(ARPA_TELNET)
 #
 telnetd.o: telnetd.c telnetd.h defs.h $(srcdir)/../arpa/telnet.h \
   $(SRCTOP)/include/socket-utils.h $(BUILDTOP)/include/krb5/autoconf.h \
-  $(SRCTOP)/include/syslog.h ext.h pathnames.h $(SRCTOP)/include/fake-addrinfo.c \
+  $(SRCTOP)/include/syslog.h ext.h pathnames.h $(BUILDTOP)/include/libpty.h \
+  $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/fake-addrinfo.c \
   $(SRCTOP)/include/fake-addrinfo.h $(SRCTOP)/include/port-sockets.h \
-  $(BUILDTOP)/include/libpty.h $(BUILDTOP)/include/com_err.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
   $(srcdir)/../libtelnet/auth.h $(srcdir)/../libtelnet/auth-proto.h \
   $(srcdir)/../libtelnet/encrypt.h $(srcdir)/../libtelnet/enc-proto.h \
