@@ -579,6 +579,7 @@ krb5-library-libraries-carbon-final = ¶
 	{privatekrb5-library-output-folder}{privatekrb5-library-name}{library-target-carbon}{library-kind-final}
 
 privatekrb5-library-libraries-macos9-debug = ¶
+	¶"{SharedLibraries}DriverServicesLib¶" ¶
 	{standard-libraries-macos9-debug} ¶
 	{utilitieslib-macos9-debug} ¶
 	{ccachelib-macos9-debug} ¶
@@ -588,9 +589,9 @@ privatekrb5-library-libraries-macos9-debug = ¶
 	{errorlib-macos9-debug} ¶
 	{profile-library-output-folder}{profile-library-name}{library-target-macos9}{library-kind-debug} ¶
 	{comerr-library-output-folder}{comerr-library-name}{library-target-macos9}{library-kind-debug} ¶
-	¶"{PPCLibraries}PPCMath64Lib.o¶" ¶
-	¶"{SharedLibraries}DriverServicesLib¶"
+	¶"{PPCLibraries}PPCMath64Lib.o¶"
 privatekrb5-library-libraries-macos9-final = ¶
+	¶"{SharedLibraries}DriverServicesLib¶" ¶
 	{standard-libraries-macos9-final} ¶
 	{utilitieslib-macos9-final} ¶
 	{ccachelib-macos9-final} ¶
@@ -600,8 +601,7 @@ privatekrb5-library-libraries-macos9-final = ¶
 	{errorlib-macos9-final} ¶
 	{profile-library-output-folder}{profile-library-name}{library-target-macos9}{library-kind-final} ¶
 	{comerr-library-output-folder}{comerr-library-name}{library-target-macos9}{library-kind-final} ¶
-	¶"{PPCLibraries}PPCMath64Lib.o¶" ¶
-	¶"{SharedLibraries}DriverServicesLib¶"
+	¶"{PPCLibraries}PPCMath64Lib.o¶"
 privatekrb5-library-libraries-carbon-debug = ¶
 	{standard-libraries-carbon-debug} ¶
 	{utilitieslib-carbon-debug} ¶
@@ -791,10 +791,10 @@ precompiled-headers-source-carbon = {precompiled-headers-folder}KerberosHeaders.
 
 {precompiled-headers-macos9} Ä {precompiled-headers-source-macos9} {precompiled-headers-folder}KerberosHeaders.h
 	{compiler-macos9} -i "{CWANSIIncludes}sys" {precompiled-headers-source-macos9} {common-compiler-options} {macos9-compiler-options} ¶
-		-precompile {Targ} -i {precompiled-headers-folder} {mitsupportlib-include-paths}
+		-precompile {Targ} -i {precompiled-headers-folder} {include-paths}
 {precompiled-headers-carbon} Ä {precompiled-headers-source-carbon} {precompiled-headers-folder}KerberosHeaders.h
 	{compiler-carbon} -i "{CWANSIIncludes}sys" {precompiled-headers-source-carbon} {common-compiler-options} {carbon-compiler-options} ¶
-		-precompile {Targ} -i {precompiled-headers-folder} {mitsupportlib-include-paths}
+		-precompile {Targ} -i {precompiled-headers-folder} {include-paths}
 
 make-options-common = ¶
 	-f {makefile-name} ¶

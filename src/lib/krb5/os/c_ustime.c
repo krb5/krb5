@@ -52,12 +52,16 @@
 #include <CodeFragments.h>	/* Check for presence of UpTime */
 #include <Math64.h>			/* 64-bit integer math */
 #include <Utilities.h>		/* Mac time -> UNIX time conversion */
+#include <Power.h>			/* Sleep queue */
 
 /* Mac Cincludes */
 #include <string.h>
 #include <stddef.h>
 
 static krb5_int32 last_sec = 0, last_usec = 0;
+static int gResetCachedDifference = 0;
+static SleepQRec gSleepQRecord;
+static SleepQUPP gSleepQUPP;
 
 /* Check for availability of microseconds or better timer */
 Boolean HaveAccurateTime ();
@@ -75,6 +79,14 @@ void MicrosecondsToSecsMicrosecs (
       UInt32			*eventSeconds,         /* Result goes here   */
       UInt32			*residualMicroseconds    /* Fractional second  */
    );
+
+/* Sleep notification callback in needed to reset cached
+difference when the machine goes to sleep */
+void InstallSleepNotification ();
+void RemoveSleepNotification ();
+pascal long SleepNotification (
+	SInt32 message,
+	SleepQRecPtr qRecPtr);
 
 /*
  * The Unix epoch is 1/1/70, the Mac epoch is 1/1/04.
@@ -240,7 +252,7 @@ void AbsoluteToSecsNanosecs (
     * If this is the first call, compute the offset between
     * GetDateTime and UpTime.
     */
-   if (U64Compare (gNanosecondsAtStart, U64SetU (0)) == 0) {
+   if (gResetCachedDifference || U64Compare (gNanosecondsAtStart, U64SetU (0)) == 0) {
       UInt32				secondsAtStart;
       AbsoluteTime			absoluteTimeAtStart;
       UInt64				upTimeAtStart;
@@ -285,7 +297,7 @@ void MicrosecondsToSecsMicrosecs (
     * If this is the first call, compute the offset between
     * GetDateTime and Microseconds.
     */
-   if (U64Compare (gMicrosecondsAtStart, U64SetU (0)) == 0) {
+   if (gResetCachedDifference || U64Compare (gMicrosecondsAtStart, U64SetU (0)) == 0) {
       UInt32				secondsAtStart;
       UnsignedWide			microsecondsAtStart;
 
@@ -306,6 +318,31 @@ void MicrosecondsToSecsMicrosecs (
    *eventSeconds = eventMicroseconds / 1000000;
    *residualMicroseconds = eventMicroseconds - *eventSeconds * 1000000;
 }
+
+void InstallSleepNotification ()
+{
+	gSleepQUPP = NewSleepQUPP (SleepNotification);
+	gSleepQRecord.sleepQLink = nil;
+	gSleepQRecord.sleepQType = slpQType;
+	gSleepQRecord.sleepQProc = gSleepQUPP;
+	gSleepQRecord.sleepQFlags = 0;
+	SleepQInstall (&gSleepQRecord);
+}
+
+void RemoveSleepNotification ()
+{
+	SleepQRemove (&gSleepQRecord);
+}
+
+pascal long SleepNotification (
+	SInt32 message,
+	SleepQRecPtr qRecPtr)
+{
+	if (message == sleepWakeUp) {
+		gResetCachedDifference = 1;
+	}
+}
+
 #elif defined(_WIN32)
 
    /* Microsoft Windows NT and 95   (32bit)  */
