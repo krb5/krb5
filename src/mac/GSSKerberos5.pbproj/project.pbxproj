@@ -173,6 +173,532 @@
 				);
 			};
 		};
+		00F24292FFB75B2612120156 = {
+			isa = PBXLibraryReference;
+			path = libkrb5.dylib;
+			refType = 3;
+		};
+		00F24293FFB75B2612120156 = {
+			buildPhases = (
+				00F24294FFB75B2612120156,
+				00F24295FFB75B2612120156,
+				00F24296FFB75B2612120156,
+				00F24297FFB75B2612120156,
+				00F242BAFFB76A1512120156,
+			);
+			buildSettings = {
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				FRAMEWORK_SEARCH_PATHS = /System/Library/Frameworks/Kerberos.framework/Frameworks/;
+				LIBRARY_STYLE = DYNAMIC;
+				OPTIMIZATION_CFLAGS = "";
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "";
+				OTHER_LIBTOOL_FLAGS = "";
+				OTHER_REZFLAGS = "";
+				REZ_EXECUTABLE = YES;
+				SECTORDER_FLAGS = "";
+				WARNING_CFLAGS = "-Wmost -Wno-four-char-constants -Wno-unknown-pragmas";
+			};
+			conditionalBuildSettings = {
+			};
+			dependencies = (
+				00F242B4FFB7612912120156,
+			);
+			isa = PBXLibraryTarget;
+			name = libkrb5;
+			productInstallPath = /usr/lib;
+			productName = libkrb5.dylib;
+			productReference = 00F24292FFB75B2612120156;
+			shouldUseHeadermap = 0;
+		};
+		00F24294FFB75B2612120156 = {
+			buildActionMask = 2147483647;
+			files = (
+				00F242C5FFB7717D12120156,
+				00F242C6FFB7717D12120156,
+			);
+			isa = PBXHeadersBuildPhase;
+			name = Headers;
+		};
+		00F24295FFB75B2612120156 = {
+			buildActionMask = 2147483647;
+			files = (
+				00F2429CFFB75DFF12120156,
+			);
+			isa = PBXSourcesBuildPhase;
+			name = Sources;
+		};
+		00F24296FFB75B2612120156 = {
+			buildActionMask = 2147483647;
+			files = (
+				00F24298FFB75CAB12120156,
+			);
+			isa = PBXFrameworksBuildPhase;
+			name = "Frameworks & Libraries";
+		};
+		00F24297FFB75B2612120156 = {
+			buildActionMask = 2147483647;
+			files = (
+			);
+			isa = PBXRezBuildPhase;
+			name = "ResourceManager Resources";
+		};
+		00F24298FFB75CAB12120156 = {
+			fileRef = 012574A7FF7A9C8212120111;
+			isa = PBXBuildFile;
+			settings = {
+				INCLUDED_OSS = (
+					MACOS,
+					WINDOWS,
+					PDOUNIX,
+				);
+			};
+		};
+		00F24299FFB75CD112120156 = {
+			children = (
+				00F24292FFB75B2612120156,
+				00F2429DFFB75F1512120156,
+				00F242A4FFB75FA712120156,
+				00F242ACFFB760BC12120156,
+				00F2429AFFB75D5D12120156,
+			);
+			isa = PBXGroup;
+			name = Dylibs;
+			refType = 4;
+		};
+		00F2429AFFB75D5D12120156 = {
+			isa = PBXFileReference;
+			path = DylibStub.c;
+			refType = 4;
+		};
+		00F2429CFFB75DFF12120156 = {
+			fileRef = 00F2429AFFB75D5D12120156;
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					Debug,
+				);
+				INCLUDED_OSS = (
+					MACOS,
+					WINDOWS,
+					PDOUNIX,
+				);
+			};
+		};
+		00F2429DFFB75F1512120156 = {
+			isa = PBXLibraryReference;
+			path = libk5crypto.dylib;
+			refType = 3;
+		};
+		00F2429EFFB75F1512120156 = {
+			buildPhases = (
+				00F2429FFFB75F1512120156,
+				00F242A0FFB75F1512120156,
+				00F242A2FFB75F1512120156,
+				00F242A3FFB75F1512120156,
+			);
+			buildSettings = {
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				FRAMEWORK_SEARCH_PATHS = /System/Library/Frameworks/Kerberos.framework/Frameworks;
+				LIBRARY_STYLE = DYNAMIC;
+				OPTIMIZATION_CFLAGS = "";
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "";
+				OTHER_LIBTOOL_FLAGS = "";
+				OTHER_REZFLAGS = "";
+				REZ_EXECUTABLE = YES;
+				SECTORDER_FLAGS = "";
+				WARNING_CFLAGS = "-Wmost -Wno-four-char-constants -Wno-unknown-pragmas";
+			};
+			conditionalBuildSettings = {
+			};
+			dependencies = (
+			);
+			isa = PBXLibraryTarget;
+			name = libk5crypto;
+			productInstallPath = /usr/lib;
+			productName = libk5crypto.dylib;
+			productReference = 00F2429DFFB75F1512120156;
+			shouldUseHeadermap = 0;
+		};
+		00F2429FFFB75F1512120156 = {
+			buildActionMask = 2147483647;
+			files = (
+			);
+			isa = PBXHeadersBuildPhase;
+			name = Headers;
+		};
+		00F242A0FFB75F1512120156 = {
+			buildActionMask = 2147483647;
+			files = (
+				00F242A1FFB75F1512120156,
+			);
+			isa = PBXSourcesBuildPhase;
+			name = Sources;
+		};
+		00F242A1FFB75F1512120156 = {
+			fileRef = 00F2429AFFB75D5D12120156;
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					Debug,
+				);
+				INCLUDED_OSS = (
+					MACOS,
+					WINDOWS,
+					PDOUNIX,
+				);
+			};
+		};
+		00F242A2FFB75F1512120156 = {
+			buildActionMask = 2147483647;
+			files = (
+			);
+			isa = PBXFrameworksBuildPhase;
+			name = "Frameworks & Libraries";
+		};
+		00F242A3FFB75F1512120156 = {
+			buildActionMask = 2147483647;
+			files = (
+			);
+			isa = PBXRezBuildPhase;
+			name = "ResourceManager Resources";
+		};
+		00F242A4FFB75FA712120156 = {
+			isa = PBXLibraryReference;
+			path = libcom_err.dylib;
+			refType = 3;
+		};
+		00F242A5FFB75FA712120156 = {
+			buildPhases = (
+				00F242A6FFB75FA712120156,
+				00F242A7FFB75FA712120156,
+				00F242A9FFB75FA712120156,
+				00F242ABFFB75FA712120156,
+				00F242B7FFB7698D12120156,
+			);
+			buildSettings = {
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				FRAMEWORK_SEARCH_PATHS = /System/Library/Frameworks/Kerberos.framework/Frameworks;
+				LIBRARY_STYLE = DYNAMIC;
+				OPTIMIZATION_CFLAGS = "";
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "";
+				OTHER_LIBTOOL_FLAGS = "";
+				OTHER_REZFLAGS = "";
+				REZ_EXECUTABLE = YES;
+				SECTORDER_FLAGS = "";
+				WARNING_CFLAGS = "-Wmost -Wno-four-char-constants -Wno-unknown-pragmas";
+			};
+			conditionalBuildSettings = {
+			};
+			dependencies = (
+				00F242B5FFB7612912120156,
+			);
+			isa = PBXLibraryTarget;
+			name = libcom_err;
+			productInstallPath = /usr/lib;
+			productName = libcom_err.dylib;
+			productReference = 00F242A4FFB75FA712120156;
+			shouldUseHeadermap = 0;
+		};
+		00F242A6FFB75FA712120156 = {
+			buildActionMask = 2147483647;
+			files = (
+			);
+			isa = PBXHeadersBuildPhase;
+			name = Headers;
+		};
+		00F242A7FFB75FA712120156 = {
+			buildActionMask = 2147483647;
+			files = (
+				00F242A8FFB75FA712120156,
+			);
+			isa = PBXSourcesBuildPhase;
+			name = Sources;
+		};
+		00F242A8FFB75FA712120156 = {
+			fileRef = 00F2429AFFB75D5D12120156;
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					Debug,
+				);
+				INCLUDED_OSS = (
+					MACOS,
+					WINDOWS,
+					PDOUNIX,
+				);
+			};
+		};
+		00F242A9FFB75FA712120156 = {
+			buildActionMask = 2147483647;
+			files = (
+				00F242AAFFB75FA712120156,
+			);
+			isa = PBXFrameworksBuildPhase;
+			name = "Frameworks & Libraries";
+		};
+		00F242AAFFB75FA712120156 = {
+			fileRef = 012574A5FF7A9C8212120111;
+			isa = PBXBuildFile;
+			settings = {
+				INCLUDED_OSS = (
+					MACOS,
+					WINDOWS,
+					PDOUNIX,
+				);
+			};
+		};
+		00F242ABFFB75FA712120156 = {
+			buildActionMask = 2147483647;
+			files = (
+			);
+			isa = PBXRezBuildPhase;
+			name = "ResourceManager Resources";
+		};
+		00F242ACFFB760BC12120156 = {
+			isa = PBXLibraryReference;
+			path = libgssapi_krb5.dylib;
+			refType = 3;
+		};
+		00F242ADFFB760BC12120156 = {
+			buildPhases = (
+				00F242AEFFB760BC12120156,
+				00F242AFFFB760BC12120156,
+				00F242B1FFB760BC12120156,
+				00F242B3FFB760BC12120156,
+				00F242C0FFB7705612120156,
+			);
+			buildSettings = {
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				FRAMEWORK_SEARCH_PATHS = /System/Library/Frameworks/Kerberos.framework/Frameworks;
+				LIBRARY_STYLE = DYNAMIC;
+				OPTIMIZATION_CFLAGS = "";
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "";
+				OTHER_LIBTOOL_FLAGS = "";
+				OTHER_REZFLAGS = "";
+				REZ_EXECUTABLE = YES;
+				SECTORDER_FLAGS = "";
+				WARNING_CFLAGS = "-Wmost -Wno-four-char-constants -Wno-unknown-pragmas";
+			};
+			conditionalBuildSettings = {
+			};
+			dependencies = (
+				00F242B6FFB7612912120156,
+			);
+			isa = PBXLibraryTarget;
+			name = libgssapi_krb5;
+			productInstallPath = /usr/lib;
+			productName = libgssapi_krb5.dylib;
+			productReference = 00F242ACFFB760BC12120156;
+			shouldUseHeadermap = 0;
+		};
+		00F242AEFFB760BC12120156 = {
+			buildActionMask = 2147483647;
+			files = (
+				00F242BFFFB7705612120156,
+				00F242C2FFB7706712120156,
+			);
+			isa = PBXHeadersBuildPhase;
+			name = Headers;
+		};
+		00F242AFFFB760BC12120156 = {
+			buildActionMask = 2147483647;
+			files = (
+				00F242B0FFB760BC12120156,
+			);
+			isa = PBXSourcesBuildPhase;
+			name = Sources;
+		};
+		00F242B0FFB760BC12120156 = {
+			fileRef = 00F2429AFFB75D5D12120156;
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					Debug,
+				);
+				INCLUDED_OSS = (
+					MACOS,
+					WINDOWS,
+					PDOUNIX,
+				);
+			};
+		};
+		00F242B1FFB760BC12120156 = {
+			buildActionMask = 2147483647;
+			files = (
+				00F242B2FFB760BC12120156,
+			);
+			isa = PBXFrameworksBuildPhase;
+			name = "Frameworks & Libraries";
+		};
+		00F242B2FFB760BC12120156 = {
+			fileRef = 012574A8FF7A9C8212120111;
+			isa = PBXBuildFile;
+			settings = {
+				INCLUDED_OSS = (
+					MACOS,
+					WINDOWS,
+					PDOUNIX,
+				);
+			};
+		};
+		00F242B3FFB760BC12120156 = {
+			buildActionMask = 2147483647;
+			files = (
+			);
+			isa = PBXRezBuildPhase;
+			name = "ResourceManager Resources";
+		};
+		00F242B4FFB7612912120156 = {
+			isa = PBXTargetDependency;
+			target = 1744760CFF5FF8DB12120111;
+		};
+		00F242B5FFB7612912120156 = {
+			isa = PBXTargetDependency;
+			target = 174475D2FF5EF33612120111;
+		};
+		00F242B6FFB7612912120156 = {
+			isa = PBXTargetDependency;
+			target = 5C1372EBFF6546C412120111;
+		};
+		00F242B7FFB7698D12120156 = {
+			buildActionMask = 8;
+			dstPath = /usr/include;
+			dstSubfolderSpec = 0;
+			files = (
+				00F242B9FFB769B812120156,
+			);
+			isa = PBXCopyFilesBuildPhase;
+			name = "Copy Files";
+		};
+		00F242B9FFB769B812120156 = {
+			fileRef = 174475DDFF5EF35112120111;
+			isa = PBXBuildFile;
+			settings = {
+				INCLUDED_OSS = (
+					MACOS,
+					WINDOWS,
+					PDOUNIX,
+				);
+			};
+		};
+		00F242BAFFB76A1512120156 = {
+			buildActionMask = 8;
+			dstPath = /usr/include;
+			dstSubfolderSpec = 0;
+			files = (
+				00F242C7FFB7717D12120156,
+				00F242C8FFB7717D12120156,
+			);
+			isa = PBXCopyFilesBuildPhase;
+			name = "Copy Files";
+		};
+		00F242BFFFB7705612120156 = {
+			fileRef = 5C1372FCFF654A8C12120111;
+			isa = PBXBuildFile;
+			settings = {
+				INCLUDED_OSS = (
+					MACOS,
+					WINDOWS,
+					PDOUNIX,
+				);
+			};
+		};
+		00F242C0FFB7705612120156 = {
+			buildActionMask = 8;
+			dstPath = /usr/include;
+			dstSubfolderSpec = 0;
+			files = (
+				00F242C1FFB7705612120156,
+				00F242C3FFB7707D12120156,
+			);
+			isa = PBXCopyFilesBuildPhase;
+			name = "Copy Files";
+		};
+		00F242C1FFB7705612120156 = {
+			fileRef = 5C1372FCFF654A8C12120111;
+			isa = PBXBuildFile;
+			settings = {
+				INCLUDED_OSS = (
+					MACOS,
+					WINDOWS,
+					PDOUNIX,
+				);
+			};
+		};
+		00F242C2FFB7706712120156 = {
+			fileRef = 5C13731AFF654A8C12120111;
+			isa = PBXBuildFile;
+			settings = {
+				INCLUDED_OSS = (
+					MACOS,
+					WINDOWS,
+					PDOUNIX,
+				);
+			};
+		};
+		00F242C3FFB7707D12120156 = {
+			fileRef = 5C13731AFF654A8C12120111;
+			isa = PBXBuildFile;
+			settings = {
+				INCLUDED_OSS = (
+					MACOS,
+					WINDOWS,
+					PDOUNIX,
+				);
+			};
+		};
+		00F242C5FFB7717D12120156 = {
+			fileRef = 174476B9FF5FFFA512120111;
+			isa = PBXBuildFile;
+			settings = {
+				INCLUDED_OSS = (
+					MACOS,
+					WINDOWS,
+					PDOUNIX,
+				);
+			};
+		};
+		00F242C6FFB7717D12120156 = {
+			fileRef = 174475FFFF5EFBEA12120111;
+			isa = PBXBuildFile;
+			settings = {
+				INCLUDED_OSS = (
+					MACOS,
+					WINDOWS,
+					PDOUNIX,
+				);
+			};
+		};
+		00F242C7FFB7717D12120156 = {
+			fileRef = 174476B9FF5FFFA512120111;
+			isa = PBXBuildFile;
+			settings = {
+				INCLUDED_OSS = (
+					MACOS,
+					WINDOWS,
+					PDOUNIX,
+				);
+			};
+		};
+		00F242C8FFB7717D12120156 = {
+			fileRef = 174475FFFF5EFBEA12120111;
+			isa = PBXBuildFile;
+			settings = {
+				INCLUDED_OSS = (
+					MACOS,
+					WINDOWS,
+					PDOUNIX,
+				);
+			};
+		};
 		0101EC5DFF8FDD1B7F000001 = {
 			isa = PBXFileReference;
 			path = ErrorTables.jam;
@@ -919,7 +1445,6 @@
 				174476CDFF60088512120111,
 				00CFB47BFF6EA3C312120111,
 				0F801492FF9A8D33126500C7,
-				17D71675FFAF834712120111,
 				61622FDAFF85346F12120111,
 				61622FD1FF82A36412120111,
 				174476B8FF5FFFA512120111,
@@ -949,7 +1474,7 @@
 				EXPORTED_SYMBOLS_FILE = "$(SRCROOT)/Kerberos5Lib.pbexp";
 				FRAMEWORK_SEARCH_PATHS = "\"/System/Library/Frameworks/Kerberos.framework/Frameworks\"";
 				FRAMEWORK_VERSION = A;
-				HEADER_SEARCH_PATHS = "/System/Library/Frameworks/CarbonCore.framework/Headers \"$(SYMROOT)/ComErr.framework/Headers\" \"$(SYMROOT)/Profile.framework/Headers\" /System/Library/Frameworks/Kerberos.framework/Frameworks/CCache.framework/Headers /System/Library/Frameworks/Kerberos.framework/Frameworks/Preferences.framework/Headers /System/Library/Frameworks/Kerberos.framework/Frameworks/KerberosSupport.framework/Headers /System/Library/Frameworks/Kerberos.framework/Frameworks/Login.framework/Headers";
+				HEADER_SEARCH_PATHS = "/System/Library/Frameworks/CarbonCore.framework/Headers \"$(SYMROOT)/ComErr.framework/Headers\" \"$(SYMROOT)/Profile.framework/Headers\" /System/Library/Frameworks/Kerberos.framework/Frameworks/CCache.framework/Headers /System/Library/Frameworks/Kerberos.framework/Frameworks/Preferences.framework/Headers /System/Library/Frameworks/Kerberos.framework/Frameworks/KerberosSupport.framework/Headers";
 				LIBRARY_SEARCH_PATHS = "";
 				OPTIMIZATION_CFLAGS = "";
 				OTHER_CFLAGS = "-imacros \"$(SRCROOT)/GSSKerberosPrefix.h\"";
@@ -1405,7 +1930,6 @@
 				1744770FFF60088512120111,
 				00CFB47CFF6EA3C312120111,
 				0F801493FF9A8D33126500C7,
-				17D71677FFAF834712120111,
 			);
 			isa = PBXFrameworksBuildPhase;
 			name = "Frameworks & Libraries";
@@ -7261,40 +7785,6 @@
 				);
 			};
 		};
-		17D71675FFAF834712120111 = {
-			isa = PBXFrameworkReference;
-			name = Login.framework;
-			path = /System/Library/Frameworks/Kerberos.framework/Frameworks/Login.framework;
-			refType = 0;
-		};
-		17D71676FFAF834712120111 = {
-			isa = PBXFrameworkReference;
-			name = Login.framework;
-			path = /System/Library/Frameworks/Kerberos.framework/Frameworks/Login.framework;
-			refType = 0;
-		};
-		17D71677FFAF834712120111 = {
-			fileRef = 17D71675FFAF834712120111;
-			isa = PBXBuildFile;
-			settings = {
-				INCLUDED_OSS = (
-					MACOS,
-					WINDOWS,
-					PDOUNIX,
-				);
-			};
-		};
-		17D71678FFAF834712120111 = {
-			fileRef = 17D71676FFAF834712120111;
-			isa = PBXBuildFile;
-			settings = {
-				INCLUDED_OSS = (
-					MACOS,
-					WINDOWS,
-					PDOUNIX,
-				);
-			};
-		};
 		25C77492FF52D03A12120111 = {
 			isa = PBXProject;
 			mainGroup = 25C77493FF52D03A12120111;
@@ -7307,6 +7797,10 @@
 				174475FDFF5EFB1212120111,
 				1744760CFF5FF8DB12120111,
 				5C1372EBFF6546C412120111,
+				00F24293FFB75B2612120156,
+				00F2429EFFB75F1512120156,
+				00F242A5FFB75FA712120156,
+				00F242ADFFB760BC12120156,
 			);
 		};
 		25C77493FF52D03A12120111 = {
@@ -7320,6 +7814,7 @@
 				5C1372E8FF6546C412120111,
 				0101EC5DFF8FDD1B7F000001,
 				0101EC5EFF8FE67C7F000001,
+				00F24299FFB75CD112120156,
 			);
 			isa = PBXGroup;
 			refType = 4;
@@ -7372,7 +7867,6 @@
 				5C1372EAFF6546C412120111,
 				5C137376FF654C0212120111,
 				5C137384FF6824DB12120111,
-				17D71676FFAF834712120111,
 				61622FDEFF88D9AF12120111,
 				61622FD8FF85304012120111,
 				5C1372F4FF65475012120111,
@@ -7410,7 +7904,7 @@
 				EXPORTED_SYMBOLS_FILE = "$(SRCROOT)/GSSLibrary.pbexp";
 				FRAMEWORK_SEARCH_PATHS = "";
 				FRAMEWORK_VERSION = A;
-				HEADER_SEARCH_PATHS = "/System/Library/Frameworks/CarbonCore.framework/Headers /System/Library/Frameworks/Kerberos.framework/Frameworks/Login.framework/Headers \"$(SYMROOT)/Kerberos5.framework/Headers\" \"$(SYMROOT)/Profile.framework/Headers\" \"$(SYMROOT)/ComErr.framework/Headers\"";
+				HEADER_SEARCH_PATHS = "\"/System/Library/Frameworks/CarbonCore.framework/Headers\" \"$(SYMROOT)/Kerberos5.framework/Headers\" \"$(SYMROOT)/Profile.framework/Headers\" \"$(SYMROOT)/ComErr.framework/Headers\"";
 				LIBRARY_SEARCH_PATHS = "";
 				OPTIMIZATION_CFLAGS = "";
 				OTHER_CFLAGS = "-imacros \"$(SRCROOT)/GSSKerberosPrefix.h\"";
@@ -7580,7 +8074,6 @@
 				5C1372F2FF6546C412120111,
 				5C137378FF654C0212120111,
 				5C137385FF6824DB12120111,
-				17D71678FFAF834712120111,
 			);
 			isa = PBXFrameworksBuildPhase;
 			name = "Frameworks & Libraries";
