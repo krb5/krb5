@@ -1,3 +1,12 @@
+Mon Jan  2 12:35:18 1995  Richard Basch  (probe@tardis)
+
+	* krlogind.c
+	  	Ultrix doesn't have a fully functional POSIX termios.
+
+	* krshd.c
+	  	Cleaned up some of the #ifdef's and code duplication.
+		Fixed decl. of return variable for getopt() [int not char]
+
 Fri Dec 30 18:35:50 1994  Richard Basch  (probe@tardis)
 
 	* krlogin.c
