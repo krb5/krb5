@@ -1,3 +1,8 @@
+Fri Jun  9 18:14:06 1995    <tytso@rsx-11.mit.edu>
+
+	* configure.in: Remove standardized set of autoconf macros, which
+		are now handled by CONFIG_RULES.
+
 Fri Apr 28 18:02:53 1995  Mark Eichin  <eichin@cygnus.com>
 
 	* Makefile.in (LOCAL_LIBRARIES): put KRB4_LIB inside KLIB, and put
