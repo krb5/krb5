@@ -234,7 +234,7 @@ krb5_rd_req_decoded(context, auth_context, req, server, keytab,
     else
 	starttime = req->ticket->enc_part2->times.authtime;
 
-    if (retval = krb5_timeofday(context, &currenttime))
+    if ((retval = krb5_timeofday(context, &currenttime)))
 	goto cleanup;
     if (starttime - currenttime > krb5_clockskew) {
 	retval = KRB5KRB_AP_ERR_TKT_NYV;	/* ticket not yet valid */
@@ -255,8 +255,8 @@ krb5_rd_req_decoded(context, auth_context, req, server, keytab,
 
     (*auth_context)->remote_seq_number = (*auth_context)->authentp->seq_number;
     (*auth_context)->remote_subkey = (*auth_context)->authentp->subkey;
-    if (retval = krb5_copy_keyblock(context, req->ticket->enc_part2->session,
-				    &((*auth_context)->keyblock)))
+    if ((retval = krb5_copy_keyblock(context, req->ticket->enc_part2->session,
+				     &((*auth_context)->keyblock))))
 	goto cleanup;
 
     /*

@@ -1,3 +1,13 @@
+Fri Jun  9 18:48:43 1995    <tytso@rsx-11.mit.edu>
+
+	* rd_req_dec.c (krb5_rd_req_decoded): Fix -Wall nits
+
+	* configure.in: Remove standardized set of autoconf macros, which
+		are now handled by CONFIG_RULES.
+
+	* Makefile.in, faddr_ordr.c: Remove faddr_ordr.c; its function,
+		krb5_fulladdr_order, isn't used anywhere.
+
 Fri Jun  9 02:42:54 1995  Tom Yu  (tlyu@dragons-lair)
 
 	* rd_cred.c (krb5_rd_cred_basic): fix typo (extra "context"
