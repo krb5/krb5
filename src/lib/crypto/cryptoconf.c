@@ -88,7 +88,7 @@ static char rcsid_cryptoconf_c[] =
 #include <krb5/mit-des.h>
 #define _DES_DONE__
 #endif
-#define RAW_DES_CBC_CSENTRY &krb5_des_cst_entry
+#define RAW_DES_CBC_CSENTRY &krb5_raw_des_cst_entry
 #else
 #define RAW_DES_CBC_CSENTRY 0
 #endif
