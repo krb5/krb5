@@ -41,12 +41,12 @@
 #include <netdb.h>
 
 extern int errno;
-extern short primary_port;
 
-static int udp_port_fd = -1;
+static int *udp_port_fds = (int *) NULL;
+static u_short *udp_port_nums = (u_short *) NULL;
 static int sec_udp_port_fd = -1;
 static fd_set select_fds;
-static int select_nfsd;
+static int select_nfds;
 
 krb5_error_code
 setup_network(prog)
@@ -55,34 +55,57 @@ const char *prog;
     struct servent *sp;
     struct sockaddr_in sin;
     krb5_error_code retval;
+    u_short	default_port;
+    int i, j, found;
 
     FD_ZERO(&select_fds);
-    select_nfsd = 0;
+    select_nfds = 0;
     memset((char *)&sin, 0, sizeof(sin));
-    if (primary_port) {
-	 sin.sin_port = htons(primary_port);
-    } else {
-	 sp = getservbyname(KDC_PORTNAME, "udp");
-	 if (!sp)
-	     sin.sin_port = htons(KRB5_DEFAULT_PORT);
-	 else
-	     sin.sin_port = sp->s_port;
+    sp = getservbyname(KDC_PORTNAME, "udp");
+    default_port = (sp) ? ntohs(sp->s_port) : KRB5_DEFAULT_PORT;
+    if ((udp_port_fds = (int *) malloc(kdc_numrealms * sizeof(int))) &&
+	(udp_port_nums = (u_short *) malloc(kdc_numrealms * sizeof(u_short)))
+	) {
+	for (i=0; i<kdc_numrealms; i++) {
+	    udp_port_fds[i] = -1;
+	    udp_port_nums[i] = 0;
+	}
+
+	for (i=0; i<kdc_numrealms; i++) {
+	    found = 0;
+	    for (j=0; j<i; j++) {
+		if (udp_port_nums[j] == kdc_realmlist[i]->realm_pport) {
+		    found = 1;
+		    break;
+		}
+	    }
+	    if (!found) {
+		if ((udp_port_fds[i] = socket(PF_INET, SOCK_DGRAM, 0)) == -1) {
+		    retval = errno;
+		    com_err(prog, 0, "Cannot create server socket on port %d",
+			    kdc_realmlist[i]->realm_pport);
+		    return(retval);
+		}
+		udp_port_nums[i] = kdc_realmlist[i]->realm_pport;
+		sin.sin_port = htons(kdc_realmlist[i]->realm_pport);
+		if (bind(udp_port_fds[i],
+			 (struct sockaddr *) &sin,
+			 sizeof(sin)) == -1) {
+		    retval = errno;
+		    com_err(prog, 0, "Cannot bind server socket on port %d",
+			    kdc_realmlist[i]->realm_pport);
+		    return(retval);
+		}
+		FD_SET(udp_port_fds[i], &select_fds);
+		if (udp_port_fds[i]+1 > select_nfds)
+		    select_nfds = udp_port_fds[i]+1;
+	    }
+	    else {
+		udp_port_fds[i] = udp_port_fds[j];
+		udp_port_nums[i] = udp_port_nums[j];
+	    }
+	}
     }
-    
-    if ((udp_port_fd = socket(PF_INET, SOCK_DGRAM, 0)) == -1) {
-	 retval = errno;
-	 com_err(prog, 0, "Cannot create server socket");
-	 return retval;
-    }
-    
-    if (bind(udp_port_fd, (struct sockaddr *)&sin, sizeof(sin)) == -1) {
-	retval = errno;
-	com_err(prog, 0, "Cannot bind server socket to fd %d", udp_port_fd);
-	return retval;
-    }
-    FD_SET(udp_port_fd, &select_fds);
-    if (udp_port_fd+1 > select_nfsd)
-	    select_nfsd = udp_port_fd+1;
 
     /*
      * Now we set up the secondary listening port
@@ -106,8 +129,8 @@ const char *prog;
 	return 0;		/* Don't give an error if we can't do this */
     }
     FD_SET(sec_udp_port_fd, &select_fds);
-    if (sec_udp_port_fd+1 > select_nfsd)
-	    select_nfsd = sec_udp_port_fd+1;
+    if (sec_udp_port_fd+1 > select_nfds)
+	    select_nfds = sec_udp_port_fd+1;
     
     return 0;
 }
@@ -176,21 +199,24 @@ const char *prog;
 {
     int			nfound;
     fd_set		readfds;
+    int			i;
 
-    if (udp_port_fd == -1)
+    if (udp_port_fds == (int *) NULL)
 	return KDC5_NONET;
     
     while (!signal_requests_exit) {
 	readfds = select_fds;
-	nfound = select(select_nfsd, &readfds, 0, 0, 0);
+	nfound = select(select_nfds, &readfds, 0, 0, 0);
 	if (nfound == -1) {
 	    if (errno == EINTR)
 		continue;
 	    com_err(prog, errno, "while selecting for network input");
 	    continue;
 	}
-	if (FD_ISSET(udp_port_fd, &readfds))
-	    process_packet(udp_port_fd, prog, 0);
+	for (i=0; i<kdc_numrealms; i++) {
+	    if (FD_ISSET(udp_port_fds[i], &readfds))
+		process_packet(udp_port_fds[i], prog, 0);
+	}
 
 	if ((sec_udp_port_fd > 0) && FD_ISSET(sec_udp_port_fd, &readfds))
 	    process_packet(sec_udp_port_fd, prog, 1);
@@ -202,11 +228,15 @@ krb5_error_code
 closedown_network(prog)
 const char *prog;
 {
-    if (udp_port_fd == -1)
+    int i;
+
+    if (udp_port_fds == (int *) NULL)
 	return KDC5_NONET;
 
-    (void) close(udp_port_fd);
-    udp_port_fd = -1;
+    for (i=0; i<kdc_numrealms; i++)
+	(void) close(udp_port_fds[i]);
+    free(udp_port_fds);
+    free(udp_port_nums);
 
     if (sec_udp_port_fd != -1)
 	(void) close(sec_udp_port_fd);

@@ -54,7 +54,13 @@ dispatch(pkt, from, is_secondary, response)
 	retval = process_tgs_req(pkt, from, is_secondary, response);
     } else if (krb5_is_as_req(pkt)) {
 	if (!(retval = decode_krb5_as_req(pkt, &as_req))) {
-	    retval = process_as_req(as_req, from, is_secondary, response);
+	    /*
+	     * setup_server_realm() sets up the global realm-specific data
+	     * pointer.
+	     */
+	    if (!(retval = setup_server_realm(as_req->server))) {
+		retval = process_as_req(as_req, from, is_secondary, response);
+	    }
 	    krb5_free_kdc_req(kdc_context, as_req);
 	}
     }

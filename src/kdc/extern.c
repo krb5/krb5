@@ -27,26 +27,11 @@
 #include "extern.h"
 
 /* real declarations of KDC's externs */
-krb5_rcache kdc_rcache;
-
+kdc_realm_t	**kdc_realmlist = (kdc_realm_t **) NULL;
+int		kdc_numrealms = 0;
+kdc_realm_t	*kdc_active_realm = (kdc_realm_t *) NULL;
 krb5_data empty_string = {0, 0, ""};
 krb5_timestamp kdc_infinity = KRB5_INT32_MAX; /* XXX */
-
-krb5_deltat max_life_for_realm = KRB5_KDB_MAX_LIFE;		/* XXX parameter per-realm? */
-krb5_deltat max_renewable_life_for_realm = KRB5_KDB_MAX_RLIFE; /* XXX param per-realm? */
-krb5_encrypt_block master_encblock;
-
-krb5_keyblock master_keyblock;
-krb5_principal master_princ;
+krb5_rcache	kdc_rcache = (krb5_rcache) NULL;
 
 volatile int signal_requests_exit = 0;	/* gets set when signal hits */
-
-char *dbm_db_name = DEFAULT_KDB_FILE;
-
-krb5_keyblock tgs_key;
-krb5_kvno tgs_kvno;
-
-static krb5_data tgs_data[3] = { {0, KRB5_TGS_NAME_SIZE, KRB5_TGS_NAME}, {0, 0, 0}};
-krb5_principal_data tgs_server_struct = { 0, { 0, 0, 0}, tgs_data, 2, 0};
-
-short primary_port = 0;

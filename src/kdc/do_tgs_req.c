@@ -99,6 +99,12 @@ krb5_data **response;			/* filled in with a response packet */
     if (retval)
 	return retval;
 
+    /*
+     * setup_server_realm() sets up the global realm-specific data pointer.
+     */
+    if (retval = setup_server_realm(request->server))
+	return retval;
+
 #ifdef KRB5_USE_INET
     if (from->address->addrtype == ADDRTYPE_INET)
 	fromstring =
@@ -544,8 +550,8 @@ tgt_again:
     } else {
 	/* convert server.key into a real key (it may be encrypted
 	   in the database) */
-	if ((retval = KDB_CONVERT_KEY_OUTOF_DB(kdc_context, &server.key, 
-					       &encrypting_key))) {
+	if ((retval = krb5_kdb_decrypt_key(kdc_context, &master_encblock,
+					   &server.key, &encrypting_key))) {
 	    status = "CONV_KEY";
 	    goto cleanup;
 	}

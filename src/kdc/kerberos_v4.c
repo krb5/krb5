@@ -533,7 +533,6 @@ hang()
 }
 #define kdb_encrypt_key( in, out, mk, mks, e_d_flag)
 #define LONGLEN 4
-extern krb5_encrypt_block master_encblock;
 
 /* take a v5 keyblock, masquerading as a v4 key,
  * decrypt it, and convert the resulting v5 keyblock
