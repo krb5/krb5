@@ -24,8 +24,8 @@ CFLAGS 	 = $(CCOPTS2) $(INCLUDES) /D$(KRB)=1 $(KRBOPT) /Zi
 CFLAGS 	 = $(CCOPTS2) $(INCLUDES) /D$(KRB)=1 $(KRBOPT)
 !endif
 
-##WIN32##RFLAGS  = /D$(KRB)=1 $(INCLUDES)
-##WIN16##RFLAGS  = /nologo /D$(KRB)=1 $(INCLUDES)
+##WIN32##RFLAGS  = $(INCLUDES)
+##WIN16##RFLAGS  = /nologo $(INCLUDES)
 
 
 ##### Linker
@@ -44,15 +44,15 @@ LIBS 	 = $(KLIB) $(CLIB) $(WLIB)
 
 all:: makefile telnet.exe
 
-telnet.exe: $*.def $*.res $(OBJS) $(XOBJS) $(LIBS)
+telnet.exe: $*.def $(OBJS) $(XOBJS) $(LIBS)
 ##WIN16##	$(LINK) $(LFLAGS) $(OBJS) $(XOBJS), $@, $*.map, \
 ##WIN16##	  $(LIBS) $(SYSLIBS), $*.def
-##WIN16##	$(RC) $(RFLAGS) /k telnet.rc $@
+##WIN16##	$(RC) $(RFLAGS) /k -DTELNET_APP telnet.rc $@
 ##WIN32##	$(LINK) $(LFLAGS) /map:$*.map /out:$@ $(OBJS) $(XOBJS) \
 ##WIN32##	  $(LIBS) $(SYSLIBS)
 
 ##WIN32##telnet.res: telnet.rc
-##WIN32##	$(RC) $(RFLAGS) /r $*.rc
+##WIN32##	$(RC) $(RFLAGS) -D_WIN32 -DTELNET_APP /r $*.rc
 ##WIN32##resource.obj: telnet.res
 ##WIN32##	$(CVTRES) /nologo /out:resource.obj telnet.res
 

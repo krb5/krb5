@@ -1,5 +1,7 @@
 //Microsoft Developer Studio generated resource script.
 //
+// XXX since modified by hand...
+
 #include "resource.h"
 
 #define APSTUDIO_READONLY_SYMBOLS
@@ -242,3 +244,4 @@ END
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED
 
+#include "..\version.rc"
