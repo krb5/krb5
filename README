@@ -212,6 +212,8 @@ Minor changes in 1.3.2
 * [2225] In the gss sample client, some extraneous parameters have
   been removed from client_establish_context().
 
+* [2228] Copyright notices updated in GSS sample apps.
+
 Notes, Major Changes, and Known Bugs for 1.3.1
 ----------------------------------------------
 
