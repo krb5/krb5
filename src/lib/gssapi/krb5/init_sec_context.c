@@ -443,8 +443,8 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
       } else {
 	 ctx->seq_recv = ctx->seq_send;
 	 g_order_init(&(ctx->seqstate), ctx->seq_recv,
-		      req_flags & GSS_C_REPLAY_FLAG, 
-		      req_flags & GSS_C_SEQUENCE_FLAG);
+		      (req_flags & GSS_C_REPLAY_FLAG) != 0, 
+		      (req_flags & GSS_C_SEQUENCE_FLAG) != 0);
 	 ctx->established = 1;
 	 /* fall through to GSS_S_COMPLETE */
       }
@@ -525,8 +525,8 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
       /* store away the sequence number */
       ctx->seq_recv = ap_rep_data->seq_number;
       g_order_init(&(ctx->seqstate), ctx->seq_recv,
-		   req_flags & GSS_C_REPLAY_FLAG,
-		   req_flags & GSS_C_SEQUENCE_FLAG);
+		   (req_flags & GSS_C_REPLAY_FLAG) != 0,
+		   (req_flags & GSS_C_SEQUENCE_FLAG) !=0);
 
       /* free the ap_rep_data */
       krb5_free_ap_rep_enc_part(context, ap_rep_data);

@@ -1,3 +1,12 @@
+Wed Jul 24 19:40:55 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* ser_sctx.c (kg_oid_externalize): Add proper return code
+
+	* accept_sec_context.c (krb5_gss_accept_sec_context): 
+	* init_sec_context.c (krb5_gss_init_sec_context): Test (gss_flags &
+		XXXX) against 0 so that we pass a int value to
+		g_order_init.  Needed since int is 16 bits for Win16 build.
+
 Tue Jul 23 22:35:53 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* Makefile.in (all-windows): Fix broken Windows commands to copy

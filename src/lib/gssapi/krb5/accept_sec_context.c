@@ -458,8 +458,8 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
    krb5_auth_con_getremoteseqnumber(context, auth_context, &ctx->seq_recv);
 
    g_order_init(&(ctx->seqstate), ctx->seq_recv,
-		gss_flags & GSS_C_REPLAY_FLAG,
-		gss_flags & GSS_C_SEQUENCE_FLAG);
+		(gss_flags & GSS_C_REPLAY_FLAG) != 0,
+		(gss_flags & GSS_C_SEQUENCE_FLAG) != 0);
 
    /* at this point, the entire context structure is filled in, 
       so it can be released.  */

@@ -238,6 +238,7 @@ kg_oid_externalize(kcontext, arg, buffer, lenremain)
 				buffer, lenremain);
      (void) krb5_ser_pack_bytes((krb5_octet *) oid->elements,
 				oid->length, buffer, lenremain);
+     return 0;
 }
 
 static krb5_error_code
