@@ -25,5 +25,5 @@
 #define IHaveSubdirs
 #define PassCDebugFlags
 
-SUBDIRS=sample simple telnet popper movemail user-user
+SUBDIRS=sample simple popper movemail user-user
 MakeSubdirs($(SUBDIRS))
