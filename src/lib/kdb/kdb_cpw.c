@@ -76,15 +76,16 @@ add_key_rnd(context, master_eblock, ks_tuple, ks_tuple_count, db_entry, kvno)
     int			  kvno;
 {
     krb5_principal	  krbtgt_princ;
-    krb5_keyblock	  krbtgt_keyblock, * key;
+    krb5_keyblock	  krbtgt_key, * key;
     krb5_pointer 	  krbtgt_seed;	
     krb5_encrypt_block	  krbtgt_eblock;
     krb5_db_entry	  krbtgt_entry;
+    krb5_key_data	* krbtgt_kdata;
     krb5_boolean	  more, found;
     int			  max_kvno, one, i, j;
     krb5_error_code	  retval;
 
-    memset(&krbtgt_keyblock, 0, sizeof(krbtgt_keyblock));
+    memset(&krbtgt_key, 0, sizeof(krbtgt_key));
     retval = krb5_build_principal_ext(context, &krbtgt_princ,
 				      db_entry->princ->realm.length,
 				      db_entry->princ->realm.data,
@@ -117,14 +118,33 @@ add_key_rnd(context, master_eblock, ks_tuple, ks_tuple_count, db_entry, kvno)
     }
 
     for (i = 0; i < ks_tuple_count; i++) {
+	krb5_enctype new_enctype, old_enctype;
+
+	switch (new_enctype = ks_tuple[i].ks_enctype) {
+	case ENCTYPE_DES_CBC_MD4:
+	case ENCTYPE_DES_CBC_MD5:
+	case ENCTYPE_DES_CBC_RAW:
+	    new_enctype = ENCTYPE_DES_CBC_CRC;
+	default:
+	    break;
+	}
+	found = 0;
+
 	/*
 	 * We could use krb5_keysalt_iterate to replace this loop, or use
 	 * krb5_keysalt_is_present for the loop below, but we want to avoid
 	 * circular library dependencies.
 	 */
-	found = 0;
 	for (j = 0; j < i; j++) {
-	    if (ks_tuple[j].ks_enctype == ks_tuple[i].ks_enctype) {
+	    switch (old_enctype = ks_tuple[j].ks_enctype) {
+	    case ENCTYPE_DES_CBC_MD4:
+	    case ENCTYPE_DES_CBC_MD5:
+	    case ENCTYPE_DES_CBC_RAW:
+	        old_enctype = ENCTYPE_DES_CBC_CRC;
+	    default:
+	    	break;
+	    }
+	    if (old_enctype == new_enctype) {
 		found = 1;
 		break;
 	    }
@@ -134,35 +154,26 @@ add_key_rnd(context, master_eblock, ks_tuple, ks_tuple_count, db_entry, kvno)
         if (retval = krb5_dbe_create_key_data(context, db_entry)) 
 	    goto add_key_rnd_err;
 
-	for (j = 0; j < krbtgt_entry.n_key_data; j++) {
-	     if ((krbtgt_entry.key_data[j].key_data_kvno == max_kvno) &&
-		 (krbtgt_entry.key_data[j].key_data_type[0] == 
-		  ks_tuple[i].ks_enctype)) {
-		break;
-	    }
-	}
-
-	if (j == krbtgt_entry.n_key_data) {
-	    retval = KRB5_KDB_BAD_ENCTYPE;
+	if (retval = krb5_dbe_find_enctype(context, &krbtgt_entry,
+					   ks_tuple[i].ks_enctype,
+				  	   -1, 0, &krbtgt_kdata)) 
 	    goto add_key_rnd_err;
-	}
 
 	/* Decrypt key */
     	if (retval = krb5_dbekd_decrypt_key_data(context, master_eblock, 
-						 &krbtgt_entry.key_data[j],
-						 &krbtgt_keyblock, NULL)) {
+						 krbtgt_kdata,&krbtgt_key,NULL))
 	    goto add_key_rnd_err;
-	}
 
 	/* Init key */
+	krbtgt_key.enctype = ks_tuple[i].ks_enctype;
 	krb5_use_enctype(context, &krbtgt_eblock, ks_tuple[i].ks_enctype);
-	if (retval = krb5_process_key(context,&krbtgt_eblock,&krbtgt_keyblock)){
+	if (retval = krb5_process_key(context, &krbtgt_eblock, &krbtgt_key)) {
 	    goto add_key_rnd_err;
 	}
 
 	/* Init random generator */
 	if (retval = krb5_init_random_key(context, &krbtgt_eblock,
-					  &krbtgt_keyblock, &krbtgt_seed)) {
+					  &krbtgt_key, &krbtgt_seed)) {
 	    krb5_finish_key(context, &krbtgt_eblock);
 	    goto add_key_rnd_err;
 	}
@@ -189,9 +200,9 @@ add_key_rnd(context, master_eblock, ks_tuple, ks_tuple_count, db_entry, kvno)
 
 add_key_rnd_err:;
     krb5_db_free_principal(context, &krbtgt_entry, one);
-    if (krbtgt_keyblock.contents && krbtgt_keyblock.length) {
-	memset(krbtgt_keyblock.contents, 0, krbtgt_keyblock.length);
-	krb5_xfree(krbtgt_keyblock.contents);
+    if (krbtgt_key.contents && krbtgt_key.length) {
+	memset(krbtgt_key.contents, 0, krbtgt_key.length);
+	krb5_xfree(krbtgt_key.contents);
     }
     return(retval);
 }
@@ -308,17 +319,35 @@ add_key_pwd(context, master_eblock, ks_tuple, ks_tuple_count, passwd,
     int			  i, j;
 
     for (i = 0; i < ks_tuple_count; i++) {
+	krb5_enctype new_enctype, old_enctype;
+
+	switch (new_enctype = ks_tuple[i].ks_enctype) {
+	case ENCTYPE_DES_CBC_MD4:
+	case ENCTYPE_DES_CBC_MD5:
+	case ENCTYPE_DES_CBC_RAW:
+	    new_enctype = ENCTYPE_DES_CBC_CRC;
+	default:
+	    break;
+	}
 	/*
 	 * We could use krb5_keysalt_iterate to replace this loop, or use
 	 * krb5_keysalt_is_present for the loop below, but we want to avoid
 	 * circular library dependencies.
 	 */
-	found = 0;
-	for (j = 0; j < i; j++) {
-	    if ((ks_tuple[j].ks_enctype == ks_tuple[i].ks_enctype) &&
-		(ks_tuple[j].ks_salttype == ks_tuple[i].ks_salttype)) {
-		found = 1;
-		break;
+	for (found = j = 0; j < i; j++) {
+	    if (ks_tuple[j].ks_salttype == ks_tuple[i].ks_salttype) {
+		switch (old_enctype = ks_tuple[j].ks_enctype) {
+		case ENCTYPE_DES_CBC_MD4:
+		case ENCTYPE_DES_CBC_MD5:
+		case ENCTYPE_DES_CBC_RAW:
+	    	    old_enctype = ENCTYPE_DES_CBC_CRC;
+		default:
+	    	    break;
+		}
+	        if (old_enctype == new_enctype) {
+		    found = 1;
+		    break;
+		}
 	    }
 	}
 	if (found)
@@ -360,8 +389,8 @@ add_key_pwd(context, master_eblock, ks_tuple, ks_tuple_count, passwd,
     	pwd.data = passwd;
     	pwd.length = strlen(passwd);
 	if (retval = krb5_string_to_key(context, &key_eblock, 
-					ks_tuple[i].ks_enctype, &key,
-					&pwd, &key_salt.data))
+					ks_tuple[i].ks_enctype,
+					&key, &pwd, &key_salt.data))
 	    return(retval);
 
 	if (retval = krb5_dbekd_encrypt_key_data(context, master_eblock, &key,

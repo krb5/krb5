@@ -84,6 +84,7 @@ krb5_dbekd_decrypt_key_data(context, eblock, key_data, keyblock, keysalt)
 		keysalt->data.data = (char *) NULL;
 	} else {
 	    keysalt->type = KRB5_KDB_SALTTYPE_NORMAL;
+	    keysalt->data.data = (char *) NULL;
 	    keysalt->data.length = 0;
 	}
     }

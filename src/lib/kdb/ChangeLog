@@ -1,3 +1,31 @@
+
+Fri Nov 03 04:49:58 1995  Chris Provenzano (proven@mit.edu)
+
+	* decrypt_key.c (krb5_dbekd_decrypt_key_data()) : If key salt length
+		is 0 then set keysalt->data.data to NULL.
+	* kdb_cpw.c (add_key_rnd(), add_key_pwd()) : When creating new keys 
+		for a new kvno and there are multiple enctypes that use a 
+		common keytype, then set the enctype in the key to the first
+		specified enctype and skip all other enctypes that use 
+		the same keytype. (This assumes the salt type is the same too.)
+		This way when the kdc needs to get the server key it doesn't
+		need to gues what enctypes the server supports.
+	* kdb_xdr.c (krb5_dbe_find_enctype()): Match keys that use common
+		keytypes but different enctypes. Eg. ENCTYPE_DES_CBC_MD5
+		matches ENCTYPE_DES_CBC_CRC and vice versa.
+	* kdb_xdr.c krb5_dbe_find_enctype()): If kvno = 0 then determine
+		maxkvno for all the keys and then search keys for a key that 
+		matches enctype salttype and has kvno == maxkvno. This
+		is different than when kvno = -1 which searches the keys
+		for THE key with the greatest kvno which also matches enctype
+		and salttype.
+	* kdb_kdr.c (krb5_dbe_find_enctype()): If kvno = ktype = stype = -1
+		then set kvno = 0. The first doesn't make a lot of sense.
+	* kdb_xdr.c (krb5_dbe_encode_last_pwd_change(), 
+		krb5_dbe_decode_last_pwd_change()) : Added.
+	* kdb_xdr.c (krb5_decode_princ_contents()) : Don't try to allocate 
+		space for keys if n_key_data = 0. 
+
 Mon Sep 25 17:31:02 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in: Removed "foo:: foo-$(WHAT)" lines from the

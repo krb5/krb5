@@ -48,6 +48,71 @@ krb5_dbe_create_key_data(context, entry)
 }
 
 krb5_error_code
+krb5_dbe_encode_last_pwd_change(context, stamp, entry)
+    krb5_context          context;
+    krb5_tl_last_change * stamp;
+    krb5_db_entry       * entry;
+{
+    krb5_error_code       retval;
+    krb5_tl_data       ** tl_data;
+    krb5_octet          * nextloc;
+
+    /* Find any old versions and delete them. */
+    for (tl_data = &(entry->tl_data); *tl_data;
+         tl_data = &((*tl_data)->tl_data_next)) {
+        if ((*tl_data)->tl_data_type == KRB5_TL_LAST_PWD_CHANGE) {
+            break;
+        }
+    }
+
+    if ((*tl_data) ||
+      /* Only zero data if it is freshly allocated */
+      ((*tl_data) = (krb5_tl_data *)calloc(1, sizeof(krb5_tl_data)))) {
+        if (!(*tl_data)->tl_data_type) {
+            if ((nextloc = (*tl_data)->tl_data_contents =
+              (krb5_octet *)malloc(sizeof(krb5_timestamp))) == NULL) {
+                krb5_xfree(*tl_data);
+                (*tl_data) = NULL;
+                return ENOMEM;
+            }
+            (*tl_data)->tl_data_type = KRB5_TL_LAST_PWD_CHANGE;
+            (*tl_data)->tl_data_length = sizeof(krb5_timestamp);
+            entry->n_tl_data++;
+        }
+
+        *nextloc++ = (krb5_octet)(stamp->last_pwd_change & 0xff);
+        *nextloc++ = (krb5_octet)((stamp->last_pwd_change >> 8) & 0xff);
+        *nextloc++ = (krb5_octet)((stamp->last_pwd_change >> 16) & 0xff);
+        *nextloc++ = (krb5_octet)((stamp->last_pwd_change >> 24) & 0xff);
+
+        return 0;
+    }
+    return ENOMEM;
+}
+
+krb5_error_code
+krb5_dbe_decode_last_pwd_change(context, entry, stamp)
+    krb5_context          context;
+    krb5_db_entry       * entry;
+    krb5_tl_last_change * stamp;
+{
+    krb5_tl_data        * tl_data;
+
+    for (tl_data = entry->tl_data; tl_data; tl_data = tl_data->tl_data_next) {
+        if (tl_data->tl_data_type == KRB5_TL_LAST_PWD_CHANGE) {
+            krb5_octet * nextloc = tl_data->tl_data_contents;
+
+            stamp->last_pwd_change = *nextloc++;
+            stamp->last_pwd_change += (*nextloc++ << 8);
+            stamp->last_pwd_change += (*nextloc++ << 16);
+            stamp->last_pwd_change += (*nextloc++ << 24);
+            return 0;
+        }
+    }
+    stamp->last_pwd_change = 0;
+}
+
+krb5_error_code
 krb5_dbe_encode_mod_princ_data(context, mod_princ, entry)
     krb5_context	  context;
     krb5_tl_mod_princ	* mod_princ;
@@ -527,8 +592,8 @@ krb5_decode_princ_contents(context, content, entry)
     }
 
     	/* key_data is an array */
-    if ((entry->key_data = (krb5_key_data *)
-      malloc(sizeof(krb5_key_data) * entry->n_key_data)) == NULL) {
+    if (entry->n_key_data && ((entry->key_data = (krb5_key_data *)
+      malloc(sizeof(krb5_key_data) * entry->n_key_data)) == NULL)) {
         retval = ENOMEM;
 	goto error_out;
     }
@@ -631,6 +696,8 @@ krb5_dbe_free_contents(context, entry)
  * most appropriate krb5_key_data entry of the database entry.
  *
  * If stype or kvno is negative, it is ignored.
+ * If kvno is 0 get the key which is maxkvno for the princ and matches
+ * the other attributes.
  */
 krb5_error_code
 krb5_dbe_find_enctype(kcontext, dbentp, ktype, stype, kvno, kdatap)
@@ -645,20 +712,60 @@ krb5_dbe_find_enctype(kcontext, dbentp, ktype, stype, kvno, kdatap)
     int			maxkvno;
     krb5_key_data	*datap;
 
+    if (kvno == stype == ktype == -1) 
+	kvno = 0;
+
+    if (kvno == 0) { 
+	/* Get the max key version */
+	for (i = 0; i < dbentp->n_key_data; i++) {
+	    if (kvno < dbentp->key_data[i].key_data_kvno) { 
+		kvno = dbentp->key_data[i].key_data_kvno;
+	    }
+	}
+    }
+
+    /*
+     * ENCTYPE_DES_CBC_CRC, ENCTYPE_DES_CBC_MD4, ENCTYPE_DES_CBC_MD5,
+     * ENCTYPE_DES_CBC_RAW all use the same key.
+     */
+    switch (ktype) {
+    case ENCTYPE_DES_CBC_MD4:
+    case ENCTYPE_DES_CBC_MD5:
+    case ENCTYPE_DES_CBC_RAW:
+	ktype = ENCTYPE_DES_CBC_CRC;
+	break;
+    default:
+	break;
+    }
+
     maxkvno = -1;
     datap = (krb5_key_data *) NULL;
-    for (i=0; i<dbentp->n_key_data; i++) {
-	if (((krb5_enctype) dbentp->key_data[i].key_data_type[0]) == ktype &&
-	    ((dbentp->key_data[i].key_data_type[1] == stype) ||
-	     (stype < 0))) {
+    for (i = 0; i < dbentp->n_key_data; i++) {
+        krb5_enctype db_ktype;
+        krb5_int32   db_stype;
+
+	switch (db_ktype = dbentp->key_data[i].key_data_type[0]) {
+    	case ENCTYPE_DES_CBC_MD4:
+    	case ENCTYPE_DES_CBC_MD5:
+    	case ENCTYPE_DES_CBC_RAW:
+	    db_ktype = ENCTYPE_DES_CBC_CRC;
+	defualt:
+	    break;
+	}
+	if (dbentp->key_data[i].key_data_ver > 1) {
+	    db_stype = dbentp->key_data[i].key_data_type[1];
+	} else {
+	    db_stype = KRB5_KDB_SALTTYPE_NORMAL;
+	}
+	if (((db_ktype == ktype) || (ktype < 0)) && 
+	    ((db_stype == stype) || (stype < 0))) {
 	    if (kvno >= 0) {
 		if (kvno == dbentp->key_data[i].key_data_kvno) {
-		    maxkvno = kvno;
 		    datap = &dbentp->key_data[i];
+		    maxkvno = kvno;
 		    break;
 		}
-	    }
-	    else {
+	    } else {
 		if (dbentp->key_data[i].key_data_kvno > maxkvno) {
 		    maxkvno = dbentp->key_data[i].key_data_kvno;
 		    datap = &dbentp->key_data[i];
