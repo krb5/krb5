@@ -32,10 +32,10 @@ clean-windows::
 all-windows::
 	cd generic
 	@echo Making in gssapi\generic
-	-$(MAKE) -$(MFLAGS) LIB=$(LIB)
+	-$(MAKE) -$(MFLAGS) LIBCMD=$(LIBCMD)
 	cd ..\krb5
 	@echo Making in gssapi\krb5
-	-$(MAKE) -$(MFLAGS) LIB=$(LIB)
+	-$(MAKE) -$(MFLAGS) LIBCMD=$(LIBCMD)
 	cd ..
 
 clean-windows::
@@ -46,5 +46,5 @@ clean-windows::
 	@echo Making clean in gssapi\krb5
 	-$(MAKE) -$(MFLAGS) clean
 	cd ..
-	@echo Making clean locally
+	@echo Making clean in gssapi
 
