@@ -1,3 +1,11 @@
+2003-01-09  Sam Hartman  <hartmans@mit.edu>
+
+	* get_creds.c (krb5_get_credentials_core): Patch from Ben Cox
+	<cox-work@djehuti.com> to not use expired service credentials if
+	the endtime is null but instead to search for unexpired
+	credentials.  If none are found, get new credentials.
+	
+
 2003-01-08  Sam Hartman  <hartmans@mit.edu>
 
 	* fwd_tgt.c (krb5_fwd_tgt_creds): Don't require hostname to be supplied unless you are using addresses in the ticket.

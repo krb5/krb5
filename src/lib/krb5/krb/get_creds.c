@@ -55,7 +55,13 @@ krb5_get_credentials_core(krb5_context context, krb5_flags options,
 
     memset((char *)mcreds, 0, sizeof(krb5_creds));
     mcreds->magic = KV5M_CREDS;
-    mcreds->times.endtime = in_creds->times.endtime;
+    if (in_creds->times.endtime != 0) {
+	mcreds->times.endtime = in_creds->times.endtime;
+    } else {
+	krb5_error_code retval;
+	retval = krb5_timeofday(context, &mcreds->times.endtime);
+	if (retval != 0) return retval;
+    }
 #ifdef HAVE_C_STRUCTURE_ASSIGNMENT
     mcreds->keyblock = in_creds->keyblock;
 #else
