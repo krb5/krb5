@@ -151,7 +151,7 @@ if test "$enable_thread_support" = yes; then
   # AIX and Tru64 don't support weak references, and don't have
   # stub versions of the pthread code in libc.
   case "${host_os}" in
-    aix* | osf*) LIBS="$LIBS $PTHREAD_LIBS" ;;
+    aix* | osf*) LIBS="$LIBS $PTHREAD_LIBS" ; CFLAGS="$CFLAGS $PTHREAD_CFLAGS" ;;
   esac
 fi
 dnl We want to know where these routines live, so on systems with weak
@@ -568,6 +568,14 @@ if test "$GCC" = yes ; then
     *-Wl,-search_paths_first*) ;;
     *) LDFLAGS="${LDFLAGS} -Wl,-search_paths_first" ;;
     esac
+  fi
+else
+  if test "`uname -s`" = AIX ; then
+    # Using AIX but not GCC, assume native compiler.
+    # The native compiler appears not to give a nonzero exit
+    # status for certain classes of errors, like missing arguments
+    # in function calls.  Let's try to fix that.
+    CFLAGS="$CFLAGS -qhalt=e"
   fi
 fi
 ])dnl
