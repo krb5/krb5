@@ -206,8 +206,8 @@ mit_des_generate_random_block(block, p_seed)
     /*
      * Encrypt the sequence number to get the new random block:
      */
-    mit_des_ecb_encrypt((unsigned long *)p_seed->sequence_number, 
-		    (unsigned long *)block, 
+    mit_des_ecb_encrypt((mit_des_cblock *)p_seed->sequence_number, 
+		    (mit_des_cblock *)block, 
 		    p_seed->random_sequence_key, 1);
 
     /*

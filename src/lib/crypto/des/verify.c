@@ -370,8 +370,8 @@ do_encrypt(in,out)
     char *out;
 {
     for (i =1; i<=nflag; i++) {
-	mit_des_ecb_encrypt((u_long *)in,
-			    (u_long *)out,
+	mit_des_ecb_encrypt((mit_des_cblock *)in,
+			    (mit_des_cblock *)out,
 			    (struct mit_des_ks_struct *)eblock.priv,
 			    MIT_DES_ENCRYPT);
 	if (mit_des_debug) {
@@ -392,8 +392,8 @@ do_decrypt(in,out)
     /* try to invert it */
 {
     for (i =1; i<=nflag; i++) {
-	mit_des_ecb_encrypt((u_long *)out,
-			    (u_long *)in,
+	mit_des_ecb_encrypt((mit_des_cblock *)out,
+			    (mit_des_cblock *)in,
 			    (struct mit_des_ks_struct *)eblock.priv,
 			    MIT_DES_DECRYPT);
 	if (mit_des_debug) {
