@@ -66,6 +66,14 @@ struct chpass_arg {
 typedef struct chpass_arg chpass_arg;
 bool_t xdr_chpass_arg();
 
+struct setv4key_arg {
+	krb5_ui_4 api_version;
+	krb5_principal princ;
+        krb5_keyblock *keyblock;
+};
+typedef struct setv4key_arg setv4key_arg;
+bool_t xdr_setv4key_arg();
+
 struct setkey_arg {
 	krb5_ui_4 api_version;
 	krb5_principal princ;
@@ -213,4 +221,5 @@ extern gprincs_ret *get_princs_1();
 extern gpols_ret *get_pols_1();
 #define SETKEY_PRINCIPAL ((krb5_ui_4) 16)
 extern generic_ret *setkey_principal_1();
-		    
+#define SETV4KEY_PRINCIPAL ((krb5_ui_4) 17)
+extern generic_ret *setv4key_principal_1();

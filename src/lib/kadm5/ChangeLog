@@ -1,3 +1,7 @@
+Tue Jul  1 02:31:07 1997  Tom Yu  <tlyu@mit.edu>
+
+	* kadm_rpc.h, kadm_rpc_xdr.c: Add support for setv4key.
+
 Sun Jun 29 14:52:04 1997  Tom Yu  <tlyu@mit.edu>
 
 	* kadm_err.et: Add support for kadm5_setv4key_principal.
