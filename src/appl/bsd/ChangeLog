@@ -1,3 +1,9 @@
+2003-01-03  Ezra Peisach  <epeisach@bu.edu>
+
+	* compat_recv.c (accept_a_connection): Test if IPv6 socket returns
+	EAFNOSUPPORT as well as EPROTONOSUPPORT. Irix 6.5.16m returns the
+	former.
+
 2003-01-01  Ken Raeburn  <raeburn@mit.edu>
 
 	* compat_recv.c: Include sys/select.h and port-sockets.h.

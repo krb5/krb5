@@ -475,7 +475,7 @@ accept_a_connection (int debug_port, struct sockaddr *from,
 	struct sockaddr_in6 sock_in6;
 
 	if ((s = socket(AF_INET6, SOCK_STREAM, PF_UNSPEC)) < 0) {
-	    if (errno == EPROTONOSUPPORT)
+	    if ((errno == EPROTONOSUPPORT) || (errno == EAFNOSUPPORT))
 		goto skip_ipv6;
 	    fprintf(stderr, "Error in socket(INET6): %s\n", strerror(errno));
 	    exit(2);
