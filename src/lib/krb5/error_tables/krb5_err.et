@@ -158,7 +158,7 @@ error_code KRB5_LIBOS_PWDINTR,		"Password read interrupted"
 error_code KRB5_PARSE_ILLCHAR,		"Illegal character in component name"
 error_code KRB5_PARSE_MALFORMED,	"Malformed representation of principal"
 
-error_code KRB5_CONFIG_CANTOPEN,	"Can't find configuration file"
+error_code KRB5_CONFIG_CANTOPEN,	"Can't open/find configuration file"
 error_code KRB5_CONFIG_BADFORMAT,	"Improper format of configuration file"
 error_code KRB5_CONFIG_NOTENUFSPACE,	"Insufficient space to return complete information"
 
@@ -204,7 +204,11 @@ error_code KRB5_RC_IO_IO,		"I/O error in replay cache i/o code"
 error_code KRB5_RC_IO_UNKNOWN,		"Generic unknown RC/IO error"
 error_code KRB5_RC_IO_SPACE,		"Insufficient system space to store replay information"
 
-error_code KRB5_TRANS_CANTOPEN,		"Can't find realm translation file"
+error_code KRB5_TRANS_CANTOPEN,		"Can't open/find realm translation file"
 error_code KRB5_TRANS_BADFORMAT,	"Improper format of realm translation file"
+
+error_code KRB5_LNAME_CANTOPEN,		"Can't open/find lname translation database"
+error_code KRB5_LNAME_NOTRANS,		"No translation available for requested principal"
+error_code KRB5_LNAME_BADFORMAT,	"Improper format of translation database entry"
 
 end
