@@ -24,8 +24,6 @@
 
 	* os-proto.h (krb5_locate_kdc): Update prototype.
 
-	* t_std_conf.c (test_locate_kdc): Update tests for new API.
-
 2001-06-12  Ezra Peisach  <epeisach@mit.edu>
 
 	* sn2princ.c, hst_realm.c, an_to_ln.c: Cast argument to
