@@ -30,11 +30,13 @@ OBJS 	= scc_close.o scc_destry.o scc_eseq.o \
 	scc_sseq.o scc_store.o scc_skip.o scc_ops.o scc_write.o \
 	scc_sflags.o scc_defops.o scc_errs.o scc_maybe.o
 
-SRCS 	= scc_close.c scc_destry.c scc_eseq.c \
-	scc_gennew.c scc_getnam.c scc_gprin.c scc_init.c \
-	scc_nseq.c scc_read.c scc_reslv.c scc_retrv.c \
-	scc_sseq.c scc_store.c scc_skip.c scc_ops.c scc_write.c \
-	scc_sflags.c scc_defops.c scc_errs.c scc_maybe.c
+SRCS 	= $(SRCDIR)scc_close.c $(SRCDIR)scc_destry.c $(SRCDIR)scc_eseq.c \
+	$(SRCDIR)scc_gennew.c $(SRCDIR)scc_getnam.c $(SRCDIR)scc_gprin.c \
+	$(SRCDIR)scc_init.c $(SRCDIR)scc_nseq.c $(SRCDIR)scc_read.c      \
+	$(SRCDIR)scc_reslv.c $(SRCDIR)scc_retrv.c $(SRCDIR)scc_sseq.c    \
+	$(SRCDIR)scc_store.c $(SRCDIR)scc_skip.c $(SRCDIR)scc_ops.c      \
+	$(SRCDIR)scc_write.c $(SRCDIR)scc_sflags.c $(SRCDIR)scc_defops.c \
+	$(SRCDIR)scc_errs.c $(SRCDIR)scc_maybe.c
 
 all:: ${OBJS}
 

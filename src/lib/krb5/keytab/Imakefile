@@ -39,12 +39,12 @@ OBJS=	\
 	read_servi.o
 
 SRCS=	\
-	ktadd.c		\
-	ktbase.c	\
-	ktdefault.c	\
-	ktfr_entry.c	\
-	ktremove.c	\
-	read_servi.c
+	$(SRCDIR)ktadd.c	\
+	$(SRCDIR)ktbase.c	\
+	$(SRCDIR)ktdefault.c	\
+	$(SRCDIR)ktfr_entry.c	\
+	$(SRCDIR)ktremove.c	\
+	$(SRCDIR)read_servi.c
 
 OtherdirLibraryTarget($(TOP)/lib,krb5,$(OBJS))
 

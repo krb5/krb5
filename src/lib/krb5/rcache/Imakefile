@@ -34,11 +34,11 @@ OBJS=	\
 	rc_conv.o
 
 SRCS=	\
-	rc_base.c	\
-	rc_dfl.c 	\
-	rc_io.c		\
-	rcdef.c		\
-	rc_conv.c
+	$(SRCDIR)rc_base.c	\
+	$(SRCDIR)rc_dfl.c 	\
+	$(SRCDIR)rc_io.c	\
+	$(SRCDIR)rcdef.c	\
+	$(SRCDIR)rc_conv.c
 
 OtherdirLibraryTarget($(TOP)/lib,krb5,$(OBJS))
 
