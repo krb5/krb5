@@ -338,7 +338,8 @@ asn1_error_code asn1_decode_enc_kdc_rep_part(buf, val)
     opt_field(val->key_exp,3,asn1_decode_kerberos_time,0);
     get_field(val->flags,4,asn1_decode_ticket_flags);
     get_field(val->times.authtime,5,asn1_decode_kerberos_time);
-    opt_field(val->times.starttime,6,asn1_decode_kerberos_time,0);
+    /* Set to authtime if missing */
+    opt_field(val->times.starttime,6,asn1_decode_kerberos_time,val->times.authtime);
     get_field(val->times.endtime,7,asn1_decode_kerberos_time);
     opt_field(val->times.renew_till,8,asn1_decode_kerberos_time,0);
     alloc_field(val->server,krb5_principal_data);

@@ -1,3 +1,8 @@
+Wed Jun  5 15:37:50 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* asn1_k_decode.c (asn1_decode_enc_kdc_rep_part): If starttime is
+		not sent over the wire, set equal to authtime.
+
 Thu May  2 21:59:23 1996  Mark Eichin  <eichin@cygnus.com>
 
 	* krb5_decode.c (decode_krb5_enc_tkt_part): use tagnum correctly
