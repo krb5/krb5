@@ -1,3 +1,10 @@
+2003-04-10  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in: Use library build framework.
+
+	* configure.in: Add support for library build framework.  Remove
+	old explicit checks for ranlib, etc.
+
 2003-04-09  Tom Yu  <tlyu@mit.edu>
 
 	* kerberos.c (kerberos4_status): Always copy in username if
