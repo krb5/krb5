@@ -696,14 +696,14 @@ getreply(expecteof)
 }
 
 empty(mask, sec)
-	struct fd_set *mask;
+ fd_set *mask;
 	int sec;
 {
 	struct timeval t;
 
 	t.tv_sec = (long) sec;
 	t.tv_usec = 0;
-	return(select(32, mask, (struct fd_set *) 0, (struct fd_set *) 0, &t));
+	return(select(32, mask, (fd_set *) 0, (fd_set *) 0, &t));
 }
 
 jmp_buf	sendabort;
@@ -1642,7 +1642,7 @@ proxtrans(cmd, local, remote)
 	int secndflag = 0, prox_type, nfnd;
 	extern jmp_buf ptabort;
 	char *cmd2;
-	struct fd_set mask;
+	 fd_set mask;
 	sigtype abortpt();
 
 	if (strcmp(cmd, "RETR"))
@@ -1757,7 +1757,7 @@ abort:
 
 reset()
 {
-	struct fd_set mask;
+   fd_set mask;
 	int nfnd = 1;
 
 	FD_ZERO(&mask);
@@ -2079,7 +2079,7 @@ FILE *din;
 {
 	char buf[FTP_BUFSIZ];
 	int nfnd;
-	struct fd_set mask;
+	fd_set mask;
 
 	/*
 	 * send IAC in urgent mode instead of DM because 4.3BSD places oob mark

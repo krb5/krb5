@@ -1,3 +1,8 @@
+Tue Jul 30 19:45:45 1996  Samuel D Hartman  (hartmans@vorlon)
+
+	* ftp.c (empt resety): Use fd_set as a typedef not a struct.
+        Linux breaks.
+
 Mon Jul 29 22:37:23 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* secure.c: Do not assume sizeof(long) = 4 for sending lengths OTW
