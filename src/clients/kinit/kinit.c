@@ -61,6 +61,15 @@ krb5_data tgtname = {
     TGTNAME
 };
 
+/*
+ * Try no preauthentication first; then try the encrypted timestamp
+ */
+int preauth_search_list[] = {
+	0,			
+	KRB5_PADATA_ENC_TIMESTAMP,
+	-1
+	};
+
 void
 main(argc, argv)
     int argc;
@@ -68,6 +77,7 @@ main(argc, argv)
 {
     krb5_ccache ccache = NULL;
     char *cache_name = NULL;		/* -f option */
+    char *keytab_name = NULL;		/* -t option */
     long lifetime = KRB5_DEFAULT_LIFE;	/* -l option */
     long rlife = 0;
     int options = KRB5_DEFAULT_OPTIONS;
@@ -79,8 +89,13 @@ main(argc, argv)
     krb5_principal server;
     krb5_creds my_creds;
     krb5_timestamp now;
+    int use_keytab = 0;			/* -k option */
+    int preauth_type = -1;
+    krb5_keytab keytab = NULL;
+    krb5_keytab_entry kt_ent;
     struct passwd *pw = 0;
     int pwsize;
+    int	i;
     char password[255], *client_name, prompt[255];
 
     krb5_init_ets();
@@ -88,7 +103,7 @@ main(argc, argv)
     if (strrchr(argv[0], '/'))
 	argv[0] = strrchr(argv[0], '/')+1;
 
-    while ((option = getopt(argc, argv, "r:fpl:c:")) != EOF) {
+    while ((option = getopt(argc, argv, "r:fpl:c:kt:")) != EOF) {
 	switch (option) {
 	case 'r':
 	    options |= KDC_OPT_RENEWABLE;
@@ -104,7 +119,25 @@ main(argc, argv)
 	case 'f':
 	    options |= KDC_OPT_FORWARDABLE;
 	    break;
-	case 'l':
+       case 'k':
+	    use_keytab = 1;
+	    break;
+       case 't':
+	    if (keytab == NULL) {
+		 keytab_name = optarg;
+
+		 code = krb5_kt_resolve(keytab_name, &keytab);
+		 if (code != 0) {
+		      com_err(argv[0], code, "resolving keytab %s",
+			      keytab_name);
+		 errflg++;
+		 }
+	    } else {
+		 fprintf(stderr, "Only one -t option allowed.\n");
+		 errflg++;
+	    }
+	    break;
+       case 'l':
 	    code = krb5_parse_lifetime(optarg, &lifetime);
 	    if (code != 0 || lifetime == 0) {
 		fprintf(stderr, "Bad lifetime value (%s hours?)\n", optarg);
@@ -117,7 +150,8 @@ main(argc, argv)
 		
 		code = krb5_cc_resolve (cache_name, &ccache);
 		if (code != 0) {
-		    com_err (argv[0], code, "resolving %s", cache_name);
+		    com_err (argv[0], code, "resolving ccache %s",
+			     cache_name);
 		    errflg++;
 		}
 	    } else {
@@ -133,41 +167,51 @@ main(argc, argv)
     }
 
     if (errflg) {
-	fprintf(stderr, "Usage: %s [ -r time ] [ -puf ] [ -l lifetime ] [ -c cachename ] [principal]\n", argv[0]);
+	fprintf(stderr, "Usage: %s [-r time] [-puf] [-l lifetime] [-c cachename] [-k] [-t keytab] [principal]\n", argv[0]);
 	exit(2);
     }
 
     if (ccache == NULL) {
-	if (code = krb5_cc_default(&ccache)) {
-	    com_err(argv[0], code, "while getting default ccache");
-	    exit(1);
-	}
+	 if (code = krb5_cc_default(&ccache)) {
+	      com_err(argv[0], code, "while getting default ccache");
+	      exit(1);
+	 }
     }
-    
+
     if (optind != argc-1) {       /* No principal name specified */
-	/* Get default principal from cache if one exists */
-	code = krb5_cc_get_principal(ccache, &me);
-	/* Else search passwd file for client */
-	if (code) {
-	    pw = getpwuid((int) getuid());
-	    if (pw) {
-		if (code = krb5_parse_name (pw->pw_name, &me)) {
-		    com_err (argv[0], code, "when parsing name %s", pw->pw_name);
-		    exit(1);
-		}
-	    } 
-	    else {
-		fprintf(stderr, 
+	 if (use_keytab) {
+	      /* Use the default host/service name */
+	      code = krb5_sname_to_principal(NULL, NULL,
+					     KRB5_NT_SRV_HST, &me);
+	      if (code) {
+		   com_err(argv[0], code,
+			   "when creating default server principal name");
+		   exit(1);
+	      }
+	 } else {
+	      /* Get default principal from cache if one exists */
+	      code = krb5_cc_get_principal(ccache, &me);
+	      if (code) {
+		   /* Else search passwd file for client */
+		   pw = getpwuid((int) getuid());
+		   if (pw) {
+			if (code = krb5_parse_name (pw->pw_name, &me)) {
+			     com_err (argv[0], code, "when parsing name %s",
+				      pw->pw_name);
+			     exit(1);
+			}
+		   } else {
+			fprintf(stderr, 
 			"Unable to identify user from password file\n");
-		exit(1);
-	    }
-	}
+			exit(1);
+		   }
+	      }
+	 }
+    } /* Use specified name */	 
+    else if (code = krb5_parse_name (argv[optind], &me)) {
+	 com_err (argv[0], code, "when parsing name %s",argv[optind]);
+	 exit(1);
     }
-    else /* Use specified name */
-      if (code = krb5_parse_name (argv[optind], &me)) {
-	  com_err (argv[0], code, "when parsing name %s",argv[optind]);
-	  exit(1);
-      }
     
     if (code = krb5_unparse_name(me, &client_name)) {
 	com_err (argv[0], code, "when unparsing name");
@@ -215,27 +259,77 @@ main(argc, argv)
     } else
 	my_creds.times.renew_till = 0;
 
-    (void) sprintf(prompt,"Password for %s: ", (char *) client_name);
+    if (!use_keytab) {
+	 (void) sprintf(prompt,"Password for %s: ", (char *) client_name);
 
-    pwsize = sizeof(password);
+	 pwsize = sizeof(password);
 
-    code = krb5_read_password(prompt, 0, password, &pwsize);
-    if (code || pwsize == 0) {
-	fprintf(stderr, "Error while reading password for '%s'\n",
-		client_name);
-	memset(password, 0, sizeof(password));
-	krb5_free_addresses(my_addresses);
-	exit(1);
+	 code = krb5_read_password(prompt, 0, password, &pwsize);
+	 if (code || pwsize == 0) {
+	      fprintf(stderr, "Error while reading password for '%s'\n",
+		      client_name);
+	      memset(password, 0, sizeof(password));
+	      krb5_free_addresses(my_addresses);
+	      exit(1);
+	 }
+
+	 if (preauth_type > 0) {
+	     code = krb5_get_in_tkt_with_password(options, my_addresses,
+						  preauth_type,
+						  ETYPE_DES_CBC_CRC,
+						  KEYTYPE_DES,
+						  password,
+						  ccache,
+						  &my_creds, 0);
+	 } else {
+	     for (i=0; preauth_search_list[i] >= 0; i++) {
+		 code = krb5_get_in_tkt_with_password(options, my_addresses,
+						      preauth_search_list[i],
+						      ETYPE_DES_CBC_CRC,
+						      KEYTYPE_DES,
+						      password,
+						      ccache,
+						      &my_creds, 0);
+	     if (code != KRB5KDC_PREAUTH_FAILED &&
+		 code != KRB5KRB_ERR_GENERIC)
+		 break;
+	     }
+	 }
+	 memset(password, 0, sizeof(password));
+    } else {
+	 if (keytab != NULL) {
+	      code = krb5_kt_get_entry(keytab, my_creds.client, 0,
+				       &kt_ent);
+	      if (code) {
+		   com_err(argv[0], code, "reading keytab entry %s",
+			   client_name);
+		   exit(1);
+	      }
+	 }
+
+	 if (preauth_type > 0) {
+	     code = krb5_get_in_tkt_with_skey(options, my_addresses,
+					      preauth_type, 
+					      ETYPE_DES_CBC_CRC,
+					      keytab ? &kt_ent.key : NULL,
+					      ccache, &my_creds, 0);
+	 } else {
+	     for (i=0; preauth_search_list[i] >= 0; i++) {
+		 code = krb5_get_in_tkt_with_skey(options, my_addresses,
+						  preauth_search_list[i], 
+						  ETYPE_DES_CBC_CRC,
+						  keytab ? &kt_ent.key : NULL,
+						  ccache, &my_creds, 0);
+		 if (code != KRB5KDC_PREAUTH_FAILED &&
+		     code != KRB5KRB_ERR_GENERIC)
+		     break;
+	     }
+	 }
+			 
+	 if (keytab != NULL)
+	      krb5_kt_free_entry(&kt_ent);
     }
-
-    code = krb5_get_in_tkt_with_password(options, my_addresses,
-					 KRB5_PADATA_ENC_TIMESTAMP,
-					 ETYPE_DES_CBC_CRC,
-					 KEYTYPE_DES,
-					 password,
-					 ccache,
-					 &my_creds, 0);
-    memset(password, 0, sizeof(password));
+    
     krb5_free_principal(server);
     krb5_free_addresses(my_addresses);
     
