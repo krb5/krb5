@@ -3,13 +3,13 @@ CONFIG_RULES
 AC_PROG_INSTALL
 AC_VFORK
 AC_CHECK_HEADERS(string.h arpa/nameser.h)
-AC_HAVE_HEADERS(unistd.h sys/select.h stdlib.h)
+AC_HAVE_HEADERS(unistd.h sys/select.h stdlib.h arpa/inet.h)
 AC_CHECK_LIB(termcap,main,AC_DEFINE(TERMCAP)
 LIBS="$LIBS -ltermcap",
-  AC_CHECK_LIB(curses,setupterm,LIBS="$LIBS -lcurses")
-)
-AC_CHECK_FUNCS(setupterm) dnl If we have it, use it so we don't get 
-dnl endless loop with tcgetent
+  AC_CHECK_LIB(curses,setupterm,LIBS="$LIBS -lcurses",
+  AC_CHECK_LIB(ncurses,setupterm,LIBS="$LIBS -lncurses")
+))
+AC_CHECK_FUNCS(gettosbyname setupterm)
 AC_HEADER_CHECK(termios.h,AC_DEFINE(USE_TERMIO) ac_termio=1)
 if test -z "$ac_termio"; then
 AC_HEADER_CHECK(termio.h,AC_DEFINE(SYSV_TERMIO),ac_sysv_termio=1)
@@ -28,7 +28,6 @@ AC_FUNC_CHECK(gettosbyname,AC_DEFINE(HAS_GETTOS))
 AC_HEADER_CHECK(sys/filio.h,AC_DEFINE(FILIO_H))
 AC_HEADER_CHECK(sys/stream.h,AC_DEFINE(STREAMS))
 AC_FUNC_CHECK(cgetent,AC_DEFINE(HAS_CGETENT))
-AC_FUNC_CHECK(setupterm,AC_DEFINE(HAS_SETUPTERM))
 CHECK_SIGNALS
 if test "$KRB4_LIB" = ''; then
 	AC_MSG_RESULT(No Kerberos 4 authentication)

@@ -49,6 +49,10 @@ static char sccsid[] = "@(#)ftpcmd.y	5.24 (Berkeley) 2/25/91";
 #include <sys/types.h>
 #include <sys/param.h>
 #include <sys/socket.h>
+#include <sys/ioctl.h>
+#ifdef HAVE_SYS_SOCKIO_H
+#include <sys/sockio.h>
+#endif
 #include <sys/stat.h>
 #include <netinet/in.h>
 #include <arpa/ftp.h>
@@ -106,6 +110,8 @@ extern gss_ctx_id_t gcontext;
 #endif
 #endif
 #endif
+
+static struct sockaddr_in host_port;
 
 extern	struct sockaddr_in data_dest;
 extern	int logged_in;
@@ -212,12 +218,22 @@ cmd:		USER SP username CRLF
 		}
 	|	PORT SP host_port CRLF
 		= {
-			usedefault = 0;
-			if (pdata >= 0) {
-				(void) close(pdata);
-				pdata = -1;
+			/*
+			 * Don't allow a port < 1024 if we're not
+			 * connecting back to the original source address
+			 * This prevents nastier forms of the bounce attack.
+			 */
+			if (ntohs(host_port.sin_port) < 1024)
+				reply(504, "Port number too low");
+			else {
+				data_dest = host_port;
+				usedefault = 0;
+				if (pdata >= 0) {
+					(void) close(pdata);
+					pdata = -1;
+				}
+				reply(200, "PORT command successful.");
 			}
-			reply(200, "PORT command successful.");
 		}
 	|	PASV check_login CRLF
 		= {
@@ -243,8 +259,6 @@ cmd:		USER SP username CRLF
 			else if (strlen($3) > 10 ||
 				 strlen($3) == 10 && strcmp($3,"4294967296") >= 0)
 			    reply(501, "Bad value for PBSZ: %s", $3);
-			else if (actualbuf >= (maxbuf =(unsigned int) atol($3)))
-			    reply(200, "PBSZ=%u", actualbuf);
 			else {
 			    if (ucbuf) (void) free(ucbuf);
 			    actualbuf = (unsigned int) atol($3);
@@ -594,9 +608,10 @@ cmd:		USER SP username CRLF
 					struct tm *gmtime();
 					t = gmtime(&stbuf.st_mtime);
 					reply(213,
-					    "19%02d%02d%02d%02d%02d%02d",
-					    t->tm_year, t->tm_mon+1, t->tm_mday,
-					    t->tm_hour, t->tm_min, t->tm_sec);
+					    "%4d%02d%02d%02d%02d%02d",
+					    1900+t->tm_year, t->tm_mon+1, 
+					    t->tm_mday, t->tm_hour, 
+					    t->tm_min, t->tm_sec);
 				}
 			}
 			if ($4 != NULL)
@@ -660,11 +675,11 @@ host_port:	NUMBER COMMA NUMBER COMMA NUMBER COMMA NUMBER COMMA
 		= {
 			register char *a, *p;
 
-			a = (char *)&data_dest.sin_addr;
+			a = (char *)&host_port.sin_addr;
 			a[0] = $1; a[1] = $3; a[2] = $5; a[3] = $7;
-			p = (char *)&data_dest.sin_port;
+			p = (char *)&host_port.sin_port;
 			p[0] = $9; p[1] = $11;
-			data_dest.sin_family = AF_INET;
+			host_port.sin_family = AF_INET;
 		}
 	;
 
@@ -906,6 +921,26 @@ lookup(p, cmd)
 	return (0);
 }
 
+/*
+ * urgsafe_getc - hacked up getc to ignore EOF if SIOCATMARK returns TRUE
+ */
+int
+urgsafe_getc(f)
+	FILE *f;
+{
+	register int c;
+	int atmark;
+
+	c = getc(f);
+	if (c == EOF) {
+		if (ioctl(fileno(f), SIOCATMARK, &atmark) != -1) {
+			c = getc(f);
+			syslog(LOG_DEBUG, "atmark: c=%d", c);
+		}
+	}
+	return c;
+}
+
 #include <arpa/telnet.h>
 
 /*
@@ -918,6 +953,7 @@ getline(s, n, iop)
 {
 	register c;
 	register char *cs;
+	int atmark;
 
 	cs = s;
 /* tmpline may contain saved command from urgent mode interruption */
@@ -933,21 +969,23 @@ getline(s, n, iop)
 		if (c == 0)
 			tmpline[0] = '\0';
 	}
-	while ((c = getc(iop)) != EOF) {
+	while ((c = urgsafe_getc(iop)) != EOF) {
 		c &= 0377;
 		if (c == IAC) {
-		    if ((c = getc(iop)) != EOF) {
+			if (debug) syslog(LOG_DEBUG, "got IAC");
+		    if ((c = urgsafe_getc(iop)) != EOF) {
 			c &= 0377;
+			if (debug) syslog(LOG_DEBUG, "got IAC %d", c);
 			switch (c) {
 			case WILL:
 			case WONT:
-				c = getc(iop);
+				c = urgsafe_getc(iop);
 				printf("%c%c%c", IAC, DONT, 0377&c);
 				(void) fflush(stdout);
 				continue;
 			case DO:
 			case DONT:
-				c = getc(iop);
+				c = urgsafe_getc(iop);
 				printf("%c%c%c", IAC, WONT, 0377&c);
 				(void) fflush(stdout);
 				continue;
@@ -1085,8 +1123,13 @@ getline(s, n, iop)
 	}
 #endif /* KERBEROS */
 
-	if (debug)
-		syslog(LOG_DEBUG, "command: <%s>(%d)", s, strlen(s));
+	if (debug) {
+		if (!strncmp(s, "PASS ", 5) && !guest)
+			syslog(LOG_DEBUG, "command: <PASS XXX>");
+		else
+			syslog(LOG_DEBUG, "command: <%.*s>(%d)",
+			       strlen(s) - 2, s, strlen(s));
+	}
 	return (s);
 }
 

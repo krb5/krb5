@@ -1,3 +1,53 @@
+Thu Apr 15 20:18:38 1999  Tom Yu  <tlyu@mit.edu>
+
+	* g_cnffile.c (krb__get_srvtabname): Fix to actually extract
+	krb5_srvtab value from profile, instead of always ignoring it.
+
+1998-11-13  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* g_cnffile.c: Use krb5__krb4_context instead of init'ing and
+		free'ing a krb5_context each time we need to read data
+		from the configuration file.  We also define
+		krb5__krb4_context in g_cnnfile.c, since it's a likely
+		that any use of the krb4 library will pull in that file.
+
+Fri Aug  7 11:04:03 1998  Tom Yu  <tlyu@mit.edu>
+
+	* tf_util.c (tf_init): Add call to getuid() to initialize me.
+
+Thu Jul  9 19:35:01 1998  Matthew D Hancher  <mdh@mit.edu>
+
+	* tf_util.c (tf_init): Fixed a potential race condition in the opening 
+	of v4 ticket files. tf_init() was calling lstat() followed by fopen().
+	Now it calls fopen() and then calls lstat() and fstat() to check file 
+	ownership and to check that it opened the file it thought it did. I 
+	patched the shared memory code similarly, but since nothing uses it I
+	don't have a good way to test it properly.
+	
+1998-05-08  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* stime.c (krb_stime): 
+	* log.c (krb_new_log, krb_log): 
+	* klog.c (klog): Print the year using 4 digits to avoid Y2K issues.
+
+Sun Apr  5 19:51:21 1998  Tom Yu  <tlyu@mit.edu>
+
+	* g_cnffile.c (krb__get_srvtabname): Fix up to not free context
+	unless it is valid.
+
+Wed Apr  9 23:15:39 1997  Tom Yu  <tlyu@mit.edu>
+
+	* realmofhost.c (krb_realmofhost): Add bounds checking to various
+	things.
+
+	* g_krbhst.c (krb_get_krbhst): Fix to bound fscanf and sscanf.
+
+	* g_krbrlm.c (krb_get_lrealm): Fix to bound fscanf.
+
+Mon Nov 18 20:40:39 1996  Ezra Peisach  <epeisach@mit.edu>
+
+	* configure.in: Set shared library version to 1.0. [krb5-libs/201]
+
 Thu Nov  7 12:33:06 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* g_in_tkt.c: 

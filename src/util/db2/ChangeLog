@@ -1,3 +1,13 @@
+Sun Dec 21 18:33:14 1997  Tom Yu  <tlyu@mit.edu>
+
+	* hash/dbm.c: Rename the errno member of HTAB.
+
+	* hash/hash.h: Rename the errno member of HTAB to local_errno to
+	avoid a collision with a glibc macro.
+
+	* hash/hash.c: Rename the errno member of HTAB to local_errno to
+	avoid a collision with a glibc macro.
+
 Mon Nov 11 17:01:29 1996  Mark Eichin  <eichin@cygnus.com>
 
 	* db2: overflow_page fixes, __P redef

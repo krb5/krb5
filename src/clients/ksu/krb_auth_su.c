@@ -341,7 +341,17 @@ krb5_keyblock *	tkt_ses_key;
 		return(retval);
 	}
 
-
+	/* Check to make sure ticket hasn't expired */
+	if (retval = krb5_check_exp(context, tkt->enc_part2->times)) {
+		if (auth_debug && (retval == KRB5KRB_AP_ERR_TKT_EXPIRED)) {
+			fprintf(stderr,
+				"krb5_verify_tkt_def: ticket has expired");
+		}
+		krb5_free_ticket(context, tkt);	
+		krb5_kt_free_entry(context, &ktentry);
+		krb5_free_keyblock(context, tkt_key);
+		return KRB5KRB_AP_ERR_TKT_EXPIRED;
+	}
 
 	if (!krb5_principal_compare(context, client, tkt->enc_part2->client)) {
 			krb5_free_ticket(context, tkt);	

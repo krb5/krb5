@@ -66,7 +66,7 @@ extern int	auth_level;
 extern int auth_negotiated; /* Have we finished all authentication negotiation we plan to finish?*/
 extern slcfun	slctab[NSLC + 1];	/* slc mapping table */
 
-extern char	*terminaltype;
+extern char	terminaltype[41];
 
 /*
  * I/O data buffers, pointers, and counters.

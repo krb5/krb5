@@ -50,6 +50,7 @@ extern int errno;
 
 #ifdef FD_SETSIZE
 static SVCXPRT **xports;
+static int max_xport = 0;
 #else
 #define NOFILE 32
 
@@ -93,6 +94,8 @@ xprt_register(xprt)
 	if (sock < _rpc_dtablesize()) {
 		xports[sock] = xprt;
 		FD_SET(sock, &svc_fdset);
+		if (max_xport < sock)
+			max_xport = sock;
 	}
 #else
 	if (sock < NOFILE) {
@@ -116,6 +119,10 @@ xprt_unregister(xprt)
 	if ((sock < _rpc_dtablesize()) && (xports[sock] == xprt)) {
 		xports[sock] = (SVCXPRT *)0;
 		FD_CLR(sock, &svc_fdset);
+		if (max_xport <= sock) {
+			while ((max_xport > 0) && xports[max_xport] == 0)
+				max_xport--;
+		}
 	}
 #else
 	if ((sock < NOFILE) && (xports[sock] == xprt)) {
@@ -371,9 +378,14 @@ svc_getreq(rdfds)
 {
 #ifdef FD_SETSIZE
 	fd_set readfds;
+	int	i, mask;
 
 	FD_ZERO(&readfds);
-	readfds.fds_bits[0] = rdfds;
+	for (i=0, mask=1; rdfds; i++, mask <<=1) {
+		if (rdfds & mask)
+			FD_SET(i, &readfds);
+		rdfds &= ~mask;
+	}
 	svc_getreqset(&readfds);
 #else
 	int readfds = rdfds & svc_fds;
@@ -399,10 +411,6 @@ svc_getreqset(readfds)
 	rpc_u_int32 high_vers;
 	struct svc_req r;
 	register SVCXPRT *xprt;
-	rpc_u_int32 mask;
-	int bit;
-	rpc_u_int32 *maskp;
-	register int setsize;
 	register int sock;
         bool_t no_dispatch;
 
@@ -412,13 +420,10 @@ svc_getreqset(readfds)
 	r.rq_clntcred = &(cred_area[2*MAX_AUTH_BYTES]);
 
 #ifdef FD_SETSIZE
-	setsize = _rpc_dtablesize();	
-
-	maskp = (rpc_u_int32 *)readfds->fds_bits;
-	for (sock = 0; sock < setsize; sock += NFDBITS) {
-	    for (mask = *maskp++; bit = ffs(mask); mask ^= (1 << (bit - 1))) {
+	for (sock = 0; sock <= max_xport; sock++) {
+	    if (FD_ISSET(sock, readfds)) {
 		/* sock has input waiting */
-		xprt = xports[sock + bit - 1];
+		xprt = xports[sock];
 #else
 	for (sock = 0; readfds_local != 0; sock++, readfds_local >>= 1) {
 	    if ((readfds_local & 1) != 0) {

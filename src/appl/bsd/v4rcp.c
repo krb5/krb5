@@ -37,8 +37,15 @@ static char sccsid[] = "@(#)rcp.c	5.10 (Berkeley) 9/20/88";
  */
 #ifdef KERBEROS
 #include "krb5.h"
+#include "com_err.h"
 #endif
 
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
 #include <sys/types.h>
 #include <sys/param.h>
 #include <sys/file.h>
@@ -55,9 +62,6 @@ static char sccsid[] = "@(#)rcp.c	5.10 (Berkeley) 9/20/88";
 #include <stdio.h>
 #include <string.h>
 #include <signal.h>
-#ifdef POSIX
-#include <stdlib.h>
-#endif
 #include <pwd.h>
 #include <ctype.h>
 #include <netdb.h>
@@ -65,6 +69,17 @@ static char sccsid[] = "@(#)rcp.c	5.10 (Berkeley) 9/20/88";
 #ifdef KERBEROS
 #include <krb.h>
 #include <krbports.h>
+
+
+void sink(), source(), rsource(), usage();
+/*VARARGS*/
+void	error();
+int	response();
+#if !defined(HAS_UTIMES)
+int	utimes();
+#endif
+
+
 #if 0
 #include <kstream.h>
 #else
@@ -304,15 +319,7 @@ int	encryptflag = 0;
 
 kstream krem;
 int	errs;
-#ifdef POSIX
-void	lostconn();
-#else
-int	lostconn();
-#endif
-int	errno;
-#ifndef __NetBSD__
-extern char	*sys_errlist[];
-#endif
+krb5_sigtype lostconn();
 int	iamremote, targetshouldbedirectory;
 int	iamrecursive;
 int	pflag;
@@ -330,27 +337,18 @@ struct buffer {
 
 #define	NULLBUF	(struct buffer *) 0
 
-/*VARARGS*/
-int	error();
-
 #define	ga()		(void) kstream_write (krem, "", 1)
 
-main(argc, argv)
+int main(argc, argv)
 	int argc;
 	char **argv;
 {
-	char *targ, *host, *src;
-	char *suser, *tuser, *thost;
-	int i;
-	char buf[BUFSIZ], cmd[50 + REALM_SZ];
 	char portarg[20], rcpportarg[20];
 #ifdef ATHENA
 	static char curhost[256];
 #endif /* ATHENA */
 #ifdef KERBEROS
 	char realmarg[REALM_SZ + 5];
-	long authopts;
-	char **orig_argv = save_argv(argc, argv);
 #endif /* KERBEROS */
 
 	portarg[0] = '\0';
@@ -450,9 +448,10 @@ main(argc, argv)
 #endif /* KERBEROS */
 	}
 	usage();
+	return 1;
 }
 
-verifydir(cp)
+void verifydir(cp)
 	char *cp;
 {
 	struct stat stb;
@@ -462,11 +461,11 @@ verifydir(cp)
 			return;
 		errno = ENOTDIR;
 	}
-	error("rcp: %s: %s.\n", cp, sys_errlist[errno]);
+	error("rcp: %s: %s.\n", cp, error_message(errno));
 	exit(1);
 }
 
-source(argc, argv)
+void source(argc, argv)
 	int argc;
 	char **argv;
 {
@@ -481,7 +480,7 @@ source(argc, argv)
 	for (x = 0; x < argc; x++) {
 		name = argv[x];
 		if ((f = open(name, 0)) < 0) {
-			error("rcp: %s: %s\n", name, sys_errlist[errno]);
+			error("rcp: %s: %s\n", name, error_message(errno));
 			continue;
 		}
 		if (fstat(f, &stb) < 0)
@@ -523,7 +522,7 @@ notreg:
 			}
 		}
 		(void) sprintf(buf, "C%04o %ld %s\n",
-		    stb.st_mode&07777, stb.st_size, last);
+		    (unsigned int) stb.st_mode&07777, stb.st_size, last);
 		kstream_write (krem, buf, strlen (buf));
 		if (response() < 0) {
 			(void) close(f);
@@ -546,7 +545,7 @@ notreg:
 		if (readerr == 0)
 			ga();
 		else
-			error("rcp: %s: %s\n", name, sys_errlist[readerr]);
+			error("rcp: %s: %s\n", name, error_message(readerr));
 		(void) response();
 	}
 }
@@ -557,7 +556,7 @@ notreg:
 #include <dirent.h>
 #endif
 
-rsource(name, statp)
+void rsource(name, statp)
 	char *name;
 	struct stat *statp;
 {
@@ -572,7 +571,7 @@ rsource(name, statp)
 #endif
 
 	if (d == 0) {
-		error("rcp: %s: %s\n", name, sys_errlist[errno]);
+		error("rcp: %s: %s\n", name, error_message(errno));
 		return;
 	}
 	last = strrchr(name, '/');
@@ -589,13 +588,14 @@ rsource(name, statp)
 			return;
 		}
 	}
-	(void) sprintf(buf, "D%04o %d %s\n", statp->st_mode&07777, 0, last);
+	(void) sprintf(buf, "D%04o %d %s\n",
+		       (unsigned int) statp->st_mode&07777, 0, last);
 	kstream_write (krem, buf, strlen (buf));
 	if (response() < 0) {
 		closedir(d);
 		return;
 	}
-	while (dp = readdir(d)) {
+	while ((dp = readdir(d))) {
 		if (dp->d_ino == 0)
 			continue;
 		if (!strcmp(dp->d_name, ".") || !strcmp(dp->d_name, ".."))
@@ -613,7 +613,7 @@ rsource(name, statp)
 	(void) response();
 }
 
-response()
+int response()
 {
 	char resp, c, rbuf[BUFSIZ], *cp = rbuf;
 
@@ -642,14 +642,10 @@ response()
 		exit(1);
 	}
 	/*NOTREACHED*/
+	return -1;
 }
 
-#ifdef POSIX
-void
-#else
-int
-#endif
-lostconn()
+krb5_sigtype lostconn()
 {
 
 	if (iamremote == 0)
@@ -679,7 +675,7 @@ struct timeval *tvp;
 }
 #endif
 
-sink(argc, argv)
+void sink(argc, argv)
 	int argc;
 	char **argv;
 {
@@ -738,7 +734,7 @@ sink(argc, argv)
 			return;
 		}
 
-#define getnum(t) (t) = 0; while (isdigit(*cp)) (t) = (t) * 10 + (*cp++ - '0');
+#define getnum(t) (t) = 0; while (isdigit((int) *cp)) (t) = (t) * 10 + (*cp++ - '0');
 		if (*cp == 'T') {
 			setimes++;
 			cp++;
@@ -781,7 +777,7 @@ sink(argc, argv)
 		if (*cp++ != ' ')
 			SCREWUP("mode not delimited");
 		size = 0;
-		while (isdigit(*cp))
+		while (isdigit((int) *cp))
 			size = size * 10 + (*cp++ - '0');
 		if (*cp++ != ' ')
 			SCREWUP("size not delimited");
@@ -807,13 +803,13 @@ sink(argc, argv)
 				setimes = 0;
 				if (utimes(nambuf, tv) < 0)
 					error("rcp: can't set times on %s: %s\n",
-					    nambuf, sys_errlist[errno]);
+					    nambuf, error_message(errno));
 			}
 			continue;
 		}
 		if ((of = open(nambuf, O_WRONLY|O_CREAT|O_TRUNC, mode)) < 0) {
 	bad:
-			error("rcp: %s: %s\n", nambuf, sys_errlist[errno]);
+			error("rcp: %s: %s\n", nambuf, error_message(errno));
 			continue;
 		}
 #ifdef NO_FCHMOD
@@ -843,7 +839,7 @@ sink(argc, argv)
 					    error("rcp: dropped connection");
 					else
 					    error("rcp: %s\n",
-						sys_errlist[errno]);
+						error_message(errno));
 					exit(1);
 				}
 				amt -= j;
@@ -863,7 +859,7 @@ sink(argc, argv)
 #ifndef __SCO__
 		if (ftruncate(of, size))
 			error("rcp: can't truncate %s: %s\n",
-			    nambuf, sys_errlist[errno]);
+			    nambuf, error_message(errno));
 #endif
 		(void) close(of);
 		(void) response();
@@ -871,10 +867,10 @@ sink(argc, argv)
 			setimes = 0;
 			if (utimes(nambuf, tv) < 0)
 				error("rcp: can't set times on %s: %s\n",
-				    nambuf, sys_errlist[errno]);
+				    nambuf, error_message(errno));
 		}				   
 		if (wrerr)
-			error("rcp: %s: %s\n", nambuf, sys_errlist[errno]);
+			error("rcp: %s: %s\n", nambuf, error_message(errno));
 		else
 			ga();
 	}
@@ -893,7 +889,7 @@ allocbuf(bp, fd, blksize)
 	struct stat stb;
 
 	if (fstat(fd, &stb) < 0) {
-		error("rcp: fstat: %s\n", sys_errlist[errno]);
+		error("rcp: fstat: %s\n", error_message(errno));
 		return (NULLBUF);
 	}
 	size = roundup(stb.st_blksize, blksize);
@@ -914,7 +910,7 @@ allocbuf(bp, fd, blksize)
 }
 
 /*VARARGS1*/
-error(fmt, a1, a2, a3, a4, a5)
+void error(fmt, a1, a2, a3, a4, a5)
 	char *fmt;
 	int a1, a2, a3, a4, a5;
 {
@@ -929,7 +925,7 @@ error(fmt, a1, a2, a3, a4, a5)
 		(void) write(2, buf+1, strlen(buf+1));
 }
 
-usage()
+void usage()
 {
   fprintf(stderr,
 "v4rcp: this program only acts as a server, and is not for user function.\n");
@@ -977,7 +973,7 @@ char *sp;
 void
 answer_auth()
 {
-	int sin_len, status;
+	int status;
 	long authopts = KOPT_DO_MUTUAL;
 	char instance[INST_SZ];
 	char version[9];
@@ -985,6 +981,8 @@ answer_auth()
 	char *envaddr;
 
 #if 0
+	int sin_len;
+	
 	sin_len = sizeof (struct sockaddr_in);
 	if (getpeername(rem, &foreign, &sin_len) < 0) {
 		perror("getpeername");
@@ -997,26 +995,32 @@ answer_auth()
 		exit(1);
 	}
 #else
-	if (envaddr = getenv("KRB5LOCALADDR")) {
+	if ((envaddr = getenv("KRB5LOCALADDR"))) {
 #ifdef HAVE_INET_ATON
 	  inet_aton(envaddr,  &local.sin_addr);
 #else
 	  local.sin_addr.s_addr = inet_addr(envaddr);
 #endif
 	  local.sin_family = AF_INET;
-	  local.sin_port = 0;
+	  if (envaddr = getenv("KRB5LOCALPORT"))
+	    local.sin_port = htons(atoi(envaddr));
+	  else
+	    local.sin_port = 0;
 	} else {
 	  fprintf(stderr, "v4rcp: couldn't get local address (KRB5LOCALADDR)\n");
 	  exit(1);
 	}
-	if (envaddr = getenv("KRB5REMOTEADDR")) {
+	if ((envaddr = getenv("KRB5REMOTEADDR"))) {
 #ifdef HAVE_INET_ATON
 	  inet_aton(envaddr,  &foreign.sin_addr);
 #else
 	  foreign.sin_addr.s_addr = inet_addr(envaddr);
 #endif
 	  foreign.sin_family = AF_INET;
-	  foreign.sin_port = 0;
+	  if (envaddr = getenv("KRB5REMOTEPORT"))
+	    foreign.sin_port = htons(atoi(envaddr));
+	  else
+	    foreign.sin_port = 0;
 	} else {
 	  fprintf(stderr, "v4rcp: couldn't get remote address (KRB5REMOTEADDR)\n");
 	  exit(1);

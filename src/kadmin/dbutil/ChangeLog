@@ -1,3 +1,8 @@
+Wed Mar 12 01:19:51 1997  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* loadv4.c (argv): Check to see if the global_param's stash file
+		is non-NULL before trying to strdup() it.  [PR#341, PR#394]
+
 Wed Nov 13 00:06:40 1996  Mark Eichin  <eichin@cygnus.com>
 
 	* dump.c (load_db): lock the database directly (having fixed the

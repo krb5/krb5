@@ -213,12 +213,13 @@ krb5_sendauth(context, auth_context,
 	}
 	retval = 0;		/* Normal return */
 	if (out_creds) {
-		*out_creds = credsp;
+	    *out_creds = credsp;
+	    credspout = NULL;
 	}
 
 error_return:
     krb5_free_cred_contents(context, &creds);
-    if (credspout)
+    if (credspout != NULL)
 	krb5_free_creds(context, credspout); 
     if (!ccache && use_ccache)
 	krb5_cc_close(context, use_ccache);

@@ -43,7 +43,7 @@ dispatch(pkt, from, portnum, response)
     /* decode incoming packet, and dispatch */
 
     /* try the replay lookaside buffer */
-    if (kdc_check_lookaside(pkt, response)) {
+    if (kdc_check_lookaside(pkt, from, response)) {
 	/* a hit! */
 	krb5_klog_syslog(LOG_INFO, "DISPATCH: replay found and re-transmitted");
 	return 0;
@@ -72,7 +72,7 @@ dispatch(pkt, from, portnum, response)
 	retval = KRB5KRB_AP_ERR_MSG_TYPE;
     /* put the response into the lookaside buffer */
     if (!retval)
-	kdc_insert_lookaside(pkt, *response);
+	kdc_insert_lookaside(pkt, from, *response);
 
     return retval;
 }

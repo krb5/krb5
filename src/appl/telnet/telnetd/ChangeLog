@@ -1,3 +1,70 @@
+Thu Apr 15 17:02:49 1999  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* configure.in: Fix typo in test below; fixed name of the autoconf
+		cache variable which indicates if sys/streams.h exists.
+
+1999-04-13    <tytso@rsts-11.mit.edu>
+
+	* configure.in: Check for setupterm() in libncurses in addition to
+		libcurses.  Only set STREAMSPTY if both grantpt and
+		sys/streams.h exists.  (Will be needed for Linux/Redhat 6.0)
+
+Wed Mar 31 00:05:58 1999  Tom Yu  <tlyu@mit.edu>
+
+	* sys_term.c (getptyslave): Under AIX, ignore I_PUSH pckt
+	failure.
+
+Tue Mar 30 23:59:15 1999  Tom Yu  <tlyu@mit.edu>
+
+	* termios-tn.c: Include termio.h under AIX due to brokenness.
+
+Wed Feb 24 20:12:10 1999  Tom Yu  <tlyu@mit.edu>
+
+	* telnetd.8: Resync manpage.
+
+	* telnetd.c: Rework flags controlling hostname logging.
+
+Mon Feb 22 18:27:38 1999  Tom Yu  <tlyu@mit.edu>
+
+	* telnetd.8: Document hostname logging changes.
+
+	* telnetd.c: Add options to control logging of remote hostname to
+	login(1).
+
+Wed Feb  3 22:57:52 1999  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* state.c: Increase size of subbufer so that we don't truncate
+		mongo-gram tickets from Microsoft.  [telnet/688]
+
+Wed Jan 28 17:21:08 1998  Dan Winship  <danw@mit.edu>
+
+	* telnetd.c (doit): additional fix for previous terminaltype change
+
+Tue Jan 27 18:27:16 1998  Dan Winship  <danw@mit.edu>
+
+	* telnetd.c (getterminaltype): Null-terminate strings and avoid a
+	buffer overrun.
+
+	* ext.h: make terminaltype a char[] instead of a char * for
+	telnetd.c change
+
+	* state.c (suboption): redo handling of terminaltype
+
+Thu Dec  4 21:32:37 1997  Tom Yu  <tlyu@mit.edu>
+
+	* telnetd.c (doit): Fix up slave buffer length.
+
+Thu Oct 23 13:59:32 1997  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* state.c (envvarok): Prohibit the passing of TERMCAP, TERMPATH,
+		TERMINFO, and HOME, since they can be used to exploit a
+		security in tgetent.
+
+Wed Apr  9 23:46:40 1997  Tom Yu  <tlyu@mit.edu>
+
+	* sys_term.c (start_login): Bounds check the constructed "speed"
+	passed in to login.
+
 Thu Nov  7 15:32:06 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* telnetd.c (main): Check the error return from
