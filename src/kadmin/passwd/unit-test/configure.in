@@ -1,3 +1,12 @@
 AC_INIT(configure.in)
 CONFIG_RULES
+dnl The following are tests for the presence of programs required for testing 
+AC_CHECK_PROG(RUNTEST,runtest,runtest)
+AC_CHECK_PROG(PERL,perl,perl)
+AC_KRB5_TCL	
+if test "$PERL" = perl -a "$RUNTEST" = runtest -a "$TCL_LIB" != ""; then
+ 	DO_TEST=ok
+fi
+AC_SUBST(DO_TEST) 
+dnl
 V5_AC_OUTPUT_MAKEFILE

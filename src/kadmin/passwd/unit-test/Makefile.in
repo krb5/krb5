@@ -1,4 +1,10 @@
-check unit-test:: unit-test-setup unit-test-body unit-test-cleanup
+check unit-test:: unit-test-@DO_TEST@
+
+unit-test-:
+	@echo "The kpasswd tests require Perl, Tcl, and runtest"
+	@echo "No tests run here"
+
+unit-test-ok:: unit-test-setup unit-test-body unit-test-cleanup
 
 unit-test-body::	
 	$(ENV_SETUP) $(RUNTEST) --tool kpasswd KPASSWD=../kpasswd \
