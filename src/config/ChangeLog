@@ -1,3 +1,8 @@
+2000-07-14  Ken Raeburn  <raeburn@mit.edu>
+
+	* shlib.conf: New file, taken from KRB5_LIB_PARAMS in
+	../aclocal.m4.
+
 2000-07-03  Ezra Peisach  <epeisach@mit.edu>
 
 	* pre.in: Remove the kdb5 and db libraries from the
