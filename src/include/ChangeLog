@@ -1,3 +1,7 @@
+2003-07-22  Alexandra Ellwood  <lxs@mit.edu>
+
+        * fake-addrinfo.h: Don't use broken getaddrinfo on Mac OS X
+
 2003-07-22  Ken Raeburn  <raeburn@mit.edu>
 
 	* k5-int.h (krb5int_zap_data, zap): New macros; call memset with
