@@ -1,3 +1,15 @@
+Fri Sep 29 15:17:30 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in: If krb5/autoconf.h doesn't exist, cd to krb5 and
+		make it.
+
+		Don't make krb5-pro.h; this confuses things under Windows,
+		since Windows attempts to build krb5-pro.h and then
+		rebuildes krb5.h, when it shouldn't do that.  Fold in the
+		krb5-pro.h rules as part of the rules for krb5.h.  This
+		way, they don't get executed under DOS, since krb5.h
+		already exists under DOS.
+
 Fri Sep 29 13:35:08 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* Makefile.in (clean-unix): Remove krb5-pro.h

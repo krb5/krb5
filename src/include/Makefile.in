@@ -15,18 +15,19 @@ all-windows::
 	-$(MAKE) -$(MFLAGS) LIBCMD=$(LIBCMD)
 	cd ..
 
-krb5-pro.h: krb5/autoconf.h
-	echo "/* This is the prologue to krb5.h */" > krb5-pro.h
-	echo "/* Unfortunately some of these defines are compiler dependent */" >> krb5-pro.h
-	grep SIZEOF krb5/autoconf.h >> krb5-pro.h
-	grep HAVE_STDARG_H krb5/autoconf.h >> krb5-pro.h
-	grep HAVE_SYS_TYPES_H krb5/autoconf.h >> krb5-pro.h
-	echo "/* End of prologue section */"  >> krb5-pro.h
+krb5/autoconf.h:
+	(cd krb5; $(MAKE) autoconf.h)
 
-krb5.h: krb5-pro.h $(srcdir)/krb5.hin krb5_err.h kdb5_err.h kv5m_err.h \
+krb5.h: krb5/autoconf.h $(srcdir)/krb5.hin krb5_err.h kdb5_err.h kv5m_err.h \
 		asn1_err.h
-	cat krb5-pro.h $(srcdir)/krb5.hin krb5_err.h kdb5_err.h kv5m_err.h \
-		asn1_err.h > krb5.h
+	echo "/* This is the prologue to krb5.h */" > krb5.h
+	echo "/* Unfortunately some of these defines are compiler dependent */" >> krb5.h
+	grep SIZEOF krb5/autoconf.h >> krb5.h
+	grep HAVE_STDARG_H krb5/autoconf.h >> krb5.h
+	grep HAVE_SYS_TYPES_H krb5/autoconf.h >> krb5.h
+	echo "/* End of prologue section */"  >> krb5.h
+	cat $(srcdir)/krb5.hin krb5_err.h kdb5_err.h kv5m_err.h \
+		asn1_err.h >> krb5.h
 
 #
 # Build the error table include files:
@@ -53,7 +54,7 @@ kv5m_err.h: $(SRCTOP)/lib/krb5/error_tables/kv5m_err.et
 		$(SRCTOP)/lib/krb5/error_tables/kv5m_err.et
 
 clean-unix::
-	$(RM) krb5.h krb5-pro.h krb5_err.h kdb5_err.h kv5m_err.h \
+	$(RM) krb5.h krb5_err.h kdb5_err.h kv5m_err.h \
 		asn1_err.h adm_err.h
 
 clean-mac::
