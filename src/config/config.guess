@@ -810,6 +810,9 @@ EOF
     BePC:BeOS:*:*)	# BeOS running on Intel PC compatible.
 	echo i586-pc-beos
 	exit 0 ;;
+    Power\ Macintosh:Mac\ OS:*:*)
+	echo powerpc-apple-macos${UNAME_RELEASE}
+	exit 0 ;;
 esac
 
 #echo '(No uname command or uname output not recognized.)' 1>&2
