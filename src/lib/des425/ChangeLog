@@ -1,3 +1,8 @@
+Thu Jun 29 17:11:17 2000  Ezra Peisach  <epeisach@mit.edu>
+
+	* random_key.c (des_random_key): Add parentheses around assignment
+ 	used as truth value.
+
 2000-03-14  Ken Raeburn  <raeburn@mit.edu>
 
 	* read_passwd.c (des_read_pw_string): Make ointrfunc volatile.

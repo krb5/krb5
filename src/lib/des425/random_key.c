@@ -62,8 +62,8 @@ des_random_key(key)
     krb5_keyblock	keyblock;
     krb5_error_code	kret;
 
-    if (kret = krb5_c_make_random_key(/* XXX */ 0, ENCTYPE_DES_CBC_CRC,
-				      &keyblock))
+    if ((kret = krb5_c_make_random_key(/* XXX */ 0, ENCTYPE_DES_CBC_CRC,
+				      &keyblock)))
 	return(kret);
 
     memcpy(key, keyblock.contents, sizeof(mit_des_cblock));
