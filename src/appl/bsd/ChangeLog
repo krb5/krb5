@@ -1,3 +1,12 @@
+Sat Apr 22 00:42:22 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* krshd.c (main): The variable krb5_override_default_realm is 
+		  obsolete.  Use the krb5_set_default_realm function instead.
+
+Fri Apr 21 21:11:17 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* krshd.c: Add #include for <sys/stat.h>, which is now needed.
+
 Fri Apr 21 17:18:57 1995  Mark Eichin  <eichin@cygnus.com>
 
 	rlogin testing changes from ian@cygnus.com.

@@ -98,6 +98,7 @@ char copyright[] =
 #include <sys/param.h>
 #include <sys/socket.h>
 #include <sys/file.h>
+#include <sys/stat.h>
 #include <sys/time.h>
 
 #include <fcntl.h>
@@ -175,7 +176,6 @@ char des_outbuf[2*BUFSIZ];        /* needs to be > largest write size */
 krb5_data desinbuf,desoutbuf;
 krb5_context bsd_context;
 char *srvtab = NULL;
-extern char *krb5_override_default_realm;
 
 void fatal();
 int v5_des_read();
@@ -262,6 +262,11 @@ main(argc, argv)
     openlog(progname, LOG_PID | LOG_ODELAY, LOG_DAEMON);	
 #endif /* 4.2 syslog */
     
+#ifdef KERBEROS
+    krb5_init_context(&bsd_context);
+    krb5_init_ets(bsd_context);
+#endif
+    
     if (argc == 1) { /* Get parameters from program name. */
 	if (strlen(progname) > MAX_PROG_NAME) {
 	    usage();
@@ -322,7 +327,7 @@ main(argc, argv)
 	  break;
 
 	case 'M':
-	  krb5_override_default_realm = optarg;
+	  krb5_set_default_realm(bsd_context, optarg);
 	  break;
 
 	case 'A':
@@ -573,8 +578,6 @@ doit(f, fromp)
 	exit(1);
     }
 #ifdef KERBEROS
-    krb5_init_context(&bsd_context);
-    krb5_init_ets(bsd_context);
     netf = f;
     desinbuf.data = des_inbuf;
     desoutbuf.data = des_outbuf;
