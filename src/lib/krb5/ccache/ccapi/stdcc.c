@@ -76,7 +76,7 @@ static const struct err_xlate err_xlate_table[] =
 	{ CC_WRITE,				KRB5_CC_WRITE },
 	{ CC_LOCKED,				KRB5_FCC_INTERNAL /* XXX */ },
 	{ CC_BAD_API_VERSION,			KRB5_FCC_INTERNAL /* XXX */ },
-	{ CC_NO_EXIST,				KRB5_FCC_INTERNAL /* XXX */ },
+	{ CC_NO_EXIST,				KRB5_FCC_NOFILE },
 	{ CC_NOT_SUPP,				KRB5_FCC_INTERNAL /* XXX */ },
 	{ CC_BAD_PARM,				KRB5_FCC_INTERNAL /* XXX */ },
 	{ CC_ERR_CACHE_ATTACH,			KRB5_FCC_INTERNAL /* XXX */ },
@@ -90,12 +90,49 @@ static krb5_error_code cc_err_xlate(int err)
 {
 	const struct err_xlate *p;
 
-	for (p = err_xlate_table; p->e2err; p++) {
-		if (err == p->e2err)
-			return p->pqerr;
+	for (p = err_xlate_table; p->cc_err; p++) {
+		if (err == p->cc_err)
+			return p->krb5_err;
 	}
 	return KRB5_FCC_INTERNAL; /* XXX we need a miscellaneous return */
 }
+
+static krb5_error_code stdcc_setup(krb5_context context,
+				   stdccCacheDataPtr ccapi_data)
+{
+	int	err;
+
+  	/* make sure the API has been intialized */
+  	if (gCntrlBlock == NULL) {
+		err = cc_initialize(&gCntrlBlock, CC_API_VER_1, NULL, NULL);
+		if (err != CC_NOERROR)
+			return cc_err_xlate(err);
+	}
+
+	/*
+	 * No ccapi_data structure, so we don't need to make sure the
+	 * ccache exists.
+	 */
+	if (!ccapi_data)
+		return 0;
+
+	/*
+	 * The ccache already exists
+	 */
+	if (ccapi_data->NamedCache)
+		return 0;
+
+	err = cc_open(gCntrlBlock, ccapi_data->cache_name,
+		      CC_CRED_V5, 0L, &ccapi_data->NamedCache);
+	if (err == CC_NOTFOUND)
+	  err = CC_NO_EXIST;
+	if (err == CC_NOERROR)
+		return 0;
+
+	ccapi_data->NamedCache = NULL;
+	return cc_err_xlate(err);
+}
+
 
 /*
  * -- generate_new --------------------------------
@@ -107,24 +144,21 @@ krb5_error_code KRB5_CALLCONV  krb5_stdcc_generate_new
 	(krb5_context context, krb5_ccache *id ) 
 {
   	krb5_ccache 		newCache = NULL;
+	krb5_error_code		retval;
 	stdccCacheDataPtr	ccapi_data = NULL;
 	char 			*name = NULL;
 	cc_time_t 		time;
 	int 			err;
+
+	if ((retval = stdcc_setup(context, NULL)))
+		return retval;
 	
-  	/* make sure the API has been intialized */
-  	if (gCntrlBlock == NULL) {
-		err = cc_initialize(&gCntrlBlock, CC_API_VER_1, NULL, NULL);
-		if (err != CC_NOERROR)
-			return cc_err_xlate(err);
-	}
-  	
 	retval = KRB5_CC_NOMEM;
 	if (!(newCache = (krb5_ccache) malloc(sizeof(struct _krb5_ccache))))
 		goto errout;
-  	if (!(ccapi_ptr = (stdccCacheDataPtr)malloc(sizeof(stdccCacheData))))
+  	if (!(ccapi_data = (stdccCacheDataPtr)malloc(sizeof(stdccCacheData))))
 		goto errout;
-	if (!(cName = malloc(strlen(residual)+1)))
+	if (!(name = malloc(256)))
 		goto errout;
 	
   	/* create a unique name */
@@ -142,7 +176,7 @@ krb5_error_code KRB5_CALLCONV  krb5_stdcc_generate_new
   	/* setup some fields */
   	newCache->ops = &krb5_cc_stdcc_ops;
   	newCache->data = ccapi_data;
-	ccapi_data->ccache_name = name;
+	ccapi_data->cache_name = name;
   	
   	/* return a pointer to the new cache */
 	*id = newCache;
@@ -152,9 +186,9 @@ krb5_error_code KRB5_CALLCONV  krb5_stdcc_generate_new
 errout:
 	if (newCache)
 		free(newCache);
-	if (ccapi_ptr)
-		free(ccapi_ptr);
-	if (cName)
+	if (ccapi_data)
+		free(ccapi_data);
+	if (name)
 		free(name);
 	return retval;
 }
@@ -173,33 +207,29 @@ krb5_error_code KRB5_CALLCONV  krb5_stdcc_resolve
 	krb5_error_code		retval;
 	char 			*cName;
 	
-  	/* make sure the API has been intialized */
-  	if (gCntrlBlock == NULL) {
-		err = cc_initialize(&gCntrlBlock, CC_API_VER_1, NULL, NULL);
-		if (err != CC_NOERROR)
-			return cc_err_xlate(err);
-	}
-
+	if ((retval = stdcc_setup(context, NULL)))
+		return retval;
+	
 	retval = KRB5_CC_NOMEM;
 	if (!(newCache = (krb5_ccache) malloc(sizeof(struct _krb5_ccache))))
 		goto errout;
   	
-  	if (!(ccapi_ptr = (stdccCacheDataPtr)malloc(sizeof(stdccCacheData))))
+  	if (!(ccapi_data = (stdccCacheDataPtr)malloc(sizeof(stdccCacheData))))
 		goto errout;
 
 	if (!(cName = malloc(strlen(residual)+1)))
 		goto errout;
 	
   	newCache->ops = &krb5_cc_stdcc_ops;
-	newCache->data = ccapi_ptr;
-	ccapi_ptr->ccache_name = cName;
+	newCache->data = ccapi_data;
+	ccapi_data->cache_name = cName;
 
 	strcpy(cName, residual);
 	
  	err = cc_open(gCntrlBlock, cName, CC_CRED_V5, 0L,
-		      &ccapi_ptr->NamedCache);
+		      &ccapi_data->NamedCache);
 	if (err != CC_NOERROR)
-		ccapi_ptr->NamedCache = NULL;
+		ccapi_data->NamedCache = NULL;
 	
   	/* return new cache structure */
 	*id = newCache;
@@ -209,8 +239,8 @@ krb5_error_code KRB5_CALLCONV  krb5_stdcc_resolve
 errout:
 	if (newCache)
 		free(newCache);
-	if (ccapi_ptr)
-		free(ccapi_ptr);
+	if (ccapi_data)
+		free(ccapi_data);
 	if (cName)
 		free(cName);
 	return retval;
@@ -231,13 +261,12 @@ krb5_error_code KRB5_CALLCONV  krb5_stdcc_initialize
   	char 			*cName = NULL;
 	krb5_error_code		retval;
   	
+	if ((retval = stdcc_setup(context, NULL)))
+		return retval;
+	
   	/* test id for null */
   	if (id == NULL) return KRB5_CC_NOMEM;
   	
-  	/* test for initialized API */
-  	if (gCntrlBlock == NULL)
-  		return KRB5_FCC_INTERNAL; /* XXX better error code? */
-
 	if ((retval = krb5_unparse_name(context, princ, &cName)))
 		return retval;
 
@@ -247,14 +276,14 @@ krb5_error_code KRB5_CALLCONV  krb5_stdcc_initialize
 		err = cc_open(gCntrlBlock, ccapi_data->cache_name,
 			      CC_CRED_V5, 0L, 
 			      &ccapi_data->NamedCache);
-		if (err != CC_NO_ERROR)
+		if (err != CC_NOERROR)
 			ccapi_data->NamedCache = NULL;
 	}
 
 	if (ccapi_data->NamedCache)
 		cc_destroy(gCntrlBlock, &ccapi_data->NamedCache);
 
-	err = cc_create(gCntrlBlock, ccapi_data->ccache_name, cName,
+	err = cc_create(gCntrlBlock, ccapi_data->cache_name, cName,
 			CC_CRED_V5, 0L, &ccapi_data->NamedCache);
 	krb5_free_unparsed_name(context, cName);
 	
@@ -272,14 +301,14 @@ krb5_error_code KRB5_CALLCONV  krb5_stdcc_initialize
 krb5_error_code KRB5_CALLCONV krb5_stdcc_store 
         (krb5_context context, krb5_ccache id , krb5_creds *creds )
 {
+	krb5_error_code	retval;
 	stdccCacheDataPtr	ccapi_data = id->data;
 	cred_union *cu = NULL;
 	int err;
-       
-	/* test for initialized API */
-	if (gCntrlBlock == NULL)
-  		return KRB5_FCC_INTERNAL; /* XXX better error code? */
 
+	if ((retval = stdcc_setup(context, ccapi_data)))
+		return retval;
+	
 	/* copy the fields from the almost identical structures */
 	dupK5toCC(context, creds, &cu);
 			
@@ -306,6 +335,12 @@ krb5_error_code KRB5_CALLCONV krb5_stdcc_store
 krb5_error_code KRB5_CALLCONV krb5_stdcc_start_seq_get 
 (krb5_context context, krb5_ccache id , krb5_cc_cursor *cursor )
 {
+	stdccCacheDataPtr	ccapi_data = id->data;
+	krb5_error_code	retval;
+
+	if ((retval = stdcc_setup(context, ccapi_data)))
+		return retval;
+	
 	/* all we have to do is initialize the cursor */
 	*cursor = NULL;
 	return 0;
@@ -321,17 +356,16 @@ krb5_error_code KRB5_CALLCONV krb5_stdcc_next_cred
         (krb5_context context, krb5_ccache id,  krb5_cc_cursor *cursor, 
 	 krb5_creds *creds)
 {
+	krb5_error_code	retval;
+	stdccCacheDataPtr	ccapi_data = id->data;
 	int err;
 	cred_union *credU = NULL;
 	
-	/* test for initialized API */
-	if (gCntrlBlock == NULL)
-  		return KRB5_FCC_INTERNAL; /* XXX better error code? */
-
-	err = cc_seq_fetch_creds(gCntrlBlock,
-				 ((stdccCacheDataPtr)(id->data))->NamedCache,
-				 &credU, (ccache_cit **)cursor);
+	if ((retval = stdcc_setup(context, ccapi_data)))
+		return retval;
 	
+	err = cc_seq_fetch_creds(gCntrlBlock, ccapi_data->NamedCache,
+				 &credU, (ccache_cit **)cursor);
 	if (err != CC_NOERROR)
 		return cc_err_xlate(err);
 
@@ -357,9 +391,13 @@ krb5_error_code KRB5_CALLCONV krb5_stdcc_retrieve
 		   krb5_creds *mcreds, 
 		   krb5_creds *creds )
 {
+	krb5_error_code	retval;
 	krb5_cc_cursor curs = NULL;
 	krb5_creds *fetchcreds;
 		
+	if ((retval = stdcc_setup(context, NULL)))
+		return retval;
+	
 	fetchcreds = (krb5_creds *)malloc(sizeof(krb5_creds));
   	if (fetchcreds == NULL) return KRB5_CC_NOMEM;
 	
@@ -400,18 +438,31 @@ krb5_error_code KRB5_CALLCONV krb5_stdcc_retrieve
 krb5_error_code KRB5_CALLCONV krb5_stdcc_end_seq_get 
         (krb5_context context, krb5_ccache id, krb5_cc_cursor *cursor)
 {
-        
-	/*
-	 * the limitation of the Ccache api and the seq calls
-	 * causes trouble. cursor might have already been freed
-	 * and anyways it is in the mac's heap so we need FreePtr
-	 * but all i have is free
-	 */
-	/* FreePtr(*cursor); */
-      
-	/* LEAK IT! */
-	*cursor = NULL;
+	krb5_error_code		retval;
+	stdccCacheDataPtr	ccapi_data = NULL;
+	int			err;
+	cred_union 		*credU = NULL;
 
+	ccapi_data = id->data;
+	
+	if ((retval = stdcc_setup(context, ccapi_data)))
+		return retval;
+
+	if (*cursor == NULL)
+		return 0;
+
+	/*
+	 * Finish calling cc_seq_fetch_creds to clear out the cursor
+	 */
+	while (*cursor) {
+		err = cc_seq_fetch_creds(gCntrlBlock, ccapi_data->NamedCache,
+				 &credU, (ccache_cit **)cursor);
+		if (err)
+			break;
+		
+		cc_free_creds(gCntrlBlock, &credU);
+	}
+	
 	return(0);
 }
      
@@ -423,21 +474,23 @@ krb5_error_code KRB5_CALLCONV krb5_stdcc_end_seq_get
 krb5_error_code KRB5_CALLCONV 
 krb5_stdcc_close(krb5_context context, krb5_ccache id)
 {
+	krb5_error_code	retval;
+	stdccCacheDataPtr	ccapi_data = id->data;
+
+	if ((retval = stdcc_setup(context, NULL)))
+		return retval;
+	
 	/* free it */
 	
-	if (id->data != NULL) {
-		free((stdccCacheDataPtr)(id->data));
-		/* null it out */
-		(stdccCacheDataPtr)(id->data) = NULL;
+	if (ccapi_data) {
+		if (ccapi_data->cache_name)
+			free(ccapi_data->cache_name);
+		if (ccapi_data->NamedCache)
+			cc_close(gCntrlBlock, &ccapi_data->NamedCache);
+		free(ccapi_data);
+		id->data = NULL;
 	}
-	
-	/*
-	 * I suppose we ought to check if id is null before doing
-	 * this, but no other place in krb5 does... -smcguire
-	 */
 	free(id);
-	
-	id = NULL;
 	
 	return 0;
 }
@@ -450,24 +503,20 @@ krb5_stdcc_close(krb5_context context, krb5_ccache id)
 krb5_error_code KRB5_CALLCONV
 krb5_stdcc_destroy (krb5_context context, krb5_ccache id)
 {
-
 	int err;
+	krb5_error_code	retval;
+	stdccCacheDataPtr	ccapi_data = id->data;
 	
-	/* test for initialized API */
-	if (gCntrlBlock == NULL)
-  		return KRB5_FCC_INTERNAL; /* XXX better error code? */
-
+	if ((retval = stdcc_setup(context, ccapi_data))) {
+		if (retval == KRB5_FCC_NOFILE)
+			return 0;
+		return retval;
+	}
+	
 	/* destroy the named cache */
-	err = cc_destroy(gCntrlBlock,
-			 &(((stdccCacheDataPtr)(id->data))->NamedCache));
+	err = cc_destroy(gCntrlBlock, &ccapi_data->NamedCache);
 	
-	/* free the pointer to the record that held the pointer to the cache */
-	free((stdccCacheDataPtr)(id->data));
-	
-	/* null it out */
-	(stdccCacheDataPtr)(id->data) = NULL;
-	
-	return err;
+	return cc_err_xlate(err);
 }
 
 /*
@@ -478,22 +527,15 @@ krb5_stdcc_destroy (krb5_context context, krb5_ccache id)
 char * KRB5_CALLCONV krb5_stdcc_get_name 
         (krb5_context context, krb5_ccache id )
 {
-	char *ret = NULL;
-	int err;
-	
-	/* test for initialized API */
-	if (gCntrlBlock == NULL)
-  		return NULL;
-	
-	/* just a wrapper */
-	err = cc_get_name(gCntrlBlock,
-			  (((stdccCacheDataPtr)(id->data))->NamedCache), &ret);
-	
-	if (err != CC_NOERROR)
-		return ret;
-	else
-		return NULL;
+	char *name = NULL;
+	stdccCacheDataPtr	ccapi_data = id->data;
+
+	if (!ccapi_data)
+		return 0;
+
+	return (ccapi_data->cache_name);
 }
+
 
 /* get_principal
  *
@@ -502,16 +544,16 @@ char * KRB5_CALLCONV krb5_stdcc_get_name
 krb5_error_code KRB5_CALLCONV krb5_stdcc_get_principal
 	(krb5_context context, krb5_ccache id , krb5_principal *princ) 
 {
-	int err;
-	char *name = NULL;
+	int 			err;
+	char 	  		*name = NULL;
+	stdccCacheDataPtr	ccapi_data = id->data;
+	krb5_error_code		retval;
 	
-	/* test for initialized API */
-	if (gCntrlBlock == NULL)
-  		return KRB5_FCC_INTERNAL; /* XXX better error code? */
+	if ((retval = stdcc_setup(context, ccapi_data)))
+		return retval;
 
 	/* another wrapper */
-	err = cc_get_principal(gCntrlBlock,
-			       (((stdccCacheDataPtr)(id->data))->NamedCache),
+	err = cc_get_principal(gCntrlBlock, ccapi_data->NamedCache,
 			       &name);
 
 	if (err != CC_NOERROR) 
@@ -519,22 +561,9 @@ krb5_error_code KRB5_CALLCONV krb5_stdcc_get_principal
 		
 	/* turn it into a krb principal */
 	err = krb5_parse_name(context, name, princ);
-	
-#if defined(macintosh)
-	/*
-	 * have to do something special on the Mac because name has
-	 * been allocated with
-	 * Mac memory routine NewPtr and held in memory
-	 */
-	if (name != NULL) {
-		UnholdMemory(name,GetPtrSize(name));
-		DisposePtr(name);
-	}
-#else
-	if (name != NULL)
-		free(name);
-#endif
 
+	cc_free_principal(gCntrlBlock, &name);
+	
 	return err;	
 }
 
@@ -546,6 +575,12 @@ krb5_error_code KRB5_CALLCONV krb5_stdcc_get_principal
 krb5_error_code KRB5_CALLCONV krb5_stdcc_set_flags 
         (krb5_context context, krb5_ccache id , krb5_flags flags)
 {
+	stdccCacheDataPtr	ccapi_data = id->data;
+	krb5_error_code		retval;
+	
+	if ((retval = stdcc_setup(context, ccapi_data)))
+		return retval;
+
 	return 0;
 }
 
@@ -560,25 +595,27 @@ krb5_error_code KRB5_CALLCONV krb5_stdcc_remove
 {
     	cred_union *cu = NULL;
     	int err;
+	stdccCacheDataPtr	ccapi_data = id->data;
+	krb5_error_code		retval;
+	
+	if ((retval = stdcc_setup(context, ccapi_data))) {
+		if (retval == KRB5_FCC_NOFILE)
+			return 0;
+		return retval;
+	}
     	
-	/* test for initialized API */
-	if (gCntrlBlock == NULL)
-  		return KRB5_FCC_INTERNAL; /* XXX better error code? */
-
     	/* convert to a cred union */
     	dupK5toCC(context, creds, &cu);
     	
     	/* remove it */
-    	err = cc_remove_cred(gCntrlBlock,
-			     (((stdccCacheDataPtr)(id->data))->NamedCache),
-			     *cu);
+    	err = cc_remove_cred(gCntrlBlock, ccapi_data->NamedCache, *cu);
     	if (err != CC_NOERROR)
 		return cc_err_xlate(err);
     	
     	/* free the temp cred union */
     	err = cc_free_creds(gCntrlBlock, &cu);
-    	if (err != CC_NOERROR) return err;
+    	if (err != CC_NOERROR)
+		return cc_err_xlate(err);
 
         return 0;
 }
-     
