@@ -75,6 +75,9 @@
 #ifndef Krb5Root
 #define Krb5Root	/krb5
 #endif
+#ifndef Kdb5Dir
+#define Kdb5Dir		/krb5
+#endif
 
 #ifndef PepsyTarget
 #define	PepsyTarget(basename)						@@\
@@ -474,9 +477,10 @@ P_NESTPROTO=-UNoNestedPrototypes
          ZEPHLIBS = ZephyrLibs
 #endif
          KRB5ROOT = Krb5Root
+          KDB5DIR = Kdb5Dir
 
   PROCESS_DEFINES = $(P_TERMIOS) $(P_FLOCKS) $(P_TYPES) $(P_SIGTYPE) $(P_STRINGH) $(P_BITSIZE) $(P_DBM) $(P_INET) $(P_STDLIBH) $(P_TIME_DEFS) $(P_PROTOS) $(P_NPROTO) $(P_STDARG) $(P_ANSI_STDIO) $(P_VOID) $(P_CONST) $(P_VOLATILE) $(P_UNISTD) $(P_NESTPROTO) -DUnifdefRan
-  PROCESS_REPLACE = -e "s+@KRB5ROOT+$(KRB5ROOT)+"
+  PROCESS_REPLACE = -e "s+@KRB5ROOT+$(KRB5ROOT)+" -e "s+@KDB5DIR+$(KDB5DIR)+"
        DESDEFINES = DesDefines
 #if HasSharedLibraries
           TOPLIBD = $(TOP)/lib/shared
