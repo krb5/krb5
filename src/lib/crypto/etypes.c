@@ -54,6 +54,11 @@ struct krb5_keytypes krb5_enctypes_list[] = {
       &krb5_enc_des, &krb5_hash_md5,
       krb5_old_encrypt_length, krb5_old_encrypt, krb5_old_decrypt,
       krb5_des_string_to_key },
+    { ENCTYPE_DES_CBC_MD5,
+      "des", "DES cbc mode with RSA-MD5", /* alias */
+      &krb5_enc_des, &krb5_hash_md5,
+      krb5_old_encrypt_length, krb5_old_encrypt, krb5_old_decrypt,
+      krb5_des_string_to_key },
 
     { ENCTYPE_DES_CBC_RAW,
       "des-cbc-raw", "DES cbc mode raw",
@@ -71,12 +76,27 @@ struct krb5_keytypes krb5_enctypes_list[] = {
       &krb5_enc_des3, &krb5_hash_sha1,
       krb5_dk_encrypt_length, krb5_dk_encrypt, krb5_dk_decrypt,
       krb5_dk_string_to_key },
+    { ENCTYPE_DES3_CBC_SHA1,	/* alias */
+      "des3-hmac-sha1", "Triple DES cbc mode with HMAC/sha1",
+      &krb5_enc_des3, &krb5_hash_sha1,
+      krb5_dk_encrypt_length, krb5_dk_encrypt, krb5_dk_decrypt,
+      krb5_dk_string_to_key },
+    { ENCTYPE_DES3_CBC_SHA1,	/* alias */
+      "des3-cbc-sha1-kd", "Triple DES cbc mode with HMAC/sha1",
+      &krb5_enc_des3, &krb5_hash_sha1,
+      krb5_dk_encrypt_length, krb5_dk_encrypt, krb5_dk_decrypt,
+      krb5_dk_string_to_key },
+
     { ENCTYPE_DES_HMAC_SHA1,
       "des-hmac-sha1", "DES with HMAC/sha1",
       &krb5_enc_des, &krb5_hash_sha1,
       krb5_dk_encrypt_length, krb5_dk_encrypt, krb5_dk_decrypt,
       krb5_dk_string_to_key },
 #ifdef ATHENA_DES3_KLUDGE
+    /*
+     * If you are using this, you're almost certainly doing the
+     * Wrong Thing.
+     */
     { ENCTYPE_LOCAL_DES3_HMAC_SHA1,
       "des3-marc-hmac-sha1",
       "Triple DES with HMAC/sha1 and 32-bit length code",
