@@ -43,9 +43,7 @@ static char rcsid_kdb_edit_c[] =
 #include <ss/ss.h>
 #include <stdio.h>
 
-
-#define REALM_SEP	'@'
-#define REALM_SEP_STR	"@"
+#include "./kdb5_edit.h"
 
 struct saltblock {
     int salttype;
@@ -54,13 +52,7 @@ struct saltblock {
 
 #define norealm_salt(princ, retdata) krb5_principal2salt(&(princ)[1], retdata)
 
-struct mblock {
-    krb5_deltat max_life;
-    krb5_deltat max_rlife;
-    krb5_timestamp expiration;
-    krb5_flags flags;
-    krb5_kvno mkvno;
-} mblock = {				/* XXX */
+struct mblock mblock = {				/* XXX */
     KRB5_KDB_MAX_LIFE,
     KRB5_KDB_MAX_RLIFE,
     KRB5_KDB_EXPIRATION,
@@ -72,16 +64,15 @@ char	*Err_no_master_msg = "Master key not entered!\n";
 char	*Err_no_database = "Database not currently opened!\n";
 char	*current_dbname = NULL;
 
-/* krb5_kvno may be narrow */
-#include <krb5/widen.h>
-void add_key PROTOTYPE((char const *, char const *, krb5_const_principal,
-			const krb5_keyblock *, krb5_kvno, struct saltblock *));
-void enter_rnd_key PROTOTYPE((char **, const krb5_principal, krb5_kvno));
-void enter_pwd_key PROTOTYPE((char *, char *, krb5_const_principal,
-			      krb5_const_principal, krb5_kvno, int));
-int set_dbname_help PROTOTYPE((char *, char *));
 
-#include <krb5/narrow.h>
+/*
+ * XXX Ick, ick, ick.  These global variables shouldn't be global....
+ */
+static char search_name[40];
+static int num_name_tokens;
+static char search_instance[40];
+static int num_instance_tokens;
+static int must_be_first[2];
 
 static void
 usage(who, status)
@@ -408,6 +399,7 @@ OLDDECLARG(struct saltblock *, salt)
     krb5_db_entry newentry;
     int one = 1;
 
+    memset((char *) &newentry, 0, sizeof(newentry));
     retval = krb5_kdb_encrypt_key(&master_encblock,
 				  key,
 				  &newentry.key);
@@ -863,6 +855,39 @@ char *argv[];
     return;
 }
 
+int
+check_print(chk_entry)
+krb5_db_entry *chk_entry;
+{
+    int names = 0;
+    int instances = 1;
+    int check1, check2;
+
+	/* Print All Records */
+    if ((num_name_tokens == 0) && (num_instance_tokens == 0)) return(1);
+
+    if ((num_name_tokens > 0) && (num_instance_tokens == 0))
+	return(check_for_match(search_name, must_be_first[0], chk_entry,
+			num_name_tokens, names));
+
+    if ((krb5_princ_size(chk_entry->principal) > 1) &&
+	(num_name_tokens == 0) && 
+	(num_instance_tokens > 0))
+	return(check_for_match(search_instance, must_be_first[1], chk_entry,
+			num_instance_tokens, instances));
+
+    if ((krb5_princ_size(chk_entry->principal) > 1) &&
+	(num_name_tokens > 0) && 
+	(num_instance_tokens > 0)) {
+	check1 = check_for_match(search_name, must_be_first[0], chk_entry, 
+				 num_name_tokens, names);
+	check2 = check_for_match(search_instance, must_be_first[1], chk_entry, 
+				 num_instance_tokens, instances);
+	if (check1 && check2) return(1);
+    }
+    return(0);
+}
+
 krb5_error_code
 list_iterator(ptr, entry)
 krb5_pointer ptr;
@@ -876,7 +901,9 @@ krb5_db_entry *entry;
 	com_err(comerrname, retval, "while unparsing principal");
 	return retval;
     }
-    printf("entry: %s\n", name);
+    if (check_print(entry)) {
+	printf("entry: %s\n", name);
+    }
     free(name);
     return 0;
 }
@@ -887,6 +914,17 @@ list_db(argc, argv)
 int argc;
 char *argv[];
 {
+    char *start;
+    char *argbuf;
+    char *p;
+    int i;
+
+    if (argc > 2) {
+        printf("Usage: ldb {name/instance}\n");
+	printf("       name and instance may contain \"*\" wildcards\n");
+        return;
+    }
+
     if (!dbactive) {
 	    com_err(argv[0], 0, Err_no_database);
 	    return;
@@ -894,6 +932,20 @@ char *argv[];
     if (!valid_master_key) {
 	    com_err(argv[0], 0, Err_no_master_msg);
 	    return;
+    }
+
+    num_name_tokens = 0;
+    num_instance_tokens = 0;
+    if (argc == 2) {
+	argbuf = argv[1];
+	p = strchr(argbuf, '/');
+	if (p) {
+	    *p++ = '\0';
+	    parse_token(p, &must_be_first[1], 
+			&num_instance_tokens, search_instance);
+	}
+	parse_token(argbuf, &must_be_first[0],
+			&num_name_tokens, search_name);
     }
     (void) krb5_db_iterate(list_iterator, argv[0]);
 }
