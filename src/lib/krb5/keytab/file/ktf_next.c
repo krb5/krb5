@@ -25,16 +25,17 @@ krb5_error_code
 krb5_ktfile_get_next(id, entry, cursor)
 krb5_keytab id;
 krb5_keytab_entry *entry;
-krb5_kt_cursor cursor;
+krb5_kt_cursor *cursor;
 {
-    long fileoff = *(long *)cursor;
+    long *fileoff = (long *)cursor;
     krb5_keytab_entry *cur_entry;
     krb5_error_code kerror;
 
-    if (fseek(KTFILEP(id), fileoff, 0) == -1)
+    if (fseek(KTFILEP(id), *fileoff, 0) == -1)
 	return KRB5_KT_END;
     if (kerror = krb5_ktfileint_read_entry(id, &cur_entry))
 	return kerror;
+    *fileoff = ftell(KTFILEP(id));
     *entry = *cur_entry;
     xfree(cur_entry);
     return 0;
