@@ -75,7 +75,8 @@ xdr_array(xdrs, addrp, sizep, maxsize, elsize, elproc)
 		return (FALSE);
 	}
 	c = *sizep;
-	if ((c > maxsize) && (xdrs->x_op != XDR_FREE)) {
+	if ((c > maxsize || c > LASTUNSIGNED / elsize)
+	    && (xdrs->x_op != XDR_FREE)) {
 		return (FALSE);
 	}
 	nodesize = c * elsize;

@@ -1,3 +1,17 @@
+2002-08-26  Tom Yu  <tlyu@mit.edu>
+
+	* dbtest.c: Include btree.h if we're compiled with -DSTATISTICS.
+	[pullup from trunk]
+
+2001-12-21  Ken Raeburn  <raeburn@mit.edu>
+
+	* dbtest.c (compare): Make comparison failures fatal.
+	(get): Make no-such-key errors fatal.
+
+	* run.test (main, test3, test8): Use "/bin/." instead of "/bin" in
+	find commands, in case /bin itself is a symlink.
+	(test8): Do check exit status of program.
+
 1998-05-06  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* dbtest.c (main): POSIX states that getopt returns -1

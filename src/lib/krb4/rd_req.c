@@ -108,6 +108,19 @@ krb_clear_key_krb5(ctx)
     krb5_key = 0;
 }
 
+/* A helper function to let us see if a buffer is properly terminated. */
+static int
+krb_strnlen(const char *str, size_t max_len)
+{
+    int i = 0;
+    for(i = 0; i < max_len; i++) {
+        if(str[i] == '\0') {
+            return i;
+	}
+    }
+    return -1;
+}
+
 /*
  * krb_rd_req() takes an AUTH_MSG_APPL_REQUEST or
  * AUTH_MSG_APPL_REQUEST_MUTUAL message created by krb_mk_req(),
@@ -184,6 +197,8 @@ krb_rd_req(authent,service,instance,from_addr,ad,fn)
     krb5_keyblock keyblock;
     int status;
 
+    tkt->mbz = req_id->mbz = 0;
+
     if (authent->length <= 0)
 	return(RD_AP_MODIFIED);
 
@@ -219,8 +234,13 @@ krb_rd_req(authent,service,instance,from_addr,ad,fn)
         mutual = 0;
 #endif /* lint */
     s_kvno = *ptr++;		/* get server key version */
-    (void) strcpy(realm,ptr);   /* And the realm of the issuing KDC */
-    ptr += strlen(ptr) + 1;     /* skip the realm "hint" */
+    if(krb_strnlen(ptr, sizeof(realm)) < 0) {
+	return RD_AP_MODIFIED;  /* must have been modified, the client wouldn't
+	                           try to trick us with wacky data */
+    }
+    (void) strncpy(realm,ptr,REALM_SZ);	/* And the realm of the issuing KDC */
+    realm[REALM_SZ-1] = '\0';
+    ptr += strlen(realm) + 1;	/* skip the realm "hint" */
 
     /*
      * If "fn" is NULL, key info should already be set; don't
@@ -249,13 +269,16 @@ krb_rd_req(authent,service,instance,from_addr,ad,fn)
 		return(RD_AP_UNDEC);
 	
 #endif /* !NOENCRYPTION */
-        (void) strcpy(st_rlm,realm);
-        (void) strcpy(st_nam,service);
-        (void) strcpy(st_inst,instance);
+        (void) strncpy(st_rlm,realm, sizeof(st_rlm) - 1);
+	st_rlm[sizeof(st_rlm) - 1] = '\0';
+        (void) strncpy(st_nam,service, sizeof(st_nam) - 1);
+	st_nam[sizeof(st_nam) - 1] = '\0';
+        (void) strncpy(st_inst,instance, sizeof(st_inst) - 1);
+	st_inst[sizeof(st_inst) - 1] = '\0';
     }
 
     /* Get ticket from authenticator */
-    tkt->length = (int) *ptr++;
+    tkt->length = (int) *ptr++ & 0xff;
     if ((tkt->length + (ptr+1 - (char *) authent->dat)) > authent->length)
 	return(RD_AP_MODIFIED);
     memcpy((char *)(tkt->dat), ptr+1, tkt->length);
@@ -324,13 +347,16 @@ krb_rd_req(authent,service,instance,from_addr,ad,fn)
 #define check_ptr() if ((ptr - (char *) req_id->dat) > req_id->length) return(RD_AP_MODIFIED);
 
     ptr = (char *) req_id->dat;
-    (void) strcpy(r_aname,ptr);	/* Authentication name */
+    (void) strncpy(r_aname,ptr,ANAME_SZ); /* Authentication name */
+    r_aname[ANAME_SZ-1] = '\0';
     ptr += strlen(r_aname)+1;
     check_ptr();
-    (void) strcpy(r_inst,ptr);	/* Authentication instance */
+    (void) strncpy(r_inst,ptr,INST_SZ);	/* Authentication instance */
+    r_inst[INST_SZ-1] = '\0';
     ptr += strlen(r_inst)+1;
     check_ptr();
-    (void) strcpy(r_realm,ptr);	/* Authentication name */
+    (void) strncpy(r_realm,ptr,REALM_SZ); /* Authentication name */
+    r_realm[REALM_SZ-1] = '\0';
     ptr += strlen(r_realm)+1;
     check_ptr();
     memcpy((char *)&ad->checksum, ptr, 4);	/* Checksum */

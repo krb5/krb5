@@ -32,6 +32,7 @@
 #include "stdcc.h"
 #include "stdcc_util.h"
 #include "string.h"
+#include "k5-int.h"
 #include <stdio.h>
 
 apiCB *gCntrlBlock = NULL;
@@ -40,7 +41,7 @@ apiCB *gCntrlBlock = NULL;
 #include "winccld.h"	
 #endif
 
-#if !defined(_MSDOS) && !defined(_WIN32)
+#ifndef CC_API_VER2
 #define CC_API_VER2
 #endif
 
@@ -264,7 +265,7 @@ krb5_error_code KRB5_CALLCONV  krb5_stdcc_resolve
 	stdccCacheDataPtr	ccapi_data = NULL;
 	int 			err;
 	krb5_error_code		retval;
-	char 			*cName;
+	char 			*cName = NULL;
 	
 	if ((retval = stdcc_setup(context, NULL)))
 		return retval;
@@ -548,7 +549,9 @@ krb5_error_code KRB5_CALLCONV krb5_stdcc_end_seq_get
 	krb5_error_code		retval;
 	stdccCacheDataPtr	ccapi_data = NULL;
 	int			err;
+#ifndef CC_API_VER2
 	cred_union 		*credU = NULL;
+#endif
 
 	ccapi_data = id->data;
 	
@@ -656,7 +659,6 @@ krb5_stdcc_destroy (krb5_context context, krb5_ccache id)
 char * KRB5_CALLCONV krb5_stdcc_get_name 
         (krb5_context context, krb5_ccache id )
 {
-	char *name = NULL;
 	stdccCacheDataPtr	ccapi_data = id->data;
 
 	if (!ccapi_data)

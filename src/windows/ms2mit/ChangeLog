@@ -1,0 +1,8 @@
+2001-11-28  Danilo Almeida  <dalmeida@mit.edu>
+
+	* ms2mit.c: Make sure we get a des-cbc-crc session key instead of
+	potentially getting whatever happens to be in the cache.  Remove
+	unnecessary static variables.  Make function headers use a
+	consistent format.  Rename ShowLastError() to ShowWinError() and
+	ShowNTError() to ShowLsaError().
+

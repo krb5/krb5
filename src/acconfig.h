@@ -32,6 +32,8 @@
 /* Define if DNS support for finding realms and KDC locations should
    be compiled in.  */
 #undef KRB5_DNS_LOOKUP
+#undef KRB5_DNS_LOOKUP_KDC
+#undef KRB5_DNS_LOOKUP_REALM
 
 /* Define to `long' if <sys/types.h> doesn't define. */
 #undef time_t

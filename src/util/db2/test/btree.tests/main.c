@@ -59,12 +59,18 @@ typedef struct cmd_table {
 int stopstop;
 DB *globaldb;
 
+#if 0
 void append	__P((DB *, char **));
+#endif
+#ifdef STATISTICS
 void bstat	__P((DB *, char **));
+#endif
 void cursor	__P((DB *, char **));
 void delcur	__P((DB *, char **));
 void delete	__P((DB *, char **));
+#ifdef DEBUG
 void dump	__P((DB *, char **));
+#endif
 void first	__P((DB *, char **));
 void get	__P((DB *, char **));
 void help	__P((DB *, char **));
@@ -75,23 +81,36 @@ void insert	__P((DB *, char **));
 void keydata	__P((DBT *, DBT *));
 void last	__P((DB *, char **));
 void list	__P((DB *, char **));
+#if 0
 void load	__P((DB *, char **));
+#endif
+#ifdef STATISTICS
 void mstat	__P((DB *, char **));
+#endif
 void next	__P((DB *, char **));
 int  parse	__P((char *, char **, int));
 void previous	__P((DB *, char **));
+#ifdef DEBUG
 void show	__P((DB *, char **));
+#endif
+void rlist	__P((DB *, char **));
 void usage	__P((void));
 void user	__P((DB *));
 
 cmd_table commands[] = {
 	"?",	0, 0, help, "help", NULL,
+#if 0
 	"a",	2, 1, append, "append key def", "append key with data def",
+#endif
+#ifdef STATISTICS
 	"b",	0, 0, bstat, "bstat", "stat btree",
+#endif
 	"c",	1, 1, cursor,  "cursor word", "move cursor to word",
 	"delc",	0, 0, delcur, "delcur", "delete key the cursor references",
 	"dele",	1, 1, delete, "delete word", "delete word",
+#ifdef DEBUG
 	"d",	0, 0, dump, "dump", "dump database",
+#endif
 	"f",	0, 0, first, "first", "move cursor to first record",
 	"g",	1, 1, get, "get key", "locate key",
 	"h",	0, 0, help, "help", "print command summary",
@@ -101,13 +120,20 @@ cmd_table commands[] = {
 	"in",	2, 1, insert, "insert key def", "insert key with data def",
 	"la",	0, 0, last, "last", "move cursor to last record",
 	"li",	1, 1, list, "list file", "list to a file",
+#if 0
 	"loa",	1, 0, load, "load file", NULL,
+#endif
 	"loc",	1, 1, get, "get key", NULL,
+#ifdef STATISTICS
 	"m",	0, 0, mstat, "mstat", "stat memory pool",
+#endif
 	"n",	0, 0, next, "next", "move cursor forward one record",
 	"p",	0, 0, previous, "previous", "move cursor back one record",
 	"q",	0, 0, NULL, "quit", "quit",
+	"rli",	1, 1, rlist, "rlist file", "list to a file (recursive)",
+#ifdef DEBUG
 	"sh",	1, 0, show, "show page", "dump a page",
+#endif
 	{ NULL },
 };
 
@@ -121,11 +147,13 @@ main(argc, argv)
 	char **argv;
 {
 	int c;
+	int omode;
 	DB *db;
 	BTREEINFO b;
 
 	progname = *argv;
 
+	omode = O_RDONLY;
 	b.flags = 0;
 	b.cachesize = 0;
 	b.maxkeypage = 0;
@@ -135,10 +163,10 @@ main(argc, argv)
 	b.prefix = NULL;
 	b.lorder = 0;
 
-	while ((c = getopt(argc, argv, "bc:di:lp:ru")) != -1) {
+	while ((c = getopt(argc, argv, "bc:di:lp:ruw")) != -1) {
 		switch (c) {
 		case 'b':
-			b.lorder = BIG_ENDIAN;
+			b.lorder = DB_BIG_ENDIAN;
 			break;
 		case 'c':
 			b.cachesize = atoi(optarg);
@@ -150,7 +178,7 @@ main(argc, argv)
 			dict = optarg;
 			break;
 		case 'l':
-			b.lorder = LITTLE_ENDIAN;
+			b.lorder = DB_LITTLE_ENDIAN;
 			break;
 		case 'p':
 			b.psize = atoi(optarg);
@@ -161,6 +189,9 @@ main(argc, argv)
 		case 'u':
 			b.flags = 0;
 			break;
+		case 'w':
+			omode = O_RDWR;
+			break;
 		default:
 			usage();
 		}
@@ -169,10 +200,10 @@ main(argc, argv)
 	argv += optind;
 
 	if (recno)
-		db = dbopen(*argv == NULL ? NULL : *argv, O_RDWR|O_BINARY,
+		db = dbopen(*argv == NULL ? NULL : *argv, omode|O_BINARY,
 		    0, DB_RECNO, NULL);
 	else
-		db = dbopen(*argv == NULL ? NULL : *argv, O_CREAT|O_RDWR|O_BINARY,
+		db = dbopen(*argv == NULL ? NULL : *argv, O_CREAT|omode|O_BINARY,
 		    0600, DB_BTREE, &b);
 
 	if (db == NULL) {
@@ -240,7 +271,7 @@ user(db)
 uselast:	last = i;
 		(*commands[i].func)(db, argv);
 	}
-	if ((db->sync)(db) == RET_ERROR)
+	if ((db->sync)(db, 0) == RET_ERROR)
 		perror("dbsync");
 	else if ((db->close)(db) == RET_ERROR)
 		perror("dbclose");
@@ -269,6 +300,7 @@ parse(lbuf, argv, maxargc)
 	return (argc);
 }
 
+#if 0
 void
 append(db, argv)
 	DB *db;
@@ -298,6 +330,7 @@ append(db, argv)
 		break;
 	}
 }
+#endif
 
 void
 cursor(db, argv)
@@ -366,6 +399,7 @@ delete(db, argv)
 	}
 }
 
+#ifdef DEBUG
 void
 dump(db, argv)
 	DB *db;
@@ -373,6 +407,7 @@ dump(db, argv)
 {
 	__bt_dump(db);
 }
+#endif
 
 void
 first(db, argv)
@@ -598,10 +633,37 @@ list(db, argv)
 		(void)fprintf(fp, "%s\n", key.data);
 		status = (*db->seq)(db, &key, &data, R_NEXT);
 	}
+	(void)fclose(fp);
 	if (status == RET_ERROR)
 		perror("list/seq");
 }
 
+void
+rlist(db, argv)
+	DB *db;
+	char **argv;
+{
+	DBT data, key;
+	FILE *fp;
+	int status;
+	void *cookie;
+
+	cookie = NULL;
+	if ((fp = fopen(argv[1], "w")) == NULL) {
+		(void)fprintf(stderr, "%s: %s\n", argv[1], strerror(errno));
+		return;
+	}
+	status = bt_rseq(db, &key, &data, &cookie, R_FIRST);
+	while (status == RET_SUCCESS) {
+		(void)fprintf(fp, "%s\n", key.data);
+		status = bt_rseq(db, &key, &data, &cookie, R_NEXT);
+	}
+	(void)fclose(fp);
+	if (status == RET_ERROR)
+		perror("list/seq");
+}
+
+#if 0
 DB *BUGdb;
 void
 load(db, argv)
@@ -657,6 +719,7 @@ load(db, argv)
 	}
 	(void)fclose(fp);
 }
+#endif
 
 void
 next(db, argv)
@@ -704,6 +767,7 @@ previous(db, argv)
 	}
 }
 
+#ifdef DEBUG
 void
 show(db, argv)
 	DB *db;
@@ -722,10 +786,12 @@ show(db, argv)
 	if (pg == 0)
 		__bt_dmpage(h);
 	else
-		__bt_dpage(h);
+		__bt_dpage(db, h);
 	mpool_put(t->bt_mp, h, 0);
 }
+#endif
 
+#ifdef STATISTICS
 void
 bstat(db, argv)
 	DB *db;
@@ -743,6 +809,7 @@ mstat(db, argv)
 	(void)printf("MPOOL\n");
 	mpool_stat(((BTREE *)db->internal)->bt_mp);
 }
+#endif
 
 void
 keydata(key, data)
@@ -759,7 +826,7 @@ void
 usage()
 {
 	(void)fprintf(stderr,
-	    "usage: %s [-bdlu] [-c cache] [-i file] [-p page] [file]\n",
+	    "usage: %s [-bdluw] [-c cache] [-i file] [-p page] [file]\n",
 	    progname);
 	exit (1);
 }

@@ -99,6 +99,9 @@ const krb5_data FAR * salt;
     if (salt) {
       if (salt->length == -1) {
 	/* cheat and do AFS string2key instead */
+	char *c;
+	c = strchr(salt->data, '@');
+	if (c != NULL) *c = '\0'; /* workaround from krb5-clients/1146 */
 	return mit_afs_string_to_key (keyblock, data, salt);
       } else 
 	length = data->length + salt->length;

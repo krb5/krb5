@@ -13,7 +13,11 @@
 #ifndef __COM_ERR_H
 
 #if defined(_MSDOS) || defined(_WIN32) || defined(macintosh)
+#ifdef _WIN32
 #include <win-mac.h>
+#else
+#include <Kerberos5/win-mac.h>
+#endif
 #if defined(macintosh) && defined(__CFM68K__) && !defined(__USING_STATIC_LIBS__)
 #pragma import on
 #endif
@@ -80,7 +84,7 @@ KRB5_DLLIMP extern errcode_t KRB5_CALLCONV add_error_table
 KRB5_DLLIMP extern errcode_t KRB5_CALLCONV remove_error_table
 	ET_P((const struct error_table FAR *));
 
-#if !defined(_MSDOS) && !defined(_WIN32) && !defined(macintosh)
+#if !defined(_MSDOS) && !defined(_WIN32) && !defined(macintosh) && !defined(__MACH__)
 /*
  * The display routine should be application specific.  A global hook,
  * may cause inappropriate display procedures to be called between

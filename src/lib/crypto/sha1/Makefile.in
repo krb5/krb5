@@ -33,13 +33,28 @@ t_shs: t_shs.o shs.o
 $(OUTPRE)t_shs.exe: $(OUTPRE)t_shs.obj $(OUTPRE)shs.obj
 	link -out:$@ $**
 
-check-unix:: t_shs
+check-unix:: t_shs t_shs3
 	$(C)t_shs -x
+	$(C)t_shs3
 
-check-windows:: $(OUTPRE)t_shs.exe
+check-windows:: $(OUTPRE)t_shs.exe $(OUTPRE)t_shs3.exe
 	$(OUTPRE)$(C)t_shs.exe -x
+	$(OUTPRE)$(C)t_shs3.exe
 
 clean:: 
-	$(RM) t_shs$(EXEEXT) t_shs.$(OBJEXT)
+	$(RM) t_shs$(EXEEXT) t_shs.$(OBJEXT) t_shs3$(EXEEXT) t_shs3.$(OBJEXT)
 
 clean-unix:: clean-libobjs
+
+t_shs3: t_shs3.o shs.o
+	$(CC) $(ALL_CFLAGS) $(LDFLAGS) -o t_shs3 t_shs3.o shs.o
+# +++ Dependency line eater +++
+# 
+# Makefile dependencies follow.  This must be the last section in
+# the Makefile.in file
+#
+shs.o: shs.c shs.h $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
+  $(BUILDTOP)/include/krb5/autoconf.h $(BUILDTOP)/include/krb5.h \
+  $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/com_err.h \
+  $(SRCTOP)/include/krb5/kdb.h
+

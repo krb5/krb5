@@ -256,6 +256,9 @@ krb5_error_code pa_sam(krb5_context context,
     krb5_data *			scratch;
     krb5_pa_data *		pa;
 
+    if (prompter == NULL)
+	return KRB5_LIBOS_CANTREADPWD;
+
     tmpsam.length = in_padata->length;
     tmpsam.data = (char *) in_padata->contents;
     if (ret = decode_krb5_sam_challenge(&tmpsam, &sam_challenge))
@@ -529,6 +532,11 @@ krb5_do_preauth(krb5_context context,
 			krb5_free_pa_data(context, out_pa_list);
 		    }
 		    return ret;
+		}
+		if (etype_info[0] == NULL) {
+		    krb5_free_etype_info(context, etype_info);
+		    etype_info = NULL;
+		    break;
 		}
 		salt->data = (char *) etype_info[0]->salt;
 		salt->length = etype_info[0]->length;

@@ -35,6 +35,8 @@ SRCS=	\
 	$(srcdir)/ktremove.c	\
 	$(srcdir)/read_servi.c
 
+##DOS##OBJS=$(OBJS) $(OUTPRE)ktfns.$(OBJEXT)
+
 all-windows:: subdirs $(OBJFILE)
 
 ##DOSsubdirs:: file\$(OUTPRE)file.lst srvtab\$(OUTPRE)srvtab.lst

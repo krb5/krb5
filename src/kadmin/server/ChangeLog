@@ -1,3 +1,18 @@
+2002-08-12  Tom Yu  <tlyu@mit.edu>
+
+	* server_stubs.c: Check return value from unparse_name() in lots
+	of places.  Patch from Mark Levinson; fixes [krb5-admin/1140].
+	[pullup from trunk]
+
+2000-06-21  Tom Yu  <tlyu@mit.edu>
+
+	* server_stubs.c: Kludge to rename xdr_free() properly.
+
+2000-05-23  Tom Yu  <tlyu@mit.edu>
+
+	* schpw.c (process_chpw_request): Add new argument to call to
+	chpass_principal_util()
+
 2000-03-16  Ken Raeburn  <raeburn@mit.edu>
 	    Matt Crawford  <crawdad@fnal.gov>
 

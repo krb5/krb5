@@ -116,6 +116,12 @@ krb5_ktkdb_get_entry(context, id, principal, kvno, enctype, entry)
 	return KRB5_KT_NOTFOUND;
     }
 
+    if (db_entry.attributes & KRB5_KDB_DISALLOW_SVR
+	|| db_entry.attributes & KRB5_KDB_DISALLOW_ALL_TIX) {
+	kerror = KRB5_KT_NOTFOUND;
+	goto error;
+    }
+
     /* match key */
     kerror = krb5_db_get_mkey(context, &master_key);
     if (kerror)
@@ -130,6 +136,13 @@ krb5_ktkdb_get_entry(context, id, principal, kvno, enctype, entry)
 					 key_data, &entry->key, NULL);
     if (kerror)
 	goto error;
+
+    /*
+     * Coerce the enctype of the output keyblock in case we got an
+     * inexact match on the enctype; this behavior will go away when
+     * the key storage architecture gets redesigned for 1.3.
+     */
+    entry->key.enctype = enctype;
 
     kerror = krb5_copy_principal(context, principal, &entry->principal);
     if (kerror)

@@ -41,6 +41,7 @@
 #define krb5_db2_db_free_principal	krb5_db_free_principal
 #define krb5_db2_db_put_principal	krb5_db_put_principal
 #define krb5_db2_db_delete_principal	krb5_db_delete_principal
+#define krb5_db2_db_iterate_ext		krb5_db_iterate_ext
 #define krb5_db2_db_iterate		krb5_db_iterate
 #define krb5_db2_db_lock		krb5_db_lock
 #define krb5_db2_db_unlock		krb5_db_unlock
@@ -104,6 +105,11 @@ krb5_error_code krb5_db2_db_put_principal
 	KRB5_PROTOTYPE((krb5_context,
 		   krb5_db_entry *,
 		   int * ));
+krb5_error_code krb5_db2_db_iterate_ext
+    	KRB5_PROTOTYPE((krb5_context,
+		   krb5_error_code (*) (krb5_pointer,
+					          krb5_db_entry *),
+	           krb5_pointer, int, int ));
 krb5_error_code krb5_db2_db_iterate
     	KRB5_PROTOTYPE((krb5_context,
 		   krb5_error_code (*) KRB5_PROTOTYPE((krb5_pointer,

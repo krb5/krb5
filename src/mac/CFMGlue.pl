@@ -1,5 +1,3 @@
-#!/usr/local/bin/perl -w
-
 use strict; # Turn on careful syntax checking
 use 5.002;  # Require Perl 5.002 or later
 

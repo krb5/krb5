@@ -533,7 +533,7 @@ get_etype_info(context, request, client, server, pa_data)
     while (1) {
 	retval = krb5_dbe_search_enctype(context, client, &start, -1,
 					 -1, 0, &client_key);
-	if (retval == ENOENT)
+	if (retval == KRB5_KDB_NO_MATCHING_KEY)
 	    break;
 	if (retval)
 	    goto cleanup;
