@@ -1,3 +1,7 @@
+2000-07-20  Danilo Almeida  <dalmeida@mit.edu>
+
+	* win-pre.in: Add KRB4_INCLUDES definition.
+
 2000-07-14  Ken Raeburn  <raeburn@mit.edu>
 
 	* shlib.conf: New file, taken from KRB5_LIB_PARAMS in

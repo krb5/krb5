@@ -165,6 +165,8 @@ K4LIB=$(BUILDTOP)\lib\$(OUTPRE)krb4_32.lib
 GLIB=$(BUILDTOP)\lib\$(OUTPRE)gssapi32.lib
 WLIB=
 
+KRB4_INCLUDES=-I$(BUILDTOP)/include/kerberosIV
+
 ARADD=rem
 RANLIB=rem
 ARCHIVE=rem
