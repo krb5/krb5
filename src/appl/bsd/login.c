@@ -401,7 +401,9 @@ int main(argc, argv)
 	/* linux, sco don't have this line discipline interface */
 	(void)ioctl(0, TIOCLSET, (char *)&ioctlval);
 #endif
+#ifdef TIOCNXCL
 	(void)ioctl(0, TIOCNXCL, (char *)0);
+#endif
 	(void)fcntl(0, F_SETFL, ioctlval);
 #endif
 
@@ -517,7 +519,7 @@ int main(argc, argv)
 #endif
 		int read_long_pw_string();
 #endif /* KRB4 */
-#if !defined(_IBMR2)
+#if defined(TIOCSETD)
 		ioctlval = 0;
 		(void)ioctl(0, TIOCSETD, (char *)&ioctlval);
 #endif
@@ -827,7 +829,7 @@ bad_login:
 
 	if (*pwd->pw_shell == '\0')
 		pwd->pw_shell = BSHELL;
-#if defined(NTTYDISC) && !defined(_IBMR2)
+#if defined(NTTYDISC) && defined(TIOCSETD)
 	/* turn on new line discipline for the csh */
 	else if (!strcmp(pwd->pw_shell, "/bin/csh")) {
 		ioctlval = NTTYDISC;

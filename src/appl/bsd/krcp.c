@@ -60,6 +60,7 @@ char copyright[] =
      
 #ifdef HAVE_SETRESUID
 #ifndef HAVE_SETREUID
+#define HAVE_SETREUID
 #define setreuid(r,e) setresuid(r,e,-1)
 #endif
 #endif
