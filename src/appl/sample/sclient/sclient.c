@@ -46,7 +46,7 @@ static char rcsid_sclient_c [] =
 #include <netdb.h>
 #include <signal.h>
 
-#include "sample.h"
+#include "../sample.h"
 
 void
 main(argc, argv)
@@ -107,9 +107,7 @@ char *argv[];
     }
 
     if (retval = krb5_sname_to_principal(argv[1], SAMPLE_SERVICE,
-					 TRUE, /* TRUE means canonicalize
-						  hostname */
-					 &server)) {
+					 KRB5_NT_SRV_HST, &server)) {
 	com_err(argv[0], retval, "while creating server name for %s",
 		argv[1]);
 	exit(1);
@@ -214,8 +212,9 @@ char *argv[];
 	    com_err(argv[0], errno, "while reading data from server");
 	    exit(1);
 	}
-	printf("reply len %d, contents:\n%*s\n",
-	       recv_data.length,recv_data.length,recv_data.data);
+	recv_data.data[recv_data.length] = '\0';
+	printf("reply len %d, contents:\n%s\n",
+	       recv_data.length,recv_data.data);
     } else {
 	com_err(argv[0], 0, "no error or reply from sendauth!");
 	exit(1);
