@@ -1,3 +1,8 @@
+1999-08-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* krb5.hin (KRB5_TC_SUPPORTED_KTYPES): New flag.
+	* k5-int.h (krb5_cc_retrieve_cred_default): Declare.
+
 1999-08-18  Tom Yu  <tlyu@mit.edu>
 
 	* krb5.hin: Re-align des3-cbc-sha1 and hmac-sha1-des3 to agree
