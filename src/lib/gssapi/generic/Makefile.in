@@ -23,11 +23,8 @@ ETHDRS= gssapi_err_generic.h
 gssapi_err_generic.$(OBJEXT): gssapi_err_generic.c
 	$(CC) $(CFLAGS) -c $*.c
 @SHARED_RULE_LOCAL@
-##DOS!if defined(LIBNAME)
-##DOS!if "$(LIBCMD)"!="rem"
-##DOS	$(LIBCMD) /nologo $(LIBNAME) -+$@;
-##DOS!endif
-##DOS!endif
+##WIN16##	$(LIBCMD) $(PAGESIZE) /nologo $(LIBNAME) -+$@;
+##WIN32##	$(LIBCMD) /out:$(LIBNAME) /nologo $@
 
 gssapi_err_generic.h: gssapi_err_generic.et
 
