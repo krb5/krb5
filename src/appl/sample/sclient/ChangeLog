@@ -1,3 +1,7 @@
+2001-11-05  Ezra Peisach  <epeisach@mit.edu>
+
+	* sclient.c (main): Use GETSOCKNAME_ARG3_TYPE instead of int.
+
 2001-01-30  Ezra Peisach  <epeisach@mit.edu>
 
 	* sclient.c (main): Do not free auth_context unless

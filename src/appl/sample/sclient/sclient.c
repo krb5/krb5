@@ -54,6 +54,10 @@ extern char *malloc();
 
 #include "../sample.h"
 
+#ifndef GETSOCKNAME_ARG3_TYPE
+#define GETSOCKNAME_ARG3_TYPE int
+#endif
+
 int
 main(argc, argv)
 int argc;
@@ -62,7 +66,8 @@ char *argv[];
     struct servent *sp;
     struct hostent *hp;
     struct sockaddr_in sockin, lsockin;
-    int sock, namelen;
+    int sock;
+    GETSOCKNAME_ARG3_TYPE namelen;
     krb5_context context;
     krb5_data recv_data;
     krb5_data cksum_data;
