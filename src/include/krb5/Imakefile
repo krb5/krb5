@@ -22,6 +22,14 @@
 # or implied warranty.
 # 
 # 
+
+KRB5_HEADERS = asn1.h base-defs.h ccache.h crc-32.h encryption.h \
+		error_def.h errors.h ext-proto.h fieldbits.h \
+		free.h func-proto.h hostaddr.h kdb.h kdb_dbm.h \
+		keytab.h krb5.h libos.h los-proto.h macros.h mit-des.h \
+		narrow.h proto.h rcache.h rsa-md4.h safepriv.h \
+		sysincl.h widen.h wordsize.h
+
 includes:: config.h osconf.h
 
 ProcessStockHeader(stock/config.h,config.h)
@@ -33,3 +41,6 @@ clean::
 	$(RM) config.h osconf.h
 
 depend::
+
+Krb5InstallHeaders($(KRB5_HEADERS),$(KRB5_INCDIR)/krb5)
+
