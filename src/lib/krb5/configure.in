@@ -10,9 +10,9 @@ dnl
 dnl Determine if db library is being used
 dnl
 HASH=
-hashloc="$(BUILDTOP)/util/berk_db/hash"
+hashloc="\$(BUILDTOP)/util/berk_db/hash"
 HASHDONE=
-hashdone="$(BUILDTOP)/util/berk_db/hash/DONE"
+hashdone="\$(BUILDTOP)/util/berk_db/hash/DONE"
 WITH_ANAME_DB
 if test "$dbval" = db; then
   HASH=$hashloc

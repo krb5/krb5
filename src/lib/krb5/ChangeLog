@@ -1,3 +1,7 @@
+Sat Jan 27 18:25:42 1996  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* configure.in (hashloc): Fix quoting so it makes it into the Makefile.
+
 Mon Jan 22 15:23:05 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* configure.in: Merge in berk_db library if needed.
