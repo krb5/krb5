@@ -54,7 +54,7 @@ OLDDECLARG(krb5_data **, enc_rep)
     krb5_error_code retval;
 
     if (!valid_etype(dec_rep->etype))
-	return KRB5KDC_ERR_ETYPE_NOSUPP;
+	return KRB5_PROG_ETYPE_NOSUPP;
 
     switch (type) {
     case KRB5_AS_REP:

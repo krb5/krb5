@@ -188,7 +188,7 @@ krb5_authenticator **authpp;
     etype = keytype_to_etype(sesskey->keytype);
 
     if (!valid_etype(etype))
-	return KRB5KDC_ERR_ETYPE_NOSUPP;
+	return KRB5_PROG_ETYPE_NOSUPP;
 
     /* put together an eblock for this encryption */
 

@@ -90,10 +90,13 @@ krb5_data *outbuf;
 	    return(retval);
     }
     /* verify a valid etype is available */
-    etype = keytype_to_etype(creds->keyblock.keytype); /* XXX */
+    if (!valid_keytype(creds->keyblock.keytype))
+	return KRB5_PROG_KEYTYPE_NOSUPP;
+
+    etype = krb5_keytype_array[creds->keyblock.keytype]->system->proto_enctype;
 
     if (!valid_etype(etype))
-	return KRB5KDC_ERR_ETYPE_NOSUPP;
+	return KRB5_PROG_ETYPE_NOSUPP;
 
     request.ap_options = ap_req_options;
     /* we need a native ticket */

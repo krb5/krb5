@@ -48,7 +48,7 @@ register krb5_ticket *dec_ticket;
     /* encrypt the encrypted part */
 
     if (!valid_etype(dec_ticket->etype))
-	return KRB5KDC_ERR_ETYPE_NOSUPP;
+	return KRB5_PROG_ETYPE_NOSUPP;
 
     /*  start by encoding the to-be-encrypted part. */
     if (retval = encode_krb5_enc_tkt_part(dec_tkt_part, &scratch)) {

@@ -42,7 +42,7 @@ OLDDECLARG(krb5_kdc_rep *, dec_rep)
     krb5_enc_kdc_rep_part *local_encpart;
 
     if (!valid_etype(dec_rep->etype))
-	return KRB5KDC_ERR_ETYPE_NOSUPP; /* XXX */
+	return KRB5_PROG_ETYPE_NOSUPP;
 
     /* set up scratch decrypt/decode area */
 

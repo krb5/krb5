@@ -45,7 +45,7 @@ register krb5_ticket *ticket;
     krb5_error_code retval;
 
     if (!valid_etype(ticket->etype))
-	return KRB5KDC_ERR_ETYPE_NOSUPP;
+	return KRB5_PROG_ETYPE_NOSUPP;
 
     /* put together an eblock for this encryption */
 

@@ -61,7 +61,7 @@ OLDDECLARG(krb5_data *, outbuf)
     krb5_data *scratch;
 
     if (!valid_cksumtype(sumtype))
-	return KRB5KDC_ERR_ETYPE_NOSUPP; /* XXX */
+	return KRB5_PROG_SUMTYPE_NOSUPP;
 
     addrs[0] = sender_addr->address;
     addrs[1] = 0;
