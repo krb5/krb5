@@ -1,4 +1,3 @@
-#!/afs/athena/contrib/perl5/p
 eval 'exec /afs/athena/contrib/perl5/arch/sun4x_55/bin/perl -S $0 ${1+"$@"}'
     if $running_under_some_shell;
 			# this emulates #! processing on NIH machines.

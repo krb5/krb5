@@ -1,3 +1,8 @@
+2000-10-08  Miro Jurisic  <meeroh@mit.edu>
+
+	* et_c.perl, et_h.perl: 
+        Removed #! from the first line to avoid confusing MacPerl
+
 2000-10-02  Alexandra Ellwood  <lxs@mit.edu>
 
 	* com_err.h, error_message.c, et.pbexp, et_c.awk, et_h.awk: 
