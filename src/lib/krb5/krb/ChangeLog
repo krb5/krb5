@@ -1,3 +1,7 @@
+2001-06-21  Ezra Peisach  <epeisach@mit.edu>
+
+	* chk_trans.c: Cast length arguments of %.*s in formats to int.
+
 2001-06-20  Ezra Peisach  <epeisach@mit.edu>
 
 	* Makefile.in (check-unix): Add $(RUN_SETUP) before invocation of

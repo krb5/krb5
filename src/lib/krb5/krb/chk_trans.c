@@ -51,7 +51,7 @@ process_intermediates (krb5_error_code (*fn)(krb5_data *, void *), void *data,
     char *p1, *p2;
 
     Tprintf (("process_intermediates(%.*s,%.*s)\n",
-	      n1->length, n1->data, n2->length, n2->data));
+	      (int) n1->length, n1->data, (int) n2->length, n2->data));
 
     len1 = n1->length;
     len2 = n2->length;
@@ -71,7 +71,7 @@ process_intermediates (krb5_error_code (*fn)(krb5_data *, void *), void *data,
     if (len1 == len2) {
 	if (memcmp (n1->data, n2->data, len1)) {
 	    Tprintf (("equal length but different strings in path: '%.*s' '%.*s'\n",
-		      n1->length, n1->data, n2->length, n2->data));
+		      (int) n1->length, n1->data, (int) n2->length, n2->data));
 	    return KRB5KRB_AP_ERR_ILL_CR_TKT;
 	}
 	Tprintf (("(end intermediates)\n"));
@@ -87,12 +87,12 @@ process_intermediates (krb5_error_code (*fn)(krb5_data *, void *), void *data,
 	/* X.500 style names, with common prefix.  */
 	if (p2[0] != '/') {
 	    Tprintf (("mixed name formats in path: x500='%.*s' domain='%.*s'\n",
-		      len1, p1, len2, p2));
+		      (int) len1, p1, (int) len2, p2));
 	    return KRB5KRB_AP_ERR_ILL_CR_TKT;
 	}
 	if (memcmp (p1, p2, len1)) {
 	    Tprintf (("x500 names with different prefixes '%.*s' '%.*s'\n",
-		      len1, p1, len2, p2));
+		      (int) len1, p1, (int) len2, p2));
 	    return KRB5KRB_AP_ERR_ILL_CR_TKT;
 	}
 	for (i = len1 + 1; i < len2; i++)
@@ -110,16 +110,16 @@ process_intermediates (krb5_error_code (*fn)(krb5_data *, void *), void *data,
 	/* Domain style names, with common suffix.  */
 	if (p2[0] == '/') {
 	    Tprintf (("mixed name formats in path: domain='%.*s' x500='%.*s'\n",
-		      len1, p1, len2, p2));
+		      (int) len1, p1, (int) len2, p2));
 	    return KRB5KRB_AP_ERR_ILL_CR_TKT;
 	}
 	if (memcmp (p1, p2 + (len2 - len1), len1)) {
 	    Tprintf (("domain names with different suffixes '%.*s' '%.*s'\n",
-		      len1, p1, len2, p2));
+		      (int) len1, p1, (int) len2, p2));
 	    return KRB5KRB_AP_ERR_ILL_CR_TKT;
 	}
 	for (i = len2 - len1 - 1; i > 0; i--) {
-	    Tprintf (("looking at '%.*s'\n", len2 - i, p2+i));
+	    Tprintf (("looking at '%.*s'\n", (int) (len2 - i), p2+i));
 	    if (p2[i-1] == '.') {
 		krb5_data d;
 		krb5_error_code r;
@@ -359,7 +359,7 @@ krb5_check_transited_list (krb5_context ctx, krb5_data *trans,
 static krb5_error_code
 print_a_realm (krb5_data *realm, void *data)
 {
-    printf ("%.*s\n", realm->length, realm->data);
+    printf ("%.*s\n", (int) realm->length, realm->data);
     return 0;
 }
 
