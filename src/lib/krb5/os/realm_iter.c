@@ -33,7 +33,7 @@
 krb5_error_code KRB5_CALLCONV
 krb5_realm_iterator_create(krb5_context context, void **iter_p)
 {
-    static const char *names[] = { "realms", 0 };
+    static const char *const names[] = { "realms", 0 };
 	
     return profile_iterator_create(context->profile, names,
 				   PROFILE_ITER_LIST_SECTION |

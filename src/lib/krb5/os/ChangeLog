@@ -1,5 +1,8 @@
 2003-12-19  Ken Raeburn  <raeburn@mit.edu>
 
+	* realm_iter.c (krb5_realm_iterator_create): Array NAMES is now
+	const.
+
 	* prompter.c (catch_signals, restore_signals): Take pointer to old
 	signal handler info as new argument.
 	(osiginfo): New typedef.
