@@ -7,7 +7,7 @@ all:: libupdate
 
 libupdate: $(srcdir)/libupdate.sh
 	rm -f $@ $@.tmp
-	$(editsh) $< > $@.tmp && chmod +x $@.tmp && mv $@.tmp $@
+	$(editsh) $(srcdir)/libupdate.sh > $@.tmp && chmod +x $@.tmp && mv $@.tmp $@
 
 clean::
 	$(RM) libupdate
