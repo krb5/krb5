@@ -1,3 +1,7 @@
+2001-03-20	Miro Jurisic <meeroh@mit.edu>
+
+	* macsock.h: Updated location of Utilities.h and Sockets headers
+
 2001-03-19	Miro Jurisic <meeroh@mit.edu>
 
 	* macsock.h: #include <KerberosSupport/ErrorLib.h> 
