@@ -1379,7 +1379,7 @@ AC_DEFUN(AC_LIBRARY_NET, [
     # This may get us a gethostby* that doesn't respect nsswitch.
     AC_CHECK_LIB(resolv, main)
 _KRB5_AC_CHECK_RES_FUNCS(res_nsearch res_search ns_initparse dnl
-ns_name_uncompress dn_skipname)
+ns_name_uncompress dn_skipname res_ndestroy)
     if test $krb5_cv_func_res_nsearch = no \
       && test $krb5_cv_func_res_search = no; then
 	# Attempt to link with res_search(), in case it's not prototyped.
