@@ -315,17 +315,23 @@ check_realm_in_list (krb5_data *realm, void *data)
 }
 
 krb5_error_code
-krb5_check_transited_list (krb5_context ctx, const krb5_data *trans,
+krb5_check_transited_list (krb5_context ctx, const krb5_data *trans_in,
 			   const krb5_data *crealm, const krb5_data *srealm)
 {
+    krb5_data trans;
     struct check_data cdata;
     krb5_error_code r;
 
+    trans.length = trans_in->length;
+    trans.data = (char *) trans_in->data;
+    if (trans.length && (trans.data[trans.length-1] == '\0'))
+	trans.length--;
+
     Tprintf (("krb5_check_transited_list(trans=\"%.*s\", crealm=\"%.*s\", srealm=\"%.*s\")\n",
-	      (int) trans->length, trans->data,
+	      (int) translength, trans.data,
 	      (int) crealm->length, crealm->data,
 	      (int) srealm->length, srealm->data));
-    if (trans->length == 0)
+    if (trans.length == 0)
 	return 0;
     r = krb5_walk_realm_tree (ctx, crealm, srealm, &cdata.tgs,
 			      KRB5_REALM_BRANCH_CHAR);
@@ -347,7 +353,7 @@ krb5_check_transited_list (krb5_context ctx, const krb5_data *trans,
     }
 #endif
     cdata.ctx = ctx;
-    r = foreach_realm (check_realm_in_list, &cdata, crealm, srealm, trans);
+    r = foreach_realm (check_realm_in_list, &cdata, crealm, srealm, &trans);
     krb5_free_realm_tree (ctx, cdata.tgs);
     return r;
 }

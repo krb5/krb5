@@ -806,7 +806,7 @@ add_to_transited(tgt_trans, new_trans, tgs, client, server)
       goto fail;
     }
     strcat(trans, current);
-    new_trans->length = strlen(trans) + 1;
+    new_trans->length = strlen(trans);
 
     strncpy(prev, exp, sizeof(prev) - 1);
     prev[sizeof(prev) - 1] = '\0';
@@ -834,7 +834,7 @@ add_to_transited(tgt_trans, new_trans, tgs, client, server)
       goto fail;
     }
     strcat(trans, realm);
-    new_trans->length = strlen(trans) + 1;
+    new_trans->length = strlen(trans);
   }
 
   retval = 0;
