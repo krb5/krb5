@@ -97,20 +97,7 @@ krb5_scc_next_cred(id, cursor, creds)
 
 lose:
      if (kret != KRB5_OK) {
-	 if (creds->client)
-	     krb5_free_principal(creds->client);
-	 if (creds->server)
-	     krb5_free_principal(creds->server);
-	 if (creds->keyblock.contents)
-	     xfree(creds->keyblock.contents);
-	 if (creds->ticket.data)
-	     xfree(creds->ticket.data);
-	 if (creds->second_ticket.data)
-	     xfree(creds->second_ticket.data);
-	 if (creds->addresses)
-	     krb5_free_address(creds->addresses);
-	 if (creds->authdata)
-	     krb5_free_authdata (creds->authdata);
+	 krb5_free_cred_contents(creds);
      }
      MAYBE_CLOSE (id, kret);
      return kret;
