@@ -22,7 +22,8 @@ static char rcsid_lock_file_c [] =
 
 #include <stdio.h>
 
-#include <krb5/posix-conf.h>
+/* POSIX_* are auto-magically defined in <krb5/config.h> at source
+   configuration time. */
 
 #ifdef POSIX_FILE_LOCKS
 #include <errno.h>

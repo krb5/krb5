@@ -25,7 +25,9 @@ static char rcsid_read_pwd_c[] =
 #include <setjmp.h>
 
 #include <krb5/ext-proto.h>
-#include <krb5/posix-conf.h>
+
+/* POSIX_* are auto-magically defined in <krb5/config.h> at source
+   configuration time. */
 
 #ifdef POSIX_TERMIOS
 #include <termios.h>
