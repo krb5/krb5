@@ -1,3 +1,8 @@
+Thu Jan 29 19:51:02 1998  Dan Winship  <danw@mit.edu>
+
+	* ftpd.c (auth_data): Accept forwarded credentials and dispose of
+	them properly. (And fix some indentation bugs.)
+
 Sun Dec 21 18:17:53 1997  Tom Yu  <tlyu@mit.edu>
 
 	* logwtmp.c (ftp_logwtmp): Rename logwtmp to ftp_logwtmp to avoid

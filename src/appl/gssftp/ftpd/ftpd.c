@@ -1907,7 +1907,7 @@ char *data;
 	if (strcmp(temp_auth_type, "GSSAPI") == 0) {
 		int replied = 0;
 		int found = 0;
-		gss_cred_id_t server_creds;     
+		gss_cred_id_t server_creds, deleg_creds;
 		gss_name_t client;
 		int ret_flags;
 		struct gss_channel_bindings_struct chan;
@@ -1994,7 +1994,7 @@ char *data;
 							    &out_tok, /* output_token */
 							    &ret_flags,
 							    NULL, 	/* ignore time_rec */
-							    NULL   /* ignore del_cred_handle */
+							    &deleg_creds  /* forwarded credentials */
 							    );
 			if (accept_maj==GSS_S_COMPLETE||accept_maj==GSS_S_CONTINUE_NEEDED)
 				break;
@@ -2006,6 +2006,9 @@ char *data;
 						"accepting context");
 				syslog(LOG_ERR, "failed accepting context");
 				(void) gss_release_cred(&stat_min, &server_creds);
+				if (ret_flags & GSS_C_DELEG_FLAG)
+					(void) gss_release_cred(&stat_min,
+								&deleg_creds);
 				return 0;
 			}
 		} else {
@@ -2020,6 +2023,10 @@ char *data;
 				secure_error("Couldn't encode ADAT reply (%s)",
 					     radix_error(kerror));
 				syslog(LOG_ERR, "couldn't encode ADAT reply");
+				(void) gss_release_cred(&stat_min, &server_creds);
+				if (ret_flags & GSS_C_DELEG_FLAG)
+					(void) gss_release_cred(&stat_min,
+								&deleg_creds);
 				return(0);
 			}
 			if (stat_maj == GSS_S_COMPLETE) {
@@ -2027,52 +2034,65 @@ char *data;
 				replied = 1;
 			} else {
 				/* If the server accepts the security data, and
-				   requires additional data, it should respond with
-				   reply code 335. */
+				   requires additional data, it should respond
+				   with reply code 335. */
 				reply(335, "ADAT=%s", gbuf);
 			}
 			(void) gss_release_buffer(&stat_min, &out_tok);
 		}
 		if (stat_maj == GSS_S_COMPLETE) {
 			/* GSSAPI authentication succeeded */
-			stat_maj = gss_display_name(&stat_min, client, &client_name, 
-						    &mechid);
+			stat_maj = gss_display_name(&stat_min, client,
+						    &client_name, &mechid);
 			if (stat_maj != GSS_S_COMPLETE) {
-				/* "If the server rejects the security data (if 
+				/* "If the server rejects the security data (if
 				   a checksum fails, for instance), it should 
 				   respond with reply code 535." */
 				reply_gss_error(535, stat_maj, stat_min,
 						"extracting GSSAPI identity name");
 				syslog(LOG_ERR, "gssapi error extracting identity");
 				(void) gss_release_cred(&stat_min, &server_creds);
+				if (ret_flags & GSS_C_DELEG_FLAG)
+					(void) gss_release_cred(&stat_min,
+								&deleg_creds);
 				return 0;
 			}
 			/* If the server accepts the security data, but does
-				   not require any additional data (i.e., the security
-				   data exchange has completed successfully), it must
-				   respond with reply code 235. */
-			if (!replied) reply(235, "GSSAPI Authentication succeeded");
+			   not require any additional data (i.e., the security
+			   data exchange has completed successfully), it must
+			   respond with reply code 235. */
+			if (!replied)
+			  reply(235, "GSSAPI Authentication succeeded");
 				
 			auth_type = temp_auth_type;
 			temp_auth_type = NULL;
-				
+
 			(void) gss_release_cred(&stat_min, &server_creds);
+			if (ret_flags & GSS_C_DELEG_FLAG) {
+			  /* This would be a good place to do something
+			     useful with the forwarded credentials... */
+			  (void) gss_release_cred(&stat_min, &deleg_creds);
+			}
 			return(1);
 		} else if (stat_maj == GSS_S_CONTINUE_NEEDED) {
 			/* If the server accepts the security data, and
-				   requires additional data, it should respond with
-				   reply code 335. */
+			   requires additional data, it should respond with
+			   reply code 335. */
 			reply(335, "more data needed");
 			(void) gss_release_cred(&stat_min, &server_creds);
+			if (ret_flags & GSS_C_DELEG_FLAG)
+			  (void) gss_release_cred(&stat_min, &deleg_creds);
 			return(0);
 		} else {
 			/* "If the server rejects the security data (if 
-				   a checksum fails, for instance), it should 
-				   respond with reply code 535." */
+			   a checksum fails, for instance), it should 
+			   respond with reply code 535." */
 			reply_gss_error(535, stat_maj, stat_min, 
 					"GSSAPI failed processing ADAT");
 			syslog(LOG_ERR, "GSSAPI failed processing ADAT");
 			(void) gss_release_cred(&stat_min, &server_creds);
+			if (ret_flags & GSS_C_DELEG_FLAG)
+			  (void) gss_release_cred(&stat_min, &deleg_creds);
 			return(0);
 		}
 	}
