@@ -108,12 +108,15 @@ key_get_admin_entry(kcontext)
     DPRINT(DEBUG_CALLS, key_debug_level, ("* key_get_admin_entry()\n"));
     kret = ENOMEM;
     realm_name = key_master_realm();
+
+    memset((char *) &akey, 0, sizeof(akey));
+    memset((char *) &pkey, 0, sizeof(pkey));
     /*
      * The admin principal format is:
      *	<admin-service-name>/<realm>@<realm>
      */
     admin_princ_name = (char *) malloc((size_t)
-				       ((2*strlen(realm_name)) + 2 +
+				       ((2*strlen(realm_name)) + 3 +
 					strlen(KRB5_ADM_SERVICE_NAME)));
     if (admin_princ_name) {
 	/* Format the admin name */
@@ -155,8 +158,11 @@ key_get_admin_entry(kcontext)
 			memcpy((char *) &madmin_key,
 			       (char *) &pkey,
 			       sizeof(pkey));
-			if (akey.contents)
-			    krb5_free_keyblock(kcontext, &akey);
+			if (akey.contents) {
+				memset((char *) &akey.contents, 0,
+				       (size_t) akey.length);
+				krb5_xfree(akey.contents);
+			}
 			madmin_key_init = 1;
 		    }
 		    else {
@@ -510,7 +516,8 @@ key_init(kcontext, debug_level, enc_type, key_type, master_key_name, manual,
 	    mkeytab_init = 0;
 	}
 	if (madmin_key_init) {
-	    krb5_free_keyblock(kcontext, &madmin_key);
+	    memset((char *)madmin_key.contents, 0, madmin_key.length);
+	    krb5_xfree(madmin_key.contents);
 	    madmin_key_init = 0;
 	}
     }
@@ -561,7 +568,8 @@ key_finish(kcontext, debug_level)
 	mkeytab_init = 0;
     }
     if (madmin_key_init) {
-	krb5_free_keyblock(kcontext, &madmin_key);
+	memset((char *)madmin_key.contents, 0, madmin_key.length);
+	krb5_xfree(madmin_key.contents);
 	madmin_key_init = 0;
     }
     krb5_db_fini(kcontext);
@@ -772,11 +780,13 @@ key_decrypt_keys(kcontext, principal, eprimary, ealternate, primary, alternate)
 	if (primary->contents) {
 	    memset((char *) primary->contents, 0, (size_t) primary->length);
 	    krb5_xfree(primary->contents);
+	    primary->contents = 0;
 	}
 	if (alternate->contents) {
 	    memset((char *) alternate->contents, 0,
 		   (size_t) alternate->length);
 	    krb5_xfree(alternate->contents);
+	    alternate->contents = 0;
 	}
     }
     DPRINT(DEBUG_CALLS, key_debug_level,

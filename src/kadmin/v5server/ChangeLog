@@ -1,3 +1,14 @@
+Tue Jun  6 19:42:18 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* srv_key.c (key_decrypt_keys): On error, when clearing keyblocks,
+		set contents to null.
+		(key_get_admin_entry): Allocate enough memory for
+				admin_princ_name. 
+				Initialize akey and pkey to zero.
+				Cannot use krb5_free_keyblock on stack
+					based keyblock. 
+		(key_finish): Cannot use krb5_free_keyblock on bss based
+				keyblock. 
 
 Mon Jun 5 14:14:10 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* srv_key.c(key_get_admin_entry) - When adding database entry for
