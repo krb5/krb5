@@ -25,6 +25,7 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -35,12 +36,12 @@ extern char *optarg;
 
 char *prog;
 
-static void usage()
+static void xusage()
 {
 #ifdef KRB5_KRB4_COMPAT
-    fprintf(stderr, "usage: %s [-4 | -e etype] service1 service2 ...\n", prog);
+    fprintf(stderr, "xusage: %s [-4 | -e etype] service1 service2 ...\n", prog);
 #else
-    fprintf(stderr, "usage: %s [-e etype] service1 service2 ...\n", prog);
+    fprintf(stderr, "xusage: %s [-e etype] service1 service2 ...\n", prog);
 #endif
     exit(1);
 }
@@ -65,7 +66,7 @@ int main(int argc, char *argv[])
 	    etypestr = optarg;
 	    break;
 	case 'h':
-	    usage();
+	    xusage();
 	    break;
 	case 'q':
 	    quiet = 1;
@@ -74,16 +75,16 @@ int main(int argc, char *argv[])
 	    v4 = 1;
 	    break;
 	default:
-	    usage();
+	    xusage();
 	    break;
 	}
     }
 
     if ((argc - optind) < 1)
-	usage();
+	xusage();
 
     if (etypestr != 0 && v4)
-	usage();
+	xusage();
 
     if (v4)
 	do_v4_kvno(argc - optind, argv + optind);
@@ -135,7 +136,7 @@ static void do_v4_kvno (int count, char *names[])
 	    printf("%s: kvno = %d\n", names[i], creds.kvno);
     }
 #else
-    usage(prog);
+    xusage(prog);
 #endif
 }
 

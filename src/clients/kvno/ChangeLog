@@ -1,3 +1,8 @@
+2002-07-27  Ken Raeburn  <raeburn@mit.edu>
+
+	* kvno.c: Include stdlib.h.
+	(xusage): Renamed from usage; all callers changed.
+
 2002-07-26  Ken Raeburn  <raeburn@mit.edu>
 
 	* kvno.c (do_v5_kvno): New function, split out from main.
