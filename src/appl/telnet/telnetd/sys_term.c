@@ -1352,7 +1352,6 @@ startslave(host, autologin, autoname)
 	char *autoname;
 {
 	register int i;
-	long time();
 #ifdef	NEWINIT
 	extern char *ptyip;
 	struct init_request request;

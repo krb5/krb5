@@ -1,5 +1,11 @@
 Mon Nov  7 22:16:51 1994  Theodore Y. Ts'o  (tytso@dcl)
 
+        * configure.in: Check for sys/time.h and time.h.
+
+	* defs.h: Pull in <sys/time.h> and <time.h> as necessary.
+
+	* sys_term.c (startslave): Don't define time() manually.
+
 	* configure.in: Add check for util library (needed for the Alpha)
 
 Thu Sep 29 22:51:52 1994  Theodore Y. Ts'o  (tytso@dcl)

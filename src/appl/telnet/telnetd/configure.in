@@ -23,6 +23,8 @@ AC_COMPILE_CHECK([cc_t],[#include <termio.h>],
 [cc_t foo;],,AC_DEFINE(NO_CC_T))
 fi
 fi
+AC_HEADER_TIME
+AC_CHECK_HEADERS(sys/time.h)
 AC_HAVE_FUNCS(vhangup)
 AC_FUNC_CHECK(grantpt,AC_DEFINE(STREAMSPTY))
 AC_FUNC_CHECK(gettosbyname,AC_DEFINE(HAS_GETTOS))
