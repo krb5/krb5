@@ -38,7 +38,7 @@ typedef	unsigned int	krb5_ui_4;
 #endif
 
 #ifndef __OK
- Error:  must define word size!
+ #error:  must define word size!
 #endif /* __OK */
 
 #undef __OK
