@@ -341,11 +341,11 @@ COMPILE_ET-k5= $(BUILDTOP)/util/et/compile_et -d $(SRCTOP)/util/et
 #.et.c: ; $(COMPILE_ET) $<
 
 .et.h:
-	set -x ; d=ettmp$$$$ ; (cp $< $$d.et && $(COMPILE_ET) $$d.et && mv $$d.h $*.h) ; \
+	d=ettmp$$$$ ; (cp $< $$d.et && $(COMPILE_ET) $$d.et && mv $$d.h $*.h) ; \
 		e=$$? ; rm -f $$d.* ; exit $$e
 
 .et.c:
-	set -x ; d=ettmp$$$$ ; (cp $< $$d.et && $(COMPILE_ET) $$d.et && mv $$d.c $*.c) ; \
+	d=ettmp$$$$ ; (cp $< $$d.et && $(COMPILE_ET) $$d.et && mv $$d.c $*.c) ; \
 		e=$$? ; rm -f $$d.* ; exit $$e
 
 # rule to make object files
