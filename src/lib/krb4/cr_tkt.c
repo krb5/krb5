@@ -33,10 +33,9 @@
 
 static int
 krb_cr_tkt_int (KTEXT tkt, unsigned int flags_in, char *pname, 
-			  char *pinstance, char *prealm, long paddress,
-			  char *session, int life, long time_sec, 
-			  char *sname, char *sinstance, C_Block key, 
-			  krb5_keyblock *k5key);
+		char *pinstance, char *prealm, long paddress,
+		char *session, int life, long time_sec, 
+		char *sname, char *sinstance);
 
 /*
  * Create ticket takes as arguments information that should be in a
@@ -97,7 +96,7 @@ int
 krb_create_ticket(tkt, flags, pname, pinstance, prealm, paddress,
 		  session, life, time_sec, sname, sinstance, key)
     KTEXT   tkt;                /* Gets filled in by the ticket */
-    unsigned int flags;        /* Various Kerberos flags */
+    unsigned int flags;         /* Various Kerberos flags */
     char    *pname;             /* Principal's name */
     char    *pinstance;         /* Principal's instance */
     char    *prealm;            /* Principal's authentication domain */
@@ -109,16 +108,27 @@ krb_create_ticket(tkt, flags, pname, pinstance, prealm, paddress,
     char    *sinstance;         /* Instance Name */
     C_Block key;                /* Service's secret key */
 {
-    return krb_cr_tkt_int(tkt, flags, pname, pinstance, prealm, paddress,
-			  session, life, time_sec, sname, sinstance,
-			  key, NULL);
+    int kerr;
+    Key_schedule key_s;
+
+    kerr = krb_cr_tkt_int(tkt, flags, pname, pinstance, prealm, paddress,
+			  session, life, time_sec, sname, sinstance);
+    if (kerr)
+	return kerr;
+
+    /* Encrypt the ticket in the services key */
+    key_sched(key, key_s);
+    pcbc_encrypt((C_Block *)tkt->dat, (C_Block *)tkt->dat,
+		 (long)tkt->length, key_s, (C_Block *)key, 1);
+    memset(key_s, 0, sizeof(key_s));
+    return 0;
 }
 
 int
 krb_cr_tkt_krb5(tkt, flags, pname, pinstance, prealm, paddress,
 		  session, life, time_sec, sname, sinstance, k5key)
     KTEXT   tkt;                /* Gets filled in by the ticket */
-    unsigned int flags;        /* Various Kerberos flags */
+    unsigned int flags;         /* Various Kerberos flags */
     char    *pname;             /* Principal's name */
     char    *pinstance;         /* Principal's instance */
     char    *prealm;            /* Principal's authentication domain */
@@ -130,16 +140,49 @@ krb_cr_tkt_krb5(tkt, flags, pname, pinstance, prealm, paddress,
     char    *sinstance;         /* Instance Name */
     krb5_keyblock *k5key;	/* NULL if not present */
 {
-    C_Block key;
+    int kerr;
+    krb5_data in;
+    krb5_enc_data out;
+    krb5_error_code ret;
+    size_t enclen;
 
-    return krb_cr_tkt_int(tkt, flags, pname, pinstance, prealm, paddress,
-			  session, life, time_sec, sname, sinstance,
-			  key, k5key);
+    kerr = krb_cr_tkt_int(tkt, flags, pname, pinstance, prealm,
+			  paddress, session, life, time_sec,
+			  sname, sinstance);
+    if (kerr)
+	return kerr;
+
+    /* Encrypt the ticket in the services key */
+    in.length = tkt->length;
+    in.data = (char *)tkt->dat;
+    /* XXX assumes context arg is ignored */
+    ret = krb5_c_encrypt_length(NULL, k5key->enctype,
+				(size_t)in.length, &enclen);
+    if (ret)
+	return KFAILURE;
+    out.ciphertext.length = enclen;
+    out.ciphertext.data = malloc(enclen);
+    if (out.ciphertext.data == NULL)
+	return KFAILURE;	/* XXX maybe ENOMEM? */
+
+    /* XXX assumes context arg is ignored */
+    ret = krb5_c_encrypt(NULL, k5key, KRB5_KEYUSAGE_KDC_REP_TICKET,
+			 NULL, &in, &out);
+    if (ret) {
+	free(out.ciphertext.data);
+	return KFAILURE;
+    } else {
+	tkt->length = out.ciphertext.length;
+	memcpy(tkt->dat, out.ciphertext.data, out.ciphertext.length);
+	memset(out.ciphertext.data, 0, out.ciphertext.length);
+	free(out.ciphertext.data);
+    }
+    return 0;
 }
 
 static int
 krb_cr_tkt_int(tkt, flags_in, pname, pinstance, prealm, paddress,
-	       session, life, time_sec, sname, sinstance, key, k5key)
+	       session, life, time_sec, sname, sinstance)
     KTEXT   tkt;                /* Gets filled in by the ticket */
     unsigned int flags_in;      /* Various Kerberos flags */
     char    *pname;             /* Principal's name */
@@ -151,10 +194,7 @@ krb_cr_tkt_int(tkt, flags_in, pname, pinstance, prealm, paddress,
     long    time_sec;           /* Issue time and date */
     char    *sname;             /* Service Name */
     char    *sinstance;         /* Instance Name */
-    C_Block key;                /* Service's secret key */
-    krb5_keyblock *k5key;	/* NULL if not present */
 {
-    Key_schedule key_s;
     register unsigned char *data; /* running index into ticket */
     size_t pnamelen, pinstlen, prealmlen, snamelen, sinstlen;
     struct in_addr paddr;
@@ -210,46 +250,5 @@ krb_cr_tkt_int(tkt, flags_in, pname, pinstance, prealm, paddress,
     /* guarantee null padded ticket to multiple of 8 bytes */
     memset(data, 0, 7);
     tkt->length = ((data - tkt->dat + 7) / 8) * 8;
-
-#ifndef NOENCRYPTION
-    /* Encrypt the ticket in the services key */
-    if (k5key != NULL) {
-	/* block locals */
-	krb5_data in;
-	krb5_enc_data out;
-	krb5_error_code ret;
-	size_t enclen;
-
-	in.length = tkt->length;
-	in.data = (char *)tkt->dat;
-	/* XXX assumes context arg is ignored */
-	ret = krb5_c_encrypt_length(NULL, k5key->enctype,
-				    (size_t)in.length, &enclen);
-	if (ret)
-	    return KFAILURE;
-	out.ciphertext.length = enclen;
-	out.ciphertext.data = malloc(enclen);
-	if (out.ciphertext.data == NULL)
-	    return KFAILURE;	/* XXX maybe ENOMEM? */
-
-	/* XXX assumes context arg is ignored */
-	ret = krb5_c_encrypt(NULL, k5key, KRB5_KEYUSAGE_KDC_REP_TICKET,
-			     NULL, &in, &out);
-	if (ret) {
-	    free(out.ciphertext.data);
-	    return KFAILURE;
-	} else {
-	    tkt->length = out.ciphertext.length;
-	    memcpy(tkt->dat, out.ciphertext.data, out.ciphertext.length);
-	    memset(out.ciphertext.data, 0, out.ciphertext.length);
-	    free(out.ciphertext.data);
-	}
-    } else {
-	key_sched(key, key_s);
-	pcbc_encrypt((C_Block *)tkt->dat, (C_Block *)tkt->dat,
-		     (long)tkt->length, key_s, (C_Block *)key, 1);
-	memset(key_s, 0, sizeof(key_s));
-    }
-#endif /* !NOENCRYPTION */
     return 0;
 }
