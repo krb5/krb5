@@ -11,12 +11,14 @@ OBJS=	default.o \
 	destroy.o \
 	resolve.o \
 	init.o \
-	dir.o
+	dir.o \
+	store.o
 
 SRCS=	default.c \
 	destroy.c \
 	resolve.c \
 	init.c \
-	dir.c
+	dir.c \
+	store.c
 
 NormalLibraryTarget(cred,$(OBJS))
