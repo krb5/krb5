@@ -202,6 +202,9 @@ krb5_boolean krb5_principal_compare
 int krb5_fulladdr_order
 	PROTOTYPE((krb5_fulladdr *,
 		   krb5_fulladdr *));
+krb5_error_code krb5_copy_keyblock
+    PROTOTYPE((krb5_keyblock *,
+	       krb5_keyblock *));
 
 /* libkt.spec */
 krb5_error_code krb5_kt_register
