@@ -15,7 +15,43 @@ set timeout 100
 set stty_init {erase \^h kill \^u}
 set env(TERM) dumb
 
-set des3_krbtgt 1
+set des3_krbtgt 0
+set supported_enctypes "des-cbc-crc:normal"
+set kdc_supported_enctypes "des-cbc-crc:normal"
+
+set MULTIPASS {
+    {
+	des
+	des3_krbtgt=0
+	{supported_enctypes="des-cbc-crc:normal"}
+	{kdc_supported_enctypes="des-cbc-crc:normal"}
+	{dummy=[verbose -log "DES TGT, DES enctype"]}
+    }
+    {
+	des.des3tgt
+	des3_krbtgt=1
+	{supported_enctypes="des-cbc-crc:normal"}
+	{kdc_supported_enctypes="des3-cbc-sha1:normal des-cbc-crc:normal"}
+	{dummy=[verbose -log "DES3 TGT, DES enctype"]}
+    }
+    {
+	des3
+	des3_krbtgt=1
+	{supported_enctypes="des3-cbc-sha1:normal des-cbc-crc:normal"}
+	{kdc_supported_enctypes="des3-cbc-sha1:normal des-cbc-crc:normal"}
+	{dummy=[verbose -log "DES3 TGT, DES3 + DES enctypes"]}
+    }
+    {
+	allenctypes
+	des3_krbtgt=1
+	{supported_enctypes="des3-cbc-sha1:normal des-cbc-crc:normal des-cbc-md5:normal des-cbc-crc:v4 des-cbc-md5:norealm"}
+	{kdc_supported_enctypes="des3-cbc-sha1:normal des-cbc-crc:normal des-cbc-md5:normal des-cbc-crc:v4 des-cbc-md5:norealm"}
+	{dummy=[verbose -log "DES3 TGT, many DES3 + DES enctypes"]}
+    }
+}
+
+set last_passname_conf ""
+set last_passname_db ""
 
 # We do everything in a temporary directory.
 if ![file isdirectory tmpdir] {catch "exec mkdir tmpdir" status}
@@ -116,6 +152,14 @@ if ![info exists T_INETD] {
     set T_INETD [findfile $objdir/t_inetd]
 }
 
+if ![info exists RLOGIN] {
+    set RLOGIN rlogin
+}
+
+if ![info exists RLOGIN_FLAGS] {
+    set RLOGIN_FLAGS ""
+}
+
 # We use a couple of variables to hold shell prompts which may be
 # overridden by the user.
 
@@ -126,6 +170,12 @@ if ![info exists ROOT_PROMPT] {
 if ![info exists SHELL_PROMPT] {
     set SHELL_PROMPT "(%|#|>|\\$) $"
 }
+
+verbose "setting up onexit handler (old handler=[exit -onexit])"
+exit -onexit [concat {
+    verbose "calling stop_kerberos_daemons (onexit handler)"
+    stop_kerberos_daemons;
+} [exit -onexit]]
 
 # check_k5login
 # Most of the tests won't work if the user has a .k5login file, unless
@@ -151,8 +201,9 @@ proc check_k5login { testname } {
     }
     close $file
 
-    untested "$testname test requires that your name appear in your ~/.k5login"
-    untested "file with no realm or instance."
+    note "$testname test requires that your name appear in your ~/.k5login"
+    note "file with no realm or instance."
+    unsupported "$testname"
 
     return 0
 }
@@ -169,8 +220,7 @@ proc check_exit_status { testname } {
     verbose "wait -i $spawn_id returned $status_list ($testname)"
     catch "close -i $spawn_id"
     if { [lindex $status_list 2] != 0 || [lindex $status_list 3] != 0 } {
-	send_log "exit status: $status_list\n"
-	verbose "exit status: $status_list"
+	verbose -log "exit status: $status_list"
 	fail "$testname"
 	return 0
     } else {
@@ -266,15 +316,14 @@ proc get_hostname { } {
 
     catch "exec $RESOLVE -q >tmpdir/hostname" exec_output
     if ![string match "" $exec_output] {
-	send_log "$exec_output\n"
-	verbose $exec_output
-	send_error "ERROR: can't get hostname\n"
+	verbose -log $exec_output
+	perror "can't get hostname"
 	if {$setup == 0} restore_runtime_env
 	return 0
     }
     set file [open tmpdir/hostname r]
     if { [ gets $file hostname ] == -1 } {
-	send_error "ERROR: no output from hostname\n"
+	perror "no output from hostname"
 	if {$setup == 0} restore_runtime_env
 	return 0
     }
@@ -301,39 +350,49 @@ proc setup_kerberos_files { } {
     global hostname
     global domain
     global tmppwd
+    global default_tgt_enctypes
+    global supported_enctypes
+    global kdc_supported_enctypes
+    global last_passname_conf
+    global multipass_name
 
     if ![get_hostname] { 
 	return 0
     }
 
     # Create a krb5.conf file.
-    if ![file exists tmpdir/krb5.conf] {
-    set conffile [open tmpdir/krb5.conf w]
-    puts $conffile "\[libdefaults\]"
-    puts $conffile "	default_realm = $REALMNAME"
-#    puts $conffile "default_tgs_enctypes = des-cbc-md5 des-cbc-crc"
-    puts $conffile ""
-    puts $conffile "\[realms\]"
-    puts $conffile "	$REALMNAME = \{"
-    puts $conffile "		kdc = $hostname:3088"
-    puts $conffile "		admin_server = $hostname:3750"
-    puts $conffile "		kpasswd_server = $hostname:3751"
-    puts $conffile "		default_domain = $domain"
-    puts $conffile "	\}"
-    puts $conffile ""
-    puts $conffile "\[domain_realm\]"
-    puts $conffile "	.$domain = $REALMNAME"
-    puts $conffile "	$domain = $REALMNAME"
-    puts $conffile ""
-    puts $conffile "\[logging\]"
-    puts $conffile "	admin_server = FILE:$tmppwd/kadmind5.log"
-    puts $conffile "	kdc = FILE:$tmppwd/kdc.log"
-    puts $conffile "	default = FILE:$tmppwd/others.log"
-    close $conffile
+    if { ![file exists tmpdir/krb5.conf] \
+	    || $last_passname_conf != $multipass_name } {
+	set conffile [open tmpdir/krb5.conf w]
+	puts $conffile "\[libdefaults\]"
+	puts $conffile "	default_realm = $REALMNAME"
+	#    puts $conffile "default_tgs_enctypes = des-cbc-md5 des-cbc-crc"
+	if [info exists default_tgt_enctypes] {
+	    puts $conffile "default_tgs_enctypes = $default_tgs_enctypes"
+	}
+	puts $conffile ""
+	puts $conffile "\[realms\]"
+	puts $conffile "	$REALMNAME = \{"
+	puts $conffile "		kdc = $hostname:3088"
+	puts $conffile "		admin_server = $hostname:3750"
+	puts $conffile "		kpasswd_server = $hostname:3751"
+	puts $conffile "		default_domain = $domain"
+	puts $conffile "	\}"
+	puts $conffile ""
+	puts $conffile "\[domain_realm\]"
+	puts $conffile "	.$domain = $REALMNAME"
+	puts $conffile "	$domain = $REALMNAME"
+	puts $conffile ""
+	puts $conffile "\[logging\]"
+	puts $conffile "	admin_server = FILE:$tmppwd/kadmind5.log"
+	puts $conffile "	kdc = FILE:$tmppwd/kdc.log"
+	puts $conffile "	default = FILE:$tmppwd/others.log"
+	close $conffile
     }
 
     # Create a kdc.conf file.
-    if ![file exists tmpdir/kdc.conf] {
+    if { ![file exists tmpdir/kdc.conf] \
+	    || $last_passname_conf != $multipass_name } {
 	set conffile [open tmpdir/kdc.conf w]
 	puts $conffile "\[kdcdefaults\]"
 	puts $conffile "	kdc_ports = 3085,3086,3087,3088,3089"
@@ -352,8 +411,10 @@ proc setup_kerberos_files { } {
 	puts $conffile "		max_renewable_life = 3:00:00"
 	puts $conffile "		master_key_type = des-cbc-md5"
 	puts $conffile "		master_key_name = master/key"
-	puts $conffile "		supported_enctypes = des3-cbc-sha1:normal des-cbc-crc:normal des-cbc-md5:normal des-cbc-crc:v4 des-cbc-md5:norealm"
-	puts $conffile "		kdc_supported_enctypes = des3-cbc-sha1:normal des-cbc-crc:normal des-cbc-md5:normal des-cbc-crc:v4 des-cbc-md5:norealm"
+	puts $conffile "		supported_enctypes = $supported_enctypes"
+	puts $conffile "		kdc_supported_enctypes = $kdc_supported_enctypes"
+	#	puts $conffile "		supported_enctypes = des3-cbc-sha1:normal des-cbc-crc:normal des-cbc-md5:normal des-cbc-crc:v4 des-cbc-md5:norealm"
+	#	puts $conffile "		kdc_supported_enctypes = des3-cbc-sha1:normal des-cbc-crc:normal des-cbc-md5:normal des-cbc-crc:v4 des-cbc-md5:norealm"
 	puts $conffile "		kdc_ports = 3088"
 	puts $conffile "		default_principal_expiration = 2037.12.31.23.59.59"
 	puts $conffile "		default_principal_flags = -postdateable forwardable"
@@ -369,6 +430,7 @@ proc setup_kerberos_files { } {
 	close $aclfile
     }
 
+    set last_passname_conf $multipass_name
     return 1
 }
 
@@ -538,9 +600,8 @@ proc setup_kadmind_srvtab {  } {
 
     catch "exec mv -f admin-new-srvtab changepw-new-srvtab" exec_output
     if ![string match "" $exec_output] {
-	send_log "$exec_output\n"
-	verbose $exec_output
-	send_error "ERROR: can't mv admin-new-srvtab\n"
+	verbose -log "$exec_output"
+	perror "can't mv admin-new-srvtab"
 	return 0
     }
 
@@ -552,15 +613,14 @@ proc setup_kadmind_srvtab {  } {
     expect_after
     if ![check_exit_status "kadmin.local admin-keytab"] {
 	catch "exec rm -f tmpdir/admin-keytab"
-	send_error "ERROR: kadmin.local admin-keytab exited abnormally\n"
+	perror "kadmin.local admin-keytab exited abnormally"
 	return 0
     }
 
     catch "exec mv -f changepw-new-srvtab tmpdir/admin-keytab" exec_output
     if ![string match "" $exec_output] {
-	send_log "$exec_output\n"
-	verbose $exec_output
-	send_error "ERROR: can't mv new admin-keytab\n"
+	verbose -log "$exec_output"
+	perror "can't mv new admin-keytab"
 	return 0
     }
 
@@ -583,8 +643,11 @@ proc setup_kerberos_db { standalone } {
     global tmppwd
     global spawn_id
     global des3_krbtgt
+    global multipass_name
+    global last_passname_db
 
-    if {!$standalone && [file exists tmpdir/db.ok]} {
+    if {!$standalone && [file exists tmpdir/db.ok] \
+	&& $last_passname_db == $multipass_name} {
 	return 1
     }
 
@@ -785,6 +848,7 @@ proc setup_kerberos_db { standalone } {
 	pass "kadmin_local"
     }
 
+    set last_passname_db $multipass_name
     return 1
 }
 
@@ -848,13 +912,23 @@ proc start_kerberos_daemons { standalone } {
     }
 
     if {$count >= $retry} {
-	fail "krb5kdc"
+	if {$standalone} {
+	    verbose -log "krb5kdc startup timed out"
+	    fail "krb5kdc"
+	} else {
+	    perror "krb5kdc startup timed out"
+	}
 	stop_kerberos_daemons
 	return 0
     }
 
     if ![regexp "commencing operation" [tail1 $kdc_lfile]] {
-	fail "krb5kdc"
+	if {$standalone} {
+	    verbose -log "krb5kdc failed to start"
+	    fail "krb5kdc"
+	} else {
+	    perror "krb5kdc failed to start"
+	}
 	stop_kerberos_daemons
 	return 0
     }
@@ -899,7 +973,12 @@ proc start_kerberos_daemons { standalone } {
     }
 
     if {$count >= $retry} {
-	fail "kadmin5 (starting)"
+	if {$standalone} {
+	    verbose -log "kadmind startup timed out"
+	    fail "kadmind"
+	} else {
+	    perror "kadmind startup timed out"
+	}
 	if [info exists start_save_ktname] {
 	   set env(KRB5_KTNAME) $start_save_ktname
 	   unset start_save_ktname
@@ -916,18 +995,33 @@ proc start_kerberos_daemons { standalone } {
 
     switch -regexp [tail1 $kadmind_lfile] {
 	"cannot initialize network" {
-	    fail "kadmind (network init)"
+	    if {$standalone} {
+		verbose -log "kadmind failed network init"
+		fail "kadmind"
+	    } else {
+		perror "kadmind failed network init"
+	    }
 	    stop_kerberos_daemons
 	    return 0
 	}
 	"cannot bind to network address" {
-	    fail "kadmind (bind)"
+	    if {$standalone} {
+		verbose -log "kadmind failed to bind socket"
+		fail "kadmind"
+	    } else {
+		perror "kadmind failed to bind socket"
+	    }
 	    stop_kerberos_daemons
 	    return 0
 	}
 	"starting" { }
 	default {
-	    fail "kadmind (startup)"
+	    if {$standalone} {
+		verbose -log "kadmind failed to start"
+		fail "kadmind"
+	    } else {
+		perror "kadmind failed to start"
+	    }
 	    stop_kerberos_daemons
 	    return 0
 	}
@@ -1133,9 +1227,8 @@ proc setup_srvtab { standalone {id host} } {
 
     catch "exec mv -f $hostname-new-srvtab tmpdir/srvtab" exec_output
     if ![string match "" $exec_output] {
-	send_log "$exec_output\n"
-	verbose $exec_output
-	send_error "ERROR: can't mv new srvtab\n"
+	verbose -log "$exec_output"
+	perror "can't mv new srvtab"
 	return 0
     }
 
@@ -1216,6 +1309,8 @@ proc setup_root_shell { testname } {
     global BINSH
     global ROOT_PROMPT
     global KEY
+    global RLOGIN
+    global RLOGIN_FLAGS
     global hostname
     global rlogin_spawn_id
     global rlogin_pid
@@ -1247,30 +1342,21 @@ proc setup_root_shell { testname } {
     #    send "rootpassword\r"
     #    exp_continue
 
-    spawn rlogin $hostname -l root
+    eval spawn $RLOGIN $hostname -l root $RLOGIN_FLAGS
     set rlogin_spawn_id $spawn_id
     set rlogin_pid [exp_pid]
     expect {
-	"word:" {
-	    untested "$testname test requires ability to rlogin as root"
-	    stop_root_shell
-	    return 0
-	}
-	"Kerberos rlogin failed" {
-	    untested "$testname test requires ability to rlogin as root"
-	    stop_root_shell
-	    return 0
-	}
-	eof {
-	    untested "$testname test requires ability to rlogin as root"
+	-re "word:|erberos rlogin failed|ection refused" {
+	    note "$testname test requires ability to rlogin as root"
+	    unsupported "$testname"
 	    stop_root_shell
 	    return 0
 	}
 	-re "$ROOT_PROMPT" { }
 	timeout {
-	    send_error "ERROR: timeout from rlogin $hostname -l root\n"
-	    send_error "ERROR: If you have an unusual root prompt,\n"
-	    send_error "ERROR: try running with ROOT_PROMPT=\"regexp\"\n"
+	    perror "timeout from rlogin $hostname -l root"
+	    perror "If you have an unusual root prompt,"
+	    perror "try running with ROOT_PROMPT=\"regexp\""
 	    stop_root_shell
 	    return 0
 	}
@@ -1278,13 +1364,13 @@ proc setup_root_shell { testname } {
 
     expect_after {
 	timeout {
-	    send_error "ERROR: timeout from rlogin $hostname -l root\n"
+	    perror "timeout from rlogin $hostname -l root"
 	    stop_root_shell
 	    catch "expect_after"
 	    return 0
 	}
 	eof {
-	    send_error "ERROR: eof from rlogin $hostname -l root\n"
+	    perror "eof from rlogin $hostname -l root"
 	    stop_root_shell
 	    catch "expect_after"
 	    return 0
@@ -1336,7 +1422,7 @@ proc setup_root_shell { testname } {
     expect {
 	-re "$ROOT_PROMPT" { }
 	"$dir:" {
-	    send_error "ERROR: root shell can not cd to $dir\n"
+	    perror "root shell can not cd to $dir"
 	    stop_root_shell
 	    return 0
 	}
@@ -1376,8 +1462,7 @@ proc check_date { date } {
     scan $date "%s %s %d %d:%d:%d %s %d" adow amon adom ahr amn asc atz ayr
     scan $ndate "%s %s %d %d:%d:%d %s %d" ndow nmon ndom nhr nmn nsc ntz nyr
     if { $atz != $ntz } {
-	verbose "date check failed: $atz != $ntz"
-	send_log "date check failed: $atz != $ntz\n"
+	verbose -log "date check failed: $atz != $ntz"
 	return 0
     }
     return 1

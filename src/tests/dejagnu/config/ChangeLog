@@ -1,3 +1,28 @@
+2000-07-02  Tom Yu  <tlyu@mit.edu>
+
+	* default.exp: Add rudimentary support for multiple passes.  For
+	now, iterate over a few combinations of des_krbtgt and assorted
+	enctype lists.  Will eventually allow for separate krb5.conf files
+	for clients and servers.  Add varibles RLOGIN and RLOGIN_FLAGS to
+	permit run-time configuration of rlogin program if necessary.  Set
+	up an onexit handler that calls stop_kerberos_daemons.  Replace
+	many uses of doubled-up send_log and verbose with single calls to
+	verbose -log.  Replace instances of send_error with perror where
+	appropriate, since this will cause successor test to fail, which
+	is usually what we want.
+	(setup_root_shell): Replace calls to untested with calls to
+	unsupported; also use note for explanatory text previously printed
+	using untested.  Add match string for "connection refused" and
+	collapse common code into a single expect clause by using the -re
+	flag.
+	(start_kerberos_daemons): Conditionalize calls to fail based on
+	$standalone; in the !$standalone case, call perror instead.  Calls
+	to fail and pass for a given test should have consistent strings,
+	and extraneous calls to fail should not be made in order to keep
+	the total number of passed and failed tests constant regardless of
+	success of setup steps.  Much remains to be done in this area
+	though.
+
 2000-05-31  Ken Raeburn  <raeburn@mit.edu>
 
 	* default.exp (setup_kerberos_files): Include des3 in supported
