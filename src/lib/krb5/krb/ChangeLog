@@ -1,3 +1,8 @@
+2000-01-27  Ken Raeburn  <raeburn@raeburn.org>
+
+	* init_ctx.c (get_profile_etype_list): Discard DESONLY changes
+	from 1999-09-01, and revert call sites.
+
 1999-12-02  Ken Raeburn  <raeburn@mit.edu>
 
 	* init_ctx.c (get_profile_etype_list): Report an error if no
