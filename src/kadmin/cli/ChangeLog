@@ -1,3 +1,8 @@
+Thu Aug 29 16:08:10 1996  Jeff Bigler  <jcb@mit.edu>
+
+	* Makefile.in (install): added man pages for kadmin and
+	kadmin.local
+
 Fri Aug 23 14:16:18 1996  Sam Hartman  <hartmans@mit.edu>
 
 	* configure.in: Use shared libaries if present.
