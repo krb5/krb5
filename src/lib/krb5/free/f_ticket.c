@@ -2,7 +2,8 @@
  * $Source$
  * $Author$
  *
- * Copyright 1990 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991 by the Massachusetts Institute of Technology.
+ * All Rights Reserved.
  *
  * For copying and distribution information, please see the file
  * <krb5/copyright.h>.
@@ -23,6 +24,8 @@ void
 krb5_free_ticket(val)
 krb5_ticket *val;
 {
+    if (val->server)
+	krb5_free_principal(val->server);
     if (val->enc_part.ciphertext.data)
 	xfree(val->enc_part.ciphertext.data);
     if (val->enc_part2)
