@@ -57,6 +57,13 @@
  *		address if the responder to the broadcast.
  */
 
+#define pmap_set	gssrpc_pmap_set
+#define pmap_unset	gssrpc_pmap_unset
+#define pmap_getmaps	gssrpc_pmap_getmaps
+#define pmap_rmtcall	gssrpc_pmap_rmtcall
+#define clnt_broadcast	gssrpc_clnt_broadcast
+#define pmap_getport	gssrpc_pmap_getport
+
 extern bool_t		pmap_set();
 extern bool_t		pmap_unset();
 extern struct pmaplist	*pmap_getmaps();

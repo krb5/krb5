@@ -39,7 +39,7 @@ static char sccsid[] = "@(#)svc_simple.c 1.18 87/08/11 Copyr 1984 Sun Micro";
  */
 
 #include <stdio.h>
-#include <rpc/rpc.h>
+#include <gssrpc/rpc.h>
 #include <sys/socket.h>
 #include <netdb.h>
 
@@ -52,9 +52,9 @@ static struct proglst {
 } *proglst;
 static void universal();
 static SVCXPRT *transp;
-struct proglst *pl;
+static struct proglst *pl;
 
-registerrpc(prognum, versnum, procnum, progname, inproc, outproc)
+gssrpc_registerrpc(prognum, versnum, procnum, progname, inproc, outproc)
 	char *(*progname)();
 	xdrproc_t inproc, outproc;
 {

@@ -160,6 +160,7 @@ struct rpc_msg {
  * 	XDR *xdrs;
  * 	struct rpc_msg *cmsg;
  */
+#define xdr_callmsg	gssrpc_xdr_callmsg
 extern bool_t	xdr_callmsg();
 
 /*
@@ -168,6 +169,7 @@ extern bool_t	xdr_callmsg();
  * 	XDR *xdrs;
  * 	struct rpc_msg *cmsg;
  */
+#define xdr_callhdr	gssrpc_xdr_callhdr
 extern bool_t	xdr_callhdr();
 
 /*
@@ -176,6 +178,7 @@ extern bool_t	xdr_callhdr();
  * 	XDR *xdrs;
  * 	struct rpc_msg *rmsg;
  */
+#define xdr_replymsg	gssrpc_xdr_replymsg
 extern bool_t	xdr_replymsg();
 
 /*
@@ -184,4 +187,6 @@ extern bool_t	xdr_replymsg();
  * 	struct rpc_msg *msg;
  * 	struct rpc_err *error;
  */
+#define _seterr_reply	_gssrpc_seterr_reply
+#define sunrpc_seterr_reply	_seterr_reply
 extern void	_seterr_reply();

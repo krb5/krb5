@@ -42,7 +42,7 @@ static char sccsid[] = "@(#)clnt_raw.c 1.22 87/08/11 Copyr 1984 Sun Micro";
  * any interference from the kernal.
  */
 
-#include <rpc/rpc.h>
+#include <gssrpc/rpc.h>
 
 #define MCALL_MSG_SIZE 24
 
@@ -190,7 +190,7 @@ call_again:
 		}
 		if (msg.acpted_rply.ar_verf.oa_base != NULL) {
 			xdrs->x_op = XDR_FREE;
-			(void)xdr_opaque_auth(xdrs, &(msg.acpted_rply.ar_verf));
+			(void)gssrpc_xdr_opaque_auth(xdrs, &(msg.acpted_rply.ar_verf));
 		}
 	}
 

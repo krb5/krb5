@@ -39,10 +39,10 @@ static char sccsid[] = "@(#)authunix_prot.c 1.15 87/08/11 Copyr 1984 Sun Micro";
  */
 
 
-#include <rpc/types.h>
-#include <rpc/xdr.h>
-#include <rpc/auth.h>
-#include <rpc/auth_unix.h>
+#include <gssrpc/types.h>
+#include <gssrpc/xdr.h>
+#include <gssrpc/auth.h>
+#include <gssrpc/auth_unix.h>
 
 /*
  * XDR for unix authentication parameters.

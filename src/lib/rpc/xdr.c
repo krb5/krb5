@@ -44,8 +44,8 @@ static char sccsid[] = "@(#)xdr.c 1.35 87/08/12";
 #include <stdio.h>
 #include <string.h>
 
-#include <rpc/types.h>
-#include <rpc/xdr.h>
+#include <gssrpc/types.h>
+#include <gssrpc/xdr.h>
 
 /*
  * constants specific to the xdr "protocol"
@@ -64,7 +64,7 @@ static char xdr_zero[BYTES_PER_XDR_UNIT] = { 0, 0, 0, 0 };
  * Not a filter, but a convenient utility nonetheless
  */
 void
-xdr_free(proc, objp)
+gssrpc_xdr_free(proc, objp)
 	xdrproc_t proc;
 	char *objp;
 {

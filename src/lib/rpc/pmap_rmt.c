@@ -39,10 +39,10 @@ static char sccsid[] = "@(#)pmap_rmt.c 1.21 87/08/27 Copyr 1984 Sun Micro";
  * Copyright (C) 1984, Sun Microsystems, Inc.
  */
 
-#include <rpc/rpc.h>
-#include <rpc/pmap_prot.h>
-#include <rpc/pmap_clnt.h>
-#include <rpc/pmap_rmt.h>
+#include <gssrpc/rpc.h>
+#include <gssrpc/pmap_prot.h>
+#include <gssrpc/pmap_clnt.h>
+#include <gssrpc/pmap_rmt.h>
 #include <sys/socket.h>
 #ifdef sun
 #include <sys/sockio.h>
@@ -335,7 +335,7 @@ clnt_broadcast(prog, vers, proc, xargs, argsp, xresults, resultsp, eachresult)
 		msg.acpted_rply.ar_results.where = (caddr_t)&r;
                 msg.acpted_rply.ar_results.proc = xdr_rmtcallres;
 		readfds = mask;
-		switch (select(_rpc_dtablesize(), &readfds, (fd_set *)NULL, 
+		switch (select(_gssrpc_rpc_dtablesize(), &readfds, (fd_set *)NULL, 
 			       (fd_set *)NULL, &t)) {
 
 		case 0:  /* timed out */

@@ -42,7 +42,7 @@ static char sccsid[] = "@(#)svc_tcp.c 1.21 87/08/11 Copyr 1984 Sun Micro";
  */
 
 #include <stdio.h>
-#include <rpc/rpc.h>
+#include <gssrpc/rpc.h>
 #include <sys/socket.h>
 #include <errno.h>
 #include <stdlib.h>
@@ -140,7 +140,7 @@ svctcp_create(sock, sendsize, recvsize)
 	}
 	memset((char *)&addr, 0, sizeof (addr));
 	addr.sin_family = AF_INET;
-	if (bindresvport(sock, &addr)) {
+	if (gssrpc_bindresvport(sock, &addr)) {
 		addr.sin_port = 0;
 		(void)bind(sock, (struct sockaddr *)&addr, len);
 	}
@@ -184,7 +184,7 @@ svctcp_create(sock, sendsize, recvsize)
  * descriptor as its first input.
  */
 SVCXPRT *
-svcfd_create(fd, sendsize, recvsize)
+gssrpc_svcfd_create(fd, sendsize, recvsize)
 	int fd;
 	unsigned int sendsize;
 	unsigned int recvsize;
@@ -318,7 +318,7 @@ readtcp(xprt, buf, len)
 #endif /* def FD_SETSIZE */
 	do {
 		readfds = mask;
-		if (select(_rpc_dtablesize(), &readfds, (fd_set*)NULL,
+		if (select(_gssrpc_rpc_dtablesize(), &readfds, (fd_set*)NULL,
 			   (fd_set*)NULL, &wait_per_try) <= 0) {
 			if (errno == EINTR) {
 				continue;

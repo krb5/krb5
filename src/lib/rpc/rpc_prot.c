@@ -46,7 +46,7 @@ static char sccsid[] = "@(#)rpc_prot.c 1.36 87/08/11 Copyr 1984 Sun Micro";
 
 #include <sys/param.h>
 
-#include <rpc/rpc.h>
+#include <gssrpc/rpc.h>
 
 /* * * * * * * * * * * * * * XDR Authentication * * * * * * * * * * * */
 
@@ -55,7 +55,7 @@ static char sccsid[] = "@(#)rpc_prot.c 1.36 87/08/11 Copyr 1984 Sun Micro";
  * (see auth.h)
  */
 bool_t
-xdr_opaque_auth(xdrs, ap)
+gssrpc_xdr_opaque_auth(xdrs, ap)
 	register XDR *xdrs;
 	register struct opaque_auth *ap;
 {
@@ -83,13 +83,13 @@ xdr_des_block(xdrs, blkp)
  * XDR the MSG_ACCEPTED part of a reply message union
  */
 bool_t 
-xdr_accepted_reply(xdrs, ar)
+gssrpc_xdr_accepted_reply(xdrs, ar)
 	register XDR *xdrs;   
 	register struct accepted_reply *ar;
 {
 
 	/* personalized union, rather than calling xdr_union */
-	if (! xdr_opaque_auth(xdrs, &(ar->ar_verf)))
+	if (! gssrpc_xdr_opaque_auth(xdrs, &(ar->ar_verf)))
 		return (FALSE);
 	if (! xdr_enum(xdrs, (enum_t *)&(ar->ar_stat)))
 		return (FALSE);
@@ -110,7 +110,7 @@ xdr_accepted_reply(xdrs, ar)
  * XDR the MSG_DENIED part of a reply message union
  */
 bool_t 
-xdr_rejected_reply(xdrs, rr)
+gssrpc_xdr_rejected_reply(xdrs, rr)
 	register XDR *xdrs;
 	register struct rejected_reply *rr;
 {
@@ -132,8 +132,8 @@ xdr_rejected_reply(xdrs, rr)
 }
 
 static struct xdr_discrim reply_dscrm[3] = {
-	{ (int)MSG_ACCEPTED, xdr_accepted_reply },
-	{ (int)MSG_DENIED, xdr_rejected_reply },
+	{ (int)MSG_ACCEPTED, gssrpc_xdr_accepted_reply },
+	{ (int)MSG_DENIED, gssrpc_xdr_rejected_reply },
 	{ __dontcare__, NULL_xdrproc_t } };
 
 /*

@@ -37,31 +37,36 @@
 #ifndef __RPC_HEADER__
 #define __RPC_HEADER__
 
-#include <rpc/types.h>		/* some typedefs */
+#include <gssrpc/types.h>		/* some typedefs */
 #include <netinet/in.h>
 
 /* external data representation interfaces */
-#include <rpc/xdr.h>		/* generic (de)serializer */
+#include <gssrpc/xdr.h>		/* generic (de)serializer */
 
 /* Client side only authentication */
-#include <rpc/auth.h>		/* generic authenticator (client side) */
+#include <gssrpc/auth.h>		/* generic authenticator (client side) */
 
 /* Client side (mostly) remote procedure call */
-#include <rpc/clnt.h>		/* generic rpc stuff */
+#include <gssrpc/clnt.h>		/* generic rpc stuff */
 
 /* semi-private protocol headers */
-#include <rpc/rpc_msg.h>	/* protocol for rpc messages */
-#include <rpc/auth_unix.h>	/* protocol for unix style cred */
+#include <gssrpc/rpc_msg.h>	/* protocol for rpc messages */
+#include <gssrpc/auth_unix.h>	/* protocol for unix style cred */
 /*
  *  Uncomment-out the next line if you are building the rpc library with    
  *  DES Authentication (see the README file in the secure_rpc/ directory).
  */
-/*#include <rpc/auth_des.h>	protocol for des style cred */
+/*#include <gssrpc/auth_des.h>	protocol for des style cred */
 
 /* Server side only remote procedure callee */
-#include <rpc/svc_auth.h>	/* service side authenticator */
-#include <rpc/svc.h>		/* service manager and multiplexer */
+#include <gssrpc/svc_auth.h>	/* service side authenticator */
+#include <gssrpc/svc.h>		/* service manager and multiplexer */
 
+/*
+ * Punt the rpc/netdb.h everywhere because it just makes things much more
+ * difficult.  We don't use the *rpcent functions anyway.
+ */
+#if 0
 /*
  * COMMENT OUT THE NEXT INCLUDE IF RUNNING ON SUN OS OR ON A VERSION
  * OF UNIX BASED ON NFSSRC.  These systems will already have the structures
@@ -72,6 +77,7 @@
 #include <netdb.h>
 #endif
 
-#include <rpc/netdb.h>	/* structures and routines to parse /etc/rpc */
+#include <gssrpc/netdb.h>	/* structures and routines to parse /etc/rpc */
+#endif
 
 #endif /* ndef __RPC_HEADER__ */

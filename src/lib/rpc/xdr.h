@@ -232,6 +232,29 @@ struct xdr_discrim {
 /*
  * These are the "generic" xdr routines.
  */
+#define xdr_void	gssrpc_xdr_void
+#define xdr_int		gssrpc_xdr_int
+#define xdr_u_int	gssrpc_xdr_u_int
+#define xdr_long	gssrpc_xdr_long
+#define xdr_u_long	gssrpc_xdr_u_long
+#define xdr_short	gssrpc_xdr_short
+#define xdr_u_short	gssrpc_xdr_u_short
+#define xdr_bool	gssrpc_xdr_bool
+#define xdr_enum	gssrpc_xdr_enum
+#define xdr_array	gssrpc_xdr_array
+#define xdr_bytes	gssrpc_xdr_bytes
+#define xdr_opaque	gssrpc_xdr_opaque
+#define xdr_string	gssrpc_xdr_string
+#define xdr_union	gssrpc_xdr_union
+#define xdr_char	gssrpc_xdr_char
+#define xdr_u_char	gssrpc_xdr_u_char
+#define xdr_vector	gssrpc_xdr_vector
+#define xdr_float	gssrpc_xdr_float
+#define xdr_double	gssrpc_xdr_double
+#define xdr_reference	gssrpc_xdr_reference
+#define xdr_pointer	gssrpc_xdr_pointer
+#define xdr_wrapstring	gssrpc_xdr_wrapstring
+
 extern bool_t	xdr_void();
 extern bool_t	xdr_int
 PROTOTYPE((XDR *, int *));
@@ -280,6 +303,10 @@ PROTOTYPE((XDR *, char **));
  * Common opaque bytes objects used by many rpc protocols;
  * declared here due to commonality.
  */
+#define xdr_netobj	gssrpc_xdr_netobj
+#define xdr_int32	gssrpc_xdr_int32
+#define xdr_u_int32	gssrpc_xdr_u_int32
+
 #define MAX_NETOBJ_SZ 1024 
 struct netobj {
 	unsigned int	n_len;
@@ -298,6 +325,16 @@ PROTOTYPE((XDR *, rpc_u_int32 *));
  * These are the public routines for the various implementations of
  * xdr streams.
  */
+#define xdrmem_create		gssrpc_xdrmem_create
+#define xdrstdio_create		gssrpc_xdrstdio_create
+#define xdrrec_create		gssrpc_xdrrec_create
+#define xdralloc_create		gssrpc_xdralloc_create
+#define xdralloc_release	gssrpc_xdralloc_release
+#define xdrrec_endofrecord	gssrpc_xdrrec_endofrecord
+#define xdrrec_skiprecord	gssrpc_xdrrec_skiprecord
+#define xdrrec_eof		gssrpc_xdrrec_eof
+#define xdralloc_getdata	gssrpc_xdralloc_getdata
+
 extern void   xdrmem_create();		/* XDR using memory buffers */
 extern void   xdrstdio_create();	/* XDR using stdio library */
 extern void   xdrrec_create();		/* XDR pseudo records for tcp */

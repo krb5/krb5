@@ -33,7 +33,7 @@ static char sccsid[] = "@(#)clnt_generic.c 1.4 87/08/11 (C) 1987 SMI";
 /*
  * Copyright (C) 1987, Sun Microsystems, Inc.
  */
-#include <rpc/rpc.h>
+#include <gssrpc/rpc.h>
 #include <sys/socket.h>
 #include <sys/errno.h>
 #include <netdb.h>

@@ -84,6 +84,7 @@ struct pmap {
 	rpc_u_int32 pm_port;
 };
 
+#define xdr_pmap	gssrpc_xdr_pmap
 extern bool_t xdr_pmap();
 
 struct pmaplist {
@@ -91,4 +92,5 @@ struct pmaplist {
 	struct pmaplist *pml_next;
 };
 
+#define xdr_pmaplist	gssrpc_xdr_pmaplist
 extern bool_t xdr_pmaplist();

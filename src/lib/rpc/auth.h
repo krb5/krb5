@@ -72,6 +72,7 @@ union des_block {
 	char c[8];
 };
 typedef union des_block des_block;
+#define xdr_des_block	gssrpc_xdr_des_block
 extern bool_t xdr_des_block();
 
 /*
@@ -151,6 +152,7 @@ typedef struct {
 		((*((auth)->ah_ops->ah_destroy))(auth))
 
 
+#define _null_auth	_gssrpc_null_auth
 extern struct opaque_auth _null_auth;
 
 
@@ -162,6 +164,10 @@ extern struct opaque_auth _null_auth;
  * Any style authentication.  These routines can be used by any
  * authentication style that does not use the wrap/unwrap functions.
  */
+
+#define authany_wrap	gssrpc_authany_wrap
+#define authany_unwrap	gssrpc_authany_unwrap
+
 int authany_wrap(), authany_unwrap();
 	
 /*
@@ -173,6 +179,11 @@ int authany_wrap(), authany_unwrap();
  *	int len;
  *	int *aup_gids;
  */
+#define authunix_create		gssrpc_authunix_create
+#define authunix_create_default	gssrpc_authunix_create_default
+#define authnone_create		gssrpc_authnone_create
+#define authdes_create		gssrpc_authdes_create
+
 extern AUTH *authunix_create();
 extern AUTH *authunix_create_default();	/* takes no parameters */
 extern AUTH *authnone_create();		/* takes no parameters */

@@ -174,6 +174,7 @@ struct svc_req {
  *	void (*dispatch)();
  *	int protocol;  like TCP or UDP, zero means do not register 
  */
+#define svc_register		gssrpc_svc_register
 extern bool_t	svc_register();
 
 /*
@@ -183,6 +184,7 @@ extern bool_t	svc_register();
  *	rpc_u_int32 prog;
  *	rpc_u_int32 vers;
  */
+#define svc_unregister		gssrpc_svc_unregister
 extern void	svc_unregister();
 
 /*
@@ -191,6 +193,7 @@ extern void	svc_unregister();
  * xprt_register(xprt)
  *	SVCXPRT *xprt;
  */
+#define xprt_register		gssrpc_xprt_register
 extern void	xprt_register();
 
 /*
@@ -199,6 +202,7 @@ extern void	xprt_register();
  * xprt_unregister(xprt)
  *	SVCXPRT *xprt;
  */
+#define xprt_unregister		gssrpc_xprt_unregister
 extern void	xprt_unregister();
 
 
@@ -231,6 +235,15 @@ extern void	xprt_unregister();
  * deadlock the caller and server processes!
  */
 
+#define svc_sendreply		gssrpc_svc_sendreply
+#define svcerr_decode		gssrpc_svcerr_decode
+#define svcerr_weakauth		gssrpc_svcerr_weakauth
+#define svcerr_noproc		gssrpc_svcerr_noproc
+#define svcerr_progvers		gssrpc_svcerr_progvers
+#define svcerr_auth		gssrpc_svcerr_auth
+#define svcerr_noprog		gssrpc_svcerr_noprog
+#define svcerr_systemerr	gssrpc_svcerr_systemerr
+
 extern bool_t	svc_sendreply();
 extern void	svcerr_decode();
 extern void	svcerr_weakauth();
@@ -255,18 +268,25 @@ extern void	svcerr_systemerr();
  * Global keeper of rpc service descriptors in use
  * dynamic; must be inspected before each call to select 
  */
+#define svc_fdset	gssrpc_svc_fdset
+#define svc_fds		gssrpc_svc_fds
 #ifdef FD_SETSIZE
-extern fd_set svc_fdset;
-#define svc_fds svc_fdset.fds_bits[0]	/* compatibility */
+extern fd_set gssrpc_svc_fdset;
+#define gssrpc_svc_fds gsssrpc_svc_fdset.fds_bits[0]	/* compatibility */
 #else
-extern int svc_fds;
+extern int gssrpc_svc_fds;
 #endif /* def FD_SETSIZE */
 
 /*
  * a small program implemented by the svc_rpc implementation itself;
  * also see clnt.h for protocol numbers.
  */
+#define rpctest_service		gssrpc_rpctest_service
 extern void rpctest_service();
+
+#define svc_getreq	gssrpc_svc_getreq
+#define svc_getreqset	gssrpc_svc_getreqset
+#define svc_run		gssrpc_svc_run
 
 extern void	svc_getreq();
 extern void	svc_getreqset();	/* takes fdset instead of int */
@@ -284,17 +304,21 @@ extern void	svc_run(); 	 /* never returns */
 /*
  * Memory based rpc for testing and timing.
  */
+#define svcraw_create	gssrpc_svcraw_create
 extern SVCXPRT *svcraw_create();
 
 /*
  * Udp based rpc.
  */
+#define svcudp_create		gssrpc_svcudp_create
+#define svcudp_bufcreate	gssrpc_svcudp_bufcreate
 extern SVCXPRT *svcudp_create();
 extern SVCXPRT *svcudp_bufcreate();
 
 /*
  * Tcp based rpc.
  */
+#define svctcp_create		gssrpc_svctcp_create
 extern SVCXPRT *svctcp_create();
 
 #endif /* !__SVC_HEADER__ */

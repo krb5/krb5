@@ -41,9 +41,9 @@ static char sccsid[] = "@(#)xdr_stdio.c 1.16 87/08/11 Copyr 1984 Sun Micro";
  * from the stream.
  */
 
-#include <rpc/types.h>
+#include <gssrpc/types.h>
 #include <stdio.h>
-#include <rpc/xdr.h>
+#include <gssrpc/xdr.h>
 
 static bool_t	xdrstdio_getlong();
 static bool_t	xdrstdio_putlong();

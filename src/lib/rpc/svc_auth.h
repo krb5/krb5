@@ -51,6 +51,7 @@ extern SVCAUTH svc_auth_any;
 /*
  * Server side authenticator
  */
+#define _authenticate	_gssrpc_authenticate
 extern enum auth_stat _authenticate();
 
 #define SVCAUTH_WRAP(auth, xdrs, xfunc, xwhere) \

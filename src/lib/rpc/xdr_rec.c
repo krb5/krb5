@@ -49,8 +49,8 @@ static char sccsid[] = "@(#)xdr_rec.c 1.21 87/08/11 Copyr 1984 Sun Micro";
  */
 
 #include <stdio.h>
-#include <rpc/types.h>
-#include <rpc/xdr.h>
+#include <gssrpc/types.h>
+#include <gssrpc/xdr.h>
 #include <netinet/in.h>
 
 #include <unistd.h>

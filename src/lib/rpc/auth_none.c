@@ -39,9 +39,9 @@ static char sccsid[] = "@(#)auth_none.c 1.19 87/08/11 Copyr 1984 Sun Micro";
  * Copyright (C) 1984, Sun Microsystems, Inc. 
  */
 
-#include <rpc/types.h>
-#include <rpc/xdr.h>
-#include <rpc/auth.h>
+#include <gssrpc/types.h>
+#include <gssrpc/xdr.h>
+#include <gssrpc/auth.h>
 #include <stdlib.h>
 #define MAX_MARSHEL_SIZE 20
 
@@ -89,8 +89,8 @@ authnone_create()
 		xdrs = &xdr_stream;
 		xdrmem_create(xdrs, ap->marshalled_client, (unsigned int)MAX_MARSHEL_SIZE,
 		    XDR_ENCODE);
-		(void)xdr_opaque_auth(xdrs, &ap->no_client.ah_cred);
-		(void)xdr_opaque_auth(xdrs, &ap->no_client.ah_verf);
+		(void)gssrpc_xdr_opaque_auth(xdrs, &ap->no_client.ah_cred);
+		(void)gssrpc_xdr_opaque_auth(xdrs, &ap->no_client.ah_verf);
 		ap->mcnt = XDR_GETPOS(xdrs);
 		XDR_DESTROY(xdrs);
 	}

@@ -40,7 +40,7 @@ static char sccsid[] = "@(#)rpc_callmsg.c 1.4 87/08/11 Copyr 1984 Sun Micro";
 
 #include <sys/param.h>
 
-#include <rpc/rpc.h>
+#include <gssrpc/rpc.h>
 
 /*
  * XDR a call message
@@ -188,8 +188,8 @@ xdr_callmsg(xdrs, cmsg)
 	    xdr_u_int32(xdrs, &(cmsg->rm_call.cb_prog)) &&
 	    xdr_u_int32(xdrs, &(cmsg->rm_call.cb_vers)) &&
 	    xdr_u_int32(xdrs, &(cmsg->rm_call.cb_proc)) &&
-	    xdr_opaque_auth(xdrs, &(cmsg->rm_call.cb_cred)) )
-	    return (xdr_opaque_auth(xdrs, &(cmsg->rm_call.cb_verf)));
+	    gssrpc_xdr_opaque_auth(xdrs, &(cmsg->rm_call.cb_cred)) )
+	    return (gssrpc_xdr_opaque_auth(xdrs, &(cmsg->rm_call.cb_verf)));
 	return (FALSE);
 }
 

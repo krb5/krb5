@@ -45,10 +45,10 @@ static char sccsid[] = "@(#)auth_unix.c 1.19 87/08/11 Copyr 1984 Sun Micro";
 
 #include <stdio.h>
 
-#include <rpc/types.h>
-#include <rpc/xdr.h>
-#include <rpc/auth.h>
-#include <rpc/auth_unix.h>
+#include <gssrpc/types.h>
+#include <gssrpc/xdr.h>
+#include <gssrpc/auth.h>
+#include <gssrpc/auth_unix.h>
 
 
 /*
@@ -224,11 +224,11 @@ authunix_validate(auth, verf)
 			    au->au_shcred.oa_length);
 			au->au_shcred.oa_base = NULL;
 		}
-		if (xdr_opaque_auth(&xdrs, &au->au_shcred)) {
+		if (gssrpc_xdr_opaque_auth(&xdrs, &au->au_shcred)) {
 			auth->ah_cred = au->au_shcred;
 		} else {
 			xdrs.x_op = XDR_FREE;
-			(void)xdr_opaque_auth(&xdrs, &au->au_shcred);
+			(void)gssrpc_xdr_opaque_auth(&xdrs, &au->au_shcred);
 			au->au_shcred.oa_base = NULL;
 			auth->ah_cred = au->au_origcred;
 		}
@@ -312,8 +312,8 @@ marshal_new_auth(auth)
 	register struct audata *au = AUTH_PRIVATE(auth);
 
 	xdrmem_create(xdrs, au->au_marshed, MAX_AUTH_BYTES, XDR_ENCODE);
-	if ((! xdr_opaque_auth(xdrs, &(auth->ah_cred))) ||
-	    (! xdr_opaque_auth(xdrs, &(auth->ah_verf)))) {
+	if ((! gssrpc_xdr_opaque_auth(xdrs, &(auth->ah_cred))) ||
+	    (! gssrpc_xdr_opaque_auth(xdrs, &(auth->ah_verf)))) {
 		perror("auth_none.c - Fatal marshalling problem");
 	} else {
 		au->au_mpos = XDR_GETPOS(xdrs);

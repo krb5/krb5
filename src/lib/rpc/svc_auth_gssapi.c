@@ -2,221 +2,8 @@
  * Copyright 1993 OpenVision Technologies, Inc., All Rights Reserved.
  *
  * $Id$
- * $Source$
- * 
- * $Log$
- * Revision 1.44  1997/12/16 16:23:38  epeisach
- * 	* svc_auth_gssapi.c (_svcauth_gssapi): When looping over services,
- * 		free previous output_tokens.
- *
- * Revision 1.43  1997/10/21 18:33:55  epeisach
- * Fix to not lose entries in the chain linked client list.
- *
- * A pointer was not being updated resulting in the situation where
- * random clients would sudenly fail with a misc. rpc. error as the client
- * handle could not be found. The scenario required three active clients
- * to trigger the problem.
- *
- * Revision 1.42  1996/12/04 17:47:18  bjaspan
- * 	* Various changes to allow channel bindings to work with both UDP
- *  	and TCP cleanly [krb5-libs/180]:
- *
- * 	* auth_gssapi.c: remove the special-case exception to channel
- *  	bindings failure added in the previous revision, since we now
- *  	solve the problem by making channel bindings not fail
- *
- * 	* clnt_udp.c: use a connected socket so that the client can
- *  	determine its own source address with getsockname
- *
- * 	* svc.h: add xp_laddr and xp_laddrlen fields to SVCXPRT structure
- *
- * 	* svc_tcp.c: set xp_laddr and xp_laddrlen when a connection is
- *  	established
- *
- * 	* svc_udp.c (svcudp_recv): use recvmsg with MSG_PEEK followed by
- *  	recvfrom in order to determine both source and dest address on
- *  	unconnected UDP socket, set xp_laddr and xp_laddrlen
- *
- * Revision 1.41  1996/10/16 20:16:10  bjaspan
- * * svc_auth_gssapi.c (_svcauth_gssapi): accept add call_arg version 4
- *
- * Revision 1.40  1996/10/15 21:05:10  bjaspan
- * 	* configure.in: add DO_SUBDIRS so make will descend into unit-test
- *
- * Revision 1.39  1996/08/14 00:01:48  tlyu
- * 	* getrpcent.c: Add PROTOTYPE and conditionalize function
- * 		prototypes.
- *
- * 	* xdr.h: Add PROTOTYPE and conditionalize function prototypes.
- *
- * 	* svc_auth_gssapi.c: Remove ANSI string concatenation, de-ANSI-fy
- *  		function definitions.
- *
- * 	* auth_gssapi_misc.c (auth_gssapi_display_status_1): Remove ANSI
- * 		string concatenation, de-ANSI-fy function definitions.
- *
- * 	* auth_gssapi.h: Add PROTOTYPE and conditionalize function
- * 		prototypes.
- *
- * 	* auth_gssapi.c (auth_gssapi_create): remove ANSI-ish string
- * 		concatenation, de-ANSI-fy function definitions.
- *
- * Revision 1.38  1996/07/30 23:25:37  tlyu
- * 	* svc_auth_gssapi.c: #include <rpc/rpc.h> before <sys/stat.h> (to
- * 		get sys/types.h.
- *
- * Revision 1.37  1996/07/22 20:41:00  marc
- * this commit includes all the changes on the OV_9510_INTEGRATION and
- * OV_MERGE branches.  This includes, but is not limited to, the new openvision
- * admin system, and major changes to gssapi to add functionality, and bring
- * the implementation in line with rfc1964.  before committing, the
- * code was built and tested for netbsd and solaris.
- *
- * Revision 1.36.4.1  1996/07/18 04:19:34  marc
- * merged in changes from OV_9510_BP to OV_9510_FINAL1
- *
- * Revision 1.36.2.1  1996/06/20  23:39:22  marc
- * File added to the repository on a branch
- *
- * Revision 1.36  1996/05/30  19:25:02  bjaspan
- * zero bindings structure before using it
- *
- * Revision 1.35  1996/05/12 06:17:25  marc
- * changed around the file includes, since krb5 has changed some.
- *
- * added conditionalization GSS_BACKWARD_HACK until and if this hack is
- * reimplemented in the newly merged gssapi.
- *
- * conditionalize out the host-specific cruft for setting the local
- * address to INADDR_ANY, since you can just assign it that way on all
- * platforms I know of.
- *
- * Revision 1.34  1996/02/12  15:14:00  grier
- * [secure/3570]
- * restore (struct sockaddr *) cast that got mangled
- *
- * Revision 1.33  1996/02/07  13:09:52  jik
- * Actually, I should have used krb5_error_code, not krb5_int32.
- *
- * Revision 1.32  1996/02/07 13:08:31  jik
- * Include <krb5/krb5.h> to get the krb5_int32 typedef, which we then use
- * in a cast when checking if the GSS-API minor status value is equal to
- * a krb5 error code.
- *
- * Revision 1.31  1996/02/01 18:29:29  grier
- * Restore use of error code definition.
- * Return original code structure.
- *
- * Revision 1.30  1996/01/31  19:15:49  grier
- * [secure/3570]
- * Remove (void *) casts to memcpy() args
- *
- * Revision 1.29  1996/01/25  03:58:04  grier
- * Remove debug code
- *
- * Revision 1.28  1996/01/25  03:56:50  grier
- * secure/3570 - missed Alpha checkin
- *
- * Revision 1.26  1995/11/07  23:17:23  grier
- * memcpy() cast
- *
- * Revision 1.25  1995/08/24  21:05:48  bjaspan
- * set acceptor channel bindings
- *
- * Revision 1.24  1995/08/23  20:28:02  bjaspan
- * [secure-rpc/3392] add channel bindinds to the rpc
- *
- * Revision 1.23  1995/07/10  18:49:22  bjaspan
- * [secure-build/3377] remove use of BSD db
- *
- * Revision 1.22  1995/05/25  18:35:53  bjaspan
- * [secure-rpc/3103] log misc errors from RPC
- *
- * Revision 1.21  1995/05/24  17:34:03  bjaspan
- * [secure-rpc/3302] don't allow client to make server exit unless
- * debugging is enabled
- *
- * Revision 1.20  1995/05/08  22:32:44  marc
- * if a new client is in use, set the krb5 gssapi mech into
- * backward-compatibility mode.
- *
- * Revision 1.19  1994/10/27  12:38:51  jik
- * [secure-rpc/2808: add credential versioning]
- *
- * Sandbox:
- *
- *  [secure-rpc/2808] add version field to client creds
- *
- * Revision 1.22  1994/10/26  20:03:27  bjaspan
- * [secure-rpc/2808] add version field to client creds
- *
- * Revision 1.21  1994/05/23  01:26:01  bjaspan
- * [secure-rpc/1911] set rq_svccred to the context instead of the service
- * gss name
- *
- * Revision 1.20  1994/05/09  17:48:39  shanzer
- * change sys/fcntl.h to fcntl.h
- *
- * Revision 1.19  1994/04/08  17:21:32  bjaspan
- * remove KRB5KTNAME hack
- *
- * Revision 1.18  1994/03/18  15:48:13  shanzer
- * include sys/fcntl.h
- *
- * Revision 1.17  1994/03/08  00:05:56  shanzer
- * call rand() instead random()
- *
- * Revision 1.16  1993/12/08  21:43:54  bjaspan
- * gss_delete_sec_context failure is not fatal (in fact, the context
- * will often be expired); use AUTH_GSSAPI_DISPLAY_STATUS macro
- *
- * Revision 1.15  1993/12/08  20:20:08  bjaspan
- * add debugging info to expire_client, correct comment above btree->put
- *
- * Revision 1.14  1993/12/08  06:52:49  bjaspan
- * *many* debugging improvements to help find secure-rpc/586, and (I hope)
- * the fix: don't change client_data->expiration without deleting it
- * and reinserting it into the btree
- *
- * Revision 1.13  1993/12/06  21:22:26  bjaspan
- * debugging levels, #ifdef PURIFY, call abort() on impossible failures
- *
- * Revision 1.12  1993/11/12  02:33:14  bjaspan
- * add badauth
- * /
- *
- * Revision 1.11  1993/11/03  23:46:15  bjaspan
- * new log_badverf format
- *
- * Revision 1.10  1993/11/03  21:23:30  bjaspan
- * handle GSS_C_INDEFINITE expiration, add log_badverf, set rq_svccred
- *
- * Revision 1.9  1993/11/03  01:30:36  bjaspan
- * don't include gssapi_krb5.h, it isn't needed
- *
- * Revision 1.8  1993/11/02  22:09:02  bjaspan
- * support multiple service-side names via _svcauth_gssapi_set_names
- *
- * Revision 1.7  1993/11/01  19:56:22  bjaspan
- * unstatic svc_debug_gssapi, and send gss_{major,minor} back if
- * accept_sec_context fails
- *
- * Revision 1.6  1993/10/28  22:09:58  bjaspan
- * fix verifier mem leak, clean_clients() first to avoid dangling ref,
- * only include hacked kt_default_name if DEBUG_GSSAPI defined
- *
- * Revision 1.5  1993/10/27  18:26:51  bjaspan
- * use xdr_free instead of gss_release_buffer; this fixes memory leaks
- * that were probably caused by zero-length seal/unseal tokens
- *
- * Revision 1.4  1993/10/26  21:12:51  bjaspan
- * fully working
  *
  */
-
-#if !defined(lint) && !defined(__CODECENTER__)
-static char *rcsid = "$Header$";
-#endif
 
 /*
  * svc_auth_gssapi.c
@@ -226,11 +13,11 @@ static char *rcsid = "$Header$";
 
 #include <stdio.h>
 #include <string.h>
-#include <rpc/rpc.h>
+#include <gssrpc/rpc.h>
 #include <sys/stat.h>
 
 #include <gssapi/gssapi_generic.h>
-#include <rpc/auth_gssapi.h>
+#include <gssrpc/auth_gssapi.h>
 
 #ifdef GSS_BACKWARD_HACK
 #include <gssapi/gssapi_krb5.h>
@@ -396,7 +183,7 @@ enum auth_stat _svcauth_gssapi(rqst, msg, no_dispatch)
 	  if (creds.auth_msg && rqst->rq_proc == AUTH_GSSAPI_EXIT) {
 	       PRINTF(("svcauth_gssapi: GSSAPI_EXIT, cleaning up\n"));
 	       svc_sendreply(rqst->rq_xprt, xdr_void, NULL);
-	       xdr_free(xdr_authgssapi_creds, &creds);
+	       gssrpc_xdr_free(xdr_authgssapi_creds, &creds);
 	       cleanup();
 	       exit(0);
 	  }
@@ -618,7 +405,7 @@ enum auth_stat _svcauth_gssapi(rqst, msg, no_dispatch)
 	  minor_stat = call_res.gss_minor;
 
 	  /* done with call args */
-	  xdr_free(xdr_authgssapi_init_arg, &call_arg);
+	  gssrpc_xdr_free(xdr_authgssapi_init_arg, &call_arg);
 
 	  PRINTF(("svcauth_gssapi: accept_sec_context returned %#x\n",
 		  call_res.gss_major));
@@ -773,7 +560,7 @@ enum auth_stat _svcauth_gssapi(rqst, msg, no_dispatch)
 							&call_arg.token);
 
 		    /* done with call args */
-		    xdr_free(xdr_authgssapi_init_arg, &call_arg);
+		    gssrpc_xdr_free(xdr_authgssapi_init_arg, &call_arg);
 		    
 		    if (gssstat != GSS_S_COMPLETE) {
 			 AUTH_GSSAPI_DISPLAY_STATUS(("processing token",
@@ -815,7 +602,7 @@ enum auth_stat _svcauth_gssapi(rqst, msg, no_dispatch)
      if (creds.client_handle.length != 0) {
 	  PRINTF(("svcauth_gssapi: freeing client_handle len %d\n",
 		  creds.client_handle.length));
-	  xdr_free(xdr_authgssapi_creds, &creds);
+	  gssrpc_xdr_free(xdr_authgssapi_creds, &creds);
      }
      
      PRINTF(("\n"));
@@ -825,7 +612,7 @@ error:
      if (creds.client_handle.length != 0) {
 	  PRINTF(("svcauth_gssapi: freeing client_handle len %d\n",
 		  creds.client_handle.length));
-	  xdr_free(xdr_authgssapi_creds, &creds);
+	  gssrpc_xdr_free(xdr_authgssapi_creds, &creds);
      }
      
      PRINTF(("\n"));

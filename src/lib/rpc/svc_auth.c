@@ -37,7 +37,7 @@ static char sccsid[] = "@(#)svc_auth.c	2.1 88/08/07 4.0 RPCSRC; from 1.19 87/08/
  * Copyright (C) 1984, Sun Microsystems, Inc.
  */
 
-#include <rpc/rpc.h>
+#include <gssrpc/rpc.h>
 
 /*
  * Server side authenticators are called from authenticate by
@@ -51,6 +51,10 @@ static char sccsid[] = "@(#)svc_auth.c	2.1 88/08/07 4.0 RPCSRC; from 1.19 87/08/
  *		register struct rpc_msg *msg;
  *
  */
+
+#define _svcauth_null		_gssrpc_svcauth_null
+#define _svcauth_unix		_gssrpc_svcauth_unix
+#define _svcauth_short		_gssrpc_svcauth_short
 
 enum auth_stat _svcauth_null();		/* no authentication */
 enum auth_stat _svcauth_unix();		/* unix style (uid, gids) */

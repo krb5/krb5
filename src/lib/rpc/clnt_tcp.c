@@ -51,11 +51,11 @@ static char sccsid[] = "@(#)clnt_tcp.c 1.37 87/10/05 Copyr 1984 Sun Micro";
  */
 
 #include <stdio.h>
-#include <rpc/rpc.h>
+#include <gssrpc/rpc.h>
 #include <sys/socket.h>
 #include <netdb.h>
 #include <errno.h>
-#include <rpc/pmap_clnt.h>
+#include <gssrpc/pmap_clnt.h>
 
 #define MCALL_MSG_SIZE 24
 
@@ -153,7 +153,7 @@ clnttcp_create(raddr, prog, vers, sockp, sendsz, recvsz)
 	 */
 	if (*sockp < 0) {
 		*sockp = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-		(void)bindresvport(*sockp, (struct sockaddr_in *)0);
+		(void)gssrpc_bindresvport(*sockp, (struct sockaddr_in *)0);
 		if ((*sockp < 0)
 		    || (connect(*sockp, (struct sockaddr *)raddr,
 		    sizeof(*raddr)) < 0)) {
@@ -314,7 +314,7 @@ call_again:
 	if ((reply_msg.rm_reply.rp_stat == MSG_ACCEPTED) &&
 	    (reply_msg.acpted_rply.ar_verf.oa_base != NULL)) {
 	    xdrs->x_op = XDR_FREE;
-	    (void)xdr_opaque_auth(xdrs, &(reply_msg.acpted_rply.ar_verf));
+	    (void)gssrpc_xdr_opaque_auth(xdrs, &(reply_msg.acpted_rply.ar_verf));
 	}
 	return (ct->ct_error.re_status);
 }
@@ -425,7 +425,7 @@ readtcp(ct, buf, len)
 #endif /* def FD_SETSIZE */
 	while (TRUE) {
 		readfds = mask;
-		switch (select(_rpc_dtablesize(), &readfds, (fd_set*)NULL, (fd_set*)NULL,
+		switch (select(_gssrpc_rpc_dtablesize(), &readfds, (fd_set*)NULL, (fd_set*)NULL,
 			       &(ct->ct_wait))) {
 		case 0:
 			ct->ct_error.re_status = RPC_TIMEDOUT;

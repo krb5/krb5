@@ -43,8 +43,8 @@ static char sccsid[] = "@(#)xdr_mem.c 1.19 87/08/11 Copyr 1984 Sun Micro";
  */
 
 
-#include <rpc/types.h>
-#include <rpc/xdr.h>
+#include <gssrpc/types.h>
+#include <gssrpc/xdr.h>
 #include <netinet/in.h>
 #include <stdio.h>
 

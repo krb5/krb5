@@ -60,6 +60,7 @@ struct authunix_parms {
 	int	*aup_gids;
 };
 
+#define xdr_authunix_parms	gssrpc_xdr_authunix_parms
 extern bool_t xdr_authunix_parms();
 
 /* 

@@ -38,7 +38,7 @@ static char sccsid[] = "@(#)clnt_udp.c 1.39 87/08/11 Copyr 1984 Sun Micro";
  */
 
 #include <stdio.h>
-#include <rpc/rpc.h>
+#include <gssrpc/rpc.h>
 #include <sys/socket.h>
 #include <sys/ioctl.h>
 #if defined(sun)
@@ -46,7 +46,7 @@ static char sccsid[] = "@(#)clnt_udp.c 1.39 87/08/11 Copyr 1984 Sun Micro";
 #endif
 #include <netdb.h>
 #include <errno.h>
-#include <rpc/pmap_clnt.h>
+#include <gssrpc/pmap_clnt.h>
 
 extern int errno;
 
@@ -178,7 +178,7 @@ clntudp_bufcreate(raddr, program, version, wait, sockp, sendsz, recvsz)
 			goto fooy;
 		}
 		/* attempt to bind to prov port */
-		(void)bindresvport(*sockp, (struct sockaddr_in *)0);
+		(void)gssrpc_bindresvport(*sockp, (struct sockaddr_in *)0);
 		/* the sockets rpc controls are non-blocking */
 		(void)ioctl(*sockp, FIONBIO, (char *) &dontblock);
 		cu->cu_closeit = TRUE;
@@ -296,7 +296,7 @@ send_again:
 #endif /* def FD_SETSIZE */
 	for (;;) {
 		readfds = mask;
-		switch (select(_rpc_dtablesize(), &readfds, (fd_set *)NULL, 
+		switch (select(_gssrpc_rpc_dtablesize(), &readfds, (fd_set *)NULL, 
 			       (fd_set *)NULL, &(cu->cu_wait))) {
 
 		case 0:
@@ -374,7 +374,7 @@ send_again:
 		if ((reply_msg.rm_reply.rp_stat == MSG_ACCEPTED) &&
 		    (reply_msg.acpted_rply.ar_verf.oa_base != NULL)) {
 		    xdrs->x_op = XDR_FREE;
-		    (void)xdr_opaque_auth(xdrs,
+		    (void)gssrpc_xdr_opaque_auth(xdrs,
 					  &(reply_msg.acpted_rply.ar_verf));
 		} 
 	}  /* end of valid reply message */

@@ -39,7 +39,7 @@ static char sccsid[] = "@(#)clnt_simple.c 1.35 87/08/11 Copyr 1984 Sun Micro";
  */
 
 #include <stdio.h>
-#include <rpc/rpc.h>
+#include <gssrpc/rpc.h>
 #include <sys/socket.h>
 #include <netdb.h>
 #include <string.h>
@@ -51,7 +51,7 @@ static struct callrpc_private {
 	char	*oldhost;
 } *callrpc_private;
 
-callrpc(host, prognum, versnum, procnum, inproc, in, outproc, out)
+gssrpc_callrpc(host, prognum, versnum, procnum, inproc, in, outproc, out)
 	char *host;
 	xdrproc_t inproc, outproc;
 	char *in, *out;

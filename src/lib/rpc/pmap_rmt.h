@@ -41,6 +41,7 @@ struct rmtcallargs {
 	xdrproc_t xdr_args;
 };
 
+#define xdr_rmtcall_args	gssrpc_xdr_rmtcall_args
 bool_t xdr_rmtcall_args();
 
 struct rmtcallres {
@@ -50,4 +51,5 @@ struct rmtcallres {
 	xdrproc_t xdr_results;
 };
 
+#define xdr_rmtcallres		gssrpc_xdr_rmtcallres
 bool_t xdr_rmtcallres();

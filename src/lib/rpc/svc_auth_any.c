@@ -7,7 +7,7 @@
  */
 
 #include <stdio.h>
-#include <rpc/rpc.h>
+#include <gssrpc/rpc.h>
 
 extern int authany_wrap();
 

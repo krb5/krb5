@@ -1,3 +1,75 @@
+Fri Feb 13 20:57:49 1998  Tom Yu  <tlyu@mit.edu>
+
+	* auth.h: Renames.
+	* auth_any.c: Update header locations.
+	* auth_gssapi.c: Punt naughty RCS keywords.  Update header
+	locations.  Remove explicit extern decl of rpc_createrr (clnt.h
+	gets it).  Renames.
+	* auth_gssapi.h: Punt naughty RCS keywords.
+	* auth_gssapi_misc.c: Punt naught RCS keywords.  Update header
+	locations.
+	* auth_none.c: Update header locations.  Renames.
+	* auth_unix.c: Update header locations.  Renames.
+	* auth_unix.h: Renames.
+	* authunix_prot.c: Update header locations.
+	* bindresvport.c: Renames.
+	* clnt.h: Renames.
+	* clnt_generic.c: Update header locations.
+	* clnt_perror.c: Update header locations.
+	* clnt_raw.c: Update header locations.  Renames.
+	* clnt_simple.c: Update header locations.  Renames.
+	* clnt_tcp.c: Update header locations.  Renames.
+	* clnt_udp.c: Upate header loations.  Renames.
+	* get_myaddress.c: Update header locations.  Renames.
+	* getrpcent.c: Update header locations.
+	* getrpcport.c: Update header locations. Renames.
+	* netdb.h: Update header locations.
+	* pmap_clnt.c: Update header locations.  Renames.
+	* pmap_clnt.h: Renames.
+	* pmap_getmaps.c: Update header locations.
+	* pmap_getport.c: Update header locations.
+	* pmap_prot.c: Update header locations.
+	* pmap_prot.h: Renames.
+	* pmap_prot2.c: Update header locations.
+	* pmap_rmt.c: Update header locations.  Renames.
+	* pmap_rmt.h: Renames.
+	* rpc.h: Update header locations.  No longer include rpc/netdb.h.
+	* rpc_callmsg.c: Update header locations.  Renames.
+	* rpc_commondata.c: Update header locations.
+	* rpc_dtablesize.c: Renames.
+	* rpc_msg.h: Renames.
+	* rpc_prot.c: Update header locations.  Renames.
+	* svc.c: Update header locations.  Renames.
+	* svc.h: Renames.
+	* svc_auth.c: Update header locations.  Renames.
+	* svc_auth.h: Renames.
+	* svc_auth_any.c: Update header locations.
+	* svc_auth_gssapi.c: Punt naughty RCS keywords.  Update header
+	locations.  Renames.
+	* svc_auth_unix.c: Renames.
+	* svc_raw.c: Update header locations.
+	* svc_run.c: Update header locations.  Renames.
+	* svc_simple.c: Update header locations.  Renames.  Make pl
+	static.
+	* svc_tcp.c: Update header locations.  Renames.
+	* svc_udp.c: Update header locations.  Renames.
+	* xdr.c: Update header locations.  Renames.
+	* xdr.h: Renames.
+	* xdr_alloc.c: Punt naughty RCS keywords.  Update header
+	locations.
+	* xdr_array.c: Update header locations.
+	* xdr_float.c: Update header locations.
+	* xdr_mem.c: Update header locations.
+	* xdr_rec.c: Update header locations.
+	* xdr_reference.c: Update header locations.
+	* xdr_stdio.c: Update header locations.
+
+	* Makefile.in: Bump major version due to changes.  Don't build
+	getrpcent.o, since we don't use it, and dealing with the
+	rpc/netdb.h lossage was a major pain.  Also, rename HDRDIR to
+	$(BUILDTOP)/gssrpc in order to avoid problems with system headers
+	including rpc/*.h.
+
 Thu Feb 12 16:18:22 1998  Tom Yu  <tlyu@mit.edu>
 
 	* configure.in: Add commented out AC_OUTPUT to force autoreconf to

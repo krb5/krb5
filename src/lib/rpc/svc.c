@@ -42,8 +42,8 @@ static char sccsid[] = "@(#)svc.c 1.41 87/10/13 Copyr 1984 Sun Micro";
  */
 
 #include <sys/errno.h>
-#include <rpc/rpc.h>
-#include <rpc/pmap_clnt.h>
+#include <gssrpc/rpc.h>
+#include <gssrpc/pmap_clnt.h>
 #include <stdio.h>
 
 extern int errno;
@@ -90,7 +90,7 @@ xprt_register(xprt)
 		xports = (SVCXPRT **)
 			mem_alloc(FD_SETSIZE * sizeof(SVCXPRT *));
 	}
-	if (sock < _rpc_dtablesize()) {
+	if (sock < _gssrpc_rpc_dtablesize()) {
 		xports[sock] = xprt;
 		FD_SET(sock, &svc_fdset);
 	}
@@ -113,7 +113,7 @@ xprt_unregister(xprt)
 	register int sock = xprt->xp_sock;
 
 #ifdef FD_SETSIZE
-	if ((sock < _rpc_dtablesize()) && (xports[sock] == xprt)) {
+	if ((sock < _gssrpc_rpc_dtablesize()) && (xports[sock] == xprt)) {
 		xports[sock] = (SVCXPRT *)0;
 		FD_CLR(sock, &svc_fdset);
 	}
@@ -412,7 +412,7 @@ svc_getreqset(readfds)
 	r.rq_clntcred = &(cred_area[2*MAX_AUTH_BYTES]);
 
 #ifdef FD_SETSIZE
-	setsize = _rpc_dtablesize();	
+	setsize = _gssrpc_rpc_dtablesize();	
 
 	maskp = (rpc_u_int32 *)readfds->fds_bits;
 	for (sock = 0; sock < setsize; sock += NFDBITS) {

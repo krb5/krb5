@@ -34,48 +34,10 @@ static char sccsid[] = "@(#)xdr_mem.c 1.19 87/08/11 Copyr 1984 Sun Micro";
 /*
  * Copyright 1993 OpenVision Technologies, Inc., All Rights Reserved.
  *
- * $Header$
- * 
- * $Log$
- * Revision 1.6  1996/07/22 20:41:21  marc
- * this commit includes all the changes on the OV_9510_INTEGRATION and
- * OV_MERGE branches.  This includes, but is not limited to, the new openvision
- * admin system, and major changes to gssapi to add functionality, and bring
- * the implementation in line with rfc1964.  before committing, the
- * code was built and tested for netbsd and solaris.
- *
- * Revision 1.5.4.1  1996/07/18 04:19:49  marc
- * merged in changes from OV_9510_BP to OV_9510_FINAL1
- *
- * Revision 1.5.2.1  1996/06/20  23:40:30  marc
- * File added to the repository on a branch
- *
- * Revision 1.5  1996/05/12  06:19:25  marc
- * renamed lots of types: u_foo to unsigned foo, and foo32 to rpc_foo32.  This is to make autoconfiscation less painful.
- *
- * Revision 1.4  1995/12/13  14:03:14  grier
- * Longs to ints for Alpha
- *
- * Revision 1.3  1993/12/09  18:57:25  bjaspan
- * [secure-releng/833] misc bugfixes to admin library
- *
- * Revision 1.3  1993/12/06  21:23:08  bjaspan
- * add xdralloc_release
- *
- * Revision 1.2  1993/10/26  21:13:19  bjaspan
- * add casts for correctness
- *
- * Revision 1.1  1993/10/19  03:11:39  bjaspan
- * Initial revision
- *
  */
 
-#if !defined(lint) && !defined(__CODECENTER__)
-static char *rcsid = "$Header$";
-#endif
-
-#include <rpc/types.h>
-#include <rpc/xdr.h>
+#include <gssrpc/types.h>
+#include <gssrpc/xdr.h>
 #include <dyn.h>
 
 static bool_t	xdralloc_putlong();

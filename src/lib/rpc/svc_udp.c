@@ -40,7 +40,7 @@ static char sccsid[] = "@(#)svc_udp.c 1.24 87/08/11 Copyr 1984 Sun Micro";
  */
 
 #include <stdio.h>
-#include <rpc/rpc.h>
+#include <gssrpc/rpc.h>
 #include <sys/socket.h>
 #include <errno.h>
 #ifdef HAVE_SYS_UIO_H
@@ -119,7 +119,7 @@ svcudp_bufcreate(sock, sendsz, recvsz)
 	}
 	memset((char *)&addr, 0, sizeof (addr));
 	addr.sin_family = AF_INET;
-	if (bindresvport(sock, &addr)) {
+	if (gssrpc_bindresvport(sock, &addr)) {
 		addr.sin_port = 0;
 		(void)bind(sock, (struct sockaddr *)&addr, len);
 	}
@@ -374,7 +374,7 @@ struct udp_cache {
  * Enable use of the cache. 
  * Note: there is no disable.
  */
-svcudp_enablecache(transp, size)
+gssrpc_svcudp_enablecache(transp, size)
 	SVCXPRT *transp;
 	rpc_u_int32 size;
 {

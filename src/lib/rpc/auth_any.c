@@ -5,9 +5,9 @@
  */
 
 #include <stdio.h>
-#include <rpc/types.h>
-#include <rpc/xdr.h>
-#include <rpc/auth.h>
+#include <gssrpc/types.h>
+#include <gssrpc/xdr.h>
+#include <gssrpc/auth.h>
 
 int authany_wrap(auth, xdrs, xfunc, xwhere)
    AUTH *auth;

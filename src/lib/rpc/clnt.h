@@ -239,12 +239,14 @@ typedef struct {
  *	rpc_u_int32 prog;
  *	rpc_u_int32 vers;
  */
+#define clntraw_create	gssrpc_clntraw_create
 extern CLIENT *clntraw_create();
 
 
 /*
  * Generic client creation routine. Supported protocols are "udp" and "tcp"
  */
+#define clnt_create	gssrpc_clnt_create
 extern CLIENT *
 clnt_create(/*host, prog, vers, prot*/); /*
 	char *host; 	-- hostname
@@ -267,6 +269,7 @@ clnt_create(/*host, prog, vers, prot*/); /*
  *	unsigned int sendsz;
  *	unsigned int recvsz;
  */
+#define clnttcp_create	gssrpc_clnttcp_create
 extern CLIENT *clnttcp_create();
 
 /*
@@ -290,29 +293,37 @@ extern CLIENT *clnttcp_create();
  *	unsigned int sendsz;
  *	unsigned int recvsz;
  */
+#define clntudp_create		gssrpc_clntudp_create
+#define clntudp_bufcreate	gssrpc_clntudp_bufcreate
 extern CLIENT *clntudp_create();
 extern CLIENT *clntudp_bufcreate();
 
 /*
  * Print why creation failed
  */
+#define clnt_pcreateerror	gssrpc_clnt_pcreateerror
+#define clnt_spcreateerror	gssrpc_clnt_spcreateerror
 void clnt_pcreateerror(/* char *msg */);	/* stderr */
 char *clnt_spcreateerror(/* char *msg */);	/* string */
 
 /*
  * Like clnt_perror(), but is more verbose in its output
  */ 
+#define clnt_perrno		gssrpc_clnt_perrno
 void clnt_perrno(/* enum clnt_stat num */);	/* stderr */
 
 /*
  * Print an English error message, given the client error code
  */
+#define clnt_perror		gssrpc_clnt_perror
+#define clnt_sperror		gssrpc_clnt_sperror
 void clnt_perror(/* CLIENT *clnt, char *msg */); 	/* stderr */
 char *clnt_sperror(/* CLIENT *clnt, char *msg */);	/* string */
 
 /* 
  * If a creation fails, the following allows the user to figure out why.
  */
+#define rpc_createerr gssrpc_rpc_createrr
 struct rpc_createerr {
 	enum clnt_stat cf_stat;
 	struct rpc_err cf_error; /* useful when cf_stat == RPC_PMAPFAILURE */
@@ -325,6 +336,7 @@ extern struct rpc_createerr rpc_createerr;
 /*
  * Copy error message to buffer.
  */
+#define clnt_sperrno		gssrpc_clnt_sperrno
 char *clnt_sperrno(/* enum clnt_stat num */);	/* string */
 
 

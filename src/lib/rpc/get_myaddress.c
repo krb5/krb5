@@ -40,15 +40,15 @@ static char sccsid[] = "@(#)get_myaddress.c 1.4 87/08/11 Copyr 1984 Sun Micro";
 
 #ifdef GSSAPI_KRB5
 #include <string.h>
-#include <rpc/types.h>
-#include <rpc/pmap_prot.h>
+#include <gssrpc/types.h>
+#include <gssrpc/pmap_prot.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <krb5.h>
 /* 
  * don't use gethostbyname, which would invoke yellow pages
  */
-get_myaddress(addr)
+gssrpc_get_myaddress(addr)
 	struct sockaddr_in *addr;
 {
      krb5_address **addrs, **a;
@@ -79,8 +79,8 @@ get_myaddress(addr)
 }
 
 #else /* !GSSAPI_KRB5 */
-#include <rpc/types.h>
-#include <rpc/pmap_prot.h>
+#include <gssrpc/types.h>
+#include <gssrpc/pmap_prot.h>
 #include <sys/socket.h>
 #if defined(sun)
 #include <sys/sockio.h>

@@ -1,13 +1,7 @@
 /*
  * Copyright 1993 OpenVision Technologies, Inc., All Rights Reserved.
  *
- * $Header$
- *
  */
-
-#if !defined(lint) && !defined(__CODECENTER__)
-static char *rcsid = "$Header$";
-#endif
 
 #include <stdio.h>
 #include <string.h>
@@ -19,8 +13,8 @@ static char *rcsid = "$Header$";
 #include <gssapi/gssapi_krb5.h>
 #endif
 
-#include <rpc/rpc.h>
-#include <rpc/auth_gssapi.h>
+#include <gssrpc/rpc.h>
+#include <gssrpc/auth_gssapi.h>
 
 #ifdef __CODECENTER__
 #define DEBUG_GSSAPI 1
@@ -74,8 +68,6 @@ struct auth_gssapi_data {
      rpc_u_int32 cred_len;
 };
 #define AUTH_PRIVATE(auth) ((struct auth_gssapi_data *)auth->ah_private)
-
-extern struct rpc_createerr rpc_createerr;
 
 /*
  * Function: auth_gssapi_create_default
@@ -419,7 +411,7 @@ next_token:
 		       AUTH_PRIVATE(auth)->seq_num));
 	       
 	       /* we no longer need these results.. */
-	       xdr_free(xdr_authgssapi_init_res, &call_res);
+	       gssrpc_xdr_free(xdr_authgssapi_init_res, &call_res);
 	  }
      } else if (call_res.signed_isn.length != 0) {
 	  PRINTF(("gssapi_create: got signed isn, can't check yet\n"));
@@ -596,8 +588,8 @@ static bool_t auth_gssapi_marshall(auth, xdrs)
 	  auth->ah_verf.oa_base = out_buf.value;
 	  auth->ah_verf.oa_length = out_buf.length;
 	  
-	  if (! xdr_opaque_auth(xdrs, &auth->ah_cred) ||
-	      ! xdr_opaque_auth(xdrs, &auth->ah_verf)) {
+	  if (! gssrpc_xdr_opaque_auth(xdrs, &auth->ah_cred) ||
+	      ! gssrpc_xdr_opaque_auth(xdrs, &auth->ah_verf)) {
 	       (void) gss_release_buffer(&minor_stat, &out_buf);
 	       return FALSE;
 	  }
@@ -608,8 +600,8 @@ static bool_t auth_gssapi_marshall(auth, xdrs)
 	  auth->ah_verf.oa_base = NULL;
 	  auth->ah_verf.oa_length = 0;
 	  
-	  if (! xdr_opaque_auth(xdrs, &auth->ah_cred) ||
-	      ! xdr_opaque_auth(xdrs, &auth->ah_verf)) {
+	  if (! gssrpc_xdr_opaque_auth(xdrs, &auth->ah_cred) ||
+	      ! gssrpc_xdr_opaque_auth(xdrs, &auth->ah_verf)) {
 	       return FALSE;
 	  }
      }

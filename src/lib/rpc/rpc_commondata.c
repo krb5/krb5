@@ -27,7 +27,7 @@
  * 2550 Garcia Avenue
  * Mountain View, California  94043
  */
-#include <rpc/rpc.h>
+#include <gssrpc/rpc.h>
 /*
  * This file should only contain common data (global data) that is exported
  * by public interfaces 

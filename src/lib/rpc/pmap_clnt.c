@@ -38,15 +38,17 @@ static char sccsid[] = "@(#)pmap_clnt.c 1.37 87/08/11 Copyr 1984 Sun Micro";
  * Copyright (C) 1984, Sun Microsystems, Inc.
  */
 
-#include <rpc/rpc.h>
-#include <rpc/pmap_prot.h>
-#include <rpc/pmap_clnt.h>
+#include <gssrpc/rpc.h>
+#include <gssrpc/pmap_prot.h>
+#include <gssrpc/pmap_clnt.h>
 
 static struct timeval timeout = { 5, 0 };
 static struct timeval tottimeout = { 60, 0 };
 
+#define clnt_perror	gssrpc_clnt_perror
 void clnt_perror();
 
+#define get_myaddress	gssrpc_get_myaddress
 
 /*
  * Set a mapping between program,version and port.

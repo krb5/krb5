@@ -1,115 +1,13 @@
 /*
  * Copyright 1993 OpenVision Technologies, Inc., All Rights Reserved.
  *
- * $Header$
- * 
- * $Log$
- * Revision 1.15  1996/08/14 00:01:37  tlyu
- * 	* getrpcent.c: Add PROTOTYPE and conditionalize function
- * 		prototypes.
- *
- * 	* xdr.h: Add PROTOTYPE and conditionalize function prototypes.
- *
- * 	* svc_auth_gssapi.c: Remove ANSI string concatenation, de-ANSI-fy
- *  		function definitions.
- *
- * 	* auth_gssapi_misc.c (auth_gssapi_display_status_1): Remove ANSI
- * 		string concatenation, de-ANSI-fy function definitions.
- *
- * 	* auth_gssapi.h: Add PROTOTYPE and conditionalize function
- * 		prototypes.
- *
- * 	* auth_gssapi.c (auth_gssapi_create): remove ANSI-ish string
- * 		concatenation, de-ANSI-fy function definitions.
- *
- * Revision 1.14  1996/07/22 20:39:44  marc
- * this commit includes all the changes on the OV_9510_INTEGRATION and
- * OV_MERGE branches.  This includes, but is not limited to, the new openvision
- * admin system, and major changes to gssapi to add functionality, and bring
- * the implementation in line with rfc1964.  before committing, the
- * code was built and tested for netbsd and solaris.
- *
- * Revision 1.13.4.1  1996/07/18 04:18:32  marc
- * merged in changes from OV_9510_BP to OV_9510_FINAL1
- *
- * Revision 1.13.2.1  1996/06/20  23:35:49  marc
- * File added to the repository on a branch
- *
- * Revision 1.13  1996/05/12  06:11:38  marc
- * renamed lots of types: u_foo to unsigned foo, and foo32 to rpc_foo32.  This is to make autoconfiscation less painful.
- *
- * Revision 1.12  1996/02/25  15:53:57  grier
- * [secure/3570]
- * OSF1 long changes
- *
- * Revision 1.11  1995/12/13  14:03:30  grier
- * Longs to ints for Alpha
- *
- * Revision 1.10  1994/10/27  12:39:23  jik
- * [secure-rpc/2808: add credential versioning]
- *
- * Sandbox:
- *
- *  [secure-rpc/2808] back out the backwards compat hack (I only put it
- *  there in case we ever decide we want it, which we won't) and just
- *  handle the version field as if it were always there
- *
- *  [secure-rpc/2808] add a backwards-compatible version field encoder
- *
- *  change to use GSS_ERROR &c macros; I don't think this is correct
- *  =============================================================================
- *
- * Revision 1.12  1994/10/26  19:48:45  bjaspan
- * [secure-rpc/2808] back out the backwards compat hack (I only put it
- * there in case we ever decide we want it, which we won't) and just
- * handle the version field as if it were always there
- *
- * Revision 1.11  1994/10/26  19:47:42  bjaspan
- * [secure-rpc/2808] add a backwards-compatible version field encoder
- *
- * Revision 1.10  1993/12/19  22:19:40  bjaspan
- * [secure-rpc/1077] use free instead of xdr_free(xdr_bytes,...) because
- * xdr_bytes takes non-standard arguments
- *
- * Revision 1.9  1993/12/08  21:43:37  bjaspan
- * use AUTH_GSSAPI_DISPLAY_STATUS macro, reindent
- *
- * Revision 1.8  1993/12/06  21:21:21  bjaspan
- * debugging levels
- *
- * Revision 1.7  1993/11/03  23:46:34  bjaspan
- * add debugging printfs showing amount of data wrapped/unwrapped
- *
- * Revision 1.6  1993/11/03  21:21:53  bjaspan
- * unstatic misc_debug_gssapi
- *
- * Revision 1.5  1993/11/01  19:55:54  bjaspan
- * improve display_status messages, and include gss_{major,minor}
- *
- * Revision 1.4  1993/10/28  22:08:21  bjaspan
- * wrap/unwrap_data include sequence number in arg/result block
- *
- * Revision 1.3  1993/10/27  18:26:16  bjaspan
- * use xdr_free instead of free(in_buf.value); doesn't actually make a
- * difference, though
- *
- * Revision 1.2  1993/10/26  21:12:38  bjaspan
- * cleaning
- *
- * Revision 1.1  1993/10/19  03:12:28  bjaspan
- * Initial revision
- *
  */
 
-#if !defined(lint) && !defined(__CODECENTER__)
-static char *rcsid = "$Header$";
-#endif
-
-#include <rpc/rpc.h>
+#include <gssrpc/rpc.h>
 #include <stdio.h>
 
 #include <gssapi/gssapi.h>
-#include <rpc/auth_gssapi.h>
+#include <gssrpc/auth_gssapi.h>
 
 #ifdef __CODECENTER__
 #define DEBUG_GSSAPI 1
