@@ -1,8 +1,8 @@
 /*
  * include/kerberosIV/krb.h
  *
- * Copyright 1987, 1988, 1994 by the Massachusetts Institute of Technology.
- * All Rights Reserved.
+ * Copyright 1987, 1988, 1994, 2001 by the Massachusetts Institute of
+ * Technology.  All Rights Reserved.
  *
  * Export of this software from the United States of America may
  *   require a specific license from the United States Government.
@@ -278,146 +278,6 @@ typedef struct msg_dat MSG_DAT;
 /* Error code returned by krb_mk_safe */
 #define		SAFE_PRIV_ERROR	-1	/* syscall error */
 
-/*
- * macros for byte swapping; also scratch space
- * u_quad  0-->7, 1-->6, 2-->5, 3-->4, 4-->3, 5-->2, 6-->1, 7-->0
- * u_long  0-->3, 1-->2, 2-->1, 3-->0
- * u_short 0-->1, 1-->0
- */
-
-#define     swap_u_16(x) {\
- unsigned KRB4_32   _krb_swap_tmp[4];\
- swab(((char *) x) +0, ((char *)  _krb_swap_tmp) +14 ,2); \
- swab(((char *) x) +2, ((char *)  _krb_swap_tmp) +12 ,2); \
- swab(((char *) x) +4, ((char *)  _krb_swap_tmp) +10 ,2); \
- swab(((char *) x) +6, ((char *)  _krb_swap_tmp) +8  ,2); \
- swab(((char *) x) +8, ((char *)  _krb_swap_tmp) +6 ,2); \
- swab(((char *) x) +10,((char *)  _krb_swap_tmp) +4 ,2); \
- swab(((char *) x) +12,((char *)  _krb_swap_tmp) +2 ,2); \
- swab(((char *) x) +14,((char *)  _krb_swap_tmp) +0 ,2); \
- memcpy((char *)x,(char *)_krb_swap_tmp,16);\
-                            }
-
-#define     swap_u_12(x) {\
- unsigned KRB4_32   _krb_swap_tmp[4];\
- swab(( char *) x,     ((char *)  _krb_swap_tmp) +10 ,2); \
- swab(((char *) x) +2, ((char *)  _krb_swap_tmp) +8 ,2); \
- swab(((char *) x) +4, ((char *)  _krb_swap_tmp) +6 ,2); \
- swab(((char *) x) +6, ((char *)  _krb_swap_tmp) +4 ,2); \
- swab(((char *) x) +8, ((char *)  _krb_swap_tmp) +2 ,2); \
- swab(((char *) x) +10,((char *)  _krb_swap_tmp) +0 ,2); \
- memcpy((char *)x,(char *)_krb_swap_tmp,12);\
-                            }
-
-#define     swap_C_Block(x) {\
- unsigned KRB4_32   _krb_swap_tmp[4];\
- swab(( char *) x,    ((char *)  _krb_swap_tmp) +6 ,2); \
- swab(((char *) x) +2,((char *)  _krb_swap_tmp) +4 ,2); \
- swab(((char *) x) +4,((char *)  _krb_swap_tmp) +2 ,2); \
- swab(((char *) x) +6,((char *)  _krb_swap_tmp)    ,2); \
- memcpy((char *)x,(char *)_krb_swap_tmp,8);\
-                            }
-#define     swap_u_quad(x) {\
- unsigned KRB4_32   _krb_swap_tmp[4];\
- swab(( char *) &x,    ((char *)  _krb_swap_tmp) +6 ,2); \
- swab(((char *) &x) +2,((char *)  _krb_swap_tmp) +4 ,2); \
- swab(((char *) &x) +4,((char *)  _krb_swap_tmp) +2 ,2); \
- swab(((char *) &x) +6,((char *)  _krb_swap_tmp)    ,2); \
- memcpy((char *)&x,(char *)_krb_swap_tmp,8);\
-                            }
-
-#define     swap_u_long(x) {\
- unsigned KRB4_32   _krb_swap_tmp[4];\
- swab((char *)  &x,    ((char *)  _krb_swap_tmp) +2 ,2); \
- swab(((char *) &x) +2,((char *)  _krb_swap_tmp),2); \
- x = _krb_swap_tmp[0];   \
-                           }
-
-#define     swap_u_short(x) {\
- unsigned short	_krb_swap_sh_tmp; \
- swab((char *)  &x,    ( &_krb_swap_sh_tmp) ,2); \
- x = (unsigned short) _krb_swap_sh_tmp; \
-                            }
-
-/*
- * New byte swapping routines, much cleaner
- */
-#define krb4_swab16(val)	((((val) >> 8)&0xFF) | ((val) << 8))
-#define krb4_swab32(val)	((((val)>>24)&0xFF) | (((val)>>8)&0xFF00) | \
-				  (((val)<<8)&0xFF0000) | ((val)<<24))
-
-/*
- * Macros to encode integers into buffers in big-endian order.  These
- * take a parameter that is a moving pointer of type (unsigned char *)
- * into the buffer, and assume that the caller has already
- * bounds-checked.
- */
-#define KRB4_PUT32(p, val)				\
-do {							\
-    *(p)++ = ((unsigned KRB4_32)(val) >> 24) & 0xff;	\
-    *(p)++ = ((unsigned KRB4_32)(val) >> 16) & 0xff;	\
-    *(p)++ = ((unsigned KRB4_32)(val) >> 8) & 0xff;	\
-    *(p)++ = (unsigned KRB4_32)(val) & 0xff;		\
-} while (0)
-
-#define KRB4_PUT16(p, val)				\
-do {							\
-    *(p)++ = ((unsigned KRB4_32)(val) >> 8) & 0xff;	\
-    *(p)++ = (unsigned KRB4_32)(val) & 0xff;		\
-} while (0)
-
-/*
- * Macros to get integers from a buffer.  These take a parameter that
- * is a moving pointer of type (unsigned char *) into the buffer, and
- * assume that the caller has already bounds-checked.  In addition,
- * they assume that val is an unsigned type; ANSI leaves the semantics
- * of unsigned -> signed conversion as implementation-defined, so it's
- * unwise to depend on such.
- */
-#define KRB4_GET32BE(val, p)			\
-do {						\
-    (val) = (unsigned KRB4_32)*(p)++ << 24;	\
-    (val) |= (unsigned KRB4_32)*(p)++ << 16;	\
-    (val) |= (unsigned KRB4_32)*(p)++ << 8;	\
-    (val) |= (unsigned KRB4_32)*(p)++;		\
-} while (0)
-
-#define KRB4_GET32LE(val, p)			\
-do {						\
-    (val) = (unsigned KRB4_32)*(p)++;		\
-    (val) |= (unsigned KRB4_32)*(p)++ << 8;	\
-    (val) |= (unsigned KRB4_32)*(p)++ << 16;	\
-    (val) |= (unsigned KRB4_32)*(p)++ << 24;	\
-} while(0)
-
-#define KRB4_GET32(val, p, le)			\
-do {						\
-    if (le)					\
-	KRB4_GET32LE((val), (p));		\
-    else					\
-	KRB4_GET32BE((val), (p));		\
-} while (0)
-
-#define KRB4_GET16BE(val, p)			\
-do {						\
-    (val) = (unsigned KRB4_32)*(p)++ << 8;	\
-    (val) |= (unsigned KRB4_32)*(p)++;		\
-} while (0)
-
-#define KRB4_GET16LE(val, p)			\
-do {						\
-    (val) = (unsigned KRB4_32)*(p)++;		\
-    (val) |= (unsigned KRB4_32)*(p)++ << 8;	\
-} while (0)
-
-#define KRB4_GET16(val, p, le)			\
-do {						\
-    if (le)					\
-	KRB4_GET16LE((val), (p));		\
-    else					\
-	KRB4_GET16BE((val), (p));		\
-} while (0)
-
 /* Kerberos ticket flag field bit definitions */
 #define K_FLAG_ORDER    0       /* bit 0 --> lsb */
 #define K_FLAG_1                /* reserved */
@@ -599,9 +459,6 @@ KRB5_DLLIMP int KRB5_CALLCONV krb_get_ticket_for_service
 		   char FAR *buf, unsigned KRB4_32 FAR *buflen,
 		   int checksum, des_cblock, Key_schedule,
 		   char FAR *version, int includeVersion));
-/* getst.c */
-int getst
-	PROTOTYPE((int fd, char *s, int n));
 /* in_tkt.c */
 KRB5_DLLIMP int KRB5_CALLCONV in_tkt
 	PROTOTYPE((char *name, char *inst));
@@ -743,10 +600,6 @@ KRB5_DLLIMP void KRB5_CALLCONV tf_close PROTOTYPE((void));
 /* unix_time.c */
 KRB5_DLLIMP unsigned KRB4_32 KRB5_CALLCONV unix_time_gmt_unixsec 
         PROTOTYPE((unsigned KRB4_32 *));
-
-/* strnlen.c */
-extern int KRB5_CALLCONV krb_strnlen
-	PROTOTYPE((const char *, int));
 
 /*
  * Internal prototypes

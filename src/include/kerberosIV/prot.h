@@ -1,8 +1,8 @@
 /*
  * include/kerberosIV/prot.h
  *
- * Copyright 1985-1994 by the Massachusetts Institute of Technology.
- * All Rights Reserved.
+ * Copyright 1985-1994, 2001 by the Massachusetts Institute of
+ * Technology.  All Rights Reserved.
  *
  * Export of this software from the United States of America may
  *   require a specific license from the United States Government.
@@ -23,7 +23,8 @@
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
  * 
- * Include file with authentication protocol information.
+ * Prototypes for internal functions, mostly related to protocol
+ * encoding and decoding.
  */
 
 #include <kerberosIV/krb_conf.h>
@@ -73,11 +74,169 @@
 	 strlen((char *)pkt_a_inst(packet)) + \
 	 strlen((char *)pkt_a_realm(packet)))
 
+/*
+ * This remains here for the KDC to use for now, but will go away
+ * soon.
+ */
+
+#define     swap_u_long(x) {\
+ unsigned KRB4_32   _krb_swap_tmp[4];\
+ swab((char *)  &x,    ((char *)  _krb_swap_tmp) +2 ,2); \
+ swab(((char *) &x) +2,((char *)  _krb_swap_tmp),2); \
+ x = _krb_swap_tmp[0];   \
+                           }
+
+/*
+ * New byte swapping routines, much cleaner.
+ *
+ * Should also go away soon though.
+ */
+#define krb4_swab16(val)	((((val) >> 8)&0xFF) | ((val) << 8))
+#define krb4_swab32(val)	((((val)>>24)&0xFF) | (((val)>>8)&0xFF00) | \
+				  (((val)<<8)&0xFF0000) | ((val)<<24))
+
+/*
+ * Macros to encode integers into buffers.  These take a parameter
+ * that is a moving pointer of type (unsigned char *) into the buffer,
+ * and assume that the caller has already bounds-checked.
+ */
+#define KRB4_PUT32BE(p, val)				\
+do {							\
+    *(p)++ = ((unsigned KRB4_32)(val) >> 24) & 0xff;	\
+    *(p)++ = ((unsigned KRB4_32)(val) >> 16) & 0xff;	\
+    *(p)++ = ((unsigned KRB4_32)(val) >> 8) & 0xff;	\
+    *(p)++ = (unsigned KRB4_32)(val) & 0xff;		\
+} while (0)
+
+#define KRB4_PUT32LE(p, val)				\
+do {							\
+    *(p)++ = (unsigned KRB4_32)(val) & 0xff;		\
+    *(p)++ = ((unsigned KRB4_32)(val) >> 8) & 0xff;	\
+    *(p)++ = ((unsigned KRB4_32)(val) >> 16) & 0xff;	\
+    *(p)++ = ((unsigned KRB4_32)(val) >> 24) & 0xff;	\
+} while (0)
+
+#define KRB4_PUT32(p, val, le)			\
+do {						\
+    if (le)					\
+	KRB4_PUT32LE((p), (val));		\
+    else					\
+	KRB4_PUT32BE((p), (val));		\
+} while (0)
+
+#define KRB4_PUT16BE(p, val)				\
+do {							\
+    *(p)++ = ((unsigned KRB4_32)(val) >> 8) & 0xff;	\
+    *(p)++ = (unsigned KRB4_32)(val) & 0xff;		\
+} while (0)
+
+#define KRB4_PUT16LE(p, val)				\
+do {							\
+    *(p)++ = (unsigned KRB4_32)(val) & 0xff;		\
+    *(p)++ = ((unsigned KRB4_32)(val) >> 8) & 0xff;	\
+} while (0)
+
+#define KRB4_PUT16(p, val, le)			\
+do {						\
+    if (le)					\
+	KRB4_PUT16LE((p), (val));		\
+    else					\
+	KRB4_PUT16BE((p), (val));		\
+} while (0)
+
+/*
+ * Macros to get integers from a buffer.  These take a parameter that
+ * is a moving pointer of type (unsigned char *) into the buffer, and
+ * assume that the caller has already bounds-checked.  In addition,
+ * they assume that val is an unsigned type; ANSI leaves the semantics
+ * of unsigned -> signed conversion as implementation-defined, so it's
+ * unwise to depend on such.
+ */
+#define KRB4_GET32BE(val, p)			\
+do {						\
+    (val) = (unsigned KRB4_32)*(p)++ << 24;	\
+    (val) |= (unsigned KRB4_32)*(p)++ << 16;	\
+    (val) |= (unsigned KRB4_32)*(p)++ << 8;	\
+    (val) |= (unsigned KRB4_32)*(p)++;		\
+} while (0)
+
+#define KRB4_GET32LE(val, p)			\
+do {						\
+    (val) = (unsigned KRB4_32)*(p)++;		\
+    (val) |= (unsigned KRB4_32)*(p)++ << 8;	\
+    (val) |= (unsigned KRB4_32)*(p)++ << 16;	\
+    (val) |= (unsigned KRB4_32)*(p)++ << 24;	\
+} while(0)
+
+#define KRB4_GET32(val, p, le)			\
+do {						\
+    if (le)					\
+	KRB4_GET32LE((val), (p));		\
+    else					\
+	KRB4_GET32BE((val), (p));		\
+} while (0)
+
+#define KRB4_GET16BE(val, p)			\
+do {						\
+    (val) = (unsigned KRB4_32)*(p)++ << 8;	\
+    (val) |= (unsigned KRB4_32)*(p)++;		\
+} while (0)
+
+#define KRB4_GET16LE(val, p)			\
+do {						\
+    (val) = (unsigned KRB4_32)*(p)++;		\
+    (val) |= (unsigned KRB4_32)*(p)++ << 8;	\
+} while (0)
+
+#define KRB4_GET16(val, p, le)			\
+do {						\
+    if (le)					\
+	KRB4_GET16LE((val), (p));		\
+    else					\
+	KRB4_GET16BE((val), (p));		\
+} while (0)
+
 /* Routines to create and read packets may be found in prot.c */
 
 KTEXT create_auth_reply();
 KTEXT create_death_packet();
 KTEXT pkt_cipher();
+
+/* getst.c */
+int krb4int_getst(int, char *, int);
+
+/* strnlen.c */
+extern int KRB5_CALLCONV krb4int_strnlen(const char *, int);
+
+/* prot_common.c */
+extern int KRB5_CALLCONV krb4prot_encode_naminstrlm(
+    char *, char *, char *,
+    int, KTEXT, unsigned char **);
+extern int KRB5_CALLCONV krb4prot_decode_naminstrlm(
+    KTEXT, unsigned char **,
+    char *, char *, char *);
+
+/* prot_kdc.c */
+extern int KRB5_CALLCONV krb4prot_encode_kdc_reply(
+    char *, char *, char *,
+    long, int, unsigned long,
+    int, KTEXT, int, int, KTEXT);
+extern int KRB5_CALLCONV krb4prot_encode_ciph(
+    C_Block,
+    char *, char *, char *,
+    unsigned long, int, KTEXT, unsigned long,
+    int, int, KTEXT);
+extern int KRB5_CALLCONV krb4prot_encode_tkt(
+    unsigned int,
+    char *, char *, char *,
+    unsigned long,
+    char *, int, long,
+    char *, char *,
+    int, int, KTEXT tkt);
+extern int KRB5_CALLCONV krb4prot_encode_err_reply(
+    char *, char *, char *,
+    unsigned long, unsigned long, char *,
+    int, int, KTEXT);
 
 /* Message types , always leave lsb for byte order */
 

@@ -1,3 +1,12 @@
+2001-01-23  Tom Yu  <tlyu@mit.edu>
+
+	* krb.h: Remove internal prototypes and macros.
+
+	* prot.h: Put internal prototypes and macros here.  Make
+	KRB4_PUT{16,32} into little-endian and big-endian versions
+	thereof, with the original names getting an extra arg to determine
+	endianness of encoding.
+
 2000-11-08  Tom Yu  <tlyu@mit.edu>
 
 	* des.h: Change to make KRB4_32 an int if it's at least 32 bits
