@@ -1,3 +1,8 @@
+2002-09-15  Ken Raeburn  <raeburn@mit.edu>
+
+	* lib/helpers.exp (setup_database): Use "!=" instead of "ne" for
+	string comparisons.
+
 2002-09-15  Tom Yu  <tlyu@mit.edu>
 
 	* lib/helpers.exp (expect_tcl_prompt): Use the "-re" flag, and

@@ -79,7 +79,7 @@ proc setup_database {} {
     expect_tcl_prompt
     # tcl 8.4 for some reason screws up autodetection of output EOL
     # translation.  Work around it for now.
-    send_tcl_cmd_await_echo "if { \[info commands fconfigure\] ne \"\" } { fconfigure stdout -translation lf }"
+    send_tcl_cmd_await_echo "if { \[info commands fconfigure\] != \"\" } { fconfigure stdout -translation lf }"
     expect_tcl_prompt
     send_tcl_cmd_await_echo "source {$TCLUTIL}"
     expect_tcl_prompt
