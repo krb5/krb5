@@ -1,9 +1,6 @@
-CFLAGS = $(CCOPTS) $(DEFS) -I$(srcdir)/crc32 -I$(srcdir)/des -I$(srcdir)/md4 \
-	-I$(srcdir)/md5
-LDFLAGS = -g
+CFLAGS = $(CCOPTS) $(DEFS) -I$(srcdir)/crc32 -I$(srcdir)/des -I$(srcdir)/md4 -I$(srcdir)/md5
 
 ##DOSBUILDTOP = ..\..
-##DOSLIBNAME=crypto.lib
 ##DOS!include $(BUILDTOP)\config\windows.in
 
 TST=if test -n "`cat DONE`" ; then
@@ -21,10 +18,12 @@ SRCS=	$(srcdir)/cryptoconf.c \
 all:: all-$(WHAT)
 
 all-unix::
+# FIXME, need to build the library too...
+all-mac:: $(OBJS)
 
 all-windows:: $(OBJS)
 
-libcrypto.a: des/DONE md4/DONE md5/DONE crc32/DONE os/DONE $(OBJS)
+libcrypto.a: ./des/DONE ./md4/DONE ./md5/DONE ./crc32/DONE ./os/DONE $(OBJS)
 	(cd des; $(TST) $(ARADD) ../$@ `cat DONE` ; fi)
 	(cd crc32; $(TST) $(ARADD) ../$@ `cat DONE` ; fi)
 	(cd md4; $(TST) $(ARADD) ../$@ `cat DONE` ; fi)

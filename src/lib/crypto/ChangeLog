@@ -1,3 +1,12 @@
+Thu Mar 16 21:10:37 1995  John Gilmore  (gnu at toad.com)
+
+	* Makefile.in (CFLAGS):  Avoid continuation line that starts with
+	dash; it confuses the Unix->MPW makefile converter.
+	(##DOSLIBNAME):  No longer needed since DLL built one level up.
+	(all-mac):  Add.
+	(libcrypto.a):  Use explicit "./" on paths to DONE files, to
+	help Unix->MPW makefile converter with rotten Mac pathname conventions.
+
 Wed Mar 15 20:23:17 1995 Keith Vetter (keithv@fusion.com)
 
 	* Makefile.in: cleaned up for the PC
