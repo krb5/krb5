@@ -21,6 +21,8 @@ static char rcsid_fetch_mkey_c[] =
 #include <krb5/kdb.h>
 #include <errno.h>
 #include <stdio.h>
+#include <krb5/libos-proto.h>
+#include <krb5/ext-proto.h>
 
 /* these are available to other funcs, and the pointers may be reassigned */
 
@@ -42,11 +44,14 @@ char *krb5_mkey_pwd_prompt2 = KRB5_KDC_MKEY_2;
  */
 
 krb5_error_code
-krb5_db_fetch_mkey(mname, eblock, fromkeyboard, key)
-krb5_principal mname;
-krb5_encrypt_block *eblock;
-krb5_boolean fromkeyboard;
-krb5_keyblock *key;
+krb5_db_fetch_mkey(DECLARG(krb5_principal, mname),
+		   DECLARG(krb5_encrypt_block *, eblock),
+		   DECLARG(krb5_boolean, fromkeyboard),
+		   DECLARG(krb5_keyblock *,key))
+OLDDECLARG(krb5_principal, mname)
+OLDDECLARG(krb5_encrypt_block *, eblock)
+OLDDECLARG(krb5_boolean, fromkeyboard)
+OLDDECLARG(krb5_keyblock *,key)
 {
     krb5_error_code retval;
     char password[BUFSIZ];
