@@ -1740,11 +1740,12 @@ int rewrite_ccache = 1; /*try to write out ccache*/
 #ifdef	HAVE_SETLUID
 	/*
 	 * If we're on a system which keeps track of login uids, then
-	 * attempt to set the login uid, but don't get too unhappy when/if
-	 * it doesn't succeed.
+ 	 * set the login uid. If this fails this opens up a problem on DEC OSF
+ 	 * with C2 enabled.
 	 */
-	if ((uid_t) getluid() < (uid_t) 0) {
-	    setluid((uid_t) pwd->pw_uid);
+ 	if (setluid((uid_t) pwd->pw_uid) < 0) {
+	    perror("setuid");
+	    sleepexit(1);
 	}
 #endif	/* HAVE_SETLUID */
 #ifdef _IBMR2
