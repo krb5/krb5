@@ -98,6 +98,7 @@
 #define	AdditiveLibraryTarget(libname,objlist)				@@\
 AllTarget(lib/**/libname.a)						@@\
 AllTarget(foo/**/libname)						@@\
+DependTarget()								@@\
 									@@\
 foo/**/libname: objlist							@@\
 	$(ARADD) lib/**/libname.a objlist				@@\
@@ -117,6 +118,7 @@ lib/**/libname.a: objlist						@@\
 AllTarget(objlist)							@@\
 AllTarget(libdir/lib/**/libname.a)					@@\
 AllTarget(foo/**/libname)						@@\
+DependTarget()								@@\
 									@@\
 foo/**/libname: objlist							@@\
 	$(ARADD) libdir/lib/**/libname.a objlist			@@\

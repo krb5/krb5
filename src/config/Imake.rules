@@ -874,6 +874,7 @@ objs:	depends								@@\
 #ifndef NormalLibraryTarget
 #define	NormalLibraryTarget(libname,objlist)				@@\
 AllTarget(lib/**/libname.a)						@@\
+DependTarget()								@@\
 									@@\
 lib/**/libname.a: objlist						@@\
 	$(RM) $@							@@\
