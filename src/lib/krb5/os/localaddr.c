@@ -290,7 +290,7 @@ static struct hostent *local_addr_fallback_kludge()
 /* No ioctls in winsock so we just assume there is only one networking 
  * card per machine, so gethostent is good enough. 
  */
-krb5_error_code
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_os_localaddr (krb5_context context, krb5_address ***addr) {
     char host[64];                              /* Name of local machine */
     struct hostent *hostrec;
