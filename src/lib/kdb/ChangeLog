@@ -1,3 +1,8 @@
+2001-03-10  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* kdb_xdr.c: Change the variable index to idx to prevent function
+	name shadowing.
+
 2000-11-01  Ezra Peisach  <epeisach@mit.edu>
 
 	* configure.in: Use AC_CHECK_HEADERS instead of AC_HAVE_HEADERS. 

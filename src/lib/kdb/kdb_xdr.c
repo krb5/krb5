@@ -722,7 +722,7 @@ krb5_dbe_search_enctype(kcontext, dbentp, start, ktype, stype, kvno, kdatap)
     krb5_int32		kvno;
     krb5_key_data	**kdatap;
 {
-    int			i, index;
+    int			i, idx;
     int			maxkvno;
     krb5_key_data	*datap;
 
@@ -763,7 +763,7 @@ krb5_dbe_search_enctype(kcontext, dbentp, start, ktype, stype, kvno, kdatap)
 	    if (kvno >= 0) {
 		if (kvno == dbentp->key_data[i].key_data_kvno) {
 		    datap = &dbentp->key_data[i];
-		    index = i;
+		    idx = i;
 		    maxkvno = kvno;
 		    break;
 		}
@@ -771,7 +771,7 @@ krb5_dbe_search_enctype(kcontext, dbentp, start, ktype, stype, kvno, kdatap)
 		if (dbentp->key_data[i].key_data_kvno > maxkvno) {
 		    maxkvno = dbentp->key_data[i].key_data_kvno;
 		    datap = &dbentp->key_data[i];
-		    index = i;
+		    idx = i;
 		}
 	    }
 	}
@@ -779,7 +779,7 @@ krb5_dbe_search_enctype(kcontext, dbentp, start, ktype, stype, kvno, kdatap)
     if (maxkvno < 0)
 	return ENOENT;
     *kdatap = datap;
-    *start = index+1;
+    *start = idx+1;
     return 0;
 }
 
