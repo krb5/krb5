@@ -1,3 +1,10 @@
+Tue Feb 27 19:23:55 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* krb5_decode.c (decode_krb5_enc_tkt_part): If starttime is not
+		set, then use authtime as a default.  (This fixes the bug
+		where if you try to immediately use a TGT to get a ticket,
+		you get a time skew error.)
+
 Wed Feb  7 00:23:18 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in: Folded in danw's changes to allow
