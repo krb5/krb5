@@ -22,6 +22,8 @@
  *
  */
 
+#if 0 /* i don't believe this is used anywhere --marc */
+
 /*
  * ser_eblk.c - Serialize a krb5_encblock structure.
  */
@@ -249,3 +251,5 @@ krb5_ser_encrypt_block_init(kcontext)
 {
     return(krb5_register_serializer(kcontext, &krb5_encrypt_block_ser_entry));
 }
+
+#endif
