@@ -201,7 +201,7 @@ all-unix:: krb_err.h kadm_err.h includes all-liblinks
 ##DOS##LIBOBJS = $(OBJS)
 
 # comp_et_depend(krb_err)
-krb_err.h:: krb_err.et
+krb_err.h: krb_err.et
 krb_err.c: krb_err.et
 
 kadm_err.h: kadm_err.et
@@ -210,19 +210,12 @@ kadm_err.c: kadm_err.et
 depend:: krb_err.h kadm_err.h
 depend:: $(CODE) 
 
-includes:: krb_err.h
-	if cmp krb_err.h $(EHDRDIR)/krb_err.h >/dev/null 2>&1; then :; \
-	else \
-		(set -x; $(RM) $(EHDRDIR)/krb_err.h; \
-		 $(CP) krb_err.h $(EHDRDIR)/krb_err.h) ; \
-	fi
+includes: $(EHDRDIR)$(S)krb_err.h $(EHDRDIR)$(S)kadm_err.h
 
-includes:: kadm_err.h
-	if cmp kadm_err.h $(EHDRDIR)/kadm_err.h >/dev/null 2>&1; then :; \
-	else \
-		(set -x; $(RM) $(EHDRDIR)/kadm_err.h; \
-		 $(CP) kadm_err.h $(EHDRDIR)/kadm_err.h) ; \
-	fi
+$(EHDRDIR)$(S)krb_err.h: krb_err.h
+	$(CP) krb_err.h $@
+$(EHDRDIR)$(S)kadm_err.h: kadm_err.h
+	$(CP) kadm_err.h $@
 
 clean-unix::
 	$(RM) $(EHDRDIR)/krb_err.h

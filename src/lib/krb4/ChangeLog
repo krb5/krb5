@@ -1,3 +1,7 @@
+2002-12-04  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in: Fix up includes handling somewhat.
+
 2002-12-02  Tom Yu  <tlyu@mit.edu>
 
 	* change_password.c: Remove netdb.h inclusion.
