@@ -649,6 +649,7 @@ key_string2key_keysalt(ksent, ptr)
      * Determine if this key/salt pair is salted.
      */
     salted = 0;
+    krb5_use_keytype(argp->context, &master_encblock, ksent->ks_keytype);
     if (!key_name_to_data(argp->dbentry, ksent, -1, &kdata)) {
 	if (kdata->key_data_length[1] && kdata->key_data_contents[1])
 	    salted = 1;
@@ -833,6 +834,7 @@ key_randomkey_keysalt(ksent, ptr)
     argp = (struct keysalt_iterate_args *) ptr;
     kret = 0;
 
+    krb5_use_keytype(argp->context, &master_encblock, ksent->ks_keytype);
     if (key_name_to_data(argp->dbentry, ksent, -1, &kdata)) {
 	/*
 	 * Cannot find a name-to-data matching, so we must have to create a
@@ -953,6 +955,9 @@ key_encrypt_keys(kcontext, dbentp, nkeysp, inkeys, outkeysp)
     ndone = 0;
     nkeys = *nkeysp;
     for (i=0; i<nkeys; i++) {
+	krb5_use_keytype(kcontext,
+			 &master_encblock,
+			 (krb5_keytype) inkeys[i].key_data_type[0]);
 	if (!(kret = krb5_dbe_create_key_data(kcontext, &loser))) {
 	    tmpkey.keytype = inkeys[i].key_data_type[0];
 	    tmpkey.length = inkeys[i].key_data_length[0];
@@ -1026,6 +1031,9 @@ key_decrypt_keys(kcontext, dbentp, nkeysp, inkeys, outkeysp)
     ndone = 0;
     nkeys = *nkeysp;
     for (i=0; i<nkeys; i++) {
+	krb5_use_keytype(kcontext,
+			 &master_encblock,
+			 (krb5_keytype) inkeys[i].key_data_type[0]);
 	if (!(kret = krb5_dbe_create_key_data(kcontext, &loser))) {
 	    if (kret = krb5_dbekd_decrypt_key_data(kcontext,
 						   &master_encblock,
@@ -1136,6 +1144,15 @@ krb5_keyblock *
 key_admin_key()
 {
     return((madmin_key_init) ? &madmin_key : (krb5_keyblock *) NULL);
+}
+
+/*
+ * key_master_encblock()	- Return pointer to master encryption block.
+ */
+krb5_encrypt_block *
+key_master_encblock()
+{
+    return((mencb_init) ? &master_encblock : (krb5_encrypt_block *) NULL);
 }
 
 /*
