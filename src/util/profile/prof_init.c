@@ -119,11 +119,11 @@ errcode_t profile_get_values(profile, names, ret_values)
 {
     prf_file_t	file;
     errcode_t	retval;
-    struct profile_node *parent, *section;
+    struct profile_node *section;
     void		*state;
     char		*value;
     struct string_list values;
-    char		**cpp;
+    const char		**cpp;
 
     if (names == 0 || names[0] == 0 || names[1] == 0)
 	return PROF_BAD_NAMESET;
@@ -156,3 +156,84 @@ cleanup:
     return retval;
 }	
 
+/*
+ * XXX this version only works to get values from the first file.
+ */
+static errcode_t profile_get_value(profile, names, ret_value)
+    profile_t	profile;
+    const char	**names;
+    char	**ret_value;
+{
+    prf_file_t	file;
+    errcode_t	retval;
+    struct profile_node *section;
+    void		*state;
+    char		*value;
+    const char		**cpp;
+
+    if (names == 0 || names[0] == 0 || names[1] == 0)
+	return PROF_BAD_NAMESET;
+
+    file = profile->first_file;
+    section = file->root;
+
+    for (cpp = names; cpp[1]; cpp++) {
+	state = 0;
+	retval = profile_find_node_subsection(section, *cpp,
+					      &state, 0, &section);
+	if (retval)
+	    goto cleanup;
+    }
+
+    state = 0;
+    retval = profile_find_node_relation(section, *cpp, &state, 0, &value);
+    if (retval)
+	goto cleanup;
+
+    *ret_value = value;
+    return 0;
+cleanup:
+    return retval;
+}
+
+errcode_t profile_get_string(profile, names, def_val, ret_string)
+    profile_t	profile;
+    const char	**names;
+    const char	*def_val;
+    char 	**ret_string;
+{
+    const char	*value;
+    errcode_t	retval;
+
+    retval = profile_get_value(profile, names, &value);
+    if (retval == PROF_NO_SECTION || retval == PROF_NO_RELATION)
+	value = def_val;
+    else if (retval)
+	return retval;
+    
+    *ret_string = malloc(strlen(value)+1);
+    if (*ret_string == 0)
+	return ENOMEM;
+    strcpy(*ret_string, value);
+    return 0;
+}
+
+errcode_t profile_get_integer(profile, names, def_val, ret_int)
+    profile_t	profile;
+    const char	**names;
+    int		def_val;
+    int		*ret_int;
+{
+   char	*value;
+   errcode_t	retval;
+
+   retval = profile_get_value(profile, names, &value);
+   if (retval == PROF_NO_SECTION || retval == PROF_NO_RELATION) {
+       *ret_int = def_val;
+       return 0;
+   } else if (retval)
+       return retval;
+   
+   *ret_int = atoi(value);
+   return 0;
+}
