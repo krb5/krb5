@@ -889,6 +889,8 @@ krb5_dbm_db_rename(context, from, to)
 	 * Set the database to the target, so that other processes sharing
 	 * the target will stop their activity, and notice the new database.
 	 */
+	db_ctx = (krb5_db_context *) context->db_context;
+
 	retval = krb5_dbm_db_set_name(context, to);
 	if (retval) {
 	    if (retval == ENOENT)
@@ -897,7 +899,6 @@ krb5_dbm_db_rename(context, from, to)
 		goto errout;
 	}
 	
-	db_ctx = (krb5_db_context *) context->db_context;
 	db_ctx->db_lf_name = gen_dbsuffix(db_ctx->db_name,
 					  KDBM_LOCK_EXT(db_ctx));
 	if (db_ctx->db_lf_name == (char *)NULL) {

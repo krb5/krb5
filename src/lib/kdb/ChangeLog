@@ -1,3 +1,8 @@
+Tue Feb 13 21:33:03 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* kdb_dbm.c (krb5_dbm_db_rename): Initialize pointer before use
+		for case where new db does not exist.
+
 Tue Jan 30 18:26:38 1996  Mark Eichin  <eichin@cygnus.com>
 
 	* kdb_dbm.c (krb5_dbm_db_rename): O_EXCL is meaningless without
