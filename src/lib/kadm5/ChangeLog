@@ -1,3 +1,8 @@
+Fri Oct 18 15:44:14 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* kadm_rpc_xdr.c, misc_free.c, server_internal.h: include stdlib.h
+ 	instead of malloc.h [krb5-admin/35]
+
 Tue Oct 15 18:01:51 1996  Barry Jaspan  <bjaspan@mit.edu>
 
 	* logger.c (krb5_klog_init): remember to call openlog() when

@@ -8,7 +8,7 @@
 static char *rcsid = "$Header$";
 #endif
 #include	<kadm5/admin.h>
-#include	<malloc.h>
+#include	<stdlib.h>
 #include	"server_internal.h"
 
 kadm5_ret_t

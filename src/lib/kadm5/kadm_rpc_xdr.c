@@ -13,7 +13,7 @@ static char *rcsid = "$Header$";
 #include <k5-int.h>
 #include <kadm5/admin.h>
 #include <kadm5/kadm_rpc.h>
-#include <malloc.h>
+#include <stdlib.h>
 #include <string.h>
 
 static bool_t

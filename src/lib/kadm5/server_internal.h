@@ -14,7 +14,7 @@
 #define __KADM5_SERVER_INTERNAL_H__
 
 #include    <memory.h>
-#include    <malloc.h>
+#include    <stdlib.h>
 #include    "k5-int.h"
 #include    <krb5/kdb.h>
 #include    <kadm5/admin.h>
