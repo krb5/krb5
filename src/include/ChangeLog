@@ -1,3 +1,8 @@
+Thu Jun 29 22:54:30 1995  Tom Yu  (tlyu@dragons-lair)
+
+	* krb5.hin: special-case ultrix brokenness (again!) for
+		KRB5_CONST; krb5.h breaks when typedef'ing while
+		installed.  Yuck.
 
 Tue Jun 27 16:14:38 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* krb5.hin - Reinstate KRB5_PROVIDE_PROTOTYPES.  This is needed for

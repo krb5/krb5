@@ -153,7 +153,12 @@ typedef struct _krb5_data {
 } krb5_data;
 
 /* Define krb5_const as necessary */
-#ifdef KRB5_NO_CONST
+
+/*
+ * Hardcoded scrudge to deal with Ultrix; see note on NPROTOTYPE below
+ */
+
+#if defined(KRB5_NO_CONST) || (defined(__ultrix) && !defined(__GNUC__))
 #define krb5_const
 #else
 #define krb5_const const
