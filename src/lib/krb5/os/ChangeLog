@@ -1,3 +1,8 @@
+2001-03-19	Miro Jurisic <meeroh@mit.edu>
+
+	* c_us_time.c: Fix the sleep queue notification code to
+		only run on machines with power management
+
 2001-02-27	Alexandra Ellwood <lxs@mit.edu>
 
 	* ccdefname.c, init_os_ctx.c: Updated Mac OS #defines and #includes 

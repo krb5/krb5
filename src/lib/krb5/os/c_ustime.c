@@ -319,24 +319,41 @@ void MicrosecondsToSecsMicrosecs (
    *residualMicroseconds = eventMicroseconds - *eventSeconds * 1000000;
 }
 
+static int SleepQPresent (void)
+{
+	SInt32 pmgrAttributes;
+	Boolean sleepQPresent = 0;
+
+	if (Gestalt (gestaltPowerMgrAttr, &pmgrAttributes) == noErr) {
+		if ((pmgrAttributes & (1 << gestaltPMgrDispatchExists)) != 0) {
+			sleepQPresent = 1;
+		}
+	}
+	return sleepQPresent;
+}
+
 void InstallSleepNotification ()
 {
-	gSleepQUPP = NewSleepQProc (SleepNotification);
-	gSleepQRecord.sleepQLink = nil;
-	gSleepQRecord.sleepQType = slpQType;
-	gSleepQRecord.sleepQProc = gSleepQUPP;
-	gSleepQRecord.sleepQFlags = 0;
-	SleepQInstall (&gSleepQRecord);
+	if (SleepQPresent ()) {
+		gSleepQUPP = NewSleepQProc (SleepNotification);
+		gSleepQRecord.sleepQLink = nil;
+		gSleepQRecord.sleepQType = slpQType;
+		gSleepQRecord.sleepQProc = gSleepQUPP;
+		gSleepQRecord.sleepQFlags = 0;
+		SleepQInstall (&gSleepQRecord);
+	}
 }
 
 void RemoveSleepNotification ()
 {
-	SleepQRemove (&gSleepQRecord);
+	if (SleepQPresent ()) {
+		SleepQRemove (&gSleepQRecord);
 #if TARGET_API_MAC_CARBON
-	DisposeSleepQUPP (gSleepQUPP);
+		DisposeSleepQUPP (gSleepQUPP);
 #else
-	DisposeRoutineDescriptor (gSleepQUPP);
+		DisposeRoutineDescriptor (gSleepQUPP);
 #endif
+	}
 }
 
 pascal long SleepNotification (
