@@ -1,3 +1,17 @@
+2001-06-26  Ezra Peisach  <epeisach@mit.edu>
+
+	* krb4int.h: Add prototypes for krb__get_realmsfile(),
+	krb5 prototypes are declarted from krb.hkrb__get_cnffile() and
+	krb5 prototypes are declarted from krb.hk_gethostname(). 
+
+	* g_pw_in_tkt.c: Declare passwd_to_key() static.
+
+	* cr_tkt.c: Move krb5.h inclusion before krb.h so that certain
+	krb5 prototypes are declarted from krb.h.
+
+	* g_admhost.c, g_cnffile.c, g_krbhst.c, g_krbrlm.c, gethostname.c
+	krb5 prototypes are declarted from krb.hrealmofhost.c: 
+	Include krb4int.h and remove prototypes included in there.
 
 2001-06-20  Ezra Peisach  <epeisach@mit.edu>
 

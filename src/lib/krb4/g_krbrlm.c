@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include "krb.h"
 #include <string.h>
+#include "krb4int.h"
 
 /*
  * krb_get_lrealm takes a pointer to a string, and a number, n.  It fills
@@ -33,7 +34,7 @@ krb_get_lrealm(r,n)
     char *r;
     int n;
 {
-    FILE *cnffile, *krb__get_cnffile();
+    FILE *cnffile;
 
     if (n > 1)
 	return(KFAILURE);  /* Temporary restriction */

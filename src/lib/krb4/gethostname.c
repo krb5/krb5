@@ -10,6 +10,8 @@
 #include "mit-copyright.h"
 #define	DEFINE_SOCKADDR
 #include "krb.h"
+#include "krb4int.h"
+
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif

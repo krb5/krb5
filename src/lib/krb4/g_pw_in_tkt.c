@@ -47,7 +47,7 @@
  * and 0 is returned.
  */
 /*ARGSUSED */
-int
+static int
 passwd_to_key(user,instance,realm,passwd,key)
     char *user, *instance, *realm, *passwd;
     C_Block key;

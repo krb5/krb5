@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include "krb.h"
 #include <string.h>
+#include "krb4int.h"
 
 /*
  * Given a Kerberos realm, find a host on which the Kerberos database
@@ -40,7 +41,7 @@ krb_get_admhst(h, r, n)
     char FAR *r;
     int n;
 {
-    FILE *cnffile, *krb__get_cnffile();
+    FILE *cnffile;
     char tr[REALM_SZ];
     char linebuf[BUFSIZ];
     char scratch[64];

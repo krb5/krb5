@@ -21,6 +21,7 @@
 #else
 extern char *malloc();
 #endif
+#include "krb4int.h"
 
 /*
  * krb_realmofhost.
@@ -48,7 +49,6 @@ krb_realmofhost(host)
 {
 	char *domain;
 	FILE *trans_file;
-	FILE *krb__get_realmsfile();
 	/*
 	 * This used to be MAXHOSTNAMELEN, but we don't know how big
 	 * that will necessarily be on all systems, so assume 1024.

@@ -18,6 +18,7 @@
 #include <stdio.h>
 #include "krb.h"
 #include "k5-int.h"
+#include "krb4int.h"
 
 krb5_context krb5__krb4_context = 0;
 

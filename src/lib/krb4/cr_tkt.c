@@ -24,11 +24,11 @@
  * or implied warranty.
  */
 
+#include <krb5.h>
 #include "des.h"
 #include "krb.h"
 #include "prot.h"
 #include <string.h>
-#include <krb5.h>
 
 static int
 krb_cr_tkt_int PROTOTYPE((KTEXT tkt, unsigned int flags_in, char *pname, 

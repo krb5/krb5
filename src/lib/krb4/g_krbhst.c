@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include "krb.h"
 #include <string.h>
+#include "krb4int.h"
 
 /*
  * Given a Kerberos realm, find a host on which the Kerberos authenti-
@@ -69,7 +70,7 @@ krb_get_krbhst(h,r,n)
     char FAR *r;
     int n;
 {
-    FILE *cnffile, *krb__get_cnffile();
+    FILE *cnffile;
     char tr[REALM_SZ];
     char linebuf[BUFSIZ];
     register int i;
