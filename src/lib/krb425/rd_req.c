@@ -31,6 +31,7 @@ static char rcsid_rd_req_c[] =
 #endif	/* !lint & !SABER */
 
 #include "krb425.h"
+#include <sys/param.h>
 
 static krb5_error_code
 setkey_key_proc(DECLARG(krb5_pointer,arg),
@@ -62,6 +63,8 @@ char *fn;
 	krb5_data authe;
 	extern int gethostname();
 	int use_set_key = 0;
+	char file_name[MAXPATHLEN];
+	int tmp;
 
 	if (from_addr) {
 		peer.addrtype = ADDRTYPE_INET;
@@ -108,8 +111,15 @@ char *fn;
 	if (!fn) {
 	    use_set_key = 1;
 	    fn = (char *)0;
-	} else if (!*fn)
+	} else if (!*fn) {
 	    fn = (char *)0;
+	} else {
+	    strcpy(file_name, "FILE:");
+	    strncpy(file_name + 5, fn, MAXPATHLEN-5);
+	    file_name[sizeof(file_name)-1] = '\0';
+	    fn = file_name;
+	}
+	    
 
 #ifdef  EBUG
         EPRINT "Calling krb5_rd_req with:\n");
@@ -175,12 +185,20 @@ char *fn;
 	r = 0;
 #endif
 	set_string(ad->pname, ANAME_SZ,
-		   krb5_princ_component(authdat->authenticator->client, 1));
-	set_string(ad->pinst, INST_SZ,
-		   krb5_princ_component(authdat->authenticator->client, 2));
-	set_string(ad->prealm, REALM_SZ,
 		   krb5_princ_component(authdat->authenticator->client, 0));
 
+	if (authdat->authenticator->client->length > 1) {
+     		set_string(ad->pinst, INST_SZ,
+			   krb5_princ_component(authdat->authenticator->client,
+						1));
+	}
+	else {
+		ad->pinst[0] = '\0';
+	}
+
+	set_string(ad->prealm, REALM_SZ,
+		   krb5_princ_realm(authdat->authenticator->client));
+  
 	ad->checksum = *(long *)authdat->authenticator->checksum->contents;
 
 	if (authdat->ticket->enc_part2->session->keytype != KEYTYPE_DES) {

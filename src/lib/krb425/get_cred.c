@@ -93,12 +93,16 @@ CREDENTIALS *c;
 			}
 	}
 #endif
-	set_string(c->pname, ANAME_SZ, krb5_princ_component(creds.client, 1));
-	set_string(c->pinst, INST_SZ, krb5_princ_component(creds.client, 2));
-
+	set_string(c->pname, ANAME_SZ, krb5_princ_component(creds.client, 0));
+	if (creds.client->length > 1) {
+	  set_string(c->pinst, INST_SZ, krb5_princ_component(creds.client, 1));
+	}
+	else {
+	  c->pinst[0] = '\0';
+	}
 	set_string(c->realm, REALM_SZ, krb5_princ_realm(creds.server));
-	set_string(c->service, REALM_SZ, krb5_princ_component(creds.server, 1));
-	set_string(c->instance, REALM_SZ, krb5_princ_component(creds.server, 2));
+	set_string(c->service, ANAME_SZ, krb5_princ_component(creds.server, 0));
+*	set_string(c->instance, INST_SZ, krb5_princ_component(creds.server, 1));
 
 	c->ticket_st.length = creds.ticket.length;
 	memcpy((char *)c->ticket_st.dat,
