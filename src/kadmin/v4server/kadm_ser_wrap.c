@@ -28,9 +28,8 @@ unwraps wrapped packets and calls the appropriate server subroutine
 #include <krb_err.h>
 #include <syslog.h>
 
-#ifdef OVSEC_KADM
+#ifdef KADM5
 #include <kadm5/admin.h>
-extern void *ovsec_handle;
 #endif
 
 Kadm_Server server_parm;
@@ -39,7 +38,7 @@ Kadm_Server server_parm;
 kadm_ser_init
 set up the server_parm structure
 */
-#ifdef OVSEC_KADM
+#ifdef KADM5
 kadm_ser_init(inter, realm, params)
     int inter;			/* interactive or from file */
     char realm[];
@@ -87,7 +86,7 @@ kadm_ser_init(inter, realm)
     /* setting up the database */
     mkey_name = KRB5_KDB_M_NAME;
 
-#ifdef OVSEC_KADM
+#ifdef KADM5
     server_parm.master_keyblock.enctype = params->enctype;
     krb5_use_enctype(kadm_context, &server_parm.master_encblock, 
 		     server_parm.master_keyblock.enctype);
@@ -108,7 +107,7 @@ kadm_ser_init(inter, realm)
     krb5_db_fetch_mkey(kadm_context, server_parm.master_princ,
 		       &server_parm.master_encblock,
 		       (inter == 1), FALSE,
-#ifdef OVSEC_KADM
+#ifdef KADM5
 		       params->stash_file,
 #else
 		       (char *) NULL,
@@ -240,7 +239,7 @@ int *dat_len;
 	retval = kadm_ser_cpw(msg_st.app_data+1,(int) msg_st.app_length,&ad,
 			      &retdat, &retlen);
 	break;
-#ifndef OVSEC_KADM
+#ifndef KADM5
     case ADD_ENT:
 	retval = kadm_ser_add(msg_st.app_data+1,(int) msg_st.app_length,&ad,
 			      &retdat, &retlen);
@@ -265,7 +264,7 @@ int *dat_len;
 	retval = kadm_ser_stab(msg_st.app_data+1,(int) msg_st.app_length,&ad,
 			       &retdat, &retlen);
 	break;
-#endif /* OVSEC_KADM */
+#endif /* KADM5 */
     default:
 	clr_cli_secrets();
 	errpkt(dat, dat_len, KADM_NO_OPCODE);

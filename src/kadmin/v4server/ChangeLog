@@ -1,3 +1,12 @@
+Tue May 13 20:21:21 1997  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in:
+	* admin_server.c:
+	* kadm_server.c:
+	* kadm_ser_wrap.c: Convert to use new kadm5 API; this still needs
+	work to remove references to krb5_db and to regain full v4 kadmind
+	functionality (or as much as is possible).
+
 Tue Feb 18 09:59:59 1997  Ezra Peisach  <epeisach@mit.edu>
 
 	* acl_files.c: Do not declare malloc() or calloc() if stdlib.h exists.

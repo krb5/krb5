@@ -41,10 +41,10 @@
 #include <sys/time.h>
 #include <syslog.h>
 
-#ifdef OVSEC_KADM
+#ifdef KADM5
 #include <kadm5/admin.h>
-void *ovsec_handle;
-kadm5_config_params params;
+void *kadm5_handle;
+kadm5_config_params paramsin, paramsout;
 #endif
 
 #include "k5-int.h"
@@ -97,8 +97,8 @@ char *argv[];
     extern int fascist_cpw;
     krb5_error_code retval;
     
-#ifdef OVSEC_KADM
-    memset(&params, 0, sizeof(params));
+#ifdef KADM5
+    memset(&paramsin, 0, sizeof(paramsin));
 #endif
 
     retval = krb5_init_context(&kadm_context);
@@ -132,9 +132,9 @@ char *argv[];
 	    acldir = optarg;
 	    break;
 	case 'd':
-#ifdef OVSEC_KADM
-	    params.dbname = optarg;
-	    params.mask |= KADM5_CONFIG_DBNAME;
+#ifdef KADM5
+	    paramsin.dbname = optarg;
+	    paramsin.mask |= KADM5_CONFIG_DBNAME;
 #else
 	    if (errval = krb5_db_set_name(kadm_context, optarg)) {
 		com_err(argv[0], errval, "while setting dbname");
@@ -152,9 +152,9 @@ char *argv[];
 	    (void) strncpy(krbrlm, optarg, sizeof(krbrlm) - 1);
 	    break;
         case 'k':
-#ifdef OVSEC_KADM
-	    params.admin_keytab = optarg;
-	    params.mask |= KADM5_CONFIG_ADMIN_KEYTAB;
+#ifdef KADM5
+	    paramsin.admin_keytab = optarg;
+	    paramsin.mask |= KADM5_CONFIG_ADMIN_KEYTAB;
 #endif
 	    break;
         case 'h':			/* get help on using admin_server */
@@ -171,27 +171,27 @@ char *argv[];
 	(void) strncpy(krbrlm, lrealm, sizeof(krbrlm) - 1);
     }
 
-#ifdef OVSEC_KADM
-    params.realm = krbrlm;
-    params.mask |= KADM5_CONFIG_REALM;
+#ifdef KADM5
+    paramsin.realm = krbrlm;
+    paramsin.mask |= KADM5_CONFIG_REALM;
 
     if (errval = kadm5_get_config_params(kadm_context, NULL, NULL,
-					 &params, &params)) {
+					 &paramsin, &paramsout)) {
 	 com_err(argv[0], errval, "while retrieving kadm5 params");
 	 exit(1);
     }
-    if (errval = krb5_db_set_name(kadm_context, params.dbname)) {
+    if (errval = krb5_db_set_name(kadm_context, paramsout.dbname)) {
 	 com_err(argv[0], errval, "while setting dbname");
 	 exit(1);
     }
-#endif /* OVSEC_KADM */
+#endif /* KADM5 */
 
     printf("KADM Server %s initializing\n",KADM_VERSTR);
     printf("Please do not use 'kill -9' to kill this job, use a\n");
     printf("regular kill instead\n\n");
 
-#ifdef OVSEC_KADM
-    printf("KADM Server starting in the OVSEC_KADM mode (%sprocess id %d).\n",
+#ifdef KADM5
+    printf("KADM Server starting in the KADM5 mode (%sprocess id %d).\n",
 	   debug ? "" : "parent ", getpid());
 #else
     printf("KADM Server starting in %s mode for the purposes for password changing\n\n", fascist_cpw ? "fascist" : "NON-FASCIST");
@@ -216,8 +216,8 @@ char *argv[];
     }
     /* set up the server_parm struct */
     if ((errval = kadm_ser_init(prm.inter, krbrlm
-#ifdef OVSEC_KADM
-				, &params
+#ifdef KADM5
+				, &paramsout
 #endif
 				))==KADM_SUCCESS) {
 	krb5_db_fini(kadm_context);	/* Close the Kerberos database--
@@ -395,7 +395,7 @@ void process_client(fd, who)
     krb5_key_data *kdatap;
     int status;
 
-#ifdef OVSEC_KADM
+#ifdef KADM5
     char *service_name;
 
     service_name = (char *) malloc(strlen(server_parm.sname) +
@@ -405,23 +405,22 @@ void process_client(fd, who)
 	 syslog(LOG_ERR, "error: out of memory allocating service name");
 	 cleanexit(1);
     }
-    sprintf(service_name, "%s/%s@%s", server_parm.sname,
-	    server_parm.sinst, server_parm.krbrlm);
+    sprintf(service_name, "%s@%s", KADM5_ADMIN_SERVICE, paramsin.realm);
 
-    retval = ovsec_kadm_init_with_skey(service_name,
-				       params.admin_keytab,
-				       OVSEC_KADM_ADMIN_SERVICE, krbrlm,
-				       OVSEC_KADM_STRUCT_VERSION,
-				       OVSEC_KADM_API_VERSION_1,
-				       &ovsec_handle); 
+    retval = kadm5_init_with_skey(service_name,
+				  paramsout.admin_keytab,
+				  KADM5_ADMIN_SERVICE,
+				  &paramsin,
+				  KADM5_STRUCT_VERSION,
+				  KADM5_API_VERSION_2,
+				  &kadm5_handle);
     if (retval) {
-	 syslog(LOG_ERR, "error: ovsec_kadm_init failed: %s",
+	 syslog(LOG_ERR, "error: kadm5_init failed: %s",
 		 error_message(retval));
 	 cleanexit(1);
     }
     free(service_name);
-
-    if (retval = krb5_db_set_name(kadm_context, params.dbname)) {
+    if (retval = krb5_db_set_name(kadm_context, paramsout.dbname)) {
 	 syslog(LOG_ERR, "%s while setting dbname", error_message(retval));
 	 cleanexit(1);
     }
@@ -498,8 +497,8 @@ void process_client(fd, who)
 	    else if (retval)
 		syslog(LOG_ERR, "short dlen read: %d", retval);
 	    (void) close(fd);
-#ifdef OVSEC_KADM
-	    (void) ovsec_kadm_destroy(ovsec_handle);
+#ifdef KADM5
+	    (void) kadm5_destroy(kadm5_handle);
 #endif
 	    cleanexit(retval ? 3 : 0);
 	}
@@ -642,8 +641,8 @@ kill_children()
     return;
 }
 
-#ifdef OVSEC_KADM
-krb5_ui_4 convert_ovsec_to_kadm(val)
+#ifdef KADM5
+krb5_ui_4 convert_kadm5_to_kadm(val)
    krb5_ui_4 val;
 {
      switch (val) {
