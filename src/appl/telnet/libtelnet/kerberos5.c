@@ -393,7 +393,7 @@ kerberos5_is(ap, data, cnt)
 		    r = krb5_auth_con_getrcache(telnet_context, auth_context,
 						&rcache);
 		    if (!r && !rcache) {
-			r = krb5_sname_to_principal(telnet_context, 0, "host",
+			r = krb5_sname_to_principal(telnet_context, 0, 0,
 						    KRB5_NT_SRV_HST, &server);
 			if (!r) {
 			    r = krb5_get_server_rcache(telnet_context,

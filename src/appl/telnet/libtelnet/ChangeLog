@@ -1,3 +1,8 @@
+Thu May  9 00:06:41 1996  Richard Basch  <basch@lehman.com>
+
+	* kerberos5.c: use the default server principal name to generate
+	the rcache filename
+
 Sat Apr 27 16:09:54 1996  Richard Basch  <basch@lehman.com>
 
 	* kerberos5.c: a host may have multiple names and multiple keys,
