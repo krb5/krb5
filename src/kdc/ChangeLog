@@ -1,3 +1,8 @@
+2002-09-15  Tom Yu  <tlyu@mit.edu>
+
+	* kerberos_v4.c (check_princ): Call strftime() with correct number
+	of arguments.
+
 2002-09-15  Ken Raeburn  <raeburn@mit.edu>
 
 	* kerberos_v4.c: Always include stdarg.h, not varargs.h.

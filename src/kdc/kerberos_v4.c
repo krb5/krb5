@@ -1085,7 +1085,8 @@ check_princ(char *p_name, char *instance, int lifetime, Principal *p,
 	time_t t = p->exp_date;
 
 	tm = localtime(&t);
-	strftime(timestr, "%Y-%m-%d %H:%M:%S", tm);
+	if (!strftime(timestr, sizeof(timestr), "%Y-%m-%d %H:%M:%S", tm))
+	    timestr[0] = '\0';
 	lt = klog(L_ERR_SEXP,
 		  "EXPIRED \"%s\" \"%s\"  %s", p->name, p->instance, timestr);
 	return KERB_ERR_NAME_EXP;
