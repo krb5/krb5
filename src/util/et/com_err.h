@@ -38,6 +38,9 @@
 #define INTERFACE_C
 #endif
 #endif
+#ifndef FAR
+#define FAR
+#endif
 
 #if defined(__STDC__) || defined(_WINDOWS)
 /* ANSI C -- use prototypes etc */

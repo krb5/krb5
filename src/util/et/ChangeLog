@@ -1,3 +1,7 @@
+Fri Apr 14 08:48:00 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* com_err.h: If FAR is not defined, define it away.
+
 Thu Apr 13 16:02:24 1995 Keith Vetter (keithv@fusion.com)
 
         * com_err.c, compile_et.c, error_ta.h, et_c.awk, internal.h:
