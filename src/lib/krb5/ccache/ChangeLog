@@ -1,3 +1,23 @@
+2002-60-20  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in: Build cc accessor functions on Windows.
+	[pullup from 1-2-2-branch]
+
+2002-06-20 Alexandra Ellwood <lxs@mit.edu>
+
+	* ccdefault.c: updated to new KLL function name
+
+	* ccdefault.c: swapped include of KerberosLoginPrivate with
+	k5-int.h to avoid problems with including CoreServices.h after
+	profile.h and krb.h
+
+	* ccdefault.c: Updated Mac OS X headers to new framework layout
+
+	* ccdefops.c: created #define for USE_CCAPI now that both Mac OS 9
+	and Mac OS 10 use ccapi.
+
+	[pullups from 1-2-2-branch]
+
 2002-04-10  Danilo Almeida  <dalmeida@mit.edu>
 
 	* cc_file.c: Use _WIN32 instead of _WINSOCKAPI_ because
