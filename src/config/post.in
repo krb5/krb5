@@ -71,7 +71,7 @@ depend-prerecurse::
 clean:: clean-$(WHAT)
 
 clean-unix::
-	$(RM) $(OBJS) .depend .d
+	$(RM) $(OBJS) .depend .d depfix2.sed
 
 clean-windows::
 	$(RM) *.$(OBJEXT)
