@@ -42,4 +42,29 @@
 #include "fake-addrinfo.h"
 
 /* Allocate the storage here.  */
-struct fac krb5int_fac = { 0 };
+struct fac krb5int_fac = { K5_MUTEX_PARTIAL_INITIALIZER, 0 };
+
+int krb5int_init_fac (void)
+{
+    return k5_mutex_finish_init(&krb5int_fac.lock);
+}
+
+void krb5int_fini_fac (void)
+{
+    k5_mutex_destroy(&krb5int_fac.lock);
+}
+
+extern int krb5int_call_thread_support_init(void);
+int krb5int_lock_fac (void)
+{
+    int err;
+    err = krb5int_call_thread_support_init();
+    if (err)
+	return err;
+    return k5_mutex_lock(&krb5int_fac.lock);
+}
+
+int krb5int_unlock_fac (void)
+{
+    return k5_mutex_unlock(&krb5int_fac.lock);
+}

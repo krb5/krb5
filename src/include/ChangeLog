@@ -1,3 +1,11 @@
+2004-07-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* fake-addrinfo.h: Include k5-thread.h.
+	(struct fac): Add a mutex.
+	(plant_face, find_face): Check that mutex is already locked.
+	(krb5int_lock_fac, krb5int_unlock_fac): Declare.
+	(fai_add_hosts_by_name): Use them to lock and unlock the mutex.
+
 2004-07-22  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Look for "struct lifconf" and maybe define

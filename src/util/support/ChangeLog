@@ -1,3 +1,16 @@
+2004-07-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* fake-addrinfo.c (krb5int_fac): Initialize the mutex.
+	(krb5int_init_fac, krb5int_fini_fac): New functions; finish
+	initializing or destroy the mutex.
+	(krb5int_lock_fac, krb5int_unlock_fac): New functions; lock the
+	mutex after calling krb5int_call_thread_support_init, or unlock
+	it.
+	* threads.c (krb5int_call_thread_support_init): New function.
+	(krb5int_init_fac, krb5int_fini_fac): Declare.
+	(krb5int_thread_support_init, krb5int_thread_support_fini): Call
+	them.
+
 2004-07-19  Ken Raeburn  <raeburn@mit.edu>
 
 	* fake-addrinfo.c: New file.

@@ -102,6 +102,7 @@
 #include "port-sockets.h"
 #include "socket-utils.h"
 #include "k5-platform.h"
+#include "k5-thread.h"
 
 #include <stdio.h>		/* for sprintf */
 
@@ -580,6 +581,7 @@ struct face {
 
 /* fake addrinfo cache */
 struct fac {
+    k5_mutex_t lock;
     struct face *data;
 };
 extern struct fac krb5int_fac;
@@ -645,6 +647,7 @@ static void plant_face (const char *name, struct face *entry)
     if (entry->name == NULL)
 	/* @@ Wastes memory.  */
 	return;
+    k5_mutex_assert_locked(&krb5int_fac.lock);
     entry->next = krb5int_fac.data;
     entry->expiration = time(0) + CACHE_ENTRY_LIFETIME;
     krb5int_fac.data = entry;
@@ -664,6 +667,7 @@ static int find_face (const char *name, struct face **entry)
 #ifdef DEBUG_ADDRINFO
     printf("scanning cache at %d for '%s'...\n", now, name);
 #endif
+    k5_mutex_assert_locked(&krb5int_fac.lock);
     for (fpp = &krb5int_fac.data; *fpp; ) {
 	fp = *fpp;
 #ifdef DEBUG_ADDRINFO
@@ -703,6 +707,8 @@ static int find_face (const char *name, struct face **entry)
 
 #endif
 
+extern int krb5int_lock_fac(void), krb5int_unlock_fac(void);
+
 static inline int fai_add_hosts_by_name (const char *name,
 					 struct addrinfo *template,
 					 int portnum, int flags,
@@ -711,8 +717,13 @@ static inline int fai_add_hosts_by_name (const char *name,
 #ifdef FAI_CACHE
 
     struct face *ce;
-    int i, r;
+    int i, r, err;
 
+    err = krb5int_lock_fac();
+    if (err) {
+	errno = err;
+	return EAI_SYSTEM;
+    }
     if (!find_face(name, &ce)) {
 	struct addrinfo myhints = { 0 }, *ai, *ai2;
 	int i4, i6, aierr;
@@ -729,8 +740,10 @@ static inline int fai_add_hosts_by_name (const char *name,
 	   asked for IPv4 only, but let's deal with that later, if we
 	   have to.  */
 	aierr = system_getaddrinfo(name, "telnet", &myhints, &ai);
-	if (aierr)
+	if (aierr) {
+	    krb5int_unlock_fac();
 	    return aierr;
+	}
 	ce = malloc(sizeof(struct face));
 	memset(ce, 0, sizeof(*ce));
 	ce->expiration = time(0) + 30;
@@ -751,11 +764,13 @@ static inline int fai_add_hosts_by_name (const char *name,
 	}
 	ce->addrs4 = calloc(ce->naddrs4, sizeof(*ce->addrs4));
 	if (ce->addrs4 == NULL && ce->naddrs4 != 0) {
+	    krb5int_unlock_fac();
 	    system_freeaddrinfo(ai);
 	    return EAI_MEMORY;
 	}
 	ce->addrs6 = calloc(ce->naddrs6, sizeof(*ce->addrs6));
 	if (ce->addrs6 == NULL && ce->naddrs6 != 0) {
+	    krb5int_unlock_fac();
 	    free(ce->addrs4);
 	    system_freeaddrinfo(ai);
 	    return EAI_MEMORY;
@@ -780,18 +795,23 @@ static inline int fai_add_hosts_by_name (const char *name,
     template->ai_addrlen = sizeof(struct sockaddr_in6);
     for (i = 0; i < ce->naddrs6; i++) {
 	r = fai_add_entry (result, &ce->addrs6[i], portnum, template);
-	if (r)
+	if (r) {
+	    krb5int_unlock_fac();
 	    return r;
+	}
     }
     template->ai_family = AF_INET;
     template->ai_addrlen = sizeof(struct sockaddr_in);
     for (i = 0; i < ce->naddrs4; i++) {
 	r = fai_add_entry (result, &ce->addrs4[i], portnum, template);
-	if (r)
+	if (r) {
+	    krb5int_unlock_fac();
 	    return r;
+	}
     }
     if (*result && (flags & AI_CANONNAME))
 	(*result)->ai_canonname = strdup(ce->canonname);
+    krb5int_unlock_fac();
     return 0;
 
 #else

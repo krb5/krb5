@@ -317,43 +317,56 @@ int k5_key_delete (k5_key_t keynum)
     return 0;
 }
 
+int krb5int_call_thread_support_init (void)
+{
+    return CALL_INIT_FUNCTION(krb5int_thread_support_init);
+}
+
+extern int krb5int_init_fac(void);
+extern void krb5int_fini_fac(void);
+
 int krb5int_thread_support_init (void)
 {
+    int err;
+
 #ifndef ENABLE_THREADS
 
-    return 0;
+    /* Nothing to do for TLS initialization.  */
 
 #elif defined(_WIN32)
 
     tls_idx = TlsAlloc();
     /* XXX This can raise an exception if memory is low!  */
     InitializeCriticalSection(&key_lock);
-    return 0;
 
 #else /* POSIX */
 
-    int err;
     err = k5_mutex_finish_init(&key_lock);
     if (err)
 	return err;
     if (K5_PTHREADS_LOADED)
 	return pthread_key_create(&key, thread_termination);
-    else
-	return 0;
 
 #endif
+
+    err = krb5int_init_fac();
+    if (err)
+	return err;
+
+    return 0;
 }
 
 void krb5int_thread_support_fini (void)
 {
+    if (! INITIALIZER_RAN (krb5int_thread_support_init))
+	return;
+
 #ifndef ENABLE_THREADS
 
     /* Do nothing.  */
 
 #elif defined(_WIN32)
 
-    if (! INITIALIZER_RAN (krb5int_thread_support_init))
-	return;
     /* ... free stuff ... */
     TlsFree(tls_idx);
     DeleteCriticalSection(&key_lock);
@@ -368,5 +381,7 @@ void krb5int_thread_support_fini (void)
     k5_mutex_destroy(&key_lock);
 
 #endif
+
+    krb5int_fini_fac();
 }
 
