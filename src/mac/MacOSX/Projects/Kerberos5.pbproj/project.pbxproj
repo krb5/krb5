@@ -17,7 +17,7 @@
 		};
 		F52B1687022FDA5701120112 = {
 			isa = PBXLibraryReference;
-			path = Kerberos524;
+			path = libKerberos524.a;
 			refType = 3;
 		};
 		F52B1688022FDA5701120112 = {
@@ -33,7 +33,7 @@
 				HEADER_SEARCH_PATHS = "\"$(SYMROOT)/Kerberos5.intermediates\" \"$(SYMROOT)/Kerberos4.intermediates\" \"$(SRCROOT)/../../KerberosErrors/Headers\" \"$(SRCROOT)/../../KerberosDES/Headers\"";
 				LIBRARY_STYLE = STATIC;
 				PREFIX_HEADER = "$(SRCROOT)/../Headers/MacOSX/Kerberos5Prefix.h";
-				PRODUCT_NAME = Kerberos524;
+				PRODUCT_NAME = libKerberos524.a;
 				REZ_EXECUTABLE = YES;
 				WARNING_CFLAGS = "-Wmost -Wno-four-char-constants -Wno-unknown-pragmas";
 			};
@@ -3214,7 +3214,7 @@
 		};
 		F5CFD5CC022D86AD01120112 = {
 			isa = PBXLibraryReference;
-			path = KerberosProfile;
+			path = libKerberosProfile.a;
 			refType = 3;
 		};
 		F5CFD5CD022D86AD01120112 = {
@@ -3230,7 +3230,7 @@
 				HEADER_SEARCH_PATHS = "\"$(SRCROOT)/../../KerberosErrors/Headers\" \"$(SRCROOT)/../../MoreFiles/Headers\"";
 				LIBRARY_STYLE = STATIC;
 				PREFIX_HEADER = "$(SRCROOT)/../Headers/MacOSX/Kerberos5Prefix.h";
-				PRODUCT_NAME = KerberosProfile;
+				PRODUCT_NAME = libKerberosProfile.a;
 				REZ_EXECUTABLE = YES;
 				WARNING_CFLAGS = "-Wmost -Wno-four-char-constants -Wno-unknown-pragmas";
 			};
@@ -3690,7 +3690,7 @@
 		};
 		F5CFD638022DD45401120112 = {
 			isa = PBXLibraryReference;
-			path = Kerberos5;
+			path = libKerberos5.a;
 			refType = 3;
 		};
 		F5CFD639022DD45401120112 = {
@@ -3706,7 +3706,7 @@
 				HEADER_SEARCH_PATHS = "\"$(SYMROOT)/Kerberos5.intermediates\" \"$(SRCROOT)/../../KerberosDebug/Headers\" \"$(SRCROOT)/../../KerberosErrors/Headers\" \"$(SRCROOT)/../../KerberosPreferences/Headers\" \"$(SRCROOT)/../../KerberosLogin/Headers\"";
 				LIBRARY_STYLE = STATIC;
 				PREFIX_HEADER = "$(SRCROOT)/../Headers/MacOSX/Kerberos5Prefix.h";
-				PRODUCT_NAME = Kerberos5;
+				PRODUCT_NAME = libKerberos5.a;
 				REZ_EXECUTABLE = YES;
 				WARNING_CFLAGS = "-Wmost -Wno-four-char-constants -Wno-unknown-pragmas";
 			};
