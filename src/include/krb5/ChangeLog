@@ -1,3 +1,11 @@
+Wed Feb 22 17:39:46 1995 Chris Provenzano (proven@mit.edu)
+
+	* func-proto.h (krb5_get_credentials(), krb5_get_cred_from_kdc(),
+		and krb5_sendauth()) replaced krb5_cred * IN/OUT arg with
+		a krb5_cred * IN and a krb5_cred ** OUT arg.
+	* func-proto.h (krb5_mk_req_extended()) Remove kdc_options flag arg
+		and krb5_ccache arg. They are no longer necessary.
+	
 Wed Feb 22 01:45:17 1995 Keith Vetter (keithv@fusion.com)
 
 	* keytab.h: added windows INTERFACE keyword to prototypes

@@ -67,6 +67,7 @@ krb5_error_code INTERFACE krb5_get_cred_from_kdc
 		   krb5_ccache,		/* not const, as reading may save
 					   state */
 		   krb5_creds *,
+		   krb5_creds **,
 		   krb5_creds *** ));
 void INTERFACE krb5_free_tgt_creds
 	PROTOTYPE((krb5_context,
@@ -79,7 +80,8 @@ krb5_error_code INTERFACE krb5_get_credentials
 	PROTOTYPE((krb5_context,
 		   const krb5_flags,
 		   krb5_ccache,
-		   krb5_creds * ));
+		   krb5_creds *,
+		   krb5_creds **));
 krb5_error_code	INTERFACE krb5_get_for_creds
 	PROTOTYPE((krb5_context,
 		   const krb5_cksumtype,
@@ -99,10 +101,8 @@ krb5_error_code INTERFACE krb5_mk_req_extended
 	PROTOTYPE((krb5_context,
 		   const krb5_flags,
 		   const krb5_checksum *,
-		   const krb5_flags,
 		   krb5_int32,
 		   krb5_keyblock **,
-		   krb5_ccache,
 		   krb5_creds *,
 		   krb5_authenticator *,
 		   krb5_data * ));
@@ -582,7 +582,8 @@ krb5_error_code INTERFACE krb5_sendauth
 		   krb5_int32 *,
 		   krb5_keyblock **,
 		   krb5_error **,
-		   krb5_ap_rep_enc_part **));
+		   krb5_ap_rep_enc_part **,
+		   krb5_creds **));
 	
 krb5_error_code INTERFACE krb5_recvauth PROTOTYPE((krb5_context,
 		   krb5_pointer,
