@@ -1,3 +1,7 @@
+2003-06-16  Sam Hartman  <hartmans@mit.edu>
+
+	* fwd_tgt.c (krb5_fwd_tgt_creds): Set use_conf_ktypes to true while getting the TGT key
+
 2003-06-13  Tom Yu  <tlyu@mit.edu>
 
 	* rd_rep.c (krb5_rd_rep): Free subkeys before replacing them, if
