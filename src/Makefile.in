@@ -237,7 +237,7 @@ kerbsrc.zip: awk-windows
 	zip -Dlk kerbsrc.zip $(ZIPFILES) -x $(ZIPEXCLUDE)
 	zip -Dk kerbsrc.zip $(ZIPBINARYFILES)
 	cp Makefile.bak Makefile
-	rm -f util/profile/profile.h
+	rm -f util/profile/profile.h util/profile/prof_err.[ch]
 
 #
 # Part of building the PC release has to be done on Unix. This includes
