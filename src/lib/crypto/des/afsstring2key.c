@@ -13,8 +13,7 @@
 static char *afs_crypt PROTOTYPE((char*,char*));
 
 krb5_error_code
-mit_afs_string_to_key (eblock, keyblock, data, salt)
-     const krb5_encrypt_block FAR * eblock;
+mit_afs_string_to_key (keyblock, data, salt)
      krb5_keyblock FAR * keyblock;
      const krb5_data FAR * data;
      const krb5_data FAR * salt;
