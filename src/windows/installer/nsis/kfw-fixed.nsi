@@ -197,6 +197,7 @@ Section "KfW Client" secClient
   !insertmacro ReplaceDLL "${KFW_BIN_DIR}\kpasswd.exe"         "$INSTDIR\bin\kpasswd.exe"       "$INSTDIR"
   !insertmacro ReplaceDLL "${KFW_BIN_DIR}\kvno.exe"            "$INSTDIR\bin\kvno.exe"          "$INSTDIR"
   !insertmacro ReplaceDLL "${KFW_BIN_DIR}\krb5_32.dll"         "$INSTDIR\bin\krb5_32.dll"       "$INSTDIR"
+  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\k5sprt32.dll"        "$INSTDIR\bin\k5sprt32.dll"      "$INSTDIR"
   !insertmacro ReplaceDLL "${KFW_BIN_DIR}\krb524.dll"          "$INSTDIR\bin\krb524.dll"        "$INSTDIR"
   !insertmacro ReplaceDLL "${KFW_BIN_DIR}\krbcc32.dll"         "$INSTDIR\bin\krbcc32.dll"       "$INSTDIR"
   !insertmacro ReplaceDLL "${KFW_BIN_DIR}\krbcc32s.exe"        "$INSTDIR\bin\krbcc32s.exe"      "$INSTDIR"
@@ -209,6 +210,9 @@ Section "KfW Client" secClient
 !endif                                                                         
   !insertmacro ReplaceDLL "${KFW_BIN_DIR}\leashw32.dll"        "$INSTDIR\bin\leashw32.dll"      "$INSTDIR"
   !insertmacro ReplaceDLL "${KFW_BIN_DIR}\ms2mit.exe"          "$INSTDIR\bin\ms2mit.exe"        "$INSTDIR"
+  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\mit2ms.exe"          "$INSTDIR\bin\mit2ms.exe"        "$INSTDIR"
+  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\kcpytkt.exe"          "$INSTDIR\bin\kcpytkt.exe"        "$INSTDIR"
+  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\kdeltkt.exe"          "$INSTDIR\bin\kdeltkt.exe"        "$INSTDIR"
   !insertmacro ReplaceDLL "${KFW_BIN_DIR}\wshelp32.dll"        "$INSTDIR\bin\wshelp32.dll"      "$INSTDIR"
   !insertmacro ReplaceDLL "${KFW_BIN_DIR}\xpprof32.dll"        "$INSTDIR\bin\xpprof32.dll"      "$INSTDIR"
   
@@ -227,6 +231,7 @@ Section "KfW Client" secClient
   File "${KFW_BIN_DIR}\kpasswd.pdb"
   File "${KFW_BIN_DIR}\kvno.pdb"
   File "${KFW_BIN_DIR}\krb5_32.pdb"
+  File "${KFW_BIN_DIR}\k5sprt32.pdb"
   File "${KFW_BIN_DIR}\krb524.pdb"
   File "${KFW_BIN_DIR}\krbcc32.pdb"
   File "${KFW_BIN_DIR}\krbcc32s.pdb"
@@ -234,6 +239,9 @@ Section "KfW Client" secClient
   File "${KFW_BIN_DIR}\leashw32.pdb"
   File "${KFW_BIN_DIR}\leash32.pdb"
   File "${KFW_BIN_DIR}\ms2mit.pdb"
+  File "${KFW_BIN_DIR}\mit2ms.pdb"
+  File "${KFW_BIN_DIR}\kcpytkt.pdb"
+  File "${KFW_BIN_DIR}\kdeltkt.pdb"
   File "${KFW_BIN_DIR}\wshelp32.pdb"
   File "${KFW_BIN_DIR}\xpprof32.pdb"
 
@@ -460,6 +468,7 @@ skipAllowTgtKey:
   WriteRegDWORD HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kpasswd" "Flags" 0x408
   WriteRegDWORD HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kvno" "Flags" 0x408
   WriteRegDWORD HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\ms2mit" "Flags" 0x408
+  WriteRegDWORD HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\mit2ms" "Flags" 0x408
   WriteRegDWORD HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\mit2ms" "Flags" 0x408
   WriteRegDWORD HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kcpytkt" "Flags" 0x408
   WriteRegDWORD HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kdeltkt" "Flags" 0x408
@@ -1060,6 +1069,7 @@ StartRemove:
    Delete /REBOOTOK "$INSTDIR\bin\kpasswd.exe"   
    Delete /REBOOTOK "$INSTDIR\bin\kvno.exe"   
    Delete /REBOOTOK "$INSTDIR\bin\krb5_32.dll" 
+   Delete /REBOOTOK "$INSTDIR\bin\k5sprt32.dll" 
    Delete /REBOOTOK "$INSTDIR\bin\krb524.dll"  
    Delete /REBOOTOK "$INSTDIR\bin\krbcc32.dll" 
    Delete /REBOOTOK "$INSTDIR\bin\krbcc32s.exe"
@@ -1072,6 +1082,9 @@ StartRemove:
 !endif
    Delete /REBOOTOK "$INSTDIR\bin\leashw32.dll"
    Delete /REBOOTOK "$INSTDIR\bin\ms2mit.exe"  
+   Delete /REBOOTOK "$INSTDIR\bin\mit2ms.exe"  
+   Delete /REBOOTOK "$INSTDIR\bin\kcpytkt.exe"  
+   Delete /REBOOTOK "$INSTDIR\bin\kdeltkt.exe"  
    Delete /REBOOTOK "$INSTDIR\bin\wshelp32.dll"
    Delete /REBOOTOK "$INSTDIR\bin\xpprof32.dll"
 
@@ -1090,12 +1103,16 @@ StartRemove:
    Delete /REBOOTOK "$INSTDIR\bin\kpasswd.pdb"   
    Delete /REBOOTOK "$INSTDIR\bin\kvno.pdb"   
    Delete /REBOOTOK "$INSTDIR\bin\krb5_32.pdb" 
+   Delete /REBOOTOK "$INSTDIR\bin\k5sprt32.pdb" 
    Delete /REBOOTOK "$INSTDIR\bin\krb524.pdb"  
    Delete /REBOOTOK "$INSTDIR\bin\krbcc32.pdb" 
    Delete /REBOOTOK "$INSTDIR\bin\krbcc32s.pdb"
    Delete /REBOOTOK "$INSTDIR\bin\krbv4w32.pdb"
    Delete /REBOOTOK "$INSTDIR\bin\leashw32.pdb"
    Delete /REBOOTOK "$INSTDIR\bin\ms2mit.pdb"  
+   Delete /REBOOTOK "$INSTDIR\bin\mit2ms.pdb"  
+   Delete /REBOOTOK "$INSTDIR\bin\kcpytkt.pdb"  
+   Delete /REBOOTOK "$INSTDIR\bin\kdeltkt.pdb"  
    Delete /REBOOTOK "$INSTDIR\bin\wshelp32.pdb"
    Delete /REBOOTOK "$INSTDIR\bin\xpprof32.pdb"
 
