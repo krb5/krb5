@@ -586,7 +586,7 @@ OLDDECLARG(krb5_principal, client)
     if ((retval = krb5_get_in_tkt_with_password(
 			0,			/* options */
 			my_addresses,
-			KRB5_PADATA_ENC_RANDOM,	/* do random preauth */
+			KRB5_PADATA_ENC_TIMESTAMP, /* do preauth */
 			ETYPE_DES_CBC_CRC,  	/* etype */
 			KEYTYPE_DES,
 			password,
