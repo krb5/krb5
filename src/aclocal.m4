@@ -197,6 +197,22 @@ dnl Check for IPv6 compile-time support.
 dnl
 AC_DEFUN(KRB5_AC_INET6,[
 AC_CHECK_HEADERS(sys/types.h macsock.h sys/socket.h netinet/in.h)
+AC_CHECK_FUNCS(inet_ntop inet_pton getipnodebyname getipnodebyaddr getaddrinfo getnameinfo)
+AC_ARG_ENABLE([ipv6],
+[  --enable-ipv6           enable IPv6 support
+  --disable-ipv6          disable IPv6 support
+                            (default: enable if available)], ,enableval=try)dnl
+case "$enableval" in
+  yes | try)
+	KRB5_AC_CHECK_INET6
+	if test "$enableval/$krb5_cv_inet6" = yes/no ; then
+	  AC_MSG_ERROR(IPv6 support does not appear to be available)
+	fi ;;
+  no)	;;
+  *)	AC_MSG_ERROR(bad value "$enableval" for enable-ipv6 option) ;;
+esac
+])dnl
+AC_DEFUN(KRB5_AC_CHECK_INET6,[
 AC_MSG_CHECKING(for IPv6 compile-time support)
 AC_CACHE_VAL(krb5_cv_inet6,[
 AC_TRY_COMPILE([
@@ -223,7 +239,6 @@ AC_MSG_RESULT($krb5_cv_inet6)
 if test $krb5_cv_inet6 = yes ; then
   AC_DEFINE(KRB5_USE_INET6)
 fi
-AC_CHECK_FUNCS(inet_ntop inet_pton getipnodebyname getipnodebyaddr getaddrinfo getnameinfo)
 ])dnl
 dnl
 dnl Generic File existence tests
@@ -630,7 +645,7 @@ AC_CHECK_FUNCS(re_comp re_exec regexec)
 dnl
 dnl regcomp is present but non-functional on Solaris 2.4
 dnl
-AC_C_CROSS
+AC_REQUIRE([AC_PROG_CC])
 AC_MSG_CHECKING(for working regcomp)
 AC_CACHE_VAL(ac_cv_func_regcomp,[
 AC_TRY_RUN([
@@ -657,6 +672,96 @@ AC_CHECK_LIB(gen, compile, GEN_LIB=-lgen, GEN_LIB=)
 AC_SUBST(GEN_LIB)
 ])dnl
 dnl
+dnl AC_KRB5_TCL_FIND_CONFIG (uses tcl_dir)
+dnl
+AC_DEFUN(AC_KRB5_TCL_FIND_CONFIG,[
+AC_MSG_CHECKING(for tclConfig.sh)
+if test -r "$tcl_dir/lib/tclConfig.sh" ; then
+  tcl_conf="$tcl_dir/lib/tclConfig.sh"
+else
+  tcl_conf=
+  lib="$tcl_dir/lib"
+  changequote(<<,>>)dnl
+  for d in "$lib" "$lib"/tcl7.[0-9] "$lib"/tcl8.[0-9] ; do
+    if test -r "$d/tclConfig.sh" ; then
+      tcl_conf="$tcl_conf $d/tclConfig.sh"
+    fi
+  done
+  changequote([,])dnl
+fi
+if test -n "$tcl_conf" ; then
+  AC_MSG_RESULT($tcl_conf)
+else
+  AC_MSG_RESULT(not found)
+fi
+tcl_ok_conf=
+tcl_vers_maj=
+tcl_vers_min=
+old_CPPFLAGS=$CPPFLAGS
+old_LIBS=$LIBS
+old_LDFLAGS=$LDFLAGS
+if test -n "$tcl_conf" ; then
+  for file in $tcl_conf ; do
+    TCL_MAJOR_VERSION=x ; TCL_MINOR_VERSION=x
+    AC_MSG_CHECKING(Tcl info in $file)
+    . $file
+    v=$TCL_MAJOR_VERSION.$TCL_MINOR_VERSION
+    if test -z "$tcl_vers_maj" -o "$tcl_vers_maj" -lt "$TCL_MAJOR_VERSION" \
+	|| test "$tcl_vers_maj" = "$TCL_MAJOR_VERSION" -a "$tcl_vers_min" -lt "$TCL_MINOR_VERSION" ; then
+      for incdir in "$TCL_PREFIX/include/tcl$v" "$TCL_PREFIX/include" ; do
+	if test -r "$incdir/tcl.h" -o -r "$incdir/tcl/tcl.h" ; then
+	  CPPFLAGS="$old_CPPFLAGS -I$incdir"
+	  break
+	fi
+      done
+      LIBS="$old_LIBS `eval echo x $TCL_LIB_SPEC $TCL_LIBS | sed 's/^x//'`"
+      LDFLAGS="$old_LDFLAGS $TCL_LD_FLAGS"
+      AC_TRY_LINK([#include <tcl.h>
+],[Tcl_CreateInterp ();],
+	tcl_ok_conf=$file
+	tcl_vers_maj=$TCL_MAJOR_VERSION
+	tcl_vers_min=$TCL_MINOR_VERSION
+	AC_MSG_RESULT($v - working),
+	AC_MSG_RESULT($v - compilation failed)
+      )
+    else
+      AC_MSG_RESULT(older version $v)
+    fi
+  done
+fi
+CPPFLAGS=$old_CPPFLAGS
+LIBS=$old_LIBS
+LDFLAGS=$old_LDFLAGS
+tcl_header=no
+tcl_lib=no
+if test -n "$tcl_ok_conf" ; then
+  . $tcl_ok_conf
+  TCL_INCLUDES=
+  if test "$TCL_PREFIX" != /usr ; then
+    for incdir in "$TCL_PREFIX/include/tcl$v" "$TCL_PREFIX/include" ; do
+      if test -r "$incdir/tcl.h" -o -r "$incdir/tcl/tcl.h" ; then
+        TCL_INCLUDES=-I$incdir
+        break
+      fi
+    done
+  fi
+  TCL_LIBS="$TCL_LIB_SPEC $TCL_LIBS $TCL_DL_LIBS"
+  TCL_LIBPATH=
+  TCL_RPATH=
+  CPPFLAGS="$old_CPPFLAGS $TCL_INCLUDES"
+  AC_CHECK_HEADER(tcl.h,AC_DEFINE(HAVE_TCL_H) tcl_header=yes)
+  if test $tcl_header=no; then
+     AC_CHECK_HEADER(tcl/tcl.h,AC_DEFINE(HAVE_TCL_TCL_H) tcl_header=yes)
+  fi
+  CPPFLAGS="$old_CPPFLAGS"
+  tcl_lib=yes
+fi  
+AC_SUBST(TCL_INCLUDES)
+AC_SUBST(TCL_LIBS)
+AC_SUBST(TCL_LIBPATH)
+AC_SUBST(TCL_RPATH)
+])dnl
+dnl
 dnl AC_KRB5_TCL - determine if the TCL library is present on system
 dnl
 AC_DEFUN(AC_KRB5_TCL,[
@@ -665,67 +770,25 @@ TCL_LIBPATH=
 TCL_RPATH=
 TCL_LIBS=
 TCL_WITH=
+tcl_dir=
 AC_ARG_WITH(tcl,
-[  --with-tcl=path         where Tcl resides],
-	TCL_WITH=$withval
-	if test "$withval" != yes -a "$withval" != no ; then
-		TCL_INCLUDES=-I$withval/include
-		TCL_LIBPATH=-L$withval/lib
-		TCL_RPATH=:$withval/lib
-	fi)
-if test "$TCL_WITH" != no ; then
-	AC_CHECK_LIB(dl, dlopen, DL_LIB=-ldl)
-	AC_CHECK_LIB(ld, main, DL_LIB=-lld)
-	krb5_save_CPPFLAGS="$CPPFLAGS"
-	krb5_save_LDFLAGS="$LDFLAGS"
-	CPPFLAGS="$TCL_INCLUDES $CPPFLAGS"
-	LDFLAGS="$TCL_LIBPATH $LDFLAGS"
-	tcl_header=no
-	AC_CHECK_HEADER(tcl.h,AC_DEFINE(HAVE_TCL_H) tcl_header=yes)
-	if test $tcl_header=no; then
-	   AC_CHECK_HEADER(tcl/tcl.h,AC_DEFINE(HAVE_TCL_TCL_H) tcl_header=yes)
-	fi
-
-	if test $tcl_header = yes ; then
-		tcl_lib=no
-
-		if test $tcl_lib = no; then
-			AC_CHECK_LIB(tcl8.0, Tcl_CreateCommand, 
-				TCL_LIBS="$TCL_LIBS -ltcl8.0 -lm $DL_LIB" 
-				tcl_lib=yes,,-lm $DL_LIB)
-		fi
-		if test $tcl_lib = no; then
-			AC_CHECK_LIB(tcl7.6, Tcl_CreateCommand, 
-				TCL_LIBS="$TCL_LIBS -ltcl7.6 -lm $DL_LIB" 
-				tcl_lib=yes,,-lm $DL_LIB)
-		fi
-		if test $tcl_lib = no; then
-			AC_CHECK_LIB(tcl7.5, Tcl_CreateCommand, 
-				TCL_LIBS="$TCL_LIBS -ltcl7.5 -lm $DL_LIB"
-				tcl_lib=yes,,-lm $DL_LIB)
-
-		fi
-		if test $tcl_lib = no ; then
-			AC_CHECK_LIB(tcl, Tcl_CreateCommand, 
-				TCL_LIBS="$TCL_LIBS -ltcl -lm $DL_LIB"
-				tcl_lib=yes,,-lm $DL_LIB)
-
-		fi
-		if test $tcl_lib = no ; then		
-			AC_MSG_WARN("tcl.h found but not library")
-		fi
-	else
-		AC_MSG_WARN(Could not find Tcl which is needed for the kadm5 tests)
-		TCL_LIBS=
-	fi
-	CPPFLAGS="$krb5_save_CPPFLAGS"
-	LDFLAGS="$krb5_save_LDFLAGS"
-	AC_SUBST(TCL_INCLUDES)
-	AC_SUBST(TCL_LIBS)
-	AC_SUBST(TCL_LIBPATH)
-	AC_SUBST(TCL_RPATH)
+[  --with-tcl=path         where Tcl resides], , with_tcl=try)
+if test "$with_tcl" = no ; then
+  true
+elif test "$with_tcl" = yes -o "$with_tcl" = try ; then
+  tcl_dir=/usr
 else
-	AC_MSG_RESULT("Not looking for Tcl library")
+  tcl_dir=$with_tcl
+fi
+if test "$with_tcl" != no ; then
+  AC_KRB5_TCL_FIND_CONFIG
+  if test $tcl_lib = no ; then
+    if test "$with_tcl" != try ; then
+      AC_MSG_ERROR(Could not find Tcl)
+    else
+      AC_MSG_WARN(Could not find Tcl which is needed for some tests)
+    fi
+  fi
 fi
 ])dnl
 
@@ -954,7 +1017,7 @@ dnl
 dnl Determine parameters related to libraries, e.g. various extensions.
 
 AC_DEFUN(KRB5_LIB_PARAMS,
-[AC_CHECKING([host system type])
+[AC_MSG_CHECKING([host system type])
 AC_CACHE_VAL(krb5_cv_host,
 [AC_CANONICAL_HOST
 krb5_cv_host=$host])
@@ -1261,4 +1324,23 @@ AC_DEFUN(AC_LIBRARY_NET, [
    )
   AC_CHECK_FUNC(socket, , AC_CHECK_LIB(socket, socket, ,
     AC_CHECK_LIB(socket, socket, LIBS="-lsocket -lnsl $LIBS", , -lnsl)))
+  KRB5_AC_ENABLE_DNS
+  if test "$enable_dns" = yes ; then
+    AC_CHECK_FUNC(res_search, , AC_CHECK_LIB(resolv, res_search,
+	LIBS="$LIBS -lresolv",
+	AC_ERROR(Cannot find resolver support routine res_search in -lresolv.)
+    ))
+  fi
   ])
+dnl
+dnl
+dnl KRB5_AC_ENABLE_DNS
+dnl
+AC_DEFUN(KRB5_AC_ENABLE_DNS, [
+  AC_ARG_ENABLE([dns],
+[  --enable-dns            enable DNS lookups of Kerberos realm and servers], ,
+[enable_dns=no])
+  if test "$enable_val" = yes; then
+    AC_DEFINE(KRB5_DNS_LOOKUP)
+  fi
+])

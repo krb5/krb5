@@ -29,6 +29,10 @@
 /* Define if Kerberos V4 backwards compatibility should be supported */
 #undef KRB5_KRB4_COMPAT
 
+/* Define if DNS support for finding realms and KDC locations should
+   be compiled in.  */
+#undef KRB5_DNS_LOOKUP
+
 /* Define to `long' if <sys/types.h> doesn't define. */
 #undef time_t
 

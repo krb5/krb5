@@ -1,3 +1,25 @@
+2000-01-26  Ken Raeburn  <raeburn@raeburn.org>
+
+	* aclocal.m4 (KRB5_AC_REGEX_FUNCS): Require AC_PROG_CC instead of
+	invoking obsolete AC_C_CROSS.
+	(KRB5_LIB_PARAMS): Use AC_MSG_CHECKING, not AC_CHECKING.
+
+	* aclocal.m4 (AC_KRB5_TCL_FIND_CONFIG): New macro, looks for
+	installed tclConfig.sh file and extracts library name and other
+	information from it.
+	(AC_KRB5_TCL): Rewrite, uses AC_KRB5_TCL_FIND_CONFIG.
+
+	* aclocal.m4 (AC_LIBRARY_NET): Require KRB5_AC_ENABLE_DNS, and if
+	it's enabled, pull in res_search from -lresolv if needed.
+	(KRB5_AC_ENABLE_DNS): New macro, just implements argument
+	checking, and may define KRB5_DNS_LOOKUP C macro.
+	* acconfig.h (KRB5_DNS_LOOKUP): Undef.
+
+	* aclocal.m4 (KRB5_AC_INET6): Add enable/disable-ipv6
+	configure-time options; by default, enable it only if support code
+	is available.
+	(KRB5_AC_CHECK_INET6): Moved part of old KRB5_AC_INET6 here.
+
 1999-12-03  Danilo Almeida  <dalmeida@mit.edu>
 
 	* Makefile.in: On Windows, build error tables if we believe awk
