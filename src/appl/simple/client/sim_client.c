@@ -30,12 +30,19 @@
 #include <netinet/in.h>
 #include <netdb.h>
 #include <stdio.h>
+#include <string.h>
 #include <ctype.h>
 
 #include <krb5.h>
 #include "com_err.h"
 
 #include "simple.h"
+
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#else
+extern char *malloc();
+#endif
 
 /* for old Unixes and friends ... */
 #ifndef MAXHOSTNAMELEN
