@@ -1,3 +1,8 @@
+2001-10-29  Miro Jurisic  <meeroh@mit.edu>
+	* pullup from krb5-1-2 branch after krb5-1-2-2-bp
+	* krb5_err.et: Changed Credentials Cache file to Credentials Cache 
+	because on Mac and Windows, the credentials cache is in memory.
+
 2001-10-24  Tom Yu  <tlyu@mit.edu>
 
 	* kdb5_err.et: Add KRB5_KDB_NO_PERMITTED_KEY,
