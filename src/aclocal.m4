@@ -408,7 +408,6 @@ AC_CACHE_VAL(krb5_cv_prog_cc,[dnl
 # -Wno-comment is for SunOS system header <sys/stream.h>
 extra_gcc_warn_opts="-Wall -Wmissing-prototypes -Wcast-qual \
  -Wcast-align -Wconversion -Wshadow -Wno-comment -pedantic"
-#extra_gcc_warn_opts="-Wall -Wmissing-prototypes -Wcast-align -Wshadow -Wno-comment"
 if test "$GCC" = yes ; then
   AC_MSG_RESULT(adding extra warning flags for gcc)
   CCOPTS="$CCOPTS $extra_gcc_warn_opts"
