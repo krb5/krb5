@@ -34,6 +34,15 @@ if [ "$K5ROOT" = "" ]; then
 	export K5ROOT
 fi
 
+# If $VERBOSE_TEST is non-null, enter verbose mode.  Set $VERBOSE to
+# true or false so its exit status identifies the mode.
+if test x$VERBOSE_TEST = x; then
+	VERBOSE=false
+else
+	VERBOSE=true
+fi
+export VERBOSE
+
 REALM=SECURE-TEST.OV.COM; export REALM
 
 EXPECT=@EXPECT@; export EXPECT

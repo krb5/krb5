@@ -17,14 +17,6 @@ DUMMY=${START_SERVERS_LOCAL=$STESTDIR/scripts/start_servers_local}
 # This'll be wrong sometimes
 DUMMY=${RSH_CMD=rsh}
 
-# If it's set, set it to true
-if test x$VERBOSE_TEST = x; then
-	VERBOSE=true
-# Otherwise, set it to false
-else
-	VERBOSE=false
-fi
-
 local=1
 
 if [ $# -gt 0 ]; then

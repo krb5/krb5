@@ -9,14 +9,6 @@ while [ $# -gt 0 ] ; do
 	shift
 done
 
-# If it's set, set it to true
-if test x$VERBOSE_TEST = x; then
-	VERBOSE=true
-# Otherwise, set it to false
-else
-	VERBOSE=false
-fi
-
 # files="/etc/inetd.conf /etc/syslog.conf /etc/krb.conf \
 # 	/etc/krb.realms /etc/passwd /etc/services /etc/v5srvtab \
 # 	/etc/rc.local /etc/shadow /etc/security/passwd /.k5login \

@@ -1,13 +1,5 @@
 #!/bin/sh
 
-# If it's set, set it to true
-if test x$VERBOSE_TEST = x; then
-	VERBOSE=true
-# Otherwise, set it to false
-else
-	VERBOSE=false
-fi
-
 if $VERBOSE; then
 	REDIRECT=
 else
@@ -68,7 +60,7 @@ sed -e "s/__REALM__/$REALM/g" -e "s#__K5ROOT__#$K5ROOT#g" \
 sed -e "s/__REALM__/$REALM/g" -e "s#__K5ROOT__#$K5ROOT#g" \
 	< $STESTDIR/proto/kdc.conf.proto > $K5ROOT/kdc.conf
 
-kdb5_util -r $REALM create -P mrroot -s $REDIRECT
+eval kdb5_util -r $REALM create -P mrroot -s $REDIRECT
 
 cp $STESTDIR/proto/ovsec_adm.dict $K5ROOT/ovsec_adm.dict
 

@@ -1,3 +1,12 @@
+Thu Nov 14 15:28:16 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* env-setup.shin, init_db, save_files.sh, start_servers,
+ 	start_servers_local, stop_servers, stop_servers_local: move
+ 	VERBOSE_TEST -> VERBOSE logic to env-setup.sh, make everything
+ 	else inherit from it, and fix the sense of the test (Tom got it
+ 	backwards); also fix init_db so that kdb5_util create is not
+ 	always verbose
+
 Wed Nov 13 17:12:51 1996  Tom Yu  <tlyu@mit.edu>
 
 	* env-setup.shin: Explicitly set KRB5CCNAME so the user's ccache
