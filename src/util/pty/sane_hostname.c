@@ -73,7 +73,6 @@ pty_make_sane_hostname(const struct sockaddr *addr, int maxlen,
 	return ENOMEM;
 
     if (always_ipaddr) {
-	char addrbuf[NI_MAXHOST];
     use_ipaddr:
 	if (getnameinfo (addr, socklen (addr), addrbuf, sizeof (addrbuf),
 			 (char *)0, 0, NI_NUMERICHOST) == 0)
