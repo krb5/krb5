@@ -23,11 +23,20 @@
 
 /* 
  * The hand-coded parser used in the Beta 4 distribution didn't
- * reverse the order of the bit string fields.  This define allows partial
+ * reverse the order of the bit string fields.  These define allows partial
  * interoperability with the Beta 4 distribution by doing a bit reversal
  * on bitfields which have bits set in the high 16 bits.
+ *
+ * Warning: defining this will cause proxiable tickets and renewable
+ * tickets to break.  Fortunately, these aren't in common use yet....
+ * Vendors shipping product probably should NOT define this #define,
+ * unless there is an explicit need for backwards compatibility with
+ * Beta 4 implementations.  (Which hopefully will be relatively rare.)
  */
 #define BACKWARD_BITMASK_COMPAT
+#ifdef BACKWARD_BITMASK_COMPAT
+int asn1_always_reverse = 0;
+#endif
 
 #include "asn1_k_decode.h"
 #include "asn1_decode.h"
@@ -352,8 +361,23 @@ asn1_error_code asn1_decode_krb5_flags(buf, val)
   if(retval) return retval;
   f = (f<<8) | ((krb5_flags)o&asn1_pad_mask[pad]);
 
+  *val = f;
+  return 0;
+}
+
+asn1_error_code asn1_decode_ticket_flags(buf, val)
+     asn1buf * buf;
+     krb5_flags * val;
+{
+    asn1_error_code retval;
+    krb5_flags f;
+    
+    retval = asn1_decode_krb5_flags(buf, &f);
+    if (retval)
+	return retval;
+    
 #ifdef BACKWARD_BITMASK_COMPAT
-  if (((f & 0xFFFF0000) == 0) && ((f & 0xFFFF) != 0))
+  if (asn1_always_reverse || (((f & 0xFFFF0000) == 0) && ((f & 0xFFFF) != 0)))
 #endif
   f = (asn1_swbits[(f & 0xff)] << 24) | (asn1_swbits[(f >> 8) & 0xff] << 16) |
       (asn1_swbits[(f >> 16) & 0xff] << 8) | asn1_swbits[(f >> 24) & 0xff];
@@ -362,20 +386,82 @@ asn1_error_code asn1_decode_krb5_flags(buf, val)
   return 0;
 }
 
-asn1_error_code asn1_decode_ticket_flags(buf, val)
-     asn1buf * buf;
-     krb5_flags * val;
-{ return asn1_decode_krb5_flags(buf,val); }
-
 asn1_error_code asn1_decode_ap_options(buf, val)
      asn1buf * buf;
      krb5_flags * val;
-{ return asn1_decode_krb5_flags(buf,val); }
+{
+    asn1_error_code retval;
+    krb5_flags f;
+    
+    retval = asn1_decode_krb5_flags(buf, &f);
+    if (retval)
+	return retval;
+    
+#ifdef BACKWARD_BITMASK_COMPAT
+  if (asn1_always_reverse || (((f & 0xFFFF0000) == 0) && ((f & 0xFFFF) != 0)))
+#endif
+  f = (asn1_swbits[(f & 0xff)] << 24) | (asn1_swbits[(f >> 8) & 0xff] << 16) |
+      (asn1_swbits[(f >> 16) & 0xff] << 8) | asn1_swbits[(f >> 24) & 0xff];
+
+  *val = f;
+  return 0;
+}
+
+
+#ifdef BACKWARD_BITMASK_COMPAT
+#define VALID_KDC_FLAGS (KDC_OPT_FORWARDABLE | KDC_OPT_FORWARDED | \
+			 KDC_OPT_PROXIABLE | KDC_OPT_PROXY | \
+			 KDC_OPT_ALLOW_POSTDATE | KDC_OPT_POSTDATED | \
+			 KDC_OPT_RENEWABLE | KDC_OPT_RENEWABLE_OK | \
+			 KDC_OPT_ENC_TKT_IN_SKEY | KDC_OPT_RENEW | \
+			 KDC_OPT_VALIDATE)
+#endif
 
 asn1_error_code asn1_decode_kdc_options(buf, val)
      asn1buf * buf;
      krb5_flags * val;
-{ return asn1_decode_krb5_flags(buf,val); }
+{
+    asn1_error_code retval;
+    krb5_flags f;
+#ifdef BACKWARD_BITMASK_COMPAT
+    krb5_flags r;
+#endif
+    
+    retval = asn1_decode_krb5_flags(buf, &f);
+    if (retval)
+	return retval;
+    
+#ifdef BACKWARD_BITMASK_COMPAT
+    
+    r = ((asn1_swbits[(f & 0xff)] << 24) |
+	 (asn1_swbits[(f >> 8) & 0xff] << 16) |
+	 (asn1_swbits[(f >> 16) & 0xff] << 8) |
+	 asn1_swbits[(f >> 24) & 0xff]);
+
+    if (asn1_always_reverse)
+	*val = r;
+    else if (((f & ~VALID_KDC_FLAGS) == 0) &&
+	((r & ~VALID_KDC_FLAGS) != 0))
+	*val = f;
+    else if (((r & ~VALID_KDC_FLAGS) == 0) &&
+	     ((f & ~VALID_KDC_FLAGS) != 0))
+	*val = r;
+    else if (f & (KDC_OPT_FORWARDABLE|
+		  KDC_OPT_FORWARDED|
+		  KDC_OPT_ENC_TKT_IN_SKEY))
+	*val = f;
+    else
+	*val = r;
+#else
+    f = ((asn1_swbits[(f & 0xff)] << 24) |
+	 (asn1_swbits[(f >> 8) & 0xff] << 16) |
+	 (asn1_swbits[(f >> 16) & 0xff] << 8) |
+	 asn1_swbits[(f >> 24) & 0xff]);
+    
+    *val = f;
+#endif
+    return 0;
+}
 
 asn1_error_code asn1_decode_transited_encoding(buf, val)
      asn1buf * buf;

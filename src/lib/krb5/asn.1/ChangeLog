@@ -1,3 +1,14 @@
+Fri Apr 21 09:45:00 1995  Theodore Y. Ts'o  <tytso@lurch.mit.edu>
+
+	* asn1_k_decode.c (asn1_decode_kdc_options): Fix
+		BACKWARD_BITMASK_COMPAT so that it doesn't break
+		user-to-user authentication.  Unfortunately, this breaks 
+		proxy tickets (and renewable tickets continue to be
+		broken if BACKWARD_BITMASK_COMPAT is defined; nothing
+		can be done by this.)  Sites should only define
+		BACKWARD_BITMASK_COMPAT if they have an installed base
+		of broken implementations.
+
 Thu Apr 20 17:41:24 1995  Theodore Y. Ts'o  (tytso@dcl)
 
 	* asn1_k_decode.c, krbasn1.h: Move the define of
