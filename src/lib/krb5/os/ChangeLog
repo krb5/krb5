@@ -1,3 +1,7 @@
+2003-07-03 Alexandra Ellwood <lxs@mit.edu>
+	* init_os_ctx.c: removed memory leak.  Was leaking profiles on
+        the Mac.  Fix for KfM 4.5.3
+
 2002-10-31  Tom Yu  <tlyu@mit.edu>
 
 	* hst_realm.c (krb5_try_realm_txt_rr): Apply patch from Nalin

@@ -167,7 +167,6 @@ static void
 free_filespecs(files)
 	profile_filespec_t *files;
 {
-#if !TARGET_OS_MAC
     char **cp;
 
     if (files == 0)
@@ -175,7 +174,6 @@ free_filespecs(files)
     
     for (cp = files; *cp; cp++)
 	free(*cp);
-#endif
     free(files);
 }
 
