@@ -25,9 +25,7 @@
  * krb5_free_authenticator()
  */
 
-
-#include <krb5/krb5.h>
-#include <krb5/ext-proto.h>
+#include "k5-int.h"
 
 void INTERFACE
 krb5_free_authenticator(context, val)

@@ -24,10 +24,7 @@
  * krb5_free_tgt_creds()
  */
 
-
-
-#include <krb5/krb5.h>
-#include <krb5/ext-proto.h>
+#include "k5-int.h"
 
 void INTERFACE
 krb5_free_tgt_creds(context, tgts)

@@ -1,3 +1,7 @@
+Tue Feb 28 00:38:44 1995  John Gilmore  (gnu at toad.com)
+
+	* *.c:  Avoid <krb5/...> includes.
+
 Tue Feb 21 23:39:19 1995  Theodore Y. Ts'o  (tytso@dcl)
 
 	* f_cred_enc.c (krb5_free_cred_enc_part): Remove call to xfree at

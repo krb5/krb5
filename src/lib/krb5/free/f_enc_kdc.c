@@ -24,9 +24,7 @@
  * krb5_free_enc_kdc_rep_part()
  */
 
-
-#include <krb5/krb5.h>
-#include <krb5/ext-proto.h>
+#include "k5-int.h"
 
 void INTERFACE
 krb5_free_enc_kdc_rep_part(context, val)
