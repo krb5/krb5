@@ -1,3 +1,8 @@
+Mon Oct 21 16:27:28 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* api.2/mod-principal-v2.exp: create this file, implement tests
+ 	100-104 [krb5-admin/20]
+
 Fri Oct 18 13:21:08 1996  Barry Jaspan  <bjaspan@mit.edu>
 
 	* api.2/init-v2.exp: add test 117, for default max_life
