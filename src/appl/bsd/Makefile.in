@@ -42,7 +42,7 @@ clean::
 rsh: krsh.o kcmd.o forward.o $(SETENVOBJ) $(LIBOBJS) $(KRB4COMPAT_DEPLIBS)
 	$(CC_LINK) -o rsh krsh.o kcmd.o forward.o $(SETENVOBJ) $(LIBOBJS) $(KRB4COMPAT_LIBS)
 
-rcp: krcp.o kcmd.o forward.o $(SETENVOBJ) $(LIBOBJS) $(KRB4COMATP_DEPLIBS)
+rcp: krcp.o kcmd.o forward.o $(SETENVOBJ) $(LIBOBJS) $(KRB4COMPAT_DEPLIBS)
 	$(CC_LINK) -o rcp krcp.o kcmd.o forward.o $(SETENVOBJ) $(LIBOBJS) $(KRB4COMPAT_LIBS)
 
 v4rcp: v4rcp.o $(SETENVOBJ) $(LIBOBJS) $(KRB4COMPAT_DEPLIBS)
