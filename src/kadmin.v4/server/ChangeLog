@@ -1,4 +1,14 @@
 
+Thu Aug 10 14:48:26 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* kadm_funcs.c - Add kadm_find_keytype() to find a particular key/salt
+		pair.  Use this to find keys instead of assuming that the
+		right one's in the first slot.
+		Fix transposed arguments to strncpy().
+		Handle mod_princ_data stuff.
+		Supply saltblock to encrypt_key_data().
+	* admin_server, kadm_ser_wrap.c - Use kadm_find_keytype() to find keys.
+
+
 Mon Aug 7 13:30:46 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* admin_server,kadm_funcs,kadm_ser_wrap.c - Brute force substitutions
 		to get this to compile. 

@@ -336,6 +336,7 @@ struct sockaddr_in *who;
     krb5_db_entry sprinc_entries;
     krb5_boolean more;
     krb5_keyblock cpw_skey;
+    krb5_key_data *kdatap;
     int status;
 
 #ifndef NOENCRYPTION
@@ -379,9 +380,15 @@ struct sockaddr_in *who;
 	cleanexit(2);
     }
 
+    status = kadm_find_keytype(&sprinc_entries, KEYTYPE_DES, -1, &kdatap);
+    if (status) {
+	syslog(LOG_ERR, "find keytype failed: %s", error_message(status));
+	cleanexit(1);
+    }
+
     status = krb5_dbekd_decrypt_key_data(kadm_context,
 					 &server_parm.master_encblock,
-					 &sprinc_entries.key_data[0],
+					 kdatap,
 					 &cpw_skey,
 					 (krb5_keysalt *) NULL);
     if (status) {
