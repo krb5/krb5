@@ -1,5 +1,9 @@
 Wed Jul 27 12:52:04 1994  Mark Eichin  (eichin@tweedledumber.cygnus.com)
 
+	* Makefile.in: add LIBOBJS, dependency for getdtablesize.o.
+	* getdtablesize.c: new file.
+	* configure.in: build getdtablesize.c if needed.
+
 	* login.c: HAVE_TTYENT_H.
 	* configure.in: add ttyent.h to HEADERS test.
 

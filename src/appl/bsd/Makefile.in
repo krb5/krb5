@@ -6,10 +6,12 @@ COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
 K4LIB = $(KRB4)/lib/libkrb.a
 KLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(ISODELIB) $(COMERRLIB)
 
+LIBOBJS=@LIBOBJS@
+
 SRCS= krcp.c krlogin.c krsh.c kcmd.c forward.c logutil.c $(SETENVSRC) \
 	login.c
 OBJS= krcp.o krlogin.o krsh.o kcmd.o forward.c logutil.o $(SETENVOBJ) \
-	login.o
+	login.o $(LIBOBJS)
 
 all:: rsh rcp rlogin krshd krlogind login.krb5
 
@@ -48,3 +50,6 @@ login.krb5: login.o logutil.o $(SETENVOBJ)
 
 install::
 	$(INSTALL_PROGRAM) login.krb5 $(DESTDIR)$(SERVER_BINDIR)/login.krb5
+
+getdtablesize.o: $(srcdir)/getdtablesize.c
+
