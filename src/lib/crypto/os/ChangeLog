@@ -1,3 +1,8 @@
+Fri Mar 17 16:21:46 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* Makefile.in: Fix rules for localdr.c, ustime.c, and memmove.c so
+		that they reference $(srcdir) where appropriate.
+
 Thu Mar 16 21:24:43 1995  John Gilmore  (gnu at toad.com)
 
 	* Makefile.in (LDFLAGS):  Eliminate, comes in from pre.in.
