@@ -194,6 +194,7 @@ krb54_get_service_keyblock(service,instance,realm,kvno,file,keyblock)
 					 &kt_entry.key, keyblock);
     
     krb5_kt_free_entry(krb5__krb4_context, &kt_entry);
+    krb5_kt_close (krb5__krb4_context, kt_id);
 
 errout:
     if (princ)

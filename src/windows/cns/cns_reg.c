@@ -135,7 +135,7 @@ cns_load_registry(void)
   } else
 	  strcpy(cns_res.confname, cns_res.def_confname);
 
-  if (registry_string_get(key, "ccname", &ts) == 0) {
+  if (cns_res.cc_override && (registry_string_get(key, "ccname", &ts) == 0)) {
 	strcpy(cns_res.ccname, ts);
 	free(ts);
   } else
@@ -197,15 +197,20 @@ cns_save_registry(void)
   registry_string_set(key, "realm", cns_res.realm);
 
   if (cns_res.conf_override)
-	  if (strcmp(cns_res.confname, cns_res.def_confname))
-		registry_string_set(key, "confname", cns_res.confname);
-	  else
-		registry_value_delete(key, "confname");
+  {
+      if (strcmp(cns_res.confname, cns_res.def_confname))
+	  registry_string_set(key, "confname", cns_res.confname);
+      else
+	  registry_value_delete(key, "confname");
+  }
 
-  if (strcmp(cns_res.ccname, cns_res.def_ccname))
+  if (cns_res.cc_override)
+  {
+      if (strcmp(cns_res.ccname, cns_res.def_ccname))
 	  registry_string_set(key, "ccname", cns_res.ccname);
-  else
+      else
 	  registry_value_delete(key, "ccname");
+  }
 
   for (i = 0 ; i < FILE_MENU_MAX_LOGINS ; i++)
     if (cns_res.logins[i][0] != '\0') {

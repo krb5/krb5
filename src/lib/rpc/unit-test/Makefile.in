@@ -2,7 +2,7 @@ thisconfigdir=.
 myfulldir=lib/rpc/unit-test
 mydir=.
 BUILDTOP=$(REL)$(U)$(S)$(U)$(S)$(U)
-CFLAGS	= $(CCOPTS) $(DEFS) $(LOCALINCLUDE) -I.
+LOCALINCLUDES = -I.
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 

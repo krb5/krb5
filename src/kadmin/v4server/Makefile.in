@@ -2,15 +2,14 @@ thisconfigdir=./..
 myfulldir=kadmin/v4server
 mydir=v4server
 BUILDTOP=$(REL)$(U)$(S)$(U)
-CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE) \
-	-DKADM5 -DNEED_SOCKETS @HESIOD_DEFS@
+DEFINES = -DKADM5 -DNEED_SOCKETS @HESIOD_DEFS@
 PROG_LIBPATH=-L$(TOPLIBD) $(KRB4_LIBPATH)
 PROG_RPATH=$(KRB5_LIBDIR)
 LOCAL_SUBDIRS = unit-test
 
 HESIOD_LIBS=@HESIOD_LIBS@
 
-LOCALINCLUDE = $(KRB4_INCLUDES) -I. -I$(srcdir)
+LOCALINCLUDES = $(KRB4_INCLUDES) -I. -I$(srcdir)
 
 PROG = kadmind4
 OBJS = kadm_server.o admin_server.o kadm_ser_wrap.o \

@@ -2,7 +2,6 @@ thisconfigdir=./../..
 myfulldir=lib/krb5/ccache/file
 mydir=ccache/file
 BUILDTOP=$(REL)$(U)$(S)$(U)$(S)$(U)$(S)$(U)
-CFLAGS = $(CCOPTS) $(DEFS)
 
 ##DOS##BUILDTOP = ..\..\..\..
 ##DOS##PREFIXDIR = ccache\file

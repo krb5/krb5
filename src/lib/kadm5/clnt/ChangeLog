@@ -1,3 +1,15 @@
+1999-10-26  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,
+	LOCAL_INCLUDES such that one can override CFLAGS from the command
+	line without losing CPP search patchs and defines. Some associated
+	Makefile cleanup. [from wsanchez@apple.com]
+
+1999-08-27  Tom Yu  <tlyu@mit.edu>
+
+	* client_init.c (_kadm5_init_any): Remove support for krb5-mech2
+	for now.
+
 Thu May 13 17:24:44 1999  Tom Yu  <tlyu@mit.edu>
 
 	* client_init.c (_kadm5_init_any): Use gss_krb5_ccache_name() to

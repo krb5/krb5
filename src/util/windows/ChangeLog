@@ -1,3 +1,8 @@
+1999-12-03  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in: Fix build flags with respect to win-pre.in build
+	changes.
+
 Mon May 10 15:27:34 1999  Danilo Almeida  <dalmeida@mit.edu>
 
 	* Makefile.in: Do win32 build in subdir.

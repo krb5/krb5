@@ -1,3 +1,16 @@
+1999-12-03  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in: Clean kpasswd in Windows build.
+
+1999-11-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Check for setenv.  Set SETENVOBJ to setenv.o if
+	it's not available, empty otherwise.
+
+1999-08-09  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in: Build kpasswd under windows.
+
 Tue May 18 19:52:56 1999  Danilo Almeida  <dalmeida@mit.edu>
 
 	* Makefile.in: Remove - from recursive Win32 make invocation.

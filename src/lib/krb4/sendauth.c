@@ -107,7 +107,7 @@
  * 
  * See FIXME KLUDGE code in appl/bsd/kcmd.c.
  */
-KRB4_32 __krb_sendauth_hidden_tkt_len;
+KRB4_32 __krb_sendauth_hidden_tkt_len=0;
 #define raw_tkt_len __krb_sendauth_hidden_tkt_len
 
 

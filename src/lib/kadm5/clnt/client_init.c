@@ -469,29 +469,17 @@ static kadm5_ret_t _kadm5_init_any(char *client_name,
      
 #ifndef INIT_TEST
      handle->clnt->cl_auth = auth_gssapi_create(handle->clnt,
-					&gssstat,
-					&minor_stat,
-					gss_client_creds,
-					gss_target,
-					gss_mech_krb5_v2,
-					GSS_C_MUTUAL_FLAG | GSS_C_REPLAY_FLAG,
-					0,
-					NULL,
-					NULL,
-					NULL);
-
-     if (!handle->clnt->cl_auth)
-	 handle->clnt->cl_auth = auth_gssapi_create(handle->clnt,
-					&gssstat,
-					&minor_stat,
-					gss_client_creds,
-					gss_target,
-					gss_mech_krb5,
-					GSS_C_MUTUAL_FLAG | GSS_C_REPLAY_FLAG,
-					0,
-					NULL,
-					NULL,
-					NULL);
+						&gssstat,
+						&minor_stat,
+						gss_client_creds,
+						gss_target,
+						gss_mech_krb5,
+						GSS_C_MUTUAL_FLAG
+						| GSS_C_REPLAY_FLAG,
+						0,
+						NULL,
+						NULL,
+						NULL);
 
      (void) gss_release_name(&minor_stat, &gss_target);
 #endif /* ! INIT_TEST */

@@ -229,10 +229,10 @@ EXPORTS
 	krb5_ser_rcache_init
 	decode_krb5_ap_req
 	krb5_mcc_ops
-
 ;
 ;Added for Kermit 95
         krb5_address_search
         krb5_auth_con_getrcache
         krb5_c_enctype_compare
 
+	krb5_kuserok

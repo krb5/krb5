@@ -5,7 +5,7 @@ BUILDTOP=$(REL)$(U)$(S)$(U)$(S)$(U)
 #
 # appl/gssftp/ftp/Makefile.in
 #
-CFLAGS = -DGSSAPI -DFTP_BUFSIZ=10240 $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
+DEFINES = -DGSSAPI -DFTP_BUFSIZ=10240
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 
@@ -18,8 +18,7 @@ SRCS	= $(srcdir)/cmds.c $(srcdir)/cmdtab.c $(srcdir)/domacro.c \
 OBJS	= cmds.o cmdtab.o domacro.o ftp.o getpass.o glob.o main.o pclose.o \
 	  radix.o ruserpass.o secure.o
 
-LOCALINCLUDE = -I$(srcdir)/.. -I$(srcdir) @KRB4_INCLUDES@
-DEFINES = -DGSSAPI -DNOCONFIDENTIAL
+LOCALINCLUDES = -I$(srcdir)/.. -I$(srcdir) @KRB4_INCLUDES@
 
 all::	ftp
 

@@ -8,13 +8,10 @@ XOBJS	= $(RESFILE)
 ##### Options
 # Set NODEBUG if building release instead of debug
 BUILDTOP=..\..
-INCLUDES= /I$(BUILDTOP)\include /I$(BUILDTOP)\include\krb5
-
-##### C Compiler
-CFLAGS	= $(CCOPTS2) $(INCLUDES)
+LOCALINCLUDES= /I$(BUILDTOP)\include /I$(BUILDTOP)\include\krb5
 
 ##### RC Compiler
-RFLAGS	= $(INCLUDES)
+RFLAGS	= $(LOCALINCLUDES)
 RCFLAGS	= $(RFLAGS) -D_WIN32 -DGSS_APP
 
 ##### Linker

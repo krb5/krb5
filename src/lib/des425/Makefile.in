@@ -2,7 +2,7 @@ thisconfigdir=.
 myfulldir=lib/des425
 mydir=.
 BUILDTOP=$(REL)$(U)$(S)$(U)
-CFLAGS = $(CCOPTS) $(DEFS) -I$(srcdir)/../crypto/des -I$(srcdir)/../../include/kerberosIV
+LOCALINCLUDES = -I$(srcdir)/../crypto/des -I$(srcdir)/../../include/kerberosIV
 
 ##DOS##BUILDTOP = ..\..
 ##DOS##LIBNAME=$(OUTPRE)des425.lib

@@ -16,7 +16,10 @@
  * this permission notice appear in supporting documentation, and that
  * the name of M.I.T. not be used in advertising or publicity pertaining
  * to distribution of the software without specific, written prior
- * permission.  M.I.T. makes no representations about the suitability of
+ * permission.  Furthermore if you modify this software you must label
+ * your software as modified software and not distribute it in such a
+ * fashion that it might be confused with the original M.I.T. software.
+ * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
  */
@@ -89,11 +92,10 @@ else { len = 0; var = 0; }
 
 #define begin_structure()\
 asn1buf subbuf;\
-retval = asn1_get_tag(buf,&class,&construction,&tagnum,&length);\
+int indef;\
+retval = asn1_get_sequence(buf,&length,&indef);\
 if(retval) return retval;\
-if(class != UNIVERSAL || construction != CONSTRUCTED ||\
-   tagnum != ASN1_SEQUENCE) return ASN1_BAD_ID;\
-retval = asn1buf_imbed(&subbuf,buf,length);\
+retval = asn1buf_imbed(&subbuf,buf,length,indef);\
 if(retval) return retval;\
 next_tag()
 
@@ -105,9 +107,10 @@ if(retval) return retval
 int size=0;\
 asn1buf seqbuf;\
 int length;\
-retval = asn1_get_sequence(buf,&length);\
+int indef;\
+retval = asn1_get_sequence(buf,&length,&indef);\
 if(retval) return retval;\
-retval = asn1buf_imbed(&seqbuf,buf,length);\
+retval = asn1buf_imbed(&seqbuf,buf,length,indef);\
 if(retval) return retval
 
 #define end_sequence_of(buf)\

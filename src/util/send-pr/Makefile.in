@@ -13,7 +13,8 @@ EMACS=emacs
 
 infodir = $(prefix)/info
 lispdir = $(prefix)/lib/emacs/site-lisp
-man1dir = $(KRB5MANROOT)/man1
+mandir  = $(KRB5MANROOT)
+man1dir = $(mandir)/man1
 datadir = @datadir@
 
 all:: send-pr  install-sid

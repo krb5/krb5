@@ -38,6 +38,11 @@ CPU=i386
 # End of figuring out CPU
 #
 
+!if "$(OS)" == "Windows_NT"
+NULL=
+!else 
+NULL=nul
+!endif
 
 # NOTE: ^ is an escape char for NMAKE.
 !ifdef NODEBUG
@@ -78,13 +83,31 @@ C=.^\
 srcdir = .
 SRCTOP = $(srcdir)\$(BUILDTOP)
 
+!if defined(KRB5_USE_DNS)
+!if !defined(DNS_INC)
+!message Must define DNS_INC to point to wshelper includes dir!
+!error
+!endif
+!if !defined(DNS_LIB)
+!message Must define DNS_LIB to point to wshelper library!
+!error
+!endif
+DNSLIBS=$(DNS_LIB)
+DNSFLAGS=-I$(DNS_INC) -DKRB5_DNS_LOOKUP -DWSHELPER
+!else
+DNSLIBS=
+DNSFLAGS=
+!endif
+
 #
 # The name of the C compiler for the target
 #
-CC=cl /nologo
-CL=
+CC=cl
 
 PDB_OPTS=-Fd$(OUTPRE)\ -FD
+CPPFLAGS=-I$(SRCTOP)\include -I$(SRCTOP)\include\krb5 $(DNSFLAGS)
+CCOPTS=-nologo /W3 $(PDB_OPTS) $(DLL_FILE_DEF)
+LOPTS=-nologo -incremental:no
 
 # /ZI gives better debug info in each object file (MSVC 6.0 or higher).
 # /Zi gives debug info in each object file.
@@ -94,32 +117,20 @@ PDB_OPTS=-Fd$(OUTPRE)\ -FD
 # /MD (Win32) thread safe, ML would be single threaded, don't build with ML
 
 #
-# CCOPTS  is for DLL compiles
-# CCOPTS2 is for non-DLL compiles (EXEs, for example)
+# CCOPTS  was for DLL compiles
+# CCOPTS2 was for non-DLL compiles (EXEs, for example)
 #
 !ifdef NODEBUG
-CCOPTS =/Os /W3 /MD $(PDB_OPTS) $(XTRA) $(DLL_FILE_DEF)
-CCOPTS2=/Os /W3 $(PDB_OPTS) $(XTRA)
-LOPTS=
+CCOPTS=/Os /MD $(CCOPTS)
+LOPTS=$(LOPTS)
 !else
-CCOPTS =/Od /ZI /W3 /MD $(PDB_OPTS) $(XTRA) $(DLL_FILE_DEF)
-CCOPTS2=/Od /ZI /W3 $(PDB_OPTS) $(XTRA)
-LOPTS=-debug
+CCOPTS=/Od /ZI /MDd $(CCOPTS)
+LOPTS=$(LOPTS) -debug
 !endif
 
 # XXX - NOTE: We should probably use DllMainCRTStartup
-LINKOPTS=-incremental:no $(LOPTS) -nologo -dll -entry:DllMain
-LINKOPTS2=-incremental:no $(LOPTS) -nologo
-
-!if defined(KRB5_USE_DNS) 
-DNSFLAGS= -DKRB5_DNS_LOOKUP -DWSHELPER
-!else
-DNSFLAGS=
-!endif
-
-CPPFLAGS =  -I$(SRCTOP)\include -I$(SRCTOP)\include\krb5 -I$(SRCTOP)\mit\windows\include $(DNSFLAGS)
-DEFS = $(CPPFLAGS)
-CFLAGS2 = $(CCOPTS2) $(DEFS)
+DLL_LINKOPTS=$(LOPTS) -dll -entry:DllMain
+EXE_LINKOPTS=$(LOPTS)
 
 RM=$(BUILDTOP)\config\rm.bat
 LIBECHO=$(BUILDTOP)\util\windows\$(OUTPRE)libecho
@@ -155,17 +166,20 @@ MFLAGS=$(MAKEFLAGS)
 MAKE=-$(MAKE)
 !endif
 
+CFLAGS = $(CCOPTS)
+ALL_CFLAGS = $(DEFS) $(DEFINES) $(LOCALINCLUDES) $(CPPFLAGS) $(CFLAGS)
+
 {}.rc{$(OUTPRE)}.res:
 	$(RC) $(RCFLAGS) -fo $@ -r $<
 
 {}.c{$(OUTPRE)}.obj:
-	$(CC) $(CFLAGS) -Fo$(OUTPRE)\ -c $<
+	$(CC) $(ALL_CFLAGS) -Fo$(OUTPRE)\ -c $<
 
 {}.cxx{$(OUTPRE)}.obj:
-	$(CC) $(CFLAGS) -Fo$(OUTPRE)\ -c $<
+	$(CC) $(ALL_CFLAGS) -Fo$(OUTPRE)\ -c $<
 
 {}.cpp{$(OUTPRE)}.obj:
-	$(CC) $(CFLAGS) -Fo$(OUTPRE)\ -c $<
+	$(CC) $(ALL_CFLAGS) -Fo$(OUTPRE)\ -c $<
 
 #
 # End of Win32 pre-config lines (config/win-pre.in)

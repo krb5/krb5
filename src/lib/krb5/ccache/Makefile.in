@@ -4,7 +4,7 @@ mydir=ccache
 BUILDTOP=$(REL)$(U)$(S)$(U)$(S)$(U)
 LOCAL_SUBDIRS = stdio file memory
 
-CFLAGS = $(CCOPTS) $(DEFS) -I$(srcdir)$(S)file -I$(srcdir)$(S)stdio \
+LOCALINCLUDES = -I$(srcdir)$(S)file -I$(srcdir)$(S)stdio \
 		-I$(srcdir)$(S)ccapi $(WIN_INCLUDES)
 
 ##DOS##WIN_INCLUDES = -I$(SRCTOP)\windows\lib
@@ -21,18 +21,21 @@ STLIBOBJS= \
 	cccopy.o \
 	ccdefault.o \
 	ccdefops.o \
+	cc_retr.o \
 	ser_cc.o
 
 OBJS=	$(OUTPRE)ccbase.$(OBJEXT) \
 	$(OUTPRE)cccopy.$(OBJEXT) \
 	$(OUTPRE)ccdefault.$(OBJEXT) \
 	$(OUTPRE)ccdefops.$(OBJEXT) \
+	$(OUTPRE)cc_retr.$(OBJEXT) \
 	$(OUTPRE)ser_cc.$(OBJEXT)
 
 SRCS=	$(srcdir)/ccbase.c \
 	$(srcdir)/cccopy.c \
 	$(srcdir)/ccdefault.c \
 	$(srcdir)/ccdefops.c \
+	$(srcdir)/cc_retr.c \
 	$(srcdir)/ser_cc.c
 
 all-unix:: all-libobjs

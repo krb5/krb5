@@ -2,7 +2,7 @@ thisconfigdir=./../..
 myfulldir=lib/krb5/ccache/ccapi
 mydir=ccache/ccapi
 BUILDTOP=$(REL)$(U)$(S)$(U)$(S)$(U)$(S)$(U)
-CFLAGS = $(CCOPTS) $(DEFS) $(WIN_INCLUDES)
+LOCALINCLUDES = $(WIN_INCLUDES)
 
 ##DOS##WIN_INCLUDES = -I$(SRCTOP)\windows\lib
 

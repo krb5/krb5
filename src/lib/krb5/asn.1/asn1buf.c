@@ -75,13 +75,14 @@ asn1_error_code asn1buf_wrap_data(buf, code)
   return 0;
 }
 
-asn1_error_code asn1buf_imbed(subbuf, buf, length)
+asn1_error_code asn1buf_imbed(subbuf, buf, length, indef)
      asn1buf * subbuf;
      const asn1buf * buf;
      const int length;
+     const int indef;
 {
   subbuf->base = subbuf->next = buf->next;
-  if (length > 0 ) {
+  if (!indef) {
       subbuf->bound = subbuf->base + length - 1;
       if (subbuf->bound > buf->bound)
 	  return ASN1_OVERRUN;

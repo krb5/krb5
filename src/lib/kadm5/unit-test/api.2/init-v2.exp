@@ -19,21 +19,63 @@ proc test100 {} {
 }
 if {$RPC} test100
 
+if ![info exists RESOLVE] {
+    set RESOLVE [findfile $objdir/../../../tests/resolve/resolve]
+}
+proc get_hostname { } {
+    global RESOLVE
+    global hostname
+    global localhostname
+    global domain
+
+    if {[info exists hostname] && [info exists localhostname]} {
+	return 1
+    }
+
+    catch "exec $RESOLVE -q >myname" exec_output
+    if ![string match "" $exec_output] {
+	send_log "$exec_output\n"
+	verbose $exec_output
+	send_error "ERROR: can't get hostname\n"
+	return 0
+    }
+    set file [open myname r]
+    if { [ gets $file hostname ] == -1 } {
+	send_error "ERROR: no output from hostname\n"
+	return 0
+    }
+    close $file
+    catch "exec rm -f myname" exec_output
+    regexp "^(\[^.\]*)\.(.*)$" $hostname foo localhostname domain
+
+    set hostname [string tolower $hostname]
+    set localhostname [string tolower $localhostname]
+    set domain [string tolower $domain]
+    verbose "hostname: $hostname; localhostname: $localhostname; domain $domain"
+
+    return 1
+}
+
+
 test "init 101"
 proc test101 {} {
     global test
+    global hostname
+
+    get_hostname
+    tcl_cmd "set hostname $hostname"
 
     # XXX Fix to work with a remote TEST_SERVER.  For now, make sure
     # it fails in that case.
     one_line_succeed_test {
 	kadm5_init admin admin $KADM5_ADMIN_SERVICE \
-		[config_params {KADM5_CONFIG_ADMIN_SERVER KADM5_CONFIG_KADMIND_PORT} {localhost 1751}] \
+		[config_params {KADM5_CONFIG_ADMIN_SERVER KADM5_CONFIG_KADMIND_PORT} [list $hostname 1751]] \
 		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
 		server_handle
     }
     one_line_fail_test {
 	kadm5_init admin admin $KADM5_ADMIN_SERVICE \
-		[config_params {KADM5_CONFIG_ADMIN_SERVER KADM5_CONFIG_KADMIND_PORT} {localhost 1}] \
+		[config_params {KADM5_CONFIG_ADMIN_SERVER KADM5_CONFIG_KADMIND_PORT} [list $hostname 1]] \
 		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
 		server_handle
     } "RPC_ERROR"

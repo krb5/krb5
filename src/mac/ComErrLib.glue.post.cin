@@ -1,0 +1,7 @@
+#include <ComErrLib.glue.h>
+
+Boolean ComErrLibraryIsPresent ()
+{
+	Ptr	symAddr;
+	return (Find_Symbol (&symAddr, "\perror_message", error_message_ProcInfo)) == noErr;
+}

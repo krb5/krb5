@@ -1,0 +1,18 @@
+long profile_init (profile_filespec_t *files, profile_t *ret_profile);
+long profile_init_path (profile_filespec_list_t filelist, profile_t *ret_profile);
+long profile_flush (profile_t profile);
+void profile_abandon (profile_t profile);
+void profile_release (profile_t profile);
+long profile_get_values (profile_t profile, const char **names, char ***ret_values);
+void profile_free_list (char **list);
+long profile_get_string (profile_t profile, const char *name, const char *subname, const char *subsubname, const char *def_val, char **ret_string); long profile_get_integer (profile_t profile, const char *name, const char *subname, const char *subsubname, int def_val, int *ret_default);
+long profile_get_relation_names (profile_t profile, const char **names, char ***ret_names);
+long profile_get_subsection_names (profile_t profile, const char **names, char ***ret_names);
+long profile_iterator_create (profile_t profile, const char **names, int flags, void **ret_iter);
+void profile_iterator_free (void **iter_p);
+long profile_iterator (void	**iter_p, char **ret_name, char **ret_value);
+void profile_release_string (char *str);
+long profile_update_relation (profile_t profile, const char **names, const char *old_value, const char *new_value);
+long profile_clear_relation (profile_t profile, const char **names);
+long profile_rename_section (profile_t profile, const char **names, const char *new_name);
+long profile_add_relation (profile_t profile, const char **names, const char *new_value);

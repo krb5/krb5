@@ -5,7 +5,7 @@ BUILDTOP=$(REL)$(U)$(S)$(U)$(S)$(U)
 #
 # appl/gssftp/ftpd/Makefile.in
 #
-CFLAGS = -DGSSAPI -DFTP_BUFSIZ=10240 $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
+DEFINES = -DGSSAPI -DFTP_BUFSIZ=10240 #-DNOCONFIDENTIAL
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 
@@ -25,8 +25,7 @@ SRCS	= $(srcdir)/ftpd.c ftpcmd.c $(srcdir)/popen.c \
 OBJS	= ftpd.o ftpcmd.o glob.o popen.o vers.o radix.o \
 	  secure.o $(LIBOBJS) $(SETENVOBJ)
 
-LOCALINCLUDE = -I$(srcdir)/.. -I$(srcdir) @KRB4_INCLUDES@
-DEFINES = -DGSSAPI -DNOCONFIDENTIAL
+LOCALINCLUDES = -I$(srcdir)/.. -I$(srcdir) @KRB4_INCLUDES@
 
 all::	ftpd
 
@@ -53,17 +52,17 @@ ftpcmd.c: $(srcdir)/ftpcmd.y
 	$(MV) y.tab.c ftpcmd.c
 
 glob.o: $(srcdir)/../ftp/glob.c
-	$(CC) -c $(CFLAGS) $(srcdir)/../ftp/glob.c
+	$(CC) -c $(ALL_CFLAGS) $(srcdir)/../ftp/glob.c
 radix.o: $(srcdir)/../ftp/radix.c
-	$(CC) -c $(CFLAGS) $(srcdir)/../ftp/radix.c
+	$(CC) -c $(ALL_CFLAGS) $(srcdir)/../ftp/radix.c
 secure.o: $(srcdir)/../ftp/secure.c
-	$(CC) -c $(CFLAGS) $(srcdir)/../ftp/secure.c
+	$(CC) -c $(ALL_CFLAGS) $(srcdir)/../ftp/secure.c
 
 getdtablesize.o: $(srcdir)/../../bsd/getdtablesize.c
-	$(CC) -c $(CFLAGS) $(srcdir)/../../bsd/getdtablesize.c
+	$(CC) -c $(ALL_CFLAGS) $(srcdir)/../../bsd/getdtablesize.c
 
 setenv.o: $(srcdir)/../../bsd/setenv.c
-	$(CC) -c $(CFLAGS) $(srcdir)/../../bsd/setenv.c
+	$(CC) -c $(ALL_CFLAGS) $(srcdir)/../../bsd/setenv.c
 
 
 ftpd.o: $(srcdir)/pathnames.h

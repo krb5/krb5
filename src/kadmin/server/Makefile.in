@@ -2,7 +2,6 @@ thisconfigdir=./..
 myfulldir=kadmin/server
 mydir=server
 BUILDTOP=$(REL)$(U)$(S)$(U)
-CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
 
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)

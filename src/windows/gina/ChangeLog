@@ -1,3 +1,7 @@
+1999-12-03  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in: Windows fix for updated win-pre.in.
+
 Mon May 17 14:24:25 1999  Danilo Almeida  <dalmeida@mit.edu>
 
 	* Makefile.in: Reflect that we only build this under win32.

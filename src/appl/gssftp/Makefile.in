@@ -3,5 +3,4 @@ myfulldir=appl/gssftp
 mydir=.
 BUILDTOP=$(REL)$(U)$(S)$(U)
 LOCAL_SUBDIRS=ftp ftpd
-CFLAGS = $(CCOPTS)
 LDFLAGS = -g

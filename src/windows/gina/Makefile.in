@@ -4,7 +4,7 @@ OBJS=	$(OUTPRE)ginastub.$(OBJEXT)
 
 # Set NODEBUG if building release instead of debug
 
-INCLUDES = -I$(BUILDTOP)\include
+LOCALINCLUDES = -I$(BUILDTOP)\include
 
 WINLIBS = advapi32.lib comctl32.lib \
 	libc.lib kernel32.lib wsock32.lib user32.lib shell32.lib oldnames.lib
@@ -12,10 +12,11 @@ WINLIBS = advapi32.lib comctl32.lib \
 WINDLLFLAGS = /nodefaultlib /incremental:no /release \
 	/nologo /base:0x1c000000 /dll $(LOPTS)
 
+DEFINES = -DUNICODE -D_UNICODE
 !ifdef NODEBUG
-CFLAGS = $(CCOPTS2) $(INCLUDES) -DUNICODE -D_UNICODE
+DEFINES = $(DEFINES)
 !else
-CFLAGS = $(CCOPTS2) $(INCLUDES) -DUNICODE -D_UNICODE -DDBG
+DEFINES = $(DEFINES) -DDBG
 !endif
 
 all-windows::

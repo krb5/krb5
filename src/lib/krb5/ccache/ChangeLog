@@ -1,3 +1,22 @@
+1999-10-26  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,
+	LOCAL_INCLUDES such that one can override CFLAGS from the command
+	line without losing CPP search patchs and defines. Some associated
+	Makefile cleanup. [from wsanchez@apple.com]
+
+1999-08-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* cc_retr.c: New file.
+	(krb5_cc_retrieve_cred_seq): New function, derived from
+	fcc_retrieve but takes an optional list of enctypes to look for in
+	priority order.
+	(krb5_cc_retrieve_cred_default): New function.  Same signature as
+	original fcc_retrieve but if new flag KRB5_TC_SUPPORTED_KTYPES is
+	set, calls krb5_get_tgs_ktypes to get a list of enctypes to look
+	for.
+	* Makefile.in (STLIBOBJS, OBJS, SRCS): Add it.
+
 Tue May 18 19:52:56 1999  Danilo Almeida  <dalmeida@mit.edu>
 
 	* Makefile.in: Remove - from recursive Win32 make invocation.

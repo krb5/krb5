@@ -202,7 +202,7 @@ extern int standard_shell PROTOTYPE((char *));
 
 extern krb5_error_code get_params PROTOTYPE((int *, int, char **, char ***));
 
-extern char *get_dir_of_file PROTOTYPE((char *));
+extern char *get_dir_of_file PROTOTYPE((const char *));
 
 /* heuristic.c */
 extern krb5_error_code get_all_princ_from_file PROTOTYPE((FILE *, char ***));
@@ -241,4 +241,5 @@ extern krb5_error_code get_best_princ_for_target
 extern char *krb5_lname_file;  /* Note: print this out just be sure
 				  that it gets set */   	    
 
-
+extern void *xmalloc (), *xrealloc (), *xcalloc();
+extern char *xstrdup ();

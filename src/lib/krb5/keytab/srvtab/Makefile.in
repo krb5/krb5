@@ -3,8 +3,6 @@ myfulldir=lib/krb5/keytab/srvtab
 mydir=keytab/srvtab
 BUILDTOP=$(REL)$(U)$(S)$(U)$(S)$(U)$(S)$(U)
 
-CFLAGS = $(CCOPTS) $(DEFS)
-
 ##DOS##BUILDTOP = ..\..\..\..
 ##DOS##PREFIXDIR=keytab\srvtab
 ##DOS##OBJFILE=$(OUTPRE)srvtab.lst

@@ -1,3 +1,17 @@
+2000-04-28  Ken Raeburn  <raeburn@mit.edu>
+	    Nalin Dahyabhai  <nalin@redhat.com>
+
+	* syslog.c (vsyslog): Use strncpy and strncat instead of strcpy
+	and strcat when adding to buffer "tbuf".  If calling vsprintf,
+	abort if it appears to have overrun the buffer.
+
+1999-10-26  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,
+	LOCAL_INCLUDES such that one can override CFLAGS from the command
+	line without losing CPP search patchs and defines. Some associated
+	Makefile cleanup. [from wsanchez@apple.com]
+
 Mon May 10 15:26:38 1999  Danilo Almeida  <dalmeida@mit.edu>
 
 	* Makefile.in: Do win32 build in subdir.

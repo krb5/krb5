@@ -383,6 +383,11 @@ main(argc, argv)
 
     if (argc > 0 && !strcmp(*argv, "-D")) {
 	argv++; argc--;
+	if (*argv == NULL) {
+	    fprintf (stderr,
+		     "rlogin: -D flag must be followed by the debug port.\n");
+	    exit (1);
+	}
 	debug_port = htons(atoi(*argv));
 	argv++; argc--;
 	goto another;
@@ -545,6 +550,10 @@ main(argc, argv)
 			/* On some systems, ospeed is the baud rate itself,
 			   not a table index.  */
 			sprintf (term + strlen (term), "%d", ospeed);
+		else if (ospeed >= sizeof(speeds)/sizeof(char*))
+			/* Past end of table, but not high enough to
+			   look like a real speed.  */
+			(void) strcat (term, speeds[sizeof(speeds)/sizeof(char*) - 1]);
 		else {
 			(void) strcat(term, speeds[ospeed]);
 		}

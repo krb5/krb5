@@ -1,3 +1,30 @@
+1999-10-26  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,
+	LOCAL_INCLUDES such that one can override CFLAGS from the command
+	line without losing CPP search patchs and defines. Some associated
+	Makefile cleanup. [from wsanchez@apple.com]
+
+1999-09-01  Danilo Almeida  <dalmeida@mit.edu>
+
+	* profile.hin (profile_init, profile_init_path): Define and use
+	const_profile_filespec_t.
+
+	* prof_init.c (profile_init, profile_init_path):
+	* prof_file.c (profile_open_file):
+	* prof_int.h (profile_open_file): Use const_profile_filespec_t.
+
+	* prof_int.h (PROFILE_LAST_FILESPEC): Compare a char against a char,
+	not a void*.
+
+	* Makefile.in: Remove DOSDEFS to avoid warnings.  The thing it
+	defined is already set in win-mac.h.
+
+1999-08-18  Miro Jurisic  <meeroh@mit.edu>
+
+	* profile.exp: removed com_err functions (they are in a library
+	of their own now) from MacOS export file
+
 1999-08-05  Danilo Almeida  <dalmeida@mit.edu>
 
 	* prof_get.c (profile_free_string): 

@@ -27,14 +27,12 @@ SONAME=@SONAME@
 #
 PICFLAGS=@PICFLAGS@
 PROFFLAGS=@PROFFLAGS@
-.SUFFIXES: .c .o .so .po
-.c.o:
-	$(CC) $(CFLAGS) -c $<
+.SUFFIXES: .c .so .po
 .c.so:
-	$(CC) $(PICFLAGS) $(CFLAGS) -c $< -o $*.so.o && \
+	$(CC) $(DEFS) $(DEFINES) $(LOCALINCLUDES) $(PICFLAGS) $(CPPFLAGS) -c $< -o $*.so.o && \
 		$(MV) $*.so.o $*.so
 .c.po:
-	$(CC) $(PROFFLAGS) $(CFLAGS) -c $< -o $*.po.o && \
+	$(CC) $(DEFS) $(DEFINES) $(LOCALINCLUDES) $(PROFFLAGS) $(CPPFLAGS) -c $< -o $*.po.o && \
 		$(MV) $*.po.o $*.po
 
 # rules to generate object file lists

@@ -1,5 +1,3 @@
-CFLAGS = $(CCOPTS2) $(DEFS)
-
 BUILDTOP = ..\..
 
 lib-windows: $(OUTPRE)libwin.lib

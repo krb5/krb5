@@ -7,11 +7,8 @@ PROG_RPATH=$(KRB5_LIBDIR)
 ##DOS##BUILDTOP = ..\..
 ##DOS##OBJFILE=$(OUTPRE)profile.lst
 ##DOS##LIBNAME=$(OUTPRE)profile.lib
-##DOS##DOSDEFS=-DHAVE_STDLIB_H
 
-CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE) $(DOSDEFS)
-
-LOCALINCLUDE=-I. -I$(srcdir)/../et
+LOCALINCLUDES=-I. -I$(srcdir)/../et
 
 STLIBOBJS = \
 	prof_tree.o \

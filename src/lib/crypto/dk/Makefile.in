@@ -2,7 +2,7 @@ thisconfigdir=./..
 myfulldir=lib/crypto/dk
 mydir=dk
 BUILDTOP=$(REL)$(U)$(S)$(U)$(S)$(U)
-CFLAGS = $(CCOPTS) $(DEFS) -I$(srcdir)/..
+LOCALINCLUDES = -I$(srcdir)/..
 
 ##DOS##BUILDTOP = ..\..\..
 ##DOS##PREFIXDIR=dk

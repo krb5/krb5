@@ -25,9 +25,6 @@ profile_add_relation
 
 ### Temporary -- DO NOT USE
 
-error_message
-add_error_table
-remove_error_table
 profile_ser_internalize
 profile_ser_externalize
 profile_ser_size

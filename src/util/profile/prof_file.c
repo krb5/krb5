@@ -67,7 +67,7 @@ static int rw_access(filespec)
 }
 
 errcode_t profile_open_file(filespec, ret_prof)
-	profile_filespec_t filespec;
+	const_profile_filespec_t filespec;
 	prf_file_t *ret_prof;
 {
 	prf_file_t	prf;

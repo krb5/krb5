@@ -16,6 +16,9 @@ all-windows::
 	@echo Making all in clients\kinit
 	cd ..\kinit
 	$(MAKE) -$(MFLAGS)
+	@echo Making all in clients\kpasswd
+	cd ..\kpasswd
+	$(MAKE) -$(MFLAGS)
 	cd ..
 
 clean-windows::
@@ -27,5 +30,8 @@ clean-windows::
 	$(MAKE) -$(MFLAGS) clean
 	@echo Making clean in clients\kinit
 	cd ..\kinit
+	$(MAKE) -$(MFLAGS) clean
+	@echo Making clean in clients\kpasswd
+	cd ..\kpasswd
 	$(MAKE) -$(MFLAGS) clean
 	cd ..

@@ -3,26 +3,19 @@ myfulldir=clients/klist
 mydir=klist
 BUILDTOP=$(REL)$(U)$(S)$(U)
 
-CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 
 all-unix:: klist
-all-windows::
+all-windows:: $(OUTPRE)klist.exe
 all-mac::
 
 
 klist: klist.o $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o $@ klist.o $(KRB5_BASE_LIBS)
 
-
-##WIN32##INCLUDES = /I$(BUILDTOP)\include /I$(BUILDTOP)\include\krb5
-##WIN32##CFLAGS	= $(CCOPTS2) $(INCLUDES)
-
-##WIN32##all-windows:: $(OUTPRE)klist.exe
-##WIN32##$(OUTPRE)klist.exe: $(OUTPRE)klist.obj $(KLIB) $(CLIB)
-##WIN32##	link /nologo /out:$@ $** wsock32.lib
-
+$(OUTPRE)klist.exe: $(OUTPRE)klist.obj $(KLIB) $(CLIB)
+	link $(EXE_LINKOPTS) -out:$@ $** wsock32.lib
 
 clean-unix::
 	$(RM) klist.o klist

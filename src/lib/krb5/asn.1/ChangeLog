@@ -1,3 +1,37 @@
+1999-11-01  Tom Yu  <tlyu@mit.edu>
+
+	* krb5_decode.c (begin_structure): Update to deal with indefinite
+	encodings better; also call asn1_get_sequence().
+
+	* asn1_k_decode.c (sequence_of): Update to deal with indefinite
+	encodings better.
+	(begin_structure): Update to deal with indefinite encodings
+	better; also call asn1_get_sequence().
+
+	* asn1_get.h: Update prototypes for asn1_get_tag_indef(),
+	asn1_get_tag(), asn1_get_sequence(), asn1_get_length().
+
+	* asn1_get.c (asn1_get_tag_indef): New function; get tag info,
+	lengths, etc. as well as flag indicating whether the length is
+	indefinite.
+	(asn1_get_tag): Modify to just call asn1_get_tag_indef().
+	(asn1_get_sequence): Call asn1_get_tag_indef() in order to
+	determine whether encoding is indefinite length.
+	(asn1_get_length): Add "indef" arg to indicate whether an encoding
+	has an indefinite length.
+
+	* asn1buf.h: Update asn1buf_imbed() prototype.
+
+	* asn1buf.c (asn1buf_imbed): Add "indef" arg so that we don't
+	treat a definite zero-length encoding as an indefinite encoding.
+
+1999-10-26  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,
+	LOCAL_INCLUDES such that one can override CFLAGS from the command
+	line without losing CPP search patchs and defines. Some associated
+	Makefile cleanup. [from wsanchez@apple.com]
+
 Sat Jul 10 10:21:40 1999  Tom Yu  <chaoself@mit.edu>
 
 	* asn1_decode.c (asn1_decode_integer): Fix to deal with overflows

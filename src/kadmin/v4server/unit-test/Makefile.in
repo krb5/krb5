@@ -8,13 +8,19 @@ BUILDTOP=$(REL)$(U)$(S)$(U)$(S)$(U)
 
 check:: check-@DO_V4_TEST@
 
-check-::
+# When the tests get updated, nuke this and delete "-not" from the next two.
+check- check-ok::
+	@echo "+++"
+	@echo "+++ WARNING: kadmin/v4server unit tests out of date; not run."
+	@echo "+++"
+
+check--not::
 	@echo "+++"
 	@echo "+++ WARNING: kadmin/v4server unit tests not run."
 	@echo "+++ Either Athena compatibility, tcl, runtest, or Perl is unavailable."
 	@echo "+++"
 
-check-ok unit-test:: unit-test-setup unit-test-body unit-test-cleanup
+check-ok-not unit-test:: unit-test-setup unit-test-body unit-test-cleanup
 
 unit-test-setup::
 	$(ENV_SETUP) $(START_SERVERS_LOCAL) -v4files -kdcport 750 -keysalt des-cbc-crc:v4

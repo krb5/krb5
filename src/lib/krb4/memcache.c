@@ -194,7 +194,7 @@ change_cache()
 		locked = FALSE;
 	}
 
-	SendMessage(HWND_BROADCAST, krb_get_notification_message(), 0, 0);
+	PostMessage(HWND_BROADCAST, krb_get_notification_message(), 0, 0);
 }
 
 

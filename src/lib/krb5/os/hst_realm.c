@@ -16,7 +16,10 @@
  * this permission notice appear in supporting documentation, and that
  * the name of M.I.T. not be used in advertising or publicity pertaining
  * to distribution of the software without specific, written prior
- * permission.  M.I.T. makes no representations about the suitability of
+ * permission.  Furthermore if you modify this software you must label
+ * your software as modified software and not distribute it in such a
+ * fashion that it might be confused with the original M.I.T. software.
+ * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
  * 
@@ -234,14 +237,26 @@ krb5_get_host_realm(context, host, realmsp)
     krb5_error_code retval;
     int l;
     char local_host[MAX_DNS_NAMELEN+1];
+    struct hostent *h;
+
 
     if (host)
-	strncpy(local_host, host, MAX_DNS_NAMELEN);
+	strncpy(local_host, host, sizeof(local_host));
     else {
-	if (gethostname(local_host, sizeof(local_host)-1) == -1)
+	if (gethostname(local_host, sizeof(local_host)) == -1)
 	    return SOCKET_ERRNO;
+	/*
+	 * Try to make sure that we have a fully qualified name if
+	 * possible.  We need to handle the case where the host has a
+	 * dot but is not FQDN, so we call gethostbyname.
+	 */
+	h = gethostbyname(local_host);
+	if (h) {
+	    strncpy(local_host, h->h_name, sizeof(local_host));
+	}
     }
-    local_host[MAX_DNS_NAMELEN] = '\0';
+    local_host[sizeof(local_host) - 1] = '\0';
+
     for (cp = local_host; *cp; cp++) {
 	if (isupper(*cp))
 	    *cp = tolower(*cp);

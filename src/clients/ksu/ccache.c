@@ -64,7 +64,7 @@ krb5_creds ** cc_def_creds_arr = NULL;
 krb5_creds ** cc_other_creds_arr = NULL;
 struct stat st_temp;
 
-    cc_other = (krb5_ccache *)  calloc(1, sizeof (krb5_ccache));  	
+    cc_other = (krb5_ccache *)  xcalloc(1, sizeof (krb5_ccache));  	
 
     if ((retval = krb5_cc_resolve(context, cc_other_tag, cc_other))){
                com_err (prog_name, retval, "resolving ccache %s",
@@ -381,6 +381,10 @@ krb5_get_login_princ(luser, princ_list)
     if ((pwd = getpwnam(luser)) == NULL) {
 	return 0;
     }
+    if (strlen(pwd->pw_dir) + sizeof("/.k5login") > MAXPATHLEN) {
+	fprintf (stderr, "home directory path for %s too long\n", luser);
+	exit (1);
+    }
     (void) strcpy(pbuf, pwd->pw_dir);
     (void) strcat(pbuf, "/.k5login");
 
@@ -655,7 +659,7 @@ krb5_creds ** cc_def_creds_arr = NULL;
 krb5_creds ** cc_other_creds_arr = NULL;
 struct stat st_temp;
 
-    cc_other = (krb5_ccache *)  calloc(1, sizeof (krb5_ccache));  	
+    cc_other = (krb5_ccache *)  xcalloc(1, sizeof (krb5_ccache));  	
 
     if ((retval = krb5_cc_resolve(context, cc_other_tag, cc_other))){
                com_err (prog_name, retval, "resolving ccache %s",
@@ -734,7 +738,7 @@ struct stat st_temp;
     if ( ! stat(cc_name, &st_temp)){
 
 	if (auth_debug) {  
-	      fprintf(stderr,"puting cache %s through a filter for -z option\n", 		      cc_name);
+	      fprintf(stderr,"putting cache %s through a filter for -z option\n", 		      cc_name);
 	}
 
 	if ((retval = krb5_get_nonexp_tkts(context, cc, &cc_creds_arr))){

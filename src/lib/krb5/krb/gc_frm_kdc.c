@@ -17,7 +17,10 @@
  * this permission notice appear in supporting documentation, and that
  * the name of M.I.T. not be used in advertising or publicity pertaining
  * to distribution of the software without specific, written prior
- * permission.  Neither M.I.T., the Open Computing Security Group, nor 
+ * permission.  Furthermore if you modify this software you must label
+ * your software as modified software and not distribute it in such a
+ * fashion that it might be confused with the original M.I.T. software.
+ * Neither M.I.T., the Open Computing Security Group, nor 
  * CyberSAFE Corporation make any representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
@@ -118,10 +121,10 @@ krb5_get_cred_from_kdc_opt(context, ccache, in_cred, out_cred, tgts, kdcopt)
   }
 
   if ((retval = krb5_cc_retrieve_cred(context, ccache,
-				      KRB5_TC_MATCH_SRV_NAMEONLY,
+				      KRB5_TC_MATCH_SRV_NAMEONLY | KRB5_TC_SUPPORTED_KTYPES,
 				      &tgtq, &tgt))) {
 
-    if (retval != KRB5_CC_NOTFOUND) {
+    if (retval != KRB5_CC_NOTFOUND && retval != KRB5_CC_NOT_KTYPE) {
 	goto cleanup;
     }
 
@@ -154,7 +157,7 @@ krb5_get_cred_from_kdc_opt(context, ccache, in_cred, out_cred, tgts, kdcopt)
 	goto cleanup;
 
     if ((retval = krb5_cc_retrieve_cred(context, ccache,
-					KRB5_TC_MATCH_SRV_NAMEONLY,
+					KRB5_TC_MATCH_SRV_NAMEONLY | KRB5_TC_SUPPORTED_KTYPES,
 					&tgtq, &tgt))) {
 	goto cleanup;
     }
@@ -217,10 +220,10 @@ krb5_get_cred_from_kdc_opt(context, ccache, in_cred, out_cred, tgts, kdcopt)
 	  goto cleanup;
 
       if ((retval = krb5_cc_retrieve_cred(context, ccache,
-					  KRB5_TC_MATCH_SRV_NAMEONLY,
+					  KRB5_TC_MATCH_SRV_NAMEONLY | KRB5_TC_SUPPORTED_KTYPES,
 					  &tgtq, &tgt))) {
     
-	if (retval != KRB5_CC_NOTFOUND) {
+	if (retval != KRB5_CC_NOTFOUND && retval != KRB5_CC_NOT_KTYPE) {
 	    goto cleanup;
 	}
   
@@ -280,7 +283,7 @@ krb5_get_cred_from_kdc_opt(context, ccache, in_cred, out_cred, tgts, kdcopt)
 		goto cleanup;
 
 	    if ((retval = krb5_cc_retrieve_cred(context, ccache,
-						KRB5_TC_MATCH_SRV_NAMEONLY,
+						KRB5_TC_MATCH_SRV_NAMEONLY | KRB5_TC_SUPPORTED_KTYPES,
 						&tgtq, &tgt))) {
 	      if (retval != KRB5_CC_NOTFOUND) {
 		  goto cleanup;

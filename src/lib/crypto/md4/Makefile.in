@@ -2,7 +2,7 @@ thisconfigdir=./..
 myfulldir=lib/crypto/md4
 mydir=md4
 BUILDTOP=$(REL)$(U)$(S)$(U)$(S)$(U)
-CFLAGS = $(CCOPTS) $(DEFS)  -I$(srcdir)
+LOCALINCLUDES = -I$(srcdir)
 
 ##DOS##BUILDTOP = ..\..\..
 ##DOS##PREFIXDIR=md4
@@ -32,13 +32,13 @@ t_mddriver.c: $(srcdir)/../md5/t_mddriver.c
 	$(CP) $(srcdir)/../md5/t_mddriver.c t_mddriver.c
 
 t_mddriver.o: t_mddriver.c
-	$(CC) -DMD=4 $(CFLAGS) -c  t_mddriver.c
+	$(CC) -DMD=4 $(ALL_CFLAGS) -c  t_mddriver.c
 
 t_mddriver: t_mddriver.o md4.o
-	$(CC) $(CFLAGS) -o t_mddriver t_mddriver.o md4.o
+	$(CC) $(ALL_CFLAGS) -o t_mddriver t_mddriver.o md4.o
 
 $(OUTPRE)t_mddriver.obj: t_mddriver.c
-	$(CC) -DMD=4 $(CFLAGS) -Fo$@ -c $**
+	$(CC) -DMD=4 $(ALL_CFLAGS) -Fo$@ -c $**
 
 $(OUTPRE)t_mddriver.exe: $(OUTPRE)t_mddriver.obj $(OUTPRE)md4.obj
 	link -out:$@ $**

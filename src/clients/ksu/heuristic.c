@@ -59,7 +59,7 @@ krb5_error_code get_all_princ_from_file (fp, plist)
 	fprinc = get_first_token (line, &lp);
 		
 	if (fprinc ){
-	    temp_list[count] = strdup(fprinc);
+	    temp_list[count] = xstrdup(fprinc);
 	    count ++;
 	}
 
@@ -451,7 +451,7 @@ krb5_error_code find_ticket (context, cc, client, server, found)
     if (retval= krb5_copy_principal(context,  server, &tgtq.server))
 	return retval ; 	
 
-    retval = krb5_cc_retrieve_cred(context, cc, KRB5_TC_MATCH_SRV_NAMEONLY,
+    retval = krb5_cc_retrieve_cred(context, cc, KRB5_TC_MATCH_SRV_NAMEONLY | KRB5_TC_SUPPORTED_KTYPES,
 				   &tgtq, &tgt);
 
     if (! retval) retval = krb5_check_exp(context, tgt.times);

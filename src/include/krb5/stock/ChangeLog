@@ -1,3 +1,7 @@
+1999-09-20  Ken Raeburn  <raeburn@mit.edu>
+
+	* osconf.h (KPASSWD_PORTNAME): Define.
+
 Tue Jan 20 23:19:53 1998  Tom Yu  <tlyu@mit.edu>
 
 	* osconf.h: Add DEFAULT_KPASSWD_PORT to support Cygnus chpw.

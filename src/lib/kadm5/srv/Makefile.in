@@ -2,7 +2,8 @@ thisconfigdir=./..
 myfulldir=lib/kadm5/srv
 mydir=srv
 BUILDTOP=$(REL)$(U)$(S)$(U)$(S)$(U)
-CFLAGS = $(CCOPTS) $(DEFS) -I$(BUILDTOP)/include/kadm5 @HESIOD_DEFS@
+LOCALINCLUDES = -I$(BUILDTOP)/include/kadm5
+DEFINES = @HESIOD_DEFS@
 
 ##DOSBUILDTOP = ..\..\..
 ##DOSLIBNAME = libkadm5srv.lib

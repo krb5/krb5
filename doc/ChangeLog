@@ -1,3 +1,45 @@
+1999-09-22  Tom Yu  <tlyu@mit.edu>
+
+	* copyright.texinfo: Update copyright again.
+
+1999-09-17  Tom Yu  <tlyu@mit.edu>
+
+	* copyright.texinfo: Update copyright notice somewhat.
+
+	* install.texinfo: Update info on upgrading a KDC for 1.1.
+
+1999-09-08  Ken Raeburn  <raeburn@mit.edu>
+
+	* install.texinfo (Mac OS X Configuration): Revised text from
+	Alexis, with more explanations of what's going on.
+
+1999-09-07  Ken Raeburn  <raeburn@mit.edu>
+
+	* definitions.texinfo: Update for 1.1 release.
+
+	* admin.texinfo (Adding or Modifying Principals): Mention des3
+	enctype for host keys.
+
+	* build.texinfo: Replace "krb5-1.0" with "krb5-@value{RELEASE}"
+	throughout.
+	(Shared Library Support): Cut supported-OS list down to Solaris
+	and Irix for now.
+
+	* install.texinfo: Update EDITION to 1.1.
+	(MacOS X Configuration): New node, with info from Brad Thompson.
+	(Encryption Types and Salt Types): Mention des3.
+
+1999-08-31  Ken Raeburn  <raeburn@mit.edu>
+
+	* admin.texinfo (Kadmin Options): Describe -e option.
+	(The User/Kerberos Interaction): Renamed from User--Kerberos to
+	avoid an apparent makeinfo 1.68 bug.
+	(realms (kdc.conf)): Document kdc_supported_enctypes, and mention
+	how des3 can be used there.  Add des-cbc-crc:v4 to both enctype
+	lists, in the descriptions and in the examples.  Delete
+	encryption_type, which doesn't exist.
+	(Date Format): Avoid 2-digit years, and add a warning about them.
+
 Fri Dec 13 15:10:44 1996  Tom Yu  <tlyu@mit.edu>
 
 	* admin.texinfo (The User--Kerberos Interaction): The environment

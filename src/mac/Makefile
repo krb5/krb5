@@ -20,16 +20,23 @@ library-kind-final						=
 ##############################################################################################################
 
 #	Everything
-all Ä glue all-debug all-final
+all Ä unset-echo all-debug all-final
 
 #	Debugging versions
-all-debug Ä ppc-debug 68k-debug headers
+all-debug Ä unset-echo ppc-debug 68k-debug
 
 #	Final versions
-all-final Ä ppc-final 68k-final headers
+all-final Ä unset-echo ppc-final 68k-final
 
 #	Clasic 68K glue
-glue Ä glue-gss glue-krb5
+glue Ä unset-echo glue-gss glue-krb5
+
+unset-echo Ä
+	If ({MacdevScriptDebug})
+		Set Echo 1
+	Else
+		Unset Echo
+	End
 
 ##############################################################################################################
 ###			More global constants
@@ -42,42 +49,49 @@ krb5-library-output-folder							= {root-folder}:Kerberos5Lib:Binaries:
 krb5-globals-library-output-folder					= {root-folder}:Kerberos5GlobalsLib:Binaries:
 krb5-globals-data-library-output-folder				= {krb5-globals-library-output-folder}
 profile-library-output-folder						= {root-folder}:KerberosProfileLib:Binaries:
+comerr-library-output-folder						= {root-folder}:ComErrLib:Binaries:
 
 gss-library-name									= GSSLib
 krb5-library-name									= Kerberos5Lib
 krb5-globals-library-name							= Krb5GlobalsLib
 krb5-globals-data-library-name						= Krb5GlobalsDataLib
 profile-library-name								= KrbProfileLib
+comerr-library-name									= ComErrLib
 
 gss-library-export									= {root-folder}mac:GSSLibrary.exp
 krb5-library-export									= {root-folder}mac:K5Library.exp
 krb5-globals-library-export							= {krb5-globals-root-folder}Krb5Globals.exp
 krb5-globals-data-library-export					= {krb5-globals-root-folder}Krb5GlobalsData.exp
 profile-library-export								= {root-folder}util:profile:profile.exp
+comerr-library-export								= {root-folder}util:et:et.exp
 
 gss-library-fragment-name							= "GSSLibrary"
 krb5-library-fragment-name							= "MIT Kerberos¥Kerberos5Lib"
 krb5-globals-library-fragment-name					= "MIT Kerberos¥Kerberos5GlobalsLib"
 krb5-globals-data-library-fragment-name				= "MIT Kerberos¥Kerberos5GlobalsDataLib"
 profile-library-fragment-name						= "MIT Kerberos¥KerberosProfileLib"
+comerr-library-fragment-name						= "MIT Kerberos¥ComErrLib"
 
 gss-library-main									= ¶"¶"
 krb5-library-main									= ¶"¶"
 krb5-globals-library-main							= ¶"¶"
 krb5-globals-data-library-main						= ¶"¶"
 profile-library-main								= ¶"¶"
+comerr-library-main									= ¶"¶"
 
 gss-library-init									= __initializeGSS
 krb5-library-init									= __initializeK5
 krb5-globals-library-init							= __initialize_Kerberos5GlobalsLib
 krb5-globals-data-library-init						= __initialize
 profile-library-init								= InitializeProfileLib
+comerr-library-init									= __initialize
 	
 gss-library-term 									= __terminateGSS
 krb5-library-term									= __terminateK5
 krb5-globals-library-term							= __terminate_Kerberos5GlobalsLib
 krb5-globals-data-library-term						= __terminate
 profile-library-term								= TerminateProfileLib
+comerr-library-term									= __terminate
 
 gss-library-current-version							= 1
 gss-library-definition-version						= 0
@@ -99,14 +113,18 @@ profile-library-current-version						= 0
 profile-library-definition-version					= 0
 profile-library-implementation-version				= 0
 
+comerr-library-current-version						= 0
+comerr-library-definition-version					= 0
+comerr-library-implementation-version				= 0
+
 ##############################################################################################################
 ###			Generation of file lists
 ##############################################################################################################
 
+list-generation-script-working-folder = "{root-folder}mac:"
 list-generation-script-folder = "{root-folder}mac:"
 list-generation-script = "{list-generation-script-folder}macfile_gen.pl"
 list-generation-script-root = ".."
-list-generation-script-prefix = "{root-folder}"
 
 all-files-list									= {root-folder}"All files.list"
 all-sources-list								= {root-folder}"All sources.list"
@@ -132,6 +150,11 @@ profile-objects-68k-debug-list					= {root-folder}"Profile objects 68K debug.lis
 profile-objects-ppc-final-list					= {root-folder}"Profile objects PPC final.list"
 profile-objects-68k-final-list					= {root-folder}"Profile objects 68K final.list"
 
+comerr-objects-ppc-debug-list					= {root-folder}"ComErr objects PPC debug.list"
+comerr-objects-68k-debug-list					= {root-folder}"ComErr objects 68K debug.list"
+comerr-objects-ppc-final-list					= {root-folder}"ComErr objects PPC final.list"
+comerr-objects-68k-final-list					= {root-folder}"ComErr objects 68K final.list"
+
 all-lists = ¶
 	{all-files-list} ¶
 	{all-sources-list} ¶
@@ -150,7 +173,11 @@ all-lists = ¶
 	{profile-objects-ppc-debug-list} ¶
 	{profile-objects-68k-debug-list} ¶
 	{profile-objects-ppc-final-list} ¶
-	{profile-objects-68k-final-list}
+	{profile-objects-68k-final-list} ¶
+	{comerr-objects-ppc-debug-list} ¶
+	{comerr-objects-68k-debug-list} ¶
+	{comerr-objects-ppc-final-list} ¶
+	{comerr-objects-68k-final-list}
 
 file-lists Ä {all-lists}
 
@@ -159,75 +186,91 @@ file-lists Ä {all-lists}
 # path to root Makefile.in. This is why we run it with -x to specify the root.
 
 {all-files-list} Ä {list-generation-script} {makefile-name}
-	perl -x"{list-generation-script-folder}" {list-generation-script} all-files {list-generation-script-root} {list-generation-script-prefix} ¶
+	perl -x"{list-generation-script-working-folder}" {list-generation-script} all-files {list-generation-script-root} ¶
  > {Targ}
 
 {all-sources-list} Ä {all-files-list} {list-generation-script} {makefile-name}
-	perl -x"{list-generation-script-folder}" {list-generation-script} all-sources {list-generation-script-root} {list-generation-script-prefix} ¶
+	perl -x"{list-generation-script-working-folder}" {list-generation-script} all-sources {list-generation-script-root} ¶
  < {all-files-list} > {Targ}
 
 {all-folders-list} Ä {all-files-list} {list-generation-script} {makefile-name}
-	perl -x"{list-generation-script-folder}" {list-generation-script} all-folders {list-generation-script-root} {list-generation-script-prefix} ¶
+	perl -x"{list-generation-script-working-folder}" {list-generation-script} all-folders {list-generation-script-root} ¶
  < {all-files-list} > {Targ}
 
 {include-folders-list} Ä {all-files-list} {list-generation-script} {makefile-name}
-	perl -x"{list-generation-script-folder}" {list-generation-script} include-folders {list-generation-script-root} {list-generation-script-prefix} ¶
+	perl -x"{list-generation-script-working-folder}" {list-generation-script} include-folders {list-generation-script-root} ¶
  < {all-files-list} > {Targ}
 
 {gss-sources-list} Ä {all-files-list} {list-generation-script} {makefile-name}
-	perl -x"{list-generation-script-folder}" {list-generation-script} gss-sources {list-generation-script-root} {list-generation-script-prefix} ¶
+	perl -x"{list-generation-script-working-folder}" {list-generation-script} gss-sources {list-generation-script-root} ¶
  < {all-files-list} > {Targ}
 
 {krb5-sources-list} Ä {all-files-list} {list-generation-script} {makefile-name}
-	perl -x"{list-generation-script-folder}" {list-generation-script} krb5-sources {list-generation-script-root} {list-generation-script-prefix} ¶
+	perl -x"{list-generation-script-working-folder}" {list-generation-script} krb5-sources {list-generation-script-root} ¶
  < {all-files-list} > {Targ}
 
 {gss-objects-ppc-debug-list} Ä {all-files-list} {list-generation-script} {makefile-name}
-	perl -x"{list-generation-script-folder}" {list-generation-script} gss-objects-ppc-debug {list-generation-script-root} {list-generation-script-prefix} ¶
+	perl -x"{list-generation-script-working-folder}" {list-generation-script} gss-objects-ppc-debug {list-generation-script-root} ¶
  < {all-files-list} > {Targ}
 
 {gss-objects-68k-debug-list} Ä {all-files-list} {list-generation-script} {makefile-name}
-	perl -x"{list-generation-script-folder}" {list-generation-script} gss-objects-68k-debug {list-generation-script-root} {list-generation-script-prefix} ¶
+	perl -x"{list-generation-script-working-folder}" {list-generation-script} gss-objects-68k-debug {list-generation-script-root} ¶
  < {all-files-list} > {Targ}
 
 {gss-objects-ppc-final-list} Ä {all-files-list} {list-generation-script} {makefile-name}
-	perl -x"{list-generation-script-folder}" {list-generation-script} gss-objects-ppc-final {list-generation-script-root} {list-generation-script-prefix} ¶
+	perl -x"{list-generation-script-working-folder}" {list-generation-script} gss-objects-ppc-final {list-generation-script-root} ¶
  < {all-files-list} > {Targ}
 
 {gss-objects-68k-final-list} Ä {all-files-list} {list-generation-script} {makefile-name}
-	perl -x"{list-generation-script-folder}" {list-generation-script} gss-objects-68k-final {list-generation-script-root} {list-generation-script-prefix} ¶
+	perl -x"{list-generation-script-working-folder}" {list-generation-script} gss-objects-68k-final {list-generation-script-root} ¶
  < {all-files-list} > {Targ}
 
 {krb5-objects-ppc-debug-list} Ä {all-files-list} {list-generation-script} {makefile-name}
-	perl -x"{list-generation-script-folder}" {list-generation-script} krb5-objects-ppc-debug {list-generation-script-root} {list-generation-script-prefix} ¶
+	perl -x"{list-generation-script-working-folder}" {list-generation-script} krb5-objects-ppc-debug {list-generation-script-root} ¶
  < {all-files-list} > {Targ}
 
 {krb5-objects-68k-debug-list} Ä {all-files-list} {list-generation-script} {makefile-name}
-	perl -x"{list-generation-script-folder}" {list-generation-script} krb5-objects-68k-debug {list-generation-script-root} {list-generation-script-prefix} ¶
+	perl -x"{list-generation-script-working-folder}" {list-generation-script} krb5-objects-68k-debug {list-generation-script-root} ¶
  < {all-files-list} > {Targ}
 
 {krb5-objects-ppc-final-list} Ä {all-files-list} {list-generation-script} {makefile-name}
-	perl -x"{list-generation-script-folder}" {list-generation-script} krb5-objects-ppc-final {list-generation-script-root} {list-generation-script-prefix} ¶
+	perl -x"{list-generation-script-working-folder}" {list-generation-script} krb5-objects-ppc-final {list-generation-script-root} ¶
  < {all-files-list} > {Targ}
 
 {krb5-objects-68k-final-list} Ä {all-files-list} {list-generation-script} {makefile-name}
-	perl -x"{list-generation-script-folder}" {list-generation-script} krb5-objects-68k-final {list-generation-script-root} {list-generation-script-prefix} ¶
+	perl -x"{list-generation-script-working-folder}" {list-generation-script} krb5-objects-68k-final {list-generation-script-root} ¶
  < {all-files-list} > {Targ}
 
 {profile-objects-ppc-debug-list} Ä {all-files-list} {list-generation-script} {makefile-name}
-	perl -x"{list-generation-script-folder}" {list-generation-script} profile-objects-ppc-debug {list-generation-script-root} {list-generation-script-prefix} ¶
+	perl -x"{list-generation-script-working-folder}" {list-generation-script} profile-objects-ppc-debug {list-generation-script-root} ¶
  < {all-files-list} > {Targ}
 
 {profile-objects-68k-debug-list} Ä {all-files-list} {list-generation-script} {makefile-name}
-	perl -x"{list-generation-script-folder}" {list-generation-script} profile-objects-68k-debug {list-generation-script-root} {list-generation-script-prefix} ¶
+	perl -x"{list-generation-script-working-folder}" {list-generation-script} profile-objects-68k-debug {list-generation-script-root} ¶
  < {all-files-list} > {Targ}
 
 {profile-objects-ppc-final-list} Ä {all-files-list} {list-generation-script} {makefile-name}
-	perl -x"{list-generation-script-folder}" {list-generation-script} profile-objects-ppc-final {list-generation-script-root} {list-generation-script-prefix} ¶
+	perl -x"{list-generation-script-working-folder}" {list-generation-script} profile-objects-ppc-final {list-generation-script-root} ¶
  < {all-files-list} > {Targ}
 
 {profile-objects-68k-final-list} Ä {all-files-list} {list-generation-script} {makefile-name}
-	perl -x"{list-generation-script-folder}" {list-generation-script} profile-objects-68k-final {list-generation-script-root} {list-generation-script-prefix} ¶
+	perl -x"{list-generation-script-working-folder}" {list-generation-script} profile-objects-68k-final {list-generation-script-root} ¶
+ < {all-files-list} > {Targ}
+
+{comerr-objects-ppc-debug-list} Ä {all-files-list} {list-generation-script} {makefile-name}
+	perl -x"{list-generation-script-working-folder}" {list-generation-script} comerr-objects-ppc-debug {list-generation-script-root} ¶
+ < {all-files-list} > {Targ}
+
+{comerr-objects-68k-debug-list} Ä {all-files-list} {list-generation-script} {makefile-name}
+	perl -x"{list-generation-script-working-folder}" {list-generation-script} comerr-objects-68k-debug {list-generation-script-root} ¶
+ < {all-files-list} > {Targ}
+
+{comerr-objects-ppc-final-list} Ä {all-files-list} {list-generation-script} {makefile-name}
+	perl -x"{list-generation-script-working-folder}" {list-generation-script} comerr-objects-ppc-final {list-generation-script-root} ¶
+ < {all-files-list} > {Targ}
+
+{comerr-objects-68k-final-list} Ä {all-files-list} {list-generation-script} {makefile-name}
+	perl -x"{list-generation-script-working-folder}" {list-generation-script} comerr-objects-68k-final {list-generation-script-root} ¶
  < {all-files-list} > {Targ}
 
 ##############################################################################################################
@@ -324,19 +367,19 @@ autogenerated-files = ¶
 	Catenate {root-folder}util:profile:profile.hin {root-folder}util:profile:prof_err.h > {root-folder}util:profile:profile.h
 	
 {root-folder}include:profile.h Ä {root-folder}util:profile:profile.h
-	Duplicate -y {root-folder}util:profile:profile.h {root-folder}include:profile.h
+	Catenate {root-folder}util:profile:profile.h > {root-folder}include:profile.h
 	SetFile -a l "{Targ}"
 
 {root-folder}include:krb5:osconf.h Ä {root-folder}include:krb5:stock:osconf.h
-	Duplicate -y {root-folder}include:krb5:stock:osconf.h {root-folder}include:krb5:osconf.h
+	Catenate {root-folder}include:krb5:stock:osconf.h > {root-folder}include:krb5:osconf.h
 	SetFile -a l "{Targ}"
 
 {root-folder}lib:gssapi:generic:gssapi.h Ä {root-folder}lib:gssapi:generic:gssapi.hin
-	Duplicate -y {root-folder}lib:gssapi:generic:gssapi.hin {root-folder}lib:gssapi:generic:gssapi.h
+	Catenate {root-folder}lib:gssapi:generic:gssapi.hin > {root-folder}lib:gssapi:generic:gssapi.h
 	SetFile -a l "{Targ}"
 	
 {root-folder}include:autoconf.h Ä {root-folder}mac:libraries:autoconf.h
-	Duplicate -y {root-folder}mac:libraries:autoconf.h {root-folder}include:autoconf.h
+	Catenate {root-folder}mac:libraries:autoconf.h > {root-folder}include:autoconf.h
 	SetFile -a l "{Targ}"
 
 ##############################################################################################################
@@ -377,16 +420,27 @@ autogenerated-files = ¶
 ###			krb5-globals-library-term						-- name of Krb5 globals library termination routine
 ###			krb5-globals-library-linker-options				-- all other Krb5 globals library linker options
 ###		For profile library
-###			profile-library-output-folder					-- destination of Krb5 globals library output
-###			profile-library-name							-- name of the Krb5 globals library
-###			profile-library-export							-- name of gss Krb5 globals library export file
-###			profile-library-libraries						-- list of libraries Krb5 globals library links against
-###			profile-library-objects							-- list of object files Krb5 globals library links
-###			profile-library-fragment-name					-- name of Krb5 globals library fragment
-###			profile-library-main							-- name of Krb5 globals library main entry point
-###			profile-library-init							-- name of Krb5 globals library initialization routine
-###			profile-library-term							-- name of Krb5 globals library termination routine
-###			profile-library-linker-options					-- all other Krb5 globals library linker options
+###			profile-library-output-folder					-- destination of profile library output
+###			profile-library-name							-- name of the profile library
+###			profile-library-export							-- name of gss profile library export file
+###			profile-library-libraries						-- list of libraries profile library links against
+###			profile-library-objects							-- list of object files profile library links
+###			profile-library-fragment-name					-- name of profile library fragment
+###			profile-library-main							-- name of profile library main entry point
+###			profile-library-init							-- name of profile library initialization routine
+###			profile-library-term							-- name of profile library termination routine
+###			profile-library-linker-options					-- all other profile library linker options
+###		For comerr library
+###			comerr-library-output-folder					-- destination of comerr library output
+###			comerr-library-name								-- name of the comerr library
+###			comerr-library-export							-- name of gss comerr library export file
+###			comerr-library-libraries						-- list of libraries comerr library links against
+###			comerr-library-objects							-- list of object files comerr library links
+###			comerr-library-fragment-name					-- name of comerr library fragment
+###			comerr-library-main								-- name of comerr library main entry point
+###			comerr-library-init								-- name of comerr library initialization routine
+###			comerr-library-term								-- name of comerr library termination routine
+###			comerr-library-linker-options					-- all other comerr library linker options
 ###		General
 ###			library-linker									-- linker to use
 ###			autogenerated-files								-- list of autogenerated files
@@ -458,19 +512,23 @@ object-suffix-68k-data					= .68k.o
 gss-library-libraries-ppc-debug = ¶
 	{standard-libraries-ppc-debug} ¶
 	{krb5-library-output-folder}{krb5-library-name}{library-platform-ppc}{library-kind-debug} ¶
-	{profile-library-output-folder}{profile-library-name}{library-platform-ppc}{library-kind-debug}
+	{profile-library-output-folder}{profile-library-name}{library-platform-ppc}{library-kind-debug} ¶
+	{comerr-library-output-folder}{comerr-library-name}{library-platform-ppc}{library-kind-debug}
 gss-library-libraries-68k-debug = ¶
 	{standard-libraries-68k-debug} ¶
 	{krb5-library-output-folder}{krb5-library-name}{library-platform-68k}{library-kind-debug} ¶
-	{profile-library-output-folder}{profile-library-name}{library-platform-68k}{library-kind-debug}
+	{profile-library-output-folder}{profile-library-name}{library-platform-68k}{library-kind-debug} ¶
+	{comerr-library-output-folder}{comerr-library-name}{library-platform-68k}{library-kind-debug}
 gss-library-libraries-ppc-final = ¶
 	{standard-libraries-ppc-final} ¶
 	{krb5-library-output-folder}{krb5-library-name}{library-platform-ppc}{library-kind-final} ¶
-	{profile-library-output-folder}{profile-library-name}{library-platform-ppc}{library-kind-final}
+	{profile-library-output-folder}{profile-library-name}{library-platform-ppc}{library-kind-final} ¶
+	{comerr-library-output-folder}{comerr-library-name}{library-platform-ppc}{library-kind-final}
 gss-library-libraries-68k-final = ¶
 	{standard-libraries-68k-final} ¶
 	{krb5-library-output-folder}{krb5-library-name}{library-platform-68k}{library-kind-final} ¶
-	{profile-library-output-folder}{profile-library-name}{library-platform-68k}{library-kind-final}
+	{profile-library-output-folder}{profile-library-name}{library-platform-68k}{library-kind-final} ¶
+	{comerr-library-output-folder}{comerr-library-name}{library-platform-68k}{library-kind-final}
 
 krb5-library-libraries-ppc-debug = ¶
 	{standard-libraries-ppc-debug} ¶
@@ -479,6 +537,7 @@ krb5-library-libraries-ppc-debug = ¶
 	{errorlib-ppc-debug} ¶
 	{krb5-globals-library-output-folder}{krb5-globals-library-name}{library-platform-ppc}{library-kind-debug} ¶
 	{profile-library-output-folder}{profile-library-name}{library-platform-ppc}{library-kind-debug} ¶
+	{comerr-library-output-folder}{comerr-library-name}{library-platform-ppc}{library-kind-debug} ¶
 	¶"{PPCLibraries}PPCMath64Lib.o¶" ¶
 	¶"{SharedLibraries}DriverServicesLib¶"
 krb5-library-libraries-68k-debug = ¶
@@ -487,7 +546,8 @@ krb5-library-libraries-68k-debug = ¶
 	{socketslib-68k-debug} ¶
 	{errorlib-68k-debug} ¶
 	{krb5-globals-library-output-folder}{krb5-globals-library-name}{library-platform-68k}{library-kind-debug} ¶
-	{profile-library-output-folder}{profile-library-name}{library-platform-68k}{library-kind-debug}
+	{profile-library-output-folder}{profile-library-name}{library-platform-68k}{library-kind-debug} ¶
+	{comerr-library-output-folder}{comerr-library-name}{library-platform-68k}{library-kind-debug}
 krb5-library-libraries-ppc-final = ¶
 	{standard-libraries-ppc-final} ¶
 	{ccachelib-ppc-final} ¶
@@ -495,6 +555,7 @@ krb5-library-libraries-ppc-final = ¶
 	{errorlib-ppc-final} ¶
 	{krb5-globals-library-output-folder}{krb5-globals-library-name}{library-platform-ppc}{library-kind-final} ¶
 	{profile-library-output-folder}{profile-library-name}{library-platform-ppc}{library-kind-final} ¶
+	{comerr-library-output-folder}{comerr-library-name}{library-platform-ppc}{library-kind-final} ¶
 	¶"{PPCLibraries}PPCMath64Lib.o¶" ¶
 	¶"{SharedLibraries}DriverServicesLib¶"
 krb5-library-libraries-68k-final = ¶
@@ -503,7 +564,8 @@ krb5-library-libraries-68k-final = ¶
 	{socketslib-68k-final} ¶
 	{errorlib-68k-final} ¶
 	{krb5-globals-library-output-folder}{krb5-globals-library-name}{library-platform-68k}{library-kind-final} ¶
-	{profile-library-output-folder}{profile-library-name}{library-platform-68k}{library-kind-final}
+	{profile-library-output-folder}{profile-library-name}{library-platform-68k}{library-kind-final} ¶
+	{comerr-library-output-folder}{comerr-library-name}{library-platform-68k}{library-kind-final}
 
 krb5-globals-library-libraries-ppc-debug = ¶
 	{standard-libraries-ppc-debug} ¶
@@ -526,12 +588,25 @@ krb5-globals-data-library-libraries-ppc = ¶"{MWPPCLibraries}MSL RuntimePPC.Lib¶"
 krb5-globals-data-library-libraries-68k = ¶"{MW68KLibraries}MSL MWCFM68KRuntime.Lib¶"
 
 profile-library-libraries-ppc-debug = ¶
-	{standard-libraries-ppc-debug}
+	{standard-libraries-ppc-debug} ¶
+	{comerr-library-output-folder}{comerr-library-name}{library-platform-ppc}{library-kind-debug}
 profile-library-libraries-68k-debug = ¶
-	{standard-libraries-68k-debug}
+	{standard-libraries-68k-debug} ¶
+	{comerr-library-output-folder}{comerr-library-name}{library-platform-68k}{library-kind-debug}
 profile-library-libraries-ppc-final = ¶
-	{standard-libraries-ppc-final}
+	{standard-libraries-ppc-final} ¶
+	{comerr-library-output-folder}{comerr-library-name}{library-platform-ppc}{library-kind-final}
 profile-library-libraries-68k-final = ¶
+	{standard-libraries-68k-final} ¶
+	{comerr-library-output-folder}{comerr-library-name}{library-platform-68k}{library-kind-final}
+
+comerr-library-libraries-ppc-debug = ¶
+	{standard-libraries-ppc-debug}
+comerr-library-libraries-68k-debug = ¶
+	{standard-libraries-68k-debug}
+comerr-library-libraries-ppc-final = ¶
+	{standard-libraries-ppc-final}
+comerr-library-libraries-68k-final = ¶
 	{standard-libraries-68k-final}
 
 ### Construct linker options. 
@@ -555,9 +630,9 @@ krb5-library-common-linker-options = ¶
 	-dv {krb5-library-definition-version} ¶
 	-uv {krb5-library-implementation-version}
 
-krb5-library-linker-options-ppc-debug = {common-linker-options-debug} {krb5-library-common-linker-options}
+krb5-library-linker-options-ppc-debug = {common-linker-options-debug} {krb5-library-common-linker-options} -weaklib "DriverServicesLib"
 krb5-library-linker-options-68k-debug = {common-linker-options-debug} {krb5-library-common-linker-options}
-krb5-library-linker-options-ppc-final = {common-linker-options-final} {krb5-library-common-linker-options}
+krb5-library-linker-options-ppc-final = {common-linker-options-final} {krb5-library-common-linker-options} -weaklib "DriverServicesLib"
 krb5-library-linker-options-68k-final = {common-linker-options-final} {krb5-library-common-linker-options}
 
 krb5-globals-library-common-linker-options = ¶
@@ -589,15 +664,33 @@ profile-library-linker-options-68k-debug = {common-linker-options-debug} {profil
 profile-library-linker-options-ppc-final = {common-linker-options-final} {profile-library-common-linker-options}
 profile-library-linker-options-68k-final = {common-linker-options-final} {profile-library-common-linker-options}
 
-gss-library-objects-ppc-debug = `catenate {gss-objects-ppc-debug-list}` {root-folder}mac:GSS.CFM{object-suffix-ppc-debug}
-gss-library-objects-68k-debug = `catenate {gss-objects-68k-debug-list}` {root-folder}mac:GSS.CFM{object-suffix-68k-debug}
-gss-library-objects-ppc-final = `catenate {gss-objects-ppc-final-list}` {root-folder}mac:GSS.CFM{object-suffix-ppc-final}
-gss-library-objects-68k-final = `catenate {gss-objects-68k-final-list}` {root-folder}mac:GSS.CFM{object-suffix-68k-final}
+comerr-library-common-linker-options = ¶
+	-cv {comerr-library-current-version} ¶
+	-dv {comerr-library-definition-version} ¶
+	-uv {comerr-library-implementation-version}
 
-krb5-library-objects-ppc-debug = `catenate {krb5-objects-ppc-debug-list}` {root-folder}mac:K5.CFM{object-suffix-ppc-debug}
-krb5-library-objects-68k-debug = `catenate {krb5-objects-68k-debug-list}` {root-folder}mac:K5.CFM{object-suffix-68k-debug}
-krb5-library-objects-ppc-final = `catenate {krb5-objects-ppc-final-list}` {root-folder}mac:K5.CFM{object-suffix-ppc-final}
-krb5-library-objects-68k-final = `catenate {krb5-objects-68k-final-list}` {root-folder}mac:K5.CFM{object-suffix-68k-final}
+comerr-library-linker-options-ppc-debug = {common-linker-options-debug} {comerr-library-common-linker-options}
+comerr-library-linker-options-68k-debug = {common-linker-options-debug} {comerr-library-common-linker-options}
+comerr-library-linker-options-ppc-final = {common-linker-options-final} {comerr-library-common-linker-options}
+comerr-library-linker-options-68k-final = {common-linker-options-final} {comerr-library-common-linker-options}
+
+gss-library-objects-ppc-debug = `catenate {gss-objects-ppc-debug-list} | StreamEdit -d -set prefix="{root-folder}" -e "/¥:(Å)¨2/ Print prefix¨2"` ¶
+	{root-folder}mac:GSS.CFM{object-suffix-ppc-debug}
+gss-library-objects-68k-debug = `catenate {gss-objects-68k-debug-list} | StreamEdit -d -set prefix="{root-folder}" -e "/¥:(Å)¨2/ Print prefix¨2"` ¶
+	{root-folder}mac:GSS.CFM{object-suffix-68k-debug}
+gss-library-objects-ppc-final = `catenate {gss-objects-ppc-final-list} | StreamEdit -d -set prefix="{root-folder}" -e "/¥:(Å)¨2/ Print prefix¨2"` ¶
+	{root-folder}mac:GSS.CFM{object-suffix-ppc-final}
+gss-library-objects-68k-final = `catenate {gss-objects-68k-final-list} | StreamEdit -d -set prefix="{root-folder}" -e "/¥:(Å)¨2/ Print prefix¨2"` ¶
+	{root-folder}mac:GSS.CFM{object-suffix-68k-final}
+
+krb5-library-objects-ppc-debug = `catenate {krb5-objects-ppc-debug-list} | StreamEdit -d -set prefix="{root-folder}" -e "/¥:(Å)¨2/ Print prefix¨2"` ¶
+	{root-folder}mac:K5.CFM{object-suffix-ppc-debug}
+krb5-library-objects-68k-debug = `catenate {krb5-objects-68k-debug-list} | StreamEdit -d -set prefix="{root-folder}" -e "/¥:(Å)¨2/ Print prefix¨2"` ¶
+	{root-folder}mac:K5.CFM{object-suffix-68k-debug}
+krb5-library-objects-ppc-final = `catenate {krb5-objects-ppc-final-list} | StreamEdit -d -set prefix="{root-folder}" -e "/¥:(Å)¨2/ Print prefix¨2"` ¶
+	{root-folder}mac:K5.CFM{object-suffix-ppc-final}
+krb5-library-objects-68k-final = `catenate {krb5-objects-68k-final-list} | StreamEdit -d -set prefix="{root-folder}" -e "/¥:(Å)¨2/ Print prefix¨2"` ¶
+	{root-folder}mac:K5.CFM{object-suffix-68k-final}
 
 krb5-globals-library-objects-ppc-debug = ¶
 	{krb5-globals-root-folder}Krb5Globals{object-suffix-ppc-debug} ¶
@@ -615,10 +708,19 @@ krb5-globals-library-objects-68k-final = ¶
 krb5-globals-data-library-objects-ppc = {krb5-globals-root-folder}Krb5GlobalsData{object-suffix-ppc-data}
 krb5-globals-data-library-objects-68k = {krb5-globals-root-folder}Krb5GlobalsData{object-suffix-68k-data}
 
-profile-library-objects-ppc-debug = `catenate {profile-objects-ppc-debug-list}` {root-folder}mac:ProfileLib.CFM{object-suffix-ppc-debug}
-profile-library-objects-68k-debug = `catenate {profile-objects-68k-debug-list}` {root-folder}mac:ProfileLib.CFM{object-suffix-68k-debug}
-profile-library-objects-ppc-final = `catenate {profile-objects-ppc-final-list}` {root-folder}mac:ProfileLib.CFM{object-suffix-ppc-final}
-profile-library-objects-68k-final = `catenate {profile-objects-68k-final-list}` {root-folder}mac:ProfileLib.CFM{object-suffix-68k-final}
+profile-library-objects-ppc-debug = `catenate {profile-objects-ppc-debug-list} | StreamEdit -d -set prefix="{root-folder}" -e "/¥:(Å)¨2/ Print prefix¨2"` ¶
+	{root-folder}mac:ProfileLib.CFM{object-suffix-ppc-debug}
+profile-library-objects-68k-debug = `catenate {profile-objects-68k-debug-list} | StreamEdit -d -set prefix="{root-folder}" -e "/¥:(Å)¨2/ Print prefix¨2"` ¶
+	{root-folder}mac:ProfileLib.CFM{object-suffix-68k-debug}
+profile-library-objects-ppc-final = `catenate {profile-objects-ppc-final-list} | StreamEdit -d -set prefix="{root-folder}" -e "/¥:(Å)¨2/ Print prefix¨2"` ¶
+	{root-folder}mac:ProfileLib.CFM{object-suffix-ppc-final}
+profile-library-objects-68k-final = `catenate {profile-objects-68k-final-list} | StreamEdit -d -set prefix="{root-folder}" -e "/¥:(Å)¨2/ Print prefix¨2"` ¶
+	{root-folder}mac:ProfileLib.CFM{object-suffix-68k-final}
+
+comerr-library-objects-ppc-debug = `catenate {comerr-objects-ppc-debug-list} | StreamEdit -d -set prefix="{root-folder}" -e "/¥:(Å)¨2/ Print prefix¨2"`
+comerr-library-objects-68k-debug = `catenate {comerr-objects-68k-debug-list} | StreamEdit -d -set prefix="{root-folder}" -e "/¥:(Å)¨2/ Print prefix¨2"`
+comerr-library-objects-ppc-final = `catenate {comerr-objects-ppc-final-list} | StreamEdit -d -set prefix="{root-folder}" -e "/¥:(Å)¨2/ Print prefix¨2"`
+comerr-library-objects-68k-final = `catenate {comerr-objects-68k-final-list} | StreamEdit -d -set prefix="{root-folder}" -e "/¥:(Å)¨2/ Print prefix¨2"`
 
 library-linker-ppc						= MWLinkPPC
 library-linker-68K						= MWLink68K
@@ -632,7 +734,7 @@ common-compiler-options = ¶
 		-model farData
 
 # Don't put the prefix file in these options because they are used to precompile the prefix file
-ppc-compiler-options = 
+ppc-compiler-options = -tb on
 68k-compiler-options = -model cfmflat 
 debug-compiler-options = -sym on
 final-compiler-options = -sym off
@@ -642,7 +744,7 @@ mitsupportlib-include-paths = ¶
 	-i {mitsupportlib-root-folder}ErrorLib:Headers: ¶
 	-i {mitsupportlib-root-folder}UtilitiesLib:Headers:
 
-include-paths = `catenate {include-folders-list}` ¶
+include-paths = `catenate {include-folders-list} | StreamEdit -d -set prefix="{root-folder}mac:" -e "/-i (Å)¨1/ Print '-i 'prefix¨1"` ¶
 	-i {mitkerberoslib-root-folder}CCacheLib:Headers: ¶
 	-i {krb5-globals-root-folder} ¶
 	{mitsupportlib-include-paths}
@@ -714,7 +816,14 @@ make-options-common = ¶
 	-d profile-library-fragment-name={profile-library-fragment-name} ¶
 	-d profile-library-main="{profile-library-main}" ¶
 	-d profile-library-init="{profile-library-init}" ¶
-	-d profile-library-term="{profile-library-term}"
+	-d profile-library-term="{profile-library-term}" ¶
+	-d comerr-library-output-folder="{comerr-library-output-folder}" ¶
+	-d comerr-library-name="{comerr-library-name}" ¶
+	-d comerr-library-export="{comerr-library-export}" ¶
+	-d comerr-library-fragment-name={comerr-library-fragment-name} ¶
+	-d comerr-library-main="{comerr-library-main}" ¶
+	-d comerr-library-init="{comerr-library-init}" ¶
+	-d comerr-library-term="{comerr-library-term}"
 
 make-options-ppc-debug = ¶
 	-d library-linker="{library-linker-ppc}" ¶
@@ -735,6 +844,9 @@ make-options-ppc-debug = ¶
 	-d profile-library-libraries="{profile-library-libraries-ppc-debug}" ¶
 	-d profile-library-objects="{profile-library-objects-ppc-debug}" ¶
 	-d profile-library-linker-options="{profile-library-linker-options-ppc-debug}" ¶
+	-d comerr-library-libraries="{comerr-library-libraries-ppc-debug}" ¶
+	-d comerr-library-objects="{comerr-library-objects-ppc-debug}" ¶
+	-d comerr-library-linker-options="{comerr-library-linker-options-ppc-debug}" ¶
 	-d object-suffix="{object-suffix-ppc-debug}" ¶
 	-d object-suffix-data="{object-suffix-ppc-data}" ¶
 	-d compiler-options="{compiler-options-ppc-debug}" ¶
@@ -760,6 +872,9 @@ make-options-68k-debug = ¶
 	-d profile-library-libraries="{profile-library-libraries-68k-debug}" ¶
 	-d profile-library-objects="{profile-library-objects-68k-debug}" ¶
 	-d profile-library-linker-options="{profile-library-linker-options-68k-debug}" ¶
+	-d comerr-library-libraries="{comerr-library-libraries-68k-debug}" ¶
+	-d comerr-library-objects="{comerr-library-objects-68k-debug}" ¶
+	-d comerr-library-linker-options="{comerr-library-linker-options-68k-debug}" ¶
 	-d object-suffix="{object-suffix-68k-debug}" ¶
 	-d object-suffix-data="{object-suffix-68k-data}" ¶
 	-d compiler-options="{compiler-options-68k-debug}" ¶
@@ -786,6 +901,9 @@ make-options-ppc-final = ¶
 	-d profile-library-libraries="{profile-library-libraries-ppc-final}" ¶
 	-d profile-library-objects="{profile-library-objects-ppc-final}" ¶
 	-d profile-library-linker-options="{profile-library-linker-options-ppc-final}" ¶
+	-d comerr-library-libraries="{comerr-library-libraries-ppc-final}" ¶
+	-d comerr-library-objects="{comerr-library-objects-ppc-final}" ¶
+	-d comerr-library-linker-options="{comerr-library-linker-options-ppc-final}" ¶
 	-d object-suffix="{object-suffix-ppc-final}" ¶
 	-d object-suffix-data="{object-suffix-ppc-data}" ¶
 	-d compiler-options="{compiler-options-ppc-final}" ¶
@@ -811,6 +929,9 @@ make-options-68k-final = ¶
 	-d profile-library-libraries="{profile-library-libraries-68k-final}" ¶
 	-d profile-library-objects="{profile-library-objects-68k-final}" ¶
 	-d profile-library-linker-options="{profile-library-linker-options-68k-final}" ¶
+	-d comerr-library-libraries="{comerr-library-libraries-68k-final}" ¶
+	-d comerr-library-objects="{comerr-library-objects-68k-final}" ¶
+	-d comerr-library-linker-options="{comerr-library-linker-options-68k-final}" ¶
 	-d object-suffix="{object-suffix-68k-final}" ¶
 	-d object-suffix-data="{object-suffix-68k-data}" ¶
 	-d compiler-options="{compiler-options-68k-final}" ¶
@@ -820,23 +941,23 @@ make-options-68k-final = ¶
 make-output = "{TempFolder}GSS/Kerberos Makefile script"
 submakefile-target = gss-library
 
-ppc-debug Ä {makefile-name} {gss-objects-ppc-debug-list} {krb5-objects-ppc-debug-list} ¶
-	{profile-objects-ppc-debug-list} {include-folders-list}
+ppc-debug Ä glue headers documentation {makefile-name} {gss-objects-ppc-debug-list} {krb5-objects-ppc-debug-list} ¶
+	{profile-objects-ppc-debug-list} {comerr-objects-ppc-debug-list} {include-folders-list}
 	Make {make-options-common} {make-options-ppc-debug} {submakefile-target} > {make-output}
 	{make-output}
 	
-68k-debug Ä {makefile-name} {gss-objects-68k-debug-list} {krb5-objects-68k-debug-list} ¶
-	 {profile-objects-68k-debug-list} {include-folders-list}
+68k-debug Ä glue headers documentation  {makefile-name} {gss-objects-68k-debug-list} {krb5-objects-68k-debug-list} ¶
+	 {profile-objects-68k-debug-list} {comerr-objects-68k-debug-list} {include-folders-list}
 	Make {make-options-common} {make-options-68k-debug} {submakefile-target} > {make-output}
 	{make-output}
 	
-ppc-final Ä {makefile-name} {gss-objects-ppc-final-list} {krb5-objects-ppc-final-list} ¶
-	{profile-objects-ppc-final-list} {include-folders-list}
+ppc-final Ä glue headers documentation  {makefile-name} {gss-objects-ppc-final-list} {krb5-objects-ppc-final-list} ¶
+	{profile-objects-ppc-final-list} {comerr-objects-ppc-final-list} {include-folders-list}
 	Make {make-options-common} {make-options-ppc-final} {submakefile-target} > {make-output}
 	{make-output}
 	
-68k-final Ä {makefile-name} {gss-objects-68k-final-list} {krb5-objects-68k-final-list} ¶
-	{profile-objects-68k-final-list} {include-folders-list}
+68k-final Ä glue headers documentation  {makefile-name} {gss-objects-68k-final-list} {krb5-objects-68k-final-list} ¶
+	{profile-objects-68k-final-list} {comerr-objects-68k-final-list} {include-folders-list}
 	Make {make-options-common} {make-options-68k-final} {submakefile-target} > {make-output}
 	{make-output}
 	
@@ -900,6 +1021,17 @@ ppc-final Ä {makefile-name} {gss-objects-ppc-final-list} {krb5-objects-ppc-final
 ###			profile-library-init							-- name of profile library initialization routine
 ###			profile-library-term							-- name of profile library termination routine
 ###			profile-library-linker-options					-- all other profile library linker options
+###		For comerr library
+###			comerr-library-output-folder					-- destination of comerr library output
+###			comerr-library-name								-- name of the comerr library
+###			comerr-library-export							-- name of comerr library export file
+###			comerr-library-libraries						-- list of libraries comerr library links against
+###			comerr-library-objects							-- list of object files comerr library links
+###			comerr-library-fragment-name					-- name of comerr library fragment
+###			comerr-library-main								-- name of comerr library main entry point
+###			comerr-library-init								-- name of comerr library initialization routine
+###			comerr-library-term								-- name of comerr library termination routine
+###			comerr-library-linker-options					-- all other comerr library linker options
 ###		General
 ###			library-linker									-- linker to use
 ###			autogenerated-files								-- list of autogenerated files
@@ -933,6 +1065,9 @@ object-suffix-data = .ignore.me.too
 profile-library-libraries =
 profile-library-objects =
 profile-library-linker-options =
+comerr-library-libraries =
+comerr-library-objects =
+comerr-library-linker-options =
 
 ###	Generate various major components of build commands from the above variables
 gss-library-output-files = ¶
@@ -1015,6 +1150,22 @@ profile-library-build-command = ¶
 	{profile-library-linker-options} ¶
 	{profile-library-objects} {profile-library-libraries}
 
+comerr-library-output-files = ¶
+	{comerr-library-output-folder}{comerr-library-name}{library-platform}{library-kind}
+comerr-library-dependencies = ¶
+	{autogenerated-files} {comerr-library-export} {comerr-library-libraries} {comerr-library-objects}
+comerr-library-build-command = ¶
+	{library-linker} ¶
+	-name "{comerr-library-fragment-name}{library-kind}" ¶
+	-main {comerr-library-main} ¶
+	-init {comerr-library-init} ¶
+	-term {comerr-library-term} ¶
+	-@export {comerr-library-export} ¶
+	-map {comerr-library-output-folder}{comerr-library-name}{library-platform}{library-kind}.MAP ¶
+	-o {comerr-library-output-folder}{comerr-library-name}{library-platform}{library-kind} ¶
+	{comerr-library-linker-options} ¶
+	{comerr-library-objects} {comerr-library-libraries}
+
 ###	Build commands
 
 gss-library Ä {gss-library-output-files}
@@ -1022,6 +1173,7 @@ krb5-library Ä {krb5-library-output-files}
 krb5-globals-library Ä {krb5-globals-library-output-files}
 krb5-globals-data-library Ä {krb5-globals-data-library-output-files}
 profile-library Ä {profile-library-output-files}
+comerr-library Ä {comerr-library-output-files}
 
 {gss-library-output-files} ÄÄ {gss-library-dependencies} {makefile-name}
 	{create-folder} {gss-library-output-folder}
@@ -1043,14 +1195,20 @@ profile-library Ä {profile-library-output-files}
 	{create-folder} {profile-library-output-folder}
 	{profile-library-build-command}
 
+{comerr-library-output-files} ÄÄ {comerr-library-dependencies} {makefile-name}
+	{create-folder} {comerr-library-output-folder}
+	{comerr-library-build-command}
+
 ##############################################################################################################
 ###			Default compilation rules
 ##############################################################################################################
 
 {object-suffix} Ä .c {autogenerated-files} {makefile-name} {precompiled-headers}
+	echo {DepDir}{Default}{object-suffix}
 	{compiler} {DepDir}{Default}.c -o {DepDir}{Default}{object-suffix} {compiler-options}
 
 {object-suffix-data} Ä .c {autogenerated-files} {makefile-name} {precompiled-headers}
+	echo {DepDir}{Default}{object-suffix-data}
 	{compiler} {DepDir}{Default}.c -o {DepDir}{Default}{object-suffix-data} {compiler-options}
 
 ##############################################################################################################
@@ -1060,18 +1218,26 @@ profile-library Ä {profile-library-output-files}
 classic-glue-generation-script 						= {root-folder}mac:CFMGlue.pl
 gss-library-glue-output-folder						= {root-folder}:GSSLib:ClassicGlue:
 krb5-library-glue-output-folder						= {root-folder}:Kerberos5Lib:ClassicGlue:
+profile-library-glue-output-folder					= {root-folder}:KerberosProfileLib:ClassicGlue:
+comerr-library-glue-output-folder					= {root-folder}:ComErrLib:ClassicGlue:
 
 gss-library-glue-output								= {gss-library-glue-output-folder}GSSLib.glue.c
 krb5-library-glue-output							= {krb5-library-glue-output-folder}Kerberos5Lib.glue.c
+profile-library-glue-output							= {profile-library-glue-output-folder}KrbProfileLib.glue.c
+comerr-library-glue-output							= {comerr-library-glue-output-folder}ComErrLib.glue.c
 
 classic-glue-output = ¶
 	{gss-library-glue-output} ¶
-	{krb5-library-glue-output}
+	{krb5-library-glue-output} ¶
+	{profile-library-glue-output} ¶
+	{comerr-library-glue-output}
 
 glue Ä {classic-glue-output}
 
 glue-gss Ä {gss-library-glue-output}
 glue-krb5 Ä {krb5-library-glue-output}
+glue-profile Ä {profile-library-glue-output}
+glue-comerr Ä {comerr-library-glue-output}
 
 {krb5-library-glue-output} Ä {root-folder}mac:K5.CFMglue.cin {root-folder}mac:K5.CFMglue.proto.h ¶
 	{root-folder}mac:CFMglue.c {root-folder}mac:K5.moreCFMglue.cin {classic-glue-generation-script}
@@ -1086,6 +1252,20 @@ glue-krb5 Ä {krb5-library-glue-output}
 	perl {classic-glue-generation-script} < {root-folder}mac:GSS.CFMglue.proto.h > {root-folder}mac:GSS.CFMglue.c
 	Catenate {root-folder}mac:GSS.CFMglue.cin {root-folder}mac:CFMglue.c {root-folder}mac:GSS.CFMglue.c ¶
 	{root-folder}mac:GSS.moreCFMglue.cin | Catenate > {gss-library-glue-output}
+
+{profile-library-glue-output} Ä {root-folder}mac:KrbProfileLib.glue.pre.cin {root-folder}mac:KrbProfileLib.glue.proto.h ¶
+	{root-folder}mac:CFMglue.c {root-folder}mac:KrbProfileLib.glue.post.cin {classic-glue-generation-script}
+	{create-folder} {profile-library-glue-output-folder}
+	perl {classic-glue-generation-script} < {root-folder}mac:KrbProfileLib.glue.proto.h > {root-folder}mac:KrbProfileLib.CFMglue.c
+	Catenate {root-folder}mac:KrbProfileLib.glue.pre.cin {root-folder}mac:CFMglue.c {root-folder}mac:KrbProfileLib.CFMglue.c ¶
+	{root-folder}mac:KrbProfileLib.glue.post.cin | Catenate > {profile-library-glue-output}
+
+{comerr-library-glue-output} Ä {root-folder}mac:ComErrLib.glue.pre.cin {root-folder}mac:ComErrLib.glue.proto.h ¶
+	{root-folder}mac:CFMglue.c {root-folder}mac:ComErrLib.glue.post.cin {classic-glue-generation-script}
+	{create-folder} {comerr-library-glue-output-folder}
+	perl {classic-glue-generation-script} < {root-folder}mac:ComErrLib.glue.proto.h > {root-folder}mac:ComErrLib.CFMglue.c
+	Catenate {root-folder}mac:ComErrLib.glue.pre.cin {root-folder}mac:CFMglue.c {root-folder}mac:ComErrLib.CFMglue.c ¶
+	{root-folder}mac:ComErrLib.glue.post.cin | Catenate > {comerr-library-glue-output}
 
 ##############################################################################################################
 ###			Clean target deletes all generated files
@@ -1108,6 +1288,7 @@ clean Ä
 gss-headers-output-folder							= {root-folder}:GSSLib:Headers:
 krb5-headers-output-folder							= {root-folder}:Kerberos5Lib:Headers:
 krb5-globals-headers-output-folder					= {root-folder}:Kerberos5GlobalsLib:Headers:
+comerr-headers-output-folder						= {root-folder}:ComErrLib:Headers:
 profile-headers-output-folder						= {root-folder}:KerberosProfileLib:Headers:
 
 gss-headers-output = ¶
@@ -1116,26 +1297,28 @@ gss-headers-output = ¶
 
 krb5-headers-output = ¶
 	"{krb5-headers-output-folder}krb5.h" ¶
-	"{krb5-headers-output-folder}com_err.h" ¶
-	"{krb5-headers-output-folder}profile.h" ¶
 	"{krb5-headers-output-folder}win-mac.h"
 
 krb5-globals-headers-output = ¶
 	"{krb5-globals-headers-output-folder}Kerberos5Globals.h"
 	
+comerr-headers-output = ¶
+	"{comerr-headers-output-folder}com_err.h"
+	
 profile-headers-output = ¶
 	"{profile-headers-output-folder}profile.h"
 	
-headers-output = {gss-headers-output} {krb5-headers-output} {krb5-globals-headers-output} {profile-headers-output}
+headers-output = {gss-headers-output} {krb5-headers-output} {krb5-globals-headers-output} ¶
+	{comerr-headers-output} {profile-headers-output} 
 
-headers Ä {headers-output}
+headers Ä unset-echo {headers-output}
 
 "{gss-headers-output-folder}gssapi.h" Ä "{root-folder}lib:gssapi:generic:gssapi.h" {makefile-name}
 	"{create-folder}" "{TargDir}"
 	If (`Exists "{Targ}" | Count -l`)
 		SetFile -a l "{Targ}"
 	End
-	Duplicate -y "{root-folder}lib:gssapi:generic:gssapi.h" "{Targ}"
+	Catenate "{root-folder}lib:gssapi:generic:gssapi.h" > "{Targ}"
 	SetFile -a l "{Targ}"
 
 "{gss-headers-output-folder}gssapi_krb5.h" Ä "{root-folder}lib:gssapi:krb5:gssapi_krb5.h" {makefile-name}
@@ -1143,7 +1326,7 @@ headers Ä {headers-output}
 	If (`Exists "{Targ}" | Count -l`)
 		SetFile -a l "{Targ}"
 	End
-	Duplicate -y "{root-folder}lib:gssapi:krb5:gssapi_krb5.h" "{Targ}"
+	Catenate "{root-folder}lib:gssapi:krb5:gssapi_krb5.h" > "{Targ}"
 	SetFile -a l "{Targ}"
 
 "{krb5-headers-output-folder}krb5.h" Ä "{root-folder}include:krb5.h" {makefile-name}
@@ -1151,23 +1334,7 @@ headers Ä {headers-output}
 	If (`Exists "{Targ}" | Count -l`)
 		SetFile -a l "{Targ}"
 	End
-	Duplicate -y "{root-folder}include:krb5.h" "{Targ}"
-	SetFile -a l "{Targ}"
-
-"{krb5-headers-output-folder}com_err.h" Ä "{root-folder}util:et:com_err.h" {makefile-name}
-	"{create-folder}" "{TargDir}"
-	If (`Exists "{Targ}" | Count -l`)
-		SetFile -a l "{Targ}"
-	End
-	Duplicate -y "{root-folder}util:et:com_err.h" "{Targ}"
-	SetFile -a l "{Targ}"
-
-"{krb5-headers-output-folder}profile.h" Ä "{root-folder}util:profile:profile.h" {makefile-name}
-	"{create-folder}" "{TargDir}"
-	If (`Exists "{Targ}" | Count -l`)
-		SetFile -a l "{Targ}"
-	End
-	Duplicate -y "{root-folder}util:profile:profile.h" "{Targ}"
+	Catenate "{root-folder}include:krb5.h" > "{Targ}"
 	SetFile -a l "{Targ}"
 
 "{krb5-headers-output-folder}win-mac.h" Ä "{root-folder}include:win-mac.h" {makefile-name}
@@ -1175,7 +1342,7 @@ headers Ä {headers-output}
 	If (`Exists "{Targ}" | Count -l`)
 		SetFile -a l "{Targ}"
 	End
-	Duplicate -y "{root-folder}include:win-mac.h" "{Targ}"
+	Catenate "{root-folder}include:win-mac.h" > "{Targ}"
 	SetFile -a l "{Targ}"
 
 "{krb5-globals-headers-output-folder}Kerberos5Globals.h" Ä "{root-folder}mac:libraries:Kerberos v5 Globals:Krb5Globals.h" {makefile-name}
@@ -1183,7 +1350,15 @@ headers Ä {headers-output}
 	If (`Exists "{Targ}" | Count -l`)
 		SetFile -a l "{Targ}"
 	End
-	Duplicate -y "{root-folder}mac:libraries:Kerberos v5 Globals:Krb5Globals.h" "{Targ}"
+	Catenate "{root-folder}mac:libraries:Kerberos v5 Globals:Krb5Globals.h" > "{Targ}"
+	SetFile -a l "{Targ}"
+
+"{comerr-headers-output-folder}com_err.h" Ä "{root-folder}util:et:com_err.h" {makefile-name}
+	"{create-folder}" "{TargDir}"
+	If (`Exists "{Targ}" | Count -l`)
+		SetFile -a l "{Targ}"
+	End
+	Catenate "{root-folder}util:et:com_err.h" > "{Targ}"
 	SetFile -a l "{Targ}"
 
 "{profile-headers-output-folder}profile.h" Ä "{root-folder}util:profile:profile.h" {makefile-name}
@@ -1191,5 +1366,78 @@ headers Ä {headers-output}
 	If (`Exists "{Targ}" | Count -l`)
 		SetFile -a l "{Targ}"
 	End
-	Duplicate -y "{root-folder}util:profile:profile.h" "{Targ}"
+	Catenate "{root-folder}util:profile:profile.h" > "{Targ}"
 	SetFile -a l "{Targ}"
+
+##############################################################################################################
+###			Copying documentation around
+##############################################################################################################
+
+gss-documentation-output-folder						= {root-folder}:GSSLib:Documentation:
+krb5-documentation-output-folder					= {root-folder}:Kerberos5Lib:Documentation:
+krb5-globals-documentation-output-folder			= {root-folder}:Kerberos5GlobalsLib:Documentation:
+comerr-documentation-output-folder					= {root-folder}:ComErrLib:Documentation:
+profile-documentation-output-folder					= {root-folder}:KerberosProfileLib:Documentation:
+
+gss-documentation-output = ¶
+	{gss-documentation-output-folder}"GSSLib ReadMe"
+
+krb5-documentation-output = ¶
+	{krb5-documentation-output-folder}"krb5api.pdf"
+
+krb5-globals-documentation-output = ¶
+	{krb5-globals-documentation-output-folder}"Kerberos5Globals.html"
+	
+comerr-documentation-output = ¶
+	{comerr-documentation-output-folder}"ComErrLib ReadMe"
+	
+profile-documentation-output = ¶
+	{profile-documentation-output-folder}"KerberosProfileLib ReadMe"
+	
+documentation-output = {gss-documentation-output} {krb5-documentation-output} ¶
+	{krb5-globals-documentation-output} {profile-documentation-output} ¶
+	{comerr-documentation-output}
+
+documentation Ä unset-echo {documentation-output}
+
+{gss-documentation-output-folder}"GSSLib ReadMe" Ä {root-folder}"mac:GSSLib ReadMe" {makefile-name}
+	"{create-folder}" "{TargDir}"
+	If (`Exists "{Targ}" | Count -l`)
+		SetFile -a l {Targ}
+	End
+	Catenate {root-folder}"mac:GSSLib ReadMe" > {Targ}
+	SetFile -a l {Targ}
+
+{krb5-documentation-output-folder}"krb5api.pdf" Ä {makefile-name}
+	"{create-folder}" "{TargDir}"
+	If (`Exists "{Targ}" | Count -l`)
+		SetFile -a l {Targ}
+	End
+	If (`Exists {root-folder}":::Documentation:pdf:krb5api.pdf"`)
+		Catenate {root-folder}":::Documentation:pdf:krb5api.pdf" > {Targ}
+		SetFile -a l -t 'PDF ' -c 'CARO' {Targ}
+	End
+
+{krb5-globals-documentation-output-folder}"Kerberos5Globals.html" Ä {root-folder}"mac:libraries:Kerberos v5 Globals:Krb5Globals.html" {makefile-name}
+	"{create-folder}" "{TargDir}"
+	If (`Exists "{Targ}" | Count -l`)
+		SetFile -a l {Targ}
+	End
+	Catenate {root-folder}"mac:libraries:Kerberos v5 Globals:Krb5Globals.html" > {Targ}
+	SetFile -a l -c 'MOSS' {Targ}
+
+{comerr-documentation-output-folder}"ComErrLib ReadMe" Ä {root-folder}"mac:ComErrLib ReadMe" {makefile-name}
+	"{create-folder}" "{TargDir}"
+	If (`Exists "{Targ}" | Count -l`)
+		SetFile -a l {Targ}
+	End
+	Catenate {root-folder}"mac:ComErrLib ReadMe" > {Targ}
+	SetFile -a l {Targ}
+
+{profile-documentation-output-folder}"KerberosProfileLib ReadMe" Ä {root-folder}"mac:KerberosProfileLib ReadMe" {makefile-name}
+	"{create-folder}" "{TargDir}"
+	If (`Exists "{Targ}" | Count -l`)
+		SetFile -a l {Targ}
+	End
+	Catenate {root-folder}"mac:KerberosProfileLib ReadMe" > {Targ}
+	SetFile -a l {Targ}

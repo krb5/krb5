@@ -16,7 +16,10 @@
  * this permission notice appear in supporting documentation, and that
  * the name of M.I.T. not be used in advertising or publicity pertaining
  * to distribution of the software without specific, written prior
- * permission.  M.I.T. makes no representations about the suitability of
+ * permission.  Furthermore if you modify this software you must label
+ * your software as modified software and not distribute it in such a
+ * fashion that it might be confused with the original M.I.T. software.
+ * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
  * 
@@ -56,7 +59,7 @@
  *
  */
 
-krb5_boolean
+krb5_boolean KRB5_CALLCONV
 krb5_kuserok(context, principal, luser)
     krb5_context context;
     krb5_principal principal;
@@ -77,8 +80,9 @@ krb5_kuserok(context, principal, luser)
     if ((pwd = getpwnam(luser)) == NULL) {
 	return(FALSE);
     }
-    (void) strcpy(pbuf, pwd->pw_dir);
-    (void) strcat(pbuf, "/.k5login");
+    (void) strncpy(pbuf, pwd->pw_dir, sizeof(pbuf) - 1);
+    pbuf[sizeof(pbuf) - 1] = '\0';
+    (void) strncat(pbuf, "/.k5login", sizeof(pbuf) - 1 - strlen(pbuf));
 
     if (access(pbuf, F_OK)) {	 /* not accessible */
 	/*
@@ -143,7 +147,7 @@ krb5_kuserok(context, principal, luser)
  * If the given Kerberos name "server" translates to the same name as "luser"
  * (using * krb5_aname_to_lname()), returns TRUE.
  */
-krb5_boolean
+krb5_boolean KRB5_CALLCONV
 krb5_kuserok(context, principal, luser)
     krb5_context context;
     krb5_principal principal;
@@ -151,7 +155,7 @@ krb5_kuserok(context, principal, luser)
 {
     char kuser[50];
 
-    if (! krb5_aname_to_localname(context, principal, sizeof(kuser), kuser))
+    if (krb5_aname_to_localname(context, principal, sizeof(kuser), kuser))
         return FALSE;
 
     if (strcmp(kuser, luser) == 0)

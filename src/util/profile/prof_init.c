@@ -25,16 +25,16 @@ error(do not have a 4-byte integer type)
 
 KRB5_DLLIMP errcode_t KRB5_CALLCONV
 profile_init(files, ret_profile)
-	profile_filespec_t *files;
+	const_profile_filespec_t *files;
 	profile_t *ret_profile;
 {
-	profile_filespec_t *fs;
+	const_profile_filespec_t *fs;
 	profile_t profile;
 	prf_file_t  new_file, last = 0;
 	errcode_t retval = 0;
 
 	initialize_prof_error_table();
-	
+
 	profile = malloc(sizeof(struct _profile_t));
 	if (!profile)
 		return ENOMEM;
@@ -79,7 +79,7 @@ profile_init(files, ret_profile)
  */
 KRB5_DLLIMP errcode_t KRB5_CALLCONV
 profile_init_path(filepath, ret_profile)
-	profile_filespec_list_t filepath;
+	const_profile_filespec_list_t filepath;
 	profile_t *ret_profile;
 {
 	int n_entries, i;

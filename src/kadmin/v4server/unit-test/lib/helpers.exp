@@ -215,7 +215,7 @@ proc unexpire { name fullname } {
     # While we're at it, make sure they aren't expired.
     exp_prog "$name: kadmin.local" $kadmin_local "" 0 {
 	"kadmin.local:" {
-	    send "modprinc -expire \"May 6, 1999\" $fullname\n" 
+	    send "modprinc -expire \"May 6, 2029\" $fullname\n" 
 	}
     } { 
 	-re "Principal .* modified." { send "quit\n" }

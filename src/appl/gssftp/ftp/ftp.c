@@ -541,7 +541,12 @@ getreply(expecteof)
 	sigtype cmdabort();
 	char ibuf[FTP_BUFSIZ], obuf[FTP_BUFSIZ];
 	int safe = 0;
-	extern char *strpbrk(), *strstr();
+#ifndef strpbrk
+	extern char *strpbrk();
+#endif
+#ifndef strstr
+	extern char *strstr();
+#endif
 
 	ibuf[0] = '\0';
 	if (reply_parse) reply_ptr = reply_buf;
@@ -1877,9 +1882,7 @@ struct {
     const gss_OID_desc * const * mech_type;
     char *service_name;
 } gss_trials[] = {
-    { &gss_mech_krb5_v2, "ftp" },
     { &gss_mech_krb5, "ftp" },
-    { &gss_mech_krb5_v2, "host" },
     { &gss_mech_krb5, "host" },
 };
 int n_gss_trials = sizeof(gss_trials)/sizeof(gss_trials[0]);

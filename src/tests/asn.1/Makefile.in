@@ -2,7 +2,6 @@ thisconfigdir=./..
 myfulldir=tests/asn.1
 mydir=asn.1
 BUILDTOP=$(REL)$(U)$(S)$(U)
-CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDES)
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 
@@ -27,7 +26,7 @@ krb5_decode_test: $(DECOBJS) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o krb5_decode_test $(DECOBJS) $(KRB5_BASE_LIBS)
 
 trval: $(srcdir)/trval.c
-	$(CC) -o trval $(CFLAGS) -DSTANDALONE $(srcdir)/trval.c
+	$(CC) -o trval $(ALL_CFLAGS) -DSTANDALONE $(srcdir)/trval.c
 
 check:: krb5_decode_test krb5_encode_test
 	KRB5_CONFIG=$(SRCTOP)/config-files/krb5.conf ; \

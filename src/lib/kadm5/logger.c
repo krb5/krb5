@@ -16,7 +16,10 @@
  * this permission notice appear in supporting documentation, and that
  * the name of M.I.T. not be used in advertising or publicity pertaining
  * to distribution of the software without specific, written prior
- * permission.  M.I.T. makes no representations about the suitability of
+ * permission.  Furthermore if you modify this software you must label
+ * your software as modified software and not distribute it in such a
+ * fashion that it might be confused with the original M.I.T. software.
+ * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
  *
@@ -57,19 +60,19 @@
 #define	LOG_ERR		0
 #endif	/* LOG_ERR */
 
-static const char lspec_parse_err_1[] =	"%s: cannot parse <%s>\n";
-static const char lspec_parse_err_2[] =	"%s: warning - logging entry syntax error\n";
-static const char log_file_err[] =	"%s: error writing to %s\n";
-static const char log_device_err[] =	"%s: error writing to %s device\n";
-static const char log_ufo_string[] =	"???";
-static const char log_emerg_string[] =	"EMERGENCY";
-static const char log_alert_string[] =	"ALERT";
-static const char log_crit_string[] =	"CRITICAL";
-static const char log_err_string[] =	"Error";
-static const char log_warning_string[] =	"Warning";
-static const char log_notice_string[] =	"Notice";
-static const char log_info_string[] =	"info";
-static const char log_debug_string[] =	"debug";
+#define lspec_parse_err_1	"%s: cannot parse <%s>\n"
+#define lspec_parse_err_2	"%s: warning - logging entry syntax error\n"
+#define log_file_err		"%s: error writing to %s\n"
+#define log_device_err		"%s: error writing to %s device\n"
+#define log_ufo_string		"???"
+#define log_emerg_string	"EMERGENCY"
+#define log_alert_string	"ALERT"
+#define log_crit_string		"CRITICAL"
+#define log_err_string		"Error"
+#define log_warning_string	"Warning"
+#define log_notice_string	"Notice"
+#define log_info_string		"info"
+#define log_debug_string	"debug"
 
 /*
  * Output logging.
@@ -160,8 +163,8 @@ static struct log_entry	def_log_entry;
  */
 #define	DEVICE_OPEN(d, m)	fopen(d, m)
 #define	CONSOLE_OPEN(m)		fopen("/dev/console", m)
-#define	DEVICE_PRINT(f, m)	((fprintf(f, m) >= 0) ? 		\
-				 (fprintf(f, "\r\n"), fflush(f), 0) :	\
+#define	DEVICE_PRINT(f, m)	((fprintf(f, "%s\r\n", m) >= 0) ? 	\
+				 (fflush(f), 0) :			\
 				 -1)
 #define	DEVICE_CLOSE(d)		fclose(d)
 
@@ -277,14 +280,13 @@ klog_com_err_proc(whoami, code, format, ap)
 	    /*
 	     * Files/standard error.
 	     */
-	    if (fprintf(log_control.log_entries[lindex].lfu_filep,
+	    if (fprintf(log_control.log_entries[lindex].lfu_filep, "%s\n",
 			outbuf) < 0) {
 		/* Attempt to report error */
 		fprintf(stderr, log_file_err, whoami,
 			log_control.log_entries[lindex].lfu_fname);
 	    }
 	    else {
-		fprintf(log_control.log_entries[lindex].lfu_filep, "\n");
 		fflush(log_control.log_entries[lindex].lfu_filep);
 	    }
 	    break;
@@ -316,7 +318,7 @@ klog_com_err_proc(whoami, code, format, ap)
 		    log_control.log_entries[lindex].lsu_severity;
 					       
 	    /* Log the message with our header trimmed off */
-	    syslog(log_pri, syslogp);
+	    syslog(log_pri, "%s", syslogp);
 	    break;
 #endif /* HAVE_SYSLOG */
 	default:
@@ -851,8 +853,8 @@ klog_vsyslog(priority, format, arglist)
     cp += 15;
 #endif	/* HAVE_STRFTIME */
 #ifdef VERBOSE_LOGS
-    sprintf(cp, " %s %s[%d](%s): ", 
-	    log_control.log_hostname, log_control.log_whoami, getpid(),
+    sprintf(cp, " %s %s[%ld](%s): ",
+	    log_control.log_hostname, log_control.log_whoami, (long) getpid(),
 	    severity2string(priority));
 #else
     sprintf(cp, " ");
@@ -879,14 +881,13 @@ klog_vsyslog(priority, format, arglist)
 	    /*
 	     * Files/standard error.
 	     */
-	    if (fprintf(log_control.log_entries[lindex].lfu_filep, 
+	    if (fprintf(log_control.log_entries[lindex].lfu_filep, "%s\n",
 			outbuf) < 0) {
 		/* Attempt to report error */
-		fprintf(stderr, log_file_err,
+		fprintf(stderr, log_file_err, log_control.log_whoami,
 			log_control.log_entries[lindex].lfu_fname);
 	    }
 	    else {
-		fprintf(log_control.log_entries[lindex].lfu_filep, "\n");
 		fflush(log_control.log_entries[lindex].lfu_filep);
 	    }
 	    break;
@@ -898,7 +899,7 @@ klog_vsyslog(priority, format, arglist)
 	    if (DEVICE_PRINT(log_control.log_entries[lindex].ldu_filep,
 			     outbuf) < 0) {
 		/* Attempt to report error */
-		fprintf(stderr, log_device_err,
+		fprintf(stderr, log_device_err, log_control.log_whoami,
 			log_control.log_entries[lindex].ldu_devname);
 	    }
 	    break;
@@ -909,7 +910,7 @@ klog_vsyslog(priority, format, arglist)
 	     */
 					       
 	    /* Log the message with our header trimmed off */
-	    syslog(priority, syslogp);
+	    syslog(priority, "%s", syslogp);
 	    break;
 #endif /* HAVE_SYSLOG */
 	default:

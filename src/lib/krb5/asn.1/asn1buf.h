@@ -111,7 +111,8 @@ asn1_error_code asn1buf_wrap_data
 	     Returns ASN1_MISSING_FIELD if code is empty. */
 
 asn1_error_code asn1buf_imbed
-	PROTOTYPE((asn1buf *subbuf, const asn1buf *buf, const int length));
+	PROTOTYPE((asn1buf *subbuf, const asn1buf *buf, const int length,
+		   const int indef));
 /* requires  *subbuf and *buf are allocated
    effects   *subbuf becomes a sub-buffer of *buf.  *subbuf begins
               at *buf's current position and is length octets long.

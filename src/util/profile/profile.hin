@@ -51,21 +51,25 @@ extern "C" {
 #endif
 
 #ifdef PROFILE_USES_PATHS
-typedef char* profile_filespec_t;		/* path as C string */
+typedef char* profile_filespec_t;	/* path as C string */
 typedef char* profile_filespec_list_t;	/* list of : separated paths, C string */
+typedef const char* const_profile_filespec_t;	/* path as C string */
+typedef const char* const_profile_filespec_list_t;	/* list of : separated paths, C string */
 #else
 /* On MacOS, we use native file specifiers as unique file identifiers */
 #include <Files.h>
 typedef FSSpec profile_filespec_t;
-typedef FSSpec* profile_filespec_list_t;	
-							/* array should be terminated with {0, 0, ""} */
+typedef FSSpec* profile_filespec_list_t;
+/* array should be terminated with {0, 0, ""} */
+typedef FSSpec const_profile_filespec_t;
+typedef FSSpec* const_profile_filespec_list_t;	
 #endif
 
 KRB5_DLLIMP long KRB5_CALLCONV profile_init
-	PROTOTYPE ((profile_filespec_t *files, profile_t *ret_profile));
+	PROTOTYPE ((const_profile_filespec_t *files, profile_t *ret_profile));
 
 KRB5_DLLIMP long KRB5_CALLCONV profile_init_path
-	PROTOTYPE ((profile_filespec_list_t filelist, profile_t *ret_profile));
+	PROTOTYPE ((const_profile_filespec_list_t filelist, profile_t *ret_profile));
 
 KRB5_DLLIMP long KRB5_CALLCONV profile_flush
 	PROTOTYPE ((profile_t profile));

@@ -6,7 +6,7 @@ BUILDTOP=$(REL)$(U)
 # -DNOCACHE    - disable lookaside cache, which is used to resend previous
 #                response to replay (i.e., *don't* define this if you
 #                define USE_RCACHE)
-CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE) -DNOCACHE
+DEFINES = -DNOCACHE
 RUN_SETUP = @KRB5_RUN_ENV@
 PROG_LIBPATH=-L$(TOPLIBD) $(KRB4_LIBPATH)
 PROG_RPATH=$(KRB5_LIBDIR)
@@ -15,7 +15,7 @@ all:: krb5kdc rtest
 
 # DEFINES = -DBACKWARD_COMPAT $(KRB4DEF)
 
-LOCALINCLUDE = @KRB4_INCLUDES@ -I.
+LOCALINCLUDES = @KRB4_INCLUDES@ -I.
 SRCS= \
 	kdc5_err.c \
 	$(srcdir)/dispatch.c \

@@ -1,3 +1,12 @@
+1999-12-03  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in: Windows fix for updated win-pre.in.
+
+1999-08-26  Danilo Almeida  <dalmeida@mit.edu>
+
+	* cns_reg.c (cns_load_registry, cns_save_registry): Honor setting
+	in cns_res.cc_override.
+
 Mon May 17 19:55:08 1999  Danilo Almeida  <dalmeida@mit.edu>
 
 	* Makefile.in: Add included version resouce script to 
