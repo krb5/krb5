@@ -1,3 +1,8 @@
+Tue Sep 17 15:09:28 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* server_internal.h (ALL_PRINC_MASK): Add MAX_RLIFE to
+ 	ALL_PRINC_MASK.
+
 Tue Sep 10 01:47:39 1996  Mark Eichin  <eichin@cygnus.com>
 
 	* alt_prof.c (krb5_aprof_init): use profile_init_path on fname,
