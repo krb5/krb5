@@ -1,15 +1,10 @@
 AC_INIT(configure.in)
-WITH_CCOPTS
 CONFIG_RULES
-AC_SET_BUILDTOP
 AC_MSG_CHECKING([for build host])
 AC_CACHE_VAL(krb5_cv_host, [export CC
 AC_CANONICAL_HOST
 krb5_cv_host=$host])
 AC_MSG_RESULT($krb5_cv_host)
-WITH_KRB5ROOT
-WITH_KRB4
-WITH_NETLIB
 AC_ARG_ENABLE([shared],
 [  --enable-shared         build with shared libraries],[
 case $krb5_cv_host in
@@ -53,9 +48,6 @@ kadminv4=kadmin.v4
 krb524=krb524
 fi
 CONFIG_DIRS(util include lib kdc admin kadmin $kadminv4 kadmin.old $krb524 slave clients appl tests)
-MAKE_SUBDIRS("making",all)
-MAKE_SUBDIRS("cleaning",clean)
-MAKE_SUBDIRS("installing",install)
-MAKE_SUBDIRS("checking",check)
+DO_SUBDIRS
 dnl dnl AC_OUTPUT(Makefile,[EXTRA_RULES])
 V5_AC_OUTPUT_MAKEFILE

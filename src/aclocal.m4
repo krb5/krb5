@@ -17,8 +17,8 @@ AC_DIVERT_POP()dnl
 dnl
 dnl look for the top of the tree
 dnl
-AC_DEFUN(AC_CONFIG_FRAGMENTS_DEFAULT,
-[AC_CONFIG_FRAGMENTS(. .. ../.. ../../.. ../../../.. ../../../../.. ../../../../../..)])dnl
+AC_DEFUN(AC_CONFIG_FRAGMENTS_DEFAULT, [
+AC_CONFIG_FRAGMENTS(. .. ../.. ../../.. ../../../.. ../../../../.. ../../../../../..)])dnl
 dnl
 dnl search them looking for the directory named config.
 dnl Crude, but it works.
@@ -50,15 +50,14 @@ fi
   else
      ac_postpend=
   fi
-AC_PROVIDE([AC_CONFIG_FRAGMENTS_DEFAULT])dnl
 ])
 dnl
 dnl
 dnl set up buildtop stuff
 dnl
 define(AC_BUILDTOP,[.])dnl
-define(AC_SET_BUILDTOP,
-[AC_CONFIG_FRAGMENTS_DEFAULT()dnl
+define(AC_SET_BUILDTOP,[dnl
+ifdef([AC_PROVIDE_AC_CONFIG_FRAGMENTS_DEFAULT], ,[AC_CONFIG_FRAGMENTS_DEFAULT()])dnl
 AC_SUBST(BUILDTOP)dnl
 BUILDTOP=[$]ac_reltopdir
 ])dnl
@@ -137,12 +136,26 @@ undivert(AC_DIVERSION_MAKEFILE)
 SUBDIREOF
 ])dnl
 dnl
-dnl drop in standard configure rebuild rules -- CONFIG_RULES
+dnl drop in standard subdirectory rules
+dnl
+define(DO_SUBDIRS,[
+MAKE_SUBDIRS("making",all)
+MAKE_SUBDIRS("cleaning",clean)
+MAKE_SUBDIRS("installing",install)
+MAKE_SUBDIRS("checking",check)
+])dnl
+dnl
+dnl drop in standard rules for all configure files -- CONFIG_RULES
 dnl
 define(CONFIG_RULES,[
+AC_SET_BUILDTOP dnl
 WITH_CC dnl
+WITH_CCOPTS dnl
 WITH_LINKER dnl
 WITH_CPPOPTS dnl
+WITH_KRB4 dnl
+WITH_NETLIB dnl
+KRB_INCLUDE dnl
 AC_DIVERT_PUSH(AC_DIVERSION_MAKEFILE)dnl
 [
 SHELL=/bin/sh
@@ -307,17 +320,6 @@ if test $krb5_cv_struct_sigjmp_buf = yes; then
 fi
 )])dnl
 dnl
-dnl set $(KRB5ROOT) from --with-krb5-root=value -- WITH_KRB5ROOT
-dnl
-define(WITH_KRB5ROOT,[
-AC_ARG_WITH([krb5-root],
-[  --with-krb5-root=DIR    set path for Kerberos V5 config files],
-AC_MSG_RESULT(krb5-root is $withval)
-KRB5ROOT=$withval,
-AC_MSG_RESULT(krb5-root defaults to /krb5)
-KRB5ROOT=/krb5)dnl
-AC_SUBST(KRB5ROOT)])dnl
-dnl
 dnl set $(KRB4) from --with-krb4=value -- WITH_KRB4
 dnl
 define(WITH_KRB4,[
@@ -333,8 +335,7 @@ if test $withval = no; then
 	KRB4_LIB=
 	KDB4_LIB=
 else 
- ADD_DEF(-DKRB4)
- ADD_DEF(-DBACKWARD_COMPAT)
+ ADD_DEF(-DKRB5_KRB4_COMPAT)
  if test $withval = yes; then
 	AC_MSG_RESULT(built in krb4 support)
 	KRB4_LIB='$(TOPLIBD)/libkrb4.a $(TOPLIBD)/libdes425.a'

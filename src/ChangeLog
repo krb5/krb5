@@ -1,3 +1,13 @@
+Fri Jun  9 18:01:26 1995    <tytso@rsx-11.mit.edu>
+
+	* aclocal.m4 (CONFIG_RULES): CONFIG_RULES now contains the
+		standardized autoconf macros which all configure.in files
+		will include.  Removed WITH_KRB5ROOT, since it's no longer
+		used.
+
+	* configure.in: Remove standardized set of autoconf macros, which
+		are now handled by CONFIG_RULES.
+
 Thu Jun  8 17:42:40 1995    <tytso@rsx-11.mit.edu>
 
 	* Makefile.in: Remove excess definitions of prefix, exec_prefix,
