@@ -117,6 +117,8 @@ krb5_error_code INTERFACE krb5_fcc_store
 	PROTOTYPE((krb5_context, krb5_ccache id , krb5_creds *creds ));
 
 /* fcc_skip.c */
+krb5_error_code krb5_fcc_skip_header
+	PROTOTYPE((krb5_context, krb5_ccache));
 krb5_error_code krb5_fcc_skip_principal 
 	PROTOTYPE((krb5_context, krb5_ccache id ));
 

@@ -1,3 +1,8 @@
+Wed Mar 20 22:48:51 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* fcc-proto.h (krb5_fcc_skip_header): Added prototype (fix Windows
+		lint flames).
+
 Sat Feb 24 19:16:23 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* fcc_destry.c (krb5_fcc_destroy): For MS-DOS filesystems, you
