@@ -30,7 +30,7 @@
  * hard-coded in this file.
  */
 
-#include <krb5/krb5.h>
+#include "k5-int.h"
 #include <string.h>
 #include <ctype.h>
 

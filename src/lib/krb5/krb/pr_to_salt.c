@@ -24,10 +24,7 @@
  * krb5_principal2salt()
  */
 
-
-
-#include <krb5/krb5.h>
-#include <krb5/ext-proto.h>
+#include "k5-int.h"
 
 /*
  * Convert a krb5_principal into the default salt for that principal.

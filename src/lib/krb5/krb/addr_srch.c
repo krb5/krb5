@@ -24,8 +24,7 @@
  * krb5_address_search()
  */
 
-
-#include <krb5/krb5.h>
+#include "k5-int.h"
 
 /*
  * if addr is listed in addrlist, or addrlist is null, return TRUE.

@@ -23,9 +23,7 @@
  * krb5_init_contex()
  */
 
-#include <krb5/krb5.h>
-#include <krb5/los-proto.h>
-#include <krb5/ext-proto.h>
+#include "k5-int.h"
 
 krb5_error_code INTERFACE
 krb5_init_context(context)

@@ -24,8 +24,7 @@
  * Configuration variables for libkrb.
  */
 
-
-#include <krb5/krb5.h>
+#include "k5-int.h"
 
 krb5_deltat krb5_clockskew = 5 * 60;	/* five minutes */
 krb5_cksumtype krb5_kdc_req_sumtype = CKSUMTYPE_RSA_MD4;

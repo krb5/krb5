@@ -24,10 +24,7 @@
  * krb5_copy_ticket()
  */
 
-
-#include <krb5/krb5.h>
-
-#include <krb5/ext-proto.h>
+#include "k5-int.h"
 
 static krb5_error_code
 krb5_copy_enc_tkt_part(context, partfrom, partto)

@@ -24,11 +24,7 @@
  * krb5_rd_safe()
  */
 
-
-#include <krb5/krb5.h>
-#include <krb5/asn1.h>
-#include <krb5/los-proto.h>
-#include <krb5/ext-proto.h>
+#include "k5-int.h"
 
 extern krb5_deltat krb5_clockskew;
 #define in_clock_skew(date) (labs((date)-currenttime) < krb5_clockskew)

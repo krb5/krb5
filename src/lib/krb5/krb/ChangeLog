@@ -1,3 +1,8 @@
+Tue Feb 28 01:14:57 1995  John Gilmore  (gnu at toad.com)
+
+	* *.c:  Avoid <krb5/...> includes.
+	* parse.c:  Exdent #ifndef to left margin for old compilers.
+
 Wed Feb 22 17:14:31 1995 Keith Vetter (keithv@fusion.com)
 
 	* walk_rtr.c (krb5_walk_realm_tree): formal parameter wasn't declared.

@@ -24,10 +24,7 @@
  * krb5_copy_principal()
  */
 
-
-#include <krb5/krb5.h>
-
-#include <krb5/ext-proto.h>
+#include "k5-int.h"
 
 /*
  * Copy a principal structure, with fresh allocation.

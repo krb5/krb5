@@ -3,9 +3,8 @@
  */
 
 #include <stdio.h>
-#include <com_err.h>
-
-#include <krb5/krb5.h>
+#include "com_err.h"
+#include "k5-int.h"
 
 main(argc, argv)
 	int	argc;

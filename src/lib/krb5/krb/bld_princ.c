@@ -24,17 +24,14 @@
  * Build a principal from a list of strings
  */
 
-
 /* Need <krb5/config.h> for STDARG_PROTOTYPES */
-#include <krb5/krb5.h>
+#include "k5-int.h"
 
 #if __STDC__ || defined(STDARG_PROTOTYPES)
 #include <stdarg.h>
 #else
 #include <varargs.h>
 #endif
-
-#include <krb5/ext-proto.h>
 
 krb5_error_code INTERFACE_C
 krb5_build_principal_va(context, princ, rlen, realm, ap)

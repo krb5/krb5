@@ -24,11 +24,7 @@
  * Given two tgts, get a ticket.
  */
 
-#include <krb5/krb5.h>
-#include <krb5/asn1.h>		/* needed for some macros */
-
-#include <krb5/los-proto.h>
-#include <krb5/ext-proto.h>
+#include "k5-int.h"
 #include "int-proto.h"
 
 krb5_error_code INTERFACE

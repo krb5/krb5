@@ -24,12 +24,7 @@
  * krb5_encrypt_tkt_part() routine.
  */
 
-
-
-#include <krb5/krb5.h>
-#include <krb5/asn1.h>
-
-#include <krb5/ext-proto.h>
+#include "k5-int.h"
 
 /*
  Takes unencrypted dec_ticket & dec_tkt_part, encrypts with

@@ -21,7 +21,7 @@
  */
 
 #include <stdio.h>
-#include <krb5/krb5.h>
+#include "k5-int.h"
 
 #define MAX_REALM_LN 500
 

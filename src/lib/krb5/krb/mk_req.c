@@ -24,10 +24,7 @@
  * krb5_mk_req() routine.
  */
 
-
-#include <krb5/krb5.h>
-
-#include <krb5/ext-proto.h>
+#include "k5-int.h"
 
 /*
  Formats a KRB_AP_REQ message into outbuf.

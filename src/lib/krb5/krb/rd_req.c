@@ -24,11 +24,7 @@
  * krb5_rd_req()
  */
 
-
-#include <krb5/krb5.h>
-
-#include <krb5/asn1.h>
-#include <krb5/ext-proto.h>
+#include "k5-int.h"
 
 /*
  *  Parses a KRB_AP_REQ message, returning its contents.

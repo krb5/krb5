@@ -24,9 +24,7 @@
  * krb5_walk_realm_tree()
  */
 
-
-#include <krb5/krb5.h>
-#include <krb5/ext-proto.h>
+#include "k5-int.h"
 #include "int-proto.h"
 
 /* internal function, used by krb5_get_cred_from_kdc() */

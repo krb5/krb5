@@ -24,11 +24,7 @@
  * krb5_get_in_tkt()
  */
 
-
-#include <krb5/krb5.h>
-#include <krb5/asn1.h>
-#include <krb5/los-proto.h>
-#include <krb5/ext-proto.h>
+#include "k5-int.h"
 
 /*
  All-purpose initial ticket routine, usually called via

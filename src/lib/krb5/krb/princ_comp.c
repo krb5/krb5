@@ -25,9 +25,7 @@
  * not.
  */
 
-
-#include <krb5/krb5.h>
-#include <krb5/ext-proto.h>
+#include "k5-int.h"
 
 krb5_boolean INTERFACE
 krb5_realm_compare(context, princ1, princ2)

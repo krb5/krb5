@@ -35,10 +35,7 @@
 #include <pwd.h>
 #include <netdb.h>
 
-#include <krb5/krb5.h>
-#include <krb5/asn1.h>
-#include <krb5/los-proto.h>
-#include <krb5/ext-proto.h>
+#include "k5-int.h"
 
 #define KRB5_DEFAULT_LIFE 60*60*8   /* 8 hours */
 /* helper function: convert flags to necessary KDC options */

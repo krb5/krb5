@@ -24,9 +24,7 @@
  * Build a principal from a list of lengths and strings
  */
 
-
-#include <krb5/krb5.h>
-#include <krb5/ext-proto.h>
+#include "k5-int.h"
 
 #if __STDC__ || defined(STDARG_PROTOTYPES)
 #include <stdarg.h>

@@ -27,11 +27,7 @@
  * characters in the principal name.
  */
 
-
-
-#include <krb5/krb5.h>
-#include <krb5/ext-proto.h>
-#include <krb5/los-proto.h>
+#include "k5-int.h"
 
 /*
  * converts a single-string representation of the name to the
@@ -190,10 +186,10 @@ krb5_parse_name(context, name, nprincipal)
 		else
 			krb5_princ_component(context, principal, i)->length = size;
 		if (i + 1 != components) {
-                        #ifndef _WINDOWS
+#ifndef _WINDOWS
 			fprintf(stderr,
 				"Programming error in krb5_parse_name!");
-                        #endif
+#endif
 			exit(1);
 		}
 	} else {

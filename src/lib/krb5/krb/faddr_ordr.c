@@ -24,9 +24,7 @@
  * krb5_fulladdr_order()
  */
 
-
-#include <krb5/krb5.h>
-#include <krb5/ext-proto.h>
+#include "k5-int.h"
 
 #ifndef min
 #define min(a,b) ((a) > (b) ? (a) : (b))

@@ -24,12 +24,7 @@
  * krb5_decrypt_tkt_part() function.
  */
 
-
-
-#include <krb5/krb5.h>
-#include <krb5/asn1.h>
-
-#include <krb5/ext-proto.h>
+#include "k5-int.h"
 
 /*
  Decrypts dec_ticket->enc_part

@@ -24,14 +24,7 @@
  * krb5_mk_rep()
  */
 
-
-#include <krb5/krb5.h>
-#include <krb5/asn1.h>
-
-#include <krb5/libos.h>
-#include <krb5/los-proto.h>
-
-#include <krb5/ext-proto.h>
+#include "k5-int.h"
 
 /*
  Formats a KRB_AP_REP message into outbuf.

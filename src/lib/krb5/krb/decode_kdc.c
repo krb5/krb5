@@ -24,12 +24,7 @@
  * krb5_decode_kdc_rep() function.
  */
 
-
-
-#include <krb5/krb5.h>
-#include <krb5/asn1.h>
-
-#include <krb5/ext-proto.h>
+#include "k5-int.h"
 
 /*
  Takes a KDC_REP message and decrypts encrypted part using etype and

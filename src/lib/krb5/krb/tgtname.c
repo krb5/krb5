@@ -24,9 +24,7 @@
  * krb5_tgtname()
  */
 
-
-#include <krb5/krb5.h>
-#include <krb5/ext-proto.h>
+#include "k5-int.h"
 
 /* This is an internal-only function, used by krb5_get_cred_from_kdc() */
 

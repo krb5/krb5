@@ -39,11 +39,7 @@
 
 #include <stdio.h>
 #include <time.h>
-#include <krb5/krb5.h>
-#include <krb5/ext-proto.h>
-#include <krb5/preauth.h>
-#include <krb5/mit-des.h>
-
+#include "k5-int.h"
 #include <syslog.h>
 
 static krb5_preauth_ops preauth_systems[] = {

@@ -24,11 +24,8 @@
  * krb5_send_tgs()
  */
 
+#include "k5-int.h"
 
-#include <krb5/krb5.h>
-#include <krb5/asn1.h>
-#include <krb5/los-proto.h>
-#include <krb5/ext-proto.h>
 /*
  Sends a request to the TGS and waits for a response.
  options is used for the options in the KRB_TGS_REQ.

@@ -24,10 +24,7 @@
  * krb5_encode_kdc_rep() function.
  */
 
-#include <krb5/krb5.h>
-#include <krb5/asn1.h>
-
-#include <krb5/ext-proto.h>
+#include "k5-int.h"
 
 /*
  Takes KDC rep parts in *rep and *encpart, and formats it into *enc_rep,

@@ -24,10 +24,7 @@
  * krb5_kdc_rep_decrypt_proc()
  */
 
-
-#include <krb5/krb5.h>
-#include <krb5/asn1.h>
-#include <krb5/ext-proto.h>
+#include "k5-int.h"
 
 /*
  * Decrypt the encrypted portion of the KDC_REP message, using the key

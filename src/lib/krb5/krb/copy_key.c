@@ -24,9 +24,7 @@
  * krb5_copy_keyblock()
  */
 
-
-#include <krb5/krb5.h>
-#include <krb5/ext-proto.h>
+#include "k5-int.h"
 
 /*
  * Copy a keyblock, including alloc'ed storage.

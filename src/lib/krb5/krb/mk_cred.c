@@ -28,10 +28,7 @@
 /* XXX Once we finalize the API, it should go into func-proto.h and */
 /* into the API doc. */
 
-#include <krb5/krb5.h>
-#include <krb5/ext-proto.h>
-#include <krb5/los-proto.h>
-#include <krb5/asn1.h>
+#include "k5-int.h"
 
 /* Create asn.1 encoded KRB-CRED message from the kdc reply. */
 krb5_error_code INTERFACE

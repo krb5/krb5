@@ -24,9 +24,7 @@
  * Allocate & prepare a default replay cache for a server.
  */
 
-
-#include <krb5/krb5.h>
-#include <krb5/ext-proto.h>
+#include "k5-int.h"
 #include <ctype.h>
 #include <stdio.h>
 

@@ -26,11 +26,7 @@
  * krb5_rd_req_decoded()
  */
 
-
-#include <krb5/krb5.h>
-#include <krb5/ext-proto.h>
-#include <krb5/los-proto.h>
-#include <krb5/asn1.h>
+#include "k5-int.h"
 
 /*
  * essentially the same as krb_rd_req, but uses a decoded AP_REQ as

@@ -24,11 +24,7 @@
  * krb5_mk_error() routine.
  */
 
-
-#include <krb5/krb5.h>
-#include <krb5/asn1.h>
-
-#include <krb5/ext-proto.h>
+#include "k5-int.h"
 
 /*
  formats the error structure *dec_err into an error buffer *enc_err.

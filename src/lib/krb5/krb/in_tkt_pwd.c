@@ -24,10 +24,7 @@
  * krb5_get_in_tkt_with_password()
  */
 
-
-#include <krb5/krb5.h>
-#include <krb5/ext-proto.h>
-#include <krb5/los-proto.h>
+#include "k5-int.h"
 
 extern char *krb5_default_pwd_prompt1;
 
