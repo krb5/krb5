@@ -120,13 +120,9 @@ krb5_unparse_name_ext(context, principal, name, size)
 		    switch (*cp) {
 		    case COMPONENT_SEP:
 		    case REALM_SEP:
-		    case '\0':
-			*q++ = '\\';
-			*q++ = *cp;
-			break;
 		    case '\\':
 			*q++ = '\\';
-			*q++ = '\\';
+			*q++ = *cp;
 			break;
 		    case '\t':
 			*q++ = '\\';
@@ -139,6 +135,10 @@ krb5_unparse_name_ext(context, principal, name, size)
 		    case '\b':
 			*q++ = '\\';
 			*q++ = 'b';
+			break;
+		    case '\0':
+			*q++ = '\\';
+			*q++ = '0';
 			break;
 		    default:
 			*q++ = *cp;
@@ -156,10 +156,21 @@ krb5_unparse_name_ext(context, principal, name, size)
 		switch (*cp) {
 		case COMPONENT_SEP:
 		case REALM_SEP:
-		case '\t':
 		case '\\':
 			*q++ = '\\';
 			*q++ = *cp;
+			break;
+		case '\t':
+			*q++ = '\\';
+			*q++ = 't';
+			break;
+		case '\n':
+			*q++ = '\\';
+			*q++ = 'n';
+			break;
+		case '\b':
+			*q++ = '\\';
+			*q++ = 'b';
 			break;
 		case '\0':
 			*q++ = '\\';

@@ -184,13 +184,23 @@ TEST_PROGS= t_walk_rtree t_kerb t_ser
 
 check-unix:: $(TEST_PROGS)
 	KRB5_CONFIG=$(srcdir)/t_krb5.conf ; export KRB5_CONFIG ;\
-	$(RUN_SETUP) ./t_kerb 425_conv_principal rcmd e40-po ATHENA.MIT.EDU \
-		 425_conv_principal rcmd mit ATHENA.MIT.EDU \
-		 425_conv_principal rcmd lithium ATHENA.MIT.EDU \
-		 425_conv_principal rcmd tweedledumb CYGNUS.COM \
-		 425_conv_principal rcmd uunet UU.NET \
-		 425_conv_principal zephyr zephyr ATHENA.MIT.EDU \
-		 425_conv_principal kadmin ATHENA.MIT.EDU ATHENA.MIT.EDU \
+	$(RUN_SETUP) ./t_kerb \
+		parse_name tytso \
+		parse_name tytso@SHAZAAM \
+		parse_name tytso/root@VEGGIE.COM \
+		parse_name tytso/tuber/carrot@VEGGIE.COM \
+		parse_name tytso/a/b/c/d/e/f/g/h/i/j/k/l/m/n/o/p/q/r/s/t \
+		parse_name tytso/a/b/c/d/e/f/g/h/i/j/k/l/m/n/o/p/q/r/s/t@FOO \
+		parse_name tytso\\\\0/\\0@B\\n\\t\\\\GAG \
+		parse_name tytso/\\n/\\b\\t@B\\0hacky-test \
+		parse_name \\/slash/\\@atsign/octa\\/thorpe@\\/slash\\@at\\/sign \
+		425_conv_principal rcmd e40-po ATHENA.MIT.EDU \
+		425_conv_principal rcmd mit ATHENA.MIT.EDU \
+		425_conv_principal rcmd lithium ATHENA.MIT.EDU \
+		425_conv_principal rcmd tweedledumb CYGNUS.COM \
+		425_conv_principal rcmd uunet UU.NET \
+		425_conv_principal zephyr zephyr ATHENA.MIT.EDU \
+		425_conv_principal kadmin ATHENA.MIT.EDU ATHENA.MIT.EDU \
 		> test.out
 	cmp test.out $(srcdir)/t_ref_kerb.out
 	$(RM) test.out

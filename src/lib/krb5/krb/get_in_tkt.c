@@ -354,6 +354,7 @@ make_preauth_list(context, ptypes, ret_list)
 	(*preauthp)->length = 0;
 	(*preauthp)->contents = 0;
     }
+    *preauthp = NULL;
     *ret_list = preauth_to_use;
     return 0;
 }

@@ -154,7 +154,6 @@ krb5_parse_name(context, name, nprincipal)
 		}
 		default_realm_size = strlen(default_realm);
 	    }
-	    krb5_princ_realm(context, principal)->length = default_realm_size;
 	    realmsize = default_realm_size;
 	}
 	/*
@@ -202,7 +201,6 @@ krb5_parse_name(context, name, nprincipal)
 		 */
 		for (i=0; i < components; i++)
 			krb5_princ_component(context, principal, i)->length = fcompsize[i];
-		krb5_princ_realm(context, principal)->length = realmsize;
 	}
 	/*	
 	 * Now, we need to allocate the space for the strings themselves.....
@@ -213,6 +211,7 @@ krb5_parse_name(context, name, nprincipal)
 		krb5_xfree(principal);
 		return ENOMEM;
 	}
+	krb5_princ_set_realm_length(context, principal, realmsize);
 	krb5_princ_set_realm_data(context, principal, tmpdata);
 	for (i=0; i < components; i++) {
 		char *tmpdata =
@@ -226,6 +225,7 @@ krb5_parse_name(context, name, nprincipal)
 			return(ENOMEM);
 		}
 		krb5_princ_component(context, principal, i)->data = tmpdata;
+		krb5_princ_component(context, principal, i)->magic = KV5M_DATA;
 	}
 	
 	/*
@@ -272,6 +272,7 @@ krb5_parse_name(context, name, nprincipal)
 	 */
 	krb5_princ_type(context, principal) = KRB5_NT_PRINCIPAL;
 	principal->magic = KV5M_PRINCIPAL;
+	principal->realm.magic = KV5M_DATA;
 	*nprincipal = principal;
 	return(0);
 }
