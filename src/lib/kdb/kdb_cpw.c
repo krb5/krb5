@@ -80,6 +80,9 @@ cleanup_key_data(context, count, data)
 {
     int i, j;
 
+    /* If data is NULL, count is always 0 */
+    if (data == NULL) return;
+
     for (i = 0; i < count; i++) {
 	for (j = 0; j < data[i].key_data_ver; j++) {
 	    if (data[i].key_data_length[j]) {

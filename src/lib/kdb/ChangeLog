@@ -1,3 +1,7 @@
+2001-10-30  Ezra Peisach  <epeisach@mit.edu>
+
+	* kdb_cpw.c (cleanup_key_data): Do not free NULL pointer.
+
 2001-10-26  Ezra Peisach  <epeisach@mit.edu>
 
 	* kdb_xdr.c (krb5_encode_princ_contents): Use krb5_ui_2 instead of
