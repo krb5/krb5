@@ -1,3 +1,9 @@
+Tue Sep 27 23:30:14 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* accept_security_context.c (krb5_gss_accept_sec_context):
+		  krb5_rc_dfl_close now frees the rcache structure, so
+		  this routine shouldn't.
+
 Wed Aug 17 15:47:26 1994  Theodore Y. Ts'o  (tytso at tsx-11)
 
 	* gssapi_krb5.c: Fixed OID for the krb5 mechanism.  (Transcription

@@ -222,7 +222,6 @@ OM_uint32 krb5_gss_accept_sec_context(minor_status, context_handle,
    if (code = krb5_rd_req(&ap_req, cred->princ, paddr, NULL, &rd_req_keyproc,
 			  (krb5_pointer) cred->keytab, rcache, &authdat)) {
       (void) krb5_rc_close(rcache);
-      xfree(rcache);
       *minor_status = code;
       return(GSS_S_FAILURE);
    }
@@ -230,7 +229,6 @@ OM_uint32 krb5_gss_accept_sec_context(minor_status, context_handle,
    /* close and free the rcache */
 
    krb5_rc_close(rcache);
-   xfree(rcache);
 
    /* make sure the necessary parts of the authdat are present */
 
