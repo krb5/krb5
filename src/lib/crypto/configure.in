@@ -5,6 +5,87 @@ AC_PROG_ARCHIVE
 AC_PROG_ARCHIVE_ADD
 AC_PROG_RANLIB
 AC_PROG_INSTALL
+dnl
+dnl Determine which cryptosystems we are enabling
+dnl
+AC_ARG_ENABLE([des-cbc-md5],
+[ --enable-des-cbc-md5		enable DES_CBC_MD5 (DEFAULT).
+ --disable-des-cbc-md5		disable DES_CBC_MD5.],
+,
+enableval=yes)dnl
+if test "$enableval" = yes; then
+	AC_MSG_RESULT(Enabling DES_CBC_MD5)
+	AC_DEFINE(PROVIDE_DES_CBC_MD5)
+else
+	AC_MSG_RESULT(Disabling DES_CBC_MD5)
+fi
+AC_ARG_WITH([des-cbc-crc],
+[ --enable-des-cbc-crc		enable DES_CBC_CRC (DEFAULT).
+ --disable-des-cbc-crc		disable DES_CBC_CRC.],
+,
+enableval=yes)dnl
+if test "$enableval" = yes; then
+	AC_MSG_RESULT(Enabling DES_CBC_CRC)
+	AC_DEFINE(PROVIDE_DES_CBC_CRC)
+else
+	AC_MSG_RESULT(Disabling DES_CBC_CRC)
+fi
+AC_ARG_WITH([raw-des-cbc],
+[ --enable-raw-des-cbc		enable RAW_DES_CBC (DEFAULT).
+ --disable-raw-des-cbc		disable RAW_DES_CBC.],
+,
+enableval=yes)dnl
+if test "$enableval" = yes; then
+	AC_MSG_RESULT(Enabling RAW_DES_CBC)
+	AC_DEFINE(PROVIDE_RAW_DES_CBC)
+else
+	AC_MSG_RESULT(Disabling RAW_DES_CBC)
+fi
+AC_ARG_WITH([des-cbc-cksum],
+[ --enable-des-cbc-cksum		enable DES_CBC_CKSUM (DEFAULT).
+ --disable-des-cbc-cksum	disable DES_CBC_CKSUM.],
+,
+enableval=yes)dnl
+if test "$enableval" = yes; then
+	AC_MSG_RESULT(Enabling DES_CBC_CKSUM)
+	AC_DEFINE(PROVIDE_DES_CBC_CKSUM)
+else
+	AC_MSG_RESULT(Disabling DES_CBC_CKSUM)
+fi
+AC_ARG_WITH([crc32],
+[ --enable-crc32			enable CRC32 (DEFAULT).
+ --disable-crc32		disable CRC32.],
+,
+enableval=yes)dnl
+if test "$enableval" = yes; then
+	AC_MSG_RESULT(Enabling CRC32)
+	AC_DEFINE(PROVIDE_CRC32)
+else
+	AC_MSG_RESULT(Disabling CRC32)
+fi
+AC_ARG_WITH([rsa-md4],
+[ --enable-rsa-md4		enable RSA_MD4 (DEFAULT).
+ --disable-rsa-md4		disable RSA_MD4.],
+,
+enableval=yes)dnl
+if test "$enableval" = yes; then
+	AC_MSG_RESULT(Enabling RSA_MD4)
+	AC_DEFINE(PROVIDE_RSA_MD4)
+else
+	AC_MSG_RESULT(Disabling RSA_MD4)
+fi
+AC_ARG_WITH([rsa-md5],
+[ --enable-rsa-md5		enable RSA_MD5 (DEFAULT).
+ --disable-rsa-md5		disable RSA_MD5.],
+,
+enableval=yes)dnl
+if test "$enableval" = yes; then
+	AC_MSG_RESULT(Enabling RSA_MD5)
+	AC_DEFINE(PROVIDE_RSA_MD5)
+else
+	AC_MSG_RESULT(Disabling RSA_MD5)
+fi
+
 V5_SHARED_LIB_OBJS
 SubdirLibraryRule([${OBJS}])
 DO_SUBDIRS
