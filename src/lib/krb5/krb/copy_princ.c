@@ -42,22 +42,33 @@ krb5_copy_principal(inprinc, outprinc)
 krb5_const_principal inprinc;
 krb5_principal *outprinc;
 {
-    krb5_error_code retval;
-    krb5_principal tempprinc;
-    register int nelems;
+    register krb5_principal tempprinc;
+    register int i, nelems;
 
-    for (nelems = 0; inprinc[nelems]; nelems++);
+    tempprinc = (krb5_principal)malloc(sizeof(krb5_principal_data));
 
-    /* one more for a null terminated list */
-    if (!(tempprinc = (krb5_principal) calloc(nelems+1, sizeof(krb5_data *))))
+    if (tempprinc == 0)
 	return ENOMEM;
 
-    for (nelems = 0; inprinc[nelems]; nelems++)
-	if (retval = krb5_copy_data(inprinc[nelems], &tempprinc[nelems])) {
-	    krb5_free_principal(tempprinc);
-	    return retval;
-	}
+    nelems = krb5_princ_size(inprinc);
+    tempprinc->data = malloc(nelems * sizeof(krb5_data));
 
+    if (tempprinc->data == 0) {
+	free((char *)tempprinc);
+	return ENOMEM;
+    }
+
+    for (i = 0; i < nelems; i++) {
+	int len = krb5_princ_component(inprinc, i)->length;
+	krb5_princ_component(tempprinc, i)->length = len;
+	if ((krb5_princ_component(tempprinc, i)->data = malloc(len)) == 0) {
+	    while (--i >= 0)
+		free(krb5_princ_component(tempprinc, i)->data);
+	    free (tempprinc->data);
+	    free (tempprinc);
+	    return ENOMEM;
+	}
+    }
     *outprinc = tempprinc;
     return 0;
 }
