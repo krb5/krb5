@@ -57,7 +57,7 @@ static errcode_t parse_std_line(line, state)
 {
 	char	*cp, ch, *tag, *value;
 	char	*p;
-	unsigned int retval;
+	errcode_t retval;
 	int do_subsection = 0;
 	void *iter = 0;
 	
