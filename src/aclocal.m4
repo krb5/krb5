@@ -656,8 +656,6 @@ changequote(,)dnl
 	-e 's,/\./,/,'		\
 	-e 'tLOOP'		\
 	-e 's,^\./,,'		\
-	-e 's,/\./$,/,g'	\
-	-e 's,^\./$,,'		\
 	-e 's,[^/]*/,../,g'	\
 	`
 changequote([,])dnl
@@ -671,7 +669,7 @@ changequote([,])dnl
 	-e ':LOOP'		\
 	-e 's,/\./,/,'		\
 	-e 'tLOOP'		\
-	-e 's,^\./$,,'		\
+	-e 's,^\./,,'		\
 	-e 's,/\.$,,g'		\
 	`
     test "$s" = "" && s=.

@@ -1,3 +1,8 @@
+Fri Mar 15 01:45:54 1996  Tom Yu  <tlyu@dragons-lair.MIT.EDU>
+
+	* aclocal.m4 (V5_OUTPUT_MAKEFILE): nuke some redundant sed rules
+		and also make sure that SRCTOP doesn't get a leading "./".
+
 Thu Mar 14 02:00:10 1996  Tom Yu  <tlyu@dragons-lair.MIT.EDU>
 
 	* aclocal.m4 (V5_OUTPUT_MAKEFILE): most seds don't deal with
