@@ -22,7 +22,7 @@
 #include <com_err.h>
 #include "ss_internal.h"
 
-#ifdef _STDARG_H_
+#if (defined(_STDARG_H_) || defined(_STDARG_H))
 #define STDARG
 #endif
 
