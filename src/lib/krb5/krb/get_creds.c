@@ -59,6 +59,9 @@ krb5_creds *creds;
     krb5_creds mcreds;
     krb5_flags fields;
 
+    if (!creds || !creds->server || !creds->client)
+	    return -EINVAL;
+
     memset((char *)&mcreds, 0, sizeof(mcreds));
     mcreds.server = creds->server;
     mcreds.client = creds->client;
