@@ -150,7 +150,7 @@ OtherdirLibraryTarget($(TOP)/lib,krb5,$(OBJS))
 KRB5-001.c:: KRB5-types.py
 	@echo '***Ignore the warning message "line XXXX: Warning: Can'\''t find UNIV.ph failed"'
 	$(PEPY) $(PYFLAGS) -b KRB5 KRB5-types.py
-KRB5-types.h: KRB5-types.c
+KRB5-types.h: KRB5-001.c
 
 KRB5-types.py:	KRB5-asn.py
 	$(POSY) $(POFLAGS) -o $@ KRB5-asn.py
@@ -158,4 +158,4 @@ KRB5-types.py:	KRB5-asn.py
 CopyHeader(KRB5-types.h,$(EHDRDIR))
 
 clean::
-	$(RM) KRB5-types.c KRB5.ph KRB5-types.py KRB5-types.h KRB5-???.c KRB5-oflist
+	$(RM) KRB5.ph KRB5-types.py KRB5-types.h KRB5-???.c
