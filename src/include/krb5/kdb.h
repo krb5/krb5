@@ -37,7 +37,16 @@ typedef struct _krb5_db_entry {
     krb5_principal mod_name;
     krb5_timestamp mod_date;
     krb5_flags attributes;
+    krb5_int32 salt_type:8,
+ 	       salt_length:24;
+    krb5_octet *salt;
 } krb5_db_entry;
+
+#define KRB5_KDB_SALTTYPE_NORMAL	0
+#define KRB5_KDB_SALTTYPE_V4		1
+#define KRB5_KDB_SALTTYPE_NOREALM	2
+#define KRB5_KDB_SALTTYPE_ONLYREALM	3
+#define KRB5_KDB_SALTTYPE_SPECIAL	4
 
 #define	KRB5_KDB_DISALLOW_POSTDATED	0x00000001
 #define	KRB5_KDB_DISALLOW_FORWARDABLE	0x00000002

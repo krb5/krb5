@@ -417,11 +417,12 @@ krb5_db_entry *entry;
     /* since there is some baggage pointing off of the entry
        structure, we'll encode it by writing the structure, with nulled
        pointers, followed by the unparsed principal name, then the key, and
-       then the unparsed mod_princ name.
+       then the unparsed mod_princ name, and then the salt (if any).
        */
     copy_princ = *entry;
     copy_princ.principal = 0;
     copy_princ.mod_name = 0;
+    copy_princ.salt = 0;
 
     if (retval = krb5_unparse_name(entry->principal, &unparse_princ))
 	return(retval);
@@ -432,7 +433,7 @@ krb5_db_entry *entry;
     princ_size = strlen(unparse_princ)+1;
     mod_size = strlen(unparse_mod_princ)+1;
     contents->dsize = sizeof(copy_princ)+ princ_size + mod_size
-		      + entry->key.length;
+		      + entry->key.length + entry->salt_length;
     contents->dptr = malloc(contents->dsize);
     if (!contents->dptr) {
 	free(unparse_princ);
@@ -449,6 +450,10 @@ krb5_db_entry *entry;
     (void) memcpy(nextloc, unparse_mod_princ, mod_size);
     nextloc += mod_size;
     (void) memcpy(nextloc, (char *)entry->key.contents, entry->key.length);
+    if (entry->salt) {
+	nextloc += entry->key.length;
+	(void) memcpy(nextloc, (char *)entry->salt, entry->salt_length);
+    }
     free(unparse_princ);
     free(unparse_mod_princ);
     return 0;
@@ -499,7 +504,8 @@ krb5_db_entry *entry;
     }
     entry->mod_name = mod_princ;
     nextloc += strlen(nextloc)+1;	/* advance past 2nd string */
-    keysize = contents->dsize - (nextloc - contents->dptr);
+    keysize = contents->dsize - (nextloc - contents->dptr) -
+	entry->salt_length;
     if (keysize <= 0) {
 	krb5_free_principal(princ);
 	krb5_free_principal(mod_princ);
@@ -519,7 +525,21 @@ krb5_db_entry *entry;
 	free((char *)entry->key.contents);
 	(void) memset((char *) entry, 0, sizeof(*entry));
 	return KRB5_KDB_TRUNCATED_RECORD;
-    }	
+    }
+    if (entry->salt_length) {
+	nextloc += keysize;
+	/* already determined above that sufficient space for this
+	   exists, since we factor entry->salt_length into the keysize
+	   calculations */
+	if (!(entry->salt = (krb5_octet *)malloc(entry->salt_length))) {
+	    krb5_free_principal(princ);
+	    krb5_free_principal(mod_princ);
+	    free((char *)entry->key.contents);
+	    (void) memset((char *) entry, 0, sizeof(*entry));
+	    return KRB5_KDB_TRUNCATED_RECORD;
+	}
+	(void) memcpy((char *)entry->salt, nextloc, entry->salt_length);
+    }
     return 0;
 }
 
@@ -530,6 +550,8 @@ krb5_db_entry *entry;
     /* erase the key */
     memset((char *)entry->key.contents, 0, entry->key.length);
     free((char *)entry->key.contents);
+    if (entry->salt_length)
+	free((char *)entry->salt);
 
     krb5_free_principal(entry->principal);
     krb5_free_principal(entry->mod_name);
