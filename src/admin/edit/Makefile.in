@@ -28,13 +28,14 @@ OBJS= kdb5_edit.o \
 	ss_wrapper.o \
 	getdate.o \
 	$(LIBOBJS)
+
 SRCS= $(srcdir)/kdb5_edit.c \
 	$(srcdir)/kdb5_ed_ct.c \
 	$(srcdir)/util.c \
 	$(srcdir)/dump.c \
 	$(srcdir)/ss_wrapper.c \
 	$(srcdir)/dumpv4.c \
-	$(srcdir)/getdate.o
+	$(srcdir)/getdate.c
 
 all:: kdb5_edit
 
