@@ -50,7 +50,8 @@ int send_token(int s, gss_buffer_t tok) {
 
     ret = send (s, (char *) &len, 4, 0);        // Send length over the socket
     if (ret < 0) {
-	    my_perror("sending token length");
+		errno = WSAGetLastError();
+		my_perror("sending token length");
         return -1;
     } else if (ret != 4) {
         OkMsgBox ("sending token length: %d of %d bytes written\n",
@@ -60,6 +61,7 @@ int send_token(int s, gss_buffer_t tok) {
 
     ret = send (s, tok->value, tok->length, 0); // Send the data
     if (ret < 0) {
+		errno = WSAGetLastError();
         my_perror("sending token data");
         return -1;
     } else if (ret != tok->length) {
@@ -97,8 +99,9 @@ recv_token (int s, gss_buffer_t tok) {
     int ret;
     unsigned long len;
 
-    ret = recv (s, (char *) &tok->length, 4, 0);
+    ret = recv (s, (char *) &len, 4, 0);
     if (ret < 0) {
+		errno = WSAGetLastError();
         my_perror("reading token length");
         return -1;
     } else if (ret != 4) {
@@ -107,7 +110,7 @@ recv_token (int s, gss_buffer_t tok) {
         return -1;
     }
 	  
-    len = ntohl(tok->length);
+    len = ntohl(len);
     tok->length = (size_t) len;
     tok->value = (char *) malloc(tok->length);
     if (tok->value == NULL) {
@@ -117,6 +120,7 @@ recv_token (int s, gss_buffer_t tok) {
 
     ret = recv (s, (char *) tok->value, tok->length, 0);
     if (ret < 0) {
+		errno = WSAGetLastError();
         my_perror("reading token data");
         free(tok->value);
         return -1;
@@ -172,7 +176,13 @@ display_status_1(char *m, OM_uint32 code, int type) {
             break;
     }
 }
-
+/*+*************************************************************************
+** 
+** OkMsgBox
+** 
+** A MessageBox version of printf
+** 
+***************************************************************************/
 void
 OkMsgBox (char *format, ...) {
     char buf[256];								// Message goes into here
@@ -180,9 +190,15 @@ OkMsgBox (char *format, ...) {
 
     args = (char *) &format + sizeof(format);
     vsprintf (buf, format, args);
-    MessageBox(NULL, buf, NULL, MB_OK);
+    MessageBox(NULL, buf, "", MB_OK);
 }
-
+/*+*************************************************************************
+** 
+** My_perror
+** 
+** A windows conversion of perror displaying the output into a MessageBox.
+** 
+***************************************************************************/
 void
 my_perror (char *msg) {
     char *err;

@@ -1,3 +1,8 @@
+Fri Apr 28 17:07:01 1995 Keith Vetter (keithv@fusion.com)
+
+	* gss-misc.c: bug with reading 4 bytes into a 2 byte entity.
+	* *.c, *.h, *.rc: changed UI -- not great but better.
+
 Fri Apr 28 11:45:23 1995 Keith Vetter (keithv@fusion.com)
 
 	* gss.rc: added an icon for the program.
@@ -5,3 +10,5 @@ Fri Apr 28 11:45:23 1995 Keith Vetter (keithv@fusion.com)
 Fri Apr 28 11:20:38 1995 Keith Vetter (keithv@fusion.com)
 
 	* Initial release
+
+

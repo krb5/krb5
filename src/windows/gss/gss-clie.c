@@ -9,7 +9,7 @@
  * in advertising or publicity pertaining to distribution of the software
  * without specific, written prior permission. OpenVision makes no
  * representations about the suitability of this software for any
- * purpose.	 It is provided "as is" without express or implied warranty.
+ * purpose. It is provided "as is" without express or implied warranty.
  * 
  * OPENVISION DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE,
  * INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO
@@ -35,7 +35,7 @@ const_gss_OID gss_nt_string_uid_name = oids+2;
 const_gss_OID gss_nt_service_name = oids+3;
 
 int
-gss (char *host, char *name, char *msg, u_short port)
+gss (char *host, char *name, char *msg, int port)
 {
 	if (port == 0 || port == -1)
         port = 4444;
