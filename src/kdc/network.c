@@ -40,8 +40,6 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 
-extern char *krb5_kdc_udp_portname;
-extern char *krb5_kdc_sec_udp_portname;
 extern int errno;
 extern short primary_port;
 
@@ -64,7 +62,7 @@ const char *prog;
     if (primary_port) {
 	 sin.sin_port = htons(primary_port);
     } else {
-	 sp = getservbyname(krb5_kdc_udp_portname, "udp");
+	 sp = getservbyname(KDC_PORTNAME, "udp");
 	 if (!sp)
 	     sin.sin_port = htons(KRB5_DEFAULT_PORT);
 	 else
@@ -87,15 +85,13 @@ const char *prog;
 	    select_nfsd = udp_port_fd+1;
 
     /*
-     * Now we set up the secondary listening port, if it is enabled
+     * Now we set up the secondary listening port
      */
-    if (!krb5_kdc_sec_udp_portname)
-	    return 0;		/* No secondary listening port defined */
 
-    sp = getservbyname(krb5_kdc_sec_udp_portname, "udp");
-    if (!sp && sin.sin_port != htons(KRB5_DEFAULT_SEC_PORT)) {
+    sp = getservbyname(KDC_SECONDARY_PORTNAME, "udp");
+    if (!sp && sin.sin_port == htons(KRB5_DEFAULT_SEC_PORT)) {
 	com_err(prog, 0, "%s/udp service unknown\n",
-		krb5_kdc_sec_udp_portname);
+		KDC_SECONDARY_PORTNAME);
 	return 0;		/* Don't give an error if we can't */
 				/* find it */
     }

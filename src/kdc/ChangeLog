@@ -1,3 +1,8 @@
+Sat Apr 22 00:36:37 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* network.c (setup_network): Don't rely on krb5_kdc_portname and
+		krb5_kdc_sec_portname anymore.  Use the #define'd versions.
+
 Fri Mar 31 16:50:07 1995  Theodore Y. Ts'o  (tytso@dcl)
 
 	* main.c (main): Make sure the context is initialized before it is
