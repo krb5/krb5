@@ -1,3 +1,8 @@
+Tue Dec 16 09:43:15 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* sclient.c (main): Free client principal and krb5_ap_rep_enc_part
+	    returned from krb5_sendauth when done using.
+
 Tue Feb  4 20:44:24 1997  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in:
