@@ -87,49 +87,16 @@ main(argc, argv)
 	    exit(1);
 	printf("OK, deleting database '%s'...\n", dbname);
     }
-#ifndef	BERK_DB_DBM
-    (void) strcpy(dbfilename, dbname);
-    (void) strcat(dbfilename, ".dir");
-    if (unlink(dbfilename) == -1) {
-	retval = errno;
-	com_err(argv[0], retval, "deleting database file '%s'",dbfilename);
-	if (retval == ENOENT)
-	    fprintf(stderr,
-		    "Database appears to not exist--inspect files manually!\n");
-	else
-	    fprintf(stderr,
-	        "Database may be partially deleted--inspect files manually!\n");
+
+    if (retval = krb5_db_set_name(context, dbname)) {
+	com_err(argv[0], retval, "'%s'",dbname);
 	exit(1);
     }
-    (void) strcpy(dbfilename, dbname);
-    (void) strcat(dbfilename, ".pag");
-    if (unlink(dbfilename) == -1) {
-	retval = errno;
-	com_err(argv[0], retval, "deleting database file '%s'",dbfilename);
-	fprintf(stderr,
-		"Database may be partially deleted--inspect files manually!\n");
+    if (retval = kdb5_db_destroy(context, dbname)) {
+	com_err(argv[0], retval, "deleting database '%s'",dbname);
 	exit(1);
     }
-#else	/* BERK_DB_DBM */
-    (void) strcpy(dbfilename, dbname);
-    (void) strcat(dbfilename, ".db");
-    if (unlink(dbfilename) == -1) {
-	retval = errno;
-	com_err(argv[0], retval, "deleting database file '%s'",dbfilename);
-	fprintf(stderr,
-		"Database may be partially deleted--inspect files manually!\n");
-	exit(1);
-    }
-#endif	/* BERK_DB_DBM */
-    (void) strcpy(dbfilename, dbname);
-    (void) strcat(dbfilename, ".ok");
-    if (unlink(dbfilename) == -1) {
-	retval = errno;
-	com_err(argv[0], retval, "deleting database file '%s'",dbfilename);
-	fprintf(stderr,
-		"Database partially deleted--inspect files manually!\n");
-	exit(1);
-    }
+
     printf("** Database '%s' destroyed.\n", dbname);
     exit(0);
 }
