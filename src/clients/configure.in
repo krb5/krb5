@@ -3,7 +3,13 @@ CONFIG_RULES
 AC_PROG_INSTALL
 KRB5_BUILD_PROGRAM
 AC_HEADER_STDARG
-AC_CHECK_FUNCS(getusershell lstat )
+AC_CHECK_FUNCS(getusershell lstat setenv)
+if test $ac_cv_func_setenv = no ; then
+  SETENVOBJ=setenv.o
+else
+  SETENVOBJ=
+fi
+AC_SUBST(SETENVOBJ)
 AC_CHECK_HEADERS(unistd.h pwd.h)
 case $krb5_cv_host in
 alpha-dec-osf*)

@@ -1,3 +1,8 @@
+1999-12-06  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Check for setenv.  Set SETENVOBJ to setenv.o if
+	it's not available, empty otherwise.
+
 1999-12-03  Danilo Almeida  <dalmeida@mit.edu>
 
 	* Makefile.in: Add kvno to Windows build.

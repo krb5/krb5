@@ -1,3 +1,47 @@
+1999-12-02  Ken Raeburn  <raeburn@mit.edu>
+
+	* krb_auth_su.c (krb5_get_tkt_via_passwd): Check length of
+	principal name before copying to fixed-size buffer.
+
+	* ccache.c (krb5_ccache_filter): Fix speling error.
+	(krb5_get_login_princ): Check length of home directory pathname.
+
+	* setenv.c: New file, copied from appl/bsd.
+	* Makefile.in (OBJS): Add @SETENVOBJ@.
+	(SRCS): Add setenv.c.
+
+	* xmalloc.c: New file, providing versions of malloc, calloc,
+	realloc, and strdup that print messages and exit if memory
+	allocation fails.
+	* ksu.h (xmalloc, xrealloc, xcalloc, xstrdup): Declare.
+	* Makefile.in (SRCS, OBJS): Use it.
+	* authorization.c, ccache.c, heuristic.c, main.c: Change all calls
+	to malloc, calloc, realloc, and strdup to call x* versions if the
+	return value is not checked before use.
+
+	* authorization.c (auth_cleanup): Ditch int arguments, check for
+	null pointers instead.
+	(krb5_authorization): Update calls.  Initialize file pointers to
+	null.
+	(init_auth_names): Check for buffer overflow.
+	(fcmd_resolve): Ensure enough buffer space is allocated.
+	(find_first_cmd_that_exists): Likewise.  Use strcat instead of
+	sprintf'ing a buffer into itself.
+
+	* krb_auth_su.c (dump_principal, plain_dump_principal): Reformat
+	slightly.
+
+	* main.c (cc_source_tag, cc_source_tag_tmp): Now point to const.
+	(main): Unset environment variable KRB5_CONFIG.  Delete -C
+	option.  Force an error if lifetime strings are over 14
+	characters.  Fix error message string if setluid fails.  Cast pid
+	to long for printing.  Call krb5_init_secure_context instead of
+	krb5_init_context and krb5_secure_config_files.
+	(main): Fix speling error.
+	(ontty): Check string size.
+	(get_dir_of_file): Argument now points to const.
+	* ksu.h (get_dir_of_file): Update declaration.
+
 1999-10-26  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,
