@@ -63,6 +63,11 @@ do_it (struct test_case *tcase)
 	else
 		salt.length = tcase->saltlen;
 
+	/*
+	 * Try passwords with lengths equal to, greater than, and less
+	 * than 8 characters, since the AFS s2k algorithm does
+	 * interesting stuff depending on the length.
+	 */
 	passwd.data = "My Password";
 	for (i = 0; i < 12; i++) {
 		passwd.length = i;
