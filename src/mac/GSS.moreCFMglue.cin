@@ -1,4 +1,4 @@
-#include <GSS.CFMglue.h>
+#include <GSSLib.glue.h>
 
 Boolean GSSAPILibraryIsPresent ()
 {

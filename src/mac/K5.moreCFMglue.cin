@@ -1,4 +1,4 @@
-#include <K5.CFMglue.h>
+#include <Kerberos5Lib.glue.h>
 
 Boolean KerberosV5LibraryIsPresent ()
 {
