@@ -176,6 +176,21 @@ gss_display_status(minor_status, status_value, status_type,
 }
 
 OM_uint32 INTERFACE
+gss_export_sec_context(minor_status, context_handle, interprocess_token)
+     OM_uint32		*minor_status;
+     gss_ctx_id_t	*context_handle;
+     gss_buffer_t	interprocess_token;
+{
+   if (!kg_context && kg_get_context())
+	   return GSS_S_FAILURE;
+   
+   return(krb5_gss_export_sec_context(kg_context,
+				      minor_status,
+				      context_handle,
+				      interprocess_token));
+}
+
+OM_uint32 INTERFACE
 gss_import_name(minor_status, input_name_buffer, input_name_type, output_name)
      OM_uint32 *minor_status;
      gss_buffer_t input_name_buffer;
@@ -187,6 +202,21 @@ gss_import_name(minor_status, input_name_buffer, input_name_type, output_name)
    
    return(krb5_gss_import_name(kg_context, minor_status, input_name_buffer,
 			       input_name_type, output_name));
+}
+
+OM_uint32 INTERFACE
+gss_import_sec_context(minor_status, interprocess_token, context_handle)
+     OM_uint32		*minor_status;
+     gss_buffer_t	interprocess_token;
+     gss_ctx_id_t	*context_handle;
+{
+   if (!kg_context && kg_get_context())
+	   return GSS_S_FAILURE;
+   
+   return(krb5_gss_import_sec_context(kg_context,
+				      minor_status,
+				      interprocess_token,
+				      context_handle));
 }
 
 OM_uint32 INTERFACE
