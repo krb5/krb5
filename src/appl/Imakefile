@@ -10,5 +10,5 @@
 #define IHaveSubdirs
 #define PassCDebugFlags
 
-SUBDIRS=sample common telnetd telnet
+SUBDIRS=sample telnet
 MakeSubdirs($(SUBDIRS))
