@@ -1,3 +1,12 @@
+Thu Feb 25 23:05:03 1999  Tom Yu  <tlyu@mit.edu>
+
+	* secure.c (secure_putbuf): Revert Sam's last change; if
+ 	FUDGE_FACTOR is wrong, then badness can happen.  Also, if
+ 	out_buf.length != nbytes+FUDGE_FACTOR, heap corruption could
+ 	happen.  We really should be using gss_wrap_size_limit() or
+ 	something like that, but doing so would require substantial
+ 	amounts of reworking. [krb5-appl/685]
+
 Tue Dec  1 18:10:47 1998  Tom Yu  <tlyu@mit.edu>
 
 	* ftp.c (login): Unconditionally send password as PROT_P.
