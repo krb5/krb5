@@ -74,7 +74,6 @@ krb5_sendauth(/* IN */
 	krb5_flags		kdc_options = krb5_kdc_default_options;
 	krb5_octet		result;
 	krb5_creds 		creds;
-	krb5_checksum		checksum;
 	krb5_error_code		retval = 0;
 	krb5_authenticator	authent;
 	krb5_data		inbuf, outbuf;
@@ -139,15 +138,6 @@ krb5_sendauth(/* IN */
 			krb5_free_cred_contents(&creds);
 			return(retval);
 		}
-	}
-
-	/*
-	 * If no checksum was provided, supply a zero checksum structure
-	 */
-	
-	if (!checksump) {
-		memset((char *)&checksum, 0, sizeof(checksum));
-		checksump = &checksum;
 	}
 
 	/*
