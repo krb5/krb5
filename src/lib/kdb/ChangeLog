@@ -1,3 +1,9 @@
+Sun Mar 16 21:20:00 1997  Tom Yu  <tlyu@mit.edu>
+
+	* keytab.c: Don't assume dbm_db_get_mkey() and dbe_find_enctype
+	won't error out.  Also, some gcc -Wall warning
+	cleanups. [krb5-kdc/361]
+
 Sat Feb 22 01:15:30 1997  Sam Hartman  <hartmans@tertius.mit.edu>
 
 	* Makefile.in (SHLIB_EXPLIBS): depend on -lcrypto
