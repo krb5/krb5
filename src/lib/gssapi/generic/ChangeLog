@@ -1,3 +1,9 @@
+2003-12-19  Ken Raeburn  <raeburn@mit.edu>
+
+	* gssapi_generic.c (const_oids): Renamed from oids, and now const.
+	(oids): New macro, casts const_oids to non-const pointer for use
+	in initializers.
+
 2003-12-13  Ken Raeburn  <raeburn@mit.edu>
 
 	* gssapiP_generic.h: Include k5-platform.h.

@@ -33,7 +33,8 @@
 
 /* Reserved static storage for GSS_oids.  Comments are quotes from RFC 2744. */
 
-static gss_OID_desc oids[] = {
+#define oids ((gss_OID_desc *)const_oids)
+static const gss_OID_desc const_oids[] = {
     /*
      * The implementation must reserve static storage for a
 	 * gss_OID_desc object containing the value */
