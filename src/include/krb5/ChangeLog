@@ -1,3 +1,8 @@
+1998-11-22  Miro Jurisic  <meeroh@.mit.edu>
+
+	* macsock.h: MacOS: only #define MACHOSTNAMELEN when not
+	already defined
+
 Wed May 19 11:35:18 1999  Danilo Almeida  <dalmeida@mit.edu>
 
 	* Makefile.in: Create build rules for windows instead of blindly

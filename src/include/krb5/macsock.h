@@ -82,7 +82,9 @@ typedef int SOCKET;
 #define SOCKET_EINTR		EINTR
 #define WSAECONNABORTED     kECONNABORTEDErr
 
+#ifndef MAXHOSTNAMELEN
 #define MAXHOSTNAMELEN      MAXHOSTNAMESIZE
+#endif
 
 #define	SOCKET_NFDS(f)		(FD_SETSIZE)	/* select()'s first arg is maxed out */
 
