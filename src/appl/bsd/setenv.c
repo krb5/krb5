@@ -19,6 +19,7 @@
 
 #include <sys/types.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #ifdef NEED_SETENV
 extern int setenv(char *, char *, int);
@@ -40,7 +41,6 @@ setenv(name, value, rewrite)
 	static int alloced;			/* if allocated space before */
 	register char *C;
 	int l_value, offset;
-	char *malloc(), *realloc();
 
 	if (*value == '=')			/* no `=' in value */
 		++value;

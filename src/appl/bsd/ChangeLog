@@ -1,3 +1,7 @@
+2001-07-23  Ezra Peisach  <epeisach@mit.edu>
+
+	* setenv.c (setenv): Include stdlib.h for malloc prototypes. 
+
 2001-07-14  Ken Raeburn  <raeburn@mit.edu>
 
 	* v4rcp.c (kstream_create_rcp_from_fd, kstream_create_from_fd):
