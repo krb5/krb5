@@ -1,3 +1,9 @@
+Sat Dec  6 02:26:16 1997  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in: Add cccopy.c.
+
+	* cccopy.c: New file; krb5_cc_copy_creds from Cygnus.
+
 Mon Sep 15 15:14:16 1997  Ezra Peisach  <epeisach@mit.edu>
 
 	* ccbase.c (krb5_cc_resolve): Incoming cache name is const.

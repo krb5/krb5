@@ -9,16 +9,19 @@ MAC_SUBDIRS = file stdio
 
 STLIBOBJS= \
 	ccbase.o \
+	cccopy.o \
 	ccdefault.o \
 	ccdefops.o \
 	ser_cc.o
 
 OBJS=	ccbase.$(OBJEXT) \
+	cccopy.$(OBJEXT) \
 	ccdefault.$(OBJEXT) \
 	ccdefops.$(OBJEXT) \
 	ser_cc.$(OBJEXT)
 
 SRCS=	$(srcdir)/ccbase.c \
+	$(srcdir)/cccopy.c \
 	$(srcdir)/ccdefault.c \
 	$(srcdir)/ccdefops.c \
 	$(srcdir)/ser_cc.c
