@@ -361,14 +361,14 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
     (void) write(s, locuser, strlen(locuser)+1);
     
     if (options & OPTS_FORWARD_CREDS) {   /* Forward credentials */
-	if (status = get_for_creds(ETYPE_DES_CBC_CRC,
-				   krb5_kdc_req_sumtype,
-				   hp->h_name,
-				   ret_cred->client,
-				   &ret_cred->keyblock,
-				   /* Forwardable TGT? */
-				   options & OPTS_FORWARDABLE_CREDS,
-				   &outbuf)) {
+	if (status = krb5_get_for_creds(ETYPE_DES_CBC_CRC,
+					krb5_kdc_req_sumtype,
+					hp->h_name,
+					ret_cred->client,
+					&ret_cred->keyblock,
+					/* Forwardable TGT? */
+					options & OPTS_FORWARDABLE_CREDS,
+					&outbuf)) {
 	    fprintf(stderr, "kcmd: Error getting forwarded creds\n");
 	    goto bad2;
 	}
