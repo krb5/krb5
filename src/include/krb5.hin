@@ -422,15 +422,9 @@ KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 		    size_t *length));
 
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
-    krb5_c_num_keyed_checksum_types
-    KRB5_PROTOTYPE((krb5_context context, krb5_enctype enctype, 
-		    unsigned int *count));
-
-KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
     krb5_c_keyed_checksum_types
     KRB5_PROTOTYPE((krb5_context context, krb5_enctype enctype, 
 		    unsigned int count, krb5_cksumtype *cksumtypes));
-
 
 #define KRB5_KEYUSAGE_AS_REQ_PA_ENC_TS		1
 #define KRB5_KEYUSAGE_KDC_REP_TICKET		2
@@ -458,7 +452,7 @@ KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 
 #define KRB5_KEYUSAGE_GSS_TOK_MIC		22
 #define KRB5_KEYUSAGE_GSS_TOK_WRAP_INTEG	23
-#define KRB5_KEYUSAGE_GSS_TOK_WRAP_PRIVINTEG	24
+#define KRB5_KEYUSAGE_GSS_TOK_WRAP_PRIV		24
 
 
 krb5_boolean KRB5_CALLCONV valid_enctype
@@ -1740,6 +1734,8 @@ KRB5_DLLIMP void KRB5_CALLCONV krb5_free_cred_enc_part
 	KRB5_PROTOTYPE((krb5_context, krb5_cred_enc_part FAR *));
 KRB5_DLLIMP void KRB5_CALLCONV krb5_free_checksum
 	KRB5_PROTOTYPE((krb5_context, krb5_checksum FAR *));
+KRB5_DLLIMP void KRB5_CALLCONV krb5_free_checksum_contents
+	KRB5_PROTOTYPE((krb5_context, krb5_checksum FAR *));
 KRB5_DLLIMP void KRB5_CALLCONV krb5_free_keyblock
 	KRB5_PROTOTYPE((krb5_context, krb5_keyblock FAR *));
 KRB5_DLLIMP void KRB5_CALLCONV krb5_free_keyblock_contents
@@ -1760,6 +1756,8 @@ KRB5_DLLIMP void KRB5_CALLCONV krb5_free_data_contents
 	KRB5_PROTOTYPE((krb5_context, krb5_data FAR *));
 KRB5_DLLIMP void KRB5_CALLCONV krb5_free_unparsed_name
 	KRB5_PROTOTYPE((krb5_context, char FAR *));
+KRB5_DLLIMP void KRB5_CALLCONV krb5_free_cksumtypes
+	KRB5_PROTOTYPE((krb5_context, krb5_cksumtype FAR *));
 
 /* From krb5/os but needed but by the outside world */
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_us_timeofday
