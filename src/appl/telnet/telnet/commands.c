@@ -1661,7 +1661,7 @@ env_cmd(argc, argv)
     if (c->narg + 2 != argc) {
 	fprintf(stderr,
 	    "Need %s%d argument%s to 'environ %s' command.  'environ ?' for help.\n",
-		c->narg < argc + 2 ? "only " : "",
+		c->narg < argc - 2 ? "only " : "",
 		c->narg, c->narg == 1 ? "" : "s", c->name);
 	return 0;
     }

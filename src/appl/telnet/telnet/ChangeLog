@@ -1,6 +1,12 @@
+Mon Oct 14 02:22:16 1996  Sam Hartman  <hartmans@mit.edu>
+
+	* commands.c (env_cmd): Print only' at correct times.  Patch from
+ 	jhawk. [
+75]
 Sat Sep 21 03:47:46 1996  Sam Hartman  <hartmans@mit.edu>
 
-	* telnet.c (telnet): Only support XDISPLOC if DISPLAY is supported, thanks to jik.
+	* telnet.c (telnet): Only support XDISPLOC if DISPLAY is
+ 	supported, thanks to jik.
 
 	* commands.c (tn): Save away arguments before memory used by other
  	functions.  Patch thanks to jik.
