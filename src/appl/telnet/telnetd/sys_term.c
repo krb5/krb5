@@ -1115,7 +1115,7 @@ startslave(host, autologin, autoname)
 		
 		pty_update_utmp (PTY_LOGIN_PROCESS, getpid(), "LOGIN", line,
 				 host, PTY_TTYSLOT_USABLE);
-		getptyslave(autologin);
+		getptyslave();
 
 		/* Notify our parent we're ready to continue.*/
 		write(syncpipe[1],"y",1);
