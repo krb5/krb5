@@ -44,4 +44,3 @@ mastermakefiles::
 	-$(MV) Makefile Makefile.bak
 	$(MAKE) -f Makefile.bak Makefile
 	$(MAKE) Makefiles
-	cd $(IMAKESRC); $(MAKE) clean
