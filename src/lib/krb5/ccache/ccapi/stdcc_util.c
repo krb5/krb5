@@ -187,7 +187,7 @@ void dupCCtoK5(krb5_context context, cc_creds *src, krb5_creds *dest) {
 	dest->keyblock.contents = (krb5_octet *)malloc(dest->keyblock.length);
 	memcpy(dest->keyblock.contents, src->keyblock.data, dest->keyblock.length);
 	
-	/* copy times *//
+	/* copy times */
 	dest->times.authtime = src->authtime;
 	dest->times.starttime = src->starttime;
 	dest->times.endtime = src->endtime;
