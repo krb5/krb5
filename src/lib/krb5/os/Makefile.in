@@ -310,7 +310,7 @@ hst_realm.so hst_realm.po $(OUTPRE)hst_realm.$(OBJEXT): hst_realm.c $(SRCTOP)/in
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
   $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
-  os-proto.h
+  os-proto.h $(SRCTOP)/include/fake-addrinfo.h
 init_os_ctx.so init_os_ctx.po $(OUTPRE)init_os_ctx.$(OBJEXT): init_os_ctx.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
