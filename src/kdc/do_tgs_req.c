@@ -62,6 +62,7 @@ krb5_data **response;			/* filled in with a response packet */
     krb5_keyblock *session_key;
     int newtransited = 0;
     krb5_timestamp until, rtime;
+    krb5_keyblock encrypting_key;
 
 	
     /* assume that we've already dealt with the AP_REQ header, so
@@ -328,7 +329,20 @@ krb5_data **response;			/* filled in with a response packet */
 	    return retval;
 	}
     } else {
-	if (retval = krb5_encrypt_tkt_part(&server.key, &ticket_reply)) {
+	/* convert server.key into a real key (it may be encrypted
+	   in the database) */
+	if (retval = kdc_convert_key(&server.key, &encrypting_key,
+				     CONVERT_OUTOF_DB)) {
+	    cleanup();
+	    return retval;
+	}
+
+	retval = krb5_encrypt_tkt_part(&encrypting_key, &ticket_reply);
+
+	bzero((char *)encrypting_key.contents, encrypting_key.length);
+	free((char *)encrypting_key.contents);
+
+	if (retval) {
 	    cleanup();
 	    return retval;
 	}
@@ -397,7 +411,7 @@ krb5_data **response;
     (void) strcpy(errpkt.text.data, error_message(error+KRB5KDC_ERR_NONE));
 
     if (!(scratch = (krb5_data *)malloc(sizeof(*scratch)))) {
-	free(errpkt.txt.data);
+	free(errpkt.text.data);
 	return ENOMEM;
     }
     retval = krb5_mk_error(&errpkt, scratch);

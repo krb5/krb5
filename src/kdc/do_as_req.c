@@ -65,6 +65,7 @@ krb5_data **response;			/* filled in with a response packet */
     krb5_boolean more;
     krb5_timestamp kdc_time;
     krb5_keyblock *session_key;
+    krb5_keyblock encrypting_key;
 
     krb5_timestamp until, rtime;
 
@@ -199,7 +200,18 @@ krb5_data **response;			/* filled in with a response packet */
     /* XXX need separate etypes for ticket encryption and kdc_rep encryption */
 
     ticket_reply.enc_part2 = &enc_tkt_reply;
-    if (retval = krb5_encrypt_tkt_part(&server.key, &ticket_reply)) {
+
+    /* convert server.key into a real key (it may be encrypted
+       in the database) */
+    if (retval = kdc_convert_key(&server.key, &encrypting_key,
+				 CONVERT_OUTOF_DB)) {
+	cleanup();
+	return retval;
+    }
+    retval = krb5_encrypt_tkt_part(&encrypting_key, &ticket_reply);
+    bzero((char *)encrypting_key.contents, encrypting_key.length);
+    free((char *)encrypting_key.contents);
+    if (retval) {
 	cleanup();
 	return retval;
     }
@@ -236,8 +248,17 @@ krb5_data **response;			/* filled in with a response packet */
 
     /* now encode/encrypt the response */
 
+    /* convert client.key into a real key (it may be encrypted
+       in the database) */
+    if (retval = kdc_convert_key(&client.key, &encrypting_key,
+				 CONVERT_OUTOF_DB)) {
+	cleanup();
+	return retval;
+    }
     retval = krb5_encode_kdc_rep(KRB5_AS_REP, &reply, &reply_encpart,
-				 &client.key, response);
+				 &encrypting_key, response);
+    bzero((char *)encrypting_key.contents, encrypting_key.length);
+    free((char *)encrypting_key.contents);
     cleanup();
     return retval;
 }
@@ -266,10 +287,10 @@ krb5_data **response;
     (void) strcpy(errpkt.text.data, error_message(error+KRB5KDC_ERR_NONE));
 
     if (!(scratch = (krb5_data *)malloc(sizeof(*scratch)))) {
-	free(errpkt.txt.data);
+	free(errpkt.text.data);
 	return ENOMEM;
     }
-    retval = encode_krb5_error(&errpkt, scratch);
+    retval = krb5_mk_error(&errpkt, scratch);
     free(errpkt.text.data);
     *response = scratch;
     return retval;
