@@ -1,3 +1,9 @@
+Mon Nov  4 23:12:06 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* server.c: We don't need the special case for linux anymore,
+ 		since we're including the output from rpcgen in the source
+ 		tree now.
+
 Thu Oct 31 13:14:45 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* Makefile.in (client,server): Use $(LD) instead of $(CC) in link

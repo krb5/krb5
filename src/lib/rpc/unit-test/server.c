@@ -20,17 +20,6 @@ static char *rcsid = "$Header$";
 #include <sys/param.h>	/* MAXHOSTNAMELEN */
 #include "rpc_test.h"
 
-#ifdef linux
-/*
-  For some reason, Linux's rpcgen names the server function
-  differently from the client function.  I suppose this is useful if
-  you want to include them both in the same library or something, but
-  not useful at all if you want to link the client code directly to
-  the server code for testing, instead of going through the RPC layer.
-  */
-#define rpc_test_echo_1 rpc_test_echo_1_svc
-#endif
-
 extern void rpc_test_prog_1();
 
 extern int svc_debug_gssapi, misc_debug_gssapi;
