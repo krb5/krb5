@@ -44,7 +44,10 @@ krb5_error_code  krb5_stdcc_generate_new
 	int err;
 	
   	//make sure the API has been intialized
-  	if (gCntrlBlock == NULL) cc_initialize(&gCntrlBlock, CC_API_VER_1, NULL, NULL);
+  	if (gCntrlBlock == NULL) {
+  	  err = cc_initialize(&gCntrlBlock, CC_API_VER_1, NULL, NULL);
+  	  if (err != CC_NOERROR) return err;
+    }
   	
   	//allocate the cache structure
   	newCache = (krb5_ccache) malloc(sizeof(struct _krb5_ccache));
@@ -79,8 +82,12 @@ krb5_error_code  krb5_stdcc_resolve
 	int err,pos;
 	char *cName;
 	
-  	if (gCntrlBlock == NULL) cc_initialize(&gCntrlBlock, CC_API_VER_1, NULL, NULL);
-  		
+  	//make sure the API has been intialized
+  	if (gCntrlBlock == NULL) {
+  	  err = cc_initialize(&gCntrlBlock, CC_API_VER_1, NULL, NULL);
+  	  if (err != CC_NOERROR) return err;
+    }
+    
     newCache = (krb5_ccache) malloc(sizeof(struct _krb5_ccache));
   	if (newCache == NULL) return KRB5_CC_NOMEM;
   	
@@ -111,11 +118,12 @@ krb5_error_code  krb5_stdcc_resolve
 
   {
   
-  	int err,err1, found;
-  	char cName[kStringLiteralLen];
-  	ccache_p *testNC;
+  	int err, err1, found;
+  	//char cName[kStringLiteralLen];
+  	char *cName = nil;
+  	ccache_p *testNC = NULL;
   	ccache_it *it;
-  	char *p, *targetName;
+  	char *p = NULL, *targetName = NULL;
   	
   	//test id for null
   	if (id == NULL) return KRB5_CC_NOMEM;
@@ -124,8 +132,12 @@ krb5_error_code  krb5_stdcc_resolve
   	if (gCntrlBlock == NULL)
   		return CC_NO_EXIST; 
   	 	
-	//create a principal name for the named cache 
-	sprintf(cName, "%s@%s", krb5_princ_name(context, princ)->data, krb5_princ_realm(context, princ)->data);
+	//create a principal name for the named cache
+	err = krb5_unparse_name(context, princ, &cName);
+	if (err)
+		return(err);
+		
+	//sprintf(cName, "%s@%s", krb5_princ_name(context, princ)->data, krb5_princ_realm(context, princ)->data);
 
 	//look for a cache already extant for this principal
 	it = NULL;
@@ -139,20 +151,22 @@ krb5_error_code  krb5_stdcc_resolve
 				cc_get_name(gCntrlBlock, testNC, &targetName);
 			}
 			cc_free_principal(gCntrlBlock, p);
+			err1 = cc_close(gCntrlBlock, &testNC);
 		}
-		err1 = cc_close(gCntrlBlock, &testNC);
 	}
 	
 	if (!found)  
 		//we didn't find one with the name we were looking for, use the one we had and change the name
 		cc_set_principal(gCntrlBlock, (((stdccCacheDataPtr)(id->data))->NamedCache), CC_CRED_V5, cName);
 	else {
- 		//we found a cache for this guy, lets trash ours and use that one
-		cc_destroy(gCntrlBlock, &(((stdccCacheDataPtr)(id->data))->NamedCache));
+ 		//we found a cache for this guy, lets trash ours and use that one - let's not; sgm 10/7/98
+		//cc_destroy(gCntrlBlock, &(((stdccCacheDataPtr)(id->data))->NamedCache));
 		err = cc_open(gCntrlBlock, targetName, CC_CRED_V5, 0L, &(((stdccCacheDataPtr)(id->data))->NamedCache));
 		if (err != CC_NOERROR) return err; //error opening
 		cc_free_name(gCntrlBlock, targetName);
 	}
+	
+	free(cName);
 	
 	return CC_NOERROR;
 	
@@ -164,7 +178,7 @@ krb5_error_code  krb5_stdcc_resolve
  krb5_error_code  krb5_stdcc_store 
         (krb5_context context, krb5_ccache id , krb5_creds *creds )  {
        
-       cred_union *cu;
+       cred_union *cu = NULL;
        int err;
        
 		
@@ -203,8 +217,8 @@ krb5_error_code  krb5_stdcc_next_cred
 		   krb5_creds *creds ) {
 
 	int err;
-	cred_union *credU;
-	cc_creds *c;
+	cred_union *credU = NULL;
+	cc_creds *c = NULL;
 	
 	err = cc_seq_fetch_creds(gCntrlBlock, ((stdccCacheDataPtr)(id->data))->NamedCache,
 							 &credU, (ccache_it **)cursor);
@@ -232,10 +246,11 @@ krb5_error_code  krb5_stdcc_retrieve
 		   krb5_creds *mcreds, 
 		   krb5_creds *creds ) {
 		   
-	krb5_cc_cursor curs;
+	krb5_cc_cursor curs = NULL;
 	krb5_creds *fetchcreds;
 		
 	fetchcreds = (krb5_creds *)malloc(sizeof(krb5_creds));
+  	if (fetchcreds == NULL) return KRB5_CC_NOMEM;
 	
 	//we're going to use the iterators
 	krb5_stdcc_start_seq_get(context, id, &curs);
@@ -314,7 +329,7 @@ krb5_stdcc_destroy (krb5_context context, krb5_ccache id ) {
 char *  krb5_stdcc_get_name 
         (krb5_context context, krb5_ccache id ) {
         
-       char *ret;
+       char *ret = NULL;
 	   int err;
 	   
 	   //just a wrapper
@@ -333,7 +348,7 @@ krb5_error_code
 krb5_stdcc_get_principal (krb5_context context, krb5_ccache id , krb5_principal *princ ) {
 
 	int err;
-	char *name;
+	char *name = NULL;
 	
 	//another wrapper
 	err = cc_get_principal(gCntrlBlock, (((stdccCacheDataPtr)(id->data))->NamedCache), &name);
@@ -360,7 +375,7 @@ krb5_error_code  krb5_stdcc_set_flags
 krb5_error_code  krb5_stdcc_remove 
         (krb5_context context, krb5_ccache id , krb5_flags flags, krb5_creds *creds ) {
     
-    	cred_union *cu;
+    	cred_union *cu = NULL;
     	int err;
     	
     	//convert to a cred union

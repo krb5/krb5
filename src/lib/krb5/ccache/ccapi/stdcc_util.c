@@ -11,6 +11,37 @@
 
 #define fieldSize 255
 
+/* on the Mac, we need the calls which allocate memory for the Credentials Cache to use
+   Ptr's in the system help, so that they stay global and so that bad things don't happen
+   when we call DisposePtr() on them.  However, on other systems, malloc is probably the
+   right thing to use.
+   So for any place where we allocate memory for the Credentials Cache, use sys_alloc() and
+   define it accordingly.
+*/
+
+#if defined(macintosh)
+#define sys_alloc(size) NewSafePtrSys(size)
+#else
+#define sys_alloc(size) malloc(size)
+#endif
+
+#if defined(macintosh)
+//stolen from CCacheUtils.c
+// -- NewSafePtrSys -----------------
+//  - analagous to NewSafePtr but memory is allocated in the system heap
+Ptr NewSafePtrSys(long size) {
+
+	Ptr retPtr;
+	
+	retPtr = NewPtrSys(size);
+	
+	if (retPtr != NULL)
+		HoldMemory(retPtr, size);
+	
+	return retPtr;
+}
+#endif
+
 // CopyCCDataArrayToK5
 // - copy and translate the null terminated arrays of data records
 //	 used in k5 tickets
@@ -91,19 +122,19 @@ int copyK5DataArrayToCC(krb5_creds *kc, cc_creds *cc, char whichArray) {
 	//calc number of records
 	while (*kbase++ != NULL) numRecords++;
 	//allocate new array
-	constCBase = cbase = (cc_data **)malloc((numRecords+1)*sizeof(char *));
+	constCBase = cbase = (cc_data **)sys_alloc((numRecords+1)*sizeof(char *));
 	//reset base
 	kbase = (whichArray == kAddressArray) ? kc->addresses : (krb5_address **)kc->authdata;
 		
 		
 	//copy records
 	while (*kbase != NULL) {
-		*cbase = (cc_data *)malloc(sizeof(krb5_address));
+		*cbase = (cc_data *)sys_alloc(sizeof(krb5_address));
 		kAdr = *kbase;
 		ccAdr = *cbase;
 		ccAdr->type = kAdr->addrtype;
 		ccAdr->length = kAdr->length;
-		ccAdr->data = (unsigned char *)malloc(ccAdr->length);
+		ccAdr->data = (unsigned char *)sys_alloc(ccAdr->length);
 		memcpy(ccAdr->data, kAdr->contents, kAdr->length);
 		//next element please
 		kbase++; cbase++;
@@ -168,33 +199,59 @@ void dupCCtoK5(krb5_context context, cc_creds *src, krb5_creds *dest) {
 // - analagous to above but in the reverse direction
 void dupK52cc(krb5_context context, krb5_creds *creds, cred_union **cu) {
 
-	  krb5_address **tA;
-	  krb5_authdata **tAd;
-	  cc_creds *c;
-	  int err;
+		krb5_address **tA;
+		krb5_authdata **tAd;
+		cc_creds *c;
+		int err;
+	#ifdef macintosh
+		char *tempname = NULL;
+	#endif
 	  
 		if (cu == NULL) return;
 		
 		//allocate the cred_union
-		*cu = (cred_union *)malloc(sizeof(cred_union));
+		*cu = (cred_union *)sys_alloc(sizeof(cred_union));
 		if ((*cu) == NULL) return;
 		(*cu)->cred_type = CC_CRED_V5;
 		
 		//allocate creds structure (and install)
-		c  = (cc_creds *)malloc(sizeof(cc_creds));
+		c  = (cc_creds *)sys_alloc(sizeof(cc_creds));
 		if (c == NULL) return;
 		(*cu)->cred.pV5Cred = c;
 		
 		//convert krb5 principals to flat principals
+	#ifdef macintosh
+		//and make sure the memory for c->client and c->server is on the system heap with NewPtr
+		//for the Mac (krb5_unparse_name puts it in appl heap with malloc)
+		err = krb5_unparse_name(context, creds->client, &tempname);
+		c->client = sys_alloc(strlen(tempname));
+		if (c->client != NULL)
+			strcpy(c->client,tempname);
+		free(tempname);
+		tempname = NULL;
+		
+		err = krb5_unparse_name(context, creds->server, &tempname);
+		c->server = sys_alloc(strlen(tempname));
+		if (c->server != NULL)
+			strcpy(c->server,tempname);
+		free(tempname);
+	#else
 		err = krb5_unparse_name(context, creds->client, &(c->client));
 		err = krb5_unparse_name(context, creds->server, &(c->server));
+	#endif
 		if (err) return;
 		
 		//copy more fields
 		c->keyblock.type = creds->keyblock.enctype;
 		c->keyblock.length = creds->keyblock.length;
-		c->keyblock.data = (unsigned char *)malloc(creds->keyblock.length);
-		memcpy(c->keyblock.data, creds->keyblock.contents, creds->keyblock.length);
+		
+		if (creds->keyblock.contents != NULL) {
+			c->keyblock.data = (unsigned char *)sys_alloc(creds->keyblock.length);
+			memcpy(c->keyblock.data, creds->keyblock.contents, creds->keyblock.length);
+		} else {
+			c->keyblock.data = NULL;
+		}
+		
 		c->authtime = creds->times.authtime;
 		c->starttime = creds->times.starttime;
 		c->endtime = creds->times.endtime;
@@ -205,12 +262,21 @@ void dupK52cc(krb5_context context, krb5_creds *creds, cred_union **cu) {
 		copyK5DataArrayToCC(creds, c, kAddressArray);	
 
 		c->ticket.length = creds->ticket.length;
-		c->ticket.data = (unsigned char *)malloc(creds->ticket.length);
-		memcpy(c->ticket.data, creds->ticket.data, creds->ticket.length); 
+		if (creds->ticket.data != NULL) {
+			c->ticket.data = (unsigned char *)sys_alloc(creds->ticket.length);
+			memcpy(c->ticket.data, creds->ticket.data, creds->ticket.length);
+		} else {
+			c->ticket.data = NULL;
+		}
+		
 		c->second_ticket.length = creds->second_ticket.length;
-		c->second_ticket.data = (unsigned char *)malloc(creds->second_ticket.length);
-		memcpy(c->second_ticket.data, creds->second_ticket.data, creds->second_ticket.length);
-
+		if (creds->second_ticket.data != NULL) {
+			c->second_ticket.data = (unsigned char *)sys_alloc(creds->second_ticket.length);
+			memcpy(c->second_ticket.data, creds->second_ticket.data, creds->second_ticket.length);
+		} else {
+			c->second_ticket.data = NULL;
+		}
+		
 		c->authdata = NULL;
 	
 	return;
