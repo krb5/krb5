@@ -25,6 +25,10 @@ static char rcsid_adm_listen[] =
   adm_listen.c
 */
 
+#ifdef _AIX
+#include <sys/select.h>
+#endif
+
 #include <krb5/krb5.h>
 #include <krb5/ext-proto.h>
 #include <krb5/los-proto.h>
@@ -43,10 +47,6 @@ static char rcsid_adm_listen[] =
 #include <netinet/in.h>
 #ifndef hpux
 #include <arpa/inet.h>
-#endif
-
-#ifdef _AIX
-#include <sys/select.h>
 #endif
 
 #include "adm_extern.h"

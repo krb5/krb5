@@ -42,14 +42,14 @@ static char rcsid_adm_fmt_inq[] =
 #include <com_err.h>
 #include <stdio.h>
 
-#if defined (unicos61) || (defined(mips) && defined(SYSTYPE_BSD43)) || defined(sysvimp)
-#include <time.h>
-#else
+#ifdef USE_SYS_TIME_H
 #include <sys/time.h>
-#endif  /* unicos61 */
-#if defined(aux20)
+#ifdef TIME_WITH_SYS_TIME
 #include <time.h>
-#endif  /* aux20 */
+#endif
+#else
+#include <time.h>
+#endif
 
 #define REALM_SEP	'@'
 #define REALM_SEP_STR	"@"
