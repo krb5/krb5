@@ -1,3 +1,7 @@
+2001-10-15  Danilo Almeida  <dalmeida@mit.edu>
+
+	* krb5.hin (krb5_kt_get_type): KRB5_CALLCONV.
+
 2001-10-12  Ken Raeburn  <raeburn@mit.edu>
 
 	* k5-int.h (struct _krb5_kt_ops, krb5_kt_ops, krb5_kt_dfl_ops):
