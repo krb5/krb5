@@ -235,6 +235,7 @@ void change_pwd_key(argc, argv)
     char *argv[];
 {
     krb5_key_salt_tuple	* ks_tuple = NULL;
+    krb5_int32		  n_ks_tuple = 0;
     krb5_error_code 	  retval;
     krb5_principal 	  newprinc;
     krb5_db_entry	  entry;
@@ -245,64 +246,30 @@ void change_pwd_key(argc, argv)
 
     if (argc < 2) {
 	com_err(argv[0], 0, "Too few arguments");
-	com_err(argv[0], 0, "Usage: %s [-<key_type[:<salt_type>]> principal",
+	com_err(argv[0], 0, "Usage: %s [<key_type[:<salt_type>]>] principal",
 		argv[0]);
     	exit_status++;
 	return;
     }
 
     for (i = 1; i < (argc - 1); i++) {
-        char * salt_type_name;
-
-	if (!ks_tuple) {
-	    ks_tuple = (krb5_key_salt_tuple *)malloc(
-		sizeof(krb5_key_salt_tuple));
-	} else {
-	    ks_tuple = (krb5_key_salt_tuple *)realloc(ks_tuple,
-	      sizeof(krb5_key_salt_tuple) * i);
-	}
-	if (!ks_tuple) {
-	    com_err(argv[0], 0, "Insufficient memory to proceed");
+	if (krb5_string_to_keysalts(argv[i],
+				    "",
+				    ":",
+				    0,
+				    &ks_tuple,
+				    &n_ks_tuple)) {
+	    com_err(argv[0], 0, "Unrecognized key/salt type %s", argv[i]);
 	    exit_status++;
 	    return;
 	}
-
-	while (salt_type_name = strchr(argv[i], ':')) {
-	    *salt_type_name++ = '\0';
-            if (!strcmp(salt_type_name, "v4")) {
-		ks_tuple[i - 1].ks_salttype = KRB5_KDB_SALTTYPE_V4;
-		break;
-	    }
-            if (!strcmp(salt_type_name, "normal")) {
-		ks_tuple[i - 1].ks_salttype = KRB5_KDB_SALTTYPE_NORMAL;
-		break;
-	    }
-            if (!strcmp(salt_type_name, "norealm")) {
-		ks_tuple[i - 1].ks_salttype = KRB5_KDB_SALTTYPE_NOREALM;
-		break;
-	    }
-            if (!strcmp(salt_type_name, "onlyrealm")) {
-		ks_tuple[i - 1].ks_salttype = KRB5_KDB_SALTTYPE_ONLYREALM;
-		break;
-	    }
-	    com_err(argv[0], 0, "Unknown salt type %s", salt_type_name);
-	    exit_status++;
-	    return;
-	}
-	    
-        if (!strcmp(argv[i], "des")) {
-	    ks_tuple[i - 1].ks_keytype = KRB5_KDB_SALTTYPE_ONLYREALM;
-	    continue;
-	}
-	com_err(argv[0], 0, "Unknown key type %s", argv[i]);
-	goto change_pwd_key_error;
     }
 
     switch (pre_key(argc, argv, &newprinc, &entry)) {
     case 1:
         /* Done with principal */ 
         krb5_free_principal(edit_context, newprinc);
-        enter_pwd_key(argv[0], argv[i], ks_tuple, i-1, &entry);
+        enter_pwd_key(argv[0], argv[i], ks_tuple, n_ks_tuple, &entry);
 	break;
     case 0:
     	com_err(argv[0], 0, "No principal '%s' exists", argv[i]);
@@ -327,7 +294,7 @@ void add_new_key(argc, argv)
 
     if (argc < 2) {
 	com_err(argv[0], 0, "Too few arguments");
-	com_err(argv[0], 0, "Usage: %s [-<key_type[:<salt_type>]> principal",
+	com_err(argv[0], 0, "Usage: %s [<key_type[:<salt_type>]>] principal",
 		argv[0]);
     	exit_status++;
 	return;

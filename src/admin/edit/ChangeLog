@@ -1,4 +1,9 @@
 
+Mon Aug 7 17:32:31 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* cpw.c - Use krb5_string_to_keysalts() to generate a list of unique
+		key/salt pairs supplied in argv.
+
+
 Mon Aug 07 11:16:03 1995  Chris Provenzano   (proven@mit.edu)
 
 	* cpw.c : Uses new kdb change password routines for ank, ark, cpw,
