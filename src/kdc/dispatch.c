@@ -31,6 +31,9 @@
 #include "kdc_util.h"
 #include "extern.h"
 #include "adm_proto.h"
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <string.h>
 
 krb5_error_code
 dispatch(pkt, from, portnum, response)
@@ -57,7 +60,7 @@ dispatch(pkt, from, portnum, response)
 	name = inet_ntop (from->address->addrtype, from->address->contents,
 			  buf, sizeof (buf));
 #else
-	if (addrtype == ADDRTYPE_INET) {
+	if (from->address->addrtype == ADDRTYPE_INET) {
 	    struct sockaddr_in *sin
 		= (struct sockaddr_in *)from->address->contents;
 	    strcpy (buf, inet_ntoa (sin->sin_addr));
