@@ -154,7 +154,7 @@
 #define LINEMODE                     1
 #define NEED_DAEMON_PROTO            1
 #define NEED_PARSETOS_PROTO          1
-#define NEED_SOCKETS                 1
+#define NEED_SOCKETS                 
 #define NO_UT_EXIT                   1
 #define NO_UT_PID                    1
 #define NO_UT_TYPE                   1
