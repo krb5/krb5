@@ -1334,7 +1334,7 @@ typedef struct _krb5_kt_ops {
     void * serializer;
 } krb5_kt_ops;
 
-#define krb5_kt_get_type(context, keytab) (*(keytab)->ops->prefix)
+#define krb5_kt_get_type(context, keytab) ((keytab)->ops->prefix)
 #define krb5_kt_get_name(context, keytab, name, namelen) krb5_x((keytab)->ops->get_name,(context, keytab,name,namelen))
 #define krb5_kt_close(context, keytab) krb5_x((keytab)->ops->close,(context, keytab))
 #define krb5_kt_get_entry(context, keytab, principal, vno, enctype, entry) krb5_x((keytab)->ops->get,(context, keytab, principal, vno, enctype, entry))
