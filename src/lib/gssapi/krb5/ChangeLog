@@ -1,3 +1,9 @@
+Thu Jul 25 20:21:33 1996  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
+
+	* Makefile.in: remove trailing backslash from comment under SRCS
+		because it was causing line that set OBJS variable to
+		become part of a comment
+
 Thu Jul 25 02:08:17 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* init_sec_context.c (krb5_gss_init_sec_context): Fixed error

@@ -68,7 +68,7 @@ SRCS = \
 	gssapi_err_krb5.c
 
 #	$(srcdir)/pname_to_uid.c \
-#	$(srcdir)/k5mech.c \
+#	$(srcdir)/k5mech.c
 
 OBJS = \
 	accept_sec_context.$(OBJEXT) \

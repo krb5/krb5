@@ -198,10 +198,12 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
 					 &ptr, KG_TOK_CTX_AP_REQ,
 					 input_token->length))) {
 	     *minor_status = err;
+	     abort();
 	     return(GSS_S_DEFECTIVE_TOKEN);
 	} else {
 	     if (! cred->prerfc_mech) {
 		  *minor_status = G_WRONG_MECH;
+		  syslog(5, "accept_sec_context: prerfc_mech");
 		  return(GSS_S_DEFECTIVE_TOKEN);
 	     }
 
@@ -210,6 +212,7 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
    } else {
 	if (! cred->rfc_mech) {
 	     *minor_status = G_WRONG_MECH;
+	     syslog(5, "accept_sec_context: rfc_mech");
 	     return(GSS_S_DEFECTIVE_TOKEN);
 	}
 
