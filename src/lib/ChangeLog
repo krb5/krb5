@@ -1,3 +1,8 @@
+Fri Jun  9 18:53:30 1995    <tytso@rsx-11.mit.edu>
+
+	* configure.in: Remove standardized set of autoconf macros, which
+		are now handled by CONFIG_RULES.
+
 Sun Jun  4 20:50:31 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* configure.in: Change order of library building to allow for

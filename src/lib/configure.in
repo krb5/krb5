@@ -1,7 +1,5 @@
 AC_INIT(configure.in)
-WITH_CCOPTS
 CONFIG_RULES
-AC_SET_BUILDTOP
 CONFIG_DIRS(crypto des425 kdb4 krb4 krb5 kdb gssapi kadm)
 AC_PROG_ARCHIVE
 AC_PROG_RANLIB
@@ -17,5 +15,4 @@ LinkFile(libkdb4.a, ./kdb4/libkdb4.a)
 AppendRule([all-unix:: all-unix-subdirs libkrb5.a libcrypto.a])
 AppendRule([all-unix:: libgssapi_krb5.a])
 AppendRule([all-unix:: libkrb4.a libkdb4.a])
-WITH_KRB5ROOT
 V5_AC_OUTPUT_MAKEFILE
