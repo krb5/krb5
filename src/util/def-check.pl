@@ -13,7 +13,7 @@ my $h_filename = shift @ARGV || die "usage: $0 header-file [def-file]\n";
 my $d_filename = shift @ARGV;
 
 my $h = open_always($h_filename);
-my $d = open_always($d_filename);
+my $d = open_always($d_filename) if $d_filename;
 
 sub open_always
 {
@@ -23,13 +23,16 @@ sub open_always
     return $handle;
 }
 
+my @convW = ();
 my @convC = ();
 my @convK = ();
 my @convD = ();
+my @vararg = ();
 
 my $len1;
 my %conv;
 my $printit;
+my $vararg;
 
 LINE:
 while (! $h->eof()) {
@@ -43,6 +46,13 @@ while (! $h->eof()) {
         next LINE;
     }
   Top:
+    # drop KRB5INT_BEGIN_DECLS and KRB5INT_END_DECLS
+    if (/^ *KRB5INT_BEGIN_DECLS/) {
+        next LINE;
+    }
+    if (/^ *KRB5INT_END_DECLS/) {
+        next LINE;
+    }
     # drop preprocessor directives
     if (/^ *#/) {
         next LINE;
@@ -119,9 +129,13 @@ while (! $h->eof()) {
     }
     s/[ \t]*$//;
     goto Notfunct unless /\(.*\)/;
+    # Get rid of KRB5_PROTOTYPE
+    s/KRB5_PROTOTYPE//;
+    s/KRB5_STDARG_P//;
     # here, is probably function decl
     # strip simple arg list - parens, no parens inside; discard, iterate.
     # the iteration should deal with function pointer args.
+    $vararg = /\.\.\./;
   Striparg:
     if (/ *\([^\(\)]*\)/) {
 	s/ *\([^\(\)]*\)//g;
@@ -129,20 +143,31 @@ while (! $h->eof()) {
     }
     # replace return type etc with one token indicating calling convention
     if (/CALLCONV/) {
-	if (/KRB5_CALLCONV_C/) {
+	if (/\bKRB5_CALLCONV_WRONG\b/) {
+	    s/^.*KRB5_CALLCONV_WRONG *//;
+	    die "Invalid function name: '$_'" if (!/^[A-Za-z0-9_]+$/);
+	    push @convW, $_;
+	    push @vararg, $_ if $vararg;
+	} elsif (/\bKRB5_CALLCONV_C\b/) {
 	    s/^.*KRB5_CALLCONV_C *//;
+	    die "Invalid function name: '$_'" if (!/^[A-Za-z0-9_]+$/);
 	    push @convC, $_;
-	} elsif (/KRB5_CALLCONV/) {
+	    push @vararg, $_ if $vararg;
+	} elsif (/\bKRB5_CALLCONV\b/) {
 	    s/^.*KRB5_CALLCONV *//;
+	    die "Invalid function name: '$_'" if (!/^[A-Za-z0-9_]+$/);
 	    push @convK, $_;
+	    push @vararg, $_ if $vararg;
 	} else {
-	    die;
+	    die "Unrecognized calling convention while parsing: '$_'\n";
 	}
 	goto Hadcallc;
     }
     # deal with no CALLCONV indicator
     s/^.* (\w+) *$/$1/;
+    die "Invalid function name: '$_'" if (!/^[A-Za-z0-9_]+$/);
     push @convD, $_;
+    push @vararg, $_ if $vararg;
   Hadcallc:
     goto Skipnotf;
   Notfunct:
@@ -157,15 +182,23 @@ while (! $h->eof()) {
 
 print join("\n\t", "Using default calling convention:", sort(@convD));
 print join("\n\t", "\nUsing KRB5_CALLCONV:", sort(@convK));
-print join("\n\t", "\nUsing KRB5_C_CALLCONV:", sort(@convC));
-print "\n";
+print join("\n\t", "\nUsing KRB5_CALLCONV_C:", sort(@convC));
+print join("\n\t", "\nUsing KRB5_CALLCONV_WRONG:", sort(@convW));
+print "\n","-"x70,"\n";
 
 %conv = ();
 map { $conv{$_} = "default"; } @convD;
-map { $conv{$_} = "KRB5"; } @convK;
-map { $conv{$_} = "KRB5_C"; } @convC;
+map { $conv{$_} = "KRB5_CALLCONV"; } @convK;
+map { $conv{$_} = "KRB5_CALLCONV_C"; } @convC;
+map { $conv{$_} = "KRB5_CALLCONV_WRONG"; } @convW;
 
-exit if !$d;
+my %vararg = ();
+map { $vararg{$_} = 1; } @vararg;
+
+if (!$d) {
+    print "No .DEF file specified\n";
+    exit;
+}
 
 LINE2:
 while (! $d->eof()) {
@@ -187,9 +220,11 @@ while (! $d->eof()) {
     s/[ \t]*//g;
     my($xconv);
     if (/!CALLCONV/) {
-	$xconv = "KRB5_C";
+	$xconv = "KRB5_CALLCONV_WRONG";
+    } elsif ($vararg{$_}) {
+	$xconv = "KRB5_CALLCONV_C";
     } else {
-	$xconv = "KRB5";
+	$xconv = "KRB5_CALLCONV";
     }
     s/;.*$//;
     if (!defined($conv{$_})) {
