@@ -22,13 +22,8 @@ all::
 #endif
 #ifdef UseSSInstalled
 SSDIR=
-all::
-	$(RM) include/ss
 #else
 SSDIR=ss
-all::
-	$(RM) include/ss
-	$(LN) ../ss include/ss
 #endif
         SUBDIRS = $(COMERRDIR) $(SSDIR) \
 			error_tables asn.1 lib kdc admin clients appl
