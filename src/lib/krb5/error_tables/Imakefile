@@ -1,3 +1,5 @@
+SRCS=isode_err.c kdb5_err.c krb5_err.c krb5_tc_err.c
+
 OBJS=isode_err.o kdb5_err.o krb5_err.o krb5_tc_err.o
 
 HDRS=isode_err.h kdb5_err.h krb5_err.h krb5_tc_err.h
@@ -7,4 +9,4 @@ ErrorTableObjectRule()
 
 NormalLibraryTarget (krberrs,$(OBJS))
 
-all:: ${HDRS}
+all:: ${HDRS} ${SRCS}
