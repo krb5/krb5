@@ -166,6 +166,9 @@ t_an_to_ln: $(T_AN_TO_LN_OBJS) $(KRB5_BASE_DEPLIBS)
 t_realm_iter: $(T_REALM_ITER_OBJS) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o t_realm_iter $(T_REALM_ITER_OBJS) $(KRB5_BASE_LIBS)
 
+t_mktime: gmt_mktime.c
+	$(CC) $(ALL_CFLAGS) -DTEST_LEAP -o t_mktime $(srcdir)/gmt_mktime.c
+
 t_localaddr: localaddr.c
 	$(CC) $(ALL_CFLAGS) -DTEST -o t_localaddr $(srcdir)/localaddr.c
 LCLINT=lclint
