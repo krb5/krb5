@@ -1,3 +1,8 @@
+Thu Oct 31 13:48:14 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* init_ctx.c (krb5_init_context): Make it more obvious that
+		default ticket lifetimes is not yet supported.
+
 Tue Sep 24 20:59:14 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* get_in_tkt.c (make_preauth_list): Correctly null-terminate the
