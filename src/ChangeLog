@@ -1,3 +1,8 @@
+1999-09-08  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in: Add install target for windows.  Remove references
+	to unused mit directory.
+
 1999-08-27  Danilo Almeida  <dalmeida@mit.edu>
 
 	* Makefile.in: Add some missing dirs needed for generating a proper
