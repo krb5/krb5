@@ -103,7 +103,7 @@ asn.1/Makefile::
 	fi; \
 	if [ "$$executeit" != "no" ]; then \
 		curdir=$(CURRENT_DIR)/; \
-		ImakeSubCmdHelper -DTOPDIR=$$top -DCURDIR=CURDIR/$$i -f$(SRCSUBDIR)Imakefile -s Makefile.new; \
+		$(IMAKE_CMD) -DTOPDIR=$$top -DCURDIR=CURDIR/$$i -f$(SRCSUBDIR)Imakefile -s Makefile.new; \
 		sed 's/^@/	@/' Makefile.new > Makefile.newer && $(MV) Makefile.newer Makefile.new ; \
 		$(MAKE) -f Makefile.new noop; \
 		if [ -f Makefile ]; then \
