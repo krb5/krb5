@@ -80,11 +80,11 @@ if ![info exists KRB5KDC] {
 }
 
 if ![info exists KADMIND] {
-    set KADMIND [findfile $objdir/../../kadmin/server/kadmind]
+    set KADMIND [findfile $objdir/../../kadmin.old/server/kadmind]
 }
 
 if ![info exists KADMIN] {
-    set KADMIN [findfile $objdir/../../kadmin/client/kadmin]
+    set KADMIN [findfile $objdir/../../kadmin.old/client/kadmin]
 }
 
 if ![info exists KINIT] {

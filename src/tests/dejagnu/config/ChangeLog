@@ -1,0 +1,5 @@
+Wed Apr 26 17:46:57 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* default.exp (KADMIND, KADMIN): use kadmind.old, since these test
+	the old server not the new (unfinished) one.
+
