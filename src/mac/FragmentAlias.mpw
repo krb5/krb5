@@ -1,0 +1,24 @@
+# StreamEdit script to find a GSSLibrary fragment in a derez output and
+# create an alias to it
+
+# If a line matches "/* [number] */", it's the first line of a cfrg array element.
+# copy the next 11 lines, and if the last one matches "GSSLibrary", print them out with
+# a different fragment name
+
+¥
+	Print "#include ¶"CodeFragments.r¶""
+
+/¶/¶* ¶[[0-9]*¶] ¶*¶//
+	Set FragEntry ""
+	
+/GSSLibrary/
+	Print "¶t¶t¶"MIT_¥GSSLib¶",¶t¶t"
+	Print FragEntry
+
+/K5Library/
+	Print "¶t¶t¶"MIT_¥Kerberos5Lib¶",¶t¶t"
+	Print FragEntry
+
+/Å/
+	Set -a FragEntry .
+	Set -a FragEntry "¶n"
