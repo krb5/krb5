@@ -1756,9 +1756,13 @@ int des_write(fd, buf, len)
 	    seeded = 1;
 	    srandom((int) time((long *)0));
 	}
+#if 0
 	garbage = random();
 	/* insert random garbage */
 	(void) memcpy(garbage_buf, &garbage, min(sizeof(long),8));
+#else
+	krb5_random_confounder(8, &garbage_buf);
+#endif
 	
 	/* this "right-justifies" the data in the buffer */
 	(void) memcpy(garbage_buf + 8 - len, buf, len);

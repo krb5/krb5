@@ -32,8 +32,6 @@ AC_FUNC_CHECK(initgroups,AC_DEFINE(HAVE_INITGROUPS))
 AC_FUNC_CHECK(setpriority,AC_DEFINE(HAVE_SETPRIORITY))
 AC_FUNC_CHECK(setreuid,AC_DEFINE(HAVE_SETREUID))
 AC_FUNC_CHECK(setresuid,AC_DEFINE(HAVE_SETRESUID))
-dnl if srand48 is there, use it (krlogind needs it)
-AC_FUNC_CHECK(srand48,AC_DEFINE(srandom,srand48) AC_DEFINE(random,lrand48))
 AC_FUNC_CHECK(sigprocmask,
 AC_COMPILE_CHECK([sigset_t],
 [#include <signal.h>],

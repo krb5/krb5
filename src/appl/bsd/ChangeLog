@@ -1,3 +1,11 @@
+Mon Oct 24 14:46:07 1994    (tytso@rsx-11)
+
+	* configure.in
+	* krlogin.c (des_write): Don't check for srand48 and then try to
+		define srandom to be srand48.  This breaks on machines
+		which have both srandom and srand48.  Instead, use
+		krb5_random_confounder; it will do the right thing.
+
 Wed Oct 19 12:36:47 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* krlogind.c (protocol): Change yet another variable to be an
