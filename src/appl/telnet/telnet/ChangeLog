@@ -1,3 +1,9 @@
+Wed Jul 27 22:49:18 1994  Tom Yu  (tlyu@dragons-lair)
+
+	* configure.in: add check for dbm libs
+
+	* commands.c: linux in_system.h (note "e") is broken
+
 Tue Jul 26 18:22:00 1994  Tom Yu  (tlyu@dragons-lair)
 
 	* Makefile.in: forgot some $(srcdir) stuff

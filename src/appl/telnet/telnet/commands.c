@@ -68,7 +68,11 @@ static char sccsid[] = "@(#)commands.c	8.1 (Berkeley) 6/6/93";
 #include "types.h"
 
 #if !defined(CRAY) && !defined(sysV88)
+#ifndef linux
 #include <netinet/in_systm.h>
+#else				/* someone broke the linux includes... */
+#include <netinet/in_system.h>
+#endif
 # if (defined(vax) || defined(tahoe) || defined(hp300)) && !defined(ultrix)
 # include <machine/endian.h>
 # endif /* vax */
