@@ -76,6 +76,13 @@ int main(int argc, char *argv[])
 	ignore_len = strlen(ignore_str);
 	argc--; argv++;
 	while (*argv && *argv[0] == '-') {
+		wflags[sizeof(wflags) - 1] = '\0';
+		if (strlen (wflags) + 1 + strlen (*argv) > sizeof (wflags) - 1) {
+			fprintf (stderr,
+				 "wconfig: argument list too long (internal limit %d)",
+				 sizeof (wflags));
+			exit (1);
+		}
 		if (wflags[0])
 			strcat(wflags, " ");
 		strcat(wflags, *argv);

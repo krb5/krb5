@@ -1,3 +1,8 @@
+2000-05-08  Nalin Dahyabhai  <nalin@redhat.com>
+
+	* wconfig.c (main): Warn if copying command-line option string
+	will overflow internal buffer.
+
 2000-05-03  Tom Yu  <tlyu@mit.edu>
 
 	* aclocal.m4 (AC_KRB5_TCL_TRYOLD): Search by appending stuff to
