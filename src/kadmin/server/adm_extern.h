@@ -26,8 +26,6 @@
  * <<< Description >>>
  */
 
-#include <krb5/copyright.h>
-
 #ifndef __ADM_EXTERN__
 #define __ADM_EXTERN__
 

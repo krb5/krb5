@@ -28,27 +28,14 @@
 #include <netdb.h>
 #include <signal.h>
 #include <string.h>
-#include <com_err.h>
+#include "com_err.h"
 
 #include <sys/param.h>
 #include <pwd.h>
 
-#include <krb5/adm_defs.h>
-
 #include <sys/stat.h>
 
-#include <krb5/krb5.h>
-#include <krb5/kdb.h>
-#include <krb5/kdb_dbm.h>
-#include <krb5/ext-proto.h>
-#include <krb5/los-proto.h>
-#include <krb5/asn1.h>
-#include <krb5/config.h>
-#include <krb5/base-defs.h>
-#include <krb5/adm_err.h>
-#include <krb5/errors.h>
-#include <krb5/kdb5_err.h>
-#include <krb5/krb5_err.h>
+#include "k5-int.h"
 
 #ifndef MAXPATHLEN
 #define MAXPATHLEN 1024

@@ -29,19 +29,13 @@
 #include <signal.h>
 #include <string.h>
 #include <pwd.h>
-#include <com_err.h>
+#include "com_err.h"
 
 #ifndef MAXPATHLEN
 #define MAXPATHLEN 1024
 #endif
 
-#include <krb5/adm_defs.h>
-
-#include <krb5/krb5.h>
-#include <krb5/ext-proto.h>
-#include <krb5/los-proto.h>
-#include <krb5/kdb.h>
-#include <krb5/kdb_dbm.h>
+#include "k5-int.h"
 
 static krb5_error_code get_first_ticket 
 	PROTOTYPE((krb5_context,

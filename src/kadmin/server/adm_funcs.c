@@ -27,8 +27,7 @@
  * Modify the Kerberos Database
  */
 
-
-#include <com_err.h>
+#include "com_err.h"
 #include <sys/types.h>
  
 #include <sys/socket.h>
@@ -37,20 +36,9 @@
 #include <arpa/inet.h>
 #endif
 
-#include <krb5/krb5.h>
-#include <krb5/ext-proto.h>
-#include <krb5/los-proto.h>
-#include <krb5/kdb.h>
-#include <krb5/kdb_dbm.h>
-#include <krb5/asn1.h>
-
-#include <krb5/adm_defs.h>
+#include "k5-int.h"
+#include "adm_err.h"
 #include "adm_extern.h"
-
-#include <krb5/adm_err.h>
-#include <krb5/errors.h>
-#include <krb5/kdb5_err.h>
-#include <krb5/krb5_err.h>
 
 struct saltblock {
     int salttype;

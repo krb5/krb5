@@ -30,7 +30,7 @@
 
 #include <sys/types.h>
 #include <syslog.h>
-#include <com_err.h>
+#include "com_err.h"
 
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -38,13 +38,7 @@
 #include <arpa/inet.h>
 #endif
 
-#include <krb5/krb5.h>
-#include <krb5/ext-proto.h>
-#include <krb5/los-proto.h>
-#include <krb5/kdb.h>
-#include <krb5/kdb_dbm.h>
-
-#include <krb5/adm_defs.h>
+#include "k5-int.h"
 #include "adm_extern.h"
 
 #ifdef SANDIA

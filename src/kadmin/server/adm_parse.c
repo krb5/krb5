@@ -27,7 +27,6 @@
  *
  * Edit a KDC database.
  */
-
  
 #include <syslog.h>
 #include <stdio.h>
@@ -41,9 +40,7 @@
 #include <time.h>
 #endif  /* aux20 */
 
-#include <krb5/krb5.h>
-#include <krb5/kdb.h>
-#include <krb5/kdb_dbm.h>
+#include "k5-int.h"
 
 void
 kadmin_parse_and_set(input_string)

@@ -27,13 +27,7 @@
  * allocations of adm_extern stuff
  */
 
-
-#include <krb5/copyright.h>
-
-#include <krb5/krb5.h>
-#include <krb5/kdb.h>
-#include <krb5/kdb_dbm.h>
-#include <krb5/osconf.h>
+#include "k5-int.h"
 
 /* real declarations of KDC's externs */
 krb5_encrypt_block master_encblock;

@@ -26,15 +26,9 @@
 #include <netinet/in.h>
 #include <netdb.h>
 #include <string.h>
-#include <com_err.h>
+#include "com_err.h"
 
-#include <krb5/adm_defs.h>
-
-#include <krb5/krb5.h>
-#include <krb5/ext-proto.h>
-#include <krb5/los-proto.h>
-#include <krb5/kdb.h>
-#include <krb5/kdb_dbm.h>
+#include "k5-int.h"
 
 krb5_error_code
 kadm_done(context, my_creds, rep_ret, local_addr, foreign_addr, 

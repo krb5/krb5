@@ -83,14 +83,7 @@ typedef struct {
 } V4_Principal;
 
         /* V5 Definitions */
-#include <krb5/adm_defs.h>
-#include <krb5/krb5.h>
-#include <krb5/osconf.h>
-#include <krb5/kdb.h>
-#include <krb5/kdb_dbm.h>
-#include <krb5/encryption.h>
-#include <krb5/mit-des.h>
-
+#include "k5-int.h"
 #include "adm_extern.h"
 
 struct saltblock {

@@ -24,16 +24,11 @@
 #include <sys/select.h>
 #endif
 
-#include <krb5/krb5.h>
-#include <krb5/ext-proto.h>
-#include <krb5/los-proto.h>
-#include <krb5/adm_defs.h>
-#include <krb5/sysincl.h>
-#include <krb5/kdb.h>
+#include "k5-int.h"
 
 #include <syslog.h>
 #include <signal.h>
-#include <com_err.h>
+#include "com_err.h"
 
 #ifndef sigmask
 #define sigmask(m)    (1 <<((m)-1))
