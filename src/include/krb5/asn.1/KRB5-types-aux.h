@@ -50,12 +50,15 @@
 #undef encode_KRB5_TicketFlags
 #undef encode_KRB5_AS__REQ
 #undef encode_KRB5_TGS__REQ
+#undef encode_KRB5_KDC__REQ
 #undef encode_KRB5_PA__DATA
 #undef encode_KRB5_KDC__REQ__BODY
 #undef encode_KRB5_AS__REP
 #undef encode_KRB5_TGS__REP
+#undef encode_KRB5_KDC__REP
 #undef encode_KRB5_EncASRepPart
 #undef encode_KRB5_EncTGSRepPart
+#undef encode_KRB5_EncKDCRepPart
 #undef encode_KRB5_AP__REQ
 #undef encode_KRB5_APOptions
 #undef encode_KRB5_AP__REP
@@ -84,12 +87,15 @@
 #undef decode_KRB5_TicketFlags
 #undef decode_KRB5_AS__REQ
 #undef decode_KRB5_TGS__REQ
+#undef decode_KRB5_KDC__REQ
 #undef decode_KRB5_PA__DATA
 #undef decode_KRB5_KDC__REQ__BODY
 #undef decode_KRB5_AS__REP
 #undef decode_KRB5_TGS__REP
+#undef decode_KRB5_KDC__REP
 #undef decode_KRB5_EncASRepPart
 #undef decode_KRB5_EncTGSRepPart
+#undef decode_KRB5_EncKDCRepPart
 #undef decode_KRB5_AP__REQ
 #undef decode_KRB5_APOptions
 #undef decode_KRB5_AP__REP
@@ -114,12 +120,15 @@
 #undef free_KRB5_Authenticator
 #undef free_KRB5_AS__REQ
 #undef free_KRB5_TGS__REQ
+#undef free_KRB5_KDC__REQ
 #undef free_KRB5_PA__DATA
 #undef free_KRB5_KDC__REQ__BODY
 #undef free_KRB5_AS__REP
 #undef free_KRB5_TGS__REP
+#undef free_KRB5_KDC__REP
 #undef free_KRB5_EncASRepPart
 #undef free_KRB5_EncTGSRepPart
+#undef free_KRB5_EncKDCRepPart
 #undef free_KRB5_AP__REQ
 #undef free_KRB5_AP__REP
 #undef free_KRB5_EncAPRepPart
@@ -149,12 +158,15 @@ int encode_KRB5_Authenticator P_TYPE_((PE *, int , integer , char *, struct type
 int encode_KRB5_TicketFlags P_TYPE_((PE *, int , integer , char *, struct type_KRB5_TicketFlags *));
 int encode_KRB5_AS__REQ P_TYPE_((PE *, int , integer , char *, struct type_KRB5_AS__REQ *));
 int encode_KRB5_TGS__REQ P_TYPE_((PE *, int , integer , char *, struct type_KRB5_TGS__REQ *));
+int encode_KRB5_KDC__REQ P_TYPE_((PE *, int , integer , char *, struct type_KRB5_KDC__REQ *));
 int encode_KRB5_PA__DATA P_TYPE_((PE *, int , integer , char *, struct type_KRB5_PA__DATA *));
 int encode_KRB5_KDC__REQ__BODY P_TYPE_((PE *, int , integer , char *, struct type_KRB5_KDC__REQ__BODY *));
 int encode_KRB5_AS__REP P_TYPE_((PE *, int , integer , char *, struct type_KRB5_AS__REP *));
 int encode_KRB5_TGS__REP P_TYPE_((PE *, int , integer , char *, struct type_KRB5_TGS__REP *));
+int encode_KRB5_KDC__REP P_TYPE_((PE *, int , integer , char *, struct type_KRB5_KDC__REP *));
 int encode_KRB5_EncASRepPart P_TYPE_((PE *, int , integer , char *, struct type_KRB5_EncASRepPart *));
 int encode_KRB5_EncTGSRepPart P_TYPE_((PE *, int , integer , char *, struct type_KRB5_EncTGSRepPart *));
+int encode_KRB5_EncKDCRepPart P_TYPE_((PE *, int , integer , char *, struct type_KRB5_EncKDCRepPart *));
 int encode_KRB5_AP__REQ P_TYPE_((PE *, int , integer , char *, struct type_KRB5_AP__REQ *));
 int encode_KRB5_APOptions P_TYPE_((PE *, int , integer , char *, struct type_KRB5_APOptions *));
 int encode_KRB5_AP__REP P_TYPE_((PE *, int , integer , char *, struct type_KRB5_AP__REP *));
@@ -182,13 +194,16 @@ int decode_KRB5_EncTicketPart P_TYPE_((PE , int , integer *, char **, struct typ
 int decode_KRB5_Authenticator P_TYPE_((PE , int , integer *, char **, struct type_KRB5_Authenticator **));
 int decode_KRB5_TicketFlags P_TYPE_((PE , int , integer *, char **, struct type_KRB5_TicketFlags **));
 int decode_KRB5_AS__REQ P_TYPE_((PE , int , integer *, char **, struct type_KRB5_AS__REQ **));
+int decode_KRB5_KDC__REQ P_TYPE_((PE , int , integer *, char **, struct type_KRB5_KDC__REQ **));
 int decode_KRB5_TGS__REQ P_TYPE_((PE , int , integer *, char **, struct type_KRB5_TGS__REQ **));
 int decode_KRB5_PA__DATA P_TYPE_((PE , int , integer *, char **, struct type_KRB5_PA__DATA **));
 int decode_KRB5_KDC__REQ__BODY P_TYPE_((PE , int , integer *, char **, struct type_KRB5_KDC__REQ__BODY **));
 int decode_KRB5_AS__REP P_TYPE_((PE , int , integer *, char **, struct type_KRB5_AS__REP **));
 int decode_KRB5_TGS__REP P_TYPE_((PE , int , integer *, char **, struct type_KRB5_TGS__REP **));
+int decode_KRB5_KDC__REP P_TYPE_((PE , int , integer *, char **, struct type_KRB5_KDC__REP **));
 int decode_KRB5_EncASRepPart P_TYPE_((PE , int , integer *, char **, struct type_KRB5_EncASRepPart **));
 int decode_KRB5_EncTGSRepPart P_TYPE_((PE , int , integer *, char **, struct type_KRB5_EncTGSRepPart **));
+int decode_KRB5_EncKDCRepPart P_TYPE_((PE , int , integer *, char **, struct type_KRB5_EncKDCRepPart **));
 int decode_KRB5_AP__REQ P_TYPE_((PE , int , integer *, char **, struct type_KRB5_AP__REQ **));
 int decode_KRB5_APOptions P_TYPE_((PE , int , integer *, char **, struct type_KRB5_APOptions **));
 int decode_KRB5_AP__REP P_TYPE_((PE , int , integer *, char **, struct type_KRB5_AP__REP **));
@@ -214,12 +229,15 @@ void free_KRB5_EncTicketPart P_TYPE_((struct type_KRB5_EncTicketPart *));
 void free_KRB5_Authenticator P_TYPE_((struct type_KRB5_Authenticator *));
 void free_KRB5_AS__REQ P_TYPE_((struct type_KRB5_AS__REQ *));
 void free_KRB5_TGS__REQ P_TYPE_((struct type_KRB5_TGS__REQ *));
+void free_KRB5_KDC__REQ P_TYPE_((struct type_KRB5_KDC__REQ *));
 void free_KRB5_PA__DATA P_TYPE_((struct type_KRB5_PA__DATA *));
 void free_KRB5_KDC__REQ__BODY P_TYPE_((struct type_KRB5_KDC__REQ__BODY *));
 void free_KRB5_AS__REP P_TYPE_((struct type_KRB5_AS__REP *));
 void free_KRB5_TGS__REP P_TYPE_((struct type_KRB5_TGS__REP *));
+void free_KRB5_KDC__REP P_TYPE_((struct type_KRB5_KDC__REP *));
 void free_KRB5_EncASRepPart P_TYPE_((struct type_KRB5_EncASRepPart *));
 void free_KRB5_EncTGSRepPart P_TYPE_((struct type_KRB5_EncTGSRepPart *));
+void free_KRB5_EncKDCRepPart P_TYPE_((struct type_KRB5_EncKDCRepPart *));
 void free_KRB5_AP__REQ P_TYPE_((struct type_KRB5_AP__REQ *));
 void free_KRB5_AP__REP P_TYPE_((struct type_KRB5_AP__REP *));
 void free_KRB5_EncAPRepPart P_TYPE_((struct type_KRB5_EncAPRepPart *));

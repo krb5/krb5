@@ -69,8 +69,8 @@ krb5_enc_data *KRB5_EncryptedData2krb5_enc_data
 	PROTOTYPE((const struct type_KRB5_EncryptedData *, int *));
 
 /* ekrp2kekrp.c */
-krb5_enc_kdc_rep_part *KRB5_EncTGSRepPart2krb5_enc_kdc_rep_part
-	PROTOTYPE((const struct type_KRB5_EncTGSRepPart *, int *));
+krb5_enc_kdc_rep_part *KRB5_EncKDCRepPart2krb5_enc_kdc_rep_part
+	PROTOTYPE((const struct type_KRB5_EncKDCRepPart *, int *));
 
 /* enck2kkey.c */
 krb5_keyblock *KRB5_EncryptionKey2krb5_keyblock
@@ -112,10 +112,6 @@ struct type_KRB5_AP__REQ *krb5_ap_req2KRB5_AP__REQ
 struct type_KRB5_EncAPRepPart *krb5_ap_rep_enc_part2KRB5_EncAPRepPart
 	PROTOTYPE((const krb5_ap_rep_enc_part *, int *));
 
-/* kasrp2kdcr.c */
-struct type_KRB5_AS__REP *krb5_as_rep2KRB5_KDC__REP
-	PROTOTYPE((const krb5_kdc_rep *, int *));
-
 /* kauth2auth.c */
 struct type_KRB5_Authenticator *krb5_authenticator2KRB5_Authenticator
 	PROTOTYPE((const krb5_authenticator *, int *));
@@ -123,10 +119,6 @@ struct type_KRB5_Authenticator *krb5_authenticator2KRB5_Authenticator
 /* kck2ck.c */
 struct type_KRB5_Checksum *krb5_checksum2KRB5_Checksum
 	PROTOTYPE((const krb5_checksum *, int *));
-
-/* kdcr2kasrp.c */
-krb5_kdc_rep *KRB5_KDC__REP2krb5_as_rep
-	PROTOTYPE((const struct type_KRB5_AS__REP *, int *));
 
 /* kdcr2kkdcr.c */
 krb5_kdc_rep *KRB5_KDC__REP2krb5_kdc_rep
@@ -141,7 +133,7 @@ struct type_KRB5_EncryptedData *krb5_enc_data2KRB5_EncryptedData
 	PROTOTYPE((const krb5_enc_data *, int *));
 
 /* kekrp2ekrp.c */
-struct type_KRB5_EncTGSRepPart *krb5_enc_kdc_rep_part2KRB5_EncTGSRepPart
+struct type_KRB5_EncKDCRepPart *krb5_enc_kdc_rep_part2KRB5_EncKDCRepPart
 	PROTOTYPE((const krb5_enc_kdc_rep_part *, int *));
 
 /* kerr2err.c */
@@ -179,7 +171,7 @@ struct type_KRB5_KRB__SAFE *krb5_safe2KRB5_KRB__SAFE
 /* ktgrq2tgrq.c */
 struct type_KRB5_KDC__REQ__BODY *krb5_kdc_req2KRB5_KDC__REQ__BODY
 	PROTOTYPE((const krb5_kdc_req *, int *));
-struct type_KRB5_TGS__REQ *krb5_kdc_req2KRB5_TGS__REQ
+struct type_KRB5_KDC__REQ *krb5_kdc_req2KRB5_KDC__REQ
 	PROTOTYPE((const krb5_kdc_req *, int *));
 
 /* ktgsr2kdcr.c */
@@ -217,8 +209,8 @@ krb5_safe *KRB5_KRB__SAFE2krb5_safe
 /* tgrq2ktgrq.c */
 krb5_kdc_req *KRB5_KDC__REQ__BODY2krb5_kdc_req
 	PROTOTYPE((const struct type_KRB5_KDC__REQ__BODY *, int *));
-krb5_kdc_req *KRB5_TGS__REQ2krb5_kdc_req
-	PROTOTYPE((const struct type_KRB5_TGS__REQ *, int *));
+krb5_kdc_req *KRB5_KDC__REQ2krb5_kdc_req
+	PROTOTYPE((const struct type_KRB5_KDC__REQ *, int *));
 
 /* tkt2ktkt.c */
 krb5_ticket *KRB5_Ticket2krb5_ticket
