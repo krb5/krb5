@@ -33,7 +33,7 @@
 #include "k5-int.h"
 #include "./kdb5_edit.h"
 
-#if defined(sysvimp) || ( defined(mips) && defined(SYSTYPE_BSD43)) || (defined(vax) && !defined(ultrix))
+#if !defined(HAVE_STRSTR)
 char *
 strstr(s1, s2)
 char *s1;
