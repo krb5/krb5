@@ -1,0 +1,14 @@
+/krb5\.saber/d
+/autoconf.h$/d
+/t_mddriver$/d
+/test_parse$/d
+/test_profile$/d
+/\.orig$/d
+/\.rej/d
+/\.ico$/d
+/\.o$/d
+/\.a$/d
+/\.zip$/d
+/\.tar$/d
+/~$/d
+/winfile.list$/d
