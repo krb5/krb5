@@ -1,3 +1,8 @@
+2001-06-21  Ezra Peisach  <epeisach@mit.edu>
+
+	* libpty.h: Change variable line in prototype to tty_line to
+	prevent shadowing.
+
 2001-06-11  Ezra Peisach  <epeisach@mit.edu>
 
 	* pty-int.h: Provide revoke() prototype if system headers lacking. 

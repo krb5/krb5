@@ -39,7 +39,7 @@ long pty_open_ctty (const char *slave, int *fd);
 
 long pty_initialize_slave ( int fd);
 long pty_update_utmp(int process_type, int pid, const char *user,
-		     const char *line, const char *host, int flags);
+		     const char *tty_line, const char *host, int flags);
 
 long pty_logwtmp(const char *tty, const char *user, const char *host);
 
