@@ -1,3 +1,11 @@
+
+Fri Jun 30 14:35:00 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* srv_main.c - Instead of moving up the initialization and calls to
+		key_init() before the call to daemon(), have daemon() not
+		disassociate from the terminal if the -m flag is set.
+	* configure.in - Add --with-dbm to select between Berkeley and DBM
+		KDC database format.
+
 Tue Jun 27 18:14:33 1995  Sam Hartman  <hartmans@tardis.MIT.EDU>
 
 	* srv_main.c (main): Rearrange code so that we ask for the master key *before* we detach from the controlling terminal.  This causes the Kerberos context to be initialized in the parent before the fork; I'm not sure if this is acceptable or not.

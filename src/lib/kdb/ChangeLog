@@ -1,3 +1,14 @@
+
+Fri Jun 30 14:39:45 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* kdb_dbm.c - Add function dispatch table to context and use it to
+		perform database accesses.  Add kdb5_db_set_dbops() to set
+		a context's function dispatch table.
+	* Makefile.in - Remove Berkeley database object modules from this
+		library.  They're now in libkrb5 since we use them in
+		other places.
+	* t_kdb.c - Add ability to test both DBM and Berkeley database
+		format.
+
 Thu Jun 29 06:54:00 1995  Mark Eichin  <eichin@cygnus.com>
 
 	* configure.in (--with-dbm): new option, allows easy building of

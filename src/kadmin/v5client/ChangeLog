@@ -1,3 +1,10 @@
+
+Fri Jun 30 14:33:31 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* kadmin5.c - Add usage of compile(3) regular expression interfaces
+		if present.  Also call regfree if using regcomp.
+	* configure.in - Add --with-dbm to select between Berkeley and DBM
+		KDC database format.
+
 Tue Jun 27 18:50:29 1995  Sam Hartman  (hartmans@tardis)
 
 	* Makefile.in: Remove -g from linker flags.
