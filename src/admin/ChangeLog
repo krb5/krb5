@@ -1,3 +1,7 @@
+Mon Aug 12 23:05:36 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* configure.in: Don't build in edit directory.
+
 Thu Jul 25 02:29:19 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* configure.in: Don't build the create, destroy, and stash directories.
