@@ -170,7 +170,7 @@ t_mktime: gmt_mktime.c
 	$(CC) $(ALL_CFLAGS) -DTEST_LEAP -o t_mktime $(srcdir)/gmt_mktime.c
 
 t_localaddr: localaddr.c
-	$(CC) $(ALL_CFLAGS) -DTEST -o t_localaddr $(srcdir)/localaddr.c
+	$(CC) $(ALL_CFLAGS) -DTEST -o t_localaddr $(srcdir)/localaddr.c $(LIBS)
 
 t_locate_kdc: t_locate_kdc.o
 	$(CC) $(ALL_CFLAGS) -o t_locate_kdc t_locate_kdc.o \

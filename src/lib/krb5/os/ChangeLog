@@ -6,6 +6,8 @@
 	(krb5_get_host_realm): Call it.
 	* def_realm.c (krb5_get_default_realm): Call it.
 
+	* Makefile.in (t_localaddr): Link against $(LIBS).
+
 2001-12-05  Ezra Peisach  <epeisach@mit.edu>
 
 	* sendto_kdc.c (krb5_sendto_kdc): Get rid of unecessary casts.
