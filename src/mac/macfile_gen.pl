@@ -4,7 +4,7 @@ if (defined ($ENV{'KERBSRCROOT'}))
 {
 	$ROOT=$ENV{'KERBSRCROOT'};
 } else {
-	$ROOT='..';
+	$ROOT='.';
 }
 
 print(STDERR "Creating makefile.\n");
