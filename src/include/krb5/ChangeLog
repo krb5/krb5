@@ -1,3 +1,7 @@
+2000-10-02	Alexandra Ellwood <lxs@mit.edu>
+
+	* kdb.h: added Mac OS X #define (__MACH__) -- we're still a kerberos client
+
 2000-5-18	Alexandra Ellwood <lxs@mit.edu>
 
 	* macsock.h: local_addr_fallback_kludge defined to 0 again... fixed gethostname
