@@ -239,17 +239,13 @@ int *dat_len;
 	retval = kadm_ser_cpw(msg_st.app_data+1,(int) msg_st.app_length,&ad,
 			      &retdat, &retlen);
 	break;
-#ifndef KADM5
     case ADD_ENT:
 	retval = kadm_ser_add(msg_st.app_data+1,(int) msg_st.app_length,&ad,
 			      &retdat, &retlen);
 	break;
+#ifndef KADM5
     case DEL_ENT:
 	retval = kadm_ser_del(msg_st.app_data+1,(int) msg_st.app_length,&ad,
-			      &retdat, &retlen);
-	break;
-    case GET_ENT:
-	retval = kadm_ser_get(msg_st.app_data+1,(int) msg_st.app_length,&ad,
 			      &retdat, &retlen);
 	break;
     case MOD_ENT:
@@ -261,6 +257,10 @@ int *dat_len;
 			       &retdat, &retlen);
 	break;
 #endif /* KADM5 */
+    case GET_ENT:
+	retval = kadm_ser_get(msg_st.app_data+1,(int) msg_st.app_length,&ad,
+			      &retdat, &retlen);
+	break;
     case CHG_STAB:
 	retval = kadm_ser_stab(msg_st.app_data+1,(int) msg_st.app_length,&ad,
 			       &retdat, &retlen);

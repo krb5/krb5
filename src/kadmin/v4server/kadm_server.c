@@ -330,7 +330,6 @@ send_response:
     return retval;
 }
 
-#ifndef KADM5
 /*
 kadm_ser_add - the server side of the add_entry routine
   recieves    : KTEXT, {values}
@@ -365,6 +364,7 @@ int *outlen;
   }
 }
 
+#ifndef KADM5
 /*
 kadm_ser_del - the server side of the del_entry routine
   recieves    : KTEXT, {values}
@@ -434,6 +434,9 @@ int *outlen;
   }
 }
 
+#endif /* !KADM5 */
+
+#ifdef KADM5
 /*
 kadm_ser_get
   recieves   : KTEXT, {values, flags}
@@ -472,7 +475,9 @@ int *outlen;
       return status;
   }
 }
+#endif /* KADM5 */
 
+#ifndef KADM5
 /* 
 kadm_ser_ckpw - the server side of the check_password routine
   recieves    : KTEXT, {key}

@@ -41,115 +41,70 @@ the actual database manipulation code
 
 extern Kadm_Server server_parm;
 
-#ifdef KADM5
 #include <kadm5/admin.h>
 extern void *kadm5_handle;
-#endif
 
-#ifndef KADM5
+/* Generate dummy password.  Yes, it's gross. */
+static char *dummypw()
+{
+    static char dummybuf[256];
+    int i;
+
+    if (dummybuf[0] == 0)
+	for (i = 0; i < 256; i++)
+	    dummybuf[i] = (i + 1) % 256;
+    return dummybuf;
+}
+
+/*
+ * kadm_entry2princ:
+ *
+ * Convert a kadm5_principal_ent_t to a Principal.  Assumes that princ
+ * is already allocated.
+ */
 krb5_error_code
 kadm_entry2princ(entry, princ)
-     krb5_db_entry entry;
-     Principal *princ;
+    kadm5_principal_ent_t entry;
+    Principal *princ;
 {
-  char realm[REALM_SZ];		/* dummy values only */
-  krb5_tl_mod_princ *mprinc;
-  krb5_key_data *pkey;
-  krb5_error_code retval;
+    char realm[REALM_SZ + 1];	/* dummy values only */
+    krb5_error_code retval;
+    int i;
 
-  /* NOTE: does not convert the key */
-  memset(princ, 0, sizeof (*princ));
-  retval = krb5_524_conv_principal(kadm_context, entry.princ,
-				   princ->name, princ->instance, realm);
-  if (retval)
-    return retval;
-  princ->exp_date = entry.expiration;
-  strncpy(princ->exp_date_txt, ctime((const time_t *) &entry.expiration),
-	  DATE_SZ);
-  princ->attributes = entry.attributes;
-  princ->max_life = entry.max_life / (60 * 5);
-  princ->kdc_key_ver = 1; /* entry.mkvno; */
-  princ->key_version = entry.key_data[0].key_data_kvno;
+    /* NOTE: does not convert the key */
+    memset(princ, 0, sizeof (*princ));
+    retval = krb5_524_conv_principal(kadm_context, entry->principal,
+				     princ->name, princ->instance, realm);
+    if (retval)
+	return retval;
+    princ->exp_date = entry->pw_expiration;
+    strncpy(princ->exp_date_txt,
+	    ctime((const time_t *) &entry->pw_expiration), DATE_SZ);
+    princ->attributes = entry->attributes;
+    princ->max_life = entry->max_life / (60 * 5);
+    princ->kdc_key_ver = 1; /* entry->mkvno .... WTF??? --tlyu */
+    for (i = 0; i < entry->n_key_data; i++) {
+	/* XXX This assumes knowledge of the internals of krb5_key_data */
+	if (entry->key_data[i].key_data_type[0] == ENCTYPE_DES_CBC_CRC &&
+	    entry->key_data[i].key_data_type[1] == KRB5_KDB_SALTTYPE_V4) {
+	    princ->key_version = entry->key_data[i].key_data_kvno;
+	    break;
+	}
+    }
 
-  retval = krb5_dbe_decode_mod_princ_data(kadm_context, &entry, &mprinc);
-  if (retval)
-    return retval;
-  princ->mod_date = mprinc->mod_date;
-  strncpy(princ->mod_date_txt,
-	  ctime((const time_t *) &mprinc->mod_date),
-	  DATE_SZ);
-  krb5_free_principal(kadm_context, mprinc->mod_princ);
-  krb5_xfree(mprinc);
+    retval = krb5_524_conv_principal(kadm_context, entry->mod_name,
+					princ->mod_name, princ->mod_instance,
+					realm);
+    if (retval)
+	return retval;
 
-  /* Find the V4 key */
-  retval = krb5_dbe_find_enctype(kadm_context,
-				 &entry,
-				 ENCTYPE_DES_CBC_CRC,
-				 KRB5_KDB_SALTTYPE_V4,
-				 -1,
-				 &pkey);
-  if (retval)
-    return retval;
-  princ->key_version = pkey->key_data_kvno;
+    princ->mod_date = entry->mod_date;
+    strncpy(princ->mod_date_txt,
+	    ctime((const time_t *) &entry->mod_date),
+	    DATE_SZ);
 
-  return 0;
+    return 0;
 }
-
-krb5_error_code
-kadm_princ2entry(princ, entry)
-     Principal princ;
-     krb5_db_entry *entry;
-{
-  krb5_error_code retval;
-  krb5_tl_mod_princ mprinc;
-  krb5_key_data	*kdatap;
-
-  /* NOTE: does not convert the key */
-  memset(entry, 0, sizeof (*entry));
-  /* yeah yeah stupid v4 database doesn't store realm names */
-  retval = krb5_425_conv_principal(kadm_context, princ.name, princ.instance,
-				   server_parm.krbrlm, &entry->princ);
-  if (retval)
-    return retval;
-
-  entry->len = KRB5_KDB_V1_BASE_LENGTH;
-  entry->max_life = princ.max_life * (60 * 5);
-  entry->max_renewable_life = server_parm.max_rlife; /* XXX yeah well */
-  entry->expiration = princ.exp_date;
-  entry->attributes = princ.attributes;
-
-  retval = krb5_425_conv_principal(kadm_context, princ.mod_name,
-				   princ.mod_instance,
-				   server_parm.krbrlm, &mprinc.mod_princ);
-  if (retval)
-    return(retval);
-  mprinc.mod_date = princ.mod_date;
-
-  retval = krb5_dbe_encode_mod_princ_data(kadm_context, &mprinc, entry);
-  if (retval)
-    return(retval);
-
-  if (mprinc.mod_princ)
-    krb5_free_principal(kadm_context, mprinc.mod_princ);
-
-  if (retval = krb5_dbe_find_enctype(kadm_context,
-				     entry,
-				     ENCTYPE_DES_CBC_CRC,
-				     KRB5_KDB_SALTTYPE_V4,
-				     -1,
-				     &kdatap)) {
-    if (!(retval = krb5_dbe_create_key_data(kadm_context, entry)))
-      kdatap = &entry->key_data[entry->n_key_data-1];
-  }
-  if (kdatap) {
-    kdatap->key_data_ver = 2;
-    kdatap->key_data_type[0] = (krb5_int16) ENCTYPE_DES_CBC_CRC;
-    kdatap->key_data_type[1] = (krb5_int16) KRB5_KDB_SALTTYPE_V4; 
-    kdatap->key_data_kvno = (krb5_int16) princ.key_version;
-  }
-  return(retval);
-}
-#endif /* !KADM5 */
 
 int check_access(pname, pinst, prealm, acltype)
     char *pname;
@@ -191,166 +146,138 @@ char *str;
     return(0);
 }
 
-#ifndef KADM5
-#define failadd(code) {  (void) syslog(LOG_ERR, "FAILED adding '%s.%s' (%s)", valsin->name, valsin->instance, error_message(code)); return code; }
-
+krb5_error_code
 kadm_add_entry (rname, rinstance, rrealm, valsin, valsout)
-char *rname;				/* requestors name */
-char *rinstance;			/* requestors instance */
-char *rrealm;				/* requestors realm */
-Kadm_vals *valsin;
-Kadm_vals *valsout;
+    char *rname;				/* requestors name */
+    char *rinstance;			/* requestors instance */
+    char *rrealm;				/* requestors realm */
+    Kadm_vals *valsin;
+    Kadm_vals *valsout;
 {
-  Principal data_i, data_o;		/* temporary principal */
-  u_char flags[4];
-  krb5_principal default_princ;
-  krb5_error_code retval;
-  krb5_db_entry newentry, tmpentry;
-  krb5_boolean more;
-  krb5_keyblock newpw;
-  krb5_tl_mod_princ mprinc;
-  krb5_key_data *pkey;
-  krb5_keysalt	sblock;
-  int numfound;
+    Principal data_i, data_o;		/* temporary principal */
+    u_char flags[4];
+    krb5_principal default_princ;
+    krb5_error_code retval;
+    kadm5_principal_ent_rec newentry, tmpentry;
+    krb5_boolean more;
+    krb5_keyblock newpw;
+    krb5_key_data *pkey;
+    krb5_keysalt	sblock;
+    int numfound;
+    long mask = 0;
 
-  if (!check_access(rname, rinstance, rrealm, ADDACL)) {
-    syslog(LOG_WARNING, "WARNING: '%s.%s@%s' tried to add an entry for '%s.%s'",
-	   rname, rinstance, rrealm, valsin->name, valsin->instance);
-    return KADM_UNAUTH;
-  }
-
-  /* Need to check here for "legal" name and instance */
-  if (wildcard(valsin->name) || wildcard(valsin->instance)) {
-      failadd(KADM_ILL_WILDCARD);
-  }
-
-  syslog(LOG_INFO, "request to add an entry for '%s.%s' from '%s.%s@%s'",
-	 valsin->name, valsin->instance, rname, rinstance, rrealm);
-
-  kadm_vals_to_prin(valsin->fields, &data_i, valsin);
-  (void) strncpy(data_i.name, valsin->name, ANAME_SZ);
-  (void) strncpy(data_i.instance, valsin->instance, INST_SZ);
-
-  if (!IS_FIELD(KADM_EXPDATE,valsin->fields))
-    data_i.exp_date = server_parm.expiration;
-  if (!IS_FIELD(KADM_ATTR,valsin->fields))
-    data_i.attributes = server_parm.flags;
-  if (!IS_FIELD(KADM_MAXLIFE,valsin->fields))
-    data_i.max_life = server_parm.max_life;
-
-  retval = kadm_princ2entry(data_i, &newentry);
-  if (retval) {
-    krb5_db_free_principal(kadm_context, &newentry, 1);
-    failadd(retval);
-  }
-
-  newpw.magic = KV5M_KEYBLOCK;
-  if ((newpw.contents = (krb5_octet *)malloc(8)) == NULL)
-    failadd(KADM_NOMEM);
-
-  retval = krb5_dbe_find_enctype(kadm_context,
-				 &newentry,
-				 ENCTYPE_DES_CBC_CRC,
-				 KRB5_KDB_SALTTYPE_V4,
-				 -1,
-				 &pkey);
-  if (retval)
-    failadd(retval);
-
-  data_i.key_low = ntohl(data_i.key_low);
-  data_i.key_high = ntohl(data_i.key_high);
-  memcpy(newpw.contents, &data_i.key_low, 4);
-  memcpy((char *)(((krb5_int32 *) newpw.contents) + 1), &data_i.key_high, 4);
-  newpw.length = 8;
-  newpw.enctype = ENCTYPE_DES_CBC_CRC;
-  sblock.type = KRB5_KDB_SALTTYPE_V4;
-  sblock.data.length = 0;
-  sblock.data.data = (char *) NULL;
-  /* encrypt new key in master key */
-  retval = krb5_dbekd_encrypt_key_data(kadm_context,
-				       &server_parm.master_encblock,
-				       &newpw,
-				       &sblock,
-				       (int) ++data_i.key_version,
-				       pkey);
-  memset((char *)newpw.contents, 0, newpw.length);
-  free(newpw.contents);
-  if (retval) {
-    failadd(retval);
-  }
-  data_o = data_i;
-
-  numfound = 1;
-  retval = krb5_db_get_principal(kadm_context, newentry.princ,
-				 &tmpentry, &numfound, &more);
-
-  if (retval) {
-    krb5_db_free_principal(kadm_context, &newentry, 1);
-    failadd(retval);
-  }
-  krb5_db_free_principal(kadm_context, &tmpentry, numfound);
-  if (numfound) {
-    krb5_db_free_principal(kadm_context, &newentry, 1);
-    failadd(KADM_INUSE);
-  } else {
-    if (retval = krb5_timeofday(kadm_context, &mprinc.mod_date)) {
-	krb5_db_free_principal(kadm_context, &newentry, 1);
-	failadd(retval);
-    }
-    mprinc.mod_princ = NULL;	/* in case the following breaks */
-    retval = krb5_425_conv_principal(kadm_context, rname, rinstance, rrealm,
-				     &mprinc.mod_princ);
-    if (retval) {
-      krb5_db_free_principal(kadm_context, &newentry, 1);
-      failadd(retval);
+    if (!check_access(rname, rinstance, rrealm, ADDACL)) {
+	syslog(LOG_WARNING,
+	       "WARNING: '%s.%s@%s' tried to add an entry for '%s.%s'",
+	       rname, rinstance, rrealm, valsin->name, valsin->instance);
+	return KADM_UNAUTH;
     }
 
-    retval = krb5_dbe_encode_mod_princ_data(kadm_context,
-					    &mprinc,
-					    &newentry);
-    krb5_free_principal(kadm_context, mprinc.mod_princ);
-    if (retval) {
-      krb5_db_free_principal(kadm_context, &newentry, 1);
-      failadd(retval);
+    /* Need to check here for "legal" name and instance */
+    if (wildcard(valsin->name) || wildcard(valsin->instance)) {
+	retval = KADM_ILL_WILDCARD;
+	goto err;
     }
 
-    numfound = 1;
-    retval = krb5_db_put_principal(kadm_context, &newentry, &numfound);
-    if (retval) {
-      krb5_db_free_principal(kadm_context, &newentry, 1);
-      failadd(retval);
+    syslog(LOG_INFO, "request to add an entry for '%s.%s' from '%s.%s@%s'",
+	   valsin->name, valsin->instance, rname, rinstance, rrealm);
+
+    kadm_vals_to_prin(valsin->fields, &data_i, valsin);
+    (void) strncpy(data_i.name, valsin->name, ANAME_SZ);
+    (void) strncpy(data_i.instance, valsin->instance, INST_SZ);
+
+    memset(&newentry, 0, sizeof (newentry));
+    retval = krb5_425_conv_principal(kadm_context,
+				     data_i.name, data_i.instance,
+				     server_parm.krbrlm,
+				     &newentry.principal);
+    if (retval)
+	goto err_newentry;
+
+    if (IS_FIELD(KADM_EXPDATE,valsin->fields)) {
+	newentry.princ_expire_time = data_i.exp_date;
+	mask |= KADM5_PRINC_EXPIRE_TIME;
     }
-    if (!numfound) {
-      krb5_db_free_principal(kadm_context, &newentry, 1);
-      failadd(KADM_UK_SERROR);
-    } else {
-      numfound = 1;
-      retval = krb5_db_get_principal(kadm_context, newentry.princ,
-				     &tmpentry,
-				     &numfound, &more);
-      krb5_db_free_principal(kadm_context, &newentry, 1);
-      if (retval) {
-	failadd(retval);
-      } else if (numfound != 1 || more) {
-	krb5_db_free_principal(kadm_context, &tmpentry, numfound);
-	failadd(KADM_UK_RERROR);
-      }
-      kadm_entry2princ(tmpentry, &data_o);
-      krb5_db_free_principal(kadm_context, &tmpentry, numfound);
-      memset((char *)flags, 0, sizeof(flags));
-      SET_FIELD(KADM_NAME,flags);
-      SET_FIELD(KADM_INST,flags);
-      SET_FIELD(KADM_EXPDATE,flags);
-      SET_FIELD(KADM_ATTR,flags);
-      SET_FIELD(KADM_MAXLIFE,flags);
-      kadm_prin_to_vals(flags, valsout, &data_o);
-      syslog(LOG_INFO, "'%s.%s' added.", valsin->name, valsin->instance);
-      return KADM_DATA;		/* Set all the appropriate fields */
+
+    if (IS_FIELD(KADM_MAXLIFE,valsin->fields)) {
+	newentry.max_life = data_i.max_life * (60 * 5);
+	mask |= KADM5_MAX_LIFE;
     }
-  }
+
+    /* Create with ticket issuing disabled. */
+    newentry.attributes = KRB5_KDB_DISALLOW_ALL_TIX;
+    mask |= KADM5_PRINCIPAL|KADM5_ATTRIBUTES;
+    retval = kadm5_get_principal(kadm5_handle, newentry.principal,
+				 &tmpentry, KADM5_PRINCIPAL_NORMAL_MASK);
+    switch (retval) {
+    case KADM5_UNK_PRINC:
+	break;
+    case 0:
+	kadm5_free_principal_ent(kadm5_handle, &tmpentry);
+	retval = KADM_INUSE;
+    default:
+	goto err_newentry;
+	break;
+    }
+
+    retval = kadm5_create_principal(kadm5_handle, &newentry,
+				    mask, dummypw());
+    if (retval)
+	goto err_newentry;
+
+    newpw.magic = KV5M_KEYBLOCK;
+    if ((newpw.contents = (krb5_octet *)malloc(8)) == NULL) {
+	retval = KADM_NOMEM;
+	goto err_newentry;
+    }
+
+    data_i.key_low = ntohl(data_i.key_low);
+    data_i.key_high = ntohl(data_i.key_high);
+    memcpy(newpw.contents, &data_i.key_low, 4);
+    memcpy((char *)(((krb5_int32 *) newpw.contents) + 1), &data_i.key_high, 4);
+    newpw.length = 8;
+    newpw.enctype = ENCTYPE_DES_CBC_CRC;
+
+    retval = kadm5_setv4key_principal(kadm5_handle,
+				      newentry.principal, &newpw);
+    memset((char *)newpw.contents, 0, newpw.length);
+    free(newpw.contents);
+    if (retval)
+	goto err_newentry;
+
+    newentry.attributes &= ~KRB5_KDB_DISALLOW_ALL_TIX;
+    retval = kadm5_modify_principal(kadm5_handle, &newentry,
+				    KADM5_ATTRIBUTES);
+    if (retval)
+      goto err_newentry;
+
+    retval = kadm5_get_principal(kadm5_handle, newentry.principal,
+				 &tmpentry, KADM5_PRINCIPAL_NORMAL_MASK);
+    kadm5_free_principal_ent(kadm5_handle, &newentry);
+    if (retval)
+	goto err;
+
+    kadm_entry2princ(tmpentry, &data_o);
+    kadm5_free_principal_ent(kadm5_handle, &tmpentry);
+    memset((char *)flags, 0, sizeof(flags));
+    SET_FIELD(KADM_NAME,flags);
+    SET_FIELD(KADM_INST,flags);
+    SET_FIELD(KADM_EXPDATE,flags);
+    SET_FIELD(KADM_ATTR,flags);
+    SET_FIELD(KADM_MAXLIFE,flags);
+    kadm_prin_to_vals(flags, valsout, &data_o);
+    syslog(LOG_INFO, "'%s.%s' added.", valsin->name, valsin->instance);
+    return KADM_DATA;		/* Set all the appropriate fields */
+
+err_newentry:
+    kadm5_free_principal_ent(kadm5_handle, &newentry);
+err:
+    syslog(LOG_ERR, "FAILED adding '%s.%s' (%s)",
+	   valsin->name, valsin->instance, error_message(retval));
+    return retval;
 }
-#undef failadd
 
+#ifndef KADM5
 #define faildel(code) {  (void) syslog(LOG_ERR, "FAILED deleting '%s.%s' (%s)", valsin->name, valsin->instance, error_message(code)); return code; }
 
 kadm_del_entry (rname, rinstance, rrealm, valsin, valsout)
@@ -429,61 +356,75 @@ Kadm_vals *valsout;
 }
 #undef faildel
 
-#define failget(code) {  (void) syslog(LOG_ERR, "FAILED retrieving '%s.%s' (%s)", valsin->name, valsin->instance, error_message(code)); return code; }
+#endif /* !KADM5 */
 
+#ifdef KADM5
+
+krb5_error_code
 kadm_get_entry (rname, rinstance, rrealm, valsin, flags, valsout)
-char *rname;				/* requestors name */
-char *rinstance;			/* requestors instance */
-char *rrealm;				/* requestors realm */
-Kadm_vals *valsin;			/* what they wannt to get */
-u_char *flags;				/* which fields we want */
-Kadm_vals *valsout;			/* what data is there */
+    char *rname;		/* requestors name */
+    char *rinstance;		/* requestors instance */
+    char *rrealm;		/* requestors realm */
+    Kadm_vals *valsin;		/* what they wannt to get */
+    u_char *flags;		/* which fields we want */
+    Kadm_vals *valsout;		/* what data is there */
 {
-  int numfound;			/* check how many were returned */
-  krb5_boolean more;		/* To point to more name.instances */
-  Principal data_o;		/* Data object to hold Principal */
-  krb5_principal inprinc;
-  krb5_db_entry entry;
-  krb5_error_code retval;
+    Principal data_o;		/* Data object to hold Principal */
+    krb5_principal inprinc;
+    krb5_error_code retval;
+    kadm5_principal_ent_rec ent;
 
-  if (!check_access(rname, rinstance, rrealm, GETACL)) {
-    syslog(LOG_WARNING, "WARNING: '%s.%s@%s' tried to get '%s.%s's entry",
-	    rname, rinstance, rrealm, valsin->name, valsin->instance);
-    return KADM_UNAUTH;
-  }
+    if (!check_access(rname, rinstance, rrealm, GETACL)) {
+	syslog(LOG_WARNING, "WARNING: '%s.%s@%s' tried to get '%s.%s's entry",
+	       rname, rinstance, rrealm, valsin->name, valsin->instance);
+	return KADM_UNAUTH;
+    }
 
-  if (wildcard(valsin->name) || wildcard(valsin->instance)) {
-      failget(KADM_ILL_WILDCARD);
-  }
+    if (wildcard(valsin->name) || wildcard(valsin->instance)) {
+	retval = KADM_ILL_WILDCARD;
+	goto err;
+    }
 
-  syslog(LOG_INFO, "retrieve '%s.%s's entry for '%s.%s@%s'",
-	     valsin->name, valsin->instance, rname, rinstance, rrealm);
+    syslog(LOG_INFO, "retrieve '%s.%s's entry for '%s.%s@%s'",
+	   valsin->name, valsin->instance, rname, rinstance, rrealm);
 
-  retval = krb5_425_conv_principal(kadm_context, valsin->name,
-				   valsin->instance,
-				   server_parm.krbrlm, &inprinc);
-  if (retval)
-    failget(retval);
-  /* Look up the record in the database */
-  numfound = 1;
-  retval = krb5_db_get_principal(kadm_context, inprinc, &entry, &numfound,
-				 &more);
-  krb5_free_principal(kadm_context, inprinc);
-  if (retval) {
-    failget(retval);
-  } else if (!numfound || more) {
-    failget(KADM_NOENTRY);
-  }
-  retval = kadm_entry2princ(entry, &data_o);
-  krb5_db_free_principal(kadm_context, &entry, 1);
-  if (retval) {
-    failget(retval);
-  }
-  kadm_prin_to_vals(flags, valsout, &data_o);
-  syslog(LOG_INFO, "'%s.%s' retrieved.", valsin->name, valsin->instance);
-  return KADM_DATA;		/* Set all the appropriate fields */
+    retval = krb5_425_conv_principal(kadm_context, valsin->name,
+				     valsin->instance,
+				     server_parm.krbrlm, &inprinc);
+    if (retval)
+	goto err_princ;
+
+    retval = kadm5_get_principal(kadm5_handle, inprinc, &ent,
+				 KADM5_PRINCIPAL_NORMAL_MASK);
+    krb5_free_principal(kadm_context, inprinc);
+    switch (retval) {
+    case KADM5_UNK_PRINC:
+	retval = KADM_NOENTRY;
+	goto err_princ;
+    default:
+	goto err_princ;
+    case 0:
+	break;
+    }
+    retval = kadm_entry2princ(ent, &data_o);
+    kadm5_free_principal_ent(kadm5_handle, &ent);
+    if (retval) {
+	goto err_princ;
+    }
+    kadm_prin_to_vals(flags, valsout, &data_o);
+    syslog(LOG_INFO, "'%s.%s' retrieved.", valsin->name, valsin->instance);
+    return KADM_DATA;		/* Set all the appropriate fields */
+err_princ:
+    krb5_free_principal(kadm_context, inprinc);
+err:
+    syslog(LOG_ERR, "FAILED retrieving '%s.%s' (%s)",
+	   valsin->name, valsin->instance, error_message(retval));
+    return retval;
 }
-#undef failget
+
+#endif /* KADM5 */
+
+#ifndef KADM5
 
 #define failmod(code) {  (void) syslog(LOG_ERR, "FAILED modifying '%s.%s' (%s)", valsin1->name, valsin1->instance, error_message(code)); return code; }
 
@@ -934,13 +875,14 @@ int kadm_check_srvtab(name, instance)
  * to call free() on the keyblocks allocated by
  * kadm5_randkey_principal().
  */
-static void nuke_keyblocks(keyblocks, nkeys)
+static void free_keyblocks(context, keyblocks, nkeys)
+    krb5_context context;
     krb5_keyblock *keyblocks;
     int nkeys;
 {
     int i;
     for (i = 0; i < nkeys; i++) {
-	krb5_free_keyblock_contents(kadm_context, &keyblocks[i]);
+	krb5_free_keyblock_contents(context, &keyblocks[i]);
     }
     free(keyblocks);
 }
@@ -950,7 +892,8 @@ static void nuke_keyblocks(keyblocks, nkeys)
  * principal to a random key, which the admin server will return to
  * the client.
  */
-int kadm_chg_srvtab(rname, rinstance, rrealm, values)
+krb5_error_code
+kadm_chg_srvtab(rname, rinstance, rrealm, values)
     char *rname;		/* requestors name */
     char *rinstance;		/* requestors instance */
     char *rrealm;		/* requestors realm */
@@ -960,17 +903,9 @@ int kadm_chg_srvtab(rname, rinstance, rrealm, values)
     krb5_principal inprinc;
     krb5_error_code retval;
     krb5_keyblock *keyblocks;
-    int nkeys;
+    int nkeys, i;
     kadm5_principal_ent_rec princ_ent;
 
-    /* "random" password for initial principal creation */
-    static char dummybuf[256];
-    int i;
-
-    if (dummybuf[0] == 0)
-	for (i = 0; i < 256; i++) {
-	    dummybuf[i] = (i + 1) % 256;
-	}
     memset(&princ_ent, 0, sizeof (princ_ent)); /* XXX */
 
     if (!check_access(rname, rinstance, rrealm, STABACL)) {
@@ -1008,7 +943,7 @@ int kadm_chg_srvtab(rname, rinstance, rrealm, values)
 
 	retval = kadm5_create_principal(kadm5_handle, &princ_ent,
 					KADM5_PRINCIPAL|KADM5_ATTRIBUTES,
-					dummybuf);
+					dummypw());
 	if (retval)
 	    goto err_princ_ent;
 	break;
@@ -1052,13 +987,13 @@ int kadm_chg_srvtab(rname, rinstance, rrealm, values)
     }
     if (i == nkeys) {
 	krb5_free_principal(kadm_context, inprinc);
-	nuke_keyblocks(keyblocks, nkeys);
+	free_keyblocks(kadm_context, keyblocks, nkeys);
 	syslog(LOG_ERR, "change_srvtab: DES_CBC_CRC key not found");
 	return(KADM_NOENTRY);	/* XXX not quite accurate */
     }
     if (keyblocks[i].length != 8) {
 	krb5_free_principal(kadm_context, inprinc);
-	nuke_keyblocks(keyblocks, nkeys);
+	free_keyblocks(kadm_context, keyblocks, nkeys);
 	syslog(LOG_ERR, "change_srvtab: bad length for DES_CBC_CRC key");
 	return(KADM_NOENTRY);	/* XXX not quite accruate */
     }
@@ -1070,7 +1005,7 @@ int kadm_chg_srvtab(rname, rinstance, rrealm, values)
     memcpy((char *)&values->key_high, keyblocks[i].contents + 4, 4);
     values->key_low = htonl(values->key_low);
     values->key_high = htonl(values->key_high);
-    nuke_keyblocks(keyblocks, nkeys);
+    free_keyblocks(kadm_context, keyblocks, nkeys);
     retval = kadm5_get_principal(kadm5_handle, inprinc, &princ_ent,
 				 KADM5_PRINCIPAL_NORMAL_MASK);
     if (retval)
