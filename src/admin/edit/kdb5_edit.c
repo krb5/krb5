@@ -697,8 +697,7 @@ OLDDECLARG(krb5_kvno, vno)
     krb5_error_code retval;
     krb5_keyblock *tempkey;
 
-    if (retval = (*master_encblock.crypto_entry->random_key)(master_random,
-							     &tempkey)) {
+    if (retval = krb5_random_key(&master_encblock, master_random, &tempkey)) {
 	com_err(argv[0], retval, "while generating random key");
 	return;
     }
@@ -789,11 +788,10 @@ OLDDECLARG(krb5_kvno, vno)
     pwd.data = password;
     pwd.length = pwsize;
 
-    retval = (*master_encblock.crypto_entry->
-	      string_to_key)(master_keyblock.keytype,
-			     &tempkey,
-			     &pwd,
-			     string_princ);
+    retval = krb5_string_to_key(&master_encblock, master_keyblock.keytype,
+				&tempkey,
+				&pwd,
+				string_princ);
     bzero(password, sizeof(password)); /* erase it */
     if (retval) {
 	com_err(argv[0], retval, "while converting password to key for '%s'", argv[1]);
