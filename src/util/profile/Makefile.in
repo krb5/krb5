@@ -1,0 +1,52 @@
+CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
+
+LOCALINCLUDE=-I. -I$(srcdir)/../et
+
+OBJS = prof_tree.o \
+	prof_file.o \
+	prof_parse.o \
+	prof_err.o \
+	prof_init.o
+
+SRCS = $(srcdir)/prof_tree.c \
+	$(srcdir)/prof_file.c \
+	$(srcdir)/prof_parse.c \
+	prof_err.c \
+	$(srcdir)/prof_init.c
+
+LIBS = ../et/libcom_err.a
+
+all:: includes libprofile.a test_parse
+
+libprofile.a: $(OBJS)
+	$(ARCHIVE) $@ $(OBJS)
+	$(RANLIB) $@
+
+test_parse: test_parse.o $(OBJS) $(LIBS)
+	cc -o test_parse test_parse.o $(OBJS) $(LIBS)
+
+test_profile: test_profile.o $(OBJS) $(LIBS)
+	cc -o test_profile test_profile.o $(OBJS) $(LIBS)
+
+profile.h: prof_err.h profile.h.in
+	cat $(srcdir)/profile.h.in prof_err.h > $@
+
+prof_err.h: prof_err.et
+
+prof_err.c: prof_err.et
+
+clean::
+	rm -f $(PROGS) *.o *~ test_parse core libprofile.a prof_err.h \
+		prof_err.c
+
+# +++ Dependency line eater +++
+# 
+# Makefile dependencies follow.  This must be the last section in
+# the Makefile.in file
+#
+prof_tree.o : $(srcdir)/prof_tree.c $(srcdir)/prof_int.h ./prof_err.h 
+prof_file.o : $(srcdir)/prof_file.c $(srcdir)/prof_int.h ./prof_err.h 
+prof_parse.o : $(srcdir)/prof_parse.c $(srcdir)/prof_int.h ./prof_err.h 
+prof_err.o : prof_err.c 
+prof_init.o : $(srcdir)/prof_init.c $(srcdir)/prof_int.h ./prof_err.h 
+

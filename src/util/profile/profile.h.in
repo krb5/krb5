@@ -1,0 +1,20 @@
+/*
+ * profile.h
+ */
+
+typedef struct _profile_t *profile_t;
+
+#if defined(__STDC__) || defined(_WINDOWS)
+#define PROTOTYPE(x) x
+#else
+#define PROTOTYPE(x) ()
+#endif
+
+extern long profile_init
+	PROTOTYPE ((const char **filenames, profile_t *ret_profile));
+
+extern void profile_release
+	PROTOTYPE ((profile_t profile));
+
+extern long profile_get_values
+	PROTOTYPE ((profile_t profile, const char **names, char ***ret_values));
