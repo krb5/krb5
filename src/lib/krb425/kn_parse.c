@@ -6,7 +6,7 @@
  * All Rights Reserved.
  *
  * For copying and distribution information, please see the file
- * <mit-copyright.h>.
+ * <krb5/copyright.h>.
  */
 
 #if !defined(lint) && !defined(SABER)

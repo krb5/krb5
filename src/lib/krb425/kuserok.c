@@ -3,9 +3,10 @@
  * $Author$
  *
  * Copyright 1987, 1988 by the Massachusetts Institute of Technology.
+ * All Rights Reserved.
  *
  * For copying and distribution information, please see the file
- * <mit-copyright.h>.
+ * <krb5/copyright.h>.
  *
  * kuserok: check if a kerberos principal has
  * access to a local account
