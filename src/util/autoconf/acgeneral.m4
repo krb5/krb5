@@ -1987,7 +1987,19 @@ changequote([, ])dnl
 ])dnl
   echo creating "$ac_file"
   rm -f "$ac_file"
-  configure_input="Generated automatically from `echo $ac_file_in|sed 's%.*/%%'` by configure."
+  # allow for outfile[:infile1[+infile2[+infile3...]]] syntax
+  IFS="${IFS= 	}"; ac_save_ifs="$IFS"; IFS="${IFS}+"
+  ac_files_in=
+  for ac_file_name in $ac_file_in
+  do
+    ac_files_in="$ac_files_in $ac_given_srcdir/$ac_file_name"
+  done
+  IFS="$ac_save_ifs"
+  configure_input=`echo $ac_files_in | sed 's%/./%/%g
+s%  *./%%g
+s%  *%+%g
+s%^%Generated automatically from %
+s%$% by configure.%'`
   case "$ac_file" in
   *Makefile*) ac_comsub="1i\\
 # $configure_input" ;;
@@ -1999,7 +2011,7 @@ s%@srcdir@%$srcdir%g
 s%@top_srcdir@%$top_srcdir%g
 ifdef([AC_PROVIDE_AC_PROG_INSTALL], [s%@INSTALL@%$INSTALL%g
 ])dnl
-" -f conftest.subs $ac_given_srcdir/$ac_file_in > $ac_file
+" -f conftest.subs $ac_files_in > $ac_file
 dnl This would break Makefile dependencies.
 dnl  if cmp -s $ac_file conftest.out 2>/dev/null; then
 dnl    echo "$ac_file is unchanged"
