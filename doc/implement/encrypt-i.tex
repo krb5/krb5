@@ -5,7 +5,7 @@ Kerberos v5 implementation must implement at least this interface:
 \subsection{Functional interface}
 
 \begin{funcdecl}{encrypt_func}{krb5_error_code}{\funcvoid}
-\funcarg{const krb5_pointer}{in}
+\funcarg{krb5_const_pointer}{in}
 \funcarg{krb5_pointer}{out}
 \funcarg{const size_t}{size}
 \funcarg{krb5_encrypt_block *}{eblock}
@@ -29,7 +29,7 @@ If null, the cryptosystem may choose an appropriate initialization vector.
 Returns errors.
 
 \begin{funcdecl}{decrypt_func}{krb5_error_code}{\funcvoid}
-\funcarg{const krb5_pointer}{in}
+\funcarg{krb5_const_pointer}{in}
 \funcarg{krb5_pointer}{out}
 \funcarg{const size_t}{size}
 \funcarg{krb5_encrypt_block *}{eblock}
@@ -53,7 +53,7 @@ Returns errors.
 
 \begin{funcdecl}{process_key}{krb5_error_code}{\funcvoid}
 \funcarg{krb5_encrypt_block *}{eblock}
-\funcarg{krb5_keyblock *}{keyblock}
+\funcarg{const krb5_keyblock *}{keyblock}
 \end{funcdecl}
 Does any necessary key preprocessing (such as computing key
 schedules for DES).
@@ -76,10 +76,10 @@ resources held by \funcparam{eblock{\ptsto}priv}.
 Returns errors.
 
 \begin{funcdecl}{string_to_key}{krb5_error_code}{\funcvoid}
-\funcarg{krb5_keytype}{keytype}
+\funcarg{const krb5_keytype}{keytype}
 \funcarg{krb5_keyblock *}{keyblock}
-\funcarg{krb5_data *}{data}
-\funcarg{krb5_principal}{princ}
+\funcarg{const krb5_data *}{data}
+\funcarg{const krb5_data}{salt}
 \end{funcdecl}
 Converts the string pointed to by \funcparam{data} into an encryption key
 of type \funcparam{keytype}.  \funcparam{*keyblock} is filled in with
@@ -87,7 +87,7 @@ the key info; in particular, \funcparam{keyblock{\ptsto}contents} is to
 be set to allocated storage. It is the responsibility of the caller to
 release this storage when the generated key no longer needed.
 
-The routine may use \funcparam{princ} to seed or alter the conversion
+The routine may use \funcparam{salt} to seed or alter the conversion
 algorithm.
 
 If the particular function called does not know how to make a
@@ -96,9 +96,10 @@ key of type \funcparam{keytype}, an error may be returned.
 Returns errors.
 
 \begin{funcdecl}{init_random_key}{krb5_error_code}{\funcvoid}
-\funcarg{krb5_keyblock *}{seedblock}
+\funcarg{const krb5_keyblock *}{seedblock}
 \funcarg{krb5_pointer *}{seed}
 \end{funcdecl}
+
 Initialize the random key generator using the encryption key
 \funcparam{seedblock} and allocating private sequence information, filling
 in \funcparam{*seed} with the address of such information.
@@ -106,15 +107,17 @@ in \funcparam{*seed} with the address of such information.
 sequence information.
 
 \begin{funcdecl}{finish_random_key}{krb5_error_code}{\funcvoid}
-\funcarg{krb5_pointer}{seed}
+\funcarg{krb5_pointer *}{seed}
 \end{funcdecl}
+
 Free any resources held by \funcparam{seed} and assigned by
 \funcname{init_random_key}. 
 
 \begin{funcdecl}{random_key}{krb5_error_code}{\funcvoid}
-\funcarg{krb5_pointer}{seed}
+\funcarg{krb5_pointer *}{seed}
 \funcarg{krb5_keyblock **}{keyblock}
 \end{funcdecl}
+
 Generate a random encryption key, allocating storage for it and
 filling in the keyblock address in \funcparam{*keyblock}.
 When the caller has finished using the keyblock, he should call

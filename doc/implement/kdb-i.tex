@@ -147,7 +147,7 @@ Returns error code if not all entries were stored.
 
 Iterates over the database, fetching every entry in an unspecified order
 and calling \funcparam{(*func)}(\funcparam{iterate_arg},
-{\sl principal\/}) where {\sl principal\/} points to a record from the
+\funcparam{principal}) where \funcparam{principal} points to a record from the
 database.
 
 If \funcparam{(*func)}() ever returns an error code, the iteration is
@@ -168,6 +168,7 @@ principal name \funcparam{mname} is used.
 \funcarg{krb5_encrypt_block *}{eblock}
 \funcarg{krb5_boolean}{fromkeyboard}
 \funcarg{krb5_boolean}{twice}
+\funcarg{krb5_data }{salt}
 \funcinout
 \funcarg{krb5_keyblock *}{key}
 \end{funcdecl}
@@ -175,23 +176,30 @@ principal name \funcparam{mname} is used.
 Get the KDC database master key from somewhere, filling it into
 \funcparam{*key}. 
 \funcparam{key{\ptsto}keytype} should be set to the desired key type.
+
 If \funcparam{fromkeyboard} is TRUE, then the master key is read as a password
-from the user's terminal.  In this case,
+from the user's terminal.  In this case:
 \funcparam{eblock} should point to a block with an appropriate
-\funcname{string_to_key}  function.
-If \funcparam{twice} is TRUE, the password is read twice for verification.
+\funcname{string_to_key} function; if \funcparam{twice} is TRUE, the
+password is read twice for verification; and if \funcparam{salt} is
+non-NULL, it is used as the salt when converting the typed
+password to the master key.
+
 
 If \funcparam{fromkeyboard} is false, then the key is read from
 a file whose name is derived from the principal name \funcparam{mname}.
+Therefore, \funcparam{eblock}, \funcparam{twice} and \funcparam{salt}
+are ignored.
+
 
 \funcparam{mname} is the name of the key sought; this is often used by
 \funcname{string_to_key} to aid in conversion of the password to a key. 
 
 \begin{funcdecl}{krb5_kdb_encrypt_key}{krb5_error_code}{\funcin}
 \funcarg{krb5_encrypt_block *}{eblock}
-\funcarg{krb5_keyblock *}{in}
+\funcarg{const krb5_keyblock *}{in}
 \funcinout
-\funcarg{krb5_keyblock *}{out}
+\funcarg{krb5_encrypted_keyblock *}{out}
 \end{funcdecl}
 
 Encrypt a key for storage in the database.  \funcparam{eblock} is used
@@ -201,7 +209,7 @@ freed when the caller is finished with it.
 
 \begin{funcdecl}{krb5_kdb_decrypt_key}{krb5_error_code}{\funcin}
 \funcarg{krb5_encrypt_block *}{eblock}
-\funcarg{krb5_keyblock *}{in}
+\funcarg{const krb5_encrypted_keyblock *}{in}
 \funcinout
 \funcarg{krb5_keyblock *}{out}
 \end{funcdecl}

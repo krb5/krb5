@@ -20,7 +20,7 @@ Creates a credentials cache named by \funcparam{residual} (which may be
 interpreted differently by each type of ccache).  The cache is not
 opened, but the cache name is held in reserve.
 
-\begin{funcdecl}{krb5_cc_gennew_internal}{krb5_error_code}{\funcout}
+\begin{funcdecl}{krb5_cc_gen_new_internal}{krb5_error_code}{\funcout}
 \funcarg{krb5_ccache *}{id}
 \end{funcdecl}
 
@@ -59,16 +59,16 @@ Errors:  permission errors.
 \funcarg{krb5_ccache}{id}
 \end{funcdecl}
 
-Closes the credentials cache \funcparam{id}, invalidates \funcparam{id},
-and releases any other resources acquired during use of the credentials
-cache.  Requires that \funcparam{id} identifies a valid credentials
-cache.  After return, \funcparam{id} must not be used unless it is first
-reinitialized.
+Closes the credentials cache \funcparam{id}, invalidates
+\funcparam{id}, and releases \funcparam{id} and any other resources
+acquired during use of the credentials cache.  Requires that
+\funcparam{id} identifies a valid credentials cache.  After return,
+\funcparam{id} must not be used unless it is first reinitialized.
 
 
 \begin{funcdecl}{krb5_cc_store_cred}{krb5_error_code}{\funcin}
 \funcarg{krb5_ccache}{id}
-\funcarg{krb5_credentials *}{creds}
+\funcarg{krb5_creds *}{creds}
 \end{funcdecl}
 
 Stores \funcparam{creds} in the cache \funcparam{id}, tagged with
@@ -80,9 +80,9 @@ Errors: permission errors, storage failure errors.
 \begin{funcdecl}{krb5_cc_retrieve_cred}{krb5_error_code}{\funcin}
 \funcarg{krb5_ccache}{id}
 \funcarg{krb5_flags}{whichfields}
-\funcarg{krb5_credentials *}{mcreds}
+\funcarg{krb5_creds *}{mcreds}
 \funcout
-\funcarg{krb5_credentials *}{creds}
+\funcarg{krb5_creds *}{creds}
 \end{funcdecl}
 
 Searches the cache \funcparam{id} for credentials matching
@@ -92,7 +92,8 @@ name \funcparam{mcreds{\ptsto}server}.
 Requires that \funcparam{id} identifies a valid credentials cache.
 
 If at least one match is found, one of the matching credentials is
-returned in \funcparam{*creds}. XXX free the return creds?
+returned in \funcparam{*creds}. The credentials should be freed using
+\funcname{krb5_free_credentials}.
 
 Errors: error code if no matches found.
 
@@ -124,7 +125,7 @@ Requires that \funcparam{id} identifies a valid credentials cache opened by
 \begin{funcdecl}{krb5_cc_next_cred}{krb5_error_code}{\funcin}
 \funcarg{krb5_ccache}{id}
 \funcout
-\funcarg{krb5_credentials *}{creds}
+\funcarg{krb5_creds *}{creds}
 \funcinout
 \funcarg{krb5_cc_cursor *}{cursor}
 \end{funcdecl}
@@ -157,7 +158,7 @@ Errors: may return error code if \funcparam{*cursor} is invalid.
 \begin{funcdecl}{krb5_cc_remove_cred}{krb5_error_code}{\funcin}
 \funcarg{krb5_ccache}{id}
 \funcarg{krb5_flags}{which}
-\funcarg{krb5_credentials *}{cred}
+\funcarg{krb5_creds *}{cred}
 \end{funcdecl}
 
 Removes any credentials from \funcparam{id} which match the principal

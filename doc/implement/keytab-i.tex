@@ -120,7 +120,7 @@ Errors: error code if no more cache entries or if the keytab changes.
 
 \begin{funcdecl}{krb5_kt_end_seq_get}{krb5_error_code}{\funcin}
 \funcarg{krb5_keytab}{id}
-\funcarg{krb5_kt_cursor}{cursor}
+\funcarg{krb5_kt_cursor *}{cursor}
 \end{funcdecl}
 
 Finishes sequential processing mode and invalidates \funcparam{cursor},
@@ -179,7 +179,7 @@ yet known.
 An error is returned if \funcparam{ops{\ptsto}prefix} is already known.
 
 \begin{funcdecl}{krb5_kt_resolve}{krb5_error_code}{\funcin}
-\funcarg{char *}{string_name}
+\funcarg{const char *}{string_name}
 \funcout
 \funcarg{krb5_keytab *}{id}
 \end{funcdecl}
