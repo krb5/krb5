@@ -446,7 +446,12 @@ char *handle_sam_labels(sc)
 	label = "Challenge for Enigma Logic mechanism";
 	break;
       case PA_SAM_TYPE_DIGI_PATH: /*  Digital Pathways */
+      case PA_SAM_TYPE_DIGI_PATH_HEX: /*  Digital Pathways */
 	label = "Challenge for Digital Pathways mechanism";
+	break;
+      case PA_SAM_TYPE_ACTIVCARD_DEC: /*  Digital Pathways */
+      case PA_SAM_TYPE_ACTIVCARD_HEX: /*  Digital Pathways */
+	label = "Challenge for Activcard mechanism";
 	break;
       case PA_SAM_TYPE_SKEY_K0:	/*  S/key where  KDC has key 0 */
 	label = "Challenge for Enhanced S/Key mechanism";
@@ -455,6 +460,9 @@ char *handle_sam_labels(sc)
 	label = "Challenge for Traditional S/Key mechanism";
 	break;
       case PA_SAM_TYPE_SECURID:	/*  Security Dynamics */
+	label = "Challenge for Security Dynamics mechanism";
+	break;
+      case PA_SAM_TYPE_SECURID_PREDICT:	/* predictive Security Dynamics */
 	label = "Challenge for Security Dynamics mechanism";
 	break;
       }
@@ -470,10 +478,12 @@ char *handle_sam_labels(sc)
     p = prompt1 = malloc(label_len + strlen(sep1) +
 			 challenge_len + strlen(sep2) +
 			 prompt_len+ strlen(sep3) + 1);
-    strncpy(p, label, label_len); p += label_len;
-    strcpy(p, sep1); p += strlen(sep1);
-    strncpy(p, challenge, challenge_len); p += challenge_len;
-    strcpy(p, sep2); p += strlen(sep2);
+    if (challenge_len) {
+	strncpy(p, label, label_len); p += label_len;
+	strcpy(p, sep1); p += strlen(sep1);
+	strncpy(p, challenge, challenge_len); p += challenge_len;
+	strcpy(p, sep2); p += strlen(sep2);
+    }
     strncpy(p, prompt, prompt_len); p += prompt_len;
     strcpy(p, sep3); /* p += strlen(sep3); */
     return prompt1;

@@ -16,6 +16,7 @@ STLIBOBJS= \
 	bld_pr_ext.o	\
 	bld_princ.o	\
 	chk_trans.o	\
+	chpw.o		\
 	conv_princ.o	\
 	copy_addrs.o	\
 	copy_auth.o	\
@@ -39,6 +40,9 @@ STLIBOBJS= \
 	gen_subkey.o	\
 	get_creds.o	\
 	get_in_tkt.o	\
+	gic_keytab.o	\
+	gic_opt.o	\
+	gic_pwd.o	\
 	in_tkt_ktb.o	\
 	in_tkt_pwd.o	\
 	in_tkt_sky.o	\
@@ -54,6 +58,7 @@ STLIBOBJS= \
 	parse.o		\
 	pr_to_salt.o	\
 	preauth.o	\
+	preauth2.o	\
 	princ_comp.o	\
 	rd_cred.o	\
 	rd_error.o	\
@@ -81,6 +86,8 @@ STLIBOBJS= \
 	tgtname.o	\
 	unparse.o	\
 	valid_times.o	\
+	vfy_increds.o	\
+	vic_opt.o	\
 	walk_rtree.o
 
 OBJS=	addr_comp.$(OBJEXT)	\
@@ -90,6 +97,7 @@ OBJS=	addr_comp.$(OBJEXT)	\
 	bld_pr_ext.$(OBJEXT)	\
 	bld_princ.$(OBJEXT)	\
 	chk_trans.$(OBJEXT)	\
+	chpw.$(OBJEXT)		\
 	conv_princ.$(OBJEXT)	\
 	copy_addrs.$(OBJEXT)	\
 	copy_auth.$(OBJEXT)	\
@@ -113,6 +121,9 @@ OBJS=	addr_comp.$(OBJEXT)	\
 	gen_subkey.$(OBJEXT)	\
 	get_creds.$(OBJEXT)	\
 	get_in_tkt.$(OBJEXT)	\
+	gic_keytab.$(OBJEXT)	\
+	gic_opt.$(OBJEXT)	\
+	gic_pwd.$(OBJEXT)	\
 	in_tkt_ktb.$(OBJEXT)	\
 	in_tkt_pwd.$(OBJEXT)	\
 	in_tkt_sky.$(OBJEXT)	\
@@ -128,6 +139,7 @@ OBJS=	addr_comp.$(OBJEXT)	\
 	parse.$(OBJEXT)		\
 	pr_to_salt.$(OBJEXT)	\
 	preauth.$(OBJEXT)	\
+	preauth2.$(OBJEXT)	\
 	princ_comp.$(OBJEXT)	\
 	rd_cred.$(OBJEXT)	\
 	rd_error.$(OBJEXT)	\
@@ -155,6 +167,8 @@ OBJS=	addr_comp.$(OBJEXT)	\
 	tgtname.$(OBJEXT)	\
 	unparse.$(OBJEXT)	\
 	valid_times.$(OBJEXT)	\
+	vfy_increds.$(OBJEXT)	\
+	vic_opt.$(OBJEXT)	\
 	walk_rtree.$(OBJEXT)
 
 SRCS=	$(srcdir)/addr_comp.c	\
@@ -165,6 +179,7 @@ SRCS=	$(srcdir)/addr_comp.c	\
 	$(srcdir)/bld_princ.c	\
 	$(srcdir)/brand.c	\
 	$(srcdir)/chk_trans.c	\
+	$(srcdir)/chpw.c	\
 	$(srcdir)/conv_princ.c	\
 	$(srcdir)/copy_addrs.c	\
 	$(srcdir)/copy_auth.c	\
@@ -188,6 +203,9 @@ SRCS=	$(srcdir)/addr_comp.c	\
 	$(srcdir)/gen_subkey.c	\
 	$(srcdir)/get_creds.c	\
 	$(srcdir)/get_in_tkt.c	\
+	$(srcdir)/gic_keytab.c	\
+	$(srcdir)/gic_opt.c	\
+	$(srcdir)/gic_pwd.c	\
 	$(srcdir)/in_tkt_ktb.c	\
 	$(srcdir)/in_tkt_pwd.c	\
 	$(srcdir)/in_tkt_sky.c	\
@@ -203,6 +221,7 @@ SRCS=	$(srcdir)/addr_comp.c	\
 	$(srcdir)/parse.c	\
 	$(srcdir)/pr_to_salt.c	\
 	$(srcdir)/preauth.c	\
+	$(srcdir)/preauth2.c	\
 	$(srcdir)/princ_comp.c	\
 	$(srcdir)/rd_cred.c	\
 	$(srcdir)/rd_error.c	\
@@ -230,6 +249,8 @@ SRCS=	$(srcdir)/addr_comp.c	\
 	$(srcdir)/tgtname.c	\
 	$(srcdir)/unparse.c	\
 	$(srcdir)/valid_times.c	\
+	$(srcdir)/vfy_increds.c \
+	$(srcdir)/vic_opt.c	\
 	$(srcdir)/walk_rtree.c
 
 ##DOS##LIBOBJS = $(OBJS)

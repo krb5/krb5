@@ -337,7 +337,7 @@ krb5_send_tgs(context, kdcoptions, timestruct, ktypes, sname, addrs,
     /* now send request & get response from KDC */
     retval = krb5_sendto_kdc(context, scratch, 
 			     krb5_princ_realm(context, sname),
-			     &rep->response);
+			     &rep->response, NULL);
     krb5_free_data(context, scratch);
 
     if (retval == 0) {

@@ -1,0 +1,238 @@
+#include "k5-int.h"
+
+static krb5_error_code
+krb5_cc_copy_creds_except(context, incc, outcc, princ)
+     krb5_context context;
+     krb5_ccache incc;
+     krb5_ccache outcc;
+     krb5_principal princ;
+{
+   krb5_error_code code;
+   krb5_flags flags;
+   krb5_cc_cursor cur;
+   krb5_creds creds;
+
+   flags = 0;				/* turns off OPENCLOSE mode */
+   if ((code = krb5_cc_set_flags(context, incc, flags)))
+      return(code);
+   if ((code = krb5_cc_set_flags(context, outcc, flags)))
+      return(code);
+
+   if ((code = krb5_cc_start_seq_get(context, incc, &cur)))
+      goto cleanup;
+
+   while (!(code = krb5_cc_next_cred(context, incc, &cur, &creds))) {
+      if (krb5_principal_compare(context, princ, creds.server))
+	 continue;
+
+      code = krb5_cc_store_cred(context, outcc, &creds);
+      krb5_free_cred_contents(context, &creds);
+      if (code)
+	 goto cleanup;
+   }
+
+   if (code != KRB5_CC_END)
+      goto cleanup;
+
+   code = 0;
+
+cleanup:
+   flags = KRB5_TC_OPENCLOSE;
+
+   if (code)
+      krb5_cc_set_flags(context, incc, flags);
+   else
+      code = krb5_cc_set_flags(context, incc, flags);
+
+   if (code)
+      krb5_cc_set_flags(context, outcc, flags);
+   else
+      code = krb5_cc_set_flags(context, outcc, flags);
+
+   return(code);
+}
+
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
+krb5_verify_init_creds(krb5_context context,
+		       krb5_creds *creds,
+		       krb5_principal server_arg,
+		       krb5_keytab keytab_arg,
+		       krb5_ccache *ccache_arg,
+		       krb5_verify_init_creds_opt *options)
+{
+   krb5_error_code ret;
+   krb5_principal server;
+   krb5_keytab keytab;
+   krb5_ccache ccache;
+   krb5_keytab_entry kte;
+   krb5_creds in_creds, *out_creds;
+   krb5_auth_context authcon;
+   krb5_data ap_req;
+   int keytab_key_exists, rd_req_succeeds, nofail;
+   
+   keytab_key_exists = 0;
+   rd_req_succeeds = 0;
+   nofail = 0;
+
+   /* KRB5KDC_ERR_S_PRINCIPAL_UNKNOWN */
+
+   server = NULL;
+   keytab = NULL;
+   ccache = NULL;
+   out_creds = NULL;
+   authcon = NULL;
+   ap_req.data = NULL;
+
+   if (server_arg) {
+      server = server_arg;
+   } else {
+      if (ret = krb5_sname_to_principal(context, NULL, NULL, 
+					KRB5_NT_SRV_HST, &server))
+	 goto cleanup;
+   }
+      
+   /* first, check if the server is in the keytab.  If not, there's
+      no reason to continue.  rd_req does all this, but there's
+      no way to know that a given error is caused by a missing
+      keytab or key, and not by some other problem. */
+
+   if (keytab_arg) {
+      keytab = keytab_arg;
+   } else {
+      if (ret = krb5_kt_default(context, &keytab))
+	 goto cleanup;
+   }
+
+   if (ret = krb5_kt_get_entry(context, keytab, server, 0, 0, &kte))
+      goto cleanup;
+
+   krb5_kt_free_entry(context, &kte);
+   keytab_key_exists = 1;
+
+   /* If the creds are for the server principal, we're set, just do
+      a mk_req.	 Otherwise, do a get_credentials first. */
+
+   if (krb5_principal_compare(context, server, creds->server)) {
+      /* make an ap_req */
+      if (ret = krb5_mk_req_extended(context, &authcon, 0, NULL, creds,
+				     &ap_req))
+	 goto cleanup;
+   } else {
+      /* this is unclean, but it's the easiest way without ripping the
+	 library into very small pieces.  store the client's initial cred
+	 in a memory ccache, then call the library.  Later, we'll copy
+	 everything except the initial cred into the ccache we return to
+	 the user.  A clean implementation would involve library
+	 internals with a coherent idea of "in" and "out". */
+
+      /* insert the initial cred into the ccache */
+
+      if (ret = krb5_cc_resolve(context, "MEMORY:rd_req", &ccache))
+	 goto cleanup;
+
+      if (ret = krb5_cc_initialize(context, ccache, creds->client))
+	 goto cleanup;
+
+      if (ret = krb5_cc_store_cred(context, ccache, creds))
+	 goto cleanup;
+
+      /* set up for get_creds */
+      memset(&in_creds, 0, sizeof(in_creds));
+      in_creds.client = creds->client;
+      in_creds.server = server;
+      if (ret = krb5_timeofday(context, &in_creds.times.endtime))
+	 goto cleanup;
+      in_creds.times.endtime += 5*60;
+
+      if (ret = krb5_get_credentials(context, 0, ccache, &in_creds,
+				     &out_creds))
+	 goto cleanup;
+
+      /* make an ap_req */
+      if (ret = krb5_mk_req_extended(context, &authcon, 0, NULL, out_creds,
+				     &ap_req))
+	 goto cleanup;
+   }
+
+   /* wipe the auth context for mk_req */
+   if (authcon) {
+      krb5_auth_con_free(context, authcon);
+      authcon = NULL;
+   }
+
+   /* verify the ap_req */
+
+   if (ret = krb5_rd_req(context, &authcon, &ap_req, server, keytab,
+			 NULL, NULL))
+      goto cleanup;
+
+   rd_req_succeeds = 1;   
+
+cleanup:
+   /* I could test the error case first, but then there would be a
+      chance that the verification would succeed when there was
+      actually a significant failure (some transient condition could
+      make rd_req fail, and this would not be a problem if nofail was
+      not set */
+
+   if (!keytab_key_exists) {
+      krb5_error_code ret2;
+
+      if (options &&
+	  (options->flags & KRB5_VERIFY_INIT_CREDS_OPT_AP_REQ_NOFAIL))
+	 nofail = options->ap_req_nofail;
+      else if ((ret2 = krb5_appdefault_boolean(context, &creds->client->realm,
+					       "verify_ap_req_nofail",
+					       &nofail))
+	       == 0)
+	    ;
+      else
+	 nofail = 0;
+   }
+
+   if ((keytab_key_exists && rd_req_succeeds) ||
+       (!keytab_key_exists && !nofail)) {
+      ret = 0;
+
+      if (ccache_arg && ccache) {
+	 if (*ccache_arg == NULL) {
+	    krb5_ccache retcc;
+
+	    retcc = NULL;
+
+	    if ((ret = krb5_cc_resolve(context, "MEMORY:rd_req2", &retcc)) ||
+		(ret = krb5_cc_initialize(context, retcc, creds->client)) ||
+		(ret = krb5_cc_copy_creds_except(context, ccache, retcc,
+						 creds->server))) {
+	       if (retcc)
+		  krb5_cc_destroy(context, retcc);
+	    } else {
+	       *ccache_arg = retcc;
+	    }
+	 } else {
+	    /* if this returns an error, then that's the return
+	       from this function */
+	    ret = krb5_cc_copy_creds_except(context, ccache, *ccache_arg,
+					    server);
+	 }
+      }
+   }
+
+   if (!server_arg)
+      krb5_free_principal(context, server);
+   if (!keytab_arg)
+      krb5_kt_close(context, keytab);
+   if (ccache)
+      krb5_cc_destroy(context, ccache);
+   if (out_creds)
+      krb5_free_creds(context, out_creds);
+   if (authcon)
+      krb5_auth_con_free(context, authcon);
+   if (ap_req.data)
+      krb5_xfree(ap_req.data);
+
+   return(ret);
+}
+
+
+   
