@@ -591,6 +591,8 @@ library using a password to obtain initial credentials. \\
 init_with_skey & none & Open a connection with the ovsec_kadm library
 using the keytab entry to obtain initial credentials. \\
 destroy & none & Close the connection with the ovsec_kadm library. \\
+flush & none & Flush all database changes to disk; no-op when called
+remotely. \\
 create_principal & add & Create a new principal. \\
 delete_principal & delete & Delete a principal. \\
 modify_principal & modify & Modify the attributes of an existing
@@ -738,6 +740,30 @@ exist.  This is a special-case replacement return code for ``Server
 not found in database'' for these required principals.
 
 \end{description}
+
+\subsection{ovsec_kadm_flush}
+
+\begin{verbatim}
+ovsec_kadm_ret_t ovsec_kadm_flush(void *server_handle)
+\end{verbatim}
+
+AUTHORIZATION REQUIRED: none
+
+Flush all changes to the Kerberos databases, leaving the connection to
+the Admin API open.  This function behaves differently when called by
+local and remote clients.
+
+For local clients, the function closes and reopens the Kerberos
+database with krb5_db_fini() and krb5_db_init(), and closes and
+reopens the Admin policy database with adb_policy_close() and
+adb_policy_open().  Although it is unlikely, any other these functions
+could return errors; in that case, this function calls
+ovsec_kadm_destroy and returns the error code.  Therefore, if
+ovsec_kadm_flush does not return OVSEC_KADM_OK, the connection to the
+Admin server has been terminated and, in principle, the databases
+might be corrupt.
+
+For remote clients, the function is a no-op.
 
 \subsection{ovsec_kadm_destroy}
 
