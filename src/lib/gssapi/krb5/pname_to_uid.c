@@ -46,7 +46,7 @@ gss_OID name_type;
 gss_OID mech_type;
 uid_t * uid;
 {
-#if defined(_MSDOS) || defined(_MACINTOSH)
+#if defined(_MSDOS) || defined(_WIN32) || defined(_MACINTOSH)
 	return (0);		/* failure */
 #else
 
