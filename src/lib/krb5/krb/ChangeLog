@@ -1,3 +1,16 @@
+Wed Apr  3 16:04:36 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* rd_req_dec.c (krb5_rd_req_decoded): Move code which
+	        validated the ticket times to krb5_validate_times.
+
+	* valid_times.c (krb5_validate_times): New function which
+		determines whether or not the ticket times are valid.
+
+	* mk_req_ext.c (krb5_mk_req_extended): Call krb5_validate_time()
+		to determine whether or not the ticket in passed-in
+		credentials is valid.  If it isn't, return an error right
+		away. 
+
 Tue Mar 26 14:45:03 1996  Richard Basch  <basch@lehman.com>
 
 	* conv_princ.c: added "imap" service to the conversion list as

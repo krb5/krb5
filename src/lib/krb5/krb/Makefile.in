@@ -78,6 +78,7 @@ OBJS=	addr_comp.$(OBJEXT)	\
 	str_conv.$(OBJEXT)	\
 	tgtname.$(OBJEXT)	\
 	unparse.$(OBJEXT)	\
+	valid_times.$(OBJEXT)	\
 	walk_rtree.$(OBJEXT)
 
 SRCS=	$(srcdir)/addr_comp.c	\
@@ -150,6 +151,7 @@ SRCS=	$(srcdir)/addr_comp.c	\
 	$(srcdir)/str_conv.c	\
 	$(srcdir)/tgtname.c	\
 	$(srcdir)/unparse.c	\
+	$(srcdir)/valid_times.c	\
 	$(srcdir)/walk_rtree.c
 
 all-unix:: shared $(OBJS)

@@ -98,7 +98,7 @@ krb5_rd_req_decoded(context, auth_context, req, server, keytab,
     krb5_ticket	       ** ticket;
 {
     krb5_error_code 	  retval = 0;
-    krb5_timestamp 	  currenttime, starttime;
+    krb5_timestamp 	  currenttime;
 
     if (server && !krb5_principal_compare(context, server, req->ticket->server))
 	return KRB5KRB_AP_WRONG_PRINC;
@@ -223,27 +223,18 @@ krb5_rd_req_decoded(context, auth_context, req, server, keytab,
 	    goto cleanup;
     }
 
-    /* if starttime is not in ticket, then treat it as authtime */
-    if (req->ticket->enc_part2->times.starttime != 0)
-	starttime = req->ticket->enc_part2->times.starttime;
-    else
-	starttime = req->ticket->enc_part2->times.authtime;
+    retval = krb5_validate_times(context, &req->ticket->enc_part2->times);
+    if (retval != 0)
+	    goto cleanup;
 
     if ((retval = krb5_timeofday(context, &currenttime)))
 	goto cleanup;
-    if (starttime - currenttime > context->clockskew) {
-	retval = KRB5KRB_AP_ERR_TKT_NYV;	/* ticket not yet valid */
-	goto cleanup;
-    }	
+
     if (!in_clock_skew((*auth_context)->authentp->ctime)) {
 	retval = KRB5KRB_AP_ERR_SKEW;
 	goto cleanup;
     }
-    if ((currenttime - req->ticket->enc_part2->times.endtime) >
-	context->clockskew) {
-	retval = KRB5KRB_AP_ERR_TKT_EXPIRED;	/* ticket expired */
-	goto cleanup;
-    }	
+
     if (req->ticket->enc_part2->flags & TKT_FLG_INVALID) {
 	retval = KRB5KRB_AP_ERR_TKT_INVALID;
 	goto cleanup;

@@ -104,6 +104,10 @@ krb5_mk_req_extended(context, auth_context, ap_req_options, in_data, in_creds,
 	goto cleanup;
     }
 
+    /* verify that the ticket is not expired */
+    if ((retval = krb5_validate_times(context, &in_creds->times)) != 0)
+	goto cleanup;
+
     /* generate auth_context if needed */
     if (*auth_context == NULL) {
 	if ((retval = krb5_auth_con_init(context, &new_auth_context)))
