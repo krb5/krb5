@@ -584,8 +584,8 @@ krb5_timestamp_to_string(timestamp, buffer, buflen)
 	buffer[strlen(buffer)-1] = '\0';
 	return(0);
     }
-#endif	/* HAVE_STRFTIME */
     return(ENOMEM);
+#endif	/* HAVE_STRFTIME */
 }
 
 krb5_error_code

@@ -162,6 +162,8 @@ krb5_address_internalize(kcontext, argp, buffer, lenremain)
 	    (address = (krb5_address *) malloc(sizeof(krb5_address)))) {
 	    memset(address, 0, sizeof(krb5_address));
 
+	    address->magic = KV5M_ADDRESS;
+
 	    /* Get the addrtype */
 	    (void) krb5_ser_unpack_int32(&ibuf, &bp, &remain);
 	    address->addrtype = (krb5_addrtype) ibuf;

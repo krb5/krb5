@@ -1,3 +1,10 @@
+Mon Mar 11 11:15:26 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* str_conv.c (krb5_timestamp_to_string): Handle statement not
+		reached warning.
+
+	* ser_addr.c (krb5_address_internalize): Add magic numbers
+
 Thu Feb 29 11:49:38 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* fwd_tgt.c (NEED_SOCKETS): Use NEED_SOCKETS instead of #including
