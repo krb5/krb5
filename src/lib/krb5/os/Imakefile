@@ -31,7 +31,9 @@ OBJS= \
 	osconfig.o	\
 	port2ip.o	\
 	rnd_confoun.o	\
+	read_msg.o	\
 	read_pwd.o	\
+	send_msg.o	\
 	sendto_kdc.o	\
 	sn2princ.o	\
 	timeofday.o	\
@@ -57,9 +59,11 @@ SRCS= \
 	net_read.c	\
 	net_write.c	\
 	osconfig.c	\
+	read_msg.c	\
 	read_pwd.c	\
 	port2ip.c	\
 	rnd_confoun.c	\
+	send_msg.c	\
 	sendto_kdc.c	\
 	sn2princ.c	\
 	timeofday.c	\
