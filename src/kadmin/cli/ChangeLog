@@ -1,3 +1,7 @@
+Tue Aug  6 15:18:49 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* kadmin.c: remove unsupported -salt option from ank usage
+
 Fri Aug  2 13:13:24 1996  Barry Jaspan  <bjaspan@DUN-DUN-NOODLES>
 
 	* keytab.c (add_principal): free_keyblock -> free_keyblock_contents

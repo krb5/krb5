@@ -789,7 +789,7 @@ void kadmin_addmodprinc_usage(func)
 {
      fprintf(stderr, "usage: %s [options] principal\n", func);
      fprintf(stderr, "\toptions are:\n");
-     fprintf(stderr, "\t\t[-salt salttype] [-expire expdate] [-pwexpire pwexpdate]\n\t\t[-maxlife maxtixlife] [-kvno kvno] [-policy policy]\n\t\t[-randkey] [-pw password] [{+|-}attribute]\n");
+     fprintf(stderr, "\t\t[-expire expdate] [-pwexpire pwexpdate] [-maxlife maxtixlife]\n\t\t[-kvno kvno] [-policy policy] [-randpass] [-pw password]\n\t\t[{+|-}attribute]\n");
      fprintf(stderr, "\tattributes are:\n");
      fprintf(stderr, "\t\tallow_tgs_req, allow_tix, needchange, password_changing_service\n");
 }
