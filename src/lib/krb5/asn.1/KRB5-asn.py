@@ -120,6 +120,11 @@ HostAddresses ::= SEQUENCE OF SEQUENCE {
 	address[1]			OCTET STRING
 }
 
+HostAddress ::= SEQUENCE  {
+	addr-type[0]			INTEGER, -- AddressType
+	address[1]			OCTET STRING
+}
+
 AuthorizationData ::= SEQUENCE OF SEQUENCE {
 	ad-type[0]			INTEGER,
 	ad-data[1]			GeneralString
@@ -277,7 +282,8 @@ KRB-SAFE ::= [APPLICATION 6] SEQUENCE {
 	user-data[2]			OCTET STRING,
 	timestamp[3]			GeneralizedTime,
 	msec[4]				INTEGER,
-	addresses[5]			HostAddresses,
+	s-address[5]			HostAddress,	-- sender's addr
+	r-address[5]			HostAddress,	-- recip's addr
 	checksum[6]			Checksum			
 }
 
