@@ -111,7 +111,7 @@ krb5_crypto_us_timeofday(seconds, microseconds)
     	((66 * 365 * 24 * 60 * 60) + (17 *  24 * 60 * 60) + 
     	(getTimeZoneOffset() * 60 * 60));
 
-#ifdef TARGET_CPU_PPC    						/* Only PPC has accurate time */
+#if TARGET_CPU_PPC	    						/* Only PPC has accurate time */
     if (HaveAccurateTime ()) {					/* Does hardware support accurate time? */
     
     	AbsoluteTime 	absoluteTime;
@@ -154,6 +154,7 @@ Boolean HaveAccurateTime ()
 	if (!alreadyChecked) {
 		alreadyChecked = true;
 		haveAccurateTime = false;
+#if TARGET_CPU_PPC
 		if ((Ptr) UpTime != (Ptr) kUnresolvedCFragSymbolAddress) {
 			UInt32	minAbsoluteTimeDelta;
 			UInt32	theAbsoluteTimeToNanosecondNumerator;
@@ -176,6 +177,7 @@ Boolean HaveAccurateTime ()
 				haveAccurateTime = true;
 			}
 		}
+#endif /* TARGET_CPU_PPC */
 	}
 	
 	return haveAccurateTime;
