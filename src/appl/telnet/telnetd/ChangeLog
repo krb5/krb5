@@ -1,5 +1,8 @@
 2001-08-30  Ken Raeburn  <raeburn@mit.edu>
 
+	* ext.h: Always use prototype declarations.
+	(P): Definitions deleted.
+
 	* defs.h: Don't include socket-utils.h until after netinet/in.h.
 
 2001-08-29  Ken Raeburn  <raeburn@mit.edu>
