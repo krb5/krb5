@@ -35,7 +35,7 @@ CL=
 #
 # CCOPTS for non-DLL compiles
 #
-##WIN16##CCOPTS2=/AL /Zp /G2s  /Os /Zi /Od /W3 $(XTRA)
+##WIN16##CCOPTS2=/AL /Zp /GA /G2s  /Os /Zi /Od /W3 $(XTRA)
 ##WIN32##CCOPTS2=/Os /Zi /Od /W3 $(XTRA)
 CPPFLAGS =  -I$(SRCTOP)\include -I$(SRCTOP)\include\krb5 -DLEHMAN
 DEFS = $(CPPFLAGS)
