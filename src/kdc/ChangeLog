@@ -1,5 +1,11 @@
 2001-06-21  Ezra Peisach  <epeisach@mit.edu>
 
+	* configure.in: Test for daemon prototype.
+	
+	* main.c: Provide daemon prototype if needed.
+
+2001-06-21  Ezra Peisach  <epeisach@mit.edu>
+
 	* configure.in: Use optional argument to KRB5_NEED_PROTO so test
 	for swab existance removed.
 

@@ -48,6 +48,10 @@
 #include <des.h>
 #endif
 
+#if defined(NEED_DAEMON_PROTO)
+extern int daemon(int, int);
+#endif
+
 kdc_realm_t *find_realm_data (char *, krb5_ui_4);
 
 void usage (char *);

@@ -8,6 +8,11 @@ KRB5_NEED_PROTO([#include <string.h>
 #include <unistd.h>
 #endif
 ],swab,1)
+dnl
+KRB5_NEED_PROTO([#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif],daemon,1)
+dnl
 AC_PROG_AWK
 KRB5_AC_INET6
 KRB5_SOCKADDR_SA_LEN
