@@ -1,5 +1,8 @@
 Mon Aug 19 12:11:27 1996  Barry Jaspan  <bjaspan@mit.edu>
 
+	* kadmin.c: prints absolute 0 dates as "[never]", print mod date
+ 	and by on one line, fix coredump on getprinc -terse
+
 	* Makefile.in: add target for datetest
 
 	* getdate.y: accept dates after 1999

@@ -682,7 +682,12 @@ int kadmin_parse_princ_args(argc, argv, oprinc, mask, pass, randkey, caller)
 		return -1;
 	    else {
 		date = get_date(argv[i], NULL);
-		oprinc->princ_expire_time = date == (time_t)-1 ? 0 : date;
+ 		if (date == (time_t)-1) {
+		     fprintf(stderr, "Invalid date specification \"%s\".",
+			     argv[i]);
+		     return -1;
+ 		}
+		oprinc->princ_expire_time = date;
 		*mask |= KADM5_PRINC_EXPIRE_TIME;
 		continue;
 	    }
@@ -693,7 +698,12 @@ int kadmin_parse_princ_args(argc, argv, oprinc, mask, pass, randkey, caller)
 		return -1;
 	    else {
 		date = get_date(argv[i], NULL);
-		oprinc->pw_expiration = date == (time_t)-1 ? 0 : date;
+ 		if (date == (time_t)-1) {
+		     fprintf(stderr, "Invalid date specification \"%s\".",
+			     argv[i]);
+		     return -1;
+ 		}
+		oprinc->pw_expiration = date;
 		*mask |= KADM5_PW_EXPIRATION;
 		continue;
 	    }
@@ -703,7 +713,13 @@ int kadmin_parse_princ_args(argc, argv, oprinc, mask, pass, randkey, caller)
 	    if (++i > argc - 2)
 		return -1;
 	    else {
-		oprinc->max_life = get_date(argv[i], NULL) - now;
+		date = get_date(argv[i], NULL);
+ 		if (date == (time_t)-1) {
+		     fprintf(stderr, "Invalid date specification \"%s\".",
+			     argv[i]);
+		     return -1;
+ 		}
+		oprinc->max_life = date - now;
 		*mask |= KADM5_MAX_LIFE;
 		continue;
 	    }
@@ -713,7 +729,13 @@ int kadmin_parse_princ_args(argc, argv, oprinc, mask, pass, randkey, caller)
 	    if (++i > argc - 2)
 		return -1;
 	    else {
-		oprinc->max_renewable_life = get_date(argv[i], NULL) - now;
+		date = get_date(argv[i], NULL);
+ 		if (date == (time_t)-1) {
+		     fprintf(stderr, "Invalid date specification \"%s\".",
+			     argv[i]);
+		     return -1;
+ 		}
+		oprinc->max_renewable_life = date - now;
 		*mask |= KADM5_MAX_RLIFE;
 		continue;
 	    }
@@ -1023,20 +1045,22 @@ void kadmin_getprinc(argc, argv)
     }
     if (argc == 2) {
 	printf("Principal: %s\n", canon);
-	printf("Expiration date: %s\n", strdate(dprinc.princ_expire_time));
-	printf("Last password change: %s\n",
-	       strdate(dprinc.last_pwd_change));
+	printf("Expiration date: %s\n", dprinc.princ_expire_time ?
+	       strdate(dprinc.princ_expire_time) : "[never]");
+	printf("Last password change: %s\n", dprinc.last_pwd_change ? 
+	       strdate(dprinc.last_pwd_change) : "[never]");
 	printf("Password expiration date: %s\n",
 	       dprinc.pw_expiration ?
 	       strdate(dprinc.pw_expiration) : "[none]");
 	printf("Maximum ticket life: %s\n", strdur(dprinc.max_life));
 	printf("Maximum renewable life: %s\n", strdur(dprinc.max_renewable_life));
-	printf("Last modified: by %s\n\ton %s\n",
-	       modcanon, strdate(dprinc.mod_date));
+	printf("Last modified: %s (%s)\n", strdate(dprinc.mod_date), modcanon);
 	printf("Last successful authentication: %s\n",
-	       strdate(dprinc.last_success));
+	       dprinc.last_success ? strdate(dprinc.last_success) :
+	       "[never]"); 
 	printf("Last failed authentication: %s\n",
-	       strdate(dprinc.last_failed));
+	       dprinc.last_failed ? strdate(dprinc.last_failed) :
+	       "[never]");
 	printf("Failed password attempts: %d\n",
 	       dprinc.fail_auth_count);
 	printf("Number of keys: %d\n", dprinc.n_key_data);
@@ -1072,7 +1096,7 @@ void kadmin_getprinc(argc, argv)
 	       canon, dprinc.princ_expire_time, dprinc.last_pwd_change,
 	       dprinc.pw_expiration, dprinc.max_life, modcanon,
 	       dprinc.mod_date, dprinc.attributes, dprinc.kvno,
-	       dprinc.mkvno, dprinc.policy,
+	       dprinc.mkvno, dprinc.policy ? dprinc.policy : "[none]",
 	       dprinc.max_renewable_life, dprinc.last_success,
 	       dprinc.last_failed, dprinc.fail_auth_count,
 	       dprinc.n_key_data);
@@ -1133,8 +1157,12 @@ int kadmin_parse_policy_args(argc, argv, policy, mask, caller)
 		return -1;
 	    else {
 		date = get_date(argv[i], NULL);
-		policy->pw_max_life =
-		    (date == (time_t)-1 ? 0 : date) - now;
+ 		if (date == (time_t)-1) {
+		     fprintf(stderr, "Invalid date specification \"%s\".",
+			     argv[i]);
+		     return -1;
+ 		}
+		policy->pw_max_life = date - now;
 		*mask |= KADM5_PW_MAX_LIFE;
 		continue;
 	    }
@@ -1144,8 +1172,12 @@ int kadmin_parse_policy_args(argc, argv, policy, mask, caller)
 		return -1;
 	    else {
 		date = get_date(argv[i], NULL);
-		policy->pw_min_life =
-		    (date == (time_t)-1 ? 0 : date) - now;
+ 		if (date == (time_t)-1) {
+		     fprintf(stderr, "Invalid date specification \"%s\".",
+			     argv[i]);
+		     return -1;
+ 		}
+		policy->pw_min_life = date - now;
 		*mask |= KADM5_PW_MIN_LIFE;
 		continue;
 	    }
