@@ -1,5 +1,8 @@
 2002-08-29  Ken Raeburn  <raeburn@mit.edu>
 
+	* shlib.conf: Use $(LDFLAGS) in CC_LINK_SHARED and CC_LINK_STATIC,
+	after other options.
+
 	* pre.in (S): Variable restored.
 	(ABS): Variable deleted.
 	(SS_DEPS): New variable.
