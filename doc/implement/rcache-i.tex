@@ -91,6 +91,11 @@ be called before the other per-replay cache functions.
 Requires that \funcparam{id} points to allocated space, with an
 initialized \funcparam{id{\ptsto}ops} field.
 
+Since \funcname{krb5_rc_resolve} allocates memory,
+\funcname{krb5_rc_close} must be called to free the allocated memory,
+even if neither \funcname{krb5_rc_initialize} or
+\funcname{krb5_rc_recover} were successfully called by the application.
+
 Returns:  allocation errors.
 
 
