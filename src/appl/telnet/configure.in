@@ -96,7 +96,6 @@ dnl
 dnl from old telnetd/configure.in
 dnl
 dnl AC_PROG_INSTALL
-AC_CHECK_LIB(util,main)
 AC_CHECK_LIB(termcap,main,AC_DEFINE(TERMCAP)
 LIBS="$LIBS -ltermcap",
   AC_CHECK_LIB(curses,setupterm,LIBS="$LIBS -lcurses",
@@ -172,4 +171,5 @@ TELNETD_LIBS="$LIBS"
 AC_SUBST(TELNETD_LIBS)
 LIBS="$old_LIBS"
 dnl
+KRB5_AC_LIBUTIL
 V5_AC_OUTPUT_MAKEFILE(. libtelnet telnet telnetd)

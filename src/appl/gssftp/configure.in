@@ -20,7 +20,7 @@ DECLARE_SYS_ERRLIST
 AC_REPLACE_FUNCS(getdtablesize)
 AC_CHECK_FUNCS(getcwd getdtablesize getusershell seteuid setreuid setresuid strerror getenv)
 AC_CHECK_LIB(crypt,crypt) dnl 
-AC_CHECK_LIB(util,logwtmp) dnl
+KRB5_AC_LIBUTIL
 dnl 
 dnl copied from appl/bsd/configure.in
 dnl

@@ -395,6 +395,9 @@ KADMCLNT_LIBS	= -lkadm5clnt $(KADM_COMM_LIBS)
 # need fixing if ever used on Mac OS X!
 PTY_LIB		= -lpty
 
+# libutil for NetBSD, et al. for openpty(), etc.
+UTIL_LIB	= @UTIL_LIB@
+
 # Misc stuff for linking server programs (and maybe some others,
 # eventually) but which we don't want to install.
 APPUTILS_LIB	= -lapputils

@@ -83,6 +83,9 @@
 #include <string.h>
 #include <sys/param.h>
 
+#ifdef HAVE_UTIL_H
+#include <util.h>
+#endif
 
 #ifdef HAVE_STREAMS
 /* krlogin doesn't test sys/tty... */

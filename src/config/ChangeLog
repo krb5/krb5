@@ -1,5 +1,7 @@
 2004-09-22  Tom Yu  <tlyu@mit.edu>
 
+	* pre.in (UTIL_LIB): Set if we need libutil.
+
 	* shlib.conf (alpha*-dec-osf*): Only use -Wl,-oldstyle_liblookup
 	if using native linker, with check for native linker if gcc is
 	being used.

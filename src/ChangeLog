@@ -1,5 +1,7 @@
 2004-09-22  Tom Yu  <tlyu@mit.edu>
 
+	* aclocal.m4 (KRB5_AC_LIBUTIL): New macro to check for libutil.
+	
 	* aclocal.m4 (WITH_CC): Check for GNU linker.
 
 2004-09-21  Tom Yu  <tlyu@mit.edu>

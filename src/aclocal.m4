@@ -1700,3 +1700,15 @@ fi])
 dnl
 dnl
 m4_include(config/ac-archive/acx_pthread.m4)
+#
+# KRB5_AC_LIBUTIL
+#
+# Check for libutil, for NetBSD, et al.; needed for openpty() and
+# logwtmp() on some platforms.
+#
+AC_DEFUN([KRB5_AC_LIBUTIL],
+	[AC_CHECK_LIB(util, main,
+		[AC_DEFINE(HAVE_LIBUTIL)
+  UTIL_LIB=-lutil])dnl
+AC_SUBST(UTIL_LIB)
+])

@@ -1,3 +1,7 @@
+2004-09-22  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in: Use KRB5_AC_LIBUTIL.
+
 2004-03-07  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Move test for setupterm back down below addition

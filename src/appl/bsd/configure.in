@@ -12,7 +12,6 @@ if test $with_afs != no; then
 fi
 AC_PROG_INSTALL
 dnl dbm libs for use of an_to_ln
-AC_CHECK_LIB(util,main)
 save_LIBS="$LIBS"
  LIBS=
  AC_CHECK_LIB(crypt,crypt)
@@ -191,6 +190,6 @@ else
 fi
 
 AC_CHECK_HEADERS(krb4-proto.h)
-
+KRB5_AC_LIBUTIL
 KRB5_BUILD_PROGRAM
 V5_AC_OUTPUT_MAKEFILE

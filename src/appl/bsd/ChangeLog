@@ -1,3 +1,9 @@
+2004-09-22  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in: Use KRB5_AC_LIBUTIL.
+
+	* Makefile.in (kshd, klogind): Use UTIL_LIB.
+
 2004-09-08  Tom Yu  <tlyu@mit.edu>
 
 	* login.c (main): Don't overwrite "PATH" environment variable if

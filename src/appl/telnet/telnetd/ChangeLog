@@ -1,3 +1,7 @@
+2004-09-22  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (telnetd): Use UTIL_LIB.
+
 2004-03-04  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Deleted; configure this dir from parent now.

@@ -61,7 +61,7 @@ OBJS=	telnetd.o \
 all:: telnetd
 
 telnetd: $(OBJS) $(PTY_DEPLIB) $(KRB4COMPAT_DEPLIBS) ../libtelnet/libtelnet.a
-	$(CC_LINK) -o $@ $(OBJS) ../libtelnet/libtelnet.a $(PTY_LIB) $(KRB4COMPAT_LIBS)
+	$(CC_LINK) -o $@ $(OBJS) ../libtelnet/libtelnet.a $(PTY_LIB) $(UTIL_LIB) $(KRB4COMPAT_LIBS)
 
 clean::
 	$(RM) telnetd
