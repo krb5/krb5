@@ -24,7 +24,7 @@
  * Dump a KDC database into a V4 slave dump.
  */
 
-#ifdef KRB4
+#ifdef KRB5_KRB4_COMPAT
 
 #include "k5-int.h"
 #include "com_err.h"
@@ -362,11 +362,11 @@ handle_one_key(arg, v5master, v5key, v4key)
     return 0;
 }
 
-#else /* KRB4 */
+#else /* KRB5_KRB4_COMPAT */
 void dump_v4db(argc, argv)
 	int	argc;
 	char	**argv;
 {
 	printf("This version of krb5_edit does not support the V4 dump command.\n");
 }
-#endif /* KRB4 */
+#endif /* KRB5_KRB4_COMPAT */
