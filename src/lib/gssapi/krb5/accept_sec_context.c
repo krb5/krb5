@@ -487,7 +487,7 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
    }
 
    ctx->endtime = ticket->enc_part2->times.endtime;
-   ctx->flags = ticket->enc_part2->flags;
+   ctx->krb_flags = ticket->enc_part2->flags;
 
    krb5_free_ticket(context, ticket); /* Done with ticket */
 

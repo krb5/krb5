@@ -320,7 +320,7 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
       ctx->initiate = 1;
       ctx->gss_flags = ((req_flags & (GSS_C_MUTUAL_FLAG | GSS_C_DELEG_FLAG)) |
 			GSS_C_CONF_FLAG | GSS_C_INTEG_FLAG);
-      ctx->flags = req_flags & GSS_C_DELEG_FLAG;
+      ctx->krb_flags = req_flags & GSS_C_DELEG_FLAG;
       ctx->seed_init = 0;
       ctx->big_endian = 0;  /* all initiators do little-endian, as per spec */
       ctx->seqstate = 0;
@@ -352,7 +352,7 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
 
       if ((code = make_ap_req(context, &(ctx->auth_context), cred, 
 			      ctx->there, &ctx->endtime, input_chan_bindings, 
-			      req_flags, &ctx->flags, mech_type, &token))) {
+			      req_flags, &ctx->krb_flags, mech_type, &token))) {
 	 krb5_free_principal(context, ctx->here);
 	 krb5_free_principal(context, ctx->there);
 	 xfree(ctx);
