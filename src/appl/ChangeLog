@@ -1,3 +1,7 @@
+Sat Jul 23 08:25:48 1994  Tom Yu  (tlyu@dragons-lair)
+
+	* configure.in: autoconf'ing telnet
+
 Wed Jul 20 00:10:30 1994  Tom Yu  (tlyu at dragons-lair)
 
 	* configure.in: autoconf'ing gss-sample
