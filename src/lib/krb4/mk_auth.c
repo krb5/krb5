@@ -12,9 +12,10 @@
 #include "mit-copyright.h"
 
 #define	DEFINE_SOCKADDR		/* Ask for sockets declarations from krb.h. */
-#include "krb.h"
-#include <errno.h>
 #include <stdio.h>
+#include "krb.h"
+#include "krb4-proto.h"
+#include <errno.h>
 #include <string.h>
 
 #define	KRB_SENDAUTH_VERS "AUTHV0.1" /* MUST be KRB_SENDAUTH_VLEN chars */

@@ -18,7 +18,7 @@
 
 #define S_AD_SZ sizeof(struct sockaddr_in)
 
-#ifdef POSIX
+#ifdef HAS_STDLIB_H
 #include <stdlib.h>
 #else
 extern char *malloc(), *calloc(), *realloc();

@@ -13,7 +13,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <ctype.h>
-#ifdef POSIX
+#ifdef HAS_STDLIB_H
 #include <stdlib.h>
 #else
 extern char *malloc();

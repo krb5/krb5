@@ -1,3 +1,25 @@
+Sun May  7 08:05:56 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* mk_preauth.c: Add <string.h> and either <stdlib.h> or provide
+		prototypes for malloc.
+
+	* g_svc_in_tkt.c: Add <string.h>
+
+
+	* rd_preauth.c: Add <string.h>
+
+	* mk_auth.c: Include "krb4-proto.h" for get_phost definition.
+
+	* g_pw_in_tkt.c (stub_key): Add <string.h>
+
+	* send_to_kdc.c: Ifdef on HAS_STDLIB_H not POSIX
+
+	* realmofhost.c: Ifdef on HAS_STDLIB_H not POSIX
+
+	* memcache.c: Ifdef on HAS_STDLIB_H not POSIX
+
+	* configure.in: Check for stdlib.h
+
 Thu May  4 10:03:22 1995  Tom Yu  (tlyu@dragons-lair)
 
 	* put_svc_key.c (put_svc_key): remove spurious & in front of fkey

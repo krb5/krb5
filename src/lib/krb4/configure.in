@@ -12,6 +12,10 @@ AC_CONST
 CHECK_FCNTL
 KRB5_POSIX_LOCKS
 AC_HEADER_CHECK(unistd.h,AC_DEFINE(HAS_UNISTD_H))
+dnl Could check for full stdc environment, but will only test
+dnl for stdlib.h
+AC_HEADER_CHECK(stdlib.h,AC_DEFINE(HAS_STDLIB_H))
+
 dnl need MSBFIRST, LSBFIRST, BITS16, BITS32
 AC_MSG_CHECKING([if system is msbfirst])
 AC_CACHE_VAL(krb5_cv_is_msbfirst,

@@ -16,6 +16,8 @@
 #include "krb_db.h"
 #include "prot.h"
 #include "des.h"
+#include <string.h>
+
 /* #define      KERB_ERR_PREAUTH_SHORT		11 */
 /* #define	KERB_ERR_PREAUTH_MISMATCH	12 */
 

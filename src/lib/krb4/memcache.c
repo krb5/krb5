@@ -29,7 +29,7 @@
 
 #include <stdio.h>
 #include <errno.h>
-#ifdef POSIX
+#ifdef HAS_STDLIB_H
 #include <stdlib.h>
 #else
 extern char *malloc (), *realloc ();

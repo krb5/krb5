@@ -13,6 +13,13 @@
  */
 
 #include "krb.h"
+#include <string.h>
+
+#ifdef HAS_STDLIB_H
+#include <stdlib.h>
+#else
+extern char *malloc(), *calloc(), *realloc();
+#endif
 
 /* Define a couple of function types including parameters.  These
    are needed on MS-Windows to convert arguments of the function pointers
