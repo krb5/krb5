@@ -1,3 +1,20 @@
+Tue Apr  9 22:51:36 1996  Mark Eichin  <eichin@cygnus.com>
+
+	* krb5_decode.c (decode_krb5_sam_challenge,
+	decode_krb5_enc_sam_key, decode_krb5_enc_sam_response_enc,
+	decode_krb5_sam_response, decode_krb5_predicted_sam_response):
+	Change to new indirect interface.
+
+	* asn1_k_decode.c (opt_encfield): macro for handling optional
+	encrypted_data fields (see asn1_decode_kdc_req_body for original
+	version.) 
+	(asn1_decode_sam_response): use opt_encfield, since we're making
+	sam_enc_key optional (as it is reserved for future use.)
+	* asn1_k_encode.c (asn1_encode_sam_response): check sam_enc_key
+	for content before adding it.
+	* KRB5-asn.py: note sam-enc-key as OPTIONAL regardless of future
+	plans.
+
 Wed Mar 20 22:43:17 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* asn1_k_decode.c: Decode pa_type in the krb5_pa_data structure as
