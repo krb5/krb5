@@ -1,4 +1,11 @@
 
+Thu Jun 22 11:56:15 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* alt_prof.c - New jacket routines for handling profiles.  This includes
+		the ability to parse certain string values to appropriate types
+		(e.g. delta time or 32-bit integer).
+	* Makefile.in - Add alt_prof.c
+
+
 Thu Jun 15 18:03:40 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in - Remove explicit copying of archive library to library
 		directory.
