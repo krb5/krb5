@@ -55,6 +55,7 @@ krb5_data **response;			/* filled in with a response packet */
     krb5_enc_kdc_rep_part reply_encpart;
     krb5_ticket ticket_reply, *second_ticket, *header_ticket;
     krb5_enc_tkt_part enc_tkt_reply;
+    krb5_data enc_tkt_transited;
     krb5_error_code retval;
     int nprincs;
     krb5_boolean more;
@@ -349,10 +350,15 @@ krb5_data **response;			/* filled in with a response packet */
 	enc_tkt_reply.transited = header_ticket->enc_part2->transited;
     } else {
 	/* assemble new transited field into allocated storage */
+	enc_tkt_transited.data = 0;
+	enc_tkt_transited.length = 0;
+	enc_tkt_reply.transited = enc_tkt_transited;
 	if (retval =
-	    compress_transited(&header_ticket->enc_part2->transited,
+	    add_to_transited(&header_ticket->enc_part2->transited,
+			       &enc_tkt_reply.transited,
 			       header_ticket->server,
-			       &enc_tkt_reply.transited)) {
+			       enc_tkt_reply.client,
+			       realreq->server)) {
 	    cleanup();
 	    return retval;
 	}

@@ -331,13 +331,203 @@ krb5_ticket *ticket;
     return 0;
 }
 
-/* XXX!  This is a temporary place-holder */
+#define MAX_REALM_LN 500
 
-krb5_error_code
-compress_transited(in_tran, princ, out_tran)
-krb5_data *in_tran;
-krb5_principal princ;
-krb5_data *out_tran;
+/*
+ * add_to_transited  Adds the name of the realm which issued the
+ *                   ticket granting ticket on which the new ticket to
+ *                   be issued is based (note that this is the same as
+ *                   the realm of the server listed in the ticket
+ *                   granting ticket. 
+ *
+ * ASSUMPTIONS:  This procedure assumes that the transited field from
+ *               the existing ticket granting ticket already appears
+ *               in compressed form.  It will add the new realm while
+ *               maintaining that form.   As long as each successive
+ *               realm is added using this (or a similar) routine, the
+ *               transited field will be in compressed form.  The
+ *               basis step is an empty transited field which is, by
+ *               its nature, in its most compressed form.
+ *
+ * ARGUMENTS: krb5_data *tgt_trans  Transited field from TGT
+ *            krb5_data *new_trans  The transited field for the new ticket
+ *            krb5_principal tgs    Name of ticket granting server
+ *                                  This includes the realm of the KDC
+ *                                  that issued the ticket granting
+ *                                  ticket.  This is the realm that is
+ *                                  to be added to the transited field.
+ *            krb5_principal client Name of the client
+ *            krb5_principal server The name of the requested server.
+ *                                  This may be the an intermediate
+ *                                  ticket granting server.
+ *
+ *            The last two argument are needed since they are
+ *            implicitly part of the transited field of the new ticket
+ *            even though they are not explicitly listed.
+ *
+ * RETURNS:   krb5_error_code - Success, or out of memory
+ *
+ * MODIFIES:  new_trans:  ->length will contain the length of the new
+ *                        transited field.
+ * 
+ *                        If ->data was not null when this procedure
+ *                        is called, the memory referenced by ->data
+ *                        will be deallocated. 
+ *
+ *                        Memory will be allocated for the new transited field
+ *                        ->data will be updated to point to the newly
+ *                        allocated memory.  
+ *
+ * BUGS:  The space allocated for the new transited field is the
+ *        maximum that might be needed given the old transited field,
+ *        and the realm to be added.  This length is calculated
+ *        assuming that no compression of the new realm is possible.
+ *        This has no adverse consequences other than the allocation
+ *        of more space than required.  
+ *
+ *        This procedure will not yet use the null subfield notation,
+ *        and it will get confused if it sees it.
+ *
+ */
+
+/* subrealm takes two realms, r1 and r2,  and determines if r2    */
+/* is a subrealm of r1.  Keep in mind that the name of a subrealm */
+/* is a superstring of its parent and vice versa.  If a subrealm, */
+/* then the number of charcters that form the prefix in r2 is     */
+/* returned.  Otherwise subrealm returns 0.                       */
+static  int
+subrealm(r1,r2)
+char	*r1;
+char	*r2;
 {
-    return EOPNOTSUPP;
+    int	l1,l2;
+    l1 = strlen(r1);
+    l2 = strlen(r2);
+    if (l2 <= l1) return(0);
+    if (strcmp(r1,r2+l2-l1)  != 0) return(0);
+    return(l2-l1);
 }
+
+krb5_error_code 
+add_to_transited(tgt_trans,new_trans,tgs,client,server)
+krb5_data *tgt_trans;
+krb5_data *new_trans;
+krb5_principal tgs;
+krb5_principal client;
+krb5_principal server;
+{
+    char	*realm = (char *)krb5_princ_realm(tgs)->data;
+    char	*trans = (char *)malloc(strlen(realm) + tgt_trans->length + 1);
+    char	*otrans = tgt_trans->data;
+
+    /* The following are for stepping through the transited field     */
+    char	prev[MAX_REALM_LN];
+    char	next[MAX_REALM_LN];
+    char	current[MAX_REALM_LN];
+    char	exp[MAX_REALM_LN];	/* Expanded current realm name     */
+
+    int	retval;
+    int	clst,nlst;			/* count of last character in current and next */
+    int	pl,pl1;				/* prefix length                               */
+    int	added = 0;			/* 1 = new realm has been added                */
+
+    if(!trans) return(ENOMEM);
+
+    if(new_trans->data) xfree(new_trans->data);
+
+    new_trans->data = trans;
+
+    strcpy(prev,krb5_princ_realm(client)->data);
+
+    /* read field into current */
+    retval = sscanf(otrans,"%[^,]",current);
+
+    if(retval == 1) otrans = otrans + strlen(current);
+    else *current = '\0';
+
+    if(*otrans == ',') otrans++;
+	       
+    if(strcmp(krb5_princ_realm(client)->data,realm) == 0)
+	added = 1;
+
+    if(strcmp(krb5_princ_realm(server)->data,realm) == 0)
+	added = 1;
+
+    while(*current) {
+
+	/* figure out expanded form of current name */
+	clst = strlen(current) - 1;
+	strcpy(exp,current);
+	if(current[clst] == '.') {
+	    strcat(exp,prev);
+	}
+
+	/* read field into next */
+	retval = sscanf(otrans,"%[^,]",next);
+
+	if(retval == 1) {
+	    otrans = otrans + strlen(next);
+	    nlst = strlen(next) - 1;
+	}
+	else {
+	    *next = '\0';
+	    nlst = 0;
+	}
+
+	if(*otrans == ',') otrans++;
+
+	if(strcmp(exp,realm) == 0) added = 1;
+
+	/* If we still have to insert the new realm */
+	if(added == 0) {
+	    /* Is the next field compressed?  If not, and if the new */
+	    /* realm is a superstring of the current realm, compress */
+	    /* the new realm, and insert immediately following the   */
+	    /* current one.  Note that we can not do this if the next*/
+	    /* field is already compressed since it would mess up    */
+	    /* what has already been done.  In most cases, this is   */
+	    /* not a problem becase the realm to be added will be a  */
+	    /* superstring of the next field too, and we will catch  */
+	    /* it in a future iteration.                             */
+	    if((next[nlst] != '.') && (pl = subrealm(exp,realm))) {
+		added = 1;
+		strcat(current,",");
+		strncat(current,realm,pl);
+	    }
+
+	    /* Whether or not the next field is compressed, if the   */
+	    /* realm to be added is a substring of the current field,*/
+	    /* then the current field can be compressed.  First the  */
+	    /* realm to be added must be compressed relative to the  */
+	    /* previous field (of possible), and then the current    */
+	    /* field compressed relative to the new realm.  Note that*/
+	    /* if the realm to be added is also a substring of the   */
+	    /* previous realm, it would have been added earlier, and */
+	    /* we would not reach this step this time around.        */
+	    else if(pl = subrealm(realm,exp)) {
+		added = 1;
+		*current = '\0';
+		pl1 = subrealm(prev,realm);
+		if(pl1) strncat(current,realm,subrealm(prev,realm));
+		else strcat(current,realm);
+		strcat(current,",");
+		strncat(current,exp,pl);
+	    }
+	}
+
+	if(new_trans->length != 0) strcat(trans,",");
+	strcat(trans,current);
+	new_trans->length = strlen(trans) + 1;
+
+	strcpy(prev,exp);
+	strcpy(current,next);
+    }
+
+    if(added == 0) {
+	if(new_trans->length != 0) strcat(trans,",");
+	strcat(trans,realm);
+	new_trans->length = strlen(trans) + 1;
+    }
+    return 0;
+}
+
