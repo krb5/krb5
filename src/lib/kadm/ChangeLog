@@ -1,3 +1,6 @@
+Thu Jul  6 17:34:22 1995  Tom Yu  <tlyu@lothlorien.MIT.EDU>
+
+	* adm_conn.c (kadm_get_creds): Pass kcontext to os_localaddr.
 
 Tue Jun 27 15:50:31 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* alt_prof.c - Change filename and hierarchy lists to be const char.

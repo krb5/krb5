@@ -195,7 +195,7 @@ kadm_get_creds(kcontext, ccache, client, creds, prompt, oldpw, tlife)
     if (kret = krb5_unparse_name(kcontext, client, &client_name))
 	return(kret);
 
-    if (kret = krb5_os_localaddr(&my_addresses))
+    if (kret = krb5_os_localaddr(kcontext, &my_addresses))
 	goto cleanup;
 
     creds->client = client;
