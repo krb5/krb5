@@ -105,16 +105,7 @@ krb5_aprof_getvals(acontext, hierarchy, retdata)
  *
  * Returns:
  * 	error codes from profile_get_values()
- *	EINVAL			- Invalid syntax.
- *
- * Valid formats are:
- *	<days>-<hours>:<minutes>:<seconds>
- *	<days>d <hours>h <minutes>m <seconds>s
- *	<hours>:<minutes>:<seconds>
- *	<hours>h <minutes>m <seconds>s
- *	<hours>:<minutes>
- *	<hours>h <minutes>m
- *	<seconds>
+ *	error codes from krb5_string_to_deltat()
  */
 krb5_error_code
 krb5_aprof_get_deltat(acontext, hierarchy, uselast, deltatp)
@@ -127,8 +118,6 @@ krb5_aprof_get_deltat(acontext, hierarchy, uselast, deltatp)
     char		**values;
     char		*valp;
     int			index;
-    krb5_boolean	found;
-    int			days, hours, minutes, seconds;
     krb5_deltat		dt;
 
     if (!(kret = krb5_aprof_getvals(acontext, hierarchy, &values))) {
@@ -138,53 +127,7 @@ krb5_aprof_get_deltat(acontext, hierarchy, uselast, deltatp)
 	    index--;
 	}
 	valp = values[index];
-	days = hours = minutes = seconds = 0;
-	found = 0;
-
-	/*
-	 * Blast our way through potential syntaxes until we find a match.
-	 */
-	if (sscanf(valp, "%d-%d:%d:%d", &days, &hours, &minutes, &seconds)
-	    == 4)
-	    found = 1;
-	else if (sscanf(valp, "%dd %dh %dm %ds",
-			&days, &hours, &minutes, &seconds) == 4)
-	    found = 1;
-	else if (sscanf(valp, "%d:%d:%d", &hours, &minutes, &seconds) == 3) {
-	    found = 1;
-	    days = 0;
-	}
-	else if (sscanf(valp, "%dh %dm %ds", &hours, &minutes, &seconds)
-		 == 3) {
-	    found = 1;
-	    days = 0;
-	}
-	else if (sscanf(valp, "%d:%d", &hours, &minutes) == 2) {
-	    found = 1;
-	    days = seconds = 0;
-	}
-	else if (sscanf(valp, "%dh %dm", &hours, &minutes) == 2) {
-	    found = 1;
-	    days = seconds = 0;
-	}
-	else if (sscanf(valp, "%d", &seconds) == 1) {
-	    found = 1;
-	    days = hours = minutes = 0;
-	}
-
-	/* If found, calculate the delta value */
-	if (found) {
-	    dt = days;
-	    dt *= 24;
-	    dt += hours;
-	    dt *= 60;
-	    dt += minutes;
-	    dt *= 60;
-	    dt += seconds;
-	    *deltatp = dt;
-	}
-	else
-	    kret = EINVAL;
+	kret = krb5_string_to_deltat(valp, &dt);
 
 	/* Free the string storage */
 	for (index=0; values[index]; index++)
@@ -390,16 +333,18 @@ krb5_read_realm_params(kcontext, realm, kdcprofile, kdcenv, rparamp)
 	    
 	    /* Get the value for the master key type */
 	    hierarchy[2] = "master_key_type";
-	    if (!krb5_aprof_get_int32(aprofile, hierarchy, TRUE, &ivalue)) {
-		rparams->realm_keytype = ivalue;
-		rparams->realm_keytype_valid = 1;
+	    if (!krb5_aprof_get_string(aprofile, hierarchy, TRUE, &svalue)) {
+		if (!krb5_string_to_keytype(svalue, &rparams->realm_keytype))
+		    rparams->realm_keytype_valid = 1;
+		krb5_xfree(svalue);
 	    }
 	    
 	    /* Get the value for the encryption type */
 	    hierarchy[2] = "encryption_type";
-	    if (!krb5_aprof_get_int32(aprofile, hierarchy, TRUE, &ivalue)) {
-		rparams->realm_enctype = ivalue;
-		rparams->realm_enctype_valid = 1;
+	    if (!krb5_aprof_get_string(aprofile, hierarchy, TRUE, &svalue)) {
+		if (!krb5_string_to_enctype(svalue, &rparams->realm_enctype))
+		    rparams->realm_enctype_valid = 1;
+		krb5_xfree(svalue);
 	    }
 	    
 	    /* Get the value for the stashfile */
@@ -423,16 +368,126 @@ krb5_read_realm_params(kcontext, realm, kdcprofile, kdcenv, rparamp)
 	    
 	    /* Get the value for the default principal expiration */
 	    hierarchy[2] = "default_principal_expiration";
-	    if (!krb5_aprof_get_int32(aprofile, hierarchy, TRUE, &ivalue)) {
-		rparams->realm_expiration = (krb5_timestamp) ivalue;
-		rparams->realm_expiration_valid = 1;
+	    if (!krb5_aprof_get_string(aprofile, hierarchy, TRUE, &svalue)) {
+		if (!krb5_string_to_timestamp(svalue,
+					      &rparams->realm_expiration))
+		    rparams->realm_expiration_valid = 1;
+		krb5_xfree(svalue);
 	    }
 	    
 	    /* Get the value for the default principal flags */
 	    hierarchy[2] = "default_principal_flags";
-	    if (!krb5_aprof_get_int32(aprofile, hierarchy, TRUE, &ivalue)) {
-		rparams->realm_flags = (krb5_flags) ivalue;
-		rparams->realm_flags_valid = 1;
+	    if (!krb5_aprof_get_string(aprofile, hierarchy, TRUE, &svalue)) {
+		char *sp, *ep, *tp;
+
+		sp = svalue;
+		rparams->realm_flags = 0;
+		while (sp) {
+		    if ((ep = strchr(sp, (int) ',')) ||
+			(ep = strchr(sp, (int) ' ')) ||
+			(ep = strchr(sp, (int) '\t'))) {
+			/* Fill in trailing whitespace of sp */
+			tp = ep - 1;
+			while (isspace(*tp) && (tp < sp)) {
+			    *tp = '\0';
+			    tp--;
+			}
+			*ep = '\0';
+			ep++;
+			/* Skip over trailing whitespace of ep */
+			while (isspace(*ep) && (*ep)) ep++;
+		    }
+		    /* Convert this flag */
+		    if (krb5_string_to_flags(sp,
+					     "+",
+					     "-",
+					     &rparams->realm_flags))
+			break;
+		    sp = ep;
+		}
+		if (!sp)
+		    rparams->realm_flags_valid = 1;
+		krb5_xfree(svalue);
+	    }
+
+	    /* Get the value for the supported keytype/salttype matrix */
+	    hierarchy[2] = "supported_keytypes";
+	    if (!krb5_aprof_get_string(aprofile, hierarchy, TRUE, &svalue)) {
+		char 			*kp, *sp, *ep, *tp;
+		krb5_keytype		ktype;
+		krb5_int32		stype;
+		krb5_key_salt_tuple	*savep;
+
+		kp = svalue;
+		while (kp) {
+		    if ((ep = strchr(kp, (int) ',')) ||
+			(ep = strchr(kp, (int) ' ')) ||
+			(ep = strchr(kp, (int) '\t'))) {
+			/* Fill in trailing whitespace of kp */
+			tp = ep - 1;
+			while (isspace(*tp) && (tp < kp)) {
+			    *tp = '\0';
+			    tp--;
+			}
+			*ep = '\0';
+			ep++;
+			/* Skip trailing whitespace of ep */
+			while (isspace(*ep) && (*ep)) ep++;
+		    }
+		    /*
+		     * kp points to something (hopefully) of the form:
+		     *	<keytype>:<salttype>
+		     */
+		    if(sp = strchr(kp, (int) ':')) {
+			/* Separate keytype from salttype */
+			*sp = '\0';
+			sp++;
+			/* Attempt to parse keytype and salttype */
+			if (!krb5_string_to_keytype(kp, &ktype) &&
+			    !krb5_string_to_salttype(sp, &stype)) {
+
+			    /* Squirrel away old keysalt array */
+			    savep = rparams->realm_keysalts;
+
+			    /* Get new keysalt array */
+			    if (rparams->realm_keysalts =
+				(krb5_key_salt_tuple *)
+				malloc((rparams->realm_num_keysalts+1) *
+				       sizeof(krb5_key_salt_tuple))) {
+
+				/* Copy old keysalt if appropriate */
+				if (savep) {
+				    memcpy(rparams->realm_keysalts, savep,
+					   rparams->realm_num_keysalts *
+					   sizeof(krb5_key_salt_tuple));
+				    krb5_xfree(savep);
+				}
+
+				/* Save our values */
+				rparams->realm_keysalts[rparams->
+							realm_num_keysalts].
+							    ks_keytype = ktype;
+				rparams->realm_keysalts[rparams->
+							realm_num_keysalts].
+							    ks_salttype =
+								stype;
+				rparams->realm_num_keysalts++;
+			    }
+			    else {
+				if (savep)
+				    krb5_xfree(savep);
+				break;
+			    }
+			}
+		    }
+		    kp = ep;
+		}
+		if (kp) {
+		    rparams->realm_num_keysalts = 0;
+		    krb5_xfree(rparams->realm_keysalts);
+		    rparams->realm_keysalts = (krb5_key_salt_tuple *) NULL;
+		}
+		krb5_xfree(svalue);
 	    }
 	}
 	krb5_aprof_finish(aprofile);
@@ -458,6 +513,8 @@ krb5_free_realm_params(kcontext, rparams)
 	    krb5_xfree(rparams->realm_mkey_name);
 	if (rparams->realm_stash_file)
 	    krb5_xfree(rparams->realm_stash_file);
+	if (rparams->realm_keysalts)
+	    krb5_xfree(rparams->realm_keysalts);
 	krb5_xfree(rparams);
     }
     return(0);
