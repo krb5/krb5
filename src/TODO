@@ -1,6 +1,44 @@
-integrate new DES implementation		(after beta)
+needed before beta4-patch2:
 
-eliminate ISODE dependence			(after beta)
+940802		stdargs/varargs breakage of ksu under SunOS
+940802		ultrix appl/bsd stuff breaks (Mark?)
+940802		double-check make install
+
+not-quite-critical bug fixes:
+
+940808		Support for DES-MD5
+940802		linux port problems, e.g. broken linux headers, sgtty.h, etc.
+940802		double-check telnet problems, e.g. solaris pty grabbing
+940802		rethink using compile check for fopen() binary mode
+
+future development:
+
+940808		check file vs stdio ccache code; replace file code with stdio
+940808		rewrite rcache code
+940808		fold in krb4 library
+940808		memory ccache
+940808		support for realm name changes
+940808		configuration file for krb5 clients to replace compile-time
+			constants
+ 
+cleanup for later:
+
+940802		realloc lossage made more reasonable;  requires a compile
+		and run type of check, then use REALLOC everywhere, #defined
+		to check if argument is NULL first, if realloc(NULL) returns
+		NULL.  This is to guard against lossage like SunOS.
+940802		yank isode from tree, insert tcl subset
+940802		sanity check API doc
+940802		deja gnu, testing framework
+940808		make depend 
+940808		flush imake (and MIT DES code)
+940808		make sure we're using $(MAKE) everywhere
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+OLD TODO LIST.  To be vetted later....
+
+
 
 look at sandia changes (contact gmachin@somnet.sandia.gov):
 
@@ -15,19 +53,10 @@ specific coding items:
 
 new protocol revision
 
-principal type change (krb5_data ** -> struct)
-
-merge local changes into latest telnet 
-
 telnet client address checking (hard to get hold of the addr?)
-
-generalize walk realm tree, add to API
 
 uuserver adds a ticket to the credentials cache each time it runs,
 even if the client is using the same ticket.
-
-other XXX stuff in code
-
 
 KDC bulletproofing				(after beta)
 
@@ -83,8 +112,6 @@ RFC
 	byte-wise comparison for principal names
 	DER, "Zulu" format timestamps
 
-API doc (tytso maintaining)
-
 bug list
 
 testing issues:
@@ -118,26 +145,3 @@ krb5_gc_via_2tgt
 
 Bad comment message in KRB5-aux.h (KRB5-types.c should be KRB5_tables.c)
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-needed before beta4-patch2:
-
-940802		stdargs/varargs breakage of ksu under SunOS
-940802		ultrix appl/bsd stuff breaks (Mark?)
-940802		double-check make install
-
-not-quite-critical bug fixes:
-
-940802		linux port problems, e.g. broken linux headers, sgtty.h, etc.
-940802		double-check telnet problems, e.g. solaris pty grabbing
-940802		rethink using compile check for fopen() binary mode
-
-cleanup for later:
-
-940802		realloc lossage made more reasonable;  requires a compile
-		and run type of check, then use REALLOC everywhere, #defined
-		to check if argument is NULL first, if realloc(NULL) returns
-		NULL.  This is to guard against lossage like SunOS.
-940802		yank isode from tree, insert tcl subset
-940802		sanity check API doc
-940802		deja gnu, testing framework
