@@ -69,7 +69,9 @@ Notes, Major Changes, and Known Bugs
 
 * Triple DES support is included; however, it is only usable for
   service keys at the moment, due to a large number of compatibility
-  issues.  More here later.
+  issues.  For example, the GSSAPI library has some (buggy) support
+  for a triple DES session key, but it is intentionally disabled.
+  More here later.
 
 * The lib/rpc tests do not appear to work under NetBSD-1.4, for
   reasons that are not completely clear at the moment, but probably
@@ -81,10 +83,24 @@ Notes, Major Changes, and Known Bugs
   other working shared library builds may be figments of your
   imagination.
 
+* Many existing databases, especially those converted from krb4
+  original databases, may contain expiration dates in 1999.  You
+  should make sure to update these expiration dates, and also change
+  any config file entries that have two-digit years.
+
+* Not all reported bugs have been fixed in this release, due to time
+  constraints.  We are planning to make another release in the near
+  future with more complete triple DES support, and additional
+  bugfixes.  Many of the bugs in our database are reported against
+  what is now quite old code, or require hardware that we do not have,
+  which make them difficult to reproduce and debug.  We will work on
+  these older bugs and some externally submitted patches for the
+  following release.
+
 Copyright Notice and Legal Administrivia
 ----------------------------------------
 
-Copyright (C) 1990-1999 by the Massachusetts Institute of Technology.
+Copyright (C) 1985-1999 by the Massachusetts Institute of Technology.
 
 All rights reserved.
 
