@@ -29,6 +29,9 @@ alpha-dec-osf*)
 	krb5_cv_shlibs_cflags=
 	krb5_cv_shlibs_ext=so
 	krb5_cv_shlibs_dir=
+	if test ! -f so_locations; then
+		cp -p /usr/shlib/so_locations .
+	fi
 	;;
 
 *) 

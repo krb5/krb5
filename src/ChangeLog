@@ -1,3 +1,8 @@
+Fri May 26 13:41:46 1995  Ezra Peisach  (epeisach@kangaroo.mit.edu)
+
+	* configure.in: For Alphs OSF/1, prime a local shared library
+		registry with system installed registry file.
+
 Fri May 26 10:16:02 1995 Keith Vetter (keithv@fusion.com)
 
 	* Makefile.in: added lib/kadm and deleted lib/krb425 from PC stuff.
