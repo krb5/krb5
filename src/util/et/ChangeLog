@@ -1,3 +1,8 @@
+Tue Mar 18 15:07:40 1997  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* com_err.h: Add 'extern "C"' for C++ compatibility; also check for
+		__cplusplus since some C++ compilers don't set __STDC__
+
 Mon Mar  3 14:57:35 1997  Ezra Peisach  <epeisach@mit.edu>
 
 	* error_message.c: Don't declare sys_nerr on Macintosh.

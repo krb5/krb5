@@ -36,7 +36,7 @@
 #define NEAR
 #endif
 
-#if defined(__STDC__) || defined(_MSDOS) || defined(_WIN32) || defined(_MACINTOSH)
+#if defined(__STDC__) || defined(__cplusplus) || defined(_MSDOS) || defined(_WIN32) || defined(_MACINTOSH)
 
 /* End-user programs may need this -- oh well */
 #ifndef HAVE_STDARG_H
@@ -68,6 +68,10 @@ struct error_table {
 	unsigned int n_msgs;
 };
 
+#ifdef __cplusplus
+#extern "C" {
+#endif
+
 KRB5_DLLIMP extern void KRB5_CALLCONV_C com_err
 	ET_STDARG_P((const char FAR *, errcode_t, const char FAR *, ...));
 KRB5_DLLIMP extern void KRB5_CALLCONV com_err_va
@@ -91,6 +95,10 @@ extern et_old_error_hook_func set_com_err_hook
 	ET_P((et_old_error_hook_func));
 extern et_old_error_hook_func reset_com_err_hook
 	ET_P((void));
+#endif
+
+#ifdef __cplusplus
+}
 #endif
 
 #define __COM_ERR_H
