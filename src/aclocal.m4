@@ -22,7 +22,7 @@ esac
 ],[
 ac_reltopdir=
 for x in . .. ../.. ../../.. ../../../..; do
-	if test -r $srcdir/$x/aclocal.m4; then
+	if test "x$ac_reltopdir" = "x" -a -r "$srcdir/$x/aclocal.m4" ; then
 		ac_reltopdir=$x
 	fi
 done

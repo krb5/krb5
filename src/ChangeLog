@@ -1,3 +1,9 @@
+2002-09-23  Ezra Peisach  <epeisach@bu.edu>
+
+	* aclocal.m4 (V5_SET_TOPDIR): When determining the location of the
+	top of the source tree, stop when reach the top and aclocal.m4
+	file is located instead of continuing up and out of the tree.
+
 2002-09-19  Ezra Peisach  <epeisach@bu.edu>
 
 	* aclocal.m4: Put V5_OUTPUT_MAKEFILE back - still in use. Needs to
