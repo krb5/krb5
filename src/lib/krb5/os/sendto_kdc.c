@@ -708,10 +708,11 @@ service_tcp_fd (struct conn_state *conn, struct select_state *selstate,
 	if (ssflags & SSF_EXCEPTION) {
 #ifdef DEBUG
 	    int sockerr;
-	    socklen_t sockerrlen = sizeof(sockerr);
+	    socklen_t sockerrlen;
 #endif
 	handle_exception:
 #ifdef DEBUG
+	    sockerrlen = sizeof(sockerr);
 	    e = getsockopt(conn->fd, SOL_SOCKET, SO_ERROR,
 			   &sockerr, &sockerrlen);
 	    if (e != 0) {

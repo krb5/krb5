@@ -1,3 +1,8 @@
+2002-10-22  Ezra Peisach  <epeisach@bu.edu>
+
+	* sendto_kdc.c (service_tcp_fd): If DEBUG defined, ensure that
+	initialization of variable not bypassed by goto.
+
 2002-10-15  Tom Yu  <tlyu@mit.edu>
 
 	* hst_realm.c (krb5_try_realm_txt_rr): Apply patch from Nalin
