@@ -68,6 +68,13 @@
 #define MAX_MSG_SIZE 256
 #define MAX_MSPRINC_SIZE 1024
 
+/* THREAD SAFETY 
+ * The functions is_windows_2000(), is_windows_xp(), and does_retrieve_ticket_cache_ticket()
+ * contain static variables to cache the responses of the tests being performed.  There is
+ * no harm in the test being performed more than once since the result will always be the 
+ * same.
+ */
+
 static BOOL 
 is_windows_2000 (void)
 {
@@ -77,7 +84,6 @@ is_windows_2000 (void)
    if (!fChecked)
    {
        OSVERSIONINFO Version;
-       fChecked = TRUE;
 
        memset (&Version, 0x00, sizeof(Version));
        Version.dwOSVersionInfoSize = sizeof(Version);
@@ -88,6 +94,7 @@ is_windows_2000 (void)
                 Version.dwMajorVersion >= 5)
                fIsWin2K = TRUE;
        }
+       fChecked = TRUE;
    }
 
    return fIsWin2K;
@@ -102,7 +109,6 @@ is_windows_xp (void)
    if (!fChecked)
    {
        OSVERSIONINFO Version;
-       fChecked = TRUE;
 
        memset (&Version, 0x00, sizeof(Version));
        Version.dwOSVersionInfoSize = sizeof(Version);
@@ -114,6 +120,7 @@ is_windows_xp (void)
                  Version.dwMajorVersion == 5 && Version.dwMinorVersion >= 1) )
                fIsWinXP = TRUE;
        }
+       fChecked = TRUE;
    }
 
    return fIsWinXP;
@@ -437,7 +444,6 @@ does_retrieve_ticket_cache_ticket (void)
        PKERB_RETRIEVE_TKT_RESPONSE pTicketResponse = NULL;
        ULONG ResponseSize;
 
-       fChecked = TRUE;
        RequestSize = sizeof(*pTicketRequest) + 1;
 
        if (!PackageConnectLookup(&LogonHandle, &PackageId))
@@ -476,6 +482,7 @@ does_retrieve_ticket_cache_ticket (void)
            if ( SubStatus == STATUS_NOT_SUPPORTED )
                fCachesTicket = TRUE;
        }
+       fChecked = TRUE;
    }
 
    return fCachesTicket;
