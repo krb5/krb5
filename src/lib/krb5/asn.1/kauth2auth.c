@@ -50,6 +50,7 @@ register int *error;
 	free_KRB5_Authenticator(retval);
 	return(0);
     }
+    retval->authenticator__vno->parm = KRB5_PVNO;
     retval->crealm = krb5_data2qbuf(val->client[0]);
     if (!retval->crealm) {
 	*error = ENOMEM;
