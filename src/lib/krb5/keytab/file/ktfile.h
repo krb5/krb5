@@ -35,6 +35,7 @@
  * Constants
  */
 #define IGNORE_VNO 0
+#define IGNORE_ENCTYPE 0
 
 #define KRB5_KT_VNO_1	0x0501	/* krb v5, keytab version 1 (DCE compat) */
 #define KRB5_KT_VNO	0x0502	/* krb v5, keytab version 2 (standard)  */

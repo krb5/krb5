@@ -56,14 +56,18 @@ krb5_ktfile_get_entry(context, id, principal, kvno, enctype, entry)
 	if ((kerror = krb5_ktfileint_read_entry(context, id, &new_entry)))
 	    break;
 
-	if (krb5_principal_compare(context, principal, new_entry.principal)) {
+	if (((enctype  == IGNORE_ENCTYPE)||
+	    (new_entry.key.enctype  == enctype))&&
+	    krb5_principal_compare(context, principal, new_entry.principal)) {
 		if (kvno == IGNORE_VNO) {
 			if (cur_entry.vno < new_entry.vno) {
-				krb5_kt_free_entry(context, &cur_entry);
+			    krb5_kt_free_entry(context, &cur_entry);
 				cur_entry = new_entry;
 			}
 		} else {
 			if (new_entry.vno == kvno) {
+krb5_kt_free_entry(context, &cur_entry);
+
 				cur_entry = new_entry;
 				break;
 			}

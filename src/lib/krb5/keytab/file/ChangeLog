@@ -1,3 +1,7 @@
+Thu Jan 25 15:52:34 1996  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* ktf_g_ent.c (krb5_ktfile_get_entry): Match against enctype.
+
 Fri Jan  5 04:50:41 1996  Ezra Peisach  (epeisach@kangaroo.mit.edu)
 
 	* ser_ktf.c (krb5_ktf_keytab_internalize): Take care of gcc
