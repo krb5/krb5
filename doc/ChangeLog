@@ -1,3 +1,9 @@
+2003-05-30  Sam Hartman  <hartmans@mit.edu>
+
+	* admin.texinfo (Supported Encryption Types): Document AES interop issues.
+
+	* support-enc.texinfo: Add AES enctypes
+
 2003-05-27  Tom Yu  <tlyu@mit.edu>
 
 	* admin.texinfo (realms (kdc.conf)): Update to reflect that
