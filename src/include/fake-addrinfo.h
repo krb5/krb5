@@ -114,6 +114,10 @@ extern /*@dependent@*/ char *gai_strerror (int code) /*@*/;
 #endif
 
 
+#if defined (__APPLE__) && defined (__MACH__)
+#undef HAVE_GETADDRINFO
+#endif
+
 #if defined (__linux__) || defined (_AIX)
 /* See comments below.  */
 #  define WRAP_GETADDRINFO
