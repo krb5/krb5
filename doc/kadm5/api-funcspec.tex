@@ -499,7 +499,11 @@ expired
 \item[* OVSEC_KADM_OLD_LIB_API_VERSION] API version specified by application is no longer supported by libraries (to fix, update application to adhere to current API version and recompile)
 \item[* OVSEC_KADM_OLD_SERVER_API_VERSION] API version specified by application is no longer supported by server (to fix, update application to adhere to current API version and recompile)
 \item[* OVSEC_KADM_NEW_LIB_API_VERSION] API version specified by application is unknown to libraries (to fix, obtain current OpenV*Secure Admin API header files and libraries and recompile application)
-\item[* OVSEC_KADM_NEW_SERVER_API_VERSION] API version specified by application is unknown to server (to fix, obtain and install newest OpenV*Secure Admin Server)
+\item[* OVSEC_KADM_NEW_SERVER_API_VERSION] API version specified by
+application is unknown to server (to fix, obtain and install newest
+OpenV*Secure Admin Server)
+\item[OVSEC_KADM_SECURE_PRINC_MISSING] Database error! Required
+OpenV*Secure principal missing
 \end{description}
 
 \subsection{Authentication and Authorization}
@@ -727,6 +731,12 @@ specified realm.
 initiated.
 
 \item[OVSEC_KADM_BAD_PASSWORD] Incorrect password.
+
+\item[OVSEC_KADM_SECURE_PRINC_MISSING] The principal
+OVSEC_KADM_ADMIN_SERVICE or OVSEC_KADM_CHANGEPW_SERVICE does not
+exist.  This is a special-case replacement return code for ``Server
+not found in database'' for these required principals.
+
 \end{description}
 
 \subsection{ovsec_kadm_destroy}
