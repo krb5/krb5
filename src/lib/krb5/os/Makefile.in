@@ -41,7 +41,6 @@ STLIBOBJS= \
 	osconfig.o	\
 	port2ip.o	\
 	prompter.o	\
-	promptusr.o	\
 	read_msg.o	\
 	read_pwd.o	\
 	realm_dom.o	\
@@ -86,7 +85,6 @@ OBJS= \
 	$(OUTPRE)osconfig.$(OBJEXT)	\
 	$(OUTPRE)port2ip.$(OBJEXT)	\
 	$(OUTPRE)prompter.$(OBJEXT)	\
-	$(OUTPRE)promptusr.$(OBJEXT)	\
 	$(OUTPRE)read_msg.$(OBJEXT)	\
 	$(OUTPRE)read_pwd.$(OBJEXT)	\
 	$(OUTPRE)realm_dom.$(OBJEXT)	\
@@ -130,7 +128,6 @@ SRCS= \
 	$(srcdir)/net_write.c	\
 	$(srcdir)/osconfig.c	\
 	$(srcdir)/prompter.c	\
-	$(srcdir)/promptusr.c	\
 	$(srcdir)/read_msg.c	\
 	$(srcdir)/read_pwd.c	\
 	$(srcdir)/realm_dom.c	\
@@ -393,11 +390,6 @@ osconfig.so osconfig.po $(OUTPRE)osconfig.$(OBJEXT): osconfig.c $(SRCTOP)/includ
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h
 prompter.so prompter.po $(OUTPRE)prompter.$(OBJEXT): prompter.c $(SRCTOP)/include/k5-int.h \
-  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
-  $(SRCTOP)/include/k5-platform.h $(BUILDTOP)/include/krb5.h \
-  $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h
-promptusr.so promptusr.po $(OUTPRE)promptusr.$(OBJEXT): promptusr.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(SRCTOP)/include/k5-platform.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \

@@ -1,5 +1,7 @@
 2003-12-19  Ken Raeburn  <raeburn@mit.edu>
 
+	* Makefile.in (STLIBOBJS, OBJS, SRCS): Don't build promptusr.c.
+
 	* sendto_kdc.c (default_debug_handler, put, putstr): Define only
 	if DEBUG is defined.
 	(DEBUG): Don't define.
