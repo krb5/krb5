@@ -73,16 +73,14 @@ EXPORTED_HEADERS= gssapi.h gssapi_generic.h
 
 HDRS= $(ETHDRS)
 
-$(OBJS): $(WHAT)-includes
-unix-includes: includes
-windows-inclues: win-include
-mac-includes: includes
+all-unix:: shared $(SRCS) $(HDRS) includes
+all-unix:: $(OBJS)
 
-all-unix:: shared $(SRCS) $(HDRS) $(OBJS)
+all-mac:: $(SRCS) $(HDRS) includes
+all-max:: $(OBJS)
 
-all-mac:: $(SRCS) $(HDRS) $(OBJS)
-
-all-windows:: $(SRCS) $(HDRS) $(OBJS)
+all-windows:: $(SRCS) $(HDRS) win-include
+all-windows:: $(OBJS)
 
 win-include::
 	if not exist $(EHDRDIR)\nul mkdir $(EHDRDIR)
