@@ -106,7 +106,7 @@ krb5int_debug_fprint (const char *fmt, ...)
 	    abort();
 	case 'E':
 	    /* %E => krb5_error_code */
-	    kerr = va_arg(args, int);
+	    kerr = va_arg(args, krb5_error_code);
 	    fprintf(out, "%lu/%s", (unsigned long) kerr, error_message(kerr));
 	    break;
 	case 'm':
@@ -346,6 +346,12 @@ static char *bogus_strerror (int xerr)
  * - getsockopt(SO_ERROR) to check connect status
  */
 
+struct select_state {
+    int max, nfds;
+    fd_set rfds, wfds, xfds;
+    struct timeval end_time;
+};
+
 static const char *state_strings[] = {
     "INITIALIZING", "CONNECTING", "WRITING", "READING", "FAILED"
 };
@@ -355,6 +361,7 @@ struct conn_state {
     krb5_error_code err;
     enum conn_states state;
     unsigned int is_udp : 1;
+    int (*service)(struct conn_state *, struct select_state *, int);
     struct addrinfo *addr;
     struct {
 	struct {
@@ -371,12 +378,6 @@ struct conn_state {
 	    size_t n_left;
 	} in;
     } x;
-};
-
-struct select_state {
-    int max, nfds;
-    fd_set rfds, wfds, xfds;
-    struct timeval end_time;
 };
 
 static int getcurtime (struct timeval *tvp)
@@ -444,6 +445,12 @@ call_select (struct select_state *in, struct select_state *out, int *sret)
     return 0;
 }
 
+static int service_tcp_fd (struct conn_state *conn,
+			   struct select_state *selstate, int ssflags);
+static int service_udp_fd (struct conn_state *conn,
+			   struct select_state *selstate, int ssflags);
+
+
 static int
 setup_connection (struct conn_state *state, struct addrinfo *ai,
 		  const krb5_data *message, unsigned char *message_len_buf,
@@ -460,11 +467,13 @@ setup_connection (struct conn_state *state, struct addrinfo *ai,
 	SG_SET(&state->x.out.sgbuf[1], message->data, message->length);
 	state->x.out.sg_count = 2;
 	state->is_udp = 0;
+	state->service = service_tcp_fd;
     } else {
 	SG_SET(&state->x.out.sgbuf[0], message->data, message->length);
 	SG_SET(&state->x.out.sgbuf[1], 0, 0);
 	state->x.out.sg_count = 1;
 	state->is_udp = 1;
+	state->service = service_udp_fd;
 
 	if (*udpbufp == 0) {
 	    *udpbufp = malloc(krb5_max_dgram_size);
@@ -847,32 +856,6 @@ service_udp_fd(struct conn_state *conn, struct select_state *selstate,
 }
 
 static int
-service_fd(struct conn_state *conn, struct select_state *selstate, int ssflags)
-{
-#ifdef DEBUG
-    if (debug) {
-	int sep = ' ';
-	fprintf(stderr, "handling");
-	if (ssflags & SSF_READ)
-	    fprintf(stderr, "%cread", sep), sep = '/';
-	if (ssflags & SSF_WRITE)
-	    fprintf(stderr, "%cwrite", sep), sep = '/';
-	if (ssflags & SSF_EXCEPTION)
-	    fprintf(stderr, "%cexception", sep), sep = '/';
-	if (sep == ' ')
-	    fprintf(stderr, " no_flags?!");
-	dprint(" on fd %d (%A) in state %s\n",
-		conn->fd, conn->addr, state_strings[(int) conn->state]);
-    }
-#endif
-
-    if (conn->is_udp)
-	return service_udp_fd(conn, selstate, ssflags);
-    else
-	return service_tcp_fd(conn, selstate, ssflags);
-}
-
-static int
 service_fds (struct select_state *selstate,
 	     struct conn_state *conns, size_t n_conns, int *winning_conn)
 {
@@ -892,31 +875,33 @@ service_fds (struct select_state *selstate,
 	    return 0;
 
 	/* Got something on a socket, process it.  */
-	for (i = 0; i <= selstate->max && selret > 0; i++) {
+	for (i = 0; i <= selstate->max && selret > 0 && i < n_conns; i++) {
 	    int ssflags;
 
 	    if (conns[i].fd == INVALID_SOCKET)
 		continue;
 	    ssflags = 0;
 	    if (FD_ISSET(conns[i].fd, &sel_results.rfds))
-		ssflags |= SSF_READ;
+		ssflags |= SSF_READ, selret--;
 	    if (FD_ISSET(conns[i].fd, &sel_results.wfds))
-		ssflags |= SSF_WRITE;
+		ssflags |= SSF_WRITE, selret--;
 	    if (FD_ISSET(conns[i].fd, &sel_results.xfds))
-		ssflags |= SSF_EXCEPTION;
+		ssflags |= SSF_EXCEPTION, selret--;
 	    if (!ssflags)
 		continue;
 
-	    selret--;
-	    if (service_fd(&conns[i], selstate, ssflags)) {
-		dfprintf((stderr, "service_tcp_fd says we're done\n"));
-		*winning_conn = i;
-		return 1;
-	    }
+	    dprint("handling flags '%s%s%s' on fd %d (%A) in state %s\n",
+		   (ssflags & SSF_READ) ? "r" : "",
+		   (ssflags & SSF_WRITE) ? "w" : "",
+		   (ssflags & SSF_EXCEPTION) ? "x" : "",
+		   conns[i].fd, conns[i].addr,
+		   state_strings[(int) conns[i].state]);
+
+	    conns[i].service (&conns[i], selstate, ssflags);
 	}
     }
     if (e != 0) {
-	dfprintf((stderr, "select returned %s\n", strerror(e)));
+	dprint("select returned %m\n", e);
 	*winning_conn = -1;
 	return 1;
     }
