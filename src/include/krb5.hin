@@ -135,6 +135,11 @@ typedef	unsigned short	krb5_ui_4;
    indicator */
 #define KRB5_INT32_MIN	(-KRB5_INT32_MAX-1)
 
+#define KRB5_INT16_MAX 65535	
+/* this strange form is necessary since - is a unary operator, not a sign
+   indicator */
+#define KRB5_INT16_MIN	(-KRB5_INT16_MAX-1)
+
 /*
  * end wordsize.h
  */

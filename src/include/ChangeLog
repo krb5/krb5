@@ -1,3 +1,8 @@
+Thu Jan  4 22:49:13 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* krb5.hin: Added support for KRB5_INT16_MAX, which tells us the
+		limitations of using 16 bit ints.
+
 Sun Nov 26 19:23:35 1995  Tom Yu  <tlyu@dragons-lair.MIT.EDU>
 
 	* k5-int.h: Ultrix is broken.  Hacked around by redefining the
