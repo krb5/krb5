@@ -66,40 +66,32 @@ mit_des_n_fold(inbuf, inlen, outbuf, outlen)
 #endif
 
     do {
-	int i, j;
+	int j;
 	register unsigned int k;
 
-	if ((bytes % inlen) == 0) {
-	    /* Rotate input */
-	    k = ((bytes/inlen) * ROTATE_VALUE) % (inlen*8);
-	    
-	    for (j = (k+7)/8; j < inlen + (k+7)/8; j++)
-		tempbuf[j % inlen] =
-		    ((inbuf[((8*j-k)/8)%inlen] << ((8-(k&7))&7)) +
-		     ((k&7) ? (inbuf[((8*j-k)/8 +1)%inlen] >> (k&7)) : 0))
-		    & 0xff;
-	}
+	/* Rotate input */
+	k = ((bytes/inlen) * ROTATE_VALUE) % (inlen*8);
+	for (j = (k+7)/8; j < inlen + (k+7)/8; j++)
+	    tempbuf[j % inlen] =
+		((inbuf[((8*j-k)/8)%inlen] << ((8-(k&7))&7)) +
+		 ((k&7) ? (inbuf[((8*j-k)/8 +1)%inlen] >> (k&7)) : 0))
+		& 0xff;
 
-
-	i = min(outlen - (bytes % outlen), inlen - (bytes % inlen));
-
-	j = i;
-	k = 0;
-	while (j--) {
-	    k += outbuf[(bytes+j) % outlen] + tempbuf[(bytes+j) % inlen];
+	for (k=0, j=inlen; j--; ) {
+	    k += outbuf[(bytes+j) % outlen] + tempbuf[j];
 	    outbuf[(bytes+j) % outlen] = k & 0xff;
 	    k >>= 8;
 	}
-
-	j = outlen-1;
+	j = bytes % outlen;
 	while (k) {
+	    if (j-- == 0)
+		j += outlen;
 	    k += outbuf[j];
-	    outbuf[j--] = k & 0xff;
+	    outbuf[j] = k & 0xff;
 	    k >>= 8;
 	}
-	
-	bytes += i;
-    } while (((bytes % inlen) != 0) || ((bytes % outlen) != 0));
+	bytes += inlen;
+    } while (bytes % outlen);
     
     return 0;
 }
