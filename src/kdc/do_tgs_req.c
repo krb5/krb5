@@ -348,9 +348,10 @@ tgt_again:
 	setflag(enc_tkt_reply.flags, TKT_FLG_RENEWABLE);
 	enc_tkt_reply.times.renew_till =
 	    min(rtime,
-		min(enc_tkt_reply.times.starttime + server.max_renewable_life,
-		    min(enc_tkt_reply.times.starttime + max_renewable_life_for_realm,
-			header_ticket->enc_part2->times.renew_till)));
+		min(header_ticket->enc_part2->times.renew_till,
+		    enc_tkt_reply.times.starttime +
+		    min(server.max_renewable_life,
+			max_renewable_life_for_realm)));
     } else {
 	enc_tkt_reply.times.renew_till = 0; /* XXX */
     }
@@ -471,6 +472,9 @@ tgt_again:
     ticket_reply.enc_part2 = &enc_tkt_reply;
 
     if (isflagset(request->kdc_options, KDC_OPT_ENC_TKT_IN_SKEY)) {
+	krb5_keyblock *st_sealing_key;
+	krb5_kvno st_srv_kvno;
+
 	if (!request->second_ticket ||
 	    !request->second_ticket[st_idx]) {
 		cleanup();
@@ -479,6 +483,24 @@ tgt_again:
 					 fromstring,
 					 response));
 	    }
+	if (retval = kdc_get_server_key(request->second_ticket[st_idx],
+					&st_sealing_key,
+					&st_srv_kvno)) {
+	    tkt_cleanup();
+	    cleanup();
+	    return retval;
+	}
+
+	/* decrypt the ticket */
+	retval = krb5_decrypt_tkt_part(st_sealing_key,
+				       request->second_ticket[st_idx]);
+	krb5_free_keyblock(st_sealing_key);
+	if (retval) {
+	    tkt_cleanup();
+	    cleanup();
+	    return retval;
+	}
+					
 	if (retval = krb5_encrypt_tkt_part(request->second_ticket[st_idx]->enc_part2->session,
 					   &ticket_reply)) {
 	    tkt_cleanup();
