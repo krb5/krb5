@@ -109,7 +109,7 @@ krb5_get_in_tkt(context, options, addrs, etypes, ptypes, key_proc, keyseed,
     
     request.msg_type = KRB5_AS_REQ;
     if (!addrs)
-	krb5_os_localaddr(&request.addresses);
+	krb5_os_localaddr(context, &request.addresses);
     else
 	request.addresses = (krb5_address **) addrs;
 

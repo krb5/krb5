@@ -106,7 +106,7 @@ krb5_rd_cred_basic(context, pcreddata, pkeyblock, local_addr, remote_addr,
         } else {
             krb5_address **our_addrs;
 
-            if ((retval = krb5_os_localaddr(&our_addrs))) {
+            if ((retval = krb5_os_localaddr(context, &our_addrs))) {
                 goto cleanup_cred;
             }
             if (!krb5_address_search(context, encpart.r_address, our_addrs)) {

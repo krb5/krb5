@@ -91,7 +91,7 @@ krb5_rd_safe_basic(context, inbuf, keyblock, recv_addr, sender_addr,
 	} else {
 	    krb5_address **our_addrs;
 	
-	    if ((retval = krb5_os_localaddr( &our_addrs)))
+	    if ((retval = krb5_os_localaddr(context, &our_addrs)))
 		goto cleanup;
 	    
 	    if (!krb5_address_search(context, message->r_address, our_addrs)) {

@@ -1,3 +1,13 @@
+Thu Jul  6 17:31:40 1995  Tom Yu  <tlyu@lothlorien.MIT.EDU>
+
+	* rd_safe.c (krb5_rd_safe_basic): Pass context to os_localaddr.
+
+	* rd_priv.c (krb5_rd_priv_basic): Pass context to os_localaddr.
+
+	* rd_cred.c (krb5_rd_cred_basic): Pass context to os_localaddr.
+
+	* get_in_tkt.c (krb5_get_in_tkt): Pass context to os_localaddr.
+
 Wed July  5 15:52:31 1995  James Mattly  <mattly@fusion.com>
 	* added condition for _MACINTOSH
 

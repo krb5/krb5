@@ -134,7 +134,7 @@ krb5_rd_priv_basic(context, inbuf, keyblock, local_addr, remote_addr,
 	} else {
 	    krb5_address **our_addrs;
 	
-	    if ((retval = krb5_os_localaddr(&our_addrs))) {
+	    if ((retval = krb5_os_localaddr(context, &our_addrs))) {
 		goto cleanup_data;
 	    }
 	    if (!krb5_address_search(context, privmsg_enc_part->r_address, 
