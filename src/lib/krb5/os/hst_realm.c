@@ -80,6 +80,7 @@
 #ifdef WSHELPER
 #include <wshelper.h>
 #else /* WSHELPER */
+#include <netinet/in.h>
 #include <arpa/inet.h>       
 #include <arpa/nameser.h>
 #ifndef T_TXT /* not defined on SunOS 4 */

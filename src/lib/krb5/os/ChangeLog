@@ -1,3 +1,10 @@
+2004-09-13  Tom Yu  <tlyu@mit.edu>
+
+	* dnssrv.c: 
+	* hst_realm.c: 
+	* locate_kdc.c: Include netinet/in.h as a prerequisite for
+	resolv.h.
+
 2004-08-27  Ken Raeburn  <raeburn@mit.edu>
 
 	* sendto_kdc.c (start_connection) [DEBUG]: Log the local socket
