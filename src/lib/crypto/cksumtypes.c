@@ -71,6 +71,19 @@ const struct krb5_cksumtypes krb5_cksumtypes_list[] = {
       "hmac-sha1-des3-kd", "HMAC-SHA1 DES3 key", /* alias */
       0, NULL,
       &krb5int_hash_sha1 },
+    { CKSUMTYPE_HMAC_MD5_ARCFOUR, 0,
+      "hmac-md5-rc4", "Microsoft HMAC MD5 (RC4 key)", 
+      ENCTYPE_ARCFOUR_HMAC, &krb5int_keyhash_hmac_md5,
+      NULL },
+    { CKSUMTYPE_HMAC_MD5_ARCFOUR, 0,
+      "hmac-md5-enc", "Microsoft HMAC MD5 (RC4 key)",  /*Heimdal alias*/
+      ENCTYPE_ARCFOUR_HMAC, &krb5int_keyhash_hmac_md5,
+      NULL },
+    { CKSUMTYPE_HMAC_MD5_ARCFOUR, 0,
+      "hmac-md5-earcfour", "Microsoft HMAC MD5 (RC4 key)",  /* alias*/
+      ENCTYPE_ARCFOUR_HMAC, &krb5int_keyhash_hmac_md5,
+      NULL },
+
 };
 
 const int krb5_cksumtypes_length =

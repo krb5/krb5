@@ -1,4 +1,12 @@
+2001-10-23  Sam Hartman  <hartmans@mit.edu>
+
+	* k5_md5des.c (k5_md5des_verify): Add usage
+
+	* k5_md4des.c (k5_md4des_verify): Add usage
+
 2001-10-22  Sam Hartman  <hartmans@mit.edu>
+
+	* keyhash_provider.h hmac_md5.c:  Implement Microsoft hmac-md5 keyhash provider
 
 	* t_cksum.c (main):  Include key usage in hash call.
 

@@ -3,7 +3,8 @@ myfulldir=lib/crypto/keyhash_provider
 mydir=keyhash_provider
 BUILDTOP=$(REL)$(U)$(S)$(U)$(S)$(U)
 LOCALINCLUDES = -I$(srcdir)/../des -I$(srcdir)/../md4 \
-	-I$(srcdir)/../md5
+	-I$(srcdir)/../md5 -I$(srcdir)/../arcfour \
+	-I$(srcdir)/../hash_provider
 
 ##DOS##BUILDTOP = ..\..\..
 ##DOS##PREFIXDIR=keyhash_provider
@@ -15,11 +16,11 @@ PROG_RPATH=$(KRB5_LIBDIR)
 
 RUN_SETUP = @KRB5_RUN_ENV@ KRB5_CONFIG=$(SRCTOP)/config-files/krb5.conf
 
-STLIBOBJS= descbc.o k5_md4des.o k5_md5des.o
+STLIBOBJS= descbc.o k5_md4des.o k5_md5des.o hmac_md5.o
 
-OBJS= $(OUTPRE)descbc.$(OBJEXT) $(OUTPRE)k5_md4des.$(OBJEXT) $(OUTPRE)k5_md5des.$(OBJEXT)
+OBJS= $(OUTPRE)descbc.$(OBJEXT) $(OUTPRE)k5_md4des.$(OBJEXT) $(OUTPRE)k5_md5des.$(OBJEXT) $(OUTP)hmac_md5.$(OBJEXT)
 
-SRCS= $(srcdir)/descbc.c $(srcdir)/k5_md4des.c $(srcdir)/k5_md5des.c
+SRCS= $(srcdir)/descbc.c $(srcdir)/k5_md4des.c $(srcdir)/k5_md5des.c $(srcdir)/hmac_md5.c
 
 ##DOS##LIBOBJS = $(OBJS)
 

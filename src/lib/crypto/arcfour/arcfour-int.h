@@ -20,31 +20,7 @@ typedef struct
    unsigned char state[256];
 } ArcfourContext;
 
-/* gets the next byte from the PRNG */
-static inline unsigned int k5_arcfour_byte(ArcfourContext *);
+krb5_keyusage krb5int_arcfour_translate_usage(krb5_keyusage usage);
 
-/* Initializes the context and sets the key. */
-static krb5_error_code k5_arcfour_init(ArcfourContext *ctx, const unsigned char *key, 
-		  unsigned int keylen);
-
-/* Encrypts/decrypts data. */
-static void k5_arcfour_crypt(ArcfourContext *ctx, unsigned char *dest, 
-		     const unsigned char *src, unsigned int len);
-
-/* Interface layer to kerb5 crypto layer */
-static krb5_error_code
-k5_arcfour_docrypt(krb5_const krb5_keyblock *, krb5_const krb5_data *,
-		   krb5_const krb5_data *, krb5_data *);
-
-
-/* The blocksize for the enctype */
-static void k5_arcfour_blocksize(size_t *);
-
-/* keysize for the enctype (number of bytes, and length of key (parity/etc) */
-static void k5_arcfour_keysize(size_t *, size_t *);
-
-/* from a random bitstrem, construct a key */
-static krb5_error_code
-k5_arcfour_make_key(krb5_const krb5_data *, krb5_keyblock *);
 
 #endif /* ARCFOUR_INT_H */

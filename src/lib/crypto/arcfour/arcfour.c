@@ -27,7 +27,7 @@ krb5_arcfour_encrypt_length(enc, hash, inputlen, length)
   *length = hashsize + krb5_roundup(8 + inputlen, blocksize);
 }
 
-static krb5_keyusage arcfour_translate_usage(krb5_keyusage usage)
+ krb5_keyusage krb5int_arcfour_translate_usage(krb5_keyusage usage)
 {
   switch (usage) {
   case 1:			/* AS-REQ PA-ENC-TIMESTAMP padata timestamp,  */
@@ -139,7 +139,7 @@ krb5_arcfour_encrypt(enc, hash, key, usage, ivec, input, output)
   confounder.data=plaintext.data;
   
   /* begin the encryption, computer K1 */
-  ms_usage=arcfour_translate_usage(usage);
+  ms_usage=krb5int_arcfour_translate_usage(usage);
   if (key->enctype == ENCTYPE_ARCFOUR_HMAC_EXP) {
     strncpy(salt.data, l40, salt.length);
     salt.data[10]=ms_usage & 0xff;
@@ -261,7 +261,7 @@ krb5_arcfour_decrypt(enc, hash, key, usage, ivec, input, output)
   checksum.data=input->data;
 
   /* compute the salt */
-  ms_usage=arcfour_translate_usage(usage);
+  ms_usage=krb5int_arcfour_translate_usage(usage);
   if (key->enctype == ENCTYPE_ARCFOUR_HMAC_EXP) {
     strncpy(salt.data, l40, salt.length);
     salt.data[10]=ms_usage & 0xff;
@@ -319,3 +319,4 @@ krb5_arcfour_decrypt(enc, hash, key, usage, ivec, input, output)
   free(plaintext.data);
   return (ret);
 }
+

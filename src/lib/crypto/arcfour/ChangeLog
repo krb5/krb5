@@ -1,3 +1,8 @@
+2001-10-22  Sam Hartman  <hartmans@mit.edu>
+
+	* arcfour-int.h: Make krb5int_arcfour_translate_usage non-static so the hash can use it
+	
+
 2001-10-19  Sam Hartman  <hartmans@mit.edu>
 
 	* string_to_key.c (krb5_arcfour_string_to_key): Ignore salt

@@ -31,6 +31,7 @@
 #include "old.h"
 #include "raw.h"
 #include "dk.h"
+#include "arcfour.h"
 
 /* these will be linear searched.  if they ever get big, a binary
    search or hash table would be better, which means these would need
@@ -92,6 +93,25 @@ const struct krb5_keytypes krb5_enctypes_list[] = {
       &krb5int_enc_des, &krb5int_hash_sha1,
       krb5_dk_encrypt_length, krb5_dk_encrypt, krb5_dk_decrypt,
       krb5_dk_string_to_key },
+    { ENCTYPE_ARCFOUR_HMAC, 
+      "arcfour-hmac","ArcFour with HMAC/md5", &krb5int_enc_arcfour,
+      &krb5int_hash_md5, krb5_arcfour_encrypt_length, krb5_arcfour_encrypt,
+      krb5_arcfour_decrypt, krb5_arcfour_string_to_key },
+    { ENCTYPE_ARCFOUR_HMAC,  /* alias */
+      "rc4-hmac", "ArcFour with HMAC/md5", &krb5int_enc_arcfour,
+      &krb5int_hash_md5, krb5_arcfour_encrypt_length, krb5_arcfour_encrypt,
+      krb5_arcfour_decrypt, krb5_arcfour_string_to_key },
+    { ENCTYPE_ARCFOUR_HMAC_EXP, 
+      "arcfour-hmac-exp", "Exportable ArcFour with HMAC/md5",
+      &krb5int_enc_arcfour,
+      &krb5int_hash_md5, krb5_arcfour_encrypt_length, krb5_arcfour_encrypt,
+      krb5_arcfour_decrypt, krb5_arcfour_string_to_key },
+    { ENCTYPE_ARCFOUR_HMAC_EXP, /* alias */
+      "rc4-hmac-exp", "Exportable ArcFour with HMAC/md5",
+      &krb5int_enc_arcfour,
+      &krb5int_hash_md5, krb5_arcfour_encrypt_length, krb5_arcfour_encrypt,
+      krb5_arcfour_decrypt, krb5_arcfour_string_to_key },
+
 #ifdef ATHENA_DES3_KLUDGE
     /*
      * If you are using this, you're almost certainly doing the

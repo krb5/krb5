@@ -110,7 +110,7 @@ k5_md5des_hash(const krb5_keyblock *key, krb5_keyusage usage, const krb5_data *i
 }
 
 static krb5_error_code
-k5_md5des_verify(const krb5_keyblock *key, const krb5_data *ivec,
+k5_md5des_verify(const krb5_keyblock *key, krb5_keyusage usage, const krb5_data *ivec,
 		 const krb5_data *input, const krb5_data *hash,
 		 krb5_boolean *valid)
 {

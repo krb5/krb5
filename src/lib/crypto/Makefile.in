@@ -3,10 +3,10 @@ myfulldir=lib/crypto
 mydir=.
 BUILDTOP=$(REL)$(U)$(S)$(U)
 LOCAL_SUBDIRS=crc32 des dk enc_provider hash_provider keyhash_provider \
-	md4 md5 old raw sha1
+	md4 md5 old raw sha1 arcfour
 LOCALINCLUDES = -I$(srcdir)/enc_provider \
 	-I$(srcdir)/hash_provider -I$(srcdir)/keyhash_provider \
-	-I$(srcdir)/old -I$(srcdir)/raw -I$(srcdir)/dk
+	-I$(srcdir)/old -I$(srcdir)/raw -I$(srcdir)/dk -I$(srcdir)/arcfour
 
 ##DOSBUILDTOP = ..\..
 ##DOSLIBNAME=$(OUTPRE)crypto.lib
@@ -112,7 +112,8 @@ RELDIR=crypto
 
 STOBJLISTS=crc32/OBJS.ST des/OBJS.ST dk/OBJS.ST enc_provider/OBJS.ST \
 	hash_provider/OBJS.ST keyhash_provider/OBJS.ST md4/OBJS.ST \
-	md5/OBJS.ST old/OBJS.ST raw/OBJS.ST sha1/OBJS.ST OBJS.ST
+	md5/OBJS.ST old/OBJS.ST raw/OBJS.ST sha1/OBJS.ST arcfour/OBJS.ST \
+	OBJS.ST
 
 # No dependencies.  Record places to find this shared object if the target
 # link editor and loader support it.
@@ -131,14 +132,18 @@ libcrypto.lib:
 
 clean-unix:: clean-liblinks clean-libs clean-libobjs
 
-check-unix:: t_nfold
+check-unix:: t_nfold t_encrypt
 	$(RUN_SETUP) ./t_nfold
+	$(RUN_SETUP) ./t_encrypt
 
 t_nfold$(EXEEXT): t_nfold.$(OBJEXT) nfold.$(OBJEXT)
 	$(CC_LINK) -o $@ t_nfold.$(OBJEXT) nfold.$(OBJEXT)
 
+t_encrypt$(EXEEXT): t_encrypt.$(OBJEXT) nfold.$(OBJEXT)
+	$(CC_LINK) -o $@ t_encrypt.$(OBJEXT)  -lk5crypto -lcom_err
+
 clean::
-	$(RM) t_nfold.o t_nfold
+	$(RM) t_nfold.o t_nfold t_encrypt t_encrypt.o
 
 all-windows::
 	cd crc32

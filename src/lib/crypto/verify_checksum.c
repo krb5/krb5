@@ -57,7 +57,7 @@ krb5_c_verify_checksum(context, key, usage, data, cksum, valid)
 
     if (krb5_cksumtypes_list[i].keyhash &&
 	krb5_cksumtypes_list[i].keyhash->verify)
-	return((*(krb5_cksumtypes_list[i].keyhash->verify))(key, 0, data,
+	return((*(krb5_cksumtypes_list[i].keyhash->verify))(key, usage, 0, data,
 							    &indata, valid));
 
     /* otherwise, make the checksum again, and compare */

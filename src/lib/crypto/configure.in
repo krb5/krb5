@@ -30,4 +30,5 @@ K5_GEN_MAKEFILE(md5, libobj)
 K5_GEN_MAKEFILE(old, libobj)
 K5_GEN_MAKEFILE(raw, libobj)
 K5_GEN_MAKEFILE(sha1, libobj)
+K5_GEN_MAKEFILE(arcfour, libobj)
 K5_AC_OUTPUT

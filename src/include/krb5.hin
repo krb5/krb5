@@ -334,6 +334,8 @@ typedef struct _krb5_enc_data {
 #define	ENCTYPE_DES3_CBC_RAW	0x0006	/* DES-3 cbc mode raw */
 #define ENCTYPE_DES_HMAC_SHA1	0x0008
 #define ENCTYPE_DES3_CBC_SHA1	0x0010
+#define ENCTYPE_ARCFOUR_HMAC	0x0017
+#define ENCTYPE_ARCFOUR_HMAC_EXP 0x0018
 #define ENCTYPE_UNKNOWN		0x01ff
 /* local crud */
 /* marc's DES-3 with 32-bit length */
@@ -349,6 +351,7 @@ typedef struct _krb5_enc_data {
 #define	CKSUMTYPE_RSA_MD5_DES	0x0008
 #define CKSUMTYPE_NIST_SHA	0x0009
 #define CKSUMTYPE_HMAC_SHA1_DES3	0x000c
+#define CKSUMTYPE_HMAC_MD5_ARCFOUR -138 /*Microsoft md5 hmac cksumtype*/
 
 #ifndef krb5_roundup
 /* round x up to nearest multiple of y */

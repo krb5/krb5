@@ -1,3 +1,13 @@
+2001-10-23  Sam Hartman  <hartmans@mit.edu>
+
+	* cksumtypes.c: hmac-md5-rc4 keyed checksum added
+
+	* etypes.c: arcfour-hmac enctype added
+
+	* configure.in Makefile.in :  New subdir: arcfour
+
+	* verify_checksum.c (krb5_c_verify_checksum): Add usage argument to verify call
+
 2001-10-22  Sam Hartman  <hartmans@mit.edu>
 
 	* make_checksum.c (krb5_c_make_checksum):  Include key usage
