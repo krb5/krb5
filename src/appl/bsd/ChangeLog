@@ -1,3 +1,14 @@
+Thu Apr 11 00:22:51 1996  Richard Basch  <basch@lehman.com>
+
+	* kcmd.c: Cleaned up whitespace and removed commented & unused cruft
+
+	* krlogind.c, krshd.c: Allow the recvauth routine to find any key
+	in the keytab for which the user is trying to login.  The host may
+	be known as many names.  Additionally, for krlogind, clean up the
+	error handling for bad authentication (potential null dereference
+	and a misleading message because of the wrong authentication system
+	being used)
+
 Sun Apr  7 22:46:07 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* krshd.c: Add an option -L to pass certain environment variables

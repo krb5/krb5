@@ -1062,7 +1062,7 @@ do_krb_login(host)
 {
     krb5_error_code status;
     struct passwd *pwd;
-    char *msg_fail;
+    char *msg_fail = NULL;
 int valid_checksum;
 
 
@@ -1127,23 +1127,28 @@ int valid_checksum;
 	    syslog(LOG_WARNING, "Client did not supply required checksum.");
 	
 	    fatal(netf, "You are using an old Kerberos5 without initial connection support; only newer clients are authorized.");
+	}
+	else {
+	    syslog(LOG_WARNING, "Checksums are only required for v5 clients; other clients cannot produce initial authenticator checksums.");
+	}
     }
-    else {
-	syslog(LOG_WARNING, "Checksums are only required for v5 clients; other clients cannot produce initial authenticator checksums.");
-    }
-      }
-    if 
-(auth_ok&auth_sent) /* This should be bitwise.*/
+    if (auth_ok&auth_sent) /* This should be bitwise.*/
 	return;
     
     if (ticket)
 	krb5_free_ticket(bsd_context, ticket);
 
-    msg_fail =  (char *) malloc( strlen(krusername) + strlen(lusername) + 80 );
+    if (krusername)
+	msg_fail = (char *)malloc(strlen(krusername) + strlen(lusername) + 80);
     if (!msg_fail)
-    fatal(netf, "User is not authorized to login to specified account");
-    sprintf(msg_fail, "User %s is not authorized to login to account %s",
-	    krusername, lusername);
+	fatal(netf, "User is not authorized to login to specified account");
+
+    if (auth_sent)
+	sprintf(msg_fail, "Access denied because of improper credentials");
+    else
+	sprintf(msg_fail, "User %s is not authorized to login to account %s",
+		krusername, lusername);
+    
     fatal(netf, msg_fail);
     /* NOTREACHED */
 }
@@ -1472,7 +1477,6 @@ recvauth(valid_checksum)
     struct sockaddr_in peersin, laddr;
     char krb_vers[KRB_SENDAUTH_VLEN + 1];
     int len;
-    krb5_principal server;
     krb5_data inbuf;
     char v4_instance[INST_SZ];	/* V4 Instance */
     char v4_version[9];
@@ -1489,13 +1493,6 @@ recvauth(valid_checksum)
 	exit(1);
     }
 
-    if (status = krb5_sname_to_principal(bsd_context, NULL, "host", 
-					 KRB5_NT_SRV_HST, &server)) {
-	    syslog(LOG_ERR, "parse server name %s: %s", "host",
-		   error_message(status));
-	    exit(1);
-    }
-
     strcpy(v4_instance, "*");
 
     if (status = krb5_auth_con_init(bsd_context, &auth_context))
@@ -1508,7 +1505,7 @@ recvauth(valid_checksum)
 
     if (status = krb5_compat_recvauth(bsd_context, &auth_context, &netf,
 				  "KCMDV0.1",
-				  server, 	/* Specify daemon principal */
+				  NULL, 	/* Specify daemon principal */
 				  0, 		/* no flags */
 				  keytab, /* normally NULL to use v5srvtab */
 

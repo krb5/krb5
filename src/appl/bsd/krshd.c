@@ -1696,7 +1696,6 @@ recvauth(netf, peersin, valid_checksum)
     struct sockaddr_in laddr;
     char krb_vers[KRB_SENDAUTH_VLEN + 1];
     int len;
-    krb5_principal server;
     krb5_data inbuf;
     char v4_instance[INST_SZ];	/* V4 Instance */
     char v4_version[9];
@@ -1715,13 +1714,6 @@ krb5_authenticator *authenticator;
 #define SIZEOF_INADDR sizeof(struct in_addr)
 #endif
 
-    if (status = krb5_sname_to_principal(bsd_context, NULL, "host", 
-					 KRB5_NT_SRV_HST, &server)) {
-	    syslog(LOG_ERR, "parse server name %s: %s", "host",
-		   error_message(status));
-	    exit(1);
-    }
-
     strcpy(v4_instance, "*");
 
     if (status = krb5_auth_con_init(bsd_context, &auth_context))
@@ -1733,7 +1725,7 @@ krb5_authenticator *authenticator;
 
     status = krb5_compat_recvauth(bsd_context, &auth_context, &netf,
 				  "KCMDV0.1",
-				  server, /* Specify daemon principal */
+				  NULL,		/* Specify daemon principal */
 				  0, 		/* no flags */
 				  keytab, /* normally NULL to use v5srvtab */
 				  0, 		/* v4_opts */

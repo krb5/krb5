@@ -66,8 +66,6 @@ char *default_service = "host";
 
 extern krb5_context bsd_context;
 
-krb5_enctype bsd_ktypes[] = { ENCTYPE_DES_CBC_CRC , 0 };
-
 
 kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
      cred, seqno, server_seqno, laddr, faddr, authopts, anyport)
@@ -109,15 +107,16 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
     krb5_auth_context auth_context = NULL;
     char *cksumbuf;
     krb5_data cksumdat;
+
     if ((cksumbuf = malloc(strlen(cmd)+strlen(remuser)+64)) == 0 ) {
-      fprintf(stderr, "Unable to allocate memory for checksum buffer.\n");
-      return(-1);
+	fprintf(stderr, "Unable to allocate memory for checksum buffer.\n");
+	return(-1);
     }
-sprintf(cksumbuf, "%u:", ntohs(rport));
+    sprintf(cksumbuf, "%u:", ntohs(rport));
     strcat(cksumbuf, cmd);
     strcat(cksumbuf, remuser);
     cksumdat.data = cksumbuf;
-	cksumdat.length = strlen(cksumbuf);
+    cksumdat.length = strlen(cksumbuf);
 	
     pid = getpid();
     hp = gethostbyname(*ahost);
@@ -144,7 +143,7 @@ sprintf(cksumbuf, "%u:", ntohs(rport));
         fprintf(stderr,"kcmd: no memory\n");
         return(-1);
     }
-    status = krb5_sname_to_principal(bsd_context, host_save,service,
+    status = krb5_sname_to_principal(bsd_context, host_save, service,
 				     KRB5_NT_SRV_HST, &get_cred->server);
     if (status) {
 	    fprintf(stderr, "kcmd: krb5_sname_to_principal failed: %s\n",
@@ -278,9 +277,6 @@ sprintf(cksumbuf, "%u:", ntohs(rport));
     if (status = krb5_cc_default(bsd_context, &cc))
     	goto bad2;
 
-/*     if (krb5_set_default_tgs_ktypes(bsd_context, bsd_ktypes)) */
-/* 	goto bad2; */
-    
     if (status = krb5_cc_get_principal(bsd_context, cc, &get_cred->client)) {
     	(void) krb5_cc_close(bsd_context, cc);
     	goto bad2;
