@@ -1,3 +1,7 @@
+2004-12-08  Ken Raeburn  <raeburn@mit.edu>
+
+	* k5-int.h (KRB5INT_ACCESS_STRUCT_VERSION): Bump to 9.
+
 2004-10-29  Ken Raeburn  <raeburn@mit.edu>
 
 	* fake-addrinfo.h: Include errno.h earlier.
