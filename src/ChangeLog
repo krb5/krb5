@@ -1,3 +1,9 @@
+Thu Aug 18 02:05:14 1994  Mark Eichin  (eichin@perdiem)
+
+	* .../*.[ch]: remove rcsid, sccsid strings; punt all RCS variable
+	expansions; get rid of LIBC_SCCS. Leave the BSD sccs variables in
+	comments, for historical reference.
+
 Thu Aug  4 03:11:13 1994  Tom Yu  (tlyu@dragons-lair)
 
 	* aclocal.m4: fixed up Krb5InstallHeaders to use INSTALL_DATA
