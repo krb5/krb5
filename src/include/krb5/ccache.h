@@ -41,7 +41,7 @@ typedef struct _krb5_cc_ops {
 	int (*end_get) PROTOTYPE((krb5_ccache, krb5_cc_cursor *));
 	int (*remove_cred) PROTOTYPE((krb5_ccache, krb5_flags,
 				      krb5_creds *));
-	int (*set_flags) PROTOTYPE((krb5_ccache, krb5_cflags));
+	int (*set_flags) PROTOTYPE((krb5_ccache, krb5_flags));
 } krb5_cc_ops;
 
 /* for retrieve_cred */
