@@ -15,6 +15,9 @@
 
 #ifndef KRB5_INT_FUNC_PROTO__
 #define KRB5_INT_FUNC_PROTO__
+/* widen prototypes, if needed */
+#include <krb5/widen.h>
+
 krb5_error_code krb5_tgtname
     PROTOTYPE((const krb5_data *,
 	       const krb5_data *,
@@ -31,6 +34,9 @@ krb5_error_code krb5_walk_realm_tree
 	       krb5_principal **));
 void krb5_free_realm_tree
     PROTOTYPE((const krb5_principal *));
+
+/* and back to normal... */
+#include <krb5/narrow.h>
 
 #endif /* KRB5_INT_FUNC_PROTO__ */
 
