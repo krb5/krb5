@@ -1,8 +1,10 @@
 /*
  * $Source$
  * $Author$
+ * $Id$
  *
- * Copyright 1990 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991 by the Massachusetts Institute of Technology.
+ * All Rights Reserved.
  *
  * For copying and distribution information, please see the file
  * <krb5/copyright.h>.
@@ -22,3 +24,4 @@
 #define KPROP_PROT_VERSION "kprop5_01"
 
 #define KPROP_BUFSIZ 32768
+

@@ -8,6 +8,12 @@
  * For copying and distribution information, please see the file
  * <krb5/copyright.h>.
  *
+ * XXX We need to modify the protocol so that an acknowledge is set
+ * after each block, instead after the entire series is sent over.
+ * The reason for this is so that error packets can get interpreted
+ * right away.  If you don't do this, the sender may never get the
+ * error packet, because it will die an EPIPE trying to complete the
+ * write...
  */
 
 #if !defined(lint) && !defined(SABER)
@@ -21,7 +27,7 @@ static char rcsid_kpropd_c[] =
 #include <krb5/kdb.h>
 #include <krb5/kdb_dbm.h>
 #include <krb5/ext-proto.h>
-#include <krb5/libos-proto.h>
+#include <krb5/los-proto.h>
 #include <com_err.h>
 #include <errno.h>
 
@@ -177,7 +183,6 @@ void doit(fd)
 	int on = 1, fromlen;
 	struct hostent	*hp;
 	krb5_error_code	retval;
-	struct timeval	my_time;
 	int	lock_fd;
 
 	fromlen = sizeof (from);
@@ -494,9 +499,10 @@ kerberos_authenticate(fd, clientp, sin)
 	memcpy((char *) receiver_addr.contents, (char *) &r_sin.sin_addr,
 	       sizeof(r_sin.sin_addr));
 	
-	if (retval = krb5_recvauth(fd, kprop_version, server, &sender_addr,
-				   kerb_keytab, NULL, NULL, &my_seq_num,
-				   "dfl", clientp, &ticket, &authent)) {
+	if (retval = krb5_recvauth((void *) &fd, kprop_version, server,
+				   &sender_addr, kerb_keytab, NULL, NULL,
+				   "dfl", &my_seq_num, clientp, &ticket,
+				   &authent)) {
 		syslog(LOG_ERR, "Error in krb5_recvauth: %s",
 		       error_message(retval));
 		exit(1);
@@ -575,7 +581,7 @@ recv_database(fd, database_fd)
 	/*
 	 * Receive and decode size from client
 	 */
-	if (retval = krb5_read_message(fd, &inbuf)) {
+	if (retval = krb5_read_message((void *) &fd, &inbuf)) {
 		send_error(fd, retval, "while reading database size");
 		com_err(progname, retval,
 			"while reading size of database from client");
@@ -614,7 +620,7 @@ recv_database(fd, database_fd)
 	 */
 	received_size = 0;
 	while (received_size < database_size) {
-		if (retval = krb5_read_message(fd, &inbuf)) {
+		if (retval = krb5_read_message((void *) &fd, &inbuf)) {
 			sprintf(buf,
 				"while reading database block starting at offset %d",
 				received_size);
@@ -683,7 +689,7 @@ recv_database(fd, database_fd)
 			   "while encoding # of received bytes");
 		exit(1);
 	}
-	if (retval = krb5_write_message(fd, &outbuf)) {
+	if (retval = krb5_write_message((void *) &fd, &outbuf)) {
 		xfree(outbuf.data);
 		com_err(progname, retval,
 			"while sending # of receeived bytes");
@@ -702,23 +708,32 @@ send_error(fd, err_code, err_text)
 	krb5_error	error;
 	const char	*text;
 	krb5_data	outbuf;
+	char		buf[1024];
 
 	memset((char *)&error, 0, sizeof(error));
 	krb5_us_timeofday(&error.stime, &error.susec);
 	error.server = server;
 	error.client = client;
-	error.error = err_code - ERROR_TABLE_BASE_krb5;
-	if (error.error < 0 || error.error > 127)
-		error.error = KRB_ERR_GENERIC;
+	
 	if (err_text)
 		text = err_text;
 	else
 		text = error_message(err_code);
+	
+	error.error = err_code - ERROR_TABLE_BASE_krb5;
+	if (error.error < 0 || error.error > 127) {
+		error.error = KRB_ERR_GENERIC;
+		if (err_text) {
+			sprintf(buf, "%s %s", error_message(err_code),
+				err_text);
+			text = buf;
+		}
+	} 
 	error.text.length = strlen(text) + 1;
 	if (error.text.data = malloc(error.text.length)) {
 		strcpy(error.text.data, text);
 		if (!krb5_mk_error(&error, &outbuf)) {
-			(void) krb5_write_message(fd, &outbuf);
+			(void) krb5_write_message((void *) &fd, &outbuf);
 			xfree(outbuf.data);
 		}
 		free(error.text.data);

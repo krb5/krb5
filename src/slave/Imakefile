@@ -12,11 +12,11 @@
         DEPLIBS = $(DEPKLIB)
 LOCAL_LIBRARIES = $(KLIB)
 
-CLIENTSRCS= sendauth.c kprop.c 
-CLIENTOBJS= sendauth.o kprop.o 
+CLIENTSRCS= kprop.c 
+CLIENTOBJS= kprop.o 
 
-SERVERSRCS= sendauth.c kpropd.c 
-SERVEROBJS= sendauth.o kpropd.o 
+SERVERSRCS= kpropd.c 
+SERVEROBJS= kpropd.o 
 
 all::	kprop kpropd
 

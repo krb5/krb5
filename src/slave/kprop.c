@@ -21,7 +21,7 @@ static char rcsid_kprop_c[] =
 #include <krb5/kdb.h>
 #include <krb5/kdb_dbm.h>
 #include <krb5/ext-proto.h>
-#include <krb5/libos-proto.h>
+#include <krb5/los-proto.h>
 #include <com_err.h>
 #include <errno.h>
 
@@ -348,12 +348,11 @@ void kerberos_authenticate(fd, me)
 	krb5_error_code	retval;
 	krb5_error	*error = NULL;
 	krb5_ap_rep_enc_part	*rep_result;
-	struct timeval	mytime;
 
-	if (retval = krb5_sendauth(fd, kprop_version, me, my_creds.server,
-				    AP_OPTS_MUTUAL_REQUIRED, &my_seq_num, NULL,
-				    NULL, &my_creds, NULL, &error,
-				    &rep_result)) {
+	if (retval = krb5_sendauth((void *)&fd, kprop_version, me,
+				   my_creds.server, AP_OPTS_MUTUAL_REQUIRED,
+				   NULL, &my_creds, NULL, &my_seq_num, NULL,
+				   &error, &rep_result)) {
 		com_err(progname, retval, "while authenticating to server");
 		if (error) {
 			if (error->error == KRB_ERR_GENERIC) {
@@ -472,7 +471,7 @@ xmit_database(fd, database_fd, database_size)
 		send_error(fd, "while encoding database size", retval);
 		exit(1);
 	}
-	if (retval = krb5_write_message(fd, &outbuf)) {
+	if (retval = krb5_write_message((void *) &fd, &outbuf)) {
 		xfree(outbuf.data);
 		com_err(progname, retval, "while sending database size");
 		exit(1);
@@ -513,7 +512,7 @@ xmit_database(fd, database_fd, database_size)
 			send_error(fd, buf, retval);
 			exit(1);
 		}
-		if (retval = krb5_write_message(fd, &outbuf)) {
+		if (retval = krb5_write_message((void *) &fd, &outbuf)) {
 			xfree(outbuf.data);
 			com_err(progname, retval,
 				"while sending database block starting at %d",
@@ -535,7 +534,7 @@ xmit_database(fd, database_fd, database_size)
 	 * OK, we've sent the database; now let's wait for a success
 	 * indication from the remote end.
 	 */
-	if (retval = krb5_read_message(fd, &inbuf)) {
+	if (retval = krb5_read_message((void *) &fd, &inbuf)) {
 		com_err(progname, retval,
 			"while reading response from server");
 		exit(1);
@@ -611,7 +610,7 @@ send_error(fd, err_text, err_code)
 	if (error.text.data = malloc(error.text.length)) {
 		strcpy(error.text.data, text);
 		if (!krb5_mk_error(&error, &outbuf)) {
-			(void) krb5_write_message(fd, &outbuf);
+			(void) krb5_write_message((void *) &fd, &outbuf);
 			xfree(outbuf.data);
 		}
 		free(error.text.data);
