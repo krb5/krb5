@@ -26,14 +26,13 @@
 /*
  * Triple-DES string-to-key algorithm
  *
- * 1. Concatenate the input string and salt, and pad with zeroes until
- *    it is at least 24 bits, and a multiple of eight.
- * 2. Fanfold the bits into a 24 bytes of key information (3 DES keys).
- * 3. Use the three DES keys to perform a triple CBC encryption and return
- *    the last 24 bytes (similar to the MAC computation for DES in FIPS 81).
- *
- * This routine assumes that the triple CBC checksum will do the appropriate
- * padding and that its return value will be 24 bytes.
+ * 168-fold the input string (appended with any salt), and treat the resulting
+ * 168 bits as three DES keys sans parity.  Process each set of 56 bits into
+ * a usable DES key with odd parity, and then encrypt the set of three usable
+ * DES keys using Triple-DES CBC mode.  The result is then treated as three
+ * DES keys, and should be corrected for parity.  Any DES key that is weak or
+ * semi-weak is to be corrected by eXclusive-ORing the first octet with the
+ * value 0xF0.
  */
 
 static mit_des_cblock zero_ivec = { 0, 0, 0, 0, 0, 0, 0, 0 };
@@ -85,15 +84,26 @@ const krb5_data FAR * salt;
     if (salt)
 	memcpy(copystr + data->length, (char *)salt->data, salt->length);
 
-    /* n-fold into des3 key */
-    if (mit_des_n_fold(copystr, length, keyblock->contents, keyblock->length))
+    /* n-fold into des3 key sans parity */
+    if (mit_des_n_fold(copystr, length, keyblock->contents,
+		       keyblock->length * 7 / 8))
 	return EINVAL;
+
+    /* Add space for parity (low bit) */
+    for (j = keyblock->length; j--; ) {
+	register int k;
+
+	k = (8-(j%8)) & 7;
+	keyblock->contents[j] =
+	    ((keyblock->contents[j*7/8] << k) & 0xfe) +
+	    ((k>1) ? keyblock->contents[j*7/8 +1] >> (8-k) : 0);
+    }
 	
     /* fix key parity */
     for (j = 0; j < keyblock->length/sizeof(mit_des_cblock); j++) {
-	mit_des_fixup_key_parity(*((mit_des_cblock *)key+j));
-	if (mit_des_is_weak_key(*((mit_des_cblock *)key+j)))
-	    *((unsigned char *)((mit_des_cblock *)key+j)) ^= 0xf0;
+	mit_des_fixup_key_parity(key[j]);
+	if (mit_des_is_weak_key(key[j]))
+	    *((krb5_octet *)(key[j])) ^= 0xf0;
     }
 
     /* Now, CBC encrypt with itself */
@@ -115,9 +125,9 @@ const krb5_data FAR * salt;
 
     /* now fix up key parity again */
     for (j = 0; j < keyblock->length/sizeof(mit_des_cblock); j++) {
-	mit_des_fixup_key_parity(*((mit_des_cblock *)key+j));
-	if (mit_des_is_weak_key(*((mit_des_cblock *)key+j)))
-	    *((unsigned char *)((mit_des_cblock *)key+j)) ^= 0xf0;
+	mit_des_fixup_key_parity(key[j]);
+	if (mit_des_is_weak_key(key[j]))
+	    *((krb5_octet *)(key[j])) ^= 0xf0;
     }
 
     return 0;
