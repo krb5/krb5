@@ -126,11 +126,20 @@ char *fn;
 	}
 #endif
 
-	if (r = krb5_rd_req(&authe,
-			    (krb5_principal)server,
-			    from_addr ? &peer : 0,
-			    fn, use_set_key ? setkey_key_proc : 0,
-			    0, 0, &authdat)) {
+/* ? : will break some compilers when dealing with function pointers */
+	if (use_set_key)
+		r = krb5_rd_req(&authe,
+				(krb5_principal)server,
+				from_addr ? &peer : 0,
+				fn, setkey_key_proc,
+				0, 0, &authdat);
+	else
+		r = krb5_rd_req(&authe,
+				(krb5_principal)server,
+				from_addr ? &peer : 0,
+				fn, 0,
+				0, 0, &authdat);
+	if (r) {
 #ifdef	EBUG
 		ERROR(r)
 #endif
