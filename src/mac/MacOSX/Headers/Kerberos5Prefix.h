@@ -23,6 +23,8 @@
 #define USE_CCAPI			1
 #define USE_LOGIN_LIBRARY	1
 #define NO_PASSWORD			1
+#define KRB5_KRB4_COMPAT	1
+#define KINIT_DEFAULT_BOTH	1
 
 #define HAVE_SRAND			1
 #define HAVE_LABS			1
@@ -45,6 +47,7 @@
 #define HAVE_PTHREADS	1
 
 #define	HAVE_STAT		1
+#define HAVE_LSTAT		1
 #define	HAVE_ACCESS		1
 #define	HAVE_FLOCK		1
 
@@ -57,6 +60,8 @@
 #define	HAVE_SETENV		1
 #define	HAVE_UNSETENV		1
 #define	HAVE_GETENV		1
+
+#define HAVE_GETUSERSHELL 1
 
 #define	HAVE_SETSID		1
 #define	HAVE_GETHOSTBYNAME2	1
