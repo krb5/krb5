@@ -269,7 +269,7 @@ krb5_fcc_open_file (context, id, mode)
 	     sizeof(fcc_fvno)) {
 	     (void) fcc_lock_file(data, fd, UNLOCK_IT);
 	     (void) close(fd);
-	     return KRB5_CCACHE_BADVNO;
+	     return KRB5_CC_FORMAT;
 	 }
 	 if ((fcc_fvno != htons(KRB5_FCC_FVNO_4)) &&
 	     (fcc_fvno != htons(KRB5_FCC_FVNO_3)) &&
@@ -287,14 +287,14 @@ krb5_fcc_open_file (context, id, mode)
 		!= sizeof(fcc_flen)) {
 		     (void) fcc_lock_file(data, fd, UNLOCK_IT);
 		     (void) close(fd);
-		     return KRB5_CCACHE_BADVNO;
+		     return KRB5_CC_FORMAT;
 	    }
 	    /* Skip past the header info for now */
-	    if (fcc_flen = htons(fcc_flen)) {
+	    if ((fcc_flen = htons(fcc_flen)) != 0) {
 	        if ((krb5_ui_2) read(fd, buf, fcc_flen) != fcc_flen) {
 		     (void) fcc_lock_file(data, fd, UNLOCK_IT);
 		     (void) close(fd);
-		     return KRB5_CCACHE_BADVNO;
+		     return KRB5_CC_FORMAT;
 		}
 	    }
 	}

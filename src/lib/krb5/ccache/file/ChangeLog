@@ -4,6 +4,9 @@ Thu Dec 21 18:28:09 1995  Theodore Y. Ts'o  <tytso@dcl>
 		FCC_OPEN_AND_ERASE, unlink the old filename, and then add
 		the O_EXCL open flag, to prevent O_CREAT from following a
 		symbolic link.
+		(krb5_fcc_open_file): Use KRB5_CC_FORMAT as an error code
+		instead of KRB5_CCACHE_BADVNO, when it's really a format
+		error in the credentials cache file.
 
 Fri Oct  6 22:03:16 1995  Theodore Y. Ts'o  <tytso@dcl>
 

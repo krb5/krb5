@@ -4,6 +4,9 @@ Thu Dec 21 18:33:39 1995  Theodore Y. Ts'o  <tytso@dcl>
 		SCC_OPEN_AND_ERASE, unlink the filename first, in case
 		there's a symbolic link lurking about.  (We should do an
 		exclusive open then, but there's no such thing in stdio.)
+		(krb5_scc_open_file): Use KRB5_CC_FORMAT as an error code
+		instead of KRB5_CCACHE_BADVNO, when it's really a format
+		error in the credentials cache file.
 
 Mon Sep 25 16:56:51 1995  Theodore Y. Ts'o  <tytso@dcl>
 
