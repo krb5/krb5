@@ -148,7 +148,7 @@ sapi.2: api.2
 
 unit-test-server-body: sapi.0 sapi.1 sapi.2 site.exp randkey-test test-handle-server \
 	lock-test test-sizes
-	$(RUNTEST) --tool sapi API=$(SRVTCL) LOCKTEST=./lock-test KDBFIVE_EDIT=$(TOP)/../admin/edit/kdb5_edit KADMIN_LOCAL=$(TOP)/cli/kadmin.local TOP=$(TOP) RPC=0
+	$(RUNTEST) --tool sapi API=$(SRVTCL) LOCKTEST=./lock-test KADMIN_LOCAL=$(TOP)/cli/kadmin.local TOP=$(TOP) RPC=0
 
 clean::
 	$(CLEAN) -r *.log *.plog *.sum *.psum unit-test-log.*

@@ -1,5 +1,7 @@
 Tue Aug 20 13:46:54 1996  Barry Jaspan  <bjaspan@mit.edu>
 
+	* Makefile.ov (unit-test-server-body): remove kdb5_edit
+
 	* api.0/init.exp, api.2/init.exp, config/unix.exp, Makefile.ov:
  	use kadmin.local instead of kdb5_edit
 
