@@ -856,7 +856,7 @@ void protocol(f, p)
 	 */
    if ( ioctl(p, TIOCPKT, &on) < 0)
 	tiocpkt_on = 0;
-   else tiocpkt_on = 0;
+   else tiocpkt_on = 1;
 #endif
 
     /*
