@@ -29,6 +29,7 @@
  * ser_rcdfl.c - Serialize replay cache context.
  */
 #include "k5-int.h"
+#include "rc-int.h"
 
 /*
  * Routines to deal with externalizing krb5_rcache.

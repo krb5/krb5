@@ -1806,15 +1806,6 @@ struct _krb5_cc_ops {
 
 extern const krb5_cc_ops *krb5_cc_dfl_ops;
 
-/* And this should be in lib/krb5/rcache somewhere.  */
-
-struct krb5_rc_st {
-    krb5_magic magic;
-    const struct _krb5_rc_ops *ops;
-    krb5_pointer data;
-    k5_mutex_t lock;
-};
-
 typedef struct _krb5_donot_replay {
     krb5_magic magic;
     krb5_ui_4 hash;
@@ -1864,35 +1855,6 @@ char *KRB5_CALLCONV krb5_rc_get_name
 	(krb5_context, krb5_rcache);
 krb5_error_code KRB5_CALLCONV krb5_rc_resolve
 	(krb5_context, krb5_rcache, char *);
-
-struct _krb5_rc_ops {
-    krb5_magic magic;
-    char *type;
-    krb5_error_code (KRB5_CALLCONV *init)
-	(krb5_context, krb5_rcache,krb5_deltat); /* create */
-    krb5_error_code (KRB5_CALLCONV *recover)
-	(krb5_context, krb5_rcache); /* open */
-    krb5_error_code (KRB5_CALLCONV *destroy)
-	(krb5_context, krb5_rcache);
-    krb5_error_code (KRB5_CALLCONV *close)
-	(krb5_context, krb5_rcache);
-    krb5_error_code (KRB5_CALLCONV *store)
-	(krb5_context, krb5_rcache,krb5_donot_replay *);
-    krb5_error_code (KRB5_CALLCONV *expunge)
-	(krb5_context, krb5_rcache);
-    krb5_error_code (KRB5_CALLCONV *get_span)
-	(krb5_context, krb5_rcache,krb5_deltat *);
-    char *(KRB5_CALLCONV *get_name)
-	(krb5_context, krb5_rcache);
-    krb5_error_code (KRB5_CALLCONV *resolve)
-	(krb5_context, krb5_rcache, char *);
-};
-
-typedef struct _krb5_rc_ops krb5_rc_ops;
-
-krb5_error_code krb5_rc_register_type (krb5_context, const krb5_rc_ops *);
-
-extern const krb5_rc_ops krb5_rc_dfl_ops;
 
 typedef struct _krb5_kt_ops {
     krb5_magic magic;

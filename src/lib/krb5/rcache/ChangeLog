@@ -1,3 +1,11 @@
+2004-06-02  Ken Raeburn  <raeburn@mit.edu>
+
+	* rc-int.h (struct krb5_rc_st, struct _krb5_rc_ops, krb5_rc_ops):
+	Move type definitions here from k5-int.h.
+	(krb5_rc_register_type, krb5_rc_dfl_ops): Move declarations here
+	from k5-int.h.
+	* rc_dfl.c, rcdef.c, rcfns.c: Include rc-int.h.
+
 2004-05-27  Ezra Peisach  <epeisach@mit.edu>
 
 	* rc_base.c: Include rc-int.h

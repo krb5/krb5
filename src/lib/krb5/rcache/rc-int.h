@@ -25,7 +25,7 @@
  * 
  *
  * This file contains constant and function declarations used in the
- * file-based credential cache routines.
+ * file-based replay cache routines.
  */
 
 #ifndef __KRB5_RCACHE_INT_H__
@@ -34,5 +34,41 @@
 int krb5int_rc_finish_init(void);
 
 void krb5int_rc_terminate(void);
+
+struct krb5_rc_st {
+    krb5_magic magic;
+    const struct _krb5_rc_ops *ops;
+    krb5_pointer data;
+    k5_mutex_t lock;
+};
+
+struct _krb5_rc_ops {
+    krb5_magic magic;
+    char *type;
+    krb5_error_code (KRB5_CALLCONV *init)
+	(krb5_context, krb5_rcache,krb5_deltat); /* create */
+    krb5_error_code (KRB5_CALLCONV *recover)
+	(krb5_context, krb5_rcache); /* open */
+    krb5_error_code (KRB5_CALLCONV *destroy)
+	(krb5_context, krb5_rcache);
+    krb5_error_code (KRB5_CALLCONV *close)
+	(krb5_context, krb5_rcache);
+    krb5_error_code (KRB5_CALLCONV *store)
+	(krb5_context, krb5_rcache,krb5_donot_replay *);
+    krb5_error_code (KRB5_CALLCONV *expunge)
+	(krb5_context, krb5_rcache);
+    krb5_error_code (KRB5_CALLCONV *get_span)
+	(krb5_context, krb5_rcache,krb5_deltat *);
+    char *(KRB5_CALLCONV *get_name)
+	(krb5_context, krb5_rcache);
+    krb5_error_code (KRB5_CALLCONV *resolve)
+	(krb5_context, krb5_rcache, char *);
+};
+
+typedef struct _krb5_rc_ops krb5_rc_ops;
+
+krb5_error_code krb5_rc_register_type (krb5_context, const krb5_rc_ops *);
+
+extern const krb5_rc_ops krb5_rc_dfl_ops;
 
 #endif /* __KRB5_RCACHE_INT_H__ */

@@ -28,6 +28,7 @@
  */
 
 #include "k5-int.h"
+#include "rc-int.h"
 #include "rc_dfl.h"
 
 const krb5_rc_ops krb5_rc_dfl_ops =
