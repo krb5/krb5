@@ -1,3 +1,7 @@
+Wed Jan 21 15:06:00 1998  Ezra Peisach  <epeisach@mit.edu>
+
+	* bindresvport.c: Include string.h for memset prototype.
+
 Tue Dec 16 11:22:13 1997  Ezra Peisach  <epeisach@mit.edu>
 
 	* svc_auth_gssapi.c (_svcauth_gssapi): When looping over services,

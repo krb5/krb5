@@ -32,6 +32,7 @@ static  char sccsid[] = "@(#)bindresvport.c	2.2 88/07/29 4.0 RPCSRC 1.8 88/02/08
  * Copyright (c) 1987 by Sun Microsystems, Inc.
  */
 
+#include <string.h>
 #include <sys/types.h>
 #include <sys/errno.h>
 #include <sys/socket.h>
