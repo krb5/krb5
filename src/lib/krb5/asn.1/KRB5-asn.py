@@ -377,10 +377,10 @@ PA-SAM-RESPONSE ::= SEQUENCE {
     sam-flags[1]                SAMFlags,
     sam-track-id[2]             GeneralString OPTIONAL,
     -- sam-enc-key is reserved for future use, so I'm making it OPTIONAL - mwe
-    sam-enc-key[3]              EncryptedData
-                                   -- PA-ENC-SAM-KEY,
-    sam-enc-nonce-or-ts[4]      EncryptedData
-                                   -- PA-ENC-SAM-RESPONSE-ENC,
+    sam-enc-key[3]              EncryptedData,
+                                   -- PA-ENC-SAM-KEY
+    sam-enc-nonce-or-ts[4]      EncryptedData,
+                                   -- PA-ENC-SAM-RESPONSE-ENC
     sam-nonce[5]                INTEGER OPTIONAL,
     sam-patimestamp[6]          KerberosTime OPTIONAL
 }

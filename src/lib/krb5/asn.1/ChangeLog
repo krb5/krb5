@@ -1,3 +1,9 @@
+1999-07-06  Ken Raeburn  <raeburn@mit.edu>
+
+	* KRB5-asn.py (PA-SAM-RESPONSE): Fix syntax error -- comma
+	separating sequence components doesn't belong buried in a
+	comment.
+
 1999-07-03  Tom Yu  <tlyu@mit.edu>
 
 	* asn1buf.c (asn1buf_sync): Add length parameter to disambiguate
