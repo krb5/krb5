@@ -1,3 +1,24 @@
+/*
+ * $Source$
+ * $Author$
+ *
+ * Copyright 1990 by the Massachusetts Institute of Technology.
+ *
+ * For copying and distribution information, please see the file
+ * <krb5/copyright.h>.
+ *
+ * CRC-32 routines
+ */
+
+#if !defined(lint) && !defined(SABER)
+static char rcsid_crc_c[] =
+"$Id$";
+#endif	/* !lint & !SABER */
+
+#include <krb5/copyright.h>
+#include <krb5/krb5.h>
+#include <krb5/crc-32.h>
+
 static u_long const crc_table[256] = {
     0x00000000, 0x01080082, 0x02100104, 0x03180186,
     0x04200208, 0x0528028a, 0x0630030c, 0x0738038e,
@@ -65,19 +86,38 @@ static u_long const crc_table[256] = {
     0xfbe07ff8, 0xfae87f7a, 0xf9f07efc, 0xf8f87e7e
     };
 
-
-static u_long crc(d)
-    krb5_data *d;
+static krb5_error_code
+crc32_sum_func(in, out, seed, in_length, seed_length, outcksum)
+krb5_pointer in;
+krb5_pointer out;
+krb5_pointer seed;
+size_t in_length;
+size_t seed_length;
+krb5_checksum *outcksum;
 {
+    register u_char *data = (u_char *)in;
     register u_long c = 0;
     register int idx;
     int i;
 
-    for (i=0; i<d->length;i++) {
-	idx = (d->data[i] ^ c);
+    for (i=0; i<in_length;i++) {
+	idx = (data[i] ^ c);
 	idx &= 0xff;
 	c >>= 8;
 	c ^= crc_table[idx];
     }
-    return c;
+    /* c now holds the result */
+    outcksum->checksum_type = CKSUMTYPE_CRC32;
+    outcksum->length = 4;
+    outcksum->contents[0] = c & 0xff;
+    outcksum->contents[1] = (c >> 8) & 0xff;
+    outcksum->contents[2] = (c >> 16) & 0xff;
+    outcksum->contents[3] = (c >> 24) & 0xff;
+    return 0;
 }
+
+
+krb5_checksum_entry crc32_cksumtable_entry = {
+    &crc32_sum_func,
+    4,					/* CRC-32 is 4 octets */
+};
