@@ -242,10 +242,10 @@ krb5_error_code krb5int_c_combine_keys
     ret = 0;
 
 cleanup:
-    memset(r1, 0, keylength);
-    memset(r2, 0, keylength);
+    memset(r1, 0, keybytes);
+    memset(r2, 0, keybytes);
     memset(rnd, 0, keybytes);
-    memset(combined, 0, keylength * 2);
+    memset(combined, 0, keybytes * 2);
     memset(output, 0, keylength);
 
     free(r1);
