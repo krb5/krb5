@@ -23,6 +23,7 @@
 /* XXX Until I find out the right #define for this.. XXX */
 #define KRB5_OK 0
 #define KRB5_NOMEM 1
+#define KRB5_NOTFOUND 2
 #define KRB5_FCC_MAXLEN 100
 
 #ifndef TKT_ROOT
