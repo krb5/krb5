@@ -20,6 +20,8 @@ char *error_message (long err) {
 }
 #endif
 
+void dump_profile(struct profile_node *root, int level);
+
 int main(argc, argv)
 	int	argc;
 	char	**argv;
@@ -27,7 +29,6 @@ int main(argc, argv)
 	struct profile_node *root;
 	unsigned long retval;
 	FILE *f;
-	void dump_profile(struct profile_node *root, int level);
 
 	initialize_prof_error_table();
 	if (argc != 2) {
