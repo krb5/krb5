@@ -1,3 +1,11 @@
+2003-01-07  Ken Raeburn  <raeburn@mit.edu>
+
+	* rc_base.c (struct krb5_rc_typelist): Field "ops" now points to
+	const.
+	(krb5_rc_register_type): Likewise for "ops" argument.
+	* rcdef.c (krb5_rc_dfl_ops): Now const.
+	* rc_dfl.h (krb5_rc_dfl_ops): Declaration deleted.
+
 2002-09-05  Ken Raeburn  <raeburn@mit.edu>
 
 	* rc_io.c (krb5_rc_io_move): Missed a variable name change.

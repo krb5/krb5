@@ -13,8 +13,6 @@
 #ifndef KRB5_RC_DFL_H
 #define KRB5_RC_DFL_H
 
-extern krb5_rc_ops krb5_rc_dfl_ops; /* initialized to the following */
-
 krb5_error_code KRB5_CALLCONV krb5_rc_dfl_init 
     	(krb5_context,
 		   krb5_rcache,

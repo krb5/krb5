@@ -1,3 +1,7 @@
+2003-01-07  Ken Raeburn  <raeburn@mit.edu>
+
+	* ccdefops.c (krb5_cc_dfl_ops): Now points to const.
+
 2002-09-03  Ken Raeburn  <raeburn@mit.edu>
 
 	* cc_file.c, cc_memory.c, cc_retr.c, ccbase.c, cccopy.c,

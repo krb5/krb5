@@ -20,7 +20,7 @@
 
 struct krb5_rc_typelist
  {
-  krb5_rc_ops *ops;
+  const krb5_rc_ops *ops;
   struct krb5_rc_typelist *next;
  };
 static struct krb5_rc_typelist krb5_rc_typelist_dfl = { &krb5_rc_dfl_ops, 0 };
@@ -30,7 +30,8 @@ static struct krb5_rc_typelist *typehead = &krb5_rc_typelist_dfl;
 semaphore ex_typelist = 1;
 #endif
 
-krb5_error_code krb5_rc_register_type(krb5_context context, krb5_rc_ops *ops)
+krb5_error_code krb5_rc_register_type(krb5_context context,
+				      const krb5_rc_ops *ops)
 {
  struct krb5_rc_typelist *t;
 #ifdef SEMAPHORE

@@ -1714,13 +1714,13 @@ struct _krb5_cc_ops {
 					    krb5_flags);
 };
 
-extern krb5_cc_ops *krb5_cc_dfl_ops;
+extern const krb5_cc_ops *krb5_cc_dfl_ops;
 
 /* And this should be in lib/krb5/rcache somewhere.  */
 
 struct krb5_rc_st {
     krb5_magic magic;
-    struct _krb5_rc_ops *ops;
+    const struct _krb5_rc_ops *ops;
     krb5_pointer data;
 };
 
@@ -1749,9 +1749,9 @@ struct _krb5_rc_ops {
 
 typedef struct _krb5_rc_ops krb5_rc_ops;
 
-krb5_error_code krb5_rc_register_type (krb5_context, krb5_rc_ops *);
+krb5_error_code krb5_rc_register_type (krb5_context, const krb5_rc_ops *);
 
-extern krb5_rc_ops krb5_rc_dfl_ops;
+extern const krb5_rc_ops krb5_rc_dfl_ops;
 
 typedef struct _krb5_kt_ops {
     krb5_magic magic;

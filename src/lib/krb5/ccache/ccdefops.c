@@ -40,11 +40,11 @@
  */
 #include "stdcc.h" /* from ccapi subdir */
 
-krb5_cc_ops *krb5_cc_dfl_ops = &krb5_cc_stdcc_ops;
+const krb5_cc_ops *krb5_cc_dfl_ops = &krb5_cc_stdcc_ops;
 
 #else
 
 #include "fcc.h"
-krb5_cc_ops *krb5_cc_dfl_ops = &krb5_cc_file_ops;
+const krb5_cc_ops *krb5_cc_dfl_ops = &krb5_cc_file_ops;
 
 #endif

@@ -30,7 +30,7 @@
 #include "k5-int.h"
 #include "rc_dfl.h"
 
-krb5_rc_ops krb5_rc_dfl_ops =
+const krb5_rc_ops krb5_rc_dfl_ops =
  {
   0,
   "dfl",
