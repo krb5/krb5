@@ -1,3 +1,7 @@
+Fri Sep  6 15:48:05 1996  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in: remove admin subdir
+
 Fri Aug 30 22:58:19 1996  Tom Yu  <tlyu@mit.edu>
 
 	* aclocal.m4 (DECLARE_SYS_ERRLIST): Fix up to look for sys_errlist
