@@ -113,4 +113,4 @@ _krb_time_to_life
 _krb_life_to_time
 
 ### Used by KEYFILE macro ###
-krb__get_srvtabname
+_krb__get_srvtabname
