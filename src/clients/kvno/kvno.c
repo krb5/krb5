@@ -104,21 +104,23 @@ int main(int argc, char *argv[])
 	krb5_free_principal(context, in_creds.server);
 
 	if (ret) {
-	    free(princ);
-
 	    fprintf(stderr, "%s: %s while getting credentials\n",
 		    princ, error_message(ret));
+
+	    free(princ);
+
 	    errors++;
 	    continue;
 	}
 
 	/* we need a native ticket */
 	if (ret = decode_krb5_ticket(&out_creds->ticket, &ticket)) {
+	    fprintf(stderr, "%s: %s while decoding ticket\n",
+		    princ, error_message(ret));
+
 	    krb5_free_creds(context, out_creds);
 	    free(princ);
 
-	    fprintf(stderr, "princ: %s while decoding ticket\n",
-		    argv[i], error_message(ret));
 	    errors++;
 	    continue;
 	}
