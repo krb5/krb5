@@ -103,7 +103,6 @@ OLDDECLARG(krb5_response *,rep)
 	return(retval);
     }
 
-    /* XXX choose a checksum type */
     if (!(ap_checksum.contents = (krb5_octet *)
 	  malloc(krb5_cksumarray[sumtype]->checksum_length))) {
 	if (sec_ticket)
