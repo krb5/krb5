@@ -151,6 +151,8 @@ krb5_error_code krb5_copy_checksum
 void krb5_init_ets PROTOTYPE((void));
 krb5_error_code krb5_generate_subkey
     PROTOTYPE((const krb5_keyblock *, krb5_keyblock **));
+krb5_error_code krb5_generate_seq_number
+    PROTOTYPE((const krb5_keyblock *, krb5_int32 *));
 
 /* libkt.spec */
 krb5_error_code krb5_kt_register
