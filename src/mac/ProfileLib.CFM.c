@@ -17,6 +17,7 @@
  */
  
 #include "profile.h"
+#include "prof_err.h"
 
 #if TARGET_RT_MAC_CFM
 #include <CodeFragments.h>
