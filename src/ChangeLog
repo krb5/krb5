@@ -1,3 +1,9 @@
+2002-08-26  Ezra Peisach  <epeisach@bu.edu>
+
+	* aclocal.m4 (KRB5_LIB_PARAMS): Substitute krb5_cv_host in
+	Makefiles. Remove K5_OUTPUT_FILES as nothing depends on it
+	anymore.
+
 2002-08-23  Ken Raeburn  <raeburn@mit.edu>
 
 	* aclocal.m4: Require autoconf 2.52 or later.

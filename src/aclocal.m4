@@ -557,13 +557,6 @@ dnl K5_AC_OUTPUT
 dnl
 define(K5_AC_OUTPUT,[AC_OUTPUT($krb5_output_list)])dnl
 dnl
-dnl K5_OUTPUT_FILES
-dnl
-dnl This is for compatibility purposes, and can be removed (once all the
-dnl Makefile.in's have been checked in.)
-dnl
-define(K5_OUTPUT_FILES,[K5_AC_OUTPUT])dnl
-dnl
 dnl V5_OUTPUT_MAKEFILE
 dnl
 define(V5_AC_OUTPUT_MAKEFILE,
@@ -1189,6 +1182,7 @@ AC_CACHE_VAL(krb5_cv_host,
 [AC_CANONICAL_HOST
 krb5_cv_host=$host])
 AC_MSG_RESULT($krb5_cv_host)
+AC_SUBST(krb5_cv_host)
 AC_REQUIRE([AC_PROG_CC])
 AC_REQUIRE([V5_SET_TOPDIR])
 . $ac_topdir/config/shlib.conf
