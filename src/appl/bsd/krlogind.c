@@ -160,10 +160,6 @@ char copyright[] =
 #include <sys/param.h>
 #include <utmp.h>
 
-#ifdef HAVE_UTXENT
-#include <utmpx.h>
-#endif
-     
 #ifdef HAVE_SYS_TTY_H
 #include <sys/tty.h>
 #endif
@@ -772,41 +768,17 @@ void doit(f, fromp)
 	}
 #endif
 
-#ifdef HAVE_UTENT
+#ifdef LOGIN_PROCESS
 	{
 	    int tmpx;
 	    char utmp_id[5];
 	    struct utmp ent;
-#ifdef HAVE_UTXENT
-	    struct utmpx entx;
+
+#ifndef NO_UT_PID
+	    ent.ut_pid = getpid();
 #endif
-	    strcpy(ent.ut_user, "rlogin");
-	    strcpy(ent.ut_line, line+sizeof("/dev/")-1);
-
-	    sscanf(line, "/dev/pts/%d", &tmpx);
-	    sprintf(utmp_id, "kl%02d", tmpx);
-	    strncpy(ent.ut_id, utmp_id, sizeof(ent.ut_id));
-
-	    ent.ut_pid = getpid;
 	    ent.ut_type = LOGIN_PROCESS;
-	    ent.ut_time = time(0);
-
-#ifdef HAVE_UTXENT
-	    getutmpx(&ent, &entx);
-	    setutxent();
-	    pututxline(&entx);
-	    endutxent();
-	    updwtmpx(WTMPX_FILE, &ent);
-#endif
-	    utmpname(UTMP_FILE);
-	    setutent();
-	    pututline(&ent);
-	    endutent();
-
-	    utmpname(WTMP_FILE);
-	    setutent();
-	    pututline(&ent);
-	    endutent();
+	    update_utmp(&ent, "rlogin", line, (char *)0);
 	}
 #endif
 	
@@ -1074,23 +1046,15 @@ protocol(f, p)
 krb5_sigtype cleanup()
 {
     char *p;
+    struct utmp ut;
     
-    /* 
-      I dont know why P starts with the character '/', but apparently it
-      has to do with the way login set line when the initial entry for this
-      line is made.
-      */
-    p = line + sizeof("/dev/") -1 ;
-    if (!logout(p)) {
-#ifdef SYSV
-	logwtmp(p, "", "", 0, 0);
-#else
-	logwtmp(p, "", "", 0);
+#ifndef NO_UT_PID
+    ut.ut_pid = 0;
 #endif
-    }
-    else 
-      syslog(LOG_ERR ,
-	     "Cannot delete entry from utmp for %s\n",p);
+#ifdef HAVE_SETUTENT
+    ut.ut_type = DEAD_PROCESS;
+#endif
+    update_utmp(&ut, "", line, (char *)0);
     
     (void)chmod(line, 0666);
     (void)chown(line, 0, 0);

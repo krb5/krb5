@@ -240,7 +240,7 @@ main(argc, argv)
 	int kflag, Kflag, eflag;
 	int quietlog, passwd_req, ioctlval;
 	sigtype timedout();
-	char *domain, *salt, **envinit, *ttyn, *tty, *ktty;
+	char *domain, *salt, **envinit, *ttyn, *tty;
 	char tbuf[MAXPATHLEN + 2];
 	char *ttyname(), *stypeof(), *crypt(), *getpass();
 	time_t login_time;
@@ -490,12 +490,6 @@ main(argc, argv)
 	else
 		tty = ttyn;
 
-	/* For kerberos tickets, extract only the last part of the ttyname */
-	if (ktty = strrchr(tty, '/'))
-		++ktty;
-	else
-		ktty = tty;
-
 #ifndef LOG_ODELAY /* 4.2 syslog ... */                      
 	openlog("login", 0);
 #else
@@ -597,14 +591,6 @@ main(argc, argv)
 		       log in.  Can you say abstraction violation? */
 		    _res.retrans = 1;
 #endif /* BIND_HACK */
-#if 0  /* XXX krb5 has defaults; don't do this. */
-		    /* Set up the ticket file environment variable */
-		    strncpy(tkfile, KRB_TK_DIR, sizeof(tkfile));
-		    strncat(tkfile, ktty,
-			    sizeof(tkfile) - strlen(tkfile) - 1);
-		    (void) setenv(KRB_ENVIRON, tkfile, 1);
-		    krb_set_tkt_string(tkfile);
-#endif
 
 #ifdef _IBMR2
 		    krbval = setuidx(ID_REAL|ID_EFFECTIVE, pwd->pw_uid);
@@ -766,17 +752,13 @@ bad_login:
 
 		memset((char *)&utmp, 0, sizeof(utmp));
 		login_time = time(&utmp.ut_time);
-		(void) strncpy(utmp.ut_name, username, sizeof(utmp.ut_name));
-#ifndef NO_UT_HOST
-		if (hostname)
-		    (void) strncpy(utmp.ut_host, hostname,
-				   sizeof(utmp.ut_host));
-		else
-		    memset(utmp.ut_host, 0, sizeof(utmp.ut_host));
+#ifdef USER_PROCESS
+		utmp.ut_type = USER_PROCESS;
 #endif
-		/* Solaris 2.0, 2.1 used ttyn here. Never Again... */
-		(void) strncpy(utmp.ut_line, tty, sizeof(utmp.ut_line));
-		login(&utmp);
+#ifndef NO_UT_PID
+		utmp.ut_pid = getppid();
+#endif
+		update_utmp(&utmp, username, ttyn, hostname);
 	}
 
 	quietlog = access(HUSHLOGIN, F_OK) == 0;
