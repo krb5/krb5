@@ -156,7 +156,7 @@ process_args(context, argc, argv)
         fclose(startup_file);
     }
 #endif
-    while ((c = getopt(argc, argv, "hmMa:d:k:r:De:")) != EOF) {
+    while ((c = getopt(argc, argv, "hmM:a:d:k:r:De:")) != EOF) {
 	switch(c) {
 	    case 'a':			/* new acl directory */
 		acl_file_name = optarg;
