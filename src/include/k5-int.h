@@ -718,6 +718,11 @@ krb5_error_code krb5int_c_combine_keys
 (krb5_context context, krb5_keyblock *key1, krb5_keyblock *key2,
 		krb5_keyblock *outkey);
 
+/*
+ * Internal - for cleanup.
+ */
+extern void krb5int_prng_cleanup (void);
+
 
 /* 
  * These declarations are here, so both krb5 and k5crypto
