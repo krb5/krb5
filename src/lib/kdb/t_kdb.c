@@ -487,8 +487,11 @@ do_testing(db, passes, verbose, timing, rcases, check, save_db, dontclean,
     oparg = "";
 
     /* Set up some initial context */
-    krb5_init_context(&kcontext);
-    krb5_init_ets(kcontext);
+    kret = krb5_init_context(&kcontext);
+    if (kret) {
+	    com_err(programname, kret, "while initializing krb5");
+	    exit(1);
+    }
 
     /* 
      * The database had better not exist.
@@ -868,8 +871,11 @@ do_testing(db, passes, verbose, timing, rcases, check, save_db, dontclean,
 		struct stat stbuf;
 
 		while (stat("./test.lock", &stbuf) == -1)
-		krb5_init_context(&ccontext);
-		krb5_init_ets(ccontext);
+	        kret = krb5_init_context(&ccontext);
+		if (kret) {
+		    com_err(programname, kret, "while initializing krb5");
+		    exit(1);
+		}
 		if ((kret = krb5_db_set_name(ccontext, db)) ||
 		    (kret = krb5_db_init(ccontext)))
 		    exit(1);

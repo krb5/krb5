@@ -71,8 +71,10 @@ t_kdb:	t_kdb.o $(OBJS) $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(TOPLIBD)/li
 	$(LD) $(LDFLAGS) $(LDARGS) -o t_kdb t_kdb.o $(OBJS) $(LIBS) $(TOPLIBD)/libdb.a
 
 check::	t_kdb
-	$(KRB5_RUN_ENV) ./t_kdb -tcv
-	$(KRB5_RUN_ENV) ./t_kdb -tcvr
+	KRB5_CONFIG=$(srcdir)/t_krb5.conf ; export KRB5_CONFIG ;\
+		$(KRB5_RUN_ENV) ./t_kdb -tcv
+	KRB5_CONFIG=$(srcdir)/t_krb5.conf ; export KRB5_CONFIG ;\
+		$(KRB5_RUN_ENV) ./t_kdb -tcvr
 
 clean::
 	$(RM) t_kdb t_kdb.o

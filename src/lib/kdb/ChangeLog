@@ -1,3 +1,11 @@
+Sat Nov  9 15:57:50 1996  Ezra Peisach  <epeisach@mit.edu>
+
+	* t_krb5.conf: Dummy krb5.conf file from the krb5 library. 
+
+	* Makefile.in (check): Set KRB5_CONFIG to a valid krb5.conf file.
+
+	* t_kdb.c (do_testing): Check return value from krb5_init_context.
+
 Thu Oct 31 11:10:56 1996  Ezra Peisach  <epeisach@trane.rose.brandeis.edu>
 
 	* Makefile.in (t_kdb): Link with $(TOPLIBD)/libdb.a
