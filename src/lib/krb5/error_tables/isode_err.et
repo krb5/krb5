@@ -41,4 +41,6 @@ error_code	ISODE_50_PE_ERR_TYPE, "isode(pe):Class/ID mismatch in constructor"
 error_code	ISODE_50_PE_ERR_OID, "isode(pe):Malformed object identifier"
 error_code	ISODE_50_PE_ERR_BITS, "isode(pe):Malformed bitstring"
 
+error_code	ISODE_50_LOCAL_ERR_BADDECODE,	"isode: ASN.1 decode failed"
+
 end
