@@ -47,8 +47,8 @@ struct saltblock {
 };
 
 static const krb5_key_salt_tuple	keysalts[] = {
-{ KEYTYPE_DES, KRB5_KDB_SALTTYPE_NORMAL },
-{ KEYTYPE_DES, KRB5_KDB_SALTTYPE_V4 }
+{ KEYTYPE_DES_CBC_MD5, KRB5_KDB_SALTTYPE_NORMAL },
+{ KEYTYPE_DES_CBC_CRC, KRB5_KDB_SALTTYPE_V4 }
 };
 static const krb5_int32			n_keysalts =
 	sizeof(keysalts) / sizeof(keysalts[0]);

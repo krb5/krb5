@@ -121,8 +121,7 @@ process_args(context, argc, argv)
     int keytypedone = 0;
     char *mkey_name = 0;
     char *local_realm;
-    krb5_enctype etype;
-    krb5_enctype kdc_etype = DEFAULT_KDC_ETYPE;
+    krb5_keytype ktype;
 
 #ifdef SANDIA
     char input_string[80];
@@ -165,12 +164,6 @@ process_args(context, argc, argv)
 		}
 		break;
 
-	    case 'e':
-		if (krb5_string_to_enctype(optarg, &kdc_etype))
-		    fprintf(stderr, "%s: %s is an invalid encryption type\n",
-			    argv[0], optarg);
-		break;
-		
 	    case 'k':			/* keytype for master key */
 		if (!krb5_string_to_keytype(optarg, &master_keyblock.keytype))
 		    keytypedone++;
@@ -222,7 +215,7 @@ process_args(context, argc, argv)
     }
  
     if (!keytypedone) {
-	master_keyblock.keytype = KEYTYPE_DES;
+	master_keyblock.keytype = KEYTYPE_DES_CBC_MD5;
     }
  
     /* assemble & parse the master key name */
@@ -234,12 +227,7 @@ process_args(context, argc, argv)
 	exit(1);
     }
 
-    if (!valid_etype(kdc_etype)) {
-	com_err(argv[0], KRB5_PROG_ETYPE_NOSUPP,
-		"while setting up etype %d", kdc_etype);
-	exit(1);
-    }
-    krb5_use_cstype(context, &master_encblock, kdc_etype);
+    krb5_use_keytype(context, &master_encblock, master_keyblock.keytype);
  
     if ((retval = krb5_db_fetch_mkey(context, 
 		master_princ, 
@@ -254,15 +242,15 @@ process_args(context, argc, argv)
     }
 
     /* initialize random key generators */
-    for (etype = 0; etype <= krb5_max_cryptosystem; etype++) {
-	if (krb5_csarray[etype]) {
-		if ((retval = (*krb5_csarray[etype]->system->
+    for (ktype = 0; ktype <= krb5_max_keytype; ktype++) {
+	if (krb5_keytype_array[ktype]) {
+		if (retval = (*krb5_keytype_array[ktype]->system->
 				init_random_key)(&master_keyblock,
-				&krb5_csarray[etype]->random_sequence))) {
+				&krb5_keytype_array[ktype]->random_sequence)) {
 			com_err(argv[0], retval, 
-	"while setting up random key generator for etype %d--etype disabled", 
-				etype);
-			krb5_csarray[etype] = 0;
+	"while setting up random key generator for ktype %d--ktype disabled", 
+				ktype);
+			krb5_keytype_array[ktype] = 0;
 		}
 	}
     }
@@ -366,12 +354,12 @@ init_db(context, dbname, masterkeyname, masterkeyblock)
 	convert server.key into a real key 
 	(it may be encrypted in the database) 
  */
-    if ((retval = krb5_dbe_find_keytype(context,
-					&server_entry,
-					KEYTYPE_DES,
-					-1,
-					-1,
-					&kdatap))) {
+    if (retval = krb5_dbe_find_keytype(context,
+				       &server_entry,
+				       KEYTYPE_DES_CBC_MD5,
+				       -1,
+				       -1,
+				       &kdatap)) {
 	krb5_db_free_principal(context, &server_entry, number_of_entries);
 	(void) krb5_finish_key(context, &master_encblock);
 	memset((char *)&master_encblock, 0, sizeof(master_encblock));

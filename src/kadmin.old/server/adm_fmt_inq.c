@@ -171,7 +171,7 @@ adm_fmt_prt(context, entry, Principal_name, ret_data)
     pkey = (krb5_key_data *) NULL;
     if (retval = krb5_dbe_find_keytype(context,
 				       entry,
-				       KEYTYPE_DES,
+				       KEYTYPE_DES_CBC_MD5,
 				       KRB5_KDB_SALTTYPE_NORMAL,
 				       -1,
 				       &pkey)) {

@@ -1,4 +1,10 @@
 
+Tue Sep 05 22:10:34 1995   Chris Provenzano (proven@mit.edu)
+
+        * adm_adm_func.c, adm_fmt_inq.c, adm_funcs.c, adm_process.c,
+	* adm_server.c, adm_v4_pwd.c adm_v4_pwd.c: Remove krb5_enctype 
+		references, and replace with krb5_keytype where appropriate.
+
 Mon Aug 21 17:05:18 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* adm_server.c - Change dbm_db_set_name to db_set_name.  Interpret -k
 		and -e arguments as strings instead of string representations
