@@ -6,16 +6,11 @@
 #include "Types.r"
 #endif
 
-resource 'vers' (1) {
-	0x01, 0x10, beta, 20,
-	verUS,
-	"1.1b20",
-	"1.1b20, Copyright 1996-1999 Massachusetts Institute of Technology"
-};
+#include "MIT Kerberos.r"
 
-resource 'vers' (2) {
-	0x01, 0x50, beta, 0x1,
+resource 'vers' (1) {
+	2, 0, final, 1,
 	verUS,
-	"1.5b1",
-	"MacOS Kerberos v5 1.5b1"
+	"2.0fc1",
+	"2.0fc1, Copyright 1996-1999 Massachusetts Institute of Technology"
 };

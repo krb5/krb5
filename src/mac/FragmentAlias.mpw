@@ -12,11 +12,11 @@
 	Set FragEntry ""
 	
 /GSSLibrary/
-	Print "¶t¶t¶"MIT_¥GSSLib¶",¶t¶t"
+	Print "¶t¶t¶"MIT Kerberos¥GSSLib¶",¶t¶t"
 	Print FragEntry
 
 /K5Library/
-	Print "¶t¶t¶"MIT_¥Kerberos5Lib¶",¶t¶t"
+	Print "¶t¶t¶"MIT Kerberos¥Kerberos5Lib¶",¶t¶t"
 	Print FragEntry
 
 /Å/

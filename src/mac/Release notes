@@ -62,3 +62,13 @@ Changes in 1.1a3:
  
 1.1b20
  fixed glue to include gss_krb5_ccache_name
+ 
+----- Version upped to 2.0fc1 -----
+
+2.0fc1
+ changed fragment names to "MIT Kerberos¥É"
+ updated to DES lib 1.0.3
+ updated to CCache 2.0fc1
+ removed CLib and RuntimeLib from output binary
+ renamed output to MIT Kerberos Library
+ changed vers 2 resource to new name (MIT Kerberos for the Macintosh)
