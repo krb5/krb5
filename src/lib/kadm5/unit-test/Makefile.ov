@@ -8,7 +8,7 @@ LIBS	:= 	$(LIBADMCLNT) $(LIBCOM_ERR) $(LIBRPCLIB) $(LIBDYN) \
 		$(LIBKRB5) $(LIBCRYPTO) $(LIBISODE) $(LIBTCL) $(LIBM) \
 		$(LIBDB) $(NDBMLIB) $(BSDLIB) $(NETLIB)
 
-INIT_SRCS =	init-test.c ../client_init.c
+INIT_SRCS =	init-test.c ../clnt/client_init.c
 DESTROY_SRCS =	destroy-test.c
 HANDLE_SRCS =	handle-test.c
 RANDKEY_SRCS =	randkey-test.c
@@ -20,8 +20,8 @@ PROG	=	init-test
 SRCS	=	$(INIT_SRCS)
 OBJS	=	init-test.o client_init.o
 
-client_init.o: ../client_init.c
-	$(CC) $(CFLAGS) -DUSE_KADM5_API_VERSION=2 -DINIT_TEST -c -I.. $<
+client_init.o: ../clnt/client_init.c
+	$(CC) $(CFLAGS) -DUSE_KADM5_API_VERSION=2 -DINIT_TEST -c -I.. -I../clnt $<
 
 expand Program
 
@@ -46,7 +46,7 @@ expand Program
 LIBS	:= 	$(LIBADMSRV) $(LIBCOM_ERR) $(LIBRPCLIB) $(LIBDYN) \
 		$(LIBGSSAPI_KRB5) $(LIBKDB5) $(LIBKRB5) \
 		$(LIBCRYPTO) $(LIBISODE) $(LIBTCL) $(LIBM) $(LIBDB) \
-		$(NDBMLIB) $(BSDLIB) $(NETLIB) 
+		$(NDBMLIB) $(BSDLIB) $(NETLIB) $(REGEXLIB)
 
 PROG	=	randkey-test
 SRCS	=	$(RANDKEY_SRCS)

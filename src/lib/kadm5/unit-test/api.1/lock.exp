@@ -5,6 +5,8 @@
 
 source lib.t
 
+api_exit
+
 if { $RPC } {
     return
 }
@@ -65,6 +67,7 @@ proc lock_test_start {test cmds} {
 
 proc lock_test_continue {test my_spawn_id test_failed fail_output cont cmds} {
     global wait_error_index wait_errno_index wait_status_index
+    global spawn_id
 
     set spawn_id $my_spawn_id
 
@@ -229,14 +232,20 @@ lock_test 12.1 [list \
 	[list eof	0]]
 eval lock_test_continue $lock12
 
-# This test doesn't work yet, somehow I or expect am confused about
-# the spawn_id's between the lock-test and api.
-warning "test 13: doesn't work, bug in unit-test"
-# set lock13 [lock_test_start 13 [list \
-# 	[list "get lock13"	"Principal or policy does not exist"] \
-# 	[list wait	""] \
-# 	[list "get lock13"	retrieved] \
-# 	[list eof	0]]]
-# create_policy lock13
-# eval lock_test_continue $lock13
-# delete_policy lock13
+set lock13 [lock_test_start 13 [list \
+	[list "get lock13"	"Principal or policy does not exist"] \
+	[list wait	""] \
+	[list "get lock13"	retrieved] \
+	[list eof	0]]]
+set test13_spawn_id $spawn_id
+# create_policy could call api_exit immediately when it starts up.
+# If it does, and the spawn ID in $spawn_id is ours rather than its,
+# it'll close our spawn ID.  So, we call api_start to give it something
+# to close.
+api_start
+create_policy lock13
+set api_spawn_id $spawn_id
+set spawn_id $test13_spawn_id
+eval lock_test_continue $lock13
+set spawn_id $api_spawn_id
+delete_policy lock13
