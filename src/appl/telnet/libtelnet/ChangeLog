@@ -1,4 +1,8 @@
-Thu Jul 31 14:57:05 1997  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+Tue Oct 21 10:54:22 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* enc_des.c: Include string.h/strings.h for memcpy prototype
+
+Thu Jul 31 14:57:05 1997  Ezra Peisach  <epeisach@mit.edu>
 
 	* Makefile.in (SRCS): Fix typo s/scrdir/srcdir/
 
@@ -211,12 +215,12 @@ Fri Jun  9 18:30:02 1995    <tytso@rsx-11.mit.edu>
 	* configure.in: Remove standardized set of autoconf macros, which
 		are now handled by CONFIG_RULES.
 
-Wed May 24 10:29:54 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+Wed May 24 10:29:54 1995  Ezra Peisach  <epeisach@mit.edu>
 
 	* kerberos5.c: Include string.h/strings.h. Include stdlib.h or
 		declare malloc. 
 
-Sun May  7 18:45:09 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+Sun May  7 18:45:09 1995  Ezra Peisach  <epeisach@mit.edu>
 
 	* kerberos5.c (kerberos5_send): Fix improperly closed comment
 			krb5_get_credentials second argument is not 
