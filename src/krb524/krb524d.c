@@ -138,11 +138,11 @@ int main(argc, argv)
 	  cleanup_and_exit(1, context);
      }
      
-     timeout.tv_sec = TIMEOUT;
-     timeout.tv_usec = 0;
      while (1) {
 	  FD_ZERO(&rfds);
 	  FD_SET(s, &rfds);
+	  timeout.tv_sec = TIMEOUT;
+	  timeout.tv_usec = 0;
 
 	  ret = select(s+1, &rfds, NULL, NULL, &timeout);
 	  if (signalled)
@@ -180,6 +180,9 @@ void cleanup_and_exit(ret, context)
 	  memset((char *)&master_encblock, 0, sizeof(master_encblock));
 	  (void) krb5_db_fini(context);
      }
+     if (use_master) krb5_free_principal(context, master_princ);
+     if (use_keytab) krb5_kt_close(context, kt);
+     krb5_free_context(context);
      exit(ret);
 }
 
@@ -213,8 +216,11 @@ void init_master(context)
      }
      if ((ret = krb5_db_setup_mkey_name(context, NULL, realm, (char **) 0,
 				       &master_princ))) {
+          free(realm);
 	  com_err(whoami, ret, "while setting up master key name");
 	  cleanup_and_exit(1, context);
+     } else {
+          free(realm);
      }
 
      master_keyblock.keytype = KEYTYPE_DES_CBC_MD5;

@@ -1,3 +1,10 @@
+Wed Sep  6 00:11:53 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* krb524d.c (main): set timeout inside while loop to prevent spin.
+	(cleanup_and_exit): free master_princ or close keytab, and free
+	the global context, to eliminate spurious storage use in malloc
+	debugging.
+	(init_master): free realm.
 
 Tue Sep 05 22:10:34 1995   Chris Provenzano (proven@mit.edu)
 
