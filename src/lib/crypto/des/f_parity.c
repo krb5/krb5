@@ -21,8 +21,7 @@
 #define parity_char(x) pstep(pstep(pstep((x),4),2),1)
 
 void
-mit_des_fixup_key_parity(key)
-     register mit_des_cblock key;
+mit_des_fixup_key_parity(mit_des_cblock key)
 {
     int i;
     for (i=0; i<sizeof(mit_des_cblock); i++) 
@@ -40,8 +39,7 @@ mit_des_fixup_key_parity(key)
  *                       correct des parity.
  */
 int
-mit_des_check_key_parity(key)
-     register mit_des_cblock key;
+mit_des_check_key_parity(mit_des_cblock key)
 {
     int i;
     

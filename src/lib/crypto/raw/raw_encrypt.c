@@ -28,11 +28,9 @@
 #include "raw.h"
 
 void
-krb5_raw_encrypt_length(enc, hash, inputlen, length)
-     const struct krb5_enc_provider *enc;
-     const struct krb5_hash_provider *hash;
-     size_t inputlen;
-     size_t *length;
+krb5_raw_encrypt_length(const struct krb5_enc_provider *enc,
+			const struct krb5_hash_provider *hash,
+			size_t inputlen, size_t *length)
 {
     size_t blocksize;
 
@@ -42,14 +40,11 @@ krb5_raw_encrypt_length(enc, hash, inputlen, length)
 }
 
 krb5_error_code
-krb5_raw_encrypt(enc, hash, key, usage, ivec, input, output)
-     const struct krb5_enc_provider *enc;
-     const struct krb5_hash_provider *hash;
-     const krb5_keyblock *key;
-     krb5_keyusage usage;
-     const krb5_data *ivec;
-     const krb5_data *input;
-     krb5_data *output;
+krb5_raw_encrypt(const struct krb5_enc_provider *enc,
+		 const struct krb5_hash_provider *hash,
+		 const krb5_keyblock *key, krb5_keyusage usage,
+		 const krb5_data *ivec, const krb5_data *input,
+		 krb5_data *output)
 {
     return((*(enc->encrypt))(key, ivec, input, output));
 }

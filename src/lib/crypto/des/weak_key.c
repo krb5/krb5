@@ -71,8 +71,7 @@ static const mit_des_cblock weak[16] = {
  * Requires: key has correct odd parity.
  */
 int
-mit_des_is_weak_key(key)
-     mit_des_cblock key;
+mit_des_is_weak_key(mit_des_cblock key)
 {
     int i;
     const mit_des_cblock *weak_p = weak;

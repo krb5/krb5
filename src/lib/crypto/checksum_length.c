@@ -28,10 +28,8 @@
 #include "cksumtypes.h"
 
 krb5_error_code KRB5_CALLCONV
-krb5_c_checksum_length(context, cksumtype, length)
-     krb5_context context;
-     krb5_cksumtype cksumtype;
-     size_t *length;
+krb5_c_checksum_length(krb5_context context, krb5_cksumtype cksumtype,
+		       size_t *length)
 {
     int i;
 

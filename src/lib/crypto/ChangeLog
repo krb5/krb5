@@ -1,3 +1,14 @@
+2004-02-18  Ken Raeburn  <raeburn@mit.edu>
+
+	* block_size.c, checksum_length.c, cksumtype_to_string.c,
+	coll_proof_cksum.c, decrypt.c, encrypt.c, encrypt_length.c,
+	enctype_compare.c, enctype_to_string.c, hmac.c,
+	keyed_checksum_types.c, keyed_cksum.c, make_checksum.c,
+	make_random_key.c, nfold.c, old_api_glue.c, prng.c,
+	string_to_cksumtype.c, string_to_enctype.c, string_to_key.c,
+	valid_cksumtype.c, valid_enctype.c, verify_checksum.c: Use ANSI C
+	style function definitions.
+
 2004-02-13  Ken Raeburn  <raeburn@mit.edu>
 
 	* t_encrypt.c (compare_results): New function.

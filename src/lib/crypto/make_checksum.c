@@ -30,13 +30,9 @@
 #include "dk.h"
 
 krb5_error_code KRB5_CALLCONV
-krb5_c_make_checksum(context, cksumtype, key, usage, input, cksum)
-     krb5_context context;
-     krb5_cksumtype cksumtype;
-     const krb5_keyblock *key;
-     krb5_keyusage usage;
-     const krb5_data *input;
-     krb5_checksum *cksum;
+krb5_c_make_checksum(krb5_context context, krb5_cksumtype cksumtype,
+		     const krb5_keyblock *key, krb5_keyusage usage,
+		     const krb5_data *input, krb5_checksum *cksum)
 {
     int i, e1, e2;
     krb5_data data;

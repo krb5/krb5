@@ -28,13 +28,9 @@
 #include "cksumtypes.h"
 
 krb5_error_code KRB5_CALLCONV
-krb5_c_verify_checksum(context, key, usage, data, cksum, valid)
-     krb5_context context;
-     const krb5_keyblock *key;
-     krb5_keyusage usage;
-     const krb5_data *data;
-     const krb5_checksum *cksum;
-     krb5_boolean *valid;
+krb5_c_verify_checksum(krb5_context context, const krb5_keyblock *key,
+		       krb5_keyusage usage, const krb5_data *data,
+		       const krb5_checksum *cksum, krb5_boolean *valid)
 {
     int i;
     size_t hashsize;

@@ -1,3 +1,9 @@
+2004-02-18  Ken Raeburn  <raeburn@mit.edu>
+
+	* afsstring2key.c, d3_cbc.c, d3_kysched.c, f_cbc.c, f_cksum.c,
+	f_parity.c, f_sched.c, key_sched.c, string2key.c, weak_key.c: Use
+	ANSI C style function definitions.
+
 2004-02-17  Ken Raeburn  <raeburn@mit.edu>
 
 	* f_tables.h (DES_DO_ENCRYPT, DES_DO_DECRYPT): Allocate temporary

@@ -37,11 +37,9 @@
    include these bits of info. */
 
 void
-krb5_dk_encrypt_length(enc, hash, inputlen, length)
-     const struct krb5_enc_provider *enc;
-     const struct krb5_hash_provider *hash;
-     size_t inputlen;
-     size_t *length;
+krb5_dk_encrypt_length(const struct krb5_enc_provider *enc,
+		       const struct krb5_hash_provider *hash,
+		       size_t inputlen, size_t *length)
 {
     size_t blocksize, hashsize;
 
@@ -51,14 +49,11 @@ krb5_dk_encrypt_length(enc, hash, inputlen, length)
 }
 
 krb5_error_code
-krb5_dk_encrypt(enc, hash, key, usage, ivec, input, output)
-     const struct krb5_enc_provider *enc;
-     const struct krb5_hash_provider *hash;
-     const krb5_keyblock *key;
-     krb5_keyusage usage;
-     const krb5_data *ivec;
-     const krb5_data *input;
-     krb5_data *output;
+krb5_dk_encrypt(const struct krb5_enc_provider *enc,
+		const struct krb5_hash_provider *hash,
+		const krb5_keyblock *key, krb5_keyusage usage,
+		const krb5_data *ivec, const krb5_data *input,
+		krb5_data *output)
 {
     size_t blocksize, keybytes, keylength, plainlen, enclen;
     krb5_error_code ret;
@@ -180,11 +175,9 @@ cleanup:
 /* Not necessarily "AES", per se, but "a CBC+CTS mode block cipher
    with a 96-bit truncated HMAC".  */
 void
-krb5int_aes_encrypt_length(enc, hash, inputlen, length)
-     const struct krb5_enc_provider *enc;
-     const struct krb5_hash_provider *hash;
-     size_t inputlen;
-     size_t *length;
+krb5int_aes_encrypt_length(const struct krb5_enc_provider *enc,
+			   const struct krb5_hash_provider *hash,
+			   size_t inputlen, size_t *length)
 {
     size_t blocksize, hashsize;
 
@@ -221,14 +214,11 @@ trunc_hmac (const struct krb5_hash_provider *hash,
 }
 
 krb5_error_code
-krb5int_aes_dk_encrypt(enc, hash, key, usage, ivec, input, output)
-     const struct krb5_enc_provider *enc;
-     const struct krb5_hash_provider *hash;
-     const krb5_keyblock *key;
-     krb5_keyusage usage;
-     const krb5_data *ivec;
-     const krb5_data *input;
-     krb5_data *output;
+krb5int_aes_dk_encrypt(const struct krb5_enc_provider *enc,
+		       const struct krb5_hash_provider *hash,
+		       const krb5_keyblock *key, krb5_keyusage usage,
+		       const krb5_data *ivec, const krb5_data *input,
+		       krb5_data *output)
 {
     size_t blocksize, keybytes, keylength, plainlen, enclen;
     krb5_error_code ret;

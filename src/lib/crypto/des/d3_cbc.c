@@ -29,13 +29,11 @@
 
 #undef mit_des3_cbc_encrypt
 int
-mit_des3_cbc_encrypt(in, out, length, ks1, ks2, ks3, ivec, enc)
-	const mit_des_cblock *in;
-	mit_des_cblock *out;
-	unsigned long length;
-	const mit_des_key_schedule ks1, ks2, ks3;
-	const mit_des_cblock ivec;
-	int enc;
+mit_des3_cbc_encrypt(const mit_des_cblock *in, mit_des_cblock *out,
+		     unsigned long length, const mit_des_key_schedule ks1,
+		     const mit_des_key_schedule ks2,
+		     const mit_des_key_schedule ks3,
+		     const mit_des_cblock ivec, int enc)
 {
     if (enc)
 	krb5int_des3_cbc_encrypt(in, out, length, ks1, ks2, ks3, ivec);

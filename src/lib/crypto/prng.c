@@ -123,8 +123,7 @@ void prng_cleanup (void)
 #if defined(_WIN32)
 
 krb5_error_code KRB5_CALLCONV
-krb5_c_random_os_entropy (
-			  krb5_context context, int strong, int *success)
+krb5_c_random_os_entropy (krb5_context context, int strong, int *success)
 {
   if (success)
     *success  = 0;

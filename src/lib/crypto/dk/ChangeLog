@@ -1,3 +1,8 @@
+2004-02-18  Ken Raeburn  <raeburn@mit.edu>
+
+	* checksum.c, derive.c, dk_decrypt.c, dk_encrypt.c: Use ANSI C
+	style function definitions.
+
 2004-02-13  Ken Raeburn  <raeburn@mit.edu>
 
 	* dk_decrypt.c (krb5_dk_decrypt_maybe_trunc_hmac): New argument

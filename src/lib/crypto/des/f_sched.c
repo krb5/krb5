@@ -220,9 +220,7 @@ static const unsigned DES_INT32 PC2_D[4][64] = {
  * Permute the key to give us our key schedule.
  */
 int
-mit_des_make_key_sched(key, schedule)
-     mit_des_cblock key;
-     mit_des_key_schedule schedule;
+mit_des_make_key_sched(mit_des_cblock key, mit_des_key_schedule schedule)
 {
 	register unsigned DES_INT32 c, d;
 

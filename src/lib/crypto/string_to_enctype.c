@@ -28,9 +28,7 @@
 #include "etypes.h"
 
 krb5_error_code KRB5_CALLCONV
-krb5_string_to_enctype(string, enctypep)
-    char		* string;
-    krb5_enctype	* enctypep;
+krb5_string_to_enctype(char *string, krb5_enctype *enctypep)
 {
     int i;
 

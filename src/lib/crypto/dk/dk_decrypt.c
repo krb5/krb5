@@ -41,45 +41,34 @@ krb5_dk_decrypt_maybe_trunc_hmac(const struct krb5_enc_provider *enc,
 				 int ivec_mode);
 
 krb5_error_code
-krb5_dk_decrypt(enc, hash, key, usage, ivec, input, output)
-     const struct krb5_enc_provider *enc;
-     const struct krb5_hash_provider *hash;
-     const krb5_keyblock *key;
-     krb5_keyusage usage;
-     const krb5_data *ivec;
-     const krb5_data *input;
-     krb5_data *output;
+krb5_dk_decrypt(const struct krb5_enc_provider *enc,
+		const struct krb5_hash_provider *hash,
+		const krb5_keyblock *key, krb5_keyusage usage,
+		const krb5_data *ivec, const krb5_data *input,
+		krb5_data *output)
 {
     return krb5_dk_decrypt_maybe_trunc_hmac(enc, hash, key, usage,
 					    ivec, input, output, 0, 0);
 }
 
 krb5_error_code
-krb5int_aes_dk_decrypt(enc, hash, key, usage, ivec, input, output)
-     const struct krb5_enc_provider *enc;
-     const struct krb5_hash_provider *hash;
-     const krb5_keyblock *key;
-     krb5_keyusage usage;
-     const krb5_data *ivec;
-     const krb5_data *input;
-     krb5_data *output;
+krb5int_aes_dk_decrypt(const struct krb5_enc_provider *enc,
+		       const struct krb5_hash_provider *hash,
+		       const krb5_keyblock *key, krb5_keyusage usage,
+		       const krb5_data *ivec, const krb5_data *input,
+		       krb5_data *output)
 {
     return krb5_dk_decrypt_maybe_trunc_hmac(enc, hash, key, usage,
 					    ivec, input, output, 96 / 8, 1);
 }
 
 static krb5_error_code
-krb5_dk_decrypt_maybe_trunc_hmac(enc, hash, key, usage, ivec, input, output,
-				 hmacsize, ivec_mode)
-     const struct krb5_enc_provider *enc;
-     const struct krb5_hash_provider *hash;
-     const krb5_keyblock *key;
-     krb5_keyusage usage;
-     const krb5_data *ivec;
-     const krb5_data *input;
-     krb5_data *output;
-     size_t hmacsize;
-     int ivec_mode;
+krb5_dk_decrypt_maybe_trunc_hmac(const struct krb5_enc_provider *enc,
+				 const struct krb5_hash_provider *hash,
+				 const krb5_keyblock *key, krb5_keyusage usage,
+				 const krb5_data *ivec, const krb5_data *input,
+				 krb5_data *output, size_t hmacsize,
+				 int ivec_mode)
 {
     krb5_error_code ret;
     size_t hashsize, blocksize, keybytes, keylength, enclen, plainlen;

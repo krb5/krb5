@@ -28,9 +28,7 @@
 #include "cksumtypes.h"
 
 krb5_error_code KRB5_CALLCONV
-krb5_string_to_cksumtype(string, cksumtypep)
-    char		* string;
-    krb5_cksumtype	* cksumtypep;
+krb5_string_to_cksumtype(char *string, krb5_cksumtype *cksumtypep)
 {
     int i;
 

@@ -11,11 +11,9 @@ of RSA Data Security)
 static const char *const l40 = "fortybits";
 
 void
-krb5_arcfour_encrypt_length(enc, hash, inputlen, length)
-     const struct krb5_enc_provider *enc;
-     const struct krb5_hash_provider *hash;
-     size_t inputlen;
-     size_t *length;
+krb5_arcfour_encrypt_length(const struct krb5_enc_provider *enc,
+			    const struct krb5_hash_provider *hash,
+			    size_t inputlen, size_t *length)
 {
   size_t blocksize, hashsize;
 
@@ -62,14 +60,11 @@ case 7:				/* tgs-req authenticator */
 }
 
 krb5_error_code
-krb5_arcfour_encrypt(enc, hash, key, usage, ivec, input, output)
-     const struct krb5_enc_provider *enc;
-     const struct krb5_hash_provider *hash;
-     const krb5_keyblock *key;
-     krb5_keyusage usage;
-     const krb5_data *ivec;
-     const krb5_data *input;
-     krb5_data *output;
+krb5_arcfour_encrypt(const struct krb5_enc_provider *enc,
+		     const struct krb5_hash_provider *hash,
+		     const krb5_keyblock *key, krb5_keyusage usage,
+		     const krb5_data *ivec, const krb5_data *input,
+		     krb5_data *output)
 {
   krb5_keyblock k1, k2, k3;
   krb5_data d1, d2, d3, salt, plaintext, checksum, ciphertext, confounder;
@@ -191,14 +186,11 @@ krb5_arcfour_encrypt(enc, hash, key, usage, ivec, input, output)
 
 /* This is the arcfour-hmac decryption routine */
 krb5_error_code
-krb5_arcfour_decrypt(enc, hash, key, usage, ivec, input, output)
-     const struct krb5_enc_provider *enc;
-     const struct krb5_hash_provider *hash;
-     const krb5_keyblock *key;
-     krb5_keyusage usage;
-     const krb5_data *ivec;
-     const krb5_data *input;
-     krb5_data *output;
+krb5_arcfour_decrypt(const struct krb5_enc_provider *enc,
+		     const struct krb5_hash_provider *hash,
+		     const krb5_keyblock *key, krb5_keyusage usage,
+		     const krb5_data *ivec, const krb5_data *input,
+		     krb5_data *output)
 {
   krb5_keyblock k1,k2,k3;
   krb5_data d1,d2,d3,salt,ciphertext,plaintext,checksum;

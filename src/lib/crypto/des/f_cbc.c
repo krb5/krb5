@@ -40,13 +40,9 @@ const mit_des_cblock mit_des_zeroblock /* = all zero */;
 
 #undef mit_des_cbc_encrypt
 int
-mit_des_cbc_encrypt(in, out, length, schedule, ivec, enc)
-	const mit_des_cblock *in;
-	mit_des_cblock *out;
-	unsigned long length;
-	const mit_des_key_schedule schedule;
-	const mit_des_cblock ivec;
-	int enc;
+mit_des_cbc_encrypt(const mit_des_cblock *in, mit_des_cblock *out,
+		    unsigned long length, const mit_des_key_schedule schedule,
+		    const mit_des_cblock ivec, int enc)
 {
     /*
      * Deal with encryption and decryption separately.

@@ -31,12 +31,9 @@
 #define K5CLENGTH 5 /* 32 bit net byte order integer + one byte seed */
 
 krb5_error_code
-krb5_dk_make_checksum(hash, key, usage, input, output)
-     const struct krb5_hash_provider *hash;
-     const krb5_keyblock *key;
-     krb5_keyusage usage;
-     const krb5_data *input;
-     krb5_data *output;
+krb5_dk_make_checksum(const struct krb5_hash_provider *hash,
+		      const krb5_keyblock *key, krb5_keyusage usage,
+		      const krb5_data *input, krb5_data *output)
 {
     int i;
     const struct krb5_enc_provider *enc;
@@ -106,12 +103,9 @@ cleanup:
 
 #ifdef ATHENA_DES3_KLUDGE
 krb5_error_code
-krb5_marc_dk_make_checksum(hash, key, usage, input, output)
-     const struct krb5_hash_provider *hash;
-     const krb5_keyblock *key;
-     krb5_keyusage usage;
-     const krb5_data *input;
-     krb5_data *output;
+krb5_marc_dk_make_checksum(const struct krb5_hash_provider *hash,
+			   const krb5_keyblock *key, krb5_keyusage usage,
+			   const krb5_data *input, krb5_data *output)
 {
     int i;
     struct krb5_enc_provider *enc;

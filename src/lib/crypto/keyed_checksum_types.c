@@ -28,8 +28,7 @@
 #include "etypes.h"
 #include "cksumtypes.h"
 
-static int etype_match(e1, e2)
-     krb5_enctype e1, e2;
+static int etype_match(krb5_enctype e1, krb5_enctype e2)
 {
     int i1, i2;
 
@@ -47,11 +46,8 @@ static int etype_match(e1, e2)
 }
 
 krb5_error_code KRB5_CALLCONV
-krb5_c_keyed_checksum_types(context, enctype, count, cksumtypes)
-     krb5_context context;
-     krb5_enctype enctype;
-     unsigned int *count;
-     krb5_cksumtype **cksumtypes;
+krb5_c_keyed_checksum_types(krb5_context context, krb5_enctype enctype,
+			    unsigned int *count, krb5_cksumtype **cksumtypes)
 {
     unsigned int i, c;
 
@@ -84,9 +80,7 @@ krb5_c_keyed_checksum_types(context, enctype, count, cksumtypes)
 }
 
 void KRB5_CALLCONV
-krb5_free_cksumtypes(context, val)
-    krb5_context context;
-    krb5_cksumtype * val;
+krb5_free_cksumtypes(krb5_context context, krb5_cksumtype *val)
 {
     if (val)
 	krb5_xfree(val);

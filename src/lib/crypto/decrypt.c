@@ -28,13 +28,9 @@
 #include "etypes.h"
 
 krb5_error_code KRB5_CALLCONV
-krb5_c_decrypt(context, key, usage, ivec, input, output)
-     krb5_context context;
-     const krb5_keyblock *key;
-     krb5_keyusage usage;
-     const krb5_data *ivec;
-     const krb5_enc_data *input;
-     krb5_data *output;
+krb5_c_decrypt(krb5_context context, const krb5_keyblock *key,
+	       krb5_keyusage usage, const krb5_data *ivec,
+	       const krb5_enc_data *input, krb5_data *output)
 {
     int i;
 

@@ -46,9 +46,7 @@
 #include "des_int.h"
 
 int
-mit_des_key_sched(k,schedule)
-    mit_des_cblock k;
-    mit_des_key_schedule schedule;
+mit_des_key_sched(mit_des_cblock k, mit_des_key_schedule schedule)
 {
     mit_des_make_key_sched(k,schedule);
 

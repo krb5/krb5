@@ -1,3 +1,7 @@
+2004-02-18  Ken Raeburn  <raeburn@mit.edu>
+
+	* des_stringtokey.c: Use ANSI C style function definitions.
+
 2003-07-22  Ken Raeburn  <raeburn@mit.edu>
 
 	* old_decrypt.c (krb5_old_decrypt): Use block_size and hashsize

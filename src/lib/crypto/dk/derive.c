@@ -28,11 +28,9 @@
 #include "dk.h"
 
 krb5_error_code
-krb5_derive_key(enc, inkey, outkey, in_constant)
-     const struct krb5_enc_provider *enc;
-     const krb5_keyblock *inkey;
-     krb5_keyblock *outkey;
-     const krb5_data *in_constant;
+krb5_derive_key(const struct krb5_enc_provider *enc,
+		const krb5_keyblock *inkey, krb5_keyblock *outkey,
+		const krb5_data *in_constant)
 {
     size_t blocksize, keybytes, keylength, n;
     unsigned char *inblockdata, *outblockdata, *rawkey;
@@ -115,11 +113,9 @@ krb5_derive_key(enc, inkey, outkey, in_constant)
 
 
 krb5_error_code
-krb5_derive_random(enc, inkey, outrnd, in_constant)
-     const struct krb5_enc_provider *enc;
-     const krb5_keyblock *inkey;
-     krb5_data *outrnd;
-     const krb5_data *in_constant;
+krb5_derive_random(const struct krb5_enc_provider *enc,
+		   const krb5_keyblock *inkey, krb5_data *outrnd,
+		   const krb5_data *in_constant)
 {
     size_t blocksize, keybytes, keylength, n;
     unsigned char *inblockdata, *outblockdata, *rawkey;

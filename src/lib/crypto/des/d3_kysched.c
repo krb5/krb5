@@ -24,9 +24,7 @@
 #include "des_int.h"
 
 int
-mit_des3_key_sched(k,schedule)
-    mit_des3_cblock k;
-    mit_des3_key_schedule schedule;
+mit_des3_key_sched(mit_des3_cblock k, mit_des3_key_schedule schedule)
 {
     mit_des_make_key_sched(k[0],schedule[0]);
     mit_des_make_key_sched(k[1],schedule[1]);

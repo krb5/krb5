@@ -68,10 +68,8 @@ char *afs_crypt (const char *, const char *, char *);
 #define min(a,b) ((a)>(b)?(b):(a))
 
 krb5_error_code
-mit_afs_string_to_key (keyblock, data, salt)
-     krb5_keyblock * keyblock;
-     const krb5_data * data;
-     const krb5_data * salt;
+mit_afs_string_to_key (krb5_keyblock *keyblock, const krb5_data *data,
+		       const krb5_data *salt)
 {
   /* totally different approach from MIT string2key. */
   /* much of the work has already been done by the only caller 
@@ -338,10 +336,9 @@ static const char	S[8][64] = {
 };
  
  
-char *afs_crypt(pw, salt, iobuf)
-     const char *pw;
-     const char *salt;
-     char *iobuf;		/* must be at least 16 bytes */
+char *afs_crypt(const char *pw, const char *salt,
+		/* must be at least 16 bytes */
+		char *iobuf)
 {
 	int i, j, c;
 	int temp;
@@ -405,9 +402,7 @@ char *afs_crypt(pw, salt, iobuf)
  * Set up the key schedule from the key.
  */
  
-static void krb5_afs_crypt_setkey(key, E, KS)
-     char *key;
-     char *E, (*KS)[48];
+static void krb5_afs_crypt_setkey(char *key, char *E, char (*KS)[48])
 {
 	register int i, j, k;
 	int t;
@@ -467,9 +462,7 @@ static void krb5_afs_crypt_setkey(key, E, KS)
  * The payoff: encrypt a block.
  */
  
-static void krb5_afs_encrypt(block, E, KS)
-     char *block;
-     char *E, (*KS)[48];
+static void krb5_afs_encrypt(char *block, char *E, char (*KS)[48])
 {
 	const long edflag = 0;
 	int i, ii;

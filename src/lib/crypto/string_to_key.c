@@ -37,25 +37,19 @@ krb5_c_string_to_key_with_params(krb5_context context,
 
 
 krb5_error_code KRB5_CALLCONV
-krb5_c_string_to_key(context, enctype, string, salt, key)
-     krb5_context context;
-     krb5_enctype enctype;
-     const krb5_data *string;
-     const krb5_data *salt;
-     krb5_keyblock *key;
+krb5_c_string_to_key(krb5_context context, krb5_enctype enctype,
+		     const krb5_data *string, const krb5_data *salt,
+		     krb5_keyblock *key)
 {
     return krb5_c_string_to_key_with_params(context, enctype, string, salt,
 					    NULL, key);
 }
 
 krb5_error_code KRB5_CALLCONV
-krb5_c_string_to_key_with_params(context, enctype, string, salt, params, key)
-     krb5_context context;
-     krb5_enctype enctype;
-     const krb5_data *string;
-     const krb5_data *salt;
-     const krb5_data *params;
-     krb5_keyblock *key;
+krb5_c_string_to_key_with_params(krb5_context context, krb5_enctype enctype,
+				 const krb5_data *string,
+				 const krb5_data *salt,
+				 const krb5_data *params, krb5_keyblock *key)
 {
     int i;
     krb5_error_code ret;

@@ -76,8 +76,7 @@
 
 /* Initialize the SHS values */
 
-void shsInit(shsInfo)
-    SHS_INFO *shsInfo;
+void shsInit(SHS_INFO *shsInfo)
 {
     /* Set the h-vars to their initial values */
     shsInfo->digest[ 0 ] = h0init;
@@ -100,9 +99,7 @@ void shsInit(shsInfo)
 static void SHSTransform (SHS_LONG *digest, const SHS_LONG *data);
 
 static
-void SHSTransform(digest, data)
-    SHS_LONG *digest;
-    const SHS_LONG *data;
+void SHSTransform(SHS_LONG *digest, const SHS_LONG *data)
 {
     SHS_LONG A, B, C, D, E;     /* Local vars */
     SHS_LONG eData[ 16 ];       /* Expanded data */
@@ -215,10 +212,7 @@ void SHSTransform(digest, data)
 
 /* Update SHS for a block of data */
 
-void shsUpdate(shsInfo, buffer, count)
-    SHS_INFO *shsInfo;
-    const SHS_BYTE *buffer;
-    int count;
+void shsUpdate(SHS_INFO *shsInfo, const SHS_BYTE *buffer, int count)
 {
     SHS_LONG tmp;
     int dataCount, canfill;
@@ -314,8 +308,7 @@ void shsUpdate(shsInfo, buffer, count)
 /* Final wrapup - pad to SHS_DATASIZE-byte boundary with the bit pattern
    1 0* (64-bit count of bits processed, MSB-first) */
 
-void shsFinal(shsInfo)
-    SHS_INFO *shsInfo;
+void shsFinal(SHS_INFO *shsInfo)
 {
     int count;
     SHS_LONG *lp;

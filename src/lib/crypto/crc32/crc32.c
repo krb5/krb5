@@ -147,10 +147,7 @@ static u_long const crc_table[256] = {
     };
 
 void
-mit_crc32(in, in_length, cksum)
-    const krb5_pointer in;
-    const size_t in_length;
-    unsigned long *cksum;
+mit_crc32(krb5_pointer in, size_t in_length, unsigned long *cksum)
 {
     register u_char *data;
     register u_long c = 0;
@@ -177,10 +174,7 @@ static unsigned long const tbl4[16] = {
 };
 
 void
-mit_crc32_shift4(in, in_length, cksum)
-    const krb5_pointer in;
-    const size_t in_length;
-    unsigned long *cksum;
+mit_crc32_shift4(krb5_pointer in, size_t in_length, unsigned long *cksum)
 {
     register unsigned char *data, b;
     register unsigned long c = 0;
