@@ -1,3 +1,9 @@
+Wed Jul 24 17:09:39 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* preauth.c (find_pa_system): Change type of first argument to be
+ 	 	krb5_preauthtype, to eliminate compiler warnings under
+ 	 	Windows.
+	
 Wed Jul 10 20:22:41 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* init_ctx.c (krb5_init_context): Add a call to krb5_win_do_init()

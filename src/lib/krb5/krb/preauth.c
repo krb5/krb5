@@ -118,7 +118,7 @@ static krb5_preauth_ops preauth_systems[] = {
 };
 
 static krb5_error_code find_pa_system
-    PROTOTYPE((int type, krb5_preauth_ops **Preauth_proc));
+    PROTOTYPE((krb5_preauthtype type, krb5_preauth_ops **Preauth_proc));
 
 /* some typedef's for the function args to make things look a bit cleaner */
 
@@ -377,7 +377,7 @@ process_pw_salt(context, padata, request, as_reply,
     
 static krb5_error_code
 find_pa_system(type, preauth)
-    int			type;
+    krb5_preauthtype	type;
     krb5_preauth_ops	**preauth;
 {
     krb5_preauth_ops *ap = preauth_systems;
@@ -496,7 +496,6 @@ obtain_sam_padata(context, in_padata, etype_info, def_enc_key,
     krb5_kdc_req *		request;
     krb5_pa_data **		out_padata;
 {
-    krb5_pa_enc_ts		pa_enc;
     krb5_error_code		retval;
     krb5_data *			scratch;
     krb5_data			tmpsam;
