@@ -1,5 +1,11 @@
 1999-08-23  Ken Raeburn  <raeburn@mit.edu>
 
+	* krlogin.c (main): Error out if -D isn't followed by another
+	argument.  Based on patch from Brad Thompson.
+
+	* krshd.c (v4_kdata, v4_ticket): Don't define if KRB5_KRB4_COMPAT
+	is not defined.  Patch from Brad Thompson.
+
 	* kcmd.c (kcmd): If krb5_get_credentials returns a nonzero error
 	code, print an error message before returning.
 

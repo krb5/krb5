@@ -383,6 +383,11 @@ main(argc, argv)
 
     if (argc > 0 && !strcmp(*argv, "-D")) {
 	argv++; argc--;
+	if (*argv == NULL) {
+	    fprintf (stderr,
+		     "rlogin: -D flag must be followed by the debug port.\n");
+	    exit (1);
+	}
 	debug_port = htons(atoi(*argv));
 	argv++; argc--;
 	goto another;
