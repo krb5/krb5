@@ -1,0 +1,5 @@
+Fri Jun 24 18:06:51 1994  Tom Yu  (tlyu at dragons-lair)
+
+	* Makefile.in (in all subdirs): fix last clean rule to have two
+	colons
+
