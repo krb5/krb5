@@ -1,0 +1,39 @@
+/**/# $Source$
+/**/# $Author$
+/**/# $Id$
+/**/#
+
+/*
+ * SET VERSION NUMBERS BEFORE MAKING MAKEFILES
+ *
+ * Tahoe 4.4BSD config file
+ * K. Fall
+ */
+
+#define OSName            BSD 4.4
+#define	OS_BSD            1
+/* #define OS_BSD_TAHOE */
+/* #define OS_BSD_RENO */
+#define OSMajorVersion    4
+#define OSMinorVersion    4
+
+#define HasVoidSignalReturn YES
+#define HasPosixTermios YES
+#define HasPosixFileLocks YES
+#define HasPosixTypes YES
+#define HasStringH YES
+#define HasStdlibH YES
+#define HasInet YES
+#define Bitsize32
+#define	UnalignedReferencesAllowed NO
+#define HasSaberC NO
+#define DesDefines -DBIG -DMUSTALIGN -DMSBFIRST
+#define HasGcc NO
+#define HasPutenv YES
+#define HasNdbm YES
+#define HasBsearch YES
+#define SystemV NO
+#define HasDESLibrary YES
+#define CppCmd /usr/bin/cpp
+
+#define DefaultCDebugFlags OptimizedCDebugFlags
