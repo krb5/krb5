@@ -36,7 +36,7 @@ SRCS=	invocation.c help.c \
 	ss_err.h
 # ss_err.h here, so that make depend catches it.
 
-std_rqs.o:: std_rqs.c ss_err.h
+std_rqs.o: std_rqs.c ss_err.h
 
 CODE= $(SRCS) $(MKCMDSFILES)
 

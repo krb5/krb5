@@ -19,7 +19,7 @@
 #endif
 
 #include "copyright.h"
-#include <com_err.h>
+#include "com_err.h"
 #include "ss_internal.h"
 
 #undef ss_error
