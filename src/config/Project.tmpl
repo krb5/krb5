@@ -121,15 +121,19 @@ libdir/lib/**/libname.a:						@@\
  * CopyHeader - generate rule to copy a generated header file to an include
  * tree.
  */
-#ifndef CopyHeader
-#define CopyHeader(hfile,hdir)						@@\
-headers:: hfile								@@\
-	-if cmp hfile hdir/hfile >/dev/null 2>&1; then \		@@\
+#ifndef CopyHeaderNewName
+#define CopyHeaderNewName(hfile,hdir,newname)				@@\
+includes:: hfile							@@\
+	-if cmp hfile hdir/newname >/dev/null 2>&1; then \		@@\
 		echo ; \						@@\
 	else \								@@\
-		$(RM) hdir/hfile ; \					@@\
-		$(CP) hfile hdir/hfile; \				@@\
+		$(RM) hdir/newname ; \					@@\
+		$(CP) hfile hdir/newname; \				@@\
 	fi
+#endif /* CopyHeaderNewName */
+
+#ifndef CopyHeader
+#define CopyHeader(hfile,hdir) CopyHeaderNewName(hfile,hdir,hfile)
 #endif /* CopyHeader */
 
 /*
