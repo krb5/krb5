@@ -1,3 +1,10 @@
+Thu Oct  5 19:46:40 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* alt_prof.c (krb5_read_realm_params): Remove the profile
+		relation, since it's really a bad idea.  Removed the
+		"port" and "secondary_port" relations, and replaced them
+		with the "kdc_port" relation, which takes a list of ports.
+
 Mon Oct  2 15:08:53 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* logger.c (krb5_klog_init): If the log file can't be opened,

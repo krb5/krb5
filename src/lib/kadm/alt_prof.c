@@ -292,45 +292,18 @@ krb5_read_realm_params(kcontext, realm, kdcprofile, kdcenv, rparamp)
     /* Initialize realm parameters */
     memset((char *) rparams, 0, sizeof(krb5_realm_params));
 
-    /* Get the value of the per-realm profile */
+    /* Get the value for the database */
     hierarchy[0] = "realms";
     hierarchy[1] = lrealm;
-    hierarchy[2] = "profile";
-    hierarchy[3] = (char *) NULL;
-    if (!krb5_aprof_get_string(aprofile, hierarchy, TRUE, &svalue)) {
-	const char *filenames[2];
-
-	/*
-	 * XXX this knows too much about krb5 contexts.
-	 */
-	filenames[0] = svalue;
-	filenames[1] = (char *) NULL;
-	if (kcontext->profile)
-	    profile_release(kcontext->profile);
-	if (!(kret = profile_init(filenames, &kcontext->profile)))
-	    rparams->realm_profile = svalue;
-	else
-	    krb5_xfree(svalue);
-    }
-
-    /* Get the value for the database */
     hierarchy[2] = "database_name";
+    hierarchy[3] = (char *) NULL;
     if (!krb5_aprof_get_string(aprofile, hierarchy, TRUE, &svalue))
 	rparams->realm_dbname = svalue;
 	
-    /* Get the value for the KDC primary port */
-    hierarchy[2] = "port";
-    if (!krb5_aprof_get_int32(aprofile, hierarchy, TRUE, &ivalue)) {
-	rparams->realm_kdc_pport = ivalue;
-	rparams->realm_kdc_pport_valid = 1;
-    }
-	    
-    /* Get the value for the KDC secondary port */
-    hierarchy[2] = "secondary_port";
-    if (!krb5_aprof_get_int32(aprofile, hierarchy, TRUE, &ivalue)) {
-	rparams->realm_kdc_sport = ivalue;
-	rparams->realm_kdc_sport_valid = 1;
-    }
+    /* Get the value for the KDC port list */
+    hierarchy[2] = "kdc_ports";
+    if (!krb5_aprof_get_string(aprofile, hierarchy, TRUE, &svalue))
+	rparams->realm_kdc_ports = svalue;
 	    
     /* Get the value for the kadmind port */
     hierarchy[2] = "kadmind_port";
