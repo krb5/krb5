@@ -36,11 +36,11 @@ static char rcsid_decode_kdc_c[] =
  */
 
 krb5_error_code
-krb5_decode_kdc_rep(DECLARG(const krb5_data *, enc_rep),
+krb5_decode_kdc_rep(DECLARG(krb5_data *, enc_rep),
 		    DECLARG(const krb5_keyblock *, key),
 		    DECLARG(const krb5_enctype, etype),
 		    DECLARG(krb5_kdc_rep **, dec_rep))
-OLDDECLARG(const krb5_data *, enc_rep)
+OLDDECLARG(krb5_data *, enc_rep)
 OLDDECLARG(const krb5_keyblock *, key)
 OLDDECLARG(const krb5_enctype, etype)
 OLDDECLARG(krb5_kdc_rep **, dec_rep)
