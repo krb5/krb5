@@ -32,8 +32,8 @@ kadmin: $(OBJS) $(DEPLIBS)
 	$(LD) $(LDFLAGS) $(LDARGS) -o kadmin $(OBJS) $(LIBS)
 
 install::
-	$(INSTALL_PROGRAM) $(C)kadmin ${DESTDIR}$(CLIENT_BINDIR)$(S)kadmin_old
-	$(INSTALL_DATA) $(srcdir)$(S)kadmin.M ${DESTDIR}$(CLIENT_MANDIR)$(S)kadmin_old.1
+	$(INSTALL_PROGRAM) $(C)kadmin ${DESTDIR}$(ADMIN_BINDIR)$(S)kadmin_old
+	$(INSTALL_DATA) $(srcdir)$(S)kadmin.M ${DESTDIR}$(ADMIN_MANDIR)$(S)kadmin_old.1
 
 clean::
 	$(RM) kadmin
