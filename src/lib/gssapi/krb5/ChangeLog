@@ -1,3 +1,17 @@
+2004-02-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* ser_sctx.c (kg_oid_externalize): Check for errors.
+	(kg_oid_internalize): Check for errors.  Free allocated storage on
+	error.
+	(kg_queue_externalize): Check for errorrs.
+	(kg_queue_internalize): Check for errors.  Free allocated storage
+	on error.
+	(kg_ctx_size): Update for new context data.
+	(kg_ctx_externalize): Update for new context data.  Check for
+	error storing trailer.
+	(kg_ctx_internalize): Update for new context data.  Check for
+	errors in a few more cases.
+
 2004-02-05  Jeffrey Altman <jaltman@mit.edu>
 
     * gssapiP_krb5.h:  remove KG_IMPLFLAGS macro

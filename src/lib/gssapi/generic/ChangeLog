@@ -1,3 +1,8 @@
+2004-02-08  Ken Raeburn  <raeburn@mit.edu>
+
+	* util_ordering.c (g_queue_externalize, g_queue_internalize):
+	Check for sufficient buffer space.
+
 2003-12-13  Ken Raeburn  <raeburn@mit.edu>
 
 	* gssapiP_generic.h: Include k5-platform.h.
