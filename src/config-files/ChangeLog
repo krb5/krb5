@@ -1,3 +1,16 @@
+Tue Apr 25 22:04:54 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* krb5.conf.M: New file added to document the new krb5.conf
+		format.
+
+	* krb5.conf: New file added as a demo version of the new krb5.conf
+		format. 
+
+	* convert-config-files: New file to convert old-style krb.conf and
+		krb.realms file to use the new krb5.conf format.
+
+	* krb.conf, krb.realms, krb.conf.M, krb.realms.M: Removed.
+
 Thu Apr 20 22:20:37 1995  Theodore Y. Ts'o  (tytso@dcl)
 
 	* services.append: Fix name of port for kpropd from krb_prop to
