@@ -1,3 +1,11 @@
+Wed Jul 15 11:46:05 1998  Ezra Peisach  <epeisach@mit.edu>
+
+	* gic_pwd.c (krb5_get_init_creds_password): Remove unused argument
+	 	to sprintf().
+
+	* t_ref_kerb.out: Fix test case for zephyr principal to reflect
+	 	addition to conv_princ.c
+
 Tue Jul  7 17:06:13 1998  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* conv_princ.c: Add additional commonly seen Kerberos V4 services

@@ -293,8 +293,7 @@ cleanup:
 	  (hours >= 0)) {
 	 if (hours < 1)
 	    sprintf(banner,
-		    "Warning: Your password will expire in less than one hour.",
-		    hours);
+		    "Warning: Your password will expire in less than one hour.");
 	 else if (hours <= 48)
 	    sprintf(banner, "Warning: Your password will expire in %d hour%s.",
 		    hours, (hours == 1)?"":"s");
