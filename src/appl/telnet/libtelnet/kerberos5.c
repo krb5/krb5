@@ -235,6 +235,7 @@ kerberos5_send(ap)
 	ap_opts |= AP_OPTS_USE_SUBKEY;
 #endif	/* ENCRYPTION */
 	    
+	auth_context = 0;
 	r = krb5_mk_req_extended(telnet_context, &auth_context, ap_opts,
 				 NULL, new_creds, &auth);
 

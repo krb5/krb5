@@ -1,3 +1,8 @@
+Fri Mar 24 23:51:18 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* kerberos5.c (kerberos5_send): Initialize auth_context to zero
+		before calling mk_req.
+
 Fri Mar 10 11:09:34 1995  Chris Provenzano (proven@mit.edu)
 
         * kerberos5.c Use new calling convention for krb5_mk_req_extended().
