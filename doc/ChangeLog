@@ -1,3 +1,10 @@
+2002-05-30  Jen Selby  <jenselby@mit.edu>
+
+	* admin.texinfo, install.texinfo, dnssrv.texinfo, dnstxt.texinfo:
+	I corrected some minor typos.  Moved DNS information to separate
+	files.  Included these files in install guide (where they had
+	been) and in new sections in the admin guide.
+
 2002-05-08  Ken Raeburn  <raeburn@mit.edu>
 
 	* implementor.texinfo: Formatting updates.  Tru64 5.1 SIOCGIFCONF
