@@ -187,7 +187,7 @@ main(argc, argv)
 	    argc--, argv++;
 	    if (argc == 0)
 	      usage();
-	    port = atoi(*argv);
+	    port = htons(atoi(*argv));
 	    goto next_arg;
 
 	  case 'N':
