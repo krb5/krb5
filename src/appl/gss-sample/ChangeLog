@@ -1,3 +1,15 @@
+Mon Oct 21 20:03:53 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* gss-server.c: Re-added code to test import and export security
+ 		context.  Yes, yes, I know this isn't the best place to
+ 		have this test, but DO NOT REMOVE THIS TEST UNTIL WE HAVE
+ 		IT CODED ELSEWHERE.  Better slightly ugly sample server
+ 		code than untested (and broken) library code....  Add code
+ 		to print out the mechanism OID used by accept_sec_context.
+
+	* gss-client.c: Add code to allow user to specify the mechanism
+		OID that gss-client should use.
+
 Wed Jun  5 00:08:32 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* gss-client.c (call_server): When reading in the test value from

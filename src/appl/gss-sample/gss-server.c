@@ -27,6 +27,7 @@ static char *rcsid = "$Header$";
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/time.h>
 #include <netinet/in.h>
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
@@ -43,7 +44,7 @@ static char *rcsid = "$Header$";
 #include <strings.h>
 #endif
 
-usage()
+void usage()
 {
      fprintf(stderr, "Usage: gss-server [-port port] [-verbose]\n");
      fprintf(stderr, "       [-inetd] [-logfile file] [service_name]\n");
@@ -137,6 +138,7 @@ int server_establish_context(s, server_creds, context, client_name, ret_flags)
      gss_name_t client;
      gss_OID doid;
      OM_uint32 maj_stat, min_stat;
+     gss_buffer_desc	oid_name;
 
      *context = GSS_C_NO_CONTEXT;
      
@@ -145,7 +147,7 @@ int server_establish_context(s, server_creds, context, client_name, ret_flags)
 	       return -1;
 
 	  if (verbose && log) {
-	      fprintf(log, "Received token: \n");
+	      fprintf(log, "Received token (size=%d): \n", recv_tok.length);
 	      print_token(&recv_tok);
 	  }
 
@@ -173,7 +175,7 @@ int server_establish_context(s, server_creds, context, client_name, ret_flags)
 	  if (send_tok.length != 0) {
 	      if (verbose && log) {
 		  fprintf(log,
-			  "Sending accept_sec_context token (size=%d)...",
+			  "Sending accept_sec_context token (size=%d):\n",
 			  send_tok.length);
 		  print_token(&send_tok);
 	      }
@@ -184,17 +186,28 @@ int server_establish_context(s, server_creds, context, client_name, ret_flags)
 
 	       (void) gss_release_buffer(&min_stat, &send_tok);
 	  }
-	  if (log) {
+	  if (verbose && log) {
 	      if (maj_stat == GSS_S_CONTINUE_NEEDED)
-		  fprintf(log, "\n");
-	      else
 		  fprintf(log, "continue needed...\n");
+	      else
+		  fprintf(log, "\n");
 	      fflush(log);
 	  }
      } while (maj_stat == GSS_S_CONTINUE_NEEDED);
 
      /* display the flags */
      display_ctx_flags(*ret_flags);
+
+     if (verbose && log) {
+	 maj_stat = gss_oid_to_str(&min_stat, doid, &oid_name);
+	 if (maj_stat != GSS_S_COMPLETE) {
+	     display_status("converting oid->string", maj_stat, min_stat);
+	     return -1;
+	 }
+	 fprintf(log, "Accepted connection using mechanism OID %.*s.\n",
+		 (int) oid_name.length, (char *) oid_name.value);
+	 (void) gss_release_buffer(&min_stat, &oid_name);
+     }
 
      maj_stat = gss_display_name(&min_stat, client, client_name, &doid);
      if (maj_stat != GSS_S_COMPLETE) {
@@ -255,6 +268,58 @@ int create_socket(port)
      return s;
 }
 
+static float timeval_subtract(tv1, tv2)
+	struct timeval *tv1, *tv2;
+{
+	return ((tv1->tv_sec - tv2->tv_sec) +
+		((float) (tv1->tv_usec - tv2->tv_usec)) / 1000000);
+}
+
+/*
+ * Yes, yes, this isn't the best place for doing this test.
+ * DO NOT REMOVE THIS UNTIL A BETTER TEST HAS BEEN WRITTEN, THOUGH.
+ * 					-TYT
+ */
+int test_import_export_context(context)
+	gss_ctx_id_t *context;
+{
+	OM_uint32	min_stat, maj_stat;
+	gss_buffer_desc context_token, copied_token;
+	struct timeval tm1, tm2;
+	
+	/*
+	 * Attempt to save and then restore the context.
+	 */
+	gettimeofday(&tm1, (struct timezone *)0);
+	maj_stat = gss_export_sec_context(&min_stat, context, &context_token);
+	if (maj_stat != GSS_S_COMPLETE) {
+		display_status("exporting context", maj_stat, min_stat);
+		return 1;
+	}
+	gettimeofday(&tm2, (struct timezone *)0);
+	if (verbose && log)
+		fprintf(log, "Exported context: %d bytes, %7.4f seconds\n",
+			context_token.length, timeval_subtract(&tm2, &tm1));
+	copied_token.length = context_token.length;
+	copied_token.value = malloc(context_token.length);
+	if (copied_token.value == 0) {
+	    fprintf(log, "Couldn't allocate memory to copy context token.\n");
+	    return 1;
+	}
+	memcpy(copied_token.value, context_token.value, copied_token.length);
+	maj_stat = gss_import_sec_context(&min_stat, &copied_token, context);
+	if (maj_stat != GSS_S_COMPLETE) {
+		display_status("importing context", maj_stat, min_stat);
+		return 1;
+	}
+	gettimeofday(&tm1, (struct timezone *)0);
+	if (verbose && log)
+		fprintf(log, "Importing context: %7.4f seconds\n",
+			timeval_subtract(&tm1, &tm2));
+	(void) gss_release_buffer(&min_stat, &context_token);
+	return 0;
+}
+
 /*
  * Function: sign_server
  *
@@ -296,8 +361,12 @@ int sign_server(s, server_creds)
 	return(-1);
 	  
      printf("Accepted connection: \"%.*s\"\n",
-	    client_name.length, client_name.value);
+	    (int) client_name.length, (char *) client_name.value);
      (void) gss_release_buffer(&min_stat, &client_name);
+
+     for (i=0; i < 3; i++)
+	     if (test_import_export_context(&context))
+		     return -1;
 
      /* Receive the sealed message token */
      if (recv_token(s, &xmit_buf) < 0)
@@ -416,7 +485,7 @@ main(argc, argv)
      } else {
 	 int stmp;
 
-	 if (stmp = create_socket(port)) {
+	 if ((stmp = create_socket(port))) {
 	     do {
 		 /* Accept a TCP connection */
 		 if ((s = accept(stmp, NULL, 0)) < 0) {

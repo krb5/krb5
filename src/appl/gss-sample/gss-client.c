@@ -27,6 +27,8 @@ static char *rcsid = "$Header$";
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -119,10 +121,11 @@ int connect_to_server(host, port)
  * unsuccessful, the GSS-API error messages are displayed on stderr
  * and -1 is returned.
  */
-int client_establish_context(s, service_name, deleg_flag,
+int client_establish_context(s, service_name, deleg_flag, oid,
 			     gss_context, ret_flags)
      int s;
      char *service_name;
+     gss_OID oid;
      OM_uint32 deleg_flag;
      gss_ctx_id_t *gss_context;
      OM_uint32 *ret_flags;
@@ -169,7 +172,7 @@ int client_establish_context(s, service_name, deleg_flag,
 				    GSS_C_NO_CREDENTIAL,
 				    gss_context,
 				    target_name,
-				    GSS_C_NULL_OID,
+				    oid,
 				    GSS_C_MUTUAL_FLAG | GSS_C_REPLAY_FLAG |
 							deleg_flag,
 				    0,
@@ -276,9 +279,10 @@ void read_file(file_name, in_buf)
  * verifies it with gss_verify.  -1 is returned if any step fails,
  * otherwise 0 is returned.
  */
-int call_server(host, port, service_name, deleg_flag, msg, use_file)
+int call_server(host, port, oid, service_name, deleg_flag, msg, use_file)
      char *host;
      u_short port;
+     gss_OID oid;
      char *service_name;
      OM_uint32 deleg_flag;
      char *msg;
@@ -306,7 +310,7 @@ int call_server(host, port, service_name, deleg_flag, msg, use_file)
 	  return -1;
 
      /* Establish context */
-     if (client_establish_context(s, service_name, deleg_flag, &context,
+     if (client_establish_context(s, service_name, deleg_flag, oid, &context,
 				  &ret_flags) < 0) {
 	  (void) close(s);
 	  return -1;
@@ -461,14 +465,45 @@ int call_server(host, port, service_name, deleg_flag, msg, use_file)
      return 0;
 }
 
+static void parse_oid(char *mechanism, gss_OID *oid)
+{
+    char	*mechstr = 0, *cp;
+    gss_buffer_desc tok;
+    OM_uint32 maj_stat, min_stat;
+    
+    if (isdigit(mechanism[0])) {
+	mechstr = malloc(strlen(mechanism)+5);
+	if (!mechstr) {
+	    printf("Couldn't allocate mechanism scratch!\n");
+	    return;
+	}
+	sprintf(mechstr, "{ %s }", mechanism);
+	for (cp = mechstr; *cp; cp++)
+	    if (*cp == '.')
+		*cp = ' ';
+	tok.value = mechstr;
+    } else
+	tok.value = mechanism;
+    tok.length = strlen(tok.value);
+    maj_stat = gss_str_to_oid(&min_stat, &tok, oid);
+    if (maj_stat != GSS_S_COMPLETE) {
+	display_status("str_to_oid", maj_stat, min_stat);
+	return;
+    }
+    if (mechstr)
+	free(mechstr);
+}
+
 int main(argc, argv)
      int argc;
      char **argv;
 {
      char *service_name, *server_host, *msg;
+     char *mechanism = 0;
      u_short port = 4444;
      int use_file = 0;
-     OM_uint32 deleg_flag = 0;
+     OM_uint32 deleg_flag = 0, min_stat;
+     gss_OID oid = GSS_C_NULL_OID;
      
      display_file = stdout;
 
@@ -479,7 +514,11 @@ int main(argc, argv)
 	       argc--; argv++;
 	       if (!argc) usage();
 	       port = atoi(*argv);
-	  } else if (strcmp(*argv, "-d") == 0) {
+	   } else if (strcmp(*argv, "-mech") == 0) {
+	       argc--; argv++;
+	       if (!argc) usage();
+	       mechanism = *argv;
+	   } else if (strcmp(*argv, "-d") == 0) {
 	       deleg_flag = GSS_C_DELEG_FLAG;
 	  } else if (strcmp(*argv, "-f") == 0) {
 	       use_file = 1;
@@ -494,10 +533,16 @@ int main(argc, argv)
      service_name = *argv++;
      msg = *argv++;
 
-     if (call_server(server_host, port, service_name,
+     if (mechanism)
+	 parse_oid(mechanism, &oid);
+
+     if (call_server(server_host, port, oid, service_name,
 		     deleg_flag, msg, use_file) < 0)
 	  exit(1);
 
+     if (oid != GSS_C_NULL_OID)
+	 (void) gss_release_oid(&min_stat, &oid);
+	 
      return 0;
 }
 
