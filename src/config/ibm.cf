@@ -17,27 +17,41 @@
 #undef HasGcc
 #define HasGcc NO
 
-#define HasVoidSignalReturn NO
-#define HasSaberC YES
-#undef HasNdbm
-#define HasNdbm		YES
+#define	Bitsize32
 
-/* HC lies */
-#define StandardCppDefines -U__STDC__
-#define SaberDefines -DBITS32
-#define StandardDefines -U__STDC__ -DBITS32
+#define HasVoidSignalReturn	NO
+#define HasSaberC		YES
+#undef HasNdbm
+#define HasNdbm			YES
+
+/* Note: the following configuration is for a non-standard RT 
+   build environment.  The standard Athena setup (using /lib/cpp
+   and BSD 4.3 include files) should reverse the following and
+   probably make the compiler not define __STDC__. */
+#define	HasStdlibH		YES
+#define	HasStringH		YES
+#define	HaveSetenv		YES
+
+
+#define	HasPosixTermios		NO
+#define	HasPosixFileLocks	NO
+#define	HasPosixTypes		NO		/* ??? */
+
+#define	HasInet			YES
 
 #define DesDefines -DBIG -DMSBFIRST -DMUSTALIGN
 
 /* On RT */
 #ifdef RtArchitecture
 #undef HCRevision
-#define HCRevision	21019
+#define HCRevision	21025
 
 #if HCRevision < 21001
 #define BandAidCompiler "rtcchack.bac"
 #undef MacroFile
 #define MacroFile ibm.cf $(IRULESRC)/rtcchack.bac
 #endif
+
+#define DefaultCDebugFlags OptimizedCDebugFlags
 
 #endif /* RtArchitecture */
