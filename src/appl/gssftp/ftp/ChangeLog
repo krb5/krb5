@@ -1,3 +1,15 @@
+Thu Mar 28 21:07:40 1996  Ken Raeburn  <raeburn@cygnus.com>
+
+	* cmds.c (setpeer): Define unix for HP-UX.
+
+Thu Mar 28 19:26:53 1996  Marc Horowitz  <marc@mit.edu>
+
+	* secure.c (secure_putbuf): the size computation of the output
+ 	buffer was ok for krb4, but completely wrong for gssapi.  I moved
+ 	the code into the KERBEROS block, and wrote suitable code for
+ 	GSSAPI.  This affects the client and server, which were core
+ 	dumping on hpux.
+
 Mon Mar 18 12:12:44 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* secure.c, ftp.c, ftp_var.h: Define STDARG if HAVE_STDARG_H is
