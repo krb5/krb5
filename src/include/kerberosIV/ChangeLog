@@ -1,3 +1,8 @@
+Thu Jun  8 11:22:23 1995  Theodore Y. Ts'o  <tytso@lurch.mit.edu>
+
+	* Makefile.in (install): Don't install the install/kerberosIV
+		header files.
+
 Tue Jun  6 21:16:39 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* krb4-proto.h: decomp_ticket change the time field to unsigned
