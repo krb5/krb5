@@ -26,14 +26,16 @@
 
 \newcommand{\Number}[1]{\item[Number:] #1}
 \newcommand{\Reason}[1]{\item[Reason:] #1}
-%\newcommand{\Call}[1]{\item[Call:] #1}
 \newcommand{\Expected}[1]{\item[Expected:] #1}
 \newcommand{\Conditions}[1]{\item[Conditions:] #1}
 \newcommand{\Priority}[1]{\item[Priority:] #1}
 \newcommand{\Status}[1]{\item[Status:] #1}
+\newcommand{\Vtwonote}[1]{\item[V2 note:] #1}
+\newcommand{\Version}[1]{\item[Version:] #1}
+\newcommand{\Call}[1]{}
+%\newcommand{\Call}[1]{\item[Call:] #1}
 %\newcommand{\Number}[1]{}
 %\newcommand{\Reason}[1]{}
-\newcommand{\Call}[1]{}
 %\newcommand{\Expected}[1]{}
 %\newcommand{\Conditions}[1]{}
 %\newcommand{\Priority}[1]{}
@@ -50,15 +52,15 @@ Unit Test Description\footnote{\rcsHeader}}
 
 \section{Introduction}
 
-The following is a description of a black-box unit test of the
-OpenV*Secure Admin API.  Each API function is listed, followed by the
-tests that shoud be performed on it.
+The following is a description of a black-box unit test of the KADM5
+API.  Each API function is listed, followed by the tests that shoud be
+performed on it.
 
-The tests described here are based on the ``OV*Secure Admin Functional
-Specifications'' revision 1.41, dated August 18, 1994.
-
-Since inter-realm functionality is not a requirement for OpenV*Secure
-1.0, it is not tested.
+The tests described here are based on the ``Kerberos Administration
+System KADM5 API Functional Specifications'', revision 1.68.  This
+document was originally written based on the OpenVision API functional
+specifications, version 1.41, dated August 18, 1994, and many
+indications of the original version remain.
 
 All tests which test for success should verify, using some means other
 than the return value of the function being tested, that the requested
@@ -70,10 +72,9 @@ have taken place did, and that the new, modified data is in effect;
 for get operations, verify that the data retrieved is the data that
 should actually be in the database.
 
-As of now the tests are being re-worked to use database comparision routines
-simular to the GUI tests.  This routines are not completly in place yet. The
-purpose for using these routines is for better detection of incorrect
-database modification.
+The tests would be better if they compared the actual contents of the
+database before and after each test, rather than relying on the KADM5
+API to report the results of changes.
 
 Similarly, all tests which test for failure should verify that the
 no component of the requested operation took place.  For example: if
@@ -109,21 +110,31 @@ invalidating a server handle.  So there is a program that calls init and
 changes the handle magic number, and then attempts to call each API function
 with the corrupted server handle.
 
+A number of tests have been added or changed to correspond with KADM5
+API version 2.  Tests which are only performed against the newer
+version specify the version number in the test description.
+
 \section{ovsec_kadm_init}
 
 \numtest{1}{
 \Reason{An empty string realm is rejected.}
 \Status{Implemented}
+\Vtwonote{The empty string is now passed as the realm field of the
+parameters structure.}
 }
 
 \numtest{2}{
 \Reason{A realm containing invalid characters is rejected.}
 \Status{Implemented}
+\Vtwonote{The invalid character is now passed as the realm field of the
+parameters structure.}
 }
 
 \numtest{2.5}{
 \Reason{A non-existent realm is rejected.}
 \Status{Implemented}
+\Vtwonote{The non-existent realm is now passed as the realm field of the
+parameters structure.}
 }
 
 \numtest{3}{
@@ -227,6 +238,8 @@ with the corrupted server handle.
 \numtest{19}{
 \Reason{Valid invocation (explicit service realm).}
 \Status{Implemented}
+\Vtwonote{The explicit realm is now passed as the realm field of the
+configuration parameters.}
 }
 
 \numtest{20}{
@@ -243,12 +256,14 @@ with the corrupted server handle.
 \Reason{A null password causes master-key prompting.}
 \Conditions{local}
 \Status{Implemented}
+\Vtwonote{Obsolete.}
 }
 
 \numtest{22.5}{
 \Reason{A empty string password causes master-key prompting.}
 \Conditions{local}
 \Status{Implemented}
+\Vtwonote{Obsolete.}
 }
 
 %\numtest{23}{
@@ -401,6 +416,161 @@ exist.}
 \Reason{Returns SECURE_PRINC_MISSING when CHANGEPW_SERVICE does not
 exist.}
 \Status{Implemented}
+}
+
+\numtest{100}{
+\Version{KADM5_API_VERSION_2}
+\Reason{Obeys the profile field of the configuration parameters, if
+set.}
+\Status{Implemented}
+}
+
+\numtest{101}{
+\Version{KADM5_API_VERSION_2}
+\Reason{Obeys the kadmind_port field of the configuration parameters,
+if set.}
+\Conditions{RPC}
+\Status{Implemented}
+}
+
+\numtest{102}{
+\Version{KADM5_API_VERSION_2}
+\Reason{Obeys the admin_server field of the configuration parameters,
+if set with only an admin server name.}
+\Conditions{RPC}
+\Status{Implemented}
+}
+
+\numtest{102.5}{
+\Version{KADM5_API_VERSION_2}
+\Reason{Obeys the admin_server field of the configuratin parameters,
+if set with a host name and port number.}
+\Conditions{RPC}
+}
+
+\numtest{103}{
+\Version{KADM5_API_VERSION_2}
+\Reason{Obeys the dbname field of the configuration parameters, if
+set.}
+\Conditions{local}
+\Status{Implemented}
+}
+
+\numtest{104}{
+\Version{KADM5_API_VERSION_2}
+\Reason{Obeys the admin_dbname field of the configuration parameters, if
+set.}
+\Conditions{local}
+\Status{Implemented}
+}
+
+\numtest{105}{
+\Version{KADM5_API_VERSION_2}
+\Reason{Obeys the admin_lockfile field of the configuration parameters, if
+set.}
+\Conditions{local}
+\Status{Implemented}
+}
+
+\numtest{106}{
+\Version{KADM5_API_VERSION_2}
+\Reason{Obeys the mkey_from_kbd field of the configuration parameters, if
+set.}
+\Conditions{local}
+\Status{Implemented}
+}
+
+\numtest{107}{
+\Version{KADM5_API_VERSION_2}
+\Reason{Obeys the stash_file field of the configuration parameters, if
+set.}
+\Conditions{local}
+\Status{Implemented}
+}
+
+\numtest{108}{
+\Version{KADM5_API_VERSION_2}
+\Reason{Obeys the mkey_name field of the configuration parameters, if
+set.}
+\Conditions{local}
+\Status{Implemented}
+}
+
+\numtest{109}{
+\Version{KADM5_API_VERSION_2}
+\Reason{Obeys the max_life field of the configuration parameters, if
+set.}
+\Conditions{local}
+\Status{Implemented}
+}
+
+\numtest{110}{
+\Version{KADM5_API_VERSION_2}
+\Reason{Obeys the max_rlife field of the configuration parameters, if
+set.}
+\Conditions{local}
+\Status{Implemented}
+}
+
+\numtest{111}{
+\Version{KADM5_API_VERSION_2}
+\Reason{Obeys the expiration field of the configuration parameters, if
+set.}
+\Status{Implemented}
+\Conditions{local}
+}
+
+\numtest{112}{
+\Version{KADM5_API_VERSION_2}
+\Reason{Obeys the flags field of the configuration parameters, if
+set.}
+\Conditions{local}
+\Status{Implemented}
+}
+
+\numtest{113}{
+\Version{KADM5_API_VERSION_2}
+\Reason{Obeys the keysalts and num_keysalts field of the configuration
+parameters, if set.}
+\Conditions{local}
+\Status{Implemented}
+}
+
+\numtest{114}{
+\Version{KADM5_API_VERSION_2}
+\Reason{Returns KADM5_BAD_SERVER_PARAMS if any client-only parameters
+are specified to server-side init.}
+\Conditions{local}
+\Status{Implemented}
+}
+
+\numtest{115}{
+\Version{KADM5_API_VERSION_2}
+\Reason{Returns KADM5_BAD_CLIENT_PARAMS if any client-only parameters
+are specified to server-side init.}
+\Conditions{RPC}
+\Status{Implemented}
+}
+
+\numtest{150}{
+\Version{KADM5_API_VERSION_2}
+\Reason{init_with_creds works when given an open ccache with a valid
+credential for ADMIN_SERVICE.}
+\Conditions{RPC}
+}
+
+\numtest{150}{
+\Version{KADM5_API_VERSION_2}
+\Reason{init_with_creds works when given an open ccache with a valid
+credential for CHANGEPW_SERVICE.}
+\Conditions{RPC}
+}
+
+\numtest{150}{
+\Version{KADM5_API_VERSION_2}
+\Reason{init_with_creds fails with KADM5_GSS_ERROR when given an open
+ccache without a valid credential.}
+\Conditions{RPC}
 }
 
 \section{ovsec_kadm_destroy}
@@ -1468,6 +1638,12 @@ Base & Modify access? & Own password? & Service & Pass/Fail \\ \hline
 \Conditions{RPC}
 }
 
+\numtest{200}{
+\Version{KADM5_API_VERSION_2}
+\Reason{Creates a key for the principal for each unique encryption
+type/salt type in use.}
+\Status{Implemented}
+}
 
 \section{ovsec_kadm_chpass_principal_util}
 
@@ -1573,28 +1749,34 @@ Number & Modify Access? & Own Key? & Service & Pass/Fail & Implemented? \\ \hlin
 \Priority{High}
 \Reason{Fails for user with ``get'' but not ``modify'' access, on
 	other's password.}
+\Vtwonote{Change-password instead of modify access.}
 }
 
 \numtest{26}{
 \Reason{Fails for user with ``delete'' but not ``modify'' access, on
 	other's password.}
+\Vtwonote{Change-password instead of modify access.}
 }
 
 \numtest{27}{
 \Reason{Fails for user with ``add'' but not ``modify'' access, on
 	other's password.}
+\Vtwonote{Change-password instead of modify access.}
 }
 
 \numtest{28}{
 \Reason{Succeeds for user with ``get'' and ``modify'' access, on
 	other's password.}
 \Status{Implemented}
+\Vtwonote{Change-password instead of modify access.}
 }
+
 \numtest{28.25}{
 \Priority{High}
 \Reason{Fails for user with get and modify access on others password
 	When conneceted with CHANGEPW_SERVICE}
 \Status{Implemented}
+\Vtwonote{Change-password instead of modify access.}
 }
 
 \numtest{28.5}{
@@ -1602,7 +1784,7 @@ Number & Modify Access? & Own Key? & Service & Pass/Fail & Implemented? \\ \hlin
 \Reason{Succeeds for user with ``modify'' but not ``get'' access, on
 	other's password.}
 \Status{Implemented}
-	
+\Vtwonote{Change-password instead of modify access.}
 }
 
 \numtest{29}{
@@ -1636,6 +1818,11 @@ Number & Modify Access? & Own Key? & Service & Pass/Fail & Implemented? \\ \hlin
 \Conditions{RPC}
 }
 
+\numtest{100}{
+\Version{KADM5_API_VERSION_2}
+\Reason{Returns a key for each unique encryption type specified in the
+keysalts.}
+}
 
 \section{ovsec_kadm_get_principal}
 
@@ -1742,6 +1929,35 @@ Number & Modify Access? & Own Key? & Service & Pass/Fail & Implemented? \\ \hlin
 \Priority{Low}
 \Reason{Connects to correct server when mutliple handles exist}
 \Conditions{RPC}
+}
+
+\numtest{100}{
+\Version{KADM5_API_VERSION_2}
+\Reason{If KADM5_PRINCIPAL_NORMAL_MASK is specified, the key_data and
+tl_data fields are NULL/zero.}
+\Status{Implemented}
+}
+
+\numtest{101}{
+\Version{KADM5_API_VERSION_2}
+\Reason{If KADM5_KEY_DATA is specified, the key_data fields contain
+data but the contents are all NULL.}
+\Conditions{RPC}
+\Status{Implemented}
+}
+
+\numtest{102}{
+\Version{KADM5_API_VERSION_2}
+\Reason{If KADM5_KEY_DATA is specified, the key_data fields contain
+data and the contents are all non-NULL.}
+\Conditions{local}
+\Status{Implemented}
+}
+
+\numtest{103}{
+\Version{KADM5_API_VERSION_2}
+\Reason{If KADM5_TL_DATA is specified, the tl_data fields contain data.}
+\Status{Implemented}
 }
 
 
