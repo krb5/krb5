@@ -1,3 +1,8 @@
+2004-04-29  Ken Raeburn  <raeburn@mit.edu>
+
+	* debug.h (test): Macro renamed from "assert".
+	* krb5_decode_test.c, krb5_encode_test.c: Callers updated.
+
 2003-05-18  Tom Yu  <tlyu@mit.edu>
 
 	* krb5_decode_test.c (main): Add new test cases for sequence

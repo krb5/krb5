@@ -212,7 +212,7 @@ main(argc, argv)
     setup(kdcr,kdc_rep,"kdc_rep",ktest_make_sample_kdc_rep);
   
 /*    kdcr.msg_type = KRB5_TGS_REP;
-    assert(encode_krb5_as_rep(&kdcr,&code) == KRB5_BADMSGTYPE,
+    test(encode_krb5_as_rep(&kdcr,&code) == KRB5_BADMSGTYPE,
 	   "encode_krb5_as_rep type check\n");
     ktest_destroy_data(&code);*/
   
@@ -233,7 +233,7 @@ main(argc, argv)
     setup(kdcr,kdc_rep,"kdc_rep",ktest_make_sample_kdc_rep);
 
 /*    kdcr.msg_type = KRB5_AS_REP;
-    assert(encode_krb5_tgs_rep(&kdcr,&code) == KRB5_BADMSGTYPE,
+    test(encode_krb5_tgs_rep(&kdcr,&code) == KRB5_BADMSGTYPE,
 	   "encode_krb5_tgs_rep type check\n");*/
   
     kdcr.msg_type = KRB5_TGS_REP;

@@ -12,7 +12,7 @@
 
 #include <stdio.h>
 
-#define assert(pred,message)\
+#define test(pred,message)\
   if(pred) printf("OK: ");\
   else { printf("ERROR: "); error_count++; }\
   printf(message);

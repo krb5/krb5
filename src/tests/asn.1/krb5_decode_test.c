@@ -48,7 +48,7 @@ int main(argc, argv)
       com_err("krb5_decode_test", retval, "while decoding %s", typestring);\
       error_count++;\
     }\
-    assert(comparator(&ref,var),typestring);\
+    test(comparator(&ref,var),typestring);\
     printf("%s\n",description);\
     krb5_free_data_contents(test_context, &code);\
     cleanup(test_context, var);
@@ -693,7 +693,7 @@ int main(argc, argv)
     }
     retval = decode_krb5_authdata(&code,&var);
     if(retval) com_err("decoding authorization_data",retval,"");
-    assert(ktest_equal_authorization_data(ref,var),"authorization_data\n")
+    test(ktest_equal_authorization_data(ref,var),"authorization_data\n")
     krb5_free_data_contents(test_context, &code);
     krb5_free_authdata(test_context, var);
     ktest_destroy_authorization_data(&ref);
@@ -731,7 +731,7 @@ int main(argc, argv)
     }
     retval = decode_krb5_padata_sequence(&code,&var);
     if(retval) com_err("decoding padata_sequence",retval,"");
-    assert(ktest_equal_sequence_of_pa_data(ref,var),"pa_data\n");
+    test(ktest_equal_sequence_of_pa_data(ref,var),"pa_data\n");
     krb5_free_pa_data(test_context, var);
     krb5_free_data_contents(test_context, &code);
     ktest_destroy_pa_data_array(&ref);
@@ -753,7 +753,7 @@ int main(argc, argv)
     }
     retval = decode_krb5_padata_sequence(&code,&var);
     if(retval) com_err("decoding padata_sequence (empty)",retval,"");
-    assert(ktest_equal_sequence_of_pa_data(ref,var),"pa_data (empty)\n");
+    test(ktest_equal_sequence_of_pa_data(ref,var),"pa_data (empty)\n");
     krb5_free_pa_data(test_context, var);
     krb5_free_data_contents(test_context, &code);
     ktest_destroy_pa_data_array(&ref);
@@ -789,7 +789,7 @@ int main(argc, argv)
       if(retval){
 	  com_err("krb5_decode_test", retval, "while decoding etype_info");
       }
-      assert(ktest_equal_etype_info(ref,var),"etype_info\n");
+      test(ktest_equal_etype_info(ref,var),"etype_info\n");
 
       ktest_destroy_etype_info(var);
       ktest_destroy_etype_info_entry(ref[2]);      ref[2] = 0;
@@ -807,7 +807,7 @@ int main(argc, argv)
 	  com_err("krb5_decode_test", retval,
 		  "while decoding etype_info (only one)");
       }
-      assert(ktest_equal_etype_info(ref,var),"etype_info (only one)\n");
+      test(ktest_equal_etype_info(ref,var),"etype_info (only one)\n");
       
       ktest_destroy_etype_info(var);
       ktest_destroy_etype_info_entry(ref[0]);      ref[0] = 0;
@@ -824,7 +824,7 @@ int main(argc, argv)
 	  com_err("krb5_decode_test", retval,
 		  "while decoding etype_info (no info)");
       }
-      assert(ktest_equal_etype_info(ref,var),"etype_info (no info)\n");
+      test(ktest_equal_etype_info(ref,var),"etype_info (no info)\n");
 
       krb5_free_data_contents(test_context, &code);
       ktest_destroy_etype_info(var);
