@@ -1654,9 +1654,8 @@
 				F5CFD3FC022D86AD01120112,
 			);
 			isa = PBXGroup;
-			name = file;
-			path = "/Volumes/Ragna/New World Order/Sources/KerberosFramework/Kerberos5/Sources/Kerberos5/ccache/file";
-			refType = 0;
+			path = file;
+			refType = 4;
 		};
 		F5CFD3E6022D86AD01120112 = {
 			isa = PBXFileReference;
