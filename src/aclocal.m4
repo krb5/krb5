@@ -5,6 +5,7 @@ dnl being a relative pathname; we could make it general later, but for now
 dnl this is good enough.
 dnl
 AC_DEFUN(V5_SET_TOPDIR,[dnl
+ifdef([AC_LOCALDIR], [dnl AC_LOCALDIR exists in 2.13, but not newer autoconfs.
 ac_reltopdir=AC_LOCALDIR
 case "$ac_reltopdir" in 
 /*)
@@ -15,6 +16,18 @@ case "$ac_reltopdir" in
 	ac_reltopdir=.
 	;;
 esac
+],[
+ac_reltopdir=
+for x in . .. ../.. ../../.. ../../../..; do
+	if test -r $srcdir/$x/aclocal.m4; then
+		ac_reltopdir=$x
+	fi
+done
+if test "x$ac_reltopdir" = "x"; then
+	echo "Configure could not determine the relative topdir"
+	exit 1
+fi
+])
 ac_topdir=$srcdir/$ac_reltopdir
 ac_config_fragdir=$ac_reltopdir/config
 krb5_pre_in=$ac_config_fragdir/pre.in
@@ -38,7 +51,9 @@ WITH_LINKER dnl
 WITH_LDOPTS dnl
 WITH_CPPOPTS dnl
 WITH_KRB4 dnl
-AC_CONST dnl
+ifdef([AC_PROG_CC_STDC], [AC_PROG_CC_STDC])
+dnl AC_PROG_CC_STDC
+AC_C_CONST dnl
 WITH_NETLIB dnl
 WITH_HESIOD dnl
 KRB_INCLUDE dnl
@@ -112,14 +127,14 @@ if test $krb5_cv_func_sigprocmask_use = yes; then
 fi
 ])dnl
 dnl
-define(AC_PROG_ARCHIVE, [AC_PROGRAM_CHECK(ARCHIVE, ar, ar cqv, false)])dnl
-define(AC_PROG_ARCHIVE_ADD, [AC_PROGRAM_CHECK(ARADD, ar, ar cruv, false)])dnl
+define(AC_PROG_ARCHIVE, [AC_CHECK_PROG(ARCHIVE, ar, ar cqv, false)])dnl
+define(AC_PROG_ARCHIVE_ADD, [AC_CHECK_PROG(ARADD, ar, ar cruv, false)])dnl
 dnl
 dnl check for <dirent.h> -- CHECK_DIRENT
 dnl (may need to be more complex later)
 dnl
 define(CHECK_DIRENT,[
-AC_HEADER_CHECK(dirent.h,AC_DEFINE(USE_DIRENT_H))])dnl
+AC_CHECK_HEADER(dirent.h,AC_DEFINE(USE_DIRENT_H))])dnl
 dnl
 dnl check if union wait is defined, or if WAIT_USES_INT -- CHECK_WAIT_TYPE
 dnl
@@ -142,7 +157,7 @@ dnl
 dnl check for POSIX signal handling -- CHECK_SIGNALS
 dnl
 define(CHECK_SIGNALS,[
-AC_FUNC_CHECK(sigprocmask,
+AC_CHECK_FUNC(sigprocmask,
 AC_MSG_CHECKING(for sigset_t and POSIX_SIGNALS)
 AC_CACHE_VAL(krb5_cv_type_sigset_t,
 [AC_TRY_COMPILE(
@@ -183,7 +198,7 @@ dnl
 dnl check for POSIX setjmp/longjmp -- CHECK_SETJMP
 dnl
 define(CHECK_SETJMP,[
-AC_FUNC_CHECK(sigsetjmp,
+AC_CHECK_FUNC(sigsetjmp,
 AC_MSG_CHECKING(for sigjmp_buf)
 AC_CACHE_VAL(krb5_cv_struct_sigjmp_buf,
 [AC_TRY_COMPILE(
@@ -433,7 +448,7 @@ ADD_DEF([-I$(BUILDTOP)/include -I$(SRCTOP)/include -I$(BUILDTOP)/include/krb5 -I
 dnl
 dnl check for yylineno -- HAVE_YYLINENO
 dnl
-define(HAVE_YYLINENO,[dnl
+AC_DEFUN(HAVE_YYLINENO,[dnl
 AC_REQUIRE_CPP()AC_REQUIRE([AC_PROG_LEX])dnl
 AC_MSG_CHECKING([for yylineno declaration])
 AC_CACHE_VAL(krb5_cv_type_yylineno,
@@ -555,10 +570,10 @@ AC_MSG_RESULT($krb5_cv_struct_ut_exit)
 if test $krb5_cv_struct_ut_exit = no; then
   AC_DEFINE(NO_UT_EXIT)
 fi
-AC_FUNC_CHECK(setutent,AC_DEFINE(HAVE_SETUTENT))
-AC_FUNC_CHECK(setutxent,AC_DEFINE(HAVE_SETUTXENT))
-AC_FUNC_CHECK(updwtmp,AC_DEFINE(HAVE_UPDWTMP))
-AC_FUNC_CHECK(updwtmpx,AC_DEFINE(HAVE_UPDWTMPX))
+AC_CHECK_FUNC(setutent,AC_DEFINE(HAVE_SETUTENT))
+AC_CHECK_FUNC(setutxent,AC_DEFINE(HAVE_SETUTXENT))
+AC_CHECK_FUNC(updwtmp,AC_DEFINE(HAVE_UPDWTMP))
+AC_CHECK_FUNC(updwtmpx,AC_DEFINE(HAVE_UPDWTMPX))
 ])dnl
 dnl
 dnl WITH_NETLIB
@@ -567,13 +582,13 @@ dnl
 define(WITH_NETLIB,[
 AC_ARG_WITH([netlib],
 [  --with-netlib[=libs]    use user defined resolve library],
-  if test "$withval" = yes -o "$withval" = no ; then
+[  if test "$withval" = yes -o "$withval" = no ; then
 	AC_MSG_RESULT("netlib will link with C library resolver only")
   else
 	LIBS="$LIBS $withval"
 	AC_MSG_RESULT("netlib will use \'$withval\'")
   fi
-,dnl
+],dnl
 [AC_LIBRARY_NET]
 )])dnl
 dnl
@@ -905,7 +920,7 @@ dnl Pull in the necessary stuff to create the libraries.
 
 AC_DEFUN(KRB5_BUILD_LIBRARY,
 [AC_REQUIRE([KRB5_LIB_AUX])
-AC_REQUIRE([AC_LN_S])
+AC_REQUIRE([AC_PROG_LN_S])
 AC_REQUIRE([AC_PROG_RANLIB])
 AC_CHECK_PROG(AR, ar, ar, false)
 # add frag for building libraries
@@ -943,7 +958,7 @@ dnl generated shared library.
 
 AC_DEFUN(KRB5_BUILD_LIBRARY_WITH_DEPS,
 [AC_REQUIRE([KRB5_LIB_AUX])
-AC_REQUIRE([AC_LN_S])
+AC_REQUIRE([AC_PROG_LN_S])
 AC_REQUIRE([AC_PROG_RANLIB])
 AC_CHECK_PROG(AR, ar, ar, false)
 # add frag for building libraries
@@ -1177,7 +1192,7 @@ AC_DEFUN(AC_LIBRARY_NET, [
   if test "$enable_dns" = yes ; then
     AC_CHECK_FUNC(res_search, , AC_CHECK_LIB(resolv, res_search,
 	LIBS="$LIBS -lresolv" ; RESOLV_LIB=-lresolv,
-	AC_ERROR(Cannot find resolver support routine res_search in -lresolv.)
+	AC_MSG_ERROR(Cannot find resolver support routine res_search in -lresolv.)
     ))
   fi
   AC_SUBST(RESOLV_LIB)

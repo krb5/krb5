@@ -1,3 +1,17 @@
+2000-11-01  Ezra Peisach  <epeisach@mit.edu>
+
+	* aclocal.m4 (V5_SET_TOPDIR): In newer versions of autoconf
+	(2.49), AC_LOCALDIR is not set by the reconfiguration process. If
+	AC_LOCALDIR is not set, try to find the top of the tree by looking
+	for aclocal.m4. If aclocal.m4 ever exists in a subdir, we will
+	need to redo this test.
+
+	* aclocal.m4: Upgrade to autoconf 2 naming schemes - AC_C_CONST,
+	AC_CHECK_HEADER, AC_PROG_LN_S, AC_MSG_ERROR instead of AC_CONST,
+	AC_HEADER_CHECK, AC_LN_S, AC_ERROR. Use AC_DEFUN instead of
+	define() for macro definitions and better quoting of macros within
+	macros.
+	
 2000-10-31  Ezra Peisach  <epeisach@mit.edu>
 
 	* aclocal.m4 (AC_LIBRARY_NET): Newer versions of autoconf are more
