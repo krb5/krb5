@@ -701,6 +701,8 @@ __add_ovflpage(hashp, pagep)
 			hashp->hdr.ffactor = MIN_FFACTOR;
 	}
 	ovfl_num = overflow_page(hashp);
+	if (!ovfl_num)
+		return (NULL);
 
 	if (__new_page(hashp, (u_int32_t)ovfl_num, A_OVFL) != 0)
 		return (NULL);
@@ -741,6 +743,8 @@ __add_bigpage(hashp, pagep, ndx, is_basepage)
 	u_int16_t ovfl_num;
 
 	ovfl_num = overflow_page(hashp);
+	if (!ovfl_num)
+		return (NULL);
 
 	if (__new_page(hashp, (u_int32_t)ovfl_num, A_OVFL) != 0)
 		return (NULL);
@@ -1062,6 +1066,9 @@ first_free(map)
 	return (i);
 }
 
+/*
+ * returns 0 on error
+ */
 static u_int16_t
 overflow_page(hashp)
 	HTAB *hashp;

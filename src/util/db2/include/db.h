@@ -90,11 +90,13 @@ typedef enum { DB_BTREE, DB_HASH, DB_RECNO } DBTYPE;
 
 /* deal with turning prototypes on and off */
 
+#ifndef __P
 #if defined(__STDC__) || defined(__cplusplus)
 #define	__P(protos)	protos		/* full-blown ANSI C */
 #else	/* !(__STDC__ || __cplusplus) */
 #define	__P(protos)	()		/* traditional C preprocessor */
 #endif
+#endif /* no __P from system */
 
 /* Access method description structure. */
 typedef struct __db {

@@ -1,3 +1,28 @@
+Mon Nov 11 17:01:29 1996  Mark Eichin  <eichin@cygnus.com>
+
+	* db2: overflow_page fixes, __P redef
+	* db2 tests: better alternate dictionary support
+
+	Tue Oct  8 22:55:01 1996  Mark W. Eichin  <eichin@cygnus.com>
+
+	* hash/hash.h (DEF_BUCKET_SIZE, DEF_SEGSIZE): now derived from
+ 	DEF_BUCKET_SHIFT and DEF_SEGSIZE_SHIFT respectively, for
+	consistency.
+
+	Tue Oct  8 22:43:26 1996  Mark W. Eichin  <eichin@cygnus.com>
+
+	* hash/hash_page.c (__add_ovflpage, __add_bigpage): overflow_page
+ 	can return a 0 indicating a failure -- callers must check it
+	instead of corrupting the database.
+	(overflow_page): document apparent error return.
+
+	Fri Aug 30 20:05:57 1996  Ken Raeburn  <raeburn@cygnus.com>
+
+	* test/dictionary: New file, list of garbage words.
+	* test/run.test (main): Use it if no other dictionary can be
+	found.  Set dictsize with size of dictionary.
+	(test12, test20): Skip if dictionary is too small.
+
 Wed Aug 28 17:25:10 1996  Tom Yu  <tlyu@mit.edu>
 
 	* configure.in: Add check for SIZEOF_INT.

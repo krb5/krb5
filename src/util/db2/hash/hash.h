@@ -110,10 +110,10 @@ typedef struct htab {		/* Memory resident data structure */
 #define MIN_BUFFERS		6
 #define MINHDRSIZE		512
 #define DEF_CACHESIZE	65536
-#define DEF_BUCKET_SIZE		4096
 #define DEF_BUCKET_SHIFT	12		/* log2(BUCKET) */
-#define DEF_SEGSIZE		256
+#define DEF_BUCKET_SIZE		(1<<DEF_BUCKET_SHIFT)
 #define DEF_SEGSIZE_SHIFT	8		/* log2(SEGSIZE)	 */
+#define DEF_SEGSIZE		(1<<DEF_SEGSIZE_SHIFT)
 #define DEF_DIRSIZE		256
 #define DEF_FFACTOR		65536
 #define MIN_FFACTOR		4

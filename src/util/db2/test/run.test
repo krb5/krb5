@@ -22,11 +22,15 @@ main()
 		DICT=/usr/dict/words
 	elif [ -f /usr/share/lib/dict/words ]; then
 		DICT=/usr/share/lib/dict/words
+	elif [ -f $srcdir/../test/dictionary ]; then
+		DICT=`cd $srcdir/../test && pwd`/dictionary
 	else
 		echo 'run.test: no dictionary'
 		exit 1
 	fi
 	
+	dictsize=`wc -l < $DICT`
+
 	if [ $# -eq 0 ]; then
 		for t in 1 2 3 4 5 6 7 8 9 10 11 12 13 20; do
 			test$t
@@ -543,6 +547,12 @@ test12()
 		echo "Test 12: skipped, rev not found"
 		return
 	fi
+	if test $dictsize -lt 20001 ; then
+		echo "Test 12: skipped, dictionary too small"
+		return
+	else
+		:
+	fi
 	echo "Test 12: btree: lots of keys, small page size"
 	mdata=abcdefghijklmnopqrstuvwxy
 	echo $mdata |
@@ -605,6 +615,12 @@ test13()
 # Try a variety of bucketsizes and fill factors for hashing
 test20()
 {
+	if test $dictsize -lt 10001 ; then
+		echo "Test 20: skipped, dictionary too small"
+		return
+	else
+		:
+	fi
 	echo\
     "Test 20: hash: bucketsize, fill factor; nelem 25000 cachesize 65536"
 	echo "abcdefg abcdefg abcdefg abcdefg abcdefg abcdefg abcdefg" |
