@@ -49,7 +49,7 @@
 
 
 #include <stdio.h>
-#include "des.h"
+#include "des425.h"
 
 KRB5_DLLIMP int KRB5_CALLCONV
 des_key_sched(k,schedule)

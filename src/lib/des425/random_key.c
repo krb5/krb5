@@ -52,7 +52,7 @@
  * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include "des.h"
+#include "des425.h"
 
 /* random_key */
 int

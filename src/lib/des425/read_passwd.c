@@ -32,7 +32,7 @@
 
 #if !defined(_MSDOS)&&!defined(_WIN32)
 
-#include "des.h"
+#include "des425.h"
 #include <stdio.h>
 #include <errno.h>
 #include <signal.h>

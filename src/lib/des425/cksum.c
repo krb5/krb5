@@ -38,7 +38,7 @@
  */
 
 
-#include "des.h"
+#include "des425.h"
 
 /*
  * This routine performs DES cipher-block-chaining checksum operation,

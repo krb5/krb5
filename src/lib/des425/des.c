@@ -52,7 +52,7 @@
  */
 
 
-#include "des.h"
+#include "des425.h"
 
 KRB5_DLLIMP int KRB5_CALLCONV
 des_ecb_encrypt(clear, cipher, schedule, encrypt)

@@ -43,7 +43,7 @@
 
 #include <stdio.h>
 #include <string.h>
-#include "des.h"
+#include "des425.h"
 /*   #include "des_internal.h" */
 
 extern int mit_des_debug;

@@ -1,5 +1,9 @@
 2001-04-09  Ken Raeburn  <raeburn@mit.edu>
 
+	* des425.h: Renamed from des.h to avoid confusion with the other
+	des.h in the source tree.  Adjust include directives in all other
+	files.
+
 	* quad_cksum.c (des_quad_cksum): Add comments.  Force 32-bit
 	arithmetic just to be careful.
 

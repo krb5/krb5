@@ -106,7 +106,7 @@
 #include <stdio.h>
 #include <errno.h>
 
-#include "des.h"
+#include "des425.h"
 
 /* Definitions for byte swapping */
 

@@ -1,5 +1,5 @@
 /*
- * lib/des425/des.h
+ * lib/des425/des425.h (formerly des.h)
  *
  * Copyright 1991 by the Massachusetts Institute of Technology.
  * All Rights Reserved.

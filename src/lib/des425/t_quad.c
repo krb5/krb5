@@ -27,7 +27,7 @@
 
 #include <stdio.h>
 #include <errno.h>
-#include "des.h"
+#include "des425.h"
 
 extern char *errmsg();
 extern int errno;
