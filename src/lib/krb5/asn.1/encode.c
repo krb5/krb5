@@ -37,22 +37,10 @@ void (*free_translation) PROTOTYPE((krb5_pointer ));
     krb5_pointer isode_out;
     PE pe;
     PS ps;
-    char encode_buf[BUFSIZ];
     krb5_error_code error;
 
     if (!(isode_out = (*translator)(input, &error)))
 	return(error);
-    if (!(ps = ps_alloc(str_open))) {
-	free_translation(isode_out);
-	return(ENOMEM);
-    }
-    if (str_setup(ps, encode_buf, sizeof(encode_buf), 1) != OK) {
-	error = ps->ps_errno + ISODE_50_PS_ERR_NONE;
-    errout:
-	ps_free(ps);
-	free_translation(isode_out);
-	return(error);
-    }
     if ((*encoder)(&pe, 0, 0, 0, isode_out)) {
 	error = ENOMEM;
 	goto errout;
@@ -60,28 +48,39 @@ void (*free_translation) PROTOTYPE((krb5_pointer ));
     *data_out = (krb5_data *)malloc(sizeof(**data_out));
     if (!*data_out) {
 	error = ENOMEM;
-	goto errout;
+	goto peout;
     }    
-    if (((*data_out)->length = ps_get_abs(pe)) > sizeof(encode_buf)) {
-	abort();			/* xxx */
-    }
-    (*data_out)->data = malloc(ps_get_abs(pe));
+    (*data_out)->length = ps_get_abs(pe);
+    (*data_out)->data = malloc((*data_out)->length);
     if (!(*data_out)->data) {
 	error = ENOMEM;
-	free((char *)*data_out);
-	*data_out = 0;
-	goto errout;
+	goto datout;
+    }
+    if (!(ps = ps_alloc(str_open))) {
+	error = ENOMEM;
+	goto alldatout;
+    }
+    if (str_setup(ps, (*data_out)->data, (*data_out)->length, 1) != OK) {
+	error = ps->ps_errno + ISODE_50_PS_ERR_NONE;
+	goto oops;
     }
     if (pe2ps(ps, pe) != OK || ps_flush(ps) != OK) {
 	error = ps->ps_errno + ISODE_50_PS_ERR_NONE;
+    oops:
+	ps_free(ps);
+    alldatout:
 	free((*data_out)->data);
+    datout:
 	free((char *)*data_out);
 	*data_out = 0;
-	goto errout;
+    peout:
+	pe_free(pe);
+    errout:
+	(*free_translation)(isode_out);
+	return(error);
     }
-    bcopy(encode_buf, (*data_out)->data, (*data_out)->length);
     ps_free(ps);
     pe_free(pe);
-    free_translation(isode_out);
+    (*free_translation)(isode_out);
     return(0);
 }
