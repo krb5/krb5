@@ -192,9 +192,11 @@ proc v4ftp_test { } {
     expect {
 	"Kerberos V4 authentication succeeded" { pass "ftp authentication" }
 	eof	{ fail "ftp authentication" ; catch "expect_after" ; return }
-	"Kerberos V4 authentication failed" { fail "ftp authentication"; 
-	                                    send "quit\r"; catch "expect_after";
-	return}
+	-re "Kerberos V4 .* failed.*\r" {
+	    fail "ftp authentication";
+	    send "quit\r"; catch "expect_after";
+	    return
+	}
     }
     expect -nocase "name ($hostname:$env(USER)): "
     send "$env(USER)\r"
