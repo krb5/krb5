@@ -38,7 +38,7 @@
 /* this must be after <krb5/krb5.h>, since krb5 #defines xfree(), too */
 #include "../generic/gssapiP_generic.h"
 #include "gssapi_krb5.h"
-#include "gssapi_krb5_err.h"
+#include "gssapi_err_krb5.h"
 
 /** constants **/
 

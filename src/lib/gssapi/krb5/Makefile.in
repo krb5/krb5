@@ -3,15 +3,15 @@ LDFLAGS = -g
 
 all:: $(OBJS)
 
-ETSRCS= gssapi_krb5_err.c
-ETOBJS= gssapi_krb5_err.o
-ETHDRS= gssapi_krb5_err.h
+ETSRCS= gssapi_err_krb5.c
+ETOBJS= gssapi_err_krb5.o
+ETHDRS= gssapi_err_krb5.h
 
-gssapi_krb5_err.o: gssapi_krb5_err.c
+gssapi_err_krb5.o: gssapi_err_krb5.c
 
-gssapi_krb5_err.h: gssapi_krb5_err.et
+gssapi_err_krb5.h: gssapi_err_krb5.et
 
-gssapi_krb5_err.c: gssapi_krb5_err.et
+gssapi_err_krb5.c: gssapi_err_krb5.et
 
 CCSRCS = \
 	$(srcdir)/accept_sec_context.c \

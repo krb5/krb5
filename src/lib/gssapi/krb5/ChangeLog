@@ -1,3 +1,12 @@
+Mon Feb 20 12:00:00 1995  keith Vetter (keithv@fusion.com)
+
+	Rename files for DOS 8.3 uniqueness--files created by Make
+	* gssapi_krb5_err.et => gssapi_err_krb5.et
+			     => gssapi_err_krb5.h
+			     => gssapi_err_krb5.c
+	* gssapiP_krb5.h changed to match
+	* Makefile.in changed to match
+
 Fri Feb  3 00:34:55 1995  John Gilmore  <gnu@cygnus.com>
 
 	Rename files for DOS 8.3 uniqueness:
