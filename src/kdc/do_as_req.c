@@ -365,7 +365,11 @@ got_a_key:;
 		    client.attributes |= KRB5_KDB_DISALLOW_ALL_TIX;
 		}
 	    }
-            krb5_db_put_principal(kdc_context, &client, &one);
+	    {
+		int	one = 1;
+
+		krb5_db_put_principal(kdc_context, &client, &one);
+	    }
 #endif
             krb5_klog_syslog(LOG_INFO, "AS_REQ: PREAUTH FAILED: host %s, %s for %s (%s)",
 		   fromstring, cname, sname, error_message(retval));

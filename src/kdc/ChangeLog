@@ -1,4 +1,8 @@
 
+Thu Aug 10 14:52:24 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* do_as_req.c - Add missing variable when KRBCONF_KDC_MODIFIES_KDB on.
+
+
 Thu Aug 03 12:22:34 1995 Chris Provenzano (proven@mit.edu)
 
 	* do_as_req.c : Fix bug from new kdb changes.
