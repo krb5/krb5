@@ -2,23 +2,23 @@ thisconfigdir=./
 BUILDTOP=$(U)$(U)
 ##DOSBUILDTOP = ..\..
 ##DOSLIBNAME=krb5.lib
-##DOSOBJFILEDEP=asn1.lst ccache.lst err_tbls.lst free.lst keytab.lst krb.lst os.lst posix.lst rcache.lst
-##DOSOBJFILELIST=@asn1.lst @ccache.lst @err_tbls.lst @free.lst @keytab.lst @krb.lst @os.lst @posix.lst @rcache.lst
+##DOSOBJFILEDEP=asn1.lst ccache.lst err_tbls.lst keytab.lst krb.lst os.lst posix.lst rcache.lst
+##DOSOBJFILELIST=@asn1.lst @ccache.lst @err_tbls.lst @keytab.lst @krb.lst @os.lst @posix.lst @rcache.lst
 
 ANAME_DBDEP=@ANAME_DBDEP@
 ANAME_DBLIB=@ANAME_DBLIB@
 
 TST=if test -n "`cat DONE`" ; then
 
-MAC_SUBDIRS = error_tables asn.1 ccache keytab krb rcache free os posix 
+MAC_SUBDIRS = error_tables asn.1 ccache keytab krb rcache os posix 
 
 LIB_SUBDIRS= error_tables asn.1 ccache ccache/stdio ccache/file ccache/memory \
-	keytab keytab/file krb rcache free os posix \
+	keytab keytab/file krb rcache os posix \
         $(BUILDTOP)/util/profile
 LIBUPDATE= $(BUILDTOP)/util/libupdate
 LIBDONE= error_tables/DONE asn.1/DONE ccache/DONE ccache/stdio/DONE \
 		ccache/file/DONE ccache/memory/DONE keytab/DONE \
-		keytab/file/DONE krb/DONE rcache/DONE free/DONE os/DONE \
+		keytab/file/DONE krb/DONE rcache/DONE  os/DONE \
 		posix/DONE $(BUILDTOP)/util/profile/DONE
 
 #
@@ -39,7 +39,6 @@ STOBJLISTS= \
 	keytab/OBJS.ST keytab/file/OBJS.ST \
 	krb/OBJS.ST \
 	rcache/OBJS.ST \
-	free/OBJS.ST \
 	os/OBJS.ST \
 	posix/OBJS.ST \
 	$(BUILDTOP)/util/profile/OBJS.ST
@@ -71,9 +70,6 @@ all-windows::
 	cd ..\error_tables
 	@echo Making in krb5\error_tables
 	-$(MAKE) -$(MFLAGS)
-	cd ..\free
-	@echo Making in krb5\free
-	-$(MAKE) -$(MFLAGS)
 	cd ..\keytab
 	@echo Making in krb5\keytab
 	-$(MAKE) -$(MFLAGS)
@@ -100,9 +96,6 @@ clean-windows::
 	-$(MAKE) -$(MFLAGS) clean
 	cd ..\error_tables
 	@echo Making clean in krb5\error_tables
-	-$(MAKE) -$(MFLAGS) clean
-	cd ..\FREE
-	@echo Making clean in krb5\free
 	-$(MAKE) -$(MFLAGS) clean
 	cd ..\KEYTAB
 	@echo Making clean in krb5\keytab
