@@ -24,10 +24,17 @@ if test "$have_PERL" = perl -a "$have_RUNTEST" = runtest -a "$TCL_LIBS" != ""; t
 fi
 AC_SUBST(DO_TEST) 
 dnl The following are substituted into testing/scripts/env-setup.sh
-SRCTOPDIR=`pwd`/$srcdir/..
-AC_SUBST(SRCTOPDIR)
 RBUILD=`pwd`/..
 AC_SUBST(RBUILD)
+case "$srcdir" in
+/*)
+	S_TOP=$srcdir/..
+	;;
+*)
+	S_TOP=`pwd`/$srcdir/..
+	;;
+esac
+AC_SUBST(S_TOP)
 AC_PATH_PROG(PERL,perl)
 AC_PATH_PROG(EXPECT,expect)
 dnl

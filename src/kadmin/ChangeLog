@@ -1,7 +1,7 @@
-Sat Feb 28 19:37:23 1998  Tom Yu  <tlyu@mit.edu>
+Sun Mar  1 21:12:08 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
-	* configure.in: Fix up somewhat (SRCTOP -> SRCTOPDIR) and also get
-	directory correct.  (`pwd`/..)
+	* configure.in: Define S_TOP to contain an absolute pathname
+		to the top of the source tree.
 
 Fri Feb 27 23:32:38 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
