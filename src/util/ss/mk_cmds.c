@@ -34,7 +34,7 @@ int main(argc, argv)
 {
     char c_file[MAXPATHLEN];
     int result;
-    char *path, *p;
+    char *path, *p, *q;
 
     if (argc != 2) {
 	fputs("Usage: ", stderr);
@@ -61,7 +61,8 @@ int main(argc, argv)
 
     p = strrchr(path, '.');
     *p = '\0';
-    strcpy(c_file, path);
+    q = rindex(path, '/');
+    strcpy(c_file, (q) ? q + 1 : path);
     strcat(c_file, ".c");
     *p = '.';
 

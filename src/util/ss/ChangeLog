@@ -1,3 +1,9 @@
+Thu Jun  8 22:54:16 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* mk_cmds.c (main): Change mk_cmds so that the output file is
+		always created in the current directory, instead of in the
+		directory where the source file is located.
+
 Thu Apr 27 12:26:26 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* pager.c: Use posix signals.
