@@ -154,7 +154,7 @@ Data(ap, type, d, c)
         return(net_write(str_data, p - str_data));
 }
 
-krb5_context telnet_context;
+krb5_context telnet_context = 0;
 int
 kerberos5_init(ap, server)
 	Authenticator *ap;
@@ -167,7 +167,8 @@ kerberos5_init(ap, server)
 	memset(&session_key, 0, sizeof(session_key));
 	session_key.magic = KV5M_KEYBLOCK;
 	session_key.etype = ETYPE_UNKNOWN;
-        krb5_init_context(&telnet_context);
+	if (telnet_context == 0)
+	    krb5_init_context(&telnet_context);
         krb5_init_ets(telnet_context);
 	return(1);
 }

@@ -1,3 +1,8 @@
+Sat Apr 22 00:50:14 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* kerberos5.c (kerberos5_init): Only call krb5_init_context if 
+		the telnet context hasn't been initialized yet.
+
 Thu Apr 20 20:12:32 1995  Mark Eichin  <eichin@cygnus.com>
 
 	Changes for testsuite from Ian Taylor <ian@cygnus.com>
