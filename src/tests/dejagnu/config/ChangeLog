@@ -1,3 +1,8 @@
+Sat Oct  7 08:03:43 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* default.exp: Change kdc.conf ports definitions to current
+		methodology. 
+
 Thu Sep 28 18:54:43 1995  Mark Eichin  <eichin@cygnus.com>
 
 	* default.exp: set timeout to 100 since the default of 10 is

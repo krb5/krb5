@@ -277,16 +277,14 @@ proc setup_kerberos_files { } {
     if ![file exists tmpdir/kdc.conf] {
 	set conffile [open tmpdir/kdc.conf w]
 	puts $conffile "\[kdcdefaults\]"
-	puts $conffile "	primary_ports = 3085,3086,3087,3088,3089"
-	puts $conffile "	secondary_ports = -1"
+	puts $conffile "	kdc_ports = 3085,3086,3087,3088,3089"
 	puts $conffile ""
 	puts $conffile "\[realms\]"
 	puts $conffile "	KRBTEST.COM = \{"
-	puts $conffile "		profile = $tmppwd/krb5.conf"
 	puts $conffile "		database_name = $tmppwd/db"
 	puts $conffile "		master_key_name = master/key"
 	puts $conffile "		master_key_type = des-cbc-md5"
-	puts $conffile "		port = 3088"
+	puts $conffile "		kdc_ports = 3088"
 	puts $conffile "		kadmind_port = 3750"
 	puts $conffile "		key_stash_file = $tmppwd/stash"
 	puts $conffile "		max_life = 1:00:00"
