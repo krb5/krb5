@@ -10,15 +10,14 @@ SRCS=	$(srcdir)/crc.c $(srcdir)/crctest.c
 
 all:: $(OBJS)
 
-crctest-unix: crctest.$(OBJEXT) $(OBJS)
+crctest: crctest.$(OBJEXT) $(OBJS)
 	$(RM) crctest
-	$(CC) -o crctest crctest.$(OBJEXT) $(CCFLAGS) $(OBJS)
+	$(CC) -o crctest crctest.$(OBJEXT) $(CFLAGS) $(LDFLAGS) $(OBJS)
 
-crctest-windows:
+crctest.exe:
 	$(CC) -o crctest.exe $(CFLAGS2) $(SRCS)
-	$(RM) $(OBJS)
 
-check:: crctest-$(WHAT)
+check:: crctest$(EXEEXT)
 	$(C)crctest$(EXEEXT) < $(srcdir)$(S)crc-test
 
 clean::

@@ -1,3 +1,9 @@
+Thu Mar 16 21:14:15 1995  John Gilmore  (gnu at toad.com)
+
+	* Makefile.in (crctest, crctest.exe):  Replace crctest-unix and
+	crctest-windows with versions that work for Mac too.
+	(check):  Build and run crctest$(EXEEXT).  This runs on MPW now.
+
 Tue Mar 14 17:20:47 1995 Keith Vetter (keithv@fusion.com)
 
 	* crc.c: removed method for pulling in a data structure (windows),
