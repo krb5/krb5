@@ -1,3 +1,7 @@
+2002-06-25  Ken Raeburn  <raeburn@mit.edu>
+
+	* pre.in (UTIL_DEPLIB, UTIL_LIB): Variables deleted.
+
 2002-06-15  Ken Raeburn  <raeburn@mit.edu>
 
 	* pre.in (COM_ERR_DEPS): New variable.

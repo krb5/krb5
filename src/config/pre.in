@@ -222,7 +222,6 @@ PTY_DEPLIB	= $(TOPLIBD)/libpty$(DEPLIBEXT)
 
 # These are forced to use ".a" as an extension because they're never
 # built shared.
-UTIL_DEPLIB	= $(TOPLIBD)/libkrb5util.a
 SS_DEPLIB	= $(TOPLIBD)/libss.a
 KRB524_DEPLIB	= @KRB524_DEPLIB@
 
@@ -291,7 +290,6 @@ KADMSRV_LIBS	= -lkadm5srv $(HESIOD_LIBS) $(KDB5_LIBS) $(KADM_COMM_LIBS)
 KADMCLNT_LIBS	= -lkadm5clnt $(KADM_COMM_LIBS)
 
 # need fixing if ever used on Mac OS X!
-UTIL_LIB	= -lkrb5util
 PTY_LIB		= -lpty
 
 #

@@ -1,3 +1,8 @@
+2002-06-25  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (MY_SUBDIRS): Don't list krb5util.
+	(CLEANLIBS): Don't delete libkrb5util.a.
+
 2002-06-13  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (WINLIBS): Use ws2_32.lib instead of wsock32.lib.
