@@ -1,3 +1,8 @@
+2001-06-26  Ezra Peisach  <epeisach@mit.edu>
+
+	* user-guide.texinfo, install.texinfo: Cleanup makeinfo warning of
+	not having `.' or `,' after @xref.
+
 2001-01-19  Ken Raeburn  <raeburn@mit.edu>
 
 	* coding-style: Assume ANSI C '89.  Use krb5int_ for internal

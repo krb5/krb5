@@ -444,7 +444,7 @@ post@b{d}ated
 Here is a sample listing.  In this example, the user @value{RANDOMUSER1}
 obtained her initial tickets (@samp{I}), which are forwardable
 (@samp{F}) and postdated (@samp{d}) but not yet validated (@samp{i}).
-(@xref{kinit Reference} for more information about postdated tickets.)
+(@xref{kinit Reference}, for more information about postdated tickets.)
 
 @smallexample
 @group
@@ -663,7 +663,7 @@ If you need to give someone access to log into your account, you can do
 so through Kerberos, without telling the person your password.  Simply
 create a file called @code{.k5login} in your home directory.  This file
 should contain the Kerberos principal (@xref{What is a Kerberos
-Principal?}) of each person to whom you wish to give access.  Each
+Principal?}.) of each person to whom you wish to give access.  Each
 principal must be on a separate line.  Here is a sample @code{.k5login}
 file:
 
