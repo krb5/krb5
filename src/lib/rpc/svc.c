@@ -90,6 +90,7 @@ xprt_register(xprt)
 	if (xports == NULL) {
 		xports = (SVCXPRT **)
 			mem_alloc(FD_SETSIZE * sizeof(SVCXPRT *));
+		memset(xports, 0, FD_SETSIZE * sizeof(SVCXPRT *));
 	}
 	if (sock < _gssrpc_rpc_dtablesize()) {
 		xports[sock] = xprt;

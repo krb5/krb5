@@ -1,3 +1,13 @@
+2000-02-14  Tom Yu  <tlyu@mit.edu>
+
+	* svc.c (xprt_register): Zero out xports after allocating.
+
+	* auth_gssapi_misc.c (xdr_authgssapi_creds):
+	(xdr_authgssapi_init_arg): 
+	(xdr_authgssapi_init_res): 
+	(auth_gssapi_unwrap_data): If xdr_gss_buf or xdr_bytes fails, call
+	again with XDR_FREE set so that allocated memory doesn't leak.
+
 2000-01-24  Tom Yu  <tlyu@mit.edu>
 
 	* get_myaddress.c (gssrpc_get_myaddress): Copy in from NetBSD;
