@@ -119,7 +119,7 @@ xprt_unregister(xprt)
 	if ((sock < _gssrpc_rpc_dtablesize()) && (xports[sock] == xprt)) {
 		xports[sock] = (SVCXPRT *)0;
 		FD_CLR(sock, &svc_fdset);
-		if (max_xport = sock) {
+		if (max_xport <= sock) {
 			while ((max_xport > 0) && xports[max_xport] == 0)
 				max_xport--;
 		}
