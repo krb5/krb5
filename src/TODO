@@ -9,9 +9,10 @@ DONE	* KDC does not notice new databases after new db loads (HIGH PRIORITY)
 	* KDC returns wrong starttime if queried too quickly with a TGS req.
 		after a TGT request.
 	* v4kadmind: convert syslog -> log (to real file)
-	* v4kadmind: should store (kvno++ % 256) in database, or there should
+DONE	* v4kadmind: should store (kvno++ % 256) in database, or there should
 		be a mechanism in ktutil to query the server for the kvno
 		because V4 and V5 kvno's have different limits/wraps.
+		(currently, it is set to store kvno++ % 256)
 
 2.  API changes
 DONE	* context changes (mostly done)
@@ -26,9 +27,6 @@ DONE	* Remove krb5_enctype argument from string_to_key().  (HIGH)
 DONE	* kdb5_edit support (show princal, set attributes)
 DONE	* test DES-MD5
 DONE	* make DES-MD5 default, fall back to DES-CRC
-	* krb5_get_in_tkt_with_keytab needs to pass local ktypes in AS_REQ.
-		It should only be requesting ktypes for which there are
-		local keytab entries.
 DONE	* DES_CBC_* are not being properly treated.
 		Requesting one type does not always return a key of the
 		same type (even if there is another DES key in the db).
@@ -102,9 +100,9 @@ DONE	* Save the time offset between the kerberos server and the
 8.  New applications
 	* POP (POST 1.0)
 	* discuss (POST 1.0)
-	* FTP (POST 1.0?)
+DONE	* FTP (POST 1.0?)
 	* Zephyr (POST 1.0)
-	* Encrypted telnet (HIGH)
+	* Proper encrypted telnet (POST 1.0)
 
 9.  Kadmin
 DONE	* Password changing protocol.
