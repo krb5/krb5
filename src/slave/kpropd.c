@@ -241,6 +241,7 @@ void doit(fd)
 		       "Rejected connection from unauthorized principal %s",
 		       name);
 		free(name);
+		exit(1);
 	}
 	if (debug) {
 		printf("My sequence number: %d\n", my_seq_num);
@@ -521,7 +522,7 @@ kerberos_authenticate(fd, clientp, sin)
 				"While unparsing client name");
 			exit(1);
 		}
-		printf("krb5_recvauth(&%d, %s, %s, ...)\n", fd,
+		printf("krb5_recvauth(%d, %s, %s, ...)\n", fd,
 		       kprop_version, name);
 		free(name);
 	}
@@ -555,44 +556,35 @@ krb5_boolean
 authorized_principal(p)
 	krb5_principal	p;
 {
-	static char	*localrealm = NULL;
-	char	*default_realm;
-	krb5_error_code	retval;
-	krb5_data *tmpdata;
+    char		*name;
+    char		buf[1024];
+    krb5_error_code	retval;
+    FILE		*acl_file;
+    int			end;
+    
+    retval = krb5_unparse_name(p, &name);
+    if (retval)
+	return FALSE;
 
-	if (!localrealm) {
-		if (realm)
-			localrealm = realm;
-		else {
-			if (retval = krb5_get_default_realm(&default_realm)) {
-				com_err(progname, retval,
-					"While getting default realm in authorized_boolean");
-				abort();
-			}
-			localrealm = default_realm;
-		}
+    acl_file = fopen(KPROPD_ACL_FILE, "r");
+    if (!acl_file)
+	return FALSE;
+
+    while (!feof(acl_file)) {
+	if (!fgets(buf, sizeof(buf), acl_file))
+	    break;
+	end = strlen(buf) - 1;
+	if (buf[end] == '\n')
+	    buf[end] = '\0';
+	if (!strcmp(name, buf)) {
+	    free(name);
+	    fclose(acl_file);
+	    return TRUE;
 	}
-	/*
-	 * The other side must be coming from the local realm!
-	 */
-	tmpdata = krb5_princ_realm(p);
-	if (tmpdata->length != strlen(localrealm)
-	    || memcmp(tmpdata->data, localrealm, tmpdata->length))
-		return(FALSE);
-	/*
-	 * The client's service must be KPROP_SERVICE_NAME
-	 */
-	tmpdata = krb5_princ_component(p, 0);
-	if (!tmpdata || (tmpdata->length != strlen(KPROP_SERVICE_NAME))
-	    || memcmp(tmpdata->data, KPROP_SERVICE_NAME, tmpdata->length))
-		return(FALSE);
-	/*
-	 * For now, it can come from any hostname.  We this needs to
-	 * be fixed to check an access control list or something.
-	 * 
-	 * XXXX
-	 */
-	return(TRUE);
+    }
+    free(name);
+    fclose(acl_file);
+    return FALSE;
 }
 
 void
