@@ -1,3 +1,8 @@
+2005-02-11  Ken Raeburn  <raeburn@mit.edu>
+
+	* gss-misc.c: Include autoconf.h.  If both time.h and sys/time.h
+	are available, and they're compatible, include both.
+
 2005-02-09  Ken Raeburn  <raeburn@mit.edu>
 
 	* New directory.
