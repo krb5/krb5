@@ -36,9 +36,9 @@ SRCS	= $(srcdir)/g_acquire_cred.c \
 	  $(srcdir)/g_rel_buffer.c \
 	  $(srcdir)/g_rel_oid_set.c \
 	  $(srcdir)/g_oid_ops.c \
-	  $(srcdir)/g_inquire_cred.c \
-	  $(srcdir)/g_inquire_context.c \
-	  $(srcdir)/g_inquire_names.c \
+	  $(srcdir)/g_inq_cred.c \
+	  $(srcdir)/g_inq_context.c \
+	  $(srcdir)/g_inq_names.c \
 	  $(srcdir)/g_initialize.c \
 	  $(srcdir)/g_glue.c \
 	  $(srcdir)/gssd_pname_to_uid.c \
@@ -68,9 +68,9 @@ OBJS	= g_acquire_cred.$(OBJEXT) \
 	  g_rel_buffer.$(OBJEXT) \
 	  g_rel_oid_set.$(OBJEXT) \
 	  g_oid_ops.$(OBJEXT) \
-	  g_inquire_cred.$(OBJEXT) \
-	  g_inquire_context.$(OBJEXT) \
-	  g_inquire_names.$(OBJEXT) \
+	  g_inq_cred.$(OBJEXT) \
+	  g_inq_context.$(OBJEXT) \
+	  g_inq_names.$(OBJEXT) \
 	  g_initialize.$(OBJEXT) \
 	  g_glue.$(OBJEXT) \
 	  gssd_pname_to_uid.$(OBJEXT) \

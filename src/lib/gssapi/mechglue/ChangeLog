@@ -1,5 +1,9 @@
 Sat Feb 24 16:19:30 1996  Theodore Y. Ts'o  <tytso@dcl>
 
+	* Makefile.in, g_inquire_cred.c, g_inquire_names.c,
+		g_inquire_context.c: Renamed files to g_inq_cred.c,
+		g_inq_names.c, and g_inq_context.c, respectively.
+
 	* g_acquire_cred.c (gss_add_cred): New GSSAPI V2 function.
 
 	* g_inquire_cred.c (gss_inquire_cred_by_mech): New GSSAPI V2
