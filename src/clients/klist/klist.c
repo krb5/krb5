@@ -707,7 +707,7 @@ void one_addr(a)
     namebuf[0] = 0;
     err = getnameinfo (ss2sa (&ss), socklen (ss2sa (&ss)),
 		       namebuf, sizeof (namebuf), 0, 0,
-		       no_resolve ? NI_NUMERICHOST : 0);
+		       no_resolve ? NI_NUMERICHOST : 0U);
     if (err) {
 	printf ("unprintable address (type %d, error %d %s)", a->addrtype, err,
 		gai_strerror (err));
