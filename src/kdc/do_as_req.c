@@ -37,9 +37,9 @@ static char rcsid_do_as_req_c[] =
 #include "policy.h"
 #include "extern.h"
 
-static krb5_error_code prepare_error_as PROTOTYPE((krb5_as_req *,
-						int,
-						krb5_data **));
+static krb5_error_code prepare_error_as PROTOTYPE((krb5_kdc_req *,
+						   int,
+						   krb5_data **));
 
 /*
  * Do all the processing required for a AS_REQ
@@ -50,7 +50,7 @@ static krb5_error_code prepare_error_as PROTOTYPE((krb5_as_req *,
 /*ARGSUSED*/
 krb5_error_code
 process_as_req(request, from, response)
-register krb5_as_req *request;
+register krb5_kdc_req *request;
 const krb5_fulladdr *from;		/* who sent it ? */
 krb5_data **response;			/* filled in with a response packet */
 {
@@ -70,10 +70,21 @@ krb5_data **response;			/* filled in with a response packet */
     krb5_timestamp until, rtime;
     char *cname = 0, *sname = 0, *fromstring = 0;
 
-    if (retval = krb5_unparse_name(request->client, &cname))
-	return(retval);
+    if (!request->client)
+	return(prepare_error_as(request, KDC_ERR_C_PRINCIPAL_UNKNOWN,
+				response));
+    if (retval = krb5_unparse_name(request->client, &cname)) {
+	syslog(LOG_INFO, "AS_REQ: %s while unparsing client name",
+	       error_message(retval));
+	return(prepare_error_as(request, KDC_ERR_C_PRINCIPAL_UNKNOWN,
+				response));
+    }
     if (retval = krb5_unparse_name(request->server, &sname)) {
 	free(cname);
+	syslog(LOG_INFO, "AS_REQ: %s while unparsing server name",
+	       error_message(retval));
+	return(prepare_error_as(request, KDC_ERR_S_PRINCIPAL_UNKNOWN,
+				response));
 	return(retval);
     }
 #ifdef KRB5_USE_INET
@@ -142,8 +153,8 @@ krb5_data **response;			/* filled in with a response packet */
 
 
     ticket_reply.server = request->server;
-    ticket_reply.etype = request->etype;
-    ticket_reply.skvno = server.kvno;
+    ticket_reply.enc_part.etype = request->etype;
+    ticket_reply.enc_part.kvno = server.kvno;
 
     enc_tkt_reply.flags = 0;
 
@@ -219,8 +230,6 @@ krb5_data **response;			/* filled in with a response packet */
     enc_tkt_reply.caddrs = request->addresses;
     enc_tkt_reply.authorization_data = 0; /* XXX? */
 
-    /* XXX need separate etypes for ticket encryption and kdc_rep encryption */
-
     ticket_reply.enc_part2 = &enc_tkt_reply;
 
     /* convert server.key into a real key (it may be encrypted
@@ -230,7 +239,6 @@ krb5_data **response;			/* filled in with a response packet */
 	cleanup();
 	return retval;
     }
-    enc_tkt_reply.confounder = krb5_random_confounder();
     retval = krb5_encrypt_tkt_part(&encrypting_key, &ticket_reply);
     bzero((char *)encrypting_key.contents, encrypting_key.length);
     free((char *)encrypting_key.contents);
@@ -246,14 +254,15 @@ krb5_data **response;			/* filled in with a response packet */
 		   bzero((char *)session_key->contents, session_key->length); \
 		   free((char *)session_key->contents); \
 		   session_key->contents = 0; \
-		   bzero(ticket_reply.enc_part.data, \
-			 ticket_reply.enc_part.length); \
-		   free(ticket_reply.enc_part.data);}
+		   bzero(ticket_reply.enc_part.ciphertext.data, \
+			 ticket_reply.enc_part.ciphertext.length); \
+		   free(ticket_reply.enc_part.ciphertext.data);}
 
     /* Start assembling the response */
     reply.client = request->client;
-    reply.etype = request->etype;
-    reply.ckvno = client.kvno;
+    /* XXX need separate etypes for ticket encryption and kdc_rep encryption */
+    reply.enc_part.etype = request->etype;
+    reply.enc_part.kvno = client.kvno;
     reply.ticket = &ticket_reply;
 
     reply_encpart.session = session_key;
@@ -262,7 +271,7 @@ krb5_data **response;			/* filled in with a response packet */
 	return retval;
     }
 
-    reply_encpart.ctime = request->ctime;
+    reply_encpart.nonce = request->nonce;
     reply_encpart.key_exp = client.expiration;
     reply_encpart.flags = enc_tkt_reply.flags;
     reply_encpart.server = ticket_reply.server;
@@ -273,8 +282,6 @@ krb5_data **response;			/* filled in with a response packet */
     reply_encpart.times.authtime = kdc_time;
 
     reply_encpart.caddrs = enc_tkt_reply.caddrs;
-
-    reply_encpart.confounder = krb5_random_confounder();
 
     /* now encode/encrypt the response */
 
@@ -295,7 +302,7 @@ krb5_data **response;			/* filled in with a response packet */
 
 static krb5_error_code
 prepare_error_as (request, error, response)
-register krb5_as_req *request;
+register krb5_kdc_req *request;
 int error;
 krb5_data **response;
 {
@@ -320,6 +327,9 @@ krb5_data **response;
 	free(errpkt.text.data);
 	return ENOMEM;
     }
+    errpkt.e_data.length = 0;
+    errpkt.e_data.data = 0;
+
     retval = krb5_mk_error(&errpkt, scratch);
     free(errpkt.text.data);
     *response = scratch;
