@@ -1,3 +1,8 @@
+Wed Jul 30 18:27:36 1997  Tom Yu  <tlyu@mit.edu>
+
+	* kdb5_mkdums.c: Update to match reality of libkdb, so that it
+	actually works.
+
 Tue Feb 18 18:20:14 1997  Richard Basch  <basch@lehman.com>
 
 	* kdb5_mkdums.c (add_princ): 

@@ -251,15 +251,18 @@ add_princ(context, str_newprinc)
 	goto error;
     }
 
-    {	/* Add mod princ to db entry */
-	krb5_tl_mod_princ mod_princ;
+    {
+	/* Add mod princ to db entry */
+	krb5_int32 now;
 
-    	mod_princ.mod_princ = master_princ;
-    	if (retval = krb5_timeofday(context, &mod_princ.mod_date)) {
+	retval = krb5_timeofday(context, &now);
+	if (retval) {
 	    com_err(progname, retval, "while fetching date");
 	    goto error;
-        }
-	if(retval=krb5_dbe_encode_mod_princ_data(context,&mod_princ,&newentry)){
+	}
+	retval = krb5_dbe_update_mod_princ_data(context, &newentry, now,
+					       master_princ);
+	if (retval) {
 	    com_err(progname, retval, "while encoding mod_princ data");
 	    goto error;
 	}
