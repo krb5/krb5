@@ -47,6 +47,7 @@ static char sccsid[] = "@(#)dbm.c	8.6 (Berkeley) 11/7/95";
 #include <string.h>
 
 #include "db-ndbm.h"
+#include "db-dbm.h"
 #include "hash.h"
 
 /* If the two size fields of datum and DBMT are not equal, then

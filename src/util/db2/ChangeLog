@@ -1,3 +1,7 @@
+2001-07-06  Ezra Peisach  <epeisach@mit.edu>
+
+	* hash/dbm.c: Include db-dbm.h for prototypes.
+
 2001-07-04  Ezra Peisach  <epeisach@mit.edu>
 
 	* hash/hash_log2.c: Include hash.h, page.h and extern.h for prototype.
