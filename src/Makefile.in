@@ -15,7 +15,7 @@ all-unix::
 
 all-mac::
 
-all-windows:: Makefile-windows
+all-windows:: maybe-awk Makefile-windows
 	@echo Making in util
 	cd util
 	$(MAKE) -$(MFLAGS)
@@ -490,6 +490,17 @@ $(GG)gssapi.h: $(GG)gssapi.hin
 	cat $(GG)gssapi.hin > $@
 
 awk-windows-mac: $(ETOUT) $(HOUT)
+
+#
+# The maybe-awk target needs to happen after AWK is defined.
+#
+
+##DOS##maybe-awk::
+##DOS##!ifdef WHICH_CMD
+##DOS##!if ![ $(WHICH_CMD) $(AWK) ]
+##DOS##maybe-awk:: awk-windows-mac
+##DOS##!endif
+##DOS##!endif
 
 clean-windows-mac:
 	rm -f $(CLEANUP)
