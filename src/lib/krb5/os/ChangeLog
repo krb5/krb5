@@ -1,3 +1,7 @@
+Fri Sep 29 16:31:47 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* osconfig.c: Remove krb5_lname_file; it's not used any more.
+
 Mon Sep 25 16:58:17 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in: Removed "foo:: foo-$(WHAT)" lines from the

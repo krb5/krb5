@@ -27,9 +27,6 @@
 #include "k5-int.h"
 
 char *krb5_defkeyname  = DEFAULT_KEYTAB_NAME;
-#ifdef USE_DBM_LNAME
-char *krb5_lname_file = DEFAULT_LNAME_FILENAME;
-#endif
 
 int krb5_max_dgram_size = MAX_DGRAM_SIZE;
 int krb5_max_skdc_timeout = MAX_SKDC_TIMEOUT;
