@@ -35,6 +35,19 @@ krb5_c_string_to_key(context, enctype, string, salt, key)
      const krb5_data *salt;
      krb5_keyblock *key;
 {
+    return krb5_c_string_to_key_with_params(context, enctype, string, salt,
+					    NULL, key);
+}
+
+krb5_error_code KRB5_CALLCONV
+krb5_c_string_to_key_with_params(context, enctype, string, salt, params, key)
+     krb5_context context;
+     krb5_enctype enctype;
+     const krb5_data *string;
+     const krb5_data *salt;
+     const krb5_data *params;
+     krb5_keyblock *key;
+{
     int i;
     krb5_error_code ret;
     const struct krb5_enc_provider *enc;
@@ -59,7 +72,8 @@ krb5_c_string_to_key(context, enctype, string, salt, key)
     key->enctype = enctype;
     key->length = keylength;
 
-    if ((ret = ((*(krb5_enctypes_list[i].str2key))(enc, string, salt, key)))) {
+    ret = (*krb5_enctypes_list[i].str2key)(enc, string, salt, params, key);
+    if (ret) {
 	memset(key->contents, 0, keylength);
 	free(key->contents);
     }

@@ -136,7 +136,7 @@ test_mit_des_s2k ()
 	printf ("\npassword: %-25s", buf);
 	printhex (strlen(p), p);
 	printf ("\n");
-	r = krb5_des_string_to_key (0, &pd, &sd, &key);
+	r = krb5int_des_string_to_key (0, &pd, &sd, 0, &key);
 	printf (  "DES key:  %-25s", "");
 	printhex (key.length, key.contents);
 	printf ("\n\n");

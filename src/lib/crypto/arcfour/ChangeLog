@@ -1,3 +1,9 @@
+2003-03-04  Ken Raeburn  <raeburn@mit.edu>
+
+	* arcfour.c (krb5int_arcfour_string_to_key): Renamed from
+	krb5_... and added new s2k-params argument, which must be null.
+	* arcfour.h: Updated.
+
 2003-02-03  Sam Hartman  <hartmans@mit.edu>
 
 	* arcfour.c (krb5_arcfour_encrypt_length): l40, the 40-bit

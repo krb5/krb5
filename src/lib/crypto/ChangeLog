@@ -1,3 +1,21 @@
+2003-03-04  Ken Raeburn  <raeburn@mit.edu>
+
+	* etypes.c: Include aes_s2k.h.
+	(krb5_enctypes): Add AES enctypes.  Update s2k function names.
+	* pbkdf2.c (krb5int_pbkdf2): Now static.  Output data descriptor
+	is const.
+	(krb5int_pbkdf2_hmac_sha1_128, krb5int_pbkdf2_hmac_sha1_256):
+	Deleted.
+	* string_to_key.c (krb5_c_string_to_key_with_params): Renamed from
+	krb5_c_string_to_key, takes new params argument and passes it
+	through.
+	(krb5_c_string_to_key): New function, passes null params.
+	* t_pkcs5.c (test_pbkdf2_rfc3211): Update calls to
+	krb5int_pbkdf2_hmac_sha1 for new API.
+	* vectors.c (test_mit_des_s2k): Update krb5_des_string_to_key call
+	for new API.
+	* Makefile.in: Update dependencies.
+
 2003-03-03  Ken Raeburn  <raeburn@mit.edu>
 
 	* pbkdf2.c (F): Now takes krb5_data for password and salt.

@@ -12,15 +12,16 @@ static void asctouni(unsigned char *unicode, unsigned char *ascii, size_t len)
 }
 
 krb5_error_code
-krb5_arcfour_string_to_key(enc, string, salt, key)
-	const struct krb5_enc_provider *enc;
-	const krb5_data *string;
-	const krb5_data *salt;
-	krb5_keyblock *key;
+krb5int_arcfour_string_to_key(const struct krb5_enc_provider *enc,
+			      const krb5_data *string, const krb5_data *salt,
+			      const krb5_data *params, krb5_keyblock *key)
 {
   size_t len,slen;
   unsigned char *copystr;
   krb5_MD4_CTX md4_context;
+
+  if (params != NULL)
+      return KRB5_ERR_BAD_S2K_PARAMS;
   
   if (key->length != 16)
     return (KRB5_BAD_MSIZE);

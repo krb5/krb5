@@ -30,11 +30,9 @@ static const unsigned char kerberos[] = "kerberos";
 #define kerberos_len (sizeof(kerberos)-1)
 
 krb5_error_code
-krb5_dk_string_to_key(enc, string, salt, key)
-     const struct krb5_enc_provider *enc;
-     const krb5_data *string;
-     const krb5_data *salt;
-     krb5_keyblock *key;
+krb5int_dk_string_to_key(const struct krb5_enc_provider *enc,
+			 const krb5_data *string, const krb5_data *salt,
+			 const krb5_data *parms, krb5_keyblock *key)
 {
     krb5_error_code ret;
     size_t keybytes, keylength, concatlen;

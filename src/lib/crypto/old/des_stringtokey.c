@@ -34,11 +34,14 @@ extern krb5_error_code mit_des_string_to_key_int
 		 const krb5_data * salt);
 
 krb5_error_code
-krb5_des_string_to_key(enc, string, salt, key)
+krb5int_des_string_to_key(enc, string, salt, parm, key)
      const struct krb5_enc_provider *enc;
      const krb5_data *string;
      const krb5_data *salt;
+     const krb5_data *parm;
      krb5_keyblock *key;
 {
+    if (parm != NULL)
+	return KRB5_ERR_BAD_S2K_PARAMS;
     return(mit_des_string_to_key_int(key, string, salt));
 }

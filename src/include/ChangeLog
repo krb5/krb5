@@ -1,3 +1,13 @@
+2003-03-04  Ken Raeburn  <raeburn@mit.edu>
+
+	* krb5.h (ENCTYPE_AES128_CTS_HMAC_SHA1_96,
+	ENCTYPE_AES256_CTS_HMAC_SHA1_96, CKSUMTYPE_HMAC_SHA1_96_AES128,
+	CKSUMTYPE_HMAC_SHA1_96_AES256): New macros.
+	* k5-int.h (krb5_str2key_func): Added params argument.
+	(krb5int_pbkdf2_hmac_sha1): Declare.
+	(krb5_cryptosystem_entry, krb5_cs_table_entry, SUM_FUNC,
+	SUM_VERF_FUNC, krb5_checksum_entry): Delete unused declarations.
+
 2003-02-26  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Set and substitute maybe_kerberosIV.

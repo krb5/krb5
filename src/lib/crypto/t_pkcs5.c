@@ -49,7 +49,7 @@ static void test_pbkdf2_rfc3211()
 {
     char x[100];
     krb5_error_code err;
-    krb5_data d;
+    krb5_data d, pass, salt;
     int i;
 
     /* RFC 3211 test cases.  */
@@ -80,8 +80,11 @@ static void test_pbkdf2_rfc3211()
 	       t[i].count, t[i].len * 8, t[i].len, t[i].pass);
 
 	d.length = t[i].len;
-	err = krb5int_pbkdf2_hmac_sha1 (x, d.length, t[i].count,
-					t[i].pass, t[i].salt);
+	pass.data = t[i].pass;
+	pass.length = strlen(pass.data);
+	salt.data = t[i].salt;
+	salt.length = strlen(salt.data);
+	err = krb5int_pbkdf2_hmac_sha1 (&d, t[i].count, &pass, &salt);
 	if (err) {
 	    printf("error in computing pbkdf2: %s\n", error_message(err));
 	    exit(1);

@@ -620,7 +620,7 @@ typedef krb5_error_code (*krb5_crypt_func) (const struct krb5_enc_provider *enc,
   const krb5_data *input, krb5_data *output);
 
 typedef krb5_error_code (*krb5_str2key_func) (const struct krb5_enc_provider *enc, const krb5_data *string,
-  const krb5_data *salt, krb5_keyblock *key);
+  const krb5_data *salt, const krb5_data *parm, krb5_keyblock *key);
 
 struct krb5_keytypes {
     krb5_enctype etype;
@@ -669,6 +669,10 @@ krb5_error_code krb5_hmac
 		const krb5_keyblock *key, unsigned int icount,
 		const krb5_data *input, krb5_data *output);
 
+krb5_error_code krb5int_pbkdf2_hmac_sha1 (const krb5_data *, unsigned long,
+					  const krb5_data *,
+					  const krb5_data *);
+
 /* A definition of init_state for DES based encryption systems.
  * sets up an 8-byte IV of all zeros
  */
@@ -703,74 +707,6 @@ extern const struct krb5_hash_provider krb5int_hash_md5;
 
 #ifdef KRB5_OLD_CRYPTO
 /* old provider api */
-
-typedef struct _krb5_cryptosystem_entry {
-    krb5_magic magic;
-    krb5_error_code (*encrypt_func) ( krb5_const_pointer /* in */,
-					       krb5_pointer /* out */,
-					       const size_t,
-					       krb5_encrypt_block *,
-					       krb5_pointer);
-    krb5_error_code (*decrypt_func) ( krb5_const_pointer /* in */,
-					       krb5_pointer /* out */,
-					       const size_t,
-					       krb5_encrypt_block *,
-					       krb5_pointer);
-    krb5_error_code (*process_key) ( krb5_encrypt_block *,
-					      const krb5_keyblock *);
-    krb5_error_code (*finish_key) ( krb5_encrypt_block *);
-    krb5_error_code (*string_to_key) (const krb5_encrypt_block *,
-						krb5_keyblock *,
-						const krb5_data *,
-						const krb5_data *);
-    krb5_error_code (*init_random_key) ( const krb5_encrypt_block *,
-						const krb5_keyblock *,
-						krb5_pointer *);
-    krb5_error_code (*finish_random_key) ( const krb5_encrypt_block *,
-						krb5_pointer *);
-    krb5_error_code (*random_key) ( const krb5_encrypt_block *,
-					      krb5_pointer,
-					      krb5_keyblock **);
-    int block_length;
-    int pad_minimum;			/* needed for cksum size computation */
-    int keysize;
-    krb5_enctype proto_enctype;		/* key type,
-					   (assigned protocol number AND
-					    table index) */
-} krb5_cryptosystem_entry;
-
-typedef struct _krb5_cs_table_entry {
-    krb5_magic magic;
-    krb5_cryptosystem_entry * system;
-    krb5_pointer random_sequence;	/* from init_random_key() */
-} krb5_cs_table_entry;
-
-
-/* could be used in a table to find a sumtype */
-typedef krb5_error_code
-	(*SUM_FUNC) (
-		const krb5_pointer /* in */,
-		const size_t /* in_length */,
-		const krb5_pointer /* key/seed */,
-		const size_t /* key/seed size */,
-		krb5_checksum * /* out_cksum */);
-
-typedef krb5_error_code
-	(*SUM_VERF_FUNC) (
-		const krb5_checksum * /* out_cksum */,
-		const krb5_pointer /* in */,
-		const size_t /* in_length */,
-		const krb5_pointer /* key/seed */,
-		const size_t /* key/seed size */);
-
-typedef struct _krb5_checksum_entry {
-    krb5_magic magic;
-    SUM_FUNC sum_func;			/* Checksum generator */
-    SUM_VERF_FUNC sum_verf_func;	/* Verifier of checksum */
-    int checksum_length;	   	/* length returned by sum_func */
-    unsigned int is_collision_proof:1;
-    unsigned int uses_key:1;
-} krb5_checksum_entry;
 
 krb5_error_code krb5_crypto_os_localaddr
 	(krb5_address ***);

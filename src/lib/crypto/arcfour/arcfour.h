@@ -25,8 +25,9 @@ krb5_error_code krb5_arcfour_decrypt(const struct krb5_enc_provider *,
 			const krb5_data *,
 			krb5_data *);
 
-extern krb5_error_code krb5_arcfour_string_to_key(
+extern krb5_error_code krb5int_arcfour_string_to_key(
      const struct krb5_enc_provider *,
+     const krb5_data *,
      const krb5_data *,
      const krb5_data *,
      krb5_keyblock *);

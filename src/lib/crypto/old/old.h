@@ -45,7 +45,8 @@ krb5_error_code krb5_old_decrypt
 		const krb5_data *ivec, const krb5_data *input,
 		krb5_data *arg_output);
 
-krb5_error_code krb5_des_string_to_key
+krb5_error_code krb5int_des_string_to_key
 (const struct krb5_enc_provider *enc,
-		const krb5_data *string, const krb5_data *salt, 
+		const krb5_data *string, const krb5_data *salt,
+		const krb5_data *params,
 		krb5_keyblock *key);

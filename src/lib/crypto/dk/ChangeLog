@@ -1,3 +1,9 @@
+2003-03-04  Ken Raeburn  <raeburn@mit.edu>
+
+	* stringtokey.c (krb5int_dk_string_to_key): Renamed from
+	krb5_... and added s2k-params argument.
+	* dk.h: Updated.
+
 2003-01-10  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in: Add AC_SUBST_FILE marker for libobj_frag.

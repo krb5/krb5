@@ -32,24 +32,12 @@
 #include "k5-int.h"
 #include "hash_provider.h"
 
-/* for k5-int.h */
-extern krb5_error_code
+/* Not exported, for now.  */
+static krb5_error_code
 krb5int_pbkdf2 (krb5_error_code (*prf)(krb5_keyblock *, krb5_data *,
 				       krb5_data *),
 		size_t hlen, const krb5_data *pass, const krb5_data *salt,
-		unsigned long count, krb5_data *output);
-extern krb5_error_code
-krb5int_pbkdf2_hmac_sha1 (const krb5_data *out, unsigned long count,
-			  const krb5_data *pass, const krb5_data *salt);
-extern krb5_error_code
-krb5int_pbkdf2_hmac_sha1_128 (char *out, unsigned long count,
-			      const krb5_data *pass, const krb5_data *salt);
-extern krb5_error_code
-krb5int_pbkdf2_hmac_sha1_256 (char *out, unsigned long count,
-			      const krb5_data *pass, const krb5_data *salt);
-
-
-
+		unsigned long count, const krb5_data *output);
 
 static int debug_hmac = 0;
 
@@ -161,12 +149,12 @@ F(char *output, char *u_tmp1, char *u_tmp2,
     return 0;
 }
 
-krb5_error_code
+static krb5_error_code
 krb5int_pbkdf2 (krb5_error_code (*prf)(krb5_keyblock *, krb5_data *,
 				       krb5_data *),
 		size_t hlen,
 		const krb5_data *pass, const krb5_data *salt,
-		unsigned long count, krb5_data *output)
+		unsigned long count, const krb5_data *output)
 {
     int l, r, i;
     char *utmp1, *utmp2;
@@ -257,24 +245,4 @@ krb5int_pbkdf2_hmac_sha1 (const krb5_data *out, unsigned long count,
 			  const krb5_data *pass, const krb5_data *salt)
 {
     return krb5int_pbkdf2 (foo, 20, pass, salt, count, out);
-}
-
-krb5_error_code
-krb5int_pbkdf2_hmac_sha1_128 (char *out, unsigned long count,
-			      const krb5_data *pass, const krb5_data *salt)
-{
-    krb5_data out_d;
-    out_d.data = out;
-    out_d.length = 16;
-    return krb5int_pbkdf2 (foo, 20, pass, salt, count, &out_d);
-}
-
-krb5_error_code
-krb5int_pbkdf2_hmac_sha1_256 (char *out, unsigned long count,
-			      const krb5_data *pass, const krb5_data *salt)
-{
-    krb5_data out_d;
-    out_d.data = out;
-    out_d.length = 32;
-    return krb5int_pbkdf2 (foo, 20, pass, salt, count, &out_d);
 }

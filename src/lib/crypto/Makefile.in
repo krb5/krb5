@@ -412,7 +412,8 @@ etypes.so etypes.po $(OUTPRE)etypes.$(OBJEXT): etypes.c $(SRCTOP)/include/k5-int
   $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
   $(BUILDTOP)/include/profile.h $(srcdir)/enc_provider/enc_provider.h \
   $(srcdir)/hash_provider/hash_provider.h etypes.h $(srcdir)/old/old.h \
-  $(srcdir)/raw/raw.h $(srcdir)/dk/dk.h $(srcdir)/arcfour/arcfour.h
+  $(srcdir)/raw/raw.h $(srcdir)/dk/dk.h $(srcdir)/arcfour/arcfour.h \
+  $(srcdir)/aes/aes_s2k.h
 hmac.so hmac.po $(OUTPRE)hmac.$(OBJEXT): hmac.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(SRCTOP)/include/port-sockets.h \
