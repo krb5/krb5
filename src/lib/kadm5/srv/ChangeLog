@@ -1,3 +1,8 @@
+Tue Oct 10 03:09:27 2000  Ezra Peisach  <epeisach@mit.edu>
+
+	* server_dict.c (init_dict): Change syslog() to krb5_klog_syslog()
+ 	so that errors go to the intended place as indicated by krb5.conf.
+
 2000-06-30  Tom Yu  <tlyu@mit.edu>
 
 	* adb_openclose.c (osa_adb_create_db): Default to btree.
