@@ -999,6 +999,7 @@ krb5_ktfileint_open(krb5_context context, krb5_keytab id, int mode)
     krb5_kt_vno kt_vno;
     int writevno = 0;
 
+    errno = 0;
     KTFILEP(id) = fopen(KTFILENAME(id),
 			(mode == KRB5_LOCKMODE_EXCLUSIVE) ?
 			  fopen_mode_rbplus : fopen_mode_rb);
@@ -1006,12 +1007,13 @@ krb5_ktfileint_open(krb5_context context, krb5_keytab id, int mode)
 	if ((mode == KRB5_LOCKMODE_EXCLUSIVE) && (errno == ENOENT)) {
 	    /* try making it first time around */
             krb5_create_secure_file(context, KTFILENAME(id));
+	    errno = 0;
 	    KTFILEP(id) = fopen(KTFILENAME(id), fopen_mode_rbplus);
 	    if (!KTFILEP(id))
-		return errno ? errno : ENFILE;
+		return errno ? errno : EMFILE;
 	    writevno = 1;
 	} else				/* some other error */
-	    return errno ? errno : ENFILE;
+	    return errno ? errno : EMFILE;
     }
     if ((kerror = krb5_lock_file(context, fileno(KTFILEP(id)), mode))) {
 	(void) fclose(KTFILEP(id));

@@ -1,3 +1,10 @@
+2004-11-23  Tom Yu  <tlyu@mit.edu>
+
+	* kt_file.c (krb5_ktfileint_open): Update previous change by
+	explicitly setting errno=0 prior to calling fopen().  Also, return
+	EMFILE, not ENFILE, for compatibility with Solaris 8, which does
+	set errno when out of file descriptors.
+
 2004-11-19  Tom Yu  <tlyu@mit.edu>
 
 	* kt_file.c (krb5_ktfileint_open): Patch from Roland Dowdeswell to
