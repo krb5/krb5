@@ -1,3 +1,8 @@
+Sun Nov 24 23:55:52 1996  Ezra Peisach  (epeisach@mit.edu)
+
+	* build.texinfo: Remove --with-kdb-db section as it does not
+	exist. Add --with-tcl info.
+
 Tue Nov 19 13:42:00 1996  Barry Jaspan  <bjaspan@mit.edu>
 
 	* install.texinfo, build.texinfo: misc suggestions from jhawk

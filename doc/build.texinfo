@@ -281,22 +281,12 @@ you're using slave servers!!!  It also causes the database to be
 modified (and thus needing to be locked) frequently. Please note that
 the implementors do not regularly test this feature.
 
-@item --with-kdb-db=database 
+@item --with-tcl=TCLPATH
 
-The configuration process will try to determine a working set of
-libraries required to implement the Kerberos database. Configure will
-look for interfaces that use or emulate a @samp{ndbm} or @samp{dbm}
-library. Failing that, a build in copy of the Berkeley DB code will be
-used. You may decide to compile a different interface than the default
-by specifying one of "ndbm", "dbm", or "db". 
-
-An important note on platforms where the @samp{ndbm} implementation is
-based on @sc{GDBM} (such as the Linux Slackware distribution). @sc{GDBM}
-has its own built in file locking which prevents simultaneous access to
-the database from two separate processes in which one wants to modify
-the database while the otherone only wants to read. (i.e. the KDC and
-administrative servers). In this case, you will need to specify the use
-of the Berkeley DB.
+Some of the unit-tests in the build tree rely upon using a program in
+Tcl. The directory specified by @code{TCLPATH} specifies where the Tcl
+header file (@file{/TCLPATH/include/tcl.h} as well as where the Tcl
+library should be found (@file{/TCLPATH/lib}).
 
 @end table
 
