@@ -19,7 +19,7 @@
 #include <sys/stat.h>
 #include <sys/file.h>
 #include <string.h>
-#ifdef USE_UNISTD_H
+#ifdef HAS_UNISTD_H
 #include <unistd.h>
 #endif
 #ifdef __SCO__

@@ -1,3 +1,8 @@
+Fri Apr 28 01:55:18 1995  Mark W. Eichin  <eichin@cygnus.com>
+
+	* kuserok.c: HAS_UNISTD_H instead of USE_.
+	* configure.in: test for HAVE_STRSAVE (for kparse.c).
+
 Fri Apr 28 01:38:42 1995  Mark W. Eichin  <eichin@cygnus.com>
 
 	* configure.in: use AC_CHECK_SIZEOF(int) to set BITS16/BITS32.

@@ -37,6 +37,7 @@ if test $ac_cv_sizeof_int = 2; then
 else
 	AC_DEFINE(BITS32)
 fi
+AC_FUNC_CHECK(strsave,AC_DEFINE(HAVE_STRSAVE))
 ET_RULES
 SubdirLibraryRule([$(OBJS)])
 KRB_INCLUDE
