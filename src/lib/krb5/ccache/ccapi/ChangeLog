@@ -1,3 +1,9 @@
+1999-08-03	Alexandra Ellwood <lxs@mit.edu>
+	
+	* stdcc.c (krb5_stdcc_destroy):
+		Added code to free the krb5_ccache like krb5_stdcc_close does 
+		so we don't leak memory.
+		
 1999-06-10  Danilo Almeida  <dalmeida@mit.edu>
 
 	* stdcc.c (cache_changed): Use PostMessage instead of SendMessage
