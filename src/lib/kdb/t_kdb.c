@@ -967,6 +967,9 @@ do_testing(db, passes, verbose, timing, rcases, check, save_db, dontclean,
 			programname);
 	}
     }
+
+    krb5_free_context(kcontext);
+
     return((kret) ? 1 : 0);
 }
 

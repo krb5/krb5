@@ -1,3 +1,7 @@
+Mon Oct 13 10:18:19 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* t_kdb.c (do_testing): Add krb5_free_context.
+
 Mon Sep 15 15:05:30 1997  Ezra Peisach  <epeisach@mit.edu>
 
 	* keytab.c: (krb5_ktkdb_get_entry): Incoming principal is const.
