@@ -8,23 +8,6 @@ static char *rcsid = "$Header$";
  * $Header$
  *
  *
- * $Log$
- * Revision 1.2  1994/06/15 21:14:45  eichin
- * step 2: bcmp->memcmp
- *
- * Revision 1.1  1994/06/10 03:27:52  eichin
- * autoconfed isode for kerberos work
- *
- * Revision 1.1  94/06/10  03:16:22  eichin
- * autoconfed isode for kerberos work
- * 
- * Revision 1.1  1994/05/31 20:34:23  eichin
- * reduced-isode release from /mit/isode/isode-subset/src
- *
- * Revision 8.0  91/07/17  12:18:06  isode
- * Release 7.0
- * 
- * 
  */
 
 /*
@@ -282,7 +265,7 @@ unrealNS: ;
 		      ("NSAP address too long: %d octets", len));
 		return NOTOK;
 	    }
-	    bcopy (p, na -> na_address, na -> na_addrlen = len);
+	    memcpy (na -> na_address, p, na -> na_addrlen = len);
 	}
     }
 

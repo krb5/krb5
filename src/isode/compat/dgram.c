@@ -325,8 +325,8 @@ struct sockaddr *sock;
 
 	up = &peers[sd];
 #ifdef	BSD44
-	bcopy (qb -> qb_base, (caddr_t) sock,
-	       ((struct sockaddr *) qb -> qb_base) -> sa_len);
+	memcpy ((caddr_t) sock, qb -> qb_base,
+		((struct sockaddr *) qb -> qb_base) -> sa_len);
 #else
 	*sock = *((struct sockaddr *) qb -> qb_base);	/* struct copy */
 #endif
@@ -341,7 +341,7 @@ struct sockaddr *sock;
 #ifdef	BSD44
     if (sock -> sa_len == 0)
 	sock -> sa_len = sizeof *sock;
-    bcopy ((caddr_t) sock, (caddr_t) &up -> dgram_peer, sock -> sa_len);
+    memcpy ((caddr_t) &up -> dgram_peer, (caddr_t) sock, sock -> sa_len);
     {
 	struct sockaddr_in *sin;
 
@@ -422,7 +422,7 @@ struct  sockaddr *sock;
 #ifdef	BSD44
     if (sock -> sa_len == 0)
 	sock -> sa_len = sizeof *sock;
-    bcopy ((caddr_t) sock, (caddr_t) &up -> dgram_peer, sock -> sa_len);
+    memcpy ((caddr_t) &up -> dgram_peer, (caddr_t) sock, sock -> sa_len);
     up -> dgram_addrlen = 0;
 #else
     up -> dgram_peer.sa = *sock;	/* struct copy */

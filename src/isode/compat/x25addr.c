@@ -9,23 +9,6 @@ static char *rcsid = "$Header$";
  *
  * Contributed by George Michaelson, Julian Onions, and John Pavel
  *
- *
- * $Log$
- * Revision 1.2  1994/06/15 20:59:33  eichin
- * step 1: bzero->memset(,0,)
- *
- * Revision 1.1  1994/06/10 03:28:53  eichin
- * autoconfed isode for kerberos work
- *
- * Revision 1.1  94/06/10  03:17:16  eichin
- * autoconfed isode for kerberos work
- * 
- * Revision 1.1  1994/05/31 20:35:13  eichin
- * reduced-isode release from /mit/isode/isode-subset/src
- *
- * Revision 8.0  91/07/17  12:18:24  isode
- * Release 7.0
- * 
  * 
  */
 
@@ -108,20 +91,20 @@ int             context;
 	if ( strncmp(generic -> na_dte, x25_dnic_prefix,
 	    i = strlen(x25_dnic_prefix)) == 0 )
 	    {
-	    if (x25_strip_dnic) bcopy(generic -> na_dte + i, dte, dtelen =
-		generic -> na_dtelen - i);
-	    else bcopy (generic -> na_dte, dte, dtelen = generic -> na_dtelen);
+	    if (x25_strip_dnic) memcpy(dte, generic -> na_dte + i,
+				       dtelen = generic -> na_dtelen - i);
+	    else memcpy(dte, generic -> na_dte, dtelen = generic -> na_dtelen);
 	    }
 	else
 	    if (x25_intl_zero)
 		{
-		bcopy(generic -> na_dte, dte + 1, dtelen = generic-> na_dtelen);
+		memcpy(dte + 1, generic -> na_dte, dtelen = generic-> na_dtelen);
 		*dte = '0', dtelen++;
 		}
-	    else bcopy(generic -> na_dte, dte, dtelen = generic -> na_dtelen);
+	    else memcpy(dte, generic -> na_dte, dtelen = generic -> na_dtelen);
 
     }
-    else bcopy (generic -> na_dte, dte, dtelen = generic -> na_dtelen);
+    else memcpy (dte, generic -> na_dte, dtelen = generic -> na_dtelen);
     dte[dtelen] = NULL;
 
 #ifdef	SUN_X25_HACK
@@ -161,8 +144,8 @@ int             context;
 	if ( strncmp(generic -> na_dte, x25_local_dte,
 	    i = strlen(x25_local_dte)) == 0 ) 
 	    {
-	    bcopy(generic -> na_dte + i, dte, dtelen =
-		generic -> na_dtelen - i);
+	    memcpy(dte, generic -> na_dte + i, dtelen =
+		   generic -> na_dtelen - i);
     	    dte[dtelen] = NULL;
 	    }
 	}
@@ -180,21 +163,21 @@ int             context;
 
 #ifdef UBC_X25
     if ((specific -> xaddr_len = dtelen) != 0)  {
-	bcopy (dte, specific -> xaddr_addr,
-	       dtelen);
+	memcpy (specific -> xaddr_addr, dte,
+		dtelen);
 	specific -> xaddr_len = dtelen;
 	specific -> xaddr_facilities = 0;
-	bcopy (generic -> na_pid, specific -> xaddr_proto,
-	       generic -> na_pidlen);
-	bcopy (generic -> na_cudf, specific -> xaddr_userdata,
-	       generic -> na_cudflen);
+	memcpy (specific -> xaddr_proto, generic -> na_pid,
+		generic -> na_pidlen);
+	memcpy (specific -> xaddr_userdata, generic -> na_cudf,
+		generic -> na_cudflen);
     }
 #endif
 
 #ifdef HPUX_X25
     if ((dtelen != 1) || (dte [0] != '0'))
-	bcopy (dte, specific -> addr.x25_host,
-	       specific -> addr.x25hostlen = dtelen);
+	memcpy (specific -> addr.x25_host, dte,
+		specific -> addr.x25hostlen = dtelen);
 
     /* Zero PID */
     if (generic -> na_pidlen) { /* non-null PID */
@@ -204,10 +187,10 @@ int             context;
 	    return (CONN_DB *)0;
 	} else {
 	    memset((char *)specific -> addr.x25pid, 0, NPSIZE);
-	    bcopy (generic -> na_pid, (char *)specific -> addr.x25pid,
-		   specific -> addr.x25pidlen = generic -> na_pidlen);
-	    bcopy (generic -> na_pid, (char *)specific -> cudf.x25_cu_data,
-		   specific -> cudf.x25_cud_len = generic -> na_pidlen);
+	    memcpy ((char *)specific -> addr.x25pid, generic -> na_pid,
+		    specific -> addr.x25pidlen = generic -> na_pidlen);
+	    memcpy ((char *)specific -> cudf.x25_cu_data, generic -> na_pid,
+		    specific -> cudf.x25_cud_len = generic -> na_pidlen);
 	}
 	/* copy in CUDF */
 	if (generic -> na_cudflen) {
@@ -219,28 +202,27 @@ int             context;
 		       X25_MAX_CU_LEN));
 		return (CONN_DB *)0;
 	    } else {
-		bcopy (generic -> na_cudf,
-		       &specific -> cudf.x25_cu_data [specific -> cudf.x25_cud_len]
-		       ,
-		       generic -> na_cudflen);
+		memcpy (&specific -> cudf.x25_cu_data [specific -> cudf.x25_cud_len],
+			generic -> na_cudf,
+			generic -> na_cudflen);
 		specific -> cudf.x25_cud_len += generic -> na_cudflen;
 	    }
 	}
     } else {
 	/* PID ws empty, use first four Byte of cudf */
 	/* CUDF has PID - I hope so */
-	bcopy (generic -> na_cudf, specific -> addr.x25pid,
-	       specific -> addr.x25pidlen =
-	       (generic -> na_cudflen <= NPSIZE) ?
-	       generic -> na_cudflen : NPSIZE);
+	memcpy (specific -> addr.x25pid, generic -> na_cudf,
+		specific -> addr.x25pidlen =
+		(generic -> na_cudflen <= NPSIZE) ?
+		generic -> na_cudflen : NPSIZE);
 	if (generic -> na_cudflen > X25_MAX_CU_LEN) {
 	    SLOG (compat_log, LLOG_EXCEPTIONS, NULLCP,
 		  ("CALL-USERDATA too long (%d > %d)",
 		   generic -> na_cudflen - NPSIZE, X25_MAX_CU_LEN));
 	    return (CONN_DB *)0;
 	} else
-	    bcopy (generic -> na_cudf, specific -> cudf.x25_cu_data,
-		   specific -> cudf.x25_cud_len = generic -> na_cudflen);
+	    memcpy (specific -> cudf.x25_cu_data, generic -> na_cudf,
+		    specific -> cudf.x25_cud_len = generic -> na_cudflen);
     }
 
 #endif
@@ -256,16 +238,16 @@ int             context;
 	    return (CONN_DB *)0;
 	} else {
 	    memset((char *)specific -> data, 0, NPSIZE);
-	    bcopy (generic -> na_pid, (char *)specific -> data,
-		   generic -> na_pidlen);
-	    bcopy (generic -> na_cudf, (char *) specific -> data + NPSIZE,
-		   generic -> na_cudflen);
+	    memcpy ((char *)specific -> data, generic -> na_pid,
+		    generic -> na_pidlen);
+	    memcpy ((char *) specific -> data + NPSIZE, generic -> na_cudf,
+		    generic -> na_cudflen);
 	    specific -> datalen = generic -> na_pidlen + generic -> na_cudflen;
 	}
     } else { /* Null PID (just copy in CUDF, the first four octets of which
 		will be the PID in any case) */
-	 bcopy (generic -> na_cudf, (char *)specific -> data,
-		generic -> na_cudflen);
+	 memcpy ((char *)specific -> data, generic -> na_cudf,
+		 generic -> na_cudflen);
 	 specific -> datalen = generic -> na_cudflen;
     }
 #endif
@@ -292,7 +274,7 @@ int             context;
 	    }
 	    else {
 		iov -> iov_len = dtelen+1;
-		bcopy(dte, (iov -> iov_base)+1, dtelen);
+		memcpy((iov -> iov_base)+1, dte, dtelen);
 		*(iov -> iov_base) = x25_outgoing_port;
 	    }
 	    break;
@@ -309,8 +291,8 @@ int             context;
 		{                       /* listen on a PID */
 		register int i;
 		iov -> iov_base[0] = 'C';
-		bcopy(generic -> na_pid, iov -> iov_base + 1,
-		    i = generic -> na_pidlen);
+		memcpy(iov -> iov_base + 1, generic -> na_pid,
+		       i = generic -> na_pidlen);
 		iov -> iov_len = i + 1;
 		}
 	    else
@@ -318,13 +300,13 @@ int             context;
 		{           /* listen on a subaddress */
 		register int i;
 		iov -> iov_base[0] = 'S';
-		bcopy(generic -> na_dte, iov -> iov_base + 1,
-		    i = generic -> na_dtelen);
+		memcpy(iov -> iov_base + 1, generic -> na_dte,
+		       i = generic -> na_dtelen);
 		iov -> iov_len = i + 1;
 		}
 	    else    /* full DTE */
-		bcopy(dte, iov -> iov_base,
-		    iov -> iov_len = dtelen);
+		memcpy(iov -> iov_base, dte,
+		       iov -> iov_len = dtelen);
 	    return (specific);
     }
     /*
@@ -336,11 +318,11 @@ int             context;
 
     (iov = &(specific -> ccl_iovec[2])) -> iov_len = 0;
     if (generic -> na_faclen != 0)
-	bcopy (generic -> na_fac, 0, iov -> iov_base,
-	    iov -> iov_len = min( generic -> na_faclen, FACSIZE) );
+	memcpy ( iov -> iov_base, generic -> na_fac,
+		iov -> iov_len = min( generic -> na_faclen, FACSIZE) );
     iov++;
     if ( (iov -> iov_len = generic -> na_pidlen) != 0)
-	bcopy (generic -> na_pid, iov -> iov_base, generic -> na_pidlen);
+	memcpy ( iov -> iov_base, generic -> na_pid, generic -> na_pidlen);
 
     /*
      * if there is any other user data add that in now...
@@ -349,29 +331,29 @@ int             context;
      */
 
     if (generic -> na_cudflen != 0)
-	bcopy(generic -> na_cudf, iov -> iov_base + iov -> iov_len,
-	    generic -> na_cudflen), iov -> iov_len += generic -> na_cudflen;
+	memcpy(iov -> iov_base + iov -> iov_len, generic -> na_cudf,
+	       generic -> na_cudflen), iov -> iov_len += generic -> na_cudflen;
 #endif
 
 #ifdef	ULTRIX_X25
     if (generic -> na_dtelen  != 0) {
         specific -> na_dtelen = specific -> na_pidlen 
 		= specific -> na_cudflen = 0;
-	bcopy (generic -> na_dte, 
-	       specific -> na_dte, 
-	       specific -> na_dtelen = generic -> na_dtelen);
+	memcpy (specific -> na_dte,
+		generic -> na_dte, 
+		specific -> na_dtelen = generic -> na_dtelen);
         /*
          * concatenate PID and CUDF into CUDF buffer.
          */
         if (generic -> na_pidlen > 0) {
-	    bcopy (generic -> na_pid, 
-		   specific -> na_cudf, 
-	           specific -> na_cudflen = generic -> na_pidlen);
+	    memcpy (specific -> na_cudf,
+		    generic -> na_pid, 
+		    specific -> na_cudflen = generic -> na_pidlen);
         }
         if (generic -> na_cudflen > 0) {
-	    bcopy (generic -> na_cudf, 
-	           specific -> na_cudf + specific -> na_pidlen, 
-	           generic -> na_cudflen);
+	    memcpy (specific -> na_cudf + specific -> na_pidlen,
+		    generic -> na_cudf, 
+		    generic -> na_cudflen);
 	    specific -> na_cudflen += generic -> na_cudflen;
         }
     }
@@ -407,13 +389,13 @@ int             context;
 
 #ifdef UBC_X25
     if (specific -> xaddr_len  != 0) {
-	bcopy (specific -> xaddr_addr, dte, specific -> xaddr_len);
+	memcpy (dte, specific -> xaddr_addr, specific -> xaddr_len);
 	dtelen = specific -> xaddr_len;
-	bcopy (specific -> xaddr_proto, generic -> na_pid,
-				sizeof(specific -> xaddr_proto));
+	memcpy (generic -> na_pid, specific -> xaddr_proto,
+		sizeof(specific -> xaddr_proto));
 	generic -> na_pidlen = sizeof specific -> xaddr_proto;
-	bcopy (specific -> xaddr_userdata, generic -> na_cudf,
-				sizeof(specific -> xaddr_userdata));
+	memcpy (generic -> na_cudf, specific -> xaddr_userdata,
+		sizeof(specific -> xaddr_userdata));
 	generic -> na_cudflen = sizeof specific -> xaddr_userdata;
     }
 #endif
@@ -422,15 +404,15 @@ int             context;
     dtelen = bcd2char (specific -> host, dte, (int) specific -> hostlen);
 
     if (specific -> datalen > NPSIZE) { /* have some real user data after the PID */
-	bcopy((char *)specific -> data, generic -> na_pid,
-	      generic -> na_pidlen = NPSIZE);
-	bcopy((char *) specific -> data + generic -> na_pidlen,
-	      generic -> na_cudf,
-	      generic -> na_cudflen = specific -> datalen - generic -> na_pidlen);
+	memcpy(generic -> na_pid, (char *)specific -> data,
+	       generic -> na_pidlen = NPSIZE);
+	memcpy(generic -> na_cudf, 
+	       (char *) specific -> data + generic -> na_pidlen,
+	       generic -> na_cudflen = specific -> datalen - generic -> na_pidlen);
     }
     else { /* PID only */
-	bcopy((char *)specific -> data, generic -> na_pid,
-	      generic -> na_pidlen = specific -> datalen);
+	memcpy(generic -> na_pid, (char *)specific -> data,
+	       generic -> na_pidlen = specific -> datalen);
 	generic -> na_cudflen = 0;
     }
 
@@ -438,8 +420,8 @@ int             context;
 
 #ifdef HPUX_X25
     if (specific -> addr.x25hostlen)
-	bcopy (specific -> addr.x25_host, dte,
-	       dtelen = specific -> addr.x25hostlen);
+	memcpy (dte, specific -> addr.x25_host,
+		dtelen = specific -> addr.x25hostlen);
     else {
 	dte [0] = '0';
 	dte [1] = NULL;
@@ -451,12 +433,12 @@ int             context;
 	      ("PID too long (%d > %d)", specific -> addr.x25pidlen, NPSIZE));
 	specific -> addr.x25pidlen = NPSIZE;
     }
-    bcopy((char *)specific -> addr.x25pid, generic -> na_pid,
-	  generic -> na_pidlen = specific -> addr.x25pidlen);
+    memcpy(generic -> na_pid, (char *)specific -> addr.x25pid,
+	   generic -> na_pidlen = specific -> addr.x25pidlen);
 
     if (specific -> cudf.x25_cud_len) {
-	bcopy (specific -> cudf.x25_cu_data, generic -> na_cudf,
-	       generic -> na_cudflen = specific -> cudf.x25_cud_len);
+	memcpy (generic -> na_cudf, specific -> cudf.x25_cu_data,
+		generic -> na_cudflen = specific -> cudf.x25_cud_len);
     }
 #endif
 
@@ -484,12 +466,12 @@ int             context;
 				dtelen = 0;
 			else {
 				dtelen = iov -> iov_len;
-				bcopy (a, dte, dtelen);
+				memcpy (dte, a, dtelen);
 			}
 		}
 		else {
 			dtelen = iov -> iov_len - 1;
-			bcopy ((iov -> iov_base)+1, dte,
+			memcpy (dte, (iov -> iov_base)+1,
 				dtelen);
 		}
 	}
@@ -500,7 +482,7 @@ int             context;
 	iov = &(specific -> ccl_iovec[0]);
 	if (iov -> iov_len) {
 		dtelen = iov -> iov_len -1;
-		bcopy ((iov -> iov_base)+1, dte,
+		memcpy (dte, (iov -> iov_base)+1,
 			dtelen);
 	}
 	else dtelen = 0;
@@ -511,22 +493,22 @@ int             context;
     }
 
     if ( (iov = &(specific -> ccl_iovec[2])) -> iov_len )
-	bcopy( iov -> iov_base, generic -> na_fac,
-	    generic -> na_faclen = min( iov -> iov_len, FACSIZE));
+	memcpy(generic -> na_fac,  iov -> iov_base,
+	       generic -> na_faclen = min( iov -> iov_len, FACSIZE));
 
     if ( ++iov -> iov_len)
 	{
-	bcopy( iov -> iov_base, generic -> na_pid,
-	    generic -> na_pidlen = min( iov -> iov_len, NPSIZE));
+	memcpy(generic -> na_pid,  iov -> iov_base,
+	       generic -> na_pidlen = min( iov -> iov_len, NPSIZE));
 	if ( iov -> iov_len > NPSIZE)
-	    bcopy( iov -> iov_base + NPSIZE, generic -> na_cudf,
-		generic -> na_cudflen = min(iov -> iov_len - NPSIZE, CUDFSIZE));
+	    memcpy(generic -> na_cudf,  iov -> iov_base + NPSIZE,
+		   generic -> na_cudflen = min(iov -> iov_len - NPSIZE, CUDFSIZE));
 	}
 #endif
 
 #ifdef	ULTRIX_X25
     if (specific -> na_dtelen  > 0) {
-	bcopy (specific -> na_dte, dte, specific -> na_dtelen);
+	memcpy (dte, specific -> na_dte, specific -> na_dtelen);
 	dtelen = specific -> na_dtelen;
 
 	/*
@@ -534,14 +516,14 @@ int             context;
 	 * bytes into pid field and shift remainder down.
 	 */
 	if (specific -> na_cudflen > 0) {
-	    bcopy(specific -> na_cudf, 
-		  generic -> na_pid, 
-		  generic -> na_pidlen = (specific -> na_cudflen <= NPSIZE ? 
-		   			  specific -> na_cudflen : NPSIZE));
+	    memcpy(generic -> na_pid,
+		   specific -> na_cudf, 
+		   generic -> na_pidlen = (specific -> na_cudflen <= NPSIZE ? 
+					   specific -> na_cudflen : NPSIZE));
 	    if (specific -> na_cudflen > NPSIZE) {
-	        bcopy(specific -> na_cudf + NPSIZE, 
-		      generic -> na_cudf, 
-		      generic -> na_cudflen = specific -> na_cudflen - NPSIZE);
+	        memcpy(generic -> na_cudf,
+		       specific -> na_cudf + NPSIZE, 
+		       generic -> na_cudflen = specific -> na_cudflen - NPSIZE);
 	    }
 	} else {
 	    generic -> na_pidlen = 0;
@@ -563,14 +545,14 @@ int             context;
 		    && *x25_dnic_prefix
 		    && x25_strip_dnic
 		    && dtelen < 12)   /* local call... */
-		bcopy (x25_dnic_prefix, generic -> na_dte,
-		       generic -> na_dtelen = strlen (x25_dnic_prefix));
+		memcpy (generic -> na_dte, x25_dnic_prefix,
+			generic -> na_dtelen = strlen (x25_dnic_prefix));
 
-	bcopy (dte + i, generic -> na_dte + generic -> na_dtelen, dtelen - i);
+	memcpy (generic -> na_dte + generic -> na_dtelen, dte + i, dtelen - i);
 	generic -> na_dtelen += dtelen - i;
     }
     else
-	bcopy (dte, generic -> na_dte, generic -> na_dtelen = dtelen);
+	memcpy (generic -> na_dte, dte, generic -> na_dtelen = dtelen);
 
     DLOG (x25_log, LLOG_DEBUG,
 	   ("if2gen %s -> %s, %d octets; PID %s",

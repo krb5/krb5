@@ -11,6 +11,9 @@ static char *rcsid = "$Header$";
  *
  *
  * $Log$
+ * Revision 1.2  1994/06/15 22:59:15  eichin
+ * step 3: bcopy->memcpy or memmove (chose by hand), twiddle args
+ *
  * Revision 1.1  1994/06/10 03:28:45  eichin
  * autoconfed isode for kerberos work
  *
@@ -288,7 +291,7 @@ char    *buffer;
     do {
 	count = len > X25_PACKETSIZE ? X25_PACKETSIZE : len;
 	mybuffer[0] = len > X25_PACKETSIZE ? X25_MBIT : 0;
-	bcopy (p, &mybuffer[1], count);
+	memcpy (&mybuffer[1], p, count);
 	switch (cc = write (fd, mybuffer, count + 1))
 	{
 	    case NOTOK:

@@ -614,8 +614,9 @@ handle_dsp: ;
 
 				    if (ta -> ta_naddr >= NTADDR)
 					goto too_many;
-				    bcopy ((char *) (na - 1), (char *) na,
-					   sizeof *na);
+				    /* just copy one */
+				    memcpy ((char *) na, (char *) (na - 1),
+					    sizeof *na);
 				    (void) strcpy (na -> na_domain,
 					  inet_ntoa (*(struct in_addr *) *ap));
 				}
@@ -707,24 +708,24 @@ next: ;
     
     switch (sp - sels) {
         case 3:	/* PSEL+SSEL+TSEL */
-	    bcopy (*--sp, ta -> ta_selector,
-		   ta -> ta_selectlen = *--lp);
-	    bcopy (*--sp, sa -> sa_selector,
-		   sa -> sa_selectlen = *--lp);
-	    bcopy (*--sp, pa -> pa_selector,
-		   pa -> pa_selectlen = *--lp);
+	    memcpy (ta -> ta_selector, *--sp,
+		    ta -> ta_selectlen = *--lp);
+	    memcpy (sa -> sa_selector, *--sp,
+		    sa -> sa_selectlen = *--lp);
+	    memcpy (pa -> pa_selector, *--sp,
+		    pa -> pa_selectlen = *--lp);
 	    break;
 
 	case 2:	/* SSEL+TSEL */
-	    bcopy (*--sp, ta -> ta_selector,
-		   ta -> ta_selectlen = *--lp);
-	    bcopy (*--sp, sa -> sa_selector,
-		   sa -> sa_selectlen = *--lp);
+	    memcpy (ta -> ta_selector, *--sp,
+		    ta -> ta_selectlen = *--lp);
+	    memcpy (sa -> sa_selector, *--sp,
+		    sa -> sa_selectlen = *--lp);
 	    break;
 
 	case 1:	/* TSEL */
-	    bcopy (*--sp, ta -> ta_selector,
-		   ta -> ta_selectlen = *--lp);
+	    memcpy (ta -> ta_selector, *--sp,
+		    ta -> ta_selectlen = *--lp);
 	    break;
 
 	default:

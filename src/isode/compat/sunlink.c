@@ -10,23 +10,6 @@ static char *rcsid = "$Header$";
  * Contributed by John Pavel, Department of Trade and Industry/National
  * Physical Laboratory in the UK
  * much hacked my others since then - i.e., don't blame John!
- *
- *
- * $Log$
- * Revision 1.2  1994/06/15 20:59:28  eichin
- * step 1: bzero->memset(,0,)
- *
- * Revision 1.1  1994/06/10 03:28:39  eichin
- * autoconfed isode for kerberos work
- *
- * Revision 1.1  94/06/10  03:17:02  eichin
- * autoconfed isode for kerberos work
- * 
- * Revision 1.1  1994/05/31 20:34:59  eichin
- * reduced-isode release from /mit/isode/isode-subset/src
- *
- * Revision 8.0  91/07/17  12:18:20  isode
- * Release 7.0
  * 
  * 
  */
@@ -145,9 +128,9 @@ int     backlog,
 		local -> na_pidlen = NPSIZE;
 	    *sock = *xs;	/* struct copy */
 	    memset((char *) sock -> data, 0, NPSIZE);
-	    bcopy (local -> na_pid, (char *) sock -> data, local -> na_pidlen);
-	    bcopy (local -> na_cudf, (char *) sock -> data + NPSIZE,
-		   local -> na_cudflen);
+	    memcpy ((char *) sock -> data, local -> na_pid, local -> na_pidlen);
+	    memcpy ((char *) sock -> data + NPSIZE, local -> na_cudf,
+		    local -> na_cudflen);
 	    sock -> datalen = local -> na_pidlen + local -> na_cudflen;
 	}
 	else

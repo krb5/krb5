@@ -7,24 +7,6 @@ static char *rcsid = "$Header$";
 /* 
  * $Header$
  *
- *
- * $Log$
- * Revision 1.2  1994/06/15 20:59:21  eichin
- * step 1: bzero->memset(,0,)
- *
- * Revision 1.1  1994/06/10 03:27:46  eichin
- * autoconfed isode for kerberos work
- *
- * Revision 1.1  94/06/10  03:16:16  eichin
- * autoconfed isode for kerberos work
- * 
- * Revision 1.1  1994/05/31 20:34:18  eichin
- * reduced-isode release from /mit/isode/isode-subset/src
- *
- * Revision 8.0  91/07/17  12:18:04  isode
- * Release 7.0
- * 
- * 
  */
 
 /*
@@ -150,7 +132,7 @@ register struct NSAPaddr *na;
 
     cp = nsap, dp = ca -> na_address;
     if (ts) {
-	bcopy (ts -> ts_prefix, dp, ts -> ts_length);
+	memcpy (dp, ts -> ts_prefix, ts -> ts_length);
 	dp += ts -> ts_length;
     }
     while (*cp) {

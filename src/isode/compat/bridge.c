@@ -9,24 +9,6 @@ static char *rcsid = "$Header$";
  *
  * Contributed by Julian Onions, Nottingham University in the UK
  *
- *
- * $Log$
- * Revision 1.2  1994/06/15 20:59:09  eichin
- * step 1: bzero->memset(,0,)
- *
- * Revision 1.1  1994/06/10 03:26:59  eichin
- * autoconfed isode for kerberos work
- *
- * Revision 1.1  94/06/10  03:15:25  eichin
- * autoconfed isode for kerberos work
- * 
- * Revision 1.1  1994/05/31 20:33:32  eichin
- * reduced-isode release from /mit/isode/isode-subset/src
- *
- * Revision 8.0  91/07/17  12:17:49  isode
- * Release 7.0
- * 
- * 
  */
 
 /*
@@ -367,14 +349,14 @@ IFP	writefnx;
     if (nsap == NULLNA || (na_stack = nsap -> na_stack) != NA_BRG)
 	return NOTOK;
     na_stack = htons(na_stack);
-    bcopy ((char *)&na_stack, buffer, sizeof(na_stack));
-    bcopy (nsap -> na_dte, &buffer[2], 16);
+    memcpy (buffer, (char *)&na_stack, sizeof(na_stack));
+    memcpy (&buffer[2], nsap -> na_dte, 16);
     buffer[18] = nsap -> na_dtelen;
-    bcopy (nsap -> na_pid, &buffer[19], 4);
+    memcpy (&buffer[19], nsap -> na_pid, 4);
     buffer[23] = nsap -> na_pidlen;
-    bcopy (nsap -> na_cudf, &buffer[24], 16);
+    memcpy (&buffer[24], nsap -> na_cudf, 16);
     buffer[40] = nsap -> na_cudflen;
-    bcopy (nsap -> na_fac, &buffer[41], 6);
+    memcpy (&buffer[41], nsap -> na_fac, 6);
     buffer[47] = nsap -> na_faclen;
     if ((*writefnx) (fd, buffer, 48) != 48)
 	return NOTOK;
@@ -393,18 +375,18 @@ IFP	readfnx;
 
     if (readx (fd, buffer, 48, readfnx) != 48)
 	return NOTOK;
-    bcopy (buffer, (char *)&na_stack, sizeof(na_stack));
+    memcpy ((char *)&na_stack, buffer, sizeof(na_stack));
     na_stack = ntohs(na_stack);
     if (na_stack != NA_BRG)
 	return NOTOK;
     nsap -> na_stack = na_stack;
-    bcopy (&buffer[2], nsap -> na_dte, 16);
+    memcpy (nsap -> na_dte, &buffer[2], 16);
     nsap -> na_dtelen = buffer[18];
-    bcopy (&buffer[19], nsap -> na_pid, 4);
+    memcpy (nsap -> na_pid, &buffer[19], 4);
     nsap -> na_pidlen = buffer[23];
-    bcopy (&buffer[24], nsap -> na_cudf, 16);
+    memcpy (nsap -> na_cudf, &buffer[24], 16);
     nsap -> na_cudflen = buffer[40];
-    bcopy (&buffer[41], nsap -> na_fac, 6);
+    memcpy (nsap -> na_fac, &buffer[41], 6);
     nsap -> na_faclen = buffer[47];
     return OK;
 }
