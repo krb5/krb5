@@ -328,8 +328,9 @@ delete_fd (struct connection *xconn)
     FOREACH_ELT(connections, i, conn)
 	if (conn == xconn) {
 	    DEL(connections, i);
-	    return;
+	    break;
 	}
+    free(xconn);
 }
 
 static int
@@ -841,6 +842,7 @@ static void accept_tcp_connection(struct connection *conn, const char *prog,
 		newconn->u.tcp.addrbuf);
 	delete_fd(newconn);
 	close(s);
+	tcp_data_counter--;
 	return;
     }
     newconn->u.tcp.offset = 0;
@@ -857,7 +859,6 @@ static void accept_tcp_connection(struct connection *conn, const char *prog,
 static void
 kill_tcp_connection(struct connection *conn)
 {
-    delete_fd(conn);
     if (conn->u.tcp.response)
 	krb5_free_data(kdc_context, conn->u.tcp.response);
     if (conn->u.tcp.buffer)
@@ -873,6 +874,7 @@ kill_tcp_connection(struct connection *conn)
 	    sstate.max--;
     close(conn->fd);
     conn->fd = -1;
+    delete_fd(conn);
     tcp_data_counter--;
 }
 

@@ -24,6 +24,10 @@
  * or implied warranty.
  *
  */
+/*
+ * krb5_set_password - Implements set password per RFC 3244
+ * Added by Paul W. Nelson, Thursby Software Systems, Inc.
+ */
 
 #define NEED_SOCKETS
 #include "fake-addrinfo.h"
@@ -49,8 +53,8 @@ krb5_locate_kpasswd(krb5_context context, const krb5_data *realm,
 
     code = krb5int_locate_server (context, realm, addrlist, 0,
 				  "kpasswd_server", "_kpasswd", 0,
-				  DEFAULT_KPASSWD_PORT, 0, 0);
-    if (code) {
+				  htons(DEFAULT_KPASSWD_PORT), 0, 0);
+    if (code == KRB5_REALM_CANT_RESOLVE || code == KRB5_REALM_UNKNOWN) {
 	code = krb5int_locate_server (context, realm, addrlist, 0,
 				      "admin_server", "_kerberos-adm", 1,
 				      DEFAULT_KPASSWD_PORT, 0, 0);
@@ -69,8 +73,16 @@ krb5_locate_kpasswd(krb5_context context, const krb5_data *realm,
 }
 
 
+/*
+** The logic for setting and changing a password is mostly the same
+** krb5_change_set_password handles both cases 
+**	if set_password_for is NULL, then a password change is performed,
+**  otherwise, the password is set for the principal indicated in set_password_for
+*/
 krb5_error_code KRB5_CALLCONV
-krb5_change_password(krb5_context context, krb5_creds *creds, char *newpw, int *result_code, krb5_data *result_code_string, krb5_data *result_string)
+krb5_change_set_password(
+	krb5_context context, krb5_creds *creds, char *newpw, krb5_principal set_password_for,
+	int *result_code, krb5_data *result_code_string, krb5_data *result_string)
 {
     krb5_auth_context auth_context;
     krb5_data ap_req, chpw_req, chpw_rep;
@@ -104,7 +116,7 @@ krb5_change_password(krb5_context context, krb5_creds *creds, char *newpw, int *
 	  goto cleanup;
 
     if ((code = krb5_locate_kpasswd(context,
-                                    krb5_princ_realm(context, creds->client),
+                                    krb5_princ_realm(context, creds->server),
 				    &al)))
         goto cleanup;
 
@@ -218,14 +230,15 @@ krb5_change_password(krb5_context context, krb5_creds *creds, char *newpw, int *
 
 	if ((code = krb5_auth_con_setaddrs(context, auth_context,
 					   &local_kaddr, NULL))) {
-	    code = SOCKET_ERRNO;
-	    goto cleanup;
+	  goto cleanup;
 	}
 
-	if ((code = krb5_mk_chpw_req(context, auth_context, &ap_req,
-				     newpw, &chpw_req)))
+	if( set_password_for )
+		code = krb5int_mk_setpw_req(context, auth_context, &ap_req, set_password_for, newpw, &chpw_req);
+	else
+		code = krb5int_mk_chpw_req(context, auth_context, &ap_req, newpw, &chpw_req);
+	if (code)
 	{
-	    code = SOCKET_ERRNO;
 	    goto cleanup;
 	}
 
@@ -289,19 +302,23 @@ krb5_change_password(krb5_context context, krb5_creds *creds, char *newpw, int *
 					   NULL, &remote_kaddr)))
 	    goto cleanup;
 
-	if ((code = krb5_rd_chpw_rep(context, auth_context, &chpw_rep,
-				     &local_result_code,
-				     result_string)))
-	    goto cleanup;
+	if( set_password_for )
+		code = krb5int_rd_setpw_rep(context, auth_context, &chpw_rep, &local_result_code, result_string);
+	else
+		code = krb5int_rd_chpw_rep(context, auth_context, &chpw_rep, &local_result_code, result_string);
+	if (code)
+		goto cleanup;
 
 	if (result_code)
 	    *result_code = local_result_code;
 
 	if (result_code_string) {
-	    if ((code = krb5_chpw_result_code_string(context,
-						     local_result_code,
-						     &code_string)))
-		goto cleanup;
+		if( set_password_for )
+	    	code = krb5int_setpw_result_code_string(context, local_result_code, (const char **)&code_string);
+		else
+	    	code = krb5_chpw_result_code_string(context, local_result_code, &code_string);
+		if(code)
+			goto cleanup;
 
 	    result_code_string->length = strlen(code_string);
 	    result_code_string->data = malloc(result_code_string->length);
@@ -342,4 +359,72 @@ cleanup:
     krb5_free_data_contents(context, &ap_req);
 
     return(code);
+}
+
+krb5_error_code KRB5_CALLCONV
+krb5_change_password(krb5_context context, krb5_creds *creds, char *newpw, int *result_code, krb5_data *result_code_string, krb5_data *result_string)
+{
+	return krb5_change_set_password(
+		context, creds, newpw, NULL, result_code, result_code_string, result_string );
+}
+
+/*
+ * krb5_set_password - Implements set password per RFC 3244
+ *
+ */
+
+krb5_error_code KRB5_CALLCONV
+krb5_set_password(
+	krb5_context context,
+	krb5_creds *creds,
+	char *newpw,
+	krb5_principal change_password_for,
+	int *result_code, krb5_data *result_code_string, krb5_data *result_string
+	)
+{
+	return krb5_change_set_password(
+		context, creds, newpw, change_password_for, result_code, result_code_string, result_string );
+}
+
+krb5_error_code KRB5_CALLCONV
+krb5_set_password_using_ccache(
+	krb5_context context,
+	krb5_ccache ccache,
+	char *newpw,
+	krb5_principal change_password_for,
+	int *result_code, krb5_data *result_code_string, krb5_data *result_string
+	)
+{
+	krb5_creds		creds;
+	krb5_creds		*credsp;
+	krb5_error_code	code;
+
+/*
+** get the proper creds for use with krb5_set_password -
+*/
+	memset( &creds, 0, sizeof(creds) );
+/*
+** first get the principal for the password service -
+*/
+	code = krb5_cc_get_principal( context, ccache, &creds.client );
+	if( !code )
+	{
+		code = krb5_build_principal( context, &creds.server, 
+				krb5_princ_realm(context, change_password_for)->length,
+				krb5_princ_realm(context, change_password_for)->data,
+				"kadmin", "changepw", NULL );
+		if(!code)
+		{
+			code = krb5_get_credentials(context, 0, ccache, &creds, &credsp);
+			if( ! code )
+			{
+				code = krb5_set_password(context, credsp, newpw, change_password_for,
+					result_code, result_code_string,
+					result_string);
+				krb5_free_creds(context, credsp);
+			}
+		}
+		krb5_free_cred_contents(context, &creds);
+	}
+	return code;
 }

@@ -77,7 +77,7 @@ proc test6 {} {
     send "ovsec_kadm_init admin null \$OVSEC_KADM_ADMIN_SERVICE null \$OVSEC_KADM_STRUCT_VERSION \$OVSEC_KADM_API_VERSION_1 server_handle\n"
 
     expect {
-	{Enter password:} { }
+	-re "assword\[^\r\n\]*: *" { }
 	eof {
 		fail "$test: eof instead of password prompt"
 		api_exit
@@ -103,7 +103,7 @@ proc test7 {} {
     send "ovsec_kadm_init admin \"\" \$OVSEC_KADM_ADMIN_SERVICE null \$OVSEC_KADM_STRUCT_VERSION \$OVSEC_KADM_API_VERSION_1 server_handle\n"
 
     expect {
-	{Enter password:} { }
+	-re "assword\[^\r\n\]*: *" { }
 	-re "\n\[^\n\]+key:\[^\n\]*$" { }
 	eof {
 		fail "$test: eof instead of password prompt"

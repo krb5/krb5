@@ -49,13 +49,10 @@ typedef struct __kdc_realm_data {
     char *		realm_mpname;	/* Master principal name for realm  */
     krb5_principal	realm_mprinc;	/* Master principal for realm	    */
     krb5_keyblock	realm_mkey;	/* Master key for this realm	    */
-    krb5_kvno		realm_mkvno;	/* Master key vno for this realm    */
     /*
      * TGS per-realm data.
      */
     krb5_principal	realm_tgsprinc;	/* TGS principal for this realm	    */
-    krb5_keyblock	realm_tgskey;	/* TGS' key for this realm	    */
-    krb5_kvno		realm_tgskvno;	/* TGS' key vno for this realm	    */
     /*
      * Other per-realm data.
      */
@@ -66,8 +63,6 @@ typedef struct __kdc_realm_data {
      */
     krb5_deltat		realm_maxlife;	/* Maximum ticket life for realm    */
     krb5_deltat		realm_maxrlife;	/* Maximum renewable life for realm */
-    void		*realm_kstypes;	/* Key/Salts supported for realm    */
-    krb5_int32		realm_nkstypes;	/* Number of key/salts		    */
     krb5_boolean	realm_reject_bad_transit; /* Accept unverifiable transited_realm ? */
 } kdc_realm_t;
 
@@ -87,8 +82,6 @@ kdc_realm_t *find_realm_data (char *, krb5_ui_4);
 #define	max_renewable_life_for_realm	kdc_active_realm->realm_maxrlife
 #define	master_keyblock			kdc_active_realm->realm_mkey
 #define	master_princ			kdc_active_realm->realm_mprinc
-#define	tgs_key				kdc_active_realm->realm_tgskey
-#define	tgs_kvno			kdc_active_realm->realm_tgskvno
 #define	tgs_server_struct		*(kdc_active_realm->realm_tgsprinc)
 #define	tgs_server			kdc_active_realm->realm_tgsprinc
 #define	dbm_db_name			kdc_active_realm->realm_dbname

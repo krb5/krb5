@@ -166,7 +166,7 @@ krb5_error_code encode_krb5_authenticator(const krb5_authenticator *rep, krb5_da
 
   /* seq-number[7]		INTEGER OPTIONAL */
   if(rep->seq_number != 0)
-    krb5_addfield(rep->seq_number,7,asn1_encode_integer);
+    krb5_addfield(rep->seq_number,7,asn1_encode_unsigned_integer);
 
   /* subkey[6]			EncryptionKey OPTIONAL */
   if(rep->subkey != NULL)
@@ -305,6 +305,7 @@ krb5_error_code encode_krb5_enc_kdc_rep_part(const krb5_enc_kdc_rep_part *rep, k
 #ifdef KRB5_ENCKRB5KDCREPPART_COMPAT
   krb5_apptag(26);
 #else
+  /* XXX WRONG!!! Should use 25 || 26, not the outer KDC_REP tags! */
   if (rep->msg_type == KRB5_AS_REP) { krb5_apptag(ASN1_KRB_AS_REP); }
   else if (rep->msg_type == KRB5_TGS_REP) { krb5_apptag(ASN1_KRB_TGS_REP); }
   else return KRB5_BADMSGTYPE;
@@ -395,7 +396,7 @@ krb5_error_code encode_krb5_ap_rep_enc_part(const krb5_ap_rep_enc_part *rep, krb
 
   /* seq-number[3]	INTEGER OPTIONAL */
   if(rep->seq_number)
-    krb5_addfield(rep->seq_number,3,asn1_encode_integer);
+    krb5_addfield(rep->seq_number,3,asn1_encode_unsigned_integer);
 
   /* subkey[2]		EncryptionKey OPTIONAL */
   if(rep->subkey != NULL)
@@ -477,6 +478,43 @@ krb5_error_code encode_krb5_safe(const krb5_safe *rep, krb5_data **code)
   krb5_cleanup();
 }
 
+/*
+ * encode_krb5_safe_with_body
+ *
+ * Like encode_krb5_safe(), except takes a saved KRB-SAFE-BODY
+ * encoding to avoid problems with re-encoding.
+ */
+krb5_error_code encode_krb5_safe_with_body(
+  const krb5_safe *rep,
+  const krb5_data *body,
+  krb5_data **code)
+{
+  krb5_setup();
+
+  if (body == NULL) {
+      asn1buf_destroy(&buf);
+      return ASN1_MISSING_FIELD;
+  }
+
+  /* cksum[3]		Checksum */
+  krb5_addfield(rep->checksum,3,asn1_encode_checksum);
+
+  /* safe-body[2]	KRB-SAFE-BODY */
+  krb5_addfield(body,2,asn1_encode_krb_saved_safe_body);
+
+  /* msg-type[1]	INTEGER */
+  krb5_addfield(ASN1_KRB_SAFE,1,asn1_encode_integer);
+
+  /* pvno[0]		INTEGER */
+  krb5_addfield(KVNO,0,asn1_encode_integer);
+
+  /* KRB-SAFE ::= [APPLICATION 20] SEQUENCE */
+  krb5_makeseq();
+  krb5_apptag(20);
+
+  krb5_cleanup();
+}
+
 krb5_error_code encode_krb5_priv(const krb5_priv *rep, krb5_data **code)
 {
   krb5_setup();
@@ -510,7 +548,7 @@ krb5_error_code encode_krb5_enc_priv_part(const krb5_priv_enc_part *rep, krb5_da
 
   /* seq-number[3]	INTEGER OPTIONAL */
   if(rep->seq_number)
-    krb5_addfield(rep->seq_number,3,asn1_encode_integer);
+    krb5_addfield(rep->seq_number,3,asn1_encode_unsigned_integer);
 
   /* usec[2]		INTEGER OPTIONAL */
   if(rep->timestamp){
@@ -678,11 +716,21 @@ krb5_error_code encode_krb5_alt_method(const krb5_alt_method *rep, krb5_data **c
 krb5_error_code encode_krb5_etype_info(const krb5_etype_info_entry **rep, krb5_data **code)
 {
   krb5_setup();
-  retval = asn1_encode_etype_info(buf,rep,&length);
+  retval = asn1_encode_etype_info(buf,rep,&length, 0);
   if(retval) return retval;
   sum += length;
   krb5_cleanup();
 }
+
+krb5_error_code encode_krb5_etype_info2(const krb5_etype_info_entry **rep, krb5_data **code)
+{
+  krb5_setup();
+  retval = asn1_encode_etype_info(buf,rep,&length, 1);
+  if(retval) return retval;
+  sum += length;
+  krb5_cleanup();
+}
+  
 
 krb5_error_code encode_krb5_enc_data(const krb5_enc_data *rep, krb5_data **code)
 {
@@ -820,5 +868,22 @@ krb5_error_code encode_krb5_predicted_sam_response(const krb5_predicted_sam_resp
   retval = asn1_encode_predicted_sam_response(buf,rep,&length);
   if(retval) return retval;
   sum += length;
+  krb5_cleanup();
+}
+
+krb5_error_code encode_krb5_setpw_req(const krb5_principal target,
+				      char *password, krb5_data **code)
+{
+  /* Macros really want us to have a variable called rep which we do not need*/
+  const char *rep = "dummy string";
+
+  krb5_setup();
+
+  krb5_addfield(target,2,asn1_encode_realm);
+  krb5_addfield(target,1,asn1_encode_principal_name);
+  krb5_addlenfield(strlen(password), password,0,asn1_encode_octetstring);
+  krb5_makeseq();
+
+
   krb5_cleanup();
 }

@@ -1,3 +1,138 @@
+2004-07-23  Tom Yu  <tlyu@mit.edu>
+
+	* kerberos_v4.c (kerberos_v4): Duplicate backdating fix for
+	APPL_REQUEST as well.  Fix comments.
+
+2004-03-22  Ken Raeburn  <raeburn@mit.edu>
+
+	* network.c (delete_fd): Free pointed-to data after removing it
+	from the connection set.
+	(kill_tcp_connection): Move delete_fd call to the end.
+	(accept_tcp_connection): Decrement connection counter again if we
+	drop the incoming connection for lack of buffer space.
+
+2004-02-19  Ken Hornstein  <kenh@mit.edu>
+
+	* fakeka.c (main): Bug from David Thompson <thomas@cs.wisc.edu>.
+	Bug originally introduced during conversion from bcopy() to
+	memcpy().
+
+2004-02-12  Sam Hartman  <hartmans@mit.edu>
+
+	* kdc_util.c (validate_tgs_request): Fix logic error
+
+2004-02-09  Tom Yu  <tlyu@mit.edu>
+
+	* main.c (init_realm): Apply patch from Will Fiveash to use
+	correct TCP listening ports.
+
+2004-02-06  Sam Hartman  <hartmans@avalanche-breakdown.mit.edu>
+
+	* kdc_util.c:  Ignore unknown TGS options
+
+2004-01-05  Sam Hartman  <hartmans@mit.edu>
+
+	* kerberos_v4.c (kerberos_v4): Only backdate the rquest in the
+	issued ticket.  Client libraries tend to verify that the
+	backdating falls within clockskew.  a
+
+2003-06-03  Tom Yu  <tlyu@mit.edu>
+
+	* extern.h (master_princ): Remove realm_mkvno, realm_tgskey,
+	realm_tgskvno, realm_kstypes, realm_nkstypes.  They're not needed
+	anymore.
+
+	* main.c (finish_realm): Remove references to realm_kstypes,
+	realm_tgskey.
+	(init_realm): Don't bother with realm_kstypes.  Don't bother
+	looking up the master kvno.  Don't bother caching the TGS key.
+	None of these were being used.
+
+2003-05-30  Ken Raeburn  <raeburn@mit.edu>
+
+	* main.c (init_realm): Use KRB5_KDB_MAX_RLIFE, not
+	KRB5_KDB_MAX_LIFE, as default for realm's max renewable lifetime.
+
+2003-05-23  Sam Hartman  <hartmans@mit.edu>
+
+	* kdc_preauth.c (_make_etype_info_entry): Add flag to know if we
+	are producing etype_info2 so we know whether filling in s2kparams
+	is allowed.    In the etype_info2 case support afs3 salts.
+	(etype_info_helper): Pass in flag
+	(return_etype_info2): And here
+
+2003-05-23  Ezra Peisach  <epeisach@mit.edu>
+
+	* kdc_preauth.c (return_etype_info2): After encoding the
+	etype_info2 and copying the pointers to the pa_data, free the
+	krb5_data pointer.
+
+2003-05-22  Sam Hartman  <hartmans@mit.edu>
+
+	* kdc_util.c (validate_as_request): Only reject options we
+	understand and believe are inappropriate for AS requests. Per
+	spec, unknown options are ignored.
+
+2003-05-14  Sam Hartman  <hartmans@mit.edu>
+
+	* kdc_preauth.c (check_padata): Allow bad_integrity to be returned to a client
+
+2003-05-08  Sam Hartman  <hartmans@mit.edu>
+
+	* kdc_preauth.c (return_pw_salt): Don't return pw-salt if the
+	client's enctype list  mandates it supports enctype-info2
+
+2003-05-09  Tom Yu  <tlyu@mit.edu>
+
+	* kdc_util.c (kdc_process_tgs_req): Rename getremotesubkey ->
+	getrecvsubkey.
+
+2003-05-07  Sam Hartman  <hartmans@mit.edu>
+
+	* kdc_preauth.c (get_etype_info): Patch from Sun to reorganize
+	code and make sure that even for md5 the database order is
+	preserved. 
+	(enctype_requires_etype_info_2): new function; determines wether a
+	particular enctype in a client request means that the client  is
+	required to support etype_info2 by Kerberos clarifications.
+	(etype_info_helper): Renamed from get_etype_info  to abstract out
+	code in common between etype_info and etype_info2
+	(get_enctype_info): Return etype info only if request contains no
+	enctypes that  require etype_info2
+	(return_etype_info2): New function.
+
+2003-04-02  Sam Hartman  <hartmans@mit.edu>
+
+	* kdc_preauth.c (get_etype_info): Avoid infinite loop if request
+	does not contain des-cbc-crc and database does 
+
+2003-04-01  Nalin Dahyabhai  <nalin@redhat.com>
+
+	* do_tgs_req.c (process_tgs_req): Check that principal name
+	component 1 is present before examining it.
+	* kdc_util.c (krb5_is_tgs_principal, validate_tgs_request): Check
+	principal name length before examining components.
+
+2003-03-28  Tom Yu  <tlyu@mit.edu>
+
+	* kdc_preauth.c (verify_enc_timestamp): Save decryption error, in
+	case we get NO_MATCHING_KEY later.  This allows us to log a more
+	sane error if an incorrect password is used for encrypting the
+	enc-timestamp preauth.
+
+2003-03-16  Sam Hartman  <hartmans@mit.edu>
+
+	* main.c (initialize_realms): Add support to call
+	enable_v4_crossrealm if the user wants insecure operation 
+
+	* kerberos_v4.c: Add enable_v4_crossrealm.  By default krb4
+	cross-realm is not allowed as it is insecure.  Also, remove
+	support for generating krb4 tickets encrypted in 3DES as they are
+	insecure. 
+
+	* kdc_util.h: Define enable_v4_crossrealm, new function to enable
+	secure krb4 cross-realm authentication 
+
 2003-03-05  Tom Yu  <tlyu@mit.edu>
 
 	* main.c (init_realm): Update call to krb5_ktdb_resolve().

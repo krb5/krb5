@@ -15,9 +15,6 @@ static	char sccsid[] = "@(#)pclose.c 1.1 90/04/28 SMI"; /* from UCB 1.2 3/7/86 *
 #include <signal.h>
 #include <sys/param.h>
 #include <sys/wait.h>
-#ifdef HAVE_VFORK_H
-#include <vfork.h>
-#endif
 #define sig_t my_sig_t
 #define sigtype krb5_sigtype
 typedef sigtype (*sig_t)();
@@ -60,7 +57,7 @@ mypopen(cmd,mode)
 		return (NULL);
 	myside = tst(p[WTR], p[RDR]);
 	hisside = tst(p[RDR], p[WTR]);
-	if ((pid = vfork()) == 0) {
+	if ((pid = fork()) == 0) {
 		/* myside and hisside reverse roles in child */
 		(void) close(myside);
 		if (hisside != tst(0, 1)) {

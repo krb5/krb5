@@ -16,8 +16,8 @@ HDRDIR=$(BUILDTOP)/include
 HDRS =	$(HDRDIR)/db.h $(HDRDIR)/db-config.h $(HDRDIR)/db-ndbm.h
 
 all-unix:: all-liblinks includes
+all-prerecurse: include/config.h include/db-config.h
 clean-unix:: clean-liblinks clean-libs clean-includes
-install-unix:: install-libs
 
 includes:: $(HDRS)
 
@@ -27,6 +27,13 @@ $(HDRDIR)/db-config.h: include/db-config.h
 	$(CP) include/db-config.h $@
 $(HDRDIR)/db-ndbm.h: $(srcdir)/include/db-ndbm.h
 	$(CP) $(srcdir)/include/db-ndbm.h $@
+
+include/config.h: $(srcdir)/include/config.h.in
+	cd $(thisconfigdir) && $(SHELL) config.status
+$(srcdir)/include/config.h.in: $(srcdir)/configure.in $(SRCTOP)/aclocal.m4
+	cd $(srcdir) && ($(AUTOHEADER) --include=$(CONFIG_RELTOPDIR) $(AUTOHEADERFLAGS) || $(AUTOHEADER) --localdir=$(CONFIG_RELTOPDIR) $(AUTOHEADERFLAGS))
+include/db-config.h: $(srcdir)/include/db-config.h.in
+	cd $(thisconfigdir) && $(SHELL) config.status
 
 clean-includes::
 	$(RM) $(HDRS)

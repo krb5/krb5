@@ -132,11 +132,11 @@ static char *strdate(when)
     krb5_timestamp when;
 {
     struct tm *tm;
-    static char out[30];
+    static char out[40];
     
     time_t lcltim = when;
     tm = localtime(&lcltim);
-    strftime(out, 30, "%a %b %d %H:%M:%S %Z %Y", tm);
+    strftime(out, sizeof(out), "%a %b %d %H:%M:%S %Z %Y", tm);
     return out;
 }
 
@@ -175,7 +175,6 @@ char *kadmin_startup(argc, argv)
     int argc;
     char *argv[];
 {
-    extern krb5_kt_ops krb5_ktf_writable_ops;
     extern char *optarg;
     char *princstr = NULL, *keytab_name = NULL, *query = NULL;
     char *password = NULL;
@@ -449,11 +448,6 @@ char *kadmin_startup(argc, argv)
     }
 
     /* register the WRFILE keytab type and set it as the default */
-    if ((retval = krb5_kt_register(context, &krb5_ktf_writable_ops))) {
-	 com_err(whoami, retval,
-		 "while registering writable key table functions");
-	 exit(1);
-    }
     {
 #define DEFAULT_KEYTAB "WRFILE:/etc/krb5.keytab"
 	 /* XXX krb5_defkeyname is an internal library global and

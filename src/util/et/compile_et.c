@@ -12,6 +12,8 @@
 #include <sys/file.h>
 #include <string.h>
 #include <sys/param.h>
+#include <stdlib.h>
+#include <errno.h>
 #include "mit-sipb-copyright.h"
 #include "compiler.h"
 
@@ -26,10 +28,6 @@ extern int table_number, current;
 char buffer[BUFSIZ];
 char *table_name = (char *)NULL;
 FILE *hfile, *cfile;
-
-/* C library */
-extern char *malloc();
-extern int errno;
 
 /* lex stuff */
 extern FILE *yyin;

@@ -54,7 +54,7 @@ static krb5_error_code
 make_seal_token_v1 (krb5_context context,
 		    krb5_keyblock *enc,
 		    krb5_keyblock *seq,
-		    krb5_ui_4 *seqnum,
+		    gssint_uint64 *seqnum,
 		    int direction,
 		    gss_buffer_t text,
 		    gss_buffer_t token,
@@ -304,6 +304,7 @@ make_seal_token_v1 (krb5_context context,
     /* that's it.  return the token */
 
     (*seqnum)++;
+    *seqnum &= 0xffffffffL;
 
     token->length = tlen;
     token->value = (void *) t;
@@ -334,50 +335,16 @@ kg_seal(context, minor_status, context_handle, conf_req_flag, qop_req,
     output_message_buffer->length = 0;
     output_message_buffer->value = NULL;
 
-    /* only default qop or matching established cryptosystem is allowed */
-    
-#if 0
-    switch (qop_req & GSS_KRB5_CONF_C_QOP_MASK) {
-    case GSS_C_QOP_DEFAULT:
-	break;
-    default:
-    unknown_qop:
-	*minor_status = (OM_uint32) G_UNKNOWN_QOP;
-	return GSS_S_FAILURE;
-    case GSS_KRB5_CONF_C_QOP_DES:
-	if (ctx->sealalg != SEAL_ALG_DES) {
-	bad_qop:
-	    *minor_status = (OM_uint32) G_BAD_QOP;
-	    return GSS_S_FAILURE;
-	}
-	break;
-    case GSS_KRB5_CONF_C_QOP_DES3:
-	if (ctx->sealalg != SEAL_ALG_DES3)
-	    goto bad_qop;
-	break;
-    }
-    switch (qop_req & GSS_KRB5_INTEG_C_QOP_MASK) {
-    case GSS_C_QOP_DEFAULT:
-	break;
-    default:
-	goto unknown_qop;
-    case GSS_KRB5_INTEG_C_QOP_MD5:
-    case GSS_KRB5_INTEG_C_QOP_DES_MD5:
-    case GSS_KRB5_INTEG_C_QOP_DES_MAC:
-	if (ctx->sealalg != SEAL_ALG_DES)
-	    goto bad_qop;
-	break;
-    case GSS_KRB5_INTEG_C_QOP_HMAC_SHA1:
-	if (ctx->sealalg != SEAL_ALG_DES3KD)
-	    goto bad_qop;
-	break;
-    }
-#else
+    /* Only default qop or matching established cryptosystem is allowed.
+
+       There are NO EXTENSIONS to this set for AES and friends!  The
+       new spec says "just use 0".  The old spec plus extensions would
+       actually allow for certain non-zero values.  Fix this to handle
+       them later.  */
     if (qop_req != 0) {
 	*minor_status = (OM_uint32) G_UNKNOWN_QOP;
 	return GSS_S_FAILURE;
     }
-#endif
 
     /* validate the context handle */
     if (! kg_validate_ctx_id(context_handle)) {
@@ -397,12 +364,26 @@ kg_seal(context, minor_status, context_handle, conf_req_flag, qop_req,
 	return(GSS_S_FAILURE);
     }
 
-    code = make_seal_token_v1(context, ctx->enc, ctx->seq,
-			      &ctx->seq_send, ctx->initiate,
-			      input_message_buffer, output_message_buffer,
-			      ctx->signalg, ctx->cksum_size, ctx->sealalg,
-			      conf_req_flag, toktype, ctx->big_endian,
-			      ctx->mech_used);
+    switch (ctx->proto)
+    {
+    case 0:
+	code = make_seal_token_v1(context, ctx->enc, ctx->seq,
+				  &ctx->seq_send, ctx->initiate,
+				  input_message_buffer, output_message_buffer,
+				  ctx->signalg, ctx->cksum_size, ctx->sealalg,
+				  conf_req_flag, toktype, ctx->big_endian,
+				  ctx->mech_used);
+	break;
+    case 1:
+	code = gss_krb5int_make_seal_token_v3(context, ctx,
+					      input_message_buffer,
+					      output_message_buffer,
+					      conf_req_flag, toktype);
+	break;
+    default:
+	code = G_UNKNOWN_QOP;	/* XXX */
+	break;
+    }
 
     if (code) {
 	*minor_status = code;

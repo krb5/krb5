@@ -60,7 +60,7 @@
 #include <netinet/in.h>
 
 #include <krb.h>
-#include "krb524.h"
+#include "krb524d.h"
 
 #if defined(NEED_DAEMON_PROTO)
 extern int daemon(int, int);
@@ -76,6 +76,7 @@ static int debug = 0;
 void *handle = NULL;
 
 int use_keytab, use_master;
+int allow_v4_crossrealm = 0;
 char *keytab = NULL;
 krb5_keytab kt;
 
@@ -110,6 +111,8 @@ static RETSIGTYPE request_exit(signo)
      signalled = 1;
 }
 
+int (*encode_v4tkt)(KTEXT, char *, unsigned int *) = 0;
+
 int main(argc, argv)
      int argc;
      char **argv;
@@ -132,12 +135,31 @@ int main(argc, argv)
 	     exit(1);
      }
 
+     {
+	 krb5int_access k5int;
+	 retval = krb5int_accessor(&k5int, KRB5INT_ACCESS_VERSION);
+	 if (retval != 0) {
+	     com_err(whoami, retval,
+		     "while accessing krb5 library internal support");
+	     exit(1);
+	 }
+	 encode_v4tkt = k5int.krb524_encode_v4tkt;
+	 if (encode_v4tkt == NULL) {
+	     com_err(whoami, 0,
+		     "krb4 support disabled in krb5 support library");
+	     exit(1);
+	 }
+     }
+
      argv++; argc--;
      use_master = use_keytab = nofork = 0;
      config_params.mask = 0;
      
      while (argc) {
-	  if (strncmp(*argv, "-k", 2) == 0)
+       if (strncmp(*argv, "-X", 2) == 0) {
+	 allow_v4_crossrealm = 1;
+       }
+       else if (strncmp(*argv, "-k", 2) == 0)
 	       use_keytab = 1;
 	  else if (strncmp(*argv, "-m", 2) == 0)
 	       use_master = 1;
@@ -346,7 +368,7 @@ krb5_error_code do_connection(s, context)
      if (debug)
 	  printf("V5 ticket decoded\n");
      
-     if( v5tkt->server->length >= 1
+     if( krb5_princ_size(context, v5tkt->server) >= 1
 	 &&krb5_princ_component(context, v5tkt->server, 0)->length == 3
 	 &&strncmp(krb5_princ_component(context, v5tkt->server, 0)->data,
 		   "afs", 3) == 0) {
@@ -524,19 +546,7 @@ handle_classic_v4 (krb5_context context, krb5_ticket *v5tkt,
 				   &v5_service_key, NULL)))
 	  goto error;
 
-     if ((ret = lookup_service_key(context, v5tkt->server,
-				   ENCTYPE_DES3_CBC_RAW,
-				   0, /* highest kvno */
-				   &v4_service_key, v4kvno)) &&
-	 (ret = lookup_service_key(context, v5tkt->server,
-				   ENCTYPE_LOCAL_DES3_HMAC_SHA1,
-				   0,
-				   &v4_service_key, v4kvno)) &&
-	 (ret = lookup_service_key(context, v5tkt->server,
-				   ENCTYPE_DES3_CBC_SHA1,
-				   0,
-				   &v4_service_key, v4kvno)) &&
-	 (ret = lookup_service_key(context, v5tkt->server,
+     if ( (ret = lookup_service_key(context, v5tkt->server,
 				   ENCTYPE_DES_CBC_CRC,
 				   0,
 				   &v4_service_key, v4kvno)))
@@ -544,8 +554,19 @@ handle_classic_v4 (krb5_context context, krb5_ticket *v5tkt,
 
      if (debug)
 	  printf("service key retrieved\n");
+     if ((ret = krb5_decrypt_tkt_part(context, &v5_service_key, v5tkt))) {
+       goto error;
+     }
 
-     ret = krb524_convert_tkt_skey(context, v5tkt, &v4tkt, &v5_service_key,
+    if (!(allow_v4_crossrealm || krb5_realm_compare(context, v5tkt->server,
+						    v5tkt->enc_part2->client))) {
+ret =  KRB5KDC_ERR_POLICY ;
+ goto error;
+    }
+    krb5_free_enc_tkt_part(context, v5tkt->enc_part2);
+    v5tkt->enc_part2= NULL;
+
+         ret = krb524_convert_tkt_skey(context, v5tkt, &v4tkt, &v5_service_key,
 				   &v4_service_key,
 				   (struct sockaddr_in *)saddr);
      if (ret)
@@ -561,6 +582,11 @@ handle_classic_v4 (krb5_context context, krb5_ticket *v5tkt,
 	  printf("v4 credentials encoded\n");
 
  error:
+     if (v5tkt->enc_part2) {
+	 krb5_free_enc_tkt_part(context, v5tkt->enc_part2);
+	 v5tkt->enc_part2 = NULL;
+     }
+
      if(v5_service_key.contents)
        krb5_free_keyblock_contents(context, &v5_service_key);
      if (v4_service_key.contents)

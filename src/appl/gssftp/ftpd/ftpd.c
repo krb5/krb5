@@ -130,7 +130,6 @@ extern int yyparse(void);
 #ifdef KRB5_KRB4_COMPAT
 #include <krb5.h>
 #include <krb.h>
-#include <krb524.h>
 
 AUTH_DAT kdata;
 KTEXT_ST ticket;
@@ -170,7 +169,6 @@ int have_creds;		/* User has credentials on disk */
 #include "ftpd_var.h"
 #include "secure.h"
 
-extern	int errno;
 extern	char *crypt();
 extern	char version[];
 extern	char *home;		/* pointer to home directory for glob */
@@ -315,9 +313,6 @@ main(argc, argv, envp)
 
 #ifdef GSSAPI
 	krb5_init_context(&kcontext);
-#ifdef KRB5_KRB4_COMPAT
-	krb524_init_ets(kcontext);
-#endif
 #endif
 
 	while ((c = getopt(argc, argv, option_string)) != -1) {
@@ -965,12 +960,12 @@ char *name, *passwd;
 	my_creds.times.endtime = now + 60 * 60 * 10;
 	my_creds.times.renew_till = 0;
 
-	if (krb5_get_in_tkt_with_password(kcontext, 0,
-					  0, NULL, 0 /*preauth*/,
-					  passwd,
-					  ccache,
-					  &my_creds, 0))
-		goto nuke_ccache;
+	if (krb5_get_init_creds_password(kcontext, &my_creds, me,
+					 passwd, NULL, NULL, 0, NULL, NULL))
+	  goto nuke_ccache;
+
+	if (krb5_cc_store_cred(kcontext, ccache, &my_creds))
+	  goto nuke_ccache;
 
 	if (!want_creds) {
 		krb5_cc_destroy(kcontext, ccache);

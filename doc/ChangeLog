@@ -1,3 +1,109 @@
+2004-09-02  Tom Yu  <tlyu@mit.edu>
+
+	* build.texinfo: Fix some typos.
+	(Build Requirements): Note ANSI C (c89) requirement.
+	(Alpha OSF/1 V4.0): Document "-std0" vs "-std" cc behavior.
+
+2004-06-10  Ken Raeburn  <raeburn@mit.edu>
+
+	* admin.texinfo (Supported Encryption Types): Reflect new AES
+	support in GSSAPI, but keep a warning about interoperability with
+	old versions.
+
+2004-02-13  Tom Yu  <tlyu@mit.edu>
+
+	* build.texinfo (Solaris 9): Add section describing workaround for
+	Solaris 9 pty-close kernel bug.
+
+2003-07-25  Ken Raeburn  <raeburn@mit.edu>
+
+	* admin.texinfo (realms (krb5.conf)): Add description of
+	master_kdc tag.
+	(Sample krb5.conf File): Add it to the example.
+
+2003-07-24  Sam Hartman  <hartmans@mit.edu>
+
+	* admin.texinfo (realms (kdc.conf)): Remove references to kdc_supported_enctypes
+	(Sample kdc.conf File): Remove kdc_supported_enctypes here too
+
+2003-06-20  Tom Yu  <tlyu@mit.edu>
+
+	* build.texinfo (Installing the Binaries): New node; describe
+	basic "make install", along with "DESTDIR=...".
+
+2003-06-19  Tom Yu  <tlyu@mit.edu>
+
+	* build.texinfo (HPUX): Fix typo.
+	(Options to Configure): Note that --with-system-db is unsupported,
+	concerning possible lossage with loading dumpfiles.
+
+2003-06-18  Tom Yu  <tlyu@mit.edu>
+
+	* dnssrv.texinfo: Add note about _kerberos-iv._udp SRV records.
+
+2003-05-30  Ken Raeburn  <raeburn@mit.edu>
+
+	* definitions.texinfo (DefaultCcacheType, DefaultKDCTimesync,
+	DefaultMasterKeyType, DefaultTktLifetime): Updated for code
+	changes.
+	(DefaultCcacheTypeMac, DefaultKDCTimesyncMac): Deleted.
+
+	* admin.texinfo (libdefaults): Update kdc_timesync and ccache_type
+	descriptions to not separate Mac case.
+
+2003-05-30  Sam Hartman  <hartmans@mit.edu>
+
+	* admin.texinfo (Supported Encryption Types): Document AES interop issues.
+
+	* support-enc.texinfo: Add AES enctypes
+
+2003-05-27  Tom Yu  <tlyu@mit.edu>
+
+	* admin.texinfo (realms (kdc.conf)): Update to reflect that
+	kadm5.keytab is only used by legacy admin daemons.
+
+	* install.texinfo (Create a kadmind Keytab (optional)): Update to
+	reflect that kadm5.keytab is only used by legacy admin daemons.
+
+	* build.texinfo (HPUX): Make HPUX compiler flags simpler.
+
+2003-05-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* build.texinfo (HPUX, Solaris 2.X, Ultrix 4.2/3 [notdef]):
+	Replace descriptions of old --with- options with VAR=.
+	(Solaris 2.X): Suggest that defining _XOPEN_SOURCE and
+	__EXTENSIONS__ might help for 64-bit mode.
+
+2003-05-23  Tom Yu  <tlyu@mit.edu>
+
+	* admin.texinfo (appdefaults): Clarify afs_krb5 slightly.
+
+2003-05-22  Sam Hartman  <hartmans@mit.edu>
+
+	* admin.texinfo (appdefaults): Describe afs_krb5
+
+	* krb425.texinfo (AFS and the Appdefaults Section): Note about AFS and 2b tokens
+
+2003-05-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* definitions.texinfo: Updated DefaultSupportedEnctypes.
+
+2003-05-12  Sam Hartman  <hartmans@mit.edu>
+
+	* definitions.texinfo: Default v4 mode is now none
+
+2003-04-18  Ken Raeburn  <raeburn@mit.edu>
+
+	* definitions.texinfo (DefaultETypeList,
+	DefaultSupportedEnctypes): Update for AES.
+	* install.texinfo (Client Machine Configuration Files): Fix typo
+	in variable reference.
+
+2003-04-08  Tom Yu  <tlyu@mit.edu>
+
+	* krb4-xrealm.txt: New file.  Describe the krb4 cross-realm
+	patchkit.  Copied from 2003-004-krb4_patchkit.
+
 2003-02-04  Sam Hartman  <hartmans@mit.edu>
 
 	* krb425.texinfo (Upgrading KDCs): Note that -4 needs to be specified
