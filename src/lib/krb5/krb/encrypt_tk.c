@@ -61,7 +61,15 @@ register krb5_ticket *dec_ticket;
 
     eblock.crypto_entry = krb5_csarray[dec_ticket->etype]->system;
     dec_ticket->enc_part.length = krb5_encrypt_size(scratch->length,
-						     eblock.crypto_entry);
+						    eblock.crypto_entry);
+    /* add padding area, and zero it */
+    if (!(scratch->data = realloc(scratch->data, dec_ticket->enc_part.length))) {
+	/* may destroy scratch->data */
+	xfree(scratch);
+	return ENOMEM;
+    }
+    bzero(scratch->data + scratch->length,
+	  dec_ticket->enc_part.length - scratch->length);
     if (!(dec_ticket->enc_part.data = malloc(dec_ticket->enc_part.length))) {
 	retval = ENOMEM;
 	goto clean_scratch;

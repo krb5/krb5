@@ -123,6 +123,15 @@ krb5_data *outbuf;
     eblock.crypto_entry = krb5_csarray[etype]->system;
     request.authenticator.length = krb5_encrypt_size(scratch->length,
 						     eblock.crypto_entry);
+    /* add padding area, and zero it */
+    if (!(scratch->data = realloc(scratch->data, request.authenticator.length))) {
+	/* may destroy scratch->data */
+	xfree(scratch);
+	retval = ENOMEM;
+	goto clean_ticket;
+    }
+    bzero(scratch->data + scratch->length,
+	  request.authenticator.length - scratch->length);
     if (!(request.authenticator.data = malloc(request.authenticator.length))) {
 	retval = ENOMEM;
 	goto clean_scratch;
@@ -168,6 +177,7 @@ krb5_data *outbuf;
     cleanup_encpart();
  clean_scratch:
     cleanup_scratch();
+ clean_ticket:
     cleanup_ticket();
 
     return retval;

@@ -90,7 +90,15 @@ OLDDECLARG(krb5_data *, outbuf)
 
     eblock.crypto_entry = krb5_csarray[etype]->system;
     privmsg.enc_part.length = krb5_encrypt_size(scratch->length,
-                                                     eblock.crypto_entry);
+						eblock.crypto_entry);
+    /* add padding area, and zero it */
+    if (!(scratch->data = realloc(scratch->data, privmsg.enc_part.length))) {
+	/* may destroy scratch->data */
+	xfree(scratch);
+	return ENOMEM;
+    }
+    bzero(scratch->data + scratch->length,
+	  privmsg.enc_part.length - scratch->length);
     if (!(privmsg.enc_part.data = malloc(privmsg.enc_part.length))) {
         retval = ENOMEM;
         goto clean_scratch;
