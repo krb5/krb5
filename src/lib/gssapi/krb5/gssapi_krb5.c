@@ -209,12 +209,10 @@ kg_get_ccache_name (OM_uint32 *minor_status, const char **out_name)
     OM_uint32 err = 0;
     OM_uint32 minor;
     
-    if (!err) {
-        if (GSS_ERROR(kg_get_context (&minor, &context))) {
-            err = minor;
-        }
+    if (GSS_ERROR(kg_get_context (&minor, &context))) {
+	err = minor;
     }
-    
+
     if (!err) {
         if (kg_ccache_name != NULL) {
             name = kg_ccache_name;
@@ -241,32 +239,22 @@ OM_uint32
 kg_set_ccache_name (OM_uint32 *minor_status, const char *name)
 {
     char *new_name = NULL;
-    OM_uint32 err = 0;
-    
-    if (!err) {
-        if (name) {
-            new_name = malloc(strlen(name) + 1);
-            if (new_name == NULL) {
-                err = ENOMEM;
-            } else {
-                strcpy(new_name, name);
-            }
-        }
-    }
-    
-    if (!err) {
-        char *swap = NULL;
-        
-        swap = kg_ccache_name;
-        kg_ccache_name = new_name;
-        new_name = swap;
-    }
-    
-    if (new_name != NULL) {
-        free (new_name);
-    }
-    
-    *minor_status = err;
-    return (*minor_status == 0) ? GSS_S_COMPLETE : GSS_S_FAILURE;
-}
+    char *swap = NULL;
 
+    if (name) {
+	new_name = malloc(strlen(name) + 1);
+	if (new_name == NULL) {
+	    *minor_status = ENOMEM;
+	    return GSS_S_FAILURE;
+	}
+	strcpy(new_name, name);
+    }
+
+    swap = kg_ccache_name;
+    kg_ccache_name = new_name;
+    new_name = swap;
+
+    free (new_name);
+    *minor_status = 0;
+    return GSS_S_COMPLETE;
+}
