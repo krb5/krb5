@@ -1,4 +1,8 @@
 
+Fri May 26 17:50:13 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* Makefile.in	- Add KDBLIB to dependency list.
+
+
 Mon May 22 09:46:53 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in	- Install kadmind5 in $(SERVER_BINDIR), install
 			  manpage in $(SERVER_MANDIR).

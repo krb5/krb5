@@ -10,7 +10,7 @@ KADMLIB=$(TOPLIBD)/libkadm.a
 all::
 
 KLIB = $(KADMLIB) $(KDBLIB) $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(SSLIB) $(COMERRLIB) $(DBMLIB)
-DEPKLIB = $(KADMLIB) $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(SSLIB) $(COMERRLIB) $(DBMLIB)
+DEPKLIB = $(KADMLIB) $(KDBLIB) $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(SSLIB) $(COMERRLIB) $(DBMLIB)
 
 SRCS = \
 	$(srcdir)/srv_main.c $(srcdir)/srv_key.c  \
