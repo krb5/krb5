@@ -67,7 +67,8 @@ error_code KRB5KRB_AP_ERR_BADDIRECTION,	"Incorrect message direction"
 error_code KRB5KRB_AP_ERR_METHOD,	"Alternative authentication method required"
 error_code KRB5KRB_AP_ERR_BADSEQ,	"Incorrect sequence number in message"
 error_code KRB5KRB_AP_ERR_INAPP_CKSUM,	"Inappropriate type of checksum in message"
-#^^ 51
+#^^ 50
+error_code KRB5PLACEHOLD_51,	"KRB5 error code 51"
 error_code KRB5PLACEHOLD_52,	"KRB5 error code 52"
 error_code KRB5PLACEHOLD_53,	"KRB5 error code 53"
 error_code KRB5PLACEHOLD_54,	"KRB5 error code 54"
@@ -238,4 +239,13 @@ error_code KRB5_CC_NOMEM,		"No more memory to allocate (in credentials cache cod
 error_code KRB5_INVALID_FLAGS,		"Invalid KDC option combination (library internal error)"
 error_code KRB5_NO_2ND_TKT,		"Request missing second ticket"
 
+error_code KRB5_NOCREDS_SUPPLIED,	"No credentials supplied to library routine"
+
+# errors for sendauth (and recvauth)
+
+error_code KRB5_SENDAUTH_BADAUTHVERS,	"Bad sendauth version was sent"
+error_code KRB5_SENDAUTH_BADAPPLVERS,	"Bad application version was sent (via sendauth)"
+error_code KRB5_SENDAUTH_BADRESPONSE,	"Bad response (during sendauth exchange)"
+error_code KRB5_SENDAUTH_REJECTED,	"Server rejected authentication (during sendauth exchange)"
+error_code KRB5_SENDAUTH_MUTUAL_FAILED,	"Mutual authentication failed (during sendauth exchange)"
 end
