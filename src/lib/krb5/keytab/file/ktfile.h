@@ -1,0 +1,62 @@
+/*
+ * $Source$
+ * $Author$
+ * $Id$
+ *
+ * Copyright 1990 by the Massachusetts Institute of Technology.
+ *
+ * For copying and distribution information, please see the file
+ * <krb5/mit-copyright.h>.
+ *
+ * This header file contains information needed by internal routines
+ * of the file-based ticket cache implementation.
+ */
+
+#include <krb5/copyright.h>
+
+#ifndef __KTFILE__
+#define __KTFILE__
+
+/*
+ * Constants
+ */
+#define IGNORE_VNO 0
+
+
+/* 
+ * Types
+ */
+typedef struct _krb5_ktfile_data {
+    char *name;			/* Name of the file */
+} krb5_ktfile_data;
+
+/*
+ * Macros
+ */
+#define KTFILENAME(id) (((krb5_ktfile_data *)(id)->data)->name)
+
+extern struct _krb5_kt_ops krb5_ktf_ops;
+krb5_error_code krb5_ktfile_resolve PROTOTYPE((char *,
+					       krb5_keytab *));
+krb5_error_code krb5_ktfile_get_name PROTOTYPE((krb5_keytab,
+						char *,
+						int));
+krb5_error_code krb5_ktfile_close PROTOTYPE((krb5_keytab));
+krb5_error_code krb5_ktfile_get PROTOTYPE((krb5_keytab,
+					   krb5_principal,
+					   krb5_kvno,
+					   krb5_keytab_entry *));
+krb5_error_code krb5_ktfile_start_seq_get PROTOTYPE((krb5_keytab,
+						     krb5_kt_cursor *));
+krb5_error_code krb5_ktfile_get_next PROTOTYPE((krb5_keytab,
+						krb5_keytab_entry *,
+						krb5_kt_cursor));
+krb5_error_code krb5_ktfile_end_get PROTOTYPE((krb5_keytab,
+					       krb5_kt_cursor));
+/* routines to be included on extended version (write routines) */
+krb5_error_code krb5_ktfile_add PROTOTYPE((krb5_keytab,
+					   krb5_keytab_entry *));
+krb5_error_code krb5_ktfile_remove PROTOTYPE((krb5_keytab,
+					      krb5_keytab_entry *));
+
+#endif /* __KTFILE__ */

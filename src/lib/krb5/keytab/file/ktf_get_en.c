@@ -1,0 +1,50 @@
+/*
+ * $Source$
+ * $Author$
+ *
+ * Copyright 1990 by the Massachusetts Institute of Technology.
+ *
+ * For copying and distribution information, please see the file
+ * <krb5/mit-copyright.h>.
+ *
+ * This is the get_entry routine for the file based keytab implementation.
+ * It opens the keytab file, and either retrieves the entry or returns
+ * an error.
+ */
+
+#if !defined(lint) && !defined(SABER)
+static char rcsid_krb5_ktfile_get_entry_c[] =
+"$Id$";
+#endif	/* !lint & !SABER */
+
+#include <krb5/copyright.h>
+#include <krb5/krb5.h>
+
+#include "ktfile.h"
+
+krb5_error_code
+krb5_ktfile_get_entry(id, principal, kvno, entry)
+  krb5_keytab id;
+  krb5_principal principal;
+  krb5_kvno kvno;
+  krb5_keytab_entry *entry;
+{
+    krb5_keytab_entry cur_entry;
+    krb5_error_code kerror = 0; /* XXX */
+
+    bzero((char *)&cur_entry, sizeof(krb5_keytab_entry));
+
+    /* Open the keyfile for reading */
+    if (kerror = krb5_ktfileint_openr(id))
+	return(kerror); /* XXX */
+    
+    /* 
+     * For efficiency and simplicity, we'll use a while true that 
+     * is exited with a break statement.
+     */
+    while (TRUE) {
+	if (kerror = krb5_ktfileint_read_entry(id, &entry))
+	    break;
+
+	if (((kvno == IGNORE_VNO) || (kvno == entry.kvno)) &&
+	    (principal  XXXXX here XXXXX
