@@ -201,11 +201,7 @@ init_common (krb5_context *context, krb5_boolean secure)
 			    "kdc_default_options", 0,
 			    KDC_OPT_RENEWABLE_OK, &tmp);
 	ctx->kdc_default_options = tmp;
-#if TARGET_OS_MAC
 #define DEFAULT_KDC_TIMESYNC 1
-#else
-#define DEFAULT_KDC_TIMESYNC 0
-#endif
 	profile_get_integer(ctx->profile, "libdefaults",
 			    "kdc_timesync", 0, DEFAULT_KDC_TIMESYNC,
 			    &tmp);
@@ -219,11 +215,7 @@ init_common (krb5_context *context, krb5_boolean secure)
 	 * Note: DCE 1.0.3a only supports a cache type of 1
 	 * 	DCE 1.1 supports a cache type of 2.
 	 */
-#if TARGET_OS_MAC
 #define DEFAULT_CCACHE_TYPE 4
-#else
-#define DEFAULT_CCACHE_TYPE 3
-#endif
 	profile_get_integer(ctx->profile, "libdefaults", "ccache_type",
 			    0, DEFAULT_CCACHE_TYPE, &tmp);
 	ctx->fcc_default_format = tmp + 0x0500;

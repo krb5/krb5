@@ -1,3 +1,8 @@
+2003-05-30  Ken Raeburn  <raeburn@mit.edu>
+
+	* init_ctx.c (DEFAULT_KDC_TIMESYNC): Define as 1 always.
+	(DEFAULT_CCACHE_TYPE): Define as 4 always.
+
 2003-05-30  Alexandra Ellwood <lxs@mit.edu>
 
 	* get_in_tkt.c: (verify_as_reply) Only check the renewable lifetime
