@@ -200,7 +200,6 @@ krb5_generate_seq_number
 krb5_get_cred_via_2tgt
 krb5_get_cred_via_tgt
 krb5_get_cred_from_kdc
-krb5_fulladdr_order
 krb5_free_realm_tree
 krb5_encrypt_tkt_part
 krb5_encode_kdc_rep
