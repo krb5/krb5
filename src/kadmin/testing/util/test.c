@@ -27,6 +27,10 @@ extern int main();
 int *tclDummyMainPtr = (int *) main;
 #endif
 
+/* No header files... sigh... */
+extern void Tcl_ovsec_kadm_init(Tcl_Interp *interp);
+extern void Tcl_kadm5_init(Tcl_Interp *interp);
+
 int Tcl_AppInit(Tcl_Interp *interp)
 {
      Tcl_ovsec_kadm_init(interp);

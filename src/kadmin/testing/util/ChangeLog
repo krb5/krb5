@@ -1,3 +1,9 @@
+2001-06-08  Ezra Peisach  <epeisach@mit.edu>
+
+	* tcl_kadm5.c: Cleanup assignments in conditionals.
+
+	* test.c: Add prototype for Tcl_ovsec_kadm_init() and Tcl_kadm5_init().
+
 2001-04-25  Ezra Peisach  <epeisach@mit.edu>
 
 	* tcl_kadm5.c, tcl_ovsec_kadm.c: Cleanup of assignments in
