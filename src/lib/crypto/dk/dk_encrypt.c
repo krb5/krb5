@@ -65,7 +65,7 @@ krb5_dk_encrypt(enc, hash, key, usage, ivec, input, output)
     krb5_error_code ret;
     unsigned char constantdata[K5CLENGTH];
     krb5_data d1, d2;
-    unsigned char *plaintext, *kedata, *kidata;
+    unsigned char *plaintext, *kedata, *kidata, *cn;
     krb5_keyblock ke, ki;
 
     /* allocate and set up plaintext and to-be-derived keys */
@@ -142,6 +142,11 @@ krb5_dk_encrypt(enc, hash, key, usage, ivec, input, output)
     if ((ret = ((*(enc->encrypt))(&ke, ivec, &d1, &d2))))
 	goto cleanup;
 
+    if (ivec != NULL && ivec->length == blocksize)
+	cn = d2.data + d2.length - blocksize;
+    else
+	cn = NULL;
+
     /* hash the plaintext */
 
     d2.length = enclen - plainlen;
@@ -149,8 +154,14 @@ krb5_dk_encrypt(enc, hash, key, usage, ivec, input, output)
 
     output->length = enclen;
 
-    if ((ret = krb5_hmac(hash, &ki, 1, &d1, &d2)))
+    if ((ret = krb5_hmac(hash, &ki, 1, &d1, &d2))) {
 	memset(d2.data, 0, d2.length);
+	goto cleanup;
+    }
+
+    /* update ivec */
+    if (cn != NULL)
+	memcpy(ivec->data, cn, blocksize);
 
     /* ret is set correctly by the prior call */
 
@@ -196,7 +207,7 @@ krb5_marc_dk_encrypt(enc, hash, key, usage, ivec, input, output)
     krb5_error_code ret;
     unsigned char constantdata[K5CLENGTH];
     krb5_data d1, d2;
-    unsigned char *plaintext, *kedata, *kidata;
+    unsigned char *plaintext, *kedata, *kidata, *cn;
     krb5_keyblock ke, ki;
 
     /* allocate and set up plaintext and to-be-derived keys */
@@ -278,6 +289,11 @@ krb5_marc_dk_encrypt(enc, hash, key, usage, ivec, input, output)
     if ((ret = ((*(enc->encrypt))(&ke, ivec, &d1, &d2))))
 	goto cleanup;
 
+    if (ivec != NULL && ivec->length == blocksize)
+	cn = d2.data + d2.length - blocksize;
+    else
+	cn = NULL;
+
     /* hash the plaintext */
 
     d2.length = enclen - plainlen;
@@ -285,8 +301,14 @@ krb5_marc_dk_encrypt(enc, hash, key, usage, ivec, input, output)
 
     output->length = enclen;
 
-    if ((ret = krb5_hmac(hash, &ki, 1, &d1, &d2)))
+    if ((ret = krb5_hmac(hash, &ki, 1, &d1, &d2))) {
 	memset(d2.data, 0, d2.length);
+	goto cleanup;
+    }
+
+    /* update ivec */
+    if (cn != NULL)
+	memcpy(ivec->data, cn, blocksize);
 
     /* ret is set correctly by the prior call */
 

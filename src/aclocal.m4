@@ -783,8 +783,8 @@ if test "$with_tcl" != no ; then
 	AC_CHECK_LIB(ld, main, DL_LIB=-lld)
 	krb5_save_CPPFLAGS="$CPPFLAGS"
 	krb5_save_LDFLAGS="$LDFLAGS"
-	CPPFLAGS="$TCL_INCLUDES $CPPFLAGS"
-	LDFLAGS="$TCL_LIBPATH $LDFLAGS"
+	CPPFLAGS="$CPPFLAGS $TCL_INCLUDES"
+	LDFLAGS="$LDFLAGS $TCL_LIBPATH"
 	tcl_header=no
 	AC_CHECK_HEADER(tcl.h,AC_DEFINE(HAVE_TCL_H) tcl_header=yes)
 	if test $tcl_header=no; then
@@ -1119,7 +1119,7 @@ CC_LINK_STATIC='$(CC) $(PROG_LIBPATH)'
 
 # Set up architecture-specific variables.
 case $krb5_cv_host in
-alpha-dec-osf*)
+alpha*-dec-osf*)
 	SHLIBVEXT='.so.$(LIBMAJOR).$(LIBMINOR)'
 	SHLIBSEXT='.so.$(LIBMAJOR)'
 	SHLIBEXT=.so
@@ -1129,7 +1129,11 @@ alpha-dec-osf*)
 	SHLIB_EXPFLAGS='-rpath $(SHLIB_RDIRS) $(SHLIB_DIRS) $(SHLIB_EXPLIBS)'
 	PROFFLAGS=-pg
 	CC_LINK_SHARED='$(CC) $(PROG_LIBPATH) -Wl,-rpath -Wl,$(PROG_RPATH)'
-	CC_LINK_STATIC='$(CC) $(PROG_LIBPATH)'
+	# Need -oldstyle_liblookup to avoid picking up shared libs from
+	# other builds.  OSF/1 / Tru64 ld programs look through the entire
+	# library path for shared libs prior to looking through the
+	# entire library path for static libs.
+	CC_LINK_STATIC='$(CC) $(PROG_LIBPATH) -Wl,-oldstyle_liblookup'
 	# $(PROG_RPATH) is here to handle things like a shared tcl library
 	RUN_ENV='LD_LIBRARY_PATH=`echo $(PROG_LIBPATH) | sed -e "s/-L//g" -e "s/ /:/g"`:$(PROG_RPATH):/usr/shlib:/usr/ccs/lib:/usr/lib/cmplrs/cc:/usr/lib:/usr/local/lib; export LD_LIBRARY_PATH; _RLD_ROOT=/dev/dummy/d; export _RLD_ROOT;'
 	;;
@@ -1243,7 +1247,7 @@ mips-*-netbsd*)
 	PICFLAGS=-fpic
 	if test "x$objformat" = "xelf" ; then
 		SHLIBVEXT='.so.$(LIBMAJOR)'
-		CC_LINK_SHARED='$(CC) $(PROG_LIBPATH) -Wl,-rpath -Wl,-R$(PROG_RPATH)'
+		CC_LINK_SHARED='$(CC) $(PROG_LIBPATH) -Wl,-rpath -Wl,$(PROG_RPATH)'
 	else
 		SHLIBVEXT='.so.$(LIBMAJOR).$(LIBMINOR)'
 		CC_LINK_SHARED='$(CC) $(PROG_LIBPATH) -R$(PROG_RPATH)'
@@ -1396,7 +1400,8 @@ AC_DEFUN(AC_LIBRARY_NET, [
           # ugliness is necessary:
           AC_CHECK_LIB(socket, gethostbyname,
              LIBS="-lsocket -lnsl $LIBS",
-               AC_CHECK_LIB(resolv, gethostbyname),
+               AC_CHECK_LIB(resolv, gethostbyname,
+			    LIBS="-lresolv $LIBS" ; RESOLV_LIB=-lresolv),
              -lnsl)
        )
      )
@@ -1406,20 +1411,61 @@ AC_DEFUN(AC_LIBRARY_NET, [
   KRB5_AC_ENABLE_DNS
   if test "$enable_dns" = yes ; then
     AC_CHECK_FUNC(res_search, , AC_CHECK_LIB(resolv, res_search,
-	LIBS="$LIBS -lresolv",
+	LIBS="$LIBS -lresolv" ; RESOLV_LIB=-lresolv,
 	AC_ERROR(Cannot find resolver support routine res_search in -lresolv.)
     ))
   fi
+  AC_SUBST(RESOLV_LIB)
   ])
 dnl
 dnl
 dnl KRB5_AC_ENABLE_DNS
 dnl
 AC_DEFUN(KRB5_AC_ENABLE_DNS, [
+AC_MSG_CHECKING(if DNS Kerberos lookup support should be compiled in)
+
   AC_ARG_ENABLE([dns],
-[  --enable-dns            enable DNS lookups of Kerberos realm and servers], ,
-[enable_dns=no])
-  if test "$enable_dns" = yes; then
-    AC_DEFINE(KRB5_DNS_LOOKUP)
+[  --enable-dns            build in support for Kerberos-related DNS lookups], ,
+[enable_dns=default])
+
+  AC_ARG_ENABLE([dns-for-kdc],
+[  --enable-dns-for-kdc    enable DNS lookups of Kerberos KDCs (default=YES)], ,
+[case "$enable_dns" in
+  yes | no) enable_dns_for_kdc=$enable_dns ;;
+  *) enable_dns_for_kdc=yes ;;
+esac])
+  if test "$enable_dns_for_kdc" = yes; then
+    AC_DEFINE(KRB5_DNS_LOOKUP_KDC)
   fi
+
+  AC_ARG_ENABLE([dns-for-realm],
+[  --enable-dns-for-realm  enable DNS lookups of Kerberos realm names], ,
+[case "$enable_dns" in
+  yes | no) enable_dns_for_realm=$enable_dns ;;
+  *) enable_dns_for_realm=no ;;
+esac])
+  if test "$enable_dns_for_realm" = yes; then
+    AC_DEFINE(KRB5_DNS_LOOKUP_REALM)
+  fi
+
+  if test "$enable_dns_for_kdc,$enable_dns_for_realm" != no,no
+  then
+    # must compile in the support code
+    if test "$enable_dns" = no ; then
+      AC_MSG_ERROR(cannot both enable some DNS options and disable DNS support)
+    fi
+    enable_dns=yes
+  fi
+  if test "$enable_dns" = yes ; then
+    AC_DEFINE(KRB5_DNS_LOOKUP)
+  else
+    enable_dns=no
+  fi
+
+AC_MSG_RESULT($enable_dns)
+dnl AC_MSG_CHECKING(if DNS should be used to find KDCs by default)
+dnl AC_MSG_RESULT($enable_dns_for_kdc)
+dnl AC_MSG_CHECKING(if DNS should be used to find realm name by default)
+dnl AC_MSG_RESULT($enable_dns_for_realm)
+
 ])

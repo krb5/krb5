@@ -1,3 +1,9 @@
+2000-05-08  Nalin Dahyabhai  <nalin@redhat.com>
+
+	* auth.c (auth_abort): Don't overflow buffer "strTmp".
+	(k4_auth_send): Don't overflow buffer "dbgbuf".
+	* encrypt.c (printsub): Don't overflow buffer "p".
+
 1999-12-03  Danilo Almeida  <dalmeida@mit.edu>
 
 	* Makefile.in: Windows fix for updated win-pre.in.

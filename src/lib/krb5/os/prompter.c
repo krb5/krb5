@@ -235,7 +235,7 @@ krb5int_set_prompt_types(context, types)
     krb5_context context;
     krb5_prompt_type *types;
 {
-    context->prompt_types = 0;
+    context->prompt_types = types;
 }
 
 KRB5_DLLIMP

@@ -1,3 +1,91 @@
+2000-06-09  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in: Check for strdup().
+
+	* kparse.c: Remove strsave() and replace with an inlined static
+	version of strdup() if HAVE_STRDUP is not defined.
+
+	* g_ad_tkt.c (get_ad_tkt): ptr may be signed; cast while
+	assigning to larger types.  [from Charles Hannum by way of
+	ghudson]
+
+2000-05-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* decomp_tkt.c (dcmp_tkt_int): Add a couple more length checks.
+	Reject names that are exactly ANAME_SZ (etc) bytes long without
+	the trailing nul, because krb.h says the *_SZ macros are "maximum
+	sizes ... +1".
+	* mk_auth.c (krb_mk_auth): Force nul termination of inst.
+	* sendauth.c (krb_sendauth): Force nul termination of srv_inst.
+
+2000-05-11  Nalin Dahyabhai  <nalin@redhat.com>
+
+	* Password.c (GetUserInfo): Truncate user name if it's too long
+	to fit.
+	* cr_auth_repl.c (cr_auth_reply): Bail if the reply packet won't
+	fit into its buffer.
+	* cr_ciph.c (create_ciph): Ditto.
+	* cr_death_pkt.c (krb_create_death_packet): Truncate "aname" to
+	make it fit into the packet's data buffer.
+	* cr_err_repl.c (cr_err_reply): Bail if the reply packet won't
+	fit into its buffer.
+	* cr_tkt.c (krb_create_ticket): Ditto.
+	* g_ad_tkt.c (get_ad_tkt): Stop if data being added to buffer
+	would overflow it.  Add more sanity checks when decomposing the
+	credential received.
+	* g_in_tkt.c (krb_mk_in_tkt_preauth): Bail if the request packet
+	won't fit into its buffer.
+	* g_krbhst.c (get_krbhst_default): Truncate the guessed KDC's
+	hostname if it is too long.
+	* g_pw_in_tkt.c: Remove useless strcpy() prototype.
+	* kntoln.c (krb_kntoln): Don't overflow buffer "lname".
+	* mk_err.c (krb_mk_err): Return the needed buffer length if the
+	pointer passed in is NULL.
+	* mk_req.c (krb_mk_req): Bail if the reply packet won't 
+        fit into its buffer.
+	* rd_req.c (krb_rd_req): Sanity check the realm name being read,
+	and truncate the service name, nstance, and realm from credential
+	read from keytab.
+	* realmofhost.c (krb_realmofhost): Truncate realm names read
+	from file if they are too long.
+	* send_to_kdc.c (send_to_kdc): Truncate passed-in realm name.
+
+2000-05-08  Ken Raeburn  <raeburn@mit.edu>
+
+	* rd_req.c (krb_rd_req): Mask length byte with 0xff in case the
+	length is over 127 and char is signed.
+
+	* recvauth.c (krb_recvauth): If the number of bytes to be read
+	from the net is not positive, just return an error.
+
+2000-05-03  Tom Yu  <tlyu@mit.edu>
+
+	* cr_tkt.c: Delete prototype for krb_cr_tkt_int(), since the
+	definition is K&R style and contains narrow types.  Thank you
+	HP/UX for having a compiler that actually makes this a fatal
+	error.
+
+2000-04-28  Ken Raeburn  <raeburn@mit.edu>
+	    Nalin Dahyabhai  <nalin@redhat.com>
+
+	* dest_tkt.c (dest_tkt): Don't overflow buffer "shmidname".
+	* in_tkt.c (in_tkt): Don't overflow buffer "shmidname".
+	* kuserok.c (kuserok): Don't overflow buffer "pbuf".
+	* tf_util.c (tf_init): Don't overflow buffer "shmidname".
+	* win_store.c (krb__get_cnffile): Don't overflow buffers "defname"
+	and "cnfname".
+	(krb__get_realmsfile): Don't overflow buffers "defname" and
+	"realmsname".
+
+2000-04-28  Tom Yu  <tlyu@mit.edu>
+
+	* rd_req.c (krb_rd_req): Fix some uses of strcpy().
+
+2000-03-12  Ezra Peisach  <epeisach@mit.edu>
+
+	* cr_tkt.c (krb_cr_tkt_int): Add static prototype.
+	* decomp_tkt.c: (dcmp_tkt_int): Add static prototype
+
 1999-10-26  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,
