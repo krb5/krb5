@@ -1,3 +1,7 @@
+2001-11-05  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (LIBMINOR): Bump due to changes to internals.
+
 2001-09-25  Tom Yu  <tlyu@mit.edu>
 
 	* pty-int.h: Fix up botched merge: cause prototypes for
