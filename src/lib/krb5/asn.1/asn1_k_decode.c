@@ -39,10 +39,16 @@ int length,taglen
 #define unused_var(x) if(0) x=0
 
 #define next_tag()\
-retval = asn1_get_tag(&subbuf,&class,&construction,&tagnum,&taglen);\
-if(retval) return retval;\
-if(class != CONTEXT_SPECIFIC || construction != CONSTRUCTED)\
-  return ASN1_BAD_ID
+retval = asn1_get_tag_indef(&subbuf,&class,&construction,\
+			    &tagnum,&taglen,&indef);\
+if(retval) return retval;
+
+#define get_eoc()						\
+retval = asn1_get_tag_indef(&subbuf,&class,&construction,	\
+			    &tagnum,&taglen,&indef);		\
+if(retval) return retval;					\
+if(class != UNIVERSAL || tagnum || indef)			\
+  return ASN1_MISSING_EOC
 
 #define alloc_field(var,type)\
 var = (type*)calloc(1,sizeof(type));\
@@ -59,15 +65,21 @@ if(class != APPLICATION || construction != CONSTRUCTED ||\
 #define get_field_body(var,decoder)\
 retval = decoder(&subbuf,&(var));\
 if(retval) return retval;\
-if(!taglen) { next_tag(); }\
+if(!taglen && indef) { get_eoc(); }\
 next_tag()
 
 #define get_field(var,tagexpect,decoder)\
 if(tagnum > (tagexpect)) return ASN1_MISSING_FIELD;\
 if(tagnum < (tagexpect)) return ASN1_MISPLACED_FIELD;\
+if((class != CONTEXT_SPECIFIC || construction != CONSTRUCTED) \
+   && (tagnum || taglen || class != UNIVERSAL)) \
+  return ASN1_BAD_ID;\
 get_field_body(var,decoder)
 
 #define opt_field(var,tagexpect,decoder,optvalue)\
+if((class != CONTEXT_SPECIFIC || construction != CONSTRUCTED) \
+   && (tagnum || taglen || class != UNIVERSAL)) \
+  return ASN1_BAD_ID;\
 if(tagnum == (tagexpect)){\
   get_field_body(var,decoder); }\
 else var = optvalue
@@ -76,12 +88,15 @@ else var = optvalue
 #define get_lenfield_body(len,var,decoder)\
 retval = decoder(&subbuf,&(len),&(var));\
 if(retval) return retval;\
-if(!taglen) { next_tag(); }\
+if(!taglen && indef) { get_eoc(); }\
 next_tag()
 
 #define get_lenfield(len,var,tagexpect,decoder)\
 if(tagnum > (tagexpect)) return ASN1_MISSING_FIELD;\
 if(tagnum < (tagexpect)) return ASN1_MISPLACED_FIELD;\
+if((class != CONTEXT_SPECIFIC || construction != CONSTRUCTED) \
+   && (tagnum || taglen || class != UNIVERSAL)) \
+  return ASN1_BAD_ID;\
 get_lenfield_body(len,var,decoder)
 
 #define opt_lenfield(len,var,tagexpect,decoder)\
@@ -92,30 +107,58 @@ else { len = 0; var = 0; }
 
 #define begin_structure()\
 asn1buf subbuf;\
+int seqindef;\
 int indef;\
-retval = asn1_get_sequence(buf,&length,&indef);\
+retval = asn1_get_sequence(buf,&length,&seqindef);\
 if(retval) return retval;\
-retval = asn1buf_imbed(&subbuf,buf,length,indef);\
+retval = asn1buf_imbed(&subbuf,buf,length,seqindef);\
 if(retval) return retval;\
 next_tag()
 
 #define end_structure()\
-retval = asn1buf_sync(buf,&subbuf,tagnum,length);\
+retval = asn1buf_sync(buf,&subbuf,class,tagnum,length,indef,seqindef);\
 if(retval) return retval
 
-#define sequence_of(buf)\
-int size=0;\
-asn1buf seqbuf;\
-int length;\
-int indef;\
-retval = asn1_get_sequence(buf,&length,&indef);\
-if(retval) return retval;\
-retval = asn1buf_imbed(&seqbuf,buf,length,indef);\
+#define sequence_of(buf)			\
+unsigned int length, taglen;			\
+asn1_class class;				\
+asn1_construction construction;			\
+asn1_tagnum tagnum;				\
+int indef;					\
+sequence_of_common(buf)
+
+#define sequence_of_common(buf)				\
+int size=0;						\
+asn1buf seqbuf;						\
+int seqofindef;						\
+retval = asn1_get_sequence(buf,&length,&seqofindef);	\
+if(retval) return retval;				\
+retval = asn1buf_imbed(&seqbuf,buf,length,seqofindef);	\
 if(retval) return retval
 
-#define end_sequence_of(buf)\
-retval = asn1buf_sync(buf,&seqbuf,ASN1_TAGNUM_CEILING,length);\
-if(retval) return retval
+#define sequence_of_no_tagvars(buf)		\
+asn1_class eseqclass;				\
+asn1_construction eseqconstr;			\
+asn1_tagnum eseqnum;				\
+unsigned int eseqlen;				\
+int eseqindef;					\
+sequence_of_common(buf)
+
+#define end_sequence_of_no_tagvars(buf)				\
+retval = asn1_get_tag_indef(&seqbuf,&eseqclass,&eseqconstr,	\
+			    &eseqnum,&eseqlen,&eseqindef);	\
+if(retval) return retval;					\
+retval = asn1buf_sync(buf,&seqbuf,eseqclass,eseqnum,		\
+		      eseqlen,eseqindef,seqofindef);		\
+if(retval) return retval;
+
+#define end_sequence_of(buf)					\
+retval = asn1_get_tag_indef(&seqbuf,&class,&construction,	\
+			    &tagnum,&taglen,&indef);		\
+if(retval) return retval;					\
+retval = asn1buf_sync(buf,&seqbuf,class,tagnum,			\
+		      length,indef,seqofindef);			\
+if(retval) return retval;
 
 #define cleanup()\
 return 0
@@ -206,8 +249,8 @@ asn1_error_code asn1_decode_principal_name(buf, val)
   { begin_structure();
     get_field((*val)->type,0,asn1_decode_int32);
   
-    { sequence_of(&subbuf);
-      while(asn1buf_remains(&seqbuf)){
+    { sequence_of_no_tagvars(&subbuf);
+      while(asn1buf_remains(&seqbuf,seqofindef) > 0){
 	size++;
 	if ((*val)->data == NULL)
 	  (*val)->data = (krb5_data*)malloc(size*sizeof(krb5_data));
@@ -221,8 +264,12 @@ asn1_error_code asn1_decode_principal_name(buf, val)
 	if(retval) return retval;
       }
       (*val)->length = size;
-      end_sequence_of(&subbuf);
+      end_sequence_of_no_tagvars(&subbuf);
     }
+    if (indef) {
+	get_eoc();
+    }
+    next_tag();
     end_structure();
     (*val)->magic = KV5M_PRINCIPAL;
   }
@@ -528,7 +575,7 @@ if(*(array) == NULL) return ENOMEM;\
   type *elt;\
 \
   { sequence_of(buf);\
-    while(asn1buf_remains(&seqbuf) > 0){\
+    while(asn1buf_remains(&seqbuf,seqofindef) > 0){\
       alloc_field(elt,type);\
       get_element(elt,decoder);\
       array_append(val,size,elt,type);\
@@ -660,7 +707,7 @@ asn1_error_code asn1_decode_sequence_of_enctype(buf, num, val)
 {
   asn1_error_code retval;
   { sequence_of(buf);
-    while(asn1buf_remains(&seqbuf) > 0){
+    while(asn1buf_remains(&seqbuf,seqofindef) > 0){
       size++;
       if (*val == NULL)
         *val = (krb5_enctype*)malloc(size*sizeof(krb5_enctype));

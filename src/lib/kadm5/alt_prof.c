@@ -1,7 +1,7 @@
 /*
  * lib/kadm/alt_prof.c
  *
- * Copyright 1995 by the Massachusetts Institute of Technology.
+ * Copyright 1995,2001 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -114,6 +114,64 @@ krb5_aprof_getvals(acontext, hierarchy, retdata)
     return(profile_get_values((profile_t) acontext,
 			      hierarchy,
 			      retdata));
+}
+
+/*
+ * krb5_aprof_get_boolean()
+ *
+ * Parameters:
+ *	acontext	- opaque context for alternate profile
+ *	hierarchy	- hierarchy of value to retrieve
+ *	retdata		- Returned data value
+ * Returns:
+ *	error codes
+ */
+
+static krb5_error_code
+string_to_boolean (const char *string, krb5_boolean *out)
+{
+    static const char *const yes[] = { "y", "yes", "true", "t", "1", "on" };
+    static const char *const no[] = { "n", "no", "false", "f", "nil", "0", "off" };
+    int i;
+
+    for (i = 0; i < sizeof(yes)/sizeof(yes[0]); i++)
+	if (!strcasecmp(string, yes[i])) {
+	    *out = 1;
+	    return 0;
+	}
+    for (i = 0; i < sizeof(no)/sizeof(no[0]); i++)
+	if (!strcasecmp(string, no[i])) {
+	    *out = 0;
+	    return 0;
+	}
+    return PROF_BAD_BOOLEAN;
+}
+
+krb5_error_code
+krb5_aprof_get_boolean(krb5_pointer acontext, const char **hierarchy,
+		       int uselast, int *retdata)
+{
+    krb5_error_code kret;
+    char **values;
+    char *valp;
+    int idx;
+    krb5_boolean val;
+
+    kret = krb5_aprof_getvals (acontext, hierarchy, &values);
+    if (kret)
+	return kret;
+    idx = 0;
+    if (uselast) {
+	while (values[idx])
+	    idx++;
+	idx--;
+    }
+    valp = values[idx];
+    kret = string_to_boolean (valp, &val);
+    if (kret)
+	return kret;
+    *retdata = val;
+    return 0;
 }
 
 /*
@@ -644,8 +702,8 @@ krb5_error_code kadm5_get_config_params(context, kdcprofile, kdcenv,
 	 if (aprofile)
 	      krb5_aprof_get_string(aprofile, hierarchy, TRUE, &svalue);
 	 if (svalue == NULL)
-	      svalue = strdup("des-cbc-crc:normal");
-	 
+	      svalue = strdup("des3-hmac-sha1:normal des-cbc-crc:normal");
+
 	 params.keysalts = NULL;
 	 params.num_keysalts = 0;
 	 krb5_string_to_keysalts(svalue,
@@ -736,6 +794,7 @@ krb5_read_realm_params(kcontext, realm, kdcprofile, kdcenv, rparamp)
     const char		*hierarchy[4];
     char		*svalue;
     krb5_int32		ivalue;
+    krb5_boolean	bvalue;
     krb5_deltat		dtvalue;
 
     krb5_error_code	kret;
@@ -832,7 +891,13 @@ krb5_read_realm_params(kcontext, realm, kdcprofile, kdcenv, rparamp)
 	    rparams->realm_expiration_valid = 1;
 	krb5_xfree(svalue);
     }
-	    
+
+    hierarchy[2] = "reject_bad_transit";
+    if (!krb5_aprof_get_boolean(aprofile, hierarchy, TRUE, &bvalue)) {
+	rparams->realm_reject_bad_transit = bvalue;
+	rparams->realm_reject_bad_transit_valid = 1;
+    }
+
     /* Get the value for the default principal flags */
     hierarchy[2] = "default_principal_flags";
     if (!krb5_aprof_get_string(aprofile, hierarchy, TRUE, &svalue)) {

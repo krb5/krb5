@@ -51,7 +51,7 @@ rd_and_store_for_creds(context, auth_context, inbuf, ticket, ccache)
      */
   
     sprintf(ccname, "FILE:/tmp/krb5cc_p%d", getpid());
-    setenv("KRB5CCNAME", ccname, 0);
+    setenv("KRB5CCNAME", ccname, 1);
   
     if (retval = krb5_cc_resolve(context, ccname, ccache)) 
 	goto cleanup;

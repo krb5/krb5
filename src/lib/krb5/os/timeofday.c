@@ -48,7 +48,7 @@ krb5_timeofday(context, timeret)
 	    *timeret = os_ctx->time_offset;
 	    return 0;
     }
-#ifdef macintosh
+#if defined(macintosh) || defined(__MACH__)
 {
 	long usecs;
 	krb5_error_code	kret;

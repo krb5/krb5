@@ -23,8 +23,7 @@ OBJS = \
 	authorization.o \
 	main.o \
 	heuristic.o \
-	xmalloc.o \
-	@SETENVOBJ@
+	xmalloc.o @SETENVOBJ@
 
 all:: ksu
 

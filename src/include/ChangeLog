@@ -1,3 +1,84 @@
+2001-12-19  Miro Jurisic  <meeroh@mit.edu>
+	* win-mac.h: Fixed EFBIG #define
+
+2001-10-29  Miro Jurisic  <meeroh@mit.edu>
+	* pullup from krb5-1-2 branch after krb5-1-2-2-bp
+	* krb5.hin, k5-int.h: Condintionally use cc_* macros or functions
+	* krb5.hin: Changed KerberosConditionalMacros.h to
+	KerberosSupport.h
+	* k5-int.h: Rearranged the #ifdef macintosh section to
+	work on Mac OS 9 and X
+	* win-mac.h, k5-int.h, krb5.hin: Updated Mac OS #defines
+	and #includes for new header layout and Mac OS X frameworks
+        
+2001-09-25  Ken Raeburn  <raeburn@mit.edu>
+
+	* krb5.hin (TKT_FLG_TRANSIT_POLICY_CHECKED,
+	TKT_FLG_OK_AS_DELEGATE, TKT_FLG_ANONYMOUS): New macros.
+	(KDC_OPT_REQUEST_ANONYMOUS, KDC_OPT_DISABLE_TRANSITED_CHECK):
+	Likewise.
+	(krb5_check_transited_list): Pointed-to krb5_data structures are
+	now all const.
+
+2000-10-16  Miro Jurisic  <meeroh@mit.edu>
+
+	* win-mac.h: #include <KerberosConditionalMacros.h> on Mac OS
+        
+2000-10-02  Alexandra Ellwood  <lxs@mit.edu>
+
+	* krb5-int.h: Added warning comment about #define macintosh
+        
+2000-09-19  Miro Jurisic  <meeroh@mit.edu>
+
+	* win-mac.h: Put #include <fcntl.h> back in
+
+2000-06-02  Danilo Almeida  <dalmeida@mit.edu>
+
+	* krb5.hin (krb5_get_tgs_ktypes, krb5_free_ktypes): Fix linkage to
+	be KRB5_CALLCONV.
+
+	* k5-int.h (krb5int_cc_default): Fix linkage to be consistent with
+	code.  (Note: We should dump KRB5_DLLIMP.)
+
+2000-05-31  Ken Raeburn  <raeburn@mit.edu>
+
+	* krb5.hin (krb5_recvauth_version): Declare.
+
+2000-5-19	Alexandra Ellwood <lxs@mit.edu>
+
+	* krb5-int.h: Added krb5int_cc_default.  This function supports the 
+	Kerberos Login Library and pops up a dialog if the cache does not
+	contain valid tickets.  This is used to automatically get a tgt before
+	obtaining service tickets.  Note that this should be an internal function
+	because callers don't expect krb5_cc_default to pop up a dialog!
+	(We found this out the hard way :-)
+
+2000-05-15      Jeffrey Altman          <jaltman@columbia.edu>
+
+        * krb5.hin -- Added prototypes for new public functions
+
+               krb5_appdefault_string
+               krb5_appdefault_boolean
+
+2000-04-18  Ken Raeburn  <raeburn@mit.edu>
+
+	* krb5.hin: Declare krb5_free_ktypes.
+
+2000-4-13	Alexandra Ellwood <lxs@mit.edu>
+
+	* krb5-int.h: Added support to store a krb5_principal in the os_context 
+	along with the default ccache name (if known, this principal is the same 
+	as the last time we looked at the ccache.
+	* win-mac.h: Set up the macintosh build to use KerberosLogin.
+
+2000-03-25  Miro Jurisic  <meeroh@mit.edu>
+
+	* k5-int.h: Fixed protos for krb5_locate_srv_* (naddrs is int*)
+
+2000-03-20  Miro Jurisic  <meeroh@mit.edu>
+
+	* krb5.hin: Add krb5_free_default_realm
+
 2000-03-15  Danilo Almeida  <dalmeida@mit.edu>
 
 	* krb5.hin: Add krb5_get_prompt_types() and related defs..

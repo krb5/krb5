@@ -1,3 +1,98 @@
+2001-12-18  Tom Yu  <tlyu@mit.edu>
+
+	* aclocal.m4 (KRB5_LIB_PARAMS): Fix hpux to deal with building
+	shared libs with gcc.  Patch from Doug Engert; fixes
+	krb5-build/1021.
+
+2001-11-27  Ken Raeburn  <raeburn@mit.edu>
+
+	* aclocal.m4 (KRB5_LIB_PARAMS): On Linux, add "-lc" to shared
+	library link line.
+
+2001-11-06  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in: Prepare Makefile for ms2mit.
+
+2001-01-31  Tom Yu  <tlyu@mit.edu>
+
+	* aclocal.m4 (KRB5_LIB_PARAMS): Fix up previous patch to avoid
+	ordering issues when calling sed, as well as some quoting
+	nastiness due to bugs in kadmin/testing/scripts/env_setup.shin.
+
+2001-01-31  Tom Yu  <tlyu@mit.edu>
+
+	* aclocal.m4 (KRB5_LIB_PARAMS): Fix up Irix RUN_ENV to work around
+	LD_LIBRARY*_PATH's inability to override rpaths.
+
+2001-01-28  Tom Yu  <tlyu@mit.edu>
+
+	* aclocal.m4 (KRB5_LIB_AUX): Smash some shared lib file extensions
+	so that AIX doesn't break, since static and shared libs are
+	mutually exclusive on AIX.
+
+2000-06-22  Tom Yu  <tlyu@mit.edu>
+
+	* aclocal.m4 (CC_LINK_STATIC): Another fix for freebsd shared libs
+	from David Cross.
+
+2000-06-21  Ken Raeburn  <raeburn@mit.edu>
+
+	* aclocal.m4 (KRB5_AC_ENABLE_DNS): Rewrite to fix logic.  Now
+	--enable-dns-for-XX really will be heeded for setting default
+	behavior.  Also, DNS support can now be compiled in while still
+	turned off by default.  Print out whether the DNS support will be
+	compiled in.
+
+2000-06-21  Tom Yu  <tlyu@mit.edu>
+
+	* aclocal.m4: Fix freebsd CC_LINK_SHARED to have correct rpath
+	flags.  Thanks to David Cross.
+
+2000-06-08  Tom Yu  <tlyu@mit.edu>
+
+	* aclocal.m4 (CC_LINK_STATIC): Fix to use old library search
+	order; otherwise if there are shared libraries with the same name
+	elsewhere in the search path, they'll take precedence over the
+	static ones in the tree.
+
+2000-05-08  Nalin Dahyabhai  <nalin@redhat.com>
+
+	* wconfig.c (main): Warn if copying command-line option string
+	will overflow internal buffer.
+
+2000-05-03  Tom Yu  <tlyu@mit.edu>
+
+	* aclocal.m4 (AC_KRB5_TCL_TRYOLD): Search by appending stuff to
+	CPPFLAGS and LDFLAGS to notice if there may be problems with stuff
+	earlier along in either variable overriding.
+
+2000-04-18  Ken Raeburn  <raeburn@mit.edu>
+
+	* aclocal.m4 (KRB5_AC_ENABLE_DNS): Set RESOLV_LIB, and substitute
+	it into the Makefile.
+	(AC_LIBRARY_NET): Set RESOLV_LIB.
+
+2000-04-18  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in (clean-windows): Actually clean gss-sample on Windows.
+
+2000-04-11  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in (clean-windows): Clean gss-sample on Windows.
+
+2000-04-04  Ken Raeburn  <raeburn@mit.edu>
+
+	* aclocal.m4 (KRB5_AC_ENABLE_DNS): Check for dns, dns-for-kdc, and
+	dns-for-realm separately.  Define KRB5_DNS_LOOKUP if either mode
+	is enabled.  Define KRB5_DNS_LOOKUP_KDC and KRB5_DNS_LOOKUP_REALM
+	if the appropriate modes are enabled.
+	* acconfig.h (KRB5_DNS_LOOKUP_KDC, KRB5_DNS_LOOKUP_REALM): Undef.
+
+2000-03-24  Ken Raeburn  <raeburn@mit.edu>
+
+	* aclocal.m4 (KRB5_LIB_PARAMS): Check for alpha*-dec-osf* instead
+	of alpha-dec-osf*.
+
 2000-03-15  Ken Raeburn  <raeburn@mit.edu>
 
 	* aclocal.m4 (KRB5_AC_ENABLE_DNS): Fix typo that caused the DNS

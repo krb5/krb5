@@ -183,7 +183,7 @@ krb54_get_service_keyblock(service,instance,realm,kvno,file,keyblock)
     
     if ((retval = krb5_kt_resolve(krb5__krb4_context, keytabname, &kt_id)))
 	    goto errout;
-    
+
     if ((retval = krb5_kt_get_entry(krb5__krb4_context, kt_id, princ, kvno,
 				    0, &kt_entry))) {
 	krb5_kt_close(krb5__krb4_context, kt_id);
@@ -192,6 +192,12 @@ krb54_get_service_keyblock(service,instance,realm,kvno,file,keyblock)
 
     retval = krb5_copy_keyblock_contents(krb5__krb4_context,
 					 &kt_entry.key, keyblock);
+    /* Bash types */
+    /* KLUDGE! If it's a non-raw des3 key, bash its enctype */
+    /* See kdc/kerberos_v4.c */
+    if (keyblock->enctype == ENCTYPE_DES3_CBC_SHA1 ||
+	keyblock->enctype == ENCTYPE_LOCAL_DES3_HMAC_SHA1)
+      keyblock->enctype = ENCTYPE_DES3_CBC_RAW;
     
     krb5_kt_free_entry(krb5__krb4_context, &kt_entry);
     krb5_kt_close (krb5__krb4_context, kt_id);

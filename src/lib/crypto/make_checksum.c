@@ -114,6 +114,7 @@ cleanup:
     if (ret) {
 	memset(cksum->contents, 0, cksum->length);
 	free(cksum->contents);
+	cksum->contents = NULL;
     }
 
     return(ret);

@@ -226,6 +226,10 @@ HINSTANCE get_lib_instance(void);
 
 #ifdef macintosh
 
+#include <KerberosSupport/KerberosConditionalMacros.h>
+
+#define USE_LOGIN_LIBRARY
+
 #define KRB5_CALLCONV
 #define KRB5_CALLCONV_C
 #define KRB5_DLLIMP
@@ -243,12 +247,7 @@ HINSTANCE get_lib_instance(void);
 #define NO_PASSWORD
 #define HAVE_LABS
 /*#define ENOMEM 12*/
-#include <unix.h>
 #include <ctype.h>
-
-#ifdef NEED_LOWLEVEL_IO
-#include <fcntl.h>
-#endif
 
 /*
  * Which encryption routines libcrypto will provide is controlled by
@@ -288,7 +287,10 @@ int stat(const char *path, struct stat *buf);
 
 int fstat(int fildes, struct stat *buf);
 
+#include <errno.h>
+#ifndef EFBIG
 #define EFBIG 1000
+#endif
 
 #define NOFCHMOD 1
 #define NOCHMOD 1

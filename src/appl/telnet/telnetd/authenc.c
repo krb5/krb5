@@ -37,20 +37,17 @@
 #include "telnetd.h"
 #include <libtelnet/misc.h>
 
-	int
+int
 net_write(str, len)
 	unsigned char *str;
 	int len;
 {
-	if (nfrontp + len < netobuf + BUFSIZ) {
-		memcpy((void *)nfrontp, (void *)str, len);
-		nfrontp += len;
-		return(len);
-	}
-	return(0);
+	if (len < 0)
+		return 0;
+	return netwrite(str, len);
 }
 
-	void
+void
 net_encrypt()
 {
 #ifdef	ENCRYPTION
@@ -87,7 +84,3 @@ telnet_gets(prompt, result, length, echo)
 	return((char *)0);
 }
 #endif	/* defined(AUTHENTICATION) || defined(ENCRYPTION) */
-
-
-
-

@@ -93,8 +93,6 @@ krb5_sigtype  sendsig();
 #define UCB_RSH "/usr/ucb/rsh"
 #endif
 
-
-
 krb5_context bsd_context;
 krb5_creds *cred;
 
@@ -137,7 +135,7 @@ main(argc, argv0)
     struct servent *sp;
     struct servent defaultservent;
     struct sockaddr_in local, foreign;
-    int suppress;
+    int suppress = 0;
 
 #ifdef POSIX_SIGNALS
     sigset_t omask, igmask;
@@ -148,6 +146,7 @@ main(argc, argv0)
 #ifdef KERBEROS
     krb5_flags authopts;
     krb5_error_code status;
+    krb5_auth_context auth_context;
     int fflag = 0, Fflag = 0;
 #ifdef KRB5_KRB4_COMPAT
     KTEXT_ST v4_ticket;
@@ -155,6 +154,7 @@ main(argc, argv0)
 #endif
 #endif  /* KERBEROS */
     int debug_port = 0;
+    enum kcmd_proto kcmd_proto = KCMD_PROTOCOL_COMPAT_HACK;
 
     memset(&defaultservent, 0, sizeof(struct servent));
     if (strrchr(argv[0], '/'))
@@ -237,6 +237,16 @@ main(argc, argv0)
     }
     if (argc > 0 && !strncmp(*argv, "-A", 2)) {
 	argv++, argc--;
+	goto another;
+    }
+    if (argc > 0 && !strcmp(*argv, "-PO")) {
+	argv++, argc--;
+	kcmd_proto = KCMD_OLD_PROTOCOL;
+	goto another;
+    }
+    if (argc > 0 && !strcmp(*argv, "-PN")) {
+	argv++, argc--;
+	kcmd_proto = KCMD_NEW_PROTOCOL;
 	goto another;
     }
 #endif  /* KERBEROS */
@@ -367,10 +377,15 @@ main(argc, argv0)
 		  0,           /* No need for sequence number */
 		  0,           /* No need for server seq # */
 		  &local, &foreign,
-		  authopts,
+		  &auth_context, authopts,
 		  1,	/* Always set anyport, there is no need not to. --proven */
-		  suppress);
+		  suppress,
+		  &kcmd_proto);
     if (status) {
+	/* If new protocol requested, don't fall back to less secure
+	   ones.  */
+	if (kcmd_proto == KCMD_NEW_PROTOCOL)
+	    exit (1);
 #ifdef KRB5_KRB4_COMPAT
 	/* No encrypted Kerberos 4 rsh. */
 	if (encrypt_flag)
@@ -391,8 +406,24 @@ main(argc, argv0)
 #else
 	try_normal(argv0);
 #endif
-    } else
-	rcmd_stream_init_krb5(&cred->keyblock, encrypt_flag, 0);
+    } else {
+	krb5_keyblock *key = &cred->keyblock;
+
+	if (kcmd_proto == KCMD_NEW_PROTOCOL) {
+	    status = krb5_auth_con_getlocalsubkey (bsd_context, auth_context,
+						   &key);
+	    if (status) {
+		com_err (argv[0], status, "determining subkey for session");
+		exit (1);
+	    }
+	    if (!key) {
+		com_err (argv[0], 0, "no subkey negotiated for connection");
+		exit (1);
+	    }
+	}
+
+	rcmd_stream_init_krb5(key, encrypt_flag, 0, 1, kcmd_proto);
+    }
 
 #ifdef HAVE_ISATTY
     if(encrypt_flag&&isatty(2)) {
@@ -489,7 +520,7 @@ main(argc, argv0)
 	}
 	if (FD_ISSET(rem, &rembits) == 0)
 	  goto rewrite;
-	wc = rcmd_stream_write(rem, bp, cc);
+	wc = rcmd_stream_write(rem, bp, cc, 0);
 	if (wc < 0) {
 	    if ((errno == EWOULDBLOCK) || (errno == EAGAIN))
 	      goto rewrite;
@@ -524,7 +555,7 @@ main(argc, argv0)
 	}
 	if (FD_ISSET(rfd2, &ready)) {
 	    errno = 0;
-	    cc = rcmd_stream_read(rfd2, buf, sizeof buf);
+	    cc = rcmd_stream_read(rfd2, buf, sizeof buf, 1);
 	    if (cc <= 0) {
 		if ((errno != EWOULDBLOCK) && (errno != EAGAIN))
 		    FD_CLR(rfd2, &readfrom);
@@ -533,7 +564,7 @@ main(argc, argv0)
 	}
 	if (FD_ISSET(rem, &ready)) {
 	    errno = 0;
-	    cc = rcmd_stream_read(rem, buf, sizeof buf);
+	    cc = rcmd_stream_read(rem, buf, sizeof buf, 0);
 	    if (cc <= 0) {
 		if ((errno != EWOULDBLOCK) && (errno != EAGAIN))
 		    FD_CLR(rem, &readfrom);
@@ -546,9 +577,9 @@ main(argc, argv0)
     exit(0);
   usage:
     fprintf(stderr,
-	    "usage: \trsh host [ -l login ] [ -n ] [ -x ] [ -f / -F] command\n");
+	    "usage: \trsh host [ -PN / -PO ] [ -l login ] [ -n ] [ -x ] [ -f / -F] command\n");
     fprintf(stderr,
-	    "OR \trsh [ -l login ] [-n ] [ -x ] [ -f / -F ] host command\n");
+	    "OR \trsh [ -PN / -PO ] [ -l login ] [-n ] [ -x ] [ -f / -F ] host command\n");
     exit(1);
 }
 
@@ -557,7 +588,7 @@ main(argc, argv0)
 krb5_sigtype sendsig(signo)
      char signo;
 {
-    (void) rcmd_stream_write(rfd2, &signo, 1);
+    (void) rcmd_stream_write(rfd2, &signo, 1, 1);
 }
 
 

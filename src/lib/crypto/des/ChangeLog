@@ -1,3 +1,7 @@
+2001-10-29  Miro Jurisic  <meeroh@mit.edu>
+	* pullup from krb5-1-2 branch after krb5-1-2-2-bp
+	* des_int.h: use "" includes for k5-int.h
+
 2000-02-25  Ezra Peisach  <epeisach@mit.edu>
 
 	* t_verify.c: Add "const" to casts in calls to mit_des_cbc_encrypt().
