@@ -58,55 +58,55 @@
 
 /* libkdb.spec */
 krb5_error_code krb5_dbm_db_set_name 
-	PROTOTYPE((krb5_context,
+	KRB5_PROTOTYPE((krb5_context,
 		   char * ));
 krb5_error_code krb5_dbm_db_init 
-	PROTOTYPE((krb5_context));
+	KRB5_PROTOTYPE((krb5_context));
 krb5_error_code krb5_dbm_db_fini 
-	PROTOTYPE((krb5_context));
+	KRB5_PROTOTYPE((krb5_context));
 krb5_error_code krb5_dbm_db_get_age 
-	PROTOTYPE((krb5_context,
+	KRB5_PROTOTYPE((krb5_context,
 		   char *,
 		   time_t * ));
 krb5_error_code krb5_dbm_db_create 
-	PROTOTYPE((krb5_context,
+	KRB5_PROTOTYPE((krb5_context,
 		   char * ));
 krb5_error_code krb5_dbm_db_destroy 
-	PROTOTYPE((krb5_context,
+	KRB5_PROTOTYPE((krb5_context,
 		   char * ));
 krb5_error_code krb5_dbm_db_rename 
-	PROTOTYPE((krb5_context,
+	KRB5_PROTOTYPE((krb5_context,
 		   char *,
 		   char * ));
 krb5_error_code krb5_dbm_db_get_principal 
-	PROTOTYPE((krb5_context,
+	KRB5_PROTOTYPE((krb5_context,
 		   krb5_principal,
 		   krb5_db_entry *,
 		   int *,
 		   krb5_boolean * ));
 void krb5_dbm_db_free_principal 
-	PROTOTYPE((krb5_context,
+	KRB5_PROTOTYPE((krb5_context,
 		   krb5_db_entry *,
 		   int ));
 krb5_error_code krb5_dbm_db_put_principal 
-	PROTOTYPE((krb5_context,
+	KRB5_PROTOTYPE((krb5_context,
 		   krb5_db_entry *,
 		   int * ));
 krb5_error_code krb5_dbm_db_iterate
-    	PROTOTYPE((krb5_context,
-		   krb5_error_code (*) PROTOTYPE((krb5_pointer,
+    	KRB5_PROTOTYPE((krb5_context,
+		   krb5_error_code (*) KRB5_PROTOTYPE((krb5_pointer,
 					          krb5_db_entry *)),
 	           krb5_pointer ));
 krb5_error_code krb5_dbm_db_set_nonblocking 
-	PROTOTYPE((krb5_context,
+	KRB5_PROTOTYPE((krb5_context,
 		   krb5_boolean,
 		   krb5_boolean * ));
 krb5_boolean krb5_dbm_db_set_lockmode
-	PROTOTYPE((krb5_context,
+	KRB5_PROTOTYPE((krb5_context,
 		   krb5_boolean ));
 krb5_error_code krb5_dbm_db_open_database 
-	PROTOTYPE((krb5_context));
+	KRB5_PROTOTYPE((krb5_context));
 krb5_error_code krb5_dbm_db_close_database 
-	PROTOTYPE((krb5_context));
+	KRB5_PROTOTYPE((krb5_context));
 
 #endif /* KRB5_KDB5_DBM__ */

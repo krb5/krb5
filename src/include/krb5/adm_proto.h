@@ -38,7 +38,7 @@ typedef struct _krb5_db_entry krb5_db_entry;
 
 /* adm_conn.c */
 krb5_error_code INTERFACE krb5_adm_connect
-	PROTOTYPE((krb5_context,
+	KRB5_PROTOTYPE((krb5_context,
 		   char *,
 		   char *,
 		   char *,
@@ -48,7 +48,7 @@ krb5_error_code INTERFACE krb5_adm_connect
 		   char *,
 		   krb5_timestamp));
 void INTERFACE krb5_adm_disconnect
-	PROTOTYPE((krb5_context,
+	KRB5_PROTOTYPE((krb5_context,
 		   int *,
 		   krb5_auth_context,
 		   krb5_ccache));
@@ -56,7 +56,7 @@ void INTERFACE krb5_adm_disconnect
 #if ! defined(_WINDOWS)
 /* adm_kw_dec.c */
 krb5_error_code krb5_adm_proto_to_dbent
-	PROTOTYPE((krb5_context,
+	KRB5_PROTOTYPE((krb5_context,
 		   krb5_int32,
 		   krb5_data *,
 		   krb5_ui_4 *,
@@ -65,7 +65,7 @@ krb5_error_code krb5_adm_proto_to_dbent
 
 /* adm_kw_enc.c */
 krb5_error_code krb5_adm_dbent_to_proto
-	PROTOTYPE((krb5_context,
+	KRB5_PROTOTYPE((krb5_context,
 		   krb5_ui_4,
 		   krb5_db_entry *,
 		   char *,
@@ -75,45 +75,45 @@ krb5_error_code krb5_adm_dbent_to_proto
 
 /* adm_kt_dec.c */
 krb5_error_code krb5_adm_proto_to_ktent
-	PROTOTYPE((krb5_context,
+	KRB5_PROTOTYPE((krb5_context,
 		   krb5_int32,
 		   krb5_data *,
 		   krb5_keytab_entry *));
 
 /* adm_kt_enc.c */
 krb5_error_code krb5_adm_ktent_to_proto
-	PROTOTYPE((krb5_context,
+	KRB5_PROTOTYPE((krb5_context,
 		   krb5_keytab_entry *,
 		   krb5_int32 *,
 		   krb5_data **));
 
 /* adm_rw.c */
 void INTERFACE krb5_free_adm_data
-	PROTOTYPE((krb5_context,
+	KRB5_PROTOTYPE((krb5_context,
 		   krb5_int32,
 		   krb5_data *));
 
 krb5_error_code INTERFACE krb5_send_adm_cmd
-	PROTOTYPE((krb5_context,
+	KRB5_PROTOTYPE((krb5_context,
 		   krb5_pointer,
 		   krb5_auth_context,
 		   krb5_int32,
 		   krb5_data *));
 krb5_error_code krb5_send_adm_reply
-	PROTOTYPE((krb5_context,
+	KRB5_PROTOTYPE((krb5_context,
 		   krb5_pointer,
 		   krb5_auth_context,
 		   krb5_int32,
 		   krb5_int32,
 		   krb5_data *));
 krb5_error_code krb5_read_adm_cmd
-	PROTOTYPE((krb5_context,
+	KRB5_PROTOTYPE((krb5_context,
 		   krb5_pointer,
 		   krb5_auth_context,
 		   krb5_int32 *,
 		   krb5_data **));
 krb5_error_code INTERFACE krb5_read_adm_reply
-	PROTOTYPE((krb5_context,
+	KRB5_PROTOTYPE((krb5_context,
 		   krb5_pointer,
 		   krb5_auth_context,
 		   krb5_int32 *,
@@ -122,10 +122,10 @@ krb5_error_code INTERFACE krb5_read_adm_reply
 
 /* logger.c */
 krb5_error_code krb5_klog_init
-	PROTOTYPE((krb5_context,
+	KRB5_PROTOTYPE((krb5_context,
 		   char *,
 		   char *,
 		   krb5_boolean));
-void krb5_klog_close PROTOTYPE((krb5_context));
-int krb5_klog_syslog PROTOTYPE((int, const char *, ...));
+void krb5_klog_close KRB5_PROTOTYPE((krb5_context));
+int krb5_klog_syslog KRB5_PROTOTYPE((int, const char *, ...));
 #endif	/* KRB5_ADM_PROTO_H__ */

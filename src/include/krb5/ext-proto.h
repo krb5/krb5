@@ -50,7 +50,7 @@ extern char *getenv();
 #endif
 
 #ifndef HAS_STRDUP
-extern char *strdup PROTOTYPE((const char *));
+extern char *strdup KRB5_PROTOTYPE((const char *));
 #endif
 
 #ifdef HAS_UNISTD_H

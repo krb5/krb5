@@ -36,11 +36,11 @@
  * Note: these typedefs are subject to change.... [tytso:19920903.1609EDT]
  */
 typedef krb5_error_code (krb5_preauth_obtain_proc)
-    PROTOTYPE((krb5_context, krb5_principal client, krb5_address **src_addr,
+    KRB5_PROTOTYPE((krb5_context, krb5_principal client, krb5_address **src_addr,
 	       krb5_pa_data *pa_data));
 
 typedef krb5_error_code (krb5_preauth_verify_proc)
-    PROTOTYPE((krb5_context, krb5_principal client, krb5_address **src_addr,
+    KRB5_PROTOTYPE((krb5_context, krb5_principal client, krb5_address **src_addr,
 	       krb5_data *data));
 
 typedef struct _krb5_preauth_ops {
@@ -59,28 +59,28 @@ typedef struct _krb5_preauth_ops {
 
 #if 0
 krb5_error_code get_random_padata
-    PROTOTYPE((krb5_principal client, krb5_address **src_addr,
+    KRB5_PROTOTYPE((krb5_principal client, krb5_address **src_addr,
 	       krb5_pa_data *data));
 
 krb5_error_code verify_random_padata
-    PROTOTYPE((krb5_principal client, krb5_address **src_addr,
+    KRB5_PROTOTYPE((krb5_principal client, krb5_address **src_addr,
 	       krb5_data *data));
 #endif
 
 krb5_error_code get_unixtime_padata
-    PROTOTYPE((krb5_context, krb5_principal client, 
+    KRB5_PROTOTYPE((krb5_context, krb5_principal client, 
 	       krb5_address **src_addr, krb5_pa_data *data));
 
 krb5_error_code verify_unixtime_padata
-    PROTOTYPE((krb5_context, krb5_principal client, krb5_address **src_addr,
+    KRB5_PROTOTYPE((krb5_context, krb5_principal client, krb5_address **src_addr,
 	       krb5_data *data));
 
 krb5_error_code get_securid_padata
-    PROTOTYPE((krb5_context, krb5_principal client, krb5_address **src_addr,
+    KRB5_PROTOTYPE((krb5_context, krb5_principal client, krb5_address **src_addr,
 	       krb5_pa_data *data));
 
 krb5_error_code verify_securid_padata
-    PROTOTYPE((krb5_context, krb5_principal client, krb5_address **src_addr,
+    KRB5_PROTOTYPE((krb5_context, krb5_principal client, krb5_address **src_addr,
 	       krb5_data *data));
 
 #endif /* KRB5_PREAUTH__ */

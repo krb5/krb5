@@ -1,3 +1,11 @@
+Wed Jun 21 10:44:06 1995    <tytso@rsx-11.mit.edu>
+
+	* Makefile.in: Don't remove autoconf.h when doing a make clean;
+		it's an autoconf generated file.
+
+	* adm_proto.h, asn1.h, ext-proto.h, kdb.h, kdb_dbm.h, los-proto.h,
+		preauth.c: Change PROTOTYPE -> KRB5_PROTOTYPE
+
 Sat Jun 10 22:11:45 1995  Tom Yu  (tlyu@dragons-lair)
 
 	* adm_proto.h: update krb5_auth_context stuff

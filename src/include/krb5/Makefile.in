@@ -10,27 +10,18 @@ KRB5_HEADERS = adm.h adm_proto.h asn1.h ext-proto.h k5-config.h k5-errors.h \
 # these are installed here for the build from lib/krb5/error_tables but 
 # also need to be in the installed tree
 ET_HEADERS = adm_err.h asn1_err.h kdb5_err.h krb5_err.h
-BUILT_HEADERS = autoconf.h osconf.h
+BUILT_HEADERS = osconf.h
 
 all:: all-$(WHAT)
 
-all-unix:: $(BUILT_HEADERS)
-all-mac:: $(BUILT_HEADERS)
+all-unix:: autoconf.h $(BUILT_HEADERS)
+all-mac:: autoconf.h  $(BUILT_HEADERS)
 all-windows:
 	copy stock\osconf.h osconf.h
 	echo /* not used in windows */ > autoconf.h
 
-includes:: autoconf.h
-
-# Run a header through a preprocessor to generate an architecture/environment
-# specific header file.  note that unifdef's exit status will normally be 1,
-# indicating some adjustment of the file took place.
-
 autoconf.h: $(srcdir)/autoconf.h.in config.status
 	$(SHELL) config.status
-
-clean::
-	$(RM) autoconf.h
 
 depend::
 
