@@ -1,3 +1,8 @@
+2004-09-21  Tom Yu  <tlyu@mit.edu>
+
+	* rd_cred.c (decrypt_credencdata): Clear and free ppart to avoid
+	leak, reported by Derrick Schommer.
+
 2004-08-31  Tom Yu  <tlyu@mit.edu>
 
 	* rd_rep.c:

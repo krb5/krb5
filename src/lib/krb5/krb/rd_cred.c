@@ -14,7 +14,7 @@
 static krb5_error_code 
 decrypt_credencdata(krb5_context context, krb5_cred *pcred, krb5_keyblock *pkeyblock, krb5_cred_enc_part *pcredenc)
 {
-    krb5_cred_enc_part  * ppart;
+    krb5_cred_enc_part  * ppart = NULL;
     krb5_error_code 	  retval;
     krb5_data 		  scratch;
 
@@ -39,6 +39,10 @@ decrypt_credencdata(krb5_context context, krb5_cred *pcred, krb5_keyblock *pkeyb
     retval = 0;
 
 cleanup:
+    if (ppart != NULL) {
+	memset(ppart, 0, sizeof(*ppart));
+	krb5_xfree(ppart);
+    }
     memset(scratch.data, 0, scratch.length);
     krb5_xfree(scratch.data);
 
