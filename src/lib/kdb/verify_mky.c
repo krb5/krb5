@@ -58,7 +58,7 @@ krb5_encrypt_block *eblock;
     if (retval = (*eblock->crypto_entry->process_key)(eblock, mkey)) {
 	return(retval);
     }
-    if (retval = krb5_kdb_decrypt_key(&master_entry.key, &tempkey, eblock)) {
+    if (retval = krb5_kdb_decrypt_key(eblock, &master_entry.key, &tempkey)) {
 	(void) (*eblock->crypto_entry->finish_key)(eblock);
 	return retval;
     }
