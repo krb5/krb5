@@ -75,7 +75,6 @@ EXPORTS
 	krb5_get_in_tkt_with_skey
 	krb5_get_notification_message
 	krb5_init_context
-	krb5_init_ets
 	krb5_mk_error
 	krb5_mk_priv
 	krb5_mk_rep

@@ -16,23 +16,28 @@
  * working. 
  */
 
-/* We can't include winsock.h directly because of /Za (stdc) options */
 #ifdef KRB4
 #include <kerberosIV/krb.h>
 #endif
-
 #define NEED_SOCKETS
 #include "k5-int.h"
 
-#if defined(GSSAPI) && !defined(KRB5)
-#define KRB5 1
-#endif
-#if (defined(KRB4) || defined(KRB5)) && !defined(NEED_WINSOCK)
+#ifndef NEED_WINSOCK
+#if defined(KRB4) || defined(KRB5) || defined(GSSAPI)
 #define NEED_WINSOCK 1
+#endif
 #endif
 
 #ifdef KRB4
 #include <kerberosIV/krb_err.h>
+#endif
+#ifdef KRB5
+#include "krb5_err.h"
+#include "kv5m_err.h"
+#include "asn1_err.h"
+#include "kdb5_err.h"
+#include "profile.h"
+#include "adm_err.h"
 #endif
 #ifdef GSSAPI
 #include "gssapi/generic/gssapi_err_generic.h"
@@ -181,29 +186,6 @@ krb5_error_code krb5_vercheck()
 	return 0;
 }
 
-#ifdef NEED_WINSOCK
-int
-win_socket_initialize()
-{
-    WORD wVersionRequested;
-    WSADATA wsaData;
-    int err;
-
-    wVersionRequested = 0x0101;                 /* We need version 1.1 */
-
-    err = WSAStartup (wVersionRequested, &wsaData);
-    if (err != 0)
-	return err;                             /* Library can't initialize */
-
-    if (wVersionRequested != wsaData.wVersion) {
-	/* DLL couldn't support our version of the spec */
-	WSACleanup ();
-	return -104;                            /* FIXME -- better error? */
-    }
-
-    return 0;
-}
-#endif
 
 static HINSTANCE hlibinstance;
 
@@ -212,6 +194,65 @@ HINSTANCE get_lib_instance()
     return hlibinstance;
 }
 
+#define DLL_STARTUP 0
+#define DLL_SHUTDOWN 1
+
+static int
+control(int mode)
+{
+    void ((KRB5_CALLCONV *et_func)(struct error_table FAR *));
+#ifdef NEED_WINSOCK
+    WORD wVersionRequested;
+    WSADATA wsaData;
+    int err;
+#endif
+
+    switch(mode) {
+    case DLL_STARTUP:
+	et_func = add_error_table;
+
+#ifdef NEED_WINSOCK
+	wVersionRequested = 0x0101;		/* We need version 1.1 */
+	if ((err = WSAStartup (wVersionRequested, &wsaData)))
+	    return err;
+	if (wVersionRequested != wsaData.wVersion) {
+	    /* DLL couldn't support our version of the spec */
+	    WSACleanup ();
+	    return -104;			/* FIXME -- better error? */
+	}
+#endif
+
+	break;
+
+    case DLL_SHUTDOWN:
+	et_func = remove_error_table;
+#ifdef NEED_WINSOCK
+	WSACleanup ();
+#endif
+	break;
+
+    default:
+	return -1;
+    }
+
+#ifdef KRB4
+    (*et_func)(&et_krb_error_table);
+#endif
+#ifdef KRB5
+    (*et_func)(&et_krb5_error_table);
+    (*et_func)(&et_kv5m_error_table);
+    (*et_func)(&et_kdb5_error_table);
+    (*et_func)(&et_asn1_error_table);
+    (*et_func)(&et_prof_error_table);
+    (*et_func)(&et_kadm_error_table);
+#endif
+#ifdef GSSAPI
+    (*et_func)(&et_k5g_error_table);
+    (*et_func)(&et_ggss_error_table);
+#endif
+
+    return 0;
+}
 
 #ifdef _WIN32
 
@@ -221,19 +262,8 @@ BOOL WINAPI DllMain (HANDLE hModule, DWORD fdwReason, LPVOID lpReserved)
     {
         case DLL_PROCESS_ATTACH:
 	    hlibinstance = (HINSTANCE) hModule;
-#ifdef NEED_WINSOCK
-	    win_socket_initialize ();
-#endif
-#ifdef KRB4
-	    initialize_krb_error_table();
-#endif
-#ifdef KRB5
-	    krb5_init_ets((krb5_context)0);
-#endif
-#ifdef GSSAPI
-	    initialize_k5g_error_table();
-	    initialize_ggss_error_table();
-#endif	   
+	    if (control(DLL_STARTUP))
+		return FALSE;
 	    break;
 
         case DLL_THREAD_ATTACH:
@@ -243,19 +273,8 @@ BOOL WINAPI DllMain (HANDLE hModule, DWORD fdwReason, LPVOID lpReserved)
 	    break;
 
         case DLL_PROCESS_DETACH:
-#ifdef GSSAPI
-	    cleanup_k5g_error_table();
-	    cleanup_ggss_error_table();
-#endif
-#ifdef KRB5
-	    krb5_finish_ets((krb5_context)0);
-#endif
-#ifdef KRB4
-	    cleanup_krb_error_table();
-#endif
-#ifdef NEED_WINSOCK
-	    WSACleanup ();
-#endif
+	    if (control(DLL_SHUTDOWN))
+		return FALSE;
 	    break;
 
         default:
@@ -275,40 +294,20 @@ WORD cbHeap;
 LPSTR CmdLine;
 {
     hlibinstance = hInst;
-#ifdef NEED_WINSOCK
-    win_socket_initialize ();
-#endif
-#ifdef KRB4
-    initialize_krb_error_table();
-#endif
-#ifdef KRB5
-    krb5_init_ets((krb5_context)0);
-#endif
-#ifdef GSSAPI
-    initialize_k5g_error_table();
-    initialize_ggss_error_table();
-#endif
-    return 1;
+    if (control(DLL_STARTUP))
+	return 0;
+    else 
+	return 1;
 }
 
 int CALLBACK __export
 WEP(nParam)
 	int nParam;
 {
-#ifdef GSSAPI
-    cleanup_k5g_error_table();
-    cleanup_ggss_error_table();
-#endif
-#ifdef KRB5
-    krb5_finish_ets((krb5_context)0);
-#endif
-#ifdef KRB4
-    cleanup_krb_error_table();
-#endif
-#ifdef NEED_WINSOCK
-    WSACleanup();
-#endif
-    return 1;
+    if (control(DLL_SHUTDOWN))
+	return 0;
+    else
+	return 1;
 }
 
 #endif
