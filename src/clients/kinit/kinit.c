@@ -273,8 +273,6 @@ main(argc, argv)
 #endif
     }
     
-    krb5_free_principal(kcontext, server);
-    
     if (code) {
 	if (code == KRB5KRB_AP_ERR_BAD_INTEGRITY)
 	    fprintf (stderr, "%s: Password incorrect\n", argv[0]);
@@ -296,5 +294,10 @@ main(argc, argv)
 	exit(1);
     }
 
+    /* my_creds is pointing at server */
+    krb5_free_principal(kcontext, server);
+
+    krb5_free_context(kcontext);
+    
     exit(0);
 }
