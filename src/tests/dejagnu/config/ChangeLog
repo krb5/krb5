@@ -1,4 +1,9 @@
 
+Thu Jun 8 14:58:15 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* default.exp - Add logging section to the profile.  Also, export
+		profile location to root shell.
+
+
 Mon Jun 5 16:09:25 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* default.exp - Reverse prompting order for kadmin5.
 

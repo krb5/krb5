@@ -203,6 +203,7 @@ proc get_hostname { } {
 proc setup_kerberos_files { } {
     global hostname
     global domain
+    global tmppwd
 
     if ![get_hostname] { 
 	return 0
@@ -223,6 +224,12 @@ proc setup_kerberos_files { } {
     puts $conffile "\[domain_realm\]"
     puts $conffile "	.$domain = KRBTEST.COM"
     puts $conffile "	$domain = KRBTEST.COM"
+    puts $conffile ""
+    puts $conffile "\[logging\]"
+    puts $conffile "	admin_server = STDERR"
+    puts $conffile "	admin_server = FILE:$tmppwd/kadmind5.log"
+    puts $conffile "	kdc = FILE:$tmppwd/kdc.log"
+    puts $conffile "	default = FILE:$tmppwd/others.log"
     close $conffile
     }
 
@@ -1025,6 +1032,17 @@ proc setup_root_shell { testname } {
     expect {
 	-re "$ROOT_PROMPT" { }
     }
+
+    # Set up our krb5.conf
+    send "KRB5_CONFIG=$tmppwd/krb5.conf\r"
+    expect {
+	-re "$ROOT_PROMPT" { }
+    }
+    send "export KRB5_CONFIG\r"
+    expect {
+	-re "$ROOT_PROMPT" { }
+    }
+
 
     # Move over to the right directory.
     set dir [pwd]
