@@ -31,39 +31,117 @@
  * encoding an object identifier.
  */
 
-/*
- * The OID of user_name is:
- * 	iso(1) member-body(2) US(840) mit(113554) infosys(1) gssapi(2)
- * 	generic(1) user_name(1) = 1.2.840.113554.1.2.1.1
- * machine_uid_name:
- * 	iso(1) member-body(2) US(840) mit(113554) infosys(1) gssapi(2)
- * 	generic(1) machine_uid_name(2) = 1.2.840.113554.1.2.1.2
- * string_uid_name:
- * 	iso(1) member-body(2) US(840) mit(113554) infosys(1) gssapi(2)
- * 	generic(1) string_uid_name(3) = 1.2.840.113554.1.2.1.3
- * service_name:
- * 	iso(1) member-body(2) US(840) mit(113554) infosys(1) gssapi(2)
- * 	generic(1) service_name(4) = 1.2.840.113554.1.2.1.4
- * exported_name:
- *      1(iso), 3(org), 6(dod), 1(internet), 5(security), 6(nametypes),
- *	    4(gss-api-exported-name)
- * host_based_service_name (v2):
- *      iso (1) org (3), dod (6), internet (1), security (5), nametypes(6),
- *      gss-host-based-services(2)
- */
+/* Reserved static storage for GSS_oids.  Comments are quotes from RFC 2744. */
 
 static gss_OID_desc oids[] = {
-   {10, "\052\206\110\206\367\022\001\002\001\001"},
-   {10, "\052\206\110\206\367\022\001\002\001\002"},
-   {10, "\052\206\110\206\367\022\001\002\001\003"},
-   {10, "\052\206\110\206\367\022\001\002\001\004"},
-   { 6, "\053\006\001\005\006\004"},
-   { 6, "\053\006\001\005\006\002"},
+    /*
+     * The implementation must reserve static storage for a
+	 * gss_OID_desc object containing the value */
+    {10, (void *)"\x2a\x86\x48\x86\xf7\x12\x01\x02\x01\x01"},
+    /* corresponding to an object-identifier value of
+	 * {iso(1) member-body(2) United States(840) mit(113554)
+	 * infosys(1) gssapi(2) generic(1) user_name(1)}.  The constant
+	 * GSS_C_NT_USER_NAME should be initialized to point
+	 * to that gss_OID_desc.
+	 */                                
+    
+    /*
+	 * The implementation must reserve static storage for a
+	 * gss_OID_desc object containing the value */
+    {10, (void *)"\x2a\x86\x48\x86\xf7\x12\x01\x02\x01\x02"},
+    /* corresponding to an object-identifier value of
+	 * {iso(1) member-body(2) United States(840) mit(113554)
+	 * infosys(1) gssapi(2) generic(1) machine_uid_name(2)}.
+	 * The constant GSS_C_NT_MACHINE_UID_NAME should be
+	 * initialized to point to that gss_OID_desc.
+	 */
+     
+    /*
+    * The implementation must reserve static storage for a
+    * gss_OID_desc object containing the value */
+    {10, (void *)"\x2a\x86\x48\x86\xf7\x12\x01\x02\x01\x03"},
+    /* corresponding to an object-identifier value of
+    * {iso(1) member-body(2) United States(840) mit(113554)
+    * infosys(1) gssapi(2) generic(1) string_uid_name(3)}.
+    * The constant GSS_C_NT_STRING_UID_NAME should be
+    * initialized to point to that gss_OID_desc.
+    */
+    
+    /*
+     * The implementation must reserve static storage for a
+     * gss_OID_desc object containing the value */
+    {6, (void *)"\x2b\x06\x01\x05\x06\x02"},
+    /* corresponding to an object-identifier value of
+     * {iso(1) org(3) dod(6) internet(1) security(5)
+     * nametypes(6) gss-host-based-services(2)).  The constant
+     * GSS_C_NT_HOSTBASED_SERVICE_X should be initialized to point
+     * to that gss_OID_desc.  This is a deprecated OID value, and
+     * implementations wishing to support hostbased-service names
+     * should instead use the GSS_C_NT_HOSTBASED_SERVICE OID,
+     * defined below, to identify such names;
+     * GSS_C_NT_HOSTBASED_SERVICE_X should be accepted a synonym
+     * for GSS_C_NT_HOSTBASED_SERVICE when presented as an input
+     * parameter, but should not be emitted by GSS-API
+     * implementations
+     */
+    
+    /*
+     * The implementation must reserve static storage for a
+     * gss_OID_desc object containing the value */
+    {10, (void *)"\x2a\x86\x48\x86\xf7\x12\x01\x02\x01\x04"}, 
+    /* corresponding to an object-identifier value of 
+     * {iso(1) member-body(2) Unites States(840) mit(113554) 
+     * infosys(1) gssapi(2) generic(1) service_name(4)}.  
+     * The constant GSS_C_NT_HOSTBASED_SERVICE should be 
+     * initialized to point to that gss_OID_desc.
+     */
+
+    /*
+     * The implementation must reserve static storage for a
+     * gss_OID_desc object containing the value */
+    {6, (void *)"\x2b\x06\01\x05\x06\x03"},
+    /* corresponding to an object identifier value of
+     * {1(iso), 3(org), 6(dod), 1(internet), 5(security),
+     * 6(nametypes), 3(gss-anonymous-name)}.  The constant
+     * and GSS_C_NT_ANONYMOUS should be initialized to point
+     * to that gss_OID_desc.
+     */
+    
+    /*
+     * The implementation must reserve static storage for a
+     * gss_OID_desc object containing the value */
+    {6, (void *)"\x2b\x06\x01\x05\x06\x04"},
+    /* corresponding to an object-identifier value of
+     * {1(iso), 3(org), 6(dod), 1(internet), 5(security),
+     * 6(nametypes), 4(gss-api-exported-name)}.  The constant
+     * GSS_C_NT_EXPORT_NAME should be initialized to point
+     * to that gss_OID_desc.
+     */
 };
 
-GSS_DLLIMP gss_OID gss_nt_user_name = oids+0;
-GSS_DLLIMP gss_OID gss_nt_machine_uid_name = oids+1;
-GSS_DLLIMP gss_OID gss_nt_string_uid_name = oids+2;
-GSS_DLLIMP gss_OID gss_nt_service_name = oids+3;
-GSS_DLLIMP gss_OID gss_nt_exported_name = oids+4;
-GSS_DLLIMP gss_OID gss_nt_service_name_v2 = oids+5;
+/* Here are the constants which point to the static structure above.
+ *
+ * Constants of the form GSS_C_NT_* are specified by rfc 2744.
+ *
+ * Constants of the form gss_nt_* are the original MIT krb5 names 
+ * found in gssapi_generic.h.  They are provided for compatibility. */ 
+
+GSS_DLLIMP gss_OID GSS_C_NT_USER_NAME           = oids+0;
+GSS_DLLIMP gss_OID gss_nt_user_name             = oids+0;
+
+GSS_DLLIMP gss_OID GSS_C_NT_MACHINE_UID_NAME    = oids+1;
+GSS_DLLIMP gss_OID gss_nt_machine_uid_name      = oids+1;
+
+GSS_DLLIMP gss_OID GSS_C_NT_STRING_UID_NAME     = oids+2;
+GSS_DLLIMP gss_OID gss_nt_string_uid_name       = oids+2;
+
+GSS_DLLIMP gss_OID GSS_C_NT_HOSTBASED_SERVICE_X = oids+3;
+GSS_DLLIMP gss_OID gss_nt_service_name_v2       = oids+3;
+
+GSS_DLLIMP gss_OID GSS_C_NT_HOSTBASED_SERVICE   = oids+4;
+GSS_DLLIMP gss_OID gss_nt_service_name          = oids+4;
+
+GSS_DLLIMP gss_OID GSS_C_NT_ANONYMOUS           = oids+5;
+
+GSS_DLLIMP gss_OID GSS_C_NT_EXPORT_NAME         = oids+6;
+GSS_DLLIMP gss_OID gss_nt_exported_name         = oids+6;

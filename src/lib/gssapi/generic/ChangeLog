@@ -1,3 +1,9 @@
+2001-06-25  Tom Yu  <tlyu@mit.edu>
+
+	* gssapi.hin, gssapi_generic.h, gssapi_generic.c:
+	added oids from rfc 2744.  Kept old oids for compatibility.
+	[pullup of lxs's changes]
+
 2001-06-21  Ezra Peisach  <epeisach@mit.edu>
 
 	* util_validate.c (g_save): Cleanup extraneous variable from last
