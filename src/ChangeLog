@@ -1,3 +1,7 @@
+1999-08-13  Brad Thompson  <yak@mit.edu>
+
+	* aclocal.m4: Added MacOS X shared library support.
+
 1999-08-09  Danilo Almeida  <dalmeida@mit.edu>
 
 	* Makefile.in: Build kpasswd under windows.
