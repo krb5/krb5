@@ -1,3 +1,10 @@
+Tue Aug  2 03:39:14 1994  Tom Yu  (tlyu@dragons-lair)
+
+	* acconfig.h: add HAVE_SETVBUF
+
+	* configure.in: changes to make things saner when checking for
+	ANSI_STDIO
+
 Thu Jul 14 03:31:06 1994  Tom Yu  (tlyu at dragons-lair)
 
 	* Makefile.in: some cleanup to not echo cruft

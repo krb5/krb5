@@ -1,6 +1,7 @@
 /* just stuff needed by kerberos 5 */
 
 #undef ANSI_STDIO
+#undef HAS_SETVBUF
 #undef BITS32
 #undef HAS_ANSI_CONST
 #undef HAS_ANSI_VOLATILE

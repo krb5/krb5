@@ -39,9 +39,21 @@ AC_HEADER_CHECK(string.h,AC_DEFINE(USE_STRING_H))
 AC_HEADER_CHECK(stdlib.h,AC_DEFINE(HAS_STDLIB_H),AC_DEFINE(NO_STDLIB_H))
 CHECK_STDARG
 
-dnl this is misused to *also* mean that "b" is needed to fopen binary...
-AC_FUNC_CHECK([setvbuf],AC_DEFINE(ANSI_STDIO))
-
+AC_FUNC_CHECK([setvbuf],AC_DEFINE(HAS_SETVBUF))
+dnl check for ANSI stdio, esp "b" option to fopen().  This (unfortunately)
+dnl requires a run check...
+AC_CHECKING([for ANSI stdio])
+AC_TEST_PROGRAM([
+#include <stdio.h>
+int main()
+{
+  FILE *conftest;
+  if ((conftest = fopen("conftest.dat", "w")) == NULL) exit(1);
+  if (fclose(conftest)) exit(1);
+  if ((conftest = fopen("conftest.dat", "rb+")) == NULL) exit(1);
+  if (fputs("testing ANSI for stdio\n", conftest) == EOF) exit(1);
+  exit(0);
+}],AC_DEFINE(ANSI_STDIO))
 
 AC_COMPILE_CHECK([prototype support],
 [int x(double y, int z);],,AC_DEFINE(KRB5_PROVIDE_PROTOTYPES))
