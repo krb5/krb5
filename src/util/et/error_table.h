@@ -23,8 +23,8 @@ extern struct et_list * _et_list;
 #define	ERRCODE_RANGE	8	/* # of bits to shift table number */
 #define	BITS_PER_CHAR	6	/* # bits to shift per character in name */
 
-extern const char FAR *error_table_name ET_P((long));
-extern const char FAR *error_table_name_r ET_P((long, char FAR *));
+extern const char FAR *error_table_name ET_P((unsigned long));
+extern const char FAR *error_table_name_r ET_P((unsigned long, char FAR *));
 
 #define _ET_H
 #endif

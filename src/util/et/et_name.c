@@ -23,7 +23,7 @@ static const char char_set[] =
 	"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_";
 
 const char * error_table_name_r(num, out)
-	long num;
+	unsigned long num;
 	char FAR *out;
 {
 	long ch;
@@ -43,7 +43,7 @@ const char * error_table_name_r(num, out)
 }
 
 const char FAR * error_table_name(num)
-	long num;
+	unsigned long num;
 {
 	static char buf[6];
 

@@ -52,7 +52,7 @@ KRB5_DLLIMP const char FAR * KRB5_CALLCONV error_message(code)
 	unsigned long offset;
 	unsigned long l_offset;
 	struct et_list *et;
-	long table_num;
+	unsigned long table_num;
 	int started = 0;
 	unsigned int divisor = 100;
 	char *cp;
@@ -83,8 +83,7 @@ KRB5_DLLIMP const char FAR * KRB5_CALLCONV error_message(code)
 
 	et = _et_list;
 	while (et) {
-		/* Work-around for a DEC/Alpha compiler bug comparing longs */
-		if (((int) (et->table->base - table_num)) == 0) {
+	    if (et->table->base == table_num) {
 			/* This is the right table */
 			if (et->table->n_msgs <= offset)
 				break;
@@ -195,7 +194,7 @@ add_error_table(et)
     el->table = et;
     el->next = _et_list;
     _et_list = el;
-    
+
     return 0;
 }
 
