@@ -291,8 +291,8 @@ WINFILES= util/windows/* \
 	windows/* windows/cns/* windows/wintel/* windows/gss/* windows/gina/*
 
 MACFILES= mac/* mac/kconfig/* mac/libraries/* mac/telnet-k5-auth/* \
-	mac/gss-sample/* mac/SAP/* config/* include/* include/krb5/* \
-	include/krb5/stock/* include/sys/* \
+	mac/gss/* mac/gss-sample/* mac/SAP/* config/* include/* \
+	include/krb5/* include/krb5/stock/* include/sys/* \
 	./patchlevel.h
 
 MITWINFILES= mit/windows/include/* 
