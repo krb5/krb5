@@ -338,7 +338,7 @@
 #else
 #define PTY_STRUCT_UTMPX struct utmp
 #define PTY_SETUTXENT setutent
-#define PTY_GETUTXENT gettutent
+#define PTY_GETUTXENT getutent
 #define PTY_GETUTXLINE getutline
 #define PTY_PUTUTXLINE pututline
 #define PTY_ENDUTXENT endutent
