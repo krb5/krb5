@@ -31,7 +31,7 @@ static char rcsid_kn_parse_c[] =
 
 #include <stdio.h>
 #include <krb.h>
-#include <strings.h>
+#include <krb5/osconf.h>
 
 /* max size of full name */
 #define FULL_SZ (ANAME_SZ + INST_SZ + REALM_SZ)
