@@ -1,3 +1,8 @@
+Sat May  4 11:56:17 1996  Ezra Peisach  (epeisach@kangaroo.mit.edu)
+
+	* default.exp: For stty_init set to \^h as on some /bin/sh, ^ is
+		treated as a pipe.
+
 Fri May  3 20:48:16 1996  Ken Raeburn  <raeburn@cygnus.com>
 
 	Tue Apr  2 22:22:47 1996  Chris Provenzano  <proven@cygnus.com>

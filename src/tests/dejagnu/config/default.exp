@@ -12,7 +12,7 @@
 # realm name, defaulting to KRBTEST.COM.
 
 set timeout 100
-set stty_init {erase ^h kill ^u}
+set stty_init {erase \^h kill \^u}
 
 # We do everything in a temporary directory.
 if ![file isdirectory tmpdir] {catch "exec mkdir tmpdir" status}
