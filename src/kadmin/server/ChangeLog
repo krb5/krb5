@@ -1,3 +1,13 @@
+
+Mon Mar 27 07:56:26 1995 Chris Provenzano (proven@mit.edu)
+
+        * adm_process.c, adm_kadmin.c, adm_adm_func.c, adm_kpasswd.c, 
+	* adm_funcs, adm_nego.c adm_extern.c and adm_listen.c
+                Use new calling convention for krb5_recvauth(), krb5_mk_priv(),
+                krb5_rd_priv(), krb5_mk_safe(), and krb5_rd_safe().
+		(Redid many of the internal functions to accomidate new a
+		uth_context structure and remove old unnecessary structures.)
+
 Fri Mar 24 14:38:06 1995    <tytso@rsx-11.mit.edu>
 
 	* adm_network.c (setup_network): If /etc/services doesn't have the

@@ -42,11 +42,11 @@ struct cpw_keyproc_arg {
 };
  
 krb5_error_code
-adm5_kpasswd(context, prog, request_type, client_creds, retbuf, otype)
+adm5_kpasswd(context, auth_context, prog, request_type, retbuf, otype)
     krb5_context context;
+    krb5_auth_context *auth_context;
     char *prog;
     kadmin_requests *request_type;
-    krb5_ticket *client_creds;
     char *retbuf;
     int *otype;
 {
@@ -58,9 +58,8 @@ adm5_kpasswd(context, prog, request_type, client_creds, retbuf, otype)
 	*otype = 3;
 	syslog(LOG_AUTH | LOG_INFO,
 	       "adm_kpasswd: kpasswd change received");
-	retval = adm5_change(context, "adm5_kpasswd", 
-			     client_server_info.client,
-			     client_creds);
+	retval = adm5_change(context, auth_context, "adm5_kpasswd", 
+			     client_server_info.client);
 
 	switch(retval) {
 	case 0:

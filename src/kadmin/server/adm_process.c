@@ -37,38 +37,21 @@
 extern krb5_encrypt_block master_encblock;
 extern krb5_keyblock master_keyblock;
 
-struct cpw_keyproc_arg {
-    krb5_keyblock *key;
-};
-
-krb5_error_code
-cpw_keyproc(context, keyprocarg, server, key_vno, keytype, key)
+static krb5_error_code
+cpw_keyproc(context, keyblock)
     krb5_context context;
-    krb5_pointer keyprocarg;
-    krb5_principal server;
-    krb5_kvno key_vno;
-    krb5_keytype keytype;
-    krb5_keyblock ** key;
+    krb5_keyblock ** keyblock;
 {
     krb5_error_code retval;
     krb5_db_entry cpw_entry;
     krb5_principal cpw_krb;
     krb5_keyblock *realkey;
-
-    struct cpw_keyproc_arg *arg;
-
     krb5_boolean more;
-
     int nprincs = 1;
 
-    arg = ( struct cpw_keyproc_arg *) keyprocarg;
-
-    if (arg->key) {
-	retval = krb5_copy_keyblock(context, arg->key, key);
-	if (retval)
-	    return retval;
-    } else {
-	if (retval = krb5_parse_name(context, client_server_info.name_of_service, 
+    if (*keyblock == NULL) {
+	if (retval = krb5_parse_name(context, 
+				     client_server_info.name_of_service, 
 				     &cpw_krb)) {
             syslog(LOG_ERR, 
 		   "cpw_keyproc %d while attempting to parse \"%s\"",
@@ -77,7 +60,7 @@ cpw_keyproc(context, keyprocarg, server, key_vno, keytype, key)
 	}
 
 	if (retval = krb5_db_get_principal(context, cpw_krb, &cpw_entry, 
-			&nprincs, &more)) {
+					   &nprincs, &more)) {
             syslog(LOG_ERR, 
 		   "cpw_keyproc %d while extracting %s entry",
 		   client_server_info.name_of_service, retval);
@@ -107,9 +90,8 @@ cpw_keyproc(context, keyprocarg, server, key_vno, keytype, key)
 	    exit(retval);
 	}
 
-	*key = realkey;
+	*keyblock = realkey;
     }
-
     return(0);
 }
 
@@ -120,18 +102,19 @@ process_client(context, prog)
 {
     krb5_error_code retval;
 
-    struct cpw_keyproc_arg cpw_key;
+    krb5_keyblock  * cpw_keyblock = NULL;
 
     int on = 1;
     krb5_db_entry server_entry;
 
-    krb5_ticket *client_creds;
-    krb5_authenticator *client_auth_data;
     char retbuf[512];
 
     krb5_data final_msg;
     char completion_msg[520];
     kadmin_requests request_type;
+    krb5_auth_context *auth_context = NULL;
+    krb5_ticket * client_ticket = NULL;
+    krb5_replay_data replaydata;
 
     int number_of_entries;
     krb5_boolean more;
@@ -196,7 +179,7 @@ process_client(context, prog)
 	exit(0);
     }
 
-    if ((cpw_key.key = (krb5_keyblock *) calloc (1, 
+    if ((cpw_keyblock = (krb5_keyblock *) calloc (1, 
 		sizeof(krb5_keyblock))) == (krb5_keyblock *) 0) {
 	krb5_db_free_principal(context, &server_entry, number_of_entries);
 	syslog(LOG_ERR, 
@@ -209,9 +192,9 @@ process_client(context, prog)
     if (retval = krb5_kdb_decrypt_key(context, 
 				      &master_encblock,
 				      &server_entry.key,
-				      (krb5_keyblock *) cpw_key.key)) {
+				      cpw_keyblock)) {
 	krb5_db_free_principal(context, &server_entry, number_of_entries);
-	free(cpw_key.key);
+	free(cpw_keyblock);
 	syslog(LOG_ERR,  
 	       "kadmind error: Cannot extract kadmin/<realm> from master key");
 	close(client_server_info.client_socket);
@@ -250,36 +233,48 @@ process_client(context, prog)
     syslog(LOG_AUTH | LOG_INFO,
 	"Request for Administrative Service Received from %s - Authenticating.",
 	inet_ntoa( client_server_info.client_name.sin_addr ));
+
+    cpw_keyproc(context, &cpw_keyblock);
 	
-    if ((retval = krb5_recvauth(context, 
+    if (krb5_auth_con_init(context, &auth_context))
+        exit(1);
+
+    krb5_auth_con_setflags(context,auth_context,KRB5_AUTH_CONTEXT_RET_SEQUENCE);
+ 
+    krb5_auth_con_setaddrs(context, auth_context, 
+			   &client_server_info.server_addr,
+			   &client_server_info.client_addr); 
+ 
+    if (krb5_auth_con_setuseruserkey(context, auth_context, cpw_keyblock))
+        exit(1);
+
+    if ((retval = krb5_recvauth(context, &auth_context,
 		(krb5_pointer) &client_server_info.client_socket,
 		ADM5_CPW_VERSION,
 		client_server_info.server,
-		&client_server_info.client_addr,
+		NULL,
 		0,
-		cpw_keyproc,
-		(krb5_pointer) &cpw_key,
-		0,
-		0,
-		&send_seqno,
-		&client_server_info.client,
-		&client_creds,
-		&client_auth_data
+		NULL,
+		&client_ticket
 		))) {
 	syslog(LOG_ERR, "kadmind error: %s during recvauth\n", 
 			error_message(retval));
 	(void) sprintf(retbuf, "kadmind error during recvauth: %s\n", 
 			error_message(retval));
-	krb5_free_keyblock(context, cpw_key.key);
+	krb5_free_keyblock(context, cpw_keyblock);
 	goto finish;
     }
-    krb5_free_keyblock(context, cpw_key.key);
+    krb5_free_keyblock(context, cpw_keyblock);
 
+    if (retval = krb5_copy_principal(context, client_ticket->enc_part2->client,
+				     &client_server_info.client))
+	goto finish;
+				     
     /* Check if ticket was issued using password (and not tgt)
      * within the last 5 minutes
      */
 	
-    if (!(client_creds->enc_part2->flags & TKT_FLG_INITIAL)) {
+    if (!(client_ticket->enc_part2->flags & TKT_FLG_INITIAL)) {
 	syslog(LOG_ERR, "Client ticket not initial");
 	close(client_server_info.client_socket);
 	exit(0);
@@ -291,13 +286,11 @@ process_client(context, prog)
 	exit(0);
     }
 	
-    if ((adm_time - client_creds->enc_part2->times.authtime) > 60*5) {
+    if ((adm_time - client_ticket->enc_part2->times.authtime) > 60*5) {
 	syslog(LOG_ERR, "Client ticket not recent");
 	close(client_server_info.client_socket);
 	exit(0);
     }
-
-    recv_seqno = client_auth_data->seq_number;
 
     if ((client_server_info.name_of_client =
 	 (char *) calloc (1, 3 * 255)) == (char *) 0) {
@@ -341,15 +334,8 @@ process_client(context, prog)
 	goto finish;
     }
 
-    if ((retval = krb5_rd_priv(context, &inbuf, 
-			client_creds->enc_part2->session,
-			&client_server_info.client_addr, 
-			&client_server_info.server_addr,
-			client_auth_data->seq_number,
-			KRB5_PRIV_DOSEQUENCE|KRB5_PRIV_NOTIME,
-			0,
-			0,
-			&msg_data))) {
+    if ((retval = krb5_rd_priv(context, auth_context, &inbuf, 
+			       &msg_data, &replaydata))) {
 	free(inbuf.data);
 	syslog(LOG_ERR, "kadmind error: rd_priv:%s\n", error_message(retval));
 	goto finish;
@@ -364,16 +350,15 @@ process_client(context, prog)
     switch (request_type.appl_code) {
 	case KPASSWD:
 	    req_type = "kpasswd";
-	    if (retval = adm5_kpasswd(context, "process_client", &request_type, 
-			client_creds, retbuf, &otype)) {
+	    if (retval = adm5_kpasswd(context, auth_context, "process_client",
+				      &request_type, retbuf, &otype)) {
 		goto finish;
 	    }
 	    break;
 
 	case KADMIN:
 	    req_type = "kadmin";
-	    if (retval = adm5_kadmin(context, "process_client", 
-				     client_auth_data, client_creds, 
+	    if (retval = adm5_kadmin(context, auth_context, "process_client", 
 				     retbuf, &otype)) {
 		goto finish;
 	    }
@@ -404,17 +389,9 @@ process_client(context, prog)
     final_msg.data = retbuf;
     final_msg.length = strlen(retbuf) + 1;
 
-                /* Send Completion Message */
-    if (retval = krb5_mk_priv(context, &final_msg,
-                        ETYPE_DES_CBC_CRC,
-                        client_creds->enc_part2->session,
-                        &client_server_info.server_addr,
-                        &client_server_info.client_addr,
-                        send_seqno,
-                        KRB5_PRIV_DOSEQUENCE|KRB5_PRIV_NOTIME,
-                        0,
-                        0,
-                        &msg_data)) {
+    	/* Send Completion Message */
+    if (retval = krb5_mk_priv(context, auth_context, &final_msg,
+                              &msg_data, &replaydata)) {
 	syslog(LOG_ERR, "kadmind error Error Performing Final mk_priv");
 	goto finish;
     }

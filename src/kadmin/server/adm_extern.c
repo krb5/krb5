@@ -45,7 +45,6 @@ krb5_data inbuf;
 krb5_data msg_data;
 
 int send_seqno;
-int recv_seqno;
 
 /*
 static krb5_data tgs_name = {KRB5_TGS_NAME_SIZE, KRB5_TGS_NAME};

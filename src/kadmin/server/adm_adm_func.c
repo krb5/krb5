@@ -46,14 +46,14 @@ extern int classification;
 #endif
 
 krb5_error_code
-adm_build_key (context, newprinc, client_creds, new_passwd, oper_type, entry)
+adm_build_key (context, auth_context, new_passwd, oper_type, entry)
     krb5_context context;
-    krb5_principal newprinc;
-    krb5_ticket *client_creds;
+    krb5_auth_context * auth_context;
     char *new_passwd;
     int oper_type;
     krb5_db_entry entry;
 {
+    krb5_replay_data replaydata;
     krb5_data outbuf;
     int retval;
 #if defined(MACH_PASS) || defined(SANDIA)
@@ -114,16 +114,8 @@ adm_build_key (context, newprinc, client_creds, new_passwd, oper_type, entry)
 #endif
 
     /* Encrypt Password and Phrase */
-    if (retval = krb5_mk_priv(context, &outbuf,
-			      ETYPE_DES_CBC_CRC,
-			      client_creds->enc_part2->session,
-			      &client_server_info.server_addr,
-			      &client_server_info.client_addr,
-			      send_seqno,
-			      KRB5_PRIV_DOSEQUENCE|KRB5_PRIV_NOTIME,
-			      0,
-			      0,
-			      &msg_data)) {
+    if (retval = krb5_mk_priv(context, auth_context, &outbuf,
+			      &msg_data, &replaydata)) {
 	com_err("adm_build_key", retval, "during mk_priv");
 #if defined(MACH_PASS) || defined(SANDIA)
 	free(tmp_passwd);
@@ -159,15 +151,8 @@ adm_build_key (context, newprinc, client_creds, new_passwd, oper_type, entry)
     }
     
     /* Decrypt Client Response */
-    if (retval = krb5_rd_priv(context, &inbuf,
-			      client_creds->enc_part2->session,
-			      &client_server_info.client_addr,
-			      &client_server_info.server_addr,
-			      recv_seqno,
-			      KRB5_PRIV_DOSEQUENCE|KRB5_PRIV_NOTIME,
-			      0,
-			      0,
-			      &msg_data)) {
+    if (retval = krb5_rd_priv(context, auth_context, &inbuf,
+			      &msg_data, &replaydata)) {
 	syslog(LOG_ERR | LOG_INFO, "adm_build_key krb5_rd_priv error");
 	free(inbuf.data);
 	return(5);		/* Protocol Failure */
@@ -184,11 +169,11 @@ adm_build_key (context, newprinc, client_creds, new_passwd, oper_type, entry)
 
 /*	kadmin change password request	*/
 krb5_error_code
-adm_change_pwd(context, prog, customer_name, client_creds, salttype)
+adm_change_pwd(context, auth_context, prog, customer_name, salttype)
     krb5_context context;
+    krb5_auth_context * auth_context;
     char *prog;
     char *customer_name;
-    krb5_ticket *client_creds;
     int salttype;
 {
     krb5_db_entry entry;
@@ -227,8 +212,8 @@ adm_change_pwd(context, prog, customer_name, client_creds, salttype)
     
     oper_type = (salttype == KRB5_KDB_SALTTYPE_NORMAL) ? CHGOPER : CH4OPER;
 
-    if (retval = adm_build_key(context, newprinc, client_creds, 
-			       new_passwd, oper_type, entry)) {
+    if (retval = adm_build_key(context, auth_context, new_passwd, 
+			       oper_type, entry)) {
 	krb5_free_principal(context, newprinc);
 	krb5_db_free_principal(context, &entry, nprincs);
 	free(new_passwd);
@@ -258,11 +243,10 @@ adm_change_pwd(context, prog, customer_name, client_creds, salttype)
 
 /* kadmin add new random key function */
 krb5_error_code
-adm_change_pwd_rnd(context, cmdname, customer_name, client_creds)
+adm_change_pwd_rnd(context, cmdname, customer_name)
     krb5_context context;
     char *cmdname;
     char *customer_name;
-    krb5_ticket *client_creds;
 {
     krb5_db_entry entry;
     int nprincs = 1;
@@ -309,11 +293,11 @@ adm_change_pwd_rnd(context, cmdname, customer_name, client_creds)
 
 /* kadmin add new key function */
 krb5_error_code
-adm_add_new_key(context, cmdname, customer_name, client_creds, salttype)
+adm_add_new_key(context, auth_context, cmdname, customer_name, salttype)
     krb5_context context;
+    krb5_auth_context *auth_context;
     char *cmdname;
     char *customer_name;
-    krb5_ticket *client_creds;
     int salttype;
 {
     krb5_db_entry entry;
@@ -356,11 +340,8 @@ adm_add_new_key(context, cmdname, customer_name, client_creds, salttype)
 	return(3);		/* No Memory */
     }
     
-    if (retval = adm_build_key(context, newprinc, 
-			       client_creds, 
-			       new_passwd, 
-			       ADDOPER,
-			       entry)) {
+    if (retval = adm_build_key(context, auth_context, new_passwd, 
+			       ADDOPER, entry)) {
 	krb5_free_principal(context, newprinc);
 	krb5_db_free_principal(context, &entry, nprincs);
 	free(new_passwd);
@@ -385,11 +366,10 @@ adm_add_new_key(context, cmdname, customer_name, client_creds, salttype)
 
 /* kadmin add new random key function */
 krb5_error_code
-adm_add_new_key_rnd(context, cmdname, customer_name, client_creds)
+adm_add_new_key_rnd(context, cmdname, customer_name)
     krb5_context context;
     char *cmdname;
     char *customer_name;
-    krb5_ticket *client_creds;
 {
     krb5_db_entry entry;
     int nprincs = 1;
@@ -488,12 +468,13 @@ adm_del_old_key(context, cmdname, customer_name)
 
 /* kadmin modify existing Principal function */
 krb5_error_code
-adm_mod_old_key(context, cmdname, customer_name, client_creds)
+adm_mod_old_key(context, auth_context, cmdname, customer_name)
     krb5_context context;
+    krb5_auth_context * auth_context;
     char *cmdname;
     char *customer_name;
-    krb5_ticket *client_creds;
 {
+    krb5_replay_data replaydata;
     krb5_db_entry entry;
     int nprincs = 1;
     extern int errno;
@@ -540,16 +521,8 @@ adm_mod_old_key(context, cmdname, customer_name, client_creds)
 	outbuf.data[1] = MODOPER;
 	outbuf.data[2] = SENDDATA3;
 	
-	if (retval = krb5_mk_priv(context, &outbuf,
-				  ETYPE_DES_CBC_CRC,
-				  client_creds->enc_part2->session,
-				  &client_server_info.server_addr,
-				  &client_server_info.client_addr,
-				  send_seqno,
-				  KRB5_PRIV_DOSEQUENCE|KRB5_PRIV_NOTIME,
-				  0,
-				  0,
-				  &msg_data)) {
+	if (retval = krb5_mk_priv(context, auth_context, &outbuf,
+				  &msg_data, &replaydata)) {
 	    krb5_free_principal(context, newprinc);
 	    krb5_db_free_principal(context, &entry, nprincs);
 	    com_err("adm_mod_old_key", retval, "during mk_priv");
@@ -579,15 +552,8 @@ adm_mod_old_key(context, cmdname, customer_name, client_creds)
 	}
 	
 	/* Decrypt Client Response */
-	if (retval = krb5_rd_priv(context, &inbuf,
-				  client_creds->enc_part2->session,
-				  &client_server_info.client_addr,
-				  &client_server_info.server_addr,
-				  recv_seqno,
-				  KRB5_PRIV_DOSEQUENCE|KRB5_PRIV_NOTIME,
-				  0,
-				  0,
-				  &msg_data)) {
+	if (retval = krb5_rd_priv(context, auth_context, &inbuf,
+				  &msg_data, &replaydata)) {
 	    com_err("adm_mod_old_key", retval, "krb5_rd_priv error %s",
 		    error_message(retval));
 	    free(inbuf.data);
@@ -698,15 +664,8 @@ adm_mod_old_key(context, cmdname, customer_name, client_creds)
     }
     
     /* Decrypt Client Response */
-    if (retval = krb5_rd_priv(context, &inbuf,
-			      client_creds->enc_part2->session,
-			      &client_server_info.client_addr,
-			      &client_server_info.server_addr,
-			      recv_seqno,
-			      KRB5_PRIV_DOSEQUENCE|KRB5_PRIV_NOTIME,
-			      0,
-			      0,
-			      &msg_data)) {
+    if (retval = krb5_rd_priv(context, auth_context, &inbuf,
+			      &msg_data, &replaydata)) {
 	com_err("adm_mod_old_key", retval, "krb5_rd_priv error %s",
 		error_message(retval));
 	free(inbuf.data);
@@ -721,12 +680,13 @@ adm_mod_old_key(context, cmdname, customer_name, client_creds)
 
 /* kadmin inquire existing Principal function */
 krb5_error_code
-adm_inq_old_key(context, cmdname, customer_name, client_creds)
+adm_inq_old_key(context, auth_context, cmdname, customer_name)
     krb5_context context;
+    krb5_auth_context * auth_context;
     char *cmdname;
     char *customer_name;
-    krb5_ticket *client_creds;
 {
+    krb5_replay_data replaydata;
     krb5_db_entry entry;
     int nprincs = 1;
     
@@ -782,16 +742,8 @@ adm_inq_old_key(context, cmdname, customer_name, client_creds)
     free(fullname);
     
     /* Encrypt Inquiry Data */
-    if (retval = krb5_mk_priv(context, &outbuf,
-			      ETYPE_DES_CBC_CRC,
-			      client_creds->enc_part2->session,
-			      &client_server_info.server_addr,
-			      &client_server_info.client_addr,
-			      send_seqno,
-			      KRB5_PRIV_DOSEQUENCE|KRB5_PRIV_NOTIME,
-			      0,
-			      0,
-			      &msg_data)) {
+    if (retval = krb5_mk_priv(context, auth_context, &outbuf,
+			      &msg_data, &replaydata)) {
 	com_err("adm_inq_old_key", retval, "during mk_priv");
 	free(outbuf.data);
 	return(5);		/* Protocol Failure */
@@ -816,15 +768,8 @@ adm_inq_old_key(context, cmdname, customer_name, client_creds)
     }
     
     /* Decrypt Client Response */
-    if (retval = krb5_rd_priv(context, &inbuf,
-			      client_creds->enc_part2->session,
-			      &client_server_info.client_addr,
-			      &client_server_info.server_addr,
-			      recv_seqno,
-			      KRB5_PRIV_DOSEQUENCE|KRB5_PRIV_NOTIME,
-			      0,
-			      0,
-			      &msg_data)) {
+    if (retval = krb5_rd_priv(context, auth_context, &inbuf,
+			      &msg_data, &replaydata)) {
 	com_err("adm_inq_old_key", retval, "krb5_rd_priv error %s",
 		error_message(retval));
 	free(inbuf.data);

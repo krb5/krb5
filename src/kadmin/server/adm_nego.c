@@ -43,12 +43,13 @@
 #include "adm_extern.h"
 
 krb5_error_code
-adm_negotiate_key(context, prog, client_creds, new_passwd)
+adm_negotiate_key(context, auth_context, prog, new_passwd)
     krb5_context context;
+    krb5_auth_context *auth_context;
     char const * prog;
-    krb5_ticket * client_creds;
     char * new_passwd;
 {
+   krb5_replay_data replaydata;
    krb5_data msg_data, inbuf;
    krb5_error_code retval;
 #if defined(MACH_PASS) || defined(SANDIA) /* Machine-generated passwords. */
@@ -221,16 +222,8 @@ adm_negotiate_key(context, prog, client_creds, new_passwd)
     free_phrases();
 
 		/* Encrypt Password/Phrases Encoding */
-    retval = krb5_mk_priv(context, encoded_pw_string,
-			ETYPE_DES_CBC_CRC,
-			client_creds->enc_part2->session, 
-			&client_server_info.server_addr, 
-			&client_server_info.client_addr,
-			send_seqno,
-			KRB5_PRIV_DOSEQUENCE|KRB5_PRIV_NOTIME,
-			0,
-			0,
-			&msg_data);
+    retval = krb5_mk_priv(context, auth_context, encoded_pw_string,
+			  &msg_data, &replaydata);
     if (retval ) {
 	free_passwds();
 	free_pwd_and_phrase_structures();
@@ -266,15 +259,8 @@ adm_negotiate_key(context, prog, client_creds, new_passwd)
     }
 
 		/* Decrypt Client Response */
-    if ((retval = krb5_rd_priv(context, &inbuf,
-			client_creds->enc_part2->session,
-			&client_server_info.client_addr,
-			&client_server_info.server_addr, 
-			recv_seqno,
-			KRB5_PRIV_DOSEQUENCE|KRB5_PRIV_NOTIME,
-			0,
-			0,
-			&msg_data))) {
+    if ((retval = krb5_rd_priv(context, auth_context, &inbuf,
+			       &msg_data, &replaydata))) {
 	free(inbuf.data);
 #if defined(MACH_PASS) || defined(SANDIA)
 	free_passwds();

@@ -403,11 +403,11 @@ cleanup:
 }
 
 krb5_error_code
-adm5_change(context, prog, newprinc, client_creds)
+adm5_change(context, auth_context, prog, newprinc)
     krb5_context context;
+    krb5_auth_context * auth_context;
     char *prog;
     krb5_principal newprinc;
-    krb5_ticket *client_creds;
 {
     krb5_db_entry entry;
     int nprincs = 1;
@@ -426,7 +426,7 @@ adm5_change(context, prog, newprinc, client_creds)
     memset((char *) new_passwd, 0, ADM_MAX_PW_LENGTH + 1);
 
 		/* Negotiate for New Key */
-    if (retval = adm_negotiate_key(context, "adm5_change", client_creds,
+    if (retval = adm_negotiate_key(context, auth_context, "adm5_change", 
 				   new_passwd)) {
 	krb5_db_free_principal(context, &entry, nprincs);
 	krb5_free_principal(context, newprinc);

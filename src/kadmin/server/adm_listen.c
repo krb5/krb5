@@ -151,7 +151,8 @@ adm5_listen_and_process(context, prog)
 		}
 		
 		if (adm_debug_flag) {
-			retval = process_client(context, "adm5_listen_and_process");
+			retval = process_client(context, 
+					        "adm5_listen_and_process");
 			exit(retval);
 		}
 			
@@ -160,7 +161,8 @@ adm5_listen_and_process(context, prog)
 			/* child */
 			(void) close(client_server_info.server_socket);
 
-			retval = process_client(context, "adm5_listen_and_process");
+			retval = process_client(context, 
+						"adm5_listen_and_process");
 			exit(retval);
 		} else {
 			/* parent */
