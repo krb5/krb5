@@ -1356,7 +1356,7 @@ mips-*-netbsd*)
 	# Linux ld doesn't default to stuffing the SONAME field...
 	# Use objdump -x to examine the fields of the library
 	LDCOMBINE='ld -shared -h lib$(LIB)$(SHLIBSEXT)'
-	SHLIB_EXPFLAGS='-R$(SHLIB_RDIRS) $(SHLIB_DIRS) $(SHLIB_EXPLIBS)'
+	SHLIB_EXPFLAGS='-R$(SHLIB_RDIRS) $(SHLIB_DIRS) $(SHLIB_EXPLIBS) -lc'
 	PROFFLAGS=-pg
 	CC_LINK_SHARED='$(CC) $(PROG_LIBPATH) -Wl,-rpath -Wl,$(PROG_RPATH)'
 	CC_LINK_STATIC='$(CC) $(PROG_LIBPATH)'

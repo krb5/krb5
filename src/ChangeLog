@@ -1,3 +1,8 @@
+2001-11-27  Ken Raeburn  <raeburn@mit.edu>
+
+	* aclocal.m4 (KRB5_LIB_PARAMS): On Linux, add "-lc" to shared
+	library link line.
+
 2001-11-06  Danilo Almeida  <dalmeida@mit.edu>
 
 	* Makefile.in: Prepare Makefile for ms2mit.
