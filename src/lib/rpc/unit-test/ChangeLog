@@ -1,3 +1,10 @@
+2002-11-11  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (unit-test-body): Set RPC_TEST_SRVTAB based on
+	process-id.  Set trap handler to delete it before returning an
+	exit status.
+	(unit-test-cleanup): Don't delete files here.
+
 2002-11-07  Tom Yu  <tlyu@mit.edu>
 
 	* rpc_test.0/expire.exp (overlap): Add another call to
