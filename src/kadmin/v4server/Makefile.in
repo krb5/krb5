@@ -21,3 +21,4 @@ install::
 
 clean::
 	$(RM) $(PROG) $(OBJS)
+	$(RM) kadm_err.h kadm_err.c

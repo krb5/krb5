@@ -2,3 +2,5 @@ CFLAGS = $(CCOPTS)
 
 all::
 
+clean::
+	-$(RM) -r krb5-test-root

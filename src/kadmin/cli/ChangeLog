@@ -1,5 +1,7 @@
 Wed Nov 13 14:29:02 1996  Tom Yu  <tlyu@mit.edu>
 
+	* Makefile.in (clean-unix): Remove getdate.c and kadmin_ct.c.
+
 	* keytab.c (process_keytab): Note that krb5_defkeyname is an
 	internal interface.
 

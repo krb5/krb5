@@ -16,3 +16,5 @@ unit-test-setup::
 
 unit-test-cleanup::
 	$(ENV_SETUP) $(STOP_SERVERS)
+clean::
+	$(RM) dbg.log kpasswd.sum kpasswd.log

@@ -86,6 +86,7 @@ clean-windows::
 
 clean-unix::
 	$(RM) libkadm5srv.$(STEXT) libkadm5srv.stamp
+	$(RM) shared/*
 
 install:: libkadm5srv.a
 	$(INSTALL_DATA) libkadm5srv.a $(DESTDIR)$(KRB5_LIBDIR)/libkadm5srv.a

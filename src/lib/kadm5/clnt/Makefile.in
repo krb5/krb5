@@ -73,6 +73,7 @@ clean-windows::
 
 clean-unix::
 	$(RM) libkadm5clnt.$(STEXT) libkadm5clnt.stamp
+	$(RM) shared/*
 
 install:: libkadm5clnt.a
 	$(INSTALL_DATA) libkadm5clnt.a $(DESTDIR)$(KRB5_LIBDIR)/libkadm5clnt.a

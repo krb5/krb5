@@ -1,3 +1,7 @@
+Wed Nov 13 19:20:36 1996  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (clean-unix): Remove shared/*.
+
 Mon Nov 11 17:01:00 1996  Barry Jaspan  <bjaspan@mit.edu>
 
 	* svr_principal.c (kadm5_modify_principal): fix memory leak

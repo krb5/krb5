@@ -21,6 +21,8 @@ install::
 
 clean::
 	$(RM) $(PROG).local $(PROG) $(OBJS)
+clean-unix::
+	$(RM) getdate.c kadmin_ct.c
 
 # for testing getdate.y
 datetest: getdate.c
