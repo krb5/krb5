@@ -1,3 +1,8 @@
+Wed Jan 21 12:44:25 1998  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* kdc.conf.proto: Add kpasswd_port line so kadmind can start as
+        non-root for testing.
+
 Mon Mar 31 17:42:33 1997  Barry Jaspan  <bjaspan@mit.edu>
 
 	* krb5.conf.proto: add support for setkey_principal (support more enctypes)
