@@ -1,3 +1,6 @@
+Thu Jul 13 19:51:33 1995  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* main.c: Include netinet/in.h if we're using IP.
 
 Wed Jul 12 12:19:44 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* main.c - Reorganize KDC profile handling so that the hierarchy for

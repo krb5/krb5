@@ -35,6 +35,9 @@
 #include "extern.h"
 #include "kdc5_err.h"
 #include "adm_proto.h"
+#ifdef KRB5_USE_INET
+#include <netinet/in.h>
+#endif
 
 kdc_realm_t *find_realm_data PROTOTYPE((char *, krb5_ui_4));
 
