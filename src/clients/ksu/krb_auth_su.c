@@ -303,8 +303,7 @@ krb5_keyblock *	tkt_ses_key;
 		return retval;
 	}
 
-	/* We have the encryption type get the keytpe. */
-	keytype = krb5_csarray[tkt->enc_part.etype]->system->proto_keytype;
+	keytype = tkt->enc_part.keytype;
 
 	if ((retval = krb5_kt_get_entry(context, keytabid, server,
 					tkt->enc_part.kvno, keytype, &ktentry))){

@@ -1,4 +1,9 @@
 
+Tue Sep 05 22:10:34 1995   Chris Provenzano (proven@mit.edu)
+
+        * krb_auth_su.c : Remove krb5_enctype references, and replace with
+                krb5_keytype where appropriate.
+
 Mon Aug 21 16:53:40 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* ksu.h - Change lifetime types to krb5_deltat.
 	* main.c - Use string_to_deltat() to parse lifetimes.  Fix gcc -Wall.
