@@ -1207,7 +1207,6 @@ void oob()
     
     recv(rem, &mark, 1, MSG_OOB);
 
-    printf("oob mark = %ux\n", mark);
 
     if (mark & TIOCPKT_WINDOW) {
 	/*
@@ -1361,8 +1360,8 @@ fd_set readset, excset, writeset;
 		{
 		    int x;
 		    
-		    if (!ioctl(rem, FIONREAD, &x))
-			printf("ioctl(rem, FIONREAD) == %d\n", x);
+		    if (!ioctl(rem, FIONREAD, &x));
+
 		}
 
 	  	rcvcnt = rcmd_stream_read(rem, rcvbuf, sizeof (rcvbuf));

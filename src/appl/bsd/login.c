@@ -630,8 +630,6 @@ try_convert524 (kcontext, me)
     krb5_creds increds, *v5creds;
     CREDENTIALS v4creds;
 
-    if (!got_v5_tickets)
-	return 0;
 
     /* or do this directly with krb524_convert_creds_kdc */
     krb524_init_ets(kcontext);
@@ -849,7 +847,7 @@ void destroy_tickets()
 
     if (login_krb5_get_tickets) {
 	if(!krb5_cc_default(kcontext, &cache))
-	    krb5_cc_destroy (kcontext, cache);
+	  krb5_cc_destroy (kcontext, cache);
     }
 #endif
 #ifdef KRB4_GET_TICKETS
@@ -1450,7 +1448,7 @@ int main(argc, argv)
 
 #if defined(KRB5_GET_TICKETS) && defined(KRB4_CONVERT)
     if (login_krb4_convert && !got_v4_tickets) {
-	if (got_v5_tickets)
+	if (got_v5_tickets||forwarded_v5_tickets)
 	    try_convert524 (kcontext, me);
     }
 #endif
@@ -1588,7 +1586,7 @@ int main(argc, argv)
 #endif /* KRB4_GET_TICKETS */
 
 #ifdef KRB5_GET_TICKETS
-    if (got_v5_tickets)
+    if (forwarded_v5_tickets)
 	destroy_tickets();
     else
 #endif
