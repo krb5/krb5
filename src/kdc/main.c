@@ -101,7 +101,7 @@ kdc_com_err_proc(whoami, code, format, pvar)
 void
 setup_com_err()
 {
-    krb5_init_ets();
+    krb5_init_ets(kdc_context);
     initialize_kdc5_error_table();
     (void) set_com_err_hook(kdc_com_err_proc);
     return;
@@ -188,7 +188,7 @@ char **argv;
     }
     if (!db_realm) {
 	/* no realm specified, use default realm */
-	if (retval = krb5_get_default_realm(&lrealm)) {
+	if (retval = krb5_get_default_realm(kdc_context, &lrealm)) {
 	    com_err(argv[0], retval,
 		    "while attempting to retrieve default realm");
 	    exit(1);
@@ -204,32 +204,32 @@ char **argv;
 
     if (!rcname)
 	rcname = KDCRCACHE;
-    if (retval = krb5_rc_resolve_full(&kdc_rcache, rcname)) {
+    if (retval = krb5_rc_resolve_full(kdc_context, &kdc_rcache, rcname)) {
 	com_err(argv[0], retval, "while resolving replay cache '%s'", rcname);
 	exit(1);
     }
-    if ((retval = krb5_rc_recover(kdc_rcache)) &&
-	(retval2 = krb5_rc_initialize(kdc_rcache, krb5_clockskew))) {
+    if ((retval = krb5_rc_recover(kdc_context, kdc_rcache)) &&
+	(retval2 = krb5_rc_initialize(kdc_context, kdc_rcache, krb5_clockskew))) {
 	com_err(argv[0], retval, "while recovering replay cache '%s:%s'",
 		kdc_rcache->ops->type,
-		krb5_rc_get_name(kdc_rcache));
+		krb5_rc_get_name(kdc_context, kdc_rcache));
 	com_err(argv[0], retval2, "while initializing replay cache '%s:%s'",
 		kdc_rcache->ops->type,
-		krb5_rc_get_name(kdc_rcache));
+		krb5_rc_get_name(kdc_context, kdc_rcache));
 	exit(1);
     }
-    if ((retval = krb5_rc_expunge(kdc_rcache))) {
+    if ((retval = krb5_rc_expunge(kdc_context, kdc_rcache))) {
 	com_err(argv[0], retval, "while expunging replay cache '%s:%s'",
 		kdc_rcache->ops->type,
-		krb5_rc_get_name(kdc_rcache));
+		krb5_rc_get_name(kdc_context, kdc_rcache));
 	exit(1);
     }
     /* assemble & parse the master key name */
 
-    if (retval = krb5_db_setup_mkey_name(mkey_name, db_realm, (char **) 0,
+    if (retval = krb5_db_setup_mkey_name(kdc_context, mkey_name, db_realm, (char **) 0,
 					 &master_princ)) {
 	com_err(argv[0], retval, "while setting up master key name");
-	(void) krb5_rc_close(kdc_rcache);
+	(void) krb5_rc_close(kdc_context, kdc_rcache);
 	exit(1);
     }
 
@@ -238,13 +238,13 @@ char **argv;
 		"while setting up etype %d", kdc_etype);
 	exit(1);
     }
-    krb5_use_cstype(&master_encblock, kdc_etype);
+    krb5_use_cstype(kdc_context, &master_encblock, kdc_etype);
 
-    if (retval = krb5_db_fetch_mkey(master_princ, &master_encblock, manual,
+    if (retval = krb5_db_fetch_mkey(kdc_context, master_princ, &master_encblock, manual,
 				    FALSE, /* only read it once, if at all */
 				    0, &master_keyblock)) {
 	com_err(argv[0], retval, "while fetching master key");
-	(void) krb5_rc_close(kdc_rcache);
+	(void) krb5_rc_close(kdc_context, kdc_rcache);
 	exit(1);
     }
     /* initialize random key generators */
@@ -274,8 +274,8 @@ char *prog;
 		    rtype = strdup(kdc_rcache->ops->type);
 	    else
 		    rtype = strdup("Unknown_rcache_type");
-	    rname = strdup(krb5_rc_get_name(kdc_rcache));
-	    if (retval = krb5_rc_close(kdc_rcache)) {
+	    rname = strdup(krb5_rc_get_name(kdc_context, kdc_rcache));
+	    if (retval = krb5_rc_close(kdc_context, kdc_rcache)) {
 		    com_err(prog, retval, "while closing replay cache '%s:%s'",
 			    rtype, rname);
 	    }
@@ -301,15 +301,15 @@ krb5_keyblock *masterkeyblock;
 #endif
 
     /* set db name if appropriate */
-    if (dbname && (retval = krb5_db_set_name(dbname)))
+    if (dbname && (retval = krb5_db_set_name(kdc_context, dbname)))
 	return(retval);
 
     /* initialize database */
-    if (retval = krb5_db_init())
+    if (retval = krb5_db_init(kdc_context))
 	return(retval);
 
-    if (retval = krb5_db_verify_master_key(masterkeyname, masterkeyblock,
-					   &master_encblock)) {
+    if (retval = krb5_db_verify_master_key(kdc_context, masterkeyname, 
+					   masterkeyblock, &master_encblock)) {
 	master_encblock.crypto_entry = 0;
 	return(retval);
     }
@@ -317,27 +317,27 @@ krb5_keyblock *masterkeyblock;
 #ifdef KRB4    
     /* get the master key, to extract the master key version number */
     nprincs = 1;
-    if (retval = krb5_db_get_principal(masterkeyname,
+    if (retval = krb5_db_get_principal(kdc_context, masterkeyname,
 				       &server, &nprincs,
 				       &more)) {
 	return(retval);
     }
     if (nprincs != 1) {
 	if (nprincs)
-	    krb5_db_free_principal(&server, nprincs);
+	    krb5_db_free_principal(kdc_context, &server, nprincs);
 	return(KRB5_KDB_NOMASTERKEY);
     } else if (more) {
-	krb5_db_free_principal(&server, nprincs);
+	krb5_db_free_principal(kdc_context, &server, nprincs);
 	return(KRB5KDC_ERR_PRINCIPAL_NOT_UNIQUE);
     }
     master_key_version = server.kvno;
-    krb5_db_free_principal(&server, nprincs);
+    krb5_db_free_principal(kdc_context, &server, nprincs);
 #endif
     
     /* do any necessary key pre-processing */
-    if (retval = krb5_process_key(&master_encblock, masterkeyblock)) {
+    if (retval = krb5_process_key(kdc_context, &master_encblock, masterkeyblock)) {
 	master_encblock.crypto_entry = 0;
-	(void) krb5_db_fini();
+	(void) krb5_db_fini(kdc_context);
 	return(retval);
     }
 
@@ -346,40 +346,42 @@ krb5_keyblock *masterkeyblock;
     /* the master key name here is from the master_princ global,
        so we can safely share its substructure */
 
-    krb5_princ_set_realm(tgs_server, krb5_princ_realm(masterkeyname));
+    krb5_princ_set_realm(kdc_context, tgs_server, 
+			 krb5_princ_realm(kdc_context, masterkeyname));
     /* tgs_server[0] is init data */
-    *krb5_princ_component(tgs_server, 1) = *krb5_princ_realm(masterkeyname);
+    *krb5_princ_component(kdc_context, tgs_server, 1) = 
+		*krb5_princ_realm(kdc_context, masterkeyname);
 
     nprincs = 1;
-    if (retval = krb5_db_get_principal(tgs_server,
+    if (retval = krb5_db_get_principal(kdc_context, tgs_server,
 				       &server, &nprincs,
 				       &more)) {
 	return(retval);
     }
     if (more) {
-	krb5_db_free_principal(&server, nprincs);
-	(void) krb5_finish_key(&master_encblock);
+	krb5_db_free_principal(kdc_context, &server, nprincs);
+	(void) krb5_finish_key(kdc_context, &master_encblock);
 	memset((char *)&master_encblock, 0, sizeof(master_encblock));
-	(void) krb5_db_fini();
+	(void) krb5_db_fini(kdc_context );
 	return(KRB5KDC_ERR_PRINCIPAL_NOT_UNIQUE);
     } else if (nprincs != 1) {
-	krb5_db_free_principal(&server, nprincs);
-	(void) krb5_finish_key(&master_encblock);
+	krb5_db_free_principal(kdc_context, &server, nprincs);
+	(void) krb5_finish_key(kdc_context, &master_encblock);
 	memset((char *)&master_encblock, 0, sizeof(master_encblock));
-	(void) krb5_db_fini();
+	(void) krb5_db_fini(kdc_context );
 	return(KRB5KDC_ERR_S_PRINCIPAL_UNKNOWN);
     }
     /* convert server.key into a real key (it may be encrypted
        in the database) */
-    if (retval = KDB_CONVERT_KEY_OUTOF_DB(&server.key, &tgs_key)) {
-	krb5_db_free_principal(&server, nprincs);
-	(void) krb5_finish_key(&master_encblock);
+    if (retval = KDB_CONVERT_KEY_OUTOF_DB(kdc_context, &server.key, &tgs_key)) {
+	krb5_db_free_principal(kdc_context, &server, nprincs);
+	(void) krb5_finish_key(kdc_context, &master_encblock);
 	memset((char *)&master_encblock, 0, sizeof(master_encblock));
-	(void) krb5_db_fini();
+	(void) krb5_db_fini(kdc_context );
 	return retval;
     }
     tgs_kvno = server.kvno;
-    krb5_db_free_principal(&server, nprincs);
+    krb5_db_free_principal(kdc_context, &server, nprincs);
     return 0;
 }
 
@@ -389,7 +391,7 @@ closedown_db()
     krb5_error_code retval;
 
     /* clean up master key stuff */
-    retval = krb5_finish_key(&master_encblock);
+    retval = krb5_finish_key(kdc_context, &master_encblock);
 
     memset((char *)&master_encblock, 0, sizeof(master_encblock));
 
@@ -397,10 +399,10 @@ closedown_db()
 
     /* close database */
     if (retval) {
-	(void) krb5_db_fini();
+	(void) krb5_db_fini(kdc_context );
 	return retval;
     } else
-	return (krb5_db_fini());
+	return (krb5_db_fini(kdc_context));
 }
 
 /*
@@ -428,6 +430,8 @@ closedown_db()
 
  exit
  */
+
+krb5_context kdc_context;
 
 main(argc, argv)
 int argc;

@@ -160,18 +160,18 @@ void process_packet(port_fd, prog, is_secondary)
     cc = sendto(port_fd, response->data, response->length, 0,
 		(struct sockaddr *)&saddr, saddr_len);
     if (cc == -1) {
-        krb5_free_data(response);
+        krb5_free_data(kdc_context, response);
 	com_err(prog, errno, "while sending reply to %s/%d",
 		inet_ntoa(saddr.sin_addr), ntohs(saddr.sin_port));
 	return;
     }
     if (cc != response->length) {
-	krb5_free_data(response);
+	krb5_free_data(kdc_context, response);
 	com_err(prog, 0, "short reply write %d vs %d\n",
 		response->length, cc);
 	return;
     }
-    krb5_free_data(response);
+    krb5_free_data(kdc_context, response);
     return;
 }
 

@@ -62,9 +62,10 @@ return(TRUE);
  *
  */
 
-krb5_error_code krb5_authorization(principal, luser, local_realm_name,
+krb5_error_code krb5_authorization(context, principal, luser, local_realm_name,
 				   cmd, ok, out_fcmd)
     /* IN */
+    krb5_context context;
     krb5_principal principal;
     const char *luser;
     char *local_realm_name;
@@ -90,7 +91,7 @@ krb5_error_code krb5_authorization(principal, luser, local_realm_name,
 	return 0;
     }
 
-    if (retval = krb5_unparse_name(principal, &princname)){
+    if (retval = krb5_unparse_name(context, principal, &princname)){
 	return retval;	
     }
 
@@ -196,7 +197,7 @@ krb5_error_code krb5_authorization(principal, luser, local_realm_name,
 
 		if (!strcmp(local_realm_name, USE_DEFAULT_REALM_NAME)){
 
-    			if (retval = krb5_get_default_realm(&realm)) {
+    			if (retval = krb5_get_default_realm(context, &realm)) {
 				auth_cleanup(k5users_flag,users_fp,
 					k5login_flag,login_fp, princname); 
 				free(kuser);
@@ -206,8 +207,9 @@ krb5_error_code krb5_authorization(principal, luser, local_realm_name,
 		}
 		else{ realm = local_realm_name; }
 
-		if((! _username_an_to_ln(principal,strlen(princname), kuser,
-					realm)) && (strcmp(kuser,luser) == 0)){
+		if((! _username_an_to_ln(context, principal, strlen(princname),
+					 kuser, realm)) 
+		    && (strcmp(kuser,luser) == 0)){
 			retbool = TRUE;
 		}
 
@@ -734,7 +736,8 @@ return out_ptr;
  * null in the DBM datum.size.
  ********************************************************************/
 static krb5_error_code
-_dbm_an_to_ln(aname, lnsize, lname)
+_dbm_an_to_ln(context, aname, lnsize, lname)
+    krb5_context context;
     krb5_const_principal aname;
     const int lnsize;
     char *lname;
@@ -744,7 +747,7 @@ _dbm_an_to_ln(aname, lnsize, lname)
     datum key, contents;
     char *princ_name;
 
-    if (retval = krb5_unparse_name(aname, &princ_name))
+    if (retval = krb5_unparse_name(context, aname, &princ_name))
 	return(retval);
     key.dptr = princ_name;
     key.dsize = strlen(princ_name)+1;	/* need to store the NULL for
@@ -783,7 +786,8 @@ _dbm_an_to_ln(aname, lnsize, lname)
  ************************************************************/
 
 static krb5_error_code
-_username_an_to_ln (aname, lnsize, lname, realm)
+_username_an_to_ln (context, aname, lnsize, lname, realm)
+    krb5_context context;
     krb5_const_principal aname;
     const int lnsize;
     char *lname;
@@ -792,19 +796,19 @@ _username_an_to_ln (aname, lnsize, lname, realm)
     krb5_error_code retval;
     int realm_length;
 
-    realm_length = krb5_princ_realm(aname)->length;
+    realm_length = krb5_princ_realm(context, aname)->length;
     
     if ((realm_length != strlen(realm)) ||
-        (memcmp(realm, krb5_princ_realm(aname)->data, realm_length))) {
+        (memcmp(realm, krb5_princ_realm(context, aname)->data, realm_length))) {
         return KRB5_LNAME_NOTRANS;
     }
 
-    if (krb5_princ_size(aname) != 1) {
-        if (krb5_princ_size(aname) == 2 ) {
+    if (krb5_princ_size(context, aname) != 1) {
+        if (krb5_princ_size(context, aname) == 2 ) {
            /* Check to see if 2nd component is the local realm. */
-           if ( strncmp(krb5_princ_component(aname,1)->data,realm,
+           if ( strncmp(krb5_princ_component(context, aname,1)->data,realm,
                         realm_length) ||
-                realm_length != krb5_princ_component(aname,1)->length)
+                realm_length != krb5_princ_component(context, aname,1)->length)
                 return KRB5_LNAME_NOTRANS;
         }
         else
@@ -813,12 +817,12 @@ _username_an_to_ln (aname, lnsize, lname, realm)
             return KRB5_LNAME_NOTRANS;
     }
 
-    strncpy(lname, krb5_princ_component(aname,0)->data, 
-	    min(krb5_princ_component(aname,0)->length,lnsize));
-    if (lnsize < krb5_princ_component(aname,0)->length ) {
+    strncpy(lname, krb5_princ_component(context, aname,0)->data, 
+	    min(krb5_princ_component(context, aname,0)->length,lnsize));
+    if (lnsize < krb5_princ_component(context, aname,0)->length ) {
 	retval = KRB5_CONFIG_NOTENUFSPACE;
     } else {
-	lname[krb5_princ_component(aname,0)->length] = '\0';
+	lname[krb5_princ_component(context, aname,0)->length] = '\0';
 	retval = 0;
     }
     return retval;

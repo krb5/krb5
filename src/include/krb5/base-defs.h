@@ -85,18 +85,9 @@ typedef char const * krb5_const_pointer;
 #else
 #define STDARG_P(x) ()
 #endif /* defined(__STDC__) || defined(STDARG_PROTOTYPES) */
-#ifdef NARROW_PROTOTYPES
-#define DECLARG(type, val) type val
-#define OLDDECLARG(type, val)
-#else
-#define DECLARG(type, val) val
-#define OLDDECLARG(type, val) type val;
-#endif /* NARROW_PROTOTYPES */
 #else
 #define PROTOTYPE(x) ()
 #define STDARG_P(x) ()
-#define DECLARG(type, val) val
-#define OLDDECLARG(type, val) type val;
 #endif /* STDC or PROTOTYPES */
 
 #ifdef NO_NESTED_PROTOTYPES
@@ -135,13 +126,13 @@ typedef	krb5_principal_data *krb5_principal;
 /* constant version thereof: */
 typedef const krb5_principal_data *krb5_const_principal;
 
-#define krb5_princ_realm(princ) (&(princ)->realm)
-#define krb5_princ_set_realm(princ,value) ((princ)->realm = *(value))
-#define krb5_princ_set_realm_length(princ,value) (princ)->realm.length = (value)
-#define krb5_princ_set_realm_data(princ,value) (princ)->realm.data = (value)
-#define	krb5_princ_size(princ) (princ)->length
-#define	krb5_princ_type(princ) (princ)->type
-#define	krb5_princ_name(princ) (princ)->data
-#define	krb5_princ_component(princ,i) ((princ)->data + i)
+#define krb5_princ_realm(context, princ) (&(princ)->realm)
+#define krb5_princ_set_realm(context, princ,value) ((princ)->realm = *(value))
+#define krb5_princ_set_realm_length(context, princ,value) (princ)->realm.length = (value)
+#define krb5_princ_set_realm_data(context, princ,value) (princ)->realm.data = (value)
+#define	krb5_princ_size(context, princ) (princ)->length
+#define	krb5_princ_type(context, princ) (princ)->type
+#define	krb5_princ_name(context, princ) (princ)->data
+#define	krb5_princ_component(context, princ,i) ((princ)->data + i)
 
 #endif /* KRB5_BASE_DEFS__ */

@@ -321,7 +321,8 @@ A principal is picked that has the best chance of getting in.
 **********************************************************************/
 
 
-krb5_error_code get_closest_principal(plist, client, found)
+krb5_error_code get_closest_principal(context, plist, client, found)
+    krb5_context context;
     char **plist;
     krb5_principal *client;
     krb5_boolean *found;
@@ -335,35 +336,35 @@ krb5_boolean got_one;
 
 	if (! plist ) return 0;
 
-	cnelem = krb5_princ_size(*client);
+	cnelem = krb5_princ_size(context, *client);
 
 
         while(plist[i]){
 
-		if (retval = krb5_parse_name(plist[i], &temp_client)){
+		if (retval = krb5_parse_name(context, plist[i], &temp_client)){
                          return retval;
                 }
 
-		pnelem = krb5_princ_size(temp_client);
+		pnelem = krb5_princ_size(context, temp_client);
 
 		 if ( cnelem > pnelem){	
 	        	i++;
 			continue;
 		}
 
-		if (krb5_princ_realm(*client)->length ==
-	   	    krb5_princ_realm(temp_client)->length  
-       	    		 && (!memcmp (krb5_princ_realm(*client)->data,
-	 			      krb5_princ_realm(temp_client)->data,
-                	  	      krb5_princ_realm(temp_client)->length))){
+		if (krb5_princ_realm(context, *client)->length ==
+	   	    krb5_princ_realm(context, temp_client)->length  
+       	    		 && (!memcmp (krb5_princ_realm(context, *client)->data,
+	 			      krb5_princ_realm(context, temp_client)->data,
+                	  	      krb5_princ_realm(context, temp_client)->length))){
 
 			got_one = TRUE;
 			for(j =0; j < cnelem; j ++){ 
 
 				krb5_data *p1 =
-					 krb5_princ_component(*client, j);
+					 krb5_princ_component(context, *client, j);
         			krb5_data *p2 = 
-					krb5_princ_component(temp_client, j);
+					krb5_princ_component(context, temp_client, j);
 
 			        if ((p1->length != p2->length) || 
             			    memcmp(p1->data,p2->data,p1->length)){
@@ -373,8 +374,8 @@ krb5_boolean got_one;
 			 }
 			 if (got_one == TRUE){		
 			 	if(best_client){
-					if(krb5_princ_size(best_client) >
-			       	 	            krb5_princ_size(temp_client)){
+					if(krb5_princ_size(context, best_client) >
+			       	 	            krb5_princ_size(context, temp_client)){
 						best_client = temp_client;
 					}
 			 	}else{
@@ -398,7 +399,8 @@ find_either_ticket checks to see whether there is a ticket for the
    end server or tgt, if neither is there the return FALSE,
 *****************************************************************/                
 
-krb5_error_code find_either_ticket (cc, client, end_server, found)
+krb5_error_code find_either_ticket (context, cc, client, end_server, found)
+    krb5_context context;
     krb5_ccache cc;
     krb5_principal client;
     krb5_principal end_server;
@@ -411,7 +413,7 @@ krb5_boolean temp_found = FALSE;
 char * cc_source_name;
 struct stat st_temp;
 
-cc_source_name = krb5_cc_get_name(cc);
+cc_source_name = krb5_cc_get_name(context, cc);
 
 if ( ! stat(cc_source_name, &st_temp)){
 
@@ -421,8 +423,10 @@ if ( ! stat(cc_source_name, &st_temp)){
  	
 	if (temp_found == FALSE){
 	 	
-		if (retval = krb5_tgtname( krb5_princ_realm (client),
-               		            krb5_princ_realm(client), &kdc_server)){
+		if (retval = krb5_tgtname(context, 
+					  krb5_princ_realm(context, client),
+               		                  krb5_princ_realm(context, client), 
+					  &kdc_server)){
        		           return retval ;
   		}
 
@@ -443,7 +447,8 @@ if ( ! stat(cc_source_name, &st_temp)){
 }
 
 
-krb5_error_code find_ticket (cc, client, server, found)
+krb5_error_code find_ticket (context, cc, client, server, found)
+    krb5_context context;
     krb5_ccache cc;
     krb5_principal client;
     krb5_principal server;
@@ -458,18 +463,18 @@ krb5_error_code retval;
 	memset((char *) &tgtq, 0, sizeof(tgtq)); 
 	memset((char *) &tgt, 0, sizeof(tgt)); 
 
-	if (retval= krb5_copy_principal( client, &tgtq.client)){
+	if (retval= krb5_copy_principal(context,  client, &tgtq.client)){
  		return retval; 	
 	}
 
-	if (retval= krb5_copy_principal( server, &tgtq.server)){
+	if (retval= krb5_copy_principal(context,  server, &tgtq.server)){
  		return retval ; 	
 	}
 
-	retval = krb5_cc_retrieve_cred(cc, KRB5_TC_MATCH_SRV_NAMEONLY,
+	retval = krb5_cc_retrieve_cred(context, cc, KRB5_TC_MATCH_SRV_NAMEONLY,
 					&tgtq, &tgt);
 
- 	if (! retval) retval = krb5_check_exp(tgt.times);
+ 	if (! retval) retval = krb5_check_exp(context, tgt.times);
 
  	if (retval){
        		if ((retval != KRB5_CC_NOTFOUND) &&
@@ -489,7 +494,8 @@ krb5_error_code retval;
 
 
 
-krb5_error_code find_princ_in_list (princ, plist, found)
+krb5_error_code find_princ_in_list (context, princ, plist, found)
+    krb5_context context;
     krb5_principal princ;
     char **plist;
     krb5_boolean *found;
@@ -503,7 +509,7 @@ krb5_error_code retval;
 
 if (!plist) return 0;  
 
-if (retval = krb5_unparse_name(princ, &princname)){
+if (retval = krb5_unparse_name(context, princ, &princname)){
 	return retval;
 }
 
@@ -532,10 +538,11 @@ path_out gets set to ...
 
 ***********************************************************************/
 
-krb5_error_code get_best_princ_for_target(source_uid, target_uid,
+krb5_error_code get_best_princ_for_target(context, source_uid, target_uid,
 					  source_user, target_user,
 					  cc_source, options, cmd,
 					  hostname, client, path_out)
+    krb5_context context;
     int source_uid;
     int target_uid;
     char *source_user;
@@ -570,19 +577,19 @@ if (options->princ){
 	return 0; 
 }
 
-cc_source_name = krb5_cc_get_name(cc_source);
+cc_source_name = krb5_cc_get_name(context, cc_source);
 
 if ( ! stat(cc_source_name, &st_temp)){
-	 if (retval = krb5_cc_get_principal(cc_source, &cc_def_princ)){
+	 if (retval = krb5_cc_get_principal(context, cc_source, &cc_def_princ)){
                 return retval;
         }
 }
 
-if (retval=krb5_parse_name(target_user, &target_client)){
+if (retval=krb5_parse_name(context, target_user, &target_client)){
 		return retval; 
 }
 
-if (retval=krb5_parse_name(source_user, &source_client)){
+if (retval=krb5_parse_name(context, source_user, &source_client)){
 		return retval; 
 }
 
@@ -651,7 +658,7 @@ if ( stat(k5login_path, &tb) && stat(k5users_path, &tb) ){
 	}
 }
 
-if (retval = krb5_sname_to_principal(hostname, NULL,
+if (retval = krb5_sname_to_principal(context, hostname, NULL,
                                       KRB5_NT_SRV_HST, &end_server)){
 	return retval;
 }
@@ -705,7 +712,7 @@ for (i= 0; i < count; i ++){
 i=0;
 while (aplist[i]){ 
 
- 	if (retval = krb5_parse_name(aplist[i], &temp_client)){
+ 	if (retval = krb5_parse_name(context, aplist[i], &temp_client)){
 		return retval;
         }  
 
@@ -721,7 +728,7 @@ while (aplist[i]){
 		return 0;	
 	}
 
-	krb5_free_principal(temp_client);
+	krb5_free_principal(context, temp_client);
 
 	i++;
 }
@@ -747,7 +754,8 @@ for (i=0; i < count; i ++){
 
 for (i=0; i < count; i ++){ 
 	if (princ_trials[i].p){
-		if(retval=krb5_copy_principal(princ_trials[i].p, &temp_client)){
+		if(retval=krb5_copy_principal(context, princ_trials[i].p, 
+					      &temp_client)){
 			return retval; 	
 		}
 
@@ -766,7 +774,7 @@ for (i=0; i < count; i ++){
 			}
 			return 0;
 		}
-		krb5_free_principal(temp_client);
+		krb5_free_principal(context, temp_client);
 	}
 }
 

@@ -52,12 +52,13 @@ extern int classification;
 #endif
 
 krb5_error_code
-  adm_build_key (newprinc, client_creds, new_passwd, oper_type, entry)
-krb5_principal newprinc;
-krb5_ticket *client_creds;
-char *new_passwd;
-int oper_type;
-krb5_db_entry entry;
+adm_build_key (context, newprinc, client_creds, new_passwd, oper_type, entry)
+    krb5_context context;
+    krb5_principal newprinc;
+    krb5_ticket *client_creds;
+    char *new_passwd;
+    int oper_type;
+    krb5_db_entry entry;
 {
     krb5_data outbuf;
     int retval;
@@ -119,7 +120,7 @@ krb5_db_entry entry;
 #endif
 
     /* Encrypt Password and Phrase */
-    if (retval = krb5_mk_priv(&outbuf,
+    if (retval = krb5_mk_priv(context, &outbuf,
 			      ETYPE_DES_CBC_CRC,
 			      client_creds->enc_part2->session,
 			      &client_server_info.server_addr,
@@ -148,7 +149,8 @@ krb5_db_entry entry;
     free(outbuf.data);
     
     /* Send private message to Client */
-    if (krb5_write_message(&client_server_info.client_socket, &msg_data)){
+    if (krb5_write_message(context, &client_server_info.client_socket, 
+			   &msg_data)){
 	free(msg_data.data);
 	com_err("adm_build_key", 0, "Error Performing Password Write");
 	return(5);		/* Protocol Failure */
@@ -157,13 +159,13 @@ krb5_db_entry entry;
     free(msg_data.data);
     
     /* Read Client Response */
-    if (krb5_read_message(&client_server_info.client_socket, &inbuf)){
+    if (krb5_read_message(context, &client_server_info.client_socket, &inbuf)){
 	syslog(LOG_ERR | LOG_INFO, "Error Performing Password Read");
 	return(5);		/* Protocol Failure */
     }
     
     /* Decrypt Client Response */
-    if (retval = krb5_rd_priv(&inbuf,
+    if (retval = krb5_rd_priv(context, &inbuf,
 			      client_creds->enc_part2->session,
 			      &client_server_info.client_addr,
 			      &client_server_info.server_addr,
@@ -188,11 +190,12 @@ krb5_db_entry entry;
 
 /*	kadmin change password request	*/
 krb5_error_code
-  adm_change_pwd(prog, customer_name, client_creds, salttype)
-char *prog;
-char *customer_name;
-krb5_ticket *client_creds;
-int salttype;
+adm_change_pwd(context, prog, customer_name, client_creds, salttype)
+    krb5_context context;
+    char *prog;
+    char *customer_name;
+    krb5_ticket *client_creds;
+    int salttype;
 {
     krb5_db_entry entry;
     int nprincs = 1;
@@ -207,45 +210,42 @@ int salttype;
 	   "Remote Administrative Password Change Request for %s by %s", 
 	   customer_name, client_server_info.name_of_client);
     
-    if (retval = krb5_parse_name(customer_name, &newprinc)) {
+    if (retval = krb5_parse_name(context, customer_name, &newprinc)) {
 	syslog(LOG_ERR | LOG_INFO, "parse failure while parsing '%s'", 
 	       customer_name);
 	return(5);		/* Protocol Failure */
     }
     
-    if (!(adm_princ_exists("adm_change_pwd", newprinc,
+    if (!(adm_princ_exists(context, "adm_change_pwd", newprinc,
 			   &entry, &nprincs))) {
 	com_err("adm_change_pwd", 0, "Principal does not exist!");
-	krb5_free_principal(newprinc);
-	krb5_db_free_principal(&entry, nprincs);
+	krb5_free_principal(context, newprinc);
+	krb5_db_free_principal(context, &entry, nprincs);
 	return(1);              /* Principal Unknown */
     }
     
     if ((new_passwd = (char *) calloc (1, ADM_MAX_PW_LENGTH+1)) == (char *) 0) {
 	com_err("adm_change_pwd", ENOMEM, "while allocating new_passwd!");
-	krb5_free_principal(newprinc);
-	krb5_db_free_principal(&entry, nprincs);
+	krb5_free_principal(context, newprinc);
+	krb5_db_free_principal(context, &entry, nprincs);
 	return(3);		/* No Memory */
     }
     
     oper_type = (salttype == KRB5_KDB_SALTTYPE_NORMAL) ? CHGOPER : CH4OPER;
 
-    if (retval = adm_build_key(newprinc, 
-			       client_creds, 
-			       new_passwd, 
-			       oper_type,
-			       entry)) {
-	krb5_free_principal(newprinc);
-	krb5_db_free_principal(&entry, nprincs);
+    if (retval = adm_build_key(context, newprinc, client_creds, 
+			       new_passwd, oper_type, entry)) {
+	krb5_free_principal(context, newprinc);
+	krb5_db_free_principal(context, &entry, nprincs);
 	free(new_passwd);
 	return(retval);
     }
     
-    retval = krb5_unparse_name(newprinc, &composite_name);
+    retval = krb5_unparse_name(context, newprinc, &composite_name);
 
     entry.salt_type = (krb5_int32) salttype;
 
-    if (retval = adm_enter_pwd_key("adm_change_pwd",              
+    if (retval = adm_enter_pwd_key(context, "adm_change_pwd",              
 				   composite_name,
 				   newprinc,
 				   newprinc,
@@ -253,8 +253,8 @@ int salttype;
 				   salttype,
 				   new_passwd,
 				   &entry)) retval = 8;
-    krb5_free_principal(newprinc);
-    krb5_db_free_principal(&entry, nprincs);
+    krb5_free_principal(context, newprinc);
+    krb5_db_free_principal(context, &entry, nprincs);
     free(composite_name);
     
     (void) memset(new_passwd, 0, strlen(new_passwd));
@@ -264,10 +264,11 @@ int salttype;
 
 /* kadmin add new random key function */
 krb5_error_code
-  adm_change_pwd_rnd(cmdname, customer_name, client_creds)
-char *cmdname;
-char *customer_name;
-krb5_ticket *client_creds;
+adm_change_pwd_rnd(context, cmdname, customer_name, client_creds)
+    krb5_context context;
+    char *cmdname;
+    char *customer_name;
+    krb5_ticket *client_creds;
 {
     krb5_db_entry entry;
     int nprincs = 1;
@@ -279,46 +280,47 @@ krb5_ticket *client_creds;
 	   "Remote Administrative Random Password Change Request for %s by %s", 
 	   customer_name, client_server_info.name_of_client);
     
-    if (retval = krb5_parse_name(customer_name, &newprinc)) {
+    if (retval = krb5_parse_name(context, customer_name, &newprinc)) {
 	com_err("adm_change_pwd_rnd", retval, "while parsing '%s'", customer_name);
 	return(5);		/* Protocol Failure */
     }
 #ifdef SANDIA       
     if (!(newprinc[2])) {
 	if (retval = check_security(newprinc, classification)) {
-	    krb5_free_principal(newprinc);
+	    krb5_free_principal(context, newprinc);
 	    syslog(LOG_ERR, "Principal (%s) - Incorrect Classification level",
 		   customer_name);
 	    return(6);
 	}
     }
 #endif
-    if (!(adm_princ_exists("adm_change_pwd_rnd", newprinc,
+    if (!(adm_princ_exists(context, "adm_change_pwd_rnd", newprinc,
 			   &entry, &nprincs))) {
 	com_err("adm_change_pwd_rnd", 0, "Principal does not exist!");
-	krb5_free_principal(newprinc);
-	krb5_db_free_principal(&entry, nprincs);
+	krb5_free_principal(context, newprinc);
+	krb5_db_free_principal(context, &entry, nprincs);
 	return(1);              /* Principal Unknown */
     }
     
-    if (retval = adm_enter_rnd_pwd_key("adm_change_pwd_rnd",
+    if (retval = adm_enter_rnd_pwd_key(context, "adm_change_pwd_rnd",
 				       newprinc,
 				       1, /* change existing entry */
 				       &entry))
       retval = 8;
 	
-    krb5_free_principal(newprinc);
-    krb5_db_free_principal(&entry, nprincs);
+    krb5_free_principal(context, newprinc);
+    krb5_db_free_principal(context, &entry, nprincs);
     return(retval);
 }
 
 /* kadmin add new key function */
 krb5_error_code
-  adm_add_new_key(cmdname, customer_name, client_creds, salttype)
-char *cmdname;
-char *customer_name;
-krb5_ticket *client_creds;
-int salttype;
+adm_add_new_key(context, cmdname, customer_name, client_creds, salttype)
+    krb5_context context;
+    char *cmdname;
+    char *customer_name;
+    krb5_ticket *client_creds;
+    int salttype;
 {
     krb5_db_entry entry;
     int nprincs = 1;
@@ -331,47 +333,47 @@ int salttype;
 	   "Remote Administrative Addition Request for %s by %s", 
 	   customer_name, client_server_info.name_of_client);
     
-    if (retval = krb5_parse_name(customer_name, &newprinc)) {
+    if (retval = krb5_parse_name(context, customer_name, &newprinc)) {
 	com_err("adm_add_new_key", retval, "while parsing '%s'", customer_name);
 	return(5);		/* Protocol Failure */
     }
 #ifdef SANDIA       
     if (!(newprinc[2])) {
 	if (retval = check_security(newprinc, classification)) {
-	    krb5_free_principal(newprinc);
+	    krb5_free_principal(context, newprinc);
 	    syslog(LOG_ERR, "Principal (%s) - Incorrect Classification level",
 		   customer_name);
 	    return(6);
 	}
     }
 #endif
-    if (adm_princ_exists("adm_add_new_key", newprinc, &entry, &nprincs)) {
+    if (adm_princ_exists(context, "adm_add_new_key",newprinc,&entry,&nprincs)) {
 	com_err("adm_add_new_key", 0, 
 		"principal '%s' already exists", customer_name);
-	krb5_free_principal(newprinc);
-	krb5_db_free_principal(&entry, nprincs);
+	krb5_free_principal(context, newprinc);
+	krb5_db_free_principal(context, &entry, nprincs);
 	return(2);		/* Principal Already Exists */
     }
     
     if ((new_passwd = (char *) calloc (1, 255)) == (char *) 0) {
 	com_err("adm_add_new_key", ENOMEM, "for new_passwd");
-	krb5_free_principal(newprinc);
-	krb5_db_free_principal(&entry, nprincs);
+	krb5_free_principal(context, newprinc);
+	krb5_db_free_principal(context, &entry, nprincs);
 	return(3);		/* No Memory */
     }
     
-    if (retval = adm_build_key(newprinc, 
+    if (retval = adm_build_key(context, newprinc, 
 			       client_creds, 
 			       new_passwd, 
 			       ADDOPER,
 			       entry)) {
-	krb5_free_principal(newprinc);
-	krb5_db_free_principal(&entry, nprincs);
+	krb5_free_principal(context, newprinc);
+	krb5_db_free_principal(context, &entry, nprincs);
 	free(new_passwd);
 	return(retval);
     }
     
-    if (retval = adm_enter_pwd_key( "adm_add_new_key", 
+    if (retval = adm_enter_pwd_key(context, "adm_add_new_key", 
 				   customer_name,
 				   newprinc, 
 				   newprinc,
@@ -382,17 +384,18 @@ int salttype;
       retval = 8;
     (void) memset(new_passwd, 0, strlen(new_passwd));
     free(new_passwd);
-    krb5_free_principal(newprinc);
-    krb5_db_free_principal(&entry, nprincs);
+    krb5_free_principal(context, newprinc);
+    krb5_db_free_principal(context, &entry, nprincs);
     return(retval);
 }
 
 /* kadmin add new random key function */
 krb5_error_code
-  adm_add_new_key_rnd(cmdname, customer_name, client_creds)
-char *cmdname;
-char *customer_name;
-krb5_ticket *client_creds;
+adm_add_new_key_rnd(context, cmdname, customer_name, client_creds)
+    krb5_context context;
+    char *cmdname;
+    char *customer_name;
+    krb5_ticket *client_creds;
 {
     krb5_db_entry entry;
     int nprincs = 1;
@@ -404,44 +407,46 @@ krb5_ticket *client_creds;
 	   "Remote Administrative Addition Request for %s by %s", 
 	   customer_name, client_server_info.name_of_client);
     
-    if (retval = krb5_parse_name(customer_name, &newprinc)) {
+    if (retval = krb5_parse_name(context, customer_name, &newprinc)) {
 	com_err("adm_add_new_key_rnd", retval, "while parsing '%s'", customer_name);
 	return(5);		/* Protocol Failure */
     }
 #ifdef SANDIA       
     if (!(newprinc[2])) {
 	if (retval = check_security(newprinc, classification)) {
-	    krb5_free_principal(newprinc);
+	    krb5_free_principal(context, newprinc);
 	    syslog(LOG_ERR, "Principal (%s) - Incorrect Classification level",
 		   customer_name);
 	    return(6);
 	}
     }
 #endif
-    if (adm_princ_exists("adm_add_new_key_rnd", newprinc, &entry, &nprincs)) {
+    if (adm_princ_exists(context, "adm_add_new_key_rnd", newprinc, 
+			 &entry, &nprincs)) {
 	com_err("adm_add_new_key_rnd", 0, 
 		"principal '%s' already exists", customer_name);
-	krb5_free_principal(newprinc);
-	krb5_db_free_principal(&entry, nprincs);
+	krb5_free_principal(context, newprinc);
+	krb5_db_free_principal(context, &entry, nprincs);
 	return(2);		/* Principal Already Exists */
     }
     
-    if (retval = adm_enter_rnd_pwd_key("adm_add_new_key_rnd",
+    if (retval = adm_enter_rnd_pwd_key(context, "adm_add_new_key_rnd",
 				       newprinc,
 				       0, /* new entry */
 				       &entry))
       retval = 8;
 	
-    krb5_free_principal(newprinc);
-    krb5_db_free_principal(&entry, nprincs);
+    krb5_free_principal(context, newprinc);
+    krb5_db_free_principal(context, &entry, nprincs);
     return(retval);
 }
 
 /* kadmin delete old key function */
 krb5_error_code
-  adm_del_old_key(cmdname, customer_name)
-char *cmdname;
-char *customer_name;
+adm_del_old_key(context, cmdname, customer_name)
+    krb5_context context;
+    char *cmdname;
+    char *customer_name;
 {
     krb5_db_entry entry;
     int nprincs = 1;
@@ -454,45 +459,46 @@ char *customer_name;
 	   "Remote Administrative Deletion Request for %s by %s", 
 	   customer_name, client_server_info.name_of_client);
     
-    if (retval = krb5_parse_name(customer_name, &newprinc)) {
+    if (retval = krb5_parse_name(context, customer_name, &newprinc)) {
 	com_err("adm_del_old_key", retval, "while parsing '%s'", customer_name);
 	return(5);		/* Protocol Failure */
     }
     
-    if (!adm_princ_exists("adm_del_old_key", newprinc,
+    if (!adm_princ_exists(context, "adm_del_old_key", newprinc,
 			  &entry, &nprincs)) {
 	com_err("adm_del_old_key", 0, "principal '%s' is not in the database", 
 		customer_name);
-	krb5_free_principal(newprinc);
-	krb5_db_free_principal(&entry, nprincs);
+	krb5_free_principal(context, newprinc);
+	krb5_db_free_principal(context, &entry, nprincs);
 	return(1);
     }
     
-    if (retval = krb5_db_delete_principal(newprinc, &one)) {
+    if (retval = krb5_db_delete_principal(context, newprinc, &one)) {
 	com_err("adm_del_old_key", retval, 
 		"while deleting '%s'", customer_name);
-	krb5_free_principal(newprinc);
-	krb5_db_free_principal(&entry, nprincs);
+	krb5_free_principal(context, newprinc);
+	krb5_db_free_principal(context, &entry, nprincs);
 	return(8);
     } else if (one != 1) {
 	com_err("adm_del_old_key", 0, 
 		"no principal deleted - unknown error");
-	krb5_free_principal(newprinc);
-	krb5_db_free_principal(&entry, nprincs);
+	krb5_free_principal(context, newprinc);
+	krb5_db_free_principal(context, &entry, nprincs);
 	return(8);
     }
     
-    krb5_free_principal(newprinc);
-    krb5_db_free_principal(&entry, nprincs);
+    krb5_free_principal(context, newprinc);
+    krb5_db_free_principal(context, &entry, nprincs);
     return(0);
 }
 
 /* kadmin modify existing Principal function */
 krb5_error_code
-  adm_mod_old_key(cmdname, customer_name, client_creds)
-char *cmdname;
-char *customer_name;
-krb5_ticket *client_creds;
+adm_mod_old_key(context, cmdname, customer_name, client_creds)
+    krb5_context context;
+    char *cmdname;
+    char *customer_name;
+    krb5_ticket *client_creds;
 {
     krb5_db_entry entry;
     int nprincs = 1;
@@ -510,27 +516,27 @@ krb5_ticket *client_creds;
 	   "Remote Administrative Modification Request for %s by %s", 
 	   customer_name, client_server_info.name_of_client);
     
-    if (retval = krb5_parse_name(customer_name, &newprinc)) {
+    if (retval = krb5_parse_name(context, customer_name, &newprinc)) {
 	com_err("adm_mod_old_key", retval, "while parsing '%s'", customer_name);
 	return(5);		/* Protocol Failure */
     }
     
     for ( ; ; ) {
 	
-	if (!adm_princ_exists("adm_mod_old_key", newprinc,
+	if (!adm_princ_exists(context, "adm_mod_old_key", newprinc,
 			      &entry, &nprincs)) {
-	    krb5_db_free_principal(&entry, nprincs);
+	    krb5_db_free_principal(context, &entry, nprincs);
 	    com_err("adm_mod_old_key", 0, 
 		    "principal '%s' is not in the database", 
 		    customer_name);
-	    krb5_free_principal(newprinc);
+	    krb5_free_principal(context, newprinc);
 	    return(1);
 	}
 	
 	/* Send Acknowledgement */
 	if ((outbuf.data = (char *) calloc (1, 255)) == (char *) 0) {
-	    krb5_free_principal(newprinc);
-	    krb5_db_free_principal(&entry, nprincs);
+	    krb5_free_principal(context, newprinc);
+	    krb5_db_free_principal(context, &entry, nprincs);
 	    com_err("adm_mod_old_key", ENOMEM, "for outbuf.data");
 	    return(3);		/* No Memory */
 	}
@@ -540,7 +546,7 @@ krb5_ticket *client_creds;
 	outbuf.data[1] = MODOPER;
 	outbuf.data[2] = SENDDATA3;
 	
-	if (retval = krb5_mk_priv(&outbuf,
+	if (retval = krb5_mk_priv(context, &outbuf,
 				  ETYPE_DES_CBC_CRC,
 				  client_creds->enc_part2->session,
 				  &client_server_info.server_addr,
@@ -550,18 +556,19 @@ krb5_ticket *client_creds;
 				  0,
 				  0,
 				  &msg_data)) {
-	    krb5_free_principal(newprinc);
-	    krb5_db_free_principal(&entry, nprincs);
+	    krb5_free_principal(context, newprinc);
+	    krb5_db_free_principal(context, &entry, nprincs);
 	    com_err("adm_mod_old_key", retval, "during mk_priv");
 	    free(outbuf.data);
 	    return(5);		/* Protocol Failure */
 	}
 	free(outbuf.data);
 	
-	if (krb5_write_message(&client_server_info.client_socket, &msg_data)){
+	if (krb5_write_message(context, &client_server_info.client_socket, 
+			       &msg_data)){
 	    free(msg_data.data);
-	    krb5_free_principal(newprinc);
-	    krb5_db_free_principal(&entry, nprincs);
+	    krb5_free_principal(context, newprinc);
+	    krb5_db_free_principal(context, &entry, nprincs);
 	    com_err("adm_mod_old_key", 0, 
 		    "Error Performing Modification Write");
 	    return(5);		/* Protocol Failure */
@@ -569,16 +576,16 @@ krb5_ticket *client_creds;
 	free(msg_data.data);
 	
 	/* Read Client Response */
-	if (krb5_read_message(&client_server_info.client_socket, &inbuf)){
-	    krb5_free_principal(newprinc);
-	    krb5_db_free_principal(&entry, nprincs);
+	if (krb5_read_message(context, &client_server_info.client_socket, &inbuf)){
+	    krb5_free_principal(context, newprinc);
+	    krb5_db_free_principal(context, &entry, nprincs);
 	    com_err("adm_mod_old_key", errno, 
 		    "Error Performing Modification Read");
             return(5);		/* Protocol Failure */
 	}
 	
 	/* Decrypt Client Response */
-	if (retval = krb5_rd_priv(&inbuf,
+	if (retval = krb5_rd_priv(context, &inbuf,
 				  client_creds->enc_part2->session,
 				  &client_server_info.client_addr,
 				  &client_server_info.server_addr,
@@ -590,8 +597,8 @@ krb5_ticket *client_creds;
 	    com_err("adm_mod_old_key", retval, "krb5_rd_priv error %s",
 		    error_message(retval));
 	    free(inbuf.data);
-	    krb5_free_principal(newprinc);
-	    krb5_db_free_principal(&entry, nprincs);
+	    krb5_free_principal(context, newprinc);
+	    krb5_db_free_principal(context, &entry, nprincs);
 	    return(5);		/* Protocol Failure */
 	}
 	
@@ -602,8 +609,8 @@ krb5_ticket *client_creds;
 	/* Decode Message - Modify Database */
 	if (msg_data.data[2] != SENDDATA3) {
 	    free(msg_data.data);
-	    krb5_free_principal(newprinc);
-	    krb5_db_free_principal(&entry, nprincs);
+	    krb5_free_principal(context, newprinc);
+	    krb5_db_free_principal(context, &entry, nprincs);
 	    return(5);		/* Protocol Failure */
 	}
 #ifdef SANDIA
@@ -670,34 +677,34 @@ krb5_ticket *client_creds;
 	
 	free(msg_data.data);
 	entry.mod_name = client_server_info.client;
-	if (retval = krb5_timeofday(&entry.mod_date)) {
+	if (retval = krb5_timeofday(context, &entry.mod_date)) {
 	    com_err("adm_mod_old_key", retval, "while fetching date");
-	    krb5_free_principal(newprinc);
-	    krb5_db_free_principal(&entry, nprincs);
+	    krb5_free_principal(context, newprinc);
+	    krb5_db_free_principal(context, &entry, nprincs);
 	    return(5);		/* Protocol Failure */
 	}
 	
-	retval = krb5_db_put_principal(&entry, &one);
+	retval = krb5_db_put_principal(context, &entry, &one);
 	if (retval) {
 	    com_err("adm_mod_old_key", retval, "while storing principal");
-	    krb5_free_principal(newprinc);
-	    krb5_db_free_principal(&entry, nprincs);
+	    krb5_free_principal(context, newprinc);
+	    krb5_db_free_principal(context, &entry, nprincs);
 	    return(8);		/* Update failed */
 	}
 	one = 1;
     }	/* for */
     
-    krb5_db_free_principal(&entry, nprincs);
-    krb5_free_principal(newprinc);
+    krb5_db_free_principal(context, &entry, nprincs);
+    krb5_free_principal(context, newprinc);
     
     /* Read Client Response */
-    if (krb5_read_message(&client_server_info.client_socket, &inbuf)){
+    if (krb5_read_message(context, &client_server_info.client_socket, &inbuf)){
 	com_err("adm_mod_old_key", errno, "Error Performing Read");
 	return(5);		/* Protocol Failure */
     }
     
     /* Decrypt Client Response */
-    if (retval = krb5_rd_priv(&inbuf,
+    if (retval = krb5_rd_priv(context, &inbuf,
 			      client_creds->enc_part2->session,
 			      &client_server_info.client_addr,
 			      &client_server_info.server_addr,
@@ -720,10 +727,11 @@ krb5_ticket *client_creds;
 
 /* kadmin inquire existing Principal function */
 krb5_error_code
-  adm_inq_old_key(cmdname, customer_name, client_creds)
-char *cmdname;
-char *customer_name;
-krb5_ticket *client_creds;
+adm_inq_old_key(context, cmdname, customer_name, client_creds)
+    krb5_context context;
+    char *cmdname;
+    char *customer_name;
+    krb5_ticket *client_creds;
 {
     krb5_db_entry entry;
     int nprincs = 1;
@@ -737,21 +745,21 @@ krb5_ticket *client_creds;
 	   "Remote Administrative Inquiry Request for %s by %s", 
 	   customer_name, client_server_info.name_of_client);
     
-    if (retval = krb5_parse_name(customer_name, &newprinc)) {
+    if (retval = krb5_parse_name(context, customer_name, &newprinc)) {
         com_err("adm_inq_old_key", retval, "while parsing '%s'", customer_name);
 	return(5);		/* Protocol Failure */
     }
     
-    if (retval = krb5_unparse_name(newprinc, &fullname)) {
-	krb5_free_principal(newprinc);
+    if (retval = krb5_unparse_name(context, newprinc, &fullname)) {
+	krb5_free_principal(context, newprinc);
 	com_err("adm_inq_old_key", retval, "while unparsing");
         return(5);		/* Protocol Failure */
     }
     
-    if (!adm_princ_exists("adm_inq_old_key", newprinc,
+    if (!adm_princ_exists(context, "adm_inq_old_key", newprinc,
 			  &entry, &nprincs)) {
-	krb5_db_free_principal(&entry, nprincs);
-	krb5_free_principal(newprinc);
+	krb5_db_free_principal(context, &entry, nprincs);
+	krb5_free_principal(context, newprinc);
 	free(fullname);
 	com_err("adm_inq_old_key", 0, "principal '%s' is not in the database", 
 		customer_name);
@@ -759,28 +767,28 @@ krb5_ticket *client_creds;
     }
     
     if ((outbuf.data = (char *) calloc (1, 2048)) == (char *) 0) {
-	krb5_db_free_principal(&entry, nprincs);
-	krb5_free_principal(newprinc);
+	krb5_db_free_principal(context, &entry, nprincs);
+	krb5_free_principal(context, newprinc);
 	free(fullname);
 	com_err("adm_inq_old_key", ENOMEM, "for outbuf.data");
 	return(3);		/* No Memory */
     }
     
     /* Format Inquiry Data */
-    if ((retval = adm_fmt_prt(&entry, fullname, outbuf.data))) {
-	krb5_db_free_principal(&entry, nprincs);
-	krb5_free_principal(newprinc);
+    if ((retval = adm_fmt_prt(context, &entry, fullname, outbuf.data))) {
+	krb5_db_free_principal(context, &entry, nprincs);
+	krb5_free_principal(context, newprinc);
 	free(fullname);
 	com_err("adm_inq_old_key", 0, "Unable to Format Inquiry Data");
 	return(5);		/* XXX protocol failure --- not right, but.. */
     }
     outbuf.length = strlen(outbuf.data);
-    krb5_db_free_principal(&entry, nprincs);
-    krb5_free_principal(newprinc);
+    krb5_db_free_principal(context, &entry, nprincs);
+    krb5_free_principal(context, newprinc);
     free(fullname);
     
     /* Encrypt Inquiry Data */
-    if (retval = krb5_mk_priv(&outbuf,
+    if (retval = krb5_mk_priv(context, &outbuf,
 			      ETYPE_DES_CBC_CRC,
 			      client_creds->enc_part2->session,
 			      &client_server_info.server_addr,
@@ -797,7 +805,8 @@ krb5_ticket *client_creds;
     free(outbuf.data);
     
     /* Send Inquiry Information */
-    if (krb5_write_message(&client_server_info.client_socket, &msg_data)){
+    if (krb5_write_message(context, &client_server_info.client_socket, 
+			   &msg_data)){
 	free(msg_data.data);
 	com_err("adm_inq_old_key", 0, "Error Performing Write");
 	return(5);		/* Protocol Failure */
@@ -806,14 +815,14 @@ krb5_ticket *client_creds;
     free(msg_data.data);
     
     /* Read Client Response */
-    if (krb5_read_message(&client_server_info.client_socket, &inbuf)){
+    if (krb5_read_message(context, &client_server_info.client_socket, &inbuf)){
 	com_err("adm_inq_old_key", errno, "Error Performing Read");
 	syslog(LOG_ERR, "adm_inq sock %d", client_server_info.client_socket);
 	return(5);		/* Protocol Failure */
     }
     
     /* Decrypt Client Response */
-    if (retval = krb5_rd_priv(&inbuf,
+    if (retval = krb5_rd_priv(context, &inbuf,
 			      client_creds->enc_part2->session,
 			      &client_server_info.client_addr,
 			      &client_server_info.server_addr,

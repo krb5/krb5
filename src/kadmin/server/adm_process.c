@@ -45,17 +45,13 @@ struct cpw_keyproc_arg {
     krb5_keyblock *key;
 };
 
-#include <krb5/widen.h>
-static krb5_error_code
-cpw_keyproc(DECLARG(krb5_pointer, keyprocarg),
-		DECLARG(krb5_principal, server),
-		DECLARG(krb5_kvno, key_vno),
-		DECLARG(krb5_keyblock **, key))
-OLDDECLARG(krb5_pointer, keyprocarg)
-OLDDECLARG(krb5_principal, server)
-OLDDECLARG(krb5_kvno, key_vno)
-OLDDECLARG(krb5_keyblock **, key)
-#include <krb5/narrow.h>
+krb5_error_code
+cpw_keyproc(context, keyprocarg, server, key_vno, key)
+    krb5_context context;
+    krb5_pointer keyprocarg;
+    krb5_principal server;
+    krb5_kvno key_vno;
+    krb5_keyblock ** key;
 {
     krb5_error_code retval;
     krb5_db_entry cpw_entry;
@@ -71,11 +67,11 @@ OLDDECLARG(krb5_keyblock **, key)
     arg = ( struct cpw_keyproc_arg *) keyprocarg;
 
     if (arg->key) {
-	retval = krb5_copy_keyblock(arg->key, key);
+	retval = krb5_copy_keyblock(context, arg->key, key);
 	if (retval)
 	    return retval;
     } else {
-	if (retval = krb5_parse_name(client_server_info.name_of_service, 
+	if (retval = krb5_parse_name(context, client_server_info.name_of_service, 
 				     &cpw_krb)) {
             syslog(LOG_ERR, 
 		   "cpw_keyproc %d while attempting to parse \"%s\"",
@@ -83,7 +79,7 @@ OLDDECLARG(krb5_keyblock **, key)
             return(retval);
 	}
 
-	if (retval = krb5_db_get_principal(cpw_krb, &cpw_entry, 
+	if (retval = krb5_db_get_principal(context, cpw_krb, &cpw_entry, 
 			&nprincs, &more)) {
             syslog(LOG_ERR, 
 		   "cpw_keyproc %d while extracting %s entry",
@@ -95,18 +91,18 @@ OLDDECLARG(krb5_keyblock **, key)
 
 	if ((realkey = (krb5_keyblock *) calloc (1, 
 		sizeof(krb5_keyblock))) == (krb5_keyblock * ) 0) {
-	    krb5_db_free_principal(&cpw_entry, nprincs);
+	    krb5_db_free_principal(context, &cpw_entry, nprincs);
 	    syslog(LOG_ERR, "cpw_keyproc: No Memory for server key");
 	    close(client_server_info.client_socket);
 	    return(ENOMEM);
 	}
 
 	/* Extract the real kadmin/<realm> keyblock */
-	if (retval = krb5_kdb_decrypt_key(
+	if (retval = krb5_kdb_decrypt_key(context, 
 				&master_encblock,
 				&cpw_entry.key,
 				realkey)) {
-	    krb5_db_free_principal(&cpw_entry, nprincs);
+	    krb5_db_free_principal(context, &cpw_entry, nprincs);
 	    free(realkey);
 	    syslog(LOG_ERR, 
 		   "cpw_keyproc: Cannot extract %s from master key",
@@ -121,8 +117,9 @@ OLDDECLARG(krb5_keyblock **, key)
 }
 
 krb5_error_code
-process_client(prog)
-char *prog;
+process_client(context, prog)
+    krb5_context context;
+    char *prog;
 {
     krb5_error_code retval;
 
@@ -161,7 +158,7 @@ char *prog;
 
 		/* V4 kpasswd Protocol Hack */
 		/* Read Length of Data */
-    retval = krb5_net_read(client_server_info.client_socket,
+    retval = krb5_net_read(context, client_server_info.client_socket,
 		(char *) &data_len, 2);
     if (retval < 0) {
 	syslog(LOG_ERR, "kadmind error: net_read Length Failure");
@@ -169,7 +166,7 @@ char *prog;
 	exit(0);
     }
 
-    if (retval = krb5_db_init()) {		/* Open as client */
+    if (retval = krb5_db_init(context)) {		/* Open as client */
 	syslog(LOG_ERR, "adm_process: Can't Open Database");
 	close(client_server_info.client_socket);
 	exit(0);
@@ -179,7 +176,7 @@ char *prog;
  *	Messages  Note: Here client is the kadmin/<realm> server
  */
     number_of_entries = 1;
-    if ((retval = krb5_db_get_principal(client_server_info.server,
+    if ((retval = krb5_db_get_principal(context, client_server_info.server,
 			&server_entry,
 			&number_of_entries,
 			&more))) {
@@ -190,13 +187,13 @@ char *prog;
     }
 
     if (more) {
-	krb5_db_free_principal(&server_entry, number_of_entries);
+	krb5_db_free_principal(context, &server_entry, number_of_entries);
 	syslog(LOG_ERR, "kadmind error: kadmin/<realm> service not unique");
 	exit(1);
     }
 
     if (number_of_entries != 1) {
-	krb5_db_free_principal(&server_entry, number_of_entries);
+	krb5_db_free_principal(context, &server_entry, number_of_entries);
 	syslog(LOG_ERR, "kadmind error: kadmin/<realm> service UNKNOWN");
 	close(client_server_info.client_socket);
 	exit(0);
@@ -204,7 +201,7 @@ char *prog;
 
     if ((cpw_key.key = (krb5_keyblock *) calloc (1, 
 		sizeof(krb5_keyblock))) == (krb5_keyblock *) 0) {
-	krb5_db_free_principal(&server_entry, number_of_entries);
+	krb5_db_free_principal(context, &server_entry, number_of_entries);
 	syslog(LOG_ERR, 
 	       "kadmind error: No Memory for server key");
 	close(client_server_info.client_socket);
@@ -212,11 +209,11 @@ char *prog;
     }
 
     /* Extract the real kadmin/<realm> keyblock */
-    if (retval = krb5_kdb_decrypt_key(
+    if (retval = krb5_kdb_decrypt_key(context, 
 				      &master_encblock,
 				      &server_entry.key,
 				      (krb5_keyblock *) cpw_key.key)) {
-	krb5_db_free_principal(&server_entry, number_of_entries);
+	krb5_db_free_principal(context, &server_entry, number_of_entries);
 	free(cpw_key.key);
 	syslog(LOG_ERR,  
 	       "kadmind error: Cannot extract kadmin/<realm> from master key");
@@ -251,13 +248,13 @@ char *prog;
     client_server_info.server_addr.contents = 
 		(krb5_octet *) &client_server_info.server_name.sin_addr;
 
-    krb5_init_ets();
+    krb5_init_ets(context);
 
     syslog(LOG_AUTH | LOG_INFO,
 	"Request for Administrative Service Received from %s - Authenticating.",
 	inet_ntoa( client_server_info.client_name.sin_addr ));
 	
-    if ((retval = krb5_recvauth(
+    if ((retval = krb5_recvauth(context, 
 		(krb5_pointer) &client_server_info.client_socket,
 		ADM5_CPW_VERSION,
 		client_server_info.server,
@@ -276,10 +273,10 @@ char *prog;
 			error_message(retval));
 	(void) sprintf(retbuf, "kadmind error during recvauth: %s\n", 
 			error_message(retval));
-	krb5_free_keyblock(cpw_key.key);
+	krb5_free_keyblock(context, cpw_key.key);
 	goto finish;
     }
-    krb5_free_keyblock(cpw_key.key);
+    krb5_free_keyblock(context, cpw_key.key);
 
     /* Check if ticket was issued using password (and not tgt)
      * within the last 5 minutes
@@ -291,7 +288,7 @@ char *prog;
 	exit(0);
     }
 
-    if (retval = krb5_timeofday(&adm_time)) {
+    if (retval = krb5_timeofday(context, &adm_time)) {
 	syslog(LOG_ERR, "Can't get time of day");
 	close(client_server_info.client_socket);
 	exit(0);
@@ -312,7 +309,7 @@ char *prog;
 	exit(0);
     }
 
-    if ((retval = krb5_unparse_name(client_server_info.client, 
+    if ((retval = krb5_unparse_name(context, client_server_info.client, 
 				    &client_server_info.name_of_client))) {
 	syslog(LOG_ERR, "kadmind error: unparse failed.", 
 	       error_message(retval));
@@ -330,7 +327,7 @@ char *prog;
     outbuf.length = 2;
 
 		/* write back the response */
-    if ((retval = krb5_write_message(&client_server_info.client_socket,
+    if ((retval = krb5_write_message(context, &client_server_info.client_socket,
 					&outbuf))){
 	syslog(LOG_ERR, "kadmind error: Write Message Failure: %s",
 			error_message(retval));
@@ -339,7 +336,7 @@ char *prog;
     }
 
 	/* Ok Now let's get the first private message and respond */
-    if (retval = krb5_read_message(&client_server_info.client_socket,
+    if (retval = krb5_read_message(context, &client_server_info.client_socket,
                                         &inbuf)){
 	syslog(LOG_ERR, "kadmind error: read First Message Failure: %s",
 		error_message(retval));
@@ -347,7 +344,7 @@ char *prog;
 	goto finish;
     }
 
-    if ((retval = krb5_rd_priv(&inbuf, 
+    if ((retval = krb5_rd_priv(context, &inbuf, 
 			client_creds->enc_part2->session,
 			&client_server_info.client_addr, 
 			&client_server_info.server_addr,
@@ -370,7 +367,7 @@ char *prog;
     switch (request_type.appl_code) {
 	case KPASSWD:
 	    req_type = "kpasswd";
-	    if (retval = adm5_kpasswd("process_client", &request_type, 
+	    if (retval = adm5_kpasswd(context, "process_client", &request_type, 
 			client_creds, retbuf, &otype)) {
 		goto finish;
 	    }
@@ -378,8 +375,9 @@ char *prog;
 
 	case KADMIN:
 	    req_type = "kadmin";
-	    if (retval = adm5_kadmin("process_client", client_auth_data,
-			client_creds, retbuf, &otype)) {
+	    if (retval = adm5_kadmin(context, "process_client", 
+				     client_auth_data, client_creds, 
+				     retbuf, &otype)) {
 		goto finish;
 	    }
 	    retbuf[0] = KADMIN;
@@ -410,7 +408,7 @@ char *prog;
     final_msg.length = strlen(retbuf) + 1;
 
                 /* Send Completion Message */
-    if (retval = krb5_mk_priv(&final_msg,
+    if (retval = krb5_mk_priv(context, &final_msg,
                         ETYPE_DES_CBC_CRC,
                         client_creds->enc_part2->session,
                         &client_server_info.server_addr,
@@ -425,7 +423,7 @@ char *prog;
     }
     
         /* Send Final Reply to Client */
-    if (retval = krb5_write_message(&client_server_info.client_socket,
+    if (retval = krb5_write_message(context, &client_server_info.client_socket,
 					&msg_data)){
 	free(msg_data.data);
 	syslog(LOG_ERR, "Error Performing Final Write: %s",

@@ -39,25 +39,31 @@ typedef struct _krb5_ccache {
 typedef struct _krb5_cc_ops {
     krb5_magic magic;
     char *prefix;
-    char *(*get_name) NPROTOTYPE((krb5_ccache));
-    krb5_error_code (*resolve) NPROTOTYPE((krb5_ccache *, char *));
-    krb5_error_code (*gen_new) NPROTOTYPE((krb5_ccache *));
-    krb5_error_code (*init) NPROTOTYPE((krb5_ccache, krb5_principal));
-    krb5_error_code (*destroy) NPROTOTYPE((krb5_ccache));
-    krb5_error_code (*close) NPROTOTYPE((krb5_ccache));
-    krb5_error_code (*store) NPROTOTYPE((krb5_ccache, krb5_creds *));
-    krb5_error_code (*retrieve) NPROTOTYPE((krb5_ccache, krb5_flags,
-					    krb5_creds *, krb5_creds *));
-    krb5_error_code (*get_princ) NPROTOTYPE((krb5_ccache,
-					     krb5_principal *));
-    krb5_error_code (*get_first) NPROTOTYPE((krb5_ccache,
-					     krb5_cc_cursor *));
-    krb5_error_code (*get_next) NPROTOTYPE((krb5_ccache, krb5_cc_cursor *,
+    char *(*get_name) NPROTOTYPE((krb5_context, krb5_ccache));
+    krb5_error_code (*resolve) NPROTOTYPE((krb5_context, krb5_ccache *, 
+					    char *));
+    krb5_error_code (*gen_new) NPROTOTYPE((krb5_context, krb5_ccache *));
+    krb5_error_code (*init) NPROTOTYPE((krb5_context, krb5_ccache,
+					    krb5_principal));
+    krb5_error_code (*destroy) NPROTOTYPE((krb5_context, krb5_ccache));
+    krb5_error_code (*close) NPROTOTYPE((krb5_context, krb5_ccache));
+    krb5_error_code (*store) NPROTOTYPE((krb5_context, krb5_ccache,
 					    krb5_creds *));
-    krb5_error_code (*end_get) NPROTOTYPE((krb5_ccache, krb5_cc_cursor *));
-    krb5_error_code (*remove_cred) NPROTOTYPE((krb5_ccache, krb5_flags,
-					       krb5_creds *));
-    krb5_error_code (*set_flags) NPROTOTYPE((krb5_ccache, krb5_flags));
+    krb5_error_code (*retrieve) NPROTOTYPE((krb5_context, krb5_ccache,
+					    krb5_flags, krb5_creds *,
+					    krb5_creds *));
+    krb5_error_code (*get_princ) NPROTOTYPE((krb5_context, krb5_ccache,
+					    krb5_principal *));
+    krb5_error_code (*get_first) NPROTOTYPE((krb5_context, krb5_ccache,
+					    krb5_cc_cursor *));
+    krb5_error_code (*get_next) NPROTOTYPE((krb5_context, krb5_ccache,
+					    krb5_cc_cursor *, krb5_creds *));
+    krb5_error_code (*end_get) NPROTOTYPE((krb5_context, krb5_ccache,
+					    krb5_cc_cursor *));
+    krb5_error_code (*remove_cred) NPROTOTYPE((krb5_context, krb5_ccache,
+					    krb5_flags, krb5_creds *));
+    krb5_error_code (*set_flags) NPROTOTYPE((krb5_context, krb5_ccache,
+					    krb5_flags));
 } krb5_cc_ops;
 
 /* for retrieve_cred */
@@ -73,19 +79,19 @@ typedef struct _krb5_cc_ops {
 /* for set_flags and other functions */
 #define KRB5_TC_OPENCLOSE		0x00000001
 
-#define krb5_cc_initialize(cache, principal) (*(cache)->ops->init)(cache, principal)
-#define krb5_cc_gen_new(cache) (*(cache)->ops->gen_new)(cache)
-#define krb5_cc_destroy(cache) (*(cache)->ops->destroy)(cache)
-#define krb5_cc_close(cache) (*(cache)->ops->close)(cache)
-#define krb5_cc_store_cred(cache, creds) (*(cache)->ops->store)(cache, creds)
-#define krb5_cc_retrieve_cred(cache, flags, mcreds, creds) (*(cache)->ops->retrieve)(cache, flags, mcreds, creds)
-#define krb5_cc_get_principal(cache, principal) (*(cache)->ops->get_princ)(cache, principal)
-#define krb5_cc_start_seq_get(cache, cursor) (*(cache)->ops->get_first)(cache, cursor)
-#define krb5_cc_next_cred(cache, cursor, creds) (*(cache)->ops->get_next)(cache, cursor, creds)
-#define krb5_cc_end_seq_get(cache, cursor) (*(cache)->ops->end_get)(cache, cursor)
-#define krb5_cc_remove_cred(cache, flags, creds) (*(cache)->ops->remove_cred)(cache,flags, creds)
-#define krb5_cc_set_flags(cache, flags) (*(cache)->ops->set_flags)(cache, flags)
-#define krb5_cc_get_name(cache) (*(cache)->ops->get_name)(cache)
+#define krb5_cc_initialize(context, cache, principal) (*(cache)->ops->init)(context, cache, principal)
+#define krb5_cc_gen_new(context, cache) (*(cache)->ops->gen_new)(context, cache)
+#define krb5_cc_destroy(context, cache) (*(cache)->ops->destroy)(context, cache)
+#define krb5_cc_close(context, cache) (*(cache)->ops->close)(context, cache)
+#define krb5_cc_store_cred(context, cache, creds) (*(cache)->ops->store)(context, cache, creds)
+#define krb5_cc_retrieve_cred(context, cache, flags, mcreds, creds) (*(cache)->ops->retrieve)(context, cache, flags, mcreds, creds)
+#define krb5_cc_get_principal(context, cache, principal) (*(cache)->ops->get_princ)(context, cache, principal)
+#define krb5_cc_start_seq_get(context, cache, cursor) (*(cache)->ops->get_first)(context, cache, cursor)
+#define krb5_cc_next_cred(context, cache, cursor, creds) (*(cache)->ops->get_next)(context, cache, cursor, creds)
+#define krb5_cc_end_seq_get(context, cache, cursor) (*(cache)->ops->end_get)(context, cache, cursor)
+#define krb5_cc_remove_cred(context, cache, flags, creds) (*(cache)->ops->remove_cred)(context, cache,flags, creds)
+#define krb5_cc_set_flags(context, cache, flags) (*(cache)->ops->set_flags)(context, cache, flags)
+#define krb5_cc_get_name(context, cache) (*(cache)->ops->get_name)(context, cache)
 
 extern krb5_cc_ops *krb5_cc_dfl_ops;
 

@@ -1,3 +1,7 @@
+Fri Jan 13 15:23:47 1995  Chris Provenzano (proven@mit.edu)
+
+    * Added krb5_context to all krb5_routines
+
 Fri Nov 18 01:15:58 1994  Mark Eichin  <eichin@cygnus.com>
 
 	* configure.in: use KRB5_POSIX_LOCKS (from epeisach).

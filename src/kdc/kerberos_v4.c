@@ -414,7 +414,7 @@ krb5_data **resp;
     KTEXT_ST v4_pkt;
     char *lrealm;
 
-    if (retval = krb5_timeofday((krb5_timestamp *) &kerb_time.tv_sec))
+    if (retval = krb5_timeofday(kdc_context, (krb5_timestamp *) &kerb_time.tv_sec))
         return(retval);
 
     if (!*local_realm) {		/* local-realm name already set up */
@@ -511,7 +511,7 @@ int to_len;
 	return ENOMEM;
     }
     if ( !(response->data = (char *) malloc( len))) {
-	krb5_free_data( response);
+	krb5_free_data(kdc_context,  response);
 	return ENOMEM;
     }
     response->length = len;
@@ -554,7 +554,7 @@ compat_decrypt_key (in5, out4)
     int retval = -1;
 
     out5.contents = NULL;
-    if ( krb5_kdb_decrypt_key( &master_encblock, in5, &out5)) {
+    if ( krb5_kdb_decrypt_key(kdc_context,  &master_encblock, in5, &out5)) {
 	lt = klog(L_DEATH_REQ, "KDC can't decrypt principal's key.");
     }
     if ( ! out5.contents) return( retval);
@@ -614,13 +614,13 @@ kerb_get_principal(name, inst, principal, maxn, more)
      */
 
 
-    retval = krb5_425_conv_principal(name, inst, local_realm, &search);
+    retval = krb5_425_conv_principal(kdc_context, name, inst, local_realm, &search);
     if (retval) {
 	    *more = 0;
 	    return(0);
     }
-    retval = krb5_db_get_principal(search, &entries, &nprinc, &more5);
-    krb5_free_principal(search);
+    retval = krb5_db_get_principal(kdc_context, search, &entries, &nprinc, &more5);
+    krb5_free_principal(kdc_context, search);
     if (retval) {
 	*more = 0;
         return(0);
@@ -679,7 +679,7 @@ cleanup:
      * which was allocated by krb5_db_get_principal().
      * this routine clears the keyblock's contents for us.
      */
-    krb5_db_free_principal( &entries, nprinc);
+    krb5_db_free_principal(kdc_context,  &entries, nprinc);
 
     *more = (int) more5 || (nprinc > maxn);
     return( nprinc);

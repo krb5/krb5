@@ -33,6 +33,7 @@ extern AUTH_DAT kdata;
 #include <krb5/los-proto.h>
 #include <com_err.h>
 extern krb5_principal ext_client;
+extern krb5_context pop_context;
 extern char *client_name;
 #endif /* KRB5 */
 #endif /* KERBEROS */
@@ -92,7 +93,7 @@ POP     *   p;
     {
       krb5_error_code retval;
 
-    if (retval = krb5_get_default_realm(&lrealm)) {
+    if (retval = krb5_get_default_realm(pop_context, &lrealm)) {
         pop_log(p, POP_WARNING, "%s: (%s) %s", p->client, client_name,
 		error_message(retval));
         return(pop_msg(p,POP_FAILURE,
@@ -100,7 +101,7 @@ POP     *   p;
     }
     }
 
-    tmpdata = krb5_princ_realm(ext_client);
+    tmpdata = krb5_princ_realm(pop_context, ext_client);
     if (strncmp(tmpdata->data, lrealm, tmpdata->length))  {
          pop_log(p, POP_WARNING, "%s: (%s) realm not accepted.", 
 		 p->client, client_name);
@@ -110,7 +111,7 @@ POP     *   p;
     }
 #endif
     /* only accept one-component names, i.e. realm and name only */
-    if (krb5_princ_size(ext_client) > 1) {
+    if (krb5_princ_size(pop_context, ext_client) > 1) {
         pop_log(p, POP_WARNING, "%s: (%s) instance not accepted.", 
 		 p->client, client_name);
         return(pop_msg(p,POP_FAILURE,
@@ -124,7 +125,7 @@ POP     *   p;
      * but this causes too much confusion and assumes p->user will never
      * change. This makes me feel more comfortable.
      */
-    tmpdata = krb5_princ_component(ext_client, 0);
+    tmpdata = krb5_princ_component(pop_context, ext_client, 0);
     if(strncmp(p->user, tmpdata->data, tmpdata->length))
       {
 	pop_log(p, POP_WARNING, "%s: auth failed: %s vs %s", 

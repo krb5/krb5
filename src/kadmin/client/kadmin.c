@@ -52,15 +52,19 @@ int preauth_search_list[] = {
 	-1
 	};
 
-krb5_error_code get_first_ticket 
-	PROTOTYPE((krb5_ccache, 
-		krb5_principal));
+static krb5_error_code get_first_ticket 
+	PROTOTYPE((krb5_context,
+		   krb5_ccache, 
+		   krb5_principal));
 
 struct sockaddr_in local_sin, remote_sin;
 
 krb5_creds my_creds;
 
-void get_def_princ();
+static void get_def_princ
+	PROTOTYPE((krb5_context,
+     		   krb5_principal * ));
+
 void decode_kadmind_reply();
 int print_status_message();
 
@@ -90,6 +94,7 @@ main(argc,argv)
 
     kadmin_requests rd_priv_resp;
 
+    krb5_context context;
     krb5_checksum send_cksum;
     krb5_data msg_data, inbuf;
     krb5_int32 seqno;
@@ -100,7 +105,9 @@ main(argc,argv)
     int option;
     int oper_type;
 
-    krb5_init_ets();
+    krb5_init_context(&context);
+    krb5_init_ets(context);
+
     client_name = (char *) malloc(755);
     memset((char *) client_name, 0, sizeof(client_name));
 
@@ -108,11 +115,11 @@ main(argc,argv)
       usage();
 
     if (argc == 1) {  /* No User Specified */
-	get_def_princ(&client);
+	get_def_princ(context, &client);
 	strcpy(client_name, client->data[0].data);
 	strncat(client_name, "/admin@", 7);
 	strncat(client_name, client->realm.data, client->realm.length);
-	if (retval = krb5_parse_name(client_name, &client)) {
+	if (retval = krb5_parse_name(context, client_name, &client)) {
 	    fprintf(stderr, "Unable to Parse Client Name!\n");
 	    usage();
 	}
@@ -123,14 +130,14 @@ main(argc,argv)
 	      case 'n':
 		if (argc == 3) {
 		    strcpy(client_name, argv[2]);
-		    if (retval = krb5_parse_name(client_name, &client)) {
+		    if (retval = krb5_parse_name(context, client_name, &client)) {
 			fprintf(stderr, "Unable to Parse Client Name!\n");
 			usage();
 		    }
 		}
 		else {
-		    get_def_princ(&client);
-		    if (retval = krb5_unparse_name(client, &client_name)) {
+		    get_def_princ(context, &client);
+		    if (retval = krb5_unparse_name(context, client, &client_name)) {
 			fprintf(stderr, "Unable to unparse Client Name!\n");
 			usage();
 		    }
@@ -153,7 +160,7 @@ main(argc,argv)
     		fprintf(stderr, "root is not a valid Administrator!\n\n");
 		usage();
 	    }
-	    if (retval = krb5_parse_name(client_name, &client)) {
+	    if (retval = krb5_parse_name(context, client_name, &client)) {
 		fprintf(stderr, "Error Parsing User Specified Name Option!\n");
 		exit(1);
 	    }
@@ -163,11 +170,11 @@ main(argc,argv)
 	/* Create credential cache for kadmin */
     (void) sprintf(cache_name, "FILE:/tmp/tkt_adm_%d", getpid());
 
-    if ((retval = krb5_cc_resolve(cache_name, &cache))) {
+    if ((retval = krb5_cc_resolve(context, cache_name, &cache))) {
 	fprintf(stderr, "Unable to Resolve Cache: %s!\n", cache_name);
     }
     
-    if ((retval = krb5_cc_initialize(cache, client))) {
+    if ((retval = krb5_cc_initialize(context, cache, client))) {
         fprintf(stderr, "Error initializing cache: %s!\n", cache_name);
         exit(1);
     }
@@ -176,20 +183,20 @@ main(argc,argv)
  *	Verify User by Obtaining Initial Credentials prior to Initial Link
  */
 
-    if ((retval = get_first_ticket(cache, client))) {
-        (void) krb5_cc_destroy(cache);
+    if ((retval = get_first_ticket(context, cache, client))) {
+        (void) krb5_cc_destroy(context, cache);
 	exit(1);
     }
     /* my_creds has the necessary credentials for further processing:
        Destroy credential cache for security reasons */
-    (void) krb5_cc_destroy(cache);
+    (void) krb5_cc_destroy(context, cache);
     
     requested_realm = (krb5_data *) &client->realm;
 
 
 	/* Initiate Link to Server */
-    if ((retval = adm5_init_link(requested_realm, &local_socket))) {
-	(void) krb5_cc_destroy(cache);
+    if ((retval = adm5_init_link(context, requested_realm, &local_socket))) {
+	(void) krb5_cc_destroy(context, cache);
 	exit(1);
     } 
 
@@ -205,10 +212,10 @@ main(argc,argv)
     {
 	int msg_length = 0;
 
-	retval = krb5_net_write(local_socket, (char *) &msg_length + 2, 2);
+	retval = krb5_net_write(context, local_socket, (char *) &msg_length + 2, 2);
 	if (retval < 0) {
 	    fprintf(stderr, "krb5_net_write failure!\n");
-            (void) krb5_cc_destroy(cache);
+            (void) krb5_cc_destroy(context, cache);
 	    exit(1);
 	}
     }
@@ -223,14 +230,14 @@ main(argc,argv)
 
 		/* compute checksum, using CRC-32 */
     if (!(send_cksum.contents = (krb5_octet *)
-	malloc(krb5_checksum_size(CKSUMTYPE_CRC32)))) {
+	malloc(krb5_checksum_size(context, CKSUMTYPE_CRC32)))) {
         fprintf(stderr, "Insufficient Memory while Allocating Checksum!\n");
-        (void) krb5_cc_destroy(cache);
+        (void) krb5_cc_destroy(context, cache);
         exit(1);
     }
 
 		/* choose some random stuff to compute checksum from */
-	if (retval = krb5_calculate_checksum(CKSUMTYPE_CRC32,
+	if (retval = krb5_calculate_checksum(context, CKSUMTYPE_CRC32,
 					ADM5_ADM_VERSION,
 					strlen(ADM5_ADM_VERSION),
 					0,
@@ -240,7 +247,7 @@ main(argc,argv)
         fprintf(stderr, "Error while Computing Checksum: %s!\n",
 		error_message(retval));
 	free(send_cksum.contents);
-        (void) krb5_cc_destroy(cache);
+        (void) krb5_cc_destroy(context, cache);
         exit(1);
     }
 
@@ -248,7 +255,7 @@ main(argc,argv)
        pass it over the socket to the server, and obtain mutual
        authentication. */
 
-    if ((retval = krb5_sendauth((krb5_pointer) &local_socket,
+    if ((retval = krb5_sendauth(context, (krb5_pointer) &local_socket,
 			ADM_CPW_VERSION, 
 			my_creds.client, 
 			my_creds.server,
@@ -267,7 +274,7 @@ main(argc,argv)
     }
 
 	/* Read back what the server has to say ... */
-    if (retval = krb5_read_message(&local_socket, &inbuf)){
+    if (retval = krb5_read_message(context, &local_socket, &inbuf)){
 	fprintf(stderr, " Read Message Error: %s!\n",
 			error_message(retval));
 	free(send_cksum.contents);
@@ -292,7 +299,7 @@ main(argc,argv)
     inbuf.data[1] = 0xff;
     inbuf.length = 2;
 
-    if ((retval = krb5_mk_priv(&inbuf,
+    if ((retval = krb5_mk_priv(context, &inbuf,
 			ETYPE_DES_CBC_CRC,
 			&my_creds.keyblock, 
 			&local_addr, 
@@ -311,7 +318,7 @@ main(argc,argv)
     free(inbuf.data);
 
 		/* write private message to server */
-    if (krb5_write_message(&local_socket, &msg_data)){
+    if (krb5_write_message(context, &local_socket, &msg_data)){
 	fprintf(stderr, "Write Error During First Message Transmission!\n");
 	free(send_cksum.contents);
         exit(1);
@@ -320,14 +327,14 @@ main(argc,argv)
 
     for ( ; ; ) {
 		/* Ok Now let's get the private message */
-	if (retval = krb5_read_message(&local_socket, &inbuf)){
+	if (retval = krb5_read_message(context, &local_socket, &inbuf)){
 	    fprintf(stderr, "Read Error During First Reply: %s!\n",
 			error_message(retval));
 	    free(send_cksum.contents);
             exit(1);
 	}
 
-	if ((retval = krb5_rd_priv(&inbuf,
+	if ((retval = krb5_rd_priv(context, &inbuf,
 			&my_creds.keyblock,
     			&foreign_addr, 
 			&local_addr,
@@ -357,7 +364,7 @@ repeat:
 	if (!strcmp(command_type, "add")) {
 	    valid++;
 	    oper_type = ADDOPER;
-	    if (retval = kadm_add_user(&my_creds, 
+	    if (retval = kadm_add_user(context, &my_creds, 
 				       rep_ret,
 				       &local_addr, 
 				       &foreign_addr, 
@@ -369,7 +376,7 @@ repeat:
 	if (!strcmp(command_type, "cpw")) {
 	    valid++;
 	    oper_type = CHGOPER;
-	    if (retval = kadm_cpw_user(&my_creds, 
+	    if (retval = kadm_cpw_user(context, &my_creds, 
 				       rep_ret,
 				       &local_addr, 
 				       &foreign_addr, 
@@ -380,7 +387,7 @@ repeat:
 	}
 	if (!strcmp(command_type, "addrnd")) {
 	    valid++;
-	    if (retval = kadm_add_user_rnd(&my_creds, 
+	    if (retval = kadm_add_user_rnd(context, &my_creds, 
 					   rep_ret,
 					   &local_addr, 
 					   &foreign_addr, 
@@ -390,7 +397,7 @@ repeat:
 	}
 	if (!strcmp(command_type, "cpwrnd")) {
 	    valid++;
-	    if (retval = kadm_cpw_user_rnd(&my_creds, 
+	    if (retval = kadm_cpw_user_rnd(context, &my_creds, 
 					   rep_ret,
 					   &local_addr, 
 					   &foreign_addr, 
@@ -400,7 +407,7 @@ repeat:
 	}
 	if (!strcmp(command_type, "del")) {
 	    valid++;
-	    if (retval = kadm_del_user(&my_creds, 
+	    if (retval = kadm_del_user(context, &my_creds, 
 				       rep_ret,
 				       &local_addr, 
 				       &foreign_addr, 
@@ -410,7 +417,7 @@ repeat:
 	}
 	if (!strcmp(command_type, "inq")) {
 	    valid++;
-	    if (retval = kadm_inq_user(&my_creds, 
+	    if (retval = kadm_inq_user(context, &my_creds, 
 				       rep_ret,
 				       &local_addr, 
 				       &foreign_addr, 
@@ -420,7 +427,7 @@ repeat:
 	}
 	if (!strcmp(command_type, "mod")) {
 	    valid++;
-	    if (retval = kadm_mod_user(&my_creds, 
+	    if (retval = kadm_mod_user(context, &my_creds, 
 				       rep_ret,
 				       &local_addr, 
 				       &foreign_addr, 
@@ -431,7 +438,7 @@ repeat:
 	if (!strcmp(command_type, "addv4")) {
 	    valid++;
 	    oper_type = AD4OPER;
-	    if (retval = kadm_add_user(&my_creds, 
+	    if (retval = kadm_add_user(context, &my_creds, 
 				       rep_ret,
 				       &local_addr, 
 				       &foreign_addr, 
@@ -443,7 +450,7 @@ repeat:
 	if (!strcmp(command_type, "cpwv4")) {
 	    valid++;
 	    oper_type = CH4OPER;
-	    if (retval = kadm_cpw_user(&my_creds, 
+	    if (retval = kadm_cpw_user(context, &my_creds, 
 				       rep_ret,
 				       &local_addr, 
 				       &foreign_addr, 
@@ -454,7 +461,7 @@ repeat:
 	}
 	if (!strcmp(command_type, "q")) { 
 	    valid++;
-	    retval = kadm_done(&my_creds, 
+	    retval = kadm_done(context, &my_creds, 
 			       rep_ret,
 			       &local_addr, 
 			       &foreign_addr, 
@@ -475,14 +482,14 @@ repeat:
     }
 
     		/* Ok Now let's get the final private message */
-    if (retval = krb5_read_message(&local_socket, &inbuf)){
+    if (retval = krb5_read_message(context, &local_socket, &inbuf)){
 	fprintf(stderr, "Read Error During Final Reply: %s!\n",
                         error_message(retval));
 	free(send_cksum.contents);
         exit(1);
     }
      
-    if ((retval = krb5_rd_priv(&inbuf,
+    if ((retval = krb5_rd_priv(context, &inbuf,
                         &my_creds.keyblock,
                         &foreign_addr,
                         &local_addr,
@@ -521,11 +528,11 @@ repeat:
     exit(retval);
 }
 
-krb5_error_code
-get_first_ticket(DECLARG(krb5_ccache, cache),
-		DECLARG(krb5_principal, client))
-OLDDECLARG(krb5_ccache, cache)
-OLDDECLARG(krb5_principal, client)
+static krb5_error_code
+get_first_ticket(context, cache, client)
+    krb5_context context;
+    krb5_ccache cache;
+    krb5_principal client;
 {
     char prompt[255];			/* for the password prompt */
     
@@ -537,7 +544,7 @@ OLDDECLARG(krb5_principal, client)
     int  pwsize;
     int	 i;
     
-    if ((retval = krb5_unparse_name(client, &client_name))) {
+    if ((retval = krb5_unparse_name(context, client, &client_name))) {
 	fprintf(stderr, "Unable to Unparse Client Name!\n");
 	return(1);
     }
@@ -551,7 +558,7 @@ OLDDECLARG(krb5_principal, client)
 
     my_creds.client = client;
 
-    if ((retval = krb5_build_principal_ext(&my_creds.server,
+    if ((retval = krb5_build_principal_ext(context, &my_creds.server,
                                         client->realm.length, 
 					client->realm.data,
                                         strlen(CPWNAME),
@@ -562,7 +569,7 @@ OLDDECLARG(krb5_principal, client)
                                         0))) {
         fprintf(stderr, "Error %s while building client name!\n",
 		error_message(retval));
-	krb5_free_addresses(my_addresses);
+	krb5_free_addresses(context, my_addresses);
         return(1);
     }
     
@@ -574,7 +581,7 @@ OLDDECLARG(krb5_principal, client)
     }
 
     pwsize = 255;
-    if ((retval = krb5_read_password(
+    if ((retval = krb5_read_password(context, 
                                 prompt,
                                 0,
                                 password,
@@ -582,13 +589,13 @@ OLDDECLARG(krb5_principal, client)
 	fprintf(stderr, "Error while reading password for '%s'!\n",
                                 client_name);
 	free(password);
-	krb5_free_addresses(my_addresses);
+	krb5_free_addresses(context, my_addresses);
 	return(1);
     }
 
 	/*	Build Request for Initial Credentials */
     for (i=0; preauth_search_list[i] >= 0; i++) {
-	retval = krb5_get_in_tkt_with_password(
+	retval = krb5_get_in_tkt_with_password(context, 
 					0,	/* options */
 					my_addresses,
 					/* do random preauth */
@@ -607,7 +614,7 @@ OLDDECLARG(krb5_principal, client)
         /* Do NOT Forget to zap password  */
     memset((char *) password, 0, pwsize);
     free(password);
-    krb5_free_addresses(my_addresses);
+    krb5_free_addresses(context, my_addresses);
     
     if (retval) {
             fprintf(stderr, "\nUnable to Get Initial Credentials : %s!\n",
@@ -619,10 +626,10 @@ OLDDECLARG(krb5_principal, client)
 }
 
 krb5_error_code
-adm5_init_link( realm_of_server, local_socket)
-krb5_data *realm_of_server;
-int * local_socket;
-
+adm5_init_link(context, realm_of_server, local_socket)
+    krb5_context context;
+    krb5_data *realm_of_server;
+    int * local_socket;
 {
     struct servent *service_process;	       /* service we will talk to */
     struct hostent *remote_host;	       /* host we will talk to */
@@ -647,7 +654,7 @@ int * local_socket;
     hostlist = 0;
 
 		/* Identify all Hosts Associated with this Realm */
-    if ((retval = krb5_get_krbhst (realm_of_server, &hostlist))) {
+    if ((retval = krb5_get_krbhst (context, realm_of_server, &hostlist))) {
         fprintf(stderr, "krb5_get_krbhst: Unable to Determine Server Name!\n");
         return(retval);
     }
@@ -670,7 +677,7 @@ int * local_socket;
 	}
     }
 
-    krb5_free_krbhst(hostlist);
+    krb5_free_krbhst(context, hostlist);
 
     /* open a TCP socket */
     *local_socket = socket(PF_INET, SOCK_STREAM, 0);
@@ -699,8 +706,9 @@ int * local_socket;
 	return 0;
 }
 
-void
-get_def_princ(client)
+static void
+get_def_princ(context, client)
+     krb5_context context;
      krb5_principal *client;
 {
     krb5_ccache cache = NULL;
@@ -710,7 +718,7 @@ get_def_princ(client)
     krb5_flags cc_flags;
 
     /* Identify Default Credentials Cache */
-    if (retval = krb5_cc_default(&cache)) {
+    if (retval = krb5_cc_default(context, &cache)) {
 	fprintf(stderr, "Error while getting default ccache!\n");
 	exit(1);
     }
@@ -722,7 +730,7 @@ get_def_princ(client)
      *		retval != 0 ==> Assume ccache does NOT Exist 
      */
     cc_flags = 0;
-    if (retval = krb5_cc_set_flags(cache, cc_flags)) {
+    if (retval = krb5_cc_set_flags(context, cache, cc_flags)) {
 	/* Search passwd file for client */
 	pw = getpwuid((int) getuid());
 	if (pw) {
@@ -740,13 +748,13 @@ get_def_princ(client)
 	}
 	
 	/* Use this to get default_realm and format client_name */
-	if ((retval = krb5_parse_name(client_name, client))) {
+	if ((retval = krb5_parse_name(context, client_name, client))) {
 	    fprintf(stderr, "Unable to Parse Client Name!\n");
 	    usage();
 	}
     } else {
 	/* Read Client from Cache */
-	if (retval = krb5_cc_get_principal(cache, client)) {
+	if (retval = krb5_cc_get_principal(context, cache, client)) {
 	    fprintf(stderr, 
 		    "Unable to Read Principal Credentials File!\n");
 	    exit(1);
@@ -758,7 +766,7 @@ get_def_princ(client)
 	    usage();
 	}
 	
-	(void) krb5_cc_close(cache);
+	(void) krb5_cc_close(context, cache);
     }
 }
 

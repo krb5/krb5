@@ -31,6 +31,7 @@
 #include <krb5/los-proto.h>
 #include <krb5/kdb.h>
 #include "kdc_util.h"
+#include "extern.h"
 
 typedef struct _krb5_kdc_replay_ent {
     struct _krb5_kdc_replay_ent *next;
@@ -68,7 +69,7 @@ register krb5_data **outpkt;
     krb5_int32 timenow;
     register krb5_kdc_replay_ent *eptr, *last, *hold;
 
-    if (krb5_timeofday(&timenow))
+    if (krb5_timeofday(kdc_context, &timenow))
 	return FALSE;
 
     calls++;
@@ -84,7 +85,7 @@ register krb5_data **outpkt;
 		eptr->num_hits++;
 		hits++;
 
-		if (krb5_copy_data(eptr->reply_packet, outpkt))
+		if (krb5_copy_data(kdc_context, eptr->reply_packet, outpkt))
 		    return FALSE;
 		else
 		    return TRUE;
@@ -94,8 +95,8 @@ register krb5_data **outpkt;
 	    if (STALE(eptr)) {
 		/* flush it and collect stats */
 		max_hits_per_entry = max(max_hits_per_entry, eptr->num_hits);
-		krb5_free_data(eptr->req_packet);
-		krb5_free_data(eptr->reply_packet);
+		krb5_free_data(kdc_context, eptr->req_packet);
+		krb5_free_data(kdc_context, eptr->reply_packet);
 		hold = eptr;
 		last->next = eptr->next;
 		eptr = last;
@@ -120,7 +121,7 @@ register krb5_data *outpkt;
     register krb5_kdc_replay_ent *eptr;    
     krb5_int32 timenow;
 
-    if (krb5_timeofday(&timenow))
+    if (krb5_timeofday(kdc_context, &timenow))
 	return;
 
     /* this is a new entry */
@@ -128,12 +129,12 @@ register krb5_data *outpkt;
     if (!eptr)
 	return;
     eptr->timein = timenow;
-    if (krb5_copy_data(inpkt, &eptr->req_packet)) {
+    if (krb5_copy_data(kdc_context, inpkt, &eptr->req_packet)) {
 	krb5_xfree(eptr);
 	return;
     }
-    if (krb5_copy_data(outpkt, &eptr->reply_packet)) {
-	krb5_free_data(eptr->req_packet);
+    if (krb5_copy_data(kdc_context, outpkt, &eptr->reply_packet)) {
+	krb5_free_data(kdc_context, eptr->req_packet);
 	krb5_xfree(eptr);
 	return;
     }

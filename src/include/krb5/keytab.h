@@ -57,39 +57,57 @@ typedef struct _krb5_kt_ops {
     krb5_magic magic;
     char *prefix;
     /* routines always present */
-    krb5_error_code (*resolve) NPROTOTYPE((const char *,
-					   krb5_keytab *));
-    krb5_error_code (*get_name) NPROTOTYPE((krb5_keytab,
-					    char *,
-					    int));
-    krb5_error_code (*close) NPROTOTYPE((krb5_keytab));
-    krb5_error_code (*get) NPROTOTYPE((krb5_keytab,
-				       krb5_principal,
-				       krb5_kvno,
-				       krb5_keytab_entry *));
-    krb5_error_code (*start_seq_get) NPROTOTYPE((krb5_keytab,
-						 krb5_kt_cursor *));	
-    krb5_error_code (*get_next) NPROTOTYPE((krb5_keytab,
-					    krb5_keytab_entry *,
-					    krb5_kt_cursor *));
-    krb5_error_code (*end_get) NPROTOTYPE((krb5_keytab,
-					   krb5_kt_cursor *));
+    krb5_error_code (*resolve) 
+	NPROTOTYPE((krb5_context,
+		    const char *,
+		    krb5_keytab *));
+    krb5_error_code (*get_name) 
+	NPROTOTYPE((krb5_context,
+		    krb5_keytab,
+		    char *,
+		    int));
+    krb5_error_code (*close) 
+	NPROTOTYPE((krb5_context,
+		    krb5_keytab));
+    krb5_error_code (*get) 
+	NPROTOTYPE((krb5_context,
+		    krb5_keytab,
+		    krb5_principal,
+		    krb5_kvno,
+		    krb5_keytab_entry *));
+    krb5_error_code (*start_seq_get) 
+	NPROTOTYPE((krb5_context,
+		    krb5_keytab,
+		    krb5_kt_cursor *));	
+    krb5_error_code (*get_next) 
+	NPROTOTYPE((krb5_context,
+		    krb5_keytab,
+		    krb5_keytab_entry *,
+		    krb5_kt_cursor *));
+    krb5_error_code (*end_get) 
+	NPROTOTYPE((krb5_context,
+		    krb5_keytab,
+		    krb5_kt_cursor *));
     /* routines to be included on extended version (write routines) */
-    krb5_error_code (*add) NPROTOTYPE((krb5_keytab,
-				       krb5_keytab_entry *));
-    krb5_error_code (*remove) NPROTOTYPE((krb5_keytab,
-					  krb5_keytab_entry *));
+    krb5_error_code (*add) 
+	NPROTOTYPE((krb5_context,
+		    krb5_keytab,
+		    krb5_keytab_entry *));
+    krb5_error_code (*remove) 
+	NPROTOTYPE((krb5_context,
+		    krb5_keytab,
+		  krb5_keytab_entry *));
 } krb5_kt_ops;
 
 /* and back to narrow */
 #include <krb5/narrow.h>
 
-#define krb5_kt_get_name(keytab, name, namelen) (*(keytab)->ops->get_name)(keytab,name,namelen)
-#define krb5_kt_close(keytab) (*(keytab)->ops->close)(keytab)
-#define krb5_kt_get_entry(keytab, principal, vno, entry) (*(keytab)->ops->get)(keytab, principal, vno, entry)
-#define krb5_kt_start_seq_get(keytab, cursor) (*(keytab)->ops->start_seq_get)(keytab, cursor)
-#define krb5_kt_next_entry(keytab, entry, cursor) (*(keytab)->ops->get_next)(keytab, entry, cursor)
-#define krb5_kt_end_seq_get(keytab, cursor) (*(keytab)->ops->end_get)(keytab, cursor)
+#define krb5_kt_get_name(context, keytab, name, namelen) (*(keytab)->ops->get_name)(context, keytab,name,namelen)
+#define krb5_kt_close(context, keytab) (*(keytab)->ops->close)(context, keytab)
+#define krb5_kt_get_entry(context, keytab, principal, vno, entry) (*(keytab)->ops->get)(context, keytab, principal, vno, entry)
+#define krb5_kt_start_seq_get(context, keytab, cursor) (*(keytab)->ops->start_seq_get)(context, keytab, cursor)
+#define krb5_kt_next_entry(context, keytab, entry, cursor) (*(keytab)->ops->get_next)(context, keytab, entry, cursor)
+#define krb5_kt_end_seq_get(context, keytab, cursor) (*(keytab)->ops->end_get)(context, keytab, cursor)
 /* remove and add are functions, so that they can return NOWRITE
    if not a writable keytab */
 

@@ -124,8 +124,9 @@ do_child()
 }
 
 krb5_error_code
-setup_network(prog)
-const char *prog;
+setup_network(context, prog)
+    krb5_context context;
+    const char *prog;
 {
     krb5_error_code retval;
     char server_host_name[MAXHOSTNAMELEN];
@@ -150,7 +151,7 @@ const char *prog;
     }
 
    
-    if (retval = krb5_get_default_realm(&lrealm)) {
+    if (retval = krb5_get_default_realm(context, &lrealm)) {
         free(client_server_info.name_of_service);
 	com_err( "setup_network", 0, 
 		"adm_network: Unable to get Default Realm");
@@ -166,7 +167,7 @@ const char *prog;
 		client_server_info.name_of_service);
 #endif	/* DEBUG */
 
-    if ((retval = krb5_parse_name(client_server_info.name_of_service,
+    if ((retval = krb5_parse_name(context, client_server_info.name_of_service,
                         &client_server_info.server))) {
         free(client_server_info.name_of_service);
 	com_err( "setup_network", retval, 
@@ -176,7 +177,7 @@ const char *prog;
 
     if (gethostname(server_host_name, sizeof(server_host_name))) {
 	retval = errno;
-        krb5_free_principal(client_server_info.server);
+        krb5_free_principal(context, client_server_info.server);
         free(client_server_info.name_of_service);
 	com_err( "setup_network", retval,
 		"adm_network: Unable to Identify Who I am");
@@ -214,7 +215,7 @@ const char *prog;
     service_servent = getservbyname(adm5_tcp_portname, "tcp");
 
     if (!service_servent) {
-        krb5_free_principal(client_server_info.server);
+        krb5_free_principal(context, client_server_info.server);
         free(client_server_info.name_of_service);
 	com_err("setup_network", 0, "adm_network: %s/tcp service unknown", 
 			adm5_tcp_portname);
@@ -230,7 +231,7 @@ const char *prog;
     if ((client_server_info.server_socket = 
 		socket(AF_INET, SOCK_STREAM, 0)) < 0) {
 	retval = errno;
-        krb5_free_principal(client_server_info.server);
+        krb5_free_principal(context, client_server_info.server);
         free(client_server_info.name_of_service);
 	com_err("setup_network", retval, 
 		"adm_network: Cannot create server socket.");
@@ -252,7 +253,7 @@ const char *prog;
 		&client_server_info.server_name, 
 		sizeof(client_server_info.server_name)) < 0) {
 	retval = errno;
-        krb5_free_principal(client_server_info.server);
+        krb5_free_principal(context, client_server_info.server);
         free(client_server_info.name_of_service);
 	com_err("setup_network", retval, 
 		"adm_network: Cannot bind server socket.");

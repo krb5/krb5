@@ -72,43 +72,34 @@ krb5_error_code adm_get_rnd_key PROTOTYPE((char *,
 			int,
 			krb5_db_entry *));
 
-krb5_error_code adm_modify_kdb PROTOTYPE((char const *, 
-			char const *, 
-			krb5_const_principal,
-			const krb5_keyblock *,  
-			const krb5_keyblock *,
-			int, 
-			struct saltblock *,
-			struct saltblock *,
-			krb5_db_entry *));
-
-krb5_error_code adm_enter_pwd_key PROTOTYPE((char *, 
-			char *, 
-			krb5_const_principal,
-			krb5_const_principal, 
-			int, 
-			int, 
-			char *,
-			krb5_db_entry *));
-
-krb5_error_code adm_negotiate_key PROTOTYPE((char const *, 
-			krb5_ticket *,
-			char *));
+static krb5_error_code adm_modify_kdb 
+	PROTOTYPE((krb5_context,
+		   char const *, 
+		   char const *, 
+		   krb5_const_principal,
+		   const krb5_keyblock *,  
+		   const krb5_keyblock *,
+		   int, 
+		   struct saltblock *,
+		   struct saltblock *,
+		   krb5_db_entry *));
 
 #include <krb5/narrow.h>
 
 
 krb5_kvno
-adm_princ_exists(cmdname, principal, entry, nprincs)
-char *cmdname;
-krb5_principal principal;
-krb5_db_entry *entry;
-int *nprincs;
+adm_princ_exists(context, cmdname, principal, entry, nprincs)
+    krb5_context context;
+    char *cmdname;
+    krb5_principal principal;
+    krb5_db_entry *entry;
+    int *nprincs;
 {
     krb5_boolean more;
     krb5_error_code retval;
 
-    if (retval = krb5_db_get_principal(principal, entry, nprincs, &more)) {
+    if (retval = krb5_db_get_principal(context, principal, entry, 
+				       nprincs, &more)) {
 	com_err("adm_princ_exists", retval, 
 		"while attempting to verify principal's existence");
 	return(0);
@@ -119,26 +110,19 @@ int *nprincs;
     return(*nprincs);
 }
 
-krb5_error_code
-adm_modify_kdb(DECLARG(char const *, cmdname),
-        DECLARG(char const *, newprinc),
-        DECLARG(krb5_const_principal, principal),
-        DECLARG(const krb5_keyblock *, key),
-        DECLARG(const krb5_keyblock *, alt_key),
-        DECLARG(int, req_type),
-        DECLARG(struct saltblock *, salt),
-        DECLARG(struct saltblock *, altsalt),
-        DECLARG(krb5_db_entry *, entry))
-OLDDECLARG(char const *, cmdname)
-OLDDECLARG(char const *, newprinc)
-OLDDECLARG(krb5_const_principal, principal)
-OLDDECLARG(const krb5_keyblock *, key)
-OLDDECLARG(const krb5_keyblock *, alt_key)
-OLDDECLARG(int, req_type)
-OLDDECLARG(struct saltblock *, salt)
-OLDDECLARG(struct saltblock *, altsalt)
-OLDDECLARG(krb5_db_entry *, entry)
-
+static krb5_error_code
+adm_modify_kdb(context, cmdname, newprinc, principal, key, alt_key, req_type,
+               salt, altsalt, entry)
+    krb5_context context;
+    char const * cmdname;
+    char const * newprinc;
+    krb5_const_principal principal;
+    const krb5_keyblock * key;
+    const krb5_keyblock * alt_key;
+    int req_type;
+    struct saltblock * salt;
+    struct saltblock * altsalt;
+    krb5_db_entry * entry;
 {
     krb5_error_code retval;
     int one = 1;
@@ -148,7 +132,7 @@ OLDDECLARG(krb5_db_entry *, entry)
 
     if (!req_type) { /* New entry - initialize */
 	memset((char *) entry, 0, sizeof(krb5_db_entry));
-	retval = krb5_copy_principal(principal, &entry->principal);
+	retval = krb5_copy_principal(context, principal, &entry->principal);
 	if (retval)
 		return retval;
         entry->kvno = KDB5_VERSION_NUM;
@@ -156,9 +140,9 @@ OLDDECLARG(krb5_db_entry *, entry)
         entry->max_renewable_life = master_entry.max_renewable_life;
         entry->mkvno = master_entry.mkvno;
         entry->expiration = master_entry.expiration;
-	retval = krb5_copy_principal(master_princ, &entry->mod_name);
+	retval = krb5_copy_principal(context, master_princ, &entry->mod_name);
 	if (retval) {
-	    krb5_free_principal(entry->principal);
+	    krb5_free_principal(context, entry->principal);
 	    entry->principal = 0;
 	    return retval;
 	}
@@ -167,13 +151,13 @@ OLDDECLARG(krb5_db_entry *, entry)
 #ifdef SANDIA
 	entry->attributes &= ~KRB5_KDB_REQUIRES_PWCHANGE;
 #endif
-	retval = krb5_copy_principal(principal, &entry->mod_name);
+	retval = krb5_copy_principal(context, principal, &entry->mod_name);
 	if (retval)
 		return retval;
     }
 
     if (key && key->length) {
-	retval = krb5_kdb_encrypt_key(&master_encblock,
+	retval = krb5_kdb_encrypt_key(context, &master_encblock,
 				      key,
 				      &entry->key);
 	if (retval) {
@@ -184,7 +168,7 @@ OLDDECLARG(krb5_db_entry *, entry)
     }
 
     if (alt_key && alt_key->length) {
-	retval = krb5_kdb_encrypt_key(&master_encblock,
+	retval = krb5_kdb_encrypt_key(context, &master_encblock,
 				      alt_key,
 				      &entry->alt_key);
 	if (retval) {
@@ -199,7 +183,7 @@ OLDDECLARG(krb5_db_entry *, entry)
 	}
     }
 
-    if (retval = krb5_timeofday(&entry->mod_date)) {
+    if (retval = krb5_timeofday(context, &entry->mod_date)) {
 	com_err("adm_modify_kdb", retval, "while fetching date");
 	if (entry->key.contents) {
 	    memset((char *) entry->key.contents, 0, entry->key.length);
@@ -252,7 +236,7 @@ OLDDECLARG(krb5_db_entry *, entry)
 	    entry->alt_salt = 0;
 	}
     } else {
-	if (retval = krb5_timeofday(&entry->last_pwd_change)) {
+	if (retval = krb5_timeofday(context, &entry->last_pwd_change)) {
 	    com_err("adm_modify_kdb", retval, "while fetching date");
 	    if (entry->key.contents) {
 		memset((char *) entry->key.contents, 0, entry->key.length);
@@ -269,7 +253,7 @@ OLDDECLARG(krb5_db_entry *, entry)
 	}
     }
 
-    retval = krb5_db_put_principal(entry, &one);
+    retval = krb5_db_put_principal(context, entry, &one);
 
     if (entry->key.contents) {
 	memset((char *) entry->key.contents, 0, entry->key.length);
@@ -295,22 +279,17 @@ OLDDECLARG(krb5_db_entry *, entry)
 }
 
 krb5_error_code
-adm_enter_pwd_key(DECLARG(char *, cmdname),
-	      DECLARG(char *, newprinc),
-	      DECLARG(krb5_const_principal, princ),
-	      DECLARG(krb5_const_principal, string_princ),
-	      DECLARG(int, req_type),
-	      DECLARG(int, salttype),
-	      DECLARG(char *, new_password),
-	      DECLARG(krb5_db_entry *, entry))
-OLDDECLARG(char *, cmdname)
-OLDDECLARG(char *, newprinc)
-OLDDECLARG(krb5_const_principal, princ)
-OLDDECLARG(krb5_const_principal, string_princ)
-OLDDECLARG(int, req_type)
-OLDDECLARG(int, salttype)
-OLDDECLARG(char *, new_password)
-OLDDECLARG(krb5_db_entry *, entry)
+adm_enter_pwd_key(context, cmdname, newprinc, princ, string_princ, req_type,
+	          salttype, new_password, entry)
+    krb5_context context;
+    char * cmdname;
+    char * newprinc;
+    krb5_const_principal princ;
+    krb5_const_principal string_princ;
+    int req_type;
+    int salttype;
+    char * new_password;
+    krb5_db_entry * entry;
 {
     krb5_error_code retval;
     krb5_keyblock tempkey;
@@ -329,7 +308,7 @@ OLDDECLARG(krb5_db_entry *, entry)
 
     switch (salttype) {
     case KRB5_KDB_SALTTYPE_NORMAL:
-	if (retval = krb5_principal2salt(string_princ, &salt.saltdata)) {
+	if (retval = krb5_principal2salt(context,string_princ,&salt.saltdata)) {
 	    com_err("adm_enter_pwd_key", retval,
 		    "while converting principal to salt for '%s'", newprinc);
 	    goto cleanup;
@@ -343,7 +322,8 @@ OLDDECLARG(krb5_db_entry *, entry)
     case KRB5_KDB_SALTTYPE_V4:
 	salt.saltdata.data = 0;
 	salt.saltdata.length = 0;
-        if (retval = krb5_principal2salt(string_princ, &altsalt.saltdata)) {
+        if (retval = krb5_principal2salt(context, string_princ, 
+					 &altsalt.saltdata)) {
             com_err("adm_enter_pwd_key", retval,
                     "while converting principal to altsalt for '%s'", newprinc);
 	    goto cleanup;
@@ -353,7 +333,7 @@ OLDDECLARG(krb5_db_entry *, entry)
 	break;
 
     case KRB5_KDB_SALTTYPE_NOREALM:
-	if (retval = krb5_principal2salt_norealm(string_princ,
+	if (retval = krb5_principal2salt_norealm(context, string_princ,
 						 &salt.saltdata)) {
 	    com_err("adm_enter_pwd_key", retval,
 		    "while converting principal to salt for '%s'", newprinc);
@@ -368,7 +348,8 @@ OLDDECLARG(krb5_db_entry *, entry)
     case KRB5_KDB_SALTTYPE_ONLYREALM:
     {
 	krb5_data *foo;
-	if (retval = krb5_copy_data(krb5_princ_realm(string_princ),
+	if (retval = krb5_copy_data(context, 
+				    krb5_princ_realm(context, string_princ),
 				    &foo)) {
 	    com_err("adm_enter_pwd_key", retval,
 		    "while converting principal to salt for '%s'", newprinc);
@@ -389,7 +370,7 @@ OLDDECLARG(krb5_db_entry *, entry)
 	goto cleanup;
     }
 
-    if (retval = krb5_string_to_key(&master_encblock, 
+    if (retval = krb5_string_to_key(context, &master_encblock, 
 				master_keyblock.keytype,
                                 &tempkey,
                                 &pwd,
@@ -399,7 +380,7 @@ OLDDECLARG(krb5_db_entry *, entry)
 	goto cleanup;
     }
 
-    if (retval = krb5_string_to_key(&master_encblock, 
+    if (retval = krb5_string_to_key(context, &master_encblock, 
 				master_keyblock.keytype,
                                 &alttempkey,
                                 &pwd,
@@ -411,7 +392,7 @@ OLDDECLARG(krb5_db_entry *, entry)
 
     memset((char *) new_password, 0, sizeof(new_password)); /* erase it */
 
-    retval = adm_modify_kdb("adm_enter_pwd_key", 
+    retval = adm_modify_kdb(context, "adm_enter_pwd_key", 
 			newprinc, 
 			princ, 
 			&tempkey,
@@ -439,10 +420,11 @@ cleanup:
 }
 
 krb5_error_code
-adm5_change(prog, newprinc, client_creds)
-char *prog;
-krb5_principal newprinc;
-krb5_ticket *client_creds;
+adm5_change(context, prog, newprinc, client_creds)
+    krb5_context context;
+    char *prog;
+    krb5_principal newprinc;
+    krb5_ticket *client_creds;
 {
     krb5_db_entry entry;
     int nprincs = 1;
@@ -451,26 +433,26 @@ krb5_ticket *client_creds;
     char *composite_name;
     char new_passwd[ADM_MAX_PW_LENGTH + 1];
 
-    if (!(adm_princ_exists("adm5_change", newprinc,
+    if (!(adm_princ_exists(context, "adm5_change", newprinc,
 		&entry, &nprincs))) {
 	com_err("adm5_change", 0, "No principal exists!");
-	krb5_free_principal(newprinc);
+	krb5_free_principal(context, newprinc);
 	return(1);
     }
 
     memset((char *) new_passwd, 0, ADM_MAX_PW_LENGTH + 1);
 
 		/* Negotiate for New Key */
-    if (retval = adm_negotiate_key("adm5_change", client_creds,
+    if (retval = adm_negotiate_key(context, "adm5_change", client_creds,
 				   new_passwd)) {
-	krb5_db_free_principal(&entry, nprincs);
-	krb5_free_principal(newprinc);
+	krb5_db_free_principal(context, &entry, nprincs);
+	krb5_free_principal(context, newprinc);
 	return(1);
     }
 
-    if (retval = krb5_unparse_name(newprinc, &composite_name)) {
-	krb5_free_principal(newprinc);
-	krb5_db_free_principal(&entry, nprincs);
+    if (retval = krb5_unparse_name(context, newprinc, &composite_name)) {
+	krb5_free_principal(context, newprinc);
+	krb5_db_free_principal(context, &entry, nprincs);
 	return retval;
     }
 
@@ -480,7 +462,7 @@ krb5_ticket *client_creds;
 	com_err("adm5_change", 0, "Converting v4user to v5user");
     }
  
-    retval = adm_enter_pwd_key("adm5_change",              
+    retval = adm_enter_pwd_key(context, "adm5_change",              
                                 composite_name,
                                 newprinc,
                                 newprinc,
@@ -489,8 +471,8 @@ krb5_ticket *client_creds;
                                 new_passwd,
 				&entry);
     (void) memset(new_passwd, 0, strlen(new_passwd));
-    krb5_free_principal(newprinc);
-    krb5_db_free_principal(&entry, nprincs);
+    krb5_free_principal(context, newprinc);
+    krb5_db_free_principal(context, &entry, nprincs);
     free(composite_name);
     return(retval);
 }
@@ -536,14 +518,12 @@ krb5_ticket *client_creds;
 #define MAXMSGSZ	255
 
 krb5_error_code
-adm_enter_rnd_pwd_key(DECLARG(char *, cmdname),
-		DECLARG(krb5_principal, change_princ),
-		DECLARG(int, req_type),
-		DECLARG(krb5_db_entry *, entry))
-OLDDECLARG(char *, cmdname)
-OLDDECLARG(krb5_principal, change_princ)
-OLDDECLARG(int, req_type)
-OLDDECLARG(krb5_db_entry *, entry)
+adm_enter_rnd_pwd_key(context, cmdname, change_princ, req_type, entry)
+    krb5_context context;
+    char * cmdname;
+    krb5_principal change_princ;
+    int req_type;
+    krb5_db_entry * entry;
 {
     krb5_error_code retval;
     krb5_keyblock *tempkey;
@@ -555,18 +535,18 @@ OLDDECLARG(krb5_db_entry *, entry)
     salt.salttype = salttype;
     entry->salt_type = salttype;
 
-    if (retval = krb5_init_random_key(&master_encblock,
+    if (retval = krb5_init_random_key(context, &master_encblock,
                                       &master_keyblock,
                                       &master_random)) {
         com_err("adm_enter_rnd_pwd_key", 0, "Unable to Initialize Random Key");
-        (void) krb5_finish_key(&master_encblock);
+        (void) krb5_finish_key(context, &master_encblock);
         memset((char *)master_keyblock.contents, 0, master_keyblock.length);
         krb5_xfree(master_keyblock.contents);
         goto finish;
     }
 
 	/* Get Random Key */
-    if (retval = krb5_random_key(&master_encblock, 
+    if (retval = krb5_random_key(context, &master_encblock, 
 				 master_random, 
 				 &tempkey)) {
         com_err("adm_enter_rnd_pwd_key", 0, "Unable to Obtain Random Key");
@@ -574,16 +554,16 @@ OLDDECLARG(krb5_db_entry *, entry)
     }
 
 	/* Tie the Random Key to the Principal */
-    if (retval = krb5_principal2salt(change_princ, &salt.saltdata)) {
+    if (retval = krb5_principal2salt(context, change_princ, &salt.saltdata)) {
         com_err("adm_enter_rnd_pwd_key", 0, "Principal2salt Failure");
         goto finish;
     }
 
-    if (retval = krb5_unparse_name(change_princ, &principal_name))
+    if (retval = krb5_unparse_name(context, change_princ, &principal_name))
 	goto finish;
     
 		/* Modify Database */
-    retval = adm_modify_kdb("adm_enter_rnd_pwd_key", 
+    retval = adm_modify_kdb(context, "adm_enter_rnd_pwd_key", 
 			    principal_name, 
 			    change_princ, 
 			    tempkey,
@@ -604,7 +584,7 @@ OLDDECLARG(krb5_db_entry *, entry)
 
     if (tempkey->contents) {
 	memset((char *) tempkey->contents, 0, tempkey->length);
-	krb5_free_keyblock(tempkey);
+	krb5_free_keyblock(context, tempkey);
     }
 
     return(retval);

@@ -535,6 +535,7 @@ char *host;
 #ifdef KRB5
     krb5_error_code retval;
     krb5_ccache ccdef;
+    krb5_context context;
     krb5_principal client, server;
     krb5_error *err_ret = NULL;
     char *hostname;
@@ -602,24 +603,26 @@ char *host;
     }
 #endif /* KRB4 */
 #ifdef KRB5
-    krb5_init_ets();
+    krb5_init_context(&context);
+    krb5_init_ets(context);
 
-    if (retval = krb5_cc_default(&ccdef)) {
+    if (retval = krb5_cc_default(context, &ccdef)) {
     krb5error:
 	sprintf(Errmsg, "krb5 error: %s", error_message(retval));
 	close(s);
 	return(NOTOK);
     }
-    if (retval = krb5_cc_get_principal(ccdef, &client)) {
+    if (retval = krb5_cc_get_principal(context, ccdef, &client)) {
 	goto krb5error;
     }
 
-    if (retval = krb5_sname_to_principal(hostname, POP_SNAME,
+    if (retval = krb5_sname_to_principal(context, hostname, POP_SNAME,
 					 KRB5_NT_SRV_HST, &server)) {
 	goto krb5error;
     }
 
-    retval = krb5_sendauth((krb5_pointer) &s, "KPOPV1.0", client, server,
+    retval = krb5_sendauth(context, (krb5_pointer) &s, "KPOPV1.0", 
+			   client, server,
 			   AP_OPTS_MUTUAL_REQUIRED,
 			   0,		/* no checksum */
 			   0,		/* no creds, use ccache instead */
@@ -628,14 +631,14 @@ char *host;
 			   0,		/* don't need a subsession key */
 			   &err_ret,
 			   0);		/* don't need reply */
-    krb5_free_principal(server);
+    krb5_free_principal(context, server);
     if (retval) {
 	if (err_ret && err_ret->text.length) {
 	    sprintf(Errmsg, "krb5 error: %s [server says '%*s'] ",
 		    error_message(retval),
 		    err_ret->text.length,
 		    err_ret->text.data);
-	    krb5_free_error(err_ret);
+	    krb5_free_error(context, err_ret);
 	} else
 	    sprintf(Errmsg, "krb5 error: %s", error_message(retval));
 	close(s);

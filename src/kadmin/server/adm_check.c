@@ -49,8 +49,8 @@
 
 krb5_error_code
 adm_check_acl(name_of_client, acl_type)
-char *name_of_client;
-char *acl_type;
+    char *name_of_client;
+    char *acl_type;
 {
     FILE *acl_file;
     char input_string[255];

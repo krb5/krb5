@@ -54,12 +54,14 @@ char *argv[];
   krb5_ccache cc;
   krb5_data msgtext, msg;
   krb5_int32 seqno;
+  krb5_context context;
 
 #ifndef DEBUG
   freopen("/tmp/uu-server.log", "w", stderr);
 #endif
 
-  krb5_init_ets();
+  krb5_init_context(&context);
+  krb5_init_ets(context);
 
 #ifdef DEBUG
     {
@@ -98,23 +100,23 @@ char *argv[];
 	sock = 0;
     }
 #endif
-  if (retval = krb5_read_message((krb5_pointer) &sock, &pname_data)) {
+  if (retval = krb5_read_message(context, (krb5_pointer) &sock, &pname_data)) {
       com_err ("uu-server", retval, "reading pname");
       return 2;
   }
-  if (retval = krb5_read_message((krb5_pointer) &sock, &tkt_data)) {
+  if (retval = krb5_read_message(context, (krb5_pointer) &sock, &tkt_data)) {
       com_err ("uu-server", retval, "reading ticket data");
       return 2;
   }
 
-  if (retval = krb5_cc_default(&cc))
+  if (retval = krb5_cc_default(context, &cc))
     {
       com_err("uu-server", retval, "getting credentials cache");
       return 4;
     }
 
   memset ((char*)&creds, 0, sizeof(creds));
-  if (retval = krb5_cc_get_principal(cc, &creds.client))
+  if (retval = krb5_cc_get_principal(context, cc, &creds.client))
     {
       com_err("uu-client", retval, "getting principal name");
       return 6;
@@ -123,7 +125,7 @@ char *argv[];
   /* client sends it already null-terminated. */
   printf ("uu-server: client principal is \"%s\".\n", pname_data.data);
 
-  if (retval = krb5_parse_name(pname_data.data, &creds.server))
+  if (retval = krb5_parse_name(context, pname_data.data, &creds.server))
     {
       com_err("uu-server", retval, "parsing client name");
       return 3;
@@ -132,7 +134,7 @@ char *argv[];
   printf ("uu-server: client ticket is %d bytes.\n",
 	  creds.second_ticket.length);
 
-  if (retval = krb5_get_credentials(KRB5_GC_USER_USER, cc, &creds))
+  if (retval = krb5_get_credentials(context, KRB5_GC_USER_USER, cc, &creds))
     {
       com_err("uu-server", retval, "getting user-user ticket");
       return 5;
@@ -164,12 +166,12 @@ char *argv[];
   /* send a ticket/authenticator to the other side, so it can get the key
      we're using for the krb_safe below. */
 
-  if (retval = krb5_generate_seq_number(&creds.keyblock, &seqno)) {
+  if (retval = krb5_generate_seq_number(context, &creds.keyblock, &seqno)) {
       com_err("uu-server", retval, "generating sequence number");
       return 8;
   }
 #if 1
-  if (retval = krb5_mk_req_extended(AP_OPTS_USE_SESSION_KEY,
+  if (retval = krb5_mk_req_extended(context, AP_OPTS_USE_SESSION_KEY,
 			       0,	/* no application checksum here */
 			       krb5_kdc_default_options,
 			       seqno,
@@ -181,9 +183,9 @@ char *argv[];
       com_err("uu-server", retval, "making AP_REQ");
       return 8;
   }
-  retval = krb5_write_message((krb5_pointer) &sock, &msg);
+  retval = krb5_write_message(context, (krb5_pointer) &sock, &msg);
 #else
-  retval = krb5_sendauth((krb5_pointer)&sock, "???", 0, 0,
+  retval = krb5_sendauth(context, (krb5_pointer)&sock, "???", 0, 0,
 			 AP_OPTS_MUTUAL_REQUIRED | AP_OPTS_USE_SESSION_KEY,
 			 0, /* no checksum*/
 			 &creds, cc,
@@ -198,15 +200,15 @@ char *argv[];
   msgtext.length = 32;
   msgtext.data = "Hello, other end of connection.";
 
-  if (retval = krb5_mk_safe(&msgtext, CKSUMTYPE_RSA_MD4_DES, &creds.keyblock,
-			    &laddr, &faddr, seqno,
+  if (retval = krb5_mk_safe(context, &msgtext, CKSUMTYPE_RSA_MD4_DES, 
+			    &creds.keyblock, &laddr, &faddr, seqno,
 			    KRB5_SAFE_NOTIME|KRB5_SAFE_DOSEQUENCE, 0, &msg))
     {
       com_err("uu-server", retval, "encoding message to client");
       return 6;
     }
 
-  retval = krb5_write_message((krb5_pointer) &sock, &msg);
+  retval = krb5_write_message(context, (krb5_pointer) &sock, &msg);
   if (retval)
     {
     cl_short_wrt:

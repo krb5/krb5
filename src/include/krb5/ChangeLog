@@ -1,3 +1,11 @@
+Fri Jan 13 15:23:47 1995  Chris Provenzano (proven@mit.edu)
+
+    * Added krb5_context to all krb5_routines
+
+	* Removed DECLARG and OLDDECLARG from base-defs.h (and any file that
+	  was using it.) The next thing to do is make all narrow types
+	  wide types and remove narrow.h and wide.h.
+
 Thu Jan 12 01:55:54 1995  Mark Eichin  <eichin@cygnus.com>
 
 	* Makefile.in (install): constructed headers come from the build

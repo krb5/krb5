@@ -43,9 +43,10 @@ void show_credential();
    with k5 beta 3 release.                                          
 */
 
-krb5_error_code krb5_ccache_copy (cc_def, cc_other_tag, primary_principal,
-				  cc_out, stored)
+krb5_error_code krb5_ccache_copy (context, cc_def, cc_other_tag, 
+				  primary_principal, cc_out, stored)
     /* IN */
+    krb5_context context;
     krb5_ccache cc_def;
     char *cc_other_tag;
     krb5_principal primary_principal;
@@ -64,34 +65,35 @@ struct stat st_temp;
 
     cc_other = (krb5_ccache *)  calloc(1, sizeof (krb5_ccache));  	
 
-    if( retval = krb5_cc_resolve(cc_other_tag, cc_other)){
+    if( retval = krb5_cc_resolve(context, cc_other_tag, cc_other)){
                com_err (prog_name, retval, "resolving ccache %s",
                         cc_other_tag);
 		return retval;
     }
 
-    cc_def_name = krb5_cc_get_name(cc_def);    
-    cc_other_name = krb5_cc_get_name(*cc_other);    
+    cc_def_name = krb5_cc_get_name(context, cc_def);    
+    cc_other_name = krb5_cc_get_name(context, *cc_other);    
 
     if ( ! stat(cc_def_name, &st_temp)){
-	if(retval = krb5_get_nonexp_tkts( cc_def, &cc_def_creds_arr)){
+	if(retval = krb5_get_nonexp_tkts(context,  cc_def, &cc_def_creds_arr)){
 		return retval;
 	}
     }
 
-    *stored = krb5_find_princ_in_cred_list(cc_def_creds_arr,primary_principal);
+    *stored = krb5_find_princ_in_cred_list(context, cc_def_creds_arr,
+					   primary_principal);
 
 
-    if (retval = krb5_cc_initialize(*cc_other, primary_principal)){
+    if (retval = krb5_cc_initialize(context, *cc_other, primary_principal)){
 	return retval; 
     }
 
-    retval = krb5_store_all_creds(* cc_other, 
-			cc_def_creds_arr, cc_other_creds_arr); 
+    retval = krb5_store_all_creds(context, * cc_other, cc_def_creds_arr, 
+				  cc_other_creds_arr); 
 
     if (cc_def_creds_arr){ 	
  	   while (cc_def_creds_arr[i]){
-    		krb5_free_creds(cc_def_creds_arr[i]);	
+    		krb5_free_creds(context, cc_def_creds_arr[i]);	
 		i++;
     	   }
     }	
@@ -100,7 +102,7 @@ struct stat st_temp;
 
     if(cc_other_creds_arr){	
     	while (cc_other_creds_arr[i]){
-    		krb5_free_creds(cc_other_creds_arr[i]);	
+    		krb5_free_creds(context, cc_other_creds_arr[i]);	
 		i++;
 	}
     }
@@ -110,8 +112,8 @@ struct stat st_temp;
 }
 
 
-
-krb5_error_code krb5_store_all_creds(cc, creds_def, creds_other)
+krb5_error_code krb5_store_all_creds(context, cc, creds_def, creds_other)
+    krb5_context context;
     krb5_ccache cc;
     krb5_creds **creds_def;
     krb5_creds **creds_other;
@@ -136,7 +138,8 @@ krb5_boolean cmp;
 
 	if (temp_creds){	
 		while(temp_creds[i]){ 
-			if (retval= krb5_cc_store_cred(cc, temp_creds[i])){
+			if (retval= krb5_cc_store_cred(context, cc, 
+						       temp_creds[i])){
 				return retval; 
 			}
 			i++;	
@@ -157,7 +160,7 @@ krb5_boolean cmp;
 			   j++; 	
 			}
 			if (cmp == FALSE){
-				if (retval= krb5_cc_store_cred(cc,
+				if (retval= krb5_cc_store_cred(context, cc,
 							 creds_other[i])){
 						return retval; 
 				}
@@ -167,7 +170,8 @@ krb5_boolean cmp;
 
 		i=0;	
 		while(creds_def[i]){ 
-			if (retval= krb5_cc_store_cred(cc, creds_def[i])){
+			if (retval= krb5_cc_store_cred(context, cc, 
+						       creds_def[i])){
 				return retval; 
 			}
 			i++;	
@@ -178,16 +182,17 @@ krb5_boolean cmp;
 	return 0;
 }
 
-krb5_boolean compare_creds(cred1, cred2)
+krb5_boolean compare_creds(context, cred1, cred2)
+    krb5_context context;
     krb5_creds *cred1;
     krb5_creds *cred2;
 {
 krb5_boolean retval; 
 
-	retval = krb5_principal_compare (cred1->client, cred2->client);
+	retval = krb5_principal_compare (context, cred1->client, cred2->client);
 
 	if (retval == TRUE) 
-		retval = krb5_principal_compare (cred1->server, cred2->server);
+		retval = krb5_principal_compare (context, cred1->server, 							 cred2->server);
 
 	return retval;
 }
@@ -195,7 +200,8 @@ krb5_boolean retval;
 
 
  
-krb5_error_code krb5_get_nonexp_tkts(cc, creds_array)
+krb5_error_code krb5_get_nonexp_tkts(context, cc, creds_array)
+    krb5_context context;
     krb5_ccache cc;
     krb5_creds ***creds_array;
 {
@@ -217,13 +223,13 @@ int chunk_count = 1;
    memset((char *) &creds, 0, sizeof(creds));
 
 	/* initialize the cursor */    	
-    if (retval = krb5_cc_start_seq_get(cc, &cur)) {
+    if (retval = krb5_cc_start_seq_get(context, cc, &cur)) {
 	return retval; 
     }
 
-    while (!(retval = krb5_cc_next_cred(cc, &cur, &creds))){
+    while (!(retval = krb5_cc_next_cred(context, cc, &cur, &creds))){
 
-	if(retval = krb5_check_exp(creds.times)){
+	if(retval = krb5_check_exp(context, creds.times)){
 		if (retval != KRB5KRB_AP_ERR_TKT_EXPIRED){ 
 			return retval;
 		} 
@@ -236,7 +242,8 @@ int chunk_count = 1;
 	}
 	else {   /* these credentials didn't expire */      
 	
-		if (retval = krb5_copy_creds(&creds,  &temp_creds[count])){
+		if (retval = krb5_copy_creds(context, &creds, 
+					     &temp_creds[count])){
 			return retval;				
 		}
 		count ++;
@@ -256,7 +263,7 @@ int chunk_count = 1;
     *creds_array   = temp_creds; 	
 
     if (retval == KRB5_CC_END) {
-		retval = krb5_cc_end_seq_get(cc, &cur);
+		retval = krb5_cc_end_seq_get(context, cc, &cur);
     }	
 
     return retval;	
@@ -266,13 +273,14 @@ int chunk_count = 1;
 
 extern krb5_deltat krb5_clockskew;
 
-krb5_error_code krb5_check_exp(tkt_time)
+krb5_error_code krb5_check_exp(context, tkt_time)
+    krb5_context context;
     krb5_ticket_times tkt_time;
 {
 krb5_error_code retval =0;
 krb5_timestamp currenttime;
 
-	if (retval = krb5_timeofday (&currenttime)){ 
+	if (retval = krb5_timeofday (context, &currenttime)){ 
 		return retval;		
 	}	
 	if (auth_debug){
@@ -432,7 +440,8 @@ krb5_get_login_princ(luser, princ_list)
 
 
 void
-show_credential(cred, cc)
+show_credential(context, cred, cc)
+    krb5_context context;
     krb5_creds *cred;
     krb5_ccache cc;
 {
@@ -443,23 +452,23 @@ show_credential(cred, cc)
     char * defname;	
     int show_flags =1;
 
-    retval = krb5_unparse_name(cred->client, &name);
+    retval = krb5_unparse_name(context, cred->client, &name);
     if (retval) {
 	com_err(prog_name, retval, "while unparsing client name");
 	return;
     }
-    retval = krb5_unparse_name(cred->server, &sname);
+    retval = krb5_unparse_name(context, cred->server, &sname);
     if (retval) {
 	com_err(prog_name, retval, "while unparsing server name");
 	free(name);
 	return;
     }
 
-    if (retval = krb5_cc_get_principal(cc, &princ)) {
+    if (retval = krb5_cc_get_principal(context, cc, &princ)) {
         com_err(prog_name, retval, "while retrieving principal name");
 	return;
     }
-    if (retval = krb5_unparse_name(princ, &defname)) {
+    if (retval = krb5_unparse_name(context, princ, &defname)) {
         com_err(prog_name, retval, "while unparsing principal name");
 	return;
     }	
@@ -509,7 +518,8 @@ int gen_sym(){
 	return i;
 }
 
-krb5_error_code krb5_ccache_overwrite(ccs, cct, primary_principal)
+krb5_error_code krb5_ccache_overwrite(context, ccs, cct, primary_principal)
+    krb5_context context;
     krb5_ccache ccs;
     krb5_ccache cct;
     krb5_principal primary_principal;
@@ -522,33 +532,32 @@ krb5_creds ** ccs_creds_arr = NULL;
 int i=0; 
 struct stat st_temp;
 
-    ccs_name = krb5_cc_get_name(ccs);    
-    cct_name = krb5_cc_get_name(cct);    
+    ccs_name = krb5_cc_get_name(context, ccs);    
+    cct_name = krb5_cc_get_name(context, cct);    
 
     if ( ! stat(ccs_name, &st_temp)){
-	if(retval = krb5_get_nonexp_tkts( ccs, &ccs_creds_arr)){
+	if(retval = krb5_get_nonexp_tkts(context,  ccs, &ccs_creds_arr)){
 		return retval;
 	}
     }	
 
     if ( ! stat(cct_name, &st_temp)){
-	if (retval = krb5_cc_get_principal(cct, &temp_principal)){ 
+	if (retval = krb5_cc_get_principal(context, cct, &temp_principal)){ 
 		return retval;
 	}
     }else{
 	temp_principal = primary_principal; 
     }
 
-    if (retval = krb5_cc_initialize(cct, temp_principal)){
+    if (retval = krb5_cc_initialize(context, cct, temp_principal)){
 	return retval; 
     }
 
-    retval = krb5_store_all_creds(cct, 
-			ccs_creds_arr, NULL); 
+    retval = krb5_store_all_creds(context, cct, ccs_creds_arr, NULL); 
 
     if (ccs_creds_arr){ 	
  	   while (ccs_creds_arr[i]){
-    		krb5_free_creds(ccs_creds_arr[i]);	
+    		krb5_free_creds(context, ccs_creds_arr[i]);	
 		i++;
     	   }
     }	
@@ -556,8 +565,9 @@ struct stat st_temp;
     return retval;	
 }
 
-krb5_error_code krb5_store_some_creds(cc, creds_def, creds_other, prst,
+krb5_error_code krb5_store_some_creds(context, cc, creds_def, creds_other, prst,
 				      stored)
+    krb5_context context;
     krb5_ccache cc;
     krb5_creds **creds_def;
     krb5_creds **creds_other;
@@ -583,10 +593,12 @@ krb5_boolean temp_stored = FALSE;
 
 	if (temp_creds){	
 		while(temp_creds[i]){ 
-			if (krb5_principal_compare( temp_creds[i]->client,
-								 prst)== TRUE){
+			if (krb5_principal_compare(context, 
+						   temp_creds[i]->client,
+						   prst)== TRUE) {
 
-				if(retval=krb5_cc_store_cred(cc,temp_creds[i])){
+				if (retval = krb5_cc_store_cred(context, 
+							cc,temp_creds[i])){
 					return retval; 
 				}
 				temp_stored = TRUE;
@@ -614,8 +626,9 @@ but I had to do it this way, since cc_remove function did not come
 with k5 beta 3 release.                                          
 ************************************************************************/
 
-krb5_error_code krb5_ccache_copy_restricted (cc_def, cc_other_tag, prst,
-					     cc_out, stored)
+krb5_error_code krb5_ccache_copy_restricted (context, cc_def, cc_other_tag, 
+					     prst, cc_out, stored)
+    krb5_context context;
     krb5_ccache cc_def;
     char *cc_other_tag;
     krb5_principal prst;
@@ -635,34 +648,34 @@ struct stat st_temp;
 
     cc_other = (krb5_ccache *)  calloc(1, sizeof (krb5_ccache));  	
 
-    if( retval = krb5_cc_resolve(cc_other_tag, cc_other)){
+    if( retval = krb5_cc_resolve(context, cc_other_tag, cc_other)){
                com_err (prog_name, retval, "resolving ccache %s",
                         cc_other_tag);
 		return retval;
     }
 
-    cc_def_name = krb5_cc_get_name(cc_def);    
-    cc_other_name = krb5_cc_get_name(*cc_other);    
+    cc_def_name = krb5_cc_get_name(context, cc_def);    
+    cc_other_name = krb5_cc_get_name(context, *cc_other);    
 
     if ( ! stat(cc_def_name, &st_temp)){
-	if(retval = krb5_get_nonexp_tkts( cc_def, &cc_def_creds_arr)){
+	if(retval = krb5_get_nonexp_tkts(context,  cc_def, &cc_def_creds_arr)){
 		return retval;
 	}
 
     }
 
-    if (retval = krb5_cc_initialize(*cc_other, prst)){
+    if (retval = krb5_cc_initialize(context, *cc_other, prst)){
 	return retval; 
     }
 
-    retval = krb5_store_some_creds(* cc_other, 
+    retval = krb5_store_some_creds(context, * cc_other, 
 			cc_def_creds_arr, cc_other_creds_arr, prst, stored); 
 
 
 
     if (cc_def_creds_arr){ 	
  	   while (cc_def_creds_arr[i]){
-    		krb5_free_creds(cc_def_creds_arr[i]);	
+    		krb5_free_creds(context, cc_def_creds_arr[i]);	
 		i++;
     	   }
     }	
@@ -671,7 +684,7 @@ struct stat st_temp;
 
     if(cc_other_creds_arr){	
     	while (cc_other_creds_arr[i]){
-    		krb5_free_creds(cc_other_creds_arr[i]);	
+    		krb5_free_creds(context, cc_other_creds_arr[i]);	
 		i++;
 	}
     }
@@ -687,7 +700,8 @@ not available with beta3 release.
 
 ************************************************************/
 
-krb5_error_code krb5_ccache_refresh (cc)
+krb5_error_code krb5_ccache_refresh (context, cc)
+    krb5_context context;
     krb5_ccache cc;
 {
 
@@ -698,7 +712,7 @@ krb5_creds ** cc_creds_arr = NULL;
 char * cc_name;
 struct stat st_temp;
 
-    cc_name = krb5_cc_get_name(cc);    
+    cc_name = krb5_cc_get_name(context, cc);    
 
     if ( ! stat(cc_name, &st_temp)){
 
@@ -706,26 +720,25 @@ struct stat st_temp;
 		fprintf(stderr,"Refreshing cache %s\n", cc_name);
 	}
 
-	if(retval = krb5_get_nonexp_tkts( cc, &cc_creds_arr)){
+	if(retval = krb5_get_nonexp_tkts(context,  cc, &cc_creds_arr)){
 		return retval;
 	}
 
-	if (retval = krb5_cc_get_principal(cc, &temp_principal)){ 
+	if (retval = krb5_cc_get_principal(context, cc, &temp_principal)){ 
 		return retval;
 	}
 
-    	if (retval = krb5_cc_initialize(cc, temp_principal)){
+    	if (retval = krb5_cc_initialize(context, cc, temp_principal)){
 		return retval; 
     	}
 
-	if (retval = krb5_store_all_creds(cc, 
-			cc_creds_arr, NULL)){ 
+	if (retval = krb5_store_all_creds(context, cc, cc_creds_arr, NULL)){ 
 		return retval; 
     	}
 
    	if (cc_creds_arr){ 	
  	  	 while (cc_creds_arr[i]){
-    			krb5_free_creds(cc_creds_arr[i]);	
+    			krb5_free_creds(context, cc_creds_arr[i]);	
 			i++;
     	   	}
     	}	
@@ -733,7 +746,8 @@ struct stat st_temp;
     return 0;	
 }
 
-krb5_error_code krb5_ccache_filter (cc, prst)
+krb5_error_code krb5_ccache_filter (context, cc, prst)
+    krb5_context context;
     krb5_ccache cc;
     krb5_principal prst;
 {
@@ -746,7 +760,7 @@ char * cc_name;
 krb5_boolean stored;
 struct stat st_temp;
 
-    cc_name = krb5_cc_get_name(cc);    
+    cc_name = krb5_cc_get_name(context, cc);    
 
     if ( ! stat(cc_name, &st_temp)){
 
@@ -754,25 +768,26 @@ struct stat st_temp;
 	      fprintf(stderr,"puting cache %s through a filter for -z option\n", 		      cc_name);
 	}
 
-	if(retval = krb5_get_nonexp_tkts( cc, &cc_creds_arr)){
+	if(retval = krb5_get_nonexp_tkts(context, cc, &cc_creds_arr)){
 		return retval;
 	}
 
-	if (retval = krb5_cc_get_principal(cc, &temp_principal)){ 
+	if (retval = krb5_cc_get_principal(context, cc, &temp_principal)){ 
 		return retval;
 	}
 
-    	if (retval = krb5_cc_initialize(cc, temp_principal)){
+    	if (retval = krb5_cc_initialize(context, cc, temp_principal)){
 		return retval; 
     	}
 
-	if (retval = krb5_store_some_creds(cc,cc_creds_arr,NULL,prst,&stored)){ 
+	if (retval = krb5_store_some_creds(context, cc, cc_creds_arr,
+					   NULL, prst, &stored)){ 
 		return retval; 
     	}
 
    	if (cc_creds_arr){ 	
  	  	 while (cc_creds_arr[i]){
-    			krb5_free_creds(cc_creds_arr[i]);	
+    			krb5_free_creds(context, cc_creds_arr[i]);	
 			i++;
     	   	}
     	}	
@@ -780,7 +795,8 @@ struct stat st_temp;
     return 0;	
 }
 
-krb5_boolean  krb5_find_princ_in_cred_list (creds_list, princ)
+krb5_boolean  krb5_find_princ_in_cred_list (context, creds_list, princ)
+    krb5_context context;
     krb5_creds **creds_list;
     krb5_principal princ;
 {
@@ -790,8 +806,9 @@ krb5_boolean temp_stored = FALSE;
 
 	if (creds_list){	
 		while(creds_list[i]){ 
-			if (krb5_principal_compare( creds_list[i]->client,
-								 princ)== TRUE){
+			if (krb5_principal_compare(context, 
+						   creds_list[i]->client,
+						   princ)== TRUE){
 				temp_stored = TRUE;
 				break;
 			}
@@ -803,7 +820,8 @@ krb5_boolean temp_stored = FALSE;
 return temp_stored;
 }
 
-krb5_error_code  krb5_find_princ_in_cache (cc, princ, found)
+krb5_error_code  krb5_find_princ_in_cache (context, cc, princ, found)
+    krb5_context context;
     krb5_ccache cc;
     krb5_principal princ;
     krb5_boolean *found;
@@ -813,14 +831,14 @@ krb5_creds ** creds_list = NULL;
 char * cc_name;
 struct stat st_temp;
 
-    cc_name = krb5_cc_get_name(cc);    
+    cc_name = krb5_cc_get_name(context, cc);    
 
     if ( ! stat(cc_name, &st_temp)){
-	if(retval = krb5_get_nonexp_tkts( cc, &creds_list)){
+	if(retval = krb5_get_nonexp_tkts(context, cc, &creds_list)){
 		return retval;
 	}
     }
 
-    *found = krb5_find_princ_in_cred_list(creds_list, princ); 
+    *found = krb5_find_princ_in_cred_list(context, creds_list, princ); 
 return 0;
 }

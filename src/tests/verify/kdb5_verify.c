@@ -56,7 +56,7 @@ struct mblock {
     0
 };
 
-int set_dbname_help PROTOTYPE((char *, char *));
+int set_dbname_help PROTOTYPE((krb5_context, char *, char *));
 
 static void
 usage(who, status)
@@ -86,9 +86,10 @@ static krb5_boolean manual_mkey = FALSE;
 static krb5_boolean dbactive = FALSE;
 
 void
-quit()
+quit(context)
+    krb5_context context;
 {
-    krb5_error_code retval = krb5_db_fini();
+    krb5_error_code retval = krb5_db_fini(context);
     memset((char *)master_keyblock.contents, 0, master_keyblock.length);
     if (retval) {
 	com_err(progname, retval, "while closing database");
@@ -97,7 +98,7 @@ quit()
     exit(0);
 }
 
-int check_princ PROTOTYPE((char *));
+int check_princ PROTOTYPE((krb5_context, char *));
 
 void
 main(argc, argv)
@@ -108,6 +109,7 @@ char *argv[];
     int optchar, i, n;
     char tmp[4096], tmp2[BUFSIZ], *str_princ;
 
+    krb5_context context;
     krb5_error_code retval;
     char *dbname = 0;
     int keytypedone = 0;
@@ -118,7 +120,8 @@ char *argv[];
     char *suffix = 0;
     int depth, errors;
 
-    krb5_init_ets();
+    krb5_init_context(&context);
+    krb5_init_ets(context);
 
     if (strrchr(argv[0], '/'))
 	argv[0] = strrchr(argv[0], '/')+1;
@@ -189,19 +192,19 @@ char *argv[];
 		"while setting up etype %d", etype);
 	exit(1);
     }
-    krb5_use_cstype(&master_encblock, etype);
+    krb5_use_cstype(context, &master_encblock, etype);
     csentry = master_encblock.crypto_entry;
 
     if (!dbname)
 	dbname = DEFAULT_KDB_FILE;	/* XXX? */
 
     if (!cur_realm) {
-	if (retval = krb5_get_default_realm(&cur_realm)) {
+	if (retval = krb5_get_default_realm(context, &cur_realm)) {
 	    com_err(progname, retval, "while retrieving default realm name");
 	    exit(1);
 	}	    
     }
-    if (retval = set_dbname_help(progname, dbname))
+    if (retval = set_dbname_help(context, progname, dbname))
 	exit(retval);
 
     errors = 0;
@@ -215,14 +218,14 @@ char *argv[];
       (void) sprintf(suffix, "%d", n);
       (void) sprintf(tmp, "%s-DEPTH-1", principal_string);
       str_princ = tmp;
-      if (check_princ(str_princ)) errors++;
+      if (check_princ(context, str_princ)) errors++;
 
       for (i = 2; i <= depth; i++) {
 	tmp2[0] = '\0';
 	(void) sprintf(tmp2, "/%s-DEPTH-%d", principal_string, i);
 	strcat(tmp, tmp2);
 	str_princ = tmp;
-	if (check_princ(str_princ)) errors++;
+	if (check_princ(context, str_princ)) errors++;
       }
     }
 
@@ -233,7 +236,7 @@ char *argv[];
 
     (void) (*csentry->finish_key)(&master_encblock);
     (void) (*csentry->finish_random_key)(&master_random);
-    retval = krb5_db_fini();
+    retval = krb5_db_fini(context);
     memset((char *)master_keyblock.contents, 0, master_keyblock.length);
     if (retval && retval != KRB5_KDB_DBNOTINITED) {
 	com_err(progname, retval, "while closing database");
@@ -243,8 +246,9 @@ char *argv[];
 }
 
 int
-check_princ(DECLARG(char *, str_princ))
-OLDDECLARG(char *, str_princ)
+check_princ(context, str_princ)
+    krb5_context context;
+    char * str_princ;
 {
     krb5_error_code retval;
     krb5_db_entry kdbe;
@@ -260,7 +264,7 @@ OLDDECLARG(char *, str_princ)
 
     fprintf(stderr, "\t%s ...\n", princ_name);
 
-    if (retval = krb5_parse_name(princ_name, &princ)) {
+    if (retval = krb5_parse_name(context, princ_name, &princ)) {
       com_err(progname, retval, "while parsing '%s'", princ_name);
       goto out;
     }
@@ -268,12 +272,12 @@ OLDDECLARG(char *, str_princ)
     pwd.data = princ_name;  /* must be able to regenerate */
     pwd.length = strlen(princ_name);
 
-    if (retval = krb5_principal2salt(princ, &salt)) {
+    if (retval = krb5_principal2salt(context, princ, &salt)) {
 	com_err(progname, retval, "while converting principal to salt for '%s'", princ_name);
 	goto out;
     }
 
-    retval = krb5_string_to_key(&master_encblock, master_keyblock.keytype,
+    retval = krb5_string_to_key(context, &master_encblock, master_keyblock.keytype,
 				&pwd_key,
 				&pwd,
 				&salt);
@@ -282,7 +286,7 @@ OLDDECLARG(char *, str_princ)
 	goto out;
     }
 
-    if (retval = krb5_db_get_principal(princ, &kdbe, &nprincs, &more)) {
+    if (retval = krb5_db_get_principal(context,princ, &kdbe, &nprincs, &more)) {
       com_err(progname, retval, "while attempting to verify principal's existence");
       goto out;
     }
@@ -293,7 +297,7 @@ OLDDECLARG(char *, str_princ)
       goto errout;
     }
 
-    retval = krb5_kdb_decrypt_key(&master_encblock,
+    retval = krb5_kdb_decrypt_key(context, &master_encblock,
 				  &kdbe.key,
 				  &db_key);
     if (retval) {
@@ -306,7 +310,7 @@ OLDDECLARG(char *, str_princ)
       fprintf (stderr, "\tKey types do not agree (%d expected, %d from db)\n",
 	       pwd_key.keytype, db_key.keytype);
 errout:
-      krb5_db_free_principal(&kdbe, nprincs);
+      krb5_db_free_principal(context, &kdbe, nprincs);
       return(-1);
     }
     else {
@@ -350,7 +354,7 @@ errout:
       goto errout;
     }
 
-    if (retval = krb5_unparse_name(kdbe.mod_name, &str_mod_name))
+    if (retval = krb5_unparse_name(context, kdbe.mod_name, &str_mod_name))
       com_err(progname, retval, "while unparsing mode name");
     else {
       if (strcmp(str_mod_name, str_master_princ) != 0) {
@@ -369,15 +373,16 @@ errout:
     }
 
     out:
-    krb5_db_free_principal(&kdbe, nprincs);
+    krb5_db_free_principal(context, &kdbe, nprincs);
 
     return(0);
 }
 
 int
-set_dbname_help(pname, dbname)
-char *pname;
-char *dbname;
+set_dbname_help(context, pname, dbname)
+    krb5_context context;
+    char *pname;
+    char *dbname;
 {
     krb5_error_code retval;
     int nentries;
@@ -387,14 +392,14 @@ char *dbname;
 
     csentry = master_encblock.crypto_entry;
 
-    if (retval = krb5_db_set_name(dbname)) {
+    if (retval = krb5_db_set_name(context, dbname)) {
 	com_err(pname, retval, "while setting active database to '%s'",
 		dbname);
 	return(1);
     }
     /* assemble & parse the master key name */
 
-    if (retval = krb5_db_setup_mkey_name(mkey_name, cur_realm, 0,
+    if (retval = krb5_db_setup_mkey_name(context, mkey_name, cur_realm, 0,
 					 &master_princ)) {
 	com_err(pname, retval, "while setting up master key name");
 	return(1);
@@ -402,13 +407,14 @@ char *dbname;
     if (mkey_password) {
 	pwd.data = mkey_password;
 	pwd.length = strlen(mkey_password);
-	retval = krb5_principal2salt(master_princ, &scratch);
+	retval = krb5_principal2salt(context, master_princ, &scratch);
 	if (retval) {
 	    com_err(pname, retval, "while calculated master key salt");
 	    return(1);
 	}
-	retval = krb5_string_to_key(&master_encblock, master_keyblock.keytype,
-				    &master_keyblock, &pwd, &scratch);
+	retval = krb5_string_to_key(context, &master_encblock, 
+				    master_keyblock.keytype, &master_keyblock,
+				    &pwd, &scratch);
 	if (retval) {
 	    com_err(pname, retval,
 		    "while transforming master key from password");
@@ -416,57 +422,57 @@ char *dbname;
 	}
 	free(scratch.data);
     } else {
-	if (retval = krb5_db_fetch_mkey(master_princ, &master_encblock,
+	if (retval = krb5_db_fetch_mkey(context, master_princ, &master_encblock,
 					manual_mkey, FALSE, 0,
 					&master_keyblock)) {
 	    com_err(pname, retval, "while reading master key");
 	    return(1);
 	}
     }
-    if (retval = krb5_db_init()) {
+    if (retval = krb5_db_init(context )) {
 	com_err(pname, retval, "while initializing database");
 	return(1);
     }
-    if (retval = krb5_db_verify_master_key(master_princ, &master_keyblock,
-					   &master_encblock)) {
+    if (retval = krb5_db_verify_master_key(context, master_princ, 
+					   &master_keyblock,&master_encblock)) {
 	com_err(pname, retval, "while verifying master key");
-	(void) krb5_db_fini();
+	(void) krb5_db_fini(context);
 	return(1);
     }
     nentries = 1;
-    if (retval = krb5_db_get_principal(master_princ, &master_entry, &nentries,
-				       &more)) {
+    if (retval = krb5_db_get_principal(context, master_princ, &master_entry, 
+				       &nentries, &more)) {
 	com_err(pname, retval, "while retrieving master entry");
-	(void) krb5_db_fini();
+	(void) krb5_db_fini(context);
 	return(1);
     } else if (more) {
 	com_err(pname, KRB5KDC_ERR_PRINCIPAL_NOT_UNIQUE,
 		"while retrieving master entry");
-	(void) krb5_db_fini();
+	(void) krb5_db_fini(context);
 	return(1);
     } else if (!nentries) {
 	com_err(pname, KRB5_KDB_NOENTRY, "while retrieving master entry");
-	(void) krb5_db_fini();
+	(void) krb5_db_fini(context);
 	return(1);
     }
 
-    if (retval = krb5_unparse_name(master_princ, &str_master_princ)) {
+    if (retval = krb5_unparse_name(context, master_princ, &str_master_princ)) {
       com_err(pname, retval, "while unparsing master principal");
-      krb5_db_fini();
+      krb5_db_fini(context);
       return(1);
     }
 
     if (retval = (*csentry->process_key)(&master_encblock,
 					 &master_keyblock)) {
 	com_err(pname, retval, "while processing master key");
-	(void) krb5_db_fini();
+	(void) krb5_db_fini(context);
 	return(1);
     }
     if (retval = (*csentry->init_random_key)(&master_keyblock,
 					     &master_random)) {
 	com_err(pname, retval, "while initializing random key generator");
 	(void) (*csentry->finish_key)(&master_encblock);
-	(void) krb5_db_fini();
+	(void) krb5_db_fini(context);
 	return(1);
     }
     mblock.max_life = master_entry.max_life;
@@ -475,7 +481,7 @@ char *dbname;
     /* don't set flags, master has some extra restrictions */
     mblock.mkvno = master_entry.kvno;
 
-    krb5_db_free_principal(&master_entry, nentries);
+    krb5_db_free_principal(context, &master_entry, nentries);
     dbactive = TRUE;
     return 0;
 }

@@ -51,6 +51,7 @@ char *argv[];
     struct hostent *hp;
     struct sockaddr_in sin, lsin;
     int sock, namelen;
+    krb5_context context;
     krb5_data recv_data;
     krb5_checksum send_cksum;
     krb5_error_code retval;
@@ -65,7 +66,8 @@ char *argv[];
 	exit(1);
     }
 
-    krb5_init_ets();
+    krb5_init_context(& context);
+    krb5_init_ets(context);
 
     (void) signal(SIGPIPE, SIG_IGN);
     if (!valid_cksumtype(CKSUMTYPE_CRC32)) {
@@ -100,7 +102,7 @@ char *argv[];
 	exit(1);
     }
 
-    if (retval = krb5_sname_to_principal(argv[1], SAMPLE_SERVICE,
+    if (retval = krb5_sname_to_principal(context, argv[1], SAMPLE_SERVICE,
 					 KRB5_NT_SRV_HST, &server)) {
 	com_err(argv[0], retval, "while creating server name for %s",
 		argv[1]);
@@ -137,12 +139,12 @@ char *argv[];
 
     /* compute checksum, using CRC-32 */
     if (!(send_cksum.contents = (krb5_octet *)
-	  malloc(krb5_checksum_size(CKSUMTYPE_CRC32)))) {
+	  malloc(krb5_checksum_size(context, CKSUMTYPE_CRC32)))) {
 	com_err(argv[0], ENOMEM, "while allocating checksum");
 	exit(1);
     }
     /* choose some random stuff to compute checksum from */
-    if (retval = krb5_calculate_checksum(CKSUMTYPE_CRC32,
+    if (retval = krb5_calculate_checksum(context, CKSUMTYPE_CRC32,
 					 argv[1],
 					 strlen(argv[1]),
 					 0,
@@ -153,16 +155,16 @@ char *argv[];
 	exit(1);
     }
 
-    if (retval = krb5_cc_default(&ccdef)) {
+    if (retval = krb5_cc_default(context, &ccdef)) {
 	com_err(argv[0], retval, "while getting default ccache");
 	exit(1);
     }
 
-    if (retval = krb5_cc_get_principal(ccdef, &client)) {
+    if (retval = krb5_cc_get_principal(context, ccdef, &client)) {
 	com_err(argv[0], retval, "while getting client principal name");
 	exit(1);
     }
-    retval = krb5_sendauth((krb5_pointer) &sock,
+    retval = krb5_sendauth(context, (krb5_pointer) &sock,
 			   SAMPLE_VERSION, client, server,
 			   AP_OPTS_MUTUAL_REQUIRED,
 			   &send_cksum,
@@ -173,7 +175,7 @@ char *argv[];
 			   &err_ret,
 			   &rep_ret);
 
-    krb5_free_principal(server);	/* finished using it */
+    krb5_free_principal(context, server);	/* finished using it */
 
     if (retval && retval != KRB5_SENDAUTH_REJECTED) {
 	com_err(argv[0], retval, "while using sendauth");
@@ -186,7 +188,7 @@ char *argv[];
     } else if (rep_ret) {
 	/* got a reply */
 	printf("sendauth succeeded, reply is:\n");
-	if ((retval = krb5_net_read(sock, (char *)&xmitlen,
+	if ((retval = krb5_net_read(context, sock, (char *)&xmitlen,
 				    sizeof(xmitlen))) <= 0) {
 	    if (retval == 0)
 		errno = ECONNABORTED;
@@ -199,7 +201,7 @@ char *argv[];
 		    "while allocating buffer to read from server");
 	    exit(1);
 	}
-	if ((retval = krb5_net_read(sock, (char *)recv_data.data,
+	if ((retval = krb5_net_read(context, sock, (char *)recv_data.data,
 				    recv_data.length)) <= 0) {
 	    if (retval == 0)
 		errno = ECONNABORTED;

@@ -2,8 +2,8 @@
 #include "utility.h"
 #include <stdlib.h>
 
-krb5_error_code ktest_make_sample_authenticator(DECLARG(krb5_authenticator *, a))
-     OLDDECLARG(krb5_authenticator *, a)
+krb5_error_code ktest_make_sample_authenticator(a)
+     krb5_authenticator * a;
 {
   krb5_error_code retval;
 
@@ -26,8 +26,8 @@ krb5_error_code ktest_make_sample_authenticator(DECLARG(krb5_authenticator *, a)
   return 0;
 }
 
-krb5_error_code ktest_make_sample_principal(DECLARG(krb5_principal *, p))
-     OLDDECLARG(krb5_principal *, p)
+krb5_error_code ktest_make_sample_principal(p)
+     krb5_principal * p;
 {
   krb5_error_code retval;
 
@@ -49,8 +49,8 @@ krb5_error_code ktest_make_sample_principal(DECLARG(krb5_principal *, p))
   return 0;
 }
 
-krb5_error_code ktest_make_sample_checksum(DECLARG(krb5_checksum *, cs))
-     OLDDECLARG(krb5_checksum *, cs)
+krb5_error_code ktest_make_sample_checksum(cs)
+     krb5_checksum * cs;
 {
   cs->checksum_type = 1;
   cs->length = 4;
@@ -61,8 +61,8 @@ krb5_error_code ktest_make_sample_checksum(DECLARG(krb5_checksum *, cs))
   return 0;
 }
 
-krb5_error_code ktest_make_sample_keyblock(DECLARG(krb5_keyblock *, kb))
-     OLDDECLARG(krb5_keyblock *, kb)
+krb5_error_code ktest_make_sample_keyblock(kb)
+     krb5_keyblock * kb;
 {
   kb->magic = KV5M_KEYBLOCK;
   kb->etype = ETYPE_UNKNOWN;
@@ -75,8 +75,8 @@ krb5_error_code ktest_make_sample_keyblock(DECLARG(krb5_keyblock *, kb))
   return 0;
 }
 
-krb5_error_code ktest_make_sample_ticket(DECLARG(krb5_ticket *, tkt))
-     OLDDECLARG(krb5_ticket *, tkt)
+krb5_error_code ktest_make_sample_ticket(tkt)
+     krb5_ticket * tkt;
 {
   krb5_error_code retval;
 
@@ -88,8 +88,8 @@ krb5_error_code ktest_make_sample_ticket(DECLARG(krb5_ticket *, tkt))
   return 0;
 }
 
-krb5_error_code ktest_make_sample_enc_data(DECLARG(krb5_enc_data *, ed))
-     OLDDECLARG(krb5_enc_data *, ed)
+krb5_error_code ktest_make_sample_enc_data(ed)
+     krb5_enc_data * ed;
 {
   krb5_error_code retval;
 
@@ -101,8 +101,8 @@ krb5_error_code ktest_make_sample_enc_data(DECLARG(krb5_enc_data *, ed))
   return 0;
 }
 
-krb5_error_code ktest_make_sample_enc_tkt_part(DECLARG(krb5_enc_tkt_part *, etp))
-     OLDDECLARG(krb5_enc_tkt_part *, etp)
+krb5_error_code ktest_make_sample_enc_tkt_part(etp)
+     krb5_enc_tkt_part * etp;
 {
   krb5_error_code retval;
 
@@ -124,8 +124,8 @@ krb5_error_code ktest_make_sample_enc_tkt_part(DECLARG(krb5_enc_tkt_part *, etp)
   return 0;
 }
 
-krb5_error_code ktest_make_sample_addresses(DECLARG(krb5_address ***, caddrs))
-     OLDDECLARG(krb5_address ***, caddrs)
+krb5_error_code ktest_make_sample_addresses(caddrs)
+     krb5_address *** caddrs;
 {
   asn1_error_code retval;
   int i;
@@ -142,8 +142,8 @@ krb5_error_code ktest_make_sample_addresses(DECLARG(krb5_address ***, caddrs))
   return 0;
 }
 
-krb5_error_code ktest_make_sample_authorization_data(DECLARG(krb5_authdata ***, ad))
-     OLDDECLARG(krb5_authdata ***, ad)
+krb5_error_code ktest_make_sample_authorization_data(ad)
+     krb5_authdata *** ad;
 {
   krb5_error_code retval;
   int i;
@@ -162,16 +162,16 @@ krb5_error_code ktest_make_sample_authorization_data(DECLARG(krb5_authdata ***, 
   return 0;
 }
 
-krb5_error_code ktest_make_sample_transited(DECLARG(krb5_transited *, t))
-     OLDDECLARG(krb5_transited *, t)
+krb5_error_code ktest_make_sample_transited(t)
+     krb5_transited * t;
 {
   t->tr_type = 1;
   return krb5_data_parse(&(t->tr_contents),
 			 "EDU,MIT.,ATHENA.,WASHINGTON.EDU,CS.");
 }
 
-krb5_error_code ktest_make_sample_ticket_times(DECLARG(krb5_ticket_times *, tt))
-     OLDDECLARG(krb5_ticket_times *, tt)
+krb5_error_code ktest_make_sample_ticket_times(tt)
+     krb5_ticket_times * tt;
 {
   tt->authtime = SAMPLE_TIME;
   tt->starttime = SAMPLE_TIME;
@@ -180,8 +180,8 @@ krb5_error_code ktest_make_sample_ticket_times(DECLARG(krb5_ticket_times *, tt))
   return 0;
 }
 
-krb5_error_code ktest_make_sample_address(DECLARG(krb5_address *, a))
-     OLDDECLARG(krb5_address *, a)
+krb5_error_code ktest_make_sample_address(a)
+     krb5_address * a;
 {
   a->addrtype = ADDRTYPE_INET;
   a->length = 4;
@@ -195,8 +195,8 @@ krb5_error_code ktest_make_sample_address(DECLARG(krb5_address *, a))
   return 0;
 }
 
-krb5_error_code ktest_make_sample_authdata(DECLARG(krb5_authdata *, ad))
-     OLDDECLARG(krb5_authdata *, ad)
+krb5_error_code ktest_make_sample_authdata(ad)
+     krb5_authdata * ad;
 {
   ad->ad_type = 1;
   ad->length = 6;
@@ -206,8 +206,8 @@ krb5_error_code ktest_make_sample_authdata(DECLARG(krb5_authdata *, ad))
   return 0;
 }
 
-krb5_error_code ktest_make_sample_enc_kdc_rep_part(DECLARG(krb5_enc_kdc_rep_part *, ekr))
-     OLDDECLARG(krb5_enc_kdc_rep_part *, ekr)
+krb5_error_code ktest_make_sample_enc_kdc_rep_part(ekr)
+     krb5_enc_kdc_rep_part * ekr;
 {
   krb5_error_code retval;
 
@@ -232,8 +232,8 @@ krb5_error_code ktest_make_sample_enc_kdc_rep_part(DECLARG(krb5_enc_kdc_rep_part
   return 0;
 }
 
-krb5_error_code ktest_make_sample_last_req(DECLARG(krb5_last_req_entry ***, lr))
-     OLDDECLARG(krb5_last_req_entry ***, lr)
+krb5_error_code ktest_make_sample_last_req(lr)
+     krb5_last_req_entry *** lr;
 {
   krb5_error_code retval;
   int i;
@@ -250,8 +250,8 @@ krb5_error_code ktest_make_sample_last_req(DECLARG(krb5_last_req_entry ***, lr))
   return 0;
 }
 
-krb5_error_code ktest_make_sample_last_req_entry(DECLARG(krb5_last_req_entry **, lre))
-     OLDDECLARG(krb5_last_req_entry **, lre)
+krb5_error_code ktest_make_sample_last_req_entry(lre)
+     krb5_last_req_entry ** lre;
 {
   *lre = (krb5_last_req_entry*)calloc(1,sizeof(krb5_last_req_entry));
   if(*lre == NULL) return ENOMEM;
@@ -260,8 +260,8 @@ krb5_error_code ktest_make_sample_last_req_entry(DECLARG(krb5_last_req_entry **,
   return 0;
 }
 
-krb5_error_code ktest_make_sample_kdc_rep(DECLARG(krb5_kdc_rep *, kdcr))
-     OLDDECLARG(krb5_kdc_rep *, kdcr)
+krb5_error_code ktest_make_sample_kdc_rep(kdcr)
+     krb5_kdc_rep * kdcr;
 {
   krb5_error_code retval;
 
@@ -280,8 +280,8 @@ krb5_error_code ktest_make_sample_kdc_rep(DECLARG(krb5_kdc_rep *, kdcr))
   return 0;
 }
 
-krb5_error_code ktest_make_sample_pa_data_array(DECLARG(krb5_pa_data ***, pad))
-     OLDDECLARG(krb5_pa_data ***, pad)
+krb5_error_code ktest_make_sample_pa_data_array(pad)
+     krb5_pa_data *** pad;
 {
   krb5_error_code retval;
   int i;
@@ -300,8 +300,8 @@ krb5_error_code ktest_make_sample_pa_data_array(DECLARG(krb5_pa_data ***, pad))
   return 0;
 }
 
-krb5_error_code ktest_make_sample_pa_data(DECLARG(krb5_pa_data *, pad))
-     OLDDECLARG(krb5_pa_data *, pad)
+krb5_error_code ktest_make_sample_pa_data(pad)
+     krb5_pa_data * pad;
 {
   pad->pa_type = 13;
   pad->length = 7;
@@ -311,8 +311,8 @@ krb5_error_code ktest_make_sample_pa_data(DECLARG(krb5_pa_data *, pad))
   return 0;
 }
 
-krb5_error_code ktest_make_sample_ap_req(DECLARG(krb5_ap_req *, ar))
-     OLDDECLARG(krb5_ap_req *, ar)
+krb5_error_code ktest_make_sample_ap_req(ar)
+     krb5_ap_req * ar;
 {
   krb5_error_code retval;
   ar->ap_options = SAMPLE_FLAGS;
@@ -325,14 +325,14 @@ krb5_error_code ktest_make_sample_ap_req(DECLARG(krb5_ap_req *, ar))
   return 0;
 }
 
-krb5_error_code ktest_make_sample_ap_rep(DECLARG(krb5_ap_rep *, ar))
-     OLDDECLARG(krb5_ap_rep *, ar)
+krb5_error_code ktest_make_sample_ap_rep(ar)
+     krb5_ap_rep * ar;
 {
   return ktest_make_sample_enc_data(&(ar->enc_part));
 }
 
-krb5_error_code ktest_make_sample_ap_rep_enc_part(DECLARG(krb5_ap_rep_enc_part *, arep))
-     OLDDECLARG(krb5_ap_rep_enc_part *, arep)
+krb5_error_code ktest_make_sample_ap_rep_enc_part(arep)
+     krb5_ap_rep_enc_part * arep;
 {
   krb5_error_code retval;
 
@@ -347,8 +347,8 @@ krb5_error_code ktest_make_sample_ap_rep_enc_part(DECLARG(krb5_ap_rep_enc_part *
   return 0;
 }
 
-krb5_error_code ktest_make_sample_kdc_req(DECLARG(krb5_kdc_req *, kr))
-     OLDDECLARG(krb5_kdc_req *, kr)
+krb5_error_code ktest_make_sample_kdc_req(kr)
+     krb5_kdc_req * kr;
 {
   krb5_error_code retval;
 
@@ -379,8 +379,8 @@ krb5_error_code ktest_make_sample_kdc_req(DECLARG(krb5_kdc_req *, kr))
   return 0;
 }
 
-krb5_error_code ktest_make_sample_kdc_req_body(DECLARG(krb5_kdc_req *, krb))
-     OLDDECLARG(krb5_kdc_req *, krb)
+krb5_error_code ktest_make_sample_kdc_req_body(krb)
+     krb5_kdc_req * krb;
 {
   krb5_error_code retval;
 
@@ -408,8 +408,8 @@ krb5_error_code ktest_make_sample_kdc_req_body(DECLARG(krb5_kdc_req *, krb))
   return 0;
 }
   
-krb5_error_code ktest_make_sample_safe(DECLARG(krb5_safe *, s))
-     OLDDECLARG(krb5_safe *, s)
+krb5_error_code ktest_make_sample_safe(s)
+     krb5_safe * s;
 {
   krb5_error_code retval;
 
@@ -434,14 +434,14 @@ krb5_error_code ktest_make_sample_safe(DECLARG(krb5_safe *, s))
   return 0;
 }
 
-krb5_error_code ktest_make_sample_priv(DECLARG(krb5_priv *, p))
-     OLDDECLARG(krb5_priv *, p)
+krb5_error_code ktest_make_sample_priv(p)
+     krb5_priv * p;
 {
   return ktest_make_sample_enc_data(&(p->enc_part));
 }
 
-krb5_error_code ktest_make_sample_priv_enc_part(DECLARG(krb5_priv_enc_part *, pep))
-     OLDDECLARG(krb5_priv_enc_part *, pep)
+krb5_error_code ktest_make_sample_priv_enc_part(pep)
+     krb5_priv_enc_part * pep;
 {
   krb5_error_code retval;
   retval = ktest_make_sample_data(&(pep->user_data));
@@ -460,8 +460,8 @@ krb5_error_code ktest_make_sample_priv_enc_part(DECLARG(krb5_priv_enc_part *, pe
   return 0;
 }
 
-krb5_error_code ktest_make_sample_cred(DECLARG(krb5_cred *, c))
-     OLDDECLARG(krb5_cred *, c)
+krb5_error_code ktest_make_sample_cred(c)
+     krb5_cred * c;
 {
   krb5_error_code retval;
   retval = ktest_make_sample_sequence_of_ticket(&(c->tickets));
@@ -471,8 +471,8 @@ krb5_error_code ktest_make_sample_cred(DECLARG(krb5_cred *, c))
   return 0;
 }
 
-krb5_error_code ktest_make_sample_sequence_of_ticket(DECLARG(krb5_ticket ***, sot))
-     OLDDECLARG(krb5_ticket ***, sot)
+krb5_error_code ktest_make_sample_sequence_of_ticket(sot)
+     krb5_ticket *** sot;
 {
   krb5_error_code retval;
   int i;
@@ -490,8 +490,8 @@ krb5_error_code ktest_make_sample_sequence_of_ticket(DECLARG(krb5_ticket ***, so
   return 0;
 }
 
-krb5_error_code ktest_make_sample_cred_enc_part(DECLARG(krb5_cred_enc_part *, cep))
-     OLDDECLARG(krb5_cred_enc_part *, cep)
+krb5_error_code ktest_make_sample_cred_enc_part(cep)
+     krb5_cred_enc_part * cep;
 {
   krb5_error_code retval;
 
@@ -512,8 +512,8 @@ krb5_error_code ktest_make_sample_cred_enc_part(DECLARG(krb5_cred_enc_part *, ce
   return 0;
 }
 
-krb5_error_code ktest_make_sequence_of_cred_info(DECLARG(krb5_cred_info ***, soci))
-     OLDDECLARG(krb5_cred_info ***, soci)
+krb5_error_code ktest_make_sequence_of_cred_info(soci)
+     krb5_cred_info *** soci;
 {
   krb5_error_code retval;
   int i;
@@ -531,8 +531,8 @@ krb5_error_code ktest_make_sequence_of_cred_info(DECLARG(krb5_cred_info ***, soc
   return 0;
 }
 
-krb5_error_code ktest_make_sample_cred_info(DECLARG(krb5_cred_info *, ci))
-     OLDDECLARG(krb5_cred_info *, ci)
+krb5_error_code ktest_make_sample_cred_info(ci)
+     krb5_cred_info * ci;
 {
   krb5_error_code retval;
 
@@ -555,8 +555,8 @@ krb5_error_code ktest_make_sample_cred_info(DECLARG(krb5_cred_info *, ci))
   return 0;
 }
 
-krb5_error_code ktest_make_sample_error(DECLARG(krb5_error *, kerr))
-     OLDDECLARG(krb5_error *, kerr)
+krb5_error_code ktest_make_sample_error(kerr)
+     krb5_error * kerr;
 {
   krb5_error_code retval;
 
@@ -577,8 +577,8 @@ krb5_error_code ktest_make_sample_error(DECLARG(krb5_error *, kerr))
   return 0;
 }
 
-krb5_error_code ktest_make_sample_data(DECLARG(krb5_data *, d))
-     OLDDECLARG(krb5_data *, d)
+krb5_error_code ktest_make_sample_data(d)
+     krb5_data * d;
 {
   d->data = (char*)calloc(8,sizeof(char));
   if(d->data == NULL) return ENOMEM;
@@ -588,8 +588,8 @@ krb5_error_code ktest_make_sample_data(DECLARG(krb5_data *, d))
   return 0;
 }
 
-krb5_error_code ktest_make_sample_passwd_phrase_element(DECLARG(passwd_phrase_element *, ppe))
-     OLDDECLARG(passwd_phrase_element *, ppe)
+krb5_error_code ktest_make_sample_passwd_phrase_element(ppe)
+     passwd_phrase_element * ppe;
 {
   krb5_error_code retval;
 
@@ -604,8 +604,8 @@ krb5_error_code ktest_make_sample_passwd_phrase_element(DECLARG(passwd_phrase_el
   return 0;
 }
 
-krb5_error_code ktest_make_sample_krb5_pwd_data(DECLARG(krb5_pwd_data *, pd))
-     OLDDECLARG(krb5_pwd_data *, pd)
+krb5_error_code ktest_make_sample_krb5_pwd_data(pd)
+     krb5_pwd_data * pd;
 {
   krb5_error_code retval;
   int i;
@@ -630,8 +630,8 @@ krb5_error_code ktest_make_sample_krb5_pwd_data(DECLARG(krb5_pwd_data *, pd))
 /****************************************************************/
 /* destructors */
 
-void ktest_destroy_data(DECLARG(krb5_data **, d))
-     OLDDECLARG(krb5_data **, d)
+void ktest_destroy_data(d)
+     krb5_data ** d;
 {
   if(*d != NULL){
     if((*d)->data != NULL) free((*d)->data);
@@ -640,8 +640,8 @@ void ktest_destroy_data(DECLARG(krb5_data **, d))
   }
 }
 
-void ktest_empty_data(DECLARG(krb5_data *, d))
-     OLDDECLARG(krb5_data *, d)
+void ktest_empty_data(d)
+     krb5_data * d;
 {
   if(d->data != NULL){
     free(d->data);
@@ -650,8 +650,8 @@ void ktest_empty_data(DECLARG(krb5_data *, d))
   }
 }  
 
-void ktest_destroy_checksum(DECLARG(krb5_checksum **, cs))
-     OLDDECLARG(krb5_checksum **, cs)
+void ktest_destroy_checksum(cs)
+     krb5_checksum ** cs;
 {
   if(*cs != NULL){
     if((*cs)->contents != NULL) free((*cs)->contents);
@@ -660,8 +660,8 @@ void ktest_destroy_checksum(DECLARG(krb5_checksum **, cs))
   }
 }
 
-void ktest_destroy_keyblock(DECLARG(krb5_keyblock **, kb))
-     OLDDECLARG(krb5_keyblock **, kb)
+void ktest_destroy_keyblock(kb)
+     krb5_keyblock ** kb;
 {
   if(*kb != NULL){
     if((*kb)->contents != NULL) free((*kb)->contents);
@@ -670,8 +670,8 @@ void ktest_destroy_keyblock(DECLARG(krb5_keyblock **, kb))
   }
 }
 
-void ktest_empty_authorization_data(DECLARG(krb5_authdata **, ad))
-     OLDDECLARG(krb5_authdata **, ad)
+void ktest_empty_authorization_data(ad)
+     krb5_authdata ** ad;
 {
   int i;
 
@@ -679,16 +679,16 @@ void ktest_empty_authorization_data(DECLARG(krb5_authdata **, ad))
     ktest_destroy_authdata(&(ad[i]));
 }
 
-void ktest_destroy_authorization_data(DECLARG(krb5_authdata ***, ad))
-     OLDDECLARG(krb5_authdata ***, ad)
+void ktest_destroy_authorization_data(ad)
+     krb5_authdata *** ad;
 {
   ktest_empty_authorization_data(*ad);
   free(*ad);
   *ad = NULL;
 }
 
-void ktest_destroy_authdata(DECLARG(krb5_authdata **, ad))
-     OLDDECLARG(krb5_authdata **, ad)
+void ktest_destroy_authdata(ad)
+     krb5_authdata ** ad;
 {
   if(*ad != NULL){
     if((*ad)->contents != NULL) free((*ad)->contents);
@@ -697,8 +697,8 @@ void ktest_destroy_authdata(DECLARG(krb5_authdata **, ad))
   }
 }
 
-void ktest_empty_pa_data_array(DECLARG(krb5_pa_data **, pad))
-     OLDDECLARG(krb5_pa_data **, pad)
+void ktest_empty_pa_data_array(pad)
+     krb5_pa_data ** pad;
 {
   int i;
 
@@ -706,16 +706,16 @@ void ktest_empty_pa_data_array(DECLARG(krb5_pa_data **, pad))
     ktest_destroy_pa_data(&(pad[i]));
 }
 
-void ktest_destroy_pa_data_array(DECLARG(krb5_pa_data ***, pad))
-     OLDDECLARG(krb5_pa_data ***, pad)
+void ktest_destroy_pa_data_array(pad)
+     krb5_pa_data *** pad;
 {
   ktest_empty_pa_data_array(*pad);
   free(*pad);
   *pad = NULL;
 }
 
-void ktest_destroy_pa_data(DECLARG(krb5_pa_data **, pad))
-     OLDDECLARG(krb5_pa_data **, pad)
+void ktest_destroy_pa_data(pad)
+     krb5_pa_data ** pad;
 {
   if(*pad != NULL){
     if((*pad)->contents != NULL) free((*pad)->contents);
@@ -725,8 +725,8 @@ void ktest_destroy_pa_data(DECLARG(krb5_pa_data **, pad))
 }
 
 
-void ktest_destroy_address(DECLARG(krb5_address **, a))
-     OLDDECLARG(krb5_address **, a)
+void ktest_destroy_address(a)
+     krb5_address ** a;
 {
   if(*a != NULL){
     if((*a)->contents != NULL) free((*a)->contents);
@@ -735,8 +735,8 @@ void ktest_destroy_address(DECLARG(krb5_address **, a))
   }
 }
 
-void ktest_empty_addresses(DECLARG(krb5_address **, a))
-     OLDDECLARG(krb5_address **, a)
+void ktest_empty_addresses(a)
+     krb5_address ** a;
 {
   int i;
 
@@ -744,16 +744,16 @@ void ktest_empty_addresses(DECLARG(krb5_address **, a))
     ktest_destroy_address(&(a[i]));
 }  
 
-void ktest_destroy_addresses(DECLARG(krb5_address ***, a))
-     OLDDECLARG(krb5_address ***, a)
+void ktest_destroy_addresses(a)
+     krb5_address *** a;
 {
   ktest_empty_addresses(*a);
   free(*a);
   *a = NULL;
 }
 
-void ktest_destroy_principal(DECLARG(krb5_principal *, p))
-     OLDDECLARG(krb5_principal *, p)
+void ktest_destroy_principal(p)
+     krb5_principal * p;
 {
   int i;
 
@@ -763,22 +763,22 @@ void ktest_destroy_principal(DECLARG(krb5_principal *, p))
   *p = NULL;
 }
 
-void ktest_destroy_sequence_of_integer(DECLARG(long **, soi))
-     OLDDECLARG(long **, soi)
+void ktest_destroy_sequence_of_integer(soi)
+     long ** soi;
 {
   free(*soi);
   *soi = NULL;
 }
 
-void ktest_destroy_sequence_of_enctype(DECLARG(krb5_enctype **, soi))
-     OLDDECLARG(krb5_enctype **, soi)
+void ktest_destroy_sequence_of_enctype(soi)
+     krb5_enctype ** soi;
 {
   free(*soi);
   *soi = NULL;
 }
 
-void ktest_destroy_sequence_of_ticket(DECLARG(krb5_ticket ***, sot))
-     OLDDECLARG(krb5_ticket ***, sot)
+void ktest_destroy_sequence_of_ticket(sot)
+     krb5_ticket *** sot;
 {
   int i;
 
@@ -788,8 +788,8 @@ void ktest_destroy_sequence_of_ticket(DECLARG(krb5_ticket ***, sot))
   *sot = NULL;
 }
 
-void ktest_destroy_ticket(DECLARG(krb5_ticket **, tkt))
-     OLDDECLARG(krb5_ticket **, tkt)
+void ktest_destroy_ticket(tkt)
+     krb5_ticket ** tkt;
 {
   ktest_destroy_principal(&((*tkt)->server));
   ktest_destroy_enc_data(&((*tkt)->enc_part));
@@ -797,8 +797,8 @@ void ktest_destroy_ticket(DECLARG(krb5_ticket **, tkt))
   *tkt = NULL;
 }  
 
-void ktest_destroy_enc_data(DECLARG(krb5_enc_data *, ed))
-     OLDDECLARG(krb5_enc_data *, ed)
+void ktest_destroy_enc_data(ed)
+     krb5_enc_data * ed;
 {
   ktest_empty_data(&(ed->ciphertext));
   ed->kvno = 0;

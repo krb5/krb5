@@ -36,81 +36,108 @@ void krb5_free_os_context
 
 /* libos.spec */
 krb5_error_code krb5_read_password
-	PROTOTYPE((char *,
+	PROTOTYPE((krb5_context,
+		   char *,
 		   char *,
 		   char *,
 		   int * ));
 krb5_error_code krb5_lock_file
-	PROTOTYPE((FILE *,
+	PROTOTYPE((krb5_context,
+		   FILE *,
 		   char *,
 		   int  ));
 krb5_error_code krb5_unlock_file
-	PROTOTYPE((FILE *,
+	PROTOTYPE((krb5_context,
+		   FILE *,
 		   char * ));
 krb5_error_code krb5_timeofday
-	PROTOTYPE((krb5_int32 * ));
+	PROTOTYPE((krb5_context,
+		   krb5_int32 * ));
 krb5_error_code krb5_us_timeofday
-	PROTOTYPE((krb5_int32 *,
+	PROTOTYPE((krb5_context,
+		   krb5_int32 *,
 		   krb5_int32 * ));
 int krb5_net_read
-	PROTOTYPE((int ,
+	PROTOTYPE((krb5_context,
+		   int ,
 		   char *,
 		   int  ));
 int krb5_net_write
-	PROTOTYPE((int ,
+	PROTOTYPE((krb5_context,
+		   int ,
 		   const char *,
 		   int  ));
 		 /* get all the addresses of this host */
 krb5_error_code krb5_os_localaddr
 	PROTOTYPE((krb5_address ***));
 krb5_error_code krb5_sendto_kdc
-	PROTOTYPE((const krb5_data *,
+	PROTOTYPE((krb5_context,
+		   const krb5_data *,
 		   const krb5_data *,
 		   krb5_data * ));
 krb5_error_code krb5_get_krbhst
-	PROTOTYPE((const krb5_data *,
+	PROTOTYPE((krb5_context,
+		   const krb5_data *,
 		   char *** ));
 krb5_error_code krb5_free_krbhst
-	PROTOTYPE((char * const * ));
+	PROTOTYPE((krb5_context,
+		   char * const * ));
 krb5_error_code krb5_aname_to_localname
-	PROTOTYPE((krb5_const_principal,
+	PROTOTYPE((krb5_context,
+		   krb5_const_principal,
 		   const int,
 		   char * ));
 krb5_error_code krb5_get_default_realm
-	PROTOTYPE(( char ** ));
+	PROTOTYPE((krb5_context,
+		    char ** ));
 krb5_error_code krb5_get_host_realm
-	PROTOTYPE((const char *,
+	PROTOTYPE((krb5_context,
+		   const char *,
 		   char *** ));
 krb5_error_code krb5_free_host_realm
-	PROTOTYPE((char * const * ));
+	PROTOTYPE((krb5_context,
+		   char * const * ));
 krb5_error_code krb5_get_realm_domain
-	PROTOTYPE((const char *,
+	PROTOTYPE((krb5_context,
+		   const char *,
 		   char ** ));
 krb5_boolean krb5_kuserok
-	PROTOTYPE((krb5_principal, const char *));
+	PROTOTYPE((krb5_context,
+		   krb5_principal, const char *));
 krb5_error_code krb5_random_confounder
 	PROTOTYPE((int,
 		   krb5_pointer ));
 krb5_error_code krb5_gen_replay_name
-    PROTOTYPE((const krb5_address *,
+    PROTOTYPE((krb5_context,
+		   const krb5_address *,
 	       const char *,
 	       char **));
 krb5_error_code krb5_gen_portaddr
-    PROTOTYPE((const krb5_address *,
+    PROTOTYPE((krb5_context,
+		   const krb5_address *,
 	       krb5_const_pointer,
 	       krb5_address **));
 krb5_error_code krb5_create_secure_file
-	PROTOTYPE((const char * pathname));
+	PROTOTYPE((krb5_context,
+		   const char * pathname));
 krb5_error_code krb5_sync_disk_file
-	PROTOTYPE((FILE *fp));
+	PROTOTYPE((krb5_context,
+		   FILE *fp));
 
 
-krb5_error_code krb5_read_message PROTOTYPE((krb5_pointer, krb5_data *));
-krb5_error_code krb5_write_message PROTOTYPE((krb5_pointer, krb5_data *));
+krb5_error_code krb5_read_message 
+	PROTOTYPE((krb5_context,
+		   krb5_pointer, 
+		   krb5_data *));
+krb5_error_code krb5_write_message 
+	PROTOTYPE((krb5_context,
+		   krb5_pointer, 
+		   krb5_data *));
 
 #include <krb5/widen.h>
 krb5_error_code krb5_sname_to_principal
-    PROTOTYPE((const char *,
+    PROTOTYPE((krb5_context,
+		   const char *,
 	       const char *,
 	       krb5_int32,
 	       krb5_principal *));

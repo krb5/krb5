@@ -90,7 +90,6 @@ typedef struct opt_info{
 extern krb5_boolean krb5_auth_check();
 extern krb5_error_code get_best_principal();
 extern void dump_principal ();
-extern krb5_error_code krb5_verify_tkt_def();
 extern krb5_boolean krb5_fast_auth();
 extern krb5_boolean krb5_get_tkt_via_passwd ();
 extern int gen_sym();  

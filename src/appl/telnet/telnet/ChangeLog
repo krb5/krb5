@@ -1,3 +1,7 @@
+Fri Jan 13 15:23:47 1995  Chris Provenzano (proven@mit.edu)
+
+    * Added krb5_context to all krb5_routines
+
 Thu Dec  1 13:09:34 1994    <tytso@rsx-11.mit.edu>
 
 	* externs.h: If USE_TERMIO is  defined and SYSV_TERMIO isn't,

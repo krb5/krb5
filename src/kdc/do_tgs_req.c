@@ -112,7 +112,7 @@ krb5_data **response;			/* filled in with a response packet */
     if (!fromstring)
 	fromstring = "<unknown>";
 
-    if (errcode = krb5_unparse_name(request->server, &sname)) {
+    if (errcode = krb5_unparse_name(kdc_context, request->server, &sname)) {
 	status = "UNPARSING SERVER";
 	goto cleanup;
     }
@@ -122,7 +122,7 @@ krb5_data **response;			/* filled in with a response packet */
 	header_ticket = req_authdat->ticket;
 
     if (header_ticket && header_ticket->enc_part2 &&
-	(errcode2 = krb5_unparse_name(header_ticket->enc_part2->client,
+	(errcode2 = krb5_unparse_name(kdc_context, header_ticket->enc_part2->client,
 				      &cname))) {
 	status = "UNPARSING CLIENT";
 	errcode = errcode2;
@@ -151,8 +151,8 @@ krb5_data **response;			/* filled in with a response packet */
        header? */
 
     nprincs = 1;
-    if (retval = krb5_db_get_principal(request->server, &server, &nprincs,
-				       &more)) {
+    if (retval = krb5_db_get_principal(kdc_context, request->server, &server,
+				       &nprincs, &more)) {
         syslog(LOG_INFO,
 	       "TGS_REQ: GET_PRINCIPAL: authtime %d, host %s, %s for %s (%s)",
 	       authtime, fromstring, cname, sname, error_message(retval));
@@ -169,25 +169,25 @@ tgt_again:
 	 * might be a request for a TGT for some other realm; we
 	 * should do our best to find such a TGS in this db
 	 */
-	if (firstpass && krb5_princ_size(request->server) == 2) {
-	    krb5_data *server_1 = krb5_princ_component(request->server, 1);
-	    krb5_data *tgs_1 = krb5_princ_component(tgs_server, 1);
+	if (firstpass && krb5_princ_size(kdc_context, request->server) == 2) {
+	    krb5_data *server_1 = krb5_princ_component(kdc_context, request->server, 1);
+	    krb5_data *tgs_1 = krb5_princ_component(kdc_context, tgs_server, 1);
 
 	    if (server_1->length != tgs_1->length ||
 		memcmp(server_1->data, tgs_1->data, tgs_1->length)) {
-		krb5_db_free_principal(&server, nprincs);
+		krb5_db_free_principal(kdc_context, &server, nprincs);
 		find_alternate_tgs(request, &server, &more, &nprincs);
 		firstpass = 0;
 		goto tgt_again;
 	    }
 	}
-	krb5_db_free_principal(&server, nprincs);
+	krb5_db_free_principal(kdc_context, &server, nprincs);
 	status = "UNKNOWN_SERVER";
 	errcode = KRB5KDC_ERR_S_PRINCIPAL_UNKNOWN;
 	goto cleanup;
     }
 
-    if (retval = krb5_timeofday(&kdc_time)) {
+    if (retval = krb5_timeofday(kdc_context, &kdc_time)) {
 	status = "TIME_OF_DAY";
 	goto cleanup;
     }
@@ -238,9 +238,9 @@ tgt_again:
 	goto cleanup;
     }
     useetype = request->etype[i];
-    krb5_use_keytype(&eblock, useetype);
+    krb5_use_keytype(kdc_context, &eblock, useetype);
 
-    retval = krb5_random_key(&eblock, krb5_csarray[useetype]->random_sequence,
+    retval = krb5_random_key(kdc_context, &eblock, krb5_csarray[useetype]->random_sequence,
 			     &session_key);
     if (retval) {
 	/* random key failed */
@@ -395,7 +395,7 @@ tgt_again:
 	}
 	/* put together an eblock for this encryption */
 
-	krb5_use_cstype(&eblock, request->authorization_data.etype);
+	krb5_use_cstype(kdc_context, &eblock, request->authorization_data.etype);
 
 	scratch.length = request->authorization_data.ciphertext.length;
 	if (!(scratch.data =
@@ -404,7 +404,7 @@ tgt_again:
 	    goto cleanup;
 	}
 	/* do any necessary key pre-processing */
-	if (retval = krb5_process_key(&eblock,
+	if (retval = krb5_process_key(kdc_context, &eblock,
 				      header_ticket->enc_part2->session)) {
 	    status = "AUTH_PROCESS_KEY";
 	    free(scratch.data);
@@ -412,15 +412,15 @@ tgt_again:
 	}
 
 	/* call the encryption routine */
-	if (retval = krb5_decrypt((krb5_pointer) request->authorization_data.ciphertext.data,
+	if (retval = krb5_decrypt(kdc_context, (krb5_pointer) request->authorization_data.ciphertext.data,
 				  (krb5_pointer) scratch.data,
 				  scratch.length, &eblock, 0)) {
 	    status = "AUTH_ENCRYPT_FAIL";
-	    (void) krb5_finish_key(&eblock);
+	    (void) krb5_finish_key(kdc_context, &eblock);
 	    free(scratch.data);
 	    goto cleanup;
 	}
-	if (retval = krb5_finish_key(&eblock)) {
+	if (retval = krb5_finish_key(kdc_context, &eblock)) {
 	    status = "AUTH_FINISH_KEY";
 	    free(scratch.data);
 	    goto cleanup;
@@ -511,9 +511,9 @@ tgt_again:
 	}
 
 	/* decrypt the ticket */
-	retval = krb5_decrypt_tkt_part(st_sealing_key,
+	retval = krb5_decrypt_tkt_part(kdc_context, st_sealing_key,
 				       request->second_ticket[st_idx]);
-	krb5_free_keyblock(st_sealing_key);
+	krb5_free_keyblock(kdc_context, st_sealing_key);
 	if (retval) {
 	    status = "2ND_TKT_DECRYPT";
 	    goto cleanup;
@@ -523,9 +523,9 @@ tgt_again:
 	 * Make sure the client for the second ticket matches
 	 * requested server.
 	 */
-	if (!krb5_principal_compare(request->server,
+	if (!krb5_principal_compare(kdc_context, request->server,
 				    request->second_ticket[st_idx]->enc_part2->client)) {
-		if (retval = krb5_unparse_name(request->second_ticket[st_idx]->enc_part2->client, &tmp))
+		if (retval = krb5_unparse_name(kdc_context, request->second_ticket[st_idx]->enc_part2->client, &tmp))
 			tmp = 0;
 		syslog(LOG_INFO, "TGS_REQ: 2ND_TKT_MISMATCH: authtime %d, host %s, %s for %s, 2nd tkt client %s",
 		       authtime, fromstring, cname, sname,
@@ -536,8 +536,8 @@ tgt_again:
 	ticket_reply.enc_part.kvno = 0;
 	ticket_reply.enc_part.etype =
 		request->second_ticket[st_idx]->enc_part2->session->etype;
-	krb5_use_cstype(&eblock, ticket_reply.enc_part.etype);
-	if (retval = krb5_encrypt_tkt_part(&eblock,
+	krb5_use_cstype(kdc_context, &eblock, ticket_reply.enc_part.etype);
+	if (retval = krb5_encrypt_tkt_part(kdc_context, &eblock,
 					   request->second_ticket[st_idx]->enc_part2->session,
 					   &ticket_reply)) {
 	    status = "2ND_TKT_ENCRYPT";
@@ -547,15 +547,15 @@ tgt_again:
     } else {
 	/* convert server.key into a real key (it may be encrypted
 	   in the database) */
-	if (retval = KDB_CONVERT_KEY_OUTOF_DB(&server.key, &encrypting_key)) {
+	if (retval = KDB_CONVERT_KEY_OUTOF_DB(kdc_context, &server.key, &encrypting_key)) {
 	    status = "CONV_KEY";
 	    goto cleanup;
 	}
 
 	ticket_reply.enc_part.kvno = server.kvno;
 	ticket_reply.enc_part.etype = useetype;
-	krb5_use_cstype(&eblock, ticket_reply.enc_part.etype);
-	retval = krb5_encrypt_tkt_part(&eblock, &encrypting_key, &ticket_reply);
+	krb5_use_cstype(kdc_context, &eblock, ticket_reply.enc_part.etype);
+	retval = krb5_encrypt_tkt_part(kdc_context, &eblock, &encrypting_key, &ticket_reply);
 
 	memset((char *)encrypting_key.contents, 0, encrypting_key.length);
 	krb5_xfree(encrypting_key.contents);
@@ -601,9 +601,9 @@ tgt_again:
     reply.enc_part.etype = req_authdat->authenticator->subkey ?
 	    req_authdat->authenticator->subkey->etype :
 		    header_ticket->enc_part2->session->etype;
-    krb5_use_cstype(&eblock, reply.enc_part.etype);
+    krb5_use_cstype(kdc_context, &eblock, reply.enc_part.etype);
 
-    retval = krb5_encode_kdc_rep(KRB5_TGS_REP, &reply_encpart, &eblock,
+    retval = krb5_encode_kdc_rep(kdc_context, KRB5_TGS_REP, &reply_encpart, &eblock,
 				 req_authdat->authenticator->subkey ?
 				 req_authdat->authenticator->subkey :
 				 header_ticket->enc_part2->session,
@@ -641,17 +641,17 @@ cleanup:
     }
     
     if (request)
-	krb5_free_kdc_req(request);
+	krb5_free_kdc_req(kdc_context, request);
     if (req_authdat)
-	krb5_free_tkt_authent(req_authdat);
+	krb5_free_tkt_authent(kdc_context, req_authdat);
     if (cname)
 	free(cname);
     if (sname)
 	free(sname);
     if (nprincs)
-	krb5_db_free_principal(&server, 1);
+	krb5_db_free_principal(kdc_context, &server, 1);
     if (session_key)
-	krb5_free_keyblock(session_key);
+	krb5_free_keyblock(kdc_context, session_key);
     if (newtransited)
 	free(enc_tkt_reply.transited.tr_contents.data); 
 
@@ -673,7 +673,7 @@ krb5_data **response;
     errpkt.ctime = request->nonce;
     errpkt.cusec = 0;
 
-    if (retval = krb5_us_timeofday(&errpkt.stime, &errpkt.susec))
+    if (retval = krb5_us_timeofday(kdc_context, &errpkt.stime, &errpkt.susec))
 	return(retval);
     errpkt.error = error;
     errpkt.server = request->server;
@@ -693,7 +693,7 @@ krb5_data **response;
     errpkt.e_data.length = 0;
     errpkt.e_data.data = 0;
 
-    retval = krb5_mk_error(&errpkt, scratch);
+    retval = krb5_mk_error(kdc_context, &errpkt, scratch);
     free(errpkt.text.data);
     *response = scratch;
     return retval;
@@ -718,8 +718,9 @@ int *nprincs;
     *nprincs = 0;
     *more = FALSE;
 
-    if (retval = krb5_walk_realm_tree(krb5_princ_realm(request->server),
-				      krb5_princ_component(request->server, 1),
+    if (retval = krb5_walk_realm_tree(kdc_context, 
+		      krb5_princ_realm(kdc_context, request->server),
+		      krb5_princ_component(kdc_context, request->server, 1),
 				      &plist, KRB5_REALM_BRANCH_CHAR))
 	return;
 
@@ -730,36 +731,38 @@ int *nprincs;
        ignore it */
     while (--pl2 > plist) {
 	*nprincs = 1;
-	tmp = *krb5_princ_realm(*pl2);
-	krb5_princ_set_realm(*pl2, krb5_princ_realm(tgs_server));
-	retval = krb5_db_get_principal(*pl2, server, nprincs, more);
-	krb5_princ_set_realm(*pl2, &tmp);
+	tmp = *krb5_princ_realm(kdc_context, *pl2);
+	krb5_princ_set_realm(kdc_context, *pl2, 
+			     krb5_princ_realm(kdc_context, tgs_server));
+	retval = krb5_db_get_principal(kdc_context, *pl2, server, nprincs, more);
+	krb5_princ_set_realm(kdc_context, *pl2, &tmp);
 	if (retval) {
 	    *nprincs = 0;
 	    *more = FALSE;
-	    krb5_free_realm_tree(plist);
+	    krb5_free_realm_tree(kdc_context, plist);
 	    return;
 	}
 	if (*more) {
-	    krb5_db_free_principal(server, *nprincs);
+	    krb5_db_free_principal(kdc_context, server, *nprincs);
 	    continue;
 	} else if (*nprincs == 1) {
 	    /* Found it! */
 	    krb5_principal tmpprinc;
 	    char *sname;
 
-	    tmp = *krb5_princ_realm(*pl2);
-	    krb5_princ_set_realm(*pl2, krb5_princ_realm(tgs_server));
-	    if (retval = krb5_copy_principal(*pl2, &tmpprinc)) {
-		krb5_db_free_principal(server, *nprincs);
-		krb5_princ_set_realm(*pl2, &tmp);
+	    tmp = *krb5_princ_realm(kdc_context, *pl2);
+	    krb5_princ_set_realm(kdc_context, *pl2, 
+				 krb5_princ_realm(kdc_context, tgs_server));
+	    if (retval = krb5_copy_principal(kdc_context, *pl2, &tmpprinc)) {
+		krb5_db_free_principal(kdc_context, server, *nprincs);
+		krb5_princ_set_realm(kdc_context, *pl2, &tmp);
 		continue;
 	    }
-	    krb5_princ_set_realm(*pl2, &tmp);
+	    krb5_princ_set_realm(kdc_context, *pl2, &tmp);
 
-	    krb5_free_principal(request->server);
+	    krb5_free_principal(kdc_context, request->server);
 	    request->server = tmpprinc;
-	    if (krb5_unparse_name(request->server, &sname)) {
+	    if (krb5_unparse_name(kdc_context, request->server, &sname)) {
 		syslog(LOG_INFO,
 		       "TGS_REQ: issuing alternate <un-unparseable> TGT");
 	    } else {
@@ -769,13 +772,13 @@ int *nprincs;
 	    }
 	    return;
 	}
-	krb5_db_free_principal(server, *nprincs);
+	krb5_db_free_principal(kdc_context, server, *nprincs);
 	continue;
     }
 
     *nprincs = 0;
     *more = FALSE;
-    krb5_free_realm_tree(plist);
+    krb5_free_realm_tree(kdc_context, plist);
     return;
 }
 

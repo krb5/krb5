@@ -39,6 +39,7 @@ main(argc, argv)
     int argc;
     char **argv;
 {
+	krb5_context kcontext;
     int c;
     krb5_ccache cache = NULL;
     char *cache_name = NULL;
@@ -46,7 +47,7 @@ main(argc, argv)
     int errflg=0;
     int quiet = 0;	
     
-    krb5_init_ets();
+    krb5_init_ets(kcontext);
 
     if (strrchr(argv[0], '/'))
 	argv[0] = strrchr(argv[0], '/')+1;
@@ -60,7 +61,7 @@ main(argc, argv)
 	    if (cache == NULL) {
 		cache_name = optarg;
 		
-		code = krb5_cc_resolve (cache_name, &cache);
+		code = krb5_cc_resolve (kcontext, cache_name, &cache);
 		if (code != 0) {
 		    com_err (argv[0], code, "while resolving %s", cache_name);
 		    errflg++;
@@ -86,13 +87,13 @@ main(argc, argv)
     }
 
     if (cache == NULL) {
-	if (code = krb5_cc_default(&cache)) {
+	if (code = krb5_cc_default(kcontext, &cache)) {
 	    com_err(argv[0], code, "while getting default ccache");
 	    exit(1);
 	}
     }
 
-    code = krb5_cc_destroy (cache);
+    code = krb5_cc_destroy (kcontext, cache);
     if (code != 0) {
 	com_err (argv[0], code, "while destroying cache");
 	if (quiet)

@@ -77,14 +77,14 @@ check_padata (client, src_addr, padata, pa_id, flags)
     enckey = &(client->key);
     /* 	Extract client key/alt_key from master key */
    
-    retval = KDB_CONVERT_KEY_OUTOF_DB(enckey,&tmpkey);
+    retval = KDB_CONVERT_KEY_OUTOF_DB(kdc_context,enckey,&tmpkey);
     if (retval) {
 	syslog( LOG_ERR, "AS_REQ: Unable to extract client key: %s",
 	       error_message(retval));
 	return retval;
     }
-    retval =  krb5_verify_padata(*padata,client->principal,src_addr,
-				 &tmpkey, pa_id, flags);
+    retval =  krb5_verify_padata(kdc_context, *padata,client->principal,
+				 src_addr, &tmpkey, pa_id, flags);
     memset((char *)tmpkey.contents, 0, tmpkey.length);
     krb5_xfree(tmpkey.contents);
     if (retval && client->alt_key.length) {
@@ -93,13 +93,13 @@ check_padata (client, src_addr, padata, pa_id, flags)
 	 */
 	enckey = &(client->alt_key);
 	/* Extract client key/alt_key from master key */
-	if (retval = KDB_CONVERT_KEY_OUTOF_DB(enckey,&tmpkey)) {
+	if (retval = KDB_CONVERT_KEY_OUTOF_DB(kdc_context,enckey,&tmpkey)) {
 	    syslog( LOG_ERR, "AS_REQ: Unable to extract client alt_key: %s",
 		   error_message(retval));
 	    return retval;
 	}
-	retval = krb5_verify_padata(*padata,client->principal,src_addr,
-				    &tmpkey, pa_id, flags);
+	retval = krb5_verify_padata(kdc_context, *padata,client->principal,
+				    src_addr, &tmpkey, pa_id, flags);
 	memset((char *)tmpkey.contents, 0, tmpkey.length);
 	krb5_xfree(tmpkey.contents);
     }
@@ -147,13 +147,13 @@ krb5_data **response;			/* filled in with a response packet */
     if (!request->client)
 	return(prepare_error_as(request, KDC_ERR_C_PRINCIPAL_UNKNOWN,
 				response));
-    if (retval = krb5_unparse_name(request->client, &cname)) {
+    if (retval = krb5_unparse_name(kdc_context, request->client, &cname)) {
 	syslog(LOG_INFO, "AS_REQ: %s while unparsing client name",
 	       error_message(retval));
 	return(prepare_error_as(request, KDC_ERR_C_PRINCIPAL_UNKNOWN,
 				response));
     }
-    if (retval = krb5_unparse_name(request->server, &sname)) {
+    if (retval = krb5_unparse_name(kdc_context, request->server, &sname)) {
 	free(cname);
 	syslog(LOG_INFO, "AS_REQ: %s while unparsing server name",
 	       error_message(retval));
@@ -176,19 +176,19 @@ krb5_data **response;			/* filled in with a response packet */
      */
     pwreq = 0;
     if (!cpw) {
-	    retval = krb5_parse_name("changepw/kerberos", &cpw);
+	    retval = krb5_parse_name(kdc_context, "changepw/kerberos", &cpw);
 	    if (retval)
 		    goto errout;
-	    free(krb5_princ_realm(cpw)->data);
-	    krb5_princ_realm(cpw)->data = 0;
+	    free(krb5_princ_realm(kdc_context, cpw)->data);
+	    krb5_princ_realm(kdc_context, cpw)->data = 0;
     }
-    krb5_princ_realm(cpw)->data = krb5_princ_realm(request->server)->data;
-    if (krb5_principal_compare(request->server, cpw))
+    krb5_princ_realm(kdc_context, cpw)->data = krb5_princ_realm(kdc_context, request->server)->data;
+    if (krb5_principal_compare(kdc_context, request->server, cpw))
 	    pwreq++;
 
     c_nprincs = 1;
-    if (retval = krb5_db_get_principal(request->client, &client, &c_nprincs,
-				       &more)) {
+    if (retval = krb5_db_get_principal(kdc_context, request->client, &client, 
+				       &c_nprincs, &more)) {
 	c_nprincs = 0;
 	goto errout;
     }
@@ -207,8 +207,8 @@ krb5_data **response;			/* filled in with a response packet */
     }
     
     s_nprincs = 1;
-    if (retval = krb5_db_get_principal(request->server, &server, &s_nprincs,
-				       &more)) {
+    if (retval = krb5_db_get_principal(kdc_context, request->server, &server,
+				       &s_nprincs, &more)) {
 	s_nprincs = 0;
 	goto errout;
     }
@@ -222,7 +222,7 @@ krb5_data **response;			/* filled in with a response packet */
 	goto errout;
     }
 
-    if (retval = krb5_timeofday(&kdc_time)) {
+    if (retval = krb5_timeofday(kdc_context, &kdc_time)) {
 	syslog(LOG_INFO, "AS_REQ: TIME_OF_DAY: host %s, %s for %s", 
                   fromstring, cname, sname);
 	goto errout;
@@ -263,9 +263,9 @@ krb5_data **response;			/* filled in with a response packet */
 	goto errout;
     }
     useetype = request->etype[i];
-    krb5_use_cstype(&eblock, useetype);
+    krb5_use_cstype(kdc_context, &eblock, useetype);
     
-    if (retval = krb5_random_key(&eblock,
+    if (retval = krb5_random_key(kdc_context, &eblock,
 				 krb5_csarray[useetype]->random_sequence,
 				 &session_key)) {
 	/* random key failed */
@@ -366,7 +366,7 @@ krb5_data **response;			/* filled in with a response packet */
 		    client.attributes |= KRB5_KDB_DISALLOW_ALL_TIX;
 		}
 	    }
-            krb5_db_put_principal(&client, &one);
+            krb5_db_put_principal(kdc_context, &client, &one);
 #endif
             syslog(LOG_INFO, "AS_REQ: PREAUTH FAILED: host %s, %s for %s (%s)",
 		   fromstring, cname, sname, error_message(retval));
@@ -414,9 +414,9 @@ krb5_data **response;			/* filled in with a response packet */
 
     /* convert server.key into a real key (it may be encrypted
        in the database) */
-    if (retval = KDB_CONVERT_KEY_OUTOF_DB(&server.key, &encrypting_key))
+    if (retval = KDB_CONVERT_KEY_OUTOF_DB(kdc_context, &server.key, &encrypting_key))
 	goto errout;
-    retval = krb5_encrypt_tkt_part(&eblock, &encrypting_key, &ticket_reply);
+    retval = krb5_encrypt_tkt_part(kdc_context, &eblock, &encrypting_key, &ticket_reply);
     memset((char *)encrypting_key.contents, 0, encrypting_key.length);
     krb5_xfree(encrypting_key.contents);
     if (retval)
@@ -444,14 +444,15 @@ krb5_data **response;			/* filled in with a response packet */
 	    padat_tmp[0]->length = 0;
 	    break;
 	case KRB5_KDB_SALTTYPE_NOREALM:
-	    if (retval = krb5_principal2salt_norealm(request->client,
+	    if (retval = krb5_principal2salt_norealm(kdc_context, 
+						     request->client,
 						     &salt_data))
 		goto errout;
 	    padat_tmp[0]->length = salt_data.length;
 	    padat_tmp[0]->contents = (krb5_octet *)salt_data.data;
 	    break;
 	case KRB5_KDB_SALTTYPE_ONLYREALM:
-	    data_foo = krb5_princ_realm(request->client);
+	    data_foo = krb5_princ_realm(kdc_context, request->client);
 	    padat_tmp[0]->length = data_foo->length;
 	    padat_tmp[0]->contents = (krb5_octet *)data_foo->data;
 	    break;
@@ -487,12 +488,12 @@ krb5_data **response;			/* filled in with a response packet */
 
     /* convert client.key into a real key (it may be encrypted
        in the database) */
-    if (retval = KDB_CONVERT_KEY_OUTOF_DB(&client.key, &encrypting_key))
+    if (retval = KDB_CONVERT_KEY_OUTOF_DB(kdc_context, &client.key, &encrypting_key))
 	goto errout;
     reply.enc_part.etype = useetype;
     reply.enc_part.kvno = client.kvno;
-    retval = krb5_encode_kdc_rep(KRB5_AS_REP, &reply_encpart, &eblock,
-				 &encrypting_key,  &reply, response);
+    retval = krb5_encode_kdc_rep(kdc_context, KRB5_AS_REP, &reply_encpart, 
+				 &eblock, &encrypting_key,  &reply, response);
     memset((char *)encrypting_key.contents, 0, encrypting_key.length);
     krb5_xfree(encrypting_key.contents);
 
@@ -521,11 +522,11 @@ errout:
     if (sname)
 	    free(sname);
     if (c_nprincs)
-	krb5_db_free_principal(&client, c_nprincs);
+	krb5_db_free_principal(kdc_context, &client, c_nprincs);
     if (s_nprincs)
-	krb5_db_free_principal(&server, s_nprincs);
+	krb5_db_free_principal(kdc_context, &server, s_nprincs);
     if (session_key)
-	krb5_free_keyblock(session_key);
+	krb5_free_keyblock(kdc_context, session_key);
     if (ticket_reply.enc_part.ciphertext.data) {
 	memset(ticket_reply.enc_part.ciphertext.data , 0,
 	       ticket_reply.enc_part.ciphertext.length);
@@ -548,10 +549,10 @@ krb5_data **response;
     krb5_data *scratch;
     char *cname = 0, *sname = 0;
 
-    if (retval = krb5_unparse_name(request->client, &cname))
+    if (retval = krb5_unparse_name(kdc_context, request->client, &cname))
        syslog(LOG_INFO, "AS_REQ: %s while unparsing client name for error",
               error_message(retval));
-    if (retval = krb5_unparse_name(request->server, &sname))
+    if (retval = krb5_unparse_name(kdc_context, request->server, &sname))
        syslog(LOG_INFO, "AS_REQ: %s while unparsing server name for error",
               error_message(retval));
 
@@ -567,7 +568,7 @@ krb5_data **response;
     errpkt.ctime = request->nonce;
     errpkt.cusec = 0;
 
-    if (retval = krb5_us_timeofday(&errpkt.stime, &errpkt.susec))
+    if (retval = krb5_us_timeofday(kdc_context, &errpkt.stime, &errpkt.susec))
 	return(retval);
     errpkt.error = error;
     errpkt.server = request->server;
@@ -584,7 +585,7 @@ krb5_data **response;
     errpkt.e_data.length = 0;
     errpkt.e_data.data = 0;
 
-    retval = krb5_mk_error(&errpkt, scratch);
+    retval = krb5_mk_error(kdc_context, &errpkt, scratch);
     free(errpkt.text.data);
     *response = scratch;
     return retval;

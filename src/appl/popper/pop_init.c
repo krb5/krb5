@@ -27,6 +27,7 @@ AUTH_DAT kdata;
 #include <com_err.h>
 #include <ctype.h>
 krb5_principal ext_client;
+krb5_context pop_context;
 char *client_name;
 #endif /* KRB5 */
 #endif /* KERBEROS */
@@ -291,10 +292,11 @@ authenticate(p, addr)
     krb5_principal server;
     int sock = 0;
 
-    krb5_init_ets();
+    krb5_init_context(&pop_context);
+    krb5_init_ets(pop_context);
 
-    if (retval = krb5_sname_to_principal(p->myhost, "pop", KRB5_NT_SRV_HST,
-					 &server)) {
+    if (retval = krb5_sname_to_principal(pop_context, p->myhost, "pop", 
+					 KRB5_NT_SRV_HST, &server)) {
 	pop_msg(p, POP_FAILURE,
 		"server '%s' mis-configured, can't get principal--%s",
 		p->myhost, error_message(retval));
@@ -303,7 +305,7 @@ authenticate(p, addr)
 	exit(-1);
     }
 
-    if (retval = krb5_recvauth((krb5_pointer)&sock,
+    if (retval = krb5_recvauth(pop_context, (krb5_pointer)&sock,
 			       "KPOPV1.0",
 			       server,
 			       0,	/* ignore peer address */
@@ -320,8 +322,8 @@ authenticate(p, addr)
 		p->client, error_message(retval));
 	exit(-1);
     }
-    krb5_free_principal(server);
-    if (retval = krb5_unparse_name(ext_client, &client_name)) {
+    krb5_free_principal(pop_context, server);
+    if (retval = krb5_unparse_name(pop_context, ext_client, &client_name)) {
 	pop_msg(p, POP_FAILURE, "name not parsable--%s",
 		error_message(retval));
 	pop_log(p, POP_DEBUG, "name not parsable (%s)",
@@ -332,7 +334,8 @@ authenticate(p, addr)
     pop_log(p, POP_DEBUG, "%s (%s): ok", client_name, inet_ntoa(addr->sin_addr));
 #endif /* DEBUG */
 
-    if (retval= krb5_aname_to_localname(ext_client, sizeof(p->user), p->user)) {
+    if (retval= krb5_aname_to_localname(pop_context, ext_client, 
+					sizeof(p->user), p->user)) {
 	pop_msg(p, POP_FAILURE, "unable to convert aname(%s) to localname --%s",
 		client_name,
 		error_message(retval));

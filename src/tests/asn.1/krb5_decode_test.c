@@ -8,6 +8,7 @@
 #include "debug.h"
 #include <string.h>
 
+krb5_context test_context;
 int error_count = 0;
 
 void main()
@@ -15,7 +16,8 @@ void main()
   krb5_data code;
   krb5_error_code retval;
   
-  krb5_init_ets();
+  krb5_init_context(&test_context);
+  krb5_init_ets(test_context);
   
 #define setup(type,typestring,constructor)\
   type ref, *var;\

@@ -9,6 +9,7 @@
 
 #include "debug.h"
 
+krb5_context test_context;
 int error_count = 0;
 int do_trval = 0;
 
@@ -85,7 +86,8 @@ void main(argc, argv)
 
   PRS(argc, argv);
   
-  krb5_init_ets();
+  krb5_init_context(&test_context);
+  krb5_init_ets(test_context);
   
 #define setup(value,type,typestring,constructor)\
   retval = constructor(&(value));\

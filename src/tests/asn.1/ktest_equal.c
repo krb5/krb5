@@ -18,10 +18,9 @@ comparator(ref->field,var->field)
 ((ref->length == var->length) && \
  comparator(ref->length,ref->field,var->field))
 
-int ktest_equal_authenticator(DECLARG(krb5_authenticator *, ref),
-			      DECLARG(krb5_authenticator *, var))
-     OLDDECLARG(krb5_authenticator *, ref)
-     OLDDECLARG(krb5_authenticator *, var)
+int ktest_equal_authenticator(ref, var)
+     krb5_authenticator * ref;
+     krb5_authenticator * var;
 {
   int p=TRUE;
   if(ref==var) return TRUE;
@@ -36,10 +35,9 @@ int ktest_equal_authenticator(DECLARG(krb5_authenticator *, ref),
   return p;
 }
 
-int ktest_equal_principal_data(DECLARG(krb5_principal_data *, ref),
-			       DECLARG(krb5_principal_data *, var))
-     OLDDECLARG(krb5_principal_data *, ref)
-     OLDDECLARG(krb5_principal_data *, var)
+int ktest_equal_principal_data(ref, var)
+     krb5_principal_data * ref;
+     krb5_principal_data * var;
 {
   if(ref==var) return TRUE;
   else if(ref == NULL || var == NULL) return FALSE;
@@ -48,10 +46,9 @@ int ktest_equal_principal_data(DECLARG(krb5_principal_data *, ref),
 	 scalar_equal(type));
 }
 
-int ktest_equal_authdata(DECLARG(krb5_authdata *, ref),
-			 DECLARG(krb5_authdata *, var))
-     OLDDECLARG(krb5_authdata *, ref)
-     OLDDECLARG(krb5_authdata *, var)
+int ktest_equal_authdata(ref, var)
+     krb5_authdata * ref;
+     krb5_authdata * var;
 {
   if(ref==var) return TRUE;
   else if(ref == NULL || var == NULL) return FALSE;
@@ -59,40 +56,36 @@ int ktest_equal_authdata(DECLARG(krb5_authdata *, ref),
 	 len_equal(length,contents,ktest_equal_array_of_octet));
 }
 
-int ktest_equal_checksum(DECLARG(krb5_checksum *, ref),
-			 DECLARG(krb5_checksum *, var))
-     OLDDECLARG(krb5_checksum *, ref)
-     OLDDECLARG(krb5_checksum *, var)
+int ktest_equal_checksum(ref, var)
+     krb5_checksum * ref;
+     krb5_checksum * var;
 {
   if(ref==var) return TRUE;
   else if(ref == NULL || var == NULL) return FALSE;
   return(scalar_equal(checksum_type) && len_equal(length,contents,ktest_equal_array_of_octet));
 }
 
-int ktest_equal_keyblock(DECLARG(krb5_keyblock *, ref),
-			 DECLARG(krb5_keyblock *, var))
-     OLDDECLARG(krb5_keyblock *, ref)
-     OLDDECLARG(krb5_keyblock *, var)
+int ktest_equal_keyblock(ref, var)
+     krb5_keyblock * ref;
+     krb5_keyblock * var;
 {
   if(ref==var) return TRUE;
   else if(ref == NULL || var == NULL) return FALSE;
   return(scalar_equal(keytype) && len_equal(length,contents,ktest_equal_array_of_octet));
 }
 
-int ktest_equal_data(DECLARG(krb5_data *, ref),
-		     DECLARG(krb5_data *, var))
-     OLDDECLARG(krb5_data *, ref)
-     OLDDECLARG(krb5_data *, var)
+int ktest_equal_data(ref, var)
+     krb5_data * ref;
+     krb5_data * var;
 {
   if(ref==var) return TRUE;
   else if(ref == NULL || var == NULL) return FALSE;
   return(len_equal(length,data,ktest_equal_array_of_char));
 }
 
-int ktest_equal_ticket(DECLARG(krb5_ticket *, ref),
-		       DECLARG(krb5_ticket *, var))
-     OLDDECLARG(krb5_ticket *, ref)
-     OLDDECLARG(krb5_ticket *, var)
+int ktest_equal_ticket(ref, var)
+     krb5_ticket * ref;
+     krb5_ticket * var;
 {
   int p=TRUE;
   if(ref==var) return TRUE;
@@ -103,10 +96,9 @@ int ktest_equal_ticket(DECLARG(krb5_ticket *, ref),
   return p;
 }
 
-int ktest_equal_enc_data(DECLARG(krb5_enc_data *, ref),
-			 DECLARG(krb5_enc_data *, var))
-     OLDDECLARG(krb5_enc_data *, ref)
-     OLDDECLARG(krb5_enc_data *, var)
+int ktest_equal_enc_data(ref, var)
+     krb5_enc_data * ref;
+     krb5_enc_data * var;
 {
   int p=TRUE;
   if(ref==var) return TRUE;
@@ -117,10 +109,9 @@ int ktest_equal_enc_data(DECLARG(krb5_enc_data *, ref),
   return p;
 }
 
-int ktest_equal_encryption_key(DECLARG(krb5_keyblock *, ref),
-			       DECLARG(krb5_keyblock *, var))
-     OLDDECLARG(krb5_keyblock *, ref)
-     OLDDECLARG(krb5_keyblock *, var)
+int ktest_equal_encryption_key(ref, var)
+     krb5_keyblock * ref;
+     krb5_keyblock * var;
 {
   int p=TRUE;
   if(ref==var) return TRUE;
@@ -130,10 +121,9 @@ int ktest_equal_encryption_key(DECLARG(krb5_keyblock *, ref),
   return p;
 }
 
-int ktest_equal_enc_tkt_part(DECLARG(krb5_enc_tkt_part *, ref),
-			     DECLARG(krb5_enc_tkt_part *, var))
-     OLDDECLARG(krb5_enc_tkt_part *, ref)
-     OLDDECLARG(krb5_enc_tkt_part *, var)
+int ktest_equal_enc_tkt_part(ref, var)
+     krb5_enc_tkt_part * ref;
+     krb5_enc_tkt_part * var;
 {
   int p=TRUE;
   if(ref==var) return TRUE;
@@ -148,10 +138,9 @@ int ktest_equal_enc_tkt_part(DECLARG(krb5_enc_tkt_part *, ref),
   return p;
 }
 
-int ktest_equal_transited(DECLARG(krb5_transited *, ref),
-			  DECLARG(krb5_transited *, var))
-     OLDDECLARG(krb5_transited *, ref)
-     OLDDECLARG(krb5_transited *, var)
+int ktest_equal_transited(ref, var)
+     krb5_transited * ref;
+     krb5_transited * var;
 {
   int p=TRUE;
   if(ref==var) return TRUE;
@@ -161,10 +150,9 @@ int ktest_equal_transited(DECLARG(krb5_transited *, ref),
   return p;
 }
 
-int ktest_equal_ticket_times(DECLARG(krb5_ticket_times *, ref),
-			     DECLARG(krb5_ticket_times *, var))
-     OLDDECLARG(krb5_ticket_times *, ref)
-     OLDDECLARG(krb5_ticket_times *, var)
+int ktest_equal_ticket_times(ref, var)
+     krb5_ticket_times * ref;
+     krb5_ticket_times * var;
 {
   int p=TRUE;
   if(ref==var) return TRUE;
@@ -176,10 +164,9 @@ int ktest_equal_ticket_times(DECLARG(krb5_ticket_times *, ref),
   return p;
 }
 
-int ktest_equal_address(DECLARG(krb5_address *, ref),
-			DECLARG(krb5_address *, var))
-     OLDDECLARG(krb5_address *, ref)
-     OLDDECLARG(krb5_address *, var)
+int ktest_equal_address(ref, var)
+     krb5_address * ref;
+     krb5_address * var;
 {
   int p=TRUE;
   if(ref==var) return TRUE;
@@ -189,10 +176,9 @@ int ktest_equal_address(DECLARG(krb5_address *, ref),
   return p;
 }
 
-int ktest_equal_enc_kdc_rep_part(DECLARG(krb5_enc_kdc_rep_part *, ref),
-				 DECLARG(krb5_enc_kdc_rep_part *, var))
-     OLDDECLARG(krb5_enc_kdc_rep_part *, ref)
-     OLDDECLARG(krb5_enc_kdc_rep_part *, var)
+int ktest_equal_enc_kdc_rep_part(ref, var)
+     krb5_enc_kdc_rep_part * ref;
+     krb5_enc_kdc_rep_part * var;
 {
   int p=TRUE;
   if(ref==var) return TRUE;
@@ -208,10 +194,9 @@ int ktest_equal_enc_kdc_rep_part(DECLARG(krb5_enc_kdc_rep_part *, ref),
   return p;
 }
 
-int ktest_equal_priv(DECLARG(krb5_priv *, ref),
-		     DECLARG(krb5_priv *, var))
-     OLDDECLARG(krb5_priv *, ref)
-     OLDDECLARG(krb5_priv *, var)
+int ktest_equal_priv(ref, var)
+     krb5_priv * ref;
+     krb5_priv * var;
 {
   int p=TRUE;
   if(ref==var) return TRUE;
@@ -220,10 +205,9 @@ int ktest_equal_priv(DECLARG(krb5_priv *, ref),
   return p;
 }
 
-int ktest_equal_cred(DECLARG(krb5_cred *, ref),
-		     DECLARG(krb5_cred *, var))
-     OLDDECLARG(krb5_cred *, ref)
-     OLDDECLARG(krb5_cred *, var)
+int ktest_equal_cred(ref, var)
+     krb5_cred * ref;
+     krb5_cred * var;
 {
   int p=TRUE;
   if(ref==var) return TRUE;
@@ -233,10 +217,9 @@ int ktest_equal_cred(DECLARG(krb5_cred *, ref),
   return p;
 }
 
-int ktest_equal_error(DECLARG(krb5_error *, ref),
-		      DECLARG(krb5_error *, var))
-     OLDDECLARG(krb5_error *, ref)
-     OLDDECLARG(krb5_error *, var)
+int ktest_equal_error(ref, var)
+     krb5_error * ref;
+     krb5_error * var;
 {
   int p=TRUE;
   if(ref==var) return TRUE;
@@ -253,10 +236,9 @@ int ktest_equal_error(DECLARG(krb5_error *, ref),
   return p;
 }
 
-int ktest_equal_ap_req(DECLARG(krb5_ap_req *, ref),
-		       DECLARG(krb5_ap_req *, var))
-     OLDDECLARG(krb5_ap_req *, ref)
-     OLDDECLARG(krb5_ap_req *, var)
+int ktest_equal_ap_req(ref, var)
+     krb5_ap_req * ref;
+     krb5_ap_req * var;
 {
   int p=TRUE;
   if(ref==var) return TRUE;
@@ -267,10 +249,9 @@ int ktest_equal_ap_req(DECLARG(krb5_ap_req *, ref),
   return p;
 }
 
-int ktest_equal_ap_rep(DECLARG(krb5_ap_rep *, ref),
-		       DECLARG(krb5_ap_rep *, var))
-     OLDDECLARG(krb5_ap_rep *, ref)
-     OLDDECLARG(krb5_ap_rep *, var)
+int ktest_equal_ap_rep(ref, var)
+     krb5_ap_rep * ref;
+     krb5_ap_rep * var;
 {
   int p=TRUE;
   if(ref==var) return TRUE;
@@ -279,10 +260,9 @@ int ktest_equal_ap_rep(DECLARG(krb5_ap_rep *, ref),
   return p;
 }
 
-int ktest_equal_ap_rep_enc_part(DECLARG(krb5_ap_rep_enc_part *, ref),
-				DECLARG(krb5_ap_rep_enc_part *, var))
-     OLDDECLARG(krb5_ap_rep_enc_part *, ref)
-     OLDDECLARG(krb5_ap_rep_enc_part *, var)
+int ktest_equal_ap_rep_enc_part(ref, var)
+     krb5_ap_rep_enc_part * ref;
+     krb5_ap_rep_enc_part * var;
 {
   int p=TRUE;
   if(ref==var) return TRUE;
@@ -294,10 +274,9 @@ int ktest_equal_ap_rep_enc_part(DECLARG(krb5_ap_rep_enc_part *, ref),
   return p;
 }
 
-int ktest_equal_safe(DECLARG(krb5_safe *, ref),
-		     DECLARG(krb5_safe *, var))
-     OLDDECLARG(krb5_safe *, ref)
-     OLDDECLARG(krb5_safe *, var)
+int ktest_equal_safe(ref, var)
+     krb5_safe * ref;
+     krb5_safe * var;
 {
   int p=TRUE;
   if(ref==var) return TRUE;
@@ -313,10 +292,9 @@ int ktest_equal_safe(DECLARG(krb5_safe *, ref),
 }
 
 
-int ktest_equal_enc_cred_part(DECLARG(krb5_cred_enc_part *, ref),
-			      DECLARG(krb5_cred_enc_part *, var))
-     OLDDECLARG(krb5_cred_enc_part *, ref)
-     OLDDECLARG(krb5_cred_enc_part *, var)
+int ktest_equal_enc_cred_part(ref, var)
+     krb5_cred_enc_part * ref;
+     krb5_cred_enc_part * var;
 {
   int p=TRUE;
   if(ref==var) return TRUE;
@@ -330,10 +308,9 @@ int ktest_equal_enc_cred_part(DECLARG(krb5_cred_enc_part *, ref),
   return p;
 }
 
-int ktest_equal_enc_priv_part(DECLARG(krb5_priv_enc_part *, ref),
-			      DECLARG(krb5_priv_enc_part *, var))
-     OLDDECLARG(krb5_priv_enc_part *, ref)
-     OLDDECLARG(krb5_priv_enc_part *, var)
+int ktest_equal_enc_priv_part(ref, var)
+     krb5_priv_enc_part * ref;
+     krb5_priv_enc_part * var;
 {
   int p=TRUE;
   if(ref==var) return TRUE;
@@ -347,10 +324,9 @@ int ktest_equal_enc_priv_part(DECLARG(krb5_priv_enc_part *, ref),
   return p;
 }
 
-int ktest_equal_as_rep(DECLARG(krb5_kdc_rep *, ref),
-		       DECLARG(krb5_kdc_rep *, var))
-     OLDDECLARG(krb5_kdc_rep *, ref)
-     OLDDECLARG(krb5_kdc_rep *, var)
+int ktest_equal_as_rep(ref, var)
+     krb5_kdc_rep * ref;
+     krb5_kdc_rep * var;
 {
   int p=TRUE;
   if(ref==var) return TRUE;
@@ -364,18 +340,16 @@ int ktest_equal_as_rep(DECLARG(krb5_kdc_rep *, ref),
   return p;
 }
 
-int ktest_equal_tgs_rep(DECLARG(krb5_kdc_rep *, ref),
-			DECLARG(krb5_kdc_rep *, var))
-     OLDDECLARG(krb5_kdc_rep *, ref)
-     OLDDECLARG(krb5_kdc_rep *, var)
+int ktest_equal_tgs_rep(ref, var)
+     krb5_kdc_rep * ref;
+     krb5_kdc_rep * var;
 {
   return ktest_equal_as_rep(ref,var);
 }
 
-int ktest_equal_as_req(DECLARG(krb5_kdc_req *, ref),
-		       DECLARG(krb5_kdc_req *, var))
-     OLDDECLARG(krb5_kdc_req *, ref)
-     OLDDECLARG(krb5_kdc_req *, var)
+int ktest_equal_as_req(ref, var)
+     krb5_kdc_req * ref;
+     krb5_kdc_req * var;
 {
   int p=TRUE;
   if(ref==var) return TRUE;
@@ -397,18 +371,16 @@ int ktest_equal_as_req(DECLARG(krb5_kdc_req *, ref),
   return p;
 }
 
-int ktest_equal_tgs_req(DECLARG(krb5_kdc_req *, ref),
-			DECLARG(krb5_kdc_req *, var))
-     OLDDECLARG(krb5_kdc_req *, ref)
-     OLDDECLARG(krb5_kdc_req *, var)
+int ktest_equal_tgs_req(ref, var)
+     krb5_kdc_req * ref;
+     krb5_kdc_req * var;
 {
   return ktest_equal_as_req(ref,var);
 }
 
-int ktest_equal_kdc_req_body(DECLARG(krb5_kdc_req *, ref),
-			     DECLARG(krb5_kdc_req *, var))
-     OLDDECLARG(krb5_kdc_req *, ref)
-     OLDDECLARG(krb5_kdc_req *, var)
+int ktest_equal_kdc_req_body(ref, var)
+     krb5_kdc_req * ref;
+     krb5_kdc_req * var;
 {
   int p=TRUE;
   if(ref==var) return TRUE;
@@ -428,10 +400,9 @@ int ktest_equal_kdc_req_body(DECLARG(krb5_kdc_req *, ref),
   return p;
 }
 
-int ktest_equal_last_req_entry(DECLARG(krb5_last_req_entry *, ref),
-			       DECLARG(krb5_last_req_entry *, var))
-     OLDDECLARG(krb5_last_req_entry *, ref)
-     OLDDECLARG(krb5_last_req_entry *, var)
+int ktest_equal_last_req_entry(ref, var)
+     krb5_last_req_entry * ref;
+     krb5_last_req_entry * var;
 {
   int p=TRUE;
   if(ref==var) return TRUE;
@@ -441,10 +412,9 @@ int ktest_equal_last_req_entry(DECLARG(krb5_last_req_entry *, ref),
   return p;
 }
 
-int ktest_equal_pa_data(DECLARG(krb5_pa_data *, ref),
-			DECLARG(krb5_pa_data *, var))
-     OLDDECLARG(krb5_pa_data *, ref)
-     OLDDECLARG(krb5_pa_data *, var)
+int ktest_equal_pa_data(ref, var)
+     krb5_pa_data * ref;
+     krb5_pa_data * var;
 {
   int p=TRUE;
   if(ref==var) return TRUE;
@@ -454,10 +424,9 @@ int ktest_equal_pa_data(DECLARG(krb5_pa_data *, ref),
   return p;
 }
 
-int ktest_equal_cred_info(DECLARG(krb5_cred_info *, ref),
-			  DECLARG(krb5_cred_info *, var))
-     OLDDECLARG(krb5_cred_info *, ref)
-     OLDDECLARG(krb5_cred_info *, var)
+int ktest_equal_cred_info(ref, var)
+     krb5_cred_info * ref;
+     krb5_cred_info * var;
 {
   int p=TRUE;
   if(ref==var) return TRUE;
@@ -472,10 +441,9 @@ int ktest_equal_cred_info(DECLARG(krb5_cred_info *, ref),
   return p;
 }
 
-int ktest_equal_passwd_phrase_element(DECLARG(passwd_phrase_element *, ref),
-				      DECLARG(passwd_phrase_element *, var))
-     OLDDECLARG(passwd_phrase_element *, ref)
-     OLDDECLARG(passwd_phrase_element *, var)
+int ktest_equal_passwd_phrase_element(ref, var)
+     passwd_phrase_element * ref;
+     passwd_phrase_element * var;
 {
   int p=TRUE;
   if(ref==var) return TRUE;
@@ -485,10 +453,9 @@ int ktest_equal_passwd_phrase_element(DECLARG(passwd_phrase_element *, ref),
   return p;
 }
 
-int ktest_equal_krb5_pwd_data(DECLARG(krb5_pwd_data *, ref),
-			      DECLARG(krb5_pwd_data *, var))
-     OLDDECLARG(krb5_pwd_data *, ref)
-     OLDDECLARG(krb5_pwd_data *, var)
+int ktest_equal_krb5_pwd_data(ref, var)
+     krb5_pwd_data * ref;
+     krb5_pwd_data * var;
 {
   int p=TRUE;
   if(ref==var) return TRUE;
@@ -500,12 +467,10 @@ int ktest_equal_krb5_pwd_data(DECLARG(krb5_pwd_data *, ref),
 
 /**** arrays ****************************************************************/
 
-int ktest_equal_array_of_data(DECLARG(const int , length),
-			      DECLARG(krb5_data *, ref),
-			      DECLARG(krb5_data *, var))
-     OLDDECLARG(const int , length)
-     OLDDECLARG(krb5_data *, ref)
-     OLDDECLARG(krb5_data *, var)
+int ktest_equal_array_of_data(length, ref, var)
+     const int length;
+     krb5_data * ref;
+     krb5_data * var;
 {
   int i,p=TRUE;
 
@@ -517,12 +482,10 @@ int ktest_equal_array_of_data(DECLARG(const int , length),
   return p;
 }
 
-int ktest_equal_array_of_octet(DECLARG(const int , length),
-			       DECLARG(krb5_octet *, ref),
-			       DECLARG(krb5_octet *, var))
-     OLDDECLARG(const int , length)
-     OLDDECLARG(krb5_octet *, ref)
-     OLDDECLARG(krb5_octet *, var)
+int ktest_equal_array_of_octet(length, ref, var)
+     const int length;
+     krb5_octet * ref;
+     krb5_octet * var;
 {
   int i, p=TRUE;
 
@@ -533,12 +496,10 @@ int ktest_equal_array_of_octet(DECLARG(const int , length),
   return p;
 }
 
-int ktest_equal_array_of_char(DECLARG(const int , length),
-			      DECLARG(char *, ref),
-			      DECLARG(char *, var))
-     OLDDECLARG(const int , length)
-     OLDDECLARG(char *, ref)
-     OLDDECLARG(char *, var)
+int ktest_equal_array_of_char(length, ref, var)
+     const int length;
+     char * ref;
+     char * var;
 {
   int i, p=TRUE;
 
@@ -549,12 +510,10 @@ int ktest_equal_array_of_char(DECLARG(const int , length),
   return p;
 }
 
-int ktest_equal_array_of_enctype(DECLARG(const int , length),
-				 DECLARG(krb5_enctype *, ref),
-				 DECLARG(krb5_enctype *, var))
-     OLDDECLARG(const int , length)
-     OLDDECLARG(krb5_enctype *, ref)
-     OLDDECLARG(krb5_enctype *, var)
+int ktest_equal_array_of_enctype(length, ref, var)
+     const int length;
+     krb5_enctype * ref;
+     krb5_enctype * var;
 {
   int i, p=TRUE;
 
@@ -576,58 +535,51 @@ for(i=0; ref[i] != NULL && var[i] != NULL; i++)\
 if(ref[i] == NULL && var[i] == NULL) return p;\
 else return FALSE
 
-int ktest_equal_authorization_data(DECLARG(krb5_authdata **, ref),
-				   DECLARG(krb5_authdata **, var))
-     OLDDECLARG(krb5_authdata **, ref)
-     OLDDECLARG(krb5_authdata **, var)
+int ktest_equal_authorization_data(ref, var)
+     krb5_authdata ** ref;
+     krb5_authdata ** var;
 {
   array_compare(ktest_equal_authdata);
 }
 
-int ktest_equal_addresses(DECLARG(krb5_address **, ref),
-			  DECLARG(krb5_address **, var))
-     OLDDECLARG(krb5_address **, ref)
-     OLDDECLARG(krb5_address **, var)
+int ktest_equal_addresses(ref, var)
+     krb5_address ** ref;
+     krb5_address ** var;
 {
   array_compare(ktest_equal_address);
 }
 
-int ktest_equal_last_req(DECLARG(krb5_last_req_entry **, ref),
-			 DECLARG(krb5_last_req_entry **, var))
-     OLDDECLARG(krb5_last_req_entry **, ref)
-     OLDDECLARG(krb5_last_req_entry **, var)
+int ktest_equal_last_req(ref, var)
+     krb5_last_req_entry ** ref;
+     krb5_last_req_entry ** var;
 {
   array_compare(ktest_equal_last_req_entry);
 }
 
-int ktest_equal_sequence_of_ticket(DECLARG(krb5_ticket **, ref),
-				   DECLARG(krb5_ticket **, var))
-     OLDDECLARG(krb5_ticket **, ref)
-     OLDDECLARG(krb5_ticket **, var)
+int ktest_equal_sequence_of_ticket(ref, var)
+     krb5_ticket ** ref;
+     krb5_ticket ** var;
 {
   array_compare(ktest_equal_ticket);
 }
 
-int ktest_equal_sequence_of_pa_data(DECLARG(krb5_pa_data **, ref),
-				    DECLARG(krb5_pa_data **, var))
-     OLDDECLARG(krb5_pa_data **, ref)
-     OLDDECLARG(krb5_pa_data **, var)
+int ktest_equal_sequence_of_pa_data(ref, var)
+     krb5_pa_data ** ref;
+     krb5_pa_data ** var;
 {
   array_compare(ktest_equal_pa_data);
 }
 
-int ktest_equal_sequence_of_cred_info(DECLARG(krb5_cred_info **, ref),
-				      DECLARG(krb5_cred_info **, var))
-     OLDDECLARG(krb5_cred_info **, ref)
-     OLDDECLARG(krb5_cred_info **, var)
+int ktest_equal_sequence_of_cred_info(ref, var)
+     krb5_cred_info ** ref;
+     krb5_cred_info ** var;
 {
   array_compare(ktest_equal_cred_info);
 }
 
-int ktest_equal_array_of_passwd_phrase_element(DECLARG(passwd_phrase_element **, ref),
-					       DECLARG(passwd_phrase_element **, var))
-     OLDDECLARG(passwd_phrase_element **, ref)
-     OLDDECLARG(passwd_phrase_element **, var)
+int ktest_equal_array_of_passwd_phrase_element(ref, var)
+     passwd_phrase_element ** ref;
+     passwd_phrase_element ** var;
 {
   array_compare(ktest_equal_passwd_phrase_element);
 }

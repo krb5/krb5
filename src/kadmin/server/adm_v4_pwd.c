@@ -249,13 +249,13 @@ struct cpw_keyproc_arg *cpw_key;
 
     dlen = htons(dlen);
 
-    if (krb5_net_write(client_server_info.client_socket, 
+    if (krb5_net_write(context, client_server_info.client_socket, 
 			(char *) &dlen, 2) < 0) {
 	syslog(LOG_ERR, "process_v4_kpasswd: Error writing dlen to client");
 	(void) close(client_server_info.client_socket);
     }
     
-    if (krb5_net_write(client_server_info.client_socket, 
+    if (krb5_net_write(context, client_server_info.client_socket, 
 			(char *) *dat, *dat_len) < 0) {
 	syslog(LOG_ERR, "writing to client: %s",error_message(errno));
 	(void) close(client_server_info.client_socket);
@@ -268,9 +268,10 @@ struct cpw_keyproc_arg *cpw_key;
 }
 
 krb5_kvno
-princ_exists(principal, entry)
-krb5_principal principal;
-krb5_db_entry *entry;
+princ_exists(context, principal, entry)
+    krb5_context context;
+    krb5_principal principal;
+    krb5_db_entry *entry;
 {
     int nprincs = 1;
     krb5_boolean more;
@@ -278,7 +279,8 @@ krb5_db_entry *entry;
     krb5_kvno vno;
 
     nprincs = 1;
-    if (retval = krb5_db_get_principal(principal, entry, &nprincs, &more)) {
+    if (retval = krb5_db_get_principal(context, principal, entry, 
+				       &nprincs, &more)) {
         return 0;
     }
 
@@ -343,7 +345,7 @@ int *outlen;
                         /* Zero Next Output Entry */
     memset((char *) &entry, 0, sizeof(entry));
 
-    if (retval = krb5_parse_name(v5_principal, &entry.principal)) {
+    if (retval = krb5_parse_name(context, v5_principal, &entry.principal)) {
         syslog(LOG_ERR, "adm_v4_cpw - Error parsing %s",
                 v5_principal);
         return(1);
@@ -374,7 +376,7 @@ int *outlen;
  
     memcpy(v5_keyblock->contents, v4_clear_key, 8);
 
-    if (retval = krb5_kdb_encrypt_key(&master_encblock,
+    if (retval = krb5_kdb_encrypt_key(context, &master_encblock,
                                   v5_keyblock,
                                   &entry.key)) {
 	syslog(LOG_ERR, 
@@ -389,7 +391,7 @@ int *outlen;
 #ifdef SANDIA
     entry.attributes &= ~KRB5_KDB_REQUIRES_PWCHANGE;
 #endif
-    if (retval = krb5_timeofday(&entry.mod_date)) {
+    if (retval = krb5_timeofday(context, &entry.mod_date)) {
         syslog(LOG_ERR, "adm_v4_cpw - Error while fetching date");
         return(1);
     }
@@ -399,7 +401,7 @@ int *outlen;
     entry.mod_name = entry.principal; /* Should be Person who did Action */
 
         /* Write the Modified Principal to the V5 Database */
-    if (retval = krb5_db_put_principal(&entry, &one)) {
+    if (retval = krb5_db_put_principal(context, &entry, &one)) {
         syslog(LOG_ERR, 
 		"adm_v4_cpw - Error %d while Entering Principal for '%s'", 
 		retval, v5_principal);

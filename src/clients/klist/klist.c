@@ -39,7 +39,9 @@ char *defname;
 time_t now;
 
 void
-show_credential PROTOTYPE((krb5_creds *));
+show_credential 
+	PROTOTYPE((krb5_context,
+		   krb5_creds *));
 
 void
 main(argc, argv)
@@ -55,8 +57,9 @@ main(argc, argv)
     char *cache_name;
     krb5_principal princ;
     krb5_flags flags;
+    krb5_context kcontext;
 
-    krb5_init_ets();
+    krb5_init_ets(kcontext);
 
     time(&now);
     
@@ -74,7 +77,7 @@ main(argc, argv)
 	    if (cache == NULL) {
 		cache_name = optarg;
 		
-		code = krb5_cc_resolve (cache_name, &cache);
+		code = krb5_cc_resolve (kcontext, cache_name, &cache);
 		if (code != 0) {
 		    com_err(progname, code, "while resolving %s", cache_name);
 		    errflg++;
@@ -99,50 +102,50 @@ main(argc, argv)
 	exit(2);
     }
     if (cache == NULL) {
-	if (code = krb5_cc_default(&cache)) {
+	if (code = krb5_cc_default(kcontext, &cache)) {
 	    com_err(progname, code, "while getting default ccache");
 	    exit(1);
 	}
     }
 
     flags = 0;				/* turns off OPENCLOSE mode */
-    if (code = krb5_cc_set_flags(cache, flags)) {
+    if (code = krb5_cc_set_flags(kcontext, cache, flags)) {
 	if (code == ENOENT) {
 	    com_err(progname, code, "(ticket cache %s)",
-		    krb5_cc_get_name(cache));
+		    krb5_cc_get_name(kcontext, cache));
 	} else
 	    com_err(progname, code,
 		    "while setting cache flags (ticket cache %s)",
-		    krb5_cc_get_name(cache));
+		    krb5_cc_get_name(kcontext, cache));
 	exit(1);
     }
-    if (code = krb5_cc_get_principal(cache, &princ)) {
+    if (code = krb5_cc_get_principal(kcontext, cache, &princ)) {
 	com_err(progname, code, "while retrieving principal name");
 	exit(1);
     }
-    if (code = krb5_unparse_name(princ, &defname)) {
+    if (code = krb5_unparse_name(kcontext, princ, &defname)) {
 	com_err(progname, code, "while unparsing principal name");
 	exit(1);
     }
     printf("Ticket cache: %s\nDefault principal: %s\n\n",
-           krb5_cc_get_name(cache), defname);
-    if (code = krb5_cc_start_seq_get(cache, &cur)) {
+           krb5_cc_get_name(kcontext, cache), defname);
+    if (code = krb5_cc_start_seq_get(kcontext, cache, &cur)) {
 	com_err(progname, code, "while starting to retrieve tickets");
 	exit(1);
     }
     fputs("  Valid starting       Expires          Service principal\n",
 	  stdout);
-    while (!(code = krb5_cc_next_cred(cache, &cur, &creds))) {
-	show_credential(&creds);
-	krb5_free_cred_contents(&creds);
+    while (!(code = krb5_cc_next_cred(kcontext, cache, &cur, &creds))) {
+	show_credential(kcontext, &creds);
+	krb5_free_cred_contents(kcontext, &creds);
     }
     if (code == KRB5_CC_END) {
-	if (code = krb5_cc_end_seq_get(cache, &cur)) {
+	if (code = krb5_cc_end_seq_get(kcontext, cache, &cur)) {
 	    com_err(progname, code, "while finishing ticket retrieval");
 	    exit(1);
 	}
 	flags = KRB5_TC_OPENCLOSE;	/* turns on OPENCLOSE mode */
-	if (code = krb5_cc_set_flags(cache, flags)) {
+	if (code = krb5_cc_set_flags(kcontext, cache, flags)) {
 	    com_err(progname, code, "while closing ccache");
 	    exit(1);
 	}
@@ -153,8 +156,9 @@ main(argc, argv)
     }	
 }
 
-char *flags_string(cred)
-register krb5_creds *cred;
+char *
+flags_string(cred)
+    register krb5_creds *cred;
 {
     static char buf[32];
     int i = 0;
@@ -188,7 +192,8 @@ register krb5_creds *cred;
 static  char *Month_names[] = { "Jan", "Feb", "Mar", "Apr", "May", "Jun",
 				"Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
 
-void printtime(tv)
+void 
+printtime(tv)
     time_t tv;
 {
     struct tm *stime;
@@ -204,19 +209,20 @@ void printtime(tv)
 }
 
 void
-show_credential(cred)
-register krb5_creds *cred;
+show_credential(kcontext, cred)
+    krb5_context kcontext;
+    register krb5_creds *cred;
 {
     krb5_error_code retval;
     char *name, *sname, *flags;
     int	first = 1;
 
-    retval = krb5_unparse_name(cred->client, &name);
+    retval = krb5_unparse_name(kcontext, cred->client, &name);
     if (retval) {
 	com_err(progname, retval, "while unparsing client name");
 	return;
     }
-    retval = krb5_unparse_name(cred->server, &sname);
+    retval = krb5_unparse_name(kcontext, cred->server, &sname);
     if (retval) {
 	com_err(progname, retval, "while unparsing server name");
 	free(name);

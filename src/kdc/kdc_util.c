@@ -68,7 +68,7 @@ krb5_authdata ***output;
 	    /* now walk & copy */
 	    retdata[i] = (krb5_authdata *)malloc(sizeof(*retdata[i]));
 	    if (!retdata[i]) {
-		krb5_free_authdata(retdata);
+		krb5_free_authdata(kdc_context, retdata);
 		return ENOMEM;
 	    }
 	    *retdata[i] = **ptr;
@@ -76,7 +76,7 @@ krb5_authdata ***output;
 		  (krb5_octet *)malloc(retdata[i]->length))) {
 		krb5_xfree(retdata[i]);
 		retdata[i] = 0;
-		krb5_free_authdata(retdata);
+		krb5_free_authdata(kdc_context, retdata);
 		return ENOMEM;
 	    }
 	    memcpy((char *) retdata[i]->contents,
@@ -91,13 +91,12 @@ krb5_authdata ***output;
 }
 
 krb5_boolean
-realm_compare(DECLARG(krb5_principal, princ1), 
-              DECLARG(krb5_principal, princ2))
-OLDDECLARG(krb5_principal, princ1)
-OLDDECLARG(krb5_principal, princ2)
+realm_compare(princ1, princ2)
+    krb5_principal princ1;
+    krb5_principal princ2;
 {
-  krb5_data *realm1 = krb5_princ_realm(princ1);
-  krb5_data *realm2 = krb5_princ_realm(princ2);
+  krb5_data *realm1 = krb5_princ_realm(kdc_context, princ1);
+  krb5_data *realm2 = krb5_princ_realm(kdc_context, princ2);
 
   return((realm1->length == realm2->length) &&
          !memcmp(realm1->data, realm2->data, realm1->length));
@@ -116,21 +115,19 @@ struct kparg {
 
 #include <krb5/widen.h>
 static krb5_error_code
-kdc_rdreq_keyproc(DECLARG(krb5_pointer, keyprocarg),
-		  DECLARG(krb5_principal, principal),
-		  DECLARG(krb5_kvno, vno),
-		  DECLARG(krb5_keyblock **, key))
-OLDDECLARG(krb5_pointer, keyprocarg)
-OLDDECLARG(krb5_principal, principal)
-OLDDECLARG(krb5_kvno, vno)
-OLDDECLARG(krb5_keyblock **, key)
+kdc_rdreq_keyproc(context, keyprocarg, principal, vno, key)
+    krb5_context context;
+    krb5_pointer keyprocarg;
+    krb5_principal principal;
+    krb5_kvno vno;
+    krb5_keyblock ** key;
 #include <krb5/narrow.h>
 {
     register struct kparg *whoisit = (struct kparg *)keyprocarg;
     char	*sname;
 
     if (vno != whoisit->kvno) {
-	if (!krb5_unparse_name(principal, &sname)) {
+	if (!krb5_unparse_name(context, principal, &sname)) {
 	    syslog(LOG_ERR,
 		   "TGS_REQ: BAD KEY VNO: server='%s', expecting %d, got %d",
 		   sname, vno, whoisit->kvno);
@@ -138,7 +135,7 @@ OLDDECLARG(krb5_keyblock **, key)
 	}
 	return KRB5KRB_AP_ERR_BADKEYVER;
     }
-    return(krb5_copy_keyblock(whoisit->key, key));
+    return(krb5_copy_keyblock(context, whoisit->key, key));
 }
 
 /*
@@ -148,9 +145,9 @@ OLDDECLARG(krb5_keyblock **, key)
 krb5_boolean krb5_is_tgs_principal(principal)
 	krb5_principal	principal;
 {
-	if ((krb5_princ_component(principal, 0)->length ==
+	if ((krb5_princ_component(kdc_context, principal, 0)->length ==
 	     KRB5_TGS_NAME_SIZE) &&
-	    (!memcmp(krb5_princ_component(principal, 0)->data,
+	    (!memcmp(krb5_princ_component(kdc_context, principal, 0)->data,
 		     KRB5_TGS_NAME, KRB5_TGS_NAME_SIZE)))
 		return TRUE;
 	return FALSE;
@@ -171,7 +168,7 @@ krb5_checksum *dest;
 	krb5_error_code retval;
 
 	/* first compute checksum */
-	if (retval = krb5_calculate_checksum(type, 
+	if (retval = krb5_calculate_checksum(kdc_context, type, 
  					     source->data, 
  					     source->length,
 					     authdat->ticket->enc_part2->session->contents, /* seed */
@@ -254,21 +251,21 @@ krb5_tkt_authent **ret_authdat;
        
        we set a flag here for checking below.
        */
-    if ((krb5_princ_realm(apreq->ticket->server)->length !=
-	 krb5_princ_realm(tgs_server)->length) ||
-	memcmp(krb5_princ_realm(apreq->ticket->server)->data,
-	       krb5_princ_realm(tgs_server)->data,
-	       krb5_princ_realm(tgs_server)->length))
+    if ((krb5_princ_realm(kdc_context, apreq->ticket->server)->length !=
+	 krb5_princ_realm(kdc_context, tgs_server)->length) ||
+	memcmp(krb5_princ_realm(kdc_context, apreq->ticket->server)->data,
+	       krb5_princ_realm(kdc_context, tgs_server)->data,
+	       krb5_princ_realm(kdc_context, tgs_server)->length))
 	foreign_server = TRUE;
 
-    retval = krb5_rd_req_decoded(apreq, apreq->ticket->server,
+    retval = krb5_rd_req_decoded(kdc_context, apreq, apreq->ticket->server,
 				 from->address,
 				 0,	/* no fetchfrom */
 				 kdc_rdreq_keyproc,
 				 (krb5_pointer)&who,
 				 kdc_rcache,
 				 &nauthdat);
-    krb5_free_keyblock(who.key);
+    krb5_free_keyblock(kdc_context, who.key);
 
     if (retval) {
 	apreq->ticket = 0;		/* Caller will free the ticket */
@@ -289,8 +286,8 @@ krb5_tkt_authent **ret_authdat;
 
     /* make sure the client is of proper lineage (see above) */
     if (foreign_server) {
-	krb5_data *tkt_realm = krb5_princ_realm(ticket_enc->client);
-	krb5_data *tgs_realm = krb5_princ_realm(tgs_server);
+	krb5_data *tkt_realm = krb5_princ_realm(kdc_context, ticket_enc->client);
+	krb5_data *tgs_realm = krb5_princ_realm(kdc_context, tgs_server);
 	if (tkt_realm->length == tgs_realm->length &&
 	    !memcmp(tkt_realm->data, tgs_realm->data, tgs_realm->length)) {
 	    /* someone in a foreign realm claiming to be local */
@@ -315,7 +312,7 @@ krb5_tkt_authent **ret_authdat;
     }
 
     if (!(our_cksum.contents = (krb5_octet *)
-	  malloc(krb5_checksum_size(our_cksum.checksum_type)))) {
+	  malloc(krb5_checksum_size(kdc_context, our_cksum.checksum_type)))) {
 	retval = ENOMEM;
 	goto cleanup;
     }
@@ -344,9 +341,9 @@ krb5_tkt_authent **ret_authdat;
     
 cleanup:
     if (apreq)
-	krb5_free_ap_req(apreq);
+	krb5_free_ap_req(kdc_context, apreq);
     if (scratch)
-	krb5_free_data(scratch);
+	krb5_free_data(kdc_context, scratch);
     return retval;
 }
 
@@ -361,25 +358,25 @@ krb5_kvno *kvno;
     krb5_db_entry server;
     krb5_boolean more;
 
-    if (krb5_principal_compare(tgs_server, ticket->server)) {
+    if (krb5_principal_compare(kdc_context, tgs_server, ticket->server)) {
 	*kvno = tgs_kvno;
-	return krb5_copy_keyblock(&tgs_key, key);
+	return krb5_copy_keyblock(kdc_context, &tgs_key, key);
     } else {
 	nprincs = 1;
 
-	if (retval = krb5_db_get_principal(ticket->server,
+	if (retval = krb5_db_get_principal(kdc_context, ticket->server,
 					   &server, &nprincs,
 					   &more)) {
 	    return(retval);
 	}
 	if (more) {
-	    krb5_db_free_principal(&server, nprincs);
+	    krb5_db_free_principal(kdc_context, &server, nprincs);
 	    return(KRB5KDC_ERR_PRINCIPAL_NOT_UNIQUE);
 	} else if (nprincs != 1) {
 	    char *sname;
 
-	    krb5_db_free_principal(&server, nprincs);
-	    if (!krb5_unparse_name(ticket->server, &sname)) {
+	    krb5_db_free_principal(kdc_context, &server, nprincs);
+	    if (!krb5_unparse_name(kdc_context, ticket->server, &sname)) {
 		syslog(LOG_ERR, "TGS_REQ: UNKNOWN SERVER: server='%s'",
 		       sname);
 		free(sname);
@@ -389,11 +386,11 @@ krb5_kvno *kvno;
 	/* convert server.key into a real key (it may be encrypted
 	   in the database) */
 	if (*key = (krb5_keyblock *)malloc(sizeof **key)) {
-	    retval = KDB_CONVERT_KEY_OUTOF_DB(&server.key, *key);
+	    retval = KDB_CONVERT_KEY_OUTOF_DB(kdc_context, &server.key, *key);
 	} else
 	    retval = ENOMEM;
 	*kvno = server.kvno;
-	krb5_db_free_principal(&server, nprincs);
+	krb5_db_free_principal(kdc_context, &server, nprincs);
 	return retval;
     }
 }
@@ -521,16 +518,12 @@ char	*r2;
  */
 
 krb5_error_code 
-add_to_transited(DECLARG(krb5_data *, tgt_trans),
-                 DECLARG(krb5_data *, new_trans),
-                 DECLARG(krb5_principal, tgs),
-                 DECLARG(krb5_principal, client),
-                 DECLARG(krb5_principal, server))
-OLDDECLARG(krb5_data *, tgt_trans)
-OLDDECLARG(krb5_data *, new_trans)
-OLDDECLARG(krb5_principal, tgs)
-OLDDECLARG(krb5_principal, client)
-OLDDECLARG(krb5_principal, server)
+add_to_transited(tgt_trans, new_trans, tgs, client, server)
+    krb5_data * tgt_trans;
+    krb5_data * new_trans;
+    krb5_principal tgs;
+    krb5_principal client;
+    krb5_principal server;
 {
   char        *realm;
   char        *trans;
@@ -547,11 +540,12 @@ OLDDECLARG(krb5_principal, server)
   int         pl, pl1;       /* prefix length                               */
   int         added;         /* TRUE = new realm has been added             */
 
-  if (!(realm = (char *) malloc(krb5_princ_realm(tgs)->length+1))) {
+  if (!(realm = (char *) malloc(krb5_princ_realm(kdc_context, tgs)->length+1))) {
     return(ENOMEM);
   }
-  memcpy(realm, krb5_princ_realm(tgs)->data, krb5_princ_realm(tgs)->length);
-  realm[krb5_princ_realm(tgs)->length] = '\0';
+  memcpy(realm, krb5_princ_realm(kdc_context, tgs)->data, 
+	 krb5_princ_realm(kdc_context, tgs)->length);
+  realm[krb5_princ_realm(kdc_context, tgs)->length] = '\0';
 
   if (!(otrans = (char *) malloc(tgt_trans->length+1))) {
     return(ENOMEM);
@@ -583,10 +577,10 @@ OLDDECLARG(krb5_principal, server)
 
   if (otrans[0] == ',')  otrans++;
              
-  added = (krb5_princ_realm(client)->length == strlen(realm) &&
-           !strncmp(krb5_princ_realm(client)->data, realm, strlen(realm))) ||
-          (krb5_princ_realm(server)->length == strlen(realm) &&
-           !strncmp(krb5_princ_realm(server)->data, realm, strlen(realm)));
+  added = (krb5_princ_realm(kdc_context, client)->length == strlen(realm) &&
+           !strncmp(krb5_princ_realm(kdc_context, client)->data, realm, strlen(realm))) ||
+          (krb5_princ_realm(kdc_context, server)->length == strlen(realm) &&
+           !strncmp(krb5_princ_realm(kdc_context, server)->data, realm, strlen(realm)));
 
   while (current[0]) {
 
@@ -1034,7 +1028,7 @@ char **status;
      * originally requested)
      */
     if (request->kdc_options & NO_TGT_OPTION) {
-	if (!krb5_principal_compare(ticket->server, request->server)) {
+	if (!krb5_principal_compare(kdc_context, ticket->server, request->server)) {
 	    *status = "SERVER DIDN'T MATCH TICKET FOR RENEW/FORWARD/ETC";
 	    return(KDC_ERR_SERVER_NOMATCH);
 	}
@@ -1054,7 +1048,7 @@ char **status;
 	 */
 
 	/* Make sure there are two components... */
-	if (krb5_princ_size(ticket->server) != 2) {
+	if (krb5_princ_size(kdc_context, ticket->server) != 2) {
 	    *status = "BAD TGS SERVER LENGTH";
 	    return KRB_AP_ERR_NOT_US;
 	}
@@ -1064,11 +1058,11 @@ char **status;
 	    return KRB_AP_ERR_NOT_US;
 	}
 	/* ...and that the second component matches the server realm... */
-	if ((krb5_princ_component(ticket->server, 1)->length !=
-	     krb5_princ_realm(request->server)->length) ||
-	    memcmp(krb5_princ_component(ticket->server, 1)->data,
-		   krb5_princ_realm(request->server)->data,
-		   krb5_princ_realm(request->server)->length)) {
+	if ((krb5_princ_component(kdc_context, ticket->server, 1)->length !=
+	     krb5_princ_realm(kdc_context, request->server)->length) ||
+	    memcmp(krb5_princ_component(kdc_context, ticket->server, 1)->data,
+		   krb5_princ_realm(kdc_context, request->server)->data,
+		   krb5_princ_realm(kdc_context, request->server)->length)) {
 	    *status = "BAD TGS SERVER INSTANCE";
 	    return KRB_AP_ERR_NOT_US;
 	}
@@ -1216,7 +1210,7 @@ char **status;
 	    *status = "NO_2ND_TKT";
 	    return(KDC_ERR_BADOPTION);
 	}
-	if (!krb5_principal_compare(request->second_ticket[st_idx]->server,
+	if (!krb5_principal_compare(kdc_context, request->second_ticket[st_idx]->server,
 				    tgs_server)) {
 		*status = "2ND_TKT_NOT_TGS";
 		return(KDC_ERR_POLICY);

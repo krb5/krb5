@@ -87,5 +87,160 @@ extern char *kadmind_kpasswd_response[];
 extern char *kadmind_ksrvutil_response[];
 extern char *kadmind_kadmin_response[];
 
+/* PROTOTYPES */
+
+krb5_error_code adm_build_key
+	PROTOTYPE((krb5_context,
+		   krb5_principal,
+		   krb5_ticket *,
+		   char *,
+		   int,
+		   krb5_db_entry));
+
+krb5_error_code adm_change_pwd
+	PROTOTYPE((krb5_context,
+		   char *,
+		   char *,
+		   krb5_ticket *,
+		   int));
+
+krb5_error_code adm_change_pwd_rnd
+	PROTOTYPE((krb5_context,
+		   char *,
+		   char *,
+		   krb5_ticket *));
+
+krb5_error_code adm_add_new_key
+	PROTOTYPE((krb5_context,
+		   char *,
+		   char *,
+		   krb5_ticket *,
+		   int));
+
+krb5_error_code adm_add_new_key_rnd
+	PROTOTYPE((krb5_context, 
+		   char *,
+		   char *,
+		   krb5_ticket *));
+
+krb5_error_code adm_del_old_key
+	PROTOTYPE((krb5_context,
+		   char *,
+		   char *));
+
+krb5_error_code adm_mod_old_key
+	PROTOTYPE((krb5_context,
+		   char *,
+		   char *,
+		   krb5_ticket* ));
+
+krb5_error_code adm_inq_old_key
+	PROTOTYPE((krb5_context, 
+		   char *,
+		   char *,
+		   krb5_ticket *));
+
+krb5_error_code adm_print_exp_time
+	PROTOTYPE((krb5_context, 
+		   char *,
+		   krb5_timestamp));
+
+krb5_kvno adm_princ_exists
+	PROTOTYPE((krb5_context, 
+		   char *,
+		   krb5_principal,
+		   krb5_db_entry *,
+		   int *));
+
+krb5_error_code adm_enter_rnd_pwd_key
+	PROTOTYPE((krb5_context,
+		   char *,
+		   krb5_principal,
+		   int,
+		   krb5_db_entry *));
+
+krb5_error_code adm5_kadmin
+	PROTOTYPE((krb5_context,
+    		   char *,  
+    		   krb5_authenticator *,
+    		   krb5_ticket *,
+    		   char *,
+    		   int *));
+
+krb5_error_code adm_negotiate_key
+	PROTOTYPE((krb5_context,
+		   char const *,
+		   krb5_ticket *,
+		   char *));
+
+krb5_error_code setup_network
+	PROTOTYPE((krb5_context,
+		   const char *));
+
+krb5_error_code cpw_keyproc
+	PROTOTYPE((krb5_context, 
+		   krb5_pointer,
+		   krb5_principal,
+		   krb5_kvno,
+		   krb5_keyblock **));
+
+krb5_error_code process_client
+	PROTOTYPE((krb5_context, 
+		   char *));
+
+krb5_error_code cleanexit
+	PROTOTYPE((krb5_context,
+		   int));
+
+krb5_error_code closedown_db
+	PROTOTYPE((krb5_context));
+
+krb5_error_code process_args
+	PROTOTYPE((krb5_context, 
+		   int,
+		   char **));
+
+krb5_error_code init_db
+	PROTOTYPE((krb5_context,
+		   char *,
+		   krb5_principal,
+		   krb5_keyblock *));
+
+void setup_com_err
+	PROTOTYPE((krb5_context));
+
+krb5_error_code princ_exists
+	PROTOTYPE((krb5_context, 
+		   krb5_principal, 
+		   krb5_db_entry *));
+
+krb5_error_code adm_enter_pwd_key
+	PROTOTYPE((krb5_context,
+   		   char * ,
+    		   char * ,
+    		   krb5_const_principal ,
+    		   krb5_const_principal ,
+    		   int ,
+    		   int ,
+    		   char * ,
+    		   krb5_db_entry * ));
+
+krb5_error_code adm5_change
+	PROTOTYPE((krb5_context,
+	    	   char *,
+    		   krb5_principal ,
+    		   krb5_ticket *));
+
+int adm5_listen_and_process
+	PROTOTYPE((krb5_context,
+	    	   const char *));
+
+krb5_error_code adm5_kpasswd
+	PROTOTYPE((krb5_context,
+    		   char *,
+    		   kadmin_requests *,
+    		   krb5_ticket *,
+    		   char *,
+    		   int *));
 
 #endif /* __ADM_EXTERN__ */

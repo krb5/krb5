@@ -29,10 +29,11 @@
 #define __KRB5_KDC_EXTERN__
 
 /* various externs for KDC */
-extern krb5_rcache kdc_rcache;                /* KDC's replay cache */
+extern krb5_context 	kdc_context;	/* New context for API changes */
+extern krb5_rcache 	kdc_rcache;     /* KDC's replay cache */
 
-extern krb5_data empty_string;		/* an empty string */
-extern krb5_timestamp kdc_infinity;	/* greater than all other timestamps */
+extern krb5_data 	empty_string;	/* an empty string */
+extern krb5_timestamp 	kdc_infinity;	/* greater than all other timestamps */
 
 extern krb5_deltat max_life_for_realm;	/* XXX should be a parameter? */
 extern krb5_deltat max_renewable_life_for_realm; /* XXX should be a parameter? */

@@ -42,14 +42,15 @@ void decode_kadmind_reply();
 int print_status_message();
 
 krb5_error_code
-  kadm_add_user_rnd(my_creds, rep_ret, local_addr, foreign_addr, 
-		    local_socket, seqno, principal)
-krb5_creds *my_creds;
-krb5_ap_rep_enc_part *rep_ret;
-krb5_address *local_addr, *foreign_addr;
-int *local_socket;
-krb5_int32 *seqno;
-char *principal;
+kadm_add_user_rnd(context, my_creds, rep_ret, local_addr, foreign_addr, 
+		  local_socket, seqno, principal)
+    krb5_context context;
+    krb5_creds *my_creds;
+    krb5_ap_rep_enc_part *rep_ret;
+    krb5_address *local_addr, *foreign_addr;
+    int *local_socket;
+    krb5_int32 *seqno;
+    char *principal;
 {
     krb5_data msg_data, inbuf;
     kadmin_requests rd_priv_resp;
@@ -90,7 +91,7 @@ char *principal;
     (void) memcpy( inbuf.data + 3, username, strlen(username));
     inbuf.length = strlen(username) + 3;
     
-    if ((retval = krb5_mk_priv(&inbuf,
+    if ((retval = krb5_mk_priv(context, &inbuf,
 			       ETYPE_DES_CBC_CRC,
 			       &my_creds->keyblock, 
 			       local_addr, 
@@ -108,7 +109,7 @@ char *principal;
     free(inbuf.data);
     
     /* write private message to server */
-    if (krb5_write_message(local_socket, &msg_data)){
+    if (krb5_write_message(context, local_socket, &msg_data)){
         fprintf(stderr, "Write Error During Second Message Transmission!\n");
         return(1);
     } 
@@ -116,13 +117,13 @@ char *principal;
     free(msg_data.data);
     
     /* Ok Now let's get the final private message */
-    if (retval = krb5_read_message(local_socket, &inbuf)){
+    if (retval = krb5_read_message(context, local_socket, &inbuf)){
         fprintf(stderr, "Read Error During Final Reply: %s!\n",
 		error_message(retval));
         retval = 1;
     }
     
-    if ((retval = krb5_rd_priv(&inbuf,
+    if ((retval = krb5_rd_priv(context, &inbuf,
 			       &my_creds->keyblock,
 			       foreign_addr,
 			       local_addr,

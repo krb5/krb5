@@ -45,36 +45,50 @@ typedef struct _krb5_donot_replay {
 typedef struct _krb5_rc_ops {
     krb5_magic magic;
     char *type;
-    krb5_error_code (*init)NPROTOTYPE((krb5_rcache,krb5_deltat)); /* create */
-    krb5_error_code (*recover)NPROTOTYPE((krb5_rcache)); /* open */
-    krb5_error_code (*destroy)NPROTOTYPE((krb5_rcache));
-    krb5_error_code (*close)NPROTOTYPE((krb5_rcache));
-    krb5_error_code (*store)NPROTOTYPE((krb5_rcache,krb5_donot_replay *));
-    krb5_error_code (*expunge)NPROTOTYPE((krb5_rcache));
-    krb5_error_code (*get_span)NPROTOTYPE((krb5_rcache,krb5_deltat *));
-    char *(*get_name)NPROTOTYPE((krb5_rcache));
-    krb5_error_code (*resolve)NPROTOTYPE((krb5_rcache, char *));
+    krb5_error_code (*init)NPROTOTYPE((krb5_context, krb5_rcache,krb5_deltat)); /* create */
+    krb5_error_code (*recover)NPROTOTYPE((krb5_context, krb5_rcache)); /* open */
+    krb5_error_code (*destroy)NPROTOTYPE((krb5_context, krb5_rcache));
+    krb5_error_code (*close)NPROTOTYPE((krb5_context, krb5_rcache));
+    krb5_error_code (*store)NPROTOTYPE((krb5_context, krb5_rcache,krb5_donot_replay *));
+    krb5_error_code (*expunge)NPROTOTYPE((krb5_context, krb5_rcache));
+    krb5_error_code (*get_span)NPROTOTYPE((krb5_context, krb5_rcache,krb5_deltat *));
+    char *(*get_name)NPROTOTYPE((krb5_context, krb5_rcache));
+    krb5_error_code (*resolve)NPROTOTYPE((krb5_context, krb5_rcache, char *));
 } krb5_rc_ops;
 
-krb5_error_code krb5_rc_default PROTOTYPE((krb5_rcache *));
-krb5_error_code krb5_rc_register_type PROTOTYPE((krb5_rc_ops *));
-krb5_error_code krb5_rc_resolve_type PROTOTYPE((krb5_rcache *,char *));
-krb5_error_code krb5_rc_resolve_full PROTOTYPE((krb5_rcache *,char *));
-char *krb5_rc_get_type PROTOTYPE((krb5_rcache));
-char *krb5_rc_default_type PROTOTYPE((void));
-char *krb5_rc_default_name PROTOTYPE((void));
-krb5_error_code krb5_auth_to_rep PROTOTYPE((krb5_tkt_authent *,
-					    krb5_donot_replay *));
+krb5_error_code krb5_rc_default 
+	PROTOTYPE((krb5_context,
+		   krb5_rcache *));
+krb5_error_code krb5_rc_register_type 
+	PROTOTYPE((krb5_context,
+		   krb5_rc_ops *));
+krb5_error_code krb5_rc_resolve_type 
+	PROTOTYPE((krb5_context,
+		   krb5_rcache *,char *));
+krb5_error_code krb5_rc_resolve_full 
+	PROTOTYPE((krb5_context,
+		   krb5_rcache *,char *));
+char *krb5_rc_get_type 
+	PROTOTYPE((krb5_context,
+		   krb5_rcache));
+char *krb5_rc_default_type 
+	PROTOTYPE((krb5_context));
+char *krb5_rc_default_name 
+	PROTOTYPE((krb5_context));
+krb5_error_code krb5_auth_to_rep 
+	PROTOTYPE((krb5_context,
+		   krb5_tkt_authent *,
+		   krb5_donot_replay *));
 
-#define krb5_rc_initialize(id, span) (*(id)->ops->init)(id, span)
-#define krb5_rc_recover(id) (*(id)->ops->recover)(id)
-#define krb5_rc_destroy(id) (*(id)->ops->destroy)(id)
-#define krb5_rc_close(id) (*(id)->ops->close)(id)
-#define krb5_rc_store(id, dontreplay) (*(id)->ops->store)(id, dontreplay)
-#define krb5_rc_expunge(id) (*(id)->ops->expunge)(id)
-#define krb5_rc_get_lifespan(id, spanp) (*(id)->ops->get_span)(id, spanp)
-#define krb5_rc_get_name(id) (*(id)->ops->get_name)(id)
-#define krb5_rc_resolve(id, name) (*(id)->ops->resolve)(id, name)
+#define krb5_rc_initialize(context, id, span) (*(id)->ops->init)(context, id, span)
+#define krb5_rc_recover(context, id) (*(id)->ops->recover)(context, id)
+#define krb5_rc_destroy(context, id) (*(id)->ops->destroy)(context, id)
+#define krb5_rc_close(context, id) (*(id)->ops->close)(context, id)
+#define krb5_rc_store(context, id, dontreplay) (*(id)->ops->store)(context, id, dontreplay)
+#define krb5_rc_expunge(context, id) (*(id)->ops->expunge)(context, id)
+#define krb5_rc_get_lifespan(context, id, spanp) (*(id)->ops->get_span)(context, id, spanp)
+#define krb5_rc_get_name(context, id) (*(id)->ops->get_name)(context, id)
+#define krb5_rc_resolve(context, id, name) (*(id)->ops->resolve)(context, id, name)
 
 extern krb5_rc_ops krb5_rc_dfl_ops;
 

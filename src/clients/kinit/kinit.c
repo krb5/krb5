@@ -69,6 +69,7 @@ main(argc, argv)
     int argc;
     char **argv;
 {
+	krb5_context kcontext;
     krb5_ccache ccache = NULL;
     char *cache_name = NULL;		/* -f option */
     char *keytab_name = NULL;		/* -t option */
@@ -92,7 +93,7 @@ main(argc, argv)
     int	i;
     char password[255], *client_name, prompt[255];
 
-    krb5_init_ets();
+    krb5_init_ets(kcontext);
 
     if (strrchr(argv[0], '/'))
 	argv[0] = strrchr(argv[0], '/')+1;
@@ -120,7 +121,7 @@ main(argc, argv)
 	    if (keytab == NULL) {
 		 keytab_name = optarg;
 
-		 code = krb5_kt_resolve(keytab_name, &keytab);
+		 code = krb5_kt_resolve(kcontext, keytab_name, &keytab);
 		 if (code != 0) {
 		      com_err(argv[0], code, "resolving keytab %s",
 			      keytab_name);
@@ -142,7 +143,7 @@ main(argc, argv)
 	    if (ccache == NULL) {
 		cache_name = optarg;
 		
-		code = krb5_cc_resolve (cache_name, &ccache);
+		code = krb5_cc_resolve (kcontext, cache_name, &ccache);
 		if (code != 0) {
 		    com_err (argv[0], code, "resolving ccache %s",
 			     cache_name);
@@ -166,7 +167,7 @@ main(argc, argv)
     }
 
     if (ccache == NULL) {
-	 if (code = krb5_cc_default(&ccache)) {
+	 if (code = krb5_cc_default(kcontext, &ccache)) {
 	      com_err(argv[0], code, "while getting default ccache");
 	      exit(1);
 	 }
@@ -175,7 +176,7 @@ main(argc, argv)
     if (optind != argc-1) {       /* No principal name specified */
 	 if (use_keytab) {
 	      /* Use the default host/service name */
-	      code = krb5_sname_to_principal(NULL, NULL,
+	      code = krb5_sname_to_principal(kcontext, NULL, NULL,
 					     KRB5_NT_SRV_HST, &me);
 	      if (code) {
 		   com_err(argv[0], code,
@@ -184,12 +185,12 @@ main(argc, argv)
 	      }
 	 } else {
 	      /* Get default principal from cache if one exists */
-	      code = krb5_cc_get_principal(ccache, &me);
+	      code = krb5_cc_get_principal(kcontext, ccache, &me);
 	      if (code) {
 		   /* Else search passwd file for client */
 		   pw = getpwuid((int) getuid());
 		   if (pw) {
-			if (code = krb5_parse_name (pw->pw_name, &me)) {
+			if (code = krb5_parse_name (kcontext, pw->pw_name, &me)) {
 			     com_err (argv[0], code, "when parsing name %s",
 				      pw->pw_name);
 			     exit(1);
@@ -202,17 +203,17 @@ main(argc, argv)
 	      }
 	 }
     } /* Use specified name */	 
-    else if (code = krb5_parse_name (argv[optind], &me)) {
+    else if (code = krb5_parse_name (kcontext, argv[optind], &me)) {
 	 com_err (argv[0], code, "when parsing name %s",argv[optind]);
 	 exit(1);
     }
     
-    if (code = krb5_unparse_name(me, &client_name)) {
+    if (code = krb5_unparse_name(kcontext, me, &client_name)) {
 	com_err (argv[0], code, "when unparsing name");
 	exit(1);
     }
 
-    code = krb5_cc_initialize (ccache, me);
+    code = krb5_cc_initialize (kcontext, ccache, me);
     if (code != 0) {
 	com_err (argv[0], code, "when initializing cache %s",
 		 cache_name?cache_name:"");
@@ -223,12 +224,12 @@ main(argc, argv)
     
     my_creds.client = me;
 
-    if (code = krb5_build_principal_ext(&server,
-					krb5_princ_realm(me)->length,
-					krb5_princ_realm(me)->data,
+    if (code = krb5_build_principal_ext(kcontext, &server,
+					krb5_princ_realm(kcontext, me)->length,
+					krb5_princ_realm(kcontext, me)->data,
 					tgtname.length, tgtname.data,
-					krb5_princ_realm(me)->length,
-					krb5_princ_realm(me)->data,
+					krb5_princ_realm(kcontext, me)->length,
+					krb5_princ_realm(kcontext, me)->data,
 					0)) {
 	com_err(argv[0], code, "while building server name");
 	exit(1);
@@ -241,7 +242,7 @@ main(argc, argv)
 	com_err (argv[0], code, "when getting my address");
 	exit(1);
     }
-    if (code = krb5_timeofday(&now)) {
+    if (code = krb5_timeofday(kcontext, &now)) {
 	com_err(argv[0], code, "while getting time of day");
 	exit(1);
     }
@@ -258,17 +259,18 @@ main(argc, argv)
 
 	 pwsize = sizeof(password);
 
-	 code = krb5_read_password(prompt, 0, password, &pwsize);
+	 code = krb5_read_password(kcontext, prompt, 0, password, &pwsize);
 	 if (code || pwsize == 0) {
 	      fprintf(stderr, "Error while reading password for '%s'\n",
 		      client_name);
 	      memset(password, 0, sizeof(password));
-	      krb5_free_addresses(my_addresses);
+	      krb5_free_addresses(kcontext, my_addresses);
 	      exit(1);
 	 }
 
 	 if (preauth_type > 0) {
-	     code = krb5_get_in_tkt_with_password(options, my_addresses,
+	     code = krb5_get_in_tkt_with_password(kcontext, options, 
+						  my_addresses,
 						  preauth_type,
 						  ETYPE_DES_CBC_CRC,
 						  KEYTYPE_DES,
@@ -277,7 +279,8 @@ main(argc, argv)
 						  &my_creds, 0);
 	 } else {
 	     for (i=0; preauth_search_list[i] >= 0; i++) {
-		 code = krb5_get_in_tkt_with_password(options, my_addresses,
+		 code = krb5_get_in_tkt_with_password(kcontext, options, 
+						      my_addresses,
 						      preauth_search_list[i],
 						      ETYPE_DES_CBC_CRC,
 						      KEYTYPE_DES,
@@ -292,7 +295,7 @@ main(argc, argv)
 	 memset(password, 0, sizeof(password));
     } else {
 	 if (keytab != NULL) {
-	      code = krb5_kt_get_entry(keytab, my_creds.client, 0,
+	      code = krb5_kt_get_entry(kcontext, keytab, my_creds.client, 0,
 				       &kt_ent);
 	      if (code) {
 		   com_err(argv[0], code, "reading keytab entry %s",
@@ -302,14 +305,16 @@ main(argc, argv)
 	 }
 
 	 if (preauth_type > 0) {
-	     code = krb5_get_in_tkt_with_skey(options, my_addresses,
+	     code = krb5_get_in_tkt_with_skey(kcontext, options, 
+					      my_addresses,
 					      preauth_type, 
 					      ETYPE_DES_CBC_CRC,
 					      keytab ? &kt_ent.key : NULL,
 					      ccache, &my_creds, 0);
 	 } else {
 	     for (i=0; preauth_search_list[i] >= 0; i++) {
-		 code = krb5_get_in_tkt_with_skey(options, my_addresses,
+		 code = krb5_get_in_tkt_with_skey(kcontext, options, 
+						  my_addresses,
 						  preauth_search_list[i], 
 						  ETYPE_DES_CBC_CRC,
 						  keytab ? &kt_ent.key : NULL,
@@ -321,11 +326,11 @@ main(argc, argv)
 	 }
 			 
 	 if (keytab != NULL)
-	      krb5_kt_free_entry(&kt_ent);
+	      krb5_kt_free_entry(kcontext, &kt_ent);
     }
     
-    krb5_free_principal(server);
-    krb5_free_addresses(my_addresses);
+    krb5_free_principal(kcontext, server);
+    krb5_free_addresses(kcontext, my_addresses);
     
     if (code) {
 	if (code == KRB5KRB_AP_ERR_BAD_INTEGRITY)

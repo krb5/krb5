@@ -60,14 +60,19 @@ krb5_data tgtname = {
     KRB5_TGS_NAME
 };
 
-int verify_cs_pair PROTOTYPE((char *,
-			      krb5_principal,
-			      char *,
-			      int, int, int,
-			      krb5_ccache));
-int get_tgt PROTOTYPE((char *,
-		       krb5_principal *,
-		       krb5_ccache));
+int verify_cs_pair 
+	PROTOTYPE((krb5_context,
+		   char *,
+		   krb5_principal,
+		   char *,
+		   int, int, int,
+		   krb5_ccache));
+
+int get_tgt 
+	PROTOTYPE((krb5_context,
+		   char *,
+		   krb5_principal *,
+		   krb5_ccache));
 
 static void
 usage(who, status)
@@ -85,6 +90,7 @@ int status;
 
 static krb5_enctype etype = 0xffff;
 static krb5_preauthtype patype = KRB5_PADATA_NONE;
+static krb5_context test_context;
 static krb5_keytype keytype;
 
 void
@@ -105,7 +111,8 @@ main(argc, argv)
     krb5_principal client_princ;
     krb5_error_code retval;
 
-    krb5_init_ets();
+    krb5_init_context(&test_context);
+    krb5_init_ets(test_context);
 
     if (strrchr(argv[0], '/'))
 	prog = strrchr(argv[0], '/')+1;
@@ -157,7 +164,7 @@ main(argc, argv)
 	    if (ccache == NULL) {
 		cache_name = optarg;
 		
-		code = krb5_cc_resolve (cache_name, &ccache);
+		code = krb5_cc_resolve (test_context, cache_name, &ccache);
 		if (code != 0) {
 		    com_err (prog, code, "resolving %s", cache_name);
 		    errflg++;
@@ -180,7 +187,7 @@ main(argc, argv)
 	keytype = DEFAULT_KDC_KEYTYPE;
 
     if (!cur_realm) {
-	if (retval = krb5_get_default_realm(&cur_realm)) {
+	if (retval = krb5_get_default_realm(test_context, &cur_realm)) {
 	    com_err(prog, retval, "while retrieving default realm name");
 	    exit(1);
 	}	    
@@ -202,7 +209,7 @@ main(argc, argv)
     }
 
     if (ccache == NULL) {
-	if (code = krb5_cc_default(&ccache)) {
+	if (code = krb5_cc_default(test_context, &ccache)) {
 	    com_err(prog, code, "while getting default ccache");
 	    exit(1);
 	}
@@ -226,7 +233,7 @@ main(argc, argv)
 	  strcat(ctmp, ctmp2);
 	  sprintf(client, "%s@%s", ctmp, cur_realm);
 
-	  if (get_tgt (client, &client_princ, ccache)) {
+	  if (get_tgt (test_context, client, &client_princ, ccache)) {
 	    errors++;
 	    n_tried++;
 	    continue;
@@ -240,11 +247,12 @@ main(argc, argv)
 			   prefix, n, j);
 	    strcat(stmp, stmp2);
 	    sprintf(server, "%s@%s", stmp, cur_realm);
-	    if (verify_cs_pair(client, client_princ, server, n, i, j, ccache))
+	    if (verify_cs_pair(test_context, client, client_princ, 
+			       server, n, i, j, ccache))
 	      errors++;
 	    n_tried++;
 	  }
-	  krb5_free_principal(client_princ);
+	  krb5_free_principal(test_context, client_princ);
 	}
       }
     }
@@ -253,14 +261,12 @@ main(argc, argv)
 
        
 #include <krb5/widen.h>
-krb5_error_code get_server_key(DECLARG(krb5_pointer,keyprocarg),
-			       DECLARG(krb5_principal,princ),
-			       DECLARG(krb5_kvno,vno),
-			       DECLARG(krb5_keyblock **,key))
-OLDDECLARG(krb5_pointer,keyprocarg)
-OLDDECLARG(krb5_principal,princ)
-OLDDECLARG(krb5_kvno,vno)
-OLDDECLARG(krb5_keyblock **,key)
+krb5_error_code get_server_key(context, keyprocarg, princ, vno, key)
+    krb5_context context;
+    krb5_pointer keyprocarg;
+    krb5_principal princ;
+    krb5_kvno vno;
+    krb5_keyblock ** key;
 #include <krb5/narrow.h>
 {
   krb5_encrypt_block eblock;
@@ -270,7 +276,7 @@ OLDDECLARG(krb5_keyblock **,key)
   /* Jon Rochlis asks: Does this belong here or in libos or something? */
   /* John Kohl replies: not really; it's not a generally useful function */
 
-  code = krb5_unparse_name(princ, &princ_str);
+  code = krb5_unparse_name(context, princ, &princ_str);
   if (code) {
     com_err (prog, code, "while unparsing server name");
     return(code);
@@ -284,7 +290,7 @@ OLDDECLARG(krb5_keyblock **,key)
   pwd.data = princ_str;
   pwd.length = strlen(princ_str);
   
-  if (code = krb5_principal2salt(princ, &salt)) {
+  if (code = krb5_principal2salt(context, princ, &salt)) {
     com_err(prog, code, "while converting principal to salt for '%s'", princ_str);
     goto errout;
   }
@@ -295,8 +301,8 @@ OLDDECLARG(krb5_keyblock **,key)
     com_err(prog, code, "while allocating key for server %s", princ_str);
     goto errout;
   }    
-  krb5_use_keytype(&eblock, keytype);
-  code = krb5_string_to_key(&eblock, keytype, *key, &pwd, &salt);
+  krb5_use_keytype(context, &eblock, keytype);
+  code = krb5_string_to_key(context, &eblock, keytype, *key, &pwd, &salt);
   if (code)
     goto errout;
 
@@ -311,13 +317,14 @@ out:
 
 }
 
-int verify_cs_pair(p_client_str, p_client, p_server_str, p_num, 
+int verify_cs_pair(context, p_client_str, p_client, p_server_str, p_num, 
 		   c_depth, s_depth, ccache)
-     char *p_client_str;
-     krb5_principal p_client;
-     char *p_server_str;
-     int p_num, c_depth, s_depth;
-     krb5_ccache ccache;
+    krb5_context context;
+    char *p_client_str;
+    krb5_principal p_client;
+    char *p_server_str;
+    int p_num, c_depth, s_depth;
+    krb5_ccache ccache;
 {
     krb5_error_code code;
     krb5_principal server;
@@ -332,46 +339,49 @@ int verify_cs_pair(p_client_str, p_client, p_server_str, p_num,
       fprintf(stderr, "\tclient %s for server %s\n", p_client_str, 
 	      p_server_str);
 
-    if (code = krb5_parse_name (p_server_str, &server)) {
+    if (code = krb5_parse_name (context, p_server_str, &server)) {
       com_err (prog, code, "when parsing name %s", p_server_str);
       return(-1);
     }
 
     /* test the checksum stuff? */
-    if (code = krb5_mk_req(server, 0, 0, ccache, &request_data)) {
+    if (code = krb5_mk_req(context, server, 0, 0, ccache, &request_data)) {
 	com_err(prog, code, "while preparing AP_REQ for %s", p_server_str);
 	return(-1);
     }
 
-    if (code = krb5_rd_req(&request_data, server, 0, 0, get_server_key, 0, 0, 
-			   &authdat)) {
+    if (code = krb5_rd_req(context, &request_data, server, 0, 0, 
+			   get_server_key, 0, 0, &authdat)) {
 	com_err(prog, code, "while decoding AP_REQ for %s", p_server_str);
 	return(-1);
     }
 
-    if (!krb5_principal_compare(authdat->authenticator->client, p_client)) {
-      code = krb5_unparse_name(authdat->authenticator->client, &returned_client);
+    if (!krb5_principal_compare(context, authdat->authenticator->client, 
+				p_client)) {
+      code = krb5_unparse_name(context, authdat->authenticator->client, 
+			       &returned_client);
       if (code)
 	com_err (prog, code, 
 		 "Client not as expected, but cannot unparse client name");
       else
 	com_err (prog, 0, "Client not as expected (%s).", returned_client);
-      krb5_free_tkt_authent(authdat);
+      krb5_free_tkt_authent(context, authdat);
       free(returned_client);
       return(-1);
     }
 
-    krb5_free_tkt_authent(authdat);
-    krb5_free_principal(server);
+    krb5_free_tkt_authent(context, authdat);
+    krb5_free_principal(context, server);
     if (request_data.data) krb5_xfree(request_data.data);
 
     return(0);
 }
 
-int get_tgt (p_client_str, p_client, ccache)
-     char *p_client_str;
-     krb5_principal *p_client;
-     krb5_ccache ccache;
+int get_tgt (context, p_client_str, p_client, ccache)
+    krb5_context context;
+    char *p_client_str;
+    krb5_principal *p_client;
+    krb5_ccache ccache;
 {
     char *cache_name = NULL;		/* -f option */
     long lifetime = KRB5_DEFAULT_LIFE;	/* -l option */
@@ -385,27 +395,27 @@ int get_tgt (p_client_str, p_client, ccache)
     if (!brief)
       fprintf(stderr, "\tgetting TGT for %s\n", p_client_str);
 
-    if (code = krb5_timeofday(&start)) {
+    if (code = krb5_timeofday(context, &start)) {
 	com_err(prog, code, "while getting time of day");
 	return(-1);
     }
 
     memset((char *)&my_creds, 0, sizeof(my_creds));
     
-    if (code = krb5_parse_name (p_client_str, p_client)) {
+    if (code = krb5_parse_name (context, p_client_str, p_client)) {
 	com_err (prog, code, "when parsing name %s", p_client_str);
 	return(-1);
     }
 
 
-    if (code = krb5_build_principal_ext(&tgt_server,
-					krb5_princ_realm(*p_client)->length,
-					krb5_princ_realm(*p_client)->data,
-					tgtname.length,
-					tgtname.data,
-					krb5_princ_realm(*p_client)->length,
-					krb5_princ_realm(*p_client)->data,
-					0)) {
+    if (code = krb5_build_principal_ext(context, &tgt_server,
+				krb5_princ_realm(context, *p_client)->length,
+				krb5_princ_realm(context, *p_client)->data,
+				tgtname.length,
+				tgtname.data,
+				krb5_princ_realm(context, *p_client)->length,
+				krb5_princ_realm(context, *p_client)->data,
+				0)) {
 	com_err(prog, code, "when setting up tgt principal");
 	return(-1);
     }
@@ -419,9 +429,10 @@ int get_tgt (p_client_str, p_client, ccache)
     my_creds.client = *p_client;
     my_creds.server = tgt_server;
 
-    krb5_cc_destroy(ccache);  /* ugh, I'd much rather just delete the credential */
+    /* ugh, I'd much rather just delete the credential */
+    krb5_cc_destroy(context, ccache);  
 
-    code = krb5_cc_initialize (ccache, *p_client);
+    code = krb5_cc_initialize (context, ccache, *p_client);
     if (code != 0) {
 	com_err (prog, code, "when initializing cache %s",
 		 cache_name?cache_name:"");
@@ -433,7 +444,7 @@ int get_tgt (p_client_str, p_client, ccache)
     my_creds.times.endtime = start + lifetime;
     my_creds.times.renew_till = 0;
 
-    code = krb5_get_in_tkt_with_password(options, my_addresses,
+    code = krb5_get_in_tkt_with_password(context, options, my_addresses,
 					 patype,
 					 etype,
 					 keytype,
@@ -441,9 +452,9 @@ int get_tgt (p_client_str, p_client, ccache)
 					 ccache,
 					 &my_creds, 0);
     my_creds.server = my_creds.client = 0;
-    krb5_free_principal(tgt_server);
-    krb5_free_addresses(my_addresses);
-    krb5_free_cred_contents(&my_creds);
+    krb5_free_principal(context, tgt_server);
+    krb5_free_addresses(context, my_addresses);
+    krb5_free_cred_contents(context, &my_creds);
     if (code != 0) {
 	com_err (prog, code, "while getting initial credentials");
 	return(-1);

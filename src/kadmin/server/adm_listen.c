@@ -99,11 +99,12 @@ kill_children()
 }
 #endif /* HAVE_SIGSET */
 
-/*
-adm5_listen_and_process - listen on the admin servers port for a request
-*/
-adm5_listen_and_process(prog)
-const char *prog;
+/* adm5_listen_and_process - listen on the admin servers port for a request */
+
+int
+adm5_listen_and_process(context, prog)
+    krb5_context context;
+    const char *prog;
 {
     extern int errno;
     int found;
@@ -155,16 +156,16 @@ const char *prog;
 		}
 		
 		if (adm_debug_flag) {
-			retval = process_client("adm5_listen_and_process");
+			retval = process_client(context, "adm5_listen_and_process");
 			exit(retval);
 		}
 			
 		/* if you want a sep daemon for each server */
-		if (!(pid = fork())) {
+		if (!(pid = fork())) { 
 			/* child */
 			(void) close(client_server_info.server_socket);
 
-			retval = process_client("adm5_listen_and_process");
+			retval = process_client(context, "adm5_listen_and_process");
 			exit(retval);
 		} else {
 			/* parent */

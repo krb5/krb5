@@ -114,9 +114,10 @@ krb5_flags attribs;
 }
 
 krb5_error_code
-adm_print_exp_time(ret_data, time_input)
-char *ret_data;
-krb5_timestamp *time_input;
+adm_print_exp_time(context, ret_data, time_input)
+    krb5_context context;
+    char *ret_data;
+    krb5_timestamp *time_input;
 {
     char *my_data;
     struct tm *exp_time;
@@ -140,10 +141,11 @@ krb5_timestamp *time_input;
 }
 
 krb5_error_code
-adm_fmt_prt(entry, Principal_name, ret_data)
-krb5_db_entry *entry;
-char *Principal_name;
-char *ret_data;
+adm_fmt_prt(context, entry, Principal_name, ret_data)
+    krb5_context context;
+    krb5_db_entry *entry;
+    char *Principal_name;
+    char *ret_data;
 {
     struct tm *mod_time;
     krb5_error_code retval;
@@ -168,7 +170,7 @@ char *ret_data;
     strcat(my_data, thisline);
     sprintf(thisline, "Principal Key Version (PKV) = %d\n", entry->kvno);
     strcat(my_data, thisline);
-    if (retval = adm_print_exp_time(my_data, &entry->expiration)) {
+    if (retval = adm_print_exp_time(context, my_data, &entry->expiration)) {
 	free(my_data);
 	return retval;
     }
@@ -204,7 +206,7 @@ char *ret_data;
     sprintf(thisline,
 	"Invalid Authentication Count (FCNT) = %d\n", entry->fail_auth_count);
     strcat(my_data, thisline);
-    retval = krb5_timeofday(&now);
+    retval = krb5_timeofday(context, &now);
     pwd_expire = (now - entry->last_pwd_change) / 86400;
     sprintf(thisline, "Password Age is %d Days\n", pwd_expire);
     strcat(my_data, thisline);

@@ -5,10 +5,9 @@
 
 char hexchar PROTOTYPE((const unsigned int digit));
 
-asn1_error_code asn1_krb5_data_unparse(DECLARG(const krb5_data *, code),
-				       DECLARG(char **, s))
-     OLDDECLARG(const krb5_data *, code)
-     OLDDECLARG(char **, s)
+asn1_error_code asn1_krb5_data_unparse(code, s)
+     const krb5_data * code;
+     char ** s;
 {
   if(*s != NULL) free(*s);
   
@@ -35,8 +34,8 @@ asn1_error_code asn1_krb5_data_unparse(DECLARG(const krb5_data *, code),
   return 0;
 }
 
-char hexchar(DECLARG(const unsigned int , digit))
-     OLDDECLARG(const unsigned int , digit)
+char hexchar(digit)
+     const unsigned int digit;
 {
   if(digit<=9)
     return '0'+digit;
@@ -46,10 +45,9 @@ char hexchar(DECLARG(const unsigned int , digit))
     return 'X';
 }
 
-krb5_error_code krb5_data_parse(DECLARG(krb5_data *, d),
-				DECLARG(const char *, s))
-     OLDDECLARG(krb5_data *, d)
-     OLDDECLARG(const char *, s)
+krb5_error_code krb5_data_parse(d, s)
+     krb5_data * d;
+     const char * s;
 {
   /*if(d->data != NULL){
     free(d->data);
@@ -62,10 +60,9 @@ krb5_error_code krb5_data_parse(DECLARG(krb5_data *, d),
   return 0;
 }
 
-krb5_error_code krb5_data_hex_parse(DECLARG(krb5_data *, d),
-				    DECLARG(const char *, s))
-     OLDDECLARG(krb5_data *, d)
-     OLDDECLARG(const char *, s)
+krb5_error_code krb5_data_hex_parse(d, s)
+     krb5_data * d;
+     const char * s;
 {
   int i, digit;
   char *pos;
@@ -87,8 +84,8 @@ krb5_error_code krb5_data_hex_parse(DECLARG(krb5_data *, d),
 }
 
 #if 0
-void asn1buf_print(DECLARG(const asn1buf *, buf))
-     OLDDECLARG(const asn1buf *, buf)
+void asn1buf_print(buf)
+     const asn1buf * buf;
 {
   asn1buf bufcopy;
   char *s=NULL;

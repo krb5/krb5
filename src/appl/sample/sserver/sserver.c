@@ -57,6 +57,7 @@ main(argc, argv)
 int argc;
 char *argv[];
 {
+    krb5_context context;
     struct sockaddr_in peername;
     krb5_address peeraddr;
     int namelen = sizeof(peername);
@@ -68,13 +69,14 @@ char *argv[];
     char repbuf[BUFSIZ];
     char *cname;
 
-    krb5_init_ets();
-    /* open a log connection */
+    krb5_init_context(&context);
+    krb5_init_ets(context);
 
+    /* open a log connection */
     openlog("sserver", 0, LOG_DAEMON);
 
-    if (retval = krb5_sname_to_principal(NULL, SAMPLE_SERVICE, KRB5_NT_SRV_HST,
-					 &server)) {
+    if (retval = krb5_sname_to_principal(context, NULL, SAMPLE_SERVICE, 
+					 KRB5_NT_SRV_HST, &server)) {
 	syslog(LOG_ERR, "while generating service name (%s): %s",
 	       SAMPLE_SERVICE, error_message(retval));
 	exit(1);
@@ -126,7 +128,7 @@ char *argv[];
     peeraddr.length = sizeof(peername.sin_addr);
     peeraddr.contents = (krb5_octet *)&peername.sin_addr;
 
-    if (retval = krb5_recvauth((krb5_pointer)&sock,
+    if (retval = krb5_recvauth(context, (krb5_pointer)&sock,
 			       SAMPLE_VERSION, server, &peeraddr,
 			       0, 0, 0,	/* no fetchfrom, keyproc or arg */
 			       0,	/* default rc type */
@@ -140,7 +142,7 @@ char *argv[];
 	exit(1);
     }
 
-    if (retval = krb5_unparse_name(client, &cname)) {
+    if (retval = krb5_unparse_name(context, client, &cname)) {
 	syslog(LOG_ERR, "unparse failed: %s", error_message(retval));
 	cname = "<unparse error>";
     }
@@ -151,12 +153,12 @@ char *argv[];
     xmitlen = htons(strlen(repbuf));
     recv_data.length = strlen(repbuf);
     recv_data.data = repbuf;
-    if ((retval = krb5_net_write(0, (char *)&xmitlen,
+    if ((retval = krb5_net_write(context, 0, (char *)&xmitlen,
 				 sizeof(xmitlen))) < 0) {
 	syslog(LOG_ERR, "%m: while writing len to client");
 	exit(1);
     }
-    if ((retval = krb5_net_write(0, (char *)recv_data.data,
+    if ((retval = krb5_net_write(context, 0, (char *)recv_data.data,
 				 recv_data.length)) < 0) {
 	syslog(LOG_ERR, "%m: while writing data to client");
 	exit(1);

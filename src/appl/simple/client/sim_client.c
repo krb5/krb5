@@ -74,6 +74,7 @@ char *argv[];
     krb5_creds creds;
     krb5_address local_addr, foreign_addr, *portlocal_addr;
     krb5_rcache rcache;
+    krb5_context context;
     extern krb5_deltat krb5_clockskew;
 
     if (argc != 2 && argc != 3) {
@@ -81,7 +82,8 @@ char *argv[];
 	exit(1);
     }
     
-    krb5_init_ets();
+    krb5_init_context(&context);
+    krb5_init_ets(context);
 
     if (!valid_cksumtype(CKSUMTYPE_CRC32)) {
 	com_err(PROGNAME, KRB5_PROG_SUMTYPE_NOSUPP, "while using CRC-32");
@@ -136,14 +138,14 @@ char *argv[];
 	exit(1);
     }
 	
-    if (retval = krb5_get_default_realm(&c_realm)) {
+    if (retval = krb5_get_default_realm(context, &c_realm)) {
 	com_err(PROGNAME, retval, "while retrieving local realm");
 	exit(1);
     }
     printf("Local Kerberos realm is %s\n", c_realm);
 
     /* Get Kerberos realm of host */
-    if (retval = krb5_get_host_realm(full_hname, &s_realms)) {
+    if (retval = krb5_get_host_realm(context, full_hname, &s_realms)) {
 	com_err(PROGNAME, retval, "while getting realm for '%s'", full_hname);
 	exit(1);
     }
@@ -155,13 +157,13 @@ char *argv[];
 
     /* compute checksum, using CRC-32 */
     if (!(send_cksum.contents = (krb5_octet *)
-	  malloc(krb5_checksum_size(CKSUMTYPE_CRC32)))) {
+	  malloc(krb5_checksum_size(context, CKSUMTYPE_CRC32)))) {
 	com_err(PROGNAME, ENOMEM, "while allocating checksum");
 	exit(1);
     }
 
     /* choose some random stuff to compute checksum from */
-    if (retval = krb5_calculate_checksum(CKSUMTYPE_CRC32,
+    if (retval = krb5_calculate_checksum(context, CKSUMTYPE_CRC32,
 					 HOST,
 					 strlen(HOST),
 					 0,
@@ -174,7 +176,7 @@ char *argv[];
 
     /* Get credentials for server, create krb_mk_req message */
 
-    if (retval = krb5_cc_default(&ccdef)) {
+    if (retval = krb5_cc_default(context, &ccdef)) {
 	com_err(PROGNAME, retval, "while getting default ccache");
 	exit(1);
     }
@@ -184,14 +186,14 @@ char *argv[];
 				[2] == FULL host name (by convention)
 				[3] == null ptr */
 
-    if (retval = krb5_build_principal(&server,
+    if (retval = krb5_build_principal(context, &server,
 				      strlen(s_realms[0]), s_realms[0],
 				      SERVICE, full_hname, 0)) {
 	com_err(PROGNAME, retval, "while setting up server principal");
 	exit(1);
     }
 
-    if (retval = krb5_mk_req(server,
+    if (retval = krb5_mk_req(context, server,
 			     0,		/* use default options */
 			     &send_cksum,
 			     ccdef,
@@ -228,14 +230,14 @@ char *argv[];
     local_addr.length = sizeof(c_sock.sin_addr);
     local_addr.contents = (krb5_octet *)&c_sock.sin_addr;
 
-    if (retval = krb5_gen_portaddr(&local_addr,
+    if (retval = krb5_gen_portaddr(context, &local_addr,
 				   (krb5_pointer) &c_sock.sin_port,
 				   &portlocal_addr)) {
 	com_err(PROGNAME, retval, "while generating port address");
 	exit(1);
     }
     
-    if (retval = krb5_gen_replay_name(portlocal_addr, "_sim_clt",
+    if (retval = krb5_gen_replay_name(context, portlocal_addr, "_sim_clt",
 				      &cp)) {
 	com_err(PROGNAME, retval, "while generating replay cache name");
 	exit(1);
@@ -244,33 +246,34 @@ char *argv[];
 	com_err(PROGNAME, ENOMEM, "while allocating replay cache");
 	exit(1);
     }
-    if (retval = krb5_rc_resolve_type(&rcache, krb5_rc_default_type())) {
+    if (retval = krb5_rc_resolve_type(context, &rcache, 
+				      krb5_rc_default_type(context))) {
 	krb5_xfree(rcache);
 	com_err(PROGNAME, retval, "while resolving replay cache type");
 	exit(1);
     }
-    if (retval = krb5_rc_resolve(rcache, cp)) {
+    if (retval = krb5_rc_resolve(context, rcache, cp)) {
 	krb5_xfree(rcache);
 	com_err(PROGNAME, retval, "while resolving replay cache type");
 	exit(1);
     }
-    if ((retval = krb5_rc_recover(rcache)) &&
-	(retval = krb5_rc_initialize(rcache, krb5_clockskew))) {
+    if ((retval = krb5_rc_recover(context, rcache)) &&
+	(retval = krb5_rc_initialize(context, rcache, krb5_clockskew))) {
 	com_err(PROGNAME, retval, "while initializing replay cache '%s:%s'",
 		rcache->ops->type,
-		krb5_rc_get_name(rcache));
+		krb5_rc_get_name(context, rcache));
 	exit(1);
     }
 
     /* Get session key & creds */
     memset((char *)&creds, 0, sizeof(creds));
     creds.server = server;
-    if (retval = krb5_cc_get_principal(ccdef, &creds.client)) {
+    if (retval = krb5_cc_get_principal(context, ccdef, &creds.client)) {
 	com_err(PROGNAME, retval, "while getting my principal name");
 	exit(1);
     }
 
-    if (retval = krb5_get_credentials(0, /* no flags */
+    if (retval = krb5_get_credentials(context, 0, /* no flags */
 				      ccdef,
 				      &creds)) {
 	com_err(PROGNAME, retval, "while fetching credentials");
@@ -281,7 +284,7 @@ char *argv[];
     inbuf.data = argc == 3 ? argv[2] : MSG;
     inbuf.length = strlen (inbuf.data);
 
-    if (retval = krb5_mk_safe(&inbuf,
+    if (retval = krb5_mk_safe(context, &inbuf,
 			      CKSUMTYPE_RSA_MD4_DES,
 			      &creds.keyblock, 
 			      portlocal_addr, 
@@ -304,7 +307,7 @@ char *argv[];
 
 
     /* Make the encrypted message */
-    if (retval = krb5_mk_priv(&inbuf,
+    if (retval = krb5_mk_priv(context, &inbuf,
 			      ETYPE_DES_CBC_CRC,
 			      &creds.keyblock, 
 			      portlocal_addr, 

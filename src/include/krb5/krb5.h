@@ -36,17 +36,18 @@
 
 #include <krb5/base-defs.h>
 #include <krb5/hostaddr.h>
+
+typedef struct _krb5_context {
+	krb5_magic	magic;
+	void		*os_context;
+} *krb5_context;
+
 #include <krb5/encryption.h>
 #include <krb5/fieldbits.h>
 #include <krb5/errors.h>
 #include <krb5/proto.h>
 #include <krb5/macros.h>
 #include <krb5/error_def.h>
-
-typedef struct _krb5_context {
-	krb5_magic	magic;
-	void		*os_context;
-} *krb5_context;
 
 /* Time set */
 typedef struct _krb5_ticket_times {

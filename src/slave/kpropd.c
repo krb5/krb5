@@ -77,6 +77,7 @@ krb5_principal	client;		/* This is who we're talking to */
 krb5_keyblock	*session_key;	/* Here is the session key */
 krb5_address	**server_addrs;
 krb5_pointer	kerb_keytab = 0; /* Use default */
+krb5_context kpropd_context;
 char	*realm = NULL;		/* Our realm */
 char	*file = KPROPD_DEFAULT_FILE;
 char	*temp_file_name;
@@ -89,15 +90,36 @@ krb5_int32	his_seq_num;	/* The remote's sequence number */
 krb5_address	sender_addr;
 krb5_address	receiver_addr;
 
-void	PRS();
-void	do_standalone();
-void	doit();
-void	kerberos_authenticate();
-krb5_boolean authorized_principal();
-void	recv_database();
-void	load_database();
-void	send_error();
-void	recv_error();
+void	PRS
+	PROTOTYPE((char**));
+void	do_standalone
+	PROTOTYPE((void));
+void	doit
+	PROTOTYPE((int));
+void	kerberos_authenticate
+	PROTOTYPE((krb5_context,
+		   int,
+		   krb5_principal *,
+		   struct sockaddr_in));
+krb5_boolean authorized_principal
+	PROTOTYPE((krb5_context,
+    		   krb5_principal));
+void	recv_database
+	PROTOTYPE((krb5_context,
+		   int,
+		   int));
+void	load_database
+	PROTOTYPE((krb5_context,
+    		   char *,
+    		   char *));
+void	send_error
+	PROTOTYPE((krb5_context,
+    		   int,
+		   krb5_error_code,
+    		   char	*));
+void	recv_error
+	PROTOTYPE((krb5_context,
+    		   krb5_data *));
 
 static void usage()
 {
@@ -221,11 +243,11 @@ void doit(fd)
 	/*
 	 * Now do the authentication
 	 */
-	kerberos_authenticate(fd, &client, from);
-	if (!authorized_principal(client)) {
+	kerberos_authenticate(kpropd_context, fd, &client, from);
+	if (!authorized_principal(kpropd_context, client)) {
 		char	*name;
 
-		if (retval = krb5_unparse_name(client, &name)) {
+		if (retval = krb5_unparse_name(kpropd_context, client, &name)) {
 			com_err(progname, retval,
 				"While unparsing client name");
 			exit(1);
@@ -243,7 +265,7 @@ void doit(fd)
 	omask = umask(077);
 	lock_fp = fopen(temp_file_name, "a");
 	(void) umask(omask);
-	retval = krb5_lock_file(lock_fp, temp_file_name,
+	retval = krb5_lock_file(kpropd_context, lock_fp, temp_file_name,
 				KRB5_LOCKMODE_EXCLUSIVE|KRB5_LOCKMODE_DONTBLOCK);
 	if (retval) {
 	    com_err(progname, retval, "while trying to lock '%s'",
@@ -257,7 +279,7 @@ void doit(fd)
 			temp_file_name);
 		exit(1);
 	}
-	recv_database(fd, database_fd);
+	recv_database(kpropd_context, fd, database_fd);
 	if (close(fd) < 0) {
 		com_err(progname, errno,
 			"while trying to close database file");
@@ -268,8 +290,9 @@ void doit(fd)
 			temp_file_name, file);
 		exit(1);
 	}
-	load_database(kdb5_edit, file);
-	retval = krb5_lock_file(lock_fp, temp_file_name, KRB5_LOCKMODE_UNLOCK);
+	load_database(kpropd_context, kdb5_edit, file);
+	retval = krb5_lock_file(kpropd_context, lock_fp, temp_file_name, 
+				KRB5_LOCKMODE_UNLOCK);
 	if (retval) {
 	    com_err(progname, retval, "while unlocking '%s'", temp_file_name);
 	    exit(1);
@@ -304,7 +327,8 @@ void PRS(argv)
 	krb5_error_code	retval;
 	static const char	tmp[] = ".temp";
 	
-	krb5_init_ets();
+	krb5_init_context(&kpropd_context);
+	krb5_init_ets(kpropd_context);
 
 	progname = *argv++;
 	while (word = *argv++) {
@@ -398,7 +422,7 @@ void PRS(argv)
 			realm);
 	else
 		sprintf(buf, "%s/%s", KPROP_SERVICE_NAME, hp->h_name);
-	if (retval = krb5_parse_name(buf, &server)) {
+	if (retval = krb5_parse_name(kpropd_context, buf, &server)) {
 		com_err(progname, retval,
 			"While trying to parse %s for service name");
 		exit(1);
@@ -425,10 +449,11 @@ void PRS(argv)
  * Figure out who's calling on the other end of the connection....
  */
 void
-kerberos_authenticate(fd, clientp, sin)
-	int	fd;
-	krb5_principal	*clientp;
-	struct sockaddr_in	sin;
+kerberos_authenticate(context, fd, clientp, sin)
+    krb5_context context;
+    int	fd;
+    krb5_principal	*clientp;
+    struct sockaddr_in	sin;
 {
 	krb5_error_code	retval;
 	krb5_ticket	*ticket;
@@ -459,7 +484,7 @@ kerberos_authenticate(fd, clientp, sin)
 
 	if (debug) {
 		char *name;
-		if (retval = krb5_unparse_name(server, &name)) {
+		if (retval = krb5_unparse_name(context, server, &name)) {
 			com_err(progname, retval,
 				"While unparsing client name");
 			exit(1);
@@ -469,7 +494,7 @@ kerberos_authenticate(fd, clientp, sin)
 		free(name);
 	}
 
-	if (retval = krb5_recvauth((void *) &fd, kprop_version, server,
+	if (retval = krb5_recvauth(context, (void *) &fd, kprop_version, server,
 				   &sender_addr, kerb_keytab, NULL, NULL,
 				   "dfl", 0, &my_seq_num, clientp, &ticket,
 				   &authent)) {
@@ -480,7 +505,7 @@ kerberos_authenticate(fd, clientp, sin)
 	if (debug) {
 		char	*name;
 
-		if (retval = krb5_unparse_name(*clientp, &name)) {
+		if (retval = krb5_unparse_name(context, *clientp, &name)) {
 			com_err(progname, retval,
 				"While unparsing client name");
 			exit(1);
@@ -489,14 +514,15 @@ kerberos_authenticate(fd, clientp, sin)
 		free(name);
 	}
 	his_seq_num = authent->seq_number;
-	krb5_copy_keyblock(ticket->enc_part2->session, &session_key);
-	krb5_free_ticket(ticket);
-	krb5_free_authenticator(authent);
+	krb5_copy_keyblock(context, ticket->enc_part2->session, &session_key);
+	krb5_free_ticket(context, ticket);
+	krb5_free_authenticator(context, authent);
 }
 
 krb5_boolean
-authorized_principal(p)
-	krb5_principal	p;
+authorized_principal(context, p)
+    krb5_context context;
+    krb5_principal p;
 {
     char		*name;
     char		buf[1024];
@@ -504,7 +530,7 @@ authorized_principal(p)
     FILE		*acl_file;
     int			end;
     
-    retval = krb5_unparse_name(p, &name);
+    retval = krb5_unparse_name(context, p, &name);
     if (retval)
 	return FALSE;
 
@@ -530,9 +556,10 @@ authorized_principal(p)
 }
 
 void
-recv_database(fd, database_fd)
-	int	fd;
-	int	database_fd;
+recv_database(context, fd, database_fd)
+    krb5_context context;
+    int	fd;
+    int	database_fd;
 {
 	int	database_size;
 	int	received_size, n;
@@ -545,19 +572,19 @@ recv_database(fd, database_fd)
 	/*
 	 * Receive and decode size from client
 	 */
-	if (retval = krb5_read_message((void *) &fd, &inbuf)) {
-		send_error(fd, retval, "while reading database size");
+	if (retval = krb5_read_message(context, (void *) &fd, &inbuf)) {
+		send_error(context, fd, retval, "while reading database size");
 		com_err(progname, retval,
 			"while reading size of database from client");
 		exit(1);
 	}
 	if (krb5_is_krb_error(&inbuf))
-		recv_error(&inbuf);
-	if (retval = krb5_rd_safe(&inbuf, session_key, &sender_addr,
+		recv_error(context, &inbuf);
+	if (retval = krb5_rd_safe(context, &inbuf, session_key, &sender_addr,
 				  &receiver_addr, his_seq_num++,
 				  KRB5_SAFE_DOSEQUENCE|KRB5_SAFE_NOTIME,
 				  0, &outbuf)) {
-		send_error(fd, retval, "while decoding database size");
+		send_error(context, fd, retval, "while decoding database size");
 		krb5_xfree(inbuf.data);
 		com_err(progname, retval,
 			"while decoding database size from client");
@@ -574,7 +601,7 @@ recv_database(fd, database_fd)
 		system->block_length;
 	if (!(i_vector=malloc(eblock_size))) {
 		com_err(progname, ENOMEM, "while allocating i_vector");
-		send_error(fd, ENOMEM,
+		send_error(context, fd, ENOMEM,
 			   "malloc failed while allocating i_vector");
 		exit(1);
 	}
@@ -584,17 +611,17 @@ recv_database(fd, database_fd)
 	 */
 	received_size = 0;
 	while (received_size < database_size) {
-		if (retval = krb5_read_message((void *) &fd, &inbuf)) {
+		if (retval = krb5_read_message(context, (void *) &fd, &inbuf)) {
 			sprintf(buf,
 				"while reading database block starting at offset %d",
 				received_size);
 			com_err(progname, retval, buf);
-			send_error(fd, retval, buf);
+			send_error(context, fd, retval, buf);
 			exit(1);
 		}
 		if (krb5_is_krb_error(&inbuf))
-			recv_error(&inbuf);
-		if (retval = krb5_rd_priv(&inbuf, session_key,
+			recv_error(context, &inbuf);
+		if (retval = krb5_rd_priv(context, &inbuf, session_key,
 					  &sender_addr, &receiver_addr,
 					  his_seq_num++,
 					  KRB5_PRIV_DOSEQUENCE|KRB5_PRIV_NOTIME,
@@ -603,7 +630,7 @@ recv_database(fd, database_fd)
 				"while decoding database block starting at offset %d",
 				received_size);
 			com_err(progname, retval, buf);
-			send_error(fd, retval, buf);
+			send_error(context, fd, retval, buf);
 			krb5_xfree(inbuf.data);
 			exit(1);
 		}
@@ -614,12 +641,12 @@ recv_database(fd, database_fd)
 			sprintf(buf,
 				"while writing database block starting at offset %d",
 				received_size);
-			send_error(fd, errno, buf);
+			send_error(context, fd, errno, buf);
 		} else if (n != outbuf.length) {
 			sprintf(buf,
 				"incomplete write while writing database block starting at \noffset %d (%d written, %d expected)",
 				received_size, n, outbuf.length);
-			send_error(fd, KRB5KRB_ERR_GENERIC, buf);
+			send_error(context, fd, KRB5KRB_ERR_GENERIC, buf);
 		}
 		received_size += outbuf.length;
 	}
@@ -630,7 +657,7 @@ recv_database(fd, database_fd)
 		sprintf(buf,
 			"Received %d bytes, expected %d bytes for database file",
 			received_size, database_size);
-		send_error(fd, KRB5KRB_ERR_GENERIC, buf);
+		send_error(context, fd, KRB5KRB_ERR_GENERIC, buf);
 	}
 	/*
 	 * Send over acknowledgement of number of bytes receieved.
@@ -638,7 +665,7 @@ recv_database(fd, database_fd)
 	database_size = htonl(database_size);
 	inbuf.data = (char *) &database_size;
 	inbuf.length = sizeof(database_size);
-	if (retval = krb5_mk_safe(&inbuf, KPROP_CKSUMTYPE,
+	if (retval = krb5_mk_safe(context, &inbuf, KPROP_CKSUMTYPE,
 				  session_key,
 				  /* Note these are reversed because */
 				  /* we are sending, not receiving! */
@@ -649,11 +676,11 @@ recv_database(fd, database_fd)
 				  &outbuf)) {
 		com_err(progname, retval,
 			"while encoding # of receieved bytes");
-		send_error(fd, retval,
+		send_error(context, fd, retval,
 			   "while encoding # of received bytes");
 		exit(1);
 	}
-	if (retval = krb5_write_message((void *) &fd, &outbuf)) {
+	if (retval = krb5_write_message(context, (void *) &fd, &outbuf)) {
 		krb5_xfree(outbuf.data);
 		com_err(progname, retval,
 			"while sending # of receeived bytes");
@@ -664,10 +691,11 @@ recv_database(fd, database_fd)
 
 
 void
-send_error(fd, err_code, err_text)
-	int	fd;
-	char	*err_text;
-	krb5_error_code	err_code;
+send_error(context, fd, err_code, err_text)
+    krb5_context context;
+    int	fd;
+    krb5_error_code	err_code;
+    char	*err_text;
 {
 	krb5_error	error;
 	const char	*text;
@@ -675,7 +703,7 @@ send_error(fd, err_code, err_text)
 	char		buf[1024];
 
 	memset((char *)&error, 0, sizeof(error));
-	krb5_us_timeofday(&error.stime, &error.susec);
+	krb5_us_timeofday(context, &error.stime, &error.susec);
 	error.server = server;
 	error.client = client;
 	
@@ -696,8 +724,8 @@ send_error(fd, err_code, err_text)
 	error.text.length = strlen(text) + 1;
 	if (error.text.data = malloc(error.text.length)) {
 		strcpy(error.text.data, text);
-		if (!krb5_mk_error(&error, &outbuf)) {
-			(void) krb5_write_message((void *) &fd, &outbuf);
+		if (!krb5_mk_error(context, &error, &outbuf)) {
+			(void) krb5_write_message(context, (void *)&fd,&outbuf);
 			krb5_xfree(outbuf.data);
 		}
 		free(error.text.data);
@@ -705,13 +733,14 @@ send_error(fd, err_code, err_text)
 }
 
 void
-recv_error(inbuf)
-	krb5_data	*inbuf;
+recv_error(context, inbuf)
+    krb5_context context;
+    krb5_data	*inbuf;
 {
 	krb5_error	*error;
 	krb5_error_code	retval;
 
-	if (retval = krb5_rd_error(inbuf, &error)) {
+	if (retval = krb5_rd_error(context, inbuf, &error)) {
 		com_err(progname, retval,
 			"while decoding error packet from client");
 		exit(1);
@@ -729,14 +758,15 @@ recv_error(inbuf)
 				"Error text from client: %s\n",
 				error->text.data);
 	}
-	krb5_free_error(error);
+	krb5_free_error(context, error);
 	exit(1);
 }
 
 void
-load_database(kdb5_edit, database_file_name)
-	char	*kdb5_edit;
-	char	*database_file_name;
+load_database(context, kdb5_edit, database_file_name)
+    krb5_context context;
+    char *kdb5_edit;
+    char *database_file_name;
 {
 	static char	*edit_av[4];
 	int	error_ret, save_stderr;

@@ -37,12 +37,13 @@
 #include "adm_extern.h"
  
 krb5_error_code
-adm5_kadmin(prog, client_auth_data, client_creds, retbuf, otype)
-char *prog;
-krb5_authenticator *client_auth_data;
-krb5_ticket *client_creds;
-char *retbuf;		/* Allocated in Calling Routine */
-int *otype;
+adm5_kadmin(context, prog, client_auth_data, client_creds, retbuf, otype)
+    krb5_context context;
+    char *prog;
+    krb5_authenticator *client_auth_data;
+    krb5_ticket *client_creds;
+    char *retbuf;		/* Allocated in Calling Routine */
+    int *otype;
 {
     krb5_error_code retval;
     kadmin_requests request_type;
@@ -65,7 +66,7 @@ int *otype;
 	retbuf[2] = SENDDATA2;
 	outbuf.length = 3;
 
-	retval = krb5_mk_priv(&outbuf,
+	retval = krb5_mk_priv(context, &outbuf,
 			ETYPE_DES_CBC_CRC,
 			client_creds->enc_part2->session,
 			&client_server_info.server_addr,
@@ -82,7 +83,7 @@ int *otype;
 	}
 
 		/* Send Acknowledgement Reply to Client */
-	if (retval = krb5_write_message(&client_server_info.client_socket,
+	if (retval = krb5_write_message(context, &client_server_info.client_socket,
 				&msg_data)){
 	    free(msg_data.data);
 	    syslog(LOG_ERR,
@@ -93,13 +94,13 @@ int *otype;
 	free(msg_data.data);
 
 			/* Read Username */
-	if (krb5_read_message(&client_server_info.client_socket, &inbuf)){
+	if (krb5_read_message(context, &client_server_info.client_socket, &inbuf)){
 	    syslog(LOG_ERR | LOG_INFO, "Error Performing Username Read");
 	    return(5);		/* Protocol Failure */
 	}
 
                 /* Decrypt Client Response */
-	if ((retval = krb5_rd_priv(&inbuf,
+	if ((retval = krb5_rd_priv(context, &inbuf,
 			client_creds->enc_part2->session,
 			&client_server_info.client_addr,
 			&client_server_info.server_addr,
@@ -168,7 +169,7 @@ int *otype;
 		}
 		*otype = 1;
 		salttype = KRB5_KDB_SALTTYPE_NORMAL;
-		retval = adm_add_new_key("adm5_kadmin", customer_name,
+		retval = adm_add_new_key(context, "adm5_kadmin", customer_name,
 					 client_creds, salttype);
 		goto process_retval;
 
@@ -181,7 +182,7 @@ int *otype;
 		}
 		*otype = 2;
 		salttype = KRB5_KDB_SALTTYPE_NORMAL;
-		retval = adm_change_pwd("adm5_kadmin", customer_name,
+		retval = adm_change_pwd(context, "adm5_kadmin", customer_name,
 					client_creds, salttype);
 		goto process_retval;
 
@@ -193,8 +194,8 @@ int *otype;
 		    goto process_retval;
 		}
 		*otype = 3;
-		retval = adm_add_new_key_rnd("adm5_kadmin", customer_name,
-					     client_creds);
+		retval = adm_add_new_key_rnd(context, "adm5_kadmin", 
+					     customer_name, client_creds);
 		goto process_retval;
 
 	    case CHROPER:
@@ -205,8 +206,8 @@ int *otype;
 		    goto process_retval;
 		}
 		*otype = 4;
-		retval = adm_change_pwd_rnd("adm5_kadmin", customer_name,
-					    client_creds);
+		retval = adm_change_pwd_rnd(context, "adm5_kadmin", 
+					    customer_name, client_creds);
 		goto process_retval;
 
 	    case DELOPER:
@@ -217,7 +218,7 @@ int *otype;
 		    goto process_retval;
 		}
 		*otype = 5;
-		retval = adm_del_old_key("adm5_kadmin", customer_name);
+		retval = adm_del_old_key(context, "adm5_kadmin", customer_name);
 		goto process_retval;
 
 	    case MODOPER:
@@ -228,7 +229,7 @@ int *otype;
 		    goto process_retval;
 		}
 		*otype = 6;
-		retval = adm_mod_old_key("adm5_kadmin", customer_name,
+		retval = adm_mod_old_key(context, "adm5_kadmin", customer_name,
 					 client_creds);
 		goto process_retval;
 
@@ -240,7 +241,7 @@ int *otype;
 		    goto process_retval;
 		}
 		*otype = 7;
-		retval = adm_inq_old_key("adm5_kadmin", customer_name,
+		retval = adm_inq_old_key(context, "adm5_kadmin", customer_name,
 					 client_creds);
 		goto process_retval;
 
@@ -253,7 +254,7 @@ int *otype;
 		}
 		*otype = 8;
 		salttype = KRB5_KDB_SALTTYPE_V4;
-		retval = adm_add_new_key("adm5_kadmin", customer_name,
+		retval = adm_add_new_key(context, "adm5_kadmin", customer_name,
 					 client_creds, salttype);
 		goto process_retval;
 
@@ -266,7 +267,7 @@ int *otype;
 		}
 		*otype = 9;
 		salttype = KRB5_KDB_SALTTYPE_V4;
-		retval = adm_change_pwd("adm5_kadmin", customer_name,
+		retval = adm_change_pwd(context, "adm5_kadmin", customer_name,
 					client_creds, salttype);
 		goto process_retval;
 
@@ -336,7 +337,7 @@ send_last:
 	outbuf.length = strlen(retbuf) + 1;
 
 		/* Send Completion Message */
-	if (retval = krb5_mk_priv(&outbuf,
+	if (retval = krb5_mk_priv(context, &outbuf,
 			ETYPE_DES_CBC_CRC,
 			client_creds->enc_part2->session,
 			&client_server_info.server_addr,
@@ -351,7 +352,7 @@ send_last:
 	}
 
 			/* Send Final Reply to Client */
-	if (retval = krb5_write_message(&client_server_info.client_socket,
+	if (retval = krb5_write_message(context, &client_server_info.client_socket,
 					&msg_data)){
 	    free(msg_data.data);
 	    syslog(LOG_ERR, "adm5_kadmin - Error Performing Final Write: %s",
