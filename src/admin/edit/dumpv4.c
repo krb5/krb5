@@ -71,7 +71,7 @@ v4_print_time(file, timeval)
 {
     struct tm *tm;
     struct tm *gmtime();
-    tm = gmtime((long *)&timeval);
+    tm = gmtime((time_t *)&timeval);
     fprintf(file, " %04d%02d%02d%02d%02d",
             tm->tm_year < 1900 ? tm->tm_year + 1900: tm->tm_year,
             tm->tm_mon + 1,

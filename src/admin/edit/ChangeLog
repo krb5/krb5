@@ -1,3 +1,9 @@
+Wed Dec  7 00:07:46 1994    <tytso@rsx-11.mit.edu>
+
+	* dumpv4.c (v4_print_time): gmtime expects a pointer to a time_t,
+		not a long. On most systems these are the same, on
+		others.... 
+
 Wed Nov 16 01:03:42 1994  Mark Eichin  (eichin@cygnus.com)
 
 	* dumpv4.c: new file. New command dump_v4db which creates a v4
