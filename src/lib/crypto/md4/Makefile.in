@@ -1,6 +1,5 @@
 # -I$(srcdir) is needed to pull in $(srcdir)/rsa-md4.h for ./t_mddriver.c.
-CFLAGS = $(CCOPTS) $(DEFS) -I$(srcdir)/../des -I$(srcdir)
-LDFLAGS = -g
+CFLAGS = $(CCOPTS) $(DEFS) -I$(srcdir)/../des -I"$(srcdir)"
 
 ##DOSBUILDTOP = ..\..\..
 ##DOSLIBNAME=..\crypto.lib
@@ -10,11 +9,7 @@ OBJS=	md4.$(OBJEXT) md4glue.$(OBJEXT) md4crypto.$(OBJEXT)
 
 SRCS=	$(srcdir)/md4.c $(srcdir)/md4glue.c $(srcdir)/md4crypto.c
 
-all:: $(OBJS) all-$(WHAT)
-
-all-unix:: t_mddriver-unix
-
-all-windows::
+all:: $(OBJS)
 
 t_mddriver.c: $(srcdir)/../md5/t_mddriver.c
 	$(CP) $(srcdir)/../md5/t_mddriver.c t_mddriver.c
@@ -22,15 +17,15 @@ t_mddriver.c: $(srcdir)/../md5/t_mddriver.c
 t_mddriver.o: t_mddriver.c
 	$(CC) -DMD=4 $(CFLAGS) -c  t_mddriver.c
 
-t_mddriver-unix: t_mddriver.o md4.o
+t_mddriver: t_mddriver.o md4.o
 	$(CC) $(CFLAGS) -o t_mddriver t_mddriver.o md4.o
 
-t_mddriver-windows:
+t_mddriver.exe:
 	$(CP) $(srcdir)\..\md5\t_mddriver.c t_mddriver.c
 	$(CC) -DMD=4 $(CFLAGS2) -o t_mddriver t_mddriver.c md4.c
 	$(RM) md4.obj
 
-check:: t_mddriver-$(WHAT)
+check:: t_mddriver$(EXEEXT)
 	$(C)t_mddriver$(EXEEXT) -x
 
 clean::

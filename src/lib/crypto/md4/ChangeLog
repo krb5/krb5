@@ -1,3 +1,11 @@
+Thu Mar 16 21:19:55 1995  John Gilmore  (gnu at toad.com)
+
+	* Makefile.in (CFLAGS):  Tweak for Unix->MPW converter.
+	(LDFLAGS):  Remove, conflicts with pre.in.
+	(all):  Remove all-$(WHAT) stuff, generalize for all platforms.
+	(t_mddriver):  Remove t_mddriver-$(WHAT) stuff, ditto.
+	(check):  Use $(EXEEXT).
+
 Tue Mar 14 17:24:57 1995 Keith Vetter (keithv@fusion.com)
 
 	* md4crypto.c: removed method for DLL data since everything's
