@@ -3,6 +3,7 @@ CONFIG_RULES
 AC_PROG_INSTALL
 dnl dbm libs for use of an_to_ln
 AC_CHECK_LIB(util,main)
+USE_ANAME
 AC_CHECK_LIB(crypt,crypt)
 dnl
 dnl AIX has them all; SCO might too
