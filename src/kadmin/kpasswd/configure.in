@@ -5,6 +5,7 @@ AC_SET_BUILDTOP
 AC_PROG_INSTALL
 AC_HAVE_LIBRARY(socket)
 AC_HAVE_LIBRARY(nsl)
+AC_HAVE_HEADERS(unistd.h)
 AC_COMPILE_CHECK([ut_pid in struct utmp],
 [#include <utmp.h>],
 [struct utmp ut; ut.ut_pid;],

@@ -33,6 +33,10 @@
  * suitability of the modifications, or additions to this software for 
  * any purpose.  It is provided "as is" without express or implied warranty.
  */
+#include <string.h>
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 #ifndef _TYPES_
 #include <sys/types.h>
 #ifndef _TYPES_
@@ -140,7 +144,7 @@ char *username,*tmpname;
 	kadmin_endutent();
 	return(1);
     }
-    byte_copy((char *)tmpptr,(char *)&retutent,sizeof(struct utmp));
+    memcpy((char *)&retutent,(char *)tmpptr,sizeof(struct utmp));
     kadmin_endutent();
 #ifdef DEBUG
 #ifdef NO_UT_HOST
@@ -191,16 +195,6 @@ char *username,*tmpname;
      */
     return(1);
 }
-
-byte_copy(str1,str2,len)
-char *str1, *str2;
-int len;
-{
- int i;
- for (i=0;i < len; i++) *(str2 + i) = *(str1 + i);
- return;
-}
-
 
 #ifdef NOTKERBEROS
 main(argc,argv)

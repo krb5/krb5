@@ -33,10 +33,6 @@ static char rcsid_kpasswd_c[] =
 #include <netdb.h>
 #include <signal.h>
 
-#ifndef MAXPATHLEN
-#define MAXPATHLEN 1024
-#endif
-
 #include <sys/param.h>
 #include <pwd.h>
 
@@ -65,6 +61,11 @@ static char rcsid_kpasswd_c[] =
 #include <krb5/errors.h>
 #include <krb5/kdb5_err.h>
 #include <krb5/krb5_err.h>
+#include <com_err.h>
+
+#ifndef MAXPATHLEN
+#define MAXPATHLEN 1024
+#endif
 
 krb5_error_code get_first_ticket 
 	PROTOTYPE((krb5_ccache, 
@@ -101,20 +102,17 @@ main(argc,argv)
     struct passwd *pw;
 
     krb5_principal client;
-    krb5_principal server;
 
     char default_name[256];
     char *client_name;		/* Single string representation of client id */
 
     krb5_data requested_realm;
-    char * local_realm;
 
     char input_string[768];
 
     krb5_error_code retval;	/* return code */
 
     int local_socket;
-    int c, count;
 
     krb5_error *err_ret;
     krb5_ap_rep_enc_part *rep_ret;
@@ -128,8 +126,6 @@ main(argc,argv)
 
     char *new_password;
     int new_pwsize;
-    krb5_data *decodable_pwd_string;
-    int i, j;
 
 #ifdef SANDIA
     extern int networked();
@@ -584,9 +580,7 @@ OLDDECLARG(krb5_ccache, cache)
 OLDDECLARG(krb5_principal, client)
 {
     char prompt[255];			/* for the password prompt */
-    char verify_prompt[255];		/* Verification Prompt if Desired */
     char pword[ADM_MAX_PW_LENGTH+1];	/* storage for the password */
-    int  pword_length = sizeof(pword);
     char *old_password;
     int  old_pwsize;
     int	 i;
@@ -594,7 +588,6 @@ OLDDECLARG(krb5_principal, client)
     krb5_address **my_addresses;
 
     char *client_name;
-    char local_realm[255];
     krb5_error_code retval;
     
     if ((retval = krb5_unparse_name(client, &client_name))) {
@@ -622,7 +615,8 @@ OLDDECLARG(krb5_principal, client)
 					   /* instance is local realm */
 					client->realm.data,
                                         0))) {
-        fprintf(stderr, "Error %s while building server name\n");
+        fprintf(stderr, "Error %s while building server name\n",
+		error_message(retval));
         return(1);
     }
 
@@ -685,7 +679,6 @@ krb5_error_code retval;
    krb5_pwd_data *pwd_data;
    passwd_phrase_element **next_passwd_phrase_element;
    char prompt[255];
-   char *verify_prompt = 0;
    int i, j, k;
    int legit_pswd = 0;	/* Assume No Legitimate Password */
    char *password_list[ADM_MAX_PW_CHOICES];
@@ -818,9 +811,7 @@ int * local_socket;
 
 {
     struct servent *service_process;	       /* service we will talk to */
-    struct hostent *local_host;		       /* us */
     struct hostent *remote_host;	       /* host we will talk to */
-    struct sockaddr *sockaddr_list;
 
     char **hostlist;
 
