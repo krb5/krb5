@@ -208,7 +208,7 @@ extern krb5_deltat krb5_clockskew;
  * This functions takes as input an KRB_CRED message, validates it, and
  * outputs the nonce and an array of the forwarded credentials.
  */
-krb5_error_code INTERFACE
+krb5_error_code
 krb5_rd_cred(context, auth_context, pcreddata, pppcreds, outdata)
     krb5_context          context;
     krb5_auth_context     auth_context;

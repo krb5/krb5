@@ -283,7 +283,7 @@ krb5_context_internalize(kcontext, argp, buffer, lenremain)
 		/* Get the number of ktypes */
 		if (!(kret = krb5_ser_unpack_int32(&ibuf, &bp, &remain))) {
 		    /* Reduce it to a count */
-		    context->ktype_count = ibuf;
+		    context->ktype_count = (int) ibuf;
 		    if ((context->ktypes = (krb5_enctype *)
 			 malloc(sizeof(krb5_enctype) *
 				(context->ktype_count+1)))) {

@@ -1,3 +1,10 @@
+Wed Sep 13 10:58:20 1995 Keith Vetter (keithv@fusion.com)
+
+        * get_in_t.c: removed unused variable.
+        * rd_cred.c: removed INTERFACE keyword.
+        * ser_auth.c: passing int32 where a size_t is wanted.
+        * ser_ctx.c: 16/32 bit int size mismatch.
+
 Sun Sep 17 23:41:19 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* rd_safe.c: Fix typo error.

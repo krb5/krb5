@@ -239,6 +239,7 @@ krb5_authenticator_internalize(kcontext, argp, buffer, lenremain)
     size_t		remain;
     int			i;
     krb5_int32		nadata;
+    size_t		len;
 
     bp = *buffer;
     remain = *lenremain;
@@ -306,12 +307,13 @@ krb5_authenticator_internalize(kcontext, argp, buffer, lenremain)
 	    /* Attempt to read in the authorization data count */
 	    if (!(kret = krb5_ser_unpack_int32(&ibuf, &bp, &remain))) {
 		nadata = ibuf;
+		len = (size_t) (nadata + 1);
 
 		/* Get memory for the authorization data pointers */
 		if ((authenticator->authorization_data = (krb5_authdata **)
-		     malloc(sizeof(krb5_authdata *) * (nadata+1)))) {
+		     malloc(sizeof(krb5_authdata *) * len))) {
 		    memset(authenticator->authorization_data, 0,
-			   sizeof(krb5_authdata *) * (nadata+1));
+			   sizeof(krb5_authdata *) * len);
 
 		    for (i=0; !kret && (i<nadata); i++) {
 			kret = krb5_internalize_opaque(kcontext,

@@ -86,7 +86,7 @@ krb5_get_in_tkt(context, options, addrs, ktypes, ptypes, key_proc, keyseed,
     krb5_ccache ccache;
     krb5_kdc_rep ** ret_as_reply;
 {
-    krb5_enctype enctype, ktype;
+    krb5_enctype enctype;
     krb5_kdc_req request;
     krb5_kdc_rep *as_reply = 0;
     krb5_error *err_reply;
