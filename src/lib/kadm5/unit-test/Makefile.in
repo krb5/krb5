@@ -115,14 +115,14 @@ unit-test-client-body: site.exp test-noauth test-destroy test-handle-client
 	$(ENV_SETUP) $(RUNTEST) --tool api RPC=1 API=$(CLNTTCL) \
 		KINIT=$(BUILDTOP)/clients/kinit/kinit \
 		KDESTROY=$(BUILDTOP)/clients/kdestroy/kdestroy \
-		KADMIN_LOCAL=$(BUILDTOP)/kadmin/cli/kadmin.local 
+		KADMIN_LOCAL=$(BUILDTOP)/kadmin/cli/kadmin.local $(RUNTESTFLAGS)
 	-mv api.log capi.log
 	-mv api.sum capi.sum
 
 unit-test-server-body: site.exp test-handle-server lock-test 
 	$(ENV_SETUP) $(RUNTEST) --tool api RPC=0 API=$(SRVTCL) \
 		LOCKTEST=./lock-test \
-		KADMIN_LOCAL=$(BUILDTOP)/kadmin/cli/kadmin.local
+		KADMIN_LOCAL=$(BUILDTOP)/kadmin/cli/kadmin.local $(RUNTESTFLAGS)
 	-mv api.log sapi.log
 	-mv api.sum sapi.sum
 
