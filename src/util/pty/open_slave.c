@@ -1,7 +1,7 @@
 /*
  * pty_open_slave: open slave side of terminal, clearing for use.
  *
- * Copyright 1995 by the Massachusetts Institute of Technology.
+ * Copyright 1995, 1996 by the Massachusetts Institute of Technology.
  *
  * 
  * Permission to use, copy, modify, and distribute this software and
@@ -26,7 +26,7 @@ long pty_open_slave ( slave, fd)
     const char *slave;
     int *fd;
 {
-    int vfd;
+    int vfd, testfd;
     long retval;
 #ifdef POSIX_SIGNALS
     struct sigaction sa;
@@ -78,7 +78,17 @@ long pty_open_slave ( slave, fd)
     if  (( retval = pty_open_ctty ( slave, fd))  != 0 ) {
 	return PTY_OPEN_SLAVE_OPENFAIL;
     }
-    return pty_initialize_slave (*fd);
+    retval =  pty_initialize_slave (*fd);
+
+    if (retval)
+      return retval;
+    testfd = open("/dev/tty", O_RDWR|O_NDELAY);
+    if ( testfd < 0 )
+      {
+	close(*fd);
+	*fd = -1;
+	return PTY_OPEN_SLAVE_NOCTTY;
+      }
+    close(testfd);
+    return 0;
 }
-
-

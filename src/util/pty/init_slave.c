@@ -1,7 +1,7 @@
 /*
  * pty_open_slave: open slave side of terminal, clearing for use.
  *
- * Copyright 1995 by the Massachusetts Institute of Technology.
+ * Copyright 1995, 1996 by the Massachusetts Institute of Technology.
  * 
  * Permission to use, copy, modify, and distribute this software and
  * its documentation for any purpose and without fee is hereby
@@ -19,6 +19,26 @@
 #include <com_err.h>
 #include "libpty.h"
 #include "pty-int.h"
+
+/* * The following is an array of modules that should be pushed on the
+ *  stream.  See configure.in for caviats and notes about when this
+ *  array is used and not used.
+ */
+#if defined(HAVE_STREAMS)&&(!defined(HAVE_LINE_PUSH))
+static char *push_list[] = {
+#ifdef PUSH_PTEM
+  "ptem",
+#endif
+#ifdef PUSH_LDTERM
+  "ldterm",
+#endif
+#ifdef PUSH_TTCOMPAT
+"ttcompat",
+#endif
+  0};
+#endif /*HAVE_STREAMS but not HAVE_LINE_PUSH*/
+
+ 
 
 long pty_initialize_slave (fd)
     int fd;
@@ -47,15 +67,13 @@ long pty_initialize_slave (fd)
 	    return PTY_OPEN_SLAVE_LINE_PUSHFAIL;
 	}
 #else /*No line_push */
-#ifdef sun 
-    if (ioctl(fd, I_PUSH, "ptem") < 0)
-	return PTY_OPEN_SLAVE_PUSH_FAIL;
-    if (ioctl(fd, I_PUSH, "ldterm") < 0)
-	return PTY_OPEN_SLAVE_PUSH_FAIL;
-    if (ioctl(fd, I_PUSH, "ttcompat") < 0)
-	return PTY_OPEN_SLAVE_PUSH_FAIL;
+    {
+       char **module = &push_list[0];
+      while (*module)
+		if (ioctl(fd, I_PUSH, *(module++)) < 0)
+		  	return PTY_OPEN_SLAVE_PUSH_FAIL;
+    }
 
-#endif /*SUN*/
 #endif /*LINE_PUSH*/
 #endif /*HAVE_STREAMS*/
 

@@ -12,6 +12,13 @@ LOGINLIBS=
 dnl
 dnl Make our operating system-specific security checks and definitions for
 dnl login.
+dnl  In addition, the following code decides what streams modules will
+dnl be pushed onto a pty.In particular, if HAVE_STREAMS is defined and
+dnl HAVE_LINE_PUSH is not defined, modules may be pushed by inserting
+dnl An appropriate generic ifdef for each module in init_slave.c and
+dnl  AC_DEFINES for the operating systems that need the modules.
+dnl  Each OS that supports streams has a different idea of what you want to
+dnl push.
 dnl
 case $krb5_cv_host in
 *-*-ultrix*)
@@ -30,6 +37,15 @@ alpha-dec-osf*)
 		LOGINLIBS="$LOGINLIBS -lsecurity"
 	)
 	;;
+*-*-solaris*)
+     AC_DEFINE(PUSH_PTEM)
+     AC_DEFINE(PUSH_LDTERM)
+     AC_DEFINE(PUSH_TTCOMPAT)
+     ;;
+*-*-hpux*)
+    AC_DEFINE(PUSH_PTEM)
+     AC_DEFINE(PUSH_LDTERM)
+     ;;
 esac
 dnl
 AC_SUBST(LOGINLIBS)

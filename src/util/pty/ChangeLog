@@ -1,3 +1,23 @@
+Sun Mar 24 19:59:14 1996  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* configure.in : Do streams handling by deciding what modules to
+ 	push for each system.
+
+	* init_slave.c (pty_initialize_slave): Better abstraction for
+ 	dealing with what modules get pushed on what streams system.
+  	There is a list of modules controlled on a module-by-module basis
+ 	by configure.in, and the modules included in that list are pushed.
+
+	* void_assoc.c: Duplicate comment from open_ctty.c explaining that
+ 	it's OK to call void_association twice, and giving the caviats
+ 	about setsid.
+
+	* open_ctty.c (pty_open_ctty): Remove test to make sure /dev/tty
+ 	worked, so we can push the streams for the HP.
+
+	* open_slave.c (pty_open_slave): Test to see if /dev/tty works
+ 	only after calling pty_initialize_slave.
+
 Sat Mar 23 15:24:38 1996  Sam Hartman  <hartmans@tertius.mit.edu>
 
 	* configure.in : Remove shadow passwords check because nothing in

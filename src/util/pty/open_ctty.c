@@ -1,7 +1,7 @@
 /*
  * pty_open_ctty: Open and establish controlling terminal.
  *
- * Copyright 1995 by the Massachusetts Institute of Technology.
+ * Copyright 1995, 1996 by the Massachusetts Institute of Technology.
  *
  * Permission to use, copy, modify, and distribute this software and
  * its documentation for any purpose and without fee is hereby
@@ -37,7 +37,7 @@ pty_open_ctty (slave, fd)
     const char * slave;
     int *fd;
 {
-    int testfd, retval;
+    int retval;
 
 /* First, dissociate from previous terminal */
     if ( (retval = ptyint_void_association()) != 0 )
@@ -54,21 +54,9 @@ pty_open_ctty (slave, fd)
 #ifdef ultrix
     setpgrp(0, getpid());
 #endif
-#ifdef ultrix
-    setpgrp(0, getpid());
-#endif
 
 #ifdef TIOCSCTTY
     ioctl(*fd, TIOCSCTTY, 0); /* Don't check return.*/
 #endif /* TIOCSTTY */
-
-    testfd = open("/dev/tty", O_RDWR|O_NDELAY);
-    if ( testfd < 0 )
-	{
-	    close(*fd);
-	    *fd = -1;
-	    return PTY_OPEN_SLAVE_NOCTTY;
-	}
-    close(testfd);
     return 0;
 }
