@@ -324,7 +324,7 @@ void doit(fd)
 	 */
 	if (retval = krb5_write_message(kpropd_context, (void *) &fd,
 					&confmsg)) { 
-		krb5_free_data_contents(context, &confmsg);
+		krb5_free_data_contents(kpropd_context, &confmsg);
 		com_err(progname, retval,
 			"while sending # of received bytes");
 		exit(1);
