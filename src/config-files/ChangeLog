@@ -1,0 +1,6 @@
+Thu Apr 20 22:20:37 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* services.append: Fix name of port for kpropd from krb_prop to
+		krb5_prop. 
+
+
