@@ -13,11 +13,13 @@ PROG_RPATH=$(KRB5_LIBDIR)
 
 RUN_SETUP = @KRB5_RUN_ENV@ KRB5_CONFIG=$(SRCTOP)/config-files/krb5.conf
 
-STLIBOBJS= crc32.o md4.o md5.o sha1.o
+STLIBOBJS= hash_crc32.o hash_md4.o hash_md5.o hash_sha1.o
 
-OBJS= crc32.$(OBJEXT) md4.$(OBJEXT) md5.$(OBJEXT) sha1.$(OBJEXT)
+OBJS= hash_crc32.$(OBJEXT) hash_md4.$(OBJEXT) \
+	hash_md5.$(OBJEXT) hash_sha1.$(OBJEXT)
 
-SRCS= $(srcdir)/crc32.c $(srcdir)/md4.c $(srcdir)/md5.c $(srcdir)/sha1.c
+SRCS= $(srcdir)/hash_crc32.c $(srcdir)/hash_md4.c \
+	$(srcdir)/hash_md5.c $(srcdir)/hash_sha1.c
 
 ##DOS##LIBOBJS = $(OBJS)
 
