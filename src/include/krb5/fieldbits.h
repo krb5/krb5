@@ -173,6 +173,13 @@
 
 #define LR_TYPE_INTERPRETATION_MASK	0x7fff
 
+/* definitions for ad_type fields. */
+#define	AD_TYPE_EXTERNAL	0x4000
+#define	AD_TYPE_REGISTERED	0x2000
+
+#define AD_TYPE_FIELD_TYPE_MASK	0x1fff
+#define AD_TYPE_INTERNAL_MASK	0x3fff
+
 #endif /* __KRB5_FIELDBITS__ */
 
 
