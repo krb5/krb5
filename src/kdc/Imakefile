@@ -10,8 +10,10 @@
 
 #ifdef Krb4KDCCompat
 KRB4DEF = -DKRB4
+K4LIB=$(KRB4LIB)
 #else
 KRB4DEF =
+K4LIB=
 #endif
 DEFINES = -DBACKWARD_COMPAT $(KRB4DEF)
 
@@ -51,7 +53,7 @@ depend:: kdc5_err.c
 kdc5_err.c: kdc5_err.et
 
 NormalProgramTarget(krb5kdc,$(OBJS),$(DEPKDBLIB) $(DEPKLIB), \
-	$(KDBLIB) $(KLIB) $(KRB4LIB),)
+	$(KDBLIB) $(KLIB) $(K4LIB),)
 
 clean::
 	$(RM) kdc5_err.h kdc5_err.c
