@@ -1,3 +1,7 @@
+Tue Feb 21 18:25:51 1995  Mark Eichin  (eichin@tweedledumber.cygnus.com)
+
+	* init_ets.c (krb5_init_ets): use old-style definition.
+
 Tue Feb 21 0:57:40 1995 Keith Vetter (keithv@fusion.com)
 
 	* Makefile.in: made to work for PC

@@ -28,7 +28,8 @@
 #include <krb5/krb5.h>
 
 void INTERFACE
-krb5_init_ets (krb5_context context)
+krb5_init_ets (context)
+     krb5_context context;
 {
     static int initialized = 0;
 
