@@ -1,3 +1,16 @@
+2003-06-25  Ken Raeburn  <raeburn@mit.edu>
+
+	* checksum_length.c (krb5_c_checksum_length): Handle trunc_size.
+
+2003-06-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* cksumtypes.c (krb5_cksumtypes_list): Add aes128/256 hmacs, with
+	new trunc_size field.
+
+	* make_checksum.c (krb5_c_make_checksum): If trunc_size is
+	specified, shrink the computed checksum down to the indicated
+	size.
+
 2003-06-05  Sam Hartman  <hartmans@mit.edu>
 
 	* string_to_key.c (krb5_c_string_to_key_with_params): Only allow
