@@ -1,3 +1,10 @@
+Wed Oct 25 15:38:00 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* init_sec_context.c (make_ap_req): Change the input type of
+		do_mutual to be OM_int32 instead of an int, to prevent
+		lossage under windows, since the passed in type size is a
+		OM_int32.
+
 Fri Oct  6 22:02:24 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in: Remove ##DOS!include of config/windows.in.

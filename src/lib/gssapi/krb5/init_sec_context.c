@@ -32,7 +32,7 @@ make_ap_req(context, auth_context, cred, server, endtime, chan_bindings,
     krb5_principal server;
     krb5_timestamp *endtime;
     gss_channel_bindings_t chan_bindings;
-    int do_mutual;
+    OM_uint32 do_mutual;
     krb5_flags *flags;
     gss_buffer_t token;
 {
