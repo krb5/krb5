@@ -1,3 +1,14 @@
+Sun Jul  7 15:14:43 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* get_creds.c: (krb5_get_credentials_val_renew_core) Combine
+		common internals needed from krb5_get_credentials_validate()
+		and used by new function krb5_get_credentials_renew()
+
+	* gc_frm_kdc.c (krb5_get_cred_from_kdc_renew): A wrapper that
+		passes KDC_OPT_RENEW to the static
+		krb5_get_cred_from_kdc_opt so that kinit can use it.
+
+
 Mon Jun 24 09:45:04 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* bld_princ.c (krb5_build_principal_va): Change const to

@@ -143,13 +143,18 @@ krb5_get_credentials(context, options, ccache, in_creds, out_creds)
     return retval;
 }
 
-krb5_error_code INTERFACE
-krb5_get_credentials_validate(context, options, ccache, in_creds, out_creds)
+#define INT_GC_VALIDATE 1
+#define INT_GC_RENEW 2
+
+static krb5_error_code 
+krb5_get_credentials_val_renew_core(context, options, ccache, 
+				    in_creds, out_creds, which)
     krb5_context context;
     const krb5_flags options;
     krb5_ccache ccache;
     krb5_creds *in_creds;
     krb5_creds **out_creds;
+    int which;
 {
     krb5_error_code retval;
     krb5_creds mcreds;
@@ -163,8 +168,20 @@ krb5_get_credentials_validate(context, options, ccache, in_creds, out_creds)
 
     if (retval) return retval;
 
-    retval = krb5_get_cred_from_kdc_validate(context, ccache, 
+    switch(which) {
+    case INT_GC_VALIDATE:
+	    retval = krb5_get_cred_from_kdc_validate(context, ccache, 
 					     in_creds, out_creds, &tgts);
+	    break;
+    case INT_GC_RENEW:
+	    retval = krb5_get_cred_from_kdc_renew(context, ccache, 
+					     in_creds, out_creds, &tgts);
+	    break;
+    default:
+	    /* Should never happen */
+	    retval = 255;
+	    break;
+    }
     if (retval) return retval;
     if (tgts) krb5_free_tgt_creds(context, tgts);
 
@@ -176,4 +193,31 @@ krb5_get_credentials_validate(context, options, ccache, in_creds, out_creds)
     
     retval = krb5_cc_store_cred(context, ccache, *out_creds);
     return retval;
+}
+
+krb5_error_code INTERFACE
+krb5_get_credentials_validate(context, options, ccache, in_creds, out_creds)
+    krb5_context context;
+    const krb5_flags options;
+    krb5_ccache ccache;
+    krb5_creds *in_creds;
+    krb5_creds **out_creds;
+{
+    return(krb5_get_credentials_val_renew_core(context, options, ccache, 
+					       in_creds, out_creds, 
+					       INT_GC_VALIDATE));
+}
+
+krb5_error_code INTERFACE
+krb5_get_credentials_renew(context, options, ccache, in_creds, out_creds)
+    krb5_context context;
+    const krb5_flags options;
+    krb5_ccache ccache;
+    krb5_creds *in_creds;
+    krb5_creds **out_creds;
+{
+
+    return(krb5_get_credentials_val_renew_core(context, options, ccache, 
+					       in_creds, out_creds, 
+					       INT_GC_RENEW));
 }
