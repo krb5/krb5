@@ -1,3 +1,9 @@
+2003-03-24  Tom Yu  <tlyu@mit.edu>
+
+	* xdr_mem.c (xdrmem_create): Perform some additional size checks.
+	(xdrmem_getlong, xdrmem_putlong, xdrmem_getbytes): Check x_handy
+	prior to decrementing it.
+
 2002-08-12  Tom Yu  <tlyu@mit.edu>
 
 	* xdr.c (xdr_string): Fix off-by-one error; we're not vulnerable,

@@ -47,6 +47,7 @@ static char sccsid[] = "@(#)xdr_mem.c 1.19 87/08/11 Copyr 1984 Sun Micro";
 #include <gssrpc/xdr.h>
 #include <netinet/in.h>
 #include <stdio.h>
+#include <limits.h>
 
 static bool_t	xdrmem_getlong();
 static bool_t	xdrmem_putlong();
@@ -83,7 +84,7 @@ xdrmem_create(xdrs, addr, size, op)
 	xdrs->x_op = op;
 	xdrs->x_ops = &xdrmem_ops;
 	xdrs->x_private = xdrs->x_base = addr;
-	xdrs->x_handy = size;
+	xdrs->x_handy = (size > INT_MAX) ? INT_MAX : size; /* XXX */
 }
 
 static void
@@ -98,8 +99,10 @@ xdrmem_getlong(xdrs, lp)
 	long *lp;
 {
 
-	if ((xdrs->x_handy -= sizeof(rpc_int32)) < 0)
+	if (xdrs->x_handy < sizeof(rpc_int32))
 		return (FALSE);
+	else
+		xdrs->x_handy -= sizeof(rpc_int32);
 	*lp = (long)ntohl(*((rpc_u_int32 *)(xdrs->x_private)));
 	xdrs->x_private += sizeof(rpc_int32);
 	return (TRUE);
@@ -111,8 +114,10 @@ xdrmem_putlong(xdrs, lp)
 	long *lp;
 {
 
-	if ((xdrs->x_handy -= sizeof(rpc_int32)) < 0)
+	if (xdrs->x_handy < sizeof(rpc_int32))
 		return (FALSE);
+	else
+		xdrs->x_handy -= sizeof(rpc_int32);
 	*(rpc_int32 *)xdrs->x_private = (rpc_int32)htonl((rpc_u_int32)(*lp));
 	xdrs->x_private += sizeof(rpc_int32);
 	return (TRUE);
@@ -125,8 +130,10 @@ xdrmem_getbytes(xdrs, addr, len)
 	register unsigned int len;
 {
 
-	if ((xdrs->x_handy -= len) < 0)
+	if (xdrs->x_handy < len)
 		return (FALSE);
+	else
+		xdrs->x_handy -= len;
 	memmove(addr, xdrs->x_private, len);
 	xdrs->x_private += len;
 	return (TRUE);
@@ -139,8 +146,10 @@ xdrmem_putbytes(xdrs, addr, len)
 	register unsigned int len;
 {
 
-	if ((xdrs->x_handy -= len) < 0)
+	if (xdrs->x_handy < len)
 		return (FALSE);
+	else
+		xdrs->x_handy -= len;
 	memmove(xdrs->x_private, addr, len);
 	xdrs->x_private += len;
 	return (TRUE);
@@ -179,7 +188,7 @@ xdrmem_inline(xdrs, len)
 {
 	rpc_int32 *buf = 0;
 
-	if (xdrs->x_handy >= len) {
+	if (len >= 0 && xdrs->x_handy >= len) {
 		xdrs->x_handy -= len;
 		buf = (rpc_int32 *) xdrs->x_private;
 		xdrs->x_private += len;
