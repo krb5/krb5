@@ -344,8 +344,12 @@ proc check_k5login { testname } {
     global env
     global REALMNAME
 
-    if {![file exists ~/.k5login] && $env(USER) != "root"} {
-	return 1
+    if {![file exists ~/.k5login]} {
+	if {$env(USER) == "root"} {
+	    return 0
+	} else {
+	    return 1
+	}
     }
 
     verbose "looking for $env(USER)@$REALMNAME in ~/.k5login" 2
@@ -370,8 +374,12 @@ proc check_klogin { testname } {
     global env
     global REALMNAME
 
-    if {![file exists ~/.klogin] && $env(USER) != "root" } {
-	return 1
+    if {![file exists ~/.klogin]} {
+	if {$env(USER) == "root"} {
+	    return 0
+	} else {
+	    return 1
+	}
     }
 
     verbose "looking for $env(USER) in ~/.klogin" 2
@@ -879,6 +887,12 @@ proc setup_kadmind_srvtab {  } {
     envstack_pop
     catch expect_after
     expect_after {
+	-re "(.*)\r\nkadmin.local:  " {
+	    fail "kadmin.local admin-keytab (unmatched output: $expect_out(1,string)"
+	    catch "exec rm -f $tmppwd/admin-keytab"
+	    catch "expect_after"
+	    return 0
+	}
 	timeout {
 	    fail "kadmin.local admin-keytab (timeout)"
 	    catch "exec rm -f $tmppwd/admin-keytab"
@@ -894,6 +908,7 @@ proc setup_kadmind_srvtab {  } {
     }
     expect "kadmin.local:  "
     send "xst -k admin-new-srvtab kadmin/admin\r"
+    expect "xst -k admin-new-srvtab kadmin/admin\r\n"
     expect -re ".*Entry for principal kadmin/admin.* added to keytab WRFILE:admin-new-srvtab."
     expect "kadmin.local:  "
 
@@ -901,15 +916,17 @@ proc setup_kadmind_srvtab {  } {
     if ![string match "" $exec_output] {
 	verbose -log "$exec_output"
 	perror "can't mv admin-new-srvtab"
+	catch expect_after
 	return 0
     }
 
     send "xst -k changepw-new-srvtab kadmin/changepw\r"
+    expect "xst -k changepw-new-srvtab kadmin/changepw\r\n"
     expect -re ".*Entry for principal kadmin/changepw.* added to keytab WRFILE:changepw-new-srvtab."
     expect "kadmin.local:  "
     send "quit\r"
-    expect "\r"
-    expect_after
+    expect eof
+    catch expect_after
     if ![check_exit_status "kadmin.local admin-keytab"] {
 	catch "exec rm -f $tmppwd/admin-keytab"
 	perror "kadmin.local admin-keytab exited abnormally"
@@ -995,6 +1012,7 @@ proc setup_kerberos_db { standalone } {
 	send "masterkey$KEY\r"
 	expect {
 	    -re "\[Cc\]ouldn't" {
+		expect eof
 		break
 	    }
 	    "Cannot find/read stored" exp_continue
@@ -1007,6 +1025,7 @@ proc setup_kerberos_db { standalone } {
 	}
     }
     set ret [catch $body]
+    catch expect_after
     if $ret {
 	set failall 1
 	if $standalone {
@@ -1035,7 +1054,10 @@ proc setup_kerberos_db { standalone } {
 	    break
 	}
     }
-    if [catch $body] {
+    set ret [catch $body]
+    catch "expect eof"
+    catch expect_after
+    if $ret {
 	set failall 1
 	if $standalone {
 	    fail $test
@@ -1080,7 +1102,10 @@ proc setup_kerberos_db { standalone } {
 	    break
 	}
     }
-    if [catch $body] {
+    set ret [catch $body]
+    catch "expect eof"
+    catch expect_after
+    if $ret {
 	set failall 1
 	if $standalone {
 	    fail $test
@@ -1119,7 +1144,10 @@ proc setup_kerberos_db { standalone } {
 		break
 	    }
 	}
-	if [catch $body] {
+	set ret [catch $body]
+	catch "expect eof"
+	catch expect_after
+	if $ret {
 	    set failall 1
 	    if $standalone {
 		fail $test
@@ -1158,7 +1186,10 @@ proc setup_kerberos_db { standalone } {
 		break
 	    }
 	}
-	if [catch $body] {
+	set ret [catch $body]
+	catch "expect eof"
+	catch expect_after
+	if $ret {
 	    set failall 1
 	    if $standalone {
 		fail $test
@@ -1456,6 +1487,7 @@ proc add_kerberos_key { kkey standalone } {
 	    "Principal \"$kkey@$REALMNAME\" created" { }
 	    "Principal or policy already exists while creating*" { }
 	}
+	expect eof
 	if ![check_exit_status kadmin] {
 	    break
 	}
@@ -1518,11 +1550,13 @@ proc add_random_key { kkey standalone } {
 	}
     }
     if [catch $body] {
+	catch expect_after
 	if $standalone {
 	    fail $test
 	}
 	return 0
     } else {
+	catch expect_after
 	if $standalone {
 	    pass $test
 	}
@@ -1562,6 +1596,14 @@ proc setup_srvtab { standalone {id host} } {
     spawn $KADMIN_LOCAL -r $REALMNAME
     envstack_pop
     expect_after {
+	-re "(.*)\r\nkadmin.local:  " {
+	    fail "kadmin.local srvtab (unmatched output: $expect_out(1,string))"
+	    if {!$standalone} {
+		catch "exec rm -f $tmppwd/srvtab"
+	    }
+	    catch "expect_after"
+	    return 0
+	}
 	timeout {
 	    fail "kadmin.local srvtab"
 	    if {!$standalone} {
@@ -1596,8 +1638,8 @@ proc setup_srvtab { standalone {id host} } {
     }
     expect "kadmin.local:  "
     send "quit\r"
-    expect "\r"
-    expect_after
+    expect eof
+    catch expect_after
     if ![check_exit_status "kadmin.local srvtab"] {
 	if {!$standalone} {
 	    catch "exec rm -f $tmppwd/srvtab"

@@ -1,3 +1,13 @@
+2001-10-31  Tom Yu  <tlyu@mit.edu>
+
+	* default.exp (check_k5login, check_klogin): Error out if there is
+	a nonexistent .k5login or .klogin for root.
+	(setup_{kadmind_,}srvtab, add_{random,kerberos}_key): Notice
+	unmatched output to avoid timing out on certain errors.  Look for
+	command echoes.  Clear the expect_after list in places to avoid
+	problems with lingering expect_after clauses against invalid
+	spawn_ids.  expect eof in places to avoid pty deadlock.
+
 2001-10-27  Tom Yu  <tlyu@mit.edu>
 
 	* default.exp: Mark as unused the test passes that won't
