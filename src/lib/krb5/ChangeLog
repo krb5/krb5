@@ -1,3 +1,8 @@
+2001-06-11  Ezra Peisach  <epeisach@mit.edu>
+
+	* configure.in: Test for strptime() prototype. Debian linux has
+	strptime in the C library but does not provide a prototype.
+
 2001-04-26  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Don't use HAS_ANSI_VOLATILE.
