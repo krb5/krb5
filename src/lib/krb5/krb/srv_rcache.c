@@ -64,8 +64,9 @@ krb5_rcache *rcptr;
 	retval = ENOMEM;
 	goto cleanup;
     }
+    strcpy(cachename, "rc_");
     p = 3;
-    for (i = 0; i <= piece->length; i++) {
+    for (i = 0; i < piece->length; i++) {
 	if (piece->data[i] == '\\') {
 	    cachename[p++] = '\\';
 	    cachename[p++] = '\\';
@@ -83,11 +84,17 @@ krb5_rcache *rcptr;
 
     if (retval = krb5_rc_resolve(rcache, cachename))
 	goto cleanup;
-
-    if (retval = krb5_rc_initialize(rcache, krb5_clockskew)) {
-	krb5_rc_close(rcache);
-	rcache = 0;
-	goto cleanup;
+    
+    /*
+     * First try to recover the replay cache; if that doesn't work,
+     * initialize it.
+     */
+    if (krb5_rc_recover(rcache)) {
+	if (retval = krb5_rc_initialize(rcache, krb5_clockskew)) {
+	    krb5_rc_close(rcache);
+	    rcache = 0;
+	    goto cleanup;
+	}
     }
 
     *rcptr = rcache;
