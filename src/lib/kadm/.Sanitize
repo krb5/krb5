@@ -34,6 +34,7 @@ adm_kt_enc.c
 adm_rw.c
 configure.in
 configure
+str_conv.c
 t_dbentry.c
 t_ktentry.c
 
