@@ -2154,7 +2154,7 @@ KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_get_realm_domain
 	KRB5_PROTOTYPE((krb5_context,
 		const char *,
 		char ** ));
-krb5_boolean krb5_kuserok
+KRB5_DLLIMP krb5_boolean KRB5_CALLCONV krb5_kuserok
 	KRB5_PROTOTYPE((krb5_context,
 		krb5_principal, const char *));
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_auth_con_genaddrs

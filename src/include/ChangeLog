@@ -1,3 +1,9 @@
+1999-08-26  Danilo Almeida  <dalmeida@mit.edu>
+
+	* krb5.hin (krb5_kuserok): Fix calling convention to make it
+	consistent with rest of krb5 exports before we start exporting 
+	this from the Windows DLL.
+
 1999-08-25  Danilo Almeida  <dalmeida@mit.edu>
 
 	* k5-int.h (krb5_cc_retrieve_cred_default): Fix calling convention
