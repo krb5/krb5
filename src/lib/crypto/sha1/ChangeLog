@@ -1,3 +1,22 @@
+2001-07-16  Ken Raeburn  <raeburn@mit.edu>
+
+	* t_shs3.c: New test file from Marcus Watts.
+	(longReverse): Resurrected function long since deleted from
+	shs.c.
+	* Makefile.in (check-unix, check-windows): Use t_shs3 test.
+	(clean): Delete it.
+
+	* shs.c (SHSTransform): Make input data pointer point to const.
+	(SHSUpdate): Bugfixes suggested by Marcus Watts, to fix buffer
+	overruns, bugs with small or odd block sizes.
+
+2001-07-05  Danilo Almeida  <dalmeida@mit.edu>
+
+	* shs.h, shs.c, t_shs.c: Fix sha1 on Windows by renaming LONG to
+	SHS_LONG to avoid problem with LONG being signed on Windows.
+	Rename BYTE to SHS_BYTE to avoid any name colisions with Windows
+	(where BYTE and LONG are types defined in the Platform SDK).
+
 2000-01-21  Ken Raeburn  <raeburn@mit.edu>
 
 	* shs.c (ROTL): Change (a&b|c) construct to make meaning clear,
