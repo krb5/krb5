@@ -2092,7 +2092,6 @@ int do_auth()
 	    if (realm[0] == '\0')
 	    	strncpy(realm, (char *) krb_realmofhost(hostname), sizeof(realm) - 1);
 	    realm[sizeof(realm) - 1] = '\0';
-   fprintf(stderr, "inst=%s, realm=%s, checksum %d\n", inst, realm, checksum);
 	    if ((kerror = krb_mk_req(&ticket, service = "ftp",
 					inst, realm, checksum))
 		&& (kerror != KDC_PR_UNKNOWN ||

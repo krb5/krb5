@@ -1,3 +1,8 @@
+Tue Oct 10 05:01:21 2000  Ezra Peisach  <epeisach@mit.edu>
+
+	* ftp.c (do_auth): Remove debugging printf which I inadvertantly
+ 	introduced.
+
 2000-08-29  Alexandra Ellwood  <lxs@mit.edu>
 
         * cmds.c, cmdtab.c, ftp_var.h: renamed getmode() and setmode()
