@@ -69,7 +69,7 @@ void ss_error (va_alist)
     va_dcl
 #endif
 {
-    register char const *whoami;
+    register char *whoami;
     va_list pvar;
 #ifndef HAVE_STDARG_H
     int sci_idx;

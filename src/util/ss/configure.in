@@ -18,7 +18,7 @@ CHECK_WAIT_TYPE
 CHECK_SIGNALS
 CHECK_SIGPROCMASK
 AC_RETSIGTYPE
-AC_CHECK_HEADERS(stdarg.h)
+AC_CHECK_HEADERS(stdarg.h stdlib.h)
 CopySrcHeader(ss.h,$(BUILDTOP)/include/ss)
 CopySrcHeader(mit-sipb-copyright.h,$(BUILDTOP)/include/ss)
 CopyHeader(ss_err.h,$(BUILDTOP)/include/ss)

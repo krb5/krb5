@@ -9,7 +9,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+#ifdef HAVE_STDLIB_H
 #include <stdlib.h>
+#endif
 
 #ifdef __STDC__
 
@@ -107,9 +109,11 @@ void ss_page_stdin();
 extern ss_data **_ss_table;
 extern char *ss_et_msgs[];
 
+#ifndef HAVE_STDLIB_H
 extern pointer malloc PROTOTYPE((unsigned));
 extern pointer realloc PROTOTYPE((pointer, unsigned));
 extern pointer calloc PROTOTYPE((unsigned, unsigned));
+#endif
 
 #ifdef USE_SIGPROCMASK
 /* fake sigmask, sigblock, sigsetmask */

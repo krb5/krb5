@@ -1,3 +1,13 @@
+Fri Jun  9 06:20:37 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* error.c (ss_error): remove const declaration from local
+		variable. (it is used with free is called on the contents).
+
+	* ss_internal.h: Include stdlib.h if present on system. If is
+	present, don't redeclare malloc.
+
+	* configure.in: Check for stdlib.h before including blindly.
+
 Thu Jun  8 23:22:07 1995    <tytso@rsx-11.mit.edu>
 
 	* list_req.c, ss_internal.h: Clean up -Wall flames.
