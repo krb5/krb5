@@ -3,7 +3,6 @@ myfulldir=util/pty
 mydir=.
 BUILDTOP=$(REL)$(U)$(S)$(U)
 RELDIR=../util/pty
-CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE)
 
 SED = sed
 
@@ -20,7 +19,7 @@ STOBJLISTS=OBJS.ST
 INSTALLFILE = cp
 
 # for pty-int.h
-LOCALINCLUDE=-I. -I$(srcdir)
+LOCALINCLUDES=-I. -I$(srcdir)
 
 FILES= Makefile cleanup.c getpty.c init_slave.c open_ctty.c open_slave.c update_utmp.c update_wtmp.c vhangup.c void_assoc.c pty_err.h pty_err.c\
 logwtmp.c init.c

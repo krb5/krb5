@@ -2,8 +2,7 @@ thisconfigdir=.
 myfulldir=appl/bsd
 mydir=.
 BUILDTOP=$(REL)$(U)$(S)$(U)
-CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDE) $(DEFINES)
-LOCALINCLUDE=@KRB4_INCLUDES@
+LOCALINCLUDES=@KRB4_INCLUDES@
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 
@@ -28,7 +27,7 @@ RSH=	-DKRB5_PATH_RLOGIN=\"$(CLIENT_BINDIR)/rlogin\"
 BSD=	-DUCB_RLOGIN=\"$(UCB_RLOGIN)\" \
 	-DUCB_RSH=\"$(UCB_RSH)\" -DUCB_RCP=\"$(UCB_RCP)\"
 
-DEFINES= $(RSH) $(BSD) $(RPROGS) \
+DEFINES = $(RSH) $(BSD) $(RPROGS) \
 	-DLOGIN_PROGRAM=\"$(SERVER_BINDIR)/login.krb5\" -DKPROGDIR=\"$(CLIENT_BINDIR)\"
 
 all:: rsh rcp rlogin kshd klogind login.krb5 $(V4RCP)

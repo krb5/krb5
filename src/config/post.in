@@ -4,7 +4,7 @@ check-windows::
 
 .depend: $(SRCS) $(SRCTOP)/util/depfix.sed
 	if test -n "$(SRCS)" ; then \
-		$(CC) -M $(CFLAGS) $(SRCS) | \
+		$(CC) -M $(ALL_CFLAGS) $(SRCS) | \
 			sed -f $(SRCTOP)/util/depfix.sed | \
 			sed -e 's; $(SRCTOP)/; $$(SRCTOP)/;g' | \
 			sed -e 's; $(srcdir)/; $$(srcdir)/;g' | \

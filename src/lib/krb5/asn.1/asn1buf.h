@@ -170,14 +170,14 @@ asn1_error_code asn1buf_insert_charstring
    modifies  *buf
    effects   Inserts the contents of s (a character array of length len)
               into the buffer *buf, expanding the buffer if necessary.
-	     Returns ENOMEM if memory is exhuasted. */
+	     Returns ENOMEM if memory is exhausted. */
 
 asn1_error_code asn1buf_remove_octet
 	PROTOTYPE((asn1buf *buf, asn1_octet *o));
 /* requires  *buf is allocated
    effects   Returns *buf's current octet in *o and advances to
               the next octet.
-	     Returns ASN1_OVERRUN if *buf has already been exhuasted. */
+	     Returns ASN1_OVERRUN if *buf has already been exhausted. */
 #define asn1buf_remove_octet(buf,o) \
   (((buf)->next > (buf)->bound) \
    ? ASN1_OVERRUN \
