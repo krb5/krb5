@@ -1,3 +1,11 @@
+2001-02-02  Ken Raeburn  <raeburn@mit.edu>
+
+	* localaddr.c (foreach_localaddr): Increase buffer space initially
+	allocated.  Add more slop space at the end that must remain unused
+	before we stop growing the buffer.  Impose a maximum size on the
+	buffer.  Handle possibility of returned ifc_len being larger than
+	the supplied buffer.
+
 2001-01-30  Ken Raeburn  <raeburn@mit.edu>
 
 	* changepw.c (fixup_ports): New function, uses correct level of

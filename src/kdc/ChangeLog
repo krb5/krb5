@@ -1,3 +1,8 @@
+2001-02-02  Ken Raeburn  <raeburn@mit.edu>
+
+	* network.c (foreach_localaddr): Sync with lib/krb5/os/localaddr.c
+	version.
+
 2000-05-17  Tom Yu  <tlyu@mit.edu>
 
 	* kerberos_v4.c (process_v4): Zero out v4_pkt.mbz.

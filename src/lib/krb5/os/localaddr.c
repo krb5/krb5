@@ -249,6 +249,45 @@ add_addr (void *P_data, struct sockaddr *a)
 #define ifreq_size(i) sizeof(struct ifreq)
 #endif /* HAVE_SA_LEN*/
 
+/* SIOCGIFCONF:
+
+   The behavior of this ioctl varies across systems.
+
+   NetBSD 1.5-alpha: The returned ifc_len is the desired amount of
+   space, always.  The returned list may be truncated if there isn't
+   enough room; no overrun.
+
+   Solaris 2.7: Return EINVAL if the buffer space is too small,
+   including ifc_len==0.  (Not sure if this is "too small for a single
+   entry" or "too small for the entire list"; my Sun has only one
+   interface.)  Solaris is the only system I've found so far that
+   actually returns an error.
+
+   AIX 4.3.3: Sometimes the returned ifc_len is bigger than the
+   supplied one, but it may not be big enough for *all* the
+   interfaces.  Sometimes it's smaller than the supplied value, even
+   if the returned list is truncated.  The list is filled in with as
+   many entries as will fit; no overrun.
+
+   Linux 2.2.12 (RH 6.1 dist, x86): The buffer is filled in with as
+   many entries as will fit, and the size used is returned in ifc_len.
+   The list is truncated if needed, with no indication.
+
+   IRIX 6.5: The buffer is filled in with as many entries as will fit
+   in N-1 bytes, and the size used is returned in ifc_len.  Providing
+   exactly the desired number of bytes is inadequate; the buffer must
+   be *bigger* than needed.  (E.g., 32->0, 33->32.)  The returned
+   ifc_len is always less than the supplied one.
+
+   Digital UNIX 4.0F: If input ifc_len is zero, return an ifc_len
+   that's big enough to include all entries.  (Actually, on our
+   system, it appears to be larger than that by 32.)  If input ifc_len
+   is nonzero, fill in as many entries as will fit, and set ifc_len
+   accordingly.
+
+   Using this ioctl is going to be messy.  Let's just hope that
+   getifaddrs() catches on quickly....  */
+
 static int
 foreach_localaddr (data, pass1fn, betweenfn, pass2fn)
     void *data;
@@ -274,7 +313,7 @@ foreach_localaddr (data, pass1fn, betweenfn, pass2fn)
     /* At least on NetBSD, an ifreq can hold an IPv4 address, but
        isn't big enough for an IPv6 or ethernet address.  So add a
        little more space.  */
-    est_ifreq_size = sizeof (struct ifreq) + 8;
+    est_ifreq_size = sizeof (struct ifreq) + 16;
 #ifdef SIOCGSIZIFCONF
     code = ioctl (s, SIOCGSIZIFCONF, &ifconfsize);
     if (!code) {
@@ -282,8 +321,9 @@ foreach_localaddr (data, pass1fn, betweenfn, pass2fn)
 	est_if_count = ifconfsize / est_ifreq_size;
     }
 #endif
-    if (current_buf_size == 0)
+    if (current_buf_size == 0) {
 	current_buf_size = est_ifreq_size * est_if_count;
+    }
     buf = malloc (current_buf_size);
 
  ask_again:
@@ -297,15 +337,34 @@ foreach_localaddr (data, pass1fn, betweenfn, pass2fn)
 	closesocket (s);
 	return retval;
     }
-    /* Test that the buffer was big enough that another ifreq could've
+    /* BSD 4.4 and similar systems truncate the address list if the
+       supplied buffer isn't big enough.
+
+       Test that the buffer was big enough that another ifreq could've
        fit easily, if the OS wanted to provide one.  That seems to be
        the only indication we get, complicated by the fact that the
        associated address may make the required storage a little
        bigger than the size of an ifreq.  */
-    if (current_buf_size - ifc.ifc_len < sizeof (struct ifreq) + 40
+#define SLOP (sizeof (struct ifreq) + 128)
+    if ((current_buf_size - ifc.ifc_len < sizeof (struct ifreq) + SLOP
+	/* On AIX 4.3.3, ifc.ifc_len may be set to a larger size than
+	   provided under some circumstances.  On my test system, a
+	   supplied value of 32..112 gets me 112, but with no data
+	   filled in even at 112.  But larger input ifc_len values get
+	   me larger output values, so it's not necessarily the full
+	   desired output buffer size.  And as near as I can tell, the
+	   ifc_len output has little to do with the offset of the last
+	   byte in the buffer actually modified, except that both
+	   input and output ifc_len values are higher (i.e., no buffer
+	   overrun takes place in my testing).  */
+	 || current_buf_size < ifc.ifc_len)
+	/* But let's let SIOCGSIZIFCONF dominate, unless we discover
+	   it's broken somewhere.  */
 #ifdef SIOCGSIZIFCONF
 	&& ifconfsize <= 0
 #endif
+	/* And we need *some* sort of bounds.  */
+	&& current_buf_size <= 100000
 	) {
 	int new_size;
 	char *newbuf;
@@ -324,7 +383,15 @@ foreach_localaddr (data, pass1fn, betweenfn, pass2fn)
     }
 
     n = ifc.ifc_len;
+    if (n > current_buf_size)
+	n = current_buf_size;
 
+    /* Note: Apparently some systems put the size (used or wanted?)
+       into the start of the buffer, just none that I'm actually
+       using.  Fix this when there's such a test system available.
+       The Samba mailing list archives mention that NTP looks for the
+       size on these systems: *-fujitsu-uxp* *-ncr-sysv4*
+       *-univel-sysv*.  [raeburn:20010201T2226-05]  */
     for (i = 0; i < n; i+= ifreq_size(*ifr) ) {
 	ifr = (struct ifreq *)((caddr_t) ifc.ifc_buf+i);
 
