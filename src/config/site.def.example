@@ -40,78 +40,13 @@
 #define Krb5Root	/krb5
 
 /*
- * 1.  HasLargeTmp - if your /tmp space is less than a 1meg, you should
+ * HasLargeTmp - if your /tmp space is less than a 1meg, you should
  * probably set this to NO
  */
 #ifndef HasLargeTmp
 #define HasLargeTmp YES
 #endif
 
-/*
- * 2. Man page locations & suffixes.
- */
-/* AdminManSuffix: man page suffix for administrative programs */
-#ifndef AdminManSuffix
-#define AdminManSuffix 8
-#endif
-/* AdminMandir: manual page directory for administrative man pages */
-#ifndef AdminMandir
-#define AdminMandir $(KRB5ROOT)/man/man$(ADMIN_MANSUFFIX)
-#endif
-
-/* ServerManSuffix: man page suffix for server programs */
-#ifndef ServerManSuffix
-#define ServerManSuffix 8
-#endif
-/* ServerMandir: manual page directory for server man pages */
-#ifndef ServerMandir
-#define ServerMandir $(KRB5ROOT)/man/man$(SERVER_MANSUFFIX)
-#endif
-
-/* ClientManSuffix: man page suffix for client programs */
-#ifndef ClientManSuffix
-#define ClientManSuffix 1
-#endif
-/* ClientMandir: manual page directory for client man pages */
-#ifndef ClientMandir
-#define ClientMandir $(KRB5ROOT)/man/man$(CLIENT_MANSUFFIX)
-#endif
-
-/* FileManSuffix: man page suffix for files */
-#ifndef FileManSuffix
-#define FileManSuffix 5
-#endif
-/* FileMandir: manual page directory for file man pages */
-#ifndef FileMandir
-#define FileMandir $(KRB5ROOT)/man/man$(FILE_MANSUFFIX)
-#endif
-
-/*
- * 3. Binary program install areas.
- */
-/* AdminBindir: binary install directory for administrative programs */
-#ifndef AdminBindir
-#define AdminBindir $(KRB5ROOT)/admin
-#endif
-
-/* ServerBindir: binary install directory for server programs */
-#ifndef ServerBindir
-#define ServerBindir $(KRB5ROOT)/sbin
-#endif
-
-/* ClientBindir: binary install directory for client programs */
-#ifndef ClientBindir
-#define ClientBindir $(KRB5ROOT)/bin
-#endif
-
-/* Libdir: install directory for kerberos libraries */
-#ifndef Krb5Libdir
-#define	Krb5Libdir $(KRB5ROOT)/lib
-#endif
-
-#ifndef Krb5Incdir
-#define	Krb5Incdir $(KRB5ROOT)/include
-#endif
 /*****************************************************************************
  *                                                                           *
  *			       Build Parameters                              *
@@ -130,16 +65,12 @@
  */
 #undef Use_VPATH
 
-/* With gcc, use -g -O.  Otherwise use the default (-O). */
-#if !defined(DefaultCDebugFlags) && HasGcc
-#define DefaultCDebugFlags OptimizedCDebugFlags DebuggableCDebugFlags
-#endif
-
 /* If you have the Hesiod software and libraries installed, and want to
    use it in some application programs, then turn these on.  If they're
    not turned on, they are left empty in Project.tmpl */
 #define HesiodDefines -DHESIOD
 #define HesiodLibs /usr/athena/lib/libhesiod.a
+#define HesiodIncludes -I/usr/athena/include
 
 #if 0
 /* not yet in use, but maybe someday... */
@@ -170,8 +101,8 @@
 
 #define PepsyCmd IsodeDir/@sys/bin/pepsy
 
-#define UseImakeInstalled /* -- turn on if you have imake installed */
-#define UseMakedependInstalled /* -- turn on if you have makedepend installed */
+/* #define UseImakeInstalled -- /* turn on if you have imake installed */
+/* #define UseMakedependInstalled -- /* turn on if you have makedepend installed */
 
 /* #define Krb4ApplCompat /* turn this on if you want selected applications to
 			  work with both v4 & v5 code */
@@ -190,36 +121,6 @@
 
 /* the following might want to be put into a specific architecture
    definition file */
-
-/*
- * If yes, you have vfprintf/vsprintf in libc (might want to be in the
- * architecture-specific configuration file) 
- */
-/* #define HasVfprintf YES */ 
-
-/*
- * If yes, you have vsyslog in libc (might want to be in the
- * architecture-specific configuration file) 
- */
-/* #define HasVsyslog YES */
-
-/*
- * If yes, you have strdup in libc (might want to be in the
- * architecture-specific configuration file) 
- */
-/* #define HasStrdup  YES */
-
-/*
- * If yes, you have strerror in libc (might want to be in the
- * architecture-specific configuration file) 
- */
-/* #define HasStrerror  YES */
-
-/*
- * If yes, you have memmove in libc (might want to be in the
- * architecture-specific configuration file) 
- */
-/* #define HasMemmove  YES */
 
 /* 
  * If you have the Hash library it will enable the GSSAPI validation code.
@@ -254,26 +155,17 @@
 
 /* Define BuildGssapi to be YES if you want to build GSSAPI.  Note: GSSAPI
    doesn't build with C compilers that don't support full ANSI C.  
-   For example, the Ultrix C compiler.  GCC, however, does work. */
+   For example, the Ultrix C compiler.  GCC, however, does work.
+   Project.tmpl defines BuildGssapi to be YES if HasGcc is YES. */
 
-#if HasGcc
-#define BuildGssapi YES
-#else
-#define BuildGssapi NO
-#endif
+/* #define BuildGssapi YES */
 
 /* Define this if you are building for multiple architectures or operating
    systems.  This tells the build where to look for the sources.  */
 #ifndef UseInstalled
 /* #define SourceTop /u1/krb5/sandbox/build */
 #endif
-
-#if defined(VaxArchitecture) && defined(UltrixArchitecture)
-#undef STDCTopIncludes
-#undef CcCmd
-#define CcCmd gcc -pedantic -pipe -Wall -fpcc-struct-return
-#define	OptimizedCDebugFlags -O3
-#define DefaultCDebugFlags OptimizedCDebugFlags -g
-#endif
-
-
+/* Define these appropriately if you have tcl installed */
+/* #define HasTcl YES */
+/* #define TclIncludes -I/u1/tcl/include */
+/* #define TclLibs -L/u1/tcl/lib -ltcl -lm */

@@ -48,6 +48,11 @@
 #define UnalignedReferencesAllowed YES	       /* if arbitrary deref is okay */
 #define HasSaberC YES
 #define DesDefines -DBIG -DLSBFIRST
+#undef STDCTopIncludes
+#undef CcCmd
+#define CcCmd gcc -pedantic -pipe -Wall -fpcc-struct-return
+#define	OptimizedCDebugFlags -O3
+#define DefaultCDebugFlags OptimizedCDebugFlags -g
 #endif
 
 #ifdef MipsArchitecture

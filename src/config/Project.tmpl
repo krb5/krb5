@@ -6,6 +6,14 @@
 
 #define ProjectKRB		5
 
+#ifndef BuildGssapi
+#if HasGcc
+#define BuildGssapi YES
+#else
+#define BuildGssapi NO
+#endif
+#endif
+
 #ifndef TouchCmd
 #define TouchCmd touch
 #endif
@@ -184,8 +192,12 @@
 #ifndef TclIncludes
 #define TclIncludes /**/
 #endif
+/* With gcc, use -g -O.  Otherwise use the default (-O). */
+#if !defined(DefaultCDebugFlags) && HasGcc
+#define DefaultCDebugFlags OptimizedCDebugFlags DebuggableCDebugFlags
+#endif
+
 /* Hack around sun cpp bug */
-  
 PEPSY_WARNING_STRING = \
 	@echo '***Ignore the warning message "Warning: Can'"'"'t find UNIV.ph failed"'
 

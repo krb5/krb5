@@ -35,78 +35,13 @@
  */
 
 /*
- * 1.  HasLargeTmp - if your /tmp space is less than a 1meg, you should
+ * HasLargeTmp - if your /tmp space is less than a 1meg, you should
  * probably set this to NO
  */
 #ifndef HasLargeTmp
 #define HasLargeTmp YES
 #endif
 
-/*
- * 2. Man page locations & suffixes.
- */
-/* AdminManSuffix: man page suffix for administrative programs */
-#ifndef AdminManSuffix
-#define AdminManSuffix 8
-#endif
-/* AdminMandir: manual page directory for administrative man pages */
-#ifndef AdminMandir
-#define AdminMandir $(KRB5ROOT)/man/man$(ADMIN_MANSUFFIX)
-#endif
-
-/* ServerManSuffix: man page suffix for server programs */
-#ifndef ServerManSuffix
-#define ServerManSuffix 8
-#endif
-/* ServerMandir: manual page directory for server man pages */
-#ifndef ServerMandir
-#define ServerMandir $(KRB5ROOT)/man/man$(SERVER_MANSUFFIX)
-#endif
-
-/* ClientManSuffix: man page suffix for client programs */
-#ifndef ClientManSuffix
-#define ClientManSuffix 1
-#endif
-/* ClientMandir: manual page directory for client man pages */
-#ifndef ClientMandir
-#define ClientMandir $(KRB5ROOT)/man/man$(CLIENT_MANSUFFIX)
-#endif
-
-/* FileManSuffix: man page suffix for files */
-#ifndef FileManSuffix
-#define FileManSuffix 5
-#endif
-/* FileMandir: manual page directory for file man pages */
-#ifndef FileMandir
-#define FileMandir $(KRB5ROOT)/man/man$(FILE_MANSUFFIX)
-#endif
-
-/*
- * 3. Binary program install areas.
- */
-/* AdminBindir: binary install directory for administrative programs */
-#ifndef AdminBindir
-#define AdminBindir $(KRB5ROOT)/admin
-#endif
-
-/* ServerBindir: binary install directory for server programs */
-#ifndef ServerBindir
-#define ServerBindir $(KRB5ROOT)/sbin
-#endif
-
-/* ClientBindir: binary install directory for client programs */
-#ifndef ClientBindir
-#define ClientBindir $(KRB5ROOT)/bin
-#endif
-
-/* Libdir: install directory for kerberos libraries */
-#ifndef Krb5Libdir
-#define	Krb5Libdir $(KRB5ROOT)/lib
-#endif
-
-#ifndef Krb5Incdir
-#define	Krb5Incdir $(KRB5ROOT)/include
-#endif
 /*****************************************************************************
  *                                                                           *
  *			       Build Parameters                              *
@@ -141,11 +76,6 @@
 #if !defined(UltrixArchitecture) && !defined(AIXArchitecture) && !defined(SunArchitecture) && !defined(LinuxArchitecture)
 #define ExtraLoadFlags -Z
 #endif
-#endif
-
-/* With gcc, use -g -O.  Otherwise use the default (-O). */
-#if !defined(DefaultCDebugFlags) && HasGcc
-#define DefaultCDebugFlags OptimizedCDebugFlags DebuggableCDebugFlags
 #endif
 
 /* If you have the Hesiod software and libraries installed, and want to
@@ -205,19 +135,6 @@
 #define Krb4LibList /usr/athena/lib/libkrb.a $(KLIBLOC) -l$(DES425LIB)
 #define Krb4KdbList /usr/athena/lib/libkdb.a
 
-/* the following might want to be put into a specific architecture
-   definition file */
-
-/* #define HasVfprintf -- turn on if you have vfprintf/vsprintf in libc
-   			  (might want to be in the architecture-specific
-			   configuration file) */
-/* #define HasVsyslog -- turn on if you have vsyslog in libc
-   			  (might want to be in the architecture-specific
-			   configuration file) */
-/* #define HasStrdup -- turn on if you have strdup() in libc
-   			  (might want to be in the architecture-specific
-			   configuration file) */
-
 /* If you have the Hash library it will enable the GSSAPI validation code.
    It will make the GSSAPI library more robust, but it is not strictly 
    necessary. */
@@ -268,14 +185,7 @@
 #endif /* HasGcc */
 #endif
 
-
-#if defined(VaxArchitecture) && defined(UltrixArchitecture)
-#undef STDCTopIncludes
-#undef CcCmd
-#define CcCmd gcc -pedantic -pipe -Wall -fpcc-struct-return
-#define	OptimizedCDebugFlags -O3
-#define DefaultCDebugFlags OptimizedCDebugFlags -g
-#endif
+/* Define these appropriately if you have tcl installed */
 #define HasTcl YES
 #define TclIncludes -I/u1/tcl/include
 #define TclLibs -L/u1/tcl/lib -ltcl -lm
