@@ -3,6 +3,7 @@
  * $Author$
  *
  * Copyright 1990 by the Massachusetts Institute of Technology.
+ * All Rights Reserved.
  *
  * For copying and distribution information, please see the file
  * <krb5/copyright.h>.
@@ -18,7 +19,6 @@ static char rcsid_krb5_kt_read_service_key_c[] =
 "$Id$";
 #endif	/* !lint & !SABER */
 
-#include <krb5/copyright.h>
 #include <krb5/krb5.h>
 
 #include <krb5/ext-proto.h>

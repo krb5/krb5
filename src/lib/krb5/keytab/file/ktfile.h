@@ -4,6 +4,7 @@
  * $Id$
  *
  * Copyright 1990 by the Massachusetts Institute of Technology.
+ * All Rights Reserved.
  *
  * For copying and distribution information, please see the file
  * <krb5/copyright.h>.
@@ -12,7 +13,6 @@
  * of the file-based ticket cache implementation.
  */
 
-#include <krb5/copyright.h>
 
 #ifndef KRB5_KTFILE__
 #define KRB5_KTFILE__
