@@ -61,7 +61,7 @@ MSG_DAT *msg;
 #ifdef	EBUG
 	    ERROR(r);
 #endif
-	    return(-1);
+	    return(krb425error(r));
 	}
 	if (rcache = (krb5_rcache) malloc(sizeof(*rcache))) {
 	    if (!(r = krb5_rc_resolve_type(&rcache, "dfl"))) {
@@ -94,7 +94,7 @@ MSG_DAT *msg;
 #ifdef	EBUG
 	    ERROR(ENOMEM);
 #endif
-	    return(-1);
+	    return(krb425error(ENOMEM));
 	}
 	krb5_free_addr(saddr2);
 
@@ -102,7 +102,7 @@ MSG_DAT *msg;
 #ifdef	EBUG
 		ERROR(r);
 #endif
-		return(-1);
+		return(krb425error(r));
 	}
 
 	msg->app_data = (u_char *)out.data;
