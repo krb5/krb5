@@ -21,6 +21,7 @@ SRCS= \
 	arep2karep.c	\
 	asrq2kasrq.c	\
 	auth2kauth.c	\
+	cvt_flags.c	\
 	ck2kck.c	\
 	ekrp2kekrp.c	\
 	enck2kkey.c	\
@@ -77,6 +78,7 @@ OBJS= \
 	arep2karep.o	\
 	asrq2kasrq.o	\
 	auth2kauth.o	\
+	cvt_flags.o	\
 	ck2kck.o	\
 	ekrp2kekrp.o	\
 	enck2kkey.o	\
