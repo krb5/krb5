@@ -670,7 +670,7 @@ asn1_error_code asn1_decode_sequence_of_enctype(DECLARG(asn1buf *, buf),
     while(asn1buf_remains(&seqbuf) > 0){
       size++;
       if (*val == NULL)
-        *val = (krb5_enctype*)malloc(*val,size*sizeof(krb5_enctype));
+        *val = (krb5_enctype*)malloc(size*sizeof(krb5_enctype));
       else
         *val = (krb5_enctype*)realloc(*val,size*sizeof(krb5_enctype));
       if(*val == NULL) return ENOMEM;

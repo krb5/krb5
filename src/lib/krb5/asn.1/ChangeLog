@@ -1,3 +1,7 @@
+Thu Aug  4 13:19:14 1994  Tom Yu  (tlyu@dragons-lair)
+
+	* asn1_decode_k.c (asn1_decode_sequence_of_enctype): fix typo
+
 Tue Aug  2 07:22:57 1994  Tom Yu  (tlyu@dragons-lair)
 
 	* asn1_decode_k.c (asn1_decode_sequence_of_enctype): more fixing
