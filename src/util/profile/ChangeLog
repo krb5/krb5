@@ -1,3 +1,7 @@
+Thu Apr 27 20:26:48 1995    <tytso@rsx-11.mit.edu>
+
+	* Makefile.in (clean-unix): Remove profile.h and test_profile
+
 Thu Apr 27 15:36:27 1995  Mark Eichin  <eichin@cygnus.com>
 
 	* test_parse.c (main): can't make function declarations local to

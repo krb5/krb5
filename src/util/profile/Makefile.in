@@ -63,7 +63,8 @@ clean:: clean-$(WHAT)
 clean-mac:: clean-unix
 clean-unix::
 	rm -f $(PROGS) *.o *~ test_parse core libprofile.a prof_err.h \
-		prof_err.c
+		prof_err.c test_profile profile.h
+
 clean-windows::
 	$(RM) profile.lib profile.bak test_parse.exe test_profile.exe
 
