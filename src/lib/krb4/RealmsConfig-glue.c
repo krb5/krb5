@@ -377,7 +377,7 @@ get_krbhst_default(h, r, n)
     if (strlen(KRB_HOST) + 1 + strlen(r) >= MAXHOSTNAMELEN)
 	return KFAILURE;
     /* KRB_HOST.REALM (ie. kerberos.CYGNUS.COM) */
-    strncpy(h, KRB_HOST, MAXHOSTNAMELEN);
+    strcpy(h, KRB_HOST);
     strcat(h, ".");
     strcat(h, r);
     return KSUCCESS;
@@ -469,7 +469,7 @@ krb_get_krbhst(
 	}
 	fclose(cnffile);
 	if (result == KSUCCESS && strlen(scratch) < MAXHOSTNAMELEN)
-	    strncpy(host, scratch, MAXHOSTNAMELEN);
+	    strcpy(host, scratch);
 	else
 	    result = KFAILURE;
     } while (0);
@@ -598,7 +598,7 @@ krb_realmofhost(char *host)
 
     if (strlen(lhost) >= MAXHOSTNAMELEN)
 	return realm;
-    strncpy(hostname, lhost, MAXHOSTNAMELEN);
+    strcpy(hostname, lhost);
 
     /* Remove possible trailing dot. */
     p = strrchr(hostname, '.');
