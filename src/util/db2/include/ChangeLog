@@ -1,3 +1,9 @@
+2001-10-24  Ezra Peisach  <epeisach@mit.edu>
+
+	* db-config.h.in: Remove unnecessary definitions for including
+	db.h header file. These include WORDS_BIGENDIAN, ssize_t, u_short,
+	int8_t, u_int8_t, int16_t, u_int16_t, int32_t.
+
 2001-07-06  Ezra Peisach  <epeisach@mit.edu>
 
 	* db-dbm.h: New header file which lists the dbm interfaces.
