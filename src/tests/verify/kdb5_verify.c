@@ -255,12 +255,10 @@ check_princ(context, str_princ)
 	goto out;
     }
 
-    retval = krb5_string_to_key(context, &master_encblock, master_keyblock.enctype,
-				&pwd_key,
-				&pwd,
-				&salt);
-    if (retval) {
-	com_err(progname, retval, "while converting password to key for '%s'", princ_name);
+    if (retval = krb5_string_to_key(context, &master_encblock, 
+				    &pwd_key, &pwd, &salt)) {
+	com_err(progname, retval, "while converting password to key for '%s'", 
+		princ_name);
 	goto out;
     }
 
@@ -390,10 +388,8 @@ set_dbname_help(context, pname, dbname)
 	    com_err(pname, retval, "while calculated master key salt");
 	    return(1);
 	}
-	retval = krb5_string_to_key(context, &master_encblock, 
-				    master_keyblock.enctype, &master_keyblock,
-				    &pwd, &scratch);
-	if (retval) {
+	if (retval = krb5_string_to_key(context, &master_encblock, 
+				    &master_keyblock, &pwd, &scratch)) {
 	    com_err(pname, retval,
 		    "while transforming master key from password");
 	    return(1);

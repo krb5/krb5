@@ -1,3 +1,7 @@
+Thu Nov 09 17:05:57 1995  Chris Provenzano (proven@mit.edu)
+
+        * kdb5_verify.c : Remove krb5_enctype from krb5_string_to_key() args.
+
 Wed Sep 06 14:20:57 1995   Chris Provenzano (proven@mit.edu)
 
         * kdb5_verify.c : s/keytype/enctype/g, s/KEYTYPE/ENCTYPE/g
