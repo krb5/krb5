@@ -1,3 +1,8 @@
+Fri Nov 22 11:52:52 1996  Sam Hartman  <hartmans@mit.edu>
+
+	* configure.in : Make sure time_t is define [203]
+	* update_wtmp.c (ptyint_update_wtmp): Use time_t for call to time(2). [203]
+
 Fri Nov 15 08:33:54 1996  Ezra Peisach  <epeisach@mit.edu>
 
 	* update_utmp.c (pty_update_utmp): Handle case where utmp uses
