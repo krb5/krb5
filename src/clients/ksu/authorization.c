@@ -782,7 +782,7 @@ _username_an_to_ln ( krb5_const_principal aname, const int lnsize,
     return retval;
 }
 
-void auth_cleanup(int k5users_flag, FILE * users_fp,
+static void auth_cleanup(int k5users_flag, FILE * users_fp,
 		  int k5login_flag, FILE * login_fp, char *princname){
 
 	free (princname);
