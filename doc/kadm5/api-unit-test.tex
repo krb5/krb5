@@ -87,10 +87,13 @@ Furthermore, in addition to the tests labelled below, a test should be
 implemented to verify that a client can't perform operations on the
 server through the client API library when it's linked against
 standard Sun RPC instead of OpenV*Secure's authenticated Sun RPC.
-Since the tests below already verify that all of the API functions
-will fail if called before ovsec_kadm_init, this test can consist of
-nothing more than verifying that it's not possible to initialize a
-connection to the server using standard Sun RPC.
+This will require a client with a modified version of ovsec_kadm_init
+which doesn't call auth_gssapi_create.  This client should call this
+modified ovsec_kadm_init and then call some other admin API function,
+specifying arguments to both functions that would work if the
+authenciated Sun RPC had been used, but shouldn't if authentication
+wasn't used.  The test should verify that the API function call after
+the init doesn't succeed.
 
 \section{ovsec_kadm_init}
 
