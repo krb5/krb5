@@ -129,7 +129,7 @@ int type;
     char *found3;
     char *local_entry;
 
-    local_entry = chk_entry->principal->data[type].data;
+    local_entry = chk_entry->princ->data[type].data;
 
     token1[0] = token2[0] = token3[0] = '\0';
 

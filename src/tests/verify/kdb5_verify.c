@@ -287,10 +287,8 @@ check_princ(context, str_princ)
       goto errout;
     }
 
-    retval = krb5_kdb_decrypt_key(context, &master_encblock,
-				  &kdbe.key,
-				  &db_key);
-    if (retval) {
+    if (retval = krb5_dbekd_decrypt_key_data(context, &master_encblock, 
+				       	     kdbe.key_data, &db_key, NULL)) {
 	com_err(progname, retval, "while decrypting key for '%s'", princ_name);
 	goto errout;
     }
@@ -314,8 +312,8 @@ errout:
     free((char *)pwd_key.contents);
     free((char *)db_key.contents);
 
-    if (kdbe.kvno != 1) {
-      fprintf(stderr, "\tkvno did not match stored value for %s.\n", princ_name);
+    if (kdbe.key_data[0].key_data_kvno != 1) {
+      fprintf(stderr,"\tkvno did not match stored value for %s.\n", princ_name);
       goto errout;
     }
 
@@ -344,6 +342,7 @@ errout:
       goto errout;
     }
 
+/*
     if (retval = krb5_unparse_name(context, kdbe.mod_name, &str_mod_name))
       com_err(progname, retval, "while unparsing mode name");
     else {
@@ -355,6 +354,7 @@ errout:
       }
       else free(str_mod_name);
     }
+*/
 
     if (kdbe.attributes != mblock.flags) {
       fprintf(stderr, "\tAttributes did not match stored value for %s.\n",
@@ -469,7 +469,7 @@ set_dbname_help(context, pname, dbname)
     mblock.max_rlife = master_entry.max_renewable_life;
     mblock.expiration = master_entry.expiration;
     /* don't set flags, master has some extra restrictions */
-    mblock.mkvno = master_entry.kvno;
+    mblock.mkvno = master_entry.key_data[0].key_data_kvno;
 
     krb5_db_free_principal(context, &master_entry, nentries);
     dbactive = TRUE;

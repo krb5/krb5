@@ -1,4 +1,8 @@
 
+Thu Jul 27 02:59:05 1995 Chris Provenzano (proven@mit.edu)
+
+        * do_as_req.c do_tgs_req.c kdc_util.c main.c : Use new kdb format.
+
 Mon Jul 17 15:13:09 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* main.c - Gut KDC profile handling logic and move it to lib/kadm/
 		alt_prof.c because it's now used by admin and kadmin programs.

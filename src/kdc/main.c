@@ -361,6 +361,7 @@ init_realm(progname, rdp, realm, def_dbname, def_mpname,
     krb5_boolean	db_inited;
     krb5_int32		ibuf;
     krb5_enctype	etype;
+    int			i, keyno;
     krb5_realm_params	*rparams;
 
     kret = EINVAL;
@@ -369,7 +370,6 @@ init_realm(progname, rdp, realm, def_dbname, def_mpname,
     if (realm) {
 	rdp->realm_name = realm;
 	if (!(kret = krb5_init_context(&rdp->realm_context))) {
-
 	    (void) krb5_read_realm_params(rdp->realm_context,
 					  rdp->realm_name,
 					  (char *) NULL,
@@ -410,6 +410,7 @@ init_realm(progname, rdp, realm, def_dbname, def_mpname,
 						  "kdc",
 						  def_port,
 						  KDC_PORTNAME);
+
 	    /* Handle KDC secondary port */
 	    if (rparams && rparams->realm_kdc_sport_valid)
 		rdp->realm_sport = rparams->realm_kdc_sport;
@@ -543,12 +544,15 @@ init_realm(progname, rdp, realm, def_dbname, def_mpname,
 		com_err(progname, kret,
 			"while fetching master entry for realm %s", realm);
 		goto whoops;
-	    }
-	    else {
-		rdp->realm_mkvno = db_entry.kvno;
-		krb5_db_free_principal(rdp->realm_context,
-				       &db_entry,
-				       num2get);
+	    } else {
+		/* Get the most recent mkvno */
+		for (rdp->realm_mkvno = i = 0; i < db_entry.n_key_data; i++) {
+		    if (rdp->realm_mkvno < db_entry.key_data[i].key_data_kvno) {
+		    	rdp->realm_mkvno = db_entry.key_data[i].key_data_kvno;
+			keyno = i;
+		    }
+		}
+		krb5_db_free_principal(rdp->realm_context, &db_entry, num2get);
 	    }
 
 	    /* Now preprocess the master key */
@@ -595,13 +599,12 @@ init_realm(progname, rdp, realm, def_dbname, def_mpname,
 		com_err(progname, kret,
 			"while fetching TGS entry for realm %s", realm);
 		goto whoops;
-	    }
-	    else {
-		if (!(kret = krb5_kdb_decrypt_key(rdp->realm_context,
-						  &rdp->realm_encblock,
-						  &db_entry.key,
-						  &rdp->realm_tgskey))) {
-		    rdp->realm_tgskvno = db_entry.kvno;
+	    } else {
+		if (!(kret = krb5_dbekd_decrypt_key_data(rdp->realm_context,
+						    &rdp->realm_encblock,
+						    &db_entry.key_data[keyno],
+						    &rdp->realm_tgskey, NULL))){
+		    rdp->realm_tgskvno = db_entry.key_data[keyno].key_data_kvno;
 		}
 		krb5_db_free_principal(rdp->realm_context,
 				       &db_entry,
@@ -710,16 +713,9 @@ initialize_realms(kcontext, argc, argv)
 	case 'r':			/* realm name for db */
 	    if (!find_realm_data(optarg, (krb5_ui_4) strlen(optarg))) {
 		if (rdatap = (kdc_realm_t *) malloc(sizeof(kdc_realm_t))) {
-		    if (retval = init_realm(argv[0],
-					    rdatap,
-					    optarg,
-					    db_name,
-					    mkey_name,
-					    mkeytype,
-					    pport,
-					    sport,
-					    kdc_etype,
-					    manual)) {
+		    if (retval = init_realm(argv[0], rdatap, optarg, db_name,
+					    mkey_name, mkeytype, pport, sport,
+					    kdc_etype, manual)) {
 			fprintf(stderr,"%s: cannot initialize realm %s\n",
 				argv[0], optarg);
 			exit(1);
@@ -774,16 +770,8 @@ initialize_realms(kcontext, argc, argv)
 	    exit(1);
 	}
 	if (rdatap = (kdc_realm_t *) malloc(sizeof(kdc_realm_t))) {
-	    if (retval = init_realm(argv[0],
-				    rdatap,
-				    lrealm,
-				    db_name,
-				    mkey_name,
-				    mkeytype,
-				    pport,
-				    sport,
-				    kdc_etype,
-				    manual)) {
+	    if (retval = init_realm(argv[0], rdatap, lrealm, db_name, mkey_name,
+				    mkeytype, pport, sport, kdc_etype, manual)){
 		fprintf(stderr,"%s: cannot initialize realm %s\n",
 			argv[0], lrealm);
 		exit(1);
@@ -797,8 +785,7 @@ initialize_realms(kcontext, argc, argv)
      * Now handle the replay cache.
      */
     if (retval = kdc_initialize_rcache(kcontext, rcname)) {
-	com_err(argv[0], retval,
-		"while initializing KDC replay cache");
+	com_err(argv[0], retval, "while initializing KDC replay cache");
 	exit(1);
     }
 
@@ -813,7 +800,7 @@ finish_realms(prog)
 {
     int i;
 
-    for (i=0; i<kdc_numrealms; i++)
+    for (i = 0; i < kdc_numrealms; i++)
 	finish_realm(kdc_realmlist[i]);
 }
 

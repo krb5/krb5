@@ -34,7 +34,7 @@ struct dump_record {
 	FILE	*f;
 };
 
-static char ld_vers[] = "kdb5_edit load_dump version 2.0\n";
+static char ld_vers[] = "kdb5_edit load_dump version 3.0\n";
 
 krb5_encrypt_block master_encblock;
 extern char *current_dbname;
@@ -46,56 +46,21 @@ void update_ok_file();
 
 krb5_error_code
 dump_iterator(ptr, entry)
-    krb5_pointer ptr;
-    krb5_db_entry *entry;
+    krb5_pointer 	  ptr;
+    krb5_db_entry 	* entry;
 {
-    krb5_error_code retval;
-    struct dump_record *arg = (struct dump_record *) ptr;
-    char *name=NULL, *mod_name=NULL;
-    int	i;
+    struct dump_record  * arg = (struct dump_record *) ptr;
+    krb5_error_code 	  retval;
+    datum		  content;
 
-    if (retval = krb5_unparse_name(edit_context, entry->principal, &name)) {
-	com_err(arg->comerr_name, retval, "while unparsing principal");
+    if (retval = krb5_encode_princ_contents(edit_context, &content, entry)) {
+	com_err(arg->comerr_name, retval, "while encoding an entry");
 	exit_status++;
 	return retval;
     }
-    if (retval = krb5_unparse_name(edit_context, entry->mod_name, &mod_name)) {
-	free(name);
-	com_err(arg->comerr_name, retval, "while unparsing principal");
-	exit_status++;
-	return retval;
-    }
-    fprintf(arg->f, "%d\t%d\t%d\t%d\t%d\t%d\t%s\t%d\t", strlen(name),
-	    strlen(mod_name), entry->key.length, entry->alt_key.length,
-	    entry->salt_length, entry->alt_salt_length, name,
-	    entry->key.keytype);
-    for (i=0; i<entry->key.length; i++) {
-	    fprintf(arg->f, "%02x", *(entry->key.contents+i));
-    }
-    fprintf(arg->f,
-	    "\t%u\t%u\t%u\t%u\t%u\t%u\t%u\t%u\t%u\t%u\t%s\t%u\t%u\t%u\t",
-	    entry->kvno, entry->max_life, entry->max_renewable_life,
-	    entry->mkvno, entry->expiration, entry->pw_expiration,
-	    entry->last_pwd_change, entry->last_success, entry->last_failed,
-	    entry->fail_auth_count, mod_name, entry->mod_date,
-	    entry->attributes, entry->salt_type);
-    for (i=0; i<entry->salt_length; i++) {
-	    fprintf(arg->f, "%02x", *(entry->salt+i));
-    }
-    fprintf(arg->f, "\t%u\t", entry->alt_key.keytype);
-    for (i=0; i<entry->alt_key.length; i++) {
-	    fprintf(arg->f, "%02x", *(entry->alt_key.contents+i));
-    }
-    fprintf(arg->f, "\t%u\t", entry->alt_salt_type);
-    for (i=0; i<entry->alt_salt_length; i++) {
-	    fprintf(arg->f, "%02x", *(entry->alt_salt+i));
-    }
-    for (i=0; i < 8; i++) {
-	fprintf(arg->f, "\t%u", entry->expansion[i]);
-    }
+    fprintf(arg->f, "%d\t", content.dsize);
+    fwrite(content.dptr, content.dsize, 1, arg->f);
     fprintf(arg->f, ";\n");
-    free(name);
-    free(mod_name);
     return 0;
 }
 /*ARGSUSED*/
@@ -141,7 +106,7 @@ void dump_db(argc, argv)
 	fputs(ld_vers, f);
 	arg.comerr_name = argv[0];
 	arg.f = f;
-	(void) krb5_db_iterate(edit_context, dump_iterator, (krb5_pointer) &arg);
+	(void)krb5_db_iterate(edit_context, dump_iterator, (krb5_pointer) &arg);
 	if (argc == 2)
 		fclose(f);
 	if (argv[1])
@@ -235,21 +200,21 @@ void load_db(argc, argv)
 	int	argc;
 	char	**argv;
 {
-	FILE	*f;
-	krb5_db_entry entry;
-	krb5_error_code retval;
-	int	name_len, mod_name_len, key_len, alt_key_len;
-	int	salt_len, alt_salt_len;
-	int	i, one;
-	char	*name, *mod_name;
+    krb5_error_code 	  retval;
+    krb5_db_entry 	  entry;
+    datum	  	  contents;
+    FILE		* f;
+    char		* new_dbname;
+    char		  buf[64];	/* Must be longer than ld_vers */
+    int			  lineno;
+    int			  one;
+
+	int	i;
 	int	name_ret;
-	char	*new_dbname;
 	int	ch;
 	int	load_error = 0;
-	int	lineno = 0;
 	int	stype;
 	int	tmp1, tmp2, tmp3;
-	char	buf[64];	/* Must be longer than ld_vers */
 	
 	if (argc != 3) {
 		com_err(argv[0], 0, "Usage: %s filename dbname", argv[0]);
@@ -301,212 +266,55 @@ void load_db(argc, argv)
 	if (strcmp(buf, ld_vers)) {
 		com_err(argv[0], 0, "Bad dump file version");
 		load_error++;
-		goto error_out;
 	}
-	lineno++;
-	for (;;) {
-		int nitems;
+	for (lineno = 1; load_error == 0; lineno++) {
+	    datum contents;
+	    int nitems;
 
-		lineno++;
-		memset((char *)&entry, 0, sizeof(entry));
-		nitems = fscanf(f, "%d\t%d\t%d\t%d\t%d\t%d\t",
-				&name_len, &mod_name_len, &key_len,
-				&alt_key_len, &salt_len, &alt_salt_len);
-		if (nitems == EOF)
-			break;
-		if (nitems != 6) {
-			fprintf(stderr, "Couldn't parse line #%d\n", lineno);
-			load_error++;
-			break;
+	    memset((char *)&entry, 0, sizeof(entry));
+	    if ((nitems = fscanf(f, "%d\t", &contents.dsize)) != 1) {
+		if (nitems != EOF) {
+	            fprintf(stderr, "Couldn't parse line #%d\n", lineno);
+	            load_error++;
+		    continue;
 		}
-		if (!(name = malloc(name_len+1))) {
-			com_err(argv[0], errno,
-				"While allocating space for name");
-			load_error++;
-			goto cleanup;
-		}
-		if (!(mod_name = malloc(mod_name_len+1))) {
-			com_err(argv[0], errno,
-				"While allocating space for mod_name");
-			load_error++;
-			goto cleanup;
-		}
-		entry.key.length = key_len;
-		if (key_len) {
-		    if (!(entry.key.contents = (krb5_octet *)
-			  malloc(key_len+1))) {
-			com_err(argv[0], errno,
-				"While allocating space for the key");
-			load_error++;
-			goto cleanup;
-		    }
-		} 
-		entry.alt_key.length = alt_key_len;
-		if (alt_key_len) {
-		    if (!(entry.alt_key.contents = (krb5_octet *)
-			  malloc(alt_key_len+1))) {
-			com_err(argv[0], errno,
-				"While allocating space for alt_key");
-			load_error++;
-			goto cleanup;
-		    }			
-		}
-		entry.salt_length = salt_len;
-		if (salt_len) {
-		    if (!(entry.salt = (krb5_octet *) malloc(salt_len+1))) {
-			com_err(argv[0], errno,
-				"While allocating space for the salt");
-			load_error++;
-			goto cleanup;
-		    }
-		}
-		entry.alt_salt_length = alt_salt_len;
-		if (alt_salt_len) {
-		    if (!(entry.alt_salt = (krb5_octet *)
-			  malloc(alt_salt_len+1))) {
-			com_err(argv[0], errno,
-				"While allocating space for the alt_salt");
-			load_error++;
-			goto cleanup;
-		    }
-		}
-		if ((name_ret = read_name(f, name, name_len)) < 0) {
-			fprintf(stderr, "Couldn't parse line #%d\n", lineno);
-			load_error++;
-			break;
-		}
-		lineno += name_ret;
-		if (fscanf(f, "%d\t", &tmp1) != 1) {
-			fprintf(stderr, "Couldn't parse line #%d\n", lineno);
-			load_error++;
-			break;
-		}
-		/* keytype is probably a short, but might not be.
-		   To avoid problems with scanf, read into a variable of
-		   known type then copy the value.  */
-		entry.key.keytype = tmp1;
-		for (i=0; i<entry.key.length; i++) {
-			if (fscanf(f,"%02x", &tmp1) != 1) {
-				fprintf(stderr, "Couldn't parse line #%d\n",
-					lineno);
-				load_error++;
-				break;
-			}
-			entry.key.contents[i] = tmp1;
-		}
-		if (fscanf(f, "\t%u\t%u\t%u\t%u\t%u\t%u\t%u\t%u\t%u\t%u\t",
-			   &tmp1, &entry.max_life, &entry.max_renewable_life,
-			   &tmp2, &entry.expiration, &entry.pw_expiration,
-			   &entry.last_pwd_change, &entry.last_success,
-			   &entry.last_failed, &tmp3) != 10) {
-			fprintf(stderr, "Couldn't parse line #%d\n",
-				lineno);
-			load_error++;
-			break;
-		}
-		if ((name_ret = read_name(f, mod_name, mod_name_len)) < 0) {
-			fprintf(stderr, "Couldn't parse line #%d\n", lineno);
-			load_error++;
-			break;
-		}
-		lineno += name_ret;
-		if (fscanf(f, "%u\t%u\t%u\t",
-			   &entry.mod_date, &entry.attributes, &stype) != 3) {
-			fprintf(stderr, "Couldn't parse line #%d\n", lineno);
-			load_error++;
-			break;
-		}
-		entry.kvno = tmp1;
-		entry.mkvno = tmp2;
-		entry.fail_auth_count = tmp3;
-		entry.salt_type = stype;
-		for (i=0; i < salt_len; i++) {
-		    if (fscanf(f, "%02x", &tmp1) != 1) {
-			fprintf(stderr, "Couldn't parse line #%d\n",
-				lineno);
-			load_error++;
-			break;
-		    }
-		    entry.salt[i] = tmp1;
-		}
-		if (fscanf(f, "\t%u\t", &tmp1) != 1) {
-		    fprintf(stderr, "Couldn't parse line #%d\n",
-			    lineno);
-		    load_error++;
-		    break;
-		}
-		entry.alt_key.keytype = tmp1;
-		for (i=0; i<alt_key_len; i++) {
-			if (fscanf(f,"%02x", &tmp1) != 1) {
-				fprintf(stderr, "Couldn't parse line #%d\n",
-					lineno);
-				load_error++;
-				break;
-			}
-			entry.alt_key.contents[i] = tmp1;
-		}
-		if (fscanf(f, "\t%u\t", &stype) != 1) {
-		    fprintf(stderr, "Couldn't parse line #%d\n",
-			    lineno);
-		    load_error++;
-		    break;
-		}
-		entry.alt_salt_type = stype;
-		for (i=0; i < alt_salt_len; i++) {
-		    if (fscanf(f, "%02x", &tmp1) != 1) {
-			fprintf(stderr, "Couldn't parse line #%d\n",
-				lineno);
-			load_error++;
-			break;
-		    }
-		    entry.alt_salt[i] = tmp1;
-		}
-		for (i=0; i < 8; i++) {
-		    fscanf(f, "\t%u", &entry.expansion[i]);
-		}
-		if (((ch = fgetc(f)) != ';') || ((ch = fgetc(f)) != '\n')) {
-			fprintf(stderr, "Ignoring trash at end of entry: ");
-			while (ch != '\n') {
-				putc(ch, stderr);
-				ch = fgetc(f);
-			}
-			putc(ch, stderr);
-		}
-		if (retval=krb5_parse_name(edit_context, name, &entry.principal)) {
-			com_err(argv[0], retval,
-				"while trying to parse %s in line %d",
-				name, lineno);
-			load_error++;
-			goto cleanup;
-		}
-		if (retval=krb5_parse_name(edit_context, mod_name, &entry.mod_name)) {
-			com_err(argv[0], retval,
-				"while trying to parse %s in line %d",
-				mod_name, lineno);
-			load_error++;
-			goto cleanup;
-		}
-		one=1;
-		if (retval = krb5_db_put_principal(edit_context, &entry, &one)) {
-			com_err(argv[0], retval,
-				"while trying to store principal %s",
-				name);
-			load_error++;
-			goto cleanup;
-		}
-	cleanup:
-		free(name);
-		free(mod_name);
-		if (entry.key.contents)
-		    krb5_xfree(entry.key.contents);
-		if (entry.alt_key.contents)
-		    krb5_xfree(entry.alt_key.contents);
-		if (entry.salt)
-		    krb5_xfree(entry.salt);
-		if (entry.alt_salt)
-		    krb5_xfree(entry.alt_salt);
+		break;
+	    }
+	    if (!(contents.dptr = malloc(contents.dsize))) {
+	        com_err(argv[0], errno, "While allocating space");
+	        load_error++;
+	        continue;
+	    }
+	    if (fread(contents.dptr, contents.dsize, 1, f) == EOF) {
+	        fprintf(stderr, "Couldn't read line #%d\n", lineno);
+	        free(contents.dptr);
+	        load_error++;
+	        continue;
+	    }
+	    if (((ch = fgetc(f)) != ';') || ((ch = fgetc(f)) != '\n')) {
+	        fprintf(stderr, "Ignoring trash at end of entry: ");
+	        while ((ch != '\n') && (ch != EOF)) {
+		    putc(ch, stderr);
+		    ch = fgetc(f);
+	        }
+	        putc(ch, stderr);
+	        load_error++;
+	        continue;
+	    }
+	    if (retval = krb5_decode_princ_contents(edit_context, &contents, &entry)) {
+	    	com_err(argv[0], retval,"while trying to parse line %d",lineno);
+	    	free (contents.dptr);
+	    	load_error++;
+	    	continue;
+	    }
+	    one=1;
+	    if (retval = krb5_db_put_principal(edit_context, &entry, &one)) {
+	    	com_err(argv[0], retval, "while trying to write db entry");
+	   	krb5_dbe_free_contents(edit_context, &entry);
+	    	free (contents.dptr);
+		continue;
+	    }
 	}
-error_out:
 	if (retval = krb5_db_fini(edit_context)) {
 		com_err(argv[0], retval,
 			"while closing database '%s'", new_dbname);

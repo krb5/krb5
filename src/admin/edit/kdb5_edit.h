@@ -36,15 +36,10 @@ struct mblock {
     krb5_kvno mkvno;
 };
 
-struct saltblock {
-    int salttype;
-    krb5_data saltdata;
-};
-
 void add_key 
 	PROTOTYPE((char const *, char const *, 
 		   krb5_const_principal, const krb5_keyblock *, 
-		   krb5_kvno, struct saltblock *));
+		   krb5_kvno, krb5_keysalt *));
 void enter_pwd_key
 	PROTOTYPE((char *, char *, krb5_const_principal,
 		   krb5_const_principal, krb5_kvno, int));

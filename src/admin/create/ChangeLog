@@ -1,4 +1,8 @@
 
+Thu Jul 27 02:59:05 1995   Chris Provenzano (proven@mit.edu)
+
+	* kdb5_create.c : Use new kdb format.
+
 Mon Jul 17 14:58:00 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* configure.in - Add KADM library.
 	* kdb5_create.c - Add KDC profile reading/handling as a supplement to

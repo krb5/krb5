@@ -87,6 +87,7 @@ krb5_data **response;			/* filled in with a response packet */
     int	errcode, errcode2;
     register int i;
     int firstpass = 1;
+    int ok_key_data = 0;
     char	*status = 0;
     char	secondary_ch;
     
@@ -227,21 +228,21 @@ tgt_again:
 
 	ok_keytype = krb5_csarray[request->etype[i]]->system->proto_keytype;
 
-	if (server.key.keytype == ok_keytype ||
-	    server.alt_key.keytype == ok_keytype)
-	    break;
+        for (ok_key_data = 0; ok_key_data < server.n_key_data; ok_key_data++)
+            if (server.key_data[ok_key_data].key_data_type[0] == ok_keytype)
+                goto got_a_key;
     }
     
-    if (i == request->netypes) {
-	/* unsupported etype */
-	status = "BAD_ENCRYPTION_TYPE";
-	errcode = KRB5KDC_ERR_ETYPE_NOSUPP;
-	goto cleanup;
-    }
+    /* unsupported etype */
+    errcode = KRB5KDC_ERR_ETYPE_NOSUPP;
+    status = "BAD_ENCRYPTION_TYPE";
+    goto cleanup;
+
+got_a_key:;
     useetype = request->etype[i];
     krb5_use_cstype(kdc_context, &eblock, useetype);
-
-    retval = krb5_random_key(kdc_context, &eblock, krb5_csarray[useetype]->random_sequence,
+    retval = krb5_random_key(kdc_context, &eblock, 
+			     krb5_csarray[useetype]->random_sequence,
 			     &session_key);
     if (retval) {
 	/* random key failed */
@@ -427,11 +428,7 @@ tgt_again:
 	    goto cleanup;
 	}
 	/* scratch now has the authorization data, so we decode it */
-#ifdef KRB5_USE_ISODE
-	retval = decode_krb5_authdata(&scratch, request->unenc_authdata);
-#else
 	retval = decode_krb5_authdata(&scratch, &(request->unenc_authdata));
-#endif
 	free(scratch.data);
 	if (retval) {
 	    status = "AUTH_DECODE";
@@ -550,16 +547,18 @@ tgt_again:
     } else {
 	/* convert server.key into a real key (it may be encrypted
 	   in the database) */
-	if ((retval = krb5_kdb_decrypt_key(kdc_context, &master_encblock,
-					   &server.key, &encrypting_key))) {
+    	if ((retval = krb5_dbekd_decrypt_key_data(kdc_context, &master_encblock,
+                                      		  &server.key_data[ok_key_data],
+                                      		  &encrypting_key, NULL))) {
 	    status = "CONV_KEY";
 	    goto cleanup;
 	}
 
-	ticket_reply.enc_part.kvno = server.kvno;
+	ticket_reply.enc_part.kvno = server.key_data[ok_key_data].key_data_kvno;
 	ticket_reply.enc_part.etype = useetype;
 	krb5_use_cstype(kdc_context, &eblock, ticket_reply.enc_part.etype);
-	retval = krb5_encrypt_tkt_part(kdc_context, &eblock, &encrypting_key, &ticket_reply);
+	retval = krb5_encrypt_tkt_part(kdc_context, &eblock, &encrypting_key, 
+				       &ticket_reply);
 
 	memset((char *)encrypting_key.contents, 0, encrypting_key.length);
 	krb5_xfree(encrypting_key.contents);

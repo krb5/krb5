@@ -1,3 +1,5 @@
+Thu Jul 27 02:59:05 1995        Chris Provenzano (proven@mit.edu)
+        * kdb5_verify.c : Use new kdb format.
 
 Mon Jul 17 15:25:03 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* kdb5_verify.c - Change setting of defaulted keytype to be DEFAULT_

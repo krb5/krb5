@@ -63,39 +63,25 @@ check_padata (client, src_addr, padata, pa_id, flags)
 				   of padata. */
     int *flags;
 {
-    krb5_encrypted_keyblock *enckey;
-    krb5_keyblock tmpkey;
     krb5_error_code retval;
-   
-    enckey = &(client->key);
-    /* 	Extract client key/alt_key from master key */
-   
-    retval = krb5_kdb_decrypt_key(kdc_context,&master_encblock,enckey,&tmpkey);
-    if (retval) {
-	krb5_klog_syslog( LOG_ERR, "AS_REQ: Unable to extract client key: %s",
-	       error_message(retval));
-	return retval;
-    }
-    retval =  krb5_verify_padata(kdc_context, *padata,client->principal,
-				 src_addr, &tmpkey, pa_id, flags);
-    memset((char *)tmpkey.contents, 0, tmpkey.length);
-    krb5_xfree(tmpkey.contents);
-    if (retval && client->alt_key.length) {
-	/*
-	 * If we failed, try again with the alternative key
-	 */
-	enckey = &(client->alt_key);
-	/* Extract client key/alt_key from master key */
-	if ((retval = krb5_kdb_decrypt_key(kdc_context,&master_encblock,
-					   enckey,&tmpkey))) {
-	    krb5_klog_syslog( LOG_ERR, "AS_REQ: Unable to extract client alt_key: %s",
-		   error_message(retval));
+    krb5_keyblock tmpkey;
+    int i;
+
+    /* 	Extract a client key from master key */
+    for (i = 0; i < client->n_key_data; i++) {
+	if (retval = krb5_dbekd_decrypt_key_data(kdc_context, &master_encblock,
+					       &client->key_data[i],
+					       &tmpkey, NULL)) {
+	    krb5_klog_syslog(LOG_ERR,"AS_REQ: Unable to extract client key: %s",
+	       		     error_message(retval));
 	    return retval;
 	}
-	retval = krb5_verify_padata(kdc_context, *padata,client->principal,
+        retval = krb5_verify_padata(kdc_context, *padata, client->princ,
 				    src_addr, &tmpkey, pa_id, flags);
-	memset((char *)tmpkey.contents, 0, tmpkey.length);
-	krb5_xfree(tmpkey.contents);
+        memset((char *)tmpkey.contents, 0, tmpkey.length);
+        krb5_xfree(tmpkey.contents);
+	if (!retval) 
+	    break;
     }
     return retval;
 }
@@ -127,6 +113,7 @@ krb5_data **response;			/* filled in with a response packet */
     static krb5_principal cpw = 0;
     char *status;
     krb5_encrypt_block eblock;
+    int ok_key = 0;
 
     register int i;
 
@@ -229,31 +216,51 @@ krb5_data **response;			/* filled in with a response packet */
 	goto errout;
     }
       
-    for (i = 0; i < request->netypes; i++) {
-	krb5_keytype ok_keytype;
+    { /* Get a key that fits the kvno and keytype */
+	int max_kvno = 0;
+
+    	/* 
+	 * First find latest key unless  a kvno is specified in which
+	 * case we should only look for those keys.
+	 *
+	 * Note: specifing a kvno isn't defined yet
+	 */
+	for (i = 0; i < server.n_key_data; i++) {
+	    if (max_kvno < server.key_data[i].key_data_kvno) {
+	    	max_kvno = server.key_data[i].key_data_kvno;
+	    }
+	}
+
+        /* This will change when the etype == keytype */
+        for (i = 0; i < request->netypes; i++) {
+	    krb5_keytype ok_keytype;
+	    int j;
 	
-	if (!valid_etype(request->etype[i]))
-	    continue;
+	    if (!valid_etype(request->etype[i]))
+	        continue;
 
-	if (request->etype[i] == ETYPE_DES_CBC_MD5 &&
-	    !isflagset(server.attributes, KRB5_KDB_SUPPORT_DESMD5))
-	    continue;
+	    if (request->etype[i] == ETYPE_DES_CBC_MD5 &&
+	        !isflagset(server.attributes, KRB5_KDB_SUPPORT_DESMD5))
+	        continue;
 
-	ok_keytype = krb5_csarray[request->etype[i]]->system->proto_keytype;
+	    ok_keytype = krb5_csarray[request->etype[i]]->system->proto_keytype;
 
-	if (server.key.keytype == ok_keytype ||
-	    server.alt_key.keytype == ok_keytype)
-	    break;
+ 	    for (ok_key = 0; ok_key < server.n_key_data; ok_key++) {
+		if ((server.key_data[ok_key].key_data_kvno = max_kvno) &&
+	            (server.key_data[ok_key].key_data_type[0] == ok_keytype)) {
+		    goto got_a_key;
+		}
+	    }
+	}
     }
     
-    if (i == request->netypes) {
-	/* unsupported etype */
-	    
-	krb5_klog_syslog(LOG_INFO, "AS_REQ: BAD ENCRYPTION TYPE: host %s, %s for %s",
-                  fromstring, cname, sname);
-	retval = prepare_error_as(request, KDC_ERR_ETYPE_NOSUPP, response);
-	goto errout;
-    }
+    /* unsupported etype */
+    krb5_klog_syslog(LOG_INFO,"AS_REQ: BAD ENCRYPTION TYPE: host %s, %s for %s",
+                     fromstring, cname, sname);
+    retval = prepare_error_as(request, KDC_ERR_ETYPE_NOSUPP, response);
+    goto errout;
+
+got_a_key:;
     useetype = request->etype[i];
     krb5_use_cstype(kdc_context, &eblock, useetype);
     
@@ -261,8 +268,8 @@ krb5_data **response;			/* filled in with a response packet */
 				  krb5_csarray[useetype]->random_sequence,
 				  &session_key))) {
 	/* random key failed */
-	krb5_klog_syslog(LOG_INFO, "AS_REQ: RANDOM KEY FAILED: host %s, %s for %s",
-                  fromstring, cname, sname);
+      krb5_klog_syslog(LOG_INFO,"AS_REQ: RANDOM KEY FAILED: host %s, %s for %s",
+                       fromstring, cname, sname);
 	goto errout;
     }
 
@@ -406,21 +413,27 @@ krb5_data **response;			/* filled in with a response packet */
 
     /* convert server.key into a real key (it may be encrypted
        in the database) */
-    if ((retval = krb5_kdb_decrypt_key(kdc_context, &master_encblock,
-				       &server.key, &encrypting_key)))
+    if ((retval = krb5_dbekd_decrypt_key_data(kdc_context, &master_encblock, 
+				      	      &server.key_data[ok_key],
+				      	      &encrypting_key, NULL)))
 	goto errout;
-    retval = krb5_encrypt_tkt_part(kdc_context, &eblock, &encrypting_key, &ticket_reply);
+    retval = krb5_encrypt_tkt_part(kdc_context, &eblock, &encrypting_key, 
+				   &ticket_reply);
     memset((char *)encrypting_key.contents, 0, encrypting_key.length);
     krb5_xfree(encrypting_key.contents);
     if (retval)
 	goto errout;
-    ticket_reply.enc_part.kvno = server.kvno;
+    ticket_reply.enc_part.kvno = server.key_data[i].key_data_kvno;
 
     /* Start assembling the response */
     reply.msg_type = KRB5_AS_REP;
 
     reply.padata = 0;
-    if (client.salt_type != KRB5_KDB_SALTTYPE_NORMAL) {
+    /*
+     * XXX  If the client principal has more than one key we have a problem
+     * -- proven
+     */
+    if (client.key_data[0].key_data_ver > 1) {
         padat_tmp[0] = &padat_local;
         padat_tmp[1] = 0;
  
@@ -429,7 +442,7 @@ krb5_data **response;			/* filled in with a response packet */
 	/* WARNING: sharing substructure here, but it's not a real problem,
 	   since nothing below will "pull out the rug" */
 
-	switch (client.salt_type) {
+	switch (client.key_data[0].key_data_type[1]) {
 	    krb5_data *data_foo;
 	case KRB5_KDB_SALTTYPE_V4:
 	    /* send an empty (V4) salt */
@@ -441,17 +454,17 @@ krb5_data **response;			/* filled in with a response packet */
 						      request->client,
 						      &salt_data)))
 		goto errout;
-	    padat_tmp[0]->length = salt_data.length;
 	    padat_tmp[0]->contents = (krb5_octet *)salt_data.data;
+	    padat_tmp[0]->length = salt_data.length;
 	    break;
 	case KRB5_KDB_SALTTYPE_ONLYREALM:
 	    data_foo = krb5_princ_realm(kdc_context, request->client);
-	    padat_tmp[0]->length = data_foo->length;
 	    padat_tmp[0]->contents = (krb5_octet *)data_foo->data;
+	    padat_tmp[0]->length = data_foo->length;
 	    break;
 	case KRB5_KDB_SALTTYPE_SPECIAL:
-	    padat_tmp[0]->length = client.salt_length;
-	    padat_tmp[0]->contents = client.salt;
+	    padat_tmp[0]->contents = client.key_data[0].key_data_contents[1];
+	    padat_tmp[0]->length = client.key_data[0].key_data_length[1];
 	    break;
 	}
 	reply.padata = padat_tmp;
@@ -479,36 +492,34 @@ krb5_data **response;			/* filled in with a response packet */
 
     /* now encode/encrypt the response */
 
-    /* convert client.key into a real key (it may be encrypted
-       in the database) */
-    if ((retval = krb5_kdb_decrypt_key(kdc_context, &master_encblock,
-				       &client.key, &encrypting_key)))
-	goto errout;
     reply.enc_part.etype = useetype;
-    reply.enc_part.kvno = client.kvno;
+    reply.enc_part.kvno = client.key_data[0].key_data_kvno;
+
+    /* convert client.key_data into a real key */
+    if ((retval = krb5_dbekd_decrypt_key_data(kdc_context, &master_encblock, 
+				      	      &client.key_data[0],
+				      	      &encrypting_key, NULL)))
+	goto errout;
+
     retval = krb5_encode_kdc_rep(kdc_context, KRB5_AS_REP, &reply_encpart, 
 				 &eblock, &encrypting_key,  &reply, response);
     memset((char *)encrypting_key.contents, 0, encrypting_key.length);
     krb5_xfree(encrypting_key.contents);
 
     if (retval) {
-	krb5_klog_syslog(LOG_INFO, "AS_REQ: ENCODE_KDC_REP: host %s, %s for %s (%s)",
-	       fromstring, cname, sname, error_message(retval));
+	krb5_klog_syslog(LOG_INFO, 
+			 "AS_REQ: ENCODE_KDC_REP: host %s, %s for %s (%s)",
+	       		 fromstring, cname, sname, error_message(retval));
 	goto errout;
     }
     
     /* these parts are left on as a courtesy from krb5_encode_kdc_rep so we
        can use them in raw form if needed.  But, we don't... */
-    memset(reply.enc_part.ciphertext.data, 0,
-	   reply.enc_part.ciphertext.length);
+    memset(reply.enc_part.ciphertext.data, 0, reply.enc_part.ciphertext.length);
     free(reply.enc_part.ciphertext.data);
 
-    if (is_secondary)
-	krb5_klog_syslog(LOG_INFO, "AS_REQ; ISSUE: authtime %d, host %s, %s for %s",
-	       authtime, fromstring, cname, sname);
-    else
-	krb5_klog_syslog(LOG_INFO, "AS_REQ: ISSUE: authtime %d, host %s, %s for %s",
-	       authtime, fromstring, cname, sname);
+    krb5_klog_syslog(LOG_INFO, "AS_REQ; ISSUE: authtime %d, host %s, %s for %s",
+	             authtime, fromstring, cname, sname);
 
 errout:
     if (cname)

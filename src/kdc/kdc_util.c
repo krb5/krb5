@@ -306,7 +306,7 @@ cleanup_authenticator:
     krb5_free_authenticator(kdc_context, authenticator);
 
 cleanup_auth_context:
-    /* We do not want the fre of the auth_context to close the rcache */
+    /* We do not want the free of the auth_context to close the rcache */
     (void)  krb5_auth_con_setrcache(kdc_context, auth_context, 0);
     krb5_auth_con_free(kdc_context, auth_context);
 
@@ -317,18 +317,19 @@ cleanup:
 
 krb5_error_code
 kdc_get_server_key(ticket, key, kvno)
-krb5_ticket *ticket;
-krb5_keyblock **key;
-krb5_kvno *kvno;
+    krb5_ticket 	* ticket;
+    krb5_keyblock      ** key;
+    krb5_kvno 		* kvno;
 {
-    krb5_error_code retval;
-    int nprincs;
-    krb5_db_entry server;
-    krb5_boolean more;
+    krb5_error_code 	  retval;
+    krb5_db_entry 	  server;
+    krb5_boolean 	  more;
+    int	nprincs, i, last_i;
 
     if (krb5_principal_compare(kdc_context, tgs_server, ticket->server)) {
+	retval = krb5_copy_keyblock(kdc_context, &tgs_key, key);
 	*kvno = tgs_kvno;
-	return krb5_copy_keyblock(kdc_context, &tgs_key, key);
+	return retval;
     } else {
 	nprincs = 1;
 
@@ -345,20 +346,28 @@ krb5_kvno *kvno;
 
 	    krb5_db_free_principal(kdc_context, &server, nprincs);
 	    if (!krb5_unparse_name(kdc_context, ticket->server, &sname)) {
-		krb5_klog_syslog(LOG_ERR, "TGS_REQ: UNKNOWN SERVER: server='%s'",
+		krb5_klog_syslog(LOG_ERR,"TGS_REQ: UNKNOWN SERVER: server='%s'",
 		       sname);
 		free(sname);
 	    }
 	    return(KRB5KDC_ERR_S_PRINCIPAL_UNKNOWN);
 	}
-	/* convert server.key into a real key (it may be encrypted
-	   in the database) */
+	/* 
+	 * Get the latest version of the server key_data and
+	 * convert the key into a real key (it may be encrypted in the database)
+	 */
+	for (*kvno = last_i = i = 0; i < server.n_key_data; i++) {
+	    if (*kvno < server.key_data[i].key_data_kvno) {
+		*kvno = server.key_data[i].key_data_kvno;
+		last_i = i;
+	    }
+	}
 	if ((*key = (krb5_keyblock *)malloc(sizeof **key))) {
-	    retval = krb5_kdb_decrypt_key(kdc_context, &master_encblock,
-					  &server.key, *key);
+	    retval = krb5_dbekd_decrypt_key_data(kdc_context, &master_encblock,
+					         &server.key_data[last_i],
+					         *key, NULL);
 	} else
 	    retval = ENOMEM;
-	*kvno = server.kvno;
 	krb5_db_free_principal(kdc_context, &server, nprincs);
 	return retval;
     }

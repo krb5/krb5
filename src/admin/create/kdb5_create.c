@@ -360,37 +360,51 @@ add_principal(context, princ, op, pblock)
     enum ap_op op;
     struct realm_info *pblock;
 {
-    krb5_db_entry entry;
-    krb5_error_code retval;
-    krb5_encrypted_keyblock ekey;
-    krb5_keyblock *rkey;
-    int nentries = 1;
+    krb5_error_code 	  retval;
+    krb5_db_entry 	  entry;
+    krb5_keyblock 	* rkey;
+
+    krb5_tl_mod_princ	  mod_princ;
+
+    int			  nentries = 1;
 
     memset((char *) &entry, 0, sizeof(entry));
-    entry.principal = princ;
-    entry.kvno = 1;
+
+    entry.mkvno = 1;
+    entry.len = KRB5_KDB_V1_BASE_LENGTH;
+    entry.attributes = pblock->flags;
     entry.max_life = pblock->max_life;
     entry.max_renewable_life = pblock->max_rlife;
-    entry.mkvno = 1;
     entry.expiration = pblock->expiration;
-    entry.mod_name = &db_create_princ;
 
-    if (retval = krb5_timeofday(context, &entry.mod_date))
-	return retval;
-    entry.attributes = pblock->flags;
+    if (retval = krb5_copy_principal(context, princ, &entry.princ))
+	goto error_out;
+
+    mod_princ.mod_princ = &db_create_princ;
+    if (retval = krb5_timeofday(context, &mod_princ.mod_date))
+	goto error_out;
+    if (retval = krb5_dbe_encode_mod_princ_data(context, &mod_princ, &entry))
+	goto error_out;
+
+    if ((entry.key_data=(krb5_key_data*)malloc(sizeof(krb5_key_data))) == NULL)
+	goto error_out;
+    memset((char *) entry.key_data, 0, sizeof(krb5_key_data));
+    entry.n_key_data = 1;
 
     switch (op) {
     case MASTER_KEY:
 	entry.attributes |= KRB5_KDB_DISALLOW_ALL_TIX;
-	if (retval = krb5_kdb_encrypt_key(context, pblock->eblock,
-					  &master_keyblock, &ekey))
+	if (retval = krb5_dbekd_encrypt_key_data(context, pblock->eblock,
+				      	       	 &master_keyblock, NULL, 
+					       	 1, entry.key_data))
 	    return retval;
 	break;
     case RANDOM_KEY:
 	if (retval = krb5_random_key(context, pblock->eblock, 
 				     pblock->rseed, &rkey))
 	    return retval;
-	retval = krb5_kdb_encrypt_key(context, pblock->eblock, rkey, &ekey);
+	retval = krb5_dbekd_encrypt_key_data(context, pblock->eblock, rkey, 
+						NULL, 1, entry.key_data);
 	krb5_free_keyblock(context, rkey);
 	if (retval)
 	    return retval;
@@ -400,14 +414,10 @@ add_principal(context, princ, op, pblock)
     default:
 	break;
     }
-    entry.key = ekey;
-    entry.salt_type = KRB5_KDB_SALTTYPE_NORMAL;
-    entry.salt_length = 0;
-    entry.salt = 0;
 
-    if (retval = krb5_db_put_principal(context, &entry, &nentries))
-	return retval;
+    retval = krb5_db_put_principal(context, &entry, &nentries);
 
-    krb5_xfree(ekey.contents);
-    return 0;
+error_out:;
+    krb5_dbe_free_contents(context, &entry);
+    return retval;
 }
