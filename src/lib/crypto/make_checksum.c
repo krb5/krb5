@@ -24,7 +24,10 @@ krb5_c_make_checksum(context, cksumtype, key, usage, input, cksum)
     if (i == krb5_cksumtypes_length)
 	return(KRB5_BAD_ENCTYPE);
 
-    (*(krb5_cksumtypes_list[i].hash->hash_size))(&cksumlen);
+    if (krb5_cksumtypes_list[i].keyhash)
+	(*(krb5_cksumtypes_list[i].keyhash->hash_size))(&cksumlen);
+    else
+	(*(krb5_cksumtypes_list[i].hash->hash_size))(&cksumlen);
 
     cksum->length = cksumlen;
 
