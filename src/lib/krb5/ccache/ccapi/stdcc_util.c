@@ -5,6 +5,11 @@
 
 #include <stdlib.h>
 #include <string.h>
+
+#if defined(_MSDOS) || defined(_WIN32)
+#include <malloc.h>
+#endif
+
 #include "stdcc_util.h"
 #include "krb5.h"
 #include "kv5m_err.h"
@@ -29,7 +34,7 @@
 //stolen from CCacheUtils.c
 // -- NewSafePtrSys -----------------
 //  - analagous to NewSafePtr but memory is allocated in the system heap
-Ptr NewSafePtrSys(long size) {
+static Ptr NewSafePtrSys(long size) {
 
 	Ptr retPtr;
 	
@@ -195,9 +200,9 @@ void dupCCtoK5(krb5_context context, cc_creds *src, krb5_creds *dest) {
 	return;
 }
 
-// dupK52CC
+// dupK5toCC
 // - analagous to above but in the reverse direction
-void dupK52cc(krb5_context context, krb5_creds *creds, cred_union **cu) {
+void dupK5toCC(krb5_context context, krb5_creds *creds, cred_union **cu) {
 
 		cc_creds *c;
 		int err;

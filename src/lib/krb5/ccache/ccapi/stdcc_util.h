@@ -16,10 +16,9 @@
 int copyCCDataArrayToK5(cc_creds *cc, krb5_creds *kc, char whichArray);
 int copyK5DataArrayToCC(krb5_creds *kc, cc_creds *cc, char whichArray);
 void dupCCtoK5(krb5_context context, cc_creds *src, krb5_creds *dest);
-void dupK52cc(krb5_context context, krb5_creds *creds, cred_union **cu);
+void dupK5toCC(krb5_context context, krb5_creds *creds, cred_union **cu);
 int stdccCredsMatch(krb5_context context, krb5_creds *base, krb5_creds *match, int whichfields);
 int bitTst(int var, int mask);
-void typeK52cc(krb5_context context, krb5_creds *creds, cc_creds *c, char **client, char **server);
 #define kAddressArray 4 
 #define kAuthDataArray 5
 

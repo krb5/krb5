@@ -7,9 +7,13 @@
   **********************************************************/
 
 #include "stdcc.h"
+#include "stdcc_util.h"
 #include "string.h"
 #include <stdio.h>
 
+#if defined(_MSDOS) || defined(_WIN32)
+apiCB *gCntrlBlock = NULL;
+#endif
 
 //declare our global object wanna-be
 //must be installed in ccdefops.c
@@ -121,7 +125,7 @@ krb5_error_code KRB5_CALLCONV  krb5_stdcc_initialize
   {
   
   	int err, err1, found;
-  	char *cName = nil;
+  	char *cName = NULL;
   	ccache_p *testNC = NULL;
   	ccache_cit *it;
   	char *p = NULL, *targetName = NULL;
@@ -132,11 +136,21 @@ krb5_error_code KRB5_CALLCONV  krb5_stdcc_initialize
   	//test for initialized API
   	if (gCntrlBlock == NULL)
   		return CC_NO_EXIST; 
-  	 	
+
+
+#if defined(_MSDOS) || defined(_WIN32)
+
+	cName = calloc(1, strlen(krb5_princ_name(context, princ)->data) + 1);	
+	sprintf(cName, "%s", krb5_princ_name(context, princ)->data);
+
+#else
+
 	//create a principal name for the named cache
 	err = krb5_unparse_name(context, princ, &cName);
 	if (err)
 		return(err);
+#endif
+
 		
 	//look for a cache already extant for this principal
 	it = NULL;
@@ -149,7 +163,7 @@ krb5_error_code KRB5_CALLCONV  krb5_stdcc_initialize
 				found = 1;
 				cc_get_name(gCntrlBlock, testNC, &targetName);
 			}
-			cc_free_principal(gCntrlBlock, p);
+			cc_free_principal(gCntrlBlock, &p);
 			err1 = cc_close(gCntrlBlock, &testNC);
 		}
 	}
@@ -158,11 +172,16 @@ krb5_error_code KRB5_CALLCONV  krb5_stdcc_initialize
 		//we didn't find one with the name we were looking for, use the one we had and change the name
 		cc_set_principal(gCntrlBlock, (((stdccCacheDataPtr)(id->data))->NamedCache), CC_CRED_V5, cName);
 	else {
- 		//we found a cache for this guy, lets trash ours and use that one - let's not; sgm 10/7/98
-		//cc_destroy(gCntrlBlock, &(((stdccCacheDataPtr)(id->data))->NamedCache));
+#if defined(macintosh)
+ 		//use the default cache
 		err = cc_open(gCntrlBlock, targetName, CC_CRED_V5, 0L, &(((stdccCacheDataPtr)(id->data))->NamedCache));
+#else
+ 		//we found a cache for this guy, lets trash ours and use that one
+		cc_destroy(gCntrlBlock, &(((stdccCacheDataPtr)(id->data))->NamedCache));
+		cc_create(gCntrlBlock, targetName, krb5_princ_name(context, princ)->data, CC_CRED_V5, 0L, &(((stdccCacheDataPtr)(id->data))->NamedCache));
+#endif
 		if (err != CC_NOERROR) return err; //error opening
-		cc_free_name(gCntrlBlock, targetName);
+		cc_free_name(gCntrlBlock, &targetName);
 	}
 	
 	free(cName);
@@ -180,9 +199,12 @@ krb5_error_code KRB5_CALLCONV krb5_stdcc_store
        cred_union *cu = NULL;
        int err;
        
-		
+  		//test for initialized API
+  		if (gCntrlBlock == NULL)
+  			return CC_NO_EXIST; 
+
 		//copy the fields from the almost identical structures
-		dupK52cc(context, creds, &cu);
+		dupK5toCC(context, creds, &cu);
 			
 		//finally store the credential
 		//store will copy (that is duplicate) everything
@@ -218,11 +240,16 @@ krb5_error_code KRB5_CALLCONV krb5_stdcc_next_cred
 	int err;
 	cred_union *credU = NULL;
 	
+	//test for initialized API
+	if (gCntrlBlock == NULL)
+		return CC_NO_EXIST; 
+
 	err = cc_seq_fetch_creds(gCntrlBlock, ((stdccCacheDataPtr)(id->data))->NamedCache,
 							 &credU, (ccache_cit **)cursor);
 	
 	if (err != CC_NOERROR)
 		return err;
+
 	
 	//copy data	(with translation)
 	dupCCtoK5(context, credU->cred.pV5Cred, creds);
@@ -265,8 +292,11 @@ krb5_error_code KRB5_CALLCONV krb5_stdcc_retrieve
 		krb5_free_cred_contents(context, fetchcreds);
 		}
 		
-	//no luck, end get and exti
+	//no luck, end get and exit
 	krb5_stdcc_end_seq_get(context, id, &curs);
+	
+	//we're not using this anymore so we should get rid of it!
+	free(fetchcreds);
 	
 	return KRB5_CC_NOTFOUND;
 }
@@ -291,9 +321,7 @@ krb5_error_code KRB5_CALLCONV krb5_stdcc_end_seq_get
 // -- close ---------------------------
 // - free our pointers to the NC
 krb5_error_code KRB5_CALLCONV 
-krb5_stdcc_close(context, id)
-   krb5_context context;
-   krb5_ccache id;
+krb5_stdcc_close(krb5_context context, krb5_ccache id)
 {
 	//free it
 	
@@ -320,6 +348,10 @@ krb5_stdcc_destroy (krb5_context context, krb5_ccache id ) {
 
 	int err;
 	
+	//test for initialized API
+	if (gCntrlBlock == NULL)
+		return CC_NO_EXIST; 
+
 	//destroy the named cache
 	err = cc_destroy(gCntrlBlock, &(((stdccCacheDataPtr)(id->data))->NamedCache));
 	//free the pointer to the record that held the pointer to the cache
@@ -338,16 +370,20 @@ krb5_stdcc_destroy (krb5_context context, krb5_ccache id ) {
 char * KRB5_CALLCONV krb5_stdcc_get_name 
         (krb5_context context, krb5_ccache id ) {
         
-       char *ret = NULL;
-	   int err;
-	   
-	   //just a wrapper
-       err = cc_get_name(gCntrlBlock, (((stdccCacheDataPtr)(id->data))->NamedCache), &ret);
-       
-       if (err != CC_NOERROR)
-       		return ret;
-       	else
-       		return NULL;
+	char *ret = NULL;
+	int err;
+	
+	//test for initialized API
+	if (gCntrlBlock == NULL)
+		return NULL;
+	
+	//just a wrapper
+	err = cc_get_name(gCntrlBlock, (((stdccCacheDataPtr)(id->data))->NamedCache), &ret);
+	
+	if (err != CC_NOERROR)
+		return ret;
+	else
+		return NULL;
        		
 }
 
@@ -359,6 +395,10 @@ krb5_stdcc_get_principal (krb5_context context, krb5_ccache id , krb5_principal 
 	int err;
 	char *name = NULL;
 	
+	//test for initialized API
+	if (gCntrlBlock == NULL)
+		return NULL;
+
 	//another wrapper
 	err = cc_get_principal(gCntrlBlock, (((stdccCacheDataPtr)(id->data))->NamedCache), &name);
 
@@ -400,8 +440,12 @@ krb5_error_code KRB5_CALLCONV krb5_stdcc_remove
     	cred_union *cu = NULL;
     	int err;
     	
+		//test for initialized API
+		if (gCntrlBlock == NULL)
+			return CC_NO_EXIST; 
+
     	//convert to a cred union
-    	dupK52cc(context, creds, &cu);
+    	dupK5toCC(context, creds, &cu);
     	
     	//remove it
     	err = cc_remove_cred(gCntrlBlock, (((stdccCacheDataPtr)(id->data))->NamedCache), *cu);
