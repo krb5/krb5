@@ -494,7 +494,7 @@ void k_init (ttyn)
     if (krb_get_lrealm(realm, 1) != KSUCCESS) {
 	strncpy(realm, KRB_REALM, sizeof(realm));
     }
-    if (login_krb4_get_tickets) {
+    if (login_krb4_get_tickets || login_krb4_convert) {
 	/* Set up the ticket file environment variable */
 	strncpy(tkfile, KRB_TK_DIR, sizeof(tkfile));
 	strncat(tkfile, strrchr(ttyn, '/')+1,

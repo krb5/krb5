@@ -2,6 +2,11 @@ Sat Nov  9 10:49:36 1996  Sam Hartman  <hartmans@mit.edu>
 
 	* login.c: Re-arrange to deal with compiling without krb4 support. [148]
 
+Fri Nov  8 20:59:27 1996  Tom Yu  <tlyu@mit.edu>
+
+	* login.c (k_init): Set up KRBTKFILE if converting krb5 tickets to
+	krb4 but not getting them via password.
+
 Wed Nov  6 11:32:36 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* login.c (destroy_tickets): Just use global kcontext instead
