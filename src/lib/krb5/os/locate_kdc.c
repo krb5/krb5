@@ -78,7 +78,7 @@ _krb5_use_dns(context)
  * the master kdc
  */
 
-static krb5_error_code
+krb5_error_code
 krb5_locate_srv_conf(context, realm, name, addr_pp, naddrs, master_index, nmasters)
     krb5_context context;
     const krb5_data *realm;
@@ -97,8 +97,8 @@ krb5_locate_srv_conf(context, realm, name, addr_pp, naddrs, master_index, nmaste
     struct hostent *hp;
     struct servent *sp;
 #ifdef HAVE_NETINET_IN_H
-    u_short udpport = htons(KRB5_DEFAULT_PORT);
-    u_short sec_udpport = htons(KRB5_DEFAULT_SEC_PORT);
+    u_short udpport;
+    u_short sec_udpport;
 #endif
 
     if ((host = malloc(realm->length + 1)) == NULL) 
@@ -125,10 +125,22 @@ krb5_locate_srv_conf(context, realm, name, addr_pp, naddrs, master_index, nmaste
      }
 
 #ifdef HAVE_NETINET_IN_H
+    if ( !strcmp(name,"kpasswd_server") ) {
+        if ((sp = getservbyname(KPASSWD_PORTNAME, "udp")))
+            udpport = sp->s_port;
+        else
+            udpport = htons(DEFAULT_KPASSWD_PORT);
+        sec_udpport = 0;
+    } else {
     if ((sp = getservbyname(KDC_PORTNAME, "udp")))
 	udpport = sp->s_port;
+        else 
+            udpport = htons(KRB5_DEFAULT_PORT);
     if ((sp = getservbyname(KDC_SECONDARY_PORTNAME, "udp")))
 	sec_udpport = sp->s_port;
+        else
+            sec_udpport = htons(KRB5_DEFAULT_SEC_PORT);
+    }
 #endif
     if (sec_udpport == udpport)
 	sec_udpport = 0;
@@ -284,7 +296,7 @@ krb5_locate_srv_conf(context, realm, name, addr_pp, naddrs, master_index, nmaste
  * Lookup a KDC via DNS SRV records
  */
 
-static krb5_error_code
+krb5_error_code
 krb5_locate_srv_dns(realm, service, protocol, addr_pp, naddrs)
     const krb5_data *realm;
     const char *service;

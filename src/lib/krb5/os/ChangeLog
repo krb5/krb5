@@ -1,3 +1,19 @@
+1999-09-21  Ken Raeburn  <raeburn@mit.edu>
+
+	* changepw.c: Changes from Jeffrey Altman to look up kpasswd
+	server using DNS.  Placed entirely under #ifdef KRB5_DNS_LOOKUP so
+	currently-MIT-supported functionality (i.e., no DNS) can't be
+	impacted; without KRB5_DNS_LOOKUP defined, old code is used
+	unchanged.
+	(krb5_locate_kpasswd): New function, split out from
+	krb5_change_password.  Calls krb5_locate_srv_dns if use of DNS is
+	desired, and krb5_locate_srv_conf to check config file.
+	(krb5_change_password): Call it to find the server.
+	* locate_kdc.c (krb5_locate_srv_conf): No longer static.  Choose
+	default port numbers based on service name rather than a single
+	hard-coded value.
+	(krb5_locate_srv_dns): No longer static.
+
 1999-09-17  Tom Yu  <tlyu@mit.edu>
 
 	* def_realm.c: Patch from jaltman@columbia.edu to allow compiling
