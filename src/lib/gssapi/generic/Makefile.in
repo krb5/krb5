@@ -112,7 +112,7 @@ win-include::
 unixmac: $(SRCS) $(ETHDRS)
 
 clean-unix:: clean-libobjs
-	$(RM) $(ETHDRS) $(ETSRCS) $(HDRS)
+	$(RM) $(ETHDRS) $(ETSRCS) $(HDRS) $(EXPORTED_BUILT_HEADERS)
 
 clean-windows::
 	$(RM) $(HDRS)
