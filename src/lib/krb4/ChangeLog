@@ -1,3 +1,21 @@
+2000-07-21  Ezra Peisach  <epeisach@mit.edu>
+
+	* g_pw_tkt.c, unix_time.c: Add KRB5_DLLIMP/KRB5_CALLCONV defintion.
+
+Thu Jun 29 17:13:53 2000  Ezra Peisach  <epeisach@home>
+
+	* getst.c: Include <unistd.h> for read() prototype.
+
+	* gethostname.c: Include <unistd.h> (if present) for gethostname()
+	prototype.
+
+	* g_pw_tkt.c (get_pw_tkt): Declare function returning as int.
+
+	* g_ad_tkt.c, g_in_tkt.c, g_tkt_svc: Add parenthesis about
+ 	assignment used as truth value.
+
+	* cr_ciph.c (create_ciph): Declare as returning int.
+
 2000-07-20  Danilo Almeida  <dalmeida@mit.edu>
 
 	* memcache.c: Add krb_in_tkt() function to initialize ticket for a
