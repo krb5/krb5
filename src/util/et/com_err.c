@@ -56,8 +56,8 @@ static void default_com_err_proc(whoami, code, fmt, ap)
 	}
 	if (code) {
 		errbuf[sizeof(errbuf) - 1] = '\0';
-		strcat (errbuf, error_message(code), sizeof(errbuf) - 1 - strlen(errbuf));
-		strcat (errbuf, " ", sizeof(errbuf) - 1 - strlen(errbuf));
+		strncat (errbuf, error_message(code), sizeof(errbuf) - 1 - strlen(errbuf));
+		strncat (errbuf, " ", sizeof(errbuf) - 1 - strlen(errbuf));
 	}
 	if (fmt)
 		vsprintf (errbuf + strlen (errbuf), fmt, ap);

@@ -1,3 +1,8 @@
+2000-05-07  Miro Jurisic  <meeroh@mit.edu>
+
+	* com_err.c (default_com_err_proc): use strncpy
+	where strncpy was meant (typo in Nalin's patch)
+
 2000-05-01  Nalin Dahyabhai  <nalin@redhat.com>
 
 	* com_err.c (default_com_err_proc) [_MSDOS || _WIN32 ||
