@@ -85,7 +85,7 @@ krb5_rd_req_decoded(req, server, sender_addr, fetchfrom, keyproc, keyprocarg,
 const krb5_ap_req *req;
 krb5_const_principal server;
 const krb5_address *sender_addr;
-krb5_const_pointer fetchfrom;
+const char * fetchfrom;
 rdreq_key_proc keyproc;
 krb5_pointer keyprocarg;
 krb5_rcache rcache;
