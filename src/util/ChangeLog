@@ -1,3 +1,8 @@
+Thu Nov 13 20:28:31 1997  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* libupdate.sh: Add semicolons to prevent Bash 2.0 from
+	 	complaining.  [krb5-build/486]
+
 Wed Oct  8 16:19:49 1997  Tom Yu  <tlyu@mit.edu>
 
 	* mkrel: Allow for edits of relevant files that should be changed
