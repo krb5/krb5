@@ -1,3 +1,9 @@
+2000-08-30  Tom Yu  <tlyu@mit.edu>
+
+	* pre.in: Fix some inconsistent spelling in the previous changes
+	for MacOS X lib framework support, especially in the *_LIB and
+	*_LIB_*opt variables.
+
 2000-08-30  Ken Raeburn  <raeburn@mit.edu>
 
 	* lib.in (EXTRA_CLEAN_TARGETS, EXTRA_CLEAN_LINKS): New variables.

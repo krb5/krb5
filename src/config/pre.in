@@ -244,11 +244,11 @@ KRB5_LIB			= $(KRB5_LIB_@LIB_LINK_OPT@)
 KRB5_LIB_libopt			= -lkrb5
 KRB5_LIB_frameworkopt		= -framework Kerberos5
 
-KRB5CRYPTO_LIB			= $(KRB5CRYPTO_LIB_@LIB_LINK_OPT@)
-KRB5CRYPTO_LIB_libopt		= -lk5crypto
-KRB5CRYPTO_LIB_frameworkopt	= -framework Kerberos5Crypto
+K5CRYPTO_LIB			= $(K5CRYPTO_LIB_@LIB_LINK_OPT@)
+K5CRYPTO_LIB_libopt		= -lk5crypto
+K5CRYPTO_LIB_frameworkopt	= -framework Kerberos5Crypto
 
-COM_ERR_LIB			= $(COMERR_LIB_@LIB_LINK_OPT@)
+COM_ERR_LIB			= $(COM_ERR_LIB_@LIB_LINK_OPT@)
 COM_ERR_LIB_libopt		= -lcom_err
 COM_ERR_LIB_frameworkopt	= -framework FooComErr
 
