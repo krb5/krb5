@@ -128,7 +128,7 @@ struct filepointer	*getfile();
 struct inclist		*newinclude();
 struct inclist		*inc_path();
 
-#ifdef STDARG_PROTOTYPES	/* NeedVarargsPrototypes */
+#ifdef HAVE_STDARG_H	/* NeedVarargsPrototypes */
 extern fatalerr(char *, ...);
 extern warning(char *, ...);
 extern warning1(char *, ...);
