@@ -1,5 +1,3 @@
-#  TEMPLATE BEGINS HERE
-
 SnapshotRoot = //GSS-Kerberos5-1.0.5
 
 INCLUDES = {AUTOINCLUDES} -i /mac/TestTrack/
@@ -64,7 +62,8 @@ MACFILES = {AUTOMACFILES} /Makefile.in /patchlevel.h \
 	/mac/TestTrack/ShlibTestTrack.c \
 	/mac/TestTrack/ShlibTestTrack.h \
 	/mac/TestTrack/TestTrackLib.h \
-	/mac/TestTrack/testtrack.h
+	/mac/TestTrack/testtrack.h \
+	/mac/templatify.pl
 MACDIRS = /config/ /include/ /include/krb5/ /include/krb5/stock/ \
 	/include/sys/ /lib/ /lib/krb5/ /lib/gssapi/ /util/ {AUTOMACDIRS} \
 	/mac/ \
