@@ -612,10 +612,11 @@ user(name)
 		if ((shell = pw->pw_shell) == NULL || *shell == 0)
 			shell = "/bin/sh";
 #ifdef HAVE_GETUSERSHELL
+		setusershell();
 		while ((cp = getusershell()) != NULL)
 			if (strcmp(cp, shell) == 0)
 				break;
-		/* endusershell(); */ /* this breaks on solaris 2.4 */
+		endusershell();
 #else
 		cp = shell;
 #endif
@@ -845,26 +846,34 @@ pass(passwd)
 	logged_in = 1;
 
 	if (guest) {
+ 	        if (chroot(pw->pw_dir) < 0) {
+		        reply(550, "Can't set guest priveleges.");
+			goto bad;
+		}
+	}
+	if (krb5_seteuid((uid_t)pw->pw_uid) < 0) {
+	        reply(550, "Can't set uid.");
+		goto bad;
+	}
+	if (guest) {
 		/*
 		 * We MUST do a chdir() after the chroot. Otherwise
 		 * the old current directory will be accessible as "."
 		 * outside the new root!
 		 */
-		if (chroot(pw->pw_dir) < 0 || chdir("/") < 0) {
+		if (chdir("/") < 0) {
 			reply(550, "Can't set guest privileges.");
 			goto bad;
 		}
-	} else if (chdir(pw->pw_dir) < 0) {
-		if (chdir("/") < 0) {
-			reply(530, "User %s: can't change directory to %s.",
-			    pw->pw_name, pw->pw_dir);
-			goto bad;
-		} else
-			lreply(230, "No directory! Logging in with home=/");
-	}
-	if (krb5_seteuid((uid_t)pw->pw_uid) < 0) {
-		reply(550, "Can't set uid.");
-		goto bad;
+	} else {
+	        if (chdir(pw->pw_dir) < 0) {
+		        if (chdir("/") < 0) {
+			        reply(530, "User %s: can't change directory to %s.",
+				      pw->pw_name, pw->pw_dir);
+				goto bad;
+			} else
+			        lreply(230, "No directory! Logging in with home=/");
+		}
 	}
 	if (guest) {
 		reply(230, "Guest login ok, access restrictions apply.");
@@ -2040,8 +2049,14 @@ char *data;
 				return 0;
 			}
 		} else {
-			reply_gss_error(501, stat_maj, stat_min,
-					"acquiring credentials");
+			/* Kludge to make sure the right error gets reported, so we don't *
+			 * get those nasty "error: no error" messages.			  */
+			if(stat_maj != GSS_S_COMPLETE)
+			        reply_gss_error(501, stat_maj, stat_min,
+						"acquiring credentials");
+			else
+			        reply_gss_error(501, acquire_maj, acquire_min,
+						"acquiring credentials");
 			syslog(LOG_ERR, "gssapi error acquiring credentials");
 			return 0;
 		}

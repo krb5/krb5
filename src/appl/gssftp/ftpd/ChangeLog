@@ -1,3 +1,11 @@
+Fri Aug  7 00:56:30 1998  Matthew D Hancher  <mdh@mit.edu>
+
+	* ftpd.c: (pass): Make daemon not lose for homedirs on 
+	root-squashing filesystems.
+	(auth_data): Fix that godawful "error: No error" message 
+	when gss_acquire_cred() fails.
+	(user): Fix getusershell() code so it works more than once.
+
 1998-07-11    <hartmans@fundsxpress.com>
 
 	* ftpd.c (data;): do not declare h_errno; breaks on AIX and
