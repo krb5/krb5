@@ -8,15 +8,15 @@ hostname-by-hostname basis.  Since greater specificity takes precedence,
 you would do this by specifying the mappings for a given domain or
 subdomain and listing the exceptions.
 
-The second mechanism, recently introduced into the MIT code base but not
-currently used by default, works by looking up the information in
-special @code{TXT} records in the Domain Name Service.  If this
-mechanism is enabled on the client, it will try to look up a @code{TXT}
-record for the DNS name formed by putting the prefix @code{_kerberos} in
-front of the hostname in question.  If that record is not found, it will
-try using @code{_kerberos} and the host's domain name, then its parent
-domain, and so forth.  So for the hostname
-BOSTON.ENGINEERING.FOOBAR.COM, the names looked up would be:
+The second mechanism works by looking up the information in special
+@code{TXT} records in the Domain Name Service.  This is currently not
+used by default because security holes could result if the DNS TXT
+records were spoofed.  If this mechanism is enabled on the client,
+it will try to look up a @code{TXT} record for the DNS name formed by
+putting the prefix @code{_kerberos} in front of the hostname in question.
+If that record is not found, it will try using @code{_kerberos} and the
+host's domain name, then its parent domain, and so forth.  So for the
+hostname BOSTON.ENGINEERING.FOOBAR.COM, the names looked up would be:
 
 @smallexample
 _kerberos.boston.engineering.foobar.com

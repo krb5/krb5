@@ -38,6 +38,7 @@
 
 @ifinfo
 This document describes how to convert to @value{PRODUCT} from Kerberos V4.
+@end ifinfo
 
 @menu
 * Copyright::                   
@@ -52,8 +53,6 @@ This document describes how to convert to @value{PRODUCT} from Kerberos V4.
 @node Copyright, Introduction, Top, Top
 @unnumbered Copyright
 @include copyright.texinfo
-
-@end ifinfo
 
 @node Introduction, Configuration Files, Copyright, Top
 @chapter Introduction

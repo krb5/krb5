@@ -1,3 +1,38 @@
+2002-06-26 Jen Selby <jenselby@mit.edu>
+
+	* Makefile: changed the way html output is generated, made "make all"
+	remove generated tex files
+	* admin.texinfo: added sections about encryption types and salts,
+	updated the configuration file sections, revised the example 
+	configuration files, updated dates on output strings, added an
+	explanation of destroying a Kerberos database
+	* build.texinfo: changed the description of the tarball
+	* definitions.texinfo: added variables for all the default values
+	so that they can all be updated in one place, changed the release
+	from 1.2 to 1.3
+	* dnstxt.texinfo updated the information
+	* install.texinfo added more description of the configuration files
+	and the minimum needed in the files to set up a kerberos realm,
+	revised the examples of the configuration file sections, took out
+	old encryption type and salt information
+	* kdcconf.texinfo: new file, taken from the admin guide and included
+	in both the admin and install guides, provides descriptions of the
+	sections in kdc.conf
+	* krb425.texinfo: moved a texinfo tag so that makeinfo --html would
+	work
+	* krb5conf.texinfo: new file, take from the admin guide and included
+	in both the admin and install guides, provides descriptions of the
+	sections in krb5.conf
+	* man2html, man2html.M: new files, a perl program to create html pages 
+	from the output of the man command
+	* salts.texinfo: new file, a description of the different salt types
+	that are currently supported
+	* support-enc.texinfo: new file, a description of the currently
+	supported encryptions types
+	* user-guide.texinfo: added a section describing different ticket
+	flags, added a way to have the man pages in the reference section
+	accessible in the html version of the documentation
+
 2002-06-21  Ezra Eeisach  <epeisach@bu.edu>
 
 	* implementor.texinfo (IPv6 Support): Update fact that IRIX 6.5.16

@@ -36,6 +36,7 @@
 
 @ifinfo
 This file describes how to use the @value{PRODUCT} client programs.
+@end ifinfo
 
 @c The master menu is updated using emacs19's M-x texinfo-all-menus-update
 @c function.  Don't forget to run M-x texinfo-every-node-update after
@@ -62,7 +63,6 @@ This file describes how to use the @value{PRODUCT} client programs.
 @unnumbered Copyright
 
 @include copyright.texinfo
-@end ifinfo
 
 @node Introduction, Kerberos V5 Tutorial, Copyright, Top
 @chapter Introduction
@@ -96,11 +96,11 @@ a layer of security that is not dependent on which side of a firewall
 either client is on.  Since studies have shown that half of the computer
 security breaches in industry happen from @i{inside} firewalls,
 @value{COMPANY}'s @value{PRODUCT} plays a vital role in maintaining your
-nework security.
+network security.
 
 The @value{PRODUCT} package is designed to be easy to use.  Most of the
-commands are nearly identical to UNIX network programs you are already
-used to.  @value{PRODUCT} is a @dfn{single-sign-on} system, which means
+commands are nearly identical to UNIX network programs you already
+use.  @value{PRODUCT} is a @dfn{single-sign-on} system, which means
 that you have to type your password only once per session, and Kerberos
 does the authenticating and encrypting transparently.
 
@@ -226,12 +226,92 @@ or use a screensaver that locks the screen.
 
 @need 2000
 @menu
+* Kerberos Ticket Properties::  
 * Obtaining Tickets with kinit::  
 * Viewing Your Tickets with klist::  
 * Destroying Your Tickets with kdestroy::  
 @end menu
 
-@node Obtaining Tickets with kinit, Viewing Your Tickets with klist, Ticket Management, Ticket Management
+@node Kerberos Ticket Properties, Obtaining Tickets with kinit, Ticket Management, Ticket Management
+@subsection Kerberos Ticket Properties
+
+There are various properties that Kerberos tickets can have:
+
+If a ticket is @dfn{forwardable}, then the KDC can issue a new ticket with
+a different network address based on the forwardable ticket.  This
+allows for authentication forwarding without requiring a password to be
+typed in again.  For example, if a user with a forwardable TGT logs
+into a remote system, the KDC could issue a new TGT for that user with
+the netword address of the remote system, allowing authentication on
+that host to work as though the user were logged in locally.
+
+When the KDC creates a new ticket based on a forwardable ticket, it
+sets the @dfn{forwarded} flag on that new ticket.  Any tickets that are
+created based on a ticket with the forwarded flag set will also have
+their forwarded flags set.
+
+A @dfn{proxiable} ticket is similar to a forwardable ticket in that it
+allows a service to take on the identity of the client.  Unlike a
+forwardable ticket, however, a proxiable ticket is only issued for
+specific services.  In other words, a ticket-granting ticket cannot be
+issued based on a ticket that is proxiable but not forwardable.
+
+A @dfn{proxy} ticket is one that was issued based on a proxiable ticket.
+
+If a tickets is @dfn{postdated}, this means that it will become valid at a
+specific time in the future.  Postdated tickets can be issued for the
+time at which a job is going to start so that the time that valid
+tickets exist unused on a machine is minimized.
+
+Tickets with the @dfn{postdateable} flag set can be used to issue postdated
+tickets.
+
+@dfn{Renewable} tickets can be used to obtain new session keys without the
+user entering a new password.  A renewable ticket has two expiration
+times.  The first is the time at which this particular ticket expires.
+The second is the latest possible expiration time for any ticket issued
+based on this renewable ticket.
+
+A ticket with the @dfn{initial} flag set was issued based on the
+authentication protocol, and not on a ticket-granting ticket.   Clients
+that wish to ensure that the user's key has been recently presented for
+verification could specify that this flag must be set to accept the
+ticket.
+
+An @dfn{initial} ticket must be rejected by application servers.  Postdated
+tickets are usually issued with this flag set, and must be validated by
+the KDC before they can be used.
+
+A @dfn{preauthenticated} ticket is one that was only issued after the
+client requesting the ticket had authenticated itself to the KDC.
+
+The @dfn{hardware authentication} flag is set on a ticket which required
+the use of hardware expected to be possessed soley by the requesting
+client for authentication.
+
+If a ticket has the @dfn{transit policy checked} flag set, the the KDC that
+issued this ticket implements the transited-realm check policy and
+checked the transited-realms list on the ticket.  The transited-realms
+list contains a list of all intermediate realms between the realm of the
+KDC that issued the first ticket and that of the one that issued the
+current ticket.  If this flag is not set, then the application server
+must check the transited realms itself or else reject the ticket.
+
+The @dfn{okay as delegate} flag indicates that the server specified in the
+ticket is suitable as a delegate as determined by the policy of that
+realm.  A server that is acting as a delegate has been granted a proxy
+or a forwarded TGT.  The client can use this flag in its decision of
+whether or not to use this server as a delgate.  This flag is a new
+addition to the @value{PRODUCT} protocol and is not yet implemented on MIT
+servers.
+
+An @dfn{anonymous}  ticket is one in which the named principal is a generic
+principal for that realm; it does not actually specify the individual
+that will be using the ticket.  This ticket is meant only to securely
+distribute a session key.  This is a new addition to the @value{PRODUCT}
+protocol and is not yet implemented on MIT servers.
+
+@node Obtaining Tickets with kinit, Viewing Your Tickets with klist, Kerberos Ticket Properties, Ticket Management
 @subsection Obtaining Tickets with kinit
 
 If your site is using the @value{PRODUCT} login program, you will get
@@ -438,6 +518,16 @@ post@b{d}ated
 @b{I}nitial
 @itemx i
 @b{i}nvalid
+@itemx H
+@b{H}ardeware authenticated
+@itemx A
+pre@b{A}uthenticated
+@itemx T
+@b{T}ransit policy checked
+@itemx O
+@b{O}kay as delegate
+@itemx a
+@b{a}nonymous
 @end table
 
 @need 1500
@@ -893,7 +983,7 @@ requests tickets for the remote host in the specified realm, instead of
 determining the realm itself.
 
 @itemx -x, --encrypt
-turns on encryption.
+encrypts the input and output data streams (the command line is not encrypted)
 
 @itemx --noencrypt
 turns off encryption.
@@ -936,7 +1026,7 @@ and request an encrypted session as follows:
 @smallexample
 @group
 @b{shell%} rlogin @value{RANDOMHOST2}.@value{SECONDDOMAIN} -f -x
-@b{This rlogin session is using DES encryption for all data transmissions.
+@b{This rlogin session is encrypting all data transmissions.
 Last login: Thu Jun 20 16:20:50 from @value{RANDOMHOST1}
 SunOS Release 4.1.4 (GENERIC) #2: Tue Nov 14 18:09:31 EST 1995
 Not checking quotas. Try quota.real if you need them.
@@ -1043,7 +1133,7 @@ requests tickets for the remote host in the specified realm, instead of
 determining the realm itself.
 
 @itemx -x, --encrypt
-turns on encryption.
+encrypts the input and output data streams (the command line is not encrypted)
 
 @itemx --noencrypt
 turns off encryption.
@@ -1057,7 +1147,7 @@ run the @samp{date} program as follows:
 @smallexample
 @group
 @b{shell%} rsh @value{RANDOMHOST2}.@value{SECONDDOMAIN} -l root -x date
-@b{This rsh session is using DES encryption for all data transmissions.
+@b{This rsh session is encrypting input/output data transmissions.
 Fri Jun 21 17:06:12 EDT 1996
 shell%}
 @end group
@@ -1352,6 +1442,12 @@ M-x manual-entry @emph{command}
 Type @kbd{M-x manual-entry kinit} to read this manual page.
 @end ifinfo
 
+@ifhtml
+@html
+<a href="kinit.html"> kinit manpage</a>
+@end rawhtml
+@end ifhtml
+
 @node klist Reference, kdestroy Reference, kinit Reference, Kerberos V5 Reference
 @section klist Reference
 
@@ -1363,6 +1459,12 @@ Type @kbd{M-x manual-entry kinit} to read this manual page.
 @ifinfo
 Type @kbd{M-x manual-entry klist} to read this manual page.
 @end ifinfo
+
+@ifhtml
+@html
+<a href="klist.html"> klist manpage</a>
+@end rawhtml
+@end ifhtml
 
 @node kdestroy Reference, kpasswd Reference, klist Reference, Kerberos V5 Reference
 @section kdestroy Reference
@@ -1376,6 +1478,12 @@ Type @kbd{M-x manual-entry klist} to read this manual page.
 Type @kbd{M-x manual-entry kdestroy} to read this manual page.
 @end ifinfo
 
+@ifhtml
+@html
+<a href="kdestroy.html"> kdestroy manpage</a>
+@end rawhtml
+@end ifhtml
+
 @node kpasswd Reference, telnet Reference, kdestroy Reference, Kerberos V5 Reference
 @section kpasswd Reference
 
@@ -1387,6 +1495,12 @@ Type @kbd{M-x manual-entry kdestroy} to read this manual page.
 @ifinfo
 Type @kbd{M-x manual-entry kpasswd} to read this manual page.
 @end ifinfo
+
+@ifhtml
+@html
+<a href="kpasswd.html"> kpasswd manpage</a>
+@end rawhtml
+@end ifhtml
 
 @node telnet Reference, rlogin Reference, kpasswd Reference, Kerberos V5 Reference
 @section telnet Reference
@@ -1432,6 +1546,12 @@ Type @kbd{M-x manual-entry kpasswd} to read this manual page.
 Type @kbd{M-x manual-entry telnet} to read this manual page.
 @end ifinfo
 
+@ifhtml
+@html
+<a href="telnet.html"> telnet manpage</a>
+@end rawhtml
+@end ifhtml
+
 @node rlogin Reference, FTP Reference, telnet Reference, Kerberos V5 Reference
 @section rlogin Reference
 
@@ -1447,6 +1567,12 @@ Type @kbd{M-x manual-entry telnet} to read this manual page.
 @ifinfo
 Type @kbd{M-x manual-entry rlogin} to read this manual page.
 @end ifinfo
+
+@ifhtml
+@html
+<a href="rlogin.html"> rlogin manpage</a>
+@end rawhtml
+@end ifhtml
 
 @node FTP Reference, rsh Reference, rlogin Reference, Kerberos V5 Reference
 @section FTP Reference
@@ -1488,6 +1614,12 @@ Type @kbd{M-x manual-entry rlogin} to read this manual page.
 Type @kbd{M-x manual-entry FTP} to read this manual page.
 @end ifinfo
 
+@ifhtml
+@html
+<a href="ftp.html"> ftp manpage</a>
+@end rawhtml
+@end ifhtml
+
 @node rsh Reference, rcp Reference, FTP Reference, Kerberos V5 Reference
 @section rsh Reference
 
@@ -1504,6 +1636,12 @@ Type @kbd{M-x manual-entry FTP} to read this manual page.
 Type @kbd{M-x manual-entry rsh} to read this manual page.
 @end ifinfo
 
+@ifhtml
+@html
+<a href="rsh.html"> rsh manpage</a>
+@end rawhtml
+@end ifhtml
+
 @node rcp Reference, ksu Reference, rsh Reference, Kerberos V5 Reference
 @section rcp Reference
 
@@ -1515,6 +1653,12 @@ Type @kbd{M-x manual-entry rsh} to read this manual page.
 @ifinfo
 Type @kbd{M-x manual-entry rcp} to read this manual page.
 @end ifinfo
+
+@ifhtml
+@html
+<a href="rcp.html"> rcp manpage</a>
+@end rawhtml
+@end ifhtml
 
 @node ksu Reference,  , rcp Reference, Kerberos V5 Reference
 @section ksu Reference
@@ -1543,6 +1687,12 @@ Type @kbd{M-x manual-entry rcp} to read this manual page.
 @ifinfo
 Type @kbd{M-x manual-entry ksu} to read this manual page.
 @end ifinfo
+
+@ifhtml
+@html
+<a href="ksu.html"> ksu manpage</a>
+@end rawhtml
+@end ifhtml
 
 @node Kerberos Glossary,  , Kerberos V5 Reference, Top
 @appendix Kerberos Glossary

@@ -35,20 +35,22 @@ link tree for your build tree.
 @node Unpacking the Sources, Doing the Build, Build Requirements, Building Kerberos V5
 @section Unpacking the Sources
 
-The first step in each of these build procedures is to unpack the source
-distribution.  The Kerberos V5 distribution comes in two compressed tar
-files.  The first file, which is generally named
-@file{krb5-@value{RELEASE}.src.tar.gz}, contains the sources for all of Kerberos
-except for the crypto library, which is found in the file
-@file{krb5-@value{RELEASE}.crypto.tar.gz}.
+The first step in each of these build procedures is to unpack the
+source distribution.  The Kerberos V5 distribution comes in a tar file,
+generally named @file{krb5-@value{RELEASE}.tar}, which contains a
+compressed tar file consisting of the sources for all of Kerberos
+(generally @file{krb5-@value{RELEASE}.tar.gz}) and a PGP signature for
+this source tree (generally @file{krb5-@value{RELEASE}.tar.gz.asc}).
+@value{COMPANY} highly recommends that you verify the integrity of the
+source code using this signature.
 
-Both files should be unpacked in the same directory, such as
-@file{/u1/krb5-@value{RELEASE}}.  (In the rest of this document, we will assume that
-you have chosen to unpack the Kerberos V5 source distribution in this
-directory.  Note that the tarfiles will by default all unpack into the
-@file{./krb5-@value{RELEASE}} directory, so that if your current directory is
-@file{/u1} when you unpack the tarfiles, you will get
-@file{/u1/krb5-@value{RELEASE}/src}, etc.)
+Unpack the compressed tar file in some directory, such as
+@file{/u1/krb5-@value{RELEASE}}.  (In the rest of this document, we
+will assume that you have chosen to unpack the Kerberos V5 source
+distribution in this directory.  Note that the tarfiles will by default
+all unpack into the @file{./krb5-@value{RELEASE}} directory, so that if
+your current directory is @file{/u1} when you unpack the tarfiles, you
+will get @file{/u1/krb5-@value{RELEASE}/src}, etc.)
 
 
 @node Doing the Build, Testing the Build, Unpacking the Sources, Building Kerberos V5

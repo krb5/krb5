@@ -2,18 +2,22 @@ SRCDIR=../src
 DVI=texi2dvi
 DVIPS=dvips -o "$@"
 INFO=makeinfo
-HTML=texi2html
+HTML=makeinfo --html
 RM=rm -f
 TAR=tar -chvf
 GZIP=gzip -9
 MANPS=./man2ps
+MANTXT=nroff -man 
+MANHTML=./man2html
 
 ADMIN_INCLUDES=definitions.texinfo copyright.texinfo document-list.texinfo \
-	glossary.texinfo send-pr.texinfo
+	glossary.texinfo support-enc.texinfo salts.texinfo krb5conf.texinfo \
+	kdcconf.texinfo dnstxt.texinfo dnssrv.texinfo send-pr.texinfo
 ADMIN_DEPS=admin.texinfo $(ADMIN_INCLUDES)
 
 INSTALL_INCLUDES=definitions.texinfo copyright.texinfo document-list.texinfo \
-	build.texinfo bug-report.texinfo send-pr.texinfo
+	dnstxt.texinfo dnssrv.texinfo build.texinfo bug-report.texinfo \
+	krb5conf.texinfo kdcconf.texinfo send-pr.texinfo
 INSTALL_DEPS=install.texinfo $(INSTALL_INCLUDES)
 
 USER_GUIDE_INCLUDES=definitions.texinfo copyright.texinfo glossary.texinfo
@@ -23,7 +27,7 @@ KRB425_INCLUDES=definitions.texinfo copyright.texinfo
 KRB425_DEPS=krb425.texinfo $(KRB425_INCLUDES)
 
 .PHONY: all
-all:: admin-guide-full install-guide-full user-guide-full krb425-guide-full clean-temp-ps
+all:: admin-guide-full install-guide-full user-guide-full krb425-guide-full clean-temp-ps clean-tex
 
 .PHONY: admin-guide-full
 admin-guide-full:: admin-guide admin-guide-info admin-guide-html
@@ -90,6 +94,16 @@ krb5-user.info: $(USER_GUIDE_DEPS)
 user-guide-html:: user-guide.html
 
 user-guide.html: $(USER_GUIDE_DEPS)
+	$(MANTXT) $(SRCDIR)/appl/gssftp/ftp/ftp.M | $(MANHTML) > ftp.html
+	$(MANTXT) $(SRCDIR)/clients/kdestroy/kdestroy.M | $(MANHTML) > kdestroy.html
+	$(MANTXT) $(SRCDIR)/clients/kinit/kinit.M | $(MANHTML) > kinit.html
+	$(MANTXT) $(SRCDIR)/clients/klist/klist.M | $(MANHTML) > klist.html
+	$(MANTXT) $(SRCDIR)/clients/ksu/ksu.M | $(MANHTML) > ksu.html
+	$(MANTXT) $(SRCDIR)/appl/bsd/rcp.M | $(MANHTML) > rcp.html
+	$(MANTXT) $(SRCDIR)/appl/bsd/rlogin.M | $(MANHTML) > rlogin.html
+	$(MANTXT) $(SRCDIR)/appl/bsd/rsh.M | $(MANHTML) > rsh.html
+	$(MANTXT) $(SRCDIR)/appl/telnet/telnet/telnet.1 | $(MANHTML) > telnet.html
+	$(MANTXT) $(SRCDIR)/kadmin/passwd/kpasswd.M | $(MANHTML) > kpasswd.html
 	$(HTML) user-guide.texinfo		
 
 .PHONY: krb425-guide-full

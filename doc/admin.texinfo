@@ -39,6 +39,7 @@
 @ifinfo
 This document describes how to administrate a @value{PRODUCT}
 installation.
+@end ifinfo
 
 @c The master menu is updated using emacs19's M-x texinfo-all-menus-update
 @c function.  Don't forget to run M-x texinfo-every-node-update after
@@ -71,7 +72,6 @@ installation.
 @node Copyright, Introduction, Top, Top
 @unnumbered Copyright
 @include copyright.texinfo
-@end ifinfo
 
 
 @node Introduction, How Kerberos Works, Copyright, Top
@@ -336,75 +336,31 @@ Following are definitions of some of the Kerberos terminology.
 @chapter Configuration Files
 
 @menu
+* Supported Encryption Types::  
+* Salts::                       
 * krb5.conf::                   
 * kdc.conf::                    
 @end menu
 
-@node krb5.conf, kdc.conf, Configuration Files, Configuration Files
+@node Supported Encryption Types, Salts, Configuration Files, Configuration Files
+@section Supported Encryption Types
+
+@include support-enc.texinfo
+
+@node Salts, krb5.conf, Supported Encryption Types, Configuration Files
+@section Salts
+
+Your Kerberos key is derived from your password.  To ensure that people
+who happen to pick the same password do not have the same key, Kerberos
+5 incorporates more information into the key using something called a
+salt.  The supported values for salts are as follows.
+
+@include salts.texinfo
+
+@node krb5.conf, kdc.conf, Salts, Configuration Files
 @section krb5.conf
 
-The @code{krb5.conf} file contains Kerberos configuration information,
-including the locations of KDCs and admin servers for the Kerberos
-realms of interest, defaults for the current realm and for Kerberos
-applications, and mappings of hostnames onto Kerberos realms.  Normally,
-you should install your @code{krb5.conf} file in the directory
-@code{/etc}.  You can override the default location by setting the
-environment variable @samp{KRB5_CONFIG}.
-
-The @code{krb5.conf} file is set up in the style of a Windows INI file.
-Sections are headed by the section name, in square brackets.  Each
-section may contain zero or more relations, of the form:
-
-@smallexample
-foo = bar
-@end smallexample
-
-@noindent
-or
-
-@smallexample
-@group
-fubar = @{
-        foo = bar
-        baz = quux
-@}
-@end group
-@end smallexample
-
-The @code{krb5.conf} file may contain any or all of the following seven
-sections:
-
-@table @b
-@itemx libdefaults
-Contains default values used by the Kerberos V5 library.
-
-@itemx appdefaults
-Contains default values used by Kerberos V5 applications.
-
-@itemx realms
-Contains subsections keyed by Kerberos realm names.  Each subsection
-describes realm-specific information, including where to find the
-Kerberos servers for that realm.
-
-@itemx domain_realm
-Contains relations which map domain names and subdomains onto Kerberos
-realm names.  This is used by programs to determine what realm a host
-should be in, given its fully qualified domain name.
-
-@itemx logging
-Contains relations which determine how Kerberos programs are to perform
-logging.
-
-@itemx capaths
-Contains the authentication paths used with direct (nonhierarchical)
-cross-realm authentication.  Entries in this section are used by the
-client to determine the intermediate realms which may be used in
-cross-realm authentication.  It is also used by the end-service when
-checking the transited field for trusted intermediate realms.
-
-@itemx kdc
-For a KDC, may contain the location of the kdc.conf file.
-@end table
+@include krb5conf.texinfo
 
 @menu
 * libdefaults::                 
@@ -425,39 +381,84 @@ relations:
 @table @b
 @itemx default_realm
 Identifies the default Kerberos realm for the client.  Set its value to
-your Kerberos realm.
+your Kerberos realm.  If this is not specified and the TXT record
+lookup is enabled (see @ref{Using DNS}), then that information will be
+used to determine the default realm.  If this tag is not set in this
+configuration file and there is no DNS information found, then an error
+will be returned.
 
 @itemx default_tgs_enctypes
 Identifies the supported list of session key encryption types that
-should be returned by the KDC.  The list may be delimited with commas or
-whitespace.  Currently, the supported encryption types are
-"des3-hmac-sha1" and
-"des-cbc-crc".  Support for other encryption types is planned in the
-future.
+should be returned by the KDC.  The list may be delimited with commas
+or whitespace.  Kerberos supports many different encryption types, and
+support for more is planned in the future. (see @ref{Supported Encryption
+Types} for a list of the accepted values for this tag).  The default
+value is @value{DefaultDefaultTgsEnctypes}.
 
 @itemx default_tkt_enctypes
-Identifies the supported list of session key encryption
-types that should be requested by the client.  The format is the same as
-for @emph{default_tkt_enctypes}.  Again, the only supported encryption
-types are "des3-hmac-sha1" and "des-cbc-crc".
+Identifies the supported list of session key encryption types that
+should be requested by the client.  The format is the same as for
+@emph{default_tkt_enctypes}.  The default value for this tag is
+@value{DefaultDefaultTktEnctypes}.
 
 @itemx clockskew
 Sets the maximum allowable amount of clockskew in seconds that the
 library  will tolerate before assuming that a Kerberos message is
-invalid.  The default value is 300 seconds, or five minutes.
+invalid.  The default value is @value{DefaultClockskew}.
 
-@itemx checksum_type
-Used for compatability with DCE security servers which do not support
-the default CKSUMTYPE_RSA_MD5 used by this version of Kerberos.  A value
-of 1 indicates the default checksum type.  Use a value of 2 to use the
-CKSUMTYPE_RSA_MD4 instead.  This applies to DCE 1.1 and earlier.
+@itemx kdc_req_checksum_type
+@itemx ap_req_checksum_type
+@itemx safe_checksum_type
+An integer which specifies the type of checksum to use.  Used for
+compatability with DCE security servers which do not support the
+default @value{DefaultChecksumType} used by this version of Kerberos.
+The possible values and their meanings are as follows.
 
+@comment taken from krb5/src/include/krb5.h[in]
+@table @b
+@item 1
+CRC32
+@item 2
+RSA MD4
+@item 3
+RSA MD4 DES
+@item 4
+DES CBC
+@item 7
+RSA MD5
+@item 8
+RSA MD5 DES
+@item 9
+NIST SHA
+@item 12
+HMAC SHA1 DES3
+@item -138
+Microsoft MD5 HMAC checksum type
+@end table
+
+@comment see lib/krb5/ccache/fcc.h
 @itemx ccache_type
-Use this parameter on systems which are DCE clients, to specify the type
-of cache to be created by kinit, or when forwarded tickets are received.
-DCE and Kerberos can share the cache, but some versions of DCE do not
-support the default cache as created by this version of Kerberos.  Use a
-value of 1 on DCE 1.0.3a systems, and a value of 2 on DCE 1.1 systems.
+Use this parameter on systems which are DCE clients, to specify the
+type of cache to be created by kinit, or when forwarded tickets are
+received.  DCE and Kerberos can share the cache, but some versions of
+DCE do not support the default cache as created by this version of
+Kerberos.  Use a value of 1 on DCE 1.0.3a systems, and a value of 2 on
+DCE 1.1 systems.  The default value is @value{DefaultCcacheTypeMac}
+for Macintosh computers and @value{DefaultCcacheType} for other
+platforms.
+
+@ignore
+@itemx tkt_lifetime
+The default lifetime of a ticket.  The default is
+@value{DefaultTktLifetime}.  This is currently not supported by the
+code.
+@end ignore
+
+@itemx kdc_timesync
+If this is set to 1 (for true), then client machines will attempt
+to sync their time with the KDC using the timestamps in the tickets.
+The default is @value{DefaultKDCTimesyncMac} for Macintosh computers
+and @value{DefaultKDCTimesync} for all other platforms.
 
 @itemx dns_lookup_kdc
 Indicate whether DNS SRV records should be used to locate the KDCs and
@@ -524,6 +525,12 @@ For example:
         encrypt = true
         autologin = true
     @}
+    telnet = @{
+        @value{PRIMARYREALM} = @{
+             forward = false
+        @}
+    @}
+
 @end group
 @end smallexample
 
@@ -542,16 +549,27 @@ tags may be specified in the realm's subsection:
 @table @b
 @itemx kdc
 The name of a host running a KDC for that realm.  An optional port
-number (separated from the hostname by a colon) may be included.
+number (separated from the hostname by a colon) may be included.  For
+your computer to be able to communicate with the KDC for each realm,
+this tag must be given a value in each realm subsection in the
+configuration file, or there must be DNS SRV records specifying the
+KDCs (see @ref{Using DNS}).
 
 @itemx admin_server
 Identifies the host where the administration server is running.
-Typically, this is the master Kerberos server.
+Typically, this is the master Kerberos server.  This tag must be given
+a value in order to communicate with the kadmin server for the realm.
 
 @itemx application defaults
 Application defaults that are specific to a particular realm may be
 specified within that realm's tag.  Realm-specific application defaults
 override the global defaults specified in the [appdefaults] section.
+
+@itemx default_domain
+This tag is used for Kerberos 4 compatibility.  Kerberos 4 does not
+require the entire hostname of a server to be in its principal like
+Kerberos 5 does.  This tag provides the domain name needed to produce a
+full hostname.
 @end table
 
 @node domain_realm, logging, realms (krb5.conf), krb5.conf
@@ -602,6 +620,10 @@ its logging.  The relations in this section assign one or more values to
 the entity name.  Currently, the following entities are used:
 
 @table @b
+
+@itemx kdc
+These entries specify how the KDC is to perform its logging.
+
 @itemx admin_server
 These entries specify how the administrative server
 is to perform its logging.
@@ -768,16 +790,17 @@ Here is an example of a generic @code{krb5.conf} file:
 @smallexample
 @group
 [libdefaults]
-    ticket_lifetime = 600
     default_realm = @value{PRIMARYREALM}
     default_tkt_enctypes = des3-hmac-sha1 des-cbc-crc
     default_tgs_enctypes = des3-hmac-sha1 des-cbc-crc
+    dns_lookup_kdc = true
+    dns_lookup_realm = false
 
 [realms]
     @value{PRIMARYREALM} = @{
         kdc = @value{KDCSERVER}.@value{PRIMARYDOMAIN}
         kdc = @value{KDCSLAVE1}.@value{PRIMARYDOMAIN}
-        kdc = @value{KDCSLAVE2}.@value{PRIMARYDOMAIN}
+        kdc = @value{KDCSLAVE2}.@value{PRIMARYDOMAIN}:750
         admin_server = @value{KDCSERVER}.@value{PRIMARYDOMAIN}
         default_domain = @value{PRIMARYDOMAIN}
     @}
@@ -803,29 +826,7 @@ Here is an example of a generic @code{krb5.conf} file:
 @node kdc.conf,  , krb5.conf, Configuration Files
 @section kdc.conf
 
-The @code{kdc.conf} file contains KDC configuration information,
-including defaults used when issuing Kerberos tickets.  Normally, you
-should install your @code{kdc.conf} file in the directory
-@code{@value{ROOTDIR}/var/krb5kdc}.  You can override the default
-location by setting the environment variable @samp{KRB5_KDC_PROFILE}.
-
-The @code{kdc.conf} file is set up in the same format as the
-@code{krb5.conf} file.  (@xref{krb5.conf}.)  The @code{kdc.conf} file
-may contain any or all of the following three sections:
-
-@table @b
-@itemx kdcdefaults
-Contains default values for overall behavior of the KDC.
-
-@itemx realms
-Contains subsections keyed by Kerberos realm names.  Each subsection
-describes realm-specific information, including where to find the
-Kerberos servers for that realm.
-
-@itemx logging
-Contains relations which determine how Kerberos programs are to perform
-logging.
-@end table
+@include kdcconf.texinfo
 
 @menu
 * kdcdefaults::                 
@@ -840,11 +841,11 @@ The following relation is defined in the [kdcdefaults] section:
 
 @table @b
 @itemx kdc_ports
-This relation lists the ports on which the Kerberos server should listen
-by default.  This list is a comma separated list of integers.  If this
-relation is not specified, the compiled-in default is usually port 88
-(the assigned Kerberos port) and port 750 (the port used by Kerberos
-V4).
+This relation lists the ports on which the Kerberos server should
+listen by default.  This list is a comma separated list of integers.
+If this relation is not specified, the compiled-in default is
+@value{DefaultKdcPorts}, the first being the assigned Kerberos port
+and the second which was used by Kerberos V4.
 @end table
 
 @node realms (kdc.conf), Sample kdc.conf File, kdcdefaults, kdc.conf
@@ -861,38 +862,41 @@ subsection:
 @itemx acl_file
 (String.)  Location of the access control list (acl) file that kadmin
 uses to determine which principals are allowed which permissions on the
-database.  The default is @code{@value{ROOTDIR}/var/krb5kdc/kadm5.acl}.
+database.  The default is @code{@value{DefaultAclFile}}.
 
 @itemx admin_keytab
 (String.)  Location of the keytab file that kadmin uses to authenticate
 to the database.  The default is
-@code{@value{ROOTDIR}/var/krb5kdc/kadm5.keytab}.
+@code{@value{DefaultAdminKeytab}}.
 
 @itemx database_name
 (String.)  Location of the Kerberos database for this realm.  The
-default is @* @code{@value{ROOTDIR}/var/krb5kdc/principal}.
+default is @* @code{@value{DefaultDatabaseName}}.
 
 @itemx default_principal_expiration
 (Absolute time string.)  Specifies the default expiration date of
-principals created in this realm.
+principals created in this realm.  The default value for this tag is
+@value{DefaultDefaultPrincipalExpiration}.
 
 @itemx default_principal_flags
 (Flag string.)  Specifies the default attributes of principals created
-in this realm.
+in this realm.  The default value for this tag is
+@value{DefaultDefaultPrincipalFlags}.
 
 @itemx dict_file
 (String.)  Location of the dictionary file containing strings that are
-not allowed as passwords.  The default is
-@code{@value{ROOTDIR}/var/krb5kdc/kadm5.dict}.
+not allowed as passwords.  If none is specified, no dictionary checks
+of passwords will be performed.
 
 @itemx kadmind_port
 (Port number.)  Specifies the port that the kadmind daemon is to listen
-for this realm.  The assigned port for kadmind is 749.
+for this realm.  The assigned port for kadmind is
+@value{DefaultKadmindPort}.
 
 @itemx key_stash_file
 (String.)  Specifies the location where the master key has been stored
 (via @code{kdb5_util stash}).  The default is
-@code{@value{ROOTDIR}/var/krb5kdc/.k5.@i{REALM}}, where @i{REALM} is the
+@code{@value{DefaultKeyStashFileStub}@i{REALM}}, where @i{REALM} is the
 Kerberos realm.
 
 @itemx kdc_ports
@@ -901,33 +905,33 @@ this realm.  By default, the value of kdc_ports as specified in the
 [kdcdefaults] section is used.
 
 @itemx master_key_name
-(String.)  Specifies the name of the master key.
+(String.)  Specifies the name of the master key.  The default is
+@value{DefaultMasterKeyName}.
 
 @itemx master_key_type
-(Key type string.)  Specifies the master key's key type.  Either
-"des3-hmac-sha1" or
-"des-cbc-crc" may be used at this time.
+(Key type string.)  Specifies the master key's key type.  The default
+value for this is @value{DefaultMasterKeyType}.  For a list of all
+possible values, see @ref{Supported Encryption Types}.
 
 @itemx max_life
 (Delta time string.)  Specifes the maximum time period for which a
-ticket may be valid in this realm.
+ticket may be valid in this realm.  The default value is
+@value{DefaultMaxLife}.
 
 @itemx max_renewable_life
 (Delta time string.)  Specifies the maximum time period during which a
-valid ticket may be renewed in this realm.
+valid ticket may be renewed in this realm.  The default value is
+@value{DefaultMaxRenewableLife}.
 
 @itemx supported_enctypes
 List of key:salt strings.  Specifies the default key/salt combinations
 of principals for this realm.  Any principals created through
-@code{kadmin} will have keys of these types.  If you do not yet wish to
-enable triple-DES support, you should set this tag to
-@samp{des-cbc-crc:normal des-cbc-crc:v4}; otherwise, put
-@samp{des3-hmac-sha1:normal} at the beginning of the list.
+@code{kadmin} will have keys of these types.  For lists of possible
+values, see @ref{Supported Encryption Types} and @ref{Salts}. 
 
 @itemx kdc_supported_enctypes
-List of key:salt strings.  Specifies the permitted key/salt combinations
-of principals for this realm.  You should set this tag to
-@samp{des3-hmac-sha1:normal des-cbc-crc:normal des-cbc-crc:v4}.
+Specifies the permitted key/salt combinations of principals for this
+realm.  The format is the same as @code{supported_enctypes}
 
 @itemx reject_bad_transit
 A boolean value (@code{true}, @code{false}).  If set to @code{true}, the
@@ -1097,10 +1101,9 @@ Pass @i{query} directly to @code{kadmin}.  This is useful for writing
 scripts that pass specific queries to @code{kadmin}.
 
 @item @b{-e} @i{"enctypes ..."}
-@b{(For @code{kadmin.local} only.)}
-Sets the list of cryptosystem and salt types to be used for any new keys
-created.  Available types include @samp{des3-cbc-sha1:normal},
-@samp{des-cbc-crc:normal}, and @samp{des-cbc-crc:v4}.
+@b{(For @code{kadmin.local} only.)} Sets the list of cryptosystem and
+salt types to be used for any new keys created.  See @ref{Supported
+Encryption Types} and @ref{Salts} for available types.
 
 @end table
 
@@ -1216,10 +1219,10 @@ Maximum life: 1 day 00:00:00
 Maximum renewable life: 7 days 00:00:00
 Master key version: 1
 Expires: Mon Jan 18 22:14:07 EDT 2038
-Password expires: Mon Sep 19 14:40:00 EDT 1996
-Password last changed: Mon Jan 31 02:06:40 EDT 1996
+Password expires: Mon Sep 19 14:40:00 EDT 2004
+Password last changed: Mon Jan 31 02:06:40 EDT 2004
 Last modified: by @value{ADMINUSER}/admin@@@value{PRIMARYREALM}
-	on Wed Jul 13 18:27:08 EDT 1996
+	on Wed Jul 13 18:27:08 EDT 2004
 Attributes: DISALLOW_FORWARDABLE, DISALLOW_PROXIABLE,
 	REQUIRES_HW_AUTH
 Salt type: DEFAULT
@@ -1373,15 +1376,8 @@ following switches:
 
 @table @b
 @item -salt @i{salttype}
-Uses the specified salt for generating the key.  The valid salt types
-are:
-
-@itemize @bullet
-@item full_name (aliases ``v5_salt'' and ``normal''; this is the default)
-@item name_only
-@item realm_only
-@item no_salt (alias ``v4_salt'')
-@end itemize
+Uses the specified salt for generating the key.  For valid salt types,
+see @ref{Salts}.
 
 @item -clearpolicy
 For @code{modify_principal}, removes the current policy from a
@@ -1502,10 +1498,11 @@ prompt for a password (@code{add_principal} only).  @value{COMPANY} does
 not recommend using this option.
 
 @item -e @i{enc:salt...}
-Uses the specified list of enctype-salttype pairs for setting the key of
-the principal.  The quotes are necessary if there are multiple
+Uses the specified list of enctype-salttype pairs for setting the key
+of the principal.  The quotes are necessary if there are multiple
 enctype-salttype pairs.  This will not function against kadmin daemons
-earlier than krb5-1.2.
+earlier than krb5-1.2.  See @ref{Supported Encryption Types} and
+@ref{Salts} for available types.
 @end table
 
 If you want to just use the default values, all you need to do is:
@@ -1619,10 +1616,11 @@ Sets the password to the string @i{password}.  @value{COMPANY} does not
 recommend using this option.
 
 @item @b{-e} @i{"enc:salt..."}
-Uses the specified list of enctype-salttype pairs for setting the key of
-the principal.  The quotes are necessary if there are multiple
+Uses the specified list of enctype-salttype pairs for setting the key
+of the principal.  The quotes are necessary if there are multiple
 enctype-salttype pairs.  This will not function against kadmin daemons
-earlier than krb5-1.2.
+earlier than krb5-1.2.  See @ref{Supported Encryption Types} and
+@ref{Salts} for possible values.
 @end table
 
 For example:
@@ -2043,6 +2041,35 @@ It is important that you NOT FORGET this password.}
 @end group
 @end smallexample
 
+If you need to destroy the current Kerberos database, use the
+@code{kdb5_util} @code{destroy} command.  The syntax is:
+
+@smallexample
+@b{kdb5_util destroy} [@b{-f}]
+@end smallexample
+
+The @code{destroy} command destroys the database, first overwriting the
+disk sectors and then unlinking the files.  If you specify the
+@samp{-f} option, @code{kdb5_util} will not prompt you for a
+confirmation before destroying the database.
+
+@smallexample
+@group
+@b{shell%} @value{ROOTDIR}/sbin/kdb5_util -r @value{PRIMARYREALM} destroy
+@iftex
+@b{kdb5_util: Deleting KDC database stored in @value{DefaultDatabaseName}, are you sure 
+(type yes to confirm)?} @i{@doubleleftarrow{}yes}
+@end iftex
+@ifinfo
+@b{kdb5_util: Deleting KDC database stored in @value{DefaultDatabaseName}, are you sure 
+(type yes to confirm)?} @i{<== yes}
+@end ifinfo
+@b{OK, deleting database '@value{DefaultDatabaseName}'...}
+
+@b{shell%}
+@end group
+@end smallexample
+
 @ignore
 @c @node The KDC Logs,  , Creating and Destroying a Kerberos Database, Administrating Kerberos Database Entries
 @c @section The KDC Logs
@@ -2106,11 +2133,12 @@ The @code{ktadd} command takes the following switches:
 use @i{keytab} as the keytab file.  Otherwise, @code{ktadd} will use the
 default keytab file (@code{/etc/krb5.keytab}).
 
-@item @b{-e} @i{"enc:salt..."}
-Uses the specified list of enctype-salttype pairs for setting the key of
-the principal.  The quotes are necessary if there are multiple
+@item @b{-e} @i{"enc:salt..."} 
+Uses the specified list of enctype-salttype pairs for setting the key
+of the principal.  The quotes are necessary if there are multiple
 enctype-salttype pairs.  This will not function against kadmin daemons
-earlier than krb5-1.2.
+earlier than krb5-1.2.  See @ref{Supported Encryption Types} and
+@ref{Salts} for all possible values.
 
 @item -q
 run in quiet mode.  This causes @code{ktadd} to display less verbose

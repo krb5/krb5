@@ -19,8 +19,8 @@
 @set RANDOMUSER johndoe
 @set RANDOMUSER1 jennifer
 @set RANDOMUSER2 david
-@set RELEASE 1.2
-@set PREVRELEASE 1.1
+@set RELEASE 1.3
+@set PREVRELEASE 1.2
 @set INSTALLDIR /usr/@value{LCPRODUCT}
 @set PREVINSTALLDIR @value{INSTALLDIR}
 @set ROOTDIR /usr/local
@@ -28,3 +28,99 @@
 @set SECONDDOMAIN fubar.org
 @set SECONDREALM FUBAR.ORG
 @set UPDATED @today
+
+@ignore
+The rest of the variables in this file are defaults for tags in the
+configuration files.  Each group of defaults come from the same file in
+the code, which is specified in the ignore comment above the group.
+After each variable, there should be a comment specifying the variable
+in the code that holds the default variable, or the line in which the
+default was set.
+@end ignore
+
+@ignore 
+the following should be consistent with the variables set in
+krb5/src/lib/krb5/krb/init_ctx.c
+@end ignore
+@set DefaultETypeList des3-cbc-sha1 arcfour-hmac-md5 des-cbc-crc des-cbc-md5 des-cbc-md4 
+@comment DEFAULT_ETYPE_LIST
+@set DefaultDefaultTgsEnctypes @value{DefaultETypeList}
+@set DefaultDefaultTktEnctypes @value{DefaultETypeList}
+@set DefaultClockskew 300 seconds, or five minutes 
+@comment libdefaults, clockskew
+@set DefaultChecksumType RSA MD5 
+@comment libdefaults, kdc_req_checksum_type, ap_req_checksum_type, safe_checksum_type
+@set DefaultCcacheType 3 
+@comment DEFAULT_CCACHE_TYPE 
+@set DefaultCcacheTypeMac 4 
+@comment DEFAULT_CCACHE_TYPE
+@set DefaultTktLifetime 10 hours
+@comment libdefaults, tkt_lifetime
+@set DefaultKDCTimesyncMac 1
+@set DefaultKDCTimesync 0
+@comment DEFAULT_KDC_TIMESYNC
+
+@ignore
+the following defaults should be consistent with default variables set
+in krb5/src/include/krb5/stock/osconf.h
+@end ignore
+@set DefaultMasterKeyType des-cbc-crc 
+@comment DEFAULT_KDC_ENCTYPE
+@set DefaultKadmindPort 749 
+@comment DEFAULT_KADM5_PORT
+@set DefaultAclFile @value{ROOTDIR}/krb5kdc/kadm5.acl 
+@comment DEFAULT_KADM5_ACL_FILE
+@set DefaultAdminKeytab @value{ROOTDIR}/krb5kdc/kadm5.keytab 
+@comment DEFAULT_KADM5_KEYTAB
+@set DefaultDatabaseName /usr/local/var/krb5kdc/principal
+@comment DEFAULT_KDB_FILE (@LOCALSTATEDIR is /usr/local/var)
+@set DefaultKdcPorts 88,750 
+@comment DEFAULT_KDC_PORTLIST
+@set DefaultKpasswdPort 464 
+@comment DEFAULT_KPASSWD_PORT
+@set DefaultSecPort 750 
+@comment KRB5_DEFAULT_SEC_PORT
+@set DefaultPort 88 
+@comment KRB5_DEFAULT_PORT
+@set DefaultKeyStashFileStub /usr/local/var/krb5kdc/.k5. 
+@comment DEFAULT_KEYFILE_STUB
+
+@ignore
+the following defaults should be consistent with the numbers set in
+krb5/src/lib/kadm5/alt_prof.c
+@end ignore
+@set DefaultMaxLife 10 hours 
+@comment line 608
+@set DefaultMaxRenewableLife 0 
+@comment line 622
+@set DefaultDefaultPrincipalExpiration 0 
+@comment line 639
+
+@ignore
+the following defaults should be consistent with the values set in
+krb5/src/include/krb5/kdb.h
+@end ignore
+@set DefaultDefaultPrincipalFlags no flags set 
+@comment KRB5_KDB_DEF_FLAGS set to 0
+
+@ignore
+in krb5/src/include/k5-int.h, the values KRB5_KDB_MAX_LIFE,
+KRB5_KDB_MAX_RLIFE, and KRB5_KDB_EXPIRATION are set to one day, one week,
+and Thursday Jan 1 2038, respectively
+@end ignore
+
+@ignore
+the following defaults should be consistent with the values set in
+include/krb5/kdb.h
+@end ignore
+@set DefaultMasterKeyName K/M
+@comment KRB5_KDB_M_NAME
+
+@ignore
+krb5/src/lib/krb5/krb/init_ctx.c, line 195 has libdefault
+kdc_default_options (KDC_OPT_RENEWABLE_OKAY)
+@end ignore
+
+@comment this should be verified in the code
+@set DefaultDNSLookupKDC true
+@set DefaultDNSLookupRealm false
