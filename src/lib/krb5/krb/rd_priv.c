@@ -155,12 +155,9 @@ krb5_rd_priv_basic(context, inbuf, keyblock, local_addr, remote_addr,
     retval = 0;
 
 cleanup_data:;
-    if (retval) {
-	memset(privmsg_enc_part->user_data.data, 0, 
-	       privmsg_enc_part->user_data.length); 
-	krb5_xfree(privmsg_enc_part->user_data.data);
-    }
-    krb5_xfree(privmsg_enc_part);
+    if (retval == 0)
+	privmsg_enc_part->user_data.data = 0;
+    krb5_free_priv_enc_part(context, privmsg_enc_part);
 
 cleanup_scratch:;
     memset(scratch.data, 0, scratch.length); 

@@ -1,3 +1,7 @@
+Sat Apr 29 00:09:40 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* rd_priv.c (krb5_rd_priv_basic): Call krb5_free_priv_enc_part to free 
+		the entire privenc_msg structure.
 
 Fri Apr 28 09:54:51 EDT 1995	Paul Park	(pjpark@mit.edu)
 
