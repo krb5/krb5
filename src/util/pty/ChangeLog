@@ -1,3 +1,9 @@
+2004-07-30  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in: Only sanity-check setutent() API if there is no
+	utmpx.h, since some setutent() implementations aren't sysV-derived,
+	e.g., NetBSD.
+
 2004-07-16  Ken Raeburn  <raeburn@mit.edu>
 
 	* pty-int.h: Include port-sockets.h instead of netdb.h and

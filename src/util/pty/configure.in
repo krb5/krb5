@@ -139,23 +139,6 @@ krb5_utmpx_e_termination=`echo $krb5_mem|sed -e 's%_exit$%_termination%'`], )
   fi
 fi
 
-if test "$ac_cv_func_setutent" = yes; then
-  AC_MSG_CHECKING(consistency of sysV-ish utmp API)
-  if test "$ac_cv_header_utmp_h" = yes; then
-    if test "$krb5_cv_struct_utmp_ut_id" = yes \
-      && test "$krb5_cv_struct_utmp_ut_type" = yes \
-      && test "$krb5_cv_struct_utmp_ut_pid" = yes; then
-      AC_MSG_RESULT(ok)
-    else
-      AC_MSG_RESULT(not ok)
-      AC_MSG_ERROR([have setutent but no ut_id, ut_type, or ut_pid in utmp])
-    fi
-  else
-    AC_MSG_RESULT(not ok)
-    AC_MSG_ERROR([have setutent but no utmp.h])
-  fi
-fi
-
 if test "$ac_cv_header_utmpx_h" = yes; then
   AC_MSG_CHECKING(consistency of utmpx API)
   if test "$ac_cv_func_setutxent" = yes; then
@@ -170,6 +153,24 @@ if test "$ac_cv_header_utmpx_h" = yes; then
   else
     AC_MSG_RESULT(not ok)
     AC_MSG_ERROR([have utmpx.h but no setutxent])
+  fi
+fi
+
+if test "$ac_cv_func_setutent" = yes && \
+  test "$ac_cv_header_utmpx_h" = no; then
+  AC_MSG_CHECKING(consistency of sysV-ish utmp API)
+  if test "$ac_cv_header_utmp_h" = yes; then
+    if test "$krb5_cv_struct_utmp_ut_id" = yes \
+      && test "$krb5_cv_struct_utmp_ut_type" = yes \
+      && test "$krb5_cv_struct_utmp_ut_pid" = yes; then
+      AC_MSG_RESULT(ok)
+    else
+      AC_MSG_RESULT(not ok)
+      AC_MSG_ERROR([have setutent but no ut_id, ut_type, or ut_pid in utmp])
+    fi
+  else
+    AC_MSG_RESULT(not ok)
+    AC_MSG_ERROR([have setutent but no utmp.h])
   fi
 fi
 
