@@ -175,3 +175,37 @@ g_order_free(void **vqueue)
 
    *vqueue = NULL;
 }
+
+/*
+ * These support functions are for the serialization routines
+ */
+gss_uint32
+g_queue_size(void *vqueue, size_t *sizep)
+{
+    *sizep += sizeof(queue);
+    return 0;
+}
+
+gss_uint32
+g_queue_externalize(void *vqueue, unsigned char **buf, size_t *lenremain)
+{
+    memcpy(*buf, vqueue, sizeof(queue));
+    *buf += sizeof(queue);
+    *lenremain += sizeof(queue);
+    
+    return 0;
+}
+
+gss_uint32
+g_queue_internalize(void **vqueue, unsigned char **buf, size_t *lenremain)
+{
+    void *q;
+
+    if ((q = malloc(sizeof(queue))) == 0)
+	return ENOMEM;
+    memcpy(q, *buf, sizeof(queue));
+    *buf += sizeof(queue);
+    *lenremain += sizeof(queue);
+    *vqueue = q;
+    return 0;
+}

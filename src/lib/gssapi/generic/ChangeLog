@@ -1,3 +1,9 @@
+Sat Oct 19 00:39:25 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* util_ordering.c (g_queue_externalize, g_queue_internalize,
+	 	g_queue_size):  New routines which allow the serailizing
+	 	routines to access the seqstate structure.
+
 Thu Oct 10 15:03:38 1996  Tom Yu  <tlyu@mit.edu>
 
 	* configure.in: Remove calls to CopySrcHeader.

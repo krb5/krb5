@@ -145,6 +145,12 @@ gss_int32 g_order_check PROTOTYPE((void **queue, OM_uint32 seqnum));
 
 void g_order_free PROTOTYPE((void **queue));
 
+gss_uint32 g_queue_size(void *vqueue, size_t *sizep);
+gss_uint32 g_queue_externalize(void *vqueue, unsigned char **buf,
+			       size_t *lenremain);
+gss_uint32 g_queue_internalize(void **vqueue, unsigned char **buf,
+			       size_t *lenremain);
+
 char *g_canonicalize_host PROTOTYPE((char *hostname));
 char *g_local_host_name PROTOTYPE((void));
 
