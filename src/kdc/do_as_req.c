@@ -251,7 +251,7 @@ krb5_data **response;
 {
     krb5_error errpkt;
     krb5_error_code retval;
-
+    krb5_data *scratch;
 
     errpkt.ctime = request->ctime;
     errpkt.cmsec = 0;
@@ -266,7 +266,12 @@ krb5_data **response;
 	return ENOMEM;
     (void) strcpy(errpkt.text.data, error_message(error+KRB5KDC_ERR_NONE));
 
-    retval = encode_krb5_error(&errpkt, response);
+    if (!(scratch = (krb5_data *)malloc(sizeof(*scratch)))) {
+	free(errpkt.txt.data);
+	return ENOMEM;
+    }
+    retval = encode_krb5_error(&errpkt, scratch);
     free(errpkt.text.data);
+    *response = scratch;
     return retval;
 }
