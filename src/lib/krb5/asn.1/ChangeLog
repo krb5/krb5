@@ -1,3 +1,9 @@
+Thu May  2 21:59:23 1996  Mark Eichin  <eichin@cygnus.com>
+
+	* krb5_decode.c (decode_krb5_enc_tkt_part): use tagnum correctly
+	to handle optional starttime (previous code *always* replaced
+	starttime with authtime.)
+
 Tue Apr  9 22:51:36 1996  Mark Eichin  <eichin@cygnus.com>
 
 	* krb5_decode.c (decode_krb5_sam_challenge,

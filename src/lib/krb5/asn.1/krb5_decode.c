@@ -259,9 +259,10 @@ krb5_error_code decode_krb5_enc_tkt_part(code, rep)
     get_field((*rep)->client,3,asn1_decode_principal_name);
     get_field((*rep)->transited,4,asn1_decode_transited_encoding);
     get_field((*rep)->times.authtime,5,asn1_decode_kerberos_time);
-    opt_field((*rep)->times.starttime,6,asn1_decode_kerberos_time);
-    if (tagnum != 6)
-	    (*rep)->times.starttime=(*rep)->times.authtime;
+    if (tagnum == 6)
+      { get_field((*rep)->times.starttime,6,asn1_decode_kerberos_time); }
+    else
+      (*rep)->times.starttime=(*rep)->times.authtime;
     get_field((*rep)->times.endtime,7,asn1_decode_kerberos_time);
     opt_field((*rep)->times.renew_till,8,asn1_decode_kerberos_time);
     opt_field((*rep)->caddrs,9,asn1_decode_host_addresses);
