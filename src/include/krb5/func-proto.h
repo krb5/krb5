@@ -121,6 +121,18 @@ krb5_error_code krb5_rd_req
 		   krb5_pointer,
 		   krb5_rcache,
 		   krb5_tkt_authent * ));
+krb5_error_code krb5_rd_req_decoded
+	PROTOTYPE((krb5_ap_req *,
+		   krb5_principal,
+		   krb5_address *,
+		   krb5_pointer,
+		   int (* )(krb5_pointer,
+				   krb5_principal,
+				   krb5_kvno,
+				   krb5_keyblock ** ),
+		   krb5_pointer,
+		   krb5_rcache,
+		   krb5_tkt_authent * ));
 krb5_error_code krb5_mk_error
 	PROTOTYPE((krb5_error *,
 		   krb5_data * ));
@@ -336,5 +348,9 @@ void krb5_free_priv
 	PROTOTYPE((krb5_priv * ));
 void krb5_free_priv_enc_part
 	PROTOTYPE((krb5_priv_enc_part * ));
+
+/* internal functions */
+krb5_boolean krb5_principal_compare
+	PROTOTYPE((krb5_principal, krb5_principal));
 
 #endif /* __KRB5_FUNC_PROTO__ */
