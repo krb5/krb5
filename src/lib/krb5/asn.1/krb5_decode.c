@@ -746,11 +746,16 @@ krb5_error_code decode_krb5_etype_info(const krb5_data *code, krb5_etype_info_en
 
 krb5_error_code decode_krb5_etype_info2(const krb5_data *code, krb5_etype_info_entry ***rep)
 {
-  setup_buf_only();
-  *rep = 0;
-  retval = asn1_decode_etype_info2(&buf,rep);
-  if(retval) clean_return(retval);
-  cleanup_none();		/* we're not allocating anything here */
+    setup_buf_only();
+    *rep = 0;
+    retval = asn1_decode_etype_info2(&buf,rep, 0);
+    if (retval == ASN1_BAD_ID) {
+	retval = asn1buf_wrap_data(&buf,code);
+	if(retval) clean_return(retval);
+	retval = asn1_decode_etype_info2(&buf, rep, 1);
+    }
+    if(retval) clean_return(retval);
+    cleanup_none();		/* we're not allocating anything here */
 }
 
 
