@@ -1,4 +1,4 @@
-2000-06-06  Kenneth Raeburn  <raeburn@raeburn.org>
+2000-06-06  Ken Raeburn  <raeburn@mit.edu>
 
 	* install.texinfo: Describe new DNS support, and 3DES upgrade
 	path.  Update "enctypes" config file sample lines.
