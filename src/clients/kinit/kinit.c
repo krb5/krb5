@@ -94,8 +94,10 @@ char * get_name_from_os()
 static char *progname;
 
 static char* progname_v5 = 0;
+#ifdef KRB5_KRB4_COMPAT
 static char* progname_v4 = 0;
 static char* progname_v524 = 0;
+#endif
 
 static int got_k5 = 0;
 static int got_k4 = 0;
@@ -273,8 +275,6 @@ parse_options(argc, argv, opts)
     int errflg = 0;
     int use_k4 = 0;
     int use_k5 = 0;
-    int have_k4 = got_k4;
-    int have_k5 = got_k5;
     int i;
 
     while ((i = GETOPT(argc, argv, "r:fpFP54AVl:s:c:kt:RS:v"))
@@ -591,8 +591,10 @@ k4_begin(opts, k4)
     struct k_opts* opts;
     struct k4_data* k4;
 {
+#ifdef KRB5_KRB4_COMPAT
     char* progname = progname_v4;
     int k_errno = 0;
+#endif
 
     if (!got_k4)
 	return 0;
@@ -679,8 +681,10 @@ k4_end(k4)
     memset(k4, 0, sizeof(*k4));
 }
 
+#ifdef KRB5_KRB4_COMPAT
 static char stash_password[1024];
 static int got_password = 0;
+#endif /* KRB5_KRB4_COMPAT */
 
 krb5_error_code
 KRB5_CALLCONV
@@ -702,9 +706,11 @@ kinit_prompter(
 	    if ((types[i] == KRB5_PROMPT_TYPE_PASSWORD) ||
 		(types[i] == KRB5_PROMPT_TYPE_NEW_PASSWORD_AGAIN))
 	    {
+#ifdef KRB5_KRB4_COMPAT
 		strncpy(stash_password, prompts[i].reply->data,
 			sizeof(stash_password));
 		got_password = 1;
+#endif
 	    }
     return rc;
 }
@@ -857,8 +863,10 @@ k4_kinit(opts, k4, ctx)
     struct k4_data* k4;
     krb5_context ctx;
 {
+#ifdef KRB5_KRB4_COMPAT
     char* progname = progname_v4;
     int k_errno = 0;
+#endif
 
     if (!got_k4)
 	return 0;
@@ -884,9 +892,10 @@ k4_kinit(opts, k4, ctx)
 	if (!got_password) {
 	    int pwsize = sizeof(stash_password);
 	    krb5_error_code code;
+	    char prompt[1024];
 
-	    sprintf(prompt, "Password for %s: ", opts.principal_name);
-	    password[0] = 0;
+	    sprintf(prompt, "Password for %s: ", opts->principal_name);
+	    stash_password[0] = 0;
 	    /*
 	      Note: krb5_read_password does not actually look at the
 	      context, so we're ok even if we don't have a context.  If
@@ -897,7 +906,7 @@ k4_kinit(opts, k4, ctx)
 	    if (code || pwsize == 0)
 	    {
 		fprintf(stderr, "Error while reading password for '%s'\n",
-			opts.principal_name);
+			opts->principal_name);
 		memset(stash_password, 0, sizeof(stash_password));
 		return 0;
 	    }
@@ -1046,8 +1055,10 @@ main(argc, argv)
 
     progname = GET_PROGNAME(argv[0]);
     progname_v5 = getvprogname("5");
+#ifdef KRB5_KRB4_COMPAT
     progname_v4 = getvprogname("4");
     progname_v524 = getvprogname("524");
+#endif
 
     /* Ensure we can be driven from a pipe */
     if(!isatty(fileno(stdin)))
@@ -1084,7 +1095,9 @@ main(argc, argv)
 #endif
     if (!authed_k4)
 	authed_k4 = k4_kinit(&opts, &k4, k5.ctx);
+#ifdef KRB5_KRB4_COMPATH
     memset(stash_password, 0, sizeof(stash_password));
+#endif
 
     if (authed_k5 && opts.verbose)
 	fprintf(stderr, "Authenticated to Kerberos v5\n");

@@ -1,4 +1,10 @@
-2000-03-15  Danilo Almeida  <dalmeida@mit.edu>
+2000-03-16  Ezra Peisach  <epeisach@mit.edu>
+
+	* kinit.c (k4_kinit): Fix the code that was broken with
+	krb5_get_prompt_types code changes. Also - cleanup unused
+	variables when krb4 not compiled in.
+
+2000-03-15  Danilo Almeida  <dalmeida@mit.edu  >
 
 	* kinit.c: Add support for krb5_get_prompt_types.
 
