@@ -99,10 +99,10 @@ static kdb5_dispatch_table kdb5_default_dispatch = {
  * dbm_clearerr are in the library but not prototyped
  * (e.g. NetBSD-1.0)
  */
-#ifdef MISSING_ERROR_PROTO
+#if defined(MISSING_ERROR_PROTO) && !defined(dbm_error)
 int dbm_error PROTOTYPE((DBM *));
 #endif
-#ifdef MISSING_CLEARERR_PROTO
+#if defined(MISSING_CLEARERR_PROTO) && !defined(dbm_clearerr)
 int dbm_clearerr PROTOTYPE((DBM *));
 #endif
 

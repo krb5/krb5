@@ -1,3 +1,8 @@
+Sat May 18 15:07:09 1996  Ezra Peisach  (epeisach@paris)
+
+	* kdb_dbm.c: Do not provide prototypes for dbm_error or
+		dbm_clearerr if they are really macros.
+
 Tue May  7 19:48:57 1996  Ezra Peisach  <epeisach@dumpster.rose.brandeis.edu>
 
 	* t_kdb.c (do_testing): Compile if using BERK_DB and dbm is not
