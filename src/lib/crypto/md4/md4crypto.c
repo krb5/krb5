@@ -206,7 +206,7 @@ size_t seed_length;
     krb5_encrypt_block eblock;
     krb5_keyblock keyblock;
     krb5_error_code retval;
-	size_t i;
+    size_t i;
 
     MD4_CTX working;
 
