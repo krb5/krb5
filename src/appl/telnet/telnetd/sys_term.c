@@ -1235,7 +1235,9 @@ cleanopen(line)
 	 */
 # if !(defined(CRAY) || defined(__hpux)) && (BSD <= 43) && !defined(STREAMSPTY)
 	(void) signal(SIGHUP, SIG_IGN);
+#ifdef HAVE_VHANGUP
 	vhangup();
+#endif
 	(void) signal(SIGHUP, SIG_DFL);
 	t = open(line, O_RDWR|O_NOCTTY);
 	if (t < 0)
@@ -1782,7 +1784,9 @@ cleanup(sig)
 	void rmut();
 
 	rmut();
+#ifdef HAVE_VHANGUP
 	vhangup();	/* XXX */
+#endif
 	(void) shutdown(net, 2);
 	exit(1);
 # endif

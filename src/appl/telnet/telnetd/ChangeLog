@@ -1,3 +1,9 @@
+Tue Aug 16 18:04:58 1994  Mark Eichin  (eichin@tweedledumber.cygnus.com)
+
+	* configure.in: check for vhangup.
+	sys_term.c (cleanup): check for HAVE_VHANGUP.
+	(cleanopen): ditto.
+
 Mon Aug  8 01:15:27 1994  Mark Eichin  (eichin@cygnus.com)
 
 	* utility.c (putf): don't misdeclare index/rindex, strings.h
