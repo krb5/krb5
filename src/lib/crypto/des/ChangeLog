@@ -1,3 +1,8 @@
+Tue Sep 12 18:50:50 1995   John Rivlin (jrivlin@fusion.com)
+
+	* f_pcbc.c: Added include of des_int.h which seemed to
+		get lost so that mit_des_xxx get defined.
+
 Wed Sep 06 14:20:57 1995   Chris Provenzano (proven@mit.edu)
 
         * des_int.h, destest.c, init_rkey.c, random_key.c, string2key.c 
