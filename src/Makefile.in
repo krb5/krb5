@@ -11,7 +11,7 @@ HDRS =
 
 DISTFILES = $(SRCS) $(HDRS) COPYING COPYING.LIB ChangeLog Makefile.in
 
-all-unix::
+all-unix:: krb5-config
 
 all-mac::
 
@@ -546,3 +546,11 @@ install-windows::
 	$(CP) clients\kpasswd\$(OUTPRE)kpasswd.exe "$(KRB_INSTALL_DIR)\bin\."
 	@if exist "$(KRB_INSTALL_DIR)\bin\krb4_32.dll" del "$(KRB_INSTALL_DIR)\bin\krb4_32.dll"
 	@if exist "$(KRB_INSTALL_DIR)\lib\krb4_32.lib" del "$(KRB_INSTALL_DIR)\lib\krb4_32.lib"
+
+install-unix:: 
+	$(INSTALL) krb5-config \
+		$(DESTDIR)$(CLIENT_BINDIR)/krb5-config
+
+krb5-config: $(srcdir)/krb5-config.in $(thisconfigdir)/config.status
+	cd $(thisconfigdir) && $(SHELL) config.status
+
