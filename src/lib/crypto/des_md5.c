@@ -97,6 +97,7 @@ mit_des_md5_encrypt_func(in, out, size, key, ivec)
     memcpy((char *)out+sizeof(mit_des_cblock)+RSA_MD5_CKSUM_LENGTH, (char *)in,
 	   size);
 
+    cksum.length = sizeof(contents);
     cksum.contents = contents; 
 
     /* This is equivalent to krb5_calculate_checksum(CKSUMTYPE_MD5,...)
@@ -149,6 +150,7 @@ mit_des_md5_decrypt_func(in, out, size, key, ivec)
     if (retval)
 	return retval;
 
+    cksum.length = sizeof(contents_prd);
     cksum.contents = contents_prd;
     p = (char *)out + sizeof(mit_des_cblock);
     memcpy((char *)contents_get, p, RSA_MD5_CKSUM_LENGTH);

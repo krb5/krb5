@@ -96,6 +96,7 @@ mit_des_crc_encrypt_func(in, out, size, key, ivec)
     memcpy((char *)out+sizeof(mit_des_cblock)+CRC32_CKSUM_LENGTH, (char *)in,
 	   size);
 
+    cksum.length = sizeof(contents);
     cksum.contents = contents; 
 
     /* This is equivalent to krb5_calculate_checksum(CKSUMTYPE_CRC32,...)
@@ -148,6 +149,7 @@ mit_des_crc_decrypt_func(in, out, size, key, ivec)
     if (retval)
 	return retval;
 
+    cksum.length = sizeof(contents_prd);
     cksum.contents = contents_prd;
     p = (char *)out + sizeof(mit_des_cblock);
     memcpy((char *)contents_get, p, CRC32_CKSUM_LENGTH);

@@ -1,3 +1,12 @@
+Tue May 14 15:14:20 1996  Richard Basch  <basch@lehman.com>
+
+	* des_crc.c des_md5.c:
+		set the length field of the cksum structure.
+
+	* des3_sha.c:
+		Increase the confounder length to 24 bytes.
+		Set the length of the cksum structure.
+
 Fri May 10 01:34:46 1996  Richard Basch  <basch@lehman.com>
 
 	* configure.in cryptoconf.c des3_sha.c:

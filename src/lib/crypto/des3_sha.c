@@ -26,11 +26,16 @@
 #include "shs.h"
 #include "des_int.h"
 
-krb5_error_code mit_des3_sha_encrypt_func
+
+#define DES3_SHA_CONFOUNDER_SIZE	sizeof(mit_des3_cblock)
+
+static krb5_error_code
+mit_des3_sha_encrypt_func
     PROTOTYPE(( krb5_const_pointer, krb5_pointer, const size_t,
                krb5_encrypt_block *, krb5_pointer ));
 
-krb5_error_code mit_des3_sha_decrypt_func
+static krb5_error_code
+mit_des3_sha_decrypt_func
     PROTOTYPE(( krb5_const_pointer, krb5_pointer, const size_t,
                krb5_encrypt_block *, krb5_pointer ));
 
@@ -47,7 +52,7 @@ static krb5_cryptosystem_entry mit_des3_sha_cryptosystem_entry = {
     mit_des_finish_random_key,
     mit_des_random_key,
     sizeof(mit_des_cblock),
-    NIST_SHA_CKSUM_LENGTH+sizeof(mit_des_cblock),
+    NIST_SHA_CKSUM_LENGTH + DES3_SHA_CONFOUNDER_SIZE,
     sizeof(mit_des3_cblock),
     ENCTYPE_DES3_CBC_SHA
     };
@@ -72,58 +77,54 @@ mit_des3_sha_encrypt_func(in, out, size, key, ivec)
     int sumsize;
     krb5_error_code retval;
 
-/*    if ( size < sizeof(mit_des_cblock) )
-	return KRB5_BAD_MSIZE; */
-
     /* caller passes data size, and saves room for the padding. */
     /* format of ciphertext, per RFC is:
       +-----------+----------+-------------+-----+
       |confounder |   check  |   msg-seq   | pad |
       +-----------+----------+-------------+-----+
       
-      our confounder is 8 bytes (one cblock);
+      our confounder is 24 bytes
       our checksum is NIST_SHA_CKSUM_LENGTH
      */
-    sumsize =  krb5_roundup(size+NIST_SHA_CKSUM_LENGTH+sizeof(mit_des_cblock),
-			    sizeof(mit_des_cblock));
+    sumsize =  krb5_roundup(size + mit_des3_sha_cryptosystem_entry.pad_minimum,
+			    mit_des3_sha_cryptosystem_entry.block_length);
 
     /* assemble crypto input into the output area, then encrypt in place. */
 
     memset((char *)out, 0, sumsize);
 
     /* put in the confounder */
-    if ((retval = krb5_random_confounder(sizeof(mit_des_cblock), out)))
+    if ((retval = krb5_random_confounder(DES3_SHA_CONFOUNDER_SIZE, out)))
 	return retval;
 
-    memcpy((char *)out+sizeof(mit_des_cblock)+NIST_SHA_CKSUM_LENGTH, (char *)in,
-	   size);
+    memcpy((char *)out + mit_des3_sha_cryptosystem_entry.pad_minimum,
+	   (char *)in, size);
 
+    cksum.length = sizeof(contents);
     cksum.contents = contents; 
 
-    /* This is equivalent to krb5_calculate_checksum(CKSUMTYPE_MD5,...)
+    /* This is equivalent to krb5_calculate_checksum(CKSUMTYPE_SHA,...)
        but avoids use of the cryptosystem config table which can not be
-       referenced here if this object is to be included in a shared library.  */
-    if ((retval = nist_sha_cksumtable_entry.sum_func((krb5_pointer) out,
-						    sumsize,
-						    (krb5_pointer)key->key->contents,
-						    key->key->length,
-						    &cksum)))
+       referenced here if this object is to be included in a shared library. */
+    retval = nist_sha_cksumtable_entry.sum_func((krb5_pointer) out, sumsize,
+						0, 0, &cksum);
+    if (retval)
 	return retval;
 
-    memcpy((char *)out+sizeof(mit_des_cblock), (char *)contents,
-	   NIST_SHA_CKSUM_LENGTH);
+    memcpy((char *)out + DES3_SHA_CONFOUNDER_SIZE,
+	   (char *)contents, NIST_SHA_CKSUM_LENGTH);
 
     /* We depend here on the ability of this DES-3 implementation to
        encrypt plaintext to ciphertext in-place. */
-    return (mit_des3_cbc_encrypt(out, 
-				out,
-				sumsize, 
-				(struct mit_des_ks_struct *) key->priv, 
-				((struct mit_des_ks_struct *) key->priv) + 1, 
-				((struct mit_des_ks_struct *) key->priv) + 2, 
-				ivec ? ivec : (krb5_pointer)zero_ivec,
-				MIT_DES_ENCRYPT));
-    
+    retval = mit_des3_cbc_encrypt(out,
+				  out,
+				  sumsize,
+				  (struct mit_des_ks_struct *) key->priv,
+				  ((struct mit_des_ks_struct *) key->priv) + 1,
+				  ((struct mit_des_ks_struct *) key->priv) + 2,
+				  ivec ? ivec : (krb5_pointer)zero_ivec,
+				  MIT_DES_ENCRYPT);
+    return retval;
 }
 
 krb5_error_code
@@ -140,35 +141,38 @@ mit_des3_sha_decrypt_func(in, out, size, key, ivec)
     char 	*p;
     krb5_error_code   retval;
 
-    if ( size < 2*sizeof(mit_des_cblock) )
+    if ( size < krb5_roundup(mit_des3_sha_cryptosystem_entry.pad_minimum,
+			     mit_des3_sha_cryptosystem_entry.block_length))
 	return KRB5_BAD_MSIZE;
 
     retval = mit_des3_cbc_encrypt((const mit_des_cblock *) in,
-				 out,
-				 size,
-				 (struct mit_des_ks_struct *) key->priv,
-				 ((struct mit_des_ks_struct *) key->priv) + 1, 
-				 ((struct mit_des_ks_struct *) key->priv) + 2, 
-				 ivec ? ivec : (krb5_pointer)zero_ivec,
-				 MIT_DES_DECRYPT);
+				  out,
+				  size,
+				  (struct mit_des_ks_struct *) key->priv,
+				  ((struct mit_des_ks_struct *) key->priv) + 1,
+				  ((struct mit_des_ks_struct *) key->priv) + 2,
+				  ivec ? ivec : (krb5_pointer)zero_ivec,
+				  MIT_DES_DECRYPT);
     if (retval)
 	return retval;
 
+    cksum.length = sizeof(contents_prd);
     cksum.contents = contents_prd;
-    p = (char *)out + sizeof(mit_des_cblock);
+    p = (char *)out + DES3_SHA_CONFOUNDER_SIZE;
     memcpy((char *)contents_get, p, NIST_SHA_CKSUM_LENGTH);
     memset(p, 0, NIST_SHA_CKSUM_LENGTH);
 
-    if ((retval = nist_sha_cksumtable_entry.sum_func(out, size,
-						    (krb5_pointer)key->key->contents,
-						    key->key->length,
-						    &cksum)))
+    retval = nist_sha_cksumtable_entry.sum_func(out, size, 0, 0, &cksum);
+    if (retval)
 	return retval;
 
-    if (memcmp((char *)contents_get, (char *)contents_prd, NIST_SHA_CKSUM_LENGTH) )
+    if (memcmp((char *)contents_get,
+	       (char *)contents_prd,
+	       NIST_SHA_CKSUM_LENGTH))
         return KRB5KRB_AP_ERR_BAD_INTEGRITY;
+
     memmove((char *)out, (char *)out +
-	   sizeof(mit_des_cblock) + NIST_SHA_CKSUM_LENGTH,
-	   size - sizeof(mit_des_cblock) - NIST_SHA_CKSUM_LENGTH);
+	    mit_des3_sha_cryptosystem_entry.pad_minimum,
+	    size - mit_des3_sha_cryptosystem_entry.pad_minimum);
     return 0;
 }

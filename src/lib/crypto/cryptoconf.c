@@ -54,10 +54,10 @@
 #ifdef PROVIDE_NIST_SHA
 #include "shs.h"
 #define SHA_CKENTRY &nist_sha_cksumtable_entry
-#define SHA_DES3_CKENTRY &nist_sha_des3_cksumtable_entry
+#define HMAC_SHA_CKENTRY &hmac_sha_cksumtable_entry
 #else
 #define SHA_CKENTRY 0
-#define SHA_DES3_CKENTRY 0
+#define HMAC_SHA_CKENTRY 0
 #endif
 
 #ifdef PROVIDE_SNEFRU
@@ -153,7 +153,7 @@ krb5_checksum_entry * NEAR krb5_cksumarray[] = {
     MD5_CKENTRY,		/* 7 - CKSUMTYPE_RSA_MD5 */
     MD5_DES_CKENTRY,		/* 8 - CKSUMTYPE_RSA_MD5_DES */
     SHA_CKENTRY,		/* 9 - CKSUMTYPE_NIST_SHA */
-    SHA_DES3_CKENTRY		/* 10 - CKSUMTYPE_NIST_SHA_DES3 */
+    HMAC_SHA_CKENTRY		/* 10 - CKSUMTYPE_NIST_SHA_DES3 */
 };
 
 krb5_cksumtype krb5_max_cksum = sizeof(krb5_cksumarray)/sizeof(krb5_cksumarray[0]);
