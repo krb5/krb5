@@ -55,7 +55,7 @@ krb5_data *outbuf;
     /* obtain ticket & session key */
 
     bzero((char *)&creds, sizeof(creds));
-    creds.server = server;
+    creds.server = (krb5_principal) server;
     if (retval = krb5_cc_get_principal(ccache, &creds.client))
 	return(retval);
     /* creds.times.endtime = 0; -- bzero takes care of this
