@@ -57,6 +57,11 @@ char copyright[] =
 #ifdef HAVE_VFORK_H
 #include <vfork.h>
 #endif
+#ifdef HAVE_STDARG_H
+#include <stdarg.h>
+#else
+#include <varargs.h>
+#endif
      
 #ifdef HAVE_SETRESUID
 #ifndef HAVE_SETREUID
@@ -126,8 +131,12 @@ struct buffer {
 
 #define	NULLBUF	(struct buffer *) 0
   
-  /*VARARGS*/
-  int	error();
+#ifdef HAVE_STDARG_H
+int 	error KRB5_PROTOTYPE((char *fmt, ...));
+#else
+/*VARARGS*/
+int	error KRB5_PROTOTYPE((char *, va_list));
+#endif
 
 #define	ga()	 	(void) des_write(rem, "", 1)
 
@@ -1118,16 +1127,29 @@ struct buffer *allocbuf(bp, fd, blksize)
 
 
 
+#ifdef HAVE_STDARG_H
+error(char *fmt, ...)
+#else
 /*VARARGS1*/
-error(fmt, a1, a2, a3, a4, a5)
+error(fmt, va_alist)
      char *fmt;
-     int a1, a2, a3, a4, a5;
+     va_dcl
+#endif
 {
+    va_list ap;
     char buf[RCP_BUFSIZ], *cp = buf;
-    
+
+#ifdef HAVE_STDARG_H
+    va_start(ap, fmt);
+#else
+    va_start(ap);
+#endif
+
     errs++;
     *cp++ = 1;
-    (void) sprintf(cp, fmt, a1, a2, a3, a4, a5);
+    (void) vsprintf(cp, fmt, ap);
+    va_end(ap);
+
     (void) des_write(rem, buf, strlen(buf));
     if (iamremote == 0)
       (void) write(2, buf+1, strlen(buf+1));

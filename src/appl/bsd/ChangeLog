@@ -1,3 +1,9 @@
+Thu Jan 11 11:27:04 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* krcp.c (error): Convert to use varargs.
+
+	* configure.in: Check for stdarg.h
+
 Wed Jan 10 21:26:20 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* kcmd.c (getport): Clear the sin structure to be zero.  (From
