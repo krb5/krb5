@@ -63,11 +63,14 @@ clean-unix::
 
 mostlyclean: clean
 
-distclean: clean
-	rm -f Makefile config.status
-
-realclean: distclean
-	rm -f TAGS
+# This doesn't work; if you think you need it, you should use a
+# separate build directory.
+# 
+# distclean: clean
+# 	rm -f Makefile config.status
+# 
+# realclean: distclean
+# 	rm -f TAGS
 
 dist: $(DISTFILES)
 	echo cpio-`sed -e '/version_string/!d' \
