@@ -216,7 +216,8 @@ typedef struct _krb5_priv_enc_part {
     krb5_data user_data;		/* user data */
     krb5_timestamp timestamp;		/* client time */
     krb5_ui_2 msec;			/* millisecond portion of time */
-    krb5_address **addresses;		/* array of ptrs to addresses */
+    krb5_address *s_address;		/* sender address */
+    krb5_address *r_address;		/* recipient address */
 } krb5_priv_enc_part;
 
 /* these need to be here so the typedefs are available for the prototypes */
