@@ -87,11 +87,11 @@ gss_krb5int_make_seal_token_v3 (krb5_context context,
     acceptor_flag = ctx->initiate ? 0 : FLAG_SENDER_IS_ACCEPTOR;
     key_usage = (toktype == KG_TOK_WRAP_MSG
 		 ? (ctx->initiate
-		    ? KG_USAGE_INITIATOR_SIGN
-		    : KG_USAGE_ACCEPTOR_SIGN)
-		 : (ctx->initiate
 		    ? KG_USAGE_INITIATOR_SEAL
-		    : KG_USAGE_ACCEPTOR_SEAL));
+		    : KG_USAGE_ACCEPTOR_SEAL)
+		 : (ctx->initiate
+		    ? KG_USAGE_INITIATOR_SIGN
+		    : KG_USAGE_ACCEPTOR_SIGN));
     if (ctx->have_acceptor_subkey) {
 	_log("%s:%d: using acceptor subkey\n", SFILE, __LINE__);
 	key = ctx->acceptor_subkey;
@@ -342,11 +342,11 @@ gss_krb5int_unseal_token_v3(krb5_context *contextptr,
     acceptor_flag = ctx->initiate ? FLAG_SENDER_IS_ACCEPTOR : 0;
     key_usage = (toktype == KG_TOK_WRAP_MSG
 		 ? (!ctx->initiate
-		    ? KG_USAGE_INITIATOR_SIGN
-		    : KG_USAGE_ACCEPTOR_SIGN)
-		 : (!ctx->initiate
 		    ? KG_USAGE_INITIATOR_SEAL
-		    : KG_USAGE_ACCEPTOR_SEAL));
+		    : KG_USAGE_ACCEPTOR_SEAL)
+		 : (!ctx->initiate
+		    ? KG_USAGE_INITIATOR_SIGN
+		    : KG_USAGE_ACCEPTOR_SIGN));
 
 #define LOG()		_log("%s:%d: here\n", SFILE, __LINE__)
 #define DEFECTIVE	do{LOG();goto defective;}while(0)

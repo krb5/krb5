@@ -1,3 +1,8 @@
+2003-12-09  Sam Hartman  <hartmans@avalanche-breakdown.mit.edu>
+
+	* k5sealv3.c (gss_krb5int_unseal_token_v3
+	gss_krb5int_seal_token_v3):  Use correct key usages 
+
 2003-09-25  Ken Raeburn  <raeburn@mit.edu>
 
 	* gssapiP_krb5.h (struct _krb5_gss_ctx_id_rec): Deleted fields

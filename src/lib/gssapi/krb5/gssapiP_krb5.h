@@ -70,7 +70,7 @@
 #include "gssapi_err_krb5.h"
 
 /* for debugging */
-#define CFX_EXERCISE
+#undef CFX_EXERCISE
 
 /** constants **/
 
