@@ -254,7 +254,6 @@ int	princ_maps_to_lname(), default_realm();
 
 int must_pass_rhosts = 0, must_pass_k5 = 0, must_pass_one = 0;
 int do_encrypt = 0, passwd_if_fail = 0, passwd_req = 0;
-int failed_auth = 0, failed_k5 = 0, failed_rhosts = 0;
 
 main(argc, argv)
      int argc;
@@ -500,13 +499,6 @@ void doit(f, fromp)
 #if defined(KERBEROS)
     /* All validation, and authorization goes through do_krb_login() */
     do_krb_login(rhost_name);
-    
-    if (failed_auth || (failed_k5 && failed_rhosts)) {
-	if (must_pass_one && passwd_if_fail)
-	  passwd_req = 1;
-	else
-	  fatal(netf, "Permission denied");
-    }
 #else
     getstr(f, rusername, sizeof(rusername), "remuser");
     getstr(f, lusername, sizeof(lusername), "locuser");
@@ -1014,6 +1006,9 @@ do_krb_login(host)
 {
     krb5_error_code status;
     struct passwd *pwd;
+    int	passed_krb, passed_rhosts;
+
+    passed_krb = passed_rhosts = 0;
 
     if (getuid()) {
 	exit(1);
@@ -1022,13 +1017,13 @@ do_krb_login(host)
     /* Check authentication. This can be either Kerberos V5, */
     /* Kerberos V4, or host-based. */
     if (status = recvauth()) {
-	failed_auth = 1;
 	if (ticket)
 	  krb5_free_ticket(ticket);
 	if (status != 255)
 	  syslog(LOG_ERR,
 		 "Authentication failed from %s: %s\n",
 		 host,error_message(status));
+	fatal(netf, "Kerberos authentication failed");
 	return;
     }
     
@@ -1038,42 +1033,17 @@ do_krb_login(host)
     if (must_pass_k5 || must_pass_one) {
 #ifdef ALWAYS_V5_KUSEROK
 	/* krb5_kuserok returns 1 if OK */
-	if (!client || !krb5_kuserok(client, lusername)){
-	    if (ticket)
-	      krb5_free_ticket(ticket);
-	    syslog(LOG_ERR,
-		   "Principal %s (%s@%s) logging in as %s failed krb5_kuserok.\n",
-		   krusername ? krusername : "", rusername, host, lusername);
-	    if (must_pass_k5)
-	      fatal(netf, "Permission denied");	
-	    failed_k5 = 1;
-	}
+	if (client && krb5_kuserok(client, lusername))
+	    passed_krb++;
 #else
 	if (V4) {
 	    /* kuserok returns 0 if OK */
-	    if (kuserok(v4_kdata, lusername)){
-		syslog(LOG_ERR,
-		       "Principal %s (%s@%s) logging in as %s failed kuserok.\n",
-		       krusername ? krusername : "", rusername, host,
-		       lusername);
-		if (must_pass_k5)
-		  fatal(netf, "Permission denied");
-		failed_k5 = 1;
-	    }
-	}
-	else {
+	    if (!kuserok(v4_kdata, lusername))
+		passed_krb++;
+	} else {
 	    /* krb5_kuserok returns 1 if OK */
-	    if (!client || !krb5_kuserok(client, lusername)){
-		if (ticket)
-		  krb5_free_ticket(ticket);
-		syslog(LOG_ERR,
-		       "Principal %s (%s@%s) logging in as %s failed krb5_kuserok.\n",
-		       krusername ? krusername : "", rusername, host,
-		       lusername);
-		if (must_pass_k5)
-		  fatal(netf, "Permission denied");
-		failed_k5 = 1;
-	    }
+	    if (client && krb5_kuserok(client, lusername))
+		passed_krb++;
 	}
 #endif
     }
@@ -1081,33 +1051,25 @@ do_krb_login(host)
     /*  The kerberos authenticated request must pass ruserok also
 	if asked for. */
     
-    if (must_pass_rhosts || (failed_k5 && must_pass_one)) {
+    if (must_pass_rhosts || (!passed_krb && must_pass_one)) {
 	/* Cannot check .rhosts unless connection from a privileged port. */
 	if (non_privileged) 
 	  fatal(netf, "Permission denied - Connection from bad port");
 
 	pwd = (struct passwd *) getpwnam(lusername);
-	if ((pwd == (struct passwd *) 0) ||
-	    (ruserok(rhost_name, pwd->pw_uid == 0, rusername, lusername))) {
-	    failed_rhosts = 1;
-	    if (ticket)
-	      krb5_free_ticket(ticket);
-	    
-	    if (pwd == (struct passwd *) 0) 
-	      syslog(LOG_ERR,
-		     "Principal %s (%s@%s) logging in as %s has no account.\n",
-		     krusername ? krusername : "", rusername, rhost_name, lusername);
-	    else
-	      syslog(LOG_ERR,
-		     "Principal %s (%s@%s) logging in as %s failed ruserok.\n",
-		     krusername ? krusername : "", rusername, rhost_name, lusername);
-	    
-	    if (must_pass_rhosts)
-	      fatal(netf, "Permission denied");
-	}
+	if (pwd &&
+	    !ruserok(rhost_name, pwd->pw_uid == 0, rusername, lusername))
+	    passed_rhosts++;
     }
+
+    if ((must_pass_k5 && passed_krb) ||
+	(must_pass_rhosts && passed_rhosts) ||
+	(must_pass_one && (passed_krb || passed_rhosts)))
+	return;
     
-    return;
+    if (ticket)
+	krb5_free_ticket(ticket);
+    fatal(netf, "User is not authorized to login to specified account.");
 }
 
 
