@@ -78,12 +78,16 @@ main(argc, argv)
     int argc;
     char **argv;
 {
+    krb5_error_code retval;
     int code;
     char *name;
     int mode;
 
-    krb5_init_context(&kcontext);
-    krb5_init_ets(kcontext);
+    retval = krb5_init_context(&kcontext);
+    if (retval) {
+	    com_err(argv[0], status, "while initializing krb5");
+	    exit(1);
+    }
 
     progname = (strrchr(*argv, '/') ? strrchr(*argv, '/')+1 : argv[0]);
 
