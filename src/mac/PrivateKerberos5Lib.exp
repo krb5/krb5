@@ -31,3 +31,4 @@
 	krb5_c_checksum_length				# GSSAPI
 	krb5_c_encrypt_length				# GSSAPI
 	krb5int_cc_default					# GSSAPI
+    krb5_set_default_tgs_enctypes		# GSSAPI
