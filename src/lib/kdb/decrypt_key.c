@@ -65,14 +65,20 @@ krb5_dbekd_decrypt_key_data(context, mkey, key_data, dbkey, keysalt)
 	    return retval;
 	}
 
-	if (tmplen != plain.length) {
+	/* tmplen is the true length of the key.  plain.data is the
+	   plaintext data length, but it may be padded, since the
+	   old-style etypes didn't store the real length.  I can check
+	   to make sure that there are enough bytes, but I can't do
+	   any better than that. */
+
+	if (tmplen > plain.length) {
 	    krb5_xfree(plain.data);
 	    return(KRB5_CRYPTO_INTERNAL);
 	}
 
 	dbkey->magic = KV5M_KEYBLOCK;
 	dbkey->enctype = key_data->key_data_type[0];
-	dbkey->length = plain.length;
+	dbkey->length = tmplen;
 	dbkey->contents = plain.data;
     }
 
