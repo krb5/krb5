@@ -1,3 +1,7 @@
+Wed Mar 1 16:00:00 1995 Keith Vetter (keithv@fusion.com)
+
+	* f_princ.h: changed int to krb5_int32 for the PC.
+
 Tue Feb 28 00:38:44 1995  John Gilmore  (gnu at toad.com)
 
 	* *.c:  Avoid <krb5/...> includes.

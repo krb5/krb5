@@ -31,7 +31,7 @@ krb5_free_principal(context, val)
     krb5_context context;
     krb5_principal val;
 {
-    register int i;
+    register krb5_int32 i;
 
     if (!val)
 	return;
