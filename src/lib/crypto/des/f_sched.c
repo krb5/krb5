@@ -10,7 +10,6 @@
 /*
  * des_make_sched.c - permute a DES key, returning the resulting key schedule
  */
-#include "des.h"
 #include "k5-int.h"
 #include "des_int.h"
 
@@ -20,26 +19,26 @@
  * The code that uses these tables knows which bits from which
  * part of each key are used to form Ci and Di.
  */
-static const unsigned KRB_INT32 PC1_CL[8] = {
+static const unsigned DES_INT32 PC1_CL[8] = {
 	0x00000000, 0x00000010, 0x00001000, 0x00001010,
 	0x00100000, 0x00100010, 0x00101000, 0x00101010
 };
 
-static const unsigned KRB_INT32 PC1_DL[16] = {
+static const unsigned DES_INT32 PC1_DL[16] = {
 	0x00000000, 0x00100000, 0x00001000, 0x00101000,
 	0x00000010, 0x00100010, 0x00001010, 0x00101010,
 	0x00000001, 0x00100001, 0x00001001, 0x00101001,
 	0x00000011, 0x00100011, 0x00001011, 0x00101011
 };
 
-static const unsigned KRB_INT32 PC1_CR[16] = {
+static const unsigned DES_INT32 PC1_CR[16] = {
 	0x00000000, 0x00000001, 0x00000100, 0x00000101,
 	0x00010000, 0x00010001, 0x00010100, 0x00010101,
 	0x01000000, 0x01000001, 0x01000100, 0x01000101,
 	0x01010000, 0x01010001, 0x01010100, 0x01010101
 };
 
-static const unsigned KRB_INT32 PC1_DR[8] = {
+static const unsigned DES_INT32 PC1_DR[8] = {
 	0x00000000, 0x01000000, 0x00010000, 0x01010000,
 	0x00000100, 0x01000100, 0x00010100, 0x01010100
 };
@@ -65,7 +64,7 @@ static const unsigned KRB_INT32 PC1_DR[8] = {
  * rearranged to produce keys which match the order we will apply them
  * in in the des code.
  */
-static const unsigned KRB_INT32 PC2_C[4][64] = {
+static const unsigned DES_INT32 PC2_C[4][64] = {
 	0x00000000, 0x00000004, 0x00010000, 0x00010004,
 	0x00000400, 0x00000404, 0x00010400, 0x00010404,
 	0x00000020, 0x00000024, 0x00010020, 0x00010024,
@@ -135,7 +134,7 @@ static const unsigned KRB_INT32 PC2_C[4][64] = {
 	0x04001202, 0x04001212, 0x0c001202, 0x0c001212
 };
 
-static const unsigned KRB_INT32 PC2_D[4][64] = {
+static const unsigned DES_INT32 PC2_D[4][64] = {
 	0x00000000, 0x02000000, 0x00020000, 0x02020000,
 	0x00000100, 0x02000100, 0x00020100, 0x02020100,
 	0x00000008, 0x02000008, 0x00020008, 0x02020008,
@@ -215,14 +214,14 @@ make_key_sched(key, schedule)
      mit_des_cblock key;
      mit_des_key_schedule schedule;
 {
-	register unsigned KRB_INT32 c, d;
+	register unsigned DES_INT32 c, d;
 
 	{
 		/*
-		 * Need a pointer for the keys and a temporary KRB_INT32
+		 * Need a pointer for the keys and a temporary DES_INT32
 		 */
 		register unsigned char *k;
-		register unsigned KRB_INT32 tmp;
+		register unsigned DES_INT32 tmp;
 
 		/*
 		 * Fetch the key into something we can work with
@@ -235,10 +234,10 @@ make_key_sched(key, schedule)
 		 * the right, while D0 gets 16 from the left and 12 from the
 		 * right.  The code knows which bits go where.
 		 */
-		tmp = ((unsigned KRB_INT32)(*(k)++)) << 24;
-		tmp |= ((unsigned KRB_INT32)(*(k)++)) << 16;
-		tmp |= ((unsigned KRB_INT32)(*(k)++)) << 8;
-		tmp |= (unsigned KRB_INT32)(*(k)++);		/* left part of key */
+		tmp = ((unsigned DES_INT32)(*(k)++)) << 24;
+		tmp |= ((unsigned DES_INT32)(*(k)++)) << 16;
+		tmp |= ((unsigned DES_INT32)(*(k)++)) << 8;
+		tmp |= (unsigned DES_INT32)(*(k)++);		/* left part of key */
 		c =  PC1_CL[(tmp >> 29) & 0x7]
 		  | (PC1_CL[(tmp >> 21) & 0x7] << 1)
 		  | (PC1_CL[(tmp >> 13) & 0x7] << 2)
@@ -248,10 +247,10 @@ make_key_sched(key, schedule)
 		  | (PC1_DL[(tmp >>  9) & 0xf] << 2)
 		  | (PC1_DL[(tmp >>  1) & 0xf] << 3);
 
-		tmp = ((unsigned KRB_INT32)(*(k)++)) << 24;
-		tmp |= ((unsigned KRB_INT32)(*(k)++)) << 16;
-		tmp |= ((unsigned KRB_INT32)(*(k)++)) << 8;
-		tmp |= (unsigned KRB_INT32)(*(k)++);		/* right part of key */
+		tmp = ((unsigned DES_INT32)(*(k)++)) << 24;
+		tmp |= ((unsigned DES_INT32)(*(k)++)) << 16;
+		tmp |= ((unsigned DES_INT32)(*(k)++)) << 8;
+		tmp |= (unsigned DES_INT32)(*(k)++);		/* right part of key */
 		c |= PC1_CR[(tmp >> 28) & 0xf]
 		  | (PC1_CR[(tmp >> 20) & 0xf] << 1)
 		  | (PC1_CR[(tmp >> 12) & 0xf] << 2)
@@ -266,8 +265,8 @@ make_key_sched(key, schedule)
 		/*
 		 * Need several temporaries in here
 		 */
-		register unsigned KRB_INT32 ltmp, rtmp;
-		register unsigned KRB_INT32 *k;
+		register unsigned DES_INT32 ltmp, rtmp;
+		register unsigned DES_INT32 *k;
 		register int two_bit_shifts;
 		register int i;
 		/*
@@ -277,7 +276,7 @@ make_key_sched(key, schedule)
 		 * 48/6 char's/subkey * 16 subkeys/encryption == 128 bytes.
 		 * The schedule must be this big.
 		 */
-		k = (unsigned KRB_INT32 *)schedule;
+		k = (unsigned DES_INT32 *)schedule;
 		two_bit_shifts = TWO_BIT_SHIFTS;
 		for (i = 16; i > 0; i--) {
 			/*

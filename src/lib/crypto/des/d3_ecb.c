@@ -20,7 +20,6 @@
  * express or implied warranty.
  */
 
-#include "des.h"
 #include "des_int.h"
 #include "f_tables.h"
 

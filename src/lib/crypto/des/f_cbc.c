@@ -10,7 +10,6 @@
 /*
  * des_cbc_encrypt.c - an implementation of the DES cipher function in cbc mode
  */
-#include "des.h"
 #include "des_int.h"
 #include "f_tables.h"
 
@@ -46,15 +45,15 @@ mit_des_cbc_encrypt(in, out, length, schedule, ivec, encrypt)
 	mit_des_cblock ivec;
 	int encrypt;
 {
-	register unsigned KRB_INT32 left, right;
-	register unsigned KRB_INT32 temp;
-	register unsigned KRB_INT32 *kp;
+	register unsigned DES_INT32 left, right;
+	register unsigned DES_INT32 temp;
+	register unsigned DES_INT32 *kp;
 	register unsigned char *ip, *op;
 
 	/*
 	 * Get key pointer here.  This won't need to be reinitialized
 	 */
-	kp = (unsigned KRB_INT32 *)schedule;
+	kp = (unsigned DES_INT32 *)schedule;
 
 	/*
 	 * Deal with encryption and decryption separately.
@@ -134,8 +133,8 @@ mit_des_cbc_encrypt(in, out, length, schedule, ivec, encrypt)
 		 * the necessity of remembering a lot more things.
 		 * Should think about this a little more...
 		 */
-		unsigned KRB_INT32 ocipherl, ocipherr;
-		unsigned KRB_INT32 cipherl, cipherr;
+		unsigned DES_INT32 ocipherl, ocipherr;
+		unsigned DES_INT32 cipherl, cipherr;
 
 		if (length <= 0)
 			return 0;

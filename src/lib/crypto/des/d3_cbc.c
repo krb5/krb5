@@ -20,7 +20,6 @@
  * express or implied warranty.
  */
 
-#include "des.h"
 #include "des_int.h"
 #include "f_tables.h"
 
@@ -37,17 +36,17 @@ mit_des3_cbc_encrypt(in, out, length, ks1, ks2, ks3, ivec, encrypt)
 	mit_des_cblock ivec;
 	int encrypt;
 {
-    register unsigned KRB_INT32 left, right;
-    register unsigned KRB_INT32 temp;
-    register unsigned KRB_INT32 *kp1, *kp2, *kp3;
+    register unsigned DES_INT32 left, right;
+    register unsigned DES_INT32 temp;
+    register unsigned DES_INT32 *kp1, *kp2, *kp3;
     register unsigned char *ip, *op;
 
     /*
      * Get key pointer here.  This won't need to be reinitialized
      */
-    kp1 = (unsigned KRB_INT32 *)ks1;
-    kp2 = (unsigned KRB_INT32 *)ks2;
-    kp3 = (unsigned KRB_INT32 *)ks3;
+    kp1 = (unsigned DES_INT32 *)ks1;
+    kp2 = (unsigned DES_INT32 *)ks2;
+    kp3 = (unsigned DES_INT32 *)ks3;
 
     /*
      * Deal with encryption and decryption separately.
@@ -122,8 +121,8 @@ mit_des3_cbc_encrypt(in, out, length, ks1, ks2, ks3, ivec, encrypt)
 	 * the necessity of remembering a lot more things.
 	 * Should think about this a little more...
 	 */
-	unsigned KRB_INT32 ocipherl, ocipherr;
-	unsigned KRB_INT32 cipherl, cipherr;
+	unsigned DES_INT32 ocipherl, ocipherr;
+	unsigned DES_INT32 cipherl, cipherr;
 
 	if (length <= 0)
 	    return 0;

@@ -10,7 +10,6 @@
 /*
  * des_cbc_cksum.c - compute an 8 byte checksum using DES in CBC mode
  */
-#include "des.h"
 #include "des_int.h"
 #include "f_tables.h"
 
@@ -37,11 +36,11 @@ mit_des_cbc_cksum(in, out, length, schedule, ivec)
 	mit_des_key_schedule schedule;
 	krb5_octet FAR *ivec;
 {
-	register unsigned KRB_INT32 left, right;
-	register unsigned KRB_INT32 temp;
-	register unsigned KRB_INT32 *kp;
+	register unsigned DES_INT32 left, right;
+	register unsigned DES_INT32 temp;
+	register unsigned DES_INT32 *kp;
 	register unsigned char *ip;
-	register KRB_INT32 len;
+	register DES_INT32 len;
 
 	/*
 	 * Initialize left and right with the contents of the initial
@@ -103,7 +102,7 @@ mit_des_cbc_cksum(in, out, length, schedule, ivec)
 		/*
 		 * Encrypt what we have
 		 */
-		kp = (unsigned KRB_INT32 *)schedule;
+		kp = (unsigned DES_INT32 *)schedule;
 		DES_DO_ENCRYPT(left, right, temp, kp);
 	}
 
@@ -118,7 +117,7 @@ mit_des_cbc_cksum(in, out, length, schedule, ivec)
 	/*
 	 * Return right.  I'll bet the MIT code returns this
 	 * inconsistantly (with the low order byte of the checksum
-	 * not always in the low order byte of the KRB_INT32).  We won't.
+	 * not always in the low order byte of the DES_INT32).  We won't.
 	 */
 	return right;
 }

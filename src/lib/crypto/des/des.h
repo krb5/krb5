@@ -15,25 +15,25 @@
 
 #include "k5-int.h"
 
-#ifndef KRB_INT32
+#ifndef DES_INT32
 #ifdef SIZEOF_INT
 #if SIZEOF_INT >= 4
-#define KRB_INT32 int
+#define DES_INT32 int
 #else
-#define KRB_INT32 long
+#define DES_INT32 long
 #endif
 #else /* !defined(SIZEOF_INT) */
 #include <limits.h>
 #if (UINT_MAX >= 0xffffffff)
-#define KRB_INT32 int
+#define DES_INT32 int
 #else
-#define KRB_INT32 long
+#define DES_INT32 long
 #endif
 #endif /* !defined(SIZEOF_INT) */
-#endif /* !defined(KRB_INT32) */
+#endif /* !defined(DES_INT32) */
 
-#ifndef KRB_UINT32
-#define KRB_UINT32 unsigned KRB_INT32
+#ifndef DES_UINT32
+#define DES_UINT32 unsigned DES_INT32
 #endif
 
 #ifndef NCOMPAT

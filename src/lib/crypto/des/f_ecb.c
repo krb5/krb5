@@ -10,7 +10,6 @@
 /*
  * des_ecb_encrypt.c - do an encryption in ECB mode
  */
-#include "des.h"
 #include "des_int.h"
 #include "f_tables.h"
 
@@ -24,8 +23,8 @@ mit_des_ecb_encrypt(in, out, schedule, encrypt)
 	mit_des_key_schedule schedule;
 	int encrypt;
 {
-	register unsigned KRB_INT32 left, right;
-	register unsigned KRB_INT32 temp;
+	register unsigned DES_INT32 left, right;
+	register unsigned DES_INT32 temp;
 	register int i;
 
 	{
@@ -53,20 +52,20 @@ mit_des_ecb_encrypt(in, out, schedule, encrypt)
 	 * sets of keys in the key schedule instead).
 	 */
 	if (encrypt) {
-		register unsigned KRB_INT32 *kp;
+		register unsigned DES_INT32 *kp;
 
-		kp = (unsigned KRB_INT32 *)schedule;
+		kp = (unsigned DES_INT32 *)schedule;
 		for (i = 0; i < 8; i++) {
 			DES_SP_ENCRYPT_ROUND(left, right, temp, kp);
 			DES_SP_ENCRYPT_ROUND(right, left, temp, kp);
 		}
 	} else {
-		register unsigned KRB_INT32 *kp;
+		register unsigned DES_INT32 *kp;
 
 		/*
 		 * Point kp past end of schedule
 		 */
-		kp = ((unsigned KRB_INT32 *)schedule) + (2 * 16);;
+		kp = ((unsigned DES_INT32 *)schedule) + (2 * 16);;
 		for (i = 0; i < 8; i++) {
 			DES_SP_DECRYPT_ROUND(left, right, temp, kp);
 			DES_SP_DECRYPT_ROUND(right, left, temp, kp);

@@ -24,9 +24,9 @@
  * These may be declared const if you wish.  Be sure to change the
  * declarations in des_tables.c as well.
  */
-extern const unsigned KRB_INT32 des_IP_table[256];
-extern const unsigned KRB_INT32 des_FP_table[256];
-extern const unsigned KRB_INT32 des_SP_table[8][64];
+extern const unsigned DES_INT32 des_IP_table[256];
+extern const unsigned DES_INT32 des_FP_table[256];
+extern const unsigned DES_INT32 des_SP_table[8][64];
 
 /*
  * Use standard shortforms to reference these to save typing
@@ -63,10 +63,10 @@ extern const unsigned KRB_INT32 des_SP_table[8][64];
  * and decryption key schedules would allow one to use the same code
  * for both.
  *
- * left, right and temp should be unsigned KRB_INT32 values.  left and right
+ * left, right and temp should be unsigned DES_INT32 values.  left and right
  * should be the high and low order parts of the cipher block at the
  * current stage of processing (this makes sense if you read the spec).
- * kp should be an unsigned KRB_INT32 pointer which points at the current
+ * kp should be an unsigned DES_INT32 pointer which points at the current
  * set of subkeys in the key schedule.  It is advanced to the next set
  * (i.e. by 8 bytes) when this is done.
  *
@@ -113,7 +113,7 @@ extern const unsigned KRB_INT32 des_SP_table[8][64];
  * Macros to help deal with the initial permutation table.  Note
  * the IP table only deals with 32 bits at a time, allowing us to
  * collect the bits we need to deal with each half into an unsigned
- * KRB_INT32.  By carefully selecting how the bits are ordered we also
+ * DES_INT32.  By carefully selecting how the bits are ordered we also
  * take advantages of symmetries in the table so that we can use a
  * single table to compute the permutation of all bytes.  This sounds
  * complicated, but if you go through the process of designing the
@@ -122,7 +122,7 @@ extern const unsigned KRB_INT32 des_SP_table[8][64];
  * The follow macros compute the set of bits used to index the
  * table for produce the left and right permuted result.
  *
- * The inserted cast to unsigned KRB_INT32 circumvents a bug in
+ * The inserted cast to unsigned DES_INT32 circumvents a bug in
  * the Macintosh MPW 3.2 C compiler which loses the unsignedness and
  * propagates the high-order bit in the shift.
  */
@@ -130,7 +130,7 @@ extern const unsigned KRB_INT32 des_SP_table[8][64];
 	((((left) & 0x55555555) << 1) | ((right) & 0x55555555))
 #define	DES_IP_RIGHT_BITS(left, right) \
 	(((left) & 0xaaaaaaaa) | \
-		( ( (unsigned KRB_INT32) ((right) & 0xaaaaaaaa) ) >> 1))
+		( ( (unsigned DES_INT32) ((right) & 0xaaaaaaaa) ) >> 1))
 
 /*
  * The following macro does an in-place initial permutation given
@@ -138,7 +138,7 @@ extern const unsigned KRB_INT32 des_SP_table[8][64];
  * temporary.  Use this more as a guide for rolling your own, though.
  * The best way to do the IP depends on the form of the data you
  * are dealing with.  If you use this, though, try to make left,
- * right and temp register unsigned KRB_INT32s.
+ * right and temp register unsigned DES_INT32s.
  */
 #define	DES_INITIAL_PERM(left, right, temp) \
 	(temp) = DES_IP_RIGHT_BITS((left), (right)); \
@@ -157,7 +157,7 @@ extern const unsigned KRB_INT32 des_SP_table[8][64];
  * this as to the initial permutation, except that we use different
  * bits and shifts.
  *
- * The inserted cast to unsigned KRB_INT32 circumvents a bug in
+ * The inserted cast to unsigned DES_INT32 circumvents a bug in
  * the Macintosh MPW 3.2 C compiler which loses the unsignedness and
  * propagates the high-order bit in the shift.
  */
@@ -165,7 +165,7 @@ extern const unsigned KRB_INT32 des_SP_table[8][64];
 	((((left) & 0x0f0f0f0f) << 4) | ((right) & 0x0f0f0f0f))
 #define	DES_FP_RIGHT_BITS(left, right) \
 	(((left) & 0xf0f0f0f0) | \
-		( ( (unsigned KRB_INT32) ((right) & 0xf0f0f0f0) ) >> 4))
+		( ( (unsigned DES_INT32) ((right) & 0xf0f0f0f0) ) >> 4))
 
 
 /*
@@ -191,11 +191,11 @@ extern const unsigned KRB_INT32 des_SP_table[8][64];
 /*
  * Finally, as a sample of how all this might be held together, the
  * following two macros do in-place encryptions and decryptions.  left
- * and right are two unsigned KRB_INT32 variables which at the beginning
+ * and right are two unsigned DES_INT32 variables which at the beginning
  * are expected to hold the clear (encrypted) block in host byte order
  * (left the high order four bytes, right the low order).  At the end
- * they will contain the encrypted (clear) block.  temp is an unsigned KRB_INT32
- * used as a temporary.  kp is an unsigned KRB_INT32 pointer pointing at
+ * they will contain the encrypted (clear) block.  temp is an unsigned DES_INT32
+ * used as a temporary.  kp is an unsigned DES_INT32 pointer pointing at
  * the start of the key schedule.  All these should be in registers.
  *
  * You can probably do better than these by rewriting for particular
@@ -240,10 +240,10 @@ extern const unsigned KRB_INT32 des_SP_table[8][64];
  * Included here because they're used a couple of places.
  */
 #define	GET_HALF_BLOCK(lr, ip) \
-	(lr) = ((unsigned KRB_INT32)(*(ip)++)) << 24; \
-	(lr) |= ((unsigned KRB_INT32)(*(ip)++)) << 16; \
-	(lr) |= ((unsigned KRB_INT32)(*(ip)++)) << 8; \
-	(lr) |= (unsigned KRB_INT32)(*(ip)++)
+	(lr) = ((unsigned DES_INT32)(*(ip)++)) << 24; \
+	(lr) |= ((unsigned DES_INT32)(*(ip)++)) << 16; \
+	(lr) |= ((unsigned DES_INT32)(*(ip)++)) << 8; \
+	(lr) |= (unsigned DES_INT32)(*(ip)++)
 
 #define	PUT_HALF_BLOCK(lr, op) \
 	*(op)++ = (unsigned char) (((lr) >> 24) & 0xff); \
@@ -253,6 +253,6 @@ extern const unsigned KRB_INT32 des_SP_table[8][64];
 
 /* Shorthand that we'll need in several places, for creating values that
    really can hold 32 bits regardless of the prevailing int size.  */
-#define FF_UINT32	((unsigned KRB_INT32) 0xFF)
+#define FF_UINT32	((unsigned DES_INT32) 0xFF)
 
 #endif	/* __DES_TABLES_H__ */

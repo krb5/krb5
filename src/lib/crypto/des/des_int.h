@@ -28,8 +28,7 @@
 #ifndef DES_INTERNAL_DEFS
 #define DES_INTERNAL_DEFS
 
-#include "des.h"
-
+#include <k5-int.h>
 /*
  * Begin "mit-des.h"
  */
@@ -46,26 +45,26 @@
 
 typedef krb5_octet mit_des_cblock[8];		/* crypto-block size */
 
-#ifndef KRB_INT32
+#ifndef DES_INT32
 #ifdef SIZEOF_INT
 #if SIZEOF_INT >= 4
-#define KRB_INT32 int
+#define DES_INT32 int
 #else
-#define KRB_INT32 long
+#define DES_INT32 long
 #endif
 #else /* !defined(SIZEOF_INT) */
 #include <limits.h>
 #if (UINT_MAX >= 0xffffffff)
-#define KRB_INT32 int
+#define DES_INT32 int
 #else
-#define KRB_INT32 long
+#define DES_INT32 long
 #endif
 #endif /* !defined(SIZEOF_INT) */
-#endif /* !defined(KRB_INT32) */
+#endif /* !defined(DES_INT32) */
 
 /* Key schedule--used internally by DES routines to gain some speed */
 typedef struct mit_des_ks_struct {
-    KRB_INT32 _[2];
+    DES_INT32 _[2];
 } mit_des_key_schedule[16];
 
 /* Triple-DES structures */

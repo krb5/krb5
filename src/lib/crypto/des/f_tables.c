@@ -15,7 +15,7 @@
  * Include the header file so something will complain if the
  * declarations get out of sync
  */
-#include "des.h"
+#include "des_int.h"
 #include "f_tables.h"
 
 /*
@@ -50,7 +50,7 @@
  * byte shifted left by three.  Clear?
  */
 
-const unsigned KRB_INT32 des_IP_table[256] = {
+const unsigned DES_INT32 des_IP_table[256] = {
 	0x00000000, 0x00000010, 0x00000001, 0x00000011,
 	0x00001000, 0x00001010, 0x00001001, 0x00001011,
 	0x00000100, 0x00000110, 0x00000101, 0x00000111,
@@ -130,7 +130,7 @@ const unsigned KRB_INT32 des_IP_table[256] = {
  * is or'd with the result from the next byte shifted left 2 bits,
  * which is or'd with the result from the low byte.
  */
-const unsigned KRB_INT32 des_FP_table[256] = {
+const unsigned DES_INT32 des_FP_table[256] = {
 	0x00000000, 0x02000000, 0x00020000, 0x02020000,
 	0x00000200, 0x02000200, 0x00020200, 0x02020200,
 	0x00000002, 0x02000002, 0x00020002, 0x02020002,
@@ -203,7 +203,7 @@ const unsigned KRB_INT32 des_FP_table[256] = {
  * table combined.  This table is actually reordered from the
  * spec, to match the order of key application we follow.
  */
-const unsigned KRB_INT32 des_SP_table[8][64] = {
+const unsigned DES_INT32 des_SP_table[8][64] = {
 	0x00100000, 0x02100001, 0x02000401, 0x00000000,	/* 7 */
 	0x00000400, 0x02000401, 0x00100401, 0x02100400,
 	0x02100401, 0x00100000, 0x00000000, 0x02000001,
