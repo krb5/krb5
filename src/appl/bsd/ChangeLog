@@ -1,3 +1,8 @@
+1999-08-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* kcmd.c (kcmd): If krb5_get_credentials returns a nonzero error
+	code, print an error message before returning.
+
 1999-08-17  Ken Raeburn  <raeburn@mit.edu>
 
 	* krlogin.c (main): If ospeed is outside of compiled-in table
