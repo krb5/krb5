@@ -354,10 +354,10 @@ krb5_stdcc_destroy (krb5_context context, krb5_ccache id ) {
 
 	//destroy the named cache
 	err = cc_destroy(gCntrlBlock, &(((stdccCacheDataPtr)(id->data))->NamedCache));
+	
 	//free the pointer to the record that held the pointer to the cache
-	cc_shutdown(&gCntrlBlock);
-
 	free((stdccCacheDataPtr)(id->data));
+	
 	//null it out
 	(stdccCacheDataPtr)(id->data) = NULL;
 	
