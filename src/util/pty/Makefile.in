@@ -67,8 +67,8 @@ clean-unix:: clean-liblinks clean-libs clean-libobjs
 
 depend::  pty_err.h
 
-install:: libpty.h
-	$(INSTALL_DATA) $(srcdir)/libpty.h  $(DESTDIR)$(KRB5_INCDIR)/libpty.h
+#install:: libpty.h
+#	$(INSTALL_DATA) $(srcdir)/libpty.h  $(DESTDIR)$(KRB5_INCDIR)/libpty.h
 
 clean-mac::
 	$(RM) libpty.a

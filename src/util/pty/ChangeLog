@@ -1,3 +1,8 @@
+2002-07-12  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (install): Don't install libpty.h.
+	* configure.in: Always build static library only.
+
 2002-06-12  Ken Raeburn  <raeburn@mit.edu>
 
 	* cleanup.c, getpty.c, init.c, init_slave.c, logwtmp.c,
