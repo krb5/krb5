@@ -1419,7 +1419,7 @@ AC_DEFUN(KRB5_AC_ENABLE_DNS, [
   AC_ARG_ENABLE([dns],
 [  --enable-dns            enable DNS lookups of Kerberos realm and servers], ,
 [enable_dns=no])
-  if test "$enable_val" = yes; then
+  if test "$enable_dns" = yes; then
     AC_DEFINE(KRB5_DNS_LOOKUP)
   fi
 ])

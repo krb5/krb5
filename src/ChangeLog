@@ -1,3 +1,8 @@
+2000-03-15  Ken Raeburn  <raeburn@mit.edu>
+
+	* aclocal.m4 (KRB5_AC_ENABLE_DNS): Fix typo that caused the DNS
+	code to never get enabled.
+
 2000-03-01  Tom Yu  <tlyu@mit.edu>
 
 	* aclocal.m4: Tweak the HPUX shared lib build some more.  Don't
