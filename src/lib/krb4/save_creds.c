@@ -34,7 +34,7 @@ krb_save_credentials(service, instance, realm, session, lifetime, kvno,
     char FAR *service;		/* Service name */
     char FAR *instance;		/* Instance */
     char FAR *realm;		/* Auth domain */
-    C_Block FAR *session;	/* Session key */
+    C_Block session;		/* Session key */
     int lifetime;		/* Lifetime */
     int kvno;			/* Key version number */
     KTEXT ticket;		/* The ticket itself */
