@@ -151,7 +151,7 @@ krb5_dbe_lookup_last_pwd_change(context, entry, stamp)
 
     tl_data.tl_data_type = KRB5_TL_LAST_PWD_CHANGE;
 
-    if (code = krb5_dbe_lookup_tl_data(context, entry, &tl_data))
+    if ((code = krb5_dbe_lookup_tl_data(context, entry, &tl_data)))
 	return(code);
     
     if (tl_data.tl_data_length != 4) {
@@ -225,7 +225,7 @@ krb5_dbe_lookup_mod_princ_data(context, entry, mod_time, mod_princ)
 
     tl_data.tl_data_type = KRB5_TL_MOD_PRINC;
 
-    if (code = krb5_dbe_lookup_tl_data(context, entry, &tl_data))
+    if ((code = krb5_dbe_lookup_tl_data(context, entry, &tl_data)))
 	return(code);
     
     if ((tl_data.tl_data_length < 5) ||

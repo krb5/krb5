@@ -102,7 +102,6 @@ add_key_rnd(context, master_key, ks_tuple, ks_tuple_count, db_entry, kvno)
     krb5_principal	  krbtgt_princ;
     krb5_keyblock	  key;
     krb5_db_entry	  krbtgt_entry;
-    krb5_key_data	* krbtgt_kdata;
     krb5_boolean	  more;
     int			  max_kvno, one, i, j;
     krb5_error_code	  retval;
@@ -162,7 +161,7 @@ add_key_rnd(context, master_key, ks_tuple, ks_tuple_count, db_entry, kvno)
 	if (similar)
 	    continue;
 
-        if (retval = krb5_dbe_create_key_data(context, db_entry)) 
+        if ((retval = krb5_dbe_create_key_data(context, db_entry))) 
 	    goto add_key_rnd_err;
 
 	/* there used to be code here to extract the old key, and derive
@@ -276,8 +275,8 @@ krb5_dbe_ark(context, master_key, ks_tuple, ks_tuple_count, db_entry)
     /* increment the kvno */
     kvno++;
 
-    if (retval = add_key_rnd(context, master_key, ks_tuple, 
-			     ks_tuple_count, db_entry, kvno)) {
+    if ((retval = add_key_rnd(context, master_key, ks_tuple, 
+			     ks_tuple_count, db_entry, kvno))) {
 	cleanup_key_data(context, db_entry->n_key_data, db_entry->key_data);
 	db_entry->n_key_data = key_data_count;
 	db_entry->key_data = key_data;
@@ -285,7 +284,7 @@ krb5_dbe_ark(context, master_key, ks_tuple, ks_tuple_count, db_entry)
 	/* Copy keys with key_data_kvno == kvno - 1 ( = old kvno ) */
 	for (i = 0; i < key_data_count; i++) {
 	    if (key_data[i].key_data_kvno == (kvno - 1)) {
-		if (retval = krb5_dbe_create_key_data(context, db_entry)) {
+		if ((retval = krb5_dbe_create_key_data(context, db_entry))) {
 		    cleanup_key_data(context, db_entry->n_key_data,
 				     db_entry->key_data);
 		    break;
@@ -319,7 +318,6 @@ add_key_pwd(context, master_key, ks_tuple, ks_tuple_count, passwd,
     krb5_keysalt	  key_salt;
     krb5_keyblock	  key;
     krb5_data	  	  pwd;
-    krb5_boolean	  found;
     int			  i, j;
 
     retval = 0;
@@ -349,15 +347,15 @@ add_key_pwd(context, master_key, ks_tuple, ks_tuple_count, passwd,
 	if (j < i)
 	    continue;
 
-	if (retval = krb5_dbe_create_key_data(context, db_entry)) 
+	if ((retval = krb5_dbe_create_key_data(context, db_entry))) 
 	    return(retval);
 
 	/* Convert password string to key using appropriate salt */
 	switch (key_salt.type = ks_tuple[i].ks_salttype) {
     	case KRB5_KDB_SALTTYPE_ONLYREALM: {
             krb5_data * saltdata;
-            if (retval = krb5_copy_data(context, krb5_princ_realm(context,
-					db_entry->princ), &saltdata))
+            if ((retval = krb5_copy_data(context, krb5_princ_realm(context,
+					      db_entry->princ), &saltdata)))
 	 	return(retval);
 
 	    key_salt.data = *saltdata;
@@ -365,13 +363,13 @@ add_key_pwd(context, master_key, ks_tuple, ks_tuple_count, passwd,
 	}
 		break;
     	case KRB5_KDB_SALTTYPE_NOREALM:
-            if (retval=krb5_principal2salt_norealm(context, db_entry->princ,
-                                                         &key_salt.data)) 
+            if ((retval=krb5_principal2salt_norealm(context, db_entry->princ,
+						    &key_salt.data))) 
 		return(retval);
             break;
 	case KRB5_KDB_SALTTYPE_NORMAL:
-            if (retval = krb5_principal2salt(context, db_entry->princ,
-					         &key_salt.data)) 
+            if ((retval = krb5_principal2salt(context, db_entry->princ,
+					      &key_salt.data))) 
 		return(retval);
             break;
     	case KRB5_KDB_SALTTYPE_V4:
@@ -421,9 +419,9 @@ add_key_pwd(context, master_key, ks_tuple, ks_tuple_count, passwd,
 	    key_salt.data.length = 
 	      krb5_princ_realm(context, db_entry->princ)->length;
 
-	if (retval = krb5_dbekd_encrypt_key_data(context, master_key, &key,
+	if ((retval = krb5_dbekd_encrypt_key_data(context, master_key, &key,
 		     (const krb5_keysalt *)&key_salt,
-		     kvno, &db_entry->key_data[db_entry->n_key_data-1])) {
+		     kvno, &db_entry->key_data[db_entry->n_key_data-1]))) {
 	    if (key_salt.data.data)
 		 free(key_salt.data.data);
 	    krb5_xfree(key.contents);
@@ -530,8 +528,8 @@ krb5_dbe_apw(context, master_key, ks_tuple, ks_tuple_count, passwd, db_entry)
     /* increment the kvno */
     new_kvno = old_kvno+1;
 
-    if (retval = add_key_pwd(context, master_key, ks_tuple, ks_tuple_count,
-			     passwd, db_entry, new_kvno)) {
+    if ((retval = add_key_pwd(context, master_key, ks_tuple, ks_tuple_count,
+			     passwd, db_entry, new_kvno))) {
 	cleanup_key_data(context, db_entry->n_key_data, db_entry->key_data);
 	db_entry->n_key_data = key_data_count;
 	db_entry->key_data = key_data;
@@ -539,7 +537,7 @@ krb5_dbe_apw(context, master_key, ks_tuple, ks_tuple_count, passwd, db_entry)
 	/* Copy keys with key_data_kvno == old_kvno */
 	for (i = 0; i < key_data_count; i++) {
 	    if (key_data[i].key_data_kvno == old_kvno) {
-		if (retval = krb5_dbe_create_key_data(context, db_entry)) {
+		if ((retval = krb5_dbe_create_key_data(context, db_entry))) {
 		    cleanup_key_data(context, db_entry->n_key_data,
 				     db_entry->key_data);
 		    break;
