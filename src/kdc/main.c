@@ -360,9 +360,8 @@ init_realm(progname, rdp, realm, def_dbname, def_mpname,
 		rdp->realm_mkey.enctype =
 		    (krb5_enctype) rparams->realm_enctype;
 	    else
-		/* If not manual, we can lookup the enctype */
-		rdp->realm_mkey.enctype = (def_enctype || !manual)
-		    ? def_enctype : ENCTYPE_DES_CBC_CRC;
+		rdp->realm_mkey.enctype =
+		   manual ? def_enctype : ENCTYPE_UNKNOWN;
 
 	    /* Handle ticket maximum life */
 	    rdp->realm_maxlife = (rparams && rparams->realm_max_life_valid) ?
@@ -428,7 +427,8 @@ init_realm(progname, rdp, realm, def_dbname, def_mpname,
 	    }
 
 	    /* Select the specified encryption type */
-	    if (rdp->realm_mkey.enctype)
+	    /* krb5_db_fetch_mkey will setup the encblock for stashed keys */
+	    if (manual)
 		krb5_use_enctype(rdp->realm_context, &rdp->realm_encblock, 
 				 rdp->realm_mkey.enctype);
 
