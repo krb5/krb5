@@ -87,7 +87,7 @@ void mit_des_init_random_number_generator(key,p_seed)
      * use a host id in generating the seed to ensure
      * that different servers have different streams:
      */
-    bzero((char *)seed, sizeof(seed));
+    memset((char *)seed, 0, sizeof(seed));
     if (!krb5_os_localaddr(&addrs) && *addrs) {
 	memcpy((char *)seed, (char *)addrs[0]->contents,
 	      min(sizeof(seed), addrs[0]->length));

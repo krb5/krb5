@@ -26,7 +26,7 @@ static char rcsid_fin_rndkey_c[] =
 krb5_error_code mit_des_finish_random_key (DECLARG(krb5_pointer *, seed))
 OLDDECLARG(krb5_pointer *, seed)
 {
-    bzero( (char *)*seed, sizeof(mit_des_random_key_seed) );
+    memset((char *)*seed, 0, sizeof(mit_des_random_key_seed) );
     free((char *)*seed);
     *seed = 0;
     return 0;		/* XXX init_random_key */

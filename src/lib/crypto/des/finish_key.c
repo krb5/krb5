@@ -30,7 +30,7 @@ static char rcsid_finish_key_c[] =
 krb5_error_code mit_des_finish_key (DECLARG(krb5_encrypt_block *,eblock))
 OLDDECLARG(krb5_encrypt_block *,eblock)
 {
-    bzero((char *)eblock->priv, sizeof(mit_des_key_schedule));
+    memset((char *)eblock->priv, 0, sizeof(mit_des_key_schedule));
     free(eblock->priv);
     eblock->priv = 0;
     /* free/clear other stuff here? */

@@ -39,7 +39,7 @@ OLDDECLARG(krb5_pointer *,seed)
     if ( !(p_seed = (mit_des_random_key_seed *) 
 	   malloc(sizeof(mit_des_random_key_seed))) ) 
 	return ENOMEM;
-    bzero( (char *)p_seed, sizeof(mit_des_random_key_seed) );
+    memset((char *)p_seed, 0, sizeof(mit_des_random_key_seed) );
     mit_des_init_random_number_generator(seedblock->contents, p_seed);
     *seed = (krb5_pointer) p_seed;
     return 0;

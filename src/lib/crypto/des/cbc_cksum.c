@@ -57,7 +57,7 @@ OLDDECLARG(krb5_checksum *, cksum)
     if (!(schedule = (struct mit_des_ks_struct *) malloc(sizeof(mit_des_key_schedule))))
         return ENOMEM;
 
-#define cleanup() { bzero((char *)schedule, sizeof(mit_des_key_schedule));\
+#define cleanup() { memset((char *)schedule, 0, sizeof(mit_des_key_schedule));\
 		    free( (char *) schedule); }
 
     switch (mit_des_key_sched ((krb5_octet *)key, schedule)) {

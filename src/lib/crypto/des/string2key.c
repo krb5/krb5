@@ -74,14 +74,14 @@ OLDDECLARG(krb5_const_principal, princ)
     if ( !(keyblock->contents = (krb5_octet *)malloc(sizeof(mit_des_cblock))) )
 	return(ENOMEM);
 
-#define cleanup() {bzero(keyblock->contents, sizeof(mit_des_cblock));\
+#define cleanup() {memset(keyblock->contents, 0, sizeof(mit_des_cblock));\
 		       (void) free((char *) keyblock->contents);}
 
     keyblock->keytype = KEYTYPE_DES;
     keyblock->length = sizeof(mit_des_cblock);
     key = keyblock->contents;
 
-    bzero(copystr, sizeof(copystr));
+    memset(copystr, 0, sizeof(copystr));
     j = min(data->length, 511);
     (void) strncpy(copystr, data->data, j);
     if ( princ != 0 )
@@ -97,7 +97,7 @@ OLDDECLARG(krb5_const_principal, princ)
     length = strlen(str);
 
     /* init key array for bits */
-    bzero(k_char,sizeof(k_char));
+    memset(k_char,0,sizeof(k_char));
 
 #ifdef DEBUG
     if (mit_des_debug)
@@ -146,7 +146,7 @@ OLDDECLARG(krb5_const_principal, princ)
     (void) mit_des_key_sched(key, key_sked);
     (void) mit_des_cbc_cksum((krb5_octet *)copystr, key, length, key_sked, key);
     /* erase key_sked */
-    bzero((char *)key_sked, sizeof(key_sked));
+    memset((char *)key_sked, 0, sizeof(key_sked));
 
     /* now fix up key parity again */
     mit_des_fixup_key_parity(key);
