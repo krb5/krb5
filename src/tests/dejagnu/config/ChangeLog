@@ -1,3 +1,9 @@
+2003-03-28  Tom Yu  <tlyu@mit.edu>
+
+	* default.exp (start_kerberos_daemons): If we get a timeout
+	looking for the mark, log out the last 10 lines of the kdc
+	logfile.
+
 2003-03-26  Tom Yu  <tlyu@mit.edu>
 
 	* default.exp (v4kinit): Expect failure when kiniting to a des3

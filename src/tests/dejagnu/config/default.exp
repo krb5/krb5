@@ -1255,6 +1255,7 @@ proc start_kerberos_daemons { standalone } {
     set markstr "===MARK $tailf_pid [exec date] ==="
     set f [open $kdc_lfile a]
     puts $f $markstr
+    flush $f
     close $f
 
     expect {
@@ -1262,6 +1263,8 @@ proc start_kerberos_daemons { standalone } {
 	-ex "$markstr\r\n" { }
 	-re "\[^\r\n\]*\r\n" { exp_continue }
 	timeout {
+	    verbose -log "tail $kdc_lfile output:"
+	    verbose -log [exec tail $kdc_lfile]
 	    if {$standalone} {
 		verbose -log "tail -f timed out ($timeout sec) looking for mark in kdc log"
 		fail "krb5kdc"
