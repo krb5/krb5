@@ -1,4 +1,10 @@
 
+Wed Aug 9 18:05:44 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* kdb5_create.c - Use default key/salt tuple list or one generated from
+		reading KDC profile to determine which key types to make for
+		the tgt principal.
+
+
 Mon Jul 31 15:45:49 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* kdb5_create.c - Use new admin string conversion routines.
 	* kdb5_create.M - Remove "string representation of integer" for keytype

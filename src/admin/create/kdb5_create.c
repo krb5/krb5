@@ -33,8 +33,10 @@
 enum ap_op {
     NULL_KEY,				/* setup null keys */
     MASTER_KEY,				/* use master key as new key */
-    RANDOM_KEY				/* choose a random key */
+    TGT_KEY				/* special handling for tgt key */
 };
+
+krb5_key_salt_tuple def_kslist = { KEYTYPE_DES, KRB5_KDB_SALTTYPE_NORMAL };
 
 struct realm_info {
     krb5_deltat max_life;
@@ -43,12 +45,23 @@ struct realm_info {
     krb5_flags flags;
     krb5_encrypt_block *eblock;
     krb5_pointer rseed;
+    krb5_int32 nkslist;
+    krb5_key_salt_tuple *kslist;
 } rblock = { /* XXX */
     KRB5_KDB_MAX_LIFE,
     KRB5_KDB_MAX_RLIFE,
     KRB5_KDB_EXPIRATION,
     KRB5_KDB_DEF_FLAGS,
-    0
+    (krb5_encrypt_block *) NULL,
+    (krb5_pointer) NULL,
+    1,
+    &def_kslist
+};
+
+struct iterate_args {
+    krb5_context	ctx;
+    struct realm_info	*rblock;
+    krb5_db_entry	*dbentp;
 };
 
 static krb5_error_code add_principal 
@@ -213,6 +226,14 @@ char *argv[];
 	if (rparams->realm_flags_valid)
 	    rblock.flags = rparams->realm_flags;
 
+	/* Get the value of the supported key/salt pairs */
+	if (rparams->realm_num_keysalts) {
+	    rblock.nkslist = rparams->realm_num_keysalts;
+	    rblock.kslist = rparams->realm_keysalts;
+	    rparams->realm_num_keysalts = 0;
+	    rparams->realm_keysalts = (krb5_key_salt_tuple *) NULL;
+	}
+
 	krb5_free_realm_params(context, rparams);
     }
 
@@ -349,7 +370,7 @@ master key name '%s'\n",
     }
 
     if ((retval = add_principal(context, master_princ, MASTER_KEY, &rblock)) ||
-	(retval = add_principal(context, &tgt_princ, RANDOM_KEY, &rblock))) {
+	(retval = add_principal(context, &tgt_princ, TGT_KEY, &rblock))) {
 	(void) krb5_db_fini(context);
 	(void) krb5_finish_key(context, &master_encblock);
 	(void) krb5_finish_random_key(context, &master_encblock, &rblock.rseed);
@@ -366,6 +387,38 @@ master key name '%s'\n",
 }
 
 static krb5_error_code
+tgt_keysalt_iterate(ksent, ptr)
+    krb5_key_salt_tuple	*ksent;
+    krb5_pointer	ptr;
+{
+    krb5_error_code	kret;
+    struct iterate_args	*iargs;
+    krb5_keyblock	*key;
+    krb5_int32		ind;
+
+    iargs = (struct iterate_args *) ptr;
+    kret = 0;
+
+    krb5_use_keytype(iargs->ctx, iargs->rblock->eblock, ksent->ks_keytype);
+    if (!(kret = krb5_dbe_create_key_data(iargs->ctx, iargs->dbentp))) {
+	ind = iargs->dbentp->n_key_data-1;
+	if (!(kret = krb5_random_key(iargs->ctx,
+				     iargs->rblock->eblock,
+				     iargs->rblock->rseed,
+				     &key))) {
+	    kret = krb5_dbekd_encrypt_key_data(iargs->ctx,
+					       iargs->rblock->eblock,
+					       key, 
+					       NULL,
+					       1,
+					       &iargs->dbentp->key_data[ind]);
+	    krb5_free_keyblock(iargs->ctx, key);
+	}
+    }
+    return(kret);
+}
+
+static krb5_error_code
 add_principal(context, princ, op, pblock)
     krb5_context context;
     krb5_principal princ;
@@ -377,6 +430,7 @@ add_principal(context, princ, op, pblock)
     krb5_keyblock 	* rkey;
 
     krb5_tl_mod_princ	  mod_princ;
+    struct iterate_args	  iargs;
 
     int			  nentries = 1;
 
@@ -398,27 +452,32 @@ add_principal(context, princ, op, pblock)
     if (retval = krb5_dbe_encode_mod_princ_data(context, &mod_princ, &entry))
 	goto error_out;
 
-    if ((entry.key_data=(krb5_key_data*)malloc(sizeof(krb5_key_data))) == NULL)
-	goto error_out;
-    memset((char *) entry.key_data, 0, sizeof(krb5_key_data));
-    entry.n_key_data = 1;
-
     switch (op) {
     case MASTER_KEY:
+	if ((entry.key_data=(krb5_key_data*)malloc(sizeof(krb5_key_data)))
+	    == NULL)
+	    goto error_out;
+	memset((char *) entry.key_data, 0, sizeof(krb5_key_data));
+	entry.n_key_data = 1;
+
 	entry.attributes |= KRB5_KDB_DISALLOW_ALL_TIX;
 	if (retval = krb5_dbekd_encrypt_key_data(context, pblock->eblock,
 				      	       	 &master_keyblock, NULL, 
 					       	 1, entry.key_data))
 	    return retval;
 	break;
-    case RANDOM_KEY:
-	if (retval = krb5_random_key(context, pblock->eblock, 
-				     pblock->rseed, &rkey))
-	    return retval;
-	retval = krb5_dbekd_encrypt_key_data(context, pblock->eblock, rkey, 
-						NULL, 1, entry.key_data);
-	krb5_free_keyblock(context, rkey);
-	if (retval)
+    case TGT_KEY:
+	iargs.ctx = context;
+	iargs.rblock = pblock;
+	iargs.dbentp = &entry;
+	/*
+	 * Iterate through the key/salt list, ignoring salt types.
+	 */
+	if (retval = krb5_keysalt_iterate(pblock->kslist,
+					  pblock->nkslist,
+					  1,
+					  tgt_keysalt_iterate,
+					  (krb5_pointer) &iargs))
 	    return retval;
 	break;
     case NULL_KEY:
