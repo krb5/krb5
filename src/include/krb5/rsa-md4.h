@@ -15,9 +15,12 @@
  * md4.h from RFC1186
  *
  * $Log$
- * Revision 5.2  1990/11/20 10:23:54  jtkohl
- * don't need types defined here, see <encryption.h>
+ * Revision 5.3  1991/01/03 16:54:49  jtkohl
+ * add encrypted version entries
  *
+ * Revision 5.2  90/11/20  10:23:54  jtkohl
+ * don't need types defined here, see <encryption.h>
+ * 
  * Revision 5.1  90/11/08  11:30:49  jtkohl
  * add STDC function prototypes
  * add declaration of MDreverse
@@ -34,8 +37,11 @@
 #define KRB5_RSA_MD4__
 
 #define RSA_MD4_CKSUM_LENGTH	(4*sizeof(krb5_int32))
+#define RSA_MD4_DES_CKSUM_LENGTH	(4*sizeof(krb5_int32))
 
-extern krb5_checksum_entry rsa_md4_cksumtable_entry;
+extern krb5_checksum_entry
+    rsa_md4_cksumtable_entry,
+    rsa_md4_des_cksumtable_entry;
 
 /*
 ** ********************************************************************
