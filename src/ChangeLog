@@ -1,3 +1,12 @@
+Wed Jun 14 16:51:28 1995  Tom Yu  (tlyu@dragons-lair)
+
+	* aclocal.m4(_MAKE_SUBDIRS): revert yet again; no workaround since
+		subshells inherit "-e" flag.  Ultrix sucks.
+
+	* aclocal.m4 (_MAKE_SUBDIRS): "-@" was the wrong answer; set a
+		shell variable "e" to "exit 0" and execute it after the
+		make in each subdirectory
+
 Tue Jun 13 01:44:12 1995  Tom Yu  (tlyu@dragons-lair)
 
 	* aclocal.m4 (CopySrcHeader): do a set -x before mkdir

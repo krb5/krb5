@@ -96,8 +96,8 @@ AC_DIVERT_PUSH(AC_DIVERSION_MAKEFILE)dnl
 changequote(<<<,>>>)dnl
 
 $2::<<<
-	-@case "`echo '$(MAKEFLAGS)'|sed -e 's/ --.*$$//'`" in \
-		*[ik]*) ;; *) set -e ;; esac; \
+	@case "`echo '$(MAKEFLAGS)'|sed -e 's/ --.*$$//'`" in \
+		*[ik]*) set +e;; *) set -e;; esac; \
 	for i in $(SUBDIRS) ; do \
 		(cd $$i ; echo>>> $1 <<<"in $(CURRENT_DIR)$$i..."; \
 			$(MAKE) CC="$(CC)" CCOPTS="$(CCOPTS)" \
