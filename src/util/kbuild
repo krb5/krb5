@@ -8,7 +8,7 @@
 CONFIG=$1
 BUILD_PATH=./build-path
 
-if test ${CONFIG}x = x ]; then
+if [ ${CONFIG}x = x ]; then
 	echo "You must specify an build configuration file!"
 	exit 1
 fi
