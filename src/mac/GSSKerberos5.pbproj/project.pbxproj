@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 32;
+	objectVersion = 34;
 	objects = {
 		00CC63ED00975A877F000001 = {
 			isa = PBXFileReference;
@@ -360,7 +360,6 @@
 			buildSettings = {
 				HEADER_SEARCH_PATHS = "";
 				INSTALL_PATH = /usr/bin;
-				OPTIMIZATION_CFLAGS = "";
 				OTHER_CFLAGS = "-DTARGET_HEADER_FRAMEWORK -DKRB5_KRB4_COMPAT -DKINIT_DEFAULT_BOTH";
 				OTHER_LDFLAGS = "-dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KerberosSupport.framework/Versions/A/KerberosSupport:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KerberosSupport.framework/Versions/A/KerberosSupport -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KerberosPreferences.framework/Versions/A/KerberosPreferences:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KerberosPreferences.framework/Versions/A/KerberosPreferences -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KerberosDES.framework/Versions/A/KerberosDES:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KerberosDES.framework/Versions/A/KerberosDES -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/CredentialsCache.framework/Versions/A/CredentialsCache:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/CredentialsCache.framework/Versions/A/CredentialsCache -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KerberosLogin.framework/Versions/A/KerberosLogin:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KerberosLogin.framework/Versions/A/KerberosLogin -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KerberosComErr.framework/Versions/A/KerberosComErr:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KerberosComErr.framework/Versions/A/KerberosComErr -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KerberosProfile.framework/Versions/A/KerberosProfile:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KerberosProfile.framework/Versions/A/KerberosProfile -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/Kerberos5.framework/Versions/A/Kerberos5:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/Kerberos5.framework/Versions/A/Kerberos5 -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/GSS.framework/Versions/A/GSS:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/GSS.framework/Versions/A/GSS -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/Kerberos4.framework/Versions/A/Kerberos4:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/Kerberos4.framework/Versions/A/Kerberos4 -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KerberosWrappers.framework/Versions/A/KerberosWrappers:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KerberosWrappers.framework/Versions/A/KerberosWrappers -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KClient.framework/Versions/A/KClient:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KClient.framework/Versions/A/KClient -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KClientCompat.framework/Versions/A/KClientCompat:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KClientCompat.framework/Versions/A/KClientCompat -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KClientDeprecated.framework/Versions/A/KClientDeprecated:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KClientDeprecated.framework/Versions/A/KClientDeprecated -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KerberosLoginServer.framework/Versions/A/KerberosLoginServer:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KerberosLoginServer.framework/Versions/A/KerberosLoginServer -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/CCacheServer.framework/Versions/A/CCacheServer:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/CCacheServer.framework/Versions/A/CCacheServer -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/CCacheClassicServer.framework/Versions/A/CCacheClassicServer:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/CCacheClassicServer.framework/Versions/A/CCacheClassicServer";
 				OTHER_REZFLAGS = "";
@@ -368,8 +367,6 @@
 				REZ_EXECUTABLE = YES;
 				SECTORDER_FLAGS = "";
 				WARNING_CFLAGS = "-Wmost -Wno-four-char-constants -Wno-unknown-pragmas";
-			};
-			conditionalBuildSettings = {
 			};
 			dependencies = (
 			);
@@ -457,7 +454,6 @@
 			buildSettings = {
 				HEADER_SEARCH_PATHS = "";
 				INSTALL_PATH = /usr/bin;
-				OPTIMIZATION_CFLAGS = "";
 				OTHER_CFLAGS = "-DTARGET_HEADER_FRAMEWORK -DKRB5_KRB4_COMPAT -DUSE_CCAPI";
 				OTHER_LDFLAGS = "-dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KerberosSupport.framework/Versions/A/KerberosSupport:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KerberosSupport.framework/Versions/A/KerberosSupport -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KerberosPreferences.framework/Versions/A/KerberosPreferences:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KerberosPreferences.framework/Versions/A/KerberosPreferences -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KerberosDES.framework/Versions/A/KerberosDES:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KerberosDES.framework/Versions/A/KerberosDES -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/CredentialsCache.framework/Versions/A/CredentialsCache:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/CredentialsCache.framework/Versions/A/CredentialsCache -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KerberosLogin.framework/Versions/A/KerberosLogin:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KerberosLogin.framework/Versions/A/KerberosLogin -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KerberosComErr.framework/Versions/A/KerberosComErr:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KerberosComErr.framework/Versions/A/KerberosComErr -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KerberosProfile.framework/Versions/A/KerberosProfile:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KerberosProfile.framework/Versions/A/KerberosProfile -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/Kerberos5.framework/Versions/A/Kerberos5:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/Kerberos5.framework/Versions/A/Kerberos5 -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/GSS.framework/Versions/A/GSS:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/GSS.framework/Versions/A/GSS -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/Kerberos4.framework/Versions/A/Kerberos4:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/Kerberos4.framework/Versions/A/Kerberos4 -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KerberosWrappers.framework/Versions/A/KerberosWrappers:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KerberosWrappers.framework/Versions/A/KerberosWrappers -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KClient.framework/Versions/A/KClient:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KClient.framework/Versions/A/KClient -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KClientCompat.framework/Versions/A/KClientCompat:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KClientCompat.framework/Versions/A/KClientCompat -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KClientDeprecated.framework/Versions/A/KClientDeprecated:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KClientDeprecated.framework/Versions/A/KClientDeprecated -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KerberosLoginServer.framework/Versions/A/KerberosLoginServer:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KerberosLoginServer.framework/Versions/A/KerberosLoginServer -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/CCacheServer.framework/Versions/A/CCacheServer:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/CCacheServer.framework/Versions/A/CCacheServer -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/CCacheClassicServer.framework/Versions/A/CCacheClassicServer:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/CCacheClassicServer.framework/Versions/A/CCacheClassicServer";
 				OTHER_REZFLAGS = "";
@@ -465,8 +461,6 @@
 				REZ_EXECUTABLE = YES;
 				SECTORDER_FLAGS = "";
 				WARNING_CFLAGS = "-Wmost -Wno-four-char-constants -Wno-unknown-pragmas";
-			};
-			conditionalBuildSettings = {
 			};
 			dependencies = (
 			);
@@ -517,7 +511,6 @@
 			buildSettings = {
 				HEADER_SEARCH_PATHS = "";
 				INSTALL_PATH = /usr/bin;
-				OPTIMIZATION_CFLAGS = "";
 				OTHER_CFLAGS = "-DTARGET_HEADER_FRAMEWORK";
 				OTHER_LDFLAGS = "-dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KerberosSupport.framework/Versions/A/KerberosSupport:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KerberosSupport.framework/Versions/A/KerberosSupport -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KerberosPreferences.framework/Versions/A/KerberosPreferences:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KerberosPreferences.framework/Versions/A/KerberosPreferences -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KerberosDES.framework/Versions/A/KerberosDES:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KerberosDES.framework/Versions/A/KerberosDES -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/CredentialsCache.framework/Versions/A/CredentialsCache:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/CredentialsCache.framework/Versions/A/CredentialsCache -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KerberosLogin.framework/Versions/A/KerberosLogin:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KerberosLogin.framework/Versions/A/KerberosLogin -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KerberosComErr.framework/Versions/A/KerberosComErr:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KerberosComErr.framework/Versions/A/KerberosComErr -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KerberosProfile.framework/Versions/A/KerberosProfile:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KerberosProfile.framework/Versions/A/KerberosProfile -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/Kerberos5.framework/Versions/A/Kerberos5:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/Kerberos5.framework/Versions/A/Kerberos5 -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/GSS.framework/Versions/A/GSS:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/GSS.framework/Versions/A/GSS -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/Kerberos4.framework/Versions/A/Kerberos4:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/Kerberos4.framework/Versions/A/Kerberos4 -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KerberosWrappers.framework/Versions/A/KerberosWrappers:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KerberosWrappers.framework/Versions/A/KerberosWrappers -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KClient.framework/Versions/A/KClient:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KClient.framework/Versions/A/KClient -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KClientCompat.framework/Versions/A/KClientCompat:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KClientCompat.framework/Versions/A/KClientCompat -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KClientDeprecated.framework/Versions/A/KClientDeprecated:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KClientDeprecated.framework/Versions/A/KClientDeprecated -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KerberosLoginServer.framework/Versions/A/KerberosLoginServer:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KerberosLoginServer.framework/Versions/A/KerberosLoginServer -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/CCacheServer.framework/Versions/A/CCacheServer:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/CCacheServer.framework/Versions/A/CCacheServer -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/CCacheClassicServer.framework/Versions/A/CCacheClassicServer:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/CCacheClassicServer.framework/Versions/A/CCacheClassicServer";
 				OTHER_REZFLAGS = "";
@@ -525,8 +518,6 @@
 				REZ_EXECUTABLE = YES;
 				SECTORDER_FLAGS = "";
 				WARNING_CFLAGS = "-Wmost -Wno-four-char-constants -Wno-unknown-pragmas";
-			};
-			conditionalBuildSettings = {
 			};
 			dependencies = (
 			);
@@ -576,7 +567,6 @@
 			);
 			buildSettings = {
 				INSTALL_PATH = /usr/bin;
-				OPTIMIZATION_CFLAGS = "";
 				OTHER_CFLAGS = "-DTARGET_HEADER_FRAMEWORK -DKRB5_KRB4_COMPAT";
 				OTHER_LDFLAGS = "-dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KerberosSupport.framework/Versions/A/KerberosSupport:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KerberosSupport.framework/Versions/A/KerberosSupport -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KerberosPreferences.framework/Versions/A/KerberosPreferences:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KerberosPreferences.framework/Versions/A/KerberosPreferences -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KerberosDES.framework/Versions/A/KerberosDES:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KerberosDES.framework/Versions/A/KerberosDES -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/CredentialsCache.framework/Versions/A/CredentialsCache:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/CredentialsCache.framework/Versions/A/CredentialsCache -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KerberosLogin.framework/Versions/A/KerberosLogin:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KerberosLogin.framework/Versions/A/KerberosLogin -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KerberosComErr.framework/Versions/A/KerberosComErr:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KerberosComErr.framework/Versions/A/KerberosComErr -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KerberosProfile.framework/Versions/A/KerberosProfile:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KerberosProfile.framework/Versions/A/KerberosProfile -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/Kerberos5.framework/Versions/A/Kerberos5:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/Kerberos5.framework/Versions/A/Kerberos5 -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/GSS.framework/Versions/A/GSS:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/GSS.framework/Versions/A/GSS -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/Kerberos4.framework/Versions/A/Kerberos4:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/Kerberos4.framework/Versions/A/Kerberos4 -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KerberosWrappers.framework/Versions/A/KerberosWrappers:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KerberosWrappers.framework/Versions/A/KerberosWrappers -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KClient.framework/Versions/A/KClient:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KClient.framework/Versions/A/KClient -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KClientCompat.framework/Versions/A/KClientCompat:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KClientCompat.framework/Versions/A/KClientCompat -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KClientDeprecated.framework/Versions/A/KClientDeprecated:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KClientDeprecated.framework/Versions/A/KClientDeprecated -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KerberosLoginServer.framework/Versions/A/KerberosLoginServer:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KerberosLoginServer.framework/Versions/A/KerberosLoginServer -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/CCacheServer.framework/Versions/A/CCacheServer:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/CCacheServer.framework/Versions/A/CCacheServer -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/CCacheClassicServer.framework/Versions/A/CCacheClassicServer:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/CCacheClassicServer.framework/Versions/A/CCacheClassicServer";
 				OTHER_REZFLAGS = "";
@@ -584,8 +574,6 @@
 				REZ_EXECUTABLE = YES;
 				SECTORDER_FLAGS = "";
 				WARNING_CFLAGS = "-Wmost -Wno-four-char-constants -Wno-unknown-pragmas";
-			};
-			conditionalBuildSettings = {
 			};
 			dependencies = (
 			);
@@ -695,7 +683,6 @@
 				FRAMEWORK_SEARCH_PATHS = "/System/Library/Frameworks/Kerberos.framework/Frameworks/ /Users/lxs/builds";
 				INSTALL_PATH = /usr/lib;
 				LIBRARY_STYLE = DYNAMIC;
-				OPTIMIZATION_CFLAGS = "";
 				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = "-dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KerberosSupport.framework/Versions/A/KerberosSupport:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KerberosSupport.framework/Versions/A/KerberosSupport -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KerberosPreferences.framework/Versions/A/KerberosPreferences:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KerberosPreferences.framework/Versions/A/KerberosPreferences -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KerberosDES.framework/Versions/A/KerberosDES:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KerberosDES.framework/Versions/A/KerberosDES -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/CredentialsCache.framework/Versions/A/CredentialsCache:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/CredentialsCache.framework/Versions/A/CredentialsCache -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KerberosLogin.framework/Versions/A/KerberosLogin:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KerberosLogin.framework/Versions/A/KerberosLogin -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KerberosComErr.framework/Versions/A/KerberosComErr:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KerberosComErr.framework/Versions/A/KerberosComErr -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KerberosProfile.framework/Versions/A/KerberosProfile:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KerberosProfile.framework/Versions/A/KerberosProfile -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/Kerberos5.framework/Versions/A/Kerberos5:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/Kerberos5.framework/Versions/A/Kerberos5 -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/GSS.framework/Versions/A/GSS:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/GSS.framework/Versions/A/GSS -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/Kerberos4.framework/Versions/A/Kerberos4:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/Kerberos4.framework/Versions/A/Kerberos4 -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KerberosWrappers.framework/Versions/A/KerberosWrappers:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KerberosWrappers.framework/Versions/A/KerberosWrappers -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KClient.framework/Versions/A/KClient:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KClient.framework/Versions/A/KClient -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KClientCompat.framework/Versions/A/KClientCompat:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KClientCompat.framework/Versions/A/KClientCompat -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KClientDeprecated.framework/Versions/A/KClientDeprecated:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KClientDeprecated.framework/Versions/A/KClientDeprecated -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KerberosLoginServer.framework/Versions/A/KerberosLoginServer:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KerberosLoginServer.framework/Versions/A/KerberosLoginServer -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/CCacheServer.framework/Versions/A/CCacheServer:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/CCacheServer.framework/Versions/A/CCacheServer -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/CCacheClassicServer.framework/Versions/A/CCacheClassicServer:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/CCacheClassicServer.framework/Versions/A/CCacheClassicServer";
 				OTHER_LIBTOOL_FLAGS = "";
@@ -704,8 +691,6 @@
 				REZ_EXECUTABLE = YES;
 				SECTORDER_FLAGS = "";
 				WARNING_CFLAGS = "-Wmost -Wno-four-char-constants -Wno-unknown-pragmas";
-			};
-			conditionalBuildSettings = {
 			};
 			dependencies = (
 			);
@@ -790,7 +775,6 @@
 				FRAMEWORK_SEARCH_PATHS = "/System/Library/Frameworks/Kerberos.framework/Frameworks /Users/lxs/builds";
 				INSTALL_PATH = /usr/lib;
 				LIBRARY_STYLE = DYNAMIC;
-				OPTIMIZATION_CFLAGS = "";
 				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = "-dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KerberosSupport.framework/Versions/A/KerberosSupport:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KerberosSupport.framework/Versions/A/KerberosSupport -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KerberosPreferences.framework/Versions/A/KerberosPreferences:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KerberosPreferences.framework/Versions/A/KerberosPreferences -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KerberosDES.framework/Versions/A/KerberosDES:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KerberosDES.framework/Versions/A/KerberosDES -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/CredentialsCache.framework/Versions/A/CredentialsCache:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/CredentialsCache.framework/Versions/A/CredentialsCache -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KerberosLogin.framework/Versions/A/KerberosLogin:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KerberosLogin.framework/Versions/A/KerberosLogin -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KerberosComErr.framework/Versions/A/KerberosComErr:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KerberosComErr.framework/Versions/A/KerberosComErr -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KerberosProfile.framework/Versions/A/KerberosProfile:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KerberosProfile.framework/Versions/A/KerberosProfile -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/Kerberos5.framework/Versions/A/Kerberos5:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/Kerberos5.framework/Versions/A/Kerberos5 -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/GSS.framework/Versions/A/GSS:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/GSS.framework/Versions/A/GSS -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/Kerberos4.framework/Versions/A/Kerberos4:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/Kerberos4.framework/Versions/A/Kerberos4 -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KerberosWrappers.framework/Versions/A/KerberosWrappers:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KerberosWrappers.framework/Versions/A/KerberosWrappers -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KClient.framework/Versions/A/KClient:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KClient.framework/Versions/A/KClient -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KClientCompat.framework/Versions/A/KClientCompat:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KClientCompat.framework/Versions/A/KClientCompat -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KClientDeprecated.framework/Versions/A/KClientDeprecated:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KClientDeprecated.framework/Versions/A/KClientDeprecated -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KerberosLoginServer.framework/Versions/A/KerberosLoginServer:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KerberosLoginServer.framework/Versions/A/KerberosLoginServer -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/CCacheServer.framework/Versions/A/CCacheServer:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/CCacheServer.framework/Versions/A/CCacheServer -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/CCacheClassicServer.framework/Versions/A/CCacheClassicServer:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/CCacheClassicServer.framework/Versions/A/CCacheClassicServer";
 				OTHER_LIBTOOL_FLAGS = "";
@@ -799,8 +783,6 @@
 				REZ_EXECUTABLE = YES;
 				SECTORDER_FLAGS = "";
 				WARNING_CFLAGS = "-Wmost -Wno-four-char-constants -Wno-unknown-pragmas";
-			};
-			conditionalBuildSettings = {
 			};
 			dependencies = (
 			);
@@ -867,7 +849,6 @@
 				FRAMEWORK_SEARCH_PATHS = "/System/Library/Frameworks/Kerberos.framework/Frameworks /Users/lxs/builds";
 				INSTALL_PATH = /usr/lib;
 				LIBRARY_STYLE = DYNAMIC;
-				OPTIMIZATION_CFLAGS = "";
 				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = "-dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KerberosSupport.framework/Versions/A/KerberosSupport:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KerberosSupport.framework/Versions/A/KerberosSupport -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KerberosPreferences.framework/Versions/A/KerberosPreferences:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KerberosPreferences.framework/Versions/A/KerberosPreferences -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KerberosDES.framework/Versions/A/KerberosDES:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KerberosDES.framework/Versions/A/KerberosDES -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/CredentialsCache.framework/Versions/A/CredentialsCache:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/CredentialsCache.framework/Versions/A/CredentialsCache -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KerberosLogin.framework/Versions/A/KerberosLogin:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KerberosLogin.framework/Versions/A/KerberosLogin -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KerberosComErr.framework/Versions/A/KerberosComErr:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KerberosComErr.framework/Versions/A/KerberosComErr -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KerberosProfile.framework/Versions/A/KerberosProfile:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KerberosProfile.framework/Versions/A/KerberosProfile -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/Kerberos5.framework/Versions/A/Kerberos5:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/Kerberos5.framework/Versions/A/Kerberos5 -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/GSS.framework/Versions/A/GSS:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/GSS.framework/Versions/A/GSS -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/Kerberos4.framework/Versions/A/Kerberos4:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/Kerberos4.framework/Versions/A/Kerberos4 -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KerberosWrappers.framework/Versions/A/KerberosWrappers:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KerberosWrappers.framework/Versions/A/KerberosWrappers -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KClient.framework/Versions/A/KClient:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KClient.framework/Versions/A/KClient -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KClientCompat.framework/Versions/A/KClientCompat:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KClientCompat.framework/Versions/A/KClientCompat -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KClientDeprecated.framework/Versions/A/KClientDeprecated:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KClientDeprecated.framework/Versions/A/KClientDeprecated -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KerberosLoginServer.framework/Versions/A/KerberosLoginServer:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KerberosLoginServer.framework/Versions/A/KerberosLoginServer -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/CCacheServer.framework/Versions/A/CCacheServer:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/CCacheServer.framework/Versions/A/CCacheServer -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/CCacheClassicServer.framework/Versions/A/CCacheClassicServer:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/CCacheClassicServer.framework/Versions/A/CCacheClassicServer";
 				OTHER_LIBTOOL_FLAGS = "";
@@ -876,8 +857,6 @@
 				REZ_EXECUTABLE = YES;
 				SECTORDER_FLAGS = "";
 				WARNING_CFLAGS = "-Wmost -Wno-four-char-constants -Wno-unknown-pragmas";
-			};
-			conditionalBuildSettings = {
 			};
 			dependencies = (
 			);
@@ -944,7 +923,6 @@
 				FRAMEWORK_SEARCH_PATHS = "/System/Library/Frameworks/Kerberos.framework/Frameworks /Users/lxs/builds";
 				INSTALL_PATH = /usr/lib;
 				LIBRARY_STYLE = DYNAMIC;
-				OPTIMIZATION_CFLAGS = "";
 				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = "-dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KerberosSupport.framework/Versions/A/KerberosSupport:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KerberosSupport.framework/Versions/A/KerberosSupport -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KerberosPreferences.framework/Versions/A/KerberosPreferences:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KerberosPreferences.framework/Versions/A/KerberosPreferences -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KerberosDES.framework/Versions/A/KerberosDES:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KerberosDES.framework/Versions/A/KerberosDES -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/CredentialsCache.framework/Versions/A/CredentialsCache:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/CredentialsCache.framework/Versions/A/CredentialsCache -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KerberosLogin.framework/Versions/A/KerberosLogin:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KerberosLogin.framework/Versions/A/KerberosLogin -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KerberosComErr.framework/Versions/A/KerberosComErr:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KerberosComErr.framework/Versions/A/KerberosComErr -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KerberosProfile.framework/Versions/A/KerberosProfile:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KerberosProfile.framework/Versions/A/KerberosProfile -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/Kerberos5.framework/Versions/A/Kerberos5:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/Kerberos5.framework/Versions/A/Kerberos5 -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/GSS.framework/Versions/A/GSS:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/GSS.framework/Versions/A/GSS -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/Kerberos4.framework/Versions/A/Kerberos4:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/Kerberos4.framework/Versions/A/Kerberos4 -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KerberosWrappers.framework/Versions/A/KerberosWrappers:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KerberosWrappers.framework/Versions/A/KerberosWrappers -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KClient.framework/Versions/A/KClient:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KClient.framework/Versions/A/KClient -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KClientCompat.framework/Versions/A/KClientCompat:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KClientCompat.framework/Versions/A/KClientCompat -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KClientDeprecated.framework/Versions/A/KClientDeprecated:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KClientDeprecated.framework/Versions/A/KClientDeprecated -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/KerberosLoginServer.framework/Versions/A/KerberosLoginServer:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/KerberosLoginServer.framework/Versions/A/KerberosLoginServer -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/CCacheServer.framework/Versions/A/CCacheServer:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/CCacheServer.framework/Versions/A/CCacheServer -dylib_file /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks/CCacheClassicServer.framework/Versions/A/CCacheClassicServer:$(SYMROOT)/Kerberos.framework/Versions/A/Frameworks/CCacheClassicServer.framework/Versions/A/CCacheClassicServer";
 				OTHER_LIBTOOL_FLAGS = "";
@@ -953,8 +931,6 @@
 				REZ_EXECUTABLE = YES;
 				SECTORDER_FLAGS = "";
 				WARNING_CFLAGS = "-Wmost -Wno-four-char-constants -Wno-unknown-pragmas";
-			};
-			conditionalBuildSettings = {
 			};
 			dependencies = (
 			);
@@ -1037,6 +1013,16 @@
 			isa = PBXTargetDependency;
 			target = 174475FDFF5EFB1212120111;
 		};
+//000
+//001
+//002
+//003
+//004
+//010
+//011
+//012
+//013
+//014
 		0101EC5DFF8FDD1B7F000001 = {
 			isa = PBXFileReference;
 			path = ErrorTables.jam;
@@ -1132,6 +1118,7 @@
 			);
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
+				OPTIMIZATION_CFLAGS = "-O0";
 			};
 			isa = PBXBuildStyle;
 			name = Development;
@@ -1169,6 +1156,16 @@
 			settings = {
 			};
 		};
+//010
+//011
+//012
+//013
+//014
+//0A0
+//0A1
+//0A2
+//0A3
+//0A4
 		0A53389B00C407D37F000001 = {
 			buildActionMask = 2147483647;
 			files = (
@@ -1221,6 +1218,16 @@
 			shellPath = /bin/sh;
 			shellScript = "/bin/cp -p \"${SYMROOT}/GSSKerberos5.intermediates/GSS.h\" \"${SYMROOT}/GSS.${WRAPPER_EXTENSION}/Headers/GSS.h\"\n/bin/cp -p \"${SYMROOT}/GSSKerberos5.intermediates/gssapi.h\" \"${SYMROOT}/GSS.${WRAPPER_EXTENSION}/Headers/gssapi.h\"";
 		};
+//0A0
+//0A1
+//0A2
+//0A3
+//0A4
+//0F0
+//0F1
+//0F2
+//0F3
+//0F4
 		0F80148EFF9A7E33126500C7 = {
 			isa = PBXFrameworkReference;
 			name = CoreServices.framework;
@@ -1255,6 +1262,16 @@
 			settings = {
 			};
 		};
+//0F0
+//0F1
+//0F2
+//0F3
+//0F4
+//130
+//131
+//132
+//133
+//134
 		13CD711900D835ED7F000001 = {
 			isa = PBXFileReference;
 			path = ccfns.c;
@@ -1266,6 +1283,16 @@
 			settings = {
 			};
 		};
+//130
+//131
+//132
+//133
+//134
+//170
+//171
+//172
+//173
+//174
 		174475CBFF5EEEE312120111 = {
 			buildArgumentsString = "-d3 -f $(SRCROOT)/ErrorTables.jam $(ACTION)";
 			buildPhases = (
@@ -1274,7 +1301,6 @@
 				FRAMEWORK_SEARCH_PATHS = "";
 				HEADER_SEARCH_PATHS = "";
 				LIBRARY_SEARCH_PATHS = "";
-				OPTIMIZATION_CFLAGS = "";
 				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = "";
 				OTHER_REZFLAGS = "";
@@ -1283,8 +1309,6 @@
 				WARNING_CFLAGS = "-Wmost -Wno-four-char-constants -Wno-unknown-pragmas";
 			};
 			buildToolPath = /usr/bin/jam;
-			conditionalBuildSettings = {
-			};
 			dependencies = (
 			);
 			isa = PBXLegacyTarget;
@@ -1352,7 +1376,6 @@
 				HEADER_SEARCH_PATHS = "\"$(SYMROOT)/GSSKerberos5.intermediates\"";
 				INSTALL_PATH = /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks;
 				LIBRARY_SEARCH_PATHS = "";
-				OPTIMIZATION_CFLAGS = "";
 				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = "-umbrella Kerberos";
 				OTHER_LIBTOOL_FLAGS = "";
@@ -1363,8 +1386,6 @@
 				SKIP_INSTALL = YES;
 				WARNING_CFLAGS = "-Wmost -Wno-four-char-constants -Wno-unknown-pragmas";
 				WRAPPER_EXTENSION = framework;
-			};
-			conditionalBuildSettings = {
 			};
 			dependencies = (
 				174475D3FF5EF33612120111,
@@ -1514,10 +1535,10 @@
 				FRAMEWORK_SEARCH_PATHS = "";
 				FRAMEWORK_VERSION = A;
 				HEADER_SEARCH_PATHS = "\"$(SYMROOT)/GSSKerberos5.intermediates\"";
+				IMPLICITLY_INCLUDED_HEADERS = "\"$(SRCROOT)/GSSKerberosPrefix.h\"";
 				INSTALL_PATH = /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks;
 				LIBRARY_SEARCH_PATHS = "";
-				OPTIMIZATION_CFLAGS = "";
-				OTHER_CFLAGS = "-include \"$(SRCROOT)/GSSKerberosPrefix.h\"";
+				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = "-init ___InitializeProfileLib -umbrella Kerberos";
 				OTHER_LIBTOOL_FLAGS = "";
 				OTHER_REZFLAGS = "";
@@ -1527,8 +1548,6 @@
 				SKIP_INSTALL = YES;
 				WARNING_CFLAGS = "-Wmost -Wno-four-char-constants -Wno-unknown-pragmas";
 				WRAPPER_EXTENSION = framework;
-			};
-			conditionalBuildSettings = {
 			};
 			dependencies = (
 				00F89AD30046F2EC7F000001,
@@ -1745,7 +1764,6 @@
 				FRAMEWORK_SEARCH_PATHS = "";
 				HEADER_SEARCH_PATHS = "";
 				LIBRARY_SEARCH_PATHS = "";
-				OPTIMIZATION_CFLAGS = "";
 				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = "";
 				OTHER_REZFLAGS = "";
@@ -1754,8 +1772,6 @@
 				WARNING_CFLAGS = "-Wmost -Wno-four-char-constants -Wno-unknown-pragmas";
 			};
 			buildToolPath = /usr/bin/jam;
-			conditionalBuildSettings = {
-			};
 			dependencies = (
 				17447609FF5FF54A12120111,
 			);
@@ -1844,10 +1860,10 @@
 				FRAMEWORK_SEARCH_PATHS = "\"$(SYMROOT)/StubFrameworks\"";
 				FRAMEWORK_VERSION = A;
 				HEADER_SEARCH_PATHS = "\"$(SYMROOT)/GSSKerberos5.intermediates\" \"$(SYMROOT)/StubFrameworks\"";
+				IMPLICITLY_INCLUDED_HEADERS = "\"$(SRCROOT)/GSSKerberosPrefix.h\"";
 				INSTALL_PATH = /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks;
 				LIBRARY_SEARCH_PATHS = "";
-				OPTIMIZATION_CFLAGS = "";
-				OTHER_CFLAGS = "-include \"$(SRCROOT)/GSSKerberosPrefix.h\"";
+				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = "-init ___initializeK5 -umbrella Kerberos";
 				OTHER_LIBTOOL_FLAGS = "";
 				OTHER_REZFLAGS = "";
@@ -1857,8 +1873,6 @@
 				SKIP_INSTALL = YES;
 				WARNING_CFLAGS = "-Wmost -Wno-four-char-constants -Wno-unknown-pragmas";
 				WRAPPER_EXTENSION = framework;
-			};
-			conditionalBuildSettings = {
 			};
 			dependencies = (
 				1744760DFF5FF8DB12120111,
@@ -6315,6 +6329,16 @@
 				);
 			};
 		};
+//170
+//171
+//172
+//173
+//174
+//1C0
+//1C1
+//1C2
+//1C3
+//1C4
 		1C82B3220062A0257F000001 = {
 			isa = PBXFrameworkReference;
 			path = Kerberos.framework;
@@ -6344,6 +6368,16 @@
 			settings = {
 			};
 		};
+//1C0
+//1C1
+//1C2
+//1C3
+//1C4
+//250
+//251
+//252
+//253
+//254
 		25C77492FF52D03A12120111 = {
 			buildStyles = (
 				0156F76F002F5A1112120114,
@@ -6352,7 +6386,7 @@
 			isa = PBXProject;
 			mainGroup = 25C77493FF52D03A12120111;
 			productRefGroup = 25C77493FF52D03A12120111;
-			projectDirPath = .;
+			projectDirPath = "";
 			targets = (
 				174475CBFF5EEEE312120111,
 				174475FDFF5EFB1212120111,
@@ -6385,6 +6419,16 @@
 			isa = PBXGroup;
 			refType = 4;
 		};
+//250
+//251
+//252
+//253
+//254
+//410
+//411
+//412
+//413
+//414
 		41D6B5480029FA1112120111 = {
 			isa = PBXFrameworkReference;
 			name = KerberosLogin.framework;
@@ -6415,6 +6459,16 @@
 			settings = {
 			};
 		};
+//410
+//411
+//412
+//413
+//414
+//4E0
+//4E1
+//4E2
+//4E3
+//4E4
 		4E933A40FF828AEA12120111 = {
 			isa = PBXFileReference;
 			path = et.pbexp;
@@ -6447,6 +6501,16 @@
 			path = et_h.awk;
 			refType = 4;
 		};
+//4E0
+//4E1
+//4E2
+//4E3
+//4E4
+//5C0
+//5C1
+//5C2
+//5C3
+//5C4
 		5C1372E8FF6546C412120111 = {
 			children = (
 				012574A8FF7A9C8212120111,
@@ -6497,10 +6561,10 @@
 				FRAMEWORK_SEARCH_PATHS = "\"$(SYMROOT)/StubFrameworks\"";
 				FRAMEWORK_VERSION = A;
 				HEADER_SEARCH_PATHS = "\"$(SYMROOT)/GSSKerberos5.intermediates\" \"$(SYMROOT)/StubFrameworks\"";
+				IMPLICITLY_INCLUDED_HEADERS = "\"$(SRCROOT)/GSSKerberosPrefix.h\"";
 				INSTALL_PATH = /System/Library/Frameworks/Kerberos.framework/Versions/A/Frameworks;
 				LIBRARY_SEARCH_PATHS = "";
-				OPTIMIZATION_CFLAGS = "";
-				OTHER_CFLAGS = "-include \"$(SRCROOT)/GSSKerberosPrefix.h\"";
+				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = "-init ___initializeGSS -umbrella Kerberos";
 				OTHER_LIBTOOL_FLAGS = "";
 				OTHER_REZFLAGS = "";
@@ -6510,8 +6574,6 @@
 				SKIP_INSTALL = YES;
 				WARNING_CFLAGS = "-Wmost -Wno-four-char-constants -Wno-unknown-pragmas";
 				WRAPPER_EXTENSION = framework;
-			};
-			conditionalBuildSettings = {
 			};
 			dependencies = (
 				00F89AD40046F2EC7F000001,
@@ -8439,6 +8501,16 @@
 				);
 			};
 		};
+//5C0
+//5C1
+//5C2
+//5C3
+//5C4
+//610
+//611
+//612
+//613
+//614
 		61622FD1FF82A36412120111 = {
 			isa = PBXFileReference;
 			path = Kerberos5Lib.pbexp;
