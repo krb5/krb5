@@ -1,3 +1,8 @@
+Tue Oct  4 16:13:45 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* asn1_decode_k.c (asn1_decode_kerberos_time): Don't assume that
+		  krb5_timestamp and time_t are the same.
+
 Thu Sep 29 14:26:34 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* asn1buf.c (asn1buf_remove_octetstring, asn1buf_remove_charstring): 

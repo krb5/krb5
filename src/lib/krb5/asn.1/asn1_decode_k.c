@@ -115,7 +115,15 @@ asn1_error_code asn1_decode_kerberos_time(DECLARG(asn1buf *, buf),
      OLDDECLARG(asn1buf *, buf)
      OLDDECLARG(krb5_timestamp *, val)
 {
-  return asn1_decode_generaltime(buf,val);
+    time_t	t;
+    asn1_error_code retval;
+    
+    retval =  asn1_decode_generaltime(buf,&t);
+    if (retval)
+	return retval;
+
+    *val = t;
+    return 0;
 }
 
 #define integer_convert(fname,ktype)\
