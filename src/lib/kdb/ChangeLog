@@ -1,3 +1,7 @@
+2004-04-22  Ken Raeburn  <raeburn@mit.edu>
+
+	* libkdb5.exports: New file.
+
 2004-04-02  Ken Raeburn  <raeburn@mit.edu>
 
 	* t_kdb.c (add_principal): Delete unused argument 'rseed'.

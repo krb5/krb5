@@ -1,3 +1,7 @@
+2004-04-22  Ken Raeburn  <raeburn@mit.edu>
+
+	* libkadm5clnt.exports: New file.
+
 2003-12-13  Ken Raeburn  <raeburn@mit.edu>
 
 	* client_init.c (enctypes): Variable deleted.

@@ -1,3 +1,7 @@
+2004-04-22  Ken Raeburn  <raeburn@mit.edu>
+
+	* libkrb5.exports: New file.
+
 2003-12-23  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Remove basic checks for header files and

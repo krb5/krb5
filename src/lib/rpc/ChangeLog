@@ -1,3 +1,7 @@
+2004-04-22  Ken Raeburn  <raeburn@mit.edu>
+
+	* libgssrpc.exports: New file.
+
 2004-04-02  Ken Raeburn  <raeburn@mit.edu>
 
 	* svc_auth_gssapi.c (destroy_client): Don't call purify_watch_n

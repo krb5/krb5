@@ -1,3 +1,7 @@
+2004-04-22  Ken Raeburn  <raeburn@mit.edu>
+
+	* libk5crypto.exports: New file.
+
 2004-03-22  Ken Raeburn  <raeburn@mit.edu>
 
 	* pbkdf2.c (hmac1): Make a local copy of the supplied keyblock

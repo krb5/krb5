@@ -1,3 +1,7 @@
+2004-04-22  Ken Raeburn  <raeburn@mit.edu>
+
+	* libdes425.exports: New file.
+
 2004-02-18  Ken Raeburn  <raeburn@mit.edu>
 
 	* pcbc_encrypt.c (des_pcbc_encrypt): Don't pass a temporary
