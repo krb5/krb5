@@ -26,7 +26,6 @@ static char rcsid_rc_io_c[] =
 #include "rc_io.h"
 #include <krb5/sysincl.h>
 #include <krb5/osconf.h>
-#include <sys/stat.h>
 
 #ifdef KRB5_USE_INET
 #include <netinet/in.h>
