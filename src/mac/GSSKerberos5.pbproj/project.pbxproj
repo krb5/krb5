@@ -203,6 +203,57 @@
 			path = GSS.framework;
 			refType = 3;
 		};
+		0F80148EFF9A7E33126500C7 = {
+			isa = PBXFrameworkReference;
+			name = Carbon.framework;
+			path = /System/Library/Frameworks/Carbon.framework;
+			refType = 0;
+		};
+		0F80148FFF9A7E33126500C7 = {
+			fileRef = 0F80148EFF9A7E33126500C7;
+			isa = PBXBuildFile;
+			settings = {
+				INCLUDED_OSS = (
+					MACOS,
+					WINDOWS,
+					PDOUNIX,
+				);
+			};
+		};
+		0F801490FF9A7E5D126500C7 = {
+			isa = PBXFrameworkReference;
+			name = KerberosSupport.framework;
+			path = /System/Library/Frameworks/Kerberos.framework/Frameworks/KerberosSupport.framework;
+			refType = 0;
+		};
+		0F801491FF9A7E5D126500C7 = {
+			fileRef = 0F801490FF9A7E5D126500C7;
+			isa = PBXBuildFile;
+			settings = {
+				INCLUDED_OSS = (
+					MACOS,
+					WINDOWS,
+					PDOUNIX,
+				);
+			};
+		};
+		0F801492FF9A8D33126500C7 = {
+			isa = PBXFrameworkReference;
+			name = Preferences.framework;
+			path = /System/Library/Frameworks/Kerberos.framework/Frameworks/Preferences.framework;
+			refType = 0;
+		};
+		0F801493FF9A8D33126500C7 = {
+			fileRef = 0F801492FF9A8D33126500C7;
+			isa = PBXBuildFile;
+			settings = {
+				INCLUDED_OSS = (
+					MACOS,
+					WINDOWS,
+					PDOUNIX,
+				);
+			};
+		};
 		174475CAFF5EEEE312120111 = {
 			isa = PBXFileReference;
 			path = GenerateErrorTables.sh;
@@ -478,9 +529,9 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				EXPORTED_SYMBOLS_FILE = "$(SRCROOT)/../util/profile/profile.pbexp";
-				FRAMEWORK_SEARCH_PATHS = "";
+				FRAMEWORK_SEARCH_PATHS = /System/Library/Frameworks/Kerberos.framework/Frameworks;
 				FRAMEWORK_VERSION = A;
-				HEADER_SEARCH_PATHS = "\"/System/Library/Frameworks/CarbonCore.framework/Headers\" \"$(SYMROOT)/ComErr.framework/Headers\"";
+				HEADER_SEARCH_PATHS = "/System/Library/Frameworks/CarbonCore.framework/Headers \"$(SYMROOT)/ComErr.framework/Headers\" /System/Library/Frameworks/Kerberos.framework/Frameworks/KerberosSupport.framework/Headers";
 				LIBRARY_SEARCH_PATHS = "";
 				OPTIMIZATION_CFLAGS = "";
 				OTHER_CFLAGS = "-imacros \"$(SRCROOT)/GSSKerberosPrefix.h\"";
@@ -572,6 +623,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				17447604FF5EFCC612120111,
+				0F80148FFF9A7E33126500C7,
+				0F801491FF9A7E5D126500C7,
 			);
 			isa = PBXFrameworksBuildPhase;
 			name = "Frameworks & Libraries";
@@ -587,6 +640,8 @@
 			children = (
 				012574A6FF7A9C8212120111,
 				17447603FF5EFCC612120111,
+				0F80148EFF9A7E33126500C7,
+				0F801490FF9A7E5D126500C7,
 				61622FDCFF8535E112120111,
 				4E933A42FF828B8512120111,
 				174475E9FF5EF8A512120111,
@@ -863,6 +918,7 @@
 				174476CCFF60088512120111,
 				174476CDFF60088512120111,
 				00CFB47BFF6EA3C312120111,
+				0F801492FF9A8D33126500C7,
 				61622FDAFF85346F12120111,
 				61622FD1FF82A36412120111,
 				174476B8FF5FFFA512120111,
@@ -892,7 +948,7 @@
 				EXPORTED_SYMBOLS_FILE = "$(SRCROOT)/Kerberos5Lib.pbexp";
 				FRAMEWORK_SEARCH_PATHS = "\"/System/Library/Frameworks/Kerberos.framework/Frameworks\"";
 				FRAMEWORK_VERSION = A;
-				HEADER_SEARCH_PATHS = "\"/System/Library/Frameworks/CarbonCore.framework/Headers\" \"$(SYMROOT)/ComErr.framework/Headers\" \"$(SYMROOT)/Profile.framework/Headers\" \"/System/Library/Frameworks/Kerberos.framework/Frameworks/CCache.framework/Headers\"";
+				HEADER_SEARCH_PATHS = "/System/Library/Frameworks/CarbonCore.framework/Headers \"$(SYMROOT)/ComErr.framework/Headers\" \"$(SYMROOT)/Profile.framework/Headers\" /System/Library/Frameworks/Kerberos.framework/Frameworks/CCache.framework/Headers /System/Library/Frameworks/Kerberos.framework/Frameworks/Preferences.framework/Headers /System/Library/Frameworks/Kerberos.framework/Frameworks/KerberosSupport.framework/Headers";
 				LIBRARY_SEARCH_PATHS = "";
 				OPTIMIZATION_CFLAGS = "";
 				OTHER_CFLAGS = "-imacros \"$(SRCROOT)/GSSKerberosPrefix.h\"";
@@ -1347,6 +1403,7 @@
 				1744770EFF60088512120111,
 				1744770FFF60088512120111,
 				00CFB47CFF6EA3C312120111,
+				0F801493FF9A8D33126500C7,
 			);
 			isa = PBXFrameworksBuildPhase;
 			name = "Frameworks & Libraries";
