@@ -754,6 +754,7 @@ dnl
 kdb5_deplib=''
 kdb5_lib=''
 define(USE_KDB5_LIBRARY,[
+WITH_KDB_DB
 kdb5_deplib="\[$](TOPLIBD)/libkdb5.a"
 kdb5_lib=-lkdb5])
 dnl
@@ -960,41 +961,113 @@ fi
 AC_SUBST(LDARGS)
 ])dnl
 dnl
-dnl --with-dbm uses native DBM for the KDC database.
 dnl
-define(WITH_DBM_KDB,[
-AC_ARG_WITH([dbm],
-[  --with-dbm		use native dbm for kdc database
-  --without-dbm		use included version of Berkeley db (default)],
-,
-withval=no)dnl
-if test "$withval" = yes; then
-	AC_MSG_RESULT(Using native dbm)
-	AC_CHECK_LIB(ndbm,main)
-	AC_CHECK_LIB(dbm,main)
-else
-	AC_MSG_RESULT(Using Berkeley db)
+dnl Database determination
+dnl
+dnl
+dnl Check for missing DBM prototypes
+dnl
+AC_DEFUN(AC_CHECK_DBM_PROTO,[
+ AC_MSG_CHECKING([for missing $2 prototype])
+ AC_CACHE_VAL(krb_cv_missing_$2_prototype,
+  AC_EGREP_HEADER([$2], [$1.h],
+   eval krb_cv_missing_$2_prototype=no,
+   AC_TRY_LINK(
+[#include <$1.h>
+int $2();],
+[$2();], $4
+    eval krb_cv_missing_$2_prototype=yes,
+    $3
+    eval krb_cv_missing_$2_prototype=no)))
+ if eval "test \"`echo '$krb_cv_missing_'$1_prototype`\" = yes"; then
+  AC_MSG_RESULT(yes)
+ else
+  AC_MSG_RESULT(no)
+ fi
+])dnl
+dnl
+dnl
+dnl --with-aname-db=[dbm type]
+dnl --with-aname-dbopts=[compile flags]
+dnl
+dnl --with-kdb-db=[dbm type]
+dnl --with-kdb-dbopts=[compile flags]
+dnl
+dnl
+define(USE_ANAME,[WITH_ANAME_DB])dnl
+dnl
+define(WITH_ANAME_DB,[
+AC_ARG_WITH([aname-db],
+[  --with-aname-db=DBM	name conversion database type]
+dbval="$withval",
+dbval=
+)dnl
+AC_ARG_WITH([aname-dbopts],
+[  --with-aname-dbopts=CCOPTS  compilation flags],
+dbflags="$withval",
+)dnl
+CHECK_DB
+CPPFLAGS="$CPPFLAGS $dbflags"
+AC_MSG_RESULT(Using $dbval for name conversion database.)
+])dnl
+dnl
+dnl
+dnl
+define(WITH_KDB_DB,[
+AC_ARG_WITH([kdb-db],
+[  --with-kdb-db=DBM	kerberos database type],
+dbval="$withval",
+dbval=
+)dnl
+AC_ARG_WITH([kdb-dbopts],
+[  --with-kdb-dbopts=CCOPTS  compilation flags],
+dbflags="$withval",
+)dnl
+CHECK_DB
+CPPFLAGS="$CPPFLAGS $dbflags"
+AC_MSG_RESULT(Using $dbval for kerberos database.)
+])dnl
+dnl
+dnl
+define(CHECK_DB,[
+if test "$dbval" = "" -o "$dbval" = ndbm; then
+	AC_HEADER_CHECK(ndbm.h,dbval=ndbm
+	  AC_DEFINE(NDBM)
+	  AC_CHECK_LIB(ndbm,main,,AC_CHECK_LIB(gdbm,main))
+	  AC_CHECK_DBM_PROTO($dbval,dbm_error,,
+		AC_DEFINE(MISSING_ERROR_PROTO))
+	  AC_CHECK_DBM_PROTO($dbval,dbm_clearerr,,
+		AC_DEFINE(MISSING_CLEARERR_PROTO)))
+fi
+if test "$dbval" = "" -o "$dbval" = dbm; then
+	AC_HEADER_CHECK(dbm.h,dbval=dbm
+	  AC_DEFINE(ODBM)
+	  AC_CHECK_LIB(dbm,main)
+	  AC_CHECK_DBM_PROTO($dbval,dbm_error,,
+		AC_DEFINE(MISSING_ERROR_PROTO))
+	  AC_CHECK_DBM_PROTO($dbval,dbm_clearerr,,
+		AC_DEFINE(MISSING_CLEARERR_PROTO)))
+fi
+if test "$dbval" = "" -o "$dbval" = db; then
+	  dbval=db
+	  AC_DEFINE(BERK_DB_DBM)
 fi
 ])dnl
 dnl
-dnl --with-dbm-lname uses native DBM for the aname to lname conversion
 dnl
-define(WITH_DBM_LNAME,[
-AC_ARG_WITH([dbm-lname],
-[  --with-dbm-lname              use native dbm for aname to lname conversion
-  --without-dbm-lname           use included version of Berkeley db (default)],
+dnl
+dnl
+AC_DEFUN(WITH_KDB4,[
+AC_ARG_WITH([kdb4],
+[  --with-kdb4		use Kerberos version 4 database library.
+  --without-kdb4	Avoid using Kerberos version 4 database library.],
 ,
 withval=no)dnl
-if test "$withval" = yes; then
-	AC_MSG_RESULT(Using native dbm)
-	AC_CHECK_LIB(ndbm,main)
-	AC_CHECK_LIB(dbm,main)
+if test "$withval" = no; then
+$2
+:
 else
-	AC_MSG_RESULT(Using Berkeley db)
+$1
+:
 fi
 ])dnl
-dnl
-
-
-
-
