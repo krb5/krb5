@@ -1,3 +1,9 @@
+Thu Nov 14 14:30:28 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* krcp.c: don't print our own error message if kcmd returns -1 (it
+ 	always printed something in that case, and error_message(-1)
+ 	prints a mess [krb5-appl/70]
+
 Mon Nov 11 23:38:05 1996  Mark Eichin  <eichin@cygnus.com>
 
 	* krshd "plumbing" fixes

@@ -429,10 +429,11 @@ krb5_creds *cred;
 				  authopts,
 				  0); /* Not any port # */
 		    if (status) {
-			fprintf(stderr,
-				"%s: kcmd to host %s failed - %s\n",
-				orig_argv[0], host,
-				error_message(status));
+			if (status != -1) 
+			     fprintf(stderr,
+				     "%s: kcmd to host %s failed - %s\n",
+				     orig_argv[0], host,
+				     error_message(status));
 			try_normal(orig_argv);
 		    }
 		    else {
@@ -525,10 +526,11 @@ krb5_creds *cred;
 			      authopts,
 			      0); /* Not any port # */
 		if (status) {
-		    fprintf(stderr,
-			    "%s: kcmd to host %s failed - %s\n",
-			    orig_argv[0], host,
-			    error_message(status));
+		    if (status != -1)
+			 fprintf(stderr,
+				 "%s: kcmd to host %s failed - %s\n",
+				 orig_argv[0], host,
+				 error_message(status));
 		    try_normal(orig_argv);
 		    
 		} else {
