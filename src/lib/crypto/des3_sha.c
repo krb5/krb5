@@ -64,7 +64,7 @@ krb5_cs_table_entry krb5_des3_sha_cst_entry = {
     };
 
 
-krb5_error_code
+static krb5_error_code
 mit_des3_sha_encrypt_func(in, out, size, key, ivec)
     krb5_const_pointer in;
     krb5_pointer out;
@@ -127,7 +127,7 @@ mit_des3_sha_encrypt_func(in, out, size, key, ivec)
     return retval;
 }
 
-krb5_error_code
+static krb5_error_code
 mit_des3_sha_decrypt_func(in, out, size, key, ivec)
     krb5_const_pointer in;
     krb5_pointer out;
