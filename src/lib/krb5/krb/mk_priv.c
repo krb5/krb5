@@ -29,6 +29,10 @@ static char rcsid_mk_priv_c[] =
  encryption; sender_addr and recv_addr specify the full addresses (host
  and port) of the sender and receiver.
 
+ i_vector is used as an initialization vector for the encryption, and if
+ non-NULL its contents are replaced with the last block of the encrypted
+ data upon exit.
+
  The outbuf buffer storage is allocated, and should be freed by the
  caller when finished.
 
@@ -40,12 +44,14 @@ krb5_mk_priv(DECLARG(const krb5_data *, userdata),
 	     DECLARG(const krb5_keyblock *, key),
 	     DECLARG(const krb5_fulladdr *, sender_addr),
 	     DECLARG(const krb5_fulladdr *, recv_addr),
+	     DECLARG(krb5_pointer, i_vector),
 	     DECLARG(krb5_data *, outbuf))
 OLDDECLARG(const krb5_data *, userdata)
 OLDDECLARG(const krb5_enctype, etype)
 OLDDECLARG(const krb5_keyblock *, key)
 OLDDECLARG(const krb5_fulladdr *, sender_addr)
 OLDDECLARG(const krb5_fulladdr *, recv_addr)
+OLDDECLARG(krb5_pointer, i_vector)
 OLDDECLARG(krb5_data *, outbuf)
 {
     krb5_error_code retval;
@@ -60,16 +66,16 @@ OLDDECLARG(krb5_data *, outbuf)
     privmsg.etype = etype; 
 
     privmsg_enc_part.user_data = *userdata;
-    privmsg_enc_part.addresses = addrs;
+    privmsg_enc_part.s_address = sender_addr->address;
+    privmsg_enc_part.r_address = recv_addr->address;
 
-    addrs[0] = sender_addr->address;
-    addrs[1] = 0;
-
-    if (retval = krb5_ms_timeofday(&privmsg_enc_part.timestamp, &privmsg_enc_part.msec))
+    if (retval = krb5_ms_timeofday(&privmsg_enc_part.timestamp,
+				   &privmsg_enc_part.msec))
 	return retval;
 
     if (krb5_fulladdr_order(sender_addr, recv_addr) > 0)
-	privmsg_enc_part.msec = (privmsg_enc_part.msec & MSEC_VAL_MASK) | MSEC_DIRBIT;
+	privmsg_enc_part.msec =
+	    (privmsg_enc_part.msec & MSEC_VAL_MASK) | MSEC_DIRBIT;
     else
 	/* this should be a no-op, but just to be sure... */
 	privmsg_enc_part.msec = privmsg_enc_part.msec & MSEC_VAL_MASK;
@@ -112,10 +118,18 @@ OLDDECLARG(krb5_data *, outbuf)
     if (retval =
         (*eblock.crypto_entry->encrypt_func)((krb5_pointer) scratch->data,
                                              (krb5_pointer) privmsg.enc_part.data,
-                                             scratch->length, &eblock, 0)) {
+                                             scratch->length, &eblock,
+					     i_vector)) {
         goto clean_prockey;
     }
 
+    /* put last block into the i_vector */
+    if (i_vector)
+	bcopy(privmsg.enc_part.data +
+	      (privmsg.enc_part.length - eblock.crypto_entry->block_length),
+	      i_vector,
+	      eblock.crypto_entry->block_length);
+	   
     /* private message is now assembled-- do some cleanup */
     cleanup_scratch();
 
