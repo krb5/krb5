@@ -157,14 +157,14 @@ typedef struct iovec sg_buf;
 #define inet_ntop(AF,SRC,DST,CNT)					    \
     ((AF) == AF_INET							    \
      ? ((CNT) < 16							    \
-	? (SOCKET_SET_ERRNO(ENOSPC), NULL)				    \
+	? (SOCKET_SET_ERRNO(ENOSPC), (const char *)NULL)		    \
 	: (sprintf((DST), "%d.%d.%d.%d",				    \
 		   ((const unsigned char *)(const void *)(SRC))[0] & 0xff,  \
 		   ((const unsigned char *)(const void *)(SRC))[1] & 0xff,  \
 		   ((const unsigned char *)(const void *)(SRC))[2] & 0xff,  \
 		   ((const unsigned char *)(const void *)(SRC))[3] & 0xff), \
 	   (DST)))							    \
-     : (SOCKET_SET_ERRNO(EAFNOSUPPORT), NULL))
+     : (SOCKET_SET_ERRNO(EAFNOSUPPORT), (const char *)NULL))
 #define HAVE_INET_NTOP
 #endif
 
