@@ -1,3 +1,10 @@
+1999-08-31  Ken Raeburn  <raeburn@mit.edu>
+
+	* default.exp (setup_kerberos_files): Set kdc_supported_enctypes
+	in kdc.conf, and include des3-cbc-sha1:normal.
+	(setup_kerberos_db): If setting up krbtgt to use des3, now use
+	only des3, not des3 and des-crc both.
+
 1999-08-30  Ken Raeburn  <raeburn@raeburn.org>
 
 	* default.exp (des3_krbtgt): New variable.
