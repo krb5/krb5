@@ -1,3 +1,21 @@
+Wed Jan 21 19:14:09 1998  Tom Yu  <tlyu@mit.edu>
+
+	* gssapiP_krb5.h: Add rcache member to the creds
+	structure. [krb5-libs/370]
+
+	* accept_sec_context.c (krb5_gss_accept_sec_context): Actually set
+	an rcache in auth context from the one saved in the creds
+	structure. [krb5-libs/370]
+
+	* acquire_cred.c (acquire_accept_cred): Set up an rcache for use
+	later. [krb5-libs/370]
+
+	* delete_sec_context.c (krb5_gss_delete_sec_context): Don't delete
+	the rcache when freeing the auth_context. [krb5-libs/370]
+
+	* rel_cred.c (krb5_gss_release_cred): Properly close the
+	rcache. [krb5-libs/370]
+
 Mon Dec 29 10:30:43 1997  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* Makefile.in (OBJS): Changed val_cred.$(OBJECT) to

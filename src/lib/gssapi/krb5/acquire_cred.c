@@ -89,6 +89,15 @@ acquire_accept_cred(context, minor_status, desired_name, output_princ, cred)
    /* hooray.  we made it */
 
    cred->keytab = kt;
+
+   /* Open the replay cache for this principal. */
+   if ((code = krb5_get_server_rcache(context,
+				      krb5_princ_component(context, princ, 0),
+				      &cred->rcache))) {
+       *minor_status = code;
+       return(GSS_S_FAILURE);
+   }
+
    return(GSS_S_COMPLETE);
 }
 

@@ -88,6 +88,7 @@ typedef struct _krb5_gss_cred_id_rec {
    /* ccache (init) data */
    krb5_ccache ccache;
    krb5_timestamp tgt_expire;
+   krb5_rcache rcache;
 } krb5_gss_cred_id_rec, *krb5_gss_cred_id_t; 
 
 typedef struct _krb5_gss_enc_desc {
