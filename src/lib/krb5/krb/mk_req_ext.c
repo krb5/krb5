@@ -81,7 +81,6 @@ krb5_mk_req_extended(context, auth_context, ap_req_options, in_data, in_creds,
     krb5_checksum	  checksum;
     krb5_checksum	  *checksump = 0;
     krb5_auth_context	  new_auth_context;
-    size_t		  cksumlen;
 
     krb5_ap_req request;
     krb5_data *scratch = 0;
@@ -136,17 +135,6 @@ krb5_mk_req_extended(context, auth_context, ap_req_options, in_data, in_creds,
 	    checksum.length = in_data->length;
 	    checksum.contents = (krb5_octet *) in_data->data;
 	} else {
-	    if ((retval=krb5_c_checksum_length(context,
-					       (*auth_context)->req_cksumtype,
-					       &cksumlen)))
-		goto cleanup;
-
-	    /* Generate checksum, XXX What should the seed be? */
-	    checksum.length = cksumlen;
-	    if ((checksum.contents = (krb5_octet *)malloc(checksum.length)) == NULL) {
-		retval = ENOMEM;
-		goto cleanup;
-	    }
 	    if ((retval = krb5_c_make_checksum(context, 
 					       (*auth_context)->req_cksumtype,
 					       (*auth_context)->keyblock,

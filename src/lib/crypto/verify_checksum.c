@@ -43,8 +43,6 @@ krb5_c_verify_checksum(context, key, usage, data, cksum, valid)
 	return(KRB5_BAD_MSIZE);
 
     computed.length = hashsize;
-    if ((computed.contents = (krb5_octet *) malloc(computed.length)) == NULL)
-	return(ENOMEM);
 
     if (ret = krb5_c_make_checksum(context, cksum->checksum_type, key, usage,
 				   data, &computed)) {

@@ -57,17 +57,8 @@ krb5_send_tgs_basic(context, in_data, in_cred, outbuf)
     krb5_ap_req 	  request;
     krb5_data		* scratch;
     krb5_data           * toutbuf;
-    size_t		  sumlen;
-
-    if ((retval = krb5_c_checksum_length(context, context->kdc_req_sumtype,
-					 &sumlen)))
-	return(retval);
 
     /* Generate checksum */
-    checksum.length = krb5_checksum_size(context, context->kdc_req_sumtype);
-    if ((checksum.contents = (krb5_octet *) malloc(checksum.length)) == NULL)
-        return(ENOMEM);
-
     if ((retval = krb5_c_make_checksum(context, context->kdc_req_sumtype,
 				       &in_cred->keyblock,
 				       KRB5_KEYUSAGE_TGS_REQ_AUTH_CKSUM,

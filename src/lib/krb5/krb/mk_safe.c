@@ -60,7 +60,6 @@ krb5_mk_safe_basic(context, userdata, keyblock, replaydata, local_addr,
     krb5_octet zero_octet = 0;
     krb5_checksum safe_checksum;
     krb5_data *scratch1, *scratch2;
-    size_t sumlen;
 
     if (!valid_cksumtype(sumtype))
 	return KRB5_PROG_SUMTYPE_NOSUPP;
@@ -90,17 +89,6 @@ krb5_mk_safe_basic(context, userdata, keyblock, replaydata, local_addr,
 
     if ((retval = encode_krb5_safe(&safemsg, &scratch1)))
 	return retval;
-
-    if ((retval = krb5_c_checksum_length(context, sumtype, &sumlen)))
-	goto cleanup_scratch;
-
-    safe_checksum.length = sumlen;
-
-    if (!(safe_checksum.contents = (krb5_octet *) malloc(safe_checksum.length))) {
-
-	retval = ENOMEM;
-	goto cleanup_scratch;
-    }
 
     if ((retval = krb5_c_make_checksum(context, sumtype, keyblock,
 				       KRB5_KEYUSAGE_KRB_SAFE_CKSUM,
