@@ -1,3 +1,9 @@
+Sun Feb 18 16:23:59 2001  Ezra Peisach  <epeisach@mit.edu>
+
+	* kadm_rpc_svc.c, server_stubs.c: Rename all server side dispatch
+        routines to end in _svc so as to not conflict with prototypes of
+        client side handlers.
+
 2000-10-17  Ezra Peisach  <epeisach@mit.edu>
 
 	* ovsec_kadmd.c (do_schpw): Cast arguments to sendto() which take int.

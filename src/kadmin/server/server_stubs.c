@@ -16,6 +16,8 @@ static char *rcsid = "$Header$";
 #include <kadm5/server_internal.h>
 #include <kadm5/server_acl.h>
 #include <syslog.h>
+#include <arpa/inet.h>  /* inet_ntoa */
+#include <krb5/adm_proto.h>  /* krb5_klog_syslog */
 #include "misc.h"
 
 #define xdr_free gssrpc_xdr_free /* XXX kludge */
@@ -33,7 +35,15 @@ extern void *				global_server_handle;
 	  cmp_gss_names_rel_1(acceptor_name(rqstp->rq_svccred), \
 			gss_oldchangepw_name)))
 
-int cmp_gss_names(gss_name_t n1, gss_name_t n2)
+
+static int gss_to_krb5_name(kadm5_server_handle_t handle,
+		     gss_name_t gss_name, krb5_principal *princ);
+
+static int gss_name_to_string(gss_name_t gss_name, gss_buffer_desc *str);
+
+static gss_name_t acceptor_name(gss_ctx_id_t context);
+
+static int cmp_gss_names(gss_name_t n1, gss_name_t n2)
 {
    OM_uint32 emaj, emin;
    int equal;
@@ -46,7 +56,7 @@ int cmp_gss_names(gss_name_t n1, gss_name_t n2)
 
 /* Does a comparison of the names and then releases the first entity */
 /* For use above in CHANGEPW_SERVICE */
-int cmp_gss_names_rel_1(gss_name_t n1, gss_name_t n2)
+static int cmp_gss_names_rel_1(gss_name_t n1, gss_name_t n2)
 {
    OM_uint32 min_stat;
    int ret;
@@ -152,6 +162,7 @@ static void free_server_handle(kadm5_server_handle_t handle)
  * server_name, both of which must be freed by the caller.  Returns 0
  * on success and -1 on failure.
  */
+static 
 int setup_gss_names(struct svc_req *rqstp,
 		    gss_buffer_desc *client_name,
 		    gss_buffer_desc *server_name)
@@ -178,7 +189,7 @@ int setup_gss_names(struct svc_req *rqstp,
      return 0;
 }
 
-gss_name_t acceptor_name(gss_ctx_id_t context)
+static gss_name_t acceptor_name(gss_ctx_id_t context)
 {
      OM_uint32 maj_stat, min_stat;
      gss_name_t name;
@@ -190,49 +201,49 @@ gss_name_t acceptor_name(gss_ctx_id_t context)
      return name;
 }
      
-int cmp_gss_krb5_name(kadm5_server_handle_t handle,
+static int cmp_gss_krb5_name(kadm5_server_handle_t handle,
 		      gss_name_t gss_name, krb5_principal princ)
 {
      krb5_principal princ2;
-     int stat;
+     int status;
 
      if (! gss_to_krb5_name(handle, gss_name, &princ2))
 	  return 0;
-     stat = krb5_principal_compare(handle->context, princ, princ2);
+     status = krb5_principal_compare(handle->context, princ, princ2);
      krb5_free_principal(handle->context, princ2);
-     return stat;
+     return status;
 }
 
-int gss_to_krb5_name(kadm5_server_handle_t handle,
+static int gss_to_krb5_name(kadm5_server_handle_t handle,
 		     gss_name_t gss_name, krb5_principal *princ)
 {
-     OM_uint32 stat, minor_stat;
+     OM_uint32 status, minor_stat;
      gss_buffer_desc gss_str;
      gss_OID gss_type;
      int success;
 
-     stat = gss_display_name(&minor_stat, gss_name, &gss_str, &gss_type);
-     if ((stat != GSS_S_COMPLETE) || (gss_type != gss_nt_krb5_name))
+     status = gss_display_name(&minor_stat, gss_name, &gss_str, &gss_type);
+     if ((status != GSS_S_COMPLETE) || (gss_type != gss_nt_krb5_name))
 	  return 0;
      success = (krb5_parse_name(handle->context, gss_str.value, princ) == 0);
      gss_release_buffer(&minor_stat, &gss_str);
      return success;
 }
-int
+
+static int
 gss_name_to_string(gss_name_t gss_name, gss_buffer_desc *str)
 {
-     OM_uint32 stat, minor_stat;
+     OM_uint32 status, minor_stat;
      gss_OID gss_type;
-     int ret;
 
-     stat = gss_display_name(&minor_stat, gss_name, str, &gss_type);
-     if ((stat != GSS_S_COMPLETE) || (gss_type != gss_nt_krb5_name))
+     status = gss_display_name(&minor_stat, gss_name, str, &gss_type);
+     if ((status != GSS_S_COMPLETE) || (gss_type != gss_nt_krb5_name))
 	  return 1;
      return 0;
 }
 
 generic_ret *
-create_principal_1(cprinc_arg *arg, struct svc_req *rqstp)
+create_principal_1_svc(cprinc_arg *arg, struct svc_req *rqstp)
 {
     static generic_ret		ret;
     char			*prime_arg;
@@ -243,10 +254,10 @@ create_principal_1(cprinc_arg *arg, struct svc_req *rqstp)
 
     xdr_free(xdr_generic_ret, &ret);
 
-    if (ret.code = new_server_handle(arg->api_version, rqstp, &handle))
+    if ((ret.code = new_server_handle(arg->api_version, rqstp, &handle)))
 	 return &ret;
 
-    if (ret.code = check_handle((void *)handle)) {
+    if ((ret.code = check_handle((void *)handle))) {
 	 free_server_handle(handle);
 	 return &ret;
     }
@@ -286,7 +297,7 @@ create_principal_1(cprinc_arg *arg, struct svc_req *rqstp)
 }
 
 generic_ret *
-create_principal3_1(cprinc3_arg *arg, struct svc_req *rqstp)
+create_principal3_1_svc(cprinc3_arg *arg, struct svc_req *rqstp)
 {
     static generic_ret		ret;
     char			*prime_arg;
@@ -297,10 +308,10 @@ create_principal3_1(cprinc3_arg *arg, struct svc_req *rqstp)
 
     xdr_free(xdr_generic_ret, &ret);
 
-    if (ret.code = new_server_handle(arg->api_version, rqstp, &handle))
+    if ((ret.code = new_server_handle(arg->api_version, rqstp, &handle)))
 	 return &ret;
 
-    if (ret.code = check_handle((void *)handle)) {
+    if ((ret.code = check_handle((void *)handle))) {
 	 free_server_handle(handle);
 	 return &ret;
     }
@@ -342,7 +353,7 @@ create_principal3_1(cprinc3_arg *arg, struct svc_req *rqstp)
 }
 
 generic_ret *
-delete_principal_1(dprinc_arg *arg, struct svc_req *rqstp)
+delete_principal_1_svc(dprinc_arg *arg, struct svc_req *rqstp)
 {
     static generic_ret		    ret;
     char			    *prime_arg;
@@ -353,10 +364,10 @@ delete_principal_1(dprinc_arg *arg, struct svc_req *rqstp)
 
     xdr_free(xdr_generic_ret, &ret);
 
-    if (ret.code = new_server_handle(arg->api_version, rqstp, &handle))
+    if ((ret.code = new_server_handle(arg->api_version, rqstp, &handle)))
 	 return &ret;
 
-    if (ret.code = check_handle((void *)handle)) {
+    if ((ret.code = check_handle((void *)handle))) {
 	 free_server_handle(handle);
 	 return &ret;
     }
@@ -391,7 +402,7 @@ delete_principal_1(dprinc_arg *arg, struct svc_req *rqstp)
 }
 
 generic_ret *
-modify_principal_1(mprinc_arg *arg, struct svc_req *rqstp)
+modify_principal_1_svc(mprinc_arg *arg, struct svc_req *rqstp)
 {
     static generic_ret		    ret;
     char			    *prime_arg;
@@ -403,10 +414,10 @@ modify_principal_1(mprinc_arg *arg, struct svc_req *rqstp)
 
     xdr_free(xdr_generic_ret, &ret);
 
-    if (ret.code = new_server_handle(arg->api_version, rqstp, &handle))
+    if ((ret.code = new_server_handle(arg->api_version, rqstp, &handle)))
 	 return &ret;
 
-    if (ret.code = check_handle((void *)handle)) {
+    if ((ret.code = check_handle((void *)handle))) {
 	 free_server_handle(handle);
 	 return &ret;
     }
@@ -443,7 +454,7 @@ modify_principal_1(mprinc_arg *arg, struct svc_req *rqstp)
 }
 
 generic_ret *
-rename_principal_1(rprinc_arg *arg, struct svc_req *rqstp)
+rename_principal_1_svc(rprinc_arg *arg, struct svc_req *rqstp)
 {
     static generic_ret		ret;
     char			*prime_arg1,
@@ -457,10 +468,10 @@ rename_principal_1(rprinc_arg *arg, struct svc_req *rqstp)
 
     xdr_free(xdr_generic_ret, &ret);
 
-    if (ret.code = new_server_handle(arg->api_version, rqstp, &handle))
+    if ((ret.code = new_server_handle(arg->api_version, rqstp, &handle)))
 	 return &ret;
 
-    if (ret.code = check_handle((void *)handle)) {
+    if ((ret.code = check_handle((void *)handle))) {
 	 free_server_handle(handle);
 	 return &ret;
     }
@@ -510,7 +521,7 @@ rename_principal_1(rprinc_arg *arg, struct svc_req *rqstp)
 }
 
 gprinc_ret *
-get_principal_1(gprinc_arg *arg, struct svc_req *rqstp)
+get_principal_1_svc(gprinc_arg *arg, struct svc_req *rqstp)
 {
     static gprinc_ret		    ret;
     kadm5_principal_ent_t_v1	    e;
@@ -522,10 +533,10 @@ get_principal_1(gprinc_arg *arg, struct svc_req *rqstp)
 
     xdr_free(xdr_gprinc_ret, &ret);
 
-    if (ret.code = new_server_handle(arg->api_version, rqstp, &handle))
+    if ((ret.code = new_server_handle(arg->api_version, rqstp, &handle)))
 	 return &ret;
 
-    if (ret.code = check_handle((void *)handle)) {
+    if ((ret.code = check_handle((void *)handle))) {
 	 free_server_handle(handle);
 	 return &ret;
     }
@@ -579,7 +590,7 @@ get_principal_1(gprinc_arg *arg, struct svc_req *rqstp)
 }
 
 gprincs_ret *
-get_princs_1(gprincs_arg *arg, struct svc_req *rqstp)
+get_princs_1_svc(gprincs_arg *arg, struct svc_req *rqstp)
 {
     static gprincs_ret		    ret;
     char			    *prime_arg;
@@ -590,10 +601,10 @@ get_princs_1(gprincs_arg *arg, struct svc_req *rqstp)
 
     xdr_free(xdr_gprincs_ret, &ret);
 
-    if (ret.code = new_server_handle(arg->api_version, rqstp, &handle))
+    if ((ret.code = new_server_handle(arg->api_version, rqstp, &handle)))
 	 return &ret;
 
-    if (ret.code = check_handle((void *)handle)) {
+    if ((ret.code = check_handle((void *)handle))) {
 	 free_server_handle(handle);
 	 return &ret;
     }
@@ -634,7 +645,7 @@ get_princs_1(gprincs_arg *arg, struct svc_req *rqstp)
 }
 
 generic_ret *
-chpass_principal_1(chpass_arg *arg, struct svc_req *rqstp)
+chpass_principal_1_svc(chpass_arg *arg, struct svc_req *rqstp)
 {
     static generic_ret		    ret;
     char			    *prime_arg;
@@ -645,10 +656,10 @@ chpass_principal_1(chpass_arg *arg, struct svc_req *rqstp)
 
     xdr_free(xdr_generic_ret, &ret);
 
-    if (ret.code = new_server_handle(arg->api_version, rqstp, &handle))
+    if ((ret.code = new_server_handle(arg->api_version, rqstp, &handle)))
 	 return &ret;
 
-    if (ret.code = check_handle((void *)handle)) {
+    if ((ret.code = check_handle((void *)handle))) {
 	 free_server_handle(handle);
 	 return &ret;
     }
@@ -692,7 +703,7 @@ chpass_principal_1(chpass_arg *arg, struct svc_req *rqstp)
 }
 
 generic_ret *
-chpass_principal3_1(chpass3_arg *arg, struct svc_req *rqstp)
+chpass_principal3_1_svc(chpass3_arg *arg, struct svc_req *rqstp)
 {
     static generic_ret		    ret;
     char			    *prime_arg;
@@ -703,10 +714,10 @@ chpass_principal3_1(chpass3_arg *arg, struct svc_req *rqstp)
 
     xdr_free(xdr_generic_ret, &ret);
 
-    if (ret.code = new_server_handle(arg->api_version, rqstp, &handle))
+    if ((ret.code = new_server_handle(arg->api_version, rqstp, &handle)))
 	 return &ret;
 
-    if (ret.code = check_handle((void *)handle)) {
+    if ((ret.code = check_handle((void *)handle))) {
 	 free_server_handle(handle);
 	 return &ret;
     }
@@ -753,7 +764,7 @@ chpass_principal3_1(chpass3_arg *arg, struct svc_req *rqstp)
 }
 
 generic_ret *
-setv4key_principal_1(setv4key_arg *arg, struct svc_req *rqstp)
+setv4key_principal_1_svc(setv4key_arg *arg, struct svc_req *rqstp)
 {
     static generic_ret		    ret;
     char			    *prime_arg;
@@ -764,10 +775,10 @@ setv4key_principal_1(setv4key_arg *arg, struct svc_req *rqstp)
 
     xdr_free(xdr_generic_ret, &ret);
 
-    if (ret.code = new_server_handle(arg->api_version, rqstp, &handle))
+    if ((ret.code = new_server_handle(arg->api_version, rqstp, &handle)))
 	 return &ret;
 
-    if (ret.code = check_handle((void *)handle)) {
+    if ((ret.code = check_handle((void *)handle))) {
 	 free_server_handle(handle);
 	 return &ret;
     }
@@ -808,7 +819,7 @@ setv4key_principal_1(setv4key_arg *arg, struct svc_req *rqstp)
 }
 
 generic_ret *
-setkey_principal_1(setkey_arg *arg, struct svc_req *rqstp)
+setkey_principal_1_svc(setkey_arg *arg, struct svc_req *rqstp)
 {
     static generic_ret		    ret;
     char			    *prime_arg;
@@ -819,10 +830,10 @@ setkey_principal_1(setkey_arg *arg, struct svc_req *rqstp)
 
     xdr_free(xdr_generic_ret, &ret);
 
-    if (ret.code = new_server_handle(arg->api_version, rqstp, &handle))
+    if ((ret.code = new_server_handle(arg->api_version, rqstp, &handle)))
 	 return &ret;
 
-    if (ret.code = check_handle((void *)handle)) {
+    if ((ret.code = check_handle((void *)handle))) {
 	 free_server_handle(handle);
 	 return &ret;
     }
@@ -863,7 +874,7 @@ setkey_principal_1(setkey_arg *arg, struct svc_req *rqstp)
 }
 
 generic_ret *
-setkey_principal3_1(setkey3_arg *arg, struct svc_req *rqstp)
+setkey_principal3_1_svc(setkey3_arg *arg, struct svc_req *rqstp)
 {
     static generic_ret		    ret;
     char			    *prime_arg;
@@ -874,10 +885,10 @@ setkey_principal3_1(setkey3_arg *arg, struct svc_req *rqstp)
 
     xdr_free(xdr_generic_ret, &ret);
 
-    if (ret.code = new_server_handle(arg->api_version, rqstp, &handle))
+    if ((ret.code = new_server_handle(arg->api_version, rqstp, &handle)))
 	 return &ret;
 
-    if (ret.code = check_handle((void *)handle)) {
+    if ((ret.code = check_handle((void *)handle))) {
 	 free_server_handle(handle);
 	 return &ret;
     }
@@ -921,7 +932,7 @@ setkey_principal3_1(setkey3_arg *arg, struct svc_req *rqstp)
 }
 
 chrand_ret *
-chrand_principal_1(chrand_arg *arg, struct svc_req *rqstp)
+chrand_principal_1_svc(chrand_arg *arg, struct svc_req *rqstp)
 {
     static chrand_ret		ret;
     krb5_keyblock		*k;
@@ -934,10 +945,10 @@ chrand_principal_1(chrand_arg *arg, struct svc_req *rqstp)
 
     xdr_free(xdr_chrand_ret, &ret);
 
-    if (ret.code = new_server_handle(arg->api_version, rqstp, &handle))
+    if ((ret.code = new_server_handle(arg->api_version, rqstp, &handle)))
 	 return &ret;
 
-    if (ret.code = check_handle((void *)handle)) {
+    if ((ret.code = check_handle((void *)handle))) {
 	 free_server_handle(handle);
 	 return &ret;
     }
@@ -994,7 +1005,7 @@ chrand_principal_1(chrand_arg *arg, struct svc_req *rqstp)
 }
 
 chrand_ret *
-chrand_principal3_1(chrand3_arg *arg, struct svc_req *rqstp)
+chrand_principal3_1_svc(chrand3_arg *arg, struct svc_req *rqstp)
 {
     static chrand_ret		ret;
     krb5_keyblock		*k;
@@ -1007,10 +1018,10 @@ chrand_principal3_1(chrand3_arg *arg, struct svc_req *rqstp)
 
     xdr_free(xdr_chrand_ret, &ret);
 
-    if (ret.code = new_server_handle(arg->api_version, rqstp, &handle))
+    if ((ret.code = new_server_handle(arg->api_version, rqstp, &handle)))
 	 return &ret;
 
-    if (ret.code = check_handle((void *)handle)) {
+    if ((ret.code = check_handle((void *)handle))) {
 	 free_server_handle(handle);
 	 return &ret;
     }
@@ -1070,7 +1081,7 @@ chrand_principal3_1(chrand3_arg *arg, struct svc_req *rqstp)
 }
 
 generic_ret *
-create_policy_1(cpol_arg *arg, struct svc_req *rqstp)
+create_policy_1_svc(cpol_arg *arg, struct svc_req *rqstp)
 {
     static generic_ret		    ret;
     char			    *prime_arg;
@@ -1081,10 +1092,10 @@ create_policy_1(cpol_arg *arg, struct svc_req *rqstp)
 
     xdr_free(xdr_generic_ret, &ret);
 
-    if (ret.code = new_server_handle(arg->api_version, rqstp, &handle))
+    if ((ret.code = new_server_handle(arg->api_version, rqstp, &handle)))
 	 return &ret;
 
-    if (ret.code = check_handle((void *)handle)) {
+    if ((ret.code = check_handle((void *)handle))) {
 	 free_server_handle(handle);
 	 return &ret;
     }
@@ -1121,7 +1132,7 @@ create_policy_1(cpol_arg *arg, struct svc_req *rqstp)
 }
 
 generic_ret *
-delete_policy_1(dpol_arg *arg, struct svc_req *rqstp)
+delete_policy_1_svc(dpol_arg *arg, struct svc_req *rqstp)
 {
     static generic_ret		    ret;
     char			    *prime_arg;
@@ -1132,10 +1143,10 @@ delete_policy_1(dpol_arg *arg, struct svc_req *rqstp)
 
     xdr_free(xdr_generic_ret, &ret);
 
-    if (ret.code = new_server_handle(arg->api_version, rqstp, &handle))
+    if ((ret.code = new_server_handle(arg->api_version, rqstp, &handle)))
 	 return &ret;
 
-    if (ret.code = check_handle((void *)handle)) {
+    if ((ret.code = check_handle((void *)handle))) {
 	 free_server_handle(handle);
 	 return &ret;
     }
@@ -1170,7 +1181,7 @@ delete_policy_1(dpol_arg *arg, struct svc_req *rqstp)
 }
 
 generic_ret *
-modify_policy_1(mpol_arg *arg, struct svc_req *rqstp)
+modify_policy_1_svc(mpol_arg *arg, struct svc_req *rqstp)
 {
     static generic_ret		    ret;
     char			    *prime_arg;
@@ -1181,10 +1192,10 @@ modify_policy_1(mpol_arg *arg, struct svc_req *rqstp)
 
     xdr_free(xdr_generic_ret, &ret);
 
-    if (ret.code = new_server_handle(arg->api_version, rqstp, &handle))
+    if ((ret.code = new_server_handle(arg->api_version, rqstp, &handle)))
 	 return &ret;
 
-    if (ret.code = check_handle((void *)handle)) {
+    if ((ret.code = check_handle((void *)handle))) {
 	 free_server_handle(handle);
 	 return &ret;
     }
@@ -1220,7 +1231,7 @@ modify_policy_1(mpol_arg *arg, struct svc_req *rqstp)
 }
 
 gpol_ret * 
-get_policy_1(gpol_arg *arg, struct svc_req *rqstp)
+get_policy_1_svc(gpol_arg *arg, struct svc_req *rqstp)
 {
     static gpol_ret		ret;
     kadm5_ret_t		ret2;
@@ -1230,15 +1241,14 @@ get_policy_1(gpol_arg *arg, struct svc_req *rqstp)
     OM_uint32			minor_stat;    
     kadm5_policy_ent_t	e;
     kadm5_principal_ent_rec	caller_ent;
-    krb5_principal		caller;
     kadm5_server_handle_t	handle;
 
     xdr_free(xdr_gpol_ret,  &ret);
 
-    if (ret.code = new_server_handle(arg->api_version, rqstp, &handle))
+    if ((ret.code = new_server_handle(arg->api_version, rqstp, &handle)))
 	 return &ret;
 
-    if (ret.code = check_handle((void *)handle)) {
+    if ((ret.code = check_handle((void *)handle))) {
 	 free_server_handle(handle);
 	 return &ret;
     }
@@ -1305,7 +1315,7 @@ get_policy_1(gpol_arg *arg, struct svc_req *rqstp)
 }
 
 gpols_ret *
-get_pols_1(gpols_arg *arg, struct svc_req *rqstp)
+get_pols_1_svc(gpols_arg *arg, struct svc_req *rqstp)
 {
     static gpols_ret		    ret;
     char			    *prime_arg;
@@ -1316,10 +1326,10 @@ get_pols_1(gpols_arg *arg, struct svc_req *rqstp)
 
     xdr_free(xdr_gpols_ret, &ret);
 
-    if (ret.code = new_server_handle(arg->api_version, rqstp, &handle))
+    if ((ret.code = new_server_handle(arg->api_version, rqstp, &handle)))
 	 return &ret;
 
-    if (ret.code = check_handle((void *)handle)) {
+    if ((ret.code = check_handle((void *)handle))) {
 	 free_server_handle(handle);
 	 return &ret;
     }
@@ -1357,20 +1367,19 @@ get_pols_1(gpols_arg *arg, struct svc_req *rqstp)
     return &ret;
 }
 
-getprivs_ret * get_privs_1(krb5_ui_4 *arg, struct svc_req *rqstp)
+getprivs_ret * get_privs_1_svc(krb5_ui_4 *arg, struct svc_req *rqstp)
 {
      static getprivs_ret	    ret;
-     char			    *prime_arg;
      gss_buffer_desc		    client_name, service_name;
      OM_uint32			    minor_stat;
      kadm5_server_handle_t	    handle;
 
      xdr_free(xdr_getprivs_ret, &ret);
 
-     if (ret.code = new_server_handle(*arg, rqstp, &handle))
+     if ((ret.code = new_server_handle(*arg, rqstp, &handle)))
 	  return &ret;
 
-     if (ret.code = check_handle((void *)handle)) {
+     if ((ret.code = check_handle((void *)handle))) {
 	  free_server_handle(handle);
 	  return &ret;
      }
@@ -1394,7 +1403,7 @@ getprivs_ret * get_privs_1(krb5_ui_4 *arg, struct svc_req *rqstp)
      return &ret;
 }
 
-generic_ret *init_1(krb5_ui_4 *arg, struct svc_req *rqstp)
+generic_ret *init_1_svc(krb5_ui_4 *arg, struct svc_req *rqstp)
 {
      static generic_ret		ret;
      gss_buffer_desc		client_name,
@@ -1404,7 +1413,7 @@ generic_ret *init_1(krb5_ui_4 *arg, struct svc_req *rqstp)
 
      xdr_free(xdr_generic_ret, &ret);
 
-     if (ret.code = new_server_handle(*arg, rqstp, &handle))
+     if ((ret.code = new_server_handle(*arg, rqstp, &handle)))
 	  return &ret;
      if (! (ret.code = check_handle((void *)handle))) {
 	 ret.api_version = handle->api_version;
