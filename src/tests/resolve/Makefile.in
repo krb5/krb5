@@ -28,4 +28,3 @@ clean::
 # the Makefile.in file
 #
 $(OUTPRE)resolve.$(OBJEXT): resolve.c
-

@@ -42,4 +42,3 @@ $(OUTPRE)gss-misc.$(OBJEXT): gss-misc.c $(BUILDTOP)/include/gssapi/gssapi_generi
   $(BUILDTOP)/include/gssapi/gssapi.h gss-misc.h
 $(OUTPRE)gss-server.$(OBJEXT): gss-server.c $(BUILDTOP)/include/gssapi/gssapi_generic.h \
   $(BUILDTOP)/include/gssapi/gssapi.h gss-misc.h
-

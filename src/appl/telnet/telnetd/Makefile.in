@@ -135,4 +135,3 @@ $(OUTPRE)authenc.$(OBJEXT): authenc.c telnetd.h defs.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/syslog.h ext.h $(srcdir)/../libtelnet/misc.h \
   $(srcdir)/../libtelnet/misc-proto.h
-

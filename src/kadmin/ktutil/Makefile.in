@@ -56,4 +56,3 @@ $(OUTPRE)ktutil_funcs.$(OBJEXT): ktutil_funcs.c $(SRCTOP)/include/k5-int.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
   $(SRCTOP)/include/krb5/kdb.h ktutil.h $(SRCTOP)/include/kerberosIV/krb.h \
   $(SRCTOP)/include/kerberosIV/des.h $(KRB_ERR_H_DEP)
-

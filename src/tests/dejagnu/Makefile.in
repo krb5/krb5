@@ -51,4 +51,3 @@ site.exp: runenv.vals
 # the Makefile.in file
 #
 $(OUTPRE)t_inetd.$(OBJEXT): t_inetd.c $(COM_ERR_DEPS)
-

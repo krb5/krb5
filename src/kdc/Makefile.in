@@ -189,4 +189,3 @@ $(OUTPRE)kerberos_v4.$(OBJEXT): kerberos_v4.c $(SRCTOP)/include/k5-int.h \
   $(SRCTOP)/include/kerberosIV/klog.h $(SRCTOP)/include/kerberosIV/prot.h \
   $(SRCTOP)/include/kerberosIV/krb_db.h $(SRCTOP)/include/kerberosIV/kdc.h \
   extern.h
-

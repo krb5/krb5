@@ -167,4 +167,3 @@ $(OUTPRE)v4rcp.$(OBJEXT): v4rcp.c $(BUILDTOP)/include/krb5.h \
   $(SRCTOP)/include/kerberosIV/des.h $(KRB_ERR_H_DEP) \
   $(BUILDTOP)/include/profile.h $(SRCTOP)/include/kerberosIV/krbports.h \
   rpaths.h
-

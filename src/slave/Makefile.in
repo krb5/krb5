@@ -54,4 +54,3 @@ $(OUTPRE)kpropd.$(OBJEXT): kpropd.c $(SRCTOP)/include/syslog.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
   kprop.h
-

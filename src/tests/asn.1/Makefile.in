@@ -93,4 +93,3 @@ $(OUTPRE)utility.$(OBJEXT): utility.c $(BUILDTOP)/include/krb5.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
   $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/lib/krb5/asn.1/asn1buf.h
 $(OUTPRE)trval.$(OBJEXT): trval.c
-

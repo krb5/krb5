@@ -107,4 +107,3 @@ $(OUTPRE)utilities.$(OBJEXT): utilities.c $(srcdir)/../arpa/telnet.h \
   general.h fdset.h ring.h defines.h externs.h $(srcdir)/../libtelnet/auth.h \
   $(srcdir)/../libtelnet/auth-proto.h $(srcdir)/../libtelnet/encrypt.h \
   $(srcdir)/../libtelnet/enc-proto.h
-

@@ -88,4 +88,3 @@ $(OUTPRE)xmalloc.$(OBJEXT): xmalloc.c ksu.h $(SRCTOP)/include/k5-int.h \
   $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-util.h \
   $(SRCTOP)/include/syslog.h
 $(OUTPRE)setenv.$(OBJEXT): setenv.c
-

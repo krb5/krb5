@@ -75,4 +75,3 @@ $(OUTPRE)tcl_kadm5.$(OBJEXT): tcl_kadm5.c $(BUILDTOP)/include/kadm5/admin.h \
   $(BUILDTOP)/include/kadm5/kadm_err.h $(BUILDTOP)/include/kadm5/adb_err.h \
   $(BUILDTOP)/include/kadm5/chpass_util_strings.h tcl_kadm5.h
 $(OUTPRE)test.$(OBJEXT): test.c tcl_kadm5.h
-

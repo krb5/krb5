@@ -99,4 +99,3 @@ $(OUTPRE)secure.$(OBJEXT): secure.c $(BUILDTOP)/include/gssapi/gssapi.h \
   $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
   $(KRB_ERR_H_DEP) $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
   $(srcdir)/../arpa/ftp.h
-

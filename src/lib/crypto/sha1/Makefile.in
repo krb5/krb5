@@ -61,4 +61,3 @@ shs.so shs.po $(OUTPRE)shs.$(OBJEXT): shs.c shs.h $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
   $(SRCTOP)/include/krb5/kdb.h
-
