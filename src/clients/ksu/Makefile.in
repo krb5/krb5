@@ -8,13 +8,17 @@ SRCS = \
 	$(srcdir)/ccache.c \
 	$(srcdir)/authorization.c \
 	$(srcdir)/main.c \
-	$(srcdir)/heuristic.c
+	$(srcdir)/heuristic.c \
+	$(srcdir)/setenv.c \
+	$(srcdir)/xmalloc.c
 OBJS = \
 	krb_auth_su.o \
 	ccache.o \
 	authorization.o \
 	main.o \
-	heuristic.o
+	heuristic.o \
+	@SETENVOBJ@ \
+	xmalloc.o
 
 all:: ksu
 

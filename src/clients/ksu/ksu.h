@@ -202,7 +202,7 @@ extern int standard_shell PROTOTYPE((char *));
 
 extern krb5_error_code get_params PROTOTYPE((int *, int, char **, char ***));
 
-extern char *get_dir_of_file PROTOTYPE((char *));
+extern char *get_dir_of_file PROTOTYPE((const char *));
 
 /* heuristic.c */
 extern krb5_error_code get_all_princ_from_file PROTOTYPE((FILE *, char ***));
@@ -242,3 +242,7 @@ extern char *krb5_lname_file;  /* Note: print this out just be sure
 				  that it gets set */   	    
 
 
+extern const char out_of_memory_error[];
+
+extern void *xmalloc (), *xrealloc (), *xcalloc();
+extern char *xstrdup ();

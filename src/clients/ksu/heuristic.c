@@ -59,7 +59,7 @@ krb5_error_code get_all_princ_from_file (fp, plist)
 	fprinc = get_first_token (line, &lp);
 		
 	if (fprinc ){
-	    temp_list[count] = strdup(fprinc);
+	    temp_list[count] = xstrdup(fprinc);
 	    count ++;
 	}
 
