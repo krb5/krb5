@@ -76,12 +76,13 @@ krb5_address ***outaddr;
     if (!(tempaddr = (krb5_address **) calloc(nelems+1, sizeof(*tempaddr))))
 	return ENOMEM;
 
-    for (nelems = 0; inaddr[nelems]; nelems++)
+    for (nelems = 0; inaddr[nelems]; nelems++) {
 	retval = krb5_copy_addr(inaddr[nelems], &tempaddr[nelems]);
         if (retval) {
 	    krb5_free_addresses(tempaddr);
 	    return retval;
 	}
+    }
 
     *outaddr = tempaddr;
     return 0;
