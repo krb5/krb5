@@ -234,7 +234,7 @@
             AllowAdvertise="no" 
             Description="$(loc.KerberosDocDesc)" 
             InstallDefault="local" 
-            Level="130" 
+            Level="30" 
             Title="$(loc.KerberosDocTitle)">
 
             <ComponentRef Id="efl_leash_userdoc_pdf" />
