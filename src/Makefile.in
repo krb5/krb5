@@ -214,7 +214,12 @@ WINEXCLUDE= LIB/KRB5.SAB \
 	WINDOWS/CNS/*.ICO WINDOWS/WINTEL/*.ICO WINDOWS/GSS/*.ICO \
 	*.O *.A *.ZIP *.TAR
 
-MACEXCLUDE= windows 
+NTEXCLUDE= ./lib/krb5.sab \
+	./include/krb5/autoconf.h \
+	./lib/crypto/md4/t_mddriv ./lib/crypto/md5/t_mddriv \
+	./util/profile/test_par ./util/profile/test_pro \
+	windows/cns/*.ico windows/wintel/*.ico windows/gss/*.ico \
+	./*.zip ./*.tar
 
 CLEANUP= util/profile/profile.h util/profile/prof_err.[ch] \
 	lib/krb5/error_tables/asn1_err.c lib/krb5/error_tables/kdb5_err.c \
@@ -233,9 +238,9 @@ kerbsrc.zip: awk-windows-mac
 	mv Makefile Makefile.bak
 	cp Makefile.in Makefile
 	rm -f kerbsrc.zip
-	$(ZIP) -Dlk kerbsrc.zip $(FILES) $(WINFILES) -x $(EXCLUDE) $(WINEXCLUDE)
+	$(ZIP) -Dlk kerbsrc.zip $(FILES) $(WINFILES) -x $(WINEXCLUDE)
 	$(ZIP) -Dk kerbsrc.zip $(WINBINARYFILES)
-	cp Makefile.bak Makefile
+	mv Makefile.bak Makefile
 	rm -f $(CLEANUP)
 
 kerbsrc-nt.zip: awk-windows-mac
@@ -243,16 +248,13 @@ kerbsrc-nt.zip: awk-windows-mac
 	mv Makefile Makefile.bak
 	cp Makefile.in Makefile
 	rm -f kerbsrc-nt.zip
-	$(ZIP) -Dl kerbsrc-nt.zip $(FILES) $(WINFILES) -x $(EXCLUDE) $(WINEXCLUDE)
+	$(ZIP) -Dl kerbsrc-nt.zip $(FILES) $(WINFILES) -x $(NTEXCLUDE)
 	$(ZIP) -D kerbsrc-nt.zip $(WINBINARYFILES)
-	cp Makefile.bak Makefile
+	mv Makefile.bak Makefile
 	rm -f $(CLEANUP)
 
 kerbsrc.mac: awk-windows-mac
-	rm -f excludefiles 
-	/bin/ls $(MACEXCLUDE) >excludefiles
-	tar cvfX kerbsrc.tar excludefiles `find $(FILES) $(MACFILES) -prune -type f -print`
-	rm -f excludefiles
+	tar cvf kerbsrc.tar `find $(FILES) $(MACFILES) -prune -type f -print | grep -v kerbsrc`
 	rm -f $(CLEANUP)
 
 #

@@ -1,5 +1,10 @@
 Fri Sep 22 19:39:30 1995  Theodore Y. Ts'o  <tytso@dcl>
 
+	* Makefile.in: Exclude the MAC and DOS tar/zip files when creating
+	        the Mac tar file.  Adjust the windows NT exclusion file so
+		that it works correctly; zip is a little bit touchy about
+		file specifications.
+
 	* Makefile.in (awk-windows-mac): Build the error table header
 		files into include, not include/krb5; and construct krb5.h
 		from krb5.hin and the error table header files.
