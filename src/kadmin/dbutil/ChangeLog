@@ -1,3 +1,8 @@
+Wed Mar 12 01:19:51 1997  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* loadv4.c (argv): Check to see if the global_param's stash file
+		is non-NULL before trying to strdup() it.  [PR#341, PR#394]
+
 Tue Feb  4 21:17:09 1997  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in:
