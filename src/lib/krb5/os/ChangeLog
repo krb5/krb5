@@ -1,3 +1,8 @@
+2000-05-09	Alexandra Ellwood <lxs@mit.edu>
+
+	*localaddr.c: Fixed the local_addr_fallback_kludge so that it actually does something.
+	Before that the error code it was handling was blowing it away in cleanup.
+
 2000-04-28  Nalin Dahyabhai  <nalin@redhat.com>
 
 	* ccdefname.c (get_from_os): Don't overflow buffer "name_buf".

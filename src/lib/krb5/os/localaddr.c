@@ -499,6 +499,8 @@ krb5_os_localaddr (krb5_context context, krb5_address ***addr) {
 	    hostrec = local_addr_fallback_kludge();
 	    if (!hostrec)
 		    return err;
+		else
+			err = 0;  /* otherwise we will die at cleanup */
     }
 
     for (count = 0; hostrec->h_addr_list[count]; count++);
