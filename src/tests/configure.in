@@ -9,6 +9,12 @@ AC_CHECK_HEADERS(unistd.h stdlib.h sys/param.h sys/socket.h)
 AC_C_CONST
 AC_PROG_INSTALL
 AC_CHECK_PROG(RUNTEST,runtest,runtest)
+if test "$RUNTEST" != ""; then
+	HAVE_RUNTEST=no
+else
+	HAVE_RUNTEST=yes
+fi
+AC_SUBST(HAVE_RUNTEST)
 AC_TYPE_SIGNAL
 CHECK_SIGNALS
 if test "$KRB4_LIB" = ''; then
