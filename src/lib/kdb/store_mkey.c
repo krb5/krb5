@@ -84,7 +84,7 @@ krb5_db_store_mkey(context, keyfile, mname, key)
 	return errno;
     }
     if ((fwrite((krb5_pointer) &key->keytype,
-		sizeof(key->keytype), 1, kf) != 1) ||
+		1, 1, kf) != 1) ||
 	(fwrite((krb5_pointer) &key->length,
 		sizeof(key->length), 1, kf) != 1) ||
 	(fwrite((krb5_pointer) key->contents,

@@ -113,7 +113,7 @@ krb5_db_fetch_mkey(context, mname, eblock, fromkeyboard, twice, salt, key)
 	if (!(kf = fopen(defkeyfile, "r")))
 #endif
 	    return KRB5_KDB_CANTREAD_STORED;
-	if (fread((krb5_pointer) &keytype, sizeof(keytype), 1, kf) != 1) {
+	if (fread((krb5_pointer) &keytype, 1, 1, kf) != 1) {
 	    retval = KRB5_KDB_CANTREAD_STORED;
 	    goto errout;
 	}
