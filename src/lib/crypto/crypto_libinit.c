@@ -1,6 +1,6 @@
 #include <assert.h>
 
-static	int		initialized = false;
+static	int		initialized = 0;
 
 /*
  * Initialize the crypto library.
@@ -10,7 +10,7 @@ int cryptoint_initialize_library (void)
 {
 	
 	if (!initialized) {
-		initialized = true;
+		initialized = 1;
 	}
 	
 	return 0;
@@ -26,5 +26,5 @@ void cryptoint_cleanup_library (void)
 	
 	prng_cleanup ();
 	
-	initialized = false;
+	initialized = 0;
 }
