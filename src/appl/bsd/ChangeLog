@@ -1,3 +1,10 @@
+Sun Jul  2 19:48:27 1995  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* krcp.c: make errno extern
+
+	* krshd.c: errno should be extern so it doesn't mask the libc
+        definition in AIX.
+
 Tue Jun 27 23:50:56 1995  Tom Yu  (tlyu@dragons-lair)
 
 	* krlogin.c: don't redeclare noltc, defltc if we happen to have

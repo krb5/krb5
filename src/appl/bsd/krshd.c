@@ -209,7 +209,7 @@ char *progname;
 int     secflag;
 extern
 #endif /* CRAY */
-int     errno;
+
 
 /*VARARGS1*/
 int	error();
