@@ -98,6 +98,14 @@ getTimeZoneOffset()
 
 /* Returns the GMT in seconds (and fake microseconds) using the Unix epoch */
 
+/*
+ * Note that unix timers are guaranteed that consecutive calls to timing functions will
+ * always return monotonically increasing values for time; even if called within one microsecond,
+ * they must increase from one call to another. We must preserve this property in this code,
+ * even though Mac UpTime does not make such guarantees... (actually it does, but it measures in 
+ * units that can be finer than 1 microsecond, so conversion can cause repeat microsecond values
+ */
+
 krb5_error_code
 krb5_crypto_us_timeofday(seconds, microseconds)
     krb5_int32 *seconds, *microseconds;
@@ -118,25 +126,40 @@ krb5_crypto_us_timeofday(seconds, microseconds)
     	UInt32			nanoseconds;
     	
     	absoluteTime = UpTime ();
-    	AbsoluteToSecsNanosecs (absoluteTime, seconds, &nanoseconds);
+    	AbsoluteToSecsNanosecs (absoluteTime, &sec, &nanoseconds);
     	
     	usec = nanoseconds / 1000;
-
     } else
 #endif /* TARGET_CPU_PPC */
     {
+	    GetDateTime (&sec);
 	    usec = 0;
-
-	    if (sec == last_sec) {				/* Same as last time? */
-	    	usec = ++last_usec;				/* Yep, so do microseconds */
-		    if (++last_usec >= 1000000) {
-		    	++sec;
-			    usec = 0;
-		    }
-	    }
-	    last_sec = sec;						/* Remember for next time */
-	    last_usec = usec;
 	}
+	
+	/* Fix secs to UNIX epoch */
+	
+    sec -= ((66 * 365 * 24 * 60 * 60) + (17 *  24 * 60 * 60) + 
+    	(getTimeZoneOffset() * 60 * 60));
+
+	/* Make sure that we are _not_ repeating */
+	
+	if (sec < last_sec) {	/* Seconds should be at least equal to last seconds */
+		sec = last_sec;
+	}
+	
+	if (sec == last_sec) {			/* Same seconds as last time? */
+		if (usec <= last_usec) {	/* Yep, microseconds must be bigger than last time*/
+			usec = last_usec + 1;
+		}
+		
+		if (usec >= 1000000) {		/* handle 1e6 wraparound */
+			sec++;
+			usec = 0;
+		}
+	}
+
+    last_sec = sec;						/* Remember for next time */
+    last_usec = usec;
 
     *seconds = sec;
     *microseconds = usec;					/* Return the values */
