@@ -1,3 +1,9 @@
+Wed Jan  1 22:56:16 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* kdc_preauth.c (get_sam_edata): Use proper interface to
+		krb5_db_get_principal. Also if SAM is not an option, do
+		not return as a possible type to client. [krb5-kdc/310]
+
 Sat Nov 23 17:26:22 1996  Mark Eichin  <eichin@kitten.gen.ma.us>
 
 	* [krb5-libs/149] only generate requests that you can actually

@@ -637,7 +637,8 @@ get_sam_edata(context, request, client, server, pa_data)
 
     {
       char *uname;
-      int npr = 1, more;
+      int npr = 1;
+      krb5_boolean more;
       krb5_db_entry assoc;
       krb5_key_data  *assoc_key;
       krb5_principal newp;
@@ -663,7 +664,7 @@ get_sam_edata(context, request, client, server, pa_data)
 	  strlen(sam_ptr->name);
 	npr = 1;
 	retval = krb5_db_get_principal(kdc_context, newp, &assoc, &npr, &more);
-	if(!retval) {
+	if(!retval && npr) {
 	  sc.sam_type = sam_ptr->sam_type;
 	  break;
 	}
@@ -697,6 +698,10 @@ get_sam_edata(context, request, client, server, pa_data)
 	  }
 	  /* now we can use encrypting_key... */
 	}
+      } else {
+	  /* SAM is not an option - so don't return as hint */
+	  retval = KRB5_PREAUTH_BAD_TYPE;
+	  goto cleanup;
       }
 
       krb5_princ_component(kdc_context,newp,probeslot)->data = 0;
