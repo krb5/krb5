@@ -10,6 +10,7 @@ AC_C_CROSS
 AC_MSG_CHECKING(for working regcomp)
 AC_CACHE_VAL(ac_cv_func_regcomp,[
 AC_TRY_RUN([
+#include <sys/types.h>
 #include <regex.h>
 regex_t x; regmatch_t m;
 int main() { return regcomp(&x,"pat.*",0) || regexec(&x,"pattern",1,&m,0); }
@@ -23,6 +24,7 @@ HAS_ANSI_VOLATILE
 AC_DEFINE(AN_TO_LN_RULES)
 USE_ANAME
 V5_SHARED_LIB_OBJS
+V5_USE_SHARED_LIB
 KRB5_LIBRARIES
 KRB5_RUN_FLAGS
 SubdirLibraryRule([${OBJS}])
