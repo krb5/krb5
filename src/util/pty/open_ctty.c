@@ -42,14 +42,15 @@ pty_open_ctty (slave, fd)
     (void) setsid();
 #endif
 
+/* First, dissociate from previous terminal */
+    if ( (retval = ptyint_void_association()) != 0 )
+	return retval;
 #ifdef ultrix
     /* The Ultrix (and other BSD tty drivers) require the process group
      * to be zero, in order to acquire the new tty as a controlling tty. */
     (void) setpgrp(0, 0);
 #endif
-/* First, dissociate from previous terminal */
-    if ( (retval = ptyint_void_association()) < 0 )
-	return retval;
+
     *fd = open(slave, O_RDWR);
     if (*fd < 0 )
 	return PTY_OPEN_SLAVE_OPENFAIL;

@@ -1,3 +1,18 @@
+Fri Aug 11 01:12:03 1995  Sam Hartman  <hartmans@infocalypse>
+
+	* initialize_slave.c (pty_initialize_slave): You really do need to
+        push and pop the streams on a Sun. 
+
+Fri Aug 11 00:49:23 1995  Sam Hartman  <hartmans@dragons-lair.MIT.EDU>
+
+	* configure.in (ac_cv_func_setsid): Pretend that Ultrix doesn't
+        have setsid, because if it does make the call then the pty never
+        becomes controlling tty.
+
+Thu Aug 10 09:47:07 1995  Sam Hartman  <hartmans@dragons-lair.MIT.EDU>
+
+	* open_ctty.c (pty_open_ctty): Move setpgrp() after void_assoc call
+
 Wed Aug  9 00:16:40 1995  Sam Hartman  <hartmans@tertius.mit.edu>
 
 	* pty-int.h (VHANG_first): Change defines so VHANG_FIRST doesn't

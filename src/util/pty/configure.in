@@ -15,7 +15,9 @@ dnl login.
 dnl
 case $krb5_cv_host in
 *-*-ultrix*)
+echo "Disabling initial vhangup and setsid because they break under Ultrix..."
 AC_DEFINE([OPEN_CTTY_ONLY_ONCE],[1])
+ac_cv_func_setsid=no # setsid doesn't do the right thing under Ultrix even though present
 ;;
 
 *-*-aix3*) # AIX has streams include files but not streams TTY

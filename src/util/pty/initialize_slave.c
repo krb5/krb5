@@ -47,7 +47,7 @@ long pty_initialize_slave (fd)
 	    return PTY_OPEN_SLAVE_LINE_PUSHFAIL;
 	}
 #else /*No line_push */
-#if 0 /* used to be SUN*/
+#ifdef sun 
     if (ioctl(fd, I_PUSH, "ptem") < 0)
 	return PTY_OPEN_SLAVE_PUSH_FAIL;
     if (ioctl(fd, I_PUSH, "ldterm") < 0)
