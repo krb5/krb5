@@ -112,8 +112,8 @@
 
 #define KPROP_DEFAULT_FILE "@LOCALSTATEDIR/krb5kdc/slave_datatrans"
 #define KPROPD_DEFAULT_FILE "@LOCALSTATEDIR/krb5kdc/from_master"
-#define KPROPD_DEFAULT_KDB5_UTIL "@PREFIX/sbin/kdb5_util"
-#define KPROPD_DEFAULT_KDB5_EDIT "@PREFIX/sbin/kdb5_edit"
+#define KPROPD_DEFAULT_KDB5_UTIL "@SBINDIR/kdb5_util"
+#define KPROPD_DEFAULT_KDB5_EDIT "@SBINDIR/kdb5_edit"
 #define KPROPD_DEFAULT_KRB_DB DEFAULT_KDB_FILE
 #define KPROPD_ACL_FILE "@LOCALSTATEDIR/krb5kdc/kpropd.acl"
 
