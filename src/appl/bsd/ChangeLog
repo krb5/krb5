@@ -1,3 +1,8 @@
+Mon Nov  3 15:25:48 1997  Tom Yu  <tlyu@mit.edu>
+
+	* krlogind.c (doit): Fix up potential buffer overrun.
+	[krb5-appl/488]
+
 Tue Mar 18 12:34:03 1997  Sam Hartman  <hartmans@luminous.MIT.EDU>
 
  [326]	* login.c(doit):  Preserve terminal even without -p.
