@@ -680,9 +680,13 @@ getreply(expecteof)
 				  n = '5';
 				} else {
 				  if (debug) printf("%c:", safe ? 'S' : 'P');
-				  memcpy(ibuf, msg_data.app_data,
-					msg_data.app_length);
-				  strcpy(&ibuf[msg_data.app_length], "\r\n");
+				  if(msg_data.app_length < sizeof(ibuf) - 2) {
+				    memcpy(ibuf, msg_data.app_data,
+					   msg_data.app_length);
+				    strcpy(&ibuf[msg_data.app_length], "\r\n");
+				  } else {
+			            printf("Message too long!");
+				  }
 				  continue;
 				}
 #endif
@@ -703,9 +707,14 @@ getreply(expecteof)
 						 "failed unsealing reply");
 				  n = '5';
 				} else {
-				  memcpy(ibuf, msg_buf.value, 
-					 msg_buf.length);
-				  strcpy(&ibuf[msg_buf.length], "\r\n");
+				  if(msg_buf.length < sizeof(ibuf) - 2 - 1) {
+				    memcpy(ibuf, msg_buf.value, 
+					   msg_buf.length);
+				    strcpy(&ibuf[msg_buf.length], "\r\n");
+				  } else {
+				    user_gss_error(maj_stat, min_stat, 
+						   "reply was too long");
+				  }
 				  gss_release_buffer(&min_stat,&msg_buf);
 				  continue;
 				}
@@ -1636,20 +1645,24 @@ pswitch(flag)
 	mcase = op->mcse;
 	ip->ntflg = ntflag;
 	ntflag = op->ntflg;
-	(void) strncpy(ip->nti, ntin, 16);
+	(void) strncpy(ip->nti, ntin, sizeof(ip->nti) - 1);
 	(ip->nti)[strlen(ip->nti)] = '\0';
-	(void) strcpy(ntin, op->nti);
-	(void) strncpy(ip->nto, ntout, 16);
+	(void) strncpy(ntin, op->nti, sizeof(ntin) - 1);
+	ntin[sizeof(ntin) - 1] = '\0';
+	(void) strncpy(ip->nto, ntout, sizeof(ip->nto) - 1);
 	(ip->nto)[strlen(ip->nto)] = '\0';
-	(void) strcpy(ntout, op->nto);
+	(void) strncpy(ntout, op->nto, sizeof(ntout) - 1);
+	ntout[sizeof(ntout) - 1] = '\0';
 	ip->mapflg = mapflag;
 	mapflag = op->mapflg;
 	(void) strncpy(ip->mi, mapin, MAXPATHLEN - 1);
 	(ip->mi)[strlen(ip->mi)] = '\0';
-	(void) strcpy(mapin, op->mi);
+	(void) strncpy(mapin, op->mi, sizeof(mapin) - 1);
+	mapin[sizeof(mapin) - 1] = '\0';
 	(void) strncpy(ip->mo, mapout, MAXPATHLEN - 1);
 	(ip->mo)[strlen(ip->mo)] = '\0';
-	(void) strcpy(mapout, op->mo);
+	(void) strncpy(mapout, op->mo, sizeof(mapout) - 1);
+	mapout[sizeof(mapout) - 1] = '\0';
 	ip->authtype = auth_type;
 	auth_type = op->authtype;
 	ip->clvl = clevel;
@@ -1846,7 +1859,8 @@ gunique(local)
 		fprintf(stderr, "local: %s: %s\n", local, strerror(errno));
 		return((char *) 0);
 	}
-	(void) strcpy(new, local);
+	(void) strncpy(new, local, sizeof(new) - 3);
+	new[sizeof(new) - 1] = '\0';
 	cp = new + strlen(new);
 	*cp++ = '.';
 	while (!d) {
@@ -2054,9 +2068,11 @@ do_auth()
 	    if (verbose)
 		printf("%s accepted as authentication type\n", "KERBEROS_V4");
 
-	    strcpy(inst, (char *) krb_get_phost(hostname));
+	    strncpy(inst, (char *) krb_get_phost(hostname), sizeof(inst) - 1);
+	    inst[sizeof(inst) - 1] = '\0';
 	    if (realm[0] == '\0')
-	    	strcpy(realm, (char *) krb_realmofhost(hostname));
+	    	strncpy(realm, (char *) krb_realmofhost(hostname), sizeof(realm) - 1);
+	    realm[sizeof(realm) - 1] = '\0';
 	    if ((kerror = krb_mk_req(&ticket, service = "ftp",
 					inst, realm, checksum))
 		&& (kerror != KDC_PR_UNKNOWN ||

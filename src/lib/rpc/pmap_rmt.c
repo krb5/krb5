@@ -165,6 +165,8 @@ xdr_rmtcallres(xdrs, crp)
  * routines which only support udp/ip .
  */
 
+#define GIFCONF_BUFSIZE (256 * sizeof (struct ifconf))
+
 static int
 getbroadcastnets(addrs, sock, buf)
 	struct in_addr *addrs;
@@ -176,8 +178,9 @@ getbroadcastnets(addrs, sock, buf)
 	struct sockaddr_in *sin;
         int n, i;
 
-        ifc.ifc_len = UDPMSGSIZE;
+        ifc.ifc_len = GIFCONF_BUFSIZE;
         ifc.ifc_buf = buf;
+	memset (buf, 0, GIFCONF_BUFSIZE);
         if (ioctl(sock, SIOCGIFCONF, (char *)&ifc) < 0) {
                 perror("broadcast: ioctl (get interface configuration)");
                 return (0);
@@ -255,7 +258,11 @@ clnt_broadcast(prog, vers, proc, xargs, argsp, xresults, resultsp, eachresult)
 	struct rmtcallres r;
 	struct rpc_msg msg;
 	struct timeval t; 
-	char outbuf[MAX_BROADCAST_SIZE], inbuf[UDPMSGSIZE];
+	char outbuf[MAX_BROADCAST_SIZE];
+#ifndef MAX
+#define MAX(A,B) ((A)<(B)?(B):(A))
+#endif
+	char inbuf[MAX (UDPMSGSIZE, GIFCONF_BUFSIZE)];
 
 	/*
 	 * initialization: create a socket, a broadcast address, and

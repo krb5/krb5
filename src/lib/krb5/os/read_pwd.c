@@ -29,7 +29,7 @@
 
 #include "k5-int.h"
 
-#if !defined(_MSDOS) && !defined(_WIN32) && !defined(macintosh)
+#if !defined(_MSDOS) && !defined(_WIN32) && !defined(macintosh) && !defined(__MACH__)
 #define DEFINED_KRB5_READ_PASSWORD
 #include <stdio.h>
 #include <errno.h>

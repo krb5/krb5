@@ -1,3 +1,80 @@
+2001-01-31  Tom Yu  <tlyu@mit.edu>
+
+	* asn1buf.c (asn1buf_sync): Add new arguments to include the full
+	complement of data about a prefetched tag, as well as to indicate
+	whether the prefetched tag or the surrounding sequence is of an
+	indefinite length.
+	(asn1buf_skiptail): Add new arguments to indicate whether the
+	prefetched tag is indefinite, as well as its length.  This
+	facilitates proper skipping of trailing garbage.
+	(asn1buf_remains): Add new argument to indicate whether the
+	surrounding encoding is indefinite.  Don't advance buf->next if an
+	EOC encoding is detected; the caller will do that.
+	[pullup from trunk]
+
+	* asn1buf.h: Update prototypes. [pullup from trunk]
+
+	* asn1_get.c (asn1_get_tag_indef): Don't treat EOC encoding as
+	special anymore, since previous behavior was overloading the
+	tag number in a bad way.  Also, report a MISMATCH_INDEF error if
+	the tag encoding is for the forbidden primitive constructed
+	encoding. [pullup from trunk]
+
+	* asn1_k_decode.c (next_tag): Call get_tag_indef() in order to get
+	information about whether the length is indefinite.  Don't check
+	the tag class and construction explicitly.
+	(get_eoc): New macro to get a tag and check if it is an EOC
+	encoding.
+	(get_field, opt_field): Move the check for the tag class and
+	construction to here.
+	(get_field_body, get_lenfield_body): Call get_eoc() instead of
+	next_tag() if we are decoding a constructed indefinite encoding.
+	(begin_structure): Use a different variable to indicate whether
+	the sequence is indefinite as opposed to whether an individual
+	field is indefinite.
+	(end_structure): Update to new calling convention of
+	asn1buf_sync().
+	(sequence_of): Rewrite significantly.
+	(sequence_of_common): Move the bulk of previous sequence_of()
+	macro to here.  Does not declare some variables that sequence_of()
+	declares.
+	(sequence_of_no_tagvars): Similar to sequence_of() macro but
+	declares different variables for the purpose of prefetching the
+	final tag.
+	(end_sequence_of_no_tagvars): Similar to end_sequence_of() macro
+	but uses variables declared by the sequence_of_no_tagvars() macro
+	to prefetch the final tag.
+	(asn1_decode_principal_name): Update for new asn1buf_remains()
+	calling convention.  Call sequence_of_no_tagvars(), etc. instead
+	of sequence_of(), etc. in order to not declare shadowing
+	block-local variables.
+	(decode_array_body): Update for new asn1buf_remains() calling
+	convention.
+	(asn1_decode_sequence_of_enctype): Update for new
+	asn1buf_remains() calling convention.
+	[pullup from trunk]
+	
+	* krb5_decode.c (next_tag): Call get_tag_indef() in order to get
+	information about whether the length is indefinite.  Don't check
+	the tag class and construction explicitly.
+	(get_eoc): New macro to get a tag and check if it is an EOC
+	encoding.
+	(get_field, opt_field): Move the check for the tag class and
+	construction to here.
+	(get_field_body, get_lenfield_body): Call get_eoc() instead of
+	next_tag() if we are decoding a constructed indefinite encoding.
+	(begin_structure): Use a different variable to indicate whether
+	the sequence is indefinite as opposed to whether an individual
+	field is indefinite.
+	(end_structure): Update to new calling convention of
+	asn1buf_sync().
+	[pullup from trunk]
+
+2000-09-28  Miro Jurisic  <meeroh@mit.edu>
+
+	* asn1_encode.c (asn1_encode_generaltime): Fixed the Mac code to
+	use the correct epoch.
+
 2000-02-06  Ken Raeburn  <raeburn@mit.edu>
 
 	Patches from Frank Cusack for helping in preauth replay

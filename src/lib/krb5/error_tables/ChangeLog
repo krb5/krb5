@@ -1,3 +1,8 @@
+2001-01-31  Tom Yu  <tlyu@mit.edu>
+
+	* asn1_err.et: Add error codes MISMATCH_INDEF and MISSING_EOC.
+	[pullup from trunk]
+
 1999-12-01  Ken Raeburn  <raeburn@mit.edu>
 
 	* krb5_err.et (KRB5_OBSOLETE_FN): New error code.

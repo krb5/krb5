@@ -1,3 +1,8 @@
+2000-09-11  Alexandra Ellwood <lxs@mit.edu>
+        * gssapi_generic.h: Added check for Mac OS X includes.  This will
+        not break autoconf-style builds because they do not include
+        ConditionalMacros.h.
+        
 1999-10-26  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,

@@ -1965,7 +1965,8 @@ int tcl_kadm5_chpass_principal_util(ClientData clientData,
 					    override_qual,
 #endif					    
 					    pw_ret_var ? &pw_ret : 0,
-					    msg_ret_var ? msg_ret : 0);
+					    msg_ret_var ? msg_ret : 0,
+				            msg_ret_var ? sizeof(msg_ret) : 0);
 
      if (ret == KADM5_OK) {
 	  if (pw_ret_var &&

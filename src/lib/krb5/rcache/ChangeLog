@@ -1,3 +1,21 @@
+2001-01-23  Tom Yu  <tlyu@mit.edu>
+
+	* rc_io.c (getdir, krb5_rc_io_creat): Undo prior fudge; dirlen
+	will now not include trailing NUL character.
+
+2001-01-17  Tom Yu  <tlyu@mit.edu>
+
+	* rc_io.c (krb5_rc_io_creat): Fudge for dirlen including trailing
+	NUL character.
+	(krb5_rc_io_move): When renaming OLD to NEW, don't copy the
+	filename.  This was causing temporary files to get leaked.
+	(krb5_rc_io_close): Don't FREE if d->fn is NULL.
+
+2000-04-28  Nalin Dahyabhai  <nalin@redhat.com>
+
+	* rc_io.c (getdir): Don't check dirlen again, the call sites
+	always do.  Fix dirlen calculation.
+
 1999-10-26  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,

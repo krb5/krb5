@@ -102,7 +102,7 @@ telrcv()
 #endif
 
 	while (ncc > 0) {
-		if ((&ptyobuf[BUFSIZ] - pfrontp) < 2)
+		if ((&ptyobuf[BUFSIZ] - pfrontp) < 1)
 			break;
 		c = *netip++ & 0377, ncc--;
 #ifdef	ENCRYPTION
@@ -1663,6 +1663,8 @@ static int envvarok(varp)
 	    strcmp(varp, "KRB_REALMS") &&  /* cns v4 */
 	    strcmp(varp, "LIBPATH") &&     /* AIX */
 	    strcmp(varp, "RESOLV_HOST_CONF") && /* linux */
+	    strcmp(varp, "NLSPATH") && /* locale stuff */
+	    strncmp(varp, "LC_", strlen("LC_")) && /* locale stuff */
 	    strcmp(varp, "IFS")) {
 		return 1;
 	} else {

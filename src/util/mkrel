@@ -3,12 +3,15 @@ repository=:kserver:cvs.mit.edu:/cvs/krbdev
 dodoc=t
 dosrc=t
 checkout=t
+multitar=nil
 while test $# -gt 2; do
 	case $1 in
 	--srconly)
 		dodoc=nil;;
 	--doconly)
 		dosrc=nil;;
+	--multi-tarbal)
+		multitar=t;;
 	--repository)
 		shift; repository=$1;;
 	--nocheckout)
@@ -136,22 +139,25 @@ fi
 
 echo "Generating tarfiles..."
 GZIP=-9; export GZIP
-if test $dosrc = t; then
-	gtar --exclude $reldir/src/lib/crypto \
-		--exclude $reldir/src/lib/des425 \
-		--exclude $reldir/doc \
-		-zcf ${reldir}.src.tar.gz $reldir
+if test $multitar = t; then
+	if test $dosrc = t; then
+		gtar --exclude $reldir/src/lib/crypto \
+			--exclude $reldir/src/lib/des425 \
+			--exclude $reldir/doc \
+			-zcf ${reldir}.src.tar.gz $reldir
 
-	gtar zcf ${reldir}.crypto.tar.gz \
-		$reldir/src/lib/crypto \
-		$reldir/src/lib/des425
+		gtar zcf ${reldir}.crypto.tar.gz \
+			$reldir/src/lib/crypto \
+			$reldir/src/lib/des425
+	fi
+	if test $dodoc = t; then
+		gtar zcf ${reldir}.doc.tar.gz $reldir/doc $reldir/README
+	fi
+	ls -l ${reldir}.*.tar.gz
+else
+	gtar zcf ${reldir}.tar.gz $reldir
+	ls -l ${reldir}.tar.gz
 fi
-
-if test $dodoc = t; then
-	gtar zcf ${reldir}.doc.tar.gz $reldir/doc $reldir/README
-fi
-
-ls -l ${reldir}.*.tar.gz
 
 echo "Done."
 
