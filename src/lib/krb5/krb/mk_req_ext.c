@@ -87,8 +87,8 @@ krb5_mk_req_extended(context, auth_context, ap_req_options, in_data, in_creds,
     krb5_encrypt_block eblock;
     krb5_data *toutbuf;
 
+    request.ap_options = ap_req_options & AP_OPTS_WIRE_MASK;
     request.authenticator.ciphertext.data = 0;
-    request.ap_options = ap_req_options;
     request.ticket = 0;
     
     if (!in_creds->ticket.length) 

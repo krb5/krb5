@@ -85,6 +85,53 @@ krb5_auth_con_setaddrs(context, auth_context, local_addr, remote_addr)
     return 0;
 }
 
+krb5_error_code
+krb5_auth_con_getaddrs(context, auth_context, local_addr, remote_addr)
+    krb5_context      	  context;
+    krb5_auth_context 	* auth_context;
+    krb5_address       ** local_addr;
+    krb5_address       ** remote_addr;
+{
+    krb5_address	* tmp_addr;
+
+    if (local_addr && auth_context->local_addr) {
+	if ((tmp_addr = (krb5_address *)malloc(sizeof(krb5_address))) == NULL)
+	    return ENOMEM;
+	if (tmp_addr->contents = malloc(auth_context->local_addr->length)) {
+	    memcpy(tmp_addr->contents, auth_context->local_addr->contents,
+		   auth_context->local_addr->length);
+	    tmp_addr->addrtype = auth_context->local_addr->addrtype;
+	    tmp_addr->length = auth_context->local_addr->length;
+	    *local_addr = tmp_addr;
+	} else {
+	    free(tmp_addr);
+	    return ENOMEM;
+	}
+    }
+    if ((remote_addr) && auth_context->remote_addr) {
+	if ((tmp_addr = (krb5_address *)malloc(sizeof(krb5_address))) == NULL) {
+	    if (local_addr && auth_context->local_addr) {
+		krb5_free_address(context, *local_addr);
+	    }
+	    return ENOMEM;
+	}
+	if (tmp_addr->contents = malloc(auth_context->remote_addr->length)) {
+	    memcpy(tmp_addr->contents, auth_context->remote_addr->contents,
+		   auth_context->remote_addr->length);
+	    tmp_addr->addrtype = auth_context->remote_addr->addrtype;
+	    tmp_addr->length = auth_context->remote_addr->length;
+	    *remote_addr = tmp_addr;
+	} else {
+	    if (local_addr && auth_context->local_addr) {
+		krb5_free_address(context, *local_addr);
+	    }
+	    free(tmp_addr);
+	    return ENOMEM;
+	}
+    }
+    return 0 ;
+}
+
 /* XXX this call is a hack. Fixed when I do the servers. */
 krb5_error_code
 krb5_auth_con_setkey(context, auth_context, keyblock)
@@ -240,6 +287,16 @@ krb5_auth_con_setflags(context, auth_context, flags)
 }
 
 krb5_error_code
+krb5_auth_con_getflags(context, auth_context, flags)
+    krb5_context      	  context;
+    krb5_auth_context 	* auth_context;
+    krb5_int32		* flags;
+{
+    *flags = auth_context->auth_context_flags;
+    return 0;
+}
+
+krb5_error_code
 krb5_auth_con_setrcache(context, auth_context, rcache)
     krb5_context      	  context;
     krb5_auth_context 	* auth_context;
@@ -248,4 +305,3 @@ krb5_auth_con_setrcache(context, auth_context, rcache)
     auth_context->rcache = rcache;
     return 0;
 }
-

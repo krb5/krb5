@@ -1,3 +1,10 @@
+Thu Apr 27 21:36:01 1995  Chris Provenzano  (proven@mit.edu)
+
+	* auth_con.c (krb5_auth_con_getaddrs() and krb5_auth_con_getflags()):
+		Added for completeness.
+	* mk_req_ext.c (krb5_mk_req_extended()) : Don't send the 
+		AP_OPTS_USE_SUBKEY option over the wire.
+
 Thu Apr 27 17:40:20 1995 Keith Vetter (keithv@fusion.com)
 
 	* adm_rw.c, mk_cred.c, rd_cred.c:
