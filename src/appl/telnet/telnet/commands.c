@@ -2521,7 +2521,7 @@ tn(argc, argv)
 #endif
 #if	defined(IPPROTO_IP) && defined(IP_TOS)
 	{
-# if	defined(HAS_GETTOS)
+# if	defined(HAVE_GETTOSBYNAME)
 	    struct tosent *tp;
 	    if (tos < 0 && (tp = gettosbyname("telnet", "tcp")))
 		tos = tp->t_tos;

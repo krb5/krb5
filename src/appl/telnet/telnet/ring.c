@@ -52,7 +52,7 @@
 #endif
 
 #include	<sys/types.h>
-#ifndef	FILIO_H
+#ifndef	HAVE_SYS_FILIO_H
 #include	<sys/ioctl.h>
 #endif
 #include	<sys/socket.h>
