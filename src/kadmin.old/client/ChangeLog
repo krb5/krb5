@@ -1,3 +1,7 @@
+Tue Jun 20 19:00:32 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* configure.in: switch obsolete AC_HAVE_HEADER to AC_CHECK_HEADERS.
+
 Tue Jun 20 12:48:06 1995  Tom Yu  (tlyu@dragons-lair)
 
 	* configure.in: add missing check for stdlib.h
