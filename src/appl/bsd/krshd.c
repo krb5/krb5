@@ -1000,7 +1000,9 @@ void doit(f, fromp)
 		       "Principal %s (%s@%s) for local user %s failed krb5_kuserok.\n",
 		       kremuser, remuser, hostname, locuser);
 	    }
-	    else auth_sent |= AUTH_KRB5;
+	    else
+		auth_sent |=
+		    ((auth_sys == KRB5_RECVAUTH_V4) ? AUTH_KRB4 : AUTH_KRB5);
 	}
 
 	
@@ -1027,7 +1029,7 @@ void doit(f, fromp)
     if (checksum_required && !valid_checksum) {
 	if (auth_sent & AUTH_KRB5) {
 	    syslog(LOG_WARNING, "Client did not supply required checksum--connection rejected.");
-	    error( "You are using an old Kerberos5 without initial connection support; only newer clients are authorized.");
+	    error( "You are using an old Kerberos5 client without checksum support; only newer clients are authorized.\n");
 	    goto signout_please;
 	} else {
 	    syslog(LOG_WARNING,
@@ -1035,12 +1037,15 @@ void doit(f, fromp)
 	}
     }
     if (require_encrypt&&(!do_encrypt)) {
-	    error("You must use encryption.");
-	    goto signout_please;
+	error("You must use encryption.\n");
+	goto signout_please;
     }
     if (!(auth_ok&auth_sent)) {
-      error("Permission denied.");
-      goto signout_please;
+	if (auth_sent)
+	    error("Another authentication mechanism must be used to access this host.\n");
+	else
+	    error("Permission denied.\n");
+	goto signout_please;
     }
     
     if (pwd->pw_uid && !access("/etc/nologin", F_OK)) {

@@ -1,3 +1,10 @@
+Sun Apr 21 12:52:35 1996  Richard Basch  <basch@lehman.com>
+
+	* krshd.c: If checksumming is required & ALWAYS_V5_KUSEROK is
+	defined, incorrect messages were being displayed for V4 clients.
+	Additionally, various errors were not being displayed with the
+	trailing newline.
+
 Sun Apr 21 00:30:28 1996  Sam Hartman  <hartmans@mit.edu>
 
 	* krshd.c krlogind.c: Implement -i.  Rewrite error message having
