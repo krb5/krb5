@@ -1,0 +1,49 @@
+NormalLibraryObjectRule()
+
+OBJS=	\
+	f_address.o	\
+	f_ap_rep.o	\
+	f_ap_req.o	\
+	f_as_req.o	\
+	f_authdata.o	\
+	f_authent.o	\
+	f_cksum.o	\
+	f_enc_kdc.o	\
+	f_enc_tkt.o	\
+	f_error.o	\
+	f_kdc_rep.o	\
+	f_keyblock.o	\
+	f_last_req.o	\
+	f_princ.o	\
+	f_priv.o	\
+	f_priv_enc.o	\
+	f_real_tgs.o	\
+	f_safe.o	\
+	f_tgs_enc.o	\
+	f_tgs_req.o	\
+	f_ticket.o
+
+SRCS=	\
+	f_address.c	\
+	f_ap_rep.c	\
+	f_ap_req.c	\
+	f_as_req.c	\
+	f_authdata.c	\
+	f_authent.c	\
+	f_cksum.c	\
+	f_enc_kdc.c	\
+	f_enc_tkt.c	\
+	f_error.c	\
+	f_kdc_rep.c	\
+	f_keyblock.c	\
+	f_last_req.c	\
+	f_princ.c	\
+	f_priv.c	\
+	f_priv_enc.c	\
+	f_real_tgs.c	\
+	f_safe.c	\
+	f_tgs_enc.c	\
+	f_tgs_req.c	\
+	f_ticket.c
+
+NormalLibraryTarget(kfree,$(OBJS))
