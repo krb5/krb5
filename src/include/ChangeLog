@@ -1,3 +1,7 @@
+2004-08-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Actually check for pthread_mutex_lock.
+
 2004-07-28  Ken Raeburn  <raeburn@mit.edu>
 
 	* k5-thread.h [HAVE_PRAGMA_WEAK_REF]: Declare the pthread mutex
