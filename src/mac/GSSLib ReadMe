@@ -1,0 +1,4 @@
+GSSLib implements the Generic Security Services API. The APi is documented in 
+RFC 2078, which you can find at <ftp://ftp.isi.edu/in-notes/rfc2078.txt>.
+
+The mechanism used by this implementation is Kerberos v5.

@@ -1,3 +1,19 @@
+1999-09-13  Tom Yu  <tlyu@mit.edu>
+
+	* do_tgs_req.c (process_tgs_req): Don't try to take the 2nd
+	component of a principal that doesn't have 2 components.
+
+1999-08-18  Tom Yu  <tlyu@mit.edu>
+
+	* kerberos_v4.c (compat_decrypt_key): Align DES3 enctypes with
+	current names.
+	(kerb_get_principal): Align DES3 enctypes with current names.
+
+1999-08-17  Ken Raeburn  <raeburn@mit.edu>
+
+	* kdc_util.c (select_session_keytype): If none of the requested
+	ktypes are NULL or single-DES, force des-cbc-crc.
+
 1999-06-30  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (CFLAGS): Define NOCACHE.

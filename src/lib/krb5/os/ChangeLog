@@ -1,3 +1,68 @@
+1999-09-21  Ken Raeburn  <raeburn@mit.edu>
+
+	* changepw.c: Changes from Jeffrey Altman to look up kpasswd
+	server using DNS.  Placed entirely under #ifdef KRB5_DNS_LOOKUP so
+	currently-MIT-supported functionality (i.e., no DNS) can't be
+	impacted; without KRB5_DNS_LOOKUP defined, old code is used
+	unchanged.
+	(krb5_locate_kpasswd): New function, split out from
+	krb5_change_password.  Calls krb5_locate_srv_dns if use of DNS is
+	desired, and krb5_locate_srv_conf to check config file.
+	(krb5_change_password): Call it to find the server.
+	* locate_kdc.c (krb5_locate_srv_conf): No longer static.  Choose
+	default port numbers based on service name rather than a single
+	hard-coded value.
+	(krb5_locate_srv_dns): No longer static.
+
+1999-09-17  Tom Yu  <tlyu@mit.edu>
+
+	* def_realm.c: Patch from jaltman@columbia.edu to allow compiling
+	under non-Windows platforms with DNS lookup enabled.
+
+1999-08-26  Danilo Almeida  <dalmeida@mit.edu>
+
+	* kuserok.c (krb5_kuserok): Fix improper negation in
+	non-Unix localname check.  Also fix calling convention
+	before this function is exported by the Windows DLL.
+
+	* localaddr.c (krb5_os_localaddr): Fix memset to clear
+	right address list.  (Thanks to jaltman@columbia.edu).
+
+1999-08-21  Danilo Almeida  <dalmeida@mit.edu>
+
+	* localaddr.c (krb5_os_localaddr): Use multiple addresses, if
+	present, on Mac and Windows.
+
+1999-08-17  Ken Raeburn  <raeburn@mit.edu>
+
+	* get_krbhst.c (krb5_get_krbhst): Fix double-indirection
+	confusion.  Do actually copy string contents to newly allocated
+	storage.
+
+1999-08-10	Alexandra Ellwood	<lxs@mit.edu>
+
+	* changepw.c (krb5_change_password):
+		Reorganized code so that krb5_change_password actually frees
+		everything it allocated on error.  Also fixed some memory 
+		leaks which happened even without an error occurring.
+
+1999-08-09  Danilo Almeida  <dalmeida@mit.edu>
+
+	* prompter.c (krb5_prompter_posix): Provide Win32 implementation
+	so that kinit and such work under Win32.
+
+1999-08-06  Danilo Almeida  <dalmeida@mit.edu>
+
+	* def_realm.c (krb5_get_default_realm): 
+	* hst_realm.c (krb5_get_host_realm): Make sure we have FQDN
+	in the case where we use gethostname.
+
+	* def_realm.c (krb5_get_default_realm): Check that we have
+	a realm before trying to copy it (since profile_get_string
+	may return no error but not get anything).
+
+	* init_os_ctx.c (krb5_get_profile): Fix calling convention.
+
 1999-08-05  Danilo Almeida  <dalmeida@mit.edu>
 
 	* t_std_conf.c (test_get_krbhst): Use krb5_free_krbhst to

@@ -16,7 +16,10 @@
  * this permission notice appear in supporting documentation, and that
  * the name of M.I.T. not be used in advertising or publicity pertaining
  * to distribution of the software without specific, written prior
- * permission.  M.I.T. makes no representations about the suitability of
+ * permission.  Furthermore if you modify this software you must label
+ * your software as modified software and not distribute it in such a
+ * fashion that it might be confused with the original M.I.T. software.
+ * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
  *
@@ -160,8 +163,8 @@ static struct log_entry	def_log_entry;
  */
 #define	DEVICE_OPEN(d, m)	fopen(d, m)
 #define	CONSOLE_OPEN(m)		fopen("/dev/console", m)
-#define	DEVICE_PRINT(f, m)	((fprintf(f, m) >= 0) ? 		\
-				 (fprintf(f, "\r\n"), fflush(f), 0) :	\
+#define	DEVICE_PRINT(f, m)	((fprintf(f, "%s\r\n", m) >= 0) ? 	\
+				 (fflush(f), 0) :			\
 				 -1)
 #define	DEVICE_CLOSE(d)		fclose(d)
 
@@ -277,14 +280,13 @@ klog_com_err_proc(whoami, code, format, ap)
 	    /*
 	     * Files/standard error.
 	     */
-	    if (fprintf(log_control.log_entries[lindex].lfu_filep,
+	    if (fprintf(log_control.log_entries[lindex].lfu_filep, "%s\n",
 			outbuf) < 0) {
 		/* Attempt to report error */
 		fprintf(stderr, log_file_err, whoami,
 			log_control.log_entries[lindex].lfu_fname);
 	    }
 	    else {
-		fprintf(log_control.log_entries[lindex].lfu_filep, "\n");
 		fflush(log_control.log_entries[lindex].lfu_filep);
 	    }
 	    break;
@@ -879,14 +881,13 @@ klog_vsyslog(priority, format, arglist)
 	    /*
 	     * Files/standard error.
 	     */
-	    if (fprintf(log_control.log_entries[lindex].lfu_filep, 
+	    if (fprintf(log_control.log_entries[lindex].lfu_filep, "%s\n",
 			outbuf) < 0) {
 		/* Attempt to report error */
-		fprintf(stderr, log_file_err,
+		fprintf(stderr, log_file_err, log_control.log_whoami,
 			log_control.log_entries[lindex].lfu_fname);
 	    }
 	    else {
-		fprintf(log_control.log_entries[lindex].lfu_filep, "\n");
 		fflush(log_control.log_entries[lindex].lfu_filep);
 	    }
 	    break;
@@ -898,7 +899,7 @@ klog_vsyslog(priority, format, arglist)
 	    if (DEVICE_PRINT(log_control.log_entries[lindex].ldu_filep,
 			     outbuf) < 0) {
 		/* Attempt to report error */
-		fprintf(stderr, log_device_err,
+		fprintf(stderr, log_device_err, log_control.log_whoami,
 			log_control.log_entries[lindex].ldu_devname);
 	    }
 	    break;

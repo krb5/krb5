@@ -16,7 +16,10 @@
  * this permission notice appear in supporting documentation, and that
  * the name of M.I.T. not be used in advertising or publicity pertaining
  * to distribution of the software without specific, written prior
- * permission.  M.I.T. makes no representations about the suitability of
+ * permission.  Furthermore if you modify this software you must label
+ * your software as modified software and not distribute it in such a
+ * fashion that it might be confused with the original M.I.T. software.
+ * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
  *
@@ -250,12 +253,13 @@ krb5_set_default_in_tkt_ktypes(context, ktypes)
 }
 
 static krb5_error_code
-get_profile_etype_list(context, ktypes, profstr, ctx_count, ctx_list)
+get_profile_etype_list(context, ktypes, profstr, ctx_count, ctx_list, desonly)
      krb5_context context;
      krb5_enctype **ktypes;
      char *profstr;
      int ctx_count;
      krb5_enctype FAR *ctx_list;
+     int desonly;
 {
     krb5_enctype *old_ktypes;
 
@@ -283,7 +287,7 @@ get_profile_etype_list(context, ktypes, profstr, ctx_count, ctx_list)
 
 	code = profile_get_string(context->profile, "libdefaults", profstr,
 				  NULL,
-				  "des3-hmac-sha1 des-cbc-md5 des-cbc-crc",
+				  "des3-cbc-sha1 des-cbc-md5 des-cbc-crc",
 				  &retval);
 	if (code)
 	    return code;
@@ -313,8 +317,21 @@ get_profile_etype_list(context, ktypes, profstr, ctx_count, ctx_list)
 	j = 0;
 	i = 1;
 	while (1) {
-	    if (! krb5_string_to_enctype(sp, &old_ktypes[j]))
+	    if (! krb5_string_to_enctype(sp, &old_ktypes[j])) {
+	      switch (old_ktypes[j]) {
+	      default:
+		if (desonly)
+		  /* Other types not supported yet.  */
+		  break;
+		/* else fall through */
+
+	      case ENCTYPE_NULL:
+	      case ENCTYPE_DES_CBC_CRC:
+	      case ENCTYPE_DES_CBC_MD5:
 		j++;
+		break;
+	      }
+	    }
 
 	    if (i++ >= count)
 		break;
@@ -339,7 +356,7 @@ krb5_get_default_in_tkt_ktypes(context, ktypes)
 {
     return(get_profile_etype_list(context, ktypes, "default_tkt_enctypes",
 				  context->in_tkt_ktype_count,
-				  context->in_tkt_ktypes));
+				  context->in_tkt_ktypes, 1));
 }
 
 krb5_error_code
@@ -382,7 +399,7 @@ krb5_get_tgs_ktypes(context, princ, ktypes)
 {
     return(get_profile_etype_list(context, ktypes, "default_tgs_enctypes",
 				  context->tgs_ktype_count,
-				  context->tgs_ktypes));
+				  context->tgs_ktypes, 1));
 }
 
 krb5_error_code
@@ -392,7 +409,7 @@ krb5_get_permitted_enctypes(context, ktypes)
 {
     return(get_profile_etype_list(context, ktypes, "permitted_enctypes",
 				  context->tgs_ktype_count,
-				  context->tgs_ktypes));
+				  context->tgs_ktypes, 0));
 }
 
 krb5_boolean

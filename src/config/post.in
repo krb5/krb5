@@ -54,12 +54,13 @@ $(srcdir)/$(thisconfigdir)/configure: $(srcdir)/$(thisconfigdir)/configure.in \
 
 all-recurse clean-recurse distclean-recurse install-recurse check-recurse Makefiles-recurse:
 	@case "`echo 'x$(MFLAGS)'|sed -e 's/^x//' -e 's/ --.*$$//'`" \
-		in *[ik]*) e=:;; *) e="exit 1";; esac; \
+		in *[ik]*) e="status=1" ;; *) e="exit 1";; esac; \
 	if test -z "$(MY_SUBDIRS)" ; then \
 		do_subdirs="$(SUBDIRS)" ; \
 	else \
 		do_subdirs="$(MY_SUBDIRS)" ; \
 	fi; \
+	status=0; \
 	if test -n "$$do_subdirs" && test -z "$(NORECURSE)"; then \
 	for i in $$do_subdirs ; do \
 		if test -d $$i ; then \
@@ -68,7 +69,7 @@ all-recurse clean-recurse distclean-recurse install-recurse check-recurse Makefi
 			echo "making $$target in $(CURRENT_DIR)$$i..."; \
 			if (cd $$i ; $(MAKE) CC="$(CC)" CCOPTS="$(CCOPTS)" \
 			    CURRENT_DIR=$(CURRENT_DIR)$$i/ $$target) then :; \
-			else $$e; fi; \
+			else eval $$e; fi; \
 			;; \
 		esac; \
 		else \
@@ -76,4 +77,5 @@ all-recurse clean-recurse distclean-recurse install-recurse check-recurse Makefi
 		fi; \
 	done; \
 	else :; \
-	fi
+	fi;\
+	exit $$status

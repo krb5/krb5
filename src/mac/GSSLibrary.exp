@@ -59,13 +59,6 @@
 	gss_export_name
 	gss_duplicate_name
 #
-# GSS-API variables
-#
-	gss_nt_user_name
-	gss_nt_machine_uid_name
-	gss_nt_string_uid_name
-	gss_nt_service_name
-#
 # krb5-specific CCache name	stuff
 #
 	gss_krb5_ccache_name

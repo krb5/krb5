@@ -1,3 +1,9 @@
+1999-08-25  Ken Raeburn  <raeburn@mit.edu>
+
+	* old_decrypt.c (memmove) [HAVE_BCOPY && !HAVE_MEMMOVE]: Define to
+	use bcopy.  Should work unless any system has no memmove *and*
+	bcopy isn't safe with overlaps.
+
 Mon May 10 15:20:32 1999  Danilo Almeida  <dalmeida@mit.edu>
 
 	* Makefile.in: Do win32 build in subdir.

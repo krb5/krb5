@@ -12,27 +12,32 @@ krb5_mk_chpw_req(context, auth_context, ap_req, passwd, packet)
      char *passwd;
      krb5_data *packet;
 {
-    krb5_error_code ret;
+    krb5_error_code ret = 0;
     krb5_data clearpw;
     krb5_data cipherpw;
     krb5_replay_data replay;
     char *ptr;
 
+    cipherpw.data = NULL;
+
     if (ret = krb5_auth_con_setflags(context, auth_context,
 				     KRB5_AUTH_CONTEXT_DO_SEQUENCE))
-	return(ret);
+	  goto cleanup;
 
     clearpw.length = strlen(passwd);
     clearpw.data = passwd;
 
     if (ret = krb5_mk_priv(context, auth_context,
 			   &clearpw, &cipherpw, &replay))
-    return(ret);
+      goto cleanup;
 
     packet->length = 6 + ap_req->length + cipherpw.length;
     packet->data = (char *) malloc(packet->length);
     if (packet->data == NULL)
-	return ENOMEM;
+	  {
+	    ret = ENOMEM;
+	    goto cleanup;
+	  }
     ptr = packet->data;
 
     /* length */
@@ -59,7 +64,11 @@ krb5_mk_chpw_req(context, auth_context, ap_req, passwd, packet)
 
     memcpy(ptr, cipherpw.data, cipherpw.length);
 
-    return(0);
+cleanup:
+    if(cipherpw.data != NULL)  /* allocated by krb5_mk_priv */
+      free(cipherpw.data);
+      
+    return(ret);
 }
 
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV

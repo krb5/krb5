@@ -22,7 +22,7 @@ kdestroy: kdestroy.o $(KRB5_BASE_DEPLIBS)
 
 ##WIN32##all-windows:: $(OUTPRE)kdestroy.exe
 ##WIN32##$(OUTPRE)kdestroy.exe: $(OUTPRE)kdestroy.obj $(BUILDTOP)\util\windows\$(OUTPRE)getopt.obj $(KLIB) $(CLIB)
-##WIN32##	link /nologo /out:$@ $**
+##WIN32##	link $(LINKOPTS2) -out:$@ $**
 
 
 clean-unix::

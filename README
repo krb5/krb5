@@ -1,4 +1,4 @@
-		   Kerberos Version 5, Release 1.0
+		   Kerberos Version 5, Release 1.1
 
 			    Release Notes
 
@@ -8,11 +8,11 @@ Unpacking the Source Distribution
 ---------------------------------
 
 The source distribution of Kerberos 5 comes in three gzipped tarfiles,
-krb5-1.0.src.tar.gz, krb5-1.0.doc.tar.gz, and krb5-1.0.crypto.tar.gz.
-The krb5-1.0.doc.tar.gz contains the doc/ directory and this README
-file.  The krb5-1.0.src.tar.gz contains the src/ directory and this
+krb5-1.1.src.tar.gz, krb5-1.1.doc.tar.gz, and krb5-1.1.crypto.tar.gz.
+The krb5-1.1.doc.tar.gz contains the doc/ directory and this README
+file.  The krb5-1.1.src.tar.gz contains the src/ directory and this
 README file, except for the crypto library sources, which are in
-krb5-1.0.crypto.tar.gz.
+krb5-1.1.crypto.tar.gz.
 
 Instruction on how to extract the entire distribution follow.  These
 directions assume that you want to extract into a directory called
@@ -22,56 +22,21 @@ If you have the GNU tar program and gzip installed, you can simply do:
 
 	mkdir DIST
 	cd DIST
-	gtar zxpf krb5-1.0.src.tar.gz
-	gtar zxpf krb5-1.0.crypto.tar.gz
-	gtar zxpf krb5-1.0.doc.tar.gz
+	gtar zxpf krb5-1.1.src.tar.gz
+	gtar zxpf krb5-1.1.crypto.tar.gz
+	gtar zxpf krb5-1.1.doc.tar.gz
 
 If you don't have GNU tar, you will need to get the FSF gzip
 distribution and use gzcat:
 
 	mkdir DIST
 	cd DIST
-	gzcat krb5-1.0.src.tar.gz | tar xpf -
-	gzcat krb5-1.0.crypto.tar.gz | tar xpf -
-	gzcat krb5-1.0.doc.tar.gz | tar xpf -
+	gzcat krb5-1.1.src.tar.gz | tar xpf -
+	gzcat krb5-1.1.crypto.tar.gz | tar xpf -
+	gzcat krb5-1.1.doc.tar.gz | tar xpf -
 
-Both of these methods will extract the sources into DIST/krb5-1.0/src
-and the documentation into DIST/krb5-1.0/doc.
-
-Unpacking the Binary Distribution
----------------------------------
-
-Binary distributions of Kerberos V5 are provided merely as convenience
-to those people who wish to try out Kerberos V5 without needing to do
-a full compile of Kerberos.
-
-MIT and the MIT Kerberos V5 development team make no guarantees that
-we will continue to supply binary distributions for future releases of
-Kerberos V5, or for any operating system/platform in particular.
-These binary distributions have been prepared by members of the MIT
-Kerberos V5 development team, or by volunteers who have graciously
-agreed to test the pre-release snapshot.  Each binary build is PGP
-signed by the person who prepared the binary distribution for that
-particular platform.  
-
-While the binary distribution is *supposed* to correspond exactly to
-the 1.0 Kerberos V5 source release, you have no way of knowing whether
-the person who prepared the binary release might have inserted a
-trojan horse, or a trapdoor.  For all you know, the binary
-distribution might be mailing all of your Kerberos keys to
-kremvax!boris.  (The same is true for the source distribution, but at
-least you can audit the code yourself!)
-
-For this reason, if you are planning on using Kerberos V5 in
-production, we strongly suggest that you obtain the source
-distribution and compile it from source yourself.
-
-The binary distributions have been compiled so that they will install
-in /usr/local.  To install, su to root and and type the command:
-
-	cd /usr/local
-	gunzip < /tmp/krb5-1.0.<platform>.tar.gz | tar xvf -
-
+Both of these methods will extract the sources into DIST/krb5-1.1/src
+and the documentation into DIST/krb5-1.1/doc.
 
 Building and Installing Kerberos 5
 ----------------------------------
@@ -80,12 +45,17 @@ The first file you should look at is doc/install.ps; it contains the
 notes for building and installing Kerberos 5.  The info file
 krb5-install.info has the same information in info file format.  You
 can view this using the GNU emacs info-mode, or by using the
-standalone info file viewer from the Free Software Foundation.
+standalone info file viewer from the Free Software Foundation.  This
+is also available as an HTML file, install.html.
 
 Other good files to look at are admin-guide.ps and user-guide.ps,
 which contain the system administrator's guide, and the user's guide,
 respectively.  They are also available as info files
-kerberos-admin.info and krb5-user.info, respectively.
+kerberos-admin.info and krb5-user.info, respectively.  These files are
+also available as HTML files.
+
+If you are attempting to build under Windows, please see the
+src/windows/README file.
 
 Reporting Bugs
 --------------
@@ -99,54 +69,53 @@ If you are not able to use krb5-send-pr because you haven't been able
 compile and install Kerberos V5 on any platform, you may send mail to
 krb5-bugs@mit.edu.
 
-Notes and Major Changes
------------------------
+Notes, Major Changes, and Known Bugs
+------------------------------------
 
-* We are now using the GNATS system to track bug reports for Kerberos
-V5.  It is therefore helpful for people to use the krb5-send-pr
-program when reporting bugs.  The old interface of sending mail to
-krb5-bugs@mit.edu will still work; however, bug reports sent in this
-fashion may experience a delay in being processed.
+* Triple DES support is included; however, it is only usable for
+  service keys at the moment, due to a large number of compatibility
+  issues.  For example, the GSSAPI library has some (buggy) support
+  for a triple DES session key, but it is intentionally disabled.
+  ** Do not use triple-DES in your config files except as described in
+  ** the documentation.
 
-* The default keytab name has changed from /etc/v5srvtab to
-/etc/krb5.keytab.
+* The principal database now uses the btree backend of Berkeley DB.
+  This should result in improved KDC performance.
 
-* login.krb5 no longer defaults to getting krb4 tickets.
+* The lib/rpc tests do not appear to work under NetBSD-1.4, for
+  reasons that are not completely clear at the moment, but probably
+  have something to do with portmapper interfacing.  This should not
+  affect other operations, such as kadmind operation.
 
-* The Windows (win16) DLL, LIBKRB5.DLL, has been renamed to
-KRB5_16.DLL.  This change was necessary to distinguish it from the
-win32 version, which will be named KRB5_32.DLL.  Note that the
-GSSAPI.DLL file has not been renamed, because this name was specified
-in a draft standard for the Windows 16 GSSAPI bindings.  (The 32-bit
-version of the GSSAPI DLL will be named GSSAPI32.DLL.)
+* Shared library builds are under a new framework; at this point only
+  Solaris (2.x), Irix (6.5), NetBSD (1.4 i386), and possibly Linux are
+  known to work.  All other working shared library builds may be
+  figments of your imagination.
 
-* The directory structure used for installations has changed.  In
-particular, files previously located in $prefix/lib/krb5kdc are now
-normally located in $sysconfdir/krb5kdc.  With the normal configure
-options, this means the KDC database goes in /usr/local/var/krb5kdc by
-default.  If you wish to have the old behavior, then you would use a
-configure line like the following:
+* Many existing databases, especially those converted from krb4
+  original databases, may contain expiration dates in 1999.  You
+  should make sure to update these expiration dates, and also change
+  any config file entries that have two-digit years.
 
-	configure --prefix=/usr/local --sysconfdir=/usr/local/lib
+* Hardware preauthentication is known to be broken; this will be fixed
+  in an upcoming release.
 
-* kshd has been modified to accept krb4 encrypted rcp connections; for
-this to work, the v4rcp program must be in the bin directory.
+* krb524d now defaults to forking into the background; use
+  "krb524d -nofork" to avoid forking.
 
-* The gssrpc library has symbol collisions with the rpc library in
-some of the libcs in certain operating systems without shared
-libraries, notably some ports of NetBSD and MkLinux.  For those
-platforms which have rpc in libc and also contain NIS in libc,
-compiling with static libraries will not work because of this
-conflict.  NetBSD users can either upgrade to the current tree, which
-includes shared libraries for more ports, choose not to build kadmind
-or kadmin, or recompile NetBSD without NIS support.  MkLinux users
-must either recompile without NIS or not build the administration
-system.
+* Not all reported bugs have been fixed in this release, due to time
+  constraints.  We are planning to make another release in the near
+  future with more complete triple DES support, and additional
+  bugfixes.  Many of the bugs in our database are reported against
+  what is now quite old code, or require hardware that we do not have,
+  which make them difficult to reproduce and debug.  We will work on
+  these older bugs and some externally submitted patches for the
+  following release.
 
 Copyright Notice and Legal Administrivia
 ----------------------------------------
 
-Copyright (C) 1996 by the Massachusetts Institute of Technology.
+Copyright (C) 1985-1999 by the Massachusetts Institute of Technology.
 
 All rights reserved.
 
@@ -162,16 +131,19 @@ notice appear in all copies and that both that copyright notice and
 this permission notice appear in supporting documentation, and that
 the name of M.I.T. not be used in advertising or publicity pertaining
 to distribution of the software without specific, written prior
-permission.  M.I.T. makes no representations about the suitability of
-this software for any purpose.  It is provided "as is" without express
-or implied warranty.
+permission.  Furthermore if you modify this software you must label
+your software as modified software and not distribute it in such a
+fashion that it might be confused with the original MIT software.
+M.I.T. makes no representations about the suitability of this software
+for any purpose.  It is provided "as is" without express or implied
+warranty.
 
 THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
 IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 
 Individual source code files are copyright MIT, Cygnus Support,
-OpenVision, Oracle, Sun Soft, and others.
+OpenVision, Oracle, Sun Soft, FundsXpress, and others.
 
 Project Athena, Athena, Athena MUSE, Discuss, Hesiod, Kerberos, Moira,
 and Zephyr are trademarks of the Massachusetts Institute of Technology
@@ -253,7 +225,9 @@ Thanks to Sean Mullan and Bill Sommerfeld from Hewlett Packard for
 their many suggestions and bug fixes.
 
 Thanks to the members of the Kerberos V5 development team at MIT, both
-past and present: Jay Berkenbilt, Richard Basch, John Carr, Don
-Davis, Nancy Gilman, Sam Hartman, Marc Horowitz, Barry Jaspan, John
-Kohl, Cliff Neuman, Kevin Mitchell, Paul Park, Ezra Peisach, Chris
-Provenzano, Jon Rochlis, Jeff Schiller, Harry Tsai, Ted Ts'o, Tom Yu.
+past and present: Danillo Almeida, Jay Berkenbilt, Richard Basch, John
+Carr, Don Davis, Alexandra Ellwood, Nancy Gilman, Matt Hancher, Sam
+Hartman, Paul Hill, Marc Horowitz, Eva Jacobus, Barry Jaspan, Geoffrey
+King, John Kohl, Scott McGuire, Kevin Mitchell, Cliff Neuman, Paul
+Park, Ezra Peisach, Chris Provenzano, Ken Raeburn, Jon Rochlis, Jeff
+Schiller, Brad Thompson, Harry Tsai, Ted Ts'o, Marshall Vale, Tom Yu.

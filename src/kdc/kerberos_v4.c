@@ -17,7 +17,10 @@
  * this permission notice appear in supporting documentation, and that
  * the name of M.I.T. not be used in advertising or publicity pertaining
  * to distribution of the software without specific, written prior
- * permission.  M.I.T. makes no representations about the suitability of
+ * permission.  Furthermore if you modify this software you must label
+ * your software as modified software and not distribute it in such a
+ * fashion that it might be confused with the original M.I.T. software.
+ * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
  * 
@@ -384,7 +387,7 @@ compat_decrypt_key (in5, out4, out5, issrv)
 	    retval = -1;
 	} else {
 	    /* KLUDGE! If it's a non-raw des3 key, bash its enctype */
-	    if (out5->enctype == ENCTYPE_DES3_HMAC_SHA1 ||
+	    if (out5->enctype == ENCTYPE_DES3_CBC_SHA1 ||
 		out5->enctype == ENCTYPE_LOCAL_DES3_HMAC_SHA1)
 		out5->enctype = ENCTYPE_DES3_CBC_RAW;
 	}
@@ -486,7 +489,7 @@ kerb_get_principal(name, inst, principal, maxn, more, k5key, kvno, issrv)
 				  ENCTYPE_LOCAL_DES3_HMAC_SHA1,
 				  -1, kvno, &pkey) &&
 	    krb5_dbe_find_enctype(kdc_context, &entries,
-				  ENCTYPE_DES3_HMAC_SHA1,
+				  ENCTYPE_DES3_CBC_SHA1,
 				  -1, kvno, &pkey) &&
 	    krb5_dbe_find_enctype(kdc_context, &entries,
 				  ENCTYPE_DES_CBC_CRC,

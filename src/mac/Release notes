@@ -110,6 +110,8 @@ Changes in 1.1a3:
  separated profile lib
  fixed krb5 library CFM version numbers
  fixed makefile and perl scripts to build form arbitrary root
+ 
+--- version upped to 2.5a1 ---
 
 2.5a1 - Monday, July 26, 1999 1:00:00 PM
  changed profile lib to use FSSpecs
@@ -119,3 +121,23 @@ Changes in 1.1a3:
  removed "K5Library alias"
  removed com_err exports from krb5 lib
  fixed win-mac.h redefinition of size_t
+ 
+2.5a2 - Friday, August 6, 1999 1:40:00 PM
+ fixed huge profile memory leak
+ fixed memory leak in krb5_stdcc_destroy
+ added traceback tables to PPC versions
+
+2.5b1
+ from tag Mac_GSSKerberos5_2_5b1
+ separated com_err lib
+ now tracking krb5-1-1 branch
+ added CCache cleanup to CFM termination procs
+ 
+2.5b2
+ from tag Mac_GSSKerberos5_2_5b2
+ cleaned up glue for all libraries
+ 
+2.5
+ from tag Mac_GSSKerberos5_2_5
+ added documentation and fixed makefile so that documentation,
+ headers, and cfrm glue are always built correctly

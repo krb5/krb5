@@ -21,7 +21,7 @@ klist: klist.o $(KRB5_BASE_DEPLIBS)
 
 ##WIN32##all-windows:: $(OUTPRE)klist.exe
 ##WIN32##$(OUTPRE)klist.exe: $(OUTPRE)klist.obj $(KLIB) $(CLIB)
-##WIN32##	link /nologo /out:$@ $** wsock32.lib
+##WIN32##	link $(LINKOPTS2) -out:$@ $** wsock32.lib
 
 
 clean-unix::

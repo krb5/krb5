@@ -14,7 +14,7 @@
 #include "prot.h"
 
 extern int krb_debug;
-int swap_bytes;
+int swap_bytes=0;
 
 /*
  * Given a pointer to an AUTH_MSG_KDC_REPLY packet, return the length of

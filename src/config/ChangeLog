@@ -1,3 +1,28 @@
+1999-09-14  Danilo Almeida  <dalmeida@mit.edu>
+
+	* win-pre.in: Fix DNS error messages to wshelper instead of
+	version server.
+
+1999-09-08  Danilo Almeida  <dalmeida@mit.edu>
+
+	* win-pre.in: Fix DNS flags it does not try to depend on mit dir.
+	Define NULL so we can do directory existence checks via the shell
+	under both NT and 9x.
+
+1999-08-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* config.guess: Recognize Rhapsody OS.
+	* config.sub: Recognize OS name "rhapsody*".
+
+1999-08-17  Ken Raeburn  <raeburn@mit.edu>
+
+	* post.in (*-recurse): If an error occurs when using -k, report an
+	error after finishing all the subdirectories.
+
+1999-08-13  Brad Thompson  <yak@mit.edu>
+
+	* config.sub: Now recognizes MacOS 10 as a valid OS.
+
 1999-07-30  Ken Raeburn  <raeburn@mit.edu>
 
 	* config.guess: Add MacOS 10 support.  (Submitted to autoconf

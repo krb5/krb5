@@ -125,8 +125,9 @@ krb5_boolean zero_password;
 	}	
 
 	if (auth_debug){ dump_principal(context, "local tgt principal name", tgtq.server ); } 	
-	retval = krb5_cc_retrieve_cred(context, cc, KRB5_TC_MATCH_SRV_NAMEONLY,
-					&tgtq, &tgt); 
+	retval = krb5_cc_retrieve_cred(context, cc,
+				       KRB5_TC_MATCH_SRV_NAMEONLY | KRB5_TC_SUPPORTED_KTYPES,
+				       &tgtq, &tgt); 
 
 	if (! retval) retval = krb5_check_exp(context, tgt.times);
 
@@ -260,8 +261,9 @@ krb5_error_code retval;
  		return (FALSE) ; 	
 	}
 
-	if ((retval = krb5_cc_retrieve_cred(context, cc, KRB5_TC_MATCH_SRV_NAMEONLY,
-					  &tgtq, &tgt))){ 
+	if ((retval = krb5_cc_retrieve_cred(context, cc,
+					    KRB5_TC_MATCH_SRV_NAMEONLY | KRB5_TC_SUPPORTED_KTYPES,
+					    &tgtq, &tgt))){ 
 		if (auth_debug)
 		   com_err(prog_name, retval,"While Retrieving credentials"); 
  		return (FALSE) ; 	
