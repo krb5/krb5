@@ -1,3 +1,8 @@
+Wed Sep 18 12:35:16 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* alt_prof.c (kadm5_get_config_params): set max_life default to 10
+ 	hours, instead of 0
+
 Tue Sep 17 15:09:28 1996  Barry Jaspan  <bjaspan@mit.edu>
 
 	* server_internal.h (ALL_PRINC_MASK): Add MAX_RLIFE to
