@@ -2,5 +2,6 @@ AC_INIT(configure.in)
 CONFIG_RULES
 dnl AC_DEFINE(NEW_SHS)
 V5_SHARED_LIB_OBJS
+AC_CHECK_HEADERS(sys/types.h)
 SubdirLibraryRule([${OBJS}])
 V5_AC_OUTPUT_MAKEFILE

@@ -1,3 +1,9 @@
+Wed Aug 28 17:40:53 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* shs.c: Only include sys/types.h if present.
+
+	* configure.in: Check for sys/types.h
+
 Thu Jun 13 10:54:27 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* hmac_sha.c: Include string.h for memcpy prototype
