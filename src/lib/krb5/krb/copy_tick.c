@@ -92,15 +92,15 @@ krb5_ticket **pto;
     *tempto = *from;
     if (retval = krb5_copy_principal(from->server, &tempto->server))
 	return retval;
-    if (retval = krb5_copy_data(&from->enc_part, &scratch)) {
+    if (retval = krb5_copy_data(&from->enc_part.ciphertext, &scratch)) {
 	krb5_free_principal(tempto->server);
 	xfree(tempto);
 	return retval;
     }
-    tempto->enc_part = *scratch;
+    tempto->enc_part.ciphertext = *scratch;
     xfree(scratch);
     if (retval = krb5_copy_enc_tkt_part(from->enc_part2, &tempto->enc_part2)) {
-	xfree(tempto->enc_part.data);
+	xfree(tempto->enc_part.ciphertext.data);
 	krb5_free_principal(tempto->server);
 	xfree(tempto);
 	return retval;
