@@ -2,13 +2,14 @@
  * test_profile.c --- testing program for the profile routine
  */
 
+#include "prof_int.h"
+
 #include <stdio.h>
 #include <string.h>
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
 
-#include "prof_int.h"
 #include "argv_parse.h"
 #include "com_err.h"
 

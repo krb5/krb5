@@ -249,7 +249,7 @@ void setpassive (void);
 
 /* ftp.c */
 void sendrequest (char *, char *, char *, int);
-void recvrequest (char *, char *volatile, char *, char *, int);
+void recvrequest (char *, char *volatile, char *, char *, int, int);
 int login (char *);
 void setpbsz (unsigned int);
 void pswitch (int);

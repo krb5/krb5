@@ -36,7 +36,6 @@
 #include <kadm5/adb.h>
 #include "kdb5_util.h"
 
-extern int errno;
 extern int exit_status;
 extern krb5_boolean dbactive;
 extern kadm5_config_params global_params;

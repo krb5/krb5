@@ -1,3 +1,7 @@
+2003-05-29  Ken Raeburn  <raeburn@mit.edu>
+
+	* osconf.h (DEFAULT_KDC_ENCTYPE): Default to des3 now.
+
 2003-03-06  Alexandra Ellwood  <lxs@mit.edu>
 
     * osconf.h: Added DEFAULT_SECURE_PROFILE_PATH so that KfM will only

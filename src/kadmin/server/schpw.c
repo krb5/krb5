@@ -1,7 +1,8 @@
 #define NEED_SOCKETS
 #include "k5-int.h"
 #include <kadm5/admin.h>
-
+#include <syslog.h>
+#include <krb5/adm_proto.h>	/* krb5_klog_syslog */
 #include <stdio.h>
 #include <errno.h>
 
@@ -39,6 +40,7 @@ process_chpw_request(context, server_handle, realm, s, keytab, sockin,
     krb5_error krberror;
     int numresult;
     char strresult[1024];
+    char *clientstr;
 
     ret = 0;
     rep->length = 0;
@@ -76,7 +78,7 @@ process_chpw_request(context, server_handle, realm, s, keytab, sockin,
 
     if (vno != 1) {
 	ret = KRB5KDC_ERR_BAD_PVNO;
-	numresult = KRB5_KPASSWD_MALFORMED;
+	numresult = KRB5_KPASSWD_BAD_VERSION;
 	sprintf(strresult,
 		"Request contained unknown protocol version number %d", vno);
 	goto chpwfail;
@@ -235,6 +237,12 @@ process_chpw_request(context, server_handle, realm, s, keytab, sockin,
 	goto chpwfail;
     }
 
+    ret = krb5_unparse_name(context, ticket->enc_part2->client, &clientstr);
+    if (ret) {
+	numresult = KRB5_KPASSWD_HARDERROR;
+	strcpy(strresult, "Failed unparsing client name for log");
+	goto chpwfail;
+    }
     /* change the password */
 
     ptr = (char *) malloc(clear.length+1);
@@ -250,6 +258,11 @@ process_chpw_request(context, server_handle, realm, s, keytab, sockin,
     krb5_xfree(clear.data);
     free(ptr);
     clear.length = 0;
+
+    krb5_klog_syslog(LOG_NOTICE, "chpw request from %s for %s: %s",
+		     inet_ntoa(((struct sockaddr_in *)&remote_addr)->sin_addr),
+		     clientstr, ret ? error_message(ret) : "success");
+    krb5_free_unparsed_name(context, clientstr);
 
     if (ret) {
 	if ((ret != KADM5_PASS_Q_TOOSHORT) && 
