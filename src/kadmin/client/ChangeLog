@@ -1,3 +1,7 @@
+Fri Feb 10 17:50:39 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* kadmin_msnd.c: Remove needless #include of <krb5/asn.1/encode.h>
+
 Mon Feb 06 17:19:04 1995 Chris Provenzano  (proven@mit.edu)
 
         * kadmin.c Removed krb5_keytype, changed krb5_enctype to
