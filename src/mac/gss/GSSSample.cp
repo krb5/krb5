@@ -6,7 +6,8 @@
 //	Started 2/28/97
 // ===========================================================================
 //
-//	This file contains the code for the GSS Sample application
+// Implementation of CGSSSample, an application class derived from LDocApplication
+// Handles top-level chores: initialization, destruction, AppleEvent dispatch
 
 #include "gss.h"
 #include "GSSSample.h"
@@ -29,12 +30,7 @@ extern "C" {
 // for mit-sock
 OSErr MacOSErr;
 
-#include "CGSSWindow.h"
-
-// put declarations for resource ids (ResIDTs) here
-
-// AppleEvent reference number
-const	long		ae_Query			= 4001;
+#include "CGSSDocument.h"
 
 // ===========================================================================
 //		€ Main Program
@@ -84,9 +80,9 @@ CGSSSample::CGSSSample():
 	URegistrar::RegisterClass(LWindow::class_ID,		(ClassCreatorFunc) LWindow::CreateWindowStream);
 
 	URegistrar::RegisterClass(LActiveScroller::class_ID,		(ClassCreatorFunc) LActiveScroller::CreateActiveScrollerStream);
-	URegistrar::RegisterClass(CGSSWindow::class_ID,				(ClassCreatorFunc) CGSSWindow::CreateGSSWindowStream);
+//	URegistrar::RegisterClass(CGSSWindow::class_ID,				(ClassCreatorFunc) CGSSWindow::CreateGSSWindowStream);
 
-	// Init sokets library	
+	// Initialize sockets library	
 	init_network (nil, true);
 }
 
@@ -104,6 +100,7 @@ CGSSSample::~CGSSSample()
 void
 CGSSSample::StartUp ()
 {
+	// On startup, always create a new document
 	MakeNewDocument ();
 }
 
@@ -122,7 +119,7 @@ CGSSSample::ObeyCommand(
 	switch (inCommand) {
 	
 		// Deal with command messages
-		// Any that you don't handle will be passed to LApplication
+		// Any that you don't handle will be passed to LDocApplication
  			
 		case cmd_Close:
 		// Quit when the window is closed
@@ -154,7 +151,7 @@ CGSSSample::FindCommandStatus(
 	switch (inCommand) {
 	
 		// Return menu item status according to command messages.
-		// Any that you don't handle will be passed to LApplication
+		// Any that you don't handle will be passed to LDocApplication
 
 		case cmd_Close:
 			// Always enabled
@@ -167,6 +164,22 @@ CGSSSample::FindCommandStatus(
 			break;
 	}
 }
+
+// ---------------------------------------------------------------------------
+//		€ MakeNewDocument
+// ---------------------------------------------------------------------------
+//	This function creates a new document
+//
+
+LModelObject*
+CGSSSample::MakeNewDocument ()
+{
+	// There should be only one document!
+	SignalIf_ (mGSSDocument != nil);
+	
+	return (mGSSDocument = new CGSSDocument ());
+}
+
 
 // ===========================================================================
 // € Apple Event Handlers								Apple Event Handlers €
@@ -181,6 +194,9 @@ CGSSSample::HandleAppleEvent (
 {
 	switch (inAENumber) {
 
+		// Deal with AppleEvents
+		// Any that you don't handle will be passed to LDocApplication
+
 		case ae_Query:
 		// Dispatch query to the document
 			mGSSDocument -> HandleAppleEvent (inAppleEvent, outAEReply, outResult, inAENumber);
@@ -188,35 +204,6 @@ CGSSSample::HandleAppleEvent (
 
 		default:
 			LDocApplication::HandleAppleEvent (inAppleEvent, outAEReply, outResult, inAENumber);
-			break;
-	}
-}
-
-LModelObject*
-CGSSSample::MakeNewDocument ()
-{
-	// There should be only one document!
-	SignalIf_ (mGSSDocument != nil);
-	
-	return (mGSSDocument = new CGSSDocument ());
-}
-
-void
-CGSSSample::GetSubModelByPosition (
-	DescType		inModelID,
-	Int32			inPosition,
-	AEDesc			&outToken) const
-{
-	switch (inModelID) {
-	
- 		case cDocument:
- 		// Assume there is only one document and always return it
-			PutInToken (mGSSDocument, outToken);
-			break;
-			
-		default:
-			LDocApplication::GetSubModelByPosition(inModelID, inPosition,
-													outToken);
 			break;
 	}
 }

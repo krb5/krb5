@@ -1,36 +1,58 @@
+// ===========================================================================
+//	CGSSdocument.h
+//	©1997 Massachusetts Institute of Technology, All Rights Reserved
+//	By meeroh@mit.edu
+//	Started 2/28/97
+// ===========================================================================
+
+#pragma once
+
 #include <LSingleDoc.h>
 #include "gss.h"
+
+// AppleEvent reference number for the query event
+const	long		ae_Query			= 4001;
 
 class CGSSDocument:
 	public LSingleDoc,
 	public LListener
 {
 	public:
+		// Constructors / destuctors
 		CGSSDocument ();
 		~CGSSDocument ();
-		void	ListenToMessage (
+		
+		// Overrides from LListener
+		
+		virtual	void	ListenToMessage (
 					MessageT	inMessage,
 					void*		ioParam);
-		Boolean	ObeyCommand (
+					
+		// Overrides from LSingleDoc
+		
+		virtual	Boolean	ObeyCommand (
 					CommandT	inCommand,
 					void		*ioParam);
-		void	GSSQuery (
-					char*				inQueryString);
-		void	HandleAppleEvent (
+		virtual	void	HandleAppleEvent (
 					const AppleEvent&	inAppleEvent,
 					AppleEvent&			outAEReply,
 					AEDesc&				outResult,
 					long				inAENumber);
-		void	DoAESave(
+		virtual	void	DoAESave(
 					FSSpec&	inFileSpec,
 					OSType	inFileType);
-
+					
+		// Interface to GSS
+		// The query string has the format:
+		// [-port port] [-v2] host service msg
+		// e.g.,
+		// -port 13136 dcl.mit.edu sample@dcl.mit.edu hi
+		
+		void	GSSQuery (
+					char*				inQueryString);
 
 	private:
-		void	AppendPString (
-					ConstStringPtr		inString);
-		void	AppendCString (
-					char*				inString);
+		// GSS calls
 		int		GSSCallServer	(
 					char *host,
 					u_short port,
@@ -54,4 +76,10 @@ class CGSSDocument:
 		int		GSSReceiveToken (
 					SOCKET s,
 					gss_buffer_t tok);
+					
+		// String display utilities
+		void	AppendPString (
+					ConstStringPtr		inString);
+		void	AppendCString (
+					char*				inString);
 };

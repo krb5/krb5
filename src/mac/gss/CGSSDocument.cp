@@ -1,3 +1,18 @@
+// ===========================================================================
+//	CGSSdocument.cp
+//	©1997 Massachusetts Institute of Technology, All Rights Reserved
+//	By meeroh@mit.edu
+//	Started 2/28/97
+// ===========================================================================
+// Implementation of CGSSDocument, a document class derived from LSingleDoc
+// CGSSDocument is the core of the GSS Sample app: it contains the interface 
+// to GSS (in member functions whose name starts with GSS). It also provides
+// AppleEvent handler  for query events and supports saving itself into a 
+// file.
+// CGSSDocument is also derived from LListener so it can easily respond to
+// Query button being clicked
+
+
 #include "CGSSDocument.h"
 
 #include <stdio.h>
@@ -6,10 +21,8 @@
 #include <ctype.h>
 
 extern "C" {
-#include <mit-sock.h>
+	#include <mit-sock.h>
 }
-
-#include "CGSSWindow.h"
 
 const	ResIDT		wind_GSS			= 128;
 const	PaneIDT		pane_Status			= 904;
@@ -18,13 +31,16 @@ const	PaneIDT		pbut_Query			= 901;
 const	PaneIDT		text_Output			= 903;
 // Message the Query button broadcasts
 const	MessageT	msg_Query			= 'GSSq';
-// AppleEvent reference number
-const	long		ae_Query			= 4001;
+
+// ---------------------------------------------------------------------------
+//		€ CGSSDocument
+// ---------------------------------------------------------------------------
+//	Constructor
 
 CGSSDocument::CGSSDocument ()
 {
 	// Make us a window
-	mWindow = CGSSWindow::CreateGSSWindow (wind_GSS, this);
+	mWindow = LWindow::CreateWindow (wind_GSS, this);
 
 	// A window, I said
 	SignalIf_ (mWindow == nil);		
@@ -34,9 +50,19 @@ CGSSDocument::CGSSDocument ()
 	((LControl*) mWindow -> FindPaneByID (pbut_Query)) -> AddListener (this);
 }
 
+// ---------------------------------------------------------------------------
+//		€ ~CGSSDocument
+// ---------------------------------------------------------------------------
+//	Destructor
+
 CGSSDocument::~CGSSDocument ()
 {
 }
+
+// ---------------------------------------------------------------------------
+//		€ HandleAppleEvent
+// ---------------------------------------------------------------------------
+//	AppleEvent handler
 
 void
 CGSSDocument::HandleAppleEvent (
@@ -49,8 +75,9 @@ CGSSDocument::HandleAppleEvent (
 
 		case ae_Query:
 			// extract the query string from the appleevent
-			AEDesc	queryData;
+			AEDesc	queryData = {typeNull, nil};
 			OSErr err = ::AEGetParamDesc (&inAppleEvent, keyDirectObject, typeChar, &queryData);
+			ThrowIfOSErr_ (err);
 			char queryString [255];
 			UInt8 dataSize;
 			{
@@ -67,11 +94,17 @@ CGSSDocument::HandleAppleEvent (
 			::AEDisposeDesc (&queryData);
 			break;
 
+			// Unhandled events passed up to LSingleDoc
 		default:
 			LSingleDoc::HandleAppleEvent (inAppleEvent, outAEReply, outResult, inAENumber);
 			break;
 	}
 }
+
+// ---------------------------------------------------------------------------
+//		€ ObeyCommand
+// ---------------------------------------------------------------------------
+//	Handle our own commands
 
 Boolean
 CGSSDocument::ObeyCommand(
@@ -86,6 +119,9 @@ CGSSDocument::ObeyCommand(
 		// Any that you don't handle will be passed to LApplication
  			
 		case msg_Query:
+		// Handle query command by figuring out the query string and calling GSSQuery
+		// The reason why this is in ObeyCommand and not in ListenToMessage is to allow us
+		// to add a Query menu command easily
 			Str255 theArgument = "\0";		
 			(LEditField*) (mWindow -> FindPaneByID (pane_QueryArgument)) -> GetDescriptor (theArgument);
 			P2CStr (theArgument);
@@ -101,11 +137,17 @@ CGSSDocument::ObeyCommand(
 
 }
 
+// ---------------------------------------------------------------------------
+//		€ DoAESave
+// ---------------------------------------------------------------------------
+//	Save self
+
 void
 CGSSDocument::DoAESave(
 	FSSpec&	inFileSpec,
 	OSType	inFileType)
 {
+	// Get a handle to text
 	TEHandle teHandle = ((LTextEdit*) (mWindow -> FindPaneByID (text_Output))) -> GetMacTEH ();
 	Handle textHandle = (*teHandle) -> hText;
 	UInt32 textSize = ::GetHandleSize (textHandle);
@@ -121,14 +163,21 @@ CGSSDocument::DoAESave(
 		// If opening failed, try creating the file
 		saveStream.CreateNewDataFile ('CWIE', 'TEXT', smSystemScript);
 		saveStream.OpenDataFork (fsRdWrPerm);
+		// If creating andopening fails, OpenDataFork will throw
 	}
 	
 	saveStream.SetLength (0); // Zap!
-	
+
+	// Write the data	
 	StHandleLocker dataLock (textHandle);
 	saveStream.WriteData (*textHandle, (*teHandle) -> teLength);
 	SetModified (false);
 }
+
+// ---------------------------------------------------------------------------
+//		€ ListenToMessage
+// ---------------------------------------------------------------------------
+//	Deal with broadcast messages
 
 void
 CGSSDocument::ListenToMessage (
@@ -172,8 +221,17 @@ CGSSDocument::AppendCString (
 	AppendPString ((ConstStringPtr) inString);
 }
 
+// ---------------------------------------------------------------------------
+//		GSS Interface
+// ---------------------------------------------------------------------------
+
 #pragma mark -
 #pragma mark € GSS Functions €
+
+// ---------------------------------------------------------------------------
+//		€ GSSQuery
+// ---------------------------------------------------------------------------
+//	Do some basic parsing of the input string
 
 void
 CGSSDocument::GSSQuery (
@@ -267,7 +325,7 @@ CGSSDocument::GSSQuery (
 }
 
 /*
- * Function: call_server
+ * Function: GSSCallServer
  *
  * Purpose: Call the "sign" service.
  *
@@ -289,8 +347,6 @@ CGSSDocument::GSSQuery (
  * verifies it with gss_verify.  -1 is returned if any step fails,
  * otherwise 0 is returned.
  */
- // meeroh: put this in CGSSDocument for easier access to Stderr
- // could have done in a different way; this simplifies the code
 int
 CGSSDocument::GSSCallServer (
 	char *host,
@@ -567,53 +623,6 @@ CGSSDocument::GSSCallServer (
 	close(s);
      
 	return 0;
-}
-
-void
-CGSSDocument::GSSDisplayStatus (
-	char *m,
-	OM_uint32 maj_stat,
-	OM_uint32 min_stat)
-{
-    OM_uint32 my_maj_stat, my_min_stat;
-    gss_buffer_desc msg;
-    #ifdef GSSAPI_V2
-        OM_uint32 msg_ctx;
-    #else	/* GSSAPI_V2 */
-        int msg_ctx;
-    #endif	/* GSSAPI_V2 */
-
-	Str255 msgString;
-
-    msg_ctx = 0;
-    while (1) {
-        my_maj_stat = gss_display_status(
-        	&my_min_stat, maj_stat, GSS_C_GSS_CODE, GSS_C_NULL_OID, &msg_ctx, &msg);
-
-        sprintf ((char*) msgString, "GSS-API error %s: %s\r", m, (char *)msg.value);
-		C2PStr ((char*) msgString);
-	    AppendPString (msgString);
-
-        (void) gss_release_buffer(&min_stat, &msg);
-
-        if (!msg_ctx)
-            break;
-    }
-
-    msg_ctx = 0;
-    while (1) {
-        my_maj_stat = gss_display_status(
-        	&my_min_stat, min_stat, GSS_C_MECH_CODE, GSS_C_NULL_OID, &msg_ctx, &msg);
-
-        sprintf ((char*) msgString, "GSS-API error %s: %s\r", m, (char *)msg.value);
-		C2PStr ((char*) msgString);
-	    AppendPString (msgString);
-
-        (void) gss_release_buffer(&min_stat, &msg);
-
-        if (!msg_ctx)
-            break;
-    }
 }
 
 /*
@@ -923,3 +932,51 @@ CGSSDocument::GSSReceiveToken (
 
 	return 0;
 } /* recv_token */
+
+void
+CGSSDocument::GSSDisplayStatus (
+	char *m,
+	OM_uint32 maj_stat,
+	OM_uint32 min_stat)
+{
+    OM_uint32 my_maj_stat, my_min_stat;
+    gss_buffer_desc msg;
+    #ifdef GSSAPI_V2
+        OM_uint32 msg_ctx;
+    #else	/* GSSAPI_V2 */
+        int msg_ctx;
+    #endif	/* GSSAPI_V2 */
+
+	Str255 msgString;
+
+    msg_ctx = 0;
+    while (1) {
+        my_maj_stat = gss_display_status(
+        	&my_min_stat, maj_stat, GSS_C_GSS_CODE, GSS_C_NULL_OID, &msg_ctx, &msg);
+
+        sprintf ((char*) msgString, "GSS-API error %s: %s\r", m, (char *)msg.value);
+		C2PStr ((char*) msgString);
+	    AppendPString (msgString);
+
+        (void) gss_release_buffer(&min_stat, &msg);
+
+        if (!msg_ctx)
+            break;
+    }
+
+    msg_ctx = 0;
+    while (1) {
+        my_maj_stat = gss_display_status(
+        	&my_min_stat, min_stat, GSS_C_MECH_CODE, GSS_C_NULL_OID, &msg_ctx, &msg);
+
+        sprintf ((char*) msgString, "GSS-API error %s: %s\r", m, (char *)msg.value);
+		C2PStr ((char*) msgString);
+	    AppendPString (msgString);
+
+        (void) gss_release_buffer(&min_stat, &msg);
+
+        if (!msg_ctx)
+            break;
+    }
+}
+
