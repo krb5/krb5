@@ -906,6 +906,7 @@ AC_SUBST(LIBLINKS)
 AC_SUBST(LDCOMBINE)
 AC_SUBST(LDCOMBINE_TAIL)
 AC_SUBST(SHLIB_EXPFLAGS)
+AC_SUBST(INSTALL_SHLIB)
 AC_SUBST(STLIBEXT)
 AC_SUBST(SHLIBEXT)
 AC_SUBST(SHLIBVEXT)
@@ -941,6 +942,7 @@ AC_SUBST(LIBLINKS)
 AC_SUBST(LDCOMBINE)
 AC_SUBST(LDCOMBINE_TAIL)
 AC_SUBST(SHLIB_EXPFLAGS)
+AC_SUBST(INSTALL_SHLIB)
 AC_SUBST(STLIBEXT)
 AC_SUBST(SHLIBEXT)
 AC_SUBST(SHLIBVEXT)
@@ -1106,6 +1108,8 @@ SHLIBVEXT=.so.v-nobuild
 SHLIBSEXT=.so.s-nobuild
 # Most systems support profiled libraries.
 PFLIBEXT=_p.a
+# Most systems install shared libs as mode 644, etc. while hpux wants 755
+INSTALL_SHLIB='$(INSTALL_DATA)'
 
 STOBJEXT=.o
 SHOBJEXT=.so
@@ -1130,7 +1134,7 @@ alpha-dec-osf*)
 	RUN_ENV='LD_LIBRARY_PATH=`echo $(PROG_LIBPATH) | sed -e "s/-L//g" -e "s/ /:/g"`:$(PROG_RPATH):/usr/shlib:/usr/ccs/lib:/usr/lib/cmplrs/cc:/usr/lib:/usr/local/lib; export LD_LIBRARY_PATH; _RLD_ROOT=/dev/dummy/d; export _RLD_ROOT;'
 	;;
 
-# HPUX untested...
+# HPUX *seems* to work under 10.20.
 # 
 # Note: "-Wl,+s" when building executables enables the use of the
 # SHLIB_PATH environment variable for finding shared libraries 
@@ -1142,10 +1146,12 @@ alpha-dec-osf*)
 #
 *-*-hpux*)
 	PICFLAGS=+z
+	INSTALL_SHLIB='$(INSTALL_PROGRAM)'
 	SHLIBEXT=.sl
 	SHLIBVEXT='.sl.$(LIBMAJOR).$(LIBMINOR)'
+	SHLIBSEXT='.sl.$(LIBMAJOR)'
 	SHLIB_EXPFLAGS='+b $(SHLIB_RDIRS) $(SHLIB_DIRS) $(SHLIB_EXPLIBS)'
-	LDCOMBINE='ld -b'
+	LDCOMBINE='ld -b +h lib$(LIB)$(SHLIBSEXT)'
 	CC_LINK_SHARED='$(CC) $(PROG_LIBPATH) -Wl,+s -Wl,+b,$(PROG_RPATH)'
 	CC_LINK_STATIC='$(CC) $(PROG_LIBPATH)'
 	RUN_ENV='SHLIB_PATH=`echo $(PROG_LIBPATH) | sed -e "s/-L//g" -e "s/ /:/g"`; export SHLIB_PATH;'

@@ -1,3 +1,9 @@
+2000-03-01  Tom Yu  <tlyu@mit.edu>
+
+	* pre.in (INSTALL_SHLIB): New variable.
+
+	* lib.in (install-shared): Use $(INSTALL_SHLIB)
+
 2000-02-15  Tom Yu  <tlyu@mit.edu>
 
 	* libobj.in: Fix up .c.so and .c.po rules to include $(CFLAGS),

@@ -150,7 +150,7 @@ install-static:
 install-shared:
 	$(RM) $(DESTDIR)$(KRB5_LIBDIR)/lib$(LIB)$(SHLIBVEXT)
 	$(RM) $(DESTDIR)$(KRB5_LIBDIR)/lib$(LIB)$(SHLIBEXT)
-	$(INSTALL_DATA) lib$(LIB)$(SHLIBVEXT) $(DESTDIR)$(KRB5_LIBDIR)
+	$(INSTALL_SHLIB) lib$(LIB)$(SHLIBVEXT) $(DESTDIR)$(KRB5_LIBDIR)
 	(cd $(DESTDIR)$(KRB5_LIBDIR) && $(LN_S) lib$(LIB)$(SHLIBVEXT) \
 		lib$(LIB)$(SHLIBEXT))
 install-shlib-soname: install-shared
