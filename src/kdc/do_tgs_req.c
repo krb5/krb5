@@ -54,10 +54,10 @@ static krb5_error_code prepare_error_tgs (krb5_kdc_req *, krb5_ticket *,
 /*ARGSUSED*/
 krb5_error_code
 process_tgs_req(pkt, from, portnum, response)
-krb5_data *pkt;
-const krb5_fulladdr *from;		/* who sent it ? */
-int	portnum;
-krb5_data **response;			/* filled in with a response packet */
+    krb5_data *pkt;
+    const krb5_fulladdr *from;	/* who sent it ? */
+    int	portnum;
+    krb5_data **response;	/* filled in with a response packet */
 {
     krb5_keyblock * subkey;
     krb5_kdc_req *request = 0;
@@ -502,15 +502,15 @@ tgt_again:
 			      "bad realm transit path from '%s' to '%s' via '%.*s'",
 			      cname ? cname : "<unknown client>",
 			      sname ? sname : "<unknown server>",
-			      enc_tkt_transited.tr_contents.length,
-			      enc_tkt_transited.tr_contents.data);
+			      enc_tkt_reply.transited.tr_contents.length,
+			      enc_tkt_reply.transited.tr_contents.data);
 	else
 	    krb5_klog_syslog (LOG_ERR,
 			      "unexpected error checking transit from '%s' to '%s' via '%.*s': %s",
 			      cname ? cname : "<unknown client>",
 			      sname ? sname : "<unknown server>",
-			      enc_tkt_transited.tr_contents.length,
-			      enc_tkt_transited.tr_contents.data,
+			      enc_tkt_reply.transited.tr_contents.length,
+			      enc_tkt_reply.transited.tr_contents.data,
 			      error_message (errcode));
     } else
 	krb5_klog_syslog (LOG_ERR, "not checking transit path");
