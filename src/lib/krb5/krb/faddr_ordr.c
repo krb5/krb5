@@ -11,7 +11,7 @@
  */
 
 #if !defined(lint) && !defined(SABER)
-static char addr_comp_c[] =
+static char rcsid_faddr_ordr_c[] =
 "$Id$";
 #endif	/* !lint & !SABER */
 

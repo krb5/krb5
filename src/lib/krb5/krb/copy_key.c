@@ -11,7 +11,7 @@
  */
 
 #if !defined(lint) && !defined(SABER)
-static char copy_key_c[] =
+static char rcsid_copy_key_c[] =
 "$Id$";
 #endif	/* !lint & !SABER */
 
