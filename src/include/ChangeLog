@@ -1,3 +1,8 @@
+Mon Aug 28 15:58:14 1995    <tytso@rsts-11.mit.edu>
+
+	* k5-int.h: Added two new data structures: krb5_alt_method and
+	        krb5_etype_info (and krb5_etype_info_entry).  
+
 Fri Aug 25 17:12:37 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* k5-int.h: Added prototypes for encode_krb5_padata_sequence and
