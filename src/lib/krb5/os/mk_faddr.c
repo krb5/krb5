@@ -37,12 +37,12 @@
 
 krb5_error_code
 krb5_make_fulladdr(context, kaddr, kport, raddr)
-    krb5_context 	  context;
-    krb5_address	* kaddr;
-    krb5_address	* kport;
-    krb5_address        * raddr;
+    krb5_context 	context;
+    krb5_address	FAR * kaddr;
+    krb5_address	FAR * kport;
+    krb5_address        FAR * raddr;
 {
-    register krb5_octet * marshal;
+    register krb5_octet FAR * marshal;
     krb5_int32 tmp32;
     krb5_int16 tmp16;
 
@@ -50,7 +50,7 @@ krb5_make_fulladdr(context, kaddr, kport, raddr)
 	return EINVAL;
 
     raddr->length = kaddr->length + kport->length + (4 * sizeof(krb5_int32));
-    if (!(raddr->contents = (krb5_octet *)malloc(raddr->length)))
+    if (!(raddr->contents = (krb5_octet FAR *)malloc(raddr->length)))
 	return ENOMEM;
 
     raddr->addrtype = ADDRTYPE_ADDRPORT;
