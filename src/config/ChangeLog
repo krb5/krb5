@@ -1,3 +1,7 @@
+Wed Sep 13 10:20:02 1995 Keith Vetter (keithv@fusion.com)
+
+	* windows.in: added windows value for SRCTOP.
+
 Thu Aug 24 19:25:10 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* .Sanitize: Update file list

@@ -10,6 +10,7 @@ S=\		# seperator
 U=..\		# up one level
 
 srcdir = .
+SRCTOP = $(srcdir)/$(BUILDTOP)
 
 # /* The name of the C compiler for the target */
 CC=cl /nologo
