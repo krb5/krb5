@@ -44,14 +44,14 @@ AC_CACHE_VAL(ac_cv_type_$1,
 #endif], [$1 test_variable;], ac_cv_type_$1=yes, ac_cv_type_$1=no)])dnl
 AC_MSG_RESULT($ac_cv_type_$1)
 if test $ac_cv_type_$1 = no; then
-  AC_DEFINE($1, $2)
+  AC_DEFINE($1, $2, [Define to \`$2' if not defined on system])
 fi
 ])
+
 
 AC_CHECK_TYPE(ssize_t, int)
 
 AC_CHECK_TYPE(u_char, unsigned char)
-AC_CHECK_TYPE(u_short, unsigned short)
 AC_CHECK_TYPE(u_int, unsigned int)
 AC_CHECK_TYPE(u_long, unsigned long)
 
@@ -71,18 +71,18 @@ AC_CHECK_SIZEOF(int)
 dnl checks for library functions
 AC_CHECK_FUNC(memmove, ,
 [MEMMOVE_OBJ=memmove.o
-AC_DEFINE(memmove, kdb2__memmove)
-AC_DEFINE(MEMMOVE)])
+AC_DEFINE(memmove, kdb2__memmove,[Define to kdb2__memmove to provide private memmove function])
+AC_DEFINE(MEMMOVE,1,[Define if memmove.o is compiled in])])
 AC_SUBST(MEMMOVE_OBJ)
 
-AC_CHECK_FUNCS(mkstemp, ,
+AC_CHECK_FUNC(mkstemp, ,
 [MKSTEMP_OBJ=mkstemp.o
-AC_DEFINE(mkstemp, kdb2__mkstemp)])
+AC_DEFINE(mkstemp, kdb2__mkstemp,[Define to \`kdb2__mkstemp' to provide private mkstemp function])])
 AC_SUBST(MKSTEMP_OBJ)
 
-AC_CHECK_FUNCS(strerror, ,
+AC_CHECK_FUNC(strerror, ,
 [STRERROR_OBJ=strerror.o
-AC_DEFINE(strerror, kdb2__strerror)])
+AC_DEFINE(strerror, kdb2__strerror,[Define to \`kdb2__strerror' to provide private strerror function])])
 AC_SUBST(STRERROR_OBJ)
 
 KRB5_BUILD_LIBRARY

@@ -1,3 +1,10 @@
+2001-10-24  Ezra Peisach  <epeisach@mit.edu>
+
+	* configure.in: Add optional argument to AC_DEFINE to provide
+	comment in generated header file.
+
+	* acconfig.h: Remove int32_t and u_int32_t, handled by configure.in
+
 2001-07-08  Ezra Peisach  <epeisach@mit.edu>
 
 	* hash/hash_func.c (hash4): Declare first argument const.
