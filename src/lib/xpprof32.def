@@ -13,6 +13,7 @@ EXPORTS
 	profile_init_path
 	profile_flush
 	profile_release
+	profile_abandon
 	profile_get_values
 	profile_free_list
 	profile_get_string

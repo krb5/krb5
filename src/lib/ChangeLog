@@ -1,3 +1,8 @@
+Fri May  7 12:10:50 1999  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* xpprof32.def: Add profile_abandon to the list of exported
+	 	functions.
+
 Sat Apr 17 01:21:15 1999  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* krb5_32.def: Add krb5_cc_set_default_name to the list of
