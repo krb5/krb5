@@ -222,7 +222,7 @@ gai_strerror (int code) /*@*/;
 	(ERR) = my_s_err;						\
     }
 #else
-/* returns ptr */
+/* returns ptr -- IRIX? */
 #define GET_SERV_BY_NAME(NAME, PROTO, SP, ERR) \
     {									\
 	struct servent my_s_ent;					\
@@ -235,12 +235,13 @@ gai_strerror (int code) /*@*/;
 
 #define GET_SERV_BY_PORT(PORT, PROTO, SP, ERR) \
     {									\
-	struct servent my_s_ent;					\
-	int my_s_err;							\
+	struct servent my_s_ent, *my_sp;				\
 	char my_s_buf[8192];						\
-	(SP) = getservbyport_r((PORT), (PROTO), &my_s_ent,		\
-			       my_s_buf, sizeof (my_s_buf), &my_s_err);	\
-	(ERR) = my_s_err;						\
+	my_sp = getservbyport_r((PORT), (PROTO), &my_s_ent,		\
+				my_s_buf, sizeof (my_s_buf));		\
+	(SP) = my_sp;							\
+	(ERR) = my_sp == 0;						\
+	(ERR) = (ERR);	/* avoid "unused" warning */			\
     }
 #endif
 #endif
@@ -603,11 +604,11 @@ fake_getnameinfo (const struct sockaddr *sa, socklen_t len,
 
     if (host) {
 	if (flags & NI_NUMERICHOST) {
-#if (defined(__GNUC__) && defined(__mips__)) || 1 /* thread-safe version */
+#if (defined(__GNUC__) && defined(__mips__)) || 1 /* thread safety always */
 	    /* The inet_ntoa call, passing a struct, fails on IRIX 6.5
 	       using gcc 2.95; we get back "0.0.0.0".  Since this in a
 	       configuration still important at Athena, here's the
-	       workaround....  */
+	       workaround, which also happens to be thread-safe....  */
 	    const unsigned char *uc;
 	    char tmpbuf[20];
 	numeric_host:
@@ -648,16 +649,10 @@ fake_getnameinfo (const struct sockaddr *sa, socklen_t len,
 	    sprintf (numbuf, "%d", port);
 	    strncpy (service, numbuf, servicelen);
 	} else {
-#ifdef HAVE_GETSERVBYPORT_R
-	    char my_s_buf[1024];
-	    struct servent my_s_ent;
-	    sp = getservbyport_r(sinp->sin_port,
-				 (flags & NI_DGRAM) ? "udp" : "tcp",
-				 &my_s_ent, my_s_buf, sizeof(my_s_buf));
-#else
-	    sp = getservbyport (sinp->sin_port,
-				(flags & NI_DGRAM) ? "udp" : "tcp");
-#endif
+	    int serr;
+	    GET_SERV_BY_PORT(sinp->sin_port,
+			     (flags & NI_DGRAM) ? "udp" : "tcp",
+			     sp, serr);
 	    if (sp == 0)
 		goto numeric_service;
 	    strncpy (service, sp->s_name, servicelen);
@@ -765,7 +760,7 @@ getaddrinfo (const char *name, const char *serv, const struct addrinfo *hint,
 	     struct addrinfo **result)
 {
     int aierr;
-#ifdef _AIX
+#if defined(_AIX) || defined(COPY_FIRST_CANONNAME)
     struct addrinfo *ai;
 #endif
 
@@ -803,20 +798,42 @@ getaddrinfo (const char *name, const char *serv, const struct addrinfo *hint,
        Since it's dependent on the target hostname, it's hard to check
        for at configure time.  Always do it on Linux for now.  When
        they get around to fixing it, add a compile-time or run-time
-       check for the glibc version in use.  */
+       check for the glibc version in use.
+
+       Some Windows documentation says that even when AI_CANONNAME is
+       set, the returned ai_canonname field can be null.  The NetBSD
+       1.5 implementation also does this, if the input hostname is a
+       numeric host address string.  That case isn't handled well at
+       the moment.  */
+
 #ifdef COPY_FIRST_CANONNAME
-    if (/* name && hint && (hint->ai_flags & AI_CANONNAME) */ (*result)->ai_canonname) {
+    /*
+     * This code must *always* return an error, return a null
+     * ai_canonname, or return an ai_canonname allocated here using
+     * malloc, so that freeaddrinfo can always free a non-null
+     * ai_canonname.  Note that it really doesn't matter if the
+     * AI_CANONNAME flag was set.
+     */
+    ai = *result;
+    if (ai->ai_canonname) {
 	struct hostent *hp;
 	const char *name2 = 0;
 	int i, herr;
 
+	/*
+	 * Current versions of GET_HOST_BY_NAME will fail if the
+	 * target hostname has IPv6 addresses only.  Make sure it
+	 * fails fairly cleanly.
+	 */
 	GET_HOST_BY_NAME (name, hp, herr);
 	if (hp == 0) {
-	    if ((*result)->ai_canonname != 0)
-		/* XXX Indicate success with the existing name?  */
-		return 0;
-	    /* No canonname listed, and gethostbyname failed.  */
-	    name2 = name;
+	    /*
+	     * This case probably means it's an IPv6-only name.  If
+	     * ai_canonname is a numeric address, get rid of it.
+	     */
+	    if (ai->ai_canonname && strchr(ai->ai_canonname, ':'))
+		ai->ai_canonname = 0;
+	    name2 = ai->ai_canonname ? ai->ai_canonname : name;
 	} else {
 	    /* Sometimes gethostbyname will be directed to /etc/hosts
 	       first, and sometimes that file will have entries with
@@ -834,9 +851,9 @@ getaddrinfo (const char *name, const char *serv, const struct addrinfo *hint,
 		name2 = hp->h_name;
 	}
 
-	(*result)->ai_canonname = strdup(name2);
-	if ((*result)->ai_canonname == 0) {
-	    (*faiptr)(*result);
+	ai->ai_canonname = strdup(name2);
+	if (name2 != 0 && ai->ai_canonname == 0) {
+	    (*faiptr)(ai);
 	    *result = 0;
 	    return EAI_MEMORY;
 	}

@@ -1,5 +1,13 @@
 2002-06-25  Ken Raeburn  <raeburn@mit.edu>
 
+	* fake-addrinfo.h (GET_SERV_BY_PORT) [HAVE_GETSERVBYNAME_R &&
+	!GETSERVBYNAME_R_RETURNS_INT]: Fix getservbyport_r calling
+	sequence, based on IRIX man pages.
+	(getaddrinfo) [WRAP_GETADDRINFO]: Handle case where gethostbyname
+	fails because host has no IPv4 addresses.  Don't return a success
+	indication without replacing the old ai_canonname value if it
+	wasn't null.
+
 	* socket-utils.h (ss2sin6): Enable compilation of inline function
 	version.
 
