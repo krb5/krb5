@@ -329,7 +329,8 @@ krb5_error_code do_connection(s, context)
      krb5_ticket *v5tkt = 0;
      krb5_data msgdata, tktdata;
      char msgbuf[MSGSIZE], tktbuf[TKT_BUFSIZ], *p;
-     int ret, saddrlen;
+     int ret;
+     socklen_t saddrlen;
      krb5_int32 n; /* Must be 4 bytes */
      krb5_kvno v4kvno;
 
