@@ -146,17 +146,25 @@ k5_arcfour_docrypt(krb5_const krb5_keyblock *key, krb5_const krb5_data *state,
 	       krb5_const krb5_data *input, krb5_data *output)
 {
   ArcfourContext *arcfour_ctx;
+  ArcFourCipherState *cipher_state;
   int ret;
 
   if (key->length != 16)
     return(KRB5_BAD_KEYSIZE);
-  if (state && (state->length != sizeof (ArcfourContext)))
+  if (state && (state->length != sizeof (ArcFourCipherState)))
     return(KRB5_BAD_MSIZE);
   if (input->length != output->length)
     return(KRB5_BAD_MSIZE);
 
   if (state) {
-    arcfour_ctx=(ArcfourContext *)state->data;
+    cipher_state = (ArcFourCipherState *) state->data;
+    arcfour_ctx=&cipher_state->ctx;
+    if (cipher_state->initialized == 0) {
+      if ((ret=k5_arcfour_init(arcfour_ctx, key->contents, key->length))) {
+	return ret;
+      }
+      cipher_state->initialized = 1;
+    }
     k5_arcfour_crypt(arcfour_ctx, (unsigned char *) output->data, (const unsigned char *) input->data, input->length);
   }
   else {
@@ -192,6 +200,26 @@ k5_arcfour_make_key(krb5_const krb5_data *randombits, krb5_keyblock *key)
     return(0);
 }
 
+static krb5_error_code
+k5_arcfour_init_state (const krb5_keyblock *key,
+		       krb5_keyusage keyusage, krb5_data *new_state)
+{
+  /* Note that we can't actually set up the state here  because the key
+   * will change  between now and when encrypt is called
+   * because  it is data dependent.  Yeah, this has strange
+   * properties. --SDH
+   */
+  new_state->length = sizeof (ArcFourCipherState);
+  new_state->data = malloc (new_state->length);
+  if (new_state->data) {
+    memset (new_state->data, 0 , new_state->length);
+    /* That will set initialized to zero*/
+  }else {
+    return (ENOMEM);
+  }
+  return 0;
+}
+
 /* Since the arcfour cipher is identical going forwards and backwards, 
    we just call "docrypt" directly
 */
@@ -200,5 +228,7 @@ const struct krb5_enc_provider krb5int_enc_arcfour = {
     k5_arcfour_keysize,
     k5_arcfour_docrypt,
     k5_arcfour_docrypt,
-    k5_arcfour_make_key
+    k5_arcfour_make_key,
+    k5_arcfour_init_state, /*xxx not implemented yet*/
+    krb5int_default_free_state
 };

@@ -1,5 +1,5 @@
 /*
- * lib/crypto/t_encrypt.c
+main * lib/crypto/t_encrypt.c
  *
  * Copyright2001 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -53,9 +53,11 @@ if( retval) { \
   abort(); \
 } else printf ("OK\n");
   
-int main () {
+int
+main ()
+{
   krb5_context context ;
-  krb5_data  in, out, check;
+  krb5_data  in, out, check, state;
   int i;
   size_t len;
   krb5_enc_data enc_out;
@@ -85,6 +87,14 @@ int main () {
 	  krb5_c_encrypt (context, &key, 7, 0, &in, &enc_out));
     test ("Decrypting",
 	  krb5_c_decrypt (context, &key, 7, 0, &enc_out, &check));
+    test ("init_state",
+	  krb5_c_init_state (context, &key, 7, &state));
+        test ("Encrypting with state",
+	  krb5_c_encrypt (context, &key, 7, &state, &in, &enc_out));
+    test ("Decrypting",
+	  krb5_c_decrypt (context, &key, 7, 0, &enc_out, &check));
+    test ("free_state",
+	  krb5_c_free_state (context, &key, &state));
   }
   return 0;
 }

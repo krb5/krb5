@@ -1,3 +1,15 @@
+2001-11-06  Sam Hartman  <hartmans@tir-na-nogth.mit.edu>
+
+	* k5-int.h: Add krb5int_des_init_state and krb5int_default_free_state
+
+2001-11-06  Sam Hartman  <hartmans@mit.edu>
+
+	* k5-int.h: Add init_state and free_state to enc_provider struct
+
+2001-11-05  Sam Hartman  <hartmans@mit.edu>
+
+	* krb5.hin:  Add krb5_c_init_state and krb5_c_free_state
+
 2001-10-30  Ezra Peisach  <epeisach@mit.edu>
 
 	* fake-addrinfo.c (freeaddrinfo): Do not free NULL pointers.

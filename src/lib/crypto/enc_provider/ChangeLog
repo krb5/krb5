@@ -1,3 +1,11 @@
+2001-11-06  Sam Hartman  <hartmans@mit.edu>
+
+	* arcfour.c (k5_arcfour_docrypt): Treat state as an
+	ArcFourCipherState structure; manipulate and initialize as appropriate.
+	(k5_arcfour_init_state): new function
+
+	* arcfour.c des.c des3.c:  Add state functions
+
 2001-10-23  Sam Hartman  <hartmans@mit.edu>
 
 	* arcfour.c (endif /* gcc inlines*/): handle inlines in an ansi-compatible manner

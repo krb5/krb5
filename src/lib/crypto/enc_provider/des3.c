@@ -131,5 +131,7 @@ const struct krb5_enc_provider krb5int_enc_des3 = {
     k5_des3_keysize,
     k5_des3_encrypt,
     k5_des3_decrypt,
-    k5_des3_make_key
+    k5_des3_make_key,
+    krb5int_des_init_state,
+    krb5int_default_free_state
 };

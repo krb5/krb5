@@ -30,6 +30,7 @@ STLIBOBJS=\
 	cksumtypes.o		\
 	coll_proof_cksum.o	\
 	crypto_libinit.o	\
+	default_state.o \
 	decrypt.o		\
 	encrypt.o		\
 	encrypt_length.o	\
@@ -44,6 +45,7 @@ STLIBOBJS=\
 	nfold.o			\
 	old_api_glue.o		\
 	prng.o			\
+	state.o \
 	string_to_cksumtype.o	\
 	string_to_enctype.o	\
 	string_to_key.o		\
@@ -58,6 +60,7 @@ OBJS=\
 	$(OUTPRE)cksumtypes.$(OBJEXT)		\
 	$(OUTPRE)coll_proof_cksum.$(OBJEXT)	\
 	$(OUTPRE)crypto_libinit.$(OBJEXT)	\
+	$(OUTPRE)default_state.$(OBJEXT) \
 	$(OUTPRE)decrypt.$(OBJEXT)		\
 	$(OUTPRE)encrypt.$(OBJEXT)		\
 	$(OUTPRE)encrypt_length.$(OBJEXT)	\
@@ -72,6 +75,7 @@ OBJS=\
 	$(OUTPRE)nfold.$(OBJEXT)		\
 	$(OUTPRE)old_api_glue.$(OBJEXT)		\
 	$(OUTPRE)prng.$(OBJEXT)			\
+	$(OUTPRE)state.$(OBJEXT) \
 	$(OUTPRE)string_to_cksumtype.$(OBJEXT)	\
 	$(OUTPRE)string_to_enctype.$(OBJEXT)	\
 	$(OUTPRE)string_to_key.$(OBJEXT)	\
@@ -86,6 +90,7 @@ SRCS=\
 	$(srcdir)/cksumtypes.c		\
 	$(srcdir)/coll_proof_cksum.c	\
 	$(srcdir)/crypto_libinit.c	\
+	$(srcdir)/default_state.c \
 	$(srcdir)/decrypt.c		\
 	$(srcdir)/encrypt.c		\
 	$(srcdir)/encrypt_length.c	\
@@ -100,6 +105,7 @@ SRCS=\
 	$(srcdir)/nfold.c		\
 	$(srcdir)/old_api_glue.c	\
 	$(srcdir)/prng.c		\
+	$(srcdir)/state.c \
 	$(srcdir)/string_to_cksumtype.c	\
 	$(srcdir)/string_to_enctype.c	\
 	$(srcdir)/string_to_key.c	\

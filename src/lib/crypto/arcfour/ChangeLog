@@ -1,3 +1,7 @@
+2001-11-06  Sam Hartman  <hartmans@mit.edu>
+
+	* arcfour-int.h: Structure for arcfour cipher state
+	
 2001-10-26  Ezra Peisach  <epeisach@mit.edu>
 
 	* string_to_key.c (krb5_arcfour_string_to_key): Cleanup variables

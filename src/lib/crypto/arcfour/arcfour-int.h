@@ -20,6 +20,11 @@ typedef struct
    unsigned char state[256];
 } ArcfourContext;
 
+typedef struct {
+  int initialized;
+  ArcfourContext ctx;
+} ArcFourCipherState;
+
 krb5_keyusage krb5int_arcfour_translate_usage(krb5_keyusage usage);
 
 

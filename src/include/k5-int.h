@@ -521,9 +521,9 @@ struct krb5_enc_provider {
        keylength is the output size */
     void (*keysize) (size_t *keybytes, size_t *keylength);
 
-    /* ivec == 0 is an all-zeros ivec */
+    /* cipher-state == 0 fresh state thrown away at end */
     krb5_error_code (*encrypt) (krb5_const krb5_keyblock *key,
-				krb5_const krb5_data *ivec,
+				krb5_const krb5_data *cipher_state,
 				krb5_const krb5_data *input,
 				krb5_data *output);
 
@@ -534,6 +534,11 @@ struct krb5_enc_provider {
 
     krb5_error_code (*make_key) (krb5_const krb5_data *randombits,
 				 krb5_keyblock *key);
+
+  krb5_error_code (*init_state) (krb5_const krb5_keyblock *key,
+				 krb5_keyusage keyusage, krb5_data *out_state);
+  krb5_error_code (*free_state) (krb5_data *state);
+  
 };
 
 struct krb5_hash_provider {
@@ -622,6 +627,21 @@ krb5_error_code krb5_hmac
 (krb5_const struct krb5_hash_provider *hash,
 		krb5_const krb5_keyblock *key, unsigned int icount,
 		krb5_const krb5_data *input, krb5_data *output);
+
+/* A definition of init_state for DES based encryption systems.
+ * sets up an 8-byte IV of all zeros
+ */
+
+krb5_error_code krb5int_des_init_state
+(krb5_const krb5_keyblock *key, krb5_keyusage usage, krb5_data *new_state);
+
+/* 
+ * normally to free a cipher_state you can just memset the length to zero and
+ * free it.
+ */
+krb5_error_code krb5int_default_free_state
+(krb5_data *state);
+
 
 /* 
  * These declarations are here, so both krb5 and k5crypto
