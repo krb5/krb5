@@ -16,6 +16,9 @@
 	check.
 	(BINARY_MODE): Always define.
 	(setvbuf) [!HAVE_SETVBUF]: Define as macro using setbuf.
+	(krb5_fcc_open_file): Change file descriptor variable to "f" and
+	combine newly matching stdio and file sections.  Use setvbuf
+	instead of checking whether to use setbuf.
 
 	* cc_stdio.c: Deleted.
 	* Makefile.in (STLIBOBJS, OBJS, SRCS): Updated.
