@@ -2,7 +2,7 @@
  * $Source$
  * $Author$
  *
- * Copyright 1985, 1986, 1987, 1988, 1990 by the Massachusetts Institute
+ * Copyright 1985, 1986, 1987, 1988, 1990, 1991 by the Massachusetts Institute
  * of Technology.
  * All Rights Reserved.
  *
@@ -36,6 +36,7 @@ static char rcsid_enc_dec_c[] =
 
 #include <krb5/krb5.h>
 #include <krb5/ext-proto.h>
+#include <krb5/los-proto.h>
 #include <krb5/crc-32.h>
 
 #include "des_int.h"
@@ -138,7 +139,6 @@ OLDDECLARG(krb5_pointer, ivec)
 {
     krb5_checksum cksum;
     krb5_octet 	contents[CRC32_CKSUM_LENGTH];
-    char 	*p, *endinput;
     int sumsize;
     krb5_error_code retval;
 
@@ -146,25 +146,44 @@ OLDDECLARG(krb5_pointer, ivec)
 	return KRB5_BAD_MSIZE; */
 
     /* caller passes data size, and saves room for the padding. */
-    /* we need to put the cksum in the end of the padding area */
-    sumsize =  krb5_roundup(size+CRC32_CKSUM_LENGTH, sizeof(mit_des_cblock));
+    /* format of ciphertext, per RFC is:
+      +-----------+----------+-------------+-----+
+      |confounder |   check  |   msg-seq   | pad |
+      +-----------+----------+-------------+-----+
+      
+      our confounder is 8 bytes (one cblock);
+      our checksum is CRC32_CKSUM_LENGTH
+     */
+    sumsize =  krb5_roundup(size+CRC32_CKSUM_LENGTH+sizeof(mit_des_cblock),
+			    sizeof(mit_des_cblock));
 
-    p = (char *)in + sumsize - CRC32_CKSUM_LENGTH;
-    endinput = (char *)in + size;
-    memset(endinput, 0, sumsize - size);
+    /* assemble crypto input into the output area, then encrypt in place. */
+
+    memset((char *)out, 0, sumsize);
+
+    /* put in the confounder */
+    if (retval = krb5_random_confounder(sizeof(mit_des_cblock), out))
+	return retval;
+
+    memcpy((char *)out+sizeof(mit_des_cblock)+CRC32_CKSUM_LENGTH, (char *)in,
+	   size);
+
     cksum.contents = contents; 
 
     if (retval = krb5_calculate_checksum(CKSUMTYPE_CRC32,
-					 (krb5_pointer) in,
+					 (krb5_pointer) out,
 					 sumsize,
 					 (krb5_pointer)key->key->contents,
 					 sizeof(mit_des_cblock),
 					 &cksum)) 
 	return retval;
-    
-    memcpy(p, (char *)contents, CRC32_CKSUM_LENGTH);
- 
-    return (mit_des_encrypt_f(in, out, sumsize, key, ivec));
+
+    memcpy((char *)out+sizeof(mit_des_cblock), (char *)contents,
+	   CRC32_CKSUM_LENGTH);
+
+    /* We depend here on the ability of this DES implementation to
+       encrypt plaintext to ciphertext in-place. */
+    return (mit_des_encrypt_f(out, out, sumsize, key, ivec));
 }
 
 krb5_error_code mit_des_decrypt_func(DECLARG(krb5_const_pointer, in),
@@ -184,14 +203,14 @@ OLDDECLARG(krb5_pointer, ivec)
     char 	*p;
     krb5_error_code   retval;
 
-    if ( size < sizeof(mit_des_cblock) )
+    if ( size < 2*sizeof(mit_des_cblock) )
 	return KRB5_BAD_MSIZE;
 
     if (retval = mit_des_decrypt_f(in, out, size, key, ivec))
 	return retval;
 
     cksum.contents = contents_prd;
-    p = (char *)out + size - CRC32_CKSUM_LENGTH;
+    p = (char *)out + sizeof(mit_des_cblock);
     memcpy((char *)contents_get, p, CRC32_CKSUM_LENGTH);
     memset(p, 0, CRC32_CKSUM_LENGTH);
 
@@ -205,7 +224,9 @@ OLDDECLARG(krb5_pointer, ivec)
 
     if (memcmp((char *)contents_get, (char *)contents_prd, CRC32_CKSUM_LENGTH) )
         return KRB5KRB_AP_ERR_BAD_INTEGRITY;
-
+    memcpy((char *)out, (char *)out +
+	   sizeof(mit_des_cblock) + CRC32_CKSUM_LENGTH,
+	   size - sizeof(mit_des_cblock) + CRC32_CKSUM_LENGTH);
     return 0;
 }
 

@@ -32,7 +32,7 @@ krb5_cryptosystem_entry mit_des_cryptosystem_entry = {
     mit_des_finish_random_key,
     mit_des_random_key,
     sizeof(mit_des_cblock),
-    CRC32_CKSUM_LENGTH,
+    CRC32_CKSUM_LENGTH+sizeof(mit_des_cblock),
     sizeof(mit_des_cblock),
     ETYPE_DES_CBC_CRC,
     KEYTYPE_DES
