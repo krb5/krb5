@@ -56,6 +56,8 @@ krb5_error_code krb5_scc_read_times PROTOTYPE((krb5_ccache id , krb5_ticket_time
 krb5_error_code krb5_scc_read_flags PROTOTYPE((krb5_ccache id , krb5_flags *f ));
 krb5_error_code krb5_scc_read_addrs PROTOTYPE((krb5_ccache, krb5_address ***));
 krb5_error_code krb5_scc_read_addr PROTOTYPE((krb5_ccache, krb5_address *));
+krb5_error_code krb5_scc_read_authdata PROTOTYPE((krb5_ccache, krb5_authdata***));
+krb5_error_code krb5_scc_read_authdatum PROTOTYPE((krb5_ccache, krb5_authdata*));
 
 /* scc_reslv.c */
 krb5_error_code krb5_scc_resolve PROTOTYPE((krb5_ccache *id , char *residual ));
@@ -91,6 +93,8 @@ krb5_error_code krb5_scc_store_times PROTOTYPE((krb5_ccache id , krb5_ticket_tim
 krb5_error_code krb5_scc_store_flags PROTOTYPE((krb5_ccache id , krb5_flags *f ));
 krb5_error_code krb5_scc_store_addrs PROTOTYPE((krb5_ccache , krb5_address ** ));
 krb5_error_code krb5_scc_store_addr PROTOTYPE((krb5_ccache , krb5_address * ));
+krb5_error_code krb5_scc_store_authdata PROTOTYPE((krb5_ccache, krb5_authdata **));
+krb5_error_code krb5_scc_store_authdatum PROTOTYPE((krb5_ccache, krb5_authdata *));
 
 /* scc_errs.c */
 krb5_error_code krb5_scc_interpret PROTOTYPE((int ));
