@@ -1,3 +1,8 @@
+2004-07-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (SHLIB_EXPDEPS): Use _DEPLIB variables.
+	(SHLIB_EXPLIBS): Add $(SUPPORT_LIB).
+
 2004-06-18  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (OBJFILELIST, OBJFILEDEP) [DOS]: Depend on locally
