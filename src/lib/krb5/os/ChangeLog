@@ -1,5 +1,9 @@
 2004-10-06  Ken Raeburn  <raeburn@mit.edu>
 
+	* localaddr.c (foreach_localaddr): Be more careful not to walk
+	past the end of the ifreq array.
+	(get_ifreq_array): Return 0 in success case, not errno.
+
 	* localaddr.c (get_ifreq_array): Split out from foreach_localaddr
 	general version.
 	(foreach_localaddr): Call it.

@@ -568,7 +568,7 @@ foreach_localaddr (/*@null@*/ void *data,
 	    goto punt;
 	}
 
-	for (i = 0; i < P.buf_size; i+= sizeof (*lifr)) {
+	for (i = 0; i + sizeof(*lifr) <= P.buf_size; i+= sizeof (*lifr)) {
 	    lifr = (struct lifreq *)((caddr_t) P.buf+i);
 
 	    strncpy(lifreq.lifr_name, lifr->lifr_name,
@@ -637,7 +637,7 @@ have_working_socket:
     if (pass2fn)
 	FOREACH_AF ()
 	    if (P.sock >= 0) {
-		for (i = 0; i < P.buf_size; i+= sizeof (*lifr)) {
+		for (i = 0; i + sizeof (*lifr) <= P.buf_size; i+= sizeof (*lifr)) {
 		    lifr = (struct lifreq *)((caddr_t) P.buf+i);
 
 		    if (lifr->lifr_name[0] == '\0')
@@ -740,7 +740,7 @@ foreach_localaddr (/*@null@*/ void *data,
 	    goto punt;
 	}
 
-	for (i = 0; i < P.buf_size; i+= sizeof (*lifr)) {
+	for (i = 0; i + sizeof(*lifr) <= P.buf_size; i+= sizeof (*lifr)) {
 	    lifr = (struct if_laddrreq *)((caddr_t) P.buf+i);
 
 	    strncpy(lifreq.iflr_name, lifr->iflr_name,
@@ -809,7 +809,7 @@ have_working_socket:
     if (pass2fn)
 	FOREACH_AF ()
 	    if (P.sock >= 0) {
-		for (i = 0; i < P.buf_size; i+= sizeof (*lifr)) {
+		for (i = 0; i + sizeof(*lifr) <= P.buf_size; i+= sizeof (*lifr)) {
 		    lifr = (struct if_laddrreq *)((caddr_t) P.buf+i);
 
 		    if (lifr->iflr_name[0] == '\0')
@@ -914,7 +914,7 @@ ask_again:
 
     *bufp = buf;
     *np = n;
-    return errno;
+    return 0;
 }
 
 int
@@ -955,8 +955,11 @@ foreach_localaddr (/*@null@*/ void *data,
        The Samba mailing list archives mention that NTP looks for the
        size on these systems: *-fujitsu-uxp* *-ncr-sysv4*
        *-univel-sysv*.  */
-    for (i = 0; i < n; i+= ifreq_size(*ifr) ) {
+    for (i = 0; i + sizeof(struct ifreq) < n; i+= ifreq_size(*ifr) ) {
 	ifr = (struct ifreq *)((caddr_t) buf+i);
+	/* In case ifreq_size is more than sizeof().  */
+	if (i + ifreq_size(*ifr) >= n)
+	  break;
 
 	strncpy(ifreq.ifr_name, ifr->ifr_name, sizeof (ifreq.ifr_name));
 	Tprintf (("interface %s\n", ifreq.ifr_name));
