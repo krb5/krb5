@@ -28,6 +28,10 @@
 #include "krb.h"
 #include <string.h>
 
+static int k_isname_unparsed(const char *s);
+static int k_isinst_unparsed(const char *s);
+static int k_isrealm_unparsed(const char *s);
+
 /*
  * max size of full name
  *
@@ -269,5 +273,139 @@ k_isrealm(s)
             /* break; */
         }
     }
+    return 1;
+}
+
+int KRB5_CALLCONV
+kname_unparse(
+    char	*outFullName,
+    const char	*inName,
+    const char	*inInstance,
+    const char	*inRealm)
+{
+    const char	*read;
+    char	*write = outFullName;
+
+    if (inName == NULL)
+	return KFAILURE;
+
+    if (outFullName == NULL)
+        return KFAILURE;
+
+    if (!k_isname_unparsed(inName) ||
+	((inInstance != NULL) && !k_isinst_unparsed(inInstance)) ||
+	((inRealm != NULL) && !k_isrealm_unparsed(inRealm))) {
+
+	return KFAILURE;
+    }
+
+    for (read = inName; *read != '\0'; read++, write++) {
+	if ((*read == '.') || (*read == '@')) {
+	    *write = '\\';
+	    write++;
+	}
+	*write = *read;
+    }
+
+    if ((inInstance != NULL) && (inInstance[0] != '\0')) {
+	*write = '.';
+	write++;
+	for (read = inInstance; *read != '\0'; read++, write++) {
+	    if (*read == '@') {
+		*write = '\\';
+		write++;
+	    }
+	    *write = *read;
+	}
+    }
+
+    if ((inRealm != NULL) && (inRealm[0] != '\0')) {
+	*write = '@';
+	write++;
+	for (read = inRealm; *read != '\0'; read++, write++) {
+	    if (*read == '@') {
+		*write = '\\';
+		write++;
+	    }
+	    *write = *read;
+	}
+    }
+
+    *write = '\0';
+    return KSUCCESS;
+}
+
+/*
+ * k_isname, k_isrealm, k_isinst expect an unparsed realm -- i.e., one where all
+ * components have special characters escaped with \. However,
+ * for kname_unparse, we need to be able to sanity-check components without \.
+ * That's what k_is*_unparsed are for.
+ */
+
+static int
+k_isname_unparsed(const char *s)
+{
+    int len = strlen(s);
+    const char* c;
+    /* Has to be non-empty and has to fit in ANAME_SZ when escaped with \ */
+
+    if (!*s)
+        return 0;
+
+    for (c = s; *c != '\0'; c++) {
+    	switch (*c) {
+	case '.':
+	case '@':
+	    len++;
+	    break;
+    	}
+    }
+
+    if (len > ANAME_SZ - 1)
+        return 0;
+    return 1;
+}
+
+static int
+k_isinst_unparsed(const char *s)
+{
+    int len = strlen(s);
+    const char* c;
+    /* Has to fit in INST_SZ when escaped with \ */
+
+    for (c = s; *c != '\0'; c++) {
+    	switch (*c) {
+	case '.':
+	case '@':
+	    len++;
+	    break;
+    	}
+    }
+
+    if (len > INST_SZ - 1)
+        return 0;
+    return 1;
+}
+
+static int
+k_isrealm_unparsed(const char *s)
+{
+    int len = strlen(s);
+    const char* c;
+    /* Has to be non-empty and has to fit in REALM_SZ when escaped with \ */
+
+    if (!*s)
+        return 0;
+
+    for (c = s; *c != '\0'; c++) {
+    	switch (*c) {
+	case '@':
+	    len++;
+	    break;
+    	}
+    }
+
+    if (len > REALM_SZ - 1)
+        return 0;
     return 1;
 }

@@ -1,5 +1,8 @@
 2002-12-05  Tom Yu  <tlyu@mit.edu>
 
+	* kname_parse.c (kname_unparse): Add new function ported from
+	KfM, including support functions.
+
 	* decomp_tkt.c (decomp_ticket): Add KRB5_CALLCONV.
 
 2002-12-04  Tom Yu  <tlyu@mit.edu>
