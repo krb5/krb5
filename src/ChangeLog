@@ -1,3 +1,7 @@
+Sun Dec 17 19:53:54 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* acconfig.h: Add blank line to work around a misfeature of
+		DecUnix fgrep interacting with autoheader.
 
 Tue Dec 12 01:30:36 1995  Chris Provenzano (proven@mit.edu)
 
