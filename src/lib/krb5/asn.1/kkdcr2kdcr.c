@@ -58,8 +58,13 @@ struct element_KRB5_11 *krb5_pa_data2element_KRB5_11(val, error)
 
 	rv2 = (struct element_KRB5_11 *) xmalloc(sizeof(*rv2));
 	if (!rv2) {
-	    if (retval)
-		free_KRB5_PA__DATA(retval);
+	errout:
+	    while (retval) {
+		free_KRB5_PA__DATA(retval->PA__DATA);
+		rv1 = retval->next;
+		free(retval);
+		retval = rv1;
+	    }
 	    *error = ENOMEM;
 	    return(0);
 	}
@@ -71,13 +76,8 @@ struct element_KRB5_11 *krb5_pa_data2element_KRB5_11(val, error)
 
 	rv2->PA__DATA = (struct type_KRB5_PA__DATA *)
 	    xmalloc(sizeof(*(rv2->PA__DATA)));
-	if (!rv2->PA__DATA) {
-	errout:
-	    if (retval)
-		free_KRB5_PA__DATA(retval);
-	    *error = ENOMEM;
-	    return(0);
-	}    
+	if (!rv2->PA__DATA)
+	    goto errout;
 	rv2->PA__DATA->padata__type = val[i]->pa_type;
 	rv2->PA__DATA->pa__data = str2qb((char *)(val[i])->contents,
 					       (val[i])->length, 1);

@@ -64,7 +64,6 @@ SRCS= \
 	$(SRCDIR)kkdcr2kdcr.c	\
 	$(SRCDIR)kkey2enck.c	\
 	$(SRCDIR)klsrq2lsrq.c	\
-	$(SRCDIR)kpadt2padt.c	\
 	$(SRCDIR)kprep2prep.c	\
 	$(SRCDIR)kprin2prin.c	\
 	$(SRCDIR)kpriv2priv.c	\
@@ -74,7 +73,6 @@ SRCS= \
 	$(SRCDIR)ktgsr2kdcr.c	\
 	$(SRCDIR)ktkt2tkt.c	\
 	$(SRCDIR)lsrq2klsrq.c	\
-	$(SRCDIR)padt2kpadt.c	\
 	$(SRCDIR)prep2kprep.c	\
 	$(SRCDIR)prin2kprin.c	\
 	$(SRCDIR)priv2kpriv.c	\
@@ -83,7 +81,12 @@ SRCS= \
 	$(SRCDIR)tran2ktran.c	\
 	$(SRCDIR)tgrq2ktgrq.c	\
 	$(SRCDIR)tkt2ktkt.c	\
-	$(SRCDIR)u2gen.c
+	$(SRCDIR)u2gen.c 	\
+	$(SRCDIR)ktgsr2kdcr.c	\
+	$(SRCDIR)kpwd2pwd.c	\
+	$(SRCDIR)kpwds2pwds.c	\
+	$(SRCDIR)pwd2kpwd.c	\
+	$(SRCDIR)pwds2kpwds.c
 
 OBJS= \
 	KRB5_tables.o	\
@@ -121,7 +124,6 @@ OBJS= \
 	kkdcr2kdcr.o	\
 	kkey2enck.o	\
 	klsrq2lsrq.o	\
-	kpadt2padt.o	\
 	kprep2prep.o	\
 	kprin2prin.o	\
 	kpriv2priv.o	\
@@ -131,7 +133,6 @@ OBJS= \
 	ktgsr2kdcr.o	\
 	ktkt2tkt.o	\
 	lsrq2klsrq.o	\
-	padt2kpadt.o	\
 	prep2kprep.o	\
 	prin2kprin.o	\
 	priv2kpriv.o	\
@@ -140,7 +141,11 @@ OBJS= \
 	tran2ktran.o	\
 	tgrq2ktgrq.o	\
 	tkt2ktkt.o	\
-	u2gen.o
+	u2gen.o		\
+	kpwd2pwd.o	\
+	kpwds2pwds.o	\
+	pwd2kpwd.o	\
+	pwds2kpwds.o
 
 all:: includes
 

@@ -22,6 +22,10 @@
 --
 -- ASN.1 definitions for the kerberos network objects
 --
+-- Do not change the order of any structure containing some
+-- element_KRB5_xx unless the corresponding translation code is also
+-- changed.
+--
 
 KRB5 DEFINITIONS ::=
 BEGIN
@@ -34,7 +38,6 @@ SECTIONS encode decode none
 -- the order of stuff in this file matches the order in the draft RFC
 
 Realm ::= GeneralString
-PrincipalName ::= SEQUENCE OF GeneralString
 
 HostAddress ::= SEQUENCE  {
 	addr-type[0]			INTEGER,
@@ -75,6 +78,11 @@ LastReq ::=	SEQUENCE OF SEQUENCE {
 
 KerberosTime ::=	GeneralizedTime -- Specifying UTC time zone (Z)
 
+PrincipalName ::= SEQUENCE{
+	name-type[0]	INTEGER,
+	name-string[1]	SEQUENCE OF GeneralString
+}
+
 Ticket ::=	[APPLICATION 1] SEQUENCE {
 	tkt-vno[0]	INTEGER,
 	realm[1]	Realm,
@@ -98,20 +106,21 @@ EncTicketPart ::=	[APPLICATION 3] SEQUENCE {
 	starttime[6]	KerberosTime OPTIONAL,
 	endtime[7]	KerberosTime,
 	renew-till[8]	KerberosTime OPTIONAL,
-	caddr[9]	HostAddresses,
+	caddr[9]	HostAddresses OPTIONAL,
 	authorization-data[10]	AuthorizationData OPTIONAL
 }
 
 -- Unencrypted authenticator
 Authenticator ::=	[APPLICATION 2] SEQUENCE  {
 	authenticator-vno[0]	INTEGER,
-	crealm[1]	Realm,
-	cname[2]	PrincipalName,
-	cksum[3]	Checksum OPTIONAL,
-	cusec[4]	INTEGER,
-	ctime[5]	KerberosTime,
-	subkey[6]	EncryptionKey OPTIONAL,
-	seq-number[7]	INTEGER OPTIONAL
+	crealm[1]		Realm,
+	cname[2]		PrincipalName,
+	cksum[3]		Checksum OPTIONAL,
+	cusec[4]		INTEGER,
+	ctime[5]		KerberosTime,
+	subkey[6]		EncryptionKey OPTIONAL,
+	seq-number[7]		INTEGER OPTIONAL,
+	authorization-data[8]	AuthorizationData OPTIONAL
 }
 
 TicketFlags ::= BIT STRING {
@@ -131,22 +140,13 @@ AS-REQ ::= [APPLICATION 10] KDC-REQ
 TGS-REQ ::= [APPLICATION 12] KDC-REQ
 
 KDC-REQ ::= SEQUENCE {
-	pvno[1]	INTEGER,
+	pvno[1]		INTEGER,
 	msg-type[2]	INTEGER,
-	padata[3]	PA-DATA OPTIONAL, -- encoded AP-REQ, not optional
-					  -- in the TGS-REQ
+	padata[3]	SEQUENCE OF PA-DATA OPTIONAL,
 	req-body[4]	KDC-REQ-BODY
 }
 
--- Note that the RFC specifies that PA-DATA is just a SEQUENCE, and when
--- it appears in the messages, it's a SEQUENCE OF PA-DATA.
--- However, this has an identical encoding to the data defined here,
--- which has PA-DATA as SEQUENCE OF SEQUENCE, and the messages use a
--- straight PA-DATA. This has the advantage (at least under ISODE) of
--- giving a "known" name to the PA-DATA array, making it more easily
--- manipulated by "glue code".
-
-PA-DATA ::=	SEQUENCE OF SEQUENCE {
+PA-DATA ::= SEQUENCE {
 	padata-type[1]	INTEGER,
 	pa-data[2]	OCTET STRING -- might be encoded AP-REQ
 }
@@ -160,9 +160,11 @@ KDC-REQ-BODY ::=	SEQUENCE {
 	 till[5]	KerberosTime,
 	 rtime[6]	KerberosTime OPTIONAL,
 	 nonce[7]	INTEGER,
-	 etype[8]	SEQUENCE OF INTEGER, -- EncryptionType, in preference order
+	 etype[8]	SEQUENCE OF INTEGER, -- EncryptionType, 
+			-- in preference order
 	 addresses[9]	HostAddresses OPTIONAL,
-	 enc-authorization-data[10]	EncryptedData OPTIONAL, -- AuthorizationData
+	 enc-authorization-data[10]	EncryptedData OPTIONAL, 
+			-- AuthorizationData
 	 additional-tickets[11]	SEQUENCE OF Ticket OPTIONAL
 }
 
@@ -171,7 +173,7 @@ TGS-REP ::= [APPLICATION 13] KDC-REP
 KDC-REP ::= SEQUENCE {
 	pvno[0]				INTEGER,
 	msg-type[1]			INTEGER,
-	padata[2]			PA-DATA OPTIONAL,
+	padata[2]			SEQUENCE OF PA-DATA OPTIONAL,
 	crealm[3]			Realm,
 	cname[4]			PrincipalName,
 	ticket[5]			Ticket,		-- Ticket
@@ -181,7 +183,7 @@ KDC-REP ::= SEQUENCE {
 EncASRepPart ::= [APPLICATION 25] EncKDCRepPart
 EncTGSRepPart ::= [APPLICATION 26] EncKDCRepPart
 EncKDCRepPart ::=  SEQUENCE {
-	key[0]	EncryptionKey,
+	key[0]		EncryptionKey,
 	last-req[1]	LastReq,
 	nonce[2]	INTEGER,
 	key-expiration[3]	KerberosTime OPTIONAL,
@@ -229,7 +231,7 @@ KRB-SAFE ::= [APPLICATION 20] SEQUENCE {
 	cksum[3]			Checksum			
 }
 
-KRB-SAFE-BODY ::=	SEQUENCE {
+KRB-SAFE-BODY ::= SEQUENCE {
 	user-data[0]			OCTET STRING,
 	timestamp[1]			KerberosTime OPTIONAL,
 	usec[2]				INTEGER OPTIONAL,
@@ -289,4 +291,20 @@ METHOD-DATA ::= SEQUENCE {
 	method-type[0]	INTEGER,
 	method-data[1]	OCTET STRING OPTIONAL
 }
+
+-- These ASN.1 definitions are NOT part of the official Kerberos protocol... 
+
+-- New ASN.1 definitions for the kadmin protocol.
+-- Originally contributed from the Sandia modifications
+
+PasswdSequence ::= SEQUENCE {
+	passwd[0]			OCTET STRING,
+	phrase[1]			OCTET STRING
+}
+
+PasswdData ::= SEQUENCE {
+	passwd-sequence-count[0]	INTEGER,
+	passwd-sequence[1]		SEQUENCE OF PasswdSequence
+}
+
 END

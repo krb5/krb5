@@ -41,6 +41,55 @@ static char rcsid_kdcr2kkdcr_c[] =
 
 /* ISODE defines max(a,b) */
 
+
+krb5_pa_data **
+element_KRB5_112krb5_pa_data(val, error)
+    struct element_KRB5_11 *val;
+    register int *error;
+{
+    register krb5_pa_data **retval;
+    register int i;
+    register struct element_KRB5_11 *rv;
+
+    for (i = 0, rv = val; rv; i++, rv = rv->next)
+	;
+
+    /* plus one for null terminator */
+    retval = (krb5_pa_data **) xcalloc(i + 1, sizeof(*retval));
+    if (!retval) {
+	*error = ENOMEM;
+	return(0);
+    }
+    for (i = 0, rv = val; rv; rv = rv->next, i++) {
+	if (qb_pullup(rv->PA__DATA->pa__data) != OK) {
+	    xfree(retval);
+	    *error = ENOMEM;
+	    return(0);
+	}
+	retval[i] = (krb5_pa_data *) xmalloc(sizeof(*retval[i]));
+	if (!retval[i]) {
+	    krb5_free_pa_data(retval);
+	    *error = ENOMEM;
+	    return(0);
+	}
+	retval[i]->contents = (unsigned char *)xmalloc(rv->PA__DATA->pa__data->qb_forw->qb_len);
+	if (!retval[i]->contents) {
+	    xfree(retval[i]);
+	    retval[i] = 0;
+	    krb5_free_pa_data(retval);
+	    *error = ENOMEM;
+	    return(0);
+	}
+	retval[i]->pa_type = rv->PA__DATA->padata__type;
+	retval[i]->length = rv->PA__DATA->pa__data->qb_forw->qb_len;
+	xbcopy(rv->PA__DATA->pa__data->qb_forw->qb_data,
+	      retval[i]->contents, retval[i]->length);
+    }
+    retval[i] = 0;
+    return(retval);
+}
+
+
 krb5_kdc_rep *
 KRB5_KDC__REP2krb5_kdc_rep(val, error)
 const register struct type_KRB5_TGS__REP *val;
@@ -59,7 +108,7 @@ register int *error;
     retval->msg_type = val->msg__type;
 
     if (val->padata) {
-	retval->padata = KRB5_PA__DATA2krb5_pa_data(val->padata, error);
+	retval->padata = element_KRB5_112krb5_pa_data(val->padata, error);
 	if (*error) {
 	    xfree(retval);
 	    return 0;
