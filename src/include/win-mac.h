@@ -74,6 +74,8 @@ typedef unsigned char	u_char;
 #define NO_PASSWORD
 #define HAVE_STRERROR
 #define SYS_ERRLIST_DECLARED
+/* if __STDC_VERSION__ >= 199901L this shouldn't be needed */
+#define inline __inline
 
 #define WM_KERBEROS5_CHANGED "Kerberos5 Changed"
 #ifdef KRB4

@@ -37,24 +37,7 @@
 #ifndef K5_PLATFORM_H
 #define K5_PLATFORM_H
 
-#if !defined(inline)
-# if __STDC_VERSION__ >= 199901L
-/* C99 supports inline, don't do anything.  */
-# elif defined(__GNUC__)
-#  define inline __inline__ /* this form silences -pedantic warnings */
-# elif defined(__mips) && defined(__sgi)
-#  define inline __inline /* IRIX used at MIT does inline but not c99 yet */
-# elif defined(__sun) && __SUNPRO_C >= 0x540
-/* The Forte Developer 7 C compiler supports "inline".  */
-# elif defined(_WIN32)
-#  define inline __inline
-# else
-#  define inline /* nothing, just static */
-# endif
-#endif
-
 #include "autoconf.h"
-
 
 /* Initialization and finalization function support for libraries.
 

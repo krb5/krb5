@@ -229,6 +229,8 @@ else
 fi
 AC_SUBST(maybe_kerberosIV)
 dnl
+AC_C_INLINE
+dnl
 dnl Not used yet, but let's find out what we've got on the platforms
 dnl we're working with....
 AC_CHECK_HEADERS(inttypes.h stdint.h)

@@ -1,3 +1,9 @@
+2004-07-01  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Test for 'inline' support.
+	* k5-platform.h (inline): Don't define here.
+	* win-mac.h (inline): Define as __inline.
+
 2004-06-30  Ken Raeburn  <raeburn@mit.edu>
 
 	* k5-thread.h (k5_debug_assert_locked, k5_debug_assert_unlocked):
