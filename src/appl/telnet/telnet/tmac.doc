@@ -1,344 +1,598 @@
-.\"
-.\" Copyright (c) 1990 The Regents of the University of California.
+.\" Copyright (c) 1991 The Regents of the University of California.
 .\" All rights reserved.
 .\"
-.\" Redistribution and use in source and binary forms are permitted provided
-.\" that: (1) source distributions retain this entire copyright notice and
-.\" comment, and (2) distributions including binaries display the following
-.\" acknowledgement:  ``This product includes software developed by the
-.\" University of California, Berkeley and its contributors'' in the
-.\" documentation or other materials provided with the distribution and in
-.\" all advertising materials mentioning features or use of this software.
-.\" Neither the name of the University nor the names of its contributors may
-.\" be used to endorse or promote products derived from this software without
-.\" specific prior written permission.
-.\" THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR IMPLIED
-.\" WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF
-.\" MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+.\" Redistribution and use in source and binary forms, with or without
+.\" modification, are permitted provided that the following conditions
+.\" are met:
+.\" 1. Redistributions of source code must retain the above copyright
+.\"    notice, this list of conditions and the following disclaimer.
+.\" 2. Redistributions in binary form must reproduce the above copyright
+.\"    notice, this list of conditions and the following disclaimer in the
+.\"    documentation and/or other materials provided with the distribution.
+.\" 3. All advertising materials mentioning features or use of this software
+.\"    must display the following acknowledgement:
+.\"	This product includes software developed by the University of
+.\"	California, Berkeley and its contributors.
+.\" 4. Neither the name of the University nor the names of its contributors
+.\"    may be used to endorse or promote products derived from this software
+.\"    without specific prior written permission.
 .\"
-.\"     @(#)tmac.doc	5.7 (Berkeley) 6/30/90
+.\" THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND
+.\" ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+.\" IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+.\" ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
+.\" FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+.\" DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+.\" OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+.\" HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+.\" LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+.\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+.\" SUCH DAMAGE.
 .\"
-.if n .nr cR 1
-.\"	STRING CONSTANTS
-.\" 	DITROFF
+.\"     @(#)doc	5.8 (Berkeley) 8/5/91
+.\"
+.\" .mdoc-parse - attempt to parse troff request arguments
+.\" This version has had comments stripped; an unstripped version is available.
+.if \n(.g \{\
+.cp 0
+.ftr C CR
+.\}
 .if t \{\
-.\"	Address Style
-.ds aD \fI
-.\"	Argument Reference Style
-.ds aR \f(CO
-.\"	Interactive Comand Modifier (flag)
-.ds cM \f(CB
-.\"	Emphasis (in the English sense - usually italics)
-.ds eM \fI
-.\"	Errno Style
-.ds eR \fC
-.\"	Environment Variable Style
-.ds eV \fC
-.\"	Command Line Flag Style
-.ds fL \f(CB
-.\"	Header String Style
-.ds Hs \fR
-.\"	Interactive Command Style
-.ds iC \f(CB
-.\"	Literal Style
+.\" tmac.mdoc-ditroff
+.ds aD \fI\s10
+.ds aR \f(CO\s10
+.ds cM \f(CB\s10
+.ds dF \fR\s10
+.ds eM \fI\s10
+.ds eR \fC\s10
+.ds eV \fC\s10
+.ds fA \f(CO\s10
+.ds fD \f(CB\s10
+.ds fL \f(CB\s10
+.ds fN \f(CB\s10
+.ds fP \fP\s0
+.ds fS \s0
+.ds fT \f(CO\s10
+.ds Hs \fR\s10
+.ds iC \f(CB\s10
 .ds lI \fC
-.\"	Left Parenthesis Style
-.ds lP \fR\|(\|\fP
-.\"	Right Parenthesis Style
-.ds rP \fR\|)\|\fP
-.\"	Options Open Bracket Style
-.ds lB \fR\^[\^\fP
-.\"	Options Open Bracket Style
-.ds rB \fR\^]\fP
-.\"	Name (subject of manpage) Style
-.ds nM \f(CB
-.\"	Pathname Style
-.ds pA \fC
-.\"	Accepted punctuation string for -mdoc syntax
-.ds Pu \fR[.,:;(\^)[\^]\fR]
-.\"	Section Header Style
-.ds Sp \s12\fB
-.\" .ds sT \s-2\fR
-.\"	Symbolic Emphasis (boldface)
-.ds sY \f(CB
-.\"	Generic Variable Style
-.ds vA \fI
-.\"	Volume Title Style
-.ds Vs \fR
-.\"	Cross Reference STyle (man page only)
-.ds xR \fC
-.\"	Math *
+.ds lP \fR\|(\|\fP\s10
+.ds lp \fR(\fP\s10
+.ds rP \fR\|)\|\fP\s10
+.ds rp \fR)\fP\s10
+.ds lB \fR\^[\^\fP\s10
+.ds rB \fR\^]\fP\s10
+.ds mL \fB\s10
+.ds nM \f(CB\s10
+.ds nO \fR\s10
+.ds nT \s0
+.ds pA \fC\s10
+.ds Pu \fR{\ .\ ,\ :\ ;\ (\ )\ [\ ]\ \fR}
+.ds rA \fR\s10
+.ds rT \f(CO\s10
+.ds sH \fB\s10
+.ds sP \s0
+.ds sY \fB\s10
+.ds sX \fR\s10
+.ds tF \fR
+.ds tN \s9
+.ds vA \fI\s10
+.ds Vs \fR\s10
+.ds vT \f(CB\s10
+.ds xR \fC\s10
 .tr *\(**
-.\}
-.\"	NROFF
-.if n \{\
-.\"	Address Style
-.ds aD \fI
-.\"	Argument Reference Style
-.ds aR \fI
-.\"	Interactive Command Modifier (flag)
-.ds cM \fB
-.\"	Emphasis (in the English sense - usually italics)
-.ds eM \fI
-.\"	Errno Style
-.ds eR \fR
-.\"	Environment Variable Style
-.ds eV \fR
-.\"	Command Line Flag Style
-.ds fL \fB
-.\"	Header String Style
-.ds Hs \fR
-.\"	Interactive Command Style
-.ds iC \fB
-.\"	Literal Style
-.ds lI \fR
-.\"	Left Parenthesis Style
-.ds lP \fR\|(\fP
-.\"	Right Parenthesis Style
-.ds rP \fR\|)\fP
-.\"	Options Open Bracket Style
-.ds lB \fR\|[\|\fP
-.\"	Options Open Bracket Style
-.ds rB \fR\|]\fP
-.\"	Name (subject of manpage) Style
-.ds nM \fB
-.\"	Pathname Style
-.ds pA \fI
-.\"	Accepted punctuation string for -mdoc syntax
-.ds Pu [.,;:()[]]
-.\"	Section Header Style
-.ds Sp \s12\fB
-.\"	.ds sT \s-2\fR
-.\" .ds sT \s-2\fR
-.\"	Symbol, Mode or Mask Style
-.ds sY \fB
-.\"	Generic Variable Style
-.ds vA \fI
-.\"	Volume Title Style
-.ds Vs \fR
-.\"	Cross Reference Style (man page only)
-.ds xR \fR
-.\}
-.\"	INDENTS - Subheaders(sI), Text(Ti) between Section Headers and Subsects
-.if t \{\
-.	nr sI \w'\fC,'u*5
-.	nr Ti \n(sIu
-.\}
-.if n \{\
-.	nr sI .5i
-.	nr Ti .5i
-.\}
-.\"	Flags for macros names which are used only for .Ds
+.nr sI \w\fC,u*5
+.nr Ti \n(sIu
+.nr Pp .5v
+.ds lS \0
+.nr lS \w'\0'u
 .nr dI 6n
-.nr dC 1
-.nr dL 1
-.nr dR 1
-.\"	INDENT WIDTHS (for Lists)
-.\"	Width Needed for Address Tag (indented amount)
-.nr Ad 12n
-.\"	Angle Quote Width
-.nr Aq 12n
-.\"	Width Needed for Argument
-.nr Ar 12n
-.\"	Width Needed for Column offset
-.nr Cl 15n
-.\"	Width neeeded for Interactive Command Modifier
-.nr Cm 10n
-.\"	Width Needed for Complex Expressions
-.nr Cx 20n
-.\"	Indent Width Needed for Display (right and left margins)
-.nr Ds 6n
-.\"	Double Quote Width
-.nr Dq 12n
-.\"	tI is dependent on Ds and used by .Dp
-.nr tI \n(Dsu
-.\"	Width Needed for Display
-.nr Em 10n
-.\"	Width Needed for Errno Types
-.nr Er 15n
-.\"	Width Needed for Environment Variables
-.nr Ev 15n
-.\"	Width Needed for Example Indent
-.nr Ex 10n
-.\"	Width Needed for Flag
-.nr Fl 10n
-.\"	Width Needed for Function
-.nr Fn 16n
-.\"	Width neeeded for Interactive Command Name
-.nr Ic 10n
-.\"	Width Needed for Constant
-.nr Li 16n
-.\"	Width Needed for Math Symbol ? not sure if needed
-.nr Ms 5n
-.\"	Width Needed for Name
-.nr Nm 10n
-.\"	Width Needed for Option Begin
-.nr Ob 14n
-.\"	Width Needed for Option End
-.nr Oe 14n
-.\"	Width Needed for Option (one line)
-.nr Op 14n
-.\"	Width Needed for Pathname
-.nr Pa 32n
-.\"	Parenthesis Quote Width
-.nr Pq 12n
-.\"	Width needed for default or unknown text width
-.nr Tx 22n
-.\"	Single Quote Width
-.nr Sq 12n
-.\"	Width Needed for Symbols, Modes or Masks
-.nr Sy 5n
-.\"	Width Needed for Generic Variable
-.nr Va 12n
-.\"	Width Needed for Cross Reference, should the cross ref be annotated.
-.nr Xr 10n
-.\" PARAGRAPH SPACE
-.if t \{\
-.	nr Pp .5v
-.\}
-.if n \{\
-.	nr Pp 1v
-.\}
-.\"	PAGE LAYOUT
-.\" .Li Tagged Paragraph Style - zero if break on oversized tag
-.\" one if add em space and continue filling line.
-.nr tP 0
-.\" Page Layout Macro
 .de pL
-.\"	DITROFF
-.ie t \{\
-.\" Header Margin
-.	nr Hm .5i
-.\" Footer Margin
-.	nr Fm .5i
-.\" Line length
-.	nr ll 5.5i
-.\" Line length
-.	ll 5.5i
-.\" Title length
-.	nr lt 5.5i
-.\" Title length
-.	lt 5.5i
-.\" Page offset
-.	nr po 1.56i
-.\" Page offset
-.	po 1.56i
-.\" Vertical space distance (from Section headers/Lists/Subsections)
-.	nr vV .5v
-.\" em space
-.	ds tP \|\|\|\|\|\|
+.nr Hm .5i
+.nr Fm .5i
+.nr ll 6.5i
+.ll 6.5i
+.nr lt 6.5i
+.lt 6.5i
+.nr po 1i
+.po 1.i
+.nr dV .5v
+..
+.ds <= \(<=
+.ds >= \(>=
+.ds Lq \&``
+.ds Rq \&''
+.ds ua \(ua
+.ds aa \(aa
+.ds ga \(ga
+.ds sR \&'
+.ds sL \&`
+.ds q \&"
+.ds Pi \(*p
+.ds Ne \(!=
+.ds Le \(<=
+.ds Ge \(>=
+.ds Lt <
+.ds Gt >
+.ds Pm \(+-
+.ds If \(if
+.ds Na \fINaN\fP
+.ds Ba \fR\&|\fP
+.nr gX 0
+.de hK
+.ds hT \\*(dT
+.if !"\\*(cH"Null" \{\
+.       ie !"\\*(gP"Null" .as hT \|(\|\\*(cH\\*(gP\|)
+.       el .as hT \\|(\\|\\*(cH\\|)
+.\}
+.if "\\*(cH"Null" \{\
+.	if !"\\*(gP"Null" .as hT \&\|(\|\\*(gP\|)
+.\}
+.wh 0 hM
+.wh -1.25i fM
+.ie \\n(gX==1 \{\
+.	rm n1
+.	if \\n(.g .br
+.	if !\\n(.g .bp
 .\}
 .el \{\
-.\" Line length
-.	nr ll 7.5i
-.\".	nr ll 7.4i
-.\" Line length
-.	ll 7.5i
-.\".	ll 7.4i
-.\" Title lenght
-.	nr lt 7.5i
-.\".	nr lt 7.4i
-.\" Title lenght
-.	lt 7.5i
-.\".	lt 7.4i
-.\" Page offset
-.	nr po 0i
-.\" Page offset
-.	po 0i
-.\" Vertical space distance (from Section headers/Lists/Subsections)
-.	nr vV 1v
-.\" em space
-.	ds tP \0\0
-.\" Test for crt
-.	ie \\n(cR .nr Hm 0
-.	el .nr Hm .5i
-.\" Footer Margin
-.	nr Fm .5i
+.	if \\n(.g .br
+.	if !\\n(.g 'bp
+.\}
+.nr % 1
+.nr gX 0
+.em lM
+..
+.nr fW \w\fC0
+.de sW
+.nr sW \w\fC\\$1
+.ie \\n(sW>=\\n(fW \{\
+.       ie \\n(sW%\\n(fW .nr sW (\\n(sW/\\n(fW)+1
+.       el .nr sW \\n(sW/\\n(fW
+.\}
+.el \{\
+.	ie \\n(sW>0 .nr sW 1
+.	el .nr sW 0
 .\}
 ..
-.\" Adjustment mode
+.de aW
+.nr sW \w\fC\\*(A\\$1
+.ie \\n(sW>=\\n(fW \{\
+.       ie \\n(sW%\\n(fW .nr sW (\\n(sW/\\n(fW)+1
+.       el .nr sW \\n(sW/\\n(fW
+.\}
+.el \{\
+.	ie \\n(sW>0 .nr sW 1
+.	el .nr sW 0
+.\}
+..
+.de Ql
+.if \\n(aC==0  \{\
+.	ds mN Ql
+.       ds A1 \\$1
+.       ds A2 \\$2
+.       ds A3 \\$3
+.       ds A4 \\$4
+.       ds A5 \\$5
+.       ds A6 \\$6
+.       ds A7 \\$7
+.       ds A8 \\$8
+. 	nr fV \\n(.$
+. 	fV
+.\}
+.nr aP \\n(aP+1
+.aW \\n(aP
+.nr aP \\n(aP-1
+.if \\n(sW>2 .Li
+.if \\n(sW<=2 \{\
+.	if (\\n(aP>0) \{\
+.		ds A\\n(aP Li
+.		nr aP \\n(aP -1
+.	\}		
+.	if (\\n(aP==0) \{\
+.		rm C0 C1 C2 C3 C4 C5 C6 C7 C8 C9
+.		rm S1 S2 S3 S4 S5 S6 S7 S8 S9
+.		rn A8 A9
+.		rn A7 A8
+.		rn A6 A7
+.		rn A5 A6
+.		rn A4 A5
+.		rn A3 A4
+.		rn A2 A3
+.		rn A1 A2
+.		ds A1 Li
+.	 	nr fV \\n(aC+1
+.		nr aC 0
+.		fV
+.	\}
+.	ds qL \&\\*(sL
+.	ds qR \&\\*(sR
+.	En
+.\}
+..
+.de Sh
+.nr nS 0
+.nr sE 0
+.nr iS 0
+'ad
+.ie "\\$1"NAME" \{\
+.       hK
+'       in 0
+.\}
+.el \{\
+.       nr nS 0
+.       nr nA 0
+.       nr nF 0
+.       nr nT 0
+.       nr nY 0
+.       nr oT 0
+.       if "\\$1"SYNOPSIS" \{\
+.		na
+.		nr nS 1
+.	\}
+.       if "\\$1"DESCRIPTION" \{\
+.		nr fY 0
+.		nr fZ 0
+.		nr fB 0
+.		nr Fb 0
+.		ds Fb
+.	\}
+.       if "\\$1"SEE" \{\
+.               nr nA 1
+.               na
+.       \}
+.       if "\\$1"FILES" .nr nF 1
+.       if "\\$1"STANDARDS" .nr nT 1
+.       if "\\$1"AUTHORS" .nr nY 1
+.	if "\\$1"SEE" .nr sE 1
+.       in 0
+.       nr aN 0
+.\}
+.pL
+'sp
+.ns
+.ta .5i 1i 1.5i 2i 2.5i 3i 3.5i 4i 4.5i 5i 5.5i 6i 6.5i
+.if !\\n(cR .ne 3
+'fi
+\&\\*(sH\\$1 \|\\$2 \|\\$3 \|\\$4 \|\\$5 \|\\$6 \|\\$7 \|\\$8 \|\\$9
+\&\fP\s0\&
+.in \\n(.iu+\\n(Tiu
+.ns
+..
+.\}
 .if n \{\
+.\" tmac.mdoc-nroff
+.ds aD \fI
+.ds aR \fI
+.ds cM \fB
+.ds dF \fR
+.ds eM \fI
+.ds eR \fR
+.ds eV \fR
+.ds fA \fI
+.ds fD \fB
+.ds fL \fB
+.ds fN \fB
+.ds fP \fP
+.ds fS
+.ds fT \fI
+.ds Hs \fR
+.ds iC \fB
+.ds lI \fR
+.ds lP \fR\|(\fP
+.ds rP \fR\|)\fP
+.ds lp \fR\|(\fP
+.ds rp \fR\|)\fP
+.ds lB \fR\|[\|\fP
+.ds rB \fR\|]\fP
+.ds mL \fB
+.ds nM \fB
+.ds nO \fR
+.ds pA \fI
+.ds Pu {\ .\ ,\ ;\ :\ (\ )\ [\ ]}
+.ds rA \fR
+.ds rT \fI
+.ds sH \fB
+.ds sP
+.ds sY \fB
+.ds sX \fI
+.ds tF \fR
+.ds tN
+.ds vA \fI
+.ds Vs \fR
+.ds vT \fB
+.ds xR \fR
+.nr sI .5i
+.nr Ti .5i
+.nr cR 1
+.nr Pp 1v
+.ds lS \0\0
+.nr lS \w'\0\0'u
+.nr dI 6n
+.de pL
+.ie \\n(cR .nr Hm 0
+.el .nr Hm .5i
+.nr Fm .5i
+.nr ll 78n
+.ll 78n
+.nr lt 78n
+.lt 78n
+.nr po 0i
+.po 0i
+.nr dV 1v
 .ad l
 .na
 ..
+.ds <= \&<\&=
+.ds >= \&>\&=
+.ds Rq ''
+.ds Lq ``
+.ds ua ^
+.ds aa \'
+.ds ga \`
+.ds sL `
+.ds sR '
+.ds q \&"
+.ds Pi pi
+.ds Ne !=
+.ds Le <=
+.ds Ge >=
+.ds Lt <
+.ds Gt >
+.ds Pm +-
+.ds If infinity
+.ds Na \fINaN\fP
+.ds Ba \fR\&|\fP
+.de hK
+.nr % 1
+.ds hT \\*(dT
+.if !"\\*(cH"Null" \{\
+.	ie !"\\*(gP"Null" .as hT \|(\|\\*(cH\\*(gP\|)
+.	el .as hT \\|(\\|\\*(cH\\|)
 .\}
-.\" PREDEFINED STRINGS
-.if t \{\
-.	ds <= \(<=
-.	ds >= \(>=
-.	ds Lq \&``
-.	ds Rq \&''
-.	ds ua \(ua
-.	ds aa \(aa
-.	ds ga \(ga
-.	ds sR \(aa
-.	ds sL \(ga
+.if "\\*(cH"Null" .if !"\\*(gP"Null" .as hT \&\|(\|\\*(gP\|)
+.ie \\n(cR \{\
+.	hM
+.	wh -1v fM
 .\}
-.if n \{\
-.	ds <= \&<\&=
-.	ds >= \&>\&=
-.       ds Rq ''
-.       ds Lq ``
-.	ds ua ^
-.	ds aa '
-.	ds ga `
-.	ds sL `
-.	ds sR '
+.el \{\
+.	wh 0 hM
+.	wh -1.167i fM
 .\}
-.\" Note: The distances from the bottom or top of the page are set
-.\" in headers (macro .hK): to -1.25 for troff, and -1.167 for nroff
-.\" bottoms, and top is 0.
-.\"
-.\"	.Dt Document/manpage_title section/chapter volume
-.\"		The \{ and \} is necessary as roff doesn't nest if-elses
-.\"		properly, especially with .ds.
-.\"	TODO: separate Dt into Dt, Ch and Vt for supp docs.
+.if \\n(nl==0:\\n(nl==-1 'bp
+.em lM
+..
+.nr fW \w'0'
+.de sW
+.nr sW \w\\$1
+.ie \\n(sW>=\\n(fW \{\
+.       ie \\n(sW%\\n(fW .nr sW (\\n(sW/\\n(fW)+1
+.       el .nr sW \\n(sW/\\n(fW
+.\}
+.el .nr sW 0
+..
+.de aW
+.nr sW \w\\*(A\\$1
+.ie \\n(sW>=\\n(fW \{\
+.       ie \\n(sW%\\n(fW .nr sW (\\n(sW/\\n(fW)+1
+.       el .nr sW \\n(sW/\\n(fW
+.\}
+.el .nr sW 0
+..
+.de Ql
+.if \\n(aC==0  \{\
+.	ds mN Ql
+.	ds A1 \\$1
+.	ds A2 \\$2
+.	ds A3 \\$3
+.	ds A4 \\$4
+.	ds A5 \\$5
+.	ds A6 \\$6
+.	ds A7 \\$7
+.	ds A8 \\$8
+.	ds A9 \\$9
+.	nr fV \\n(.$
+. 	fV
+.\}
+.ds qL \&\\*(sL
+.ds qR \&\\*(sR
+.En \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
+..
+.de Sh
+.nr nS 0
+.nr sE 0
+.nr iS 0
+.ie "\\$1"NAME" \{\
+.       hK
+'       in 0
+.\}
+.el \{\
+.       nr nS 0
+.       nr nA 0
+.       nr nF 0
+.       nr nT 0
+.       nr nY 0
+.       nr aN 0
+.       nr oT 0
+.       if "\\$1"SEE" .nr nA 1
+.       if "\\$1"FILES" .nr nF 1
+.       if "\\$1"STANDARDS" .nr nT 1
+.       if "\\$1"SYNOPSIS" .nr nS 1
+.       if "\\$1"DESCRIPTION" \{\
+.               rr fB
+.               rr Fb
+.               ds Fb
+.               nr fY 0
+.               nr fZ 0
+.       \}
+.	if "\\$1"AUTHORS" .nr nY 1
+.       in 0
+.\}
+.pL
+'sp
+.ns
+.ta .5i 1i 1.5i 2i 2.5i 3i 3.5i 4i 4.5i 5i 5.5i 6i 6.5i
+.if !\\n(cR .ne 3
+'fi
+\&\\*(sH\\$1 \|\\$2 \|\\$3 \|\\$4 \|\\$5 \|\\$6 \|\\$7 \|\\$8 \|\\$9
+\&\fP\s0\&
+.in \\n(.iu+\\n(Tiu
+.if "\\$1"SEE" .nr sE 1
+.ns
+..
+.\}
+.\"     @(#)doc-common	5.7 (Berkeley) 8/5/91
+.nr %A 1
+.nr %J 1
+.nr %N 1
+.nr %O 1
+.nr %R 1
+.nr %T 1
+.nr %V 1
+.nr Ad 12n
+.nr Ac 3
+.nr Ao 12n
+.nr Ap 2
+.nr An 12n
+.nr Aq 12n
+.nr Ar 12n
+.nr Bc 3
+.nr Bl 1
+.nr Bo 12n
+.nr Bq 12n
+.nr Bx 12n
+.nr Cd 12n
+.nr Cm 10n
+.nr Co 15n
+.nr Cx 20n
+.nr Dc 3
+.nr Do 10n
+.nr Dq 12n
+.nr Ds 6n
+.nr Dq 12n
+.nr Dv 12n
+.nr tI \n(Dsu
+.nr Ec 3
+.nr El 1
+.nr Eo 12n
+.nr Eq 12n
+.nr Em 10n
+.nr Er 12n
+.nr Ev 15n
+.nr Ex 10n
+.nr Fa 12n
+.nr Fl 10n
+.nr Fc 3
+.nr Fo 16n
+.nr Fn 16n
+.nr Hl 1
+.nr I1 6n
+.nr I2 12n
+.nr I3 18n
+.nr Ic 10n
+.nr Li 16n
+.nr Ms 6n
+.nr Nm 10n
+.nr No 12n
+.nr Ns 2
+.nr Oo 10n
+.nr Oc 3
+.nr Op 14n
+.nr Pa 32n
+.nr Pf 12n
+.nr Pc 3
+.nr Po 12n
+.nr Pq 12n
+.nr Ql 16n
+.nr Qc 3
+.nr Qo 12n
+.nr Qq 12n
+.nr Sc 3
+.nr So 12n
+.nr Sq 12n
+.nr Sy 6n
+.nr Sx 16n
+.nr Ra 1
+.nr Rj 1
+.nr Rn 1
+.nr Ro 1
+.nr Rr 1
+.nr Rt 1
+.nr Rv 1
+.nr Tn 10n
+.nr Ta 1
+.nr Tv 1
+.nr Tx 22n
+.nr Ux 10n
+.nr Va 12n
+.nr Xc 3
+.nr Xo 1
+.nr Xr 10n
+.ds sV \& \&
+.ds hV \&\ \&
+.ds iV \& \&
+.ds tV \&\\t\&
+.nr z. 3
+.nr z, 3
+.nr z: 3
+.nr z; 3
+.nr z( 4
+.nr z) 3
+.nr z[ 4
+.nr z] 3
+.ds z( z)
+.ds z[ z]
+.ds z< z>
+.nr z0 0
+.nr z1 0
+.nr z2 0
+.nr z3 0
+.nr z4 0
+.nr z5 0
+.nr z6 0
+.nr z7 0
+.nr z8 0
+.nr z9 0
+.nr z# 0
 .de Dt
 .ds dT UNTITLED
-.ds vT Local
+.ds vT LOCAL
 .ds cH Null
-.\" 	Volume and Section Number or Chapter Number
 .if !"\\$1"" .ds dT \\$1
 .if !"\\$2"" \{\
 .	ds cH \\$2
-.	if "\\$3"" \{\
-.		\" Volume Title if none given
 .		if \\$2>=1 .if \\$2<=8 \{\
-.			ds vT UNIX Reference Manual
-.			if \\$2>1 .if \\$2<6 .ds vT UNIX Programmer's Manual
-.			if "\\$2"8" .ds vT UNIX System Manager's Manual
+.			ds vT NetBSD Reference Manual
+.			if \\$2>1 .if \\$2<6 .ds vT NetBSD Programmer's Manual
+.			if "\\$2"8" .ds vT NetBSD System Manager's Manual
+.			nr sN \\$2
 .		\}
 .		if "\\$2"unass"  .ds vT DRAFT
 .		if "\\$2"draft"  .ds vT DRAFT
-.		if "\\$2"paper"  .ds vT Null
-.	\}
+.		if "\\$2"paper"  .ds vT UNTITLED
 .\}
 .if !"\\$3"" \{\
-.	\" Volume Title if given
-.	if "\\$3"USD"   .ds vT UNIX User's Supplementary Documents
-.	if "\\$3"PS1"   .ds vT UNIX Programmers's Supplementary Documents
-.	if "\\$3"AMD"   .ds vT UNIX Ancestral Manual Documents
-.	if "\\$3"SMM"   .ds vT UNIX System Manager's Manual
-.	if "\\$3"URM"   .ds vT UNIX Reference Manual
-.	if "\\$3"PRM"   .ds vT UNIX Programmers's Manual
-.	if "\\$3"IND"   .ds vT UNIX Manual Master Index
-.	if "\\$3"CON"   .ds vT UNIX Contributed Software Manual
-.	if "\\$3"IMP"	.ds vT UNIX Implementation Notes
-.	if "\\$3"HOW"	.ds vT UNIX How Pocket Manual
-.	if "\\$3"LOCAL" .ds vT UNIX Local Manual
-.	if "\\*(vT"Local" .ds vT \\$3
+.	if "\\$3"USD"   .ds vT NetBSD User's Supplementary Documents
+.	if "\\$3"PS1"   .ds vT NetBSD Programmers's Supplementary Documents
+.	if "\\$3"AMD"   .ds vT NetBSD Ancestral Manual Documents
+.	if "\\$3"SMM"   .ds vT NetBSD System Manager's Manual
+.	if "\\$3"URM"   .ds vT NetBSD Reference Manual
+.	if "\\$3"PRM"   .ds vT NetBSD Programmers's Manual
+.	if "\\$3"IND"   .ds vT NetBSD Manual Master Index
+.	if "\\$3"LOCAL" .ds vT NetBSD Local Manual
+.	if "\\$3"tahoe" .as vT \ (Tahoe Architecture)
+.	if "\\$3"vax" .as vT \ (VAX Architecture)
+.	if "\\$3"hp300" .as vT \ (HP300 Architecture)
+.	if "\\*(vT"LOCAL" .ds vT \\$3
 .\}
 ..
-.\"
-.\"	.Os Operating System/Standard and Release or Version Number
-.\"
 .de Os
 .ds oS Null
 .if "\\$1"" \{\
-.	ds oS 4.4 Berkeley UNIX
+.	ds oS BSD Experimental
 .\}
 .if "\\$2"" \{\
-.	ds o1 Non-Null
+.	ds aa Non-Null
 .\}
 .if "\\$1"ATT"   \{\
 .	ds oS AT&T
@@ -358,87 +612,50 @@
 .	if "\\$2"4.1"  .ds oS 4.1 Berkeley Distribution
 .	if "\\$2"4.2"  .ds oS 4.2 Berkeley Distribution
 .	if "\\$2"4.3"  .ds oS 4.3 Berkeley Distribution
-.	if "\\$2"4.3+" .ds oS 4.3+tahoe Berkeley Distribution
-.	if "\\$2"4.4"  .ds oS 4.4 Berkeley Distribution
+.	if "\\$2"4.3T" .ds oS 4.3-Tahoe Berkeley Distribution
+.	if "\\$2"4.3R" .ds oS 4.3-Reno Berkeley Distribution
+.	if "\\$2"4.3t" .ds oS 4.3-Tahoe Berkeley Distribution
+.	if "\\$2"4.3r" .ds oS 4.3-Reno Berkeley Distribution
+.	if "\\$2"4.4"  .ds oS BSD Experimental
 .\}
-.if "\\*(oS"Null" .ds oS \\$1
-.if "\\*(o1"Non-Null" .as oS \0\\$2
-.rm o1
+.if "\\$1"NetBSD" \{\
+.	ds oS NetBSD
+.	if "\\$2"0.8"  .as oS \00.8
+.	if "\\$2"0.8a" .as oS \00.8a
+.	if "\\$2"0.9"  .as oS \00.9
+.	if "\\$2"0.9a" .as oS \00.9a Experimental
+.	if "\\$2"1.0"  .as oS \01.0 Experimental
+.\}
+.if "\\*(oS"Null" .ds oS \0\\$1
+.if "\\*(aa"Non-Null" .as oS \0\\$2
+.rm aa
 ..
-.\"
-.\" Standards
-.\"
-.\" .de St
-.\" .ds sT Null
-.\" .if "\\$1"POSIX" \{\
-.\" .	ds sT IEEE Standard POSIX
-.\" .	if \\$2 .as sT \0\\$2
-.\" .\}
-.\" .if "\\$1"ANSI" \{\
-.\" .	ds sT ANSI Standard
-.\" .	if \\$2 .as sT \0\\$2
-.\" .\}
-.\" .if "\\$1"ISO" \{\
-.\" .	ds sT ISO Standard
-.\" .	if \\$2 .as sT \0\\$2
-.\" .\}
-.\" .if "\\*(sT"Null" .ds sR \\$3
-.\" ..
-.\"
-.\" .de Gp
-.\" .ie !"\\$1"" .ds gP \&\\$1 \\$2 \\$3 \\$4 \\$5
-.\" .el .ds gP Null
-.\" ..
-.\"
-.\"
 .de Dd
-.nr aa 0
+.if !"\\*(dD"" .nr gX 1
 .ie \\n(.$>0 \{\
-.	ie \\n(.$<4 \{\
+.	ie \\n(.$==3 \{\
 .		ds dD \\$1 \\$2 \\$3
 .	\}
-.	el .tm Usage: .Dd Month Day, Year (e.g July 4, 1977).
+.	el \{\
+.		if "\\n(mo"1"  .ds dD January
+.		if "\\n(mo"2"  .ds dD February
+.		if "\\n(mo"3"  .ds dD March
+.		if "\\n(mo"4"  .ds dD April
+.		if "\\n(mo"5"  .ds dD May
+.		if "\\n(mo"6"  .ds dD June
+.		if "\\n(mo"7"  .ds dD July
+.		if "\\n(mo"8"  .ds dD August
+.		if "\\n(mo"9"  .ds dD September
+.		if "\\n(mo"10" .ds dD October
+.		if "\\n(mo"11" .ds dD November
+.		if "\\n(mo"12" .ds dD December
+.		as dD \&\ \\n(dy, 19\\n(yr
+.	\}
 .\}
 .el \{\
 .	ds dD Epoch
 .\}
 ..
-.\"
-.\"	House Keeping Macro - Make sense of dT, cH, vT, sT, gP and dS
-.\"	TODO: Try to get else's for efficiency
-.\"	TODO: GET RID OF .wh -1.167i (its in v7)
-.\"
-.\"
-.de hK
-.nr % 1
-.ds hT \\*(dT
-.if !"\\*(cH"Null" \{\
-.	ie !"\\*(gP"Null" .as hT \|(\|\\*(cH\\*(gP\|)
-.	el .as hT \\|(\\|\\*(cH\\|)
-.\}
-.if "\\*(cH"Null" .if !"\\*(gP"Null" .as hT \&\|(\|\\*(gP\|)
-.if t \{\
-.	wh 0 hM
-.	wh -1.25i fM
-.\}
-.if n \{\
-.	ie \\n(cR \{\
-.		hM
-.		wh -0v fM
-.	\}
-.	el \{\
-.		wh 0 hM
-.		wh -1.167i fM
-.	\}
-.\}
-.if n \{\
-.	if \\n(nl==0:\\n(nl==-1 'bp
-.\}
-.if t 'bp
-.em lM
-..
-.\"	Header Macro
-.\"
 .de hM
 .ev 1
 .pL
@@ -447,25 +664,24 @@
 'sp \\n(Hmu
 .ev
 ..
-.\"
 .de fM
-.ev 1
-.pL
-.if !\\n(cR \{\
-'	sp \\n(Fmu
-.	tl @\\*(Hs\\*(oS\fP@\\*(Vs\\*(dD\fP@%@
-'	bp
+.ie \\n(cR 'br
+.el \{\
+.	ev 1
+.	pL
+.	if !\\n(cR \{\
+'		sp \\n(Fmu
+.		tl @\\*(Hs\\*(oS\fP@\\*(Vs\\*(dD\fP@%@
+'		bp
+.	\}
+.	ev
 .\}
-.if \\n(cR \{\
-.\" .	tl @\\*(Hs\\*(oS\fP@\\*(Vs\\*(dD\fP@%@
-.\" '	bp
-.\}
-.ev
 ..
 .de lM
 .fl
 .if \\n(cR \{\
-.       fM
+'	sp
+.	tl @\\*(Hs\\*(oS\fP@\\*(Vs\\*(dD\fP@%@
 .       pl \\n(nlu
 .\}
 ..
@@ -486,1270 +702,3401 @@
 .de pp
 .tm Not a \-mdoc command: .pp
 ..
-.de Co
-.tm Not a \-mdoc command: .Co
-..
-.nr z. 1
-.nr z, 1
-.nr z: 1
-.nr z; 1
-.nr z) 1
-.nr z( 1
-.nr z[ 1
-.nr z] 1
-.nr z# 0
-.\"
-.de Ad
-.ie \\n(.$==0 \{\
-.       tm Usage: .Ad address [...] \\*(Pu
-.\}
-.el \{\
-.       ds sV \\*(aD
-.       nr cF \\n(.f
-.       ie "\\*(iM"" .ds f1 \&\\*(sV
-.       el .as f1 \&\\*(sV
-.       nB \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
-.       ft \\n(cF
-.\}
-..
-.\"
-.\" Command Line Argument Macro
-.\"
-.de Ar
-.ie \\n(.$==0 \{\
-.       ie !"\\*(iM"" .as f1 \&[\|\\*(aRfile\ ...\fP\|]
-.       el \&[\|\\*(aRfile\ ...\fP\|]
-.\}
-.el \{\
-.       ds sV \\*(aR
-.       nr cF \\n(.f
-.       ie "\\*(iM"" .ds f1 \&\\*(sV
-.       el .as f1 \&\\*(sV
-.       nB \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
-.       ft \\n(cF
-.\}
-..
-.\"
-.de Em
-.ie \\n(.$==0 \{\
-.       tm Usage: .Em text ... \\*(Pu
-.\}
-.el \{\
-.       ds sV \\*(eM
-.       nr cF \\n(.f
-.       ie "\\*(iM"" .ds f1 \&\\*(sV
-.       el .as f1 \&\\*(sV
-.       nB \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
-.       ft \\n(cF
-.\}
-..
-.\"
-.de Er
-.ie \\n(.$==0 \{\
-.       tm Usage: .Er ERRNOTYPE ... \\*(Pu
-.       \}
-.el \{\
-.       ds sV \\*(eR
-.       nr cF \\n(.f
-.       ie "\\*(iM"" .ds f1 \&\\*(sV
-.       el .as f1 \&\\*(sV
-.       nB \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
-.       ft \\n(cF
-.\}
-..
-.\"
-.de Ev
-.ie \\n(.$==0 \{\
-.	tm Usage: .Ev ENVIRONMENT_VARIABLE(s) ... \\*(Pu
-.	\}
-.el \{\
-.	ds sV \\*(eV
-.	nr cF \\n(.f
-.       ie "\\*(iM"" .ds f1 \&\\*(sV
-.       el .as f1 \&\\*(sV
-.       nB \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
-.	ft \\n(cF
-.\}
-..
-.\"
-.\" Flag Name Macro
-.\"
-.de Fl
-.ie \\n(.$==0 \{\
-.       ie !"\\*(iM"" .as f1 \&\\*(fL\-\fP
-.       el \&\\*(fL\-\fP
-.\}
-.el \{\
-.       nr zR 0
-.       sW \\$1
-.       if (\\n(sW==1&\\n(.$==1) .zR \\$1
-.       ds sV \\*(fL
-.       nr cF \\n(.f
-.       ie \\n(zR \{\
-.               ie "\\*(iM"" .ds f1 \&\\*(sV\-\f\\n(cF\\$1
-.               el \&\\*(sV\-\f\\n(cF\\$1
-.       \}
-.	el \{\
-.	       ie "\\*(iM"" .ds f1 \&\\*(sV
-.	       el .as f1 \&\\*(sV
-.	       fB \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
-.	       ft \\n(cF
-.	\}
-.\}
-..
-.\"	Interactive Commands Macro
-.\"
-.de Ic
-.ie \\n(.$==0 \{\
-.	tm Usage: .Ic Interactive Commands(s) ... \\*(Pu
-.\}
-.el \{\
-.       ds sV \\*(iC
-.       nr cF \\n(.f
-.       ie "\\*(iM"" .ds f1 \&\\*(sV
-.       el .as f1 \&\\*(sV
-.       nB \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
-.       ft \\n(cF
-.\}
-..
-.\"
-.\" Interactive Command Modifiers (flags)
-.\"
-.de Cm
-.ie \\n(.$==0 \{\
-.	tm Usage: .Cm Interactive Command Modifier(s) ... \\*(Pu
-.\}
-.el \{\
-.       ds sV \\*(cM
-.       nr cF \\n(.f
-.       ie "\\*(iM"" .ds f1 \&\\*(sV
-.       el .as f1 \&\\*(sV
-.       nB \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
-.       ft \\n(cF
-.\}
-..
-.\"
-.\"
-.de Li
-.ie \\n(.$==0 \{\
-.       tm Usage: .Li constant ... \\*(Pu
-.       \}
-.el \{\
-.       ds sV \\*(lI
-.       nr cF \\n(.f
-.       ie "\\*(iM"" .ds f1 \&\\*(sV
-.       el .as f1 \&\\*(sV
-.       nB \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
-.       ft \\n(cF
-.\}
-..
-.\"
-.de Nm
-.ie \\n(.$==0 \{\
-.	if "\\*(n1"" .tm Usage: .Nm Name(s) ... \\*(Pu
-.	ie !"\\*(iM"" .as f1 \&\\*(nM\\*(n1\\$1\fP
-.	el \&\\*(nM\\*(n1\\$1\fP
-.\}
-.el \{\
-.	ds sV \\*(nM
-.	nr cF \\n(.f
-.	if \\n(nS \{\
-.		rs
-.		in -\\n(iSu
-.		ie \\n(nS>1 .br
-.		el \{\
-.			sW \\$1
-.			nr iS (\\n(sW*\\n(fW)u
-.		\}
-.		in +\\n(iSu
-.		ti -\\n(iSu
-.		nr nS \\n(nS+1
-.	\}
-.	if "\\*(n1"" .ds n1 \\$1
-.	ie "\\*(iM"" .ds f1 \&\\*(sV
-.	el .as f1 \&\\*(sV
-.	nB \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
-.	ft \\n(cF
-.\}
-..
-.\"
-.de Pa
-.ie \\n(.$==0 \{\
-\&\\*(pA~\fP
-.\}
-.el \{\
-.       ds sV \\*(pA
-.       nr cF \\n(.f
-.       ie "\\*(iM"" .ds f1 \&\\*(sV
-.       el .as f1 \&\\*(sV
-.       nB \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
-.       ft \\n(cF
-.\}
-..
-.\"
-.de Sy
-.ie \\n(.$==0 \{\
-.       tm Usage: .Sy Symbolic Text ... \\*(Pu
-.       \}
-.el \{\
-.       ds sV \\*(sY
-.       nr cF \\n(.f
-.       ie "\\*(iM"" .ds f1 \&\\*(sV
-.       el .as f1 \&\\*(sV
-.       nB \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
-.       ft \\n(cF
-.\}
-..
-.\"
-.de Ms
-.ie \\n(.$==0 \{\
-.       tm Usage: .Ms Math Symbol ... \\*(Pu
-.       \}
-.el \{\
-.       ds sV \\*(sY
-.       nr cF \\n(.f
-.       ie "\\*(iM"" .ds f1 \&\\*(sV
-.       el .as f1 \&\\*(sV
-.       nB \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
-.       ft \\n(cF
-.\}
-..
-.\"
-.de Va
-.ie \\n(.$==0 \{\
-.       tm Usage: .Va variable_name(s) ... \\*(Pu
-.\}
-.el \{\
-.       ds sV \\*(vA
-.       nr cF \\n(.f
-.       ie "\\*(iM"" .ds f1 \&\\*(sV
-.       el .as f1 \&\\*(sV
-.       nB \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
-.       ft \\n(cF
-.\}
-..
-.\"
-.de nB
-.hy 0
-.if \\n(.$==0 .tm Usage error: called with empty arguments (empty quotes)?
-.ie \\n(.$>1 \{\
-.	zR \\$1
-.	ie \\n(zR .as f1 \&\f\\n(cF\\$1\fP
-.	el .as f1 \&\\$1
-.	zR \\$2
-.	if !\\n(zR \{\
-.		ie !"\\*(iM""\{\
-.\"			I surrender
-.			if "\\*(iM"Tp" .as f1 \&\ \&
-.			if "\\*(iM"Dp" .as f1 \&\ \&
-.			if "\\*(iM"Op" .as f1 \&\ \&
-.			if "\\*(iM"Cx" .as f1 \&\ \&
-.			if "\\*(iM"Dq" .as f1 \& \&
-.			if "\\*(iM"Sq" .as f1 \& \&
-.			if "\\*(iM"Pq" .as f1 \& \&
-.			if "\\*(iM"Aq" .as f1 \& \&
-.		\}
-.		el .as f1 \& \&
-.	\}
-.	nB \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
-.\}
-.el \{\
-.	zR \\$1
-.	ie \\n(zR .as f1 \&\f\\n(cF\\$1
-.	el .as f1 \&\\$1\f\\n(cF
-.	if "\\*(iM"" \{\&\\*(f1
-.		ds f1
-.	\}
-.	hy
-.\}
-..
-.de fB
-.hy 0
-.if \\n(.$==0 .tm Usage error: called with empty arguments (empty quotes)?
-.ie \\n(.$>1 \{\
-.	zR \\$1
-.	ie \\n(zR .as f1 \&\f\\n(cF\\$1\fP
-.	el \{\
-.		ie "\\$1"-" .as f1 \&\-\-
-.		el .as f1 \&\-\\$1
-.	\}
-.	zR \\$2
-.	if !\\n(zR \{\
-.		ie !"\\*(iM""\{\
-.\"			I surrender
-.			if "\\*(iM"Tp" .as f1 \&\ \&
-.			if "\\*(iM"Dp" .as f1 \&\ \&
-.			if "\\*(iM"Op" .as f1 \&\ \&
-.			if "\\*(iM"Cx" .as f1 \&\ \&
-.			if "\\*(iM"Dq" .as f1 \& \&
-.			if "\\*(iM"Sq" .as f1 \& \&
-.			if "\\*(iM"Pq" .as f1 \& \&
-.			if "\\*(iM"Aq" .as f1 \& \&
-.		\}
-.		el .as f1 \& \&
-.	\}
-.	fB \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
-.\}
-.el \{\
-.	zR \\$1
-.	ie \\n(zR .as f1 \&\f\\n(cF\\$1
-.	el \{\
-.		ie "\\$1"-" .as f1 \&\-\-\f\\n(cF
-.		el .as f1 \&\-\\$1\f\\n(cF
-.	\}
-.	if "\\*(iM"" \{\&\\*(f1
-.		ds f1
-.	\}
-.	hy
-.\}
-..
-.\"
-.\" Single quoted Items
-.\" eF, sB g[0-9] and z2
-.de Sq
-.nr eF 0
-.ie \\n(.$==0 \{\
-.       ie "\\*(iM"" \&\\*(sL\&\\*sR
-.       el .as f1 \&\\*(sL\&\\*(sR
-.\}
-.el \{\
-.       ie "\\*(iM"" \{\
-.		ds f1 \&\\*(sL
-.		ds iM Sq
-.	\}
-.       el .as f1 \&\\*(sL
-.       sB \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
-.	ie \\n(eF>0 .\\*(g1 \\*(g2 \\*(g3 \\*(g4 \\*(g5 \\*(g6 \\*(g7 \\*(g8
-.	el .as f1 \\*(g0
-.	as f1 \\*(sR
-.	if !"\\*(z2"" .as f1 \\*(z2
-.	if "\\*(iM"Sq" \{\
-\&\\*(f1
-.		ds f1
-.		ds iM
-.	\}
-.	ds z2
-.	rm  g0 g1 g2 g3 g4 g5 g6 g7 g8 g9
-.	nr eF 0
-.\}
-..
-.\"
-.\" Double quoted Items
-.de Dq
-.nr Ef 0
-.ie \\n(.$==0 \{\
-.       ie "\\*(iM"" \&\\*(Lq\&\\*(Rq
-.       el .as f1 \&\\*(Lq\&\\*(Rq
-.\}
-.el \{\
-.       ie "\\*(iM"" \{\
-.               ds f1 \&\\*(Lq
-.               ds iM Dq
-.       \}
-.       el .as f1 \&\\*(Lq
-.       Sb \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
-.       ie \\n(Ef>0 .\\*(k1 \\*(k2 \\*(k3 \\*(k4 \\*(k5 \\*(k6 \\*(k7 \\*(k8
-.       el .as f1 \\*(k0
-.       as f1 \\*(Rq
-.       if !"\\*(z4"" .as f1 \\*(z4
-.       if "\\*(iM"Dq" \{\
-\&\\*(f1
-.               ds f1
-.               ds iM
-.       \}
-.       ds z4
-.       rm  k0 k1 k2 k3 k4 k5 k6 k7 k8 k9
-.       nr Ef 0
-.\}
-..
-.\"
-.\" Parenthesis quoted Items
-.de Pq
-.nr pQ 0
-.ie \\n(.$==0 \{\
-.       ie "\\*(iM"" \&(\&)
-.       el .as f1 \&(\&)
-.\}
-.el \{\
-.       ie "\\*(iM"" \{\
-.               ds f1 \&(
-.               ds iM Pq
-.       \}
-.       el .as f1 \&(
-.       pB \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
-.       ie \\n(pQ>0 .\\*(y1 \\*(y2 \\*(y3 \\*(y4 \\*(y5 \\*(y6 \\*(y7 \\*(y8
-.       el .as f1 \\*(y0
-.       as f1 \&)
-.       if !"\\*(z3"" .as f1 \\*(z3
-.       if "\\*(iM"Pq" \{\
-\&\\*(f1
-.               ds f1
-.               ds iM
-.       \}
-.       ds z3
-.       rm  y0 y1 y2 y3 y4 y5 y6 y7 y8 y9
-.       nr pQ 0
-.\}
-..
-.\" eF, sB g[0-9] and z2
-.de sB
-.hy 0
-.ie \\n(.$==0 .tm Sick Logic: macro sB
-.el \{\
-.	ie \\n(eF>=1 .nr eF \\n(eF+1
-.	el \{\
-.		mN \\$1
-.		if \\n(mN .nr eF \\n(eF+1
-.	\}
-.       zR \\$1
-.       ie \\n(zR .as z2 \\$1
-.       el \{\
-.		ie \\n(eF<1 .as g\\n(eF \\$1
-.		el .as g\\n(eF \\$1
-.	\}
-.       if \\n(.$>1 \{\
-.		zR \\$2
-.	        if \\n(zR==0 \{\
-.			if \\n(eF<1 \{\
-.				as g\\n(eF \& \&
-.			\}
-.		\}
-.		sB \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
-.	\}
-.\}
-..
-.de Sb
-.hy 0
-.ie \\n(.$==0 .tm Sick Logic: macro Sb
-.el \{\
-.       ie \\n(Ef>=1 .nr Ef \\n(Ef+1
-.	el \{\
-.		mN \\$1
-.	        if \\n(mN .nr Ef \\n(Ef+1
-.	\}
-.       zR \\$1
-.       ie \\n(zR .as z4 \\$1
-.       el \{\
-.               ie \\n(Ef<1 .as k\\n(Ef \\$1
-.               el .as k\\n(Ef \\$1
-.       \}
-.       if \\n(.$>1 \{\
-.               zR \\$2
-.               if \\n(zR==0 \{\
-.                       if \\n(Ef<1 \{\
-.                               as k\\n(Ef \& \&
-.                       \}
-.               \}
-.               Sb \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
-.       \}
-.\}
-..
-.de pB
-.hy 0
-.ie \\n(.$==0 .tm Sick Logic: macro pB
-.el \{\
-.       ie \\n(pQ>=1 .nr pQ \\n(pQ+1
-.       el \{\
-.               mN \\$1
-.               if \\n(mN .nr pQ \\n(pQ+1
-.       \}
-.       zR \\$1
-.       ie \\n(zR .as z3 \\$1
-.       el \{\
-.               ie \\n(pQ<1 .as y\\n(pQ \\$1
-.               el .as y\\n(pQ \\$1
-.       \}
-.       if \\n(.$>1 \{\
-.               zR \\$2
-.               if \\n(zR==0 \{\
-.                       if \\n(pQ<1 \{\
-.                               as y\\n(pQ \& \&
-.                       \}
-.               \}
-.               pB \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
-.       \}
-.\}
-..
-.de aQ
-.hy 0
-.ie \\n(.$==0 .tm Bad Syntax: .Aq
-.el \{\
-.       ie \\n(aQ>=1 .nr aQ \\n(aQ+1
-.       el \{\
-.               mN \\$1
-.               if \\n(mN .nr aQ \\n(aQ+1
-.       \}
-.       zR \\$1
-.       ie \\n(zR .as aZ \\$1
-.       el \{\
-.               ie \\n(aQ<1 .as a\\n(aQ \\$1
-.               el .as a\\n(aQ \\$1
-.       \}
-.       if \\n(.$>1 \{\
-.               zR \\$2
-.               if \\n(zR==0 \{\
-.                       if \\n(aQ<1 \{\
-.                               as a\\n(aQ \& \&
-.                       \}
-.               \}
-.               aQ \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
-.       \}
-.\}
-..
-.\" Angle Bracket Quoted Items
-.de Aq
-.nr aQ 0
-.ie \\n(.$==0 \{\
-.       ie "\\*(iM"" \&<\&>
-.       el .as f1 \&<\&>
-.\}
-.el \{\
-.       ie "\\*(iM"" \{\
-.               ds f1 \&<
-.               ds iM Aq
-.       \}
-.       el .as f1 \&<
-.       aQ \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8
-.       ie \\n(aQ>0 .\\*(a1 \\*(a2 \\*(a3 \\*(a4 \\*(a5 \\*(a6 \\*(a7 \\*(a8
-.       el .as f1 \\*(a0
-.       as f1 \&>
-.       if !"\\*(aZ"" .as f1 \\*(aZ
-.       if "\\*(iM"Aq" \{\
-\&\\*(f1
-.               ds f1
-.               ds iM
-.       \}
-.       ds aZ
-.       rm  a0 a1 a2 a3 a4 a5 a6 a7 a8
-.       nr aQ 0
-.\}
-..
-.\" macro Name test, return macro register value if true
-.de mN
-.nr mN 0
-.sW \\$1
-.if \\n(sW==2 \{\
-.	if \\n(\\$1 .nr mN \\n(\\$1
-.\}
-..
-.\" Punctuation test (using z registers), return 1 if true
-.de zR
-.nr zR 0
-.sW \\$1
-.if \\n(sW=1 \{\
-.	if \\n(z\\$1 .nr zR 1
-.	\}
-..
-.\"
-.\" sW returns number of characters in a string
-.if t \{\
-.nr fW \w'\fC,'
-.de sW
-.nr sW \w'\fC\\$1'
-.\}
-.if n \{\
-.nr fW \w'0'
-.de sW
-.nr sW \w'\\$1'
-.\}
-.ie \\n(sW>=\\n(fW \{\
-.	ie \\n(sW%\\n(fW .nr sW (\\n(sW/\\n(fW)+1
-.	el .nr sW \\n(sW/\\n(fW
-.\}
-.el .nr sW 0
-..
-.\"	Option Expression -
-.\"	TODO - add line overflow check (right!)
-.nr eP 0
-.ds e1
-.nr oE 0
-.nr hP 0
-.ds hP
-.nr Ep 0
-.de Op
-.hy 0
-.if "\\*(iM"" \{\
-.	ds iM Op
-.       ds f1 \&
-.\}
-.as f1 \&\\*(lB
-.\" .tm Op:  \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
-.dO \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
-.ie !"\\$1"Cx" .oE
-.el .nr oE \\n(oE+1
-..
-.\"
-.\" just for mike, with every bite of garlic in mind (oops, i mean burp).
-.\" dO: go dOwn an argument vector and test each argument to see if
-.\" a macro name or punctuation. stash in respective place along
-.\" with its arguments.
-.nr oO 0
-.nr oP 0
-.nr aO 0
-.de dO
-.mN \\$1
-.ie \\n(mN \{\
-.       if \\n(oP  \{\
-.               if \\n(hP \{\
-.                       nr oZ 1
-.                       oZ
-.                       Oz
-.               \}
-.               if \\n(e1==1 \{\
-.\\*(e1 \\*(e2 \\*(e3 \\*(e4 \\*(e5 \\*(e6 \\*(e7 \\*(e8 \\*(e9
-.               \}
-.               uO
-.		if !(\\n(oO:\\n(aO) .as f1 \& \&
-.	\}
-.       ie "\\$1"Op" \{\
-.               as f1 \&\\*(lB
-.               nr aO \\n(aO+1
-.       \}
-.	el \{\
-.               nr eP \\n(eP+1
-.               ds e\\n(eP \\$1
-.               nr e\\n(eP 1
-.       \}
-.\}
-.el \{\
-.\" .tm dO: $1: \\$1: eP \\n(eP e[\\n(eP]: \\*(e\\n(ePEE
-.	zR \\$1
-.	ie \\n(zR \{\
-.\" .tm dO:zR: $1: \\$1: eP \\n(eP e[\\n(eP]: \\*(e\\n(eP
-.		nr hP \\n(hP+1
-.		ds h\\n(hP \\$1
-.	\}
-.	el \{\
-.\" .tm dO:word $1: \\$1: eP \\n(eP e[\\n(eP]: \\*(e\\n(ePEE
-.		if \\n(eP==0:\\n(e\\n(eP==1 .nr eP \\n(eP+1
-.		if \\n(eZ .as e\\n(eP \& \&
-.		as e\\n(eP \&\\$1
-.\" .		ds e\\n(eP \&\\$1
-.		nr eZ \\n(eZ+1
-.	\}
-.\}
-.nr oP 1
-.ie \\n(.$>1 \{\
-.	dO \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
-.\}
-.el \{\
-.     ie \\n(e1 \{\
-.\\*(e1 \\*(e2 \\*(e3 \\*(e4 \\*(e5 \\*(e6 \\*(e7 \\*(e8 \\*(e9
-.	\}
-.     el \{\
-.	as f1 \\*(e1
-.	\}
-.\}
-..
-.\" handle old style arguments such as the arg -Idir
-.\" in adb, .Oo is a toggle.
-.de Oo
-.ie \\n(oO .nr oO 0
-.el .nr oO 1
-..
-.\" stash punctuation
-.de oZ
-.if \\n(hP>=\\n(oZ \{\
-.	nr eP \\n(eP+1
-.	ds e\\n(eP \\*(h\\n(oZ
-.	nr oZ \\n(oZ+1
-.	oZ
-.\}
-..
-.\" clean up punctuation vector
-.de Oz
-.if \\n(hP>0 \{\
-.	rm h\\n(hP
-.	nr hP \\n(hP-1
-.	Oz
-.\}
-..
-.\" uO: go back up created vector cleaning it up aong the way
-.de uO
-.if \\n(eP>0 \{\
-.	rm e\\n(eP
-.	rr e\\n(eP
-.	nr eP \\n(eP-1
-.	nr oP 0
-.	nr eZ 0
-.	uO
-.\}
-..
-.\" option end
-.de oE
-.uO
-.ie \\n(hP \{\
-.       as f1 \\*(rB\\*(h1\\*(h2\\*(h3
-.	Oz
-.	nr oZ 0
-.\}
-.el \{\
-.	as f1 \\*(rB
-.\}
-.ie "\\*(iM"Op" \{\
-.	if \\n(aO .aO
-.if t \{\
-.	if (\\n(.lu-\\n(.ku-\\n(.ou-(2*\\n(fWu))<\w'\fC\\*(f1'u .br
-.\}
-.if n \{\
-.	nr aa \w'\\*(f1'u
-.	if (\\n(.lu-\\n(.ku-\\n(.ou-\\n(aau)<=(7*\\n(fW) .br
-.\}
-\&\\*(f1
-.	ds iM
-.	ds f1
-.	hy
-.\}
-.el .nr oE \\n(oE-1
-..
-.de aO
-.as f1 \\*(rB
-.nr aO \\n(aO-1
-.if \\n(aO >0 .aO
-..
-.\"
-.de Xr
-.if \\n(.$<=1 \{\
-.	ie \\n(.$==1 \{\
-.		if !"\\*(iM"" .as f1 \&\\*(xR\\$1\fP
-.		if "\\*(iM"" \&\\*(xR\\$1\fP
-.	\}
-.	el .tm Xr Usage: .Xr manpage_name [section#] \\*(Pu
-.\}
-.if \\n(.$==2 \{\
-.	zR \\$2
-.	ie !"\\*(iM"" \{\
-.		ie \\n(zR \&\\*(xR\\$1\fP\\$2
-.		el \&\\*(xR\\$1\fP(\\$2)
-.	\}
-.	el \{\
-.		ie \\n(zR .as f1 \&\\*(xR\\$1\fP\\$2
-.		el .as f1 \&\\*(xR\\$1\fP(\\$2)
-.	\}
-.\}
-.if \\n(.$>=3 \{\
-.	zR \\$2
-.	ie \\n(zR \{\
-.		ie !"\\*(iM"" .as f1 \&\\*(xR\\$1\fP\\$2\\$3\\$4\\$5\\$6\\$7\\$8
-.		el \&\\*(xR\\$1\fP\\$2\\$3\\$4\\$5\\$6\\$7\\$8
-.	\}
-.	el \{\
-.		zR \\$3
-.		ie \\n(zR \{\
-.			if !"\\*(iM"" \{\
-.			     as f1 \&\\*(xR\\$1\fP(\\$2)\\$3\\$4\\$5\\$6\\$7\\$8
-.			\}
-.			if "\\*(iM"" \{\
-\&\\*(xR\\$1\fP(\\$2)\\$3\\$4\\$5\\$6\\$7\\$8
-.			\}
-.		\}
-.		el \{\
-.			tm zR = \\n(zR  the arg is \\$3
-.			tm Xr-XX Usage: .Xr manpage_name [section#] \\*(Pu
-.		\}
-.	\}
-.\}
-..
-.\"
-.\"
-.de Ex
-.tm Ex defunct, Use .Dl: \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
-..
-.\" Display (one) Line of text.
-.de Dl
-.ie "\\*(iM"" \{\
-'	ta .5i 1i 1.5i 2i 2.5i 3i 3.5i 4i 4.5i 5i 5.5i 6i 6.5i
-.	in \\n(.iu+\\n(Dsu
-.	mN \\$1
-.	ie \\n(mN .\\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
-.	el \{\
-.		nr cF \\n(.f
-.\"	 Literal font is none specified
-\&\\*(lI\\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
-.		ft \\n(cF
-.	\}
-.	in \\n(.iu-\\n(Dsu
-.\}
-.el \{\
-.	mN \\$1
-.	ie \\n(mN .\\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8
-.	el \{\
-.		nr cF \\n(.f
-.		ds f1 \&\\*(lI\\&\\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8
-.		as f1 \&\f\\n(cF
-.	\}
-.\}
-..
-.\"
-.\"
-.\" user set Tagged Paragraph Width (used in both Dp and Tp)
-.de Tw
-.ie \\n(.$==0 \{\
-.	nr aa 0
-.\}
-.el \{\
-.	mN \\$1
-.	ie \\n(sW>2 \{\
-.		nr tW (\\n(sW+3)*\\n(fWu)
-.	\}
-.	el \{\
-.		ie \\n(mN .nr tW \\n(mN
-.		el .nr tW \\$1
-.	\}
-.	nr tF 1
-.\}
-..
-.\"
-.de Dw
-.Tw \\$1
-..
-.\"
-.de Di
-.ie \\n(.$==0 \{\
-.	nr tI \\n(Dsu
-.\}
-.el \{\
-.	sW \\$1
-.	if \\n(sW>=2 \{\
-.		nr tI \\$1u
-.	\}
-.	if \\n(sW<2 \{\
-.		if "\\$1"L" \{\
-.			nr tI 0
-.		\}
-.	\}
-.\}
-..
-.\" tagged paragraph
-.\" initialize baby stack variables
-.nr np 0
-.nr p1 0
-.ds s\n(np
-.\"
-.de Tp
-.ie "\\$1"" .pE p s np
-.el \{\
-.	ds iM Tp
-.	mN \\$1
-.	ie \\n(tF \{\
-.		ds tC Tw
-.		nr tC 1
-.		nr tF 0
-.	\}
-.	el \{\
-.		if !"Tw"\\*(s\\n(np" \{\
-.			ie \\n(mN \{\
-.				ds tC \\$1
-.				nr tW \\n(mN
-.			\}
-.			el \{\
-.				ds tC Tx
-.				nr tW \\n(Tx
-.			\}
-.			if !"\\*(tC"\\*(s\\n(np" .nr tC 1
-.		\}
-.	\}
-.	sp \\n(vVu
-.	if !\\n(cR .ne 2
-.	if \\n(tC \{\
-.		nr np \\n(np+1
-.		nr p\\n(np \\n(tW
-.		ds s\\n(np \\*(tC
-.		nr tC 0
-.		ds tC
-.		in \\n(.iu+\\n(p\\n(npu
-.	\}
-.	ie \\n(mN \{\
-.		ds f1
-.		\\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
-.		if !"\\$1"Cx" .pT st p np
-.	\}
-.	el \{\
-.		br
-.		ev 1
-.		fi
-.		di Td
-\&\\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
-.		br
-.		di
-.		ev
-.		na
-.		ds tD \\*(Td\\
-.		pT di p np
-.	\}
-.\}
-..
-.\"
-.\"
-.\" Complex Expression Macro
-.\"
-.\"	 TODO: add length across line boundary check (like Li)
-.de Cx
-.hy 0
-.ie \\n(.$==0 \{\
-.	if "\\*(iM"Cx" \{\
-.		ds iM
-.		if \\n(oE .oE
-\&\\*(f1
-.		ds f1
-.	\}
-.	if "\\*(iM"Tp" .pT st p np
-.	if "\\*(iM"Dp" .pT st q mp
-.\}
-.el \{\
-.	if "\\*(iM"" \{\
-.		ds iM Cx
-.		ds f1 \&
-.	\}
-.	mN \\$1
-.\" Here are the args: `\\$1'  `\\$2'  `\\$3'  `\\$4'
-.	ie \\n(mN .\\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
-.	el \{\
-.		as f1 \&\\$1
-.		if \\n(.$>1 .Cx \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
-.	\}
-.\}
-..
-.\" Prefix string in default font to content specified string
-.de Pf
-.Cx \\$1
-.\\$2 \\$3 \\$4 \\$5
-.Cx
-..
-.\" Suffix string in default font to content specified string
-.de Sf
-.Cx \\$1 \\$2
-.Cx \\$3
-.Cx
-..
-.\" Simple Option Begin
-.de Ob
-.hy 0
-.ie "\\*(iM"" \{\
-.	ev 2
-.	fi
-.	di oB
-.\}
-.el \{\
-.tm shouldn't be here
-.	as f1 \&[
-.	mN \\$1
-.	ie \\n(mN .\\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
-.	el \{\
-.		as f1 \&\\$1
-.		if \\n(.$>1 .Oc \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
-.	\}
-.\}
-..
-.de Oc
-.as f1 \&\\$1
-.if \\n(.$>1 .Oc \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
-..
-.de Oe
-.hy 0
-.ie "\\*(iM"" \{\
-.	br
-.	di
-.	ev
-.	ds bO \\*(oB\\
-\&[\\*(bO\&]
-.\}
-.el \{\
-.	as f1 \&]
-.\}
-..
-.\" White space for Cx
-.de Ws
-.Cx \&\ \&
-..
-.\" tagged paragraph
-.\" initialize baby stack variables
-.nr mp 0
-.nr q1 0
-.ds r\n(np
-.\"
-.\" Complex Dp tag
-.de Dc
-.Dp Cx \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8
-..
-.\" Complex Tp tag
-.de Tc
-.Tp Cx \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8
-..
-.\" Blended tag toggle
-.de Bt
-.ie \\n(tP==0 .nr tP 1
-.el .nr tP 0
-..
-.de Dp
-.ie "\\$1"" \{\
-.	pE q r mp
-.	sp \\n(vVu
-.\}
-.el \{\
-.       ds iM Dp
-.       mN \\$1
-.       ie \\n(tF \{\
-.               ds tC Tw
-.               nr tC 1
-.               nr tF 0
-.       \}
-.       el \{\
-.               if !"Tw"\\*(r\\n(mp" \{\
-.                       ie \\n(mN \{\
-.                               ds tC \\$1
-.                               nr tW \\n(mN
-.                       \}
-.                       el \{\
-.                               ds tC Tx
-.                               nr tW \\n(Tx
-.                       \}
-.                       if !"\\*(tC"\\*(r\\n(mp" .nr tC 1
-.               \}
-.       \}
-.       if !\\n(cR .ne 2
-.       if \\n(tC \{\
-.               nr mp \\n(mp+1
-.               nr q\\n(mp \\n(tW
-.               ds r\\n(mp \\*(tC
-.               nr tC 0
-.               ds tC
-.		ie \\n(tIu==\\n(Dsu .nr i\\n(mp \\n(Dsu
-.		el \{\
-.			nr i\\n(mp \\n(tIu
-.			nr tI \\n(Dsu
-.		\}
-.              	in \\n(.iu+\\n(i\\n(mpu
-.		sp \\n(vVu
-.		in \\n(.iu+\\n(\\q\\n(mpu
-.       \}
-.       ie \\n(mN \{\
-.               \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
-.               if !"\\$1"Cx" .pT st q mp
-.       \}
-.       el \{\
-.               br
-.               ev 1
-.               fi
-.               di Td
-\&\\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
-.               br
-.               di
-.               ev
-.               na
-.               ds tD \\*(Td\\
-.               pT di q mp
-.       \}
-.\}
-..
-.\"
-.\" .pE number_stack string_stack counter
-.de pE
-.ie "\\$3"mp" \{\
-.	in \\n(.iu-(\\n(\\$1\\n(\\$3u)-(\\n(i\\n(mpu)
-.	rr i\\n(mp
-.\}
-.el .in \\n(.iu-\\n(\\$1\\n(\\$3u
-.\" .in \\n(.iu-\\n(\\$1\\n(\\$3u
-.if \\n(\\$3<=0 .tm Extraneous call .Tp or .Dp
-.rr \\$1\\n(\\$3
-.rm \\$2\\n(\\$3
-.nr \\$3 \\n(\\$3-1
-.ds iM
-..
-.\"
-.\" .pT [st or di] number_stack counter
-.de pT
-.ie "\\$1"st" \{\
-.	nr bb \\n(\\$2\\n(\\$3u
-.	ti -\\n(bbu
-.	ie (\\n(\\$2\\n(\\$3u-2n)<=\w'\\*(f1'u \{\&\\*(f1\\*(tP
-.		if \\n(tP==0 .br
-.	\}
-.	el \\*(f1\h'|\\n(\\$2\\n(\\$3u-'\c
-.\}
-.el \{\
-.       ti -\\n(\\$2\\n(\\$3u
-.	ie (\\n(\\$2\\n(\\$3u-2n)<=\\n(dlu \{\&\\*(tD\\*(tP
-.	       if !\\n(tP .br
-.	\}
-.	el \\*(tD\h'|\\n(\\$2\\n(\\$3u-'\c
-.	if t 'ad
-.\}
-.	ds iM
-.	ds f1
-'	fi
-..
-.\"
-.\" The new SH
-.\"
-.de Sh
-.\" set Sh state off, check for list state before calling indent (.In)
-.nr nS 0
-.nr sE 0
-.ie "\\$1"NAME" \{\
-.\"	name state on, housekeep (headers & footers)
-.	hK
-'	in 0
-.\}
-.el \{\
-.	if "\\$1"SYNOPSIS" .nr nS 1
-.	in 0
-.\}
-.pL
-'sp
-.ns
-.ta .5i 1i 1.5i 2i 2.5i 3i 3.5i 4i 4.5i 5i 5.5i 6i 6.5i
-.if !\\n(cR .ne 3
-'fi
-\&\fB\\$1 \|\\$2 \|\\$3 \|\\$4 \|\\$5 \|\\$6 \|\\$7 \|\\$8 \|\\$9
-\&\fP\&
-.in \\n(.iu+\\n(Tiu
-.if "\\$1"SEE" .nr sE 1
-.ns
-..
-.\"
-.\" Nd minus sign for an en dash used in .Sh Name
 .de Nd
 \&\-\& \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
 ..
 .de Ss
 .sp
+.ne 2
 .ti -.25i
-\&\fB\\$1 \|\\$2 \|\\$3 \|\\$4 \|\\$5 \|\\$6 \|\\$7 \|\\$8 \|\\$9
-\&\fP\&
+\&\\*(sH\\$1 \|\\$2 \|\\$3 \|\\$4 \|\\$5 \|\\$6 \|\\$7 \|\\$8 \|\\$9
+\&\fP\s0
 .ta .5i 1i 1.5i 2i 2.5i 3i 3.5i 4i 4.5i 5i 5.5i 6i 6.5i
 .if !\\n(cR .ne 2
 .br
 ..
-.\"	.if "\\$1"Ss" .in \\n(.iu+\\n(sIu
-.\"..
-.\"
-.\"
-.\" Column Macro
-.\"
-.hy 0
-.de Cw
+.de Rd
+.tm MDOC REGISTER DUMP
+.tm Db==\\n(Db register DEBUG MODE
+.tm L[0-9] registers - stack of list types
+.tm L0==\\n(L0
+.tm L1==\\n(L1
+.tm L2==\\n(L2
+.tm L3==\\n(L3
+.tm L4==\\n(L4
+.tm L5==\\n(L5
+.tm L6==\\n(L6
+.tm L7==\\n(L7
+.tm L8==\\n(L8
+.tm L9==\\n(L9
+.tm O[0-9] registers - stack of indent
+.tm O0==\\n(O0
+.tm O1==\\n(O1
+.tm O2==\\n(O2
+.tm O3==\\n(O3
+.tm O4==\\n(O4
+.tm O5==\\n(O5
+.tm O6==\\n(O6
+.tm O7==\\n(O7
+.tm O8==\\n(O8
+.tm O9==\\n(O9
+.tm aC==\\n(aC register argument counter (aV/fV)
+.tm aJ==\\n(aJ register (for vR)
+.tm aN==\\n(aN register
+.tm aP==\\n(aP register argument pointer (aV)
+.tm aT==\\n(aT register argument type
+.tm aa==\\n(aa local register
+.tm bK==\\n(bK register - Book Name flag
+.tm cF==\\n(cF register save current font
+.tm cI==\\n(cI register - column indent width
+.tm cZ==\\n(cZ register save current font size
+.tm dK==\\n(dK register - Date flag
+.tm d[0-9] registers - display-type stack
+.tm d0==\\n(d0
+.tm d1==\\n(d1
+.tm d2==\\n(d2
+.tm d3==\\n(d3
+.tm d4==\\n(d4
+.tm d5==\\n(d5
+.tm d6==\\n(d6
+.tm d7==\\n(d7
+.tm d8==\\n(d8
+.tm d9==\\n(d9
+.tm dZ==\\n(dZ register diversion count
+.tm fD==\\n(fD register subroutine test (in synopsis only)
+.tm fV==\\n(fV register argument counter (must set to \\n(.$ prior to
+.tm fY==\\n(fY register - dick with old style function declarations (fortran)
+.tm fZ==\\n(fZ register also subroutine count (in synopsis only)
+.tm h[0-9] register horizontal tag stack (continuous if 1, break if
+.tm h0==\\n(h0
+.tm h1==\\n(h1
+.tm h2==\\n(h2
+.tm h3==\\n(h3
+.tm h4==\\n(h4
+.tm h5==\\n(h5
+.tm h6==\\n(h6
+.tm h7==\\n(h7
+.tm h8==\\n(h8
+.tm h9==\\n(h9
+.tm iD==\\n(iD local register
+.tm iI==\\n(iI local register (indent for inline debug mode)
+.tm iN==\\n(iN register DEBUG MODE (inline if 1, to stderr if
+.tm iS==\\n(iS register - indent second command line in a synopsis
+.tm jK==\\n(jK register - [reference] Journal Name flag
+.tm jM==\\n(jM local register
+.tm jN==\\n(jN local register
+.tm lC==\\n(lC register - list type stack counter
+.tm lK==\\n(lK register count of lines read from input file
+.tm nK==\\n(nK register - [reference] issue number flag
+.tm nU==\\n(nU register count
+.tm oK==\\n(oK register - [reference] optional information flag
+.tm oM==\\n(oM register (extension possible)
+.tm o[0-9] register offset stack (nested tags)
+.tm o0==\\n(o0
+.tm o1==\\n(o1
+.tm o2==\\n(o2
+.tm o3==\\n(o3
+.tm o4==\\n(o4
+.tm o5==\\n(o5
+.tm o6==\\n(o6
+.tm o7==\\n(o7
+.tm o8==\\n(o8
+.tm o9==\\n(o9
+.tm oM==\\n(oM register open ended line flag
+.tm pK==\\n(pK register - [reference] page number flag
+.tm qK==\\n(qK register - Corporate or Foreign Author flag
+.tm rK==\\n(rK register - [reference] report flag
+.tm rS==\\n(rS register - Reference Start flag
+.tm sM==\\n(sM register - default is one (space mode on)
+.tm tK==\\n(tK register - reference title flag
+.tm tP==\\n(tP register tag flag (for diversions)
+.tm tX==\\n(tX register (initial class)
+.tm tY==\\n(tY register (next possible lC value)
+.tm t[0-9] register tag string stack (nested tags)
+.tm t0==\\n(t0
+.tm t1==\\n(t1
+.tm t2==\\n(t2
+.tm t3==\\n(t3
+.tm t4==\\n(t4
+.tm t5==\\n(t5
+.tm t6==\\n(t6
+.tm t7==\\n(t7
+.tm t8==\\n(t8
+.tm t9==\\n(t9
+.tm uK==\\n(uK register - reference author(s) counter
+.tm vK==\\n(vK register - reference volume flag
+.tm v[0-9] register vertical tag break stack
+.tm v0==\\n(v0
+.tm v1==\\n(v1
+.tm v2==\\n(v2
+.tm v3==\\n(v3
+.tm v4==\\n(v4
+.tm v5==\\n(v5
+.tm v6==\\n(v6
+.tm v7==\\n(v7
+.tm v8==\\n(v8
+.tm v9==\\n(v9
+.tm w[0-9] register tag stack (nested tags)
+.tm w0==\\n(w0
+.tm w1==\\n(w1
+.tm w2==\\n(w2
+.tm w3==\\n(w3
+.tm w4==\\n(w4
+.tm w5==\\n(w5
+.tm w6==\\n(w6
+.tm w7==\\n(w7
+.tm w8==\\n(w8
+.tm w9==\\n(w9
+.tm xX==\\n(xX local register
+.tm END OF REGISTER DUMP
+..
+.\"     @(#)doc-syms	5.6 (Berkeley) 8/5/91
+.de Ux
+.nr cF \\n(.f
+.nr cZ \\n(.s
+.ds aa \&\f\\n(cF\s\\n(cZ
+.as b1 \&\\*(tNUNIX\\*(aa
+.rm aa
+.if \\n(aC==0 \{\
+.       if \\n(.$>0 .aV \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
+.\}
+.ie \\n(aC>\\n(aP \{\
+.       nr aP \\n(aP+1
+.       ie \\n(C\\n(aP==1 \{\
+.               \\*(A\\n(aP
+.       \}
+.       el .nR
+.\}
+.el .aZ
+..
+.de Bx
+.nr cF \\n(.f
+.nr cZ \\n(.s
+.ds aa \&\f\\n(cF\s\\n(cZ
+.if \\n(aC==0 \{\
+.       ie \\n(.$==0 \&\\*(tNBSD\\*(aa \\*(tNUNIX\\*(aa
+.       el .aV \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
+.\}
+.if "\\$1"-alpha" \{\
+\&currently in alpha test.
+.	aY
+.\}
+.if "\\$1"-beta" \{\
+\&currently in beta test.
+.	aY
+.\}
+.if "\\$1"-devel" \{\
+\&currently under development.
+.	aY
+.\}
+.if \\n(aC>\\n(aP \{\
+.       nr aP \\n(aP+1
+.	ie \\n(C\\n(aP==2 \{\
+.		as b1 \&\\*(A\\n(aP\&\\*(tNBSD\\*(aa
+.		ie \\n(aC>\\n(aP \{\
+.			nr jj \\n(aP+1
+.			ie \\n(C\\n(jj==2 \{\
+.				if "\\*(A\\n(jj"Reno" \{\
+.					nr aP \\n(aP+1
+.					as b1 \&\-\\*(A\\n(jj
+.				\}
+.				if "\\*(A\\n(jj"reno" \{\
+.					nr aP \\n(aP+1
+.					as b1 \&\-Reno
+.				\}
+.				if "\\*(A\\n(jj"Tahoe" \{\
+.					nr aP \\n(aP+1
+.					as b1 \&\-\\*(A\\n(jj
+.				\}
+.				if "\\*(A\\n(jj"tahoe" \{\
+.					nr aP \\n(aP+1
+.					as b1 \&\-Tahoe
+.				\}
+.				ie \\n(aC>\\n(aP \{\
+.					nr aP \\n(aP+1
+.					nR
+.				\}
+.				el .aZ
+.			\}
+.			el \{\
+.				nr aP \\n(aP+1
+.				nR
+.			\}
+.			rr jj
+.		\}
+.		el .aZ
+.	\}
+.	el \{\
+.	       as b1 \&\\*(tNBSD\\*(aa U\\*(tNNIX\\*(aa
+.	       nR
+.	\}
+.\}
+..
+.de Ud
+\&currently under development.
+..
+.de Nx
+.nr cF \\n(.f
+.nr cZ \\n(.s
+.ds aa \&\f\\n(cF\s\\n(cZ
+.if \\n(.$==2 \{\
+.	if "\\$1"0.8"  \&\\*(tNNetBSD\\*(aa 0.8\\*(aa\\$2
+.	if "\\$1"0.8a"  \&\\*(tNNetBSD\\*(aa 0.8a\\*(aa\\$2
+.	if "\\$1"0.9"  \&\\*(tNNetBSD\\*(aa 0.9\\*(aa\\$2
+.	if "\\$1"0.9a"  \&\\*(tNNetBSD\\*(aa 0.9a\\*(aa\\$2
+.	if "\\$1"1.0"  \&\\*(tNNetBSD\\*(aa 1.0\\*(aa\\$2
+.	if "\\$1"1.0a"  \&\\*(tNNetBSD\\*(aa 1.0a\\*(aa\\$2
+.\}
+.if \\n(.$==1 \{\
+.	if "\\$1"0.8"  \&\\*(tNNetBSD\\*(aa 0.8\\*(aa
+.	if "\\$1"0.8a"  \&\\*(tNNetBSD\\*(aa 0.8a\\*(aa
+.	if "\\$1"0.9"  \&\\*(tNNetBSD\\*(aa 0.9\\*(aa
+.	if "\\$1"0.9a"  \&\\*(tNNetBSD\\*(aa 0.9a\\*(aa
+.	if "\\$1"1.0"  \&\\*(tNNetBSD\\*(aa 1.0\\*(aa
+.	if "\\$1"1.0a"  \&\\*(tNNetBSD\\*(aa 1.0a\\*(aa
+.\}
+..
+.de At
+.nr cF \\n(.f
+.nr cZ \\n(.s
+.ds aa \&\f\\n(cF\s\\n(cZ
+.if \\n(.$==2 \{\
+.	if "\\$1"32v" \&Version 32V \\*(tNAT&T UNIX\\*(aa\\$2
+.	if "\\$1"v6"  \&Version 6 \\*(tNAT&T UNIX\\*(aa\\$2
+.	if "\\$1"v7"  \&Version 7 \\*(tNAT&T UNIX\\*(aa\\$2
+.	if "\\$1"V"  \&\\*(tNAT&T\\*(aa System V \\*(tNUNIX\\*(aa\\$2
+.	if "\\$1"V.1"  \&\\*(tNAT&T\\*(aa System V.1 \\*(tNUNIX\\*(aa\\$2
+.	if "\\$1"V.2"  \&\\*(tNAT&T\\*(aa System V.2 \\*(tNUNIX\\*(aa\\$2
+.	if "\\$1"V.4"  \&\\*(tNAT&T\\*(aa System V.4 \\*(tNUNIX\\*(aa\\$2
+.\}
+.if \\n(.$==1 \{\
+.	if "\\$1"32v" \&Version 32V \\*(tNAT&T UNIX\\*(aa
+.	if "\\$1"v6"  \&Version 6 \\*(tNAT&T UNIX\\*(aa
+.	if "\\$1"v7"  \&Version 7 \\*(tNAT&T UNIX\\*(aa
+.	if "\\$1"V"  \&\\*(tNAT&T\\*(aa System V \\*(tNUNIX\\*(aa
+.	if "\\$1"V.1"  \&\\*(tNAT&T\\*(aa System V.1 \\*(tNUNIX\\*(aa
+.	if "\\$1"V.2"  \&\\*(tNAT&T\\*(aa System V.2 \\*(tNUNIX\\*(aa
+.	if "\\$1"V.4"  \&\\*(tNAT&T\\*(aa System V.4 \\*(tNUNIX\\*(aa
+.\}
+..
+.de Bt
+\&is currently in beta test.
+..
+.ds Px \\*(tNPOSIX
+.ds Ai \\*(tNANSI
+.de St
+.if \\n(aC==0 \{\
+.	ie \\n(.$==0 \{\
+.tm Usage: .St [-p1003.1-90 | -p1003.2 | -ansiC-89 | -iso ] \\*(Pu ... (#\\n(.c)
+.	\}
+.	el \{\
+.		ds mN St
+.		nr aP 0
+.		ds A1 \\$1
+.		ds A2 \\$2
+.		ds A3 \\$3
+.		ds A4 \\$4
+.		ds A5 \\$5
+.		ds A6 \\$6
+.		ds A7 \\$7
+.		ds A8 \\$8
+.		ds A9 \\$9
+.		nr fV \\n(.$
+.		fV
+.	\}
+.\}
+.if \\n(aC>\\n(aP \{\
+.	nr cF \\n(.f
+.	nr cZ \\n(.s
+.	ds aa \&\f\\n(cF\s\\n(cZ
+.	nr aP \\n(aP+1
+.       if "\\*(A\\n(aP"-p1003.1-90" \{\
+.		ie \\n(sT==1 \{\
+.			ds b1 \&\\*(tNIEEE Std\\*(aa1003.1-1990\\*(sV
+.			as b1 (``\\*(tN\\*(Px\\*(aa'')
+.		\}
+.		el \{\
+.			ds b1 \&\\*(tNIEEE Std\\*(aa1003.1-1990\\*(sV
+.			as b1 (``\\*(tN\\*(Px\\*(aa'')
+.		\}
+.       \}
+.       if "\\*(A\\n(aP"-p1003.1-88" \{\
+.		ie \\n(sT==1 \{\
+.			ds b1 \&\\*(tNIEEE Std\\*(aa1003.1-1988\\*(sV
+.			as b1 (``\\*(tN\\*(Px\\*(aa'')
+.		\}
+.		el \{\
+.			ds b1 \&\\*(tNIEEE Std\\*(aa1003.1-1988\\*(sV
+.			as b1 (``\\*(tN\\*(Px\\*(aa'')
+.		\}
+.       \}
+.       if "\\*(A\\n(aP"-p1003.1" \{\
+.		ie \\n(sT==1 \{\
+.			ds b1 \&\\*(tNIEEE Std\\*(aa1003.1\\*(sV
+.			as b1 (``\\*(tN\\*(Px\\*(aa'')
+.		\}
+.		el \{\
+.			ds b1 \&\\*(tNIEEE Std\\*(aa1003.1\\*(sV
+.			as b1 (``\\*(tN\\*(Px\\*(aa'')
+.		\}
+.       \}
+.       if "\\*(A\\n(aP"-p1003.2-92" \{\
+.		ie \\n(sT==1 \{\
+.			ds b1 \&\\*(tNIEEE Std\\*(aa1003.2-1992\\*(sV
+.			as b1 (``\\*(tN\\*(Px.2\\*(aa'')
+.		\}
+.		el \{\
+.			ds b1 \&\\*(tNIEEE Std\\*(aa1003.2-1992\\*(sV
+.			as b1 (``\\*(tN\\*(Px.2\\*(aa'')
+.		\}
+.       \}
+.       if "\\*(A\\n(aP"-p1003.2" \{\
+.		ie \\n(sT==1 \{\
+.			ds b1 \&\\*(tNIEEE Std\\*(aa1003.2\\*(sV
+.			as b1 (``\\*(tN\\*(Px.2\\*(aa'')
+.		\}
+.		el \{\
+.			ds b1 \&\\*(tNIEEE Std\\*(aa1003.2\\*(sV
+.			as b1 (``\\*(tN\\*(Px.2\\*(aa'')
+.		\}
+.       \}
+.       if "\\*(A\\n(aP"-ansiC" \{\
+.		ie \\n(sT==1 \{\
+.			ds b1 \&\\*(tNANSI \\*(aaX3.159-1989\\*(sV
+.			as b1 (``\\*(tNANSI C\\*(aa'')
+.		\}
+.		el \{\
+.			ds b1 \&\\*(tNANSI \\*(aaX3.159-1989\\*(sV
+.			as b1 (``\\*(tNANSI C\\*(aa'')
+.		\}
+.       \}
+.       if "\\*(A\\n(aP"-ansiC-89" \{\
+.		ie \\n(sT==1 \{\
+.			ds b1 \&\\*(tNANSI \\*(aaX3.159-1989\\*(sV
+.			as b1 (``\\*(tNANSI C\\*(aa'')
+.		\}
+.		el \{\
+.			ds b1 \&\\*(tNANSI \\*(aaX3.159-1989\\*(sV
+.			as b1 (``\\*(tNANSI C\\*(aa'')
+.		\}
+.       \}
+.       if "\\*(A\\n(aP"-ieee754" \{\
+.		ie \\n(sT==1 \{\
+.			ds b1 \&\\*(tNIEEE Std\\*(aa754-1985
+.		\}
+.		el \{\
+.			ds b1 \&\\*(tNIEEE Std\\*(aa754-1985
+.		\}
+.       \}
+.       if "\\*(A\\n(aP"-iso8802-3" \{\
+.		ie \\n(sT==1 \{\
+.			ds b1 \&\\*(tNISO \\*(aa8802-3: 1989\\*(sV
+.		\}
+.		el \{\
+.			ds b1 \&\\*(tNISO \\*(aa8802-3: 1989\\*(sV
+.		\}
+.       \}
+.	ie \\n(aC>\\n(aP \{\
+.		nr aP \\n(aP+1
+.		nR
+.	\}
+.	el .aZ
+.\}
+..
+.nr Db 0
+.de Db
 .ie \\n(.$==0 \{\
-.	br
-.	in \\n(.iu-\\n(eWu
-.	ta .5i 1i 1.5i 2i 2.5i 3i 3.5i 4i 4.5i 5i 5.5i 6i 6.5i
+.	ie \\n(Db==0 \{\
+.tm DEBUGGING ON
+.		nr Db 1
+.	\}
+.	el \{\
+.tm DEBUGGING OFF
+.		nr Db 0
+.	\}
 .\}
 .el \{\
-.	Pp
-.	if \\n(.$==1 \{\
-.		ta \w'\\$1    'u
-.		nr eW \w'\\$1    'u
-'		in \\n(.iu+\\n(eWu
+.	if "\\$1"on" \{\
+.tm DEBUGGING ON
+.		nr Db 1
 .	\}
-.	if \\n(.$==2 \{\
-.		ta \w'\\$1    'u +\w'\\$2    'u
-.		nr eW \w'\\$1    'u+\w'\\$2    'u
-'		in \\n(.iu+\\n(eWu
-.	\}
-.	if \\n(.$==3 \{\
-.		ta \w'\\$1    'u +\w'\\$2    'u +\w'\\$3    'u
-.		nr eW \w'\\$1    'u+\w'\\$2    'u+\w'\\$3    'u
-'		in \\n(.iu+\\n(eWu
-.	\}
-.	if \\n(.$==4 \{\
-.	ta \w'\\$1    'u +\w'\\$2    'u +\w'\\$3    'u +\w'\\$4    'u
-.	nr eW \w'\\$1    'u+\w'\\$2    'u+\w'\\$3    'u +\w'\\$4    'u
-'	in \\n(.iu+\\n(eWu
-.	\}
-.	if \\n(.$==5 \{\
-.ta \w'\\$1    'u +\w'\\$2    'u +\w'\\$3    'u +\w'\\$4    'u +\w'\\$5    'u
-.nr eW \w'\\$1    'u +\w'\\$2    'u +\w'\\$3    'u +\w'\\$4    'u +\w'\\$5    'u
-'	in \\n(.iu+\\n(eWu
+.	if "\\$1"off" \{\
+.tm DEBUGGING OFF
+.		nr Db 0
 .	\}
 .\}
 ..
-.de Cl
-.ti -\\n(eWu
-.mN \\$1
-.ie \\n(mN .\\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
-.el \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
-.\" .el \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
-..
-.nr dQ 0
-.de Ds
-.ie !"\\$1"" \{\
-.	mN d\\$1
-.	if \\n(mN \{\
-.		nr dQ \\n(dQ+1
-.		d\\$1
+.de aV
+.nr aC \\n(aC+1
+.ie "\\$1"|" \{\
+.	if "\\*(mN"Op" .ds A\\n(aC \fR\\$1\fP
+.	if "\\*(mN"Ar" .ds A\\n(aC \fR\\$1\fP
+.	if "\\*(mN"Fl" .ds A\\n(aC \fR\\$1\fP
+.	if "\\*(mN"Cm" .ds A\\n(aC \fR\\$1\fP
+.	if "\\*(mN"It" .ds A\\n(aC \fR\\$1\fP
+.\}
+.el .ds A\\n(aC \\$1
+.aU \\n(aC
+.nr C\\n(aC \\n(aT
+.s\\n(aT
+.if \\n(Db \{\
+.	if \\n(aT==1 .ds yU Executable
+.	if \\n(aT==2 .ds yU String
+.	if \\n(aT==3 .ds yU Closing Punctuation or suffix
+.	if \\n(aT==4 .ds yU Opening Punctuation or prefix
+.	if \\n(iN==1 \{\
+.		br
+.		nr iI \\n(.iu
+.		in -\\n(iIu
+.		if \\n(aC==1 \{\
+\&\fBDEBUG(argv) MACRO:\fP `.\\*(mN'  \fBLine #:\fP \\n(.c
+.		\}
+\&\t\fBArgc:\fP \\n(aC  \fBArgv:\fP `\\*(A\\n(aC'  \fBLength:\fP \\n(sW
+\&\t\fBSpace:\fP `\\*(S\\n(aC'  \fBClass:\fP \\*(yU
+.	\}
+.	if \\n(iN==0 \{\
+.		if \\n(aC==1 \{\
+.			tm DEBUG(argv) MACRO: `.\\*(mN'  Line #: \\n(.c
+.		\}
+.		tm \tArgc: \\n(aC  Argv: `\\*(A\\n(aC'  Length: \\n(sW
+.		tm \tSpace: `\\*(S\\n(aC'  Class: \\*(yU
 .	\}
 .\}
-.el .br
-.nf
+.ie \\n(.$==1 \{\
+.	nr aP 0
+.	ie \\n(dZ==1 \{\
+.		if \\n(oM>1 .as b1 \\*(S0
+.	\}
+.	el \{\
+.		if \\n(oM>0 \{\
+.			if \\n(fC==0 .as b1 \\*(S0
+.		\}
+.	\}
+.	ds S0 \\*(S\\n(aC
+.	if \\n(Db \{\
+.		if \\n(iN==1 \{\
+\&MACRO REQUEST: \t.\\*(mN \\*(A1 \\*(A2 \\*(A3 \\*(A4 \\*(A5 \\*(A6 \\*(A7 \\*(A8 \\*(A9
+.			br
+.			in \\n(iIu
+.		\}
+.		if \\n(iN==0 \{\
+.tm \tMACRO REQUEST: .\\*(mN \\*(A1 \\*(A2 \\*(A3 \\*(A4 \\*(A5 \\*(A6 \\*(A7 \\*(A8 \\*(A9
+.		\}
+.	\}
+.\}
+.el .aV \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
 ..
-.de Df
-.ie !"\\$1"" \{\
-.       mN d\\$1
-.       if \\n(mN \{\
-.               nr dQ \\n(dQ+1
-.               d\\$1
+.de fV
+.nr aC \\n(aC+1
+.if "\\*(A\\n(aC"|" \{\
+.	if "\\*(mN"Op" .ds A\\n(aC \fR\\*(A\\n(aC\fP
+.	if "\\*(mN"Ar" .ds A\\n(aC \fR\\*(A\\n(aC\fP
+.	if "\\*(mN"Fl" .ds A\\n(aC \fR\&\\*(A\\n(aC\fP
+.	if "\\*(mN"Cm" .ds A\\n(aC \fR\\*(A\\n(aC\fP
+.	if "\\*(mN"It" .ds A\\n(aC \fR\\*(A\\n(aC\fP
+.\}
+.aU \\n(aC
+.nr C\\n(aC \\n(aT
+.s\\n(aT
+.if \\n(Db \{\
+.	if \\n(aT==1 .ds yU Executable
+.	if \\n(aT==2 .ds yU String
+.	if \\n(aT==3 .ds yU Closing Punctuation or suffix
+.	if \\n(aT==4 .ds yU Opening Punctuation or prefix
+.	if \\n(iN==1 \{\
+.		br
+.		nr iI \\n(.iu
+.		in -\\n(iIu
+.		if \\n(aC==1 \{\
+\&\fBDEBUG(fargv) MACRO:\fP `.\\*(mN'  \fBLine #:\fP \\n(.c
+.		\}
+\&\t\fBArgc:\fP \\n(aC  \fBArgv:\fP `\\*(A\\n(aC'  \fBLength:\fP \\n(sW
+\&\t\fBSpace:\fP `\\*(S\\n(aC'  \fBClass:\fP \\*(yU
+.	\}
+.	if \\n(iN==0 \{\
+.		if \\n(aC==1 \{\
+.			tm DEBUG(fargv) MACRO: `.\\*(mN'  Line #: \\n(.c
+.		\}
+.		tm \tArgc: \\n(aC  Argv: `\\*(A\\n(aC'  Length: \\n(sW
+.		tm \tSpace: `\\*(S\\n(aC'  Class: \\*(yU
+.	\}
+.\}
+.ie \\n(fV==1 \{\
+.	nr aP 0
+.	ie \\n(dZ==1 \{\
+.		if \\n(oM>1 .as b1 \\*(S0
+.	\}
+.	el \{\
+.		if \\n(oM>0 \{\
+.			if \\n(fC==0 .as b1 \\*(S0
+.		\}
+.	\}
+.	ds S0 \\*(S\\n(aC
+.	nr fV 0
+.	if \\n(Db \{\
+.		ie \\n(iN \{\
+\&\tMACRO REQUEST: .\\*(mN \\*(A1 \\*(A2 \\*(A3 \\*(A4 \\*(A5 \\*(A6 \\*(A7 \\*(A8 \\*(A9
+.			br
+.			in \\n(iIu
+.		\}
+.		el \{\
+.tm \tMACRO REQUEST: .\\*(mN \\*(A1 \\*(A2 \\*(A3 \\*(A4 \\*(A5 \\*(A6 \\*(A7 \\*(A8 \\*(A9
+.		\}
+.	\}
+.\}
+.el \{\
+.	nr fV \\n(fV-1
+.	fV
+.\}
+..
+.de aX
+.nr aP \\n(aP+1
+.as b1 \&\\*(A\\n(aP
+.ie \\n(fV==1 \{\
+.	nr aP 0
+.	nr fV 0
+.\}
+.el \{\
+.	as b1 \&\\*(sV
+.	nr fV \\n(fV-1
+.	aX
+.\}
+..
+.de aI
+.ie \\n(aC<9 \{\
+.	nr aC \\n(aC+1
+.	ds A\\n(aC \\$1
+.	nr C\\n(aC \\$2
+.	s\\$2
+.	ds xV S\\n(aC
+.\}
+.el \{\
+.	tm Usage: Too many arguments (maximum of 8 accepted) (#\\n(.c)
+.	tm \\*(A1 \\*(A2 \\*(A3 \\*(A4 \\*(A5 \\*(A6 \\*(A7 \\*(A8 \\*(A9
+.\}
+..
+.de aZ
+.pB
+.aY
+..
+.de aY
+.rm C0 C1 C2 C3 C4 C5 C6 C7 C8 C9
+.rm A0 A1 A2 A3 A4 A5 A6 A7 A8 A9
+.rm S1 S2 S3 S4 S5 S6 S7 S8 S9
+.nr aC 0
+.nr aP 0
+..
+.de pB
+.ie \\n(dZ==1 \{\
+.	if \\n(oM==1 \{\&\\*(b1
+.		rm S0
+.		ds b1
+.	\}
+.	if \\n(oM==0 \{\
+.		x2
+.	\}
+.\}
+.el \{\
+.	ie \\n(oM==0 \{\&\\*(b1
+.		rm S0
+.		ds b1
+.	\}
+.	el \{\
+.		if ((\\n(sM==1)&(\\n(tP==0)) \{\
+.			x1
+.		\}
+.	\}
+.\}
+.hy
+..
+.de x1
+.nr dZ \\n(dZ+1
+.ds b2 \\*(b1
+.ds b1
+.nr lK \\n(.c
+.ev 2
+.fi
+.di eB
+..
+.de x2
+.br
+.di
+.ev
+.ie (\\n(.c-\\n(lK>1) \{\
+.	ds b0 \&\\*(eB\\
+.	ds b1 \\*(b2\\*(b0\\*(b1
+.\}
+.el .ds b1 \\*(b2\\*(b1
+\&\\*(b1
+.rm eB b2 b0 b1
+.nr dZ \\n(dZ-1
+..
+.de Fl
+.as b1 \&\\*(fL
+.if \\n(aC==0 \{\
+.	ie \\n(.$==0 \{\
+.		as b1 \&\|\-\|\fP\s0
+.		pB
+.	\}
+.	el \{\
+.		ds mN Fl
+.		aV \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
+.	\}
+.\}
+.if \\n(aC>0 \{\
+.	ie (\\n(aC-\\n(aP)==0 \{\
+.		as b1 \&\|\-\fP\s0
+.		aZ
+.	\}
+.	el \{\
+.		nr aP \\n(aP+1
+.		ie \\n(C\\n(aP==1 \{\
+.			as b1 \&\|\-\fP\s0
+.			\\*(A\\n(aP
+.		\}
+.		el \{\
+.			nr cF \\n(.f
+.			nr cZ \\n(.s
+.			if \\n(C\\n(aP==3 \{\
+.				as b1 \&\|\-\|
+.			\}
+.			fR
+.		\}
+.	\}
+.\}
+..
+.de fR
+.hy 0
+.nr jM \\n(C\\n(aP
+.ie \\n(jM==1 \{\
+.	as b1 \&\fP\s0
+.	\\*(A\\n(aP
+.\}
+.el \{\
+.	nr jN \\n(aP
+.	ie \\n(jM==2 \{\
+.		ie !"\\*(A\\n(aP"\\*(Ba" \{\
+.			ie !"\\*(A\\n(aP"\fR|\fP" \{\
+.		               ie "\\*(A\\n(aP"-" .as b1 \&\|\-\^\-\|
+.		               el .as b1 \&\|\-\\*(A\\n(aP
+.			\}
+.			el .as b1 \&\\*(A\\n(aP
+.		\}
+.		el .as b1 \&\\*(A\\n(aP
+.	\}
+.	el .as b1 \&\f\\n(cF\s\\n(cZ\\*(A\\n(aP\fP\s0
+.	ie \\n(aC==\\n(aP \{\
+.		if \\n(jM==4 .as b1 \&\|\-
+.		as b1 \&\fP\s0
+.		aZ
+.	\}
+.	el \{\
+.		nr aP \\n(aP+1
+.		ie ((\\n(C\\n(aP==3)&(\\n(C\\n(jN==4)) .as b1 \&\|\-
+.		el .as b1 \&\\*(S\\n(jN
+.		fR \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
+.	\}
+.\}
+.rr jM jN
+..
+.de nR
+.hy 0
+.nr jM \\n(C\\n(aP
+.ie \\n(jM==1 \{\
+.	as b1 \&\f\\n(cF\s\\n(cZ
+.	\\*(A\\n(aP
+.\}
+.el \{\
+.	nr jN \\n(aP
+.	ie \\n(jM==2 .as b1 \&\\*(A\\n(aP
+.	el .as b1 \&\f\\n(cF\s\\n(cZ\\*(A\\n(aP\fP\s0
+.	ie \\n(aC==\\n(aP \{\
+.		as b1 \&\f\\n(cF\s\\n(cZ
+.		aZ
+.	\}
+.	el \{\
+.		nr aP \\n(aP+1
+.		as b1 \&\\*(S\\n(jN
+.		nR
+.	\}
+.\}
+.rr jM jN
+..
+.de Ar
+.as b1 \\*(aR
+.if \\n(aC==0 \{\
+.       ie \\n(.$==0 \{\
+.		as b1 file\ ...\fP\s0
+.		pB
+.	\}
+.	el \{\
+.		ds mN Ar
+.		aV \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
+.	\}
+.\}
+.if \\n(aC>0 \{\
+.	ie (\\n(aC-\\n(aP)==0 \{\
+.		as b1 \&file\ ...\fP\s0
+.		aZ
+.	\}
+.	el \{\
+.		nr aP \\n(aP+1
+.		ie \\n(C\\n(aP==1 \{\
+.			as b1 \&file\ ...\fP\s0
+.			\\*(A\\n(aP
+.               \}
+.               el \{\
+.                       nr cF \\n(.f
+.			nr cZ \\n(.s
+.			if \\n(C\\n(aP==3 \{\
+.				as b1 \&file\ ...
+.			\}
+.                       nR
+.		\}
 .       \}
 .\}
-.el .br
 ..
-.de Dn
-\\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
-.nf
+.de Ad
+.if \\n(aC==0 \{\
+.       ie \\n(.$==0 .tm Usage: .Ad address ... \\*(Pu (#\\n(.c)
+.	el \{\
+.		ds mN Ad
+.		aV \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
+.	\}
+.\}
+.if \\n(aC>\\n(aP \{\
+.	as b1 \\*(aD
+.	nr aP \\n(aP+1
+.       nr cF \\n(.f
+.	nr cZ \\n(.s
+.       nR
+.\}
 ..
-.de dI
-.nr d\\n(dQ \\n(dIu
-.in \\n(.iu+\\n(dIu
+.de Cd
+.if \\n(aC==0 \{\
+.       ie \\n(.$==0 .tm Usage: .Cd Configuration file declaration (#\\n(.c)
+. 	el \{\
+.		ds mN Cd
+.               ds A1 \\$1
+.               ds A2 \\$2
+.               ds A3 \\$3
+.               ds A4 \\$4
+.               ds A5 \\$5
+.               ds A6 \\$6
+.               ds A7 \\$7
+.               ds A8 \\$8
+.               ds A9 \\$9
+. 		nr fV \\n(.$
+. 		fV
+.	\}
+.\}
+.br
+.if \\n(aC>\\n(aP \{\
+.	as b1 \\*(nM
+.	nr aP \\n(aP+1
+.       nr cF \\n(.f
+.	nr cZ \\n(.s
+.	ie \\n(nS \{\
+.		if "\\*(mN"Cd" \{\
+.			rs
+.			ie \\n(nS>1 .br
+.			el \{\
+.				if \\n(iS==0 .nr iS \\n(Dsu
+.			\}
+.			in +\\n(iSu
+.			ti -\\n(iSu
+.			nr nS \\n(nS+1
+.		\}
+.	nR
+.	in -\\n(iSu
+.	\}
+.	el .nR
+.\}
 ..
-.de dC
-.nr d\\n(dQ (\\n(.l-\\n(.i)/4u
-.in \\n(.iu+\\n(d\\n(dQu
+.de Cm
+.if \\n(aC==0 \{\
+.       ie \\n(.$==0 .tm Usage: .Cm Interactive command modifier ... \\*(Pu (#\\n(.c)
+.	el \{\
+.		ds mN Cm
+.               ds A1 \\$1
+.               ds A2 \\$2
+.               ds A3 \\$3
+.               ds A4 \\$4
+.               ds A5 \\$5
+.               ds A6 \\$6
+.               ds A7 \\$7
+.               ds A8 \\$8
+.               ds A9 \\$9
+.		nr fV \\n(.$
+.		fV
+.	\}
+.\}
+.if \\n(aC>\\n(aP \{\
+.	as b1 \\*(cM
+.	nr aP \\n(aP+1
+.       nr cF \\n(.f
+.	nr cZ \\n(.s
+.       nR
+.\}
 ..
-.de dR
-.nr d\\n(dQ (\\n(.l/3)u
-.in \\n(.iu+\\n(d\\n(dQu
+.de Dv
+.if \\n(aC==0 \{\
+.       ie \\n(.$==0 .tm Usage: .Dv define_variable ... \\*(Pu (#\\n(.c)
+.	el \{\
+.		ds mN Dv
+.		aV \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
+.	\}
+.\}
+.if \\n(aC>\\n(aP \{\
+.	as b1 \\*(eR
+.	nr aP \\n(aP+1
+.       nr cF \\n(.f
+.	nr cZ \\n(.s
+.       nR
+.\}
 ..
-.de dL
+.de Em
+.if \\n(aC==0 \{\
+.       ie \\n(.$==0 \{\
+.		tm Usage: .Em text ... \\*(Pu (#\\n(.c)
+.	\}
+.	el \{\
+.		ds mN Em
+.               ds A1 \\$1
+.               ds A2 \\$2
+.               ds A3 \\$3
+.               ds A4 \\$4
+.               ds A5 \\$5
+.               ds A6 \\$6
+.               ds A7 \\$7
+.               ds A8 \\$8
+.               ds A9 \\$9
+.		nr fV \\n(.$
+.		fV
+.	\}
+.\}
+.if \\n(aC>\\n(aP \{\
+.	as b1 \\*(eM
+.	nr aP \\n(aP+1
+.       nr cF \\n(.f
+.	nr cZ \\n(.s
+.       nR
+.\}
+..
+.de Er
+.if \\n(aC==0 \{\
+.       ie \\n(.$==0 .tm Usage: .Er ERRNOTYPE ... \\*(Pu (#\\n(.c)
+.	el \{\
+.		ds mN Er
+.		aV \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
+.	\}
+.\}
+.if \\n(aC>\\n(aP \{\
+.	as b1 \\*(eR
+.	nr aP \\n(aP+1
+.       nr cF \\n(.f
+.	nr cZ \\n(.s
+.       nR
+.\}
+..
+.de Ev
+.if \\n(aC==0 \{\
+.       ie \\n(.$==0 .tm Usage: .Ev ENVIRONMENT_VARIABLE ... \\*(Pu (#\\n(.c)
+.	el \{\
+.		ds mN Ev
+.		aV \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
+.	\}
+.\}
+.if \\n(aC>\\n(aP \{\
+.	as b1 \\*(eV
+.	nr aP \\n(aP+1
+.       nr cF \\n(.f
+.	nr cZ \\n(.s
+.       nR
+.\}
+..
+.de Fd
+.ds mN Fd
+.if \\n(nS>0 \{\
+.	if \\n(fX>0 \{\
+.		Pp
+.		nr fX 0
+.	\}
+.	if \\n(fZ>0 \{\
+.		ie \\n(fD==0 \{\
+.			Pp
+.			rs
+.		\}
+.		el .br
+.	\}
+.	nr fD \\n(fD+1
+.\}
+.nr cF \\n(.f
+.nr cZ \\n(.s
+\&\\*(fD\\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
+.br
+.ft \\n(cF
+.fs \\n(cZ
+..
+.de Fr
+.if \\n(aC==0 \{\
+.       ie \\n(.$==0 .tm Usage: .Fr Function_return_value... \\*(Pu (#\\n(.c)
+.	el \{\
+.		ds mN Fr
+.		aV \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
+.	\}
+.\}
+.if \\n(aC>\\n(aP \{\
+.	as b1 \\*(aR
+.	nr aP \\n(aP+1
+.       nr cF \\n(.f
+.	nr cZ \\n(.s
+.       nR
+.\}
+..
+.de Ic
+.if \\n(aC==0 \{\
+.       ie \\n(.$==0 .tm Usage: .Ic Interactive command ... \\*(Pu (#\\n(.c)
+.	el \{\
+.		ds mN Ic
+.		aV \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
+.	\}
+.\}
+.if \\n(aC>\\n(aP \{\
+.	as b1 \\*(iC
+.	nr aP \\n(aP+1
+.       nr cF \\n(.f
+.	nr cZ \\n(.s
+.       nR
+.\}
+..
+.de Li
+.if \\n(aC==0 \{\
+.       ie \\n(.$==0 .tm Usage .Li argument ... \\*(Pu (#\\n(.c)
+.       el \{\
+.		ds mN Li
+.               ds A1 \\$1
+.               ds A2 \\$2
+.               ds A3 \\$3
+.               ds A4 \\$4
+.               ds A5 \\$5
+.               ds A6 \\$6
+.               ds A7 \\$7
+.               ds A8 \\$8
+.               ds A9 \\$9
+.               nr fV \\n(.$
+.               fV
+.       \}
+.\}
+.if \\n(aC>\\n(aP \{\
+.	as b1 \\*(lI
+.	nr aP \\n(aP+1
+.       nr cF \\n(.f
+.	nr cZ \\n(.s
+.       nR
+.\}
+..
+.de Or
+.if \\n(aC==0 \{\
+.       ie \\n(.$==0 .tm Usage: .Or ... \\*(Pu (#\\n(.c)
+.	el \{\
+.		ds mN Or
+.		aV \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
+.	\}
+.\}
+.if \\n(aC>\\n(aP \{\
+.	as b1 \\*(iC
+.	nr aP \\n(aP+1
+.       nr cF \\n(.f
+.	nr cZ \\n(.s
+.       nR
+.\}
+..
+.de Ms
+.if \\n(aC==0 \{\
+.       ie \\n(.$==0 .tm Usage: .Ms Math symbol ... \\*(Pu (#\\n(.c)
+.	el \{\
+.		ds mN Ms
+.		aV \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
+.	\}
+.\}
+.if \\n(aC>\\n(aP \{\
+.	as b1 \\*(sY
+.	nr aP \\n(aP+1
+.       nr cF \\n(.f
+.	nr cZ \\n(.s
+.       nR
+.\}
+..
+.de Nm
+.if \\n(aC==0 \{\
+.	ie \\n(.$==0 \{\
+.		ie "\\*(n1"" .tm Usage: .Nm Name(s) ... \\*(Pu (#\\n(.c)
+.		el \&\\*(nM\\*(n1\fP\s0
+.	\}
+.	el \{\
+.		ds mN Nm
+.               ds A1 \\$1
+.               ds A2 \\$2
+.               ds A3 \\$3
+.               ds A4 \\$4
+.               ds A5 \\$5
+.               ds A6 \\$6
+.               ds A7 \\$7
+.               ds A8 \\$8
+.               ds A9 \\$9
+.               nr fV \\n(.$
+.               fV
+.       \}
+.\}
+.if \\n(aC>0 \{\
+.	ie \\n(aC==\\n(aP \{\
+.		as b1 \&\\*(nM\\*(n1\fP\s0
+.		aZ
+.	\}
+.	el \{\
+.		as b1 \\*(nM
+.		nr aP \\n(aP+1
+.		ie \\n(C\\n(aP==1 \{\
+.			as b1 \&\\*(n1\fP\s0
+.			\\*(A\\n(aP
+.		\}
+.		el \{\
+.			nr cF \\n(.f
+.			nr cZ \\n(.s
+.			if \\n(nS \{\
+.				if "\\*(mN"Nm" \{\
+.					rs
+.					in -\\n(iSu
+.					ie \\n(nS>1 .br
+.					el \{\
+.						if \\n(iS==0 \{\
+.							sw \\$1
+.					nr iS ((\\n(sWu+1)*\\n(fW)u
+.						\}
+.					\}
+.					in +\\n(iSu
+.					ti -\\n(iSu
+.					nr nS \\n(nS+1
+.				\}
+.			\}
+.			if "\\*(n1"" .ds n1 \\*(A\\n(aP
+.			nR
+.		\}
+.	\}
+.\}
+..
+.de Pa
+.if \\n(aC==0 \{\
+.       ie \\n(.$==0 \&\\*(pA~\fP\s0
+.	el \{\
+.		ds mN Pa
+.		aV \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
+.	\}
+.\}
+.if \\n(aC>\\n(aP \{\
+.	as b1 \\*(pA
+.	nr aP \\n(aP+1
+.       nr cF \\n(.f
+.	nr cZ \\n(.s
+.       nR
+.\}
+..
+.de Sy
+.if \\n(aC==0 \{\
+.       ie \\n(.$==0 .tm Usage: .Sy symbolic_text ... \\*(Pu (#\\n(.c)
+. 	el \{\
+.		ds mN Sy
+.               ds A1 \\$1
+.               ds A2 \\$2
+.               ds A3 \\$3
+.               ds A4 \\$4
+.               ds A5 \\$5
+.               ds A6 \\$6
+.               ds A7 \\$7
+.               ds A8 \\$8
+.               ds A9 \\$9
+. 		nr fV \\n(.$
+. 		fV
+.	\}
+.\}
+.if \\n(aC>\\n(aP \{\
+.	as b1 \\*(sY
+.	nr aP \\n(aP+1
+.       nr cF \\n(.f
+.	nr cZ \\n(.s
+.       nR
+.\}
+..
+.de Tn
+.if \\n(aC==0 \{\
+.       ie \\n(.$==0 .tm Usage: .Tn Trade_name(s) ... \\*(Pu (#\\n(.c)
+.	el \{\
+.		ds mN Tn
+.		aV \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
+.	\}
+.\}
+.if \\n(aC>\\n(aP \{\
+.	as b1 \\*(tN\\*(tF
+.	nr aP \\n(aP+1
+.       nr cF \\n(.f
+.	nr cZ \\n(.s
+.       nR
+.\}
+..
+.de nN
+.if \\n(aC==0 \{\
+.       ie \\n(.$==0 .tm Usage: .Tn Trade_name(s) ... \\*(Pu (#\\n(.c)
+.	el \{\
+.		ds mN Tn
+.		aV \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
+.	\}
+.\}
+.if \\n(aC>\\n(aP \{\
+.	as b1 \\*(tN
+.	nr aP \\n(aP+1
+.       nr cF \\n(.f
+.	nr cZ \\n(.s
+.       rR
+.\}
+..
+.de Va
+.if \\n(aC==0 \{\
+.       ie \\n(.$==0 .tm Usage: .Va variable_name(s) ... \\*(Pu (#\\n(.c)
+.	el \{\
+.		ds mN Va
+.		aV \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
+.	\}
+.\}
+.if \\n(aC>\\n(aP \{\
+.	as b1 \\*(vA
+.	nr aP \\n(aP+1
+.       nr cF \\n(.f
+.	nr cZ \\n(.s
+.       nR
+.\}
+..
+.de No
+.as b1 \\*(nO
+.if \\n(aC==0 \{\
+.	ie \\n(.$==0 .tm Usage: .No must be called with arguments (#\\n(.c)
+.	el \{\
+.		ds mN No
+.		aV \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
+.	\}
+.\}
+.if \\n(aC>\\n(aP \{\
+.	nr aP \\n(aP+1
+.       ie \\n(C\\n(aP==1 \{\
+.		\\*(A\\n(aP
+.       \}
+.       el \{\
+.		nr cF \\n(.f
+.		nr cZ \\n(.s
+.		nR
+.       \}
+.\}
+..
+.de Op
+.if \\n(aC==0 \{\
+.	ds mN Op
+.\}
+.ds qL \&\\*(lB
+.ds qR \&\\*(rB
+.En \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8
+..
+.de Aq
+.if \\n(aC==0 .ds mN Aq
+.ds qL \&<
+.ds qR \&>
+.En \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
+..
+.de Bq
+.if \\n(aC==0 .ds mN Bq
+.ds qL \&\\*(lB
+.ds qR \&\\*(rB
+.En \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
+..
+.de Dq
+.if \\n(aC==0 .ds mN Dq
+.ds qL \&\\*(Lq
+.ds qR \&\\*(Rq
+.En \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
+..
+.de Eq
+.if \\n(aC==0 .ds mN Eq
+.ds qL \\$1
+.ds qR \\$2
+.En \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
+..
+.de Pq
+.if \\n(aC==0 .ds mN Pq
+.ds qL \&\\*(lP
+.ds qR \&\\*(rP
+.En \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
+..
+.de Qq
+.if \\n(aC==0 .ds mN Qq
+.ds qL \&\\*q
+.ds qR \&\\*q
+.En \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
+..
+.de Sq
+.if \\n(aC==0 .ds mN Sq
+.ds qL \&\\*(sL
+.ds qR \&\\*(sR
+.En \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
+..
+.de Es
+.if \\n(aC==0 \{\
+.	ie \\n(.$>2 .aV \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
+.	el \{\
+.		ds qL \\$1
+.		ds qR \\$2
+.	\}
+.\}
+.if \\n(aC>\\n(aP \{\
+.	nr aP \\n(aP+1
+.	ds qL \\*(A\\n(aP
+.	nr aP \\n(aP+1
+.	ds qR \\*(A\\n(aP
+.	ie \\n(aC>\\n(aP .c\\n(C\\n(aP
+.	el .aZ
+.\}
+..
+.de En
+.ie \\n(aC==0 \{\
+.	ie \\n(.$==0 \{\
+.		as b1 \&\\*(qL\\*(qR
+.		pB
+.	\}
+.	el \{\
+.		aV \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
+.		as b1 \&\\*(qL
+.	\}
+.\}
+.el \{\
+.	as b1 \&\\*(qL
+.\}
+.if \\n(aC>0 \{\
+.	ie (\\n(aC-\\n(aP)==0 \{\
+.		as b1 \&\\*(qR
+.		aZ
+.	\}
+.	el \{\
+.		ie \\n(C\\n(aC==3 \{\
+.			nr aJ \\n(aC-1
+.			vR
+.			nr aJ \\n(aJ+1
+.			ds A\\n(aJ \&\\*(qR\\*(A\\n(aJ
+.			nr aJ 0
+.		\}
+.		el .aI \&\\*(qR 3
+.		nr aP \\n(aP+1
+.		if \\n(C\\n(aP==1 .\\*(A\\n(aP
+.		if \\n(C\\n(aP>1 \{\
+.			nr aP \\n(aP-1
+.			No
+.		\}
+.	\}
+.\}
+..
+.de vR
+.if \\n(C\\n(aJ==3 \{\
+.	nr aJ \\n(aJ-1
+.	vR
+.\}
+..
+.de Ao
+.if \\n(aC==0 .ds mN Ao
+.ds qL \&<
+.eO \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
+..
+.de Ac
+.if \\n(aC==0 .ds mN Ac
+.ds qR \&>
+.eC \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
+..
+.de Bo
+.if \\n(aC==0 .ds mN Bo
+.ds qL \&[
+.eO \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
+..
+.de Bc
+.if \\n(aC==0 .ds mN Bc
+.ds qR \&]
+.eC \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
+..
+.de Do
+.if \\n(aC==0 .ds mN Do
+.ds qL \&\\*(Lq
+.eO \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
+..
+.de Dc
+.if \\n(aC==0 .ds mN Dc
+.ds qR \&\\*(Rq
+.eC \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
+..
+.de Eo
+.if \\n(aC==0 .ds mN Eo
+.ds qL \\$1
+.eO \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
+..
+.de Ec
+.if \\n(aC==0 .ds mN Ec
+.ds qR \\$1
+.eC \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
+..
+.de Oo
+.if \\n(aC==0 .ds mN Oo
+.ds qL \&[
+.eO \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
+..
+.de Oc
+.if \\n(aC==0 .ds mN Oc
+.ds qR \&]
+.eC \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
+..
+.de Po
+.if \\n(aC==0 .ds mN Po
+.ds qL \&(
+.eO \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
+..
+.de Pc
+.if \\n(aC==0 .ds mN Pc
+.ds qR \&)
+.eC \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
+..
+.de Qo
+.if \\n(aC==0 .ds mN Qo
+.ds qL \&\\*q
+.eO \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
+..
+.de Qc
+.if \\n(aC==0 .ds mN Qc
+.ds qR \&\\*q
+.eC \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
+..
+.de So
+.if \\n(aC==0 .ds mN So
+.ds qL \&\\*(sL
+.eO \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
+..
+.de Sc
+.if \\n(aC==0 .ds mN Sc
+.ds qR \&\\*(sR
+.eC \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
+..
+.de Xo
+.if \\n(aC==0 .ds mN Xo
+.ds qL
+.eO \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
+..
+.de Xc
+.if \\n(aC==0 .ds mN Xc
+.ds qR
+.eC \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
+..
+.de eO
+.nr oM \\n(oM+1
+.ie \\n(aC==0 \{\
+.       ie \\n(.$>0 \{\
+.               aV \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
+.		as b1 \\*(qL
+.       \}
+.	el \{\
+.		as b1 \\*(qL
+.		if (\\n(dZ==0)&(\\n(sM==1) \{\
+.			nr dZ \\n(dZ+1
+.			ds b2 \\*(b1
+.			ds b1
+.			nr lK \\n(.c
+.			ev 2
+.			fi
+.			di eB
+.		\}
+.	\}
+.\}
+.el \{\
+.	as b1 \\*(qL
+.\}
+.ie \\n(aC>0 \{\
+.	if \\n(aC>\\n(aP \{\
+.		nr aP \\n(aP+1
+.		ie \\n(C\\n(aP==1 .\\*(A\\n(aP
+.		el  \{\
+.			nr aP \\n(aP-1
+.			No
+.		\}
+.	\}
+.	if \\n(aC==\\n(aP \{\
+.		if \\n(tP==1 \{\
+.			nr Xt 1
+.		\}
+.		aY
+.	\}
+.\}
+.el \{\
+.	if \\n(oM>1 .as b1 \\*(sV
+.\}
+..
+.de eC
+.nr oM \\n(oM-1
+.as b1 \\*(qR
+.if \\n(aC==0 \{\
+.       ie \\n(.$>0 \{\
+.               aV \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
+.       \}
+.	el \{\
+.		ie "\\*(xB"" \{\
+.			pB
+.		\}
+.		el \{\
+.			pB
+.\\*(L\\n(lC
+.			nr Xt 0
+.			ds xB
+.		\}
+.	\}
+.\}
+.if \\n(aC>0 \{\
+.	ie \\n(aC==\\n(aP \{\
+.		ie \\n(oM==0 \{\
+.			aZ
+.		\}
+.		el .aY
+.	\}
+.	el \{\
+.		nr aa \\n(aP+1
+.		if \\n(C\\n(aa==2 .as b1 \\*(S\\n(aC
+.		rr aa
+.		if \\n(tP>0 \{\
+.			if \\n(Xt>0 .nr Xt \\n(Xt-1
+.		\}
+.		No
+.	\}
+.\}
+..
+.de Pf
+.if \\n(aC==0 .ds mN Pf
+.ds qL \&\\$1
+.pF \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
+..
+.de pF
+.ie \\n(aC==0 \{\
+.	as b1 \&\\*(qL
+.	ie \\n(.$<2 \{\
+.		tm Warning: Missing arguments - prefix .Pf)
+.		pB
+.	\}
+.	el .aV \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
+.\}
+.el \{\
+.	ie (\\n(aC-\\n(aP)>1 \{\
+.		nr aP \\n(aP+1
+.		as b1 \&\\*(A\\n(aP
+.	\}
+.	el .tm Warning: .Pf: trailing prefix (#\\n(.c)
+.\}
+.if \\n(aC>0 \{\
+.	ie (\\n(aC-\\n(aP)==0 .aZ
+.	el \{\
+.		nr aP \\n(aP+1
+.		c\\n(C\\n(aP
+.	\}
+.\}
+..
+.de Ns
+.if \\n(aC==0 \{\
+.	ds mN Ns
+.	ie \\n(.$>0 .aV \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
+.	el .tm Usage: .Ns must be called with arguments (#\\n(.c)
+.\}
+.No
+..
+.de Ap
+.if \\n(aC==0 \{\
+.	ds mN Ap
+.	tm Usage: Ap "cannot be first request on a line (no .Ap)" (#\\n(.c)
+.\}
+.as b1 \&'
+.No
+..
+.de Hv
+.ds iV \\*(sV
+.ds sV \\*(hV
+..
+.de Sv
+.ds sV \\*(iV
+..
+.de Tv
+.ds sV \\*(tV
+..
+.nr sM 1
+.de Sm
+.if \\n(aC==0 \{\
+.	ie \\n(.$==0 .tm "Usage: .Sm [off | on]" (#\\n(.c)
+.	el \{\
+.		ds mN Sm
+.		aV \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
+.	\}
+.\}
+.if \\n(aC>0 \{\
+.	nr aP \\n(aP+1
+.	if "\\*(A\\n(aP"on" \{\
+.		ds sV \\*(iV
+.		nr sM 1
+.	\}
+.	if "\\*(A\\n(aP"off" \{\
+.		ds sV
+.		rm S0 S1 S2 S3 S4 S5 S6 S7 S8 S9
+.		nr sM 0
+.	\}
+.	ie \\n(aC>\\n(aP \{\
+.		No
+.	\}
+.	el .aY
+.\}
+..
+.if \n(.g \{\
+.de aT
+.nr aT 0
+.ie \\n(sW>2:(\A'\\$1'==0) \{\
+.	nr aT 2
+.\}
+.el \{\
+.	if \\n(sW==1 \{\
+.		ie \\n(z\\$1>2 \{\
+.			nr aT \\n(z\\$1
+.		\}
+.		el .nr aT 2
+.	\}
+.	if \\n(sW==2 \{\
+.		ie \\n(\\$1 \{\
+.			nr aT 1
+.		\}
+.		el .nr aT 2
+.	\}
+.\}
+..
+.de aU
+.nr aT 0
+.aW \\$1
+.ie \\n(sW>2:(\A'\\*(A\\$1'==0) .nr aT 2
+.el \{\
+.	if \\n(sW==1 \{\
+.		ie \\n(z\\*(A\\$1>2 \{\
+.			nr aT \\n(z\\*(A\\$1
+.		\}
+.		el .nr aT 2
+.	\}
+.	if \\n(sW==2 \{\
+.		ie (\\n(\\*(A\\$1) \{\
+.			nr aT 1
+.		\}
+.		el .nr aT 2
+.	\}
+.\}
+..
+.\}
+.if !\n(.g \{\
+.de aT
+.nr aT 0
+.ie \\n(sW>2 \{\
+.	nr aT 2
+.\}
+.el \{\
+.	if \\n(sW==1 \{\
+.		ie \\n(z\\$1>2 \{\
+.			nr aT \\n(z\\$1
+.		\}
+.		el .nr aT 2
+.	\}
+.	if \\n(sW==2 \{\
+.		ie \\n(\\$1 \{\
+.			nr aT 1
+.		\}
+.		el .nr aT 2
+.	\}
+.\}
+..
+.de aU
+.nr aT 0
+.aW \\$1
+.ie \\n(sW>2 .nr aT 2
+.el \{\
+.	if \\n(sW==1 \{\
+.		ie \\n(z\\*(A\\$1>2 \{\
+.			nr aT \\n(z\\*(A\\$1
+.		\}
+.		el .nr aT 2
+.	\}
+.	if \\n(sW==2 \{\
+.		ie (\\n(\\*(A\\$1) \{\
+.			nr aT 1
+.		\}
+.		el .nr aT 2
+.	\}
+.\}
+..
+.\}
+.de s0
+.tm MDOC-ERROR: bogus type 0 (can't set space '\\*(A\\n(aC') (#\\n(.c)
+..
+.de s1
+.if \\n(\\*(A\\n(aC==3 \{\
+.	nr xX \\n(aC-1
+.	rm S\\n(xX
+.	ds S\\n(aC \\*(sV
+.\}
+.if \\n(\\*(A\\n(aC==2 \{\
+.	nr xX \\n(aC-1
+.	ie "\\*(A\\n(aC"Nb" .ds S\\n(xX \\*(hV
+.	el .rm S\\n(xX
+.\}
+..
+.de s2
+.ds S\\n(aC \\*(sV
+..
+.de s3
+.if \\n(aC>1 \{\
+.	nr xX \\n(aC-1
+.	rm S\\n(xX
+.\}
+.ds S\\n(aC \\*(sV
+..
+.de s4
 .nr aa 0
 ..
-.de De
-.br
-.if \\n(d\\n(dQ \{\
-.	in \\n(.iu-\\n(d\\n(dQu
-.	rr d\\n(dQ
-.	nr dQ \\n(dQ-1
-.\}
-.fi
+.de c0
+.tm MDOC-ERROR: bogus class 0 (can't determine '\\*(A\\n(aC') (#\\n(.c)
 ..
-.\"
-.de Fn
+.de c1
+.\\*(A\\n(aP
+..
+.de c2
+.nr aP \\n(aP-1
+.No
+..
+.de c3
+.nr aP \\n(aP-1
+.No
+..
+.de c4
+.nr aP \\n(aP-1
+.No
+..
+.de y1
+.nr aa 1
+..
+.de y2
+.nr aa 1
+..
+.de y3
+.as b1 \\*(A\\n(aP
+.nr aP \\n(aP+1
+.n\\C\\n(aP
+..
+.de y4
+.as b1 \\*(A\\n(aP
+.nr aP \\n(aP+1
+.n\\C\\n(aP
+..
+.de Bf
+.ds mN Bf
+.ie \\n(.$>0 \{\
+.	nr bF \\n(.f
+.	nr bZ \\n(.s
+.	if "\\$1"Em" \&\\*(eM\c
+.	if "\\$1"Li" \&\\*(lI\c
+.	if "\\$1"Sy" \&\\*(sY\c
+.	if "\\$1"-emphasis" \&\\*(eM\c
+.	if "\\$1"-literal" \&\\*(lI\c
+.	if "\\$1"-symbolic" \&\\*(sY\c
+.\}
+.el .tm Usage .Bf [Em | emphasis | Li | literal | Sy | symbolic] (#\\n(.c)
+..
+.de Ef
+.ds mN Ef
+.ie \\n(.$>0 .tm Usage .Ef (does not take arguments) (#\\n(.c)
+.el \&\f\\n(bF\s\\n(bZ
+..
+.de Bk
+.ds mN Bk
 .ie \\n(.$==0 \{\
-.	tm Usage: .Fn function_name function_arg(s) ... \\*(Pu
+.tm Usage: .Bk [-lines | -words] (#\\n(.c)
 .\}
 .el \{\
-.	nr cF \\n(.f
-.	ie \\n(.$==1 .ds f1 \&\\*(nM\\$1\fP\\*(lP\fP\\*(rP\fP
-.	el \{\
-.		ds f1 \\*(nM\\$1\fP\\*(lP
-.		nr aa 0
-.		rC \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
+.	if !"\\*(kS"" .tm .Bk: nesting keeps not implemented yet. (#\\n(.c)
+.	if "\\$1"-lines" .tm .Bd -lines: Not implemented yet. (#\\n(.c)
+.	if "\\$1"-words" .Hv
+.	ds kS \\$1
+.\}
+..
+.de Ek
+.ds mN Ek
+.ie \\n(.$>0 .tm Usage .Ek (does not take arguments) (#\\n(.c)
+.el \{\
+.	if "\\*(kS"-lines" .tm .Bd -lines: Not implemented yet. (#\\n(.c)
+.	if "\\*(kS"-words" .Sv
+.	rm kS
+.\}
+..
+.de Bd
+.ds mN Bd
+.ie \\n(.$==0 \{\
+.tm Usage: .Bd [-literal | -filled | -ragged | -unfilled] [-offset [string]] [-compact] (#\\n(.c)
+.\}
+.el \{\
+.	ds aa
+.	nr bV 0
+.       nr iD 0
+.	nr dP \\n(dP+1
+.       if "\\$1"-literal" \{\
+.		nr iD \\n(iD+1
+.               ds d\\n(dP dL
+.		nr cF \\n(.f
+.		nr cZ \\n(.s
+.		ie t \{\&\\*(lI
+'			ta 9n 18n 27n 36n 45n 54n 63n 72n
+.		\}
+.		el \{\
+'			ta 8n 16n 24n 32n 40n 48n 56n 64n 72n
+.		\}
+.		nf
+.       \}
+.       if "\\$1"-filled" \{\
+.		nr iD \\n(iD+1
+.               ds d\\n(dP dF
+.		br
+.       \}
+.       if "\\$1"-ragged" \{\
+.		nr iD \\n(iD+1
+.               ds d\\n(dP dR
+.		na
+.       \}
+.       if "\\$1"-unfilled" \{\
+.		nr iD \\n(iD+1
+.               ds d\\n(dP dU
+.		nf
+.       \}
+.       if ((\\n(iD>=1)&(\\n(.$>\\n(iD)) \{\
+.		bV \\$2 \\$3 \\$4
 .	\}
-.	if "\\*(iM"" \{\\&\\*(f1
-.		ds f1
+.	if \\n(O\\n(dP>0 'in \\n(.iu+\\n(O\\n(dPu
+.	if (\\n(bV==0) \{\
+.		if (\\n(nS==0) \{\
+.			ie "\\*(d\\n(dP"dR" .sp \\n(dVu
+.			el 'sp \\n(dVu
+.		\}
+.	\}
+.	if \\n(cR==0 .ne 2v
+.	nr bV 0
+.	nr iD 0
+.\}
+..
+.de bV
+.nr iD 1
+.ds bY
+.if "\\$1"-offset" \{\
+.	ds bY \\$2
+.	if "\\*(bY"left" \{\
+.		nr iD \\n(iD+1
+.		nr O\\n(dP 0
+.	\}
+.	if "\\*(bY"right" \{\
+.		nr iD \\n(iD+1
+.		nr O\\n(dP (\\n(.l/3)u
+.	\}
+.	if "\\*(bY"center" \{\
+.		nr iD \\n(iD+1
+.		nr O\\n(dP (\\n(.l-\\n(.i)/4u
+.	\}
+.	if "\\*(bY"indent" \{\
+.		nr iD \\n(iD+1
+.		nr O\\n(dP \\n(dIu
+.	\}
+.	if "\\*(bY"indent-two" \{\
+.		nr iD \\n(iD+1
+.		nr O\\n(dP \\n(dIu+\\n(dIu
+.	\}
+.	if \\n(iD==1 \{\
+.		nr iD \\n(iD+1
+.		sW "\\*(bY"
+.		ie \\n(sW>2 \{\
+.			ie ((\\*(bY>9n)&(\\*(bY<100n)) \{\
+.				nr O\\n(dP \\*(bY
+.			\}
+.			el .nr O\\n(dP (\\n(sW)*\\n(fWu
+.		\}
+.		el \{\
+.			if \\n(sW==2 .aT \\*(bY
+.			ie \\n(aT==1 \{\
+.				nr O\\n(dP \\n(\\*(bY
+.			\}
+.			el .nr O\\n(dP \\*(bY
+.		\}
+.	\}
+.\}
+.if "\\$1"-compact" \{\
+.	nr bV 1
+.\}
+.if \\n(iD<\\n(.$ \{\
+.	ie "\\*(bY"" \{\
+.		bV \\$2 \\$3
+.	\}
+.	el \{\
+.		bV \\$3
 .	\}
 .\}
 ..
-.\"
-.de rC
-.zR \\$1
-.ie \\n(zR \{\
-.	as f1 \f\\n(cF\\*(rP\f\\n(cF\\$1\\$2\\$3\\$4\\$5\\$6\\$7
+.de Ed
+.ds mN Ed
+.br
+.if \\n(dP==0 .tm mdoc: Extraneous .Ed
+.if "\\*(d\\n(dP"dL" \{\
+.	ft \\n(cF
+.	fz \\n(cZ
+.\}
+.in \\n(.iu-\\n(O\\n(dPu
+.rr O\\n(dP
+.rm d\\n(dP
+.nr dP \\n(dP-1
+.fi
+.if t .ad
+..
+.de Bl
+.ie \\n(.$==0 \{\
+.tm Usage: .Bl [[-hang | -tag] [-width]] [ -item | -enum | -bullet | -diag] (#\\n(.c)
 .\}
 .el \{\
-.	ie \\n(aa .as f1 \fP, \\*(aR\\$1
-.	el .as f1 \\*(aR\\$1
-.	nr aa 1
-.	ie \\n(.$>1 .rC \\$2 \\$3 \\$4 \\$5 \\$6 \\$7
-.	el .as f1 \fP\\*(rP\fP
+.	ds mN Bl
+.	nr aP 0
+.	nr lC \\n(lC+1
+.	ds A1 \\$2
+.	ds A2 \\$3
+.	ds A3 \\$4
+.	ds A4 \\$5
+.	ds A5 \\$6
+.	ds A6 \\$7
+.	ds A7 \\$8
+.	ds A8 \\$9
+.	nr fV \\n(.$-1
+.	if "\\$1"-hang" \{\
+.		nr aP \\n(aP+1
+.		ds L\\n(lC hL
+.		nr w\\n(lC 6n
+.		nr tC  1
+.	\}
+.	if "\\$1"-tag" \{\
+.		nr aP \\n(aP+1
+.		ds L\\n(lC tL
+.		nr tC  1
+.	\}
+.	if "\\$1"-item" \{\
+.		nr aP \\n(aP+1
+.		ds L\\n(lC iT
+.		nr tC  1
+.	\}
+.	if "\\$1"-enum" \{\
+.		nr aP \\n(aP+1
+.		ds L\\n(lC nU
+.		nr w\\n(lC 3n
+.		nr tC  1
+.	\}
+.	if "\\$1"-bullet" \{\
+.		nr aP \\n(aP+1
+.		ds L\\n(lC bU
+.		nr w\\n(lC 2n
+.		nr tC  1
+.	\}
+.	if "\\$1"-dash" \{\
+.		nr aP \\n(aP+1
+.		ds L\\n(lC hU
+.		nr w\\n(lC 2n
+.		nr tC  1
+.	\}
+.	if "\\$1"-hyphen" \{\
+.		nr aP \\n(aP+1
+.		ds L\\n(lC hU
+.		nr w\\n(lC 2n
+.		nr tC  1
+.	\}
+.	if "\\$1"-inset" \{\
+.		nr aP \\n(aP+1
+.		ds L\\n(lC lL
+.		nr tC  1
+.	\}
+.	if "\\$1"-diag" \{\
+.		nr aP \\n(aP+1
+.		ds L\\n(lC mL
+.		nr mL 1
+.	\}
+.	if "\\$1"-ohang" \{\
+.		nr aP \\n(aP+1
+.		ds L\\n(lC oL
+.		nr tC 1
+.	\}
+.	if "\\$1"-column" \{\
+.		nr aP \\n(aP+1
+.		ds L\\n(lC cL
+.	\}
+.	ie \\n(aP==0 \{\
+.	tm \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
+.	tm Usage: .Bl [[-inset|-tag] -width] [-item|-enum|-bullet|-diag] (#\\n(.c)
+.	\}
+.	el \{\
+.		tY
+.		if (\\n(aP==1)&(\\n(aP<\\n(.$) \{\
+.			nr aP 0
+.			lV
+.			if "\\*(L\\n(lC"cL" \{\
+.				W\\n(wV
+.				nr w\\n(lC 0
+'				in -\\n(eWu
+.				ie \\n(v\\n(lC==1 \{\
+.				       nr aa 0
+.				\}
+.				el \{\
+.					sp \\n(dVu
+.				\}
+.				nf
+.				nr wV 0
+.			\}
+.		\}
+.	\}
+.	nr aP 0
+.	aY
+.\}
+..
+.if \n(.g \{\
+.	nr i 10
+.	while \ni<100 \{\
+.	     nr num!\nin 1
+.	     nr i +1
+.	\}
+.\}
+.de lV
+.nr aP \\n(aP+1
+.if \\n(fV>=\\n(aP \{\
+.	nr iD 0
+.	if "\\*(A\\n(aP"-compact" \{\
+.		nr iD 1
+.		nr v\\n(lC 1
+.	\}
+.	if "\\*(A\\n(aP"-width" \{\
+.		nr iD 1
+.		nr aP \\n(aP+1
+.		nr tW 1
+.		ds t\\n(lC TagwidtH
+.		ds tS \\*(A\\n(aP
+.		aW \\n(aP
+.		ie \\n(sW>2 \{\
+.			nr w\\n(lC (\\n(sW)*\\n(fWu
+.			if \\n(sW==3 \{\
+.				ie \\n(.g \{\
+.					if \A'\\*(tS' .if r num!\\*(tS \{\
+.						nr w\\n(lC \\*(tS
+.					\}
+.				\}
+.				el \{\
+.					if (\\*(tS>9n)&(\\*(tS<99n) \{\
+.						nr w\\n(lC \\*(tSu
+.					\}
+.				\}
+.			\}
+.		\}
+.		el \{\
+.			aT \\*(tS
+.			ie \\n(aT==1 \{\
+.				nr w\\n(lC \\n(\\*(tS
+.			\}
+.			el \{\
+.				nr w\\n(lC \\*(tSu
+.			\}
+.		\}
+.	\}
+.	if "\\*(A\\n(aP"-offset" \{\
+.		nr iD 1
+.		nr aP \\n(aP+1
+.		ie "\\*(A\\n(aP"indent" \{\
+.			nr o\\n(lC \\n(Dsu
+.		\}
+.		el \{\
+.			ds tS \\*(A\\n(aP
+.			aW \\n(aP
+.			ie \\n(sW>2 \{\
+.				nr o\\n(lC (\\n(sW)*\\n(fWu
+.				ie \\n(.g \{\
+.					if \A'\\*(tS' .if r num!\\*(tS \{\
+.						nr o\\n(lC \\*(tS
+.					\}
+.				\}
+.				el \{\
+.					if (\\*(tS>9n)&(\\*(tS<100n) \{\
+.						nr o\\n(lC \\*(tS
+.					\}
+.				\}
+.			\}
+.			el \{\
+.				ie \\n(C\\n(aP==1 .nr o\\n(lC \\n(\\*(tS
+.				el .nr o\\n(lC \\*(tS
+.			\}
+.		\}
+.	\}
+.	if \\n(iD==0 \{\
+.		if "\\*(L\\n(lC"cL" \{\
+.			nr wV \\n(wV+1
+.			ds A\\n(wV \\*(A\\n(aP
+.		\}
+.	\}
+.	if \\n(fV>\\n(aP .lV
+.\}
+..
+.de El
+.ie \\n(.$>0 \{\
+.	tm Usage: .El (#\\n(.c)
+.\}
+.el \{\
+.	ds mN El
+.	nr iD 0
+.	if "\\*(L\\n(lC"cL" \{\
+.		nr iD 1
+.		cC
+.	\}
+.	if "\\*(L\\n(lC"nU" \{\
+.		nr nU 0
+.	\}
+.	if \\n(mL>0 \{\
+.		nr iD 1
+.		nr mL 0
+.		tZ
+.		nr lC \\n(lC-1
+.		tY
+.	\}
+.	if "\\*(L\\n(lC"iT" \{\
+'		in \\n(.iu-\\n(o\\n(lCu
+.		tZ
+.		nr lC \\n(lC-1
+.		tY
+.		nr iD 1
+.	\}
+.	if "\\*(L\\n(lC"oL" \{\
+'		in \\n(.iu-\\n(o\\n(lCu
+.		tZ
+.		nr lC \\n(lC-1
+.		tY
+.		nr iD 1
+.	\}
+.	if "\\*(L\\n(lC"lL" \{\
+'		in \\n(.iu-\\n(o\\n(lCu
+.		tZ
+.		nr lC \\n(lC-1
+.		tY
+.		nr iD 1
+.	\}
+.	if \\n(iD==0 \{\
+.		lE
+.	\}
+.	br
+.	nr iD 0
+.\}
+..
+.de It
+.if "\\*(L\\n(lC"" \{\
+.	tm Usage .Bl -list-type [-width [string] | -compact | -offset [string]] (#\\n(.c)
+.	tm .It \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8
+.\}
+.ne 3v
+.ie \\n(.$>0 \{\
+.	ds mN It
+.	ds b1
+.	nr iD 0
+.	ds A1 \\$1
+.	ds A2 \\$2
+.	ds A3 \\$3
+.	ds A4 \\$4
+.	ds A5 \\$5
+.	ds A6 \\$6
+.	ds A7 \\$7
+.	ds A8 \\$8
+.	ds A9 \\$9
+.	nr fV \\n(.$
+.	if "\\*(L\\n(lC"mL" \{\
+.		nr iD 1
+.		nr aP 0
+.		aX
+.		\\*(L\\n(lC
+.	\}
+.	if "\\*(L\\n(lC"cL" \{\
+.		ds b1
+.		nr aP 0
+.		nr iD 1
+.		\\*(L\\n(lC
+.	\}
+.	if "\\*(L\\n(lC"iT" \{\
+.		nr aP 0
+.		nr iD 1
+.		\\*(L\\n(lC
+.	\}
+.	if \\n(iD==0 \{\
+.		fV
+.		nr oM \\n(oM+1
+.		nr tP 1
+.		nr aP \\n(aP+1
+.		nr tX \\n(C\\n(aP
+.		ds tX \\*(A\\n(aP
+.		if \\n(nF==1 \{\
+.			ds aA \\*(pA
+.			if n .ds pA \\*(nO
+.		\}
+.		ie \\n(C\\n(aP==1 \{\
+.			\\*(A\\n(aP
+.		\}
+.		el \{\
+.			nr aP \\n(aP-1
+.			No
+.		\}
+.		ie \\n(Xt==1 .ds xB \&\\*(L\\n(lC
+.		el .\\*(L\\n(lC
+.	\}
+.	nr iD 0
+.\}
+.el .\\*(L\\n(lC
+..
+.de lL
+.lY
+.br
+\&\\*(b1
+.nr oM \\n(oM-1
+.nr tP 0
+.ds b1
+.aY
+'fi
+..
+.de hL
+.lX
+.nr bb \\n(w\\n(lCu+\\n(lSu
+.ti -\\n(bbu
+.ie \w\\*(b1u>=(\\n(w\\n(lCu) \&\\*(b1
+.el \&\\*(b1\h'|\\n(bbu'\c
+.nr oM \\n(oM-1
+.ds b1
+.nr tP 0
+.aY
+'fi
+..
+.de oL
+.lY
+\&\\*(b1
+.br
+.nr oM \\n(oM-1
+.ds b1
+.nr tP 0
+.aY
+'fi
+..
+.de iT
+.lY
+.br
+.aY
+'fi
+..
+.de nU
+.nr oM \\n(oM+1
+.nr nU \\n(nU+1
+.ds b1 \&\\n(nU.
+.uL
+..
+.de bU
+.nr oM \\n(oM+1
+.nr bU \\n(bU+1
+.ds b1 \&\\*(sY\&\(bu\fP
+.uL
+..
+.de hU
+.nr oM \\n(oM+1
+.nr bU \\n(bU+1
+.ds b1 \&\\*(sY\&\-\fP
+.uL
+..
+.de uL
+.lX
+.nr bb \\n(w\\n(lCu+\\n(lSu
+.ti -\\n(bbu
+.ie \w\\*(b1u>=(\\n(w\\n(lCu) \&\\*(b1
+.el \&\\*(b1\h'|\\n(bbu'\c
+.nr oM \\n(oM-1
+.ds b1
+.nr tP 0
+.aY
+'fi
+..
+.de mL
+.nr cF \\n(.f
+.nr cZ \\n(.s
+.ie \\n(mL==1 \{\
+.	nr zB \\n(.c
+.	ie (\\n(zB-\\n(zA)>1 .Pp
+.	el .br
+.	nr zA \\n(zB
+.	nr zB 0
+.\}
+.el \{\
+.	nr zA \\n(.c
+.	br
+.\}
+\&\\*(sY\\*(b1\f\\n(cF\s\\n(cZ\\*(lS\c
+.aY
+.ds b1
+'fi
+..
+.de tL
+.if \\n(tW==0 .lW
+.lX
+.nr bb \\n(w\\n(lCu+\\n(lSu
+.ti -\\n(bbu
+.ie (\w\\*(b1u)>(\\n(w\\n(lCu) \{\&\\*(b1
+.       br
+.\}
+.el \&\\*(b1\h'|\\n(bbu'\c
+.if \\n(nF==1 \{\
+.	if n .ds pA \\*(aA
+.\}
+.nr oM \\n(oM-1
+.nr tP 0
+.ds b1
+.aY
+'fi
+..
+.de lW
+.if !"TagwidtH"\\*(t\\n(lC" \{\
+.       ie \\n(tX==1 \{\
+.               ds t\\n(lN \\*(tX
+.               nr w\\n(lN \\n(\\*(tX
+.       \}
+.       el \{\
+.               ds t\\n(lN No
+.               nr w\\n(lN \\n(No
+.       \}
+.       if !"\\*(t\\n(lC"\\*(t\\n(lN" .nr tC 1
+.\}
+..
+.de lX
+.ie \\n(tC \{\
+.       nr tC 0
+.       nr tW 0
+.       if \\n(v\\n(lC==0 .sp \\n(dVu
+.       in \\n(.iu+\\n(w\\n(lCu+\\n(o\\n(lCu+\\n(lSu
+.\}
+.el \{\
+.	ie \\n(v\\n(lC==1 \{\
+.	       nr aa 0
+.	\}
+.	el \{\
+.		sp \\n(dVu
+.	\}
+.\}
+.if !\\n(cR .ne 2v
+..
+.de lY
+.ie \\n(tC \{\
+.       nr tC 0
+.       nr tW 0
+.       if \\n(v\\n(lC==0 .sp \\n(dVu
+.       in \\n(.iu+\\n(o\\n(lCu
+.\}
+.el \{\
+.	ie \\n(v\\n(lC==1 \{\
+.	       nr aa 0
+.	\}
+.	el \{\
+.		sp \\n(dVu
+.	\}
+.\}
+.if !\\n(cR .ne 2v
+..
+.nr lC 0
+.nr wV 0
+.nr w1 0
+.nr o1 0
+.nr v1 0
+.nr h1 0
+.ds t\n(lC
+.de lE
+.ie \\n(o\\n(lC>0 \{\
+'	in \\n(.iu-(\\n(w\\n(lCu)-(\\n(o\\n(lCu)-\\n(lSu
+.	rr o\\n(lC
+.\}
+.el 'in \\n(.iu-\\n(w\\n(lCu-\\n(lSu
+.if \\n(lC<=0 .tm Extraneous .El call (#\\n(.c)
+.tZ
+.nr lC \\n(lC-1
+.tY
+..
+.de tY
+.nr tY (\\n(lC+1)
+.nr w\\n(tY 0
+.nr h\\n(tY 0
+.nr o\\n(tY 0
+.ds t\\n(tY \\*(t\\n(lC
+.ds L\\n(tY
+.nr v\\n(tY 0
+..
+.de tZ
+.rm L\\n(tY
+.rr w\\n(tY
+.rr h\\n(tY
+.rr o\\n(tY
+.rm t\\n(tY
+.rr v\\n(tY
+.nr tY \\n(tY-1
+..
+.nr w1 0
+.nr o1 0
+.nr h1 0
+.ds t1
+.nr v1 0
+.nr tY 1
+.de Xr
+.if \\n(aC==0 \{\
+.	ie \\n(.$==0 .tm Usage: .Xr manpage_name [section#] \\*(Pu (#\\n(.c)
+.	el \{\
+.		ds mN Xr
+.		aV \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
+.	\}
+.\}
+.if \\n(aC>\\n(aP \{\
+.	nr aP \\n(aP+1
+.	ie \\n(C\\n(aP==1 .tm Usage: .Xr manpage_name [section#] \\*(Pu (#\\n(.c)
+.	el \{\
+.		ie \\n(C\\n(aP>2 .y\\n(C\\n(aP
+.		el \{\
+.			as b1 \&\\*(xR\\*(A\\n(aP\fP\s0
+.			if \\n(aC>\\n(aP \{\
+.				nr aP \\n(aP+1
+.				if \\n(C\\n(aP==2 \{\
+.					as b1 \&(\\*(A\\n(aP)
+.					nr aP \\n(aP+1
+.				\}
+.				if \\n(aC>=\\n(aP \{\
+.					c\\n(C\\n(aP
+.				\}
+.			\}
+.		\}
+.		aZ
+.       \}
+.\}
+..
+.de Sx
+.if \\n(aC==0 \{\
+.	ie \\n(.$==0 .tm Sx Usage: .Sx Section Header \\*(Pu (#\\n(.c)
+.	el \{\
+.		ds mN Sx
+.		aV \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
+.	\}
+.\}
+.\}
+.if \\n(aC>\\n(aP \{\
+.	nr aP \\n(aP+1
+.	as b1 \\*(sX
+.	nr cF \\n(.f
+.	nr cZ \\n(.s
+.	nR
+.\}
+..
+.de cC
+'in \\n(.iu-\\n(o\\n(lCu-\\n(w\\n(lCu
+.ta .5i 1i 1.5i 2i 2.5i 3i 3.5i 4i 4.5i 5i 5.5i 6i 6.5i
+.fi
+.tZ
+.nr lC \\n(lC-1
+.tY
+..
+.de W1
+.ta \w\\*(A1    u
+.nr eW \w\\*(A1    u
+'in \\n(.iu+\\n(eWu+\\n(o\\n(lCu
+..
+.de W2
+.ta \w\\*(A1    u +\w\\*(A2    u
+.nr eW \w\\*(A1    u+\w\\*(A2    u
+'in \\n(.iu+\\n(eWu+\\n(o\\n(lCu
+..
+.de W3
+.ta \w\\*(A1    u +\w\\*(A2    u +\w\\*(A3    u
+.nr eW \w\\*(A1    u+\w\\*(A2    u+\w\\*(A3    u
+'in \\n(.iu+\\n(eWu+\\n(o\\n(lCu
+..
+.de W4
+.ta \w\\*(A1    u +\w\\*(A2    u +\w\\*(A3    u +\w\\*(A4    u
+.nr eW \w\\*(A1    u+\w\\*(A2    u +\w\\*(A3    u +\w\\*(A4    u
+'in \\n(.iu+\\n(eWu+\\n(o\\n(lCu
+..
+.de W5
+.ta \w\\*(A1   u +\w\\*(A2   u +\w\\*(A3   u +\w\\*(A4   u +\w\\*(A5   u
+.nr eW \w\\*(A1   u +\w\\*(A2   u +\w\\*(A3   u +\w\\*(A4   u +\w\\*(A5   u
+'	in \\n(.iu+\\n(eWu+\\n(o\\n(lCu
+..
+.de W6
+.ta \w\\*(A1 u +\w\\*(A2 u +\w\\*(A3 u +\w\\*(A4 u +\w\\*(A5 u +\w\\*(A6
+.nr eW \w\\*(A1 u +\w\\*(A2 u +\w\\*(A3 u +\w\\*(A4 u +\w\\*(A5 u +\w\\*(A6
+'	in \\n(.iu+\\n(eWu+\\n(o\\n(lCu
+..
+.de cL
+.if \\n(w\\n(lC==0 .nr w\\n(lC \\n(eWu
+.if \\n(.u==0 \{\
+.	fi
+'	in \\n(.iu+\\n(eWu
+.\}
+.ti -\\n(eWu
+.fV
+.nr aP \\n(aP+1
+.ie \\n(aC>=\\n(aP  \{\
+.	if "\\*(A\\n(aP"Ta" \{\
+.		nr jJ \\n(aP-1
+.		rm S\\n(jJ
+.		rr jJ
+.	\}
+.	c\\n(C\\n(aP
+.\}
+.el .tm Usage: .It column_string [Ta [column_string ...] ] (#\\n(.c)
+..
+.de Ta
+.ie \\n(aC>0 \{\
+.	nr aP \\n(aP+1
+.	ie \\n(aC>=\\n(aP \{\
+.		if "\\*(A\\n(aP"Ta" \{\
+.			nr jJ \\n(aP-1
+.			rm S\\n(jJ
+.			rr jJ
+.		\}
+.		as b1 \\t
+.		c\\n(C\\n(aP
+.	\}
+.	el \{\
+.		as b1 \\t\\c
+.		rm S\\n(aP
+.		pB
+.		aY
+.	\}
+.\}
+.el \{\
+.	tm Usage: Ta must follow column entry: e.g. (#\\n(.c)
+.	tm .It column_string [Ta [column_string ...] ]
+.\}
+..
+.de Dl
+'ta .5i 1i 1.5i 2i 2.5i 3i 3.5i 4i 4.5i 5i 5.5i 6i 6.5i
+.in \\n(.iu+\\n(Dsu
+.ie \\n(aC==0 \{\
+.	ie \\n(.$==0 \{\
+.		tm Usage: .Dl argument ... (#\\n(.c)
+.	\}
+.	el \{\
+.		ds mN Dl
+.               ds A1 \\$1
+.               ds A2 \\$2
+.               ds A3 \\$3
+.               ds A4 \\$4
+.               ds A5 \\$5
+.               ds A6 \\$6
+.               ds A7 \\$7
+.               ds A8 \\$8
+.               ds A9 \\$9
+.		nr fV \\n(.$
+.		fV
+.		Li
+.	\}
+.\}
+.el \{\
+.	tm Usage: .Dl not callable by other macros (#\\n(.c)
+.\}
+.in \\n(.iu-\\n(Dsu
+..
+.de D1
+'ta .5i 1i 1.5i 2i 2.5i 3i 3.5i 4i 4.5i 5i 5.5i 6i 6.5i
+.in \\n(.iu+\\n(Dsu
+.ie \\n(aC==0 \{\
+.	ie \\n(.$==0 \{\
+.		tm Usage: .D1 argument ... (#\\n(.c)
+.	\}
+.	el \{\
+.		ds mN D1
+.               ds A1 \\$1
+.               ds A2 \\$2
+.               ds A3 \\$3
+.               ds A4 \\$4
+.               ds A5 \\$5
+.               ds A6 \\$6
+.               ds A7 \\$7
+.               ds A8 \\$8
+.               ds A9 \\$9
+.		nr fV \\n(.$
+.		fV
+.		nr aP \\n(aP+1
+.		ie \\n(C\\n(aP==1 .\\*(A\\n(aP
+.		el .No
+.	\}
+.\}
+.el \{\
+.	tm Usage: .D1 not callable by other macros (#\\n(.c)
+.\}
+.in \\n(.iu-\\n(Dsu
+..
+.de Ex
+.tm Ex defunct, Use .D1: \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
+..
+.de Ex
+.tm Ex defunct, Use .D1: \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
+..
+.de Vt
+.if \\n(fD>0 \{\
+.	Pp
+.	nr fD 0
+.\}
+.if \\n(fZ>0 \{\
+.	ie \\n(fX==0 \{\
+.		Pp
+.		rs
+.	\}
+.	el .br
+.\}
+.nr fX \\n(fX+1
+.nr cF \\n(.f
+.nr cZ \\n(.s
+\\*(fT\&\\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
+.ie \\n(oT==0 .br
+.el \&\ \&
+.ft \\n(cF
+.fs \\n(cZ
+..
+.nr fZ 0
+.de Ft
+.if \\n(nS>0 \{\
+.	if \\n(fZ>0 \{\
+.		Pp
+.		nr fD 0
+.		nr fX 0
+.	\}
+.	if \\n(fD>0 \{\
+.		Pp
+.		nr fD 0
+.		nr fX 0
+.	\}
+.	if \\n(fX>0 \{\
+.		Pp
+.		nr fX 0
+.	\}
+.	nr fY 1
+.\}
+.nr cF \\n(.f
+.nr cZ \\n(.s
+\&\\*(fT\\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
+.ft \\n(cF
+.fs \\n(cZ
+..
+.nr oT 0
+.de Ot
+.nr oT 1
+.if \\n(nS>0 \{\
+.	if \\n(fZ>0 \{\
+.		Pp
+.		nr fD 0
+.		nr fX 0
+.	\}
+.	if \\n(fD>0 \{\
+.		Pp
+.		nr fD 0
+.		nr fX 0
+.	\}
+.	if \\n(fX>0 \{\
+.		Pp
+.		nr fX 0
+.	\}
+.	nr fY 1
+.\}
+.if \\n(.$==4 .as b1 \&\\*(fT\&\\$1 \\$2 \\$3 \\$4
+.if \\n(.$==3 .as b1 \&\\*(fT\&\\$1 \\$2 \\$3
+.if \\n(.$==2 .as b1 \&\\*(fT\&\\$1 \\$2
+.if \\n(.$==1 .as b1 \&\\*(fT\&\\$1
+.as b1 \&\ \fP
+..
+.de Fa
+.if \\n(aC==0 \{\
+.       ie \\n(.$==0 .tm Usage: .Fa Function Arguments ... \\*(Pu (#\\n(.c)
+.       el \{\
+.		ds mN Fa
+.               ds A1 \\$1
+.               ds A2 \\$2
+.               ds A3 \\$3
+.               ds A4 \\$4
+.               ds A5 \\$5
+.               ds A6 \\$6
+.               ds A7 \\$7
+.               ds A8 \\$8
+.               ds A9 \\$9
+.		nr fV \\n(.$
+.		fV
+.	\}
+.\}
+.ie \\n(fC>0 \{\
+.	fC
+.\}
+.el \{\
+.	if \\n(aC>\\n(aP \{\
+.		as b1 \\*(fA
+.		nr aP \\n(aP+1
+.		nr cF \\n(.f
+.		nr cZ \\n(.s
+.		nR
+.		if \\n(nS>0 \{\
+.			if \\n(fZ>0 .br
+.		\}
+.	\}
+.\}
+..
+.de fC
+.ie \\n(aC>\\n(aP \{\
+.	nr aP \\n(aP+1
+.		ds Fb
+.		nr fB 0
+.		nr Fb 0
+.		fB \\*(A\\n(aP
+.		if \\n(fB>1 \{\
+.			rm A\\n(aP
+.			rn Fb A\\n(aP
+.		\}
+.	if \\n(fC>1 \{\
+.		as b1 \&\f\\n(cF\s\\n(cZ,\\*(S\\n(aP\\*(fA\\*(A\\n(aP\fP\s0
+.	\}
+.	if \\n(fC==1 \{\
+.		as b1 \&\|\\*(fA\\*(A\\n(aP\fP\s0
+.	\}
+.	nr fC \\n(fC+1
+.	fC
+.\}
+.el  \{\
+.	aY
+.\}
+..
+.de Fn
+.if \\n(aC==0 \{\
+.	ie \\n(.$==0 .tm Usage: .Fn function_name function_arg(s) ... \\*(Pu (#\\n(.c)
+.	el \{\
+.		ds mN Fn
+.               ds A1 \\$1
+.               ds A2 \\$2
+.               ds A3 \\$3
+.               ds A4 \\$4
+.               ds A5 \\$5
+.               ds A6 \\$6
+.               ds A7 \\$7
+.               ds A8 \\$8
+.               ds A9 \\$9
+.		nr fV \\n(.$
+.		fV
+.	\}
+.\}
+.if \\n(nS>0 \{\
+.	if \\n(fY==0 \{\
+.		if \\n(fZ>0 \{\
+.			Pp
+.			nr fX 0
+.			nr fD 0
+.		\}
+.	\}
+.	if \\n(fY==1 \{\
+.		br
+.		nr fX 0
+.		nr fD 0
+.		nr fY 0
+.	\}
+.	if \\n(fD>0 \{\
+.		Pp
+.		nr fX 0
+.	\}
+.	if \\n(fX>0 \{\
+.		Pp
+.		nr fD 0
+.	\}
+.	nr fZ \\n(fZ+1
+.	nr fY 0
+.	rs
+.	ie \\n(nS>1 .br
+.	el \{\
+.		if \\n(iS==0 \{\
+.			nr iS ((8)*\\n(fW)u
+.		\}
+.	\}
+.	in +\\n(iSu
+.	ti -\\n(iSu
+.	nr nS \\n(nS+1
+.\}
+.if \\n(aC>\\n(aP \{\
+.	nr aP \\n(aP+1
+.	nr cF \\n(.f
+.	nr cZ \\n(.s
+.	as b1 \\*(fN\\*(A\\n(aP\fP\s0\\*(lp
+.	ie \\n(aC>\\n(aP \{\
+.		as b1 \\*(fA
+.		nr aP \\n(aP+1
+.		f\\n(C\\n(aP
+.	\}
+.	el \{\
+.		as b1 \|\\*(rp
+.		aZ
+.	\}
+.	if \\n(nS>0 \{\
+. 		in -\\n(iSu
+.	\}
+.\}
+..
+.de f1
+.as b1 \\*(rp\f\\n(cF\s\\n(cZ
+.\\*(A\\n(aP
+..
+.de f2
+.if \\n(nS>0 \{\
+.	ds Fb
+.	nr fB 0
+.	nr Fb 0
+.	fB \\*(A\\n(aP
+.	if \\n(fB>1 \{\
+.		rm A\\n(aP
+.		rn Fb A\\n(aP
+.	\}
+.\}
+.as b1 \\*(A\\n(aP
+.ie \\n(aC>\\n(aP \{\
+.	nr aa \\n(aP
+.	nr aP \\n(aP+1
+.	if \\n(C\\n(aP==2 \{\
+.		as b1 \&\|\f\\n(cF\s\\n(cZ,\\*(S\\n(aa\fP\s0\|
+.	\}
+.	f\\n(C\\n(aP
+.\}
+.el  \{\
+.	as b1 \\*(rp\f\\n(cF\s\\n(cZ
+.	aZ
+.\}
+..
+.de f3
+.as b1 \\*(rp\f\\n(cF\s\\n(cZ\\*(A\\n(aP
+.ie \\n(aC>\\n(aP \{\
+.	No
+.\}
+.el .aZ
+..
+.de f4
+.as b1 \\*(rp\f\\n(cF\s\\n(cZ\\*(S\\n(aP\\*(A\\n(aP
+.ie \\n(aC>\\n(aP \{\
+.	nr aP \\n(aP+1
+.	No
+.\}
+.el .aZ
+..
+.de Fo
+.hy 0
+.if \\n(aC==0 \{\
+.	ie \\n(.$==0 .tm Usage: .Fo function_name
+.	el \{\
+.		ds mN Fo
+.               ds A1 \\$1
+.               ds A2 \\$2
+.               ds A3 \\$3
+.               ds A4 \\$4
+.               ds A5 \\$5
+.               ds A6 \\$6
+.               ds A7 \\$7
+.               ds A8 \\$8
+.               ds A9 \\$9
+.		nr fV \\n(.$
+.		fV
+.	\}
+.\}
+.if \\n(nS>0 \{\
+.	if \\n(fY==0 \{\
+.		if \\n(fZ>0 \{\
+.			Pp
+.			nr fX 0
+.			nr fD 0
+.		\}
+.	\}
+.	if \\n(fY==1 \{\
+.		br
+.		nr fX 0
+.		nr fD 0
+.		nr fY 0
+.	\}
+.	if \\n(fD>0 \{\
+.		Pp
+.		nr fX 0
+.	\}
+.	if \\n(fX>0 \{\
+.		Pp
+.		nr fD 0
+.	\}
+.	nr fZ \\n(fZ+1
+.	nr fY 0
+.	rs
+.	ie \\n(nS>1 .br
+.	el \{\
+.		if \\n(iS==0 \{\
+.			nr iS ((8)*\\n(fW)u
+.		\}
+.	\}
+.	in +\\n(iSu
+.	ti -\\n(iSu
+.	nr nS \\n(nS+1
+.\}
+.if \\n(aC>\\n(aP \{\
+.	nr oM \\n(oM+1
+.	nr fC 1
+.	nr aP \\n(aP+1
+.	nr cF \\n(.f
+.	nr cZ \\n(.s
+.	as b1 \\*(fN\\*(A\\n(aP\fP\s0\\*(lp
+.	aY
+.\}
+..
+.de Fc
+.if \\n(aC==0 \{\
+.	if \\n(.$>0 \{\
+.		ds mN Fo
+.               ds A1 \\$1
+.               ds A2 \\$2
+.               ds A3 \\$3
+.               ds A4 \\$4
+.               ds A5 \\$5
+.               ds A6 \\$6
+.               ds A7 \\$7
+.               ds A8 \\$8
+.               ds A9 \\$9
+.		nr fV \\n(.$
+.		fV
+.	\}
+.\}
+.nr fC 0
+.nr oM \\n(oM-1
+.as b1 \|\\*(rp
+.ie \\n(aC>\\n(aP \{\
+.	nr aP \\n(aP+1
+.	\\*(A\\n(aP
+.\}
+.el \{\
+.	aZ
+.\}
+.if \\n(nS>0 \{\
+.	in -\\n(iSu
+.\}
+.hy
+..
+.de fB
+.if \\n(fB==0 \{\
+.	nr fB \\n(.$
+.	nr Fb 0
+.	ds Fb
+.\}
+.nr Fb \\n(Fb+1
+.as Fb \&\\$1
+.if \\n(Fb<\\n(fB \{\
+.	as Fb \&\\*(hV
+.	fB \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
+.\}
+..
+.de Rs
+.nr rS 1
+.rC
+.if \\n(nA==1 .Pp
+.nr Kl 0
+..
+.de Re
+.rZ
+.rC
+.nr rS 0
+..
+.de rC
+.nr uK 0
+.nr jK 0
+.nr nK 0
+.nr oK 0
+.nr qK 0
+.nr rK 0
+.nr tK 0
+.nr vK 0
+.nr dK 0
+.nr pK 0
+.nr bK 0
+.ds rS
+.rm U1 U2 U3 U4 U5 U6 U7 U8
+.rm uK jK nK oK rK qK tK vK dK pK bK
+..
+.de rZ
+.if \\n(uK \{\&\\*(U1,
+.	nr aK 1
+.	if (\\n(uK>1 \{\
+.		aK
+.	\}
+.	nr Kl -\\n(uK
+.\}
+.if \\n(tK \{\
+.	nr Kl \\n(Kl-1
+.	if \\n(Kl==0 \{\
+.		ie (\\n(jK==1):(\\n(bK==1) \{\&\\*q\\*(tK\\*q.
+.		\}
+.		el \{\&\\*(eM\\*(tK\\*(nO.
+.		\}
+.	\}
+.	if \\n(Kl>0 \{\
+.		ie (\\n(jK==1):(\\n(bK==1) \{\&\\*q\\*(tK\\*q,
+.		\}
+.		el \{\&\\*(eM\\*(tK\\*(nO,
+.		\}
+.	\}
+.\}
+.if \\n(bK \{\
+.	nr Kl \\n(Kl-1
+.	if \\n(Kl==0 \&\\*(eM\\*(bK\\*(nO.
+.	if \\n(Kl>0 \&\\*(eM\\*(bK\\*(nO,
+.\}
+.if \\n(jK \{\
+.	nr Kl \\n(Kl-1
+.	if \\n(Kl==0 \&\\*(eM\\*(jK\\*(nO.
+.	if \\n(Kl>0 \&\\*(eM\\*(jK\\*(nO,
+.\}
+.if \\n(rK \{\
+.	nr Kl \\n(Kl-1
+.	if \\n(Kl==0 \&\\*(rK.
+.	if \\n(Kl>0 \&\\*(rK,
+.\}
+.if \\n(nK \{\
+.	nr Kl \\n(Kl-1
+.	if \\n(Kl==0 \&\\*(nK.
+.	if \\n(Kl>0 \&\\*(nK,
+.\}
+.if \\n(vK \{\
+.	nr Kl \\n(Kl-1
+.	if \\n(Kl==0 \&\\*(vK.
+.	if \\n(Kl>0 \&\\*(vK,
+.\}
+.if \\n(pK \{\
+.	nr Kl \\n(Kl-1
+.	if \\n(Kl==0 \&\\*(pK.
+.	if \\n(Kl>0 \&\\*(pK,
+.\}
+.if \\n(qK \{\
+.	nr Kl \\n(Kl-1
+.	if \\n(Kl==0 \&\\*(qK.
+.	if \\n(Kl>0 \&\\*(qK,
+.\}
+.if \\n(dK \{\
+.	nr Kl \\n(Kl-1
+.	if \\n(Kl==0 \&\\*(dK.
+.	if \\n(Kl>0 \&\\*(dK,
+.\}
+.if \\n(oK \{\
+.	nr Kl \\n(Kl-1
+.	if \\n(Kl==0 \&\\*(oK.
+.	if \\n(Kl>0 \&\\*(oK,
+.\}
+.if \\n(Kl>0 .tm unresolved reference problem
+..
+.de aK
+.nr aK \\n(aK+1
+.ie (\\n(uK-\\n(aK)==0 \{\&and \\*(U\\n(aK,
+.\}
+.el \{\&\\*(U\\n(aK,
+.	aK
+.\}
+..
+.de %A
+.if \\n(aC==0 \{\
+.       ie \\n(.$==0 .tm Usage: .%A Author_name (#\\n(.c)
+.	el \{\
+.		nr uK \\n(uK+1
+.		nr Kl \\n(Kl+1
+.		ds rS U\\n(uK
+.		ds mN %A
+.		aV \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
+.	\}
+.\}
+.if \\n(aC>\\n(aP \{\
+.	nr aP \\n(aP+1
+.       nr cF \\n(.f
+.	nr cZ \\n(.s
+.       rR
+.\}
+..
+.de %B
+.if \\n(aC==0 \{\
+.       ie \\n(.$==0 .tm Usage: .%B Book Name (#\\n(.c)
+.       el \{\
+.		ds mN %B
+.		if \\n(rS>0 \{\
+.			nr bK \\n(bK+1
+.			nr Kl \\n(Kl+1
+.			ds rS bK
+.		\}
+.               ds A1 \\$1
+.               ds A2 \\$2
+.               ds A3 \\$3
+.               ds A4 \\$4
+.               ds A5 \\$5
+.               ds A6 \\$6
+.               ds A7 \\$7
+.               ds A8 \\$8
+.               ds A9 \\$9
+.		nr fV \\n(.$
+.		fV
+.	\}
+.\}
+.if \\n(aC>\\n(aP \{\
+.	nr aP \\n(aP+1
+.       nr cF \\n(.f
+.	nr cZ \\n(.s
+.	ie \\n(rS==0 \{\
+.		as b1 \&\\*(eM
+.		nR
+.	\}
+.	el .rR
+.\}
+..
+.de %D
+.if \\n(aC==0 \{\
+.       ie \\n(.$==0 .tm Usage: .%D Date (#\\n(.c)
+.       el \{\
+.		ds mN %D
+.		nr dK \\n(dK+1
+.		nr Kl \\n(Kl+1
+.		ds rS dK
+.               ds A1 \\$1
+.               ds A2 \\$2
+.               ds A3 \\$3
+.               ds A4 \\$4
+.               ds A5 \\$5
+.               ds A6 \\$6
+.               ds A7 \\$7
+.               ds A8 \\$8
+.               ds A9 \\$9
+.		nr fV \\n(.$
+.		fV
+.	\}
+.\}
+.if \\n(aC>\\n(aP \{\
+.	nr aP \\n(aP+1
+.       nr cF \\n(.f
+.	nr cZ \\n(.s
+.       rR
+.\}
+..
+.de %J
+.if \\n(aC==0 \{\
+.       ie \\n(.$==0 .tm Usage: .%J Journal Name (#\\n(.c)
+.       el \{\
+.		ds mN %J
+.		nr jK \\n(jK+1
+.		ds rS jK
+.		nr Kl \\n(Kl+1
+.               ds A1 \\$1
+.               ds A2 \\$2
+.               ds A3 \\$3
+.               ds A4 \\$4
+.               ds A5 \\$5
+.               ds A6 \\$6
+.               ds A7 \\$7
+.               ds A8 \\$8
+.               ds A9 \\$9
+.		nr fV \\n(.$
+.		fV
+.	\}
+.\}
+.if \\n(aC>\\n(aP \{\
+.	nr aP \\n(aP+1
+.       nr cF \\n(.f
+.	nr cZ \\n(.s
+.       rR
+.\}
+..
+.de %N
+.if \\n(aC==0 \{\
+.       ie \\n(.$==0 .tm Usage: .%N issue number (#\\n(.c)
+.	el \{\
+.		nr nK \\n(nK+1
+.		nr Kl \\n(Kl+1
+.		ds rS nK
+.		ds mN %N
+.		aV \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
+.	\}
+.\}
+.if \\n(aC>\\n(aP \{\
+.	nr aP \\n(aP+1
+.       nr cF \\n(.f
+.	nr cZ \\n(.s
+.       rR
+.\}
+..
+.de %O
+.if \\n(aC==0 \{\
+.       ie \\n(.$==0 .tm Usage: .%O optional information ... \\*(Pu (#\\n(.c)
+.       el \{\
+.		ds mN %O
+.		nr oK \\n(oK+1
+.		nr Kl \\n(Kl+1
+.		ds rS oK
+.               ds A1 \\$1
+.               ds A2 \\$2
+.               ds A3 \\$3
+.               ds A4 \\$4
+.               ds A5 \\$5
+.               ds A6 \\$6
+.               ds A7 \\$7
+.               ds A8 \\$8
+.               ds A9 \\$9
+.		nr fV \\n(.$
+.		fV
+.	\}
+.\}
+.if \\n(aC>\\n(aP \{\
+.	nr aP \\n(aP+1
+.       nr cF \\n(.f
+.	nr cZ \\n(.s
+.       rR
+.\}
+..
+.de %P
+.if \\n(aC==0 \{\
+.       ie \\n(.$==0 .tm Usage: .%P page numbers ... \\*(Pu (#\\n(.c)
+.       el \{\
+.		ds mN %P
+.		nr pK \\n(pK+1
+.		nr Kl \\n(Kl+1
+.		ds rS pK
+.               ds A1 \\$1
+.               ds A2 \\$2
+.               ds A3 \\$3
+.               ds A4 \\$4
+.               ds A5 \\$5
+.               ds A6 \\$6
+.               ds A7 \\$7
+.               ds A8 \\$8
+.               ds A9 \\$9
+.		nr fV \\n(.$
+.		fV
+.	\}
+.\}
+.if \\n(aC>\\n(aP \{\
+.	nr aP \\n(aP+1
+.       nr cF \\n(.f
+.	nr cZ \\n(.s
+.       rR
+.\}
+..
+.de %Q
+.if \\n(aC==0 \{\
+.       ie \\n(.$==0 .tm Usage: .%Q Corporate or Foreign Author (#\\n(.c)
+.       el \{\
+.		ds mN %Q
+.		nr qK \\n(qK+1
+.		nr Kl \\n(Kl+1
+.		ds rS qK
+.               ds A1 \\$1
+.               ds A2 \\$2
+.               ds A3 \\$3
+.               ds A4 \\$4
+.               ds A5 \\$5
+.               ds A6 \\$6
+.               ds A7 \\$7
+.               ds A8 \\$8
+.               ds A9 \\$9
+.		nr fV \\n(.$
+.		fV
+.	\}
+.\}
+.if \\n(aC>\\n(aP \{\
+.	nr aP \\n(aP+1
+.       nr cF \\n(.f
+.	nr cZ \\n(.s
+.       rR
+.\}
+..
+.de %R
+.if \\n(aC==0 \{\
+.       ie \\n(.$==0 .tm Usage: .%R reference report (#\\n(.c)
+.       el \{\
+.		ds mN %R
+.		nr rK \\n(rK+1
+.		nr Kl \\n(Kl+1
+.		ds rS rK
+.               ds A1 \\$1
+.               ds A2 \\$2
+.               ds A3 \\$3
+.               ds A4 \\$4
+.               ds A5 \\$5
+.               ds A6 \\$6
+.               ds A7 \\$7
+.               ds A8 \\$8
+.               ds A9 \\$9
+.		nr fV \\n(.$
+.		fV
+.	\}
+.\}
+.if \\n(aC>\\n(aP \{\
+.	nr aP \\n(aP+1
+.       nr cF \\n(.f
+.	nr cZ \\n(.s
+.       rR
+.\}
+..
+.de %T
+.if \\n(aC==0 \{\
+.       ie \\n(.$==0 .tm Usage: .%T (#\\n(.c)
+.       el \{\
+.		ds mN %T
+.		if \\n(rS>0 \{\
+.			nr tK \\n(tK+1
+.			nr Kl \\n(Kl+1
+.			ds rS tK
+.		\}
+.               ds A1 \\$1
+.               ds A2 \\$2
+.               ds A3 \\$3
+.               ds A4 \\$4
+.               ds A5 \\$5
+.               ds A6 \\$6
+.               ds A7 \\$7
+.               ds A8 \\$8
+.               ds A9 \\$9
+.		nr fV \\n(.$
+.		fV
+.	\}
+.\}
+.if \\n(aC>\\n(aP \{\
+.		nr aP \\n(aP+1
+.		nr cF \\n(.f
+.		nr cZ \\n(.s
+.		ie \\n(rS==0 \{\
+.			as b1 \&\\*(eM
+.			nR
+.		\}
+.		el .rR
+.\}
+..
+.de %V
+.if \\n(aC==0 \{\
+.       ie \\n(.$==0 .tm Usage: .%V Volume , ... \\*(Pu (#\\n(.c)
+.	el \{\
+.		ds mN %V
+.		nr vK \\n(vK+1
+.		nr Kl \\n(Kl+1
+.		ds rS vK
+.		aV \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
+.	\}
+.\}
+.if \\n(aC>\\n(aP \{\
+.	nr aP \\n(aP+1
+.       nr cF \\n(.f
+.	nr cZ \\n(.s
+.       rR
+.\}
+..
+.de rR
+.hy 0
+.nr jM \\n(C\\n(aP
+.ie \\n(jM==1 \{\
+.	ie "\\*(A\\n(aP"Tn" \{\
+.		nN
+.	\}
+.	el \{\
+.		if \\n(aC>8 .tm Usage: \\*(mN - maximum 8 arguments (#\\n(.c)
+.		aI rR 1
+.		\\*(A\\n(aP
+.	\}
+.\}
+.el \{\
+.	nr jN \\n(aP
+.	ie \\n(jM==2 .as b1 \&\\*(A\\n(aP
+.	el .as b1 \&\\*(A\\n(aP
+.	ie \\n(aC==\\n(aP \{\
+.		rD
+.	\}
+.	el \{\
+.		nr aP \\n(aP+1
+.		as b1 \&\\*(S\\n(jN
+.		rR
+.	\}
+.\}
+.rr jM jN
+..
+.de rD
+.as \\*(rS \\*(b1
+.ds b1
+.ds rS
+.aY
+..
+.de Hf
+.Pp
+File:
+.Pa \\$1
+.Pp
+.nr cF \\n(.f
+.nr cZ \\n(.s
+.ie t \{\
+\&\\*(lI
+.br
+.ta +9n 18n 27n 36n 45n 54n 63n 72n
+.\}
+.el \{\
+.ta +8n 16n 24n 32n 40n 48n 56n 64n 72n
+.\}
+.nf
+.so  \\$1
+.fi
+.ft \\n(cF
+.fz \\n(cZ
+.Pp
+..
+.nr aN 0
+.de An
+.if \\n(nY==1 \{\
+.	ie \\n(aN==1 \{\
+.		br
+.	\}
+.	el \{\
+.		nr aN 1
+.	\}
+.\}
+.if \\n(aC==0 \{\
+.       ie \\n(.$==0 .tm Usage: .An author_name ... \\*(Pu (#\\n(.c)
+.	el \{\
+.		ds mN An
+.		aV \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
+.	\}
+.\}
+.if \\n(aC>\\n(aP \{\
+.	nr aP \\n(aP+1
+.       nr cF \\n(.f
+.	nr cZ \\n(.s
+.       nR
+.\}
+..
+.de Sf
+.tm .Sf defunct, use prefix or Ns
+..
+.ds rV "function returns the value 0 if successful; otherwise the value -1 is returned and the global variable \\*(vAerrno\fP is set to indicate the error.
+.de Rv
+.ie \\n(.$==0 \{\
+.tm Usage: .Rv [-std] (#\\n(.c)
+.\}
+.el \{\
+.	ds mN Rv
+.	if "\\$1"-std" \{\
+.	nr cH \\*(cH
+.	if (\\n(cH<2):(\\n(cH>3) .tm Usage: .Rv -std sections 2 and 3 only
+.		br
+\&The
+.Fn \\$2
+\&\\*(rV
+.	\}
 .\}
 ..
