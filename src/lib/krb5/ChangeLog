@@ -1,3 +1,8 @@
+2003-03-06  Alexandra Ellwood <lxs@mit.edu>
+
+    * krb5_libinit.c: Removed Mac OS X header goober.  Conditionalize
+    CCAPI calls on USE_CCAPI so Darwin builds work.
+
 2003-02-04  Tom Yu  <tlyu@mit.edu>
 
 	* configure.in: Add KRB5_SIGTYPE and CHECK_SIGNALS for

@@ -1,14 +1,16 @@
 #include <assert.h>
 
-#if TARGET_OS_MAC
-#    include <Kerberos/com_err.h>
-#endif
-
+#include "com_err.h"
 #include "krb5.h"
 #include "krb5_err.h"
 #include "kv5m_err.h"
 #include "asn1_err.h"
 #include "kdb5_err.h"
+
+#if defined(_WIN32) || defined(USE_CCAPI)
+#include "stdcc.h"
+#endif
+
 #include "krb5_libinit.h"
 
 static	int		initialized = 0;
@@ -42,7 +44,7 @@ void krb5int_cleanup_library (void)
 {
 	assert (initialized);
 
-#if defined(_WIN32) || TARGET_OS_MAC
+#if defined(_WIN32) || defined(USE_CCAPI)
 	krb5_stdcc_shutdown();
 #endif
 	
