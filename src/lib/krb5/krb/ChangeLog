@@ -1,3 +1,12 @@
+Thu Feb  5 23:48:34 1998  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* rd_cred.c (krb5_rd_cred): 
+	* rd_safe.c (krb5_rd_safe): 
+	* rd_priv.c (krb5_rd_priv): Use the remote_subkey first, since the
+		mk_* routines try to use their local_subkey first.
+		Otherwise, the wrong keys will get used if subkeys are
+		used in both directions.
+
 Fri Jan  2 21:21:29 1998  Tom Yu  <tlyu@mit.edu>
 
 	* preauth.c (handle_sam_labels):

@@ -183,8 +183,8 @@ krb5_rd_priv(context, auth_context, inbuf, outbuf, outdata)
     krb5_replay_data	  replaydata;
 
     /* Get keyblock */
-    if ((keyblock = auth_context->local_subkey) == NULL)
-        if ((keyblock = auth_context->remote_subkey) == NULL)
+    if ((keyblock = auth_context->remote_subkey) == NULL)
+	if ((keyblock = auth_context->local_subkey) == NULL)
             keyblock = auth_context->keyblock;
 
     if (((auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_RET_TIME) ||

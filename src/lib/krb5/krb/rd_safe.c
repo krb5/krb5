@@ -170,8 +170,8 @@ krb5_rd_safe(context, auth_context, inbuf, outbuf, outdata)
 	return KRB5_RC_REQUIRED;
 
     /* Get keyblock */
-    if ((keyblock = auth_context->local_subkey) == NULL)
-        if ((keyblock = auth_context->remote_subkey) == NULL)
+    if ((keyblock = auth_context->remote_subkey) == NULL)
+	if ((keyblock = auth_context->local_subkey) == NULL)
             keyblock = auth_context->keyblock;
 
 {
