@@ -167,15 +167,19 @@ tgt_again:
 	 * should do our best to find such a TGS in this db
 	 */
 	if (firstpass && krb5_is_tgs_principal(request->server) == TRUE) {
-	    krb5_data *server_1 = krb5_princ_component(kdc_context, request->server, 1);
-	    krb5_data *tgs_1 = krb5_princ_component(kdc_context, tgs_server, 1);
+	    if (krb5_princ_size(kdc_context, request->server) == 2) {
+		krb5_data *server_1 =
+		    krb5_princ_component(kdc_context, request->server, 1);
+		krb5_data *tgs_1 =
+		    krb5_princ_component(kdc_context, tgs_server, 1);
 
-	    if (server_1->length != tgs_1->length ||
-		memcmp(server_1->data, tgs_1->data, tgs_1->length)) {
-		krb5_db_free_principal(kdc_context, &server, nprincs);
-		find_alternate_tgs(request, &server, &more, &nprincs);
-		firstpass = 0;
-		goto tgt_again;
+		if (server_1->length != tgs_1->length ||
+		    memcmp(server_1->data, tgs_1->data, tgs_1->length)) {
+		    krb5_db_free_principal(kdc_context, &server, nprincs);
+		    find_alternate_tgs(request, &server, &more, &nprincs);
+		    firstpass = 0;
+		    goto tgt_again;
+		}
 	    }
 	}
 	krb5_db_free_principal(kdc_context, &server, nprincs);
@@ -707,6 +711,12 @@ int *nprincs;
     *nprincs = 0;
     *more = FALSE;
 
+    /*
+     * Call to krb5_princ_component is normally not safe but is so
+     * here only because find_alternate_tgs() is only called from
+     * somewhere that has already checked the number of components in
+     * the principal.
+     */
     if ((retval = krb5_walk_realm_tree(kdc_context, 
 		      krb5_princ_realm(kdc_context, request->server),
 		      krb5_princ_component(kdc_context, request->server, 1),
