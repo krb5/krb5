@@ -63,7 +63,7 @@ type, and replay cache pointer.
 \begin{funcdecl}{krb5_auth_con_init}{krb5_error_code}{\funcinout}
 \funcarg{krb5_context}{context}
 \funcout
-\funcarg{krb5_auth_context **}{auth_context}
+\funcarg{krb5_auth_context *}{auth_context}
 \end{funcdecl}
 
 The auth_context may be described as a per connection context. This
@@ -82,15 +82,17 @@ The auth_context structure should be freed with
 
 \begin{funcdecl}{krb5_auth_con_free}{krb5_error_code}{\funcinout}
 \funcarg{krb5_context}{context}
-\funcarg{krb5_auth_context *}{auth_context}
+\funcarg{krb5_auth_context}{auth_context}
 \end{funcdecl}
 
 Frees the auth_context \funcparam{auth_context} returned by
 \funcname{krb5_auth_con_init}.
 
+% perhaps some comment about which substructures are freed and which are not?
+
 \begin{funcdecl}{krb5_auth_con_setflags}{krb5_error_code}{\funcinout}
 \funcarg{krb5_context}{context}
-\funcarg{krb5_auth_context *}{auth_context}
+\funcarg{krb5_auth_context}{auth_context}
 \funcin
 \funcarg{krb5_int32}{flags}
 \end{funcdecl}
@@ -110,7 +112,7 @@ KRB5_AUTH_CONTEXT_RET_SEQUENCE	& Copy sequence numbers \\ &\ to output structure
 \begin{funcdecl}{krb5_auth_con_getflags}{krb5_error_code}{\funcinout}
 \funcarg{krb5_context}{context}
 \funcin
-\funcarg{krb5_auth_context *}{auth_context}
+\funcarg{krb5_auth_context}{auth_context}
 \funcout
 \funcarg{krb5_int32 *}{flags}
 \end{funcdecl}
@@ -119,7 +121,7 @@ Retrievs the flags of \funcparam{auth_context}.
 
 \begin{funcdecl}{krb5_auth_con_setaddrs}{krb5_error_code}{\funcinout}
 \funcarg{krb5_context}{context}
-\funcarg{krb5_auth_context *}{auth_context}
+\funcarg{krb5_auth_context}{auth_context}
 \funcin
 \funcarg{krb5_address *}{local_addr}
 \funcarg{krb5_address *}{remote_addr}
@@ -131,7 +133,7 @@ address remains in place.
 
 \begin{funcdecl}{krb5_auth_con_getaddrs}{krb5_error_code}{\funcinout}
 \funcarg{krb5_context}{context}
-\funcarg{krb5_auth_context *}{auth_context}
+\funcarg{krb5_auth_context}{auth_context}
 \funcout
 \funcarg{krb5_address **}{local_addr}
 \funcarg{krb5_address **}{remote_addr}
@@ -144,9 +146,9 @@ Retrieves  \funcparam{local_addr} and \funcparam{remote_addr} from the
 responsibility to free the returned addresses in this way.
 
 
-\begin{funcdecl}{krb5_auth_con_setaddrs}{krb5_error_code}{\funcinout}
+\begin{funcdecl}{krb5_auth_con_setports}{krb5_error_code}{\funcinout}
 \funcarg{krb5_context}{context}
-\funcarg{krb5_auth_context *}{auth_context}
+\funcarg{krb5_auth_context}{auth_context}
 \funcin
 \funcarg{krb5_address *}{local_port}
 \funcarg{krb5_address *}{remote_port}
@@ -159,7 +161,7 @@ address remains in place. These addresses are set by
 
 \begin{funcdecl}{krb5_auth_con_setuserkey}{krb5_error_code}{\funcinout}
 \funcarg{krb5_context}{context}
-\funcarg{krb5_auth_context *}{auth_context}
+\funcarg{krb5_auth_context}{auth_context}
 \funcin
 \funcarg{krb5_keyblock *}{keyblock}
 \end{funcdecl}
@@ -172,7 +174,7 @@ overwritten with the session key sent by the client.
 
 \begin{funcdecl}{krb5_auth_con_getkey}{krb5_error_code}{\funcinout}
 \funcarg{krb5_context}{context}
-\funcarg{krb5_auth_context *}{auth_context}
+\funcarg{krb5_auth_context}{auth_context}
 \funcout
 \funcarg{krb5_keyblock **}{keyblock}
 \end{funcdecl}
@@ -183,7 +185,7 @@ allocated in this function should be freed with a call to
 
 \begin{funcdecl}{krb5_auth_con_getlocalsubkey}{krb5_error_code}{\funcinout}
 \funcarg{krb5_context}{context}
-\funcarg{krb5_auth_context *}{auth_context}
+\funcarg{krb5_auth_context}{auth_context}
 \funcout
 \funcarg{krb5_keyblock **}{keyblock}
 \end{funcdecl}
@@ -194,7 +196,7 @@ be freed with a call to \funcname{krb5_free_keyblock}.
 
 \begin{funcdecl}{krb5_auth_con_getremotesubkey}{krb5_error_code}{\funcinout}
 \funcarg{krb5_context}{context}
-\funcarg{krb5_auth_context *}{auth_context}
+\funcarg{krb5_auth_context}{auth_context}
 \funcout
 \funcarg{krb5_keyblock **}{keyblock}
 \end{funcdecl}
@@ -206,7 +208,7 @@ be freed with a call to \funcname{krb5_free_keyblock}.
 
 \begin{funcdecl}{krb5_auth_setcksumtype}{krb5_error_code}{\funcinout}
 \funcarg{krb5_context}{context}
-\funcarg{krb5_auth_context *}{auth_context}
+\funcarg{krb5_auth_context}{auth_context}
 \funcin
 \funcarg{krb5_cksumtype}{cksumtype}
 \end{funcdecl}
@@ -215,7 +217,7 @@ Sets the checksum type used by the other functions in the library.
 
 \begin{funcdecl}{krb5_auth_getlocalseqnumber}{krb5_error_code}{\funcinout}
 \funcarg{krb5_context}{context}
-\funcarg{krb5_auth_context *}{auth_context}
+\funcarg{krb5_auth_context}{auth_context}
 \funcin
 \funcarg{krb5_int32 *}{seqnumber}
 \end{funcdecl}
@@ -225,7 +227,7 @@ and stores it in \funcparam{seqnumber}.
 
 \begin{funcdecl}{krb5_auth_getremoteseqnumber}{krb5_error_code}{\funcinout}
 \funcarg{krb5_context}{context}
-\funcarg{krb5_auth_context *}{auth_context}
+\funcarg{krb5_auth_context}{auth_context}
 \funcin
 \funcarg{krb5_int32 *}{seqnumber}
 \end{funcdecl}
@@ -235,7 +237,7 @@ and stores it in \funcparam{seqnumber}.
 
 \begin{funcdecl}{krb5_auth_getauthenticator}{krb5_error_code}{\funcinout}
 \funcarg{krb5_context}{context}
-\funcarg{krb5_auth_context *}{auth_context}
+\funcarg{krb5_auth_context}{auth_context}
 \funcout
 \funcarg{krb5_authenticator **}{authenticator}
 \end{funcdecl}
@@ -245,15 +247,15 @@ authentication. It is the callers responsibility to free the memory
 allocated to \funcparam{authenticator} by calling
 \funcname{krb5_free_authenticator}. 
 
-\begin{funcdecl}{krb5_auth_initivector}{krb5_error_code}{\funcinout}
+\begin{funcdecl}{krb5_auth_con_initivector}{krb5_error_code}{\funcinout}
 \funcarg{krb5_context}{context}
-\funcarg{krb5_auth_context *}{auth_context}
+\funcarg{krb5_auth_context}{auth_context}
 \end{funcdecl}
 
 Allocates memory for and zeros the initial vector in the
 \funcparam{auth_context} keyblock.
 
-\begin{funcdecl}{krb5_set_initivector}{krb5_error_code}{\funcinout}
+\begin{funcdecl}{krb5_auth_con_setivector}{krb5_error_code}{\funcinout}
 \funcarg{krb5_context}{context}
 \funcarg{krb5_auth_context *}{auth_context}
 \funcin
@@ -263,9 +265,9 @@ Allocates memory for and zeros the initial vector in the
 Sets the i_vector portion of \funcparam{auth_context} to
 \funcparam{ivector}. 
 
-\begin{funcdecl}{krb5_set_rcache}{krb5_error_code}{\funcinout}
+\begin{funcdecl}{krb5_auth_con_setrcache}{krb5_error_code}{\funcinout}
 \funcarg{krb5_context}{context}
-\funcarg{krb5_auth_context *}{auth_context}
+\funcarg{krb5_auth_context}{auth_context}
 \funcin
 \funcarg{krb5_rcache}{rcache}
 \end{funcdecl}
@@ -735,6 +737,29 @@ which should be freed by the caller when finished.
 
 Returns errors, system errors.
 
+\begin{funcdecl}{krb5_get_cred_via_tkt}{krb5_error_code}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcin
+\funcarg{krb5_creds *}{tkt}
+\funcarg{const krb5_flags}{kdcoptions}
+\funcarg{krb5_address *const *}{address}
+\funcarg{krb5_creds *}{in_cred}
+\funcout
+\funcarg{krb5_creds **}{out_cred}
+\end{funcdecl}
+
+Takes a ticket \funcparam{tkt} and a target credential
+\funcparam{in_cred}, attempts to fetch a TGS from the KDC. Upon
+success the resulting is stored in \funcparam{out_cred}. The memory
+allocated in \funcparam{out_cred} should be freed by the called when
+finished by using \funcname{krb5_free_creds}. 
+
+\funcparam{kdcoptions} refers to the options as listed in Table
+\ref{KDCOptions}. The optional \funcparam{address} is used for addressed
+in the KRB_TGS_REQ (see \funcname{krb5_send_tgs}).
+
+Returns errors, system errors.
+
 
 \begin{funcdecl}{krb5_get_credentials}{krb5_error_code}{\funcinout}
 \funcarg{krb5_context}{context}
@@ -985,7 +1010,7 @@ Returns system errors, preauthentication errors, encryption errors.
 
 \begin{funcdecl}{krb5_mk_req}{krb5_error_code}{\funcinout}
 \funcarg{krb5_context}{context}
-\funcarg{krb5_auth_context **}{auth_context}
+\funcarg{krb5_auth_context *}{auth_context}
 \funcin
 \funcarg{const krb5_flags}{ap_req_options}
 \funcarg{char *}{service}
@@ -1034,7 +1059,7 @@ Returns system errors, error getting credentials for
 
 \begin{funcdecl}{krb5_mk_req_extended}{krb5_error_code}{\funcinout}
 \funcarg{krb5_context}{context}
-\funcarg{krb5_auth_context **}{auth_context}
+\funcarg{krb5_auth_context *}{auth_context}
 \funcin
 \funcarg{const krb5_flags}{ap_req_options}
 \funcarg{krb5_data *}{in_data}
@@ -1093,7 +1118,7 @@ allocated and should be freed by the caller with
 
 \begin{funcdecl}{krb5_rd_req}{krb5_error_code}{\funcinout}
 \funcarg{krb5_context}{context}
-\funcarg{krb5_auth_context **}{auth_context}
+\funcarg{krb5_auth_context *}{auth_context}
 \funcin
 \funcarg{const krb5_data *}{inbuf}
 \funcarg{krb5_const_principal}{server}
@@ -1168,7 +1193,7 @@ Returns system errors, encryption errors, replay errors.
 
 \begin{funcdecl}{krb5_rd_req_decoded}{krb5_error_code}{\funcinout}
 \funcarg{krb5_context}{context}
-\funcarg{krb5_auth_context **}{auth_context}
+\funcarg{krb5_auth_context *}{auth_context}
 \funcin
 \funcarg{const krb5_ap_req *}{req}
 \funcarg{krb5_const_principal}{server}
@@ -1183,14 +1208,14 @@ as the input rather than an encoded input.
 
 \begin{funcdecl}{krb5_mk_rep}{krb5_error_code}{\funcinout}
 \funcarg{krb5_context}{context}
-\funcarg{krb5_auth_context *}{auth_context}
+\funcarg{krb5_auth_context}{auth_context}
 \funcout
 \funcarg{krb5_data *}{outbuf}
 \end{funcdecl}
 
 Formats and encrypts an AP_REP message, including in it the data in the
-authentp portion of \funcparam{*auth_context}, encrypted using the
-keyblock portion of \funcparam{*auth_context}. 
+authentp portion of \funcparam{auth_context}, encrypted using the
+keyblock portion of \funcparam{auth_context}. 
 
 When successfull, \funcparam{outbuf{\ptsto}length} and
 \funcparam{outbuf{\ptsto}data} are filled in with the length of the
@@ -1208,7 +1233,7 @@ Returns system errors.
 
 \begin{funcdecl}{krb5_rd_rep}{krb5_error_code}{\funcinout}
 \funcarg{krb5_context}{context}
-\funcarg{krb5_auth_context *}{auth_context}
+\funcarg{krb5_auth_context}{auth_context}
 \funcin
 \funcarg{const krb5_data *}{inbuf}
 \funcout
@@ -1220,7 +1245,7 @@ Parses and decrypts an AP_REP message from \funcparam{*inbuf}, filling in
 values from the message.  The caller is responsible for freeing this
 structure with \funcname{krb5_free_ap_rep_enc_part}.
 
-The keyblock stored in \funcparam{*auth_context} is used to decrypt the
+The keyblock stored in \funcparam{auth_context} is used to decrypt the
 message after establishing any key pre-processing with
 \funcname{krb5_process_key}. 
 
@@ -1275,7 +1300,7 @@ which is filled into \funcparam{*seqno} upon return.
 \begin{funcdecl}{krb5_sendauth}{krb5_error_code}
 \funcinout
 \funcarg{krb5_context}{context}
-\funcarg{krb5_auth_context **}{auth_context}
+\funcarg{krb5_auth_context *}{auth_context}
 \funcin
 \funcarg{krb5_pointer}{fd}
 \funcarg{char *}{appl_version}
@@ -1357,7 +1382,7 @@ from the server will be placed in it.  This error should be freed with
 
 \begin{funcdecl}{krb5_recvauth}{krb5_error_code}{\funcinout}
 \funcarg{krb5_context}{context}
-\funcarg{krb5_auth_context **}{auth_context}
+\funcarg{krb5_auth_context *}{auth_context}
 \funcin
 \funcarg{krb5_pointer}{fd}
 \funcarg{char *}{appl_version}
@@ -1418,7 +1443,7 @@ freed with
 
 \begin{funcdecl}{krb5_mk_safe}{krb5_error_code}{\funcinout}
 \funcarg{krb5_context}{context}
-\funcarg{krb5_auth_context *}{auth_context}
+\funcarg{krb5_auth_context}{auth_context}
 \funcin
 \funcarg{const krb5_data *}{userdata}
 \funcout
@@ -1430,7 +1455,7 @@ freed with
 Formats a KRB_SAFE message into \funcparam{outbuf}.
 
 \funcparam{userdata} is formatted as the user data in the message.
-Portions \funcparam{*auth_context} specify the checksum type; the
+Portions of \funcparam{auth_context} specify the checksum type; the
 keyblockm which might be used to seed the checksum;
 full addresses (host and port) for the sender and receiver.
 The \funcparam{local_addr} portion of \funcparam{*auth_context} 
@@ -1438,7 +1463,7 @@ is used to form the addresses usedin the KRB_SAFE message. The  \funcparam{remot
 receiver's address is not known, it may be replaced by NULL.
 \funcparam{local_addr}, however, is mandatory.
 
-The \funcparam{*auth_context} flags select whether sequence numbers or
+The \funcparam{auth_context} flags select whether sequence numbers or
 timestamps should be used to identify the message.  Valid flags are
 listed below.
 
@@ -1457,11 +1482,11 @@ If timestamps are to be used (i.e., if KRB5_AUTH_CONTEXT_DO_TIME is
 set), an entry describing the message will be entered in the replay
 cache so that the caller may detect if this message is sent
 back to him by an attacker.  If KRB5_AUTH_CONTEXT_DO_TIME_NOTIME is not set,
-the \funcparam{*auth_context} replay cache is not used.
+the \funcparam{auth_context} replay cache is not used.
 
 If sequence numbers are to be used (i.e., if either
 KRB5_AUTH_CONTEXT_DO_SEQUENCE or KRB5_AUTH_CONTEXT_RET_SEQUENEC is
-set), then \funcparam{*auth_context} local sequence number will be
+set), then \funcparam{auth_context} local sequence number will be
 placed in the protected message as its sequence number.  
 
 The \funcparam{outbuf} buffer storage (i.e.,
@@ -1472,7 +1497,7 @@ Returns system errors, encryption errors.
 
 \begin{funcdecl}{krb5_rd_safe}{krb5_error_code}{\funcinout}
 \funcarg{krb5_context}{context}
-\funcarg{krb5_auth_context *}{auth_context}
+\funcarg{krb5_auth_context}{auth_context}
 \funcin
 \funcarg{const krb5_data *}{inbuf}
 \funcout
@@ -1485,7 +1510,7 @@ Parses a KRB_SAFE message from \funcparam{inbuf}, placing the
 data in \funcparam{*outbuf} after verifying its integrity.
 
 The keyblock used for verifying the integrity of the message is taken
-from the \funcparam{*auth_context} local_subkey, remote_subkey, or
+from the \funcparam{auth_context} local_subkey, remote_subkey, or
 keyblock. The keyblock is chosen in the above order by the first one
 which is not NULL.
  
@@ -1509,16 +1534,16 @@ The \funcparam{outbuf} buffer storage (i.e.,
 \funcparam{outbuf{\ptsto}data} is allocated storage which the caller
 should free when it is no longer needed.
 
-If auth_context_flags portion of \funcparam{*auth_context} indicates
+If auth_context_flags portion of \funcparam{auth_context} indicates
 that sequence numbers are to be used (i.e., if KRB5_AUTH_CONTEXT_DOSEQUENCE is
 set in it), The \funcparam{remote_seq_number} portion of
-\funcparam{*auth_context} is compared to the sequence number for the
+\funcparam{auth_context} is compared to the sequence number for the
 message, and KRB5_KRB_AP_ERR_BADORDER is returned if it does not match.
 Otherwise, the sequence number is not used.
 
 
 If timestamps are to be used (i.e., if KRB5_AUTH_CONTEXT_DO_TIME is set
-in the \funcparam{*auth_context}), then two additional checks are performed:
+in the \funcparam{auth_context}), then two additional checks are performed:
 \begin{itemize}
 \item The timestamp in the message must be within the permitted clock
 	skew (which is usually five minutes), or KRB5KRB_AP_ERR_SKEW
@@ -1531,7 +1556,7 @@ Returns system errors, integrity errors.
 
 \begin{funcdecl}{krb5_mk_priv}{krb5_error_code}{\funcinout}
 \funcarg{krb5_context}{context}
-\funcarg{krb5_auth_context *}{auth_context}
+\funcarg{krb5_auth_context}{auth_context}
 \funcin
 \funcarg{const krb5_data *}{userdata}
 \funcout
@@ -1576,7 +1601,7 @@ Returns system errors, encryption errors.
 
 \begin{funcdecl}{krb5_rd_priv}{krb5_error_code}{\funcinout}
 \funcarg{krb5_context}{context}
-\funcarg{krb5_auth_context}{aith_context}
+\funcarg{krb5_auth_context}{auth_context}
 \funcin
 \funcarg{const krb5_data *}{inbuf}
 \funcout

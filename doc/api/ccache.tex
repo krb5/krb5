@@ -230,5 +230,9 @@ couldn't delete.
 Sets the flags on the cache \funcparam{id} to \funcparam{flags}.  Useful
 flags are defined in {\tt <krb5.h>}.
 
+\begin{funcdecl}{krb5_get_notification_message}{unsigned int}{\funcvoid}
+\end{funcdecl}
 
-
+Intended for use by Windows. Will register a unique message type using
+\funcname{RegisterWindowMessage} which will be notified whenever the
+cache changes. This will allow all processes to recheck their caches.

@@ -1,3 +1,13 @@
+Sun Jun 11 09:17:10 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* krb5.tex: Update krb5_auth_context usage.
+
+Sat May 13 17:40:32 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* ccache.tex: Add krb5_get_notification_message.
+
+	* krb5.tex:  Add krb5_get_cred_via_tkt.
+
 Sun May  7 13:56:43 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* krb5.tex (subsubsection{The krb5_auth_context}): Some function
