@@ -398,8 +398,7 @@ char *dbname;
 	return(1);
     }
     if (retval = krb5_db_fetch_mkey(master_princ, &master_encblock,
-				    manual_mkey,
-				    FALSE, &master_keyblock)) {
+				    manual_mkey, FALSE, 0, &master_keyblock)) {
 	com_err(pname, retval, "while reading master key");
 	return(1);
     }
