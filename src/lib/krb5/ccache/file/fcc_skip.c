@@ -2,7 +2,8 @@
  * $Source$
  * $Author$
  *
- * Copyright 1990 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991 by the Massachusetts Institute of Technology.
+ * All Rights Reserved.
  *
  * For copying and distribution information, please see the file
  * <krb5/copyright.h>.
@@ -29,7 +30,7 @@ krb5_fcc_skip_principal(id)
      if (kret != KRB5_OK)
 	  return kret;
 
-     /* XXX krb5_destroy_principal(&princ); */
+     krb5_free_principal(princ);
      return KRB5_OK;
 }
 

@@ -229,6 +229,7 @@ OLDDECLARG(krb5_response *,rep)
 	if (!combined_padata) {
 	    cleanup();
 	    cleanup_authdata();
+	    xfree(ap_req_padata.contents);
 	    return ENOMEM;
 	}
 	combined_padata[0] = &ap_req_padata;
@@ -240,6 +241,7 @@ OLDDECLARG(krb5_response *,rep)
 	if (!combined_padata) {
 	    cleanup();
 	    cleanup_authdata();
+	    xfree(ap_req_padata.contents);
 	    return ENOMEM;
 	}
 	combined_padata[0] = &ap_req_padata;
@@ -252,12 +254,14 @@ OLDDECLARG(krb5_response *,rep)
 	cleanup();
 	cleanup_authdata();
 	xfree(combined_padata);
+	xfree(ap_req_padata.contents);
 	return(retval);
     }
     if (sec_ticket)
 	krb5_free_ticket(sec_ticket);
     cleanup_authdata();
     xfree(combined_padata);
+    xfree(ap_req_padata.contents);
 #undef cleanup_authdata
 #undef cleanup
 #define cleanup() {xfree(ap_checksum.contents);}

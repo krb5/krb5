@@ -2,7 +2,8 @@
  * $Source$
  * $Author$
  *
- * Copyright 1990 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991 by the Massachusetts Institute of Technology.
+ * All Rights Reserved.
  *
  * For copying and distribution information, please see the file
  * <krb5/copyright.h>.
@@ -102,7 +103,7 @@ krb5_fcc_retrieve(id, whichfields, mcreds, creds)
 	  }
 
 	  /* This one doesn't match */
-	  /* XXX krb5_free_credentials(creds); */
+	  krb5_free_cred_contents(&fetchcreds);
      }
 
      /* If we get here, a match wasn't found */
