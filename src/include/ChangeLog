@@ -1,3 +1,7 @@
+2000-05-31  Ken Raeburn  <raeburn@mit.edu>
+
+	* krb5.hin (krb5_recvauth_version): Declare.
+
 2000-5-19	Alexandra Ellwood <lxs@mit.edu>
 
 	* krb5-int.h: Added krb5int_cc_default.  This function supports the 

@@ -1980,6 +1980,15 @@ KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_recvauth
 		krb5_int32, 
 		krb5_keytab,
 		krb5_ticket FAR * FAR *));
+KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_recvauth_version
+	KRB5_PROTOTYPE((krb5_context,
+		krb5_auth_context FAR *,
+		krb5_pointer,
+		krb5_principal,
+		krb5_int32, 
+		krb5_keytab,
+		krb5_ticket FAR * FAR *,
+		krb5_data FAR *));
 
 krb5_error_code krb5_walk_realm_tree
 	KRB5_PROTOTYPE((krb5_context,
