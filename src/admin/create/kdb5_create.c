@@ -296,10 +296,10 @@ struct realm_info *pblock;
 
     memset((char *) &entry, 0, sizeof(entry));
     entry.principal = princ;
-    entry.kvno = 0;
+    entry.kvno = 1;
     entry.max_life = pblock->max_life;
     entry.max_renewable_life = pblock->max_rlife;
-    entry.mkvno = 0;
+    entry.mkvno = 1;
     entry.expiration = pblock->expiration;
     entry.mod_name = &db_create_princ;
 

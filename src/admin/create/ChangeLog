@@ -1,3 +1,7 @@
+Tue Jul 19 18:56:59 1994  Tom Yu  (tlyu at dragons-lair)
+
+	* kdb5_create.c: start kvno and mkno at 1, not 0.
+
 Wed Jun 29 00:19:17 1994  Tom Yu  (tlyu at dragons-lair)
 
 	* kdb5_create.c: fixed up something that should have been a call
