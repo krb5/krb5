@@ -264,10 +264,10 @@ cleanup:
    if (code) {
        if (*auth_context)
 	   krb5_auth_con_free(context, *auth_context);
+       if (ctypes)
+	   krb5_free_cksumtypes(context, ctypes);
    }
 
-   if (ctypes)
-       krb5_free_cksumtypes(context, ctypes);
    if (out_creds)
        krb5_free_creds(context, out_creds);
    krb5_free_cred_contents(context, &in_creds);
