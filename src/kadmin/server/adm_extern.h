@@ -182,6 +182,7 @@ krb5_error_code cpw_keyproc
 		   krb5_pointer,
 		   krb5_principal,
 		   krb5_kvno,
+		   krb5_keytype,
 		   krb5_keyblock **));
 
 krb5_error_code process_client

@@ -46,11 +46,12 @@ struct cpw_keyproc_arg {
 };
 
 krb5_error_code
-cpw_keyproc(context, keyprocarg, server, key_vno, key)
+cpw_keyproc(context, keyprocarg, server, key_vno, keytype, key)
     krb5_context context;
     krb5_pointer keyprocarg;
     krb5_principal server;
     krb5_kvno key_vno;
+    krb5_keytype keytype;
     krb5_keyblock ** key;
 {
     krb5_error_code retval;
