@@ -1116,9 +1116,9 @@ uses to determine which principals are allowed which permissions on the
 database.  The default is @code{@value{DefaultAclFile}}.
 
 @itemx admin_keytab
-(String.)  Location of the keytab file that kadmin uses to authenticate
-to the database.  The default is
-@code{@value{DefaultAdminKeytab}}.
+(String.)  Location of the keytab file that the legacy administration
+daemons @code{kadmind4} and @code{v5passwdd} use to authenticate to
+the database.  The default is @code{@value{DefaultAdminKeytab}}.
 
 @itemx database_name
 (String.)  Location of the Kerberos database for this realm.  The

@@ -1,5 +1,11 @@
 2003-05-27  Tom Yu  <tlyu@mit.edu>
 
+	* admin.texinfo (realms (kdc.conf)): Update to reflect that
+	kadm5.keytab is only used by legacy admin daemons.
+
+	* install.texinfo (Create a kadmind Keytab (optional)): Update to
+	reflect that kadm5.keytab is only used by legacy admin daemons.
+
 	* build.texinfo (HPUX): Make HPUX compiler flags simpler.
 
 2003-05-23  Ken Raeburn  <raeburn@mit.edu>
