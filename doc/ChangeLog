@@ -10,6 +10,10 @@
 	* krb4-xrealm.txt: New file.  Describe the krb4 cross-realm
 	patchkit.  Copied from 2003-004-krb4_patchkit.
 
+2003-02-07  Ken Raeburn  <raeburn@mit.edu>
+
+	* copyright.texinfo: Add Yarrow, AES licenses.
+
 2003-02-04  Sam Hartman  <hartmans@mit.edu>
 
 	* krb425.texinfo (Upgrading KDCs): Note that -4 needs to be specified
