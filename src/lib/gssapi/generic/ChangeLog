@@ -1,3 +1,9 @@
+2001-06-21  Ezra Peisach  <epeisach@mit.edu>
+
+	* util_validate.c (g_validate, g_save, g_delete): If HAVE_BSD_TYPE
+	is not defined, declare static functions as taking a void *type for
+	passing to g_set_entry_add.
+
 2001-05-08  Ezra Peisach  <epeisach@mit.edu>
 
 	* disp_major_status.c (display_unknown): Remove unused variable. 

@@ -56,7 +56,11 @@ typedef struct _vkey {
 
 static int g_save(db, type, ptr)
      void **db;
+#ifdef HAVE_BSD_DB
      int type;
+#else
+     void *type;
+#endif
      void *ptr;
 {
 #ifdef HAVE_BSD_DB
@@ -76,18 +80,23 @@ static int g_save(db, type, ptr)
    return((*((*vdb)->put))(*vdb, &key, &dbtone, 0) == 0);
 #else
    g_set *gs = (g_set *) db;
+   void *a = (void *) type;
 
    if (!*gs)
       if (g_set_init(gs))
 	 return(0);
 
-   return(g_set_entry_add(gs, ptr, (void *) type) == 0);
+   return(g_set_entry_add(gs, ptr, type) == 0);
 #endif
 }
 
 static int g_validate(db, type, ptr)
      void **db;
+#ifdef HAVE_BSD_DB
      int type;
+#else
+     void *type;
+#endif
      void *ptr;
 {
 #ifdef HAVE_BSD_DB
@@ -119,13 +128,17 @@ static int g_validate(db, type, ptr)
    if (g_set_entry_get(gs, ptr, (void **) &value))
       return(0);
 
-   return(((int) value) == type);
+   return(value == type);
 #endif
 }
 
 static int g_delete(db, type, ptr)
      void **db;
+#ifdef HAVE_BSD_DB
      int type;
+#else
+     void *type;
+#endif
      void *ptr;
 {
 #ifdef HAVE_BSD_DB
