@@ -638,7 +638,7 @@ getreply(expecteof)
 					krb_get_err_text(kerror));
 				  n = '5';
 				} else {
-				  if (verbose) printf("%c:", safe ? 'S' : 'P');
+				  if (debug) printf("%c:", safe ? 'S' : 'P');
 				  memcpy(ibuf, msg_data.app_data,
 					msg_data.app_length);
 				  strcpy(&ibuf[msg_data.app_length], "\r\n");
@@ -1839,7 +1839,7 @@ char* gss_services[] = { "ftp", "host", 0 };
 do_auth()
 {
 	extern int setsafe();
-	int oldverbose;
+	int oldverbose = verbose;
 #ifdef KRB5_KRB4_COMPAT
 	char *service, inst[INST_SZ];
 	u_long cksum, checksum = (u_long) getpid();
