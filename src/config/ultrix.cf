@@ -9,7 +9,7 @@
 
 #define OSName            Ultrix-32 4.2
 #define OS_Ultrix         1
-#define OS_TelnetName     ultrix4.2 /* see appl/telnet/Makefile.telnet
+#define OS_TelnetName     ultrix4.0 /* see appl/telnet/config.generic
 				       to select the name for this */
 #define OSMajorVersion    4
 #define OSMinorVersion    2
