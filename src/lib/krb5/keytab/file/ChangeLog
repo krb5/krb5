@@ -1,3 +1,10 @@
+Fri Feb  3 01:53:44 1995  John Gilmore  <gnu@cygnus.com>
+
+	Rename files for DOS 8.3 uniqueness:
+	* ktf_get_en.c => ktf_g_ent.c
+	* ktf_get_na.c => ktf_g_name.c
+	* Makefile.in:  changed to match.
+
 Fri Jan 27 12:54:54 1995  Chris Provenzano (proven@mit.edu)
 
 	* ktf_get_en.c, ktfile.h (krb5_ktfile_get_entry()) Added 
