@@ -1,3 +1,25 @@
+2005-01-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* k5-thread.h (k5_os_mutex) [pthread case]: Add new field "owner"
+	if DEBUG_THREADS.
+	(k5_pthread_mutex_lock, k5_pthread_mutex_unlock,
+	k5_pthread_assert_locked): New macros/functions; if DEBUG_THREADS,
+	set or check the owner field.
+	(K5_OS_MUTEX_PARTIAL_INITIALIZER) [pthread case && DEBUG_THREADS]:
+	Set the owner field.  If PTHREAD_ERRORCHECK_MUTEX_INITIALIZER_NP
+	is defined, use it.
+	(k5_os_mutex_lock, k5_os_mutex_unlock, k5_os_mutex_assert_locked)
+	[pthread case]: Use k5_pthread_ versions.
+	(k5_mutex_destroy): Update the location data with the mutex
+	locked, before destroying it.
+	(k5_mutex_unlock): Update the location data while the mutex is
+	still locked, and check the assertion that the mutex really is
+	locked.  Convert inline function to macro.
+
+	* k5-thread.h (krb5int_mutex_lock_update_stats,
+	krb5int_mutex_unlock_update_stats, krb5int_mutex_report_stats)
+	[!DEBUG_THREADS_STATS]: Declare KRB5_CALLCONV.
+
 2005-01-09  Ken Raeburn  <raeburn@mit.edu>
 
 	* k5-int.h (krb5int_zap_data): Fix preprocessor test for Windows.
