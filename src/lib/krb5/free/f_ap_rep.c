@@ -23,8 +23,8 @@ void
 krb5_free_ap_rep(val)
 register krb5_ap_rep *val;
 {
-    if (val->enc_part.data)
-	xfree(val->enc_part.data);
+    if (val->enc_part.ciphertext.data)
+	xfree(val->enc_part.ciphertext.data);
     xfree(val);
     return;
 }
