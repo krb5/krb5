@@ -45,15 +45,15 @@ depend-verify-gcc-no:
 # Generate a script for dropping in the appropriate make variables, using
 # directory-specific parameters.  General substitutions independent of local
 # make variables happen in depfix.sed.
-depfix2.sed: depend-verify-gcc Makefile $(SRCTOP)/util/depgen.sed
+.depfix2.sed: depend-verify-gcc Makefile $(SRCTOP)/util/depgen.sed
 	x=`$(CC) -print-libgcc-file-name` ; \
-	echo '$(SRCTOP)' '$(myfulldir)' '$(srcdir)' '$(BUILDTOP)' "$$x" | sed -f $(SRCTOP)/util/depgen.sed > depfix2.tmp
-	mv -f depfix2.tmp depfix2.sed
+	echo '$(SRCTOP)' '$(myfulldir)' '$(srcdir)' '$(BUILDTOP)' "$$x" | sed -f $(SRCTOP)/util/depgen.sed > .depfix2.tmp
+	mv -f .depfix2.tmp .depfix2.sed
 
 DEPLIBOBJNAMEFIX = sed -e 's;^\$$(OUTPRE)\([a-zA-Z0-9_\-]*\)\.\$$(OBJEXT):;\1.so \1.po &;'
 
-.depend: .d depfix2.sed $(SRCTOP)/util/depfix.sed
-	sed -f depfix2.sed < .d | sed -f $(SRCTOP)/util/depfix.sed | \
+.depend: .d .depfix2.sed $(SRCTOP)/util/depfix.sed
+	sed -f .depfix2.sed < .d | sed -f $(SRCTOP)/util/depfix.sed | \
 	(if test "x$(STLIBOBJS)" != "x"; then $(DEPLIBOBJNAMEFIX) ; else cat; fi ) \
 	> .depend
 
@@ -71,7 +71,7 @@ depend-prerecurse::
 clean:: clean-$(WHAT)
 
 clean-unix::
-	$(RM) $(OBJS) .depend .d depfix2.sed
+	$(RM) $(OBJS) .depend .d .depfix2.sed .depfix2.tmp
 
 clean-windows::
 	$(RM) *.$(OBJEXT)
