@@ -92,10 +92,10 @@ typedef unsigned char cc_t;
 extern char *malloc(), *calloc(), *realloc();
 #endif
 
-#ifndef	NO_STRING_H
-#include <string.h>
-#else
+#ifndef	HAVE_STRING_H
 #include <strings.h>
+#else
+#include <string.h>
 #endif
 
 #ifndef	_POSIX_VDISABLE

@@ -1,3 +1,9 @@
+Tue Jun 20 14:10:26 1995  Tom Yu  (tlyu@dragons-lair)
+
+	* externs.h: NO_STRING_H -> HAVE_STRING_H
+
+	* configure.in: add test for string.h
+
 Fri Jun 16 09:18:42 1995  Tom Yu  (tlyu@dragons-lair)
 
 	* Makefile.in: "install::" to shut up gmake
