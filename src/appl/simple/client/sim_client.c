@@ -64,8 +64,8 @@ char *argv[];
     krb5_rcache rcache;
     extern krb5_deltat krb5_clockskew;
 
-    if (argc != 2) {
-	fprintf(stderr, "usage: %s <hostname>\n",PROGNAME);
+    if (argc != 2 && argc != 3) {
+	fprintf(stderr, "usage: %s <hostname> [message]\n",PROGNAME);
 	exit(1);
     }
     
@@ -263,8 +263,8 @@ char *argv[];
     }
 
     /* Make the safe message */
-    inbuf.length = strlen(MSG);
-    inbuf.data = MSG;
+    inbuf.data = argc == 3 ? argv[2] : MSG;
+    inbuf.length = strlen (inbuf.data);
 
     if (retval = krb5_mk_safe(&inbuf,
 			      CKSUMTYPE_RSA_MD4_DES,
