@@ -115,18 +115,28 @@ krb5_os_localaddr(context, addr)
     struct ifreq *ifr, ifreq;
     struct ifconf ifc;
     int s, code, n, i;
-    char buf[1024*10];
-    krb5_address *addr_temp [ sizeof(buf)/sizeof(struct ifreq) ];
+    int est_if_count = 8, est_addr_count, est_ifreq_size;
+    char *buf = 0;
+    size_t current_buf_size = 0;
+    krb5_address **addr_temp = 0;
     int n_found;
     int mem_err = 0;
     
-    memset(buf, 0, sizeof(buf));
-    ifc.ifc_len = sizeof(buf);
-    ifc.ifc_buf = buf;
-
     s = socket (USE_AF, USE_TYPE, USE_PROTO);
     if (s < 0)
 	return SOCKET_ERRNO;
+
+    /* At least on NetBSD, an ifreq can hold an IPv4 address, but
+       isn't big enough for an IPv6 or ethernet address.  So add a
+       little more space.  */
+    est_ifreq_size = sizeof (struct ifreq) + 8;
+    current_buf_size = est_ifreq_size * est_if_count;
+    buf = malloc (current_buf_size);
+
+ ask_again:
+    memset(buf, 0, current_buf_size);
+    ifc.ifc_len = current_buf_size;
+    ifc.ifc_buf = buf;
 
     code = ioctl (s, SIOCGIFCONF, (char *)&ifc);
     if (code < 0) {
@@ -134,9 +144,33 @@ krb5_os_localaddr(context, addr)
 	closesocket (s);
 	return retval;
     }
+    /* Test that the buffer was big enough that another ifreq could've
+       fit easily, if the OS wanted to provide one.  That seems to be
+       the only indication we get, complicated by the fact that the
+       associated address may make the required storage a little
+       bigger than the size of an ifreq.  */
+    if (current_buf_size - ifc.ifc_len < sizeof (struct ifreq) + 40) {
+	int new_size;
+	char *newbuf;
+
+	est_if_count *= 2;
+	new_size = est_ifreq_size * est_if_count;
+	newbuf = realloc (buf, new_size);
+	if (newbuf == 0) {
+	    krb5_error_code e = errno;
+	    free (buf);
+	    return e;
+	}
+	current_buf_size = new_size;
+	buf = newbuf;
+	goto ask_again;
+    }
+
     n = ifc.ifc_len;
-    
-n_found = 0;
+    est_addr_count = (n + sizeof (struct ifreq) - 1) / sizeof (struct ifreq);
+    addr_temp = malloc (sizeof (krb5_address *) * est_addr_count);
+    n_found = 0;
+
     for (i = 0; i < n; i+= ifreq_size(*ifr) ) {
 	krb5_address *address;
 	ifr = (struct ifreq *)((caddr_t) ifc.ifc_buf+i);
@@ -161,7 +195,7 @@ n_found = 0;
 	    {
 		struct sockaddr_in *in =
 		    (struct sockaddr_in *)&ifr->ifr_addr;
-		
+
 		address = (krb5_address *)
 		    malloc (sizeof(krb5_address));
 		if (address) {
@@ -247,11 +281,28 @@ n_found = 0;
 	default:
 	    continue;
 	}
-	if (address)
+	if (address) {
+	    /* I doubt this will ever happen, since we were
+	       conservative in figuring est_addr_count in the first
+	       place...  */
+	    if (n_found == est_addr_count - 1) {
+		krb5_address **nw;
+		est_addr_count *= 2;
+		nw = realloc (addr_temp,
+			      sizeof (krb5_address *) * est_addr_count);
+		if (nw == 0) {
+		    mem_err++;
+		    free (address);
+		    break;
+		}
+		addr_temp = nw;
+	    }
 	    addr_temp[n_found++] = address;
+	}
 	address = 0;
     }
     closesocket(s);
+    free (buf);
 
     *addr = (krb5_address **)malloc (sizeof (krb5_address *) * (n_found+1));
     if (*addr == 0)
@@ -262,6 +313,7 @@ n_found = 0;
 	    krb5_xfree(addr_temp[i]);
 	    addr_temp[i] = 0;
 	}
+	free (addr_temp);
 	return ENOMEM;
     }
     
@@ -269,6 +321,7 @@ n_found = 0;
 	(*addr)[i] = addr_temp[i];
     }
     (*addr)[n_found] = 0;
+    free (addr_temp);
     return 0;
 }
 

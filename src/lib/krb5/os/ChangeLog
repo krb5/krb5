@@ -1,3 +1,9 @@
+2000-02-16  Ken Raeburn  <raeburn@mit.edu>
+
+	* localaddr.c (krb5_os_localaddr): Dynamically grow buffer used
+	for SIOCGIFCONF until it appears to have been big enough.
+	Dynamically grow internal address pointer array as needed.
+
 2000-02-11  Marshall Vale  <mjv@mit.edu>
 
 	* init_os_ctx.c (os_get_default_config_files.c): Added new
