@@ -1,3 +1,7 @@
+2000-5-18	Alexandra Ellwood <lxs@mit.edu>
+
+	* macsock.h: local_addr_fallback_kludge defined to 0 again... fixed gethostname
+
 2000-5-9	Alexandra Ellwood <lxs@mit.edu>
 
 	* macsock.h: local_addr_fallback_kludge now defined to magic gethostaddr function
