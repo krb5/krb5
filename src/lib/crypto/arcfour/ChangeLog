@@ -1,3 +1,7 @@
+2003-12-19  Ken Raeburn  <raeburn@mit.edu>
+
+	* arcfour.c (l40): Now const.
+
 2003-07-22  Ken Raeburn  <raeburn@mit.edu>
 
 	* arcfour.c (krb5_arcfour_encrypt_length, krb5_arcfour_encrypt,
