@@ -1,3 +1,8 @@
+Sat Feb 24 18:47:41 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* gssapi.def: Add new GSSAPI V2 calls. (XXX we still need to get
+		the official function numbers defined for them.)
+
 Wed Feb  7 00:23:18 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in: Folded in danw's changes to allow
