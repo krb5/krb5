@@ -1,3 +1,16 @@
+
+Thu Jun 1 14:34:41 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* srv_acl.c: Change default acl file name to be a #define.  If it
+		is not defined, then default to /krb5/krb5_adm.acl.
+	* srv_key.c: Add logic to retrieve or create the database entry for
+		the password changing service.  Subsequently, squirrel away
+		the key so that we do not need a srvtab.
+	* proto_serv.c: If no srvtab is specified, then use the squirreled
+		admin key so that we can live without a srvtab.
+	* kadm5_defs.h: Add prototype for admin key routine.
+	* Makefile.in: Set the default acl file to be $(KRB5ROOT)/krb5_adm.acl.
+	* kadmind5.M: Add description of missing flags.  Removed file names.
+
 Sun May 28 15:58:15 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* srv_main.c (main): Use exit instead of return from

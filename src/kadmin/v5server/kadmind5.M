@@ -43,6 +43,12 @@ enctype
 .B \-k
 mkeytype
 ] [
+.B \-p
+port
+] [
+.B \-r
+realm
+] [
 .B \-t
 timeout
 ] [
@@ -83,7 +89,7 @@ Indicates that the master key name is to be entered manually.
 specifies the encryption type which is to be used.
 .IP \-T
 .B keytab
-specifies the name of the service key table.
+specifies the name of the service key table. 
 .PP
 .B ACL flag
 .IP \-a
@@ -92,12 +98,16 @@ specifies the location of the ACL file.  This file controls remote
 principals' abilities to perform administrative functions.  See the
 ACL FILE section below for the format of this file.
 .PP
-.B Connection flag
+.B Connection flags
 .IP \-t
 Indicates that the server is to terminate a connection if it remains
 inactive for
 .B timeout
 seconds.
+.IP \-p
+Indicates that the administrative server is to listen on port
+.B port
+instead of the default port.
 .PP
 .B Debugging flags
 .IP \-D
@@ -191,13 +201,6 @@ The catchall entry.  The
 applies to all principals and indicates that they may change their own
 passwords.  This entry is the default entry.
 
-.SH FILES
-.TP 2i
-/krb5/principal.*
-the default location of the database.
-.TP 2i
-/etc/krb5_adm.acl
-the default location of the ACL file.
 .SH SEE ALSO
 kpasswd(1), kadmin5(8)
 .SH BUGS

@@ -63,7 +63,10 @@ static const aop_t acl_op_table[] = {
 static aent_t	*acl_list_head = (aent_t *) NULL;
 static aent_t	*acl_list_tail = (aent_t *) NULL;
 
-static const char *acl_default_file = "/etc/krb5_adm.acl";
+#ifndef	KRB5_DEFAULT_ACL_FILE
+#define	KRB5_DEFAULT_ACL_FILE	"/krb5/krb5_adm.acl";
+#endif	/* KRB5_DEFAULT_ACL_FILE */
+static const char *acl_default_file = KRB5_DEFAULT_ACL_FILE;
 static const char *acl_acl_file = (char *) NULL;
 static int acl_inited = 0;
 static int acl_debug_level = 0;
