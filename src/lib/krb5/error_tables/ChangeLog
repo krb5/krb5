@@ -1,3 +1,8 @@
+2002-01-08  Ken Raeburn  <raeburn@mit.edu>
+
+	* krb5_err.et (KRB5_EAI_FAIL, KRB5_EAI_NODATA, KRB5_EAI_NONAME,
+	KRB5_EAI_SERVICE): New error codes for getaddrinfo failures.
+
 2001-10-24  Tom Yu  <tlyu@mit.edu>
 
 	* kdb5_err.et: Add KRB5_KDB_NO_PERMITTED_KEY,
