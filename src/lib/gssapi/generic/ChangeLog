@@ -1,3 +1,7 @@
+Wed May 24 06:52:41 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* gssapiP_generic.h: Include k5-sockets.h now that k5-config.h
+		does not include netdb.h.
 
 Mon May 22 10:08:13 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in	- Install EXPORTED_HEADERS in gssapi subdirectory of

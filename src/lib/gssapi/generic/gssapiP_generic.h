@@ -24,6 +24,9 @@
 #define _GSSAPIP_GENERIC_H_
 
 #include "k5-config.h"
+#ifdef NEED_SOCKETS
+#include "k5-sockets.h"
+#endif
 
 #include "gssapi.h"
 
