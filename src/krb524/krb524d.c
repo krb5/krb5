@@ -119,7 +119,7 @@ int main(argc, argv)
      }
      
      signal(SIGINT, request_exit);
-     signal(SIGHUP, request_exit);
+     signal(SIGHUP, SIG_IGN);
      signal(SIGTERM, request_exit);
 
      if (use_keytab)

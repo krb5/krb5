@@ -25,7 +25,6 @@
 
 #if defined(KERBEROS) || defined(KRB5)
 #include <stdio.h>
-#include <pwd.h>
 #include <netdb.h>
  
 #include "k5-int.h"
@@ -34,22 +33,17 @@ extern char *line;		/* see sys_term.c */
 
 /* Decode, decrypt and store the forwarded creds in the local ccache. */
 krb5_error_code
-rd_and_store_for_creds(context, auth_context, inbuf, ticket, lusername)
+rd_and_store_for_creds(context, auth_context, inbuf, ticket)
     krb5_context context;
     krb5_auth_context auth_context;
     krb5_data *inbuf;
     krb5_ticket *ticket;
-    char *lusername;
 {
     krb5_creds **creds;
     krb5_error_code retval;
     char ccname[35];
     krb5_ccache ccache = NULL;
-    struct passwd *pwd;
     char *tty;
-
-    if (!(pwd = (struct passwd *) getpwnam(lusername))) 
-	return -1;
 
     if (retval = krb5_rd_cred(context, auth_context, inbuf, &creds, NULL)) 
 	return(retval);
@@ -64,9 +58,6 @@ rd_and_store_for_creds(context, auth_context, inbuf, ticket, lusername)
 	goto cleanup;
 
     if (retval = krb5_cc_store_cred(context, ccache, *creds)) 
-	goto cleanup;
-
-    if (retval = chown(ccname+5, pwd->pw_uid, -1)) 
 	goto cleanup;
 
 cleanup:

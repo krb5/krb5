@@ -110,35 +110,44 @@ krb5_ktkdb_get_entry(context, id, principal, kvno, enctype, entry)
 
     /* Open database */
     /* krb5_dbm_db_init(context); */
-    if (kerror = krb5_dbm_db_open_database(context)) 
+    if ((kerror = krb5_dbm_db_open_database(context)))
         return(kerror);
 
     /* get_principal */
-    if (kerror = krb5_dbm_db_get_principal(context, principal, &db_entry,
-					   &n, &more)) {
+    kerror = krb5_dbm_db_get_principal(context, principal, &
+				       db_entry, &n, &more);
+    if (kerror) {
         krb5_dbm_db_close_database(context);
         return(kerror);
     }
-
-    if (n != 1)
-      {
+    if (n != 1) {
 	krb5_dbm_db_close_database(context);
 	return KRB5_KT_NOTFOUND;
-      }
+    }
+
     /* match key */
-    krb5_dbm_db_get_mkey(context, id->ops, &master_key);
-    krb5_dbe_find_enctype(context, &db_entry, enctype, -1, kvno, &key_data);
-    if (kerror = krb5_dbekd_decrypt_key_data(context, master_key, key_data, 
-					     &entry->key, NULL)) 
+    /* WTF??? 2nd arg to dbm_db_get_mkey appears to be unused! -tlyu */
+    kerror = krb5_dbm_db_get_mkey(context, id->ops, &master_key);
+    if (kerror)
 	goto error;
 
-    if (kerror = krb5_copy_principal(context, principal, &entry->principal)) 
+    kerror = krb5_dbe_find_enctype(context, &db_entry,
+				   enctype, -1, kvno, &key_data);
+    if (kerror)
+	goto error;
+
+    kerror = krb5_dbekd_decrypt_key_data(context, master_key,
+					 key_data, &entry->key, NULL);
+    if (kerror)
+	goto error;
+
+    kerror = krb5_copy_principal(context, principal, &entry->principal);
+    if (kerror)
 	goto error;
 
     /* Close database */
-error:;
+  error:
     krb5_dbe_free_contents(context, &db_entry);
     krb5_dbm_db_close_database(context);
     return(kerror);
 }
-

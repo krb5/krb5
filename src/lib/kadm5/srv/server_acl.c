@@ -276,7 +276,8 @@ char tmpbuf[10];
     }
     else {
 	com_err(acl_acl_file, errno, acl_cantopen_msg);
-	if (acl_list_head = acl_parse_line(acl_catchall_entry)) {
+	if (acl_catchall_entry &&
+	    (acl_list_head = acl_parse_line(acl_catchall_entry))) {
 	    acl_list_tail = acl_list_head;
 	}
 	else {

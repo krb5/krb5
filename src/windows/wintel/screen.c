@@ -694,16 +694,21 @@ long FAR PASCAL ScreenWndProc(
 			break;
 
 		case IDM_ABOUT:
-	        #ifdef KRB4
-				strcpy(strTmp, "        Kerberos 4 for Windows\n");
-			#endif
-			#ifdef KRB5
-				strcpy(strTmp, "        Kerberos 5 for Windows\n");
-			#endif
+#ifdef CYGNUS
+#ifdef KRB4
+			strcpy(strTmp, "        Kerberos 4 for Windows\n");
+#endif
+#ifdef KRB5
+			strcpy(strTmp, "        Kerberos 5 for Windows\n");
+#endif
 			strcat(strTmp, "\n                Version 1.00\n\n");
 			strcat(strTmp, "          For support, contact:\n");
 			strcat(strTmp, "Cygnus Support");
 			strcat(strTmp, " - (415) 903-1400");
+#else
+			strcpy(strTmp, "   Kerberos 5 Telnet for Windows\n");
+			strcat(strTmp, "\n             Version 1.00\n\n");
+#endif
 			MessageBox(NULL, strTmp, "Kerberos", MB_OK);
 			break;
 

@@ -21,7 +21,7 @@
 
 error_table pty
 
-	error_code PTY_GETPTY_STREAMS, "Failed to unlock or grant streams pty."
+error_code PTY_GETPTY_STREAMS, "Failed to unlock or grant streams pty."
 
 error_code PTY_GETPTY_FSTAT, "fstat of master pty failed"
 
@@ -42,3 +42,4 @@ error_code PTY_OPEN_SLAVE_PUSH_FAIL, "Failed to push stream on slave side of pty
 error_code PTY_OPEN_SLAVE_REVOKEFAIL, "Failed to revoke slave side of pty"
 
 error_code PTY_UPDATE_UTMP_PROCTYPE_INVALID, "bad process type passed to pty_update_utmp"
+error_code PTY_OPEN_SLAVE_TOOSHORT, "Slave pty name is zero-length"

@@ -25,7 +25,7 @@ possible.) It will also attempt to run
 .I aklog
 to get \fIAFS\fP tokens for the user. The version 5 tickets will be
 tested against a local 
-.I v5srvtab
+.I krb5.keytab
 if it is available, in order to verify the tickets, before letting the
 user in. However, if the password matches the entry in
 \fI/etc/passwd\fP the user will be unconditionally allowed (permitting

@@ -1,8 +1,8 @@
 #include <tcl.h>
 
-#define IS_TCL_7_5 ((TCL_MAJOR_VERSION * 100 + TCL_MINOR_VERSION) >= 705)
+#define _TCL_MAIN ((TCL_MAJOR_VERSION * 100 + TCL_MINOR_VERSION) >= 704)
 
-#if IS_TCL_7_5
+#if _TCL_MAIN
 int
 main(argc, argv)
     int argc;			/* Number of command-line arguments. */

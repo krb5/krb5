@@ -1,3 +1,11 @@
+Thu Nov 20 17:13:42 1997  Tom Yu  <tlyu@mit.edu>
+
+	* forward.c (rd_and_store_for_creds): Fix up to no longer do the
+	chown [krb5-appl/502]
+
+	* kerberos5.c (kerberos5_is): Fix up call to
+	rd_and_store_for_creds. [krb5-appl/502]
+
 Thu Nov  7 15:29:09 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* kerberos5.c (kerberos5_init): Check the error return from

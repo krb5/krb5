@@ -73,7 +73,7 @@ clnt_create(hostname, prog, vers, proto)
 	sin.sin_family = h->h_addrtype;
 	sin.sin_port = 0;
 	memset(sin.sin_zero, 0, sizeof(sin.sin_zero));
-	memmove((char*)&sin.sin_addr, h->h_addr, h->h_length);
+	memmove((char*)&sin.sin_addr, h->h_addr, sizeof(sin.sin_addr));
 	p = getprotobyname(proto);
 	if (p == NULL) {
 		rpc_createerr.cf_stat = RPC_UNKNOWNPROTO;

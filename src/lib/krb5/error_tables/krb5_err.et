@@ -300,5 +300,6 @@ error_code KRB5_CONFIG_NODEFREALM,	"Configuration file does not specify default 
 
 error_code KRB5_SAM_UNSUPPORTED,  "Bad SAM flags in obtain_sam_padata"
 error_code KRB5_KT_NAME_TOOLONG,	"Keytab name too long"
+error_code KRB5_KT_KVNONOTFOUND,	"Key version number for principal in key table is incorrect"
 
 end
