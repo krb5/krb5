@@ -143,7 +143,7 @@ int krb524_convert_tkt_skey(context, v5tkt, v4tkt, v5_skey, v4_skey,
      if ((server_time + context->clockskew >= v5etkt->times.starttime)
 	 && (server_time - context->clockskew <= v5etkt->times.endtime)) {
 	  lifetime = krb_time_to_life(server_time, v5etkt->times.endtime);
-	  v4endtime = krb_life_to_time(v5etkt->times.starttime, lifetime);
+	  v4endtime = krb_life_to_time(server_time, lifetime);
 	  /*
 	   * Adjust start time backwards if the lifetime value
 	   * returned by krb_time_to_life() maps to a longer lifetime

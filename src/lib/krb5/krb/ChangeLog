@@ -1,3 +1,8 @@
+2003-09-02  Tom Yu  <tlyu@mit.edu>
+
+	* conv_creds.c (krb524_convert_creds_plain): Apply patch from
+	Cesar Garcia to fix lifetime computation.
+
 2003-08-19  SamHartman  <hartmans@avalanche-breakdown.mit.edu>
 
 	* rd_cred.c (decrypt_credencdata): Don't double free credentials.

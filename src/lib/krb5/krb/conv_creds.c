@@ -130,7 +130,7 @@ krb524_convert_creds_plain(context, v5creds, v4creds)
      v4creds->issue_date = v5creds->times.starttime;
      v4creds->lifetime = krb5int_krb_time_to_life(v5creds->times.starttime,
 						  v5creds->times.endtime);
-     endtime = krb5int_krb_life_to_time(v5creds->times.starttime,
+     endtime = krb5int_krb_life_to_time(v4creds->issue_date,
 					v4creds->lifetime);
      /*
       * Adjust start time backwards to deal with rounding up in
