@@ -499,6 +499,7 @@ Principal *princ;
 	    printf("\nignoring '%s.%s' ...", princ->name, princ->instance);
 	return 0;
     }
+    memset((char *) &entry, 0, sizeof(entry));
     if (retval = krb5_425_conv_principal(princ->name, princ->instance,
 					 realm, &entry.principal))
 	return retval;
@@ -579,6 +580,7 @@ struct realm_info *pblock;
     krb5_keyblock *rkey;
     int nentries = 1;
 
+    memset((char *) &entry, 0, sizeof(entry));
     entry.principal = princ;
     entry.kvno = 0;
     entry.max_life = pblock->max_life;
