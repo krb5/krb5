@@ -50,7 +50,7 @@
 # include "fake-addrinfo.h"
 #endif
 
-#include "foreachaddr.c"
+#include "foreachaddr.h"
 
 /* Note: foreach_localaddr is exported from the library through
    krb5int_accessor, for the KDC to use.

@@ -159,7 +159,7 @@ $(OUTPRE)network.$(OBJEXT): network.c $(SRCTOP)/include/k5-int.h \
   $(SRCTOP)/include/krb5/kdb.h kdc_util.h extern.h kdc5_err.h \
   $(SRCTOP)/include/krb5/adm_proto.h $(SRCTOP)/include/syslog.h \
   $(SRCTOP)/include/fake-addrinfo.h $(SRCTOP)/include/cm.h \
-  $(SRCTOP)/include/foreachaddr.c
+  $(SRCTOP)/include/foreachaddr.h
 $(OUTPRE)policy.$(OBJEXT): policy.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \

@@ -373,7 +373,7 @@ localaddr.so localaddr.po $(OUTPRE)localaddr.$(OBJEXT): localaddr.c $(SRCTOP)/in
   $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
   $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
-  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/foreachaddr.c
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/foreachaddr.h
 locate_kdc.so locate_kdc.po $(OUTPRE)locate_kdc.$(OBJEXT): locate_kdc.c $(SRCTOP)/include/fake-addrinfo.h \
   $(SRCTOP)/include/port-sockets.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-platform.h \

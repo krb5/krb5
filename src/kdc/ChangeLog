@@ -1,3 +1,7 @@
+2004-05-05  Ken Raeburn  <raeburn@mit.edu>
+
+	* network.c: Include foreachaddr.h, not foreachaddr.c.
+
 2004-04-02  Ken Raeburn  <raeburn@mit.edu>
 
 	* network.c (setup_a_tcp_listener): Try to turn the IPV6_V6ONLY

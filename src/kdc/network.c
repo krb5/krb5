@@ -262,7 +262,7 @@ static krb5_error_code add_tcp_port(int port)
 #define USE_TYPE SOCK_DGRAM
 #define USE_PROTO 0
 #define SOCKET_ERRNO errno
-#include "foreachaddr.c"
+#include "foreachaddr.h"
 
 struct socksetup {
     const char *prog;
