@@ -23,16 +23,24 @@ AC_EGREP_HEADER(time_t, sys/types.h, AC_DEFINE(POSIX_TYPES))
 
 
 dnl AC_RETSIGTYPE isn't quite right, but almost.
-AC_COMPILE_CHECK([POSIX signal handlers],
+AC_MSG_CHECKING([POSIX signal handlers])
+AC_CACHE_VAL(krb5_cv_has_posix_signals,
+[AC_TRY_COMPILE(
 [#include <sys/types.h>
 #include <signal.h>
 #ifdef signal
 #undef signal
 #endif
-extern void (*signal ()) ();], ,
-[AC_DEFINE(krb5_sigtype, void) AC_DEFINE(POSIX_SIGTYPE)],
-[AC_DEFINE(krb5_sigtype, int)])
-
+extern void (*signal ()) ();], [],
+krb5_cv_has_posix_signals=yes, krb5_cv_has_posix_signals=no)])
+AC_MSG_RESULT($krb5_cv_has_posix_signals)
+if test $krb5_cv_has_posix_signals = yes; then
+AC_DEFINE(krb5_sigtype, void) AC_DEFINE(POSIX_SIGTYPE)
+else
+AC_DEFINE(krb5_sigtype, int)
+fi
+dnl
+dnl
 AC_HEADER_CHECK(string.h,AC_DEFINE(USE_STRING_H))
 AC_HEADER_CHECK(stdlib.h,AC_DEFINE(HAS_STDLIB_H),AC_DEFINE(NO_STDLIB_H))
 CHECK_STDARG
@@ -40,9 +48,10 @@ CHECK_STDARG
 AC_FUNC_CHECK([setvbuf],AC_DEFINE(HAS_SETVBUF))
 dnl check for ANSI stdio, esp "b" option to fopen().  This (unfortunately)
 dnl requires a run check...
-AC_CHECKING([for ANSI stdio])
-AC_TEST_PROGRAM([
-#include <stdio.h>
+AC_MSG_CHECKING([for ANSI stdio])
+AC_CACHE_VAL(krb5_cv_has_ansi_stdio,
+[AC_TRY_RUN(
+[#include <stdio.h>
 int main()
 {
   FILE *conftest;
@@ -51,17 +60,47 @@ int main()
   if ((conftest = fopen("conftest.dat", "rb+")) == NULL) exit(1);
   if (fputs("testing ANSI for stdio\n", conftest) == EOF) exit(1);
   exit(0);
-}],AC_DEFINE(ANSI_STDIO))
-
-AC_COMPILE_CHECK([prototype support],
-[int x(double y, int z);],,AC_DEFINE(KRB5_PROVIDE_PROTOTYPES))
+}],
+krb5_cv_has_ansi_stdio=yes, krb5_cv_has_ansi_stdio=no,
+krb5_cv_has_ansi_stdio=yes)])dnl assume ANSI in cross environment
+AC_MSG_RESULT($krb5_cv_has_ansi_stdio)
+if test $krb5_cv_has_ansi_stdio = yes; then
+AC_DEFINE(ANSI_STDIO)
+fi
+dnl
+AC_MSG_CHECKING([prototype support])
+AC_CACHE_VAL(krb5_cv_has_prototypes,
+[AC_TRY_COMPILE(
+[int x(double y, int z);], [],
+krb5_cv_has_prototypes=yes, krb5_cv_has_prototypes=no)])
+AC_MSG_RESULT($krb5_cv_has_prototypes)
+if test $krb5_cv_has_prototypes = yes; then
+AC_DEFINE(KRB5_PROVIDE_PROTOTYPES)
+fi
 dnl *never* set NARROW_PROTOTYPES
 
-AC_COMPILE_CHECK([prototypes in structs],
-[typedef int i_t; typedef struct foo { int (*foofn)(i_t, i_t); } *footype;],,,
-AC_DEFINE(NO_NESTED_PROTOTYPES))
+AC_MSG_CHECKING([prototypes in structs])
+AC_CACHE_VAL(krb5_cv_struct_prototypes,
+[AC_TRY_COMPILE(
+[typedef int i_t; typedef struct foo { int (*foofn)(i_t, i_t); } *footype;],
+[],
+krb5_cv_struct_prototypes=yes, krb5_cv_struct_prototypes=no)])
+AC_MSG_RESULT($krb5_cv_struct_prototypes)
+if test $krb5_cv_struct_prototypes = no; then
+AC_DEFINE(NO_NESTED_PROTOTYPES)
+fi
+dnl
 
-AC_COMPILE_CHECK([void],[void x();], , AC_DEFINE(HAS_VOID_TYPE))
+AC_MSG_CHECKING([void])
+AC_CACHE_VAL(krb5_cv_has_void_type,
+[AC_TRY_COMPILE(
+[void x();], [], 
+krb5_cv_has_void_type=yes, krb5_cv_has_void_type=no)])
+AC_MSG_RESULT($krb5_cv_has_void_type)
+if test $krb5_cv_has_void_type = yes; then
+AC_DEFINE(HAS_VOID_TYPE)
+fi
+dnl
 
 
 dnl base-defs.h tries to do the same thing anyhow.
@@ -69,7 +108,16 @@ dnl HAS_ANSI_CONST is here, but -Dconst= is better...
 AC_CONST
 AC_DEFINE(HAS_ANSI_CONST)
 
-AC_COMPILE_CHECK([volatile],[volatile int x();], ,AC_DEFINE(HAS_ANSI_VOLATILE))
+AC_MSG_CHECKING([volatile])
+AC_CACHE_VAL(krb5_cv_has_ansi_volatile,
+[AC_TRY_COMPILE(
+[volatile int x();], [],
+krb5_cv_has_ansi_volatile=yes, krb5_cv_has_ansi_volatile=no)])
+AC_MSG_RESULT($krb5_cv_has_ansi_volatile)
+if test $krb5_cv_has_ansi_volatile = yes; then
+AC_DEFINE(HAS_ANSI_VOLATILE)
+fi
+dnl
 
 dnl BITS16, BITS32, BITS64
 AC_DEFINE(BITS32)

@@ -1,3 +1,8 @@
+Wed Jan 25 20:01:36 1995  Mark Eichin  (eichin@cygnus.com)
+
+	* configure.in: rewrote remaining tests to use AC_TRY_COMPILE and
+	caching. Added cross-compile case for ANSI stdio test.
+
 Wed Jan 25 17:50:35 1995  Chris Provenzano  (proven@mit.edu)
 
 	* Removed narrow.h and widen.h
