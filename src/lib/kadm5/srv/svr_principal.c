@@ -1207,8 +1207,8 @@ kadm5_randkey_principal_3(void *server_handle,
        return(ret);
 
     if (ret = krb5_dbe_crk(handle->context, &master_keyblock,
-			   n_ks_tuple?n_ks_tuple:handle->params.keysalts,
-			   n_ks_tuple?ks_tuple:handle->params.num_keysalts,
+			   n_ks_tuple?ks_tuple:handle->params.keysalts,
+			   n_ks_tuple?n_ks_tuple:handle->params.num_keysalts,
 			   keepold,
 			   &kdb))
        goto done;
