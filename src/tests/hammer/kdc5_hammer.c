@@ -355,7 +355,7 @@ int get_tgt (p_client_str, p_client, ccache)
     krb5_error_code code;
     krb5_creds my_creds;
     krb5_timestamp start;
-    krb5_data *tgt_server[4];
+    krb5_principal tgt_server;
 
     if (!brief)
       fprintf(stderr, "\tgetting TGT for %s\n", p_client_str);
@@ -372,12 +372,18 @@ int get_tgt (p_client_str, p_client, ccache)
 	return(-1);
     }
 
-    my_creds.server = tgt_server;
 
-    tgt_server[0] = *p_client[0];		/* realm name */
-    tgt_server[1] = &tgtname;
-    tgt_server[2] = *p_client[0];
-    tgt_server[3] = 0;
+    if (code = krb5_build_principal_ext(&tgt_server,
+					krb5_princ_realm(*p_client)->length,
+					krb5_princ_realm(*p_client)->data,
+					tgtname.length,
+					tgtname.data,
+					krb5_princ_realm(*p_client)->length,
+					krb5_princ_realm(*p_client)->data,
+					0)) {
+	com_err(prog, code, "when setting up tgt principal");
+	return(-1);
+    }
 
     code = krb5_os_localaddr(&my_addresses);
     if (code != 0) {
@@ -409,6 +415,7 @@ int get_tgt (p_client_str, p_client, ccache)
 					 ccache,
 					 &my_creds);
     my_creds.server = my_creds.client = 0;
+    krb5_free_principal(tgt_server);
     krb5_free_addresses(my_addresses);
     krb5_free_cred_contents(&my_creds);
     if (code != 0) {
