@@ -580,9 +580,6 @@ krb5_klog_init(kcontext, ename, whoami, do_com_err)
 				    log_control.log_entries[i].lsu_facility = facilities[j].value;
 				    break;
 				}
-			    if (!strcasecmp(cp2, "AUTH")) {
-				log_control.log_entries[i].lsu_facility = LOG_AUTH;
-			    }
 			    cp2--;
 			    *cp2 = savec;
 			}
