@@ -1,3 +1,9 @@
+2003-04-24  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in ($(srcdir)/krb5/autoconf.stmp): Try running
+	autoheader with --include, and if that doesn't work, try
+	--localdir.
+
 2003-04-07  Ken Raeburn  <raeburn@mit.edu>
 
 	* fake-addrinfo.h (getaddrinfo) [NUMERIC_SERVICE_BROKEN]:

@@ -1,3 +1,7 @@
+2003-04-24  Ken Raeburn  <raeburn@mit.edu>
+
+	* aclocal.m4: Require autoconf 2.52 only.
+
 2003-04-23  Ken Raeburn  <raeburn@mit.edu>
 
 	* aclocal.m4: Require autoconf 2.53.
