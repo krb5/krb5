@@ -1,3 +1,11 @@
+2000-05-17  Tom Yu  <tlyu@mit.edu>
+
+	* kerberos_v4.c (process_v4): Zero out v4_pkt.mbz.
+	(kerberos_v4): Fix handling of APPL_REQUEST messages to deal with
+	ridiculously long realms, etc.  Fix up some calls to
+	kerb_err_reply() to be more useful.  Set req_*_ptr before any
+	possible calls to kerb_err_reply().
+
 2000-05-11  Nalin Dahyabhai  <nalin@redhat.com>
 
 	* kdc_util.c (add_to_transited): Use strncpy/strncat when building
