@@ -773,7 +773,7 @@ is_unique(name, as, ae)
 char termbuf[1024];
 
 	/*ARGSUSED*/
-	int
+static int
 setupterm(tname, fd, errp)
 	char *tname;
 	int fd, *errp;
@@ -879,14 +879,14 @@ suboption()
 	if (SB_EOF())
 	    return;
 	if (SB_GET() == TELQUAL_SEND) {
-	    long ospeed, ispeed;
+	    long o_speed, ispeed;
 	    unsigned char temp[50];
 	    int len;
 
-	    TerminalSpeeds(&ispeed, &ospeed);
+	    TerminalSpeeds(&ispeed, &o_speed);
 
 	    sprintf((char *)temp, "%c%c%c%c%ld,%ld%c%c", IAC, SB, TELOPT_TSPEED,
-		    TELQUAL_IS, ospeed, ispeed, IAC, SE);
+		    TELQUAL_IS, o_speed, ispeed, IAC, SE);
 	    len = strlen((char *)temp+4) + 4;	/* temp[3] is 0 ... */
 
 	    if (len < NETROOM()) {
@@ -1675,7 +1675,7 @@ env_opt_add(ep)
 		opt_replyp = opt_reply + len - (opt_replyend - opt_replyp);
 		opt_replyend = opt_reply + len;
 	}
-	if (opt_welldefined(ep))
+	if (opt_welldefined((char *) ep))
 #ifdef	OLD_ENVIRON
 		if (telopt_environ == TELOPT_OLD_ENVIRON)
 			*opt_replyp++ = old_env_var;

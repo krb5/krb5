@@ -1,3 +1,11 @@
+2001-08-29  Ken Raeburn  <raeburn@mit.edu>
+
+	* telnet.c (setupterm): Now static.
+	(suboption): Rename local variable "ospeed" to "o_speed" to avoid
+	conflict with global.
+	(env_opt_add): Cast opt_welldefined argument to char * to silence
+	warning.
+
 2001-07-08  Ezra Peisach  <epeisach@mit.edu>
 
 	* configure.in: Add AC_HEADER_STDARG.
