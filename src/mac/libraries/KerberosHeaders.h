@@ -14,7 +14,7 @@
 #define macintosh
 #define SIZEOF_INT 4
 #define SIZEOF_SHORT 2
-#define ENOMEM -1
+/*#define ENOMEM -1*/
 #define HAVE_SRAND
 #define NO_PASSWORD
 #define HAVE_LABS
