@@ -249,6 +249,7 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
    gss_cred_id_t cred_handle = NULL;
    krb5_gss_cred_id_t deleg_cred = NULL;
    krb5int_access kaccess;
+   int got_rcache = 0;
 
    code = krb5int_accessor (&kaccess, KRB5INT_ACCESS_VERSION);
    if (code) {
@@ -382,6 +383,7 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
        goto fail;
    }
    if (cred->rcache) {
+       got_rcache = 1;
        if ((code = krb5_auth_con_setrcache(context, auth_context, cred->rcache))) {
 	   major_status = GSS_S_FAILURE;
 	   goto fail;
@@ -877,7 +879,9 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
        krb5_free_authenticator(context, authdat);
    /* The ctx structure has the handle of the auth_context */
    if (auth_context && !ctx) {
-       (void)krb5_auth_con_setrcache(context, auth_context, NULL);
+       if (!got_rcache)
+	   (void)krb5_auth_con_setrcache(context, auth_context, NULL);
+
        krb5_auth_con_free(context, auth_context);
    }
    if (reqcksum.contents)
