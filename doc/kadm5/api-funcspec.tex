@@ -269,7 +269,7 @@ principal cannot set its password to anything with fewer than this
 number of characters.  This value must be greater than zero.
 
 \item[pw_min_classes] The minimum number of character classes in the
-password.  This value can only be 1, 2, 3, or 4.  A principal cannot
+password.  This value can only be 1, 2, 3, 4, or 5.  A principal cannot
 set its password to anything with fewer than this number of character
 classes in it.
 
@@ -1098,7 +1098,7 @@ characters.
 \item Check to see if the policy already exists, if so return
 OVSEC_KADM_DUP error. 
 \item If the PW_MIN_CLASSES bit is set and pw_min_classes is not 1, 2,
-3, or 4, return OVSEC_KADM_BAD_CLASS.
+3, 4, or 5, return OVSEC_KADM_BAD_CLASS.
 \item Create a new policy setting the appropriate fields determined
 by the mask.
 \end{enumerate}
@@ -1161,7 +1161,7 @@ characters.
 \item Check to see if policy exists, if not return
 OVSEC_KADM_UNK_POLICY error.
 \item If the PW_MIN_CLASSES bit is set and pw_min_classes is not 1, 2,
-3, or 4, return OVSEC_KADM_BAD_CLASS.
+3, 4, or 5, return OVSEC_KADM_BAD_CLASS.
 \item Update the fields specified in the mask.
 \end{enumerate}
 
