@@ -121,14 +121,24 @@ static void krb5int_yarrow_init_Limits(Yarrow_CTX* y)
 
 static int Yarrow_detect_fork(Yarrow_CTX *y)
 {
+    pid_t newpid;
     EXCEP_DECL;
 
     /* this does not work for multi-threaded apps if threads have different
      * pids */
-    if ( y->pid != getpid() )
+       newpid = getpid();
+    if ( y->pid != newpid )
     {
-	TRY( krb5int_yarrow_init( y, y->entropyfile ) );
-    }
+	/* we input the pid twice, so it will get into the fast pool at least once
+	 * Then we reseed.  This doesn't really increase entropy, but does make the
+	 * streams distinct assuming we already have good entropy*/
+	y->pid = newpid;
+	TRY (krb5int_yarrow_input (y, 0, &newpid,
+				   sizeof (newpid), 0));
+		TRY (krb5int_yarrow_input (y, 0, &newpid,
+				   sizeof (newpid), 0));
+		TRY (krb5int_yarrow_reseed (y, YARROW_FAST_POOL));
+		    }
 
  CATCH:
     EXCEP_RET;

@@ -1,3 +1,7 @@
+2001-11-21  Sam Hartman  <hartmans@mit.edu>
+
+	* yarrow.c (Yarrow_detect_fork): Reseed the number generator including the fork rather than throwing away state.
+
 2001-11-19  Sam Hartman  <hartmans@mit.edu>
 
 	* yhash.h: Work around sha1 implementation using host byte order
