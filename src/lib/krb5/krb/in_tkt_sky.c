@@ -22,6 +22,7 @@ static char rcsid_in_tkt_skey_c [] =
 
 #include <errno.h>
 #include <krb5/ext-proto.h>
+#include <krb5/asn1.h>			/* XXX for krb5_free_keyblock! */
 
 struct skey_keyproc_arg {
     krb5_keyblock *key;
@@ -50,7 +51,7 @@ OLDDECLARG(krb5_pointer, keyseed)
     arg = (struct skey_keyproc_arg *)keyseed;
 
     if (!valid_keytype(type))
-	return KRB5KDC_ERR_ETYPE_NOSUPP; /* XXX */
+	return KRB5_PROG_ETYPE_NOSUPP;
 
     if (arg->server) {
 	/* do keytab stuff */
@@ -71,23 +72,21 @@ OLDDECLARG(krb5_pointer, keyseed)
     }    
 
     if (arg->key)
-	*realkey = *arg->key;
+	retval = krb5_copy_keyblock(arg->key, realkey);
     else
-	*realkey = *kt_ent.key;
-    if (realkey->keytype != type) {
+	retval = krb5_copy_keyblock(kt_ent.key, realkey);
+    if (retval) {
 	free((char *)realkey);
 	cleanup();
-	return KRB5KDC_ERR_ETYPE_NOSUPP; /* XXX */
+	return retval;
+    }
+	
+    if (realkey->keytype != type) {
+	krb5_free_keyblock(realkey);
+	cleanup();
+	return KRB5_PROG_ETYPE_NOSUPP;
     }	
 
-    /* allocate a copy of the contents */
-    if (!(realkey->contents = (krb5_octet *)malloc(realkey->length))) {
-	free((char *)realkey);
-	cleanup();
-	return ENOMEM;
-    }
-    bcopy((char *)arg->key->contents,
-	  (char *)realkey->contents, realkey->length);
     *key = realkey;
     cleanup();
     return 0;
@@ -139,7 +138,10 @@ OLDDECLARG(krb5_creds *, creds)
     } else {
 	arg.key = 0;
 	arg.server = creds->server;
-	keytype = find_keytype(etype);	/* XXX */
+	if (!valid_etype(etype))
+	    return(KRB5_PROG_ETYPE_NOSUPP);
+
+	keytype = krb5_csarray[etype]->system->proto_keytype;
     }
     return (krb5_get_in_tkt(options, addrs, etype, keytype, skey_keyproc,
 			    (krb5_pointer) &arg,
