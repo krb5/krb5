@@ -1,3 +1,10 @@
+2004-08-12  Alexandra Ellwood  <lxs@mit.edu>
+
+        * ccdefname.c (krb5_cc_set_default_name, krb5_cc_default_name):
+        Look up the default ccache name in krb5_cc_default_name, not
+        krb5_cc_set_default_name so that krb5_init_context doesn't
+        have to do work it might never use.
+
 2004-07-22  Ken Raeburn  <raeburn@mit.edu>
 
 	* localaddr.c (get_lifconf): Define only if "struct lifconf" is

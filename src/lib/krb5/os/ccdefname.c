@@ -233,51 +233,67 @@ static krb5_error_code get_from_os(char *name_buf, int name_size)
 krb5_error_code KRB5_CALLCONV
 krb5_cc_set_default_name(krb5_context context, const char *name)
 {
-	char name_buf[1024];
-	char *new_name;
-	krb5_error_code retval;
-	krb5_os_context os_ctx;
-
-	if (!context || context->magic != KV5M_CONTEXT)
-		return KV5M_CONTEXT;
-
-	os_ctx = context->os_context;
-	
-	if (!name)
-		name = getenv(KRB5_ENV_CCNAME);
-
-	if (name) {
-		strncpy(name_buf, name, sizeof(name_buf));
-		name_buf[sizeof(name_buf)-1] = 0;
-	} else {
-		retval = get_from_os(name_buf, sizeof(name_buf));
-		if (retval)
-			return retval;
-	}
-	new_name = malloc(strlen(name_buf)+1);
-	if (!new_name)
-		return ENOMEM;
-	strcpy(new_name, name_buf);
-	
-	if (os_ctx->default_ccname)
-		free(os_ctx->default_ccname);
-
-	os_ctx->default_ccname = new_name;
-	return 0;
+    krb5_error_code err = 0;
+    char *new_ccname = NULL;
+    
+    if (!context || context->magic != KV5M_CONTEXT) { err = KV5M_CONTEXT; }
+    
+    if (name != NULL) {
+        if (!err) {
+            /* If the name isn't NULL, make a copy of it */
+            new_ccname = malloc (strlen (name) + 1);
+            if (new_ccname == NULL) { err = ENOMEM; }
+        }
+        
+        if (!err) {
+            strcpy (new_ccname, name);
+        }
+    }
+    
+    if (!err) {
+        /* free the old ccname and store the new one */
+        krb5_os_context os_ctx = context->os_context;
+        if (os_ctx->default_ccname) { free (os_ctx->default_ccname); }
+        os_ctx->default_ccname = new_ccname;
+        new_ccname = NULL;  /* don't free */
+    }
+    
+    if (new_ccname != NULL) { free (new_ccname); }
+    
+    return err;
 }
 
 	
 const char * KRB5_CALLCONV
 krb5_cc_default_name(krb5_context context)
 {
-	krb5_os_context os_ctx;
-
-	if (!context || context->magic != KV5M_CONTEXT)
-		return NULL;
-
-	os_ctx = context->os_context;
-	if (!os_ctx->default_ccname)
-		krb5_cc_set_default_name(context, NULL);
-
-	return(os_ctx->default_ccname);
+    krb5_error_code err = 0;
+    krb5_os_context os_ctx = NULL;
+    
+    if (!context || context->magic != KV5M_CONTEXT) { err = KV5M_CONTEXT; }
+    
+    if (!err) {
+        os_ctx = context->os_context;
+        
+        if (os_ctx->default_ccname == NULL) {
+            /* Default ccache name has not been set yet */
+            char *new_ccname = NULL;
+            char new_ccbuf[1024];
+            
+            /* try the environment variable first */
+            new_ccname = getenv(KRB5_ENV_CCNAME);
+            
+            if (new_ccname == NULL) {
+                /* fall back on the default ccache name for the OS */
+                new_ccname = new_ccbuf;
+                err = get_from_os (new_ccbuf, sizeof (new_ccbuf));
+            }
+            
+            if (!err) {
+                err = krb5_cc_set_default_name (context, new_ccname);
+            }
+        }
+    }
+    
+    return err ? NULL : os_ctx->default_ccname;
 }
