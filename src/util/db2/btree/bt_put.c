@@ -124,24 +124,31 @@ __bt_put(dbp, key, data, flags)
 	dflags = 0;
 	if (key->size + data->size > t->bt_ovflsize) {
 		if (key->size > t->bt_ovflsize) {
+			u_int32_t yuck_this_is_gross_code;
 storekey:		if (__ovfl_put(t, key, &pg) == RET_ERROR)
 				return (RET_ERROR);
 			tkey.data = kb;
 			tkey.size = NOVFLSIZE;
 			memmove(kb, &pg, sizeof(db_pgno_t));
+			yuck_this_is_gross_code = key->size;
+			if (yuck_this_is_gross_code != key->size)
+				abort ();
 			memmove(kb + sizeof(db_pgno_t),
-			    &key->size, sizeof(u_int32_t));
+				&yuck_this_is_gross_code, sizeof(u_int32_t));
 			dflags |= P_BIGKEY;
 			key = &tkey;
 		}
 		if (key->size + data->size > t->bt_ovflsize) {
+			u_int32_t yuck_this_is_gross_code = data->size;
 			if (__ovfl_put(t, data, &pg) == RET_ERROR)
 				return (RET_ERROR);
 			tdata.data = db;
 			tdata.size = NOVFLSIZE;
 			memmove(db, &pg, sizeof(db_pgno_t));
+			if (yuck_this_is_gross_code != data->size)
+				abort ();
 			memmove(db + sizeof(db_pgno_t),
-			    &data->size, sizeof(u_int32_t));
+				&yuck_this_is_gross_code, sizeof(u_int32_t));
 			dflags |= P_BIGDATA;
 			data = &tdata;
 		}

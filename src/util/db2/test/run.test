@@ -399,7 +399,7 @@ test7()
 # Make sure that overflow pages are reused.
 test8()
 {
-	echo "Test 8: btree, hash: repeated small key, big data pairs"
+	echo "Test 8: btree: repeated small key, big data pairs"
 	rm -f $TMP1
 	echo "" | 
 	awk 'BEGIN {
@@ -415,8 +415,8 @@ test8()
 			printf("r\nkkey1\nr\nkkey2\n");
 		}
 	}' > $TMP1
-	$PROG btree $TMP1
-#	$PROG hash $TMP1
+	$PROG btree $TMP1 || exit 1
+#	$PROG hash $TMP1 || exit 1
 	# No explicit test for success.
 }
 

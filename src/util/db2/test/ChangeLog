@@ -1,3 +1,11 @@
+2002-01-04  Ken Raeburn  <raeburn@mit.edu>
+
+	* run.test (test8): If test reports an error, exit with error
+	indication.
+
+	* dbtest.c (compare): Exit with error indication if comparison
+	fails.
+
 2000-06-26  Ken Raeburn  <raeburn@mit.edu>
 
 	* dbtest.c (err): Add format attribute to decl, for typechecking

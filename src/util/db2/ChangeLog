@@ -1,3 +1,8 @@
+2002-01-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* btree/bt_put.c (__bt_put): Correctly handle writing out the key
+	or data size on a big-endian 64-bit platform.
+
 2001-10-24  Ezra Peisach  <epeisach@mit.edu>
 
 	* configure.in: Add optional argument to AC_DEFINE to provide

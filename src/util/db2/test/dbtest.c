@@ -349,9 +349,11 @@ compare(db1, db2)
 	register size_t len;
 	register u_char *p1, *p2;
 
-	if (db1->size != db2->size)
+	if (db1->size != db2->size) {
 		printf("compare failed: key->data len %lu != data len %lu\n",
 		    (u_long) db1->size, (u_long) db2->size);
+		exit (1);
+	}
 
 	len = MIN(db1->size, db2->size);
 	for (p1 = db1->data, p2 = db2->data; len--;)
