@@ -1,3 +1,9 @@
+Sat Mar  1 14:33:21 1997  Tom Yu  <tlyu@mit.edu>
+
+	* libobj.in: Change .c.so and .c.po rules to work better with
+	compilers that insist that $(CC) -fpic -c foo.c -o foo.so is
+	wrong; basically, cheat and do -o foo.so.o, etc.
+
 Thu Feb 27 17:40:51 1997  Tom Yu  <tlyu@mit.edu>
 
 	* pre.in: Add recursion hooks for distclean.
