@@ -1,3 +1,8 @@
+2000-05-31  Ken Raeburn  <raeburn@mit.edu>
+
+	* default.exp (setup_kerberos_files): Include des3 in supported
+	enctypes.
+
 2000-02-07  Tom Yu  <tlyu@mit.edu>
 
 	* default.exp: Remove default_tgs_enctypes for now as it was
