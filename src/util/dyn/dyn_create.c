@@ -77,7 +77,7 @@ int DynDestroy(obj)
 {
      if (obj->paranoid) {
 	  if (obj->debug)
-	       fprintf(stderr, "dyn: destroy: zeroing %d bytes from %d.\n",
+	       fprintf(stderr, "dyn: destroy: zeroing %d bytes from %p.\n",
 		       obj->el_size * obj->size, obj->array);
 	  memset(obj->array, 0, obj->el_size * obj->size);
      }

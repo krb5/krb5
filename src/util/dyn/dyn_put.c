@@ -18,7 +18,7 @@ DynPtr DynArray(obj)
    DynObjectP obj;
 {
      if (obj->debug)
-	  fprintf(stderr, "dyn: array: returning array pointer %d.\n",
+	  fprintf(stderr, "dyn: array: returning array pointer %p.\n",
 		  obj->array);
 
      return obj->array;
@@ -42,7 +42,7 @@ DynPtr DynGet(obj, num)
      }
      
      if (obj->debug)
-	  fprintf(stderr, "dyn: get: Returning address %d + %d.\n",
+	  fprintf(stderr, "dyn: get: Returning address %p + %d.\n",
 		  obj->array, obj->el_size*num);
      
      return (DynPtr) obj->array + obj->el_size*num;
@@ -79,7 +79,7 @@ int DynPut(obj, el_in, idx)
      int ret;
      
      if (obj->debug)
-	  fprintf(stderr, "dyn: put: Writing %d bytes from %d to %d + %d\n",
+	  fprintf(stderr, "dyn: put: Writing %d bytes from %p to %p + %d\n",
 		  obj->el_size, el, obj->array, idx*obj->el_size);
 
      if ((ret = _DynResize(obj, idx)) != DYN_OK)

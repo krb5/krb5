@@ -1,3 +1,8 @@
+2000-06-28  Ezra Peisach  <epeisach@mit.edu>
+
+	* dyn_create.c, dyn_delete.c, dyn_insert.c, dyn_put.c: Use %p
+	format for displaying pointers.
+
 2000-06-26  Ezra Peisach  <epeisach@mit.edu>
 
 	* dyn_realloc.c: Remove unused variable.

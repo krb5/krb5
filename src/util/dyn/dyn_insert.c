@@ -36,7 +36,7 @@ int DynInsert(obj, idx, els_in, num)
      }
 
      if (obj->debug)
-	  fprintf(stderr,"dyn: insert: Moving %d bytes from %d + %d to + %d\n",
+	  fprintf(stderr,"dyn: insert: Moving %d bytes from %p + %d to + %d\n",
 		  (obj->num_el-idx)*obj->el_size, obj->array,
 		  obj->el_size*idx, obj->el_size*(idx+num));
 
@@ -53,7 +53,7 @@ int DynInsert(obj, idx, els_in, num)
 #endif	     
 
      if (obj->debug)
-	  fprintf(stderr, "dyn: insert: Copying %d bytes from %d to %d + %d\n",
+	  fprintf(stderr, "dyn: insert: Copying %d bytes from %p to %p + %d\n",
 		  obj->el_size*num, els, obj->array, obj->el_size*idx);
 
 #ifdef HAVE_MEMMOVE

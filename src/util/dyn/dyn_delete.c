@@ -50,7 +50,7 @@ int DynDelete(obj, idx)
      else {
 	  if (obj->debug)
 	       fprintf(stderr,
-		       "dyn: delete: copying %d bytes from %d + %d to + %d.\n",
+		       "dyn: delete: copying %d bytes from %p + %d to + %d.\n",
 		       obj->el_size*(obj->num_el - idx), obj->array,
 		       (idx+1)*obj->el_size, idx*obj->el_size);
 	  
@@ -66,7 +66,7 @@ int DynDelete(obj, idx)
 	  if (obj->paranoid) {
 	       if (obj->debug)
 		    fprintf(stderr,
-			    "dyn: delete: zeroing %d bytes from %d + %d\n",
+			    "dyn: delete: zeroing %d bytes from %p + %d\n",
 			    obj->el_size, obj->array,
 			    obj->el_size*(obj->num_el - 1));
 	       memset(obj->array + obj->el_size*(obj->num_el - 1), 0,
