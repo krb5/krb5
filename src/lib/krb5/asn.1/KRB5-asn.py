@@ -79,7 +79,7 @@ Authenticator ::= SEQUENCE  {
 	cname[2]			PrincipalName,
 	cksum[3]			Checksum,
 	cmsec[4]			INTEGER,
-	ctime[5]			UTCTime
+	ctime[5]			GeneralizedTime
 }
 
 AuthenticatorVersion ::= INTEGER {krb5(5)}
@@ -91,10 +91,10 @@ EncTicketPart ::= SEQUENCE {
 	crealm[2]			Realm,
 	cname[3]			PrincipalName,
 	transited[4]			GeneralString,
-	authtime[5]			UTCTime,
-	starttime[6]			UTCTime,
-	endtime[7]			UTCTime,
-	renew-till[8]			UTCTime OPTIONAL,
+	authtime[5]			GeneralizedTime,
+	starttime[6]			GeneralizedTime,
+	endtime[7]			GeneralizedTime,
+	renew-till[8]			GeneralizedTime OPTIONAL,
 	caddr[9]			HostAddresses,
 	authorization-data[10]		AuthorizationData OPTIONAL
 }
@@ -156,10 +156,10 @@ AS-REQ ::= [APPLICATION 0] SEQUENCE {
 	pvno[0]				INTEGER,
 	msg-type[1]			INTEGER,
 	kdc-options[2]			KDCOptions,
-	ctime[3]			UTCTime,
-	from[4]				UTCTime,
-	till[5]				UTCTime,
-	rtime[6]			UTCTime OPTIONAL,
+	ctime[3]			GeneralizedTime,
+	from[4]				GeneralizedTime,
+	till[5]				GeneralizedTime,
+	rtime[6]			GeneralizedTime OPTIONAL,
 	etype[7]			INTEGER, -- EncryptionType
 	crealm[8]			Realm,
 	cname[9]			PrincipalName,
@@ -181,13 +181,13 @@ KDC-REP ::= [APPLICATION 1] SEQUENCE {
 EncKDCRepPart ::= SEQUENCE {
 	key[0]				EncryptionKey,
 	last-req[1]			LastReq,
-	ctime[2]			UTCTime,
-	key-exp[4]			UTCTime,
+	ctime[2]			GeneralizedTime,
+	key-exp[4]			GeneralizedTime,
 	flags[5]			TicketFlags,
-	authtime[3]			UTCTime,	-- also known as ktime
-	starttime[6]			UTCTime,
-	endtime[7]			UTCTime,
-	renew-till[8]			UTCTime OPTIONAL,
+	authtime[3]			GeneralizedTime,-- also known as ktime
+	starttime[6]			GeneralizedTime,
+	endtime[7]			GeneralizedTime,
+	renew-till[8]			GeneralizedTime OPTIONAL,
 	srealm[9]			Realm,
 	sname[10]			PrincipalName,
 	caddr[11]			HostAddresses
@@ -196,9 +196,9 @@ EncKDCRepPart ::= SEQUENCE {
 KRB-ERROR ::= [APPLICATION 2] SEQUENCE {
 	pvno[0]				INTEGER,
 	msg-type[1]			INTEGER,
-	ctime[2]			UTCTime,
+	ctime[2]			GeneralizedTime,
 	cmsec[3]			INTEGER,
-	stime[4]			UTCTime,
+	stime[4]			GeneralizedTime,
 	smsec[5]			INTEGER,
 	error[6]			INTEGER,
 	crealm[7]			Realm,
@@ -234,7 +234,7 @@ AP-REP ::= [APPLICATION 4] SEQUENCE {
 }
 
 EncAPRepPart ::= SEQUENCE {
-	ctime[0]			UTCTime,
+	ctime[0]			GeneralizedTime,
 	cmsec[1]			INTEGER
 }
 
@@ -254,10 +254,10 @@ RealTGS-REQ ::= SEQUENCE {
 	pvno[1]				INTEGER,
 	msg-type[2]			INTEGER,
 	kdc-options[3]			KDCOptions,
-	from[4]				UTCTime,
-	till[5]				UTCTime,
-	rtime[6]			UTCTime OPTIONAL,
-	ctime[7]			UTCTime,
+	from[4]				GeneralizedTime,
+	till[5]				GeneralizedTime,
+	rtime[6]			GeneralizedTime OPTIONAL,
+	ctime[7]			GeneralizedTime,
 	etype[8]			INTEGER, -- EncryptionType
 	sname[9]			PrincipalName,
 	addresses[10]			HostAddresses,
@@ -273,7 +273,7 @@ KRB-SAFE ::= [APPLICATION 6] SEQUENCE {
 	pvno[0]				INTEGER,
 	msg-type[1]			INTEGER,
 	user-data[2]			OCTET STRING,
-	timestamp[3]			UTCTime,
+	timestamp[3]			GeneralizedTime,
 	msec[4]				INTEGER,
 	addresses[5]			HostAddresses,
 	checksum[6]			Checksum			
@@ -288,7 +288,7 @@ KRB-PRIV ::= [APPLICATION 7] SEQUENCE {
 
 EncKrbPrivPart ::= SEQUENCE {
 	user-data[0]			OCTET STRING,
-	timestamp[1]			UTCTime,
+	timestamp[1]			GeneralizedTime,
 	msec[2]				INTEGER,
 	addresses[3]			HostAddresses
 }
