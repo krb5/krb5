@@ -176,13 +176,18 @@
 #  endif
 #elif defined(_MSC_VER)
 #  include <stdlib.h>
+#elif defined(_MIPSEB)
+#  define PLATFORM_BYTE_ORDER AES_BIG_ENDIAN
+#elif defined(_MIPSEL)
+#  define PLATFORM_BYTE_ORDER AES_LITTLE_ENDIAN
 #elif !defined(WIN32)
 #  include <stdlib.h>
-#undef _ENDIAN_H /* XXX */
-#  if !defined (_ENDIAN_H)
-#    include <sys/param.h>
+#  if defined(HAVE_ENDIAN_H)
+#    include <endian.h>
+#  elif defined(HAVE_MACHINE_ENDIAN_H)
+#    include <machine/endian.h>
 #  else
-#    include _ENDIAN_H
+#    include <sys/param.h>
 #  endif
 #endif
 
@@ -231,10 +236,12 @@
 #define PLATFORM_BYTE_ORDER AES_LITTLE_ENDIAN
 #elif 0     /* **** EDIT HERE IF NECESSARY **** */
 #define PLATFORM_BYTE_ORDER AES_BIG_ENDIAN
-#elif (('1234' >> 24) == '1')
+#else
+# error "barf"
+/*#elif (('1234' >> 24) == '1')
 #  define PLATFORM_BYTE_ORDER AES_LITTLE_ENDIAN
 #elif (('4321' >> 24) == '1')
-#  define PLATFORM_BYTE_ORDER AES_BIG_ENDIAN
+#  define PLATFORM_BYTE_ORDER AES_BIG_ENDIAN*/
 #endif
 #endif
 
