@@ -346,13 +346,15 @@ char *flags_string(cred)
 void printtime(tv)
     time_t tv;
 {
-    struct tm *kstime;
     char fmtbuf[18];
     char fill;
+    krb5_timestamp tstamp;
 
-    kstime = localtime((time_t *)&tv);
+    /* XXXX ASSUMES sizeof(krb5_timestamp) >= sizeof(time_t) */
+    (void) localtime((time_t *)&tv);
+    tstamp = tv;
     fill = ' ';
-    if (!krb5_timestamp_to_sfstring((krb5_timestamp) tv,
+    if (!krb5_timestamp_to_sfstring(tstamp,
 				    fmtbuf,
 				    sizeof(fmtbuf),
 				    &fill))

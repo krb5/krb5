@@ -1,3 +1,12 @@
+2002-06-21  Ezra Peisach  <epeisach@bu.edu>
+
+	* ccache.c (printtime): Do not assume that krb5_timestamp and
+	time_t are the same size as an argument to localtime.
+
+	* heuristic.c (get_authorized_princ_names): If .k5login file
+	exists but is not owned by the user, do not attempt to fclose an
+	uninitialized FILE *.
+
 2001-10-30  Ezra Peisach  <epeisach@mit.edu>
 
 	* main.c (main): Do not pass LOG_AUTH facility into openlog() as a

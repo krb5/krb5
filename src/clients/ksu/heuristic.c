@@ -224,7 +224,8 @@ get_authorized_princ_names(luser, cmd, princ_list)
         if ((login_fp = fopen(k5login_path, "r")) == NULL)
 	    return 0;
         if ( fowner(login_fp, pwd->pw_uid) == FALSE){
-	    close_time(k5users_flag,users_fp, k5login_flag,login_fp);
+	    close_time(1 /*k5users_flag*/, (FILE *) 0 /*users_fp*/, 
+		       k5login_flag,login_fp);
 	    return 0;
         }
     }
