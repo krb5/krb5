@@ -9,7 +9,8 @@ BASE_OBJS= adm_conn.$(OBJEXT)	\
 	adm_kt_enc.$(OBJEXT)	\
 	adm_rw.$(OBJEXT)	\
 	alt_prof.$(OBJEXT)	\
-	str_conv.$(OBJEXT)
+	str_conv.$(OBJEXT)	\
+	keysalt.$(OBJEXT)
 
 UNIX_OBJS = logger.$(OBJEXT)
 
@@ -26,7 +27,8 @@ SRCS=	$(srcdir)/adm_conn.c	\
 	$(srcdir)/adm_kw_enc.c	\
 	$(srcdir)/logger.c	\
 	$(srcdir)/alt_prof.c	\
-	$(srcdir)/str_conv.c
+	$(srcdir)/str_conv.c	\
+	$(srcdir)/keysalt.c
 
 all:: all-$(WHAT) $(BASE_OBJS) 
 

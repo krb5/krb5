@@ -412,80 +412,12 @@ krb5_read_realm_params(kcontext, realm, kdcprofile, kdcenv, rparamp)
 	    /* Get the value for the supported keytype/salttype matrix */
 	    hierarchy[2] = "supported_keytypes";
 	    if (!krb5_aprof_get_string(aprofile, hierarchy, TRUE, &svalue)) {
-		char 			*kp, *sp, *ep, *tp;
-		krb5_keytype		ktype;
-		krb5_int32		stype;
-		krb5_key_salt_tuple	*savep;
-
-		kp = svalue;
-		while (kp) {
-		    if ((ep = strchr(kp, (int) ',')) ||
-			(ep = strchr(kp, (int) ' ')) ||
-			(ep = strchr(kp, (int) '\t'))) {
-			/* Fill in trailing whitespace of kp */
-			tp = ep - 1;
-			while (isspace(*tp) && (tp < kp)) {
-			    *tp = '\0';
-			    tp--;
-			}
-			*ep = '\0';
-			ep++;
-			/* Skip trailing whitespace of ep */
-			while (isspace(*ep) && (*ep)) ep++;
-		    }
-		    /*
-		     * kp points to something (hopefully) of the form:
-		     *	<keytype>:<salttype>
-		     */
-		    if(sp = strchr(kp, (int) ':')) {
-			/* Separate keytype from salttype */
-			*sp = '\0';
-			sp++;
-			/* Attempt to parse keytype and salttype */
-			if (!krb5_string_to_keytype(kp, &ktype) &&
-			    !krb5_string_to_salttype(sp, &stype)) {
-
-			    /* Squirrel away old keysalt array */
-			    savep = rparams->realm_keysalts;
-
-			    /* Get new keysalt array */
-			    if (rparams->realm_keysalts =
-				(krb5_key_salt_tuple *)
-				malloc((rparams->realm_num_keysalts+1) *
-				       sizeof(krb5_key_salt_tuple))) {
-
-				/* Copy old keysalt if appropriate */
-				if (savep) {
-				    memcpy(rparams->realm_keysalts, savep,
-					   rparams->realm_num_keysalts *
-					   sizeof(krb5_key_salt_tuple));
-				    krb5_xfree(savep);
-				}
-
-				/* Save our values */
-				rparams->realm_keysalts[rparams->
-							realm_num_keysalts].
-							    ks_keytype = ktype;
-				rparams->realm_keysalts[rparams->
-							realm_num_keysalts].
-							    ks_salttype =
-								stype;
-				rparams->realm_num_keysalts++;
-			    }
-			    else {
-				if (savep)
-				    krb5_xfree(savep);
-				break;
-			    }
-			}
-		    }
-		    kp = ep;
-		}
-		if (kp) {
-		    rparams->realm_num_keysalts = 0;
-		    krb5_xfree(rparams->realm_keysalts);
-		    rparams->realm_keysalts = (krb5_key_salt_tuple *) NULL;
-		}
+		krb5_string_to_keysalts(svalue,
+					", \t",	/* Tuple separators	*/
+					":.-",	/* Key/salt separators	*/
+					0,	/* No duplicates	*/
+					&rparams->realm_keysalts,
+					&rparams->realm_num_keysalts);
 		krb5_xfree(svalue);
 	    }
 	}
@@ -518,3 +450,4 @@ krb5_free_realm_params(kcontext, rparams)
     }
     return(0);
 }
+
