@@ -218,6 +218,7 @@
 	_krb5_free_default_realm
 #
 	_krb5_sname_to_principal
+    _krb5_principal2salt
 	_krb5_change_password
 #
 	_krb5_get_profile
