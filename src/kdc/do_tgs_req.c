@@ -130,6 +130,7 @@ krb5_data **response;			/* filled in with a response packet */
     }
 
     if (!header_ticket) {
+	errcode = KRB5_NO_TKT_SUPPLIED;	/* XXX? */
 	status="UNEXPECTED NULL in header_ticket";
 	goto cleanup;
     }
@@ -419,6 +420,7 @@ tgt_again:
 	if (!(scratch.data =
 	      malloc(request->authorization_data.ciphertext.length))) {
 	    status = "AUTH_NOMEM";
+	    errcode = ENOMEM;
 	    goto cleanup;
 	}
 	/* do any necessary key pre-processing */
@@ -525,8 +527,11 @@ tgt_again:
 						&tmp)))
 			tmp = 0;
 		krb5_klog_syslog(LOG_INFO, "TGS_REQ %s(%d): 2ND_TKT_MISMATCH: authtime %d, %s for %s, 2nd tkt client %s",
-		       fromstring, portnum, authtime, cname, sname,
+		       fromstring, portnum, authtime,
+		       cname ? cname : "<unknown client>",
+		       sname ? sname : "<unknown server>",
 		       tmp ? tmp : "<unknown>");
+		errcode = KRB5KDC_ERR_SERVER_NOMATCH;
 		goto cleanup;
 	}
 	    

@@ -69,6 +69,14 @@ static char sccsid[] = "@(#)ftpd.c	5.40 (Berkeley) 7/2/91";
 #include <shadow.h>
 #endif
 #include <setjmp.h>
+#ifndef POSIX_SETJMP
+#undef sigjmp_buf
+#undef sigsetjmp
+#undef siglongjmp
+#define sigjmp_buf	jmp_buf
+#define sigsetjmp(j,s)	setjmp(j)
+#define siglongjmp	longjmp
+#endif
 #include <netdb.h>
 #include <errno.h>
 #include <syslog.h>
@@ -86,6 +94,7 @@ static char sccsid[] = "@(#)ftpd.c	5.40 (Berkeley) 7/2/91";
 #include <stdarg.h>
 #endif
 #include "pathnames.h"
+#include <libpty.h>
 
 #ifndef L_SET
 #define L_SET 0
@@ -127,6 +136,7 @@ char *keyfile = KEYFILE;
 #ifdef GSSAPI
 #include <gssapi/gssapi.h>
 #include <gssapi/gssapi_generic.h>
+#include <krb5.h>
 gss_ctx_id_t gcontext;
 gss_buffer_desc client_name;
 int gss_ok;	/* GSSAPI authentication and userok authorization succeeded */
@@ -158,7 +168,8 @@ struct	sockaddr_in his_addr;
 struct	sockaddr_in pasv_addr;
 
 int	data;
-jmp_buf	errcatch, urgcatch;
+jmp_buf	errcatch;
+sigjmp_buf urgcatch;
 int	logged_in;
 struct	passwd *pw;
 int	debug;
@@ -185,6 +196,9 @@ int	defumask = CMASK;		/* default umask value */
 char	tmpline[FTP_BUFSIZ];
 char	hostname[MAXHOSTNAMELEN];
 char	remotehost[MAXHOSTNAMELEN];
+char	rhost_addra[16];
+char	*rhost_sane;
+
 
 /*
  * Timeout intervals for retrying connections
@@ -217,6 +231,10 @@ int initgroups(char* name, gid_t basegid) {
   return setgroups(ngrps+1, others);
 }
 #endif
+
+int stripdomain = 1;
+int maxhostlen = 0;
+int always_ip = 0;
 
 main(argc, argv, envp)
 	int argc;
@@ -317,6 +335,43 @@ main(argc, argv, envp)
 			goto nextopt;
 		    }
 
+		case 'w':
+		{
+			char *optarg;
+			if (*++cp != '\0')
+				optarg = cp;
+			else if (argc > 1) {
+				argc--;
+				argv++;
+				optarg = *argv;
+			} else {
+				fprintf(stderr, "ftpd: -w expects arg\n");
+				exit(1);
+			}
+
+			if (!strcmp(optarg, "ip"))
+				always_ip = 1;
+			else {
+				char *cp;
+				cp = strchr(optarg, ',');
+				if (cp == NULL)
+					maxhostlen = atoi(optarg);
+				else if (*(++cp)) {
+					if (!strcmp(cp, "striplocal"))
+						stripdomain = 1;
+					else if (!strcmp(cp, "nostriplocal"))
+						stripdomain = 0;
+					else {
+						fprintf(stderr,
+							"ftpd: bad arg to -w\n");
+						exit(1);
+					}
+					*(--cp) = '\0';
+					maxhostlen = atoi(optarg);
+				}
+			}
+			goto nextopt;
+		}
 		default:
 			fprintf(stderr, "ftpd: Unknown flag -%c ignored.\n",
 			     *cp);
@@ -399,9 +454,21 @@ nextopt:
 	(void) signal(SIGPIPE, lostconn);
 	(void) signal(SIGCHLD, SIG_IGN);
 #ifdef SIGURG
+#ifdef POSIX_SIGNALS
+	{
+		struct sigaction sa;
+
+		sigemptyset(&sa.sa_mask);
+		sa.sa_flags = 0;
+		sa.sa_handler = myoob;
+		if (sigaction(SIGURG, &sa, NULL) < 0)
+			syslog(LOG_ERR, "signal: %m");
+	}
+#else
 	if ((long)signal(SIGURG, myoob) < 0)
 		syslog(LOG_ERR, "signal: %m");
-#endif
+#endif /* POSIX_SIGNALS */
+#endif /* SIGURG */
 
 	/* Try to handle urgent data inline */
 #ifdef SO_OOBINLINE
@@ -587,8 +654,8 @@ user(name)
 			reply(530, "User %s access denied.", name);
 			if (logging)
 				syslog(LOG_NOTICE,
-				    "FTP LOGIN REFUSED FROM %s, %s",
-				    remotehost, name);
+				    "FTP LOGIN REFUSED FROM %s, %s (%s)",
+				    rhost_addra, remotehost, name);
 			pw = (struct passwd *) NULL;
 			return;
 		}
@@ -691,7 +758,7 @@ end_login()
 
 	(void) seteuid((uid_t)0);
 	if (logged_in)
-		logwtmp(ttyline, "", "");
+		pty_logwtmp(ttyline, "", "");
 	pw = NULL;
 	logged_in = 0;
 	guest = 0;
@@ -792,8 +859,8 @@ pass(passwd)
 			pw = NULL;
 			if (login_attempts++ >= 5) {
 				syslog(LOG_NOTICE,
-				    "repeated login failures from %s",
-				    remotehost);
+				       "repeated login failures from %s (%s)",
+				       rhost_addra, remotehost);
 				exit(0);
 			}
 			return;
@@ -804,8 +871,8 @@ pass(passwd)
 	(void) initgroups(pw->pw_name, pw->pw_gid);
 
 	/* open wtmp before chroot */
-	(void)sprintf(ttyline, "ftp%d", getpid());
-	logwtmp(ttyline, pw->pw_name, remotehost);
+	(void) sprintf(ttyline, "ftp%d", getpid());
+	pty_logwtmp(ttyline, pw->pw_name, rhost_sane);
 	logged_in = 1;
 
 	if (guest) {
@@ -826,6 +893,17 @@ pass(passwd)
 		} else
 			lreply(230, "No directory! Logging in with home=/");
 	}
+#ifdef HAVE_SETLUID
+  	/*
+  	 * If we're on a system which keeps track of login uids, then
+ 	 * set the login uid. If this fails this opens up a problem on DEC OSF
+ 	 * with C2 enabled.
+	 */
+	if (setluid((uid_t)pw->pw_uid) < 0) {
+	        reply(550, "Can't set luid.");
+		goto bad;
+	}
+#endif
 	if (seteuid((uid_t)pw->pw_uid) < 0) {
 		reply(550, "Can't set uid.");
 		goto bad;
@@ -833,23 +911,24 @@ pass(passwd)
 	if (guest) {
 		reply(230, "Guest login ok, access restrictions apply.");
 #ifdef SETPROCTITLE
-		sprintf(proctitle, "%s: anonymous/%.*s", remotehost,
-		    sizeof(proctitle) - sizeof(remotehost) -
+		sprintf(proctitle, "%s: anonymous/%.*s", rhost_sane,
+		    sizeof(proctitle) - strlen(rhost_sane) -
 		    sizeof(": anonymous/"), passwd);
 		setproctitle(proctitle);
 #endif /* SETPROCTITLE */
 		if (logging)
-			syslog(LOG_INFO, "ANONYMOUS FTP LOGIN FROM %s, %s",
-			    remotehost, passwd);
+			syslog(LOG_INFO,
+			       "ANONYMOUS FTP LOGIN FROM %s, %s (%s)",
+			       rhost_addra, remotehost, passwd);
 	} else {
 		reply(230, "User %s logged in.", pw->pw_name);
 #ifdef SETPROCTITLE
-		sprintf(proctitle, "%s: %s", remotehost, pw->pw_name);
+		sprintf(proctitle, "%s: %s", rhost_sane, pw->pw_name);
 		setproctitle(proctitle);
 #endif /* SETPROCTITLE */
 		if (logging)
-			syslog(LOG_INFO, "FTP LOGIN FROM %s, %s",
-			    remotehost, pw->pw_name);
+			syslog(LOG_INFO, "FTP LOGIN FROM %s, %s (%s)",
+			    rhost_addra, remotehost, pw->pw_name);
 	}
 	home = pw->pw_dir;		/* home dir for globbing */
 	(void) umask(defumask);
@@ -1143,8 +1222,9 @@ send_data(instr, outstr, blksize)
 	int ret = 0;
 
 	transflag++;
-	if (setjmp(urgcatch)) {
+	if (sigsetjmp(urgcatch, 1)) {
 		transflag = 0;
+		(void)secure_flush(fileno(outstr));
 		return;
 	}
 	switch (type) {
@@ -1225,7 +1305,7 @@ receive_data(instr, outstr)
 	int ret = 0;
 
 	transflag++;
-	if (setjmp(urgcatch)) {
+	if (sigsetjmp(urgcatch, 1)) {
 		transflag = 0;
 		return (-1);
 	}
@@ -1342,9 +1422,8 @@ statcmd()
 
 	lreply(211, "%s FTP server status:", hostname, version);
 	reply(0, "     %s", version);
-	sprintf(str, "     Connected to %s", remotehost);
-	if (!isdigit(remotehost[0]))
-		sprintf(&str[strlen(str)], " (%s)", inet_ntoa(his_addr.sin_addr));
+	sprintf(str, "     Connected to %s", remotehost[0] ? remotehost : "");
+	sprintf(&str[strlen(str)], " (%s)", rhost_addra);
 	reply(0, "%s", str);
 	if (auth_type) reply(0, "     Authentication type: %s", auth_type);
 	if (logged_in) {
@@ -1364,7 +1443,7 @@ statcmd()
 		sprintf(&str[strlen(str)], ", FORM: %s", formnames[form]);
 	if (type == TYPE_L)
 #if 1
-		strcat(str, " 8");
+		strncat(str, " 8", sizeof (str) - strlen(str) - 1);
 #else
 /* this is silly. -- eichin@cygnus.com */
 #if NBBY == 8
@@ -1438,7 +1517,7 @@ reply(n, fmt, p0, p1, p2, p3, p4, p5)
 		 */
 		if (n) sprintf(in, "%d%c", n, cont_char);
 		else in[0] = '\0';
-		strcat(in, buf);
+		strncat(in, buf, sizeof (in) - strlen(in) - 1);
 #ifdef KERBEROS
 		if (strcmp(auth_type, "KERBEROS_V4") == 0)
 		  if ((length = level == PROT_P ?
@@ -1468,13 +1547,19 @@ reply(n, fmt, p0, p1, p2, p3, p4, p5)
 					    &in_buf, &conf_state,
 					    &out_buf);
 			if (maj_stat != GSS_S_COMPLETE) {
+#if 0
+/* Don't setup an infinite loop */
 				/* generally need to deal */
 				secure_gss_error(maj_stat, min_stat,
 					       (level==PROT_P)?
 						 "gss_seal ENC didn't complete":
 						 "gss_seal MIC didn't complete");
+#endif /* 0 */
 			} else if ((level == PROT_P) && !conf_state) {
+#if 0
+/* Don't setup an infinite loop */
 				secure_error("GSSAPI didn't encrypt message");
+#endif /* 0 */
 			} else {
 				memcpy(out, out_buf.value, 
 				       length=out_buf.length);
@@ -1644,21 +1729,31 @@ dolog(sin)
 		sizeof (struct in_addr), AF_INET);
 	time_t t, time();
 	extern char *ctime();
+	krb5_error_code retval;
 
-	if (hp)
+	if (hp != NULL) {
 		(void) strncpy(remotehost, hp->h_name, sizeof (remotehost));
-	else
-		(void) strncpy(remotehost, inet_ntoa(sin->sin_addr),
-		    sizeof (remotehost));
+		remotehost[sizeof (remotehost) - 1] = '\0';
+	} else
+		remotehost[0] = '\0';
+	strncpy(rhost_addra, inet_ntoa(sin->sin_addr), sizeof (rhost_addra));
+	rhost_addra[sizeof (rhost_addra) - 1] = '\0';
+	retval = pty_make_sane_hostname(sin, maxhostlen,
+					stripdomain, always_ip, &rhost_sane);
+	if (retval) {
+		fprintf(stderr, "make_sane_hostname: %s\n",
+			error_message(retval));
+		exit(1);
+	}
 #ifdef SETPROCTITLE
-	sprintf(proctitle, "%s: connected", remotehost);
+	sprintf(proctitle, "%s: connected", rhost_sane);
 	setproctitle(proctitle);
 #endif /* SETPROCTITLE */
 
 	if (logging) {
 		t = time((time_t *) 0);
-		syslog(LOG_INFO, "connection from %s at %s",
-		    remotehost, ctime(&t));
+		syslog(LOG_INFO, "connection from %s (%s) at %s",
+		    rhost_addra, remotehost, ctime(&t));
 	}
 }
 
@@ -1671,7 +1766,7 @@ dologout(status)
 {
 	if (logged_in) {
 		(void) seteuid((uid_t)0);
-		logwtmp(ttyline, "", "");
+		pty_logwtmp(ttyline, "", "");
 	}
 	/* beware of flushing buffers after a SIGPIPE */
 	_exit(status);
@@ -1698,7 +1793,7 @@ myoob()
 		tmpline[0] = '\0';
 		reply(426, "Transfer aborted. Data connection closed.");
 		reply(226, "Abort successful");
-		longjmp(urgcatch, 1);
+		siglongjmp(urgcatch, 1);
 	}
 	if (strcmp(cp, "STAT") == 0) {
 		if (file_size != (off_t) -1)
@@ -2139,8 +2234,9 @@ send_file_list(whichfiles)
 		simple = 1;
 	}
 
-	if (setjmp(urgcatch)) {
+	if (sigsetjmp(urgcatch, 1)) {
 		transflag = 0;
+		(void)secure_flush(fileno(dout));
 		return;
 	}
 	while (dirname = *dirlist++) {
@@ -2319,7 +2415,6 @@ char *s;
 }
 
 
-#include <krb5.h>
 /* ftpd_userok -- hide details of getting the name and verifying it */
 /* returns 0 for OK */
 ftpd_userok(client_name, name)

@@ -207,10 +207,11 @@ kdc_process_tgs_req(request, from, pkt, ticket, subkey)
     if ((retval = krb5_auth_con_setaddrs(kdc_context, auth_context, NULL,
 					 from->address)) )
 	goto cleanup_auth_context;
-
+#ifdef USE_RCACHE
     if ((retval = krb5_auth_con_setrcache(kdc_context, auth_context,
 					  kdc_rcache)))
 	goto cleanup_auth_context;
+#endif
 
 /*
     if ((retval = kdc_get_server_key(apreq->ticket, &key, &kvno)))
@@ -232,6 +233,7 @@ kdc_process_tgs_req(request, from, pkt, ticket, subkey)
 				      apreq->ticket->server, 
 				      kdc_active_realm->realm_keytab,
 				      NULL, ticket))) {
+#ifdef USE_RCACHE
 	/*
 	 * I'm not so sure that this is right, but it's better than nothing
 	 * at all.
@@ -256,6 +258,7 @@ kdc_process_tgs_req(request, from, pkt, ticket, subkey)
 	    }
 	} else
 	    goto cleanup_auth_context;
+#endif
     }
 
     /* "invalid flag" tickets can must be used to validate */
@@ -315,7 +318,9 @@ cleanup_authenticator:
 
 cleanup_auth_context:
     /* We do not want the free of the auth_context to close the rcache */
+#ifdef USE_RCACHE
     (void)  krb5_auth_con_setrcache(kdc_context, auth_context, 0);
+#endif
     krb5_auth_con_free(kdc_context, auth_context);
 
 cleanup:
@@ -530,9 +535,10 @@ add_to_transited(tgt_trans, new_trans, tgs, client, server)
     krb5_principal client;
     krb5_principal server;
 {
+  krb5_error_code retval;
   char        *realm;
   char        *trans;
-  char        *otrans;
+  char        *otrans, *otrans_ptr;
 
   /* The following are for stepping through the transited field     */
 
@@ -541,6 +547,7 @@ add_to_transited(tgt_trans, new_trans, tgs, client, server)
   char        current[MAX_REALM_LN];
   char        exp[MAX_REALM_LN];      /* Expanded current realm name     */
 
+  int	      i;
   int         clst, nlst;    /* count of last character in current and next */
   int         pl, pl1;       /* prefix length                               */
   int         added;         /* TRUE = new realm has been added             */
@@ -553,35 +560,52 @@ add_to_transited(tgt_trans, new_trans, tgs, client, server)
   realm[krb5_princ_realm(kdc_context, tgs)->length] = '\0';
 
   if (!(otrans = (char *) malloc(tgt_trans->length+1))) {
+    free(realm);
     return(ENOMEM);
   }
   memcpy(otrans, tgt_trans->data, tgt_trans->length);
   otrans[tgt_trans->length] = '\0';
+  /* Keep track of start so we can free */
+  otrans_ptr = otrans;
 
-  if (!(trans = (char *) malloc(strlen(realm) + strlen(otrans) + 1))) {
-    return(ENOMEM);
+  /* +1 for null, 
+     +1 for extra comma which may be added between
+     +1 for potential space when leading slash in realm */
+  if (!(trans = (char *) malloc(strlen(realm) + strlen(otrans) + 3))) {
+    retval = ENOMEM;
+    goto fail;
   }
 
   if (new_trans->data)  free(new_trans->data);
   new_trans->data = trans;
+  new_trans->length = 0;
+
+  trans[0] = '\0';
 
   /* For the purpose of appending, the realm preceding the first */
   /* realm in the transited field is considered the null realm   */
 
   prev[0] = '\0';
 
-  /***** In next statement, need to keep reading if the , was quoted *****/
   /* read field into current */
-
-  if (sscanf(otrans, "%[^,]", current) == 1) {
-    otrans += strlen(current);
+  for (i = 0; *otrans != '\0';) {
+    if (*otrans == '\\')
+      if (*(++otrans) == '\0')
+	break;
+      else
+	continue;
+    if (*otrans == ',') {
+      otrans++;
+      break;
+    }
+    current[i++] = *otrans++;
+    if (i >= MAX_REALM_LN) {
+      retval = KRB5KRB_AP_ERR_ILL_CR_TKT;
+      goto fail;
+    }
   }
-  else {
-    current[0] = '\0';
-  }
+  current[i] = '\0';
 
-  if (otrans[0] == ',')  otrans++;
-             
   added = (krb5_princ_realm(kdc_context, client)->length == strlen(realm) &&
            !strncmp(krb5_princ_realm(kdc_context, client)->data, realm, strlen(realm))) ||
           (krb5_princ_realm(kdc_context, server)->length == strlen(realm) &&
@@ -597,29 +621,43 @@ add_to_transited(tgt_trans, new_trans, tgs, client, server)
     }
     else if ((current[0] == '/') && (prev[0] == '/')) {
       strcpy(exp, prev);
+      if (strlen(exp) + strlen(current) + 1 >= MAX_REALM_LN) {
+	retval = KRB5KRB_AP_ERR_ILL_CR_TKT;
+	goto fail;
+      }
       strcat(exp, current);
     }
     else if (current[clst] == '.') {
       strcpy(exp, current);
+      if (strlen(exp) + strlen(current) + 1 >= MAX_REALM_LN) {
+	retval = KRB5KRB_AP_ERR_ILL_CR_TKT;
+	goto fail;
+      }
       strcat(exp, prev);
     }
     else {
       strcpy(exp, current);
     }
 
-    /***** next statement, need to keep reading if the , was quoted *****/
     /* read field into next */
-
-    if (sscanf(otrans, "%[^,]", next) == 1) {
-      otrans += strlen(next);
-      nlst    = strlen(next) - 1;
+    for (i = 0; *otrans != '\0';) {
+      if (*otrans == '\\')
+	if (*(++otrans) == '\0')
+	  break;
+	else
+	  continue;
+      if (*otrans == ',') {
+	otrans++;
+	break;
+      }
+      next[i++] = *otrans++;
+      if (i >= MAX_REALM_LN) {
+	retval = KRB5KRB_AP_ERR_ILL_CR_TKT;
+	goto fail;
+      }
     }
-    else {
-      next[0] = '\0';
-      nlst    = 0;
-    }
-
-    if (otrans[0] == ',')  otrans++;
+    next[i] = '\0';
+    nlst = i - 1;
 
     if (!strcmp(exp, realm))  added = TRUE;
 
@@ -640,6 +678,10 @@ add_to_transited(tgt_trans, new_trans, tgs, client, server)
       if ((next[nlst] != '.') && (next[0] != '/') &&
           (pl = subrealm(exp, realm))) {
         added = TRUE;
+	if (strlen(current) + (pl>0?pl:-pl) + 2 >= MAX_REALM_LN) {
+	  retval = KRB5KRB_AP_ERR_ILL_CR_TKT;
+	  goto fail;
+	}
         strcat(current, ",");
         if (pl > 0) {
           strncat(current, realm, pl);
@@ -663,6 +705,10 @@ add_to_transited(tgt_trans, new_trans, tgs, client, server)
         added      = TRUE;
         current[0] = '\0';
         if ((pl1 = subrealm(prev,realm))) {
+	  if (strlen(current) + (pl1>0?pl1:-pl1) + 1 >= MAX_REALM_LN) {
+	    retval = KRB5KRB_AP_ERR_ILL_CR_TKT;
+	    goto fail;
+	  }
           if (pl1 > 0) {
             strncat(current, realm, pl1);
           }
@@ -672,10 +718,22 @@ add_to_transited(tgt_trans, new_trans, tgs, client, server)
         }
         else { /* If not a subrealm */
           if ((realm[0] == '/') && prev[0]) {
-            strcat(current, " ");
+	    if (strlen(current) + 2 >= MAX_REALM_LN) {
+	      retval = KRB5KRB_AP_ERR_ILL_CR_TKT;
+	      goto fail;
+	    }
+	    strcat(current, " ");
           }
+	  if (strlen(current) + strlen(realm) + 1 >= MAX_REALM_LN) {
+	    retval = KRB5KRB_AP_ERR_ILL_CR_TKT;
+	    goto fail;
+	  }
           strcat(current, realm);
         }
+	if (strlen(current) + (pl>0?pl:-pl) + 2 >= MAX_REALM_LN) {
+	  retval = KRB5KRB_AP_ERR_ILL_CR_TKT;
+	  goto fail;
+	}
         strcat(current,",");
         if (pl > 0) {
           strncat(current, exp, pl);
@@ -686,7 +744,17 @@ add_to_transited(tgt_trans, new_trans, tgs, client, server)
       }
     }
 
-    if (new_trans->length != 0)  strcat(trans, ",");
+    if (new_trans->length != 0) {
+      if (strlen(trans) + 2 >= MAX_REALM_LN) {
+	retval = KRB5KRB_AP_ERR_ILL_CR_TKT;
+	goto fail;
+      }
+      strcat(trans, ",");
+    }
+    if (strlen(trans) + strlen(current) + 1 >= MAX_REALM_LN) {
+      retval = KRB5KRB_AP_ERR_ILL_CR_TKT;
+      goto fail;
+    }
     strcat(trans, current);
     new_trans->length = strlen(trans) + 1;
 
@@ -695,13 +763,33 @@ add_to_transited(tgt_trans, new_trans, tgs, client, server)
   }
 
   if (!added) {
-    if (new_trans->length != 0)  strcat(trans, ",");
-    if((realm[0] == '/') && trans[0])  strcat(trans, " ");
+    if (new_trans->length != 0) {
+      if (strlen(trans) + 2 >= MAX_REALM_LN) {
+	retval = KRB5KRB_AP_ERR_ILL_CR_TKT;
+	goto fail;
+      }
+      strcat(trans, ",");
+    }
+    if((realm[0] == '/') && trans[0]) {
+      if (strlen(trans) + 2 >= MAX_REALM_LN) {
+	retval = KRB5KRB_AP_ERR_ILL_CR_TKT;
+	goto fail;
+      }
+      strcat(trans, " ");
+    }
+    if (strlen(trans) + strlen(realm) + 1 >= MAX_REALM_LN) {
+      retval = KRB5KRB_AP_ERR_ILL_CR_TKT;
+      goto fail;
+    }
     strcat(trans, realm);
     new_trans->length = strlen(trans) + 1;
   }
 
-  return(0);
+  retval = 0;
+fail:
+  free(realm);
+  free(otrans_ptr);
+  return (retval);
 }
 
 /*
@@ -912,7 +1000,7 @@ krb5_data *data;
 {
     unsigned char *estream;	/* end of stream */
     int classes;		/* # classes seen so far this level */
-    int levels = 0;		/* levels seen so far */
+    unsigned int levels = 0;		/* levels seen so far */
     int lastlevel = 1000;       /* last level seen */
     int length;			/* various lengths */
     int tag;			/* tag number */
@@ -1375,8 +1463,26 @@ get_salt_from_key(context, client, client_key, salt)
     return 0;
 }
 
+/*
+ * Limit strings to a "reasonable" length to prevent crowding out of
+ * other useful information in the log entry
+ */
+#define NAME_LENGTH_LIMIT 128
 
-    
-   
-    
-    
+void limit_string(char *name)
+{
+	int	i;
+
+	if (!name)
+		return;
+
+	if (strlen(name) < NAME_LENGTH_LIMIT)
+		return;
+
+	i = NAME_LENGTH_LIMIT-4;
+	name[i++] = '.';
+	name[i++] = '.';
+	name[i++] = '.';
+	name[i] = '\0';
+	return;
+}

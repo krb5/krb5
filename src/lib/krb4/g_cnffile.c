@@ -67,7 +67,8 @@ krb__get_srvtabname(default_srvtabname)
 	} else {
 		retname = strdup(default_srvtabname);
 	}
-	krb5_free_context(context);
+	if (context != NULL)
+		krb5_free_context(context);
 	return retname;
 }
 

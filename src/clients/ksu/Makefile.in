@@ -1,6 +1,8 @@
 DEFINES = -DGET_TGT_VIA_PASSWD -DPRINC_LOOK_AHEAD -DCMD_PATH='"/bin /local/bin"'
 CFLAGS = $(CCOPTS) $(DEFINES) $(DEFS) $(LOCALINCLUDE)
 
+KSU_LIBS=@KSU_LIBS@
+
 SRCS = \
 	$(srcdir)/krb_auth_su.c \
 	$(srcdir)/ccache.c \
@@ -17,7 +19,7 @@ OBJS = \
 all:: ksu
 
 ksu: $(OBJS) $(DEPLIBS)
-	$(LD) $(LDFLAGS) $(LDARGS) -o ksu $(OBJS) $(LIBS)
+	$(LD) $(LDFLAGS) $(LDARGS) -o ksu $(OBJS) $(LIBS) $(KSU_LIBS)
 
 clean::
 	$(RM) ksu

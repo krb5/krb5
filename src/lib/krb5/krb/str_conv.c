@@ -133,6 +133,8 @@ static const char cstype_hmacsha_out[]	= "HMAC-SHA";
 /* Absolute time strings */
 static const char atime_full_digits[]	= "%y%m%d%H%M%S";
 static const char atime_full_digits_d[]	= "%y.%m.%d.%H.%M.%S";
+static const char atime_full_digits_Y[]	= "%Y%m%d%H%M%S";
+static const char atime_full_digits_Yd[]= "%Y.%m.%d.%H.%M.%S";
 static const char atime_nsec_digits[]	= "%y%m%d%H%M";
 static const char atime_rel_hms[]	= "%H%M%S";
 static const char atime_rel_hm[]	= "%H%M";
@@ -144,6 +146,8 @@ static const char atime_full_text_nos[]	= "%d-%b-%Y:%R";
 #if	!HAVE_STRPTIME
 static const char ascan_full_digits[]	= "%02d%02d%02d%02d%02d%02d";
 static const char ascan_full_digits_d[]	= "%02d.%02d.%02d.%02d.%02d.%02d";
+static const char ascan_full_digits_Y[]	= "%4d%02d%02d%02d%02d%02d";
+static const char ascan_full_digits_Yd[]= "%4d.%02d.%02d.%02d.%02d.%02d";
 static const char ascan_nsec_digits[]	= "%02d%02d%02d%02d%02d";
 static const char ascan_rel_hms[]	= "%02d%02d%02d";
 static const char ascan_rel_hm[]	= "%02d%02d";
@@ -152,12 +156,12 @@ static const char ascan_rel_col_hm[]	= "%02d:%02d";
 #endif	/* !HAVE_STRPTIME */
 #ifdef	HAVE_STRFTIME
 static const char sftime_ldep_time[]	= "%c";
-static const char sftime_med_fmt[]	= "%d %b %y %T";
+static const char sftime_med_fmt[]	= "%d %b %Y %T";
 static const char sftime_short_fmt[]	= "%x %X";
-static const char sftime_last_fmt[]	= "%d/%m/%y %R";
+static const char sftime_last_fmt[]	= "%d/%m/%Y %R";
 #endif	/* HAVE_STRFTIME */
-static const char sftime_default_fmt[]	= "%02d/%02d/%02d %02d:%02d";
-static const size_t sftime_default_len	= 2+1+2+1+2+1+2+1+2+1;
+static const char sftime_default_fmt[]	= "%02d/%02d/%4d %02d:%02d";
+static const size_t sftime_default_len	= 2+1+2+1+4+1+2+1+2+1;
 
 /* Delta time strings */
 static const char dtscan_dhms_notext[]	= "%d-%02d:%02d:%02d";
@@ -223,6 +227,8 @@ static const int cksumtype_table_nents = sizeof(cksumtype_table)/
 					 sizeof(cksumtype_table[0]);
 
 static const char * const atime_format_table[] = {
+atime_full_digits_Y,	/* yyyymmddhhmmss		*/
+atime_full_digits_Yd,	/* yyyy.mm.dd.hh.mm.ss		*/
 atime_full_digits,	/* yymmddhhmmss			*/
 atime_full_digits_d,	/* yy.mm.dd.hh.mm.ss		*/
 atime_nsec_digits,	/* yymmddhhmm			*/
@@ -282,6 +288,8 @@ strptime(buf, format, tm)
     
     /*
      * We only understand the following fixed formats:
+     *    %Y%m%d%H%M%S
+     *    %Y.%m.%d.%H.%M.%S
      *    %y%m%d%H%M%S
      *    %y.%m.%d.%H.%M.%S
      *    %y%m%d%H%M
@@ -291,9 +299,37 @@ strptime(buf, format, tm)
      *    %R
      */
     bp = (char *) NULL;
-    if (!strcmp(format, atime_full_digits) &&
+    if (!strcmp(format, atime_full_digits_Y) &&
+	(sscanf(buf, ascan_full_digits_Y,
+		&year, &month, &day, &hour, &minute, &second) == 6)) {
+	if (year < 1900)
+		return NULL;
+	tm->tm_year = year-1900;
+	tm->tm_mon = month - 1;
+	tm->tm_mday = day;
+	tm->tm_hour = hour;
+	tm->tm_min = minute;
+	tm->tm_sec = second;
+	bp = &buf[strlen(atime_full_digits)];
+    }
+    else if (!strcmp(format,atime_full_digits_Yd) &&
+	     (sscanf(buf, ascan_full_digits_Yd,
+		     &year, &month, &day, &hour, &minute, &second) == 6)) {
+	if (year < 1900)
+		return NULL;
+	tm->tm_year = year-1900;
+	tm->tm_mon = month - 1;
+	tm->tm_mday = day;
+	tm->tm_hour = hour;
+	tm->tm_min = minute;
+	tm->tm_sec = second;
+	bp = &buf[strlen(atime_full_digits_d)];
+    }
+    else if (!strcmp(format, atime_full_digits) &&
 	(sscanf(buf, ascan_full_digits,
 		&year, &month, &day, &hour, &minute, &second) == 6)) {
+	if (year <= 68)
+		year += 100;
 	tm->tm_year = year;
 	tm->tm_mon = month - 1;
 	tm->tm_mday = day;
@@ -305,6 +341,8 @@ strptime(buf, format, tm)
     else if (!strcmp(format,atime_full_digits_d) &&
 	     (sscanf(buf, ascan_full_digits_d,
 		     &year, &month, &day, &hour, &minute, &second) == 6)) {
+	if (year <= 68)
+		year += 100;
 	tm->tm_year = year;
 	tm->tm_mon = month - 1;
 	tm->tm_mday = day;
@@ -316,6 +354,8 @@ strptime(buf, format, tm)
     else if (!strcmp(format, atime_nsec_digits) &&
 	     (sscanf(buf, ascan_nsec_digits,
 		&year, &month, &day, &hour, &minute) == 5)) {
+	if (year <= 68)
+		year += 100;
 	tm->tm_year = year;
 	tm->tm_mon = month - 1;
 	tm->tm_mday = day;
@@ -357,8 +397,9 @@ strptime(buf, format, tm)
 	tm->tm_hour = hour;
 	tm->tm_min = minute;
 	bp = &buf[strlen(atime_rel_col_hm)];
-    }
-    return(bp);
+    } else
+	    return NULL;
+    return bp;
 }
 #endif	/* HAVE_STRPTIME */
 
@@ -430,12 +471,10 @@ krb5_string_to_timestamp(string, timestampp)
     krb5_timestamp	* timestampp;
 {
     int i;
-    int found;
     struct tm timebuf;
-    time_t now;
+    time_t now, ret_time;
     char *s;
 
-    found = 0;
     now = time((time_t *) NULL);
     for (i=0; i<atime_format_table_nents; i++) {
         /* We reset every time throughout the loop as the manual page
@@ -445,13 +484,16 @@ krb5_string_to_timestamp(string, timestampp)
 	memcpy(&timebuf, localtime(&now), sizeof(timebuf));
 	if ((s = strptime(string, atime_format_table[i], &timebuf))
 	    && (s != string)) {
-	    found = 1;
-	    break;
+	    if (timebuf.tm_year <= 0)
+		continue;	/* clearly confused */
+	    ret_time = mktime(&timebuf);
+	    if (ret_time == (time_t) -1)
+		continue;	/* clearly confused */
+	    *timestampp = (krb5_timestamp) ret_time;
+	    return 0;
 	}
     }
-    if (found)
-	*timestampp = (krb5_timestamp) mktime(&timebuf);
-    return((found) ? 0 : EINVAL);
+    return(EINVAL);
 }
 
 krb5_error_code
@@ -590,18 +632,23 @@ krb5_timestamp_to_string(timestamp, buffer, buflen)
     size_t		buflen;
 {
 #if	HAVE_STRFTIME
-    if (strftime(buffer, buflen, "%c", localtime((time_t *) &timestamp)))
-	return(0);
-    else
+    int ret;
+	
+    ret = strftime(buffer, buflen, "%c", localtime((time_t *) &timestamp));
+    if (ret == 0 || ret == buflen)
 	return(ENOMEM);
+    return(0);
 #else	/* HAVE_STRFTIME */
-    if (strlen(ctime((time_t *) &timestamp)) <= buflen) {
-	strcpy(buffer, ctime((time_t *) &timestamp));
-	/* ctime returns <datestring>\n\0 */
-	buffer[strlen(buffer)-1] = '\0';
-	return(0);
-    }
-    return(ENOMEM);
+    char *cp;
+    time_t t = timestamp;
+    
+    cp = ctime(&t);
+    if (strlen(cp) >= buflen)
+	return ENOMEM;
+    strcpy(buffer, cp);
+    /* ctime returns <datestring>\n\0 */
+    buffer[strlen(buffer)-1] = '\0';
+    return(0);
 #endif	/* HAVE_STRFTIME */
 }
 
@@ -627,7 +674,7 @@ krb5_timestamp_to_sfstring(timestamp, buffer, buflen, pad)
     if (!ndone) {
 	if (buflen >= sftime_default_len) {
 	    sprintf(buffer, sftime_default_fmt,
-		    tmp->tm_mday, tmp->tm_mon+1, tmp->tm_year,
+		    tmp->tm_mday, tmp->tm_mon+1, 1900+tmp->tm_year,
 		    tmp->tm_hour, tmp->tm_min, tmp->tm_sec);
 	    ndone = strlen(buffer);
 	}

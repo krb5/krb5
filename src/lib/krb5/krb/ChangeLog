@@ -1,3 +1,94 @@
+Mon Mar  8 22:39:01 1999  Tom Yu  <tlyu@mit.edu>
+
+	* sendauth.c (krb5_sendauth): Set credspout to NULL if it's
+	destined to be returned to avoid freeing it.  Also,
+	unconditionally free credspout if it's non-NULL so that if someone
+	doesn't pass in a ticket and doesn't give us a non-NULL out_creds,
+	we don't leak it. [krb5-libs/699]
+
+Fri Jan 29 22:46:37 1999  Tom Yu  <tlyu@mit.edu>
+
+	* recvauth.c (krb5_recvauth): Add some bookkeeping flags so we
+	know how much stuff to free upon cleanup.  Fix the up cleanup
+	code.
+
+Tue Jul  7 17:06:13 1998  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* conv_princ.c: Add additional commonly seen Kerberos V4 services
+		to the hard-coded list.
+
+Tue Jul  7 16:59:03 1998  Tom Yu  <tlyu@mit.edu>
+
+	* chk_trans.c: Fix up previous fix; short-circuit out when
+	trans->length == 0.
+
+Wed Jul  1 17:59:26 1998  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* chk_trans.c (krb5_check_transited_list): Fix use of an
+ 		uninitialized variable; apparently the code was depending
+ 		on the stack garbage being non-zero(!)
+
+1998-05-12  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* str_conv.c (krb5_timestamp_to_sfstring): Make sure the date
+		string printed uses 4 digit years.
+
+1998-05-08  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* str_conv.c (krb5_string_to_timestamp, strptime): Fix routines to
+		be able to properly parse Y2K dates.  
+
+	* t_kerb.c: Add ability to test krb5_string_to_timestamp
+
+Mon Mar 16 19:50:55 1998  Tom Yu  <tlyu@mit.edu>
+
+	* chk_trans.c (krb5_check_transited_list): Check lengths when
+	appending to next and prev.
+
+Wed Jan 14 20:58:52 1998  Tom Yu  <tlyu@mit.edu>
+
+	* preauth.c (handle_sam_labels): Check return value of
+	malloc. [krb5-libs/518]
+
+Wed Oct 22 00:29:33 1997  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* send_tgs.c (krb5_send_tgs): Don't send a zero endtime; if the
+		requested endtime is zero, set it equal to the TGT endtime.
+
+Sat Dec 21 01:26:11 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* brand.c: New file, which allows a release engineer to "brand"
+ 		the krb5 library or a binary application program
+ 		statically linked against the krb5 library.  This file is
+		statically included by init_ctx.c, to force it be in a
+		binary library or application program.
+
+Tue Mar 25 00:32:55 1997  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* preauth.c (obtain_sam_padata): Fix handling of the sam-timestamp
+ 		and sam-usec fields, which should always be set if the
+		nonce is not available, not just SAM_USE_SAD_AS_KEY is
+		being used.  [krb5-libs/325]
+
+Wed Feb 12 20:47:30 1997  Tom Yu  <tlyu@mit.edu>
+
+	* fwd_tgt.c (krb5_fwd_tgt_creds): Use the client's realm rather
+	than the server's realm for constructing the tgs principal.
+	Remove TC_MATCH_SRV_NAMEONLY from call to retrieve_cred() because
+	we want to get an exact match.
+
+Tue Apr  8 10:31:30 1997  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* sendauth.c (krb5_sendauth): Don't free credspout if it is to be
+		returned in out_creds (#PR 357)
+
+Thu Nov 21 13:54:01 1996  Ezra Peisach  <epeisach@mit.edu>
+
+	* recvauth.c (krb5_recvauth): If there is an error, and the server
+		argument to krb5_recvauth is NULL, create a dummy server
+		entry for the krb5_error structure so that krb5_mk_error
+		will not die with missing required fields. [krb5-libs/209]
+
 Wed Nov 13 14:30:47 1996  Tom Yu  <tlyu@mit.edu>
 
 	* init_ctx.c: Revert previous kt_default_name changes.

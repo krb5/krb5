@@ -1,3 +1,105 @@
+Tue Jul 21 20:29:38 1998  Tom Yu  <tlyu@mit.edu>
+
+	* replay.c (kdc_check_lookaside):
+	(kdc_insert_lookaside): Add code to originating address of packet,
+ 	as krb4 initial ticket requests don't contain an address.  This
+ 	would cause a subtle problem wherein two simultaneous krb4 initial
+ 	ticket requests for the same principal originating from different
+ 	addresses would result in both replies containing the same
+	address.
+
+	* kdc_util.h: Modify prototype for lookaside functions.
+
+	* dispatch.c (dispatch): Update to new calling conventions of the
+	lookaside functions.
+
+Fri May  8 18:46:59 1998  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* kerberos_v4.c (krb4_stime): Print 4 digit years in Krb4 log
+	 	entries to avoid Y2K issues.
+
+Fri Mar 20 17:13:46 1998  Tom Yu  <tlyu@mit.edu>
+
+	* kdc_util.c (add_to_transited): Check lengths, fix up comma
+	quoting somewhat (though things are still way broken).
+
+Thu Feb  5 19:09:06 1998  Tom Yu  <tlyu@mit.edu>
+
+	* kerberos_v4.c: Fix up call to klog, also delete logic to check
+ 	whether v4 processing is disabled (relies on code that is only in
+ 	the mainline).
+
+Wed Feb  4 14:15:20 1998  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* kerberos_v4.c (process_v4): Check the length of the incoming V4
+		packet before copying it into the KTEXT_ST variable.
+		(kerberos_v4): Make sure the strings in the V4 request
+		structures aren't no longer than they are allowed to be.
+
+Fri Jan 16 03:33:50 1998  Tom Yu  <tlyu@mit.edu>
+
+	* do_tgs_req.c: Add some explicit settings of errcode so that the
+ 	cleanup code doesn't try to construct a bogus error reply, which
+ 	was causing coredumps in the lookaside code.
+
+Mon Nov 24 19:57:48 1997  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* do_tgs_req.c (process_tgs_req): Add check to make sure cname and
+		sname are non-NULL when syslogging an error because the
+		principals don't match.
+	
+	* kdc_util.c (limit_string): Check to make sure the input string
+		is non-NULL before operating on it.
+
+Wed Sep 24 11:56:50 1997  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* kdc_util.c (add_to_transited): Fix up memory leaks, clean out
+        new memory allocated, allocate buffers to max size
+        needed. [based on krb5-kdc/461 by Ken Hornstein].
+
+Wed Jul 30 18:29:19 1997  Tom Yu  <tlyu@mit.edu>
+
+	* kdc_util.c: 
+	* main.c: Don't use an rcache.
+
+Tue Jul 15 01:55:56 1997  Tom Yu  <tlyu@mit.edu>
+
+	* kdc_preauth.c (get_sam_edata): Don't goto cleanup if SAM is not
+	used; this prevents freeing an unallocated keyblock.
+
+Thu May 29 21:08:24 1997  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* do_as_req.c (process_as_req), do_tgs_req (process_tgs_req): Use
+		limit_string() to make sure the length of cname and sname
+		are reasonable.
+
+	* kdc_util.c (limit_string): New function which limits the strings
+		that will end up in log files to "reasonable" lengths.
+
+Wed Jan  1 22:56:16 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* kdc_preauth.c (get_sam_edata): Use proper interface to
+		krb5_db_get_principal. Also if SAM is not an option, do
+		not return as a possible type to client. [krb5-kdc/310]
+
+Sat Nov 23 17:26:22 1996  Mark Eichin  <eichin@kitten.gen.ma.us>
+
+	* [krb5-libs/149] only generate requests that you can actually
+	handle.
+	
+	Tue Sep  3 22:53:56 1996  Mark Eichin  <eichin@cygnus.com>
+
+	* kdc_preauth.c (get_preauth_hint_list): detect ap->get_edata
+	return status and don't pass back hint if it failed.
+	(get_etype_info): malloc one more word in entry for end marker.
+
+Wed Nov 20 11:25:05 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* main.c (initialize_realms): krb5_aprof_init can succeed while
+ 	leaving aprof == NULL, but krb5_aprof_finish will fail.  This is
+ 	just more grossness that needs to be redone when the kdc.conf
+ 	interface is reworked.
+
 Thu Nov  7 12:27:21 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* kdc_preauth.c (check_padata): Fixed error handling; in order for

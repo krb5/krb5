@@ -48,7 +48,11 @@ char *host;
 	char *domain;
 	FILE *trans_file;
 	FILE *krb__get_realmsfile();
-	char trans_host[MAXHOSTNAMELEN+1];
+ 	/*
+ 	 * This used to be MAXHOSTNAMELEN, but we don't know how big
+ 	 * that will necessarily be on all systems, so assume 1024.
+ 	 */
+ 	char trans_host[1025];
 	char trans_realm[REALM_SZ+1];
 	int retval;
 	struct hostent *h;
@@ -111,24 +115,28 @@ char *host;
 
 	/* loop while not exact match, and more entries to read */
 	while (1) {
-		if ((retval = fscanf(trans_file, "%s %s",
+	        /* XXX REALM_SZ == 40 */
+		if ((retval = fscanf(trans_file, "%1023s %40s",
 				     trans_host, trans_realm)) != 2) {
 			if (retval == EOF)
 			  break;
 			continue;	/* ignore broken lines */
 		}
-		trans_host[MAXHOSTNAMELEN] = '\0';
+		trans_host[(MAXHOSTNAMELEN <= 1023) ? MAXHOSTNAMELEN : 1023]
+			= '\0';
 		trans_realm[REALM_SZ] = '\0';
 		if (trans_host[0] == '.') {
 		  /* want domain match only */
-		  if (domain && !strcasecmp (trans_host, domain)) {
+		  if (domain && (strlen(trans_host) == strlen(domain))
+		      && !strcasecmp (trans_host, domain)) {
 		    /* got domain match, save for later */
 		    (void) strcpy (ret_realm, trans_realm);
 		    continue;
 		  }
 		} else {
 		  /* want exact match of hostname */
-		  if (!strcasecmp (trans_host, lhost)) {
+		  if ((strlen(lhost) == strlen(trans_host)) &&
+		      !strcasecmp (trans_host, lhost)) {
 		    (void) strcpy (ret_realm, trans_realm);
 		    break;
 		  }

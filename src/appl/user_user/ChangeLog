@@ -1,3 +1,8 @@
+Fri Nov 22 15:49:09 1996  unknown  <bjaspan@mit.edu>
+
+	* client.c (argv): use sizeof instead of h_length to determine
+ 	number of bytes of addr to copy from DNS response [krb5-misc/211]
+
 Thu Nov  7 15:36:15 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* client.c (argv): 

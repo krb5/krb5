@@ -92,7 +92,7 @@ void kerberos5_forward();
 
 #endif	/* FORWARD */
 
-static unsigned char str_data[1024] = { IAC, SB, TELOPT_AUTHENTICATION, 0,
+static unsigned char str_data[2048] = { IAC, SB, TELOPT_AUTHENTICATION, 0,
 			  		AUTHTYPE_KERBEROS_V5, };
 /*static unsigned char str_name[1024] = { IAC, SB, TELOPT_AUTHENTICATION,
 					TELQUAL_NAME, };*/
@@ -529,7 +529,7 @@ kerberos5_is(ap, data, cnt)
 		if ((r = krb5_auth_con_genaddrs(telnet_context, auth_context, 
 			net, KRB5_AUTH_CONTEXT_GENERATE_REMOTE_FULL_ADDR)) || 
 		    (r = rd_and_store_for_creds(telnet_context, auth_context,
-			   &inbuf, ticket, UserNameRequested))) {
+			   &inbuf, ticket))) {
 
 		    char errbuf[128];
 		    
