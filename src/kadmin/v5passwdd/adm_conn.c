@@ -59,7 +59,7 @@ static krb5_error_code kadm_get_creds
 		krb5_ccache ,
 		krb5_principal,
 		krb5_creds  *,
-		char *,
+		const char *,
 		char *,
 		krb5_timestamp));
 static krb5_error_code kadm_contact_server
@@ -126,7 +126,8 @@ kadm_get_ccache(kcontext, user, ccname, ccache, client)
     }
 
     /* Parse the name and form our principal */
-    if (kret = krb5_parse_name(kcontext, name, client))
+    kret = krb5_parse_name(kcontext, name, client);
+    if (kret)
 	goto cleanup;
 
     if (!ccname) {
@@ -184,7 +185,7 @@ kadm_get_creds(kcontext, ccache, client, creds, prompt, oldpw, tlife)
     krb5_ccache		ccache;
     krb5_principal	client;
     krb5_creds		*creds;
-    char		*prompt;
+    const char		*prompt;
     char		*oldpw;
     krb5_timestamp	tlife;
 {
@@ -199,10 +200,12 @@ kadm_get_creds(kcontext, ccache, client, creds, prompt, oldpw, tlife)
     client_name = (char *) NULL;
 
     /* Get the string form for our principal */
-    if (kret = krb5_unparse_name(kcontext, client, &client_name))
+    kret = krb5_unparse_name(kcontext, client, &client_name);
+    if (kret)
 	return(kret);
 
-    if (kret = krb5_os_localaddr(kcontext, &my_addresses))
+    kret = krb5_os_localaddr(kcontext, &my_addresses);
+    if (kret)
 	goto cleanup;
 
     creds->client = client;
@@ -212,15 +215,16 @@ kadm_get_creds(kcontext, ccache, client, creds, prompt, oldpw, tlife)
      *	realm name is instance
      *	realm name is realm name
      */
-    if (kret = krb5_build_principal_ext(kcontext,
-					&creds->server,
-					client->realm.length,
-					client->realm.data,
-					strlen(KRB5_ADM_SERVICE_INSTANCE),
-					KRB5_ADM_SERVICE_INSTANCE,
-					client->realm.length,
-					client->realm.data,
-					0))
+    kret = krb5_build_principal_ext(kcontext,
+				    &creds->server,
+				    client->realm.length,
+				    client->realm.data,
+				    strlen(KRB5_ADM_SERVICE_INSTANCE),
+				    KRB5_ADM_SERVICE_INSTANCE,
+				    client->realm.length,
+				    client->realm.data,
+				    0);
+    if (kret)
 	goto cleanup;
 
     /* Attempt to retrieve an appropriate entry from the credentials cache. */
@@ -235,15 +239,16 @@ kadm_get_creds(kcontext, ccache, client, creds, prompt, oldpw, tlife)
 	if (prompt != (char *) NULL) {
 	    /* Read the password */
 	    old_pwsize = KRB5_ADM_MAX_PASSWORD_LEN;
-	    if (kret = krb5_read_password(kcontext,
-					  prompt,
-					  (char *) NULL,
-					  oldpw,
-					  &old_pwsize))
+	    kret = krb5_read_password(kcontext, prompt, (char *) NULL,
+					  oldpw, &old_pwsize);
+	    if (kret)
 		goto cleanup;
 	}
-	if (kret = krb5_timeofday(kcontext, &jetzt))
+
+	kret = krb5_timeofday(kcontext, &jetzt);
+	if (kret)
 	    goto cleanup;
+
 	if (tlife > 0)
 	    creds->times.endtime = jetzt + tlife;
 	else
@@ -480,7 +485,8 @@ kadm_contact_server(kcontext, realmp, sockp, local, remote)
 	}
 	in_remote.sin_port = service->s_port;
 	
-	if (kret = krb5_get_krbhst(kcontext, realmp, &hostlist))
+	kret = krb5_get_krbhst(kcontext, realmp, &hostlist);
+	if (kret)
 	    goto cleanup;
 	
 	/* Now count the number of hosts in the realm */
@@ -610,7 +616,7 @@ krb5_adm_connect(kcontext, user, prompt, opassword, sockp, ctxp,
 		 ccachep, ccname, tlife)
     krb5_context	kcontext;	/* Context handle	(In ) */
     char		*user;		/* User specified	(In ) */
-    char		*prompt;	/* Old password prompt	(In ) */
+    const char		*prompt;	/* Old password prompt	(In ) */
     char		*opassword;	/* Old Password		(I/O) */
     int			*sockp;		/* Socket for conn.	(Out) */
     krb5_auth_context	*ctxp;		/* Auth context		(Out) */
@@ -642,19 +648,16 @@ krb5_adm_connect(kcontext, user, prompt, opassword, sockp, ctxp,
     /*
      * Find the appropriate credentials cache and set up our identity.
      */
-    if (kret = kadm_get_ccache(kcontext, user, ccname, ccachep, &client))
+    kret = kadm_get_ccache(kcontext, user, ccname, ccachep, &client);
+    if (kret)
 	goto cleanup;
 
     /*
      * Get initial credentials.
      */
-    if (kret = kadm_get_creds(kcontext,
-			      *ccachep,
-			      client,
-			      &creds,
-			      prompt,
-			      opassword,
-			      tlife))
+    kret = kadm_get_creds(kcontext, *ccachep, client, &creds,
+			      prompt, opassword, tlife);
+    if (kret)
 	goto cleanup;
 
     /*
@@ -667,17 +670,17 @@ krb5_adm_connect(kcontext, user, prompt, opassword, sockp, ctxp,
     server_realm.length = client->realm.length;
     memcpy(server_realm.data, client->realm.data, server_realm.length);
     server_realm.data[server_realm.length] = '\0';
-    if (kret = kadm_contact_server(kcontext,
-				   &server_realm,
-				   sockp,
-				   &local_addr,
-				   &remote_addr))
+
+    kret = kadm_contact_server(kcontext, &server_realm, sockp,
+			       &local_addr, &remote_addr);
+    if (kret)
 	goto cleanup;
 
     /*
      * Obtain our authorization context
      */
-    if (kret = kadm_get_auth(kcontext, ctxp, local_addr, remote_addr))
+    kret = kadm_get_auth(kcontext, ctxp, local_addr, remote_addr);
+    if (kret)
 	goto cleanup;
 
     /*
@@ -685,21 +688,21 @@ krb5_adm_connect(kcontext, user, prompt, opassword, sockp, ctxp,
      */
     suppl_data.data = NULL;
     suppl_data.length = 0;
-    if (kret = krb5_mk_req_extended(kcontext,
-				    ctxp,
-				    AP_OPTS_MUTUAL_REQUIRED,
-				    &suppl_data,
-				    &creds,
-				    &request_data))
+
+    kret = krb5_mk_req_extended(kcontext, ctxp, AP_OPTS_MUTUAL_REQUIRED,
+				&suppl_data, &creds, &request_data);
+    if (kret)
 	goto cleanup;
 
-    if (kret = krb5_write_message(kcontext, sockp, &request_data))
+    kret = krb5_write_message(kcontext, sockp, &request_data);
+    if (kret)
 	goto cleanup;
 
     /*
      * Now read back the response.
      */
-    if (kret = krb5_read_message(kcontext, sockp, &response_data)) {
+    kret = krb5_read_message(kcontext, sockp, &response_data);
+    if (kret) {
 	goto cleanup;
     }
     else {

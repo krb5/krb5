@@ -107,7 +107,7 @@ krb5_send_adm_cmd(kcontext, sock, ctx, nargs, arglist)
     krb5_int32			nargs;		/* Number of arguments	(In ) */
     krb5_data		*arglist;	/* Components to write	(In ) */
 {
-    int	writebufsize;
+    size_t writebufsize;
     int i;
     char *writebuf;
     krb5_error_code ret;
@@ -116,7 +116,8 @@ krb5_send_adm_cmd(kcontext, sock, ctx, nargs, arglist)
     /*
      * First check that our auth context has the right flags in it.
      */
-    if (ret = krb5_auth_con_getflags(kcontext, ctx, &ac_flags))
+    ret = krb5_auth_con_getflags(kcontext, ctx, &ac_flags);
+    if (ret)
 	return(ret);
 
     if ((ac_flags & (KRB5_AUTH_CONTEXT_RET_SEQUENCE|
@@ -134,7 +135,8 @@ krb5_send_adm_cmd(kcontext, sock, ctx, nargs, arglist)
 	writebufsize += arglist[i].length;	/* for actual arg */
     }
 
-    if (writebuf = (char *) malloc(writebufsize)) {
+    writebuf = (char *) malloc(writebufsize);
+    if (writebuf != NULL) {
 	char 			*curr;
 	krb5_data		write_data, out_data;
 	krb5_replay_data	replay_data;
@@ -157,15 +159,14 @@ krb5_send_adm_cmd(kcontext, sock, ctx, nargs, arglist)
 	write_data.data = writebuf;
 
 	/* Generate the message */
-	if (!(ret = krb5_mk_priv(kcontext,
-				 ctx,
-				 &write_data,
-				 &out_data,
-				 &replay_data))) {
+	ret = krb5_mk_priv(kcontext, ctx, &write_data,
+			   &out_data, &replay_data);
+	if (!ret) {
 	    /* Write the message */
-	    if (ret = krb5_write_message(kcontext, sock, &out_data))
+	    ret = krb5_write_message(kcontext, sock, &out_data);
+	    krb5_free_data_contents(kcontext, &out_data);
+	    if (ret)
 		goto cleanup;
-	    krb5_xfree(out_data.data);
 	}
 
     cleanup:
@@ -201,7 +202,7 @@ krb5_send_adm_reply(kcontext, sock, ctx, cmd_stat, ncomps, complist)
     krb5_int32			ncomps;		/* Number of arguments	(In ) */
     krb5_data		*complist;	/* Components to write	(In ) */
 {
-    int	writebufsize;
+    size_t writebufsize;
     int i;
     char *writebuf;
     krb5_error_code ret;
@@ -210,7 +211,8 @@ krb5_send_adm_reply(kcontext, sock, ctx, cmd_stat, ncomps, complist)
     /*
      * First check that our auth context has the right flags in it.
      */
-    if (ret = krb5_auth_con_getflags(kcontext, ctx, &ac_flags))
+    ret = krb5_auth_con_getflags(kcontext, ctx, &ac_flags);
+    if (ret)
 	return(ret);
 
     if ((ac_flags & (KRB5_AUTH_CONTEXT_RET_SEQUENCE|
@@ -228,7 +230,8 @@ krb5_send_adm_reply(kcontext, sock, ctx, cmd_stat, ncomps, complist)
 	writebufsize += complist[i].length;	/* for actual arg */
     }
 
-    if (writebuf = (char *) malloc(writebufsize)) {
+    writebuf = (char *) malloc(writebufsize);
+    if (writebuf != NULL) {
 	char 			*curr;
 	krb5_data		write_data, out_data;
 	krb5_replay_data	replay_data;
@@ -255,15 +258,14 @@ krb5_send_adm_reply(kcontext, sock, ctx, cmd_stat, ncomps, complist)
 	write_data.data = writebuf;
 
 	/* Generate the message */
-	if (!(ret = krb5_mk_priv(kcontext,
-				 ctx,
-				 &write_data,
-				 &out_data,
-				 &replay_data))) {
+	ret = krb5_mk_priv(kcontext, ctx, &write_data, &out_data, 
+			   &replay_data);
+	if (!ret) {
 	    /* Write the message */
-	    if (ret = krb5_write_message(kcontext, sock, &out_data))
+	    ret = krb5_write_message(kcontext, sock, &out_data);
+	    krb5_free_data_contents(kcontext, &out_data);
+	    if (ret)
 		goto cleanup;
-	    krb5_xfree(out_data.data);
 	}
 
     cleanup:
@@ -305,7 +307,8 @@ krb5_read_adm_cmd(kcontext, sock, ctx, nargs, arglist)
     /*
      * First check that our auth context has the right flags in it.
      */
-    if (ret = krb5_auth_con_getflags(kcontext, ctx, &ac_flags))
+    ret = krb5_auth_con_getflags(kcontext, ctx, &ac_flags);
+    if (ret)
 	return(ret);
 
     if ((ac_flags & (KRB5_AUTH_CONTEXT_RET_SEQUENCE|
@@ -336,8 +339,9 @@ krb5_read_adm_cmd(kcontext, sock, ctx, nargs, arglist)
 		if (*nargs > 0) {
 
 		    /* Get the memory for the list */
-		    if (*arglist = (krb5_data *)
-			malloc((size_t) (*nargs) * sizeof(krb5_data))) {
+		    *arglist = (krb5_data *)
+			malloc((size_t) (*nargs) * sizeof(krb5_data));
+		    if (*arglist != NULL) {
 			krb5_data *xarglist;
 
 			xarglist = *arglist;
@@ -434,7 +438,8 @@ krb5_read_adm_reply(kcontext, sock, ctx, cmd_stat, ncomps, complist)
     /*
      * First check that our auth context has the right flags in it.
      */
-    if (ret = krb5_auth_con_getflags(kcontext, ctx, &ac_flags))
+    ret = krb5_auth_con_getflags(kcontext, ctx, &ac_flags);
+    if (ret)
 	return(ret);
 
     if ((ac_flags & (KRB5_AUTH_CONTEXT_RET_SEQUENCE|
@@ -467,14 +472,15 @@ krb5_read_adm_reply(kcontext, sock, ctx, cmd_stat, ncomps, complist)
 		if (*ncomps > 0) {
 
 		    /* Get the memory for the list */
-		    if (*complist = (krb5_data *)
-			malloc((size_t) ((*ncomps) * sizeof(krb5_data)))) {
+		    *complist = (krb5_data *)
+			malloc((size_t) ((*ncomps) * sizeof(krb5_data)));
+		    if (*complist) {
 			krb5_data *xcomplist;
-
+			
 			xcomplist = *complist;
 			memset((char *) (xcomplist), 0, 
 			       (size_t) ((*ncomps) * sizeof(krb5_data)));
-
+			
 			replyok = 1;
 			/* Copy out each list entry */
 			for (i=0; i<*ncomps; i++) {

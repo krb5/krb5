@@ -7,6 +7,7 @@
 
 #include <krb5.h>
 #include <kadm5/admin.h>
+#include <krb5/adm_proto.h>
 #include "kadm5_defs.h"
 
 static krb5_keytab keytab;
@@ -36,7 +37,7 @@ unhandled_signal(signo)
     /* NOTREACHED */
 }
 
-void usage()
+static void usage()
 {
      fprintf(stderr, "Usage: kadmind [-r realm] [-m] [-nofork] "
 	     "[-D debuglevel] [-T keytable] [-port port-number]\n");
@@ -45,7 +46,7 @@ void usage()
 
 int main(int argc, char *argv[])
 {
-     int ret, rlen, nofork, oldnames = 0;
+     int ret, nofork;
      int timeout = -1;
      krb5_error_code code;
      int debug_level = 0;
@@ -102,22 +103,24 @@ int main(int argc, char *argv[])
      if (argc != 0)
 	  usage();
 
-     if (ret = krb5_init_context(&context)) {
-	  fprintf(stderr, "%s: %s while initializing context, aborting\n",
-		  programname, error_message(ret));
-	  exit(1);
+     ret = krb5_init_context(&context);
+     if (ret) {
+	 fprintf(stderr, "%s: %s while initializing context, aborting\n",
+		 programname, error_message(ret));
+	 exit(1);
      }
 
      krb5_klog_init(context, "admin_server", programname, 1);
 
-     if (ret = kadm5_get_config_params(context, NULL, NULL, &params,
-				       &params)) {
-	  krb5_klog_syslog(LOG_ERR, "%s: %s while initializing, aborting\n",
-			   programname, error_message(ret));
-	  fprintf(stderr, "%s: %s while initializing, aborting\n",
-		  programname, error_message(ret));
-	  krb5_klog_close();
-	  exit(1);
+     ret = kadm5_get_config_params(context, NULL, NULL, &params,
+				   &params);
+     if (ret) {
+	 krb5_klog_syslog(LOG_ERR, "%s: %s while initializing, aborting\n",
+			  programname, error_message(ret));
+	 fprintf(stderr, "%s: %s while initializing, aborting\n",
+		 programname, error_message(ret));
+	 krb5_klog_close(context);
+	 exit(1);
      }
 
 #define REQUIRED_PARAMS (KADM5_CONFIG_REALM | KADM5_CONFIG_ACL_FILE | \
@@ -128,9 +131,9 @@ int main(int argc, char *argv[])
 			   "(%x) while initializing, aborting\n", programname,
 			   (params.mask & REQUIRED_PARAMS) ^ REQUIRED_PARAMS);
 	  fprintf(stderr, "%s: Missing required configuration values "
-		  "(%x) while initializing, aborting\n", programname,
+		  "(%lx) while initializing, aborting\n", programname,
 		  (params.mask & REQUIRED_PARAMS) ^ REQUIRED_PARAMS);
-	  krb5_klog_close();
+	  krb5_klog_close(context);
 	  exit(1);
      }
 
@@ -171,9 +174,10 @@ int main(int argc, char *argv[])
 
      krb5_klog_syslog(LOG_INFO, "starting");
 
-     if (code = net_init(context, params.realm, debug_level,
-			 (params.mask&KADM5_CONFIG_KADMIND_PORT)?
-			 params.kadmind_port:0)) {
+     code = net_init(context, params.realm, debug_level,
+		     (params.mask&KADM5_CONFIG_KADMIND_PORT)?
+		     params.kadmind_port:0);
+     if (code) {
 	krb5_klog_syslog(LOG_ERR, "%s: %s while initializing network",
 			 programname, error_message(code));
 	fprintf(stderr, "%s: %s while initializing network\n",
@@ -181,11 +185,13 @@ int main(int argc, char *argv[])
 
 	exit(1);
      }
-     if (code = proto_init(context, debug_level, timeout)) {
-	     krb5_klog_syslog(LOG_ERR, "%s: %s while initializing proto",
-			      programname, error_message(code));
-	     fprintf(stderr, "%s: %s while initializing  proto\n",
-		     programname, error_message(code));
+
+     code = proto_init(context, debug_level, timeout);
+     if (code) {
+	 krb5_klog_syslog(LOG_ERR, "%s: %s while initializing proto",
+			  programname, error_message(code));
+	 fprintf(stderr, "%s: %s while initializing  proto\n",
+		 programname, error_message(code));
      }
 
      if (
@@ -196,7 +202,8 @@ int main(int argc, char *argv[])
 #endif	/* POSIX_SETJMP */
 	 )
 	 {
-	     if (code = net_dispatch(context, !nofork)) {
+	     code = net_dispatch(context, !nofork);
+	     if (code) {
 		 krb5_klog_syslog(LOG_ERR, "%s: %s while dispatching requests",
 				  programname, error_message(code));
 		 fprintf(stderr, "%s: %s while dispatching requests\n",
@@ -209,7 +216,7 @@ int main(int argc, char *argv[])
      net_finish(context, debug_level);
 	 
      krb5_klog_syslog(LOG_INFO, "finished, exiting");
-     krb5_klog_close();
+     krb5_klog_close(context);
      exit(2);
 }
 
@@ -259,15 +266,16 @@ pwd_change(kcontext, debug_level, auth_context, ticket,
      /* check to see if the min_time has passed.  this is stolen
 	from chpass_principal_wrapper */
 
-    if (ret = krb5_timeofday(kcontext, &now)) {
+     ret = krb5_timeofday(kcontext, &now);
+     if (ret) {
 	 sprintf(err_str, error_message(ret));
 	 return(KRB5_ADM_SYSTEM_ERROR);
-    }
+     }
 
-    if((ret = kadm5_get_principal(global_server_handle, principal,
-				  &princ,
-				  KADM5_PRINCIPAL_NORMAL_MASK)) !=
-       KADM5_OK) {
+     if((ret = kadm5_get_principal(global_server_handle, principal,
+				   &princ,
+				   KADM5_PRINCIPAL_NORMAL_MASK)) !=
+	KADM5_OK) {
 	 sprintf(err_str, error_message(ret));
 	 return(KRB5_ADM_SYSTEM_ERROR);
     }
@@ -285,25 +293,28 @@ pwd_change(kcontext, debug_level, auth_context, ticket,
 	    sprintf(err_str, error_message(ret));
 	    return(KRB5_ADM_PW_UNACCEPT);
 	}
-	if (ret = kadm5_free_policy_ent(global_server_handle, &pol)) {
+
+	ret = kadm5_free_policy_ent(global_server_handle, &pol);
+	if (ret) {
 	    (void) kadm5_free_principal_ent(global_server_handle, &princ);
 	    sprintf(err_str, error_message(ret));
 	    return(KRB5_ADM_SYSTEM_ERROR);
         }
     }
-    if (ret = kadm5_free_principal_ent(global_server_handle, &princ)) {
-	 sprintf(err_str, error_message(ret));
-	 return(KRB5_ADM_SYSTEM_ERROR);
+
+    ret = kadm5_free_principal_ent(global_server_handle, &princ);
+    if (ret) {
+	sprintf(err_str, error_message(ret));
+	return(KRB5_ADM_SYSTEM_ERROR);
     }
 
     /* ok, it's not too early to change the password. change it. */
-
-    if (ret = kadm5_chpass_principal_util(global_server_handle,
-					  principal,
-					  newdata->data,
-					  NULL,
-					  err_str, err_str_len))
-	 return(KRB5_ADM_PW_UNACCEPT);
-
+    
+    ret = kadm5_chpass_principal_util(global_server_handle,
+				      principal, newdata->data,
+				      NULL, err_str, err_str_len);
+    if (ret)
+	return(KRB5_ADM_PW_UNACCEPT);
+    
     return(KRB5_ADM_SUCCESS);
 }

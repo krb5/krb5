@@ -110,7 +110,7 @@
  * Inter-module function prototypes
  */
 
-krb5_keytab key_keytab_id();
+krb5_keytab key_keytab_id KRB5_PROTOTYPE((void));
 krb5_error_code key_open_db KRB5_PROTOTYPE((krb5_context));
 krb5_error_code key_close_db KRB5_PROTOTYPE((krb5_context));
 
@@ -226,7 +226,7 @@ void net_finish
 		   int));
 krb5_error_code net_dispatch
 	KRB5_PROTOTYPE((krb5_context, int));
-krb5_principal net_server_princ();
+krb5_principal net_server_princ KRB5_PROTOTYPE((void));
 
 /* proto_serv.c */
 krb5_error_code proto_init

@@ -177,17 +177,19 @@ proto_serv(kcontext, my_id, cl_sock, sv_p, cl_p)
     /*
      * First setup the replay cache.
      */
-    if (kret = krb5_get_server_rcache(kcontext,
-				      krb5_princ_component(kcontext,
-							   net_server_princ(),
-							   0),
-				      &rcache)) {
+    kret = krb5_get_server_rcache(kcontext,
+				  krb5_princ_component(kcontext,
+						       net_server_princ(),
+						       0),
+				  &rcache);
+    if (kret) {
 	com_err(programname, kret, proto_rcache_msg, my_id);
 	goto cleanup;
     }
 
     /* Initialize the auth context */
-    if (kret = krb5_auth_con_init(kcontext, &auth_context)) {
+    kret = krb5_auth_con_init(kcontext, &auth_context);
+    if (kret) {
 	com_err(programname, kret, proto_auth_con_msg, my_id);
 	goto cleanup;
     }
@@ -216,9 +218,8 @@ proto_serv(kcontext, my_id, cl_sock, sv_p, cl_p)
 	    ntohl(sv_addr->sin_addr.s_addr),
 	    ntohl(cl_addr->sin_addr.s_addr)));
     /* Now, read in the AP_REQ message and decode it. */
-    if (kret = krb5_read_message(kcontext,
-				 (krb5_pointer) &cl_sock,
-				 &in_data)) {
+    kret = krb5_read_message(kcontext, (krb5_pointer) &cl_sock, &in_data);
+    if (kret) {
 	com_err(programname, kret, proto_ap_req_msg, my_id);
 	goto cleanup;
     }
@@ -227,13 +228,10 @@ proto_serv(kcontext, my_id, cl_sock, sv_p, cl_p)
 	   ("= %d:parse message(%d bytes)\n", my_id, in_data.length));
 
     /* Parse the AP_REQ message */
-    if (kret = krb5_rd_req(kcontext,
-			   &auth_context,
-			   &in_data,
-			   net_server_princ(),
-			   key_keytab_id(),
-			   &ap_options,
-			   &ticket)) {
+    kret = krb5_rd_req(kcontext, &auth_context, &in_data,
+			   net_server_princ(), key_keytab_id(),
+			   &ap_options, &ticket);
+    if (kret) {
 	com_err(programname, kret, proto_rd_req_msg, my_id);
 	goto err_reply;
     }
@@ -248,16 +246,17 @@ proto_serv(kcontext, my_id, cl_sock, sv_p, cl_p)
 
     DPRINT(DEBUG_PROTO, proto_debug_level,
 	   ("= %d:make AP_REP\n", my_id));
-    if (kret = krb5_mk_rep(kcontext, auth_context, &out_data)) {
+    kret = krb5_mk_rep(kcontext, auth_context, &out_data);
+    if (kret) {
 	com_err(programname, kret, proto_mk_rep_msg, my_id);
 	goto cleanup;
     }
 
     DPRINT(DEBUG_PROTO, proto_debug_level,
 	   ("= %d:write AP_REP(%d bytes)\n", my_id, out_data.length));
-    if (kret = krb5_write_message(kcontext,
-				  (krb5_pointer) &cl_sock,
-				  &out_data)) {
+    kret = krb5_write_message(kcontext, (krb5_pointer) &cl_sock,
+			      &out_data);
+    if (kret) {
 	com_err(programname, kret, proto_wr_rep_msg, my_id);
 	goto cleanup;
     }
@@ -297,7 +296,7 @@ proto_serv(kcontext, my_id, cl_sock, sv_p, cl_p)
 	     * Read a command and figure out what to do.
 	     */
 	    if (proto_proto_timeout > 0)
-		alarm(proto_proto_timeout);
+		alarm((unsigned) proto_proto_timeout);
 	    num_args = 0;
 	    DPRINT(DEBUG_PROTO, proto_debug_level,
 		   ("= %d:waiting for command\n", my_id));

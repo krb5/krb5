@@ -85,7 +85,9 @@ typedef struct _net_slave_info {
  * Error messages.
  */
 static const char *net_waiterr_msg = "\004child wait failed - cannot reap children";
+#if 0
 static const char *net_def_realm_fmt = "%s: cannot get default realm (%s).\n";
+#endif
 static const char *net_no_mem_fmt = "%s: cannot get memory.\n";
 static const char *net_parse_srv_fmt = "%s: cannot parse server name %s (%s).\n";
 static const char *net_no_hostname_fmt = "%s: cannot get our host name (%s).\n";
@@ -108,7 +110,6 @@ static krb5_principal	net_service_principal = (krb5_principal) NULL;
 static int		net_server_addr_init = 0;
 static struct sockaddr_in	net_server_addr;
 static int		net_listen_socket = -1;
-static int		net_slaves_active = 0;
 static int		net_max_slaves = 0;
 static net_slave_info	*net_slave_table = (net_slave_info *) NULL;
 
@@ -475,9 +476,8 @@ net_init(kcontext, realm, debug_level, port)
 	   ("- name of service is %s\n", net_service_name));
 
     /* Now formulate the principal name */
-    if (kret = krb5_parse_name(kcontext,
-			       net_service_name,
-			       &net_service_principal)) {
+    kret = krb5_parse_name(kcontext, net_service_name, &net_service_principal);
+    if (kret) {
 	fprintf(stderr, net_parse_srv_fmt, programname, net_service_name,
 		error_message(kret));
 	goto done;

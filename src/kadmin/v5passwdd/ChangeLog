@@ -1,3 +1,9 @@
+Mon Feb 26 15:22:44 2001  Ezra Peisach  <epeisach@mit.edu>
+
+	*adm_conn.c, adm_rw.c, kadm5_defs.h, kpasswd.c, main.c,
+ 	proto_serv.c, srv_net.c: Warnings cleanup including assignments in
+ 	conditionals, shadowed variables, unused variables, prototypes.
+
 2000-10-17  Ezra Peisach  <epeisach@mit.edu>
 
 	* adm_conn.c, kpasswd.c: Argument to krb5_read_password
