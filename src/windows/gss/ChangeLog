@@ -1,3 +1,13 @@
+Wed Jun 12 00:16:46 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* gss-clie.c: Renamed to gss-client.c, for VFAT/NTFS filesystems
+
+	* makefile: Renamed to Makefile.in, so that we can do WIN16/WIN32
+ 		specializations.  Remove /nologo option for Win32 RFLAGS,
+ 		since RC apparently doesn't support it.
+
+	* changelo: Renamed to ChangeLog, to make life easier.
+
 Thu Feb 29 13:25:07 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* gss.c: Add closeoscket() call so that program properly

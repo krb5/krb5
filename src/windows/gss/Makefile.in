@@ -24,7 +24,8 @@ CFLAGS 	 = $(CFLAGS_RELEASE) $(INCLUDES)
 
 ##### RC Compiler
 RC 	 = rc
-RFLAGS 	 = /nologo $(INCLUDES)
+##WIN16##RFLAGS 	 = /nologo $(INCLUDES)
+##WIN32##RFLAGS 	 = $(INCLUDES)
 
 ##### Linker
 LINK 	 = link
