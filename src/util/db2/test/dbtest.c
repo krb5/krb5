@@ -57,10 +57,16 @@ static char sccsid[] = "@(#)dbtest.c	8.17 (Berkeley) 9/1/94";
 
 enum S { COMMAND, COMPARE, GET, PUT, REMOVE, SEQ, SEQFLAG, KEY, DATA };
 
+#if __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 7)
+#define ATTR(x) __attribute__(x)
+#else
+#define ATTR(x)
+#endif
+
 void	 compare __P((DBT *, DBT *));
 DBTYPE	 dbtype __P((char *));
 void	 dump __P((DB *, int));
-void	 err __P((const char *, ...));
+void	 err __P((const char *, ...)) ATTR ((__format__(__printf__,1,2)));
 void	 get __P((DB *, DBT *));
 void	 getdata __P((DB *, DBT *, DBT *));
 void	 put __P((DB *, DBT *, DBT *));
