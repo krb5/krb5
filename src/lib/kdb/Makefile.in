@@ -7,6 +7,7 @@ all:: $(OBJS) all-$(WHAT)
 SRCS= \
 	$(srcdir)/encrypt_key.c \
 	$(srcdir)/decrypt_key.c \
+	$(srcdir)/kdb_cpw.c \
 	$(srcdir)/kdb_dbm.c \
 	$(srcdir)/kdb_xdr.c \
 	$(srcdir)/verify_mky.c \
@@ -17,6 +18,7 @@ SRCS= \
 OBJS= \
 	encrypt_key.o \
 	decrypt_key.o \
+	kdb_cpw.o \
 	kdb_dbm.o \
 	kdb_xdr.o \
 	verify_mky.o \
