@@ -501,7 +501,7 @@ char * v4_klog( type, format, va_alist)
 }
 
 static
-int sendto(s, msg, len, flags, to, to_len)
+int krb4_sendto(s, msg, len, flags, to, to_len)
 int s;
 const char *msg;
 int len, flags;
@@ -859,7 +859,7 @@ kerberos_v4(client, pkt)
 	    rpkt = create_auth_reply(req_name_ptr, req_inst_ptr,
 		req_realm_ptr, req_time_ws, 0, a_name_data.exp_date,
 		a_name_data.key_version, ciph);
-	    sendto(f, (char *) rpkt->dat, rpkt->length, 0,
+	    krb4_sendto(f, (char *) rpkt->dat, rpkt->length, 0,
 		   (struct sockaddr *) client, S_AD_SZ);
 	    bzero(&a_name_data, sizeof(a_name_data));
 	    bzero(&s_name_data, sizeof(s_name_data));
@@ -976,7 +976,7 @@ kerberos_v4(client, pkt)
 	    rpkt = create_auth_reply(ad->pname, ad->pinst,
 				     ad->prealm, time_ws,
 				     0, 0, 0, ciph);
-	    sendto(f, (char *) rpkt->dat, rpkt->length, 0,
+	    krb4_sendto(f, (char *) rpkt->dat, rpkt->length, 0,
 		   (struct sockaddr *) client, S_AD_SZ);
 	    bzero(&s_name_data, sizeof(s_name_data));
 	    break;
@@ -1059,7 +1059,7 @@ kerb_err_reply(client, pkt, err, string)
     strcat(e_msg, string);
     cr_err_reply(e_pkt, req_name_ptr, req_inst_ptr, req_realm_ptr,
 		 req_time_ws, err, e_msg);
-    sendto(f, (char *) e_pkt->dat, e_pkt->length, 0,
+    krb4_sendto(f, (char *) e_pkt->dat, e_pkt->length, 0,
 	   (struct sockaddr *) client, S_AD_SZ);
 
 }
