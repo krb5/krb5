@@ -1,3 +1,10 @@
+2001-10-18  Ken Raeburn  <raeburn@mit.edu>
+
+	Don't crash if .k[5]login file ownership is wrong.  Patch from
+	Emily Ratliff, ratliff@austin.ibm.com.
+	* authorization.c (fowner): Don't close the file even on error.
+	(krb5_authorization): Close the file if fowner returns FALSE.
+
 2001-02-21  Tom Yu  <tlyu@mit.edu>
 
 	* setenv.c: Add conditionals for compilation of setenv, unsetenv,
