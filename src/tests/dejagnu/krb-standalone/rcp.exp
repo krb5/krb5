@@ -74,6 +74,7 @@ proc stop_rsh_daemon { } {
     if [info exists krshd_pid] {
 	catch "close -i $krshd_spawn_id"
 	catch "exec kill $krshd_pid"
+	catch "expect -i $krshd_spawn_id eof"
 	catch "wait -i $krshd_spawn_id"
 	unset krshd_pid
     }
