@@ -1,3 +1,12 @@
+2003-06-16  Ken Raeburn  <raeburn@mit.edu>
+
+	* ftp.c (recvrequest): Add new argument indicating whether "-" and
+	"|..." special treatment should be disabled.
+	* ftp_var.h (recvrequest): Update declaration.
+	* cmds.c (remglob, ls, mls): Pass 0 as the extra argument.
+	(mget): Pass 1.
+	(getit): Pass 1 iff only one filename was supplied.
+
 2003-06-05  Sam Hartman  <hartmans@mit.edu>
 
 	* pclose.c (mypopen): use fork not vfork
