@@ -1,5 +1,8 @@
 Thu Jan 25 01:35:52 1996  Sam Hartman  <hartmans@tertius.mit.edu>
 
+	* rd_req_dec.c (krb5_rd_req_decrypt_tkt_part): Remove outdated
+        comment about mapping etype to ktype.
+
 	* gc_via_tkt.c (krb5_get_cred_via_tkt): If the keyblock.enctype is
         non-null in in_cred, then request that particular key.
 

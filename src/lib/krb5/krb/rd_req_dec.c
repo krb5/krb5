@@ -72,10 +72,6 @@ krb5_rd_req_decrypt_tkt_part(context, req, keytab)
     krb5_enctype 	  enctype;
     krb5_keytab_entry 	  ktent;
 
-    /*
-     * OK we know the encryption type req->ticket->enc_part.enctype, 
-     * and now we need to get the enctype
-     */
     enctype = req->ticket->enc_part.enctype;
 
     if ((retval = krb5_kt_get_entry(context, keytab, req->ticket->server,
