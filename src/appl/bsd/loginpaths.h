@@ -96,13 +96,9 @@
 #endif
 
 #ifdef _PATH_DEFPATH
-#ifdef LPATH
 #undef LPATH
-#endif
 #define LPATH _PATH_DEFPATH
-#ifdef RPATH
 #undef RPATH
-#endif 
 #define RPATH _PATH_DEFPATH
 #endif
 
