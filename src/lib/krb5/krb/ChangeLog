@@ -1,3 +1,9 @@
+2001-01-29	Alexandra Ellwood <lxs@mit.edu>
+
+	* conv_princ.c (krb5_524_conv_principal): Fixed strncmp bug where principals 
+	which are left substrings of "changepw" were being remapped into "changepw".  
+	Added length check to if() statement.
+
 2001-01-29  Ken Raeburn  <raeburn@mit.edu>
 
 	* preauth2.c (pa_sam): Check for a null prompter function pointer,
