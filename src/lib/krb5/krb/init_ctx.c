@@ -29,9 +29,9 @@
 
 krb5_error_code
 krb5_init_context(context)
-	krb5_context **context;
+	krb5_context *context;
 {
-	krb5_context *ctx;
+	krb5_context ctx;
 	krb5_error_code retval;
 
 	*context = 0;
@@ -56,7 +56,7 @@ cleanup:
 
 void
 krb5_free_context(ctx)
-	krb5_context	*ctx;
+	krb5_context	ctx;
 {
 	krb5_os_free_context(ctx);
 	ctx->magic = 0;

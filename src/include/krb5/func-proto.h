@@ -28,9 +28,9 @@
 #define KRB5_FUNC_PROTO__
 
 krb5_error_code krb5_init_context
-	PROTOTYPE((krb5_context **));
-void krb5_free_context
 	PROTOTYPE((krb5_context *));
+void krb5_free_context
+	PROTOTYPE((krb5_context));
 
 /* libkrb.spec */
 krb5_error_code krb5_kdc_rep_decrypt_proc

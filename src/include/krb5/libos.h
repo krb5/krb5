@@ -30,7 +30,7 @@
 
 typedef struct _krb5_os_context {
 	krb5_magic	magic;
-} krb5_os_context;
+} *krb5_os_context;
 
 /* lock mode flags */
 #define	KRB5_LOCKMODE_SHARED	0x0001

@@ -30,9 +30,9 @@
 
 krb5_error_code
 krb5_os_init_context(ctx)
-	krb5_context *ctx;
+	krb5_context ctx;
 {
-	krb5_os_context *os_ctx;
+	krb5_os_context os_ctx;
 	
 	if (ctx->os_context)
 		return 0;
@@ -50,9 +50,9 @@ krb5_os_init_context(ctx)
 
 void
 krb5_free_os_context(ctx)
-	krb5_context	*ctx;
+	krb5_context	ctx;
 {
-	krb5_os_context *os_ctx;
+	krb5_os_context os_ctx;
 
 	os_ctx = ctx->os_context;
 	

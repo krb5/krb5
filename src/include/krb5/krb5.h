@@ -46,7 +46,7 @@
 typedef struct _krb5_context {
 	krb5_magic	magic;
 	void		*os_context;
-} krb5_context;
+} *krb5_context;
 
 /* Time set */
 typedef struct _krb5_ticket_times {
