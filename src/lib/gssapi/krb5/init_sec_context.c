@@ -207,6 +207,10 @@ cleanup:
    return (code);
 }
 
+#define IS_KRB_ERROR(dat)\
+	((dat) && (dat)->length && ((dat)->data[0] == 0x7e ||\
+				    (dat)->data[0] == 0x5e))
+
 OM_uint32
 krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
 			  context_handle, target_name, mech_type,
@@ -466,6 +470,7 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
       char *sptr;
       krb5_data ap_rep;
       krb5_ap_rep_enc_part *ap_rep_data;
+      krb5_error *krb_error;
 
       /* validate the context handle */
       /*SUPPRESS 29*/
@@ -511,29 +516,45 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
       if ((err = g_verify_token_header((gss_OID) mech_type, &(ap_rep.length),
 				       &ptr, KG_TOK_CTX_AP_REP,
 				       input_token->length))) {
-	 *minor_status = err;
-	 return(GSS_S_DEFECTIVE_TOKEN);
+	      if (g_verify_token_header((gss_OID) mech_type, &(ap_rep.length),
+					&ptr, KG_TOK_CTX_ERROR,
+					input_token->length) == 0) {
+
+		      /* Handle a KRB_ERROR message from the server */
+
+		      sptr = (char *) ptr;           /* PC compiler bug */
+		      TREAD_STR(sptr, ap_rep.data, ap_rep.length);
+		      
+		      code = krb5_rd_error(context, &ap_rep, &krb_error);
+		      if (code)
+			      goto fail;
+		      if (krb_error->error)
+			      code = krb_error->error + ERROR_TABLE_BASE_krb5;
+		      else
+			      code = 0;
+		      krb5_free_error(context, krb_error);
+		      goto fail;
+	      } else {
+		      *minor_status = err;
+		      return(GSS_S_DEFECTIVE_TOKEN);
+	      }
       }
 
       sptr = (char *) ptr;                      /* PC compiler bug */
       TREAD_STR(sptr, ap_rep.data, ap_rep.length);
 
-      	/* decode the ap_rep */
-      	if ((code = krb5_rd_rep(context,ctx->auth_context,&ap_rep,
-				&ap_rep_data))) {
-	    /*
-	     * XXX A hack for backwards compatiblity.
-	     * To be removed in 1999 -- proven 
-	     */
-	    krb5_auth_con_setuseruserkey(context,ctx->auth_context,ctx->subkey);
-	    if ((krb5_rd_rep(context, ctx->auth_context, &ap_rep,
-			     &ap_rep_data))) {
-	 	(void)krb5_gss_delete_sec_context(minor_status, 
-					          context_handle, NULL);
-		*minor_status = code;
-	 	return(GSS_S_FAILURE);
-	    }
-      	}
+      /* decode the ap_rep */
+      if ((code = krb5_rd_rep(context,ctx->auth_context,&ap_rep,
+			      &ap_rep_data))) {
+	      /*
+	       * XXX A hack for backwards compatiblity.
+	       * To be removed in 1999 -- proven 
+	       */
+	      krb5_auth_con_setuseruserkey(context,ctx->auth_context,ctx->subkey);
+	      if ((krb5_rd_rep(context, ctx->auth_context, &ap_rep,
+			     &ap_rep_data)))
+		      goto fail;
+      }
 
       /* store away the sequence number */
       ctx->seq_recv = ap_rep_data->seq_number;
@@ -550,12 +571,8 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
       /* set returns */
 
       if (time_rec) {
-	 if ((code = krb5_timeofday(context, &now))) {
-	    (void)krb5_gss_delete_sec_context(minor_status, 
-					      (gss_ctx_id_t) ctx, NULL);
-	    *minor_status = code;
-	    return(GSS_S_FAILURE);
-	 }
+	 if ((code = krb5_timeofday(context, &now)))
+		 goto fail;
 	 *time_rec = ctx->endtime - now;
       }
 
@@ -572,4 +589,10 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
    }
 
    return(GSS_S_COMPLETE);
+
+fail:
+   (void)krb5_gss_delete_sec_context(minor_status, 
+				     (gss_ctx_id_t) ctx, NULL);
+   *minor_status = code;
+   return(GSS_S_FAILURE);
 }
