@@ -637,7 +637,6 @@ int main(argc, argv)
 		       deleg_flag, auth_flag, wrap_flag, encrypt_flag, mic_flag,
 		       msg, use_file, mcount) < 0)
 	 exit(1);
-}
      }
 
      if (oid != GSS_C_NULL_OID)
