@@ -9,12 +9,6 @@
 #
 # Imakefile for Kerberos admin server library.
 
-#ifdef Krb4KDCCompat
-K4LIB=-l$(DES425LIB)
-#else
-K4LIB=
-#endif
-
 SRCS = \
 	networked.c \
 	kpasswd.c
@@ -28,7 +22,7 @@ ErrorTableObjectRule()
 all::	kpasswd
 
 NormalProgramTarget(kpasswd,$(OBJS),$(KDBDEPLIB) $(DEPKLIB), \
-	$(KDBLIB) $(K4LIB) $(KLIB) ,)
+	$(KDBLIB) $(KLIB) ,)
 Krb5InstallClientProgram(kpasswd)
 
 clean::
