@@ -47,61 +47,61 @@ clean-windows::
 
 all-windows::
 	cd ASN.1
-	@echo Making in ASN.1
-	-$(MAKE) -$(MFLAGS) LIBCMD="$(LIBCMD)"
+	@echo Making in lib\asn.1
+	-$(MAKE) -$(MFLAGS) LIBCMD=$(LIBCMD)
 	cd ..\CCACHE
-	@echo Making in CCACHE
-	-$(MAKE) -$(MFLAGS) LIBCMD="$(LIBCMD)"
+	@echo Making in lib\ccache
+	-$(MAKE) -$(MFLAGS) LIBCMD=$(LIBCMD)
 	cd ..\ERROR_TA
-	@echo Making in ERROR_TA
-	-$(MAKE) -$(MFLAGS) LIBCMD="$(LIBCMD)"
+	@echo Making in lib\error_ta
+	-$(MAKE) -$(MFLAGS) LIBCMD=$(LIBCMD)
 	cd ..\FREE
-	@echo Making in FREE
-	-$(MAKE) -$(MFLAGS) LIBCMD="$(LIBCMD)"
+	@echo Making in lib\free
+	-$(MAKE) -$(MFLAGS) LIBCMD=$(LIBCMD)
 	cd ..\KEYTAB
-	@echo Making in KEYTAB
-	-$(MAKE) -$(MFLAGS) LIBCMD="$(LIBCMD)"
+	@echo Making in lib\keytab
+	-$(MAKE) -$(MFLAGS) LIBCMD=$(LIBCMD)
 	cd ..\KRB
-	@echo Making in KRB
-	-$(MAKE) -$(MFLAGS) LIBCMD="$(LIBCMD)"
+	@echo Making in lib\krb
+	-$(MAKE) -$(MFLAGS) LIBCMD=$(LIBCMD)
 	cd ..\OS
-	@echo Making in OS
-	-$(MAKE) -$(MFLAGS) LIBCMD="$(LIBCMD)"
+	@echo Making in lib\os
+	-$(MAKE) -$(MFLAGS) LIBCMD=$(LIBCMD)
 	cd ..\POSIX
-	@echo Making in POSIX
-	-$(MAKE) -$(MFLAGS) LIBCMD="$(LIBCMD)"
+	@echo Making in lib\posix
+	-$(MAKE) -$(MFLAGS) LIBCMD=$(LIBCMD)
 	cd ..\RCACHE
-	@echo Making in RCACHE
-	-$(MAKE) -$(MFLAGS) LIBCMD="$(LIBCMD)"
+	@echo Making in lib\rcache
+	-$(MAKE) -$(MFLAGS) LIBCMD=$(LIBCMD)
 	cd ..
 
 clean-windows::
 	cd ASN.1
-	@echo Making clean in ASN.1
+	@echo Making clean in lib\asn.1
 	-$(MAKE) -$(MFLAGS) clean
 	cd ..\CCACHE
-	@echo Making clean in CCACHE
+	@echo Making clean in lib\ccache
 	-$(MAKE) -$(MFLAGS) clean
 	cd ..\ERROR_TA
-	@echo Making clean in ERROR_TA
+	@echo Making clean in lib\error_ta
 	-$(MAKE) -$(MFLAGS) clean
 	cd ..\FREE
-	@echo Making clean in FREE
+	@echo Making clean in lib\free
 	-$(MAKE) -$(MFLAGS) clean
 	cd ..\KEYTAB
-	@echo Making clean in KEYTAB
+	@echo Making clean in lib\keytab
 	-$(MAKE) -$(MFLAGS) clean
 	cd ..\KRB
-	@echo Making clean in KRB
+	@echo Making clean in lib\krb
 	-$(MAKE) -$(MFLAGS) clean
 	cd ..\OS
-	@echo Making clean in OS
+	@echo Making clean in lib\os
 	-$(MAKE) -$(MFLAGS) clean
 	cd ..\POSIX
-	@echo Making clean in POSIX
+	@echo Making clean in lib\posix
 	-$(MAKE) -$(MFLAGS) clean
 	cd ..\RCACHE
-	@echo Making clean in RCACHE
+	@echo Making clean in lib\rcache
 	-$(MAKE) -$(MFLAGS) clean
 	cd ..
 	@echo Making clean locally

@@ -27,7 +27,7 @@ all-unix::
 
 all-windows::
 	cd file
-	@echo Making in .\file
+	@echo Making in keytab\file
 	-$(MAKE) -$(MFLAGS) LIBCMD=$(LIBCMD)
 	cd ..
 
@@ -37,6 +37,8 @@ clean-unix::
 
 clean-windows::
 	cd file
-	@echo Making clean in .\file
+	@echo Making clean in keytab\file
 	-$(MAKE) -$(MFLAGS) clean
 	cd ..
+	@echo Making clean locally
+

@@ -1,3 +1,7 @@
+Wed Mar 15 20:23:17 1995 Keith Vetter (keithv@fusion.com)
+
+	* Makefile.in: cleaned up for the PC
+
 Wed Mar 15 12:26:21 1995 Keith Vetter (keithv@fusion.com)
 
 	* Makefile.in: made so it recurses into the subdirs for the PC.

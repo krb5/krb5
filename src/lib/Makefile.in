@@ -1,7 +1,93 @@
 CFLAGS = $(CCOPTS) $(DEFS)
 LDFLAGS = -g
 
-all::
+##DOSBUILDTOP = ..
+##DOS!include $(BUILDTOP)\config\windows.in
 
-clean::
-	$(RM) libkrb5.a libkdb5.a libcrypto.a libgssapi_krb5.a libdes425.a libkrb425.a
+all:: all-$(WHAT)
+
+all-unix::
+
+clean:: clean-$(WHAT)
+
+clean-unix::
+	$(RM) libkrb5.a libkdb5.a libcrypto.a 
+	$(RM) libgssapi_krb5.a libdes425.a libkrb425.a
+
+clean-windows::
+	$(RM) libkrb5.dll libkrb5.lib libkrb5.bak winsock.lib
+#
+# Windows stuff to make libkrb5.dll and libkrb5.lib. Currently it
+# combines crypto, krb5 and the util/et directories.
+#
+CLIB = crypto\crypto.lib
+KLIB = krb5\krb5.lib
+ETLIB = $(BUILDTOP)\util\et\comerr.lib
+WLIB = .\winsock.lib
+LIBS = $(CLIB) $(KLIB) $(ETLIB) $(WLIB)
+
+#
+# Fast: is a faster way to make things on the PC. Unfortunately it requires
+# the unix utility sed so it can't be part of the final production release.
+#
+fast:
+	$(RM) libkrb5.lib libkrb5.dll
+	cd crypto
+	$(MAKE) -$(MFLAGS) LIBCMD=rem
+	libdir crypto.lib
+	cd ..\krb5
+	$(MAKE) -$(MFLAGS) LIBCMD=rem
+	libdir krb5.lib
+	cd ..
+	cd $(BUILDTOP)\util\et
+	$(MAKE) -$(MFLAGS)
+	cd ..\..\lib
+	link /co /seg:400 /noe /nologo win_glue, libkrb5.dll,nul, \
+	   $(LIBS) ldllcew libw,libkrb5.def
+	rc /nologo /p /k libkrb5.dll
+	implib /nologo libkrb5.lib libkrb5.dll
+		
+libkrb5.lib:: libkrb5.dll
+	implib /nologo librkb5.lib libkrb5.dll
+	
+libkrb5.dll:: $(LIBS) libkrb5.def win_glue.obj
+	link /co /seg:400 /noe /nol win_glue, libkrb5.dll,nul, \
+	   $(LIBS) ldllcew libw,libkrb5.def
+	rc /nologo /p /k libkrb5.dll
+
+winsock.lib:  winsock.def
+	implib /nologo winsock.lib winsock.def
+
+all-windows:: 
+	cd crypto
+	@echo Making in lib\crypto
+	-$(MAKE) -$(MFLAGS) LIBCMD=$(LIBCMD)
+	cd ..\krb5
+	@echo Making in lib\krb5
+	-$(MAKE) -$(MFLAGS) LIBCMD=$(LIBCMD)
+	cd ..\gssapi
+	@echo Making in lib\gssapi
+	-$(MAKE) -$(MFLAGS) LIBCMD=$(LIBCMD)
+	cd ..\des425
+	@echo Making in lib\des425
+	-$(MAKE) -$(MFLAGS) LIBCMD=$(LIBCMD)
+	cd ..
+
+all-windows:: libkrb5.lib
+
+clean-windows::
+	cd crypto
+	@echo Making clean in lib\crypto
+	-$(MAKE) -$(MFLAGS) clean
+	cd ..\krb5
+	@echo Making clean in lib\krb5
+	-$(MAKE) -$(MFLAGS) clean
+	cd ..\gssapi
+	@echo Making clean in lib\gssapi
+	-$(MAKE) -$(MFLAGS) clean
+	cd ..\des425
+	@echo Making clean in lib\des425
+	-$(MAKE) -$(MFLAGS) clean
+	cd ..
+	@echo Making clean locally
+

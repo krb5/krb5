@@ -19,7 +19,7 @@ all-unix::
 
 all-windows::
 	cd FILE
-	@echo Making in CCACHE\FILE
+	@echo Making in ccache\file
 	-$(MAKE) -$(MFLAGS) LIBCMD=$(LIBCMD)
 	cd ..
 
@@ -29,7 +29,8 @@ clean-unix::
 
 clean-windows::
 	cd FILE
-	@echo Making clean in CCACHE\FILE
+	@echo Making clean in ccache\file
 	-$(MAKE) -$(MFLAGS) clean
 	cd ..
-        
+	@echo Making clean locally
+

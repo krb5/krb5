@@ -24,20 +24,20 @@ clean-unix::
 
 all-windows::
 	cd generic
-	@echo Making in ..\generic
+	@echo Making in gssapi\generic
 	-$(MAKE) -$(MFLAGS) LIB=$(LIB)
 	cd ..\krb5
-	@echo Making in krb5
+	@echo Making in gssapi\krb5
 	-$(MAKE) -$(MFLAGS) LIB=$(LIB)
 	cd ..
 
 clean-windows::
 	cd generic
-	@echo Making clean in ..\generic
+	@echo Making clean in gssapi\generic
 	-$(MAKE) -$(MFLAGS) clean
 	cd ..\krb5
-	@echo Making clean in krb5
+	@echo Making clean in gssapi\krb5
 	-$(MAKE) -$(MFLAGS) clean
 	cd ..
-
+	@echo Making clean locally
 
