@@ -1,3 +1,10 @@
+2002-04-30  Sam Hartman  <hartmans@mit.edu>
+
+	* gss-server.c (server_establish_context): Same here.
+
+	* gss-client.c (client_establish_context):  delete the context
+	when it is non-null, not when it is null. 
+
 2001-12-05  Ezra Peisach  <epeisach@mit.edu>
 
 	* gss-client.c, gss-misc.c, gss-server.c: Cast buffer length to

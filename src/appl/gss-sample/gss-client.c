@@ -217,7 +217,7 @@ static int client_establish_context(s, service_name, deleg_flag, auth_flag,
 	      display_status("initializing context", maj_stat,
 			     init_sec_min_stat);
 	      (void) gss_release_name(&min_stat, &target_name);
-	      if (*gss_context == GSS_C_NO_CONTEXT)
+	      if (*gss_context != GSS_C_NO_CONTEXT)
 		      gss_delete_sec_context(&min_stat, gss_context,
 					     GSS_C_NO_BUFFER);
 	      return -1;

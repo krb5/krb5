@@ -206,7 +206,7 @@ static int server_establish_context(s, server_creds, context, client_name,
 	 if (maj_stat!=GSS_S_COMPLETE && maj_stat!=GSS_S_CONTINUE_NEEDED) {
 	      display_status("accepting context", maj_stat,
 			     acc_sec_min_stat);
-	      if (*context == GSS_C_NO_CONTEXT)
+	      if (*context != GSS_C_NO_CONTEXT)
 		      gss_delete_sec_context(&min_stat, context,
 					     GSS_C_NO_BUFFER);
 	      return -1;
