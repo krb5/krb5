@@ -3,12 +3,12 @@
  * $Author$
  * $Id$
  *
- * Copyright 1989 by the Massachusetts Institute of Technology.
+ * Copyright 1989,1990 by the Massachusetts Institute of Technology.
  *
  * For copying and distribution information, please see the file
  * <krb5/mit-copyright.h>.
  *
- * <<< Description >>>
+ * Basic definitions for Kerberos V5 library
  */
 
 #include <krb5/copyright.h>
@@ -37,6 +37,7 @@ typedef krb5_ui_2	krb5_cksumtype;
 typedef krb5_ui_2	krb5_authdatatype;
 
 typedef	krb5_int32	krb5_error_code;
+typedef krb5_int32	krb5_deltat;
 
 typedef struct _krb5_data {
     int length;
@@ -48,8 +49,10 @@ typedef	krb5_data **	krb5_principal;	/* array of strings */
 					/* CONVENTION: realm is first elem. */
 #ifdef __STDC__
 typedef	void * krb5_pointer;
+#define PROTOTYPE(x) x
 #else
 typedef char * krb5_pointer;
+#define PROTOTYPE(x) ()
 #endif /* __STDC__ */
 
 #endif /* __KRB5_BASE_DEFS__ */
