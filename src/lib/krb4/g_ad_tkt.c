@@ -1,8 +1,8 @@
 /*
  * lib/krb4/g_ad_tkt.c
  *
- * Copyright 1986, 1987, 1988, 2000 by the Massachusetts Institute of
- * Technology.  All Rights Reserved.
+ * Copyright 1986, 1987, 1988, 2000, 2001 by the Massachusetts
+ * Institute of Technology.  All Rights Reserved.
  *
  * Export of this software from the United States of America may
  *   require a specific license from the United States Government.
@@ -110,18 +110,6 @@ g_ad_tkt_parse(KTEXT rpkt, C_Block tgtses, C_Block ses,
     /* Check byte order (little-endian == 1) */
     msg_byte_order = t_switch & 1;
     t_switch &= ~1;
-    switch (t_switch) {
-    case AUTH_MSG_KDC_REPLY:
-	break;
-    case AUTH_MSG_ERR_REPLY:
-	if (RPKT_REMAIN < 4)
-	    return INTK_PROT;
-	KRB4_GET32(rep_err_code, ptr, msg_byte_order);
-	return rep_err_code;
-
-    default:
-	return INTK_PROT;
-    }
     /*
      * Skip over some stuff (3 strings and various integers -- see
      * cr_auth_repl.c for details).  Maybe we should actually verify
@@ -133,9 +121,21 @@ g_ad_tkt_parse(KTEXT rpkt, C_Block tgtses, C_Block ses,
 	    return INTK_PROT;
 	ptr += len;
     }
-    if (RPKT_REMAIN < 4 + 1 + 4 + 1)
-    	return INTK_PROT;
-    ptr += 4 + 1 + 4 + 1;
+    switch (t_switch) {
+    case AUTH_MSG_KDC_REPLY:
+	if (RPKT_REMAIN < 4 + 1 + 4 + 1)
+	    return INTK_PROT;
+	ptr += 4 + 1 + 4 + 1;
+	break;
+    case AUTH_MSG_ERR_REPLY:
+	if (RPKT_REMAIN < 4)
+	    return INTK_PROT;
+	KRB4_GET32(rep_err_code, ptr, msg_byte_order);
+	return rep_err_code;
+
+    default:
+	return INTK_PROT;
+    }
 
     /* Extract the ciphertext */
     if (RPKT_REMAIN < 2)

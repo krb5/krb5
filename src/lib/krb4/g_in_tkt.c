@@ -1,8 +1,8 @@
 /*
  * lib/krb4/g_in_tkt.c
  *
- * Copyright 1986, 1987, 1988, 2000 by the Massachusetts Institute of
- * Technology.  All Rights Reserved.
+ * Copyright 1986, 1987, 1988, 2000, 2001 by the Massachusetts
+ * Institute of Technology.  All Rights Reserved.
  *
  * Export of this software from the United States of America may
  *   require a specific license from the United States Government.
@@ -43,6 +43,14 @@ typedef int (*key_proc_type) PROTOTYPE ((char *, char *, char *,
 typedef int (*decrypt_tkt_type) PROTOTYPE ((char *, char *, char *, char *,
 				     key_proc_type, KTEXT *));
 #endif
+
+static int
+krb_mk_in_tkt_preauth(char *, char *, char *, char *, char *,
+		      int, char *, int, KTEXT, int *);
+
+static int
+krb_parse_in_tkt(char *, char *, char *, char *, char *,
+		 int, KTEXT, int);
 
 /*
  * decrypt_tkt(): Given user, instance, realm, passwd, key_proc
@@ -125,7 +133,7 @@ decrypt_tkt(user, instance, realm, arg, key_proc, cipp)
  * string		sinstance		service's instance
  */
 
-int
+static int
 krb_mk_in_tkt_preauth(user, instance, realm, service, sinstance, life,
 		      preauth_p, preauth_len, cip, byteorder)
     char *user;
@@ -225,17 +233,6 @@ krb_mk_in_tkt_preauth(user, instance, realm, service, sinstance, life,
     /* Check byte order */
     msg_byte_order = t_switch & 1;
     t_switch &= ~1;
-    switch (t_switch) {
-    case AUTH_MSG_KDC_REPLY:
-        break;
-    case AUTH_MSG_ERR_REPLY:
-	if (RPKT_REMAIN < 4)
-	    return INTK_PROT;
-	KRB4_GET32(rep_err_code, p, msg_byte_order);
-	return rep_err_code;
-    default:
-        return INTK_PROT;
-    }
 
     /* EXTRACT INFORMATION FROM RETURN PACKET */
 
@@ -249,9 +246,20 @@ krb_mk_in_tkt_preauth(user, instance, realm, service, sinstance, life,
 	    return INTK_PROT;
 	p += len;
     }
-    if (RPKT_REMAIN < 4 + 1 + 4 + 1)
-	return INTK_PROT;
-    p += 4 + 1 + 4 + 1;
+    switch (t_switch) {
+    case AUTH_MSG_KDC_REPLY:
+	if (RPKT_REMAIN < 4 + 1 + 4 + 1)
+	    return INTK_PROT;
+	p += 4 + 1 + 4 + 1;
+        break;
+    case AUTH_MSG_ERR_REPLY:
+	if (RPKT_REMAIN < 4)
+	    return INTK_PROT;
+	KRB4_GET32(rep_err_code, p, msg_byte_order);
+	return rep_err_code;
+    default:
+        return INTK_PROT;
+    }
 
     /* Extract the ciphertext */
     if (RPKT_REMAIN < 2)
@@ -271,7 +279,7 @@ krb_mk_in_tkt_preauth(user, instance, realm, service, sinstance, life,
     return INTK_OK;
 }
 
-int
+static int
 krb_parse_in_tkt(user, instance, realm, service, sinstance, life, cip,
 		 byteorder)
     char *user;

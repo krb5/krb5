@@ -1,3 +1,10 @@
+2001-01-18  Tom Yu  <tlyu@mit.edu>
+
+	* g_ad_tkt.c: Fix error packet parsing.
+
+	* g_in_tkt.c: Fix error packet parsing.  Also, declare some
+	internal functions as static and add prototypes.
+
 2000-11-09  Danilo Almeida  <dalmeida@mit.edu>
 
 	* strnlen.c (krb_strnlen): Put The return type before the calling
