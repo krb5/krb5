@@ -1,3 +1,8 @@
+Thu Mar 30 15:54:54 1995 Keith Vetter (keithv@fusion.com)
+
+	* localaddr.c: in Windows/Mac code, fixed bug due to wrong level
+           of indirection on memcpy call.
+
 Tue Mar 28 19:22:28 1995 Keith Vetter (keithv@fusion.com)
 
         For Windows, added calls to get the default config, realms and

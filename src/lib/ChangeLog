@@ -1,3 +1,8 @@
+Thu Mar 30 15:46:23 1995 Keith Vetter (keithv@fusion.com)
+
+	* libkrb5.def: removed the masses of exported files, leaving just
+	   the ones needed by telnet and cns plus the gssapi ones.
+
 Tue Mar 28 18:26:01 1995  John Gilmore  (gnu at toad.com)
 
 	* Makefile.in (clean-mac):  Add.

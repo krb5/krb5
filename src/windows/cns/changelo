@@ -1,6 +1,13 @@
-Tue Mar 28 12:00:00  1995 Keith Vetter (keithv@fusion.com)
+Thu Mar 30 16:11:27 1995 Keith Vetter (keithv@fusion.com)
 
-	* ChangeLog renamed to changelo to avoid having to always rename it.
+	* cns.h, cns.c, tktlist.c: improved error handling for a bad cache.
+        * cns.rc: conditionally removed more instance stuff.
+
+Tue Mar 28 21:52:01 1995 Keith Vetter (keithv@fusion.com)
+
+	* cns.rc, cns.h, cns.c: removed instance edit box for K5.
+        * makefile: RFLAGS need version k4 or k5 set.
+        * tktlist.c: also displays ticket flags.
 
 Mon Mar 27 20:31:04 1995 Keith Vetter (keithv@fusion.com)
 

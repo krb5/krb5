@@ -1,3 +1,7 @@
+Thu Mar 30 15:49:27 1995 Keith Vetter (keithv@fusion.com)
+
+	* rd_req.c: removed unused local variable.
+
 Tue Mar 28 18:34:20 1995  John Gilmore  (gnu at toad.com)
 
 	* rd_req_sim.c:  Really remove the file.

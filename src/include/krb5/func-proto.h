@@ -669,6 +669,18 @@ krb5_error_code INTERFACE krb5_auth_con_getrcache
 		   krb5_auth_context *,
 		   krb5_rcache *));
 
+krb5_error_code INTERFACE krb5_auth_con_getauthenticator
+   PROTOTYPE((krb5_context,
+         krb5_auth_context *,
+         krb5_authenticator **));
+
+krb5_error_code INTERFACE krb5_auth_con_getremotesubkey
+   PROTOTYPE((krb5_context,
+         krb5_auth_context *,
+         krb5_keyblock **));
+
+
+
 #define KRB5_REALM_BRANCH_CHAR '.'
 
 #endif /* KRB5_FUNC_PROTO__ */

@@ -56,7 +56,6 @@ krb5_rd_req(context, auth_context, inbuf, server, keytab,
     krb5_error_code 	  retval;
     krb5_ap_req 	* request;
     krb5_auth_context	* new_auth_context;
-    krb5_rcache           new_rcache;
     krb5_keytab           new_keytab = NULL;
 
     if (!krb5_is_ap_req(inbuf))

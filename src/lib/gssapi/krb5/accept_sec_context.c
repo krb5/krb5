@@ -142,7 +142,7 @@ krb5_gss_accept_sec_context(context, minor_status, context_handle,
       return(GSS_S_FAILURE);
    }
 
-   krb5_auth_con_getauthenticator(context, &auth_context, &authdat);
+   krb5_auth_con_getauthenticator(context, auth_context, &authdat);
 
    /* verify that the checksum is correct */
 

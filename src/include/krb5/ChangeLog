@@ -1,3 +1,7 @@
+Thu Mar 30 15:57:22 1995 Keith Vetter (keithv@fusion.com)
+
+	* func-proto.h: added 2 missing prototypes dealing with auth_con.
+
 Tue Mar 28 19:53:09 1995 Keith Vetter (keithv@fusion.com)
 
 	* Makefile.in: changed to reflect deletion of stock/osconf.win.

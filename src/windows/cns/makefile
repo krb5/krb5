@@ -39,7 +39,7 @@ CFLAGS 	 = $(CFLAGS_RELEASE) $(INCLUDES) /D$(KRB)=1
 
 ##### RC Compiler
 RC 	 = rc
-RFLAGS 	 = /nologo $(INCLUDES)
+RFLAGS 	 = /nologo /D$(KRB)=1 $(INCLUDES)
 
 ##### Linker
 LINK 	 = link

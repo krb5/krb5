@@ -264,8 +264,8 @@ krb5_os_localaddr (krb5_address ***addr) {
         free(*addr);
         return ENOMEM;
     } else {
-        memcpy ((char *)(*addr)[0]->contents,
-                (char *)&hostrec->h_addr,
+        memcpy ((*addr)[0]->contents,
+                hostrec->h_addr,
                 (*addr)[0]->length);
     }
 	/* FIXME, deal with the case where gethostent returns multiple addrs */

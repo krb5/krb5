@@ -37,19 +37,39 @@
 		#define IDD_TICKET_LIST_TITLE 101
 		#define IDD_TICKET_LIST 102
 
-	#define IDD_MIN_TITLE 103
-		#define IDD_LOGIN_NAME_TITLE 103
-		#define IDD_LOGIN_INSTANCE_TITLE 104
-		#define IDD_LOGIN_REALM_TITLE 105
-		#define IDD_LOGIN_PASSWORD_TITLE 106
-	#define IDD_MAX_TITLE 106
+   #ifdef KRB4
 
-	#define IDD_MIN_EDIT 107
-		#define IDD_LOGIN_NAME 107
-		#define IDD_LOGIN_INSTANCE 108
-		#define IDD_LOGIN_REALM 109
-		#define IDD_LOGIN_PASSWORD 110
-	#define IDD_MAX_EDIT 110
+      #define IDD_MIN_TITLE 103
+		   #define IDD_LOGIN_NAME_TITLE 103
+		   #define IDD_LOGIN_INSTANCE_TITLE 104
+		   #define IDD_LOGIN_REALM_TITLE 105
+		   #define IDD_LOGIN_PASSWORD_TITLE 106
+	   #define IDD_MAX_TITLE 106
+
+	   #define IDD_MIN_EDIT 107
+		   #define IDD_LOGIN_NAME 107
+		   #define IDD_LOGIN_INSTANCE 108
+		   #define IDD_LOGIN_REALM 109
+		   #define IDD_LOGIN_PASSWORD 110
+	   #define IDD_MAX_EDIT 110
+
+   #endif
+
+   #ifdef KRB5
+
+	   #define IDD_MIN_TITLE 103
+		   #define IDD_LOGIN_NAME_TITLE 103
+		   #define IDD_LOGIN_REALM_TITLE 104
+		   #define IDD_LOGIN_PASSWORD_TITLE 105
+	   #define IDD_MAX_TITLE 105
+
+	   #define IDD_MIN_EDIT 107
+		   #define IDD_LOGIN_NAME 107
+		   #define IDD_LOGIN_REALM 108
+		   #define IDD_LOGIN_PASSWORD 109
+	   #define IDD_MAX_EDIT 109
+
+   #endif
 
 	#define IDD_MIN_BUTTON 111
 		#define IDD_CHANGE_PASSWORD 111
@@ -124,7 +144,7 @@
 time_t kwin_get_epoch(void);
 #ifdef KRB5
    static krb5_error_code k5_dest_tkt (void);
-   static int k5_get_num_cred (void);
+   static int k5_get_num_cred (int verbose);
    static int k5_kname_parse (char *name, char *realm, char *fullname);
    static int k5_get_lrealm (char *realm);
 #endif

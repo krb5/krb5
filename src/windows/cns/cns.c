@@ -630,10 +630,12 @@ password_initdialog (
 	LPARAM lparam)
 {
 	char name[ANAME_SZ];
-	char instance[INST_SZ];
 	char realm[REALM_SZ];
 	HWND hwndparent;
 	int id;
+    #ifdef KRB4
+    	char instance[INST_SZ];
+    #endif
 
 	center_dialog(hwnd);
 	set_dialog_font(hwnd, hfontdialog);
@@ -645,9 +647,11 @@ password_initdialog (
 	trim(name);
 	SetDlgItemText(hwnd, IDD_PASSWORD_NAME, name);
 
-    GetDlgItemText(hwndparent, IDD_LOGIN_INSTANCE, instance, sizeof(instance));
-	trim(instance);
-	SetDlgItemText(hwnd, IDD_PASSWORD_INSTANCE, instance);
+    #ifdef KRB4
+        GetDlgItemText(hwndparent, IDD_LOGIN_INSTANCE, instance, sizeof(instance));
+	    trim(instance);
+    	SetDlgItemText(hwnd, IDD_PASSWORD_INSTANCE, instance);
+    #endif
 
 	GetDlgItemText(hwndparent, IDD_LOGIN_REALM, realm, sizeof(realm));
 	trim(realm);
@@ -1262,8 +1266,11 @@ kwin_init_name (
 	SetDlgItemText(hwnd, IDD_LOGIN_NAME, name);
 	name[0] = 0;
 	GetDlgItemText(hwnd, IDD_LOGIN_NAME, name, sizeof(name));
-	SetDlgItemText(hwnd, IDD_LOGIN_INSTANCE, instance);
 	SetDlgItemText(hwnd, IDD_LOGIN_REALM, realm);
+
+    #ifdef KRB4
+    	SetDlgItemText(hwnd, IDD_LOGIN_INSTANCE, instance);
+    #endif
 
 } /* kwin_init_name */
 
@@ -1572,26 +1579,21 @@ kwin_size (
 	}
 
 	/*
-	 * Edit fields
+	 * Edit fields: stretch boxes, keeping the gap between boxes equal to
+     * what it was on entry.
 	 */
 	editbottom += r.top;
 
-	cx = 0;
-	for (i = IDD_MIN_EDIT; i <= IDD_MAX_EDIT; i++) {
-		hwnditem = GetDlgItem(hwnd, i);
-		windowrect(hwnditem, hwnd, &r);
+    hwnditem = GetDlgItem(hwnd, IDD_MIN_EDIT);
+    windowrect(hwnditem, hwnd, &r);
+	gap = r.right;
+	hmargin = r.left;
+	editbottom += r.bottom;
+	titlebottom = -r.top;
 
-		if (i == IDD_MIN_EDIT) {
-			gap = r.right;
-			hmargin = r.left;
-			editbottom += r.bottom;
-			titlebottom = -r.top;
-		}
-		if (i == IDD_MIN_EDIT + 1)
-			gap = r.left - gap;
-
-		cx += r.right - r.left;
-	}
+    hwnditem = GetDlgItem(hwnd, IDD_MIN_EDIT + 1);
+    windowrect(hwnditem, hwnd, &r);
+	gap = r.left - gap;
 
 	cx = cxdlg - 2 * hmargin - (IDD_MAX_EDIT - IDD_MIN_EDIT) * gap;
 	cx = cx / (IDD_MAX_EDIT - IDD_MIN_EDIT + 1);
@@ -1779,7 +1781,8 @@ kwin_timer (
                 break;
             }
         }
-        krb5_cc_end_seq_get(k5_context, k5_ccache, &cursor);
+        if (code == 0 || code == KRB5_CC_END)
+            krb5_cc_end_seq_get(k5_context, k5_ccache, &cursor);
     
     #endif
 
@@ -1837,7 +1840,6 @@ kwin_command (
 	LPARAM lparam)
 {
     char name[ANAME_SZ];
-    char instance[INST_SZ];
     char realm[REALM_SZ];
     char password[MAX_KPW_LEN];
 	HCURSOR hcursor;
@@ -1846,6 +1848,7 @@ kwin_command (
 	char menuitem[MAX_K_NAME_SZ + 3];
 	char copyright[128];
 	#ifdef KRB4
+        char instance[INST_SZ];
         int lifetime;
 		int krc;
 	#endif
@@ -1863,7 +1866,7 @@ kwin_command (
 	#endif
 
 	#ifdef KRB5
-		EnableWindow(GetDlgItem(hwnd, IDD_TICKET_DELETE), k5_get_num_cred() > 0);
+		EnableWindow(GetDlgItem(hwnd, IDD_TICKET_DELETE), k5_get_num_cred(0) > 0);
 	#endif
 
 	GetDlgItemText(hwnd, IDD_LOGIN_NAME, name, sizeof(name));
@@ -1917,12 +1920,15 @@ kwin_command (
 
 		GetDlgItemText(hwnd, IDD_LOGIN_NAME, name, sizeof(name));
 		trim(name);
-		GetDlgItemText(hwnd, IDD_LOGIN_INSTANCE, instance, sizeof(instance));
-		trim(instance);
 		GetDlgItemText(hwnd, IDD_LOGIN_REALM, realm, sizeof(realm));
 		trim(realm);
 		GetDlgItemText(hwnd, IDD_LOGIN_PASSWORD, password, sizeof(password));
 		trim(password);
+
+        #ifdef KRB4
+    		GetDlgItemText(hwnd, IDD_LOGIN_INSTANCE, instance, sizeof(instance));
+	    	trim(instance);
+        #endif
 
 		hcursor = SetCursor(LoadCursor(NULL, IDC_WAIT));
 		lifetime = GetPrivateProfileInt(INI_OPTIONS, INI_DURATION,
@@ -1973,7 +1979,7 @@ kwin_command (
             if (server) 
     			krb5_free_principal(k5_context, server);
 
-		#endif
+		#endif  /* KRB5 */
 
 		end_blocking_hook();
 		SetCursor(hcursor);
@@ -2183,7 +2189,8 @@ kwin_paint (
             break;
                 
         }
-        krb5_cc_end_seq_get(k5_context, k5_ccache, &cursor);
+        if (code == 0 || code == KRB5_CC_END)
+            krb5_cc_end_seq_get(k5_context, k5_ccache, &cursor);
 	#endif
 
 	hdc = BeginPaint(hwnd, &ps);
@@ -2496,6 +2503,14 @@ init_instance (
 		krb5_init_context(&k5_context);
 		krb5_init_ets(k5_context);
 		krb5_cc_default(k5_context, &k5_ccache);
+
+        i = k5_get_num_cred (0);            /* Test integrity */
+        if (i == -1) {
+            remove (krb5_cc_get_name(k5_context, k5_ccache));
+            i = k5_get_num_cred (1);
+            if (i == -1)
+                return FALSE;
+        }
 	#endif
 
 	return TRUE;
@@ -2754,11 +2769,6 @@ WinMain (
 
 #ifdef KRB5
 
-void
-debugbox () {
-    MessageBox (NULL, "foobar", "FOOBAR", IDOK | MB_ICONINFORMATION);
-}
-
 /*+
  * Function: destroys all tickets in a k5 ccache
  *
@@ -2795,35 +2805,52 @@ k5_dest_tkt (void) {
  * 
  * k5_get_num_cred
  * 
- * Returns: number of creds in the credential cache
+ * Returns: number of creds in the credential cache, -1 on error
  * 
  */
 static int
-k5_get_num_cred () {
+k5_get_num_cred (int verbose) {
     krb5_error_code code;
     krb5_cc_cursor cursor;
     krb5_creds c;
     int ncreds = 0;
 
-    if (code = krb5_cc_start_seq_get(k5_context, k5_ccache, &cursor)) {
-        if (code != KRB5_FCC_NOFILE)
-            com_err (NULL, code, "while starting to retrieve tickets");
-        return 0;
+    /* Turn off OPENCLOSE and leave open while we use ccache */
+    if (code = krb5_cc_set_flags(k5_context, k5_ccache, 0)) {
+        if (code == KRB5_FCC_NOFILE)
+            return 0;
+        if (verbose)
+            com_err (NULL, code,
+                "while setting cache flags (ticket cache %s)",
+                krb5_cc_get_name(k5_context, k5_ccache));
+        return -1;
     }
 
-    while (1) {
+    if (code = krb5_cc_start_seq_get(k5_context, k5_ccache, &cursor)) {
+        if (verbose)
+            com_err (NULL, code, "while starting to retrieve tickets.");
+        return -1;
+    }
+
+    while (1) {                                 /* Loop and get creds */
         code = krb5_cc_next_cred(k5_context, k5_ccache, &cursor, &c);
         if (code)
             break;
         ++ncreds;
     }
 
-    if (code == KRB5_CC_END) {               /* End of ccache */
-        if (code = krb5_cc_end_seq_get(k5_context, k5_ccache, &cursor))
-            com_err (NULL, code, "while finishing ticket retrieval");
-    } else {
-        com_err (NULL, code, "while retrieving a ticket");
-        return 0;
+    if (code != KRB5_CC_END) {                  /* Error while looping??? */
+        if (verbose)
+            com_err (NULL, code, "while retrieving a ticket.");
+        return -1;
+    }
+
+    if (code = krb5_cc_end_seq_get(k5_context, k5_ccache, &cursor)) {
+        if (verbose)
+            com_err (NULL, code, "while closing ccache.");
+    } else if (code = krb5_cc_set_flags(k5_context, k5_ccache, KRB5_TC_OPENCLOSE)) {
+        if (verbose)
+            com_err(NULL, code, "while closing ccache.");
     }
 
     return ncreds;
@@ -2846,7 +2873,8 @@ k5_get_num_cred2 () {
             break;
         ++ncreds;
     }
-    krb5_cc_end_seq_get(k5_context, k5_ccache, &cursor);
+    if (code == KRB5_CC_END)
+        krb5_cc_end_seq_get(k5_context, k5_ccache, &cursor);
 
     return ncreds;
 }

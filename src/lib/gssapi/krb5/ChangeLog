@@ -1,3 +1,8 @@
+Thu Mar 30 16:00:30 1995 Keith Vetter (keithv@fusion.com)
+
+	* accept_sec_context.c: fixed wrong level of indirection on a 
+           parameter to getauthenticator.
+
 Mon Mar 27 07:56:26 1995 Chris Provenzano (proven@mit.edu)
 
         * accept_sec_context.c: Use new calling convention for krb5_rd_req()

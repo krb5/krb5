@@ -112,6 +112,7 @@ ticket_init_list (
 		krb5_creds c;
         krb5_flags flags;
         char *sname;                            /* Name of the service */
+        char *flags_string(krb5_creds *cred);
 	#endif
 
 	SendMessage(hwnd, WM_SETREDRAW, FALSE, 0);
@@ -168,14 +169,14 @@ ticket_init_list (
         flags = 0;
         if (code = krb5_cc_set_flags(k5_context, k5_ccache, flags)) {
             if (code != KRB5_FCC_NOFILE) {
-                com_err (NULL, code,
-                    "while setting cache flags (ticket cache %s)",
-                    krb5_cc_get_name(k5_context, k5_ccache));
+                //com_err (NULL, code,
+                //    "while setting cache flags (ticket cache %s)",
+                //    krb5_cc_get_name(k5_context, k5_ccache));
                 return -1;
             }
         } else {
             if (code = krb5_cc_start_seq_get(k5_context, k5_ccache, &cursor)) {
-                com_err (NULL, code, "while starting to retrieve tickets");
+                //com_err (NULL, code, "while starting to retrieve tickets");
                 return -1;
             }
 
@@ -191,6 +192,7 @@ ticket_init_list (
                 strcat (buf, short_date (c.times.endtime - kwin_get_epoch()));
                 strcat (buf, "  ");
 
+                /* Add ticket service name and realm */
                 code = krb5_unparse_name (k5_context, c.server, &sname);
                 if (code) {
                     com_err (NULL, code, "while unparsing server name");
@@ -198,6 +200,7 @@ ticket_init_list (
                 }
                 strcat (buf, sname);
                 free (sname);
+                strcat (buf, flags_string (&c)); /* Add flag info */
 
 		    	l = strlen(buf);
 			    lpinfo = (LPTICKETINFO) malloc(sizeof(TICKETINFO) + l + 1);
@@ -220,16 +223,16 @@ ticket_init_list (
 
             if (code == KRB5_CC_END) {               /* End of ccache */
                 if (code = krb5_cc_end_seq_get(k5_context, k5_ccache, &cursor)) {
-                    com_err(NULL, code, "while finishing ticket retrieval");
+                    //com_err(NULL, code, "while finishing ticket retrieval");
                     return -1;
                 }
                 flags = KRB5_TC_OPENCLOSE;          /* turns on OPENCLOSE mode */
                 if (code = krb5_cc_set_flags(k5_context, k5_ccache, flags)) {
-                    com_err(NULL, code, "while closing ccache");
+                    //com_err(NULL, code, "while closing ccache");
                     return -1;
                 }
             } else {
-                com_err(NULL, code, "while retrieving a ticket");
+                //com_err(NULL, code, "while retrieving a ticket");
                 return -1;
             }
         }
@@ -425,3 +428,48 @@ LONG ticket_drawitem(
 	return TRUE;
 
 } /* ticket_drawitem */
+
+
+#ifdef KRB5
+
+/*+
+ * 
+ * Flags_string
+ * 
+ * Return buffer with the current flags for the credential
+ * 
+ */
+char *
+flags_string(krb5_creds *cred) {
+    static char buf[32];
+    int i = 0;
+
+    buf[i++] = ' ';    
+    if (cred->ticket_flags & TKT_FLG_FORWARDABLE)
+        buf[i++] = 'F';
+    if (cred->ticket_flags & TKT_FLG_FORWARDED)
+        buf[i++] = 'f';
+    if (cred->ticket_flags & TKT_FLG_PROXIABLE)
+        buf[i++] = 'P';
+    if (cred->ticket_flags & TKT_FLG_PROXY)
+        buf[i++] = 'p';
+    if (cred->ticket_flags & TKT_FLG_MAY_POSTDATE)
+        buf[i++] = 'D';
+    if (cred->ticket_flags & TKT_FLG_POSTDATED)
+        buf[i++] = 'd';
+    if (cred->ticket_flags & TKT_FLG_INVALID)
+        buf[i++] = 'i';
+    if (cred->ticket_flags & TKT_FLG_RENEWABLE)
+        buf[i++] = 'R';
+    if (cred->ticket_flags & TKT_FLG_INITIAL)
+        buf[i++] = 'I';
+    if (cred->ticket_flags & TKT_FLG_HW_AUTH)
+        buf[i++] = 'H';
+    if (cred->ticket_flags & TKT_FLG_PRE_AUTH)
+        buf[i++] = 'A';
+
+    buf[i] = '\0';
+    return(buf);
+}
+
+#endif /* KRB5 */
