@@ -34,7 +34,12 @@ ss_list_requests(argc, argv, sci_idx, info_ptr)
     FILE *output;
     int fd;
     int mask;
+#ifdef POSIX_SIGNALS
+    struct sigaction nsig, osig;
+    sigset_t nmask, omask;
+#else
     RETSIGTYPE (*func)();
+#endif
 #ifndef WAIT_USES_INT
     union wait waitb;
 #else
@@ -44,11 +49,28 @@ ss_list_requests(argc, argv, sci_idx, info_ptr)
     DONT_USE(argc);
     DONT_USE(argv);
 
+#ifdef POSIX_SIGNALS
+    sigemptyset(&nmask);
+    sigaddset(&nmask, SIGINT);
+    sigprocmask(SIG_BLOCK, &nmask, &omask);
+    
+    nsig.sa_handler = SIG_IGN;
+    sigemptyset(&nsig.sa_mask);
+    nsig.sa_flags = 0;
+    sigaction(SIGINT, &nsig, &osig);
+#else
     mask = sigblock(sigmask(SIGINT));
     func = signal(SIGINT, SIG_IGN);
+#endif
+
     fd = ss_pager_create();
     output = fdopen(fd, "w");
+
+#ifdef POSIX_SIGNALS
+    sigprocmask(SIG_SETMASK, &omask, (sigset_t *)0);
+#else
     sigsetmask(mask);
+#endif
 
     fprintf (output, "Available %s requests:\n\n",
 	     ss_info (sci_idx) -> subsystem_name);
@@ -84,5 +106,9 @@ ss_list_requests(argc, argv, sci_idx, info_ptr)
 #ifndef NO_FORK
     wait(&waitb);
 #endif
+#ifdef POSIX_SIGNALS
+    sigaction(SIGINT, &osig, (struct sigaction *)0);
+#else
     (void) signal(SIGINT, func);
+#endif
 }

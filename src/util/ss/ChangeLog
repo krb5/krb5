@@ -1,3 +1,17 @@
+Thu Apr 27 12:26:26 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* pager.c: Use posix signals.
+
+	* listen.c: Use posix signals.
+
+	* list_rqs.c: Use posix signals.
+
+	* help.c: Call wait with proper casting (int * vs. union wait *)
+
+	* configure.in: Add AC_PROG_ARCHIVE_ADD and CHECK_SIGNALS.
+
+	* Makefile.in (all): Use ARADD for incremental changes to library
+
 Tue Mar 28 18:51:08 1995  John Gilmore  (gnu at toad.com)
 
 	* Makefile.in (all):  Run all-$(WHAT).

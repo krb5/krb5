@@ -79,7 +79,11 @@ got_it:
 	ss_page_stdin();
     default:
 	(void) close(fd); /* what can we do if it fails? */
+#ifdef WAIT_USES_INT
+	while (wait((int *)NULL) != child) {
+#else
 	while (wait((union wait *)NULL) != child) {
+#endif
 	    /* do nothing if wrong pid */
 	};
     }
