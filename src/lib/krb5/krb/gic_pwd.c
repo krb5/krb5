@@ -431,6 +431,7 @@ krb5_get_in_tkt_with_password(krb5_context context, krb5_flags options,
     krb5_get_init_creds_opt opt;
     char * server;
     krb5_principal server_princ, client_princ;
+    int use_master = 0;
 
     pw0array[0] = '\0';
     pw0.data = pw0array;
@@ -457,7 +458,7 @@ krb5_get_in_tkt_with_password(krb5_context context, krb5_flags options,
 					   krb5_prompter_posix,  NULL,
 					   0, server, &opt,
 				      krb5_get_as_key_password, &pw0,
-				      0, ret_as_reply);
+				      &use_master, ret_as_reply);
 	  krb5_free_unparsed_name( context, server);
 	if (retval) {
 	  return (retval);

@@ -1,3 +1,8 @@
+2004-02-27  Ken Raeburn  <raeburn@mit.edu>
+
+	* gic_pwd.c (krb5_get_in_tkt_with_password): Fix a case Jeff
+	missed.
+
 2004-02-26  Jeffrey Altman <jaltman@mit.edu>
   
     * get_in_tkt.c, gic_keytab.c, gic_pwd.c, send_tgs.c: 
