@@ -1,4 +1,15 @@
 
+Thu Aug 31 16:07:24 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* srv_acl.c, kadm5_defs.h - Change operation of acl_op_permitted().  It
+		now takes another argument which is the name of the target of
+		the operation.  This allows finer granularity of control over
+		administrative operations for clients.
+	* srv_acl.c - Change SIGALRM to SIGHUP under POSIX_SIGNALS.  We want
+		SIGHUP to reread the ACL file.
+	* admin.c, passwd.c - Conform to new ACL operations.
+	* kadmind5.M - Change description of ACL file.
+
+
 Fri Aug 25 17:40:52 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* srv_key.c - Fix automatic generation of changepw service which got
 		screwed up when the database changes went in.
