@@ -50,25 +50,26 @@ krb5_encrypt_block master_encblock;
 extern char *current_dbname;
 extern krb5_boolean dbactive;
 extern int exit_status;
+extern krb5_context edit_context;
 
 void update_ok_file();
 
 krb5_error_code
 dump_iterator(ptr, entry)
-krb5_pointer ptr;
-krb5_db_entry *entry;
+    krb5_pointer ptr;
+    krb5_db_entry *entry;
 {
     krb5_error_code retval;
     struct dump_record *arg = (struct dump_record *) ptr;
     char *name=NULL, *mod_name=NULL;
     int	i;
 
-    if (retval = krb5_unparse_name(entry->principal, &name)) {
+    if (retval = krb5_unparse_name(edit_context, entry->principal, &name)) {
 	com_err(arg->comerr_name, retval, "while unparsing principal");
 	exit_status++;
 	return retval;
     }
-    if (retval = krb5_unparse_name(entry->mod_name, &mod_name)) {
+    if (retval = krb5_unparse_name(edit_context, entry->mod_name, &mod_name)) {
 	free(name);
 	com_err(arg->comerr_name, retval, "while unparsing principal");
 	exit_status++;
@@ -150,7 +151,7 @@ void dump_db(argc, argv)
 	fputs(ld_vers, f);
 	arg.comerr_name = argv[0];
 	arg.f = f;
-	(void) krb5_db_iterate(dump_iterator, (krb5_pointer) &arg);
+	(void) krb5_db_iterate(edit_context, dump_iterator, (krb5_pointer) &arg);
 	if (argc == 2)
 		fclose(f);
 	if (argv[1])
@@ -272,14 +273,14 @@ void load_db(argc, argv)
 	}
 	strcpy(new_dbname, argv[2]);
 	strcat(new_dbname, "~");
-	if (retval = krb5_db_create(new_dbname)) {
+	if (retval = krb5_db_create(edit_context, new_dbname)) {
 		com_err(argv[0], retval, "while creating database '%s'",
 			new_dbname);
 		exit_status++;
 		return;
 	}
 	if (dbactive) {
-		if ((retval = krb5_db_fini()) &&
+		if ((retval = krb5_db_fini(edit_context)) &&
 		    retval != KRB5_KDB_DBNOTINITED) {
 			com_err(argv[0], retval,
 				"while closing previous database");
@@ -287,13 +288,13 @@ void load_db(argc, argv)
 			return;
 		}
 	}
-	if (retval = krb5_db_set_name(new_dbname)) {
+	if (retval = krb5_db_set_name(edit_context, new_dbname)) {
 		com_err(argv[0], retval,
 			"while setting active database to '%s'", new_dbname
 			);
 		exit(1);
 	}
-	if (retval = krb5_db_init()) {
+	if (retval = krb5_db_init(edit_context)) {
 		com_err(argv[0], retval,
 			"while initializing database %s",
 			new_dbname
@@ -481,14 +482,14 @@ void load_db(argc, argv)
 			}
 			putc(ch, stderr);
 		}
-		if (retval=krb5_parse_name(name, &entry.principal)) {
+		if (retval=krb5_parse_name(edit_context, name, &entry.principal)) {
 			com_err(argv[0], retval,
 				"while trying to parse %s in line %d",
 				name, lineno);
 			load_error++;
 			goto cleanup;
 		}
-		if (retval=krb5_parse_name(mod_name, &entry.mod_name)) {
+		if (retval=krb5_parse_name(edit_context, mod_name, &entry.mod_name)) {
 			com_err(argv[0], retval,
 				"while trying to parse %s in line %d",
 				mod_name, lineno);
@@ -496,7 +497,7 @@ void load_db(argc, argv)
 			goto cleanup;
 		}
 		one=1;
-		if (retval = krb5_db_put_principal(&entry, &one)) {
+		if (retval = krb5_db_put_principal(edit_context, &entry, &one)) {
 			com_err(argv[0], retval,
 				"while trying to store principal %s",
 				name);
@@ -516,7 +517,7 @@ void load_db(argc, argv)
 		    krb5_xfree(entry.alt_salt);
 	}
 error_out:
-	if (retval = krb5_db_fini()) {
+	if (retval = krb5_db_fini(edit_context)) {
 		com_err(argv[0], retval,
 			"while closing database '%s'", new_dbname);
 		exit(1);
@@ -524,7 +525,7 @@ error_out:
 	if (load_error) {
 		printf("Error while loading database, aborting load.\n");
 		exit_status += load_error;
-		if (retval = kdb5_db_destroy(new_dbname)) {
+		if (retval = kdb5_db_destroy(edit_context, new_dbname)) {
 			com_err(argv[0], retval,
 				"while destroying temporary database '%s'",
 				new_dbname);
@@ -538,7 +539,7 @@ error_out:
 		 */
 		exit(1);
 	} else {
-		if (retval = krb5_db_rename(new_dbname, argv[2])) {
+		if (retval = krb5_db_rename(edit_context, new_dbname, argv[2])) {
 			com_err(argv[0], retval,
 				"while renaming database from %s to %s",
 				new_dbname, argv[2]);
@@ -546,13 +547,13 @@ error_out:
 		}
 	}
 	if (dbactive) {
-		if (retval = krb5_db_set_name(current_dbname)) {
+		if (retval = krb5_db_set_name(edit_context, current_dbname)) {
 			com_err(argv[0], retval,
 				"while resetting active database to '%s'",
 				current_dbname);
 			exit(1);
 		}
-		if (retval = krb5_db_init()) {
+		if (retval = krb5_db_init(edit_context)) {
 			com_err(argv[0], retval,
 				"while initializing active database %s",
 				current_dbname);

@@ -28,14 +28,11 @@
 #include "kdb5_edit.h"
 #include <tcl.h>
 
-#define CMDDECL(x) int x(DECLARG(ClientData, clientData),\
-			 DECLARG(Tcl_Interp, interp),\
-			 DECLARG(int, argc),\
-			 DECLARG(char **, argv))\
-OLDDECLARG(ClientData, clientData)\
-OLDDECLARG(Tcl_Interp *, interp)\
-OLDDECLARG(int, argc)\
-OLDDECLARG(char **, argv)
+#define CMDDECL(x) int x(clientData, interp, argc, argv)\
+    ClientData clientData;\
+    Tcl_Interp * interp;\
+    int argc;\
+    char ** argv;
 #define CMDPROTO(x) int x PROTOTYPE((ClientData, Tcl_Interp,\
 				     int, char **))
 #define MKCMD(name,cmd) Tcl_CreateCommand(interp, name, cmd,\
@@ -57,13 +54,13 @@ void change_rnd_key PROTOTYPE((int, char **));
 void add_v4_key PROTOTYPE((int, char **));
 void change_v4_key PROTOTYPE((int, char **));
 void delete_entry PROTOTYPE((int, char **));
-void extract_srvtab PROTOTYPE((int, char **));
+void extract_srvtab PROTOTYPE((krb5_context, int, char **));
 void extract_v4_srvtab PROTOTYPE((int, char **));
 void list_db PROTOTYPE((int, char **));
 void dump_db PROTOTYPE((int, char **));
 void load_db PROTOTYPE((int, char **));
-void set_dbname PROTOTYPE((int, char **));
-void enter_master_key PROTOTYPE((int, char **));
+void set_dbname PROTOTYPE((krb5_context, int, char **));
+void enter_master_key PROTOTYPE((krb5_context, int, char **));
 
 /*
  * this is mostly stolen from tcl_ExitCmd()

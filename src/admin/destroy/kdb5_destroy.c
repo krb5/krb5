@@ -42,8 +42,8 @@ char *yes = "yes\n";			/* \n to compare against result of
 
 static void
 usage(who, status)
-char *who;
-int status;
+    char *who;
+    int status;
 {
     fprintf(stderr, "usage: %s [-d dbpathname]\n", who);
     exit(status);
@@ -51,8 +51,8 @@ int status;
 
 void
 main(argc, argv)
-int argc;
-char *argv[];
+    int argc;
+    char *argv[];
 {
     extern char *optarg;	
     int optchar;
@@ -60,9 +60,11 @@ char *argv[];
     char buf[5];
     char dbfilename[MAXPATHLEN];
     krb5_error_code retval;
+    krb5_context context;
     int force = 0;
 
-    krb5_init_ets();
+    krb5_init_context(&context);
+    krb5_init_ets(context);
 
     if (strrchr(argv[0], '/'))
 	argv[0] = strrchr(argv[0], '/')+1;
@@ -82,8 +84,7 @@ char *argv[];
 	}
     }
     if (!force) {
-	printf("Deleting KDC database stored in '%s', are you sure?\n",
-	       dbname);
+	printf("Deleting KDC database stored in '%s', are you sure?\n", dbname);
 	printf("(type 'yes' to confirm)? ");
 	if (fgets(buf, sizeof(buf), stdin) == NULL)
 	    exit(1);
@@ -101,7 +102,7 @@ char *argv[];
 		    "Database appears to not exist--inspect files manually!\n");
 	else
 	    fprintf(stderr,
-		    "Database may be partially deleted--inspect files manually!\n");
+	        "Database may be partially deleted--inspect files manually!\n");
 	exit(1);
     }
     (void) strcpy(dbfilename, dbname);
