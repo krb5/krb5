@@ -1,3 +1,10 @@
+2000-07-14  Ken Raeburn  <raeburn@mit.edu>
+
+	* aclocal.m4 (KRB5_LIB_PARAMS): Moved bulk of the work into
+	config/shlib.conf.
+	(K5_AC_CHECK_FILES): Require AC_PROG_CC be run first.
+	(WITH_CC): If we're using gcc, enable a bunch of warning options.
+
 2000-07-01  Tom Yu  <tlyu@mit.edu>
 
 	* acconfig.h: Add function replacement renaming symbols for
