@@ -1,3 +1,8 @@
+Wed Feb 21 23:34:31 1996  Richard Basch  <basch@lehman.com>
+
+	* kadm_funcs.c: Initialize the length element of the krb5_db_entry
+		structure in kadm_princ2entry (add_entry was failing).
+
 Wed Dec 13 03:51:53 1995  Chris Provenzano (proven@mit.edu)
 
         * kadm_funcs.c : Remove mkvno for krb5_db_entry
