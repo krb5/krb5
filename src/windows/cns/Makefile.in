@@ -1,7 +1,7 @@
 # makefile: Constructs the Kerberos for Windows ticket manager
 # Works for both k4 and k5 releases.
 #
-NAME 	 = cns
+NAME 	 = krb5
 OBJS 	 = $(NAME).obj tktlist.obj
 
 ##### Options
