@@ -1,3 +1,8 @@
+2003-07-18  Tom Yu  <tlyu@mit.edu>
+
+	* README: Note requirement for Feb 2003 Platform SDK.  Thanks to
+	Doug Engert and Rodney Dyer.
+
 2002-04-10  Danilo Almeida  <dalmeida@mit.edu>
 
 	* Makefile.in: Build ms2mit.
