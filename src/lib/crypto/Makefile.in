@@ -29,8 +29,8 @@ SRCS=	$(srcdir)/cryptoconf.c \
 	$(srcdir)/raw_des.c 
 
 LIB=crypto
-LIBMAJOR=1
-LIBMINOR=1
+LIBMAJOR=2
+LIBMINOR=0
 RELDIR=crypto
 STLIBOBJS=cryptoconf.o encrypt_data.o decrypt_data.o \
 	des_crc.o des_md5.o des3_sha.o des3_raw.o raw_des.o krb5_glue.o

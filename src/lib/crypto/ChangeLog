@@ -1,3 +1,7 @@
+Tue Oct 14 15:34:44 1997  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
+
+	* Makefile.in: Bump major version due to possible size changes.
+
 Fri Feb 21 18:40:13 1997  Sam Hartman  <hartmans@tertius.mit.edu>
 
 	* Makefile.in (OBJS): Move in crypto_glue.c as krb5_glue.c; avoid
