@@ -53,7 +53,7 @@ krb5_error_code krb5_mk_req_extended
 		   const krb5_ticket_times *,
 		   const krb5_flags,
 		   krb5_int32,
-		   krb5_keyblock *,
+		   krb5_keyblock **,
 		   krb5_ccache,
 		   krb5_creds *,
 		   krb5_authenticator *,
