@@ -219,7 +219,7 @@ extern int krb5int_getnameinfo (const struct sockaddr *sa, socklen_t salen,
 				char *hbuf, size_t hbuflen,
 				char *sbuf, size_t sbuflen,
 				int flags);
-#ifdef IMPLEMENT_FAKE_GETADDRINFO
+#ifndef IMPLEMENT_FAKE_GETADDRINFO
 #undef	getaddrinfo
 #define getaddrinfo krb5int_getaddrinfo
 #undef  freeaddrinfo
