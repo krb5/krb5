@@ -1,3 +1,37 @@
+2002-08-23  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (LIBMINOR): Bump due to addition of bt_rseq().
+
+	* hash/hash_debug.c: Remove inclusion of compat.h, as we don't
+	have it in our build system.
+
+	* btree/extern.h: Add missing prototypes/renames for
+	__bt_dmpage().  Add renames for bt_rseq() support functions.
+
+	* btree/bt_seq.c (bt_rseq): New function; like __bt_seq() but does
+	recursive descent rather than using the prev/next pointers.  This
+	will catch some pages that might be missed if the database is
+	inconsistent.  Added support functions for bt_rseq() as well.
+
+	* btree/bt_page.c (__bt_free): Set B_METADIRTY when updating free
+	list.
+	(__bt_new): Set B_METADIRTY when updating free list.
+	[patch from www.sleepycat.com]
+
+	* btree/bt_debug.c (__bt_dump): Bound loop by number of pages
+	actually in file to avoid getting a nigh-infinite number of
+	all-zeroes pages.
+	(__bt_dmpage): Print a newline after dumping the meta page.
+	(__bt_dpage): Add DB* parameter; use this to get pagesize in order
+	to limit dumping of page contents, in case NEXTINDEX(h) happens to
+	be bogus.
+	(__bt_stat): Bound loop by number of pages actually in file so as
+	to stop counting pages after the actual end of file.
+
+	* btree/bt_close.c (__bt_sync): Apply a Kerbnet fix from long ago;
+	don't return prematurely when B_METADIRTY is set but B_MODIFIED is
+	clear.
+
 2002-08-14  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (SUBDIROBJLISTS): New variable.
