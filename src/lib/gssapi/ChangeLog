@@ -1,3 +1,8 @@
+Tue Jul 23 22:50:22 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* Makefile.in (MAC_SUBDIRS): Remove mechglue from the list of
+		Macintosh subdirectories.
+
 Thu Jun  6 00:04:38 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* Makefile.in (all-windows): Don't pass $(LIBCMD) on the command
