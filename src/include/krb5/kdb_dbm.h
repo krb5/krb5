@@ -97,10 +97,6 @@ krb5_error_code krb5_dbm_db_iterate
 		   krb5_error_code (*) PROTOTYPE((krb5_pointer,
 					          krb5_db_entry *)),
 	           krb5_pointer ));
-
-/* need to play games here, since we take a pointer and the real thing,
-   and it might be narrow. */
-#ifdef NARROW_PROTOTYPES
 krb5_error_code krb5_dbm_db_set_nonblocking 
 	PROTOTYPE((krb5_context,
 		   krb5_boolean,
@@ -108,16 +104,6 @@ krb5_error_code krb5_dbm_db_set_nonblocking
 krb5_boolean krb5_dbm_db_set_lockmode
 	PROTOTYPE((krb5_context,
 		   krb5_boolean ));
-#else
-krb5_error_code krb5_dbm_db_set_nonblocking 
-	PROTOTYPE((krb5_context,
-		   int, /* krb5_boolean */
-		    krb5_boolean * ));
-krb5_boolean krb5_dbm_db_set_lockmode
-	PROTOTYPE((krb5_context,
-		   int /* krb5_boolean */ ));
-#endif /* NARROW_PROTOTYPES */
-
 krb5_error_code krb5_dbm_db_open_database 
 	PROTOTYPE((krb5_context));
 krb5_error_code krb5_dbm_db_close_database 

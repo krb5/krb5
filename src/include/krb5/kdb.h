@@ -185,17 +185,13 @@ krb5_error_code krb5_db_lock
 		   int ));
 krb5_error_code krb5_db_unlock
 	PROTOTYPE((krb5_context));
-
-/* need to play games here, since we take a pointer and the real thing,
-   and it might be narrow. */
 krb5_error_code krb5_db_set_nonblocking
 	PROTOTYPE((krb5_context,
-		   int, /* krb5_boolean */
+		   krb5_boolean,
 		   krb5_boolean * ));
 krb5_boolean krb5_db_set_lockmode
 	PROTOTYPE((krb5_context,
-		   int /* krb5_boolean */ ));
-
+		   krb5_boolean));
 krb5_error_code	krb5_db_fetch_mkey
 	PROTOTYPE((krb5_context,
 		   krb5_principal, 

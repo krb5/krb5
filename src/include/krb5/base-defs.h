@@ -36,15 +36,15 @@
 #define	TRUE	1
 #endif
 
-typedef	int		krb5_boolean;
-typedef	int		krb5_msgtype;	
-typedef	int		krb5_kvno;	
+typedef	unsigned int krb5_boolean;
+typedef	unsigned int krb5_msgtype;	
+typedef	unsigned int krb5_kvno;	
 
-typedef	int		krb5_addrtype;
-typedef int		krb5_keytype;
-typedef int		krb5_enctype;
-typedef int		krb5_cksumtype;
-typedef int		krb5_authdatatype;
+typedef	unsigned int krb5_addrtype;
+typedef unsigned int krb5_keytype;
+typedef unsigned int krb5_enctype;
+typedef unsigned int krb5_cksumtype;
+typedef unsigned int krb5_authdatatype;
 
 typedef krb5_int32	krb5_preauthtype; /* This may change, later on */
 typedef	krb5_int32	krb5_flags;
