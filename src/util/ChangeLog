@@ -1,3 +1,7 @@
+Fri Apr 28 15:30:03 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* lndir (ls): use ls -a to get dotfiles too.
+
 Fri Apr 28 10:59:25 1995  Mark Eichin  <eichin@cygnus.com>
 
 	* reconf (usage): fix the whole message.

@@ -75,7 +75,7 @@ then
 	exit 1
 fi
 
-for file in `ls $DIRFROM`
+for file in `ls -a $DIRFROM`
 do
 	if [ ! -d $DIRFROM/$file ]
 	then
