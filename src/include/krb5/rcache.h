@@ -44,15 +44,15 @@ typedef struct _krb5_donot_replay {
 
 typedef struct _krb5_rc_ops {
     char *type;
-    krb5_error_code (*init)PROTOTYPE((krb5_rcache,krb5_deltat)); /* create */
-    krb5_error_code (*recover)PROTOTYPE((krb5_rcache)); /* open */
-    krb5_error_code (*destroy)PROTOTYPE((krb5_rcache));
-    krb5_error_code (*close)PROTOTYPE((krb5_rcache));
-    krb5_error_code (*store)PROTOTYPE((krb5_rcache,krb5_donot_replay *));
-    krb5_error_code (*expunge)PROTOTYPE((krb5_rcache));
-    krb5_error_code (*get_span)PROTOTYPE((krb5_rcache,krb5_deltat *));
-    char *(*get_name)PROTOTYPE((krb5_rcache));
-    krb5_error_code (*resolve)PROTOTYPE((krb5_rcache, char *));
+    krb5_error_code (*init)NPROTOTYPE((krb5_rcache,krb5_deltat)); /* create */
+    krb5_error_code (*recover)NPROTOTYPE((krb5_rcache)); /* open */
+    krb5_error_code (*destroy)NPROTOTYPE((krb5_rcache));
+    krb5_error_code (*close)NPROTOTYPE((krb5_rcache));
+    krb5_error_code (*store)NPROTOTYPE((krb5_rcache,krb5_donot_replay *));
+    krb5_error_code (*expunge)NPROTOTYPE((krb5_rcache));
+    krb5_error_code (*get_span)NPROTOTYPE((krb5_rcache,krb5_deltat *));
+    char *(*get_name)NPROTOTYPE((krb5_rcache));
+    krb5_error_code (*resolve)NPROTOTYPE((krb5_rcache, char *));
 } krb5_rc_ops;
 
 krb5_error_code krb5_rc_default PROTOTYPE((krb5_rcache *));
