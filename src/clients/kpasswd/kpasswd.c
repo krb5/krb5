@@ -7,8 +7,8 @@
 
 #include <krb5.h>
 
-#define P1 "Enter new password: "
-#define P2 "Enter it again: "
+#define P1 "Enter new password"
+#define P2 "Enter it again"
 
 #ifdef HAVE_PWD_H
 #include <pwd.h>

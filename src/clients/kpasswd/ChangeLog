@@ -1,3 +1,8 @@
+2004-06-24  Tom Yu  <tlyu@mit.edu>
+
+	* kpasswd.c (P1, P2): Cosmetic fix for prompts to avoid
+	double colons.
+
 2004-06-07  Ezra Peisach  <epeisach@mit.edu>
 
 	* kpasswd.c (get_name_from_passwd_file): Do not cast return from
