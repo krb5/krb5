@@ -182,6 +182,10 @@ setpeer(argc, argv)
 #ifdef _AIX
 #define unix
 #endif
+
+#ifdef __hpux
+#define unix
+#endif
 #endif
 
 #if defined(unix) && (NBBY == 8 || defined(linux))

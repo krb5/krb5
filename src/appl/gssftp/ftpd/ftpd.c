@@ -2060,7 +2060,7 @@ char *data;
 		   respond with reply code 535." */
 		reply_gss_error(535, maj_stat, min_stat, 
 				"GSSAPI failed processing ADAT");
-		syslog(LOG_ERR, "GSSAPI failed prossing ADAT");
+		syslog(LOG_ERR, "GSSAPI failed processing ADAT");
 		(void) gss_release_cred(&min_stat, &server_creds);
 		return(0);
 	}

@@ -211,19 +211,21 @@ unsigned int nbyte;
 	long length;
 	u_long net_len;
 
+	/* Other auth types go here ... */
+#ifdef KERBEROS
 	if (bufsize < nbyte + FUDGE_FACTOR) {
-		if (outbuf) (void) free(outbuf);
-		if (outbuf = malloc((unsigned) (nbyte + FUDGE_FACTOR)))
+		if (outbuf?
+		    (outbuf = realloc(outbuf, (unsigned) (nbyte + FUDGE_FACTOR))):
+		    (outbuf = malloc((unsigned) (nbyte + FUDGE_FACTOR)))) {
 			bufsize = nbyte + FUDGE_FACTOR;
-		else {
+		} else {
 			bufsize = 0;
 			secure_error("%s (in malloc of PROT buffer)",
-					sys_errlist[errno]);
+				     sys_errlist[errno]);
 			return(ERR);
 		}
 	}
-	/* Other auth types go here ... */
-#ifdef KERBEROS
+
 	if (strcmp(auth_type, "KERBEROS_V4") == 0)
 	  if ((length = level == PROT_P ?
 	    krb_mk_priv(buf, (unsigned char *) outbuf, nbyte, schedule,
@@ -237,29 +239,42 @@ unsigned int nbyte;
 #endif /* KERBEROS */
 #ifdef GSSAPI
 	if (strcmp(auth_type, "GSSAPI") == 0) {
-	  gss_buffer_desc in_buf, out_buf;
-	  OM_uint32 maj_stat, min_stat;
-	  int conf_state;
+		gss_buffer_desc in_buf, out_buf;
+		OM_uint32 maj_stat, min_stat;
+		int conf_state;
 		
-	  in_buf.value = buf;
-	  in_buf.length = nbyte;
-	  maj_stat = gss_seal(&min_stat, gcontext,
-			      (level == PROT_P), /* confidential */
-			      GSS_C_QOP_DEFAULT,
-			      &in_buf, &conf_state,
-			      &out_buf);
-	  if (maj_stat != GSS_S_COMPLETE) {
-	    /* generally need to deal */
-	    /* ie. should loop, but for now just fail */
-	    secure_gss_error(maj_stat, min_stat,
-			     level == PROT_P?
-			     "GSSAPI seal failed":
-			     "GSSAPI sign failed");
-	    return(ERR);
-	  }
-	  memcpy(outbuf, out_buf.value, length=out_buf.length);
-	  gss_release_buffer(&min_stat, &out_buf);
+		in_buf.value = buf;
+		in_buf.length = nbyte;
+		maj_stat = gss_seal(&min_stat, gcontext,
+				    (level == PROT_P), /* confidential */
+				    GSS_C_QOP_DEFAULT,
+				    &in_buf, &conf_state,
+				    &out_buf);
+		if (maj_stat != GSS_S_COMPLETE) {
+			/* generally need to deal */
+			/* ie. should loop, but for now just fail */
+			secure_gss_error(maj_stat, min_stat,
+					 level == PROT_P?
+					 "GSSAPI seal failed":
+					 "GSSAPI sign failed");
+			return(ERR);
+		}
 
+		if (bufsize < out_buf.length) {
+			if (outbuf?
+			    (outbuf = realloc(outbuf, (unsigned) out_buf.length)):
+			    (outbuf = malloc((unsigned) out_buf.length))) {
+				bufsize = nbyte + FUDGE_FACTOR;
+			} else {
+				bufsize = 0;
+				secure_error("%s (in malloc of PROT buffer)",
+					     sys_errlist[errno]);
+				return(ERR);
+			}
+		}
+
+		memcpy(outbuf, out_buf.value, length=out_buf.length);
+		gss_release_buffer(&min_stat, &out_buf);
 	}
 #endif /* GSSAPI */
 	net_len = htonl((u_long) length);
