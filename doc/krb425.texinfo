@@ -3,7 +3,7 @@
 @c definitions added by jcb.
 @c %**start of header
 @c guide
-@setfilename Kerberos-V4-to-V5.info
+@setfilename krb425.info
 @settitle Upgrading to Kerberos V5 from Kerberos V4
 @setchapternewpage odd                  @c chapter begins on next odd page
 @c @setchapternewpage on                   @c chapter begins on next page
@@ -177,7 +177,7 @@ Create a dump of the V4 database in the directory where your V5 database
 will reside by issuing the command:
 
 @smallexample
-% kdb_util dump @value{INSTALLDIR}/lib/krb5kdc/v4-dump
+% kdb_util dump @value{ROOTDIR}/var/krb5kdc/v4-dump
 @end smallexample
 
 @item

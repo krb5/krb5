@@ -157,21 +157,10 @@ Slave KDCs.
 @end enumerate
 
 @item
-Client machines (user machines):
-
-@enumerate A
-@item
-UNIX client machines.
+UNIX client machines
 
 @item
-Windows machines.
-
-@item
-Macintoshes.
-@end enumerate
-
-@item
-application server machines
+UNIX application server machines
 @end enumerate
 
 @noindent
@@ -232,7 +221,7 @@ Kerberos realm @value{SECONDREALM}.
 
 If you need multiple Kerberos realms, @value{COMPANY} recommends that
 you use descriptive names which end with your domain name, such as
-BOSTON.@value{SECONDREALM} and SAN_FRANCISCO.@value{SECONDREALM}.
+BOSTON.@value{SECONDREALM} and HOUSTON.@value{SECONDREALM}.
 
 @node Mapping Hostnames onto Kerberos Realms, Ports for the KDC and Admin Services, Kerberos Realms, Realm Configuration Decisions
 @section Mapping Hostnames onto Kerberos Realms
@@ -340,18 +329,7 @@ The sections of this chapter describe procedures for installing
 The KDCs
 
 @item
-Client machines
-
-@enumerate A
-@item
 UNIX client machines
-
-@item
-Windows machines 
-
-@item 
-Macintoshes
-@end enumerate
 
 @item
 UNIX Application Servers
@@ -635,7 +613,7 @@ kadmin.local:} quit
 
 @noindent
 As specified in the @samp{-k} argument, @code{ktadd} will save the
-extracted keytab as @code{@value{ROOTDIR}/var/krb5kdc/kadm5.keytab}.
+extracted keytab as @* @code{@value{ROOTDIR}/var/krb5kdc/kadm5.keytab}.
 The filename you use must be the one specified in your @code{kdc.conf}
 file.
 

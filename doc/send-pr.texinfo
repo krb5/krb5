@@ -12,11 +12,14 @@ The @code{krb5-send-pr} program is installed in the directory
 The @code{krb5-send-pr} program enters the problem report into our
 Problem Report Management System (PRMS), which automatically assigns it
 to the engineer best able to help you with problems in the assigned
-category.  The engineer will work with you via email, telephone, or
-both, and all email related to this Problem Report will be tracked by
-PRMS for future reference.  If you need to talk to someone else in our
-organization about the problem (@i{e.g.}, if the engineer gets hit by a
-truck), we can find out what the current state is through the PR number.
+category.
+@ifset CYGNUS
+The engineer will work with you via email, telephone, or both, and all
+email related to this Problem Report will be tracked by PRMS for future
+reference.  If you need to talk to someone else in our organization
+about the problem (@i{e.g.}, if the engineer gets hit by a truck), we
+can find out what the current state is through the PR number.
+@end ifset
 
 The @code{krb5-send-pr} program will try to intelligently fill in as
 many fields as it can.  You need to choose the @dfn{category},
@@ -53,7 +56,7 @@ A @dfn{serious} problem is one in which the product, component or
 concept is not working properly or significant functionality is missing.
 Problems that would otherwise be considered @i{critical} are rated
 @i{serious} when a workaround is known.  A @dfn{non-critical} problem is
-one that is indeed a problem, but one that is having a minimal affect on
+one that is indeed a problem, but one that is having a minimal effect on
 your ability to use @value{PRODUCT}.  @i{E.g.}, The product, component
 or concept is working in general, but lacks features, has irritating
 behavior, does something wrong, or doesn't match its documentation.  The
@@ -61,9 +64,12 @@ default severity is @i{serious}.
 
 The @b{priority} indicates how urgent this particular problem is in
 relation to your work.  Note that low priority does not imply low
-importance.  @value{COMPANY} considers all problems important, and
-encourages its customers to be realistic about priority ratings.  A
-priority of @dfn{high} means a solution is needed as soon as possible.
+importance.
+@ifset CYGNUS
+@value{COMPANY} considers all problems important, and
+encourages its customers to be realistic about priority ratings.
+@end ifset
+A priority of @dfn{high} means a solution is needed as soon as possible.
 A priority of @dfn{medium} means the problem should be solved no later
 than the next release.  A priority of @dfn{low} means the problem should
 be solved in a future release, but it is not important to your work how

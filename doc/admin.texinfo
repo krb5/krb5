@@ -3,7 +3,7 @@
 \input texinfo @c -*-texinfo-*-
 @c %**start of header
 @c guide
-@setfilename kerberos-admin.info
+@setfilename krb5-admin.info
 @settitle Kerberos V5 System Administrator's Guide
 @setchapternewpage odd                  @c chapter begins on next odd page
 @c @setchapternewpage on                   @c chapter begins on next page
@@ -831,7 +831,7 @@ to the database.  The default is
 
 @itemx database_name
 (String.)  Location of the Kerberos database for this realm.  The
-default is @code{@value{ROOTDIR}/var/krb5kdc/principal}.
+default is @* @code{@value{ROOTDIR}/var/krb5kdc/principal}.
 
 @itemx default_principal_expiration
 (Absolute time string.)  Specifies the default expiration date of
@@ -949,13 +949,13 @@ database dump and load, which are provided by @code{kdb5_util}).
 
 The remote version authenticates to the KADM5 server using the service
 principal @code{kadmin/admin}.  If the credentials cache contains a
-ticket for the @code{kadmin/admin} principal, and the @samp{-c
-credentials_cache} option is specified, that ticket is used to
-authenticate to KADM5.  Otherwise, the @samp{-p} and @samp{-k} options
-are used to specify the client Kerberos principal name used to
-authenticate.  Once kadmin has determined the principal name, it
-requests a @code{kadmin/admin} Kerberos service ticket from the KDC, and
-uses that service ticket to authenticate to KADM5.
+ticket for the @code{kadmin/admin} principal, and the @samp{-c ccache}
+option is specified, that ticket is used to authenticate to KADM5.
+Otherwise, the @samp{-p} and @samp{-k} options are used to specify the
+client Kerberos principal name used to authenticate.  Once kadmin has
+determined the principal name, it requests a @code{kadmin/admin}
+Kerberos service ticket from the KDC, and uses that service ticket to
+authenticate to KADM5.
 
 @menu
 * Kadmin Options::              
@@ -1102,7 +1102,7 @@ requires the ``inquire'' administrative privilege.  The syntax is:
 @noindent The @code{get_principal} command has the alias @code{getprinc}.
 
 For example, suppose you wanted to view the attributes of the principals
-@code{@value{RANDOMUSER1}/root@@@value{PRIMARYREALM}} and
+@* @code{@value{RANDOMUSER1}/root@@@value{PRIMARYREALM}} and
 @code{systest@@@value{PRIMARYREALM}}.  You would type:
 
 @smallexample
@@ -1217,7 +1217,7 @@ permissions are determined by the first matching entry.
 @smallexample
 @group
 */admin@@@value{PRIMARYREALM}  *
-@value{ADMINUSER}/null@@@value{PRIMARYREALM}  ADMCIL
+@value{ADMINUSER}@@@value{PRIMARYREALM}  ADMCIL
 @value{ADMINUSER}/*@@@value{PRIMARYREALM}  il
 @value{RANDOMUSER1}/root@@@value{PRIMARYREALM}  cil  */root@@@value{PRIMARYREALM}
 */*@@@value{PRIMARYREALM}  i
@@ -1229,7 +1229,7 @@ has all administrative privileges.  The user @code{@value{ADMINUSER}}
 has all permissions with his @code{admin} instance,
 @code{@value{ADMINUSER}/admin@@@value{PRIMARYREALM}} (matches the first
 line).  He has no permissions at all with his @code{null} instance,
-@code{@value{ADMINUSER}/null@@@value{PRIMARYREALM}} (matches the second
+@code{@value{ADMINUSER}@@@value{PRIMARYREALM}} (matches the second
 line).  He has @i{inquire} and @i{list} permissions with any other
 instance (matches the third line).  When @code{@value{RANDOMUSER1}} is
 using her @code{root}
@@ -1237,7 +1237,7 @@ instance, @code{@value{RANDOMUSER1}/root@@@value{PRIMARYREALM}}, she has
 @i{change password}, @i{inquire}, and @i{list} privileges for any other
 principal that has the instance @code{root}.  Finally, any principal in
 the realm @code{@value{PRIMARYREALM}} (except for
-@code{@value{ADMINUSER}/null@@@value{PRIMARYREALM}}, as mentioned above)
+@code{@value{ADMINUSER}@@@value{PRIMARYREALM}}, as mentioned above)
 has @i{inquire} privileges.
 
 @node Adding or Modifying Principals, Deleting Principals, Privileges, Principals
@@ -1329,14 +1329,14 @@ principal in the database.
 @item @{-|+@}allow_proxiable
 The ``-allow_proxiable'' option prohibits this principal from obtaining
 proxiable tickets.  ``+allow_proxiable'' clears this flag.  In effect,
-``-allow_proxiable'' sets the KRB5_KDB_DISALLOW_PROXIABLE flag. on the
+``-allow_proxiable'' sets the @* KRB5_KDB_DISALLOW_PROXIABLE flag. on the
 principal in the database.
 
 @item @{-|+@}allow_dup_skey
 The ``-allow_dup_skey'' option disables user-to-user authentication for
 this principal by prohibiting this principal from obtaining a session
 key for another user.  ``+allow_dup_skey'' clears this flag.  In effect,
-``-allow_dup_skey'' sets the KRB5_KDB_DISALLOW_DUP_SKEY flag on the
+``-allow_dup_skey'' sets the @* KRB5_KDB_DISALLOW_DUP_SKEY flag on the
 principal in the database.
 
 @item @{-|+@}requires_preauth
@@ -1355,7 +1355,7 @@ database.
 @item @{-|+@}allow_svr
 The ``-allow_svr'' flag prohibits the issuance of service tickets for
 this principal.  ``+allow_svr'' clears this flag.  In effect,
-``-allow_svr'' sets the KRB5_KDB_DISALLOW_SVR flag on the principal in
+``-allow_svr'' sets the @* KRB5_KDB_DISALLOW_SVR flag on the principal in
 the database.
 
 @item @{-|+@}allow_tgs_req
@@ -1369,7 +1369,7 @@ principal in the database.
 @item @{-|+@}allow_tix
 The ``-allow_tix'' option forbids the issuance of any tickets for this
 principal.  ``+allow_tix'' clears this flag.  The default is
-``+allow_tix''.  In effect, ``-allow_tix'' sets the
+``+allow_tix''.  In effect, ``-allow_tix'' sets the @*
 KRB5_KDB_DISALLOW_ALL_TIX flag on the principal in the database.
 
 @item @{-|+@}needchange
@@ -1451,7 +1451,7 @@ kadmin:}
 If you will need cross-realm authentication, you need to add principals
 for the other realm's TGT to each realm.  For example, if you need to do
 cross-realm authentication between the realms @value{PRIMARYREALM} and
-@value{SECONDREALM}, you would need to add the principals
+@value{SECONDREALM}, you would need to add the principals @*
 @samp{krbtgt/@value{SECONDREALM}@@@value{PRIMARYREALM}} and
 @samp{krbtgt/@value{PRIMARYREALM}@@@value{SECONDREALM}} to both
 databases.  You need to be sure the passwords and the key version

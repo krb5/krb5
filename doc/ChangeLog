@@ -1,3 +1,39 @@
+Fri Dec  6 13:58:19 1996  Tom Yu  <tlyu@mit.edu>
+
+	* .cvsignore: Ignore by suffix rather than by file.
+
+	* Makefile (admin-guide-info):
+	(admin-guide-info): Update to reflect new info file name.
+
+	* admin.texinfo: Change info file name to krb5-admin.info for
+	consistency.
+	(Administrating Kerberos Database Entries): "-c credentials_cache"
+	-> "-c ccache" to avoid overrun.
+	(Privileges): Null instance example is joeuser@REALM, not
+	joeuser/null@REALM.
+
+	* install.texinfo (Kerberos Realms): SAN_FRANCISCO.FUBAR.ORG ->
+	HOUSTON.FUBAR.ORG to prevent margin overrun.
+	(Create a kadmind Keytab): Add explicit linebreak to prevent
+	margin overrun.
+	(Overview of This Guide): 
+	(Installing Kerberos V5): Remove references to windows and mac
+	client machines for now.
+
+	* krb425.texinfo: Use krb425.info instead of
+	Kerberos-V4-to-V5.info in the interest of shorter filenames.
+
+	* user-guide.texinfo (Introduction): Eliminate "Kerberos V5 is
+	based on Kerberos V5".
+	(Ticket Management): Fix ref to "/rsh".
+	(rsh): Add explicit linebreak to avoid margin overrun.
+
+	* krb425.texinfo (Upgrading KDCs): Use ROOTDIR rather than
+	INSTALLDIR to get the proper pathname.
+
+	* send-pr.texinfo: Fix some misspellings, also remove references
+	to things that are only really applicable for Cygnus.
+
 Wed Dec  4 23:47:28 1996  Tom Yu  <tlyu@mit.edu>
 
 	* krb425.texinfo (Upgrading Application Servers): v5srvtab ->

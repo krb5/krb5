@@ -42,9 +42,9 @@ admin.html: $(ADMIN_DEPS)
 	$(HTML) admin.texinfo
 
 .PHONY: admin-guide-info
-admin-guide-info:: kerberos-admin.info
+admin-guide-info:: krb5-admin.info
 
-kerberos-admin.info: $(ADMIN_DEPS)
+krb5-admin.info: $(ADMIN_DEPS)
 	$(INFO) admin.texinfo
 
 .PHONY: install-guide-full
