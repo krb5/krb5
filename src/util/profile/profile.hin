@@ -36,6 +36,10 @@ typedef struct _profile_t *profile_t;
 #define PROFILE_ITER_SECTIONS_ONLY	0x0002
 #define PROFILE_ITER_RELATIONS_ONLY	0x0004
 
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
 KRB5_DLLIMP long KRB5_CALLCONV profile_init
 	PROTOTYPE ((const char **filenames, profile_t *ret_profile));
 
@@ -98,5 +102,9 @@ KRB5_DLLIMP long KRB5_CALLCONV profile_rename_section
 KRB5_DLLIMP long KRB5_CALLCONV profile_add_relation
 	PROTOTYPE((profile_t profile, const char **names, 
 		   const char *new_value));
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
 #endif /* _KRB5_PROFILE_H */
