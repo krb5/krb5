@@ -12,3 +12,4 @@
 /\.tar$/d
 /~$/d
 /winfile.list$/d
+/macfile.list$/d
