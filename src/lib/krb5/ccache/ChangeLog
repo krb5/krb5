@@ -1,3 +1,15 @@
+2004-09-09  Jeffrey Altman <jaltman@mit.edu>
+
+        * cc_mslsa.c: The following functionality is being committed
+                      but commented out because it is not presently
+                      available in public Microsoft SDKs
+        - support for KerbSubmitTicket which allows a KERB_CRED 
+          message to be forwarded to the LSA.  (KERB_SUBMIT_TICKET)
+        - support for the KerbQueryTicketCacheEx2Message which 
+          adds the Session Key Enctype to the contents of the
+          response from KerbQueryTicketCacheExMessage.  
+          (HAVE_CACHE_INFO_EX2)
+
 2004-09-01  Jeffrey Altman <jaltman@mit.edu>
 
         * cc_mslsa.c: 
