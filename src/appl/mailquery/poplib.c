@@ -26,6 +26,7 @@
 #include <netinet/in.h>
 #include <netdb.h>
 #include <stdio.h>
+#include <string.h>
 #if defined(KRB4) && defined(KRB5)
 error You cannot define both KRB4 and KRB5
 #endif
@@ -41,6 +42,12 @@ error You cannot define both KRB4 and KRB5
 #include "com_err.h"
 #include <ctype.h>
 #endif
+#endif
+
+#ifdef HAS_STDLIB_H
+#include <stdlib.h>
+#else
+extern char *malloc();
 #endif
 
 #include "pop.h"

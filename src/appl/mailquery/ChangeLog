@@ -1,3 +1,10 @@
+Tue May  9 10:29:44 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* configure.in: Check for stdlib.h
+
+	* poplib.c: Include <string.h>. Include <stdlib.h> if present or
+		define malloc().
+
 Mon Mar 27 07:56:26 1995 Chris Provenzano (proven@mit.edu)
 
 	* poplib.c (pop_init()): Use new calling convention for krb5_sendauth().
