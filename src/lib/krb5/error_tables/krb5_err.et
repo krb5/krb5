@@ -320,5 +320,6 @@ error_code KRB5_CHPW_FAIL,		"Password change failed"
 error_code KRB5_KT_FORMAT,		"Bad format in keytab"
 
 error_code KRB5_NOPERM_ETYPE,	"Encryption type not permitted"
+error_code KRB5_CONFIG_ETYPE_NOSUPP,	"No supported encryption types (config file error?)"
 
 end

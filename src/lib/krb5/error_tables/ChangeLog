@@ -1,3 +1,7 @@
+1999-11-02  Ken Raeburn  <raeburn@mit.edu>
+
+	* krb5_err.et (KRB5_CONFIG_ETYPE_NOSUPP): New error code.
+
 1999-10-26  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,
