@@ -150,7 +150,10 @@ krb5_ticket **ticket;
     if (retval = decode_krb5_ap_req(&scratch2, &apreq))
 	return retval;
 
-#define cleanup_apreq() {krb5_free_ap_req(apreq); *ticket = 0;}
+    *ticket = apreq->ticket;
+
+    /* the caller will free the ticket when cleaning up */
+#define cleanup_apreq() {apreq->ticket = 0; krb5_free_ap_req(apreq);}
 
 #ifdef notdef
     /* XXX why copy here? */
@@ -225,6 +228,13 @@ krb5_ticket **ticket;
 	cleanup_apreq();
 	return KRB5KDC_ERR_SUMTYPE_NOSUPP;
     }	
+    /* must be collision proof */
+    if (!is_coll_proof_cksum(our_cksum.checksum_type)) {
+	krb5_free_authenticator(authdat.authenticator);
+	krb5_free_ticket(authdat.ticket);
+	cleanup_apreq();
+	return KRB5KRB_AP_ERR_INAPP_CKSUM;
+    }
 
     /* check application checksum vs. tgs request */
     if (!(our_cksum.contents = (krb5_octet *)
@@ -275,9 +285,7 @@ krb5_ticket **ticket;
 
     /* ticket already filled in by rd_req_dec, so free the ticket */
     krb5_free_ticket(authdat.ticket);
-    *ticket = apreq->ticket;
-    apreq->ticket = 0;
-    krb5_free_ap_req(apreq);
+    cleanup_apreq();
     return 0;
 }
 
