@@ -99,6 +99,10 @@
 extern void getutmpx (const struct utmp *, struct utmpx *);
 #endif
 
+#if defined(NEED_REVOKE_PROTO)
+extern int revoke(const char *);
+#endif
+
 /* Internal functions */
 long ptyint_void_association(void);
 long ptyint_open_ctty (char *slave, int *fd);

@@ -1,8 +1,13 @@
 2001-06-11  Ezra Peisach  <epeisach@mit.edu>
 
-	* configure.in: Check for system provided getutmp() prototype.
+	* pty-int.h: Provide revoke() prototype if system headers lacking. 
 
-	* update_wtmp.c: Provide prototype for getutmp() if needed. 
+	* logwtmp.c: Provide logwtmp() prototype if needed. 
+
+	* configure.in: Check for system provided getutmp(), logwtmp() and
+	revoke() prototypes.  Check for util.h, libutil.h.
+
+	* update_wtmp.c: Provide prototype for getutmp() if needed.
 
 2001-05-15  Tom Yu  <tlyu@mit.edu>
 

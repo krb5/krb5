@@ -55,8 +55,7 @@ AC_TYPE_MODE_T
 AC_CHECK_TYPE(time_t, long)
 AC_CHECK_FUNC(strsave,[AC_DEFINE(HAS_STRSAVE)])
 AC_CHECK_FUNCS(setreuid gettosbyname setsid ttyname line_push ptsname grantpt openpty)
-AC_CHECK_HEADERS(unistd.h stdlib.h string.h pty.h sys/filio.h sys/sockio.h sys/label.h sys/tty.h ttyent.h lastlog.h sys/select.h sys/ptyvar.h)
-AC_CHECK_HEADERS(sys/wait.h)
+AC_CHECK_HEADERS(unistd.h stdlib.h string.h libutil.h pty.h sys/filio.h sys/sockio.h sys/label.h sys/tty.h sys/wait.h ttyent.h lastlog.h sys/select.h sys/ptyvar.h util.h)
 AC_CHECK_FUNCS(waitpid)
 DECLARE_SYS_ERRLIST
 KRB5_SIGTYPE
@@ -202,6 +201,22 @@ KRB5_NEED_PROTO([#ifdef HAVE_UTMP_H
 #endif
 ],getutmp)
 dnl
+#########################################
+KRB5_NEED_PROTO([#include <sys/types.h>
+#ifdef HAVE_UTMP_H
+#include <utmp.h>
+#endif
+#ifdef HAVE_LIBUTIL_H
+#include <libutil.h>
+#endif
+#ifdef HAVE_UTIL_H
+#include <util.h>
+#endif
+],logwtmp)
+########################################
+KRB5_NEED_PROTO([#include <unistd.h>
+],revoke)
+########################################
 dnl
 AC_MSG_CHECKING([streams interface])
 AC_CACHE_VAL(krb5_cv_has_streams,

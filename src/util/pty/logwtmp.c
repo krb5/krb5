@@ -30,6 +30,10 @@
 #define PTY_STRUCT_UTMPX struct utmp
 #endif
 
+#ifdef NEED_LOGWTMP_PROTO
+void logwtmp(const char *, const char *, const char *);
+#endif
+
 long
 pty_logwtmp(const char *tty, const char *user, const char *host)
 {
