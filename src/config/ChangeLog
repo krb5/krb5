@@ -1,3 +1,10 @@
+2002-04-10  Danilo Almeida  <dalmeida@mit.edu>
+
+	* win-pre.in: Define KRB5_PRIVATE=1 so that private definitions
+	are used.  Define WIN32_LEAN_AND_MEAN so there are no Winsock
+	vs. Winsock 2 header file issues.  (Winsock 2 is needed for IPv6
+	support.)
+
 2002-04-02  Tom Yu  <tlyu@mit.edu>
 
 	* pre.in: Add support for doing optional stripping of programs.
