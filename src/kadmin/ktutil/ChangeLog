@@ -1,3 +1,8 @@
+Tue Mar 19 19:41:31 1996  Richard Basch  <basch@lehman.com>
+
+	* ktutil_funcs.c (ktutil_write_srvtab): use any type of des key
+	in the keytab to create a v4 srvtab
+
 Fri Jan 26 00:06:50 1996  Sam Hartman  <hartmans@tertius.mit.edu>
 
 	* ktutil.c (ktutil_list): Implement -e option to show enctypes.

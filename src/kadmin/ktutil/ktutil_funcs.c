@@ -319,36 +319,40 @@ krb5_error_code ktutil_write_srvtab(context, list, name)
 
     /* First do heinous stuff to prune the list. */
     for (lp = list; lp; lp = lp->next) {
-	if (lp->entry->key.enctype == ENCTYPE_DES_CBC_CRC) {/* only DES keys! */
-	    for (lp1 = pruned; lp1; prev = lp1, lp1 = lp1->next) {
-		/* Hunt for the current principal in the pruned list */
-		if (krb5_principal_compare(context,
-					   lp->entry->principal,
-					   lp1->entry->principal))
+	if ((lp->entry->key.enctype != ENCTYPE_DES_CBC_CRC) &&
+	    (lp->entry->key.enctype != ENCTYPE_DES_CBC_MD5) &&
+	    (lp->entry->key.enctype != ENCTYPE_DES_CBC_MD4) &&
+	    (lp->entry->key.enctype != ENCTYPE_DES_CBC_RAW))
+	    continue;
+
+	for (lp1 = pruned; lp1; prev = lp1, lp1 = lp1->next) {
+	    /* Hunt for the current principal in the pruned list */
+	    if (krb5_principal_compare(context,
+				       lp->entry->principal,
+				       lp1->entry->principal))
 		    break;
-	    }
-	    if (!lp1) {		/* need to add entry to tail of pruned list */
-		if (!pruned) {
-		    pruned = (krb5_kt_list) malloc(sizeof (*pruned));
-		    if (!pruned)
-			return ENOMEM;
-		    memset((char *) pruned, 0, sizeof(*pruned));
-		    lp1 = pruned;
-		} else {
-		    prev->next
-			= (krb5_kt_list) malloc(sizeof (*pruned));
-		    if (!prev->next) {
-			retval = ENOMEM;
-			goto free_pruned;
-		    }
-		    memset((char *) prev->next, 0, sizeof(*pruned));
-		    lp1 = prev->next;
-		}
-		lp1->entry = lp->entry;
-	    } else if (lp1->entry->vno < lp->entry->vno)
-		/* Check if lp->entry is newer kvno; if so, update */
-		lp1->entry = lp->entry;
 	}
+	if (!lp1) {		/* need to add entry to tail of pruned list */
+	    if (!pruned) {
+		pruned = (krb5_kt_list) malloc(sizeof (*pruned));
+		if (!pruned)
+		    return ENOMEM;
+		memset((char *) pruned, 0, sizeof(*pruned));
+		lp1 = pruned;
+	    } else {
+		prev->next
+		    = (krb5_kt_list) malloc(sizeof (*pruned));
+		if (!prev->next) {
+		    retval = ENOMEM;
+		    goto free_pruned;
+		}
+		memset((char *) prev->next, 0, sizeof(*pruned));
+		lp1 = prev->next;
+	    }
+	    lp1->entry = lp->entry;
+	} else if (lp1->entry->vno < lp->entry->vno)
+	    /* Check if lp->entry is newer kvno; if so, update */
+	    lp1->entry = lp->entry;
     }
     fp = fopen(name, "w");
     if (!fp) {
