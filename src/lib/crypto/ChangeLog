@@ -1,3 +1,12 @@
+2003-04-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* pbkdf2.c (krb5int_pbkdf2): Provide a temporary buffer for the
+	output from F, if the remaining space in the output buffer isn't
+	big enough.  Free the temporary buffers before returning.
+
+	* etypes.c (krb5_enctypes_list): Use krb5int_aes_encrypt_length,
+	and krb5int_aes_dk_encrypt, and krb5int_aes_dk_decrypt for AES.
+
 2003-03-06  Alexandra Ellwood  <lxs@mit.edu>
 
     * prng.c: use Unix randomness sources on Mac OS X.
