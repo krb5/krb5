@@ -11,6 +11,11 @@ NormalLibraryObjectRule()
 
 OBJS=	crc.o
 
-SRCS=	crc.c
+SRCS=	crc.c crctest.c
+
+CRCTESTOBJ = crctest.o
 
 NormalLibraryTarget(crc32,$(OBJS))
+
+NormalProgramTarget(crctest,$(CRCTESTOBJ),libcrc32.a,libcrc32.a,)
+
