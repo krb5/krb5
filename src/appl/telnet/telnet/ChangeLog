@@ -1,0 +1,4 @@
+Tue Jul 26 18:22:00 1994  Tom Yu  (tlyu@dragons-lair)
+
+	* Makefile.in: forgot some $(srcdir) stuff
+
