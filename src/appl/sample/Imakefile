@@ -1,0 +1,8 @@
+        DEPLIBS = $(DEPKLIB)
+LOCAL_LIBRARIES = $(KLIB)
+
+CLIENTOBJS= sclient.o
+SERVEROBJS= sserver.o
+
+NormalProgramTarget(sclient,$(CLIENTOBJS),$(DEPLIBS),$(LOCAL_LIBRARIES),)
+NormalProgramTarget(sserver,$(SERVEROBJS),$(DEPLIBS),$(LOCAL_LIBRARIES),)
