@@ -4,24 +4,15 @@ system will hopefully make Kerberos V5 much simpler to build for most
 people, and reduce the amount of effort required in porting Kerberos V5
 to a new platform.
 
-In the future, we will be supporting only the configure method as the
-method for configuring and building Kerberos.  In this release, both
-the autoconf and the old imake system are included, both to make
-things easier for sites who have existing imake config files to
-convert, and because the autoconf makefiles aren't quite as flexible
-as the old imake system (although this will be fixed where the
-flexibility is really needed) and because not all of the application
-directories have been converted over to use configure.
+The imake system has been removed from this patch release, as most of
+the tree is now under autoconf control.
 
-If you want to use the old imake system, skip down to the section
-labeled "HOW TO BUILD KERBEROS V5 USING IMAKE".
-
-HOW TO BUILD KERBEROS V5 USING CONFIGURE
-========================================
+HOW TO BUILD KERBEROS V5
+========================
 
 A)  Find about 65 meg free; untar the krb5 sources.  For example,
 	we will assume that you've untar'ed the sources into /u1/krb5,
-	so that the top of the source tree is /u1/krb5/src.  
+	so that the top of the source tree is /u1/krb5/src.
 
 B)  If you don't want separate build trees for each architecture, then
 use the following abbreviated procedure.
@@ -29,22 +20,25 @@ use the following abbreviated procedure.
 	2)  ./configure
 	3)  make 
 
-C.  If you want to separate build trees for different architectures,
-then create each build tree in the top level; for example,
-/u1/krb5/solaris, /u1/krb5/pmax, etc.  Then on each platform, do
-something like the following:
-	1)  cd /u1/krb5/pmax
-	2)  ../src/autotools/lndir /u1/krb5/src
-	3)  ./configure
-	4)  make
-
 If you have a make that supports VPATH (GNU make, for example), you
-can simplify this procedure slightly:
+can keep your source tree pure by making a build directory, e.g.
+/u1/krb5/pmax.
+
 	1)  cd /u1/krb5/pmax
 	2)  ../src/configure
 	3)  make
 
 That's all there is to it!
+
+It is possible to pass compiler flags to to configure by using, for
+example, the "--with-ccopts=FLAGS" option.  Please take note that if
+you use the native Ultrix compiler on a DECstation you are likely to
+lose if you pass no flags to cc; md4.c takes an estimated 33 million
+years to compile if you provide neither the "-g" flag nor the "-O"
+flag to cc.
+
+It is also possible to explicitly specify a compiler to configure,
+e.g. "--with-cc=gcc".
 
 By default, Kerberos will expect its configuration files to be in
 /krb5.  This can be changed by passing the
@@ -56,157 +50,11 @@ If you want Kerberos V4 backwards compatibility, pass the
 the V4 include files be available in /KRB4_DIRECTORY/include, and that
 the V4 Kerberos library be available in /KRB4_DIRECTORY/lib.
 
+If, for some reason, you want to build with isode-based ASN.1 encoders
+and decoders rather than our hand-coded ones, use the "--enable-isode"
+flag to configure.  This has not been thoroughly tested, so beware.
+
 =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-
-HOW TO BUILD KERBEROS V5 USING IMAKE
-====================================
-
-
-To build kerberos v5 Beta four distribution (using imake):
-
-A) find about 65M free.
-
-B) pick up and build the following support pieces/programs if you don't
-have them already installed:
-
-	isode	 	from ftp.psi.com:/isode/
-			ISODE 6.8 works, but you must apply our
-			patches (pepsy-diffs) before buidling.  ISODE
-			7.0 is what we're using in-house.  I believe
-			ISODE 8.0 should also work
-
-			n.b.  The isode in the sources isn't linked
-			into the imake build files.  So you can use
-			this isode, but you'll have to compile it
-			yourself manually.
-
-C) building the system:
-
-1) edit any files you need to change (see below)
-2) run 'make world' and everything should get built.
-3) If you want to install stuff, you can later run 'make install'.
-
-Most of things you should need to change will be in
-include/krb5/stock/osconf.h, config/site.def and/or an
-architecture-specific file in config/.
-
-config/site.def:
----------------
-
-If you don't have pepsy in your $PATH, then add #defines to
-config/site.def to give its location.  See the top of Project.tmpl for
-the #define'ed names you should use.
-
-If you need additional library search paths to get the libraries, then
-put the appropriate -L flag(s) into the #define of LdLibLocations in
-config/site.def.
-
-See the other comments in config/site.def for other options you may wish
-to turn on (such as moving the default locations for various installed
-programs & manual pages).
-
-config/<machine>.cf:
-------------------
-
-Imake uses a separate configuration file to turn on/off certain options
-on a per-system/architecture basis.  See config/Imake.tmpl if you need
-to figure out the name of the config file your machine will use.
-[They're the same as those for X11R4, except that BSD on a VAX uses
-<vaxbsd.cf> rather than <bsd.cf> (XXX)]
-
-See ultrix.cf, sun.cf, vaxbsd.cf, ibm.cf for examples of things you
-might want to include in this file.
-
-Certain options which control some conditional compilations of interest
-are:
-HasVoidSignalReturn		YES if signal catching functions should
-				be void; NO if they should return int.
-HasPosixTermios			YES if you have POSIX termios terminal controls
-				NO if you have BSD/V7 sgtty stuff.
-				(if you have neither, check out the code
-				 in lib/os/read_pwd.c)
-
-HasPosixFileLocks		YES if you have POSIX file locking commands
-				NO if you have BSD-style flock() commands
-				(if you have neither, check out the code
-				 in lib/os/lock_file.c)
-
-HasPosixTypes			YES if you have POSIX *_t types in your
-				header files
-				NO if you don't
-HasStringH			YES if you have <string.h>
-				NO if you don't
-HasStdlibH			YES if you have <stdlib.h>
-				NO if you don't
-UseSysTimeH			YES if you should use <sys/time.h> for
-					struct timeval
-				NO if you shouldn't
-UseTimeH			YES if you should use <time.h> for ...
-				if neither this nor UseSysTimeH is defined,
-				then <sys/time.h> will be used if OS_BSD
-				is set, otherwise <time.h> will be used.
-
-HasInet				YES if you have BSD internet sockets
-				NO if you don't (not much will work in
-				this dist without them, though... see lib/os/)
-HaveSetenv			YES if you have setenv() in your library
-				NO if you don't
-HasGcc				YES if you have gcc and want to use it,
-				NO if you don't
-HasNdbm				YES if you have ndbm(3), <ndbm.h>
-				NO if you have dbm(3)
-
-Bitsize32			#define'd if you have 32-bit words
-				if not, good luck with the DES library.
-Bitsize16	
-Bitsize64	
-
-DesDefines	 		-D flags to configure the DES library.
-				common flags here are:
-				-DMSBFIRST	(big-endian)
-				-DLSBFIRST	(little-endian)
-				-DMUSTALIGN	(if you have to align
-						 references to longwords)
-				-DBIG		(32 bits)
-
-HasSaberC			YES if you have Saber-C (this turns on
-				Makefile additions to make loading easier)
-				NO if you don't (but you should get it!)
-SaberDefines			extra -D flags for Saber-C loading
-				(such as -Dconst= to avoid a bug in
-				older versions of saber)
-
-WantPrototypes			YES if your C compiler supports function
-				prototypes. redundant if your compiler
-				defines __STDC__, but may be useful if
-				your compiler has prototypes but isn't
-				fully __STDC__
-
-NeedNarrowPrototypes		YES if your C compiler supports function
-				prototypes AND you do not want the
-				parameter types to be widened/promoted.
-				NO if you want them widened (normal
-				setting, since narrow versions can lead
-				to interoperability problems between
-				modules compiled with different compilers)
-
-MakeDependFlags			extra defines to be passed onto
-				makedepend when generating include file
-				dependencies.  These might be flags that
-				your compiler sends automatically but
-				makedepend doesn't know about, e.g.:
-				-D__STDC__ -I/local/gcc-includes
-STDCTopIncludes			XXX include path for alternate STDC-ized
-				include files
-StandardDefines			-D flags for this system, e.g.
-				-YPOSIX -D_POSIX_SOURCE
-StandardCppDefines		-D flags to pass when only calling cpp, e.g.
-				-DPOSIX -D_POSIX_SOURCE
-
-telnet/telnetd need special configuration options, which are sometimes
-determined by the operating system defines.  see
-appl/telnet/telnet/Imakefile, appl/telnet/telnetd/Imakefile, and
-appl/telnet/old-makefiles/* for details.
 
 include/krb5/stock/osconf.h:
 ---------------------------
@@ -233,10 +81,7 @@ RCTMPDIR			The directory which stores replay
 
 include/krb5/stock/config.h
 ----------------------------
-Most of the defines in this file should be adjusted using your imake
-.cf file; however, some of the defines located at the end of the file
-may be of interest (and are adjusted manually since they tend to be of
-interest on a site-wide basis)
+You might wish to adjust these flags as well:
 
 KRBCONF_VAGUE_ERRORS		If defined, give vague and unhelpful
 				error messages to the client... er,
@@ -254,7 +99,7 @@ KRBCONF_KDC_MODIFIES_KDB	Define this if you want to allow the
 				Note that this doesn't work if you're
 				using slave servers!!!  It also causes
 				the database to be modified (and thus
-				need to be locked) frequently.  
+				need to be locked) frequently.
 
 
 
@@ -263,7 +108,7 @@ NOTE for building Kerberos for multiple platforms
 
 This is how we build Kerberos for multiple platforms here at MIT:
 
-1) Use the synctree program to build a symlink tree.  The .rconf files
+Use the synctree program to build a symlink tree.  The .rconf files
 included in the distribution are for use with synctree.  You can find
 the synctree program in the same directory as you found this release,
 athena-dist.mit.edu.
@@ -277,22 +122,10 @@ Assuming you have a directory hierarchy which looks something like this:
        |-solaris-
        |-src-----
 
-A typical invokation of synctree might be: 
+A typical build using synctree might be: 
 
 	cd XXX/krb5
 	mkdir decmips; cd decmips
 	synctree -s ../src -d .
-
-2)  At the top level of the build tree (in the example above, krb5/decmips)
-execute the following command to regenerate the top level makefile:
-	
-	imake -I./config
-
-3) Run a "make world".  It is often advisiable to redirect the output
-to a file, so that you can puruse any error messages when the compile
-is finished.
-
-
-
-	
-
+	./configure
+	make
