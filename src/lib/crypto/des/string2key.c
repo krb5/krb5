@@ -69,7 +69,7 @@
 	returns: errors
  */
 
-krb5_error_code
+static krb5_error_code
 mit_des_string_to_key_int (keyblock, data, salt)
     krb5_keyblock FAR * keyblock;
     const krb5_data FAR * data;
