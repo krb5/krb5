@@ -1,3 +1,7 @@
+2004-07-16  Ken Raeburn  <raeburn@mit.edu>
+
+	* compat_recv.c: Only include sys/select.h if it's available.
+
 2004-07-11  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Use KRB5_AC_INET6.

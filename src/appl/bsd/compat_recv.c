@@ -464,7 +464,9 @@ mutual_fail:
 #endif
 #endif
 
+#ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
+#endif
 #include "port-sockets.h"
 
 int
