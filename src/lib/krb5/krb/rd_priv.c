@@ -94,20 +94,19 @@ OLDDECLARG(krb5_data *, outbuf)
 #define cleanup_scratch() {(void)bzero(scratch.data, scratch.length); (void)xfree(scratch.data);}
 
     /* do any necessary key pre-processing */
-    if (retval = (*eblock.crypto_entry->process_key)(&eblock, key)) {
+    if (retval = krb5_process_key(&eblock, key)) {
         cleanup_privmsg();
 	cleanup_scratch();
 	return retval;
     }
 
-#define cleanup_prockey() {(void) (*eblock.crypto_entry->finish_key)(&eblock);}
+#define cleanup_prockey() {(void) krb5_finish_key(&eblock);}
 
     /* call the decryption routine */
-    if (retval =
-        (*eblock.crypto_entry->decrypt_func)((krb5_pointer) privmsg->enc_part.data,
-                                             (krb5_pointer) scratch.data,
-                                             scratch.length, &eblock,
-					     i_vector)) {
+    if (retval = krb5_decrypt((krb5_pointer) privmsg->enc_part.data,
+			      (krb5_pointer) scratch.data,
+			      scratch.length, &eblock,
+			      i_vector)) {
 	cleanup_privmsg();
 	cleanup_scratch();
         cleanup_prockey();
@@ -127,7 +126,7 @@ OLDDECLARG(krb5_data *, outbuf)
 
     cleanup_privmsg();
 
-    if (retval = (*eblock.crypto_entry->finish_key)(&eblock)) {
+    if (retval = krb5_finish_key(&eblock)) {
         cleanup_scratch();
         return retval;
     }

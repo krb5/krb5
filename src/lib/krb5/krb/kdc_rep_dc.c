@@ -55,22 +55,21 @@ OLDDECLARG(krb5_kdc_rep *, dec_rep)
     eblock.crypto_entry = krb5_csarray[dec_rep->etype]->system;
 
     /* do any necessary key pre-processing */
-    if (retval = (*eblock.crypto_entry->process_key)(&eblock, key)) {
+    if (retval = krb5_process_key(&eblock, key)) {
 	free(scratch.data);
 	return(retval);
     }
 
     /* call the decryption routine */
-    if (retval =
-	(*eblock.crypto_entry->decrypt_func)((krb5_pointer) dec_rep->enc_part.data,
-					     (krb5_pointer) scratch.data,
-					     scratch.length, &eblock, 0)) {
-	(void) (*eblock.crypto_entry->finish_key)(&eblock);
+    if (retval = krb5_decrypt((krb5_pointer) dec_rep->enc_part.data,
+			      (krb5_pointer) scratch.data,
+			      scratch.length, &eblock, 0)) {
+	(void) krb5_finish_key(&eblock);
 	free(scratch.data);
 	return retval;
     }
 #define clean_scratch() {bzero(scratch.data, scratch.length); free(scratch.data);}
-    if (retval = (*eblock.crypto_entry->finish_key)(&eblock)) {
+    if (retval = krb5_finish_key(&eblock)) {
 	clean_scratch();
 	return retval;
     }

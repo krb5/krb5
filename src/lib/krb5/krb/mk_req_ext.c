@@ -137,25 +137,23 @@ krb5_data *outbuf;
 #define cleanup_encpart() {(void) bzero(request.authenticator.data, request.authenticator.length); free(request.authenticator.data); request.authenticator.length = 0; request.authenticator.data = 0;}
 
     /* do any necessary key pre-processing */
-    if (retval = (*eblock.crypto_entry->process_key)(&eblock,
-						     &creds->keyblock)) {
+    if (retval = krb5_process_key(&eblock, &creds->keyblock)) {
 	goto clean_encpart;
     }
 
-#define cleanup_prockey() {(void) (*eblock.crypto_entry->finish_key)(&eblock);}
+#define cleanup_prockey() {(void) krb5_finish_key(&eblock);}
 
     /* call the encryption routine */
-    if (retval =
-	(*eblock.crypto_entry->encrypt_func)((krb5_pointer) scratch->data,
-					     (krb5_pointer) request.authenticator.data,
-					     scratch->length, &eblock, 0)) {
+    if (retval = krb5_encrypt((krb5_pointer) scratch->data,
+			      (krb5_pointer) request.authenticator.data,
+			      scratch->length, &eblock, 0)) {
 	goto clean_prockey;
     }
 
     /* authenticator now assembled-- do some cleanup */
     cleanup_scratch();
 
-    if (retval = (*eblock.crypto_entry->finish_key)(&eblock)) {
+    if (retval = krb5_finish_key(&eblock)) {
 	cleanup_encpart();
 	return retval;
     }

@@ -108,18 +108,17 @@ OLDDECLARG(krb5_data *, outbuf)
 #define cleanup_encpart() {(void) bzero(privmsg.enc_part.data, privmsg.enc_part.length); free(privmsg.enc_part.data); privmsg.enc_part.length = 0; privmsg.enc_part.data = 0;}
 
     /* do any necessary key pre-processing */
-    if (retval = (*eblock.crypto_entry->process_key)(&eblock, key)) {
+    if (retval = krb5_process_key(&eblock, key)) {
         goto clean_encpart;
     }
 
-#define cleanup_prockey() {(void) (*eblock.crypto_entry->finish_key)(&eblock);}
+#define cleanup_prockey() {(void) krb5_finish_key(&eblock);}
 
     /* call the encryption routine */
-    if (retval =
-        (*eblock.crypto_entry->encrypt_func)((krb5_pointer) scratch->data,
-                                             (krb5_pointer) privmsg.enc_part.data,
-                                             scratch->length, &eblock,
-					     i_vector)) {
+    if (retval = krb5_encrypt((krb5_pointer) scratch->data,
+			      (krb5_pointer) privmsg.enc_part.data,
+			      scratch->length, &eblock,
+			      i_vector)) {
         goto clean_prockey;
     }
 
@@ -133,7 +132,7 @@ OLDDECLARG(krb5_data *, outbuf)
     /* private message is now assembled-- do some cleanup */
     cleanup_scratch();
 
-    if (retval = (*eblock.crypto_entry->finish_key)(&eblock)) {
+    if (retval = krb5_finish_key(&eblock)) {
         cleanup_encpart();
         return retval;
     }
