@@ -1,25 +1,26 @@
 ##DOSBUILDTOP = ..\..
 
-HASH=@HASH@
-HASHDONE=@HASHDONE@
+ANAME_DBDEP=@ANAME_DBDEP@
+ANAME_DBLIB=@ANAME_DBLIB@
 
 TST=if test -n "`cat DONE`" ; then
 
 LIB_SUBDIRS= error_tables asn.1 ccache ccache/stdio ccache/file ccache/memory \
 	keytab keytab/file krb rcache free os posix \
-        $(BUILDTOP)/util/profile $(HASH)
+        $(BUILDTOP)/util/profile
 LIBUPDATE= $(BUILDTOP)/util/libupdate
 LIBDONE= error_tables/DONE asn.1/DONE ccache/DONE ccache/stdio/DONE \
 		ccache/file/DONE ccache/memory/DONE keytab/DONE \
 		keytab/file/DONE krb/DONE rcache/DONE free/DONE os/DONE \
-		posix/DONE $(BUILDTOP)/util/profile/DONE $(HASHDONE)
+		posix/DONE $(BUILDTOP)/util/profile/DONE
 
 #
 CRYPTO_VER=@CRYPTO_SH_VERS@
 COMERR_VER=@COMERR_SH_VERS@
 DEPLIBS=$(TOPLIBD)/libcrypto.$(SHEXT).$(CRYPTO_VER) \
-	$(TOPLIBD)/libcom_err.$(SHEXT).$(COMERR_VER)
-SHLIB_LIBS=-lcrypto -lcom_err
+	$(TOPLIBD)/libcom_err.$(SHEXT).$(COMERR_VER) \
+	$(ANAME_DBDEP)
+SHLIB_LIBS=-lcrypto -lcom_err $(ANAME_DBLIB)
 SHLIB_LDFLAGS= $(LDFLAGS) @SHLIB_RPATH_DIRS@	
 #	$(LD_UNRESOLVED_PREFIX)_et_list $(LD_UNRESOLVED_PREFIX)error_message
 SHLIB_LIBDIRS= @SHLIB_LIBDIRS@
