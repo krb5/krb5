@@ -1,3 +1,8 @@
+2000-05-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* client_init.c (enctypes): Add des3 and des-md5 to the list of
+	permitted enctypes.
+
 2000-05-01  Nalin Dahyabhai  <nalin@redhat.com>
 
 	* client_init.c (_kadm5_init_any): Fix determination of client

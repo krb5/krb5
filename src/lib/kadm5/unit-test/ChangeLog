@@ -1,3 +1,10 @@
+2000-05-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* api.2/chpass-principal-v2.exp (test200): Expect an additional
+	key to be reported, since des3 has been added to the list.
+	* api.2/get-principal-v2.exp (test101_102): Likewise.
+	* api.2/randkey-principal-v2.exp (test100): Likewise.
+
 2000-02-08  Tom Yu  <tlyu@mit.edu>
 
 	* api.1/lock.exp: Since a "wait" directive to the command list of

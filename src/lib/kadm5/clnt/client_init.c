@@ -134,6 +134,8 @@ static int preauth_search_list[] = {
 };
 
 static krb5_enctype enctypes[] = {
+    ENCTYPE_DES3_CBC_SHA1,
+    ENCTYPE_DES_CBC_MD5,
     ENCTYPE_DES_CBC_CRC,
     0,
 };
