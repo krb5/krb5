@@ -237,7 +237,7 @@ krb5_tkt_authent **ret_authdat;
 
     /* check application checksum vs. tgs request */
     if (!(our_cksum.contents = (krb5_octet *)
-	  malloc(krb5_cksumarray[our_cksum.checksum_type]->checksum_length))) {
+	  malloc(krb5_checksum_size(our_cksum.checksum_type)))) {
 	krb5_free_ap_req(apreq);
 	return ENOMEM; /* XXX cktype nosupp */
     }
