@@ -1,4 +1,8 @@
+
+
+
 Wed Sep 06 14:20:57 1995   Chris Provenzano (proven@mit.edu)
+
 
         * cnv_tkt_skey.c, conv_creds.c, get_cred.c k524init.c krb524d.c,
 	* test.c : s/keytype/enctype/g, s/KEYTYPE/ENCTYPE/g
@@ -21,9 +25,11 @@ Thu Aug 24 18:40:22 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* .Sanitize: Update file list
 
+
 Mon Aug 07 11:25:53 1995  Chris Provenzano  (proven@mitedu)
 
 	* krb524d.c: Hacks to get it to compile with new kdb format.
+
 
 Thu Jul 27 15:14:15 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* krb524d.c - Use the etype which is supplied in the krb5_keytype_array
@@ -34,9 +40,15 @@ Mon Jul 17 15:15:01 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* krb524d.c - Add NULL stash file argument to krb5_db_fetch_mkey().
 
 
+
 Fri Jul 7 16:07:21 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in - Remove all explicit library handling and LDFLAGS.
 	* configure.in - Add USE_<mumble> and KRB5_LIBRARIES.
+
+Thu Jul 13 17:22:17 1995  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* configure.in :  Include sys/select.h if present.
+
 
 
 Fri Jun 30 14:38:56 EDT 1995	Paul Park	(pjpark@mit.edu)

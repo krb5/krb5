@@ -24,6 +24,9 @@
 #include "com_err.h"
 
 #include <stdio.h>
+#ifdef HAVE_SYS_SELECT_H
+#include <sys/select.h>
+#endif
 #include <string.h>
 #include <signal.h>
 #include <sys/types.h>
