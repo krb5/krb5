@@ -1,3 +1,10 @@
+Fri Mar 28 01:05:27 1997  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* krlogin.c (try_normal): When falling back to the normal rlogin,
+		clear the signal mask, so that the child rlogin handles
+		SIGUSR1 (which is used for window size changes) correctly.
+		[krb5-appl/335]
+
 Tue Mar 18 12:34:03 1997  Sam Hartman  <hartmans@luminous.MIT.EDU>
 
  [326]	* login.c(doit):  Preserve terminal even without -p.

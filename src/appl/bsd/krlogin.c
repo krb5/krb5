@@ -1565,6 +1565,10 @@ void try_normal(argv)
      char **argv;
 {
     register char *host;
+#ifdef POSIX_SIGNALS
+    struct sigaction sa;
+    sigest_t mask;
+#endif
     
 #ifndef KRB5_ATHENA_COMPAT
     if (encrypt_flag)
@@ -1582,6 +1586,11 @@ void try_normal(argv)
     if (!strcmp(host, "rlogin"))
       argv++;
     
+#ifdef POSIX_SIGNALS
+    sigemptyset(&mask)
+    sigprocmask(SIG_SETMASK, &mask, NULL);
+#endif
+
     execv(UCB_RLOGIN, argv);
     perror("exec");
     exit(1);
