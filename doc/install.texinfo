@@ -123,10 +123,17 @@ installation procedure is somewhat involved, and requires forethought
 and planning.  @value{COMPANY} has attempted to make this
 @value{PRODUCT} Installation Guide as concise as possible, rather than
 making it an exhaustive description of the details of Kerberos.
+@ifset cygnus
 Consequently, everything in this guide appears because @value{COMPANY}
 believes that it is important.  Please read and follow these
 instructions carefully, and if there is anything you do not understand
 or are not sure of, please don't hesitate to call us.
+@end ifset
+@ifclear cygnus
+Consequently, everything in this guide appears because @value{COMPANY}
+believes that it is important.  Please read and follow these
+instructions carefully.
+@end ifclear
 
 @node Overview of This Guide,  , Please Read the Documentation, Introduction
 @section Overview of This Guide
@@ -363,9 +370,9 @@ Slave KDCs provide Kerberos ticket-granting services, but not database
 administration.  This allows clients to continue to obtain tickets when
 the master KDC is unavailable.
 
-@value{COMPANY}'s recommends that you install all of your KDCs to be
-able to function as either the master or one of the slaves.  This will
-enable you to easily switch your master KDC with one of the slaves if
+@value{COMPANY} recommends that you install all of your KDCs to be able
+to function as either the master or one of the slaves.  This will enable
+you to easily switch your master KDC with one of the slaves if
 necessary.  (@xref{Switching Master and Slave KDCs}.)  This installation
 procedure is based on that recommendation.
 
