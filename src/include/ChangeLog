@@ -1,3 +1,10 @@
+2001-08-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* k5-int.h (ss2sin6): New gcc-specific function and alternative
+	macro.
+	(krb5_crypt_func, krb5_encrypt_helper): Don't use "usage" in
+	argument names.
+
 2001-08-01  Ken Raeburn  <raeburn@mit.edu>
 
 	* fake-addrinfo.h (AI_NUMERICHOST): Define as zero if not already

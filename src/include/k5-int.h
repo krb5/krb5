@@ -225,11 +225,16 @@ static __inline__ struct sockaddr_in *ss2sin (struct sockaddr_storage *ss)
 {
     return (struct sockaddr_in *) ss;
 }
+static __inline__ struct sockaddr_in6 *ss2sin6 (struct sockaddr_storage *ss)
+{
+    return (struct sockaddr_in6 *) ss;
+}
 #else
 #define sa2sin(S)	((struct sockaddr_in *)(S))
 #define sa2sin6(S)	((struct sockaddr_in6 *)(S))
 #define ss2sa(S)	((struct sockaddr *)(S))
 #define ss2sin(S)	((struct sockaddr_in *)(S))
+#define ss2sin6(S)	((struct sockaddr_in6 *)(S))
 #endif
 
 #if !defined (socklen)
@@ -628,7 +633,7 @@ typedef void (*krb5_encrypt_length_func) (krb5_const struct krb5_enc_provider *e
 
 typedef krb5_error_code (*krb5_crypt_func) (krb5_const struct krb5_enc_provider *enc,
   krb5_const struct krb5_hash_provider *hash,
-  krb5_const krb5_keyblock *key, krb5_keyusage usage,
+  krb5_const krb5_keyblock *key, krb5_keyusage keyusage,
   krb5_const krb5_data *ivec, 
   krb5_const krb5_data *input, krb5_data *output);
 
@@ -769,7 +774,7 @@ time_t gmt_mktime (struct tm *);
 
 krb5_error_code krb5_encrypt_helper
 (krb5_context context, krb5_const krb5_keyblock *key,
-		krb5_keyusage usage, krb5_const krb5_data *plain,
+		krb5_keyusage keyusage, krb5_const krb5_data *plain,
 		krb5_enc_data *cipher);
 
 /*
