@@ -1,4 +1,10 @@
 
+Wed May 03 03:30:51 1995  Chris Provenzano (proven@mit.edu)
+
+        * recvauth.c, compat_recv.c (krb5_recvauth()): 
+	* compat_recv.c (krb5_compat_recvauth()):
+		No longer needs the rc_type arg.
+
 Tue May 02 19:29:18 1995  Chris Provenzano (proven@mit.edu)
 
         * mk_cred.c (mk_cred()), mk_priv.c (mk_priv()), mk_safe.c (mk_safe()),

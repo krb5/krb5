@@ -54,7 +54,7 @@ static int krb_v4_recvauth();
 krb5_error_code
 krb5_compat_recvauth(context, auth_context,
 	             /* IN */
-		     fdp, appl_version, server, rc_type, flags, keytab,
+		     fdp, appl_version, server, flags, keytab,
 		     v4_options, v4_service, v4_instance, v4_faddr, v4_laddr,
 		     v4_filename, 
 		     /* OUT */
@@ -65,7 +65,6 @@ krb5_compat_recvauth(context, auth_context,
 	krb5_pointer	fdp;
 	char	*appl_version;
 	krb5_principal	server;
-	char		*rc_type;
 	krb5_int32	flags;
 	krb5_keytab    	keytab;
 	krb5_ticket  ** ticket;
@@ -185,7 +184,7 @@ krb5_compat_recvauth(context, auth_context,
 	*auth_sys = KRB5_RECVAUTH_V5;
 	
 	retval = krb5_recvauth(context, auth_context, fdp, appl_version, server,
-			       rc_type, flags | KRB5_RECVAUTH_SKIP_VERSION, 
+			       flags | KRB5_RECVAUTH_SKIP_VERSION, 
 			       keytab, ticket);
 
 	return retval;

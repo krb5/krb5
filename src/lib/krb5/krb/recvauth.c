@@ -39,7 +39,7 @@ static char *sendauth_version = "KRB5_SENDAUTH_V1.0";
 krb5_error_code
 krb5_recvauth(context, auth_context,
 	      /* IN */
-	      fd, appl_version, server, rc_type, flags, keytab,
+	      fd, appl_version, server, flags, keytab,
 	      /* OUT */
 	      ticket)
     krb5_context 	  context;
@@ -47,7 +47,6 @@ krb5_recvauth(context, auth_context,
     krb5_pointer	  fd;
     char		* appl_version;
     krb5_principal	  server;
-    char		* rc_type;
     krb5_int32		  flags;
     krb5_keytab		  keytab;
     krb5_ticket	       ** ticket;
