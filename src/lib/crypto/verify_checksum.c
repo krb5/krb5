@@ -30,10 +30,10 @@
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_c_verify_checksum(context, key, usage, data, cksum, valid)
      krb5_context context;
-     krb5_const krb5_keyblock *key;
+     const krb5_keyblock *key;
      krb5_keyusage usage;
-     krb5_const krb5_data *data;
-     krb5_const krb5_checksum *cksum;
+     const krb5_data *data;
+     const krb5_checksum *cksum;
      krb5_boolean *valid;
 {
     int i;

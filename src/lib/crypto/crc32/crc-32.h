@@ -60,7 +60,7 @@
 #define CRC32_CKSUM_LENGTH	4
 
 void
-mit_crc32 PROTOTYPE((krb5_const krb5_pointer in, krb5_const size_t in_length,
+mit_crc32 PROTOTYPE((const krb5_pointer in, const size_t in_length,
 		     unsigned long *c));
 
 extern krb5_checksum_entry crc32_cksumtable_entry;

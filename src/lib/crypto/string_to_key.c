@@ -31,8 +31,8 @@ KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_c_string_to_key(context, enctype, string, salt, key)
      krb5_context context;
      krb5_enctype enctype;
-     krb5_const krb5_data *string;
-     krb5_const krb5_data *salt;
+     const krb5_data *string;
+     const krb5_data *salt;
      krb5_keyblock *key;
 {
     int i;

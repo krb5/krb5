@@ -41,7 +41,7 @@ k5_md5_block_size(size_t *output)
 }
 
 static krb5_error_code
-k5_md5_hash(unsigned int icount, krb5_const krb5_data *input,
+k5_md5_hash(unsigned int icount, const krb5_data *input,
 	    krb5_data *output)
 {
     krb5_MD5_CTX ctx;

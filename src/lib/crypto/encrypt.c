@@ -30,10 +30,10 @@
 KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_c_encrypt(context, key, usage, ivec, input, output)
      krb5_context context;
-     krb5_const krb5_keyblock *key;
+     const krb5_keyblock *key;
      krb5_keyusage usage;
-     krb5_const krb5_data *ivec;
-     krb5_const krb5_data *input;
+     const krb5_data *ivec;
+     const krb5_data *input;
      krb5_enc_data *output;
 {
     int i;

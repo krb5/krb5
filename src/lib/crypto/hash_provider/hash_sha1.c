@@ -41,7 +41,7 @@ k5_sha1_block_size(size_t *output)
 }
 
 static krb5_error_code
-k5_sha1_hash(unsigned int icount, krb5_const krb5_data *input,
+k5_sha1_hash(unsigned int icount, const krb5_data *input,
 	     krb5_data *output)
 {
     SHS_INFO ctx;

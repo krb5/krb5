@@ -150,26 +150,26 @@ static u_long const crc_table[256] = {
 
 static krb5_error_code
 crc32_sum_func PROTOTYPE((
-	krb5_const krb5_pointer in,
-	krb5_const size_t in_length,
-	krb5_const krb5_pointer seed,
-	krb5_const size_t seed_length,
+	const krb5_pointer in,
+	const size_t in_length,
+	const krb5_pointer seed,
+	const size_t seed_length,
 	krb5_checksum FAR *outcksum));
 
 static krb5_error_code
 crc32_verify_func PROTOTYPE((
-	krb5_const krb5_checksum FAR *cksum,
-	krb5_const krb5_pointer in,
-	krb5_const size_t in_length,
-	krb5_const krb5_pointer seed,
-	krb5_const size_t seed_length));
+	const krb5_checksum FAR *cksum,
+	const krb5_pointer in,
+	const size_t in_length,
+	const krb5_pointer seed,
+	const size_t seed_length));
 
 static krb5_error_code
 crc32_sum_func(in, in_length, seed, seed_length, outcksum)
-    krb5_const krb5_pointer in;
-    krb5_const size_t in_length;
-    krb5_const krb5_pointer seed;
-    krb5_const size_t seed_length;
+    const krb5_pointer in;
+    const size_t in_length;
+    const krb5_pointer seed;
+    const size_t seed_length;
     krb5_checksum FAR *outcksum;
 {
     register u_char *data;
@@ -199,11 +199,11 @@ crc32_sum_func(in, in_length, seed, seed_length, outcksum)
 
 static krb5_error_code
 crc32_verify_func(cksum, in, in_length, seed, seed_length)
-    krb5_const krb5_checksum FAR *cksum;
-    krb5_const krb5_pointer in;
-    krb5_const size_t in_length;
-    krb5_const krb5_pointer seed;
-    krb5_const size_t seed_length;
+    const krb5_checksum FAR *cksum;
+    const krb5_pointer in;
+    const size_t in_length;
+    const krb5_pointer seed;
+    const size_t seed_length;
 {
     register u_char *data;
     register u_long c = 0;

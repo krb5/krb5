@@ -32,10 +32,10 @@
 
 krb5_error_code
 krb5_dk_make_checksum(hash, key, usage, input, output)
-     krb5_const struct krb5_hash_provider *hash;
-     krb5_const krb5_keyblock *key;
+     const struct krb5_hash_provider *hash;
+     const krb5_keyblock *key;
      krb5_keyusage usage;
-     krb5_const krb5_data *input;
+     const krb5_data *input;
      krb5_data *output;
 {
     int i;
@@ -106,10 +106,10 @@ cleanup:
 #ifdef ATHENA_DES3_KLUDGE
 krb5_error_code
 krb5_marc_dk_make_checksum(hash, key, usage, input, output)
-     krb5_const struct krb5_hash_provider *hash;
-     krb5_const krb5_keyblock *key;
+     const struct krb5_hash_provider *hash;
+     const krb5_keyblock *key;
      krb5_keyusage usage;
-     krb5_const krb5_data *input;
+     const krb5_data *input;
      krb5_data *output;
 {
     int i;

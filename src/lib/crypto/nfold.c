@@ -48,7 +48,7 @@ n-fold(k-bits):
 void
 krb5_nfold(inbits, in, outbits, out)
      unsigned int inbits;
-     krb5_const unsigned char *in;
+     const unsigned char *in;
      unsigned int outbits;
      unsigned char *out;
 {

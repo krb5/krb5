@@ -1,3 +1,8 @@
+2001-03-05  Ken Raeburn  <raeburn@mit.edu>
+
+	* des_stringtokey.c, old.h, old_decrypt.c, old_encrypt.c: Use
+	const instead of krb5_const.
+
 2000-06-03  Tom Yu  <tlyu@mit.edu>
 
 	* old_encrypt.c (krb5_old_encrypt): Chain ivecs.

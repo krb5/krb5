@@ -1,3 +1,8 @@
+2001-03-05  Ken Raeburn  <raeburn@mit.edu>
+
+	* descbc.c, k5_md4des.c, k5_md5des.c: Use const instead of
+	krb5_const.
+
 2000-09-25  Ezra Peisach  <epeisach@mit.edu>
 
 	* descbc.c, k5_md4des.c, k5_md5des.c, t_cksum.c: Cleanup unsigned

@@ -29,10 +29,10 @@
 
 krb5_error_code
 krb5_derive_key(enc, inkey, outkey, in_constant)
-     krb5_const struct krb5_enc_provider *enc;
-     krb5_const krb5_keyblock *inkey;
+     const struct krb5_enc_provider *enc;
+     const krb5_keyblock *inkey;
      krb5_keyblock *outkey;
-     krb5_const krb5_data *in_constant;
+     const krb5_data *in_constant;
 {
     size_t blocksize, keybytes, keylength, n;
     unsigned char *inblockdata, *outblockdata, *rawkey;

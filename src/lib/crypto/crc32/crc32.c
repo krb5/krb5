@@ -148,8 +148,8 @@ static u_long const crc_table[256] = {
 
 void
 mit_crc32(in, in_length, cksum)
-    krb5_const krb5_pointer in;
-    krb5_const size_t in_length;
+    const krb5_pointer in;
+    const size_t in_length;
     unsigned long *cksum;
 {
     register u_char *data;

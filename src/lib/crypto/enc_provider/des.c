@@ -44,8 +44,8 @@ k5_des_keysize(size_t *keybytes, size_t *keylength)
 }
 
 static krb5_error_code
-k5_des_docrypt(krb5_const krb5_keyblock *key, krb5_const krb5_data *ivec,
-	       krb5_const krb5_data *input, krb5_data *output, int encrypt)
+k5_des_docrypt(const krb5_keyblock *key, const krb5_data *ivec,
+	       const krb5_data *input, krb5_data *output, int encrypt)
 {
     mit_des_key_schedule schedule;
 
@@ -80,21 +80,21 @@ k5_des_docrypt(krb5_const krb5_keyblock *key, krb5_const krb5_data *ivec,
 }
 
 static krb5_error_code
-k5_des_encrypt(krb5_const krb5_keyblock *key, krb5_const krb5_data *ivec,
-	       krb5_const krb5_data *input, krb5_data *output)
+k5_des_encrypt(const krb5_keyblock *key, const krb5_data *ivec,
+	       const krb5_data *input, krb5_data *output)
 {
     return(k5_des_docrypt(key, ivec, input, output, 1));
 }
 
 static krb5_error_code
-k5_des_decrypt(krb5_const krb5_keyblock *key, krb5_const krb5_data *ivec,
-	       krb5_const krb5_data *input, krb5_data *output)
+k5_des_decrypt(const krb5_keyblock *key, const krb5_data *ivec,
+	       const krb5_data *input, krb5_data *output)
 {
     return(k5_des_docrypt(key, ivec, input, output, 0));
 }
 
 static krb5_error_code
-k5_des_make_key(krb5_const krb5_data *randombits, krb5_keyblock *key)
+k5_des_make_key(const krb5_data *randombits, krb5_keyblock *key)
 {
     if (key->length != 8)
 	return(KRB5_BAD_KEYSIZE);

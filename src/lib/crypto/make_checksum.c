@@ -33,9 +33,9 @@ KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_c_make_checksum(context, cksumtype, key, usage, input, cksum)
      krb5_context context;
      krb5_cksumtype cksumtype;
-     krb5_const krb5_keyblock *key;
+     const krb5_keyblock *key;
      krb5_keyusage usage;
-     krb5_const krb5_data *input;
+     const krb5_data *input;
      krb5_checksum *cksum;
 {
     int i, e1, e2;
