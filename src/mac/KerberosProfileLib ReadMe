@@ -1,0 +1,11 @@
+KerberosProfileLib implements the Kerberos profile API, used for reading and writing
+Kerberos configuration files. See profile.h for API documentation.
+
+Note that you should rarely, if ever, use profile_init or profile_init_path. You 
+probably mean to use krb5_get_profile, to avoid making your code depend on the
+location of a specific Kerberos 5 preferences file. This is especially important
+as the name and possibly the location of Kerberos configuration file is going to
+change in the future.
+
+Also note that you need both Kerberos5Lib:Headers: and KerberosProfileLib:Headers:
+in your include path to use profile.h
