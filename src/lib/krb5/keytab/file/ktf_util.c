@@ -15,6 +15,7 @@
  *
  * The format is as follows:
  * 
+ * <file format vno>
  * principal vno key
  * principal vno key
  * ....
@@ -51,6 +52,11 @@ static char rcsid_ktf_util_c[] =
 
 #include "ktfile.h"
 
+#define KRB5_KT_VNO	0x0501		/* krb5, keytab v 1 */
+
+#define xfwrite(a, b, c, d) fwrite((char *)a, b, c, d)
+#define xfread(a, b, c, d) fread((char *)a, b, c, d)
+
 extern int errno;
 
 static krb5_error_code
@@ -59,10 +65,27 @@ krb5_keytab id;
 int mode;
 {
     krb5_error_code kerror;
+    krb5_int16 kt_vno = htons(KRB5_KT_VNO);
+    int writevno = 0;
 
-    if (!(KTFILEP(id) = fopen(KTFILENAME(id),
-			      (mode == KRB5_LOCKMODE_EXCLUSIVE) ? "a" : "r")))
-	return errno;
+/* XXX temp hack on vax */
+#if defined(__STDC__) && !defined(vax)
+    KTFILEP(id) = fopen(KTFILENAME(id),
+			(mode == KRB5_LOCKMODE_EXCLUSIVE) ? "rb+" : "rb");
+#else
+    KTFILEP(id) = fopen(KTFILENAME(id),
+			(mode == KRB5_LOCKMODE_EXCLUSIVE) ? "r+" : "r");
+#endif
+    if (!KTFILEP(id)) {
+	if ((mode == KRB5_LOCKMODE_EXCLUSIVE) && (errno == ENOENT)) {
+	    /* try making it first time around */
+	    KTFILEP(id) = fopen(KTFILENAME(id), "a+");
+	    if (!KTFILEP(id))
+		return errno;
+	    writevno = 1;
+	} else				/* some other error */
+	    return errno;
+    }
     if (kerror = krb5_lock_file(KTFILEP(id), KTFILENAME(id),
 				mode)) {
 	(void) fclose(KTFILEP(id));
@@ -71,6 +94,38 @@ int mode;
     }
     /* assume ANSI or BSD-style stdio */
     setbuf(KTFILEP(id), NULL);
+
+    /* get the vno and verify it */
+    if (writevno) {
+	if (!xfwrite(&kt_vno, sizeof(kt_vno), 1, KTFILEP(id))) {
+	    kerror = errno;
+	    (void) krb5_unlock_file(KTFILEP(id), KTFILENAME(id));
+	    (void) fclose(KTFILEP(id));
+	    return kerror;
+	}
+    } else {
+	/* gotta verify it instead... */
+	if (!xfread(&kt_vno, sizeof(kt_vno), 1, KTFILEP(id))) {
+	    kerror = errno;
+	    (void) krb5_unlock_file(KTFILEP(id), KTFILENAME(id));
+	    (void) fclose(KTFILEP(id));
+	    return kerror;
+	}
+	if (kt_vno != ntohs(KRB5_KT_VNO)) {
+	    (void) krb5_unlock_file(KTFILEP(id), KTFILENAME(id));
+	    (void) fclose(KTFILEP(id));
+	    return KRB5_KEYTAB_BADVNO;
+	}
+    }
+    /* seek to the end for writers */
+    if (mode == KRB5_LOCKMODE_EXCLUSIVE) {
+	if (fseek(KTFILEP(id), 0, 2)) {
+	    kerror = errno;
+	    (void) krb5_unlock_file(KTFILEP(id), KTFILENAME(id));
+	    (void) fclose(KTFILEP(id));
+	    return kerror;
+	}
+    }
     return 0;
 }
 
@@ -115,7 +170,6 @@ krb5_keytab_entry **entrypp;
     if (!(ret_entry = (krb5_keytab_entry *)calloc(1, sizeof(*ret_entry))))
 	return ENOMEM;
 
-#define xfread(a, b, c, d) fread((char *)a, b, c, d)
 
     /* deal with guts of parsing... */
 
@@ -160,8 +214,6 @@ krb5_keytab_entry **entrypp;
 		KTFILEP(id)))
 	return KRB5_KT_END;
 
-#undef xfread
-
     *entrypp = ret_entry;
     return 0;
 }
@@ -178,7 +230,6 @@ krb5_keytab_entry *entry;
 
     setbuf(KTFILEP(id), iobuf);
 
-#define xfwrite(a, b, c, d) fwrite((char *)a, b, c, d)
     /* count up principal components */
     for (count = 0, princp = entry->principal; *princp; princp++, count++);
 
