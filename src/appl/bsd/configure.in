@@ -52,7 +52,7 @@ dnl
 dnl Check for where the BSD rlogin, rcp, and rsh programs live.
 dnl
 save_path=$PATH
-PATH=/usr/bsd:/usr/ucb:/bin:/usr/bin
+PATH=/bin:/usr/bin:/usr/bsd:/usr/ucb
 AC_PATH_PROG(UCB_RLOGIN,rlogin,/usr/ucb/rlogin)
 AC_PATH_PROG(UCB_RSH,rsh,/usr/ucb/rsh)
 AC_PATH_PROG(UCB_RCP,rcp,/usr/ucb/rcp)
@@ -85,8 +85,8 @@ AC_MSG_RESULT(no))
 dnl
 dnl
 AC_MSG_CHECKING([setenv])
-AC_TRY_COMPILE(
-[setenv();],[setenv("PATH","/bin",0)],
+AC_TRY_LINK(
+[],[setenv("PATH","/bin",0);],
 AC_MSG_RESULT(yes),
 [AC_MSG_RESULT(no)
 SETENVSRC=setenv.c
