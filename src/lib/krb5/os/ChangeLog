@@ -1,3 +1,9 @@
+2003-08-21  Ken Raeburn  <raeburn@mit.edu>
+
+	* dnssrv.c: New file; split out DNS SRV RR query support...
+	* locate_kdc.c: ...from here.  Always compile in the calls.
+	* Makefile.in (STLIBOBJS, OBJS, SRCS): Add it.
+
 2003-07-25  Ken Raeburn  <raeburn@mit.edu>
 
 	* locate_kdc.c (krb5_locate_kdc): Always pass 0 to locate_server
