@@ -35,6 +35,7 @@
 #include <syslog.h>
 #include "adm.h"
 #include "adm_proto.h"
+#include <limits.h>
 
 #ifdef USE_RCACHE
 static char *kdc_current_rcname = (char *) NULL;
@@ -1540,24 +1541,33 @@ void limit_string(char *name)
 }
 
 /*
- * L10_256 = log10(256**x), rounded up.
+ * L10_2 = log10(2**x), rounded up; log10(2) ~= 0.301.
  */
-#define L10_256(x) ((int)((x) * 2.41 + 0.5))
+#define L10_2(x) ((int)(((x * 301) + 999) / 1000))
+
+/*
+ * Max length of sprintf("%ld") for an int of type T; includes leading
+ * minus sign and terminating NUL.
+ */
+#define D_LEN(t) (L10_2(sizeof(t) * CHAR_BIT) + 2)
 
 void
 ktypes2str(char *s, size_t len, int nktypes, krb5_enctype *ktype)
 {
     int i;
-    char stmp[L10_256(sizeof(krb5_enctype)) + 3];
+    char stmp[D_LEN(krb5_enctype) + 1];
+    char *p;
 
     if (nktypes < 0
-	|| len < sizeof(" etypes {}") + L10_256(sizeof(krb5_enctype)))
+	|| len < (sizeof(" etypes {...}") + D_LEN(int))) {
+	*s = '\0';
 	return;
+    }
 
     sprintf(s, "%d etypes {", nktypes);
     for (i = 0; i < nktypes; i++) {
-	sprintf(stmp, "%s%d", i ? " " : "", ktype[i]);
-	if (strlen(s) + strlen(stmp) + 2 > len)
+	sprintf(stmp, "%s%ld", i ? " " : "", (long)ktype[i]);
+	if (strlen(s) + strlen(stmp) + sizeof("}") > len)
 	    break;
 	strcat(s, stmp);
     }
@@ -1565,13 +1575,16 @@ ktypes2str(char *s, size_t len, int nktypes, krb5_enctype *ktype)
 	/*
 	 * We broke out of the loop. Try to truncate the list.
 	 */
-	for (i = strlen(s); i > 0; i--) {
-	    if (!isdigit((int)s[i]) && len - i > sizeof("...}")) {
-		s[i] = '\0';
-		strcat(s, "...");
-		break;
+	p = s + strlen(s);
+	while (p - s + sizeof("...}") > len) {
+	    while (p > s && *p != ' ' && *p != '{')
+		*p-- = '\0';
+	    if (p > s && *p == ' ') {
+		*p-- = '\0';
+		continue;
 	    }
 	}
+	strcat(s, "...");
     }
     strcat(s, "}");
     return;
@@ -1580,11 +1593,13 @@ ktypes2str(char *s, size_t len, int nktypes, krb5_enctype *ktype)
 void
 rep_etypes2str(char *s, size_t len, krb5_kdc_rep *rep)
 {
-    char stmp[sizeof("skey=") + L10_256(sizeof(krb5_enctype)) + 1];
+    char stmp[sizeof("ses=") + D_LEN(krb5_enctype)];
 
-    if (len < (3 * (L10_256(sizeof(krb5_enctype)) + 3)
-	       + sizeof("etypes {rep= tkt= skey=}")))
+    if (len < (3 * D_LEN(krb5_enctype)
+	       + sizeof("etypes {rep= tkt= ses=}"))) {
+	*s = '\0';
 	return;
+    }
 
     sprintf(s, "etypes {rep=%ld", (long)rep->enc_part.enctype);
 
@@ -1596,7 +1611,7 @@ rep_etypes2str(char *s, size_t len, krb5_kdc_rep *rep)
     if (rep->ticket != NULL
 	&& rep->ticket->enc_part2 != NULL
 	&& rep->ticket->enc_part2->session != NULL) {
-	sprintf(stmp, " skey=%ld",
+	sprintf(stmp, " ses=%ld",
 		(long)rep->ticket->enc_part2->session->enctype);
 	strcat(s, stmp);
     }

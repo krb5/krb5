@@ -1,3 +1,7 @@
+2001-10-12  Tom Yu  <tlyu@mit.edu>
+
+	* kdc_util.c (ktypes2str, rep_etypes2str): Clean up somewhat.
+
 2001-10-05  Ken Raeburn  <raeburn@mit.edu>
 
 	* do_tgs_req.c (process_tgs_req): Fix logging of bad transit path
