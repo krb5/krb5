@@ -1,3 +1,13 @@
+1999-12-03  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in: Use DLL_LINKOPTS to link DLL.  Remove dependence of
+	mit directory for version server support.  Remove references to
+	SAP.  Remove DNS defines.
+
+	* winsock.def, comerr16.def, gssapi16.def, krb4_16.def,
+	krb5_16.def, sapgss16.def, sapkrb16.def, xpprof16.def: Remove
+	obsolete DEF files.
+
 1999-10-26  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,
