@@ -1171,7 +1171,7 @@ krb5_boolean *more;			/* are there more? */
 	else found = 1;
 
 	if (current_db_ptr == 0)
-	    (void) dbm_close(db);
+	    dbm_close(db);
 	(void) krb5_dbm_db_unlock(context);	/* unlock read lock */
 	if (krb5_dbm_db_end_read(context, transaction) == 0)
 	    break;
@@ -1188,7 +1188,7 @@ krb5_boolean *more;			/* are there more? */
 
  cleanup:
     if (current_db_ptr == 0)
-	(void) dbm_close(db);
+	dbm_close(db);
     (void) krb5_dbm_db_unlock(context);	/* unlock read lock */
     return retval;
 }
@@ -1274,7 +1274,7 @@ krb5_dbm_db_put_principal(context, entries, nentries)
     }
 
     if (current_db_ptr == 0)
-	(void) dbm_close(db);
+	dbm_close(db);
     (void) krb5_dbm_db_unlock(context);		/* unlock database */
     *nentries = i;
     return (retval);
@@ -1346,7 +1346,7 @@ int *nentries;				/* how many found & deleted */
 
  cleanup:
     if (current_db_ptr == 0)
-	(void) dbm_close(db);
+	dbm_close(db);
     (void) krb5_dbm_db_unlock(context);	/* unlock write lock */
     *nentries = found;
     return retval;
@@ -1390,7 +1390,7 @@ krb5_dbm_db_iterate (context, func, func_arg)
 	    break;
     }
     if (current_db_ptr == 0)
-	(void) dbm_close(db);
+	dbm_close(db);
     (void) krb5_dbm_db_unlock(context);
     return retval;
 }
