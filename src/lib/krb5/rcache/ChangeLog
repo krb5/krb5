@@ -1,3 +1,12 @@
+2002-09-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* rc_base.c, rc_conv.c, rc_io.c, ser_rc.c: Use prototype style
+	function definitions.
+
+	* rc_io.c (errno): Don't declare.
+	(krb5_rc_io_move): Avoid variable name "new".
+	* rc_dfl.c (cmp, alive): Avoid variable name "new".
+
 2002-08-29  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in: Revert $(S)=>/ change, for Windows support.

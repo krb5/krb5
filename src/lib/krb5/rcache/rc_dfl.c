@@ -78,25 +78,25 @@ hash(krb5_donot_replay *rep, int hsize)
 
 /*ARGSUSED*/
 static int
-cmp(krb5_donot_replay *old, krb5_donot_replay *new, krb5_deltat t)
+cmp(krb5_donot_replay *old, krb5_donot_replay *new1, krb5_deltat t)
 {
-    if ((old->cusec == new->cusec) && /* most likely to distinguish */
-	(old->ctime == new->ctime) &&
-	(strcmp(old->client, new->client) == 0) &&
-	(strcmp(old->server, new->server) == 0)) /* always true */
+    if ((old->cusec == new1->cusec) && /* most likely to distinguish */
+	(old->ctime == new1->ctime) &&
+	(strcmp(old->client, new1->client) == 0) &&
+	(strcmp(old->server, new1->server) == 0)) /* always true */
 	return CMP_REPLAY;
     return CMP_HOHUM;
 }
 
 static int
-alive(krb5_context context, krb5_donot_replay *new, krb5_deltat t)
+alive(krb5_context context, krb5_donot_replay *new1, krb5_deltat t)
 {
     krb5_int32 mytime;
 
     if (krb5_timeofday(context, &mytime))
 	return CMP_HOHUM; /* who cares? */
     /* I hope we don't have to worry about overflow */
-    if (new->ctime + t < mytime)
+    if (new1->ctime + t < mytime)
 	return CMP_EXPIRED;
     return CMP_HOHUM;
 }

@@ -39,10 +39,6 @@
 #error find some way to use net-byte-order file version numbers.
 #endif
 
-#ifndef HAVE_ERRNO
-extern int errno; /* this should be in errno.h, but isn't on some systems */
-#endif
-
 #define FREE(x) ((void) free((char *) (x)))
 #define UNIQUE getpid() /* hopefully unique number */
 
@@ -56,7 +52,7 @@ static char *dir;
 #define GETDIR do { if (!dirlen) getdir(); } while(0)
 
 static void
-getdir()
+getdir(void)
 {
     if (!(dir = getenv("KRB5RCACHEDIR"))) {
 #if defined(_WIN32)
@@ -272,7 +268,7 @@ krb5_rc_io_open(krb5_context context, krb5_rc_iostuff *d, char *fn)
 }
 
 krb5_error_code
-krb5_rc_io_move(krb5_context context, krb5_rc_iostuff *new,
+krb5_rc_io_move(krb5_context context, krb5_rc_iostuff *new1,
 		krb5_rc_iostuff *old)
 {
 #if defined(_WIN32)
@@ -304,10 +300,10 @@ krb5_rc_io_move(krb5_context context, krb5_rc_iostuff *new,
      */
     offset = lseek(old->fd, 0, SEEK_CUR);
 
-    new_fn = new->fn;
-    new->fn = NULL;
+    new_fn = new1->fn;
+    new1->fn = NULL;
     close(new->fd);
-    new->fd = -1;
+    new1->fd = -1;
 
     unlink(new_fn);
 
@@ -321,7 +317,7 @@ krb5_rc_io_move(krb5_context context, krb5_rc_iostuff *new,
 	goto cleanup;
     }
 
-    retval = krb5_rc_io_open_internal(context, new, 0, new_fn);
+    retval = krb5_rc_io_open_internal(context, new1, 0, new_fn);
     if (retval)
 	goto cleanup;
 
@@ -336,16 +332,16 @@ krb5_rc_io_move(krb5_context context, krb5_rc_iostuff *new,
     return retval;
 #else
     char *fn = NULL;
-    if (rename(old->fn, new->fn) == -1) /* MUST be atomic! */
+    if (rename(old->fn, new1->fn) == -1) /* MUST be atomic! */
 	return KRB5_RC_IO_UNKNOWN;
-    fn = new->fn;
-    new->fn = NULL;		/* avoid clobbering */
-    (void) krb5_rc_io_close(context, new);
-    new->fn = fn;
+    fn = new1->fn;
+    new1->fn = NULL;		/* avoid clobbering */
+    (void) krb5_rc_io_close(context, new1);
+    new1->fn = fn;
 #ifdef macintosh
-    new->fd = fcntl(old->fd, F_DUPFD);
+    new1->fd = fcntl(old->fd, F_DUPFD);
 #else
-    new->fd = dup(old->fd);
+    new1->fd = dup(old->fd);
 #endif
     return 0;
 #endif

@@ -30,9 +30,7 @@ static struct krb5_rc_typelist *typehead = &krb5_rc_typelist_dfl;
 semaphore ex_typelist = 1;
 #endif
 
-krb5_error_code krb5_rc_register_type(context, ops)
-    krb5_context context;
-    krb5_rc_ops *ops;
+krb5_error_code krb5_rc_register_type(krb5_context context, krb5_rc_ops *ops)
 {
  struct krb5_rc_typelist *t;
 #ifdef SEMAPHORE
@@ -59,10 +57,7 @@ krb5_error_code krb5_rc_register_type(context, ops)
  return 0;
 }
 
-krb5_error_code krb5_rc_resolve_type(context, id, type)
-    krb5_context context;
-    krb5_rcache *id;
-    char *type;
+krb5_error_code krb5_rc_resolve_type(krb5_context context, krb5_rcache *id, char *type)
 {
  struct krb5_rc_typelist *t;
 #ifdef SEMAPHORE
@@ -80,15 +75,12 @@ krb5_error_code krb5_rc_resolve_type(context, id, type)
  return 0;
 }
 
-char * krb5_rc_get_type(context, id)
-    krb5_context context;
-    krb5_rcache id;
+char * krb5_rc_get_type(krb5_context context, krb5_rcache id)
 {
  return id->ops->type;
 }
 
-char * krb5_rc_default_type(context)
-    krb5_context context;
+char * krb5_rc_default_type(krb5_context context)
 {
  char *s;
  if ((s = getenv("KRB5RCACHETYPE")))
@@ -97,8 +89,7 @@ char * krb5_rc_default_type(context)
    return "dfl";
 }
 
-char * krb5_rc_default_name(context)
-    krb5_context context;
+char * krb5_rc_default_name(krb5_context context)
 {
  char *s;
  if ((s = getenv("KRB5RCACHENAME")))
@@ -108,9 +99,7 @@ char * krb5_rc_default_name(context)
 }
 
 krb5_error_code
-krb5_rc_default(context, id)
-    krb5_context context;
-    krb5_rcache *id;
+krb5_rc_default(krb5_context context, krb5_rcache *id)
 {
     krb5_error_code retval;
 
@@ -130,10 +119,7 @@ krb5_rc_default(context, id)
 }
 
 
-krb5_error_code krb5_rc_resolve_full(context, id, string_name)
-    krb5_context context;
-    krb5_rcache *id;
-    char *string_name;
+krb5_error_code krb5_rc_resolve_full(krb5_context context, krb5_rcache *id, char *string_name)
 {
     char *type;
     char *residual;
