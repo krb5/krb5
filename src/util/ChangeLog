@@ -1,3 +1,9 @@
+2001-04-05  Tom Yu  <tlyu@mit.edu>
+
+	* mkrel: When generating multiple tarballs, also generate a
+	consolidated tarball.  Default to making a single
+	tarball. [pullups from krb5-1-2-2-branch]
+
 2001-01-28  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Remove rule for aix.bincmds; we don't need it
