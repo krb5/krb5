@@ -1142,15 +1142,15 @@ dolmmode(bit, on)
     return 1;
 }
 
-    int
-setmode(bit)
+    static int
+tel_setmode(bit)
     int bit;
 {
     return dolmmode(bit, 1);
 }
 
-    int
-clearmode(bit)
+    static int
+tel_clearmode(bit)
     int bit;
 {
     return dolmmode(bit, 0);
@@ -1177,18 +1177,18 @@ static struct modelist ModeList[] = {
 #endif
     { "", "", 0 },
     { "",	"These require the LINEMODE option to be enabled", 0 },
-    { "isig",	"Enable signal trapping",	setmode, 1, MODE_TRAPSIG },
-    { "+isig",	0,				setmode, 1, MODE_TRAPSIG },
-    { "-isig",	"Disable signal trapping",	clearmode, 1, MODE_TRAPSIG },
-    { "edit",	"Enable character editing",	setmode, 1, MODE_EDIT },
-    { "+edit",	0,				setmode, 1, MODE_EDIT },
-    { "-edit",	"Disable character editing",	clearmode, 1, MODE_EDIT },
-    { "softtabs", "Enable tab expansion",	setmode, 1, MODE_SOFT_TAB },
-    { "+softtabs", 0,				setmode, 1, MODE_SOFT_TAB },
-    { "-softtabs", "Disable character editing",	clearmode, 1, MODE_SOFT_TAB },
-    { "litecho", "Enable literal character echo", setmode, 1, MODE_LIT_ECHO },
-    { "+litecho", 0,				setmode, 1, MODE_LIT_ECHO },
-    { "-litecho", "Disable literal character echo", clearmode, 1, MODE_LIT_ECHO },
+    { "isig",	"Enable signal trapping",	tel_setmode, 1, MODE_TRAPSIG },
+    { "+isig",	0,				tel_setmode, 1, MODE_TRAPSIG },
+    { "-isig",	"Disable signal trapping",	tel_clearmode, 1, MODE_TRAPSIG },
+    { "edit",	"Enable character editing",	tel_setmode, 1, MODE_EDIT },
+    { "+edit",	0,				tel_setmode, 1, MODE_EDIT },
+    { "-edit",	"Disable character editing",	tel_clearmode, 1, MODE_EDIT },
+    { "softtabs", "Enable tab expansion",	tel_setmode, 1, MODE_SOFT_TAB },
+    { "+softtabs", 0,				tel_setmode, 1, MODE_SOFT_TAB },
+    { "-softtabs", "Disable character editing",	tel_clearmode, 1, MODE_SOFT_TAB },
+    { "litecho", "Enable literal character echo", tel_setmode, 1, MODE_LIT_ECHO },
+    { "+litecho", 0,				tel_setmode, 1, MODE_LIT_ECHO },
+    { "-litecho", "Disable literal character echo", tel_clearmode, 1, MODE_LIT_ECHO },
     { "help",	0,				modehelp, 0 },
 #ifdef	KLUDGELINEMODE
     { "kludgeline", 0,				dokludgemode, 1 },
