@@ -1,3 +1,9 @@
+Sat Apr 22 00:52:01 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* telnetd.c (main): Don't use krb5_override_default_realm, as it
+		is obsolete (non-existent).  Use krb5_set_default_realm
+		instead. 
+
 Fri Apr 21 12:47:57 1995  Mark Eichin  <eichin@cygnus.com>
 
 	From Ian Taylor <ian@cygnus.com>.

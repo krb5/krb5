@@ -69,6 +69,10 @@ struct	socket_security ss;
 # endif /* SO_SEC_MULTI */
 #endif	/* _SC_CRAY_SECURE_SYS */
 
+#ifdef KRB5
+#include "krb5.h"
+#endif
+
 #if	defined(AUTHENTICATION)
 #include <libtelnet/auth.h>
 int	auth_level = 0;
@@ -342,9 +346,11 @@ main(argc, argv)
 #ifdef KRB5
 		case 'R':
 		    {
-			extern char *krb5_override_default_realm;
-
-			krb5_override_default_realm = optarg;
+			extern krb5_context telnet_context;
+			
+			if (telnet_context == 0)
+			    krb5_init_context(&telnet_context);
+			krb5_set_default_realm(telnet_context, optarg);
 			break;
 		    }
 #endif	/* KRB5 */
