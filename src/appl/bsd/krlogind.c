@@ -246,7 +246,6 @@ krb5_ticket     *ticket = 0;
 krb5_context bsd_context;
 
 char *srvtab = NULL;
-extern char *krb5_override_default_realm;
 
 #define ARGSTR	"rRkKeExXpPD:S:M:L:?"
 #else /* !KERBEROS */
@@ -322,6 +321,11 @@ main(argc, argv)
 #define LOG_NDELAY 0
 #endif
     
+#ifdef KERBEROS
+    krb5_init_context(&bsd_context);
+    krb5_init_ets(bsd_context);
+#endif
+    
 #ifndef LOG_AUTH /* 4.2 syslog */
     openlog(progname, LOG_PID | LOG_NDELAY);
 #else
@@ -392,7 +396,7 @@ main(argc, argv)
 	  srvtab = optarg;
 	  break;
 	case 'M':
-	  krb5_override_default_realm = optarg;
+	  krb5_set_default_realm(bsd_context, optarg);
 	  break;
 #endif
 	case 'p':
@@ -535,8 +539,6 @@ void doit(f, fromp)
       fatal(f, "Permission denied - Malformed from address\n");
     
 #ifdef KERBEROS
-    krb5_init_context(&bsd_context);
-    krb5_init_ets(bsd_context);
     if (must_pass_k5 || must_pass_one) {
 	/* setup des buffers */
 	desinbuf.data = des_inbuf;

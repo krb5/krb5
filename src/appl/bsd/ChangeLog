@@ -1,7 +1,10 @@
 Sat Apr 22 00:42:22 1995  Theodore Y. Ts'o  (tytso@dcl)
 
-	* krshd.c (main): The variable krb5_override_default_realm is 
-		  obsolete.  Use the krb5_set_default_realm function instead.
+	* rlogind (main, doit): The variable krb5_override_default_realm
+		is obsolete.  Use the krb5_set_default_realm function instead.
+
+	* krshd.c (main, doit): The variable krb5_override_default_realm
+		is obsolete.  Use the krb5_set_default_realm function instead.
 
 Fri Apr 21 21:11:17 1995  Theodore Y. Ts'o  (tytso@dcl)
 
