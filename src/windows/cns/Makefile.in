@@ -5,7 +5,6 @@ NAME 	 = krb5
 OBJS 	 = cns.obj tktlist.obj password.obj options.obj
 
 ##### Options
-#DEBUG 	 = 1
 !IF ! defined(KVERSION)
 KVERSION = 5
 !endif
@@ -17,11 +16,7 @@ INCLUDES = /I$(BUILDTOP)\include /I$(BUILDTOP)\include\krb5
 ##WIN16##XOBJS    = kpasswd.obj
 ##WIN32##XOBJS    = cnsres5.obj kpasswd.obj
 
-!if defined(DEBUG)
-CFLAGS	= $(CCOPTS2) $(INCLUDES) /D$(KRB)=1 /Zi /Yd /DDEBUG
-!else
 CFLAGS	= $(CCOPTS2) $(INCLUDES) /D$(KRB)=1
-!endif
 
 ##WIN16##RFLAGS 	 = /nologo /D$(KRB)=1 $(INCLUDES)
 ##WIN32##RFLAGS 	 = /D$(KRB)=1 $(INCLUDES)
@@ -30,15 +25,9 @@ CFLAGS	= $(CCOPTS2) $(INCLUDES) /D$(KRB)=1
 LINK 	 = link
 LIBS 	 = $(KLIB) $(CLIB) $(WLIB)
 ##WIN16##SYSLIBS  = libw llibcew
-!if defined(DEBUG)
-##WIN16##LFLAGS	 = /co /nologo /nod /nopackcode /map:full
-##WIN32##LFLAGS	 = /nologo /nod /debug
-##WIN32##SYSLIBS = libcd.lib kernel32.lib user32.lib gdi32.lib
-!else
 ##WIN16##LFLAGS  = /nologo /nod /nopackcode
 ##WIN32##LFLAGS	 = /nologo /nod
 ##WIN32##SYSLIBS = libc.lib kernel32.lib wsock32.lib user32.lib gdi32.lib
-!endif
 
 all:: makefile $(NAME).exe
 

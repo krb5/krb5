@@ -1685,8 +1685,6 @@ init_instance(HINSTANCE hinstance, int ncmdshow)
 {
   char buf[20];
   int i;
-
-#if 0
   int rc;
   WORD versionrequested;
   WSADATA wsadata;
@@ -1707,7 +1705,6 @@ init_instance(HINSTANCE hinstance, int ncmdshow)
 
     return FALSE;
   }
-#endif
 
   /*
    * Set up expiration action
@@ -1779,9 +1776,7 @@ quit_instance(HINSTANCE hinstance)
   krb5_cc_close(k5_context, k5_ccache);
 #endif
 
-#if 0
   WSACleanup();
-#endif
 
   /*
    * Unload clock icons
