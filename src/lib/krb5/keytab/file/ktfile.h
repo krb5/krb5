@@ -38,6 +38,10 @@
  */
 #define IGNORE_VNO 0
 
+#define KRB5_KT_VNO_1	0x0501	/* krb v5, keytab version 1 (DCE compat) */
+#define KRB5_KT_VNO	0x0502	/* krb v5, keytab version 2 (standard)  */
+
+#define KRB5_KT_DEFAULT_VNO KRB5_KT_VNO
 
 /* 
  * Types
@@ -45,6 +49,7 @@
 typedef struct _krb5_ktfile_data {
     char *name;			/* Name of the file */
     FILE *openf;		/* open file, if any. */
+    int	version;		/* Version number of keytab */
 } krb5_ktfile_data;
 
 /*
@@ -53,6 +58,7 @@ typedef struct _krb5_ktfile_data {
 #define KTPRIVATE(id) ((krb5_ktfile_data *)(id)->data)
 #define KTFILENAME(id) (((krb5_ktfile_data *)(id)->data)->name)
 #define KTFILEP(id) (((krb5_ktfile_data *)(id)->data)->openf)
+#define KTVERSION(id) (((krb5_ktfile_data *)(id)->data)->version)
 
 extern struct _krb5_kt_ops krb5_ktf_ops;
 extern struct _krb5_kt_ops krb5_ktf_writable_ops;
@@ -92,6 +98,16 @@ krb5_error_code krb5_ktfileint_read_entry PROTOTYPE((krb5_keytab,
 						     krb5_keytab_entry **));
 krb5_error_code krb5_ktfileint_write_entry PROTOTYPE((krb5_keytab,
 						      krb5_keytab_entry *));
+krb5_error_code krb5_ktfileint_delete_entry PROTOTYPE((krb5_keytab,
+                                                      krb5_int32));
+krb5_error_code krb5_ktfileint_internal_read_entry PROTOTYPE((krb5_keytab,
+						     krb5_keytab_entry **,
+                                                     krb5_int32 *));
+krb5_error_code krb5_ktfileint_size_entry PROTOTYPE((krb5_keytab_entry *,
+                                                      krb5_int32 *));
+krb5_error_code krb5_ktfileint_find_slot PROTOTYPE((krb5_keytab,
+                                                      krb5_int32 *,
+                                                      krb5_int32 *));
 /* and back to normal... */
 #include <krb5/narrow.h>
 
