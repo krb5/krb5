@@ -133,7 +133,7 @@ config-windows:: makefile-windows
 ##DOS##		lib\crypto\os\makefile lib\des425\makefile \
 ##DOS##		lib\gssapi\makefile lib\gssapi\generic\makefile \
 ##DOS##		lib\gssapi\krb5\makefile lib\gssapi\mechglue\makefile \
-##DOS##		lib\kadm\makefile lib\krb5\makefile \
+##DOS##		lib\kadm\makefile lib\krb4\makefile lib\krb5\makefile \
 ##DOS##		lib\krb5\asn.1\makefile lib\krb5\ccache\makefile \
 ##DOS##		lib\krb5\ccache\file\makefile \
 ##DOS##		lib\krb5\ccache\stdio\makefile \
@@ -313,6 +313,7 @@ ETOUT =	$(INC)asn1_err.h $(ET)asn1_err.c \
 	$(INC)krb5_err.h $(ET)krb5_err.c \
 	$(INC)kv5m_err.h $(ET)kv5m_err.c \
 	$(INC)adm_err.h $(ET)adm_err.c \
+	$(INC)/kerberosIV/krb_err.h lib/krb4/krb_err.c \
 	$(PR)prof_err.h $(PR)prof_err.c \
 	$(GG)gssapi_err_generic.h $(GG)gssapi_err_generic.c \
 	$(GK)gssapi_err_krb5.h $(GK)gssapi_err_krb5.c
@@ -416,6 +417,8 @@ $(INC)kv5m_err.h: $(AH) $(ET)kv5m_err.et
 	gawk -f $(AH) outfile=$@ $(ET)kv5m_err.et
 $(INC)adm_err.h: $(AH) $(ET)adm_err.et
 	gawk -f $(AH) outfile=$@ $(ET)adm_err.et
+$(INC)/kerberosIV/krb_err.h: $(AH) lib/krb4/krb_err.et
+	gawk -f $(AH) outfile=$@ lib/krb4/krb_err.et
 $(PR)prof_err.h: $(AH) $(PR)prof_err.et
 	gawk -f $(AH) outfile=$@ $(PR)prof_err.et
 $(GG)gssapi_err_generic.h: $(AH) $(GG)gssapi_err_generic.et
@@ -433,6 +436,8 @@ $(ET)kv5m_err.c: $(AC) $(ET)kv5m_err.et
 	gawk -f $(AC) outfile=$@ $(ET)kv5m_err.et
 $(ET)adm_err.c: $(AC) $(ET)adm_err.et
 	gawk -f $(AC) outfile=$@ $(ET)adm_err.et
+lib/krb4/krb_err.c: $(AC) lib/krb4/krb_err.et
+	gawk -f $(AC) outfile=$@ lib/krb4/krb_err.et
 $(PR)prof_err.c: $(AC) $(PR)prof_err.et
 	gawk -f $(AC) outfile=$@ $(PR)prof_err.et
 $(GG)gssapi_err_generic.c: $(AC) $(GG)gssapi_err_generic.et

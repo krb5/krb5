@@ -1,3 +1,7 @@
+Sun Feb 16 21:17:11 1997  Richard Basch  <basch@lehman.com>
+
+	* Makefile.in: Build krb4 library under win16/win32
+
 Fri Feb 14 15:52:14 1997  Tom Yu  <tlyu@mit.edu>
 
 	* aclocal.m4: Add shared library support for Irix.
