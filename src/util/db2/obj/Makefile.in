@@ -147,7 +147,7 @@ dbtest.o: $(top_srcdir)/test/dbtest.c
 	$(CC) $(CFLAGS) -c -o dbtest.o $(top_srcdir)/test/dbtest.c
 
 memmove.o: $(top_srcdir)/clib/memmove.c
-	$(CC) $(CFLAGS) -Dmemmove=my_memmove -c -o memmove.o $(top_srcdir)/clib/memmove.c
+	$(CC) $(CFLAGS) -Dmemmove=my_memmove -DMEMMOVE -c -o memmove.o $(top_srcdir)/clib/memmove.c
 mkstemp.o: $(top_srcdir)/clib/mkstemp.c
 	$(CC) $(CFLAGS) -Dmkstemp=my_mkstemp -c -o mkstemp.o $(top_srcdir)/clib/mkstemp.c
 strerror.o: $(top_srcdir)/clib/strerror.c
