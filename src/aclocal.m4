@@ -1053,7 +1053,7 @@ if test "$krb5_cv_shlibs_enabled" = yes ; then
 	AC_MSG_RESULT(Using shared libraries)
 	LDARGS="$krb5_cv_shlibs_ldflag -L\$(TOPLIBD) $LDARGS"
 	if test "$krb5_cv_exe_need_dirs" = yes; then
-		LDARGS="$LDARGS ${krb5_cv_shlibs_dirhead}\$(KRB5_SHLIBDIR) ${krb5_cv_shlibs_dirhead}`pwd`/\$(TOPLIBD)"
+		LDARGS="$LDARGS ${krb5_cv_shlibs_dirhead}\$(KRB5_SHLIBDIR)"
 	fi
 	SHLIB_TAIL_COMP=$krb5_cv_shlibs_tail_comp
 	AC_SUBST(SHLIB_TAIL_COMP)

@@ -1,3 +1,8 @@
+Wed Apr 24 03:49:06 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* aclocal.m4 (V5_USE_SHARED_LIB): Remove another dependency in the
+		executables on the build tree.
+
 Wed Apr 17 13:24:02 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* .Sanitize: Removed kadmin.old from list of things to keep.
