@@ -1,3 +1,7 @@
+Fri Jun  9 18:39:55 1995    <tytso@rsx-11.mit.edu>
+
+	* pre.in: Remove KRB5ROOT
+
 Thu Jun  8 17:44:12 1995    <tytso@rsx-11.mit.edu>
 
 	* pre.in: Define ${prefix} since exec_prefix is sometimes to that.
