@@ -1,3 +1,26 @@
+2000-07-02  Ezra Peisach  <epeisach@engrailed.mit.edu>
+
+	* recno/rec_seq.c: Include unused sccsid when LIBC_SCCS defined.
+
+	* recno/rec_close.c (__rec_close): Explicit braces to avoid
+	ambiguous `else'
+
+	* btree/bt_split.c (bt_psplit): Parenthesis about && and ||
+	conditional.
+
+	* btree/bt_put.c (__bt_put): Extra {} to make nested if/else
+	unambiguous.
+
+	* btree/bt_open.c (__bt_open): Add parenthesis to ensure
+	precedence ordering.
+
+	* hash/dbm.c (kdb2_dbm_firstkey): Conditionalize defintion of
+	variables based on use.
+
+	* hash/hash_func.c: Ifdef out unused static hash functions.
+
+	* hash/hash.c (init_htab): Remove unused variable.
+
 2000-07-01  Tom Yu  <tlyu@mit.edu>
 
 	* clib/strerror.c: #include config.h.

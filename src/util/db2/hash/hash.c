@@ -365,7 +365,6 @@ init_htab(hashp, nelem)
 	int32_t nelem;
 {
 	int32_t l2, nbuckets;
-	db_pgno_t i;
 
 	/*
 	 * Divide number of elements by the fill factor and determine a
