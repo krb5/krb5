@@ -45,8 +45,8 @@ krb5_sname_to_principal(context, hostname, sname, type, ret_princ)
     krb5_error_code retval;
     register char *cp;
     char localname[MAXHOSTNAMELEN];
-    char *host = hostname;
-    char *service = sname;
+    const char *host = hostname;
+    const char *service = sname;
 
     if ((type == KRB5_NT_UNKNOWN) ||
 	(type == KRB5_NT_SRV_HST)) {

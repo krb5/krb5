@@ -1,3 +1,8 @@
+Mon Mar 18 17:30:54 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* sn2princ.c (krb5_sname_to_principal): Do not assign a const char *
+	        to a non-const char *.
+
 Mon Mar 18 14:18:58 EST 1996  Richard Basch  <basch@lehman.com>
 
 	* sn2princ.c: Do not try to re-assign const variables.
