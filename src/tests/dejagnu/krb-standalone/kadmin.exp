@@ -437,10 +437,11 @@ proc kadmin_extract { instance name } {
     global KADMIN
     global KEY
     global spawn_id
+    global tmppwd
 
-    catch "exec rm -f tmpdir/keytab"
+    catch "exec rm -f $tmppwd/keytab"
 
-    spawn $KADMIN -p krbtest/admin@$REALMNAME -q "xst -k tmpdir/keytab $name/$instance"
+    spawn $KADMIN -p krbtest/admin@$REALMNAME -q "xst -k $tmppwd/keytab $name/$instance"
     expect_after {
 	"Cannot contact any KDC" {
 	    fail "kadmin xst $instance $name lost KDC"
@@ -461,7 +462,7 @@ proc kadmin_extract { instance name } {
     expect "Enter password:" {
 	send "adminpass$KEY\r"
     }
-#    expect -re "kadmin: Entry for principal $name/$instance with kvno [0-9], encryption type .* added to keytab WRFILE:tmpdir/keytab."
+#    expect -re "kadmin: Entry for principal $name/$instance with kvno [0-9], encryption type .* added to keytab WRFILE:$tmppwd/keytab."
     expect_after
     expect eof
     set k_stat [wait -i $spawn_id]

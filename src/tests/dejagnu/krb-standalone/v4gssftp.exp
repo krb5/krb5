@@ -26,6 +26,10 @@ if ![check_k5login ftp] {
     return
 }
 
+if ![check_klogin ftp] {
+    return
+}
+
 # Set up the kerberos database.
 if {![get_hostname] \
     || ![setup_kerberos_files] \
@@ -73,7 +77,7 @@ proc stop_ftp_daemon { } {
 }
 
 # Create a file to use for ftp testing.
-set file [open tmpdir/ftp-test w]
+set file [open $tmppwd/ftp-test w]
 puts $file "This file is used for ftp testing."
 close $file
 
@@ -284,26 +288,26 @@ proc v4ftp_test { } {
 
 
     set testname "get(v4)"
-    catch "exec rm -f tmpdir/copy"
+    catch "exec rm -f $tmppwd/copy"
     send "get $tmppwd/ftp-test $tmppwd/copy\r"
     expect "Opening BINARY mode data connection for $tmppwd/ftp-test"
     expect "Transfer complete"
     expect -re "\[0-9\]+ bytes received in \[0-9.e-\]+ seconds"
     expect "ftp> "
-    if [check_file tmpdir/copy] {
+    if [check_file $tmppwd/copy] {
 	pass $testname
     } else {
 	fail $testname
     }
 
     set testname "put(v4)"
-    catch "exec rm -f tmpdir/copy"
+    catch "exec rm -f $tmppwd/copy"
     send "put $tmppwd/ftp-test $tmppwd/copy\r"
     expect "Opening BINARY mode data connection for $tmppwd/copy"
     expect "Transfer complete"
     expect -re "\[0-9\]+ bytes sent in \[0-9.e-\]+ seconds"
     expect "ftp> "
-    if [check_file tmpdir/copy] {
+    if [check_file $tmppwd/copy] {
 	pass $testname
     } else {
 	fail $testname
@@ -317,20 +321,20 @@ proc v4ftp_test { } {
     }
 
     set testname "lcd(v4)"
-    send "lcd tmpdir\r"
+    send "lcd $tmppwd\r"
     expect "Local directory now $tmppwd"
     expect "ftp> " {
 	pass $testname
     }
 
     set testname "local get(v4)"
-    catch "exec rm -f tmpdir/copy"
+    catch "exec rm -f $tmppwd/copy"
     send "get ftp-test copy\r"
     expect "Opening BINARY mode data connection for ftp-test"
     expect "Transfer complete"
     expect -re "\[0-9\]+ bytes received in \[0-9.e-\]+ seconds"
     expect "ftp> "
-    if [check_file tmpdir/copy] {
+    if [check_file $tmppwd/copy] {
 	pass $testname
     } else {
 	fail $testname
@@ -351,7 +355,7 @@ proc v4ftp_test { } {
     }
 
     set testname "encrypted get(v4)"
-    catch "exec rm -f tmpdir/copy"
+    catch "exec rm -f $tmppwd/copy"
     send "get ftp-test copy\r"
     expect "Opening BINARY mode data connection for ftp-test"
     expect "Transfer complete"
@@ -365,7 +369,7 @@ proc v4ftp_test { } {
 	}
     }
     expect "ftp> "
-    if [check_file tmpdir/copy] {
+    if [check_file $tmppwd/copy] {
 	pass $testname
     } else {
 	fail $testname

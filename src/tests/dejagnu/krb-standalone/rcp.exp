@@ -80,7 +80,7 @@ proc stop_rsh_daemon { } {
 }
 
 # Create a file to use for rcp testing.
-set file [open tmpdir/rcp-test w]
+set file [open $tmppwd/rcp-test w]
 puts $file "This file is used for rcp testing."
 close $file
 
@@ -125,9 +125,9 @@ proc rcp_one_test { testname options frompref topref } {
     global RCP
     global tmppwd
 
-    send_log "rm -f tmpdir/copy\n"
-    verbose "exec rm -f tmpdir/copy"
-    catch "exec rm -f tmpdir/copy"
+    send_log "rm -f $tmppwd/copy\n"
+    verbose "exec rm -f $tmppwd/copy"
+    catch "exec rm -f $tmppwd/copy"
 
     set from [format "%s%s" $frompref $tmppwd/rcp-test]
     set to [format "%s%s" $topref $tmppwd/copy]
@@ -143,7 +143,7 @@ proc rcp_one_test { testname options frompref topref } {
 	return 0
     }
 
-    if ![check_file tmpdir/copy] {
+    if ![check_file $tmppwd/copy] {
 	fail $testname
 	return 0
     }

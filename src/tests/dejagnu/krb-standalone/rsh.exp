@@ -27,7 +27,6 @@ if ![check_k5login rsh] {
 # Set up the kerberos database.
 if {![get_hostname] \
     || ![setup_kerberos_files] \
-    || ![setup_kerberos_env] \
     || ![setup_kerberos_db 0]} {
     return
 }
@@ -85,6 +84,7 @@ proc rsh_test { } {
         || ![add_kerberos_key host/$hostname 0] \
         || ![setup_srvtab 0] \
 	|| ![add_kerberos_key $env(USER) 0] \
+	|| ![setup_kerberos_env client] \
 	|| ![kinit $env(USER) $env(USER)$KEY 0]} {
 	return
     }

@@ -1,3 +1,19 @@
+2001-06-22  Tom Yu  <tlyu@mit.edu>
+
+	* gssftp.exp: Use $tmppwd rather than hardcoding tmpdir.
+
+	* kadmin.exp: Use $tmppwd rather than hardcoding tmpdir.
+
+	* rcp.exp: Use $tmppwd rather than hardcoding tmpdir.
+
+	* rsh.exp: Rearrange ordering of environment setup slightly.
+
+	* standalone.exp: Use $KLIST -5 -e so as to better debug enctype
+	problems.
+
+	* v4gssftp.exp: Do check_klogin as well as check_k5login.  Use
+	$tmppwd rather than hardcoding tmpdir.
+
 2001-06-17  Ezra Peisach  <epeisach@mit.edu>
 
 	* v4krb524d.exp: New tests for the krb524d and k524init programs. 
