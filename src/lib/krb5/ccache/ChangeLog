@@ -1,3 +1,9 @@
+2004-01-31  Jeffrey Altman <jaltman@mit.edu>
+
+   * cc_mslsa.c: Do not return tickets to the caller if they contain
+     NULL session keys.  This is to prevent useless TGTs from being
+     placed into the MIT credential cache.
+
 2004-01-30  Jeffrey Altman <jaltman@mit.edu>
 
    * cc_mslsa.c: As per extensive conversations with Doug Engert we have
