@@ -123,7 +123,7 @@ including all of the kadm5_free functions and
 kadm5_chpass_principal_util.  The _KADM5_CHECK_HANDLE macro solves
 this problem; instead of inlining the handle check, it calls the
 function _kadm5_check_handle which is defined separately in both the
-client and server library, in client_handle.c and server_handle.c.
+client and server library, in client_init.c and server_init.c.
 Since these two files are only compiled once and put in a single
 library, they simply verify the handle they are passed with
 CHECK_HANDLE and return the result.
