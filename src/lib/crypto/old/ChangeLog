@@ -1,3 +1,7 @@
+2001-03-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (STLIBOBJS): Undo last change.
+
 2001-03-09  Ken Raeburn  <raeburn@mit.edu>
 
 	* old_decrypt.c (memmove): Delete macro definition.
