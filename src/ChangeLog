@@ -1,5 +1,9 @@
 2000-03-01  Tom Yu  <tlyu@mit.edu>
 
+	* aclocal.m4: Tweak the HPUX shared lib build some more.  Don't
+	use $(INSTALL_PROGRAM) for shared libs, since it strips them!  We
+	should fix this at some point.
+
 	* aclocal.m4: Add support for setting the INSTALL_SHLIB variable.
 	Tweak the HPUX shared lib build somewhat.
 
