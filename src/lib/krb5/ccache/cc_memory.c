@@ -523,8 +523,6 @@ krb5_mcc_retrieve(context, id, whichfields, mcreds, creds)
 					  mcreds, creds);
 }
 
-#endif
-
 #define CHECK(ret) if (ret != KRB5_OK) return ret;
 
 /*
