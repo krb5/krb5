@@ -1,3 +1,9 @@
+Tue Oct 29 12:19:45 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* init_db: put KRB5_RUN_ENV_CSH in setup.csh
+
+	* env-setup.shin: create KRB5_RUN_ENV_CSH for init_db
+	
 Fri Oct 18 16:15:45 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* Makefile.in (env-setup.stamp): Add dependency upon Makefile.
@@ -13,6 +19,7 @@ Tue Oct 15 18:39:58 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* configure.in (RBUILD): Pass in proper top of build tree (not
 		.. path) as this is build tree independent.
+
 Tue Oct 15 16:22:52 1996  Barry Jaspan  <bjaspan@mit.edu>
 
 	* env-setup.shin: set $QUALNAME to the right path

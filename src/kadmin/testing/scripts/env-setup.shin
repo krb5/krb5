@@ -22,6 +22,11 @@ TOPLIBD=@RBUILD@/lib
 foo=`echo "@KRB5_RUN_ENV@" | sed -e 's/(//' -e 's/)//'` 
 eval $foo
 
+# This will get put in setup.csh for convenience
+KRB5_RUN_ENV_CSH=`eval echo "$foo" | \
+	sed -e 's/\([^=]*\)=\(.*\)/setenv \1 \2/g'`
+export KRB5_RUN_ENV_CSH
+
 TESTDIR=$TOP/testing; export TESTDIR
 STESTDIR=$STOP/testing; export STESTDIR
 if [ "$K5ROOT" = "" ]; then
