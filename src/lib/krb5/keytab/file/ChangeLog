@@ -1,3 +1,11 @@
+2002-01-30  Ken Raeburn  <raeburn@mit.edu>
+
+	* ktf_g_ent.c (krb5_ktfile_get_entry): For non-zero kvno, match
+	only low 8 bits.  For zero kvno, if any kvno in the keytab is over
+	240, assume we're dealing with numbers 128 through (127+256)
+	instead.  This allows for wrapping at 256 while retaining a small
+	set of consecutively numbered prior keys in the keytab.
+
 2001-11-19  Tom Yu  <tlyu@mit.edu>
 
 	* ktf_g_ent.c (krb5_ktfile_get_entry): Coerce enctype for now to
