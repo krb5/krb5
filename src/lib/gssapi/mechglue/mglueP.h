@@ -90,7 +90,7 @@ typedef struct gss_config {
 	 gss_cred_id_t,		/* claimant_cred_handle */
 	 gss_ctx_id_t*,		/* context_handle */
 	 gss_name_t,		/* target_name */
-	 const_gss_OID,		/* mech_type */
+	 gss_OID,		/* mech_type */
 	 int,			/* req_flags */
 	 OM_uint32,		/* time_req */
 	 gss_channel_bindings_t, /* input_chan_bindings */
@@ -172,7 +172,7 @@ typedef struct gss_config {
 	 OM_uint32*,		/* minor_status */
 	 OM_uint32,		/* status_value */
 	 int,			/* status_type */
-	 const_gss_OID,		/* mech_type */
+	 gss_OID,		/* mech_type */
 	 int*,			/* message_context */
 	 gss_buffer_t		/* status_string */
 	 );
@@ -199,7 +199,7 @@ typedef struct gss_config {
 	(void*,			/* context */
 	 OM_uint32*,		/* minor_status */
 	 gss_buffer_t,		/* input_name_buffer */
-	 const_gss_OID,		/* input_name_type */
+	 gss_OID,		/* input_name_type */
 	 gss_name_t*		/* output_name */
 	 );
     OM_uint32       (*gss_release_name)
@@ -216,6 +216,49 @@ typedef struct gss_config {
 	 int *,			/* cred_usage */
 	 gss_OID_set *		/* mechanisms */
 	 );
+    OM_uint32	    (*gss_add_cred)
+	(void*,			/* context */
+	 OM_uint32 *,		/* minor_status */
+	 gss_cred_id_t,		/* input_cred_handle */
+	 gss_name_t,		/* desired_name */
+	 gss_OID,		/* desired_mech */
+	 gss_cred_usage_t,	/* cred_usage */
+	 OM_uint32,		/* initiator_time_req */
+	 OM_uint32,		/* acceptor_time_req */
+	 gss_cred_id_t *,	/* output_cred_handle */
+	 gss_OID_set *,		/* actual_mechs */
+	 OM_uint32 *,		/* initiator_time_rec */
+	 OM_uint32 *		/* acceptor_time_rec */
+	 );
+    OM_uint32	    (*gss_export_sec_context)
+	(void*,			/* context */
+	 OM_uint32 *,		/* minor_status */
+	 gss_ctx_id_t *,	/* context_handle */
+	 gss_buffer_t		/* interprocess_token */
+	 );
+    OM_uint32	    (*gss_import_sec_context)
+	(void *,		/* context */
+	 OM_uint32 *,		/* minor_status */
+	 gss_buffer_t,		/* interprocess_token */
+	 gss_ctx_id_t *		/* context_handle */
+	 );
+    OM_uint32 	    (*gss_inquire_cred_by_mech)
+	(void *,		/* context */
+	 OM_uint32 *,		/* minor_status */
+	 gss_cred_id_t,		/* cred_handle */
+	 gss_OID,		/* mech_type */
+	 gss_name_t *,		/* name */
+	 OM_uint32 *,		/* initiator_lifetime */
+	 OM_uint32 *,		/* acceptor_lifetime */
+	 gss_cred_usage_t *	/* cred_usage */
+	 );
+
+    OM_uint32	    (*gss_inquire_names_for_mech)
+	(void *,		/* context */
+	 OM_uint32 *,		/* minor_status */
+	 gss_OID,		/* mechanism */
+	 gss_OID_set *		/* name_types */
+	 );
     int		     (*pname_to_uid)
 	(char *,		/* pname */
 	 gss_OID,		/* name type */
@@ -227,7 +270,7 @@ typedef struct gss_config {
 /********************************************************/
 /* Internal mechglue routines */
 
-gss_mechanism get_mechanism (const_gss_OID);
+gss_mechanism get_mechanism (gss_OID);
 OM_uint32 add_mechanism (gss_mechanism, int);
 OM_uint32 get_mech_type(gss_OID *, gss_buffer_t);
 OM_uint32 import_internal_name (OM_uint32 *, gss_OID, gss_union_name_t,

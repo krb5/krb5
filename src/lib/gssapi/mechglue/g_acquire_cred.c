@@ -6,7 +6,7 @@
  * All rights reserved.
  */
 
-#include "mechglueP.h"
+#include "mglueP.h"
 
 OM_uint32
 gss_acquire_cred(minor_status,
@@ -62,7 +62,7 @@ OM_uint32 *		time_rec;
     if (minor_status)
 	*minor_status = 0;
     
-    if (desired_name == GSS_C_NO_NAME)
+    if (desired_name == 0)
 	return GSS_S_BAD_NAME;
 
     /* No need to continue if we don't have a place to store the creds */

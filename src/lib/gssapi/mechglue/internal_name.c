@@ -6,7 +6,7 @@
  * All rights reserved.
  */
 
-#include "mechglueP.h"
+#include "mglueP.h"
 
 OM_uint32 import_internal_name (minor_status, mech_type, union_name, 
 				internal_name)

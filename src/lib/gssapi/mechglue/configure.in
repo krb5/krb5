@@ -3,9 +3,11 @@ CONFIG_RULES
 AC_PROG_ARCHIVE
 AC_PROG_RANLIB
 AC_PROG_INSTALL
+V5_SHARED_LIB_OBJS
+SubdirLibraryRule([${OBJS}])
 CopySrcHeader(mechglue.h,[$(EHDRDIR)])
-AppendRule([install:: libgssapi.[$](LIBEXT)
-	[$](INSTALL_DATA) libgssapi.[$](LIBEXT) [$](DESTDIR)[$](KRB5_LIBDIR)[$](S)libgssapi.[$](LIBEXT)])
-LinkFileDir([$](TOPLIBD)/libgssapi.[$](LIBEXT),libgssapi.[$](LIBEXT),./gssapi/mechglue)
-AppendRule([all:: [$](TOPLIBD)/libgssapi.[$](LIBEXT)])
+dnl AppendRule([install:: libgssapi.[$](LIBEXT)
+dnl	[$](INSTALL_DATA) libgssapi.[$](LIBEXT) [$](DESTDIR)[$](KRB5_LIBDIR)[$](S)libgssapi.[$](LIBEXT)])
+dnl LinkFileDir([$](TOPLIBD)/libgssapi.[$](LIBEXT),libgssapi.[$](LIBEXT),./gssapi/mechglue)
+dnl AppendRule([all:: [$](TOPLIBD)/libgssapi.[$](LIBEXT)])
 V5_AC_OUTPUT_MAKEFILE

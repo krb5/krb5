@@ -9,7 +9,7 @@
  * All rights reserved.
  */
 
-#include "mechglueP.h"
+#include "mglueP.h"
 
 int gssd_pname_to_uid(pname, name_type, mech_type, uid)
 

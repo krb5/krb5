@@ -8,71 +8,79 @@ CFLAGS = $(CCOPTS) $(DEFS) -I. -I$(srcdir)
 LIBDONE=DONE
 LIB_SUBDIRSS=.
 
-SRCS	= gss_acquire_cred.c \
-	  gss_release_cred.c \
-	  gss_init_sec_context.c \
-	  gss_accept_sec_context.c \
-	  gss_process_context.c \
-	  gss_delete_sec_context.c \
-	  gss_context_time.c \
-	  gss_sign.c \
-	  gss_verify.c \
-	  gss_seal.c \
-	  gss_unseal.c \
-	  gss_display_status.c \
-	  gss_indicate_mechs.c \
-	  gss_compare_name.c \
-	  gss_display_name.c \
-	  gss_import_name.c \
-	  gss_release_name.c \
-	  gss_release_buffer.c \
-	  gss_release_oid_set.c \
-	  gss_inquire_cred.c \
-	  gss_initialize.c \
-	  get_mech_type.c \
+SRCS	= g_acquire_cred.c \
+	  g_rel_cred.c \
+	  g_init_sec_context.c \
+	  g_accept_sec_context.c \
+	  g_process_context.c \
+	  g_delete_sec_context.c \
+	  g_context_time.c \
+	  g_sign.c \
+	  g_verify.c \
+	  g_seal.c \
+	  g_unseal.c \
+	  g_dsp_status.c \
+	  g_indicate_mechs.c \
+	  g_compare_name.c \
+	  g_dsp_name.c \
+	  g_imp_name.c \
+	  g_rel_name.c \
+	  g_rel_buffer.c \
+	  g_rel_oid_set.c \
+	  g_inquire_cred.c \
+	  g_initialize.c \
+	  get_mtype.c \
 	  get_mechanism.c \
 	  internal_name.c \
 	  gssd_pname_to_uid.c \
 	  add_mechanism.c
 
-OBJS	= gss_acquire_cred.$(OBJEXT) \
-	  gss_release_cred.$(OBJEXT) \
-	  gss_init_sec_context.$(OBJEXT) \
-	  gss_accept_sec_context.$(OBJEXT) \
-	  gss_process_context.$(OBJEXT) \
-	  gss_delete_sec_context.$(OBJEXT) \
-	  gss_context_time.$(OBJEXT) \
-	  gss_sign.$(OBJEXT) \
-	  gss_verify.$(OBJEXT) \
-	  gss_seal.$(OBJEXT) \
-	  gss_unseal.$(OBJEXT) \
-	  gss_display_status.$(OBJEXT) \
-	  gss_indicate_mechs.$(OBJEXT) \
-	  gss_compare_name.$(OBJEXT) \
-	  gss_display_name.$(OBJEXT) \
-	  gss_import_name.$(OBJEXT) \
-	  gss_release_name.$(OBJEXT) \
-	  gss_release_buffer.$(OBJEXT) \
-	  gss_release_oid_set.$(OBJEXT) \
-	  gss_inquire_cred.$(OBJEXT) \
-	  gss_initialize.$(OBJEXT) \
-	  get_mech_type.$(OBJEXT) \
+OBJS	= g_acquire_cred.$(OBJEXT) \
+	  g_rel_cred.$(OBJEXT) \
+	  g_init_sec_context.$(OBJEXT) \
+	  g_accept_sec_context.$(OBJEXT) \
+	  g_process_context.$(OBJEXT) \
+	  g_delete_sec_context.$(OBJEXT) \
+	  g_context_time.$(OBJEXT) \
+	  g_sign.$(OBJEXT) \
+	  g_verify.$(OBJEXT) \
+	  g_seal.$(OBJEXT) \
+	  g_unseal.$(OBJEXT) \
+	  g_dsp_status.$(OBJEXT) \
+	  g_indicate_mechs.$(OBJEXT) \
+	  g_compare_name.$(OBJEXT) \
+	  g_dsp_name.$(OBJEXT) \
+	  g_imp_name.$(OBJEXT) \
+	  g_rel_name.$(OBJEXT) \
+	  g_rel_buffer.$(OBJEXT) \
+	  g_rel_oid_set.$(OBJEXT) \
+	  g_inquire_cred.$(OBJEXT) \
+	  g_initialize.$(OBJEXT) \
+	  get_mtype.$(OBJEXT) \
 	  get_mechanism.$(OBJEXT) \
 	  internal_name.$(OBJEXT) \
 	  gssd_pname_to_uid.$(OBJEXT) \
 	  add_mechanism.$(OBJEXT)
 
+EHDRDIR= $(BUILDTOP)$(S)include$(S)gssapi
 EXPORTED_HEADERS = mechglue.h
 
-all:: all-$(WHAT) $(OBJS)
+.c.o:
+	$(CC) $(CFLAGS) -c $(srcdir)/$*.c
+@SHARED_RULE@
 
-all-unix::
+all:: all-$(WHAT) 
 
-all-mac::
+all-unix:: shared includes $(OBJS)
 
-all-windows::
+all-mac:: shared includes $(OBJS)
+
+all-windows:: includes $(OBJS)
 	if not exist $(EHDRDIR)\nul mkdir $(EHDRDIR)
 	copy mechglue.h $(EHDRDIR)
+
+shared:
+	mkdir shared
 
 unixmac: 
 
@@ -83,8 +91,10 @@ libgssapi.$(LIBEXT): $(OBJS)
 clean:: clean-$(WHAT)
 
 clean-unix::
+	$(RM) shared/*
  
 clean-mac::
+	$(RM) shared/*
  
 clean-windows::
 	$(RM) $(EHDRDIR)\gssapi.h $(EHDRDIR)\gssapi_generic.h
@@ -96,3 +106,5 @@ install::
 	do $(INSTALL_DATA) $(srcdir)$(S)$$f     \
 		$(DESTDIR)$(KRB5_INCDIR)$(S)gssapi$(S)$$f ; \
 	done
+
+includes::

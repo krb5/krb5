@@ -6,7 +6,7 @@
  * All rights reserved.
  */
 
-#include "mechglueP.h"
+#include "mglueP.h"
 
 OM_uint32
 gss_import_name(minor_status,
@@ -16,7 +16,7 @@ gss_import_name(minor_status,
 
 OM_uint32 *		minor_status;
 gss_buffer_t		input_name_buffer;
-const_gss_OID		input_name_type;
+gss_OID			input_name_type;
 gss_name_t *		output_name;
 
 {

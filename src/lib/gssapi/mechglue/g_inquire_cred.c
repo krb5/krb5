@@ -6,7 +6,7 @@
  * All rights reserved.
  */
 
-#include "mechglueP.h"
+#include "mglueP.h"
 
 OM_uint32
 gss_inquire_cred(minor_status,

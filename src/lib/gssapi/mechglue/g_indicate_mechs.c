@@ -6,7 +6,7 @@
  * All rights reserved.
  */
 
-#include "mechglueP.h"
+#include "mglueP.h"
 
 extern gss_mechanism *mechs_array;
 

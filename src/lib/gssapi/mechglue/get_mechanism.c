@@ -9,11 +9,11 @@
  * All rights reserved.
  */
 
-#include "mechglueP.h"
+#include "mglueP.h"
 
 extern gss_mechanism *mechs_array;
 
-gss_mechanism get_mechanism (const_gss_OID type)
+gss_mechanism get_mechanism (gss_OID type)
 {
     int	i;
 

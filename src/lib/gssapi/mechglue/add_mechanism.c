@@ -6,7 +6,7 @@
  * All rights reserved.
  */
 
-#include "mechglueP.h"
+#include "mglueP.h"
 #include <errno.h>
 
 static struct gss_config null_mech = {

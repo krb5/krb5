@@ -6,7 +6,7 @@
  * All rights reserved.
  */
 
-#include "mechglueP.h"
+#include "mglueP.h"
 
 OM_uint32
 gss_accept_sec_context (minor_status,
@@ -29,7 +29,7 @@ gss_channel_bindings_t	input_chan_bindings;
 gss_name_t *		src_name;
 gss_OID *		mech_type;
 gss_buffer_t		output_token;
-int *			ret_flags;
+OM_uint32 *		ret_flags;
 OM_uint32 *		time_rec;
 gss_cred_id_t *		delegated_cred_handle;
 

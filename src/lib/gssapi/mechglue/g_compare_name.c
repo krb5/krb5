@@ -6,7 +6,7 @@
  * All rights reserved.
  */
 
-#include "mechglueP.h"
+#include "mglueP.h"
 
 OM_uint32
 gss_compare_name (minor_status,
@@ -25,7 +25,7 @@ int *			name_equal;
     
     gss_initialize();
 
-    if (name1 == GSS_C_NO_NAME || name2 == GSS_C_NO_NAME) {
+    if (name1 == 0 || name2 == 0) {
 	if (name_equal)
 	    *name_equal = 0;
 	return GSS_S_BAD_NAME;

@@ -6,7 +6,7 @@
  * All rights reserved.
  */
 
-#include "mechglueP.h"
+#include "mglueP.h"
 
 OM_uint32
 gss_verify (minor_status,
@@ -55,4 +55,22 @@ int *			qop_state;
     }
 
     return(GSS_S_NO_CONTEXT);
+}
+
+OM_uint32
+gss_verify_misc (minor_status,
+            context_handle,
+            message_buffer,
+            token_buffer,
+            qop_state)
+
+OM_uint32 *		minor_status;
+gss_ctx_id_t		context_handle;
+gss_buffer_t		message_buffer;
+gss_buffer_t		token_buffer;
+gss_qop_t *		qop_state;
+
+{
+	return (gss_verify(minor_status, context_handle,
+			   message_buffer, token_buffer, (int *) qop_state));
 }

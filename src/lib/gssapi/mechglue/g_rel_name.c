@@ -6,7 +6,7 @@
  * All rights reserved.
  */
 
-#include "mechglueP.h"
+#include "mglueP.h"
 
 OM_uint32
 gss_release_name (minor_status,
@@ -20,7 +20,7 @@ gss_name_t *		input_name;
     
     /* if input_name is NULL, return error */
     
-    if(input_name == GSS_C_NO_NAME)
+    if (input_name == 0)
 	return(GSS_S_BAD_NAME);
     
     /*
@@ -29,7 +29,7 @@ gss_name_t *		input_name;
      */
     
     union_name = (gss_union_name_t) *input_name;
-    *input_name = GSS_C_NO_NAME;
+    *input_name = 0;
     *minor_status = 0;
     
     if (union_name == NULL)

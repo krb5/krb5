@@ -6,7 +6,7 @@
  * All rights reserved.
  */
 
-#include "mechglueP.h"
+#include "mglueP.h"
 
 OM_uint32
 gss_display_status (minor_status,
@@ -17,10 +17,10 @@ gss_display_status (minor_status,
                     status_string)
 
 OM_uint32 *		minor_status;
-int			status_value;
+OM_uint32		status_value;
 int			status_type;
-const_gss_OID		req_mech_type;
-int *			message_context;
+gss_OID			req_mech_type;
+OM_uint32 *		message_context;
 gss_buffer_t		status_string;
 
 {

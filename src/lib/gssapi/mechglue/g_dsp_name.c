@@ -6,7 +6,7 @@
  * All rights reserved.
  */
 
-#include "mechglueP.h"
+#include "mglueP.h"
 
 OM_uint32
 gss_display_name (minor_status,
@@ -28,7 +28,7 @@ gss_OID *		output_name_type;
      * to the name_type component of union_name
      */
     
-    if (input_name == GSS_C_NO_NAME)
+    if (input_name == 0)
 	return GSS_S_BAD_NAME;
 
     union_name = (gss_union_name_t) input_name;

@@ -6,7 +6,7 @@
  * All rights reserved.
  */
 
-#include "mechglueP.h"
+#include "mglueP.h"
 
 OM_uint32
 gss_init_sec_context (minor_status,
@@ -23,19 +23,19 @@ gss_init_sec_context (minor_status,
                       ret_flags,
                       time_rec)
 
-OM_uint32 *		minor_status;
+OM_uint32 FAR *		minor_status;
 gss_cred_id_t		claimant_cred_handle;
 gss_ctx_id_t *		context_handle;
 gss_name_t		target_name;
-const_gss_OID		req_mech_type;
-int			req_flags;
-int			time_req;
+gss_OID			req_mech_type;
+OM_uint32		req_flags;
+OM_uint32		time_req;
 gss_channel_bindings_t	input_chan_bindings;
 gss_buffer_t		input_token;
-gss_OID *		actual_mech_type;
+gss_OID FAR *		actual_mech_type;
 gss_buffer_t		output_token;
-int *			ret_flags;
-OM_uint32 *		time_rec;
+OM_uint32 FAR *		ret_flags;
+OM_uint32 FAR *		time_rec;
 
 {
     OM_uint32		status, temp_status, temp_minor_status;
