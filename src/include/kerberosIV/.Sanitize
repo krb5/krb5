@@ -51,9 +51,11 @@ klog.h
 kparse.h
 krb.h
 krb4-proto.h
+krbports.h
 krb_conf.h
 krb_db.h
 krb_err.h
+lsb_addr_cmp.h
 lsb_addr_comp.h
 mit-copyright.h
 osconf.h

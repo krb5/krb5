@@ -101,5 +101,8 @@ KTEXT pkt_cipher();
 #define		KERB_ERR_PRINCIPAL_UNKNOWN		 8
 #define		KERB_ERR_PRINCIPAL_NOT_UNIQUE		 9
 #define		KERB_ERR_NULL_KEY			10
+/* Cygnus extensions for Preauthentication */
+#define         KERB_ERR_PREAUTH_SHORT			11
+#define		KERB_ERR_PREAUTH_MISMATCH		12
 
 #endif /* PROT_DEFS */

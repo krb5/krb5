@@ -1,3 +1,22 @@
+Thu Apr 27 10:55:00 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* krb.h: make INTERFACE, FAR go away for now.
+	Drag in the unix time conversion functions for unix only.
+	Locally define PROTOTYPE().
+	Drag in unix versions of SOCKET macros.
+	Recognize DEFINE_SOCKADDR and NEED_TIME_H the way cc-unix.h does.
+	Declare krb_ignore_ip_address.
+	Define DEB() to support non-printf debugging.
+	Declare errno.
+	Define key_proc_type and decrypt_tkt_type.
+	* prot.h: add KERB_ERR_PREAUTH_SHORT and _MISMATCH from Cygnus
+	extensions.
+	* krbports.h: new file, has default ports for V4 services for
+	hard-coded fallback.
+	* lsb_addr_cmp.h: from V4, handles the mutant comparison
+	functions needed for the V4 "direction" comparison. (Rename
+	of lsb_addr_comp.h due to filename length.)
+
 Tue Mar 14 16:53:37 1995    <tytso@rsx-11.mit.edu>
 
 	* Makefile.in: Delete definitions defined in pre/config.in.

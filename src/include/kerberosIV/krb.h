@@ -393,4 +393,85 @@ char *tkt_string();
 #define	KOPT_DO_OLDSTYLE 0x00000008 /* use the old-style protocol */
 #endif /* ATHENA_COMPAT */
 
+/* until we do V4 compat under DOS, just turn this off */
+#define INTERFACE
+#define FAR
+/* and likewise, just drag in the unix time interface */
+#define	TIME_GMT_UNIXSEC	unix_time_gmt_unixsec((unsigned KRB4_32 *)0)
+#define	TIME_GMT_UNIXSEC_US(us)	unix_time_gmt_unixsec((us))
+#define	CONVERT_TIME_EPOCH	((long)0)	/* Unix epoch is Krb epoch */
+
+#if defined(__STDC__) || defined(KRB5_PROVIDE_PROTOTYPES) || defined(_WINDOWS)
+#define PROTOTYPE(x) x
+#else
+#define PROTOTYPE(x) ()
+#endif /* STDC or PROTOTYPES */
+
+/* Define u_char, u_short, u_int, and u_long. */
+#include <sys/types.h>
+
+/* If this source file requires it, define struct sockaddr_in
+   (and possibly other things related to network I/O).  FIXME.  */
+#ifdef DEFINE_SOCKADDR
+#include <netinet/in.h>		/* For struct sockaddr_in and in_addr */
+#include <arpa/inet.h>		/* For inet_ntoa */
+#include <netdb.h>		/* For struct hostent, gethostbyname, etc */
+#include <sys/param.h>		/* For MAXHOSTNAMELEN */
+#include <sys/socket.h>		/* For SOCK_*, AF_*, etc */
+#include <sys/time.h>		/* For struct timeval */
+#ifdef NEED_TIME_H
+#include <time.h>		/* For localtime, etc */
+#endif
+#endif
+/*
+ * Compatability with WinSock calls on MS-Windows...
+ */
+#define	SOCKET		unsigned int
+#define	INVALID_SOCKET	((SOCKET)~0)
+#define	closesocket	close
+#define	ioctlsocket	ioctl
+#define	SOCKET_ERROR	(-1)
+
+/* Some of our own infrastructure where the WinSock stuff was too hairy
+   to dump into a clean Unix program...  */
+
+#define	SOCKET_INITIALIZE()	(0)	/* No error (or anything else) */
+#define	SOCKET_CLEANUP()	/* nothing */
+#define	SOCKET_ERRNO		errno
+#define	SOCKET_SET_ERRNO(x)	(errno = (x))
+#define SOCKET_NFDS(f)		((f)+1)	/* select() arg for a single fd */
+#define SOCKET_READ		read
+#define SOCKET_WRITE		write
+#define SOCKET_EINTR		EINTR
+
+/* ask to disable IP address checking in the library */
+extern int krb_ignore_ip_address;
+
+/* Debugging printfs shouldn't even be compiled on many systems that don't
+   support printf!  Use it like  DEB (("Oops - %s\n", string));  */
+
+#ifdef DEBUG
+#define	DEB(x)	if (krb_debug) printf x
+extern int krb_debug;
+#else
+#define	DEB(x)	/* nothing */
+#endif
+
+
+/*
+ * Some Unixes don't declare errno in <errno.h>...
+ * Move this out to individual c-*.h files if it becomes troublesome.
+ */
+#ifndef errno
+extern int errno;
+#endif
+
+/* Define a couple of function types including parameters.  These
+   are needed on MS-Windows to convert arguments of the function pointers
+   to the proper types during calls.  */
+typedef int (*key_proc_type) PROTOTYPE ((char *, char *, char *,
+					     char *, C_Block));
+typedef int (*decrypt_tkt_type) PROTOTYPE ((char *, char *, char *, char *,
+				     key_proc_type, KTEXT *));
+
 #endif	/* KRB_DEFS */
