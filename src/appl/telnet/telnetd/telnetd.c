@@ -153,7 +153,7 @@ extern void usage P((void));
  */
 char valid_opts[] = {
 	'd', ':', 'h', 'k', 'L', ':', 'n', 'S', ':', 'U',
-	'w',
+	'w', ':',
 #ifdef	AUTHENTICATION
 	'a', ':', 'X', ':',
 #endif

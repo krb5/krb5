@@ -1,3 +1,7 @@
+2001-10-15  Ken Raeburn  <raeburn@mit.edu>
+
+	* telnetd.c (valid_opts): Note that 'w' takes a parameter.
+
 2001-08-02  Tom Yu  <tlyu@mit.edu>
 
 	* authenc.c (net_write): Rewrite in terms of netwrite().
