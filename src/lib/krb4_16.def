@@ -1,0 +1,61 @@
+;-----------------------------
+;   KERBEROS.DEF - module definition file
+;-----------------------------
+
+LIBRARY   KRB4_16
+DESCRIPTION 'DLL for Kerberos support'
+EXETYPE   WINDOWS
+CODE	  PRELOAD MOVEABLE DISCARDABLE
+DATA	  PRELOAD MOVEABLE SINGLE
+HEAPSIZE  8192
+
+EXPORTS
+	LibMain			@1001 RESIDENTNAME
+	WEP			@1002
+;
+	dest_tkt
+	get_service_key
+	in_tkt
+	kname_parse
+	krb_check_auth
+	krb_get_admhst
+	krb_get_cred
+	krb_get_default_user
+	krb_get_err_text
+	krb_get_krbhst
+	krb_get_lrealm
+	krb_get_phost
+	krb_get_pw_in_tkt
+	krb_get_pw_in_tkt_preauth
+	krb_get_svc_in_tkt
+	krb_get_tf_fullname
+	krb_get_tf_realm
+	krb_get_ticket_for_service
+	krb_mk_auth
+	krb_mk_err
+	krb_mk_priv
+	krb_mk_req
+	krb_mk_safe
+	krb_rd_err
+	krb_rd_priv
+	krb_rd_req
+	krb_rd_safe
+	krb_realmofhost
+	krb_recvauth
+	krb_save_credentials
+	krb_set_default_user
+;	kuserok
+	put_svc_key
+	read_service_key
+;	kadm_change_pw2
+;	kadm_init_link
+;	kadm_get_err_text
+;	kadm_change_pw
+;	kstream_create_from_fd
+;	kstream_create_rlogin_from_fd
+;	kstream_create_rcp_from_fd
+;	kstream_write
+;	kstream_read
+;	kstream_flush
+;	kstream_destroy
+;	kstream_set_buffer_mode

@@ -29,6 +29,7 @@ KLIBS = krb5\krb5.lib crypto\crypto.lib \
 	$(BUILDTOP)\util\profile\profile.lib \
 	kadm\kadm.lib des425\des425.lib
 GLIBS = gssapi\gssapi.lib
+K4LIBS = krb4\krb4.lib
 
 ##WIN16##CDEF = comerr16.def
 ##WIN32##CDEF = comerr32.def
@@ -36,6 +37,8 @@ GLIBS = gssapi\gssapi.lib
 ##WIN32##KDEF = krb5_32.def
 ##WIN16##GDEF = gssapi16.def
 ##WIN32##GDEF = gssapi32.def
+##WIN16##K4DEF = krb4_16.def
+##WIN32##K4DEF = krb4_32.def
 
 ##WIN16##WINLIBS = $(WLIB) ldllcew libw oldnames
 ##WIN32##WINLIBS = msvcrt.lib kernel32.lib wsock32.lib \
@@ -54,14 +57,14 @@ $(CLIB): $(CLIBS) $(WLIB) $(CDEF) no_glue.obj
 ##WIN32##	link $(WINDLLFLAGS) /def:$(CDEF) /out:$*.dll \
 ##WIN32##	   no_glue.obj $(CLIBS) $(WINLIBS)
 
-$(KLIB): $(KLIBS) $(CLIB) $(WLIB) $(KDEF) krb_glue.obj
+$(KLIB): $(KLIBS) $(CLIB) $(WLIB) $(KDEF) k5_glue.obj
 ##WIN16##	link /co /seg:400 /noe /nod /nol \
-##WIN16##	   krb_glue, $*.dll, $*.map, \
+##WIN16##	   k5_glue, $*.dll, $*.map, \
 ##WIN16##	   $(KLIBS) $(CLIB) $(WINLIBS), $(KDEF)
 ##WIN16##	rc /nologo /p /k $*.dll
 ##WIN16##	implib /nologo $@ $*.dll
 ##WIN32##	link $(WINDLLFLAGS) /def:$(KDEF) /out:$*.dll \
-##WIN32##	   krb_glue.obj $(KLIBS) $(CLIB) $(WINLIBS)
+##WIN32##	   k5_glue.obj $(KLIBS) $(CLIB) $(WINLIBS)
 
 $(GLIB): $(GLIBS) $(KLIB) $(CLIB) $(GDEF) gss_glue.obj
 ##WIN16##	link /co /seg:400 /noe /nod /nol \
@@ -72,8 +75,19 @@ $(GLIB): $(GLIBS) $(KLIB) $(CLIB) $(GDEF) gss_glue.obj
 ##WIN32##	link $(WINDLLFLAGS) /def:$(GDEF) /out:$*.dll \
 ##WIN32##	   gss_glue.obj $(GLIBS) $(KLIB) $(CLIB) $(WINLIBS)
 
-krb_glue.obj: win_glue.c
+$(K4LIB): $(K4LIBS) $(KLIB) $(CLIB) $(K4DEF) k4_glue.obj
+##WIN16##	link /co /seg:400 /noe /nod /nol \
+##WIN16##	   k4_glue, $*.dll, $*.map, \
+##WIN16##	   $(K4LIBS) $(KLIB) $(CLIB) $(WINLIBS), $(K4DEF)
+##WIN16##	rc /nologo /p /k $*.dll
+##WIN16##	implib /nologo $@ $*.dll
+##WIN32##	link $(WINDLLFLAGS) /def:$(K4DEF) /out:$*.dll \
+##WIN32##	   k4_glue.obj $(K4LIBS) $(KLIB) $(CLIB) $(WINLIBS)
+
+k5_glue.obj: win_glue.c
 	$(CC) $(CFLAGS) /c /DKRB5=1 /Fo$@ $**
+k4_glue.obj: win_glue.c
+	$(CC) $(CFLAGS) /c /DKRB4=1 /Fo$@ $**
 gss_glue.obj: win_glue.c
 	$(CC) $(CFLAGS) /c /DGSSAPI=1 /Fo$@ $**
 no_glue.obj: win_glue.c
@@ -85,9 +99,9 @@ no_glue.obj: win_glue.c
 
 # Build Convenience
 comerr.lib: $(CLIB)
+krb4.lib:   $(K4LIB)
 krb5.lib:   $(KLIB)
 gssapi.lib: $(GLIB)
-
 
 sap_glue.obj: win_glue.c
 	$(CC) $(CFLAGS) -DSAP_TIMEBOMB -I$(VERS_DIR) /c /Fo$@ win_glue.c
@@ -112,9 +126,9 @@ all-windows::
 	@echo Making in lib\des425
 	cd ..\des425
 	-$(MAKE) -$(MFLAGS) 
-#	@echo Making in lib\krb4
-#	cd ..\krb4
-#	-$(MAKE) -$(MFLAGS) 
+	@echo Making in lib\krb4
+	cd ..\krb4
+	-$(MAKE) -$(MFLAGS) 
 	@echo Making in lib\gssapi
 	cd ..\gssapi
 	-$(MAKE) -$(MFLAGS) 
@@ -137,9 +151,9 @@ clean-windows::
 	@echo Making clean in lib\des425
 	cd ..\des425
 	-$(MAKE) -$(MFLAGS) clean
-#	@echo Making clean in lib\krb4
-#	cd ..\krb4
-#	-$(MAKE) -$(MFLAGS) clean
+	@echo Making clean in lib\krb4
+	cd ..\krb4
+	-$(MAKE) -$(MFLAGS) clean
 	@echo Making clean in lib\gssapi
 	cd ..\gssapi
 	-$(MAKE) -$(MFLAGS) clean

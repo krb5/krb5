@@ -17,8 +17,28 @@
  */
 
 /* We can't include winsock.h directly because of /Za (stdc) options */
+#ifdef KRB4
+#include <kerberosIV/krb.h>
+#endif
+
 #define NEED_SOCKETS
 #include "k5-int.h"
+
+#if defined(GSSAPI) && !defined(KRB5)
+#define KRB5 1
+#endif
+#if (defined(KRB4) || defined(KRB5)) && !defined(NEED_WINSOCK)
+#define NEED_WINSOCK 1
+#endif
+
+#ifdef KRB4
+#include <kerberosIV/krb_err.h>
+#endif
+#ifdef GSSAPI
+#include "gssapi/generic/gssapi_err_generic.h"
+#include "gssapi/krb5/gssapi_err_krb5.h"
+#endif
+
 
 /*
  * #defines for MIT-specific time-based timebombs and/or version
@@ -56,14 +76,6 @@
 #define WINDOWS
 #include <vs.h>
 #include <v.h>
-
-
-#if defined(GSSAPI) && !defined(KRB5)
-#define KRB5 1
-#endif
-#if defined(KRB5) && !defined(NEED_WINSOCK)
-#define NEED_WINSOCK 1
-#endif
 
 
 /*
@@ -110,7 +122,6 @@ static int CallVersionServer(app_title, app_version, app_ini, code_cover)
 	VSDestroyRequest(vrequest);
 	return (0);
 }   
-
 #endif
 
 #ifdef TIMEBOMB
@@ -194,49 +205,64 @@ win_socket_initialize()
 }
 #endif
 
+static HINSTANCE hlibinstance;
+
+HINSTANCE get_lib_instance()
+{
+    return hlibinstance;
+}
+
+
 #ifdef _WIN32
 
 BOOL WINAPI DllMain (HANDLE hModule, DWORD fdwReason, LPVOID lpReserved)
 {
-   switch (fdwReason)
-   {
-       case DLL_PROCESS_ATTACH:
+    switch (fdwReason)
+    {
+        case DLL_PROCESS_ATTACH:
+	    hlibinstance = (HINSTANCE) hModule;
 #ifdef NEED_WINSOCK
-	   win_socket_initialize ();
+	    win_socket_initialize ();
+#endif
+#ifdef KRB4
+	    initialize_krb_error_table();
 #endif
 #ifdef KRB5
-	   krb5_init_ets((krb5_context)0);
+	    krb5_init_ets((krb5_context)0);
 #endif
 #ifdef GSSAPI
-	   initialize_k5g_error_table();
-	   initialize_ggss_error_table();
+	    initialize_k5g_error_table();
+	    initialize_ggss_error_table();
 #endif	   
-	   break;
+	    break;
 
-       case DLL_THREAD_ATTACH:
-	   break;
+        case DLL_THREAD_ATTACH:
+	    break;
 
-       case DLL_THREAD_DETACH:
-	   break;
+        case DLL_THREAD_DETACH:
+	    break;
 
-       case DLL_PROCESS_DETACH:
+        case DLL_PROCESS_DETACH:
 #ifdef GSSAPI
-	   cleanup_k5g_error_table();
-	   cleanup_ggss_error_table();
+	    cleanup_k5g_error_table();
+	    cleanup_ggss_error_table();
 #endif
 #ifdef KRB5
-	   krb5_finish_ets((krb5_context)0);
+	    krb5_finish_ets((krb5_context)0);
+#endif
+#ifdef KRB4
+	    cleanup_krb_error_table();
 #endif
 #ifdef NEED_WINSOCK
-	   WSACleanup ();
+	    WSACleanup ();
 #endif
-	   break;
+	    break;
 
-       default:
-	   return FALSE;
-   }
+        default:
+	    return FALSE;
+    }
  
-   return TRUE;   // successful DLL_PROCESS_ATTACH
+    return TRUE;   // successful DLL_PROCESS_ATTACH
 }
 
 #else
@@ -248,8 +274,12 @@ WORD wDataSeg;
 WORD cbHeap;
 LPSTR CmdLine;
 {
+    hlibinstance = hInst;
 #ifdef NEED_WINSOCK
     win_socket_initialize ();
+#endif
+#ifdef KRB4
+    initialize_krb_error_table();
 #endif
 #ifdef KRB5
     krb5_init_ets((krb5_context)0);
@@ -271,6 +301,9 @@ WEP(nParam)
 #endif
 #ifdef KRB5
     krb5_finish_ets((krb5_context)0);
+#endif
+#ifdef KRB4
+    cleanup_krb_error_table();
 #endif
 #ifdef NEED_WINSOCK
     WSACleanup();
