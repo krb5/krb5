@@ -162,9 +162,11 @@ dnl
 dnl check for sigmask/sigprocmask -- CHECK_SIGPROCMASK
 dnl
 define(CHECK_SIGPROCMASK,[
-AC_COMPILE_CHECK([sigprocmask],
-[#include <signal.h>], [sigprocmask(SIG_SETMASK,0,0);],
-AC_DEFINE(USE_SIGPROCMASK),)])dnl
+AC_COMPILE_CHECK([sigmask]
+[#include <signal.h>], [sigmask(1);], ,
+ AC_COMPILE_CHECK([sigprocmask],
+ [#include <signal.h>], [sigprocmask(SIG_SETMASK,0,0);],
+ AC_DEFINE(USE_SIGPROCMASK),))])dnl
 dnl
 dnl check for <stdarg.h> -- CHECK_STDARG
 dnl (name used for consistency with krb5/config.h)
