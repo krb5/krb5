@@ -298,7 +298,8 @@ EncKrbPrivPart ::= [APPLICATION 15] SEQUENCE {
 	user-data[0]			OCTET STRING,
 	timestamp[1]			GeneralizedTime,
 	msec[2]				INTEGER,
-	addresses[3]			HostAddresses
+	s-address[5]			HostAddress,	-- sender's addr
+	r-address[5]			HostAddress	-- recip's addr
 }
 
 END
