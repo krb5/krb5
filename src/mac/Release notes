@@ -71,7 +71,7 @@ Changes in 1.1a3:
  updated to CCache 2.0fc1
  removed CLib and RuntimeLib from output binary
  renamed output to MIT Kerberos Library
- changed vers 2 resource to new name (MIT Kerberos for the Macintosh)
+ changed vers 2 resource to new name (MIT Kerberos for Macintosh)
 
 2.0fc2
  updated to CCache 2.0fc2
