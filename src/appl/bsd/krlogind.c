@@ -337,16 +337,20 @@ int main(argc, argv)
 #define LOG_NDELAY 0
 #endif
     
-#ifdef KERBEROS
-    krb5_init_context(&bsd_context);
-    krb5_init_ets(bsd_context);
-#endif
-    
 #ifndef LOG_AUTH /* 4.2 syslog */
     openlog(progname, LOG_PID | LOG_NDELAY);
 #else
     openlog(progname, LOG_PID | LOG_NDELAY, LOG_AUTH);
 #endif /* 4.2 syslog */
+    
+#ifdef KERBEROS
+    status = krb5_init_context(&bsd_context);
+    if (status) {
+	    syslog(LOG_ERR, "Error initializing krb5: %s",
+		   error_message(status));
+	    exit(1);
+    }
+#endif
     
     /* Analyse parameters. */
     opterr = 0;

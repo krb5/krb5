@@ -470,9 +470,14 @@ char realm[REALM_SZ];
 void k_init (ttyn)
     char *ttyn;
 {
-    krb5_init_context(&kcontext);
-    krb5_init_ets(kcontext);
-krb5_secure_config_files (kcontext);
+    krb5_error_code retval;
+    
+    retval = krb5_init_context(&kcontext);
+    if (retval) {
+	com_err("login", retval, "while initializing krb5");
+	exit(1);
+    }
+    krb5_secure_config_files (kcontext);
     login_get_kconf(kcontext);
 
     /* Set up the credential cache environment variable */
@@ -990,13 +995,14 @@ destroy_tickets()
 {
 	krb5_context c;
 	krb5_ccache cache;
+	krb5_error_code retval;
 
+#ifdef KRB5_GET_TICKETS
 	if (login_krb5_get_tickets) {
-	krb5_init_context(&c);
-	krb5_secure_config_files (c);
-	if(!krb5_cc_default(c, &cache))
-		krb5_cc_destroy (c, cache);
+	    if(!krb5_cc_default(kcontext, &cache))
+		krb5_cc_destroy (kcontext, cache);
 	}
+#endif
 #ifdef KRB4_GET_TICKETS
 	if (login_krb4_get_tickets||login_krb4_convert)
 	dest_tkt();

@@ -270,10 +270,13 @@ int main(argc, argv)
 #endif /* 4.2 syslog */
     
 #ifdef KERBEROS
-    krb5_init_context(&bsd_context);
-    krb5_init_ets(bsd_context);
+    status = krb5_init_context(&bsd_context);
+    if (status) {
+	    syslog(LOG_ERR, "Error initializing krb5: %s",
+		   error_message(status));
+	    exit(1);
+    }
 #endif
-    
     
     /* Analyze parameters. */
     opterr = 0;

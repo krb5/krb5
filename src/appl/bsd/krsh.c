@@ -333,8 +333,11 @@ main(argc, argv0)
     }
 
 #ifdef KERBEROS
-    krb5_init_context(&bsd_context);
-    krb5_init_ets(bsd_context);
+    status = krb5_init_context(&bsd_context);
+    if (status) {
+	    com_err(argv[0], status, "while initializing krb5");
+	    exit(1);
+    }
     authopts = AP_OPTS_MUTUAL_REQUIRED;
 
     /* Piggy-back forwarding flags on top of authopts; */
