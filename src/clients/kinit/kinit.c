@@ -70,6 +70,8 @@ main(argc, argv)
     krb5_principal server;
     krb5_creds my_creds;
     krb5_timestamp now;
+    krb5_address *null_addr = (krb5_address *)0;
+    krb5_address **addrs = (krb5_address **)0;
     int use_keytab = 0;			/* -k option */
     krb5_keytab keytab = NULL;
     struct passwd *pw = 0;
@@ -214,13 +216,6 @@ main(argc, argv)
 	exit(1);
     }
 
-    code = krb5_cc_initialize (kcontext, ccache, me);
-    if (code != 0) {
-	com_err (argv[0], code, "when initializing cache %s",
-		 cache_name?cache_name:"");
-	exit(1);
-    }
-
     memset((char *)&my_creds, 0, sizeof(my_creds));
     
     my_creds.client = me;
@@ -266,14 +261,14 @@ main(argc, argv)
 	      exit(1);
 	 }
 
-	 code = krb5_get_in_tkt_with_password(kcontext, options, 0,
-					      NULL, preauth, password, ccache,
+	 code = krb5_get_in_tkt_with_password(kcontext, options, addrs,
+					      NULL, preauth, password, 0,
 					      &my_creds, 0);
 	 memset(password, 0, sizeof(password));
 #ifndef NO_KEYTAB
     } else {
-	 code = krb5_get_in_tkt_with_keytab(kcontext, options, 0,
-					    NULL, preauth, keytab, ccache,
+	 code = krb5_get_in_tkt_with_keytab(kcontext, options, addrs,
+					    NULL, preauth, keytab, 0,
 					    &my_creds, 0);
 #endif
     }
@@ -287,5 +282,19 @@ main(argc, argv)
 	    com_err (argv[0], code, "while getting initial credentials");
 	exit(1);
     }
+
+    code = krb5_cc_initialize (kcontext, ccache, me);
+    if (code != 0) {
+	com_err (argv[0], code, "when initializing cache %s",
+		 cache_name?cache_name:"");
+	exit(1);
+    }
+
+    code = krb5_cc_store_cred(kcontext, ccache, &my_creds);
+    if (code) {
+	com_err (argv[0], code, "while storing credentials");
+	exit(1);
+    }
+
     exit(0);
 }
