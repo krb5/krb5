@@ -65,8 +65,10 @@
 	/* This is an API divergence in 1.2.3 needed for proper functioning
 	on Mac OS X. This will be reconciled in 1.3 */
 	#define KRB5_CCACHE_ACCESSOR_FUNCTIONS 1
+	#define KRB5_KEYTAB_ACCESSOR_FUNCTIONS 1
 #else
 	#define KRB5_CCACHE_ACCESSOR_FUNCTIONS 0
+	#define KRB5_KEYTAB_ACCESSOR_FUNCTIONS 0
 #endif
 
 #if defined(_MSDOS) || defined(_WIN32)
@@ -1434,6 +1436,28 @@ typedef struct _krb5_kt_ops {
     void * serializer;
 } krb5_kt_ops;
 
+#if KRB5_KEYTAB_ACCESSOR_FUNCTIONS
+char * KRB5_CALLCONV
+krb5_kt_get_type (krb5_context, krb5_keytab keytab);
+krb5_error_code KRB5_CALLCONV
+krb5_kt_get_name(krb5_context context, krb5_keytab keytab, char *name,
+		 unsigned int namelen);
+krb5_error_code KRB5_CALLCONV
+krb5_kt_close(krb5_context context, krb5_keytab keytab);
+krb5_error_code KRB5_CALLCONV
+krb5_kt_get_entry(krb5_context context, krb5_keytab keytab,
+		  krb5_const_principal principal, krb5_kvno vno,
+		  krb5_enctype enctype, krb5_keytab_entry *entry);
+krb5_error_code KRB5_CALLCONV
+krb5_kt_start_seq_get(krb5_context context, krb5_keytab keytab,
+		      krb5_kt_cursor *cursor);
+krb5_error_code KRB5_CALLCONV
+krb5_kt_next_entry(krb5_context context, krb5_keytab keytab,
+		   krb5_keytab_entry *entry, krb5_kt_cursor *cursor);
+krb5_error_code KRB5_CALLCONV
+krb5_kt_end_seq_get(krb5_context context, krb5_keytab keytab,
+		    krb5_kt_cursor *cursor);
+#else
 #define krb5_kt_get_type(context, keytab) ((keytab)->ops->prefix)
 #define krb5_kt_get_name(context, keytab, name, namelen) krb5_x((keytab)->ops->get_name,(context, keytab,name,namelen))
 #define krb5_kt_close(context, keytab) krb5_x((keytab)->ops->close,(context, keytab))
@@ -1441,11 +1465,12 @@ typedef struct _krb5_kt_ops {
 #define krb5_kt_start_seq_get(context, keytab, cursor) krb5_x((keytab)->ops->start_seq_get,(context, keytab, cursor))
 #define krb5_kt_next_entry(context, keytab, entry, cursor) krb5_x((keytab)->ops->get_next,(context, keytab, entry, cursor))
 #define krb5_kt_end_seq_get(context, keytab, cursor) krb5_x((keytab)->ops->end_get,(context, keytab, cursor))
-/* remove and add are functions, so that they can return NOWRITE
-   if not a writable keytab */
-
+#endif
 
 extern krb5_kt_ops krb5_kt_dfl_ops;
+
+/* remove and add are functions, so that they can return NOWRITE
+   if not a writable keytab */
 
 /*
  * end "keytab.h"

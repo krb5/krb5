@@ -1,3 +1,7 @@
+2000-04-01  Miro Jurisic  <meeroh@mit.edu>
+    * krb5.hin: Conditionalized krb5_kt_* macros vs. functions with
+        KRB5_KEYTAB_ACCESSOR_FUNCTIONS
+
 2002-03-28 Alexandra Ellwood <lxs@mit.edu>
     * krb5.hin: Conditionalized pragmas for Metrowerks
 

@@ -28,6 +28,7 @@
  * Dispatch methods for keytab code.
  */
 
+#include "krb5.h"
 #include "k5-int.h"
 
 char * KRB5_CALLCONV

@@ -1,3 +1,7 @@
+2000-04-01  Miro Jurisic  <meeroh@mit.edu>
+
+	* ktfns.c: Merged from trunk
+
 2000-03-12  Ezra Peisach  <epeisach@mit.edu>
 
 	* ktbase.c (krb5_kt_resolve): Change prototype from const to
