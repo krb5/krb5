@@ -320,6 +320,7 @@ authenticate(p, addr)
 			       0,	/* ignore peer address */
 			       0, 0, 0,	/* no fetchfrom, keyproc or arg */
 			       0,	/* default rc type */
+			       0, 	/* no flags */
 			       0,	/* don't need seq number */
 			       &ext_client,
 			       0, 0	/* don't care about ticket or

@@ -529,7 +529,7 @@ kerberos_authenticate(fd, clientp, sin)
 
 	if (retval = krb5_recvauth((void *) &fd, kprop_version, server,
 				   &sender_addr, kerb_keytab, NULL, NULL,
-				   "dfl", &my_seq_num, clientp, &ticket,
+				   "dfl", 0, &my_seq_num, clientp, &ticket,
 				   &authent)) {
 		syslog(LOG_ERR, "Error in krb5_recvauth: %s",
 		       error_message(retval));
