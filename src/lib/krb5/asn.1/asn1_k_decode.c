@@ -31,7 +31,9 @@ asn1_error_code retval;\
 asn1_class class;\
 asn1_construction construction;\
 asn1_tagnum tagnum;\
-int length,taglen,applen
+int length,taglen
+
+#define unused_var(x) if(0) x=0
 
 #define next_tag()\
 retval = asn1_get_tag(&subbuf,&class,&construction,&tagnum,&taglen);\
@@ -271,6 +273,7 @@ asn1_error_code asn1_decode_krb5_flags(buf, val)
   asn1_octet o;
   int i;
   krb5_flags f=0;
+  unused_var(taglen);
 
   retval = asn1_get_tag(buf,&class,&construction,&tagnum,&length);
   if(retval) return retval;
@@ -351,6 +354,7 @@ asn1_error_code asn1_decode_ticket(buf, val)
      krb5_ticket * val;
 {
   setup();
+  int applen;
   apptag(1);
   { begin_structure();
     { krb5_kvno vno;
