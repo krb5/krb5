@@ -1,3 +1,11 @@
+Wed Jun 12 00:20:08 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* makefile: Renamed to Makefile.in, so that we can do WIN16/WIN32
+ 		specializations.  Remove /nologo option for Win32 RFLAGS,
+ 		since RC apparently doesn't support it.
+
+	* changelo: Renamed to ChangeLog, to make life easier.
+
 Wed Jan 10 23:16:41 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* cns.rc: Add an #ifdef for enabling lower case realm (for use

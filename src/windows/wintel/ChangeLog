@@ -1,3 +1,11 @@
+Wed Jun 12 00:22:02 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* makefile: Renamed to Makefile.in, so that we can do WIN16/WIN32
+ 		specializations.  Remove /nologo option for Win32 RFLAGS,
+ 		since RC apparently doesn't support it.
+
+	* changelo: Renamed to ChangeLog, to make life easier.
+
 Fri Jan 19 23:22:12 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* auth.c (k5_auth_send): krb5_get_credentials does not take the
