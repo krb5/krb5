@@ -467,11 +467,9 @@ krb5_error_code krb5_lock_file (krb5_context, int, int);
 krb5_error_code krb5_unlock_file (krb5_context, int);
 krb5_error_code krb5_sendto_kdc (krb5_context, const krb5_data *,
 				 const krb5_data *, krb5_data *, int, int);
-krb5_error_code krb5int_sendto_udp (krb5_context, const krb5_data *,
-				    const struct addrlist *, krb5_data *,
-				    struct sockaddr *, socklen_t *);
-krb5_error_code krb5int_sendto_tcp (krb5_context context, const krb5_data *,
-				    const struct addrlist *, krb5_data *);
+krb5_error_code krb5int_sendto (krb5_context, const krb5_data *,
+				const struct addrlist *, krb5_data *,
+				struct sockaddr *, socklen_t *);
 krb5_error_code krb5_get_krbhst (krb5_context, const krb5_data *, char *** );
 krb5_error_code krb5_free_krbhst (krb5_context, char * const * );
 krb5_error_code krb5_create_secure_file (krb5_context, const char * pathname);
@@ -497,6 +495,7 @@ struct addrlist {
 };
 #define ADDRLIST_INIT { 0, 0, 0 }
 extern void krb5int_free_addrlist (struct addrlist *);
+extern int krb5int_grow_addrlist (struct addrlist *, int);
 
 krb5_error_code
 krb5int_locate_server (krb5_context,
