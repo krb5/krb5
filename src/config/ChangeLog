@@ -8,6 +8,7 @@
 	COMPILE_ET, MAKE_COMMANDS): Use them, selecting using new
 	configure substitutions.
 	(COM_ERR_LIB): Always define as -lcom_err.
+	(CFLAGS): Define using @CFLAGS@, not @CCOPTS@.
 
 	* win-pre.in (COM_ERR_DEPS): New variable.
 
