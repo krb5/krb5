@@ -164,6 +164,8 @@ krb5_error_code krb5_scc_store
 		   krb5_creds *creds ));
 
 /* scc_skip.c */
+krb5_error_code krb5_scc_skip_header
+	PROTOTYPE((krb5_context, krb5_ccache));
 krb5_error_code krb5_scc_skip_principal 
 	PROTOTYPE((krb5_context, 
 		   krb5_ccache id ));

@@ -1,3 +1,8 @@
+Wed Mar 20 22:50:05 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* scc-proto.h (krb5_scc_skip_header): Added prototype (to fix lint
+	        flames).
+
 Thu Feb  1 15:50:29 1996  Sam Hartman  <hartmans@tertius.mit.edu>
 
 	* scc_retrv.c (krb5_scc_retrieve): Accept any enctype unless doing a specific match.
