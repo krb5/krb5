@@ -1,3 +1,8 @@
+2003-12-15  Jeffrey Altman <jaltman@mit.edu>
+
+   * cc_mslsa.c:  Perform a GetMSTGT() call as part of krb5_lcc_start_seq_get
+     to ensure that the tgt is refreshed
+
 2003-12-13  Jeffrey Altman <jaltman@mit.edu>
 
    * Makefile.in: Remove extranenous spaces in ##WIN32## constructs

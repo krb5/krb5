@@ -1090,6 +1090,14 @@ krb5_lcc_start_seq_get(krb5_context context, krb5_ccache id, krb5_cc_cursor *cur
 {
     krb5_lcc_cursor *lcursor;
     krb5_lcc_data *data = (krb5_lcc_data *)id->data;
+    KERB_EXTERNAL_TICKET *msticket;
+
+    /*
+     * obtain a tgt to refresh the ccache in case the ticket is expired
+     */
+    if (GetMSTGT(data->LogonHandle, data->PackageId, &msticket)) {
+        LsaFreeReturnBuffer(msticket);
+    }
 
     lcursor = (krb5_lcc_cursor *) malloc(sizeof(krb5_lcc_cursor));
     if (lcursor == NULL)
