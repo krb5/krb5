@@ -20,4 +20,8 @@ typedef char *	krb5_tcache_name;	/* a name of a ticket cache */
 typedef	int	krb5_tcache_id;		/* a short "identifier" for quick
 					   cache access */
 typedef	int	krb5_tcache_magic;	/* cookie for sequential lookup */
+
+#define	KRB5_TC_READ	0		/* open cache for read only */
+#define	KRB5_TC_RDWR	1		/* open cache for read/write */
+
 #endif /* __KRB5_TCACHE__ */
