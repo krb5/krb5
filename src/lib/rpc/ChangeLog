@@ -1,3 +1,8 @@
+2001-12-14  Ezra Peisach  <epeisach@mit.edu>
+
+	* svc_auth_gssapi.c (_gssrpc_svcauth_gssapi): Local return
+	variable declared enum auth_stat instead of int.
+
 2001-12-07  Ezra Peisach  <epeisach@mit.edu>
 
 	* clnt_raw, clnt_tcp.c, clnt_udp.c: Use a union structure to

@@ -131,7 +131,8 @@ enum auth_stat _gssrpc_svcauth_gssapi(rqst, msg, no_dispatch)
      OM_uint32 gssstat, minor_stat, time_rec;
      struct opaque_auth *cred, *verf;
      svc_auth_gssapi_data *client_data;
-     int ret, i;
+     int i;
+     enum auth_stat ret;
      OM_uint32 ret_flags;
      rpc_u_int32 seq_num;
 
