@@ -1,3 +1,11 @@
+Mon Aug  7 19:26:06 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* aclocal.m4 (SS_RULES): Add double quotes around "$}{*.ct"
+
+	* aclocal.m4 (CONFIG_RULES): Add $(SHELL) to invocation of
+		autoconf, so that things work even if the execute bit
+		isn't set on the shell script.
+
 Tue Jul 18 19:20:49 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* aclocal.m4 (KRB5_SOCKADDR_SA_LEN): Add space before = to keep

@@ -158,7 +158,7 @@ Makefile: $(srcdir)/Makefile.in config.status $(SRCTOP)/config/pre.in $(SRCTOP)/
 config.status: $(srcdir)/configure
 	$(SHELL) config.status --recheck
 $(srcdir)/configure: $(srcdir)/configure.in $(SRCTOP)/aclocal.m4
-	cd $(srcdir); $(SRCTOP)/util/autoconf/autoconf --localdir=$(BUILDTOP) --macrodir=$(BUILDTOP)/util/autoconf
+	cd $(srcdir); $(SHELL) $(SRCTOP)/util/autoconf/autoconf --localdir=$(BUILDTOP) --macrodir=$(BUILDTOP)/util/autoconf
 ]
 AC_POP_MAKEFILE()dnl
 ])dnl
@@ -230,10 +230,10 @@ MAKE_COMMANDS= $(BUILDTOP)/util/ss/mk_cmds
 .SUFFIXES:  .h .c .et .ct
 
 .ct.c:
-	@if [ $< != $}{*.ct ]; then \
-		(set -x; cp $< $}{*.ct && $(MAKE_COMMANDS) $}{*.ct && $(RM) $}{*.ct) || exit 1; \
+	@if [ $< != "$}{*.ct" ]; then \
+		(set -x; cp $< "$}{*.ct" && $(MAKE_COMMANDS) "$}{*.ct" && $(RM) "$}{*.ct") || exit 1; \
 	else \
-		(set -x; $(MAKE_COMMANDS) $}{*.ct) || exit 1; \
+		(set -x; $(MAKE_COMMANDS) "$}{*.ct") || exit 1; \
 	fi
 
 }
