@@ -136,7 +136,7 @@ all-windows::
 	cd ..
 
 all-windows:: lib-windows
-lib-windows: $(KLIB) $(GLIB)
+lib-windows: krb5.lib gssapi.lib krb4.lib
 
 clean-windows::
 	@echo Making clean in lib\crypto
