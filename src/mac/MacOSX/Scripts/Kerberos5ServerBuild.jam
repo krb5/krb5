@@ -32,7 +32,7 @@ rule Configure
 actions Configure
 {
     mkdir -p "$(1:D)"
-    cd "$(1:D)" && /bin/sh "$(2)" --prefix=/usr CFLAGS="-fno-common -include /usr/include/TargetConditionals.h" LDFLAGS="-Wl,-search_paths_first" || rm -f "$(1)"
+    cd "$(1:D)" && /bin/sh "$(2)" --prefix=/usr --localstatedir=/var/db CFLAGS="-fno-common -include /usr/include/TargetConditionals.h" LDFLAGS="-Wl,-search_paths_first" || rm -f "$(1)"
 }
 
 # Make <stamp file> <build dir> : <makefile>
