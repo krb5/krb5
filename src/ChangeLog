@@ -1,3 +1,8 @@
+Wed Nov 20 13:28:00 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in (awk-windows-mac): Copy gssapi.hin to gssapi.h to
+		make Win16 build work.
+
 Thu Nov  7 23:55:02 1996  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
 
 	* aclocal.m4 (LinkFileDir, LinkFile): AC_REQUIRE the AC_LN_S macro

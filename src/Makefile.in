@@ -235,7 +235,8 @@ CLEANUP= util/profile/profile.h util/profile/prof_err.[ch] \
 	include/adm_err.h include/profile.h include/krb5.h \
 	include/krb5/osconf.h \
 	lib/gssapi/generic/gssapi_err_generic.[ch] \
-	lib/gssapi/krb5/gssapi_err_krb5.[ch] winfile.list macfile.list
+	lib/gssapi/krb5/gssapi_err_krb5.[ch] winfile.list macfile.list \
+	lib/gssapi/generic/gssapi.h
 
 kerbsrc.win: kerbsrc.zip
 
@@ -343,3 +344,4 @@ awk-windows-mac:
 	cat $(PR)/profile.hin $(PR)prof_err.h > $(PR)profile.h
 	cp $(PR)profile.h include/profile.h
 	cp $(INC)/krb5/stock/osconf.h $(INC)/krb5
+	cp $(GG)gssapi.hin $(GG)gssapi.h
