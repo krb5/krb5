@@ -50,6 +50,10 @@
 /* Used by old admin server */
 #define	DEFAULT_ADMIN_ACL	"@PREFIX/lib/krb5kdc/kadm_old.acl"
 
+/* Location of KDC profile */
+#define	DEFAULT_KDC_PROFILE	"@PREFIX/lib/krb5kdc/kdc.prof"
+#define	KDC_PROFILE_ENV		"KRB5_KDC_PROFILE"
+
 #define	DEFAULT_KDC_ETYPE	ETYPE_DES_CBC_CRC
 #define	DEFAULT_KDC_KEYTYPE	KEYTYPE_DES
 #define KDCRCACHE		"dfl:krb5kdc_rcache"

@@ -1,3 +1,8 @@
+
+Thu Jun 22 11:53:47 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* osconf.h - Add DEFAULT_KDC_PROFILE and KDC_PROFILE_ENV for KDC
+		profile location.
+
 Thu Jun 8 14:42:56 EDT 1995	Paul Park	(pjpark@mit.edu)
 
 	* osconf.h - Restore DEFAULT_ADMIN_ACL definition to be
