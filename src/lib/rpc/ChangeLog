@@ -1,3 +1,22 @@
+Wed Jul 31 20:36:34 1996  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
+
+	* getrpcent.c: Shuffle inclusion order somewhat.
+
+	* configure.in: Fix test for STRUCT_RPCENT_ALREADY_PROVIDED if
+		there happens to be a /usr/include/rpc/netdb.h.  This
+		causes /usr/include/netdb.h to include netdb.h from our
+		tree rather from /usr/include/rpc, which of course results
+		in massive damage.  Basically, if /usr/include/netdb.h
+		contains rpcent declaration and /usr/include/rpc/netdb.h
+		exists, then assume that there is no struct rpcent in the
+		system include files.  It's really unfortunate that we
+		need to do this at all, but it's all we can do short of
+		renaming a bunch of include files or directories.
+
+	* Makefile.in: Punt -I$(srcdir)/..; it was gross and not needed
+		because headers get installed in build tree before
+		building the library anyway.
+
 Wed Jul 31 16:54:29 1996  Tom Yu  <tlyu@mit.edu>
 
 	* types.hin: Remove #include <netdb.h> because it appears the only
