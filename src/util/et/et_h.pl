@@ -132,7 +132,15 @@ line: while (<>) {
 	&Pick('>', $outfile) &&
 	    (print $fh '');
 	&Pick('>', $outfile) &&
+	    (print $fh '#if defined(macintosh) || (defined(__MACH__) && defined(__APPLE__))');
+	&Pick('>', $outfile) &&
+	    (print $fh '#include <KerberosComErr/KerberosComErr.h>');
+	&Pick('>', $outfile) &&
+	    (print $fh '#else');
+	&Pick('>', $outfile) &&
 	    (print $fh '#include <com_err.h>');
+	&Pick('>', $outfile) &&
+	    (print $fh '#endif');
 	&Pick('>', $outfile) &&
 	    (print $fh '');
     }
@@ -186,7 +194,7 @@ else {
 &Pick('>', $outfile) &&
     (print $fh '');
 &Pick('>', $outfile) &&
-    (print $fh '#if defined(unix) || defined(_AIX)');
+    (print $fh '#if (defined(unix) || defined(_AIX)) && !(defined(__MACH__) && defined(__APPLE__))');
 &Pick('>', $outfile) &&
     (print $fh '/* for compatibility with older versions... */');
 &Pick('>', $outfile) &&

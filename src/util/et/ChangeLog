@@ -1,3 +1,14 @@
+2001-10-29  Miro Jurisic  <meeroh@mit.edu>
+	* pullup from krb5-1-2 branch after krb5-1-2-2-bp
+	* error_message.c: fixed busted parentheses
+	* error_message.c: call through to strerror on Mac OS X
+	* error_message.c: call through to ErrorLib on Mac OS X
+	* et.pbexp: export com_err() on Mac OS X
+	* error_massage.c: #include <KerberosSupport/ErrorLib.h> on Mac OS
+	* com_err.h: #include <Kerberos5/win-mac.h> on Mac OS
+	* et_c.awk, et_c.pl, et_h.awk, et_h.pl: Updated Mac OS #defines 
+	and #includes for new header layout and Mac OS X frameworks
+
 2000-10-08  Miro Jurisic  <meeroh@mit.edu>
 
 	* et_c.perl, et_h.perl: 
