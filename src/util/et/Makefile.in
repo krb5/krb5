@@ -178,10 +178,6 @@ depend::
 install:: com_err.h 
 	$(INSTALL_DATA) $(srcdir)/com_err.h  $(DESTDIR)$(KRB5_INCDIR)/com_err.h
 
-install:: mit-sipb-copyright.h
-	$(INSTALL_DATA) $(srcdir)/mit-sipb-copyright.h $(DESTDIR)$(KRB5_INCDIR)/mit-sipb-copyright.h
-
-
 install-unix:: compile_et.1
 	$(INSTALL_DATA) $(srcdir)/compile_et.1 $(DESTDIR)$(CLIENT_MANDIR)/compile_et.1
 

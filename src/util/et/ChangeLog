@@ -1,3 +1,8 @@
+2002-07-12  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (install): Don't install mit-sipb-copyright.h, it's
+	never referenced.
+
 2002-07-09  Ken Raeburn  <raeburn@mit.edu>
 
 	* error_message.c: Put # for cpp directives in first column.
