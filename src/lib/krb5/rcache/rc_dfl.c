@@ -178,7 +178,15 @@ krb5_error_code KRB5_CALLCONV
 krb5_rc_dfl_get_span(krb5_context context, krb5_rcache id,
 		     krb5_deltat *lifespan)
 {
-    *lifespan = ((struct dfl_data *) (id->data))->lifespan;
+    krb5_error_code err;
+    struct dfl_data *t;
+
+    t = (struct dfl_data *) id->data;
+    err = k5_mutex_lock(&id->lock);
+    if (err)
+	return err;
+    *lifespan = t->lifespan;
+    k5_mutex_unlock(&id->lock);
     return 0;
 }
 
@@ -188,19 +196,28 @@ krb5_rc_dfl_init(krb5_context context, krb5_rcache id, krb5_deltat lifespan)
     struct dfl_data *t = (struct dfl_data *)id->data;
     krb5_error_code retval;
 
+    retval = k5_mutex_lock(&id->lock);
+    if (retval)
+	return retval;
     t->lifespan = lifespan ? lifespan : context->clockskew;
     /* default to clockskew from the context */
 #ifndef NOIOSTUFF
-    if ((retval = krb5_rc_io_creat(context, &t->d, &t->name)))
+    if ((retval = krb5_rc_io_creat(context, &t->d, &t->name))) {
+	k5_mutex_unlock(&id->lock);
 	return retval;
+    }
     if ((krb5_rc_io_write(context, &t->d,
 			  (krb5_pointer) &t->lifespan, sizeof(t->lifespan))
-	 || krb5_rc_io_sync(context, &t->d)))
+	 || krb5_rc_io_sync(context, &t->d))) {
+	k5_mutex_unlock(&id->lock);
 	return KRB5_RC_IO;
+    }
 #endif
+    k5_mutex_unlock(&id->lock);
     return 0;
 }
 
+/* Called with the mutex already locked.  */
 krb5_error_code
 krb5_rc_dfl_close_no_free(krb5_context context, krb5_rcache id)
 {
@@ -227,7 +244,13 @@ krb5_rc_dfl_close_no_free(krb5_context context, krb5_rcache id)
 krb5_error_code KRB5_CALLCONV
 krb5_rc_dfl_close(krb5_context context, krb5_rcache id)
 {
+    krb5_error_code retval;
+    retval = k5_mutex_lock(&id->lock);
+    if (retval)
+	return retval;
     krb5_rc_dfl_close_no_free(context, id);
+    k5_mutex_unlock(&id->lock);
+    k5_mutex_destroy(&id->lock);
     free(id);
     return 0;
 }
@@ -377,9 +400,8 @@ errout:
 }
 
 
-
-krb5_error_code KRB5_CALLCONV
-krb5_rc_dfl_recover(krb5_context context, krb5_rcache id)
+static krb5_error_code
+krb5_rc_dfl_recover_locked(krb5_context context, krb5_rcache id)
 {
 #ifdef NOIOSTUFF
     return KRB5_RC_NOIO;
@@ -392,8 +414,9 @@ krb5_rc_dfl_recover(krb5_context context, krb5_rcache id)
     int expired_entries = 0;
     krb5_int32 now;
 
-    if ((retval = krb5_rc_io_open(context, &t->d, t->name)))
+    if ((retval = krb5_rc_io_open(context, &t->d, t->name))) {
 	return retval;
+    }
 
     t->recovering = 1;
 
@@ -457,11 +480,23 @@ io_fail:
     if (retval)
 	krb5_rc_io_close(context, &t->d);
     else if (expired_entries > EXCESSREPS)
-	retval = krb5_rc_dfl_expunge(context, id);
+	retval = krb5_rc_dfl_expunge_locked(context, id);
     t->recovering = 0;
     return retval;
 
 #endif
+}
+
+krb5_error_code KRB5_CALLCONV
+krb5_rc_dfl_recover(krb5_context context, krb5_rcache id)
+{
+    krb5_error_code ret;
+    ret = k5_mutex_lock(&id->lock);
+    if (ret)
+	return ret;
+    ret = krb5_rc_dfl_recover_locked(context, id);
+    k5_mutex_unlock(&id->lock);
+    return ret;
 }
 
 static krb5_error_code
@@ -492,6 +527,8 @@ krb5_rc_io_store(krb5_context context, struct dfl_data *t,
     return ret;
 }
 
+static krb5_error_code krb5_rc_dfl_expunge_locked(krb5_context, krb5_rcache);
+
 krb5_error_code KRB5_CALLCONV
 krb5_rc_dfl_store(krb5_context context, krb5_rcache id, krb5_donot_replay *rep)
 {
@@ -503,36 +540,49 @@ krb5_rc_dfl_store(krb5_context context, krb5_rcache id, krb5_donot_replay *rep)
     if (ret)
 	return ret;
 
+    ret = k5_mutex_lock(&id->lock);
+    if (ret)
+	return ret;
+
     switch(rc_store(context, id, rep, now)) {
     case CMP_MALLOC:
+	k5_mutex_unlock(&id->lock);
 	return KRB5_RC_MALLOC;
     case CMP_REPLAY:
+	k5_mutex_unlock(&id->lock);
 	return KRB5KRB_AP_ERR_REPEAT;
     case 0: break;
     default: /* wtf? */ ;
     }
 #ifndef NOIOSTUFF
     ret = krb5_rc_io_store(context, t, rep);
-    if (ret)
+    if (ret) {
+	k5_mutex_unlock(&id->lock);
 	return ret;
+    }
 #endif
     /* Shall we automatically expunge? */
     if (t->nummisses > t->numhits + EXCESSREPS)
     {
-	return krb5_rc_dfl_expunge(context, id);
+	ret = krb5_rc_dfl_expunge_locked(context, id);
+	k5_mutex_unlock(&id->lock);
+	return ret;
     }
 #ifndef NOIOSTUFF
     else
     {
-	if (krb5_rc_io_sync(context, &t->d))
+	if (krb5_rc_io_sync(context, &t->d)) {
+	    k5_mutex_unlock(&id->lock);
 	    return KRB5_RC_IO;
+	}
     }
 #endif
+    k5_mutex_unlock(&id->lock);
     return 0;
 }
 
-krb5_error_code KRB5_CALLCONV
-krb5_rc_dfl_expunge(krb5_context context, krb5_rcache id)
+static krb5_error_code
+krb5_rc_dfl_expunge_locked(krb5_context context, krb5_rcache id)
 {
     struct dfl_data *t = (struct dfl_data *)id->data;
 #ifdef NOIOSTUFF
@@ -579,7 +629,7 @@ krb5_rc_dfl_expunge(krb5_context context, krb5_rcache id)
 	free(name);
 	if (retval)
 	    return retval;
-	retval = krb5_rc_dfl_recover(context, id);
+	retval = krb5_rc_dfl_recover_locked(context, id);
 	if (retval)
 	    return retval;
 	t = (struct dfl_data *)id->data; /* point to recovered cache */
@@ -618,4 +668,16 @@ krb5_rc_dfl_expunge(krb5_context context, krb5_rcache id)
     (void) krb5_rc_dfl_close(context, tmp);
     return retval;
 #endif
+}
+
+krb5_error_code KRB5_CALLCONV
+krb5_rc_dfl_expunge(krb5_context context, krb5_rcache id)
+{
+    krb5_error_code ret;
+    ret = k5_mutex_lock(&id->lock);
+    if (ret)
+	return ret;
+    ret = krb5_rc_dfl_expunge_locked(context, id);
+    k5_mutex_unlock(&id->lock);
+    return ret;
 }

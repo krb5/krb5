@@ -81,7 +81,7 @@ krb5_error_code krb5_rc_resolve_type(krb5_context context, krb5_rcache *id,
     /* allocate *id? nah */
     (*id)->ops = t->ops;
     k5_mutex_unlock(&rc_typelist_lock);
-    return 0;
+    return k5_mutex_init(&(*id)->lock);
 }
 
 char * krb5_rc_get_type(krb5_context context, krb5_rcache id)
@@ -117,12 +117,16 @@ krb5_rc_default(krb5_context context, krb5_rcache *id)
 
     if ((retval = krb5_rc_resolve_type(context, id, 
 				       krb5_rc_default_type(context)))) {
+	k5_mutex_destroy(&(*id)->lock);
 	FREE(*id);
 	return retval;
     }
     if ((retval = krb5_rc_resolve(context, *id, 
-				  krb5_rc_default_name(context))))
+				  krb5_rc_default_name(context)))) {
+	k5_mutex_destroy(&(*id)->lock);
 	FREE(*id);
+	return retval;
+    }
     (*id)->magic = KV5M_RCACHE;
     return retval;
 }
@@ -151,12 +155,16 @@ krb5_error_code krb5_rc_resolve_full(krb5_context context, krb5_rcache *id, char
 
     if ((retval = krb5_rc_resolve_type(context, id,type))) {
 	FREE(type);
+	k5_mutex_destroy(&(*id)->lock);
 	FREE(*id);
 	return retval;
     }
     FREE(type);
-    if ((retval = krb5_rc_resolve(context, *id,residual + 1)))
+    if ((retval = krb5_rc_resolve(context, *id,residual + 1))) {
+	k5_mutex_destroy(&(*id)->lock);
 	FREE(*id);
+	return retval;
+    }
     (*id)->magic = KV5M_RCACHE;
     return retval;
 }

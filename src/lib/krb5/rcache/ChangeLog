@@ -1,3 +1,19 @@
+2004-04-30  Ken Raeburn  <raeburn@mit.edu>
+
+	* rc_base.c (krb5_rc_resolve_type): Initialize the mutex in the
+	replay cache structure.
+	(krb5_rc_default, krb5_rc_resolve_full): Destroy it if creation of
+	the replay cache fails.
+	* rc_dfl.c (krb5_rc_dfl_get_span, krb5_rc_dfl_init): Lock the
+	mutex while operating on the replay cache object.
+	(krb5_rc_dfl_expunge_locked): Renamed from krb5_rc_dfl_expunge and
+	made static.  Call krb5_rc_dfl_recover_locked.
+	(krb5_rc_dfl_expunge): New wrapper function, locks the mutex.
+	(krb5_rc_dfl_recover_locked): Renamed from krb5_rc_dfl_recover and
+	made static.  Call krb5_rc_dfl_expunge_locked.
+	(krb5_rc_dfl_recover): New wrapper function, locks the mutex.
+	(krb5_rc_dfl_store): Lock the mutex.  Call _expunge_locked.
+
 2004-04-24  Ken Raeburn  <raeburn@mit.edu>
 
 	* rc_base.c (rc_typelist_lock): Use new partial initializer.
