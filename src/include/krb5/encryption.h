@@ -35,6 +35,12 @@ typedef struct _krb5_encrypt_block {
 					   key schedules */
 } krb5_encrypt_block;
 
+typedef struct _krb5_enc_data {
+    krb5_enctype etype;
+    krb5_kvno kvno;
+    krb5_data ciphertext;
+} krb5_enc_data;
+
 /* could be used in a table to find an etype and initialize a block */
 typedef struct _krb5_cryptosystem_entry {
     krb5_error_code (*encrypt_func) PROTOTYPE((const krb5_pointer /* in */,
