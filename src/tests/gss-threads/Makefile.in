@@ -1,0 +1,50 @@
+# Derived from appl/gss-sample, January 2005.
+
+thisconfigdir=./..
+myfulldir=tests/gss-threads
+mydir=gss-threads
+BUILDTOP=$(REL)..$(S)..
+DEFINES = -DUSE_AUTOCONF_H -DGSSAPI_V2
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
+PTHREAD_LIBS=@PTHREAD_LIBS@
+
+SRCS= $(srcdir)/gss-client.c $(srcdir)/gss-misc.c $(srcdir)/gss-server.c
+
+OBJS= gss-client.o gss-misc.o gss-server.o
+
+all-unix:: gss-server gss-client
+all-windows:: $(OUTPRE)gss-server.exe $(OUTPRE)gss-client.exe
+
+gss-server: gss-server.o gss-misc.o $(GSS_DEPLIBS) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) $(PTHREAD_CFLAGS) -o gss-server gss-server.o gss-misc.o $(GSS_LIBS) $(KRB5_BASE_LIBS) $(PTHREAD_LIBS)
+
+gss-client: gss-client.o gss-misc.o $(GSS_DEPLIBS) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) $(PTHREAD_CFLAGS) -o gss-client gss-client.o gss-misc.o $(GSS_LIBS) $(KRB5_BASE_LIBS) $(PTHREAD_LIBS)
+
+$(OUTPRE)gss-server.exe: $(OUTPRE)gss-server.obj $(OUTPRE)gss-misc.obj $(GLIB) $(KLIB)
+	link $(EXE_LINKOPTS) -out:$@ $** ws2_32.lib
+
+$(OUTPRE)gss-client.exe: $(OUTPRE)gss-client.obj $(OUTPRE)gss-misc.obj $(GLIB) $(KLIB)
+	link $(EXE_LINKOPTS) -out:$@ $** ws2_32.lib
+
+clean-unix::
+	$(RM) gss-server gss-client
+
+install-unix::
+#	$(INSTALL_PROGRAM) gss-client $(DESTDIR)$(CLIENT_BINDIR)/gss-tclient
+#	$(INSTALL_PROGRAM) gss-server $(DESTDIR)$(SERVER_BINDIR)/gss-tserver
+# +++ Dependency line eater +++
+# 
+# Makefile dependencies follow.  This must be the last section in
+# the Makefile.in file
+#
+$(OUTPRE)gss-client.$(OBJEXT): gss-client.c $(BUILDTOP)/include/gssapi/gssapi_generic.h \
+  $(BUILDTOP)/include/gssapi/gssapi.h gss-misc.h $(SRCTOP)/include/port-sockets.h \
+  $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/fake-addrinfo.h \
+  $(SRCTOP)/include/socket-utils.h
+$(OUTPRE)gss-misc.$(OBJEXT): gss-misc.c $(BUILDTOP)/include/gssapi/gssapi_generic.h \
+  $(BUILDTOP)/include/gssapi/gssapi.h gss-misc.h
+$(OUTPRE)gss-server.$(OBJEXT): gss-server.c $(BUILDTOP)/include/gssapi/gssapi_generic.h \
+  $(BUILDTOP)/include/gssapi/gssapi.h gss-misc.h $(SRCTOP)/include/port-sockets.h \
+  $(BUILDTOP)/include/krb5/autoconf.h

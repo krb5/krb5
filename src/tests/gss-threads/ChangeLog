@@ -1,0 +1,6 @@
+2005-02-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* New directory.
+	* All files copies from appl/gss-sample, with Jeff Altman's
+	changes for multithreading on Windows, and mine for pthreads.
+
