@@ -39,6 +39,7 @@ OBJS=	addr_comp.o	\
 	get_in_tkt.o	\
 	in_tkt_pwd.o	\
 	in_tkt_sky.o	\
+	init_ctx.o	\
 	kdc_rep_dc.o	\
 	krbconfig.o	\
 	mk_cred.o	\
@@ -102,6 +103,7 @@ SRCS=	$(srcdir)/addr_comp.c	\
 	$(srcdir)/get_in_tkt.c	\
 	$(srcdir)/in_tkt_pwd.c	\
 	$(srcdir)/in_tkt_sky.c	\
+	$(srcdir)/init_ctx.c	\
 	$(srcdir)/kdc_rep_dc.c	\
 	$(srcdir)/krbconfig.c	\
 	$(srcdir)/mk_cred.c	\

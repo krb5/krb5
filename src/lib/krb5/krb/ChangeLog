@@ -1,3 +1,8 @@
+Mon Dec 19 21:55:44 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* init_ctx.c: New file.  Initializes and frees the krb5_context
+	  structure.
+
 Wed Dec  7 17:52:08 1994    <tytso@localhost>
 
 	* rd_req_dec.c (decrypt_authenticator): If the subkey doesn't
