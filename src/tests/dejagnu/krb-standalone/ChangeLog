@@ -1,5 +1,9 @@
 2004-02-25  Ken Raeburn  <raeburn@mit.edu>
 
+	* rcp.exp (stop_rsh_daemon): Check for any output before eof,
+	causing any such info to be dumped into the debug log.
+	* rsh.exp (stop_rsh_daemon): Likewise.
+
 	* gssapi.exp (doit): Fix typo in log message.
 
 2004-02-09  Ken Raeburn  <raeburn@mit.edu>
