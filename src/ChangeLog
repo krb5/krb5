@@ -1,3 +1,9 @@
+2003-03-12  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (AWK): Default to awk, not gawk.  User can override
+	on make's command line if necessary.  Still, only really useful
+	for building kerbsrc.zip, etc.
+
 2003-03-05  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (WINMAKEFILES): Add lib\crypto\aes\Makefile.

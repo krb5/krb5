@@ -349,7 +349,7 @@ WINBINARYFILES=	windows/*/*.ico windows/*/*.doc windows/*/*.hlp \
 # Part of building the PC release has to be done on Unix. This includes
 # anything the requires awk.
 #
-AWK = gawk
+AWK = awk
 AH  = util/et/et_h.awk
 AC  = util/et/et_c.awk
 INC = include/
