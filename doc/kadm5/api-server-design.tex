@@ -705,12 +705,41 @@ the iteration function are undefined.
 \subsubsection{Function descriptions}
 
 \begin{verbatim}
+osa_adb_ret_t osa_adb_create_T_db(kadm5_config_params *params)
+\end{verbatim}
+%
+Create the database and lockfile specified in params.  The database
+must not already exist, or EEXIST is returned.  The lock file is only
+created after the database file has been created successfully.
+
+\begin{verbatim}
+osa_adb_ret_t osa_adb_rename_T_db(kadm5_config_params *fromparams,
+				  kadm5_config_params *toparams)
+\end{verbatim}
+%
+Rename the database named by fromparams to that named by toparams.
+Both databases and lock files must already exist.  When the function
+returns, the database named by fromparams no longer exists, and
+toparams has been overwritten with fromparams.  This function acquires
+a permanent lock on both databases for the duration of its operation,
+so a failure is likely to leave the databases unusable.
+
+\begin{verbatim}
+osa_adb_ret_t osa_adb_destroy_policy_db(kadm5_config_params *params)
+\end{verbatim}
+%
+Destroy the database named by params.  The database file and lock file
+are deleted.
+
+\begin{verbatim}
 osa_adb_ret_t
 osa_adb_open_T(osa_adb_T_t *db, char *filename);
 \end{verbatim}
 %
-Open the database named filename.  Returns OSA_ADB_FAILURE if it
-cannot open the database.
+Open the database named filename.  Returns OSA_ADB_NOLOCKFILE if the
+database does not exist or if the lock file is missing.  The database
+is not actually opened in the operating-system file sense until a lock
+is acquire.
 
 \begin{verbatim}
 osa_adb_ret_t

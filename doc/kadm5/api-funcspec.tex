@@ -391,7 +391,8 @@ typedef struct _kadm5_config_params {
 %
 The following list describes each of the fields of the structure,
 along with the profile relation it overrides, its mask value, its
-default value, and whether it is valid on the client, server, or both.
+default value, and whether it is valid on the client, server, or both,
+or neither.
 \begin{description}
 \item[mask] No variable.  No mask value.  A bitfield specifying which
 fields of the structure contain valid information.  A caller sets this
@@ -429,31 +430,13 @@ kadmind_port field, overriding any value of the kadmind_port variable.
 database name to use; the Kerberos database stores principal
 information.  The default is DEFAULT_KDB_FILE.
 
-\item[admin_dbname] Variable: admin_database_name.  ADBNAME.  Server.
-The administration database name to use; the administration database
-stores policy information.  If DBNAME is specified in the input
-parameters and ADBNAME is not, the admin_database_name variable is
-overridden and the field is set to the value of dbname followed by
-``.kadm5''.  The default, if DBNAME is not set and the variable is not
-defined, is also the value of dbname followed by ``.kadm5'', if dbname
-is set.  NOTE: The ADBNAME mask value is allowed to be set by callers
-{\it only} for testing purposes; it should {\it never} be set by
-normal clients, which instead should allow it to be derived from the
-database name.
+\item[admin_dbname] Variable: admin_database_name.  ADBNAME.
+Neither.  If the dbname field is set, this field is set to the value
+of dbname followed by ``.kadm5''.
 
 \item[admin_lockfile] Variable: admin_database_lockfile.
-ADB_LOCKFILE.  Server.  The administration database lock file name,
-used to lock the administration database.  If ADBNAME or DBNAME is
-specified in the input parameters and ADB_LOCKFILE is not, the
-admin_database_lockfile variable is overridden and the field is set to
-the value of admin_dbname followed by ``.lock'' (this depends on
-admin_dbname already being set based on DBNAME as described above).
-The default, if neither DBNAME nor ADBNAME is set in the input
-parameters and the variable is not defined, is admin_dbname followed
-by ``.lock'', if admin_dbname is set.  NOTE: The ADBNAME mask value is
-allowed to be set by callers {\it only} for testing purposes; it
-should {\it never} be set by normal clients, which instead should
-allow it to be derived from the database name.
+ADB_LOCKFILE.  Neither.  If the admin_dbname field is set, this field
+is set to the value of admin_dbname followed by ``.lock''.
 
 \item[acl_file] Variable: acl_file.  ACL_FILE.  Server.  The admin
 server's ACL file.  The default is DEFAULT_KADM5_ACL_FILE.
