@@ -516,6 +516,11 @@ struct srv_dns_entry {
     char *host;
 };
 
+/* Do DNS SRV query, return results in *answers.
+
+   Make best effort to return all the data we can.  On memory or
+   decoding errors, just return what we've got.  Always return 0,
+   currently.  */
 static krb5_error_code
 make_srv_query_realm(const krb5_data *realm,
 		     const char *service,
@@ -535,7 +540,6 @@ make_srv_query_realm(const krb5_data *realm,
 
     struct srv_dns_entry *head = NULL;
     struct srv_dns_entry *srv = NULL, *entry = NULL;
-    krb5_error_code code = 0;
 
     /*
      * First off, build a query of the form:
@@ -548,7 +552,6 @@ make_srv_query_realm(const krb5_data *realm,
      *
      */
 
-    *answers = 0;
     if (memchr(realm->data, 0, realm->length))
 	return 0;
     if ( strlen(service) + strlen(protocol) + realm->length + 6 
@@ -683,6 +686,10 @@ make_srv_query_realm(const krb5_data *realm,
 	    srv->weight = weight;
 	    srv->port = port;
 	    srv->host = strdup(host);
+	    if (srv->host == NULL) {
+		free(srv);
+		goto out;
+	    }
 
 	    if (head == NULL || head->priority > srv->priority) {
 		srv->next = head;
@@ -708,10 +715,9 @@ make_srv_query_realm(const krb5_data *realm,
 	    INCR_CHECK(p, rdlen);
     }
 	
-    *answers = head;
-
   out:
-    return code;
+    *answers = head;
+    return 0;
 }
 
 static krb5_error_code
@@ -722,23 +728,12 @@ krb5_locate_srv_dns_1 (const krb5_data *realm,
 		       int family)
 {
     struct srv_dns_entry *head = NULL;
-    struct srv_dns_entry *entry = NULL;
+    struct srv_dns_entry *entry = NULL, *next;
     krb5_error_code code = 0;
-
-    /*
-     * First off, build a query of the form:
-     *
-     * service.protocol.realm
-     *
-     * which will most likely be something like:
-     *
-     * _kerberos._udp.REALM
-     *
-     */
 
     code = make_srv_query_realm(realm, service, protocol, &head);
     if (code)
-	goto out;
+	return 0;
 
     /*
      * Okay!  Now we've got a linked list of entries sorted by
@@ -747,33 +742,39 @@ krb5_locate_srv_dns_1 (const krb5_data *realm,
      */
 
     if (head == NULL)
-	goto out;
+	return 0;
 
     /* Check for the "." case indicating no support.  */
     if (head->next == 0 && head->host[0] == 0) {
-	code = KRB5_ERR_NO_SERVICE;
-	goto out;
+	free(head->host);
+	free(head);
+	return KRB5_ERR_NO_SERVICE;
     }
 
 #ifdef TEST
     fprintf (stderr, "walking answer list:\n");
 #endif
-    for (entry = head; entry != NULL; entry = entry->next) {
+    for (entry = head; entry != NULL; entry = next) {
 #ifdef TEST
 	fprintf (stderr, "\tport=%d host=%s\n", entry->port, entry->host);
 #endif
+	next = entry->next;
 	code = add_host_to_list (addrlist, entry->host, htons (entry->port), 0,
 				 (strcmp("_tcp", protocol)
 				  ? SOCK_DGRAM
 				  : SOCK_STREAM), family);
 	if (code)
 	    break;
+	if (entry == head) {
+	    free(entry->host);
+	    free(entry);
+	    head = next;
+	    entry = 0;
+	}
     }
 #ifdef TEST
     fprintf (stderr, "[end]\n");
 #endif
-
-  out:
 
     for (entry = head; entry != NULL; ) {
 	struct srv_dns_entry *srv;

@@ -1,3 +1,12 @@
+2003-06-05  Ken Raeburn  <raeburn@mit.edu>
+
+	* locate_kdc.c (make_srv_query_realm): Punt if strdup fails.
+	Always return what data we can, even if memory allocation or other
+	problems prevent us from returning more.
+	(krb5_locate_srv_dns_1): Always return what data we can.  Fix
+	memory leak.  Free up temporary storage as quickly as possible,
+	while building up address list to return.
+
 2003-06-03  Ken Raeburn  <raeburn@mit.edu>
 
 	* accessor.c (krb5int_accessor): Initialize restored locate_server
