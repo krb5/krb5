@@ -5,6 +5,16 @@
  * $Source$
  * 
  * $Log$
+ * Revision 1.2  1998/02/14 02:32:58  tlyu
+ * 	* client_init.c:
+ * 	* client_principal.c:
+ * 	* client_rpc.c:
+ * 	* clnt_policy.c:
+ * 	* clnt_privs.c: Update header locations.
+ *
+ * 	* Makefile.in (LIBMAJOR): Bump major version to reflect change in
+ * 	rpc library.
+ *
  * Revision 1.1  1996/07/24 22:22:48  tlyu
  * 	* Makefile.in, configure.in: break out client lib into a
  * 		subdirectory
@@ -51,7 +61,7 @@
 static char *rcsid = "$Header$";
 #endif
 
-#include    <rpc/rpc.h>
+#include    <gssrpc/rpc.h>
 #include    <kadm5/admin.h>
 #include    <kadm5/kadm_rpc.h>
 #include    "client_internal.h"

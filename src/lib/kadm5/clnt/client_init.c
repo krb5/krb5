@@ -26,10 +26,10 @@ static char *rcsid = "$Header$";
 #include <kadm5/kadm_rpc.h>
 #include "client_internal.h"
 
-#include <rpc/rpc.h>
+#include <gssrpc/rpc.h>
 #include <gssapi/gssapi.h>
 #include <gssapi/gssapi_krb5.h>
-#include <rpc/auth_gssapi.h>
+#include <gssrpc/auth_gssapi.h>
 
 #define	ADM_CCACHE  "/tmp/ovsec_adm.XXXXXX"
 

@@ -8,7 +8,7 @@
 static char *rcsid = "$Header$";
 #endif
 
-#include    <rpc/rpc.h>
+#include    <gssrpc/rpc.h>
 #include    <kadm5/admin.h>
 #include    <kadm5/kadm_rpc.h>
 #include    "client_internal.h"

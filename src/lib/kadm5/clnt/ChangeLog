@@ -1,3 +1,8 @@
+Fri Feb 13 21:30:34 1998  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (LIBMAJOR): Bump major version to reflect change in
+	rpc library.
+
 Wed Jan 28 16:32:36 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* configure.in, Makefile.in: Remove the CopySrcHeader macro

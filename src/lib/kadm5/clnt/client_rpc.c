@@ -1,4 +1,4 @@
-#include <rpc/rpc.h>
+#include <gssrpc/rpc.h>
 #include <kadm5/kadm_rpc.h>
 #include <krb5.h>
 #include <kadm5/admin.h>
