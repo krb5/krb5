@@ -104,7 +104,7 @@ KRB5_DLLIMP krb5_error_code KRB5_CALLCONV
 krb5_calculate_checksum(context, cktype, in, in_length, seed, seed_length, outcksum)
     krb5_context		context;
     krb5_const krb5_cksumtype	cktype;
-    krb5_pointer		in;
+    krb5_const krb5_pointer	in;
     krb5_const size_t		in_length;
     krb5_const krb5_pointer	seed;
     krb5_const size_t		seed_length;
