@@ -77,7 +77,7 @@ TAGS: $(SRCS)
 clean-:: clean-windows
 clean-mac:: clean-unix
 clean-unix::
-	$(RM) *.o core
+	$(RM) *.o core krb5-config
 
 mostlyclean: clean
 

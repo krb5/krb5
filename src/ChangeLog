@@ -1,3 +1,11 @@
+2002-12-06  Ezra Peisach  <epeisach@bu.edu>
+
+	* Makefile.in (clean-unix): Remove krb5-config.
+
+2002-12-06  Ezra Peisach  <epeisach@bu.edu>
+
+	* Makefile.in (clean-unix): Remove krb5-config
+
 2002-12-02  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Add rules to build kadm_err.h and kadm_err.c for
