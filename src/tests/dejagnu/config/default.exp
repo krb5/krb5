@@ -378,7 +378,7 @@ if ![info exists RLOGIN] {
 }
 
 if ![info exists RLOGIN_FLAGS] {
-    set RLOGIN_FLAGS ""
+    set RLOGIN_FLAGS "-x"
 }
 
 # We use a couple of variables to hold shell prompts which may be
@@ -1321,6 +1321,23 @@ proc start_kerberos_daemons { standalone } {
     expect {
 	-i $tailf_spawn_id
 	-re "commencing operation\r\n" { }
+	-re "krb5kdc: \[a-zA-Z\]* - Cannot bind server socket to \[ 0-9a-fA-F:.\]*\r\n" {
+	    verbose -log "warning: $expect_out(0,string)"
+	    exp_continue
+	}
+	"no sockets set up?" {
+	    if {$standalone} {
+		verbose -log "krb5kdc startup failed to bind listening sockets"
+		fail "krb5kdc"
+	    } else {
+		perror "krb5kdc startup failed to bind listening sockets"
+	    }
+	    stop_kerberos_daemons
+	    exec kill $tailf_pid
+	    expect -i $tailf_spawn_id eof
+	    wait -i $tailf_spawn_id
+	    return 0
+	}
 	timeout {
 	    if {$standalone} {
 		verbose -log "krb5kdc startup timed out"
@@ -2208,6 +2225,13 @@ proc setup_root_shell { testname } {
 	}
 	-re "word:|erberos rlogin failed|ection refused|ection reset by peer" {
 	    note "$testname test requires ability to rlogin as root"
+	    unsupported "$testname"
+	    set timeout $old_timeout
+	    stop_root_shell
+	    return 0
+	}
+	"Cannot assign requested address" {
+	    note "$testname: rlogin as root 'cannot assign requested address'"
 	    unsupported "$testname"
 	    set timeout $old_timeout
 	    stop_root_shell

@@ -1,3 +1,11 @@
+2003-06-01  Ken Raeburn  <raeburn@mit.edu>
+
+	* default.exp: Default RLOGIN_FLAGS to "-x".
+	(start_kerberos_daemons): Watch for "Cannot bind server socket"
+	and log it.  Watch for "no sockets set up" and report an error.
+	(setup_root_shell): Watch for "Cannot assign requested address",
+	log it and give up.
+
 2003-05-21  Tom Yu  <tlyu@mit.edu>
 
 	* default.exp: Be slightly more lenient about matching password
