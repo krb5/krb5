@@ -28,17 +28,16 @@
 #include "enc_provider.h"
 
 /* This random number generator is a feedback generator based on a
-   block cipher.  It uses DES by default, since it guaranteed to be
-   present in the system, but can be changed.  As new seed data comes
-   in, the old state is folded with the new seed into new state.  Each
-   time random bytes are requested, the seed is used as a key and
-   cblock, and the encryption is used as the output.  The output is
-   fed back as new seed data, as described above. */
+   block cipher.  It uses triple-DES by default now, but can be
+   changed, since everything uses it abstractly.
 
-/* this can be replaced with another encryption provider, since
-   everything below uses it abstractly */
+   As new seed data comes in, the old state is folded with the new
+   seed into new state.  Each time random bytes are requested, the
+   seed is used as a key and cblock, and the encryption is used as the
+   output.  The output is fed back as new seed data, as described
+   above.  */
 
-static const struct krb5_enc_provider *const enc = &krb5_enc_des;
+static const struct krb5_enc_provider *const enc = &krb5_enc_des3;
 
 /* XXX state.  Should it be in krb5_context? */
 
@@ -64,9 +63,9 @@ krb5_c_random_seed(krb5_context context, krb5_data *data)
     unsigned char *fold_input;
 
     if (inited == 0) {
-	/* this does a bunch of malloc'ing up front, so that
+	/* This does a bunch of malloc'ing up front, so that
 	   generating random keys doesn't have to malloc, so it can't
-	   fail.  seeding still malloc's, but that's less common. */
+	   fail.  Seeding still malloc's, but that's less common.  */
 
 	enc->block_size(&blocksize);
 	enc->keysize(&keybytes, &keylength);
@@ -102,8 +101,9 @@ krb5_c_random_make_octets(krb5_context context, krb5_data *data)
     int bytes;
 
     if (inited == 0) {
-	/* i need some entropy.  I'd use the current time and pid, but
-	   that could cause portability problems. */
+	/* I need some entropy.  I'd use the current time and pid, but
+	   that could cause portability problems.  And besides, as an
+	   entropy source, the quality just sucks.  */
 	abort();
     }
 
@@ -129,7 +129,7 @@ krb5_c_random_make_octets(krb5_context context, krb5_data *data)
 	    if ((ret = ((*(enc->encrypt))(&key, NULL, &data1, &data2))))
 		return(ret);
 
-	    /* fold the new output back into the state */
+	    /* Fold the new output back into the state.  */
 
 	    krb5_nfold(OUTPUTSIZE*8, OUTPUT, STATESIZE*8, NEWSTATE);
 	    memcpy(STATE, NEWSTATE, STATESIZE);
