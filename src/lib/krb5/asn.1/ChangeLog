@@ -1,3 +1,12 @@
+2000-08-07  Ezra Peisach  <epeisach@mit.edu>
+
+	* asn1_k_decode.c (asn1_decode_last_req_entry): Decode the lr_type
+	as an int32. Handle backwards compatibility if KRB5_GENEROUS_LR_TYPE
+	is defined. 
+
+	* krbasn1.h: Define KRB5_GENEROUS_LR_TYPE for compatibility with
+	one byte negative lr_types which are sent as a positive integer.
+
 2000-06-29  Tom Yu  <tlyu@mit.edu>
 
 	* asn1buf.h (asn1buf_insert_octet): Define using __inline__ rather

@@ -645,10 +645,15 @@ asn1_error_code asn1_decode_last_req_entry(buf, val)
 {
   setup();
   { begin_structure();
-    get_field(val->lr_type,0,asn1_decode_octet);
+    get_field(val->lr_type,0,asn1_decode_int32);
     get_field(val->value,1,asn1_decode_kerberos_time);
     end_structure();
     val->magic = KV5M_LAST_REQ_ENTRY;
+#ifdef KRB5_GENEROUS_LR_TYPE
+    /* If we are only a single byte wide and negative - fill in the
+       other bits */
+    if((val->lr_type & 0xffffff80) == 0x80) val->lr_type |= 0xffffff00;
+#endif
   }
   cleanup();
 }
