@@ -1,3 +1,12 @@
+2002-12-13  Tom Yu  <tlyu@mit.edu>
+
+	* ad_print.c, g_in_tkt.c, g_pw_in_tkt.c, kadm_net.c, klog.c:
+	* kuserok.c, log.c, memcache.c, netread.c, netwrite.c:
+	* password_to_key.c, recvauth.c, stime.c, tkt_string.c: 
+	Change _WINDOWS to _WIN32 in many places.  Update copyright
+	notices.  Remove _WINDOWS handling completely in a few places
+	where it's not needed.
+
 2002-12-12  Tom Yu  <tlyu@mit.edu>
 
 	* FSp-glue.c: Extracted and ported from various files from KfM.

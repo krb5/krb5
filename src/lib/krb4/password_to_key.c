@@ -1,5 +1,5 @@
 /*
- * password_to_key.c -- password_to_key functions merged from KfM
+ * lib/krb4/password_to_key.c
  *
  * Copyright 1999, 2002 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -22,6 +22,8 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
+ *
+ * password_to_key functions merged from KfM
  */
 
 #include <string.h>
@@ -101,7 +103,7 @@ mit_passwd_to_key(char *user, char *instance, char *realm,
 
     if (passwd)
         mit_string_to_key(passwd, key);
-#if !(defined(_WINDOWS) || defined(macintosh))
+#if !(defined(_WIN32) || defined(macintosh))
     else {
         des_read_password((C_Block *)key, "Password: ", 0);
     }
@@ -137,7 +139,7 @@ afs_passwd_to_key(char *user, char *instance, char *realm,
 
     if (passwd)
         afs_string_to_key(passwd, realm, key);
-#if !(defined(_WINDOWS) || defined(macintosh))
+#if !(defined(_WIN32) || defined(macintosh))
     else {
         des_read_password((C_Block *)key, "Password: ", 0);
     }

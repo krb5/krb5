@@ -26,6 +26,7 @@
 
 #include "krb.h"
 #include "des.h"
+#include "krb4int.h"
 #include "prot.h"
 
 #include <string.h>

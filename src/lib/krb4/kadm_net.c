@@ -1,5 +1,5 @@
 /*
- * kadm_net.c
+ * lib/krb4/kadm_net.c
  *
  * Copyright 1988, 2002 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -44,17 +44,17 @@
 #include "prot.h"
 
 /* XXX FIXME! */
-#if defined(_WINDOWS) || defined(macintosh)
+#if defined(_WIN32) || defined(macintosh)
 	#define SIGNAL(s, f) 0
 #else
 	#define SIGNAL(s, f) signal(s, f)
-	extern int errno;
 #endif
 
 static void clear_secrets(des_cblock sess_key, Key_schedule sess_sched);
 /* XXX FIXME! */
+#ifdef SIGPIPE
 static sigtype (*opipe)();
-
+#endif
 
 /*
  * kadm_init_link
@@ -286,14 +286,18 @@ int kadm_cli_conn(Kadm_Client *client_parm)
 
 	return KADM_NO_CONN;		/* couldnt get the connect */
     }
+#ifdef SIGPIPE
     opipe = SIGNAL(SIGPIPE, SIG_IGN);
+#endif
     client_parm->my_addr_len = sizeof(client_parm->my_addr);
     if (SOCKET_GETSOCKNAME(client_parm->admin_fd,
 		    (struct sockaddr *) & client_parm->my_addr,
 		    &client_parm->my_addr_len) < 0) {
 	(void) SOCKET_CLOSE(client_parm->admin_fd);
 	client_parm->admin_fd = -1;
+#ifdef SIGPIPE
 	(void) SIGNAL(SIGPIPE, opipe);
+#endif
 	return KADM_NO_HERE;		/* couldnt find out who we are */
     }
 #if 0
@@ -301,7 +305,9 @@ int kadm_cli_conn(Kadm_Client *client_parm)
 		   sizeof(on)) < 0) {
 	(void) closesocket(client_parm.admin_fd);
 	client_parm.admin_fd = -1;
+#ifdef SIGPIPE
 	(void) SIGNAL(SIGPIPE, opipe);
+#endif
 	return KADM_NO_CONN;		/* XXX */
     }
 #endif
@@ -311,7 +317,9 @@ int kadm_cli_conn(Kadm_Client *client_parm)
 void kadm_cli_disconn(Kadm_Client *client_parm)
 {
     (void) SOCKET_CLOSE(client_parm->admin_fd);
+#ifdef SIGPIPE
     (void) SIGNAL(SIGPIPE, opipe);
+#endif
     return;
 }
 

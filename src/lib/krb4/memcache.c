@@ -14,7 +14,7 @@
 
 #include "krb.h"
 
-#ifdef _WINDOWS
+#ifdef _WIN32
 #include <errno.h>
 
 typedef DWORD OSErr;
@@ -55,11 +55,11 @@ typedef int OSErr;
 static	int		fNumSessions = 0;
 static	Session		**fSessions = 0;
 
-#ifndef _WINDOWS
+#ifndef _WIN32
 #define change_cache()
 #endif
 
-#if defined (_WINDOWS) || defined (unix)
+#if defined (_WIN32) || defined (unix)
 /* Fake Mac handles up for general use.  */
 #define	Handle	char **
 #define	Size	int
@@ -164,7 +164,7 @@ MemError()
 
 #endif /* Windows || unix */
 
-#ifdef _WINDOWS
+#ifdef _WIN32
 
 /*
  * change_cache should be called after the cache changes.

@@ -38,10 +38,10 @@ char *getenv();
 #endif
 
 
-#ifdef _WINDOWS
+#ifdef _WIN32
 typedef unsigned long uid_t;
 uid_t getuid(void) { return 0; }
-#endif /* _WINDOWS */
+#endif /* _WIN32 */
 
 /*
  * This routine is used to generate the name of the file that holds
