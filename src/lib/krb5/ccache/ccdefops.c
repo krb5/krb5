@@ -27,6 +27,15 @@
 
 #include "k5-int.h"
 
+#ifdef macintosh
+
+/* Macs use the shared, memory based credentials cache */
+#include "stdcc.h" /* from ccapi subdir */
+
+krb5_cc_ops *krb5_cc_dfl_ops = &krb5_cc_stdcc_ops;
+
+#else
+
 #ifdef HAVE_SYS_TYPES_H
 /* Systems that have <sys/types.h> probably have Unix-like files (off_t,
    for example, which is needed by fcc.h).  */
@@ -39,5 +48,7 @@ krb5_cc_ops *krb5_cc_dfl_ops = &krb5_cc_file_ops;
 
 #include "scc.h"		/* From stdio subdir */
 krb5_cc_ops *krb5_cc_dfl_ops = &krb5_scc_ops;
+
+#endif
 
 #endif

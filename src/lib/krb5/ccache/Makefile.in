@@ -9,7 +9,7 @@ CFLAGS = $(CCOPTS) $(DEFS) -I$(srcdir)$(S)file -I$(srcdir)$(S)stdio
 ##DOS##OBJFILE=..\$(PREFIXDIR).lst
 ##WIN16##LIBNAME=..\krb5.lib
 
-MAC_SUBDIRS = file stdio memory
+MAC_SUBDIRS = file stdio memory ccapi
 
 STLIBOBJS= \
 	ccbase.o \
