@@ -1,3 +1,4 @@
+AC_PREREQ(2.12)
 dnl
 dnl Figure out the top of the source and build trees.  We depend on localdir
 dnl being a relative pathname; we could make it general later, but for now 

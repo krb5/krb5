@@ -1,3 +1,8 @@
+Mon Dec 30 13:39:46 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* aclocal.m4: Add AC_PREREQ(2.12) as we now require autoconf 2.12.
+		[krb5-build/289]
+
 Tue Dec 24 16:08:05 1996  Tom Yu  <tlyu@mit.edu>
 
 	* aclocal.m4 (V5_AC_OUTPUT_MAKEFILE): Fix to deal with the
