@@ -1,3 +1,10 @@
+1998-11-14  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* aclocal.m4: Add support for FreeBSD systems using ELF (and not
+		just a.out systems).  Also remove the definition for
+		the KRB5_POSIX_LOCKS test, since it is no longer needed.
+		(See ChangeLog for lib/krb5/os/lock_file.c for more details.)
+
 1998-09-22  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* aclocal.m4 (AC_PROG_LEX): Autoconf "fixed" AC_PROG_LEX long

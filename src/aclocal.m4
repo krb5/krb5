@@ -410,7 +410,8 @@ define(K5_AC_OUTPUT,[AC_OUTPUT($krb5_output_list)])dnl
 dnl
 dnl K5_OUTPUT_FILES
 dnl
-dnl This is for compatibility purposes, and is deprecated...
+dnl This is for compatibility purposes, and can be removed (once all the
+dnl Makefile.in's have been checked in.)
 dnl
 define(K5_OUTPUT_FILES,[K5_AC_OUTPUT])dnl
 dnl
@@ -495,24 +496,6 @@ AC_FUNC_CHECK(setutxent,AC_DEFINE(HAVE_SETUTXENT))
 AC_FUNC_CHECK(updwtmp,AC_DEFINE(HAVE_UPDWTMP))
 AC_FUNC_CHECK(updwtmpx,AC_DEFINE(HAVE_UPDWTMPX))
 ])dnl
-dnl
-dnl
-dnl Check for POSIX_FILE_LOCKS - used be include/krb5 and appl/popper
-dnl
-AC_DEFUN([KRB5_POSIX_LOCKS],[dnl
-AC_HEADER_CHECK(flock.h,[echo found flock.h for non-posix locks],
-  [AC_MSG_CHECKING([POSIX file locking -- structs and flags])
-  AC_CACHE_VAL(krb5_cv_struct_flock,
-[AC_TRY_LINK(dnl
-[#include <sys/types.h>
-#include <fcntl.h>],
-[struct flock f; 1+F_SETLK;], 
-  krb5_cv_struct_flock=yes, krb5_cv_struct_flock=no)])
-  AC_MSG_RESULT($krb5_cv_struct_flock)
-  if test $krb5_cv_struct_flock = yes; then
-    AC_DEFINE(POSIX_FILE_LOCKS)
-  fi
-])])dnl
 dnl
 dnl WITH_NETLIB
 dnl 
@@ -1077,12 +1060,22 @@ mips-*-netbsd*)
 	;;
 
 *-*-freebsd*)
+	if test -x /usr/bin/objformat ; then
+		objformat=`/usr/bin/objformat`
+	else
+		objformat="aout"
+	fi
 	PICFLAGS=-fpic
-	SHLIBVEXT='.so.$(LIBMAJOR).$(LIBMINOR)'
+	if test "x$objformat" = "xelf" ; then
+		SHLIBVEXT='.so.$(LIBMAJOR)'
+		CC_LINK_SHARED='$(CC) $(PROG_LIBPATH) -Wl,-rpath -Wl,-R$(PROG_RPATH)'
+	else
+		SHLIBVEXT='.so.$(LIBMAJOR).$(LIBMINOR)'
+		CC_LINK_SHARED='$(CC) $(PROG_LIBPATH) -R$(PROG_RPATH)'
+	fi
 	SHLIBEXT=.so
 	LDCOMBINE='ld -Bshareable'
 	SHLIB_EXPFLAGS='-R$(SHLIB_RDIRS) $(SHLIB_DIRS) $(SHLIB_EXPLIBS)'
-	CC_LINK_SHARED='$(CC) $(PROG_LIBPATH) -R$(PROG_RPATH)'
 	CC_LINK_STATIC='$(CC) $(PROG_LIBPATH)'
 	RUN_ENV='LD_LIBRARY_PATH=`echo $(PROG_LIBPATH) | sed -e "s/-L//g" -e "s/ /:/g"`; export LD_LIBRARY_PATH;'
 	PROFFLAGS=-pg
