@@ -1,3 +1,10 @@
+2002-12-05  Sam Hartman  <hartmans@mit.edu>
+
+	* util_token.c (g_verify_token_header g_make_token_header):
+	Accept -1 to mean  that no token type is expected; the token type
+	is purely an RFC 1964 artifact and is not used in other mechanisms
+	such as SPNEGO.
+
 2002-11-15  Ezra Peisach  <epeisach@bu.edu>
 
 	* gssapiP_generic.h, util_token.c: Change g_make_token_header and

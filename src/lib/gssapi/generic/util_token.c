@@ -46,6 +46,11 @@
 					bytes 0,1 are the token type
 					bytes 2,n are the token data
 
+Note that the token type field is a feature of RFC 1964 mechanisms and
+is not used by other GSSAPI mechanisms.  As such, a token type of -1
+is interpreted to mean that no token type should be expected or
+generated. 
+
 For the purposes of this abstraction, the token "header" consists of
 the sequence tag and length octets, the mech OID DER encoding, and the
 first two inner bytes, which indicate the token type.  The token
@@ -145,12 +150,14 @@ void g_make_token_header(mech, body_size, buf, tok_type)
      int tok_type;
 {
    *(*buf)++ = 0x60;
-   der_write_length(buf, 4 + mech->length + body_size);
+   der_write_length(buf, (tok_type == -1) ?2:4 + mech->length + body_size);
    *(*buf)++ = 0x06;
    *(*buf)++ = (unsigned char) mech->length;
    TWRITE_STR(*buf, mech->elements, mech->length);
-   *(*buf)++ = (unsigned char) ((tok_type>>8)&0xff);
-   *(*buf)++ = (unsigned char) (tok_type&0xff);
+   if (tok_type != -1) {
+       *(*buf)++ = (unsigned char) ((tok_type>>8)&0xff);
+       *(*buf)++ = (unsigned char) (tok_type&0xff);
+   }
 }
 
 /*
@@ -171,7 +178,6 @@ gss_int32 g_verify_token_header(mech, body_size, buf_in, tok_type, toksize_in)
    unsigned char *buf = *buf_in;
    int seqsize;
    gss_OID_desc toid;
-   int ret = 0;
    int toksize = toksize_in;
 
    if ((toksize-=1) < 0)
@@ -200,25 +206,17 @@ gss_int32 g_verify_token_header(mech, body_size, buf_in, tok_type, toksize_in)
    buf+=toid.length;
 
    if (! g_OID_equal(&toid, mech)) 
-      ret = G_WRONG_MECH;
- 
-   /* G_WRONG_MECH is not returned immediately because it's more important
-      to return G_BAD_TOK_HEADER if the token header is in fact bad */
+       return  G_WRONG_MECH;
+   if (tok_type != -1) {
+       if ((toksize-=2) < 0)
+	   return(G_BAD_TOK_HEADER);
 
-   if ((toksize-=2) < 0)
-      return(G_BAD_TOK_HEADER);
-
-   if (ret)
-       return(ret);
-
-   if ((*buf++ != ((tok_type>>8)&0xff)) ||
-       (*buf++ != (tok_type&0xff))) 
-      return(G_WRONG_TOKID);
-
-   if (!ret) {
+       if ((*buf++ != ((tok_type>>8)&0xff)) ||
+	   (*buf++ != (tok_type&0xff))) 
+	   return(G_WRONG_TOKID);
+   }
 	*buf_in = buf;
 	*body_size = toksize;
-   }
 
-   return(ret);
-}
+	return 0;
+	}
