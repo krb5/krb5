@@ -55,6 +55,19 @@
 #define	KRB5_ADM_EXT_KEY_CMD	"EXTRACT-KEY"
 
 /*
+ * Protocol command strings for the current version of the admin
+ * server.  (Chris had removed them in the version he was working
+ * with.)
+ *
+ * XXX I'm adding them back so the tree works.  We need to take care
+ * of this eventually.
+ */
+#define       KRB5_ADM_CHG_OPW_CMD    "OTHER-CHANGEPW"
+#define       KRB5_ADM_CHG_ORPW_CMD   "OTHER-RANDOM-CHANGEPW"
+#define       KRB5_ADM_ADD_KEY_CMD    "ADD-KEY"
+#define       KRB5_ADM_DEL_KEY_CMD    "DELETE-KEY"
+
+/*
  * Reply status values.
  */
 #define	KRB5_ADM_SUCCESS		0
