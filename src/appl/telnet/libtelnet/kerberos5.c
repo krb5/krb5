@@ -165,7 +165,7 @@ kerberos5_init(ap, server)
 	else
 		str_data[3] = TELQUAL_IS;
 	memset(&session_key, 0, sizeof(session_key));
-	session_key.magic = KV5M_MAGIC;
+	session_key.magic = KV5M_KEYBLOCK;
 	session_key.etype = ETYPE_UNKNOWN;
         krb5_init_ets();
 	return(1);
