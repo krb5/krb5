@@ -1,3 +1,9 @@
+
+Thu Aug 17 13:49:14 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* do_as_req.c - Close and re-open the database after performing a
+		database update.  This is the cleanest way to flush out the
+		update without reorganizing the code.
+
 Wed Aug 16 02:45:19 1995  Chris Provenzano <proven@mit.edu>
 
         * do_as_req.c: Pass fds to krb5_lock_file() and krb5_unlock_file()

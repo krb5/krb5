@@ -558,8 +558,17 @@ errout:
 	    free(sname);
     if (c_nprincs) {
 #ifdef	KRBCONF_KDC_MODIFIES_KDB
-	if (update_client)
+	if (update_client) {
 	    krb5_db_put_principal(kdc_context, &client, &c_nprincs);
+	    /*
+	     * ptooey.  We want krb5_db_sync() or something like that.
+	     */
+	    krb5_db_fini(kdc_context);
+	    if (kdc_active_realm->realm_dbname)
+		krb5_db_set_name(kdc_active_realm->realm_context,
+				 kdc_active_realm->realm_dbname);
+	    krb5_db_init(kdc_context);
+	}
 #endif	/* KRBCONF_KDC_MODIFIES_KDB */
 	krb5_db_free_principal(kdc_context, &client, c_nprincs);
     }
