@@ -1,3 +1,8 @@
+2000-09-12	Alexandra Ellwood <lxs@mit.edu>
+
+        * stdcc.h, stdcc_util.h: created #define for USE_CCAPI now that 
+        both Mac OS 9 and Mac OS 10 use ccapi.
+
 2000-06-08  Alexandra Ellwood  <lxs@mit.edu>
 
 	* stdcc_util.c (dupCCtoK5, dupK5toCC): 

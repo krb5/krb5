@@ -3,7 +3,7 @@
  * Frank Dabek, July 1998
  */
 
-#if defined(macintosh)
+#if defined(USE_CCAPI)
 #include "CCache2.h"
 #endif
 
