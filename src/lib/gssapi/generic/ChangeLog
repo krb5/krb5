@@ -1,3 +1,8 @@
+Sun Aug 17 14:31:26 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* util_token.c (g_verify_token_header): Change local char *
+	 	variable to unsigned char * to match usage.
+
 Tue Jul 29 22:54:40 1997  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* gssapi_generic.c: Add support for the new OID value for

@@ -166,7 +166,7 @@ gss_int32 g_verify_token_header(mech, body_size, buf_in, tok_type, toksize)
      int tok_type;
      int toksize;
 {
-   char *buf = *buf_in;
+   unsigned char *buf = *buf_in;
    int seqsize;
    gss_OID_desc toid;
    int ret = 0;
