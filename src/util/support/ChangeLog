@@ -1,3 +1,8 @@
+2005-01-17  Jeffrey Altman <jaltman@mit.edu>
+
+        * threads.c: implement cleanup of static vars on library
+                unload (for Windows)
+
 2005-01-14  Ken Raeburn  <raeburn@mit.edu>
 
 	* threads.c (k5_mutex_lock_update_stats,

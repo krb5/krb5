@@ -41,7 +41,10 @@ void gssint_lib_fini(void)
     remove_error_table(&et_k5g_error_table);
     remove_error_table(&et_ggss_error_table);
 #endif
+    k5_key_delete(K5_KEY_GSS_KRB5_SET_CCACHE_OLD_NAME);
+    k5_key_delete(K5_KEY_GSS_KRB5_CCACHE_NAME);
     k5_mutex_destroy(&kg_vdb.mutex);
+    k5_mutex_destroy(&gssint_krb5_keytab_lock);
 }
 
 OM_uint32 gssint_initialize_library (void)

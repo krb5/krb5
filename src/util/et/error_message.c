@@ -62,6 +62,8 @@ void com_err_terminate(void)
     struct dynamic_et_list *e, *enext;
     if (! INITIALIZER_RAN(com_err_initialize) || PROGRAM_EXITING())
 	return;
+    k5_key_delete(K5_KEY_COM_ERR);
+    k5_mutex_destroy(&com_err_hook_lock);
     k5_mutex_lock(&et_list_lock);
     for (e = et_list_dynamic; e; e = enext) {
 	enext = e->next;
