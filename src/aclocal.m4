@@ -492,7 +492,7 @@ dnl
 dnl local includes are used -- KRB_INCLUDE
 dnl
 define(KRB_INCLUDE,[
-ADD_DEF([-I$(SRCTOP)/include -I$(BUILDTOP)/include -I$(BUILDTOP)/include/krb5])dnl
+ADD_DEF([-I$(SRCTOP)/include -I$(BUILDTOP)/include -I$(SRCTOP)/include/krb5 -I$(BUILDTOP)/include/krb5])dnl
 ])dnl
 dnl
 dnl ISODE/pepsy includes are used -- ISODE_INCLUDE

@@ -9,6 +9,7 @@
 #undef HAS_ANSI_VOLATILE
 #undef HAS_STDLIB_H
 #undef HAS_STRDUP
+#undef HAS_LABS
 #undef HAS_SYS_FILE_H
 #undef HAS_SYS_PARAM_H
 #undef HAS_VOID_TYPE

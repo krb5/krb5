@@ -1,5 +1,10 @@
 Wed Mar  1 16:40:23 1995  Theodore Y. Ts'o  <tytso@dcl>
 
+	* acconfig.h: Add HAS_LABS defintiion.
+
+	* aclocal.m4 (KRB_INCLUDE): Add $(SRCTOP)/include/krb5 so that it
+		builds when the build tree != the source tree.
+
 	* aclocal.m4, configure.in: Folded in Ezra's changes to support
 		--with-netlib, for support of the SGI's.
 
