@@ -132,3 +132,12 @@ Changes in 1.1a3:
  separated com_err lib
  now tracking krb5-1-1 branch
  added CCache cleanup to CFM termination procs
+ 
+2.5b2
+ from tag Mac_GSSKerberos5_2_5b2
+ cleaned up glue for all libraries
+ 
+2.5fc1
+ from tag Mac_GSSKerberos5_2_5fc1
+ added documentation and fixed makefile so that documentation,
+ headers, and cfrm glue are always built correctly
