@@ -1,3 +1,9 @@
+Sat Apr 17 01:23:57 1999  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* gssapi_krb5.h, copy_ccache.c, get_tkt_flags.c, set_ccache.c:
+ 		Make the krb5 extension functions exportable in a Windows
+ 		DLL.
+
 Fri Mar 26 22:17:20 1999  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* acquire_cred.c (krb5_gss_acquire_cred): Don't use strcmp to

@@ -26,7 +26,7 @@
  * $Id$
  */
 
-OM_uint32
+GSS_DLLIMP OM_uint32 KRB5_CALLCONV 
 gss_krb5_get_tkt_flags(minor_status, context_handle, ticket_flags)
      OM_uint32 *minor_status;
      gss_ctx_id_t context_handle;

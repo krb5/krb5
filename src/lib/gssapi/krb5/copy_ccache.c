@@ -1,6 +1,6 @@
 #include "gssapiP_krb5.h"
 
-OM_uint32
+GSS_DLLIMP OM_uint32 KRB5_CALLCONV 
 gss_krb5_copy_ccache(minor_status, cred_handle, out_ccache)
      OM_uint32 *minor_status;
      gss_cred_id_t cred_handle;

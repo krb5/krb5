@@ -56,26 +56,19 @@ extern const gss_OID_desc krb5_gss_oid_array[];
 #define gss_krb5_nt_machine_uid_name	gss_nt_machine_uid_name
 #define gss_krb5_nt_string_uid_name	gss_nt_string_uid_name
 
-OM_uint32 gss_krb5_get_tkt_flags 
+GSS_DLLIMP OM_uint32 KRB5_CALLCONV gss_krb5_get_tkt_flags 
 	PROTOTYPE((OM_uint32 *minor_status,
 		   gss_ctx_id_t context_handle,
 		   krb5_flags *ticket_flags));
 
-OM_uint32 gss_krb5_copy_ccache
+GSS_DLLIMP OM_uint32 KRB5_CALLCONV gss_krb5_copy_ccache
 	PROTOTYPE((OM_uint32 *minor_status,
 		   gss_cred_id_t cred_handle,
 		   krb5_ccache out_ccache));
 
-OM_uint32 gss_krb5_ccache_name
+GSS_DLLIMP OM_uint32 KRB5_CALLCONV gss_krb5_ccache_name
 	PROTOTYPE((OM_uint32 *minor_status, const char *name,
 		   const char **out_name));
-
-/* this is for backward compatibility only.  It is declared here for
-   completeness, but should not be used */
-
-OM_uint32 krb5_gss_set_backward_mode
-        PROTOTYPE((OM_uint32 *minor_status,
-                   int mode));
 
 #ifdef __cplusplus
 }
