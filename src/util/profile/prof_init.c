@@ -20,6 +20,8 @@ errcode_t profile_init(filenames, ret_profile)
 	prf_file_t  new_file, last = 0;
 	errcode_t retval;
 
+	initialize_prof_error_table();
+	
 	profile = malloc(sizeof(struct _profile_t));
 	if (!profile)
 		return ENOMEM;
@@ -131,6 +133,10 @@ errcode_t profile_get_values(profile, names, ret_values)
     init_list(&values);
 
     file = profile->first_file;
+    retval = profile_update_file(file);
+    if (retval)
+	goto cleanup;
+    
     section = file->root;
 
     for (cpp = names; cpp[1]; cpp++) {
@@ -175,6 +181,10 @@ static errcode_t profile_get_value(profile, names, ret_value)
 	return PROF_BAD_NAMESET;
 
     file = profile->first_file;
+    retval = profile_update_file(file);
+    if (retval)
+	goto cleanup;
+    
     section = file->root;
 
     for (cpp = names; cpp[1]; cpp++) {
@@ -196,37 +206,60 @@ cleanup:
     return retval;
 }
 
-errcode_t profile_get_string(profile, names, def_val, ret_string)
+errcode_t profile_get_string(profile, name, subname, subsubname,
+			     def_val, ret_string)
     profile_t	profile;
-    const char	**names;
+    const char	*name, *subname, *subsubname;
     const char	*def_val;
     char 	**ret_string;
 {
     const char	*value;
     errcode_t	retval;
+    const char	*names[4];
 
-    retval = profile_get_value(profile, names, &value);
-    if (retval == PROF_NO_SECTION || retval == PROF_NO_RELATION)
+    if (profile) {
+	names[0] = name;
+	names[1] = subname;
+	names[2] = subsubname;
+	names[3] = 0;
+	retval = profile_get_value(profile, names, &value);
+	if (retval == PROF_NO_SECTION || retval == PROF_NO_RELATION)
+	    value = def_val;
+	else if (retval)
+	    return retval;
+    } else
 	value = def_val;
-    else if (retval)
-	return retval;
     
-    *ret_string = malloc(strlen(value)+1);
-    if (*ret_string == 0)
-	return ENOMEM;
-    strcpy(*ret_string, value);
+    if (value) {
+	*ret_string = malloc(strlen(value)+1);
+	if (*ret_string == 0)
+	    return ENOMEM;
+	strcpy(*ret_string, value);
+    } else
+	*ret_string = 0;
     return 0;
 }
 
-errcode_t profile_get_integer(profile, names, def_val, ret_int)
+errcode_t profile_get_integer(profile, name, subname, subsubname,
+			      def_val, ret_int)
     profile_t	profile;
-    const char	**names;
+    const char	*name, *subname, *subsubname;
     int		def_val;
     int		*ret_int;
 {
    char	*value;
    errcode_t	retval;
+    const char	*names[4];
 
+   if (profile == 0) {
+       *ret_int = def_val;
+       return 0;
+   }
+
+   names[0] = name;
+   names[1] = subname;
+   names[2] = subsubname;
+   names[3] = 0;
    retval = profile_get_value(profile, names, &value);
    if (retval == PROF_NO_SECTION || retval == PROF_NO_RELATION) {
        *ret_int = def_val;

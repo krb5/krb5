@@ -6,4 +6,5 @@ AC_PROG_ARCHIVE
 AC_PROG_RANLIB
 ET_RULES
 CopyHeader(profile.h,$(BUILDTOP)/include)
+SubdirLibraryRule([$(OBJS)])
 V5_AC_OUTPUT_MAKEFILE
