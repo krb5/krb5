@@ -60,6 +60,7 @@ static int rw_access(filespec)
 #endif
 }
 
+#ifdef SHARE_TREE_DATA
 static int r_access(filespec)
 	profile_filespec_t filespec;
 {
@@ -84,6 +85,7 @@ static int r_access(filespec)
 	return 0;
 #endif
 }
+#endif /* SHARE_TREE_DATA */
 
 errcode_t profile_open_file(filespec, ret_prof)
 	const_profile_filespec_t filespec;

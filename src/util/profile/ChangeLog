@@ -1,3 +1,8 @@
+2003-04-28  Ezra Peisach  <epeisach@bu.edu>
+
+	* prof_file.c (r_access): Static function. Only include if
+	SHARE_TREE_DATA defined.
+
 2003-03-06 Alexandra Ellwood <lxs@mit.edu>
     * profile.hin, prof_file.c (profile_flush_file_data): Stop copying
     the resource fork.  We stopped writing resources to the krb5
