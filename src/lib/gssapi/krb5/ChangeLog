@@ -1,3 +1,7 @@
+Thu Jun 13 22:11:30 1996  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
+
+	* configure.in: remove ref to ET_RULES
+
 Wed Jun 12 00:48:32 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* Makefile.in: Update special rule for gssapi_err_krb5.obj so that

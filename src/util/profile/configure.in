@@ -8,7 +8,7 @@ AC_CHECK_SIZEOF(short)
 AC_CHECK_SIZEOF(int)
 AC_CHECK_SIZEOF(long)
 AC_HAVE_FUNCS(stat)
-ET_RULES
+AC_PROG_AWK
 V5_SHARED_LIB_OBJS
 CopyHeader(profile.h,$(BUILDTOP)/include)
 SubdirLibraryRule([$(OBJS)])

@@ -1,3 +1,7 @@
+Thu Jun 13 22:14:24 1996  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
+
+	* configure.in: remove ref to ET_RULES
+
 Tue Apr 16 22:06:36 1996  Ken Raeburn  <raeburn@cygnus.com>
 
 	* dump-utmp.c: New file.  Not automatically used by anything, but

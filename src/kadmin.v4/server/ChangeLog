@@ -1,3 +1,7 @@
+Thu Jun 13 22:09:02 1996  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
+
+	* configure.in: remove ref to ET_RULES
+
 Thu May  9 02:03:33 1996  Richard Basch  <basch@lehman.com>
 
 	* kadm_funcs.c: Better handling of the principal lifetimes.

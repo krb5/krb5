@@ -1,6 +1,6 @@
 AC_INIT(getpty.c)
 CONFIG_RULES
-ET_RULES
+AC_PROG_AWK
 CopySrcHeader(libpty.h,[$](BUILDTOP)/include)
 LinkFileDir([$](TOPLIBD)/libpty.a,libpty.a,../util/pty)
 AC_PROG_INSTALL

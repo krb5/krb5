@@ -1,3 +1,7 @@
+Thu Jun 13 22:12:57 1996  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
+
+	* configure.in: remove ref to ET_RULES
+
 Wed Jun 12 01:02:45 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* Makefile.in: Remove unnecessary include config/windows.in.

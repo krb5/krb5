@@ -1,3 +1,7 @@
+Thu Jun 13 22:08:34 1996  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
+
+	* configure.in: remove ref to ET_RULES
+
 Mon Apr  8 03:35:08 1996  Ken Raeburn  <raeburn@cygnus.com>
 
 	* srv_key.c (key_init): Only pass one argument to

@@ -1,3 +1,6 @@
+Thu Jun 13 22:07:45 1996  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
+
+	* configure.in: remove ref to ET_RULES
 
 Fri Jul 7 15:59:51 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in - Remove all explicit library handling and LDFLAGS.

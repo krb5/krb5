@@ -8,7 +8,7 @@ AC_HEADER_STDARG
 AC_HAVE_HEADERS(pwd.h syslog.h)
 AC_HAVE_FUNCS(srand48 srand srandom syslog openlog closelog)
 AC_FUNC_CHECK(vsprintf,AC_DEFINE(HAVE_VSPRINTF))
-ET_RULES
+AC_PROG_AWK
 KRB5_RUN_FLAGS
 LinkFileDir(../libkadm.a, libkadm.a, ./kadm)
 AppendRule([all-unix:: ../libkadm.a])

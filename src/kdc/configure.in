@@ -3,7 +3,7 @@ CONFIG_RULES
 AC_PROG_INSTALL
 AC_HEADER_CHECK(termios.h,AC_FUNC_CHECK([tcsetattr],AC_DEFINE(POSIX_TERMIOS)))
 AC_CHECK_HEADERS(sys/select.h)
-ET_RULES
+AC_PROG_AWK
 HAS_ANSI_VOLATILE
 dnl
 dnl --with-vague-errors disables useful error messages.

@@ -1,6 +1,6 @@
 AC_INIT(configure.in)
 CONFIG_RULES
-ET_RULES
+AC_PROG_AWK
 AC_CHECK_HEADERS(stdlib.h)
 V5_SHARED_LIB_OBJS
 SubdirLibraryRule([${OBJS}])

@@ -41,7 +41,7 @@ else
 fi
 AC_DEFINE(KRB4_USE_KEYTAB)
 AC_HAVE_FUNCS(strsave seteuid setreuid setresuid)
-ET_RULES
+AC_PROG_AWK
 V5_SHARED_LIB_OBJS
 SubdirLibraryRule([$(OBJS)])
 V5_MAKE_SHARED_LIB(libkrb4,0.1,.., ./krb4)

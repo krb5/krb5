@@ -1,3 +1,7 @@
+Thu Jun 13 22:09:34 1996  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
+
+	* configure.in: remove ref to ET_RULES
+
 Sun Jun  9 23:03:06 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* main.c (finish_realm): Do not invoke krb5_finish_key if
