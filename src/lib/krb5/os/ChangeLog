@@ -1,3 +1,36 @@
+2001-04-26  Ken Raeburn  <raeburn@mit.edu>
+
+	* locate_kdc.c (krb5int_locate_server): New function, replaces
+	functionality of krb5_locate_srv_conf and _dns, including checking
+	whether DNS lookup is desired.
+	(krb5_locate_srv_conf, krb5_locate_srv_dns): Define only if macro
+	TEST is defined.  Added another level of indirection in the
+	address pointer argument.
+	(krb5_locate_srv_dns_1, krb5_locate_srv_conf_1,
+	translate_ai_error, get_port, struct addrlist, ADDRLIST_INIT,
+	grow_list, free_list, add_sockaddr_to_list, add_addrinfo_to_list,
+	set_port_num, add_host_to_list): New helper functions.
+	(krb5_locate_kdc): Added another level of indirection in the
+	address pointer argument.  Call krb5int_locate_server.
+	(KPASSWD_PORTNAME): Deleted.
+
+	* os-proto.h (krb5_locate_kdc): Updated prototype.
+
+	* sendto_kdc.c (krb5_sendto_kdc): Updates for change in
+	krb5_locate_kdc interface.
+
+	* changepw.c (krb5_locate_kpasswd): Call krb5int_locate_server.
+	Add another level of indirection in address pointer.  Now gives
+	preference to _kpasswd info from DNS over admin_server info in
+	config file, if kpasswd_server is not set.
+	(krb5_change_password): Use struct sockaddr_storage for all
+	automatic address variables.  Ignore any non-IPv4 addresses
+	returned from krb5_locate_kpasswd; return an error if all
+	addresses are non-IPv4.  Update for new krb5_locate_kpasswd
+	interface.
+
+	* accessor.c (krb5int_accessor): Set krb5_locate_server field.
+
 2001-04-25  Ken Raeburn  <raeburn@mit.edu>
 
 	* localaddr.c (socklen_t, socklen): Deleted; definitions now in

@@ -63,7 +63,7 @@ krb5_sendto_kdc (context, message, realm, reply, use_master)
     int use_master;
 {
     register int timeout, host, i;
-    struct sockaddr *addr;
+    struct sockaddr **addr;
     int naddr;
     int sent, nready;
     krb5_error_code retval;
@@ -90,6 +90,8 @@ krb5_sendto_kdc (context, message, realm, reply, use_master)
 	socklist[i] = INVALID_SOCKET;
 
     if (!(reply->data = malloc(krb5_max_dgram_size))) {
+	for (i = 0; i < naddr; i++)
+	    krb5_xfree (addr[i]);
 	krb5_xfree(addr);
 	krb5_xfree(socklist);
 	return ENOMEM;
@@ -133,7 +135,7 @@ krb5_sendto_kdc (context, message, realm, reply, use_master)
 		 * protocol exists to support a particular socket type
 		 * within a given protocol family.
 		 */
-		socklist[host] = socket(addr[host].sa_family, SOCK_DGRAM, 0);
+		socklist[host] = socket(addr[host]->sa_family, SOCK_DGRAM, 0);
 		if (socklist[host] == INVALID_SOCKET)
 		    continue;		/* try other hosts */
 		/* have a socket to send/recv from */
@@ -143,7 +145,7 @@ krb5_sendto_kdc (context, message, realm, reply, use_master)
 		   sendto, recvfrom.  The connect here may return an error if
 		   the destination host is known to be unreachable. */
 		if (connect(socklist[host],
-			    &addr[host], sizeof(addr[host])) == SOCKET_ERROR)
+			    addr[host], socklen(addr[host])) == SOCKET_ERROR)
 		  continue;
 	    }
 	    if (send(socklist[host],
