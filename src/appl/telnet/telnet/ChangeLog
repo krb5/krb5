@@ -1,3 +1,10 @@
+2005-03-28  Tom Yu  <tlyu@mit.edu>
+
+	* telnet.c (slc_add_reply, slc_end_reply): Fix buffer overflow
+	vulnerability by checking lengths.
+	(env_opt_add): Ensure buffer allocation is sufficiently large,
+	accounting for expansion during IAC quoting.
+
 2004-03-04  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Deleted; configure this dir from parent now.
