@@ -56,6 +56,12 @@ DONE	* Make kinit not delete the credcache before tickets are
 		gethostbyname()/gethostbyaddr() to get a real DNS name
 		so that we don't get bitten by athena.dialup.mit.edu
 		and resolvers which shuffle DNS records.  (HIGH)
+	* GSSAPI V2 calls: gss_export_name(), gss_canonicalize_name(),
+			gss_inquire_mech_for_names()
+	* GSSAPI mechglue: gss_inquire_cred() not quite right for
+		default credential.  Fix for Mech-Spec names.
+	* GSSAPI mechglue: gss_acquire_cred is really kinda broken...
+		Fix for mech-spec names.  
 	* krb5 bugs
 
 7.  Future development
@@ -66,7 +72,7 @@ DONE	* Make kinit not delete the credcache before tickets are
 		routines update the master key and then update every
 		principal in the database.  Doing this will also allow
 		us to remove the mkvno field saving 2 bytes per entry.
-	* Fix preauthentication code
+DONE	* Fix preauthentication code
 DONE	* Save the time offset between the kerberos server and the
 		current host in the credential cache. (Just need to
 		actually get and save the time.)
