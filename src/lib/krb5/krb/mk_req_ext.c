@@ -141,15 +141,14 @@ krb5_data *outbuf;
 	return(retval);
     }
     
-    if (authentp) {
+    /* Null out these fields, to prevent pointer sharing problems;
+     * they were supplied by the caller
+     */
+    authent.client = NULL;
+    authent.checksum = NULL; 
+    if (authentp)
 	    *authentp = authent;
-	    /* Null out these fields, to prevent pointer sharing problems 
-	     * The caller won't need these fields anyway, since they were
-	     * supplied by the caller
-	     */
-	    authentp->client = NULL;
-	    authentp->checksum = NULL; 
-    } else
+    else
 	    krb5_free_authenticator_contents(&authent);
 
 #define cleanup_scratch() { (void) memset(scratch->data, 0, scratch->length); \
