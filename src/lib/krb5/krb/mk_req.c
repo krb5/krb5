@@ -75,6 +75,7 @@ krb5_data *outbuf;
 				  krb5_kdc_default_options,
 				  ccache,
 				  &creds,
+				  0, 	/* We don't need the authenticator */
 				  outbuf);
     return retval;
 }

@@ -129,6 +129,7 @@ OLDDECLARG(krb5_response *,rep)
 				       0L, /* don't need kdc_options for this */
 				       0, /* XXX no ccache */
 				       usecred,
+				       0, /* don't need authenticator */
 				       &tgsreq.header)) {
 	cleanup();
 	return retval;
