@@ -33,6 +33,7 @@ static char rcsid_get_krbhst_c [] =
 #include <krb5/krb5.h>
 #include <krb5/ext-proto.h>
 #include <stdio.h>
+#include <ctype.h>
 
 /*
  Figures out the Kerberos server names for the given realm, filling in a
@@ -71,10 +72,14 @@ char ***hostlist;
     FILE *config_file;
     char filebuf[BUFSIZ];
     krb5_error_code retval;
-    char *cp;
+    char *cp, *cp2;
     register char **rethlist = 0;
-    int hlsize = 1;
     int hlindex = 0;
+    int hlsize = 2;                     /* Always have to null terminate
+                                         * host list, so be sure there
+                                         * is enough room in the common
+                                         * case.
+                                         */
 
     if (!(config_file = fopen(krb5_config_file, "r")))
 	/* can't open */
@@ -97,7 +102,24 @@ char ***hostlist;
 		retval = KRB5_CONFIG_BADFORMAT;
 		break;
 	    }
-	    rethlist[hlindex] = strdup(&filebuf[realm->length+1]);
+
+            if (!isspace(filebuf[realm->length])) {
+                continue;               /* no match */
+            }
+
+            /* Throw away any whitespace between tokens */
+            for (cp = &filebuf[realm->length + 1]; isspace(*cp); cp++);
+            if (! *cp) {
+		/* no hostname on config line */
+		retval = KRB5_CONFIG_BADFORMAT;
+		break;
+	    }
+
+            /* Throw away any trailing whitespace or tokens */
+            for (cp2 = cp+1; *cp2 && !isspace(*cp2); cp2++);
+            *cp2 = '\0';
+
+	    rethlist[hlindex] = strdup(cp);
 	    if (!rethlist[hlindex]) {
 		for (--hlindex; hlindex >= 0; hlindex--)
 		    free(rethlist[hlindex]);
@@ -106,13 +128,7 @@ char ***hostlist;
 		retval = ENOMEM;
 		break;
 	    }
-	    /* chop off remainder of line */
-	    if (cp = strchr(rethlist[hlindex], ' '))
-		*cp = '\0';
-	    if (cp = strchr(rethlist[hlindex], '\t'))
-		*cp = '\0';
-	    if (cp = strchr(rethlist[hlindex], '\n'))
-		*cp = '\0';
+
 	    if (++hlindex >= hlsize) {
 		/* need larger pointer array */
 		hlsize *= 2;
