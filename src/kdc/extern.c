@@ -27,8 +27,8 @@ krb5_rcache kdc_rcache;
 krb5_data empty_string = {0, ""};
 krb5_timestamp infinity = KRB5_INT32_MAX; /* XXX */
 
-krb5_deltat max_life_for_realm;		/* XXX parameter per-realm? */
-krb5_deltat max_renewable_life_for_realm; /* XXX param per-realm? */
+krb5_deltat max_life_for_realm = KRB5_KDB_MAX_LIFE;		/* XXX parameter per-realm? */
+krb5_deltat max_renewable_life_for_realm = KRB5_KDB_MAX_RLIFE; /* XXX param per-realm? */
 krb5_encrypt_block master_encblock;
 
 krb5_keyblock master_keyblock;
