@@ -48,7 +48,7 @@ fast: win_glue.obj winsock.lib
 	implib /nologo libkrb5.lib libkrb5.dll
 		
 libkrb5.lib:: libkrb5.dll
-	implib /nologo librkb5.lib libkrb5.dll
+	implib /nologo libkrb5.lib libkrb5.dll
 	
 libkrb5.dll:: $(LIBS) libkrb5.def win_glue.obj
 	link /co /seg:400 /noe /nol win_glue, libkrb5.dll,nul, \
@@ -59,35 +59,36 @@ winsock.lib:  winsock.def
 	implib /nologo winsock.lib winsock.def
 
 all-windows:: 
-	cd crypto
 	@echo Making in lib\crypto
+	cd crypto
 	-$(MAKE) -$(MFLAGS) LIBCMD=$(LIBCMD)
-	cd ..\krb5
 	@echo Making in lib\krb5
+	cd ..\krb5
 	-$(MAKE) -$(MFLAGS) LIBCMD=$(LIBCMD)
-	cd ..\gssapi
 	@echo Making in lib\gssapi
+	cd ..\gssapi
 	-$(MAKE) -$(MFLAGS) LIBCMD=$(LIBCMD)
-	cd ..\des425
 	@echo Making in lib\des425
+	cd ..\des425
 	-$(MAKE) -$(MFLAGS) LIBCMD=$(LIBCMD)
+	@echo Making locally
 	cd ..
 
 all-windows:: libkrb5.lib
 
 clean-windows::
-	cd crypto
 	@echo Making clean in lib\crypto
+	cd crypto
 	-$(MAKE) -$(MFLAGS) clean
-	cd ..\krb5
 	@echo Making clean in lib\krb5
+	cd ..\krb5
 	-$(MAKE) -$(MFLAGS) clean
-	cd ..\gssapi
 	@echo Making clean in lib\gssapi
+	cd ..\gssapi
 	-$(MAKE) -$(MFLAGS) clean
-	cd ..\des425
 	@echo Making clean in lib\des425
+	cd ..\des425
 	-$(MAKE) -$(MFLAGS) clean
-	cd ..
 	@echo Making clean locally
+	cd ..
 

@@ -1,3 +1,7 @@
+Thu Mar 16 15:00:00 1995 Keith Vetter (keithv@fusion.com)
+
+	* Makefile.in: fixed up a typo.
+
 Wed Mar 15 22:45:33 1995 Keith Vetter (keithv@fusion.com)
 
 	* Makefile.in: I had missed some dependencies on the PC build.
