@@ -23,7 +23,7 @@ XOBJS    =
 !if $(KVERSION) == 5
 BUILDTOP =..\..
 LIBDIR	 = $(BUILDTOP)\lib
-KLIB	 = $(LIBDIR)\libkrb5.lib
+KLIB	 = $(LIBDIR)\krb516.lib
 WLIB	 = $(LIBDIR)\winsock.lib
 INCLUDES = /I$(BUILDTOP)\include /I$(BUILDTOP)\include\krb5
 XOBJS    = kpasswd.obj

@@ -1,3 +1,7 @@
+Wed Nov 20 18:32:06 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* Makefile.in (KLIB): Change libkrb5.dll to be krb516.dll
+
 Wed Jun 12 00:20:08 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* makefile: Renamed to Makefile.in, so that we can do WIN16/WIN32
