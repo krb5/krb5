@@ -80,28 +80,13 @@ void update_utmp(ent, username, line, host)
     sprintf(utmp_id, "kl%s", tmpx);
     strncpy(ent->ut_id, utmp_id, sizeof(ent->ut_id));
     strncpy(ent->ut_user, username, sizeof(ent->ut_user));
-
-    switch(ent->ut_type) {
-    case LOGIN_PROCESS:
-    case USER_PROCESS:
-	memset((char *)&ut, 0, sizeof(ut));
-	strncpy(ut.ut_id, ent->ut_id, sizeof(ut.ut_id));
-	ut.ut_type = DEAD_PROCESS;
-	getutid(&ut);
-	break;
-    case DEAD_PROCESS:
-	memset((char *)&ut, 0, sizeof(ut));
-	strncpy(ut.ut_id, ent->ut_id, sizeof(ut.ut_id));
-	ut.ut_type = USER_PROCESS;
-	getutid(&ut);
-	break;
-    }
 #else
     strncpy(ent->ut_name, username, sizeof(ent->ut_name));
 #endif
     
 #ifdef HAVE_SETUTXENT
     getutmpx(ent, &utx);
+    getutxid(&ent);
     setutxent();
     pututxline(&utx);
     endutxent();
@@ -109,6 +94,7 @@ void update_utmp(ent, username, line, host)
 #ifdef HAVE_SETUTENT
     utmpname(UTMP_FILE);
     setutent();
+    getutid(ent);
     pututline(ent);
     endutent();
 #else /* HAVE_SETUTENT */
