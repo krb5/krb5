@@ -86,6 +86,7 @@ static char sccsid[] = "@(#)rlogin.c	5.12 (Berkeley) 9/19/88";
 #include <signal.h>
 #include <setjmp.h>
 #include <netdb.h>
+#include <string.h>
      
 #ifdef KERBEROS
 #include <krb5/krb5.h>
@@ -136,7 +137,7 @@ struct sockaddr_in local, foreign;
 # define SIGUSR1 30
 # endif /* SIGUSR1 */
 
-char	*index(), *rindex(), *getenv(), *strcat(), *strcpy();
+char	*getenv();
 #ifndef convex
 struct	passwd *getpwuid();
 #endif
@@ -266,8 +267,8 @@ main(argc, argv)
     int debug_port = 0;
 #endif /* KERBEROS */
    
-    if (rindex(argv[0], '/'))
-      argv[0] = rindex(argv[0], '/')+1;
+    if (strrchr(argv[0], '/'))
+      argv[0] = strrchr(argv[0], '/')+1;
 
     if ( argc < 2 ) goto usage;
     argc--;
@@ -588,7 +589,6 @@ struct	tchars deftc;
 struct	tchars notc =	{ -1, -1, -1, -1, -1, -1 };
 struct	ltchars defltc;
 struct	ltchars noltc =	{ -1, -1, -1, -1, -1, -1 };
-
 
 
 doit(oldmask)
@@ -1217,7 +1217,7 @@ void try_normal(argv)
 	    UCB_RLOGIN);
     fflush(stderr);
     
-    host = rindex(argv[0], '/');
+    host = strrchr(argv[0], '/');
     if (host)
       host++;
     else
