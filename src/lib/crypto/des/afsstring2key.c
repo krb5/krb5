@@ -63,6 +63,9 @@
 
 static char *afs_crypt PROTOTYPE((char*,char*,char*));
 
+#undef min
+#define min(a,b) ((a)>(b)?(b):(a))
+
 krb5_error_code
 mit_afs_string_to_key (keyblock, data, salt)
      krb5_keyblock FAR * keyblock;
@@ -75,14 +78,15 @@ mit_afs_string_to_key (keyblock, data, salt)
      set up. */
   
     char *realm = salt->data;
-    register unsigned int i;
-    register krb5_octet *key = keyblock->contents;
+    unsigned int i, j;
+    krb5_octet *key = keyblock->contents;
 
     if (data->length <= 8) {
       unsigned char password[9]; /* trailing nul for crypt() */
       char afs_crypt_buf[16];
 
-      strncpy(password, realm, 8);
+      memset (password, 0, sizeof (password));
+      memcpy (password, realm, min (salt->length, 8));
       for (i=0; i<8; i++)
 	if (isupper(password[i]))
 	  password[i] = tolower(password[i]);
@@ -102,15 +106,15 @@ mit_afs_string_to_key (keyblock, data, salt)
     } else {
       mit_des_cblock ikey, tkey;
       mit_des_key_schedule key_sked;
-      unsigned int pw_len = strlen(realm)+data->length;
+      unsigned int pw_len = salt->length+data->length;
       unsigned char *password = malloc(pw_len+1);
       if (!password) return ENOMEM;
 
       /* some bound checks from the original code are elided here as
 	 the malloc above makes sure we have enough storage. */
       strcpy (password, data->data);
-      for (i=data->length; *realm; i++) {
-	password[i] = *realm++;
+      for (i=data->length, j = 0; j < salt->length; i++, j++) {
+	password[i] = realm[j];
 	if (isupper(password[i]))
 	  password[i] = tolower(password[i]);
       }
