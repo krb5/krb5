@@ -29,8 +29,9 @@
 #include <krb5/ext-proto.h>
 
 void
-krb5_free_address(val)
-krb5_address *val;
+krb5_free_address(context, val)
+    krb5_context context;
+    krb5_address *val;
 {
     if (val->contents)
 	krb5_xfree(val->contents);

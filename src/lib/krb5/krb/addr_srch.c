@@ -32,14 +32,15 @@
  * if not listed, return FALSE
  */
 krb5_boolean
-krb5_address_search(addr, addrlist)
-const krb5_address *addr;
-krb5_address * const * addrlist;
+krb5_address_search(context, addr, addrlist)
+    krb5_context context;
+    const krb5_address *addr;
+    krb5_address * const * addrlist;
 {
     if (!addrlist)
 	return TRUE;
     for (; *addrlist; addrlist++) {
-	if (krb5_address_compare(addr, *addrlist))
+	if (krb5_address_compare(context, addr, *addrlist))
 	    return TRUE;
     }
     return FALSE;

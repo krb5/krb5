@@ -56,18 +56,19 @@
 #define	COMPONENT_SEP	'/'
 
 krb5_error_code
-krb5_unparse_name_ext(principal, name, size)
-krb5_const_principal principal;
-register char **name;
-int	*size;
+krb5_unparse_name_ext(context, principal, name, size)
+    krb5_context context;
+    krb5_const_principal principal;
+    register char **name;
+    int	*size;
 {
 	register char *cp, *q;
 	register int i,j;
 	int	length, nelem;
 	register int totalsize = 0;
 
-	cp = krb5_princ_realm(principal)->data;
-	length = krb5_princ_realm(principal)->length;
+	cp = krb5_princ_realm(context, principal)->data;
+	length = krb5_princ_realm(context, principal)->length;
 	totalsize += length;
 	for (j = 0; j < length; j++,cp++)
 		if (*cp == REALM_SEP  || *cp == COMPONENT_SEP ||
@@ -76,10 +77,10 @@ int	*size;
 			totalsize++;
 	totalsize++;		/* This is for the separator */
 
-	nelem = krb5_princ_size(principal);
+	nelem = krb5_princ_size(context, principal);
 	for (i = 0; i < nelem; i++) {
-		cp = krb5_princ_component(principal, i)->data;
-		length = krb5_princ_component(principal, i)->length;
+		cp = krb5_princ_component(context, principal, i)->data;
+		length = krb5_princ_component(context, principal, i)->length;
 		totalsize += length;
 		for (j=0; j < length; j++,cp++)
 			if (*cp == REALM_SEP || *cp == COMPONENT_SEP ||
@@ -113,8 +114,8 @@ int	*size;
 	q = *name;
 	
 	for (i = 0; i < nelem; i++) {
-		cp = krb5_princ_component(principal, i)->data;
-		length = krb5_princ_component(principal, i)->length;
+		cp = krb5_princ_component(context, principal, i)->data;
+		length = krb5_princ_component(context, principal, i)->length;
 		for (j=0; j < length; j++,cp++) {
 		    switch (*cp) {
 		    case COMPONENT_SEP:
@@ -149,8 +150,8 @@ int	*size;
 	q--;			/* Back up last component separator */
 	*q++ = REALM_SEP;
 	
-	cp = krb5_princ_realm(principal)->data;
-	length = krb5_princ_realm(principal)->length;
+	cp = krb5_princ_realm(context, principal)->data;
+	length = krb5_princ_realm(context, principal)->length;
 	for (j=0; j < length; j++,cp++) {
 		switch (*cp) {
 		case COMPONENT_SEP:
@@ -174,12 +175,13 @@ int	*size;
 }
 
 krb5_error_code
-krb5_unparse_name(principal, name)
-krb5_const_principal principal;
-register char **name;
+krb5_unparse_name(context, principal, name)
+    krb5_context context;
+    krb5_const_principal principal;
+    register char **name;
 {
 	*name = NULL;
-	return(krb5_unparse_name_ext(principal, name, NULL));
+	return(krb5_unparse_name_ext(context, principal, name, NULL));
 }
 
 

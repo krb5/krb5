@@ -29,25 +29,26 @@
 #include <krb5/ext-proto.h>
 
 void
-krb5_free_kdc_req(val)
-krb5_kdc_req *val;
+krb5_free_kdc_req(context, val)
+    krb5_context context;
+    krb5_kdc_req *val;
 {
     if (val->padata)
-	krb5_free_pa_data(val->padata);
+	krb5_free_pa_data(context, val->padata);
     if (val->client)
-	krb5_free_principal(val->client);
+	krb5_free_principal(context, val->client);
     if (val->server)
-	krb5_free_principal(val->server);
+	krb5_free_principal(context, val->server);
     if (val->etype)
 	krb5_xfree(val->etype);
     if (val->addresses)
-	krb5_free_addresses(val->addresses);
+	krb5_free_addresses(context, val->addresses);
     if (val->authorization_data.ciphertext.data)
 	krb5_xfree(val->authorization_data.ciphertext.data);
     if (val->unenc_authdata)
-	krb5_free_authdata(val->unenc_authdata);
+	krb5_free_authdata(context, val->unenc_authdata);
     if (val->second_ticket)
-	krb5_free_tickets(val->second_ticket);
+	krb5_free_tickets(context, val->second_ticket);
     krb5_xfree(val);
     return;
 }

@@ -29,8 +29,9 @@
 #include <krb5/ext-proto.h>
 
 void
-krb5_free_checksum(val)
-register krb5_checksum *val;
+krb5_free_checksum(context, val)
+    krb5_context context;
+    register krb5_checksum *val;
 {
     if (val->contents)
 	krb5_xfree(val->contents);

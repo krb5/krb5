@@ -77,7 +77,8 @@ static krb5_error_code find_preauthenticator
  *   Note: This is a first crack at what any preauthentication will need...
  */
 krb5_error_code 
-krb5_obtain_padata(type, client, src_addr, encrypt_key, ret_data)
+krb5_obtain_padata(context, type, client, src_addr, encrypt_key, ret_data)
+    krb5_context context;
     int type;			 	/*IN:  Preauth type */
     krb5_principal client;		/*IN:  requestor */
     krb5_address **src_addr;            /*IN:  array of ptrs to addresses */
@@ -110,7 +111,7 @@ krb5_obtain_padata(type, client, src_addr, encrypt_key, ret_data)
     if (retval)
 	goto error_out;
 
-    retval = (*p_system->obtain)( client, src_addr, data );
+    retval = (*p_system->obtain)(context, client, src_addr, data );
     if (retval)
 	goto error_out;
 
@@ -121,10 +122,10 @@ krb5_obtain_padata(type, client, src_addr, encrypt_key, ret_data)
 	    retval = KRB5_PREAUTH_NO_KEY;
 	    goto error_out;
 	}
-        krb5_use_keytype(&eblock, encrypt_key->keytype);
+        krb5_use_keytype(context, &eblock, encrypt_key->keytype);
 
 	/* do any necessay key pre-processing */
-	retval = krb5_process_key(&eblock, encrypt_key);
+	retval = krb5_process_key(context, &eblock, encrypt_key);
 	if (retval)
 	    goto error_out;
 	
@@ -137,7 +138,7 @@ krb5_obtain_padata(type, client, src_addr, encrypt_key, ret_data)
 					   eblock.crypto_entry) + 4;
 	
 	if(!(scratch.data = malloc(scratch.length))){
-	    (void) krb5_finish_key(&eblock);
+	    (void) krb5_finish_key(context, &eblock);
 	    retval = ENOMEM;
 	    goto error_out;
 	}
@@ -148,14 +149,14 @@ krb5_obtain_padata(type, client, src_addr, encrypt_key, ret_data)
 	scratch.data[3] = data->length;
 
 	/* Encrypt preauth data in encryption key */
-	if (retval = krb5_encrypt((krb5_pointer) data->contents,
+	if (retval = krb5_encrypt(context, (krb5_pointer) data->contents,
 				  (char *) scratch.data + 4,
 				  data->length, &eblock, 0)) {
-	    (void) krb5_finish_key(&eblock);
+	    (void) krb5_finish_key(context, &eblock);
 	    free(scratch.data);
 	    goto error_out;
 	}
-	(void) krb5_finish_key(&eblock);
+	(void) krb5_finish_key(context, &eblock);
 	    
 	free(data->contents);
 	data->length = scratch.length;
@@ -182,7 +183,8 @@ error_out:
  */
 
 krb5_error_code
-krb5_verify_padata(data,client,src_addr, decrypt_key, req_id, flags)
+krb5_verify_padata(context, data,client,src_addr, decrypt_key, req_id, flags)
+    krb5_context context;
     krb5_pa_data *data;                 /*IN: padata */
     krb5_principal client;              /*IN: requestor */
     krb5_address **src_addr;            /*IN: array of ptrs to addresses */
@@ -212,7 +214,7 @@ krb5_verify_padata(data,client,src_addr, decrypt_key, req_id, flags)
 	if (!decrypt_key)
 	    return(EINVAL);
 
-        krb5_use_keytype(&eblock, decrypt_key->keytype);
+        krb5_use_keytype(context, &eblock, decrypt_key->keytype);
 
         scratch.length = data->length;
         if (!(scratch.data = (char *)malloc(scratch.length))) {
@@ -220,18 +222,18 @@ krb5_verify_padata(data,client,src_addr, decrypt_key, req_id, flags)
         }
 
 	/* do any necessay key pre-processing */
-	retval = krb5_process_key(&eblock,decrypt_key);
+	retval = krb5_process_key(context, &eblock,decrypt_key);
 	if (retval) {
            free(scratch.data);
            return(retval);
         }
 
 	/* Decrypt data */
-	retval = krb5_decrypt((char *) data->contents + 4,
+	retval = krb5_decrypt(context, (char *) data->contents + 4,
 			      (krb5_pointer) scratch.data,
 			      scratch.length - 4, &eblock, 0);
 	if (retval) {
-           (void) krb5_finish_key(&eblock);
+           (void) krb5_finish_key(context, &eblock);
            free(scratch.data);
            return(retval);
 	}
@@ -246,7 +248,7 @@ krb5_verify_padata(data,client,src_addr, decrypt_key, req_id, flags)
 	scratch.length = data->length;
     }
 
-    retval = (*p_system->verify)(client, src_addr, &scratch);
+    retval = (*p_system->verify)(context, client, src_addr, &scratch);
     if (free_scratch)
 	free(scratch.data);
     if (retval)
@@ -260,10 +262,10 @@ krb5_verify_padata(data,client,src_addr, decrypt_key, req_id, flags)
              replay detection. */
     /* MUST malloc cksum.contents */
     cksum.contents = (krb5_octet *)calloc(1,
-				krb5_checksum_size(CKSUMTYPE_CRC32));
+				krb5_checksum_size(context, CKSUMTYPE_CRC32));
     if (!cksum.contents) return(1);
 
-    if (krb5_calculate_checksum(CKSUMTYPE_CRC32,
+    if (krb5_calculate_checksum(context, CKSUMTYPE_CRC32,
 			data->contents,
 			data->length,
                         0, /* seed is ignored */
@@ -306,7 +308,8 @@ find_preauthenticator(type, preauth)
 int seeded = 0 ; /* Used by srand below */
 
 krb5_error_code
-get_unixtime_padata(client, src_addr, pa_data)
+get_unixtime_padata(context, client, src_addr, pa_data)
+    krb5_context context;
     krb5_principal client;
     krb5_address **src_addr;
     krb5_pa_data *pa_data;
@@ -321,7 +324,7 @@ get_unixtime_padata(client, src_addr, pa_data)
     if (!tmp) 
         return(ENOMEM);
 
-    retval = krb5_timeofday(&kdc_time);
+    retval = krb5_timeofday(context, &kdc_time);
     if (retval)
         return retval;
     if ( !seeded) {
@@ -342,7 +345,8 @@ get_unixtime_padata(client, src_addr, pa_data)
 }
 
 krb5_error_code
-verify_unixtime_padata(client, src_addr, data)
+verify_unixtime_padata(context, client, src_addr, data)
+    krb5_context context;
     krb5_principal client;
     krb5_address **src_addr;
     krb5_data *data;
@@ -361,7 +365,7 @@ verify_unixtime_padata(client, src_addr, data)
     patime += (int) tmp[11] << 8;
     patime += tmp[12];
 
-    retval = krb5_timeofday(&currenttime);
+    retval = krb5_timeofday(context, &currenttime);
     if (retval)
         return retval;
 
@@ -390,18 +394,18 @@ verify_securid_padata(client, src_addr, data)
 
 	memset((char *)&sd,0, sizeof (sd));
    	memset((char *) username, 0, sizeof(username));
-        memcpy((char *) username, krb5_princ_component(client,0)->data,
-                        	  krb5_princ_component(client,0)->length);
+        memcpy((char *) username, krb5_princ_component(context, client,0)->data,
+                        	  krb5_princ_component(context, client,0)->length);
         /* If Instance then Append */
- 	if (krb5_princ_size(client) > 1 ) {
-	    if (strncmp(krb5_princ_realm(client)->data,
-			krb5_princ_component(client,1)->data,
-			krb5_princ_component(client,1)->length) ||
-		        krb5_princ_realm(client)->length != 
-			krb5_princ_component(client,1)->length) {
+ 	if (krb5_princ_size(context, client) > 1 ) {
+	    if (strncmp(krb5_princ_realm(context, client)->data,
+			krb5_princ_component(context, client,1)->data,
+			krb5_princ_component(context, client,1)->length) ||
+		        krb5_princ_realm(context, client)->length != 
+			krb5_princ_component(context, client,1)->length) {
 		strncat(username,"/",1);
-		strncat(username,krb5_princ_component(client,1)->data,
-				 krb5_princ_component(client,1)->length);
+		strncat(username,krb5_princ_component(context, client,1)->data,
+				 krb5_princ_component(context, client,1)->length);
 	    }
 	}
         if (retval = sd_check(data->data,username,&sd) != ACM_OK) {
@@ -414,7 +418,7 @@ verify_securid_padata(client, src_addr, data)
     } else {
         char *username = 0;
 
-	krb5_unparse_name(client,&username);
+	krb5_unparse_name(context, client,&username);
 	syslog(LOG_INFO, 
 	    "%s Provided Securid but this KDC does not support Securid",
 		username);
@@ -424,13 +428,14 @@ verify_securid_padata(client, src_addr, data)
 }
 #else
 krb5_error_code
-verify_securid_padata(client, src_addr, data)
+verify_securid_padata(context, client, src_addr, data)
+    krb5_context context;
     krb5_principal client;
     krb5_address **src_addr;
     krb5_data *data;
 {
  char *username = 0;
-	krb5_unparse_name(client,&username);
+	krb5_unparse_name(context, client,&username);
 	syslog(LOG_INFO, 
 	    "%s Provided Securid but this KDC does not support Securid",
 		username);
@@ -447,7 +452,8 @@ static char *krb5_SecureId_prompt = "\nEnter Your SecurId Access Code Prepended 
 static char *krb5_SecureId_prompt = "\nEnter Your SecurId Access Code Prepended with Your PIN\n (or a \'#\'if Your PIN is entered on the card keypad): ";
 
 krb5_error_code
-get_securid_padata(client,src_addr,pa_data)
+get_securid_padata(context, client,src_addr,pa_data)
+    krb5_context context;
     krb5_principal client;
     krb5_address **src_addr;
     krb5_pa_data *pa_data;
@@ -458,7 +464,7 @@ get_securid_padata(client,src_addr,pa_data)
  int retval = 0;
 
     tempsize = sizeof(temp) - 1;
-    if (krb5_read_password(krb5_SecureId_prompt, 0, temp, &tempsize))
+    if (krb5_read_password(context, krb5_SecureId_prompt, 0, temp, &tempsize))
         return(KRB5_PARSE_ILLCHAR);
     temp[tempsize] = '\0';
 

@@ -37,7 +37,8 @@
  * associated with the cache.
  */
 krb5_error_code
-krb5_scc_close(id)
+krb5_scc_close(context, id)
+   krb5_context context;
    krb5_ccache id;
 {
      register int closeval = KRB5_OK;
@@ -47,7 +48,7 @@ krb5_scc_close(id)
 	 closeval = fclose (data->file);
 	 data->file = 0;
 	 if (closeval == -1) {
-	     closeval = krb5_scc_interpret(errno);
+	     closeval = krb5_scc_interpret(context, errno);
 	 } else
 	     closeval = KRB5_OK;
 		 

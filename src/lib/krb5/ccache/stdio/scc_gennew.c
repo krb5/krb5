@@ -52,7 +52,8 @@ extern krb5_cc_ops krb5_scc_ops;
  * system errors (from open)
  */
 krb5_error_code
-krb5_scc_generate_new (id)
+krb5_scc_generate_new (context, id)
+   krb5_context context;
    krb5_ccache *id;
 {
      krb5_ccache lid;
@@ -99,19 +100,19 @@ krb5_scc_generate_new (id)
      f = fopen (((krb5_scc_data *) lid->data)->filename, "w+");
 #endif
      if (!f) {
-	     retcode = krb5_scc_interpret (errno);
+	     retcode = krb5_scc_interpret (context, errno);
 	     goto err_out;
      } else {
 	 krb5_int16 scc_fvno = htons(KRB5_SCC_DEFAULT_FVNO);
 
 	 if (!fwrite((char *)&scc_fvno, sizeof(scc_fvno), 1, f)) {
-	     retcode = krb5_scc_interpret(errno);
+	     retcode = krb5_scc_interpret(context, errno);
 	     (void) fclose(f);
 	     (void) remove(((krb5_scc_data *) lid->data)->filename);
 	     goto err_out;
 	 }
 	 if (fclose(f) == EOF) {
-	     retcode = krb5_scc_interpret(errno);
+	     retcode = krb5_scc_interpret(context, errno);
 	     (void) remove(((krb5_scc_data *) lid->data)->filename);
 	     goto err_out;
 	 }

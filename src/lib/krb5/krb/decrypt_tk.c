@@ -41,9 +41,10 @@
 */
 
 krb5_error_code
-krb5_decrypt_tkt_part(srv_key, ticket)
-const krb5_keyblock *srv_key;
-register krb5_ticket *ticket;
+krb5_decrypt_tkt_part(context, srv_key, ticket)
+    krb5_context context;
+    const krb5_keyblock *srv_key;
+    register krb5_ticket *ticket;
 {
     krb5_enc_tkt_part *dec_tkt_part;
     krb5_encrypt_block eblock;
@@ -55,31 +56,31 @@ register krb5_ticket *ticket;
 
     /* put together an eblock for this encryption */
 
-    krb5_use_cstype(&eblock, ticket->enc_part.etype);
+    krb5_use_cstype(context, &eblock, ticket->enc_part.etype);
 
     scratch.length = ticket->enc_part.ciphertext.length;
     if (!(scratch.data = malloc(ticket->enc_part.ciphertext.length)))
 	return(ENOMEM);
 
     /* do any necessary key pre-processing */
-    retval = krb5_process_key(&eblock, srv_key);
+    retval = krb5_process_key(context, &eblock, srv_key);
     if (retval) {
 	free(scratch.data);
 	return(retval);
     }
 
     /* call the encryption routine */
-    retval = krb5_decrypt((krb5_pointer) ticket->enc_part.ciphertext.data,
+    retval = krb5_decrypt(context, (krb5_pointer) ticket->enc_part.ciphertext.data,
 			  (krb5_pointer) scratch.data,
 			  scratch.length, &eblock, 0);
     if (retval) {
-	(void) krb5_finish_key(&eblock);
+	(void) krb5_finish_key(context, &eblock);
 	free(scratch.data);
 	return retval;
     }
 #define clean_scratch() {memset(scratch.data, 0, scratch.length); \
 free(scratch.data);}
-    retval = krb5_finish_key(&eblock);
+    retval = krb5_finish_key(context, &eblock);
     if (retval) {
 
 	clean_scratch();

@@ -41,19 +41,20 @@
  * KRB5_CC_NOMEM
  */
 krb5_error_code
-krb5_fcc_get_principal(id, princ)
+krb5_fcc_get_principal(context, id, princ)
+   krb5_context context;
    krb5_ccache id;
    krb5_principal *princ;
 {
      krb5_error_code kret = KRB5_OK;
 
-     MAYBE_OPEN(id, FCC_OPEN_RDONLY);
+     MAYBE_OPEN(context, id, FCC_OPEN_RDONLY);
      /* make sure we're beyond the vno */
      lseek(((krb5_fcc_data *) id->data)->fd, sizeof(krb5_int16), SEEK_SET);
 
-     kret = krb5_fcc_read_principal(id, princ);
+     kret = krb5_fcc_read_principal(context, id, princ);
 
-     MAYBE_CLOSE(id, kret);
+     MAYBE_CLOSE(context, id, kret);
      return kret;
 }
 

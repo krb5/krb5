@@ -51,12 +51,13 @@
 extern krb5_flags krb5_kdc_default_options;
 
 krb5_error_code
-krb5_mk_req(server, ap_req_options, checksum, ccache, outbuf)
-krb5_const_principal server;
-const krb5_flags ap_req_options;
-const krb5_checksum *checksum;
-krb5_ccache ccache;
-krb5_data *outbuf;
+krb5_mk_req(context, server, ap_req_options, checksum, ccache, outbuf)
+    krb5_context context;
+    krb5_const_principal server;
+    const krb5_flags ap_req_options;
+    const krb5_checksum *checksum;
+    krb5_ccache ccache;
+    krb5_data *outbuf;
 {
     krb5_error_code retval;
     krb5_creds creds;
@@ -64,9 +65,9 @@ krb5_data *outbuf;
     /* obtain ticket & session key */
 
     memset((char *)&creds, 0, sizeof(creds));
-    if (retval = krb5_copy_principal(server, &creds.server))
+    if (retval = krb5_copy_principal(context, server, &creds.server))
 	goto errout;
-    if (retval = krb5_cc_get_principal(ccache, &creds.client))
+    if (retval = krb5_cc_get_principal(context, ccache, &creds.client))
 	goto errout;
     /* creds.times.endtime = 0; -- memset 0 takes care of this
      				   zero means "as long as possible" */
@@ -74,12 +75,12 @@ krb5_data *outbuf;
        				      zero means no session keytype
 				      preference */
 
-    if (retval = krb5_get_credentials(krb5_kdc_default_options,
+    if (retval = krb5_get_credentials(context, krb5_kdc_default_options,
 				      ccache,
 				      &creds))
 	goto errout;
 
-    retval = krb5_mk_req_extended(ap_req_options,
+    retval = krb5_mk_req_extended(context, ap_req_options,
 				  checksum,
 				  krb5_kdc_default_options,
 				  0,	/* no sequence number */
@@ -90,6 +91,6 @@ krb5_data *outbuf;
 				  outbuf);
 
 errout:
-    krb5_free_cred_contents(&creds);
+    krb5_free_cred_contents(context, &creds);
     return retval;
 }

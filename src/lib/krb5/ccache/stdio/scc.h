@@ -79,16 +79,16 @@ typedef struct _krb5_scc_cursor {
     long pos;
 } krb5_scc_cursor;
 
-#define MAYBE_OPEN(ID, MODE) \
+#define MAYBE_OPEN(context, ID, MODE) \
 {									\
     if (OPENCLOSE (ID)) {						\
-	krb5_error_code maybe_open_ret = krb5_scc_open_file (ID,MODE);	\
+	krb5_error_code maybe_open_ret = krb5_scc_open_file (context, ID,MODE);	\
 	if (maybe_open_ret) return maybe_open_ret; } }
 
-#define MAYBE_CLOSE(ID, RET) \
+#define MAYBE_CLOSE(context, ID, RET) \
 {									\
     if (OPENCLOSE (ID)) {						\
-	krb5_error_code maybe_close_ret = krb5_scc_close_file (ID);	\
+	krb5_error_code maybe_close_ret = krb5_scc_close_file (context, ID);	\
 	if (!(RET)) RET = maybe_close_ret; } }
 
 /* DO NOT ADD ANYTHING AFTER THIS #endif */

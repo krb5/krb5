@@ -42,7 +42,8 @@
  * system errors
  */
 krb5_error_code
-krb5_scc_start_seq_get(id, cursor)
+krb5_scc_start_seq_get(context, id, cursor)
+   krb5_context context;
    krb5_ccache id;
    krb5_cc_cursor *cursor;
 {
@@ -54,14 +55,14 @@ krb5_scc_start_seq_get(id, cursor)
 	  return KRB5_CC_NOMEM;
 
      /* Make sure we start reading right after the primary principal */
-     MAYBE_OPEN (id, SCC_OPEN_RDONLY);
+     MAYBE_OPEN (context, id, SCC_OPEN_RDONLY);
      /* skip over vno at beginning of file */
      fseek(((krb5_scc_data *) id->data)->file, sizeof(krb5_int16), 0);
 
-     krb5_scc_skip_principal(id);
+     krb5_scc_skip_principal(context, id);
      fcursor->pos = ftell(((krb5_scc_data *) id->data)->file);
      *cursor = (krb5_cc_cursor) fcursor;
 
-     MAYBE_CLOSE (id, ret);
+     MAYBE_CLOSE (context, id, ret);
      return(ret);
 }

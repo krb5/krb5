@@ -50,7 +50,8 @@ extern krb5_cc_ops krb5_fcc_ops;
  * permission errors
  */
 krb5_error_code
-krb5_fcc_resolve (id, residual)
+krb5_fcc_resolve (context, id, residual)
+   krb5_context context;
    krb5_ccache *id;
    char *residual;
 {

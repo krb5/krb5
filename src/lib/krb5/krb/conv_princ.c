@@ -99,21 +99,22 @@ static char *strnchr(s, c, n)
 /* XXX This calls for a new error code */
 #define KRB5_INVALID_PRINCIPAL KRB5_LNAME_BADFORMAT
 
-krb5_error_code krb5_524_conv_principal(princ, name, inst, realm)
-   const krb5_principal princ;
-   char *name;
-   char *inst;
-   char *realm;
+krb5_error_code krb5_524_conv_principal(context, princ, name, inst, realm)
+    krb5_context context;
+    const krb5_principal princ;
+    char *name;
+    char *inst;
+    char *realm;
 {
      struct krb_convert *p;
      krb5_data *comp;
      char *c;
 
      *name = *inst = '\0';
-     switch (krb5_princ_size(princ)) {
+     switch (krb5_princ_size(context, princ)) {
      case 2:
 	  /* Check if this principal is listed in the table */
-	  comp = krb5_princ_component(princ, 0);
+	  comp = krb5_princ_component(context, princ, 0);
 	  p = sconv_list;
 	  while (p->v4_str) {
 	       if (strncmp(p->v5_str, comp->data, comp->length) == 0) {
@@ -121,7 +122,7 @@ krb5_error_code krb5_524_conv_principal(princ, name, inst, realm)
 		    /* instance's domain name if requested */
 		    strcpy(name, p->v4_str);
 		    if (p->flags & DO_REALM_CONVERSION) {
-			 comp = krb5_princ_component(princ, 1);
+			 comp = krb5_princ_component(context, princ, 1);
 			 c = strnchr(comp->data, '.', comp->length);
 			 if (!c || (c - comp->data) > INST_SZ - 1)
 			      return KRB5_INVALID_PRINCIPAL;
@@ -135,7 +136,7 @@ krb5_error_code krb5_524_conv_principal(princ, name, inst, realm)
 	  /* If inst isn't set, the service isn't listed in the table, */
 	  /* so just copy it. */
 	  if (*inst == '\0') {
-	       comp = krb5_princ_component(princ, 1);
+	       comp = krb5_princ_component(context, princ, 1);
 	       if (comp->length >= INST_SZ - 1)
 		    return KRB5_INVALID_PRINCIPAL;
 	       strncpy(inst, comp->data, comp->length);
@@ -145,7 +146,7 @@ krb5_error_code krb5_524_conv_principal(princ, name, inst, realm)
      case 1:
 	  /* name may have been set above; otherwise, just copy it */
 	  if (*name == '\0') {
-	       comp = krb5_princ_component(princ, 0);
+	       comp = krb5_princ_component(context, princ, 0);
 	       if (comp->length >= ANAME_SZ)
 		    return KRB5_INVALID_PRINCIPAL;
 	       strncpy(name, comp->data, comp->length);
@@ -156,7 +157,7 @@ krb5_error_code krb5_524_conv_principal(princ, name, inst, realm)
 	  return KRB5_INVALID_PRINCIPAL;
      }
 
-     comp = krb5_princ_realm(princ);
+     comp = krb5_princ_realm(context, princ);
      if (comp->length > REALM_SZ - 1)
 	  return KRB5_INVALID_PRINCIPAL;
      strncpy(realm, comp->data, comp->length);
@@ -165,7 +166,8 @@ krb5_error_code krb5_524_conv_principal(princ, name, inst, realm)
      return 0;
 }
 
-krb5_error_code krb5_425_conv_principal(name, instance, realm, princ)
+krb5_error_code krb5_425_conv_principal(context, name, instance, realm, princ)
+   krb5_context context;
    const char	*name;
    const char	*instance;
    const char	*realm;
@@ -192,7 +194,7 @@ krb5_error_code krb5_425_conv_principal(name, instance, realm, princ)
 	  name = p->v5_str;
 	  if (p->flags & DO_REALM_CONVERSION) {
 	       strcpy(buf, instance);
-	       retval = krb5_get_realm_domain(realm, &domain);
+	       retval = krb5_get_realm_domain(context, realm, &domain);
 	       if (retval)
 		   return retval;
 	       if (domain) {
@@ -207,6 +209,6 @@ krb5_error_code krb5_425_conv_principal(name, instance, realm, princ)
      }
      
 not_service:	
-     return(krb5_build_principal(princ, strlen(realm), realm, name,
+     return(krb5_build_principal(context, princ, strlen(realm), realm, name,
 				 instance, 0));
 }

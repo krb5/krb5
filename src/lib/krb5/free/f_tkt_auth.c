@@ -29,13 +29,14 @@
 #include <krb5/ext-proto.h>
 
 void
-krb5_free_tkt_authent(val)
-krb5_tkt_authent *val;
+krb5_free_tkt_authent(context, val)
+    krb5_context context;
+    krb5_tkt_authent *val;
 {
     if (val->ticket)
-	    krb5_free_ticket(val->ticket);
+	    krb5_free_ticket(context, val->ticket);
     if (val->authenticator)
-	    krb5_free_authenticator(val->authenticator);
+	    krb5_free_authenticator(context, val->authenticator);
     krb5_xfree(val);
     return;
 }

@@ -64,16 +64,17 @@ typedef krb5_error_code (*rdreq_key_proc) PROTOTYPE((krb5_pointer,
 #include <krb5/narrow.h>
 
 krb5_error_code
-krb5_rd_req(inbuf, server, sender_addr, fetchfrom, keyproc, keyprocarg,
-	    rcache, authdat)
-const krb5_data *inbuf;
-krb5_const_principal server;
-const krb5_address *sender_addr;
-const char * fetchfrom;
-rdreq_key_proc keyproc;
-krb5_pointer keyprocarg;
-krb5_rcache rcache;
-krb5_tkt_authent **authdat;
+krb5_rd_req(context, inbuf, server, sender_addr, fetchfrom, keyproc, 
+	    keyprocarg, rcache, authdat)
+    krb5_context context;
+    const krb5_data *inbuf;
+    krb5_const_principal server;
+    const krb5_address *sender_addr;
+    const char * fetchfrom;
+    krb5_rdreq_key_proc keyproc;
+    krb5_pointer keyprocarg;
+    krb5_rcache rcache;
+    krb5_tkt_authent **authdat;
 {
     krb5_error_code retval;
     krb5_ap_req *request;
@@ -94,9 +95,10 @@ krb5_tkt_authent **authdat;
 
     }
 
-    retval = krb5_rd_req_decoded(request, server, sender_addr, fetchfrom,
-				 keyproc, keyprocarg, rcache, authdat);
-    krb5_free_ap_req(request);
+    retval = krb5_rd_req_decoded(context, request, server, sender_addr, 
+				 fetchfrom, keyproc, keyprocarg, rcache, 
+				 authdat);
+    krb5_free_ap_req(context, request);
     return retval;
 }
 

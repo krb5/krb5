@@ -42,10 +42,10 @@ static struct krb5_cc_typelist *cc_typehead = 0;
  */
 
 krb5_error_code
-krb5_cc_register(DECLARG(krb5_cc_ops *,ops),
-		 DECLARG(krb5_boolean,override))
-OLDDECLARG(krb5_cc_ops *,ops)
-OLDDECLARG(krb5_boolean,override)
+krb5_cc_register(context, ops, override)
+   krb5_context context;
+   krb5_cc_ops *ops;
+   krb5_boolean override;
 {
     struct krb5_cc_typelist *t;
     for (t = cc_typehead;t && strcmp(t->ops->prefix,ops->prefix);t = t->next)
@@ -75,9 +75,10 @@ OLDDECLARG(krb5_boolean,override)
  * particular cache type.
  */
 
-krb5_error_code krb5_cc_resolve (name, cache)
-    char *name;
-    krb5_ccache *cache;
+krb5_error_code krb5_cc_resolve (context, name, cache)
+   krb5_context context;
+   char *name;
+   krb5_ccache *cache;
 {
     struct krb5_cc_typelist *tlist;
     char *pfx, *resid, *cp;
@@ -86,7 +87,7 @@ krb5_error_code krb5_cc_resolve (name, cache)
     cp = strchr (name, ':');
     if (!cp) {
 	if (krb5_cc_dfl_ops)
-	    return (*krb5_cc_dfl_ops->resolve)(cache, name);
+	    return (*krb5_cc_dfl_ops->resolve)(context, cache, name);
 	else
 	    return KRB5_CC_BADNAME;
     }
@@ -106,12 +107,12 @@ krb5_error_code krb5_cc_resolve (name, cache)
     for (tlist = cc_typehead; tlist; tlist = tlist->next) {
 	if (strcmp (tlist->ops->prefix, pfx) == 0) {
 	    free(pfx);
-	    return (*tlist->ops->resolve)(cache, resid);
+	    return (*tlist->ops->resolve)(context, cache, resid);
 	}
     }
     if (krb5_cc_dfl_ops && !strcmp (pfx, krb5_cc_dfl_ops->prefix)) {
 	free (pfx);
-	return (*krb5_cc_dfl_ops->resolve)(cache, resid);
+	return (*krb5_cc_dfl_ops->resolve)(context, cache, resid);
     }
     free(pfx);
     return KRB5_CC_UNKNOWN_TYPE;

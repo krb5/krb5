@@ -33,11 +33,13 @@
 static krb5_boolean times_match PROTOTYPE((const krb5_ticket_times *,
 					   const krb5_ticket_times *));
 static krb5_boolean standard_fields_match
-    PROTOTYPE((const krb5_creds *,
+    PROTOTYPE((krb5_context,
+		   const krb5_creds *,
 	       const krb5_creds *));
 
 static krb5_boolean srvname_match
-    PROTOTYPE((const krb5_creds *,
+    PROTOTYPE((krb5_context,
+		   const krb5_creds *,
 	       const krb5_creds *));
 
 static krb5_boolean authdata_match
@@ -83,7 +85,8 @@ register const krb5_data *data1, *data2;
  * KRB5_CC_NOMEM
  */
 krb5_error_code
-krb5_fcc_retrieve(id, whichfields, mcreds, creds)
+krb5_fcc_retrieve(context, id, whichfields, mcreds, creds)
+   krb5_context context;
    krb5_ccache id;
    krb5_flags whichfields;
    krb5_creds *mcreds;
@@ -96,14 +99,14 @@ krb5_fcc_retrieve(id, whichfields, mcreds, creds)
      krb5_error_code kret;
      krb5_creds fetchcreds;
 
-     kret = krb5_fcc_start_seq_get(id, &cursor);
+     kret = krb5_fcc_start_seq_get(context, id, &cursor);
      if (kret != KRB5_OK)
 	  return kret;
 
-     while ((kret = krb5_fcc_next_cred(id, &cursor, &fetchcreds)) == KRB5_OK) {
+     while ((kret = krb5_fcc_next_cred(context, id, &cursor, &fetchcreds)) == KRB5_OK) {
 	  if (((set(KRB5_TC_MATCH_SRV_NAMEONLY) &&
-		   srvname_match(mcreds, &fetchcreds)) ||
-	       standard_fields_match(mcreds, &fetchcreds))
+		   srvname_match(context, mcreds, &fetchcreds)) ||
+	       standard_fields_match(context, mcreds, &fetchcreds))
 	      &&
 	      (! set(KRB5_TC_MATCH_IS_SKEY) ||
 	       mcreds->is_skey == fetchcreds.is_skey)
@@ -127,17 +130,17 @@ krb5_fcc_retrieve(id, whichfields, mcreds, creds)
 	       data_match (&mcreds->second_ticket, &fetchcreds.second_ticket))
 	      )
 	  {
-	       krb5_fcc_end_seq_get(id, &cursor);
+	       krb5_fcc_end_seq_get(context, id, &cursor);
 	       *creds = fetchcreds;
 	       return KRB5_OK;
 	  }
 
 	  /* This one doesn't match */
-	  krb5_free_cred_contents(&fetchcreds);
+	  krb5_free_cred_contents(context, &fetchcreds);
      }
 
      /* If we get here, a match wasn't found */
-     krb5_fcc_end_seq_get(id, &cursor);
+     krb5_fcc_end_seq_get(context, id, &cursor);
      return KRB5_CC_NOTFOUND;
 }
 
@@ -159,23 +162,25 @@ register const krb5_ticket_times *t2;
 }
 
 static krb5_boolean
-standard_fields_match(mcreds, creds)
+standard_fields_match(context, mcreds, creds)
+   krb5_context context;
 register const krb5_creds *mcreds, *creds;
 {
-    return (krb5_principal_compare(mcreds->client,creds->client) &&
-	    krb5_principal_compare(mcreds->server,creds->server));
+    return (krb5_principal_compare(context, mcreds->client,creds->client) &&
+	    krb5_principal_compare(context, mcreds->server,creds->server));
 }
 
 /* only match the server name portion, not the server realm portion */
 
 static krb5_boolean
-srvname_match(mcreds, creds)
+srvname_match(context, mcreds, creds)
+   krb5_context context;
 register const krb5_creds *mcreds, *creds;
 {
     krb5_boolean retval;
     krb5_principal_data p1, p2;
     
-    retval = krb5_principal_compare(mcreds->client,creds->client);
+    retval = krb5_principal_compare(context, mcreds->client,creds->client);
     if (retval != TRUE)
 	return retval;
     /*
@@ -184,7 +189,7 @@ register const krb5_creds *mcreds, *creds;
     p1 = *mcreds->server;
     p2 = *creds->server;
     p1.realm = p2.realm;
-    return krb5_principal_compare(&p1, &p2);
+    return krb5_principal_compare(context, &p1, &p2);
 }
 
 static krb5_boolean

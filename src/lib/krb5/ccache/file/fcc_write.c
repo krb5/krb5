@@ -42,7 +42,8 @@
  * system errors
  */
 krb5_error_code
-krb5_fcc_write(id, buf, len)
+krb5_fcc_write(context, id, buf, len)
+   krb5_context context;
    krb5_ccache id;
    krb5_pointer buf;
    int len;
@@ -51,7 +52,7 @@ krb5_fcc_write(id, buf, len)
 
      ret = write(((krb5_fcc_data *)id->data)->fd, (char *) buf, len);
      if (ret < 0)
-	  return krb5_fcc_interpret(errno);
+	  return krb5_fcc_interpret(context, errno);
      if (ret != len)
 	 return KRB5_CC_WRITE;
      return KRB5_OK;
@@ -72,7 +73,8 @@ krb5_fcc_write(id, buf, len)
  */
 
 krb5_error_code
-krb5_fcc_store_principal(id, princ)
+krb5_fcc_store_principal(context, id, princ)
+   krb5_context context;
    krb5_ccache id;
    krb5_principal princ;
 {
@@ -80,8 +82,8 @@ krb5_fcc_store_principal(id, princ)
     krb5_error_code ret;
     krb5_int32 i, length, tmp, type;
 
-    type = krb5_princ_type(princ);
-    tmp = length = krb5_princ_size(princ);
+    type = krb5_princ_type(context, princ);
+    tmp = length = krb5_princ_size(context, princ);
 
     if (data->version == KRB5_FCC_FVNO_1) {
 	/*
@@ -91,18 +93,18 @@ krb5_fcc_store_principal(id, princ)
 	 */
 	tmp++;
     } else {
-	ret = krb5_fcc_store_int32(id, type);
+	ret = krb5_fcc_store_int32(context, id, type);
 	CHECK(ret);
     }
     
-    ret = krb5_fcc_store_int32(id, tmp);
+    ret = krb5_fcc_store_int32(context, id, tmp);
     CHECK(ret);
 
-    ret = krb5_fcc_store_data(id, krb5_princ_realm(princ));
+    ret = krb5_fcc_store_data(context, id, krb5_princ_realm(context, princ));
     CHECK(ret);
 
     for (i=0; i < length; i++) {
-	ret = krb5_fcc_store_data(id, krb5_princ_component(princ, i));
+	ret = krb5_fcc_store_data(context, id, krb5_princ_component(context, princ, i));
 	CHECK(ret);
     }
 
@@ -110,7 +112,8 @@ krb5_fcc_store_principal(id, princ)
 }
 
 krb5_error_code
-krb5_fcc_store_addrs(id, addrs)
+krb5_fcc_store_addrs(context, id, addrs)
+   krb5_context context;
    krb5_ccache id;
    krb5_address ** addrs;
 {
@@ -125,10 +128,10 @@ krb5_fcc_store_addrs(id, addrs)
 		     length += 1;
      }
 
-     ret = krb5_fcc_store_int32(id, length);
+     ret = krb5_fcc_store_int32(context, id, length);
      CHECK(ret);
      for (i=0; i < length; i++) {
-	  ret = krb5_fcc_store_addr(id, addrs[i]);
+	  ret = krb5_fcc_store_addr(context, id, addrs[i]);
 	  CHECK(ret);
      }
 
@@ -136,54 +139,58 @@ krb5_fcc_store_addrs(id, addrs)
 }
 
 krb5_error_code
-krb5_fcc_store_keyblock(id, keyblock)
+krb5_fcc_store_keyblock(context, id, keyblock)
+   krb5_context context;
    krb5_ccache id;
    krb5_keyblock *keyblock;
 {
      krb5_fcc_data *data = (krb5_fcc_data *)id->data;
      krb5_error_code ret;
 
-     ret = krb5_fcc_store_ui_2(id, keyblock->keytype);
+     ret = krb5_fcc_store_ui_2(context, id, keyblock->keytype);
      CHECK(ret);
      if ((data->version != KRB5_FCC_FVNO_1) &&
 	 (data->version != KRB5_FCC_FVNO_2)) {
-	 ret = krb5_fcc_store_ui_2(id, keyblock->etype);
+	 ret = krb5_fcc_store_ui_2(context, id, keyblock->etype);
 	 CHECK(ret);
      }
-     ret = krb5_fcc_store_int32(id, keyblock->length);
+     ret = krb5_fcc_store_int32(context, id, keyblock->length);
      CHECK(ret);
-     return krb5_fcc_write(id, (char *) keyblock->contents, keyblock->length);
+     return krb5_fcc_write(context, id, (char *) keyblock->contents, keyblock->length);
 }
 
 krb5_error_code
-krb5_fcc_store_addr(id, addr)
+krb5_fcc_store_addr(context, id, addr)
+   krb5_context context;
    krb5_ccache id;
    krb5_address *addr;
 {
      krb5_error_code ret;
 
-     ret = krb5_fcc_store_ui_2(id, addr->addrtype);
+     ret = krb5_fcc_store_ui_2(context, id, addr->addrtype);
      CHECK(ret);
-     ret = krb5_fcc_store_int32(id, addr->length);
+     ret = krb5_fcc_store_int32(context, id, addr->length);
      CHECK(ret);
-     return krb5_fcc_write(id, (char *) addr->contents, addr->length);
+     return krb5_fcc_write(context, id, (char *) addr->contents, addr->length);
 }
 
 
 krb5_error_code
-krb5_fcc_store_data(id, data)
+krb5_fcc_store_data(context, id, data)
+   krb5_context context;
    krb5_ccache id;
    krb5_data *data;
 {
      krb5_error_code ret;
 
-     ret = krb5_fcc_store_int32(id, data->length);
+     ret = krb5_fcc_store_int32(context, id, data->length);
      CHECK(ret);
-     return krb5_fcc_write(id, data->data, data->length);
+     return krb5_fcc_write(context, id, data->data, data->length);
 }
 
 krb5_error_code
-krb5_fcc_store_int32(id, i)
+krb5_fcc_store_int32(context, id, i)
+   krb5_context context;
    krb5_ccache id;
    krb5_int32 i;
 {
@@ -192,7 +199,7 @@ krb5_fcc_store_int32(id, i)
 
     if ((data->version == KRB5_FCC_FVNO_1) ||
 	(data->version == KRB5_FCC_FVNO_2)) 
-	return krb5_fcc_write(id, (char *) &i, sizeof(krb5_int32));
+	return krb5_fcc_write(context, id, (char *) &i, sizeof(krb5_int32));
     else {
 	buf[3] = i & 0xFF;
 	i >>= 8;
@@ -202,12 +209,13 @@ krb5_fcc_store_int32(id, i)
 	i >>= 8;
 	buf[0] = i & 0xFF;
 	
-	return krb5_fcc_write(id, buf, 4);
+	return krb5_fcc_write(context, id, buf, 4);
     }
 }
 
 krb5_error_code
-krb5_fcc_store_ui_2(id, i)
+krb5_fcc_store_ui_2(context, id, i)
+   krb5_context context;
     krb5_ccache id;
     krb5_int32 i;
 {
@@ -218,29 +226,31 @@ krb5_fcc_store_ui_2(id, i)
     if ((data->version == KRB5_FCC_FVNO_1) ||
 	(data->version == KRB5_FCC_FVNO_2)) {
 	ibuf = i;
-	return krb5_fcc_write(id, (char *) &ibuf, sizeof(krb5_ui_2));
+	return krb5_fcc_write(context, id, (char *) &ibuf, sizeof(krb5_ui_2));
     } else {
 	buf[1] = i & 0xFF;
 	i >>= 8;
 	buf[0] = i & 0xFF;
 	
-	return krb5_fcc_write(id, buf, 2);
+	return krb5_fcc_write(context, id, buf, 2);
     }
 }
    
 krb5_error_code
-krb5_fcc_store_octet(id, i)
+krb5_fcc_store_octet(context, id, i)
+   krb5_context context;
     krb5_ccache id;
     krb5_int32 i;
 {
     krb5_octet ibuf;
 
     ibuf = i;
-    return krb5_fcc_write(id, (char *) &ibuf, 1);
+    return krb5_fcc_write(context, id, (char *) &ibuf, 1);
 }
    
 krb5_error_code
-krb5_fcc_store_times(id, t)
+krb5_fcc_store_times(context, id, t)
+   krb5_context context;
    krb5_ccache id;
    krb5_ticket_times *t;
 {
@@ -249,22 +259,23 @@ krb5_fcc_store_times(id, t)
 
     if ((data->version == KRB5_FCC_FVNO_1) ||
 	(data->version == KRB5_FCC_FVNO_2))
-	return krb5_fcc_write(id, (char *) t, sizeof(krb5_ticket_times));
+	return krb5_fcc_write(context, id, (char *) t, sizeof(krb5_ticket_times));
     else {
-	retval = krb5_fcc_store_int32(id, t->authtime);
+	retval = krb5_fcc_store_int32(context, id, t->authtime);
 	CHECK(retval);
-	retval = krb5_fcc_store_int32(id, t->starttime);
+	retval = krb5_fcc_store_int32(context, id, t->starttime);
 	CHECK(retval);
-	retval = krb5_fcc_store_int32(id, t->endtime);
+	retval = krb5_fcc_store_int32(context, id, t->endtime);
 	CHECK(retval);
-	retval = krb5_fcc_store_int32(id, t->renew_till);
+	retval = krb5_fcc_store_int32(context, id, t->renew_till);
 	CHECK(retval);
 	return 0;
     }
 }
    
 krb5_error_code
-krb5_fcc_store_authdata(id, a)
+krb5_fcc_store_authdata(context, id, a)
+   krb5_context context;
     krb5_ccache id;
     krb5_authdata **a;
 {
@@ -277,24 +288,25 @@ krb5_fcc_store_authdata(id, a)
 	    length++;
     }
 
-    ret = krb5_fcc_store_int32(id, length);
+    ret = krb5_fcc_store_int32(context, id, length);
     CHECK(ret);
     for (i=0; i<length; i++) {
-	ret = krb5_fcc_store_authdatum (id, a[i]);
+	ret = krb5_fcc_store_authdatum (context, id, a[i]);
 	CHECK(ret);
     }
     return KRB5_OK;
 }
 
 krb5_error_code
-krb5_fcc_store_authdatum (id, a)
+krb5_fcc_store_authdatum (context, id, a)
+   krb5_context context;
     krb5_ccache id;
     krb5_authdata *a;
 {
     krb5_error_code ret;
-    ret = krb5_fcc_store_ui_2(id, a->ad_type);
+    ret = krb5_fcc_store_ui_2(context, id, a->ad_type);
     CHECK(ret);
-    ret = krb5_fcc_store_int32(id, a->length);
+    ret = krb5_fcc_store_int32(context, id, a->length);
     CHECK(ret);
-    return krb5_fcc_write(id, (krb5_pointer) a->contents, a->length);
+    return krb5_fcc_write(context, id, (krb5_pointer) a->contents, a->length);
 }

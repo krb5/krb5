@@ -67,22 +67,24 @@
 */
 
 static krb5_error_code 
-krb5_generate_authenticator PROTOTYPE(( krb5_authenticator *, krb5_principal,
+krb5_generate_authenticator PROTOTYPE((krb5_context,
+				       krb5_authenticator *, krb5_principal,
 				       const krb5_checksum *, krb5_keyblock *,
 				       krb5_int32, krb5_authdata ** ));
 
 krb5_error_code
-krb5_mk_req_extended(ap_req_options, checksum, kdc_options,
+krb5_mk_req_extended(context, ap_req_options, checksum, kdc_options,
 		     sequence, newkey, ccache, creds, authentp, outbuf)
-const krb5_flags ap_req_options;
-const krb5_checksum *checksum;
-const krb5_flags kdc_options;
-krb5_int32 sequence;
-krb5_keyblock **newkey;
-krb5_ccache ccache;
-krb5_creds *creds;
-krb5_authenticator *authentp;
-krb5_data *outbuf;
+    krb5_context context;
+    const krb5_flags ap_req_options;
+    const krb5_checksum *checksum;
+    const krb5_flags kdc_options;
+    krb5_int32 sequence;
+    krb5_keyblock **newkey;
+    krb5_ccache ccache;
+    krb5_creds *creds;
+    krb5_authenticator *authentp;
+    krb5_data *outbuf;
 {
     krb5_error_code retval;
     krb5_ap_req request;
@@ -105,7 +107,7 @@ krb5_data *outbuf;
 
     if (!creds->ticket.length) {
 	/* go get creds */
-	if (retval = krb5_get_credentials(kdc_options,
+	if (retval = krb5_get_credentials(context, kdc_options,
 					  ccache,
 					  creds))
 	    return(retval);
@@ -125,11 +127,11 @@ krb5_data *outbuf;
 
     request.ap_options = ap_req_options;
     if (newkey) {
-	if (retval = krb5_generate_subkey(&creds->keyblock, newkey))
+	if (retval = krb5_generate_subkey(context, &creds->keyblock, newkey))
 	    goto cleanup;
     }
 
-    if (retval = krb5_generate_authenticator(&authent, creds->client, checksum,
+    if (retval = krb5_generate_authenticator(context, &authent, creds->client, checksum,
 					     newkey ? *newkey : 0,
 					     sequence, creds->authdata))
 	goto cleanup;
@@ -148,11 +150,11 @@ krb5_data *outbuf;
     if (authentp)
 	    *authentp = authent;
     else
-	    krb5_free_authenticator_contents(&authent);
+	    krb5_free_authenticator_contents(context, &authent);
 
     /* put together an eblock for this encryption */
 
-    krb5_use_cstype(&eblock, etype);
+    krb5_use_cstype(context, &eblock, etype);
     request.authenticator.etype = etype;
     request.authenticator.kvno = 0;
     request.authenticator.ciphertext.length =
@@ -173,18 +175,18 @@ krb5_data *outbuf;
     }
 
     /* do any necessary key pre-processing */
-    if (retval = krb5_process_key(&eblock, &creds->keyblock))
+    if (retval = krb5_process_key(context, &eblock, &creds->keyblock))
 	goto cleanup;
 
     cleanup_key++;
 
     /* call the encryption routine */
-    if (retval = krb5_encrypt((krb5_pointer) scratch->data,
+    if (retval = krb5_encrypt(context, (krb5_pointer) scratch->data,
 			      (krb5_pointer) request.authenticator.ciphertext.data,
 			      scratch->length, &eblock, 0))
 	goto cleanup;
 
-    if (retval = krb5_finish_key(&eblock))
+    if (retval = krb5_finish_key(context, &eblock))
 	goto cleanup;
     cleanup_key = 0;
     
@@ -197,40 +199,41 @@ krb5_data *outbuf;
 
 cleanup:
     if (request.ticket)
-	krb5_free_ticket(request.ticket);
+	krb5_free_ticket(context, request.ticket);
     if (request.authenticator.ciphertext.data) {
     	(void) memset(request.authenticator.ciphertext.data, 0,
 		      request.authenticator.ciphertext.length);
 	free(request.authenticator.ciphertext.data);
     }
     if (newkey && *newkey)
-	krb5_free_keyblock(*newkey);
+	krb5_free_keyblock(context, *newkey);
     if (scratch) {
 	memset(scratch->data, 0, scratch->length);
         krb5_xfree(scratch->data);
 	krb5_xfree(scratch);
     }
     if (cleanup_key)
-	krb5_finish_key(&eblock);
+	krb5_finish_key(context, &eblock);
 
     return retval;
 }
 
 static krb5_error_code
-krb5_generate_authenticator(authent, client, cksum, key, seq_number, authorization)
-krb5_authenticator *authent;
-krb5_principal client;
-const krb5_checksum *cksum;
-krb5_keyblock *key;
-krb5_int32 seq_number;
-krb5_authdata **authorization;
+krb5_generate_authenticator(context, authent, client, cksum, key, seq_number, authorization)
+    krb5_context context;
+    krb5_authenticator *authent;
+    krb5_principal client;
+    const krb5_checksum *cksum;
+    krb5_keyblock *key;
+    krb5_int32 seq_number;
+    krb5_authdata **authorization;
 {
     krb5_error_code retval;
     
     authent->client = client;
     authent->checksum = (krb5_checksum *)cksum;
     if (key) {
-	retval = krb5_copy_keyblock(key, &authent->subkey);
+	retval = krb5_copy_keyblock(context, key, &authent->subkey);
 	if (retval)
 	    return retval;
     } else
@@ -239,5 +242,5 @@ krb5_authdata **authorization;
     authent->seq_number = seq_number;
     authent->authorization_data = authorization;
 
-    return(krb5_us_timeofday(&authent->ctime, &authent->cusec));
+    return(krb5_us_timeofday(context, &authent->ctime, &authent->cusec));
 }

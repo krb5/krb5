@@ -47,16 +47,17 @@ extern krb5_deltat krb5_clockskew;
  returns system errors, integrity errors
  */
 krb5_error_code
-krb5_rd_safe(inbuf, key, sender_addr, recv_addr, seq_number, safe_flags,
-	     rcache, outbuf)
-const krb5_data *inbuf;
-const krb5_keyblock *key;
-const krb5_address *sender_addr;
-const krb5_address *recv_addr;
-krb5_int32 seq_number;
-krb5_int32 safe_flags;
-krb5_rcache rcache;
-krb5_data *outbuf;
+krb5_rd_safe(context, inbuf, key, sender_addr, recv_addr, seq_number, 
+	     safe_flags, rcache, outbuf)
+    krb5_context context;
+    const krb5_data *inbuf;
+    const krb5_keyblock *key;
+    const krb5_address *sender_addr;
+    const krb5_address *recv_addr;
+    krb5_int32 seq_number;
+    krb5_int32 safe_flags;
+    krb5_rcache rcache;
+    krb5_data *outbuf;
 {
     krb5_error_code retval;
     krb5_safe *message;
@@ -71,7 +72,7 @@ krb5_data *outbuf;
     if (retval = decode_krb5_safe(inbuf, &message))
 	return retval;
 
-#define cleanup() krb5_free_safe(message)
+#define cleanup() krb5_free_safe(context, message)
 
     if (!valid_cksumtype(message->checksum->checksum_type)) {
 	cleanup();
@@ -86,7 +87,7 @@ krb5_data *outbuf;
     if (!(safe_flags & KRB5_SAFE_NOTIME)) {
 	krb5_donot_replay replay;
 
-	if (retval = krb5_timeofday(&currenttime)) {
+	if (retval = krb5_timeofday(context, &currenttime)) {
 	    cleanup();
 	    return retval;
 	}
@@ -100,7 +101,7 @@ krb5_data *outbuf;
 	    cleanup();
 	    return KRB5_RC_REQUIRED;
 	}
-	if (retval = krb5_gen_replay_name(sender_addr, "_safe",
+	if (retval = krb5_gen_replay_name(context, sender_addr, "_safe",
 					  &replay.client)) {
 	    cleanup();
 	    return retval;
@@ -108,7 +109,7 @@ krb5_data *outbuf;
 	replay.server = "";		/* XXX */
 	replay.cusec = message->usec;
 	replay.ctime = message->timestamp;
-	if (retval = krb5_rc_store(rcache, &replay)) {
+	if (retval = krb5_rc_store(context, rcache, &replay)) {
 	    krb5_xfree(replay.client);
 	    cleanup();
 	    return retval;
@@ -122,30 +123,30 @@ krb5_data *outbuf;
 	    return KRB5KRB_AP_ERR_BADORDER;
 	}
 
-    if (!krb5_address_compare(sender_addr, message->s_address)) {
+    if (!krb5_address_compare(context, sender_addr, message->s_address)) {
 	cleanup();
 	return KRB5KRB_AP_ERR_BADADDR;
     }
 
     if (message->r_address) {
 	if (recv_addr) {
-	    if (!krb5_address_compare(recv_addr, message->r_address)) {
+	    if (!krb5_address_compare(context, recv_addr, message->r_address)) {
 		cleanup();
 		return KRB5KRB_AP_ERR_BADADDR;
 	    }
 	} else {
 	    krb5_address **our_addrs;
 	
-	    if (retval = krb5_os_localaddr(&our_addrs)) {
+	    if (retval = krb5_os_localaddr( &our_addrs)) {
 		cleanup();
 		return retval;
 	    }
-	    if (!krb5_address_search(message->r_address, our_addrs)) {
-		krb5_free_addresses(our_addrs);
+	    if (!krb5_address_search(context, message->r_address, our_addrs)) {
+		krb5_free_addresses(context, our_addrs);
 		cleanup();
 		return KRB5KRB_AP_ERR_BADADDR;
 	    }
-	    krb5_free_addresses(our_addrs);
+	    krb5_free_addresses(context, our_addrs);
 	}
     }
 
@@ -169,20 +170,20 @@ krb5_data *outbuf;
     message->checksum = his_cksum;
 			 
     if (!(our_cksum.contents = (krb5_octet *)
-	  malloc(krb5_checksum_size(his_cksum->checksum_type)))) {
+	  malloc(krb5_checksum_size(context, his_cksum->checksum_type)))) {
 	cleanup();
 	return ENOMEM;
     }
 
 #undef cleanup
-#define cleanup() {krb5_free_safe(message); krb5_xfree(our_cksum.contents);}
+#define cleanup() {krb5_free_safe(context, message); krb5_xfree(our_cksum.contents);}
 
-    retval = krb5_calculate_checksum(his_cksum->checksum_type,
+    retval = krb5_calculate_checksum(context, his_cksum->checksum_type,
 				     scratch->data, scratch->length,
 				     (krb5_pointer) key->contents,
 				     key->length, &our_cksum);
     (void) memset((char *)scratch->data, 0, scratch->length);
-    krb5_free_data(scratch);
+    krb5_free_data(context, scratch);
     
     if (retval) {
 	cleanup();
@@ -200,10 +201,10 @@ krb5_data *outbuf;
 
     krb5_xfree(our_cksum.contents);
     if (message->s_address)
-	krb5_free_address(message->s_address);
+	krb5_free_address(context, message->s_address);
     if (message->r_address)
-	krb5_free_address(message->r_address);
-    krb5_free_checksum(his_cksum);
+	krb5_free_address(context, message->r_address);
+    krb5_free_checksum(context, his_cksum);
     krb5_xfree(message);
 
     return 0;

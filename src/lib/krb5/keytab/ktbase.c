@@ -42,8 +42,9 @@ static struct krb5_kt_typelist *kt_typehead = &krb5_kt_typelist_dfl;
  */
 
 krb5_error_code
-krb5_kt_register(ops)
-krb5_kt_ops *ops;
+krb5_kt_register(context, ops)
+    krb5_context context;
+    krb5_kt_ops *ops;
 {
     struct krb5_kt_typelist *t;
     for (t = kt_typehead;t && strcmp(t->ops->prefix,ops->prefix);t = t->next)
@@ -69,7 +70,8 @@ krb5_kt_ops *ops;
  * particular keytab type.
  */
 
-krb5_error_code krb5_kt_resolve (name, ktid)
+krb5_error_code krb5_kt_resolve (context, name, ktid)
+    krb5_context context;
     const char *name;
     krb5_keytab *ktid;
 {
@@ -79,7 +81,7 @@ krb5_error_code krb5_kt_resolve (name, ktid)
     
     cp = strchr (name, ':');
     if (!cp) {
-	    return (*krb5_kt_dfl_ops.resolve)(name, ktid);
+	    return (*krb5_kt_dfl_ops.resolve)(context, name, ktid);
     }
 
     pfxlen = cp - (char *)name;
@@ -97,7 +99,7 @@ krb5_error_code krb5_kt_resolve (name, ktid)
     for (tlist = kt_typehead; tlist; tlist = tlist->next) {
 	if (strcmp (tlist->ops->prefix, pfx) == 0) {
 	    free(pfx);
-	    return (*tlist->ops->resolve)(resid, ktid);
+	    return (*tlist->ops->resolve)(context, resid, ktid);
 	}
     }
     free(pfx);

@@ -49,28 +49,20 @@
  returns system errors
  */
 krb5_error_code
-krb5_send_tgs(DECLARG(const krb5_flags, kdcoptions),
-	      DECLARG(const krb5_ticket_times *,timestruct),
-	      DECLARG(const krb5_enctype, etype),
-	      DECLARG(const krb5_cksumtype, sumtype),
-	      DECLARG(krb5_const_principal, sname),
-	      DECLARG(krb5_address * const *, addrs),
-	      DECLARG(krb5_authdata * const *,authorization_data),
-	      DECLARG(krb5_pa_data * const *, padata),
-	      DECLARG(const krb5_data *,second_ticket),
-	      DECLARG(krb5_creds *,usecred),
-	      DECLARG(krb5_response *,rep))
-OLDDECLARG(const krb5_flags, kdcoptions)
-OLDDECLARG(const krb5_ticket_times *,timestruct)
-OLDDECLARG(const krb5_enctype, etype)
-OLDDECLARG(const krb5_cksumtype, sumtype)
-OLDDECLARG(krb5_const_principal, sname)
-OLDDECLARG(krb5_address * const *, addrs)
-OLDDECLARG(krb5_authdata * const *,authorization_data)
-OLDDECLARG(krb5_pa_data * const *, padata)
-OLDDECLARG(const krb5_data *,second_ticket)
-OLDDECLARG(krb5_creds *,usecred)
-OLDDECLARG(krb5_response *,rep)
+krb5_send_tgs(context, kdcoptions, timestruct, etype, sumtype, sname, addrs,
+	      authorization_data, padata, second_ticket, usecred, rep)
+    krb5_context context;
+    const krb5_flags kdcoptions;
+    const krb5_ticket_times * timestruct;
+    const krb5_enctype etype;
+    const krb5_cksumtype sumtype;
+    krb5_const_principal sname;
+    krb5_address * const * addrs;
+    krb5_authdata * const * authorization_data;
+    krb5_pa_data * const * padata;
+    const krb5_data * second_ticket;
+    krb5_creds * usecred;
+    krb5_response * rep;
 {
     krb5_error_code retval;
     krb5_kdc_req tgsreq;
@@ -94,7 +86,7 @@ OLDDECLARG(krb5_response *,rep)
     tgsreq.from = timestruct->starttime;
     tgsreq.till = timestruct->endtime;
     tgsreq.rtime = timestruct->renew_till;
-    if (retval = krb5_timeofday(&time_now))
+    if (retval = krb5_timeofday(context, &time_now))
 	return(retval);
     /* XXX we know they are the same size... */
     tgsreq.nonce = (krb5_int32) time_now;
@@ -112,13 +104,12 @@ OLDDECLARG(krb5_response *,rep)
 
 	if (retval = encode_krb5_authdata(authorization_data, &scratch))
 	    return(retval);
-	krb5_use_cstype(&eblock, etype);
+	krb5_use_cstype(context, &eblock, etype);
 	tgsreq.authorization_data.etype = etype;
 	tgsreq.authorization_data.kvno = 0; /* ticket session key has */
 					    /* no version */
 	tgsreq.authorization_data.ciphertext.length =
-	    krb5_encrypt_size(scratch->length,
-			      eblock.crypto_entry);
+	    krb5_encrypt_size(scratch->length, eblock.crypto_entry);
 	/* add padding area, and zero it */
 	if (!(scratch->data = realloc(scratch->data,
 				      tgsreq.authorization_data.ciphertext.length))) {
@@ -130,24 +121,24 @@ OLDDECLARG(krb5_response *,rep)
 	       tgsreq.authorization_data.ciphertext.length - scratch->length);
 	if (!(tgsreq.authorization_data.ciphertext.data =
 	      malloc(tgsreq.authorization_data.ciphertext.length))) {
-	    krb5_free_data(scratch);
+	    krb5_free_data(context, scratch);
 	    return ENOMEM;
 	}
-	if (retval = krb5_process_key(&eblock, &usecred->keyblock)) {
-	    krb5_free_data(scratch);
+	if (retval = krb5_process_key(context, &eblock, &usecred->keyblock)) {
+	    krb5_free_data(context, scratch);
 	    return retval;
 	}
 	/* call the encryption routine */
-	if (retval = krb5_encrypt((krb5_pointer) scratch->data,
+	if (retval = krb5_encrypt(context, (krb5_pointer) scratch->data,
 				  (krb5_pointer) tgsreq.authorization_data.ciphertext.data,
 				  scratch->length, &eblock, 0)) {
-	    (void) krb5_finish_key(&eblock);
+	    (void) krb5_finish_key(context, &eblock);
 	    krb5_xfree(tgsreq.authorization_data.ciphertext.data);
-	    krb5_free_data(scratch);
+	    krb5_free_data(context, scratch);
 	    return retval;
 	}	    
-	krb5_free_data(scratch);
-	if (retval = krb5_finish_key(&eblock)) {
+	krb5_free_data(context, scratch);
+	if (retval = krb5_finish_key(context, &eblock)) {
 	    krb5_xfree(tgsreq.authorization_data.ciphertext.data);
 	    return retval;
 	}
@@ -176,44 +167,45 @@ OLDDECLARG(krb5_response *,rep)
     retval = encode_krb5_kdc_req_body(&tgsreq, &scratch);
     if (retval) {
 	if (sec_ticket)
-	    krb5_free_ticket(sec_ticket);
+	    krb5_free_ticket(context, sec_ticket);
 	cleanup_authdata();
 	return(retval);
     }
 
     if (!(ap_checksum.contents = (krb5_octet *)
-	  malloc(krb5_checksum_size(sumtype)))) {
+	  malloc(krb5_checksum_size(context, sumtype)))) {
 	if (sec_ticket)
-	    krb5_free_ticket(sec_ticket);
-	krb5_free_data(scratch);
+	    krb5_free_ticket(context, sec_ticket);
+	krb5_free_data(context, scratch);
 	cleanup_authdata();
 	return ENOMEM;
     }
 
-    if (retval = krb5_calculate_checksum(sumtype,
+    if (retval = krb5_calculate_checksum(context, sumtype,
 					 scratch->data,
 					 scratch->length,
 					 (krb5_pointer) usecred->keyblock.contents,
 					 usecred->keyblock.length,
 					 &ap_checksum)) {
 	if (sec_ticket)
-	    krb5_free_ticket(sec_ticket);
+	    krb5_free_ticket(context, sec_ticket);
 	krb5_xfree(ap_checksum.contents);
-	krb5_free_data(scratch);
+	krb5_free_data(context, scratch);
 	cleanup_authdata();
 	return retval;
     }
     /* done with body */
-    krb5_free_data(scratch);
+    krb5_free_data(context, scratch);
 
 #define cleanup() {krb5_xfree(ap_checksum.contents);\
-		   if (sec_ticket) krb5_free_ticket(sec_ticket);}
+		   if (sec_ticket) krb5_free_ticket(context, sec_ticket);}
     /* attach ap_req to the tgsreq */
 
     /*
      * Get an ap_req.
      */
-    if (retval = krb5_mk_req_extended (0L /* no ap options */,
+    if (retval = krb5_mk_req_extended (context,
+			  	       0L /* no ap options */,
 				       &ap_checksum,
 				       0L, /* don't need kdc_options for this */
 				       0, /* no initial sequence */
@@ -269,7 +261,7 @@ OLDDECLARG(krb5_response *,rep)
 	return(retval);
     }
     if (sec_ticket)
-	krb5_free_ticket(sec_ticket);
+	krb5_free_ticket(context, sec_ticket);
     cleanup_authdata();
     krb5_xfree(combined_padata);
     krb5_xfree(ap_req_padata.contents);
@@ -278,9 +270,10 @@ OLDDECLARG(krb5_response *,rep)
 #define cleanup() {krb5_xfree(ap_checksum.contents);}
 
     /* now send request & get response from KDC */
-    retval = krb5_sendto_kdc(scratch, krb5_princ_realm(sname),
+    retval = krb5_sendto_kdc(context, scratch, 
+			     krb5_princ_realm(context, sname),
 			     &rep->response);
-    krb5_free_data(scratch);
+    krb5_free_data(context, scratch);
     cleanup();
     if (retval) {
 	return retval;

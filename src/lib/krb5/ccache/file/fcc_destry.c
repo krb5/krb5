@@ -35,7 +35,8 @@
  * Errors:
  * system errors
  */
-krb5_error_code krb5_fcc_destroy(id)
+krb5_error_code krb5_fcc_destroy(context, id)
+   krb5_context context;
    krb5_ccache id;
 {
      struct stat buf;
@@ -46,7 +47,7 @@ krb5_error_code krb5_fcc_destroy(id)
      if (OPENCLOSE(id)) {
 	  ret = open(((krb5_fcc_data *) id->data)->filename, O_RDWR, 0);
 	  if (ret < 0) {
-	      ret = krb5_fcc_interpret(errno);
+	      ret = krb5_fcc_interpret(context, errno);
 	      goto cleanup;
 	  }
 	  ((krb5_fcc_data *) id->data)->fd = ret;
@@ -56,7 +57,7 @@ krb5_error_code krb5_fcc_destroy(id)
 
      ret = unlink(((krb5_fcc_data *) id->data)->filename);
      if (ret < 0) {
-	 ret = krb5_fcc_interpret(errno);
+	 ret = krb5_fcc_interpret(context, errno);
 	 if (OPENCLOSE(id)) {
 	     (void) close(((krb5_fcc_data *)id->data)->fd);
 	     ((krb5_fcc_data *) id->data)->fd = -1;
@@ -66,7 +67,7 @@ krb5_error_code krb5_fcc_destroy(id)
      
      ret = fstat(((krb5_fcc_data *) id->data)->fd, &buf);
      if (ret < 0) {
-	 ret = krb5_fcc_interpret(errno);
+	 ret = krb5_fcc_interpret(context, errno);
 	 if (OPENCLOSE(id)) {
 	     (void) close(((krb5_fcc_data *)id->data)->fd);
 	     ((krb5_fcc_data *) id->data)->fd = -1;
@@ -80,7 +81,7 @@ krb5_error_code krb5_fcc_destroy(id)
      memset(zeros, 0, BUFSIZ);
      for (i=0; i < size / BUFSIZ; i++)
 	  if (write(((krb5_fcc_data *) id->data)->fd, zeros, BUFSIZ) < 0) {
-	      ret = krb5_fcc_interpret(errno);
+	      ret = krb5_fcc_interpret(context, errno);
 	      if (OPENCLOSE(id)) {
 		  (void) close(((krb5_fcc_data *)id->data)->fd);
 		  ((krb5_fcc_data *) id->data)->fd = -1;
@@ -89,7 +90,7 @@ krb5_error_code krb5_fcc_destroy(id)
 	  }
 
      if (write(((krb5_fcc_data *) id->data)->fd, zeros, size % BUFSIZ) < 0) {
-	 ret = krb5_fcc_interpret(errno);
+	 ret = krb5_fcc_interpret(context, errno);
 	 if (OPENCLOSE(id)) {
 	     (void) close(((krb5_fcc_data *)id->data)->fd);
 	     ((krb5_fcc_data *) id->data)->fd = -1;
@@ -101,7 +102,7 @@ krb5_error_code krb5_fcc_destroy(id)
      ((krb5_fcc_data *) id->data)->fd = -1;
 
      if (ret)
-	 ret = krb5_fcc_interpret(errno);
+	 ret = krb5_fcc_interpret(context, errno);
 
   cleanup:
      krb5_xfree(((krb5_fcc_data *) id->data)->filename);

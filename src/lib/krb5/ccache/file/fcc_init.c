@@ -41,13 +41,14 @@
  * permission errors
  */
 krb5_error_code
-krb5_fcc_initialize(id, princ)
+krb5_fcc_initialize(context, id, princ)
+   krb5_context context;
    krb5_ccache id;
    krb5_principal princ;
 {
      int ret = KRB5_OK;
 
-     MAYBE_OPEN(id, FCC_OPEN_AND_ERASE);
+     MAYBE_OPEN(context, id, FCC_OPEN_AND_ERASE);
 
 #ifdef NOFCHMOD
      ret = chmod(((krb5_fcc_data *) id->data)->filename, S_IREAD | S_IWRITE);
@@ -55,13 +56,13 @@ krb5_fcc_initialize(id, princ)
      ret = fchmod(((krb5_fcc_data *) id->data)->fd, S_IREAD | S_IWRITE);
 #endif
      if (ret == -1) {
-	 ret = krb5_fcc_interpret(errno);
-	 MAYBE_CLOSE(id, ret);
+	 ret = krb5_fcc_interpret(context, errno);
+	 MAYBE_CLOSE(context, id, ret);
 	 return ret;
      }
-     krb5_fcc_store_principal(id, princ);
+     krb5_fcc_store_principal(context, id, princ);
 
-     MAYBE_CLOSE(id, ret);
+     MAYBE_CLOSE(context, id, ret);
      return ret;
 }
 

@@ -118,7 +118,8 @@ int lockunlock;
 }
 
 krb5_error_code
-krb5_fcc_close_file (id)
+krb5_fcc_close_file (context, id)
+   krb5_context context;
     krb5_ccache id;
 {
      int ret;
@@ -134,11 +135,12 @@ krb5_fcc_close_file (id)
      if (retval)
 	 return retval;
      else
-     return (ret == -1) ? krb5_fcc_interpret (errno) : 0;
+     return (ret == -1) ? krb5_fcc_interpret (context, errno) : 0;
 }
 
 krb5_error_code
-krb5_fcc_open_file (id, mode)
+krb5_fcc_open_file (context, id, mode)
+   krb5_context context;
     krb5_ccache id;
     int mode;
 {
@@ -170,7 +172,7 @@ krb5_fcc_open_file (id, mode)
 
      fd = open (data->filename, open_flag, 0600);
      if (fd == -1)
-	  return krb5_fcc_interpret (errno);
+	  return krb5_fcc_interpret (context, errno);
 
      if (retval = fcc_lock_file(data, fd, LOCK_IT)) {
 	 (void) close(fd);
@@ -188,7 +190,7 @@ krb5_fcc_open_file (id, mode)
 	     errsave = errno;
 	     (void) fcc_lock_file(data, fd, UNLOCK_IT);
 	     (void) close(fd);
-	     return (cnt == -1) ? krb5_fcc_interpret(errsave) : KRB5_CC_IO;
+	     return (cnt == -1) ? krb5_fcc_interpret(context, errsave) : KRB5_CC_IO;
 	 }
      } else {
 	 /* verify a valid version number is there */

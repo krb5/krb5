@@ -30,7 +30,8 @@
 #include <krb5/ext-proto.h>
 
 static krb5_error_code
-krb5_copy_authdatum(inad, outad)
+krb5_copy_authdatum(context, inad, outad)
+    krb5_context context;
 const krb5_authdata *inad;
 krb5_authdata **outad;
 {
@@ -52,7 +53,8 @@ krb5_authdata **outad;
  * Copy an authdata array, with fresh allocation.
  */
 krb5_error_code
-krb5_copy_authdata(inauthdat, outauthdat)
+krb5_copy_authdata(context, inauthdat, outauthdat)
+    krb5_context context;
 krb5_authdata * const * inauthdat;
 krb5_authdata ***outauthdat;
 {
@@ -73,10 +75,10 @@ krb5_authdata ***outauthdat;
 	return ENOMEM;
 
     for (nelems = 0; inauthdat[nelems]; nelems++) {
-	retval = krb5_copy_authdatum(inauthdat[nelems],
+	retval = krb5_copy_authdatum(context, inauthdat[nelems],
 				     &tempauthdat[nelems]);
 	if (retval) {
-	    krb5_free_authdata(tempauthdat);
+	    krb5_free_authdata(context, tempauthdat);
 	    return retval;
 	}
     }

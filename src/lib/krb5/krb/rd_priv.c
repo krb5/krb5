@@ -56,24 +56,18 @@ Returns system errors, integrity errors.
 */
 
 krb5_error_code
-krb5_rd_priv(DECLARG(const krb5_data *, inbuf),
-	     DECLARG(const krb5_keyblock *, key),
-	     DECLARG(const krb5_address *, sender_addr),
-	     DECLARG(const krb5_address *, recv_addr),
-	     DECLARG(krb5_int32, seq_number),
-	     DECLARG(krb5_int32, priv_flags),
-	     DECLARG(krb5_pointer, i_vector),
-	     DECLARG(krb5_rcache, rcache),
-	     DECLARG(krb5_data *, outbuf))
-OLDDECLARG(const krb5_data *, inbuf)
-OLDDECLARG(const krb5_keyblock *, key)
-OLDDECLARG(const krb5_address *, sender_addr)
-OLDDECLARG(const krb5_address *, recv_addr)
-OLDDECLARG(krb5_int32, seq_number)
-OLDDECLARG(krb5_int32, priv_flags)
-OLDDECLARG(krb5_pointer, i_vector)
-OLDDECLARG(krb5_rcache, rcache)
-OLDDECLARG(krb5_data *, outbuf)
+krb5_rd_priv(context, inbuf, key, sender_addr, recv_addr, seq_number,
+	     priv_flags, i_vector, rcache, outbuf)
+    krb5_context context;
+    const krb5_data * inbuf;
+    const krb5_keyblock * key;
+    const krb5_address * sender_addr;
+    const krb5_address * recv_addr;
+    krb5_int32 seq_number;
+    krb5_int32 priv_flags;
+    krb5_pointer i_vector;
+    krb5_rcache rcache;
+    krb5_data * outbuf;
 {
     krb5_error_code retval;
     krb5_encrypt_block eblock;
@@ -97,7 +91,7 @@ OLDDECLARG(krb5_data *, outbuf)
 			   
     /* put together an eblock for this decryption */
 
-    krb5_use_cstype(&eblock, privmsg->enc_part.etype);
+    krb5_use_cstype(context, &eblock, privmsg->enc_part.etype);
     scratch.length = privmsg->enc_part.ciphertext.length;
     
     if (!(scratch.data = malloc(scratch.length))) {
@@ -108,16 +102,16 @@ OLDDECLARG(krb5_data *, outbuf)
 #define cleanup_scratch() {(void)memset(scratch.data, 0, scratch.length); (void)krb5_xfree(scratch.data);}
 
     /* do any necessary key pre-processing */
-    if (retval = krb5_process_key(&eblock, key)) {
+    if (retval = krb5_process_key(context, &eblock, key)) {
         cleanup_privmsg();
 	cleanup_scratch();
 	return retval;
     }
 
-#define cleanup_prockey() {(void) krb5_finish_key(&eblock);}
+#define cleanup_prockey() {(void) krb5_finish_key(context, &eblock);}
 
     /* call the decryption routine */
-    if (retval = krb5_decrypt((krb5_pointer) privmsg->enc_part.ciphertext.data,
+    if (retval = krb5_decrypt(context, (krb5_pointer) privmsg->enc_part.ciphertext.data,
 			      (krb5_pointer) scratch.data,
 			      scratch.length, &eblock,
 			      i_vector)) {
@@ -141,7 +135,7 @@ OLDDECLARG(krb5_data *, outbuf)
 
     cleanup_privmsg();
 
-    if (retval = krb5_finish_key(&eblock)) {
+    if (retval = krb5_finish_key(context, &eblock)) {
         cleanup_scratch();
         return retval;
     }
@@ -159,7 +153,7 @@ OLDDECLARG(krb5_data *, outbuf)
     if (!(priv_flags & KRB5_PRIV_NOTIME)) {
 	krb5_donot_replay replay;
 
-	if (retval = krb5_timeofday(&currenttime)) {
+	if (retval = krb5_timeofday(context, &currenttime)) {
 	    cleanup_data();
 	    cleanup_mesg();
 	    return retval;
@@ -175,7 +169,7 @@ OLDDECLARG(krb5_data *, outbuf)
 	    cleanup_mesg();  
 	    return KRB5_RC_REQUIRED;
 	}
-	if (retval = krb5_gen_replay_name(sender_addr, "_priv",
+	if (retval = krb5_gen_replay_name(context, sender_addr, "_priv",
 					  &replay.client)) {
 	    cleanup_data();
 	    cleanup_mesg();  
@@ -184,7 +178,7 @@ OLDDECLARG(krb5_data *, outbuf)
 	replay.server = "";		/* XXX */
 	replay.cusec = privmsg_enc_part->usec;
 	replay.ctime = privmsg_enc_part->timestamp;
-	if (retval = krb5_rc_store(rcache, &replay)) {
+	if (retval = krb5_rc_store(context, rcache, &replay)) {
 	    krb5_xfree(replay.client);
 	    cleanup_data();
 	    cleanup_mesg();  
@@ -200,7 +194,7 @@ OLDDECLARG(krb5_data *, outbuf)
 	    return KRB5KRB_AP_ERR_BADORDER;
 	}
 
-    if (!krb5_address_compare(sender_addr, privmsg_enc_part->s_address)) {
+    if (!krb5_address_compare(context, sender_addr, privmsg_enc_part->s_address)) {
 	cleanup_data();
 	cleanup_mesg();
 	return KRB5KRB_AP_ERR_BADADDR;
@@ -208,7 +202,7 @@ OLDDECLARG(krb5_data *, outbuf)
     
     if (privmsg_enc_part->r_address) {
 	if (recv_addr) {
-	    if (!krb5_address_compare(recv_addr,
+	    if (!krb5_address_compare(context, recv_addr,
 				      privmsg_enc_part->r_address)) {
 		cleanup_data();
 		cleanup_mesg();
@@ -222,13 +216,13 @@ OLDDECLARG(krb5_data *, outbuf)
 		cleanup_mesg();
 		return retval;
 	    }
-	    if (!krb5_address_search(privmsg_enc_part->r_address, our_addrs)) {
-		krb5_free_addresses(our_addrs);
+	    if (!krb5_address_search(context, privmsg_enc_part->r_address, our_addrs)) {
+		krb5_free_addresses(context, our_addrs);
 		cleanup_data();
 		cleanup_mesg();
 		return KRB5KRB_AP_ERR_BADADDR;
 	    }
-	    krb5_free_addresses(our_addrs);
+	    krb5_free_addresses(context, our_addrs);
 	}
     }
 

@@ -29,13 +29,14 @@
 #include <krb5/ext-proto.h>
 
 krb5_error_code
-krb5_kt_free_entry (entry)
-krb5_keytab_entry *entry;
+krb5_kt_free_entry (context, entry)
+    krb5_context context;
+    krb5_keytab_entry *entry;
 {
     if (!entry)
 	return 0;
     
-    krb5_free_principal(entry->principal);
+    krb5_free_principal(context, entry->principal);
     if (entry->key.contents) {
 	memset((char *)entry->key.contents, 0, entry->key.length);
 	krb5_xfree(entry->key.contents);

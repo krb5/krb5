@@ -33,10 +33,11 @@
  * Convert a krb5_principal into the default salt for that principal.
  */
 krb5_error_code
-krb5_principal2salt_internal(pr, ret, use_realm)
-register krb5_const_principal pr;
-krb5_data *ret;
-int use_realm;
+krb5_principal2salt_internal(context, pr, ret, use_realm)
+    krb5_context context;
+    register krb5_const_principal pr;
+    krb5_data *ret;
+    int use_realm;
 {
     int size = 0, offset = 0;
     int nelem;
@@ -48,43 +49,45 @@ int use_realm;
 	return 0;
     }
 
-    nelem = krb5_princ_size(pr);
+    nelem = krb5_princ_size(context, pr);
 
     if (use_realm)
-	    size += krb5_princ_realm(pr)->length;
+	    size += krb5_princ_realm(context, pr)->length;
 
     for (i = 0; i < nelem; i++)
-	size += krb5_princ_component(pr, i)->length;
+	size += krb5_princ_component(context, pr, i)->length;
 
     ret->length = size;
     if (!(ret->data = malloc (size)))
 	return ENOMEM;
 
     if (use_realm) {
-	    offset = krb5_princ_realm(pr)->length;
-	    memcpy(ret->data, krb5_princ_realm(pr)->data, offset);
+	    offset = krb5_princ_realm(context, pr)->length;
+	    memcpy(ret->data, krb5_princ_realm(context, pr)->data, offset);
     }
 
     for (i = 0; i < nelem; i++) {
-	memcpy(&ret->data[offset], krb5_princ_component(pr, i)->data,
-	       krb5_princ_component(pr, i)->length);
-	offset += krb5_princ_component(pr, i)->length;
+	memcpy(&ret->data[offset], krb5_princ_component(context, pr, i)->data,
+	       krb5_princ_component(context, pr, i)->length);
+	offset += krb5_princ_component(context, pr, i)->length;
     }
     return 0;
 }
 
 krb5_error_code
-krb5_principal2salt(pr, ret)
-register krb5_const_principal pr;
-krb5_data *ret;
+krb5_principal2salt(context, pr, ret)
+    krb5_context context;
+    register krb5_const_principal pr;
+    krb5_data *ret;
 {
-	return krb5_principal2salt_internal(pr, ret, 1);
+	return krb5_principal2salt_internal(context, pr, ret, 1);
 }
 
 krb5_error_code
-krb5_principal2salt_norealm(pr, ret)
-register krb5_const_principal pr;
-krb5_data *ret;
+krb5_principal2salt_norealm(context, pr, ret)
+    krb5_context context;
+    register krb5_const_principal pr;
+    krb5_data *ret;
 {
-	return krb5_principal2salt_internal(pr, ret, 0);
+	return krb5_principal2salt_internal(context, pr, ret, 0);
 }

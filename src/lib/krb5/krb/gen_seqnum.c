@@ -36,9 +36,10 @@
 #endif
 
 krb5_error_code
-krb5_generate_seq_number(key, seqno)
-const krb5_keyblock *key;
-krb5_int32 *seqno;
+krb5_generate_seq_number(context, key, seqno)
+    krb5_context context;
+    const krb5_keyblock *key;
+    krb5_int32 *seqno;
 {
     krb5_pointer random_state;
     krb5_encrypt_block eblock;
@@ -54,18 +55,18 @@ krb5_int32 *seqno;
     if (!valid_keytype(key->keytype))
 	return KRB5_PROG_KEYTYPE_NOSUPP;
 
-    krb5_use_keytype(&eblock, key->keytype);
+    krb5_use_keytype(context, &eblock, key->keytype);
 
-    if (retval = krb5_init_random_key(&eblock, key, &random_state))
+    if (retval = krb5_init_random_key(context, &eblock, key, &random_state))
 	return(retval);
 	
-    if (retval = krb5_random_key(&eblock, random_state, &subkey)) {
-	(void) krb5_finish_random_key(&eblock, &random_state);
+    if (retval = krb5_random_key(context, &eblock, random_state, &subkey)) {
+	(void) krb5_finish_random_key(context, &eblock, &random_state);
 	return retval;
     }	
     /* ignore the error if any, since we've already gotten the key out */
-    if (retval = krb5_finish_random_key(&eblock, &random_state)) {
-	krb5_free_keyblock(subkey);
+    if (retval = krb5_finish_random_key(context, &eblock, &random_state)) {
+	krb5_free_keyblock(context, subkey);
 	return retval;
     }
 
@@ -80,19 +81,19 @@ krb5_int32 *seqno;
 	    retval = ENOMEM;
 	    goto cleanup;
     }
-    if (retval = krb5_process_key(&eblock, subkey)) {
+    if (retval = krb5_process_key(context, &eblock, subkey)) {
 	goto cleanup;
     }
 
-    if (retval = krb5_us_timeofday(&timenow.seconds,
+    if (retval = krb5_us_timeofday(context, &timenow.seconds,
 				   &timenow.microseconds)) {
 	goto cleanup;
     }
     memcpy((char *)intmp, (char *)&timenow, sizeof(timenow));
 
-    retval = krb5_encrypt((krb5_pointer)intmp, (krb5_pointer)outtmp,
+    retval = krb5_encrypt(context, (krb5_pointer)intmp, (krb5_pointer)outtmp,
 			  sizeof(timenow), &eblock, 0);
-    (void) krb5_finish_key(&eblock);
+    (void) krb5_finish_key(context, &eblock);
     if (retval)
 	    goto cleanup;
 
@@ -100,7 +101,7 @@ krb5_int32 *seqno;
     
 cleanup:
     if (subkey)
-	    krb5_free_keyblock(subkey);
+	    krb5_free_keyblock(context, subkey);
     if (intmp)
 	    krb5_xfree(intmp);
     if (outtmp)

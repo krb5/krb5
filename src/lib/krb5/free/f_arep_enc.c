@@ -29,11 +29,12 @@
 #include <krb5/ext-proto.h>
 
 void
-krb5_free_ap_rep_enc_part(val)
-krb5_ap_rep_enc_part *val;
+krb5_free_ap_rep_enc_part(context, val)
+    krb5_context context;
+    krb5_ap_rep_enc_part *val;
 {
     if (val->subkey)
-	krb5_free_keyblock(val->subkey);
+	krb5_free_keyblock(context, val->subkey);
     krb5_xfree(val);
     return;
 }

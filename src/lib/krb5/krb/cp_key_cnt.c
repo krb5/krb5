@@ -32,9 +32,10 @@
  * Copy a keyblock, including alloc'ed storage.
  */
 krb5_error_code
-krb5_copy_keyblock_contents(from, to)
-const krb5_keyblock *from;
-krb5_keyblock *to;
+krb5_copy_keyblock_contents(context, from, to)
+    krb5_context context;
+    const krb5_keyblock *from;
+    krb5_keyblock *to;
 {
     *to = *from;
     to->contents = (krb5_octet *)malloc(to->length);

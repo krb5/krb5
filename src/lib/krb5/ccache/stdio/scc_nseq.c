@@ -49,7 +49,8 @@
  * system errors
  */
 krb5_error_code
-krb5_scc_next_cred(id, cursor, creds)
+krb5_scc_next_cred(context, id, cursor, creds)
+   krb5_context context;
    krb5_ccache id;
    krb5_cc_cursor *cursor;
    krb5_creds *creds;
@@ -71,37 +72,37 @@ krb5_scc_next_cred(id, cursor, creds)
      Z (addresses);
 #undef Z
 
-     MAYBE_OPEN (id, SCC_OPEN_RDONLY);
+     MAYBE_OPEN (context, id, SCC_OPEN_RDONLY);
 
      fcursor = (krb5_scc_cursor *) *cursor;
      ret = fseek(((krb5_scc_data *) id->data)->file, fcursor->pos, 0);
      if (ret < 0) {
-	 ret = krb5_scc_interpret(errno);
-	 MAYBE_CLOSE (id, ret);
+	 ret = krb5_scc_interpret(context, errno);
+	 MAYBE_CLOSE (context, id, ret);
 	 return ret;
      }
 
-     kret = krb5_scc_read_principal(id, &creds->client);
+     kret = krb5_scc_read_principal(context, id, &creds->client);
      TCHECK(kret);
-     kret = krb5_scc_read_principal(id, &creds->server);
+     kret = krb5_scc_read_principal(context, id, &creds->server);
      TCHECK(kret);
-     kret = krb5_scc_read_keyblock(id, &creds->keyblock);
+     kret = krb5_scc_read_keyblock(context, id, &creds->keyblock);
      TCHECK(kret);
-     kret = krb5_scc_read_times(id, &creds->times);
+     kret = krb5_scc_read_times(context, id, &creds->times);
      TCHECK(kret);
-     kret = krb5_scc_read_octet(id, &octet);
+     kret = krb5_scc_read_octet(context, id, &octet);
      TCHECK(kret);
      creds->is_skey = octet;
-     kret = krb5_scc_read_int32(id, &int32);
+     kret = krb5_scc_read_int32(context, id, &int32);
      TCHECK(kret);
      creds->ticket_flags = int32;
-     kret = krb5_scc_read_addrs(id, &creds->addresses);
+     kret = krb5_scc_read_addrs(context, id, &creds->addresses);
      TCHECK(kret);
-     kret = krb5_scc_read_authdata (id, &creds->authdata);
+     kret = krb5_scc_read_authdata (context, id, &creds->authdata);
      TCHECK (kret);
-     kret = krb5_scc_read_data(id, &creds->ticket);
+     kret = krb5_scc_read_data(context, id, &creds->ticket);
      TCHECK(kret);
-     kret = krb5_scc_read_data(id, &creds->second_ticket);
+     kret = krb5_scc_read_data(context, id, &creds->second_ticket);
      TCHECK(kret);
      
      fcursor->pos = ftell(((krb5_scc_data *) id->data)->file);
@@ -109,8 +110,8 @@ krb5_scc_next_cred(id, cursor, creds)
 
 lose:
      if (kret != KRB5_OK) {
-	 krb5_free_cred_contents(creds);
+	 krb5_free_cred_contents(context, creds);
      }
-     MAYBE_CLOSE (id, kret);
+     MAYBE_CLOSE (context, id, kret);
      return kret;
 }

@@ -37,15 +37,10 @@
 #endif
 
 krb5_error_code
-#ifdef NARROW_PROTOTYPES
-krb5_walk_realm_tree(const krb5_data *client, const krb5_data *server,
-		     krb5_principal **tree, char realm_branch_char)
-#else
-krb5_walk_realm_tree(client, server, tree, realm_branch_char)
-const krb5_data *client, *server;
-krb5_principal **tree;
-char realm_branch_char;
-#endif
+krb5_walk_realm_tree(context, client, server, tree, realm_branch_char)
+    krb5_context context;
+    const krb5_data *client, *server;
+    krb5_principal **tree;
 {
     krb5_error_code retval;
     krb5_principal *rettree;
@@ -135,7 +130,7 @@ char realm_branch_char;
 	return ENOMEM;
     }
     i = 1;
-    if (retval = krb5_tgtname(client,
+    if (retval = krb5_tgtname(context, client,
 			      client, &rettree[0])) {
 	krb5_xfree(rettree);
 	return retval;
@@ -152,9 +147,9 @@ char realm_branch_char;
 	tmpsrealm.data = ccp;
 	tmpsrealm.length = client->length -
 	    (ccp - client->data);
-	if (retval = krb5_tgtname(&tmpsrealm, &tmpcrealm, &rettree[i])) {
+	if (retval = krb5_tgtname(context, &tmpsrealm, &tmpcrealm, &rettree[i])) {
 	    while (i) {
-		krb5_free_principal(rettree[i-1]);
+		krb5_free_principal(context, rettree[i-1]);
 		i--;
 	    }
 	    krb5_xfree(rettree);
@@ -170,9 +165,9 @@ char realm_branch_char;
 	tmpsrealm.data = com_sdot + 1;
 	tmpsrealm.length = server->length -
 	    (com_sdot + 1 - server->data);
-	if (retval = krb5_tgtname(&tmpsrealm, &tmpcrealm, &rettree[i])) {
+	if (retval = krb5_tgtname(context, &tmpsrealm, &tmpcrealm, &rettree[i])) {
 	    while (i) {
-		krb5_free_principal(rettree[i-1]);
+		krb5_free_principal(context, rettree[i-1]);
 		i--;
 	    }
 	    krb5_xfree(rettree);
@@ -194,9 +189,9 @@ char realm_branch_char;
 	tmpsrealm.data = scp + 1;
 	tmpsrealm.length = server->length -
 	    (scp + 1 - server->data);
-	if (retval = krb5_tgtname(&tmpsrealm, &tmpcrealm, &rettree[i])) {
+	if (retval = krb5_tgtname(context, &tmpsrealm, &tmpcrealm, &rettree[i])) {
 	    while (i) {
-		krb5_free_principal(rettree[i-1]);
+		krb5_free_principal(context, rettree[i-1]);
 		i--;
 	    }
 	    krb5_xfree(rettree);
@@ -213,10 +208,10 @@ char realm_branch_char;
 	tmpcrealm.data = prevscp;
 	tmpcrealm.length = server->length -
 	    (prevscp - server->data);
-	if (retval = krb5_tgtname(server, &tmpcrealm,
+	if (retval = krb5_tgtname(context, server, &tmpcrealm,
 				  &rettree[i])) {
 	    while (i) {
-		krb5_free_principal(rettree[i-1]);
+		krb5_free_principal(context, rettree[i-1]);
 		i--;
 	    }
 	    krb5_xfree(rettree);

@@ -29,8 +29,9 @@
 #include <krb5/ext-proto.h>
 
 void
-krb5_free_ap_rep(val)
-register krb5_ap_rep *val;
+krb5_free_ap_rep(context, val)
+    krb5_context context;
+    register krb5_ap_rep *val;
 {
     if (val->enc_part.ciphertext.data)
 	krb5_xfree(val->enc_part.ciphertext.data);

@@ -25,7 +25,8 @@
 
 #define MAX_REALM_LN 500
 
-krb5_error_code krb5_check_transited_list(trans, realm1, realm2)
+krb5_error_code krb5_check_transited_list(context, trans, realm1, realm2)
+    krb5_context context;
 krb5_data      *trans;
 krb5_data      *realm1;
 krb5_data      *realm2;
@@ -42,7 +43,7 @@ krb5_data      *realm2;
   trans_length = trans->data[trans->length-1] ?
                  trans->length : trans->length - 1;
 
-  if (retval = krb5_walk_realm_tree(realm1, realm2, &tgs_list,
+  if (retval = krb5_walk_realm_tree(context, realm1, realm2, &tgs_list,
                                     KRB5_REALM_BRANCH_CHAR)) {
     return(retval);
   }
@@ -64,8 +65,8 @@ krb5_data      *realm2;
         if (*(nextp-1) == '.')  strcat(next, prev);
         retval = KRB5KRB_AP_ERR_ILL_CR_TKT;
         for (j = 0; tgs_list[j]; j++) {
-          if (strlen(next) == krb5_princ_realm(tgs_list[j])->length &&
-              !memcmp(next, krb5_princ_realm(tgs_list[j])->data,
+          if (strlen(next) == krb5_princ_realm(context, tgs_list[j])->length &&
+              !memcmp(next, krb5_princ_realm(context, tgs_list[j])->data,
                       strlen(next))) {
             retval = 0;
             break; 
@@ -87,6 +88,6 @@ krb5_data      *realm2;
   }
 
 finish:
-  krb5_free_realm_tree(tgs_list);
+  krb5_free_realm_tree(context, tgs_list);
   return(retval);
 }

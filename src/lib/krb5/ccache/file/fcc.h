@@ -85,22 +85,22 @@ typedef struct _krb5_fcc_cursor {
      off_t pos;
 } krb5_fcc_cursor;
 
-#define MAYBE_OPEN(ID, MODE) \
+#define MAYBE_OPEN(CONTEXT, ID, MODE) \
 {									\
     if (OPENCLOSE (ID)) {						\
-	krb5_error_code maybe_open_ret = krb5_fcc_open_file (ID,MODE);	\
+	krb5_error_code maybe_open_ret = krb5_fcc_open_file (CONTEXT,ID,MODE);	\
 	if (maybe_open_ret) return maybe_open_ret; } }
 
-#define MAYBE_CLOSE(ID, RET) \
+#define MAYBE_CLOSE(CONTEXT, ID, RET) \
 {									\
     if (OPENCLOSE (ID)) {						\
-	krb5_error_code maybe_close_ret = krb5_fcc_close_file (ID);	\
+	krb5_error_code maybe_close_ret = krb5_fcc_close_file (CONTEXT,ID);	\
 	if (!(RET)) RET = maybe_close_ret; } }
 
-#define MAYBE_CLOSE_IGNORE(ID) \
+#define MAYBE_CLOSE_IGNORE(CONTEXT, ID) \
 {									\
     if (OPENCLOSE (ID)) {						\
-	(void) krb5_fcc_close_file (ID); } }
+	(void) krb5_fcc_close_file (CONTEXT,ID); } }
 
 /* DO NOT ADD ANYTHING AFTER THIS #endif */
 #endif /* __KRB5_FILE_CCACHE__ */

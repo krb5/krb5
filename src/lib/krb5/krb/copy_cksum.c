@@ -30,9 +30,10 @@
 #include <krb5/ext-proto.h>
 
 krb5_error_code
-krb5_copy_checksum(ckfrom, ckto)
-const krb5_checksum *ckfrom;
-krb5_checksum **ckto;
+krb5_copy_checksum(context, ckfrom, ckto)
+    krb5_context context;
+    const krb5_checksum *ckfrom;
+    krb5_checksum **ckto;
 {
     krb5_checksum *tempto;
 

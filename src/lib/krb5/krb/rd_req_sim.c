@@ -49,27 +49,29 @@
  */
 
 krb5_error_code
-krb5_rd_req_simple(inbuf, server, sender_addr, authdat)
-const krb5_data *inbuf;
-krb5_const_principal server;
-const krb5_address *sender_addr;
-krb5_tkt_authent **authdat;
+krb5_rd_req_simple(context, inbuf, server, sender_addr, authdat)
+    krb5_context context;
+    const krb5_data *inbuf;
+    krb5_const_principal server;
+    const krb5_address *sender_addr;
+    krb5_tkt_authent **authdat;
 {
     krb5_error_code retval;
     krb5_rcache rcache = 0;
 
     if (server) {
-	retval = krb5_get_server_rcache(krb5_princ_component(server, 0),
+	retval = krb5_get_server_rcache(context, 
+				krb5_princ_component(context, server, 0),
 					&rcache);
 	if (retval)
 	    goto cleanup;
     }
 
-    retval = krb5_rd_req(inbuf, server, sender_addr, 0, 0, 0,
+    retval = krb5_rd_req(context, inbuf, server, sender_addr, 0, 0, 0,
 			 rcache, authdat);
 cleanup:
     if (rcache)
-	krb5_rc_close(rcache);
+	krb5_rc_close(context, rcache);
     return retval;
 }
 

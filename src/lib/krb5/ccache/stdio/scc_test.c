@@ -125,9 +125,9 @@ void scc_test()
 
      init_test_cred();
 
-     kret = krb5_scc_resolve(&id, "/tmp/tkt_test");
+     kret = krb5_scc_resolve(context, &id, "/tmp/tkt_test");
      CHECK(kret, "resolve");
-     kret = krb5_scc_initialize(id, test_creds.client);
+     kret = krb5_scc_initialize(context, id, test_creds.client);
      CHECK(kret, "initialize");
      kret = krb5_scc_store(id, &test_creds);
      CHECK(kret, "store");

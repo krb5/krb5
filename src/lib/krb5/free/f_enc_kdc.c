@@ -29,17 +29,18 @@
 #include <krb5/ext-proto.h>
 
 void
-krb5_free_enc_kdc_rep_part(val)
-register krb5_enc_kdc_rep_part *val;
+krb5_free_enc_kdc_rep_part(context, val)
+    krb5_context context;
+    register krb5_enc_kdc_rep_part *val;
 {
     if (val->session)
-	krb5_free_keyblock(val->session);
+	krb5_free_keyblock(context, val->session);
     if (val->last_req)
-	krb5_free_last_req(val->last_req);
+	krb5_free_last_req(context, val->last_req);
     if (val->server)
-	krb5_free_principal(val->server);
+	krb5_free_principal(context, val->server);
     if (val->caddrs)
-	krb5_free_addresses(val->caddrs);
+	krb5_free_addresses(context, val->caddrs);
     krb5_xfree(val);
     return;
 }

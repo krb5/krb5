@@ -35,13 +35,14 @@
 
 /* Create asn.1 encoded KRB-CRED message from the kdc reply. */
 krb5_error_code
-krb5_mk_cred(dec_rep, etype, key, sender_addr, recv_addr, outbuf)
-krb5_kdc_rep *dec_rep;
-krb5_enctype etype;
-krb5_keyblock *key;
-krb5_address *sender_addr;
-krb5_address *recv_addr;
-krb5_data *outbuf;
+krb5_mk_cred(context, dec_rep, etype, key, sender_addr, recv_addr, outbuf)
+    krb5_context context;
+    krb5_kdc_rep *dec_rep;
+    krb5_enctype etype;
+    krb5_keyblock *key;
+    krb5_address *sender_addr;
+    krb5_address *recv_addr;
+    krb5_data *outbuf;
 {
     krb5_error_code retval;
     krb5_encrypt_block eblock;
@@ -64,19 +65,19 @@ krb5_data *outbuf;
     cred_enc_part.ticket_info = (krb5_cred_info **) 
       calloc(2, sizeof(*cred_enc_part.ticket_info));
     if (!cred_enc_part.ticket_info) {
-	krb5_free_tickets(ret_cred.tickets);
+	krb5_free_tickets(context, ret_cred.tickets);
 	return ENOMEM;
     }
     cred_enc_part.ticket_info[0] = (krb5_cred_info *) 
       malloc(sizeof(*cred_enc_part.ticket_info[0]));
     if (!cred_enc_part.ticket_info[0]) {
-	krb5_free_tickets(ret_cred.tickets);
-	krb5_free_cred_enc_part(cred_enc_part);
+	krb5_free_tickets(context, ret_cred.tickets);
+	krb5_free_cred_enc_part(context, cred_enc_part);
 	return ENOMEM;
     }
     cred_enc_part.nonce = 0;
 
-    if (retval = krb5_us_timeofday(&cred_enc_part.timestamp,
+    if (retval = krb5_us_timeofday(context, &cred_enc_part.timestamp,
 				   &cred_enc_part.usec))
       return retval;
 
@@ -97,11 +98,11 @@ krb5_data *outbuf;
     if (retval = encode_krb5_enc_cred_part(&cred_enc_part, &scratch))
       return retval;
 
-#define cleanup_scratch() { (void) memset(scratch->data, 0, scratch->length); krb5_free_data(scratch); }
+#define cleanup_scratch() { (void) memset(scratch->data, 0, scratch->length); krb5_free_data(context, scratch); }
 
     /* put together an eblock for this encryption */
 
-    krb5_use_cstype(&eblock, etype);
+    krb5_use_cstype(context, &eblock, etype);
     ret_cred.enc_part.ciphertext.length = krb5_encrypt_size(scratch->length,
 						eblock.crypto_entry);
     /* add padding area, and zero it */
@@ -127,14 +128,14 @@ krb5_data *outbuf;
 	ret_cred.enc_part.ciphertext.data = 0;}
 
     /* do any necessary key pre-processing */
-    if (retval = krb5_process_key(&eblock, key)) {
+    if (retval = krb5_process_key(context, &eblock, key)) {
         goto clean_encpart;
     }
 
-#define cleanup_prockey() {(void) krb5_finish_key(&eblock);}
+#define cleanup_prockey() {(void) krb5_finish_key(context, &eblock);}
 
     /* call the encryption routine */
-    if (retval = krb5_encrypt((krb5_pointer) scratch->data,
+    if (retval = krb5_encrypt(context, (krb5_pointer) scratch->data,
 			      (krb5_pointer)
 			      ret_cred.enc_part.ciphertext.data, 
 			      scratch->length, &eblock,
@@ -145,7 +146,7 @@ krb5_data *outbuf;
     /* private message is now assembled-- do some cleanup */
     cleanup_scratch();
 
-    if (retval = krb5_finish_key(&eblock)) {
+    if (retval = krb5_finish_key(context, &eblock)) {
         cleanup_encpart();
         return retval;
     }

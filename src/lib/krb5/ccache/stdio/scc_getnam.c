@@ -36,7 +36,8 @@
  * The name of the file cred cache id.
  */
 char *
-krb5_scc_get_name (id)
+krb5_scc_get_name (context, id)
+   krb5_context context;
    krb5_ccache id;
 {
      return (char *) ((krb5_scc_data *) id->data)->filename;

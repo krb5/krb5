@@ -29,19 +29,20 @@
 #include <krb5/ext-proto.h>
 
 void
-krb5_free_kdc_rep(val)
+krb5_free_kdc_rep(context, val)
+    krb5_context context;
 krb5_kdc_rep *val;
 {
     if (val->padata)
-	krb5_free_pa_data(val->padata);
+	krb5_free_pa_data(context, val->padata);
     if (val->client)
-	krb5_free_principal(val->client);
+	krb5_free_principal(context, val->client);
     if (val->ticket)
-	krb5_free_ticket(val->ticket);
+	krb5_free_ticket(context, val->ticket);
     if (val->enc_part.ciphertext.data)
 	krb5_xfree(val->enc_part.ciphertext.data);
     if (val->enc_part2)
-	krb5_free_enc_kdc_rep_part(val->enc_part2);
+	krb5_free_enc_kdc_rep_part(context, val->enc_part2);
     krb5_xfree(val);
     return;
 }

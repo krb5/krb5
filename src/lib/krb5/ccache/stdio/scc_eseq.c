@@ -41,12 +41,13 @@
  */
 /* ARGSUSED */
 krb5_error_code
-krb5_scc_end_seq_get(id, cursor)
+krb5_scc_end_seq_get(context, id, cursor)
+   krb5_context context;
    krb5_ccache id;
    krb5_cc_cursor *cursor;
 {
     int ret = KRB5_OK;
-/*    MAYBE_CLOSE (id, ret);*/
+/*    MAYBE_CLOSE (context, id, ret);*/
 
     krb5_xfree((krb5_scc_cursor *) *cursor);
 

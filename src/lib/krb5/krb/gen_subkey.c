@@ -29,9 +29,10 @@
 #include <krb5/ext-proto.h>
 
 krb5_error_code
-krb5_generate_subkey(key, subkey)
-const krb5_keyblock *key;
-krb5_keyblock **subkey;
+krb5_generate_subkey(context, key, subkey)
+    krb5_context context;
+    const krb5_keyblock *key;
+    krb5_keyblock **subkey;
 {
     krb5_pointer random_state;
     krb5_encrypt_block eblock;
@@ -40,23 +41,23 @@ krb5_keyblock **subkey;
     if (!valid_keytype(key->keytype))
 	return KRB5_PROG_KEYTYPE_NOSUPP;
 
-    krb5_use_keytype(&eblock, key->keytype);
+    krb5_use_keytype(context, &eblock, key->keytype);
 
-    if (retval = krb5_init_random_key(&eblock, key, &random_state))
+    if (retval = krb5_init_random_key(context, &eblock, key, &random_state))
 	return(retval);
     *subkey = (krb5_keyblock *)malloc(sizeof(**subkey));
     if (!*subkey) {
-	(void) krb5_finish_random_key(&eblock, &random_state);
+	(void) krb5_finish_random_key(context, &eblock, &random_state);
 	return ENOMEM;
     }
 	
-    if (retval = krb5_random_key(&eblock, random_state, subkey)) {
-	(void) krb5_finish_random_key(&eblock, &random_state);
+    if (retval = krb5_random_key(context, &eblock, random_state, subkey)) {
+	(void) krb5_finish_random_key(context, &eblock, &random_state);
 	krb5_xfree(*subkey);
 	return retval;
     }	
     /* ignore the error if any, since we've already gotten the key out */
-    (void) krb5_finish_random_key(&eblock, &random_state);
+    (void) krb5_finish_random_key(context, &eblock, &random_state);
     return 0;
 }
 

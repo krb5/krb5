@@ -49,7 +49,8 @@ static char krb5_default_name_string[KRB5_FCC_MAXLEN] = "";
  */
 
 char *
-krb5_fcc_default_name ()
+krb5_fcc_default_name (context)
+   krb5_context context;
 {
      char *krb5ccache, *getenv();
      int len;

@@ -29,17 +29,18 @@
 #include "fcc.h"
 
 krb5_error_code
-krb5_fcc_skip_principal(id)
+krb5_fcc_skip_principal(context, id)
+   krb5_context context;
    krb5_ccache id;
 {
      krb5_error_code kret;
      krb5_principal princ;
 
-     kret = krb5_fcc_read_principal(id, &princ);
+     kret = krb5_fcc_read_principal(context, id, &princ);
      if (kret != KRB5_OK)
 	  return kret;
 
-     krb5_free_principal(princ);
+     krb5_free_principal(context, princ);
      return KRB5_OK;
 }
 

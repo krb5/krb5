@@ -29,7 +29,8 @@
 #include "fcc.h"
 
 krb5_error_code
-krb5_fcc_interpret(errnum)
+krb5_fcc_interpret(context, errnum)
+   krb5_context context;
 int errnum;
 {
     register int retval;

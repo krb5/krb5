@@ -42,45 +42,46 @@
  * storage failure errors
  */
 krb5_error_code
-krb5_fcc_store(id, creds)
+krb5_fcc_store(context, id, creds)
+   krb5_context context;
    krb5_ccache id;
    krb5_creds *creds;
 {
 #define TCHECK(ret) if (ret != KRB5_OK) goto lose;
      krb5_error_code ret;
 
-     MAYBE_OPEN(id, FCC_OPEN_RDWR);
+     MAYBE_OPEN(context, id, FCC_OPEN_RDWR);
 
      /* Make sure we are writing to the end of the file */
      ret = lseek(((krb5_fcc_data *) id->data)->fd, 0, SEEK_END);
      if (ret < 0) {
-	  MAYBE_CLOSE_IGNORE(id);
-	  return krb5_fcc_interpret(errno);
+	  MAYBE_CLOSE_IGNORE(context, id);
+	  return krb5_fcc_interpret(context, errno);
      }
 
-     ret = krb5_fcc_store_principal(id, creds->client);
+     ret = krb5_fcc_store_principal(context, id, creds->client);
      TCHECK(ret);
-     ret = krb5_fcc_store_principal(id, creds->server);
+     ret = krb5_fcc_store_principal(context, id, creds->server);
      TCHECK(ret);
-     ret = krb5_fcc_store_keyblock(id, &creds->keyblock);
+     ret = krb5_fcc_store_keyblock(context, id, &creds->keyblock);
      TCHECK(ret);
-     ret = krb5_fcc_store_times(id, &creds->times);
+     ret = krb5_fcc_store_times(context, id, &creds->times);
      TCHECK(ret);
-     ret = krb5_fcc_store_octet(id, creds->is_skey);
+     ret = krb5_fcc_store_octet(context, id, creds->is_skey);
      TCHECK(ret);
-     ret = krb5_fcc_store_int32(id, creds->ticket_flags);
+     ret = krb5_fcc_store_int32(context, id, creds->ticket_flags);
      TCHECK(ret);
-     ret = krb5_fcc_store_addrs(id, creds->addresses);
+     ret = krb5_fcc_store_addrs(context, id, creds->addresses);
      TCHECK(ret);
-     ret = krb5_fcc_store_authdata(id, creds->authdata);
+     ret = krb5_fcc_store_authdata(context, id, creds->authdata);
      TCHECK(ret);
-     ret = krb5_fcc_store_data(id, &creds->ticket);
+     ret = krb5_fcc_store_data(context, id, &creds->ticket);
      TCHECK(ret);
-     ret = krb5_fcc_store_data(id, &creds->second_ticket);
+     ret = krb5_fcc_store_data(context, id, &creds->second_ticket);
      TCHECK(ret);
 
 lose:
-     MAYBE_CLOSE(id, ret);
+     MAYBE_CLOSE(context, id, ret);
      return ret;
 #undef TCHECK
 }

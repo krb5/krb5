@@ -37,13 +37,14 @@
  * associated with the cache.
  */
 krb5_error_code
-krb5_fcc_close(id)
+krb5_fcc_close(context, id)
+   krb5_context context;
    krb5_ccache id;
 {
      register int closeval = KRB5_OK;
 
      if (((krb5_fcc_data *) id->data)->fd >= 0)
-	     krb5_fcc_close_file(id);
+	     krb5_fcc_close_file(context, id);
 
      krb5_xfree(((krb5_fcc_data *) id->data)->filename);
      krb5_xfree(((krb5_fcc_data *) id->data));

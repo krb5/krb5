@@ -1,3 +1,7 @@
+Fri Jan 13 15:23:47 1995  Chris Provenzano (proven@mit.edu)
+
+	* Added krb5_context to all krb5_routines
+
 Wed Dec  7 16:58:59 1994    <tytso@rsx-11.mit.edu>
 
 	* fcc_write.c (krb5_fcc_store_addrs): If a null addresses is

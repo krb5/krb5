@@ -29,11 +29,12 @@
 #include <krb5/ext-proto.h>
 
 void
-krb5_free_pwd_data(val)
+krb5_free_pwd_data(context, val)
+    krb5_context context;
 krb5_pwd_data *val;
 {
     if (val->element)
-	krb5_free_pwd_sequences(val->element);
+	krb5_free_pwd_sequences(context, val->element);
     krb5_xfree(val);
     return;
 }

@@ -30,7 +30,8 @@
 #include <krb5/ext-proto.h>
 
 krb5_error_code
-krb5_copy_authenticator(authfrom, authto)
+krb5_copy_authenticator(context, authfrom, authto)
+    krb5_context context;
 const krb5_authenticator *authfrom;
 krb5_authenticator **authto;
 {
@@ -41,38 +42,38 @@ krb5_authenticator **authto;
 	return ENOMEM;
     *tempto = *authfrom;
 
-    retval = krb5_copy_principal(authfrom->client, &tempto->client);
+    retval = krb5_copy_principal(context, authfrom->client, &tempto->client);
     if (retval) {
 	krb5_xfree(tempto);
 	return retval;
     }
     
     if (authfrom->checksum &&
-	(retval = krb5_copy_checksum(authfrom->checksum, &tempto->checksum))) {
-	    krb5_free_principal(tempto->client);    
+	(retval = krb5_copy_checksum(context, authfrom->checksum, &tempto->checksum))) {
+	    krb5_free_principal(context, tempto->client);    
 	    krb5_xfree(tempto);
 	    return retval;
     }
     
     if (authfrom->subkey) {
-	    retval = krb5_copy_keyblock(authfrom->subkey, &tempto->subkey);
+	    retval = krb5_copy_keyblock(context, authfrom->subkey, &tempto->subkey);
 	    if (retval) {
 		    krb5_xfree(tempto->subkey);
-		    krb5_free_checksum(tempto->checksum);
-		    krb5_free_principal(tempto->client);    
+		    krb5_free_checksum(context, tempto->checksum);
+		    krb5_free_principal(context, tempto->client);    
 		    krb5_xfree(tempto);
 		    return retval;
 	    }
     }
     
     if (authfrom->authorization_data) {
-		retval = krb5_copy_authdata(authfrom->authorization_data,
+		retval = krb5_copy_authdata(context, authfrom->authorization_data,
 				    &tempto->authorization_data);
 		if (retval) {
 		    krb5_xfree(tempto->subkey);
-		    krb5_free_checksum(tempto->checksum);
-		    krb5_free_principal(tempto->client);    
-		    krb5_free_authdata(tempto->authorization_data);
+		    krb5_free_checksum(context, tempto->checksum);
+		    krb5_free_principal(context, tempto->client);    
+		    krb5_free_authdata(context, tempto->authorization_data);
 		    krb5_xfree(tempto);
 		    return retval;
 		}

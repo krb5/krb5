@@ -41,7 +41,8 @@
  * system errors
  */
 krb5_error_code
-krb5_fcc_start_seq_get(id, cursor)
+krb5_fcc_start_seq_get(context, id, cursor)
+   krb5_context context;
    krb5_ccache id;
    krb5_cc_cursor *cursor;
 {
@@ -52,7 +53,7 @@ krb5_fcc_start_seq_get(id, cursor)
      if (fcursor == NULL)
 	  return KRB5_CC_NOMEM;
      if (OPENCLOSE(id)) {
-	  ret = krb5_fcc_open_file(id, FCC_OPEN_RDONLY);
+	  ret = krb5_fcc_open_file(context, id, FCC_OPEN_RDONLY);
 	  if (ret) {
 	      krb5_xfree(fcursor);
 	      return ret;
@@ -64,10 +65,10 @@ krb5_fcc_start_seq_get(id, cursor)
 
      /* Make sure we start reading right after the primary principal */
 
-     krb5_fcc_skip_principal(id);
+     krb5_fcc_skip_principal(context, id);
      fcursor->pos = lseek(((krb5_fcc_data *) id->data)->fd, 0, SEEK_CUR);
      *cursor = (krb5_cc_cursor) fcursor;
 
-     MAYBE_CLOSE(id, ret);
+     MAYBE_CLOSE(context, id, ret);
      return ret;
 }

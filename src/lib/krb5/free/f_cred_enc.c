@@ -29,26 +29,27 @@
 #include <krb5/ext-proto.h>
 
 void
-krb5_free_cred_enc_part(val)
-register krb5_cred_enc_part *val;
+krb5_free_cred_enc_part(context, val)
+    krb5_context context;
+    register krb5_cred_enc_part *val;
 {
     register krb5_cred_info **temp;
     
     if (val->r_address)
-      krb5_free_address(val->r_address);
+      krb5_free_address(context, val->r_address);
     if (val->s_address)
-      krb5_free_address(val->s_address);
+      krb5_free_address(context, val->s_address);
 
     if (val->ticket_info) {
 	for (temp = val->ticket_info; *temp; temp++) {
 	    if ((*temp)->session)
-		krb5_free_keyblock((*temp)->session);
+		krb5_free_keyblock(context, (*temp)->session);
 	    if ((*temp)->client)
-		krb5_free_principal((*temp)->client);
+		krb5_free_principal(context, (*temp)->client);
 	    if ((*temp)->server)
-		krb5_free_principal((*temp)->server);
+		krb5_free_principal(context, (*temp)->server);
 	    if ((*temp)->caddrs)
-		krb5_free_addresses((*temp)->caddrs);
+		krb5_free_addresses(context, (*temp)->caddrs);
 	    krb5_xfree((*temp));
 	}
 	krb5_xfree(val->ticket_info);

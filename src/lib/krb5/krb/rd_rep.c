@@ -42,10 +42,11 @@
  */
 
 krb5_error_code
-krb5_rd_rep(inbuf, kblock, repl)
-const krb5_data *inbuf;
-const krb5_keyblock *kblock;
-krb5_ap_rep_enc_part **repl;
+krb5_rd_rep(context, inbuf, kblock, repl)
+    krb5_context context;
+    const krb5_data *inbuf;
+    const krb5_keyblock *kblock;
+    krb5_ap_rep_enc_part **repl;
 {
     krb5_error_code retval;
     krb5_ap_rep *reply;
@@ -66,37 +67,37 @@ krb5_ap_rep_enc_part **repl;
     /* put together an eblock for this encryption */
 
     if (!valid_etype(reply->enc_part.etype)) {
-	krb5_free_ap_rep(reply);
+	krb5_free_ap_rep(context, reply);
 	return KRB5_PROG_ETYPE_NOSUPP;
     }
-    krb5_use_cstype(&eblock, reply->enc_part.etype);
+    krb5_use_cstype(context, &eblock, reply->enc_part.etype);
 
     scratch.length = reply->enc_part.ciphertext.length;
     if (!(scratch.data = malloc(scratch.length))) {
-	krb5_free_ap_rep(reply);
+	krb5_free_ap_rep(context, reply);
 	return(ENOMEM);
     }
 
     /* do any necessary key pre-processing */
-    if (retval = krb5_process_key(&eblock, kblock)) {
+    if (retval = krb5_process_key(context, &eblock, kblock)) {
     errout:
 	free(scratch.data);
-	krb5_free_ap_rep(reply);
+	krb5_free_ap_rep(context, reply);
 	return(retval);
     }
 
     /* call the encryption routine */
-    if (retval = krb5_decrypt((krb5_pointer) reply->enc_part.ciphertext.data,
+    if (retval = krb5_decrypt(context, (krb5_pointer) reply->enc_part.ciphertext.data,
 			      (krb5_pointer) scratch.data,
 			      scratch.length, &eblock, 0)) {
-	(void) krb5_finish_key(&eblock);
+	(void) krb5_finish_key(context, &eblock);
 	goto errout;
     }
 #define clean_scratch() {memset(scratch.data, 0, scratch.length); \
 free(scratch.data);}
     /* finished with the top-level encoding of the ap_rep */
-    krb5_free_ap_rep(reply);
-    if (retval = krb5_finish_key(&eblock)) {
+    krb5_free_ap_rep(context, reply);
+    if (retval = krb5_finish_key(context, &eblock)) {
 
 	clean_scratch();
 	return retval;

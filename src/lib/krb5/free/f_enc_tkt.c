@@ -29,19 +29,20 @@
 #include <krb5/ext-proto.h>
 
 void
-krb5_free_enc_tkt_part(val)
-krb5_enc_tkt_part *val;
+krb5_free_enc_tkt_part(context, val)
+    krb5_context context;
+    krb5_enc_tkt_part *val;
 {
     if (val->session)
-	krb5_free_keyblock(val->session);
+	krb5_free_keyblock(context, val->session);
     if (val->client)
-	krb5_free_principal(val->client);
+	krb5_free_principal(context, val->client);
     if (val->transited.tr_contents.data)
 	krb5_xfree(val->transited.tr_contents.data);
     if (val->caddrs)
-	krb5_free_addresses(val->caddrs);
+	krb5_free_addresses(context, val->caddrs);
     if (val->authorization_data)
-	krb5_free_authdata(val->authorization_data);
+	krb5_free_authdata(context, val->authorization_data);
     krb5_xfree(val);
     return;
 }

@@ -30,11 +30,12 @@
 #include <krb5/ext-proto.h>
 
 void
-krb5_free_tgt_creds(tgts)
-krb5_creds **tgts;
+krb5_free_tgt_creds(context, tgts)
+    krb5_context context;
+    krb5_creds **tgts;
 {
     register krb5_creds **tgtpp;
     for (tgtpp = tgts; *tgtpp; tgtpp++)
-	krb5_free_creds(*tgtpp);
+	krb5_free_creds(context, *tgtpp);
     krb5_xfree(tgts);
 }

@@ -30,35 +30,39 @@
 #include <krb5/ext-proto.h>
 
 krb5_boolean
-krb5_realm_compare(princ1, princ2)
-krb5_const_principal princ1;
-krb5_const_principal princ2;
+krb5_realm_compare(context, princ1, princ2)
+    krb5_context context;
+    krb5_const_principal princ1;
+    krb5_const_principal princ2;
 {
-    if (krb5_princ_realm(princ1)->length != krb5_princ_realm(princ2)->length ||
-	memcmp (krb5_princ_realm(princ1)->data, krb5_princ_realm(princ2)->data,
-		krb5_princ_realm(princ2)->length))
+    if (krb5_princ_realm(context, princ1)->length != 
+	krb5_princ_realm(context, princ2)->length ||
+	memcmp (krb5_princ_realm(context, princ1)->data, 
+	 	krb5_princ_realm(context, princ2)->data,
+		krb5_princ_realm(context, princ2)->length))
 	return FALSE;
 
     return TRUE;
 }
 
 krb5_boolean
-krb5_principal_compare(princ1, princ2)
-krb5_const_principal princ1;
-krb5_const_principal princ2;
+krb5_principal_compare(context, princ1, princ2)
+    krb5_context context;
+    krb5_const_principal princ1;
+    krb5_const_principal princ2;
 {
     register int i, nelem;
 
-    nelem = krb5_princ_size(princ1);
-    if (nelem != krb5_princ_size(princ2))
+    nelem = krb5_princ_size(context, princ1);
+    if (nelem != krb5_princ_size(context, princ2))
 	return FALSE;
 
-    if (! krb5_realm_compare(princ1, princ2))
+    if (! krb5_realm_compare(context, princ1, princ2))
 	return FALSE;
 
     for (i = 0; i < nelem; i++) {
-	register const krb5_data *p1 = krb5_princ_component(princ1, i);
-	register const krb5_data *p2 = krb5_princ_component(princ2, i);
+	register const krb5_data *p1 = krb5_princ_component(context, princ1, i);
+	register const krb5_data *p2 = krb5_princ_component(context, princ2, i);
 	if (p1->length != p2->length ||
 	    memcmp(p1->data, p2->data, p1->length))
 	    return FALSE;

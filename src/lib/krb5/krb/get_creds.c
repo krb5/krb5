@@ -44,10 +44,11 @@
 #include <krb5/ext-proto.h>
 
 krb5_error_code
-krb5_get_credentials(options, ccache, creds)
-const krb5_flags options;
-krb5_ccache ccache;
-krb5_creds *creds;
+krb5_get_credentials(context, options, ccache, creds)
+    krb5_context context;
+    const krb5_flags options;
+    krb5_ccache ccache;
+    krb5_creds *creds;
 {
     krb5_error_code retval, rv2;
     krb5_creds **tgts;
@@ -77,27 +78,27 @@ krb5_creds *creds;
 	    return KRB5_NO_2ND_TKT;
     }
 
-    retval = krb5_cc_retrieve_cred(ccache, fields, &mcreds, &ncreds);
+    retval = krb5_cc_retrieve_cred(context, ccache, fields, &mcreds, &ncreds);
     if (retval == 0) {
-	    krb5_free_cred_contents(creds);
+	    krb5_free_cred_contents(context, creds);
 	    *creds = ncreds;
     }
     if (retval != KRB5_CC_NOTFOUND || options & KRB5_GC_CACHED)
 	return retval;
 
-    retval = krb5_get_cred_from_kdc(ccache, creds, &tgts);
+    retval = krb5_get_cred_from_kdc(context, ccache, creds, &tgts);
     if (tgts) {
 	register int i = 0;
 	while (tgts[i]) {
-	    if (rv2 = krb5_cc_store_cred(ccache, tgts[i])) {
+	    if (rv2 = krb5_cc_store_cred(context, ccache, tgts[i])) {
 		retval = rv2;
 		break;
 	    }
 	    i++;
 	}
-	krb5_free_tgt_creds(tgts);
+	krb5_free_tgt_creds(context, tgts);
     }
     if (!retval)
-	retval = krb5_cc_store_cred(ccache, creds);
+	retval = krb5_cc_store_cred(context, ccache, creds);
     return retval;
 }

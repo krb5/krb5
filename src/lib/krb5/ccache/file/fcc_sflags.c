@@ -40,7 +40,8 @@
  * Sets the operational flags of id to flags.
  */
 krb5_error_code
-krb5_fcc_set_flags(id, flags)
+krb5_fcc_set_flags(context, id, flags)
+   krb5_context context;
    krb5_ccache id;
    krb5_flags flags;
 {
@@ -48,12 +49,12 @@ krb5_fcc_set_flags(id, flags)
     if (flags & KRB5_TC_OPENCLOSE) {
 	/* asking to turn on OPENCLOSE mode */
 	if (!OPENCLOSE(id)) {
-	    (void) krb5_fcc_close_file (id);
+	    (void) krb5_fcc_close_file (context, id);
 	}
     } else {
 	/* asking to turn off OPENCLOSE mode, meaning it must be
 	   left open.  We open if it's not yet open */
-	MAYBE_OPEN(id, FCC_OPEN_RDONLY);
+	MAYBE_OPEN(context, id, FCC_OPEN_RDONLY);
     }
 
     ((krb5_fcc_data *) id->data)->flags = flags;

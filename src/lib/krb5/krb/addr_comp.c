@@ -32,9 +32,10 @@
  * If the two addresses are the same, return TRUE, else return FALSE
  */
 krb5_boolean
-krb5_address_compare(addr1, addr2)
-const krb5_address *addr1;
-const krb5_address *addr2;
+krb5_address_compare(context, addr1, addr2)
+    krb5_context context;
+    const krb5_address *addr1;
+    const krb5_address *addr2;
 {
     if (addr1->addrtype != addr2->addrtype)
 	return(FALSE);

@@ -37,11 +37,12 @@
 #include <krb5/ext-proto.h>
 
 krb5_error_code
-krb5_build_principal_va(princ, rlen, realm, ap)
-krb5_principal princ;
-int rlen;
-const char *realm;
-va_list ap;
+krb5_build_principal_va(context, princ, rlen, realm, ap)
+    krb5_context context;
+    krb5_principal princ;
+    int rlen;
+    const char *realm;
+    va_list ap;
 {
     register int i, count = 0;
     register char *next;
@@ -55,13 +56,13 @@ va_list ap;
     data = (krb5_data *) malloc(sizeof(krb5_data) * count);
     if (data == 0)
 	return ENOMEM;
-    krb5_princ_set_realm_length(princ, rlen);
+    krb5_princ_set_realm_length(context, princ, rlen);
     tmpdata = malloc(rlen);
     if (!tmpdata) {
 	free (data);
 	return ENOMEM;
     }
-    krb5_princ_set_realm_data(princ, tmpdata);
+    krb5_princ_set_realm_data(context, princ, tmpdata);
     memcpy(tmpdata, realm, rlen);
 
     /* process rest of components */
@@ -100,13 +101,15 @@ va_list ap;
 
 krb5_error_code
 #if __STDC__ || defined(STDARG_PROTOTYPES)
-krb5_build_principal(krb5_principal *princ, int rlen, const char *realm, ...)
+krb5_build_principal(krb5_context context,  krb5_principal * princ, int rlen,
+    const char * realm, ...)
 #else
-krb5_build_principal(princ, rlen, realm, va_alist)
-krb5_principal *princ;
-int rlen;
-const char *realm;
-va_dcl
+krb5_build_principal(context, princ, rlen, realm, va_alist)
+    krb5_context context;
+    krb5_principal *princ;
+    int rlen;
+    const char *realm;
+    va_dcl
 #endif
 {
     va_list ap;
@@ -121,7 +124,7 @@ va_dcl
 #else
     va_start(ap);
 #endif
-    retval = krb5_build_principal_va(pr_ret, rlen, realm, ap);
+    retval = krb5_build_principal_va(context, pr_ret, rlen, realm, ap);
     va_end(ap);
     if (retval == 0)
 	*princ = pr_ret;

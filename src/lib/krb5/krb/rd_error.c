@@ -42,9 +42,10 @@
  */
 
 krb5_error_code
-krb5_rd_error( enc_errbuf, dec_error)
-const krb5_data *enc_errbuf;
-krb5_error **dec_error;
+krb5_rd_error(context,  enc_errbuf, dec_error)
+    krb5_context context;
+    const krb5_data *enc_errbuf;
+    krb5_error **dec_error;
 {
     if (!krb5_is_krb_error(enc_errbuf))
 	return KRB5KRB_AP_ERR_MSG_TYPE;

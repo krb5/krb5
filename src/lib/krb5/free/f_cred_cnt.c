@@ -34,13 +34,14 @@
  */
 
 void
-krb5_free_cred_contents(val)
-krb5_creds *val;
+krb5_free_cred_contents(context, val)
+    krb5_context context;
+    krb5_creds *val;
 {
     if (val->client)
-	krb5_free_principal(val->client);
+	krb5_free_principal(context, val->client);
     if (val->server)
-	krb5_free_principal(val->server);
+	krb5_free_principal(context, val->server);
     if (val->keyblock.contents) {
 	memset((char *)val->keyblock.contents, 0, val->keyblock.length);
 	krb5_xfree(val->keyblock.contents);
@@ -50,8 +51,8 @@ krb5_creds *val;
     if (val->second_ticket.data)
 	krb5_xfree(val->second_ticket.data);
     if (val->addresses)
-	krb5_free_addresses(val->addresses);
+	krb5_free_addresses(context, val->addresses);
     if (val->authdata)
-	krb5_free_authdata(val->authdata);
+	krb5_free_authdata(context, val->authdata);
     return;
 }

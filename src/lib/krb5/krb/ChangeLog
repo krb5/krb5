@@ -1,3 +1,7 @@
+Fri Jan 13 15:23:47 1995  Chris Provenzano (proven@mit.edu)
+
+    * Added krb5_context to all krb5_routines
+
 Mon Dec 19 21:55:44 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* init_ctx.c: New file.  Initializes and frees the krb5_context

@@ -43,11 +43,13 @@ extern krb5_flags	krb5_kdc_default_options;
 static char *sendauth_version = "KRB5_SENDAUTH_V1.0";
 
 krb5_error_code
-krb5_recvauth(/* IN */
+krb5_recvauth(context, 
+	      /* IN */
 	      fd, appl_version, server, sender_addr, fetch_from,
 	      keyproc, keyprocarg, rc_type, flags,
 	      /* OUT */
 	      seq_number, client, ticket, authent)
+    	krb5_context context;
 	krb5_pointer	fd;
 	char	*appl_version;
 	krb5_principal	server;
@@ -85,7 +87,7 @@ krb5_recvauth(/* IN */
 	    /*
 	     * First read the sendauth version string and check it.
 	     */
-	    if (retval = krb5_read_message(fd, &inbuf))
+	    if (retval = krb5_read_message(context, fd, &inbuf))
 		return(retval);
 	    if (strcmp(inbuf.data, sendauth_version)) {
 		krb5_xfree(inbuf.data);
@@ -99,7 +101,7 @@ krb5_recvauth(/* IN */
 	/*
 	 * Do the same thing for the application version string.
 	 */
-	if (retval = krb5_read_message(fd, &inbuf))
+	if (retval = krb5_read_message(context, fd, &inbuf))
 		return(retval);
 	if (strcmp(inbuf.data, appl_version)) {
 		krb5_xfree(inbuf.data);
@@ -138,7 +140,7 @@ krb5_recvauth(/* IN */
 	 * Now we actually write the response.  If the response is non-zero,
 	 * exit with a return value of problem
 	 */
-	if ((krb5_net_write(*((int *) fd), (char *)&response, 1)) < 0) {
+	if ((krb5_net_write(context, *((int *) fd), (char *)&response, 1)) < 0) {
 		return(problem); /* We'll return the top-level problem */
 	}
 	if (problem)
@@ -150,11 +152,11 @@ krb5_recvauth(/* IN */
 	if (!(rcache = (krb5_rcache) malloc(sizeof(*rcache)))) 
 		problem = ENOMEM;
 	if (!problem) 
-		problem = krb5_rc_resolve_type(&rcache,
+		problem = krb5_rc_resolve_type(context, &rcache,
 					       rc_type ? rc_type : "dfl");
 	cachename = NULL;
 	if (server) {
-	    server_name = krb5_princ_component(server, 0);
+	    server_name = krb5_princ_component(context, server, 0);
 	} else {
 	    null_server.data = "default";
 	    null_server.length = 7;
@@ -167,17 +169,17 @@ krb5_recvauth(/* IN */
 	    strcpy(cachename, rc_base ? rc_base : "rc_");
 	    strncat(cachename, server_name->data, server_name->length);
 	    cachename[server_name->length+strlen(rc_base)] = '\0';
-	    problem = krb5_rc_resolve(rcache, cachename);
+	    problem = krb5_rc_resolve(context, rcache, cachename);
 	}
 	if (!problem) {
-		if (krb5_rc_recover(rcache))
+		if (krb5_rc_recover(context, rcache))
 			/*
 			 * If the rc_recover didn't work, then try
 			 * initializing the replay cache.
 			 */
-			problem = krb5_rc_initialize(rcache, krb5_clockskew);
+			problem = krb5_rc_initialize(context, rcache, krb5_clockskew);
 		if (problem) {
-			krb5_rc_close(rcache);
+			krb5_rc_close(context, rcache);
 			rcache = NULL;
 		}
 	}
@@ -185,8 +187,8 @@ krb5_recvauth(/* IN */
 	/*
 	 * Now, let's read the AP_REQ message and decode it
 	 */
-	if (retval = krb5_read_message(fd, &inbuf)) {
-		(void) krb5_rc_close(rcache);
+	if (retval = krb5_read_message(context, fd, &inbuf)) {
+		(void) krb5_rc_close(context, rcache);
 		if (cachename)
 			free(cachename);
 		return(retval);
@@ -194,11 +196,11 @@ krb5_recvauth(/* IN */
 	authdat = 0;			/* so we can tell if we need to
 					   free it later... */
 	if (!problem)
-		problem = krb5_rd_req(&inbuf, server, sender_addr, fetch_from,
+		problem = krb5_rd_req(context, &inbuf, server, sender_addr, fetch_from,
 				      keyproc, keyprocarg, rcache, &authdat);
 	krb5_xfree(inbuf.data);
 	if (rcache)
-	    retval = krb5_rc_close(rcache);
+	    retval = krb5_rc_close(context, rcache);
 	if (!problem && retval)
 		problem = retval;
 	if (cachename)
@@ -214,7 +216,7 @@ krb5_recvauth(/* IN */
 		const	char *message;
 
 		memset((char *)&error, 0, sizeof(error));
-		krb5_us_timeofday(&error.stime, &error.susec);
+		krb5_us_timeofday(context, &error.stime, &error.susec);
 		error.server = server;
 		error.error = problem - ERROR_TABLE_BASE_krb5;
 		if (error.error > 127)
@@ -224,7 +226,7 @@ krb5_recvauth(/* IN */
 		if (!(error.text.data = malloc(error.text.length)))
 			return(ENOMEM);
 		strcpy(error.text.data, message);
-		if (retval = krb5_mk_error(&error, &outbuf)) {
+		if (retval = krb5_mk_error(context, &error, &outbuf)) {
 			free(error.text.data);
 			return(retval);
 		}
@@ -233,18 +235,18 @@ krb5_recvauth(/* IN */
 		outbuf.length = 0;
 		outbuf.data = 0;
 	}
-	if (retval = krb5_write_message(fd, &outbuf)) {
+	if (retval = krb5_write_message(context, fd, &outbuf)) {
 		if (outbuf.data)
 			krb5_xfree(outbuf.data);
 		if (!problem)
-			krb5_free_tkt_authent(authdat);
+			krb5_free_tkt_authent(context, authdat);
 		return(retval);
 	}
 	if (problem) {
 		/*
 		 * We sent back an error, we need to return
 		 */
-		if (authdat) krb5_free_tkt_authent(authdat);
+		if (authdat) krb5_free_tkt_authent(context, authdat);
 		return(problem);
 	}
 	/*
@@ -259,9 +261,9 @@ krb5_recvauth(/* IN */
 		 * Generate a random sequence number
 		 */
 		if (seq_number &&
-		    (retval = krb5_generate_seq_number(authdat->ticket->enc_part2->session,
-						      seq_number))) {
-		    krb5_free_tkt_authent(authdat);
+		    (retval = krb5_generate_seq_number(context,
+			authdat->ticket->enc_part2->session, seq_number))) {
+		    krb5_free_tkt_authent(context, authdat);
 		    return(retval);
 		}
 
@@ -273,15 +275,15 @@ krb5_recvauth(/* IN */
 		else
 		    repl.seq_number = 0;
 
-		if (retval = krb5_mk_rep(&repl,
+		if (retval = krb5_mk_rep(context, &repl,
 					 authdat->ticket->enc_part2->session,
 					 &outbuf)) {
-			krb5_free_tkt_authent(authdat);
+			krb5_free_tkt_authent(context, authdat);
 			return(retval);
 		}
-		if (retval = krb5_write_message(fd, &outbuf)) {
+		if (retval = krb5_write_message(context, fd, &outbuf)) {
 			krb5_xfree(outbuf.data);
-			krb5_free_tkt_authent(authdat);
+			krb5_free_tkt_authent(context, authdat);
 			return(retval);
 		}
 		krb5_xfree(outbuf.data);
@@ -293,9 +295,9 @@ krb5_recvauth(/* IN */
 	 */
 	if (client)
 	    if (retval =
-		krb5_copy_principal(authdat->ticket->enc_part2->client,
+		krb5_copy_principal(context, authdat->ticket->enc_part2->client,
 				    client)) {
-		krb5_free_tkt_authent(authdat);
+		krb5_free_tkt_authent(context, authdat);
 		return(retval);
 	    }
 	/*
@@ -311,11 +313,11 @@ krb5_recvauth(/* IN */
 	if (ticket)
 		*ticket = authdat->ticket;
 	else
-		krb5_free_ticket(authdat->ticket);
+		krb5_free_ticket(context, authdat->ticket);
 	if (authent)
 		*authent = authdat->authenticator;
 	else
-		krb5_free_authenticator(authdat->authenticator);
+		krb5_free_authenticator(context, authdat->authenticator);
 	krb5_xfree(authdat);
 	return 0;
 }

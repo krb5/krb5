@@ -37,12 +37,11 @@
 
 /*ARGSUSED*/
 krb5_error_code
-krb5_kdc_rep_decrypt_proc(DECLARG(const krb5_keyblock *, key),
-			  DECLARG(krb5_const_pointer, decryptarg),
-			  DECLARG(krb5_kdc_rep *, dec_rep))
-OLDDECLARG(const krb5_keyblock *, key)
-OLDDECLARG(krb5_const_pointer, decryptarg)
-OLDDECLARG(krb5_kdc_rep *, dec_rep)
+krb5_kdc_rep_decrypt_proc(context, key, decryptarg, dec_rep)
+    krb5_context context;
+    const krb5_keyblock * key;
+    krb5_const_pointer decryptarg;
+    krb5_kdc_rep * dec_rep;
 {
     krb5_error_code retval;
     krb5_encrypt_block eblock;
@@ -61,25 +60,25 @@ OLDDECLARG(krb5_kdc_rep *, dec_rep)
 
     /* put together an eblock for this encryption */
 
-    krb5_use_cstype(&eblock, dec_rep->enc_part.etype);
+    krb5_use_cstype(context, &eblock, dec_rep->enc_part.etype);
 
     /* do any necessary key pre-processing */
-    if (retval = krb5_process_key(&eblock, key)) {
+    if (retval = krb5_process_key(context, &eblock, key)) {
 	free(scratch.data);
 	return(retval);
     }
 
     /* call the decryption routine */
-    if (retval = krb5_decrypt((krb5_pointer) dec_rep->enc_part.ciphertext.data,
+    if (retval = krb5_decrypt(context, (krb5_pointer) dec_rep->enc_part.ciphertext.data,
 			      (krb5_pointer) scratch.data,
 			      scratch.length, &eblock, 0)) {
-	(void) krb5_finish_key(&eblock);
+	(void) krb5_finish_key(context, &eblock);
 	free(scratch.data);
 	return retval;
     }
 #define clean_scratch() {memset(scratch.data, 0, scratch.length); \
 free(scratch.data);}
-    if (retval = krb5_finish_key(&eblock)) {
+    if (retval = krb5_finish_key(context, &eblock)) {
 	clean_scratch();
 	return retval;
     }

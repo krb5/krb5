@@ -33,9 +33,10 @@
  * Copy a principal structure, with fresh allocation.
  */
 krb5_error_code
-krb5_copy_principal(inprinc, outprinc)
-krb5_const_principal inprinc;
-krb5_principal *outprinc;
+krb5_copy_principal(context, inprinc, outprinc)
+    krb5_context context;
+    krb5_const_principal inprinc;
+    krb5_principal *outprinc;
 {
     register krb5_principal tempprinc;
     register int i, nelems;
@@ -47,7 +48,7 @@ krb5_principal *outprinc;
 
     *tempprinc = *inprinc;	/* Copy all of the non-allocated pieces */
 
-    nelems = krb5_princ_size(inprinc);
+    nelems = krb5_princ_size(context, inprinc);
     tempprinc->data = malloc(nelems * sizeof(krb5_data));
 
     if (tempprinc->data == 0) {
@@ -56,24 +57,24 @@ krb5_principal *outprinc;
     }
 
     for (i = 0; i < nelems; i++) {
-	int len = krb5_princ_component(inprinc, i)->length;
-	krb5_princ_component(tempprinc, i)->length = len;
-	if ((krb5_princ_component(tempprinc, i)->data = malloc(len)) == 0) {
+	int len = krb5_princ_component(context, inprinc, i)->length;
+	krb5_princ_component(context, tempprinc, i)->length = len;
+	if ((krb5_princ_component(context, tempprinc, i)->data = malloc(len)) == 0) {
 	    while (--i >= 0)
-		free(krb5_princ_component(tempprinc, i)->data);
+		free(krb5_princ_component(context, tempprinc, i)->data);
 	    free (tempprinc->data);
 	    free (tempprinc);
 	    return ENOMEM;
 	}
-	memcpy(krb5_princ_component(tempprinc, i)->data,
-	       krb5_princ_component(inprinc, i)->data, len);
+	memcpy(krb5_princ_component(context, tempprinc, i)->data,
+	       krb5_princ_component(context, inprinc, i)->data, len);
     }
 
     tempprinc->realm.data =
 	    malloc(tempprinc->realm.length = inprinc->realm.length);
     if (!tempprinc->realm.data) {
 	    for (i = 0; i < nelems; i++)
-		    free(krb5_princ_component(tempprinc, i)->data);
+		    free(krb5_princ_component(context, tempprinc, i)->data);
 	    free(tempprinc->data);
 	    free(tempprinc);
 	    return ENOMEM;

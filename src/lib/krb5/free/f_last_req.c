@@ -29,8 +29,9 @@
 #include <krb5/ext-proto.h>
 
 void
-krb5_free_last_req(val)
-krb5_last_req_entry **val;
+krb5_free_last_req(context, val)
+    krb5_context context;
+    krb5_last_req_entry **val;
 {
     register krb5_last_req_entry **temp;
 

@@ -30,7 +30,8 @@
 #include <krb5/ext-proto.h>
 
 static krb5_error_code
-krb5_copy_addr(inad, outad)
+krb5_copy_addr(context, inad, outad)
+    krb5_context context;
 const krb5_address *inad;
 krb5_address **outad;
 {
@@ -52,9 +53,10 @@ krb5_address **outad;
  * Copy an address array, with fresh allocation.
  */
 krb5_error_code
-krb5_copy_addresses(inaddr, outaddr)
-krb5_address * const * inaddr;
-krb5_address ***outaddr;
+krb5_copy_addresses(context, inaddr, outaddr)
+    krb5_context context;
+    krb5_address * const * inaddr;
+    krb5_address ***outaddr;
 {
     krb5_error_code retval;
     krb5_address ** tempaddr;
@@ -72,9 +74,9 @@ krb5_address ***outaddr;
 	return ENOMEM;
 
     for (nelems = 0; inaddr[nelems]; nelems++) {
-	retval = krb5_copy_addr(inaddr[nelems], &tempaddr[nelems]);
+	retval = krb5_copy_addr(context, inaddr[nelems], &tempaddr[nelems]);
         if (retval) {
-	    krb5_free_addresses(tempaddr);
+	    krb5_free_addresses(context, tempaddr);
 	    return retval;
 	}
     }
@@ -89,9 +91,10 @@ krb5_address ***outaddr;
  * returns failure, but it will not change the contents of the list.
  */
 krb5_error_code
-krb5_append_addresses(inaddr, outaddr)
-krb5_address * const * inaddr;
-krb5_address ***outaddr;
+krb5_append_addresses(context, inaddr, outaddr)
+    krb5_context context;
+	krb5_address * const * inaddr;
+	krb5_address ***outaddr;
 {
     krb5_error_code retval;
     krb5_address ** tempaddr;
@@ -117,7 +120,7 @@ krb5_address ***outaddr;
 
 
     for (nelems = 0; inaddr[nelems]; nelems++) {
-	retval = krb5_copy_addr(inaddr[nelems],
+	retval = krb5_copy_addr(context, inaddr[nelems],
 				&tempaddr[norigelems + nelems]);
 	if (retval)
 	    goto cleanup;
@@ -128,7 +131,7 @@ krb5_address ***outaddr;
 
   cleanup:
     while (--nelems >= 0)
-	krb5_free_address(tempaddr[norigelems + nelems]);
+	krb5_free_address(context, tempaddr[norigelems + nelems]);
 
     /* Try to allocate a smaller amount of memory for *outaddr.  */
     tempaddr = (krb5_address **) realloc((char *)tempaddr,

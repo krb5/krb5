@@ -29,8 +29,9 @@
 #include <krb5/ext-proto.h>
 
 void
-krb5_free_pa_data(val)
-krb5_pa_data **val;
+krb5_free_pa_data(context, val)
+    krb5_context context;
+    krb5_pa_data **val;
 {
     register krb5_pa_data **temp;
 

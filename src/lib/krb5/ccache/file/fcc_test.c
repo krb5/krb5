@@ -111,27 +111,27 @@ void fcc_test()
 
      init_test_cred();
 
-     kret = krb5_fcc_resolve(&id, "/tmp/tkt_test");
+     kret = krb5_fcc_resolve(context, &id, "/tmp/tkt_test");
      CHECK(kret, "resolve");
-     kret = krb5_fcc_initialize(id, test_creds.client);
+     kret = krb5_fcc_initialize(context, id, test_creds.client);
      CHECK(kret, "initialize");
-     kret = krb5_fcc_store(id, &test_creds);
+     kret = krb5_fcc_store(context, id, &test_creds);
      CHECK(kret, "store");
 
-     kret = krb5_fcc_start_seq_get(id, &cursor);
+     kret = krb5_fcc_start_seq_get(context, id, &cursor);
      CHECK(kret, "start_seq_get");
      kret = 0;
      while (kret != KRB5_CC_END) {
 	  printf("Calling next_cred\n");
-	  kret = krb5_fcc_next_cred(id, &cursor, &creds);
+	  kret = krb5_fcc_next_cred(context, id, &cursor, &creds);
 	  CHECK(kret, "next_cred");
      }
-     kret = krb5_fcc_end_seq_get(id, &cursor);
+     kret = krb5_fcc_end_seq_get(context, id, &cursor);
      CHECK(kret, "end_seq_get");
 
-     kret = krb5_fcc_destroy(id);
+     kret = krb5_fcc_destroy(context, id);
      CHECK(kret, "destroy");
-     kret = krb5_fcc_close(id);
+     kret = krb5_fcc_close(context, id);
      CHECK(kret, "close");
 }
 

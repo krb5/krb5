@@ -36,14 +36,14 @@
 
 krb5_error_code
 #if __STDC__ || defined(STDARG_PROTOTYPES)
-krb5_build_principal_ext(krb5_principal *princ, int rlen,
-			 const char *realm, ...)
+krb5_build_principal_ext(krb5_context context,  krb5_principal * princ, int rlen, const char * realm, ...)
 #else
-krb5_build_principal_ext(princ, rlen, realm, va_alist)
-krb5_principal *princ;
-int rlen;
-const char *realm;
-va_dcl
+krb5_build_principal_ext(context, princ, rlen, realm, va_alist)
+    krb5_context context;
+    krb5_principal *princ;
+    int rlen;
+    const char *realm;
+    va_dcl
 #endif
 {
     va_list ap;
@@ -84,8 +84,8 @@ va_dcl
 	krb5_xfree(princ_ret);
 	return ENOMEM;
     }	
-    krb5_princ_set_realm_length(princ_ret, rlen);
-    krb5_princ_set_realm_data(princ_ret, tmpdata);
+    krb5_princ_set_realm_length(context, princ_ret, rlen);
+    krb5_princ_set_realm_data(context, princ_ret, tmpdata);
     memcpy(tmpdata, realm, rlen);
     tmpdata[rlen] = 0;
 
@@ -107,7 +107,7 @@ va_dcl
     }
     va_end(ap);
     *princ = princ_ret;
-    krb5_princ_type(princ_ret) = KRB5_NT_UNKNOWN;
+    krb5_princ_type(context, princ_ret) = KRB5_NT_UNKNOWN;
     return 0;
 
 free_out:

@@ -29,13 +29,14 @@
 #include <krb5/ext-proto.h>
 
 void
-krb5_free_error(val)
-register krb5_error *val;
+krb5_free_error(context, val)
+    krb5_context context;
+    register krb5_error *val;
 {
     if (val->client)
-	krb5_free_principal(val->client);
+	krb5_free_principal(context, val->client);
     if (val->server)
-	krb5_free_principal(val->server);
+	krb5_free_principal(context, val->server);
     if (val->text.data)
 	krb5_xfree(val->text.data);
     if (val->e_data.data)

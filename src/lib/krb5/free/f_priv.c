@@ -29,7 +29,8 @@
 #include <krb5/ext-proto.h>
 
 void
-krb5_free_priv(val)
+krb5_free_priv(context, val)
+    krb5_context context;
 register krb5_priv *val;
 {
     if (val->enc_part.ciphertext.data)

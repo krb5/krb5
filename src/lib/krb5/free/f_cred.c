@@ -29,11 +29,12 @@
 #include <krb5/ext-proto.h>
 
 void
-krb5_free_cred(val)
-register krb5_cred *val;
+krb5_free_cred(context, val)
+    krb5_context context;
+    register krb5_cred *val;
 {
     if (val->tickets)
-        krb5_free_tickets(val->tickets);
+        krb5_free_tickets(context, val->tickets);
     if (val->enc_part.ciphertext.data)
 	krb5_xfree(val->enc_part.ciphertext.data);
     krb5_xfree(val);

@@ -29,15 +29,16 @@
 #include <krb5/ext-proto.h>
 
 void
-krb5_free_ticket(val)
-krb5_ticket *val;
+krb5_free_ticket(context, val)
+    krb5_context context;
+    krb5_ticket *val;
 {
     if (val->server)
-	krb5_free_principal(val->server);
+	krb5_free_principal(context, val->server);
     if (val->enc_part.ciphertext.data)
 	krb5_xfree(val->enc_part.ciphertext.data);
     if (val->enc_part2)
-	krb5_free_enc_tkt_part(val->enc_part2);
+	krb5_free_enc_tkt_part(context, val->enc_part2);
     krb5_xfree(val);
     return;
 }

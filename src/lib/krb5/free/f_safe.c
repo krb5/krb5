@@ -29,17 +29,18 @@
 #include <krb5/ext-proto.h>
 
 void
-krb5_free_safe(val)
-register krb5_safe *val;
+krb5_free_safe(context, val)
+    krb5_context context;
+    register krb5_safe *val;
 {
     if (val->user_data.data)
 	krb5_xfree(val->user_data.data);
     if (val->r_address)
-	krb5_free_address(val->r_address);
+	krb5_free_address(context, val->r_address);
     if (val->s_address)
-	krb5_free_address(val->s_address);
+	krb5_free_address(context, val->s_address);
     if (val->checksum)
-	krb5_free_checksum(val->checksum);
+	krb5_free_checksum(context, val->checksum);
     krb5_xfree(val);
     return;
 }

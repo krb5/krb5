@@ -31,9 +31,10 @@
 #include <stdio.h>
 
 krb5_error_code
-krb5_get_server_rcache(piece, rcptr)
-const krb5_data *piece;
-krb5_rcache *rcptr;
+krb5_get_server_rcache(context, piece, rcptr)
+    krb5_context context;
+    const krb5_data *piece;
+    krb5_rcache *rcptr;
 {
     krb5_rcache rcache = 0;
     char *cachename = 0;
@@ -46,7 +47,7 @@ krb5_rcache *rcptr;
     if (!rcache)
 	return ENOMEM;
     
-    retval = krb5_rc_resolve_type(&rcache, "dfl");
+    retval = krb5_rc_resolve_type(context, &rcache, "dfl");
     if (retval) goto cleanup;
 
     len = piece->length + 3 + 1;
@@ -81,16 +82,16 @@ krb5_rcache *rcptr;
     }
     cachename[p++] = '\0';
 
-    if (retval = krb5_rc_resolve(rcache, cachename))
+    if (retval = krb5_rc_resolve(context, rcache, cachename))
 	goto cleanup;
     
     /*
      * First try to recover the replay cache; if that doesn't work,
      * initialize it.
      */
-    if (krb5_rc_recover(rcache)) {
-	if (retval = krb5_rc_initialize(rcache, krb5_clockskew)) {
-	    krb5_rc_close(rcache);
+    if (krb5_rc_recover(context, rcache)) {
+	if (retval = krb5_rc_initialize(context, rcache, krb5_clockskew)) {
+	    krb5_rc_close(context, rcache);
 	    rcache = 0;
 	    goto cleanup;
 	}

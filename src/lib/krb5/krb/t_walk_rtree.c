@@ -17,7 +17,7 @@ main(argc, argv)
 	char *name;
 	krb5_error_code	retval;
 	
-	krb5_init_ets();
+	krb5_init_ets(context);
 	
 	if (argc < 3 && argc > 4) {
 		fprintf(stderr,
@@ -34,7 +34,7 @@ main(argc, argv)
 	if (argc == 4)
 		realm_branch_char = argv[3][0];
 
-	retval = krb5_walk_realm_tree(&client, &server, &tree,
+	retval = krb5_walk_realm_tree(context, &client, &server, &tree,
 				      realm_branch_char);
 	if (retval) {
 		com_err("krb5_walk_realm_tree", retval, "");
@@ -42,7 +42,7 @@ main(argc, argv)
 	}
 
 	for (p = tree; *p; p++) {
-		retval = krb5_unparse_name(*p, &name);
+		retval = krb5_unparse_name(context, *p, &name);
 		if (retval) {
 			com_err("krb5_unprase_name", retval, "");
 			exit(2);
@@ -51,7 +51,7 @@ main(argc, argv)
 		free(name);
 	}
 
-	krb5_free_realm_tree(tree);
+	krb5_free_realm_tree(context, tree);
 
 	exit(0);
 }

@@ -34,9 +34,10 @@
  */
 
 krb5_error_code
-krb5_copy_creds(incred, outcred)
-const krb5_creds *incred;
-krb5_creds **outcred;
+krb5_copy_creds(context, incred, outcred)
+    krb5_context context;
+    const krb5_creds *incred;
+    krb5_creds **outcred;
 {
     krb5_creds *tempcred;
     krb5_error_code retval;
@@ -46,32 +47,32 @@ krb5_creds **outcred;
 	return ENOMEM;
 
     *tempcred = *incred;		/* copy everything quickly */
-    retval = krb5_copy_principal(incred->client, &tempcred->client);
+    retval = krb5_copy_principal(context, incred->client, &tempcred->client);
     if (retval)
 	goto cleanlast;
-    retval = krb5_copy_principal(incred->server, &tempcred->server);
+    retval = krb5_copy_principal(context, incred->server, &tempcred->server);
     if (retval)
 	goto cleanclient;
-    retval = krb5_copy_keyblock_contents(&incred->keyblock,
+    retval = krb5_copy_keyblock_contents(context, &incred->keyblock,
 					 &tempcred->keyblock);
     if (retval)
 	goto cleanserver;
-    retval = krb5_copy_addresses(incred->addresses, &tempcred->addresses);
+    retval = krb5_copy_addresses(context, incred->addresses, &tempcred->addresses);
     if (retval)
 	goto cleanblock;
-    retval = krb5_copy_data(&incred->ticket, &scratch);
+    retval = krb5_copy_data(context, &incred->ticket, &scratch);
     if (retval)
 	goto cleanaddrs;
     tempcred->ticket = *scratch;
     krb5_xfree(scratch);
-    retval = krb5_copy_data(&incred->second_ticket, &scratch);
+    retval = krb5_copy_data(context, &incred->second_ticket, &scratch);
     if (retval)
 	goto cleanticket;
 
     tempcred->second_ticket = *scratch;
     krb5_xfree(scratch);
 
-    retval = krb5_copy_authdata(incred->authdata,&tempcred->authdata);
+    retval = krb5_copy_authdata(context, incred->authdata,&tempcred->authdata);
     if (retval)
         goto clearticket;
 
@@ -83,13 +84,13 @@ krb5_creds **outcred;
  cleanticket:
     free(tempcred->ticket.data);
  cleanaddrs:
-    krb5_free_addresses(tempcred->addresses);
+    krb5_free_addresses(context, tempcred->addresses);
  cleanblock:
     krb5_xfree(tempcred->keyblock.contents);
  cleanserver:
-    krb5_free_principal(tempcred->server);
+    krb5_free_principal(context, tempcred->server);
  cleanclient:
-    krb5_free_principal(tempcred->client);
+    krb5_free_principal(context, tempcred->client);
  cleanlast:
     krb5_xfree(tempcred);
     return retval;

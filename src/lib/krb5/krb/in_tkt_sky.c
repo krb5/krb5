@@ -42,14 +42,12 @@ struct skey_keyproc_arg {
  */
 #include <krb5/widen.h>
 static krb5_error_code
-skey_keyproc(DECLARG(const krb5_keytype, type),
-	     DECLARG(krb5_keyblock **, key),
-	     DECLARG(krb5_const_pointer, keyseed),
-	     DECLARG(krb5_pa_data **, padata))
-OLDDECLARG(const krb5_keytype, type)
-OLDDECLARG(krb5_keyblock **, key)
-OLDDECLARG(krb5_const_pointer, keyseed)
-OLDDECLARG(krb5_pa_data **,padata)
+skey_keyproc(context, type, key, keyseed, padata)
+    krb5_context context;
+    const krb5_keytype type;
+    krb5_keyblock ** key;
+    krb5_const_pointer keyseed;
+    krb5_pa_data ** padata;
 #include <krb5/narrow.h>
 {
     krb5_keyblock *realkey;
@@ -66,26 +64,26 @@ OLDDECLARG(krb5_pa_data **,padata)
     if (arg->client) {
 	/* do keytab stuff */
 	/* else we need to fetch from system key place */
-	if (retval = krb5_kt_default(&kt_id))
+	if (retval = krb5_kt_default(context, &kt_id))
 	    return retval;
-	if (retval = krb5_kt_get_entry(kt_id, arg->client,
+	if (retval = krb5_kt_get_entry(context, kt_id, arg->client,
 				       0, /* don't have vno available */
 				       &kt_ent))
 	    return retval;
     }
-#define cleanup() {if (arg->client) (void) krb5_kt_free_entry(&kt_ent);}
+#define cleanup() {if (arg->client) (void) krb5_kt_free_entry(context, &kt_ent);}
 
     if (arg->key)
-	retval = krb5_copy_keyblock(arg->key, &realkey);
+	retval = krb5_copy_keyblock(context, arg->key, &realkey);
     else
-	retval = krb5_copy_keyblock(&kt_ent.key, &realkey);
+	retval = krb5_copy_keyblock(context, &kt_ent.key, &realkey);
     if (retval) {
 	cleanup();
 	return retval;
     }
 	
     if (realkey->keytype != type) {
-	krb5_free_keyblock(realkey);
+	krb5_free_keyblock(context, realkey);
 	cleanup();
 	return KRB5_PROG_ETYPE_NOSUPP;
     }	
@@ -118,22 +116,17 @@ OLDDECLARG(krb5_pa_data **,padata)
 
  */
 krb5_error_code
-krb5_get_in_tkt_with_skey(DECLARG(const krb5_flags, options),
-			  DECLARG(krb5_address * const *, addrs),
-			  DECLARG(const krb5_preauthtype, pre_auth_type),
-			  DECLARG(const krb5_enctype, etype),
-			  DECLARG(const krb5_keyblock *,key),
-			  DECLARG(krb5_ccache, ccache),
-			  DECLARG(krb5_creds *,creds),
-			  DECLARG(krb5_kdc_rep **, ret_as_reply))
-OLDDECLARG(const krb5_flags, options)
-OLDDECLARG(krb5_address * const *, addrs)
-OLDDECLARG(const krb5_preauthtype, pre_auth_type)
-OLDDECLARG(const krb5_enctype, etype)
-OLDDECLARG(const krb5_keyblock *,key)
-OLDDECLARG(krb5_ccache, ccache)
-OLDDECLARG(krb5_creds *, creds)
-OLDDECLARG(krb5_kdc_rep **, ret_as_reply)
+krb5_get_in_tkt_with_skey(context, options, addrs, pre_auth_type, etype,
+			  key, ccache, creds, ret_as_reply)
+    krb5_context context;
+    const krb5_flags options;
+    krb5_address * const * addrs;
+    const krb5_preauthtype pre_auth_type;
+    const krb5_enctype  etype;
+    const krb5_keyblock * key;
+    krb5_ccache ccache;
+    krb5_creds * creds;
+    krb5_kdc_rep ** ret_as_reply;
 
 {
     struct skey_keyproc_arg arg;
@@ -151,8 +144,8 @@ OLDDECLARG(krb5_kdc_rep **, ret_as_reply)
 
 	keytype = krb5_csarray[etype]->system->proto_keytype;
     }
-    return (krb5_get_in_tkt(options, addrs, pre_auth_type, etype, keytype,
-			    skey_keyproc, (krb5_pointer) &arg,
+    return (krb5_get_in_tkt(context, options, addrs, pre_auth_type, etype, 
+			    keytype, skey_keyproc, (krb5_pointer) &arg,
 			    krb5_kdc_rep_decrypt_proc, 0, creds,
 			    ccache, ret_as_reply));
 }

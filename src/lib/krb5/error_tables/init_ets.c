@@ -28,7 +28,7 @@
 #include <krb5/krb5.h>
 
 void
-krb5_init_ets PROTOTYPE((void))
+krb5_init_ets PROTOTYPE((krb5_context context))
 {
     static int initialized = 0;
 

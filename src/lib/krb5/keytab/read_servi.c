@@ -35,14 +35,12 @@
 #define KSUCCESS 0
 
 krb5_error_code 
-krb5_kt_read_service_key(DECLARG(krb5_pointer, keyprocarg),
-			 DECLARG(krb5_principal, principal),
-			 DECLARG(krb5_kvno, vno),
-			 DECLARG(krb5_keyblock **, key))
-OLDDECLARG(krb5_pointer, keyprocarg)
-OLDDECLARG(krb5_principal, principal)
-OLDDECLARG(krb5_kvno, vno)
-OLDDECLARG(krb5_keyblock **, key)
+krb5_kt_read_service_key(context, keyprocarg, principal, vno, key)
+    krb5_context context;
+    krb5_pointer keyprocarg;
+    krb5_principal principal;
+    krb5_kvno vno;
+    krb5_keyblock ** key;
 /*
 	effects: If keyprocarg is not NULL, it is taken to be 
 		the name of a keytab.  Otherwise, the default
@@ -64,7 +62,7 @@ OLDDECLARG(krb5_keyblock **, key)
      * Get the name of the file that we should use. 
      */
     if (!keyprocarg) {
-	if ((kerror = krb5_kt_default_name((char *)keytabname, 
+	if ((kerror = krb5_kt_default_name(context, (char *)keytabname, 
 					   sizeof(keytabname) - 1))!= KSUCCESS)
 	    return (kerror);
     } else {
@@ -73,18 +71,18 @@ OLDDECLARG(krb5_keyblock **, key)
 		       sizeof(keytabname) - 1);
     }
 
-    if (kerror = krb5_kt_resolve((char *)keytabname, &id))
+    if (kerror = krb5_kt_resolve(context, (char *)keytabname, &id))
 	return (kerror);
 
-    kerror = krb5_kt_get_entry(id, principal, vno, &entry);
-    krb5_kt_close(id);
+    kerror = krb5_kt_get_entry(context, id, principal, vno, &entry);
+    krb5_kt_close(context, id);
 
     if (kerror)
 	return(kerror);
 
-    krb5_copy_keyblock(&entry.key, key);
+    krb5_copy_keyblock(context, &entry.key, key);
 
-    krb5_kt_free_entry(&entry);
+    krb5_kt_free_entry(context, &entry);
 
     return (KSUCCESS);
 }

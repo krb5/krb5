@@ -46,7 +46,8 @@
 
 /* Get a TGT for use at the remote host */
 krb5_error_code
-krb5_get_for_creds(etype, sumtype, rhost, client, enc_key, forwardable, outbuf)
+krb5_get_for_creds(context, etype, sumtype, rhost, client, enc_key, forwardable, outbuf)
+    krb5_context context;
      const krb5_enctype etype;
      const krb5_cksumtype sumtype;
      char *rhost;
@@ -83,7 +84,7 @@ krb5_get_for_creds(etype, sumtype, rhost, client, enc_key, forwardable, outbuf)
     }	
     strcpy(remote_host, hp->h_name);
 
-    if (retval = krb5_get_host_realm(remote_host, &hrealms))
+    if (retval = krb5_get_host_realm(context, remote_host, &hrealms))
 	goto errout;
     if (!hrealms[0]) {
 	retval = KRB5_ERR_HOST_REALM_UNKNOWN;
@@ -118,10 +119,10 @@ krb5_get_for_creds(etype, sumtype, rhost, client, enc_key, forwardable, outbuf)
     }
     addrs[i] = 0;
 
-    if (retval = krb5_copy_principal(client, &creds.client))
+    if (retval = krb5_copy_principal(context, client, &creds.client))
 	goto errout;
     
-    if (retval = krb5_build_principal_ext(&creds.server,
+    if (retval = krb5_build_principal_ext(context, &creds.server,
 					  strlen(hrealms[0]),
 					  hrealms[0],
 					  KRB5_TGS_NAME_SIZE,
@@ -132,26 +133,26 @@ krb5_get_for_creds(etype, sumtype, rhost, client, enc_key, forwardable, outbuf)
 	goto errout;
 	
     creds.times.starttime = 0;
-    if (retval = krb5_timeofday(&now))
+    if (retval = krb5_timeofday(context, &now))
 	goto errout;
 
     creds.times.endtime = now + KRB5_DEFAULT_LIFE;
     creds.times.renew_till = 0;
     
-    if (retval = krb5_cc_default(&cc))
+    if (retval = krb5_cc_default(context, &cc))
 	goto errout;
 
     /* fetch tgt directly from cache */
-    retval = krb5_cc_retrieve_cred (cc,
+    retval = krb5_cc_retrieve_cred (context, cc,
 				    KRB5_TC_MATCH_SRV_NAMEONLY,
 				    &creds,
 				    &tgt);
-    krb5_cc_close(cc);
+    krb5_cc_close(context, cc);
     if (retval)
 	goto errout;
 
     /* tgt->client must be equal to creds.client */
-    if (!krb5_principal_compare(tgt.client, creds.client)) {
+    if (!krb5_principal_compare(context, tgt.client, creds.client)) {
 	retval = KRB5_PRINC_NOMATCH;
 	goto errout;
     }
@@ -166,7 +167,7 @@ krb5_get_for_creds(etype, sumtype, rhost, client, enc_key, forwardable, outbuf)
     if (!forwardable) /* Reset KDC_OPT_FORWARDABLE */
       kdcoptions &= ~(KDC_OPT_FORWARDABLE);
 
-    if (retval = krb5_send_tgs(kdcoptions, &creds.times, etype, sumtype,
+    if (retval = krb5_send_tgs(context, kdcoptions, &creds.times, etype, sumtype,
 			       tgt.server,
 			       addrs,
 			       creds.authdata,
@@ -190,11 +191,11 @@ krb5_get_for_creds(etype, sumtype, rhost, client, enc_key, forwardable, outbuf)
 
 	retval = err_reply->error + ERROR_TABLE_BASE_krb5;
 
-	krb5_free_error(err_reply);
+	krb5_free_error(context, err_reply);
 	goto errout;
     }
     
-    if (retval = krb5_decode_kdc_rep(&tgsrep.response,
+    if (retval = krb5_decode_kdc_rep(context, &tgsrep.response,
 				     &tgt.keyblock,
 				     etype, /* enctype */
 				     &dec_rep))
@@ -207,12 +208,12 @@ krb5_get_for_creds(etype, sumtype, rhost, client, enc_key, forwardable, outbuf)
     
     /* now it's decrypted and ready for prime time */
 
-    if (!krb5_principal_compare(dec_rep->client, tgt.client)) {
+    if (!krb5_principal_compare(context, dec_rep->client, tgt.client)) {
 	retval = KRB5_KDCREP_MODIFIED;
 	goto errout;
     }
 
-    retval = krb5_mk_cred(dec_rep, etype, enc_key, 0, 0, outbuf);
+    retval = krb5_mk_cred(context, dec_rep, etype, enc_key, 0, 0, outbuf);
     
 errout:
     if (remote_host)
@@ -220,12 +221,12 @@ errout:
     if (hrealms)
 	krb5_xfree(hrealms);
     if (addrs)
-	krb5_free_addresses(addrs);
-    krb5_free_cred_contents(&creds);
+	krb5_free_addresses(context, addrs);
+    krb5_free_cred_contents(context, &creds);
     if (tgsrep.response.data)
 	free(tgsrep.response.data);
     if (dec_rep)
-	krb5_free_kdc_rep(dec_rep); 
+	krb5_free_kdc_rep(context, dec_rep); 
     return retval;
 }
 

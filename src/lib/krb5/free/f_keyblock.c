@@ -29,8 +29,9 @@
 #include <krb5/ext-proto.h>
 
 void
-krb5_free_keyblock(val)
-register krb5_keyblock *val;
+krb5_free_keyblock(context, val)
+    krb5_context context;
+    register krb5_keyblock *val;
 {
     if (val->contents) {
 	memset((char *)val->contents, 0, val->length);

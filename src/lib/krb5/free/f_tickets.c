@@ -29,13 +29,14 @@
 #include <krb5/ext-proto.h>
 
 void
-krb5_free_tickets(val)
-krb5_ticket **val;
+krb5_free_tickets(context, val)
+    krb5_context context;
+    krb5_ticket **val;
 {
     register krb5_ticket **temp;
 
     for (temp = val; *temp; temp++)
-        krb5_free_ticket(*temp);
+        krb5_free_ticket(context, *temp);
     krb5_xfree(val);
     return;
 }

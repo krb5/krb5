@@ -41,7 +41,8 @@
  */
 /* ARGSUSED */
 krb5_error_code
-krb5_fcc_end_seq_get(id, cursor)
+krb5_fcc_end_seq_get(context, id, cursor)
+   krb5_context context;
    krb5_ccache id;
    krb5_cc_cursor *cursor;
 {
@@ -50,7 +51,7 @@ krb5_fcc_end_seq_get(id, cursor)
      /* don't close; it may be left open by the caller,
 	and if not, fcc_start_seq_get and/or fcc_next_cred will do the
 	MAYBE_CLOSE.
-     MAYBE_CLOSE(id, kret); */
+     MAYBE_CLOSE(context, id, kret); */
      krb5_xfree((krb5_fcc_cursor *) *cursor);
 
      return kret;

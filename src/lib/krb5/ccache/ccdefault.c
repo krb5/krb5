@@ -27,8 +27,9 @@
 
 #include <krb5/krb5.h>
 
-krb5_error_code krb5_cc_default(ccache)
-krb5_ccache *ccache;
+krb5_error_code krb5_cc_default(context, ccache)
+   krb5_context context;
+   krb5_ccache *ccache;
 {
-    return krb5_cc_resolve(krb5_cc_default_name(), ccache);
+    return krb5_cc_resolve(context, krb5_cc_default_name(context), ccache);
 }

@@ -28,12 +28,13 @@
 #include <krb5/krb5.h>
 
 krb5_error_code
-krb5_kt_remove_entry (id, entry)
-krb5_keytab id;
-krb5_keytab_entry *entry;
+krb5_kt_remove_entry (context, id, entry)
+    krb5_context context;
+    krb5_keytab id;
+    krb5_keytab_entry *entry;
 {
     if (id->ops->remove)
-	return (*id->ops->remove)(id, entry);
+	return (*id->ops->remove)(context, id, entry);
     else
 	return KRB5_KT_NOWRITE;
 }

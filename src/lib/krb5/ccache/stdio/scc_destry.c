@@ -39,7 +39,8 @@
  * Errors:
  * system errors
  */
-krb5_error_code krb5_scc_destroy(id)
+krb5_error_code krb5_scc_destroy(context, id)
+   krb5_context context;
    krb5_ccache id;
 {
 #if 0
@@ -56,7 +57,7 @@ krb5_error_code krb5_scc_destroy(id)
 
      ret = remove (data->filename);
      if (ret < 0) {
-	 ret = krb5_scc_interpret(errno);
+	 ret = krb5_scc_interpret(context, errno);
 	 if (OPENCLOSE(id)) {
 	     (void) fclose(data->file);
 	     data->file = 0;
@@ -72,7 +73,7 @@ krb5_error_code krb5_scc_destroy(id)
       */
      ret = fstat(fileno(data->file), &buf);
      if (ret < 0) {
-	 ret = krb5_scc_interpret(errno);
+	 ret = krb5_scc_interpret(context, errno);
 	 if (OPENCLOSE(id)) {
 	     (void) fclose(data->file);
 	     data->file = 0;
@@ -86,7 +87,7 @@ krb5_error_code krb5_scc_destroy(id)
      memset (zeros, 0, BUFSIZ);
      for (i=0; i < size / BUFSIZ; i++)
 	  if (fwrite(data->file, zeros, BUFSIZ) < 0) {
-	      ret = krb5_scc_interpret(errno);
+	      ret = krb5_scc_interpret(context, errno);
 	      if (OPENCLOSE(id)) {
 		  (void) fclose(data->file);
 		  data->file = 0;
@@ -95,7 +96,7 @@ krb5_error_code krb5_scc_destroy(id)
 	  }
 
      if (fwrite(data->file, zeros, size % BUFSIZ) < 0) {
-	 ret = krb5_scc_interpret(errno);
+	 ret = krb5_scc_interpret(context, errno);
 	 if (OPENCLOSE(id)) {
 	     (void) fclose(data->file);
 	     data->file = 0;
@@ -108,7 +109,7 @@ krb5_error_code krb5_scc_destroy(id)
 #endif
 
      if (ret)
-	 ret = krb5_scc_interpret(errno);
+	 ret = krb5_scc_interpret(context, errno);
 
   cleanup:
      krb5_xfree(data->filename);

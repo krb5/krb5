@@ -29,7 +29,8 @@
 #include <krb5/ext-proto.h>
 
 void
-krb5_free_authdata(val)
+krb5_free_authdata(context, val)
+    krb5_context context;
 krb5_authdata **val;
 {
     register krb5_authdata **temp;

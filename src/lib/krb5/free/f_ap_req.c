@@ -29,11 +29,12 @@
 #include <krb5/ext-proto.h>
 
 void
-krb5_free_ap_req(val)
-register krb5_ap_req *val;
+krb5_free_ap_req(context, val)
+    krb5_context context;
+    register krb5_ap_req *val;
 {
     if (val->ticket)
-	krb5_free_ticket(val->ticket);
+	krb5_free_ticket(context, val->ticket);
     if (val->authenticator.ciphertext.data)
 	krb5_xfree(val->authenticator.ciphertext.data);
     krb5_xfree(val);

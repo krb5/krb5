@@ -29,8 +29,9 @@
 #include <krb5/ext-proto.h>
 
 void
-krb5_free_addresses(val)
-krb5_address **val;
+krb5_free_addresses(context, val)
+    krb5_context context;
+    krb5_address **val;
 {
     register krb5_address **temp;
 

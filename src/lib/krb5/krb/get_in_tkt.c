@@ -67,40 +67,34 @@ extern krb5_deltat krb5_clockskew;
 
 /* widen this prototype if need be */
 #include <krb5/widen.h>
-typedef krb5_error_code (*git_key_proc) PROTOTYPE((const krb5_keytype,
+typedef krb5_error_code (*git_key_proc) PROTOTYPE((krb5_context,
+						   const krb5_keytype,
 						   krb5_keyblock **,
 						   krb5_const_pointer,
 						   krb5_pa_data **));
 #include <krb5/narrow.h>
 
-typedef krb5_error_code (*git_decrypt_proc) PROTOTYPE((const krb5_keyblock *,
+typedef krb5_error_code (*git_decrypt_proc) PROTOTYPE((krb5_context,
+						       const krb5_keyblock *,
 						       krb5_const_pointer,
 						       krb5_kdc_rep * ));
 krb5_error_code
-krb5_get_in_tkt(DECLARG(const krb5_flags, options),
-		DECLARG(krb5_address * const *, addrs),
-		DECLARG(const krb5_preauthtype, pre_auth_type),
-		DECLARG(const krb5_enctype, etype),
-		DECLARG(const krb5_keytype, keytype),
-		DECLARG(git_key_proc, key_proc),
-		DECLARG(krb5_const_pointer, keyseed),
-		DECLARG(git_decrypt_proc, decrypt_proc),
-		DECLARG(krb5_const_pointer, decryptarg),
-		DECLARG(krb5_creds *, creds),
-		DECLARG(krb5_ccache, ccache),
-		DECLARG(krb5_kdc_rep **, ret_as_reply))
-OLDDECLARG(const krb5_flags, options)
-OLDDECLARG(krb5_address * const *, addrs)
-OLDDECLARG(const krb5_preauthtype, pre_auth_type)
-OLDDECLARG(const krb5_enctype, etype)
-OLDDECLARG(const krb5_keytype, keytype)
-OLDDECLARG(git_key_proc, key_proc)
-OLDDECLARG(krb5_const_pointer, keyseed)
-OLDDECLARG(git_decrypt_proc, decrypt_proc)
-OLDDECLARG(krb5_const_pointer, decryptarg)
-OLDDECLARG(krb5_creds *, creds)
-OLDDECLARG(krb5_ccache, ccache)
-OLDDECLARG(krb5_kdc_rep **, ret_as_reply)
+krb5_get_in_tkt(context, options, addrs, pre_auth_type, etype, keytype,
+		key_proc, keyseed, decrypt_proc, decryptarg, creds,
+		ccache, ret_as_reply)
+    krb5_context context;
+    const krb5_flags options;
+    krb5_address * const * addrs;
+    const krb5_preauthtype pre_auth_type;
+    const krb5_enctype etype;
+    const krb5_keytype keytype;
+    git_key_proc key_proc;
+    krb5_const_pointer keyseed;
+    git_decrypt_proc decrypt_proc;
+    krb5_const_pointer decryptarg;
+    krb5_creds * creds;
+    krb5_ccache ccache;
+    krb5_kdc_rep ** ret_as_reply;
 {
     krb5_kdc_req request;
     krb5_kdc_rep *as_reply = 0;
@@ -113,7 +107,7 @@ OLDDECLARG(krb5_kdc_rep **, ret_as_reply)
     krb5_timestamp time_now;
     krb5_pa_data	*padata;
 
-    if (! krb5_realm_compare(creds->client, creds->server))
+    if (! krb5_realm_compare(context, creds->client, creds->server))
 	return KRB5_IN_TKT_REALM_MISMATCH;
 
     if (ret_as_reply)
@@ -142,7 +136,7 @@ OLDDECLARG(krb5_kdc_rep **, ret_as_reply)
 	     * default.  But if we're changing salts, because of a
 	     * realm renaming, or some such, this won't work.
 	     */
-	    retval = (*key_proc)(keytype, &decrypt_key, keyseed, 0);
+	    retval = (*key_proc)(context, keytype, &decrypt_key, keyseed, 0);
 	    if (retval)
 		    return retval;
 	    request.padata = (krb5_pa_data **) malloc(sizeof(krb5_pa_data *)
@@ -152,7 +146,7 @@ OLDDECLARG(krb5_kdc_rep **, ret_as_reply)
 		goto cleanup;
 	    }
 	    
-	    retval = krb5_obtain_padata(pre_auth_type, creds->client,
+	    retval = krb5_obtain_padata(context, pre_auth_type, creds->client,
 					request.addresses, decrypt_key,
 					&padata);
 	    if (retval)
@@ -168,7 +162,7 @@ OLDDECLARG(krb5_kdc_rep **, ret_as_reply)
     request.from = creds->times.starttime;
     request.till = creds->times.endtime;
     request.rtime = creds->times.renew_till;
-    if (retval = krb5_timeofday(&time_now))
+    if (retval = krb5_timeofday(context, &time_now))
 	goto cleanup;
 
     /* XXX we know they are the same size... */
@@ -186,8 +180,9 @@ OLDDECLARG(krb5_kdc_rep **, ret_as_reply)
     if (retval = encode_krb5_as_req(&request, &packet))
 	goto cleanup;
 
-    retval = krb5_sendto_kdc(packet, krb5_princ_realm(creds->client), &reply);
-    krb5_free_data(packet);
+    retval = krb5_sendto_kdc(context, packet, 
+			     krb5_princ_realm(context, creds->client), &reply);
+    krb5_free_data(context, packet);
     if (retval)
 	goto cleanup;
 
@@ -201,15 +196,15 @@ OLDDECLARG(krb5_kdc_rep **, ret_as_reply)
 	/* it was an error */
 
 	if ((err_reply->ctime != request.nonce) ||
-	    !krb5_principal_compare(err_reply->server, request.server) ||
-	    !krb5_principal_compare(err_reply->client, request.client))
+	    !krb5_principal_compare(context, err_reply->server, request.server) ||
+	    !krb5_principal_compare(context, err_reply->client, request.client))
 	    retval = KRB5_KDCREP_MODIFIED;
 	else
 	    retval = err_reply->error + ERROR_TABLE_BASE_krb5;
 
 	/* XXX somehow make error msg text available to application? */
 
-	krb5_free_error(err_reply);
+	krb5_free_error(context, err_reply);
 	goto cleanup;
     }
 
@@ -230,27 +225,27 @@ OLDDECLARG(krb5_kdc_rep **, ret_as_reply)
 
      /* Generate the key, if we haven't done so already. */
     if (!decrypt_key) {
-	    if (retval = (*key_proc)(keytype, &decrypt_key, keyseed,
+	    if (retval = (*key_proc)(context, keytype, &decrypt_key, keyseed,
 				     as_reply->padata))
 		goto cleanup;
     }
     
-    if (retval = (*decrypt_proc)(decrypt_key, decryptarg, as_reply))
+    if (retval = (*decrypt_proc)(context, decrypt_key, decryptarg, as_reply))
 	goto cleanup;
 
-    krb5_free_keyblock(decrypt_key);
+    krb5_free_keyblock(context, decrypt_key);
     decrypt_key = 0;
     
     /* check the contents for sanity: */
     if (!as_reply->enc_part2->times.starttime)
 	as_reply->enc_part2->times.starttime =
 	    as_reply->enc_part2->times.authtime;
-    if (!krb5_principal_compare(as_reply->client, request.client)
-	|| !krb5_principal_compare(as_reply->enc_part2->server, request.server)
-	|| !krb5_principal_compare(as_reply->ticket->server, request.server)
+    if (!krb5_principal_compare(context, as_reply->client, request.client)
+	|| !krb5_principal_compare(context, as_reply->enc_part2->server, request.server)
+	|| !krb5_principal_compare(context, as_reply->ticket->server, request.server)
 	|| (request.nonce != as_reply->enc_part2->nonce)
 	/* XXX check for extraneous flags */
-	/* XXX || (!krb5_addresses_compare(addrs, as_reply->enc_part2->caddrs)) */
+	/* XXX || (!krb5_addresses_compare(context, addrs, as_reply->enc_part2->caddrs)) */
 	|| ((request.from != 0) &&
 	    (request.from != as_reply->enc_part2->times.starttime))
 	|| ((request.till != 0) &&
@@ -276,7 +271,8 @@ OLDDECLARG(krb5_kdc_rep **, ret_as_reply)
     /* XXX issue warning if as_reply->enc_part2->key_exp is nearby */
 	
     /* fill in the credentials */
-    if (retval = krb5_copy_keyblock_contents(as_reply->enc_part2->session,
+    if (retval = krb5_copy_keyblock_contents(context, 
+					     as_reply->enc_part2->session,
 					     &creds->keyblock))
 	goto cleanup;
     creds->keyblock.etype = as_reply->ticket->enc_part.etype;
@@ -285,7 +281,7 @@ OLDDECLARG(krb5_kdc_rep **, ret_as_reply)
     creds->is_skey = FALSE;		/* this is an AS_REQ, so cannot
 					   be encrypted in skey */
     creds->ticket_flags = as_reply->enc_part2->flags;
-    if (retval = krb5_copy_addresses(as_reply->enc_part2->caddrs,
+    if (retval = krb5_copy_addresses(context, as_reply->enc_part2->caddrs,
 				     &creds->addresses))
 	goto cred_cleanup;
 
@@ -299,7 +295,7 @@ OLDDECLARG(krb5_kdc_rep **, ret_as_reply)
     krb5_xfree(packet);
 
     /* store it in the ccache! */
-    if (retval = krb5_cc_store_cred(ccache, creds))
+    if (retval = krb5_cc_store_cred(context, ccache, creds))
 	goto cred_cleanup;
 
     if (ret_as_reply) {
@@ -311,15 +307,15 @@ OLDDECLARG(krb5_kdc_rep **, ret_as_reply)
     
 cleanup:
     if (as_reply)
-	krb5_free_kdc_rep(as_reply);
+	krb5_free_kdc_rep(context, as_reply);
     if (reply.data)
 	free(reply.data);
     if (decrypt_key)
-	krb5_free_keyblock(decrypt_key);
+	krb5_free_keyblock(context, decrypt_key);
     if (request.padata)
 	free(request.padata);
     if (!addrs)
-	krb5_free_addresses(request.addresses);
+	krb5_free_addresses(context, request.addresses);
     return retval;
     
     /*
@@ -338,7 +334,7 @@ cred_cleanup:
 	creds->ticket.data = 0;
     }
     if (creds->addresses) {
-	krb5_free_addresses(creds->addresses);
+	krb5_free_addresses(context, creds->addresses);
 	creds->addresses = 0;
     }
     goto cleanup;

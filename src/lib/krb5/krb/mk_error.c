@@ -39,9 +39,10 @@
  returns system errors
  */
 krb5_error_code
-krb5_mk_error(dec_err, enc_err)
-const krb5_error *dec_err;
-krb5_data *enc_err;
+krb5_mk_error(context, dec_err, enc_err)
+    krb5_context context;
+    const krb5_error *dec_err;
+    krb5_data *enc_err;
 {
     krb5_error_code retval;
     krb5_data *new_enc_err;

@@ -37,12 +37,13 @@ extern krb5_deltat krb5_clockskew;
 
 /* Decode the KRB-CRED message, and return creds */
 krb5_error_code
-krb5_rd_cred(inbuf, key, creds, sender_addr, recv_addr)
-const krb5_data *inbuf;
-const krb5_keyblock *key;
-krb5_creds *creds;                /* Filled in */
-const krb5_address *sender_addr;  /* optional */
-const krb5_address *recv_addr;    /* optional */
+krb5_rd_cred(context, inbuf, key, creds, sender_addr, recv_addr)
+    krb5_context context;
+    const krb5_data *inbuf;
+    const krb5_keyblock *key;
+    krb5_creds *creds;                /* Filled in */
+    const krb5_address *sender_addr;  /* optional */
+    const krb5_address *recv_addr;    /* optional */
 {
     krb5_error_code retval;
     krb5_encrypt_block eblock;
@@ -90,7 +91,7 @@ const krb5_address *recv_addr;    /* optional */
 
     /* put together an eblock for this decryption */
 
-    krb5_use_cstype(&eblock, credmsg->enc_part.etype);
+    krb5_use_cstype(context, &eblock, credmsg->enc_part.etype);
     scratch->length = credmsg->enc_part.ciphertext.length;
     
     if (!(scratch->data = malloc(scratch->length))) {
@@ -99,16 +100,16 @@ const krb5_address *recv_addr;    /* optional */
     }
 
     /* do any necessary key pre-processing */
-    if (retval = krb5_process_key(&eblock, key)) {
+    if (retval = krb5_process_key(context, &eblock, key)) {
         cleanup_credmsg();
 	cleanup_scratch();
 	return retval;
     }
     
-#define cleanup_prockey() {(void) krb5_finish_key(&eblock);}
+#define cleanup_prockey() {(void) krb5_finish_key(context, &eblock);}
     
     /* call the decryption routine */
-    if (retval = krb5_decrypt((krb5_pointer) credmsg->enc_part.ciphertext.data,
+    if (retval = krb5_decrypt(context, (krb5_pointer) credmsg->enc_part.ciphertext.data,
 			      (krb5_pointer) scratch->data,
 			      scratch->length, &eblock,
 			      0)) {
@@ -122,7 +123,7 @@ const krb5_address *recv_addr;    /* optional */
 
     cleanup_credmsg();
 
-    if (retval = krb5_finish_key(&eblock)) {
+    if (retval = krb5_finish_key(context, &eblock)) {
         cleanup_scratch();
         return retval;
     }
@@ -136,7 +137,7 @@ const krb5_address *recv_addr;    /* optional */
 
 #define cleanup_mesg() {(void)krb5_xfree(credmsg_enc_part);}
 
-    if (retval = krb5_timeofday(&currenttime)) {
+    if (retval = krb5_timeofday(context, &currenttime)) {
 	cleanup_mesg();
 	return retval;
     }
@@ -146,13 +147,13 @@ const krb5_address *recv_addr;    /* optional */
     }
 
     if (sender_addr && credmsg_enc_part->s_address &&
-	!krb5_address_compare(sender_addr, 
+	!krb5_address_compare(context, sender_addr, 
 			      credmsg_enc_part->s_address)) {
 	cleanup_mesg();
 	return KRB5KRB_AP_ERR_BADADDR;
     }
     if (recv_addr && credmsg_enc_part->r_address &&
-	!krb5_address_compare(recv_addr, 
+	!krb5_address_compare(context, recv_addr, 
 			      credmsg_enc_part->r_address)) {
 	cleanup_mesg();
 	return KRB5KRB_AP_ERR_BADADDR;
@@ -165,27 +166,27 @@ const krb5_address *recv_addr;    /* optional */
 	    cleanup_mesg();
 	    return retval;
 	}
-	if (!krb5_address_search(credmsg_enc_part->r_address, 
+	if (!krb5_address_search(context, credmsg_enc_part->r_address, 
 				 our_addrs)) {
-	    krb5_free_addresses(our_addrs);
+	    krb5_free_addresses(context, our_addrs);
 	    cleanup_mesg();
 	    return KRB5KRB_AP_ERR_BADADDR;
 	}
-	krb5_free_addresses(our_addrs);
+	krb5_free_addresses(context, our_addrs);
     }
 
-    if (retval = krb5_copy_principal(credmsg_enc_part->ticket_info[0]->client,
+    if (retval = krb5_copy_principal(context, credmsg_enc_part->ticket_info[0]->client,
 				     &creds->client)) {
 	return(retval);
     }
 
-    if (retval = krb5_copy_principal(credmsg_enc_part->ticket_info[0]->server,
+    if (retval = krb5_copy_principal(context, credmsg_enc_part->ticket_info[0]->server,
 				     &creds->server)) {
 	return(retval);
     }  
 
     if (retval =
-	krb5_copy_keyblock_contents(credmsg_enc_part->ticket_info[0]->session, 
+	krb5_copy_keyblock_contents(context, credmsg_enc_part->ticket_info[0]->session, 
 				    &creds->keyblock)) {
 	return(retval);
     }
@@ -200,7 +201,7 @@ const krb5_address *recv_addr;    /* optional */
     creds->is_skey = FALSE;
     creds->ticket_flags = credmsg_enc_part->ticket_info[0]->flags;
 
-    if (retval = krb5_copy_addresses(credmsg_enc_part->ticket_info[0]->caddrs,
+    if (retval = krb5_copy_addresses(context, credmsg_enc_part->ticket_info[0]->caddrs,
 				     &creds->addresses)) {
 	clean();
 	return(retval);

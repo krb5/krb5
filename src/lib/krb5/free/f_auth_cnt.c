@@ -30,16 +30,17 @@
 #include <krb5/ext-proto.h>
 
 void
-krb5_free_authenticator_contents(val)
-krb5_authenticator *val;
+krb5_free_authenticator_contents(context, val)
+    krb5_context context;
+    krb5_authenticator *val;
 {
     if (val->checksum)
-	krb5_free_checksum(val->checksum);
+	krb5_free_checksum(context, val->checksum);
     if (val->client)
-	krb5_free_principal(val->client);
+	krb5_free_principal(context, val->client);
     if (val->subkey)
-	krb5_free_keyblock(val->subkey);
+	krb5_free_keyblock(context, val->subkey);
     if (val->authorization_data)        
-       krb5_free_authdata(val->authorization_data);
+       krb5_free_authdata(context, val->authorization_data);
     return;
 }

@@ -40,7 +40,8 @@
  * Sets the operational flags of id to flags.
  */
 krb5_error_code
-krb5_scc_set_flags(id, flags)
+krb5_scc_set_flags(context, id, flags)
+   krb5_context context;
    krb5_ccache id;
    krb5_flags flags;
 {
@@ -50,12 +51,12 @@ krb5_scc_set_flags(id, flags)
     if (flags & KRB5_TC_OPENCLOSE) {
 	/* asking to turn on OPENCLOSE mode */
 	if (!OPENCLOSE(id))
-	    ret = krb5_scc_close_file (id);
+	    ret = krb5_scc_close_file (context, id);
     } else {
 	/* asking to turn off OPENCLOSE mode, meaning it must be
 	   left open.  We open if it's not yet open */
 	if (OPENCLOSE(id)) {
-	    ret = krb5_scc_open_file (id, SCC_OPEN_RDWR);
+	    ret = krb5_scc_open_file (context, id, SCC_OPEN_RDWR);
 	}
     }
 

@@ -29,10 +29,11 @@
 #include <krb5/ext-proto.h>
 
 void
-krb5_free_creds(val)
-krb5_creds *val;
+krb5_free_creds(context, val)
+    krb5_context context;
+    krb5_creds *val;
 {
-    krb5_free_cred_contents(val);
+    krb5_free_cred_contents(context, val);
     krb5_xfree(val);
     return;
 }

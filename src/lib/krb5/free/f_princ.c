@@ -29,8 +29,9 @@
 #include <krb5/ext-proto.h>
 
 void
-krb5_free_principal(val)
-krb5_principal val;
+krb5_free_principal(context, val)
+    krb5_context context;
+    krb5_principal val;
 {
     register int i;
 
@@ -38,9 +39,9 @@ krb5_principal val;
 	return;
     
     if (val->data) {
-	i = krb5_princ_size(val);
+	i = krb5_princ_size(context, val);
 	while(--i >= 0)
-	    free(krb5_princ_component(val, i)->data);
+	    free(krb5_princ_component(context, val, i)->data);
 	krb5_xfree(val->data);
     }
     if (val->realm.data)

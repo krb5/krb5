@@ -29,12 +29,13 @@
 #include <krb5/ext-proto.h>
 
 void
-krb5_free_realm_tree(realms)
-krb5_principal *realms;
+krb5_free_realm_tree(context, realms)
+    krb5_context context;
+    krb5_principal *realms;
 {
     register krb5_principal *nrealms = realms;
     while (*nrealms) {
-	krb5_free_principal(*nrealms);
+	krb5_free_principal(context, *nrealms);
 	nrealms++;
     }
     krb5_xfree(realms);

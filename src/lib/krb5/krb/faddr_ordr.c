@@ -37,9 +37,10 @@
  * < 0 if first is less than 2nd, > 0 if first is greater than 2nd.
  */
 int
-krb5_fulladdr_order(addr1, addr2)
-register const krb5_fulladdr *addr1;
-register const krb5_fulladdr *addr2;
+krb5_fulladdr_order(context, addr1, addr2)
+    krb5_context context;
+    register const krb5_fulladdr *addr1;
+    register const krb5_fulladdr *addr2;
 {
     int dir;
     const int minlen = min(addr1->address->length, addr2->address->length);
