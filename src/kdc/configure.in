@@ -17,7 +17,7 @@ WITH_KRB5ROOT
 AC_WITH([krb4],
 ADD_DEF(-DKRB4)
 ADD_DEF(-DBACKWARD_COMPAT)
-K4LIB='$(KRB4)/lib/libkrb.a $(TOPLIBD)/libdes425.a',
+K4LIB='$(KRB4)/lib/libkrb.a $(TOPLIBD)/libdes425.a $(KRB4)/lib/libdes.a',
 echo "warning: no krb4 support will be built in kdc"
 K4LIB=)
 AC_SUBST(K4LIB)

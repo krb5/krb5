@@ -55,7 +55,7 @@ kdc5_err.h: kdc5_err.et
 kdc5_err.o: kdc5_err.h
 
 krb5kdc: $(OBJS) $(KDBDEPLIB) $(DEPKLIB)
-	$(CC) $(CFLAGS) -o krb5kdc $(OBJS) $(KDBLIB) $(KLIB) $(K4LIB) $(LIBS) $(KRB4)/lib/libdes.a
+	$(CC) $(CFLAGS) -o krb5kdc $(OBJS) $(KDBLIB) $(KLIB) $(K4LIB) $(LIBS)
 
 install::
 	$(INSTALL_PROGRAM) krb5kdc ${DESTDIR}$(SERVER_BINDIR)/krb5kdc
