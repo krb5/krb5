@@ -1,3 +1,7 @@
+Wed Jan 25 19:25:02 1995  Mark Eichin  (eichin@cygnus.com)
+
+	* kadm.h: add DEL_ENT and DEL_ACL for CNS V4 delete support.
+
 Fri Nov 18 01:24:58 1994  Mark Eichin  <eichin@cygnus.com>
 
 	* Makefile.in (install): use $(INSTALL_DATA) instead of cp. Elide

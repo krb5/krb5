@@ -125,7 +125,8 @@ enum acl_types {
 ADDACL,
 GETACL,
 MODACL,
-STABACL
+STABACL,
+DELACL
 };
 
 /* Various opcodes for the admin server's functions */
@@ -135,6 +136,9 @@ STABACL
 #define GET_ENT      5
 #define CHECK_PW     6
 #define CHG_STAB     7
+/* Cygnus principal-deletion support */
+#define KADM_CYGNUS_EXT_BASE 64
+#define DEL_ENT              (KADM_CYGNUS_EXT_BASE+1)
 
 extern long kdb_get_master_key();	/* XXX should be in krb_db.h */
 extern long kdb_verify_master_key();	/* XXX ditto */
