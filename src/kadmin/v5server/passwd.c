@@ -105,7 +105,7 @@ passwd_check_princ(kcontext, debug_level, ticket,
 /*
  * passwd_check_opass_ok()	- Check of specified old password is good.
  */
-static krb5_boolean
+krb5_boolean
 passwd_check_opass_ok(kcontext, debug_level, princ, dbentp, pwdata)
     krb5_context	kcontext;
     int			debug_level;
@@ -131,6 +131,8 @@ passwd_check_opass_ok(kcontext, debug_level, princ, dbentp, pwdata)
     kret = key_string_to_keys(kcontext,
 			      dbentp,
 			      pwdata,
+			      0,
+			      (krb5_key_salt_tuple *) NULL,
 			      &num_keys,
 			      &key_list);
 
@@ -207,6 +209,8 @@ passwd_set_npass(kcontext, debug_level, princ, dbentp, pwdata)
     if (kret = key_string_to_keys(kcontext,
 				  dbentp,
 				  pwdata,
+				  0,
+				  (krb5_key_salt_tuple *) NULL,
 				  &num_keys,
 				  &key_list))
 	goto cleanup;
@@ -246,10 +250,7 @@ passwd_set_npass(kcontext, debug_level, princ, dbentp, pwdata)
 	/* Set the time for last successful password change */
 	if (kret = krb5_timeofday(kcontext, &now))
 	    goto cleanup;
-	pwchg->tl_data_contents[0] = (unsigned char) ((now >> 24) & 0xff);
-	pwchg->tl_data_contents[1] = (unsigned char) ((now >> 16) & 0xff);
-	pwchg->tl_data_contents[2] = (unsigned char) ((now >> 8) & 0xff);
-	pwchg->tl_data_contents[3] = (unsigned char) (now & 0xff);
+	krb5_kdb_encode_int32(now, pwchg->tl_data_contents);
     }
     else {
 	kret = ENOMEM;
@@ -272,7 +273,7 @@ passwd_set_npass(kcontext, debug_level, princ, dbentp, pwdata)
 	goto cleanup;
 
     if (nwrite != 1)
-	kret = KRB_ERR_GENERIC;
+	kret = KRB5KRB_ERR_GENERIC;
 
     (void) krb5_db_free_principal(kcontext, &entry2write, 1);
 
