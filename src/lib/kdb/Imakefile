@@ -1,7 +1,7 @@
-SRCS=encrypt_key.c kdb_dbm.c verify_mky.c
+SRCS= encrypt_key.c decrypt_key.c kdb_dbm.c verify_mky.c fetch_mkey.c
 
 NormalLibraryObjectRule()
 
-OBJS= encrypt_key.o kdb_dbm.o verify_mky.o
+OBJS= encrypt_key.o decrypt_key.o kdb_dbm.o verify_mky.o fetch_mkey.o
 
 NormalLibraryTarget(kdb,$(OBJS))
