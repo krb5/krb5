@@ -1,3 +1,9 @@
+Wed Oct  8 16:19:49 1997  Tom Yu  <tlyu@mit.edu>
+
+	* mkrel: Allow for edits of relevant files that should be changed
+	each time a release is cut.  Some snapshot support.  Add "-9" flag
+	to gzip.
+
 Fri Feb 21 15:58:19 1997  Sam Hartman  <hartmans@mit.edu>
 
 	* makeshlib.sh : Remove non AIX stuff; rewrite AIX stuff to work
