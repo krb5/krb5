@@ -1,5 +1,8 @@
 2001-03-08  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
+	* do_as_req.c: If KRBCONF_KDC_MODIFIES_KDB defined, produce code
+	that compiles and works.
+
 	* kdc_util.h: Add prototype for process_v4_mode() for main.c to use.
 
 	* kerberos_v4.c: Do not shadow progname and more variables.
