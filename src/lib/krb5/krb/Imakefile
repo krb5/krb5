@@ -2,6 +2,7 @@ NormalLibraryObjectRule()
 
 OBJS=	addr_comp.o	\
 	addr_srch.o	\
+	copy_addrs.o	\
 	copy_creds.o	\
 	copy_data.o	\
 	copy_key.o	\
@@ -41,6 +42,7 @@ OBJS=	addr_comp.o	\
 
 SRCS=	addr_comp.c	\
 	addr_srch.c	\
+	copy_addrs.c	\
 	copy_creds.c	\
 	copy_data.c	\
 	copy_key.c	\
