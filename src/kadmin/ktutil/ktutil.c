@@ -237,8 +237,8 @@ void ktutil_list(argc, argv)
 	    show_enctype++;
 	    continue;
 	}
-	
-	fprintf(stderr, "%s: illegal arguments\n", argv[0]);
+
+	fprintf(stderr, "%s: usage: %s [-t] [-k] [-e]\n", argv[0], argv[0]);
 	return;
     }
     if (show_time) {

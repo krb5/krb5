@@ -1,3 +1,7 @@
+2000-12-15  Ken Raeburn  <raeburn@mit.edu>
+
+	* ktutil.c (ktutil_list): Provide a real usage message.
+
 2000-07-03  Ezra Peisach  <epeisach@mit.edu>
 
 	* Makefile.in (ktutil): Do not link with the V4
