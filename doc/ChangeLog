@@ -7,6 +7,7 @@
 	(Shared Library Theory): Fixed typo.
 	(Advanced Shared Library Requirements): New section.
 	(Thread Safety): Rewrite; add subsections.
+	(Compiler and OS Requirements): New section.
 
 2004-06-10  Ken Raeburn  <raeburn@mit.edu>
 

@@ -65,6 +65,7 @@ This file contains internal implementor's information for the
 
 @menu
 * Introduction::                
+* Compiler and OS Requirements::  
 * Socket API::                  
 * IPv6 Support::                
 * Local Addresses::             
@@ -73,7 +74,7 @@ This file contains internal implementor's information for the
 * Shared Libraries::            
 @end menu
 
-@node Introduction, Socket API, Top, Top
+@node Introduction, Compiler and OS Requirements, Top, Top
 @chapter Introduction
 
 This file contains internal implementor's information for
@@ -81,7 +82,47 @@ This file contains internal implementor's information for
 from install.texi; eventually it will have more detailed information on
 the internals of the @value{PRODUCT}.
 
-@node Socket API, IPv6 Support, Introduction, Top
+@node Compiler and OS Requirements, Socket API, Introduction, Top
+@chapter Compiler and OS Requirements
+
+The basic Kerberos libraries are entirely written in C.
+However, we do assume full ANSI C (1989) support, typical 32- or
+64-bit twos-complement architectures (@code{char} is 8 bits,
+@code{short} is 16 bits, @code{int} is 32 bits, byte order is 1234 or
+4321), and a few aspects of ISO C 1999:
+
+@itemize @bullet
+@item
+support for inline functions, even if the keyword isn't @code{inline}
+@item
+64-bit arithmetic types (needed for sequence numbers in GSSAPI)
+@end itemize
+
+These are handled through the internal header file
+@file{k5-platform.h}.
+
+We also conditionally tailor code for the GNU C compiler in a few
+places where it helps performance or debugging, but the code should
+still work fine with other C compilers.
+
+On UNIX platforms, ... @i{(should outline what POSIX stuff we
+require)}.
+
+See also @ref{Advanced Shared Library Requirements}, for UNIX and
+Windows systems.
+
+Our makefiles are intended to support building from the top level with
+a POSIX-compliant version of @code{make}, and parallel builds using
+GNU @code{make}.  This sometimes comes at the cost of efficiency with
+non-GNU versions; for example, some targets in some directories will
+always be rebuilt with certain versions of @code{make}, even though
+the real dependencies are not out of date, because some versions of
+@code{make} don't understand how we're using phony intermediate
+targets to manage building in subdirectories in parallel builds.
+(Actually, this is more my view of how we've been doing things than
+official policy.  ---Ken)
+
+@node Socket API, IPv6 Support, Compiler and OS Requirements, Top
 @chapter Socket API
 
 Someone should describe the API subset we're allowed to use with
