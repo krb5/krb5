@@ -24,7 +24,13 @@ client.c server.c: rpc_test.h
 # 	rm -f rpc_test.h rpc_test_clnt.c rpc_test_svc.c
 # 
 
-check unit-test:: unit-test-setup unit-test-body unit-test-cleanup
+check unit-test:: unit-test-@DO_TEST@
+
+unit-test-:
+	@echo "The rpc tests require PERL, Tcl, and runtest"
+	@echo "No tests run here"
+
+unit-test-ok:: unit-test-setup unit-test-body unit-test-cleanup
 
 unit-test-body::	
 	RPC_TEST_SRVTAB=/tmp/rpc_test_v5srvtab $(ENV_SETUP) \

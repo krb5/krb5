@@ -1,3 +1,11 @@
+Thu Oct 31 08:47:47 1996  Ezra Peisach  <epeisach@mit.edu>
+
+	* Makefile.in: Only run tests if required programs, libraries
+		available.  
+
+	* configure.in: Check for runtest, Perl, and tcl before making checks. 
+
+
 Thu Oct 24 17:20:11 1996  Barry Jaspan  <bjaspan@mit.edu>
 
 	* Makefile.in, rpc_test_clnt.c, rpc_test_svc.c, rpc_test.h:
