@@ -241,7 +241,7 @@
 	_krb5_cc_set_flags
 	_krb5_cc_get_type
     
-# Added for Mac OS X
+# Added for Mac OS X (used by command line apps)
     _krb5_read_password
     _krb5_prompter_posix
     _krb5_kuserok

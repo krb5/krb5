@@ -204,3 +204,7 @@
 	krb5_cc_remove_cred
 	krb5_cc_set_flags
 	krb5_cc_get_type
+
+# Added for Carbon compat in Mac OS X (used by cvs)
+    _krb5_kuserok
+    _krb5_aname_to_localname
