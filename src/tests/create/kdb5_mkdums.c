@@ -250,17 +250,20 @@ OLDDECLARG(char *, str_newprinc)
     krb5_keyblock key;
     krb5_data pwd, salt;
     krb5_principal newprinc;
+    char princ_name[4096];
 
-    if (retval = krb5_parse_name(str_newprinc, &newprinc)) {
-      com_err(progname, retval, "while parsing '%s'", str_newprinc);
+    sprintf(princ_name, "%s@%s", str_newprinc, cur_realm);
+    
+    if (retval = krb5_parse_name(princ_name, &newprinc)) {
+      com_err(progname, retval, "while parsing '%s'", princ_name);
       return;
     }
 
-    pwd.data = str_newprinc;  /* must be able to regenerate */
-    pwd.length = strlen(str_newprinc);
+    pwd.data = princ_name;  /* must be able to regenerate */
+    pwd.length = strlen(princ_name);
 
     if (retval = krb5_principal2salt(newprinc, &salt)) {
-	com_err(progname, retval, "while converting principal to salt for '%s'", str_newprinc);
+	com_err(progname, retval, "while converting principal to salt for '%s'", princ_name);
 	return;
     }
 
@@ -269,7 +272,7 @@ OLDDECLARG(char *, str_newprinc)
 				&pwd,
 				&salt);
     if (retval) {
-	com_err(progname, retval, "while converting password to key for '%s'", str_newprinc);
+	com_err(progname, retval, "while converting password to key for '%s'", princ_name);
 	return;
     }
 
@@ -277,7 +280,7 @@ OLDDECLARG(char *, str_newprinc)
 				  &key,
 				  &newentry.key);
     if (retval) {
-	com_err(progname, retval, "while encrypting key for '%s'", str_newprinc);
+	com_err(progname, retval, "while encrypting key for '%s'", princ_name);
 	return;
     }
 
@@ -312,10 +315,10 @@ OLDDECLARG(char *, str_newprinc)
 	free((char *)newentry.key.contents);
 	return;
     }
-    fprintf(stdout, "Added %s ...\n", str_newprinc);
+    fprintf(stdout, "Added %s ...\n", princ_name);
     free((char *)newentry.key.contents);
     if (retval) {
-	com_err(progname, retval, "while storing entry for '%s'\n", str_newprinc);
+	com_err(progname, retval, "while storing entry for '%s'\n", princ_name);
 	return;
     }
     if (one != 1)

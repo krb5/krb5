@@ -1,3 +1,10 @@
+Sun Oct 23 00:50:07 1994    (tytso@rsx-11)
+
+	* kdb5_mkdums.c (add_princ): Create principals with correct realm
+		name. 
+
+	* configure.in: Look for ndbm or dbm libraries
+
 Thu Oct  6 12:41:28 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* kdb5_mkdums.c (main, set_dbname_help): Allow master key password
