@@ -1,9 +1,0 @@
-Fri Jan 19 23:20:51 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
-
-	* krb5auth.c (k5_auth_send): krb5_get_credentials does not take
-		the same flags as kdc_options.
-
-Wed Sep 27 12:00:00 1995  John Rivlin <jrivlin@fusion.com>
-
-	* Directory created with NCSA Telnet Kerberos Authentication
-		module project.
