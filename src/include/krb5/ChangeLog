@@ -1,3 +1,10 @@
+Fri Feb  3 07:57:31 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+        * configure.in:
+        * wordsize.h: Don't use BITS16, BITS32, etc. anymore.  Use
+                autoconf's SIZEOF_INT and SIZEOF_LONG definitions to make
+                things work.
+
 Mon Jan 30 15:43:19 1995  Chris Provenzano  (proven@mit.edu)
 
 	* func-proto.h Added krb5_keytype arg to rb5_rdreq_key_proc.

@@ -28,49 +28,31 @@
 #ifndef KRB5_WORDSIZE__
 #define KRB5_WORDSIZE__
 
-#ifdef BITS16
-#define __OK
+typedef	unsigned char	krb5_octet;
+typedef	unsigned char	krb5_ui_1;
+
+#if (SIZEOF_INT == 2)
 typedef	int	krb5_int16;
-typedef	long	krb5_int32;
-
-typedef	unsigned char	krb5_octet;
-typedef	unsigned char	krb5_ui_1;
 typedef	unsigned int	krb5_ui_2;
+#elif (SIZEOF_SHORT == 2)
+typedef	short	krb5_int16;
+typedef	unsigned short	krb5_ui_2;
+#else
+  ?==error: undefined 16 bit type
+#endif
+
+#if (SIZEOF_INT == 4)
+typedef	int	krb5_int32;
+typedef	unsigned int	krb5_ui_4;
+#elif (SIZEOF_LONG == 4)
+typedef	long	krb5_int32;
 typedef	unsigned long	krb5_ui_4;
+#elif (SIZEOF_SHORT == 4)
+typedef	short	krb5_int32;
+typedef	unsigned short	krb5_ui_4;
+#else
+ ?== error: undefined 32 bit type
 #endif
-
-#ifdef BITS32
-#define __OK
-typedef	short	krb5_int16;
-typedef	int	krb5_int32;
-typedef	unsigned char	krb5_octet;
-typedef	unsigned char	krb5_ui_1;
-typedef	unsigned short	krb5_ui_2;
-typedef	unsigned int	krb5_ui_4;
-#endif
-
-#ifdef NOT_RIGHT_YET
-/*
- * Incorporated from the Sandia changes; but this can't be right; if
- * we're on a 64 bit machine, an int shouldn't be 32 bits!?!
- * [tytso:19920616.2224EDT]
- */
-#ifdef BITS64
-#define __OK
-typedef	short	krb5_int16;
-typedef	int	krb5_int32;
-typedef	unsigned char	krb5_octet;
-typedef	unsigned char	krb5_ui_1;
-typedef	unsigned short	krb5_ui_2;
-typedef	unsigned int	krb5_ui_4;
-#endif
-#endif	/* NOT RIGHT YET */
-
-#ifndef __OK
- ?==error:  must define word size!
-#endif /* __OK */
-
-#undef __OK
 
 #define KRB5_INT32_MAX	2147483647
 /* this strange form is necessary since - is a unary operator, not a sign
