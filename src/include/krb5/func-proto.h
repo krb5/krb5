@@ -306,6 +306,8 @@ char * INTERFACE krb5_cc_default_name
 krb5_error_code INTERFACE krb5_cc_default
 	PROTOTYPE((krb5_context,
 		   krb5_ccache *));
+unsigned int INTERFACE krb5_get_notification_message
+   PROTOTYPE((void));
 
 /* chk_trans.c */
 krb5_error_code INTERFACE krb5_check_transited_list
@@ -419,6 +421,9 @@ krb5_error_code INTERFACE krb5_timeofday
 		 /* get all the addresses of this host */
 krb5_error_code INTERFACE krb5_os_localaddr
 	PROTOTYPE((krb5_address ***));
+krb5_error_code INTERFACE krb5_get_default_realm
+	PROTOTYPE((krb5_context,
+		    char ** ));
 
 /* Only put things which don't have pointers to the narrow types in this
    section */

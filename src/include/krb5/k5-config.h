@@ -49,6 +49,8 @@
 #define NO_USERID
 #define NOFCHMOD
 #define NOCHMOD
+#define NO_PASSWORD
+#define WM_KERBEROS5_CHANGED "Kerberos5 Changed"
 
 #define HAS_ANSI_CONST                          /* For compiling w/o -Za */
 #define HAS_ANSI_VOLATILE
@@ -241,6 +243,9 @@ typedef unsigned char	u_char;
 #define INTERFACE_C
 #define FAR
 #define NEAR
+#ifndef O_BINARY
+#define O_BINARY 0
+#endif
 
 #ifndef HAS_LABS
 #define labs(x) abs(x)

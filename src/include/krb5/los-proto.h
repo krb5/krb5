@@ -81,9 +81,6 @@ krb5_error_code INTERFACE krb5_aname_to_localname
 		   krb5_const_principal,
 		   const int,
 		   char * ));
-krb5_error_code INTERFACE krb5_get_default_realm
-	PROTOTYPE((krb5_context,
-		    char ** ));
 krb5_error_code INTERFACE krb5_get_host_realm
 	PROTOTYPE((krb5_context,
 		   const char *,
