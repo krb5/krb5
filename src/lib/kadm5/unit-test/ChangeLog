@@ -1,3 +1,13 @@
+2000-02-08  Tom Yu  <tlyu@mit.edu>
+
+	* api.1/lock.exp: Since a "wait" directive to the command list of
+	the lock_test procedures does not wait for any synchronization,
+	change lock9 to acquire and release a lock before the "wait"
+	directive in order to avoid a race condition where lock9 spawns
+	the ./lock-test but the program has not opened the database prior
+	to lock9_1 acquiring a permanent lock.  This was causing
+	difficult-to-reproduce failures.
+
 2000-02-07  Tom Yu  <tlyu@mit.edu>
 
 	* lib/lib.t: Call kinit and kdestroy with -5 flag to accomodate

@@ -194,6 +194,8 @@ lock_test 8.1 [list \
 eval lock_test_continue $lock8
 
 set lock9 [lock_test_start 9 [list \
+	[list exclusive exclusive] \
+	[list release released] \
 	[list wait	""] \
 	[list exclusive	"database lock file missing while getting exclusive"] \
 	[list eof	0]]]
