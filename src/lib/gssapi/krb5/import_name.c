@@ -170,7 +170,7 @@ krb5_gss_import_name(minor_status, input_name_buffer,
 	 strncpy(tmp2, cp, length);
 	 tmp2[length] = 0;
 	 
-	 stringrep = tmp;
+	 stringrep = tmp2;
      } else {
 	 return(GSS_S_BAD_NAMETYPE);
       }

@@ -1,3 +1,9 @@
+Sun May 24 21:57:03 1998  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* import_name.c (krb5_gss_import_name): Fix typo which caused
+ 		import_name to incorrectly import names produced by
+ 		gss_export_name().
+
 1998-05-24  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* copy_ccache.c (gss_krb5_copy_ccache): Fix bugs in copy_ccache.c,
