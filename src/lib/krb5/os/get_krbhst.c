@@ -134,6 +134,7 @@ char ***hostlist;
     if (hlindex == 0) {
 	free((char *)rethlist);
 	rethlist = 0;
+	retval = KRB5_REALM_UNKNOWN;
     }
     *hostlist = rethlist;
 
