@@ -8,7 +8,6 @@
 	error message text into buffer.  Use goto rather than repeated
 	code.
 	(main): Use %lx for params.mask.  Make debug_level volatile.
-	Delete unused variables oldnames, rlen.
 
 	* srv_net.c (net_find_slave): Initialize "found".
 	(net_dispatch): Make "kret" volatile, so longjmp won't clobber
