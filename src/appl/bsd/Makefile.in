@@ -10,9 +10,9 @@ LOGINLIBS = @LOGINLIBS@
 LIBOBJS=@LIBOBJS@
 
 SRCS= krcp.c krlogin.c krsh.c kcmd.c forward.c logutil.c $(SETENVSRC) \
-	login.c
+	login.c krshd.c krlogind.c
 OBJS= krcp.o krlogin.o krsh.o kcmd.o forward.o logutil.o $(SETENVOBJ) \
-	login.o $(LIBOBJS)
+	login.o krshd.o krlogind.o $(LIBOBJS)
 
 RSH=	-DKRB_RLOGIN=\"$(PROGDIR)/rlogin\"
 
@@ -20,7 +20,8 @@ DEFINES= $(RSH) $(RPROGS) \
  	-DLOGIN_PROGRAM=\"$(SERVER_BINDIR)/login.krb5\" -DKPROGDIR=\"$(CLIENT_BINDIR)\"
 
 all:: rsh rcp rlogin krshd krlogind login.krb5
-clean:: rsh rcp rlogin krshd krlogind login.krb5
+
+clean:: 
 
 rsh: krsh.o kcmd.o forward.o $(SETENVOBJ)
 	$(CC) $(CFLAGS) -o rsh krsh.o kcmd.o forward.o $(SETENVOBJ) $(KLIB) $(LIBS)
