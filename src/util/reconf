@@ -1,6 +1,7 @@
 #!/bin/sh
 
 force=
+autoreconf=./util/autoconf/autoreconf
 
 usage="Usage: ./config.status [--recheck] [--version] [--help]"
 for option
@@ -15,4 +16,21 @@ do
   esac
 done
 
-./util/autoconf/autoreconf  -m util/autoconf -l . --verbose $force 
+
+if test ! -f $autoreconf ; then
+	if autoreconf --version | grep -q "version 2.[123456789]" && \
+	   autoconf --version  | grep -q "version 2.[123456789]" && \
+	   autoheader --version | grep -q "version 2.[123456789]" ; then
+		autoreconf=autoreconf
+		echo "Using" `autoconf --version` "found in your path..."
+	else
+		echo "Couldn't find autoconf 2.1 or higher in your path."
+		echo " "
+		echo "Please cd to util/autoconf, and type the commands"
+		echo "'configure' and then 'make'; then cd back to the top"
+		echo "of the source tree and re-run ./util/reconf"
+		exit 1
+	fi
+fi
+
+$autoreconf -m util/autoconf -l . --verbose $force 

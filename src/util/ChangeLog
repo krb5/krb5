@@ -1,3 +1,8 @@
+Fri Feb  3 16:50:07 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* reconf: If util/autoconf isn't built, try to use autoconf
+		utilities found in the user's path.
+
 Tue Nov  8 01:44:26 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* Makefile.in: Don't use $< in a non suffix rule context.
