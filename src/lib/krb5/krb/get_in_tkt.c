@@ -571,7 +571,8 @@ static char *conf_no[] = {
     0,
 };
 
-int krb5_conf_boolean(s)
+int
+_krb5_conf_boolean(s)
      char *s;
 {
     char **p;
@@ -651,18 +652,18 @@ goodbye:
 	return(ENOENT);
 
     if (!nameval[0]) {
-	free(nameval);
-	return(ENOENT);
+        retval = ENOENT;
+    } else {
+        *ret_value = malloc(strlen(nameval[0]) + 1);
+        if (!*ret_value)
+            retval = ENOMEM;
+        else
+            strcpy(*ret_value, nameval[0]);
     }
 
-    *ret_value = nameval[0];
+    profile_free_list(nameval);
 
-    for (cpp = &nameval[1]; *cpp; cpp++)
-	free(*cpp);
-
-    free(nameval);
-
-    return 0;
+    return retval;
 }
 
 /* not static so verify_init_creds() can call it */
@@ -683,7 +684,7 @@ krb5_appdefault_boolean(context, realm, option, ret_value)
     if (retval)
 	return(retval);
 
-    *ret_value = krb5_conf_boolean(string);
+    *ret_value = _krb5_conf_boolean(string);
     free(string);
 
     return(0);

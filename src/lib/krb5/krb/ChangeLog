@@ -1,3 +1,20 @@
+1999-08-05  Danilo Almeida  <dalmeida@mit.edu>
+
+	* init_ctx.c (get_profile_etype_list): Use profile_release_string
+	to free string allocated by profile_get_string.
+	(krb5_init_context): Use a real context for krb5_win_ccdll_load.
+
+	* get_in_tkt.c (krb5_appdefault_string):
+	* conv_princ.c (krb5_425_conv_principal): Use profile_free_list
+	to free values allocated by profile_get_values.
+
+1999-08-04  Danilo Almeida  <dalmeida@mit.edu>
+
+	* get_in_tkt.c (_krb5_conf_boolean, krb5_appdefault_boolean): 
+	Rename krb5_conf_boolean to _krb5_conf_boolean to denote that
+	it is not public so that folks outside the libraries won't
+	be tempted to use it.
+
 1999-08-03  Danilo Almeida  <dalmeida@mit.edu>
 
 	* get_creds.c (krb5_validate_or_renew_creds): Intialize out_creds

@@ -263,10 +263,6 @@ krb5_425_conv_principal(context, name, instance, realm, princ)
 not_service:	
      retval = krb5_build_principal(context, princ, strlen(realm), realm, name,
 				   instance, 0);
-     if (full_name) {
-	 for (cpp = full_name; *cpp; cpp++) 
-	     krb5_xfree(*cpp);
-	 krb5_xfree(full_name);
-     }
+     profile_free_list(full_name);
      return retval;
 }

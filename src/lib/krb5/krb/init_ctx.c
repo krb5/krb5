@@ -72,7 +72,6 @@ krb5_init_context(context)
 	krb5_init_ets(ctx);
 
 #if (defined(_MSDOS) || defined(_WIN32))
-	krb5_win_ccdll_load(context);	/* Load the krbcc32.dll if necessary */
 	/*
 	 * krb5_vercheck() is defined in win_glue.c, and this is
 	 * where we handle the timebomb and version server checks.
@@ -169,6 +168,9 @@ krb5_init_context(context)
 	ctx->fcc_default_format = tmp + 0x0500;
 	ctx->scc_default_format = tmp + 0x0500;
 
+#if (defined(_MSDOS) || defined(_WIN32))
+	krb5_win_ccdll_load(ctx);	/* Load the krbcc32.dll if necessary */
+#endif
 	*context = ctx;
 	return 0;
 
@@ -319,7 +321,7 @@ get_profile_etype_list(context, ktypes, profstr, ctx_count, ctx_list)
 	}
 
 	old_ktypes[j] = (krb5_enctype) 0;
-	free(retval);
+	profile_release_string(retval);
     }
 
     *ktypes = old_ktypes;
