@@ -174,8 +174,7 @@ typedef struct _krb5_tgs_req_enc_part {
     krb5_ticket *second_ticket;		/* second ticket */
 } krb5_tgs_req_enc_part;
 
-typedef struct _krb5_tgs_req {
-    krb5_ap_req *header;		/* AP-REQ */
+typedef struct _krb5_real_tgs_req {
     krb5_flags kdc_options;		/* requested options */
     krb5_timestamp from;		/* requested starttime */
     krb5_timestamp till;		/* requested endtime */
@@ -187,6 +186,13 @@ typedef struct _krb5_tgs_req {
     krb5_data enc_part;			/* (optional) encrypted part */
     krb5_tgs_req_enc_part *enc_part2;	/* ptr to decrypted version, if
 					   available */
+} krb5_real_tgs_req;
+
+typedef struct _krb5_tgs_req {
+    krb5_data header;			/* encoded AP-REQ */
+    krb5_data tgs_request;		/* encoded krb5_real_tgs_req */
+    krb5_ap_req *header2;		/* pointer to decoded, if available */
+    krb5_real_tgs_req *tgs_request2;	/* pointer to decoded, if available */
 } krb5_tgs_req;
 
 typedef struct _krb5_safe {
