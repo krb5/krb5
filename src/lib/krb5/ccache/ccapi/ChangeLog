@@ -1,3 +1,7 @@
+2003-03-06  Alexandra Ellwood <lxs@mit.edu>
+
+    * stdcc.h, stdcc_util.h: Removed Mac header goober.
+
 2003-01-07  Ken Raeburn  <raeburn@mit.edu>
 
 	* winccld.c (krb5_fcc_ops): Updated decl.

@@ -1,8 +1,8 @@
 #include "krb5.h"
 #include "k5-int.h"
 	
-#if TARGET_OS_MAC
-#include <Kerberos/CredentialsCache2.h>
+#ifdef USE_CCAPI
+#include <CredentialsCache2.h>
 #endif
 
 #if defined(_WIN32)

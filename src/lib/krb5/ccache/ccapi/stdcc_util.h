@@ -3,8 +3,8 @@
  * Frank Dabek, July 1998
  */
 
-#if TARGET_OS_MAC
-#include <Kerberos/CredentialsCache2.h>
+#if USE_CCAPI
+#include <CredentialsCache2.h>
 #endif
 
 #if defined(_WIN32)
