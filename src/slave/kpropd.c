@@ -108,8 +108,7 @@ static void usage()
 	fprintf(stderr,
 		"\nUsage: %s [-r realm] [-s srvtab] [-dS] [-f slave_file]\n",
 		progname);
-	fprintf(stderr, "\t[-F kerberos_db_file ] [-p kdb5_edit_pathname]\n\n",
-		progname);
+	fprintf(stderr, "\t[-F kerberos_db_file ] [-p kdb5_edit_pathname]\n");
 	exit(1);
 }
 
