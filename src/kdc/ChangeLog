@@ -1,3 +1,7 @@
+2002-06-24  Sam Hartman  <hartmans@mit.edu>
+
+	* kdc_preauth.c (get_etype_info): We get KRB5_KDB_NO_MATCHING_KEY not ENOENT; per 5.27 of kdb_xdr.c.
+
 2002-04-05  Ken Raeburn  <raeburn@mit.edu>
 
 	* do_as_req.c (process_as_req): Call krb5_c_valid_enctype instead
