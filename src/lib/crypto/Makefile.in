@@ -14,6 +14,7 @@ OBJS=	cryptoconf.$(OBJEXT) \
 	decrypt_data.$(OBJEXT) \
 	des_crc.$(OBJEXT) \
 	des_md5.$(OBJEXT) \
+	des3_md5.$(OBJEXT) \
 	raw_des.$(OBJEXT)
 
 SRCS=	$(srcdir)/cryptoconf.c \
@@ -21,6 +22,7 @@ SRCS=	$(srcdir)/cryptoconf.c \
 	$(srcdir)/decrypt_data.c \
 	$(srcdir)/des_crc.c \
 	$(srcdir)/des_md5.c \
+	$(srcdir)/des3_md5.c \
 	$(srcdir)/raw_des.c 
 
 LIB_SUBDIRS= des md4 md5 crc32 os .
