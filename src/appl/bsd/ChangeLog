@@ -1,3 +1,8 @@
+2000-02-28  Ken Raeburn  <raeburn@mit.edu>
+
+	* krlogin.c (main): Don't output debugging messages if debugging
+	wasn't turned on.
+
 2000-02-10  Ken Raeburn  <raeburn@mit.edu>
 
 	* login.c (main): Only destroy xtra_creds if non-null.  (Patch

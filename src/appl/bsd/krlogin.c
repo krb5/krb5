@@ -376,7 +376,7 @@ main(argc, argv)
     MSG_DAT v4_msg_data;
 #endif
 #endif
-    int debug_port = 0;
+    int port, debug_port = 0;
    
     memset(&defaultservent, 0, sizeof(struct servent));
     if (strrchr(argv[0], '/'))
@@ -521,7 +521,9 @@ main(argc, argv)
 #endif
 
 
-    if(debug_port == 0) {
+    if (debug_port)
+      port = debug_port;
+    else {
 #ifdef KERBEROS
     /*
      * if there is an entry in /etc/services for Kerberos login,
@@ -544,7 +546,7 @@ main(argc, argv)
       }
 #endif /* KERBEROS */
 
-      debug_port = sp->s_port;
+      port = sp->s_port;
     }
 
 
@@ -621,7 +623,7 @@ main(argc, argv)
     if (Fflag)
       authopts |= OPTS_FORWARDABLE_CREDS;
 
-    status = kcmd(&sock, &host, debug_port,
+    status = kcmd(&sock, &host, port,
 		  null_local_username ? "" : pwd->pw_name,
 		  name ? name : pwd->pw_name, term,
 		  0, "host", krb_realm,
@@ -635,7 +637,7 @@ main(argc, argv)
     if (status) {
 #ifdef KRB5_KRB4_COMPAT
 	fprintf(stderr, "Trying krb4 rlogin...\n");
-	status = k4cmd(&sock, &host, debug_port,
+	status = k4cmd(&sock, &host, port,
 		       null_local_username ? "" : pwd->pw_name,
 		       name ? name : pwd->pw_name, term,
 		       0, &v4_ticket, "rcmd", krb_realm,
@@ -666,7 +668,7 @@ main(argc, argv)
     rem = sock;
     
 #else
-    rem = rcmd(&host, debug_port,
+    rem = rcmd(&host, port,
 	       null_local_username ? "" : pwd->pw_name,
 	       name ? name : pwd->pw_name, term, 0);
 #endif /* KERBEROS */
