@@ -49,6 +49,7 @@
 #include "k5-int.h"
 #include "gssapiP_krb5.h"
 #include <memory.h>
+#include <assert.h>
 
 /*
  * $Id$
@@ -206,11 +207,10 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
    krb5_ui_4 gss_flags = 0;
    int decode_req_message = 0;
    krb5_gss_ctx_id_rec *ctx = 0;
-#if 0
    krb5_enctype enctype;
-#endif
    krb5_timestamp now;
    gss_buffer_desc token;
+   int err;
    krb5_auth_context auth_context = NULL;
    krb5_ticket * ticket = NULL;
    int option_id;
@@ -770,101 +770,8 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
        ctx->established = 1;
 
        if (ctx->gsskrb5_version == 2000) {
-	   krb5_ui_4 tok_flags;
-
-	   tok_flags =
-	       (ctx->gss_flags & GSS_C_DELEG_FLAG)?KG2_RESP_FLAG_DELEG_OK:0;
-
-	   cksumdata.length = 8 + 4*ctx->nctypes + 4;
-
-	   if ((cksumdata.data = (char *) malloc(cksumdata.length)) == NULL) {
-	       code = ENOMEM;
-	       major_status = GSS_S_FAILURE;
-	       goto fail;
-	   }
-
-	   /* construct the token fields */
-
-	   ptr = cksumdata.data;
-
-	   ptr[0] = (KG2_TOK_RESPONSE >> 8) & 0xff;
-	   ptr[1] = KG2_TOK_RESPONSE & 0xff;
-
-	   ptr[2] = (tok_flags >> 24) & 0xff;
-	   ptr[3] = (tok_flags >> 16) & 0xff;
-	   ptr[4] = (tok_flags >> 8) & 0xff;
-	   ptr[5] = tok_flags & 0xff;
-
-	   ptr[6] = (ctx->nctypes >> 8) & 0xff;
-	   ptr[7] = ctx->nctypes & 0xff;
-
-	   ptr += 8;
-
-	   for (i=0; i<ctx->nctypes; i++) {
-	       ptr[i] = (ctx->ctypes[i] >> 24) & 0xff;
-	       ptr[i+1] = (ctx->ctypes[i] >> 16) & 0xff;
-	       ptr[i+2] = (ctx->ctypes[i] >> 8) & 0xff;
-	       ptr[i+3] = ctx->ctypes[i] & 0xff;
-
-	       ptr += 4;
-	   }
-
-	   memset(ptr, 0, 4);
-
-	   /* make the MIC token */
-
-	   {
-	       gss_buffer_desc text, token;
-
-	       text.length = cksumdata.length;
-	       text.value = cksumdata.data;
-
-	       /* ctx->seq_send must be set before this call */
-
-	       if (GSS_ERROR(major_status =
-			     krb5_gss_get_mic(&code, ctx,
-					      GSS_C_QOP_DEFAULT,
-					      &text, &token)))
-		   goto fail;
-
-	       mic.length = token.length;
-	       mic.data = token.value;
-	   }
-
-	   token.length = g_token_size((gss_OID) mech_used,
-				       (cksumdata.length-2)+4+ap_rep.length+
-				       mic.length);
-
-	   if ((token.value = (unsigned char *) xmalloc(token.length))
-	       == NULL) {
-	       code = ENOMEM;
-	       major_status = GSS_S_FAILURE;
-	       goto fail;
-	   }
-	   ptr = token.value;
-	   g_make_token_header((gss_OID) mech_used,
-			       (cksumdata.length-2)+4+ap_rep.length+mic.length,
-			       &ptr, KG2_TOK_RESPONSE);
-
-	   memcpy(ptr, cksumdata.data+2, cksumdata.length-2);
-	   ptr += cksumdata.length-2;
-
-	   ptr[0] = (ap_rep.length >> 8) & 0xff;
-	   ptr[1] = ap_rep.length & 0xff;
-	   memcpy(ptr+2, ap_rep.data, ap_rep.length);
-
-	   ptr += (2+ap_rep.length);
-
-	   ptr[0] = (mic.length >> 8) & 0xff;
-	   ptr[1] = mic.length & 0xff;
-	   memcpy(ptr+2, mic.data, mic.length);
-
-	   ptr += (2+mic.length);
-
-	   free(cksumdata.data);
-	   cksumdata.data = 0;
-
-	   /* gss krb5 v2 */
+	   int krb5_mech2_supported = 0;
+	   assert(krb5_mech2_supported);
        } else {
 	   /* gss krb5 v1 */
 
