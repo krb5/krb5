@@ -59,6 +59,8 @@ typedef struct __kdc_realm_data {
      */
     krb5_deltat		realm_maxlife;	/* Maximum ticket life for realm    */
     krb5_deltat		realm_maxrlife;	/* Maximum renewable life for realm */
+    void		*realm_kstypes;	/* Key/Salts supported for realm    */
+    krb5_int32		realm_nkstypes;	/* Number of key/salts		    */
 } kdc_realm_t;
 
 extern kdc_realm_t	**kdc_realmlist;
