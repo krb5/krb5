@@ -6,9 +6,6 @@ OBJS= gss-client.o gss-misc.o gss-server.o
 
 all:: gss-server gss-client
 
-LOCAL_LIBRARIES = -lgssapi_krb5
-DEPLOCAL_LIBRARIES = $(TOPLIBD)/gssapi/libgssapi_krb5.a
-
 gss-server: gss-server.o gss-misc.o $(DEPLIBS)
 	$(LD) $(LDFLAGS) $(LDARGS) -o gss-server gss-server.o gss-misc.o $(LIBS)
 
