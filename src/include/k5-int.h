@@ -955,6 +955,15 @@ krb5_error_code krb5_make_fulladdr
 	       krb5_address *,
 	       krb5_address *));
 
+/* in here to deal with stuff from lib/crypto/os */
+
+krb5_error_code krb5_crypto_os_localaddr
+    KRB5_PROTOTYPE((krb5_address ***));
+
+krb5_error_code krb5_crypto_us_timeofday
+    KRB5_PROTOTYPE((krb5_int32 *,
+		    krb5_int32 *));
+
 time_t gmt_mktime KRB5_PROTOTYPE((struct tm *));
 
 #endif /* KRB5_LIBOS_PROTO__ */

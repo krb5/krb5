@@ -1,3 +1,7 @@
+Fri Aug  4 23:04:06 1995  Tom Yu  <tlyu@dragons-lair.MIT.EDU>
+
+	* k5-int.h: Add prototypes for krb5_crypto_os_localaddr and
+		krb5_crypto_us_timeofday
 
 Thu Jul 27 15:04:37 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* k5-int.h - Inline or delete header files included here.  These were:
