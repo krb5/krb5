@@ -4,6 +4,8 @@ VPATH = @srcdir@
 
 ARCHIVE = @ARCHIVE@
 ARADD = @ARADD@
+CC = @CC@
+CCOPTS = @CCOPTS@
 
 SUBDIRS = @SUBDIRS@
 

@@ -1,6 +1,8 @@
 BUILDTOP=@BUILDTOP@
 srcdir = @srcdir@
 VPATH = @srcdir@
+CC = @CC@
+CCOPTS = @CCOPTS@
 
 all::
 
