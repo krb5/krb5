@@ -46,3 +46,4 @@
 
 int krb5_seteuid(int);
 int krb5_setedid(int);
+int krb5_setegid(int);
