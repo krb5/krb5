@@ -144,6 +144,10 @@ static u_long const crc_table[256] = {
     };
 
 krb5_error_code API
+crc32_sum_func NPROTOTYPE((krb5_pointer in, size_t in_length,
+    krb5_pointer seed, size_t seed_length, krb5_checksum *outcksum));
+
+krb5_error_code API
 crc32_sum_func(in, in_length, seed, seed_length, outcksum)
 krb5_pointer in;
 size_t in_length;
@@ -176,7 +180,7 @@ krb5_checksum FAR *outcksum;
 
 krb5_checksum_entry crc32_cksumtable_entry = {
     0,
-    (SUM_FUNC) crc32_sum_func,
+    crc32_sum_func,
     CRC32_CKSUM_LENGTH, /* CRC-32 is 4 octets */
     0,					/* not collision proof */
     0,					/* doesn't use key */

@@ -1,3 +1,8 @@
+Fri Feb 20 11:08:00 1995 Keith Vetter (keithv@fusion.com)
+
+	* crc.c: added function prototype and removed a function
+	   pointer cast.
+
 Mon Feb 6 19:24:13 1995 Keith Vetter (keithv@fusion.com)
 
         * Makefile.in: made to work under Windows
