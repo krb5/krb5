@@ -97,8 +97,8 @@ krb5_principal master_princ;
 krb5_encrypt_block master_encblock;
 
 krb5_data tgt_princ_entries[] = {
-	{0, 0},
-	{sizeof(TGTNAME)-1, TGTNAME} };
+	{sizeof(TGTNAME)-1, TGTNAME},
+	{0, 0} };
 
 krb5_data db_creator_entries[] = {
 	{sizeof("db_creation")-1, "db_creation"} };
@@ -115,7 +115,7 @@ krb5_principal_data tgt_princ = {
 krb5_principal_data db_create_princ = {
 	{0, 0},					/* krb5_data realm */
 	db_creator_entries,			/* krb5_data *data */
-	2,					/* int length */
+	1,					/* int length */
 	KRB5_NT_SRV_INST			/* int type */
 };
 
@@ -215,10 +215,12 @@ char *argv[];
 	exit(1);
     }
 
-    krb5_princ_set_realm_data(&tgt_princ, realm);
-    krb5_princ_set_realm_length(&tgt_princ, strlen(realm));
     krb5_princ_set_realm_data(&db_create_princ, realm);
     krb5_princ_set_realm_length(&db_create_princ, strlen(realm));
+    krb5_princ_set_realm_data(&tgt_princ, realm);
+    krb5_princ_set_realm_length(&tgt_princ, strlen(realm));
+    krb5_princ_component(&tgt_princ,1)->data = realm;
+    krb5_princ_component(&tgt_princ,1)->length = strlen(realm);
 
     printf("Initializing database '%s' for realm '%s',\n\
 master key name '%s'\n",
@@ -230,7 +232,7 @@ master key name '%s'\n",
 
     /* TRUE here means read the keyboard, and do it twice */
     if (retval = krb5_db_fetch_mkey(master_princ, &master_encblock, TRUE, TRUE,
-				    &master_keyblock)) {
+				    0, &master_keyblock)) {
 	com_err(argv[0], retval, "while reading master key");
 	exit(1);
     }
