@@ -42,11 +42,6 @@ krb5_error_code krb5_get_cred_via_tgt
 	       const krb5_enctype,
 	       const krb5_cksumtype,
 	       krb5_creds * ));
-krb5_error_code krb5_walk_realm_tree
-    PROTOTYPE((const krb5_data *,
-	       const krb5_data *,
-	       krb5_principal **));
-
 /* and back to normal... */
 #include <krb5/narrow.h>
 
