@@ -1,5 +1,9 @@
 Mon Mar 27 14:16:39 1995  John Gilmore  (gnu at toad.com)
 
+	* full_ipadr.c, gen_rname.c, port2ip.c, read_msg.c, write_msg.c:
+	Remove explicit includes of socket files.
+	* locate_kdc.c:  Remove <sys/types.h> and "os-proto.h".
+
 	* macsock.c (connect, send, recv):  Add for K5 compatability.
 	(getmyipaddr):  Add for use in K5.
 

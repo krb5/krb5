@@ -30,9 +30,6 @@
 #ifdef KRB5_USE_INET
 
 #include "os-proto.h"
-#ifndef _WINSOCKAPI_
-#include <netinet/in.h>
-#endif
 
 krb5_error_code INTERFACE
 krb5_make_full_ipaddr(context, adr, port, outaddr)

@@ -29,9 +29,6 @@
 
 #ifdef KRB5_USE_INET
 #include "os-proto.h"
-#ifndef _WINSOCKAPI_
-#include <netinet/in.h>
-#endif
 
 krb5_error_code INTERFACE
 krb5_unpack_full_ipaddr(context, inaddr, adr, port)

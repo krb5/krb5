@@ -27,9 +27,6 @@
 #define NEED_SOCKETS
 #include "k5-int.h"
 #include <errno.h>
-#ifndef _WINSOCKAPI_
-#include <netinet/in.h>
-#endif
 
 krb5_error_code INTERFACE
 krb5_read_message(context, fdp, inbuf)
@@ -65,4 +62,3 @@ krb5_read_message(context, fdp, inbuf)
 	inbuf->data = buf;
 	return(0);
 }
-

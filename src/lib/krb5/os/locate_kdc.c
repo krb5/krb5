@@ -27,8 +27,6 @@
 #define NEED_SOCKETS
 #include "k5-int.h"
 #include <stdio.h>
-#include <sys/types.h>
-#include "os-proto.h"
 
 #ifdef KRB5_USE_INET
 extern char *krb5_kdc_udp_portname;
