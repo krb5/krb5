@@ -23,10 +23,9 @@ Do-first:
 
 Things-to-keep:
 
-LOG
-build
 doc
 src
+README
 
 Things-to-lose:
 
