@@ -1,3 +1,7 @@
+Thu May 25 22:16:02 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* configure.in, Makefile.in: Add support for shared libraries.
+
 Fri May 12 02:46:13 1995  Mark Eichin  <eichin@cygnus.com>
 
 	* key_sched.c (mit_des_key_sched): *always* fill in the schedule,

@@ -7,10 +7,13 @@ AC_PROG_ARCHIVE
 AC_PROG_ARCHIVE_ADD
 AC_PROG_RANLIB
 AC_PROG_INSTALL
+V5_SHARED_LIB_OBJS
+SubdirLibraryRule([${OBJS}])
 MAKE_SUBDIRS("making",all)
 MAKE_SUBDIRS("cleaning",clean)
 MAKE_SUBDIRS("checking",check)
 AppendRule([all:: libcrypto.a])
+V5_MAKE_SHARED_LIB(libcrypto)
 KRB_INCLUDE
 WITH_KRB5ROOT
 V5_AC_OUTPUT_MAKEFILE

@@ -6,6 +6,10 @@ CFLAGS = $(CCOPTS) $(DEFS) -I$(srcdir)/crc32 -I$(srcdir)/des -I$(srcdir)/md4 -I$
 
 TST=if test -n "`cat DONE`" ; then
 
+.c.o:
+	$(CC) $(CFLAGS) -c $(srcdir)/$*.c
+@SHARED_RULE@
+
 OBJS=	cryptoconf.$(OBJEXT) \
 	des_crc.$(OBJEXT) \
 	des_md5.$(OBJEXT) \
@@ -16,21 +20,34 @@ SRCS=	$(srcdir)/cryptoconf.c \
 	$(srcdir)/des_md5.c \
 	$(srcdir)/raw_des.c 
 
+LIB_SUBDIRS= des md4 md5 crc32 os .
+LIBUPDATE= $(BUILDTOP)/util/libupdate
+LIBDONE= ./des/DONE ./md4/DONE ./md5/DONE ./crc32/DONE ./os/DONE ./DONE
+
 all:: all-$(WHAT)
 
-all-unix::
+all-unix:: shared
+
+shared: 
+	mkdir shared
+
 # FIXME, need to build the library too...
 all-mac:: $(OBJS)
 
 all-windows:: $(OBJS)
 
-libcrypto.a: ./des/DONE ./md4/DONE ./md5/DONE ./crc32/DONE ./os/DONE $(OBJS)
-	(cd des; $(TST) $(ARADD) ../$@ `cat DONE` ; fi)
-	(cd crc32; $(TST) $(ARADD) ../$@ `cat DONE` ; fi)
-	(cd md4; $(TST) $(ARADD) ../$@ `cat DONE` ; fi)
-	(cd md5; $(TST) $(ARADD) ../$@ `cat DONE` ; fi)
-	(cd os; $(TST) $(ARADD) ../$@ `cat DONE` ; fi)
-	$(ARADD) $@ $(OBJS)
+libcrypto.a: $(LIBDONE)
+	if test -f $@ ; then \
+		for i in $(LIB_SUBDIRS) ; \
+		do \
+			$(LIBUPDATE) $@ $$i/DONE $$i ; \
+		done ; \
+	else \
+		for i in $(LIB_SUBDIRS) ; \
+		do \
+			$(LIBUPDATE) --force $@ $$i/DONE $$i ; \
+		done ; \
+	fi
 	$(RANLIB) $@
 
 libcrypto.lib:
@@ -44,6 +61,7 @@ clean:: clean-$(WHAT)
 
 clean-unix::
 	$(RM) libcrypto.a
+	$(RM) shared/*
 
 clean-windows::
 	$(RM) crypto.lib crypto.bak

@@ -15,6 +15,10 @@ OTHERSRCS=$(srcdir)/f_cbc.c $(srcdir)/f_cksum.c \
 
 OTHEROBJS=f_cbc.$(OBJEXT) f_cksum.$(OBJEXT) f_sched.$(OBJEXT) f_ecb.$(OBJEXT) f_parity.$(OBJEXT) f_tables.$(OBJEXT)
 
+.c.o:
+	$(CC) $(CFLAGS) -c $(srcdir)/$*.c
+@SHARED_RULE@
+
 OBJS=	cbc_cksum.$(OBJEXT)	\
 	cs_entry.$(OBJEXT)	\
 	finish_key.$(OBJEXT)	\
@@ -41,7 +45,10 @@ SRCS=	$(srcdir)/cs_entry.c	\
 	$(srcdir)/weak_key.c	\
 	$(OTHERSRCS)
 
-all:: $(OBJS)
+all:: shared $(OBJS)
+
+shared:
+	mkdir shared
 
 includes:: depend
 
@@ -71,3 +78,4 @@ check-windows::
 
 clean::
 	$(RM) destest$(EXEEXT) verify$(EXEEXT) destest.$(OBJEXT) verify.$(OBJEXT)
+	$(RM) shared/*

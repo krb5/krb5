@@ -4,11 +4,18 @@ CFLAGS = $(CCOPTS) $(DEFS)
 ##DOSLIBNAME=..\crypto.lib
 ##DOS!include $(BUILDTOP)\config\windows.in
 
+.c.o:
+	$(CC) $(CFLAGS) -c $(srcdir)/$*.c
+@SHARED_RULE@
+
 OBJS=	crc.$(OBJEXT)
 
 SRCS=	$(srcdir)/crc.c $(srcdir)/crctest.c
 
-all:: $(OBJS)
+all:: shared $(OBJS)
+
+shared:
+	mkdir shared
 
 crctest: crctest.$(OBJEXT) $(OBJS)
 	$(RM) crctest
@@ -22,3 +29,4 @@ check:: crctest$(EXEEXT)
 
 clean::
 	$(RM) crctest$(EXEEXT) crctest.$(OBJEXT)
+	$(RM) shared/*

@@ -4,11 +4,18 @@ CFLAGS = $(CCOPTS) $(DEFS) -I$(srcdir)/../des
 ##DOSLIBNAME=..\crypto.lib
 ##DOS!include $(BUILDTOP)\config\windows.in
 
+.c.o:
+	$(CC) $(CFLAGS) -c $(srcdir)/$*.c
+@SHARED_RULE@
+
 OBJS=	md5.$(OBJEXT) md5glue.$(OBJEXT) md5crypto.$(OBJEXT)
 
 SRCS=	$(srcdir)/md5.c $(srcdir)/md5glue.c $(srcdir)/md5crypto.c
 
-all:: $(OBJS) 
+all:: shared $(OBJS) 
+
+shared:
+	mkdir shared
 
 t_mddriver: t_mddriver.o md5.o
 	$(CC) $(CFLAGS) $(LDFLAGS) -o t_mddriver t_mddriver.o md5.o
@@ -21,3 +28,4 @@ check:: t_mddriver$(EXEEXT)
 
 clean::
 	$(RM) t_mddriver$(EXEEXT) t_mddriver.$(OBJEXT)
+	$(RM) shared/*
