@@ -27,21 +27,46 @@
 #ifndef KRB5_GENERAL__
 #define KRB5_GENERAL__
 
-#ifdef _MSDOS
+#if (defined(_MSDOS) || defined(_WIN32))
 
+#if defined(_MSDOS)   /* Win 16 vs. Win32 */
+
+	/* Windows 16 specific */
 #define SIZEOF_INT      2
 #define SIZEOF_LONG     4
+
+#ifndef INTERFACE
+#define INTERFACE   __far __export __pascal
+#define INTERFACE_C __far __export __cdecl
+#endif /* !INTERFACE */
+
+#define FAR     _far
+#define NEAR    _near
+
+#else  	/* Windows 32 specific */
+
+#define SIZEOF_INT      4
+#define SIZEOF_LONG     4
+
+/* 
+ * If the interface functions haven't been defined, then we 
+ * must be *importing* them as a consumer, not *exporting* them 
+ * as a DLL function.
+ */
+#ifndef INTERFACE
+#define INTERFACE   __declspec(__dllimport) __stdcall
+#define INTERFACE_C __declspec(__dllimport) __cdecl
+#endif
+
+#define FAR
+#define NEAR
+
+#endif /* Win 16 vs Win32 */
 
 #ifndef KRB5_CONFIG__
 #define KRB5_PROVIDE_PROTOTYPES
 #define HAS_VOID_TYPE
 #define HAVE_STDARG_H
-#ifndef INTERFACE
-#define INTERFACE   __far __export __pascal
-#define INTERFACE_C __far __export __cdecl
-#endif /* !INTERFACE */
-#define FAR     _far
-#define NEAR    _near
 #ifndef _SIZE_T_DEFINED
 typedef unsigned int size_t;
 #define _SIZE_T_DEFINED

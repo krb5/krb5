@@ -54,21 +54,61 @@
 #ifndef KRB5_CONFIG__
 #define KRB5_CONFIG__
 
-#ifdef _MSDOS
+#if (defined(_MSDOS) || defined(_WIN32))
 /* 
  * Machine-type definitions: PC Clone 386 running Microloss Windows
  */
 
+#if defined(_MSDOS)
+	/* Windows 16 specific */
+#define BITS16
+#define SIZEOF_INT      2
+#define SIZEOF_SHORT    2
+#define SIZEOF_LONG     4
+
+#ifndef INTERFACE
+#define INTERFACE   __far __export __pascal
+#define INTERFACE_C __far __export __cdecl
+#endif
+
+/*
+ * The following defines are needed to make <windows.h> work
+ * in stdc mode (/Za flag). Winsock.h needs <windows.h>.
+ */
+#define FAR     _far
+#define NEAR    _near
+#define _far    __far
+#define _near   __near
+#define _pascal __pascal
+#define _cdecl  __cdecl
+#define _huge   __huge
+
+#ifdef NEED_WINDOWS
+#include <windows.h>
+#endif
+	
+#else 
+	/* Windows 32 specific */
+#define SIZEOF_INT      4
+#define SIZEOF_SHORT    2
+#define SIZEOF_LONG     4
+
+#ifndef INTERFACE
+#define INTERFACE   __declspec(__dllexport) __stdcall
+#define INTERFACE_C __declspec(__dllexport) __cdecl
+#endif
+
+#define FAR
+#define NEAR
+
+#endif
+	
 /* Kerberos Windows initialization file */
 #define KERBEROS_INI    "kerberos.ini"
 #define INI_FILES       "Files"
 #define INI_KRB_CCACHE  "krb5cc"       /* Location of the ccache */
 #define INI_KRB5_CONF   "krb5.ini"		/* Location of krb5.conf file */
 
-#define BITS16
-#define SIZEOF_INT      2
-#define SIZEOF_SHORT    2
-#define SIZEOF_LONG     4
 #define MAXHOSTNAMELEN  512
 #define MAXPATHLEN      256            /* Also for Windows temp files */
 
@@ -116,26 +156,6 @@ typedef unsigned short	u_short;
 typedef unsigned char	u_char;
 #endif /* KRB5_SYSTYPES__ */
 
-#ifndef INTERFACE
-#define INTERFACE   __far __export __pascal
-#define INTERFACE_C __far __export __cdecl
-#endif
-
-/*
- * The following defines are needed to make <windows.h> work
- * in stdc mode (/Za flag). Winsock.h needs <windows.h>.
- */
-#define FAR     _far
-#define NEAR    _near
-#define _far    __far
-#define _near   __near
-#define _pascal __pascal
-#define _cdecl  __cdecl
-#define _huge   __huge
-
-#ifdef NEED_WINDOWS
-#include <windows.h>
-#endif
 
 #ifdef NEED_LOWLEVEL_IO
 /* Ugly. Microsoft, in stdc mode, doesn't support the low-level i/o

@@ -1,3 +1,8 @@
+Fri Jun  7 18:13:33 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* krb5.hin: 
+	* k5-int.h: Beginnings of Win-32 support.
+
 Thu Jun  6 14:14:28 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* krb5.hin (krb5_cc_get_type): Remove extraneous '*' from definition.
