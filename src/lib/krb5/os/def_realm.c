@@ -65,18 +65,34 @@ krb5_get_default_realm(context, lrealm)
 	    return KV5M_CONTEXT;
 
     if (!context->default_realm) {
-	    /*
-	     * XXX should try to figure out a reasonable default based
-	     * on the host's DNS domain.
-	     */
-	    context->default_realm = 0;
-	    if (context->profile == 0)
-		    return KRB5_CONFIG_CANTOPEN;
-	    retval = profile_get_string(context->profile, "libdefaults",
-					"default_realm", 0, 0,
-					&context->default_realm);
+        /*
+         * XXX should try to figure out a reasonable default based
+         * on the host's DNS domain.
+         */
+        context->default_realm = 0;
+        if (context->profile == 0)
+            return KRB5_CONFIG_CANTOPEN;
+        retval = profile_get_string(context->profile, "libdefaults",
+                                     "default_realm", 0, 0,
+                                     &context->default_realm);
 #ifdef KRB5_DNS_LOOKUP
-	    if (context->default_realm == 0) {
+        if (context->default_realm == 0) {
+            int use_dns=0;
+            char * string=NULL;
+            krb5_error_code retval2;
+
+            retval2 = profile_get_string(context->profile, "libdefaults",
+                                          "dns_fallback", 0, 
+                                          context->profile_in_memory?"1":"0",
+                                          &string);
+            if ( retval2 )
+                return(retval2);
+
+            if ( string ) {
+                use_dns = krb5_conf_boolean(string);
+                free(string);
+            }
+            if ( use_dns ) {
 		/*
 		 * Since this didn't appear in our config file, try looking
 		 * it up via DNS.  Look for a TXT records of the form:
@@ -111,22 +127,23 @@ krb5_get_default_realm(context, lrealm)
 		if (retval) {
 		    return(KRB5_CONFIG_NODEFREALM);
 		}
-	    }
+            }
+        }
 #endif /* KRB5_DNS_LOOKUP */
     }
 
     if (context->default_realm == 0)
 	return(KRB5_CONFIG_NODEFREALM);
     if (context->default_realm[0] == 0) {
-	    free (context->default_realm);
-	    context->default_realm = 0;
-	    return KRB5_CONFIG_NODEFREALM;
+        free (context->default_realm);
+        context->default_realm = 0;
+        return KRB5_CONFIG_NODEFREALM;
     }
 
     realm = context->default_realm;
     
     if (!(*lrealm = cp = malloc((unsigned int) strlen(realm) + 1)))
-	    return ENOMEM;
+        return ENOMEM;
     strcpy(cp, realm);
     return(0);
 }
