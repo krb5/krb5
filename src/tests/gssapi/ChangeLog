@@ -1,3 +1,7 @@
+2000-07-28  Ezra Peisach  <epeisach@mit.edu>
+
+	* t_imp_name.c: Profide full prototypes for internal functions.
+
 2000-07-02  Ezra Peisach  <epeisach@mit.edu>
 
 	* t_imp_name.c: Define GSSAPI_V2 for proper variable types.
