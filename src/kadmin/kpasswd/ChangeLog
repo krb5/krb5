@@ -1,3 +1,8 @@
+Fri Nov 18 01:08:39 1994  Mark Eichin  <eichin@cygnus.com>
+
+	* configure.in: use new macros KRB5_UTPID, KRB5_UTTYPE, and
+	KRB5_UTHOST (from epeisach).
+
 Wed Oct 19 12:18:26 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* Makefile.in: Look for man page in the source directory.
