@@ -1,3 +1,9 @@
+Mon Feb  1 19:42:45 1999  Tom Yu  <tlyu@mit.edu>
+
+	* et_c.awk: Fix to not depend on CPP symbol "unix".
+
+	* et_h.awk: Fix to not depend on CPP symbol "unix".
+
 1998-12-01  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* com_err.h, error_table.h, error_message.c: Use "#if
