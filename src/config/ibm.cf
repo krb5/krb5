@@ -7,6 +7,7 @@
  * SET VERSION NUMBERS BEFORE MAKING MAKEFILES
  */
 
+#ifdef RtArchitecture
 #define OSName            AOS 4.3
 #define	OS_BSD            1
 /* #define OS_BSD_TAHOE */
@@ -24,34 +25,44 @@
 #undef HasNdbm
 #define HasNdbm			YES
 
-/* Note: the following configuration is for a non-standard RT 
-   build environment.  The standard Athena setup (using /lib/cpp
-   and BSD 4.3 include files) should reverse the following and
-   probably make the compiler not define __STDC__. */
-#define	HasStdlibH		YES
+#define	HasStdlibH		NO
 #define	HasStringH		YES
 #define	HaveSetenv		YES
 
+/* #define DefaultCCOptions	*/
 
 #define	HasPosixTermios		NO
 #define	HasPosixFileLocks	NO
 #define	HasPosixTypes		NO		/* ??? */
 
 #define	HasInet			YES
+#define	NeedNarrowPrototypes	YES
+
+#define HCRevision	21025
 
 #define DesDefines -DBIG -DMSBFIRST -DMUSTALIGN
 
-/* On RT */
-#ifdef RtArchitecture
-#undef HCRevision
-#define HCRevision	21025
+#else	/* AIX on Risc 6000 */
 
-#if HCRevision < 21001
-#define BandAidCompiler "rtcchack.bac"
-#undef MacroFile
-#define MacroFile ibm.cf $(IRULESRC)/rtcchack.bac
-#endif
+#define	OSName			AIX 3.1
+#define	OSMajorVersion		3
+#define	OSMinorVersion		1
+
+#define	BitSize32
+
+#define	HasNdbm			YES
+#define	HasVoidSignalReturn	YES
+#define	HasSaberC		NO
+#define	HasStdlibH		YES
+#define	HasStringH		YES
+#define	HasPosixTermios		YES
+#define	HasPosixFileLocks	YES
+#define	HasPosixTypes		YES
+
+#define	HasInet			YES
+#define	NeedNarrowPrototypes	YES
+#define DesDefines -DBIG -DMSBFIRST -DMUSTALIGN
+
+#endif /* RT */
 
 #define DefaultCDebugFlags OptimizedCDebugFlags
-
-#endif /* RtArchitecture */
