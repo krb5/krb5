@@ -106,16 +106,14 @@ const char *prog;
 				/* find it */
     }
     if ((sec_udp_port_fd = socket(PF_INET, SOCK_DGRAM, 0)) == -1) {
-	retval = errno;
-	com_err(prog, 0, "Cannot create secondary server socket");
-	return retval;
+	com_err(prog, errno, "while trying to create secondary server socket");
+	return 0;		/* Don't give an error we we can't do this */
     }
     memset((char *)&sin, 0, sizeof(sin));
     sin.sin_port = sp->s_port;
     if (bind(sec_udp_port_fd, (struct sockaddr *)&sin, sizeof(sin)) == -1) {
-	retval = errno;
-	com_err(prog, 0, "Cannot bind secondary server socket");
-	return retval;
+	com_err(prog, errno, "while trying to bind secondary server socket");
+	return 0;		/* Don't give an error if we can't do this */
     }
     FD_SET(sec_udp_port_fd, &select_fds);
     if (sec_udp_port_fd+1 > select_nfsd)
