@@ -136,7 +136,7 @@ prof_tree.so prof_tree.po $(OUTPRE)prof_tree.$(OBJEXT): prof_tree.c prof_int.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h
 prof_file.so prof_file.po $(OUTPRE)prof_file.$(OBJEXT): prof_file.c prof_int.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5/autoconf.h \
-  $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h
+  $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/k5-platform.h
 prof_parse.so prof_parse.po $(OUTPRE)prof_parse.$(OBJEXT): prof_parse.c prof_int.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h
