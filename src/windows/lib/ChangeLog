@@ -1,3 +1,8 @@
+Fri Mar 12 15:54:17 1999  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* Makefile.in (clean-windows): Don't blow away Krbcc32.lib by
+		accident.
+
 Tue Mar 18 12:08:50 1997  Michael Graff  <explorer@flame.org>
 
 	* registry.h, registry.c: add.

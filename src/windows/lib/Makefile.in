@@ -14,6 +14,6 @@ libwin.lib: $(OBJS)
 all-windows:: lib-windows
 
 clean-windows::
-	$(RM) *.dll *.exp *.map *.lib *.obj
+	$(RM) *.exp *.map libwin.lib *.obj
 
 install-windows::
