@@ -124,7 +124,7 @@
                     </Component>
                     <Component Id="cmf_krb5_32_dll" Guid="31E40356-CBAC-4FC6-9A34-C6F6C72A27CA" DiskId="1">
 	                    <File Id="fil_krb5_32_dll" LongName="krb5_32.dll" Name="krb5_32.dll" KeyPath="yes" />
-	                    <Environment Id="env_kclient_path" Action="set" Name="PATH" Part="last" System="yes" Value="[dirbin]" />
+	                    <Environment Id="env_kclient_path" Action="set" Name="PATH" Part="last" System="yes" Value="[KERBEROSDIR]bin" />
                     </Component>
                     <Component Id="cmf_krb524_dll" Guid="98685874-A9AA-4BC5-9830-271D9CF52C17" DiskId="1">
 	                    <File Id="fil_krb524_dll" LongName="krb524.dll" Name="krb524.dll" KeyPath="yes" />
@@ -177,7 +177,7 @@
                     
                     <Component Id="csc_leashStartup" Guid="3408C97D-68D6-4207-9142-BF82F7C62DC0" DiskId="1">
                         <Registry Id="reg_sc_leash_marker" Root="HKLM" Key="$(var.KfwRegRoot)\Client\$(var.VersionString)" Name="LeashAutoStart" Type="integer" Value="1" KeyPath="yes" />
-                        <Shortcut Id="sc_leash32_exe_startup" Advertise="no" Directory="StartupFolder" LongName="Leash Kerberos Ticket Manager.lnk" Name="Leash.lnk" Arguments="[LEASHAUTOINIT]" Target="[dirbin]leash32.exe"/>
+                        <Shortcut Id="sc_leash32_exe_startup" Advertise="no" Directory="StartupFolder" LongName="Leash Kerberos Ticket Manager.lnk" Name="Leash.lnk" Arguments="[LEASHAUTOINIT]" Target="[dirbin]leash32.exe" Show="minimized" />
                     </Component>
                 <?ifdef OldHelp?>
                     <Component Id="cmf_leash32_hlp" Guid="919616D6-1605-4A79-8E33-C18A0D0F25E3" DiskId="1">
