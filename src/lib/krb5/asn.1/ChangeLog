@@ -1,3 +1,8 @@
+Fri Jan  2 21:18:30 1998  Tom Yu  <tlyu@mit.edu>
+
+	* asn1buf.c (asn12krb5_buf): Check return value of
+	malloc. [krb5-libs/518]
+
 Tue Sep 30 19:03:34 1997  Tom Yu  <tlyu@mit.edu>
 
 	* krbasn1.h: Replace HAS_STDLIB_H with something more sane.
