@@ -110,8 +110,10 @@ main(argc, argv)
     if(!isatty(fileno(stderr)))
         setvbuf(stderr, 0, _IONBF, 0);
 
-    krb5_init_context(&kcontext);
-    krb5_init_ets(kcontext);
+    if (code = krb5_init_context(&kcontext)) {
+	com_err(argv[0], code, "while initializing kerberos library");
+	exit(1);
+    }
 
     krb5_get_init_creds_opt_init(&opts);
 
