@@ -309,10 +309,6 @@ admin_merge_dbentries(kcontext, debug_level, who, defaultp,
 {
     krb5_error_code	kret = 0;
 #ifndef	USE_KDB5_CPW
-    krb5_timestamp	now;
-    krb5_tl_data	*pwchg, *def_pwchg;
-    krb5_tl_data	*new, *def;
-    krb5_tl_mod_princ	modent;
     krb5_int32		num_keys, num_ekeys, num_rkeys;
     krb5_key_data	*key_list;
     krb5_key_data	*ekey_list;
@@ -331,9 +327,6 @@ admin_merge_dbentries(kcontext, debug_level, who, defaultp,
     ekey_list = (krb5_key_data *) NULL;
 #endif	/* USE_KDB5_CPW */
     if (dbentp->princ &&
-#ifndef	USE_KDB5_CPW
-	!(kret = krb5_timeofday(kcontext, &now)) &&
-#endif	/* USE_KDB5_CPW */
 	(!password || ((valid & KRB5_ADM_M_RANDOMKEY) == 0))) {
 
 	/*
@@ -359,72 +352,16 @@ admin_merge_dbentries(kcontext, debug_level, who, defaultp,
 	dbentp->len = defaultp->len;
 	kret = 0;
 
-#ifndef	USE_KDB5_CPW
 	/*
-	 * Now merge tagged data.  This is a little bit painful, hold on.
-	 * First see if we already have a last change block.  If so, then just
-	 * use the existing storage to hold the appropriate value.
+	 * Update last password change (if appropriate) and modification
+	 * date and principal.
 	 */
-	pwchg = def_pwchg = (krb5_tl_data *) NULL;
-	for (new = dbentp->tl_data; new; new = new->tl_data_next) {
-	    if (new->tl_data_type == KRB5_TL_LAST_PWD_CHANGE) {
-		pwchg = new;
-		break;
-	    }
-	}
-	/* Find the entry from the default */
-	for (def = defaultp->tl_data; def; def = def->tl_data_next) {
-	    if (def->tl_data_type == KRB5_TL_LAST_PWD_CHANGE) {
-		def_pwchg = def;
-		break;
-	    }
-	}
-	/*
-	 * If not already there, then we have to make a new entry and blast
-	 * our scuzz in there.
-	 */
-	if (!pwchg) {
-	    if ((pwchg = (krb5_tl_data *) malloc(sizeof(krb5_tl_data))) &&
-		(pwchg->tl_data_contents = (krb5_octet *)
-		 malloc(sizeof(krb5_timestamp)))) {
-		pwchg->tl_data_type = KRB5_TL_LAST_PWD_CHANGE;
-		pwchg->tl_data_length = sizeof(krb5_timestamp);
-		pwchg->tl_data_next = dbentp->tl_data;
-		dbentp->tl_data = pwchg;
-		dbentp->n_tl_data++;
-	    }
-	    else
-		kret = ENOMEM;
-	}
-	if (!kret) {
-	    /*
-	     * If we're changing the password, the time is now.
-	     */
-	    if (password || is_pwchange || !def_pwchg) {
-		krb5_kdb_encode_int32(now, pwchg->tl_data_contents);
-	    }
-	    else {
-		/*
-		 * Otherwise, clone the contents of the old one.
-		 */
-		memcpy(pwchg->tl_data_contents,
-		       def_pwchg->tl_data_contents,
-		       sizeof(krb5_timestamp));
-	    }
+	if (!(kret = key_update_tl_attrs(kcontext,
+					 dbentp,
+					 who,
+					 (password || is_pwchange)))) {
 
-	    /*
-	     * Handle the modification date/principal.
-	     */
-	    modent.mod_date = now;
-	    kret = krb5_copy_principal(kcontext, who, &modent.mod_princ);
-	    if (!kret) {
-		kret = krb5_dbe_encode_mod_princ_data(kcontext,
-						      &modent,
-						      dbentp);
-		krb5_free_principal(kcontext, modent.mod_princ);
-	    }
-	}
-	if (!kret) {
+#ifndef	USE_KDB5_CPW
 	    /* See if this is a random key or not */
 	    if (password) {
 		krb5_data		pwdata;
@@ -502,8 +439,15 @@ admin_merge_dbentries(kcontext, debug_level, who, defaultp,
 		    }
 		}
 	    }
-	}
 #endif	/* USE_KDB5_CPW */
+
+	    /*
+	     * Finally, if this is a password change, clear the password-change
+	     * required bit.
+	     */
+	    if (password || is_pwchange)
+		dbentp->attributes &= ~KRB5_KDB_REQUIRES_PWCHANGE;
+	}
     }
 
 #ifndef	USE_KDB5_CPW
@@ -921,7 +865,6 @@ admin_delete_rename(kcontext, debug_level, ticket, original, new)
     krb5_principal	orig_principal;
     krb5_int32		operation;
     const char *	op_msg;
-    krb5_tl_mod_princ	*mprinc;
 
     DPRINT(DEBUG_CALLS, debug_level,
 	   ("* admin_delete_rename(%s,%s)\n",
@@ -977,7 +920,6 @@ admin_delete_rename(kcontext, debug_level, ticket, original, new)
 			    int			n_howmany;
 			    krb5_boolean	n_more;
 			    krb5_db_entry	xxx_dbentry;
-			    krb5_timestamp	now;
 
 			    n_howmany = 1;
 
@@ -987,7 +929,6 @@ admin_delete_rename(kcontext, debug_level, ticket, original, new)
 							       &xxx_dbentry,
 							       &n_howmany,
 							       &n_more))
-				&& !(kret = krb5_timeofday(kcontext, &now))
 				&& !n_howmany) {
 				/* Change our name */
 				krb5_free_principal(kcontext,
@@ -995,44 +936,26 @@ admin_delete_rename(kcontext, debug_level, ticket, original, new)
 				orig_entry.princ = new_principal;
 
 				/* Update our stats */
-				mprinc = (krb5_tl_mod_princ *) NULL;
-				(void) krb5_dbe_decode_mod_princ_data(kcontext,
+				if (!(kret = key_update_tl_attrs(kcontext,
+								 &orig_entry,
+								 client,
+								 0))) {
+				    n_howmany = 1;
+				    if ((kret = krb5_db_put_principal(kcontext,
 								      &orig_entry,
-								      &mprinc);
-				if (!mprinc) {
-				    mprinc = (krb5_tl_mod_princ *)
-					malloc(sizeof(krb5_tl_mod_princ));
-				    if (mprinc)
-					memset(mprinc, 0, sizeof(*mprinc));
-				}
-				if (mprinc) {
-				    if (mprinc->mod_princ)
-					krb5_free_principal(kcontext,
-							    mprinc->mod_princ);
-				    krb5_copy_principal(kcontext,
-							client,
-							&mprinc->mod_princ);
-				    mprinc->mod_date = now;
-				    krb5_dbe_encode_mod_princ_data(kcontext,
-								   mprinc,
-								   &orig_entry);
-				    krb5_free_principal(kcontext,
-							mprinc->mod_princ);
-				    krb5_xfree(mprinc);
-				}
-
-				n_howmany = 1;
-				if ((kret = krb5_db_put_principal(kcontext,
-								  &orig_entry,
-								  &n_howmany))
-				    || (n_howmany != 1)) {
-				    retval = KRB5_ADM_SYSTEM_ERROR;
+								      &n_howmany))
+					|| (n_howmany != 1)) {
+					retval = KRB5_ADM_SYSTEM_ERROR;
+				    }
+				    else {
+					com_err(programname, 0,
+						admin_db_rename_fmt,
+						op_msg, original, new,
+						client_name);
+				    }
 				}
 				else {
-				    com_err(programname, 0,
-					    admin_db_rename_fmt,
-					    op_msg, original, new,
-					    client_name);
+				    retval = KRB5_ADM_SYSTEM_ERROR;
 				}
 				orig_entry.princ = (krb5_principal) NULL;
 			    }
@@ -1412,11 +1335,9 @@ admin_key_op(kcontext, debug_level, ticket, nargs, arglist, is_delete)
     krb5_principal	principal;
     krb5_int32		operation;
     const char *	op_msg;
-    krb5_tl_mod_princ	*mprinc;
     krb5_int32		nkeysalts;
     krb5_key_salt_tuple	*keysalt_list;
     krb5_int32		*kvno_list;
-    krb5_timestamp	now;
     int			n_howmany;
 
     DPRINT(DEBUG_CALLS, debug_level,
@@ -1493,26 +1414,11 @@ admin_key_op(kcontext, debug_level, ticket, nargs, arglist, is_delete)
 							     nkeysalts,
 							     keysalt_list,
 							     kvno_list)) &&
-			    /* Get the time of day */
-			    !(kret = krb5_timeofday(kcontext, &now))) {
-				/* Update our stats */
-			    if (!krb5_dbe_decode_mod_princ_data(kcontext,
-								&entry,
-								&mprinc)) {
-				krb5_free_principal(kcontext,
-						    mprinc->mod_princ);
-				krb5_copy_principal(kcontext,
-						    client,
-						    &mprinc->mod_princ);
-				mprinc->mod_date = now;
-				krb5_dbe_encode_mod_princ_data(kcontext,
-							       mprinc,
-							       &entry);
-				krb5_free_principal(kcontext,
-						    mprinc->mod_princ);
-				krb5_xfree(mprinc);
-			    }
-			    
+			    /* Update our statistics */
+			    !(retval = key_update_tl_attrs(kcontext,
+							   &entry,
+							   client,
+							   0))) {
 			    n_howmany = 1;
 			    if ((kret = krb5_db_put_principal(kcontext,
 							      &entry,

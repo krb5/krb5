@@ -1214,7 +1214,7 @@ key_name_to_data(dbentp, ksent, kvno, kdatap)
 	     (ksent->ks_salttype < 0))) {
 	    if (kvno >= 0) {
 		if (kvno == dbentp->key_data[i].key_data_kvno) {
-		    maxkvno == kvno;
+		    maxkvno = kvno;
 		    datap = &dbentp->key_data[i];
 		    break;
 		}
@@ -1285,5 +1285,89 @@ key_dbent_to_keysalts(dbentp, nentsp, ksentsp)
 	else
 	    kret = ENOMEM;
     }
+    return(kret);
+}
+
+krb5_error_code
+key_update_tl_attrs(kcontext, dbentp, mod_name, is_pwchg)
+    krb5_context	kcontext;
+    krb5_db_entry	*dbentp;
+    krb5_principal	mod_name;
+    krb5_boolean	is_pwchg;
+{
+    krb5_error_code	kret;
+
+    kret = 0 ;
+
+    /*
+     * Handle modification principal.
+     */
+    if (mod_name) {
+	krb5_tl_mod_princ	mprinc;
+
+	memset(&mprinc, 0, sizeof(mprinc));
+	if (!(kret = krb5_copy_principal(kcontext,
+					 mod_name,
+					 &mprinc.mod_princ)) &&
+	    !(kret = krb5_timeofday(kcontext, &mprinc.mod_date)))
+	    kret = krb5_dbe_encode_mod_princ_data(kcontext,
+						  &mprinc,
+						  dbentp);
+	if (mprinc.mod_princ)
+	    krb5_free_principal(kcontext, mprinc.mod_princ);
+    }
+
+    /*
+     * Handle last password change.
+     */
+    if (!kret && is_pwchg) {
+	krb5_tl_data	*pwchg;
+	krb5_timestamp	now;
+	krb5_boolean	linked;
+
+	/* Find a previously existing entry */
+	for (pwchg = dbentp->tl_data;
+	     (pwchg) && (pwchg->tl_data_type != KRB5_TL_LAST_PWD_CHANGE);
+	     pwchg = pwchg->tl_data_next);
+
+	/* Check to see if we found one. */
+	linked = 0;
+	if (!pwchg) {
+	    /* No, allocate a new one */
+	    if (pwchg = (krb5_tl_data *) malloc(sizeof(krb5_tl_data))) {
+		memset(pwchg, 0, sizeof(krb5_tl_data));
+		if (!(pwchg->tl_data_contents =
+		      (krb5_octet *) malloc(sizeof(krb5_timestamp)))) {
+		    free(pwchg);
+		    pwchg = (krb5_tl_data *) NULL;
+		}
+		else {
+		    pwchg->tl_data_type = KRB5_TL_LAST_PWD_CHANGE;
+		    pwchg->tl_data_length =
+			(krb5_int16) sizeof(krb5_timestamp);
+		}
+	    }
+	}
+	else
+	    linked = 1;
+
+	/* Do we have an entry? */
+	if (pwchg && pwchg->tl_data_contents) {
+	    /* Yes, do the timestamp */
+	    if (!(kret = krb5_timeofday(kcontext, &now))) {
+		/* Encode it */
+		krb5_kdb_encode_int32(now, pwchg->tl_data_contents);
+		/* Link it in if necessary */
+		if (!linked) {
+		    pwchg->tl_data_next = dbentp->tl_data;
+		    dbentp->tl_data = pwchg;
+		    dbentp->n_tl_data++;
+		}
+	    }
+	}
+	else
+	    kret = ENOMEM;
+    }
+
     return(kret);
 }

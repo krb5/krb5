@@ -1,4 +1,11 @@
 
+Thu Aug 10 14:34:31 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* srv_key.c - Consolidate handling of tagged database attributes here
+		in key_update_tl_attrs().  Fix a bug which was never encountered
+	* kadm5_defs.h - Add prototype for key_update_tl_attrs().
+	* admin.c, passwd.c - Use key_update_tl_attrs() where appropriate.
+
+
 Wed Aug 9 17:09:35 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* admin.c - Add code to use kdb5's change-password interfaces under
 		USE_KDB5_CPW for now until it's fully shaken out.

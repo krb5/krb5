@@ -149,6 +149,11 @@ krb5_error_code key_dbent_to_keysalts
 	KRB5_PROTOTYPE((krb5_db_entry *,
 			krb5_int32 *,
 			krb5_key_salt_tuple **));
+krb5_error_code key_update_tl_attrs
+	KRB5_PROTOTYPE((krb5_context,
+			krb5_db_entry *,
+			krb5_principal,
+			krb5_boolean));
 
 /* srv_acl.c */
 krb5_error_code acl_init

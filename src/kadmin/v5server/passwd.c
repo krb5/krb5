@@ -213,9 +213,6 @@ passwd_set_npass(kcontext, debug_level, princ, dbentp, pwdata)
 #else	/* USE_KDB5_CPW */
     krb5_int32		num_keys;
     krb5_key_data	*key_list;
-    krb5_tl_data	*pwchg;
-    krb5_tl_mod_princ	modent;
-    krb5_timestamp	now;
 #endif	/* USE_KDB5_CPW */
 
     DPRINT(DEBUG_CALLS, debug_level, ("* passwd_set_npass()\n"));
@@ -305,36 +302,17 @@ passwd_set_npass(kcontext, debug_level, princ, dbentp, pwdata)
 				&entry2write.key_data))
 	goto cleanup;
     entry2write.n_key_data = num_keys;
-
-    if ((pwchg = (krb5_tl_data *) malloc(sizeof(krb5_tl_data))) &&
-	(pwchg->tl_data_contents = (krb5_octet *)
-	 malloc(sizeof(krb5_timestamp)))) {
-
-	pwchg->tl_data_type = KRB5_TL_LAST_PWD_CHANGE;
-	pwchg->tl_data_length = sizeof(krb5_timestamp);
-	pwchg->tl_data_next = (krb5_tl_data *) NULL;
-	entry2write.tl_data = pwchg;
-	entry2write.n_tl_data++;
-	/* Set the time for last successful password change */
-	if (kret = krb5_timeofday(kcontext, &now))
-	    goto cleanup;
-	krb5_kdb_encode_int32(now, pwchg->tl_data_contents);
-    }
-    else {
-	kret = ENOMEM;
-	goto cleanup;
-    }
-
-
-    /* Set entry modifier and modification time. */
-    modent.mod_date = now;
-    if (!(kret = krb5_copy_principal(kcontext,
-				     entry2write.princ, 
-				     &modent.mod_princ))) {
-	kret = krb5_dbe_encode_mod_princ_data(kcontext, &modent, &entry2write);
-	krb5_free_principal(kcontext, modent.mod_princ);
-    }
 #endif	/* USE_KDB5_CPW */
+
+    /* Update the statistics */
+    if (kret = key_update_tl_attrs(kcontext,
+				   &entry2write,
+				   entry2write.princ,
+				   1))
+	goto cleanup;
+
+    /* Clear the password-change-required bit */
+    entry2write.attributes &= ~KRB5_KDB_REQUIRES_PWCHANGE;
 
     /* Now write the entry */
     nwrite = 1;
