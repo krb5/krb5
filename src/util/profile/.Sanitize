@@ -26,21 +26,20 @@ Things-to-keep:
 .cvsignore
 ChangeLog
 Makefile.in
-Sanitize
-autoconf
 configure
 configure.in
-depfix.sed
-et
-kbuild
-kfrags
-libupdate.sh
-lndir
-makedepend
-profile
-reconf
-ss
-unifdef
+dosshell.ini
+krb5.conf
+prof_err.et
+prof_file.c
+prof_init.c
+prof_int.h
+prof_parse.c
+prof_section.c
+prof_tree.c
+profile.hin
+test.ini
+test_parse.c
 
 Things-to-lose:
 
