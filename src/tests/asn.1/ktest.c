@@ -799,4 +799,5 @@ void ktest_destroy_enc_data(DECLARG(krb5_enc_data *, ed))
      OLDDECLARG(krb5_enc_data *, ed)
 {
   ktest_empty_data(&(ed->ciphertext));
+  ed->kvno = 0;
 }

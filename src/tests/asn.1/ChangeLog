@@ -1,5 +1,8 @@
 Wed Oct 19 00:11:43 1994  Theodore Y. Ts'o  (tytso@maytag)
 
+	* ktest.c (ktest_destroy_enc_data): Clear the kvno field when
+		destroying the encrypted data.
+
 	* Makefile.in: "make check" depends on krb5_decode_test and
 		krb5_encode_test being up to date.
 
