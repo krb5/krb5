@@ -148,7 +148,7 @@ krb5_tgs_req *KRB5_TGS__REQ2krb5_tgs_req
 struct type_KRB5_RealTGS__REQ *krb5_real_tgs_req2KRB5_RealTGS__REQ
 	PROTOTYPE((krb5_real_tgs_req *val,
 		   int *error ));
-krb5_tgs_req *KRB5_RealTGS__REQ2krb5_real_tgs_req
+krb5_real_tgs_req *KRB5_RealTGS__REQ2krb5_real_tgs_req
 	PROTOTYPE((struct type_KRB5_RealTGS__REQ *val,
 		   int *error ));
 struct type_KRB5_EncTgsReqPart *krb5_tgs_req_enc_part2KRB5_EncTgsReqPart
