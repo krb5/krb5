@@ -90,8 +90,8 @@ telnet_getenv(val)
 }
 
 	char *
-telnet_gets(prompt, result, length, echo)
-	char *prompt;
+telnet_gets(tprompt, result, length, echo)
+	char *tprompt;
 	char *result;
 	int length;
 	int echo;
@@ -103,9 +103,9 @@ telnet_gets(prompt, result, length, echo)
 
 	TerminalNewMode(-1);
 	if (echo) {
-		printf("%s", prompt);
+		printf("%s", tprompt);
 		res = fgets(result, length, stdin);
-	} else if ((res = getpass(prompt))) {
+	} else if ((res = getpass(tprompt))) {
 		strncpy(result, res, length);
 		res = result;
 	}

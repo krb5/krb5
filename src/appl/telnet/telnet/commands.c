@@ -2388,7 +2388,7 @@ tn(argc, argv)
     char *argv[];
 {
     register struct hostent *host = 0;
-    struct sockaddr_in sin;
+    struct sockaddr_in sin4;
     struct servent *sp = 0;
     unsigned long temp;
 #if	defined(IP_OPTIONS) && defined(IPPROTO_IP)
@@ -2398,7 +2398,7 @@ tn(argc, argv)
     char *cmd, *hostp = 0, *portp = 0, *volatile user = 0;
 
     /* clear the socket address prior to use */
-    memset((char *)&sin, 0, sizeof(sin));
+    memset((char *)&sin4, 0, sizeof(sin4));
 
     if (connected) {
 	printf("?Already connected to %s\r\n", hostname);
@@ -2461,28 +2461,28 @@ tn(argc, argv)
 	    printf("Bad source route option: %s\r\n", hostp);
 	    return 0;
 	} else {
-	    sin.sin_addr.s_addr = temp;
-	    sin.sin_family = AF_INET;
+	    sin4.sin_addr.s_addr = temp;
+	    sin4.sin_family = AF_INET;
 	}
     } else {
 #endif
 	temp = inet_addr(hostp);
 	if ((temp & 0xffffffff) != INADDR_NONE) {
-	    sin.sin_addr.s_addr = temp;
-	    sin.sin_family = AF_INET;
+	    sin4.sin_addr.s_addr = temp;
+	    sin4.sin_family = AF_INET;
 	    (void) strncpy(_hostname, hostp, sizeof(_hostname) - 1);  
 	    _hostname[sizeof(_hostname) - 1] = '\0';
 	    hostname = _hostname;
 	} else {
 	    host = gethostbyname(hostp);
 	    if (host) {
-		sin.sin_family = host->h_addrtype;
+		sin4.sin_family = host->h_addrtype;
 #if	defined(h_addr)		/* In 4.3, this is a #define */
-		memcpy((caddr_t)&sin.sin_addr,
-		       host->h_addr_list[0], sizeof(sin.sin_addr));
+		memcpy((caddr_t)&sin4.sin_addr,
+		       host->h_addr_list[0], sizeof(sin4.sin_addr));
 #else	/* defined(h_addr) */
-		memcpy((caddr_t)&sin.sin_addr, host->h_addr, 
-		       sizeof(sin.sin_addr)); 
+		memcpy((caddr_t)&sin4.sin_addr, host->h_addr, 
+		       sizeof(sin4.sin_addr)); 
 #endif	/* defined(h_addr) */
 		strncpy(_hostname, host->h_name, sizeof(_hostname));
 		_hostname[sizeof(_hostname)-1] = '\0';
@@ -2495,24 +2495,24 @@ tn(argc, argv)
 #if	defined(IP_OPTIONS) && defined(IPPROTO_IP)
     }
 #endif
-    hostaddr.s_addr = sin.sin_addr.s_addr;
+    hostaddr.s_addr = sin4.sin_addr.s_addr;
     if (portp) {
 	if (*portp == '-') {
 	    portp++;
 	    telnetport = 1;
 	} else
 	    telnetport = 0;
-	sin.sin_port = atoi(portp);
-	if (sin.sin_port == 0) {
+	sin4.sin_port = atoi(portp);
+	if (sin4.sin_port == 0) {
 	    sp = getservbyname(portp, "tcp");
 	    if (sp)
-		sin.sin_port = sp->s_port;
+		sin4.sin_port = sp->s_port;
 	    else {
 		printf("%s: bad port number\r\n", portp);
 		return 0;
 	    }
 	} else {
-	    sin.sin_port = htons(sin.sin_port);
+	    sin4.sin_port = htons(sin4.sin_port);
 	}
     } else {
 	if (sp == 0) {
@@ -2521,11 +2521,11 @@ tn(argc, argv)
 		fprintf(stderr, "telnet: tcp/telnet: unknown service\n");
 		return 0;
 	    }
-	    sin.sin_port = sp->s_port;
+	    sin4.sin_port = sp->s_port;
 	}
 	telnetport = 1;
     }
-    printf("Trying %s...\r\n", inet_ntoa(sin.sin_addr));
+    printf("Trying %s...\r\n", inet_ntoa(sin4.sin_addr));
     do {
 	net = socket(AF_INET, SOCK_STREAM, 0);
 	if (net < 0) {
@@ -2557,20 +2557,20 @@ tn(argc, argv)
 		perror("setsockopt (SO_DEBUG)");
 	}
 
-	if (connect(net, (struct sockaddr *)&sin, sizeof (sin)) < 0) {
+	if (connect(net, (struct sockaddr *)&sin4, sizeof (sin4)) < 0) {
 #if	defined(h_addr)		/* In 4.3, this is a #define */
 	    if (host && host->h_addr_list[1]) {
 		int oerrno = errno;
 
 		fprintf(stderr, "telnet: connect to address %s: ",
-						inet_ntoa(sin.sin_addr));
+						inet_ntoa(sin4.sin_addr));
 		errno = oerrno;
 		perror((char *)0);
 		host->h_addr_list++;
-		memcpy((caddr_t)&sin.sin_addr, 
-			host->h_addr_list[0], sizeof(sin.sin_addr));
+		memcpy((caddr_t)&sin4.sin_addr, 
+			host->h_addr_list[0], sizeof(sin4.sin_addr));
 		memcpy((caddr_t)&hostaddr,
-		       host->h_addr_list[0], sizeof(sin.sin_addr));
+		       host->h_addr_list[0], sizeof(sin4.sin_addr));
 		(void) NetClose(net);
 		continue;
 	    }
@@ -2579,7 +2579,8 @@ tn(argc, argv)
 	    return 0;
 	}
 	connected++;
-	host = gethostbyaddr((char *) &sin.sin_addr, sizeof(struct in_addr), sin.sin_family);
+	host = gethostbyaddr((char *) &sin4.sin_addr, sizeof(struct in_addr),
+			     sin4.sin_family);
 	    if (host) {
 	      strncpy(_hostname, host->h_name, sizeof(_hostname));
 		_hostname[sizeof(_hostname)-1] = '\0';

@@ -1,3 +1,10 @@
+2001-06-22  Ezra Peisach  <epeisach@mit.edu>
+
+	* commands.c (tn): Change sin to sin4 to not shadow global.
+
+	* authenc.c (telnet_gets): Change local variable prompt to tprompt
+	to not shadow global variable.
+
 2001-06-21  Ezra Peisach  <epeisach@mit.edu>
 
 	* configure.in: Test for parsetos() prototype and presence of
