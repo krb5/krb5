@@ -22,10 +22,6 @@
 
 #include "gssapiP_krb5.h"
 
-/*
- * $Id$
- */
-
 OM_uint32
 krb5_gss_unseal(minor_status, context_handle,
 		input_message_buffer, output_message_buffer,

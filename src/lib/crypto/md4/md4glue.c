@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * lib/crypto/md4/md4glue.c
  *
  * Copyright 1990,1991 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -25,10 +24,6 @@
  * Kerberos glue for MD4 sample implementation.
  */
 
-#if !defined(lint) && !defined(SABER)
-static char rcsid_md4glue_c[] =
-"$Id$";
-#endif	/* !lint & !SABER */
 
 #include <krb5/krb5.h>
 #include <krb5/ext-proto.h>

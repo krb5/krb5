@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * lib/krb5/os/ustime.c
  *
  * Copyright 1990,1991 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -25,10 +24,6 @@
  * krb5_mstimeofday for BSD 4.3
  */
 
-#if !defined(lint) && !defined(SABER)
-static char rcsid_mstime_c[] =
-"$Id$";
-#endif	/* lint || SABER */
 
 #include <krb5/config.h>
 #include <krb5/krb5.h>

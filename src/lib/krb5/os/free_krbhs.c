@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * lib/krb5/os/free_krbhs.c
  *
  * Copyright 1990,1991 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -25,10 +24,6 @@
  * krb5_free_krbhst() function
  */
 
-#if !defined(lint) && !defined(SABER)
-static char rcsid_free_krbhs_c[] =
-"$Id$";
-#endif	/* !lint & !SABER */
 
 #include <krb5/krb5.h>
 

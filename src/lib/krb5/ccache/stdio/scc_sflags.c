@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * lib/krb5/ccache/stdio/scc_sflags.c
  *
  * Copyright 1990,1991 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -25,10 +24,6 @@
  * This file contains the source code for krb5_scc_set_flags.
  */
 
-#if !defined(lint) && !defined(SABER)
-static char rcsid_scc_set_flags_c[] =
-"$Id$";
-#endif /* !lint && !SABER */
 
 
 #include "scc.h"

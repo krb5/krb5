@@ -23,10 +23,6 @@
 #ifndef _GSSAPI_KRB5_H_
 #define _GSSAPI_KRB5_H_
 
-/*
- * $Id$
- */
-
 #include <gssapi/gssapi_generic.h>
 #include <krb5/krb5.h>
 

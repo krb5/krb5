@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * lib/krb5/krb/bld_princ.c
  *
  * Copyright 1991 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -25,10 +24,6 @@
  * Build a principal from a list of strings
  */
 
-#if !defined(lint) && !defined(SABER)
-static char rcsid_bld_princ_c [] =
-"$Id$";
-#endif	/* !lint & !SABER */
 
 /* Need <krb5/config.h> for STDARG_PROTOTYPES */
 #include <krb5/krb5.h>

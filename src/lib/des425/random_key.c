@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * lib/des425/random_key.c
  *
  * Copyright 1990,1991 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -24,10 +23,6 @@
  *
  */
 
-#ifndef	lint
-static char rcsid_random_key_c[] =
-"$Header$";
-#endif /* lint */
 
 #include "des.h"
 

@@ -17,9 +17,7 @@
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#if defined(LIBC_SCCS) && !defined(lint)
-static char sccsid[] = "@(#)strdup.c	5.3 (Berkeley) 6/1/90";
-#endif /* LIBC_SCCS and not lint */
+/* based on @(#)strdup.c	5.3 (Berkeley) 6/1/90 */
 
 #include <krb5/krb5.h>
 #include <krb5/ext-proto.h>

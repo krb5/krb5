@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * lib/krb5/ccache/stdio/scc_retrv.c
  *
  * Copyright 1990,1991 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -24,12 +23,6 @@
  *
  * This file contains the source code for krb5_scc_retrieve.
  */
-
-#if !defined(lint) && !defined(SABER)
-static char rcsid_scc_retrv_c[] =
-"$Id$";
-#endif /* !lint && !SABER */
-
 
 #include "scc.h"
 

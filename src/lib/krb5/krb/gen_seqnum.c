@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * lib/krb5/krb/gen_seqnum.c
  *
  * Copyright 1991 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -27,10 +26,6 @@
  * then taking the output and slicing it up.
  */
 
-#if !defined(lint) && !defined(SABER)
-static char rcsid_gen_seqnum_c[] =
-"$Id$";
-#endif	/* !lint & !SABER */
 
 #include <krb5/krb5.h>
 #include <krb5/ext-proto.h>

@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * lib/krb5/krb/copy_data.c
  *
  * Copyright 1990,1991 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -25,10 +24,6 @@
  * krb5_copy_data()
  */
 
-#if !defined(lint) && !defined(SABER)
-static char rcsid_copy_data_c[] =
-"$Id$";
-#endif	/* !lint & !SABER */
 
 #include <krb5/krb5.h>
 #include <krb5/ext-proto.h>

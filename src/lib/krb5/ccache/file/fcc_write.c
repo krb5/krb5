@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * lib/krb5/ccache/file/fcc_write.c
  *
  * Copyright 1990,1991,1992 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -25,10 +24,6 @@
  * This file contains the source code for krb5_fcc_write_<type>.
  */
 
-#if !defined(lint) && !defined(SABER)
-static char rcsid_rcsid_fcc_write_c[] =
- "$Id$";
-#endif /* !lint && !SABER */
 
 #include <errno.h>
 #include "fcc.h"

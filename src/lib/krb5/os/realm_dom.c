@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * lib/krb5/os/realm_dom.c
  *
  * Copyright 1990,1991 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -25,10 +24,6 @@
  * krb5_get_realm_domain()
  */
 
-#if !defined(lint) && !defined(SABER)
-static char rcsid_hst_realm_c[] =
-"$Id$";
-#endif	/* !lint & !SABER */
 
 /*
  * Determines the proper domain name for a realm.  This is mainly so that

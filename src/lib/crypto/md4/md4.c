@@ -1,12 +1,6 @@
 /*
- *	$Source$
- *	$Author$
- *	$Id$
+ *	lib/crypto/md4/md4.c
  */
-
-#if !defined(lint) && !defined(SABER)
-static char rcsid_md4_c[] = "$Id$";
-#endif	/* !lint & !SABER */
 
 /*
  **********************************************************************

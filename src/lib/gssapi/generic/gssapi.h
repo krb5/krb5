@@ -34,10 +34,6 @@
 #include <stdio.h>
 
 /*
- * $Id$
- */
-
-/*
  * First, define the platform-dependent types.
  */
 typedef unsigned int OM_uint32;

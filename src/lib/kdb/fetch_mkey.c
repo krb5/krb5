@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * lib/kdb/fetch_mkey.c
  *
  * Copyright 1990 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -26,10 +25,6 @@
  * Fetch a database master key from somewhere.
  */
 
-#if !defined(lint) && !defined(SABER)
-static char rcsid_fetch_mkey_c[] =
-"$Id$";
-#endif	/* !lint & !SABER */
 
 #include <krb5/krb5.h>
 #include <krb5/kdb.h>

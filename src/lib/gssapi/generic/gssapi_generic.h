@@ -23,10 +23,6 @@
 #ifndef _GSSAPI_GENERIC_H_
 #define _GSSAPI_GENERIC_H_
 
-/*
- * $Id$
- */
-
 #include <gssapi/gssapi.h>
 
 extern const gss_OID_desc * const gss_nt_user_name;

@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * lib/crypto/cryptoconf.c
  *
  * Copyright 1990,1991 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -25,10 +24,6 @@
  * Cryptosystem configurations
  */
 
-#if !defined(lint) && !defined(SABER)
-static char rcsid_cryptoconf_c[] =
-"$Id$";
-#endif	/* !lint & !SABER */
 
 #include <krb5/config.h>
 #include <krb5/osconf.h>

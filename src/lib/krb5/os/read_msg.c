@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * lib/krb5/os/read_msg.c
  *
  * Copyright 1991 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -25,10 +24,6 @@
  * Write a message to the network
  */
 
-#if !defined(lint) && !defined(SABER)
-static char rcsid_read_msg_c [] =
-"$Id$";
-#endif	/* !lint & !SABER */
 
 #include <krb5/krb5.h>
 #include <krb5/los-proto.h>

@@ -1,7 +1,5 @@
 /*
- * $Source$
- * $Author$
- * $Id$
+ * lib/kdb/kdbint.h
  *
  * Copyright 1990 by the Massachusetts Institute of Technology.
  * All Rights Reserved.

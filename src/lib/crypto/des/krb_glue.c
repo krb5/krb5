@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * lib/crypto/des/krb_glue.c
  *
  * Copyright 1985, 1986, 1987, 1988, 1990, 1991 by the Massachusetts Institute
  * of Technology.
@@ -42,10 +41,6 @@
  * even no kerberos routines are called
  */
 
-#if !defined(lint) && !defined(SABER)
-static char rcsid_enc_dec_c[] =
-"$Id$";
-#endif	/* !lint & !SABER */
 
 
 #include <krb5/krb5.h>

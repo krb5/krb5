@@ -1,7 +1,5 @@
 /*
- * $Source$
- * $Author$
- * $Id$ 
+ * lib/crypto/des/des_int.h
  *
  * Copyright 1987, 1988, 1990 by the Massachusetts Institute of Technology.
  * All Rights Reserved.

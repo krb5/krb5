@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * lib/krb5/os/osconfig.c
  *
  * Copyright 1990 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -25,10 +24,6 @@
  * Definition of default configuration parameters.
  */
 
-#if !defined(lint) && !defined(SABER)
-static char rcsid_config_fn_c [] =
-"$Id$";
-#endif	/* !lint & !SABER */
 
 #include <krb5/osconf.h>
 #include <krb5/config.h>

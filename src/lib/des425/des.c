@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * lib/des425/des.c
  *
  * Copyright 1985, 1986, 1987, 1988, 1990 by the Massachusetts Institute
  * of Technology.
@@ -49,10 +48,6 @@
  * originally written by Steve Miller, MIT Project Athena
  */
 
-#if !defined(lint) && !defined(SABER)
-static char rcsid_des_c[] =
-"$Id$";
-#endif	/* !lint & !SABER */
 
 #include "des.h"
 #include <krb5/ext-proto.h>

@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * lib/krb5/ccache/file/fcc_defops.c
  *
  * Copyright 1990 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -25,10 +24,6 @@
  * This file contains the structure krb5_cc_dfl_ops.
  */
 
-#if !defined(lint) && !defined(SABER)
-static char rcsid_fcc_defops_c[] =
-"$Id$";
-#endif /* !lint && !SABER */
 
 
 #include "fcc.h"

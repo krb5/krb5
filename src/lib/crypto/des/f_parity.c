@@ -8,10 +8,6 @@
  * Mark Eichin -- Cygnus Support
  */
 
-#ifndef	lint
-static char rcsid_f_parity_c[] =
-"$Header$";
-#endif
 
 #include "des.h"
 

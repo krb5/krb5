@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * lib/krb5/krb/compat_recv.c
  *
  * Copyright 1993 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -34,10 +33,6 @@
  * to a V4 sendauth.
  */
 
-#if !defined(lint) && !defined(SABER)
-static char rcsid_recvauth_c [] =
-"$Id$";
-#endif	/* !lint & !SABER */
 
 #include <krb5/krb5.h>
 #include <krb5/osconf.h>

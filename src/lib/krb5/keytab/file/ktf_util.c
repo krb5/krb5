@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * lib/krb5/keytab/file/ktf_util.c
  *
  * Copyright (c) Hewlett-Packard Company 1991
  * Released to the Massachusetts Institute of Technology for inclusion
@@ -69,10 +68,6 @@
  *
  */
 
-#if !defined(lint) && !defined(SABER)
-static char rcsid_ktf_util_c[] =
-"$Id$";
-#endif	/* !lint & !SABER */
 
 #include <krb5/krb5.h>
 #include <krb5/ext-proto.h>

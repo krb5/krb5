@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * lib/krb425/kuserok.c
  *
  * Copyright 1987, 1988 by the Massachusetts Institute of Technology.
  * All Rights Reserved.

@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * lib/des425/pcbc_encrypt.c
  *
  * Copyright 1985, 1986, 1987, 1988,1990 by the Massachusetts Institute
  * of Technology.
@@ -38,10 +37,6 @@
  * spm 8/85	MIT project athena
  */
 
-#ifndef	lint
-static char rcsid_pcbc_encrypt_c[] =
-"$Id$";
-#endif	/* lint */
 
 #include <stdio.h>
 #include "des.h"

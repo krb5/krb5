@@ -1,7 +1,5 @@
 /*
- * $Source$
- * $Author$
- * $Id$
+ * lib/des425/des.h
  *
  * Copyright 1991 by the Massachusetts Institute of Technology.
  * All Rights Reserved.

@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * lib/krb5/os/kuserok.c
  *
  * Copyright 1990,1993 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -25,10 +24,6 @@
  * krb5_kuserok()
  */
 
-#if !defined(lint) && !defined(SABER)
-static char rcsid_kuserok_c [] =
-"$Id$";
-#endif	/* !lint & !SABER */
 
 #include <krb5/krb5.h>
 #include <krb5/osconf.h>

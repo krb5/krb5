@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * lib/des425/read_passwd.c
  *
  * Copyright 1985,1986,1987,1988,1991 by the Massachusetts Institute
  * of Technology.
@@ -28,10 +27,6 @@
  * echoing.
  */
 
-#ifndef	lint
-static char rcsid_read_password_c[] =
-"$Id$";
-#endif	/* lint */
 
 #include <krb5/krb5.h>
 #include <krb5/los-proto.h>

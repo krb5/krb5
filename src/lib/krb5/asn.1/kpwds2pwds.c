@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * lib/krb5/asn.1/kpwds2pwds.c
  *
  * Copyright 1989,1990 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -56,10 +55,6 @@
  */
 #endif /* NEVERDEFINE */
 
-#if !defined(lint) && !defined(SABER)
-static char rcsid_kpwds2pwds[] =
-"$Id$";
-#endif	/* lint || saber */
 
 #include <stdio.h>
 #include <krb5/krb5.h>

@@ -23,10 +23,6 @@
 #include "gssapiP_krb5.h"
 #include <memory.h>
 
-/*
- * $Id$
- */
-
 static unsigned char zeros[8] = {0,0,0,0,0,0,0,0};
 
 int kg_confounder_size(ed)

@@ -1,7 +1,5 @@
 /*
- * $Source$
- * $Author$
- * $Id$
+ * lib/crypto/des/tables.h
  *
  * Copyright 1988,1990 by the Massachusetts Institute of Technology.
  * All Rights Reserved.

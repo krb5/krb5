@@ -22,10 +22,6 @@
 
 #include "gssapiP_krb5.h"
 
-/*
- * $Id$
- */
-
 OM_uint32
 krb5_gss_verify(minor_status, context_handle,
 		message_buffer, token_buffer,

@@ -1,7 +1,5 @@
 /*
- * $Source$
- * $Author$
- * $Id$
+ * lib/krb5/asn.1/asn1glue.h
  *
  * Copyright 1989,1990 by the Massachusetts Institute of Technology.
  * All Rights Reserved.

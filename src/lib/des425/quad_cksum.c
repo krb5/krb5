@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * lib/des425/quad_cksum.c
  *
  * Copyright 1985, 1986, 1987, 1988,1990 by the Massachusetts Institute
  * of Technology.
@@ -81,10 +80,6 @@
  *	but nontheless is 64 bit arithmetic.
  */
 
-#ifndef	lint
-static char rcsid_quad_cksum_c[] =
-"$Id$";
-#endif	/* lint */
 
 /* System include files */
 #include <stdio.h>

@@ -23,10 +23,6 @@
 #include "gssapiP_krb5.h"
 #include <com_err.h>
 
-/*
- * $Id$
- */
-
 /* XXXX internationalization!! */
 
 /**/

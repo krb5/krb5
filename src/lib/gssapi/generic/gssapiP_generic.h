@@ -23,10 +23,6 @@
 #ifndef _GSSAPIP_GENERIC_H_
 #define _GSSAPIP_GENERIC_H_
 
-/*
- * $Id$
- */
-
 #include "gssapi.h"
 
 #include "gssapi_generic_err.h"

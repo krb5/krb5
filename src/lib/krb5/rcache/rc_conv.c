@@ -1,16 +1,11 @@
 /*
- * $Source$
- * $Author$
+ * lib/krb5/rcache/rc_conv.c
  *
  * This file of the Kerberos V5 software is derived from public-domain code
  * contributed by Daniel J. Bernstein, <brnstnd@acf10.nyu.edu>.
  *
  */
 
-#if !defined(lint) && !defined(SABER)
-static char rcsid_rc_conv_c[] =
-"$Id$";
-#endif	/* !lint & !SABER */
 
 /*
  * An implementation for the default replay cache type.

@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * lib/krb5/ccache/stdio/scc_ops.c
  *
  * Copyright 1990 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -25,10 +24,6 @@
  * This file contains the structure krb5_scc_ops.
  */
 
-#if !defined(lint) && !defined(SABER)
-static char rcsid_scc_ops_c[] =
-"$Id$";
-#endif /* !lint && !SABER */
 
 
 #include "scc.h"

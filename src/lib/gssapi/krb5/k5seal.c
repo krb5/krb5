@@ -24,10 +24,6 @@
 #include <netinet/in.h>
 #include <krb5/rsa-md5.h>
 
-/*
- * $Id$
- */
-
 static krb5_error_code
 make_seal_token(enc_ed, seq_ed, seqnum, direction, text, token,
 		encrypt, toktype, bigend)

@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * lib/des425/str_to_key.c
  *
  * Copyright 1985, 1986, 1987, 1988, 1989,1990 by the Massachusetts Institute
  * of Technology.
@@ -38,10 +37,6 @@
  *	spm	8/85	MIT project athena
  */
 
-#ifndef	lint
-static char rcsid_string_to_key_c[] =
-"$Id$";
-#endif /* lint */
 
 #include <stdio.h>
 #include <string.h>

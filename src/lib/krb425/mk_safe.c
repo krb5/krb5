@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * lib/krb425/mk_safe.c
  *
  * Copyright 1990,1991 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -25,10 +24,6 @@
  * krb_mk_safe for krb425
  */
 
-#if !defined(lint) && !defined(SABER)
-static char rcsid_mk_safe_c[] =
-"$Id$";
-#endif	/* !lint & !SABER */
 
 #include "krb425.h"
 #ifndef hpux

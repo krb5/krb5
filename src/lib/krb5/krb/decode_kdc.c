@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * lib/krb5/krb/decode_kdc.c
  *
  * Copyright 1990 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -25,10 +24,6 @@
  * krb5_decode_kdc_rep() function.
  */
 
-#if !defined(lint) && !defined(SABER)
-static char rcsid_decode_kdc_c[] =
-"$Id$";
-#endif	/* !lint & !SABER */
 
 
 #include <krb5/krb5.h>

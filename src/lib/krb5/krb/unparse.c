@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * lib/krb5/krb/unparse.c
  *
  * Copyright 1990 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -29,10 +28,6 @@
  * components.
  */
 
-#if !defined(lint) && !defined(SABER)
-static char rcsid_unparse_c[] =
-"$Id$";
-#endif	/* !lint & !SABER */
 
 #include <stdio.h>
 #include <krb5/krb5.h>

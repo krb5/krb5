@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * lib/krb5/os/an_to_ln.c
  *
  * Copyright 1990,1991 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -25,10 +24,6 @@
  * krb5_aname_to_localname()
  */
 
-#if !defined(lint) && !defined(SABER)
-static char rcsid_an_to_ln_c[] =
-"$Id$";
-#endif	/* !lint & !SABER */
 
 #include <krb5/osconf.h>
 

@@ -22,10 +22,6 @@
 
 #include "gssapiP_krb5.h"
 
-/*
- * $Id$
- */
-
 /* get credentials corresponding to a key in the krb5 keytab.
    If the default name is requested, return the name in output_princ.
      If output_princ is non-NULL, the caller will use or free it, regardless

@@ -1,7 +1,3 @@
-#if !defined(lint) && !defined(SABER)
-static char rcsid_md5glue_c[] = "$Id$";
-#endif
-
 #include <krb5/krb5.h>
 #include <krb5/ext-proto.h>
 #include <krb5/rsa-md5.h>

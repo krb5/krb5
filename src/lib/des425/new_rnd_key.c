@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * lib/des425/new_rnd_key.c
  *
  * Copyright 1988,1990 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -24,10 +23,6 @@
  *
  */
 
-#ifndef	lint
-static char rcsid_new_rnd_key_c[] =
-"$Id$";
-#endif	/* lint */
 
 #include "des.h"
 

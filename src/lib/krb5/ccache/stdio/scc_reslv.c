@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * lib/krb5/ccache/stdio/scc_reslv.c
  *
  * Copyright 1990 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -25,10 +24,6 @@
  * This file contains the source code for krb5_scc_resolve.
  */
 
-#if !defined(lint) && !defined(SABER)
-static char rcsid_scc_reslve_c[] =
-"$Id$";
-#endif /* !lint && !SABER */
 
 
 #include "scc.h"

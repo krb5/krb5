@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * lib/krb5/keytab/read_servi.c
  *
  * Copyright 1990 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -28,10 +27,6 @@
  * internally. 
  */
 
-#if !defined(lint) && !defined(SABER)
-static char rcsid_krb5_kt_read_service_key_c[] =
-"$Id$";
-#endif	/* !lint & !SABER */
 
 #include <krb5/krb5.h>
 

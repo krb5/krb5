@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * lib/krb425/get_krbhst.c
  *
  * Copyright 1990 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -25,10 +24,6 @@
  * krb_get_krbhst for krb425
  */
 
-#if !defined(lint) && !defined(SABER)
-static char rcsid_get_krbhst_c[] =
-"$Id$";
-#endif	/* !lint & !SABER */
 
 #include "krb425.h"
 

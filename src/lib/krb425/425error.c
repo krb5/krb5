@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * lib/krb425/425error.c
  *
  * Copyright 1990,1991 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -25,10 +24,6 @@
  * convert error codes from v5 to v4
  */
 
-#if !defined(lint) && !defined(SABER)
-static char rcsid_425error_c[] =
-"$Id$";
-#endif	/* !lint & !SABER */
 
 #include <krb.h>
 #include <krb5/krb5.h>

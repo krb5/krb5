@@ -23,10 +23,6 @@
 #ifndef _GSSAPIP_KRB5_H_
 #define _GSSAPIP_KRB5_H_
 
-/*
- * $Id$
- */
-
 #include <krb5/krb5.h>
 #include <memory.h>
 #include <netinet/in.h>

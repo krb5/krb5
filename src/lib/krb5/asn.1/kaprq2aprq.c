@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * lib/krb5/asn.1/kaprq2aprq.c
  *
  * Copyright 1989,1990 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -25,10 +24,6 @@
  * Glue between Kerberos version and ISODE 6.0 version of structures.
  */
 
-#if !defined(lint) && !defined(SABER)
-static char rcsid_kaprq2aprq_c[] =
-"$Id$";
-#endif	/* lint || saber */
 
 #include <krb5/krb5.h>
 

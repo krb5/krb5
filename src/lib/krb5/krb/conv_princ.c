@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * lib/krb5/krb/conv_princ.c
  *
  * Copyright 1992 by the Massachusetts Institute of Technology.
  * All Rights Reserved.

@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * lib/crypto/des/process_ky.c
  *
  * Copyright 1990 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -24,10 +23,6 @@
  *
  */
 
-#if !defined(lint) && !defined(SABER)
-static char rcsid_process_ky_c[] =
-"$Id$";
-#endif	/* !lint & !SABER */
 
 
 #include <krb5/krb5.h>

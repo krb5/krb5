@@ -21,10 +21,6 @@
  */
 
 /*
- * $Id$
- */
-
-/*
  * stub functions for those without the hash library.
  */
 

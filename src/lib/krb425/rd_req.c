@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * lib/krb425/rd_req.c
  *
  * Copyright 1990,1991 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -25,10 +24,6 @@
  * krb_rd_req for krb425
  */
 
-#if !defined(lint) && !defined(SABER)
-static char rcsid_rd_req_c[] =
-"$Id$";
-#endif	/* !lint & !SABER */
 
 #include "krb425.h"
 #include <sys/param.h>

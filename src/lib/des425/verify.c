@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * lib/des425/verify.c
  *
  * Copyright 1988,1990 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -29,10 +28,6 @@
  * 		-1 ==> error
  */
 
-#ifndef	lint
-static char rcsid_verify_c[] =
-"$Id$";
-#endif	lint
 
 #include <stdio.h>
 #include <errno.h>

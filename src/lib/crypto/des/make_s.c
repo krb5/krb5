@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * lib/crypto/des/make_s.c
  *
  * Copyright 1985, 1988, 1990 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -23,10 +22,6 @@
  *
  */
 
-#if !defined(lint) && !defined(SABER)
-static char rcsid_make_s_c[] =
-"$Id$";
-#endif	/* !lint & !SABER */
 
 
 #include <krb5/krb5.h>

@@ -1,7 +1,5 @@
 /*
- * $Source$
- * $Author$
- * $Id$
+ * lib/krb5/krb/int-proto.h
  *
  * Copyright 1990,1991 the Massachusetts Institute of Technology.
  * All Rights Reserved.

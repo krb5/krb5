@@ -22,10 +22,6 @@
 
 #include "gssapiP_krb5.h"
 
-/*
- * $Id$
- */
-
 OM_uint32
 krb5_gss_delete_sec_context(minor_status, context_handle, output_token)
      OM_uint32 *minor_status;

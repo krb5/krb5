@@ -27,10 +27,6 @@
  * along the way.
  */
 
-#if !defined(lint) && !defined(SABER)
-static char rcsid_gcfkdc_c[] =
-"$Id$";
-#endif	/* !lint & !SABER */
 
 #include <stdio.h>
 #include <krb5/krb5.h>

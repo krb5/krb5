@@ -22,10 +22,6 @@
 
 #include "gssapiP_krb5.h"
 
-/*
- * $Id$
- */
-
 OM_uint32
 krb5_gss_inquire_context(minor_status, context_handle, initiator_name, 
 			 acceptor_name, lifetime_rec, mech_type, ret_flags,

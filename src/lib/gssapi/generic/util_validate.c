@@ -21,10 +21,6 @@
  */
 
 /*
- * $Id$
- */
-
-/*
  * functions to validate name, credential, and context handles
  */
 

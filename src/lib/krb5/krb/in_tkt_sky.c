@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * lib/krb5/krb/in_tkt_sky.c
  *
  * Copyright 1990,1991 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -26,10 +25,6 @@
  *	
  */
 
-#if !defined(lint) && !defined(SABER)
-static char rcsid_in_tkt_skey_c [] =
-"$Id$";
-#endif	/* !lint & !SABER */
 
 #include <krb5/krb5.h>
 

@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * lib/krb5/keytab/file/ktf_resolv.c
  *
  * Copyright 1990 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -26,10 +25,6 @@
  * initialized with file keytab routines.
  */
 
-#if !defined(lint) && !defined(SABER)
-static char rcsid_ktfile_resolve_c[] =
-"$Id$";
-#endif	/* !lint & !SABER */
 
 #include <krb5/krb5.h>
 #include <krb5/ext-proto.h>

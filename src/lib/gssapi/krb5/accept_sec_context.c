@@ -24,10 +24,6 @@
 #include <krb5/rsa-md5.h>
 #include <memory.h>
 
-/*
- * $Id$
- */
-
 static krb5_error_code rd_req_keyproc(keyprocarg, server, kvno, keyblock)
      krb5_pointer keyprocarg;
      krb5_principal server;

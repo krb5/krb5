@@ -20,10 +20,6 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-/*
- * $Id$
- */
-
 #include "gssapiP_krb5.h"
 
 /** exported constants defined in gssapi_krb5.h **/

@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * lib/krb5/krb/get_creds.c
  *
  * Copyright 1990 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -25,10 +24,6 @@
  * krb5_get_credentials()
  */
 
-#if !defined(lint) && !defined(SABER)
-static char rcsid_get_creds_c[] =
-"$Id$";
-#endif	/* !lint & !SABER */
 
 
 /*

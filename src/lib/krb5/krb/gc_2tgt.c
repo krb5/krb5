@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * lib/krb5/krb/gc_2tgt.c
  *
  * Copyright 1991 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -24,10 +23,6 @@
  *
  * Given two tgts, get a ticket.
  */
-
-#if !defined(lint) && !defined(SABER)
-static char rcsid_gcv2tgt_c[] = "$Id$";
-#endif
 
 #include <krb5/krb5.h>
 #include <krb5/asn1.h>		/* needed for some macros */

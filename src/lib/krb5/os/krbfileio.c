@@ -1,7 +1,5 @@
 /*
- * $Source$
- * $Author$
- *
+ * lib/krb5/os/krbfileio.c
  *
  * Copyright (c) Hewlett-Packard Company 1991
  * Released to the Massachusetts Institute of Technology for inclusion

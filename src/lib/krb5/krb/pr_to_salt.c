@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * lib/krb5/krb/pr_to_salt.c
  *
  * Copyright 1990 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -25,10 +24,6 @@
  * krb5_principal2salt()
  */
 
-#if !defined(lint) && !defined(SABER)
-static char rcsid_pr_to_salt_c[] =
-"$Id$";
-#endif  /* !lint & !SABER */
 
 
 #include <krb5/krb5.h>

@@ -1,7 +1,5 @@
 /*
- * $Source$
- * $Author$
- * $Locker$
+ * lib/crypto/des/make_kp.c
  *
  * Copyright 1988,1990 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -35,10 +33,6 @@
 #include <stdio.h>
 #include "des_int.h"
 
-#ifndef lint
-static char rcsid_make_kp[]=
-"$Id$";
-#endif /* lint */
 
 char *progname;
 extern int errno;

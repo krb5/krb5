@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * lib/crypto/des/weak_key.c
  *
  * Copyright 1989,1990 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -30,10 +29,6 @@
  * Originally written 8/85 by Steve Miller, MIT Project Athena.
  */
 
-#if !defined(lint) && !defined(SABER)
-static char rcsid_weak_key_c[] =
-"$Id$";
-#endif	/* !lint & !SABER */
 
 #include <krb5/krb5.h>
 #include <krb5/ext-proto.h>

@@ -1,7 +1,5 @@
 /*
- * $Source$
- * $Author$
- * $Id$
+ * lib/krb5/rcache/rc_io.h
  *
  * This file of the Kerberos V5 software is derived from public-domain code
  * contributed by Daniel J. Bernstein, <brnstnd@acf10.nyu.edu>.

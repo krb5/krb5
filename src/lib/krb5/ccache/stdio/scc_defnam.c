@@ -5,8 +5,7 @@
  */
 
 /*
- * $Source$
- * $Author$
+ * lib/krb5/ccache/stdio/scc_defnam.c
  *
  * Copyright 1990 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -31,10 +30,6 @@
  * This file contains the source code for krb5_scc_default_name.
  */
 
-#if !defined(lint) && !defined(SABER)
-static char rcsid_scc_defnam_c[] =
-"$Id$";
-#endif /* !lint && !SABER */
 
 #include "scc.h"
 

@@ -1,12 +1,6 @@
 /*
- *	$Source$
- *	$Author$
- *	$Id$
+ *	lib/crypto/md4/md4driver.c
  */
-
-#ifndef lint
-static char rcsid_md4driver_c[] = "$Id$";
-#endif /* lint */
 
 /*
  **********************************************************************

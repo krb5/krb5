@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * lib/crypto/des/key_sched.c
  *
  * Copyright 1985, 1986, 1987, 1988, 1990 by the Massachusetts Institute
  * of Technology.
@@ -45,10 +44,6 @@
  * Originally written 6/85 by Steve Miller, MIT Project Athena.
  */
 
-#if !defined(lint) && !defined(SABER)
-static char rcsid_key_sched_c[] =
-"$Id$";
-#endif	/* !lint & !SABER */
 
 #include <stdio.h>
 

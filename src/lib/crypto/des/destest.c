@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * lib/crypto/des/destest.c
  *
  * Copyright 1990,1991 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -25,10 +24,6 @@
  * Test a DES implementation against known inputs & outputs
  */
 
-#if !defined(lint) && !defined(SABER)
-static char rcsid_destest_c[] =
-"$Id$";
-#endif	/* !lint & !SABER */
 
 /*
  * -DBSD_DES will test the BSD DES library.

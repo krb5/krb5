@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * lib/krb5/os/hst_realm.c
  *
  * Copyright 1990,1991 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -25,10 +24,6 @@
  * krb5_get_host_realm()
  */
 
-#if !defined(lint) && !defined(SABER)
-static char rcsid_hst_realm_c[] =
-"$Id$";
-#endif	/* !lint & !SABER */
 
 /*
  Figures out the Kerberos realm names for host, filling in a

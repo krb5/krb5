@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * lib/krb5/krb/parse.c
  *
  * Copyright 1990,1991 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -28,10 +27,6 @@
  * characters in the principal name.
  */
 
-#if !defined(lint) && !defined(SABER)
-static char rcsid_parse_c [] =
-"$Id$";
-#endif	/* !lint & !SABER */
 
 
 #include <krb5/krb5.h>

@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * lib/krb5/asn.1/encode.c
  *
  * Copyright 1990,1991 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -25,10 +24,6 @@
  * encoding glue routines.
  */
 
-#if !defined(lint) && !defined(SABER)
-static char rcsid_encode_c[] =
-"$Id$";
-#endif	/* lint || saber */
 
 #include <isode/psap.h>
 #include <krb5/krb5.h>

@@ -36,9 +36,7 @@
 
 #define MEMMOVE
 
-#if defined(LIBC_SCCS) && !defined(lint)
-static char sccsid[] = "@(#)bcopy.c	5.11 (Berkeley) 6/21/91";
-#endif /* LIBC_SCCS and not lint */
+/* based on @(#)bcopy.c	5.11 (Berkeley) 6/21/91 */
 
 #include <krb5/osconf.h>
 #include <krb5/config.h>

@@ -20,11 +20,6 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-/*
- * $Id$
- */
-
-
 #include "gssapiP_krb5.h"
 #include <pwd.h>
 #ifdef USE_STRING_H

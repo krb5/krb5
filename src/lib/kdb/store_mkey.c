@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * lib/kdb/store_mkey.c
  *
  * Copyright 1990 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -26,10 +25,6 @@
  * Store a database master key in a file.
  */
 
-#if !defined(lint) && !defined(SABER)
-static char rcsid_store_mkey_c[] =
-"$Id$";
-#endif	/* !lint & !SABER */
 
 #include <errno.h>
 #include <krb5/krb5.h>

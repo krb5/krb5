@@ -23,10 +23,6 @@
 #include "gssapiP_krb5.h"
 #include <memory.h>
 
-/*
- * $Id$
- */
-
 static krb5_error_code
 make_ap_req(cred, server, endtime, chan_bindings, do_mutual, subkey, flags,
 	    seqnum, token)

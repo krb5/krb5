@@ -25,10 +25,6 @@
 #include <netinet/in.h>
 #include <krb5/rsa-md5.h>
 
-/*
- * $Id$
- */
-
 /* message_buffer is an input if SIGN, output if SEAL, and ignored if DEL_CTX
    conf_state is only valid if SEAL.
    */

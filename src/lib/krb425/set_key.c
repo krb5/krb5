@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * lib/krb425/set_key.c
  *
  * Copyright 1990,1991 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -25,10 +24,6 @@
  * krb_set_key for krb425
  */
 
-#if !defined(lint) && !defined(SABER)
-static char rcsid_set_key_c[] =
-"$Id$";
-#endif	/* !lint & !SABER */
 
 #include "krb425.h"
 

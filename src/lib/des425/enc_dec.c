@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * lib/des425/enc_dec.c
  *
  * Copyright 1985, 1986, 1987, 1988, 1990 by the Massachusetts Institute
  * of Technology.
@@ -36,10 +35,6 @@
  *
  */
 
-#if !defined(lint) && !defined(SABER)
-static char rcsid_enc_dec_c[] =
-"$Id$";
-#endif	/* !lint & !SABER */
 
 #include "des.h"
 #include <krb5/ext-proto.h>

@@ -22,10 +22,6 @@
 
 #include "gssapiP_generic.h"
 
-/*
- * $Id$
- */
-
 /* This code has knowledge of the min and max errors of each type
    within the gssapi major status */
 

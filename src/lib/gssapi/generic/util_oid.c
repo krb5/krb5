@@ -22,10 +22,6 @@
 
 #include "gssapiP_generic.h"
 
-/*
- * $Id$
- */
-
 int
 g_copy_OID_set(in, out)
      const gss_OID_set_desc * const in;

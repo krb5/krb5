@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * lib/des425/key_parity.c
  *
  * Copyright 1989, 1990 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -32,10 +31,6 @@
  *
  */
 
-#if !defined(lint) && !defined(SABER)
-static char rcsid_key_parity_c[] =
-"$Id$";
-#endif	/* !lint & !SABER */
 
 #include "des.h"
 

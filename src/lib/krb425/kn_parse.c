@@ -1,6 +1,5 @@
 /*
- * $Source$
- * $Author$
+ * lib/krb425/kn_parse.c
  *
  * Copyright 1987,1988,1990,1991 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -23,10 +22,6 @@
  * 
  */
 
-#if !defined(lint) && !defined(SABER)
-static char rcsid_kn_parse_c[] =
-"$Id$";
-#endif	/* !lint & !SABER */
 
 
 #include <stdio.h>

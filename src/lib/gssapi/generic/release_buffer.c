@@ -20,10 +20,6 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-/*
- * $Id$
- */
-
 #include "gssapiP_generic.h"
 
 OM_uint32 generic_gss_release_buffer(minor_status, buffer)
