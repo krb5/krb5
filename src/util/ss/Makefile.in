@@ -94,7 +94,7 @@ depend:: ss_err.h
 
 ct.tab.c ct.tab.h: ct.y
 	$(RM) ct.tab.* y.*
-	yacc -d $(srcdir)/ct.y
+	$(YACC) -d $(srcdir)/ct.y
 	$(MV) y.tab.c ct.tab.c
 	$(MV) y.tab.h ct.tab.h
 

@@ -43,6 +43,7 @@ LN = @LN_S@
 AWK = @AWK@
 LEX = @LEX@
 LEXLIB = @LEXLIB@
+YACC = @YACC@
 
 SRCTOP = $(srcdir)/$(BUILDTOP)
 SUBDIRS = @SUBDIRS@
