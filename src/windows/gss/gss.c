@@ -47,11 +47,29 @@ LPSTR lpszCmdLine;
 int nCmdShow;
 {
 	FARPROC lpfnDlgProc;
+	WSADATA wsadata;
+	WORD versionrequested;
+	int rc;
 
+	versionrequested = 0x0101;		/* Version 1.1 */
+	rc = WSAStartup(versionrequested, &wsadata);
+	if (rc) {
+	    MessageBox(NULL, "Couldn't initialize Winsock library", "",
+		       MB_OK | MB_ICONSTOP);
+	    return FALSE;
+	}
+	if (versionrequested != wsadata.wVersion) {
+	    WSACleanup();
+	    MessageBox(NULL, "Winsock version 1.1 not available", "",
+		       MB_OK | MB_ICONSTOP);
+	    return FALSE;
+	}
+	
 	lpfnDlgProc = MakeProcInstance(OpenGssapiDlg, hInstance);
 	DialogBox (hInstance, "OPENGSSAPIDLG", NULL, lpfnDlgProc);
 	FreeProcInstance(lpfnDlgProc);
 
+	WSACleanup();
 	return 0;
 }
 /*+*************************************************************************
