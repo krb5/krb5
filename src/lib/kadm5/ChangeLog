@@ -1,3 +1,7 @@
+2002-06-04  Ken Raeburn  <raeburn@mit.edu>
+
+	* get_admhst.c: Deleted.
+
 2001-11-05  Ezra Peisach  <epeisach@mit.edu>
 
 	* alt_prof.c (krb5_aprof_get_boolean): Return krb5_boolean *
