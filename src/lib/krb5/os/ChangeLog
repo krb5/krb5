@@ -1,3 +1,9 @@
+2004-10-19  Ken Raeburn  <raeburn@mit.edu>
+
+	* dnssrv.c (krb5int_make_srv_query_realm): Append a dot to the
+	hostname, if there's room in the buffer, to avoid domain search
+	paths.
+
 2004-10-19  Tom Yu  <tlyu@mit.edu>
 
 	* dnsglue.c (initparse): Skip query type and class when we lack

@@ -139,6 +139,10 @@ krb5int_make_srv_query_realm(const krb5_data *realm,
 	srv->priority = priority;
 	srv->weight = weight;
 	srv->port = port;
+	/* The returned names are fully qualified.  Don't let the
+	   local resolver code do domain search path stuff.  */
+	if (strlen(host) + 2 < sizeof(host))
+	    strcat(host, ".");
 	srv->host = strdup(host);
 	if (srv->host == NULL) {
 	    free(srv);
