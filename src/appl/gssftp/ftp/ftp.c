@@ -95,10 +95,12 @@ MSG_DAT msg_data;
 #endif /* KRB5_KRB4_COMPAT */
 #ifdef GSSAPI
 #include <gssapi/gssapi.h>
-#include <gssapi/gssapi_generic.h>
+/* need to include the krb5 file, because we're doing manual fallback
+   from the v2 mech to the v2 mech.  Once there's real negotiation,
+   we can be generic again. */
+#include <gssapi/gssapi_krb5.h>
 gss_ctx_id_t gcontext;
 #endif /* GSSAPI */
-
 
 static int kerror;	/* XXX needed for all auth types */
 
@@ -298,7 +300,8 @@ login(host)
 		if (pass == NULL)
 			pass = mygetpass("Password:");
 #ifndef NOENCRYPTION
-		if ((oldlevel = level) == PROT_S) level = PROT_P;
+		oldlevel = level;
+		level = PROT_P;
 #endif
 		n = command("PASS %s", pass);
 #ifndef NOENCRYPTION
@@ -1832,8 +1835,16 @@ char realm[REALM_SZ + 1];
 #endif /* KRB5_KRB4_COMPAT */
 
 #ifdef GSSAPI
-/* for testing, we don't have an ftp key yet */
-char* gss_services[] = { "ftp", "host", 0 };
+struct {
+    const gss_OID_desc * const * mech_type;
+    char *service_name;
+} gss_trials[] = {
+    { &gss_mech_krb5_v2, "ftp" },
+    { &gss_mech_krb5, "ftp" },
+    { &gss_mech_krb5_v2, "host" },
+    { &gss_mech_krb5, "host" },
+};
+int n_gss_trials = sizeof(gss_trials)/sizeof(gss_trials[0]);
 #endif /* GSSAPI */
 
 do_auth()
@@ -1859,8 +1870,7 @@ do_auth()
 	  gss_name_t target_name;
 	  gss_buffer_desc send_tok, recv_tok, *token_ptr;
 	  char stbuf[FTP_BUFSIZ];
-	  char **service_name, **end_service_name;
-	  int comcode;
+	  int comcode, trial;
 	  struct gss_channel_bindings_struct chan;
 	  chan.initiator_addrtype = GSS_C_AF_INET; /* OM_uint32  */ 
 	  chan.initiator_address.length = 4;
@@ -1871,21 +1881,15 @@ do_auth()
 	  chan.application_data.length = 0;
 	  chan.application_data.value = 0;
 
-	  for (end_service_name = gss_services; *end_service_name; )
-	    end_service_name++;
-	  end_service_name--;
-
 	  if (verbose)
-	    printf("%s accepted as authentication type\n", "GSSAPI");
+	    printf("GSSAPI accepted as authentication type\n");
 	  
 	  /* blob from gss-client */
-	    
 	  
-	  for (service_name = gss_services; *service_name; service_name++) {
-	    
+	  for (trial = 0; trial < n_gss_trials; trial++) {
 	    /* ftp@hostname first, the host@hostname */
 	    /* the V5 GSSAPI binding canonicalizes this for us... */
-	    sprintf(stbuf, "%s@%s", *service_name, hostname);
+	    sprintf(stbuf, "%s@%s", gss_trials[trial].service_name, hostname);
 	    if (debug)
 	      fprintf(stderr, "Trying to authenticate to <%s>\n", stbuf);
 
@@ -1911,7 +1915,7 @@ do_auth()
 				     GSS_C_NO_CREDENTIAL,
 				     &gcontext,
 				     target_name,
-				     GSS_C_NULL_OID,
+				     *gss_trials[trial].mech_type,
 				     GSS_C_MUTUAL_FLAG | GSS_C_REPLAY_FLAG |
 				     (forward ? GSS_C_DELEG_FLAG : 0),
 				     0,
@@ -1924,7 +1928,7 @@ do_auth()
 	      
 
 	      if (maj_stat!=GSS_S_COMPLETE && maj_stat!=GSS_S_CONTINUE_NEEDED){
-		if (service_name == end_service_name)
+		if (trial == n_gss_trials-1)
 		  user_gss_error(maj_stat, min_stat, "initializing context");
 		(void) gss_release_name(&min_stat, &target_name);
 		/* could just be that we missed on the service name */
@@ -1935,16 +1939,28 @@ do_auth()
 		int len = send_tok.length;
 		reply_parse = "ADAT="; /* for command() later */
 		oldverbose = verbose;
-		verbose = 0;
+		verbose = (trial == n_gss_trials-1)?0:-1;
 		kerror = radix_encode(send_tok.value, out_buf, &len, 0);
 		if (kerror)  {
 		  fprintf(stderr, "Base 64 encoding failed: %s\n",
 			  radix_error(kerror));
 		} else if ((comcode = command("ADAT %s", out_buf))!=COMPLETE
 			   /* && comcode != 3 (335)*/) {
-		  fprintf(stderr, "GSSAPI ADAT failed\n");
-		  /* force out of loop */
-		  maj_stat = GSS_S_FAILURE;
+		    if (trial == n_gss_trials-1) {
+			fprintf(stderr, "GSSAPI ADAT failed\n");
+			/* force out of loop */
+			maj_stat = GSS_S_FAILURE;
+		    }
+		    /* backoff to the v1 gssapi is still possible.  Send
+		       a new AUTH command.  If that fails, terminate the
+		       loop */
+		    if (command("AUTH %s", "GSSAPI") != CONTINUE) {
+			fprintf(stderr,
+				"GSSAPI ADAT failed, AUTH restart failed\n");
+			/* force out of loop */
+			maj_stat = GSS_S_FAILURE;
+		    }
+		    goto outer_loop;
 		} else if (!reply_parse) {
 		  fprintf(stderr,
 			  "No authentication data received from server\n");
@@ -1968,7 +1984,7 @@ do_auth()
 
 		/* get out of loop clean */
 	      gss_complete_loop:
-		service_name = end_service_name;
+		trial = n_gss_trials-1;
 		gss_release_buffer(&min_stat, &send_tok);
 		gss_release_name(&min_stat, &target_name);
 		goto outer_loop;
@@ -1980,8 +1996,7 @@ do_auth()
 	  }
 	  verbose = oldverbose;
 	  if (maj_stat == GSS_S_COMPLETE) {
-	    if (verbose)
-	      printf("GSSAPI authentication succeeded\n");
+	    printf("GSSAPI authentication succeeded\n");
 	    reply_parse = NULL;
 	    auth_type = "GSSAPI";
 	    return(1);
