@@ -1,3 +1,9 @@
+Tue Aug 16 18:00:48 1994  Mark Eichin  (eichin@cygnus.com)
+
+	* configure.in: use AC_VFORK (runtime test -- consider just using
+	fork instead.)
+	* commands.c: check HAVE_VFORK_H.
+
 Tue Aug  9 04:02:28 1994  Mark Eichin  (eichin@tess-turbo)
 
 	* configure.in: test for -lsocket, -lnsl, POSIX_SIGNALS

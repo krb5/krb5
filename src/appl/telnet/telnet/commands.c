@@ -61,6 +61,9 @@ static char sccsid[] = "@(#)commands.c	8.1 (Berkeley) 6/6/93";
 #include <pwd.h>
 #include <varargs.h>
 #include <errno.h>
+#ifdef HAVE_VFORK_H
+#include <vfork.h>
+#endif
 
 #include <arpa/telnet.h>
 
