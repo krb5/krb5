@@ -54,9 +54,11 @@ krb5/src/lib/krb5/krb/init_ctx.c
 @comment libdefaults, kdc_req_checksum_type, ap_req_checksum_type, safe_checksum_type
 @set DefaultCcacheType 4
 @comment DEFAULT_CCACHE_TYPE 
-@set DefaultTktLifetime 10 hours
+@set DefaultTktLifetime 1 day
 @comment libdefaults, tkt_lifetime
-@comment -- actually, that's not implemented; see clients/kinit/kinit.c
+@comment -- actually, that's not implemented; see
+@comment lib/krb5/krb/get_in_tkt.c, and clients/kinit/kinit.c for krb4
+@comment fallback
 @set DefaultKDCTimesync 1
 @comment DEFAULT_KDC_TIMESYNC
 @set DefaultKDCDefaultOptions KDC_OPT_RENEWABLE_OK
